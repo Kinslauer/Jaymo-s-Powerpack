@@ -229,7 +229,7 @@ public final class WindFlightController {
 			this.velocity = new Vec3(x, this.velocity.y, z);
 			double lost = before - this.velocity.horizontalDistance();
 			if (lost > IMPACT_SPEED) {
-				this.impact(player, lost);
+				this.impact(player, lost, true);
 			}
 			if (this.state.fast()) {
 				this.speed = Math.min(this.speed, this.velocity.length());
@@ -239,7 +239,7 @@ public final class WindFlightController {
 			double lost = Math.abs(this.velocity.y);
 			this.velocity = new Vec3(this.velocity.x, 0.0, this.velocity.z);
 			if (lost > IMPACT_SPEED * 1.5) {
-				this.impact(player, lost);
+				this.impact(player, lost, false);
 			}
 			if (this.state.fast()) {
 				this.speed = Math.min(this.speed, this.velocity.length());
@@ -354,7 +354,9 @@ public final class WindFlightController {
 		WindCamera.shake(2.2F, 14);
 	}
 
-	private void impact(LocalPlayer player, double lost) {
+	private void impact(LocalPlayer player, double lost, boolean wall) {
+		// the server decides the damage (none in creative)
+		ClientPlayNetworking.send(new WindNet.Impact((float)lost, wall));
 		ClientLevel level = (ClientLevel)player.level();
 		level.playLocalSound(player, SoundEvents.BREEZE_LAND, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.addParticle(ParticleTypes.POOF, player.getX(), player.getY() + 0.9, player.getZ(), 0.0, 0.05, 0.0);

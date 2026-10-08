@@ -127,7 +127,7 @@ take-off shake is 0.8° over 8 ticks; both are set in `WindFlightController`.
 maximum channel are in `WindAbility`.
 
 ## Testing
-1. `/power set @s wind`. Survival is fine: you take no fall damage after flying.
+1. `/power set @s wind`. In survival, crashing at speed hurts (see Impacts); creative takes no damage.
 2. **Flight:**
    - Press R, or sneak and double-tap Space. You should pop up and hover.
    - Use WASD, Space and Shift to move. Sink to the ground to land.
@@ -147,7 +147,7 @@ maximum channel are in `WindAbility`.
 ## Known limitations and upgrade ideas
 - Toggle-sprint keeps Sprint "held", so CRUISE never coasts down on its own. Use S to brake, or R.
 - Hits and knockback don't move you while you fly, because the flight overrides velocity every tick.
-- Ramming at speed does no damage. Upgrade idea: impact damage to blocks or mobs, and a ground-slam landing.
+- Upgrade idea: impact damage to blocks or mobs you ram, and a ground-slam landing.
 - The pose has no banking or roll on turns, and HOVER has no pose (only vanilla animations). Upgrade ideas: roll from
   the turn rate, legs dangling in HOVER, and a cape flutter.
 - The flight can be a little jittery for other players at SONIC speed, because they see it through vanilla's entity
@@ -155,3 +155,14 @@ maximum channel are in `WindAbility`.
 - Cooldowns aren't saved across server restarts.
 - There's no custom art. The HUD chips use vanilla item icons (feather, wind charge, ghast tear), so there's no
   `tools/gen_wind.py`.
+
+## Impacts (survival only)
+- **Reporting:** the flyer's client reports a crash, meaning a wall or the ground stopped more than `IMPACT_SPEED` of
+  its speed (1.5× that for the ground). This goes in the `wind_impact` packet.
+- **Damage:** the server deals `(lost − safe speed) × 10`, where the safe speed is `IMPACT_SAFE_WALL` 0.5 for walls and
+  `IMPACT_SAFE_GROUND` 0.8 for the ground.
+  - Lost speed is clamped to 3.0 b/t, and impacts are at least 6 ticks apart.
+  - Walls count as "flew into a wall" (like an elytra crash) and the ground counts as a fall.
+  - Rough damage: cruising (1 b/t) into a wall is about 5; sonic (2.5 b/t) into a wall is about 20.
+  - Creative and spectator players are never hurt.
+- **Falls:** fall damage is waived only while flying. When flight ends in mid-air, a fall counts from that moment.

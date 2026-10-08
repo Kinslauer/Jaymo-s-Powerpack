@@ -67,8 +67,28 @@ public final class WindNet {
 		}
 	}
 
+	/**
+	 * Client → server: the flyer crashed into a wall ({@code wall}) or the ground, losing {@code lost} blocks/tick of
+	 * speed. The server turns it into damage (survival only, clamped; see {@code WindPower.onImpact}).
+	 */
+	public record Impact(float lost, boolean wall) implements CustomPacketPayload {
+		public static final Type<Impact> TYPE = new Type<>(JaymosPowers.id("wind_impact"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Impact> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> {
+				buf.writeFloat(p.lost);
+				buf.writeBoolean(p.wall);
+			},
+			buf -> new Impact(buf.readFloat(), buf.readBoolean()));
+
+		@Override
+		public Type<Impact> type() {
+			return TYPE;
+		}
+	}
+
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(Flight.TYPE, Flight.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(Impact.TYPE, Impact.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Status.TYPE, Status.CODEC);
 	}
 }

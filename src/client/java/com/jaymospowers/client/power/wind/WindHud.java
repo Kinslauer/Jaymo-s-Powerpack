@@ -17,7 +17,7 @@ import net.minecraft.world.item.ItemStack;
 /**
  * Wind Control's HUD, kept clear of the core's top-left badge:
  * <ul>
- * <li>under the crosshair while flying: the flight state (+ LOCKED), speed, and a speed bar with the sonic mark;</li>
+ * <li>above the G / V / B chips while flying: the flight state (+ LOCKED), speed, and a speed bar with the sonic mark;</li>
  * <li>over the crosshair while channelling: the ability name and a charge meter;</li>
  * <li>right of the hotbar: G / V / B chips with their bound keys and cooldowns.</li>
  * </ul>
@@ -42,12 +42,31 @@ final class WindHud {
 		int cx = width / 2;
 		int cy = height / 2;
 		float time = player.tickCount + delta.getGameTimeDeltaPartialTick(false);
-		flight(graphics, font, client.flight(), cx, cy, time);
+		int[] chipsAt = chipsOrigin(width, height);
+		flight(graphics, font, client.flight(), chipsAt[0], chipsAt[1], time);
 		channel(graphics, font, client, cx, cy, time);
-		chips(graphics, font, client, width, height, time);
+		chips(graphics, font, client, chipsAt[0], chipsAt[1], time);
 	}
 
-	private static void flight(GuiGraphicsExtractor graphics, Font font, WindFlightController flight, int cx, int cy, float time) {
+	private static int chipsWidth() {
+		int count = WindAbility.values().length;
+		return count * CHIP + (count - 1) * CHIP_GAP;
+	}
+
+	/** Top-left of the chip row: right of the hotbar, past the off-hand slot / attack indicator; above the hunger bar on narrow screens. */
+	private static int[] chipsOrigin(int width, int height) {
+		int cx = width / 2;
+		int x = cx + 91 + 30;
+		int y = height - CHIP - 1;
+		if (x + chipsWidth() > width - 2) {
+			x = cx + 91 - chipsWidth();
+			y = height - 22 - 30 - CHIP;
+		}
+		return new int[] {x, y};
+	}
+
+	/** The flight readout, stacked just above the chip row and right-aligned with it. */
+	private static void flight(GuiGraphicsExtractor graphics, Font font, WindFlightController flight, int chipsX, int chipsY, float time) {
 		WindFlight state = flight.state();
 		if (!state.flying()) {
 			return;
@@ -57,18 +76,19 @@ final class WindHud {
 			case SONIC -> SONIC_COLOR;
 			default -> HOVER_COLOR;
 		};
-		int y = cy + 16;
+		int right = chipsX + chipsWidth();
+		int y = chipsY - 4;
 		if (state.fast()) {
-			// speed bar with a tick at the sonic threshold
-			int x0 = cx - BAR_WIDTH / 2;
+			// speed bar with a tick at the sonic threshold, as wide as the chip row
+			int x0 = right - BAR_WIDTH;
 			graphics.fill(x0 - 1, y - 1, x0 + BAR_WIDTH + 1, y + 3, 0x90000000);
 			int filled = Mth.ceil(BAR_WIDTH * flight.speedFraction());
 			int barColor = state == WindFlight.SONIC ? pulse(0xFFFFFF, 0xBFF4EA, time * 0.5F) : CRUISE_COLOR;
 			graphics.fill(x0, y, x0 + filled, y + 2, 0xFF000000 | barColor);
 			int mark = x0 + (int)Math.round(BAR_WIDTH * WindFlightController.SONIC_ENTER);
 			graphics.fill(mark, y - 1, mark + 1, y + 3, 0xFFFFD45A);
-			y += 5;
 		}
+		y -= 11;
 		MutableComponent label = Component.translatable("hud.jaymospowers.wind." + state.name().toLowerCase()).withColor(color);
 		if (state.fast()) {
 			int metresPerSecond = (int)Math.round(flight.currentSpeed() * 20.0);
@@ -80,7 +100,7 @@ final class WindHud {
 		} else if (flight.lockFlash() > 0 && state.fast()) {
 			label.append(Component.literal("  ")).append(Component.translatable("hud.jaymospowers.wind.unlocked").withColor(0x909090));
 		}
-		graphics.centeredText(font, label, cx, y, 0xE0FFFFFF);
+		graphics.text(font, label, right - font.width(label), y, 0xE0FFFFFF);
 	}
 
 	private static void channel(GuiGraphicsExtractor graphics, Font font, WindPowerClient client, int cx, int cy, float time) {
@@ -98,18 +118,8 @@ final class WindHud {
 		graphics.centeredText(font, Component.translatable(ability.langKey()).withColor(ability.color), cx, y - 11, 0xFFFFFFFF);
 	}
 
-	private static void chips(GuiGraphicsExtractor graphics, Font font, WindPowerClient client, int width, int height, float time) {
-		WindAbility[] abilities = WindAbility.values();
-		int total = abilities.length * CHIP + (abilities.length - 1) * CHIP_GAP;
-		int cx = width / 2;
-		// right of the hotbar, past the off-hand slot / attack indicator; above the hunger bar on narrow screens
-		int x = cx + 91 + 30;
-		int y = height - CHIP - 1;
-		if (x + total > width - 2) {
-			x = cx + 91 - total;
-			y = height - 22 - 30 - CHIP;
-		}
-		for (WindAbility ability : abilities) {
+	private static void chips(GuiGraphicsExtractor graphics, Font font, WindPowerClient client, int x, int y, float time) {
+		for (WindAbility ability : WindAbility.values()) {
 			chip(graphics, font, client, ability, x, y, time);
 			x += CHIP + CHIP_GAP;
 		}

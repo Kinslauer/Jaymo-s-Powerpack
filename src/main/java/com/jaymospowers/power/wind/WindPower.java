@@ -78,6 +78,7 @@ public final class WindPower implements Power {
 		Powers.register(INSTANCE);
 		WindNet.register();
 		ServerPlayNetworking.registerGlobalReceiver(WindNet.Flight.TYPE, (payload, ctx) -> INSTANCE.onFlightPacket(ctx.player(), payload));
+		ServerPlayNetworking.registerGlobalReceiver(WindNet.Impact.TYPE, (payload, ctx) -> INSTANCE.onImpact(ctx.player(), payload));
 		// cooldowns outlive a relog (no reconnect-to-reset); everything else starts over
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			State s = INSTANCE.states.get(handler.player.getUUID());
@@ -113,8 +114,9 @@ public final class WindPower implements Power {
 	private static final class State {
 		WindFlight flight = WindFlight.NONE;
 		boolean locked;
-		/** Set while flying and until the player next lands: no fall damage. */
+		/** Set while flying and until the player next lands: the server's floating/speed checks are skipped. */
 		boolean fallProtected;
+		int lastImpactTick = -1000;
 		WindAbility channel;
 		int channelTicks;
 		final int[] cooldowns = new int[WindAbility.values().length];
@@ -164,10 +166,39 @@ public final class WindPower implements Power {
 		return s != null && (s.flight.flying() || s.fallProtected || s.dashGrace > 0);
 	}
 
-	/** True while the player is flying, or falling after a flight: no fall damage (see the fall mixin). */
+	/**
+	 * True while the player is flying: no fall damage (see the fall mixin), since hard landings are judged as impacts
+	 * instead. Once flight ends in mid-air, the fall counts from that moment like any other.
+	 */
 	public boolean protectsFromFall(ServerPlayer player) {
 		State s = this.states.get(player.getUUID());
-		return s != null && (s.flight.flying() || s.fallProtected) && Powers.has(player, this);
+		return s != null && s.flight.flying() && Powers.has(player, this);
+	}
+
+	/** Crash damage per block/tick of speed lost above the safe speed; walls are less forgiving than the ground. */
+	static final float IMPACT_DAMAGE_PER_SPEED = 10.0F;
+	static final float IMPACT_SAFE_WALL = 0.5F, IMPACT_SAFE_GROUND = 0.8F;
+	/** The most speed an impact can report (a little over top speed), and the minimum ticks between two impacts. */
+	static final float IMPACT_MAX_LOST = 3.0F;
+	static final int IMPACT_SPACING = 6;
+
+	/** A crash reported by the flyer's client (motion is client-side). Survival and adventure only. */
+	private void onImpact(ServerPlayer player, WindNet.Impact payload) {
+		State s = this.states.get(player.getUUID());
+		if (s == null || !s.flight.flying() || !Powers.has(player, this) || !player.isAlive()
+			|| player.isCreative() || player.isSpectator() || player.tickCount - s.lastImpactTick < IMPACT_SPACING) {
+			return;
+		}
+		float lost = Mth.clamp(payload.lost(), 0.0F, IMPACT_MAX_LOST);
+		float damage = (lost - (payload.wall() ? IMPACT_SAFE_WALL : IMPACT_SAFE_GROUND)) * IMPACT_DAMAGE_PER_SPEED;
+		if (damage < 1.0F) {
+			return;
+		}
+		s.lastImpactTick = player.tickCount;
+		ServerLevel level = player.level();
+		player.hurtServer(level, payload.wall() ? player.damageSources().flyIntoWall() : player.damageSources().fall(), damage);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(),
+			damage >= 6.0F ? SoundEvents.PLAYER_BIG_FALL : SoundEvents.PLAYER_SMALL_FALL, SoundSource.PLAYERS, 1.0F, 1.0F);
 	}
 
 	@Override
@@ -224,7 +255,7 @@ public final class WindPower implements Power {
 			}
 		}
 		if (s.fallProtected) {
-			player.resetFallDistance();
+			// (fall distance is only waived while actually flying, above; after that a fall counts as normal)
 			if (!s.flight.flying() && (player.onGround() || player.isInWater() || player.onClimbable() || player.isPassenger())) {
 				s.fallProtected = false;
 			}
@@ -310,6 +341,10 @@ public final class WindPower implements Power {
 	}
 
 	private void setFlight(ServerPlayer player, State s, WindFlight flight, boolean locked) {
+		if (s.flight.flying() && !flight.flying()) {
+			// flight just ended: a fall from here counts from here
+			player.resetFallDistance();
+		}
 		s.flight = flight;
 		s.locked = locked;
 		if (flight.flying()) {
