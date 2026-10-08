@@ -134,3 +134,15 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   - Spider-Sense: "is it on?" is worked out once a tick, not per entity per frame.
   - Chrono echoes: they look up their mined and placed block kinds once per habit change, not on every try.
   - Audit result: the other tick paths were already throttled or skip early, and synced data is only sent on change.
+- **0.3.0, Gravity and affinities:**
+  - **Gravity, the 5th power:** Lift, Weightless, Gravity Well and Crush, plus Event Horizon / Singularity
+    ascension and Collapse corruption with a Levitation cure. See `docs/gravity.md`.
+  - **Affinity:** the first time a player is in survival without a power, they choose which power will awaken in
+    them, or "let fate decide". The choice is final; `/power affinity <players> <power|fate|none>` changes it. Esc
+    doesn't dodge the screen, and H reopens it if the choice wasn't made. The awakening still takes 1-3 days.
+  - **Web:**
+    - Wings give Feather Falling IV (-48% fall damage while they're spread, and for 0.5 s after).
+    - Zip lets go 4 blocks short and flings you upward; sneak to ride it in and perch as before.
+    - A player caught on the Yank line or hitched to a block can break free: swinging cuts the line, and straining
+      past it for 1.5 s snaps it. They're also pulled more gently than mobs.
+  - **Powers screen:** goes to three columns when the screen is wide enough.

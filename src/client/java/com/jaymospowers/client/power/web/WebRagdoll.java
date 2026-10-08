@@ -38,7 +38,8 @@ public final class WebRagdoll {
 
 	/** From the living renderer's extractRenderState. */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
-		if (entity.getAttached(WebPower.HELD) == null && entity.getAttached(WebPower.HITCH) == null) {
+		if (entity.getAttached(WebPower.HELD) == null && entity.getAttached(WebPower.HITCH) == null
+			&& entity.getAttached(com.jaymospowers.power.gravity.GravityPower.LIFTED) == null) {
 			state.setData(KEY, null);
 			return;
 		}

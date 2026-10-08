@@ -3,6 +3,7 @@ package com.jaymospowers;
 import com.jaymospowers.core.PowerEvents;
 import com.jaymospowers.power.arsenal.ArsenalPower;
 import com.jaymospowers.power.chrono.ChronoPower;
+import com.jaymospowers.power.gravity.GravityPower;
 import com.jaymospowers.power.web.WebPower;
 import com.jaymospowers.power.wind.WindPower;
 import net.fabricmc.api.ModInitializer;
@@ -26,5 +27,6 @@ public class JaymosPowers implements ModInitializer {
 		ArsenalPower.init();
 		WebPower.init();
 		ChronoPower.init();
+		GravityPower.init();
 	}
 }

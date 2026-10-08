@@ -5,6 +5,7 @@ import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.client.power.arsenal.ArsenalPowerClient;
 import com.jaymospowers.client.power.chrono.ChronoPowerClient;
+import com.jaymospowers.client.power.gravity.GravityPowerClient;
 import com.jaymospowers.client.power.web.WebPowerClient;
 import com.jaymospowers.client.power.wind.WindPowerClient;
 import com.jaymospowers.core.Fate;
@@ -55,6 +56,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		ArsenalPowerClient.init();
 		WebPowerClient.init();
 		ChronoPowerClient.init();
+		GravityPowerClient.init();
 	}
 
 	/** The key mapping for an ability key (to show its bound key in a HUD, say). */

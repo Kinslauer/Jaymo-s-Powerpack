@@ -14,6 +14,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /** Lets powers keep players airborne / moving fast on dedicated servers without being kicked or rubber-banded. */
 @Mixin(ServerGamePacketListenerImpl.class)
 abstract class ServerGamePacketListenerImplMixin {
+	/** Below this gravity (vanilla 0.08), a player isn't kicked for floating. */
+	private static final double LOW_GRAVITY = 0.02;
+
 	@Shadow
 	public ServerPlayer player;
 
@@ -21,6 +24,9 @@ abstract class ServerGamePacketListenerImplMixin {
 	private void jaymospowers$powerFloating(Entity entity, CallbackInfoReturnable<Integer> cir) {
 		Power power = Powers.of(this.player);
 		if (entity == this.player && power != null && power.allowsFloating(this.player)) {
+			cir.setReturnValue(Integer.MAX_VALUE);
+		} else if (entity == this.player && this.player.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.GRAVITY) < LOW_GRAVITY) {
+			// someone else took their weight (Gravity's Lift): floating isn't their doing
 			cir.setReturnValue(Integer.MAX_VALUE);
 		}
 	}

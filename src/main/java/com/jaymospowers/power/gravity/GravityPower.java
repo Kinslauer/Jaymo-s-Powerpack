@@ -1,0 +1,814 @@
+package com.jaymospowers.power.gravity;
+
+import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.api.Power;
+import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.Fate;
+import com.jaymospowers.core.PowerInput;
+import com.jaymospowers.core.Powers;
+import com.mojang.serialization.Codec;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
+
+/**
+ * Gravity: taking weight away from things, and piling it on. Everything is decided here, on the server; the targets'
+ * weight is their {@code minecraft:gravity} attribute (transient modifiers, so nothing sticks if the server stops).
+ * <ul>
+ * <li>R, Lift (hold): the creature under the crosshair loses its weight and floats where you point. Let go and it falls
+ * (fall damage is real). Works on players too.</li>
+ * <li>V, Weightless (toggle): your own gravity drops to a fraction; you jump high and fall slow (and land lighter). It
+ * costs hunger and runs out.</li>
+ * <li>G, Gravity Well: a point where you aim pulls everything nearby into it for a few seconds.</li>
+ * <li>B, Crush (hold to charge): everything around where you aim gets many times heavier: slammed down, hurt and pinned.</li>
+ * </ul>
+ * 0.2.0 fate: creatures that die to the weight you gave them (falls after Lift, Crush, the Singularity) count toward
+ * <b>ascension</b> (Event Horizon: unmovable, projectiles bend away; C is the {@code Singularity}); the same deaths, and
+ * long weightlessness, <b>corrupt</b> it (Collapse: you grow heavy, everything loose drifts toward you, the power hits
+ * harder). The cure: be lifted by something other than yourself, a shulker's levitation, for long enough.
+ */
+public final class GravityPower implements Power {
+	public static final GravityPower INSTANCE = new GravityPower();
+	public static final Identifier ID = JaymosPowers.id("gravity");
+
+	public static final int LIFT = 0;
+	public static final int WELL = 1;
+	public static final int WEIGHTLESS = 2;
+	public static final int CRUSH = 3;
+	public static final int SINGULARITY = 4;
+
+	// ---- Lift (R) ----
+	public static final double LIFT_RANGE = 24.0;
+	/** Held distance is clamped to this range (blocks from the eyes). */
+	static final double LIFT_MIN_HOLD = 3.0, LIFT_MAX_HOLD = 14.0;
+	/** How hard a lifted creature is steered toward the held point, and its top speed (b/t). */
+	static final double LIFT_STEER = 0.22, LIFT_MAX_SPEED = 0.7;
+	/** Longest a lift lasts, and the cooldown after it ends. */
+	public static final int LIFT_MAX_TICKS = 120;
+	public static final int LIFT_COOLDOWN = 160;
+	static final float LIFT_EXHAUSTION = 0.012F;
+
+	// ---- Gravity Well (G) ----
+	static final double WELL_RANGE = 24.0;
+	static final double WELL_RADIUS = 7.0;
+	static final double WELL_PULL = 0.09;
+	static final int WELL_TICKS = 80;
+	public static final int WELL_COOLDOWN = 280;
+
+	// ---- Weightless (V) ----
+	/** Your gravity while weightless (fraction removed), and how much lighter you land. */
+	static final double WEIGHTLESS_GRAVITY = -0.7;
+	static final double WEIGHTLESS_FALL = -0.5;
+	public static final int WEIGHTLESS_MAX_TICKS = 600;
+	public static final int WEIGHTLESS_COOLDOWN = 200;
+	static final float WEIGHTLESS_EXHAUSTION = 0.015F;
+
+	// ---- Crush (B, charged) ----
+	static final double CRUSH_RANGE = 24.0;
+	public static final int CRUSH_FULL_CHARGE = 60;
+	static final double CRUSH_RADIUS_MIN = 2.5, CRUSH_RADIUS_MAX = 5.5;
+	static final float CRUSH_DAMAGE_MIN = 4.0F, CRUSH_DAMAGE_MAX = 16.0F;
+	/** Crushed creatures weigh this many times more (gravity multiplier) for {@code CRUSH_PIN_TICKS}. */
+	static final double CRUSH_WEIGHT = 3.0;
+	static final int CRUSH_PIN_TICKS = 60;
+	static final double CRUSH_SLAM = 1.6;
+	static final int CRUSH_COOLDOWN_MIN = 120, CRUSH_COOLDOWN_MAX = 400;
+
+	// ---- fate ----
+	/** Deaths by your weight (a fall after Lift, Crush, the Singularity) within this long of your touch count. */
+	static final int TOUCH_MEMORY_TICKS = 200;
+	/** Deaths by weight needed to ascend. */
+	public static final int ASCEND_KILLS = 30;
+	/** Corruption per death by weight, and per this many ticks spent weightless. */
+	static final int CORRUPT_PER_KILL = 2;
+	static final int CORRUPT_WEIGHTLESS_TICKS = 400;
+	/** Collapse: your own weight, landing harder, harder hits, and the pull on everything loose. */
+	static final double COLLAPSE_GRAVITY = 0.35;
+	static final double COLLAPSE_FALL = 0.25;
+	static final float COLLAPSE_DAMAGE = 1.6F;
+	static final double COLLAPSE_RADIUS_BONUS = 1.0;
+	static final double COLLAPSE_FLING = 1.5;
+	static final double COLLAPSE_DRIFT_RADIUS = 6.0;
+	static final double COLLAPSE_DRIFT = 0.035;
+	/** The cure: this long levitating (from something else) while collapsed. */
+	public static final int CURE_LEVITATION_TICKS = 200;
+	/** Event Horizon: projectiles this close are bent away. */
+	static final double HORIZON_DEFLECT_RADIUS = 3.0;
+
+	// ---- Singularity (C, ascended) ----
+	static final double SINGULARITY_RANGE = 32.0;
+	static final double SINGULARITY_PULL_RADIUS = 10.0;
+	static final double SINGULARITY_PULL = 0.07;
+	static final double SINGULARITY_CORE = 4.0;
+	static final int SINGULARITY_TICKS = 60;
+	static final int SINGULARITY_HIT_EVERY = 10;
+	static final float SINGULARITY_HIT = 3.0F;
+	static final float SINGULARITY_BURST = 6.0F;
+	public static final int SINGULARITY_COOLDOWN = 500;
+
+	private static final Identifier LIFT_ID = JaymosPowers.id("gravity_lift");
+	private static final Identifier CRUSH_ID = JaymosPowers.id("gravity_crush");
+	private static final Identifier WEIGHTLESS_ID = JaymosPowers.id("gravity_weightless");
+	private static final Identifier WEIGHTLESS_FALL_ID = JaymosPowers.id("gravity_weightless_fall");
+	private static final Identifier COLLAPSE_ID = JaymosPowers.id("gravity_collapse");
+	private static final Identifier COLLAPSE_FALL_ID = JaymosPowers.id("gravity_collapse_fall");
+	private static final Identifier HORIZON_ID = JaymosPowers.id("gravity_horizon");
+
+	/** When each cooldown ends. Synced to its owner for the HUD. */
+	public static final AttachmentType<GravityCooldowns> COOLDOWNS = AttachmentRegistry.create(JaymosPowers.id("gravity_cooldowns"),
+		builder -> builder.syncWith(GravityCooldowns.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
+	/** On a player: weightless right now (everyone sees the drift). */
+	public static final AttachmentType<Boolean> WEIGHTLESS_ON = AttachmentRegistry.create(JaymosPowers.id("gravity_weightless"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** On a creature: held by someone's Lift (clients let it hang limp). */
+	public static final AttachmentType<Boolean> LIFTED = AttachmentRegistry.create(JaymosPowers.id("gravity_lifted"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** Deaths by weight so far (toward ascension). */
+	public static final AttachmentType<Integer> KILLS = AttachmentRegistry.create(JaymosPowers.id("gravity_kills"),
+		builder -> builder.persistent(Codec.INT).copyOnDeath());
+
+	/** Per player, server memory. */
+	private static final class State {
+		int liftTarget = -1;
+		double liftHold;
+		int liftTicks;
+		long crushFrom = -1;
+		int weightlessTicks;
+		int weightlessTotal;
+		int levitating;
+		boolean curedHint;
+	}
+
+	private record Well(ResourceKey<Level> dimension, Vec3 at, UUID owner, long until, boolean singularity) {
+	}
+
+	private record Pinned(ResourceKey<Level> dimension, UUID entity, long until) {
+	}
+
+	private record Touch(UUID player, long at) {
+	}
+
+	private static final Map<UUID, State> STATES = new HashMap<>();
+	private static final List<Well> WELLS = new ArrayList<>();
+	private static final List<Pinned> PINNED = new ArrayList<>();
+	private static final Map<UUID, Touch> TOUCHED = new HashMap<>();
+	/** True while Crush is landing its blows (so its kills count as deaths by weight, unlike a sword's). */
+	private static boolean crushing;
+
+	private GravityPower() {
+	}
+
+	public static void init() {
+		Powers.register(INSTANCE);
+		JaymosPowers.LOGGER.debug("gravity attachments: {} {} {} {}", COOLDOWNS, WEIGHTLESS_ON, LIFTED, KILLS);
+		ServerTickEvents.END_SERVER_TICK.register(GravityPower::serverTick);
+		ServerLivingEntityEvents.AFTER_DEATH.register(GravityPower::afterDeath);
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			State state = STATES.remove(handler.player.getUUID());
+			if (state != null) {
+				dropLift(handler.player, state, false);
+			}
+		});
+		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+			STATES.clear();
+			WELLS.clear();
+			PINNED.clear();
+			TOUCHED.clear();
+		});
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> GravityDebugCommand.register(dispatcher));
+	}
+
+	@Override
+	public Identifier id() {
+		return ID;
+	}
+
+	@Override
+	public int color() {
+		return 0x8A6CFF;
+	}
+
+	@Override
+	public ItemStack icon() {
+		return new ItemStack(Items.HEAVY_CORE);
+	}
+
+	/** Lift first, then Weightless and the Well; Crush, the charged one, comes last. */
+	@Override
+	public PowerKey[] unlockOrder() {
+		return new PowerKey[] {PowerKey.ABILITY_1, PowerKey.ABILITY_3, PowerKey.ABILITY_2, PowerKey.ABILITY_4};
+	}
+
+	private static State state(ServerPlayer player) {
+		return STATES.computeIfAbsent(player.getUUID(), k -> new State());
+	}
+
+	static GravityCooldowns cooldowns(Player player) {
+		GravityCooldowns cooldowns = player.getAttached(COOLDOWNS);
+		return cooldowns == null ? GravityCooldowns.NONE : cooldowns;
+	}
+
+	private static boolean ready(ServerPlayer player, int ability) {
+		return player.level().getGameTime() >= cooldowns(player).get(ability);
+	}
+
+	private static void cool(ServerPlayer player, int ability, int ticks) {
+		player.setAttached(COOLDOWNS, cooldowns(player).with(ability, player.level().getGameTime() + ticks));
+	}
+
+	@Override
+	public void onGained(ServerPlayer player) {
+		player.setAttached(COOLDOWNS, GravityCooldowns.NONE);
+	}
+
+	@Override
+	public void onLost(ServerPlayer player) {
+		State state = STATES.remove(player.getUUID());
+		if (state != null) {
+			dropLift(player, state, false);
+		}
+		setWeightless(player, false);
+		modifier(player, Attributes.GRAVITY, COLLAPSE_ID, 0.0, false);
+		modifier(player, Attributes.FALL_DAMAGE_MULTIPLIER, COLLAPSE_FALL_ID, 0.0, false);
+		modifier(player, Attributes.KNOCKBACK_RESISTANCE, HORIZON_ID, 0.0, false);
+		player.removeAttached(COOLDOWNS);
+		player.removeAttached(KILLS);
+	}
+
+	@Override
+	public void onPurified(ServerPlayer player) {
+		modifier(player, Attributes.GRAVITY, COLLAPSE_ID, 0.0, false);
+		modifier(player, Attributes.FALL_DAMAGE_MULTIPLIER, COLLAPSE_FALL_ID, 0.0, false);
+	}
+
+	@Override
+	public boolean allowsFloating(ServerPlayer player) {
+		return player.getAttached(WEIGHTLESS_ON) != null;
+	}
+
+	// ---------------------------------------------------------------- keys
+
+	@Override
+	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
+		State state = state(player);
+		switch (key) {
+			case ABILITY_1 -> {
+				if (down) {
+					startLift(player, state);
+				} else {
+					dropLift(player, state, true);
+				}
+			}
+			case ABILITY_2 -> {
+				if (down) {
+					well(player);
+				}
+			}
+			case ABILITY_3 -> {
+				if (down) {
+					toggleWeightless(player, state);
+				}
+			}
+			case ABILITY_4 -> {
+				if (down) {
+					if (ready(player, CRUSH)) {
+						state.crushFrom = player.level().getGameTime();
+						player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 0.5F, 1.6F);
+					}
+				} else if (state.crushFrom >= 0) {
+					float charge = Mth.clamp((player.level().getGameTime() - state.crushFrom) / (float)CRUSH_FULL_CHARGE, 0.0F, 1.0F);
+					state.crushFrom = -1;
+					crush(player, charge);
+				}
+			}
+		}
+	}
+
+	@Override
+	public void onUltimate(ServerPlayer player, boolean down) {
+		if (down) {
+			singularity(player);
+		}
+	}
+
+	// ---------------------------------------------------------------- Lift
+
+	private static void startLift(ServerPlayer player, State state) {
+		if (state.liftTarget >= 0 || !ready(player, LIFT)) {
+			return;
+		}
+		Entity hit = entityInSight(player, LIFT_RANGE);
+		if (!(hit instanceof LivingEntity target) || target instanceof ArmorStand || !target.isAlive()) {
+			fizzle(player);
+			return;
+		}
+		state.liftTarget = target.getId();
+		state.liftTicks = 0;
+		state.liftHold = Mth.clamp(player.getEyePosition().distanceTo(target.getBoundingBox().getCenter()), LIFT_MIN_HOLD, LIFT_MAX_HOLD);
+		modifier(target, Attributes.GRAVITY, LIFT_ID, -1.0, true);
+		target.setAttached(LIFTED, true);
+		touch(target, player);
+		ServerLevel level = player.level();
+		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SHULKER_SHOOT, SoundSource.PLAYERS, 0.8F, 0.6F);
+		level.sendParticles(ParticleTypes.REVERSE_PORTAL, target.getX(), target.getY(), target.getZ(), 20, 0.4, 0.1, 0.4, 0.05);
+	}
+
+	private static void tickLift(ServerPlayer player, State state) {
+		Entity entity = player.level().getEntity(state.liftTarget);
+		if (!(entity instanceof LivingEntity target) || !target.isAlive() || target.level() != player.level()
+			|| ++state.liftTicks > LIFT_MAX_TICKS || !PowerInput.isDown(player, PowerKey.ABILITY_1)
+			|| target.distanceToSqr(player) > (LIFT_RANGE + 8.0) * (LIFT_RANGE + 8.0)) {
+			dropLift(player, state, true);
+			return;
+		}
+		Vec3 hold = player.getEyePosition().add(player.getViewVector(1.0F).scale(state.liftHold));
+		Vec3 center = target.getBoundingBox().getCenter();
+		Vec3 to = hold.subtract(center);
+		Vec3 v = target.getDeltaMovement().scale(0.8).add(to.scale(LIFT_STEER));
+		double speed = v.length();
+		if (speed > LIFT_MAX_SPEED) {
+			v = v.scale(LIFT_MAX_SPEED / speed);
+		}
+		target.setDeltaMovement(v);
+		target.needsSync = true;
+		target.syncVelocity = true;
+		if (target instanceof Mob mob) {
+			mob.getNavigation().stop();
+		}
+		touch(target, player);
+		player.causeFoodExhaustion(LIFT_EXHAUSTION);
+		if (state.liftTicks % 4 == 0) {
+			player.level().sendParticles(ParticleTypes.REVERSE_PORTAL, target.getX(), target.getY(), target.getZ(), 3, 0.3, 0.05, 0.3, 0.02);
+		}
+	}
+
+	/** Let go: its weight comes back (with Collapse, it's thrown where you look). */
+	private static void dropLift(ServerPlayer player, State state, boolean cooldown) {
+		if (state.liftTarget < 0) {
+			return;
+		}
+		Entity entity = player.level().getEntity(state.liftTarget);
+		state.liftTarget = -1;
+		if (cooldown) {
+			cool(player, LIFT, LIFT_COOLDOWN);
+		}
+		if (entity == null) {
+			return;
+		}
+		modifier(entity, Attributes.GRAVITY, LIFT_ID, 0.0, false);
+		entity.removeAttached(LIFTED);
+		if (Fate.isCorrupted(player) && entity.isAlive()) {
+			entity.setDeltaMovement(player.getViewVector(1.0F).scale(COLLAPSE_FLING));
+			entity.needsSync = true;
+			entity.syncVelocity = true;
+			player.level().playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.9F, 0.5F);
+		}
+	}
+
+	// ---------------------------------------------------------------- Weightless
+
+	private static void toggleWeightless(ServerPlayer player, State state) {
+		if (player.getAttached(WEIGHTLESS_ON) != null) {
+			endWeightless(player, state);
+			return;
+		}
+		if (!ready(player, WEIGHTLESS)) {
+			return;
+		}
+		state.weightlessTicks = 0;
+		setWeightless(player, true);
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.7F, 1.6F);
+		player.level().sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 0.1, player.getZ(), 12, 0.4, 0.05, 0.4, 0.02);
+	}
+
+	private static void endWeightless(ServerPlayer player, State state) {
+		setWeightless(player, false);
+		cool(player, WEIGHTLESS, WEIGHTLESS_COOLDOWN);
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.6F, 1.4F);
+	}
+
+	private static void setWeightless(ServerPlayer player, boolean on) {
+		modifier(player, Attributes.GRAVITY, WEIGHTLESS_ID, WEIGHTLESS_GRAVITY, on);
+		modifier(player, Attributes.FALL_DAMAGE_MULTIPLIER, WEIGHTLESS_FALL_ID, WEIGHTLESS_FALL, on);
+		if (on) {
+			player.setAttached(WEIGHTLESS_ON, true);
+		} else {
+			player.removeAttached(WEIGHTLESS_ON);
+		}
+	}
+
+	// ---------------------------------------------------------------- Gravity Well
+
+	private static void well(ServerPlayer player) {
+		if (!ready(player, WELL)) {
+			return;
+		}
+		Vec3 at = aimPoint(player, WELL_RANGE);
+		WELLS.add(new Well(player.level().dimension(), at, player.getUUID(), player.level().getGameTime() + WELL_TICKS, false));
+		cool(player, WELL, WELL_COOLDOWN);
+		player.level().playSound(null, at.x, at.y, at.z, SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.5F, 1.8F);
+	}
+
+	// ---------------------------------------------------------------- Crush
+
+	private static void crush(ServerPlayer player, float charge) {
+		if (!ready(player, CRUSH)) {
+			return;
+		}
+		ServerLevel level = player.level();
+		boolean collapsed = Fate.isCorrupted(player);
+		Vec3 at = aimPoint(player, CRUSH_RANGE);
+		double radius = Mth.lerp(charge, CRUSH_RADIUS_MIN, CRUSH_RADIUS_MAX) + (collapsed ? COLLAPSE_RADIUS_BONUS : 0.0);
+		float damage = Mth.lerp(charge, CRUSH_DAMAGE_MIN, CRUSH_DAMAGE_MAX) * (collapsed ? COLLAPSE_DAMAGE : 1.0F);
+		AABB area = new AABB(at, at).inflate(radius, radius + 3.0, radius);
+		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area,
+			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand))) {
+			if (target.getBoundingBox().getCenter().distanceToSqr(at) > (radius + 1.5) * (radius + 1.5)) {
+				continue;
+			}
+			touch(target, player);
+			Vec3 v = target.getDeltaMovement();
+			target.setDeltaMovement(v.x * 0.3, -CRUSH_SLAM * (0.4 + charge), v.z * 0.3);
+			target.needsSync = true;
+			target.syncVelocity = true;
+			crushing = true;
+			try {
+				target.hurtServer(level, level.damageSources().playerAttack(player), damage);
+			} finally {
+				crushing = false;
+			}
+			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, CRUSH_PIN_TICKS, 1), player);
+			modifier(target, Attributes.GRAVITY, CRUSH_ID, CRUSH_WEIGHT, true);
+			PINNED.removeIf(p -> p.entity().equals(target.getUUID()));
+			PINNED.add(new Pinned(level.dimension(), target.getUUID(), level.getGameTime() + CRUSH_PIN_TICKS));
+		}
+		// a ring slamming outward along the ground
+		for (int i = 0; i < 24; i++) {
+			double a = i / 24.0 * Math.PI * 2.0;
+			level.sendParticles(ParticleTypes.EXPLOSION, at.x + Math.cos(a) * radius * 0.7, at.y + 0.2, at.z + Math.sin(a) * radius * 0.7, 1, 0.0, 0.0, 0.0, 0.0);
+		}
+		level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y + 0.5, at.z, 30, radius * 0.4, 0.3, radius * 0.4, 0.05);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.2F, 0.6F);
+		int cooldown = Math.round(Mth.lerp(charge, CRUSH_COOLDOWN_MIN, CRUSH_COOLDOWN_MAX));
+		player.setAttached(COOLDOWNS, cooldowns(player).withCrush(level.getGameTime() + cooldown, cooldown));
+	}
+
+	// ---------------------------------------------------------------- Singularity (C)
+
+	private static void singularity(ServerPlayer player) {
+		if (!ready(player, SINGULARITY)) {
+			return;
+		}
+		Vec3 at = aimPoint(player, SINGULARITY_RANGE).add(0.0, 1.0, 0.0);
+		WELLS.add(new Well(player.level().dimension(), at, player.getUUID(), player.level().getGameTime() + SINGULARITY_TICKS, true));
+		cool(player, SINGULARITY, SINGULARITY_COOLDOWN);
+		player.level().playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 1.5F, 0.5F);
+	}
+
+	// ---------------------------------------------------------------- ticking
+
+	@Override
+	public void tick(ServerPlayer player) {
+		if (!player.isAlive() || player.isSpectator()) {
+			State state = STATES.get(player.getUUID());
+			if (state != null) {
+				dropLift(player, state, false);
+			}
+			if (player.getAttached(WEIGHTLESS_ON) != null) {
+				setWeightless(player, false);
+			}
+			return;
+		}
+		State state = state(player);
+		if (state.liftTarget >= 0) {
+			tickLift(player, state);
+		}
+		if (player.getAttached(WEIGHTLESS_ON) != null) {
+			state.weightlessTicks++;
+			player.causeFoodExhaustion(WEIGHTLESS_EXHAUSTION);
+			if (++state.weightlessTotal >= CORRUPT_WEIGHTLESS_TICKS) {
+				state.weightlessTotal = 0;
+				Fate.addCorruption(player, 1);
+			}
+			if (state.weightlessTicks >= WEIGHTLESS_MAX_TICKS || player.isInWater() || player.getFoodData().getFoodLevel() <= 0) {
+				endWeightless(player, state);
+			}
+		}
+		boolean collapsed = Fate.isCorrupted(player);
+		boolean ascended = Fate.isAscended(player);
+		if (player.tickCount % 20 == 0) {
+			// the passive weights (re-applied, since attributes don't remember transient modifiers through death)
+			modifier(player, Attributes.GRAVITY, COLLAPSE_ID, COLLAPSE_GRAVITY, collapsed);
+			modifier(player, Attributes.FALL_DAMAGE_MULTIPLIER, COLLAPSE_FALL_ID, COLLAPSE_FALL, collapsed);
+			modifier(player, Attributes.KNOCKBACK_RESISTANCE, HORIZON_ID, 1.0, ascended);
+		}
+		if (collapsed) {
+			tickCollapse(player, state);
+		}
+		if (ascended && player.tickCount % 2 == 0) {
+			deflect(player);
+		}
+	}
+
+	/** Collapse: loose things drift in; and the cure, held up by a shulker's levitation long enough. */
+	private static void tickCollapse(ServerPlayer player, State state) {
+		ServerLevel level = player.level();
+		if (player.tickCount % 4 == 0) {
+			Vec3 me = player.position().add(0.0, 1.0, 0.0);
+			AABB area = player.getBoundingBox().inflate(COLLAPSE_DRIFT_RADIUS);
+			for (Entity e : level.getEntities(player, area, e -> e instanceof ItemEntity
+				|| e instanceof LivingEntity living && living.getMaxHealth() <= 10.0F && !(e instanceof Player) && living.isAlive())) {
+				Vec3 to = me.subtract(e.position());
+				double d = to.length();
+				if (d > 0.8 && d < COLLAPSE_DRIFT_RADIUS) {
+					e.setDeltaMovement(e.getDeltaMovement().add(to.scale(COLLAPSE_DRIFT * 4.0 / d)));
+					e.needsSync = true;
+				}
+			}
+			if (player.tickCount % 12 == 0) {
+				level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.0, player.getZ(), 2, 0.6, 0.6, 0.6, 0.01);
+			}
+		}
+		if (player.hasEffect(MobEffects.LEVITATION)) {
+			if (!state.curedHint) {
+				state.curedHint = true;
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.gravity_cure_hint").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+			}
+			if (++state.levitating >= CURE_LEVITATION_TICKS) {
+				state.levitating = 0;
+				Fate.purify(player);
+			}
+		} else {
+			state.levitating = 0;
+		}
+	}
+
+	/** Event Horizon: projectiles that come too close are bent away. */
+	private static void deflect(ServerPlayer player) {
+		Vec3 me = player.getBoundingBox().getCenter();
+		for (Projectile projectile : player.level().getEntitiesOfClass(Projectile.class, player.getBoundingBox().inflate(HORIZON_DEFLECT_RADIUS),
+			p -> p.isAlive() && p.getOwner() != player)) {
+			Vec3 away = projectile.position().subtract(me);
+			double d = away.length();
+			if (d < 0.01) {
+				continue;
+			}
+			Vec3 v = projectile.getDeltaMovement();
+			projectile.setDeltaMovement(v.add(away.scale(0.5 / d)).scale(0.8));
+			projectile.needsSync = true;
+		}
+	}
+
+	private static void serverTick(MinecraftServer server) {
+		if (!WELLS.isEmpty()) {
+			for (Iterator<Well> it = WELLS.iterator(); it.hasNext(); ) {
+				Well well = it.next();
+				ServerLevel level = server.getLevel(well.dimension());
+				if (level == null) {
+					it.remove();
+					continue;
+				}
+				long left = well.until() - level.getGameTime();
+				ServerPlayer owner = server.getPlayerList().getPlayer(well.owner());
+				if (left <= 0) {
+					it.remove();
+					if (well.singularity()) {
+						burst(level, well, owner);
+					}
+					continue;
+				}
+				tickWell(level, well, owner, left);
+			}
+		}
+		if (!PINNED.isEmpty()) {
+			for (Iterator<Pinned> it = PINNED.iterator(); it.hasNext(); ) {
+				Pinned pinned = it.next();
+				ServerLevel level = server.getLevel(pinned.dimension());
+				Entity entity = level == null ? null : level.getEntity(pinned.entity());
+				if (entity == null || level.getGameTime() >= pinned.until()) {
+					it.remove();
+					if (entity != null) {
+						modifier(entity, Attributes.GRAVITY, CRUSH_ID, 0.0, false);
+					}
+				}
+			}
+		}
+		if (server.getTickCount() % 100 == 0 && !TOUCHED.isEmpty()) {
+			long now = server.overworld().getGameTime();
+			TOUCHED.values().removeIf(t -> now - t.at() > TOUCH_MEMORY_TICKS);
+		}
+	}
+
+	private static void tickWell(ServerLevel level, Well well, @Nullable ServerPlayer owner, long left) {
+		double radius = well.singularity() ? SINGULARITY_PULL_RADIUS : WELL_RADIUS;
+		double pull = well.singularity() ? SINGULARITY_PULL : WELL_PULL;
+		if (owner != null && Fate.isCorrupted(owner)) {
+			pull *= COLLAPSE_DAMAGE;
+		}
+		Vec3 at = well.at();
+		AABB area = new AABB(at, at).inflate(radius);
+		boolean hit = well.singularity() && left % SINGULARITY_HIT_EVERY == 0;
+		for (Entity e : level.getEntities((Entity)null, area, e -> e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand)
+			&& (owner == null || e != owner) && !(e instanceof Player p && (p.isCreative() || p.isSpectator())))) {
+			Vec3 to = at.subtract(e.getBoundingBox().getCenter());
+			double d = to.length();
+			if (d > radius || d < 0.05) {
+				continue;
+			}
+			double strength = pull * (0.5 + (1.0 - d / radius));
+			e.setDeltaMovement(e.getDeltaMovement().scale(0.9).add(to.scale(strength / d)));
+			e.needsSync = true;
+			e.syncVelocity = true;
+			if (e instanceof LivingEntity living) {
+				if (owner != null) {
+					touch(living, owner);
+				}
+				if (hit && d <= SINGULARITY_CORE) {
+					DamageSource source = owner != null ? level.damageSources().indirectMagic(owner, owner) : level.damageSources().magic();
+					living.setInvulnerableTime(0);
+					living.hurtServer(level, source, SINGULARITY_HIT);
+				}
+			}
+		}
+		if (well.singularity()) {
+			level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 6, 0.3, 0.3, 0.3, 0.02);
+			level.sendParticles(ParticleTypes.PORTAL, at.x, at.y, at.z, 16, radius * 0.3, radius * 0.3, radius * 0.3, -1.0);
+			if (left % 20 == 0) {
+				level.playSound(null, at.x, at.y, at.z, SoundEvents.RESPAWN_ANCHOR_DEPLETE.value(), SoundSource.PLAYERS, 1.0F, 0.5F);
+			}
+		} else if (left % 2 == 0) {
+			// a slow spiral drawn inward
+			double a = left * 0.5;
+			for (int i = 0; i < 3; i++) {
+				double r = radius * (0.3 + 0.2 * i);
+				double ang = a + i * 2.1;
+				level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x + Math.cos(ang) * r, at.y + 0.3 * i, at.z + Math.sin(ang) * r, 1, 0.0, 0.0, 0.0, 0.0);
+			}
+			level.sendParticles(ParticleTypes.PORTAL, at.x, at.y, at.z, 4, 0.2, 0.2, 0.2, -0.6);
+		}
+	}
+
+	/** The Singularity's end: it snaps open and throws everything out. */
+	private static void burst(ServerLevel level, Well well, @Nullable ServerPlayer owner) {
+		Vec3 at = well.at();
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(SINGULARITY_CORE + 1.0),
+			e -> e.isAlive() && !e.isSpectator() && e != owner && !(e instanceof ArmorStand))) {
+			Vec3 away = living.getBoundingBox().getCenter().subtract(at);
+			double d = Math.max(0.3, away.length());
+			living.setInvulnerableTime(0);
+			DamageSource source = owner != null ? level.damageSources().indirectMagic(owner, owner) : level.damageSources().magic();
+			living.hurtServer(level, source, SINGULARITY_BURST);
+			living.setDeltaMovement(away.scale(1.3 / d).add(0.0, 0.5, 0.0));
+			living.needsSync = true;
+			living.syncVelocity = true;
+		}
+		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+		level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y, at.z, 80, 1.5, 1.5, 1.5, 0.6);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.2F, 0.6F);
+	}
+
+	// ---------------------------------------------------------------- deaths by weight
+
+	private static void touch(LivingEntity target, ServerPlayer player) {
+		TOUCHED.put(target.getUUID(), new Touch(player.getUUID(), player.level().getGameTime()));
+	}
+
+	private static void afterDeath(LivingEntity entity, DamageSource source) {
+		Touch touch = TOUCHED.remove(entity.getUUID());
+		if (touch == null || !(entity.level() instanceof ServerLevel level) || level.getGameTime() - touch.at() > TOUCH_MEMORY_TICKS) {
+			return;
+		}
+		// it died to the weight: a fall, being crushed into the ground, or the Singularity's magic
+		boolean byWeight = source.is(DamageTypeTags.IS_FALL) || crushing
+			|| source.is(net.minecraft.world.damagesource.DamageTypes.INDIRECT_MAGIC) && source.getEntity() != null
+				&& source.getEntity().getUUID().equals(touch.player());
+		ServerPlayer player = level.getServer().getPlayerList().getPlayer(touch.player());
+		if (!byWeight || player == null || !Powers.has(player, INSTANCE) || entity == player) {
+			return;
+		}
+		Fate.addCorruption(player, CORRUPT_PER_KILL);
+		if (!Fate.canAscend(player)) {
+			return;
+		}
+		int kills = kills(player) + 1;
+		player.setAttached(KILLS, kills);
+		if (kills == ASCEND_KILLS / 3 || kills == ASCEND_KILLS * 2 / 3) {
+			player.sendOverlayMessage(Component.translatable(kills == ASCEND_KILLS / 3 ? "message.jaymospowers.gravity_ascend.0" : "message.jaymospowers.gravity_ascend.1")
+				.withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+		}
+		if (kills >= ASCEND_KILLS) {
+			Fate.ascend(player);
+		}
+	}
+
+	public static int kills(Player player) {
+		Integer kills = player.getAttached(KILLS);
+		return kills == null ? 0 : kills;
+	}
+
+	static void setKills(ServerPlayer player, int kills) {
+		player.setAttached(KILLS, kills);
+	}
+
+	// ---------------------------------------------------------------- helpers
+
+	private static void modifier(Entity entity, Holder<Attribute> attribute, Identifier id, double amount, boolean on) {
+		if (!(entity instanceof LivingEntity living)) {
+			return;
+		}
+		AttributeInstance instance = living.getAttribute(attribute);
+		if (instance == null) {
+			return;
+		}
+		if (on) {
+			AttributeModifier.Operation op = attribute == Attributes.KNOCKBACK_RESISTANCE ? AttributeModifier.Operation.ADD_VALUE
+				: AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL;
+			AttributeModifier current = instance.getModifier(id);
+			if (current == null || current.amount() != amount) {
+				instance.addOrUpdateTransientModifier(new AttributeModifier(id, amount, op));
+			}
+		} else if (instance.hasModifier(id)) {
+			instance.removeModifier(id);
+		}
+	}
+
+	/** Where the crosshair lands (a block, a creature, or open air at {@code range}). */
+	private static Vec3 aimPoint(ServerPlayer player, double range) {
+		Vec3 eye = player.getEyePosition();
+		Vec3 end = eye.add(player.getViewVector(1.0F).scale(range));
+		BlockHitResult block = player.level().clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+		Entity entity = entityInSight(player, range);
+		if (entity != null && (block.getType() == HitResult.Type.MISS || entity.distanceToSqr(eye) < block.getLocation().distanceToSqr(eye))) {
+			return entity.position();
+		}
+		return block.getType() == HitResult.Type.MISS ? end : block.getLocation();
+	}
+
+	private static @Nullable Entity entityInSight(ServerPlayer player, double range) {
+		Vec3 eye = player.getEyePosition();
+		Vec3 look = player.getViewVector(1.0F);
+		Vec3 end = eye.add(look.scale(range));
+		BlockHitResult block = player.level().clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+		if (block.getType() != HitResult.Type.MISS) {
+			end = block.getLocation();
+		}
+		AABB box = player.getBoundingBox().expandTowards(look.scale(range)).inflate(1.0);
+		EntityHitResult hit = ProjectileUtil.getEntityHitResult(player, eye, end, box,
+			e -> !e.isSpectator() && e.isPickable() && e != player.getVehicle(), eye.distanceToSqr(end));
+		return hit == null ? null : hit.getEntity();
+	}
+
+	private static void fizzle(ServerPlayer player) {
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SHULKER_BULLET_HIT, SoundSource.PLAYERS, 0.4F, 1.6F);
+	}
+}
