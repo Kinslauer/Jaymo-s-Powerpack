@@ -12,7 +12,12 @@ public enum WindFlight {
 	/** Fast flight in the look direction (hold Sprint to accelerate). */
 	CRUISE,
 	/** Cruise at 80%+ of top speed. */
-	SONIC;
+	SONIC,
+	/**
+	 * Lost control: a turn too sharp for the speed sent the flyer tumbling end over end. Not flying (gravity and
+	 * momentum have them; falls count), until they recover into a hover.
+	 */
+	TUMBLE;
 
 	private static final WindFlight[] VALUES = values();
 
@@ -21,7 +26,7 @@ public enum WindFlight {
 	}
 
 	public boolean flying() {
-		return this != NONE;
+		return this != NONE && this != TUMBLE;
 	}
 
 	/** Cruise or sonic: the superman pose, the trail and the lock apply. */

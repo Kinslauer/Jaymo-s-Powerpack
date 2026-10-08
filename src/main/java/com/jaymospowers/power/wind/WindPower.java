@@ -364,6 +364,9 @@ public final class WindPower implements Power {
 			if (current == null || current != flight.ordinal()) {
 				player.setAttached(FLIGHT, flight.ordinal());
 			}
+		} else if (flight == WindFlight.TUMBLE) {
+			// everyone draws the tumble
+			player.setAttached(FLIGHT, flight.ordinal());
 		} else if (player.getAttached(FLIGHT) != null) {
 			player.removeAttached(FLIGHT);
 		}

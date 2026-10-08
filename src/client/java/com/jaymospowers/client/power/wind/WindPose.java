@@ -39,6 +39,7 @@ public final class WindPose {
 
 	static void tick(Minecraft minecraft) {
 		WindHoverSway.tick(minecraft);
+		WindTumble.tick(minecraft);
 		ClientLevel level = minecraft.level;
 		if (level == null) {
 			AMOUNTS.clear();
@@ -72,6 +73,7 @@ public final class WindPose {
 	/** From the avatar renderer's extractRenderState: put this frame's pose amount on the state. */
 	public static void extract(Entity entity, AvatarRenderState state, float partialTicks) {
 		WindHoverSway.extract(entity, state, partialTicks);
+		WindTumble.extract(entity, state, partialTicks);
 		float[] amount = AMOUNTS.get(entity.getId());
 		float value = amount == null ? 0.0F : Mth.lerp(partialTicks, amount[0], amount[1]);
 		if (value <= 0.001F || state.isFallFlying || state.isVisuallySwimming) {
@@ -88,6 +90,7 @@ public final class WindPose {
 	/** After the body has been turned to face its way: tip it into the flight, pivoting about its middle. */
 	public static void rotate(LivingEntityRenderState state, PoseStack poseStack, float entityScale) {
 		WindHoverSway.rotate(state, poseStack, entityScale);
+		WindTumble.rotate(state, poseStack, entityScale);
 		Float amount = state.getData(KEY);
 		if (amount == null || !(state instanceof AvatarRenderState) || state.deathTime > 0.0F) {
 			return;
@@ -104,6 +107,7 @@ public final class WindPose {
 	public static void applyModel(Model<?> model, Object state) {
 		// the hover ragdoll first; the cruise pose, easing in over it, wins as speed picks up
 		WindHoverSway.applyModel(model, state);
+		WindTumble.applyModel(model, state);
 		if (!(state instanceof AvatarRenderState avatar) || !(model instanceof HumanoidModel<?> humanoid)) {
 			return;
 		}

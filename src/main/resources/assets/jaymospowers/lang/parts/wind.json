@@ -13,5 +13,6 @@
 	"hud.jaymospowers.wind.cruise": "CRUISE",
 	"hud.jaymospowers.wind.sonic": "SONIC",
 	"hud.jaymospowers.wind.locked": "LOCKED",
-	"hud.jaymospowers.wind.unlocked": "unlocked"
+	"hud.jaymospowers.wind.unlocked": "unlocked",
+	"hud.jaymospowers.wind.tumble": "OUT OF CONTROL"
 }

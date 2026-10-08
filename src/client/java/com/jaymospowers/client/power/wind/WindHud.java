@@ -68,6 +68,17 @@ final class WindHud {
 	/** The flight readout, stacked just above the chip row and right-aligned with it. */
 	private static void flight(GuiGraphicsExtractor graphics, Font font, WindFlightController flight, int chipsX, int chipsY, float time) {
 		WindFlight state = flight.state();
+		if (state == WindFlight.TUMBLE) {
+			// out of control: a warning and how long until you can catch yourself
+			int right = chipsX + chipsWidth();
+			int y = chipsY - 4;
+			float left = flight.tumbleTicks() / (float)WindFlightController.TUMBLE_TICKS;
+			graphics.fill(right - BAR_WIDTH - 1, y - 1, right + 1, y + 3, 0x90000000);
+			graphics.fill(right - BAR_WIDTH, y, right - BAR_WIDTH + Mth.ceil(BAR_WIDTH * left), y + 2, 0xFFE04040);
+			Component warning = Component.translatable("hud.jaymospowers.wind.tumble").withColor((int)time % 6 < 3 ? 0xFF6060 : 0xFFFFFF);
+			graphics.text(font, warning, right - font.width(warning), y - 11, 0xE0FFFFFF);
+			return;
+		}
 		if (!state.flying()) {
 			return;
 		}

@@ -49,7 +49,20 @@ public final class WindFlightController {
 	 * many degrees per tick, from just-cruising to top speed (so at sonic a U-turn takes a long, wide arc).
 	 */
 	static final double CRUISE_TURN_RATE_SLOW = 7.0;
-	static final double CRUISE_TURN_RATE_FAST = 1.2;
+	static final double CRUISE_TURN_RATE_FAST = 0.7;
+	/**
+	 * Losing control: at or above this fraction of top speed, looking further off the flight path than the limit
+	 * (from {@code TUMBLE_ANGLE_SLOW} degrees at that speed down to {@code TUMBLE_ANGLE_FAST} at top speed) throws
+	 * you into a tumble for {@code TUMBLE_TICKS}, after which you recover into a hover.
+	 */
+	static final double TUMBLE_MIN_FRACTION = 0.35;
+	static final double TUMBLE_ANGLE_SLOW = 110.0;
+	static final double TUMBLE_ANGLE_FAST = 60.0;
+	public static final int TUMBLE_TICKS = 40;
+	/** Momentum kept per tick while tumbling (vanilla air is 0.91; a tumbling body carries further). */
+	static final double TUMBLE_DRAG = 0.975;
+	/** How long the recovery pose is held after regaining control. */
+	public static final int RECOVER_TICKS = 30;
 	/** Speed bled per radian turned (hard turns cost momentum). */
 	static final double CRUISE_TURN_DRAG = 0.5;
 	/** Gravity along the flight path: diving gains speed, climbing loses it (blocks/tick per tick at vertical). */
@@ -75,6 +88,8 @@ public final class WindFlightController {
 	private boolean sinkArmed = true;
 	private int lockFlash;
 	private @Nullable WindLoopSound loop;
+	private int tumbleTicks;
+	private int recoverTicks;
 	private WindFlight sentState = WindFlight.NONE;
 	private boolean sentLocked;
 	private int sinceSent;
@@ -85,6 +100,16 @@ public final class WindFlightController {
 
 	public boolean locked() {
 		return this.locked;
+	}
+
+	/** Ticks of tumble left (0 when not tumbling). */
+	public int tumbleTicks() {
+		return this.state == WindFlight.TUMBLE ? this.tumbleTicks : 0;
+	}
+
+	/** Ticks of the recovery pose left (0 when not recovering). */
+	public int recoverTicks() {
+		return this.recoverTicks;
 	}
 
 	/** 0..1 of the top speed (cruise), or of the hover speed while hovering. */
@@ -127,8 +152,13 @@ public final class WindFlightController {
 		int jumpTaps = drain(minecraft.options.keyJump);
 		int sneakTaps = drain(minecraft.options.keyShift);
 		Input input = player.input.keyPresses;
+		if (this.recoverTicks > 0) {
+			this.recoverTicks--;
+		}
 
-		if (!this.state.flying()) {
+		if (this.state == WindFlight.TUMBLE) {
+			this.tumble(minecraft, player);
+		} else if (!this.state.flying()) {
 			if (jumpTaps > 0 && input.shift()) {
 				if (jumpTaps >= 2 || this.ticks - this.lastJumpTap <= DOUBLE_TAP_TICKS) {
 					this.lastJumpTap = -100;
@@ -234,8 +264,19 @@ public final class WindFlightController {
 		Vec3 look = player.getLookAngle();
 		Vec3 dir = this.velocity.lengthSqr() > 1.0E-6 ? this.velocity.normalize() : look;
 		double fractionNow = Mth.clamp(this.speed / TOP_SPEED, 0.0, 1.0);
-		double maxTurn = Math.toRadians(Mth.lerp(fractionNow, CRUISE_TURN_RATE_SLOW, CRUISE_TURN_RATE_FAST));
+		// the turn rate falls away quickly with speed: half speed already turns at a third of the slow rate
+		double maxTurn = Math.toRadians(Mth.lerp(Math.sqrt(fractionNow), CRUISE_TURN_RATE_SLOW, CRUISE_TURN_RATE_FAST));
 		double angle = Math.acos(Mth.clamp(dir.dot(look), -1.0, 1.0));
+		if (fractionNow >= TUMBLE_MIN_FRACTION) {
+			double t = (fractionNow - TUMBLE_MIN_FRACTION) / (1.0 - TUMBLE_MIN_FRACTION);
+			double limit = Math.toRadians(Mth.lerp(t, TUMBLE_ANGLE_SLOW, TUMBLE_ANGLE_FAST));
+			if (angle > limit) {
+				// wrenched round far harder than this speed allows: control is lost
+				this.velocity = dir.scale(this.speed);
+				this.startTumble(minecraft, player);
+				return;
+			}
+		}
 		if (angle > 1.0E-4) {
 			double turned = Math.min(angle, maxTurn);
 			dir = rotateToward(dir, look, angle, turned);
@@ -286,6 +327,57 @@ public final class WindFlightController {
 		}
 	}
 
+	// ---- tumbling ---------------------------------------------------------------------------------------------
+
+	private void startTumble(Minecraft minecraft, LocalPlayer player) {
+		this.state = WindFlight.TUMBLE;
+		this.locked = false;
+		this.tumbleTicks = TUMBLE_TICKS;
+		this.speed = 0.0;
+		player.setDeltaMovement(this.velocity);
+		ClientLevel level = minecraft.level;
+		if (level != null) {
+			level.playLocalSound(player, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.0F, 0.6F);
+			level.playLocalSound(player, SoundEvents.BREEZE_DEFLECT, SoundSource.PLAYERS, 1.0F, 0.7F);
+			for (int i = 0; i < 16; i++) {
+				level.addParticle(ParticleTypes.CLOUD, player.getX(), player.getY() + 1.0, player.getZ(),
+					(level.getRandom().nextDouble() - 0.5) * 0.5, (level.getRandom().nextDouble() - 0.5) * 0.5, (level.getRandom().nextDouble() - 0.5) * 0.5);
+			}
+		}
+		WindCamera.shake(3.0F, 20);
+	}
+
+	/** Out of control: momentum and gravity carry you, nothing you press matters, until you recover (or hit something). */
+	private void tumble(Minecraft minecraft, LocalPlayer player) {
+		if (!WindFlight.canFly(player) || player.onGround() || player.isInWater() || player.isInLava() || player.onClimbable()) {
+			// came down still tumbling: that's a crash, and the fall counts as a fall
+			this.state = WindFlight.NONE;
+			this.tumbleTicks = 0;
+			return;
+		}
+		Vec3 v = player.getDeltaMovement();
+		// a tumbling body keeps more of its speed than vanilla air drag allows
+		player.setDeltaMovement(v.x / 0.91 * TUMBLE_DRAG, v.y, v.z / 0.91 * TUMBLE_DRAG);
+		if (this.tumbleTicks % 6 == 0) {
+			WindCamera.shake(1.4F, 6);
+			player.level().playLocalSound(player, SoundEvents.BREEZE_IDLE_AIR, SoundSource.PLAYERS, 0.5F, 1.4F);
+		}
+		if (--this.tumbleTicks <= 0) {
+			// control back: catch yourself into a hover, in the recovery pose
+			this.state = WindFlight.HOVER;
+			this.sinkArmed = false;
+			this.velocity = player.getDeltaMovement().scale(0.5);
+			player.setDeltaMovement(this.velocity);
+			this.recoverTicks = RECOVER_TICKS;
+			player.level().playLocalSound(player, SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 0.9F, 1.2F);
+			ClientLevel level = minecraft.level;
+			if (level != null) {
+				level.addParticle(ParticleTypes.GUST_EMITTER_SMALL, player.getX(), player.getY() + 0.5, player.getZ(), 0.0, 0.0, 0.0);
+			}
+			WindCamera.shake(0.8F, 8);
+		}
+	}
+
 	// ---- transitions ------------------------------------------------------------------------------------------
 
 	/** R, or a double-tapped Jump while sneaking. */
@@ -293,6 +385,10 @@ public final class WindFlightController {
 		if (player != this.player) {
 			this.player = player;
 			this.reset();
+		}
+		if (this.state == WindFlight.TUMBLE) {
+			// no control while tumbling
+			return;
 		}
 		if (this.state.flying()) {
 			this.land(player, true);
