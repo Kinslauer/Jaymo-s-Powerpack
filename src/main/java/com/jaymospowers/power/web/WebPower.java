@@ -53,6 +53,9 @@ public final class WebPower implements Power {
 	/** Cooldowns, in ticks. */
 	public static final int ZIP_COOLDOWN = 60;
 	public static final int SHOT_COOLDOWN = 40;
+	/** Web Shot charges for up to this long (hold V); the cooldown grows from SHOT_COOLDOWN to this at a full charge. */
+	public static final int SHOT_CHARGE_TICKS = 60;
+	public static final int SHOT_COOLDOWN_MAX = 160;
 	public static final int YANK_COOLDOWN = 120;
 	/** Zip reach, and how fast the client reels you in (blocks/tick; used here to time the zip). */
 	public static final double ZIP_RANGE = 48.0;
@@ -100,6 +103,8 @@ public final class WebPower implements Power {
 		int lineTicks;
 		/** Ticks the wings have been spread (0 = folded). */
 		int wingsTicks;
+		/** Game time a Web Shot charge started, or -1. */
+		long shotChargeStart = -1;
 	}
 
 	private WebPower() {
@@ -332,6 +337,15 @@ public final class WebPower implements Power {
 
 	@Override
 	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
+		if (key == PowerKey.ABILITY_3) {
+			// V charges on the way down and fires on the way up
+			if (down) {
+				startShot(player);
+			} else {
+				shoot(player);
+			}
+			return;
+		}
 		if (!down) {
 			return;
 		}
@@ -342,7 +356,6 @@ public final class WebPower implements Power {
 					zip(player);
 				}
 			}
-			case ABILITY_3 -> shoot(player);
 			case ABILITY_4 -> yank(player);
 			default -> {
 			}
@@ -408,16 +421,34 @@ public final class WebPower implements Power {
 		ServerPlayNetworking.send(player, pull);
 	}
 
-	/** V: shoot a web ball. */
+	/** V down: start charging a web blast (if it's ready). */
+	private void startShot(ServerPlayer player) {
+		long now = player.level().getGameTime();
+		if (now < cooldowns(player).shot()) {
+			return;
+		}
+		state(player).shotChargeStart = now;
+		player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.CROSSBOW_LOADING_START.value(), SoundSource.PLAYERS, 0.6F, 1.4F);
+	}
+
+	/** V up: fire the web blast, as strong as it was charged. */
 	private void shoot(ServerPlayer player) {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
+		State state = player.getAttached(STATE);
+		if (state == null || state.shotChargeStart < 0) {
+			return;
+		}
+		float charge = Math.min(1.0F, (now - state.shotChargeStart) / (float)SHOT_CHARGE_TICKS);
+		state.shotChargeStart = -1;
 		WebCooldowns cooldowns = cooldowns(player);
 		if (now < cooldowns.shot()) {
 			return;
 		}
-		Projectile.spawnProjectileFromRotation(WebBall::new, level, new ItemStack(WEB_BALL_ITEM), player, 0.0F, SHOT_SPEED, 0.5F);
-		player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), now + SHOT_COOLDOWN, cooldowns.yank()));
+		Projectile.spawnProjectileFromRotation((lvl, owner, stack) -> new WebBall(lvl, owner, stack).charged(charge), level,
+			new ItemStack(WEB_BALL_ITEM), player, 0.0F, SHOT_SPEED, 0.5F);
+		int cooldown = Mth.lerpInt(charge, SHOT_COOLDOWN, SHOT_COOLDOWN_MAX);
+		player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), now + cooldown, cooldowns.yank()));
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 1.0F, 1.3F);
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.SNOWBALL_THROW, SoundSource.PLAYERS, 0.5F, 0.7F);
 	}

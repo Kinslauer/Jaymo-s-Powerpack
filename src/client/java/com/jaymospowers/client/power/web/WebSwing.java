@@ -63,12 +63,18 @@ final class WebSwing {
 	static final double SLING_MIN_SPEED = 0.9;
 	static final double SLING_MAX_SPEED = 3.4;
 	/** How much the launch follows where you look, versus straight between the webs (0 = all webs). */
-	static final double SLING_AIM = 0.4;
+	static final double SLING_AIM = 0.8;
+	/** After a launch, no web can be shot for this long (and held web keys must be pressed again), so a held key can't
+	 * snag a web the instant you fire and kill the launch. */
+	static final int SLING_LOCKOUT = 12;
 	/** The least draw that fires (a tap of Jump just reels in). */
 	static final float SLING_MIN_DRAW = 0.12F;
 	// ===== web wings (hold Jump in mid-air) =========================================================================
 	/** Ticks Jump must be held in mid-air (while falling) before the wings spread. */
 	static final int WINGS_HOLD_TICKS = 6;
+	/** The wings only open once you've fallen more than this far from your highest point. Each time they fold, Jump
+	 * must be let go and you must fall this far again before they open again (there's no cooldown). */
+	static final double WINGS_MIN_DROP = 2.0;
 	/** Glide: steady sink rate, extra sink per unit of looking down, and how fast the path swings to the look. */
 	static final double WINGS_SINK = 0.07;
 	static final double WINGS_DIVE = 0.4;
@@ -115,10 +121,13 @@ final class WebSwing {
 	float slingDraw;
 	private Vec3 braced = Vec3.ZERO;
 	private boolean slingJumpHeld;
+	private int swingLockout;
 	// wings
 	int wingsTicks;
-	int wingsCooldown;
 	private int jumpHeldAir;
+	private boolean wingsNeedRelease;
+	/** The highest point since you last stood, rose, or folded the wings: falls for the wings count from here. */
+	private double apexY;
 	// zip / yank-to
 	WebNet.@Nullable Pull pull;
 	private int pullTicks;
@@ -138,7 +147,12 @@ final class WebSwing {
 			ClientPlayNetworking.send(new WebNet.Wings(false));
 		}
 		wingsTicks = 0;
-		wingsCooldown = 0;
+		wingsNeedRelease = false;
+		swingLockout = 0;
+	}
+
+	private static LocalPlayer player() {
+		return Minecraft.getInstance().player;
 	}
 
 	/** Both webs stuck: the slingshot is possible. */
@@ -155,6 +169,10 @@ final class WebSwing {
 
 	void press(LocalPlayer player, int hand) {
 		Strand strand = strands[hand];
+		if (swingLockout > 0) {
+			// just launched from the slingshot: no web yet (press again once the lockout's over)
+			return;
+		}
 		strand.keyHeld = true;
 		if (pull != null) {
 			return;
@@ -281,8 +299,12 @@ final class WebSwing {
 			pull = null;
 			return;
 		}
-		if (wingsCooldown > 0) {
-			wingsCooldown--;
+		if (swingLockout > 0) {
+			swingLockout--;
+		}
+		// the highest point of the current fall (resets on the ground, while rising, on a web or in water)
+		if (player.onGround() || player.getDeltaMovement().y >= 0.0 || attached() || pull != null || player.isInWater() || player.onClimbable()) {
+			apexY = player.getY();
 		}
 		if (pull != null) {
 			foldWings();
@@ -447,6 +469,11 @@ final class WebSwing {
 		slingDraw = 0.0F;
 		flying = true;
 		flightCap = Math.max(MAX_SPEED, speed);
+		// failsafe: held web keys don't re-fire, and no new web for a moment, so the launch can't be snagged
+		for (Strand strand : strands) {
+			strand.keyHeld = false;
+		}
+		swingLockout = SLING_LOCKOUT;
 		player.setDeltaMovement(dir.scale(speed));
 		play(player, SoundEvents.CROSSBOW_SHOOT, 1.0F, 0.7F);
 		play(player, SoundEvents.TRIDENT_RIPTIDE_2.value(), 0.8F, 1.3F);
@@ -460,12 +487,16 @@ final class WebSwing {
 	/** Holding Jump in mid-air (falling, no web out) spreads the wings, if they're off cooldown. */
 	private void tickWingsInput(LocalPlayer player) {
 		boolean jump = player.input.keyPresses.jump();
+		if (!jump) {
+			wingsNeedRelease = false;
+		}
 		boolean air = !player.onGround() && !player.isInWater() && !player.isInLava() && !player.onClimbable() && !player.isFallFlying();
-		if (!jump || !air || attached() || wingsTicks > 0) {
+		if (!jump || !air || attached() || wingsTicks > 0 || wingsNeedRelease) {
 			jumpHeldAir = 0;
 			return;
 		}
-		if (++jumpHeldAir >= WINGS_HOLD_TICKS && wingsCooldown == 0 && player.getDeltaMovement().y < 0.0) {
+		boolean fallenFarEnough = apexY - player.getY() > WINGS_MIN_DROP;
+		if (++jumpHeldAir >= WINGS_HOLD_TICKS && fallenFarEnough) {
 			wingsTicks = WebPower.WINGS_TICKS;
 			jumpHeldAir = 0;
 			flying = false;
@@ -504,7 +535,9 @@ final class WebSwing {
 	private void foldWings() {
 		if (wingsTicks > 0) {
 			wingsTicks = 0;
-			wingsCooldown = WebPower.WINGS_COOLDOWN;
+			// no cooldown, but let go of Jump and fall another couple of blocks before they open again
+			wingsNeedRelease = true;
+			apexY = player().getY();
 			flying = true;
 			ClientPlayNetworking.send(new WebNet.Wings(false));
 		}

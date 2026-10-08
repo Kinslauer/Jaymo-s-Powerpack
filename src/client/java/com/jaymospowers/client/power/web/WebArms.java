@@ -51,8 +51,12 @@ public final class WebArms {
 	private static final double ARM_LENGTH = 10.0 / 16.0;
 
 	/** This frame's pose: an arm's aim is null when that hand has no web out. Angles are model-part radians. */
-	public record Pose(float amount, float @Nullable [] mainArm, float @Nullable [] offArm, float legTrail, float legSide, float wings) {
+	public record Pose(float amount, float @Nullable [] mainArm, float @Nullable [] offArm, float legTrail, float legSide, float wings, float lean) {
 	}
+
+	/** Gliding: the body leans this far forward (degrees), easing in over {@code LEAN_TICKS} of the glide. */
+	private static final float GLIDE_LEAN = 70.0F;
+	private static final float LEAN_TICKS = 30.0F;
 
 	/** Spread wings: how far the arms are raised out from the sides (radians from hanging down). */
 	private static final float WING_SPREAD = 1.35F;
@@ -66,6 +70,8 @@ public final class WebArms {
 		float side, sideVel, prevSide;
 		float amount, prevAmount;
 		float wings, prevWings;
+		int wingsAge;
+		float lean, prevLean;
 	}
 
 	private static final Map<Integer, Body> BODIES = new HashMap<>();
@@ -95,6 +101,11 @@ public final class WebArms {
 			}
 			body.prevWings = body.wings;
 			body.wings = winged ? Math.min(1.0F, body.wings + 0.3F) : Math.max(0.0F, body.wings - 0.2F);
+			// the lean comes on gradually through the glide (smoothstep), and comes back up quickly when the wings fold
+			body.wingsAge = winged ? body.wingsAge + 1 : 0;
+			body.prevLean = body.lean;
+			float t = Math.min(1.0F, body.wingsAge / LEAN_TICKS);
+			body.lean = winged ? t * t * (3.0F - 2.0F * t) : Math.max(0.0F, body.lean - 0.15F);
 			tickBody(player, body, main, off);
 		}
 		BODIES.entrySet().removeIf(entry -> entry.getValue().amount <= 0.0F && entry.getValue().prevAmount <= 0.0F
@@ -246,7 +257,8 @@ public final class WebArms {
 		float[] main = aim(body, WebNet.MAIN, bodyYaw, partialTicks);
 		float[] off = aim(body, WebNet.OFF, bodyYaw, partialTicks);
 		state.setData(KEY, new Pose(amount, main, off,
-			Mth.lerp(partialTicks, body.prevTrail, body.trail), Mth.lerp(partialTicks, body.prevSide, body.side), wings));
+			Mth.lerp(partialTicks, body.prevTrail, body.trail), Mth.lerp(partialTicks, body.prevSide, body.side), wings,
+			Mth.lerp(partialTicks, body.prevLean, body.lean)));
 	}
 
 	/** An arm's {xRot, yRot} pointing it along its web, relative to the body (as the bow-aiming pose does it). */
@@ -266,6 +278,18 @@ public final class WebArms {
 		return new float[] {-Mth.HALF_PI - elevation, relative};
 	}
 
+	/** After the body has been turned to face its way: a glider leans forward into the flying pose. */
+	public static void rotate(net.minecraft.client.renderer.entity.state.LivingEntityRenderState state, com.mojang.blaze3d.vertex.PoseStack poseStack, float entityScale) {
+		Pose pose = state.getData(KEY);
+		if (pose == null || pose.lean() <= 0.001F || !(state instanceof AvatarRenderState) || state.deathTime > 0.0F) {
+			return;
+		}
+		float middle = state.boundingBoxHeight / Math.max(entityScale, 0.01F) * 0.5F;
+		poseStack.translate(0.0F, middle, 0.0F);
+		poseStack.rotateDegrees(com.mojang.math.Axis.XP, -GLIDE_LEAN * pose.lean());
+		poseStack.translate(0.0F, -middle, 0.0F);
+	}
+
 	/** After the model animates (body and armour alike): the arms along their webs, the legs limp. */
 	public static void applyModel(Model<?> model, Object state) {
 		if (!(state instanceof AvatarRenderState avatar) || !(model instanceof HumanoidModel<?> humanoid)) {
@@ -283,6 +307,8 @@ public final class WebArms {
 			set(humanoid.leftArm, 0.1F, 0.0F, -WING_SPREAD - flutter, w);
 			set(humanoid.rightLeg, 0.15F, 0.0F, 0.05F, w);
 			set(humanoid.leftLeg, 0.15F, 0.0F, -0.05F, w);
+			// leaning into the glide: head up to look ahead
+			set(humanoid.head, -1.1F * pose.lean(), humanoid.head.yRot, 0.0F, w);
 		}
 		float amount = pose.amount();
 		boolean mainRight = avatar.mainArm != HumanoidArm.LEFT;

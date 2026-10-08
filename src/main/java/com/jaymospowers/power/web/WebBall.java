@@ -18,10 +18,23 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
-/** The Web Shot: a fast, flat-flying ball of web that ensnares what it hits. */
+/**
+ * The Web Shot: a fast, flat-flying ball of web that bursts where it lands like a splash potion. Everything caught in
+ * the splash gets Slowness III and a cobweb at its feet; whatever it hits directly also takes the full damage. All of
+ * it grows with how long the shot was charged.
+ */
 public class WebBall extends ThrowableItemProjectile {
-	/** Damage on a hit (it's a snare, not a weapon). */
-	public static final float DAMAGE = 1.0F;
+	/** Direct-hit damage at no charge and at a full charge; things in the splash take up to half that. */
+	public static final float DAMAGE_MIN = 1.0F, DAMAGE_MAX = 10.0F;
+	/** Splash radius at no charge and at a full charge (a splash potion's is 4). */
+	public static final double SPLASH_MIN = 1.75, SPLASH_MAX = 4.5;
+	/** Slowness III, for (at the centre) this many ticks at no charge and at a full charge. */
+	public static final int SLOWNESS_AMPLIFIER = 2;
+	public static final int SLOWNESS_MIN_TICKS = 60, SLOWNESS_MAX_TICKS = 220;
+
+	/** 0-1: how long it was charged. Server only. */
+	private float charge;
+	private boolean burst;
 	/** Gravity per tick (a snowball is 0.03): it flies nearly flat. */
 	private static final double GRAVITY = 0.012;
 	/** Despawns after this many ticks in flight. */
@@ -33,6 +46,11 @@ public class WebBall extends ThrowableItemProjectile {
 
 	public WebBall(final Level level, final LivingEntity owner, final ItemStack stack) {
 		super(WebPower.WEB_BALL, owner, level, stack);
+	}
+
+	public WebBall charged(float charge) {
+		this.charge = Math.clamp(charge, 0.0F, 1.0F);
+		return this;
 	}
 
 	@Override
@@ -57,6 +75,39 @@ public class WebBall extends ThrowableItemProjectile {
 		}
 	}
 
+	/** The splash: like a splash potion, the effect is strongest at the centre (and on whatever was hit directly). */
+	private void burst(ServerLevel level, @org.jspecify.annotations.Nullable Entity direct) {
+		this.burst = true;
+		float damage = net.minecraft.util.Mth.lerp(this.charge, DAMAGE_MIN, DAMAGE_MAX);
+		double radius = net.minecraft.util.Mth.lerp(this.charge, SPLASH_MIN, SPLASH_MAX);
+		int slowTicks = net.minecraft.util.Mth.lerpInt(this.charge, SLOWNESS_MIN_TICKS, SLOWNESS_MAX_TICKS);
+		Entity owner = this.getOwner();
+		net.minecraft.world.phys.AABB area = this.getBoundingBox().inflate(radius, radius * 0.5, radius);
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, area, e -> e.isAlive() && !e.isSpectator() && e != owner)) {
+			double distance = living == direct ? 0.0 : Math.sqrt(living.distanceToSqr(this.position()));
+			if (distance > radius) {
+				continue;
+			}
+			double strength = living == direct ? 1.0 : 1.0 - distance / radius;
+			float hurt = living == direct ? damage : (float)(damage * 0.5 * strength);
+			if (hurt >= 0.5F) {
+				living.hurtServer(level, this.damageSources().thrown(this, owner), hurt);
+			}
+			int ticks = (int)(slowTicks * strength);
+			if (ticks > 20 && living.isAlive()) {
+				WebTraps.ensnare(level, living, SLOWNESS_AMPLIFIER, ticks);
+			}
+		}
+		if (direct != null && !(direct instanceof LivingEntity)) {
+			direct.hurtServer(level, this.damageSources().thrown(this, owner), damage);
+		}
+		int count = (int)(12 + 40 * this.charge);
+		level.sendParticles(ParticleTypes.ITEM_COBWEB, this.getX(), this.getY(), this.getZ(), count, radius * 0.4, 0.3, radius * 0.4, 0.08);
+		level.sendParticles(ParticleTypes.CLOUD, this.getX(), this.getY(), this.getZ(), (int)(4 + 12 * this.charge), radius * 0.3, 0.2, radius * 0.3, 0.05);
+		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.SPLASH_POTION_BREAK, SoundSource.PLAYERS, 0.6F + 0.6F * this.charge, 0.8F);
+		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.COBWEB_PLACE, SoundSource.PLAYERS, 1.0F, 0.7F);
+	}
+
 	private ParticleOptions particle() {
 		ItemStack item = this.getItem();
 		return item.isEmpty() ? ParticleTypes.ITEM_COBWEB : new ItemParticleOption(ParticleTypes.ITEM, ItemStackTemplate.fromNonEmptyStack(item));
@@ -78,18 +129,17 @@ public class WebBall extends ThrowableItemProjectile {
 	@Override
 	protected void onHitEntity(final EntityHitResult hitResult) {
 		super.onHitEntity(hitResult);
-		Entity entity = hitResult.getEntity();
 		if (this.level() instanceof ServerLevel level) {
-			entity.hurtServer(level, this.damageSources().thrown(this, this.getOwner()), DAMAGE);
-			if (entity instanceof LivingEntity living && living.isAlive()) {
-				WebTraps.ensnare(level, living);
-			}
+			this.burst(level, hitResult.getEntity());
 		}
 	}
 
 	@Override
 	protected void onHit(final HitResult hitResult) {
 		super.onHit(hitResult);
+		if (this.level() instanceof ServerLevel level && !this.burst) {
+			this.burst(level, null);
+		}
 		if (!this.level().isClientSide()) {
 			this.level().broadcastEntityEvent(this, (byte)3);
 			this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.PLAYERS, 0.7F, 1.4F);

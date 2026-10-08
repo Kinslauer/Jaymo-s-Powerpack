@@ -86,12 +86,17 @@ public final class WebTraps {
 
 	/** {@code target} was hit by a web shot. */
 	static void ensnare(ServerLevel level, LivingEntity target) {
-		target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ENSNARE_TICKS, ENSNARE_SLOWNESS));
+		ensnare(level, target, ENSNARE_SLOWNESS, ENSNARE_TICKS);
+	}
+
+	/** {@code target} was caught in a web blast: Slowness {@code amplifier} (0 = I) for {@code ticks}, no jumping, a cobweb. */
+	static void ensnare(ServerLevel level, LivingEntity target, int amplifier, int ticks) {
+		target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ticks, amplifier));
 		AttributeInstance jump = target.getAttribute(Attributes.JUMP_STRENGTH);
 		if (jump != null) {
 			jump.addOrUpdateTransientModifier(new AttributeModifier(NO_JUMP, -1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 			JUMP_LOCKS.removeIf(lock -> lock.entity().equals(target.getUUID()));
-			JUMP_LOCKS.add(new JumpLock(level.dimension(), target.getUUID(), clock + ENSNARE_TICKS));
+			JUMP_LOCKS.add(new JumpLock(level.dimension(), target.getUUID(), clock + Math.min(ticks, ENSNARE_TICKS)));
 		}
 		BlockPos feet = target.blockPosition();
 		if (level.isLoaded(feet) && level.getBlockState(feet).isAir()) {
