@@ -4,7 +4,7 @@
 	"power.jaymospowers.web.key.ability_1": "Hold: main-hand web swing (release on the upswing for a boost)",
 	"power.jaymospowers.web.key.ability_2": "Hold: off-hand web (empty off hand) / else Web Zip",
 	"power.jaymospowers.web.key.ability_3": "Hold to charge: web blast (splash Slowness III + cobwebs)",
-	"power.jaymospowers.web.key.ability_4": "Yank: pull a creature in (or yourself to a big one)",
+	"power.jaymospowers.web.key.ability_4": "Hold: Yank and hold a creature on a web lead (big ones pull you)",
 	"item.jaymospowers.web_ball": "Web Ball",
 	"entity.jaymospowers.web_ball": "Web Shot"
 }

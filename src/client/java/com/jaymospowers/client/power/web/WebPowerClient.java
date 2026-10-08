@@ -181,6 +181,11 @@ public final class WebPowerClient implements PowerClient {
 			graphics.fill(bx + 1, y + CHIP - 3, bx + 1 + Math.round((CHIP - 2) * charge), y + CHIP - 1, barColor);
 		}
 		chip(graphics, font, x + (CHIP + CHIP_GAP) * 2, y, PowerKey.ABILITY_4, Items.LEAD, cooldowns.yank() - now, WebPower.YANK_COOLDOWN);
+		if (player.getAttached(WebPower.TETHER) != null) {
+			// holding something on the line
+			int bx = x + (CHIP + CHIP_GAP) * 2;
+			graphics.fill(bx + 1, y + CHIP - 3, bx + CHIP - 1, y + CHIP - 1, 0xFF000000 | CHIP_COLOR);
+		}
 	}
 
 	private void wingsChip(GuiGraphicsExtractor graphics, Font font, Minecraft minecraft, int x, int y) {

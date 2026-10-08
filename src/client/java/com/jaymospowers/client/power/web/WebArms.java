@@ -193,9 +193,24 @@ public final class WebArms {
 
 	/** Where the hand's web ends for any player: the local player's own state, else the synced lines. */
 	static @Nullable Vec3 lineEnd(Minecraft minecraft, ClientLevel level, Player player, int hand, float partialTick) {
+		Vec3 end;
 		if (player == minecraft.player && WebPowerClient.isActive(minecraft.player)) {
-			return WebPowerClient.INSTANCE.swing.lineEnd(hand, partialTick);
+			end = WebPowerClient.INSTANCE.swing.lineEnd(hand, partialTick);
+		} else {
+			end = syncedEnd(level, player, hand, partialTick);
 		}
+		if (end == null && hand == WebNet.MAIN) {
+			// the Yank web holding something, like a lead
+			Integer held = player.getAttached(WebPower.TETHER);
+			Entity entity = held == null ? null : level.getEntity(held);
+			if (entity != null) {
+				end = entity.getPosition(partialTick).add(0.0, entity.getBbHeight() * 0.5, 0.0);
+			}
+		}
+		return end;
+	}
+
+	private static @Nullable Vec3 syncedEnd(ClientLevel level, Player player, int hand, float partialTick) {
 		WebLine line = player.getAttached(WebPower.line(hand));
 		if (line == null) {
 			return null;

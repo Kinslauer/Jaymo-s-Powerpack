@@ -3,6 +3,7 @@ package com.jaymospowers.power.web;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.PowerInput;
 import com.jaymospowers.core.Powers;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
@@ -24,6 +25,7 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -63,6 +65,15 @@ public final class WebPower implements Power {
 	/** Yank reach, and the bounding-box volume above which a target is "heavy" (you fly to it instead). Player = 0.65. */
 	public static final double YANK_RANGE = 24.0;
 	public static final double YANK_HEAVY_VOLUME = 2.6;
+	/**
+	 * Holding Yank keeps the web stuck to its target like a lead: past {@code TETHER_LENGTH} it's pulled back toward
+	 * you (springy, at most {@code TETHER_MAX_PULL} b/t a tick), so you can drag it along or let it hang under you. The
+	 * line snaps if it's stretched past {@code TETHER_BREAK}, or if the target hits something (a player: swings).
+	 */
+	public static final double TETHER_LENGTH = 4.0;
+	public static final double TETHER_SPRING = 0.25;
+	public static final double TETHER_MAX_PULL = 0.9;
+	public static final double TETHER_BREAK = 16.0;
 	/** Web Shot launch speed (a snowball is 1.5). */
 	public static final float SHOT_SPEED = 2.4F;
 	/** Fall-damage grace after a swing/zip lasts until you land, or this long at most. */
@@ -79,6 +90,9 @@ public final class WebPower implements Power {
 	/** Wings last a few seconds; the server folds them itself after this long in case the client never says so. */
 	public static final int WINGS_TICKS = 80;
 	public static final int WINGS_COOLDOWN = 60;
+	/** The entity a player's Yank web is holding (entity id), for everyone to draw. */
+	public static final AttachmentType<Integer> TETHER = AttachmentRegistry.create(JaymosPowers.id("web_tether"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 	/** The off-hand swing web, if one's out. */
 	public static final AttachmentType<WebLine> LINE_OFF = AttachmentRegistry.create(JaymosPowers.id("web_line_off"),
 		builder -> builder.syncWith(WebLine.STREAM_CODEC, AttachmentSyncPredicate.all()));
@@ -105,6 +119,9 @@ public final class WebPower implements Power {
 		int wingsTicks;
 		/** Game time a Web Shot charge started, or -1. */
 		long shotChargeStart = -1;
+		/** The entity held by the Yank web (-1 for none), and whether it was mid-swing when caught. */
+		int tetherId = -1;
+		boolean tetherWasSwinging;
 	}
 
 	private WebPower() {
@@ -129,6 +146,19 @@ public final class WebPower implements Power {
 		WebTraps.register();
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Swing.TYPE, (payload, ctx) -> INSTANCE.onSwing(ctx.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Wings.TYPE, (payload, ctx) -> INSTANCE.onWings(ctx.player(), payload.open()));
+		// a held target that hits anything breaks free
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
+			Entity attacker = source.getEntity();
+			if (attacker == null || !(entity.level() instanceof ServerLevel level)) {
+				return;
+			}
+			for (ServerPlayer caster : level.players()) {
+				State state = caster.getAttached(STATE);
+				if (state != null && state.tetherId == attacker.getId()) {
+					snapTether(caster, state);
+				}
+			}
+		});
 	}
 
 	@Override
@@ -169,6 +199,7 @@ public final class WebPower implements Power {
 		player.removeAttached(LINE);
 		player.removeAttached(LINE_OFF);
 		player.removeAttached(WINGS);
+		player.removeAttached(TETHER);
 		player.removeAttached(COOLDOWNS);
 	}
 
@@ -232,7 +263,11 @@ public final class WebPower implements Power {
 			player.removeAttached(LINE);
 			player.removeAttached(LINE_OFF);
 			player.removeAttached(WINGS);
+			player.removeAttached(TETHER);
 			return;
+		}
+		if (state.tetherId >= 0) {
+			tickTether(player, state);
 		}
 		if (state.wingsTicks > 0 && (++state.wingsTicks > WINGS_TICKS + 20 || player.isInWater() || player.onGround() && state.wingsTicks > 3)) {
 			state.wingsTicks = 0;
@@ -352,6 +387,14 @@ public final class WebPower implements Power {
 			}
 			return;
 		}
+		if (key == PowerKey.ABILITY_4 && !down) {
+			// letting go of Yank lets go of whatever it's holding
+			State state = player.getAttached(STATE);
+			if (state != null && state.tetherId >= 0) {
+				releaseTether(player, state);
+			}
+			return;
+		}
 		if (!down) {
 			return;
 		}
@@ -379,6 +422,58 @@ public final class WebPower implements Power {
 
 	private static void thwip(ServerPlayer player) {
 		player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 0.9F, 1.7F);
+	}
+
+	/** The Yank web holding on: a lead-like pull back toward you past its length, or a snap. */
+	private static void tickTether(ServerPlayer player, State state) {
+		Entity target = player.level().getEntity(state.tetherId);
+		if (target == null || !target.isAlive() || target.isRemoved() || target.level() != player.level()
+			|| !PowerInput.isDown(player, PowerKey.ABILITY_4)) {
+			releaseTether(player, state);
+			return;
+		}
+		Vec3 hand = player.position().add(0.0, player.getBbHeight() * 0.7, 0.0);
+		Vec3 to = hand.subtract(target.position().add(0.0, target.getBbHeight() * 0.5, 0.0));
+		double distance = to.length();
+		boolean swinging = target instanceof LivingEntity living && living.isSwinging();
+		if (distance > TETHER_BREAK || swinging && !state.tetherWasSwinging) {
+			// pulled too far, or a player fought it off
+			snapTether(player, state);
+			return;
+		}
+		state.tetherWasSwinging = swinging;
+		if (distance > TETHER_LENGTH) {
+			Vec3 dir = to.scale(1.0 / distance);
+			Vec3 v = target.getDeltaMovement();
+			double inward = v.dot(dir);
+			double want = Math.min((distance - TETHER_LENGTH) * TETHER_SPRING, TETHER_MAX_PULL);
+			if (inward < want) {
+				target.setDeltaMovement(v.add(dir.scale(want - inward)));
+				target.needsSync = true;
+				target.syncVelocity = true;
+			}
+			if (target instanceof Mob mob) {
+				mob.getNavigation().stop();
+			}
+		}
+		if (player.tickCount % 6 == 0) {
+			Vec3 mid = target.position().add(0.0, target.getBbHeight() * 0.5, 0.0).add(to.scale(0.5));
+			player.level().sendParticles(ParticleTypes.ITEM_COBWEB, mid.x, mid.y, mid.z, 1, 0.05, 0.05, 0.05, 0.0);
+		}
+	}
+
+	private static void releaseTether(ServerPlayer player, State state) {
+		state.tetherId = -1;
+		player.removeAttached(TETHER);
+	}
+
+	/** The line breaks under strain. */
+	private static void snapTether(ServerPlayer player, State state) {
+		Entity target = player.level().getEntity(state.tetherId);
+		releaseTether(player, state);
+		Vec3 at = target == null ? player.position() : target.position().add(0.0, target.getBbHeight() * 0.5, 0.0);
+		player.level().playSound(null, at.x, at.y, at.z, SoundEvents.LEAD_BREAK, SoundSource.PLAYERS, 1.0F, 1.0F);
+		player.level().sendParticles(ParticleTypes.ITEM_COBWEB, at.x, at.y, at.z, 10, 0.2, 0.2, 0.2, 0.05);
 	}
 
 	/** G with something in the off hand: fire a web at the crosshair block and get yanked to it. */
@@ -502,11 +597,11 @@ public final class WebPower implements Power {
 			target.setDeltaMovement(flat.x, up, flat.z);
 			target.needsSync = true;
 			target.syncVelocity = true;
+			// and keep hold of it for as long as Yank is held
 			State state = state(player);
-			if (!state.swinging[WebNet.MAIN]) {
-				state.lineTicks = 8;
-				player.setAttached(LINE, new WebLine(WebLine.YANK, center, target.getId()));
-			}
+			state.tetherId = target.getId();
+			state.tetherWasSwinging = target instanceof LivingEntity living && living.isSwinging();
+			player.setAttached(TETHER, target.getId());
 		}
 		player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), cooldowns.shot(), now + YANK_COOLDOWN));
 		thwip(player);

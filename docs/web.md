@@ -201,3 +201,16 @@ cobweb.
   - After a launch, held web keys are dropped and new webs are blocked for `SLING_LOCKOUT` 12 ticks, so the launch
     can't be snagged.
 - **Unlock order (natural awakening):** R, G, B, then V. The charged blast comes last.
+
+## Yank tether (0.1.7)
+- **Holding B:** after the yank, the web stays stuck to the target like a lead (`jaymospowers:web_tether`, seen by
+  everyone).
+  - Past `TETHER_LENGTH` 4 it's pulled back toward you. The spring is `TETHER_SPRING` 0.25, capped at
+    `TETHER_MAX_PULL` 0.9 b/t a tick, so you can drag it or let it hang under you while you swing.
+  - The line is drawn from the main hand when that hand has no swing web.
+- **It lets go when:** you release B.
+- **It snaps when:**
+  - it's stretched past `TETHER_BREAK` 16;
+  - the target damages anything;
+  - a tethered player swings their arm.
+- **Big targets** (volume > 2.6) still pull you to them, as before.
