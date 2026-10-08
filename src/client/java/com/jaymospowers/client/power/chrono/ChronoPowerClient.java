@@ -1,12 +1,56 @@
 package com.jaymospowers.client.power.chrono;
 
+import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.client.JaymosPowersClient;
 import com.jaymospowers.client.PowerClient;
 import com.jaymospowers.client.PowerClients;
 import com.jaymospowers.power.chrono.ChronoPower;
+import com.jaymospowers.power.chrono.ChronoSync;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 
-/** Chronokinesis, client side. STUB: the agent building this power replaces this file. */
+/**
+ * Chronokinesis, client side: only the HUD. Four little clocks above the hotbar (one per ability, with the bound
+ * key under each): the dark part of the dial is the cooldown left, sweeping away clockwise behind a golden hand.
+ * A thin bar under a clock shows how long an active Stasis / Overclock / Bloom has left. Overclock adds a faint
+ * golden vignette. Everything else (particles, sounds) comes from the server so other players see it too.
+ */
 public final class ChronoPowerClient implements PowerClient {
 	public static final ChronoPowerClient INSTANCE = new ChronoPowerClient();
+
+	private static final Identifier TEXTURE = JaymosPowers.id("textures/gui/chrono_hud.png");
+	private static final int TEX_W = 64;
+	private static final int TEX_H = 32;
+	private static final int FACE = 18;
+	private static final int SLOT = 24;
+	/** Top of the clock row, measured up from the bottom of the screen (clear of hearts, armor, item names and action bar). */
+	private static final int ROW_FROM_BOTTOM = 104;
+	private static final int OVERCLOCK = 2;
+
+	private static final int GOLD = 0xFFF2C14E;
+	private static final int HAND = 0xFFFFE08A;
+	private static final int SHADE = 0xB0100A18;
+	private static final int TEXT = 0xFFFFE6B0;
+	private static final int TEXT_DIM = 0xFFA89C88;
+	private static final int DENIED = 0xFFFF5A40;
+
+	private final int[] cooldownLeft = new int[ChronoSync.ABILITIES];
+	private final int[] cooldownTotal = new int[ChronoSync.ABILITIES];
+	private final int[] activeLeft = new int[ChronoSync.ABILITIES];
+	private final int[] activeTotal = new int[ChronoSync.ABILITIES];
+	/** Ticks left of the red "not ready" flash and of the bright "ready" flash, per ability. */
+	private final int[] deniedFlash = new int[ChronoSync.ABILITIES];
+	private final int[] readyFlash = new int[ChronoSync.ABILITIES];
 
 	private ChronoPowerClient() {
 	}
@@ -14,5 +58,174 @@ public final class ChronoPowerClient implements PowerClient {
 	/** Called once from {@link com.jaymospowers.client.JaymosPowersClient}: renderers, client packets, the PowerClient. */
 	public static void init() {
 		PowerClients.register(ChronoPower.ID, INSTANCE);
+		ClientPlayNetworking.registerGlobalReceiver(ChronoSync.TYPE, (payload, ctx) -> INSTANCE.accept(payload));
+	}
+
+	private void accept(ChronoSync sync) {
+		for (int i = 0; i < ChronoSync.ABILITIES; i++) {
+			cooldownLeft[i] = sync.cooldownLeft()[i];
+			cooldownTotal[i] = Math.max(sync.cooldownTotal()[i], sync.cooldownLeft()[i]);
+			activeLeft[i] = sync.activeLeft()[i];
+			activeTotal[i] = Math.max(sync.activeTotal()[i], sync.activeLeft()[i]);
+		}
+	}
+
+	private void reset() {
+		for (int i = 0; i < ChronoSync.ABILITIES; i++) {
+			cooldownLeft[i] = cooldownTotal[i] = activeLeft[i] = activeTotal[i] = deniedFlash[i] = readyFlash[i] = 0;
+		}
+	}
+
+	@Override
+	public void onActiveChanged(LocalPlayer player, boolean active) {
+		reset();
+	}
+
+	@Override
+	public void tick(Minecraft minecraft, LocalPlayer player) {
+		for (int i = 0; i < ChronoSync.ABILITIES; i++) {
+			if (cooldownLeft[i] > 0 && --cooldownLeft[i] == 0) {
+				readyFlash[i] = 8;
+				minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.AMETHYST_BLOCK_CHIME, 1.5F + i * 0.1F, 0.5F));
+			}
+			if (activeLeft[i] > 0) {
+				activeLeft[i]--;
+			}
+			if (deniedFlash[i] > 0) {
+				deniedFlash[i]--;
+			}
+			if (readyFlash[i] > 0) {
+				readyFlash[i]--;
+			}
+		}
+	}
+
+	@Override
+	public void onKey(LocalPlayer player, PowerKey key, boolean down) {
+		int i = key.ordinal();
+		if (down && cooldownLeft[i] > 0) {
+			deniedFlash[i] = 6;
+			Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.COMPARATOR_CLICK, 0.6F, 0.5F));
+		}
+	}
+
+	@Override
+	public void renderHud(GuiGraphicsExtractor graphics, DeltaTracker delta, LocalPlayer player) {
+		Minecraft minecraft = Minecraft.getInstance();
+		Font font = minecraft.font;
+		float partial = delta.getGameTimeDeltaPartialTick(false);
+		int width = graphics.guiWidth();
+		int height = graphics.guiHeight();
+
+		if (activeLeft[OVERCLOCK] > 0) {
+			vignette(graphics, width, height, activeLeft[OVERCLOCK] - partial, activeTotal[OVERCLOCK], player.tickCount + partial);
+		}
+
+		int x0 = width / 2 - SLOT * ChronoSync.ABILITIES / 2;
+		int top = height - ROW_FROM_BOTTOM;
+		for (int i = 0; i < ChronoSync.ABILITIES; i++) {
+			int fx = x0 + i * SLOT + (SLOT - FACE) / 2;
+			drawClock(graphics, font, i, fx, top, partial);
+		}
+	}
+
+	private void drawClock(GuiGraphicsExtractor graphics, Font font, int i, int fx, int fy, float partial) {
+		boolean active = activeLeft[i] > 0;
+		boolean cooling = cooldownLeft[i] > 0;
+
+		graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, fx, fy, active ? FACE : 0, 0, FACE, FACE, TEX_W, TEX_H);
+		graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, fx + 4, fy + 4, i * 10, FACE, 10, 10, TEX_W, TEX_H,
+			cooling && !active ? 0xFF7A7068 : 0xFFFFFFFF);
+
+		if (cooling && cooldownTotal[i] > 0) {
+			float left = Mth.clamp((cooldownLeft[i] - partial) / cooldownTotal[i], 0.0F, 1.0F);
+			float elapsed = 1.0F - left;
+			shadePie(graphics, fx, fy, elapsed);
+			hand(graphics, fx, fy, elapsed);
+			if (!active) {
+				String secs = Integer.toString(Mth.ceil(cooldownLeft[i] / 20.0F));
+				graphics.centeredText(font, secs, fx + FACE / 2, fy + 5, TEXT);
+			}
+		}
+		if (readyFlash[i] > 0) {
+			int a = readyFlash[i] * 0x18;
+			graphics.outline(fx - 1, fy - 1, FACE + 2, FACE + 2, (a << 24) | 0xFFE08A);
+		}
+		if (deniedFlash[i] > 0) {
+			graphics.outline(fx - 1, fy - 1, FACE + 2, FACE + 2, DENIED);
+		}
+
+		int below = fy + FACE + 1;
+		if (active && activeTotal[i] > 0) {
+			float frac = Mth.clamp((activeLeft[i] - partial) / activeTotal[i], 0.0F, 1.0F);
+			graphics.fill(fx, below, fx + FACE, below + 2, 0x90000000);
+			graphics.fill(fx, below, fx + Math.round(FACE * frac), below + 2, GOLD);
+		}
+
+		String key = JaymosPowersClient.keyMapping(PowerKey.values()[i]).getTranslatedKeyMessage().getString();
+		while (key.length() > 1 && font.width(key) > SLOT - 2) {
+			key = key.substring(0, key.length() - 1);
+		}
+		graphics.centeredText(font, key, fx + FACE / 2, below + 3, cooling ? TEXT_DIM : TEXT);
+	}
+
+	/** Darkens the part of the dial still on cooldown: from the hand ({@code elapsed}) clockwise round to 12. */
+	private static void shadePie(GuiGraphicsExtractor graphics, int fx, int fy, float elapsed) {
+		for (int py = 0; py < FACE; py++) {
+			int runStart = -1;
+			for (int px = 0; px <= FACE; px++) {
+				boolean dark = false;
+				if (px < FACE) {
+					double dx = px + 0.5 - FACE / 2.0;
+					double dy = py + 0.5 - FACE / 2.0;
+					if (dx * dx + dy * dy <= 7.0 * 7.0) {
+						double angle = Math.atan2(dx, -dy) / (Math.PI * 2.0);
+						if (angle < 0) {
+							angle += 1.0;
+						}
+						dark = angle >= elapsed;
+					}
+				}
+				if (dark && runStart < 0) {
+					runStart = px;
+				} else if (!dark && runStart >= 0) {
+					graphics.fill(fx + runStart, fy + py, fx + px, fy + py + 1, SHADE);
+					runStart = -1;
+				}
+			}
+		}
+	}
+
+	/** The clock hand, from the centre out at {@code elapsed} of a turn. */
+	private static void hand(GuiGraphicsExtractor graphics, int fx, int fy, float elapsed) {
+		double a = elapsed * Math.PI * 2.0;
+		double sx = Math.sin(a);
+		double sy = -Math.cos(a);
+		for (int r = 0; r <= 6; r++) {
+			int px = fx + (int) Math.floor(FACE / 2.0 + sx * r);
+			int py = fy + (int) Math.floor(FACE / 2.0 + sy * r);
+			graphics.fill(px, py, px + 1, py + 1, r == 0 ? GOLD : HAND);
+		}
+	}
+
+	/** A faint, pulsing golden frame while overclocked. Fades in and out over half a second. */
+	private static void vignette(GuiGraphicsExtractor graphics, int width, int height, float left, int total, float time) {
+		float fade = Mth.clamp(left / 10.0F, 0.0F, 1.0F) * Mth.clamp((total - left) / 10.0F, 0.0F, 1.0F);
+		float pulse = 0.75F + 0.25F * Mth.sin(time * 0.3F);
+		int alpha = (int) (0x48 * fade * pulse);
+		if (alpha <= 0) {
+			return;
+		}
+		int color = (alpha << 24) | 0xF2C14E;
+		int band = Math.max(12, height / 10);
+		graphics.fillGradient(0, 0, width, band, color, 0x00F2C14E);
+		graphics.fillGradient(0, height - band, width, height, 0x00F2C14E, color);
+		for (int s = 0; s < 4; s++) {
+			int a = alpha * (4 - s) / 5;
+			int c = (a << 24) | 0xF2C14E;
+			int w = 3;
+			graphics.fill(s * w, 0, s * w + w, height, c);
+			graphics.fill(width - s * w - w, 0, width - s * w, height, c);
+		}
 	}
 }

@@ -1,4 +1,11 @@
 {
 	"power.jaymospowers.chrono": "Chronokinesis",
-	"power.jaymospowers.chrono.desc": "Bend time: rewind, freeze, and accelerate."
+	"power.jaymospowers.chrono.desc": "Bend the flow of time. Rewind your last moments, freeze foes, and fast-forward yourself or the world.",
+	"power.jaymospowers.chrono.key.ability_1": "Rewind 3 seconds",
+	"power.jaymospowers.chrono.key.ability_2": "Stasis Field (freeze time)",
+	"power.jaymospowers.chrono.key.ability_3": "Overclock (speed yourself up)",
+	"power.jaymospowers.chrono.key.ability_4": "Time Bloom (grow and cook fast)",
+	"message.jaymospowers.chrono_rewind_short": "Not enough time has passed to rewind.",
+	"message.jaymospowers.chrono_rewind_tangled": "The timeline is tangled across dimensions.",
+	"message.jaymospowers.chrono_rewind_blocked": "Your past is blocked. Something stands where you were."
 }
