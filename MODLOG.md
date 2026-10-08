@@ -129,3 +129,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     - Ascension: 2000 blocks swung → Spider-Sense + Web Strike.
   - **Lead fix:** world hazards pass through the Echo outside the Nether; only attacks (and the void) shatter it.
   - **Tests:** dev client joined a world with no mixin errors; the dedicated server booted and stopped cleanly.
+- **0.2.1, lag pass** (following Jaymo's Kitchen's corpse fixes):
+  - Hitch lines: the hitched creatures are found once a tick, instead of every entity being checked every frame.
+  - Spider-Sense: "is it on?" is worked out once a tick, not per entity per frame.
+  - Chrono echoes: they look up their mined and placed block kinds once per habit change, not on every try.
+  - Audit result: the other tick paths were already throttled or skip early, and synced data is only sent on change.

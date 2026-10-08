@@ -57,6 +57,7 @@ public final class WebPowerClient implements PowerClient {
 		LevelRenderEvents.COLLECT_SUBMITS.register(WebLineRenderer::render);
 		// every player's arms and legs (theirs and others'), whether or not we're a web slinger ourselves
 		ClientTickEvents.END_CLIENT_TICK.register(WebArms::tick);
+		ClientTickEvents.END_CLIENT_TICK.register(WebLineRenderer::tick);
 		ClientPlayNetworking.registerGlobalReceiver(WebNet.SwingReject.TYPE, (payload, context) -> {
 			if (isActive(context.player())) {
 				INSTANCE.swing.rejected(context.player(), payload.hand());

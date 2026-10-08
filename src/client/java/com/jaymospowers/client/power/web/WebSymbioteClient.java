@@ -71,6 +71,9 @@ public final class WebSymbioteClient {
 	static void init() {
 		menuKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.web_symbiote", InputConstants.KEY_X, JaymosPowersClient.CATEGORY));
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
+			// worked out once a tick, not once per entity per frame
+			LocalPlayer self = minecraft.player;
+			sensing = self != null && WebPowerClient.isActive(self) && Fate.isAscended(self);
 			while (menuKey.consumeClick()) {
 				LocalPlayer player = minecraft.player;
 				if (player != null && minecraft.gui.screen() == null && !player.isSpectator() && WebSymbiote.isBonded(player) && takeoverTicks <= 0) {
@@ -224,11 +227,17 @@ public final class WebSymbioteClient {
 
 	// ---- spider-sense ------------------------------------------------------------------------------------------------
 
+	/** Whether Spider-Sense is on for us this tick. */
+	private static boolean sensing;
+
 	/** The outline colour for {@code entity} on our screen, or 0: red if it's about to hurt an ascended web slinger. */
 	public static int senseColor(Entity entity) {
+		if (!sensing) {
+			return 0;
+		}
 		Minecraft minecraft = Minecraft.getInstance();
 		LocalPlayer player = minecraft.player;
-		if (player == null || entity == player || !WebPowerClient.isActive(player) || !Fate.isAscended(player)) {
+		if (player == null || entity == player) {
 			return 0;
 		}
 		if (entity.distanceToSqr(player) > com.jaymospowers.power.web.WebAscension.SENSE_RANGE * com.jaymospowers.power.web.WebAscension.SENSE_RANGE) {

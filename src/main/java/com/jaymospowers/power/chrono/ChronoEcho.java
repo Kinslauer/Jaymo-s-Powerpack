@@ -115,6 +115,11 @@ public class ChronoEcho extends Monster {
 	private long bond;
 	private List<Identifier> minedKinds = new ArrayList<>();
 	private @Nullable Identifier placedKind;
+	/** The habits above as blocks, worked out once per change of habit rather than on every try. */
+	private List<Block> minedBlocks = List.of();
+	private @Nullable List<Identifier> minedBlocksFrom;
+	private @Nullable Block placedBlock;
+	private @Nullable Identifier placedBlockFrom;
 	private List<BlockPos> route = new ArrayList<>();
 	/** Shattered, faded or collapsed: it's leaving, ignore anything else that happens to it. */
 	private boolean gone;
@@ -268,10 +273,15 @@ public class ChronoEcho extends Monster {
 	}
 
 	private void mineSomething(ServerLevel level) {
-		List<Block> kinds = new ArrayList<>();
-		for (Identifier id : this.minedKinds) {
-			BuiltInRegistries.BLOCK.getOptional(id).ifPresent(kinds::add);
+		if (this.minedBlocksFrom != this.minedKinds) {
+			List<Block> resolved = new ArrayList<>();
+			for (Identifier id : this.minedKinds) {
+				BuiltInRegistries.BLOCK.getOptional(id).ifPresent(resolved::add);
+			}
+			this.minedBlocks = resolved;
+			this.minedBlocksFrom = this.minedKinds;
 		}
+		List<Block> kinds = this.minedBlocks;
 		if (kinds.isEmpty()) {
 			return;
 		}
@@ -303,11 +313,15 @@ public class ChronoEcho extends Monster {
 	}
 
 	private void placeSomething(ServerLevel level) {
-		Optional<Block> block = BuiltInRegistries.BLOCK.getOptional(this.placedKind);
-		if (block.isEmpty() || block.get() instanceof EntityBlock) {
+		if (this.placedBlockFrom != this.placedKind) {
+			this.placedBlock = this.placedKind == null ? null : BuiltInRegistries.BLOCK.getOptional(this.placedKind).orElse(null);
+			this.placedBlockFrom = this.placedKind;
+		}
+		Block block = this.placedBlock;
+		if (block == null || block instanceof EntityBlock) {
 			return;
 		}
-		BlockState state = block.get().defaultBlockState();
+		BlockState state = block.defaultBlockState();
 		if (state.isAir()) {
 			return;
 		}

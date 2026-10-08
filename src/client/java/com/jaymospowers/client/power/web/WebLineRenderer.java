@@ -42,7 +42,26 @@ final class WebLineRenderer {
 	/** Lines are drawn this much thicker than vanilla's fishing line. */
 	private static final float WIDTH_SCALE = 1.4F;
 
+	/**
+	 * Creatures hitched to a block, found once a tick rather than by checking every entity every frame (hitches start
+	 * and end on the server's tick, so a tick-old list is never behind).
+	 */
+	private static final java.util.List<net.minecraft.world.entity.Entity> HITCHED = new java.util.ArrayList<>();
+
 	private WebLineRenderer() {
+	}
+
+	/** End of every client tick: remember which creatures are hitched. */
+	static void tick(Minecraft minecraft) {
+		HITCHED.clear();
+		if (minecraft.level == null) {
+			return;
+		}
+		for (net.minecraft.world.entity.Entity entity : minecraft.level.entitiesForRendering()) {
+			if (entity.getAttached(com.jaymospowers.power.web.WebPower.HITCH) != null) {
+				HITCHED.add(entity);
+			}
+		}
 	}
 
 	static void render(LevelRenderContext context) {
@@ -55,9 +74,9 @@ final class WebLineRenderer {
 		Vec3 camera = context.levelState().cameraRenderState.pos;
 		float width = minecraft.gameRenderer.gameRenderState().windowRenderState.appropriateLineWidth * WIDTH_SCALE;
 		// creatures hitched to blocks: a line from each to where it's tied
-		for (net.minecraft.world.entity.Entity entity : level.entitiesForRendering()) {
+		for (net.minecraft.world.entity.Entity entity : HITCHED) {
 			Vec3 anchor = entity.getAttached(com.jaymospowers.power.web.WebPower.HITCH);
-			if (anchor == null) {
+			if (anchor == null || entity.isRemoved() || entity.level() != level) {
 				continue;
 			}
 			Vec3 from = entity.getPosition(partialTick).add(0.0, entity.getBbHeight() * 0.5, 0.0);
