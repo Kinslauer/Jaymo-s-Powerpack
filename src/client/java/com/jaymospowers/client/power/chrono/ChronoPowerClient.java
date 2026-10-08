@@ -5,9 +5,17 @@ import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.client.JaymosPowersClient;
 import com.jaymospowers.client.PowerClient;
 import com.jaymospowers.client.PowerClients;
+import com.jaymospowers.core.Fate;
+import com.jaymospowers.core.Powers;
+import com.jaymospowers.power.chrono.ChronoEchoes;
 import com.jaymospowers.power.chrono.ChronoPower;
 import com.jaymospowers.power.chrono.ChronoSync;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -35,6 +43,24 @@ public final class ChronoPowerClient implements PowerClient {
 	/** Gap between dials. The row sits right of the hotbar, like the other powers' ability chips. */
 	private static final int GAP = 2;
 	private static final int OVERCLOCK = 2;
+	/** Paradox Cut's chip: its glyph's place on the sheet, and its rim colours. */
+	private static final int ULT_GLYPH_U = 40;
+	private static final int ULT_RIM = 0xFF9FE6FF;
+	private static final int ULT_RIM_DIM = 0xFF4A6878;
+	private static final int ULT_BACK = 0xC0101828;
+
+	// ---- Timeless (ascended) form: two clock hands circling the player, seen by everyone nearby ----
+	/** Radius of the hands' circle, its height above the feet, and how far away other players' hands are drawn. */
+	private static final double TIMELESS_RADIUS = 0.85;
+	private static final double TIMELESS_HEIGHT = 1.05;
+	private static final double TIMELESS_VIEW_DISTANCE = 32.0;
+	/** Radians per tick of the minute and hour hands. */
+	private static final double TIMELESS_MINUTE_SPEED = 0.16;
+	private static final double TIMELESS_HOUR_SPEED = 0.035;
+	/** A particle every this many ticks per hand. */
+	private static final int TIMELESS_INTERVAL = 2;
+	private static final DustParticleOptions MINUTE_HAND = new DustParticleOptions(0xFFE8A0, 0.55F);
+	private static final DustParticleOptions HOUR_HAND = new DustParticleOptions(0xA8E8FF, 0.6F);
 
 	private static final int GOLD = 0xFFF2C14E;
 	private static final int HAND = 0xFFFFE08A;
@@ -50,6 +76,10 @@ public final class ChronoPowerClient implements PowerClient {
 	/** Ticks left of the red "not ready" flash and of the bright "ready" flash, per ability. */
 	private final int[] deniedFlash = new int[ChronoSync.ABILITIES];
 	private final int[] readyFlash = new int[ChronoSync.ABILITIES];
+	private int ultimateLeft;
+	private int ultimateTotal;
+	private int ultimateDenied;
+	private int ultimateReady;
 
 	private ChronoPowerClient() {
 	}
@@ -58,6 +88,39 @@ public final class ChronoPowerClient implements PowerClient {
 	public static void init() {
 		PowerClients.register(ChronoPower.ID, INSTANCE);
 		ClientPlayNetworking.registerGlobalReceiver(ChronoSync.TYPE, (payload, ctx) -> INSTANCE.accept(payload));
+		EntityRendererRegistry.register(ChronoEchoes.ECHO, ChronoEchoRenderer::new);
+		ClientTickEvents.END_CLIENT_TICK.register(ChronoPowerClient::timelessHands);
+	}
+
+	/** Every Timeless player in view gets two slow clock hands circling them (yours too, in third person). */
+	private static void timelessHands(Minecraft minecraft) {
+		ClientLevel level = minecraft.level;
+		if (level == null || minecraft.isPaused() || minecraft.player == null) {
+			return;
+		}
+		long time = level.getGameTime();
+		if (time % TIMELESS_INTERVAL != 0) {
+			return;
+		}
+		for (AbstractClientPlayer player : level.players()) {
+			if (!Powers.has(player, ChronoPower.INSTANCE) || !Fate.isAscended(player) || player.isInvisible() || player.isSpectator()) {
+				continue;
+			}
+			if (player == minecraft.player && minecraft.options.getCameraType().isFirstPerson()) {
+				continue;
+			}
+			if (player.distanceToSqr(minecraft.player) > TIMELESS_VIEW_DISTANCE * TIMELESS_VIEW_DISTANCE) {
+				continue;
+			}
+			double t = time + player.getId() * 37.0;
+			double y = player.getY() + TIMELESS_HEIGHT;
+			double minute = t * TIMELESS_MINUTE_SPEED;
+			double hour = t * TIMELESS_HOUR_SPEED;
+			level.addParticle(MINUTE_HAND, player.getX() + Math.sin(minute) * TIMELESS_RADIUS, y, player.getZ() - Math.cos(minute) * TIMELESS_RADIUS,
+				0.0, 0.0, 0.0);
+			level.addParticle(HOUR_HAND, player.getX() + Math.sin(hour) * TIMELESS_RADIUS * 0.65, y + 0.02,
+				player.getZ() - Math.cos(hour) * TIMELESS_RADIUS * 0.65, 0.0, 0.0, 0.0);
+		}
 	}
 
 	private void accept(ChronoSync sync) {
@@ -67,12 +130,15 @@ public final class ChronoPowerClient implements PowerClient {
 			activeLeft[i] = sync.activeLeft()[i];
 			activeTotal[i] = Math.max(sync.activeTotal()[i], sync.activeLeft()[i]);
 		}
+		ultimateLeft = sync.ultimateLeft();
+		ultimateTotal = Math.max(sync.ultimateTotal(), sync.ultimateLeft());
 	}
 
 	private void reset() {
 		for (int i = 0; i < ChronoSync.ABILITIES; i++) {
 			cooldownLeft[i] = cooldownTotal[i] = activeLeft[i] = activeTotal[i] = deniedFlash[i] = readyFlash[i] = 0;
 		}
+		ultimateLeft = ultimateTotal = ultimateDenied = ultimateReady = 0;
 	}
 
 	@Override
@@ -96,6 +162,24 @@ public final class ChronoPowerClient implements PowerClient {
 			if (readyFlash[i] > 0) {
 				readyFlash[i]--;
 			}
+		}
+		if (ultimateLeft > 0 && --ultimateLeft == 0) {
+			ultimateReady = 8;
+			minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.AMETHYST_BLOCK_CHIME, 1.2F, 0.5F));
+		}
+		if (ultimateDenied > 0) {
+			ultimateDenied--;
+		}
+		if (ultimateReady > 0) {
+			ultimateReady--;
+		}
+	}
+
+	@Override
+	public void onUltimate(LocalPlayer player, boolean down) {
+		if (down && ultimateLeft > 0) {
+			ultimateDenied = 6;
+			Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.COMPARATOR_CLICK, 0.6F, 0.5F));
 		}
 	}
 
@@ -121,7 +205,9 @@ public final class ChronoPowerClient implements PowerClient {
 		}
 
 		// right of the hotbar, past the off-hand slot / attack indicator; above the hunger bar on narrow screens
-		int total = ChronoSync.ABILITIES * FACE + (ChronoSync.ABILITIES - 1) * GAP;
+		boolean ascended = Fate.isAscended(player);
+		int chips = ChronoSync.ABILITIES + (ascended ? 1 : 0);
+		int total = chips * FACE + (chips - 1) * GAP;
 		int x0 = width / 2 + 91 + 30;
 		int top = height - FACE - 1;
 		if (x0 + total > width - 2) {
@@ -131,6 +217,34 @@ public final class ChronoPowerClient implements PowerClient {
 		for (int i = 0; i < ChronoSync.ABILITIES; i++) {
 			drawClock(graphics, font, i, x0 + i * (FACE + GAP), top, partial);
 		}
+		if (ascended) {
+			drawParadox(graphics, font, x0 + ChronoSync.ABILITIES * (FACE + GAP), top, partial);
+		}
+	}
+
+	/** Paradox Cut's chip: a square (not a dial, it's not one of the four), pale cyan rim, the C key in the corner. */
+	private void drawParadox(GuiGraphicsExtractor graphics, Font font, int fx, int fy, float partial) {
+		boolean cooling = ultimateLeft > 0;
+		graphics.fill(fx, fy, fx + FACE, fy + FACE, ULT_BACK);
+		graphics.outline(fx, fy, FACE, FACE, cooling ? ULT_RIM_DIM : ULT_RIM);
+		graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, fx + 4, fy + 4, ULT_GLYPH_U, FACE, 10, 10, TEX_W, TEX_H,
+			cooling ? 0xFF7A7068 : 0xFFFFFFFF);
+		if (cooling && ultimateTotal > 0) {
+			float left = Mth.clamp((ultimateLeft - partial) / ultimateTotal, 0.0F, 1.0F);
+			// the part still to go drains downwards
+			int shade = Math.round((FACE - 2) * left);
+			graphics.fill(fx + 1, fy + 1 + (FACE - 2 - shade), fx + FACE - 1, fy + FACE - 1, SHADE);
+			graphics.centeredText(font, Integer.toString(Mth.ceil(ultimateLeft / 20.0F)), fx + FACE / 2, fy + 5, TEXT);
+		}
+		if (ultimateReady > 0) {
+			int a = ultimateReady * 0x18;
+			graphics.outline(fx - 1, fy - 1, FACE + 2, FACE + 2, (a << 24) | 0x9FE6FF);
+		}
+		if (ultimateDenied > 0) {
+			graphics.outline(fx - 1, fy - 1, FACE + 2, FACE + 2, DENIED);
+		}
+		String key = font.plainSubstrByWidth(JaymosPowersClient.ultimateKey().getTranslatedKeyMessage().getString(), FACE - 2);
+		graphics.text(font, key, fx + FACE - font.width(key), fy + FACE - 7, cooling ? TEXT_DIM : TEXT);
 	}
 
 	private void drawClock(GuiGraphicsExtractor graphics, Font font, int i, int fx, int fy, float partial) {

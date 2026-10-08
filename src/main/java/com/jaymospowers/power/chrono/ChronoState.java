@@ -31,6 +31,16 @@ final class ChronoState {
 	final int[] readyAt = new int[ChronoSync.ABILITIES];
 	final int[] cooldownTotal = new int[ChronoSync.ABILITIES];
 
+	/** Paradox Cut (the ascended ability): server tick when it's ready again, and how long its cooldown was. */
+	int ultimateReadyAt;
+	int ultimateTotal;
+
+	/** Where the player was last tick, to notice a dimension change (their close echoes follow). */
+	net.minecraft.server.level.@Nullable ServerLevel lastLevel;
+	@Nullable Vec3 lastPos;
+	/** Slept long enough this night (set in bed, checked on waking). */
+	boolean restedFully;
+
 	@Nullable StasisField stasis;
 	@Nullable TimeBloom bloom;
 	int overclockLeft;
@@ -108,7 +118,14 @@ final class ChronoState {
 		return Math.max(0, readyAt[ability] - now);
 	}
 
+	int ultimateLeft(int now) {
+		return Math.max(0, ultimateReadyAt - now);
+	}
+
 	boolean anythingTicking(int now) {
+		if (ultimateLeft(now) > 0) {
+			return true;
+		}
 		for (int i = 0; i < ChronoSync.ABILITIES; i++) {
 			if (cooldownLeft(i, now) > 0) {
 				return true;

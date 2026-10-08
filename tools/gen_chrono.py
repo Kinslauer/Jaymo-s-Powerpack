@@ -8,14 +8,18 @@ Sheet layout (64x32, assets/jaymospowers/textures/gui/chrono_hud.png):
   (18,0)  18x18  clock face, active (brighter bezel, warm glow)
   (0,18)  10x10  glyph: Rewind     (10,18) Stasis
   (20,18) 10x10  glyph: Overclock  (30,18) Time Bloom
+  (40,18) 10x10  glyph: Paradox Cut (the ascended ability)
+
+Also the Stopped Clock item (16x16, textures/item/chrono_stopped_clock.png) and its item/model JSON.
 """
 import math
 from pathlib import Path
 
 from PIL import Image
 
-OUT = (Path(__file__).resolve().parent.parent / "src" / "main" / "resources" / "assets" / "jaymospowers"
-       / "textures" / "gui" / "chrono_hud.png")
+ASSETS = Path(__file__).resolve().parent.parent / "src" / "main" / "resources" / "assets" / "jaymospowers"
+OUT = ASSETS / "textures" / "gui" / "chrono_hud.png"
+CLOCK_OUT = ASSETS / "textures" / "item" / "chrono_stopped_clock.png"
 
 GOLD_LIGHT = (255, 226, 140, 255)
 GOLD = (242, 193, 78, 255)
@@ -34,6 +38,8 @@ GLYPH_PALETTE = {
     "l": (120, 200, 90, 255),   # leaf
     "L": (70, 150, 60, 255),    # leaf shadow
     "w": (255, 255, 255, 255),  # glint
+    "c": (168, 232, 255, 255),  # pale cyan
+    "C": (90, 170, 210, 255),   # cyan shadow
 }
 
 GLYPHS = [
@@ -89,7 +95,83 @@ GLYPHS = [
         "..dggggd..",
         "..........",
     ],
+    # Paradox Cut: a crescent slash with its own pale echo behind it
+    [
+        "........#.",
+        ".......#g.",
+        "..c...#g..",
+        ".c...#g...",
+        "c...#gd...",
+        "c..#gd....",
+        ".c#gd.....",
+        "..cd......",
+        "...C......",
+        "..........",
+    ],
 ]
+
+# The Stopped Clock: a pocket watch with a cracked crystal, both hands stuck at twelve, a faint cyan glint.
+CLOCK_PALETTE = {
+    ".": (0, 0, 0, 0),
+    "o": (58, 40, 22, 255),     # outline
+    "d": (150, 102, 36, 255),   # dark gold
+    "g": (226, 178, 70, 255),   # gold
+    "l": (255, 228, 150, 255),  # light gold
+    "f": (214, 230, 236, 255),  # face
+    "s": (170, 196, 210, 255),  # face shadow
+    "k": (40, 34, 44, 255),     # hands
+    "x": (120, 210, 240, 255),  # crack (cyan glint)
+    "w": (255, 255, 255, 255),  # glint
+}
+
+CLOCK = [
+    "......olo.......",
+    "......ogo.......",
+    ".....oolgoo.....",
+    "...oogglgggoo...",
+    "..ogglffffgddo..",
+    "..oglffkfffsdo..",
+    ".oglfffkffxfsdo.",
+    ".oglffwkfxffsdo.",
+    ".ogfffkkxffffdo.",
+    ".ogffffxfffsfdo.",
+    ".ogffffxffffsdo.",
+    "..ogfsfxfffsdo..",
+    "..odgsssssddgo..",
+    "...oodddddooo...",
+    ".....ooooo......",
+    "................",
+]
+
+ITEM_JSON = """{
+  "model": {
+    "type": "minecraft:model",
+    "model": "jaymospowers:item/chrono_stopped_clock"
+  }
+}
+"""
+
+MODEL_JSON = """{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymospowers:item/chrono_stopped_clock"
+  }
+}
+"""
+
+
+def stopped_clock() -> Image.Image:
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y, row in enumerate(CLOCK):
+        for x, ch in enumerate(row.ljust(16, ".")[:16]):
+            img.putpixel((x, y), CLOCK_PALETTE[ch])
+    return img
+
+
+def write_text(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+    print("wrote", path)
 
 
 def clock_face(active: bool) -> Image.Image:
@@ -156,6 +238,12 @@ def main() -> None:
     OUT.parent.mkdir(parents=True, exist_ok=True)
     sheet.save(OUT)
     print("wrote", OUT)
+
+    CLOCK_OUT.parent.mkdir(parents=True, exist_ok=True)
+    stopped_clock().save(CLOCK_OUT)
+    print("wrote", CLOCK_OUT)
+    write_text(ASSETS / "items" / "chrono_stopped_clock.json", ITEM_JSON)
+    write_text(ASSETS / "models" / "item" / "chrono_stopped_clock.json", MODEL_JSON)
 
 
 if __name__ == "__main__":
