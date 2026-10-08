@@ -90,3 +90,4 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.1.5:**
   - Chrono: Stasis stops players too (held in place, no actions) for 3 s, and it's the last unlock.
   - Arsenal: Barrage blades land as pickupable weapons for the caster.
+- **0.1.6:** Arsenal Reach Through is now animated: a portal opens, the arm reaches in, and the weapon is drawn out.

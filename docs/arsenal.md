@@ -142,3 +142,20 @@ Replace the owner with your UUID int-array if you want it to count on your HUD.
 - **Picking them up:** only the caster can, by walking over them. Each one comes back as a fresh summon on the usual
   timer, and the 3-summon cap still applies (`ArsenalPower.capSummons`).
 - Uncollected blades dissolve after `RiftBlade.LYING_TICKS` 600 (30 s).
+
+## Reach Through animation (0.1.6)
+- **Timeline** (`ArsenalReach`, in ticks):
+  - 0–6: the portal tears open with a slight overshoot.
+  - 6–12: the weapon arm reaches into it.
+  - 12–22: the arm hauls back while the weapon slides out of the portal into the hand, tumbling, then settling and
+    growing.
+  - 22: the server hands the weapon over.
+  - 22–28: the portal snaps shut.
+- **Rolled up front:** the weapon is rolled when the portal opens, so the one that comes out is the one you get.
+- **Sync:** `jaymospowers:arsenal_reach` (start time + weapon), seen by everyone.
+- **Portal (`ArsenalReachRenderer`):** an elliptical disc of the animated nether-portal texture, its UVs turning so
+  it swirls, plus a bright rim, all full-bright. It sits 1 block ahead of the weapon hand at shoulder height, facing
+  the player.
+- **Arm (`ArsenalArmPose` + client mixins):** aims at the portal, then pulls back to the chest. In first person the
+  weapon flies into the bottom corner of the screen.
+- **Untested in game:** the portal and item drawing only run when R is pressed.

@@ -65,7 +65,6 @@ public final class ArsenalPower implements Power {
 
 	// tuning (ticks)
 	public static final int REACH_COOLDOWN = 160;
-	public static final int RIFT_DELAY = 10;
 	public static final int SUMMON_TICKS = 1500;
 	public static final int MAX_HELD = 3;
 	public static final int RETURN_REFUND = 80;
@@ -91,14 +90,19 @@ public final class ArsenalPower implements Power {
 	public static final AttachmentType<Cooldowns> COOLDOWNS = AttachmentRegistry.create(JaymosPowers.id("arsenal_cooldowns"),
 		builder -> builder.persistent(Cooldowns.CODEC).copyOnDeath().syncWith(Cooldowns.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
 
-	/** Rifts that are opening: player → game time the weapon comes out. Server memory only. */
-	private static final Map<UUID, Long> PENDING = new HashMap<>();
+	/** A rift being reached into: when it opened, and what's coming out. Server memory only. */
+	private record Pending(long start, List<ItemStack> stacks) {
+	}
+
+	/** Rifts that are open: player → the reach in progress. */
+	private static final Map<UUID, Pending> PENDING = new HashMap<>();
 
 	private ArsenalPower() {
 	}
 
 	/** Called once from {@link JaymosPowers#onInitialize()}: register the power and everything it needs. */
 	public static void init() {
+		ArsenalReach.init();
 		Summoned.TYPE = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("arsenal_summoned"),
 			DataComponentType.<Summoned>builder().persistent(Summoned.CODEC).networkSynchronized(Summoned.STREAM_CODEC).build());
 		ArsenalEntities.init();
@@ -144,26 +148,40 @@ public final class ArsenalPower implements Power {
 	@Override
 	public void onLost(ServerPlayer player) {
 		PENDING.remove(player.getUUID());
+		player.removeAttached(ArsenalReach.REACH);
 		// the doorway closes: everything this player summoned goes home
 		dissolveWhere(player, s -> s.ownedBy(player.getUUID()), true);
 	}
 
 	@Override
 	public void tick(ServerPlayer player) {
-		Long at = PENDING.get(player.getUUID());
-		if (at == null) {
+		Pending pending = PENDING.get(player.getUUID());
+		if (pending == null) {
 			return;
 		}
 		ServerLevel level = player.level();
 		if (!player.isAlive()) {
 			PENDING.remove(player.getUUID());
+			player.removeAttached(ArsenalReach.REACH);
 			return;
 		}
-		Vec3 rift = riftPos(player);
-		riftRing(level, player, rift, 0.45);
-		if (level.getGameTime() >= at) {
+		// the portal itself is drawn by every client (see ArsenalReach); the server adds the motes and the timing
+		long t = level.getGameTime() - pending.start();
+		Vec3 rift = ArsenalReach.portalCenter(player, 1.0F);
+		if (t < ArsenalReach.PULL_END && t % 3 == 0) {
+			level.sendParticles(ParticleTypes.PORTAL, rift.x, rift.y, rift.z, 3, 0.2, 0.2, 0.2, 0.4);
+		}
+		if (t == ArsenalReach.REACH_END) {
+			level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.PORTAL_AMBIENT, SoundSource.PLAYERS, 0.35F, 1.6F);
+		}
+		if (t == ArsenalReach.PULL_END) {
+			pull(player, rift, pending.stacks());
+		}
+		if (t >= ArsenalReach.CLOSE_END) {
 			PENDING.remove(player.getUUID());
-			pull(player, rift);
+			player.removeAttached(ArsenalReach.REACH);
+			level.sendParticles(ParticleTypes.REVERSE_PORTAL, rift.x, rift.y, rift.z, 16, 0.1, 0.1, 0.1, 0.12);
+			level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.ENDER_EYE_DEATH, SoundSource.PLAYERS, 0.5F, 1.5F);
 		}
 	}
 
@@ -181,8 +199,11 @@ public final class ArsenalPower implements Power {
 			return;
 		}
 		player.setAttached(COOLDOWNS, new Cooldowns(now + REACH_COOLDOWN, cd.barrage()));
-		PENDING.put(player.getUUID(), now + RIFT_DELAY);
-		Vec3 rift = riftPos(player);
+		// decided now, so the weapon everyone sees coming out of the portal is the one you get
+		List<ItemStack> stacks = ArsenalPool.roll(level, player.getRandom());
+		PENDING.put(player.getUUID(), new Pending(now, stacks));
+		player.setAttached(ArsenalReach.REACH, new ArsenalReach.Reach(now, stacks.isEmpty() ? ItemStack.EMPTY : stacks.getFirst().copy()));
+		Vec3 rift = ArsenalReach.portalCenter(player, 1.0F);
 		level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.7F, 0.55F);
 		level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.15F, 1.8F);
 	}
@@ -212,12 +233,11 @@ public final class ArsenalPower implements Power {
 		level.sendParticles(ParticleTypes.PORTAL, center.x, center.y, center.z, 4, 0.1, 0.1, 0.1, 0.6);
 	}
 
-	private static void pull(ServerPlayer player, Vec3 rift) {
+	private static void pull(ServerPlayer player, Vec3 rift, List<ItemStack> stacks) {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		makeRoom(player, MAX_HELD - 1);
 
-		List<ItemStack> stacks = ArsenalPool.roll(level, player.getRandom());
 		Summoned tag = new Summoned(player.getUUID(), now + SUMMON_TICKS, player.getRandom().nextInt());
 		Inventory inventory = player.getInventory();
 		for (int i = 0; i < stacks.size(); i++) {

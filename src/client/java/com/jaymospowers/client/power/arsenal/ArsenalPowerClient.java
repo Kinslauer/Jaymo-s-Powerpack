@@ -35,6 +35,8 @@ public final class ArsenalPowerClient implements PowerClient {
 	public static void init() {
 		PowerClients.register(ArsenalPower.ID, INSTANCE);
 		EntityRendererRegistry.register(ArsenalEntities.RIFT_BLADE, RiftBladeRenderer::new);
+		// Reach Through: the portal and the weapon coming out of it, for everyone in view
+		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalReachRenderer::render);
 		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
 			Summoned summoned = Summoned.of(stack);
 			Minecraft minecraft = Minecraft.getInstance();
