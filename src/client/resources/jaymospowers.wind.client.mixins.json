@@ -2,6 +2,13 @@
 	"required": true,
 	"package": "com.jaymospowers.client.power.wind.mixin",
 	"compatibilityLevel": "JAVA_25",
-	"client": [],
+	"client": [
+		"AbstractClientPlayerMixin",
+		"AvatarRendererMixin",
+		"CameraMixin",
+		"LivingEntityRendererMixin",
+		"LocalPlayerMixin",
+		"ModelFeatureRendererMixin"
+	],
 	"injectors": { "defaultRequire": 1 }
 }

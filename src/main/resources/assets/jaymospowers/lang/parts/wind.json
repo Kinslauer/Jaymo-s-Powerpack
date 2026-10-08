@@ -1,4 +1,17 @@
 {
 	"power.jaymospowers.wind": "Wind Control",
-	"power.jaymospowers.wind.desc": "Ride the wind: fly, and channel gusts into buffs."
+	"power.jaymospowers.wind.desc": "Fly like a superhero: Sprint to cruise, Sneak to lock speed. Hold a key to channel the wind.",
+	"power.jaymospowers.wind.key.ability_1": "Flight on/off",
+	"power.jaymospowers.wind.key.ability_2": "Hold: Tailwind (speed, dash)",
+	"power.jaymospowers.wind.key.ability_3": "Hold: Gale Barrier (shield)",
+	"power.jaymospowers.wind.key.ability_4": "Hold: Zephyr's Breath (heal)",
+	"ability.jaymospowers.wind.tailwind": "Tailwind",
+	"ability.jaymospowers.wind.gale_barrier": "Gale Barrier",
+	"ability.jaymospowers.wind.zephyr": "Zephyr's Breath",
+	"hud.jaymospowers.wind.none": "",
+	"hud.jaymospowers.wind.hover": "HOVER",
+	"hud.jaymospowers.wind.cruise": "CRUISE",
+	"hud.jaymospowers.wind.sonic": "SONIC",
+	"hud.jaymospowers.wind.locked": "LOCKED",
+	"hud.jaymospowers.wind.unlocked": "unlocked"
 }
