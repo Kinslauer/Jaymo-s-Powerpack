@@ -51,8 +51,11 @@ public final class WebArms {
 	private static final double ARM_LENGTH = 10.0 / 16.0;
 
 	/** This frame's pose: an arm's aim is null when that hand has no web out. Angles are model-part radians. */
-	public record Pose(float amount, float @Nullable [] mainArm, float @Nullable [] offArm, float legTrail, float legSide) {
+	public record Pose(float amount, float @Nullable [] mainArm, float @Nullable [] offArm, float legTrail, float legSide, float wings) {
 	}
+
+	/** Spread wings: how far the arms are raised out from the sides (radians from hanging down). */
+	private static final float WING_SPREAD = 1.35F;
 
 	/** A player's springy state. Directions are world-space unit vectors (from the shoulder toward the web). */
 	private static final class Body {
@@ -62,6 +65,7 @@ public final class WebArms {
 		float trail, trailVel, prevTrail;
 		float side, sideVel, prevSide;
 		float amount, prevAmount;
+		float wings, prevWings;
 	}
 
 	private static final Map<Integer, Body> BODIES = new HashMap<>();
@@ -80,18 +84,57 @@ public final class WebArms {
 		for (AbstractClientPlayer player : level.players()) {
 			Vec3 main = lineEnd(minecraft, level, player, WebNet.MAIN, 1.0F);
 			Vec3 off = lineEnd(minecraft, level, player, WebNet.OFF, 1.0F);
+			boolean winged = isWinged(minecraft, player);
 			Body body = BODIES.get(player.getId());
 			if (body == null) {
-				if (main == null && off == null) {
+				if (main == null && off == null && !winged) {
 					continue;
 				}
 				body = new Body();
 				BODIES.put(player.getId(), body);
 			}
+			body.prevWings = body.wings;
+			body.wings = winged ? Math.min(1.0F, body.wings + 0.3F) : Math.max(0.0F, body.wings - 0.2F);
 			tickBody(player, body, main, off);
 		}
 		BODIES.entrySet().removeIf(entry -> entry.getValue().amount <= 0.0F && entry.getValue().prevAmount <= 0.0F
-			|| level.getEntity(entry.getKey()) == null);
+			&& entry.getValue().wings <= 0.0F && entry.getValue().prevWings <= 0.0F || level.getEntity(entry.getKey()) == null);
+	}
+
+	private static boolean isWinged(Minecraft minecraft, Player player) {
+		if (player == minecraft.player) {
+			return WebPowerClient.isActive(minecraft.player) && WebPowerClient.INSTANCE.swing.wingsTicks > 0;
+		}
+		return player.getAttached(WebPower.WINGS) != null;
+	}
+
+	/** How spread a player's wings are this frame (0 = folded). */
+	static float wings(Player player, float partialTick) {
+		Body body = BODIES.get(player.getId());
+		return body == null ? 0.0F : Mth.lerp(partialTick, body.prevWings, body.wings);
+	}
+
+	/** A spread wing's tip (the hand, out to the side) for the body's right ({@code side} 1) or left (-1). */
+	static Vec3 wingTip(Player player, int side, float spread, float partialTick) {
+		float bodyYaw = Mth.lerp(partialTick, player.yBodyRotO, player.yBodyRot) * Mth.DEG_TO_RAD;
+		Vec3 right = new Vec3(-Mth.cos(bodyYaw), 0.0, -Mth.sin(bodyYaw));
+		double scale = player.getScale();
+		Vec3 shoulder = player.getPosition(partialTick).add(right.scale(side * SHOULDER_OUT * scale)).add(0.0, SHOULDER_HEIGHT * scale, 0.0);
+		double angle = WING_SPREAD * spread;
+		return shoulder.add(right.scale(side * Math.sin(angle) * ARM_LENGTH * 1.25 * scale)).add(0.0, -Math.cos(angle) * ARM_LENGTH * 1.25 * scale, 0.0);
+	}
+
+	/** Where a wing's web meets the body: the hip on that side, and the shoulder. */
+	static Vec3 wingHip(Player player, int side, float partialTick) {
+		float bodyYaw = Mth.lerp(partialTick, player.yBodyRotO, player.yBodyRot) * Mth.DEG_TO_RAD;
+		Vec3 right = new Vec3(-Mth.cos(bodyYaw), 0.0, -Mth.sin(bodyYaw));
+		return player.getPosition(partialTick).add(right.scale(side * 0.22 * player.getScale())).add(0.0, 0.7 * player.getScale(), 0.0);
+	}
+
+	static Vec3 wingShoulder(Player player, int side, float partialTick) {
+		float bodyYaw = Mth.lerp(partialTick, player.yBodyRotO, player.yBodyRot) * Mth.DEG_TO_RAD;
+		Vec3 right = new Vec3(-Mth.cos(bodyYaw), 0.0, -Mth.sin(bodyYaw));
+		return player.getPosition(partialTick).add(right.scale(side * SHOULDER_OUT * player.getScale())).add(0.0, SHOULDER_HEIGHT * player.getScale(), 0.0);
 	}
 
 	private static void tickBody(Player player, Body body, @Nullable Vec3 main, @Nullable Vec3 off) {
@@ -194,7 +237,8 @@ public final class WebArms {
 			return;
 		}
 		float amount = Mth.lerp(partialTicks, body.prevAmount, body.amount);
-		if (amount <= 0.001F) {
+		float wings = Mth.lerp(partialTicks, body.prevWings, body.wings);
+		if (amount <= 0.001F && wings <= 0.001F) {
 			state.setData(KEY, null);
 			return;
 		}
@@ -202,7 +246,7 @@ public final class WebArms {
 		float[] main = aim(body, WebNet.MAIN, bodyYaw, partialTicks);
 		float[] off = aim(body, WebNet.OFF, bodyYaw, partialTicks);
 		state.setData(KEY, new Pose(amount, main, off,
-			Mth.lerp(partialTicks, body.prevTrail, body.trail), Mth.lerp(partialTicks, body.prevSide, body.side)));
+			Mth.lerp(partialTicks, body.prevTrail, body.trail), Mth.lerp(partialTicks, body.prevSide, body.side), wings));
 	}
 
 	/** An arm's {xRot, yRot} pointing it along its web, relative to the body (as the bow-aiming pose does it). */
@@ -230,6 +274,15 @@ public final class WebArms {
 		Pose pose = avatar.getData(KEY);
 		if (pose == null) {
 			return;
+		}
+		if (pose.wings() > 0.001F) {
+			// wings spread: arms straight out to the sides, legs together behind
+			float w = pose.wings();
+			float flutter = Mth.sin(avatar.ageInTicks * 0.8F) * 0.04F;
+			set(humanoid.rightArm, 0.1F, 0.0F, WING_SPREAD + flutter, w);
+			set(humanoid.leftArm, 0.1F, 0.0F, -WING_SPREAD - flutter, w);
+			set(humanoid.rightLeg, 0.15F, 0.0F, 0.05F, w);
+			set(humanoid.leftLeg, 0.15F, 0.0F, -0.05F, w);
 		}
 		float amount = pose.amount();
 		boolean mainRight = avatar.mainArm != HumanoidArm.LEFT;

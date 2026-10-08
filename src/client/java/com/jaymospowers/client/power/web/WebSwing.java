@@ -13,6 +13,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -54,6 +55,28 @@ final class WebSwing {
 	static final double FLIGHT_DRAG = 0.985;
 	/** Holding a swing key in the air with nothing to stick to retries every this many ticks. */
 	static final int RETRY_TICKS = 3;
+	// ===== slingshot (two webs out: hold Sneak to brace, hold Jump to draw back, let Jump go to fire) ================
+	/** Ticks of Jump to a full draw, and how far the full draw pulls you back from where you braced. */
+	static final int SLING_DRAW_TICKS = 30;
+	static final double SLING_PULLBACK = 2.5;
+	/** Launch speed at no draw and at a full draw (blocks/tick; the swing cap is lifted for the flight). */
+	static final double SLING_MIN_SPEED = 0.9;
+	static final double SLING_MAX_SPEED = 3.4;
+	/** How much the launch follows where you look, versus straight between the webs (0 = all webs). */
+	static final double SLING_AIM = 0.4;
+	/** The least draw that fires (a tap of Jump just reels in). */
+	static final float SLING_MIN_DRAW = 0.12F;
+	// ===== web wings (hold Jump in mid-air) =========================================================================
+	/** Ticks Jump must be held in mid-air (while falling) before the wings spread. */
+	static final int WINGS_HOLD_TICKS = 6;
+	/** Glide: steady sink rate, extra sink per unit of looking down, and how fast the path swings to the look. */
+	static final double WINGS_SINK = 0.07;
+	static final double WINGS_DIVE = 0.4;
+	static final double WINGS_STEER = 0.12;
+	/** Glide speed: the slowest it settles to, the fastest it builds to, speed gained per block/tick of sink. */
+	static final double WINGS_MIN_SPEED = 0.45;
+	static final double WINGS_MAX_SPEED = 1.8;
+	static final double WINGS_DIVE_GAIN = 0.05;
 	// ===== zip / yank-to ===========================================================================================
 	/** How quickly the reel-in steers your velocity onto the line (0..1 per tick). */
 	static final double ZIP_STEER = 0.55;
@@ -85,6 +108,17 @@ final class WebSwing {
 	final Strand[] strands = {new Strand(WebNet.MAIN), new Strand(WebNet.OFF)};
 	// after a release
 	boolean flying;
+	/** Speed cap for the current free flight (a slingshot launch may exceed the swing cap). */
+	private double flightCap = MAX_SPEED;
+	// slingshot
+	boolean slinging;
+	float slingDraw;
+	private Vec3 braced = Vec3.ZERO;
+	private boolean slingJumpHeld;
+	// wings
+	int wingsTicks;
+	int wingsCooldown;
+	private int jumpHeldAir;
 	// zip / yank-to
 	WebNet.@Nullable Pull pull;
 	private int pullTicks;
@@ -98,6 +132,18 @@ final class WebSwing {
 		}
 		flying = false;
 		pull = null;
+		slinging = false;
+		slingDraw = 0.0F;
+		if (wingsTicks > 0) {
+			ClientPlayNetworking.send(new WebNet.Wings(false));
+		}
+		wingsTicks = 0;
+		wingsCooldown = 0;
+	}
+
+	/** Both webs stuck: the slingshot is possible. */
+	boolean bothAttached() {
+		return strands[WebNet.MAIN].attached && strands[WebNet.OFF].attached;
 	}
 
 	/** Any web stuck right now. */
@@ -140,6 +186,7 @@ final class WebSwing {
 		}
 		strand.attached = true;
 		flying = false;
+		foldWings();
 		strand.anchor = found.pos();
 		strand.swingTicks = 0;
 		double distance = strand.anchor.distanceTo(player.position().add(0.0, ROPE_HEIGHT, 0.0));
@@ -157,11 +204,13 @@ final class WebSwing {
 		}
 		strand.attached = false;
 		ClientPlayNetworking.send(new WebNet.Swing(strand.hand, false, Vec3.ZERO));
+		slinging = false;
 		if (attached()) {
 			// still hanging from the other hand: no release yet
 			return;
 		}
 		flying = !player.onGround();
+		flightCap = MAX_SPEED;
 		if (!timed || player.onGround()) {
 			return;
 		}
@@ -232,9 +281,17 @@ final class WebSwing {
 			pull = null;
 			return;
 		}
+		if (wingsCooldown > 0) {
+			wingsCooldown--;
+		}
 		if (pull != null) {
+			foldWings();
 			tickPull(player);
 			return;
+		}
+		tickWingsInput(player);
+		if (wingsTicks > 0) {
+			tickWings(player);
 		}
 		Strand off = strands[WebNet.OFF];
 		if (off.attached && !WebPower.offHandFree(player)) {
@@ -243,7 +300,7 @@ final class WebSwing {
 		}
 		if (attached()) {
 			tickSwing(player);
-		} else if (flying) {
+		} else if (flying && wingsTicks == 0) {
 			tickFlight(player);
 		}
 		for (Strand strand : strands) {
@@ -271,6 +328,15 @@ final class WebSwing {
 			return;
 		}
 		Input input = player.input.keyPresses;
+		if (bothAttached() && input.shift()) {
+			tickSling(player, input);
+			return;
+		}
+		if (slinging) {
+			// let go of Sneak without firing: back to swinging
+			slinging = false;
+			slingDraw = 0.0F;
+		}
 		boolean air = !player.onGround();
 		Vec3 v = player.getDeltaMovement();
 		if (air && !player.isFallFlying()) {
@@ -328,13 +394,136 @@ final class WebSwing {
 		}
 	}
 
+	/** Braced between two webs: hold still; Jump draws back (storing energy), letting Jump go fires. */
+	private void tickSling(LocalPlayer player, Input input) {
+		Vec3 body = player.position().add(0.0, ROPE_HEIGHT, 0.0);
+		Vec3 mid = strands[0].anchor.add(strands[1].anchor).scale(0.5);
+		Vec3 toMid = mid.subtract(body);
+		Vec3 forward = toMid.lengthSqr() > 1.0E-6 ? toMid.normalize() : player.getLookAngle();
+		if (!slinging) {
+			slinging = true;
+			slingDraw = 0.0F;
+			slingJumpHeld = false;
+			braced = player.position();
+			play(player, SoundEvents.LEAD_TIED, 0.6F, 1.3F);
+		}
+		boolean jump = input.jump();
+		if (jump) {
+			slingJumpHeld = true;
+			float before = slingDraw;
+			slingDraw = Math.min(1.0F, slingDraw + 1.0F / SLING_DRAW_TICKS);
+			if ((int)(before * 8) != (int)(slingDraw * 8)) {
+				// the webs creak tighter as the draw builds
+				play(player, SoundEvents.CROSSBOW_LOADING_MIDDLE.value(), 0.5F, 0.8F + slingDraw * 0.9F);
+			}
+		} else if (slingJumpHeld) {
+			slingJumpHeld = false;
+			if (slingDraw >= SLING_MIN_DRAW) {
+				fireSling(player, forward);
+				return;
+			}
+			slingDraw = 0.0F;
+		}
+		// held in place, drawn back away from the webs by the draw
+		Vec3 target = braced.subtract(forward.scale(SLING_PULLBACK * slingDraw));
+		Vec3 v = target.subtract(player.position()).scale(0.4);
+		player.setDeltaMovement(v);
+		player.resetFallDistance();
+		if (slingDraw > 0.0F && player.tickCount % 3 == 0) {
+			// tension shivers along the webs
+			Vec3 at = player.position().add(0.0, 1.0, 0.0);
+			player.level().addParticle(ParticleTypes.ITEM_COBWEB, at.x, at.y, at.z, rnd(player) * 0.05, 0.02, rnd(player) * 0.05);
+		}
+	}
+
+	private void fireSling(LocalPlayer player, Vec3 forward) {
+		Vec3 dir = forward.scale(1.0 - SLING_AIM).add(player.getLookAngle().scale(SLING_AIM)).normalize();
+		double speed = SLING_MIN_SPEED + (SLING_MAX_SPEED - SLING_MIN_SPEED) * slingDraw;
+		for (Strand strand : strands) {
+			if (strand.attached) {
+				strand.attached = false;
+				ClientPlayNetworking.send(new WebNet.Swing(strand.hand, false, Vec3.ZERO));
+			}
+		}
+		slinging = false;
+		slingDraw = 0.0F;
+		flying = true;
+		flightCap = Math.max(MAX_SPEED, speed);
+		player.setDeltaMovement(dir.scale(speed));
+		play(player, SoundEvents.CROSSBOW_SHOOT, 1.0F, 0.7F);
+		play(player, SoundEvents.TRIDENT_RIPTIDE_2.value(), 0.8F, 1.3F);
+		Vec3 at = player.position().add(0.0, 1.0, 0.0);
+		for (int i = 0; i < 12; i++) {
+			player.level().addParticle(ParticleTypes.CLOUD, at.x, at.y, at.z, -dir.x * 0.3 + rnd(player) * 0.2, -dir.y * 0.3 + rnd(player) * 0.2,
+				-dir.z * 0.3 + rnd(player) * 0.2);
+		}
+	}
+
+	/** Holding Jump in mid-air (falling, no web out) spreads the wings, if they're off cooldown. */
+	private void tickWingsInput(LocalPlayer player) {
+		boolean jump = player.input.keyPresses.jump();
+		boolean air = !player.onGround() && !player.isInWater() && !player.isInLava() && !player.onClimbable() && !player.isFallFlying();
+		if (!jump || !air || attached() || wingsTicks > 0) {
+			jumpHeldAir = 0;
+			return;
+		}
+		if (++jumpHeldAir >= WINGS_HOLD_TICKS && wingsCooldown == 0 && player.getDeltaMovement().y < 0.0) {
+			wingsTicks = WebPower.WINGS_TICKS;
+			jumpHeldAir = 0;
+			flying = false;
+			ClientPlayNetworking.send(new WebNet.Wings(true));
+			play(player, SoundEvents.PHANTOM_FLAP, 0.8F, 1.5F);
+			play(player, SoundEvents.FISHING_BOBBER_THROW, 0.7F, 1.2F);
+		}
+	}
+
+	/** Gliding: a steady sink, diving trades height for speed, the path follows the look. */
+	private void tickWings(LocalPlayer player) {
+		if (--wingsTicks <= 0 || player.onGround() || player.isInWater() || player.isInLava() || player.onClimbable()) {
+			foldWings();
+			return;
+		}
+		Vec3 v = player.getDeltaMovement();
+		Vec3 look = player.getLookAngle();
+		double h = Math.sqrt(v.x * v.x + v.z * v.z) / VANILLA_AIR_DRAG;
+		double vy = v.y;
+		double sink = -WINGS_SINK + Math.min(0.0, look.y) * WINGS_DIVE;
+		if (vy < sink) {
+			vy = Mth.lerp(0.35, vy, sink);
+		} else {
+			vy = Math.max(sink, vy - 0.04);
+		}
+		h = Mth.clamp((h + Math.max(0.0, -vy) * WINGS_DIVE_GAIN) * 0.995, WINGS_MIN_SPEED, WINGS_MAX_SPEED);
+		Vec3 heading = look.horizontal().lengthSqr() > 1.0E-4 ? look.horizontal().normalize() : new Vec3(v.x, 0.0, v.z).normalize();
+		Vec3 current = v.horizontal().lengthSqr() > 1.0E-6 ? v.horizontal().normalize() : heading;
+		Vec3 dir = current.lerp(heading, WINGS_STEER).normalize();
+		player.setDeltaMovement(dir.x * h, vy, dir.z * h);
+		player.resetFallDistance();
+		if (wingsTicks % 4 == 0) {
+			play(player, SoundEvents.ELYTRA_FLYING, 0.08F, 1.6F);
+		}
+	}
+
+	private void foldWings() {
+		if (wingsTicks > 0) {
+			wingsTicks = 0;
+			wingsCooldown = WebPower.WINGS_COOLDOWN;
+			flying = true;
+			ClientPlayNetworking.send(new WebNet.Wings(false));
+		}
+	}
+
 	private void tickFlight(LocalPlayer player) {
 		if (player.onGround() || player.isInWater() || player.isInLava() || player.isFallFlying() || player.onClimbable()) {
 			flying = false;
 			return;
 		}
 		Vec3 v = player.getDeltaMovement();
-		player.setDeltaMovement(cap(new Vec3(v.x / VANILLA_AIR_DRAG * FLIGHT_DRAG, v.y, v.z / VANILLA_AIR_DRAG * FLIGHT_DRAG)));
+		Vec3 next = new Vec3(v.x / VANILLA_AIR_DRAG * FLIGHT_DRAG, v.y, v.z / VANILLA_AIR_DRAG * FLIGHT_DRAG);
+		double speed = next.length();
+		player.setDeltaMovement(speed > flightCap ? next.scale(flightCap / speed) : next);
+		// a slingshot's extra speed bleeds back down to the normal cap
+		flightCap = Math.max(MAX_SPEED, flightCap * 0.99);
 	}
 
 	private void tickPull(LocalPlayer player) {

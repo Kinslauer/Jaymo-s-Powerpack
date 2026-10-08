@@ -136,7 +136,7 @@ public final class WebPowerClient implements PowerClient {
 		Font font = minecraft.font;
 		int width = graphics.guiWidth();
 		int height = graphics.guiHeight();
-		int total = CHIP * 3 + CHIP_GAP * 2;
+		int total = CHIP * 4 + CHIP_GAP * 3;
 		// past the off-hand slot / attack indicator; above the hunger bar on narrow screens
 		int x = cx + 91 + 30;
 		int y = height - CHIP - 1;
@@ -144,6 +144,9 @@ public final class WebPowerClient implements PowerClient {
 			x = cx + 91 - total;
 			y = height - 22 - 30 - CHIP;
 		}
+		// web wings (hold Jump in mid-air): lit while spread, shaded through their cooldown
+		wingsChip(graphics, font, minecraft, x, y);
+		x += CHIP + CHIP_GAP;
 		// G: the off-hand web (no cooldown; lit while it's out) or, with something in the off hand, Zip
 		if (WebPower.offHandFree(player)) {
 			chip(graphics, font, x, y, PowerKey.ABILITY_2, Items.STRING, 0L, 1);
@@ -155,6 +158,25 @@ public final class WebPowerClient implements PowerClient {
 		}
 		chip(graphics, font, x + CHIP + CHIP_GAP, y, PowerKey.ABILITY_3, Items.COBWEB, cooldowns.shot() - now, WebPower.SHOT_COOLDOWN);
 		chip(graphics, font, x + (CHIP + CHIP_GAP) * 2, y, PowerKey.ABILITY_4, Items.LEAD, cooldowns.yank() - now, WebPower.YANK_COOLDOWN);
+	}
+
+	private void wingsChip(GuiGraphicsExtractor graphics, Font font, Minecraft minecraft, int x, int y) {
+		boolean open = swing.wingsTicks > 0;
+		boolean cooling = swing.wingsCooldown > 0;
+		graphics.fill(x, y, x + CHIP, y + CHIP, 0x90000000);
+		graphics.outline(x, y, CHIP, CHIP, open || !cooling ? 0xFF000000 | CHIP_COLOR : 0xA0505050);
+		graphics.item(new ItemStack(Items.PHANTOM_MEMBRANE), x + 2, y + 2);
+		if (open) {
+			int w = (int)Math.ceil((CHIP - 2) * swing.wingsTicks / (double)WebPower.WINGS_TICKS);
+			graphics.fill(x + 1, y + CHIP - 3, x + 1 + w, y + CHIP - 1, 0xFF000000 | CHIP_COLOR);
+		} else if (cooling) {
+			int shade = (int)Math.ceil(16 * swing.wingsCooldown / (double)WebPower.WINGS_COOLDOWN);
+			graphics.fill(x + 2, y + 2 + 16 - shade, x + 18, y + 18, 0xB0000000);
+			String seconds = String.format(Locale.ROOT, "%.1f", swing.wingsCooldown / 20.0);
+			graphics.text(font, seconds, x + CHIP / 2 - font.width(seconds) / 2, y + 4, 0xFFFFFFFF);
+		}
+		String label = font.plainSubstrByWidth(minecraft.options.keyJump.getTranslatedKeyMessage().getString(), CHIP - 2);
+		graphics.text(font, label, x + CHIP - 1 - font.width(label), y + CHIP - 8, cooling ? 0xFF909090 : 0xFFFFFFFF);
 	}
 
 	private static final int CHIP = 20;

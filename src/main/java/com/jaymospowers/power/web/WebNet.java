@@ -64,7 +64,19 @@ public final class WebNet {
 		}
 	}
 
+	/** Client → server: web wings spread ({@code open}) or folded. */
+	public record Wings(boolean open) implements CustomPacketPayload {
+		public static final Type<Wings> TYPE = new Type<>(JaymosPowers.id("web_wings"));
+		public static final StreamCodec<ByteBuf, Wings> CODEC = ByteBufCodecs.BOOL.map(Wings::new, Wings::open);
+
+		@Override
+		public Type<Wings> type() {
+			return TYPE;
+		}
+	}
+
 	static void register() {
+		PayloadTypeRegistry.serverboundPlay().register(Wings.TYPE, Wings.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Swing.TYPE, Swing.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(SwingReject.TYPE, SwingReject.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Pull.TYPE, Pull.CODEC);

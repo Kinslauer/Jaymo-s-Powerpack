@@ -62,3 +62,15 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **Smoke tests:**
   - The dedicated server boots with 65 mods and stops cleanly.
   - The dev client loads 78 mods and joins a copy of the server world. No mixin or registration errors.
+- **0.1.1:**
+  - Wind: impact damage, HUD moved, hover ragdoll sway.
+  - Web: two independent webs, ragdoll arm posing.
+  - Chrono: HUD moved.
+  - The server lives in `Desktop\Serverfiles`.
+- **0.1.2:**
+  - **Mastery** (`core/Mastery`):
+    - A natural awakening unlocks only R. The rest unlock at 30, 90 and 180 points.
+    - Points come from ability use (max one per 5 s) and from playing with the power (one per minute).
+    - Creative and `/power set` give all four abilities. `/power level <players> <1-4>` sets the count directly.
+  - H does nothing in survival until the power has awakened.
+  - Wind realism pass and Tailwind ground gust. Web slingshot and web wings.

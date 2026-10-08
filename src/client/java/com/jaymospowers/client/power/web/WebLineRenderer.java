@@ -49,7 +49,53 @@ final class WebLineRenderer {
 				}
 				draw(context.poseStack(), context, hand.subtract(camera), end.subtract(camera), width);
 			}
+			float spread = WebArms.wings(player, partialTick);
+			if (spread > 0.02F && !(player == minecraft.player && minecraft.options.getCameraType().isFirstPerson())) {
+				for (int side = -1; side <= 1; side += 2) {
+					drawWing(context, WebArms.wingShoulder(player, side, partialTick).subtract(camera),
+						WebArms.wingTip(player, side, spread, partialTick).subtract(camera), WebArms.wingHip(player, side, partialTick).subtract(camera),
+						width * 0.8F);
+				}
+			}
 		}
+	}
+
+	/**
+	 * One web wing: a membrane of strands between the arm (shoulder to hand) and the side (hand to hip), with a few
+	 * spokes from the armpit and a couple of cross threads, like a spider's web.
+	 */
+	private static void drawWing(LevelRenderContext context, Vec3 shoulder, Vec3 tip, Vec3 hip, float width) {
+		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.lines(), (pose, buffer) -> {
+			line(buffer, pose, shoulder, tip, width);
+			line(buffer, pose, tip, hip, width);
+			Vec3 armpit = shoulder.lerp(hip, 0.15);
+			Vec3 prevA = null;
+			Vec3 prevB = null;
+			for (int k = 1; k <= 4; k++) {
+				double t = k / 5.0;
+				// spokes from the armpit out to the wing's edge (arm, then hand-to-hip edge)
+				Vec3 edge = k <= 2 ? shoulder.lerp(tip, t * 2.0) : tip.lerp(hip, (t - 0.4) * 1.6);
+				line(buffer, pose, armpit, edge, width * 0.7F);
+				// cross threads between neighbouring spokes, at two distances out
+				Vec3 a = armpit.lerp(edge, 0.45);
+				Vec3 b = armpit.lerp(edge, 0.8);
+				if (prevA != null) {
+					line(buffer, pose, prevA, a, width * 0.6F);
+					line(buffer, pose, prevB, b, width * 0.6F);
+				}
+				prevA = a;
+				prevB = b;
+			}
+		});
+	}
+
+	private static void line(VertexConsumer buffer, PoseStack.Pose pose, Vec3 a, Vec3 b, float width) {
+		Vec3 d = b.subtract(a);
+		double length = d.length();
+		if (length < 1.0E-4) {
+			return;
+		}
+		segment(buffer, pose, a, b, d.scale(1.0 / length), COLOR, width);
 	}
 
 	/**

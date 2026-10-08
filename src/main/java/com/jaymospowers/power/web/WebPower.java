@@ -72,6 +72,12 @@ public final class WebPower implements Power {
 	/** The web line a player has out from their main hand (swing, zip or yank), for everyone to draw. */
 	public static final AttachmentType<WebLine> LINE = AttachmentRegistry.create(JaymosPowers.id("web_line"),
 		builder -> builder.syncWith(WebLine.STREAM_CODEC, AttachmentSyncPredicate.all()));
+	/** Web wings spread (glide), for everyone to draw. */
+	public static final AttachmentType<Boolean> WINGS = AttachmentRegistry.create(JaymosPowers.id("web_wings"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** Wings last a few seconds; the server folds them itself after this long in case the client never says so. */
+	public static final int WINGS_TICKS = 80;
+	public static final int WINGS_COOLDOWN = 60;
 	/** The off-hand swing web, if one's out. */
 	public static final AttachmentType<WebLine> LINE_OFF = AttachmentRegistry.create(JaymosPowers.id("web_line_off"),
 		builder -> builder.syncWith(WebLine.STREAM_CODEC, AttachmentSyncPredicate.all()));
@@ -94,6 +100,8 @@ public final class WebPower implements Power {
 		int graceTicks;
 		/** Ticks left on a zip/yank line (swing lines last while swinging). */
 		int lineTicks;
+		/** Ticks the wings have been spread (0 = folded). */
+		int wingsTicks;
 	}
 
 	private WebPower() {
@@ -117,6 +125,7 @@ public final class WebPower implements Power {
 		WebNet.register();
 		WebTraps.register();
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Swing.TYPE, (payload, ctx) -> INSTANCE.onSwing(ctx.player(), payload));
+		ServerPlayNetworking.registerGlobalReceiver(WebNet.Wings.TYPE, (payload, ctx) -> INSTANCE.onWings(ctx.player(), payload.open()));
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
 			!(entity instanceof ServerPlayer player && source.is(DamageTypeTags.IS_FALL) && Powers.has(player, INSTANCE) && inGrace(player)));
 	}
@@ -152,6 +161,7 @@ public final class WebPower implements Power {
 		player.removeAttached(STATE);
 		player.removeAttached(LINE);
 		player.removeAttached(LINE_OFF);
+		player.removeAttached(WINGS);
 		player.removeAttached(COOLDOWNS);
 	}
 
@@ -213,7 +223,12 @@ public final class WebPower implements Power {
 			player.removeAttached(STATE);
 			player.removeAttached(LINE);
 			player.removeAttached(LINE_OFF);
+			player.removeAttached(WINGS);
 			return;
+		}
+		if (state.wingsTicks > 0 && (++state.wingsTicks > WINGS_TICKS + 20 || player.isInWater() || player.onGround() && state.wingsTicks > 3)) {
+			state.wingsTicks = 0;
+			player.removeAttached(WINGS);
 		}
 		if (state.pullTicks > 0) {
 			state.pullTicks--;
@@ -284,6 +299,26 @@ public final class WebPower implements Power {
 		// the swinger hears their own thwip client-side; this is for everyone else
 		level.playSound(player, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 0.8F, 1.8F);
 		level.sendParticles(ParticleTypes.ITEM_COBWEB, anchor.x, anchor.y, anchor.z, 5, 0.15, 0.15, 0.15, 0.01);
+	}
+
+	private void onWings(ServerPlayer player, boolean open) {
+		if (!Powers.has(player, this) || !player.isAlive() || player.isSpectator()) {
+			return;
+		}
+		State state = state(player);
+		if (open) {
+			state.wingsTicks = 1;
+			// gliding down is never a fall
+			state.grace = true;
+			state.graceTicks = 0;
+			player.setAttached(WINGS, true);
+			ServerLevel level = player.level();
+			level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.PHANTOM_FLAP, SoundSource.PLAYERS, 0.7F, 1.4F);
+			level.sendParticles(ParticleTypes.ITEM_COBWEB, player.getX(), player.getY() + 1.2, player.getZ(), 10, 0.6, 0.2, 0.6, 0.02);
+		} else {
+			state.wingsTicks = 0;
+			player.removeAttached(WINGS);
+		}
 	}
 
 	private static void dropSwing(ServerPlayer player, State state, int hand) {

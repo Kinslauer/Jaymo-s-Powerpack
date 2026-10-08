@@ -175,3 +175,16 @@ maximum channel are in `WindAbility`.
 - Arms and legs hang limp and trail the swing.
 - Other players' sway is read from their synced flight state and their per-tick movement.
 - The cruise "superman" pose eases in over it as you speed up.
+
+## Realism pass (0.1.2)
+- **Hunger:** flying costs `FLIGHT_EXHAUSTION_BASE` 0.03 + `FLIGHT_EXHAUSTION_PER_SPEED` 0.03 × speed per tick. For
+  comparison, sprinting is about 0.028.
+  - At food ≤ `CRUISE_MIN_FOOD` 6 you can't cruise, and your lock drops. You can still hover.
+- **Turning:** the flight path turns toward your look at most `CRUISE_TURN_RATE_SLOW` 7°/tick when just cruising and
+  `CRUISE_TURN_RATE_FAST` 1.2°/tick at top speed.
+  - Turning bleeds `CRUISE_TURN_DRAG` 0.5 of your speed per radian.
+  - Gravity acts along the path (`CRUISE_GRAVITY` 0.035): dives speed you up, climbs slow you.
+- **Crashes:** damage is `IMPACT_DAMAGE_K` 8 × (lost² − safe²). That's about 6 at cruising speed and about 48 at sonic.
+- **Tailwind on the ground:** a gust blast instead of the buff.
+  - It hits a 35° cone, 6–11 blocks long, for 4–10 damage (falling off with distance).
+  - Knockback is strong, and projectiles in the cone are blown away.

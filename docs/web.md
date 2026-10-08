@@ -161,3 +161,18 @@ cobweb.
     `LEG_TRAIL_PER_SPEED` 0.9).
   - The web line starts at the posed hand: shoulder + arm direction × 10 px. In first person it still comes from the
     screen corner of that hand.
+
+## Slingshot and web wings (0.1.2)
+- **Slingshot:** with both webs stuck, hold **Sneak** to brace in place, then hold **Jump** to draw back.
+  - A full draw takes `SLING_DRAW_TICKS` 30 and pulls you back `SLING_PULLBACK` 2.5 blocks from the webs.
+  - Letting Jump go fires you between the webs, blended `SLING_AIM` 0.4 toward where you look.
+  - Launch speed is `SLING_MIN_SPEED` 0.9 at no draw and `SLING_MAX_SPEED` 3.4 at a full draw. The extra speed bleeds
+    back to the normal cap (1%/tick).
+  - Releasing Sneak first cancels the shot. A draw below `SLING_MIN_DRAW` doesn't fire.
+- **Web wings:** hold **Jump** in mid-air while falling with no web out, for `WINGS_HOLD_TICKS` 6.
+  - The wings spread for `WebPower.WINGS_TICKS` 80 (4 s), then a 3 s cooldown (`WINGS_COOLDOWN` 60). They fold early if
+    you land, swim, or shoot a web.
+  - Glide: sink `WINGS_SINK` 0.07 b/t. Looking down dives (`WINGS_DIVE`) and turns height into speed
+    (`WINGS_DIVE_GAIN`), between 0.45 and 1.8 b/t. The path steers toward your look (`WINGS_STEER`).
+  - No fall damage until you land.
+  - Others see your arms spread and a web membrane from hand to hip. The `web_wings` packet and attachment carry this.
