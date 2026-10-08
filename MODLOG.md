@@ -43,3 +43,22 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   - Power API, registry, synced attachment, key packets, survival awakening, `/power`, powers screen, HUD badge
     and the anti-kick mixin.
   - The four powers were built in parallel by four agents, one git worktree each, then merged.
+- **0.1.0, the four powers (merged):**
+  - Wind (Viltrumite-style hover / cruise / sonic flight, channelled buffs).
+  - Arsenal (pulls Balkon's WeaponMod: Legacy + vanilla weapons as 75 s summons, barrage, stash).
+  - Web (rope-physics swing, zip, web shot, yank).
+  - Chrono (rewind, stasis, overclock, time bloom).
+- **The modpack:**
+  - Mods: Fabric API 0.162, Jaymo's Kitchen 0.4.11, Balm, Cooking/Pantry for Blockheads, Balkon's WeaponMod: Legacy
+    (+ Architectury, Cloth Config), Better Combat (+ Player Animation Library), JEI (+ MezzConfig), Nature's
+    Compass, Xaero's Minimap, Sodium and Ok Zoomer. The extras were matched by file hash to the friends' server.
+  - `gradlew packageModpack` (or `Build Modpack.bat`) writes the CurseForge import zip and `modpack/mods`, and
+    syncs `Serverfiles/mods`.
+  - Epic Fight can't be included: it is Forge/NeoForge only, up to 1.21.1.
+- **Server (`Serverfiles/`, not in git; it holds the playit secret):** the old kitchen server, converted:
+  - mods synced to the pack, `allow-flight=true`, a new motd and window titles
+  - backups in `mods-backup-kitchen/` and `world-backup-before-powers/`
+  - shares port 25565 and the playit tunnel with `Desktop\Minecraft Server`, so run only one at a time
+- **Smoke tests:**
+  - The dedicated server boots with 65 mods and stops cleanly.
+  - The dev client loads 78 mods and joins a copy of the server world. No mixin or registration errors.
