@@ -3,6 +3,7 @@ package com.jaymospowers.power.wind;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.PowerInput;
 import com.jaymospowers.core.Powers;
 import java.util.HashMap;
@@ -33,6 +34,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -87,6 +90,8 @@ public final class WindPower implements Power {
 	/** A charge at least this full is a full blast (explosion and all). */
 	static final float GUST_FULL = 0.95F;
 	static final int ZEPHYR_FALL_MIN = 200, ZEPHYR_FALL_MAX = 600, ZEPHYR_REGEN_MIN = 100, ZEPHYR_REGEN_MAX = 240;
+	/** Stormbound Zephyr's Breath: the lightning seeks a hostile mob this far away, else strikes this far ahead. */
+	static final double ZEPHYR_BOLT_SEEK = 12.0, ZEPHYR_BOLT_AHEAD = 6.0;
 	/** Other players further away than this don't get the flight trail. */
 	private static final double TRAIL_VIEW_DISTANCE = 128.0;
 
@@ -99,6 +104,8 @@ public final class WindPower implements Power {
 	public static void init() {
 		Powers.register(INSTANCE);
 		WindNet.register();
+		WindTempest.init();
+		WindDebug.register();
 		ServerPlayNetworking.registerGlobalReceiver(WindNet.Flight.TYPE, (payload, ctx) -> INSTANCE.onFlightPacket(ctx.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(WindNet.Impact.TYPE, (payload, ctx) -> INSTANCE.onImpact(ctx.player(), payload));
 		// cooldowns outlive a relog (no reconnect-to-reset); everything else starts over
@@ -114,6 +121,8 @@ public final class WindPower implements Power {
 				s.lastPos = null;
 				s.synced = false;
 			}
+			WindStorm.forget(handler.player);
+			WindWeather.forget(handler.player);
 		});
 	}
 
@@ -155,6 +164,12 @@ public final class WindPower implements Power {
 		Vec3 lastPos;
 		/** False until this connection has been sent the cooldowns. */
 		boolean synced;
+		/** player.tickCount when last seen in flight (breeze kills count for a moment after). */
+		int lastFlightTick = -100000;
+		/** Cyclone Lance's cooldown. */
+		int lanceCooldown;
+		/** The eased weather factor, this tick. */
+		float weather = 1.0F;
 	}
 
 	private State state(ServerPlayer player) {
@@ -174,10 +189,63 @@ public final class WindPower implements Power {
 		State s = this.states.remove(player.getUUID());
 		player.removeAttached(FLIGHT);
 		removeBarrierModifier(player);
+		WindStorm.clear(player);
+		WindStorm.forget(player);
+		WindTempest.setBreezeKills(player, 0);
 		if (s != null && s.flight.flying()) {
 			// the client also drops its flight when it sees the power go; this covers a slow attachment sync
-			ServerPlayNetworking.send(player, new WindNet.Status(-1, 0, new int[WindAbility.values().length], 0.0F, true));
+			ServerPlayNetworking.send(player, new WindNet.Status(-1, 0, new int[WindAbility.values().length], 0.0F, true, 0));
 		}
+	}
+
+	@Override
+	public void onAscended(ServerPlayer player) {
+		this.sendStatus(player, this.state(player), 0.0F, false);
+	}
+
+	@Override
+	public void onCorrupted(ServerPlayer player) {
+		// the sky answers
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 4.0F, 0.6F);
+	}
+
+	@Override
+	public void onPurified(ServerPlayer player) {
+		WindStorm.clear(player);
+		ServerLevel level = player.level();
+		level.sendParticles(ParticleTypes.GUST_EMITTER_LARGE, player.getX(), player.getY() + 0.5, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 2.0F, 0.5F);
+	}
+
+	/** Cyclone Lance (C, ascended only): an instant spear of wind along the look direction. */
+	@Override
+	public void onUltimate(ServerPlayer player, boolean down) {
+		if (!down || !Fate.isAscended(player) || !player.isAlive() || player.isSpectator()) {
+			return;
+		}
+		State s = this.state(player);
+		if (s.lanceCooldown > 0) {
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_IDLE_GROUND, SoundSource.PLAYERS, 0.25F, 0.6F);
+			return;
+		}
+		s.lanceCooldown = WindTempest.LANCE_COOLDOWN;
+		WindStorm.onCast(player);
+		WindTempest.lance(player, s.weather);
+		this.sendStatus(player, s, 0.0F, false);
+	}
+
+	/** In wind flight now, or within the last {@code ticks}. */
+	boolean flewRecently(ServerPlayer player, int ticks) {
+		State s = this.states.get(player.getUUID());
+		return s != null && (s.flight.flying() || player.tickCount - s.lastFlightTick <= ticks);
+	}
+
+	/** Debug: every cooldown back to zero. */
+	void clearCooldowns(ServerPlayer player) {
+		State s = this.state(player);
+		java.util.Arrays.fill(s.cooldowns, 0);
+		s.lanceCooldown = 0;
+		this.sendStatus(player, s, 0.0F, false);
 	}
 
 	@Override
@@ -237,6 +305,10 @@ public final class WindPower implements Power {
 		if (s.dashGrace > 0) {
 			s.dashGrace--;
 		}
+		if (s.lanceCooldown > 0) {
+			s.lanceCooldown--;
+		}
+		s.weather = WindWeather.tick(player);
 
 		if (!player.isAlive() || player.isSpectator()) {
 			if (s.flight.flying()) {
@@ -260,6 +332,7 @@ public final class WindPower implements Power {
 		if (statusDirty) {
 			this.sendStatus(player, s, 0.0F, false);
 		}
+		WindStorm.tick(player, s.flight, s.channel != null, s.barrierTicks > 0);
 
 		// ---- flight
 		Vec3 pos = player.position();
@@ -270,6 +343,7 @@ public final class WindPower implements Power {
 				this.sendStatus(player, s, 0.0F, true);
 			} else {
 				s.fallProtected = true;
+				s.lastFlightTick = player.tickCount;
 				// fall damage always applies; like an elytra, a controlled descent (slower than 0.5 b/t) isn't a fall
 				if (player.getY() - player.yo > -GLIDE_SAFE_SINK) {
 					player.fallDistance = Math.min(player.fallDistance, 1.0);
@@ -278,8 +352,11 @@ public final class WindPower implements Power {
 					this.trail(player, level, s, moved);
 				}
 				// flying is hungry work: hovering already burns a little more than sprinting, and it climbs with speed
-				double speed = s.lastPos == null ? 0.0 : Math.min(moved.length(), 3.0);
-				player.causeFoodExhaustion((float)(FLIGHT_EXHAUSTION_BASE + FLIGHT_EXHAUSTION_PER_SPEED * speed));
+				// (the Tempest rides the wind for free)
+				if (!Fate.isAscended(player)) {
+					double speed = s.lastPos == null ? 0.0 : Math.min(moved.length(), 3.0);
+					player.causeFoodExhaustion((float)(FLIGHT_EXHAUSTION_BASE + FLIGHT_EXHAUSTION_PER_SPEED * speed));
+				}
 			}
 		}
 		if (s.fallProtected) {
@@ -328,6 +405,7 @@ public final class WindPower implements Power {
 			}
 			s.channel = ability;
 			s.channelTicks = 0;
+			WindStorm.onChannel(player);
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_INHALE, SoundSource.PLAYERS, 0.8F, 1.0F);
 			this.sendStatus(player, s, 0.0F, false);
 		} else if (s.channel == ability) {
@@ -456,39 +534,60 @@ public final class WindPower implements Power {
 		float f = Mth.clamp(s.channelTicks / (float)ability.maxChannel, 0.1F, 1.0F);
 		s.cooldowns[ability.ordinal()] = ability.cooldown;
 		ServerLevel level = player.level();
+		// the weather governs the wind's strength
+		float w = s.weather;
+		boolean stormbound = Fate.isCorrupted(player);
+		WindStorm.onCast(player);
 		float dash = 0.0F;
 		switch (ability) {
 			case TAILWIND -> {
 				if (player.onGround() && !s.flight.flying()) {
-					this.gust(player, level, f);
+					if (stormbound) {
+						WindStorm.strike(player, this.gustImpact(player, f));
+					}
+					this.gust(player, level, f, w);
 					// the bigger the blast, the longer the wind takes to gather again: up to 3 minutes for a full charge
 					s.cooldowns[ability.ordinal()] = Mth.lerpInt(f * f, GUST_COOLDOWN_MIN, GUST_COOLDOWN_MAX);
 					break;
 				}
-				int ticks = Mth.lerpInt(f, TAILWIND_MIN_TICKS, TAILWIND_MAX_TICKS);
+				if (stormbound) {
+					// the bolt falls where you launched from
+					WindStorm.strike(player, player.position());
+				}
+				int ticks = (int)(Mth.lerpInt(f, TAILWIND_MIN_TICKS, TAILWIND_MAX_TICKS) * w);
 				int amp = f >= 0.5F ? 1 : 0;
 				player.addEffect(new MobEffectInstance(MobEffects.SPEED, ticks, amp), player);
 				player.addEffect(new MobEffectInstance(MobEffects.JUMP_BOOST, ticks, amp), player);
-				dash = Mth.lerp(f, TAILWIND_DASH_MIN, TAILWIND_DASH_MAX);
+				dash = Mth.lerp(f, TAILWIND_DASH_MIN, TAILWIND_DASH_MAX) * w;
 				s.dashGrace = 40;
 				s.fallProtected = true;
 				level.sendParticles(ParticleTypes.GUST_EMITTER_SMALL, player.getX(), player.getY() + 0.5, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WIND_CHARGE_BURST, SoundSource.PLAYERS, 1.0F, 1.2F);
 			}
 			case GALE_BARRIER -> {
-				s.barrierTicks = Mth.lerpInt(f, BARRIER_MIN_TICKS, BARRIER_MAX_TICKS);
+				if (stormbound) {
+					LivingEntity nearest = this.nearestEnemy(player, level, BARRIER_PUSH_RADIUS);
+					WindStorm.strike(player, nearest != null ? nearest.position() : player.position());
+				}
+				s.barrierTicks = (int)(Mth.lerpInt(f, BARRIER_MIN_TICKS, BARRIER_MAX_TICKS) * w);
 				player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, s.barrierTicks, f >= 0.75F ? 1 : 0), player);
 				AttributeInstance knockback = player.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
 				if (knockback != null) {
 					knockback.addOrUpdateTransientModifier(new AttributeModifier(BARRIER_MODIFIER, 0.5 + 0.5 * f, AttributeModifier.Operation.ADD_VALUE));
 				}
-				this.pushMobs(player, level, f);
+				this.pushMobs(player, level, f, w * WindStorm.galeMultiplier(player));
 				level.sendParticles(ParticleTypes.GUST_EMITTER_LARGE, player.getX(), player.getY() + 0.5, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_WIND_CHARGE_BURST, SoundSource.PLAYERS, 1.2F, 0.8F);
 			}
 			case ZEPHYR -> {
-				int fall = Mth.lerpInt(f, ZEPHYR_FALL_MIN, ZEPHYR_FALL_MAX);
-				int regen = Mth.lerpInt(f, ZEPHYR_REGEN_MIN, ZEPHYR_REGEN_MAX);
+				if (stormbound) {
+					LivingEntity nearest = this.nearestEnemy(player, level, ZEPHYR_BOLT_SEEK);
+					Vec3 flat = player.getLookAngle().horizontal();
+					Vec3 ahead = player.position().add(flat.lengthSqr() < 1.0E-4 ? Vec3.ZERO : flat.normalize().scale(ZEPHYR_BOLT_AHEAD));
+					WindStorm.strike(player, nearest != null ? nearest.position() : ahead);
+				}
+				int fall = (int)(Mth.lerpInt(f, ZEPHYR_FALL_MIN, ZEPHYR_FALL_MAX) * w);
+				int regen = (int)(Mth.lerpInt(f, ZEPHYR_REGEN_MIN, ZEPHYR_REGEN_MAX) * w);
 				int regenAmp = f >= 1.0F ? 1 : 0;
 				AABB area = player.getBoundingBox().inflate(ZEPHYR_RADIUS);
 				for (Player target : level.getEntitiesOfClass(Player.class, area,
@@ -512,14 +611,16 @@ public final class WindPower implements Power {
 	}
 
 	/** Tailwind released on the ground: a cone of wind blasts everything in front away, hurting it. */
-	private void gust(ServerPlayer player, ServerLevel level, float f) {
+	private void gust(ServerPlayer player, ServerLevel level, float f, float weather) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getLookAngle();
 		boolean full = f >= GUST_FULL;
 		double range = Mth.lerp(f, GUST_RANGE_MIN, GUST_RANGE_MAX);
+		// the weather (and a Stormbound wind) scale the blow
+		float strength = weather * WindStorm.galeMultiplier(player);
 		// damage grows faster than the charge: most of a full blast's power is in its last second or two
-		float maxDamage = Mth.lerp(f * f, GUST_DAMAGE_MIN, GUST_DAMAGE_MAX);
-		double knockback = Mth.lerp(f, GUST_KNOCKBACK_MIN, GUST_KNOCKBACK_MAX);
+		float maxDamage = Mth.lerp(f * f, GUST_DAMAGE_MIN, GUST_DAMAGE_MAX) * strength;
+		double knockback = Mth.lerp(f, GUST_KNOCKBACK_MIN, GUST_KNOCKBACK_MAX) * strength;
 		double minDot = Math.cos(Math.toRadians(GUST_HALF_ANGLE));
 		AABB area = player.getBoundingBox().expandTowards(look.scale(range)).inflate(range * 0.6);
 		for (Entity target : level.getEntities(player, area, e -> e.isAlive() && !e.isSpectator() && e != player.getVehicle())) {
@@ -569,8 +670,29 @@ public final class WindPower implements Power {
 		}
 	}
 
-	private void pushMobs(ServerPlayer player, ServerLevel level, float f) {
-		double strength = Mth.lerp(f, BARRIER_PUSH_MIN, BARRIER_PUSH_MAX);
+	/** Where a ground gust of this charge lands: the first block along the look, or the cone's tip. */
+	private Vec3 gustImpact(ServerPlayer player, float f) {
+		Vec3 eye = player.getEyePosition();
+		Vec3 end = eye.add(player.getLookAngle().scale(Mth.lerp(f, GUST_RANGE_MIN, GUST_RANGE_MAX)));
+		HitResult hit = player.level().clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+		return hit.getType() == HitResult.Type.MISS ? end : hit.getLocation();
+	}
+
+	private LivingEntity nearestEnemy(ServerPlayer player, ServerLevel level, double radius) {
+		LivingEntity nearest = null;
+		double best = radius * radius;
+		for (LivingEntity mob : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius), e -> e instanceof Enemy && e.isAlive())) {
+			double d = mob.distanceToSqr(player);
+			if (d <= best) {
+				best = d;
+				nearest = mob;
+			}
+		}
+		return nearest;
+	}
+
+	private void pushMobs(ServerPlayer player, ServerLevel level, float f, float scale) {
+		double strength = Mth.lerp(f, BARRIER_PUSH_MIN, BARRIER_PUSH_MAX) * scale;
 		AABB area = player.getBoundingBox().inflate(BARRIER_PUSH_RADIUS);
 		for (LivingEntity mob : level.getEntitiesOfClass(LivingEntity.class, area,
 			e -> e instanceof Enemy && e.isAlive() && e.distanceToSqr(player) <= BARRIER_PUSH_RADIUS * BARRIER_PUSH_RADIUS)) {
@@ -628,6 +750,7 @@ public final class WindPower implements Power {
 	}
 
 	private void sendStatus(ServerPlayer player, State s, float dash, boolean stopFlight) {
-		ServerPlayNetworking.send(player, new WindNet.Status(s.channel == null ? -1 : s.channel.ordinal(), s.channelTicks, s.cooldowns.clone(), dash, stopFlight));
+		ServerPlayNetworking.send(player, new WindNet.Status(s.channel == null ? -1 : s.channel.ordinal(), s.channelTicks, s.cooldowns.clone(), dash, stopFlight,
+			s.lanceCooldown));
 	}
 }

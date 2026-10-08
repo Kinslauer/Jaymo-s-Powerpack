@@ -153,8 +153,8 @@ maximum channel are in `WindAbility`.
 - The flight can be a little jittery for other players at SONIC speed, because they see it through vanilla's entity
   interpolation.
 - Cooldowns aren't saved across server restarts.
-- There's no custom art. The HUD chips use vanilla item icons (feather, wind charge, ghast tear), so there's no
-  `tools/gen_wind.py`.
+- The HUD chips use vanilla item icons (feather, wind charge, ghast tear, breeze rod). The only custom art is the Gale
+  Heart, from `tools/gen_wind.py` (0.2.0).
 
 ## Impacts (survival only)
 - **Reporting:** the flyer's client reports a crash, meaning a wall or the ground stopped more than `IMPACT_SPEED` of
@@ -220,3 +220,164 @@ maximum channel are in `WindAbility`.
 
 ## Unlock order (0.1.4)
 - Natural awakening: R (flight), then V and B, with G (the charged Tailwind, a TNT blast at full charge) last.
+
+## 0.2.0: Ascension & Corruption
+Nothing is explained in game. The only hints are the HUD weather glyph, a chime when a breeze kill counts, and one
+whisper in the action bar.
+
+### Weather governs the wind (`power/wind/WindWeather.java`)
+- `WindWeather.factor(player)` is computed on both sides (each keeps its own eased value per player).
+  - It moves toward its target by `EASE_PER_TICK` 0.01 per tick, so 0.6 → 1.3 takes 3.5 s.
+- Targets, checked at the eyes:
+
+  | Situation | Constant | Factor |
+  |---|---|---|
+  | Nether, End, or any dimension without weather (`!canHaveWeather`) | `OTHERWORLD` | 0.85 |
+  | No sky overhead (underground, roofed) | `SHELTERED` | 0.85 |
+  | Rain or snow falling on you | `RAIN` | 1.0 |
+  | Rain or snow falling on you during a thunderstorm | `STORM` | 1.3 |
+  | Clear sky, day (`isBrightOutside`) | `CLEAR_DAY` | 0.6 |
+  | Clear sky, night | `CLEAR_NIGHT` | 0.85 |
+  | Stormbound (corrupted), anywhere | `STORMBOUND` | 1.3 |
+
+  A dry biome (desert, savanna) during a storm counts as a clear sky, because nothing is falling there.
+- **What it scales:**
+  - Flight: top cruise speed is `TOP_SPEED` × factor (×0.75 when Stormbound), and the cruise acceleration scales with
+    it. SONIC is still 80% of the current top speed, so the boom happens in any weather.
+  - Tailwind: buff duration and dash.
+  - Ground gust: damage and knockback.
+  - Gale Barrier: duration and push.
+  - Zephyr's Breath: durations.
+  - Hover speed is not scaled.
+- **HUD:** a 7×7 glyph sits at the right end of the flight readout's row, above the chips:
+  - sun, moon, roof, diamond (otherworld), rain cloud, storm cloud (flickers), or a lone purple bolt when Stormbound.
+  - A 1-px line under it shows the eased factor as a share of 1.3, so you can watch it slide.
+
+### Storm corruption (`power/wind/WindStorm.java`)
+- **The meter fills** only while the sky is `STORM` (a real thunderstorm with rain on you) and you're "active":
+  - flying, channelling, or with a Gale Barrier up, or within `ACTIVE_AFTER_CAST` 100 ticks of a cast.
+  - It gains +1 per `ACTIVE_TICKS_PER_POINT` 36 active ticks, through `Fate.addCorruption`. 100 points is 3 minutes.
+- **The meter drains** at -1 per `DRAIN_TICKS` 300 (15 s) while not under a storm.
+- Creative players are spared, because `Fate.addCorruption` ignores them.
+- **Stormbound Wind (corrupted):**
+  - Every channelled cast (G/V/B) and every Cyclone Lance calls down lightning, and thunder rolls at the caster
+    (`CAST_THUNDER_VOLUME` 3). Flight toggling (R) is not a cast. Bolt targets:
+    - Ground gust: where the blast lands (the first block along the look, or the cone's tip).
+    - Tailwind in the air: where you launched from.
+    - Gale Barrier: the nearest hostile within 6 blocks, or you.
+    - Zephyr's Breath: the nearest hostile within `ZEPHYR_BOLT_SEEK` 12, or 6 blocks ahead.
+    - Lance: see below.
+  - **The lightning is a visual-only `LightningBolt` plus our own damage.** This is the chosen fire rule.
+    - The bolt is real (render, thunder, sky flash; it powers lightning rods and scrapes copper). It has its cause set
+      to the caster.
+    - It never places fire blocks, so bases don't burn.
+    - Our damage is `LIGHTNING_DAMAGE` 5, of the vanilla `lightning_bolt` type, credited to the caster. It reaches
+      vanilla's 3-block box and hits everything except the caster, who is never hurt. Victims burn for
+      `LIGHTNING_BURN_TICKS` 80.
+    - Vanilla `thunderHit` side effects (creeper charging, pig → piglin, villager → witch) don't happen.
+  - Gales hit `STORMBOUND_GALE_MULTIPLIER` 2× harder: the ground gust's damage and knockback, and the barrier's push.
+    On top of the storm's 1.3, a full ground gust reaches about 148 point-blank.
+  - The weather always counts as 1.3.
+  - Costs:
+    - -25% movement speed: a transient attribute modifier, `jaymospowers:wind_stormbound_slow`. It's re-checked every
+      tick and removed on purification or losing the power.
+    - -25% top cruise speed (`STORMBOUND_CRUISE_MULTIPLIER`).
+  - **What others see** (client-side, from the synced Fate state, in `WindAura`):
+    - dark purple dust motes and electric sparks around the body
+    - a faint crackle (a quiet, high-pitched lightning impact) about every 2.5 s
+    - In first person you see fewer motes and no sparks.
+
+### The cure: Eye of the Storm
+- While Stormbound, keep the flight state HOVER at Y ≥ `EYE_MIN_Y` 192 in the Overworld while `isThundering()`. Hold
+  it for `EYE_TICKS` 1200 (60 s) continuous ticks, without channelling or casting. Then `Fate.purify` runs, which is
+  permanent.
+  - Any break resets it: leaving HOVER (cruising counts), dropping below 192, the storm ending, or a cast or channel.
+- **Hint:** the first time per storm that a Stormbound user flies while it's thundering, the action bar whispers *"The
+  storm is quieter above..."* once.
+- **Progress** shows only as calm:
+  - The `jaymospowers:wind_calm` attachment (0–20, synced to all) thins the static motes and sparks.
+  - The crackle softens (its volume goes with calm²).
+  - There's no bar.
+
+### Ascension: the Tempest (`power/wind/WindTempest.java`, `WindGaleHeart.java`)
+- **Breeze kills:**
+  - A kill counts when the killer has wind, `Fate.canAscend` holds (all 4 abilities mastered, not ascended), and the
+    killer is in wind flight or was within `FLEW_RECENTLY_TICKS` 60 (3 s).
+  - Credit goes by `DamageSource.getEntity()`, so deflected projectiles count.
+  - The count is stored in the persistent attachment `jaymospowers:wind_breeze_kills`. It's kept through death and
+    cleared when the power is lost.
+  - Each counted kill gives a faint amethyst resonance that rises in pitch.
+- **The Gale Heart:** every `BREEZES_FOR_HEART` 5th counted kill (5, 10, ...), so a lost heart can be earned again,
+  the Breeze drops a Gale Heart (`jaymospowers:wind_gale_heart`).
+  - The drop comes with an end-rod puff and a low breeze death sound.
+  - The heart is Rare, stacks to 1, has two cryptic lore lines, and isn't in any creative tab.
+- **Using the heart** (right-click):
+  - With wind and `Fate.canAscend`: it's consumed and `Fate.ascend` runs.
+  - For anyone else: a puff of wind and a hollow sigh, a 2 s item cooldown, and the heart is kept.
+- **Tempest form:**
+  - A swirl of cloud puffs spirals up around the body, with a small gust every 0.5 s. It's drawn client-side for every
+    ascended wind player within 48 blocks; your own swirl is hidden in first person.
+  - Flight costs no hunger.
+  - `TEMPEST_TURN_BONUS` 1.4: the cruise turn rate and the tumble angle limits are 40% more forgiving (the angle is
+    capped at 179°).
+- **Cyclone Lance** (`onUltimate`, C):
+  - An instant line from the eyes along the look direction, `LANCE_RANGE` 32 blocks. Solid blocks stop it.
+  - Every living entity (and projectile) within `LANCE_RADIUS` 0.6 of the line is hit.
+  - Damage is `LANCE_DAMAGE` 14 × max(1, weather), so 14 to 18.2. It never drops below 14 and has no randomness.
+    - The damage type is `jaymospowers:wind_lance` (`data/jaymospowers/damage_type/wind_lance.json`, scaling
+      "never"). It's tagged `minecraft:bypasses_armor` (`data/minecraft/tags/damage_type/bypasses_armor.json`,
+      `replace: false`).
+  - Knockback is `LANCE_KNOCKBACK` 1.6 along the line, plus `LANCE_LIFT` 0.25. Knockback resistance reduces it.
+  - Visuals: a double helix (cloud plus cloud, or cloud plus electric sparks when Stormbound) at 2 points per block,
+    small gusts along it, and a gust burst at the tip.
+  - Sound: riptide III, the breeze wind burst, and a wind-charge burst at the tip.
+  - `LANCE_COOLDOWN` 120 (6 s). The HUD chip (breeze rod icon, C key label) appears right of the B chip once you've
+    ascended.
+  - **Stormbound:** exactly `LANCE_MAX_BOLTS` 3 bolts fall along the lance. They land on the first living targets
+    hit, and the rest are evenly spaced along the line. The bolts land before the lance's damage, so the lance's 14
+    still lands in full through the hurt cooldown.
+
+### Testing (all as a gamemaster, in survival unless noted; `/power set @s wind` first)
+- **Weather:**
+  1. Run `/weather clear` and `/time set noon`, then `/powerdebug wind weather`. Expect factor 0.6 and the sun glyph.
+  2. Run `/time set midnight`: expect 0.85 and the moon.
+  3. Go under a roof: the roof glyph.
+  4. `/weather rain`: 1.0. `/weather thunder`: 1.3.
+  5. Watch the line under the glyph slide over about 3 s, and cruise speed rise and fall with it.
+- **Corruption:**
+  1. In survival, with `/weather thunder` in a rainy biome, fly around.
+  2. Check `/power get @s`: the meter rises about +1 every 1.8 s.
+  3. `/weather clear`: it drains -1 every 15 s.
+  4. To skip ahead, run `/power corrupt @s`.
+- **Stormbound:**
+  - Cast G, V and B and check that lightning falls and you take no damage. `/powerdebug wind strike` drops a bolt
+    where you look.
+  - You walk slower and cruise slower.
+  - A second client sees purple motes and sparks.
+- **Cure:**
+  1. While Stormbound, run `/weather thunder` and fly up to Y ≥ 192 in the Overworld. The whisper shows once.
+  2. Hover for 60 s without casting. The static thins as you go. `/powerdebug wind calm 55` jumps ahead; it only holds
+     while you stay in the eye.
+  3. You're purified. `/power corrupt @s` should now fail.
+- **Ascension:**
+  1. Have all abilities mastered (`/power set` gives that, or `/power level @s 4`).
+  2. `/powerdebug wind breezes 4`, then kill a Breeze (`/summon minecraft:breeze`) while flying or within 3 s of
+     landing. A Gale Heart drops.
+  3. Right-click it: you ascend.
+  4. Another power, or an already-ascended wind, gets a gust and keeps the heart.
+  - To skip all of this, run `/power ascend @s`.
+- **Lance:**
+  - Press C at a line of mobs: all of them on the line take 14 (even in netherite), and the HUD chip counts down 6 s.
+  - Stormbound: 3 bolts.
+- `/powerdebug wind cooldowns` clears every cooldown.
+
+### Risky or untested at runtime
+- **The bypasses-armor tag file is at `data/minecraft/tags/damage_type/bypasses_armor.json`.** If another branch adds
+  the same file, merge the `values` arrays.
+- The visual-only lightning: if a visual-only bolt is somehow treated differently on the client in 26.3, players won't
+  see it. The server side was checked against the decompiled source.
+- `precipitationAt` on the client relies on the client's heightmap and biome data. Under leaves, the canopy counts as
+  shelter (0.85).
+- Weather and sky darkness (`isBrightOutside`) are synced to clients by vanilla. On a dedicated server the client's
+  glyph and flight factor may lag the server's by a tick or two. Ability strength is always the server's value.
+- The Gale Heart drop uses `spawnAtLocation` from the `AFTER_DEATH` event. It drops even when `doMobLoot` is off.

@@ -7,6 +7,8 @@ import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.wind.WindAbility;
 import com.jaymospowers.power.wind.WindNet;
 import com.jaymospowers.power.wind.WindPower;
+import com.jaymospowers.power.wind.WindTempest;
+import com.jaymospowers.power.wind.WindWeather;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.DeltaTracker;
@@ -26,6 +28,8 @@ public final class WindPowerClient implements PowerClient {
 	private final int[] cooldownTotals = new int[WindAbility.values().length];
 	private @Nullable WindAbility channel;
 	private int channelTicks;
+	/** Cyclone Lance's cooldown (ascended). */
+	private int lanceCooldown;
 
 	private WindPowerClient() {
 	}
@@ -38,6 +42,7 @@ public final class WindPowerClient implements PowerClient {
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			if (!minecraft.isPaused()) {
 				WindPose.tick(minecraft);
+				WindAura.tick(minecraft);
 			}
 		});
 	}
@@ -57,6 +62,10 @@ public final class WindPowerClient implements PowerClient {
 	/** How long the current cooldown was when it started, for the HUD. */
 	public int cooldownTotal(WindAbility ability) {
 		return Math.max(1, this.cooldownTotals[ability.ordinal()]);
+	}
+
+	int lanceCooldown() {
+		return this.lanceCooldown;
 	}
 
 	@Nullable WindAbility channel() {
@@ -79,7 +88,11 @@ public final class WindPowerClient implements PowerClient {
 
 	@Override
 	public void tick(Minecraft minecraft, LocalPlayer player) {
+		WindWeather.tick(player);
 		this.flight.tick(minecraft, player);
+		if (this.lanceCooldown > 0) {
+			this.lanceCooldown--;
+		}
 		for (int i = 0; i < this.cooldowns.length; i++) {
 			if (this.cooldowns[i] > 0) {
 				this.cooldowns[i]--;
@@ -94,6 +107,15 @@ public final class WindPowerClient implements PowerClient {
 	public void onKey(LocalPlayer player, PowerKey key, boolean down) {
 		if (key == PowerKey.ABILITY_1 && down) {
 			this.flight.toggle(Minecraft.getInstance(), player);
+		}
+	}
+
+	@Override
+	public void onUltimate(LocalPlayer player, boolean down) {
+		if (down && this.lanceCooldown <= 0) {
+			// the server throws the lance; the thrower feels it
+			WindCamera.shake(1.2F, 8);
+			this.lanceCooldown = WindTempest.LANCE_COOLDOWN;
 		}
 	}
 
@@ -118,6 +140,7 @@ public final class WindPowerClient implements PowerClient {
 		if (!active) {
 			// (not on gaining it: the server's cooldown update may already have arrived this tick)
 			java.util.Arrays.fill(this.cooldowns, 0);
+			this.lanceCooldown = 0;
 			this.channel = null;
 			this.channelTicks = 0;
 		}
@@ -131,6 +154,7 @@ public final class WindPowerClient implements PowerClient {
 			}
 			this.cooldowns[i] = status.cooldowns()[i];
 		}
+		this.lanceCooldown = status.lanceCooldown();
 		this.channel = WindAbility.byId(status.channel());
 		this.channelTicks = status.channelTicks();
 		LocalPlayer player = minecraft.player;

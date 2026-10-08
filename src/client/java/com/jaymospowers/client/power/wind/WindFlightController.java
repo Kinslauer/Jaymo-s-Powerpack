@@ -1,8 +1,11 @@
 package com.jaymospowers.client.power.wind;
 
+import com.jaymospowers.core.Fate;
 import com.jaymospowers.power.wind.WindFlight;
 import com.jaymospowers.power.wind.WindNet;
 import com.jaymospowers.power.wind.WindPower;
+import com.jaymospowers.power.wind.WindStorm;
+import com.jaymospowers.power.wind.WindWeather;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -27,8 +30,10 @@ import org.jspecify.annotations.Nullable;
  */
 public final class WindFlightController {
 	// ---- tuning (blocks per tick; 1 b/t = 20 m/s) -------------------------------------------------------------
-	/** Top cruise speed. */
+	/** Top cruise speed in a plain rainy sky (weather factor 1.0); the weather scales it (see {@link #topSpeed()}). */
 	public static final double TOP_SPEED = 2.5;
+	/** The Tempest (ascended) turns this much harder before inertia or a tumble wins. */
+	static final double TEMPEST_TURN_BONUS = 1.4;
 	/** Sonic starts at this share of the top speed, and drops back to cruise below the exit share. */
 	public static final double SONIC_ENTER = 0.80;
 	public static final double SONIC_EXIT = 0.74;
@@ -93,6 +98,10 @@ public final class WindFlightController {
 	private WindFlight sentState = WindFlight.NONE;
 	private boolean sentLocked;
 	private int sinceSent;
+	/** This tick's top speed: TOP_SPEED × weather (× 0.75 Stormbound). */
+	private double top = TOP_SPEED;
+	/** This tick's turn-rate and tumble-angle multiplier. */
+	private double turnBonus = 1.0;
 
 	public WindFlight state() {
 		return this.state;
@@ -112,10 +121,15 @@ public final class WindFlightController {
 		return this.recoverTicks;
 	}
 
+	/** The top cruise speed right now (the weather and the power's fate decide it). */
+	public double topSpeed() {
+		return this.top;
+	}
+
 	/** 0..1 of the top speed (cruise), or of the hover speed while hovering. */
 	public double speedFraction() {
 		if (this.state.fast()) {
-			return Mth.clamp(this.speed / TOP_SPEED, 0.0, 1.0);
+			return Mth.clamp(this.speed / this.top, 0.0, 1.0);
 		}
 		return 0.0;
 	}
@@ -152,6 +166,9 @@ public final class WindFlightController {
 		int jumpTaps = drain(minecraft.options.keyJump);
 		int sneakTaps = drain(minecraft.options.keyShift);
 		Input input = player.input.keyPresses;
+		// the weather governs the wind: a still clear day flies slower, a storm faster; Stormbound drags at you
+		this.top = TOP_SPEED * WindWeather.factor(player) * (Fate.isCorrupted(player) ? WindStorm.STORMBOUND_CRUISE_MULTIPLIER : 1.0);
+		this.turnBonus = Fate.isAscended(player) ? TEMPEST_TURN_BONUS : 1.0;
 		if (this.recoverTicks > 0) {
 			this.recoverTicks--;
 		}
@@ -252,7 +269,7 @@ public final class WindFlightController {
 		}
 		boolean boosting = input.sprint() && !starving;
 		if (boosting) {
-			this.speed += CRUISE_ACCEL * (1.0 - CRUISE_ACCEL_TAPER * this.speed / TOP_SPEED);
+			this.speed += CRUISE_ACCEL * (this.top / TOP_SPEED) * (1.0 - CRUISE_ACCEL_TAPER * this.speed / this.top);
 		} else if (!this.locked) {
 			this.speed -= CRUISE_DECEL;
 		}
@@ -263,13 +280,13 @@ public final class WindFlightController {
 		// inertia: the path only swings round toward the look direction so fast, and turning hard costs speed
 		Vec3 look = player.getLookAngle();
 		Vec3 dir = this.velocity.lengthSqr() > 1.0E-6 ? this.velocity.normalize() : look;
-		double fractionNow = Mth.clamp(this.speed / TOP_SPEED, 0.0, 1.0);
+		double fractionNow = Mth.clamp(this.speed / this.top, 0.0, 1.0);
 		// the turn rate falls away quickly with speed: half speed already turns at a third of the slow rate
-		double maxTurn = Math.toRadians(Mth.lerp(Math.sqrt(fractionNow), CRUISE_TURN_RATE_SLOW, CRUISE_TURN_RATE_FAST));
+		double maxTurn = Math.toRadians(Mth.lerp(Math.sqrt(fractionNow), CRUISE_TURN_RATE_SLOW, CRUISE_TURN_RATE_FAST) * this.turnBonus);
 		double angle = Math.acos(Mth.clamp(dir.dot(look), -1.0, 1.0));
 		if (fractionNow >= TUMBLE_MIN_FRACTION) {
 			double t = (fractionNow - TUMBLE_MIN_FRACTION) / (1.0 - TUMBLE_MIN_FRACTION);
-			double limit = Math.toRadians(Mth.lerp(t, TUMBLE_ANGLE_SLOW, TUMBLE_ANGLE_FAST));
+			double limit = Math.toRadians(Math.min(179.0, Mth.lerp(t, TUMBLE_ANGLE_SLOW, TUMBLE_ANGLE_FAST) * this.turnBonus));
 			if (angle > limit) {
 				// wrenched round far harder than this speed allows: control is lost
 				this.velocity = dir.scale(this.speed);
@@ -284,8 +301,8 @@ public final class WindFlightController {
 		}
 		// and gravity along the path
 		this.speed -= dir.y * CRUISE_GRAVITY;
-		this.speed = Mth.clamp(this.speed, 0.0, TOP_SPEED);
-		double fraction = this.speed / TOP_SPEED;
+		this.speed = Mth.clamp(this.speed, 0.0, this.top);
+		double fraction = this.speed / this.top;
 		this.velocity = dir.scale(this.speed);
 
 		if (!boosting && !this.locked && this.speed <= HOVER_SPEED) {
@@ -447,7 +464,7 @@ public final class WindFlightController {
 		if (this.state.flying()) {
 			this.velocity = this.velocity.add(look.scale(strength));
 			if (this.state.fast()) {
-				this.speed = Math.min(TOP_SPEED, this.speed + strength);
+				this.speed = Math.min(this.top, this.speed + strength);
 			}
 			player.setDeltaMovement(this.velocity);
 		} else {
