@@ -112,6 +112,8 @@ public final class WebPower implements Power {
 
 	public static Item WEB_BALL_ITEM;
 	public static EntityType<WebBall> WEB_BALL;
+	/** The symbiote's goo, found at the heart of a meteor crater. */
+	public static net.minecraft.world.level.block.Block GOO;
 
 	private static final class State {
 		/** Which hands have a swing web stuck ({@link WebNet#MAIN}, {@link WebNet#OFF}). */
@@ -150,9 +152,32 @@ public final class WebPower implements Power {
 				.updateInterval(10)
 				.build(entityKey));
 
+		// the symbiote's goo, and the meteor craters it's found in
+		ResourceKey<net.minecraft.world.level.block.Block> gooKey = ResourceKey.create(Registries.BLOCK, JaymosPowers.id("web_symbiote_goo"));
+		GOO = Registry.register(BuiltInRegistries.BLOCK, gooKey, new WebSymbioteGooBlock(net.minecraft.world.level.block.state.BlockBehaviour.Properties.of()
+			.mapColor(net.minecraft.world.level.material.MapColor.COLOR_BLACK)
+			.strength(-1.0F, 3600000.0F)
+			.noLootTable()
+			.noOcclusion()
+			.sound(net.minecraft.world.level.block.SoundType.HONEY_BLOCK)
+			.pushReaction(net.minecraft.world.level.material.PushReaction.IMMOVEABLE)
+			.setId(gooKey)));
+		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("web_crater"), WebCraterFeature.CODEC);
+		net.fabricmc.fabric.api.biome.v1.BiomeModifications.addFeature(
+			net.fabricmc.fabric.api.biome.v1.BiomeSelectors.foundInOverworld()
+				.and(net.fabricmc.fabric.api.biome.v1.BiomeSelectors.tag(net.minecraft.tags.BiomeTags.IS_OCEAN).negate())
+				.and(net.fabricmc.fabric.api.biome.v1.BiomeSelectors.tag(net.minecraft.tags.BiomeTags.IS_DEEP_OCEAN).negate())
+				.and(net.fabricmc.fabric.api.biome.v1.BiomeSelectors.tag(net.minecraft.tags.BiomeTags.IS_RIVER).negate())
+				.and(net.fabricmc.fabric.api.biome.v1.BiomeSelectors.tag(net.minecraft.tags.BiomeTags.IS_BEACH).negate()),
+			net.minecraft.world.level.levelgen.GenerationStep.Decoration.VEGETAL_DECORATION,
+			ResourceKey.create(Registries.PLACED_FEATURE, JaymosPowers.id("web_crater")));
+
 		WebNet.register();
 		WebTraps.register();
 		WebHitches.register();
+		WebSymbiote.register();
+		WebAscension.register();
+		WebDebugCommand.register();
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Swing.TYPE, (payload, ctx) -> INSTANCE.onSwing(ctx.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Wings.TYPE, (payload, ctx) -> INSTANCE.onWings(ctx.player(), payload.open()));
 		// Web Zip has its own key (Z); it unlocks with the second web (G)
@@ -223,6 +248,14 @@ public final class WebPower implements Power {
 		player.removeAttached(WINGS);
 		player.removeAttached(TETHER);
 		player.removeAttached(COOLDOWNS);
+		WebSymbiote.onLost(player);
+		WebAscension.onLost(player);
+	}
+
+	/** The ascended ability (C): Web Strike. */
+	@Override
+	public void onUltimate(ServerPlayer player, boolean down) {
+		WebAscension.ultimate(player, down);
 	}
 
 	private static boolean swinging(State state) {
@@ -263,7 +296,7 @@ public final class WebPower implements Power {
 
 	@Override
 	public boolean allowsFloating(ServerPlayer player) {
-		return inGrace(player);
+		return inGrace(player) || WebSymbiote.allowsFloating(player);
 	}
 
 	@Override
@@ -277,6 +310,8 @@ public final class WebPower implements Power {
 			ensurePassive(player);
 		}
 		State state = player.getAttached(STATE);
+		WebSymbiote.tick(player);
+		WebAscension.tick(player, state != null && swinging(state));
 		if (state == null) {
 			return;
 		}
@@ -351,7 +386,7 @@ public final class WebPower implements Power {
 			return;
 		}
 		Vec3 anchor = payload.anchor();
-		if (!WebAnchors.valid(player, anchor, WebAnchors.SWING_RANGE + 4.0) || hand == WebNet.OFF && !offHandFree(player)) {
+		if (!WebAnchors.valid(player, anchor, WebAnchors.SWING_RANGE * WebSymbiote.reachScale(player) + 4.0) || hand == WebNet.OFF && !offHandFree(player)) {
 			ServerPlayNetworking.send(player, new WebNet.SwingReject(hand));
 			return;
 		}
@@ -417,7 +452,7 @@ public final class WebPower implements Power {
 				releaseTether(player, state);
 				if (target != null && target.isAlive()) {
 					Vec3 eye = player.getEyePosition();
-					BlockHitResult hit = WebAnchors.clip(player, eye, eye.add(player.getViewVector(1.0F).scale(HITCH_REACH)));
+					BlockHitResult hit = WebAnchors.clip(player, eye, eye.add(player.getViewVector(1.0F).scale(HITCH_REACH * WebSymbiote.reachScale(player))));
 					if (hit.getType() == HitResult.Type.BLOCK) {
 						WebHitches.hitch(player.level(), target, hit.getLocation(), hit.getBlockPos());
 						thwip(player);
@@ -515,7 +550,7 @@ public final class WebPower implements Power {
 			return;
 		}
 		Vec3 eye = player.getEyePosition();
-		BlockHitResult hit = WebAnchors.clip(player, eye, eye.add(player.getViewVector(1.0F).scale(ZIP_RANGE)));
+		BlockHitResult hit = WebAnchors.clip(player, eye, eye.add(player.getViewVector(1.0F).scale(ZIP_RANGE * WebSymbiote.reachScale(player))));
 		if (hit.getType() == HitResult.Type.MISS) {
 			fwip(player);
 			return;
@@ -533,13 +568,39 @@ public final class WebPower implements Power {
 		}
 		int maxTicks = Mth.ceil(target.distanceTo(player.position()) / ZIP_SPEED) + 12;
 		startPull(player, new WebNet.Pull(anchor, target, -1, maxTicks, (byte)face.ordinal()), new WebLine(WebLine.ZIP, anchor, -1));
-		player.setAttached(COOLDOWNS, new WebCooldowns(now + ZIP_COOLDOWN, cooldowns.shot(), cooldowns.yank()));
+		player.setAttached(COOLDOWNS, new WebCooldowns(now + WebSymbiote.zipCooldown(player), cooldowns.shot(), cooldowns.yank()));
 		thwip(player);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_RIPTIDE_1, SoundSource.PLAYERS, 0.6F, 1.5F);
 		level.sendParticles(ParticleTypes.ITEM_COBWEB, anchor.x, anchor.y, anchor.z, 6, 0.15, 0.15, 0.15, 0.01);
 	}
 
-	private static void startPull(ServerPlayer player, WebNet.Pull pull, WebLine line) {
+	/** The entity under the crosshair within {@code range} (not behind a block), or null. */
+	static @org.jspecify.annotations.Nullable Entity entityInSight(ServerPlayer player, double range) {
+		Vec3 eye = player.getEyePosition();
+		Vec3 look = player.getViewVector(1.0F);
+		Vec3 end = eye.add(look.scale(range));
+		BlockHitResult block = WebAnchors.clip(player, eye, end);
+		if (block.getType() != HitResult.Type.MISS) {
+			end = block.getLocation();
+		}
+		Vec3 to = end;
+		AABB box = player.getBoundingBox().expandTowards(look.scale(range)).inflate(1.0);
+		EntityHitResult hit = ProjectileUtil.getEntityHitResult(player, eye, to, box,
+			e -> !e.isSpectator() && e.isPickable() && e != player.getVehicle() && !player.hasPassenger(e), eye.distanceToSqr(to));
+		return hit == null ? null : hit.getEntity();
+	}
+
+	/** Shows a (zip/yank-style) line from the main hand for {@code ticks}, unless a swing web is out. */
+	static void showLine(ServerPlayer player, WebLine line, int ticks) {
+		State state = state(player);
+		if (state.swinging[WebNet.MAIN]) {
+			return;
+		}
+		state.lineTicks = ticks;
+		player.setAttached(LINE, line);
+	}
+
+	static void startPull(ServerPlayer player, WebNet.Pull pull, WebLine line) {
 		State state = state(player);
 		state.swinging[WebNet.MAIN] = false;
 		state.swinging[WebNet.OFF] = false;
@@ -592,21 +653,11 @@ public final class WebPower implements Power {
 		if (now < cooldowns.yank()) {
 			return;
 		}
-		Vec3 eye = player.getEyePosition();
-		Vec3 look = player.getViewVector(1.0F);
-		Vec3 end = eye.add(look.scale(YANK_RANGE));
-		BlockHitResult block = WebAnchors.clip(player, eye, end);
-		if (block.getType() != HitResult.Type.MISS) {
-			end = block.getLocation();
-		}
-		AABB box = player.getBoundingBox().expandTowards(look.scale(YANK_RANGE)).inflate(1.0);
-		EntityHitResult hit = ProjectileUtil.getEntityHitResult(player, eye, end, box,
-			e -> !e.isSpectator() && e.isPickable() && e != player.getVehicle() && !player.hasPassenger(e), eye.distanceToSqr(end));
-		if (hit == null) {
+		Entity target = entityInSight(player, YANK_RANGE * WebSymbiote.reachScale(player));
+		if (target == null) {
 			fwip(player);
 			return;
 		}
-		Entity target = hit.getEntity();
 		Vec3 center = target.getBoundingBox().getCenter();
 		double volume = target.getBbWidth() * target.getBbWidth() * target.getBbHeight();
 		if (volume > YANK_HEAVY_VOLUME) {

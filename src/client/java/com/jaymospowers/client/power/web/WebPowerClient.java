@@ -52,6 +52,7 @@ public final class WebPowerClient implements PowerClient {
 				}
 			}
 		});
+		WebSymbioteClient.init();
 		EntityRenderers.register(WebPower.WEB_BALL, context -> new ThrownItemRenderer<>(context, 0.85F, false));
 		LevelRenderEvents.COLLECT_SUBMITS.register(WebLineRenderer::render);
 		// every player's arms and legs (theirs and others'), whether or not we're a web slinger ourselves
@@ -76,6 +77,7 @@ public final class WebPowerClient implements PowerClient {
 	public void onActiveChanged(LocalPlayer player, boolean active) {
 		swing.reset();
 		preview = null;
+		WebSymbioteClient.reset();
 	}
 
 	/** Game time the local player started charging a Web Shot (-1 when not), and when the last shot went off. */
@@ -118,6 +120,7 @@ public final class WebPowerClient implements PowerClient {
 	@Override
 	public void tick(Minecraft minecraft, LocalPlayer player) {
 		swing.tick(minecraft, player);
+		WebSymbioteClient.tick(minecraft, player, swing);
 		if (swing.attached() || swing.pull != null || player.isSpectator()) {
 			preview = null;
 		} else if (player.tickCount % 2 == 0) {
@@ -165,7 +168,11 @@ public final class WebPowerClient implements PowerClient {
 		Font font = minecraft.font;
 		int width = graphics.guiWidth();
 		int height = graphics.guiHeight();
-		int total = CHIP * 5 + CHIP_GAP * 4;
+		WebSymbioteClient.renderHud(graphics, player);
+		// the ascended ability (Web Strike) joins the end of the row once you have it
+		boolean ascended = com.jaymospowers.core.Fate.isAscended(player);
+		int chips = ascended ? 6 : 5;
+		int total = CHIP * chips + CHIP_GAP * (chips - 1);
 		// past the off-hand slot / attack indicator; above the hunger bar on narrow screens
 		int x = cx + 91 + 30;
 		int y = height - CHIP - 1;
@@ -183,8 +190,12 @@ public final class WebPowerClient implements PowerClient {
 		} else if (!WebPower.offHandFree(player)) {
 			graphics.fill(x + 1, y + 1, x + CHIP - 1, y + CHIP - 1, 0x90000000);
 		}
-		// Z: Web Zip, at the end of the row
-		zipChip(graphics, font, x + (CHIP + CHIP_GAP) * 3, y, cooldowns.zip() - now);
+		// Z: Web Zip, at the end of the row (then C, once ascended)
+		zipChip(graphics, font, x + (CHIP + CHIP_GAP) * 3, y, cooldowns.zip() - now, com.jaymospowers.power.web.WebSymbiote.zipCooldown(player));
+		if (ascended) {
+			Long ready = player.getAttached(com.jaymospowers.power.web.WebAscension.STRIKE_READY);
+			strikeChip(graphics, font, x + (CHIP + CHIP_GAP) * 4, y, ready == null ? 0L : ready - now);
+		}
 		chip(graphics, font, x + CHIP + CHIP_GAP, y, PowerKey.ABILITY_3, Items.COBWEB, cooldowns.shot() - now, (int)Math.max(1L, cooldowns.shot() - shotFiredAt));
 		if (shotChargeStart >= 0 && now >= cooldowns.shot()) {
 			// charging: a bar fills under the chip, flashing when full
@@ -201,8 +212,24 @@ public final class WebPowerClient implements PowerClient {
 		}
 	}
 
+	/** Web Strike's chip (the ascended ability, on the ultimate key). */
+	private static void strikeChip(GuiGraphicsExtractor graphics, Font font, int x, int y, long left) {
+		String label = font.plainSubstrByWidth(JaymosPowersClient.ultimateKey().getTranslatedKeyMessage().getString(), CHIP - 2);
+		boolean ready = left <= 0;
+		graphics.fill(x, y, x + CHIP, y + CHIP, 0x90000000);
+		graphics.outline(x, y, CHIP, CHIP, ready ? 0xFFFFD040 : 0xA0505050);
+		graphics.item(new ItemStack(Items.LEATHER_BOOTS), x + 2, y + 2);
+		if (!ready) {
+			int shade = (int)Math.ceil(16 * Math.min(1.0, left / (double)com.jaymospowers.power.web.WebAscension.STRIKE_COOLDOWN));
+			graphics.fill(x + 2, y + 2 + 16 - shade, x + 18, y + 18, 0xB0000000);
+			String seconds = String.format(Locale.ROOT, "%.1f", left / 20.0);
+			graphics.text(font, seconds, x + CHIP / 2 - font.width(seconds) / 2, y + 4, 0xFFFFFFFF);
+		}
+		graphics.text(font, label, x + CHIP - 1 - font.width(label), y + CHIP - 8, ready ? 0xFFFFFFFF : 0xFF909090);
+	}
+
 	/** Web Zip's chip: its own key, unlocked along with G. */
-	private static void zipChip(GuiGraphicsExtractor graphics, Font font, int x, int y, long left) {
+	private static void zipChip(GuiGraphicsExtractor graphics, Font font, int x, int y, long left, int totalTicks) {
 		String label = font.plainSubstrByWidth(zipKey.getTranslatedKeyMessage().getString(), CHIP - 2);
 		if (!JaymosPowersClient.isUnlocked(PowerKey.ABILITY_2)) {
 			graphics.fill(x, y, x + CHIP, y + CHIP, 0xB0000000);
@@ -215,7 +242,7 @@ public final class WebPowerClient implements PowerClient {
 		graphics.outline(x, y, CHIP, CHIP, ready ? 0xFF000000 | CHIP_COLOR : 0xA0505050);
 		graphics.item(new ItemStack(Items.FISHING_ROD), x + 2, y + 2);
 		if (!ready) {
-			int shade = (int)Math.ceil(16 * Math.min(1.0, left / (double)WebPower.ZIP_COOLDOWN));
+			int shade = (int)Math.ceil(16 * Math.min(1.0, left / (double)Math.max(1, totalTicks)));
 			graphics.fill(x + 2, y + 2 + 16 - shade, x + 18, y + 18, 0xB0000000);
 			String seconds = String.format(Locale.ROOT, "%.1f", left / 20.0);
 			graphics.text(font, seconds, x + CHIP / 2 - font.width(seconds) / 2, y + 4, 0xFFFFFFFF);

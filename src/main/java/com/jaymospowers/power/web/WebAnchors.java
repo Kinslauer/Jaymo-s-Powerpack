@@ -40,26 +40,28 @@ public final class WebAnchors {
 	public static @Nullable Anchor find(Player player) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getViewVector(1.0F);
-		BlockHitResult hit = clip(player, eye, eye.add(look.scale(SWING_RANGE)));
+		// a symbiote's webs reach further
+		double scale = WebSymbiote.reachScale(player);
+		BlockHitResult hit = clip(player, eye, eye.add(look.scale(SWING_RANGE * scale)));
 		Vec3 direct = hit.getType() == HitResult.Type.MISS ? null : hit.getLocation();
 		if (direct != null && direct.y >= eye.y - DIRECT_MAX_DROP) {
 			return new Anchor(direct, false);
 		}
-		Vec3 assisted = assist(player, eye);
+		Vec3 assisted = assist(player, eye, scale);
 		if (assisted != null) {
 			return new Anchor(assisted, true);
 		}
 		return direct == null ? null : new Anchor(direct, false);
 	}
 
-	private static @Nullable Vec3 assist(Player player, Vec3 eye) {
+	private static @Nullable Vec3 assist(Player player, Vec3 eye, double scale) {
 		float yaw = player.getYRot();
 		Vec3 best = null;
 		double bestScore = Double.NEGATIVE_INFINITY;
 		for (float elevation : ASSIST_ELEVATIONS) {
 			for (float yawOffset : ASSIST_YAWS) {
 				Vec3 dir = Vec3.directionFromRotation(-elevation, yaw + yawOffset);
-				BlockHitResult hit = clip(player, eye, eye.add(dir.scale(ASSIST_RANGE)));
+				BlockHitResult hit = clip(player, eye, eye.add(dir.scale(ASSIST_RANGE * scale)));
 				if (hit.getType() == HitResult.Type.MISS) {
 					continue;
 				}

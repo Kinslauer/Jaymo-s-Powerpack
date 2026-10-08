@@ -363,6 +363,8 @@ final class WebSwing {
 			slingDraw = 0.0F;
 		}
 		boolean air = !player.onGround();
+		// a symbiote's webs pull harder
+		double boost = com.jaymospowers.power.web.WebSymbiote.pullScale(player);
 		Vec3 v = player.getDeltaMovement();
 		if (air && !player.isFallFlying()) {
 			v = new Vec3(v.x / VANILLA_AIR_DRAG, v.y / VANILLA_AIR_DRAG_Y, v.z / VANILLA_AIR_DRAG).scale(SWING_DRAG).add(0.0, -SWING_GRAVITY, 0.0);
@@ -374,9 +376,9 @@ final class WebSwing {
 				continue;
 			}
 			if (input.jump()) {
-				strand.rope = Math.max(ROPE_MIN, strand.rope - REEL_IN);
+				strand.rope = Math.max(ROPE_MIN, strand.rope - REEL_IN * boost);
 			} else if (input.shift()) {
-				strand.rope = Math.min(WebAnchors.SWING_RANGE, strand.rope + LET_OUT);
+				strand.rope = Math.min(WebAnchors.SWING_RANGE * com.jaymospowers.power.web.WebSymbiote.reachScale(player), strand.rope + LET_OUT);
 			}
 			Vec3 to = strand.anchor.subtract(body);
 			if (to.lengthSqr() > 1.0E-8) {
@@ -388,7 +390,7 @@ final class WebSwing {
 			Vec3 dir = pullDir.normalize();
 			Vec3 tangent = v.subtract(dir.scale(v.dot(dir)));
 			if (tangent.lengthSqr() > 1.0E-4) {
-				v = v.add(tangent.normalize().scale(JUMP_THRUST));
+				v = v.add(tangent.normalize().scale(JUMP_THRUST * boost));
 			}
 		}
 		// pump: forward on the downswing adds speed along the arc (across the webs' combined pull)
@@ -396,7 +398,7 @@ final class WebSwing {
 			Vec3 dir = pullDir.normalize();
 			Vec3 tangent = v.subtract(dir.scale(v.dot(dir)));
 			if (tangent.lengthSqr() > 1.0E-4) {
-				v = v.add(tangent.normalize().scale(PUMP));
+				v = v.add(tangent.normalize().scale(PUMP * boost));
 			}
 		}
 		// each rope: no moving further away than its length, and a springy pull back when stretched. Two passes, so
@@ -413,7 +415,7 @@ final class WebSwing {
 				}
 				Vec3 dir = toAnchor.scale(1.0 / distance);
 				double inward = v.dot(dir);
-				double want = Math.min((distance - strand.rope) * ROPE_SPRING, ROPE_MAX_PULL);
+				double want = Math.min((distance - strand.rope) * ROPE_SPRING * boost, ROPE_MAX_PULL * boost);
 				if (inward < want) {
 					v = v.add(dir.scale(want - inward));
 				}

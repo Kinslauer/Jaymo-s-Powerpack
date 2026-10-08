@@ -4,6 +4,7 @@
 	"compatibilityLevel": "JAVA_25",
 	"client": [
 		"WebAvatarRendererMixin",
+		"WebEntityRendererMixin",
 		"WebLivingEntityRendererMixin",
 		"WebModelFeatureRendererMixin"
 	],
