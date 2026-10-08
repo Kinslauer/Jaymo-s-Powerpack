@@ -17,5 +17,6 @@ abstract class WebAvatarRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$webArms(Avatar entity, AvatarRenderState state, float partialTicks, CallbackInfo ci) {
 		WebArms.extract(entity, state, partialTicks);
+		com.jaymospowers.client.power.web.WebSymbioteClient.extract(entity, state);
 	}
 }

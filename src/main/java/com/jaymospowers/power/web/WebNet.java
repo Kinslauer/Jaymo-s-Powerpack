@@ -86,7 +86,58 @@ public final class WebNet {
 		}
 	}
 
+	/** Client → server: picked a symbiote ability from the radial menu (see {@link WebSymbiote}'s ability indices). */
+	public record SymbioteUse(int ability) implements CustomPacketPayload {
+		public static final Type<SymbioteUse> TYPE = new Type<>(JaymosPowers.id("web_symbiote_use"));
+		public static final StreamCodec<ByteBuf, SymbioteUse> CODEC = ByteBufCodecs.VAR_INT.map(SymbioteUse::new, SymbioteUse::ability);
+
+		@Override
+		public Type<SymbioteUse> type() {
+			return TYPE;
+		}
+	}
+
+	/** Server → client: the symbiote takes over for {@code ticks}, lurching at entity {@code entityId} (-1: it lets go). */
+	public record Takeover(int entityId, int ticks) implements CustomPacketPayload {
+		public static final Type<Takeover> TYPE = new Type<>(JaymosPowers.id("web_takeover"));
+		public static final StreamCodec<ByteBuf, Takeover> CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_INT, Takeover::entityId,
+			ByteBufCodecs.VAR_INT, Takeover::ticks,
+			Takeover::new);
+
+		@Override
+		public Type<Takeover> type() {
+			return TYPE;
+		}
+	}
+
+	/** Server → client: set your own velocity (a dodge's sidestep, a recoil). Player motion is client-authoritative. */
+	public record Nudge(Vec3 velocity) implements CustomPacketPayload {
+		public static final Type<Nudge> TYPE = new Type<>(JaymosPowers.id("web_nudge"));
+		public static final StreamCodec<ByteBuf, Nudge> CODEC = Vec3.STREAM_CODEC.map(Nudge::new, Nudge::velocity);
+
+		@Override
+		public Type<Nudge> type() {
+			return TYPE;
+		}
+	}
+
+	/** Server → client: the creatures that mean you harm right now (Spider-Sense draws them outlined). */
+	public record Sense(java.util.List<Integer> ids) implements CustomPacketPayload {
+		public static final Type<Sense> TYPE = new Type<>(JaymosPowers.id("web_sense"));
+		public static final StreamCodec<ByteBuf, Sense> CODEC = ByteBufCodecs.VAR_INT.apply(ByteBufCodecs.list()).map(Sense::new, Sense::ids);
+
+		@Override
+		public Type<Sense> type() {
+			return TYPE;
+		}
+	}
+
 	static void register() {
+		PayloadTypeRegistry.serverboundPlay().register(SymbioteUse.TYPE, SymbioteUse.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(Takeover.TYPE, Takeover.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(Nudge.TYPE, Nudge.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(Sense.TYPE, Sense.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Zip.TYPE, Zip.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Wings.TYPE, Wings.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Swing.TYPE, Swing.CODEC);

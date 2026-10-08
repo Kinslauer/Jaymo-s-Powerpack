@@ -248,3 +248,178 @@ cobweb.
   unlocks with the second ability (G).
 - G is now only the off-hand web (it needs an empty off hand).
 - **HUD row:** wings · G · V · B · Z. G's chip dims while the off hand is full.
+
+## 0.2.0: Ascension & Corruption
+
+The web power doesn't use the Fate corruption meter. Its dark path is the **symbiote**, a separate system with its
+own bond, hunger and rejection. Nothing below is explained in game; the only hints are one-line whispers in the
+action bar, each heard once.
+
+### The symbiote
+
+**Where it's found: meteor craters** (`WebCraterFeature`, feature type `jaymospowers:web_crater`).
+- Data files: `data/jaymospowers/worldgen/feature/web_crater.json` and `.../placed_feature/web_crater.json`. Both
+  are written by `tools/gen_web.py`.
+- Placement: `rarity_filter` 1 in `CRATER_RARITY` = 500 chunks, then `in_square`, `heightmap WORLD_SURFACE_WG` and
+  `biome`. The feature refuses many sites, so the effective rate is roughly 1 in 600 or more.
+- Added with `BiomeModifications` (VEGETAL_DECORATION) to `foundInOverworld()` biomes, except oceans, deep oceans,
+  rivers and beaches.
+- Shape: a bowl of radius `MIN_RADIUS` 3.5 to `MAX_RADIUS` 5.5 (7�11 across), `DEPTH` 3 at the middle, with ragged
+  edges.
+  - The floor is blackstone and coarse dirt, with magma and obsidian toward the centre.
+  - It has a `RIM_WIDTH` 1.5 lip of debris and a `SCORCH_WIDTH` 2.5 ring of coarse dirt fading out.
+  - A 3�3 seat of magma and obsidian sits at the middle, with the goo on it. Sneaking (which bonding needs anyway)
+    keeps the magma from burning you.
+- The site is refused if:
+  - any column has fluid at or just above the ground;
+  - the ground under the bowl or lip varies more than `MAX_SLOPE` 3 from the centre;
+  - anything in the dig volume isn't natural ground (dirt, sand, stone, terracotta, snow, gravel, clay, ice, plants
+    or leaves). Logs, planks, paths, cobblestone and block entities all refuse it, which keeps craters out of
+    villages, ruins and the middle of trees.
+- **The goo** (`jaymospowers:web_symbiote_goo`, "Black Ooze"):
+  - Unbreakable, can't be pushed, and drops nothing. It's an animated 8-frame black texture with a drifting purple
+    sheen.
+  - Its client `animateTick` gives off dark motes, plus a little smoke and ash around the crater.
+  - It has no item; use `/powerdebug web crater` to make one.
+
+**Bonding:** a web slinger **sneaks and right-clicks** the goo with any hand contents (`UseBlockCallback`).
+- The block is consumed. Over `BOND_TICKS` 50 the goo spirals up your body (black dust, squelches), with Darkness and
+  Nausea, ending on a heartbeat and a sculk bloom. Whisper: "Something answers."
+- Anyone else (or a web slinger who isn't sneaking, or one already bonded) makes it **recoil**: a squelch, ink, and
+  nothing else.
+- State is the `jaymospowers:web_symbiote` attachment (`WebSymbioteState`): bonded, satiety, stress, rejections, flags
+  (suit, armor, crawl) and hints. It's persistent, kept through death, and synced to everyone.
+- Cooldowns are in `web_symbiote_cd`, synced to the owner only.
+- Losing the web power drops the bond.
+
+**While bonded:**
+- **Suit:** `WebSymbioteLayer` draws an original 64�64 texture over the whole player model: mottled black, dark purple
+  vein walks, and white angular eye-patches. It covers the skin's outer layers too.
+  - Everyone sees it. It hides while invisible.
+  - The little mask in the middle of the radial menu toggles it (`SUIT_TOGGLE`). With the suit off, every ability
+    and enhancement still works, but you and your webs look normal.
+- **Black webs:** swing, zip and yank lines and the wings render near-black, with a purple sheen running along them
+  (`WebLineRenderer.sheen`).
+- **Enhanced:** �`REACH_SCALE` 1.5 reach for swing, the assist, zip, yank and hitch; �`PULL_SCALE` 1.25 for the rope
+  spring and max pull, reel-in, jump thrust and pump; Zip cooldown �`ZIP_COOLDOWN_SCALE` 0.5.
+- A faint black drip of particles every 30 ticks.
+
+**Radial menu:** hold **X** (`key.jaymospowers.web_symbiote`), point, and release (or click).
+- `WebSymbioteScreen` is a non-pausing screen. It releases on key-up (`keyReleased`, plus polling the physical key).
+- It has six tiles clockwise from the top, each with an icon, a cooldown shade with seconds, and a lit strip for
+  toggles that are on.
+- The middle shows the pick's name and a satiety bar, which flashes red when starving. Under it is the suit mask
+  toggle. The dead zone (`DEAD_ZONE` 24) picks nothing.
+- The server checks everything: bond, cooldown and satiety cost (`WebSymbiote.use`).
+
+| # | Ability | Cooldown | Cost | What it does |
+|---|---|---|---|---|
+| 0 | Tendril Grab | 100 | 2 | Pulls the creature under the crosshair within `TENDRIL_RANGE` 20 to you. Things over `TENDRIL_HEAVY_VOLUME` 8 pull you to them instead. Aimed at a block, it zips you there. |
+| 1 | Living Armor (toggle) | 40 | 0 | +`ARMOR_ABSORPTION` 16 max absorption (8 hearts), regrowing `ARMOR_REGEN` 1 every `ARMOR_REGEN_TICKS` 40, and +0.6 knockback resistance. Satiety drains �`ARMOR_DRAIN_MULT` 3. |
+| 2 | Wall Crawl (toggle) | 20 | 0 | Client movement (`WebSymbioteClient.tickCrawl`). Next to a wall in the air, you stick; Jump or forward climbs at `CRAWL_CLIMB` 0.2, Sneak goes down. Under a ceiling, Jump sticks you to it, you move with the movement keys, and Sneak drops you. Climbing over a top edge hops you onto the ledge. The server allows floating while it's on and resets fall distance while you're touching a wall or ceiling. |
+| 3 | Consume | 160 | 0 | Swallows a non-player creature with max health = `CONSUME_MAX_HEALTH` 10 within `CONSUME_RANGE` 3, preferring the one you're looking at. It's removed with no drops. Heals 6, feeds +30, calms -10. Tamed and name-tagged creatures are never eaten. |
+| 4 | Spike Burst | 240 | 8 | Everything within `SPIKE_RADIUS` 5 takes `SPIKE_DAMAGE` 8 (player attack) and is thrown `SPIKE_KNOCKBACK` 1.3 outward and 0.45 up. Rays of black dust. |
+| 5 | Shroud | 600 | 5 | Invisibility (no particles) until you damage anything, or `SHROUD_TICKS` 400. |
+
+**Hunger:**
+- Satiety runs 0�`SATIETY_MAX` 100 and starts at 70. It loses 1 point every `SATIETY_DRAIN_TICKS` 240 (about 20
+  minutes from full), and not in creative.
+- **Raw meat** (beef, pork, chicken, mutton, rabbit, cod, salmon, rotten flesh) feeds it `MEAT_FEED_PER_NUTRITION` 5
+  � nutrition instead of you (`WebFoodPropertiesMixin`). Its other effects, such as raw chicken's Hunger, still
+  apply.
+- At or below `STARVING` 15, it eats your hunger bar: 1.2 exhaustion every 40 ticks, doubled at 0. Stress climbs 1
+  every 80 ticks while starving and calms 1 every 100 ticks while fed.
+
+**Takeover:**
+- When starving with stress = `TAKEOVER_STRESS` 50, every `TAKEOVER_CHECK_TICKS` 200 there's a
+  `TAKEOVER_CHANCE` 35% chance. It's at most once per `TAKEOVER_COOLDOWN` 1200, and never in creative.
+- It picks the nearest mob within 12 (not tamed or name-tagged; never players) and takes over for 60�100 ticks.
+- The client wrenches your view and drags you at the mob (`TAKEOVER_SPEED` 0.34, hopping over steps), with a pulsing
+  dark vignette.
+- The server swings and attacks with `player.attack` every 10 ticks when within reach 3.
+- Afterwards stress drops by 20.
+
+**Weaknesses ? rejection:**
+- **Fire:** being on fire or in lava counts as **one** exposure per burning episode. An episode ends after
+  `FIRE_EPISODE_GAP` 60 ticks without fire.
+- **Noise** (`WebServerLevelMixin` on `ServerLevel.gameEvent`):
+  - a bell ringing (`block_change` at a bell) within 16;
+  - `note_block_play` within 8;
+  - `instrument_play` (goat horn) within 24;
+  - `explode` within 16 (this includes firework bursts).
+  - After one noise counts, more noise doesn't for `NOISE_GRACE_TICKS` 100.
+- **Each exposure:** 3 magic damage, Nausea 4 s, Slowness II 2 s, +20 stress, a jolt, ink, a squelch and a warden
+  growl. +1 rejection.
+- At `REJECT_AT` 6 rejections it **rejects you**:
+  - an ink and black-dust explosion, a death squelch, the elder-guardian curse sound, 3 damage, Nausea and Weakness 30 s;
+  - then a black blot slithers away across the ground for 2.5 s and vanishes in smoke.
+  - The bond is gone. You need another crater's goo, and any crater's goo works for a rejected player, since bonding
+    only needs "not bonded".
+- **Whispers** (each once per player): first noise "It shudders at the sound.", first fire "It writhes from the
+  heat.", one exposure from rejection "It's had almost enough of you.", first starving "It's hungry.", first meat
+  "It took that for itself.", takeover "Not you. It.", rejection "It tears itself away.".
+
+### Ascension: Spider-Sense
+- **Trigger:**
+  - The server adds up distance travelled while airborne with a swing web stuck, from per-tick position deltas.
+    Steps over 6 blocks (teleports) are ignored.
+  - The total is kept in `jaymospowers:web_swung` (persistent, kept through death) and flushed every 20 ticks.
+  - At `ASCEND_DISTANCE` 2000, if `Fate.canAscend`, it calls `Fate.ascend`.
+  - Whispers at 50% and 85% (not once ascended).
+- **Spider-Sense:**
+  - Every `SENSE_TICKS` 10, the server sends the client the ids of mobs within 16 that are targeting you (`web_sense`).
+  - The client (`WebEntityRendererMixin`, at the TAIL of `EntityRenderer.extractRenderState`) gives those a red
+    outline, plus swelling creepers and skeletons drawing a bow within 16. The outline shows through walls.
+- **Dodge:** the first hit from an entity (melee or projectile; nothing that bypasses invulnerability) every
+  `DODGE_COOLDOWN` 400 ticks is cancelled (`ALLOW_DAMAGE`). You get a sidestep nudge square to the attack
+  (`web_nudge`), an amethyst tingle, and sparkles.
+- **Web Strike (C, `onUltimate`):**
+  - It zips you to the living entity under the crosshair within `STRIKE_RANGE` 32, as a Yank-to pull.
+  - When you're within 2.2 of the target's edge, the kick deals `max(STRIKE_MIN_DAMAGE 10, best speed of the last 3
+    ticks � STRIKE_DAMAGE_PER_SPEED 8)`, with `STRIKE_KNOCKBACK` 2.2 out and 0.55 up. You rebound off it.
+  - Cooldown `STRIKE_COOLDOWN` 160 (8 s), started on cast. It shows as a gold-rimmed chip with the bound key at the
+    end of the bottom-right row.
+- Lang: `.ascended` "Spider-Sense", `.key.ultimate` "Web Strike".
+
+### Testing
+- `/power set @s web`
+- **Crater:** `/powerdebug web crater` carves one where you stand. Sneak and right-click the goo: you bond. Try again
+  without sneaking, or as another power: it recoils.
+  - Worldgen: make a new world, then `/locate` won't find it (it's a feature). Fly around plains or desert, or use
+    `/place feature jaymospowers:web_crater` (that bypasses rarity but not the site checks).
+- **Bond directly:** `/powerdebug web symbiote bond`. Check the suit in F5, the black webs, and longer reach.
+- **Radial:** hold X, point, release. Test each ability on pigs, chickens and a zombie (Consume needs a chicken,
+  rabbit or similar).
+- **Hunger:** `/powerdebug web symbiote` prints the state. Eat raw beef: satiety rises and your hunger doesn't.
+- **Noise:** ring a bell, play a note block, blow a goat horn, light TNT. Each counts once per 5 s. The 6th exposure
+  rejects you. `/powerdebug web symbiote reject` forces it.
+- `/powerdebug web symbiote feed` fills satiety and clears stress.
+- **Takeover:** stay starving with stress = 50 (exposures add 20 each), then wait near a mob.
+- **Ascension:** `/powerdebug web swung 2000` (needs all 4 abilities mastered; `/power level @s 4`). Or
+  `/power ascend @s`.
+  - Then let a zombie target you: red outline. The first zombie hit misses with a sidestep.
+  - Press C at a mob: zip and kick.
+
+### Risky / untested at runtime
+- **Mixins:** `ServerLevel.gameEvent`, `FoodProperties.onConsume` and `EntityRenderer.extractRenderState` all have
+  `require 1`. They were checked against the decompiled 26.3 sources but never loaded in game.
+- **Worldgen:**
+  - How rare craters really are after site refusals, and whether the `WORLD_SURFACE_WG`/`OCEAN_FLOOR_WG` ground
+    finder behaves at chunk edges.
+  - The feature only writes within �9 blocks of a point inside its chunk, which should stay inside the
+    neighbouring-chunk write window.
+  - Craters on snowy slopes or in badlands may look odd.
+- **Rendering:**
+  - The suit's look on slim (Alex) models, and whether the outer-layer copy z-fights.
+  - The suit isn't drawn on the first-person arm.
+  - Whether the cutout layer respects armor (it draws under armour, like a skin).
+- **Spider-Sense outline:** relies on the vanilla outline pass turning on when any submitted model carries an outline
+  colour.
+- **Wall Crawl:** the feel of the climb, ceiling clinging, and corner cases (fences, slabs, trapdoors) are unknown.
+  It can also make wall-adjacent jumps "sticky" while it's on.
+- **Radial:** the key-up poll uses `InputConstants.isKeyDown(scancode)`. A mouse-button binding falls back to
+  click-to-choose.
+- **Takeover:** steering fights the player's own mouse each tick. It may feel jerky on high-FPS clients.
+
+### Known gaps / upgrade ideas
+- Feeding when your own hunger bar is full isn't possible: vanilla won't start eating.
