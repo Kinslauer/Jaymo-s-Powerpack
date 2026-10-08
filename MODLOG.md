@@ -98,3 +98,34 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.1.9:** Web: no tug on cast, Jump thrust along the arc, pendulum body sway while swinging, wings and lines follow
   the posed body.
 - **0.1.10:** Web Zip moved to its own key, Z (rebindable); G is only the off-hand web.
+- **0.2.0, Ascension & Corruption** (core `Fate` + four agents, merged):
+  - **Core:**
+    - `core/Fate` attachment: ascended / corrupted / purified flags and a 0-100 meter.
+    - The ultimate key C, sent only while ascended.
+    - `Power.onLevelUp`, `onAscended`, `onCorrupted` and `onPurified` hooks.
+    - Fate on the HUD badge: gold rim, cracks, a purple sliver.
+    - `/power ascend|corrupt|purify|resetfate`.
+    - Per-power `/powerdebug`.
+    - Design rule: everything is discovered in play, the messages stay vague, and cures are circumstances,
+      never items.
+  - **Wind:**
+    - Weather factor (sun 0.6 ... thunder 1.3).
+    - Storm overuse corrupts it into Stormbound: lightning on every cast, 2x gales, -25% speed.
+    - Cure: hover above Y 192 through 60 s of thunderstorm.
+    - Ascension: 5 Breezes killed in flight → Gale Heart → Tempest + Cyclone Lance.
+  - **Arsenal:**
+    - Enderman contact fills the meter; the End corrupts outright.
+    - Void Arsenal: end-gateway portals, aura, +30% damage with Darkness/Wither, water hurts, blinks.
+    - Cure: help kill the Ender Dragon.
+    - Ascension: Dimensional Key (bastion loot) → Armory weapon pin + Hundred Blades.
+  - **Chrono:**
+    - An Echo spawns 5-25 min after every level-up. It looks like its owner, copies their habits, is hostile to
+      everything, and dies only in the Nether.
+    - Ascension: 10 min of Stasis/Rewind, then sleep → Stopped Clock → Timeless + Paradox Cut.
+  - **Web:**
+    - Symbiote in rare meteor craters: black webs and suit, stronger webs, a hold-X radial menu with 6 abilities,
+      raw-meat hunger, takeover.
+    - 6 fire/noise exposures → rejection; you need a new crater.
+    - Ascension: 2000 blocks swung → Spider-Sense + Web Strike.
+  - **Lead fix:** world hazards pass through the Echo outside the Nether; only attacks (and the void) shatter it.
+  - **Tests:** dev client joined a world with no mixin errors; the dedicated server booted and stopped cleanly.
