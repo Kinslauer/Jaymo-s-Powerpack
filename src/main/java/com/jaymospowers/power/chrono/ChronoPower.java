@@ -77,6 +77,7 @@ public final class ChronoPower implements Power {
 	public static void init() {
 		Powers.register(INSTANCE);
 		PayloadTypeRegistry.clientboundPlay().register(ChronoSync.TYPE, ChronoSync.CODEC);
+		StasisField.registerLocks();
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			ChronoState state = STATES.get(handler.player.getUUID());
 			if (state != null) {
@@ -100,6 +101,12 @@ public final class ChronoPower implements Power {
 	@Override
 	public Identifier id() {
 		return ID;
+	}
+
+	/** Rewind first; Stasis Field, which stops other players too, comes last. */
+	@Override
+	public PowerKey[] unlockOrder() {
+		return new PowerKey[] {PowerKey.ABILITY_1, PowerKey.ABILITY_3, PowerKey.ABILITY_4, PowerKey.ABILITY_2};
 	}
 
 	@Override
@@ -286,7 +293,7 @@ public final class ChronoPower implements Power {
 		if (state.stasis != null) {
 			state.stasis.end();
 		}
-		state.stasis = new StasisField(player.level(), player.position());
+		state.stasis = new StasisField(player.level(), player.position(), player.getUUID());
 		state.stasis.start();
 		return true;
 	}

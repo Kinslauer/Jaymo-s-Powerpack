@@ -28,8 +28,10 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * A Barrage weapon: it hovers in its rift for a moment (turning to track its target), then flies straight at it, hits
- * once and dissolves back into its dimension. It carries an ItemStack only for its looks and never drops anything.
+ * A Barrage weapon: it hovers in its rift for a moment (turning to track its target), then flies straight at it and
+ * hits once. Then, like a thrown spear, it stays in the world (stuck in the ground, or dropping off whatever it hit)
+ * for its caster to pick up and fight on with: it comes back as a summoned weapon on the usual timer. Anyone else
+ * can't take it, and it dissolves if it's left lying for {@code LYING_TICKS}.
  */
 public class RiftBlade extends AbstractArrow implements ItemSupplier {
 	private static final EntityDataAccessor<ItemStack> DATA_ITEM = SynchedEntityData.defineId(RiftBlade.class, EntityDataSerializers.ITEM_STACK);
@@ -38,9 +40,12 @@ public class RiftBlade extends AbstractArrow implements ItemSupplier {
 	/** Barrage weapons fly at this speed (blocks per tick) and give up after this long. */
 	public static final float SPEED = 2.6F;
 	public static final int MAX_LIFE = 120;
+	/** How long a landed blade waits to be picked up before it dissolves. */
+	public static final int LYING_TICKS = 600;
 
 	private float impactDamage = 6.0F;
 	private boolean dealtDamage;
+	private int lyingTicks;
 	private int hoverTicks;
 	private @Nullable Vec3 aim;
 	private int targetId = -1;
@@ -55,7 +60,8 @@ public class RiftBlade extends AbstractArrow implements ItemSupplier {
 		int hover, float damage) {
 		RiftBlade blade = new RiftBlade(ArsenalEntities.RIFT_BLADE, level);
 		blade.setOwner(owner);
-		blade.pickup = Pickup.DISALLOWED; // setOwner makes player arrows pickupable
+		// picked up by its caster only (see tryPickup)
+		blade.pickup = Pickup.ALLOWED;
 		blade.entityData.set(DATA_ITEM, look.copyWithCount(1));
 		blade.entityData.set(DATA_HOVER, true);
 		blade.impactDamage = damage;
@@ -123,10 +129,17 @@ public class RiftBlade extends AbstractArrow implements ItemSupplier {
 		super.tick();
 
 		if (this.level() instanceof ServerLevel level) {
-			if (this.isInGround() || this.tickCount > MAX_LIFE) {
+			if (this.isInGround() || this.dealtDamage) {
+				lyingTicks++;
+				if (lyingTicks > LYING_TICKS) {
+					dissolve(level);
+				} else if (lyingTicks % 20 == 0) {
+					level.sendParticles(ParticleTypes.REVERSE_PORTAL, this.getX(), this.getY() + 0.2, this.getZ(), 2, 0.1, 0.1, 0.1, 0.01);
+				}
+			} else if (this.tickCount > MAX_LIFE) {
 				dissolve(level);
 			}
-		} else if (this.tickCount % 2 == 0) {
+		} else if (!this.isInGround() && this.tickCount % 2 == 0) {
 			this.level().addParticle(ParticleTypes.REVERSE_PORTAL, this.getX(), this.getY(), this.getZ(), 0, 0, 0);
 		}
 	}
@@ -179,8 +192,10 @@ public class RiftBlade extends AbstractArrow implements ItemSupplier {
 		if (this.level() instanceof ServerLevel level) {
 			level.sendParticles(ParticleTypes.CRIT, this.getX(), this.getY(), this.getZ(), 6, 0.2, 0.2, 0.2, 0.2);
 			this.playSound(SoundEvents.TRIDENT_HIT, 0.8F, 1.3F);
-			dissolve(level);
 		}
+		// bounce off and drop, like a thrown trident, to be picked up
+		this.setNoGravity(false);
+		this.setDeltaMovement(this.getDeltaMovement().multiply(-0.01, -0.1, -0.01));
 	}
 
 	@Override
@@ -194,14 +209,29 @@ public class RiftBlade extends AbstractArrow implements ItemSupplier {
 		return new ItemStack(Items.IRON_SWORD);
 	}
 
+	/** The weapon, as a fresh summon for its caster (it dissolves on the usual timer). */
 	@Override
 	protected ItemStack getPickupItem() {
-		return ItemStack.EMPTY;
+		ItemStack stack = this.getItem().copyWithCount(1);
+		Entity owner = this.getOwner();
+		if (owner != null) {
+			stack.set(com.jaymospowers.power.arsenal.Summoned.TYPE, new com.jaymospowers.power.arsenal.Summoned(owner.getUUID(),
+				this.level().getGameTime() + com.jaymospowers.power.arsenal.ArsenalPower.SUMMON_TICKS, this.random.nextInt()));
+		}
+		return stack;
 	}
 
+	/** Only its caster can take it back, and only once it has landed or hit. */
 	@Override
 	protected boolean tryPickup(net.minecraft.world.entity.player.Player player) {
-		return false;
+		if (player != this.getOwner() || isHovering() || !(this.isInGround() || this.dealtDamage)) {
+			return false;
+		}
+		boolean taken = player.getInventory().add(this.getPickupItem());
+		if (taken && player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+			com.jaymospowers.power.arsenal.ArsenalPower.capSummons(serverPlayer);
+		}
+		return taken;
 	}
 
 	@Override

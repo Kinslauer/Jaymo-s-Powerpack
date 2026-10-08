@@ -135,3 +135,10 @@ Replace the owner with your UUID int-array if you want it to count on your HUD.
   - A rarer "legendary" pull with a visual flourish.
   - Let Return send a weapon into the Stash instead (making it permanent) at a high cost.
   - A Barrage upgrade that tracks moving targets mid-flight.
+
+## 0.1.5
+- **Barrage blades stay in the world.** After hitting they bounce off and drop like a thrown trident; on a miss they
+  stick in the ground.
+- **Picking them up:** only the caster can, by walking over them. Each one comes back as a fresh summon on the usual
+  timer, and the 3-summon cap still applies (`ArsenalPower.capSummons`).
+- Uncollected blades dissolve after `RiftBlade.LYING_TICKS` 600 (30 s).

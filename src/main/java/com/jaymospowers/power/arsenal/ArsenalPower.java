@@ -241,6 +241,11 @@ public final class ArsenalPower implements Power {
 		}
 	}
 
+	/** A summon came back into the player's hands (a Barrage blade picked up): keep to the cap of {@link #MAX_HELD}. */
+	public static void capSummons(ServerPlayer player) {
+		makeRoom(player, MAX_HELD);
+	}
+
 	/** Dissolves this player's oldest summons until at most {@code keep} batches are left. */
 	private static void makeRoom(ServerPlayer player, int keep) {
 		UUID id = player.getUUID();

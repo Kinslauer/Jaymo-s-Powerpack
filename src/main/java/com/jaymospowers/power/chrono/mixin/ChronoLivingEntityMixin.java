@@ -16,7 +16,8 @@ abstract class ChronoLivingEntityMixin {
 	@Inject(method = "aiStep", at = @At("HEAD"), cancellable = true)
 	private void jaymospowers$chronoStasis(CallbackInfo ci) {
 		LivingEntity self = (LivingEntity) (Object) this;
-		if (!self.level().isClientSide() && ChronoHooks.isFrozen(self)) {
+		// (players are held in place by the field itself; their own tick must keep running)
+		if (!self.level().isClientSide() && !(self instanceof net.minecraft.world.entity.player.Player) && ChronoHooks.isFrozen(self)) {
 			ci.cancel();
 		}
 	}

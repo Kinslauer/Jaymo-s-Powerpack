@@ -2,7 +2,7 @@
 	"power.jaymospowers.chrono": "Chronokinesis",
 	"power.jaymospowers.chrono.desc": "Bend the flow of time. Rewind your last moments, freeze foes, and fast-forward yourself or the world.",
 	"power.jaymospowers.chrono.key.ability_1": "Rewind 3 seconds",
-	"power.jaymospowers.chrono.key.ability_2": "Stasis Field (freeze time)",
+	"power.jaymospowers.chrono.key.ability_2": "Stasis Field: stop time around you for 3s (players too)",
 	"power.jaymospowers.chrono.key.ability_3": "Overclock (speed yourself up)",
 	"power.jaymospowers.chrono.key.ability_4": "Time Bloom (grow and cook fast)",
 	"message.jaymospowers.chrono_rewind_short": "Not enough time has passed to rewind.",

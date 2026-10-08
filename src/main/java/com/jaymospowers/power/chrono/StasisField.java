@@ -27,10 +27,14 @@ import net.minecraft.world.phys.Vec3;
  * their velocity is stored, then zeroed, and gravity is switched off until the field ends.
  *
  * <p>Hits on a frozen mob still land; the knockback is kept in its motion and released (capped) when time resumes.
+ *
+ * <p>Other players are stopped too (never the caster): the server holds them where they were caught (they can still
+ * look around), and they can't attack, mine, build, use or interact until time resumes (see {@link #registerLocks}).
  */
 final class StasisField {
 	static final double RADIUS = 6.0;
-	static final int DURATION = 80;
+	/** As long as Rewind's window: time stops for the same 3 seconds Rewind can undo. */
+	static final int DURATION = ChronoPower.REWIND_TICKS;
 	/** Released knockback is capped to this speed (blocks/tick), so stacked hits can't fling a mob across the map. */
 	private static final double MAX_RELEASE_SPEED = 1.4;
 	private static final DustParticleOptions GOLD_DUST = new DustParticleOptions(0xF2C14E, 1.1F);
@@ -41,13 +45,31 @@ final class StasisField {
 
 	final ServerLevel level;
 	final Vec3 center;
+	/** The caster, who moves freely in their own stopped time. */
+	final java.util.UUID owner;
 	int ticksLeft = DURATION;
 	private int age;
 	private final List<Entity> held = new ArrayList<>();
 
-	StasisField(ServerLevel level, Vec3 center) {
+	StasisField(ServerLevel level, Vec3 center, java.util.UUID owner) {
 		this.level = level;
 		this.center = center;
+		this.owner = owner;
+	}
+
+	/** A stopped player can't act: no attacking, mining, building, using items or interacting. */
+	static void registerLocks() {
+		net.fabricmc.fabric.api.event.player.AttackEntityCallback.EVENT.register((player, world, hand, entity, hit) ->
+			isFrozen(player) ? net.minecraft.world.InteractionResult.FAIL : net.minecraft.world.InteractionResult.PASS);
+		net.fabricmc.fabric.api.event.player.AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) ->
+			isFrozen(player) ? net.minecraft.world.InteractionResult.FAIL : net.minecraft.world.InteractionResult.PASS);
+		net.fabricmc.fabric.api.event.player.UseBlockCallback.EVENT.register((player, world, hand, hit) ->
+			isFrozen(player) ? net.minecraft.world.InteractionResult.FAIL : net.minecraft.world.InteractionResult.PASS);
+		net.fabricmc.fabric.api.event.player.UseItemCallback.EVENT.register((player, world, hand) ->
+			isFrozen(player) ? net.minecraft.world.InteractionResult.FAIL : net.minecraft.world.InteractionResult.PASS);
+		net.fabricmc.fabric.api.event.player.UseEntityCallback.EVENT.register((player, world, hand, entity, hit) ->
+			isFrozen(player) ? net.minecraft.world.InteractionResult.FAIL : net.minecraft.world.InteractionResult.PASS);
+		net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents.BEFORE.register((world, player, pos, state, blockEntity) -> !isFrozen(player));
 	}
 
 	/** True for a mob that a stasis field is holding still (server side). */
@@ -120,7 +142,7 @@ final class StasisField {
 
 	private void capture() {
 		AABB box = new AABB(center, center).inflate(RADIUS);
-		for (Entity entity : level.getEntities((Entity) null, box, StasisField::freezable)) {
+		for (Entity entity : level.getEntities((Entity) null, box, e -> freezable(e) && !e.getUUID().equals(owner))) {
 			if (entity.position().distanceToSqr(center) > RADIUS * RADIUS || held.contains(entity)) {
 				continue;
 			}
@@ -142,6 +164,9 @@ final class StasisField {
 		}
 		if (entity instanceof Mob) {
 			return !(entity instanceof EnderDragon) && !(entity instanceof WitherBoss);
+		}
+		if (entity instanceof net.minecraft.server.level.ServerPlayer player) {
+			return !player.isSpectator();
 		}
 		if (entity instanceof Projectile) {
 			// only projectiles in flight (arrows stuck in the ground have no motion)
@@ -211,7 +236,14 @@ final class StasisField {
 
 		/** Every tick while frozen. Mobs are already held still by the mixin; projectiles are parked in place. */
 		void hold(Entity entity) {
-			if (projectile) {
+			if (entity instanceof net.minecraft.server.level.ServerPlayer player) {
+				// players move themselves, so pull them back to where time stopped (keeping where they look)
+				if (player.position().distanceToSqr(position) > 1.0E-4) {
+					player.connection.teleport(position.x, position.y, position.z, player.getYRot(), player.getXRot());
+				}
+				player.setDeltaMovement(Vec3.ZERO);
+				player.resetFallDistance();
+			} else if (projectile) {
 				entity.setPos(position.x, position.y, position.z);
 				if (entity.getDeltaMovement().lengthSqr() > 0.0) {
 					entity.setDeltaMovement(Vec3.ZERO);
