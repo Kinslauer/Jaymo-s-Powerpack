@@ -188,3 +188,10 @@ maximum channel are in `WindAbility`.
 - **Tailwind on the ground:** a gust blast instead of the buff.
   - It hits a 35° cone, 6–11 blocks long, for 4–10 damage (falling off with distance).
   - Knockback is strong, and projectiles in the cone are blown away.
+
+## Fall damage (0.1.2, by request: fall damage always applies outside creative)
+- There's no fall-damage immunity while flying; the old `PlayerFallMixin` is gone.
+- Like an elytra, a controlled descent slower than `GLIDE_SAFE_SINK` 0.5 b/t doesn't build up fall distance. Diving
+  into the ground, or turning flight off high up, is a normal fall.
+- The `wind_impact` packet is now walls only, since the ground is judged as a fall.
+- Core rule for every power: fall distance is measured from your highest point. Moving up resets it.

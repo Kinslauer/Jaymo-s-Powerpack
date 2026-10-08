@@ -74,3 +74,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     - Creative and `/power set` give all four abilities. `/power level <players> <1-4>` sets the count directly.
   - H does nothing in survival until the power has awakened.
   - Wind realism pass and Tailwind ground gust. Web slingshot and web wings.
+  - **Fall damage always applies outside creative** (user request):
+    - Wind's and Web's fall waivers and Web's safe-fall passive are removed.
+    - Controlled descents (Wind flight, web wings) slower than 0.5 b/t don't build fall distance, like vanilla's elytra
+      rule.
+    - Core: for power holders, fall distance resets while moving up, so falls are measured from the apex.

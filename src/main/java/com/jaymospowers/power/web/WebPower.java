@@ -62,8 +62,6 @@ public final class WebPower implements Power {
 	public static final double YANK_HEAVY_VOLUME = 2.6;
 	/** Web Shot launch speed (a snowball is 1.5). */
 	public static final float SHOT_SPEED = 2.4F;
-	/** Passive: extra blocks you can fall without damage, any time. */
-	public static final double SAFE_FALL_BONUS = 3.0;
 	/** Fall-damage grace after a swing/zip lasts until you land, or this long at most. */
 	private static final int GRACE_MAX_TICKS = 1200;
 
@@ -126,8 +124,6 @@ public final class WebPower implements Power {
 		WebTraps.register();
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Swing.TYPE, (payload, ctx) -> INSTANCE.onSwing(ctx.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Wings.TYPE, (payload, ctx) -> INSTANCE.onWings(ctx.player(), payload.open()));
-		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
-			!(entity instanceof ServerPlayer player && source.is(DamageTypeTags.IS_FALL) && Powers.has(player, INSTANCE) && inGrace(player)));
 	}
 
 	@Override
@@ -181,8 +177,9 @@ public final class WebPower implements Power {
 
 	private static void ensurePassive(ServerPlayer player) {
 		AttributeInstance safeFall = player.getAttribute(Attributes.SAFE_FALL_DISTANCE);
-		if (safeFall != null && !safeFall.hasModifier(SAFE_FALL_ID)) {
-			safeFall.addOrReplacePermanentModifier(new AttributeModifier(SAFE_FALL_ID, SAFE_FALL_BONUS, AttributeModifier.Operation.ADD_VALUE));
+		// (there used to be a safe-fall bonus; fall damage now always applies, so clear it off anyone who has it)
+		if (safeFall != null && safeFall.hasModifier(SAFE_FALL_ID)) {
+			safeFall.removeModifier(SAFE_FALL_ID);
 		}
 	}
 
@@ -252,7 +249,10 @@ public final class WebPower implements Power {
 			}
 		}
 		if (state.grace || swinging(state) || state.pullTicks > 0) {
-			player.resetFallDistance();
+			// fall damage always applies; only a wing glide (slower than 0.5 b/t down) isn't a fall, as with an elytra
+			if (player.getAttached(WINGS) != null && player.getY() - player.yo > -0.5) {
+				player.fallDistance = Math.min(player.fallDistance, 1.0);
+			}
 			state.graceTicks++;
 			boolean landed = player.onGround() || player.isInWater() || player.isInLava() || player.getAbilities().flying
 				|| player.isPassenger() || player.onClimbable();
@@ -308,7 +308,6 @@ public final class WebPower implements Power {
 		State state = state(player);
 		if (open) {
 			state.wingsTicks = 1;
-			// gliding down is never a fall
 			state.grace = true;
 			state.graceTicks = 0;
 			player.setAttached(WINGS, true);

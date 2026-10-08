@@ -126,6 +126,11 @@ public final class Powers {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			Power power = of(player);
 			if (power != null) {
+				// a fall is measured from its highest point: anything still moving up isn't falling yet (so a swing's or
+				// a hover's ups and downs don't pile up into one huge fall)
+				if (!player.onGround() && player.getY() > player.yo + 1.0E-3) {
+					player.resetFallDistance();
+				}
 				power.tick(player);
 				Mastery.tick(player);
 				continue;

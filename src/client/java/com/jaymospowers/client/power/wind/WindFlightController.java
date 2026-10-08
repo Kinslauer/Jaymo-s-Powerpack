@@ -148,8 +148,7 @@ public final class WindFlightController {
 			}
 			if (this.state.flying()) {
 				player.setDeltaMovement(this.velocity);
-				player.resetFallDistance();
-				this.effects(minecraft, player);
+								this.effects(minecraft, player);
 			}
 		}
 
@@ -315,8 +314,7 @@ public final class WindFlightController {
 		this.sinkArmed = false;
 		this.velocity = new Vec3(motion.x, Math.max(motion.y, 0.0) + (grounded ? TAKEOFF_BOOST : AIR_TAKEOFF_BOOST), motion.z);
 		player.setDeltaMovement(this.velocity);
-		player.resetFallDistance();
-
+		
 		ClientLevel level = minecraft.level;
 		if (level != null) {
 			level.addParticle(ParticleTypes.GUST_EMITTER_SMALL, player.getX(), player.getY() + 0.1, player.getZ(), 0.0, 0.0, 0.0);
@@ -395,8 +393,10 @@ public final class WindFlightController {
 	}
 
 	private void impact(LocalPlayer player, double lost, boolean wall) {
-		// the server decides the damage (none in creative)
-		ClientPlayNetworking.send(new WindNet.Impact((float)lost, wall));
+		// the server decides wall-crash damage (none in creative); the ground is ordinary fall damage
+		if (wall) {
+			ClientPlayNetworking.send(new WindNet.Impact((float)lost, true));
+		}
 		ClientLevel level = (ClientLevel)player.level();
 		level.playLocalSound(player, SoundEvents.BREEZE_LAND, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.addParticle(ParticleTypes.POOF, player.getX(), player.getY() + 0.9, player.getZ(), 0.0, 0.05, 0.0);

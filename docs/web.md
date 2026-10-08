@@ -176,3 +176,9 @@ cobweb.
     (`WINGS_DIVE_GAIN`), between 0.45 and 1.8 b/t. The path steers toward your look (`WINGS_STEER`).
   - No fall damage until you land.
   - Others see your arms spread and a web membrane from hand to hip. The `web_wings` packet and attachment carry this.
+
+## Fall damage (0.1.2, by request: fall damage always applies outside creative)
+- Removed: the "no fall damage until you land" grace and the +3 safe-fall passive. The passive is cleared from anyone
+  who still has it.
+- Falls during and after swings count from your highest point (the core rule).
+- Web wings follow the elytra rule: gliding slower than 0.5 b/t down isn't a fall.

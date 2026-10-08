@@ -64,6 +64,8 @@ public final class WindPower implements Power {
 	static final double BARRIER_PUSH_RADIUS = 6.0, BARRIER_PUSH_MIN = 0.9, BARRIER_PUSH_MAX = 1.8;
 	/** Zephyr's Breath: radius; Slow Falling and Regeneration durations. */
 	static final double ZEPHYR_RADIUS = 6.0;
+	/** Descending slower than this (blocks/tick) while flying doesn't build up fall distance (vanilla's elytra rule). */
+	static final double GLIDE_SAFE_SINK = 0.5;
 	/**
 	 * Hunger while flying, per tick: a base plus more per block/tick of speed. Sprinting costs about 0.028/tick, so a
 	 * hover (0.03) is a bit hungrier and full sonic (0.105) burns through a full bar in under a minute.
@@ -163,8 +165,6 @@ public final class WindPower implements Power {
 			// the client also drops its flight when it sees the power go; this covers a slow attachment sync
 			ServerPlayNetworking.send(player, new WindNet.Status(-1, 0, new int[WindAbility.values().length], 0.0F, true));
 		}
-		// a player dropped mid-flight keeps their fall protection only until this tick: be kind and reset it now
-		player.resetFallDistance();
 	}
 
 	@Override
@@ -180,15 +180,6 @@ public final class WindPower implements Power {
 	}
 
 	/**
-	 * True while the player is flying: no fall damage (see the fall mixin), since hard landings are judged as impacts
-	 * instead. Once flight ends in mid-air, the fall counts from that moment like any other.
-	 */
-	public boolean protectsFromFall(ServerPlayer player) {
-		State s = this.states.get(player.getUUID());
-		return s != null && s.flight.flying() && Powers.has(player, this);
-	}
-
-	/**
 	 * Crash damage grows with the square of the speed lost, like kinetic energy: {@code K × (lost² − safe²)}. Walls
 	 * are less forgiving than the ground. Cruising (1 b/t) into a wall ≈ 6; 1.5 b/t ≈ 16; sonic (2.5 b/t) ≈ 48.
 	 */
@@ -201,7 +192,8 @@ public final class WindPower implements Power {
 	/** A crash reported by the flyer's client (motion is client-side). Survival and adventure only. */
 	private void onImpact(ServerPlayer player, WindNet.Impact payload) {
 		State s = this.states.get(player.getUUID());
-		if (s == null || !s.flight.flying() || !Powers.has(player, this) || !player.isAlive()
+		// the ground is judged by ordinary fall damage; this is for walls
+		if (!payload.wall() || s == null || !s.flight.flying() || !Powers.has(player, this) || !player.isAlive()
 			|| player.isCreative() || player.isSpectator() || player.tickCount - s.lastImpactTick < IMPACT_SPACING) {
 			return;
 		}
@@ -265,7 +257,10 @@ public final class WindPower implements Power {
 				this.sendStatus(player, s, 0.0F, true);
 			} else {
 				s.fallProtected = true;
-				player.resetFallDistance();
+				// fall damage always applies; like an elytra, a controlled descent (slower than 0.5 b/t) isn't a fall
+				if (player.getY() - player.yo > -GLIDE_SAFE_SINK) {
+					player.fallDistance = Math.min(player.fallDistance, 1.0);
+				}
 				if (s.flight.fast() && s.lastPos != null && moved.lengthSqr() < 64.0) {
 					this.trail(player, level, s, moved);
 				}
@@ -361,15 +356,10 @@ public final class WindPower implements Power {
 	}
 
 	private void setFlight(ServerPlayer player, State s, WindFlight flight, boolean locked) {
-		if (s.flight.flying() && !flight.flying()) {
-			// flight just ended: a fall from here counts from here
-			player.resetFallDistance();
-		}
 		s.flight = flight;
 		s.locked = locked;
 		if (flight.flying()) {
 			s.fallProtected = true;
-			player.resetFallDistance();
 			Integer current = player.getAttached(FLIGHT);
 			if (current == null || current != flight.ordinal()) {
 				player.setAttached(FLIGHT, flight.ordinal());

@@ -387,7 +387,6 @@ final class WebSwing {
 			}
 		}
 		player.setDeltaMovement(cap(v));
-		player.resetFallDistance();
 		int ticks = Math.max(strands[0].swingTicks, strands[1].swingTicks);
 		if (air && v.lengthSqr() > 1.2 * 1.2 && ticks % 12 == 0) {
 			play(player, SoundEvents.PLAYER_ATTACK_SWEEP, 0.25F, 0.6F + (float)Math.min(0.6, v.length() * 0.2));
@@ -428,7 +427,6 @@ final class WebSwing {
 		Vec3 target = braced.subtract(forward.scale(SLING_PULLBACK * slingDraw));
 		Vec3 v = target.subtract(player.position()).scale(0.4);
 		player.setDeltaMovement(v);
-		player.resetFallDistance();
 		if (slingDraw > 0.0F && player.tickCount % 3 == 0) {
 			// tension shivers along the webs
 			Vec3 at = player.position().add(0.0, 1.0, 0.0);
@@ -498,7 +496,6 @@ final class WebSwing {
 		Vec3 current = v.horizontal().lengthSqr() > 1.0E-6 ? v.horizontal().normalize() : heading;
 		Vec3 dir = current.lerp(heading, WINGS_STEER).normalize();
 		player.setDeltaMovement(dir.x * h, vy, dir.z * h);
-		player.resetFallDistance();
 		if (wingsTicks % 4 == 0) {
 			play(player, SoundEvents.ELYTRA_FLYING, 0.08F, 1.6F);
 		}
@@ -555,7 +552,6 @@ final class WebSwing {
 		double speed = Math.min(WebPower.ZIP_SPEED, 0.35 + distance * 0.45);
 		Vec3 v = player.getDeltaMovement().lerp(to.scale(speed / distance), ZIP_STEER);
 		player.setDeltaMovement(v);
-		player.resetFallDistance();
 	}
 
 	private void finishPull(LocalPlayer player, WebNet.Pull pull) {
