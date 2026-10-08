@@ -119,7 +119,7 @@ final class WindHud {
 		if (ability == null) {
 			return;
 		}
-		float charge = Mth.clamp(client.channelTicks() / (float)WindAbility.MAX_CHANNEL, 0.0F, 1.0F);
+		float charge = Mth.clamp(client.channelTicks() / (float)ability.maxChannel, 0.0F, 1.0F);
 		int barWidth = 52;
 		int x0 = cx - barWidth / 2;
 		int y = cy - 20;
@@ -153,13 +153,13 @@ final class WindHud {
 		graphics.outline(x, y, CHIP, CHIP, (ready ? 0xFF000000 : 0xA0000000) | border);
 		graphics.item(new ItemStack(ability.icon), x + 2, y + 2);
 		if (!ready) {
-			float share = Mth.clamp(cooldown / (float)ability.cooldown, 0.0F, 1.0F);
+			float share = Mth.clamp(cooldown / (float)client.cooldownTotal(ability), 0.0F, 1.0F);
 			int shade = Mth.ceil(16 * share);
 			graphics.fill(x + 2, y + 2 + 16 - shade, x + 18, y + 18, 0xB0000000);
 			String seconds = cooldown >= 200 ? Integer.toString(Mth.ceil(cooldown / 20.0F)) : String.format(Locale.ROOT, "%.1f", cooldown / 20.0F);
 			graphics.text(font, seconds, x + CHIP / 2 - font.width(seconds) / 2, y + 4, 0xFFFFFFFF);
 		} else if (channelling) {
-			float charge = Mth.clamp(client.channelTicks() / (float)WindAbility.MAX_CHANNEL, 0.0F, 1.0F);
+			float charge = Mth.clamp(client.channelTicks() / (float)ability.maxChannel, 0.0F, 1.0F);
 			graphics.fill(x + 1, y + CHIP - 3, x + 1 + Mth.ceil((CHIP - 2) * charge), y + CHIP - 1, 0xFF000000 | ability.color);
 		}
 		// the bound key, bottom-right like an item count

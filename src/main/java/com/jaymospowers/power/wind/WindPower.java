@@ -74,11 +74,18 @@ public final class WindPower implements Power {
 	static final double FLIGHT_EXHAUSTION_PER_SPEED = 0.03;
 	/** At or below this food level you're too weak to cruise (like sprinting); you can still hover. */
 	public static final int CRUISE_MIN_FOOD = 6;
-	/** Tailwind on the ground: a gust blast along the look direction instead of the buff. */
-	static final double GUST_RANGE_MIN = 6.0, GUST_RANGE_MAX = 11.0;
+	/**
+	 * Tailwind on the ground: a gust blast along the look direction instead of the buff, growing with the charge (up
+	 * to 5 s). A full charge hits like TNT: point-blank damage {@code GUST_DAMAGE_MAX} (a TNT blast's 57), falling off
+	 * along TNT's curve to the blast's edge, with TNT-strength knockback; it costs a 3-minute cooldown.
+	 */
+	static final double GUST_RANGE_MIN = 6.0, GUST_RANGE_MAX = 12.0;
 	static final double GUST_HALF_ANGLE = 35.0;
-	static final float GUST_DAMAGE_MIN = 4.0F, GUST_DAMAGE_MAX = 10.0F;
-	static final double GUST_KNOCKBACK_MIN = 1.4, GUST_KNOCKBACK_MAX = 3.0;
+	static final float GUST_DAMAGE_MIN = 4.0F, GUST_DAMAGE_MAX = 57.0F;
+	static final double GUST_KNOCKBACK_MIN = 0.6, GUST_KNOCKBACK_MAX = 1.8;
+	static final int GUST_COOLDOWN_MIN = 400, GUST_COOLDOWN_MAX = 3600;
+	/** A charge at least this full is a full blast (explosion and all). */
+	static final float GUST_FULL = 0.95F;
 	static final int ZEPHYR_FALL_MIN = 200, ZEPHYR_FALL_MAX = 600, ZEPHYR_REGEN_MIN = 100, ZEPHYR_REGEN_MAX = 240;
 	/** Other players further away than this don't get the flight trail. */
 	private static final double TRAIL_VIEW_DISTANCE = 128.0;
@@ -281,7 +288,7 @@ public final class WindPower implements Power {
 		if (s.channel != null) {
 			s.channelTicks++;
 			this.channelEffects(player, level, s);
-			if (s.channelTicks >= WindAbility.MAX_CHANNEL || !PowerInput.isDown(player, s.channel.key)) {
+			if (s.channelTicks >= s.channel.maxChannel || !PowerInput.isDown(player, s.channel.key)) {
 				this.release(player, s);
 			}
 		}
@@ -406,7 +413,7 @@ public final class WindPower implements Power {
 	// ---- channelled abilities ---------------------------------------------------------------------------------
 
 	private void channelEffects(ServerPlayer player, ServerLevel level, State s) {
-		float f = s.channelTicks / (float)WindAbility.MAX_CHANNEL;
+		float f = Math.min(1.0F, s.channelTicks / (float)s.channel.maxChannel);
 		// two wisps spiralling up and in around the body
 		for (int i = 0; i < 2; i++) {
 			double angle = s.channelTicks * 0.45 + i * Math.PI;
@@ -440,7 +447,7 @@ public final class WindPower implements Power {
 			return;
 		}
 		s.channel = null;
-		float f = Mth.clamp(s.channelTicks / (float)WindAbility.MAX_CHANNEL, 0.1F, 1.0F);
+		float f = Mth.clamp(s.channelTicks / (float)ability.maxChannel, 0.1F, 1.0F);
 		s.cooldowns[ability.ordinal()] = ability.cooldown;
 		ServerLevel level = player.level();
 		float dash = 0.0F;
@@ -448,6 +455,8 @@ public final class WindPower implements Power {
 			case TAILWIND -> {
 				if (player.onGround() && !s.flight.flying()) {
 					this.gust(player, level, f);
+					// the bigger the blast, the longer the wind takes to gather again: up to 3 minutes for a full charge
+					s.cooldowns[ability.ordinal()] = Mth.lerpInt(f * f, GUST_COOLDOWN_MIN, GUST_COOLDOWN_MAX);
 					break;
 				}
 				int ticks = Mth.lerpInt(f, TAILWIND_MIN_TICKS, TAILWIND_MAX_TICKS);
@@ -500,8 +509,10 @@ public final class WindPower implements Power {
 	private void gust(ServerPlayer player, ServerLevel level, float f) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getLookAngle();
+		boolean full = f >= GUST_FULL;
 		double range = Mth.lerp(f, GUST_RANGE_MIN, GUST_RANGE_MAX);
-		float damage = Mth.lerp(f, GUST_DAMAGE_MIN, GUST_DAMAGE_MAX);
+		// damage grows faster than the charge: most of a full blast's power is in its last second or two
+		float maxDamage = Mth.lerp(f * f, GUST_DAMAGE_MIN, GUST_DAMAGE_MAX);
 		double knockback = Mth.lerp(f, GUST_KNOCKBACK_MIN, GUST_KNOCKBACK_MAX);
 		double minDot = Math.cos(Math.toRadians(GUST_HALF_ANGLE));
 		AABB area = player.getBoundingBox().expandTowards(look.scale(range)).inflate(range * 0.6);
@@ -511,30 +522,45 @@ public final class WindPower implements Power {
 			if (distance > range || distance < 1.0E-3 || to.scale(1.0 / distance).dot(look) < minDot) {
 				continue;
 			}
-			// full strength up close, half at the edge of the blast
-			double falloff = 1.0 - 0.5 * distance / range;
+			if (!player.hasLineOfSight(target)) {
+				// walls take the blast
+				continue;
+			}
+			// TNT's falloff: impact 1 point-blank, 0 at the edge; damage follows (impact² + impact) / 2
+			double impact = 1.0 - distance / range;
 			if (target instanceof LivingEntity living) {
-				living.hurtServer(level, player.damageSources().windCharge(player, player), (float)(damage * falloff));
+				float damage = (float)(maxDamage * (impact * impact + impact) / 2.0);
+				living.hurtServer(level, full ? player.damageSources().explosion(player, player) : player.damageSources().windCharge(player, player),
+					Math.max(1.0F, damage));
 				double resist = 1.0 - living.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
 				if (resist <= 0.0) {
 					continue;
 				}
-				Vec3 push = look.horizontal().normalize().scale(knockback * falloff * resist);
-				living.push(push.x, 0.45 * resist + Math.max(0.0, look.y) * knockback * 0.5, push.z);
+				Vec3 dir = to.normalize();
+				Vec3 push = dir.scale(knockback * impact * resist);
+				living.push(push.x, Math.max(push.y, 0.0) + (0.25 + 0.35 * f) * impact * resist, push.z);
 				living.syncVelocity = true;
 			} else if (target instanceof Projectile projectile) {
-				projectile.setDeltaMovement(look.scale(1.5));
+				projectile.setDeltaMovement(look.scale(1.0 + f));
 				projectile.syncVelocity = true;
 			}
 		}
 		// the blast itself: gusts rolling out along the cone
 		for (int i = 1; i <= 5; i++) {
 			Vec3 at = eye.add(look.scale(range * i / 5.0));
-			level.sendParticles(ParticleTypes.GUST, at.x, at.y - 0.3, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-			level.sendParticles(ParticleTypes.CLOUD, at.x, at.y - 0.3, at.z, 6, 0.4 * i / 5.0, 0.3 * i / 5.0, 0.4 * i / 5.0, 0.05);
+			level.sendParticles(f > 0.5F ? ParticleTypes.GUST_EMITTER_SMALL : ParticleTypes.GUST, at.x, at.y - 0.3, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+			level.sendParticles(ParticleTypes.CLOUD, at.x, at.y - 0.3, at.z, (int)(6 + 14 * f), 0.4 * i / 5.0 * (1 + f), 0.3 * i / 5.0 * (1 + f),
+				0.4 * i / 5.0 * (1 + f), 0.05 + 0.1 * f);
 		}
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_WIND_CHARGE_BURST, SoundSource.PLAYERS, 1.4F, 0.7F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_WIND_CHARGE_BURST, SoundSource.PLAYERS, 1.0F + f, 0.9F - 0.3F * f);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WIND_CHARGE_BURST, SoundSource.PLAYERS, 1.0F, 0.6F);
+		if (full) {
+			// a full charge goes off like TNT (without breaking anything)
+			Vec3 at = eye.add(look.scale(3.0));
+			level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+			level.sendParticles(ParticleTypes.GUST_EMITTER_LARGE, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 4.0F, 0.8F);
+		}
 	}
 
 	private void pushMobs(ServerPlayer player, ServerLevel level, float f) {

@@ -195,3 +195,25 @@ maximum channel are in `WindAbility`.
   into the ground, or turning flight off high up, is a normal fall.
 - The `wind_impact` packet is now walls only, since the ground is judged as a fall.
 - Core rule for every power: fall distance is measured from your highest point. Moving up resets it.
+
+## Turning limits, the tumble, charged Tailwind (0.1.3)
+- **Turning:** the turn rate falls with the square root of the speed fraction, from 7°/tick down to `CRUISE_TURN_RATE_FAST`
+  0.7°/tick at top speed.
+- **Losing control:**
+  - At ≥ `TUMBLE_MIN_FRACTION` 35% of top speed, looking further off your flight path than the limit throws you into
+    a TUMBLE. The limit is `TUMBLE_ANGLE_SLOW` 110° at that speed, down to `TUMBLE_ANGLE_FAST` 60° at top speed.
+  - The tumble lasts `TUMBLE_TICKS` 40 (2 s) with no control. Momentum and gravity carry you, with drag
+    `TUMBLE_DRAG` 0.975. Falls count.
+  - It's drawn (`WindTumble`) as an end-over-end ragdoll flip with flailing limbs.
+  - Afterwards you recover into a HOVER in the recovery pose: torso pitched 35° forward, head up, arms swept back,
+    right knee up and left leg back. It's held for `RECOVER_TICKS` 30.
+  - Landing mid-tumble ends the flight; that's a crash.
+  - `WindFlight.TUMBLE` is synced so others see it.
+- **Tailwind:**
+  - It charges for up to 5 s (`WindAbility.maxChannel`; the others stay at 2 s).
+  - On the ground the gust scales with the charge: range 6→12, point-blank damage 4→57 (charge², TNT's 57 at full),
+    following TNT's falloff `(impact² + impact) / 2`, and knockback 0.6→1.8.
+  - Walls block it (line of sight).
+  - A full charge (≥ 95%) adds an explosion effect and uses explosion damage, so Blast Protection counts. Blocks are
+    never broken.
+  - Cooldown is 20 s → 180 s by charge². The HUD shades against each cooldown's actual length.

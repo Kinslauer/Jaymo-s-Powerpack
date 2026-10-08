@@ -23,6 +23,7 @@ public final class WindPowerClient implements PowerClient {
 	private final WindFlightController flight = new WindFlightController();
 	/** Ticks left on each ability's cooldown (counted down here between server updates). */
 	private final int[] cooldowns = new int[WindAbility.values().length];
+	private final int[] cooldownTotals = new int[WindAbility.values().length];
 	private @Nullable WindAbility channel;
 	private int channelTicks;
 
@@ -53,6 +54,11 @@ public final class WindPowerClient implements PowerClient {
 		return this.cooldowns[ability.ordinal()];
 	}
 
+	/** How long the current cooldown was when it started, for the HUD. */
+	public int cooldownTotal(WindAbility ability) {
+		return Math.max(1, this.cooldownTotals[ability.ordinal()]);
+	}
+
 	@Nullable WindAbility channel() {
 		return this.channel;
 	}
@@ -79,7 +85,7 @@ public final class WindPowerClient implements PowerClient {
 				this.cooldowns[i]--;
 			}
 		}
-		if (this.channel != null && this.channelTicks < WindAbility.MAX_CHANNEL) {
+		if (this.channel != null && this.channelTicks < this.channel.maxChannel) {
 			this.channelTicks++;
 		}
 	}
@@ -119,6 +125,10 @@ public final class WindPowerClient implements PowerClient {
 
 	private void onStatus(Minecraft minecraft, WindNet.Status status) {
 		for (int i = 0; i < this.cooldowns.length && i < status.cooldowns().length; i++) {
+			// a fresh cooldown sets the length the HUD shades against (Tailwind's varies with the charge)
+			if (status.cooldowns()[i] > this.cooldowns[i]) {
+				this.cooldownTotals[i] = status.cooldowns()[i];
+			}
 			this.cooldowns[i] = status.cooldowns()[i];
 		}
 		this.channel = WindAbility.byId(status.channel());

@@ -79,3 +79,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     - Controlled descents (Wind flight, web wings) slower than 0.5 b/t don't build fall distance, like vanilla's elytra
       rule.
     - Core: for power holders, fall distance resets while moving up, so falls are measured from the apex.
+- **0.1.3:**
+  - Wind: steep turn-rate falloff at speed. A snap turn at speed causes a 2 s ragdoll tumble, then recovery into a
+    hover in the recovery pose (from the user's reference image).
+  - Tailwind charges for up to 5 s. A full charge on the ground is a TNT-strength gust with a 180 s cooldown.
