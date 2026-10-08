@@ -66,6 +66,46 @@ public final class PowerCommand {
 							c.getSource().sendSuccess(() -> Component.translatable("commands.jaymospowers.level", abilities, players.size()), true);
 							return players.size();
 						}))))
+			.then(Commands.literal("ascend")
+				.then(Commands.argument("targets", EntityArgument.players())
+					.executes(c -> {
+						Collection<ServerPlayer> players = EntityArgument.getPlayers(c, "targets");
+						int done = (int)players.stream().filter(Fate::ascend).count();
+						c.getSource().sendSuccess(() -> Component.translatable("commands.jaymospowers.ascend", done), true);
+						return done;
+					})))
+			.then(Commands.literal("corrupt")
+				.then(Commands.argument("targets", EntityArgument.players())
+					.executes(c -> {
+						Collection<ServerPlayer> players = EntityArgument.getPlayers(c, "targets");
+						int done = (int)players.stream().filter(Fate::corrupt).count();
+						c.getSource().sendSuccess(() -> Component.translatable("commands.jaymospowers.corrupt", done), true);
+						return done;
+					})
+					.then(Commands.argument("amount", IntegerArgumentType.integer(-Fate.MAX_CORRUPTION, Fate.MAX_CORRUPTION))
+						.executes(c -> {
+							int amount = IntegerArgumentType.getInteger(c, "amount");
+							Collection<ServerPlayer> players = EntityArgument.getPlayers(c, "targets");
+							players.forEach(p -> Fate.addCorruption(p, amount));
+							c.getSource().sendSuccess(() -> Component.translatable("commands.jaymospowers.corruption", amount, players.size()), true);
+							return players.size();
+						}))))
+			.then(Commands.literal("purify")
+				.then(Commands.argument("targets", EntityArgument.players())
+					.executes(c -> {
+						Collection<ServerPlayer> players = EntityArgument.getPlayers(c, "targets");
+						int done = (int)players.stream().filter(Fate::purify).count();
+						c.getSource().sendSuccess(() -> Component.translatable("commands.jaymospowers.purify", done), true);
+						return done;
+					})))
+			.then(Commands.literal("resetfate")
+				.then(Commands.argument("targets", EntityArgument.players())
+					.executes(c -> {
+						Collection<ServerPlayer> players = EntityArgument.getPlayers(c, "targets");
+						players.forEach(Fate::reset);
+						c.getSource().sendSuccess(() -> Component.translatable("commands.jaymospowers.resetfate", players.size()), true);
+						return players.size();
+					})))
 			.then(Commands.literal("get")
 				.then(Commands.argument("target", EntityArgument.player())
 					.executes(c -> {
@@ -74,6 +114,8 @@ public final class PowerCommand {
 						Integer left = player.getAttached(Powers.AWAKEN_IN);
 						c.getSource().sendSuccess(() -> power != null
 							? Component.translatable("commands.jaymospowers.get", player.getDisplayName(), power.name(), Mastery.unlocked(player), Mastery.points(player))
+								.append(" ").append(Component.translatable("commands.jaymospowers.get_fate", Fate.isAscended(player) ? "yes" : "no",
+									Fate.isCorrupted(player) ? "corrupted" : Fate.isPurified(player) ? "purified" : Fate.corruption(player) + "/" + Fate.MAX_CORRUPTION))
 							: Component.translatable("commands.jaymospowers.get_none", player.getDisplayName(), left == null ? "?" : String.valueOf(left / 20)), false);
 						return power != null ? 1 : 0;
 					}))));

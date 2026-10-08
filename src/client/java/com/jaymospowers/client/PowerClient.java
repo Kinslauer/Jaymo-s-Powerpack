@@ -19,6 +19,10 @@ public interface PowerClient {
 	default void onKey(LocalPlayer player, PowerKey key, boolean down) {
 	}
 
+	/** The ascended ability's key (C by default) went down or up. Only called while the power is ascended. */
+	default void onUltimate(LocalPlayer player, boolean down) {
+	}
+
 	/** Draw this power's HUD (cooldowns, meters). The core already draws the power badge in the top-left corner. */
 	default void renderHud(GuiGraphicsExtractor graphics, DeltaTracker delta, LocalPlayer player) {
 	}

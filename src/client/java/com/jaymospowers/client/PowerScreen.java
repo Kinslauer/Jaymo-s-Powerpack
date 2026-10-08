@@ -2,6 +2,7 @@ package com.jaymospowers.client;
 
 import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.net.PowerPayloads;
@@ -133,7 +134,8 @@ public class PowerScreen extends Screen {
 		}
 		graphics.fill(x, y, x + 2, y + CARD_H, accent);
 		graphics.item(power.icon(), x + 5, y + 4);
-		graphics.text(this.font, power.name(), x + 25, y + 8, accent);
+		Component name = active && this.minecraft.player != null ? PowerHud.title(power, Fate.state(this.minecraft.player)) : power.name();
+		graphics.text(this.font, name, x + 25, y + 8, accent);
 
 		int lineY = y + 24;
 		List<FormattedCharSequence> desc = this.font.split(power.description(), CARD_W - 10);
@@ -154,6 +156,16 @@ public class PowerScreen extends Screen {
 			List<FormattedCharSequence> split = this.font.split(line, CARD_W - 10);
 			if (!split.isEmpty()) {
 				graphics.text(this.font, split.getFirst(), x + 6, lineY, locked ? COLOR_DIM : COLOR_TEXT);
+			}
+			lineY += 9;
+		}
+		// the ascended ability shows up only once it's yours
+		if (active && this.minecraft.player != null && Fate.isAscended(this.minecraft.player) && Language.getInstance().has(base + "ultimate")) {
+			Component line = Component.literal("[").append(JaymosPowersClient.ultimateKey().getTranslatedKeyMessage()).append("] ")
+				.append(Component.translatable(base + "ultimate"));
+			List<FormattedCharSequence> split = this.font.split(line, CARD_W - 10);
+			if (!split.isEmpty()) {
+				graphics.text(this.font, split.getFirst(), x + 6, lineY, 0xFFFFD54A);
 			}
 			lineY += 9;
 		}

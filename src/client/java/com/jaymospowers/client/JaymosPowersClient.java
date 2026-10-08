@@ -7,6 +7,7 @@ import com.jaymospowers.client.power.arsenal.ArsenalPowerClient;
 import com.jaymospowers.client.power.chrono.ChronoPowerClient;
 import com.jaymospowers.client.power.web.WebPowerClient;
 import com.jaymospowers.client.power.wind.WindPowerClient;
+import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.net.PowerPayloads;
@@ -28,6 +29,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 	private static final int[] DEFAULT_KEYS = {InputConstants.KEY_R, InputConstants.KEY_G, InputConstants.KEY_V, InputConstants.KEY_B};
 	private static final KeyMapping[] ABILITY_KEYS = new KeyMapping[PowerKey.values().length];
 	private static KeyMapping menuKey;
+	/** The ascended ability's key (C by default): silent until the power ascends. */
+	private static KeyMapping ultimateKey;
+	private static boolean ultimateWasDown;
 
 	private static final boolean[] wasDown = new boolean[PowerKey.values().length];
 	private static @Nullable Identifier lastPower;
@@ -39,6 +43,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 				new KeyMapping("key.jaymospowers." + key.id(), DEFAULT_KEYS[key.ordinal()], CATEGORY));
 		}
 		menuKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.menu", InputConstants.KEY_H, CATEGORY));
+		ultimateKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.ultimate", InputConstants.KEY_C, CATEGORY));
 
 		ClientTickEvents.END_CLIENT_TICK.register(JaymosPowersClient::tick);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("power_hud"), PowerHud::render);
@@ -52,6 +57,11 @@ public class JaymosPowersClient implements ClientModInitializer {
 	/** The key mapping for an ability key (to show its bound key in a HUD, say). */
 	public static KeyMapping keyMapping(PowerKey key) {
 		return ABILITY_KEYS[key.ordinal()];
+	}
+
+	/** The ascended ability's key mapping. */
+	public static KeyMapping ultimateKey() {
+		return ultimateKey;
 	}
 
 	/** Whether the local player has unlocked this ability yet (powers' HUDs dim the locked ones). */
@@ -104,6 +114,14 @@ public class JaymosPowersClient implements ClientModInitializer {
 				if (client != null && Mastery.isUnlocked(player, key)) {
 					client.onKey(player, key, down);
 				}
+			}
+		}
+		boolean ultimate = power != null && Fate.isAscended(player) && minecraft.gui.screen() == null && ultimateKey.isDown();
+		if (ultimate != ultimateWasDown) {
+			ultimateWasDown = ultimate;
+			ClientPlayNetworking.send(new PowerPayloads.UltimateKey(ultimate));
+			if (client != null) {
+				client.onUltimate(player, ultimate);
 			}
 		}
 		if (client != null && !minecraft.isPaused()) {

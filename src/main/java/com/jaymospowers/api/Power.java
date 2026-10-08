@@ -50,6 +50,32 @@ public interface Power {
 	}
 
 	/**
+	 * The ascended ability's key (C by default; see {@link com.jaymospowers.core.Fate}) went down or up. Only sent
+	 * while the power is ascended.
+	 */
+	default void onUltimate(ServerPlayer player, boolean down) {
+	}
+
+	/**
+	 * The power grew: {@code level} is how many abilities are now unlocked (2-4) from mastery, or 5 for ascension.
+	 * Not called for powers handed out complete (creative, /power set).
+	 */
+	default void onLevelUp(ServerPlayer player, int level) {
+	}
+
+	/** The power just ascended (Fate already says so). Grant the form here. */
+	default void onAscended(ServerPlayer player) {
+	}
+
+	/** The power was just corrupted (Fate already says so). */
+	default void onCorrupted(ServerPlayer player) {
+	}
+
+	/** The power was just purified of its corruption, for good (Fate already says so). Undo corruption effects. */
+	default void onPurified(ServerPlayer player) {
+	}
+
+	/**
 	 * The order the abilities unlock in when the power awakens naturally (see Mastery): the first is there from the
 	 * start. Charged abilities go last.
 	 */

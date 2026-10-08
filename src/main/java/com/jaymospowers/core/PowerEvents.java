@@ -20,6 +20,8 @@ public final class PowerEvents {
 				Powers.key(ctx.player(), key, payload.down());
 			}
 		});
+		ServerPlayNetworking.registerGlobalReceiver(PowerPayloads.UltimateKey.TYPE,
+			(payload, ctx) -> Powers.ultimate(ctx.player(), payload.down()));
 		ServerPlayNetworking.registerGlobalReceiver(PowerPayloads.ChoosePower.TYPE,
 			(payload, ctx) -> Powers.choose(ctx.player(), payload.power()));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {

@@ -104,11 +104,16 @@ public final class Mastery {
 	/** {@code /power level}: set how many abilities are unlocked, with the points to match. */
 	public static void setLevel(ServerPlayer player, int abilities) {
 		int level = Mth.clamp(abilities, 1, PowerKey.values().length);
+		int before = unlocked(player);
 		if (level >= PowerKey.values().length) {
 			unlockAll(player);
 		} else {
 			player.setAttached(UNLOCKED, level);
 			player.setAttached(POINTS, UNLOCK_AT[level - 1]);
+		}
+		Power power = Powers.of(player);
+		if (power != null && level > before) {
+			power.onLevelUp(player, level);
 		}
 	}
 
@@ -147,6 +152,10 @@ public final class Mastery {
 			player.setAttached(UNLOCKED, unlocked + 1);
 			PowerKey[] order = order(player);
 			announce(player, order[Math.min(unlocked, order.length - 1)]);
+			Power power = Powers.of(player);
+			if (power != null) {
+				power.onLevelUp(player, unlocked + 1);
+			}
 		}
 	}
 

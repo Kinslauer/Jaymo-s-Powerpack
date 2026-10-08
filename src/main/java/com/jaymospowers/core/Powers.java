@@ -89,6 +89,8 @@ public final class Powers {
 		}
 		// a power given by hand (creative, /power set) comes complete; awaken() narrows it back to one ability
 		Mastery.unlockAll(player);
+		// a new power starts its fate fresh (not ascended, not corrupted)
+		Fate.reset(player);
 		if (power == null) {
 			player.removeAttached(POWER);
 		} else {
@@ -174,6 +176,14 @@ public final class Powers {
 			if (down) {
 				Mastery.used(player);
 			}
+		}
+	}
+
+	/** The ascended ability's key: only an ascended power answers it (anyone else's press does nothing at all). */
+	static void ultimate(ServerPlayer player, boolean down) {
+		Power power = of(player);
+		if (power != null && Fate.isAscended(player) && player.isAlive() && !player.isSpectator()) {
+			power.onUltimate(player, down);
 		}
 	}
 

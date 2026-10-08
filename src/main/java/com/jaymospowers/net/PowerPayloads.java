@@ -27,6 +27,19 @@ public final class PowerPayloads {
 		}
 	}
 
+	/** Client → server: the ascended ability's key went down or up. */
+	public record UltimateKey(boolean down) implements CustomPacketPayload {
+		public static final Type<UltimateKey> TYPE = new Type<>(JaymosPowers.id("ultimate_key"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, UltimateKey> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeBoolean(p.down),
+			buf -> new UltimateKey(buf.readBoolean()));
+
+		@Override
+		public Type<UltimateKey> type() {
+			return TYPE;
+		}
+	}
+
 	/** Client → server: pick a power on the powers screen (creative only); an empty id clears it. */
 	public record ChoosePower(String power) implements CustomPacketPayload {
 		public static final Type<ChoosePower> TYPE = new Type<>(JaymosPowers.id("choose_power"));
@@ -43,5 +56,6 @@ public final class PowerPayloads {
 	public static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(KeyInput.TYPE, KeyInput.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ChoosePower.TYPE, ChoosePower.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UltimateKey.TYPE, UltimateKey.CODEC);
 	}
 }

@@ -30,5 +30,18 @@
 	"message.jaymospowers.unlocked_chat": "Your power grows: [%s] %s",
 	"message.jaymospowers.locked": "That ability is still locked. Keep using your power to unlock it.",
 	"screen.jaymospowers.locked": "locked",
-	"screen.jaymospowers.mastery": "Mastery: next ability %s%%"
+	"screen.jaymospowers.mastery": "Mastery: next ability %s%%",
+	"key.jaymospowers.ultimate": "Power Ability 5",
+	"message.jaymospowers.ascended": "Your power ascends",
+	"message.jaymospowers.ascended_chat": "Something new answers to [%s].",
+	"message.jaymospowers.corrupted": "Something is wrong",
+	"message.jaymospowers.corrupted_sub": "Your power no longer feels like your own.",
+	"message.jaymospowers.purified": "The rot burns away",
+	"message.jaymospowers.purified_sub": "Your power is yours again, and nothing can take it now.",
+	"commands.jaymospowers.ascend": "Ascended %s player(s)",
+	"commands.jaymospowers.corrupt": "Corrupted %s player(s)",
+	"commands.jaymospowers.corruption": "Moved corruption by %s for %s player(s)",
+	"commands.jaymospowers.purify": "Purified %s player(s)",
+	"commands.jaymospowers.resetfate": "Reset the fate of %s player(s)",
+	"commands.jaymospowers.get_fate": "[ascended: %s, corruption: %s]"
 }
