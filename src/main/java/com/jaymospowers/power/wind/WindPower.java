@@ -64,6 +64,19 @@ public final class WindPower implements Power {
 	static final double BARRIER_PUSH_RADIUS = 6.0, BARRIER_PUSH_MIN = 0.9, BARRIER_PUSH_MAX = 1.8;
 	/** Zephyr's Breath: radius; Slow Falling and Regeneration durations. */
 	static final double ZEPHYR_RADIUS = 6.0;
+	/**
+	 * Hunger while flying, per tick: a base plus more per block/tick of speed. Sprinting costs about 0.028/tick, so a
+	 * hover (0.03) is a bit hungrier and full sonic (0.105) burns through a full bar in under a minute.
+	 */
+	static final double FLIGHT_EXHAUSTION_BASE = 0.03;
+	static final double FLIGHT_EXHAUSTION_PER_SPEED = 0.03;
+	/** At or below this food level you're too weak to cruise (like sprinting); you can still hover. */
+	public static final int CRUISE_MIN_FOOD = 6;
+	/** Tailwind on the ground: a gust blast along the look direction instead of the buff. */
+	static final double GUST_RANGE_MIN = 6.0, GUST_RANGE_MAX = 11.0;
+	static final double GUST_HALF_ANGLE = 35.0;
+	static final float GUST_DAMAGE_MIN = 4.0F, GUST_DAMAGE_MAX = 10.0F;
+	static final double GUST_KNOCKBACK_MIN = 1.4, GUST_KNOCKBACK_MAX = 3.0;
 	static final int ZEPHYR_FALL_MIN = 200, ZEPHYR_FALL_MAX = 600, ZEPHYR_REGEN_MIN = 100, ZEPHYR_REGEN_MAX = 240;
 	/** Other players further away than this don't get the flight trail. */
 	private static final double TRAIL_VIEW_DISTANCE = 128.0;
@@ -175,8 +188,11 @@ public final class WindPower implements Power {
 		return s != null && s.flight.flying() && Powers.has(player, this);
 	}
 
-	/** Crash damage per block/tick of speed lost above the safe speed; walls are less forgiving than the ground. */
-	static final float IMPACT_DAMAGE_PER_SPEED = 10.0F;
+	/**
+	 * Crash damage grows with the square of the speed lost, like kinetic energy: {@code K × (lost² − safe²)}. Walls
+	 * are less forgiving than the ground. Cruising (1 b/t) into a wall ≈ 6; 1.5 b/t ≈ 16; sonic (2.5 b/t) ≈ 48.
+	 */
+	static final float IMPACT_DAMAGE_K = 8.0F;
 	static final float IMPACT_SAFE_WALL = 0.5F, IMPACT_SAFE_GROUND = 0.8F;
 	/** The most speed an impact can report (a little over top speed), and the minimum ticks between two impacts. */
 	static final float IMPACT_MAX_LOST = 3.0F;
@@ -190,7 +206,8 @@ public final class WindPower implements Power {
 			return;
 		}
 		float lost = Mth.clamp(payload.lost(), 0.0F, IMPACT_MAX_LOST);
-		float damage = (lost - (payload.wall() ? IMPACT_SAFE_WALL : IMPACT_SAFE_GROUND)) * IMPACT_DAMAGE_PER_SPEED;
+		float safe = payload.wall() ? IMPACT_SAFE_WALL : IMPACT_SAFE_GROUND;
+		float damage = (lost * lost - safe * safe) * IMPACT_DAMAGE_K;
 		if (damage < 1.0F) {
 			return;
 		}
@@ -252,6 +269,9 @@ public final class WindPower implements Power {
 				if (s.flight.fast() && s.lastPos != null && moved.lengthSqr() < 64.0) {
 					this.trail(player, level, s, moved);
 				}
+				// flying is hungry work: hovering already burns a little more than sprinting, and it climbs with speed
+				double speed = s.lastPos == null ? 0.0 : Math.min(moved.length(), 3.0);
+				player.causeFoodExhaustion((float)(FLIGHT_EXHAUSTION_BASE + FLIGHT_EXHAUSTION_PER_SPEED * speed));
 			}
 		}
 		if (s.fallProtected) {
@@ -433,6 +453,10 @@ public final class WindPower implements Power {
 		float dash = 0.0F;
 		switch (ability) {
 			case TAILWIND -> {
+				if (player.onGround() && !s.flight.flying()) {
+					this.gust(player, level, f);
+					break;
+				}
 				int ticks = Mth.lerpInt(f, TAILWIND_MIN_TICKS, TAILWIND_MAX_TICKS);
 				int amp = f >= 0.5F ? 1 : 0;
 				player.addEffect(new MobEffectInstance(MobEffects.SPEED, ticks, amp), player);
@@ -477,6 +501,47 @@ public final class WindPower implements Power {
 			}
 		}
 		this.sendStatus(player, s, dash, false);
+	}
+
+	/** Tailwind released on the ground: a cone of wind blasts everything in front away, hurting it. */
+	private void gust(ServerPlayer player, ServerLevel level, float f) {
+		Vec3 eye = player.getEyePosition();
+		Vec3 look = player.getLookAngle();
+		double range = Mth.lerp(f, GUST_RANGE_MIN, GUST_RANGE_MAX);
+		float damage = Mth.lerp(f, GUST_DAMAGE_MIN, GUST_DAMAGE_MAX);
+		double knockback = Mth.lerp(f, GUST_KNOCKBACK_MIN, GUST_KNOCKBACK_MAX);
+		double minDot = Math.cos(Math.toRadians(GUST_HALF_ANGLE));
+		AABB area = player.getBoundingBox().expandTowards(look.scale(range)).inflate(range * 0.6);
+		for (Entity target : level.getEntities(player, area, e -> e.isAlive() && !e.isSpectator() && e != player.getVehicle())) {
+			Vec3 to = target.getBoundingBox().getCenter().subtract(eye);
+			double distance = to.length();
+			if (distance > range || distance < 1.0E-3 || to.scale(1.0 / distance).dot(look) < minDot) {
+				continue;
+			}
+			// full strength up close, half at the edge of the blast
+			double falloff = 1.0 - 0.5 * distance / range;
+			if (target instanceof LivingEntity living) {
+				living.hurtServer(level, player.damageSources().windCharge(player, player), (float)(damage * falloff));
+				double resist = 1.0 - living.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
+				if (resist <= 0.0) {
+					continue;
+				}
+				Vec3 push = look.horizontal().normalize().scale(knockback * falloff * resist);
+				living.push(push.x, 0.45 * resist + Math.max(0.0, look.y) * knockback * 0.5, push.z);
+				living.syncVelocity = true;
+			} else if (target instanceof Projectile projectile) {
+				projectile.setDeltaMovement(look.scale(1.5));
+				projectile.syncVelocity = true;
+			}
+		}
+		// the blast itself: gusts rolling out along the cone
+		for (int i = 1; i <= 5; i++) {
+			Vec3 at = eye.add(look.scale(range * i / 5.0));
+			level.sendParticles(ParticleTypes.GUST, at.x, at.y - 0.3, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+			level.sendParticles(ParticleTypes.CLOUD, at.x, at.y - 0.3, at.z, 6, 0.4 * i / 5.0, 0.3 * i / 5.0, 0.4 * i / 5.0, 0.05);
+		}
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_WIND_CHARGE_BURST, SoundSource.PLAYERS, 1.4F, 0.7F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WIND_CHARGE_BURST, SoundSource.PLAYERS, 1.0F, 0.6F);
 	}
 
 	private void pushMobs(ServerPlayer player, ServerLevel level, float f) {

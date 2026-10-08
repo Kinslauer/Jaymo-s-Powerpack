@@ -2,6 +2,7 @@ package com.jaymospowers.client.power.wind;
 
 import com.jaymospowers.power.wind.WindFlight;
 import com.jaymospowers.power.wind.WindNet;
+import com.jaymospowers.power.wind.WindPower;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -43,9 +44,16 @@ public final class WindFlightController {
 	static final double CRUISE_ACCEL_TAPER = 0.6;
 	static final double CRUISE_DECEL = 0.06;
 	static final double CRUISE_BRAKE = 0.15;
-	/** How quickly the velocity swings round to the look direction, at low and at top speed (lower = more drift). */
-	static final double CRUISE_TURN_SLOW = 0.35;
-	static final double CRUISE_TURN_FAST = 0.12;
+	/**
+	 * Turning is rate-limited by speed, with real inertia: the flight path swings toward where you look by at most this
+	 * many degrees per tick, from just-cruising to top speed (so at sonic a U-turn takes a long, wide arc).
+	 */
+	static final double CRUISE_TURN_RATE_SLOW = 7.0;
+	static final double CRUISE_TURN_RATE_FAST = 1.2;
+	/** Speed bled per radian turned (hard turns cost momentum). */
+	static final double CRUISE_TURN_DRAG = 0.5;
+	/** Gravity along the flight path: diving gains speed, climbing loses it (blocks/tick per tick at vertical). */
+	static final double CRUISE_GRAVITY = 0.035;
 	/** Upward kick on take-off from the ground / in mid-air. */
 	static final double TAKEOFF_BOOST = 0.9;
 	static final double AIR_TAKEOFF_BOOST = 0.5;
@@ -174,7 +182,7 @@ public final class WindFlightController {
 		Vec3 wish = new Vec3(wishX, wishY, wishZ);
 		this.velocity = this.velocity.add(wish.subtract(this.velocity).scale(HOVER_RESPONSE));
 
-		if (input.sprint()) {
+		if (input.sprint() && (player.getAbilities().instabuild || player.getFoodData().getFoodLevel() > WindPower.CRUISE_MIN_FOOD)) {
 			// punch it
 			this.state = WindFlight.CRUISE;
 			this.locked = false;
@@ -187,13 +195,33 @@ public final class WindFlightController {
 		}
 	}
 
+	/** {@code from} turned toward {@code to} (unit vectors {@code angle} apart) by {@code by} radians, on the great circle. */
+	private static Vec3 rotateToward(Vec3 from, Vec3 to, double angle, double by) {
+		if (by >= angle) {
+			return to;
+		}
+		double sin = Math.sin(angle);
+		if (sin < 1.0E-4) {
+			// facing straight back: turn about any axis across the path (prefer the vertical one, a flat U-turn)
+			Vec3 axis = Math.abs(from.y) < 0.95 ? new Vec3(0.0, 1.0, 0.0) : new Vec3(1.0, 0.0, 0.0);
+			Vec3 side = from.cross(axis).normalize();
+			return from.scale(Math.cos(by)).add(side.scale(Math.sin(by))).normalize();
+		}
+		return from.scale(Math.sin(angle - by) / sin).add(to.scale(Math.sin(by) / sin)).normalize();
+	}
+
 	private void cruise(Minecraft minecraft, LocalPlayer player, Input input, int sneakTaps) {
 		if (sneakTaps % 2 == 1) {
 			this.locked = !this.locked;
 			this.lockFlash = 20;
 			player.level().playLocalSound(player, SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS, 0.35F, this.locked ? 1.6F : 1.1F);
 		}
-		boolean boosting = input.sprint();
+		// too hungry to push hard (like sprinting): no acceleration, and the lock lets go
+		boolean starving = !player.getAbilities().instabuild && player.getFoodData().getFoodLevel() <= WindPower.CRUISE_MIN_FOOD;
+		if (starving) {
+			this.locked = false;
+		}
+		boolean boosting = input.sprint() && !starving;
 		if (boosting) {
 			this.speed += CRUISE_ACCEL * (1.0 - CRUISE_ACCEL_TAPER * this.speed / TOP_SPEED);
 		} else if (!this.locked) {
@@ -203,10 +231,22 @@ public final class WindFlightController {
 			this.speed -= CRUISE_BRAKE;
 			this.locked = false;
 		}
+		// inertia: the path only swings round toward the look direction so fast, and turning hard costs speed
+		Vec3 look = player.getLookAngle();
+		Vec3 dir = this.velocity.lengthSqr() > 1.0E-6 ? this.velocity.normalize() : look;
+		double fractionNow = Mth.clamp(this.speed / TOP_SPEED, 0.0, 1.0);
+		double maxTurn = Math.toRadians(Mth.lerp(fractionNow, CRUISE_TURN_RATE_SLOW, CRUISE_TURN_RATE_FAST));
+		double angle = Math.acos(Mth.clamp(dir.dot(look), -1.0, 1.0));
+		if (angle > 1.0E-4) {
+			double turned = Math.min(angle, maxTurn);
+			dir = rotateToward(dir, look, angle, turned);
+			this.speed -= this.speed * CRUISE_TURN_DRAG * turned;
+		}
+		// and gravity along the path
+		this.speed -= dir.y * CRUISE_GRAVITY;
 		this.speed = Mth.clamp(this.speed, 0.0, TOP_SPEED);
 		double fraction = this.speed / TOP_SPEED;
-		double turn = Mth.lerp(fraction, CRUISE_TURN_SLOW, CRUISE_TURN_FAST);
-		this.velocity = this.velocity.lerp(player.getLookAngle().scale(this.speed), turn);
+		this.velocity = dir.scale(this.speed);
 
 		if (!boosting && !this.locked && this.speed <= HOVER_SPEED) {
 			this.state = WindFlight.HOVER;
