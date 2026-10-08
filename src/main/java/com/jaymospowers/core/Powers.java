@@ -87,6 +87,8 @@ public final class Powers {
 		if (old != null) {
 			old.onLost(player);
 		}
+		// a power given by hand (creative, /power set) comes complete; awaken() narrows it back to one ability
+		Mastery.unlockAll(player);
 		if (power == null) {
 			player.removeAttached(POWER);
 		} else {
@@ -108,6 +110,8 @@ public final class Powers {
 		}
 		Power power = choices.get(player.getRandom().nextInt(choices.size()));
 		set(player, power);
+		// a natural awakening starts small: the rest of the abilities come with mastery
+		Mastery.startFresh(player);
 		Component name = power.name().copy().withStyle(style -> style.withColor(TextColor.fromRgb(power.color())).withBold(true));
 		player.connection.send(new ClientboundSetTitlesAnimationPacket(10, 70, 20));
 		player.connection.send(new ClientboundSetTitleTextPacket(Component.translatable("message.jaymospowers.awakened")));
@@ -123,6 +127,7 @@ public final class Powers {
 			Power power = of(player);
 			if (power != null) {
 				power.tick(player);
+				Mastery.tick(player);
 				continue;
 			}
 			// powerless: count down survival play towards the awakening
@@ -151,10 +156,19 @@ public final class Powers {
 	}
 
 	static void key(ServerPlayer player, PowerKey key, boolean down) {
-		PowerInput.set(player, key, down);
 		Power power = of(player);
+		if (power != null && !Mastery.isUnlocked(player, key)) {
+			if (down) {
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.locked").withStyle(ChatFormatting.GRAY));
+			}
+			return;
+		}
+		PowerInput.set(player, key, down);
 		if (power != null && player.isAlive() && !player.isSpectator()) {
 			power.onKey(player, key, down);
+			if (down) {
+				Mastery.used(player);
+			}
 		}
 	}
 

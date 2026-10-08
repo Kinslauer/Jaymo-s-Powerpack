@@ -15,7 +15,7 @@
 	"commands.jaymospowers.unknown": "Unknown power",
 	"commands.jaymospowers.set": "Gave %s to %s player(s)",
 	"commands.jaymospowers.clear": "Cleared the power of %s player(s)",
-	"commands.jaymospowers.get": "%s has %s",
+	"commands.jaymospowers.get": "%s has %s (%s/4 abilities, %s mastery)",
 	"commands.jaymospowers.get_none": "%s has no power yet (awakens in about %s seconds of survival play)",
 	"screen.jaymospowers.title": "Powers",
 	"screen.jaymospowers.choose": "Choose",
@@ -24,5 +24,11 @@
 	"screen.jaymospowers.creative_hint": "Creative: pick any power.",
 	"screen.jaymospowers.dormant": "Your power is still dormant. Keep surviving and it will awaken.",
 	"screen.jaymospowers.yours": "Your power",
-	"screen.jaymospowers.keys": "Abilities"
+	"screen.jaymospowers.keys": "Abilities",
+	"commands.jaymospowers.level": "Unlocked %s abilities for %s player(s)",
+	"message.jaymospowers.unlocked": "New ability",
+	"message.jaymospowers.unlocked_chat": "Your power grows: [%s] %s",
+	"message.jaymospowers.locked": "That ability is still locked. Keep using your power to unlock it.",
+	"screen.jaymospowers.locked": "locked",
+	"screen.jaymospowers.mastery": "Mastery: next ability %s%%"
 }

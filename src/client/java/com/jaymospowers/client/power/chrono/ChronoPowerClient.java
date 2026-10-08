@@ -134,6 +134,14 @@ public final class ChronoPowerClient implements PowerClient {
 	}
 
 	private void drawClock(GuiGraphicsExtractor graphics, Font font, int i, int fx, int fy, float partial) {
+		if (!JaymosPowersClient.isUnlocked(PowerKey.values()[i])) {
+			// not mastered yet: an empty dark slot with just the key
+			graphics.fill(fx, fy, fx + FACE, fy + FACE, 0xB0000000);
+			graphics.outline(fx, fy, FACE, FACE, 0x60505050);
+			String key = font.plainSubstrByWidth(JaymosPowersClient.keyMapping(PowerKey.values()[i]).getTranslatedKeyMessage().getString(), FACE - 2);
+			graphics.text(font, key, fx + FACE - font.width(key), fy + FACE - 7, 0xFF505050);
+			return;
+		}
 		boolean active = activeLeft[i] > 0;
 		boolean cooling = cooldownLeft[i] > 0;
 

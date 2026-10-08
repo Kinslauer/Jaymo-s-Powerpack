@@ -22,7 +22,10 @@ public final class PowerEvents {
 		});
 		ServerPlayNetworking.registerGlobalReceiver(PowerPayloads.ChoosePower.TYPE,
 			(payload, ctx) -> Powers.choose(ctx.player(), payload.power()));
-		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> PowerInput.clear(handler.player));
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			PowerInput.clear(handler.player);
+			Mastery.forget(handler.player);
+		});
 		ServerTickEvents.END_SERVER_TICK.register(Powers::tick);
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> PowerCommand.register(dispatcher));
 	}

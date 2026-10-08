@@ -7,6 +7,7 @@ import com.jaymospowers.client.power.arsenal.ArsenalPowerClient;
 import com.jaymospowers.client.power.chrono.ChronoPowerClient;
 import com.jaymospowers.client.power.web.WebPowerClient;
 import com.jaymospowers.client.power.wind.WindPowerClient;
+import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.net.PowerPayloads;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -53,6 +54,12 @@ public class JaymosPowersClient implements ClientModInitializer {
 		return ABILITY_KEYS[key.ordinal()];
 	}
 
+	/** Whether the local player has unlocked this ability yet (powers' HUDs dim the locked ones). */
+	public static boolean isUnlocked(PowerKey key) {
+		LocalPlayer player = Minecraft.getInstance().player;
+		return player == null || Mastery.isUnlocked(player, key);
+	}
+
 	/** The local player's power's client half, or null. */
 	public static @Nullable PowerClient active(LocalPlayer player) {
 		Power power = Powers.of(player);
@@ -65,11 +72,14 @@ public class JaymosPowersClient implements ClientModInitializer {
 			lastPower = null;
 			return;
 		}
+		Power power = Powers.of(player);
 		while (menuKey.consumeClick()) {
-			minecraft.gui.setScreen(new PowerScreen());
+			// in survival there's nothing to see until your power has awakened
+			if (power != null || player.isCreative()) {
+				minecraft.gui.setScreen(new PowerScreen());
+			}
 		}
 
-		Power power = Powers.of(player);
 		Identifier powerId = power == null ? null : power.id();
 		if (!java.util.Objects.equals(powerId, lastPower)) {
 			PowerClient old = PowerClients.get(lastPower);
@@ -86,11 +96,12 @@ public class JaymosPowersClient implements ClientModInitializer {
 
 		// report ability key changes (a key held while a screen opens counts as released)
 		for (PowerKey key : PowerKey.values()) {
+			// a locked ability's key does nothing here; the server still says it's locked when it's pressed
 			boolean down = power != null && minecraft.gui.screen() == null && ABILITY_KEYS[key.ordinal()].isDown();
 			if (down != wasDown[key.ordinal()]) {
 				wasDown[key.ordinal()] = down;
 				ClientPlayNetworking.send(new PowerPayloads.KeyInput(key.ordinal(), down));
-				if (client != null) {
+				if (client != null && Mastery.isUnlocked(player, key)) {
 					client.onKey(player, key, down);
 				}
 			}

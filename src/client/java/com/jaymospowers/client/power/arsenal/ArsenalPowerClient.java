@@ -100,6 +100,12 @@ public final class ArsenalPowerClient implements PowerClient {
 		int textW = font.width(text);
 		graphics.fill(x - 2, y - 1, x + textW + BAR_W + 6, y + 9, 0x60000000);
 		boolean ready = left <= 0;
+		if (!JaymosPowersClient.isUnlocked(key)) {
+			// not mastered yet
+			graphics.text(font, Component.literal("[").append(keyName).append("] ").append(Component.translatable("screen.jaymospowers.locked")),
+				x, y, 0xFF606060, true);
+			return;
+		}
 		graphics.text(font, text, x, y, ready ? 0xFFFFFFFF : 0xFFA0A0A0, true);
 		int bx = x + textW + 3;
 		graphics.fill(bx, y + 2, bx + BAR_W, y + 6, 0xFF2A2140);

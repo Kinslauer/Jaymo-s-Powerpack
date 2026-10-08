@@ -126,6 +126,14 @@ final class WindHud {
 	}
 
 	private static void chip(GuiGraphicsExtractor graphics, Font font, WindPowerClient client, WindAbility ability, int x, int y, float time) {
+		if (!JaymosPowersClient.isUnlocked(ability.key)) {
+			// not mastered yet: an empty dark slot with just the key
+			graphics.fill(x, y, x + CHIP, y + CHIP, 0xB0000000);
+			graphics.outline(x, y, CHIP, CHIP, 0x60505050);
+			String key = font.plainSubstrByWidth(JaymosPowersClient.keyMapping(ability.key).getTranslatedKeyMessage().getString(), CHIP - 2);
+			graphics.text(font, key, x + CHIP - 1 - font.width(key), y + CHIP - 8, 0xFF505050);
+			return;
+		}
 		int cooldown = client.cooldown(ability);
 		boolean channelling = client.channel() == ability;
 		boolean ready = cooldown <= 0;

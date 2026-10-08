@@ -170,6 +170,14 @@ public final class WebPowerClient implements PowerClient {
 	}
 
 	private static void chip(GuiGraphicsExtractor graphics, Font font, int x, int y, PowerKey key, Item icon, long left, int total) {
+		if (!JaymosPowersClient.isUnlocked(key)) {
+			// not mastered yet: an empty dark slot with just the key
+			graphics.fill(x, y, x + CHIP, y + CHIP, 0xB0000000);
+			graphics.outline(x, y, CHIP, CHIP, 0x60505050);
+			String label = font.plainSubstrByWidth(JaymosPowersClient.keyMapping(key).getTranslatedKeyMessage().getString(), CHIP - 2);
+			graphics.text(font, label, x + CHIP - 1 - font.width(label), y + CHIP - 8, 0xFF505050);
+			return;
+		}
 		boolean ready = left <= 0;
 		graphics.fill(x, y, x + CHIP, y + CHIP, 0x90000000);
 		graphics.outline(x, y, CHIP, CHIP, ready ? 0xFF000000 | CHIP_COLOR : 0xA0505050);

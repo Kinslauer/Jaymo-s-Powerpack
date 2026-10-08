@@ -2,6 +2,7 @@ package com.jaymospowers.client;
 
 import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.net.PowerPayloads;
 import java.util.ArrayList;
@@ -146,13 +147,19 @@ public class PowerScreen extends Screen {
 			if (!Language.getInstance().has(base + key.id())) {
 				continue;
 			}
+			// your own power's locked abilities show greyed out
+			boolean locked = active && !creative() && !JaymosPowersClient.isUnlocked(key);
 			Component line = Component.literal("[").append(JaymosPowersClient.keyMapping(key).getTranslatedKeyMessage()).append("] ")
-				.append(Component.translatable(base + key.id()));
+				.append(locked ? Component.translatable("screen.jaymospowers.locked") : Component.translatable(base + key.id()));
 			List<FormattedCharSequence> split = this.font.split(line, CARD_W - 10);
 			if (!split.isEmpty()) {
-				graphics.text(this.font, split.getFirst(), x + 6, lineY, COLOR_TEXT);
+				graphics.text(this.font, split.getFirst(), x + 6, lineY, locked ? COLOR_DIM : COLOR_TEXT);
 			}
 			lineY += 9;
+		}
+		float progress = active && this.minecraft.player != null ? Mastery.progress(this.minecraft.player) : -1.0F;
+		if (progress >= 0.0F) {
+			graphics.text(this.font, Component.translatable("screen.jaymospowers.mastery", Math.round(progress * 100.0F)), x + 6, lineY + 2, COLOR_DIM);
 		}
 	}
 }
