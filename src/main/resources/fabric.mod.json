@@ -1,0 +1,35 @@
+{
+	"schemaVersion": 1,
+	"id": "jaymospowers",
+	"version": "${version}",
+	"name": "Jaymo's Powers",
+	"description": "Every player awakens a superpower at some point in survival (or picks one in creative): Wind Control, Pocket Arsenal, Web Slinging and Chronokinesis. Made to be played alongside Jaymo's Kitchen.",
+	"authors": [],
+	"license": "MIT",
+	"environment": "*",
+	"entrypoints": {
+		"main": ["com.jaymospowers.JaymosPowers"],
+		"client": ["com.jaymospowers.client.JaymosPowersClient"]
+	},
+	"mixins": [
+		"jaymospowers.mixins.json",
+		{ "config": "jaymospowers.client.mixins.json", "environment": "client" },
+		"jaymospowers.wind.mixins.json",
+		{ "config": "jaymospowers.wind.client.mixins.json", "environment": "client" },
+		"jaymospowers.arsenal.mixins.json",
+		{ "config": "jaymospowers.arsenal.client.mixins.json", "environment": "client" },
+		"jaymospowers.web.mixins.json",
+		{ "config": "jaymospowers.web.client.mixins.json", "environment": "client" },
+		"jaymospowers.chrono.mixins.json",
+		{ "config": "jaymospowers.chrono.client.mixins.json", "environment": "client" }
+	],
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"jaymoskitchen": "*"
+	}
+}

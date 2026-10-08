@@ -1,0 +1,74 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+// build output lives outside OneDrive (its syncing locks files and breaks rebuilds);
+// one folder per checkout, so parallel worktrees don't share a build dir
+layout.buildDirectory = file("E:/jaymospowers-build/${rootDir.name.replace(' ', '-')}")
+
+repositories {
+	mavenCentral()
+	exclusiveContent {
+		forRepository { maven { url = "https://api.modrinth.com/maven" } }
+		filter { includeGroup "maven.modrinth" }
+	}
+}
+
+loom {
+	splitEnvironmentSourceSets()
+	mods {
+		"jaymospowers" {
+			sourceSet sourceSets.main
+			sourceSet sourceSets.client
+		}
+	}
+	runs {
+		server { vmArg "-Xmx1536M" }
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	// the rest of the modpack, loaded in the dev game only: Jaymo's Kitchen and what it needs
+	localRuntime files("libs/jaymos-kitchen-0.4.11.jar")
+	localRuntime "maven.modrinth:balm:26.3.0.3+fabric-26.3"
+	localRuntime "maven.modrinth:cooking-for-blockheads:26.3.0.2+fabric-26.3"
+}
+
+// each power keeps its own lang file in lang/parts/<power>.json; they're merged into en_us.json here
+def langParts = file("src/main/resources/assets/jaymospowers/lang/parts")
+processResources {
+	def version = project.version
+	inputs.property "version", version
+	inputs.dir langParts
+	filesMatching("fabric.mod.json") { expand "version": version }
+	exclude "assets/jaymospowers/lang/parts/**"
+	doLast {
+		def merged = new TreeMap()
+		langParts.listFiles().findAll { it.name.endsWith(".json") }.sort { it.name }.each { part ->
+			def entries = new JsonSlurper().parse(part, "UTF-8")
+			entries.each { k, v ->
+				if (merged.containsKey(k) && merged[k] != v) {
+					throw new GradleException("lang key ${k} is defined twice (again in ${part.name})")
+				}
+				merged[k] = v
+			}
+		}
+		def out = new File(destinationDir, "assets/jaymospowers/lang/en_us.json")
+		out.parentFile.mkdirs()
+		out.setText(JsonOutput.prettyPrint(JsonOutput.toJson(merged)), "UTF-8")
+	}
+}
+
+tasks.withType(JavaCompile).configureEach { it.options.release = 25; it.options.encoding = "UTF-8" }
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}

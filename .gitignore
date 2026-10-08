@@ -1,0 +1,14 @@
+.gradle/
+build/
+out/
+classes/
+*.launch
+.idea/
+*.iml
+.vscode/
+bin/
+run/
+hs_err_*.log
+*.hprof
+.claude/worktrees/
+modpack/

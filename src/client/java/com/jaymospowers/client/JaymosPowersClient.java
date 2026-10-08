@@ -1,0 +1,102 @@
+package com.jaymospowers.client;
+
+import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.api.Power;
+import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.client.power.arsenal.ArsenalPowerClient;
+import com.jaymospowers.client.power.chrono.ChronoPowerClient;
+import com.jaymospowers.client.power.web.WebPowerClient;
+import com.jaymospowers.client.power.wind.WindPowerClient;
+import com.jaymospowers.core.Powers;
+import com.jaymospowers.net.PowerPayloads;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.Nullable;
+
+public class JaymosPowersClient implements ClientModInitializer {
+	public static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(JaymosPowers.id("powers"));
+	private static final int[] DEFAULT_KEYS = {InputConstants.KEY_R, InputConstants.KEY_G, InputConstants.KEY_V, InputConstants.KEY_B};
+	private static final KeyMapping[] ABILITY_KEYS = new KeyMapping[PowerKey.values().length];
+	private static KeyMapping menuKey;
+
+	private static final boolean[] wasDown = new boolean[PowerKey.values().length];
+	private static @Nullable Identifier lastPower;
+
+	@Override
+	public void onInitializeClient() {
+		for (PowerKey key : PowerKey.values()) {
+			ABILITY_KEYS[key.ordinal()] = KeyMappingHelper.registerKeyMapping(
+				new KeyMapping("key.jaymospowers." + key.id(), DEFAULT_KEYS[key.ordinal()], CATEGORY));
+		}
+		menuKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.menu", InputConstants.KEY_H, CATEGORY));
+
+		ClientTickEvents.END_CLIENT_TICK.register(JaymosPowersClient::tick);
+		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("power_hud"), PowerHud::render);
+
+		WindPowerClient.init();
+		ArsenalPowerClient.init();
+		WebPowerClient.init();
+		ChronoPowerClient.init();
+	}
+
+	/** The key mapping for an ability key (to show its bound key in a HUD, say). */
+	public static KeyMapping keyMapping(PowerKey key) {
+		return ABILITY_KEYS[key.ordinal()];
+	}
+
+	/** The local player's power's client half, or null. */
+	public static @Nullable PowerClient active(LocalPlayer player) {
+		Power power = Powers.of(player);
+		return power == null ? null : PowerClients.get(power.id());
+	}
+
+	private static void tick(Minecraft minecraft) {
+		LocalPlayer player = minecraft.player;
+		if (player == null) {
+			lastPower = null;
+			return;
+		}
+		while (menuKey.consumeClick()) {
+			minecraft.gui.setScreen(new PowerScreen());
+		}
+
+		Power power = Powers.of(player);
+		Identifier powerId = power == null ? null : power.id();
+		if (!java.util.Objects.equals(powerId, lastPower)) {
+			PowerClient old = PowerClients.get(lastPower);
+			if (old != null) {
+				old.onActiveChanged(player, false);
+			}
+			PowerClient now = PowerClients.get(powerId);
+			if (now != null) {
+				now.onActiveChanged(player, true);
+			}
+			lastPower = powerId;
+		}
+		PowerClient client = PowerClients.get(powerId);
+
+		// report ability key changes (a key held while a screen opens counts as released)
+		for (PowerKey key : PowerKey.values()) {
+			boolean down = power != null && minecraft.gui.screen() == null && ABILITY_KEYS[key.ordinal()].isDown();
+			if (down != wasDown[key.ordinal()]) {
+				wasDown[key.ordinal()] = down;
+				ClientPlayNetworking.send(new PowerPayloads.KeyInput(key.ordinal(), down));
+				if (client != null) {
+					client.onKey(player, key, down);
+				}
+			}
+		}
+		if (client != null && !minecraft.isPaused()) {
+			client.tick(minecraft, player);
+		}
+	}
+}

@@ -1,0 +1,177 @@
+package com.jaymospowers.core;
+
+import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.api.Power;
+import com.jaymospowers.api.PowerKey;
+import com.mojang.serialization.Codec;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
+import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
+import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.player.Player;
+import org.jspecify.annotations.Nullable;
+
+/** The power registry, who holds which power, and the survival awakening. */
+public final class Powers {
+	private static final Map<Identifier, Power> ALL = new LinkedHashMap<>();
+
+	/** The player's power, if they have one. Saved, kept through death, and synced to every client (so others can see it). */
+	public static final AttachmentType<Identifier> POWER = AttachmentRegistry.create(JaymosPowers.id("power"),
+		builder -> builder.persistent(Identifier.CODEC).copyOnDeath().syncWith(Identifier.STREAM_CODEC, AttachmentSyncPredicate.all()));
+
+	/** Survival ticks left until a powerless player awakens. Rolled the first time they're seen. */
+	public static final AttachmentType<Integer> AWAKEN_IN = AttachmentRegistry.create(JaymosPowers.id("awaken_in"),
+		builder -> builder.persistent(Codec.INT).copyOnDeath());
+
+	/** Awakening comes after 1-3 Minecraft days (20-60 minutes) of survival play. */
+	public static final int AWAKEN_MIN_TICKS = 24000;
+	public static final int AWAKEN_MAX_TICKS = 72000;
+
+	private Powers() {
+	}
+
+	public static <P extends Power> P register(P power) {
+		if (ALL.putIfAbsent(power.id(), power) != null) {
+			throw new IllegalStateException("power registered twice: " + power.id());
+		}
+		return power;
+	}
+
+	public static Collection<Power> all() {
+		return Collections.unmodifiableCollection(ALL.values());
+	}
+
+	public static @Nullable Power get(@Nullable Identifier id) {
+		return id == null ? null : ALL.get(id);
+	}
+
+	/** By id path (e.g. "wind"), for commands. */
+	public static @Nullable Power byName(String name) {
+		return get(Identifier.tryParse(name.contains(":") ? name : JaymosPowers.MOD_ID + ":" + name));
+	}
+
+	/** The player's power, or null. Works on both sides (the attachment is synced). */
+	public static @Nullable Power of(Player player) {
+		return get(player.getAttached(POWER));
+	}
+
+	public static boolean has(Player player, Power power) {
+		return of(player) == power;
+	}
+
+	/** Gives the player {@code power} (or takes theirs away, for null). */
+	public static void set(ServerPlayer player, @Nullable Power power) {
+		Power old = of(player);
+		if (old == power) {
+			return;
+		}
+		if (old != null) {
+			old.onLost(player);
+		}
+		if (power == null) {
+			player.removeAttached(POWER);
+		} else {
+			player.setAttached(POWER, power.id());
+			player.removeAttached(AWAKEN_IN);
+			power.onGained(player);
+		}
+	}
+
+	/** Awakens a random power (a different one, if they already have one), with the full fanfare. */
+	public static void awaken(ServerPlayer player) {
+		List<Power> choices = new ArrayList<>(ALL.values());
+		Power current = of(player);
+		if (choices.size() > 1 && current != null) {
+			choices.remove(current);
+		}
+		if (choices.isEmpty()) {
+			return;
+		}
+		Power power = choices.get(player.getRandom().nextInt(choices.size()));
+		set(player, power);
+		Component name = power.name().copy().withStyle(style -> style.withColor(TextColor.fromRgb(power.color())).withBold(true));
+		player.connection.send(new ClientboundSetTitlesAnimationPacket(10, 70, 20));
+		player.connection.send(new ClientboundSetTitleTextPacket(Component.translatable("message.jaymospowers.awakened")));
+		player.connection.send(new ClientboundSetSubtitleTextPacket(name));
+		player.sendSystemMessage(Component.translatable("message.jaymospowers.awakened_chat", name)
+			.append(" ").append(Component.translatable("message.jaymospowers.open_menu").withStyle(ChatFormatting.GRAY)));
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 1.0F, 0.8F);
+		player.level().sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 80, 0.4, 0.8, 0.4, 0.15);
+	}
+
+	static void tick(MinecraftServer server) {
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			Power power = of(player);
+			if (power != null) {
+				power.tick(player);
+				continue;
+			}
+			// powerless: count down survival play towards the awakening
+			if (player.isCreative() || player.isSpectator() || !player.isAlive()) {
+				continue;
+			}
+			Integer left = player.getAttached(AWAKEN_IN);
+			if (left == null) {
+				RandomSource random = player.getRandom();
+				player.setAttached(AWAKEN_IN, AWAKEN_MIN_TICKS + random.nextInt(AWAKEN_MAX_TICKS - AWAKEN_MIN_TICKS + 1));
+				continue;
+			}
+			left--;
+			if (left <= 0) {
+				awaken(player);
+				continue;
+			}
+			player.setAttached(AWAKEN_IN, left);
+			if (left == 6000 || left == 1200) {
+				// foreshadowing: 5 minutes and 1 minute out
+				player.sendOverlayMessage(Component.translatable(left == 6000 ? "message.jaymospowers.stirring" : "message.jaymospowers.stirring_soon")
+					.withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.ITALIC));
+				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.6F, 0.5F);
+			}
+		}
+	}
+
+	static void key(ServerPlayer player, PowerKey key, boolean down) {
+		PowerInput.set(player, key, down);
+		Power power = of(player);
+		if (power != null && player.isAlive() && !player.isSpectator()) {
+			power.onKey(player, key, down);
+		}
+	}
+
+	/** From the powers screen: creative players (and operators) may pick any power, or none. */
+	static void choose(ServerPlayer player, String id) {
+		if (!player.isCreative() && !player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.creative_only"));
+			return;
+		}
+		if (id.isEmpty()) {
+			set(player, null);
+			return;
+		}
+		Power power = get(Identifier.tryParse(id));
+		if (power != null) {
+			set(player, power);
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.chosen", power.name()));
+		}
+	}
+}
