@@ -1,30 +1,25 @@
 package com.jaymospowers.client.power.arsenal;
 
 import com.jaymospowers.power.arsenal.ArsenalReach;
+import com.jaymospowers.power.arsenal.ArsenalVoid;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Draws Reach Through for everyone in view: a disc of swirling nether-portal light (the animated portal texture,
- * turning) with a bright rim, torn open in front of the weapon hand; and, while it's being drawn out, the weapon itself
+ * Draws Reach Through for everyone in view: a rift (see {@link RiftPortals}; swirling portal light, or the void's
+ * starfield when corrupted) torn open in front of the weapon hand; and, while it's being drawn out, the weapon itself
  * sliding out of the portal into the hand.
  */
 final class ArsenalReachRenderer {
-	private static final int SEGMENTS = 24;
-	private static final int FULL_BRIGHT = 0xF000F0;
 	private static final ItemStackRenderState ITEM = new ItemStackRenderState();
 
 	private ArsenalReachRenderer() {
@@ -52,75 +47,25 @@ final class ArsenalReachRenderer {
 				continue;
 			}
 			float bodyYaw = Mth.lerp(partialTick, player.yBodyRotO, player.yBodyRot);
-			portal(context, minecraft, center.subtract(camera), bodyYaw, ArsenalReach.openness(t), t);
+			boolean voidRift = ArsenalVoid.isVoid(player);
+			portal(context, center.subtract(camera), bodyYaw, ArsenalReach.openness(t), t, voidRift);
 			if (t > ArsenalReach.REACH_END && t < ArsenalReach.PULL_END && !reach.weapon().isEmpty()) {
 				emerging(context, minecraft, player, reach, center, camera, bodyYaw, t, partialTick);
 			}
 		}
 	}
 
-	/** The portal: a turning disc of portal texture, facing the player, with a glowing rim. */
-	private static void portal(LevelRenderContext context, Minecraft minecraft, Vec3 at, float bodyYaw, float open, float t) {
+	/** The portal: a turning disc facing the player (the void's starfield when the arsenal is corrupted). */
+	private static void portal(LevelRenderContext context, Vec3 at, float bodyYaw, float open, float t, boolean voidRift) {
 		if (open <= 0.01F) {
 			return;
 		}
-		TextureAtlasSprite sprite = minecraft.getModelManager().getBlockStateModelSet().getParticleMaterial(Blocks.NETHER_PORTAL.defaultBlockState()).sprite();
 		Vec3 right = ArsenalReach.right(bodyYaw);
 		Vec3 up = new Vec3(0.0, 1.0, 0.0);
 		Vec3 normal = ArsenalReach.forward(bodyYaw).scale(-1.0);
 		double radius = ArsenalReach.PORTAL_RADIUS * open;
 		// a little taller than wide, like a tear in the air
-		double rx = radius * 0.85;
-		double ry = radius * 1.1;
-		double spin = t * 0.12;
-		float u0 = sprite.getU0(), u1 = sprite.getU1(), v0 = sprite.getV0(), v1 = sprite.getV1();
-		PoseStack poseStack = context.poseStack();
-		context.submitNodeCollector().submitCustomGeometry(poseStack, RenderTypes.entityTranslucentEmissive(sprite.atlasLocation()), (pose, buffer) -> {
-			for (int i = 0; i < SEGMENTS; i++) {
-				double a0 = i * Mth.TWO_PI / SEGMENTS;
-				double a1 = (i + 1) * Mth.TWO_PI / SEGMENTS;
-				// inner disc: the portal texture, its UVs turning so the swirl spins
-				Vec3 p0 = ellipse(at, right, up, rx, ry, a0);
-				Vec3 p1 = ellipse(at, right, up, rx, ry, a1);
-				float cu = (u0 + u1) * 0.5F, cv = (v0 + v1) * 0.5F;
-				float du = (u1 - u0) * 0.5F, dv = (v1 - v0) * 0.5F;
-				quad(buffer, pose, at, p0, p1, at, normal, 0xF0E0C8FF,
-					cu, cv, cu + du * (float)Math.cos(a0 + spin), cv + dv * (float)Math.sin(a0 + spin),
-					cu + du * (float)Math.cos(a1 + spin), cv + dv * (float)Math.sin(a1 + spin), cu, cv);
-				// rim: a bright band just outside the disc
-				Vec3 q0 = ellipse(at, right, up, rx * 1.18, ry * 1.18, a0);
-				Vec3 q1 = ellipse(at, right, up, rx * 1.18, ry * 1.18, a1);
-				quad(buffer, pose, p0, q0, q1, p1, normal, 0xC0F2D8FF,
-					u0, v0, u1, v0, u1, v1, u0, v1);
-			}
-		});
-	}
-
-	private static Vec3 ellipse(Vec3 center, Vec3 right, Vec3 up, double rx, double ry, double angle) {
-		return center.add(right.scale(Math.cos(angle) * rx)).add(up.scale(Math.sin(angle) * ry));
-	}
-
-	/** A quad drawn from both sides (the portal is seen from the front and the back). */
-	private static void quad(VertexConsumer buffer, PoseStack.Pose pose, Vec3 a, Vec3 b, Vec3 c, Vec3 d, Vec3 normal, int color,
-		float ua, float va, float ub, float vb, float uc, float vc, float ud, float vd) {
-		vertex(buffer, pose, a, normal, color, ua, va);
-		vertex(buffer, pose, b, normal, color, ub, vb);
-		vertex(buffer, pose, c, normal, color, uc, vc);
-		vertex(buffer, pose, d, normal, color, ud, vd);
-		Vec3 back = normal.scale(-1.0);
-		vertex(buffer, pose, d, back, color, ud, vd);
-		vertex(buffer, pose, c, back, color, uc, vc);
-		vertex(buffer, pose, b, back, color, ub, vb);
-		vertex(buffer, pose, a, back, color, ua, va);
-	}
-
-	private static void vertex(VertexConsumer buffer, PoseStack.Pose pose, Vec3 p, Vec3 n, int color, float u, float v) {
-		buffer.addVertex(pose, (float)p.x, (float)p.y, (float)p.z)
-			.setColor(color)
-			.setUv(u, v)
-			.setOverlay(OverlayTexture.NO_OVERLAY)
-			.setLight(FULL_BRIGHT)
-			.setNormal(pose, (float)n.x, (float)n.y, (float)n.z);
+		RiftPortals.disc(context.submitNodeCollector(), context.poseStack(), at, right, up, normal, radius * 0.85, radius * 1.1, t * 0.12, voidRift);
 	}
 
 	/** The weapon sliding out of the portal toward the hand, growing as it comes into this world. */
@@ -150,7 +95,8 @@ final class ArsenalReachRenderer {
 		float scale = 0.35F + 0.4F * p;
 		poseStack.scale(scale, scale, scale);
 		minecraft.getItemModelResolver().updateForTopItem(ITEM, reach.weapon(), ItemDisplayContext.FIXED, minecraft.level, null, player.getId());
-		ITEM.submit(poseStack, context.submitNodeCollector(), FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
+		ITEM.submit(poseStack, context.submitNodeCollector(), ArsenalVoid.isVoid(player) ? RiftPortals.VOID_LIGHT : RiftPortals.FULL_BRIGHT,
+			OverlayTexture.NO_OVERLAY, 0);
 		poseStack.popPose();
 	}
 }
