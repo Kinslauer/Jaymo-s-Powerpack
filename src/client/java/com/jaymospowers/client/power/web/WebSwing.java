@@ -27,8 +27,8 @@ import org.jspecify.annotations.Nullable;
  */
 final class WebSwing {
 	// ===== swing feel: the knobs to tweak after playtesting =========================================================
-	/** The rope starts at this fraction of the distance to the anchor (< 1 = a small tug the moment it sticks). */
-	static final double ATTACH_SLACK = 0.94;
+	/** The rope starts at this fraction of the distance to the anchor: 1 = no tug when it sticks (Jump reels you in). */
+	static final double ATTACH_SLACK = 1.0;
 	/** Shortest the rope can be reeled to. */
 	static final double ROPE_MIN = 3.0;
 	/** Pull-back speed per block the rope is over-stretched (rope elasticity), and the most it pulls back per tick. */
@@ -40,6 +40,9 @@ final class WebSwing {
 	static final double SWING_DRAG = 0.993;
 	/** Holding forward on the downswing pumps this much extra speed along the swing, per tick. */
 	static final double PUMP = 0.03;
+	/** Holding Jump on a web also thrusts you along the swing this much per tick (on top of reeling in): it rockets
+	 * you round the arc, and a release flings you out of it with the extra speed. */
+	static final double JUMP_THRUST = 0.07;
 	/** Jump reels in, sneak lets out (blocks per tick), every web that's out. */
 	static final double REEL_IN = 0.45;
 	static final double LET_OUT = 0.35;
@@ -378,6 +381,14 @@ final class WebSwing {
 			Vec3 to = strand.anchor.subtract(body);
 			if (to.lengthSqr() > 1.0E-8) {
 				pullDir = pullDir.add(to.normalize());
+			}
+		}
+		// Jump: rocket along the arc (the swing's own direction, square to the webs)
+		if (air && input.jump() && pullDir.lengthSqr() > 1.0E-6 && v.lengthSqr() > 0.04) {
+			Vec3 dir = pullDir.normalize();
+			Vec3 tangent = v.subtract(dir.scale(v.dot(dir)));
+			if (tangent.lengthSqr() > 1.0E-4) {
+				v = v.add(tangent.normalize().scale(JUMP_THRUST));
 			}
 		}
 		// pump: forward on the downswing adds speed along the arc (across the webs' combined pull)

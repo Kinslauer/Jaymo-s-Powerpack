@@ -230,3 +230,15 @@ cobweb.
     faster they're dragged, and the walk cycle is suppressed.
   - It's drawn by a `LivingEntityRenderer` mixin, so it works on any mob.
 - **Client smoke test:** 78 mods load and the client joins a world with no mixin errors.
+
+## Swing feel (0.1.9)
+- **No tug on cast:** `ATTACH_SLACK` is 1.0, so a new web holds you at the distance it stuck at. Jump reels in; Sneak
+  still lets line out.
+- **Jump during a swing:** reels in and thrusts along the arc (`JUMP_THRUST` 0.07 b/t per tick, square to the webs,
+  up to the 2.6 cap). Holding it rockets you round the swing; releasing flings you out with the speed.
+- **Swing sway (`WebArms`):** hanging from a web, the body swings from the shoulders like a pendulum, with the legs
+  trailing behind the motion.
+  - Same spring as Wind's hover: `SWAY_SPRING` 0.16, `SWAY_DAMPING` 0.86, up to `SWAY_MAX` 0.6 rad.
+  - It's driven by position deltas, so it works for other players too.
+- **Posed geometry:** `WebArms.posed()` moves shoulder, hand and wing points through the same lean and sway as the
+  rendered body. The web lines and the wing membrane follow the leaning, swinging body, and the arms aim within it.

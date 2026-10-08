@@ -95,3 +95,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   stretched or when the target fights back.
 - **0.1.8:** Web Yank released while aiming at a block hitches the creature there (lead-style, barely able to move,
   breakable). Held or hitched creatures ragdoll.
+- **0.1.9:** Web: no tug on cast, Jump thrust along the arc, pendulum body sway while swinging, wings and lines follow
+  the posed body.
