@@ -33,13 +33,24 @@ loom {
 // The rest of the modpack, with each mod's CurseForge [project id, file id] for the CurseForge import zip.
 // Keep the versions in step with the CurseForge files (Cloth Config's newest Fabric file there is 26.3.158).
 def packMods = [
-	[dep: "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}", cf: [306612, 8913512]],
+	[dep: "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}", cf: [306612, 9078180]],
 	[dep: "maven.modrinth:balm:26.3.0.3+fabric-26.3", cf: [531761, 9035245]],
 	[dep: "maven.modrinth:cooking-for-blockheads:26.3.0.2+fabric-26.3", cf: [231484, 9035244]],
 	// Balkon's WeaponMod: Legacy (MIT): the Pocket Arsenal pulls its weapons from the registry, so no compile dependency
 	[dep: "maven.modrinth:balkons-weaponmod-legacy:Fabric-26.3-1.25.1", cf: [1033985, 8893149]],
 	[dep: "maven.modrinth:architectury-api:22.0.4+fabric", cf: [419699, 9075717]],
 	[dep: "maven.modrinth:cloth-config:26.3.158+fabric", cf: [348521, 8884063]],
+	// Better Combat (animated weapon swings and combos; its fallback rules cover Balkon's weapons by name) and its library
+	[dep: "maven.modrinth:better-combat:8Vyq1h9a", cf: [639842, 8906536]],
+	[dep: "maven.modrinth:player-animation-library:xJ30QmpE", cf: [1283899, 9080979]],
+	// the extras from the friends' server (Modrinth version ids, matched by file hash)
+	[dep: "maven.modrinth:pantry-for-blockheads:JsGFynFi", cf: [1514716, 8893586]],
+	[dep: "maven.modrinth:natures-compass:pHan4UQ9", cf: [252848, 8916820]],
+	[dep: "maven.modrinth:jei:QfoQJyPO", cf: [238222, 9068072]],
+	[dep: "maven.modrinth:mezzconfig:GKiA7PV4", cf: [1689768, 9048674]],
+	[dep: "maven.modrinth:xaeros-minimap:B2aG1aya", cf: [263420, 9067206]],
+	[dep: "maven.modrinth:sodium:bAZQdGpg", cf: [394468, 8888037]],
+	[dep: "maven.modrinth:ok-zoomer:3UXOK2JF", cf: [354047, 8899781]],
 ]
 // not on CurseForge: shipped inside the pack as overrides
 def kitchenJar = fileTree("libs") { include "jaymos-kitchen-*.jar" }
@@ -100,9 +111,18 @@ tasks.register("curseforgePack", Zip) {
 		from kitchenJar
 	}
 }
+// the friends' server (Serverfiles/, not in git): its mods folder is kept identical to the pack
+def serverDir = file("Serverfiles")
+tasks.register("serverMods", Sync) {
+	onlyIf { serverDir.isDirectory() }
+	from configurations.packJars
+	from tasks.named("jar")
+	from kitchenJar
+	into new File(serverDir, "mods")
+}
 tasks.register("packageModpack") {
 	group = "build"
-	dependsOn "modpackMods", "curseforgePack"
+	dependsOn "modpackMods", "curseforgePack", "serverMods"
 }
 
 // each power keeps its own lang file in lang/parts/<power>.json; they're merged into en_us.json here

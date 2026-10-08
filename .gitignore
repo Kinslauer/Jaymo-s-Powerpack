@@ -12,3 +12,5 @@ hs_err_*.log
 *.hprof
 .claude/worktrees/
 modpack/
+
+Serverfiles/
