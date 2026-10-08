@@ -32,9 +32,8 @@ public final class ChronoPowerClient implements PowerClient {
 	private static final int TEX_W = 64;
 	private static final int TEX_H = 32;
 	private static final int FACE = 18;
-	private static final int SLOT = 24;
-	/** Top of the clock row, measured up from the bottom of the screen (clear of hearts, armor, item names and action bar). */
-	private static final int ROW_FROM_BOTTOM = 104;
+	/** Gap between dials. The row sits right of the hotbar, like the other powers' ability chips. */
+	private static final int GAP = 2;
 	private static final int OVERCLOCK = 2;
 
 	private static final int GOLD = 0xFFF2C14E;
@@ -121,11 +120,16 @@ public final class ChronoPowerClient implements PowerClient {
 			vignette(graphics, width, height, activeLeft[OVERCLOCK] - partial, activeTotal[OVERCLOCK], player.tickCount + partial);
 		}
 
-		int x0 = width / 2 - SLOT * ChronoSync.ABILITIES / 2;
-		int top = height - ROW_FROM_BOTTOM;
+		// right of the hotbar, past the off-hand slot / attack indicator; above the hunger bar on narrow screens
+		int total = ChronoSync.ABILITIES * FACE + (ChronoSync.ABILITIES - 1) * GAP;
+		int x0 = width / 2 + 91 + 30;
+		int top = height - FACE - 1;
+		if (x0 + total > width - 2) {
+			x0 = width / 2 + 91 - total;
+			top = height - 22 - 30 - FACE;
+		}
 		for (int i = 0; i < ChronoSync.ABILITIES; i++) {
-			int fx = x0 + i * SLOT + (SLOT - FACE) / 2;
-			drawClock(graphics, font, i, fx, top, partial);
+			drawClock(graphics, font, i, x0 + i * (FACE + GAP), top, partial);
 		}
 	}
 
@@ -155,18 +159,16 @@ public final class ChronoPowerClient implements PowerClient {
 			graphics.outline(fx - 1, fy - 1, FACE + 2, FACE + 2, DENIED);
 		}
 
-		int below = fy + FACE + 1;
+		// how long an active ability has left: a bar just above its dial
 		if (active && activeTotal[i] > 0) {
 			float frac = Mth.clamp((activeLeft[i] - partial) / activeTotal[i], 0.0F, 1.0F);
-			graphics.fill(fx, below, fx + FACE, below + 2, 0x90000000);
-			graphics.fill(fx, below, fx + Math.round(FACE * frac), below + 2, GOLD);
+			graphics.fill(fx, fy - 3, fx + FACE, fy - 1, 0x90000000);
+			graphics.fill(fx, fy - 3, fx + Math.round(FACE * frac), fy - 1, GOLD);
 		}
 
-		String key = JaymosPowersClient.keyMapping(PowerKey.values()[i]).getTranslatedKeyMessage().getString();
-		while (key.length() > 1 && font.width(key) > SLOT - 2) {
-			key = key.substring(0, key.length() - 1);
-		}
-		graphics.centeredText(font, key, fx + FACE / 2, below + 3, cooling ? TEXT_DIM : TEXT);
+		// the bound key, bottom-right like an item count
+		String key = font.plainSubstrByWidth(JaymosPowersClient.keyMapping(PowerKey.values()[i]).getTranslatedKeyMessage().getString(), FACE - 2);
+		graphics.text(font, key, fx + FACE - font.width(key), fy + FACE - 7, cooling ? TEXT_DIM : TEXT);
 	}
 
 	/** Darkens the part of the dial still on cooldown: from the hand ({@code elapsed}) clockwise round to 12. */
