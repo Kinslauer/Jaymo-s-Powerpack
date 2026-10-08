@@ -1,4 +1,21 @@
 {
 	"power.jaymospowers.arsenal": "Pocket Arsenal",
-	"power.jaymospowers.arsenal.desc": "Reach into other dimensions and pull out whatever weapon answers."
+	"power.jaymospowers.arsenal.desc": "Reach into other dimensions and pull out whatever weapon answers. Summoned weapons return to their dimension after a while.",
+	"power.jaymospowers.arsenal.key.ability_1": "Reach Through (pull a random weapon)",
+	"power.jaymospowers.arsenal.key.ability_2": "Return held weapon (refunds Reach)",
+	"power.jaymospowers.arsenal.key.ability_3": "Barrage (weapons fly from rifts)",
+	"power.jaymospowers.arsenal.key.ability_4": "Pocket Stash (personal storage)",
+	"entity.jaymospowers.arsenal_rift_blade": "Rift Blade",
+	"container.jaymospowers.arsenal_stash": "Pocket Stash",
+	"tooltip.jaymospowers.arsenal.summoned": "Summoned: returns to its dimension in %ss",
+	"hud.jaymospowers.arsenal.reach": "Reach",
+	"hud.jaymospowers.arsenal.barrage": "Barrage",
+	"hud.jaymospowers.arsenal.none": "Summoned 0/%s",
+	"hud.jaymospowers.arsenal.held": "Summoned %s/%s · %ss",
+	"message.jaymospowers.arsenal.pulled": "Pulled from the rift: %s",
+	"message.jaymospowers.arsenal.returned": "Sent back to its dimension",
+	"message.jaymospowers.arsenal.nothing_to_return": "You aren't holding a summoned weapon",
+	"message.jaymospowers.arsenal.expired": "%s slipped back into its dimension",
+	"message.jaymospowers.arsenal.reach_recharging": "Reach Through recharging: %ss",
+	"message.jaymospowers.arsenal.barrage_recharging": "Barrage recharging: %ss"
 }
