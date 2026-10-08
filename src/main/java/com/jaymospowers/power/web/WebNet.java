@@ -13,10 +13,15 @@ public final class WebNet {
 	private WebNet() {
 	}
 
-	/** Client → server: the swing web stuck to {@code anchor} ({@code attach}), or was let go. */
-	public record Swing(boolean attach, Vec3 anchor) implements CustomPacketPayload {
+	/** The two swing webs: from the main hand (the swing key) and the off hand (G, while the off hand is empty). */
+	public static final int MAIN = 0;
+	public static final int OFF = 1;
+
+	/** Client → server: the {@code hand}'s swing web stuck to {@code anchor} ({@code attach}), or was let go. */
+	public record Swing(int hand, boolean attach, Vec3 anchor) implements CustomPacketPayload {
 		public static final Type<Swing> TYPE = new Type<>(JaymosPowers.id("web_swing"));
 		public static final StreamCodec<ByteBuf, Swing> CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_INT, Swing::hand,
 			ByteBufCodecs.BOOL, Swing::attach,
 			Vec3.STREAM_CODEC, Swing::anchor,
 			Swing::new);
@@ -27,10 +32,10 @@ public final class WebNet {
 		}
 	}
 
-	/** Server → client: the server refused that swing web (out of range, no line of sight): let go of it. */
-	public record SwingReject(int unused) implements CustomPacketPayload {
+	/** Server → client: the server refused the {@code hand}'s swing web (out of range, no line of sight, anchor gone): let go of it. */
+	public record SwingReject(int hand) implements CustomPacketPayload {
 		public static final Type<SwingReject> TYPE = new Type<>(JaymosPowers.id("web_swing_reject"));
-		public static final StreamCodec<ByteBuf, SwingReject> CODEC = ByteBufCodecs.VAR_INT.map(SwingReject::new, SwingReject::unused);
+		public static final StreamCodec<ByteBuf, SwingReject> CODEC = ByteBufCodecs.VAR_INT.map(SwingReject::new, SwingReject::hand);
 
 		@Override
 		public Type<SwingReject> type() {

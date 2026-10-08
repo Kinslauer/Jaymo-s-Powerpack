@@ -18,10 +18,11 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The local player's web movement: swinging (a rope constraint on top of vanilla physics), keeping momentum after a
- * release, and being reeled in (Zip / Yank-to). Runs at the end of each client tick, after vanilla has moved the
- * player, and sets the velocity they'll move with next tick. Player motion is client-authoritative, so this is the
- * real movement; the server only checks the anchor and waives fall damage and the flying kick.
+ * The local player's web movement: swinging on up to two webs at once (one from each hand, each on its own key and
+ * rope, as a rope constraint on top of vanilla physics), keeping momentum after a release, and being reeled in
+ * (Zip / Yank-to). Runs at the end of each client tick, after vanilla has moved the player, and sets the velocity
+ * they'll move with next tick. Player motion is client-authoritative, so this is the real movement; the server only
+ * checks the anchors and waives fall damage and the flying kick.
  */
 final class WebSwing {
 	// ===== swing feel: the knobs to tweak after playtesting =========================================================
@@ -38,7 +39,7 @@ final class WebSwing {
 	static final double SWING_DRAG = 0.993;
 	/** Holding forward on the downswing pumps this much extra speed along the swing, per tick. */
 	static final double PUMP = 0.03;
-	/** Jump reels in, sneak lets out (blocks per tick). */
+	/** Jump reels in, sneak lets out (blocks per tick), every web that's out. */
 	static final double REEL_IN = 0.45;
 	static final double LET_OUT = 0.35;
 	/** Speed cap while swinging or flying from a swing (blocks/tick; sprinting is ~0.28). */
@@ -51,7 +52,7 @@ final class WebSwing {
 	static final double RELEASE_UP = 0.5;
 	/** Horizontal velocity kept per tick in the air after a release, until you land (vanilla air is 0.91). */
 	static final double FLIGHT_DRAG = 0.985;
-	/** Holding the swing key in the air with nothing to stick to retries every this many ticks. */
+	/** Holding a swing key in the air with nothing to stick to retries every this many ticks. */
 	static final int RETRY_TICKS = 3;
 	// ===== zip / yank-to ===========================================================================================
 	/** How quickly the reel-in steers your velocity onto the line (0..1 per tick). */
@@ -66,13 +67,22 @@ final class WebSwing {
 	/** The rope pulls on the body at about hand height. */
 	private static final double ROPE_HEIGHT = 1.2;
 
-	// swing
-	boolean attached;
-	Vec3 anchor = Vec3.ZERO;
-	double rope;
-	int swingTicks;
-	boolean keyHeld;
-	private int retryIn;
+	/** One hand's swing web ({@link WebNet#MAIN} or {@link WebNet#OFF}). */
+	static final class Strand {
+		final int hand;
+		boolean attached;
+		Vec3 anchor = Vec3.ZERO;
+		double rope;
+		int swingTicks;
+		boolean keyHeld;
+		int retryIn;
+
+		Strand(int hand) {
+			this.hand = hand;
+		}
+	}
+
+	final Strand[] strands = {new Strand(WebNet.MAIN), new Strand(WebNet.OFF)};
 	// after a release
 	boolean flying;
 	// zip / yank-to
@@ -82,59 +92,75 @@ final class WebSwing {
 	private Vec3 lastPos = Vec3.ZERO;
 
 	void reset() {
-		attached = false;
+		for (Strand strand : strands) {
+			strand.attached = false;
+			strand.keyHeld = false;
+		}
 		flying = false;
 		pull = null;
-		keyHeld = false;
+	}
+
+	/** Any web stuck right now. */
+	boolean attached() {
+		return strands[WebNet.MAIN].attached || strands[WebNet.OFF].attached;
 	}
 
 	// ---- input ----------------------------------------------------------------------------------------------------
 
-	void press(LocalPlayer player) {
-		keyHeld = true;
+	void press(LocalPlayer player, int hand) {
+		Strand strand = strands[hand];
+		strand.keyHeld = true;
 		if (pull != null) {
 			return;
 		}
-		if (!tryAttach(player)) {
+		if (!tryAttach(player, strand)) {
 			play(player, SoundEvents.FISHING_BOBBER_THROW, 0.4F, 2.0F);
-			retryIn = RETRY_TICKS;
+			strand.retryIn = RETRY_TICKS;
 		}
 	}
 
-	void releaseKey(LocalPlayer player) {
-		keyHeld = false;
-		if (attached) {
-			detach(player, true);
+	void releaseKey(LocalPlayer player, int hand) {
+		Strand strand = strands[hand];
+		strand.keyHeld = false;
+		if (strand.attached) {
+			detach(player, strand, true);
 		}
 	}
 
-	private boolean tryAttach(LocalPlayer player) {
+	private boolean tryAttach(LocalPlayer player, Strand strand) {
 		if (player.getAbilities().flying || player.isInWater() || player.isInLava()) {
+			return false;
+		}
+		if (strand.hand == WebNet.OFF && !WebPower.offHandFree(player)) {
 			return false;
 		}
 		WebAnchors.Anchor found = WebAnchors.find(player);
 		if (found == null) {
 			return false;
 		}
-		attached = true;
+		strand.attached = true;
 		flying = false;
-		anchor = found.pos();
-		swingTicks = 0;
-		double distance = anchor.distanceTo(player.position().add(0.0, ROPE_HEIGHT, 0.0));
-		rope = Math.max(ROPE_MIN, distance * ATTACH_SLACK);
-		ClientPlayNetworking.send(new WebNet.Swing(true, anchor));
+		strand.anchor = found.pos();
+		strand.swingTicks = 0;
+		double distance = strand.anchor.distanceTo(player.position().add(0.0, ROPE_HEIGHT, 0.0));
+		strand.rope = Math.max(ROPE_MIN, distance * ATTACH_SLACK);
+		ClientPlayNetworking.send(new WebNet.Swing(strand.hand, true, strand.anchor));
 		play(player, SoundEvents.FISHING_BOBBER_THROW, 0.9F, 1.7F + player.getRandom().nextFloat() * 0.2F);
-		puff(player, anchor, 5);
+		puff(player, strand.anchor, 5);
 		return true;
 	}
 
-	/** Let go. {@code timed}: a deliberate release, which may earn the upswing boost. */
-	void detach(LocalPlayer player, boolean timed) {
-		if (!attached) {
+	/** Let go of one web. {@code timed}: a deliberate release, which may earn the upswing boost (if it was the last web). */
+	void detach(LocalPlayer player, Strand strand, boolean timed) {
+		if (!strand.attached) {
 			return;
 		}
-		attached = false;
-		ClientPlayNetworking.send(new WebNet.Swing(false, Vec3.ZERO));
+		strand.attached = false;
+		ClientPlayNetworking.send(new WebNet.Swing(strand.hand, false, Vec3.ZERO));
+		if (attached()) {
+			// still hanging from the other hand: no release yet
+			return;
+		}
 		flying = !player.onGround();
 		if (!timed || player.onGround()) {
 			return;
@@ -162,19 +188,33 @@ final class WebSwing {
 		}
 	}
 
-	/** The server refused the web, or the anchor broke. */
-	void rejected(LocalPlayer player) {
-		if (attached) {
-			attached = false;
-			flying = !player.onGround();
+	private void detachAll(LocalPlayer player, boolean timed) {
+		for (Strand strand : strands) {
+			detach(player, strand, timed);
+		}
+	}
+
+	/** The server refused that hand's web, or its anchor broke. */
+	void rejected(LocalPlayer player, int hand) {
+		if (hand < 0 || hand >= strands.length) {
+			return;
+		}
+		Strand strand = strands[hand];
+		if (strand.attached) {
+			strand.attached = false;
+			if (!attached()) {
+				flying = !player.onGround();
+			}
 			play(player, SoundEvents.LEAD_BREAK, 0.6F, 1.6F);
 		}
 	}
 
 	void startPull(LocalPlayer player, WebNet.Pull pull) {
-		if (attached) {
-			attached = false;
-			ClientPlayNetworking.send(new WebNet.Swing(false, Vec3.ZERO));
+		for (Strand strand : strands) {
+			if (strand.attached) {
+				strand.attached = false;
+				ClientPlayNetworking.send(new WebNet.Swing(strand.hand, false, Vec3.ZERO));
+			}
 		}
 		flying = false;
 		this.pull = pull;
@@ -187,9 +227,7 @@ final class WebSwing {
 
 	void tick(Minecraft minecraft, LocalPlayer player) {
 		if (!player.isAlive() || player.isSpectator() || player.getAbilities().flying || player.isPassenger()) {
-			if (attached) {
-				detach(player, false);
-			}
+			detachAll(player, false);
 			flying = false;
 			pull = null;
 			return;
@@ -198,28 +236,38 @@ final class WebSwing {
 			tickPull(player);
 			return;
 		}
-		if (attached) {
+		Strand off = strands[WebNet.OFF];
+		if (off.attached && !WebPower.offHandFree(player)) {
+			// something was put in the off hand: that web lets go
+			detach(player, off, false);
+		}
+		if (attached()) {
 			tickSwing(player);
 		} else if (flying) {
 			tickFlight(player);
 		}
-		if (!attached && keyHeld && !player.onGround() && --retryIn <= 0) {
-			retryIn = RETRY_TICKS;
-			tryAttach(player);
+		for (Strand strand : strands) {
+			if (!strand.attached && strand.keyHeld && !player.onGround() && --strand.retryIn <= 0) {
+				strand.retryIn = RETRY_TICKS;
+				tryAttach(player, strand);
+			}
 		}
 	}
 
 	private void tickSwing(LocalPlayer player) {
-		swingTicks++;
 		if (player.isInWater() || player.isInLava()) {
-			detach(player, false);
+			detachAll(player, false);
 			return;
 		}
-		if (swingTicks % 5 == 0 && !WebAnchors.nearSolid(player.level(), anchor)) {
-			attached = false;
-			ClientPlayNetworking.send(new WebNet.Swing(false, Vec3.ZERO));
+		for (Strand strand : strands) {
+			if (strand.attached && ++strand.swingTicks % 5 == 0 && !WebAnchors.nearSolid(player.level(), strand.anchor)) {
+				strand.attached = false;
+				ClientPlayNetworking.send(new WebNet.Swing(strand.hand, false, Vec3.ZERO));
+				play(player, SoundEvents.LEAD_BREAK, 0.6F, 1.6F);
+			}
+		}
+		if (!attached()) {
 			flying = !player.onGround();
-			play(player, SoundEvents.LEAD_BREAK, 0.6F, 1.6F);
 			return;
 		}
 		Input input = player.input.keyPresses;
@@ -228,36 +276,54 @@ final class WebSwing {
 		if (air && !player.isFallFlying()) {
 			v = new Vec3(v.x / VANILLA_AIR_DRAG, v.y / VANILLA_AIR_DRAG_Y, v.z / VANILLA_AIR_DRAG).scale(SWING_DRAG).add(0.0, -SWING_GRAVITY, 0.0);
 		}
-		if (input.jump()) {
-			rope = Math.max(ROPE_MIN, rope - REEL_IN);
-		} else if (input.shift()) {
-			rope = Math.min(WebAnchors.SWING_RANGE, rope + LET_OUT);
-		}
 		Vec3 body = player.position().add(0.0, ROPE_HEIGHT, 0.0);
-		Vec3 toAnchor = anchor.subtract(body);
-		double distance = toAnchor.length();
-		if (distance < 1.0E-4) {
-			return;
+		Vec3 pullDir = Vec3.ZERO;
+		for (Strand strand : strands) {
+			if (!strand.attached) {
+				continue;
+			}
+			if (input.jump()) {
+				strand.rope = Math.max(ROPE_MIN, strand.rope - REEL_IN);
+			} else if (input.shift()) {
+				strand.rope = Math.min(WebAnchors.SWING_RANGE, strand.rope + LET_OUT);
+			}
+			Vec3 to = strand.anchor.subtract(body);
+			if (to.lengthSqr() > 1.0E-8) {
+				pullDir = pullDir.add(to.normalize());
+			}
 		}
-		Vec3 dir = toAnchor.scale(1.0 / distance);
-		// pump: forward on the downswing adds speed along the arc
-		if (air && input.forward() && v.y < 0.0) {
+		// pump: forward on the downswing adds speed along the arc (across the webs' combined pull)
+		if (air && input.forward() && v.y < 0.0 && pullDir.lengthSqr() > 1.0E-6) {
+			Vec3 dir = pullDir.normalize();
 			Vec3 tangent = v.subtract(dir.scale(v.dot(dir)));
 			if (tangent.lengthSqr() > 1.0E-4) {
 				v = v.add(tangent.normalize().scale(PUMP));
 			}
 		}
-		// the rope: no moving further away than its length, and a springy pull back when stretched
-		if (distance > rope) {
-			double inward = v.dot(dir);
-			double want = Math.min((distance - rope) * ROPE_SPRING, ROPE_MAX_PULL);
-			if (inward < want) {
-				v = v.add(dir.scale(want - inward));
+		// each rope: no moving further away than its length, and a springy pull back when stretched. Two passes, so
+		// two webs settle against each other instead of fighting
+		for (int pass = 0; pass < 2; pass++) {
+			for (Strand strand : strands) {
+				if (!strand.attached) {
+					continue;
+				}
+				Vec3 toAnchor = strand.anchor.subtract(body);
+				double distance = toAnchor.length();
+				if (distance < 1.0E-4 || distance <= strand.rope) {
+					continue;
+				}
+				Vec3 dir = toAnchor.scale(1.0 / distance);
+				double inward = v.dot(dir);
+				double want = Math.min((distance - strand.rope) * ROPE_SPRING, ROPE_MAX_PULL);
+				if (inward < want) {
+					v = v.add(dir.scale(want - inward));
+				}
 			}
 		}
 		player.setDeltaMovement(cap(v));
 		player.resetFallDistance();
-		if (air && v.lengthSqr() > 1.2 * 1.2 && swingTicks % 12 == 0) {
+		int ticks = Math.max(strands[0].swingTicks, strands[1].swingTicks);
+		if (air && v.lengthSqr() > 1.2 * 1.2 && ticks % 12 == 0) {
 			play(player, SoundEvents.PLAYER_ATTACK_SWEEP, 0.25F, 0.6F + (float)Math.min(0.6, v.length() * 0.2));
 		}
 	}
@@ -352,13 +418,13 @@ final class WebSwing {
 		}
 	}
 
-	/** Where the local player's own web line currently ends, or null. */
-	@Nullable Vec3 lineEnd(float partialTick) {
-		if (attached) {
-			return anchor;
+	/** Where the local player's own web from {@code hand} currently ends, or null. Zips and yanks come from the main hand. */
+	@Nullable Vec3 lineEnd(int hand, float partialTick) {
+		if (strands[hand].attached) {
+			return strands[hand].anchor;
 		}
 		WebNet.Pull pull = this.pull;
-		if (pull != null) {
+		if (pull != null && hand == WebNet.MAIN) {
 			if (pull.entityId() >= 0) {
 				Minecraft minecraft = Minecraft.getInstance();
 				Entity entity = minecraft.level == null ? null : minecraft.level.getEntity(pull.entityId());

@@ -137,9 +137,28 @@ tasks.register("serverMods", Sync) {
 	from kitchenJar
 	into new File(serverDir, "mods")
 }
+// the user's own CurseForge profile (imported from the pack zip): swap in the new Jaymo's Powers jar. Skipped while
+// the game is running (its jar is locked).
+def profileMods = new File(System.getProperty("user.home"), "curseforge/minecraft/Instances/Jaymo's Powers/mods")
+tasks.register("profileMods") {
+	dependsOn "jar"
+	onlyIf { profileMods.isDirectory() }
+	doLast {
+		def built = tasks.named("jar").get().archiveFile.get().asFile
+		def old = profileMods.listFiles().findAll { it.name.startsWith("jaymos-powers-") && it.name.endsWith(".jar") && it.name != built.name }
+		if (old.any { !it.renameTo(new File(it.path + ".old")) }) {
+			logger.warn("Minecraft is running: your CurseForge profile was NOT updated. Close the game, then run Build Modpack again.")
+			old.each { new File(it.path + ".old").renameTo(it) }
+			return
+		}
+		old.each { new File(it.path + ".old").delete() }
+		java.nio.file.Files.copy(built.toPath(), new File(profileMods, built.name).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+		logger.lifecycle("Updated your CurseForge profile with ${built.name}")
+	}
+}
 tasks.register("packageModpack") {
 	group = "build"
-	dependsOn "modpackMods", "curseforgePack", "serverMods"
+	dependsOn "modpackMods", "curseforgePack", "serverMods", "profileMods"
 }
 
 // each power keeps its own lang file in lang/parts/<power>.json; they're merged into en_us.json here

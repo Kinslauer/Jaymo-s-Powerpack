@@ -9,6 +9,7 @@ import com.jaymospowers.power.web.WebAnchors;
 import com.jaymospowers.power.web.WebCooldowns;
 import com.jaymospowers.power.web.WebNet;
 import com.jaymospowers.power.web.WebPower;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
@@ -40,9 +41,11 @@ public final class WebPowerClient implements PowerClient {
 		PowerClients.register(WebPower.ID, INSTANCE);
 		EntityRenderers.register(WebPower.WEB_BALL, context -> new ThrownItemRenderer<>(context, 0.85F, false));
 		LevelRenderEvents.COLLECT_SUBMITS.register(WebLineRenderer::render);
+		// every player's arms and legs (theirs and others'), whether or not we're a web slinger ourselves
+		ClientTickEvents.END_CLIENT_TICK.register(WebArms::tick);
 		ClientPlayNetworking.registerGlobalReceiver(WebNet.SwingReject.TYPE, (payload, context) -> {
 			if (isActive(context.player())) {
-				INSTANCE.swing.rejected(context.player());
+				INSTANCE.swing.rejected(context.player(), payload.hand());
 			}
 		});
 		ClientPlayNetworking.registerGlobalReceiver(WebNet.Pull.TYPE, (payload, context) -> {
@@ -64,20 +67,29 @@ public final class WebPowerClient implements PowerClient {
 
 	@Override
 	public void onKey(LocalPlayer player, PowerKey key, boolean down) {
-		if (key != PowerKey.ABILITY_1 || player.isSpectator()) {
+		if (player.isSpectator()) {
+			return;
+		}
+		int hand;
+		if (key == PowerKey.ABILITY_1) {
+			hand = WebNet.MAIN;
+		} else if (key == PowerKey.ABILITY_2 && (!down || WebPower.offHandFree(player))) {
+			// G is the off-hand web while the off hand is empty (otherwise the server zips)
+			hand = WebNet.OFF;
+		} else {
 			return;
 		}
 		if (down) {
-			swing.press(player);
+			swing.press(player, hand);
 		} else {
-			swing.releaseKey(player);
+			swing.releaseKey(player, hand);
 		}
 	}
 
 	@Override
 	public void tick(Minecraft minecraft, LocalPlayer player) {
 		swing.tick(minecraft, player);
-		if (swing.attached || swing.pull != null || player.isSpectator()) {
+		if (swing.attached() || swing.pull != null || player.isSpectator()) {
 			preview = null;
 		} else if (player.tickCount % 2 == 0) {
 			preview = WebAnchors.find(player);
@@ -100,7 +112,7 @@ public final class WebPowerClient implements PowerClient {
 		// anchor reticle: four corner ticks around the crosshair
 		int color;
 		int r;
-		if (swing.attached || swing.pull != null) {
+		if (swing.attached() || swing.pull != null) {
 			color = RETICLE_ATTACHED;
 			r = 5;
 		} else if (preview == null) {
@@ -132,7 +144,15 @@ public final class WebPowerClient implements PowerClient {
 			x = cx + 91 - total;
 			y = height - 22 - 30 - CHIP;
 		}
-		chip(graphics, font, x, y, PowerKey.ABILITY_2, Items.STRING, cooldowns.zip() - now, WebPower.ZIP_COOLDOWN);
+		// G: the off-hand web (no cooldown; lit while it's out) or, with something in the off hand, Zip
+		if (WebPower.offHandFree(player)) {
+			chip(graphics, font, x, y, PowerKey.ABILITY_2, Items.STRING, 0L, 1);
+			if (swing.strands[WebNet.OFF].attached) {
+				graphics.fill(x + 1, y + CHIP - 3, x + CHIP - 1, y + CHIP - 1, 0xFF000000 | CHIP_COLOR);
+			}
+		} else {
+			chip(graphics, font, x, y, PowerKey.ABILITY_2, Items.FISHING_ROD, cooldowns.zip() - now, WebPower.ZIP_COOLDOWN);
+		}
 		chip(graphics, font, x + CHIP + CHIP_GAP, y, PowerKey.ABILITY_3, Items.COBWEB, cooldowns.shot() - now, WebPower.SHOT_COOLDOWN);
 		chip(graphics, font, x + (CHIP + CHIP_GAP) * 2, y, PowerKey.ABILITY_4, Items.LEAD, cooldowns.yank() - now, WebPower.YANK_COOLDOWN);
 	}

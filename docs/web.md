@@ -142,3 +142,22 @@ cobweb.
   - Web zip onto entities.
   - A web "net" area shot.
   - A charged double-web launch, like the video's slingshot.
+
+## Two webs (0.1.1)
+- **R** is the main-hand web. **G** is the off-hand web while the off hand is **empty**; with something in the off
+  hand, G is Web Zip as before.
+- **Ropes:** each web has its own rope and key, so you can hang from two anchors at once or alternate hands.
+  - Jump reels in, and sneak lets out, every web that's out.
+  - With two webs the constraints run twice per tick, so they settle against each other.
+  - The release boost only fires when the last web lets go.
+- **Off hand:** putting something in the off hand drops the off-hand web. The client and the server both check this.
+- **Sync:** the off-hand line is synced as `jaymospowers:web_line_off`. The `web_swing` packet carries the hand
+  (0 main, 1 off), and `web_swing_reject` says which hand to drop.
+- **Body (`WebArms`):** posed the same way as Jaymo's Kitchen's corpse ragdolls: spring state per player, then render
+  state, then model parts by name after `setupAnim`.
+  - Each arm springs toward its anchor (`ARM_SPRING` 0.35, `ARM_DAMPING` 0.55), so a fresh web snaps the arm up from
+    the side.
+  - The legs hang limp, trailing the swing and flopping sideways (`LEG_SPRING` 0.22, `LEG_DAMPING` 0.78,
+    `LEG_TRAIL_PER_SPEED` 0.9).
+  - The web line starts at the posed hand: shoulder + arm direction × 10 px. In first person it still comes from the
+    screen corner of that hand.

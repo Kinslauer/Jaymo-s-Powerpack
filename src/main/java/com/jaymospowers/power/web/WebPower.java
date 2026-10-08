@@ -29,6 +29,7 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.Item;
@@ -68,8 +69,11 @@ public final class WebPower implements Power {
 
 	private static final Identifier SAFE_FALL_ID = JaymosPowers.id("web_safe_fall");
 
-	/** The web line a player has out, for everyone to draw. */
+	/** The web line a player has out from their main hand (swing, zip or yank), for everyone to draw. */
 	public static final AttachmentType<WebLine> LINE = AttachmentRegistry.create(JaymosPowers.id("web_line"),
+		builder -> builder.syncWith(WebLine.STREAM_CODEC, AttachmentSyncPredicate.all()));
+	/** The off-hand swing web, if one's out. */
+	public static final AttachmentType<WebLine> LINE_OFF = AttachmentRegistry.create(JaymosPowers.id("web_line_off"),
 		builder -> builder.syncWith(WebLine.STREAM_CODEC, AttachmentSyncPredicate.all()));
 	/** Cooldown end times, for the owner's HUD. */
 	public static final AttachmentType<WebCooldowns> COOLDOWNS = AttachmentRegistry.create(JaymosPowers.id("web_cooldowns"),
@@ -81,7 +85,8 @@ public final class WebPower implements Power {
 	public static EntityType<WebBall> WEB_BALL;
 
 	private static final class State {
-		boolean swinging;
+		/** Which hands have a swing web stuck ({@link WebNet#MAIN}, {@link WebNet#OFF}). */
+		final boolean[] swinging = new boolean[2];
 		/** Ticks left of a zip / yank-to pull the client is doing. */
 		int pullTicks;
 		/** No fall damage until landing. */
@@ -146,7 +151,22 @@ public final class WebPower implements Power {
 		}
 		player.removeAttached(STATE);
 		player.removeAttached(LINE);
+		player.removeAttached(LINE_OFF);
 		player.removeAttached(COOLDOWNS);
+	}
+
+	private static boolean swinging(State state) {
+		return state.swinging[WebNet.MAIN] || state.swinging[WebNet.OFF];
+	}
+
+	/** The synced line for a hand's web. */
+	public static AttachmentType<WebLine> line(int hand) {
+		return hand == WebNet.OFF ? LINE_OFF : LINE;
+	}
+
+	/** The off-hand web needs a free hand to shoot from. */
+	public static boolean offHandFree(Player player) {
+		return player.getOffhandItem().isEmpty();
 	}
 
 	private static void ensurePassive(ServerPlayer player) {
@@ -167,7 +187,7 @@ public final class WebPower implements Power {
 
 	private static boolean inGrace(ServerPlayer player) {
 		State state = player.getAttached(STATE);
-		return state != null && (state.grace || state.swinging || state.pullTicks > 0);
+		return state != null && (state.grace || swinging(state) || state.pullTicks > 0);
 	}
 
 	@Override
@@ -192,30 +212,36 @@ public final class WebPower implements Power {
 		if (!player.isAlive() || player.isSpectator()) {
 			player.removeAttached(STATE);
 			player.removeAttached(LINE);
+			player.removeAttached(LINE_OFF);
 			return;
 		}
 		if (state.pullTicks > 0) {
 			state.pullTicks--;
 		}
-		if (state.lineTicks > 0 && --state.lineTicks == 0 && !state.swinging) {
+		if (state.lineTicks > 0 && --state.lineTicks == 0 && !state.swinging[WebNet.MAIN]) {
 			player.removeAttached(LINE);
 		}
-		if (state.swinging && player.tickCount % 10 == 0) {
-			WebLine line = player.getAttached(LINE);
-			if (line == null || !WebAnchors.nearSolid(player.level(), line.anchor())) {
+		for (int hand = WebNet.MAIN; hand <= WebNet.OFF; hand++) {
+			if (!state.swinging[hand]) {
+				continue;
+			}
+			boolean broken = false;
+			if (player.tickCount % 10 == 0) {
 				// the block it was stuck to is gone
-				state.swinging = false;
-				state.graceTicks = 0;
-				player.removeAttached(LINE);
-				ServerPlayNetworking.send(player, new WebNet.SwingReject(0));
+				WebLine line = player.getAttached(line(hand));
+				broken = line == null || !WebAnchors.nearSolid(player.level(), line.anchor());
+			}
+			if (broken || hand == WebNet.OFF && !offHandFree(player)) {
+				dropSwing(player, state, hand);
+				ServerPlayNetworking.send(player, new WebNet.SwingReject(hand));
 			}
 		}
-		if (state.grace || state.swinging || state.pullTicks > 0) {
+		if (state.grace || swinging(state) || state.pullTicks > 0) {
 			player.resetFallDistance();
 			state.graceTicks++;
 			boolean landed = player.onGround() || player.isInWater() || player.isInLava() || player.getAbilities().flying
 				|| player.isPassenger() || player.onClimbable();
-			if (!state.swinging && state.pullTicks == 0 && (landed && state.graceTicks > 3 || state.graceTicks > GRACE_MAX_TICKS)) {
+			if (!swinging(state) && state.pullTicks == 0 && (landed && state.graceTicks > 3 || state.graceTicks > GRACE_MAX_TICKS)) {
 				state.grace = false;
 			}
 		}
@@ -224,38 +250,48 @@ public final class WebPower implements Power {
 	// ---- swing (reported by the client) -----------------------------------------------------------------------------
 
 	private void onSwing(ServerPlayer player, WebNet.Swing payload) {
+		int hand = payload.hand();
+		if (hand != WebNet.MAIN && hand != WebNet.OFF) {
+			return;
+		}
 		if (!Powers.has(player, this) || !player.isAlive() || player.isSpectator()) {
 			if (payload.attach()) {
-				ServerPlayNetworking.send(player, new WebNet.SwingReject(0));
+				ServerPlayNetworking.send(player, new WebNet.SwingReject(hand));
 			}
 			return;
 		}
 		State state = state(player);
 		if (!payload.attach()) {
-			if (state.swinging) {
-				state.swinging = false;
-				state.graceTicks = 0;
-				if (state.lineTicks == 0) {
-					player.removeAttached(LINE);
-				}
+			if (state.swinging[hand]) {
+				dropSwing(player, state, hand);
 			}
 			return;
 		}
 		Vec3 anchor = payload.anchor();
-		if (!WebAnchors.valid(player, anchor, WebAnchors.SWING_RANGE + 4.0)) {
-			ServerPlayNetworking.send(player, new WebNet.SwingReject(0));
+		if (!WebAnchors.valid(player, anchor, WebAnchors.SWING_RANGE + 4.0) || hand == WebNet.OFF && !offHandFree(player)) {
+			ServerPlayNetworking.send(player, new WebNet.SwingReject(hand));
 			return;
 		}
-		state.swinging = true;
+		state.swinging[hand] = true;
 		state.grace = true;
 		state.graceTicks = 0;
-		state.lineTicks = 0;
 		state.pullTicks = 0;
-		player.setAttached(LINE, new WebLine(WebLine.SWING, anchor, -1));
+		if (hand == WebNet.MAIN) {
+			state.lineTicks = 0;
+		}
+		player.setAttached(line(hand), new WebLine(WebLine.SWING, anchor, -1));
 		ServerLevel level = player.level();
 		// the swinger hears their own thwip client-side; this is for everyone else
 		level.playSound(player, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 0.8F, 1.8F);
 		level.sendParticles(ParticleTypes.ITEM_COBWEB, anchor.x, anchor.y, anchor.z, 5, 0.15, 0.15, 0.15, 0.01);
+	}
+
+	private static void dropSwing(ServerPlayer player, State state, int hand) {
+		state.swinging[hand] = false;
+		state.graceTicks = 0;
+		if (hand == WebNet.OFF || state.lineTicks == 0) {
+			player.removeAttached(line(hand));
+		}
 	}
 
 	// ---- abilities --------------------------------------------------------------------------------------------------
@@ -266,7 +302,12 @@ public final class WebPower implements Power {
 			return;
 		}
 		switch (key) {
-			case ABILITY_2 -> zip(player);
+			// with a free off hand, G is the off-hand swing web (all client-side); otherwise it zips
+			case ABILITY_2 -> {
+				if (!offHandFree(player)) {
+					zip(player);
+				}
+			}
 			case ABILITY_3 -> shoot(player);
 			case ABILITY_4 -> yank(player);
 			default -> {
@@ -287,7 +328,7 @@ public final class WebPower implements Power {
 		player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 0.9F, 1.7F);
 	}
 
-	/** G: fire a web at the crosshair block and get yanked to it. */
+	/** G with something in the off hand: fire a web at the crosshair block and get yanked to it. */
 	private void zip(ServerPlayer player) {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
@@ -322,7 +363,9 @@ public final class WebPower implements Power {
 
 	private static void startPull(ServerPlayer player, WebNet.Pull pull, WebLine line) {
 		State state = state(player);
-		state.swinging = false;
+		state.swinging[WebNet.MAIN] = false;
+		state.swinging[WebNet.OFF] = false;
+		player.removeAttached(LINE_OFF);
 		state.pullTicks = pull.maxTicks() + 5;
 		state.lineTicks = pull.maxTicks() + 2;
 		state.grace = true;
@@ -389,7 +432,7 @@ public final class WebPower implements Power {
 			target.needsSync = true;
 			target.syncVelocity = true;
 			State state = state(player);
-			if (!state.swinging) {
+			if (!state.swinging[WebNet.MAIN]) {
 				state.lineTicks = 8;
 				player.setAttached(LINE, new WebLine(WebLine.YANK, center, target.getId()));
 			}

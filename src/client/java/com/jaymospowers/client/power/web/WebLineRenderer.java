@@ -1,7 +1,6 @@
 package com.jaymospowers.client.power.web;
 
-import com.jaymospowers.power.web.WebLine;
-import com.jaymospowers.power.web.WebPower;
+import com.jaymospowers.power.web.WebNet;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
@@ -10,15 +9,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import org.jspecify.annotations.Nullable;
 
 /**
  * Draws every web line in view (the local player's from their own state, so it shows the same tick it fires; other
- * players' from the synced {@link WebPower#LINE} attachment) as a line from the hand to the anchor, with a little
+ * players' from the synced line attachments), each from its own hand, to the anchor, with a little
  * splat of strands where it sticks. Hooked into Fabric's level render "collect submits" phase.
  */
 final class WebLineRenderer {
@@ -41,46 +38,36 @@ final class WebLineRenderer {
 		Vec3 camera = context.levelState().cameraRenderState.pos;
 		float width = minecraft.gameRenderer.gameRenderState().windowRenderState.appropriateLineWidth * WIDTH_SCALE;
 		for (Player player : level.players()) {
-			Vec3 end = lineEnd(minecraft, level, player, partialTick);
-			if (end == null) {
-				continue;
+			for (int handIndex = WebNet.MAIN; handIndex <= WebNet.OFF; handIndex++) {
+				Vec3 end = WebArms.lineEnd(minecraft, level, player, handIndex, partialTick);
+				if (end == null) {
+					continue;
+				}
+				Vec3 hand = handPos(minecraft, player, handIndex, partialTick);
+				if (hand.distanceToSqr(end) > 96.0 * 96.0) {
+					continue;
+				}
+				draw(context.poseStack(), context, hand.subtract(camera), end.subtract(camera), width);
 			}
-			Vec3 hand = handPos(minecraft, player, partialTick);
-			if (hand.distanceToSqr(end) > 96.0 * 96.0) {
-				continue;
-			}
-			draw(context.poseStack(), context, hand.subtract(camera), end.subtract(camera), width);
 		}
 	}
 
-	private static @Nullable Vec3 lineEnd(Minecraft minecraft, ClientLevel level, Player player, float partialTick) {
-		if (player == minecraft.player && WebPowerClient.isActive(minecraft.player)) {
-			Vec3 own = WebPowerClient.INSTANCE.swing.lineEnd(partialTick);
-			if (own != null) {
-				return own;
-			}
-		}
-		WebLine line = player.getAttached(WebPower.LINE);
-		if (line == null) {
-			return null;
-		}
-		if (line.entityId() >= 0) {
-			Entity entity = level.getEntity(line.entityId());
-			if (entity != null) {
-				return entity.getPosition(partialTick).add(0.0, entity.getBbHeight() * 0.5, 0.0);
-			}
-		}
-		return line.anchor();
-	}
-
-	/** Roughly where the main hand is, as the fishing line does it. */
-	private static Vec3 handPos(Minecraft minecraft, Player player, float partialTick) {
-		int side = player.getMainArm() == HumanoidArm.RIGHT ? 1 : -1;
+	/**
+	 * Where the web leaves the hand: in first person, the screen corner the hand is in (as the fishing line does it);
+	 * otherwise the posed hand at the end of the arm (see WebArms), or roughly where the hand would be.
+	 */
+	private static Vec3 handPos(Minecraft minecraft, Player player, int handIndex, float partialTick) {
+		boolean mainRight = player.getMainArm() == HumanoidArm.RIGHT;
+		int side = (handIndex == WebNet.MAIN) == mainRight ? 1 : -1;
 		if (player == minecraft.player && minecraft.options.getCameraType().isFirstPerson()) {
 			float fov = minecraft.options.fov().get().floatValue();
 			Camera camera = minecraft.gameRenderer.mainCamera();
 			Vec3 offset = camera.getNearPlane(fov).getPointOnPlane(side * 0.525F, -0.1F).scale(960.0 / fov);
 			return player.getEyePosition(partialTick).add(offset);
+		}
+		Vec3 posed = WebArms.handPos(player, handIndex, partialTick);
+		if (posed != null) {
+			return posed;
 		}
 		float bodyYaw = Mth.lerp(partialTick, player.yBodyRotO, player.yBodyRot) * Mth.DEG_TO_RAD;
 		double sin = Mth.sin(bodyYaw);
