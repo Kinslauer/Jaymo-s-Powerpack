@@ -388,6 +388,12 @@ public class ChronoEcho extends Monster {
 		if (this.isInvulnerableTo(level, source) || damage <= 0.0F) {
 			return false;
 		}
+		// only an attempt on it (something struck it) or the void shatters it; the world's own hazards (fire, cactus,
+		// falls, drowning) just pass through it, so it doesn't flicker in and out on its own
+		if (source.getEntity() == null && source.getDirectEntity() == null && !source.is(DamageTypes.FELL_OUT_OF_WORLD)) {
+			this.clearFire();
+			return false;
+		}
 		shatter(level);
 		return true;
 	}
