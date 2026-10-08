@@ -111,10 +111,27 @@ tasks.register("curseforgePack", Zip) {
 		from kitchenJar
 	}
 }
-// the friends' server (Serverfiles/, not in git): its mods folder is kept identical to the pack
-def serverDir = file("Serverfiles")
+// the friends' server (Desktop\Serverfiles): its mods folder is kept identical to the pack, but never while it's
+// running (Windows locks the jars, and swapping mods under live players would break their connection anyway)
+def serverDir = file("../Serverfiles")
+def serverRunning = {
+	try {
+		new Socket("localhost", 25565).withCloseable { true }
+	} catch (IOException ignored) {
+		false
+	}
+}
 tasks.register("serverMods", Sync) {
-	onlyIf { serverDir.isDirectory() }
+	onlyIf {
+		if (!serverDir.isDirectory()) {
+			return false
+		}
+		if (serverRunning()) {
+			logger.warn("The server is running: its mods were NOT updated. Stop it, then run Build Modpack again.")
+			return false
+		}
+		true
+	}
 	from configurations.packJars
 	from tasks.named("jar")
 	from kitchenJar
