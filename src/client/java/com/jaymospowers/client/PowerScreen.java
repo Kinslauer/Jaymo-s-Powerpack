@@ -24,7 +24,6 @@ public class PowerScreen extends Screen {
 	private static final int CARD_W = 180;
 	private static final int CARD_H = 104;
 	private static final int GAP = 6;
-	private static final int COLS = 2;
 	private static final int HEADER = 26;
 	private static final int FOOTER = 26;
 	private static final int COLOR_PANEL = 0xC0101018;
@@ -46,12 +45,17 @@ public class PowerScreen extends Screen {
 		return this.minecraft.player == null ? null : Powers.of(this.minecraft.player);
 	}
 
+	/** Three columns when the screen is wide enough (five powers), else two. */
+	private int cols() {
+		return powers.size() > 4 && this.width >= 3 * CARD_W + 4 * GAP + 8 ? 3 : 2;
+	}
+
 	private int rows() {
-		return (powers.size() + COLS - 1) / COLS;
+		return (powers.size() + cols() - 1) / cols();
 	}
 
 	private int panelW() {
-		return COLS * CARD_W + (COLS + 1) * GAP;
+		return cols() * CARD_W + (cols() + 1) * GAP;
 	}
 
 	private int panelH() {
@@ -67,11 +71,11 @@ public class PowerScreen extends Screen {
 	}
 
 	private int cardX(int i) {
-		return left() + GAP + (i % COLS) * (CARD_W + GAP);
+		return left() + GAP + (i % cols()) * (CARD_W + GAP);
 	}
 
 	private int cardY(int i) {
-		return top() + HEADER + (i / COLS) * (CARD_H + GAP);
+		return top() + HEADER + (i / cols()) * (CARD_H + GAP);
 	}
 
 	@Override

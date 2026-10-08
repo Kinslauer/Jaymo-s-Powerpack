@@ -110,7 +110,9 @@ public final class Powers {
 		if (choices.isEmpty()) {
 			return;
 		}
-		Power power = choices.get(player.getRandom().nextInt(choices.size()));
+		// the power their affinity leans to, if they chose one (and don't already have it); otherwise fate decides
+		Power leaning = Affinity.power(player);
+		Power power = leaning != null && leaning != current ? leaning : choices.get(player.getRandom().nextInt(choices.size()));
 		set(player, power);
 		// a natural awakening starts small: the rest of the abilities come with mastery
 		Mastery.startFresh(player);
@@ -141,6 +143,7 @@ public final class Powers {
 			if (player.isCreative() || player.isSpectator() || !player.isAlive()) {
 				continue;
 			}
+			Affinity.tick(player);
 			Integer left = player.getAttached(AWAKEN_IN);
 			if (left == null) {
 				RandomSource random = player.getRandom();

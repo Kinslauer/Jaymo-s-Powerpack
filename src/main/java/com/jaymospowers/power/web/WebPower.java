@@ -74,6 +74,19 @@ public final class WebPower implements Power {
 	public static final double TETHER_SPRING = 0.25;
 	public static final double TETHER_MAX_PULL = 0.9;
 	public static final double TETHER_BREAK = 16.0;
+	/**
+	 * A <i>player</i> on the Yank line can fight it: they're pulled more gently than a mob ({@code PLAYER_TETHER_*}),
+	 * so they can lean away against it, and holding it stretched past {@code TETHER_LENGTH + PLAYER_STRAIN_OVER} for
+	 * {@code PLAYER_STRAIN_TICKS} snaps it. Attacking (a swing) breaks it outright, as before.
+	 */
+	public static final double PLAYER_TETHER_SPRING = 0.08;
+	public static final double PLAYER_TETHER_MAX_PULL = 0.22;
+	public static final double PLAYER_STRAIN_OVER = 1.5;
+	public static final int PLAYER_STRAIN_TICKS = 30;
+	/** Wings spread work like Feather Falling IV: fall damage is cut by this fraction (and for a moment after folding). */
+	public static final double WINGS_FEATHER_FALLING = 0.48;
+	public static final int WINGS_FEATHER_LINGER = 10;
+	private static final Identifier FEATHER_ID = JaymosPowers.id("web_wings_feather");
 	/** Web Shot launch speed (a snowball is 1.5). */
 	public static final float SHOT_SPEED = 2.4F;
 	/** Fall-damage grace after a swing/zip lasts until you land, or this long at most. */
@@ -127,6 +140,10 @@ public final class WebPower implements Power {
 		int lineTicks;
 		/** Ticks the wings have been spread (0 = folded). */
 		int wingsTicks;
+		/** Ticks left of the wings' Feather Falling (it lingers a moment past folding, for the landing). */
+		int featherTicks;
+		/** Ticks a player on the Yank line has held it stretched. */
+		int tetherStrain;
 		/** Game time a Web Shot charge started, or -1. */
 		long shotChargeStart = -1;
 		/** The entity held by the Yank web (-1 for none), and whether it was mid-swing when caught. */
@@ -242,6 +259,7 @@ public final class WebPower implements Power {
 		if (safeFall != null) {
 			safeFall.removeModifier(SAFE_FALL_ID);
 		}
+		feather(player, false);
 		player.removeAttached(STATE);
 		player.removeAttached(LINE);
 		player.removeAttached(LINE_OFF);
@@ -277,6 +295,18 @@ public final class WebPower implements Power {
 		// (there used to be a safe-fall bonus; fall damage now always applies, so clear it off anyone who has it)
 		if (safeFall != null && safeFall.hasModifier(SAFE_FALL_ID)) {
 			safeFall.removeModifier(SAFE_FALL_ID);
+		}
+	}
+
+	private static void feather(ServerPlayer player, boolean on) {
+		AttributeInstance fall = player.getAttribute(Attributes.FALL_DAMAGE_MULTIPLIER);
+		if (fall == null) {
+			return;
+		}
+		if (on) {
+			fall.addOrUpdateTransientModifier(new AttributeModifier(FEATHER_ID, -WINGS_FEATHER_FALLING, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+		} else {
+			fall.removeModifier(FEATHER_ID);
 		}
 	}
 
@@ -316,6 +346,9 @@ public final class WebPower implements Power {
 			return;
 		}
 		if (!player.isAlive() || player.isSpectator()) {
+			if (state.featherTicks > 0) {
+				feather(player, false);
+			}
 			player.removeAttached(STATE);
 			player.removeAttached(LINE);
 			player.removeAttached(LINE_OFF);
@@ -329,6 +362,15 @@ public final class WebPower implements Power {
 		if (state.wingsTicks > 0 && (++state.wingsTicks > WINGS_TICKS + 20 || player.isInWater() || player.onGround() && state.wingsTicks > 3)) {
 			state.wingsTicks = 0;
 			player.removeAttached(WINGS);
+		}
+		// the wings break a fall like Feather Falling (fall damage itself still applies)
+		if (player.getAttached(WINGS) != null) {
+			if (state.featherTicks == 0) {
+				feather(player, true);
+			}
+			state.featherTicks = WINGS_FEATHER_LINGER;
+		} else if (state.featherTicks > 0 && --state.featherTicks == 0) {
+			feather(player, false);
 		}
 		if (state.pullTicks > 0) {
 			state.pullTicks--;
@@ -503,11 +545,23 @@ public final class WebPower implements Power {
 			return;
 		}
 		state.tetherWasSwinging = swinging;
+		boolean player2 = target instanceof Player;
+		// a caught player can lean away against the line until it gives
+		if (player2 && distance > TETHER_LENGTH + PLAYER_STRAIN_OVER) {
+			if (++state.tetherStrain >= PLAYER_STRAIN_TICKS) {
+				snapTether(player, state);
+				return;
+			}
+		} else if (state.tetherStrain > 0) {
+			state.tetherStrain--;
+		}
 		if (distance > TETHER_LENGTH) {
 			Vec3 dir = to.scale(1.0 / distance);
 			Vec3 v = target.getDeltaMovement();
 			double inward = v.dot(dir);
-			double want = Math.min((distance - TETHER_LENGTH) * TETHER_SPRING, TETHER_MAX_PULL);
+			double want = player2
+				? Math.min((distance - TETHER_LENGTH) * PLAYER_TETHER_SPRING, PLAYER_TETHER_MAX_PULL)
+				: Math.min((distance - TETHER_LENGTH) * TETHER_SPRING, TETHER_MAX_PULL);
 			if (inward < want) {
 				target.setDeltaMovement(v.add(dir.scale(want - inward)));
 				target.needsSync = true;
@@ -524,6 +578,7 @@ public final class WebPower implements Power {
 	}
 
 	private static void releaseTether(ServerPlayer player, State state) {
+		state.tetherStrain = 0;
 		Entity target = player.level().getEntity(state.tetherId);
 		if (target != null) {
 			target.removeAttached(HELD);

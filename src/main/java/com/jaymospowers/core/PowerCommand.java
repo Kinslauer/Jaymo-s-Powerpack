@@ -66,6 +66,30 @@ public final class PowerCommand {
 							c.getSource().sendSuccess(() -> Component.translatable("commands.jaymospowers.level", abilities, players.size()), true);
 							return players.size();
 						}))))
+			.then(Commands.literal("affinity")
+				.then(Commands.argument("targets", EntityArgument.players())
+					.then(Commands.argument("affinity", StringArgumentType.word())
+						.suggests((c, b) -> SharedSuggestionProvider.suggest(java.util.stream.Stream.concat(
+							Powers.all().stream().map(p -> p.id().getPath()), java.util.stream.Stream.of("fate", "none")), b))
+						.executes(c -> {
+							String name = StringArgumentType.getString(c, "affinity");
+							net.minecraft.resources.Identifier id;
+							if (name.equals("none")) {
+								id = null;
+							} else if (name.equals("fate")) {
+								id = Affinity.FATE;
+							} else {
+								Power power = Powers.byName(name);
+								if (power == null) {
+									throw UNKNOWN.create();
+								}
+								id = power.id();
+							}
+							Collection<ServerPlayer> players = EntityArgument.getPlayers(c, "targets");
+							players.forEach(p -> Affinity.set(p, id));
+							c.getSource().sendSuccess(() -> Component.translatable("commands.jaymospowers.affinity", name, players.size()), true);
+							return players.size();
+						}))))
 			.then(Commands.literal("ascend")
 				.then(Commands.argument("targets", EntityArgument.players())
 					.executes(c -> {
@@ -116,7 +140,9 @@ public final class PowerCommand {
 							? Component.translatable("commands.jaymospowers.get", player.getDisplayName(), power.name(), Mastery.unlocked(player), Mastery.points(player))
 								.append(" ").append(Component.translatable("commands.jaymospowers.get_fate", Fate.isAscended(player) ? "yes" : "no",
 									Fate.isCorrupted(player) ? "corrupted" : Fate.isPurified(player) ? "purified" : Fate.corruption(player) + "/" + Fate.MAX_CORRUPTION))
-							: Component.translatable("commands.jaymospowers.get_none", player.getDisplayName(), left == null ? "?" : String.valueOf(left / 20)), false);
+							: Component.translatable("commands.jaymospowers.get_none", player.getDisplayName(), left == null ? "?" : String.valueOf(left / 20))
+								.append(" ").append(Component.translatable("commands.jaymospowers.get_affinity",
+									Affinity.of(player) == null ? "-" : Affinity.of(player).getPath())), false);
 						return power != null ? 1 : 0;
 					}))));
 	}

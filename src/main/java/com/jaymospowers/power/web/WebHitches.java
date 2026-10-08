@@ -43,6 +43,17 @@ public final class WebHitches {
 	private static final double MAX_PULL = 0.9;
 	/** A hitched creature's own movement is cut to this fraction. */
 	private static final double OWN_MOVEMENT = 0.15;
+	/**
+	 * A hitched <i>player</i> isn't helpless: they keep more of their movement, the line pulls them back more gently,
+	 * swinging at it (attacking) cuts it, and straining past the line for {@code PLAYER_STRAIN_TICKS} snaps it.
+	 */
+	private static final double PLAYER_OWN_MOVEMENT = 0.6;
+	private static final double PLAYER_SPRING = 0.08;
+	private static final double PLAYER_MAX_PULL = 0.22;
+	private static final double PLAYER_STRAIN_OVER = 1.5;
+	private static final int PLAYER_STRAIN_TICKS = 30;
+	/** Per hitched player: how long they've strained, and whether they were mid-swing last tick. */
+	private static final java.util.Map<UUID, int[]> STRAIN = new java.util.HashMap<>();
 	private static final Identifier SLOWED = JaymosPowers.id("web_hitched");
 
 	private record Hitch(ResourceKey<Level> dimension, UUID entity, Vec3 anchor, BlockPos block, double length, long until) {
@@ -56,7 +67,10 @@ public final class WebHitches {
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(WebHitches::tick);
-		ServerLifecycleEvents.SERVER_STOPPING.register(server -> HITCHES.clear());
+		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+			HITCHES.clear();
+			STRAIN.clear();
+		});
 		// a hitched creature that fights breaks free
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			Entity attacker = source.getEntity();
@@ -78,10 +92,12 @@ public final class WebHitches {
 		double length = Math.clamp(center(entity).distanceTo(anchor), MIN_LENGTH, MAX_LENGTH);
 		HITCHES.add(new Hitch(level.dimension(), entity.getUUID(), anchor, block.immutable(), length, clock + MAX_TICKS));
 		entity.setAttached(WebPower.HITCH, anchor);
+		STRAIN.put(entity.getUUID(), new int[] {0, entity instanceof LivingEntity living && living.isSwinging() ? 1 : 0});
 		if (entity instanceof LivingEntity living) {
 			AttributeInstance speed = living.getAttribute(Attributes.MOVEMENT_SPEED);
 			if (speed != null) {
-				speed.addOrUpdateTransientModifier(new AttributeModifier(SLOWED, OWN_MOVEMENT - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+				double own = entity instanceof net.minecraft.world.entity.player.Player ? PLAYER_OWN_MOVEMENT : OWN_MOVEMENT;
+				speed.addOrUpdateTransientModifier(new AttributeModifier(SLOWED, own - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 			}
 		}
 		level.playSound(null, anchor.x, anchor.y, anchor.z, SoundEvents.LEAD_TIED, SoundSource.PLAYERS, 1.0F, 0.9F);
@@ -113,11 +129,31 @@ public final class WebHitches {
 			if (entity instanceof Mob mob) {
 				mob.getNavigation().stop();
 			}
+			boolean isPlayer = entity instanceof net.minecraft.world.entity.player.Player;
+			if (isPlayer) {
+				// a player cuts the line by swinging at it, or tears free by straining against it
+				int[] strain = STRAIN.computeIfAbsent(entity.getUUID(), k -> new int[2]);
+				boolean swinging = ((LivingEntity)entity).isSwinging();
+				boolean cut = swinging && strain[1] == 0;
+				strain[1] = swinging ? 1 : 0;
+				if (distance > hitch.length() + PLAYER_STRAIN_OVER) {
+					strain[0]++;
+				} else if (strain[0] > 0) {
+					strain[0]--;
+				}
+				if (cut || strain[0] >= PLAYER_STRAIN_TICKS) {
+					it.remove();
+					release(level, entity, true);
+					continue;
+				}
+			}
 			if (distance > hitch.length()) {
 				Vec3 dir = to.scale(1.0 / distance);
 				Vec3 v = entity.getDeltaMovement();
 				double inward = v.dot(dir);
-				double want = Math.min((distance - hitch.length()) * SPRING, MAX_PULL);
+				double want = isPlayer
+					? Math.min((distance - hitch.length()) * PLAYER_SPRING, PLAYER_MAX_PULL)
+					: Math.min((distance - hitch.length()) * SPRING, MAX_PULL);
 				if (inward < want) {
 					entity.setDeltaMovement(v.add(dir.scale(want - inward)));
 					entity.needsSync = true;
@@ -133,6 +169,7 @@ public final class WebHitches {
 
 	private static void release(ServerLevel level, Entity entity, boolean snapped) {
 		entity.removeAttached(WebPower.HITCH);
+		STRAIN.remove(entity.getUUID());
 		if (entity instanceof LivingEntity living) {
 			AttributeInstance speed = living.getAttribute(Attributes.MOVEMENT_SPEED);
 			if (speed != null) {

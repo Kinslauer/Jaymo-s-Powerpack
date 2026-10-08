@@ -35,6 +35,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 
 	private static final boolean[] wasDown = new boolean[PowerKey.values().length];
 	private static @Nullable Identifier lastPower;
+	private static boolean affinityPending;
 
 	@Override
 	public void onInitializeClient() {
@@ -46,6 +47,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		ultimateKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.ultimate", InputConstants.KEY_C, CATEGORY));
 
 		ClientTickEvents.END_CLIENT_TICK.register(JaymosPowersClient::tick);
+		// the affinity choice waits until no other screen is open
+		ClientPlayNetworking.registerGlobalReceiver(PowerPayloads.OpenAffinity.TYPE, (payload, context) -> affinityPending = true);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("power_hud"), PowerHud::render);
 
 		WindPowerClient.init();
@@ -83,10 +86,18 @@ public class JaymosPowersClient implements ClientModInitializer {
 			return;
 		}
 		Power power = Powers.of(player);
+		if (affinityPending && minecraft.gui.screen() == null) {
+			affinityPending = false;
+			if (power == null && !player.isCreative() && !com.jaymospowers.core.Affinity.chosen(player)) {
+				minecraft.gui.setScreen(new AffinityScreen());
+			}
+		}
 		while (menuKey.consumeClick()) {
-			// in survival there's nothing to see until your power has awakened
+			// in survival there's nothing to see until your power has awakened (but an unmade affinity choice comes back)
 			if (power != null || player.isCreative()) {
 				minecraft.gui.setScreen(new PowerScreen());
+			} else if (!com.jaymospowers.core.Affinity.chosen(player)) {
+				minecraft.gui.setScreen(new AffinityScreen());
 			}
 		}
 

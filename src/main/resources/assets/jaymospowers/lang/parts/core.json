@@ -43,5 +43,13 @@
 	"commands.jaymospowers.corruption": "Moved corruption by %s for %s player(s)",
 	"commands.jaymospowers.purify": "Purified %s player(s)",
 	"commands.jaymospowers.resetfate": "Reset the fate of %s player(s)",
-	"commands.jaymospowers.get_fate": "[ascended: %s, corruption: %s]"
+	"commands.jaymospowers.get_fate": "[ascended: %s, corruption: %s]",
+	"screen.jaymospowers.affinity.title": "Where does your power lie?",
+	"screen.jaymospowers.affinity.hint": "Something sleeps inside you. Choose what it may become; it will wake in time.",
+	"screen.jaymospowers.affinity.choose": "Lean",
+	"screen.jaymospowers.affinity.fate": "Let fate decide",
+	"message.jaymospowers.affinity": "You feel a pull toward %s. It will come, in time.",
+	"message.jaymospowers.affinity_fate": "You leave it to fate. Whatever sleeps in you will choose for itself.",
+	"commands.jaymospowers.affinity": "Set affinity %s for %s player(s)",
+	"commands.jaymospowers.get_affinity": "(affinity: %s)"
 }

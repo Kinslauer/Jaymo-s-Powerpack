@@ -89,6 +89,12 @@ final class WebSwing {
 	// ===== zip / yank-to ===========================================================================================
 	/** How quickly the reel-in steers your velocity onto the line (0..1 per tick). */
 	static final double ZIP_STEER = 0.55;
+	/**
+	 * A block zip lets go this far short of the anchor and keeps its speed, with a kick upward, so it flings you up and
+	 * over (gaining height) instead of stopping dead. Hold Sneak to ride it all the way in and perch as before.
+	 */
+	static final double ZIP_RELEASE_DISTANCE = 4.0;
+	static final double ZIP_RELEASE_LIFT = 0.55;
 	/** At the end of a zip onto a wall: forward push onto the ledge. */
 	static final double PERCH_FORWARD = 0.22;
 	// ===============================================================================================================
@@ -593,6 +599,14 @@ final class WebSwing {
 		lastPos = player.position();
 		if (distance < arrive || pullTicks > pull.maxTicks() || stuckTicks >= 3 || player.isInWater()) {
 			finishPull(player, pull);
+			return;
+		}
+		if (pull.entityId() < 0 && distance < ZIP_RELEASE_DISTANCE && pullTicks > 2 && !player.isShiftKeyDown()) {
+			// let go early: momentum carries on, with a kick up
+			this.pull = null;
+			Vec3 v = player.getDeltaMovement();
+			player.setDeltaMovement(v.x, Math.max(v.y, 0.0) + ZIP_RELEASE_LIFT, v.z);
+			play(player, SoundEvents.SLIME_SQUISH_SMALL, 0.5F, 1.8F);
 			return;
 		}
 		double speed = Math.min(WebPower.ZIP_SPEED, 0.35 + distance * 0.45);

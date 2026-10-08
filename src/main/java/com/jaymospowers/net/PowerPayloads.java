@@ -27,6 +27,30 @@ public final class PowerPayloads {
 		}
 	}
 
+	/** Server → client: show the affinity choice (first time in survival without a power). */
+	public record OpenAffinity() implements CustomPacketPayload {
+		public static final Type<OpenAffinity> TYPE = new Type<>(JaymosPowers.id("open_affinity"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, OpenAffinity> CODEC = StreamCodec.unit(new OpenAffinity());
+
+		@Override
+		public Type<OpenAffinity> type() {
+			return TYPE;
+		}
+	}
+
+	/** Client → server: the affinity picked (a power id, or {@code jaymospowers:fate}). */
+	public record ChooseAffinity(String affinity) implements CustomPacketPayload {
+		public static final Type<ChooseAffinity> TYPE = new Type<>(JaymosPowers.id("choose_affinity"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, ChooseAffinity> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeUtf(p.affinity),
+			buf -> new ChooseAffinity(buf.readUtf(256)));
+
+		@Override
+		public Type<ChooseAffinity> type() {
+			return TYPE;
+		}
+	}
+
 	/** Client → server: the ascended ability's key went down or up. */
 	public record UltimateKey(boolean down) implements CustomPacketPayload {
 		public static final Type<UltimateKey> TYPE = new Type<>(JaymosPowers.id("ultimate_key"));
@@ -57,5 +81,7 @@ public final class PowerPayloads {
 		PayloadTypeRegistry.serverboundPlay().register(KeyInput.TYPE, KeyInput.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ChoosePower.TYPE, ChoosePower.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(UltimateKey.TYPE, UltimateKey.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(ChooseAffinity.TYPE, ChooseAffinity.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(OpenAffinity.TYPE, OpenAffinity.CODEC);
 	}
 }
