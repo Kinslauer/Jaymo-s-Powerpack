@@ -5,7 +5,16 @@
 	"power.jaymospowers.chrono.key.ability_2": "Stasis Field: stop time around you for 3s (players too)",
 	"power.jaymospowers.chrono.key.ability_3": "Overclock (speed yourself up)",
 	"power.jaymospowers.chrono.key.ability_4": "Time Bloom (grow and cook fast)",
+	"power.jaymospowers.chrono.ascended": "Timeless",
+	"power.jaymospowers.chrono.key.ultimate": "Paradox Cut",
 	"message.jaymospowers.chrono_rewind_short": "Not enough time has passed to rewind.",
 	"message.jaymospowers.chrono_rewind_tangled": "The timeline is tangled across dimensions.",
-	"message.jaymospowers.chrono_rewind_blocked": "Your past is blocked. Something stands where you were."
+	"message.jaymospowers.chrono_rewind_blocked": "Your past is blocked. Something stands where you were.",
+	"message.jaymospowers.chrono_echo_sighted": "Someone is walking where you walked.",
+	"message.jaymospowers.chrono_echo_collapsed": "Somewhere, a moment of yours finally ends.",
+	"message.jaymospowers.chrono_clock_woke": "You wake. The ticking has stopped.",
+	"entity.jaymospowers.chrono_echo": "Echo",
+	"item.jaymospowers.chrono_stopped_clock": "Stopped Clock",
+	"item.jaymospowers.chrono_stopped_clock.lore1": "Both hands rest on the same moment.",
+	"item.jaymospowers.chrono_stopped_clock.lore2": "It waits for one who has stood outside time."
 }

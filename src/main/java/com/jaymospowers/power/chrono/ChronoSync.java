@@ -7,9 +7,10 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 /**
  * Server → client: the chrono player's cooldowns and active durations, in ticks, for the HUD. Index = ability
- * (0 Rewind, 1 Stasis, 2 Overclock, 3 Bloom). The client counts every value down by itself between updates.
+ * (0 Rewind, 1 Stasis, 2 Overclock, 3 Bloom), plus Paradox Cut's (the ascended ability's) cooldown. The client counts
+ * every value down by itself between updates.
  */
-public record ChronoSync(int[] cooldownLeft, int[] cooldownTotal, int[] activeLeft, int[] activeTotal) implements CustomPacketPayload {
+public record ChronoSync(int[] cooldownLeft, int[] cooldownTotal, int[] activeLeft, int[] activeTotal, int ultimateLeft, int ultimateTotal) implements CustomPacketPayload {
 	public static final int ABILITIES = 4;
 	public static final Type<ChronoSync> TYPE = new Type<>(JaymosPowers.id("chrono_sync"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, ChronoSync> CODEC = CustomPacketPayload.codec(ChronoSync::write, ChronoSync::read);
@@ -21,6 +22,8 @@ public record ChronoSync(int[] cooldownLeft, int[] cooldownTotal, int[] activeLe
 			buf.writeVarInt(activeLeft[i]);
 			buf.writeVarInt(activeTotal[i]);
 		}
+		buf.writeVarInt(ultimateLeft);
+		buf.writeVarInt(ultimateTotal);
 	}
 
 	private static ChronoSync read(RegistryFriendlyByteBuf buf) {
@@ -34,7 +37,7 @@ public record ChronoSync(int[] cooldownLeft, int[] cooldownTotal, int[] activeLe
 			al[i] = buf.readVarInt();
 			at[i] = buf.readVarInt();
 		}
-		return new ChronoSync(cl, ct, al, at);
+		return new ChronoSync(cl, ct, al, at, buf.readVarInt(), buf.readVarInt());
 	}
 
 	@Override

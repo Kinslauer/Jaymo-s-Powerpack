@@ -3,24 +3,31 @@ package com.jaymospowers.power.chrono;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Powers;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Prediction;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -41,6 +48,11 @@ import net.minecraft.world.phys.Vec3;
  * <li>B, Time Bloom: 5 s of fast-forward for crops, saplings, furnaces, smokers and ovens within 5 blocks.</li>
  * </ul>
  * The HUD is fed by {@link ChronoSync}.
+ *
+ * <p>0.2.0: <b>echoes</b>, Chrono's curse (one turns up after every level-up; see {@link ChronoEchoes} and
+ * {@link ChronoEcho}), and <b>ascension</b>: enough time spent in Stasis or rewound, a night's sleep, and the Stopped
+ * Clock appears in your hands ({@link StoppedClockItem}). Ascended (Timeless), cooldowns recover faster and C is
+ * {@link ParadoxCut}. Chrono has no corruption meter: the echoes are its corruption.
  */
 public final class ChronoPower implements Power {
 	public static final ChronoPower INSTANCE = new ChronoPower();
@@ -57,6 +69,16 @@ public final class ChronoPower implements Power {
 	/** Attack speed while overclocked: x1.6 of the total (a sword goes from 1.6 to ~2.56 swings a second). */
 	static final double OVERCLOCK_ATTACK_SPEED = 0.6;
 	static final int BLOOM_COOLDOWN = 800;
+
+	// ---- 0.2.0 tuning ----
+	/** Time in Stasis or rewound (ticks) before the Stopped Clock can come: 10 minutes. */
+	public static final int ASCEND_STOPPED_TICKS = 10 * 1200;
+	/** Timeless: cooldowns recover this many times as fast (1.25 = 25% faster). Paradox Cut keeps its own. */
+	static final double TIMELESS_COOLDOWN_RATE = 1.25;
+	/** How often the held item is noted, and how often (and how far apart) walked positions are. */
+	static final int HELD_SAMPLE_INTERVAL = 20;
+	static final int PATH_SAMPLE_INTERVAL = 40;
+	static final double PATH_MIN_STEP = 3.0;
 
 	static final int REWIND = 0;
 	static final int STASIS = 1;
@@ -78,6 +100,17 @@ public final class ChronoPower implements Power {
 		Powers.register(INSTANCE);
 		PayloadTypeRegistry.clientboundPlay().register(ChronoSync.TYPE, ChronoSync.CODEC);
 		StasisField.registerLocks();
+		ChronoEchoes.init();
+		StoppedClockItem.init();
+		// touch the attachment types so they register at startup
+		JaymosPowers.LOGGER.debug("chrono attachments: {} {}", ChronoMemory.MEMORY, ChronoEchoes.ORPHANS);
+		ServerTickEvents.END_SERVER_TICK.register(ParadoxCut::tick);
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ChronoDebugCommand.register(dispatcher));
+		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, blockEntity) -> {
+			if (player instanceof ServerPlayer serverPlayer && Powers.has(serverPlayer, INSTANCE)) {
+				ChronoMemory.count(ChronoMemory.of(serverPlayer).mined, BuiltInRegistries.BLOCK.getKey(state.getBlock()));
+			}
+		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			ChronoState state = STATES.get(handler.player.getUUID());
 			if (state != null) {
@@ -94,6 +127,7 @@ public final class ChronoPower implements Power {
 				}
 			}
 			StasisField.releaseAll();
+			ParadoxCut.clear();
 			STATES.clear();
 		});
 	}
@@ -145,10 +179,38 @@ public final class ChronoPower implements Power {
 			stopAll(player, state);
 			STATES.remove(player.getUUID());
 		}
+		// the echoes go with the power, and so does everything time remembered
+		ChronoEchoes.fadeAll(player);
+		ChronoMemory.forget(player);
 		// clear the HUD state on the client
 		if (ServerPlayNetworking.canSend(player, ChronoSync.TYPE)) {
 			int[] zero = new int[ChronoSync.ABILITIES];
-			ServerPlayNetworking.send(player, new ChronoSync(zero, zero, zero, zero));
+			ServerPlayNetworking.send(player, new ChronoSync(zero, zero, zero, zero, 0, 0));
+		}
+	}
+
+	/** Every level-up (mastery 2-4, ascension 5) owes the world an echo. */
+	@Override
+	public void onLevelUp(ServerPlayer player, int level) {
+		ChronoEchoes.owe(player);
+	}
+
+	/** Paradox Cut. */
+	@Override
+	public void onUltimate(ServerPlayer player, boolean down) {
+		if (!down) {
+			return;
+		}
+		ChronoState state = state(player);
+		int now = now(player);
+		if (state.ultimateLeft(now) > 0) {
+			return; // the client shows "not ready" itself
+		}
+		if (ParadoxCut.cut(player)) {
+			state.ultimateReadyAt = now + ParadoxCut.COOLDOWN;
+			state.ultimateTotal = ParadoxCut.COOLDOWN;
+			state.synced = false;
+			sync(player, state, now);
 		}
 	}
 
@@ -170,6 +232,15 @@ public final class ChronoPower implements Power {
 		ChronoState state = state(player);
 		ServerLevel level = player.level();
 		int now = now(player);
+		ChronoMemory memory = ChronoMemory.of(player);
+
+		// echoes close behind follow through dimension changes
+		if (state.lastLevel != null && state.lastLevel != level && state.lastPos != null) {
+			ChronoEchoes.follow(player, state.lastLevel, state.lastPos);
+		}
+		state.lastLevel = level;
+		state.lastPos = player.position();
+		ChronoEchoes.tick(player, memory);
 
 		if (!player.isAlive() || player.isSpectator()) {
 			if (state.stasis != null || state.bloom != null || state.overclockLeft > 0) {
@@ -181,9 +252,14 @@ public final class ChronoPower implements Power {
 		}
 
 		state.record(player.position(), player.getYRot(), player.getXRot(), player.getHealth(), level.dimension());
+		remember(player, memory, level);
+		sleep(player, state, memory, level);
 
 		if (state.trail != null && !state.trail.tick()) {
 			state.trail = null;
+		}
+		if (state.stasis != null && memory.stoppedTime < Integer.MAX_VALUE) {
+			memory.stoppedTime++;
 		}
 		if (state.stasis != null && (state.stasis.level != level || !state.stasis.tick())) {
 			if (state.stasis.ticksLeft > 0) {
@@ -227,11 +303,62 @@ public final class ChronoPower implements Power {
 			default -> false;
 		};
 		if (used) {
-			state.readyAt[ability] = now + COOLDOWNS[ability];
-			state.cooldownTotal[ability] = COOLDOWNS[ability];
+			int cooldown = cooldown(player, ability);
+			state.readyAt[ability] = now + cooldown;
+			state.cooldownTotal[ability] = cooldown;
 			state.synced = false;
 			sync(player, state, now);
 		}
+	}
+
+	/** An ability's cooldown: shorter for the Timeless (ascended). */
+	private static int cooldown(ServerPlayer player, int ability) {
+		return Fate.isAscended(player) ? (int) Math.round(COOLDOWNS[ability] / TIMELESS_COOLDOWN_RATE) : COOLDOWNS[ability];
+	}
+
+	// ---------------------------------------------------------------- habits and the clock
+
+	/** Notes what the player holds and where they walk (for their echoes). */
+	private static void remember(ServerPlayer player, ChronoMemory memory, ServerLevel level) {
+		if (player.tickCount % HELD_SAMPLE_INTERVAL == 0) {
+			ItemStack held = player.getMainHandItem();
+			if (!held.isEmpty()) {
+				ChronoMemory.count(memory.held, BuiltInRegistries.ITEM.getKey(held.getItem()));
+			}
+		}
+		if (player.tickCount % PATH_SAMPLE_INTERVAL == 0 && player.onGround() && !player.getAbilities().flying && !player.isPassenger()) {
+			ChronoMemory.PathPoint last = memory.lastPathPoint();
+			if (last == null || last.dimension() != level.dimension()
+				|| last.pos().distToCenterSqr(player.position()) > PATH_MIN_STEP * PATH_MIN_STEP) {
+				memory.addPathPoint(player.blockPosition(), level.dimension());
+			}
+		}
+	}
+
+	/** Sleeping through to morning, having spent long enough outside time: they wake holding the Stopped Clock. */
+	private static void sleep(ServerPlayer player, ChronoState state, ChronoMemory memory, ServerLevel level) {
+		if (player.isSleeping()) {
+			if (player.isSleepingLongEnough()) {
+				state.restedFully = true;
+			}
+			return;
+		}
+		if (!state.restedFully) {
+			return;
+		}
+		state.restedFully = false;
+		if (!level.isBrightOutside() || memory.stoppedTime < ASCEND_STOPPED_TICKS || !Fate.canAscend(player)
+			|| player.getInventory().contains(stack -> stack.is(StoppedClockItem.STOPPED_CLOCK))) {
+			return;
+		}
+		ItemStack clock = new ItemStack(StoppedClockItem.STOPPED_CLOCK);
+		if (player.getMainHandItem().isEmpty()) {
+			player.setItemInHand(InteractionHand.MAIN_HAND, clock);
+		} else if (!player.getInventory().add(clock)) {
+			player.drop(clock, false, Prediction.SERVER_ONLY);
+		}
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.chrono_clock_woke").withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
+		ChronoEchoes.soundFor(player, SoundEvents.COMPARATOR_CLICK, 0.8F, 0.5F);
 	}
 
 	// ---------------------------------------------------------------- Rewind
@@ -276,6 +403,7 @@ public final class ChronoPower implements Power {
 		}
 		level.playSound(null, target.x, target.y, target.z, SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.8F, 1.4F);
 
+		ChronoMemory.of(player).stoppedTime += chosen; // time undone counts as time outside time
 		state.clearHistory(); // the jump itself shouldn't be part of the next rewind
 		state.trail = new RewindTrail(level, path);
 		return true;
@@ -382,7 +510,8 @@ public final class ChronoPower implements Power {
 			activeLeft[BLOOM] = state.bloom.ticksLeft;
 			activeTotal[BLOOM] = TimeBloom.DURATION;
 		}
-		ServerPlayNetworking.send(player, new ChronoSync(cooldownLeft, state.cooldownTotal.clone(), activeLeft, activeTotal));
+		ServerPlayNetworking.send(player, new ChronoSync(cooldownLeft, state.cooldownTotal.clone(), activeLeft, activeTotal,
+			state.ultimateLeft(now), state.ultimateTotal));
 		state.synced = true;
 		state.lastSync = now;
 	}
