@@ -36,8 +36,9 @@ public final class WindNet {
 	 * @param cooldowns ticks left on each ability's cooldown
 	 * @param dash      a Tailwind dash to apply now (blocks/tick), or 0
 	 * @param stopFlight the server ended (or refused) the flight
+	 * @param lanceCooldown ticks left on Cyclone Lance (the ascended ability)
 	 */
-	public record Status(int channel, int channelTicks, int[] cooldowns, float dash, boolean stopFlight) implements CustomPacketPayload {
+	public record Status(int channel, int channelTicks, int[] cooldowns, float dash, boolean stopFlight, int lanceCooldown) implements CustomPacketPayload {
 		public static final Type<Status> TYPE = new Type<>(JaymosPowers.id("wind_status"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Status> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
@@ -49,6 +50,7 @@ public final class WindNet {
 				}
 				buf.writeFloat(p.dash);
 				buf.writeBoolean(p.stopFlight);
+				buf.writeVarInt(p.lanceCooldown);
 			},
 			buf -> {
 				int channel = buf.readVarInt() - 1;
@@ -58,7 +60,9 @@ public final class WindNet {
 				for (int i = 0; i < count; i++) {
 					cooldowns[i] = buf.readVarInt();
 				}
-				return new Status(channel, channelTicks, cooldowns, buf.readFloat(), buf.readBoolean());
+				float dash = buf.readFloat();
+				boolean stop = buf.readBoolean();
+				return new Status(channel, channelTicks, cooldowns, dash, stop, buf.readVarInt());
 			});
 
 		@Override
