@@ -1,0 +1,148 @@
+package com.jaymospowers.power.web;
+
+import com.jaymospowers.JaymosPowers;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.UUID;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
+
+/**
+ * Creatures hitched to a block with a web (Yank released while aiming at a block), like a lead tied to a fence: the
+ * line keeps the length it had when it was tied, pulls the creature back when it strains, and leaves it very little
+ * say over where it goes. The line breaks if the block it's tied to goes, the creature fights (hits anything), it's
+ * wrenched far past the line (an explosion, a big knockback), or after {@link #MAX_TICKS}.
+ */
+public final class WebHitches {
+	/** Longest a hitch lasts. */
+	public static final int MAX_TICKS = 1200;
+	/** Shortest and longest line a hitch can be tied with. */
+	public static final double MIN_LENGTH = 1.5, MAX_LENGTH = 16.0;
+	/** Wrenched this far past the line's length, it snaps. */
+	public static final double SNAP_OVER = 6.0;
+	/** How hard the line pulls back (per block over), at most per tick. */
+	private static final double SPRING = 0.3;
+	private static final double MAX_PULL = 0.9;
+	/** A hitched creature's own movement is cut to this fraction. */
+	private static final double OWN_MOVEMENT = 0.15;
+	private static final Identifier SLOWED = JaymosPowers.id("web_hitched");
+
+	private record Hitch(ResourceKey<Level> dimension, UUID entity, Vec3 anchor, BlockPos block, double length, long until) {
+	}
+
+	private static final List<Hitch> HITCHES = new ArrayList<>();
+	private static long clock;
+
+	private WebHitches() {
+	}
+
+	static void register() {
+		ServerTickEvents.END_SERVER_TICK.register(WebHitches::tick);
+		ServerLifecycleEvents.SERVER_STOPPING.register(server -> HITCHES.clear());
+		// a hitched creature that fights breaks free
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
+			Entity attacker = source.getEntity();
+			if (attacker != null && attacker.getAttached(WebPower.HITCH) != null && attacker.level() instanceof ServerLevel level) {
+				for (Iterator<Hitch> it = HITCHES.iterator(); it.hasNext(); ) {
+					Hitch hitch = it.next();
+					if (hitch.entity().equals(attacker.getUUID())) {
+						it.remove();
+						release(level, attacker, true);
+					}
+				}
+			}
+		});
+	}
+
+	/** Ties {@code entity} to the point {@code anchor} on {@code block}, at the line's current length. */
+	static void hitch(ServerLevel level, Entity entity, Vec3 anchor, BlockPos block) {
+		HITCHES.removeIf(h -> h.entity().equals(entity.getUUID()));
+		double length = Math.clamp(center(entity).distanceTo(anchor), MIN_LENGTH, MAX_LENGTH);
+		HITCHES.add(new Hitch(level.dimension(), entity.getUUID(), anchor, block.immutable(), length, clock + MAX_TICKS));
+		entity.setAttached(WebPower.HITCH, anchor);
+		if (entity instanceof LivingEntity living) {
+			AttributeInstance speed = living.getAttribute(Attributes.MOVEMENT_SPEED);
+			if (speed != null) {
+				speed.addOrUpdateTransientModifier(new AttributeModifier(SLOWED, OWN_MOVEMENT - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+			}
+		}
+		level.playSound(null, anchor.x, anchor.y, anchor.z, SoundEvents.LEAD_TIED, SoundSource.PLAYERS, 1.0F, 0.9F);
+		level.sendParticles(ParticleTypes.ITEM_COBWEB, anchor.x, anchor.y, anchor.z, 8, 0.1, 0.1, 0.1, 0.02);
+	}
+
+	private static Vec3 center(Entity entity) {
+		return entity.position().add(0.0, entity.getBbHeight() * 0.5, 0.0);
+	}
+
+	private static void tick(MinecraftServer server) {
+		clock++;
+		for (Iterator<Hitch> it = HITCHES.iterator(); it.hasNext(); ) {
+			Hitch hitch = it.next();
+			ServerLevel level = server.getLevel(hitch.dimension());
+			Entity entity = level == null ? null : level.getEntity(hitch.entity());
+			if (entity == null || !entity.isAlive() || entity.isRemoved()) {
+				it.remove();
+				continue;
+			}
+			Vec3 to = hitch.anchor().subtract(center(entity));
+			double distance = to.length();
+			boolean blockGone = !level.isLoaded(hitch.block()) || level.getBlockState(hitch.block()).getCollisionShape(level, hitch.block()).isEmpty();
+			if (blockGone || clock >= hitch.until() || distance > hitch.length() + SNAP_OVER) {
+				it.remove();
+				release(level, entity, true);
+				continue;
+			}
+			if (entity instanceof Mob mob) {
+				mob.getNavigation().stop();
+			}
+			if (distance > hitch.length()) {
+				Vec3 dir = to.scale(1.0 / distance);
+				Vec3 v = entity.getDeltaMovement();
+				double inward = v.dot(dir);
+				double want = Math.min((distance - hitch.length()) * SPRING, MAX_PULL);
+				if (inward < want) {
+					entity.setDeltaMovement(v.add(dir.scale(want - inward)));
+					entity.needsSync = true;
+					entity.syncVelocity = true;
+				}
+			}
+			if (clock % 8 == 0) {
+				Vec3 mid = center(entity).add(to.scale(0.5));
+				level.sendParticles(ParticleTypes.ITEM_COBWEB, mid.x, mid.y, mid.z, 1, 0.05, 0.05, 0.05, 0.0);
+			}
+		}
+	}
+
+	private static void release(ServerLevel level, Entity entity, boolean snapped) {
+		entity.removeAttached(WebPower.HITCH);
+		if (entity instanceof LivingEntity living) {
+			AttributeInstance speed = living.getAttribute(Attributes.MOVEMENT_SPEED);
+			if (speed != null) {
+				speed.removeModifier(SLOWED);
+			}
+		}
+		if (snapped) {
+			Vec3 at = center(entity);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.LEAD_BREAK, SoundSource.PLAYERS, 1.0F, 1.0F);
+			level.sendParticles(ParticleTypes.ITEM_COBWEB, at.x, at.y, at.z, 10, 0.2, 0.2, 0.2, 0.05);
+		}
+	}
+}

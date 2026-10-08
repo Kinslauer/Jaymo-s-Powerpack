@@ -37,6 +37,17 @@ final class WebLineRenderer {
 		float partialTick = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		Vec3 camera = context.levelState().cameraRenderState.pos;
 		float width = minecraft.gameRenderer.gameRenderState().windowRenderState.appropriateLineWidth * WIDTH_SCALE;
+		// creatures hitched to blocks: a line from each to where it's tied
+		for (net.minecraft.world.entity.Entity entity : level.entitiesForRendering()) {
+			Vec3 anchor = entity.getAttached(com.jaymospowers.power.web.WebPower.HITCH);
+			if (anchor == null) {
+				continue;
+			}
+			Vec3 from = entity.getPosition(partialTick).add(0.0, entity.getBbHeight() * 0.5, 0.0);
+			if (from.distanceToSqr(camera) < 96.0 * 96.0) {
+				draw(context.poseStack(), context, from.subtract(camera), anchor.subtract(camera), width);
+			}
+		}
 		for (Player player : level.players()) {
 			for (int handIndex = WebNet.MAIN; handIndex <= WebNet.OFF; handIndex++) {
 				Vec3 end = WebArms.lineEnd(minecraft, level, player, handIndex, partialTick);

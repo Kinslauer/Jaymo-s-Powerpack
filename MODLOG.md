@@ -93,3 +93,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.1.6:** Arsenal Reach Through is now animated: a portal opens, the arm reaches in, and the weapon is drawn out.
 - **0.1.7:** Web Yank (B) holds its target on a web lead while held: you can drag it or let it hang, and it snaps when
   stretched or when the target fights back.
+- **0.1.8:** Web Yank released while aiming at a block hitches the creature there (lead-style, barely able to move,
+  breakable). Held or hitched creatures ragdoll.

@@ -214,3 +214,19 @@ cobweb.
   - the target damages anything;
   - a tethered player swings their arm.
 - **Big targets** (volume > 2.6) still pull you to them, as before.
+
+## Hitching and ragdolls (0.1.8)
+- **Hitching:** releasing B while aiming at a block within `HITCH_REACH` 24 ties the held creature to that block
+  (`WebHitches`).
+  - The line keeps the length it had at release, clamped to 1.5–16.
+  - The creature's own movement drops to 15% (a transient attribute modifier) and its pathfinding is cancelled. Past
+    the line's length it's pulled back (spring 0.3, max 0.9 b/t).
+  - The line breaks when the block goes, the creature hits anything, it's wrenched more than `SNAP_OVER` 6 past the
+    line, or after 60 s.
+  - It's synced as `web_hitch` (the anchor) so everyone sees the line.
+- **Ragdoll (`WebRagdoll`):** creatures held by Yank (`web_held`) or hitched go limp.
+  - The body tips along the drag direction, up to 55°.
+  - Every limb the model has flops on its own beat, the same approach as the kitchen's corpse Jolt. It's stronger the
+    faster they're dragged, and the walk cycle is suppressed.
+  - It's drawn by a `LivingEntityRenderer` mixin, so it works on any mob.
+- **Client smoke test:** 78 mods load and the client joins a world with no mixin errors.

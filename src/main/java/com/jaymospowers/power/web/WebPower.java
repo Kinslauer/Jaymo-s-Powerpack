@@ -93,6 +93,14 @@ public final class WebPower implements Power {
 	/** The entity a player's Yank web is holding (entity id), for everyone to draw. */
 	public static final AttachmentType<Integer> TETHER = AttachmentRegistry.create(JaymosPowers.id("web_tether"),
 		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+	/** On a creature held by someone's Yank web: it's being dragged (clients ragdoll it). */
+	public static final AttachmentType<Boolean> HELD = AttachmentRegistry.create(JaymosPowers.id("web_held"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** On a creature hitched to a block by a web: where the line is tied (clients draw it, and ragdoll the creature). */
+	public static final AttachmentType<Vec3> HITCH = AttachmentRegistry.create(JaymosPowers.id("web_hitch"),
+		builder -> builder.syncWith(Vec3.STREAM_CODEC, AttachmentSyncPredicate.all()));
+	/** Reach for tying a held creature off to a block (release Yank while aiming at it). */
+	public static final double HITCH_REACH = 24.0;
 	/** The off-hand swing web, if one's out. */
 	public static final AttachmentType<WebLine> LINE_OFF = AttachmentRegistry.create(JaymosPowers.id("web_line_off"),
 		builder -> builder.syncWith(WebLine.STREAM_CODEC, AttachmentSyncPredicate.all()));
@@ -144,6 +152,7 @@ public final class WebPower implements Power {
 
 		WebNet.register();
 		WebTraps.register();
+		WebHitches.register();
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Swing.TYPE, (payload, ctx) -> INSTANCE.onSwing(ctx.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Wings.TYPE, (payload, ctx) -> INSTANCE.onWings(ctx.player(), payload.open()));
 		// a held target that hits anything breaks free
@@ -388,10 +397,19 @@ public final class WebPower implements Power {
 			return;
 		}
 		if (key == PowerKey.ABILITY_4 && !down) {
-			// letting go of Yank lets go of whatever it's holding
+			// letting go of Yank lets go of whatever it's holding; aimed at a block, it ties it off there instead
 			State state = player.getAttached(STATE);
 			if (state != null && state.tetherId >= 0) {
+				Entity target = player.level().getEntity(state.tetherId);
 				releaseTether(player, state);
+				if (target != null && target.isAlive()) {
+					Vec3 eye = player.getEyePosition();
+					BlockHitResult hit = WebAnchors.clip(player, eye, eye.add(player.getViewVector(1.0F).scale(HITCH_REACH)));
+					if (hit.getType() == HitResult.Type.BLOCK) {
+						WebHitches.hitch(player.level(), target, hit.getLocation(), hit.getBlockPos());
+						thwip(player);
+					}
+				}
 			}
 			return;
 		}
@@ -463,6 +481,10 @@ public final class WebPower implements Power {
 	}
 
 	private static void releaseTether(ServerPlayer player, State state) {
+		Entity target = player.level().getEntity(state.tetherId);
+		if (target != null) {
+			target.removeAttached(HELD);
+		}
 		state.tetherId = -1;
 		player.removeAttached(TETHER);
 	}
@@ -602,6 +624,7 @@ public final class WebPower implements Power {
 			state.tetherId = target.getId();
 			state.tetherWasSwinging = target instanceof LivingEntity living && living.isSwinging();
 			player.setAttached(TETHER, target.getId());
+			target.setAttached(HELD, true);
 		}
 		player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), cooldowns.shot(), now + YANK_COOLDOWN));
 		thwip(player);

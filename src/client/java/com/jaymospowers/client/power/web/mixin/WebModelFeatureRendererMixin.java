@@ -1,6 +1,7 @@
 package com.jaymospowers.client.power.web.mixin;
 
 import com.jaymospowers.client.power.web.WebArms;
+import com.jaymospowers.client.power.web.WebRagdoll;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -14,5 +15,6 @@ abstract class WebModelFeatureRendererMixin {
 		shift = At.Shift.AFTER))
 	private void jaymospowers$webArms(ModelFeatureRenderer.Submit<?> submit, CallbackInfo ci) {
 		WebArms.applyModel(submit.model(), submit.state());
+		WebRagdoll.applyModel(submit.model(), submit.state());
 	}
 }
