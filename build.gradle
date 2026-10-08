@@ -30,15 +30,79 @@ loom {
 	}
 }
 
+// The rest of the modpack, with each mod's CurseForge [project id, file id] for the CurseForge import zip.
+// Keep the versions in step with the CurseForge files (Cloth Config's newest Fabric file there is 26.3.158).
+def packMods = [
+	[dep: "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}", cf: [306612, 8913512]],
+	[dep: "maven.modrinth:balm:26.3.0.3+fabric-26.3", cf: [531761, 9035245]],
+	[dep: "maven.modrinth:cooking-for-blockheads:26.3.0.2+fabric-26.3", cf: [231484, 9035244]],
+	// Balkon's WeaponMod: Legacy (MIT): the Pocket Arsenal pulls its weapons from the registry, so no compile dependency
+	[dep: "maven.modrinth:balkons-weaponmod-legacy:Fabric-26.3-1.25.1", cf: [1033985, 8893149]],
+	[dep: "maven.modrinth:architectury-api:22.0.4+fabric", cf: [419699, 9075717]],
+	[dep: "maven.modrinth:cloth-config:26.3.158+fabric", cf: [348521, 8884063]],
+]
+// not on CurseForge: shipped inside the pack as overrides
+def kitchenJar = fileTree("libs") { include "jaymos-kitchen-*.jar" }
+
+configurations {
+	packJars {
+		canBeConsumed = false
+		canBeResolved = true
+		transitive = false
+	}
+}
+
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
-	// the rest of the modpack, loaded in the dev game only: Jaymo's Kitchen and what it needs
-	localRuntime files("libs/jaymos-kitchen-0.4.11.jar")
-	localRuntime "maven.modrinth:balm:26.3.0.3+fabric-26.3"
-	localRuntime "maven.modrinth:cooking-for-blockheads:26.3.0.2+fabric-26.3"
+	// the rest of the modpack, loaded in the dev game only (fabric-api is already on the classpath)
+	localRuntime kitchenJar
+	packMods.drop(1).each { localRuntime it.dep }
+	packMods.each { packJars it.dep }
+}
+
+// gradlew packageModpack:
+//   modpack/mods/                          every jar, for the server or a hand-made profile
+//   modpack/Jaymos-Powers-Modpack-<v>.zip  CurseForge import (Create Custom Profile → Import); it downloads the rest itself
+def packDir = file("modpack")
+tasks.register("modpackMods", Sync) {
+	from configurations.packJars
+	from tasks.named("jar")
+	from kitchenJar
+	into new File(packDir, "mods")
+}
+tasks.register("curseforgeManifest") {
+	def out = layout.buildDirectory.file("modpack/manifest.json")
+	outputs.file out
+	doLast {
+		def manifest = [
+			minecraft      : [version: project.minecraft_version, modLoaders: [[id: "fabric-${project.loader_version}", primary: true]]],
+			manifestType   : "minecraftModpack",
+			manifestVersion: 1,
+			name           : "Jaymo's Powers",
+			version        : project.version,
+			author         : "Manigraphic78",
+			files          : packMods.collect { [projectID: it.cf[0], fileID: it.cf[1], required: true] },
+			overrides      : "overrides",
+		]
+		out.get().asFile.text = JsonOutput.prettyPrint(JsonOutput.toJson(manifest))
+	}
+}
+tasks.register("curseforgePack", Zip) {
+	dependsOn "curseforgeManifest"
+	archiveFileName = "Jaymos-Powers-Modpack-${project.version}.zip"
+	destinationDirectory = packDir
+	from(layout.buildDirectory.file("modpack/manifest.json"))
+	into("overrides/mods") {
+		from tasks.named("jar")
+		from kitchenJar
+	}
+}
+tasks.register("packageModpack") {
+	group = "build"
+	dependsOn "modpackMods", "curseforgePack"
 }
 
 // each power keeps its own lang file in lang/parts/<power>.json; they're merged into en_us.json here

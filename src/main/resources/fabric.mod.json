@@ -30,6 +30,7 @@
 		"fabric-api": "*"
 	},
 	"suggests": {
-		"jaymoskitchen": "*"
+		"jaymoskitchen": "*",
+		"weaponmod": "*"
 	}
 }
