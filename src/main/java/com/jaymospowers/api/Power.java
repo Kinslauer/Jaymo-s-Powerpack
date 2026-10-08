@@ -49,6 +49,14 @@ public interface Power {
 	default void onKey(ServerPlayer player, PowerKey key, boolean down) {
 	}
 
+	/**
+	 * The order the abilities unlock in when the power awakens naturally (see Mastery): the first is there from the
+	 * start. Charged abilities go last.
+	 */
+	default PowerKey[] unlockOrder() {
+		return PowerKey.values();
+	}
+
 	/** True while the player may stay airborne without the server's "kicked for floating" check (flight, swinging). */
 	default boolean allowsFloating(ServerPlayer player) {
 		return false;

@@ -136,6 +136,12 @@ public final class WebPower implements Power {
 		return ID;
 	}
 
+	/** Swinging, the second web, Yank, and the charged web blast last. */
+	@Override
+	public PowerKey[] unlockOrder() {
+		return new PowerKey[] {PowerKey.ABILITY_1, PowerKey.ABILITY_2, PowerKey.ABILITY_4, PowerKey.ABILITY_3};
+	}
+
 	@Override
 	public int color() {
 		return 0xE0303A;

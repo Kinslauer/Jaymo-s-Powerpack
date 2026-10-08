@@ -182,3 +182,22 @@ cobweb.
   who still has it.
 - Falls during and after swings count from your highest point (the core rule).
 - Web wings follow the elytra rule: gliding slower than 0.5 b/t down isn't a fall.
+
+## 0.1.4
+- **Web blast (V):**
+  - Hold to charge for up to `SHOT_CHARGE_TICKS` 60 (3 s), release to fire. It bursts like a splash potion wherever it
+    lands.
+  - Damage: direct hit 1 → 10 by charge; things in the splash take up to half that, scaled by distance.
+  - Splash radius 1.75 → 4.5. Everything in it gets Slowness III (amplifier 2) for up to 60 → 220 ticks, plus a
+    temporary cobweb at its feet and the jump lock.
+  - Cooldown 2 → 8 s by charge. The chip shows a charge bar.
+- **Glide lean:** the body leans forward up to 70° over the first 1.5 s of a glide (smoothstep), with the head up.
+  It's drawn by `WebLivingEntityRendererMixin`.
+- **Wing rules:**
+  - The wings only open after a fall of more than `WINGS_MIN_DROP` 2 blocks from the apex.
+  - There's no cooldown, but each fold needs Jump released and another 2-block fall.
+- **Slingshot:**
+  - The aim is now 80% look direction.
+  - After a launch, held web keys are dropped and new webs are blocked for `SLING_LOCKOUT` 12 ticks, so the launch
+    can't be snagged.
+- **Unlock order (natural awakening):** R, G, B, then V. The charged blast comes last.

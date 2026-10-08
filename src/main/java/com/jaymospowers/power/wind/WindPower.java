@@ -122,6 +122,12 @@ public final class WindPower implements Power {
 		return ID;
 	}
 
+	/** Flight first; the channelled abilities after it, with the charged Tailwind (a TNT blast at full) last. */
+	@Override
+	public PowerKey[] unlockOrder() {
+		return new PowerKey[] {PowerKey.ABILITY_1, PowerKey.ABILITY_3, PowerKey.ABILITY_4, PowerKey.ABILITY_2};
+	}
+
 	@Override
 	public int color() {
 		return 0xBFF4EA;

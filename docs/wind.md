@@ -217,3 +217,6 @@ maximum channel are in `WindAbility`.
   - A full charge (≥ 95%) adds an explosion effect and uses explosion damage, so Blast Protection counts. Blocks are
     never broken.
   - Cooldown is 20 s → 180 s by charge². The HUD shades against each cooldown's actual length.
+
+## Unlock order (0.1.4)
+- Natural awakening: R (flight), then V and B, with G (the charged Tailwind, a TNT blast at full charge) last.

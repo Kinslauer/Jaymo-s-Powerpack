@@ -36,7 +36,7 @@ public final class Mastery {
 	public static final AttachmentType<Integer> POINTS = AttachmentRegistry.create(JaymosPowers.id("mastery"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath().syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
 
-	/** Mastery needed for each ability (index = PowerKey ordinal). */
+	/** Mastery needed for the 1st, 2nd, 3rd and 4th ability to unlock (in the power's unlock order). */
 	public static final int[] UNLOCK_AT = {0, 30, 90, 180};
 	/** One point per this many ticks of survival play with the power... */
 	public static final int TICKS_PER_TIME_POINT = 1200;
@@ -54,7 +54,23 @@ public final class Mastery {
 	}
 
 	public static boolean isUnlocked(Player player, PowerKey key) {
-		return key.ordinal() < unlocked(player);
+		int unlocked = unlocked(player);
+		if (unlocked >= PowerKey.values().length) {
+			return true;
+		}
+		PowerKey[] order = order(player);
+		for (int i = 0; i < unlocked && i < order.length; i++) {
+			if (order[i] == key) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** The player's power's unlock order (key order if there's no power). */
+	private static PowerKey[] order(Player player) {
+		Power power = Powers.of(player);
+		return power == null ? PowerKey.values() : power.unlockOrder();
 	}
 
 	public static int points(Player player) {
@@ -129,7 +145,8 @@ public final class Mastery {
 		int unlocked = unlocked(player);
 		if (unlocked < UNLOCK_AT.length && points >= UNLOCK_AT[unlocked]) {
 			player.setAttached(UNLOCKED, unlocked + 1);
-			announce(player, PowerKey.values()[unlocked]);
+			PowerKey[] order = order(player);
+			announce(player, order[Math.min(unlocked, order.length - 1)]);
 		}
 	}
 
