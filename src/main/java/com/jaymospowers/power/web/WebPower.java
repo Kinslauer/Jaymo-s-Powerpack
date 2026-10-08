@@ -2,15 +2,94 @@ package com.jaymospowers.power.web;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
+import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Powers;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
-/** Web Slinger. STUB: the agent building this power replaces this file. */
+/**
+ * Web Slinger, server side. Swinging itself is simulated on the client (player motion is client-authoritative); the
+ * server checks each swing web the client reports, shows the line to everyone, keeps the swinger from being kicked
+ * for flying, and cancels fall damage until they land. Zip, Web Shot and Yank are decided here.
+ */
 public final class WebPower implements Power {
 	public static final WebPower INSTANCE = new WebPower();
 	public static final Identifier ID = JaymosPowers.id("web");
+
+	/** Cooldowns, in ticks. */
+	public static final int ZIP_COOLDOWN = 60;
+	public static final int SHOT_COOLDOWN = 40;
+	public static final int YANK_COOLDOWN = 120;
+	/** Zip reach, and how fast the client reels you in (blocks/tick; used here to time the zip). */
+	public static final double ZIP_RANGE = 48.0;
+	public static final double ZIP_SPEED = 1.8;
+	/** Yank reach, and the bounding-box volume above which a target is "heavy" (you fly to it instead). Player = 0.65. */
+	public static final double YANK_RANGE = 24.0;
+	public static final double YANK_HEAVY_VOLUME = 2.6;
+	/** Web Shot launch speed (a snowball is 1.5). */
+	public static final float SHOT_SPEED = 2.4F;
+	/** Passive: extra blocks you can fall without damage, any time. */
+	public static final double SAFE_FALL_BONUS = 3.0;
+	/** Fall-damage grace after a swing/zip lasts until you land, or this long at most. */
+	private static final int GRACE_MAX_TICKS = 1200;
+
+	private static final Identifier SAFE_FALL_ID = JaymosPowers.id("web_safe_fall");
+
+	/** The web line a player has out, for everyone to draw. */
+	public static final AttachmentType<WebLine> LINE = AttachmentRegistry.create(JaymosPowers.id("web_line"),
+		builder -> builder.syncWith(WebLine.STREAM_CODEC, AttachmentSyncPredicate.all()));
+	/** Cooldown end times, for the owner's HUD. */
+	public static final AttachmentType<WebCooldowns> COOLDOWNS = AttachmentRegistry.create(JaymosPowers.id("web_cooldowns"),
+		builder -> builder.syncWith(WebCooldowns.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
+	/** Server-only bookkeeping (not saved, not synced). */
+	private static final AttachmentType<State> STATE = AttachmentRegistry.create(JaymosPowers.id("web_state"));
+
+	public static Item WEB_BALL_ITEM;
+	public static EntityType<WebBall> WEB_BALL;
+
+	private static final class State {
+		boolean swinging;
+		/** Ticks left of a zip / yank-to pull the client is doing. */
+		int pullTicks;
+		/** No fall damage until landing. */
+		boolean grace;
+		int graceTicks;
+		/** Ticks left on a zip/yank line (swing lines last while swinging). */
+		int lineTicks;
+	}
 
 	private WebPower() {
 	}
@@ -18,6 +97,23 @@ public final class WebPower implements Power {
 	/** Called once from {@link JaymosPowers#onInitialize()}: register the power and everything it needs. */
 	public static void init() {
 		Powers.register(INSTANCE);
+
+		ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, JaymosPowers.id("web_ball"));
+		WEB_BALL_ITEM = Registry.register(BuiltInRegistries.ITEM, itemKey, new Item(new Item.Properties().setId(itemKey)));
+		ResourceKey<EntityType<?>> entityKey = ResourceKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("web_ball"));
+		WEB_BALL = Registry.register(BuiltInRegistries.ENTITY_TYPE, entityKey,
+			EntityType.Builder.<WebBall>of(WebBall::new, MobCategory.MISC)
+				.noLootTable()
+				.sized(0.3F, 0.3F)
+				.clientTrackingRange(4)
+				.updateInterval(10)
+				.build(entityKey));
+
+		WebNet.register();
+		WebTraps.register();
+		ServerPlayNetworking.registerGlobalReceiver(WebNet.Swing.TYPE, (payload, ctx) -> INSTANCE.onSwing(ctx.player(), payload));
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
+			!(entity instanceof ServerPlayer player && source.is(DamageTypeTags.IS_FALL) && Powers.has(player, INSTANCE) && inGrace(player)));
 	}
 
 	@Override
@@ -33,5 +129,274 @@ public final class WebPower implements Power {
 	@Override
 	public ItemStack icon() {
 		return new ItemStack(Items.COBWEB);
+	}
+
+	// ---- lifecycle ------------------------------------------------------------------------------------------------
+
+	@Override
+	public void onGained(ServerPlayer player) {
+		ensurePassive(player);
+	}
+
+	@Override
+	public void onLost(ServerPlayer player) {
+		AttributeInstance safeFall = player.getAttribute(Attributes.SAFE_FALL_DISTANCE);
+		if (safeFall != null) {
+			safeFall.removeModifier(SAFE_FALL_ID);
+		}
+		player.removeAttached(STATE);
+		player.removeAttached(LINE);
+		player.removeAttached(COOLDOWNS);
+	}
+
+	private static void ensurePassive(ServerPlayer player) {
+		AttributeInstance safeFall = player.getAttribute(Attributes.SAFE_FALL_DISTANCE);
+		if (safeFall != null && !safeFall.hasModifier(SAFE_FALL_ID)) {
+			safeFall.addOrReplacePermanentModifier(new AttributeModifier(SAFE_FALL_ID, SAFE_FALL_BONUS, AttributeModifier.Operation.ADD_VALUE));
+		}
+	}
+
+	private static State state(ServerPlayer player) {
+		State state = player.getAttached(STATE);
+		if (state == null) {
+			state = new State();
+			player.setAttached(STATE, state);
+		}
+		return state;
+	}
+
+	private static boolean inGrace(ServerPlayer player) {
+		State state = player.getAttached(STATE);
+		return state != null && (state.grace || state.swinging || state.pullTicks > 0);
+	}
+
+	@Override
+	public boolean allowsFloating(ServerPlayer player) {
+		return inGrace(player);
+	}
+
+	@Override
+	public boolean skipsMovementCheck(ServerPlayer player) {
+		return inGrace(player);
+	}
+
+	@Override
+	public void tick(ServerPlayer player) {
+		if (player.tickCount % 20 == 0) {
+			ensurePassive(player);
+		}
+		State state = player.getAttached(STATE);
+		if (state == null) {
+			return;
+		}
+		if (!player.isAlive() || player.isSpectator()) {
+			player.removeAttached(STATE);
+			player.removeAttached(LINE);
+			return;
+		}
+		if (state.pullTicks > 0) {
+			state.pullTicks--;
+		}
+		if (state.lineTicks > 0 && --state.lineTicks == 0 && !state.swinging) {
+			player.removeAttached(LINE);
+		}
+		if (state.swinging && player.tickCount % 10 == 0) {
+			WebLine line = player.getAttached(LINE);
+			if (line == null || !WebAnchors.nearSolid(player.level(), line.anchor())) {
+				// the block it was stuck to is gone
+				state.swinging = false;
+				state.graceTicks = 0;
+				player.removeAttached(LINE);
+				ServerPlayNetworking.send(player, new WebNet.SwingReject(0));
+			}
+		}
+		if (state.grace || state.swinging || state.pullTicks > 0) {
+			player.resetFallDistance();
+			state.graceTicks++;
+			boolean landed = player.onGround() || player.isInWater() || player.isInLava() || player.getAbilities().flying
+				|| player.isPassenger() || player.onClimbable();
+			if (!state.swinging && state.pullTicks == 0 && (landed && state.graceTicks > 3 || state.graceTicks > GRACE_MAX_TICKS)) {
+				state.grace = false;
+			}
+		}
+	}
+
+	// ---- swing (reported by the client) -----------------------------------------------------------------------------
+
+	private void onSwing(ServerPlayer player, WebNet.Swing payload) {
+		if (!Powers.has(player, this) || !player.isAlive() || player.isSpectator()) {
+			if (payload.attach()) {
+				ServerPlayNetworking.send(player, new WebNet.SwingReject(0));
+			}
+			return;
+		}
+		State state = state(player);
+		if (!payload.attach()) {
+			if (state.swinging) {
+				state.swinging = false;
+				state.graceTicks = 0;
+				if (state.lineTicks == 0) {
+					player.removeAttached(LINE);
+				}
+			}
+			return;
+		}
+		Vec3 anchor = payload.anchor();
+		if (!WebAnchors.valid(player, anchor, WebAnchors.SWING_RANGE + 4.0)) {
+			ServerPlayNetworking.send(player, new WebNet.SwingReject(0));
+			return;
+		}
+		state.swinging = true;
+		state.grace = true;
+		state.graceTicks = 0;
+		state.lineTicks = 0;
+		state.pullTicks = 0;
+		player.setAttached(LINE, new WebLine(WebLine.SWING, anchor, -1));
+		ServerLevel level = player.level();
+		// the swinger hears their own thwip client-side; this is for everyone else
+		level.playSound(player, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 0.8F, 1.8F);
+		level.sendParticles(ParticleTypes.ITEM_COBWEB, anchor.x, anchor.y, anchor.z, 5, 0.15, 0.15, 0.15, 0.01);
+	}
+
+	// ---- abilities --------------------------------------------------------------------------------------------------
+
+	@Override
+	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
+		if (!down) {
+			return;
+		}
+		switch (key) {
+			case ABILITY_2 -> zip(player);
+			case ABILITY_3 -> shoot(player);
+			case ABILITY_4 -> yank(player);
+			default -> {
+			}
+		}
+	}
+
+	private static WebCooldowns cooldowns(ServerPlayer player) {
+		WebCooldowns cooldowns = player.getAttached(COOLDOWNS);
+		return cooldowns == null ? WebCooldowns.NONE : cooldowns;
+	}
+
+	private static void fwip(ServerPlayer player) {
+		player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 0.4F, 2.0F);
+	}
+
+	private static void thwip(ServerPlayer player) {
+		player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 0.9F, 1.7F);
+	}
+
+	/** G: fire a web at the crosshair block and get yanked to it. */
+	private void zip(ServerPlayer player) {
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		WebCooldowns cooldowns = cooldowns(player);
+		if (now < cooldowns.zip()) {
+			return;
+		}
+		Vec3 eye = player.getEyePosition();
+		BlockHitResult hit = WebAnchors.clip(player, eye, eye.add(player.getViewVector(1.0F).scale(ZIP_RANGE)));
+		if (hit.getType() == HitResult.Type.MISS) {
+			fwip(player);
+			return;
+		}
+		Vec3 anchor = hit.getLocation();
+		Direction face = hit.getDirection();
+		Vec3 target;
+		if (face == Direction.UP) {
+			target = anchor.add(0.0, 0.05, 0.0);
+		} else if (face == Direction.DOWN) {
+			target = anchor.add(0.0, -player.getBbHeight() - 0.1, 0.0);
+		} else {
+			// hang on the wall with the hands at the hit point; the client hops up onto the ledge at the end
+			target = anchor.add(face.getUnitVec3().scale(player.getBbWidth() * 0.5 + 0.2)).add(0.0, -1.3, 0.0);
+		}
+		int maxTicks = Mth.ceil(target.distanceTo(player.position()) / ZIP_SPEED) + 12;
+		startPull(player, new WebNet.Pull(anchor, target, -1, maxTicks, (byte)face.ordinal()), new WebLine(WebLine.ZIP, anchor, -1));
+		player.setAttached(COOLDOWNS, new WebCooldowns(now + ZIP_COOLDOWN, cooldowns.shot(), cooldowns.yank()));
+		thwip(player);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_RIPTIDE_1, SoundSource.PLAYERS, 0.6F, 1.5F);
+		level.sendParticles(ParticleTypes.ITEM_COBWEB, anchor.x, anchor.y, anchor.z, 6, 0.15, 0.15, 0.15, 0.01);
+	}
+
+	private static void startPull(ServerPlayer player, WebNet.Pull pull, WebLine line) {
+		State state = state(player);
+		state.swinging = false;
+		state.pullTicks = pull.maxTicks() + 5;
+		state.lineTicks = pull.maxTicks() + 2;
+		state.grace = true;
+		state.graceTicks = 0;
+		player.setAttached(LINE, line);
+		ServerPlayNetworking.send(player, pull);
+	}
+
+	/** V: shoot a web ball. */
+	private void shoot(ServerPlayer player) {
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		WebCooldowns cooldowns = cooldowns(player);
+		if (now < cooldowns.shot()) {
+			return;
+		}
+		Projectile.spawnProjectileFromRotation(WebBall::new, level, new ItemStack(WEB_BALL_ITEM), player, 0.0F, SHOT_SPEED, 0.5F);
+		player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), now + SHOT_COOLDOWN, cooldowns.yank()));
+		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 1.0F, 1.3F);
+		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.SNOWBALL_THROW, SoundSource.PLAYERS, 0.5F, 0.7F);
+	}
+
+	/** B: web the entity under the crosshair and pull it in (or, if it's big, pull yourself to it). */
+	private void yank(ServerPlayer player) {
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		WebCooldowns cooldowns = cooldowns(player);
+		if (now < cooldowns.yank()) {
+			return;
+		}
+		Vec3 eye = player.getEyePosition();
+		Vec3 look = player.getViewVector(1.0F);
+		Vec3 end = eye.add(look.scale(YANK_RANGE));
+		BlockHitResult block = WebAnchors.clip(player, eye, end);
+		if (block.getType() != HitResult.Type.MISS) {
+			end = block.getLocation();
+		}
+		AABB box = player.getBoundingBox().expandTowards(look.scale(YANK_RANGE)).inflate(1.0);
+		EntityHitResult hit = ProjectileUtil.getEntityHitResult(player, eye, end, box,
+			e -> !e.isSpectator() && e.isPickable() && e != player.getVehicle() && !player.hasPassenger(e), eye.distanceToSqr(end));
+		if (hit == null) {
+			fwip(player);
+			return;
+		}
+		Entity target = hit.getEntity();
+		Vec3 center = target.getBoundingBox().getCenter();
+		double volume = target.getBbWidth() * target.getBbWidth() * target.getBbHeight();
+		if (volume > YANK_HEAVY_VOLUME) {
+			// too big to budge: reel yourself in instead
+			int maxTicks = Mth.ceil(center.distanceTo(player.position()) / ZIP_SPEED) + 12;
+			startPull(player, new WebNet.Pull(center, target.position(), target.getId(), maxTicks, (byte)-1),
+				new WebLine(WebLine.YANK, center, target.getId()));
+		} else {
+			Vec3 to = player.position().subtract(target.position());
+			double horizontal = to.horizontalDistance();
+			// roughly ballistic: lands it a couple of blocks in front of you
+			double speed = Math.min(2.0, Math.max(0.0, horizontal - 2.0) * 0.14 + 0.15);
+			double up = Mth.clamp(0.42 + to.y * 0.08 + horizontal * 0.008, 0.25, 1.1);
+			Vec3 flat = new Vec3(to.x, 0.0, to.z).normalize().scale(speed);
+			if (target instanceof Mob mob) {
+				mob.getNavigation().stop();
+			}
+			target.setDeltaMovement(flat.x, up, flat.z);
+			target.needsSync = true;
+			target.syncVelocity = true;
+			State state = state(player);
+			if (!state.swinging) {
+				state.lineTicks = 8;
+				player.setAttached(LINE, new WebLine(WebLine.YANK, center, target.getId()));
+			}
+		}
+		player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), cooldowns.shot(), now + YANK_COOLDOWN));
+		thwip(player);
+		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.LEAD_TIED, SoundSource.PLAYERS, 1.0F, 1.2F);
+		level.sendParticles(ParticleTypes.ITEM_COBWEB, center.x, center.y, center.z, 8, 0.2, 0.2, 0.2, 0.02);
 	}
 }

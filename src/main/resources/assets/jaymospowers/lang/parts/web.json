@@ -1,4 +1,10 @@
 {
 	"power.jaymospowers.web": "Web Slinger",
-	"power.jaymospowers.web.desc": "Swing from webs and grapple across the world."
+	"power.jaymospowers.web.desc": "Swing from webs and keep your momentum. Zip, snare and yank with web lines.",
+	"power.jaymospowers.web.key.ability_1": "Hold: Web Swing (release on the upswing for a boost)",
+	"power.jaymospowers.web.key.ability_2": "Web Zip to the block you look at",
+	"power.jaymospowers.web.key.ability_3": "Web Shot (slows and snares)",
+	"power.jaymospowers.web.key.ability_4": "Yank: pull a creature in (or yourself to a big one)",
+	"item.jaymospowers.web_ball": "Web Ball",
+	"entity.jaymospowers.web_ball": "Web Shot"
 }
