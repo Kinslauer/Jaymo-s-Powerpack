@@ -166,3 +166,12 @@ maximum channel are in `WindAbility`.
   - Rough damage: cruising (1 b/t) into a wall is about 5; sonic (2.5 b/t) into a wall is about 20.
   - Creative and spectator players are never hurt.
 - **Falls:** fall damage is waived only while flying. When flight ends in mid-air, a fall counts from that moment.
+
+## Hover ragdoll (`WindHoverSway`)
+- While hovering there's no walk cycle. The body hangs from about the shoulders (`PIVOT` 0.85 of its height) and swings
+  opposite to its motion, like a pendulum.
+- It's a spring-damper, the same approach as the kitchen's corpses: `SPRING` 0.16, `DAMPING` 0.86. Lean is
+  `LEAN_PER_SPEED` 1.1 rad per b/t, capped at `LEAN_MAX` 0.45 rad; rising or sinking adds `LEAN_PER_RISE` 0.5.
+- Arms and legs hang limp and trail the swing.
+- Other players' sway is read from their synced flight state and their per-tick movement.
+- The cruise "superman" pose eases in over it as you speed up.
