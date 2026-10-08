@@ -75,16 +75,30 @@ public final class ArsenalPower implements Power {
 	public static final int DROPPED_TICKS = 60;
 
 	/** When each ability is ready again (game time). Saved, and synced to its owner for the HUD. */
-	public record Cooldowns(long reach, long barrage) {
-		public static final Cooldowns NONE = new Cooldowns(0, 0);
+	public record Cooldowns(long reach, long barrage, long ultimate) {
+		public static final Cooldowns NONE = new Cooldowns(0, 0, 0);
 		public static final Codec<Cooldowns> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.LONG.fieldOf("reach").forGetter(Cooldowns::reach),
-				Codec.LONG.fieldOf("barrage").forGetter(Cooldowns::barrage))
+				Codec.LONG.fieldOf("barrage").forGetter(Cooldowns::barrage),
+				Codec.LONG.optionalFieldOf("ultimate", 0L).forGetter(Cooldowns::ultimate))
 			.apply(i, Cooldowns::new));
 		public static final StreamCodec<ByteBuf, Cooldowns> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, Cooldowns::reach,
 			ByteBufCodecs.VAR_LONG, Cooldowns::barrage,
+			ByteBufCodecs.VAR_LONG, Cooldowns::ultimate,
 			Cooldowns::new);
+
+		public Cooldowns withReach(long ready) {
+			return new Cooldowns(ready, barrage, ultimate);
+		}
+
+		public Cooldowns withBarrage(long ready) {
+			return new Cooldowns(reach, ready, ultimate);
+		}
+
+		public Cooldowns withUltimate(long ready) {
+			return new Cooldowns(reach, barrage, ready);
+		}
 	}
 
 	public static final AttachmentType<Cooldowns> COOLDOWNS = AttachmentRegistry.create(JaymosPowers.id("arsenal_cooldowns"),
@@ -107,6 +121,11 @@ public final class ArsenalPower implements Power {
 			DataComponentType.<Summoned>builder().persistent(Summoned.CODEC).networkSynchronized(Summoned.STREAM_CODEC).build());
 		ArsenalEntities.init();
 		ArsenalStash.init();
+		ArsenalArmory.init();
+		HundredBlades.init();
+		ArsenalVoid.init();
+		ArsenalItems.init();
+		ArsenalDebugCommand.init();
 		Powers.register(INSTANCE);
 		ServerTickEvents.END_SERVER_TICK.register(ArsenalPower::serverTick);
 	}
@@ -146,7 +165,23 @@ public final class ArsenalPower implements Power {
 	}
 
 	@Override
+	public void onUltimate(ServerPlayer player, boolean down) {
+		if (down && player.isAlive()) {
+			HundredBlades.cast(player);
+		}
+	}
+
+	@Override
+	public void onCorrupted(ServerPlayer player) {
+		// the rift opens onto the void now
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDERMAN_SCREAM, SoundSource.PLAYERS, 1.0F, 0.5F);
+		player.level().sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 80, 0.6, 1.0, 0.6, 0.1);
+	}
+
+	@Override
 	public void onLost(ServerPlayer player) {
+		ArsenalArmory.onLost(player);
+		HundredBlades.onLost(player);
 		PENDING.remove(player.getUUID());
 		player.removeAttached(ArsenalReach.REACH);
 		// the doorway closes: everything this player summoned goes home
@@ -155,6 +190,8 @@ public final class ArsenalPower implements Power {
 
 	@Override
 	public void tick(ServerPlayer player) {
+		ArsenalVoid.tick(player);
+		HundredBlades.tick(player);
 		Pending pending = PENDING.get(player.getUUID());
 		if (pending == null) {
 			return;
@@ -193,14 +230,20 @@ public final class ArsenalPower implements Power {
 		if (PENDING.containsKey(player.getUUID())) {
 			return;
 		}
+		if (ArsenalArmory.tryPin(player)) {
+			return;
+		}
 		Cooldowns cd = cooldowns(player);
 		if (now < cd.reach()) {
 			denied(player, "message.jaymospowers.arsenal.reach_recharging", cd.reach() - now);
 			return;
 		}
-		player.setAttached(COOLDOWNS, new Cooldowns(now + REACH_COOLDOWN, cd.barrage()));
+		player.setAttached(COOLDOWNS, cd.withReach(now + REACH_COOLDOWN));
 		// decided now, so the weapon everyone sees coming out of the portal is the one you get
-		List<ItemStack> stacks = ArsenalPool.roll(level, player.getRandom());
+		List<ItemStack> stacks = ArsenalArmory.rollFor(player, level, player.getRandom());
+		if (com.jaymospowers.core.Fate.isCorrupted(player)) {
+			stacks.forEach(ArsenalVoid::voidTouched);
+		}
 		PENDING.put(player.getUUID(), new Pending(now, stacks));
 		player.setAttached(ArsenalReach.REACH, new ArsenalReach.Reach(now, stacks.isEmpty() ? ItemStack.EMPTY : stacks.getFirst().copy()));
 		Vec3 rift = ArsenalReach.portalCenter(player, 1.0F);
@@ -304,7 +347,7 @@ public final class ArsenalPower implements Power {
 		if (sent.ownedBy(player.getUUID())) {
 			long now = player.level().getGameTime();
 			Cooldowns cd = cooldowns(player);
-			player.setAttached(COOLDOWNS, new Cooldowns(Math.max(now, cd.reach() - RETURN_REFUND), cd.barrage()));
+			player.setAttached(COOLDOWNS, cd.withReach(Math.max(now, cd.reach() - RETURN_REFUND)));
 		}
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal.returned").withStyle(ChatFormatting.LIGHT_PURPLE));
 	}
@@ -319,7 +362,7 @@ public final class ArsenalPower implements Power {
 			denied(player, "message.jaymospowers.arsenal.barrage_recharging", cd.barrage() - now);
 			return;
 		}
-		player.setAttached(COOLDOWNS, new Cooldowns(cd.reach(), now + BARRAGE_COOLDOWN));
+		player.setAttached(COOLDOWNS, cd.withBarrage(now + BARRAGE_COOLDOWN));
 
 		// what are we looking at?
 		Vec3 eye = player.getEyePosition();
@@ -345,8 +388,13 @@ public final class ArsenalPower implements Power {
 				.add(right.scale(t * 1.9))
 				.add(flat.scale(-0.7 + 0.4 * Math.abs(t)))
 				.add(0, 2.3 - 0.6 * Math.abs(t), 0);
-			RiftBlade blade = RiftBlade.create(level, player, ArsenalPool.randomBlade(player.getRandom()), pos, aim, target,
-				10 + i * 4, BARRAGE_DAMAGE);
+			boolean corrupted = com.jaymospowers.core.Fate.isCorrupted(player);
+			ItemStack dress = ArsenalPool.randomBlade(player.getRandom());
+			RiftBlade blade = RiftBlade.create(level, player, corrupted ? ArsenalVoid.voidTouched(dress) : dress, pos, aim, target,
+				10 + i * 4, BARRAGE_DAMAGE * (corrupted ? ArsenalVoid.DAMAGE_MULTIPLIER : 1.0F));
+			if (corrupted) {
+				blade.makeVoid();
+			}
 			level.addFreshEntity(blade);
 			level.sendParticles(ParticleTypes.REVERSE_PORTAL, pos.x, pos.y, pos.z, 16, 0.25, 0.25, 0.25, 0.03);
 			level.sendParticles(ParticleTypes.PORTAL, pos.x, pos.y, pos.z, 10, 0.1, 0.1, 0.1, 0.5);

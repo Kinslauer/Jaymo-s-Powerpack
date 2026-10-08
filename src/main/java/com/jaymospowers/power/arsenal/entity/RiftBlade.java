@@ -36,12 +36,18 @@ import org.jspecify.annotations.Nullable;
 public class RiftBlade extends AbstractArrow implements ItemSupplier {
 	private static final EntityDataAccessor<ItemStack> DATA_ITEM = SynchedEntityData.defineId(RiftBlade.class, EntityDataSerializers.ITEM_STACK);
 	private static final EntityDataAccessor<Boolean> DATA_HOVER = SynchedEntityData.defineId(RiftBlade.class, EntityDataSerializers.BOOLEAN);
+	/** Bit flags: {@link #STYLE_VOID} (drawn from the void: dark, void rift), {@link #STYLE_SKY} (a Hundred Blades blade). */
+	private static final EntityDataAccessor<Byte> DATA_STYLE = SynchedEntityData.defineId(RiftBlade.class, EntityDataSerializers.BYTE);
+	public static final byte STYLE_VOID = 1;
+	public static final byte STYLE_SKY = 2;
 
 	/** Barrage weapons fly at this speed (blocks per tick) and give up after this long. */
 	public static final float SPEED = 2.6F;
 	public static final int MAX_LIFE = 120;
 	/** How long a landed blade waits to be picked up before it dissolves. */
 	public static final int LYING_TICKS = 600;
+	/** A Hundred Blades blade vanishes this soon after it lands or hits. */
+	public static final int SKY_LINGER_TICKS = 12;
 
 	private float impactDamage = 6.0F;
 	private boolean dealtDamage;
@@ -88,6 +94,7 @@ public class RiftBlade extends AbstractArrow implements ItemSupplier {
 		super.defineSynchedData(builder);
 		builder.define(DATA_ITEM, ItemStack.EMPTY);
 		builder.define(DATA_HOVER, false);
+		builder.define(DATA_STYLE, (byte) 0);
 	}
 
 	@Override
@@ -100,12 +107,31 @@ public class RiftBlade extends AbstractArrow implements ItemSupplier {
 		return this.entityData.get(DATA_HOVER);
 	}
 
+	/** Drawn from the void (a corrupted caster): dark, and its hits darken and wither. */
+	public boolean isVoid() {
+		return (this.entityData.get(DATA_STYLE) & STYLE_VOID) != 0;
+	}
+
+	/** One of the Hundred Blades: it hangs in a sky rift, hits through hurt-immunity, and vanishes once it lands. */
+	public boolean isSkyBlade() {
+		return (this.entityData.get(DATA_STYLE) & STYLE_SKY) != 0;
+	}
+
+	public void makeVoid() {
+		this.entityData.set(DATA_STYLE, (byte) (this.entityData.get(DATA_STYLE) | STYLE_VOID));
+	}
+
+	public void makeSkyBlade(boolean voidTouched) {
+		this.entityData.set(DATA_STYLE, (byte) (STYLE_SKY | (voidTouched ? STYLE_VOID : 0)));
+		this.pickup = Pickup.DISALLOWED;
+	}
+
 	@Override
 	public void tick() {
 		if (this.level() instanceof ServerLevel level) {
 			if (hoverTicks > 0) {
 				hoverTicks--;
-				if (this.tickCount % 3 == 0) {
+				if (this.tickCount % 3 == 0 && !isSkyBlade()) {
 					level.sendParticles(ParticleTypes.PORTAL, this.getX(), this.getY(), this.getZ(), 3, 0.15, 0.15, 0.15, 0.3);
 				}
 				Entity target = targetId < 0 ? null : level.getEntity(targetId);
@@ -131,7 +157,13 @@ public class RiftBlade extends AbstractArrow implements ItemSupplier {
 		if (this.level() instanceof ServerLevel level) {
 			if (this.isInGround() || this.dealtDamage) {
 				lyingTicks++;
-				if (lyingTicks > LYING_TICKS) {
+				if (isSkyBlade()) {
+					if (lyingTicks > SKY_LINGER_TICKS) {
+						// quietly: twenty of these land in two seconds
+						level.sendParticles(ParticleTypes.REVERSE_PORTAL, this.getX(), this.getY(), this.getZ(), 6, 0.1, 0.1, 0.1, 0.03);
+						this.discard();
+					}
+				} else if (lyingTicks > LYING_TICKS) {
 					dissolve(level);
 				} else if (lyingTicks % 20 == 0) {
 					level.sendParticles(ParticleTypes.REVERSE_PORTAL, this.getX(), this.getY() + 0.2, this.getZ(), 2, 0.1, 0.1, 0.1, 0.01);
@@ -140,7 +172,7 @@ public class RiftBlade extends AbstractArrow implements ItemSupplier {
 				dissolve(level);
 			}
 		} else if (!this.isInGround() && this.tickCount % 2 == 0) {
-			this.level().addParticle(ParticleTypes.REVERSE_PORTAL, this.getX(), this.getY(), this.getZ(), 0, 0, 0);
+			this.level().addParticle(isVoid() ? ParticleTypes.SQUID_INK : ParticleTypes.REVERSE_PORTAL, this.getX(), this.getY(), this.getZ(), 0, 0, 0);
 		}
 	}
 
@@ -183,7 +215,15 @@ public class RiftBlade extends AbstractArrow implements ItemSupplier {
 		Entity owner = this.getOwner();
 		DamageSource source = this.damageSources().trident(this, owner == null ? this : owner);
 		this.dealtDamage = true;
+		if (isSkyBlade()) {
+			// a storm of blades: each one lands, hurt-immunity or not
+			entity.setInvulnerableTime(0);
+		}
 		boolean hurt = entity.hurtOrSimulate(source, impactDamage);
+		if (hurt && entity instanceof LivingEntity living && isVoid() && !this.level().isClientSide()) {
+			// a sky blade only darkens; a Barrage blade is a summoned weapon in void hands: darkness and wither
+			com.jaymospowers.power.arsenal.ArsenalVoid.voidHit(living, owner, !isSkyBlade());
+		}
 		if (hurt && entity instanceof LivingEntity living) {
 			this.doKnockback(living, source);
 			Vec3 push = this.getDeltaMovement().multiply(1, 0, 1).normalize().scale(0.35);
@@ -224,7 +264,7 @@ public class RiftBlade extends AbstractArrow implements ItemSupplier {
 	/** Only its caster can take it back, and only once it has landed or hit. */
 	@Override
 	protected boolean tryPickup(net.minecraft.world.entity.player.Player player) {
-		if (player != this.getOwner() || isHovering() || !(this.isInGround() || this.dealtDamage)) {
+		if (player != this.getOwner() || isSkyBlade() || isHovering() || !(this.isInGround() || this.dealtDamage)) {
 			return false;
 		}
 		boolean taken = player.getInventory().add(this.getPickupItem());

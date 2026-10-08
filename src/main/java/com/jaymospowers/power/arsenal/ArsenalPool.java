@@ -198,18 +198,41 @@ public final class ArsenalPool {
 				break;
 			}
 		}
+		append(level, random, pick, out);
+		return out;
+	}
+
+	/**
+	 * The stacks for one particular weapon (the Armory's pinned weapon), dressed the same way as a random pull: ammo,
+	 * Infinity, Loyalty. A weapon that isn't in the pool (the weapon mod was removed since) comes on its own.
+	 */
+	public static List<ItemStack> stacksFor(ServerLevel level, RandomSource random, Item item) {
+		build();
+		List<ItemStack> out = new ArrayList<>();
+		Entry entry = null;
+		for (Entry e : pool) {
+			if (e.weapon == item) {
+				entry = e;
+				break;
+			}
+		}
+		append(level, random, entry != null ? entry : new Entry(item, 0, 1, List.of(), 0, Kind.PLAIN), out);
+		return out;
+	}
+
+	private static void append(ServerLevel level, RandomSource random, Entry pick, List<ItemStack> out) {
 		ItemStack weapon = new ItemStack(pick.weapon, pick.count);
 		switch (pick.kind) {
 			case BOW -> {
 				enchant(level, weapon, Enchantments.INFINITY);
 				out.add(weapon);
 				out.add(new ItemStack(Items.ARROW, 1));
-				return out;
+				return;
 			}
 			case CROSSBOW -> {
 				out.add(weapon);
 				out.add(new ItemStack(Items.ARROW, 12));
-				return out;
+				return;
 			}
 			case TRIDENT -> enchant(level, weapon, Enchantments.LOYALTY);
 			default -> {
@@ -221,7 +244,6 @@ public final class ArsenalPool {
 			int count = Math.min(pick.ammoCount, Math.max(1, ammo.getDefaultMaxStackSize()));
 			out.add(new ItemStack(ammo, count));
 		}
-		return out;
 	}
 
 	/** A random weapon to dress a Barrage projectile with. */
