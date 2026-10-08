@@ -242,3 +242,9 @@ cobweb.
   - It's driven by position deltas, so it works for other players too.
 - **Posed geometry:** `WebArms.posed()` moves shoulder, hand and wing points through the same lean and sway as the
   rendered body. The web lines and the wing membrane follow the leaning, swinging body, and the arms aim within it.
+
+## Web Zip on its own key (0.1.10)
+- Web Zip moved to **Z**: `key.jaymospowers.web_zip`, under Controls → Powers, sent as the `web_zip` packet. It
+  unlocks with the second ability (G).
+- G is now only the off-hand web (it needs an empty off hand).
+- **HUD row:** wings · G · V · B · Z. G's chip dims while the off hand is full.

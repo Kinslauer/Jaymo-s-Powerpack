@@ -37,8 +37,21 @@ public final class WebPowerClient implements PowerClient {
 	}
 
 	/** Called once from {@link com.jaymospowers.client.JaymosPowersClient}: renderers, client packets, the PowerClient. */
+	/** Web Zip's own key (Z by default), under Controls → Powers. */
+	private static net.minecraft.client.KeyMapping zipKey;
+
 	public static void init() {
 		PowerClients.register(WebPower.ID, INSTANCE);
+		zipKey = net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper.registerKeyMapping(new net.minecraft.client.KeyMapping(
+			"key.jaymospowers.web_zip", com.mojang.blaze3d.platform.InputConstants.KEY_Z, JaymosPowersClient.CATEGORY));
+		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
+			while (zipKey.consumeClick()) {
+				LocalPlayer player = minecraft.player;
+				if (player != null && isActive(player) && minecraft.gui.screen() == null && !player.isSpectator()) {
+					ClientPlayNetworking.send(new WebNet.Zip());
+				}
+			}
+		});
 		EntityRenderers.register(WebPower.WEB_BALL, context -> new ThrownItemRenderer<>(context, 0.85F, false));
 		LevelRenderEvents.COLLECT_SUBMITS.register(WebLineRenderer::render);
 		// every player's arms and legs (theirs and others'), whether or not we're a web slinger ourselves
@@ -90,7 +103,7 @@ public final class WebPowerClient implements PowerClient {
 		if (key == PowerKey.ABILITY_1) {
 			hand = WebNet.MAIN;
 		} else if (key == PowerKey.ABILITY_2 && (!down || WebPower.offHandFree(player))) {
-			// G is the off-hand web while the off hand is empty (otherwise the server zips)
+			// G is the off-hand web (it needs an empty off hand)
 			hand = WebNet.OFF;
 		} else {
 			return;
@@ -152,7 +165,7 @@ public final class WebPowerClient implements PowerClient {
 		Font font = minecraft.font;
 		int width = graphics.guiWidth();
 		int height = graphics.guiHeight();
-		int total = CHIP * 4 + CHIP_GAP * 3;
+		int total = CHIP * 5 + CHIP_GAP * 4;
 		// past the off-hand slot / attack indicator; above the hunger bar on narrow screens
 		int x = cx + 91 + 30;
 		int y = height - CHIP - 1;
@@ -163,15 +176,15 @@ public final class WebPowerClient implements PowerClient {
 		// web wings (hold Jump in mid-air): lit while spread, shaded through their cooldown
 		wingsChip(graphics, font, minecraft, x, y);
 		x += CHIP + CHIP_GAP;
-		// G: the off-hand web (no cooldown; lit while it's out) or, with something in the off hand, Zip
-		if (WebPower.offHandFree(player)) {
-			chip(graphics, font, x, y, PowerKey.ABILITY_2, Items.STRING, 0L, 1);
-			if (swing.strands[WebNet.OFF].attached) {
-				graphics.fill(x + 1, y + CHIP - 3, x + CHIP - 1, y + CHIP - 1, 0xFF000000 | CHIP_COLOR);
-			}
-		} else {
-			chip(graphics, font, x, y, PowerKey.ABILITY_2, Items.FISHING_ROD, cooldowns.zip() - now, WebPower.ZIP_COOLDOWN);
+		// G: the off-hand web (no cooldown; lit while it's out, dimmed while the off hand is full)
+		chip(graphics, font, x, y, PowerKey.ABILITY_2, Items.STRING, 0L, 1);
+		if (swing.strands[WebNet.OFF].attached) {
+			graphics.fill(x + 1, y + CHIP - 3, x + CHIP - 1, y + CHIP - 1, 0xFF000000 | CHIP_COLOR);
+		} else if (!WebPower.offHandFree(player)) {
+			graphics.fill(x + 1, y + 1, x + CHIP - 1, y + CHIP - 1, 0x90000000);
 		}
+		// Z: Web Zip, at the end of the row
+		zipChip(graphics, font, x + (CHIP + CHIP_GAP) * 3, y, cooldowns.zip() - now);
 		chip(graphics, font, x + CHIP + CHIP_GAP, y, PowerKey.ABILITY_3, Items.COBWEB, cooldowns.shot() - now, (int)Math.max(1L, cooldowns.shot() - shotFiredAt));
 		if (shotChargeStart >= 0 && now >= cooldowns.shot()) {
 			// charging: a bar fills under the chip, flashing when full
@@ -186,6 +199,28 @@ public final class WebPowerClient implements PowerClient {
 			int bx = x + (CHIP + CHIP_GAP) * 2;
 			graphics.fill(bx + 1, y + CHIP - 3, bx + CHIP - 1, y + CHIP - 1, 0xFF000000 | CHIP_COLOR);
 		}
+	}
+
+	/** Web Zip's chip: its own key, unlocked along with G. */
+	private static void zipChip(GuiGraphicsExtractor graphics, Font font, int x, int y, long left) {
+		String label = font.plainSubstrByWidth(zipKey.getTranslatedKeyMessage().getString(), CHIP - 2);
+		if (!JaymosPowersClient.isUnlocked(PowerKey.ABILITY_2)) {
+			graphics.fill(x, y, x + CHIP, y + CHIP, 0xB0000000);
+			graphics.outline(x, y, CHIP, CHIP, 0x60505050);
+			graphics.text(font, label, x + CHIP - 1 - font.width(label), y + CHIP - 8, 0xFF505050);
+			return;
+		}
+		boolean ready = left <= 0;
+		graphics.fill(x, y, x + CHIP, y + CHIP, 0x90000000);
+		graphics.outline(x, y, CHIP, CHIP, ready ? 0xFF000000 | CHIP_COLOR : 0xA0505050);
+		graphics.item(new ItemStack(Items.FISHING_ROD), x + 2, y + 2);
+		if (!ready) {
+			int shade = (int)Math.ceil(16 * Math.min(1.0, left / (double)WebPower.ZIP_COOLDOWN));
+			graphics.fill(x + 2, y + 2 + 16 - shade, x + 18, y + 18, 0xB0000000);
+			String seconds = String.format(Locale.ROOT, "%.1f", left / 20.0);
+			graphics.text(font, seconds, x + CHIP / 2 - font.width(seconds) / 2, y + 4, 0xFFFFFFFF);
+		}
+		graphics.text(font, label, x + CHIP - 1 - font.width(label), y + CHIP - 8, ready ? 0xFFFFFFFF : 0xFF909090);
 	}
 
 	private void wingsChip(GuiGraphicsExtractor graphics, Font font, Minecraft minecraft, int x, int y) {

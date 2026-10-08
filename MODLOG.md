@@ -97,3 +97,4 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   breakable). Held or hitched creatures ragdoll.
 - **0.1.9:** Web: no tug on cast, Jump thrust along the arc, pendulum body sway while swinging, wings and lines follow
   the posed body.
+- **0.1.10:** Web Zip moved to its own key, Z (rebindable); G is only the off-hand web.

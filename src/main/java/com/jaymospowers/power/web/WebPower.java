@@ -155,6 +155,19 @@ public final class WebPower implements Power {
 		WebHitches.register();
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Swing.TYPE, (payload, ctx) -> INSTANCE.onSwing(ctx.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Wings.TYPE, (payload, ctx) -> INSTANCE.onWings(ctx.player(), payload.open()));
+		// Web Zip has its own key (Z); it unlocks with the second web (G)
+		ServerPlayNetworking.registerGlobalReceiver(WebNet.Zip.TYPE, (payload, ctx) -> {
+			ServerPlayer player = ctx.player();
+			if (!Powers.has(player, INSTANCE) || !player.isAlive() || player.isSpectator()) {
+				return;
+			}
+			if (!com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_2)) {
+				player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymospowers.locked")
+					.withStyle(net.minecraft.ChatFormatting.GRAY));
+				return;
+			}
+			INSTANCE.zip(player);
+		});
 		// a held target that hits anything breaks free
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			Entity attacker = source.getEntity();
@@ -417,12 +430,7 @@ public final class WebPower implements Power {
 			return;
 		}
 		switch (key) {
-			// with a free off hand, G is the off-hand swing web (all client-side); otherwise it zips
-			case ABILITY_2 -> {
-				if (!offHandFree(player)) {
-					zip(player);
-				}
-			}
+			// G is the off-hand swing web (all client-side); Zip has its own key now (see WebNet.Zip)
 			case ABILITY_4 -> yank(player);
 			default -> {
 			}
@@ -498,7 +506,7 @@ public final class WebPower implements Power {
 		player.level().sendParticles(ParticleTypes.ITEM_COBWEB, at.x, at.y, at.z, 10, 0.2, 0.2, 0.2, 0.05);
 	}
 
-	/** G with something in the off hand: fire a web at the crosshair block and get yanked to it. */
+	/** Web Zip (Z): fire a web at the crosshair block and get yanked to it. */
 	private void zip(ServerPlayer player) {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();

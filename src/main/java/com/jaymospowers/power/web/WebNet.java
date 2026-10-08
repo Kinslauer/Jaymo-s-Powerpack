@@ -75,7 +75,19 @@ public final class WebNet {
 		}
 	}
 
+	/** Client → server: the Web Zip key (Z by default) was pressed. */
+	public record Zip() implements CustomPacketPayload {
+		public static final Type<Zip> TYPE = new Type<>(JaymosPowers.id("web_zip"));
+		public static final StreamCodec<ByteBuf, Zip> CODEC = StreamCodec.unit(new Zip());
+
+		@Override
+		public Type<Zip> type() {
+			return TYPE;
+		}
+	}
+
 	static void register() {
+		PayloadTypeRegistry.serverboundPlay().register(Zip.TYPE, Zip.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Wings.TYPE, Wings.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Swing.TYPE, Swing.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(SwingReject.TYPE, SwingReject.CODEC);
