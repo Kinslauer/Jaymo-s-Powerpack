@@ -1,0 +1,48 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "property": "weaponmod:reload",
+    "on_false": {
+      "type": "minecraft:select",
+      "property": "minecraft:display_context",
+      "cases": [
+        {
+          "when": [
+            "gui",
+            "ground",
+            "fixed"
+          ],
+          "model": {
+            "type": "minecraft:model",
+            "model": "weaponmod:item/musketbayonet.copper"
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/gun/musketbayonet_copper"
+      }
+    },
+    "on_true": {
+      "type": "minecraft:select",
+      "property": "minecraft:display_context",
+      "cases": [
+        {
+          "when": [
+            "gui",
+            "ground",
+            "fixed"
+          ],
+          "model": {
+            "type": "minecraft:model",
+            "model": "weaponmod:item/musketbayonet.copper_reload"
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/gun/musketbayonet_copper_reload"
+      }
+    }
+  }
+}

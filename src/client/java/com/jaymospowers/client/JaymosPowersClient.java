@@ -53,6 +53,11 @@ public class JaymosPowersClient implements ClientModInitializer {
 		// once per install: move other mods' (and vanilla's) defaults off the power keys
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(KeyConflicts::resolveOnce);
 
+		// Balkon's guns get solid 3D models in hand (an always-on built-in pack, above WeaponMod's own assets)
+		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("held_guns"),
+			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
+			net.minecraft.network.chat.Component.literal("Jaymo's Powers: 3D guns"),
+			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.ALWAYS_ENABLED);
 		ClientTickEvents.END_CLIENT_TICK.register(JaymosPowersClient::tick);
 		// the affinity choice waits until no other screen is open
 		ClientPlayNetworking.registerGlobalReceiver(PowerPayloads.OpenAffinity.TYPE, (payload, context) -> affinityPending = true);
