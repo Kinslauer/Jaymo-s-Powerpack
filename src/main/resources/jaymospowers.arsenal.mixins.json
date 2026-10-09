@@ -10,7 +10,8 @@
 		"ItemEntityMixin",
 		"PlayerMixin",
 		"ShulkerBoxSlotMixin",
-		"SlotMixin"
+		"SlotMixin",
+		"WeaponModProjectileSaveMixin"
 	],
 	"injectors": { "defaultRequire": 1 }
 }
