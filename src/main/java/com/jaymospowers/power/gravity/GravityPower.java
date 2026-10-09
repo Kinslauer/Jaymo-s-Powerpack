@@ -153,12 +153,14 @@ public final class GravityPower implements Power {
 	static final double THROW_SPEED = 2.6;
 	static final float THROW_DAMAGE_BASE = 4.0F, THROW_DAMAGE_PER_SPEED = 5.0F;
 	static final int THROW_TICKS = 60;
+	/** Held, a throwable thing drifts in toward you (blocks a tick) until it hangs this close, for a better throw. */
+	static final double THROW_DRIFT = 0.12, THROW_HOLD = 2.5;
 	/**
 	 * A player held by Lift is stunned at first (a wind ragdolls): {@code HELD_STUN_WIND} ticks for a wind, {@code HELD_STUN}
 	 * for anyone else. After that the hold loosens to {@code HELD_STEER_FREE} and they break free by getting
 	 * {@code HELD_ESCAPE} blocks from where they're held (a wind simply flies out).
 	 */
-	static final int HELD_STUN_WIND = 50, HELD_STUN = 80;
+	static final int HELD_STUN_WIND = 10, HELD_STUN = 80;
 	static final double HELD_STEER_FREE = 0.06, HELD_ESCAPE = 3.0;
 	/** Before Weightless is yours, holding V draws loose items in from this far, this fast (blocks/tick). */
 	static final double MAGNET_RADIUS = 12.0, MAGNET_SPEED = 0.85;
@@ -179,10 +181,10 @@ public final class GravityPower implements Power {
 	static final int SLAM_MAX_TICKS = 30;
 	/**
 	 * A slam begun in mid-air: your fall stops while you haul it up and bring it down (the rise and
-	 * {@code AERIAL_HANG} ticks more), it does {@code AERIAL_DAMAGE} times the damage, always buries three deep through
-	 * anything up to {@code AERIAL_HARDNESS}, smashes the ground around it, and throws up more debris and smoke.
+	 * {@code AERIAL_HANG} ticks more), it hits hardest of all (see {@link #SLAM_DAMAGE_MAX}), always buries three deep
+	 * through anything up to {@code AERIAL_HARDNESS}, smashes the ground around it, and throws up more debris and smoke.
 	 */
-	static final float AERIAL_DAMAGE = 1.6F, AERIAL_HARDNESS = 5.0F, AERIAL_DEBRIS = 1.6F;
+	static final float AERIAL_HARDNESS = 5.0F, AERIAL_DEBRIS = 1.6F;
 	static final int AERIAL_HANG = 4;
 	/** Width × height (blocks) past which a slammed creature counts as heavy (a cow is 0.9 × 1.4). */
 	static final float HEAVY_SLAM_SIZE = 1.27F;
@@ -199,8 +201,15 @@ public final class GravityPower implements Power {
 	static final int IMPACT_RING = 2;
 	/** How big the debris puffs are (a broken block's, and the ring's). */
 	static final float IMPACT_DEBRIS = 2.2F, BURY_DEBRIS = 2.8F;
-	/** Damage: base, per ability unlocked, more once ascended. */
-	static final float SLAM_DAMAGE_BASE = 4.0F, SLAM_DAMAGE_PER_LEVEL = 3.0F, SLAM_DAMAGE_ASCENDED = 4.0F;
+	/**
+	 * Damage. The most a slam ever does is {@code SLAM_DAMAGE_MAX}: from mid-air, on something big, every ability
+	 * mastered and ascended. Everything else is a share of that: a fresh power {@code SLAM_DAMAGE_FRESH} of it (growing
+	 * with each ability and the ascension), from the ground {@code SLAM_GROUND_SHARE}, on something small
+	 * {@code SLAM_SMALL_SHARE}.
+	 */
+	static final float SLAM_DAMAGE_MAX = 20.0F, SLAM_DAMAGE_FRESH = 0.35F, SLAM_GROUND_SHARE = 0.65F, SLAM_SMALL_SHARE = 0.75F;
+	/** Something hurled with Lift never hits harder than this. */
+	static final float THROW_DAMAGE_MAX = 12.0F;
 	/** The block it hits breaks once the power has grown: the hardest it can break at 3 and 4 abilities, and ascended (stone is 1.5). */
 	static final float SLAM_BREAK_LEVEL_3 = 1.5F, SLAM_BREAK_LEVEL_4 = 3.0F, SLAM_BREAK_ASCENDED = 5.0F;
 
@@ -593,6 +602,9 @@ public final class GravityPower implements Power {
 			drawCorpse(player, state, target);
 			return;
 		}
+		if (throwable(target) && state.liftHold > THROW_HOLD) {
+			state.liftHold = Math.max(THROW_HOLD, state.liftHold - THROW_DRIFT);
+		}
 		Vec3 hold = player.getEyePosition().add(player.getViewVector(1.0F).scale(state.choking ? CHOKE_DISTANCE + target.getBbWidth() * 0.5 : state.liftHold));
 		if (state.choking) {
 			// by the throat, held up high: its head at your raised hand
@@ -707,8 +719,11 @@ public final class GravityPower implements Power {
 		// the slam
 		int abilities = com.jaymospowers.core.Mastery.unlocked(player);
 		boolean ascended = Fate.isAscended(player);
-		float damage = (SLAM_DAMAGE_BASE + SLAM_DAMAGE_PER_LEVEL * abilities + (ascended ? SLAM_DAMAGE_ASCENDED : 0.0F))
-			* (Fate.isCorrupted(player) ? COLLAPSE_DAMAGE : 1.0F);
+		// zombies, players and anything bigger than a cow are heavy: they take the whole body (and the full blow)
+		boolean heavy = target.getBbWidth() * target.getBbHeight() > HEAVY_SLAM_SIZE || target instanceof Player
+			|| target instanceof net.minecraft.world.entity.monster.zombie.Zombie;
+		float grown = (abilities + (ascended ? 1 : 0)) / (float)(com.jaymospowers.core.Mastery.ALL + 1);
+		float damage = SLAM_DAMAGE_MAX * Mth.lerp(grown, SLAM_DAMAGE_FRESH, 1.0F) * (heavy ? 1.0F : SLAM_SMALL_SHARE);
 		float breakHardness = ascended ? SLAM_BREAK_ASCENDED : abilities >= 4 ? SLAM_BREAK_LEVEL_4 : abilities >= 3 ? SLAM_BREAK_LEVEL_3 : 0.0F;
 		double weight = SLAM_WEIGHT_BASE + SLAM_WEIGHT_PER_LEVEL * abilities + (ascended ? SLAM_WEIGHT_PER_LEVEL : 0.0);
 		// let go of it (no throw), then drive it down
@@ -728,16 +743,17 @@ public final class GravityPower implements Power {
 		// from mid-air: you hang there, flip over with it, and it hits far harder (always three deep)
 		boolean aerial = !player.onGround() && !player.isInWater();
 		if (aerial) {
-			damage *= AERIAL_DAMAGE;
 			depth = 3;
+		} else {
+			damage *= SLAM_GROUND_SHARE;
+		}
+		if (aerial) {
 			breakHardness = Math.max(breakHardness, AERIAL_HARDNESS);
 			stall(player);
 		}
 		SLAMS.add(new Slam(level.dimension(), target.getUUID(), player.getUUID(), damage, breakHardness, level.getGameTime(), rise, down, depth,
 			aerial));
-		// zombies, players and anything bigger than a cow take the whole body: one of the full overhead slams, at random
-		boolean heavy = target.getBbWidth() * target.getBbHeight() > HEAVY_SLAM_SIZE || target instanceof Player
-			|| target instanceof net.minecraft.world.entity.monster.zombie.Zombie;
+		// the heavy ones get one of the full overhead slams, at random
 		int style = heavy ? 1 + level.getRandom().nextInt(SLAM_STYLES) : 0;
 		player.setAttached(SLAM_POSE, new SlamPose(level.getGameTime(), rise, -1L, style, aerial));
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 1.0F, 0.6F);
@@ -782,7 +798,7 @@ public final class GravityPower implements Power {
 				for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, entity.getBoundingBox().inflate(0.3).expandTowards(thrown.velocity),
 					e -> e != entity && e != thrower && e.isAlive() && !e.isSpectator() && !thrown.hit.contains(e.getId()))) {
 					thrown.hit.add(victim.getId());
-					float damage = (THROW_DAMAGE_BASE + THROW_DAMAGE_PER_SPEED * (float)speed) * size;
+					float damage = Math.min(THROW_DAMAGE_MAX, (THROW_DAMAGE_BASE + THROW_DAMAGE_PER_SPEED * (float)speed) * size);
 					DamageSource source = thrower instanceof Player p ? level.damageSources().mobProjectile(entity, p) : level.damageSources().flyIntoWall();
 					victim.hurtServer(level, source, damage);
 					victim.setDeltaMovement(victim.getDeltaMovement().add(thrown.velocity.scale(0.5)).add(0.0, 0.25, 0.0));
@@ -906,6 +922,8 @@ public final class GravityPower implements Power {
 					stall(slammer);
 				}
 			}
+			// the slam is the blow: no fall damage on top of it
+			target.resetFallDistance();
 			if (age < slam.rise()) {
 				// hauled up into the air...
 				target.setDeltaMovement(0.0, SLAM_RISE_SPEED, 0.0);

@@ -112,15 +112,15 @@ public final class WebSymbiote {
 	public static final int STRESS_STARVE_TICKS = 80;
 
 	/** Takeover: starving and this stressed, every so often there's a chance it grabs the wheel. */
-	public static final int TAKEOVER_STRESS = 50;
-	public static final int TAKEOVER_CHECK_TICKS = 200;
-	public static final float TAKEOVER_CHANCE = 0.35F;
+	public static final int TAKEOVER_STRESS = 40;
+	public static final int TAKEOVER_CHECK_TICKS = 140;
+	public static final float TAKEOVER_CHANCE = 0.55F;
 	public static final int TAKEOVER_MIN_TICKS = 60;
 	public static final int TAKEOVER_MAX_TICKS = 100;
 	public static final double TAKEOVER_RANGE = 12.0;
 	public static final double TAKEOVER_REACH = 3.0;
 	public static final int TAKEOVER_ATTACK_TICKS = 10;
-	public static final int TAKEOVER_COOLDOWN = 1200;
+	public static final int TAKEOVER_COOLDOWN = 900;
 	public static final int TAKEOVER_RELIEF = 20;
 
 	/** Weaknesses: what each exposure does to you and to the bond, and how many it takes to break it. */
@@ -186,8 +186,8 @@ public final class WebSymbiote {
 	 * {@link #TAKEOVER_CHECK_TICKS}) has a chance that climbs by {@code ARMOR_TAKEOVER_PER_MINUTE} a minute, up to
 	 * {@code ARMOR_TAKEOVER_MAX}, hungry or not. Such a rampage lasts longer, and goes for players too.
 	 */
-	public static final int ARMOR_RESTLESS_TICKS = 1200;
-	public static final float ARMOR_TAKEOVER_PER_MINUTE = 0.12F;
+	public static final int ARMOR_RESTLESS_TICKS = 800;
+	public static final float ARMOR_TAKEOVER_PER_MINUTE = 0.2F;
 	public static final float ARMOR_TAKEOVER_MAX = 0.6F;
 	public static final int RAMPAGE_MIN_TICKS = 120, RAMPAGE_MAX_TICKS = 200;
 	/** In a rampage, every this many strikes on a player is a bite: this much more damage, and it feeds. */
@@ -220,16 +220,54 @@ public final class WebSymbiote {
 	 * catapulting you along.
 	 */
 	public static final int INSTINCT_CHECK_TICKS = 10;
-	public static final float INSTINCT_ARMOR_CHANCE = 0.45F;
+	public static final float INSTINCT_ARMOR_CHANCE = 0.7F;
 	public static final float INSTINCT_LOW_HEALTH = 8.0F;
 	public static final double INSTINCT_THREAT_RANGE = 3.0;
-	public static final int INSTINCT_COOLDOWN = 50;
-	public static final double INSTINCT_FIRE_SHOVE = 0.7;
+	public static final int INSTINCT_COOLDOWN = 30;
+	public static final double INSTINCT_FIRE_SHOVE = 0.9;
+	/** Something about to blow (a lit creeper, primed TNT) this close: it hurls you clear, this hard. */
+	public static final double INSTINCT_BLAST_RANGE = 7.0, INSTINCT_BLAST_SHOVE = 1.25;
 	public static final double INSTINCT_THREAT_SHOVE = 0.95;
 	public static final float INSTINCT_GRAB_CHANCE = 0.5F;
 	public static final double INSTINCT_FALL_CATCH_HEIGHT = 4.0;
 	public static final float INSTINCT_CATAPULT_CHANCE = 0.05F;
 	public static final double INSTINCT_CATAPULT = 1.4;
+
+	/**
+	 * Struck while Living Armor is up, it strikes back: a tendril lashes the attacker within reach (landing in
+	 * {@code RETALIATE_LAG} ticks), or snatches one further off. Once every {@code RETALIATE_COOLDOWN}.
+	 */
+	public static final int RETALIATE_LAG = 6, RETALIATE_COOLDOWN = 25;
+	/** Hungry (satiety under {@code SELF_FEED_BELOW}), Living Armor eats a corpse in reach on its own, looking every {@code SELF_FEED_EVERY}. */
+	public static final int SELF_FEED_BELOW = 50, SELF_FEED_EVERY = 20;
+	/**
+	 * Let your own hunger run out and it turns on you: the suit comes off and it won't come back for a while. The
+	 * stronger the bond, the shorter: {@code SULK_TICKS}, × (1 + {@code SULK_PER_REJECTION} per time it has rejected you
+	 * before), × (0.5 + its stress).
+	 */
+	public static final int SULK_TICKS = 1200;
+	public static final float SULK_PER_REJECTION = 0.5F;
+	/** Sulking until this game time: the suit (and Living Armor) won't come. Saved; synced to the owner for the menu. */
+	public static final AttachmentType<Long> SULK = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_sulk"),
+		builder -> builder.persistent(com.mojang.serialization.Codec.LONG).syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG,
+			AttachmentSyncPredicate.targetOnly()));
+
+	/** What it won't eat, alive or dead: bone (skeletons), powder (creepers), the End's own (endermen). */
+	static boolean inedible(net.minecraft.world.entity.@org.jspecify.annotations.Nullable EntityType<?> type) {
+		return type != null && (type.builtInRegistryHolder().is(net.minecraft.tags.EntityTypeTags.SKELETONS) || type == net.minecraft.world.entity.EntityTypes.CREEPER
+			|| type == net.minecraft.world.entity.EntityTypes.ENDERMAN);
+	}
+
+	/** Whether it'll eat this (a creature, or a corpse by what it was). */
+	static boolean edible(Entity food) {
+		return !inedible(com.jaymospowers.power.gravity.GravityPower.isCorpse(food) ? KitchenCompat.sourceType(food) : food.getType());
+	}
+
+	/** Sulking right now (the suit won't come). */
+	public static boolean sulking(Player player) {
+		Long until = player.getAttached(SULK);
+		return until != null && player.level().getGameTime() < until;
+	}
 
 	/** Consume takes its time: the jaws chomp {@code EAT_CHOMPS} times over {@code EAT_TICKS}, then it's gone. */
 	public static final int EAT_TICKS = 40;
@@ -279,6 +317,9 @@ public final class WebSymbiote {
 		/** Instinct: when it can act on its own again, and whether it has caught this fall already. */
 		long instinctReadyAt;
 		boolean caughtFall;
+		/** When it can strike back again; whether it has already turned on you this time your hunger ran out. */
+		long retaliateReadyAt;
+		boolean sulkedThisTime;
 		/** The meal: what, until when, and what it gives. */
 		int eatTarget = -1;
 		long eatUntil;
@@ -296,6 +337,9 @@ public final class WebSymbiote {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (source.getEntity() instanceof ServerPlayer attacker && attacker != entity) {
 				endShroud(attacker);
+			}
+			if (entity instanceof ServerPlayer victim && source.getEntity() instanceof LivingEntity attacker && attacker != victim && damageTaken > 0.0F) {
+				retaliate(victim, attacker);
 			}
 		});
 	}
@@ -437,6 +481,28 @@ public final class WebSymbiote {
 			next = next.withStress(next.stress() - 1);
 		}
 
+		// your own hunger run dry: it turns on you, and the suit won't come for a while
+		if (!player.isCreative() && player.getFoodData().getFoodLevel() <= 0) {
+			if (!live.sulkedThisTime) {
+				live.sulkedThisTime = true;
+				next = sulk(player, next, now);
+				armor = false;
+			}
+		} else {
+			live.sulkedThisTime = false;
+		}
+		Long sulkUntil = player.getAttached(SULK);
+		if (sulkUntil != null) {
+			if (now >= sulkUntil) {
+				player.removeAttached(SULK);
+				whisper(player, "sulk_over");
+			} else if (next.has(WebSymbioteState.SUIT) || next.has(WebSymbioteState.ARMOR)) {
+				next = next.withFlag(WebSymbioteState.SUIT, false).withFlag(WebSymbioteState.ARMOR, false);
+				removeArmor(player);
+				armor = false;
+			}
+		}
+
 		// Living Armor: absorption that grows back, and planted feet
 		if (armor) {
 			applyArmor(player);
@@ -445,6 +511,9 @@ public final class WebSymbiote {
 			}
 			live.armorTicks++;
 			tickStrikes(player, live, now);
+			if (next.satiety() < SELF_FEED_BELOW && live.eatTarget < 0 && live.takeoverTicks <= 0 && player.tickCount % SELF_FEED_EVERY == 0) {
+				selfFeed(player);
+			}
 			if (player.tickCount % INSTINCT_CHECK_TICKS == 0 && live.takeoverTicks <= 0) {
 				catapult(player, live, now);
 			}
@@ -811,7 +880,7 @@ public final class WebSymbiote {
 					ServerLevel level = player.level();
 					level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.PHANTOM_BITE, SoundSource.PLAYERS, 1.2F, 0.4F);
 					level.sendParticles(ParticleTypes.SQUID_INK, living.getX(), living.getY() + 1.0, living.getZ(), 15, 0.3, 0.4, 0.3, 0.05);
-				} else if (!(living instanceof Player) && living.getHealth() <= CONSUME_MAX_HEALTH) {
+				} else if (!(living instanceof Player) && living.getHealth() <= CONSUME_MAX_HEALTH && edible(living)) {
 					// anything weak enough, it simply devours
 					devour(player, living);
 				}
@@ -826,6 +895,12 @@ public final class WebSymbiote {
 
 	/** A radial-menu pick. Server-authoritative: bond, cooldown and satiety are all checked here. */
 	static void use(ServerPlayer player, int ability) {
+		if ((ability == SUIT_TOGGLE || ability == ARMOR) && isBonded(player) && sulking(player)) {
+			// it won't come: it's still angry with you
+			whisper(player, "sulking");
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.6F, 1.5F);
+			return;
+		}
 		if (ability == SUIT_TOGGLE && isBonded(player)) {
 			WebSymbioteState state = state(player);
 			boolean on = !state.has(WebSymbioteState.SUIT);
@@ -1010,6 +1085,7 @@ public final class WebSymbiote {
 		var random = player.getRandom();
 		BlockPos fire = nearFire(player);
 		boolean burning = player.isOnFire() || fire != null;
+		Vec3 blast = explosiveNear(player);
 		boolean falling = !player.onGround() && player.getY() - player.yo < -0.55 && player.fallDistance > 5.0F;
 		LivingEntity threat = null;
 		double best = INSTINCT_THREAT_RANGE * INSTINCT_THREAT_RANGE;
@@ -1021,13 +1097,13 @@ public final class WebSymbiote {
 				threat = mob;
 			}
 		}
-		boolean danger = burning || falling || threat != null || player.getHealth() <= INSTINCT_LOW_HEALTH;
+		boolean danger = burning || blast != null || falling || threat != null || player.getHealth() <= INSTINCT_LOW_HEALTH;
 		if (!danger) {
 			return state;
 		}
 		boolean armor = state.has(WebSymbioteState.ARMOR);
 		if (!armor) {
-			if (random.nextFloat() < INSTINCT_ARMOR_CHANCE) {
+			if (random.nextFloat() < INSTINCT_ARMOR_CHANCE && !sulking(player)) {
 				// it hardens around you, unasked
 				state = state.withFlag(WebSymbioteState.ARMOR, true).withFlag(WebSymbioteState.SUIT, true);
 				applyArmor(player);
@@ -1036,7 +1112,10 @@ public final class WebSymbiote {
 				level.sendParticles(dust(1.4F), player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.8, 0.4, 0.0);
 				state = hintOnce(player, state, HINT_INSTINCT, "instinct");
 			}
-			return state;
+			// fire and blasts it flees even in the plain suit; everything else needs the armour
+			if (!(state.has(WebSymbioteState.SUIT) && (burning || blast != null))) {
+				return state;
+			}
 		}
 		// a fall about to end: it reaches for the ground and takes the blow
 		if (falling && !live.caughtFall && groundWithin(player, INSTINCT_FALL_CATCH_HEIGHT)) {
@@ -1048,6 +1127,17 @@ public final class WebSymbiote {
 			return state;
 		}
 		if (now < live.instinctReadyAt) {
+			return state;
+		}
+		if (blast != null) {
+			// something's about to go off: it hurls you clear
+			live.instinctReadyAt = now + INSTINCT_COOLDOWN;
+			Vec3 away = player.position().subtract(blast);
+			away = new Vec3(away.x, 0.0, away.z);
+			away = away.lengthSqr() < 1.0E-4 ? player.getLookAngle().reverse().horizontal() : away.normalize();
+			ServerPlayNetworking.send(player, new WebNet.Nudge(away.normalize().scale(INSTINCT_BLAST_SHOVE).add(0.0, 0.45, 0.0)));
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.9F, 1.6F);
+			level.sendParticles(dust(1.4F), player.getX(), player.getY() + 0.3, player.getZ(), 16, 0.4, 0.2, 0.4, 0.0);
 			return state;
 		}
 		if (burning) {
@@ -1097,9 +1187,84 @@ public final class WebSymbiote {
 		level.sendParticles(dust(1.4F), player.getX(), player.getY() + 0.2, player.getZ(), 14, 0.4, 0.1, 0.4, 0.0);
 	}
 
-	/** Fire or lava touching or right beside you (a small box: cheap). */
+	/** A lit creeper or primed TNT close by: where it is. */
+	private static @org.jspecify.annotations.Nullable Vec3 explosiveNear(ServerPlayer player) {
+		for (Entity e : player.level().getEntities(player, player.getBoundingBox().inflate(INSTINCT_BLAST_RANGE),
+			e -> e instanceof net.minecraft.world.entity.item.PrimedTnt
+				|| e instanceof net.minecraft.world.entity.monster.Creeper creeper && (creeper.isIgnited() || creeper.getSwellDir() > 0))) {
+			return e.position();
+		}
+		return null;
+	}
+
+	/** Struck with the armour up: a tendril lashes back (or snatches the attacker from further off). */
+	private static void retaliate(ServerPlayer player, LivingEntity attacker) {
+		if (!armored(player) || !attacker.isAlive() || player.isCreative() && !player.isAlive()) {
+			return;
+		}
+		Live live = live(player);
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		if (now < live.retaliateReadyAt || live.takeoverTicks > 0) {
+			return;
+		}
+		live.retaliateReadyAt = now + RETALIATE_COOLDOWN;
+		double distance = attacker.distanceTo(player) - attacker.getBbWidth() * 0.5;
+		if (distance <= STRIKE_RANGE + 1.0) {
+			// a lash, almost at once
+			player.setAttached(STRIKE, new Strike(attacker.getId(), now - (STRIKE_HIT - RETALIATE_LAG)));
+		} else if (distance <= TENDRIL_RANGE && WebTendrils.grabbable(player, attacker)) {
+			WebTendrils.snatch(player, attacker);
+		} else {
+			return;
+		}
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.9F, 1.3F);
+	}
+
+	/** Hungry, the armour feeds itself: a corpse you carry, else one lying within reach. */
+	private static void selfFeed(ServerPlayer player) {
+		Entity corpse = KitchenCompat.carriedCorpse(player);
+		if (corpse != null && !edible(corpse)) {
+			corpse = null;
+		}
+		if (corpse == null) {
+			double best = (CONSUME_RANGE + 1.0) * (CONSUME_RANGE + 1.0);
+			for (Entity e : player.level().getEntities(player, player.getBoundingBox().inflate(CONSUME_RANGE + 1.0),
+				e -> e.isAlive() && com.jaymospowers.power.gravity.GravityPower.isCorpse(e) && edible(e))) {
+				double d = e.distanceToSqr(player);
+				if (d < best) {
+					best = d;
+					corpse = e;
+				}
+			}
+		}
+		if (corpse == null) {
+			return;
+		}
+		float size = Mth.clamp(corpse.getBbWidth() * corpse.getBbWidth() * corpse.getBbHeight() / 2.0F, 0.0F, 1.0F);
+		trail(player.level(), player.getEyePosition().add(0.0, -0.3, 0.0), corpse.getBoundingBox().getCenter());
+		startEating(player, corpse, Mth.lerp(size, CORPSE_HEAL_MIN, CORPSE_HEAL_MAX), Math.round(Mth.lerp(size, CONSUME_FEED, CORPSE_FEED_MAX)));
+		whisper(player, "self_feed");
+	}
+
+	/** Your hunger ran out: it turns on you, tears the suit away, and won't come back until it's calmed (the bond decides how long). */
+	private static WebSymbioteState sulk(ServerPlayer player, WebSymbioteState state, long now) {
+		float strain = (1.0F + SULK_PER_REJECTION * state.rejections()) * (0.5F + state.stress() / (float)STRESS_MAX);
+		int ticks = Math.round(SULK_TICKS * strain);
+		player.setAttached(SULK, now + ticks);
+		removeArmor(player);
+		ServerLevel level = player.level();
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ANGRY, SoundSource.PLAYERS, 1.0F, 1.3F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.PLAYERS, 1.0F, 0.6F);
+		level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.4, 0.8, 0.4, 0.05);
+		whisper(player, "sulk");
+		return state.withFlag(WebSymbioteState.SUIT, false).withFlag(WebSymbioteState.ARMOR, false)
+			.withStress(Math.min(STRESS_MAX, state.stress() + 10));
+	}
+
+	/** Fire or lava touching or close beside you. */
 	private static @org.jspecify.annotations.Nullable BlockPos nearFire(ServerPlayer player) {
-		AABB box = player.getBoundingBox().inflate(1.2, 0.3, 1.2);
+		AABB box = player.getBoundingBox().inflate(2.5, 1.0, 2.5);
 		for (BlockPos pos : BlockPos.betweenClosed(BlockPos.containing(box.minX, box.minY, box.minZ), BlockPos.containing(box.maxX, box.maxY, box.maxZ))) {
 			net.minecraft.world.level.block.state.BlockState block = player.level().getBlockState(pos);
 			if (block.is(net.minecraft.tags.BlockTags.FIRE) || block.getFluidState().is(net.minecraft.tags.FluidTags.LAVA)) {
@@ -1171,10 +1336,16 @@ public final class WebSymbiote {
 		if (live(player).eatTarget >= 0) {
 			return false;
 		}
-		if (corpse != null) {
+		if (corpse != null && edible(corpse)) {
 			float size = Mth.clamp(corpse.getBbWidth() * corpse.getBbWidth() * corpse.getBbHeight() / 2.0F, 0.0F, 1.0F);
 			startEating(player, corpse, Mth.lerp(size, CORPSE_HEAL_MIN, CORPSE_HEAL_MAX), Math.round(Mth.lerp(size, CONSUME_FEED, CORPSE_FEED_MAX)));
 			return true;
+		}
+		if (corpse != null) {
+			// it recoils from that one
+			whisper(player, "inedible");
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.6F, 0.5F);
+			return false;
 		}
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getViewVector(1.0F);
@@ -1182,7 +1353,7 @@ public final class WebSymbiote {
 		double bestScore = Double.MAX_VALUE;
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(CONSUME_RANGE),
 			e -> e != player && e.isAlive() && !(e instanceof Player) && !(e instanceof ArmorStand) && e.getMaxHealth() <= CONSUME_MAX_HEALTH
-				&& !(e instanceof TamableAnimal tame && tame.isTame()) && !e.hasCustomName())) {
+				&& !(e instanceof TamableAnimal tame && tame.isTame()) && !e.hasCustomName() && edible(e))) {
 			Vec3 to = living.getBoundingBox().getCenter().subtract(eye);
 			double distance = to.length();
 			if (distance > CONSUME_RANGE + living.getBbWidth() * 0.5) {

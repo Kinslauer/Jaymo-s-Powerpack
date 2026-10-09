@@ -31,13 +31,15 @@ public final class WebFeral {
 		}
 		boolean slim = avatar.skin != null && avatar.skin.model() == PlayerModelType.SLIM;
 		Float charge = avatar.getData(WebSymbioteClient.CHARGE);
-		if (charge != null) {
+		WebSymbioteClient.Tendrils tendrils = avatar.getData(WebSymbioteClient.TENDRILS);
+		// Living Armor on the run keeps galloping while it charges a leap; standing (or the plain suit), it coils
+		boolean galloping = tendrils != null && tendrils.run() > 0.3F && avatar.walkAnimationSpeed > 0.3F;
+		if (charge != null && !galloping) {
 			coil(humanoid, avatar, charge, slim);
 			return;
 		}
-		WebSymbioteClient.Tendrils tendrils = avatar.getData(WebSymbioteClient.TENDRILS);
 		if (tendrils == null || avatar.getData(WebArms.KEY) != null || avatar.isFallFlying || avatar.swimAmount > 0.0F
-			|| avatar.isPassenger || avatar.isCrouching) {
+			|| avatar.isPassenger || avatar.isCrouching && charge == null) {
 			return;
 		}
 		// eased between standing, walking and the gallop (see WebSymbioteClient.smoothRun)

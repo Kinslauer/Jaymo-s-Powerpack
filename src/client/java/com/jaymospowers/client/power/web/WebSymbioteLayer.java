@@ -36,10 +36,27 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			PlayerModel.createMesh(new net.minecraft.client.model.geom.builders.CubeDeformation(SKIN_GAP), false), 64, 64).bakeRoot(), false);
 		this.suitSlim = new PlayerModel(net.minecraft.client.model.geom.builders.LayerDefinition.create(
 			PlayerModel.createMesh(new net.minecraft.client.model.geom.builders.CubeDeformation(SKIN_GAP), true), 64, 64).bakeRoot(), true);
+		WebSuitGrowth.register(this.bulkWide, true);
+		WebSuitGrowth.register(this.bulkSlim, true);
+		WebSuitGrowth.register(this.suitWide, false);
+		WebSuitGrowth.register(this.suitSlim, false);
 	}
 
 	@Override
 	public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
+		boolean slim = state.skin.model() == net.minecraft.world.entity.player.PlayerModelType.SLIM;
+		WebSuitGrowth.Growth growth = state.getData(WebSuitGrowth.KEY);
+		if (growth != null) {
+			// it's growing over them (or drawing back): see WebSuitGrowth
+			int high = Math.max(growth.from(), growth.to()), low = Math.min(growth.from(), growth.to());
+			if (high == 2 && low == 1 || high == 1) {
+				coloredCutoutModelCopyLayerRender(slim ? this.suitSlim : this.suitWide, TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
+			}
+			if (high == 2) {
+				coloredCutoutModelCopyLayerRender(slim ? this.bulkSlim : this.bulkWide, TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
+			}
+			return;
+		}
 		if (state.getData(WebSymbioteClient.TENDRILS) != null) {
 			// Living Armor: the suit swells over the whole body, whether or not it was showing
 			PlayerModel bulk = state.skin.model() == net.minecraft.world.entity.player.PlayerModelType.SLIM ? this.bulkSlim : this.bulkWide;

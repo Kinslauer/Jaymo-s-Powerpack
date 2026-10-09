@@ -82,8 +82,16 @@ public final class WindModes {
 	static final float CAST_ZAP_CHANCE = 0.35F;
 	static final float IDLE_ZAP_DAMAGE = 1.5F;
 	static final float CAST_ZAP_DAMAGE = 3.0F;
-	/** The mode's hunger, per tick. */
+	/** The mode's hunger, per tick; at or below this much food (three shanks) it gives out, and won't start. */
 	static final float MODE_EXHAUSTION = 0.01F;
+	static final int MODE_MIN_FOOD = 6;
+	/**
+	 * The Thunderhead (both forms at once) rolls in: the sky turns to a thunderstorm for {@code THUNDERHEAD_STORM_TICKS}
+	 * (if it isn't one already), {@code THUNDERHEAD_BOLTS} bolts come down around you, and everyone within
+	 * {@code THUNDERHEAD_DARK_RANGE} sees the world go dark for {@code THUNDERHEAD_DARK_TICKS}.
+	 */
+	static final int THUNDERHEAD_STORM_TICKS = 2400, THUNDERHEAD_BOLTS = 5, THUNDERHEAD_DARK_TICKS = 70;
+	static final double THUNDERHEAD_DARK_RANGE = 48.0;
 
 	// ---- Tempest mode ----
 	public static final float TEMPEST_ABILITY_SCALE = 1.25F;
@@ -176,7 +184,15 @@ public final class WindModes {
 		if (mode == NONE) {
 			return;
 		}
+		if (tooHungry(player)) {
+			player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymospowers.wind.mode_hungry")
+				.withStyle(net.minecraft.ChatFormatting.GRAY));
+			return;
+		}
 		player.setAttached(MODE, mode);
+		if (mode == BOTH) {
+			thunderhead(player, level);
+		}
 		if ((mode & STORM) != 0) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 1.5F, 1.6F);
 			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.5, 0.9, 0.5, 0.3);
@@ -212,12 +228,62 @@ public final class WindModes {
 			player.setAttached(MODE, still);
 			mode = still;
 		}
+		if (tooHungry(player)) {
+			// running on empty: the mode gives out
+			player.removeAttached(MODE);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_DEATH, SoundSource.PLAYERS, 0.6F, 0.8F);
+			player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymospowers.wind.mode_hungry")
+				.withStyle(net.minecraft.ChatFormatting.GRAY));
+			return;
+		}
 		player.causeFoodExhaustion(MODE_EXHAUSTION);
 		if ((mode & STORM) != 0 && player.tickCount % 20 == 0 && player.getRandom().nextFloat() < IDLE_ZAP_CHANCE) {
 			zap(player, IDLE_ZAP_DAMAGE);
 		}
 		if ((mode & TEMPEST) != 0) {
 			deflect(player, level);
+		}
+	}
+
+	private static boolean tooHungry(ServerPlayer player) {
+		return !player.isCreative() && player.getFoodData().getFoodLevel() <= MODE_MIN_FOOD;
+	}
+
+	/** The Thunderhead rolls in: the sky breaks into a storm, bolts fall all around, and the world goes dark. */
+	private static void thunderhead(ServerPlayer player, ServerLevel level) {
+		if (!level.isThundering() && level.dimensionType().hasSkyLight()) {
+			level.getServer().setWeatherParameters(0, THUNDERHEAD_STORM_TICKS, true, true);
+		}
+		var random = player.getRandom();
+		for (int i = 0; i < THUNDERHEAD_BOLTS; i++) {
+			double angle = random.nextDouble() * Math.PI * 2.0;
+			double distance = 4.0 + random.nextDouble() * 10.0;
+			double x = player.getX() + Math.cos(angle) * distance;
+			double z = player.getZ() + Math.sin(angle) * distance;
+			int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, (int)Math.floor(x), (int)Math.floor(z));
+			LightningBolt bolt = EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
+			if (bolt != null) {
+				bolt.snapTo(new Vec3(x, Math.min(y, player.getY() + 12.0), z));
+				bolt.setVisualOnly(true);
+				bolt.setCause(player);
+				level.addFreshEntity(bolt);
+			}
+		}
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 6.0F, 0.6F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.2F, 0.5F);
+		for (ServerPlayer near : level.players()) {
+			if (near.distanceToSqr(player) <= THUNDERHEAD_DARK_RANGE * THUNDERHEAD_DARK_RANGE) {
+				near.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.DARKNESS, THUNDERHEAD_DARK_TICKS, 0,
+					false, false, false), player);
+			}
+		}
+		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1.0, player.getZ(), 80, 0.8, 1.2, 0.8, 0.5);
+	}
+
+	/** Real lightning charges a creeper; so does a wind's (without lightning's own damage and fire). */
+	static void chargeCreeper(Entity entity) {
+		if (entity instanceof net.minecraft.world.entity.monster.Creeper creeper) {
+			creeper.getEntityData().set(com.jaymospowers.power.wind.mixin.CreeperAccess.jaymospowers$powered(), true);
 		}
 	}
 
@@ -301,6 +367,7 @@ public final class WindModes {
 		}
 		target.setInvulnerableTime(0);
 		target.hurtServer(level, attacker.damageSources().source(DamageTypes.LIGHTNING_BOLT, attacker), SHOCK_DAMAGE);
+		chargeCreeper(target);
 		root(target, true);
 		target.setAttached(SHOCKED, true);
 		SHOCKS.removeIf(s -> s.entity().equals(target.getUUID()));
@@ -383,6 +450,7 @@ public final class WindModes {
 		AABB area = new AABB(at, at).inflate(CALL_RADIUS, CALL_RADIUS + 3.0, CALL_RADIUS);
 		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area, e -> e.isAlive() && e != player && !e.isSpectator())) {
 			target.hurtServer(level, source, damage);
+			chargeCreeper(target);
 			if (!target.fireImmune()) {
 				target.setRemainingFireTicks(Math.max(target.getRemainingFireTicks(), 60));
 			}

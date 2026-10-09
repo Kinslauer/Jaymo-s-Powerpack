@@ -214,6 +214,7 @@ public final class WindStorm {
 		DamageSource source = caster.damageSources().source(DamageTypes.LIGHTNING_BOLT, caster);
 		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area, e -> e.isAlive() && e != caster && !e.isSpectator())) {
 			target.hurtServer(level, source, LIGHTNING_DAMAGE);
+			WindModes.chargeCreeper(target);
 			if (!target.fireImmune()) {
 				target.setRemainingFireTicks(Math.max(target.getRemainingFireTicks(), LIGHTNING_BURN_TICKS));
 			}

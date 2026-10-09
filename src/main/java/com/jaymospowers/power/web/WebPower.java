@@ -213,6 +213,7 @@ public final class WebPower implements Power {
 
 		WebNet.register();
 		WebCut.register();
+		WebStrain.register();
 		WebTraps.register();
 		WebHitches.register();
 		WebBridges.register();

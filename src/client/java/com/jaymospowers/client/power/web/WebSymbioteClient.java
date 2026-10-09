@@ -178,6 +178,9 @@ public final class WebSymbioteClient {
 	/** From the avatar renderer's extractRenderState: does this player wear the suit. */
 	public static void extract(Entity entity, AvatarRenderState state) {
 		state.setData(SUIT, entity instanceof Player player && WebSymbiote.suitShown(player) ? Boolean.TRUE : null);
+		if (entity instanceof Player player) {
+			WebSuitGrowth.extract(player, state, net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false));
+		}
 		// coiling for a charged leap: deeper the longer it's held (WebSwing.CHARGE_FULL)
 		if (entity.getAttached(com.jaymospowers.power.web.WebPower.CHARGING) != null) {
 			long now = System.nanoTime();
@@ -254,15 +257,40 @@ public final class WebSymbioteClient {
 		player.setXRot(Mth.clamp(player.getXRot() + (pitch - player.getXRot()) * TAKEOVER_TURN, -90.0F, 90.0F));
 		Vec3 flat = new Vec3(to.x, 0.0, to.z);
 		if (flat.lengthSqr() > 1.5 * 1.5) {
-			flat = flat.normalize().scale(TAKEOVER_SPEED);
+			// find a way: straight at it if it's open (or a step it can hop), else the nearest open way round
+			Vec3 dir = flat.normalize();
+			Vec3 way = null;
+			boolean hop = false;
+			for (int i = 0; i < TAKEOVER_DETOURS.length && way == null; i++) {
+				Vec3 tried = dir.yRot(TAKEOVER_DETOURS[i] * Mth.DEG_TO_RAD);
+				AABB ahead = player.getBoundingBox().move(tried.scale(TAKEOVER_LOOK));
+				if (player.level().noCollision(player, ahead)) {
+					way = tried;
+				} else if (player.level().noCollision(player, ahead.move(0.0, 1.1, 0.0))) {
+					// a ledge one block up: jump it
+					way = tried;
+					hop = true;
+				}
+			}
+			if (way == null) {
+				way = dir;
+				hop = true;
+			}
 			Vec3 v = player.getDeltaMovement();
 			double up = v.y;
-			if (player.onGround() && player.horizontalCollision) {
+			if (player.isInWater()) {
+				up = Math.max(up, 0.06);
+			} else if (player.onGround() && (hop || player.horizontalCollision)) {
 				up = 0.42;
 			}
-			player.setDeltaMovement(flat.x, up, flat.z);
+			Vec3 move = way.scale(TAKEOVER_SPEED);
+			player.setDeltaMovement(move.x, up, move.z);
 		}
 	}
+
+	/** How far ahead the takeover looks for a way (blocks), and the turns it tries, nearest first (degrees). */
+	private static final double TAKEOVER_LOOK = 0.7;
+	private static final float[] TAKEOVER_DETOURS = {0.0F, 30.0F, -30.0F, 60.0F, -60.0F, 90.0F, -90.0F, 125.0F, -125.0F};
 
 	/** Wall Crawl: stick to walls and ceilings and climb them. */
 	private static void tickCrawl(LocalPlayer player, WebSwing swing) {

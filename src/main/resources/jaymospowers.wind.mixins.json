@@ -2,7 +2,9 @@
 	"required": true,
 	"package": "com.jaymospowers.power.wind.mixin",
 	"compatibilityLevel": "JAVA_25",
-	"mixins": [],
+	"mixins": [
+		"CreeperAccess"
+	],
 	"injectors": {
 		"defaultRequire": 1
 	}

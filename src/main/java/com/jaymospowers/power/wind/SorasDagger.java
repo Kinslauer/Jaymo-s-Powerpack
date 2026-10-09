@@ -18,7 +18,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -62,14 +61,16 @@ import net.minecraft.world.phys.Vec3;
  * carrying the spoils of three bosses (a Nether Star, Dragon's Breath and a Heavy Core). Its Flurry is longer, and in a
  * wind user's hand it's carried by the winds: every slash a gust, a lunge on the wind, and a burst at the end.</li>
  * </ol>
- * Upgrading keeps what's on the dagger (enchantments, name, wear).
+ * Upgrading keeps what's on the dagger (enchantments, name, wear). Its gifts answer only a wind: in anyone else's hand an
+ * upgraded dagger is just a blade of its tier (no gusts, no extra knockback, no Flurry), and the Tempest dagger won't stay
+ * in their hand at all.
  */
 public final class SorasDagger extends Item {
 	public static final int IRON = 0, GILDED = 1, DIAMOND = 2, TEMPEST = 3;
 
 	public static SorasDagger[] STAGES = new SorasDagger[4];
 
-	/** Per stage: attack damage over a fist's 1, attack speed (vanilla's 4 plus this), and extra knockback. */
+	/** Per stage: attack damage over a fist's 1, attack speed (vanilla's 4 plus this), and extra knockback (a wind's hits only). */
 	private static final float[] DAMAGE = {4.0F, 5.0F, 6.0F, 8.0F};
 	private static final float[] SPEED = {-1.8F, -1.8F, -1.7F, -1.6F};
 	private static final float[] KNOCKBACK = {0.0F, 0.5F, 1.0F, 1.5F};
@@ -77,9 +78,8 @@ public final class SorasDagger extends Item {
 		ItemTags.GOLD_TOOL_MATERIALS);
 	private static final ToolMaterial TEMPEST_MATERIAL = new ToolMaterial(BlockTags.INCORRECT_FOR_NETHERITE_TOOL, 2600, 9.0F, 0.0F, 18,
 		ItemTags.DIAMOND_TOOL_MATERIALS);
-	private static final Identifier KNOCKBACK_ID = JaymosPowers.id("soras_dagger_knockback");
 
-	/** The Flurry: slashes, ticks between them, reach (blocks), how wide (cosine of the half-angle), damage per slash (× the dagger's), cooldown. */
+	/** The Flurry: slashes, ticks between them, reach (blocks), how wide (cosine of the half-angle), damage per slash (Ã— the dagger's), cooldown. */
 	static final int FLURRY_SLASHES = 5, FLURRY_SLASHES_TEMPEST = 7, FLURRY_SLASHES_WIND = 10;
 	static final int FLURRY_EVERY = 3;
 	static final double FLURRY_REACH = 3.4, FLURRY_REACH_TEMPEST = 4.0, FLURRY_REACH_WIND = 5.5;
@@ -137,19 +137,28 @@ public final class SorasDagger extends Item {
 				EquipmentSlotGroup.MAINHAND)
 			.add(Attributes.ATTACK_SPEED, new AttributeModifier(Item.BASE_ATTACK_SPEED_ID, SPEED[stage], AttributeModifier.Operation.ADD_VALUE),
 				EquipmentSlotGroup.MAINHAND);
-		if (KNOCKBACK[stage] > 0.0F) {
-			builder.add(Attributes.ATTACK_KNOCKBACK, new AttributeModifier(KNOCKBACK_ID, KNOCKBACK[stage], AttributeModifier.Operation.ADD_VALUE),
-				EquipmentSlotGroup.MAINHAND);
-		}
 		return builder.build();
 	}
 
-	/** The wind in its edge: from the gilded stage on, a hit carries a puff of air (and the later stages lift a little). */
+	/** Its gifts only answer a wind. */
+	static boolean wind(LivingEntity holder) {
+		return holder instanceof Player player && Powers.has(player, WindPower.INSTANCE);
+	}
+
+	/**
+	 * The wind in its edge (a wind's hand only): from the gilded stage on, a hit carries a puff of air and throws harder
+	 * (and the later stages lift a little).
+	 */
 	@Override
 	public void postHurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 		super.postHurtEnemy(stack, target, attacker);
-		if (this.stage == IRON || !(target.level() instanceof ServerLevel level)) {
+		if (this.stage == IRON || !wind(attacker) || !(target.level() instanceof ServerLevel level)) {
 			return;
+		}
+		Vec3 away = target.position().subtract(attacker.position()).horizontal();
+		if (away.lengthSqr() > 1.0E-4) {
+			target.setDeltaMovement(target.getDeltaMovement().add(away.normalize().scale(KNOCKBACK[this.stage] * 0.5)));
+			target.syncVelocity = true;
 		}
 		Vec3 at = target.position().add(0.0, target.getBbHeight() * 0.6, 0.0);
 		level.sendParticles(this.stage == TEMPEST ? ParticleTypes.GUST_EMITTER_SMALL : ParticleTypes.SMALL_GUST, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
@@ -173,16 +182,47 @@ public final class SorasDagger extends Item {
 			forge(serverPlayer, serverLevel, stack);
 			return InteractionResult.SUCCESS;
 		}
+		if (!wind(serverPlayer)) {
+			// only a wind can call up the Flurry
+			return InteractionResult.PASS;
+		}
 		if (player.getCooldowns().isOnCooldown(stack) || FLURRIES.containsKey(player.getUUID())) {
 			return InteractionResult.FAIL;
 		}
-		boolean wind = this.stage == TEMPEST && Powers.has(serverPlayer, WindPower.INSTANCE);
+		boolean wind = this.stage == TEMPEST;
 		int slashes = wind ? FLURRY_SLASHES_WIND : this.stage == TEMPEST ? FLURRY_SLASHES_TEMPEST : FLURRY_SLASHES;
 		FLURRIES.put(player.getUUID(), new Flurry(serverLevel, player.getUUID(), this.stage, wind, slashes, 0));
 		player.getCooldowns().addCooldown(stack, this.stage == TEMPEST ? FLURRY_COOLDOWN_TEMPEST : FLURRY_COOLDOWN);
 		serverLevel.playSound(null, player.getX(), player.getY(), player.getZ(), wind ? SoundEvents.BREEZE_CHARGE : SoundEvents.PLAYER_ATTACK_SWEEP,
 			SoundSource.PLAYERS, 0.9F, 1.3F);
 		return InteractionResult.SUCCESS;
+	}
+
+	/** The Tempest dagger won't be held by anyone but a wind: it slips from their hand into their pack (or to the ground). */
+	@Override
+	public void inventoryTick(ItemStack stack, ServerLevel level, net.minecraft.world.entity.Entity owner, EquipmentSlot slot) {
+		if (this.stage != TEMPEST || !(owner instanceof ServerPlayer player) || wind(player)) {
+			return;
+		}
+		InteractionHand hand = player.getMainHandItem() == stack ? InteractionHand.MAIN_HAND : player.getOffhandItem() == stack ? InteractionHand.OFF_HAND : null;
+		if (hand == null) {
+			return;
+		}
+		ItemStack held = stack.copy();
+		player.setItemInHand(hand, ItemStack.EMPTY);
+		boolean stowed = false;
+		for (int i = 9; i < 36 && !stowed; i++) {
+			if (player.getInventory().getItem(i).isEmpty()) {
+				player.getInventory().setItem(i, held);
+				stowed = true;
+			}
+		}
+		if (!stowed) {
+			player.drop(held, false, net.minecraft.util.Prediction.SERVER_ONLY);
+		}
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.soras_dagger.refuses").withStyle(ChatFormatting.AQUA, ChatFormatting.ITALIC));
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_DEFLECT, SoundSource.PLAYERS, 0.8F, 1.2F);
+		level.sendParticles(ParticleTypes.GUST, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 	}
 
 	// ---------------------------------------------------------------- the Flurry
@@ -249,10 +289,11 @@ public final class SorasDagger extends Item {
 			}
 			// every slash lands, however close together (no hurt cooldown between them)
 			target.setInvulnerableTime(0);
+			Vec3 before = target.getDeltaMovement();
 			if (target.hurtServer(level, player.damageSources().playerAttack(player), damage)) {
 				hit = true;
-				Vec3 push = flat.scale(flurry.wind() ? WIND_SLASH_PUSH : 0.12).add(0.0, flurry.wind() ? WIND_SLASH_LIFT : 0.05, 0.0);
-				target.setDeltaMovement(target.getDeltaMovement().add(push));
+				// the diamond Flurry holds them in place (no knockback); the winds' throws them
+				target.setDeltaMovement(flurry.wind() ? target.getDeltaMovement().add(flat.scale(WIND_SLASH_PUSH)).add(0.0, WIND_SLASH_LIFT, 0.0) : before);
 				target.syncVelocity = true;
 				level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 4, 0.2, 0.2, 0.2, 0.2);
 			}

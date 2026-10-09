@@ -42,6 +42,16 @@ public final class WindPose {
 	/** entity id → {previous, current} pose amount. */
 	private static final Map<Integer, float[]> AMOUNTS = new HashMap<>();
 
+	/**
+	 * Banking: at speed the body keeps to its path (the way it's actually moving, not where the head looks) and rolls
+	 * into a turn, {@code BANK_PER_DEGREE} degrees for each degree a tick the path swings, up to {@code BANK_MAX}.
+	 */
+	public static final RenderStateDataKey<float[]> BANK_KEY = RenderStateDataKey.create(() -> "jaymospowers:wind_bank");
+	private static final float BANK_PER_DEGREE = 7.0F, BANK_MAX = 60.0F, BANK_EASE = 0.2F;
+
+	/** entity id → {previous heading, heading, previous bank, bank, last x, last z}. */
+	private static final Map<Integer, double[]> PATHS = new HashMap<>();
+
 	private WindPose() {
 	}
 
@@ -68,6 +78,10 @@ public final class WindPose {
 		}
 		AMOUNTS.entrySet().removeIf(entry -> entry.getValue()[0] <= 0.0F && entry.getValue()[1] <= 0.0F || level.getEntity(entry.getKey()) == null);
 		for (AbstractClientPlayer player : level.players()) {
+			bank(player, AMOUNTS.containsKey(player.getId()));
+		}
+		PATHS.keySet().removeIf(id -> !AMOUNTS.containsKey(id));
+		for (AbstractClientPlayer player : level.players()) {
 			boolean braking = player == minecraft.player
 				? WindPowerClient.isActive(minecraft.player) && WindPowerClient.INSTANCE.flight().braking()
 				: player.getAttached(WindPower.BRAKING) != null;
@@ -83,6 +97,31 @@ public final class WindPose {
 			brake[1] = braking ? Math.min(1.0F, brake[1] + BRAKE_EASE_IN) : Math.max(0.0F, brake[1] - BRAKE_EASE_OUT);
 		}
 		BRAKES.entrySet().removeIf(entry -> entry.getValue()[0] <= 0.0F && entry.getValue()[1] <= 0.0F || level.getEntity(entry.getKey()) == null);
+	}
+
+	/** The path's heading, and the roll into the turn as it swings. */
+	private static void bank(Player player, boolean flying) {
+		if (!flying) {
+			return;
+		}
+		double[] path = PATHS.get(player.getId());
+		if (path == null) {
+			path = new double[] {player.getYRot(), player.getYRot(), 0.0, 0.0, player.getX(), player.getZ()};
+			PATHS.put(player.getId(), path);
+		}
+		double dx = player.getX() - path[4], dz = player.getZ() - path[5];
+		path[4] = player.getX();
+		path[5] = player.getZ();
+		path[0] = path[1];
+		path[2] = path[3];
+		double target = 0.0;
+		if (dx * dx + dz * dz > 0.05 * 0.05) {
+			double heading = Mth.atan2(dz, dx) * Mth.RAD_TO_DEG - 90.0;
+			double swing = Mth.wrapDegrees(heading - path[1]);
+			path[1] = path[1] + swing;
+			target = Mth.clamp(swing * BANK_PER_DEGREE, -BANK_MAX, BANK_MAX);
+		}
+		path[3] = path[3] + (target - path[3]) * BANK_EASE;
 	}
 
 	private static boolean isFast(Minecraft minecraft, Player player) {
@@ -108,6 +147,9 @@ public final class WindPose {
 			return;
 		}
 		state.setData(KEY, value);
+		double[] path = PATHS.get(entity.getId());
+		state.setData(BANK_KEY, path == null ? null
+			: new float[] {(float)Mth.rotLerp(partialTicks, path[0], path[1]), (float)Mth.lerp(partialTicks, path[2], path[3])});
 		if (value > 0.3F) {
 			// no hunched-over crouch while flying (Sneak toggles the cruise lock)
 			state.isCrouching = false;
@@ -126,10 +168,16 @@ public final class WindPose {
 		// the air brake pulls the body up out of the dive, leaning back into the gust
 		Float brake = state.getData(BRAKE_KEY);
 		float b = brake == null ? 0.0F : brake;
-		// face where the head faces, not where the (lagging) body was turned
-		poseStack.rotateDegrees(Axis.YP, -state.yRot * amount);
+		// face along the path it's actually taking (a quick look aside doesn't swing the body round), else where the head faces
+		float[] bank = state.getData(BANK_KEY);
+		float facing = bank == null ? state.yRot : Mth.wrapDegrees(bank[0] - state.bodyRot);
+		poseStack.rotateDegrees(Axis.YP, -facing * amount);
 		poseStack.translate(0.0F, middle, 0.0F);
 		poseStack.rotateDegrees(Axis.XP, amount * (1.0F - 0.75F * b) * (-90.0F - state.xRot) + b * BRAKE_LEAN_BACK);
+		if (bank != null) {
+			// rolled into the turn, about the body's own length
+			poseStack.rotateDegrees(Axis.YP, bank[1] * amount * (1.0F - b));
+		}
 		poseStack.translate(0.0F, -middle, 0.0F);
 	}
 

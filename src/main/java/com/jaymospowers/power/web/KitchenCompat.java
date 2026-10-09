@@ -23,6 +23,11 @@ public final class KitchenCompat {
 		}
 	}
 
+	/** What a corpse was in life (null if it isn't one, or Jaymo's Kitchen isn't here). */
+	static net.minecraft.world.entity.@Nullable EntityType<?> sourceType(Entity entity) {
+		return LOADED ? Kitchen.sourceType(entity) : null;
+	}
+
 	/** A corpse's limbs jerk violently (a hard jolt), if it is one. */
 	static void jolt(Entity entity) {
 		if (LOADED) {
@@ -40,6 +45,10 @@ public final class KitchenCompat {
 			if (entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse) {
 				corpse.takeBy(player);
 			}
+		}
+
+		static net.minecraft.world.entity.@Nullable EntityType<?> sourceType(Entity entity) {
+			return entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse ? corpse.sourceType() : null;
 		}
 
 		static void jolt(Entity entity) {

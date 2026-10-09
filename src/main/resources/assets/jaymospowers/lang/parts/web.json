@@ -38,5 +38,10 @@
 	"block.jaymospowers.web_bridge": "Webline",
 	"power.jaymospowers.web.symbiote": "Symbiote",
 	"power.jaymospowers.web.symbiote_ascended": "Venom",
-	"message.jaymospowers.web_symbiote.instinct": "It hardens around you before you can think. It wants to live."
+	"message.jaymospowers.web_symbiote.instinct": "It hardens around you before you can think. It wants to live.",
+	"message.jaymospowers.web_symbiote.sulk": "You let it starve. It tears itself off you, seething.",
+	"message.jaymospowers.web_symbiote.sulking": "It won't come. It's still angry with you.",
+	"message.jaymospowers.web_symbiote.sulk_over": "It creeps back to you, calmer now.",
+	"message.jaymospowers.web_symbiote.inedible": "It recoils. It won't touch that.",
+	"message.jaymospowers.web_symbiote.self_feed": "It's hungry. It feeds."
 }

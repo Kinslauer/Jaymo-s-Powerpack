@@ -16,6 +16,7 @@ abstract class WebModelFeatureRendererMixin {
 	private void jaymospowers$webArms(ModelFeatureRenderer.Submit<?> submit, CallbackInfo ci) {
 		WebArms.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.power.web.WebFeral.applyModel(submit.model(), submit.state());
+		com.jaymospowers.client.power.web.WebSuitGrowth.applyModel(submit.model(), submit.state());
 		WebRagdoll.applyModel(submit.model(), submit.state());
 	}
 }

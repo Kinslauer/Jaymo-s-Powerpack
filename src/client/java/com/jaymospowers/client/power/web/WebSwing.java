@@ -132,6 +132,11 @@ public final class WebSwing {
 	float slingDraw;
 	private Vec3 braced = Vec3.ZERO;
 	private boolean slingJumpHeld;
+	/** Drawn back into a wall: ticks of strain against it so far, and the last strain sent. */
+	private int strainTicks;
+	private float sentStrain;
+	/** Ticks of grinding into a wall before it gives way (Living Armor tears through faster). */
+	static final int STRAIN_TICKS = 50, STRAIN_TICKS_ARMOR = 30;
 	private int swingLockout;
 	// wings
 	int wingsTicks;
@@ -380,6 +385,7 @@ public final class WebSwing {
 			return;
 		}
 		if (slinging) {
+			endStrain();
 			// let go of Sneak without firing: back to swinging
 			slinging = false;
 			slingDraw = 0.0F;
@@ -450,6 +456,15 @@ public final class WebSwing {
 		}
 	}
 
+	/** No longer drawing into a wall: its cracks fade. */
+	private void endStrain() {
+		if (strainTicks > 0 || sentStrain > 0.0F) {
+			strainTicks = 0;
+			sentStrain = 0.0F;
+			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebStrain.Strain(0.0F, Vec3.ZERO));
+		}
+	}
+
 	/** Braced between two webs: hold still; Jump draws back (storing energy), letting Jump go fires. */
 	private void tickSling(LocalPlayer player, Input input) {
 		Vec3 body = player.position().add(0.0, ROPE_HEIGHT, 0.0);
@@ -483,6 +498,30 @@ public final class WebSwing {
 		// held in place, drawn back away from the webs by the draw
 		Vec3 target = braced.subtract(forward.scale(SLING_PULLBACK * slingDraw));
 		Vec3 v = target.subtract(player.position()).scale(0.4);
+		Vec3 back = new Vec3(-forward.x, 0.0, -forward.z);
+		boolean blocked = jump && player.onGround() && back.lengthSqr() > 1.0E-6
+			&& target.subtract(player.position()).dot(back) > 0.2
+			&& !player.level().noCollision(player, player.getBoundingBox().move(back.normalize().scale(0.15)));
+		if (blocked) {
+			// a wall behind: no further back. The webs grind you into it, and it cracks
+			v = new Vec3(0.0, v.y, 0.0);
+			strainTicks++;
+			int needed = com.jaymospowers.power.web.WebSymbiote.armored(player) ? STRAIN_TICKS_ARMOR : STRAIN_TICKS;
+			float progress = Math.min(1.0F, strainTicks / (float)needed);
+			if (progress >= 1.0F) {
+				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebStrain.Strain(1.0F, back));
+				strainTicks = 0;
+				sentStrain = 0.0F;
+				WebShake.start(0.6F);
+			} else if (progress - sentStrain >= 0.1F) {
+				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebStrain.Strain(progress, back));
+				sentStrain = progress;
+			}
+		} else if (strainTicks > 0) {
+			strainTicks = 0;
+			sentStrain = 0.0F;
+			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebStrain.Strain(0.0F, back));
+		}
 		player.setDeltaMovement(v);
 		if (slingDraw > 0.0F && player.tickCount % 3 == 0) {
 			// tension shivers along the webs
@@ -492,6 +531,7 @@ public final class WebSwing {
 	}
 
 	private void fireSling(LocalPlayer player, Vec3 forward) {
+		endStrain();
 		Vec3 dir = forward.scale(1.0 - SLING_AIM).add(player.getLookAngle().scale(SLING_AIM)).normalize();
 		double speed = SLING_MIN_SPEED + (SLING_MAX_SPEED - SLING_MIN_SPEED) * slingDraw;
 		for (Strand strand : strands) {
