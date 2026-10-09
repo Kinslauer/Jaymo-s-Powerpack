@@ -56,6 +56,8 @@ public final class WindTempest {
 	static final double LANCE_KNOCKBACK = 1.6;
 	static final double LANCE_LIFT = 0.25;
 	public static final int LANCE_COOLDOWN = 120;
+	/** In a mode (Z), the lance also stuns what it hits for this long. */
+	static final int LANCE_MODE_STUN = 50;
 	/** Stormbound: lightning along the lance, at most this many bolts. */
 	static final int LANCE_MAX_BOLTS = 3;
 	/** Spiral particles per block of lance, per strand. */
@@ -138,7 +140,8 @@ public final class WindTempest {
 			&& (e.getBoundingBox().inflate(LANCE_RADIUS).contains(eye) || e.getBoundingBox().inflate(LANCE_RADIUS).clip(eye, tip).isPresent())));
 		hits.sort(Comparator.comparingDouble(e -> e.distanceToSqr(eye)));
 
-		boolean stormbound = Fate.isCorrupted(player);
+		// Stormbound only in the rain: under a clear sky it's the Tempest's own lance
+		boolean stormbound = Fate.isCorrupted(player) && WindModes.thunderPower(level) > 0.0F;
 		if (stormbound) {
 			// lightning first (our own damage goes on top of it, so the lance's full damage still lands)
 			List<Vec3> bolts = new ArrayList<>();
@@ -168,6 +171,12 @@ public final class WindTempest {
 					living.syncVelocity = true;
 				}
 				level.sendParticles(ParticleTypes.SWEEP_ATTACK, living.getX(), living.getY() + living.getBbHeight() * 0.5, living.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+				if (WindModes.mode(player) != WindModes.NONE) {
+					// in a mode, the lance stuns: dazed and slowed to a crawl
+					living.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOWNESS, LANCE_MODE_STUN, 4), player);
+					living.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.WEAKNESS, LANCE_MODE_STUN, 1), player);
+					living.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.NAUSEA, LANCE_MODE_STUN, 0), player);
+				}
 			} else if (hit instanceof Projectile projectile) {
 				projectile.setDeltaMovement(look.scale(2.0));
 				projectile.needsSync = true;

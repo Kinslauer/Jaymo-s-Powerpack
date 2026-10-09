@@ -27,7 +27,7 @@
 	"death.attack.jaymospowers.wind_lance": "%1$s was run through by a gale",
 	"death.attack.jaymospowers.wind_lance.player": "%1$s was run through by %2$s's gale",
 	"power.jaymospowers.wind.key.starter": "A faint cloak of wind: a little quicker, and hold Jump in the air to drift down",
-	"power.jaymospowers.wind.key.ability_4.corrupted": "Hold: Call Lightning (only in rain, full strength in a thunderstorm; costs hunger, the static bites back)",
+	"power.jaymospowers.wind.key.ability_4.corrupted": "Hold: Call Lightning in the rain (full in a thunderstorm); under a clear sky, Zephyr's Breath",
 	"item.jaymospowers.soras_dagger": "Sora's Dagger",
 	"item.jaymospowers.soras_dagger_gold": "Sora's Dagger",
 	"item.jaymospowers.soras_dagger_diamond": "Sora's Dagger",
@@ -45,5 +45,7 @@
 	"message.jaymospowers.wind.mode_hungry": "Too hungry to hold the storm.",
 	"message.jaymospowers.soras_dagger.refuses": "The dagger tears free of your grip. It answers only the wind.",
 	"message.jaymospowers.soras_dagger.forged": "The winds take the blade. Sora's Dagger is Tempest-forged.",
-	"message.jaymospowers.wind.no_storm": "No storm overhead to call down."
+	"message.jaymospowers.wind.no_storm": "No storm overhead to call down.",
+	"message.jaymospowers.wind.shield_blown": "Your wind tears the shield from your grip.",
+	"power.jaymospowers.wind.key.special": "Tempest Kick (X, everything mastered): a white crescent of wind, 5 blocks (ascended: 20)"
 }

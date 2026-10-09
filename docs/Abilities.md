@@ -1,9 +1,9 @@
-# Jaymo's Powers: every ability (v0.6.5)
+# Jaymo's Powers: every ability (v0.6.6)
 
 Edit the **Change to** column (or anything else) and send it back. Blank means keep it as it is.
 
 **Keys:** R G V B are the four abilities; **Z** is the power's mode; **C** is the ascended ability; **X** is the
-symbiote menu. Every power starts with only its **starter**, and unlocks its four abilities one by one by using them.
+power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts with only its **starter**, and unlocks its four abilities one by one by using them.
 **Ascended** and **corrupted** are separate fates: a power can be one, the other, or both.
 
 ---
@@ -21,6 +21,7 @@ symbiote menu. Every power starts with only its **starter**, and unlocks its fou
 | Base | R + right click | Choke, then Slam | 1st click: held by the throat, raised high, 0.5 heart a second. 2nd click: hauled up, then slammed down, buried 1-3 blocks, debris ring. One of 4 full-body slam animations on zombies, players and big mobs. | **Your note:** R + Left click: push people away really far (through walls if inside them, and it pushes blocks). |
 | Base | R + right click (mid-air) | Aerial slam | You hang in the air, tilt 40°, and slam harder. Always 3 blocks deep, and it smashes the ground. Mastered: flying debris knocks you clear of the crater. | |
 | Base | R + right click (items, corpses) | Draw in | Items fly into your inventory; Kitchen corpses are bagged or carried. | |
+| Base | R at a block | **Chunk** (new) | With nothing to lift where you aim, Lift tears a chunk out of the wall or ground (3 blocks +1 per ability, harder stone as it grows) and holds it. **Left click** (or right) throws it: it batters what it hits (up to 6 hearts) and shatters on impact. | |
 | Base | R + right click (objects) | Hurl | Carts, boats, armour stands, falling blocks: drift in to 2.5 blocks while held, then thrown hard (max 6 hearts to what they hit) and smash blocks. | **Your note:** R + Right click on *blocks*: rip them out of place, then throw with left click. |
 | Base | R on players | Held players | Stunned 4 s (Wind users: 0.5 s and they tumble). After that they can struggle or fly 3 blocks free. | |
 | Base | damage | Slam damage | Max 10 hearts: a mid-air slam on something big, fully mastered and ascended. Fresh power about 35% of that, ground slams 65%, small mobs 75%. | |
@@ -64,10 +65,12 @@ symbiote menu. Every power starts with only its **starter**, and unlocks its fou
 | Base | B (hold) | Zephyr's Breath | Heals you and nearby players (Regeneration, Slow Falling). 45 s cooldown. | |
 | Weather | | Weather factor | Clear weather is slower, a storm stronger (flight and abilities). | |
 | Corrupted (Stormbound) | passive | Stormbound | Every cast calls lightning at its target, but **only if it's raining** (60% strength; full in a thunderstorm). Gales hit twice as hard; slower on foot and in flight. | |
-| Corrupted | B | Call Lightning | Replaces Zephyr: a bolt where you aim (3-4.5 hearts, sets fire, charges creepers). **Only in rain**, full strength in a thunderstorm. Costs hunger; static bites back. | |
+| Corrupted | B | Call Lightning | In the rain, replaces Zephyr: a bolt where you aim (3-4.5 hearts, sets fire, charges creepers), full strength in a thunderstorm. Costs hunger; static bites back. **Under a clear sky B is Zephyr's Breath again.** | |
 | Corrupted | Z | Stormbound mode | Melee hits stun and stack static; 5 stacks = shocked (rooted 2.5 s). The storm sometimes arcs into you. | |
 | Ascended (Tempest) | Z | Tempest mode | Circling wind deflects projectiles; other abilities 1.25× stronger. | |
-| Ascended | C | Cyclone Lance | A spear of wind 32 blocks ahead: 7 hearts and a big throw (Stormbound: lightning along it, in rain only). 6 s cooldown. | |
+| Ascended | C | Cyclone Lance | A spear of wind 32 blocks ahead: 7 hearts and a big throw. Stormbound in the rain: lightning along it; otherwise the plain Tempest lance. **In a mode (Z), it also stuns** (Slowness V, Weakness, Nausea for 2.5 s). 6 s cooldown. | |
+| Mastered | X | **Tempest Kick** (new) | A roundhouse kick that throws a white crescent of wind ahead: 5 blocks, 3 hearts (ascended: 20 blocks, 6 hearts). 3 s cooldown (2 s ascended). | |
+| Any | passive | **No shields** (new) | A Wind user can't hold a shield: the wind tears it out of the hand into the inventory. | |
 | Both (Thunderhead) | Z | Thunderhead mode | Both modes at once. Turning it on in rain or a storm brings bolts down around you and darkens everyone's screen within 48 blocks. | |
 | Any | Z | Mode hunger | Modes cost hunger and switch off at 3 hunger shanks. | |
 | Item | | Sora's Dagger | Iron → Gilded (feather + gold block) → Diamond (breeze rod + diamond block, right click Flurry) → Tempest (ascended Wind, Nether Star + Dragon's Breath + Heavy Core). Its gifts only work for Wind users. | |
@@ -91,6 +94,7 @@ symbiote menu. Every power starts with only its **starter**, and unlocks its fou
 | Ascended | C | Web Strike | Zip to whatever is under the crosshair (32 blocks) and kick it (5+ hearts). 8 s cooldown. | |
 | Symbiote | X menu | Suit | Show or hide the black suit (the powers keep working). | |
 | Symbiote | X | Tendril Grab | Yank a creature to you, or yourself to a block (20 blocks). | |
+| Symbiote | Sneak + R/G at a block | **Chunk** (new) | With Living Armor, a tendril tears a chunk (up to 6 blocks) out of the wall or ground and holds it like a mob. **Left click** swings the main tendril's chunk at what's in front (up to 5 hearts, a block chips off each hit), **right click** swings the other's. Let go of the key to throw it. | |
 | Symbiote | X | Living Armor | Swollen bulk: 8 hearts of regrowing absorption, knockback resistance, bigger. Hunched idle and all-fours gallop, tendrils that strike on their own, grab and hold 2 mobs with R/G. Hungrier ×3. | |
 | Symbiote | X | Wall Crawl | Climb walls and ceilings. | |
 | Symbiote | X | Consume | Eat something small (5 hearts or less) or a carried corpse: heals you and feeds you both. Won't eat skeletons, creepers or endermen. | |
@@ -113,6 +117,7 @@ symbiote menu. Every power starts with only its **starter**, and unlocks its fou
 | Base | V | Barrage | 3-5 rifts open around you and fire weapons at what you look at (3.5 hearts each). 30 s cooldown. | |
 | Base | B | Pocket Stash | Your personal 27-slot pocket dimension. | |
 | Base | passive | Relics | Weapons lying in dungeon, temple and city chests. Picking one up claims it into your Stash, and Reach brings it out first. | |
+| World | right click | **Sword in the Stone** (new) | A rare stone pedestal on the overworld surface with Durandal driven into it. Only an Arsenal user can draw it (anyone else: it won't budge). Durandal is a relic, a netherite-strength sword (9 damage) that goes into your Stash. | |
 | Ascended (Armory) | Sneak + R | Pin | Holding a summoned weapon: every Reach brings that kind first. Empty hand: unpin. | |
 | Ascended | C | Hundred Blades | Rifts in the sky over where you aim rain 20 weapons (1.5 hearts each, about 15 hearts total). 20 s cooldown. | |
 | Corrupted (Void Arsenal) | passive | Void Arsenal | Summoned weapons hit 1.3× harder and add Darkness and Wither; water and rain burn you; a heavy hit can blink you away. | |

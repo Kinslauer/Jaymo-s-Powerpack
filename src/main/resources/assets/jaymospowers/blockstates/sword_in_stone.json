@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "sword=true": {
+      "model": "jaymospowers:block/sword_in_stone"
+    },
+    "sword=false": {
+      "model": "jaymospowers:block/sword_in_stone_empty"
+    }
+  }
+}

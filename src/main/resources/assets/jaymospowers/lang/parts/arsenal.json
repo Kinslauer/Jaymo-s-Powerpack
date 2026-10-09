@@ -43,5 +43,11 @@
 	"message.jaymospowers.arsenal_gate_placed": "Gate fixed (%s/%s).",
 	"message.jaymospowers.arsenal_gate_too_far": "Nothing there for a gate to hold to.",
 	"message.jaymospowers.arsenal_gate_none_aimed": "No gate that way.",
-	"message.jaymospowers.arsenal_gate_blocked": "Something stands where the gate opens."
+	"message.jaymospowers.arsenal_gate_blocked": "Something stands where the gate opens.",
+	"block.jaymospowers.sword_in_stone": "Sword in the Stone",
+	"item.jaymospowers.durandal": "Durandal",
+	"item.jaymospowers.durandal.lore1": "Drawn from the stone it was driven into.",
+	"item.jaymospowers.durandal.lore2": "A relic: the rift keeps it for whoever drew it.",
+	"message.jaymospowers.sword_stone.stuck": "It won't budge. It's waiting for someone the rift knows.",
+	"message.jaymospowers.sword_stone.drawn": "The stone lets go. Durandal is yours."
 }

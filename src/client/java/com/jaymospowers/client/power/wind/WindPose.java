@@ -49,6 +49,9 @@ public final class WindPose {
 	public static final RenderStateDataKey<float[]> BANK_KEY = RenderStateDataKey.create(() -> "jaymospowers:wind_bank");
 	private static final float BANK_PER_DEGREE = 7.0F, BANK_MAX = 60.0F, BANK_EASE = 0.2F;
 
+	/** A Tempest Kick under way: how far through it (0-1). */
+	public static final RenderStateDataKey<Float> KICK_KEY = RenderStateDataKey.create(() -> "jaymospowers:wind_kick");
+
 	/** entity id → {previous heading, heading, previous bank, bank, last x, last z}. */
 	private static final Map<Integer, double[]> PATHS = new HashMap<>();
 
@@ -135,6 +138,9 @@ public final class WindPose {
 
 	/** From the avatar renderer's extractRenderState: put this frame's pose amount on the state. */
 	public static void extract(Entity entity, AvatarRenderState state, float partialTicks) {
+		Long kicked = entity.getAttached(com.jaymospowers.power.wind.WindKick.KICKING);
+		float kick = kicked == null ? -1.0F : (entity.level().getGameTime() - kicked + partialTicks) / com.jaymospowers.power.wind.WindKick.KICK_TICKS;
+		state.setData(KICK_KEY, kick >= 0.0F && kick < 1.0F ? kick : null);
 		WindHoverSway.extract(entity, state, partialTicks);
 		WindTumble.extract(entity, state, partialTicks);
 		float[] amount = AMOUNTS.get(entity.getId());
@@ -187,6 +193,19 @@ public final class WindPose {
 		WindHoverSway.applyModel(model, state);
 		WindTumble.applyModel(model, state);
 		if (!(state instanceof AvatarRenderState avatar) || !(model instanceof HumanoidModel<?> humanoid)) {
+			return;
+		}
+		Float kick = avatar.getData(KICK_KEY);
+		if (kick != null) {
+			// the roundhouse: the leg comes up out to the side and sweeps round in front, the body twisting with it,
+			// arms flung out for balance
+			float up = Math.min(1.0F, kick * 3.0F) * (kick > 0.75F ? (1.0F - kick) / 0.25F : 1.0F);
+			float sweep = Mth.clamp((kick - 0.2F) / 0.5F, 0.0F, 1.0F);
+			pose(humanoid.rightLeg, -1.35F, Mth.lerp(sweep, 0.9F, -0.7F), -0.9F, up);
+			pose(humanoid.leftLeg, 0.15F, 0.0F, 0.1F, up);
+			pose(humanoid.rightArm, -0.3F, 0.0F, 1.3F, up);
+			pose(humanoid.leftArm, -0.3F, 0.0F, -1.3F, up);
+			humanoid.body.yRot = Mth.lerp(sweep, 0.5F, -0.6F) * up;
 			return;
 		}
 		Float amount = avatar.getData(KEY);

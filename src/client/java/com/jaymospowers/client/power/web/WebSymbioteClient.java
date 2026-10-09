@@ -137,6 +137,10 @@ public final class WebSymbioteClient {
 				LocalPlayer player = minecraft.player;
 				if (player != null && minecraft.gui.screen() == null && !player.isSpectator() && WebSymbiote.isBonded(player) && takeoverTicks <= 0) {
 					minecraft.gui.setScreen(new WebSymbioteScreen());
+				} else if (player != null && minecraft.gui.screen() == null && !player.isSpectator()
+					&& com.jaymospowers.client.power.wind.WindPowerClient.isActive(player)) {
+					// the same key is Wind's Tempest Kick
+					ClientPlayNetworking.send(new com.jaymospowers.power.wind.WindKick.Kick());
 				}
 			}
 		});

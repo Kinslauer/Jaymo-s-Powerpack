@@ -137,6 +137,7 @@ public final class ArsenalPower implements Power {
 		ArsenalArmory.init();
 		HundredBlades.init();
 		ArsenalVoid.init();
+		SwordStone.register();
 		ArsenalItems.init();
 		ArsenalDebugCommand.init();
 		Powers.register(INSTANCE);

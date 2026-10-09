@@ -107,6 +107,7 @@ public final class WindPower implements Power {
 		WindModes.register();
 		WindTempest.init();
 		SorasDagger.register();
+		WindKick.init();
 		WindDebug.register();
 		ServerPlayNetworking.registerGlobalReceiver(WindNet.Flight.TYPE, (payload, ctx) -> INSTANCE.onFlightPacket(ctx.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(WindNet.Impact.TYPE, (payload, ctx) -> INSTANCE.onImpact(ctx.player(), payload));
@@ -368,10 +369,37 @@ public final class WindPower implements Power {
 		}
 	}
 
+	/** A wind can't keep hold of a shield: its own wind tears it out of the hand, into the pack (or onto the ground). */
+	private static void blowShieldAway(ServerPlayer player, ServerLevel level) {
+		for (net.minecraft.world.InteractionHand hand : net.minecraft.world.InteractionHand.values()) {
+			net.minecraft.world.item.ItemStack held = player.getItemInHand(hand);
+			if (held.isEmpty() || !held.has(net.minecraft.core.component.DataComponents.BLOCKS_ATTACKS)) {
+				continue;
+			}
+			net.minecraft.world.item.ItemStack shield = held.copy();
+			player.setItemInHand(hand, net.minecraft.world.item.ItemStack.EMPTY);
+			boolean stowed = false;
+			for (int i = 9; i < 36 && !stowed; i++) {
+				if (player.getInventory().getItem(i).isEmpty()) {
+					player.getInventory().setItem(i, shield);
+					stowed = true;
+				}
+			}
+			if (!stowed) {
+				player.drop(shield, true, net.minecraft.util.Prediction.SERVER_ONLY);
+			}
+			player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymospowers.wind.shield_blown")
+				.withStyle(net.minecraft.ChatFormatting.GRAY));
+			level.sendParticles(ParticleTypes.GUST, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_DEFLECT, SoundSource.PLAYERS, 0.8F, 1.0F);
+		}
+	}
+
 	@Override
 	public void tick(ServerPlayer player) {
 		State s = this.state(player);
 		ServerLevel level = player.level();
+		blowShieldAway(player, level);
 		boolean statusDirty = !s.synced;
 		s.synced = true;
 		for (int i = 0; i < s.cooldowns.length; i++) {
@@ -679,8 +707,9 @@ public final class WindPower implements Power {
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_WIND_CHARGE_BURST, SoundSource.PLAYERS, 1.2F, 0.8F);
 			}
 			case ZEPHYR -> {
-				if (stormbound) {
-					// Stormbound has no breath to give: B calls the lightning down instead
+				if (stormbound && WindModes.thunderPower(level) > 0.0F) {
+					// Stormbound in the rain has no breath to give: B calls the lightning down instead (under a clear sky
+					// it's the Tempest's breath again)
 					s.cooldowns[ability.ordinal()] = WindModes.callLightning(player, f, WindModes.abilityScale(player)) ? CALL_LIGHTNING_COOLDOWN : 20;
 					break;
 				}
