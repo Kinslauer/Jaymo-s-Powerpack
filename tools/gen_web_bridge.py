@@ -15,7 +15,7 @@ d.line([(0, 15), (15, 0)], fill=(245, 245, 250, 170))
 for _ in range(10):
     img.putpixel((random.randrange(16), random.randrange(16)), (255, 255, 255, 255))
 img.save(f"{root}/textures/block/web_bridge.png")
-json.dump({"variants": {"": {"model": "jaymospowers:block/web_bridge"}}}, open(f"{root}/blockstates/web_bridge.json", "w"), indent=2)
+json.dump({"variants": {f"height={h}": {"model": "jaymospowers:block/web_bridge"} for h in range(1, 17)}}, open(f"{root}/blockstates/web_bridge.json", "w"), indent=2)
 face = lambda uv: {"uv": uv, "texture": "#web"}
 model = {"parent": "minecraft:block/block",
          "textures": {"web": "jaymospowers:block/web_bridge", "particle": "jaymospowers:block/web_bridge"},

@@ -25,7 +25,7 @@ import org.jspecify.annotations.Nullable;
  * they'll move with next tick. Player motion is client-authoritative, so this is the real movement; the server only
  * checks the anchors and waives fall damage and the flying kick.
  */
-final class WebSwing {
+public final class WebSwing {
 	// ===== swing feel: the knobs to tweak after playtesting =========================================================
 	/** The rope starts at this fraction of the distance to the anchor: 1 = no tug when it sticks (Jump reels you in). */
 	static final double ATTACH_SLACK = 1.0;
@@ -320,9 +320,18 @@ final class WebSwing {
 			tickPull(player);
 			return;
 		}
-		tickWingsInput(player);
-		if (wingsTicks > 0) {
-			tickWings(player);
+		if (com.jaymospowers.power.web.WebSymbiote.suitShown(player)) {
+			// the suit has no wings: Jump is a charged leap instead
+			foldWings();
+			tickChargeJump(player);
+		} else {
+			if (chargeTicks > 0 || chargeSent) {
+				endCharge();
+			}
+			tickWingsInput(player);
+			if (wingsTicks > 0) {
+				tickWings(player);
+			}
 		}
 		Strand off = strands[WebNet.OFF];
 		if (off.attached && !WebPower.offHandFree(player)) {
@@ -334,6 +343,7 @@ final class WebSwing {
 		} else if (flying && wingsTicks == 0) {
 			tickFlight(player);
 		}
+		tickApexHang(player);
 		for (Strand strand : strands) {
 			if (!strand.attached && strand.keyHeld && !player.onGround() && --strand.retryIn <= 0) {
 				strand.retryIn = RETRY_TICKS;
@@ -500,6 +510,95 @@ final class WebSwing {
 		for (int i = 0; i < 12; i++) {
 			player.level().addParticle(ParticleTypes.CLOUD, at.x, at.y, at.z, -dir.x * 0.3 + rnd(player) * 0.2, -dir.y * 0.3 + rnd(player) * 0.2,
 				-dir.z * 0.3 + rnd(player) * 0.2);
+		}
+	}
+
+	// ===== the hang at the top of an arc ============================================================================
+	/**
+	 * Off the web and near the top of an arc (rising or falling slower than {@code HANG_SPEED}), most of gravity's pull
+	 * is held off for up to {@code HANG_TICKS}: a moment's stall at the apex to line up the next swing.
+	 */
+	static final double HANG_SPEED = 0.12;
+	static final double HANG_HOLD = 0.75;
+	static final int HANG_TICKS = 8;
+	private int hangTicks;
+
+	private void tickApexHang(LocalPlayer player) {
+		boolean air = !player.onGround() && !player.isInWater() && !player.isInLava() && !player.onClimbable() && !player.isFallFlying()
+			&& !attached() && pull == null && wingsTicks == 0;
+		if (!air) {
+			hangTicks = 0;
+			return;
+		}
+		Vec3 v = player.getDeltaMovement();
+		if (Math.abs(v.y) < HANG_SPEED && hangTicks < HANG_TICKS) {
+			hangTicks++;
+			// hand back most of this tick's gravity
+			double g = player.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.GRAVITY);
+			player.setDeltaMovement(v.x, v.y + g * HANG_HOLD, v.z);
+		}
+	}
+
+	// ===== the suit's charged jump ===================================================================================
+	/** Ticks to a full charge; the leap from a tap to a full charge (up, and forward along the look). */
+	static final int CHARGE_FULL = 30;
+	static final double CHARGE_UP_MIN = 0.45, CHARGE_UP_MAX = 1.65;
+	static final double CHARGE_FORWARD_MAX = 1.1;
+	/** Charge held (ticks); whether the server's been told it's held. */
+	int chargeTicks;
+	private boolean chargeSent;
+
+	/** True while Jump is being held to charge a leap on the ground (the plain jump is held back; see the mixin). */
+	public static boolean holdingCharge(LocalPlayer player) {
+		return com.jaymospowers.power.web.WebSymbiote.suitShown(player) && WebPowerClient.isActive(player)
+			&& Minecraft.getInstance().options.keyJump.isDown();
+	}
+
+	/**
+	 * Wearing the suit: hold Jump to coil (on the ground it builds, up to {@link #CHARGE_FULL}); let go on the ground to
+	 * leap, as high and far as the charge. Held through a fall, the charge keeps and the landing doesn't hurt, so you
+	 * can let it go the moment you touch down.
+	 */
+	private void tickChargeJump(LocalPlayer player) {
+		boolean jump = player.input.keyPresses.jump();
+		boolean ground = player.onGround();
+		if (jump && !attached()) {
+			if (ground && chargeTicks < CHARGE_FULL) {
+				chargeTicks++;
+				if (chargeTicks % 6 == 0) {
+					play(player, SoundEvents.SLIME_SQUISH_SMALL, 0.4F, 0.6F + chargeTicks / (float)CHARGE_FULL);
+				}
+			}
+			if (chargeTicks == 0 && !ground) {
+				// held from mid-air: it braces for the landing
+				chargeTicks = 1;
+			}
+			if (!chargeSent) {
+				chargeSent = true;
+				ClientPlayNetworking.send(new WebNet.ChargeHold(true));
+			}
+			return;
+		}
+		if (chargeTicks > 0 && ground && !jump) {
+			float c = chargeTicks / (float)CHARGE_FULL;
+			Vec3 look = player.getLookAngle();
+			Vec3 flat = new Vec3(look.x, 0.0, look.z);
+			flat = flat.lengthSqr() < 1.0E-4 ? Vec3.ZERO : flat.normalize().scale(CHARGE_FORWARD_MAX * c);
+			Vec3 v = player.getDeltaMovement();
+			player.setDeltaMovement(v.x + flat.x, Mth.lerp(c, CHARGE_UP_MIN, CHARGE_UP_MAX), v.z + flat.z);
+			play(player, SoundEvents.SLIME_JUMP, 1.0F, 0.6F);
+			if (c > 0.5F) {
+				play(player, SoundEvents.WIND_CHARGE_BURST.value(), 0.6F, 0.6F);
+			}
+		}
+		endCharge();
+	}
+
+	private void endCharge() {
+		chargeTicks = 0;
+		if (chargeSent) {
+			chargeSent = false;
+			ClientPlayNetworking.send(new WebNet.ChargeHold(false));
 		}
 	}
 

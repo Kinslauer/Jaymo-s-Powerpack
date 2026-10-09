@@ -265,3 +265,36 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     and the symbiote feeds.
   - **Tether and hitches:** Yank holds at 3 and snaps at 4.5. Hitches are 1-3 long (1-2 when tied to a ceiling) and
     snap 1.5 past their length; attacking still breaks them.
+- **0.4.6:**
+  - **Badge names:** `Power.statusSuffix(player)` comes first. Web shows Symbiote/Venom while bonded. Otherwise the fate
+    names apply: Wind is Stormbound/Tempest/Thunderhead, Arsenal Void Arsenal/Armory/Void Armory, Gravity
+    Collapse/Event Horizon/Collapsing Horizon, Chrono Timeless.
+  - **Web:**
+    - **Floatier:** gravity is -20% for web users (`web_float`). Off the web, near an arc's apex (|vy| < 0.12),
+      75% of gravity is handed back for up to 8 ticks.
+    - **Weblines:** planks carry `height` 1-16, topped at the line's height in that block, so inclines climb in
+      ≤0.6 steps without jumping.
+    - **Symbiote cords:** 3 twisted strands drawn as 6-sided tubes (debugQuads, shaded, purple sheen) that taper.
+      Every line's anchor is an 8-spoke cobweb with two rings.
+    - **Charged jump (suit on, instead of the wings):** hold Jump to coil, up to 30 ticks; the plain jump is held
+      back by `WebJumpMixin`. Releasing on the ground leaps 0.45-1.65 up and up to 1.1 along the look. Held through a
+      fall, the charge keeps and fall damage is waived (`ChargeHold`).
+    - **Tendril aim:** grab aim boxes are inflated by 0.7, and the crosshair turns red on a grabbable target.
+    - **Lines:**
+      - Hitches are multi-line (`HITCH` is a list of `Line(anchor, dark)`). One line is out per slinger, five once
+        mastered; the oldest is dropped.
+      - More than 2 lines on one creature ensnares it like Web Shot.
+      - Mastered B has no cooldown.
+      - Lines strung with the suit on are black ropes with dark particles.
+    - **Instinct (bonded):** every 10 ticks it checks for danger: fire, a long fall, an attacker, or ≤8 HP.
+      - With the armour off, 45% it raises Living Armor by itself.
+      - With it on: it catches a fall within 4 blocks of the ground, smothers flames and shoves you clear of fire,
+        shoves you from an attacker or snatches and flings it (50/50), and sometimes catapults you while
+        sprinting.
+    - **Consume:** also restores hunger (0.75 food per point healed).
+  - **Gravity:**
+    - The choke holds at 0.75 + half the target's width.
+    - The slam rises for 10 − abilities ticks (min 4) at 0.75, then drives down at 2.2 + 0.7 per ability.
+    - Weightless weighs everything within 6 blocks: gravity ×2.5, jump −35%, Slowness I, refreshed every 5 ticks.
+  - **Kitchen 0.4.15:** an empty hand bags any small corpse, sneak + empty hand carries any corpse, and bagged
+    corpses keep their kind.

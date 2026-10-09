@@ -101,17 +101,21 @@ public final class WebBridges {
 		if (length > MAX_LENGTH || length < 1.0) {
 			return false;
 		}
-		// planks along the line, just under it, so the line is the walking surface
-		Set<BlockPos> spots = new LinkedHashSet<>();
-		int steps = (int)Math.ceil(length * 3.0);
+		// planks along the line, each topped out at the line's own height where it crosses that block: an incline
+		// rises in small steps, like stairs, so you walk up it without jumping
+		java.util.Map<BlockPos, Integer> spots = new java.util.LinkedHashMap<>();
+		int steps = (int)Math.ceil(length * 6.0);
 		for (int i = 0; i <= steps; i++) {
 			Vec3 at = from.lerp(to, i / (double)steps);
-			spots.add(BlockPos.containing(at.x, at.y - 0.1, at.z));
+			BlockPos pos = BlockPos.containing(at.x, at.y - 0.01, at.z);
+			int height = net.minecraft.util.Mth.clamp((int)Math.ceil((at.y - pos.getY()) * 16.0), 1, 16);
+			spots.merge(pos.immutable(), height, Math::max);
 		}
-		for (BlockPos pos : spots) {
+		for (java.util.Map.Entry<BlockPos, Integer> spot : spots.entrySet()) {
+			BlockPos pos = spot.getKey();
 			if (level.getBlockState(pos).isAir() && level.getFluidState(pos).isEmpty()) {
-				level.setBlock(pos, BRIDGE.defaultBlockState(), Block.UPDATE_ALL);
-				PLANKS.add(new Plank(level.dimension(), pos.immutable(), clock + BRIDGE_TICKS));
+				level.setBlock(pos, BRIDGE.defaultBlockState().setValue(WebBridgeBlock.HEIGHT, spot.getValue()), Block.UPDATE_ALL);
+				PLANKS.add(new Plank(level.dimension(), pos, clock + BRIDGE_TICKS));
 			}
 		}
 		LINES.add(new Line(level.dimension(), new Span(from, to), clock + BRIDGE_TICKS));

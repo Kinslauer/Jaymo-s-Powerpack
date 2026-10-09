@@ -1,6 +1,51 @@
 {
   "variants": {
-    "": {
+    "height=1": {
+      "model": "jaymospowers:block/web_bridge"
+    },
+    "height=2": {
+      "model": "jaymospowers:block/web_bridge"
+    },
+    "height=3": {
+      "model": "jaymospowers:block/web_bridge"
+    },
+    "height=4": {
+      "model": "jaymospowers:block/web_bridge"
+    },
+    "height=5": {
+      "model": "jaymospowers:block/web_bridge"
+    },
+    "height=6": {
+      "model": "jaymospowers:block/web_bridge"
+    },
+    "height=7": {
+      "model": "jaymospowers:block/web_bridge"
+    },
+    "height=8": {
+      "model": "jaymospowers:block/web_bridge"
+    },
+    "height=9": {
+      "model": "jaymospowers:block/web_bridge"
+    },
+    "height=10": {
+      "model": "jaymospowers:block/web_bridge"
+    },
+    "height=11": {
+      "model": "jaymospowers:block/web_bridge"
+    },
+    "height=12": {
+      "model": "jaymospowers:block/web_bridge"
+    },
+    "height=13": {
+      "model": "jaymospowers:block/web_bridge"
+    },
+    "height=14": {
+      "model": "jaymospowers:block/web_bridge"
+    },
+    "height=15": {
+      "model": "jaymospowers:block/web_bridge"
+    },
+    "height=16": {
       "model": "jaymospowers:block/web_bridge"
     }
   }

@@ -35,5 +35,6 @@
 	"power.jaymospowers.web.key.starter": "Hold on one block, let go on another: a walkable webline",
 	"block.jaymospowers.web_bridge": "Webline",
 	"power.jaymospowers.web.symbiote": "Symbiote",
-	"power.jaymospowers.web.symbiote_ascended": "Venom"
+	"power.jaymospowers.web.symbiote_ascended": "Venom",
+	"message.jaymospowers.web_symbiote.instinct": "It hardens around you before you can think. It wants to live."
 }

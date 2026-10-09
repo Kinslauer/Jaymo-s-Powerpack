@@ -138,6 +138,16 @@ public final class WebTendrils {
 				|| com.jaymospowers.power.gravity.GravityPower.isCorpse(entity));
 	}
 
+	/** Instinct: a tendril lashes out at an attacker, snatches it and flings it away a moment later. */
+	static void snatch(ServerPlayer player, Entity target) {
+		int hand = player.getAttachedOrElse(GRIPS, Grips.NONE).left() < 0 ? WebNet.OFF : WebNet.MAIN;
+		release(player, hand, false);
+		grab(player, hand, target, player.level().getGameTime() + INSTINCT_HOLD_TICKS);
+	}
+
+	/** How long an instinctive snatch holds before it flings. */
+	static final int INSTINCT_HOLD_TICKS = 12;
+
 	/** The radial menu's Tendril Grab: the right tendril snatches from afar and hurls it on its own after a moment. */
 	static boolean radialGrab(ServerPlayer player) {
 		Entity target = WebPower.entityInSight(player, RADIAL_GRAB_RANGE);
@@ -242,7 +252,7 @@ public final class WebTendrils {
 		if (grips == null) {
 			return;
 		}
-		if (!player.isAlive() || player.isSpectator() || !WebSymbiote.suitShown(player)) {
+		if (!player.isAlive() || player.isSpectator() || !WebSymbiote.suitShown(player) && !WebSymbiote.isToggled(player, WebSymbioteState.ARMOR)) {
 			releaseAll(player, false);
 			return;
 		}

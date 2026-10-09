@@ -157,6 +157,7 @@ public final class WebSymbiote {
 	private static final int HINT_HUNGER = 4;
 	private static final int HINT_EDGE = 8;
 	private static final int HINT_MEAT = 16;
+	private static final int HINT_INSTINCT = 32;
 
 	private static final Identifier ARMOR_ABSORB_ID = JaymosPowers.id("web_symbiote_armor");
 	private static final Identifier ARMOR_KNOCKBACK_ID = JaymosPowers.id("web_symbiote_knockback");
@@ -210,6 +211,26 @@ public final class WebSymbiote {
 	public static final AttachmentType<Strike> STRIKE = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_strike"),
 		builder -> builder.syncWith(Strike.STREAM_CODEC, AttachmentSyncPredicate.all()));
 
+	/**
+	 * Instinct: the symbiote keeps itself (and so you) alive. Every {@code INSTINCT_CHECK_TICKS} it looks for danger:
+	 * fire close by, a long fall about to end, something hostile on you, or your health running low. Then, now and
+	 * then ({@code INSTINCT_ARMOR_CHANCE}), it throws Living Armor up by itself; and while the armour is up it acts on
+	 * its own: shoving you clear of fire (and smothering flames on you), catching a fall just before the ground,
+	 * shoving you away from an attacker or snatching the attacker and flinging it, and sometimes, as you run,
+	 * catapulting you along.
+	 */
+	public static final int INSTINCT_CHECK_TICKS = 10;
+	public static final float INSTINCT_ARMOR_CHANCE = 0.45F;
+	public static final float INSTINCT_LOW_HEALTH = 8.0F;
+	public static final double INSTINCT_THREAT_RANGE = 3.0;
+	public static final int INSTINCT_COOLDOWN = 50;
+	public static final double INSTINCT_FIRE_SHOVE = 0.7;
+	public static final double INSTINCT_THREAT_SHOVE = 0.95;
+	public static final float INSTINCT_GRAB_CHANCE = 0.5F;
+	public static final double INSTINCT_FALL_CATCH_HEIGHT = 4.0;
+	public static final float INSTINCT_CATAPULT_CHANCE = 0.05F;
+	public static final double INSTINCT_CATAPULT = 1.4;
+
 	/** Consume takes its time: the jaws chomp {@code EAT_CHOMPS} times over {@code EAT_TICKS}, then it's gone. */
 	public static final int EAT_TICKS = 40;
 	public static final int EAT_CHOMPS = 4;
@@ -240,6 +261,9 @@ public final class WebSymbiote {
 		boolean rampage;
 		int rampageStrikes;
 		long nextStrikeAt;
+		/** Instinct: when it can act on its own again, and whether it has caught this fall already. */
+		long instinctReadyAt;
+		boolean caughtFall;
 		/** The meal: what, until when, and what it gives. */
 		int eatTarget = -1;
 		long eatUntil;
@@ -401,6 +425,9 @@ public final class WebSymbiote {
 			}
 			live.armorTicks++;
 			tickStrikes(player, live, now);
+			if (player.tickCount % INSTINCT_CHECK_TICKS == 0 && live.takeoverTicks <= 0) {
+				catapult(player, live, now);
+			}
 		} else {
 			live.armorTicks = 0;
 			if (player.getAttached(STRIKE) != null) {
@@ -413,6 +440,12 @@ public final class WebSymbiote {
 
 		if (live.eatTarget >= 0) {
 			tickEating(player, live, now);
+		}
+		if (player.onGround() || player.isInWater()) {
+			live.caughtFall = false;
+		}
+		if (live.takeoverTicks <= 0 && live.bondTicks <= 0 && !player.isCreative() && player.tickCount % INSTINCT_CHECK_TICKS == 0) {
+			next = instinct(player, live, next, now);
 		}
 
 		// Shroud runs out
@@ -938,6 +971,118 @@ public final class WebSymbiote {
 		if (scale != null && scale.hasModifier(ARMOR_SCALE_ID)) {
 			scale.removeModifier(ARMOR_SCALE_ID);
 		}
+	}
+
+	/** The symbiote looks after itself (see {@link #INSTINCT_CHECK_TICKS}). Returns the state (the armour may come up). */
+	private static WebSymbioteState instinct(ServerPlayer player, Live live, WebSymbioteState state, long now) {
+		ServerLevel level = player.level();
+		var random = player.getRandom();
+		BlockPos fire = nearFire(player);
+		boolean burning = player.isOnFire() || fire != null;
+		boolean falling = !player.onGround() && player.getY() - player.yo < -0.55 && player.fallDistance > 5.0F;
+		LivingEntity threat = null;
+		double best = INSTINCT_THREAT_RANGE * INSTINCT_THREAT_RANGE;
+		for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(INSTINCT_THREAT_RANGE),
+			m -> m.isAlive() && m.getTarget() == player)) {
+			double d = mob.distanceToSqr(player);
+			if (d < best) {
+				best = d;
+				threat = mob;
+			}
+		}
+		boolean danger = burning || falling || threat != null || player.getHealth() <= INSTINCT_LOW_HEALTH;
+		if (!danger) {
+			return state;
+		}
+		boolean armor = state.has(WebSymbioteState.ARMOR);
+		if (!armor) {
+			if (random.nextFloat() < INSTINCT_ARMOR_CHANCE) {
+				// it hardens around you, unasked
+				state = state.withFlag(WebSymbioteState.ARMOR, true);
+				applyArmor(player);
+				player.setAbsorptionAmount((float)Math.max(player.getAbsorptionAmount(), ARMOR_ABSORPTION * 0.5));
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_PLACE, SoundSource.PLAYERS, 1.0F, 0.5F);
+				level.sendParticles(dust(1.4F), player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.8, 0.4, 0.0);
+				state = hintOnce(player, state, HINT_INSTINCT, "instinct");
+			}
+			return state;
+		}
+		// a fall about to end: it reaches for the ground and takes the blow
+		if (falling && !live.caughtFall && groundWithin(player, INSTINCT_FALL_CATCH_HEIGHT)) {
+			live.caughtFall = true;
+			player.resetFallDistance();
+			ServerPlayNetworking.send(player, new WebNet.Nudge(new Vec3(0.0, -0.12, 0.0)));
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_FALL, SoundSource.PLAYERS, 1.0F, 0.5F);
+			level.sendParticles(dust(1.6F), player.getX(), player.getY(), player.getZ(), 16, 0.6, 0.1, 0.6, 0.0);
+			return state;
+		}
+		if (now < live.instinctReadyAt) {
+			return state;
+		}
+		if (burning) {
+			// it fears fire: it smothers the flames and shoves you clear
+			live.instinctReadyAt = now + INSTINCT_COOLDOWN;
+			player.clearFire();
+			Vec3 away = fire == null ? player.getLookAngle().reverse() : player.position().subtract(Vec3.atCenterOf(fire));
+			away = new Vec3(away.x, 0.0, away.z);
+			away = away.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : away.normalize();
+			ServerPlayNetworking.send(player, new WebNet.Nudge(away.scale(INSTINCT_FIRE_SHOVE).add(0.0, 0.4, 0.0)));
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.7F, 1.4F);
+			return state;
+		}
+		if (threat != null) {
+			live.instinctReadyAt = now + INSTINCT_COOLDOWN;
+			if (random.nextFloat() < INSTINCT_GRAB_CHANCE && WebTendrils.grabbable(player, threat)) {
+				// it snatches the attacker and flings it off
+				WebTendrils.snatch(player, threat);
+			} else {
+				// it shoves you out of reach
+				Vec3 away = player.position().subtract(threat.position());
+				away = new Vec3(away.x, 0.0, away.z);
+				away = away.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : away.normalize();
+				ServerPlayNetworking.send(player, new WebNet.Nudge(away.scale(INSTINCT_THREAT_SHOVE).add(0.0, 0.3, 0.0)));
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_JUMP, SoundSource.PLAYERS, 1.0F, 0.5F);
+			}
+			return state;
+		}
+		return state;
+	}
+
+	/** Running with the armour up, now and then it catapults you along (checked with the instinct). */
+	private static void catapult(ServerPlayer player, Live live, long now) {
+		if (!player.isSprinting() || !player.onGround() || now < live.instinctReadyAt
+			|| player.getRandom().nextFloat() >= INSTINCT_CATAPULT_CHANCE) {
+			return;
+		}
+		live.instinctReadyAt = now + INSTINCT_COOLDOWN * 2;
+		Vec3 look = player.getLookAngle();
+		Vec3 flat = new Vec3(look.x, 0.0, look.z);
+		if (flat.lengthSqr() < 1.0E-4) {
+			return;
+		}
+		ServerPlayNetworking.send(player, new WebNet.Nudge(flat.normalize().scale(INSTINCT_CATAPULT).add(0.0, 0.42, 0.0)));
+		ServerLevel level = player.level();
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_JUMP, SoundSource.PLAYERS, 1.0F, 0.4F);
+		level.sendParticles(dust(1.4F), player.getX(), player.getY() + 0.2, player.getZ(), 14, 0.4, 0.1, 0.4, 0.0);
+	}
+
+	/** Fire or lava touching or right beside you (a small box: cheap). */
+	private static @org.jspecify.annotations.Nullable BlockPos nearFire(ServerPlayer player) {
+		AABB box = player.getBoundingBox().inflate(1.2, 0.3, 1.2);
+		for (BlockPos pos : BlockPos.betweenClosed(BlockPos.containing(box.minX, box.minY, box.minZ), BlockPos.containing(box.maxX, box.maxY, box.maxZ))) {
+			net.minecraft.world.level.block.state.BlockState block = player.level().getBlockState(pos);
+			if (block.is(net.minecraft.tags.BlockTags.FIRE) || block.getFluidState().is(net.minecraft.tags.FluidTags.LAVA)) {
+				return pos.immutable();
+			}
+		}
+		return null;
+	}
+
+	private static boolean groundWithin(ServerPlayer player, double height) {
+		Vec3 feet = player.position();
+		return player.level().clip(new net.minecraft.world.level.ClipContext(feet, feet.subtract(0.0, height, 0.0),
+			net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.ANY, player)).getType()
+			!= HitResult.Type.MISS;
 	}
 
 	/** The tendrils, on their own: now and then they find something close and strike it, slowly and hard. */

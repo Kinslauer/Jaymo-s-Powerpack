@@ -93,6 +93,9 @@ public final class WebPower implements Power {
 	private static final int GRACE_MAX_TICKS = 1200;
 
 	private static final Identifier SAFE_FALL_ID = JaymosPowers.id("web_safe_fall");
+	/** A web slinger is a little floatier than anyone else: this much less gravity, always (time to aim the next web). */
+	public static final double FLOAT_GRAVITY = -0.2;
+	private static final Identifier FLOAT_ID = JaymosPowers.id("web_float");
 
 	/** The web line a player has out from their main hand (swing, zip or yank), for everyone to draw. */
 	public static final AttachmentType<WebLine> LINE = AttachmentRegistry.create(JaymosPowers.id("web_line"),
@@ -144,6 +147,8 @@ public final class WebPower implements Power {
 		int featherTicks;
 		/** Ticks a player on the Yank line has held it stretched. */
 		int tetherStrain;
+		/** The suit's charged jump is held: a fall caught in it doesn't count. */
+		boolean chargeHold;
 		/** A webline's first end, while B is held aimed at a block (null otherwise). */
 		@org.jspecify.annotations.Nullable Vec3 weblineFrom;
 		/** Game time a Web Shot charge started, or -1. */
@@ -205,6 +210,11 @@ public final class WebPower implements Power {
 		WebDebugCommand.register();
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Swing.TYPE, (payload, ctx) -> INSTANCE.onSwing(ctx.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Wings.TYPE, (payload, ctx) -> INSTANCE.onWings(ctx.player(), payload.open()));
+		ServerPlayNetworking.registerGlobalReceiver(WebNet.ChargeHold.TYPE, (payload, ctx) -> {
+			if (Powers.has(ctx.player(), INSTANCE)) {
+				state(ctx.player()).chargeHold = payload.held() && WebSymbiote.suitShown(ctx.player());
+			}
+		});
 		// a held target that hits anything breaks free
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			Entity attacker = source.getEntity();
@@ -250,6 +260,10 @@ public final class WebPower implements Power {
 
 	@Override
 	public void onLost(ServerPlayer player) {
+		AttributeInstance gravity = player.getAttribute(Attributes.GRAVITY);
+		if (gravity != null) {
+			gravity.removeModifier(FLOAT_ID);
+		}
 		AttributeInstance safeFall = player.getAttribute(Attributes.SAFE_FALL_DISTANCE);
 		if (safeFall != null) {
 			safeFall.removeModifier(SAFE_FALL_ID);
@@ -310,6 +324,10 @@ public final class WebPower implements Power {
 	}
 
 	private static void ensurePassive(ServerPlayer player) {
+		AttributeInstance gravity = player.getAttribute(Attributes.GRAVITY);
+		if (gravity != null && !gravity.hasModifier(FLOAT_ID)) {
+			gravity.addTransientModifier(new AttributeModifier(FLOAT_ID, FLOAT_GRAVITY, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+		}
 		AttributeInstance safeFall = player.getAttribute(Attributes.SAFE_FALL_DISTANCE);
 		// (there used to be a safe-fall bonus; fall damage now always applies, so clear it off anyone who has it)
 		if (safeFall != null && safeFall.hasModifier(SAFE_FALL_ID)) {
@@ -378,6 +396,13 @@ public final class WebPower implements Power {
 		}
 		if (state.tetherId >= 0) {
 			tickTether(player, state);
+		}
+		if (state.chargeHold) {
+			// the symbiote braces for the landing
+			player.resetFallDistance();
+			if (player.tickCount % 3 == 0) {
+				player.level().sendParticles(WebSymbiote.dust(1.0F), player.getX(), player.getY() + 0.2, player.getZ(), 2, 0.3, 0.05, 0.3, 0.0);
+			}
 		}
 		if (state.wingsTicks > 0 && (++state.wingsTicks > WINGS_TICKS + 20 || player.isInWater() || player.onGround() && state.wingsTicks > 3)) {
 			state.wingsTicks = 0;

@@ -65,6 +65,17 @@ public final class WebNet {
 	}
 
 	/** Client → server: web wings spread ({@code open}) or folded. */
+	/** Client → server: the suit's charged jump is being held (falls don't count while it is). */
+	public record ChargeHold(boolean held) implements CustomPacketPayload {
+		public static final Type<ChargeHold> TYPE = new Type<>(JaymosPowers.id("web_charge_hold"));
+		public static final StreamCodec<ByteBuf, ChargeHold> CODEC = ByteBufCodecs.BOOL.map(ChargeHold::new, ChargeHold::held);
+
+		@Override
+		public Type<ChargeHold> type() {
+			return TYPE;
+		}
+	}
+
 	public record Wings(boolean open) implements CustomPacketPayload {
 		public static final Type<Wings> TYPE = new Type<>(JaymosPowers.id("web_wings"));
 		public static final StreamCodec<ByteBuf, Wings> CODEC = ByteBufCodecs.BOOL.map(Wings::new, Wings::open);
@@ -128,6 +139,7 @@ public final class WebNet {
 		PayloadTypeRegistry.clientboundPlay().register(Nudge.TYPE, Nudge.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Sense.TYPE, Sense.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Wings.TYPE, Wings.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(ChargeHold.TYPE, ChargeHold.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Swing.TYPE, Swing.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(SwingReject.TYPE, SwingReject.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Pull.TYPE, Pull.CODEC);
