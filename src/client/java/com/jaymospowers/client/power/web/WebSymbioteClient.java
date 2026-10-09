@@ -39,7 +39,13 @@ public final class WebSymbioteClient {
 	/** Living Armor's tendrils on this player: how grown (0-1), how far into a lash (0-1), and a clock for the sway. */
 	public static final RenderStateDataKey<Tendrils> TENDRILS = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_tendrils");
 
-	public record Tendrils(float growth, float lash, float time) {
+	/**
+	 * @param strike   how far through a strike (0-1), or -1
+	 * @param aimYaw   where the strike goes, relative to the body (radians, + to the wearer's left)
+	 * @param aimPitch and how high (radians, + up)
+	 * @param side     which side's tendrils strike (+1 left, -1 right)
+	 */
+	public record Tendrils(float growth, float time, float strike, float aimYaw, float aimPitch, float side) {
 	}
 
 	/** Player entity id → game time their Living Armor came up (for the tendrils' growth). */
@@ -131,9 +137,19 @@ public final class WebSymbioteClient {
 			long now = player.level().getGameTime();
 			long since = ARMOR_SINCE.computeIfAbsent(player.getId(), id -> now);
 			float growth = Math.min(1.0F, (now - since) / WebTendrilLayer.GROWN_TICKS);
-			float swing = player.getSwingAnimation(1.0F);
-			float lash = net.minecraft.util.Mth.sin(swing * net.minecraft.util.Mth.PI);
-			state.setData(TENDRILS, new Tendrils(growth, lash, player.tickCount));
+			// a strike of their own (the server picks the target)
+			float strike = -1.0F, aimYaw = 0.0F, aimPitch = 0.0F, side = 1.0F;
+			WebSymbiote.Strike s = player.getAttached(WebSymbiote.STRIKE);
+			Entity target = s == null ? null : player.level().getEntity(s.target());
+			if (s != null && target != null) {
+				strike = net.minecraft.util.Mth.clamp((now - s.start()) / (float)WebSymbiote.STRIKE_TICKS, 0.0F, 1.0F);
+				net.minecraft.world.phys.Vec3 to = target.getBoundingBox().getCenter().subtract(player.getEyePosition());
+				float yaw = (float)(net.minecraft.util.Mth.atan2(to.z, to.x) * net.minecraft.util.Mth.RAD_TO_DEG) - 90.0F;
+				aimYaw = net.minecraft.util.Mth.wrapDegrees(yaw - player.yBodyRot) * net.minecraft.util.Mth.DEG_TO_RAD;
+				aimPitch = (float)net.minecraft.util.Mth.atan2(to.y, Math.sqrt(to.x * to.x + to.z * to.z));
+				side = aimYaw >= 0.0F ? -1.0F : 1.0F;
+			}
+			state.setData(TENDRILS, new Tendrils(growth, player.tickCount, strike, aimYaw, aimPitch, side));
 		} else {
 			ARMOR_SINCE.remove(entity.getId());
 			state.setData(TENDRILS, null);

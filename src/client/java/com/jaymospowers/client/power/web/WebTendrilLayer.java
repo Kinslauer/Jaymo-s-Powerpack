@@ -29,17 +29,22 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 	/** Ticks of Living Armor until the tendrils are fully grown. */
 	static final float GROWN_TICKS = 200.0F;
 	/** Segments per tendril, and each one's length (model pixels). */
-	private static final int SEGMENTS = 5;
-	private static final float SEGMENT_LENGTH = 3.0F;
+	private static final int SEGMENTS = 7;
+	private static final float SEGMENT_LENGTH = 4.5F;
 	/** Where each tendril roots (model space: +Y down, +Z back), its outward lean and its upward tilt (radians). */
 	private static final float[][] ROOTS = {
-		{-3.0F, 1.5F, 2.0F, -0.55F, -1.05F},
-		{3.0F, 1.5F, 2.0F, 0.55F, -1.05F},
-		{-1.5F, 0.5F, 2.0F, -0.2F, -1.35F},
-		{1.5F, 0.5F, 2.0F, 0.2F, -1.35F},
-		{-3.5F, 4.5F, 2.0F, -0.95F, -0.6F},
-		{3.5F, 4.5F, 2.0F, 0.95F, -0.6F},
+		{-3.0F, 1.5F, 2.0F, -0.6F, -1.0F},
+		{3.0F, 1.5F, 2.0F, 0.6F, -1.0F},
+		{-1.5F, 0.5F, 2.0F, -0.22F, -1.35F},
+		{1.5F, 0.5F, 2.0F, 0.22F, -1.35F},
+		{-3.5F, 4.5F, 2.0F, -1.0F, -0.55F},
+		{3.5F, 4.5F, 2.0F, 1.0F, -0.55F},
+		{-2.0F, 8.0F, 2.0F, -1.25F, -0.15F},
+		{2.0F, 8.0F, 2.0F, 1.25F, -0.15F},
 	};
+	/** A strike: rearing back until this share of it, lashing out until the next, then easing back. */
+	private static final float STRIKE_REAR = 0.42F;
+	private static final float STRIKE_OUT = 0.55F;
 
 	private final TendrilModel model;
 
@@ -54,13 +59,13 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		for (int t = 0; t < ROOTS.length; t++) {
 			float[] r = ROOTS[t];
 			PartDefinition parent = root.addOrReplaceChild("tendril" + t, CubeListBuilder.create().texOffs(0, 0)
-				.addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, SEGMENT_LENGTH), PartPose.offset(r[0], r[1], r[2]));
+				.addBox(-1.5F, -1.5F, 0.0F, 3.0F, 3.0F, SEGMENT_LENGTH), PartPose.offset(r[0], r[1], r[2]));
 			for (int k = 1; k < SEGMENTS; k++) {
-				parent = parent.addOrReplaceChild("s" + k, CubeListBuilder.create().texOffs(0, 6 + (k % 2) * 6)
-					.addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, SEGMENT_LENGTH), PartPose.offset(0.0F, 0.0F, SEGMENT_LENGTH - 0.3F));
+				parent = parent.addOrReplaceChild("s" + k, CubeListBuilder.create().texOffs(0, (k % 2) * 8)
+					.addBox(-1.5F, -1.5F, 0.0F, 3.0F, 3.0F, SEGMENT_LENGTH), PartPose.offset(0.0F, 0.0F, SEGMENT_LENGTH - 0.4F));
 			}
 		}
-		return LayerDefinition.create(mesh, 16, 16);
+		return LayerDefinition.create(mesh, 32, 32);
 	}
 
 	@Override
@@ -101,29 +106,48 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 				return;
 			}
 			float growth = tendrils.growth();
-			float lash = tendrils.lash();
 			float time = tendrils.time();
-			// thicker and longer as they grow (and thicker still as they whip)
-			float thick = 0.55F + 0.75F * growth + 0.25F * lash;
-			float length = 0.55F + 0.65F * growth + 0.35F * lash;
+			// thicker and longer as they grow
+			float thick = 0.6F + 0.7F * growth;
+			float length = 0.6F + 0.7F * growth;
 			for (int t = 0; t < ROOTS.length; t++) {
 				float[] r = ROOTS[t];
 				ModelPart base = this.parts[t][0];
-				float sway = Mth.sin(time * 0.09F + t * 1.3F) * 0.18F;
-				// at rest: up and out behind the shoulders; lashing: flung forward over them
-				base.yRot = Mth.lerp(lash, r[3] + sway * 0.5F, r[3] * 0.3F);
-				base.xRot = Mth.lerp(lash, r[4] + sway, r[4] - 2.2F);
+				float sway = Mth.sin(time * 0.07F + t * 1.3F) * 0.2F;
+				float restYaw = r[3] + sway * 0.5F;
+				float restPitch = r[4] + sway;
+				// the strikers: the upper tendrils on the target's side
+				float strike = tendrils.strike() >= 0.0F && Math.signum(r[0]) == tendrils.side() && r[1] < 6.0F ? tendrils.strike() : -1.0F;
+				float aim = 0.0F;
+				float rear = 0.0F;
+				if (strike >= 0.0F) {
+					if (strike < STRIKE_REAR) {
+						rear = Mth.sin(strike / STRIKE_REAR * Mth.HALF_PI);
+					} else if (strike < STRIKE_OUT) {
+						float p = (strike - STRIKE_REAR) / (STRIKE_OUT - STRIKE_REAR);
+						rear = 1.0F - p;
+						aim = p * p;
+					} else {
+						aim = 1.0F - (strike - STRIKE_OUT) / (1.0F - STRIKE_OUT);
+						aim = aim * aim * (3.0F - 2.0F * aim);
+					}
+				}
+				// rearing: lifted high and drawn back; striking: flung over the shoulder at the target
+				float aimYaw = Mth.PI - tendrils.aimYaw();
+				float aimPitch = -Mth.HALF_PI - 1.0F - tendrils.aimPitch();
+				base.yRot = Mth.lerp(aim, restYaw + rear * r[3] * 0.4F, aimYaw);
+				base.xRot = Mth.lerp(aim, restPitch - rear * 0.55F, aimPitch);
 				base.xScale = thick;
 				base.yScale = thick;
-				base.zScale = length;
+				base.zScale = length * (1.0F + 0.25F * aim);
 				for (int k = 1; k < SEGMENTS; k++) {
 					ModelPart segment = this.parts[t][k];
-					float wave = Mth.sin(time * 0.15F + t * 0.9F + k * 0.7F) * (0.22F + 0.1F * k);
-					// each segment curls further over, rippling; a lash straightens them into a whip
-					segment.xRot = Mth.lerp(lash, 0.32F + wave * 0.5F, 0.05F + wave * 0.25F);
-					segment.yRot = wave * 0.6F * (1.0F - lash);
-					segment.xScale = 0.86F;
-					segment.yScale = 0.86F;
+					float wave = Mth.sin(time * 0.12F + t * 0.9F + k * 0.7F) * (0.18F + 0.07F * k);
+					// each segment curls further over, rippling; rearing coils them; striking straightens them into a whip
+					segment.xRot = Mth.lerp(aim, 0.28F + wave * 0.5F + rear * 0.25F, wave * 0.15F);
+					segment.yRot = wave * 0.55F * (1.0F - aim);
+					segment.xScale = 0.9F;
+					segment.yScale = 0.9F;
 				}
 			}
 		}

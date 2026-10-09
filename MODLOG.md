@@ -222,3 +222,25 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   - **Kitchen 0.4.14:** explosions destroy corpses, and lava, fire and lit campfires ignite them.
   - **H menu:** scrolls with the mouse wheel when it's taller than the screen.
   - **Distant Horizons:** tuned via `dhTuning` in build.gradle, for the pack config, the server and the profile.
+- **0.4.4:**
+  - **Living Armor:**
+    - You become 1.25× bigger (SCALE attribute, so you no longer fit 1×2 gaps).
+    - The suit is drawn on an inflated player model (CubeDeformation 0.7, wide/slim) whenever the armour is up.
+    - The tendrils are bigger: 8 tendrils of 7 segments, 3px thick, 4.5px per segment.
+    - Tendrils no longer react to your swings. Every 2.5 s they pick the nearest Enemy within 5.5 blocks and strike
+      it (synced `web_symbiote_strike`). The strike rears back, lashes out over the shoulder at the target and eases
+      back over 40 ticks, hitting for 6 at tick 18.
+  - **Rampage:**
+    - After 60 s of Living Armor, each takeover check has a chance of a rampage: +12%/min, capped at 60%, hungry or
+      not.
+    - It lasts 6-10 s and goes from target to target, players included (not creative).
+    - Every 3rd strike on a player is a bite: +8 damage, heals you and feeds the symbiote. Mobs at 10 HP or less are
+      devoured.
+  - **Consume:** eats the Jaymo's Kitchen corpse you're carrying, whatever its size; heal and feed scale with its
+    size. Powers compiles against the Kitchen jar (`compileOnly`); `KitchenCompat` only touches it when it's loaded.
+  - **Arsenal:**
+    - Relics go into the Pocket Stash (claimed: `arsenal_relic=false`). When nothing is out, Reach brings the first
+      relic as the first of the three summons; a pinned weapon now works the same way instead of coming with a
+      second weapon.
+    - Barrage rifts open in turn, 10 ticks apart, and each weapon slides out of its rift over 9 ticks before firing.
+  - **Wind:** once mastered, flight only tumbles when you look 150°+ off your path at speed.

@@ -170,6 +170,46 @@ public final class WebSymbiote {
 	/** Server-only bookkeeping (not saved, not synced). */
 	private static final AttachmentType<Live> LIVE = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_live"));
 
+	// ---- Living Armor, bulked up (0.5.0) ----
+	/** The armour swells you: this much bigger (scale), too big for a 1x2 gap. */
+	public static final double ARMOR_SCALE = 0.25;
+	/** The tendrils strike on their own: how often they look for something, how far they reach, the wind-up to the hit,
+	 * the whole strike (slow and deliberate), and how hard it hits. */
+	public static final int STRIKE_EVERY = 50;
+	public static final double STRIKE_RANGE = 5.5;
+	public static final int STRIKE_HIT = 18;
+	public static final int STRIKE_TICKS = 40;
+	public static final float STRIKE_DAMAGE = 6.0F;
+	/**
+	 * Worn too long, it wants out: after {@code ARMOR_RESTLESS_TICKS} of Living Armor, each takeover check (every
+	 * {@link #TAKEOVER_CHECK_TICKS}) has a chance that climbs by {@code ARMOR_TAKEOVER_PER_MINUTE} a minute, up to
+	 * {@code ARMOR_TAKEOVER_MAX}, hungry or not. Such a rampage lasts longer, and goes for players too.
+	 */
+	public static final int ARMOR_RESTLESS_TICKS = 1200;
+	public static final float ARMOR_TAKEOVER_PER_MINUTE = 0.12F;
+	public static final float ARMOR_TAKEOVER_MAX = 0.6F;
+	public static final int RAMPAGE_MIN_TICKS = 120, RAMPAGE_MAX_TICKS = 200;
+	/** In a rampage, every this many strikes on a player is a bite: this much more damage, and it feeds. */
+	public static final int RAMPAGE_BITE_EVERY = 3;
+	public static final float RAMPAGE_BITE_DAMAGE = 8.0F;
+	/** Consume, on a corpse you're carrying (any size): heal and feed by its size. */
+	public static final float CORPSE_HEAL_MIN = 6.0F, CORPSE_HEAL_MAX = 16.0F;
+	public static final int CORPSE_FEED_MAX = 80;
+
+	private static final Identifier ARMOR_SCALE_ID = JaymosPowers.id("web_symbiote_bulk");
+
+	/** A tendril strike in progress: at what, and when it began (game time). Synced to everyone, who see it. */
+	public record Strike(int target, long start) {
+		public static final net.minecraft.network.codec.StreamCodec<io.netty.buffer.ByteBuf, Strike> STREAM_CODEC =
+			net.minecraft.network.codec.StreamCodec.composite(
+				net.minecraft.network.codec.ByteBufCodecs.VAR_INT, Strike::target,
+				net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, Strike::start,
+				Strike::new);
+	}
+
+	public static final AttachmentType<Strike> STRIKE = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_strike"),
+		builder -> builder.syncWith(Strike.STREAM_CODEC, AttachmentSyncPredicate.all()));
+
 	private static final class Live {
 		long noiseReadyAt;
 		boolean burning;
@@ -184,6 +224,12 @@ public final class WebSymbiote {
 		long takeoverReadyAt;
 		long shroudUntil;
 		boolean clinging;
+		/** Ticks of Living Armor worn without a break. */
+		int armorTicks;
+		/** This takeover is a rampage (from wearing the armour too long): longer, and players aren't spared. */
+		boolean rampage;
+		int rampageStrikes;
+		long nextStrikeAt;
 	}
 
 	private WebSymbiote() {
@@ -327,8 +373,16 @@ public final class WebSymbiote {
 			if (player.tickCount % ARMOR_REGEN_TICKS == 0 && player.getAbsorptionAmount() < ARMOR_ABSORPTION) {
 				player.setAbsorptionAmount((float)Math.min(ARMOR_ABSORPTION, player.getAbsorptionAmount() + ARMOR_REGEN));
 			}
-		} else if (player.tickCount % 20 == 0) {
-			removeArmor(player);
+			live.armorTicks++;
+			tickStrikes(player, live, now);
+		} else {
+			live.armorTicks = 0;
+			if (player.getAttached(STRIKE) != null) {
+				player.removeAttached(STRIKE);
+			}
+			if (player.tickCount % 20 == 0) {
+				removeArmor(player);
+			}
 		}
 
 		// Shroud runs out
@@ -362,9 +416,17 @@ public final class WebSymbiote {
 			if (live.takeoverTicks == 0) {
 				next = next.withStress(Math.max(0, next.stress() - TAKEOVER_RELIEF));
 			}
-		} else if (starving && next.stress() >= TAKEOVER_STRESS && now >= live.takeoverReadyAt
-			&& player.tickCount % TAKEOVER_CHECK_TICKS == 0 && !player.isCreative() && player.getRandom().nextFloat() < TAKEOVER_CHANCE) {
-			startTakeover(player, live, now);
+		} else if (now >= live.takeoverReadyAt && player.tickCount % TAKEOVER_CHECK_TICKS == 0 && !player.isCreative()) {
+			// hungry and stressed, it may grab the wheel; worn as armour too long, it grows restless whatever its mood
+			float restless = live.armorTicks <= ARMOR_RESTLESS_TICKS ? 0.0F
+				: Math.min(ARMOR_TAKEOVER_MAX, (live.armorTicks - ARMOR_RESTLESS_TICKS) / 1200.0F * ARMOR_TAKEOVER_PER_MINUTE);
+			if (restless > 0.0F && player.getRandom().nextFloat() < restless) {
+				live.rampage = true;
+				startTakeover(player, live, now);
+			} else if (starving && next.stress() >= TAKEOVER_STRESS && player.getRandom().nextFloat() < TAKEOVER_CHANCE) {
+				live.rampage = false;
+				startTakeover(player, live, now);
+			}
 		}
 
 		// a faint drip of black from a bonded suit, now and then (everyone sees it)
@@ -600,22 +662,32 @@ public final class WebSymbiote {
 
 	// ---- takeover ----------------------------------------------------------------------------------------------------
 
-	private static void startTakeover(ServerPlayer player, Live live, long now) {
-		Mob target = null;
+	/** The nearest thing it wants: creatures (not pets or named ones); in a rampage, other players too. */
+	private static @org.jspecify.annotations.Nullable LivingEntity prey(ServerPlayer player, boolean rampage) {
+		LivingEntity target = null;
 		double best = Double.MAX_VALUE;
-		for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(TAKEOVER_RANGE),
-			m -> m.isAlive() && !(m instanceof TamableAnimal tame && tame.isTame()) && !m.hasCustomName())) {
-			double d = mob.distanceToSqr(player);
+		for (LivingEntity living : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(TAKEOVER_RANGE),
+			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand)
+				&& (e instanceof Mob m ? !(m instanceof TamableAnimal tame && tame.isTame()) && !m.hasCustomName()
+					: rampage && e instanceof Player p && !p.isCreative()))) {
+			double d = living.distanceToSqr(player);
 			if (d < best) {
 				best = d;
-				target = mob;
+				target = living;
 			}
 		}
+		return target;
+	}
+
+	private static void startTakeover(ServerPlayer player, Live live, long now) {
+		LivingEntity target = prey(player, live.rampage);
 		live.takeoverReadyAt = now + TAKEOVER_COOLDOWN;
 		if (target == null) {
 			return;
 		}
-		live.takeoverTicks = Mth.nextInt(player.getRandom(), TAKEOVER_MIN_TICKS, TAKEOVER_MAX_TICKS);
+		live.rampageStrikes = 0;
+		live.takeoverTicks = live.rampage ? Mth.nextInt(player.getRandom(), RAMPAGE_MIN_TICKS, RAMPAGE_MAX_TICKS)
+			: Mth.nextInt(player.getRandom(), TAKEOVER_MIN_TICKS, TAKEOVER_MAX_TICKS);
 		live.takeoverTarget = target.getId();
 		ServerPlayNetworking.send(player, new WebNet.Takeover(target.getId(), live.takeoverTicks));
 		ServerLevel level = player.level();
@@ -627,7 +699,17 @@ public final class WebSymbiote {
 
 	private static void tickTakeover(ServerPlayer player, Live live, long now) {
 		Entity target = player.level().getEntity(live.takeoverTarget);
+		if (live.rampage && (target == null || !target.isAlive()) && live.takeoverTicks > 1) {
+			// a rampage doesn't stop at one: on to the next
+			LivingEntity next = prey(player, true);
+			if (next != null) {
+				live.takeoverTarget = next.getId();
+				ServerPlayNetworking.send(player, new WebNet.Takeover(next.getId(), live.takeoverTicks));
+				target = next;
+			}
+		}
 		if (target == null || !target.isAlive() || --live.takeoverTicks <= 0) {
+			live.rampage = false;
 			live.takeoverTicks = 0;
 			live.takeoverTarget = -1;
 			ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0));
@@ -637,6 +719,20 @@ public final class WebSymbiote {
 		if (live.takeoverTicks % TAKEOVER_ATTACK_TICKS == 0 && player.distanceTo(target) - target.getBbWidth() * 0.5 <= TAKEOVER_REACH) {
 			player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 			player.attack(target);
+			if (live.rampage && target instanceof LivingEntity living && living.isAlive()) {
+				if (living instanceof Player && ++live.rampageStrikes % RAMPAGE_BITE_EVERY == 0) {
+					// it bites: tearing into them, and feeding on it
+					living.hurtServer(player.level(), player.level().damageSources().playerAttack(player), RAMPAGE_BITE_DAMAGE);
+					player.heal(RAMPAGE_BITE_DAMAGE * 0.5F);
+					feed(player, 10, 0);
+					ServerLevel level = player.level();
+					level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.PHANTOM_BITE, SoundSource.PLAYERS, 1.2F, 0.4F);
+					level.sendParticles(ParticleTypes.SQUID_INK, living.getX(), living.getY() + 1.0, living.getZ(), 15, 0.3, 0.4, 0.3, 0.05);
+				} else if (!(living instanceof Player) && living.getHealth() <= CONSUME_MAX_HEALTH) {
+					// anything weak enough, it simply devours
+					devour(player, living);
+				}
+			}
 		}
 		if (live.takeoverTicks % 5 == 0) {
 			player.level().sendParticles(dust(1.0F), player.getX(), player.getY() + 1.0, player.getZ(), 4, 0.3, 0.6, 0.3, 0.0);
@@ -792,6 +888,11 @@ public final class WebSymbiote {
 		if (knockback != null && !knockback.hasModifier(ARMOR_KNOCKBACK_ID)) {
 			knockback.addOrUpdateTransientModifier(new AttributeModifier(ARMOR_KNOCKBACK_ID, ARMOR_KNOCKBACK_RESIST, AttributeModifier.Operation.ADD_VALUE));
 		}
+		// swollen with it: bigger than a body should be
+		AttributeInstance scale = player.getAttribute(Attributes.SCALE);
+		if (scale != null && !scale.hasModifier(ARMOR_SCALE_ID)) {
+			scale.addOrUpdateTransientModifier(new AttributeModifier(ARMOR_SCALE_ID, ARMOR_SCALE, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
+		}
 	}
 
 	private static void removeArmor(ServerPlayer player) {
@@ -803,11 +904,76 @@ public final class WebSymbiote {
 		if (knockback != null && knockback.hasModifier(ARMOR_KNOCKBACK_ID)) {
 			knockback.removeModifier(ARMOR_KNOCKBACK_ID);
 		}
+		AttributeInstance scale = player.getAttribute(Attributes.SCALE);
+		if (scale != null && scale.hasModifier(ARMOR_SCALE_ID)) {
+			scale.removeModifier(ARMOR_SCALE_ID);
+		}
+	}
+
+	/** The tendrils, on their own: now and then they find something close and strike it, slowly and hard. */
+	private static void tickStrikes(ServerPlayer player, Live live, long now) {
+		Strike strike = player.getAttached(STRIKE);
+		ServerLevel level = player.level();
+		if (strike != null) {
+			long t = now - strike.start();
+			Entity target = level.getEntity(strike.target());
+			if (t == STRIKE_HIT && target instanceof LivingEntity living && living.isAlive()
+				&& living.distanceTo(player) <= STRIKE_RANGE + 1.5 + living.getBbWidth() * 0.5) {
+				living.hurtServer(level, level.damageSources().playerAttack(player), STRIKE_DAMAGE);
+				Vec3 away = living.position().subtract(player.position()).horizontal();
+				if (away.lengthSqr() > 1.0E-4) {
+					Vec3 push = away.normalize().scale(0.6);
+					living.push(push.x, 0.25, push.z);
+					living.syncVelocity = true;
+				}
+				level.sendParticles(dust(1.4F), living.getX(), living.getY() + living.getBbHeight() * 0.6, living.getZ(), 14, 0.3, 0.3, 0.3, 0.0);
+				level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.0F, 0.5F);
+				level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.SLIME_ATTACK, SoundSource.PLAYERS, 1.0F, 0.5F);
+			}
+			if (t >= STRIKE_TICKS || target == null) {
+				player.removeAttached(STRIKE);
+				live.nextStrikeAt = now + STRIKE_EVERY;
+			}
+			return;
+		}
+		if (now < live.nextStrikeAt || live.takeoverTicks > 0 && !live.rampage) {
+			return;
+		}
+		live.nextStrikeAt = now + 10;
+		LivingEntity target = null;
+		double best = STRIKE_RANGE * STRIKE_RANGE;
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(STRIKE_RANGE),
+			e -> e != player && e.isAlive() && !e.isSpectator() && (e instanceof net.minecraft.world.entity.monster.Enemy
+				|| live.rampage && (e instanceof Mob || e instanceof Player p && !p.isCreative())))) {
+			double d = living.distanceToSqr(player);
+			if (d < best) {
+				best = d;
+				target = living;
+			}
+		}
+		if (target != null) {
+			player.setAttached(STRIKE, new Strike(target.getId(), now));
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 1.0F, 0.6F);
+		}
 	}
 
 	/** Consume: something small within reach (the one you look at, else the nearest) is swallowed whole. */
 	private static boolean consume(ServerPlayer player) {
 		ServerLevel level = player.level();
+		// a corpse you're carrying, whatever its size, goes down whole
+		Entity corpse = KitchenCompat.carriedCorpse(player);
+		if (corpse != null) {
+			Vec3 at = corpse.getBoundingBox().getCenter();
+			float size = Mth.clamp(corpse.getBbWidth() * corpse.getBbWidth() * corpse.getBbHeight() / 2.0F, 0.0F, 1.0F);
+			level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 30, 0.5, 0.4, 0.5, 0.05);
+			level.sendParticles(dust(1.8F), at.x, at.y, at.z, 35, 0.6, 0.5, 0.6, 0.0);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.PHANTOM_BITE, SoundSource.PLAYERS, 1.2F, 0.4F);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 1.2F, 0.4F);
+			corpse.discard();
+			player.heal(Mth.lerp(size, CORPSE_HEAL_MIN, CORPSE_HEAL_MAX));
+			feed(player, Math.round(Mth.lerp(size, CONSUME_FEED, CORPSE_FEED_MAX)), CONSUME_CALM);
+			return true;
+		}
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getViewVector(1.0F);
 		LivingEntity best = null;
@@ -843,6 +1009,23 @@ public final class WebSymbiote {
 		WebSymbioteState state = state(player);
 		set(player, state.withSatiety(Math.min(SATIETY_MAX, state.satiety() + CONSUME_FEED)).withStress(Math.max(0, state.stress() - CONSUME_CALM)));
 		return true;
+	}
+
+	/** Feeds the symbiote (and calms it). */
+	private static void feed(ServerPlayer player, int satiety, int calm) {
+		WebSymbioteState state = state(player);
+		set(player, state.withSatiety(Math.min(SATIETY_MAX, state.satiety() + satiety)).withStress(Math.max(0, state.stress() - calm)));
+	}
+
+	/** Swallowed whole in a rampage. */
+	private static void devour(ServerPlayer player, LivingEntity living) {
+		ServerLevel level = player.level();
+		Vec3 at = living.getBoundingBox().getCenter();
+		level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 20, living.getBbWidth() * 0.4, living.getBbHeight() * 0.4, living.getBbWidth() * 0.4, 0.05);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.PHANTOM_BITE, SoundSource.PLAYERS, 1.0F, 0.5F);
+		living.discard();
+		player.heal(CONSUME_HEAL);
+		feed(player, CONSUME_FEED, CONSUME_CALM);
 	}
 
 	/** Spike Burst: black spikes burst out all around, hurting and hurling everything near. */
