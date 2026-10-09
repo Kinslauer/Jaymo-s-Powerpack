@@ -162,6 +162,7 @@ public final class WindPower implements Power {
 		/** Set while flying and until the player next lands: the server's floating/speed checks are skipped. */
 		boolean fallProtected;
 		int lastImpactTick = -1000;
+		int lastSmashTick = -1000;
 		WindAbility channel;
 		int channelTicks;
 		final int[] cooldowns = new int[WindAbility.values().length];
@@ -292,6 +293,19 @@ public final class WindPower implements Power {
 	/** A crash reported by the flyer's client (motion is client-side). Survival and adventure only. */
 	private void onImpact(ServerPlayer player, WindNet.Impact payload) {
 		State s = this.states.get(player.getUUID());
+		if (s != null && s.flight.flying() && Powers.has(player, this) && player.isAlive() && !player.isSpectator()
+			&& player.tickCount - s.lastSmashTick >= IMPACT_SPACING) {
+			// a crash at speed breaks what you hit, like any hard impact (see Debris.smash)
+			float hit = Mth.clamp(payload.lost(), 0.0F, IMPACT_MAX_LOST);
+			if (hit >= com.jaymospowers.power.web.WebImpacts.SMASH_SPEED) {
+				s.lastSmashTick = player.tickCount;
+				net.minecraft.world.phys.Vec3 look = player.getLookAngle();
+				net.minecraft.world.phys.Vec3 at = payload.wall()
+					? player.position().add(0.0, player.getBbHeight() * 0.5, 0.0).add(new net.minecraft.world.phys.Vec3(look.x, 0.0, look.z).normalize().scale(0.9))
+					: player.position().add(0.0, -0.5, 0.0);
+				com.jaymospowers.core.Debris.smash(player.level(), at, hit, player);
+			}
+		}
 		// the ground is judged by ordinary fall damage; this is for walls
 		if (!payload.wall() || s == null || !s.flight.flying() || !Powers.has(player, this) || !player.isAlive()
 			|| player.isCreative() || player.isSpectator() || player.tickCount - s.lastImpactTick < IMPACT_SPACING) {

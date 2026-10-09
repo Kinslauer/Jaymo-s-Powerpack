@@ -47,7 +47,7 @@ public final class WindFlightController {
 	static final double CRUISE_ENTER_SPEED = 0.8;
 	static final double CRUISE_ACCEL = 0.05;
 	static final double CRUISE_ACCEL_TAPER = 0.6;
-	static final double CRUISE_DECEL = 0.06;
+	static final double CRUISE_DECEL = 0.012;
 	static final double CRUISE_BRAKE = 0.15;
 	/**
 	 * The air brake: S at speed pushes a gust out ahead from the palms. Momentum is shed smoothly (this share kept each
@@ -80,9 +80,19 @@ public final class WindFlightController {
 	/** How long the recovery pose is held after regaining control. */
 	public static final int RECOVER_TICKS = 30;
 	/** Speed bled per radian turned (hard turns cost momentum). */
-	static final double CRUISE_TURN_DRAG = 0.5;
-	/** Gravity along the flight path: diving gains speed, climbing loses it (blocks/tick per tick at vertical). */
-	static final double CRUISE_GRAVITY = 0.035;
+	static final double CRUISE_TURN_DRAG = 0.35;
+	/**
+	 * Gravity along the flight path: point down and you pick up speed ({@code DIVE_GRAVITY}, blocks/tick per tick
+	 * straight down); climbing costs a little ({@code CLIMB_GRAVITY}), never enough to stop you gaining height. A dive
+	 * can carry you past the top speed the wind alone gives, up to {@code DIVE_OVERSPEED} of it.
+	 */
+	static final double DIVE_GRAVITY = 0.085, CLIMB_GRAVITY = 0.02;
+	static final double DIVE_OVERSPEED = 1.3;
+	/**
+	 * Momentum fights pulling up: the nose can rise at most this many degrees per tick, from slow (free) to top speed
+	 * (barely), so at speed you can't wrench yourself up and out of a dive or a blast; you have to arc out of it.
+	 */
+	static final double PULL_UP_RATE_SLOW = 7.0, PULL_UP_RATE_FAST = 0.8;
 	/** Upward kick on take-off from the ground / in mid-air. */
 	static final double TAKEOFF_BOOST = 0.9;
 	static final double AIR_TAKEOFF_BOOST = 0.5;
@@ -293,7 +303,7 @@ public final class WindFlightController {
 			this.locked = false;
 		}
 		boolean boosting = input.sprint() && !starving;
-		if (boosting) {
+		if (boosting && this.speed < this.top) {
 			this.speed += CRUISE_ACCEL * (this.top / TOP_SPEED) * (1.0 - CRUISE_ACCEL_TAPER * this.speed / this.top);
 		} else if (!this.locked) {
 			this.speed -= CRUISE_DECEL;
@@ -321,14 +331,21 @@ public final class WindFlightController {
 		Vec3 dir = this.velocity.lengthSqr() > 1.0E-6 ? this.velocity.normalize() : look;
 		double fractionNow = Mth.clamp(this.speed / this.top, 0.0, 1.0);
 		// the turn rate falls away quickly with speed: half speed already turns at a third of the slow rate
-		double maxTurn = Math.toRadians(Mth.lerp(Math.sqrt(fractionNow), CRUISE_TURN_RATE_SLOW, CRUISE_TURN_RATE_FAST) * this.turnBonus);
+		double maxTurn = Math.toRadians(Mth.lerp(Math.sqrt(Math.min(1.0, fractionNow)), CRUISE_TURN_RATE_SLOW, CRUISE_TURN_RATE_FAST) * this.turnBonus);
 		double angle = Math.acos(Mth.clamp(dir.dot(look), -1.0, 1.0));
 		if (fractionNow >= TUMBLE_MIN_FRACTION) {
-			double t = (fractionNow - TUMBLE_MIN_FRACTION) / (1.0 - TUMBLE_MIN_FRACTION);
+			double t = Math.min(1.0, (fractionNow - TUMBLE_MIN_FRACTION) / (1.0 - TUMBLE_MIN_FRACTION));
 			double limit = com.jaymospowers.core.Mastery.unlocked(player) >= com.jaymospowers.core.Mastery.ALL
 				? Math.toRadians(MASTERED_TUMBLE_ANGLE)
 				: Math.toRadians(Math.min(179.0, Mth.lerp(t, TUMBLE_ANGLE_SLOW, TUMBLE_ANGLE_FAST) * this.turnBonus));
-			if (angle > limit) {
+			// pulling up too hard isn't a tumble, the nose just won't come up (see PULL_UP_RATE); only a turn sideways or down
+			double tumbleAngle = angle;
+			if (look.y > dir.y) {
+				Vec3 flatDir = new Vec3(dir.x, 0.0, dir.z), flatLook = new Vec3(look.x, 0.0, look.z);
+				tumbleAngle = flatDir.lengthSqr() < 1.0E-6 || flatLook.lengthSqr() < 1.0E-6 ? 0.0
+					: Math.acos(Mth.clamp(flatDir.normalize().dot(flatLook.normalize()), -1.0, 1.0));
+			}
+			if (tumbleAngle > limit) {
 				// wrenched round far harder than this speed allows: control is lost
 				this.velocity = dir.scale(this.speed);
 				this.startTumble(minecraft, player);
@@ -337,12 +354,29 @@ public final class WindFlightController {
 		}
 		if (angle > 1.0E-4) {
 			double turned = Math.min(angle, maxTurn);
+			Vec3 was = dir;
 			dir = rotateToward(dir, look, angle, turned);
+			// the nose only comes up so fast at speed: the momentum carries you on
+			double pitchWas = Math.asin(Mth.clamp(was.y, -1.0, 1.0));
+			double pitchNow = Math.asin(Mth.clamp(dir.y, -1.0, 1.0));
+			double maxUp = Math.toRadians(Mth.lerp(Math.min(1.0, fractionNow), PULL_UP_RATE_SLOW, PULL_UP_RATE_FAST) * this.turnBonus);
+			if (pitchNow - pitchWas > maxUp) {
+				double pitch = pitchWas + maxUp;
+				double flat = Math.sqrt(dir.x * dir.x + dir.z * dir.z);
+				Vec3 horizontal = flat < 1.0E-4 ? new Vec3(was.x, 0.0, was.z).normalize() : new Vec3(dir.x / flat, 0.0, dir.z / flat);
+				dir = horizontal.scale(Math.cos(pitch)).add(0.0, Math.sin(pitch), 0.0);
+			}
 			this.speed -= this.speed * CRUISE_TURN_DRAG * turned;
 		}
-		// and gravity along the path
-		this.speed -= dir.y * CRUISE_GRAVITY;
-		this.speed = Mth.clamp(this.speed, 0.0, this.top);
+		// and gravity along the path: diving gains speed (past the wind's own top, a little), climbing costs a little
+		double before = this.speed;
+		this.speed -= dir.y * (dir.y < 0.0 ? DIVE_GRAVITY : CLIMB_GRAVITY);
+		// the wind's push only reaches the top speed; a dive may carry you beyond it (and any extra bleeds off slowly)
+		double cap = this.top * DIVE_OVERSPEED;
+		if (this.speed > this.top && dir.y > -0.05) {
+			this.speed = Math.max(this.top, Math.min(this.speed, before) - CRUISE_DECEL * 2.0);
+		}
+		this.speed = Mth.clamp(this.speed, 0.0, cap);
 		double fraction = this.speed / this.top;
 		this.velocity = dir.scale(this.speed);
 
@@ -564,10 +598,9 @@ public final class WindFlightController {
 	}
 
 	private void impact(LocalPlayer player, double lost, boolean wall) {
-		// the server decides wall-crash damage (none in creative); the ground is ordinary fall damage
-		if (wall) {
-			ClientPlayNetworking.send(new WindNet.Impact((float)lost, true));
-		}
+		// the server decides wall-crash damage (none in creative; the ground is ordinary fall damage) and, fast
+		// enough, smashes what you hit
+		ClientPlayNetworking.send(new WindNet.Impact((float)lost, wall));
 		ClientLevel level = (ClientLevel)player.level();
 		level.playLocalSound(player, SoundEvents.BREEZE_LAND, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.addParticle(ParticleTypes.POOF, player.getX(), player.getY() + 0.9, player.getZ(), 0.0, 0.05, 0.0);

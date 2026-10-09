@@ -68,6 +68,7 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			return;
 		}
 		poseStack.pushPose();
+		WebFeral.applyModel(this.getParentModel(), state);
 		this.getParentModel().head.translateAndRotate(poseStack);
 		collector.submitModel(this.model, state, poseStack, RenderTypes.entityCutout(TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY,
 			state.outlineColor);

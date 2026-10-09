@@ -300,6 +300,23 @@ public final class GravityPower implements Power {
 	private record Well(ResourceKey<Level> dimension, Vec3 at, UUID owner, long until, boolean singularity) {
 	}
 
+	/**
+	 * Crush dropped into your own Gravity Well: the ground around it tears loose. Blocks ({@code CAVE_IN_BLOCKS_MIN} to
+	 * {@code CAVE_IN_BLOCKS_MAX} with the charge) are wrenched up out of the ground for {@code CAVE_IN_LIFT_TICKS}, then
+	 * hurled into the middle, where they land on whatever the well caught: {@code CAVE_IN_DAMAGE_MIN} to
+	 * {@code CAVE_IN_DAMAGE_MAX} each, when they hit, and the blocks pile up on them.
+	 */
+	private record CaveIn(ResourceKey<Level> dimension, Vec3 center, UUID owner, long start, float damage, double radius, List<Integer> blocks) {
+	}
+
+	static final int CAVE_IN_BLOCKS_MIN = 14, CAVE_IN_BLOCKS_MAX = 40;
+	static final int CAVE_IN_LIFT_TICKS = 7, CAVE_IN_FLY_TICKS = 6;
+	static final float CAVE_IN_DAMAGE_MIN = 14.0F, CAVE_IN_DAMAGE_MAX = 36.0F;
+	/** How hard a block it can tear up (deepslate is 3), and how high they're lifted (blocks/tick). */
+	static final float CAVE_IN_HARDNESS = 3.0F;
+	static final double CAVE_IN_LIFT = 0.42;
+	private static final List<CaveIn> CAVE_INS = new ArrayList<>();
+
 	private record Pinned(ResourceKey<Level> dimension, UUID entity, long until) {
 	}
 
@@ -337,6 +354,7 @@ public final class GravityPower implements Power {
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			STATES.clear();
 			WELLS.clear();
+			CAVE_INS.clear();
 			PINNED.clear();
 			SLAMS.clear();
 			WEIGHED.clear();
@@ -923,6 +941,18 @@ public final class GravityPower implements Power {
 		ServerLevel level = player.level();
 		boolean collapsed = Fate.isCorrupted(player);
 		Vec3 at = aimPoint(player, CRUSH_RANGE);
+		// into your own Gravity Well: the ground caves in on everything it caught
+		for (Iterator<Well> it = WELLS.iterator(); it.hasNext(); ) {
+			Well well = it.next();
+			if (!well.singularity() && well.owner().equals(player.getUUID()) && well.dimension() == level.dimension()
+				&& well.at().distanceTo(at) <= WELL_RADIUS) {
+				it.remove();
+				caveIn(level, player, well, charge);
+				int cooldown = Math.round(Mth.lerp(charge, CRUSH_COOLDOWN_MIN, CRUSH_COOLDOWN_MAX));
+				player.setAttached(COOLDOWNS, cooldowns(player).withCrush(level.getGameTime() + cooldown, cooldown));
+				return;
+			}
+		}
 		double radius = Mth.lerp(charge, CRUSH_RADIUS_MIN, CRUSH_RADIUS_MAX) + (collapsed ? COLLAPSE_RADIUS_BONUS : 0.0);
 		float damage = Mth.lerp(charge, CRUSH_DAMAGE_MIN, CRUSH_DAMAGE_MAX) * (collapsed ? COLLAPSE_DAMAGE : 1.0F);
 		AABB area = new AABB(at, at).inflate(radius, radius + 3.0, radius);
@@ -956,6 +986,115 @@ public final class GravityPower implements Power {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.2F, 0.6F);
 		int cooldown = Math.round(Mth.lerp(charge, CRUSH_COOLDOWN_MIN, CRUSH_COOLDOWN_MAX));
 		player.setAttached(COOLDOWNS, cooldowns(player).withCrush(level.getGameTime() + cooldown, cooldown));
+	}
+
+	/** The well's ground tears loose (see CaveIn): the blocks start rising now. */
+	private static void caveIn(ServerLevel level, ServerPlayer player, Well well, float charge) {
+		Vec3 center = well.at();
+		int want = Mth.lerpInt(charge, CAVE_IN_BLOCKS_MIN, CAVE_IN_BLOCKS_MAX);
+		double radius = WELL_RADIUS;
+		List<BlockPos> ground = new ArrayList<>();
+		int r = Mth.ceil(radius);
+		BlockPos middle = BlockPos.containing(center);
+		for (int dx = -r; dx <= r; dx++) {
+			for (int dz = -r; dz <= r; dz++) {
+				double d = Math.sqrt(dx * dx + dz * dz);
+				if (d > radius || d < 1.5) {
+					continue;
+				}
+				// the surface of this column, near the well's height
+				for (int dy = 3; dy >= -6; dy--) {
+					BlockPos pos = middle.offset(dx, dy, dz);
+					BlockState state = level.getBlockState(pos);
+					if (state.isAir() || !level.getBlockState(pos.above()).isAir()) {
+						continue;
+					}
+					float hardness = state.getDestroySpeed(level, pos);
+					if (state.getFluidState().isEmpty() && !state.hasBlockEntity() && hardness >= 0.0F && hardness <= CAVE_IN_HARDNESS) {
+						ground.add(pos.immutable());
+					}
+					break;
+				}
+			}
+		}
+		java.util.Collections.shuffle(ground, new java.util.Random(level.getRandom().nextLong()));
+		List<Integer> blocks = new ArrayList<>();
+		for (BlockPos pos : ground.subList(0, Math.min(want, ground.size()))) {
+			BlockState state = level.getBlockState(pos);
+			com.jaymospowers.core.Debris.puff(level, pos, state, 1.4F);
+			net.minecraft.world.entity.item.FallingBlockEntity falling = net.minecraft.world.entity.item.FallingBlockEntity.fall(level, pos, state);
+			falling.disableDrop();
+			falling.setHurtsEntities(2.0F, 40);
+			falling.setDeltaMovement(0.0, CAVE_IN_LIFT * (0.8 + level.getRandom().nextDouble() * 0.4), 0.0);
+			falling.needsSync = true;
+			falling.syncVelocity = true;
+			blocks.add(falling.getId());
+		}
+		float damage = Mth.lerp(charge, CAVE_IN_DAMAGE_MIN, CAVE_IN_DAMAGE_MAX) * (Fate.isCorrupted(player) ? COLLAPSE_DAMAGE : 1.0F);
+		CAVE_INS.add(new CaveIn(level.dimension(), center, player.getUUID(), level.getGameTime(), damage, radius, blocks));
+		level.playSound(null, center.x, center.y, center.z, SoundEvents.WARDEN_EMERGE, SoundSource.PLAYERS, 1.4F, 0.7F);
+		level.playSound(null, center.x, center.y, center.z, SoundEvents.ROOTED_DIRT_BREAK, SoundSource.PLAYERS, 1.5F, 0.4F);
+	}
+
+	private static void tickCaveIns(MinecraftServer server) {
+		for (Iterator<CaveIn> it = CAVE_INS.iterator(); it.hasNext(); ) {
+			CaveIn cave = it.next();
+			ServerLevel level = server.getLevel(cave.dimension());
+			if (level == null) {
+				it.remove();
+				continue;
+			}
+			long age = level.getGameTime() - cave.start();
+			Vec3 target = cave.center().add(0.0, 0.6, 0.0);
+			for (int id : cave.blocks()) {
+				Entity block = level.getEntity(id);
+				if (block == null) {
+					continue;
+				}
+				if (age < CAVE_IN_LIFT_TICKS) {
+					// wrenched up out of the ground, shuddering
+					block.setDeltaMovement((level.getRandom().nextDouble() - 0.5) * 0.06, CAVE_IN_LIFT * (1.0 - age / (double)CAVE_IN_LIFT_TICKS) + 0.04,
+						(level.getRandom().nextDouble() - 0.5) * 0.06);
+				} else if (age == CAVE_IN_LIFT_TICKS) {
+					// and hurled into the middle (arriving in CAVE_IN_FLY_TICKS, gravity and all)
+					Vec3 to = target.subtract(block.position());
+					double t = CAVE_IN_FLY_TICKS;
+					block.setDeltaMovement(to.x / t, to.y / t + 0.04 * t / 2.0, to.z / t);
+					level.sendParticles(ParticleTypes.REVERSE_PORTAL, block.getX(), block.getY() + 0.5, block.getZ(), 4, 0.2, 0.2, 0.2, 0.05);
+				} else {
+					continue;
+				}
+				block.needsSync = true;
+				block.syncVelocity = true;
+			}
+			if (age == CAVE_IN_LIFT_TICKS) {
+				level.playSound(null, cave.center().x, cave.center().y, cave.center().z, SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 1.5F, 0.4F);
+			}
+			if (age < CAVE_IN_LIFT_TICKS + CAVE_IN_FLY_TICKS) {
+				continue;
+			}
+			// it all comes down on them
+			it.remove();
+			ServerPlayer owner = server.getPlayerList().getPlayer(cave.owner());
+			Vec3 c = cave.center();
+			for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(c, c).inflate(cave.radius(), cave.radius(), cave.radius()),
+				e -> e != owner && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && e.position().distanceTo(c) <= cave.radius())) {
+				victim.setInvulnerableTime(0);
+				crushing = true;
+				try {
+					victim.hurtServer(level, owner != null ? level.damageSources().playerAttack(owner) : level.damageSources().fallingBlock(null), cave.damage());
+				} finally {
+					crushing = false;
+				}
+			}
+			BlockPos under = BlockPos.containing(c.x, c.y - 0.5, c.z);
+			BlockState ground = level.getBlockState(under);
+			com.jaymospowers.core.Debris.puff(level, under, ground.isAir() ? net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState() : ground, 4.0F);
+			level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, c.x, c.y + 0.5, c.z, 1, 0.0, 0.0, 0.0, 0.0);
+			level.sendParticles(ParticleTypes.LARGE_SMOKE, c.x, c.y + 0.5, c.z, 40, 1.5, 0.8, 1.5, 0.05);
+			level.playSound(null, c.x, c.y, c.z, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 2.0F, 0.5F);
+			level.playSound(null, c.x, c.y, c.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.5F, 0.6F);
+		}
 	}
 
 	// ---------------------------------------------------------------- Singularity (C)
@@ -1157,6 +1296,9 @@ public final class GravityPower implements Power {
 					}
 				}
 			}
+		}
+		if (!CAVE_INS.isEmpty()) {
+			tickCaveIns(server);
 		}
 		if (!WELLS.isEmpty()) {
 			for (Iterator<Well> it = WELLS.iterator(); it.hasNext(); ) {

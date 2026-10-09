@@ -15,6 +15,7 @@ abstract class WebModelFeatureRendererMixin {
 		shift = At.Shift.AFTER))
 	private void jaymospowers$webArms(ModelFeatureRenderer.Submit<?> submit, CallbackInfo ci) {
 		WebArms.applyModel(submit.model(), submit.state());
+		com.jaymospowers.client.power.web.WebFeral.applyModel(submit.model(), submit.state());
 		WebRagdoll.applyModel(submit.model(), submit.state());
 	}
 }

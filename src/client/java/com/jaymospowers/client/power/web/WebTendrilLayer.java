@@ -75,7 +75,8 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 			return;
 		}
 		poseStack.pushPose();
-		// rooted to the torso, so they lean with a crouch
+		// rooted to the torso, so they lean with a crouch (or the hunch)
+		WebFeral.applyModel(this.getParentModel(), state);
 		this.getParentModel().body.translateAndRotate(poseStack);
 		collector.submitModel(this.model, state, poseStack, RenderTypes.entityCutout(TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY,
 			state.outlineColor);
@@ -113,6 +114,8 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 			for (int t = 0; t < ROOTS.length; t++) {
 				float[] r = ROOTS[t];
 				ModelPart base = this.parts[t][0];
+				// the top two (right, left) are the ones that reach out and hold: while holding, they're drawn reaching
+				base.visible = !(t == 0 && (tendrils.held() & 1) != 0 || t == 1 && (tendrils.held() & 2) != 0);
 				float sway = Mth.sin(time * 0.07F + t * 1.3F) * 0.2F;
 				float restYaw = r[3] + sway * 0.5F;
 				float restPitch = r[4] + sway;

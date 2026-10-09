@@ -139,7 +139,7 @@ public final class WebPowerClient implements PowerClient {
 		double bestDistance = eye.distanceToSqr(end);
 		for (net.minecraft.world.entity.Entity e : player.level().getEntities(player,
 			player.getBoundingBox().expandTowards(look.scale(com.jaymospowers.power.web.WebTendrils.GRAB_RANGE)).inflate(GRAB_AIM_INFLATE + 1.0),
-			e -> com.jaymospowers.power.web.WebTendrils.grabbable(player, e))) {
+			e -> com.jaymospowers.power.web.WebTendrils.grabbable(player, e) && !holding(player, e))) {
 			java.util.Optional<net.minecraft.world.phys.Vec3> at = e.getBoundingBox().inflate(GRAB_AIM_INFLATE).clip(eye, end);
 			if (at.isPresent() && eye.distanceToSqr(at.get()) < bestDistance) {
 				bestDistance = eye.distanceToSqr(at.get());
@@ -147,6 +147,11 @@ public final class WebPowerClient implements PowerClient {
 			}
 		}
 		return best;
+	}
+
+	private static boolean holding(LocalPlayer player, net.minecraft.world.entity.Entity e) {
+		com.jaymospowers.power.web.WebTendrils.Grips grips = player.getAttached(com.jaymospowers.power.web.WebTendrils.GRIPS);
+		return grips != null && (grips.right() == e.getId() || grips.left() == e.getId());
 	}
 
 	/** How much fatter things are to the tendrils' aim (blocks, each side). */

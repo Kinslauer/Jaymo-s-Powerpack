@@ -45,7 +45,8 @@ public final class WebSymbioteClient {
 	 * @param aimPitch and how high (radians, + up)
 	 * @param side     which side's tendrils strike (+1 left, -1 right)
 	 */
-	public record Tendrils(float growth, float time, float strike, float aimYaw, float aimPitch, float side) {
+	/** {@code held}: bit 1, the right shoulder's tendril is holding something (drawn reaching out instead); bit 2, the left's. */
+	public record Tendrils(float growth, float time, float strike, float aimYaw, float aimPitch, float side, boolean sprint, int held) {
 	}
 
 	/** A meal in progress: how far through it (0-1), for the jaws. */
@@ -166,7 +167,18 @@ public final class WebSymbioteClient {
 				aimPitch = (float)net.minecraft.util.Mth.atan2(to.y, Math.sqrt(to.x * to.x + to.z * to.z));
 				side = aimYaw >= 0.0F ? -1.0F : 1.0F;
 			}
-			state.setData(TENDRILS, new Tendrils(growth, player.tickCount, strike, aimYaw, aimPitch, side));
+			int held = 0;
+			com.jaymospowers.power.web.WebTendrils.Grips grips = player.getAttached(com.jaymospowers.power.web.WebTendrils.GRIPS);
+			if (grips != null) {
+				boolean mainRight = player.getMainArm() == net.minecraft.world.entity.HumanoidArm.RIGHT;
+				for (int hand = com.jaymospowers.power.web.WebNet.MAIN; hand <= com.jaymospowers.power.web.WebNet.OFF; hand++) {
+					if (grips.get(hand) >= 0) {
+						boolean right = (hand == com.jaymospowers.power.web.WebNet.MAIN) == mainRight;
+						held |= right ? 1 : 2;
+					}
+				}
+			}
+			state.setData(TENDRILS, new Tendrils(growth, player.tickCount, strike, aimYaw, aimPitch, side, player.isSprinting(), held));
 		} else {
 			ARMOR_SINCE.remove(entity.getId());
 			state.setData(TENDRILS, null);

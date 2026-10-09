@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Camera;
+import net.minecraft.core.BlockPos;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
@@ -22,9 +23,9 @@ final class WebLineRenderer {
 	private static final int COLOR = 0xFFEDEDED;
 	private static final int SPLAT_COLOR = 0xFFD8D8D8;
 	private static final int SEGMENTS = 12;
-	/** A symbiote's webs: black, with a faint grey sheen that runs along them. */
-	private static final int DARK = 0xFF0A0A0C;
-	private static final int SHEEN = 0xFF34313A;
+	/** A symbiote's webs: black-purple, with a faint sheen that runs along them. */
+	private static final int DARK = 0xFF0B0710;
+	private static final int SHEEN = 0xFF1F1530;
 	/** How fast the sheen runs (cycles per tick) and how much of the line it lights. */
 	private static final float SHEEN_SPEED = 0.03F;
 	private static final float SHEEN_WIDTH = 0.18F;
@@ -86,12 +87,12 @@ final class WebLineRenderer {
 	private static final double ROPE_TURN_LENGTH = 1.4;
 	private static final int ROPE_SIDES = 6;
 	private static final double ROPE_STEP = 0.2;
-	private static final int ROPE_DARK = 0x09090B;
-	private static final int ROPE_SHEEN = 0x3A3740;
+	private static final int ROPE_DARK = 0x080510;
+	private static final int ROPE_SHEEN = 0x221634;
 
 	/**
 	 * Twisted strands of black, like corded rope or tentacles, as solid tubes. Each face is shaded by which way it
-	 * faces, with a faint grey sheen along the top, so it reads as round without any lighting.
+	 * faces, with a faint purple-black sheen along the top, so it reads as round without any lighting.
 	 */
 	static void rope(LevelRenderContext context, Vec3 from, Vec3 to, int strands, double radius, double twist) {
 		Vec3 delta = to.subtract(from);
@@ -280,35 +281,72 @@ final class WebLineRenderer {
 	}
 
 	/**
-	 * A Living Armor tendril holding something: out of the back, up over the shoulder on its side, and down to what it
-	 * holds in front, so the hands stay free. A thick corded rope, sagging a little in a curve.
+	 * A Living Armor tendril holding something: one of the top two on the back (its own is hidden meanwhile), reaching
+	 * up over the shoulder and down to what it holds in front, so the hands stay free. Drawn with the tendrils' own
+	 * texture, thick at the root and tapering.
 	 */
 	private static void tentacle(LevelRenderContext context, Minecraft minecraft, Player player, int handIndex, Vec3 to, Vec3 camera,
 		float partialTick) {
 		boolean mainRight = player.getMainArm() == HumanoidArm.RIGHT;
-		int side = (handIndex == WebNet.MAIN) == mainRight ? 1 : -1;
-		float bodyYaw = Mth.lerp(partialTick, player.yBodyRotO, player.yBodyRot) * Mth.DEG_TO_RAD;
-		double scale = player.getScale();
-		Vec3 forward = new Vec3(-Mth.sin(bodyYaw), 0.0, Mth.cos(bodyYaw));
-		Vec3 right = new Vec3(-Mth.cos(bodyYaw), 0.0, -Mth.sin(bodyYaw));
-		Vec3 feet = player.getPosition(partialTick);
-		Vec3 root = feet.add(0.0, 1.25 * scale, 0.0).add(forward.scale(-0.3 * scale)).add(right.scale(side * 0.18 * scale));
-		Vec3 shoulder = feet.add(0.0, 1.95 * scale, 0.0).add(forward.scale(-0.05 * scale)).add(right.scale(side * 0.55 * scale));
+		boolean right = (handIndex == WebNet.MAIN) == mainRight;
+		float bend = WebFeral.bend(player, partialTick);
+		// the root: where the top tendril on that side grows (model pixels, as WebTendrilLayer roots it)
+		Vec3 root = WebFeral.bodyPoint(player, partialTick, bend, right ? -3.0F : 3.0F, 1.5F, 2.0F);
+		Vec3 over = WebFeral.bodyPoint(player, partialTick, bend, right ? -7.0F : 7.0F, -9.0F, 0.0F);
 		if (player == minecraft.player && minecraft.options.getCameraType().isFirstPerson()) {
-			// from your own back, only the arc over the shoulder shows: start it at the edge of the view
-			shoulder = player.getEyePosition(partialTick).add(0.0, 0.25, 0.0).add(right.scale(side * 0.5));
+			// from your own back only the arc over the shoulder shows: bring it in at the edge of the view
+			float yaw = Mth.lerp(partialTick, player.yBodyRotO, player.yBodyRot) * Mth.DEG_TO_RAD;
+			Vec3 side = new Vec3(Mth.cos(yaw), 0.0, Mth.sin(yaw)).scale(right ? -0.55 : 0.55);
+			over = player.getEyePosition(partialTick).add(0.0, 0.3, 0.0).add(side);
 		}
-		// a curve: root -> over the shoulder -> down to the target, as short straight pieces
-		Vec3 prev = root;
-		int pieces = 6;
-		for (int i = 1; i <= pieces; i++) {
+		double radius = 0.1 * player.getScale();
+		int pieces = 10;
+		Vec3[] points = new Vec3[pieces + 1];
+		for (int i = 0; i <= pieces; i++) {
 			double t = i / (double)pieces;
-			Vec3 a = root.lerp(shoulder, t);
-			Vec3 b = shoulder.lerp(to, t);
-			Vec3 point = a.lerp(b, t);
-			rope(context, prev.subtract(camera), point.subtract(camera), 3, 0.06 * (1.0 - 0.3 * t), 0.06);
-			prev = point;
+			points[i] = root.lerp(over, t).lerp(over.lerp(to, t), t).subtract(camera);
 		}
+		int light = minecraft.getEntityRenderDispatcher().getPackedLightCoords(player, partialTick);
+		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.entityCutout(TENDRIL_TEXTURE), (pose, buffer) -> {
+			for (int i = 0; i < pieces; i++) {
+				double r0 = radius * (1.0 - 0.45 * i / pieces);
+				double r1 = radius * (1.0 - 0.45 * (i + 1) / pieces);
+				tube(buffer, pose, points[i], points[i + 1], r0, r1, i, light);
+			}
+		});
+	}
+
+	private static final net.minecraft.resources.Identifier TENDRIL_TEXTURE =
+		com.jaymospowers.JaymosPowers.id("textures/entity/web_symbiote_tendril.png");
+
+	/** One square, textured length of tendril from {@code a} to {@code b} (the segments alternate texture rows, like the model's). */
+	private static void tube(VertexConsumer buffer, PoseStack.Pose pose, Vec3 a, Vec3 b, double ra, double rb, int index, int light) {
+		Vec3 dir = b.subtract(a);
+		if (dir.lengthSqr() < 1.0E-6) {
+			return;
+		}
+		dir = dir.normalize();
+		Vec3 u = Math.abs(dir.y) < 0.95 ? dir.cross(new Vec3(0.0, 1.0, 0.0)).normalize() : dir.cross(new Vec3(1.0, 0.0, 0.0)).normalize();
+		Vec3 v = dir.cross(u).normalize();
+		Vec3[] su = {u, v, u.reverse(), v.reverse()};
+		float v0 = (index % 2) * 8 / 32.0F + 3.0F / 32.0F;
+		float v1 = v0 + 4.5F / 32.0F;
+		for (int k = 0; k < 4; k++) {
+			Vec3 n0 = su[k];
+			Vec3 n1 = su[(k + 1) % 4];
+			Vec3 normal = n0.add(n1).normalize();
+			Vec3 p0 = a.add(n0.scale(ra)), p1 = a.add(n1.scale(ra)), p2 = b.add(n1.scale(rb)), p3 = b.add(n0.scale(rb));
+			float u0 = 3.0F / 32.0F, u1 = 6.0F / 32.0F;
+			vertex(buffer, pose, p0, u0, v0, normal, light);
+			vertex(buffer, pose, p1, u1, v0, normal, light);
+			vertex(buffer, pose, p2, u1, v1, normal, light);
+			vertex(buffer, pose, p3, u0, v1, normal, light);
+		}
+	}
+
+	private static void vertex(VertexConsumer buffer, PoseStack.Pose pose, Vec3 p, float u, float v, Vec3 n, int light) {
+		buffer.addVertex(pose, (float)p.x, (float)p.y, (float)p.z).setColor(-1).setUv(u, v)
+			.setOverlay(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, (float)n.x, (float)n.y, (float)n.z);
 	}
 
 	/**
