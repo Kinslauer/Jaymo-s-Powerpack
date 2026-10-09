@@ -146,3 +146,31 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     - A player caught on the Yank line or hitched to a block can break free: swinging cuts the line, and straining
       past it for 1.5 s snaps it. They're also pulled more gently than mobs.
   - **Powers screen:** goes to three columns when the screen is wide enough.
+- **0.4.0, starters, Wind reworks, keys:**
+  - **Starters:** a natural awakening now begins with only a weak starter (Mastery level 0); the four abilities
+    unlock after it, at 20/60/120/200 mastery.
+    - Wind (passive, kept): a cloak of wind giving +10% speed, and slow falling while holding Jump in the air.
+    - Gravity (passive, kept): loose items within 4 blocks drift to you, and +0.06 jump.
+    - Chrono (R, gives way): Nudge, Slowness I on a target or Speed I on yourself (sneak), 15 s cooldown.
+    - Arsenal (R, gives way): Rummage, junk or (10%) a stone weapon from a smaller rift; it lasts 30 s, 30 s
+      cooldown.
+    - Web (B, kept): the webline. Hold B on one block and let go on another: walkable web planks for 60 s, up to
+      24 blocks long. Once Yank unlocks, B aimed at a block still strings weblines.
+  - **Power Mode key (Z), core:** Web Zip moved onto it. A one-time key fixer (`config/jaymospowers-keys-v1`) moves
+    these off the power keys:
+    - Xaero waypoint B→N and enlarge-map Z→M
+    - Pantry B→K
+    - Ok Zoomer C→Left Alt
+    - vanilla quick actions G→J
+    - the hotbar save/load activators are unbound
+  - **Wind:**
+    - **Stormbound B is Call Lightning:** 6-9 damage, 1.5-3 hunger, 1-2 self static; 6 s cooldown.
+    - **Z modes:**
+      - **Stormbound mode:** an electric shroud. Melee stuns (Slowness IV 0.8 s and a jolt) and adds static; 5
+        stacks shock the target, rooting it for 2.5 s with 3 damage. Self-zaps: 6%/s for 1.5 damage, 35% per
+        cast for 3 damage. Costs hunger.
+      - **Tempest mode:** a wind ring that deflects projectiles, and +25% to abilities and flight speed.
+      - Ascended and corrupted together gives both.
+    - **Air brake:** S at speed holds the palms out with a gust ahead and bleeds momentum to a hover; others see
+      the pose.
+  - The powers screen shows the starter line, plus corrupted key text (`.key.ability_N.corrupted`).

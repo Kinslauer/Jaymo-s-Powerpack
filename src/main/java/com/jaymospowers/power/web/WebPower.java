@@ -144,6 +144,8 @@ public final class WebPower implements Power {
 		int featherTicks;
 		/** Ticks a player on the Yank line has held it stretched. */
 		int tetherStrain;
+		/** A webline's first end, while B is held aimed at a block (null otherwise). */
+		@org.jspecify.annotations.Nullable Vec3 weblineFrom;
 		/** Game time a Web Shot charge started, or -1. */
 		long shotChargeStart = -1;
 		/** The entity held by the Yank web (-1 for none), and whether it was mid-swing when caught. */
@@ -192,6 +194,7 @@ public final class WebPower implements Power {
 		WebNet.register();
 		WebTraps.register();
 		WebHitches.register();
+		WebBridges.register();
 		WebSymbiote.register();
 		WebAscension.register();
 		WebDebugCommand.register();
@@ -488,8 +491,13 @@ public final class WebPower implements Power {
 			return;
 		}
 		if (key == PowerKey.ABILITY_4 && !down) {
-			// letting go of Yank lets go of whatever it's holding; aimed at a block, it ties it off there instead
 			State state = player.getAttached(STATE);
+			// a webline being strung: let go aimed at its other end
+			if (state != null && state.weblineFrom != null) {
+				finishWebline(player, state);
+				return;
+			}
+			// letting go of Yank lets go of whatever it's holding; aimed at a block, it ties it off there instead
 			if (state != null && state.tetherId >= 0) {
 				Entity target = player.level().getEntity(state.tetherId);
 				releaseTether(player, state);
@@ -507,12 +515,57 @@ public final class WebPower implements Power {
 		if (!down) {
 			return;
 		}
+		if (key == PowerKey.ABILITY_4 && com.jaymospowers.core.Mastery.starterOnly(player)) {
+			// a fresh awakening can only string weblines
+			startWebline(player);
+			return;
+		}
 		switch (key) {
 			// G is the off-hand swing web (all client-side); Zip is on the Power Mode key (see onMode)
 			case ABILITY_4 -> yank(player);
 			default -> {
 			}
 		}
+	}
+
+	/** The starter, on B (kept for good): weblines. */
+	@Override
+	public PowerKey starterKey() {
+		return PowerKey.ABILITY_4;
+	}
+
+	/** B down aimed at a block: the webline's first end sticks there, and the line pays out from your hand. */
+	private static void startWebline(ServerPlayer player) {
+		long now = player.level().getGameTime();
+		if (now < cooldowns(player).yank()) {
+			return;
+		}
+		Vec3 eye = player.getEyePosition();
+		BlockHitResult hit = WebAnchors.clip(player, eye, eye.add(player.getViewVector(1.0F).scale(WebBridges.REACH * WebSymbiote.reachScale(player))));
+		if (hit.getType() != HitResult.Type.BLOCK) {
+			fwip(player);
+			return;
+		}
+		State state = state(player);
+		state.weblineFrom = hit.getLocation();
+		showLine(player, new WebLine(WebLine.ZIP, hit.getLocation(), -1), 200);
+		thwip(player);
+	}
+
+	/** B let go: aimed at a second block within reach, the line is pulled taut between the two and becomes walkable. */
+	private static void finishWebline(ServerPlayer player, State state) {
+		Vec3 from = state.weblineFrom;
+		state.weblineFrom = null;
+		state.lineTicks = 1;
+		Vec3 eye = player.getEyePosition();
+		BlockHitResult hit = WebAnchors.clip(player, eye, eye.add(player.getViewVector(1.0F).scale(WebBridges.REACH * WebSymbiote.reachScale(player))));
+		if (from == null || hit.getType() != HitResult.Type.BLOCK || !WebBridges.string(player.level(), from, hit.getLocation())) {
+			fwip(player);
+			return;
+		}
+		WebCooldowns cooldowns = cooldowns(player);
+		player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), cooldowns.shot(), player.level().getGameTime() + WebBridges.COOLDOWN));
+		thwip(player);
 	}
 
 	private static WebCooldowns cooldowns(ServerPlayer player) {
@@ -711,7 +764,8 @@ public final class WebPower implements Power {
 		}
 		Entity target = entityInSight(player, YANK_RANGE * WebSymbiote.reachScale(player));
 		if (target == null) {
-			fwip(player);
+			// nothing to yank: B aimed at a block starts a webline instead
+			startWebline(player);
 			return;
 		}
 		Vec3 center = target.getBoundingBox().getCenter();

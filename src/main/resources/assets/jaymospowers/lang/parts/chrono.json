@@ -16,5 +16,6 @@
 	"entity.jaymospowers.chrono_echo": "Echo",
 	"item.jaymospowers.chrono_stopped_clock": "Stopped Clock",
 	"item.jaymospowers.chrono_stopped_clock.lore1": "Both hands rest on the same moment.",
-	"item.jaymospowers.chrono_stopped_clock.lore2": "It waits for one who has stood outside time."
+	"item.jaymospowers.chrono_stopped_clock.lore2": "It waits for one who has stood outside time.",
+	"power.jaymospowers.chrono.key.starter": "Nudge time: slow what you look at (sneak: speed yourself)"
 }

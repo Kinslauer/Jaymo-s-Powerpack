@@ -51,5 +51,7 @@
 	"message.jaymospowers.affinity": "You feel a pull toward %s. It will come, in time.",
 	"message.jaymospowers.affinity_fate": "You leave it to fate. Whatever sleeps in you will choose for itself.",
 	"commands.jaymospowers.affinity": "Set affinity %s for %s player(s)",
-	"commands.jaymospowers.get_affinity": "(affinity: %s)"
+	"commands.jaymospowers.get_affinity": "(affinity: %s)",
+	"key.jaymospowers.mode": "Power Mode",
+	"screen.jaymospowers.passive": "(always)"
 }

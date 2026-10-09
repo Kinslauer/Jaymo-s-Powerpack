@@ -69,6 +69,10 @@ public final class ChronoPower implements Power {
 	/** Attack speed while overclocked: x1.6 of the total (a sword goes from 1.6 to ~2.56 swings a second). */
 	static final double OVERCLOCK_ATTACK_SPEED = 0.6;
 	static final int BLOOM_COOLDOWN = 800;
+	/** The starter, Nudge: reach, how long Slowness I / Speed I lasts, and the cooldown. */
+	static final double NUDGE_RANGE = 16.0;
+	static final int NUDGE_TICKS = 80;
+	static final int NUDGE_COOLDOWN = 300;
 
 	// ---- 0.2.0 tuning ----
 	/** Time in Stasis or rewound (ticks) before the Stopped Clock can come: 10 minutes. */
@@ -295,6 +299,16 @@ public final class ChronoPower implements Power {
 		if (state.cooldownLeft(ability, now) > 0) {
 			return; // the client plays the "not ready" feedback itself
 		}
+		if (com.jaymospowers.core.Mastery.starterOnly(player)) {
+			// a fresh awakening can only nudge time a little
+			if (ability == REWIND && nudge(player)) {
+				state.readyAt[ability] = now + NUDGE_COOLDOWN;
+				state.cooldownTotal[ability] = NUDGE_COOLDOWN;
+				state.synced = false;
+				sync(player, state, now);
+			}
+			return;
+		}
 		boolean used = switch (ability) {
 			case REWIND -> rewind(player, state);
 			case STASIS -> stasis(player, state);
@@ -309,6 +323,50 @@ public final class ChronoPower implements Power {
 			state.synced = false;
 			sync(player, state, now);
 		}
+	}
+
+	/** The starter, on R: time nudged slightly. */
+	@Override
+	public PowerKey starterKey() {
+		return PowerKey.ABILITY_1;
+	}
+
+	/**
+	 * The starter, Nudge: the creature under the crosshair (within {@code NUDGE_RANGE}) is slowed slightly; with nothing
+	 * there, or sneaking, you're the one sped up slightly.
+	 */
+	private static boolean nudge(ServerPlayer player) {
+		ServerLevel level = player.level();
+		net.minecraft.world.entity.LivingEntity target = player.isShiftKeyDown() ? null : lookedAt(player, NUDGE_RANGE);
+		if (target != null) {
+			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, NUDGE_TICKS, 0), player);
+			level.sendParticles(ParticleTypes.ENCHANT, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 20, 0.3, 0.4, 0.3, 0.4);
+			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.4F, 0.6F);
+		} else {
+			player.addEffect(new MobEffectInstance(MobEffects.SPEED, NUDGE_TICKS, 0), player);
+			level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.3, 0.5, 0.3, 0.4);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.4F, 1.6F);
+		}
+		return true;
+	}
+
+	private static net.minecraft.world.entity.@org.jspecify.annotations.Nullable LivingEntity lookedAt(ServerPlayer player, double range) {
+		Vec3 eye = player.getEyePosition();
+		Vec3 look = player.getViewVector(1.0F);
+		Vec3 end = eye.add(look.scale(range));
+		net.minecraft.world.phys.BlockHitResult block = level(player).clip(new net.minecraft.world.level.ClipContext(eye, end,
+			net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, player));
+		if (block.getType() != net.minecraft.world.phys.HitResult.Type.MISS) {
+			end = block.getLocation();
+		}
+		net.minecraft.world.phys.EntityHitResult hit = net.minecraft.world.entity.projectile.ProjectileUtil.getEntityHitResult(player, eye, end,
+			player.getBoundingBox().expandTowards(look.scale(range)).inflate(1.0), e -> e instanceof net.minecraft.world.entity.LivingEntity
+				&& e.isAlive() && !e.isSpectator(), eye.distanceToSqr(end));
+		return hit == null ? null : (net.minecraft.world.entity.LivingEntity)hit.getEntity();
+	}
+
+	private static ServerLevel level(ServerPlayer player) {
+		return player.level();
 	}
 
 	/** An ability's cooldown: shorter for the Timeless (ascended). */

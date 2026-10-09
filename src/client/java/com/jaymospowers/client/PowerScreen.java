@@ -149,14 +149,30 @@ public class PowerScreen extends Screen {
 		}
 		lineY += 3;
 		String base = "power." + power.id().getNamespace() + "." + power.id().getPath() + ".key.";
+		boolean starter = active && !creative() && JaymosPowersClient.starterOnly();
+		if (starter && Language.getInstance().has(base + "starter")) {
+			// a fresh awakening: only the starter, on its key (or always on, if it's passive)
+			PowerKey key = power.starterKey();
+			Component line = (key == null ? Component.translatable("screen.jaymospowers.passive")
+				: Component.literal("[").append(JaymosPowersClient.keyMapping(key).getTranslatedKeyMessage()).append("]"))
+				.copy().append(" ").append(Component.translatable(base + "starter"));
+			List<FormattedCharSequence> split = this.font.split(line, CARD_W - 10);
+			if (!split.isEmpty()) {
+				graphics.text(this.font, split.getFirst(), x + 6, lineY, 0xFFE8D8A0);
+			}
+			lineY += 9;
+		}
+		boolean corrupted = active && this.minecraft.player != null && Fate.isCorrupted(this.minecraft.player);
 		for (PowerKey key : PowerKey.values()) {
 			if (!Language.getInstance().has(base + key.id())) {
 				continue;
 			}
 			// your own power's locked abilities show greyed out
-			boolean locked = active && !creative() && !JaymosPowersClient.isUnlocked(key);
+			boolean locked = active && !creative() && !this.minecraft.player.isCreative() && !com.jaymospowers.core.Mastery.isUnlocked(this.minecraft.player, key);
+			// a corrupted power's keys can change (Stormbound's B, say)
+			String text = corrupted && Language.getInstance().has(base + key.id() + ".corrupted") ? base + key.id() + ".corrupted" : base + key.id();
 			Component line = Component.literal("[").append(JaymosPowersClient.keyMapping(key).getTranslatedKeyMessage()).append("] ")
-				.append(locked ? Component.translatable("screen.jaymospowers.locked") : Component.translatable(base + key.id()));
+				.append(locked ? Component.translatable("screen.jaymospowers.locked") : Component.translatable(text));
 			List<FormattedCharSequence> split = this.font.split(line, CARD_W - 10);
 			if (!split.isEmpty()) {
 				graphics.text(this.font, split.getFirst(), x + 6, lineY, locked ? COLOR_DIM : COLOR_TEXT);

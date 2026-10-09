@@ -156,6 +156,13 @@ public final class GravityPower implements Power {
 	static final float SINGULARITY_BURST = 6.0F;
 	public static final int SINGULARITY_COOLDOWN = 500;
 
+	// ---- the starter (kept for good): the pull of small things ----
+	/** Loose items this close drift toward you, this hard (b/t per tick); and your jump is this much stronger. */
+	static final double PULL_RADIUS = 4.0;
+	static final double PULL_STRENGTH = 0.035;
+	static final double PULL_JUMP = 0.06;
+
+	private static final Identifier PULL_JUMP_ID = JaymosPowers.id("gravity_pull_jump");
 	private static final Identifier LIFT_ID = JaymosPowers.id("gravity_lift");
 	private static final Identifier CRUSH_ID = JaymosPowers.id("gravity_crush");
 	private static final Identifier WEIGHTLESS_ID = JaymosPowers.id("gravity_weightless");
@@ -281,6 +288,10 @@ public final class GravityPower implements Power {
 		modifier(player, Attributes.GRAVITY, COLLAPSE_ID, 0.0, false);
 		modifier(player, Attributes.FALL_DAMAGE_MULTIPLIER, COLLAPSE_FALL_ID, 0.0, false);
 		modifier(player, Attributes.KNOCKBACK_RESISTANCE, HORIZON_ID, 0.0, false);
+		AttributeInstance jump = player.getAttribute(Attributes.JUMP_STRENGTH);
+		if (jump != null) {
+			jump.removeModifier(PULL_JUMP_ID);
+		}
 		player.removeAttached(COOLDOWNS);
 		player.removeAttached(KILLS);
 	}
@@ -530,6 +541,7 @@ public final class GravityPower implements Power {
 			return;
 		}
 		State state = state(player);
+		smallThings(player);
 		if (state.liftTarget >= 0) {
 			tickLift(player, state);
 		}
@@ -557,6 +569,35 @@ public final class GravityPower implements Power {
 		}
 		if (ascended && player.tickCount % 2 == 0) {
 			deflect(player);
+		}
+	}
+
+	/**
+	 * The starter, kept for good: the pull of small things. Dropped items nearby drift slowly toward you, and you jump
+	 * a little higher than you should.
+	 */
+	private static void smallThings(ServerPlayer player) {
+		AttributeInstance jump = player.getAttribute(Attributes.JUMP_STRENGTH);
+		if (jump != null && !jump.hasModifier(PULL_JUMP_ID)) {
+			jump.addTransientModifier(new AttributeModifier(PULL_JUMP_ID, PULL_JUMP, AttributeModifier.Operation.ADD_VALUE));
+		}
+		if (player.tickCount % 2 != 0) {
+			return;
+		}
+		Vec3 me = player.position().add(0.0, 0.5, 0.0);
+		boolean pulled = false;
+		for (ItemEntity item : player.level().getEntitiesOfClass(ItemEntity.class, player.getBoundingBox().inflate(PULL_RADIUS),
+			e -> e.isAlive() && !e.hasPickUpDelay())) {
+			Vec3 to = me.subtract(item.position());
+			double d = to.length();
+			if (d > 0.5 && d <= PULL_RADIUS) {
+				item.setDeltaMovement(item.getDeltaMovement().add(to.scale(PULL_STRENGTH * 2.0 / d)));
+				item.needsSync = true;
+				pulled = true;
+			}
+		}
+		if (pulled && player.tickCount % 40 == 0) {
+			com.jaymospowers.core.Mastery.used(player);
 		}
 	}
 

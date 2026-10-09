@@ -80,10 +80,16 @@ public class JaymosPowersClient implements ClientModInitializer {
 		return ultimateKey;
 	}
 
-	/** Whether the local player has unlocked this ability yet (powers' HUDs dim the locked ones). */
+	/** Whether this key does anything for the local player yet (an unlocked ability, or the starter's key); HUDs dim the rest. */
 	public static boolean isUnlocked(PowerKey key) {
 		LocalPlayer player = Minecraft.getInstance().player;
-		return player == null || Mastery.isUnlocked(player, key);
+		return player == null || Mastery.isUsable(player, key);
+	}
+
+	/** True while the local player has only their power's starter (a fresh awakening). */
+	public static boolean starterOnly() {
+		LocalPlayer player = Minecraft.getInstance().player;
+		return player != null && Mastery.starterOnly(player);
 	}
 
 	/** The local player's power's client half, or null. */

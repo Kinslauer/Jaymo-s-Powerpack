@@ -25,5 +25,7 @@
 	"item.jaymospowers.wind_gale_heart.lore2": "The fifth one let go.",
 	"message.jaymospowers.wind.whisper": "The storm is quieter above...",
 	"death.attack.jaymospowers.wind_lance": "%1$s was run through by a gale",
-	"death.attack.jaymospowers.wind_lance.player": "%1$s was run through by %2$s's gale"
+	"death.attack.jaymospowers.wind_lance.player": "%1$s was run through by %2$s's gale",
+	"power.jaymospowers.wind.key.starter": "A faint cloak of wind: a little quicker, and hold Jump in the air to drift down",
+	"power.jaymospowers.wind.key.ability_4.corrupted": "Hold: Call Lightning (costs hunger; the static bites back)"
 }

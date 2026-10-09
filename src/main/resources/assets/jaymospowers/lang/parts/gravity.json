@@ -11,5 +11,6 @@
 	"power.jaymospowers.gravity.key.ultimate": "Singularity",
 	"message.jaymospowers.gravity_ascend.0": "Everything you drop falls a little further.",
 	"message.jaymospowers.gravity_ascend.1": "The ground feels very far below you now.",
-	"message.jaymospowers.gravity_cure_hint": "For a moment, something else carries the weight..."
+	"message.jaymospowers.gravity_cure_hint": "For a moment, something else carries the weight...",
+	"power.jaymospowers.gravity.key.starter": "Small things drift toward you, and you jump a little higher"
 }

@@ -105,7 +105,7 @@ public final class ArsenalPower implements Power {
 		builder -> builder.persistent(Cooldowns.CODEC).copyOnDeath().syncWith(Cooldowns.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
 
 	/** A rift being reached into: when it opened, and what's coming out. Server memory only. */
-	private record Pending(long start, List<ItemStack> stacks) {
+	private record Pending(long start, List<ItemStack> stacks, int life) {
 	}
 
 	/** Rifts that are open: player → the reach in progress. */
@@ -154,6 +154,13 @@ public final class ArsenalPower implements Power {
 	@Override
 	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
 		if (!down) {
+			return;
+		}
+		if (com.jaymospowers.core.Mastery.starterOnly(player)) {
+			// a fresh awakening can only rummage
+			if (key == PowerKey.ABILITY_1) {
+				rummage(player);
+			}
 			return;
 		}
 		switch (key) {
@@ -212,7 +219,7 @@ public final class ArsenalPower implements Power {
 			level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.PORTAL_AMBIENT, SoundSource.PLAYERS, 0.35F, 1.6F);
 		}
 		if (t == ArsenalReach.PULL_END) {
-			pull(player, rift, pending.stacks());
+			pull(player, rift, pending.stacks(), pending.life());
 		}
 		if (t >= ArsenalReach.CLOSE_END) {
 			PENDING.remove(player.getUUID());
@@ -244,11 +251,56 @@ public final class ArsenalPower implements Power {
 		if (com.jaymospowers.core.Fate.isCorrupted(player)) {
 			stacks.forEach(ArsenalVoid::voidTouched);
 		}
-		PENDING.put(player.getUUID(), new Pending(now, stacks));
+		PENDING.put(player.getUUID(), new Pending(now, stacks, SUMMON_TICKS));
 		player.setAttached(ArsenalReach.REACH, new ArsenalReach.Reach(now, stacks.isEmpty() ? ItemStack.EMPTY : stacks.getFirst().copy()));
 		Vec3 rift = ArsenalReach.portalCenter(player, 1.0F);
 		level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.7F, 0.55F);
 		level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.15F, 1.8F);
+	}
+
+	/** The starter, on R: Rummage. */
+	@Override
+	public PowerKey starterKey() {
+		return PowerKey.ABILITY_1;
+	}
+
+	/** Rummage's finds: mostly odds and ends; now and then ({@link #RUMMAGE_WEAPON_CHANCE}) a stone weapon. */
+	private static final net.minecraft.world.item.Item[] RUMMAGE_JUNK = {
+		net.minecraft.world.item.Items.STICK, net.minecraft.world.item.Items.FLINT, net.minecraft.world.item.Items.ARROW,
+		net.minecraft.world.item.Items.WOODEN_SWORD, net.minecraft.world.item.Items.WOODEN_AXE, net.minecraft.world.item.Items.BONE,
+		net.minecraft.world.item.Items.WOODEN_SHOVEL};
+	private static final net.minecraft.world.item.Item[] RUMMAGE_WEAPONS = {
+		net.minecraft.world.item.Items.STONE_SWORD, net.minecraft.world.item.Items.STONE_AXE, net.minecraft.world.item.Items.STONE_SPEAR};
+	static final float RUMMAGE_WEAPON_CHANCE = 0.1F;
+	/** How long a rummaged thing lasts, and Rummage's cooldown. */
+	static final int RUMMAGE_LIFE = 600;
+	static final int RUMMAGE_COOLDOWN = 600;
+
+	/**
+	 * The starter, Rummage: reach a little way into the pocket dimension (the same rift, smaller) and pull out whatever
+	 * your hand closes on: usually junk, sometimes a stone weapon. It dissolves after {@link #RUMMAGE_LIFE}.
+	 */
+	private static void rummage(ServerPlayer player) {
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		if (PENDING.containsKey(player.getUUID())) {
+			return;
+		}
+		Cooldowns cd = cooldowns(player);
+		if (now < cd.reach()) {
+			denied(player, "message.jaymospowers.arsenal.reach_recharging", cd.reach() - now);
+			return;
+		}
+		player.setAttached(COOLDOWNS, cd.withReach(now + RUMMAGE_COOLDOWN));
+		var random = player.getRandom();
+		net.minecraft.world.item.Item item = random.nextFloat() < RUMMAGE_WEAPON_CHANCE
+			? RUMMAGE_WEAPONS[random.nextInt(RUMMAGE_WEAPONS.length)] : RUMMAGE_JUNK[random.nextInt(RUMMAGE_JUNK.length)];
+		List<ItemStack> stacks = new java.util.ArrayList<>(List.of(new ItemStack(item)));
+		PENDING.put(player.getUUID(), new Pending(now, stacks, RUMMAGE_LIFE));
+		player.setAttached(ArsenalReach.REACH, new ArsenalReach.Reach(now, stacks.getFirst().copy()));
+		Vec3 rift = ArsenalReach.portalCenter(player, 1.0F);
+		level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.BUNDLE_DROP_CONTENTS, SoundSource.PLAYERS, 0.6F, 0.8F);
+		level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.08F, 2.0F);
 	}
 
 	private static Vec3 riftPos(ServerPlayer player) {
@@ -276,12 +328,12 @@ public final class ArsenalPower implements Power {
 		level.sendParticles(ParticleTypes.PORTAL, center.x, center.y, center.z, 4, 0.1, 0.1, 0.1, 0.6);
 	}
 
-	private static void pull(ServerPlayer player, Vec3 rift, List<ItemStack> stacks) {
+	private static void pull(ServerPlayer player, Vec3 rift, List<ItemStack> stacks, int life) {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		makeRoom(player, MAX_HELD - 1);
 
-		Summoned tag = new Summoned(player.getUUID(), now + SUMMON_TICKS, player.getRandom().nextInt());
+		Summoned tag = new Summoned(player.getUUID(), now + life, player.getRandom().nextInt());
 		Inventory inventory = player.getInventory();
 		for (int i = 0; i < stacks.size(); i++) {
 			ItemStack stack = stacks.get(i);
