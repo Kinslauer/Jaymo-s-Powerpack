@@ -189,3 +189,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
       but still walkable; the ends sync through a level attachment.
     - The local player now sees their own webline line while stringing it.
   - **Chrono:** Overclock slows everyone within 6 blocks (Slowness II, refreshed as you move).
+- **0.4.2, pack update:**
+  - Jaymo's Kitchen 0.4.13, with its corpse lag fixes.
+  - Distant Horizons 3.3.4 (CurseForge 508933 / 9005667), the same file the Kitchen pack uses.
+    - Its jar sits in `libs/`, git-ignored and copied from the Kitchen profile.
+    - It goes to the server and the mods folder, and the CurseForge import downloads it by id.
+    - It isn't loaded in the dev game.
+  - `profileMods` now also swaps the Kitchen jar and Distant Horizons into the CurseForge profile.
+  - The dedicated server boots with both.

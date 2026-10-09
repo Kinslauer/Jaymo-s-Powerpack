@@ -54,6 +54,13 @@ def packMods = [
 ]
 // not on CurseForge: shipped inside the pack as overrides
 def kitchenJar = fileTree("libs") { include "jaymos-kitchen-*.jar" }
+// on CurseForge but not on a maven we use: the jar sits in libs/ (git-ignored, copied from the Jaymo's Kitchen
+// profile) and the CurseForge import downloads it by id. Not loaded in the dev game (too heavy for quick tests).
+def localPackMods = [
+	// Distant Horizons (level-of-detail terrain far past the render distance), as in Jaymo's Kitchen
+	[file: "libs/DistantHorizons-3.3.4-26.3-fabric-neoforge.jar", prefix: "DistantHorizons-", cf: [508933, 9005667]],
+]
+def localPackJars = files(localPackMods.collect { it.file })
 
 configurations {
 	packJars {
@@ -82,6 +89,7 @@ tasks.register("modpackMods", Sync) {
 	from configurations.packJars
 	from tasks.named("jar")
 	from kitchenJar
+	from localPackJars
 	into new File(packDir, "mods")
 }
 tasks.register("curseforgeManifest") {
@@ -95,7 +103,7 @@ tasks.register("curseforgeManifest") {
 			name           : "Jaymo's Powers",
 			version        : project.version,
 			author         : "Manigraphic78",
-			files          : packMods.collect { [projectID: it.cf[0], fileID: it.cf[1], required: true] },
+			files          : (packMods + localPackMods).collect { [projectID: it.cf[0], fileID: it.cf[1], required: true] },
 			overrides      : "overrides",
 		]
 		out.get().asFile.text = JsonOutput.prettyPrint(JsonOutput.toJson(manifest))
@@ -135,25 +143,34 @@ tasks.register("serverMods", Sync) {
 	from configurations.packJars
 	from tasks.named("jar")
 	from kitchenJar
+	from localPackJars
 	into new File(serverDir, "mods")
 }
-// the user's own CurseForge profile (imported from the pack zip): swap in the new Jaymo's Powers jar. Skipped while
-// the game is running (its jar is locked).
+// the user's own CurseForge profile (imported from the pack zip): swap in the new Jaymo's Powers jar, the current
+// Jaymo's Kitchen jar and the local pack mods (each replacing older versions of itself). Skipped while the game is
+// running (its jars are locked).
 def profileMods = new File(System.getProperty("user.home"), "curseforge/minecraft/Instances/Jaymo's Powers/mods")
 tasks.register("profileMods") {
 	dependsOn "jar"
 	onlyIf { profileMods.isDirectory() }
 	doLast {
-		def built = tasks.named("jar").get().archiveFile.get().asFile
-		def old = profileMods.listFiles().findAll { it.name.startsWith("jaymos-powers-") && it.name.endsWith(".jar") && it.name != built.name }
+		def wanted = [[jar: tasks.named("jar").get().archiveFile.get().asFile, prefix: "jaymos-powers-"]]
+		kitchenJar.files.each { wanted << [jar: it, prefix: "jaymos-kitchen-"] }
+		localPackMods.each { wanted << [jar: file(it.file), prefix: it.prefix] }
+		def old = profileMods.listFiles().findAll { f -> f.name.endsWith(".jar") && wanted.any { w -> f.name.startsWith(w.prefix) && f.name != w.jar.name } }
 		if (old.any { !it.renameTo(new File(it.path + ".old")) }) {
 			logger.warn("Minecraft is running: your CurseForge profile was NOT updated. Close the game, then run Build Modpack again.")
 			old.each { new File(it.path + ".old").renameTo(it) }
 			return
 		}
 		old.each { new File(it.path + ".old").delete() }
-		java.nio.file.Files.copy(built.toPath(), new File(profileMods, built.name).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
-		logger.lifecycle("Updated your CurseForge profile with ${built.name}")
+		wanted.each { w ->
+			def target = new File(profileMods, w.jar.name)
+			if (!target.exists() || target.length() != w.jar.length() || w.prefix == "jaymos-powers-") {
+				java.nio.file.Files.copy(w.jar.toPath(), target.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+				logger.lifecycle("Updated your CurseForge profile with ${w.jar.name}")
+			}
+		}
 	}
 }
 tasks.register("packageModpack") {
