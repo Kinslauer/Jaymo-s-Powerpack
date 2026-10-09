@@ -62,6 +62,39 @@ def localPackMods = [
 ]
 def localPackJars = files(localPackMods.collect { it.file })
 
+// Distant Horizons tuned for a 4-core PC that hosts the server and plays at the same time (see MODLOG 0.4.3):
+// a shorter LOD distance, less generation, one thread at half time, no SSAO or layered clouds. Applied to
+// pack/config/DistantHorizons.toml (shipped in the CurseForge pack), the server's and your profile's config.
+def dhTuning = [
+	realTimeUpdateDistanceRadiusInChunks: "96",
+	maxSyncOnLoadRequestDistance        : "1536",
+	maxGenerationRequestDistance        : "1536",
+	generationRequestRateLimit          : "8",
+	numberOfThreads                     : "1",
+	threadRunTimeRatio                  : '"0.5"',
+	lodChunkRenderDistanceRadius        : "96",
+	enableSsao                          : "false",
+	enableMultiLayerClouds              : "false",
+	verticalQuality                     : '"LOW"',
+	showGarbageCollectorWarning         : "false",
+]
+// rewrites just the tuned keys in a DH config (each key appears once), keeping everything else
+def tuneDh = { File toml ->
+	if (!toml.isFile()) {
+		return false
+	}
+	def text = toml.getText("UTF-8")
+	def tuned = text
+	dhTuning.each { key, value ->
+		tuned = tuned.replaceAll("(?m)^(\\s*" + key + " = ).*\$", "\$1" + java.util.regex.Matcher.quoteReplacement(value))
+	}
+	if (tuned != text) {
+		toml.setText(tuned, "UTF-8")
+		logger.lifecycle("Tuned Distant Horizons in ${toml}")
+	}
+	true
+}
+
 configurations {
 	packJars {
 		canBeConsumed = false
@@ -109,14 +142,20 @@ tasks.register("curseforgeManifest") {
 		out.get().asFile.text = JsonOutput.prettyPrint(JsonOutput.toJson(manifest))
 	}
 }
+tasks.register("tunePackDh") {
+	doLast { tuneDh(file("pack/config/DistantHorizons.toml")) }
+}
 tasks.register("curseforgePack", Zip) {
-	dependsOn "curseforgeManifest"
+	dependsOn "curseforgeManifest", "tunePackDh"
 	archiveFileName = "Jaymos-Powers-Modpack-${project.version}.zip"
 	destinationDirectory = packDir
 	from(layout.buildDirectory.file("modpack/manifest.json"))
 	into("overrides/mods") {
 		from tasks.named("jar")
 		from kitchenJar
+	}
+	into("overrides/config") {
+		from "pack/config"
 	}
 }
 // the friends' server (Desktop\Serverfiles): its mods folder is kept identical to the pack, but never while it's
@@ -145,6 +184,8 @@ tasks.register("serverMods", Sync) {
 	from kitchenJar
 	from localPackJars
 	into new File(serverDir, "mods")
+	// (only while it's stopped: a running Distant Horizons rewrites its config)
+	doLast { tuneDh(new File(serverDir, "config/DistantHorizons.toml")) }
 }
 // the user's own CurseForge profile (imported from the pack zip): swap in the new Jaymo's Powers jar, the current
 // Jaymo's Kitchen jar and the local pack mods (each replacing older versions of itself). Skipped while the game is
@@ -164,6 +205,8 @@ tasks.register("profileMods") {
 			return
 		}
 		old.each { new File(it.path + ".old").delete() }
+		// the game is closed (its jars weren't locked), so Distant Horizons' config can be tuned too
+		tuneDh(new File(profileMods.parentFile, "config/DistantHorizons.toml"))
 		wanted.each { w ->
 			def target = new File(profileMods, w.jar.name)
 			if (!target.exists() || target.length() != w.jar.length() || w.prefix == "jaymos-powers-") {

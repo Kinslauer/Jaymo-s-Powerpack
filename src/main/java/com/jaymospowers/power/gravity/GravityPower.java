@@ -401,8 +401,8 @@ public final class GravityPower implements Power {
 		if (state.liftTarget >= 0 || !ready(player, LIFT)) {
 			return;
 		}
-		Entity hit = entityInSight(player, LIFT_RANGE);
-		if (!(hit instanceof LivingEntity target) || target instanceof ArmorStand || !target.isAlive()) {
+		Entity target = entityInSight(player, LIFT_RANGE);
+		if (!(target instanceof LivingEntity || isCorpse(target)) || target instanceof ArmorStand || !target.isAlive()) {
 			fizzle(player);
 			return;
 		}
@@ -412,8 +412,14 @@ public final class GravityPower implements Power {
 		player.setAttached(GRIP, target.getId());
 		state.liftHold = Mth.clamp(player.getEyePosition().distanceTo(target.getBoundingBox().getCenter()), LIFT_MIN_HOLD, LIFT_MAX_HOLD);
 		modifier(target, Attributes.GRAVITY, LIFT_ID, -1.0, true);
+		if (!(target instanceof LivingEntity)) {
+			// a corpse has no weight to take away, only gravity to switch off (Jaymo's Kitchen clears it on reload)
+			target.setNoGravity(true);
+		}
 		target.setAttached(LIFTED, true);
-		touch(target, player);
+		if (target instanceof LivingEntity living) {
+			touch(living, player);
+		}
 		ServerLevel level = player.level();
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SHULKER_SHOOT, SoundSource.PLAYERS, 0.8F, 0.6F);
 		level.sendParticles(ParticleTypes.REVERSE_PORTAL, target.getX(), target.getY(), target.getZ(), 20, 0.4, 0.1, 0.4, 0.05);
@@ -421,11 +427,15 @@ public final class GravityPower implements Power {
 
 	private static void tickLift(ServerPlayer player, State state) {
 		Entity entity = player.level().getEntity(state.liftTarget);
-		if (!(entity instanceof LivingEntity target) || !target.isAlive() || target.level() != player.level()
+		if (entity == null || !(entity instanceof LivingEntity || isCorpse(entity)) || !entity.isAlive() || entity.level() != player.level()
 			|| ++state.liftTicks > LIFT_MAX_TICKS || !PowerInput.isDown(player, PowerKey.ABILITY_1)
-			|| target.distanceToSqr(player) > (LIFT_RANGE + 8.0) * (LIFT_RANGE + 8.0)) {
+			|| entity.distanceToSqr(player) > (LIFT_RANGE + 8.0) * (LIFT_RANGE + 8.0)) {
 			dropLift(player, state, true);
 			return;
+		}
+		Entity target = entity;
+		if (state.choking && !(target instanceof LivingEntity)) {
+			state.choking = false;
 		}
 		Vec3 hold = player.getEyePosition().add(player.getViewVector(1.0F).scale(state.choking ? CHOKE_DISTANCE : state.liftHold));
 		if (state.choking) {
@@ -448,7 +458,9 @@ public final class GravityPower implements Power {
 		if (target instanceof Mob mob) {
 			mob.getNavigation().stop();
 		}
-		touch(target, player);
+		if (target instanceof LivingEntity living) {
+			touch(living, player);
+		}
 		player.causeFoodExhaustion(LIFT_EXHAUSTION);
 		if (state.liftTicks % 4 == 0) {
 			player.level().sendParticles(ParticleTypes.REVERSE_PORTAL, target.getX(), target.getY(), target.getZ(), 3, 0.3, 0.05, 0.3, 0.02);
@@ -471,6 +483,9 @@ public final class GravityPower implements Power {
 			return;
 		}
 		modifier(entity, Attributes.GRAVITY, LIFT_ID, 0.0, false);
+		if (!(entity instanceof LivingEntity)) {
+			entity.setNoGravity(false);
+		}
 		entity.removeAttached(LIFTED);
 		if (Fate.isCorrupted(player) && entity.isAlive()) {
 			entity.setDeltaMovement(player.getViewVector(1.0F).scale(COLLAPSE_FLING));
@@ -1001,6 +1016,12 @@ public final class GravityPower implements Power {
 		EntityHitResult hit = ProjectileUtil.getEntityHitResult(player, eye, end, box,
 			e -> !e.isSpectator() && e.isPickable() && e != player.getVehicle(), eye.distanceToSqr(end));
 		return hit == null ? null : hit.getEntity();
+	}
+
+	/** Jaymo's Kitchen's corpses (not living, but Lift can take them too). */
+	static boolean isCorpse(Entity entity) {
+		net.minecraft.resources.Identifier type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
+		return type.getNamespace().equals("jaymoskitchen") && type.getPath().contains("corpse");
 	}
 
 	private static void fizzle(ServerPlayer player) {

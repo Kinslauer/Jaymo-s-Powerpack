@@ -23,6 +23,8 @@ import net.minecraft.util.FormattedCharSequence;
 public class PowerScreen extends Screen {
 	private static final int CARD_W = 180;
 	private static final int CARD_H = 104;
+	/** Pixels per mouse-wheel notch. */
+	private static final int SCROLL_STEP = 24;
 	private static final int GAP = 6;
 	private static final int HEADER = 26;
 	private static final int FOOTER = 26;
@@ -76,8 +78,25 @@ public class PowerScreen extends Screen {
 		return (this.width - panelW()) / 2;
 	}
 
+	/** How far the panel is scrolled up (when it's taller than the screen). */
+	private int scroll;
+
+	private int maxScroll() {
+		return Math.max(0, panelH() + 8 - this.height);
+	}
+
 	private int top() {
-		return Math.max(4, (this.height - panelH()) / 2);
+		return maxScroll() > 0 ? 4 - scroll : Math.max(4, (this.height - panelH()) / 2);
+	}
+
+	@Override
+	public boolean mouseScrolled(double x, double y, double scrollX, double scrollY) {
+		int next = net.minecraft.util.Mth.clamp(scroll - (int)Math.round(scrollY * SCROLL_STEP), 0, maxScroll());
+		if (next != scroll) {
+			scroll = next;
+			rebuildWidgets();
+		}
+		return true;
 	}
 
 	private int cardX(int i) {
@@ -90,6 +109,7 @@ public class PowerScreen extends Screen {
 
 	@Override
 	protected void init() {
+		scroll = net.minecraft.util.Mth.clamp(scroll, 0, maxScroll());
 		Power current = current();
 		if (creative()) {
 			for (int i = 0; i < powers.size(); i++) {
@@ -124,6 +144,14 @@ public class PowerScreen extends Screen {
 		int x = left();
 		int y = top();
 		graphics.fill(x, y, x + panelW(), y + panelH(), COLOR_PANEL);
+		if (maxScroll() > 0) {
+			// a thin scrollbar down the right edge of the screen
+			int track = this.height - 8;
+			int thumb = Math.max(16, track * this.height / (panelH() + 8));
+			int at = 4 + (track - thumb) * scroll / maxScroll();
+			graphics.fill(this.width - 5, 4, this.width - 3, 4 + track, 0x40FFFFFF);
+			graphics.fill(this.width - 5, at, this.width - 3, at + thumb, 0xC0FFFFFF);
+		}
 		graphics.centeredText(this.font, this.title, this.width / 2, y + 6, COLOR_TEXT);
 		Power current = current();
 		Component sub = creative() ? Component.translatable("screen.jaymospowers.creative_hint")
