@@ -175,6 +175,13 @@ final class WindHud {
 		if (!state.flying()) {
 			return;
 		}
+		// weighed down by armour: how much top speed it costs, just left of the readout
+		LocalPlayer self = Minecraft.getInstance().player;
+		double burden = self == null ? 1.0 : com.jaymospowers.power.wind.WindArmor.speedFactor(self);
+		if (burden < 0.999) {
+			String weight = "-" + Math.round((1.0 - burden) * 100.0) + "%";
+			graphics.text(font, weight, readoutRight - BAR_WIDTH - 4 - font.width(weight), chipsY - 15, 0xFFB0A090);
+		}
 		int color = switch (state) {
 			case CRUISE -> CRUISE_COLOR;
 			case SONIC -> SONIC_COLOR;

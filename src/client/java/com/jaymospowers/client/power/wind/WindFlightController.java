@@ -182,7 +182,9 @@ public final class WindFlightController {
 		Input input = player.input.keyPresses;
 		// the weather governs the wind: a still clear day flies slower, a storm faster; Stormbound drags at you
 		this.top = TOP_SPEED * WindWeather.factor(player) * (Fate.isCorrupted(player) ? WindStorm.STORMBOUND_CRUISE_MULTIPLIER : 1.0)
-			* (com.jaymospowers.power.wind.WindModes.tempest(player) ? com.jaymospowers.power.wind.WindModes.TEMPEST_ABILITY_SCALE : 1.0);
+			* (com.jaymospowers.power.wind.WindModes.tempest(player) ? com.jaymospowers.power.wind.WindModes.TEMPEST_ABILITY_SCALE : 1.0)
+			// heavy armour weighs the flight down (anything above chainmail)
+			* com.jaymospowers.power.wind.WindArmor.speedFactor(player);
 		if (!this.state.fast()) {
 			this.braking = false;
 		}
