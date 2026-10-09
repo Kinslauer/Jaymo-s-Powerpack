@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "web": "jaymospowers:block/web_bridge",
+    "mat": "jaymospowers:block/web_bridge",
     "particle": "jaymospowers:block/web_bridge"
   },
   "elements": [
@@ -24,7 +24,7 @@
             16,
             16
           ],
-          "texture": "#web"
+          "texture": "#mat"
         },
         "down": {
           "uv": [
@@ -33,8 +33,7 @@
             16,
             16
           ],
-          "texture": "#web",
-          "cullface": "down"
+          "texture": "#mat"
         },
         "north": {
           "uv": [
@@ -43,7 +42,7 @@
             16,
             16
           ],
-          "texture": "#web"
+          "texture": "#mat"
         },
         "south": {
           "uv": [
@@ -52,7 +51,7 @@
             16,
             16
           ],
-          "texture": "#web"
+          "texture": "#mat"
         },
         "west": {
           "uv": [
@@ -61,7 +60,7 @@
             16,
             16
           ],
-          "texture": "#web"
+          "texture": "#mat"
         },
         "east": {
           "uv": [
@@ -70,7 +69,7 @@
             16,
             16
           ],
-          "texture": "#web"
+          "texture": "#mat"
         }
       }
     }

@@ -106,9 +106,11 @@ public final class WindPower implements Power {
 		WindNet.register();
 		WindModes.register();
 		WindTempest.init();
+		SorasDagger.register();
 		WindDebug.register();
 		ServerPlayNetworking.registerGlobalReceiver(WindNet.Flight.TYPE, (payload, ctx) -> INSTANCE.onFlightPacket(ctx.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(WindNet.Impact.TYPE, (payload, ctx) -> INSTANCE.onImpact(ctx.player(), payload));
+		ServerPlayNetworking.registerGlobalReceiver(WindNet.Ram.TYPE, (payload, ctx) -> INSTANCE.onRam(ctx.player(), payload));
 		// cooldowns outlive a relog (no reconnect-to-reset); everything else starts over
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			State s = INSTANCE.states.get(handler.player.getUUID());
@@ -299,10 +301,11 @@ public final class WindPower implements Power {
 			float hit = Mth.clamp(payload.lost(), 0.0F, IMPACT_MAX_LOST);
 			if (hit >= com.jaymospowers.power.web.WebImpacts.SMASH_SPEED) {
 				s.lastSmashTick = player.tickCount;
-				net.minecraft.world.phys.Vec3 look = player.getLookAngle();
+				// where you hit: ahead of you along the way you were going (below you, into the ground)
+				net.minecraft.world.phys.Vec3 dir = payload.dir().lengthSqr() > 1.0E-6 ? payload.dir().normalize() : player.getLookAngle();
 				net.minecraft.world.phys.Vec3 at = payload.wall()
-					? player.position().add(0.0, player.getBbHeight() * 0.5, 0.0).add(new net.minecraft.world.phys.Vec3(look.x, 0.0, look.z).normalize().scale(0.9))
-					: player.position().add(0.0, -0.5, 0.0);
+					? player.position().add(0.0, player.getBbHeight() * 0.5, 0.0).add(new net.minecraft.world.phys.Vec3(dir.x, 0.0, dir.z).normalize().scale(0.9))
+					: player.position().add(dir.x * 0.6, -0.5, dir.z * 0.6);
 				com.jaymospowers.core.Debris.smash(player.level(), at, hit, player);
 			}
 		}
@@ -322,6 +325,47 @@ public final class WindPower implements Power {
 		player.hurtServer(level, payload.wall() ? player.damageSources().flyIntoWall() : player.damageSources().fall(), damage);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(),
 			damage >= 6.0F ? SoundEvents.PLAYER_BIG_FALL : SoundEvents.PLAYER_SMALL_FALL, SoundSource.PLAYERS, 1.0F, 1.0F);
+	}
+
+	/**
+	 * Ploughing through a creature at speed: {@code RAM_DAMAGE_K} × speed² (at most {@code RAM_DAMAGE_MAX}), and it's
+	 * thrown along your path. Each creature only once every {@code RAM_SPACING} ticks.
+	 */
+	static final float RAM_DAMAGE_K = 6.0F, RAM_DAMAGE_MAX = 36.0F;
+	static final int RAM_SPACING = 10;
+	private final Map<Integer, Long> rammed = new HashMap<>();
+
+	private void onRam(ServerPlayer player, WindNet.Ram payload) {
+		State s = this.states.get(player.getUUID());
+		ServerLevel level = player.level();
+		if (s == null || !s.flight.fast() || !Powers.has(player, this) || !player.isAlive() || player.isSpectator()
+			|| !(level.getEntity(payload.entity()) instanceof net.minecraft.world.entity.LivingEntity target) || !target.isAlive()) {
+			return;
+		}
+		float speed = Mth.clamp(payload.speed(), 0.0F, IMPACT_MAX_LOST);
+		if (target.distanceTo(player) > 4.0F + speed * 2.0F) {
+			return;
+		}
+		long now = level.getGameTime();
+		Long last = this.rammed.get(target.getId());
+		if (last != null && now - last < RAM_SPACING) {
+			return;
+		}
+		this.rammed.put(target.getId(), now);
+		if (this.rammed.size() > 64) {
+			this.rammed.values().removeIf(t -> now - t > RAM_SPACING);
+		}
+		float damage = Math.min(RAM_DAMAGE_MAX, RAM_DAMAGE_K * speed * speed);
+		net.minecraft.world.phys.Vec3 dir = payload.dir().lengthSqr() > 1.0E-6 ? payload.dir().normalize() : player.getLookAngle();
+		target.hurtServer(level, player.damageSources().playerAttack(player), damage);
+		target.setDeltaMovement(target.getDeltaMovement().add(dir.scale(speed * 0.9)).add(0.0, 0.35, 0.0));
+		target.syncVelocity = true;
+		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.2F, 0.7F);
+		level.sendParticles(ParticleTypes.GUST, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+		if (speed >= com.jaymospowers.power.web.WebImpacts.SMASH_SPEED) {
+			level.sendParticles(ParticleTypes.EXPLOSION, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.5F, 1.4F);
+		}
 	}
 
 	@Override

@@ -1,52 +1,148 @@
 {
   "variants": {
-    "height=1": {
+    "height=1,style=0": {
       "model": "jaymospowers:block/web_bridge"
     },
-    "height=2": {
+    "height=1,style=1": {
+      "model": "jaymospowers:block/web_bridge_rope_1"
+    },
+    "height=1,style=2": {
+      "model": "jaymospowers:block/web_bridge_tendril_1"
+    },
+    "height=2,style=0": {
       "model": "jaymospowers:block/web_bridge"
     },
-    "height=3": {
+    "height=2,style=1": {
+      "model": "jaymospowers:block/web_bridge_rope_2"
+    },
+    "height=2,style=2": {
+      "model": "jaymospowers:block/web_bridge_tendril_2"
+    },
+    "height=3,style=0": {
       "model": "jaymospowers:block/web_bridge"
     },
-    "height=4": {
+    "height=3,style=1": {
+      "model": "jaymospowers:block/web_bridge_rope_3"
+    },
+    "height=3,style=2": {
+      "model": "jaymospowers:block/web_bridge_tendril_3"
+    },
+    "height=4,style=0": {
       "model": "jaymospowers:block/web_bridge"
     },
-    "height=5": {
+    "height=4,style=1": {
+      "model": "jaymospowers:block/web_bridge_rope_4"
+    },
+    "height=4,style=2": {
+      "model": "jaymospowers:block/web_bridge_tendril_4"
+    },
+    "height=5,style=0": {
       "model": "jaymospowers:block/web_bridge"
     },
-    "height=6": {
+    "height=5,style=1": {
+      "model": "jaymospowers:block/web_bridge_rope_5"
+    },
+    "height=5,style=2": {
+      "model": "jaymospowers:block/web_bridge_tendril_5"
+    },
+    "height=6,style=0": {
       "model": "jaymospowers:block/web_bridge"
     },
-    "height=7": {
+    "height=6,style=1": {
+      "model": "jaymospowers:block/web_bridge_rope_6"
+    },
+    "height=6,style=2": {
+      "model": "jaymospowers:block/web_bridge_tendril_6"
+    },
+    "height=7,style=0": {
       "model": "jaymospowers:block/web_bridge"
     },
-    "height=8": {
+    "height=7,style=1": {
+      "model": "jaymospowers:block/web_bridge_rope_7"
+    },
+    "height=7,style=2": {
+      "model": "jaymospowers:block/web_bridge_tendril_7"
+    },
+    "height=8,style=0": {
       "model": "jaymospowers:block/web_bridge"
     },
-    "height=9": {
+    "height=8,style=1": {
+      "model": "jaymospowers:block/web_bridge_rope_8"
+    },
+    "height=8,style=2": {
+      "model": "jaymospowers:block/web_bridge_tendril_8"
+    },
+    "height=9,style=0": {
       "model": "jaymospowers:block/web_bridge"
     },
-    "height=10": {
+    "height=9,style=1": {
+      "model": "jaymospowers:block/web_bridge_rope_9"
+    },
+    "height=9,style=2": {
+      "model": "jaymospowers:block/web_bridge_tendril_9"
+    },
+    "height=10,style=0": {
       "model": "jaymospowers:block/web_bridge"
     },
-    "height=11": {
+    "height=10,style=1": {
+      "model": "jaymospowers:block/web_bridge_rope_10"
+    },
+    "height=10,style=2": {
+      "model": "jaymospowers:block/web_bridge_tendril_10"
+    },
+    "height=11,style=0": {
       "model": "jaymospowers:block/web_bridge"
     },
-    "height=12": {
+    "height=11,style=1": {
+      "model": "jaymospowers:block/web_bridge_rope_11"
+    },
+    "height=11,style=2": {
+      "model": "jaymospowers:block/web_bridge_tendril_11"
+    },
+    "height=12,style=0": {
       "model": "jaymospowers:block/web_bridge"
     },
-    "height=13": {
+    "height=12,style=1": {
+      "model": "jaymospowers:block/web_bridge_rope_12"
+    },
+    "height=12,style=2": {
+      "model": "jaymospowers:block/web_bridge_tendril_12"
+    },
+    "height=13,style=0": {
       "model": "jaymospowers:block/web_bridge"
     },
-    "height=14": {
+    "height=13,style=1": {
+      "model": "jaymospowers:block/web_bridge_rope_13"
+    },
+    "height=13,style=2": {
+      "model": "jaymospowers:block/web_bridge_tendril_13"
+    },
+    "height=14,style=0": {
       "model": "jaymospowers:block/web_bridge"
     },
-    "height=15": {
+    "height=14,style=1": {
+      "model": "jaymospowers:block/web_bridge_rope_14"
+    },
+    "height=14,style=2": {
+      "model": "jaymospowers:block/web_bridge_tendril_14"
+    },
+    "height=15,style=0": {
       "model": "jaymospowers:block/web_bridge"
     },
-    "height=16": {
+    "height=15,style=1": {
+      "model": "jaymospowers:block/web_bridge_rope_15"
+    },
+    "height=15,style=2": {
+      "model": "jaymospowers:block/web_bridge_tendril_15"
+    },
+    "height=16,style=0": {
       "model": "jaymospowers:block/web_bridge"
+    },
+    "height=16,style=1": {
+      "model": "jaymospowers:block/web_bridge_rope_16"
+    },
+    "height=16,style=2": {
+      "model": "jaymospowers:block/web_bridge_tendril_16"
     }
   }
 }

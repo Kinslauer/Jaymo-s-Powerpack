@@ -664,7 +664,9 @@ public final class WebPower implements Power {
 		state.lineTicks = 1;
 		Vec3 eye = player.getEyePosition();
 		BlockHitResult hit = WebAnchors.clip(player, eye, eye.add(player.getViewVector(1.0F).scale(WebBridges.REACH * WebSymbiote.reachScale(player))));
-		if (from == null || hit.getType() != HitResult.Type.BLOCK || !WebBridges.string(player.level(), from, hit.getLocation())) {
+		// a symbiote strings its own: black rope from the suit, tendrils from Living Armor
+		int style = WebSymbiote.armored(player) ? WebBridgeBlock.TENDRIL : WebSymbiote.suitShown(player) ? WebBridgeBlock.ROPE : WebBridgeBlock.WEB;
+		if (from == null || hit.getType() != HitResult.Type.BLOCK || !WebBridges.string(player.level(), from, hit.getLocation(), style)) {
 			fwip(player);
 			return;
 		}

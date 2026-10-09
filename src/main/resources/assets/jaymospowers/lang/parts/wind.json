@@ -27,5 +27,20 @@
 	"death.attack.jaymospowers.wind_lance": "%1$s was run through by a gale",
 	"death.attack.jaymospowers.wind_lance.player": "%1$s was run through by %2$s's gale",
 	"power.jaymospowers.wind.key.starter": "A faint cloak of wind: a little quicker, and hold Jump in the air to drift down",
-	"power.jaymospowers.wind.key.ability_4.corrupted": "Hold: Call Lightning (costs hunger; the static bites back)"
+	"power.jaymospowers.wind.key.ability_4.corrupted": "Hold: Call Lightning (costs hunger; the static bites back)",
+	"item.jaymospowers.soras_dagger": "Sora's Dagger",
+	"item.jaymospowers.soras_dagger_gold": "Sora's Dagger",
+	"item.jaymospowers.soras_dagger_diamond": "Sora's Dagger",
+	"item.jaymospowers.soras_dagger_tempest": "Sora's Dagger",
+	"item.jaymospowers.soras_dagger.stage0": "Iron",
+	"item.jaymospowers.soras_dagger.stage1": "Gilded: the wind follows its edge",
+	"item.jaymospowers.soras_dagger.stage2": "Diamond-edged: right click to Flurry",
+	"item.jaymospowers.soras_dagger.stage3": "Tempest-forged: its Flurry rides the winds",
+	"item.jaymospowers.soras_dagger.hint0": "Gold could gild it, with a feather to guide the work.",
+	"item.jaymospowers.soras_dagger.hint1": "A diamond edge, bound with a breeze's rod.",
+	"item.jaymospowers.soras_dagger.hint2": "The spoils of three great foes, and a Tempest's hand, could wake it (sneak + right click).",
+	"item.jaymospowers.soras_dagger.hint3": "In a wind's hand, every slash is a gale.",
+	"message.jaymospowers.soras_dagger.unanswered": "The dagger stirs, but only a Tempest could wake it.",
+	"message.jaymospowers.soras_dagger.missing": "The winds wait for: %s",
+	"message.jaymospowers.soras_dagger.forged": "The winds take the blade. Sora's Dagger is Tempest-forged."
 }

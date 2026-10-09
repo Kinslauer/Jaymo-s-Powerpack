@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smithing_transform",
+  "template": "minecraft:breeze_rod",
+  "base": "jaymospowers:soras_dagger_gold",
+  "addition": "minecraft:diamond_block",
+  "result": {
+    "id": "jaymospowers:soras_dagger_diamond"
+  }
+}

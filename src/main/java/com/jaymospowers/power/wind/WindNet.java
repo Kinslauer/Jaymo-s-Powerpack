@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.phys.Vec3;
 
 /** Wind Control's packets. */
 public final class WindNet {
@@ -74,16 +75,18 @@ public final class WindNet {
 
 	/**
 	 * Client → server: the flyer crashed into a wall ({@code wall}) or the ground, losing {@code lost} blocks/tick of
-	 * speed. The server turns it into damage (survival only, clamped; see {@code WindPower.onImpact}).
+	 * speed while heading {@code dir}. The server turns it into damage (survival only, clamped) and, hard enough, smashes
+	 * what was hit (see {@code WindPower.onImpact}).
 	 */
-	public record Impact(float lost, boolean wall) implements CustomPacketPayload {
+	public record Impact(float lost, boolean wall, Vec3 dir) implements CustomPacketPayload {
 		public static final Type<Impact> TYPE = new Type<>(JaymosPowers.id("wind_impact"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Impact> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
 				buf.writeFloat(p.lost);
 				buf.writeBoolean(p.wall);
+				Vec3.STREAM_CODEC.encode(buf, p.dir);
 			},
-			buf -> new Impact(buf.readFloat(), buf.readBoolean()));
+			buf -> new Impact(buf.readFloat(), buf.readBoolean(), Vec3.STREAM_CODEC.decode(buf)));
 
 		@Override
 		public Type<Impact> type() {
@@ -91,9 +94,27 @@ public final class WindNet {
 		}
 	}
 
+	/** Client → server: the flyer ploughed through creature {@code entity} at {@code speed} blocks/tick, heading {@code dir}. */
+	public record Ram(int entity, float speed, Vec3 dir) implements CustomPacketPayload {
+		public static final Type<Ram> TYPE = new Type<>(JaymosPowers.id("wind_ram"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Ram> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> {
+				buf.writeVarInt(p.entity);
+				buf.writeFloat(p.speed);
+				Vec3.STREAM_CODEC.encode(buf, p.dir);
+			},
+			buf -> new Ram(buf.readVarInt(), buf.readFloat(), Vec3.STREAM_CODEC.decode(buf)));
+
+		@Override
+		public Type<Ram> type() {
+			return TYPE;
+		}
+	}
+
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(Flight.TYPE, Flight.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Impact.TYPE, Impact.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(Ram.TYPE, Ram.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Status.TYPE, Status.CODEC);
 	}
 }

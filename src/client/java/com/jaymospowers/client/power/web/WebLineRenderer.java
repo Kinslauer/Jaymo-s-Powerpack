@@ -235,7 +235,16 @@ final class WebLineRenderer {
 		if (spans != null) {
 			for (com.jaymospowers.power.web.WebBridges.Span span : spans) {
 				if (span.from().distanceToSqr(camera) < 128.0 * 128.0 || span.to().distanceToSqr(camera) < 128.0 * 128.0) {
-					draw(context.poseStack(), context, span.from().subtract(camera), span.to().subtract(camera), width, false);
+					Vec3 from = span.from().subtract(camera), to = span.to().subtract(camera);
+					switch (span.style()) {
+						case com.jaymospowers.power.web.WebBridgeBlock.ROPE -> {
+							// the suit's: a black corded rope, the black web splayed at both ends
+							bundle(context, from, to, width);
+							splat(context, from, from.subtract(to).normalize(), width * DARK_WIDTH, true);
+						}
+						case com.jaymospowers.power.web.WebBridgeBlock.TENDRIL -> tendrilSpan(context, minecraft, level, span.from(), span.to(), camera);
+						default -> draw(context.poseStack(), context, from, to, width, false);
+					}
 				}
 			}
 		}
@@ -325,6 +334,25 @@ final class WebLineRenderer {
 				double r1 = radius * (1.0 - 0.45 * (i + 1) / pieces);
 				Vec3 tip = i + 1 <= reach ? points[i + 1] : points[i].lerp(points[i + 1], reach - i);
 				tube(buffer, pose, points[i], tip, r0, r1, i, light);
+			}
+		});
+	}
+
+	/** Living Armor's webline: a thick tendril, drawn taut from end to end in the tendrils' own texture. */
+	private static final double SPAN_TENDRIL_RADIUS = 0.16;
+
+	private static void tendrilSpan(LevelRenderContext context, Minecraft minecraft, ClientLevel level, Vec3 a, Vec3 b, Vec3 camera) {
+		double length = a.distanceTo(b);
+		int pieces = Math.max(2, (int)Math.ceil(length / 0.7));
+		Vec3 from = a.subtract(camera), to = b.subtract(camera);
+		int light = net.minecraft.util.LightCoordsUtil.getLightCoords(level, BlockPos.containing(a.lerp(b, 0.5)));
+		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.entityCutout(TENDRIL_TEXTURE), (pose, buffer) -> {
+			for (int i = 0; i < pieces; i++) {
+				// a little thicker at each end, where it has gripped on
+				double t0 = i / (double)pieces, t1 = (i + 1) / (double)pieces;
+				double r0 = SPAN_TENDRIL_RADIUS * (1.0 + 0.35 * Math.abs(2.0 * t0 - 1.0));
+				double r1 = SPAN_TENDRIL_RADIUS * (1.0 + 0.35 * Math.abs(2.0 * t1 - 1.0));
+				tube(buffer, pose, from.lerp(to, t0), from.lerp(to, t1), r0, r1, i, light);
 			}
 		});
 	}

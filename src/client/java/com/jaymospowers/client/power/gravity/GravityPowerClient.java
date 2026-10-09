@@ -46,6 +46,7 @@ public final class GravityPowerClient implements PowerClient {
 
 	public static void init() {
 		PowerClients.register(GravityPower.ID, INSTANCE);
+		GravityHeldClient.init();
 		// every gravity user's aura, on every client
 		ClientTickEvents.END_CLIENT_TICK.register(GravityPowerClient::auras);
 		// right click while holding something with Lift: choke, then slam (and the click does nothing else)
@@ -136,8 +137,13 @@ public final class GravityPowerClient implements PowerClient {
 		chip(graphics, font, x, y, PowerKey.ABILITY_1, Items.SHULKER_SHELL, cooldowns.lift() - now, GravityPower.LIFT_COOLDOWN,
 			liftFrom >= 0 ? 1.0F - Mth.clamp((now - liftFrom) / (float)GravityPower.LIFT_MAX_TICKS, 0.0F, 1.0F) : -1.0F);
 		chip(graphics, font, x + (CHIP + CHIP_GAP), y, PowerKey.ABILITY_2, Items.ENDER_EYE, cooldowns.well() - now, GravityPower.WELL_COOLDOWN, -1.0F);
-		chip(graphics, font, x + (CHIP + CHIP_GAP) * 2, y, PowerKey.ABILITY_3, Items.FEATHER, cooldowns.weightless() - now,
-			GravityPower.WEIGHTLESS_COOLDOWN, weightless ? 1.0F : -1.0F);
+		if (com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_3)) {
+			chip(graphics, font, x + (CHIP + CHIP_GAP) * 2, y, PowerKey.ABILITY_3, Items.FEATHER, cooldowns.weightless() - now,
+				GravityPower.WEIGHTLESS_COOLDOWN, weightless ? 1.0F : -1.0F);
+		} else {
+			// before Weightless: V held pulls loose items in
+			chip(graphics, font, x + (CHIP + CHIP_GAP) * 2, y, PowerKey.ABILITY_3, Items.HOPPER, 0, 1, -1.0F);
+		}
 		float charge = crushFrom >= 0 ? Mth.clamp((now - crushFrom) / (float)GravityPower.CRUSH_FULL_CHARGE, 0.0F, 1.0F) : -1.0F;
 		chip(graphics, font, x + (CHIP + CHIP_GAP) * 3, y, PowerKey.ABILITY_4, Items.ANVIL, cooldowns.crush() - now, cooldowns.crushLength(), charge);
 		if (ascended) {

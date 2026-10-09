@@ -10,11 +10,15 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * One plank of a webline (see {@link WebBridges}): unseen (the line itself is drawn), and as tall as the line is where
- * it crosses this block ({@link #HEIGHT}, sixteenths), so a sloping line climbs in small steps you can walk up.
+ * One plank of a webline (see {@link WebBridges}), as tall as the line is where it crosses this block ({@link #HEIGHT},
+ * sixteenths), so a sloping line climbs in small steps you can walk up. A plain web's planks are unseen (the line itself
+ * is drawn); a symbiote's show, a mat of black rope ({@link #ROPE}, the suit) or of tendrils ({@link #TENDRIL}, Living
+ * Armor).
  */
 public class WebBridgeBlock extends Block {
+	public static final int WEB = 0, ROPE = 1, TENDRIL = 2;
 	public static final IntegerProperty HEIGHT = IntegerProperty.create("height", 1, 16);
+	public static final IntegerProperty STYLE = IntegerProperty.create("style", WEB, TENDRIL);
 	private static final VoxelShape[] SHAPES = new VoxelShape[17];
 
 	static {
@@ -25,18 +29,18 @@ public class WebBridgeBlock extends Block {
 
 	public WebBridgeBlock(final Properties properties) {
 		super(properties);
-		this.registerDefaultState(this.stateDefinition.any().setValue(HEIGHT, 2));
+		this.registerDefaultState(this.stateDefinition.any().setValue(HEIGHT, 2).setValue(STYLE, WEB));
 	}
 
 	@Override
 	protected void createBlockStateDefinition(final StateDefinition.Builder<Block, BlockState> builder) {
-		builder.add(HEIGHT);
+		builder.add(HEIGHT, STYLE);
 	}
 
-	/** Unseen: the webline itself is drawn as a line between its ends (see WebLineRenderer). */
+	/** A plain web's plank is unseen: the webline itself is drawn between its ends (see WebLineRenderer). */
 	@Override
 	protected net.minecraft.world.level.block.RenderShape getRenderShape(final BlockState state) {
-		return net.minecraft.world.level.block.RenderShape.INVISIBLE;
+		return state.getValue(STYLE) == WEB ? net.minecraft.world.level.block.RenderShape.INVISIBLE : net.minecraft.world.level.block.RenderShape.MODEL;
 	}
 
 	@Override

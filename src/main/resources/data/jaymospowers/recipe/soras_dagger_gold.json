@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smithing_transform",
+  "template": "minecraft:feather",
+  "base": "jaymospowers:soras_dagger",
+  "addition": "minecraft:gold_block",
+  "result": {
+    "id": "jaymospowers:soras_dagger_gold"
+  }
+}

@@ -100,6 +100,11 @@ public interface Power {
 	 * The order the abilities unlock in when the power awakens naturally (see Mastery): the first is there from the
 	 * start. Charged abilities go last.
 	 */
+	/** Whether {@code key} works before it's unlocked (the power decides what it does meanwhile). */
+	default boolean usableEarly(PowerKey key) {
+		return false;
+	}
+
 	default PowerKey[] unlockOrder() {
 		return PowerKey.values();
 	}

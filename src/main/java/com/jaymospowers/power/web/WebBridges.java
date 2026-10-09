@@ -43,10 +43,15 @@ public final class WebBridges {
 
 	public static Block BRIDGE;
 
-	/** A webline's two ends, for drawing: on each level, synced to everyone (the planks themselves are invisible). */
-	public record Span(Vec3 from, Vec3 to) {
+	/**
+	 * A webline's two ends and its {@code style} ({@link WebBridgeBlock#WEB}, {@link WebBridgeBlock#ROPE} from the suit,
+	 * {@link WebBridgeBlock#TENDRIL} from Living Armor), for drawing: on each level, synced to everyone. A plain web's
+	 * planks are unseen (only the line shows); a symbiote's platform shows, made of what its line is.
+	 */
+	public record Span(Vec3 from, Vec3 to, int style) {
 		public static final net.minecraft.network.codec.StreamCodec<io.netty.buffer.ByteBuf, Span> STREAM_CODEC =
-			net.minecraft.network.codec.StreamCodec.composite(Vec3.STREAM_CODEC, Span::from, Vec3.STREAM_CODEC, Span::to, Span::new);
+			net.minecraft.network.codec.StreamCodec.composite(Vec3.STREAM_CODEC, Span::from, Vec3.STREAM_CODEC, Span::to,
+				net.minecraft.network.codec.ByteBufCodecs.VAR_INT, Span::style, Span::new);
 	}
 
 	public static final net.fabricmc.fabric.api.attachment.v1.AttachmentType<List<Span>> SPANS =
@@ -95,8 +100,8 @@ public final class WebBridges {
 		});
 	}
 
-	/** Strings a webline from {@code from} to {@code to}. Returns false if it's too long. */
-	static boolean string(ServerLevel level, Vec3 from, Vec3 to) {
+	/** Strings a webline from {@code from} to {@code to}, in {@code style}. Returns false if it's too long. */
+	static boolean string(ServerLevel level, Vec3 from, Vec3 to, int style) {
 		double length = from.distanceTo(to);
 		if (length > MAX_LENGTH || length < 1.0) {
 			return false;
@@ -114,11 +119,12 @@ public final class WebBridges {
 		for (java.util.Map.Entry<BlockPos, Integer> spot : spots.entrySet()) {
 			BlockPos pos = spot.getKey();
 			if (level.getBlockState(pos).isAir() && level.getFluidState(pos).isEmpty()) {
-				level.setBlock(pos, BRIDGE.defaultBlockState().setValue(WebBridgeBlock.HEIGHT, spot.getValue()), Block.UPDATE_ALL);
+				level.setBlock(pos, BRIDGE.defaultBlockState().setValue(WebBridgeBlock.HEIGHT, spot.getValue()).setValue(WebBridgeBlock.STYLE, style),
+					Block.UPDATE_ALL);
 				PLANKS.add(new Plank(level.dimension(), pos, clock + BRIDGE_TICKS));
 			}
 		}
-		LINES.add(new Line(level.dimension(), new Span(from, to), clock + BRIDGE_TICKS));
+		LINES.add(new Line(level.dimension(), new Span(from, to, style), clock + BRIDGE_TICKS));
 		syncSpans(level);
 		level.playSound(null, to.x, to.y, to.z, SoundEvents.LEAD_TIED, SoundSource.PLAYERS, 1.0F, 1.3F);
 		level.sendParticles(ParticleTypes.ITEM_COBWEB, from.x, from.y, from.z, 6, 0.1, 0.1, 0.1, 0.02);

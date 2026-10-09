@@ -228,6 +228,9 @@ public final class WindFlightController {
 			} else {
 				this.cruise(minecraft, player, input, sneakTaps);
 			}
+			if (this.state.fast()) {
+				this.ram(minecraft, player);
+			}
 			if (this.state.flying()) {
 				player.setDeltaMovement(this.velocity);
 								this.effects(minecraft, player);
@@ -408,35 +411,82 @@ public final class WindFlightController {
 		}
 	}
 
-	/** Walls and floors stop you: drop the blocked part of the velocity (vanilla zeroed it on the player). */
+	/**
+	 * Walls and floors stop you: drop the blocked part of the velocity (vanilla zeroed it on the player). The crash is
+	 * the whole change in velocity, whichever way you hit (a dive into the ground at an angle counts in full).
+	 */
 	private void collide(LocalPlayer player) {
 		Vec3 actual = player.getDeltaMovement();
+		Vec3 was = this.velocity;
+		boolean wall = false, floor = false;
 		if (player.horizontalCollision) {
-			double before = this.velocity.horizontalDistance();
 			double x = Math.abs(actual.x) < 1.0E-7 ? 0.0 : this.velocity.x;
 			double z = Math.abs(actual.z) < 1.0E-7 ? 0.0 : this.velocity.z;
+			wall = x != this.velocity.x || z != this.velocity.z;
 			this.velocity = new Vec3(x, this.velocity.y, z);
-			double lost = before - this.velocity.horizontalDistance();
-			if (lost > IMPACT_SPEED) {
-				this.impact(player, lost, true);
-			}
-			if (this.state.fast()) {
-				this.speed = Math.min(this.speed, this.velocity.length());
-			}
 		}
 		if (player.verticalCollision && (this.velocity.y < 0.0 && player.onGround() || this.velocity.y > 0.0 && !player.onGround())) {
-			double lost = Math.abs(this.velocity.y);
+			floor = true;
 			this.velocity = new Vec3(this.velocity.x, 0.0, this.velocity.z);
-			if (lost > IMPACT_SPEED * 1.5) {
-				this.impact(player, lost, false);
+		}
+		if (!wall && !floor) {
+			return;
+		}
+		// a glancing blow sheds speed too: a dive's forward rush is lost on the ground as well
+		if (floor && !wall && this.state.fast()) {
+			this.velocity = this.velocity.scale(Math.max(0.0, 1.0 - Math.abs(was.y) / Math.max(1.0E-3, was.length())));
+		}
+		double lost = was.subtract(this.velocity).length();
+		if (lost > (wall ? IMPACT_SPEED : IMPACT_SPEED * 1.5)) {
+			this.impact(player, lost, wall, was);
+		}
+		if (this.state.fast()) {
+			this.speed = Math.min(this.speed, this.velocity.length());
+		}
+	}
+
+	/** Creatures you ploughed through lately (entity id → tick), so each counts once a pass. */
+	private final java.util.Map<Integer, Integer> rammed = new java.util.HashMap<>();
+	/** Flying faster than this (blocks/tick) through a creature rams it. */
+	static final double RAM_MIN_SPEED = 0.7;
+	/** How much of your speed a ram keeps. */
+	static final double RAM_KEEP = 0.75;
+
+	/** At speed, anything in your path is rammed: the server hurts and throws it, and it slows you. */
+	private void ram(Minecraft minecraft, LocalPlayer player) {
+		double speed = this.velocity.length();
+		if (speed < RAM_MIN_SPEED) {
+			return;
+		}
+		this.rammed.values().removeIf(t -> this.ticks - t > 10);
+		net.minecraft.world.phys.AABB path = player.getBoundingBox().expandTowards(this.velocity).inflate(0.3);
+		for (net.minecraft.world.entity.Entity e : player.level().getEntities(player, path,
+			e -> e instanceof net.minecraft.world.entity.LivingEntity && e.isAlive() && !e.isSpectator() && !player.isPassengerOfSameVehicle(e))) {
+			if (this.rammed.containsKey(e.getId())) {
+				continue;
 			}
-			if (this.state.fast()) {
-				this.speed = Math.min(this.speed, this.velocity.length());
-			}
+			this.rammed.put(e.getId(), this.ticks);
+			ClientPlayNetworking.send(new WindNet.Ram(e.getId(), (float)speed, this.velocity));
+			this.speed *= RAM_KEEP;
+			this.velocity = this.velocity.scale(RAM_KEEP);
+			player.level().playLocalSound(player, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.0F, 0.7F);
+			WindCamera.shake((float)Math.min(2.0, speed), 8);
 		}
 	}
 
 	// ---- tumbling ---------------------------------------------------------------------------------------------
+
+	/** Caught in a Gravity user's Lift: a flyer is knocked into a tumble (no control) for at least {@code ticks}. */
+	public void heldStun(Minecraft minecraft, LocalPlayer player, int ticks) {
+		if (player != this.player || this.state == WindFlight.NONE) {
+			return;
+		}
+		if (this.state != WindFlight.TUMBLE) {
+			this.velocity = player.getDeltaMovement();
+			this.startTumble(minecraft, player);
+		}
+		this.tumbleTicks = Math.max(this.tumbleTicks, ticks);
+	}
 
 	private void startTumble(Minecraft minecraft, LocalPlayer player) {
 		this.state = WindFlight.TUMBLE;
@@ -597,10 +647,10 @@ public final class WindFlightController {
 		WindCamera.shake(2.2F, 14);
 	}
 
-	private void impact(LocalPlayer player, double lost, boolean wall) {
+	private void impact(LocalPlayer player, double lost, boolean wall, Vec3 heading) {
 		// the server decides wall-crash damage (none in creative; the ground is ordinary fall damage) and, fast
 		// enough, smashes what you hit
-		ClientPlayNetworking.send(new WindNet.Impact((float)lost, wall));
+		ClientPlayNetworking.send(new WindNet.Impact((float)lost, wall, heading));
 		ClientLevel level = (ClientLevel)player.level();
 		level.playLocalSound(player, SoundEvents.BREEZE_LAND, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.addParticle(ParticleTypes.POOF, player.getX(), player.getY() + 0.9, player.getZ(), 0.0, 0.05, 0.0);

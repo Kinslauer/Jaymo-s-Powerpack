@@ -145,6 +145,23 @@ public final class GravityPower implements Power {
 	static final double CHOKE_DISTANCE = 0.75;
 	/** Right click on a held dropped item: it's drawn to you this fast and into your inventory (as much as fits). */
 	static final double DRAW_SPEED = 1.1, DRAW_REACH = 1.3;
+	/**
+	 * Right click on something Lift holds that can't be pocketed or choked (a cart, a boat, an armour stand, a falling
+	 * block...): it's hurled where you look, this fast (blocks/tick), and whatever it hits takes {@code THROW_DAMAGE_BASE}
+	 * + {@code THROW_DAMAGE_PER_SPEED} x its speed (x its size). It flies for at most {@code THROW_TICKS}.
+	 */
+	static final double THROW_SPEED = 2.6;
+	static final float THROW_DAMAGE_BASE = 4.0F, THROW_DAMAGE_PER_SPEED = 5.0F;
+	static final int THROW_TICKS = 60;
+	/**
+	 * A player held by Lift is stunned at first (a wind ragdolls): {@code HELD_STUN_WIND} ticks for a wind, {@code HELD_STUN}
+	 * for anyone else. After that the hold loosens to {@code HELD_STEER_FREE} and they break free by getting
+	 * {@code HELD_ESCAPE} blocks from where they're held (a wind simply flies out).
+	 */
+	static final int HELD_STUN_WIND = 50, HELD_STUN = 80;
+	static final double HELD_STEER_FREE = 0.06, HELD_ESCAPE = 3.0;
+	/** Before Weightless is yours, holding V draws loose items in from this far, this fast (blocks/tick). */
+	static final double MAGNET_RADIUS = 12.0, MAGNET_SPEED = 0.85;
 	/** Choked, it's held up this far above your eyes, the arm raised. */
 	static final double CHOKE_RAISE = 0.7;
 	static final float CHOKE_DAMAGE = 1.0F;
@@ -268,6 +285,14 @@ public final class GravityPower implements Power {
 	/** On a creature: held by someone's Lift (clients let it hang limp). */
 	public static final AttachmentType<Boolean> LIFTED = AttachmentRegistry.create(JaymosPowers.id("gravity_lifted"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** On a player held by Lift: stunned until this game time; a wind is ragdolled meanwhile, and flies free after. */
+	public record Held(long stunUntil, boolean wind) {
+		public static final net.minecraft.network.codec.StreamCodec<io.netty.buffer.ByteBuf, Held> STREAM_CODEC =
+			net.minecraft.network.codec.StreamCodec.composite(ByteBufCodecs.VAR_LONG, Held::stunUntil, ByteBufCodecs.BOOL, Held::wind, Held::new);
+	}
+
+	public static final AttachmentType<Held> HELD = AttachmentRegistry.create(JaymosPowers.id("gravity_held"),
+		builder -> builder.syncWith(Held.STREAM_CODEC, AttachmentSyncPredicate.all()));
 	/** Deaths by weight so far (toward ascension). */
 	public static final AttachmentType<Integer> KILLS = AttachmentRegistry.create(JaymosPowers.id("gravity_kills"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath());
@@ -296,6 +321,25 @@ public final class GravityPower implements Power {
 	}
 
 	private static final List<Slam> SLAMS = new ArrayList<>();
+
+	/** Something hurled by Lift's right click: its speed last tick, and who it has hit already. */
+	private static final class Thrown {
+		final ResourceKey<Level> dimension;
+		final UUID entity, thrower;
+		final long until;
+		Vec3 velocity;
+		final java.util.Set<Integer> hit = new java.util.HashSet<>();
+
+		Thrown(ResourceKey<Level> dimension, UUID entity, UUID thrower, long until, Vec3 velocity) {
+			this.dimension = dimension;
+			this.entity = entity;
+			this.thrower = thrower;
+			this.until = until;
+			this.velocity = velocity;
+		}
+	}
+
+	private static final List<Thrown> THROWN = new ArrayList<>();
 
 	private record Well(ResourceKey<Level> dimension, Vec3 at, UUID owner, long until, boolean singularity) {
 	}
@@ -390,6 +434,12 @@ public final class GravityPower implements Power {
 		return new PowerKey[] {PowerKey.ABILITY_1, PowerKey.ABILITY_3, PowerKey.ABILITY_2, PowerKey.ABILITY_4};
 	}
 
+	/** V works from the start: before Weightless is yours, holding it draws loose items in. */
+	@Override
+	public boolean usableEarly(PowerKey key) {
+		return key == PowerKey.ABILITY_3;
+	}
+
 	private static State state(ServerPlayer player) {
 		return STATES.computeIfAbsent(player.getUUID(), k -> new State());
 	}
@@ -460,7 +510,8 @@ public final class GravityPower implements Power {
 				}
 			}
 			case ABILITY_3 -> {
-				if (down) {
+				// held down before Weightless is yours: the item pull (see tick)
+				if (down && com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_3)) {
 					toggleWeightless(player, state);
 				}
 			}
@@ -513,6 +564,10 @@ public final class GravityPower implements Power {
 		if (target instanceof LivingEntity living) {
 			touch(living, player);
 		}
+		if (target instanceof ServerPlayer held) {
+			boolean wind = Powers.has(held, com.jaymospowers.power.wind.WindPower.INSTANCE);
+			held.setAttached(HELD, new Held(player.level().getGameTime() + (wind ? HELD_STUN_WIND : HELD_STUN), wind));
+		}
 		ServerLevel level = player.level();
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SHULKER_SHOOT, SoundSource.PLAYERS, 0.8F, 0.6F);
 		level.sendParticles(ParticleTypes.REVERSE_PORTAL, target.getX(), target.getY(), target.getZ(), 20, 0.4, 0.1, 0.4, 0.05);
@@ -548,7 +603,19 @@ public final class GravityPower implements Power {
 		}
 		Vec3 center = target.getBoundingBox().getCenter();
 		Vec3 to = hold.subtract(center);
-		Vec3 v = target.getDeltaMovement().scale(0.8).add(to.scale(LIFT_STEER));
+		double steer = LIFT_STEER;
+		Held held = target.getAttached(HELD);
+		if (held != null && player.level().getGameTime() >= held.stunUntil()) {
+			// the stun's worn off: the hold loosens, and far enough off they've broken free
+			if (to.length() > HELD_ESCAPE) {
+				player.level().playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.CHAIN_BREAK, SoundSource.PLAYERS, 0.9F, 0.7F);
+				player.level().sendParticles(ParticleTypes.REVERSE_PORTAL, center.x, center.y, center.z, 20, 0.3, 0.4, 0.3, 0.1);
+				dropLift(player, state, true);
+				return;
+			}
+			steer = HELD_STEER_FREE;
+		}
+		Vec3 v = target.getDeltaMovement().scale(0.8).add(to.scale(steer));
 		double speed = v.length();
 		if (speed > LIFT_MAX_SPEED) {
 			v = v.scale(LIFT_MAX_SPEED / speed);
@@ -593,6 +660,7 @@ public final class GravityPower implements Power {
 			entity.setNoGravity(state.liftWasNoGravity);
 		}
 		entity.removeAttached(LIFTED);
+		entity.removeAttached(HELD);
 		if (Fate.isCorrupted(player) && entity.isAlive()) {
 			entity.setDeltaMovement(player.getViewVector(1.0F).scale(COLLAPSE_FLING));
 			entity.needsSync = true;
@@ -617,6 +685,10 @@ public final class GravityPower implements Power {
 			// a dropped item (or a corpse): drawn in to you and pocketed (a corpse too big for a bag, carried)
 			state.drawing = true;
 			player.level().playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.SHULKER_BULLET_HURT, SoundSource.PLAYERS, 0.6F, 1.6F);
+			return;
+		}
+		if (entity != null && throwable(entity)) {
+			hurl(player, state, entity);
 			return;
 		}
 		if (!com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_1)) {
@@ -669,6 +741,64 @@ public final class GravityPower implements Power {
 		int style = heavy ? 1 + level.getRandom().nextInt(SLAM_STYLES) : 0;
 		player.setAttached(SLAM_POSE, new SlamPose(level.getGameTime(), rise, -1L, style, aerial));
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 1.0F, 0.6F);
+	}
+
+	/** Things Lift can't pocket or choke: anything that isn't alive (bar items and corpses), and armour stands. */
+	private static boolean throwable(Entity entity) {
+		return !(entity instanceof ItemEntity) && !isCorpse(entity) && (!(entity instanceof LivingEntity) || entity instanceof ArmorStand);
+	}
+
+	/** Right click on such a thing: let go and hurl it where you look, hard. */
+	private static void hurl(ServerPlayer player, State state, Entity entity) {
+		dropLift(player, state, true);
+		Vec3 velocity = player.getViewVector(1.0F).scale(THROW_SPEED);
+		entity.setDeltaMovement(velocity);
+		entity.needsSync = true;
+		entity.syncVelocity = true;
+		entity.syncVelocity = true;
+		ServerLevel level = player.level();
+		THROWN.removeIf(t -> t.entity.equals(entity.getUUID()));
+		THROWN.add(new Thrown(level.dimension(), entity.getUUID(), player.getUUID(), level.getGameTime() + THROW_TICKS, velocity));
+		player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.SHULKER_SHOOT, SoundSource.PLAYERS, 1.0F, 0.4F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.8F, 0.5F);
+		level.sendParticles(ParticleTypes.REVERSE_PORTAL, entity.getX(), entity.getY() + 0.3, entity.getZ(), 25, 0.3, 0.3, 0.3, 0.2);
+	}
+
+	/** Hurled things in flight: they batter whatever they pass through, and smash into what stops them. */
+	private static void tickThrown(MinecraftServer server) {
+		for (Iterator<Thrown> it = THROWN.iterator(); it.hasNext(); ) {
+			Thrown thrown = it.next();
+			ServerLevel level = server.getLevel(thrown.dimension);
+			Entity entity = level == null ? null : level.getEntity(thrown.entity);
+			if (entity == null || !entity.isAlive() || level.getGameTime() >= thrown.until) {
+				it.remove();
+				continue;
+			}
+			double speed = thrown.velocity.length();
+			Entity thrower = level.getEntity(thrown.thrower);
+			float size = Mth.clamp(entity.getBbWidth() * entity.getBbHeight(), 0.5F, 3.0F);
+			if (speed > 0.4) {
+				for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, entity.getBoundingBox().inflate(0.3).expandTowards(thrown.velocity),
+					e -> e != entity && e != thrower && e.isAlive() && !e.isSpectator() && !thrown.hit.contains(e.getId()))) {
+					thrown.hit.add(victim.getId());
+					float damage = (THROW_DAMAGE_BASE + THROW_DAMAGE_PER_SPEED * (float)speed) * size;
+					DamageSource source = thrower instanceof Player p ? level.damageSources().mobProjectile(entity, p) : level.damageSources().flyIntoWall();
+					victim.hurtServer(level, source, damage);
+					victim.setDeltaMovement(victim.getDeltaMovement().add(thrown.velocity.scale(0.5)).add(0.0, 0.25, 0.0));
+					victim.syncVelocity = true;
+					level.playSound(null, victim.getX(), victim.getY(), victim.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.0F, 0.6F);
+				}
+			}
+			if ((entity.horizontalCollision || entity.verticalCollision) && speed >= com.jaymospowers.power.web.WebImpacts.SMASH_SPEED) {
+				// it hit something solid at speed: that breaks, like any hard impact
+				Vec3 at = entity.getBoundingBox().getCenter().add(thrown.velocity.normalize().scale(0.6));
+				com.jaymospowers.core.Debris.smash(level, at, speed * Math.sqrt(size), thrower);
+				it.remove();
+				continue;
+			}
+			thrown.velocity = entity.getDeltaMovement();
+		}
 	}
 
 	/** A held corpse flies to you; once close it's yours (Jaymo's Kitchen bags it if it fits, otherwise you carry it). */
@@ -755,6 +885,7 @@ public final class GravityPower implements Power {
 		cool(player, LIFT, LIFT_COOLDOWN);
 		modifier(target, Attributes.GRAVITY, LIFT_ID, 0.0, false);
 		target.removeAttached(LIFTED);
+		target.removeAttached(HELD);
 	}
 
 	/** Slams land: on the ground (or after a moment), the damage and the crater. */
@@ -1243,6 +1374,9 @@ public final class GravityPower implements Power {
 		}
 		State state = state(player);
 		smallThings(player);
+		if (!com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_3) && PowerInput.isDown(player, PowerKey.ABILITY_3)) {
+			magnet(player);
+		}
 		if (state.liftTarget >= 0) {
 			tickLift(player, state);
 		}
@@ -1302,6 +1436,37 @@ public final class GravityPower implements Power {
 				item.needsSync = true;
 				pulled = true;
 			}
+		}
+		if (pulled && player.tickCount % 40 == 0) {
+			com.jaymospowers.core.Mastery.used(player);
+		}
+	}
+
+	/**
+	 * Before Weightless: V held drags loose items (and experience) in from {@link #MAGNET_RADIUS}, fast. Let go and
+	 * it's back to the gentle pull of small things.
+	 */
+	private static void magnet(ServerPlayer player) {
+		Vec3 me = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
+		ServerLevel level = player.level();
+		boolean pulled = false;
+		for (Entity loose : level.getEntities(player, player.getBoundingBox().inflate(MAGNET_RADIUS),
+			e -> e.isAlive() && (e instanceof ItemEntity || e instanceof net.minecraft.world.entity.ExperienceOrb))) {
+			Vec3 to = me.subtract(loose.position());
+			double d = to.length();
+			if (d > MAGNET_RADIUS || d < 0.4) {
+				continue;
+			}
+			loose.setDeltaMovement(to.scale(Math.min(MAGNET_SPEED, d * 0.45) / d));
+			loose.needsSync = true;
+			loose.syncVelocity = true;
+			pulled = true;
+			if (player.tickCount % 4 == 0) {
+				level.sendParticles(ParticleTypes.REVERSE_PORTAL, loose.getX(), loose.getY() + 0.15, loose.getZ(), 1, 0.05, 0.05, 0.05, 0.0);
+			}
+		}
+		if (player.tickCount % 10 == 0) {
+			level.sendParticles(ParticleTypes.REVERSE_PORTAL, me.x, me.y, me.z, 6, 0.4, 0.5, 0.4, 0.02);
 		}
 		if (pulled && player.tickCount % 40 == 0) {
 			com.jaymospowers.core.Mastery.used(player);
@@ -1420,6 +1585,9 @@ public final class GravityPower implements Power {
 		}
 		if (!SHRAPNEL.isEmpty()) {
 			tickShrapnel(server);
+		}
+		if (!THROWN.isEmpty()) {
+			tickThrown(server);
 		}
 		if (!WELLS.isEmpty()) {
 			for (Iterator<Well> it = WELLS.iterator(); it.hasNext(); ) {
