@@ -54,6 +54,9 @@ def packMods = [
 	// Moog's Voyager Structures (MIT): new structures in world generation, and its library (LGPL-3.0)
 	[dep: "maven.modrinth:moogs-voyager-structures:PiFoSPXI", cf: [656977, 8970306]],
 	[dep: "maven.modrinth:moogs-structure-lib:SkD4H9XM", cf: [1337167, 9047029]],
+	// YDM's Weapon Master (CC0): hotbar weapons shown on the body; LambDynamicLights (MIT): held torches etc. light the area
+	[dep: "maven.modrinth:weaponmaster:M0qt6sse", cf: [608235, 8905060]],
+	[dep: "maven.modrinth:lambdynamiclights:rylKnJ4M", cf: [393442, 8890400]],
 ]
 // not on CurseForge: shipped inside the pack as overrides
 def kitchenJar = fileTree("libs") { include "jaymos-kitchen-*.jar" }
