@@ -27,6 +27,14 @@ import net.minecraft.world.entity.player.Player;
  */
 public final class WindPose {
 	public static final RenderStateDataKey<Float> KEY = RenderStateDataKey.create(() -> "jaymospowers:wind_pose");
+	/** The air brake's pose amount (palms pushed out ahead, body pulled upright). */
+	public static final RenderStateDataKey<Float> BRAKE_KEY = RenderStateDataKey.create(() -> "jaymospowers:wind_brake");
+	private static final float BRAKE_EASE_IN = 0.3F;
+	private static final float BRAKE_EASE_OUT = 0.15F;
+	/** How far back the body pulls while braking (degrees, against the flight lean). */
+	private static final float BRAKE_LEAN_BACK = 25.0F;
+	/** entity id → {previous, current} brake amount. */
+	private static final Map<Integer, float[]> BRAKES = new HashMap<>();
 	/** How fast the pose eases in and out, per tick. */
 	private static final float EASE_IN = 0.12F;
 	private static final float EASE_OUT = 0.18F;
@@ -59,6 +67,22 @@ public final class WindPose {
 			amount[1] = fast ? Math.min(1.0F, amount[1] + EASE_IN) : Math.max(0.0F, amount[1] - EASE_OUT);
 		}
 		AMOUNTS.entrySet().removeIf(entry -> entry.getValue()[0] <= 0.0F && entry.getValue()[1] <= 0.0F || level.getEntity(entry.getKey()) == null);
+		for (AbstractClientPlayer player : level.players()) {
+			boolean braking = player == minecraft.player
+				? WindPowerClient.isActive(minecraft.player) && WindPowerClient.INSTANCE.flight().braking()
+				: player.getAttached(WindPower.BRAKING) != null;
+			float[] brake = BRAKES.get(player.getId());
+			if (brake == null) {
+				if (!braking) {
+					continue;
+				}
+				brake = new float[2];
+				BRAKES.put(player.getId(), brake);
+			}
+			brake[0] = brake[1];
+			brake[1] = braking ? Math.min(1.0F, brake[1] + BRAKE_EASE_IN) : Math.max(0.0F, brake[1] - BRAKE_EASE_OUT);
+		}
+		BRAKES.entrySet().removeIf(entry -> entry.getValue()[0] <= 0.0F && entry.getValue()[1] <= 0.0F || level.getEntity(entry.getKey()) == null);
 	}
 
 	private static boolean isFast(Minecraft minecraft, Player player) {
@@ -76,6 +100,9 @@ public final class WindPose {
 		WindTumble.extract(entity, state, partialTicks);
 		float[] amount = AMOUNTS.get(entity.getId());
 		float value = amount == null ? 0.0F : Mth.lerp(partialTicks, amount[0], amount[1]);
+		float[] brake = BRAKES.get(entity.getId());
+		float brakeValue = brake == null ? 0.0F : Mth.lerp(partialTicks, brake[0], brake[1]);
+		state.setData(BRAKE_KEY, brakeValue > 0.001F ? brakeValue : null);
 		if (value <= 0.001F || state.isFallFlying || state.isVisuallySwimming) {
 			state.setData(KEY, null);
 			return;
@@ -96,10 +123,13 @@ public final class WindPose {
 			return;
 		}
 		float middle = state.boundingBoxHeight / Math.max(entityScale, 0.01F) * 0.5F;
+		// the air brake pulls the body up out of the dive, leaning back into the gust
+		Float brake = state.getData(BRAKE_KEY);
+		float b = brake == null ? 0.0F : brake;
 		// face where the head faces, not where the (lagging) body was turned
 		poseStack.rotateDegrees(Axis.YP, -state.yRot * amount);
 		poseStack.translate(0.0F, middle, 0.0F);
-		poseStack.rotateDegrees(Axis.XP, amount * (-90.0F - state.xRot));
+		poseStack.rotateDegrees(Axis.XP, amount * (1.0F - 0.75F * b) * (-90.0F - state.xRot) + b * BRAKE_LEAN_BACK);
 		poseStack.translate(0.0F, -middle, 0.0F);
 	}
 
@@ -128,6 +158,16 @@ public final class WindPose {
 		// legs together, trailing, rippling slightly in the wind
 		pose(humanoid.rightLeg, 0.06F + flutter, 0.0F, 0.04F, amount);
 		pose(humanoid.leftLeg, 0.06F - flutter, 0.0F, -0.04F, amount);
+		Float brake = avatar.getData(BRAKE_KEY);
+		if (brake != null) {
+			// the air brake: both palms thrust out ahead, shaking against the gust; legs swung forward to stop
+			float shake = Mth.sin(avatar.ageInTicks * 2.3F) * 0.04F;
+			pose(humanoid.rightArm, -Mth.HALF_PI - 0.25F + shake, -0.25F, 0.1F, brake);
+			pose(humanoid.leftArm, -Mth.HALF_PI - 0.25F - shake, 0.25F, -0.1F, brake);
+			pose(humanoid.rightLeg, -0.45F, 0.0F, 0.08F, brake);
+			pose(humanoid.leftLeg, -0.25F, 0.0F, -0.08F, brake);
+			pose(humanoid.head, -0.2F, 0.0F, 0.0F, brake);
+		}
 	}
 
 	private static void pose(ModelPart part, float xRot, float yRot, float zRot, float amount) {

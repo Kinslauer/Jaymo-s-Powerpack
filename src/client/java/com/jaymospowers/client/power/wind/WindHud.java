@@ -72,7 +72,9 @@ final class WindHud {
 		int cy = height / 2;
 		float time = player.tickCount + delta.getGameTimeDeltaPartialTick(false);
 		boolean lance = Fate.isAscended(player);
-		int count = WindAbility.values().length + (lance ? 1 : 0);
+		// the Power Mode (Z) chip, once there's a form to enter
+		boolean mode = Fate.isAscended(player) || Fate.isCorrupted(player);
+		int count = WindAbility.values().length + (lance ? 1 : 0) + (mode ? 1 : 0);
 		int[] chipsAt = chipsOrigin(width, height, count);
 		int right = chipsAt[0] + chipsWidth(count);
 		weather(graphics, player, right, chipsAt[1] - 15, time);
@@ -82,6 +84,22 @@ final class WindHud {
 		if (lance) {
 			lanceChip(graphics, font, client, chipsAt[0] + WindAbility.values().length * (CHIP + CHIP_GAP), chipsAt[1], time);
 		}
+		if (mode) {
+			modeChip(graphics, font, player, chipsAt[0] + (count - 1) * (CHIP + CHIP_GAP), chipsAt[1], time);
+		}
+	}
+
+	/** The Power Mode (Z): lit while the Stormbound / Tempest mode is on. */
+	private static void modeChip(GuiGraphicsExtractor graphics, Font font, LocalPlayer player, int x, int y, float time) {
+		int mode = com.jaymospowers.power.wind.WindModes.mode(player);
+		boolean corrupted = Fate.isCorrupted(player);
+		int color = corrupted ? STORMBOUND_COLOR : LANCE_COLOR;
+		int border = mode != 0 ? pulse(color, 0xFFFFFF, time * 0.6F) : 0x505050;
+		graphics.fill(x, y, x + CHIP, y + CHIP, mode != 0 ? 0xB0302040 : 0x90000000);
+		graphics.outline(x, y, CHIP, CHIP, 0xFF000000 | border);
+		graphics.item(new ItemStack(corrupted ? (net.minecraft.world.level.ItemLike)Items.LIGHTNING_ROD.weathering().unaffected() : Items.WIND_CHARGE), x + 2, y + 2);
+		String key = font.plainSubstrByWidth(JaymosPowersClient.modeKey().getTranslatedKeyMessage().getString(), CHIP - 2);
+		graphics.text(font, key, x + CHIP - 1 - font.width(key), y + CHIP - 8, mode != 0 ? 0xFFFFFFFF : 0xFF909090);
 	}
 
 	private static int chipsWidth(int count) {
@@ -226,7 +244,9 @@ final class WindHud {
 		int border = channelling ? pulse(0xFFFFFF, ability.color, time * 0.5F) : ready ? ability.color : 0x505050;
 		graphics.fill(x, y, x + CHIP, y + CHIP, 0x90000000);
 		graphics.outline(x, y, CHIP, CHIP, (ready ? 0xFF000000 : 0xA0000000) | border);
-		graphics.item(new ItemStack(ability.icon), x + 2, y + 2);
+		// Stormbound's B calls lightning instead of breathing
+		boolean call = ability == WindAbility.ZEPHYR && Minecraft.getInstance().player != null && Fate.isCorrupted(Minecraft.getInstance().player);
+		graphics.item(new ItemStack(call ? (net.minecraft.world.level.ItemLike)Items.LIGHTNING_ROD.weathering().unaffected() : ability.icon), x + 2, y + 2);
 		if (!ready) {
 			float share = Mth.clamp(cooldown / (float)client.cooldownTotal(ability), 0.0F, 1.0F);
 			int shade = Mth.ceil(16 * share);

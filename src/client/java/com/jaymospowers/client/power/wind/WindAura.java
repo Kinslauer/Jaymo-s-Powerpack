@@ -60,6 +60,47 @@ final class WindAura {
 				float storm = 1.0F - (calmSteps == null ? 0.0F : calmSteps / (float)WindStorm.CALM_STEPS);
 				stormbound(level, player, random, storm, self);
 			}
+			int mode = com.jaymospowers.power.wind.WindModes.mode(player);
+			if ((mode & com.jaymospowers.power.wind.WindModes.STORM) != 0) {
+				enshroud(level, player, random, self);
+			}
+			if ((mode & com.jaymospowers.power.wind.WindModes.TEMPEST) != 0) {
+				ring(level, player);
+			}
+		}
+	}
+
+	/** Stormbound mode: lightning wrapped about the body, arcs crawling over it. */
+	private static void enshroud(ClientLevel level, AbstractClientPlayer player, RandomSource random, boolean self) {
+		int sparks = self ? 1 : 4;
+		for (int i = 0; i < sparks; i++) {
+			double a = random.nextDouble() * Math.PI * 2.0;
+			double r = 0.45 + random.nextDouble() * 0.25;
+			double y = player.getY() + random.nextDouble() * player.getBbHeight();
+			level.addParticle(ParticleTypes.ELECTRIC_SPARK, player.getX() + Math.cos(a) * r, y, player.getZ() + Math.sin(a) * r,
+				-Math.sin(a) * 0.25, (random.nextDouble() - 0.5) * 0.2, Math.cos(a) * 0.25);
+		}
+		if (!self && player.tickCount % 3 == 0) {
+			level.addParticle(STATIC_DUST, player.getX(), player.getY() + random.nextDouble() * player.getBbHeight(), player.getZ(), 0.0, 0.0, 0.0);
+		}
+		if (random.nextInt(30) == 0) {
+			level.playLocalSound(player.getX(), player.getY() + 1.0, player.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS,
+				0.15F, 1.8F + random.nextFloat() * 0.2F, false);
+		}
+	}
+
+	/** Tempest mode: a ring of wind circling wide around the body. */
+	private static void ring(ClientLevel level, AbstractClientPlayer player) {
+		double base = player.tickCount * 0.45;
+		for (int i = 0; i < 3; i++) {
+			double a = base + i * Math.PI * 2.0 / 3.0;
+			double r = 1.7;
+			level.addParticle(ParticleTypes.CLOUD, player.getX() + Math.cos(a) * r, player.getY() + 0.9 + Math.sin(base * 0.5 + i) * 0.4,
+				player.getZ() + Math.sin(a) * r, -Math.sin(a) * 0.18, 0.0, Math.cos(a) * 0.18);
+		}
+		if (player.tickCount % 8 == 0) {
+			level.addParticle(ParticleTypes.SMALL_GUST, player.getX() + Math.cos(base) * 1.7, player.getY() + 1.0, player.getZ() + Math.sin(base) * 1.7,
+				0.0, 0.0, 0.0);
 		}
 	}
 

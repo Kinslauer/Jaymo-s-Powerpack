@@ -90,6 +90,16 @@ public final class WindPowerClient implements PowerClient {
 	public void tick(Minecraft minecraft, LocalPlayer player) {
 		WindWeather.tick(player);
 		this.flight.tick(minecraft, player);
+		// the cloak of wind (every wind user, from the start): holding Jump in mid-air slows the fall
+		if (!this.flight.state().flying() && !player.onGround() && !player.isInWater() && !player.isFallFlying()
+			&& !player.getAbilities().flying && player.input.keyPresses.jump()
+			&& player.getDeltaMovement().y < -com.jaymospowers.power.wind.WindModes.CLOAK_FALL_SPEED) {
+			net.minecraft.world.phys.Vec3 v = player.getDeltaMovement();
+			player.setDeltaMovement(v.x, -com.jaymospowers.power.wind.WindModes.CLOAK_FALL_SPEED, v.z);
+			if (player.tickCount % 4 == 0) {
+				player.level().addParticle(net.minecraft.core.particles.ParticleTypes.CLOUD, player.getX(), player.getY(), player.getZ(), 0.0, -0.05, 0.0);
+			}
+		}
 		if (this.lanceCooldown > 0) {
 			this.lanceCooldown--;
 		}

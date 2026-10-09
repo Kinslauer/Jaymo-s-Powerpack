@@ -104,6 +104,7 @@ public final class WindPower implements Power {
 	public static void init() {
 		Powers.register(INSTANCE);
 		WindNet.register();
+		WindModes.register();
 		WindTempest.init();
 		WindDebug.register();
 		ServerPlayNetworking.registerGlobalReceiver(WindNet.Flight.TYPE, (payload, ctx) -> INSTANCE.onFlightPacket(ctx.player(), payload));
@@ -147,6 +148,13 @@ public final class WindPower implements Power {
 		return new ItemStack(Items.FEATHER);
 	}
 
+	/** Stormbound's Call Lightning (B) cooldown. */
+	static final int CALL_LIGHTNING_COOLDOWN = 120;
+	/** A flyer using the air brake (S at speed): others see the palms-out gust. */
+	public static final net.fabricmc.fabric.api.attachment.v1.AttachmentType<Boolean> BRAKING = net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry.create(
+		JaymosPowers.id("wind_braking"), builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL,
+			net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate.all()));
+
 	/** Per-player server state. */
 	private static final class State {
 		WindFlight flight = WindFlight.NONE;
@@ -188,6 +196,8 @@ public final class WindPower implements Power {
 	public void onLost(ServerPlayer player) {
 		State s = this.states.remove(player.getUUID());
 		player.removeAttached(FLIGHT);
+		player.removeAttached(BRAKING);
+		WindModes.clear(player);
 		removeBarrierModifier(player);
 		WindStorm.clear(player);
 		WindStorm.forget(player);
@@ -230,8 +240,17 @@ public final class WindPower implements Power {
 		}
 		s.lanceCooldown = WindTempest.LANCE_COOLDOWN;
 		WindStorm.onCast(player);
+		WindModes.onCast(player);
 		WindTempest.lance(player, s.weather);
 		this.sendStatus(player, s, 0.0F, false);
+	}
+
+	/** The Power Mode key (Z): the Stormbound / Tempest mode (or both), once the power has either form. */
+	@Override
+	public void onMode(ServerPlayer player, boolean down) {
+		if (down) {
+			WindModes.toggle(player);
+		}
 	}
 
 	/** In wind flight now, or within the last {@code ticks}. */
@@ -333,6 +352,19 @@ public final class WindPower implements Power {
 			this.sendStatus(player, s, 0.0F, false);
 		}
 		WindStorm.tick(player, s.flight, s.channel != null, s.barrierTicks > 0);
+		WindModes.tick(player);
+		// the air brake: a gust pushed out ahead from the palms, for everyone else to see
+		if (player.getAttached(BRAKING) != null) {
+			if (!s.flight.flying()) {
+				player.removeAttached(BRAKING);
+			} else if (player.tickCount % 2 == 0) {
+				Vec3 ahead = player.getEyePosition().add(player.getLookAngle().scale(1.4));
+				this.particlesForOthers(player, level, ParticleTypes.CLOUD, ahead.x, ahead.y - 0.3, ahead.z, 3, 0.25, 0.25, 0.25, 0.08);
+				if (player.tickCount % 8 == 0) {
+					this.particlesForOthers(player, level, ParticleTypes.SMALL_GUST, ahead.x, ahead.y - 0.3, ahead.z, 1, 0.1, 0.1, 0.1, 0.0);
+				}
+			}
+		}
 
 		// ---- flight
 		Vec3 pos = player.position();
@@ -428,6 +460,14 @@ public final class WindPower implements Power {
 		}
 		WindFlight previous = s.flight;
 		this.setFlight(player, s, next, next.fast() && payload.locked());
+		if (payload.braking() && next.flying()) {
+			if (player.getAttached(BRAKING) == null) {
+				player.setAttached(BRAKING, true);
+				player.level().playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_WIND_CHARGE_BURST, SoundSource.PLAYERS, 0.8F, 1.3F);
+			}
+		} else if (player.getAttached(BRAKING) != null) {
+			player.removeAttached(BRAKING);
+		}
 		ServerLevel level = player.level();
 		if (previous == WindFlight.NONE && next.flying()) {
 			// take-off gust, for everyone else (the flyer makes their own)
@@ -512,7 +552,7 @@ public final class WindPower implements Power {
 			ParticleOptions accent = switch (s.channel) {
 				case TAILWIND -> ParticleTypes.SMALL_GUST;
 				case GALE_BARRIER -> ParticleTypes.WHITE_SMOKE;
-				case ZEPHYR -> ParticleTypes.HAPPY_VILLAGER;
+				case ZEPHYR -> Fate.isCorrupted(player) ? ParticleTypes.ELECTRIC_SPARK : ParticleTypes.HAPPY_VILLAGER;
 			};
 			level.sendParticles(accent, player.getX(), player.getY() + 1.0, player.getZ(), 2, 0.5, 0.6, 0.5, 0.0);
 			// a chime that climbs as the wind gathers
@@ -534,10 +574,11 @@ public final class WindPower implements Power {
 		float f = Mth.clamp(s.channelTicks / (float)ability.maxChannel, 0.1F, 1.0F);
 		s.cooldowns[ability.ordinal()] = ability.cooldown;
 		ServerLevel level = player.level();
-		// the weather governs the wind's strength
-		float w = s.weather;
+		// the weather governs the wind's strength (and the Tempest mode adds to it)
+		float w = s.weather * WindModes.abilityScale(player);
 		boolean stormbound = Fate.isCorrupted(player);
 		WindStorm.onCast(player);
+		WindModes.onCast(player);
 		float dash = 0.0F;
 		switch (ability) {
 			case TAILWIND -> {
@@ -581,10 +622,10 @@ public final class WindPower implements Power {
 			}
 			case ZEPHYR -> {
 				if (stormbound) {
-					LivingEntity nearest = this.nearestEnemy(player, level, ZEPHYR_BOLT_SEEK);
-					Vec3 flat = player.getLookAngle().horizontal();
-					Vec3 ahead = player.position().add(flat.lengthSqr() < 1.0E-4 ? Vec3.ZERO : flat.normalize().scale(ZEPHYR_BOLT_AHEAD));
-					WindStorm.strike(player, nearest != null ? nearest.position() : ahead);
+					// Stormbound has no breath to give: B calls the lightning down instead
+					WindModes.callLightning(player, f, WindModes.abilityScale(player));
+					s.cooldowns[ability.ordinal()] = CALL_LIGHTNING_COOLDOWN;
+					break;
 				}
 				int fall = (int)(Mth.lerpInt(f, ZEPHYR_FALL_MIN, ZEPHYR_FALL_MAX) * w);
 				int regen = (int)(Mth.lerpInt(f, ZEPHYR_REGEN_MIN, ZEPHYR_REGEN_MAX) * w);

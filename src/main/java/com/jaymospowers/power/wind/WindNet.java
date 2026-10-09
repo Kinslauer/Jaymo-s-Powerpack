@@ -12,14 +12,15 @@ public final class WindNet {
 	}
 
 	/** Client → server: the flight state ({@link WindFlight} ordinal) and whether the cruise speed is locked. */
-	public record Flight(int state, boolean locked) implements CustomPacketPayload {
+	public record Flight(int state, boolean locked, boolean braking) implements CustomPacketPayload {
 		public static final Type<Flight> TYPE = new Type<>(JaymosPowers.id("wind_flight"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Flight> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
 				buf.writeVarInt(p.state);
 				buf.writeBoolean(p.locked);
+				buf.writeBoolean(p.braking);
 			},
-			buf -> new Flight(buf.readVarInt(), buf.readBoolean()));
+			buf -> new Flight(buf.readVarInt(), buf.readBoolean(), buf.readBoolean()));
 
 		@Override
 		public Type<Flight> type() {

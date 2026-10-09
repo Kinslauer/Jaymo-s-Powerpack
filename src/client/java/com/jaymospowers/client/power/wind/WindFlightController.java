@@ -50,6 +50,12 @@ public final class WindFlightController {
 	static final double CRUISE_DECEL = 0.06;
 	static final double CRUISE_BRAKE = 0.15;
 	/**
+	 * The air brake: S at speed pushes a gust out ahead from the palms. Momentum is shed smoothly (this share kept each
+	 * tick, plus the plain brake) down to a hover; it's only an air brake from {@code AIR_BRAKE_MIN_SPEED} up.
+	 */
+	static final double AIR_BRAKE_KEEP = 0.86;
+	static final double AIR_BRAKE_MIN_SPEED = 0.7;
+	/**
 	 * Turning is rate-limited by speed, with real inertia: the flight path swings toward where you look by at most this
 	 * many degrees per tick, from just-cruising to top speed (so at sonic a U-turn takes a long, wide arc).
 	 */
@@ -102,6 +108,9 @@ public final class WindFlightController {
 	private double top = TOP_SPEED;
 	/** This tick's turn-rate and tumble-angle multiplier. */
 	private double turnBonus = 1.0;
+	/** The air brake is on (S at speed): the palms-out pose and the gust ahead. */
+	private boolean braking;
+	private boolean sentBraking;
 
 	public WindFlight state() {
 		return this.state;
@@ -109,6 +118,11 @@ public final class WindFlightController {
 
 	public boolean locked() {
 		return this.locked;
+	}
+
+	/** Using the air brake right now. */
+	public boolean braking() {
+		return this.braking;
 	}
 
 	/** Ticks of tumble left (0 when not tumbling). */
@@ -167,7 +181,11 @@ public final class WindFlightController {
 		int sneakTaps = drain(minecraft.options.keyShift);
 		Input input = player.input.keyPresses;
 		// the weather governs the wind: a still clear day flies slower, a storm faster; Stormbound drags at you
-		this.top = TOP_SPEED * WindWeather.factor(player) * (Fate.isCorrupted(player) ? WindStorm.STORMBOUND_CRUISE_MULTIPLIER : 1.0);
+		this.top = TOP_SPEED * WindWeather.factor(player) * (Fate.isCorrupted(player) ? WindStorm.STORMBOUND_CRUISE_MULTIPLIER : 1.0)
+			* (com.jaymospowers.power.wind.WindModes.tempest(player) ? com.jaymospowers.power.wind.WindModes.TEMPEST_ABILITY_SCALE : 1.0);
+		if (!this.state.fast()) {
+			this.braking = false;
+		}
 		this.turnBonus = Fate.isAscended(player) ? TEMPEST_TURN_BONUS : 1.0;
 		if (this.recoverTicks > 0) {
 			this.recoverTicks--;
@@ -274,8 +292,22 @@ public final class WindFlightController {
 			this.speed -= CRUISE_DECEL;
 		}
 		if (input.backward()) {
-			this.speed -= CRUISE_BRAKE;
+			if (this.speed >= AIR_BRAKE_MIN_SPEED || this.braking && this.speed > HOVER_SPEED * 0.5) {
+				// the air brake: palms out, a gust ahead, and the momentum bled away to a halt
+				if (!this.braking) {
+					player.level().playLocalSound(player, SoundEvents.BREEZE_WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 0.7F, 1.3F);
+					WindCamera.shake(0.4F, 5);
+				}
+				this.braking = true;
+				this.speed = this.speed * AIR_BRAKE_KEEP - CRUISE_BRAKE * 0.5;
+				this.brakeGust(player);
+			} else {
+				this.braking = false;
+				this.speed -= CRUISE_BRAKE;
+			}
 			this.locked = false;
+		} else {
+			this.braking = false;
 		}
 		// inertia: the path only swings round toward the look direction so fast, and turning hard costs speed
 		Vec3 look = player.getLookAngle();
@@ -313,6 +345,23 @@ public final class WindFlightController {
 			this.boom(minecraft, player);
 		} else if (this.state == WindFlight.SONIC && fraction < SONIC_EXIT) {
 			this.state = WindFlight.CRUISE;
+		}
+	}
+
+	/** The air brake's gust, pushed out ahead from the hands (our own view; others get it from the server). */
+	private void brakeGust(LocalPlayer player) {
+		if (this.ticks % 2 != 0) {
+			return;
+		}
+		RandomSource random = player.getRandom();
+		Vec3 look = player.getLookAngle();
+		Vec3 hands = player.getEyePosition().add(look.scale(0.9)).add(0.0, -0.35, 0.0);
+		for (int i = 0; i < 4; i++) {
+			player.level().addParticle(ParticleTypes.CLOUD, hands.x + random.nextGaussian() * 0.15, hands.y + random.nextGaussian() * 0.15,
+				hands.z + random.nextGaussian() * 0.15, look.x * 0.5 + random.nextGaussian() * 0.05, look.y * 0.5, look.z * 0.5 + random.nextGaussian() * 0.05);
+		}
+		if (this.ticks % 6 == 0) {
+			player.level().addParticle(ParticleTypes.SMALL_GUST, hands.x + look.x, hands.y + look.y, hands.z + look.z, 0.0, 0.0, 0.0);
 		}
 	}
 
@@ -577,12 +626,14 @@ public final class WindFlightController {
 
 	private void sync() {
 		this.sinceSent++;
-		if (this.state != this.sentState || this.locked != this.sentLocked || this.state.flying() && this.sinceSent >= RESYNC_TICKS) {
+		if (this.state != this.sentState || this.locked != this.sentLocked || this.braking != this.sentBraking
+			|| this.state.flying() && this.sinceSent >= RESYNC_TICKS) {
 			this.sentState = this.state;
 			this.sentLocked = this.locked;
+			this.sentBraking = this.braking;
 			this.sinceSent = 0;
 			if (ClientPlayNetworking.canSend(WindNet.Flight.TYPE)) {
-				ClientPlayNetworking.send(new WindNet.Flight(this.state.ordinal(), this.locked));
+				ClientPlayNetworking.send(new WindNet.Flight(this.state.ordinal(), this.locked, this.braking));
 			}
 		}
 	}
