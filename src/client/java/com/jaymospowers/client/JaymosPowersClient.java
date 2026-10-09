@@ -50,6 +50,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		menuKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.menu", InputConstants.KEY_H, CATEGORY));
 		ultimateKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.ultimate", InputConstants.KEY_C, CATEGORY));
 		modeKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.mode", InputConstants.KEY_Z, CATEGORY));
+		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.core.BlockCluster.TYPE, BlockClusterRenderer::new);
 		// once per install: move other mods' (and vanilla's) defaults off the power keys
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(KeyConflicts::resolveOnce);
 

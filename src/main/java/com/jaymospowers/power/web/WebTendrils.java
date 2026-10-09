@@ -94,7 +94,27 @@ public final class WebTendrils {
 	public static final AttachmentType<Grips> GRIPS = AttachmentRegistry.create(JaymosPowers.id("web_tendril_grips"),
 		builder -> builder.syncWith(Grips.STREAM_CODEC, AttachmentSyncPredicate.all()));
 
-	/** Client → server: a tendril key on something (grab it), or let go (entity -1: throw). */
+	/**
+	 * Sneak + a tendril key at a wall or the ground (within {@code GRAB_RANGE}): the tendril tears a chunk loose, up to
+	 * {@code RIP_PIECES} blocks no harder than {@code RIP_HARDEST}, and holds it like anything else.
+	 */
+	static final int RIP_PIECES = 6;
+	static final float RIP_HARDEST = 4.0F;
+	/** The {@link Grab} entity id that means "the block I'm aiming at". */
+	public static final int GRAB_BLOCK = -2;
+
+	/** Client → server: swing the chunk this tendril holds at what's in front (left click: main, right click: off). */
+	public record Smash(int hand) implements CustomPacketPayload {
+		public static final Type<Smash> TYPE = new Type<>(JaymosPowers.id("web_tendril_smash"));
+		public static final StreamCodec<ByteBuf, Smash> CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, Smash::hand, Smash::new);
+
+		@Override
+		public Type<Smash> type() {
+			return TYPE;
+		}
+	}
+
+	/** Client → server: a tendril key on something (grab it), or let go (entity -1: throw; -2: tear a chunk out of the block aimed at). */
 	public record Grab(int hand, int entityId) implements CustomPacketPayload {
 		public static final Type<Grab> TYPE = new Type<>(JaymosPowers.id("web_tendril_grab"));
 		public static final StreamCodec<ByteBuf, Grab> CODEC = StreamCodec.composite(
@@ -128,7 +148,11 @@ public final class WebTendrils {
 		ServerPlayNetworking.registerGlobalReceiver(Grab.TYPE, (payload, ctx) -> {
 			ServerPlayer player = ctx.player();
 			int hand = payload.hand() == WebNet.OFF ? WebNet.OFF : WebNet.MAIN;
-			if (payload.entityId() < 0) {
+			if (payload.entityId() == GRAB_BLOCK) {
+				if (WebSymbiote.armored(player) && player.isAlive() && !player.isSpectator()) {
+					rip(player, hand);
+				}
+			} else if (payload.entityId() < 0) {
 				release(player, hand, true);
 			} else if (WebSymbiote.armored(player) && player.isAlive() && !player.isSpectator()) {
 				Entity target = player.level().getEntity(payload.entityId());
@@ -137,6 +161,8 @@ public final class WebTendrils {
 				}
 			}
 		});
+		PayloadTypeRegistry.serverboundPlay().register(Smash.TYPE, Smash.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Smash.TYPE, (payload, ctx) -> smash(ctx.player(), payload.hand() == WebNet.OFF ? WebNet.OFF : WebNet.MAIN));
 		ServerTickEvents.END_SERVER_TICK.register(WebTendrils::serverTick);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -152,7 +178,38 @@ public final class WebTendrils {
 		return entity != player && entity.isAlive() && !entity.isSpectator() && !(entity instanceof ArmorStand)
 			&& !(entity instanceof Player p && p.isCreative()) && entity.getVehicle() == null && !entity.isVehicle()
 			&& (entity instanceof LivingEntity || entity instanceof net.minecraft.world.entity.item.ItemEntity
-				|| com.jaymospowers.power.gravity.GravityPower.isCorpse(entity));
+				|| entity instanceof com.jaymospowers.core.BlockCluster || com.jaymospowers.power.gravity.GravityPower.isCorpse(entity));
+	}
+
+	/** Sneak + a tendril key at a block: a chunk of it torn loose, and held. */
+	private static void rip(ServerPlayer player, int hand) {
+		Vec3 eye = player.getEyePosition();
+		net.minecraft.world.phys.BlockHitResult hit = player.level().clip(new net.minecraft.world.level.ClipContext(eye,
+			eye.add(player.getLookAngle().scale(GRAB_RANGE)), net.minecraft.world.level.ClipContext.Block.COLLIDER,
+			net.minecraft.world.level.ClipContext.Fluid.NONE, player));
+		if (hit.getType() != net.minecraft.world.phys.HitResult.Type.BLOCK || !player.mayBuild()) {
+			return;
+		}
+		com.jaymospowers.core.BlockCluster chunk = com.jaymospowers.core.BlockCluster.rip(player.level(), hit, RIP_PIECES, RIP_HARDEST, player);
+		if (chunk != null) {
+			grab(player, hand, chunk, -1L);
+		}
+	}
+
+	/** Left or right click while that tendril holds a chunk: it's swung at what's in front of you. */
+	private static void smash(ServerPlayer player, int hand) {
+		Grips grips = player.getAttached(GRIPS);
+		if (grips == null || !WebSymbiote.armored(player) || !player.isAlive()) {
+			return;
+		}
+		if (player.level().getEntity(grips.get(hand)) instanceof com.jaymospowers.core.BlockCluster chunk) {
+			player.swing(hand == WebNet.OFF ? net.minecraft.world.InteractionHand.OFF_HAND : net.minecraft.world.InteractionHand.MAIN_HAND,
+				net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+			chunk.swingFrom(player);
+			if (!chunk.isAlive()) {
+				release(player, hand, false);
+			}
+		}
 	}
 
 	/** Instinct: a tendril lashes out at an attacker, snatches it and flings it away a moment later. */
@@ -239,6 +296,12 @@ public final class WebTendrils {
 			target.syncVelocity = true;
 			if (target instanceof ServerPlayer other) {
 				ServerPlayNetworking.send(other, new WebNet.Nudge(v));
+			}
+			if (target instanceof com.jaymospowers.core.BlockCluster chunk) {
+				// a chunk of wall does its own battering
+				chunk.launch(player);
+				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_THROW.value(), SoundSource.PLAYERS, 1.0F, 0.4F);
+				return;
 			}
 			THROWN.removeIf(t -> t.entity().equals(target.getUUID()));
 			THROWN.add(new Thrown(player.level().dimension(), target.getUUID(), player.getUUID(), player.level().getGameTime() + THROWN_TICKS,

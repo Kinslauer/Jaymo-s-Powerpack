@@ -115,12 +115,16 @@ public final class WebSymbiote {
 	public static final int TAKEOVER_STRESS = 40;
 	public static final int TAKEOVER_CHECK_TICKS = 140;
 	public static final float TAKEOVER_CHANCE = 0.55F;
-	public static final int TAKEOVER_MIN_TICKS = 60;
-	public static final int TAKEOVER_MAX_TICKS = 100;
 	public static final double TAKEOVER_RANGE = 12.0;
 	public static final double TAKEOVER_REACH = 3.0;
 	public static final int TAKEOVER_ATTACK_TICKS = 10;
 	public static final int TAKEOVER_COOLDOWN = 900;
+	/**
+	 * Once it has the wheel it keeps it until its prey is dead or gets {@code TAKEOVER_ESCAPE} blocks away (and, so it
+	 * can never hold you for good, {@code TAKEOVER_LIMIT} at most).
+	 */
+	public static final double TAKEOVER_ESCAPE = 30.0;
+	public static final int TAKEOVER_LIMIT = 1200;
 	public static final int TAKEOVER_RELIEF = 20;
 
 	/** Weaknesses: what each exposure does to you and to the bond, and how many it takes to break it. */
@@ -189,7 +193,6 @@ public final class WebSymbiote {
 	public static final int ARMOR_RESTLESS_TICKS = 800;
 	public static final float ARMOR_TAKEOVER_PER_MINUTE = 0.2F;
 	public static final float ARMOR_TAKEOVER_MAX = 0.6F;
-	public static final int RAMPAGE_MIN_TICKS = 120, RAMPAGE_MAX_TICKS = 200;
 	/** In a rampage, every this many strikes on a player is a bite: this much more damage, and it feeds. */
 	public static final int RAMPAGE_BITE_EVERY = 3;
 	public static final float RAMPAGE_BITE_DAMAGE = 8.0F;
@@ -867,8 +870,7 @@ public final class WebSymbiote {
 			return;
 		}
 		live.rampageStrikes = 0;
-		live.takeoverTicks = live.rampage ? Mth.nextInt(player.getRandom(), RAMPAGE_MIN_TICKS, RAMPAGE_MAX_TICKS)
-			: Mth.nextInt(player.getRandom(), TAKEOVER_MIN_TICKS, TAKEOVER_MAX_TICKS);
+		live.takeoverTicks = TAKEOVER_LIMIT;
 		live.takeoverTarget = target.getId();
 		ServerPlayNetworking.send(player, new WebNet.Takeover(target.getId(), live.takeoverTicks));
 		ServerLevel level = player.level();
@@ -880,16 +882,8 @@ public final class WebSymbiote {
 
 	private static void tickTakeover(ServerPlayer player, Live live, long now) {
 		Entity target = player.level().getEntity(live.takeoverTarget);
-		if (live.rampage && (target == null || !target.isAlive()) && live.takeoverTicks > 1) {
-			// a rampage doesn't stop at one: on to the next
-			LivingEntity next = prey(player, true);
-			if (next != null) {
-				live.takeoverTarget = next.getId();
-				ServerPlayNetworking.send(player, new WebNet.Takeover(next.getId(), live.takeoverTicks));
-				target = next;
-			}
-		}
-		if (target == null || !target.isAlive() || --live.takeoverTicks <= 0) {
+		// it lets go once its prey is dead, or has got away
+		if (target == null || !target.isAlive() || target.distanceTo(player) > TAKEOVER_ESCAPE || --live.takeoverTicks <= 0) {
 			live.rampage = false;
 			live.takeoverTicks = 0;
 			live.takeoverTarget = -1;

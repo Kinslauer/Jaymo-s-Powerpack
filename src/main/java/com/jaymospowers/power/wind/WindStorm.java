@@ -202,6 +202,11 @@ public final class WindStorm {
 	 */
 	static void strike(ServerPlayer caster, Vec3 at) {
 		ServerLevel level = caster.level();
+		// thunder only comes out of real weather: none under a clear sky, at full strength only in a storm
+		float sky = WindModes.thunderPower(level);
+		if (sky <= 0.0F) {
+			return;
+		}
 		LightningBolt bolt = EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
 		if (bolt != null) {
 			bolt.snapTo(at);
@@ -213,7 +218,7 @@ public final class WindStorm {
 			at.x + LIGHTNING_REACH, at.y + 6.0 + LIGHTNING_REACH, at.z + LIGHTNING_REACH);
 		DamageSource source = caster.damageSources().source(DamageTypes.LIGHTNING_BOLT, caster);
 		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area, e -> e.isAlive() && e != caster && !e.isSpectator())) {
-			target.hurtServer(level, source, LIGHTNING_DAMAGE);
+			target.hurtServer(level, source, LIGHTNING_DAMAGE * sky);
 			WindModes.chargeCreeper(target);
 			if (!target.fireImmune()) {
 				target.setRemainingFireTicks(Math.max(target.getRemainingFireTicks(), LIGHTNING_BURN_TICKS));

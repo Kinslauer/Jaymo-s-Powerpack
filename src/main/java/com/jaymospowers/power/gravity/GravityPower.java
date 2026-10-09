@@ -112,7 +112,8 @@ public final class GravityPower implements Power {
 	// ---- Weightless (V) ----
 	/** Your gravity while weightless (fraction removed), and how much lighter you land. */
 	static final double WEIGHTLESS_GRAVITY = -0.7;
-	static final double WEIGHTLESS_FALL = -0.5;
+	/** Weightless, falls don't hurt at all (the fall multiplier drops to nothing). */
+	static final double WEIGHTLESS_FALL = -1.0;
 	public static final int WEIGHTLESS_MAX_TICKS = 600;
 	public static final int WEIGHTLESS_COOLDOWN = 200;
 	/** Switched off early with V (not run out), the cooldown is only this. */
@@ -553,6 +554,10 @@ public final class GravityPower implements Power {
 			return;
 		}
 		Entity target = liftableInSight(player, liftRange(player));
+		if (target == null) {
+			// aimed at a wall or the ground: a chunk of it is torn up and lifted
+			target = ripChunk(player);
+		}
 		if (target == null || !target.isAlive()) {
 			fizzle(player);
 			return;
@@ -759,6 +764,26 @@ public final class GravityPower implements Power {
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 1.0F, 0.6F);
 	}
 
+	/**
+	 * R aimed at a block: Lift tears a chunk of it loose (bigger and from harder stone as the power grows:
+	 * {@code CHUNK_PIECES_BASE} + one per ability, no harder than {@code CHUNK_HARDEST_BASE} + {@code CHUNK_HARDEST_PER_LEVEL}
+	 * per ability). Thrown with left (or right) click.
+	 */
+	static final int CHUNK_PIECES_BASE = 3;
+	static final float CHUNK_HARDEST_BASE = 1.5F, CHUNK_HARDEST_PER_LEVEL = 0.75F;
+
+	private static @Nullable Entity ripChunk(ServerPlayer player) {
+		Vec3 eye = player.getEyePosition();
+		BlockHitResult hit = player.level().clip(new ClipContext(eye, eye.add(player.getViewVector(1.0F).scale(liftRange(player))),
+			ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+		if (hit.getType() != HitResult.Type.BLOCK || !player.mayBuild()) {
+			return null;
+		}
+		int abilities = com.jaymospowers.core.Mastery.unlocked(player);
+		return com.jaymospowers.core.BlockCluster.rip(player.level(), hit, CHUNK_PIECES_BASE + abilities,
+			CHUNK_HARDEST_BASE + CHUNK_HARDEST_PER_LEVEL * abilities, player);
+	}
+
 	/** Things Lift can't pocket or choke: anything that isn't alive (bar items and corpses), and armour stands. */
 	private static boolean throwable(Entity entity) {
 		return !(entity instanceof ItemEntity) && !isCorpse(entity) && (!(entity instanceof LivingEntity) || entity instanceof ArmorStand);
@@ -773,8 +798,13 @@ public final class GravityPower implements Power {
 		entity.syncVelocity = true;
 		entity.syncVelocity = true;
 		ServerLevel level = player.level();
-		THROWN.removeIf(t -> t.entity.equals(entity.getUUID()));
-		THROWN.add(new Thrown(level.dimension(), entity.getUUID(), player.getUUID(), level.getGameTime() + THROW_TICKS, velocity));
+		if (entity instanceof com.jaymospowers.core.BlockCluster chunk) {
+			// a chunk of the world does its own battering, and breaks up on what stops it
+			chunk.launch(player);
+		} else {
+			THROWN.removeIf(t -> t.entity.equals(entity.getUUID()));
+			THROWN.add(new Thrown(level.dimension(), entity.getUUID(), player.getUUID(), level.getGameTime() + THROW_TICKS, velocity));
+		}
 		player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.SHULKER_SHOOT, SoundSource.PLAYERS, 1.0F, 0.4F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.8F, 0.5F);
@@ -1403,6 +1433,8 @@ public final class GravityPower implements Power {
 		}
 		if (player.getAttached(WEIGHTLESS_ON) != null) {
 			state.weightlessTicks++;
+			// no fall counts while weightless: only what you fall after it ends
+			player.resetFallDistance();
 			if (player.tickCount % HEAVY_AURA_REFRESH == 0) {
 				heavyAura(player);
 			}

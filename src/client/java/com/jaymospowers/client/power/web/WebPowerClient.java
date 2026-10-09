@@ -39,6 +39,27 @@ public final class WebPowerClient implements PowerClient {
 	/** Called once from {@link com.jaymospowers.client.JaymosPowersClient}: renderers, client packets, the PowerClient. */
 	public static void init() {
 		WebCutClient.register();
+		// a chunk of wall in a tendril's grip: left click swings the main one's, right click the other's
+		net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> {
+			if (clicks > 0 && holdsChunk(player, WebNet.MAIN)) {
+				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebTendrils.Smash(WebNet.MAIN));
+				return true;
+			}
+			return false;
+		});
+		ClientTickEvents.START_CLIENT_TICK.register(minecraft -> {
+			LocalPlayer player = minecraft.player;
+			if (player == null || minecraft.gui.screen() != null || !holdsChunk(player, WebNet.OFF)) {
+				return;
+			}
+			boolean pressed = false;
+			while (minecraft.options.keyUse.consumeClick()) {
+				pressed = true;
+			}
+			if (pressed) {
+				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebTendrils.Smash(WebNet.OFF));
+			}
+		});
 		PowerClients.register(WebPower.ID, INSTANCE);
 		WebSymbioteClient.init();
 		EntityRenderers.register(WebPower.WEB_BALL, context -> new ThrownItemRenderer<>(context, 0.85F, false));
@@ -109,6 +130,13 @@ public final class WebPowerClient implements PowerClient {
 				net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new com.jaymospowers.power.web.WebTendrils.Grab(hand, target.getId()));
 				return;
 			}
+			if (player.isShiftKeyDown() && aimedBlock(player)) {
+				// sneaking at a wall or the ground: the tendril tears a chunk of it loose
+				grabbing[hand] = true;
+				net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(
+					new com.jaymospowers.power.web.WebTendrils.Grab(hand, com.jaymospowers.power.web.WebTendrils.GRAB_BLOCK));
+				return;
+			}
 		}
 		if (!down && grabbing[hand]) {
 			grabbing[hand] = false;
@@ -148,6 +176,22 @@ public final class WebPowerClient implements PowerClient {
 			}
 		}
 		return best;
+	}
+
+	/** A block within a tendril's reach under the crosshair. */
+	private static boolean aimedBlock(LocalPlayer player) {
+		net.minecraft.world.phys.Vec3 eye = player.getEyePosition();
+		return player.level().clip(new net.minecraft.world.level.ClipContext(eye,
+			eye.add(player.getViewVector(1.0F).scale(com.jaymospowers.power.web.WebTendrils.GRAB_RANGE)),
+			net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, player)).getType()
+			== net.minecraft.world.phys.HitResult.Type.BLOCK;
+	}
+
+	/** The chunk of wall a tendril holds (main or off), if it's holding one. */
+	static boolean holdsChunk(LocalPlayer player, int hand) {
+		com.jaymospowers.power.web.WebTendrils.Grips grips = player.getAttached(com.jaymospowers.power.web.WebTendrils.GRIPS);
+		return grips != null && grips.get(hand) >= 0
+			&& player.level().getEntity(grips.get(hand)) instanceof com.jaymospowers.core.BlockCluster;
 	}
 
 	private static boolean holding(LocalPlayer player, net.minecraft.world.entity.Entity e) {

@@ -86,11 +86,21 @@ public final class WindModes {
 	static final float MODE_EXHAUSTION = 0.01F;
 	static final int MODE_MIN_FOOD = 6;
 	/**
-	 * The Thunderhead (both forms at once) rolls in: the sky turns to a thunderstorm for {@code THUNDERHEAD_STORM_TICKS}
-	 * (if it isn't one already), {@code THUNDERHEAD_BOLTS} bolts come down around you, and everyone within
+	 * A wind can only call thunder down out of real weather: none under a clear sky, {@code RAIN_THUNDER} of its full
+	 * strength in the rain, all of it in a thunderstorm.
+	 */
+	static final float RAIN_THUNDER = 0.6F;
+
+	/** How much thunder the sky over {@code level} holds right now (0 clear, {@link #RAIN_THUNDER} rain, 1 storm). */
+	public static float thunderPower(ServerLevel level) {
+		return level.isThundering() ? 1.0F : level.isRaining() ? RAIN_THUNDER : 0.0F;
+	}
+	/**
+	 * The Thunderhead (both forms at once) rolls in, if there's weather to bring it: {@code THUNDERHEAD_BOLTS} bolts come
+	 * down around you (fewer in the rain), and everyone within
 	 * {@code THUNDERHEAD_DARK_RANGE} sees the world go dark for {@code THUNDERHEAD_DARK_TICKS}.
 	 */
-	static final int THUNDERHEAD_STORM_TICKS = 2400, THUNDERHEAD_BOLTS = 5, THUNDERHEAD_DARK_TICKS = 70;
+	static final int THUNDERHEAD_BOLTS = 5, THUNDERHEAD_DARK_TICKS = 70;
 	static final double THUNDERHEAD_DARK_RANGE = 48.0;
 
 	// ---- Tempest mode ----
@@ -190,7 +200,7 @@ public final class WindModes {
 			return;
 		}
 		player.setAttached(MODE, mode);
-		if (mode == BOTH) {
+		if (mode == BOTH && thunderPower(level) > 0.0F) {
 			thunderhead(player, level);
 		}
 		if ((mode & STORM) != 0) {
@@ -249,13 +259,14 @@ public final class WindModes {
 		return !player.isCreative() && player.getFoodData().getFoodLevel() <= MODE_MIN_FOOD;
 	}
 
-	/** The Thunderhead rolls in: the sky breaks into a storm, bolts fall all around, and the world goes dark. */
+	/**
+	 * The Thunderhead rolls in (only out of real weather): bolts fall all around, and the world goes dark. Fewer bolts in
+	 * the rain than in a thunderstorm.
+	 */
 	private static void thunderhead(ServerPlayer player, ServerLevel level) {
-		if (!level.isThundering() && level.dimensionType().hasSkyLight()) {
-			level.getServer().setWeatherParameters(0, THUNDERHEAD_STORM_TICKS, true, true);
-		}
 		var random = player.getRandom();
-		for (int i = 0; i < THUNDERHEAD_BOLTS; i++) {
+		int bolts = Math.max(1, Math.round(THUNDERHEAD_BOLTS * thunderPower(level)));
+		for (int i = 0; i < bolts; i++) {
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			double distance = 4.0 + random.nextDouble() * 10.0;
 			double x = player.getX() + Math.cos(angle) * distance;
@@ -432,8 +443,17 @@ public final class WindModes {
 
 	// ---------------------------------------------------------------- Call Lightning (Stormbound B)
 
-	static void callLightning(ServerPlayer player, float f, float scale) {
+	/** Returns false (nothing called, nothing spent) under a clear sky. */
+	static boolean callLightning(ServerPlayer player, float f, float scale) {
 		ServerLevel level = player.level();
+		float sky = thunderPower(level);
+		if (sky <= 0.0F) {
+			player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymospowers.wind.no_storm")
+				.withStyle(net.minecraft.ChatFormatting.GRAY));
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_IDLE_GROUND, SoundSource.PLAYERS, 0.6F, 0.6F);
+			return false;
+		}
+		scale *= sky;
 		Vec3 eye = player.getEyePosition();
 		Vec3 end = eye.add(player.getLookAngle().scale(CALL_RANGE));
 		HitResult hit = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
@@ -464,6 +484,7 @@ public final class WindModes {
 			player.hurtServer(level, player.damageSources().source(DamageTypes.LIGHTNING_BOLT), Mth.lerp(f, CALL_SELF_DAMAGE_MIN, CALL_SELF_DAMAGE_MAX));
 		}
 		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.3, 0.6, 0.3, 0.3);
+		return true;
 	}
 
 	// ---------------------------------------------------------------- the starter's cloak

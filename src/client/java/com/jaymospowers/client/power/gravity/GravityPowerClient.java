@@ -49,6 +49,20 @@ public final class GravityPowerClient implements PowerClient {
 		GravityHeldClient.init();
 		// every gravity user's aura, on every client
 		ClientTickEvents.END_CLIENT_TICK.register(GravityPowerClient::auras);
+		// left click while Lift holds a chunk of the world (or anything else that can't be choked): it's thrown
+		net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> {
+			Integer grip = player.getAttached(GravityPower.GRIP);
+			if (clicks <= 0 || grip == null || !Powers.has(player, GravityPower.INSTANCE)) {
+				return false;
+			}
+			net.minecraft.world.entity.Entity held = player.level().getEntity(grip);
+			if (held instanceof net.minecraft.world.entity.LivingEntity && !(held instanceof net.minecraft.world.entity.decoration.ArmorStand)
+				|| held instanceof net.minecraft.world.entity.item.ItemEntity || held == null) {
+				return false;
+			}
+			net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new com.jaymospowers.power.gravity.GravityGrip());
+			return true;
+		});
 		// right click while holding something with Lift: choke, then slam (and the click does nothing else)
 		ClientTickEvents.START_CLIENT_TICK.register(minecraft -> {
 			LocalPlayer player = minecraft.player;

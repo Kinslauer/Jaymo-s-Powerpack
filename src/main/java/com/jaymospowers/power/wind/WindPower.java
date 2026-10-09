@@ -681,8 +681,7 @@ public final class WindPower implements Power {
 			case ZEPHYR -> {
 				if (stormbound) {
 					// Stormbound has no breath to give: B calls the lightning down instead
-					WindModes.callLightning(player, f, WindModes.abilityScale(player));
-					s.cooldowns[ability.ordinal()] = CALL_LIGHTNING_COOLDOWN;
+					s.cooldowns[ability.ordinal()] = WindModes.callLightning(player, f, WindModes.abilityScale(player)) ? CALL_LIGHTNING_COOLDOWN : 20;
 					break;
 				}
 				int fall = (int)(Mth.lerpInt(f, ZEPHYR_FALL_MIN, ZEPHYR_FALL_MAX) * w);

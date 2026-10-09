@@ -3,7 +3,7 @@
 	"power.jaymospowers.gravity.desc": "Take the weight out of things, or pile it on. Lift creatures, float yourself, pull and crush.",
 	"power.jaymospowers.gravity.key.ability_1": "Hold: Lift. Right click: choke it; again: slam it down",
 	"power.jaymospowers.gravity.key.ability_2": "Gravity Well (pull everything to a point)",
-	"power.jaymospowers.gravity.key.ability_3": "Weightless (toggle: jump high, fall slow)",
+	"power.jaymospowers.gravity.key.ability_3": "Weightless (toggle: jump high, fall slow, no fall damage)",
 	"power.jaymospowers.gravity.key.ability_4": "Hold: Crush (charge, then release)",
 	"power.jaymospowers.gravity.ascended": "Event Horizon",
 	"power.jaymospowers.gravity.corrupted": "Collapse",

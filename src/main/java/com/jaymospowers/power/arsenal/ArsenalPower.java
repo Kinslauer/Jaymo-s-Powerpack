@@ -166,6 +166,12 @@ public final class ArsenalPower implements Power {
 
 	@Override
 	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
+		boolean voided = com.jaymospowers.core.Fate.isCorrupted(player) && !com.jaymospowers.core.Mastery.starterOnly(player);
+		if (key == PowerKey.ABILITY_3 && voided) {
+			// the Void Arsenal's V: gates instead of Barrage (held: a gate cast out ahead)
+			ArsenalGates.key(player, down);
+			return;
+		}
 		if (!down) {
 			return;
 		}
@@ -191,6 +197,12 @@ public final class ArsenalPower implements Power {
 		}
 	}
 
+	/** Out of the void: its gates close. */
+	@Override
+	public void onPurified(ServerPlayer player) {
+		ArsenalGates.close(player);
+	}
+
 	@Override
 	public void onCorrupted(ServerPlayer player) {
 		// the rift opens onto the void now
@@ -200,6 +212,7 @@ public final class ArsenalPower implements Power {
 
 	@Override
 	public void onLost(ServerPlayer player) {
+		ArsenalGates.close(player);
 		ArsenalArmory.onLost(player);
 		HundredBlades.onLost(player);
 		PENDING.remove(player.getUUID());
@@ -212,6 +225,9 @@ public final class ArsenalPower implements Power {
 	@Override
 	public void tick(ServerPlayer player) {
 		tickBarrage(player);
+		if (com.jaymospowers.core.Fate.isCorrupted(player)) {
+			ArsenalGates.tick(player);
+		}
 		ArsenalVoid.tick(player);
 		ArsenalRelics.tick(player);
 		HundredBlades.tick(player);
