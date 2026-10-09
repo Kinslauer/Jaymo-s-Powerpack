@@ -197,3 +197,28 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     - It isn't loaded in the dev game.
   - `profileMods` now also swaps the Kitchen jar and Distant Horizons into the CurseForge profile.
   - The dedicated server boots with both.
+- **0.4.3:**
+  - **Wind:** armour weighs flight down (`WindArmor`). Leather and chainmail are free; per piece, copper and turtle
+    0.5, gold 0.75, iron 1, diamond 1.5, netherite 2, and other mods' armour 0.75. Each point takes 6% off top flight
+    speed (at least 40% is left), shown as "-N%" by the flight readout.
+  - **Guns:** WeaponMod's flintlock, musket (and bayonets) and blunderbuss get 3D models in hand.
+    - The models are voxelised from their own sprites by `tools/gen_guns.py`: wood 3px deep, metal 2px, dark parts
+      2.5px.
+    - They live in an always-on built-in pack (`resourcepacks/held_guns`) that overrides `assets/weaponmod/items/*`
+      with a display-context select: flat in gui/ground/fixed, 3D elsewhere. The reload condition is kept.
+  - **Living Armor tendrils** (`WebTendrilLayer`): 6 five-segment cords on the back and shoulders.
+    - They grow thicker and longer over 10 s of armour, sway and ripple, and whip forward over the shoulders with
+      each arm swing.
+    - Everyone sees them; they're posed per wearer through a `Model.setupAnim`.
+  - **Arsenal relics** (`ArsenalRelics`): a random pool weapon with a glint, found in chests.
+    - Chance: 8% in dungeons, mineshafts, temples, outposts, shipwrecks, ruined portals and mansions; 25% in
+      bastions, end cities, ancient cities and stronghold corridors.
+    - An Arsenal user who carries one absorbs it into the pocket dimension (up to 5). The first stored relic leads
+      every Reach.
+    - Dropping, Return, expiry or death sends it home with its wear. A worn-out relic is gone; for an owner who's
+      offline, it waits on the Overworld.
+    - Test with `/powerdebug arsenal relic`.
+  - **Gravity:** Lift takes Jaymo's Kitchen corpses (`NoGravity` while held; Kitchen 0.4.14 respects it).
+  - **Kitchen 0.4.14:** explosions destroy corpses, and lava, fire and lit campfires ignite them.
+  - **H menu:** scrolls with the mouse wheel when it's taller than the screen.
+  - **Distant Horizons:** tuned via `dhTuning` in build.gradle, for the pack config, the server and the profile.

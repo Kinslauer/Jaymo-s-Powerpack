@@ -36,6 +36,14 @@ import net.minecraft.world.phys.Vec3;
 public final class WebSymbioteClient {
 	/** Whether a player's render state should get the black suit layer. */
 	public static final RenderStateDataKey<Boolean> SUIT = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_suit");
+	/** Living Armor's tendrils on this player: how grown (0-1), how far into a lash (0-1), and a clock for the sway. */
+	public static final RenderStateDataKey<Tendrils> TENDRILS = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_tendrils");
+
+	public record Tendrils(float growth, float lash, float time) {
+	}
+
+	/** Player entity id → game time their Living Armor came up (for the tendrils' growth). */
+	private static final java.util.Map<Integer, Long> ARMOR_SINCE = new java.util.HashMap<>();
 
 	// ===== wall crawl ===============================================================================================
 	/** Climbing speed up and down walls, and crawling speed along walls and ceilings (blocks/tick). */
@@ -102,6 +110,7 @@ public final class WebSymbioteClient {
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
 			if (renderer instanceof AvatarRenderer<?> avatar) {
 				helper.register(new WebSymbioteLayer(avatar));
+				helper.register(new WebTendrilLayer(avatar));
 			}
 		});
 	}
@@ -117,6 +126,18 @@ public final class WebSymbioteClient {
 	/** From the avatar renderer's extractRenderState: does this player wear the suit. */
 	public static void extract(Entity entity, AvatarRenderState state) {
 		state.setData(SUIT, entity instanceof Player player && WebSymbiote.suitShown(player) ? Boolean.TRUE : null);
+		// Living Armor grows tendrils (whether or not the suit is showing)
+		if (entity instanceof Player player && WebSymbiote.isBonded(player) && WebSymbiote.isToggled(player, WebSymbioteState.ARMOR)) {
+			long now = player.level().getGameTime();
+			long since = ARMOR_SINCE.computeIfAbsent(player.getId(), id -> now);
+			float growth = Math.min(1.0F, (now - since) / WebTendrilLayer.GROWN_TICKS);
+			float swing = player.getSwingAnimation(1.0F);
+			float lash = net.minecraft.util.Mth.sin(swing * net.minecraft.util.Mth.PI);
+			state.setData(TENDRILS, new Tendrils(growth, lash, player.tickCount));
+		} else {
+			ARMOR_SINCE.remove(entity.getId());
+			state.setData(TENDRILS, null);
+		}
 	}
 
 	// ---- per tick (while the web power is active) --------------------------------------------------------------------
