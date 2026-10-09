@@ -234,6 +234,21 @@ public final class WebSymbiote {
 	/** Consume takes its time: the jaws chomp {@code EAT_CHOMPS} times over {@code EAT_TICKS}, then it's gone. */
 	public static final int EAT_TICKS = 40;
 	public static final int EAT_CHOMPS = 4;
+	/**
+	 * How wide each bite gapes (0-1 of the maw's full, engulfing size): random from {@code BITE_MIN} up. The last bite
+	 * has a {@code LAST_BITE_FULL} chance of going all the way, and then it swallows the meal whole right there.
+	 */
+	public static final float BITE_MIN = 0.15F, LAST_BITE_FULL = 0.25F;
+
+	/** Bite {@code bite}'s size for the meal begun at {@code start} by entity {@code id}: the same on the server and every client. */
+	public static float biteSize(long start, int id, int bite) {
+		net.minecraft.util.RandomSource random = net.minecraft.util.RandomSource.create((start * 31L + id) * 7919L + bite);
+		float roll = random.nextFloat();
+		if (bite == EAT_CHOMPS - 1 && roll < LAST_BITE_FULL) {
+			return 1.0F;
+		}
+		return Mth.lerp(random.nextFloat(), BITE_MIN, 1.0F) * 0.999F;
+	}
 	/** What a meal does for your own hunger: food points per point healed, and the saturation modifier. */
 	public static final float CONSUME_HUNGER_PER_HEAL = 0.75F;
 	public static final float CONSUME_SATURATION = 0.6F;
@@ -1226,7 +1241,14 @@ public final class WebSymbiote {
 			level.sendParticles(dust(1.6F), at.x, at.y, at.z, 14, food.getBbWidth() * 0.5, food.getBbHeight() * 0.4, food.getBbWidth() * 0.5, 0.0);
 			level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(0x7A0A0A, 1.2F), at.x, at.y, at.z, 10, 0.3, 0.3, 0.3, 0.0);
 		}
-		if (left > 0) {
+		Long started = player.getAttached(EATING);
+		boolean gulp = started != null && t % every == every / 2 && t / every == EAT_CHOMPS - 1
+			&& biteSize(started, player.getId(), EAT_CHOMPS - 1) >= 1.0F;
+		if (gulp) {
+			// the maw opened all the way: it takes the whole thing in one
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 0.6F, 1.6F);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 1.3F, 0.3F);
+		} else if (left > 0) {
 			return;
 		}
 		// swallowed whole: nothing left behind
