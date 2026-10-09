@@ -90,7 +90,8 @@ public final class WebPowerClient implements PowerClient {
 			return;
 		}
 		int hand;
-		boolean tendrils = com.jaymospowers.power.web.WebSymbiote.suitShown(player);
+		// only Living Armor's tendrils grab; the plain suit just swings (on black ropes)
+		boolean tendrils = com.jaymospowers.power.web.WebSymbiote.armored(player);
 		if (key == PowerKey.ABILITY_1) {
 			hand = WebNet.MAIN;
 		} else if (key == PowerKey.ABILITY_2 && (!down || tendrils || WebPower.offHandFree(player))) {
@@ -99,7 +100,7 @@ public final class WebPowerClient implements PowerClient {
 		} else {
 			return;
 		}
-		// the suit on: the keys are tendrils. On something grabbable, they grab it (and throw it on release)
+		// Living Armor up: the keys are tendrils. On something grabbable, they grab it (and throw it on release)
 		if (tendrils && down) {
 			net.minecraft.world.entity.Entity target = grabTarget(player);
 			if (target != null) {
@@ -156,7 +157,7 @@ public final class WebPowerClient implements PowerClient {
 	@Override
 	public void tick(Minecraft minecraft, LocalPlayer player) {
 		swing.tick(minecraft, player);
-		grabAim = com.jaymospowers.power.web.WebSymbiote.suitShown(player) ? grabTarget(player) : null;
+		grabAim = com.jaymospowers.power.web.WebSymbiote.armored(player) ? grabTarget(player) : null;
 		WebSymbioteClient.tick(minecraft, player, swing);
 		if (swing.attached() || swing.pull != null || player.isSpectator()) {
 			preview = null;

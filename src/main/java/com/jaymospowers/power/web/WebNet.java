@@ -122,6 +122,17 @@ public final class WebNet {
 		}
 	}
 
+	/** Server → client: shake the screen this hard (Living Armor landing heavily). */
+	public record Shake(float strength) implements CustomPacketPayload {
+		public static final Type<Shake> TYPE = new Type<>(JaymosPowers.id("web_shake"));
+		public static final StreamCodec<ByteBuf, Shake> CODEC = ByteBufCodecs.FLOAT.map(Shake::new, Shake::strength);
+
+		@Override
+		public Type<Shake> type() {
+			return TYPE;
+		}
+	}
+
 	/** Server → client: the creatures that mean you harm right now (Spider-Sense draws them outlined). */
 	public record Sense(java.util.List<Integer> ids) implements CustomPacketPayload {
 		public static final Type<Sense> TYPE = new Type<>(JaymosPowers.id("web_sense"));
@@ -138,6 +149,7 @@ public final class WebNet {
 		PayloadTypeRegistry.clientboundPlay().register(Takeover.TYPE, Takeover.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Nudge.TYPE, Nudge.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Sense.TYPE, Sense.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(Shake.TYPE, Shake.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Wings.TYPE, Wings.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ChargeHold.TYPE, ChargeHold.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Swing.TYPE, Swing.CODEC);

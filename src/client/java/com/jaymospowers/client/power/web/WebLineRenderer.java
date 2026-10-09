@@ -263,9 +263,8 @@ final class WebLineRenderer {
 				for (int handIndex = WebNet.MAIN; handIndex <= WebNet.OFF; handIndex++) {
 					net.minecraft.world.entity.Entity held = grips.get(handIndex) < 0 ? null : level.getEntity(grips.get(handIndex));
 					if (held != null) {
-						Vec3 hand = handPos(minecraft, player, handIndex, partialTick);
 						Vec3 at = held.getPosition(partialTick).add(0.0, held.getBbHeight() * 0.55, 0.0);
-						bundle(context, hand.subtract(camera), at.subtract(camera), width);
+						tentacle(context, minecraft, player, handIndex, at, camera, partialTick);
 					}
 				}
 			}
@@ -277,6 +276,38 @@ final class WebLineRenderer {
 						width * 0.8F, dark);
 				}
 			}
+		}
+	}
+
+	/**
+	 * A Living Armor tendril holding something: out of the back, up over the shoulder on its side, and down to what it
+	 * holds in front, so the hands stay free. A thick corded rope, sagging a little in a curve.
+	 */
+	private static void tentacle(LevelRenderContext context, Minecraft minecraft, Player player, int handIndex, Vec3 to, Vec3 camera,
+		float partialTick) {
+		boolean mainRight = player.getMainArm() == HumanoidArm.RIGHT;
+		int side = (handIndex == WebNet.MAIN) == mainRight ? 1 : -1;
+		float bodyYaw = Mth.lerp(partialTick, player.yBodyRotO, player.yBodyRot) * Mth.DEG_TO_RAD;
+		double scale = player.getScale();
+		Vec3 forward = new Vec3(-Mth.sin(bodyYaw), 0.0, Mth.cos(bodyYaw));
+		Vec3 right = new Vec3(-Mth.cos(bodyYaw), 0.0, -Mth.sin(bodyYaw));
+		Vec3 feet = player.getPosition(partialTick);
+		Vec3 root = feet.add(0.0, 1.25 * scale, 0.0).add(forward.scale(-0.3 * scale)).add(right.scale(side * 0.18 * scale));
+		Vec3 shoulder = feet.add(0.0, 1.95 * scale, 0.0).add(forward.scale(-0.05 * scale)).add(right.scale(side * 0.55 * scale));
+		if (player == minecraft.player && minecraft.options.getCameraType().isFirstPerson()) {
+			// from your own back, only the arc over the shoulder shows: start it at the edge of the view
+			shoulder = player.getEyePosition(partialTick).add(0.0, 0.25, 0.0).add(right.scale(side * 0.5));
+		}
+		// a curve: root -> over the shoulder -> down to the target, as short straight pieces
+		Vec3 prev = root;
+		int pieces = 6;
+		for (int i = 1; i <= pieces; i++) {
+			double t = i / (double)pieces;
+			Vec3 a = root.lerp(shoulder, t);
+			Vec3 b = shoulder.lerp(to, t);
+			Vec3 point = a.lerp(b, t);
+			rope(context, prev.subtract(camera), point.subtract(camera), 3, 0.06 * (1.0 - 0.3 * t), 0.06);
+			prev = point;
 		}
 	}
 

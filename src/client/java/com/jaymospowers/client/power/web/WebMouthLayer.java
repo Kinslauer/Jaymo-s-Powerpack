@@ -30,8 +30,13 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	private static final Identifier TEXTURE = JaymosPowers.id("textures/entity/web_symbiote_mouth.png");
 	/** How far the skull lifts and the jaw drops at the widest (radians). */
 	private static final float SKULL_GAPE = 0.95F, JAW_GAPE = 0.8F;
-	/** At the widest, the maw is this much bigger, and this far forward (pixels). */
+	/** At the very widest, the maw is this much bigger, and this far forward (pixels). */
 	private static final float SWELL = 0.45F, LUNGE = 3.0F;
+	/**
+	 * Each bite gapes a random amount between {@code BITE_MIN} and all the way (1); the last has a {@code LAST_FULL}
+	 * chance of going all the way, the full engulfing size.
+	 */
+	private static final float BITE_MIN = 0.15F, LAST_FULL = 0.5F;
 	/** It grows out of the head over this much of the meal, and sinks back over the last of it. */
 	private static final float MORPH = 0.08F;
 
@@ -93,11 +98,15 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			if (phase == null) {
 				return;
 			}
-			// wide on the way in, snapping shut on each bite
+			// wide on the way in, snapping shut on each bite; each bite its own size
 			float chomp = Math.abs(Mth.sin(phase * WebSymbiote.EAT_CHOMPS * Mth.PI));
-			float open = (float)Math.pow(chomp, 0.6);
-			this.skull.xRot = -open * SKULL_GAPE;
-			this.jaw.xRot = open * JAW_GAPE;
+			int bite = Math.min(WebSymbiote.EAT_CHOMPS - 1, (int)(phase * WebSymbiote.EAT_CHOMPS));
+			Long seed = state.getData(WebSymbioteClient.EATING_SEED);
+			net.minecraft.util.RandomSource random = net.minecraft.util.RandomSource.create((seed == null ? 0L : seed) * 7919L + bite);
+			float size = bite == WebSymbiote.EAT_CHOMPS - 1 && random.nextFloat() < LAST_FULL ? 1.0F : Mth.lerp(random.nextFloat(), BITE_MIN, 1.0F);
+			float open = (float)Math.pow(chomp, 0.6) * size;
+			this.skull.xRot = -open * SKULL_GAPE - (float)Math.pow(chomp, 0.6) * 0.25F;
+			this.jaw.xRot = open * JAW_GAPE + (float)Math.pow(chomp, 0.6) * 0.2F;
 			// it grows out of the head, swells with every gape, and sinks back at the end
 			float morph = Mth.clamp(Math.min(phase, 1.0F - phase) / MORPH, 0.0F, 1.0F);
 			float scale = Mth.lerp(morph, 0.8F, 1.0F) * (1.0F + SWELL * open);

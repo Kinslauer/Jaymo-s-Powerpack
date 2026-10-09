@@ -25,7 +25,14 @@ import net.minecraft.world.phys.HitResult;
  */
 public class WebBall extends ThrowableItemProjectile {
 	/** Direct-hit damage at no charge and at a full charge; things in the splash take up to half that. */
-	public static final float DAMAGE_MIN = 1.0F, DAMAGE_MAX = 10.0F;
+	public static final float DAMAGE_MIN = 0.5F, DAMAGE_MAX = 10.0F;
+	/** The suit's symbiote mass: the same, but it hits much harder the longer it's charged. */
+	public static final float DARK_DAMAGE_MIN = 2.0F, DARK_DAMAGE_MAX = 18.0F;
+	/**
+	 * Webs left around the splash besides the ones on whoever's caught: many from a quick shot (all splash, little
+	 * sting), few from a charged one.
+	 */
+	public static final int SCATTER_MIN = 1, SCATTER_MAX = 9;
 	/** Splash radius at no charge and at a full charge (a splash potion's is 4). */
 	public static final double SPLASH_MIN = 1.75, SPLASH_MAX = 4.5;
 	/** Slowness III, for (at the centre) this many ticks at no charge and at a full charge. */
@@ -68,17 +75,24 @@ public class WebBall extends ThrowableItemProjectile {
 		super.tick();
 		if (this.level().isClientSide()) {
 			if (this.tickCount > 1) {
-				this.level().addParticle(ParticleTypes.ITEM_COBWEB, this.getX(), this.getY(), this.getZ(), 0.0, 0.0, 0.0);
+				this.level().addParticle(this.dark() ? WebSymbiote.dust(1.2F) : ParticleTypes.ITEM_COBWEB, this.getX(), this.getY(), this.getZ(), 0.0, 0.0, 0.0);
 			}
 		} else if (this.tickCount > LIFETIME) {
 			this.discard();
 		}
 	}
 
+	/** The suit's black mass (its item says so, on both sides). */
+	public boolean dark() {
+		return this.getItem().is(WebPower.SYMBIOTE_MASS_ITEM);
+	}
+
 	/** The splash: like a splash potion, the effect is strongest at the centre (and on whatever was hit directly). */
 	private void burst(ServerLevel level, @org.jspecify.annotations.Nullable Entity direct) {
 		this.burst = true;
-		float damage = net.minecraft.util.Mth.lerp(this.charge, DAMAGE_MIN, DAMAGE_MAX);
+		boolean dark = this.dark();
+		float damage = dark ? net.minecraft.util.Mth.lerp(this.charge, DARK_DAMAGE_MIN, DARK_DAMAGE_MAX)
+			: net.minecraft.util.Mth.lerp(this.charge, DAMAGE_MIN, DAMAGE_MAX);
 		double radius = net.minecraft.util.Mth.lerp(this.charge, SPLASH_MIN, SPLASH_MAX);
 		int slowTicks = net.minecraft.util.Mth.lerpInt(this.charge, SLOWNESS_MIN_TICKS, SLOWNESS_MAX_TICKS);
 		Entity owner = this.getOwner();
@@ -95,20 +109,29 @@ public class WebBall extends ThrowableItemProjectile {
 			}
 			int ticks = (int)(slowTicks * strength);
 			if (ticks > 20 && living.isAlive()) {
-				WebTraps.ensnare(level, living, SLOWNESS_AMPLIFIER, ticks);
+				WebTraps.ensnare(level, living, SLOWNESS_AMPLIFIER, ticks, dark);
 			}
 		}
 		if (direct != null && !(direct instanceof LivingEntity)) {
 			direct.hurtServer(level, this.damageSources().thrown(this, owner), damage);
 		}
+		// webs strewn about the splash: more from a quick shot
+		WebTraps.scatter(level, this.position(), radius, net.minecraft.util.Mth.lerpInt(this.charge, SCATTER_MAX, SCATTER_MIN), dark);
 		int count = (int)(12 + 40 * this.charge);
-		level.sendParticles(ParticleTypes.ITEM_COBWEB, this.getX(), this.getY(), this.getZ(), count, radius * 0.4, 0.3, radius * 0.4, 0.08);
+		level.sendParticles(dark ? WebSymbiote.dust(1.5F) : ParticleTypes.ITEM_COBWEB, this.getX(), this.getY(), this.getZ(), count,
+			radius * 0.4, 0.3, radius * 0.4, 0.08);
+		if (dark) {
+			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 1.0F, 0.5F);
+		}
 		level.sendParticles(ParticleTypes.CLOUD, this.getX(), this.getY(), this.getZ(), (int)(4 + 12 * this.charge), radius * 0.3, 0.2, radius * 0.3, 0.05);
 		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.SPLASH_POTION_BREAK, SoundSource.PLAYERS, 0.6F + 0.6F * this.charge, 0.8F);
 		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.COBWEB_PLACE, SoundSource.PLAYERS, 1.0F, 0.7F);
 	}
 
 	private ParticleOptions particle() {
+		if (this.dark()) {
+			return WebSymbiote.dust(1.2F);
+		}
 		ItemStack item = this.getItem();
 		return item.isEmpty() ? ParticleTypes.ITEM_COBWEB : new ItemParticleOption(ParticleTypes.ITEM, ItemStackTemplate.fromNonEmptyStack(item));
 	}

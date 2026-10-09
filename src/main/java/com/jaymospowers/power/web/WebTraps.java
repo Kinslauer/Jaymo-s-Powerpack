@@ -71,7 +71,7 @@ public final class WebTraps {
 				TempWeb web = it.next();
 				if (web.dimension() == serverLevel.dimension() && web.pos().equals(pos)) {
 					it.remove();
-					if (state.is(Blocks.COBWEB)) {
+					if (state.is(Blocks.COBWEB) || state.is(WebPower.SYMBIOTE_WEB)) {
 						// break it ourselves, with no drops
 						serverLevel.removeBlock(pos, false);
 						serverLevel.playSound(null, pos, SoundEvents.COBWEB_BREAK, SoundSource.BLOCKS, 1.0F, 1.0F);
@@ -91,6 +91,11 @@ public final class WebTraps {
 
 	/** {@code target} was caught in a web blast: Slowness {@code amplifier} (0 = I) for {@code ticks}, no jumping, a cobweb. */
 	static void ensnare(ServerLevel level, LivingEntity target, int amplifier, int ticks) {
+		ensnare(level, target, amplifier, ticks, false);
+	}
+
+	/** The same; {@code dark}: the symbiote's, with a black web. */
+	static void ensnare(ServerLevel level, LivingEntity target, int amplifier, int ticks, boolean dark) {
 		target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ticks, amplifier));
 		AttributeInstance jump = target.getAttribute(Attributes.JUMP_STRENGTH);
 		if (jump != null) {
@@ -99,13 +104,38 @@ public final class WebTraps {
 			JUMP_LOCKS.add(new JumpLock(level.dimension(), target.getUUID(), clock + Math.min(ticks, ENSNARE_TICKS)));
 		}
 		BlockPos feet = target.blockPosition();
-		if (level.isLoaded(feet) && level.getBlockState(feet).isAir()) {
-			level.setBlockAndUpdate(feet, Blocks.COBWEB.defaultBlockState());
-			WEBS.add(new TempWeb(level.dimension(), feet.immutable(), clock + COBWEB_TICKS));
-		}
-		level.sendParticles(ParticleTypes.ITEM_COBWEB, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(),
+		place(level, feet, dark);
+		level.sendParticles(dark ? WebSymbiote.dust(1.2F) : ParticleTypes.ITEM_COBWEB, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(),
 			14, target.getBbWidth() * 0.5, target.getBbHeight() * 0.4, target.getBbWidth() * 0.5, 0.02);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.COBWEB_PLACE, SoundSource.PLAYERS, 1.0F, 0.8F);
+	}
+
+	/** A temporary web (cobweb, or the symbiote's black one) in this spot, if it's open air. */
+	private static void place(ServerLevel level, BlockPos pos, boolean dark) {
+		if (level.isLoaded(pos) && level.getBlockState(pos).isAir()) {
+			level.setBlockAndUpdate(pos, dark ? WebPower.SYMBIOTE_WEB.defaultBlockState() : Blocks.COBWEB.defaultBlockState());
+			WEBS.add(new TempWeb(level.dimension(), pos.immutable(), clock + COBWEB_TICKS));
+		}
+	}
+
+	/** A splash strews {@code count} webs about {@code center}, on the ground within {@code radius}. */
+	static void scatter(ServerLevel level, net.minecraft.world.phys.Vec3 center, double radius, int count, boolean dark) {
+		var random = level.getRandom();
+		int placed = 0;
+		for (int tries = 0; tries < count * 4 && placed < count; tries++) {
+			double angle = random.nextDouble() * Math.PI * 2.0;
+			double r = Math.sqrt(random.nextDouble()) * radius;
+			BlockPos column = BlockPos.containing(center.x + Math.cos(angle) * r, center.y, center.z + Math.sin(angle) * r);
+			// settle on the ground: the first open spot with something solid under it, a couple of blocks up or down
+			for (int dy = 2; dy >= -3; dy--) {
+				BlockPos pos = column.above(dy);
+				if (level.getBlockState(pos).isAir() && level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), net.minecraft.core.Direction.UP)) {
+					place(level, pos, dark);
+					placed++;
+					break;
+				}
+			}
+		}
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -141,9 +171,10 @@ public final class WebTraps {
 
 	private static void removeWeb(MinecraftServer server, TempWeb web) {
 		ServerLevel level = server.getLevel(web.dimension());
-		if (level != null && level.getBlockState(web.pos()).is(Blocks.COBWEB)) {
+		if (level != null && (level.getBlockState(web.pos()).is(Blocks.COBWEB) || level.getBlockState(web.pos()).is(WebPower.SYMBIOTE_WEB))) {
+			boolean dark = level.getBlockState(web.pos()).is(WebPower.SYMBIOTE_WEB);
 			level.removeBlock(web.pos(), false);
-			level.sendParticles(ParticleTypes.ITEM_COBWEB, web.pos().getX() + 0.5, web.pos().getY() + 0.5, web.pos().getZ() + 0.5,
+			level.sendParticles(dark ? WebSymbiote.dust(1.0F) : ParticleTypes.ITEM_COBWEB, web.pos().getX() + 0.5, web.pos().getY() + 0.5, web.pos().getZ() + 0.5,
 				6, 0.3, 0.3, 0.3, 0.01);
 		}
 	}

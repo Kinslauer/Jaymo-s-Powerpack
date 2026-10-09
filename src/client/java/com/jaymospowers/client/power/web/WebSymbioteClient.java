@@ -50,6 +50,8 @@ public final class WebSymbioteClient {
 
 	/** A meal in progress: how far through it (0-1), for the jaws. */
 	public static final RenderStateDataKey<Float> EATING = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_eating");
+	/** Which meal this is (when it started), so each bite's size is random but the same for everyone. */
+	public static final RenderStateDataKey<Long> EATING_SEED = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_eating_seed");
 
 	/** Player entity id → game time their Living Armor came up (for the tendrils' growth). */
 	private static final java.util.Map<Integer, Long> ARMOR_SINCE = new java.util.HashMap<>();
@@ -105,6 +107,7 @@ public final class WebSymbioteClient {
 				context.client().gui.setScreen(null);
 			}
 		});
+		ClientPlayNetworking.registerGlobalReceiver(WebNet.Shake.TYPE, (payload, context) -> WebShake.start(payload.strength()));
 		ClientPlayNetworking.registerGlobalReceiver(WebNet.Nudge.TYPE, (payload, context) -> {
 			LocalPlayer player = context.player();
 			if (player != null) {
@@ -139,6 +142,7 @@ public final class WebSymbioteClient {
 		Long eating = entity.getAttached(WebSymbiote.EATING);
 		state.setData(EATING, eating == null ? null
 			: net.minecraft.util.Mth.clamp((entity.level().getGameTime() - eating) / (float)WebSymbiote.EAT_TICKS, 0.0F, 1.0F));
+		state.setData(EATING_SEED, eating == null ? null : eating * 31L + entity.getId());
 		if (state.getData(SUIT) != null || entity instanceof Player p && WebSymbiote.isToggled(p, WebSymbioteState.ARMOR)) {
 			// no cape poking out through the suit
 			state.showCape = false;

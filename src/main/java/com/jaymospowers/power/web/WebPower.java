@@ -127,6 +127,10 @@ public final class WebPower implements Power {
 	private static final AttachmentType<State> STATE = AttachmentRegistry.create(JaymosPowers.id("web_state"));
 
 	public static Item WEB_BALL_ITEM;
+	/** The suit's V: a black symbiote mass instead of a web ball. */
+	public static Item SYMBIOTE_MASS_ITEM;
+	/** The symbiote's black webs (left where its shots and traps catch something; temporary, like the cobwebs). */
+	public static net.minecraft.world.level.block.Block SYMBIOTE_WEB;
 	public static EntityType<WebBall> WEB_BALL;
 	/** The symbiote's goo, found at the heart of a meteor crater. */
 	public static net.minecraft.world.level.block.Block GOO;
@@ -167,6 +171,14 @@ public final class WebPower implements Power {
 
 		ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, JaymosPowers.id("web_ball"));
 		WEB_BALL_ITEM = Registry.register(BuiltInRegistries.ITEM, itemKey, new Item(new Item.Properties().setId(itemKey)));
+		ResourceKey<Item> massKey = ResourceKey.create(Registries.ITEM, JaymosPowers.id("web_symbiote_mass"));
+		SYMBIOTE_MASS_ITEM = Registry.register(BuiltInRegistries.ITEM, massKey, new Item(new Item.Properties().setId(massKey)));
+		ResourceKey<net.minecraft.world.level.block.Block> webKey = ResourceKey.create(Registries.BLOCK, JaymosPowers.id("web_symbiote_web"));
+		SYMBIOTE_WEB = Registry.register(BuiltInRegistries.BLOCK, webKey, new net.minecraft.world.level.block.WebBlock(
+			net.minecraft.world.level.block.state.BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.COBWEB)
+				.mapColor(net.minecraft.world.level.material.MapColor.COLOR_BLACK)
+				.noLootTable()
+				.setId(webKey)));
 		ResourceKey<EntityType<?>> entityKey = ResourceKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("web_ball"));
 		WEB_BALL = Registry.register(BuiltInRegistries.ENTITY_TYPE, entityKey,
 			EntityType.Builder.<WebBall>of(WebBall::new, MobCategory.MISC)
@@ -379,6 +391,7 @@ public final class WebPower implements Power {
 		State state = player.getAttached(STATE);
 		WebSymbiote.tick(player);
 		WebTendrils.tick(player);
+		WebImpacts.tick(player);
 		WebAscension.tick(player, state != null && swinging(state));
 		if (state == null) {
 			return;
@@ -797,8 +810,10 @@ public final class WebPower implements Power {
 		if (now < cooldowns.shot()) {
 			return;
 		}
+		// wearing the suit, it's a black mass of the symbiote instead
+		boolean dark = WebSymbiote.suitShown(player) || WebSymbiote.isToggled(player, WebSymbioteState.ARMOR);
 		Projectile.spawnProjectileFromRotation((lvl, owner, stack) -> new WebBall(lvl, owner, stack).charged(charge), level,
-			new ItemStack(WEB_BALL_ITEM), player, 0.0F, SHOT_SPEED, 0.5F);
+			new ItemStack(dark ? SYMBIOTE_MASS_ITEM : WEB_BALL_ITEM), player, 0.0F, SHOT_SPEED, 0.5F);
 		int cooldown = Mth.lerpInt(charge, SHOT_COOLDOWN, SHOT_COOLDOWN_MAX);
 		player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), now + cooldown, cooldowns.yank()));
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 1.0F, 1.3F);

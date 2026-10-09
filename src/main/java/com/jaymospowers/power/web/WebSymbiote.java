@@ -149,7 +149,7 @@ public final class WebSymbiote {
 
 	/** The symbiote's black, and its purple sheen (for dust particles). */
 	public static final int BLACK = 0x0E0C12;
-	public static final int SHEEN = 0x4A2A66;
+	public static final int SHEEN = 0x34313A;
 
 	// one-time whispers
 	private static final int HINT_NOISE = 1;
@@ -301,6 +301,11 @@ public final class WebSymbiote {
 	public static boolean suitShown(Player player) {
 		WebSymbioteState state = state(player);
 		return state.bonded() && state.has(WebSymbioteState.SUIT) && Powers.has(player, WebPower.INSTANCE);
+	}
+
+	/** Living Armor is up (the tendrils grab and hold; the plain suit only swings). */
+	public static boolean armored(Player player) {
+		return isToggled(player, WebSymbioteState.ARMOR);
 	}
 
 	public static boolean isToggled(Player player, int flag) {

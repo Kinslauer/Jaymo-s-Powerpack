@@ -48,8 +48,8 @@ public final class WebTendrils {
 	/** Reach of a grab on the keys (and of the radial grab). */
 	public static final double GRAB_RANGE = 9.0;
 	public static final double RADIAL_GRAB_RANGE = 20.0;
-	/** Where it's held: this far ahead, this far to its side, this far below the eyes. */
-	static final double HOLD_FORWARD = 2.1, HOLD_SIDE = 0.8, HOLD_DROP = 0.35;
+	/** Where it's held: this far ahead, this far to its side, this far below the eyes (in reach of a punch or Consume). */
+	static final double HOLD_FORWARD = 1.9, HOLD_SIDE = 0.3, HOLD_DROP = 0.45;
 	static final double HOLD_STEER = 0.45, HOLD_MAX_SPEED = 1.4;
 	/** Longest it can be held, and how long the radial grab holds before it throws by itself. */
 	static final int MAX_HOLD_TICKS = 300;
@@ -121,7 +121,7 @@ public final class WebTendrils {
 			int hand = payload.hand() == WebNet.OFF ? WebNet.OFF : WebNet.MAIN;
 			if (payload.entityId() < 0) {
 				release(player, hand, true);
-			} else if (WebSymbiote.suitShown(player) && player.isAlive() && !player.isSpectator()) {
+			} else if (WebSymbiote.armored(player) && player.isAlive() && !player.isSpectator()) {
 				Entity target = player.level().getEntity(payload.entityId());
 				if (target != null && target.distanceTo(player) <= GRAB_RANGE + 2.5) {
 					grab(player, hand, target, -1L);
@@ -261,7 +261,7 @@ public final class WebTendrils {
 		if (grips == null) {
 			return;
 		}
-		if (!player.isAlive() || player.isSpectator() || !WebSymbiote.suitShown(player) && !WebSymbiote.isToggled(player, WebSymbioteState.ARMOR)) {
+		if (!player.isAlive() || player.isSpectator() || !WebSymbiote.armored(player)) {
 			releaseAll(player, false);
 			return;
 		}
@@ -328,6 +328,9 @@ public final class WebTendrils {
 			if (living.horizontalCollision || living.verticalCollision && living.getDeltaMovement().y <= 0.0 && level.getGameTime() + THROWN_TICKS - thrown.until() > 3) {
 				it.remove();
 				float damage = (float)Math.max(IMPACT_DAMAGE_MIN, speed * IMPACT_DAMAGE_PER_SPEED);
+				// hard enough, and the wall (or ground) gives
+				WebImpacts.smash(level, living.getBoundingBox().getCenter().add(living.getDeltaMovement().normalize().scale(0.6)), speed,
+					server.getPlayerList().getPlayer(thrown.thrower()));
 				ServerPlayer thrower = server.getPlayerList().getPlayer(thrown.thrower());
 				living.hurtServer(level, thrower != null ? level.damageSources().playerAttack(thrower) : level.damageSources().flyIntoWall(), damage);
 				level.sendParticles(ParticleTypes.POOF, living.getX(), living.getY() + living.getBbHeight() * 0.5, living.getZ(), 8, 0.3, 0.3, 0.3, 0.05);

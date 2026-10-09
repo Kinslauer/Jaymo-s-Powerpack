@@ -7,7 +7,8 @@
 		"WebEntityRendererMixin",
 		"WebJumpMixin",
 		"WebLivingEntityRendererMixin",
-		"WebModelFeatureRendererMixin"
+		"WebModelFeatureRendererMixin",
+		"WebShakeMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
