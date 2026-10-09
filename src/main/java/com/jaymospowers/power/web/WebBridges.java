@@ -126,6 +126,35 @@ public final class WebBridges {
 		return true;
 	}
 
+	/** Someone punched a webline (the one from {@code from} to {@code to}): it comes down, planks and all. */
+	static boolean cut(ServerLevel level, Vec3 from, Vec3 to) {
+		Line found = null;
+		for (Line line : LINES) {
+			if (line.dimension() == level.dimension() && (line.span().from().distanceTo(from) < 1.0 && line.span().to().distanceTo(to) < 1.0
+				|| line.span().from().distanceTo(to) < 1.0 && line.span().to().distanceTo(from) < 1.0)) {
+				found = line;
+				break;
+			}
+		}
+		if (found == null) {
+			return false;
+		}
+		LINES.remove(found);
+		Vec3 a = found.span().from(), b = found.span().to();
+		for (Iterator<Plank> it = PLANKS.iterator(); it.hasNext(); ) {
+			Plank plank = it.next();
+			if (plank.dimension() != level.dimension() || WebCut.distanceToSegment(Vec3.atCenterOf(plank.pos()), a, b) > 1.0) {
+				continue;
+			}
+			it.remove();
+			if (level.isLoaded(plank.pos()) && level.getBlockState(plank.pos()).is(BRIDGE)) {
+				level.setBlock(plank.pos(), Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+			}
+		}
+		syncSpans(level);
+		return true;
+	}
+
 	private static void syncSpans(ServerLevel level) {
 		List<Span> spans = new ArrayList<>();
 		for (Line line : LINES) {

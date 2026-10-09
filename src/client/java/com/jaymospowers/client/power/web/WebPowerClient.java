@@ -38,6 +38,7 @@ public final class WebPowerClient implements PowerClient {
 
 	/** Called once from {@link com.jaymospowers.client.JaymosPowersClient}: renderers, client packets, the PowerClient. */
 	public static void init() {
+		WebCutClient.register();
 		PowerClients.register(WebPower.ID, INSTANCE);
 		WebSymbioteClient.init();
 		EntityRenderers.register(WebPower.WEB_BALL, context -> new ThrownItemRenderer<>(context, 0.85F, false));

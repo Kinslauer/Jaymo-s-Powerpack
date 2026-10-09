@@ -46,12 +46,49 @@ public final class WebSymbioteClient {
 	 * @param side     which side's tendrils strike (+1 left, -1 right)
 	 */
 	/** {@code held}: bit 1, the right shoulder's tendril is holding something (drawn reaching out instead); bit 2, the left's. */
-	public record Tendrils(float growth, float time, float strike, float aimYaw, float aimPitch, float side, boolean sprint, int held) {
+	public record Tendrils(float growth, float time, float strike, float aimYaw, float aimPitch, float side, float run, int held) {
 	}
 
 	/** A meal in progress: how far through it (0-1), for the jaws. */
 	public static final RenderStateDataKey<Float> EATING = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_eating");
 	/** Which meal this is (when it started), so each bite's size is random but the same for everyone. */
+	/** The suit's charged jump coiling: how far (0-1), for the crouch. */
+	public static final RenderStateDataKey<Float> CHARGE = RenderStateDataKey.create(() -> "jaymospowers:web_charge");
+	/** Smoothed per wearer: how far into the gallop (0 standing/walking, 1 all fours), and when each started coiling. */
+	private static final class Run {
+		float value;
+		long at;
+	}
+
+	private static final java.util.Map<Integer, Run> RUN = new java.util.HashMap<>();
+	private static final java.util.Map<Integer, Long> COILING = new java.util.HashMap<>();
+
+	/** This wearer's gallop blend right now (eased in and out over a few frames). */
+	public static float run(Entity entity) {
+		Run run = RUN.get(entity.getId());
+		return run == null ? 0.0F : run.value;
+	}
+
+	private static float smoothRun(Player player) {
+		float target = player.isSprinting() && player.onGround() ? 1.0F : 0.0F;
+		long now = System.nanoTime();
+		Run run = RUN.computeIfAbsent(player.getId(), id -> {
+			Run fresh = new Run();
+			fresh.value = target;
+			fresh.at = now;
+			return fresh;
+		});
+		float seconds = Math.min(0.25F, (now - run.at) / 1.0E9F);
+		run.at = now;
+		// about a quarter of a second to drop onto all fours, a little longer to come back up
+		float rate = target > run.value ? 5.0F : 3.5F;
+		run.value += (target - run.value) * Math.min(1.0F, seconds * rate);
+		if (RUN.size() > 64) {
+			RUN.keySet().removeIf(id -> id != player.getId() && player.level().getEntity(id) == null);
+		}
+		return run.value;
+	}
+
 	public static final RenderStateDataKey<Long> EATING_SEED = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_eating_seed");
 	public static final RenderStateDataKey<Integer> EATER = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_eater");
 
@@ -141,6 +178,15 @@ public final class WebSymbioteClient {
 	/** From the avatar renderer's extractRenderState: does this player wear the suit. */
 	public static void extract(Entity entity, AvatarRenderState state) {
 		state.setData(SUIT, entity instanceof Player player && WebSymbiote.suitShown(player) ? Boolean.TRUE : null);
+		// coiling for a charged leap: deeper the longer it's held (WebSwing.CHARGE_FULL)
+		if (entity.getAttached(com.jaymospowers.power.web.WebPower.CHARGING) != null) {
+			long now = System.nanoTime();
+			long since = COILING.computeIfAbsent(entity.getId(), id -> now);
+			state.setData(CHARGE, Math.min(1.0F, (now - since) / 1.0E9F / (WebSwing.CHARGE_FULL / 20.0F)));
+		} else {
+			COILING.remove(entity.getId());
+			state.setData(CHARGE, null);
+		}
 		Long eating = entity.getAttached(WebSymbiote.EATING);
 		state.setData(EATING, eating == null ? null
 			: net.minecraft.util.Mth.clamp((entity.level().getGameTime() - eating) / (float)WebSymbiote.EAT_TICKS, 0.0F, 1.0F));
@@ -178,7 +224,7 @@ public final class WebSymbioteClient {
 					}
 				}
 			}
-			state.setData(TENDRILS, new Tendrils(growth, player.tickCount, strike, aimYaw, aimPitch, side, player.isSprinting(), held));
+			state.setData(TENDRILS, new Tendrils(growth, player.tickCount, strike, aimYaw, aimPitch, side, smoothRun(player), held));
 		} else {
 			ARMOR_SINCE.remove(entity.getId());
 			state.setData(TENDRILS, null);

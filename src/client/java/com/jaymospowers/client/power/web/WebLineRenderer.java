@@ -251,6 +251,10 @@ final class WebLineRenderer {
 				if (hand.distanceToSqr(end) > 96.0 * 96.0) {
 					continue;
 				}
+				// shooting out to where it sticks (the symbiote's ropes slower than a web)
+				float out = WebGrowth.fraction(player.getId() * 4L + handIndex, end, hand.distanceTo(end),
+					dark ? WebGrowth.ROPE_SPEED : WebGrowth.WEB_SPEED, false);
+				end = hand.lerp(end, out);
 				// a symbiote's lines are thick, living cords: most of that side's tendrils at once
 				if (dark) {
 					bundle(context, hand.subtract(camera), end.subtract(camera), width);
@@ -265,7 +269,7 @@ final class WebLineRenderer {
 					net.minecraft.world.entity.Entity held = grips.get(handIndex) < 0 ? null : level.getEntity(grips.get(handIndex));
 					if (held != null) {
 						Vec3 at = held.getPosition(partialTick).add(0.0, held.getBbHeight() * 0.55, 0.0);
-						tentacle(context, minecraft, player, handIndex, at, camera, partialTick);
+						tentacle(context, minecraft, player, handIndex, at, held.getId(), camera, partialTick);
 					}
 				}
 			}
@@ -285,8 +289,8 @@ final class WebLineRenderer {
 	 * up over the shoulder and down to what it holds in front, so the hands stay free. Drawn with the tendrils' own
 	 * texture, thick at the root and tapering.
 	 */
-	private static void tentacle(LevelRenderContext context, Minecraft minecraft, Player player, int handIndex, Vec3 to, Vec3 camera,
-		float partialTick) {
+	private static void tentacle(LevelRenderContext context, Minecraft minecraft, Player player, int handIndex, Vec3 to, int heldId,
+		Vec3 camera, float partialTick) {
 		boolean mainRight = player.getMainArm() == HumanoidArm.RIGHT;
 		boolean right = (handIndex == WebNet.MAIN) == mainRight;
 		float bend = WebFeral.bend(player, partialTick);
@@ -307,11 +311,20 @@ final class WebLineRenderer {
 			points[i] = root.lerp(over, t).lerp(over.lerp(to, t), t).subtract(camera);
 		}
 		int light = minecraft.getEntityRenderDispatcher().getPackedLightCoords(player, partialTick);
+		// it reaches out over time (WebTendrils.TENDRIL_SPEED, as the server takes hold)
+		double path = 0.0;
+		for (int i = 0; i < pieces; i++) {
+			path += points[i].distanceTo(points[i + 1]);
+		}
+		float out = WebGrowth.fraction(((long)player.getId() << 24) ^ ((long)heldId << 2) ^ handIndex ^ 0x4000_0000_0000L, to, path,
+			com.jaymospowers.power.web.WebTendrils.TENDRIL_SPEED * path / Math.max(0.5, root.distanceTo(to)), true);
+		double reach = out * pieces;
 		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.entityCutout(TENDRIL_TEXTURE), (pose, buffer) -> {
-			for (int i = 0; i < pieces; i++) {
+			for (int i = 0; i < pieces && i < reach; i++) {
 				double r0 = radius * (1.0 - 0.45 * i / pieces);
 				double r1 = radius * (1.0 - 0.45 * (i + 1) / pieces);
-				tube(buffer, pose, points[i], points[i + 1], r0, r1, i, light);
+				Vec3 tip = i + 1 <= reach ? points[i + 1] : points[i].lerp(points[i + 1], reach - i);
+				tube(buffer, pose, points[i], tip, r0, r1, i, light);
 			}
 		});
 	}

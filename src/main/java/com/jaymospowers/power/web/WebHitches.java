@@ -219,6 +219,24 @@ public final class WebHitches {
 
 	private static final List<Entity> syncLater = new ArrayList<>();
 
+	/** Someone punched one of this creature's lines (the one tied near {@code anchor}): it breaks, the rest hold. */
+	static boolean cut(ServerLevel level, Entity entity, Vec3 anchor) {
+		Hitch nearest = null;
+		double best = 2.5;
+		for (Hitch h : HITCHES) {
+			if (h.entity().equals(entity.getUUID()) && h.anchor().distanceTo(anchor) < best) {
+				best = h.anchor().distanceTo(anchor);
+				nearest = h;
+			}
+		}
+		if (nearest == null) {
+			return false;
+		}
+		HITCHES.remove(nearest);
+		sync(level, entity);
+		return true;
+	}
+
 	private static void release(ServerLevel level, Entity entity, boolean snapped) {
 		entity.removeAttached(WebPower.HITCH);
 		STRAIN.remove(entity.getUUID());

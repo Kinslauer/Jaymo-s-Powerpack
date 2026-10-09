@@ -534,6 +534,10 @@ public final class GravityPower implements Power {
 			drawIn(player, state, item);
 			return;
 		}
+		if (state.drawing && isCorpse(target)) {
+			drawCorpse(player, state, target);
+			return;
+		}
 		Vec3 hold = player.getEyePosition().add(player.getViewVector(1.0F).scale(state.choking ? CHOKE_DISTANCE + target.getBbWidth() * 0.5 : state.liftHold));
 		if (state.choking) {
 			// by the throat, held up high: its head at your raised hand
@@ -609,8 +613,8 @@ public final class GravityPower implements Power {
 			return;
 		}
 		Entity entity = player.level().getEntity(state.liftTarget);
-		if (entity instanceof ItemEntity && !state.drawing) {
-			// a dropped item: drawn in to you and pocketed
+		if ((entity instanceof ItemEntity || entity != null && isCorpse(entity)) && !state.drawing) {
+			// a dropped item (or a corpse): drawn in to you and pocketed (a corpse too big for a bag, carried)
 			state.drawing = true;
 			player.level().playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.SHULKER_BULLET_HURT, SoundSource.PLAYERS, 0.6F, 1.6F);
 			return;
@@ -665,6 +669,21 @@ public final class GravityPower implements Power {
 		int style = heavy ? 1 + level.getRandom().nextInt(SLAM_STYLES) : 0;
 		player.setAttached(SLAM_POSE, new SlamPose(level.getGameTime(), rise, -1L, style, aerial));
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 1.0F, 0.6F);
+	}
+
+	/** A held corpse flies to you; once close it's yours (Jaymo's Kitchen bags it if it fits, otherwise you carry it). */
+	private static void drawCorpse(ServerPlayer player, State state, Entity corpse) {
+		Vec3 chest = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
+		Vec3 to = chest.subtract(corpse.getBoundingBox().getCenter());
+		if (to.length() > DRAW_REACH + corpse.getBbWidth() * 0.5) {
+			corpse.setDeltaMovement(to.normalize().scale(Math.min(DRAW_SPEED, to.length())));
+			corpse.needsSync = true;
+			corpse.syncVelocity = true;
+			return;
+		}
+		state.drawing = false;
+		dropLift(player, state, true);
+		com.jaymospowers.power.web.KitchenCompat.take(player, corpse);
 	}
 
 	/** A held item flies to you; once close it goes into your inventory (what doesn't fit drops at your feet). */
@@ -808,6 +827,10 @@ public final class GravityPower implements Power {
 			if (slam.aerial()) {
 				// and from that height it breaks the ground around it like a blast
 				com.jaymospowers.core.Debris.smash(level, Vec3.atCenterOf(under), slam.down(), player);
+				if (player != null && !player.onGround() && com.jaymospowers.core.Mastery.unlocked(player) >= com.jaymospowers.core.Mastery.ALL) {
+					// mastery: a chunk of the ground comes flying up and knocks you clear of the crater
+					clearOfCrater(level, player, Vec3.atCenterOf(under));
+				}
 				level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, target.getX(), target.getY() + 0.3, target.getZ(), 14, 1.2, 0.3, 1.2, 0.03);
 				level.sendParticles(ParticleTypes.LARGE_SMOKE, target.getX(), target.getY() + 0.3, target.getZ(), 30, 1.5, 0.4, 1.5, 0.05);
 				level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.2F, 0.7F);
@@ -819,6 +842,70 @@ public final class GravityPower implements Power {
 		}
 	}
 
+
+	/** How hard (blocks/tick) the flying debris knocks a master clear of their crater, out and up. */
+	static final double CLEAR_KNOCK = 1.15, CLEAR_LIFT = 0.65;
+	/** Debris thrown up to knock a master clear: gone after this many ticks (it never lands as a block). */
+	private record Shrapnel(ResourceKey<Level> dimension, int entity, long until) {
+	}
+
+	private static final List<Shrapnel> SHRAPNEL = new ArrayList<>();
+
+	private static void clearOfCrater(ServerLevel level, ServerPlayer player, Vec3 crater) {
+		Vec3 away = player.position().subtract(crater);
+		away = new Vec3(away.x, 0.0, away.z);
+		if (away.lengthSqr() < 0.04) {
+			Vec3 look = player.getLookAngle();
+			away = new Vec3(-look.x, 0.0, -look.z);
+		}
+		away = away.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : away.normalize();
+		// the chunk: a lump of what was hit, flung up from the crater's edge into you
+		BlockPos from = BlockPos.containing(crater.add(away.scale(1.5)));
+		for (int dy = 1; dy >= -2; dy--) {
+			BlockPos pos = from.above(dy);
+			BlockState state = level.getBlockState(pos);
+			if (!state.isAir() && state.getFluidState().isEmpty() && !state.hasBlockEntity() && state.getDestroySpeed(level, pos) >= 0.0F
+				&& state.getDestroySpeed(level, pos) <= 5.0F) {
+				net.minecraft.world.entity.item.FallingBlockEntity chunk = net.minecraft.world.entity.item.FallingBlockEntity.fall(level, pos, state);
+				chunk.disableDrop();
+				Vec3 to = player.position().add(0.0, 0.8, 0.0).subtract(chunk.position());
+				chunk.setDeltaMovement(to.scale(0.5).add(0.0, 0.25, 0.0));
+				chunk.needsSync = true;
+				chunk.syncVelocity = true;
+				SHRAPNEL.add(new Shrapnel(level.dimension(), chunk.getId(), level.getGameTime() + 6));
+				com.jaymospowers.core.Debris.puff(level, pos, state, 1.5F);
+				break;
+			}
+		}
+		player.setDeltaMovement(away.scale(CLEAR_KNOCK).add(0.0, CLEAR_LIFT, 0.0));
+		player.resetFallDistance();
+		player.needsSync = true;
+		player.syncVelocity = true;
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.0F, 0.6F);
+	}
+
+	private static void tickShrapnel(MinecraftServer server) {
+		for (Iterator<Shrapnel> it = SHRAPNEL.iterator(); it.hasNext(); ) {
+			Shrapnel s = it.next();
+			ServerLevel level = server.getLevel(s.dimension());
+			if (level == null) {
+				it.remove();
+				continue;
+			}
+			Entity chunk = level.getEntity(s.entity());
+			if (chunk == null) {
+				it.remove();
+				continue;
+			}
+			if (level.getGameTime() >= s.until()) {
+				it.remove();
+				if (chunk instanceof net.minecraft.world.entity.item.FallingBlockEntity falling) {
+					com.jaymospowers.core.Debris.puff(level, chunk.blockPosition(), falling.getBlockState(), 1.0F);
+				}
+				chunk.discard();
+			}
+		}
+	}
 
 	/** Hanging in the air for an aerial slam: the fall stops dead (sent to the player, whose client moves them). */
 	private static void stall(ServerPlayer player) {
@@ -977,6 +1064,7 @@ public final class GravityPower implements Power {
 			PINNED.removeIf(p -> p.entity().equals(target.getUUID()));
 			PINNED.add(new Pinned(level.dimension(), target.getUUID(), level.getGameTime() + CRUSH_PIN_TICKS));
 		}
+		flatten(level, at, radius, player);
 		// a ring slamming outward along the ground
 		for (int i = 0; i < 24; i++) {
 			double a = i / 24.0 * Math.PI * 2.0;
@@ -986,6 +1074,36 @@ public final class GravityPower implements Power {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.2F, 0.6F);
 		int cooldown = Math.round(Mth.lerp(charge, CRUSH_COOLDOWN_MIN, CRUSH_COOLDOWN_MAX));
 		player.setAttached(COOLDOWNS, cooldowns(player).withCrush(level.getGameTime() + cooldown, cooldown));
+	}
+
+	/**
+	 * Crush flattens everything light in the blast, at any charge: flowers, grass, torches and the like pop off and drop,
+	 * and item frames and paintings come down.
+	 */
+	private static void flatten(ServerLevel level, Vec3 at, double radius, ServerPlayer player) {
+		int r = Mth.ceil(radius);
+		BlockPos center = BlockPos.containing(at);
+		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-r, -2, -r), center.offset(r, 3, r))) {
+			if (pos.distToCenterSqr(at) > radius * radius) {
+				continue;
+			}
+			BlockState state = level.getBlockState(pos);
+			if (state.isAir() || !state.getFluidState().isEmpty() || state.hasBlockEntity() || state.is(net.minecraft.tags.BlockTags.PORTALS)) {
+				continue;
+			}
+			float hardness = state.getDestroySpeed(level, pos);
+			if (hardness >= 0.0F && hardness < 1.0F && state.getCollisionShape(level, pos).isEmpty()) {
+				level.destroyBlock(pos, true, player);
+			}
+		}
+		for (net.minecraft.world.entity.decoration.HangingEntity hanging : level.getEntitiesOfClass(
+			net.minecraft.world.entity.decoration.HangingEntity.class, new AABB(at, at).inflate(radius, 3.0, radius))) {
+			// twice: an item frame lets go of its item first, then comes down itself
+			hanging.hurtServer(level, level.damageSources().playerAttack(player), 1.0F);
+			if (hanging.isAlive()) {
+				hanging.hurtServer(level, level.damageSources().playerAttack(player), 1.0F);
+			}
+		}
 	}
 
 	/** The well's ground tears loose (see CaveIn): the blocks start rising now. */
@@ -1299,6 +1417,9 @@ public final class GravityPower implements Power {
 		}
 		if (!CAVE_INS.isEmpty()) {
 			tickCaveIns(server);
+		}
+		if (!SHRAPNEL.isEmpty()) {
+			tickShrapnel(server);
 		}
 		if (!WELLS.isEmpty()) {
 			for (Iterator<Well> it = WELLS.iterator(); it.hasNext(); ) {

@@ -114,6 +114,8 @@ public final class WebSwing {
 		int swingTicks;
 		boolean keyHeld;
 		int retryIn;
+		/** Ticks until the web reaches its anchor (it shoots out at WebGrowth's speeds); no pull till then. */
+		int travel;
 
 		Strand(int hand) {
 			this.hand = hand;
@@ -218,6 +220,7 @@ public final class WebSwing {
 		strand.swingTicks = 0;
 		double distance = strand.anchor.distanceTo(player.position().add(0.0, ROPE_HEIGHT, 0.0));
 		strand.rope = Math.max(ROPE_MIN, distance * ATTACH_SLACK);
+		strand.travel = (int)(distance / (com.jaymospowers.power.web.WebSymbiote.suitShown(player) ? WebGrowth.ROPE_SPEED : WebGrowth.WEB_SPEED));
 		ClientPlayNetworking.send(new WebNet.Swing(strand.hand, true, strand.anchor));
 		play(player, SoundEvents.FISHING_BOBBER_THROW, 0.9F, 1.7F + player.getRandom().nextFloat() * 0.2F);
 		puff(player, strand.anchor, 5);
@@ -358,6 +361,9 @@ public final class WebSwing {
 			return;
 		}
 		for (Strand strand : strands) {
+			if (strand.attached && strand.travel > 0) {
+				strand.travel--;
+			}
 			if (strand.attached && ++strand.swingTicks % 5 == 0 && !WebAnchors.nearSolid(player.level(), strand.anchor)) {
 				strand.attached = false;
 				ClientPlayNetworking.send(new WebNet.Swing(strand.hand, false, Vec3.ZERO));
@@ -388,7 +394,7 @@ public final class WebSwing {
 		Vec3 body = player.position().add(0.0, ROPE_HEIGHT, 0.0);
 		Vec3 pullDir = Vec3.ZERO;
 		for (Strand strand : strands) {
-			if (!strand.attached) {
+			if (!strand.attached || strand.travel > 0) {
 				continue;
 			}
 			if (input.jump()) {
@@ -421,7 +427,7 @@ public final class WebSwing {
 		// two webs settle against each other instead of fighting
 		for (int pass = 0; pass < 2; pass++) {
 			for (Strand strand : strands) {
-				if (!strand.attached) {
+				if (!strand.attached || strand.travel > 0) {
 					continue;
 				}
 				Vec3 toAnchor = strand.anchor.subtract(body);

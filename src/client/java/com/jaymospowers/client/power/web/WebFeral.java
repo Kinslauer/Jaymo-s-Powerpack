@@ -29,14 +29,54 @@ public final class WebFeral {
 		if (!(state instanceof AvatarRenderState avatar) || !(model instanceof HumanoidModel<?> humanoid)) {
 			return;
 		}
+		boolean slim = avatar.skin != null && avatar.skin.model() == PlayerModelType.SLIM;
+		Float charge = avatar.getData(WebSymbioteClient.CHARGE);
+		if (charge != null) {
+			coil(humanoid, avatar, charge, slim);
+			return;
+		}
 		WebSymbioteClient.Tendrils tendrils = avatar.getData(WebSymbioteClient.TENDRILS);
 		if (tendrils == null || avatar.getData(WebArms.KEY) != null || avatar.isFallFlying || avatar.swimAmount > 0.0F
 			|| avatar.isPassenger || avatar.isCrouching) {
 			return;
 		}
-		float run = tendrils.sprint() ? Mth.clamp(avatar.walkAnimationSpeed * 1.5F, 0.0F, 1.0F) : 0.0F;
-		boolean slim = avatar.skin != null && avatar.skin.model() == PlayerModelType.SLIM;
+		// eased between standing, walking and the gallop (see WebSymbioteClient.smoothRun)
+		float run = tendrils.run() * Mth.clamp(0.4F + avatar.walkAnimationSpeed, 0.0F, 1.0F);
 		pose(humanoid, avatar, run, slim);
+	}
+
+	/**
+	 * Coiling for the suit's charged leap: sinking into a deep crouch, bent low over the knees, arms swept back, head
+	 * up at where it's going. {@code c}: how far into the charge (0-1).
+	 */
+	private static void coil(HumanoidModel<?> h, AvatarRenderState state, float c, boolean slim) {
+		float e = c * (2.0F - c);
+		float bend = 0.75F * e;
+		float squat = 0.85F * e;
+		float armY = slim ? 2.5F : 2.0F;
+		place(h.body, 0.0F, 0.0F, bend);
+		place(h.head, 0.0F, 0.0F, bend);
+		place(h.rightArm, -5.0F, armY, bend);
+		place(h.leftArm, 5.0F, armY, bend);
+		h.body.xRot = bend;
+		h.head.xRot = state.xRot * Mth.DEG_TO_RAD * 0.4F - bend * 0.9F;
+		// arms swept back behind, ready to swing through; a tremble as it builds
+		float shiver = Mth.sin(state.ageInTicks * 2.3F) * 0.03F * e;
+		for (ModelPart arm : new ModelPart[] {h.rightArm, h.leftArm}) {
+			float side = arm == h.rightArm ? 1.0F : -1.0F;
+			arm.xRot = 0.9F * e - bend + shiver;
+			arm.yRot = 0.0F;
+			arm.zRot = side * (0.15F + 0.2F * e);
+		}
+		// knees forward: the legs swing forward from the hip and the whole body sinks so the feet stay down
+		for (ModelPart leg : new ModelPart[] {h.rightLeg, h.leftLeg}) {
+			float side = leg == h.rightLeg ? 1.0F : -1.0F;
+			leg.xRot = -squat;
+			leg.zRot = side * 0.12F * e;
+		}
+		float sink = 12.0F * (1.0F - Mth.cos(squat));
+		ModelPart root = h.root();
+		root.y = sink;
 	}
 
 	private static void pose(HumanoidModel<?> h, AvatarRenderState state, float run, boolean slim) {
@@ -100,7 +140,7 @@ public final class WebFeral {
 		if (!WebSymbiote.armored(player) || player.isCrouching() || player.isFallFlying() || player.isSwimming() || player.isPassenger()) {
 			return 0.0F;
 		}
-		float run = player.isSprinting() ? Mth.clamp(player.walkAnimation.speed(partialTick) * 1.5F, 0.0F, 1.0F) : 0.0F;
+		float run = WebSymbioteClient.run(player) * Mth.clamp(0.4F + player.walkAnimation.speed(partialTick), 0.0F, 1.0F);
 		return Mth.lerp(run, IDLE_BEND, RUN_BEND);
 	}
 

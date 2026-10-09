@@ -49,7 +49,11 @@ public final class WebTendrils {
 	public static final double GRAB_RANGE = 9.0;
 	public static final double RADIAL_GRAB_RANGE = 20.0;
 	/** Where it's held: this far ahead, this far to its side, this far below the eyes (in reach of a punch or Consume). */
-	static final double HOLD_FORWARD = 1.9, HOLD_SIDE = 0.34, HOLD_DROP = 0.45;
+	static final double HOLD_FORWARD = 1.9, HOLD_DROP = 0.45;
+	/** Two held: each off to its own side by this much (blocks), and this much up or down, picked at random. */
+	static final double HOLD_SIDE_MIN = 1.1, HOLD_SIDE_MAX = 1.6, HOLD_UP_MIN = -0.5, HOLD_UP_MAX = 0.7;
+	/** How fast a tendril reaches out (blocks a tick): slower than a web shoots. */
+	public static final double TENDRIL_SPEED = 0.9;
 	static final double HOLD_STEER = 0.45, HOLD_MAX_SPEED = 1.4;
 	/** Longest it can be held, and how long the radial grab holds before it throws by itself. */
 	static final int MAX_HOLD_TICKS = 300;
@@ -102,7 +106,12 @@ public final class WebTendrils {
 		}
 	}
 
-	private record Hold(UUID player, int hand, long since, long throwAt) {
+	/**
+	 * {@code reachAt}: the tendril takes time to reach out ({@code TENDRIL_SPEED} blocks a tick); until then the target
+	 * isn't held. {@code side}, {@code up}: where it's held while both tendrils are full (randomly off the middle of
+	 * the view, on its own side), in blocks across and up.
+	 */
+	private record Hold(UUID player, int hand, long since, long throwAt, long reachAt, double side, double up) {
 	}
 
 	private record Thrown(ResourceKey<Level> dimension, UUID entity, UUID thrower, long until, java.util.Set<Integer> struck) {
@@ -174,7 +183,14 @@ public final class WebTendrils {
 		release(player, hand, false);
 		weightless(target, true);
 		Hold[] holds = HOLDS.computeIfAbsent(player.getUUID(), k -> new Hold[2]);
-		holds[hand] = new Hold(player.getUUID(), hand, player.level().getGameTime(), throwAt);
+		long now = player.level().getGameTime();
+		long reach = (long)Math.ceil(target.distanceTo(player) / TENDRIL_SPEED);
+		// off to one side when both are full: this one's side, at a random spot (the middle of the view stays clear)
+		Hold other = holds[hand == WebNet.OFF ? WebNet.MAIN : WebNet.OFF];
+		double sign = other != null ? -Math.signum(other.side()) : player.getRandom().nextBoolean() ? 1.0 : -1.0;
+		double side = sign * (HOLD_SIDE_MIN + player.getRandom().nextDouble() * (HOLD_SIDE_MAX - HOLD_SIDE_MIN));
+		double up = HOLD_UP_MIN + player.getRandom().nextDouble() * (HOLD_UP_MAX - HOLD_UP_MIN);
+		holds[hand] = new Hold(player.getUUID(), hand, now, throwAt < 0 ? throwAt : throwAt + reach, now + reach, side, up);
 		Grips grips = player.getAttachedOrElse(GRIPS, Grips.NONE);
 		player.setAttached(GRIPS, grips.with(hand, target.getId()));
 		ServerLevel level = player.level();
@@ -283,13 +299,19 @@ public final class WebTendrils {
 				release(player, hand, true);
 				continue;
 			}
+			if (hold != null && now < hold.reachAt()) {
+				// still reaching for it
+				continue;
+			}
 			Vec3 look = player.getLookAngle();
 			Vec3 right = look.cross(new Vec3(0.0, 1.0, 0.0));
 			right = right.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : right.normalize();
-			// one held sits right in front (in reach of a punch); two sit side by side, touching
-			double side = grips.left() >= 0 && grips.right() >= 0 ? hand == WebNet.OFF ? -1.0 : 1.0 : 0.0;
-			Vec3 point = player.getEyePosition().add(look.scale(HOLD_FORWARD + target.getBbWidth() * 0.5)).add(right.scale(side * HOLD_SIDE))
-				.add(0.0, -HOLD_DROP, 0.0);
+			// one held sits right in front (in reach of a punch); with two, each is off to its own side (see Hold)
+			boolean both = grips.left() >= 0 && grips.right() >= 0;
+			double side = both && hold != null ? hold.side() + Math.signum(hold.side()) * target.getBbWidth() * 0.5 : 0.0;
+			double up = both && hold != null ? hold.up() : 0.0;
+			Vec3 point = player.getEyePosition().add(look.scale(HOLD_FORWARD + target.getBbWidth() * 0.5)).add(right.scale(side))
+				.add(0.0, up - HOLD_DROP, 0.0);
 			Vec3 to = point.subtract(target.getBoundingBox().getCenter());
 			Vec3 v = to.scale(HOLD_STEER);
 			double speed = v.length();

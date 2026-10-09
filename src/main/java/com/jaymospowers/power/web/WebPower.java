@@ -101,6 +101,9 @@ public final class WebPower implements Power {
 	public static final AttachmentType<WebLine> LINE = AttachmentRegistry.create(JaymosPowers.id("web_line"),
 		builder -> builder.syncWith(WebLine.STREAM_CODEC, AttachmentSyncPredicate.all()));
 	/** Web wings spread (glide), for everyone to draw. */
+	/** The suit's charged jump is coiling (synced to everyone, who see the crouch). */
+	public static final AttachmentType<Boolean> CHARGING = AttachmentRegistry.create(JaymosPowers.id("web_charging"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	public static final AttachmentType<Boolean> WINGS = AttachmentRegistry.create(JaymosPowers.id("web_wings"),
 		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	/** Wings last a few seconds; the server folds them itself after this long in case the client never says so. */
@@ -209,6 +212,7 @@ public final class WebPower implements Power {
 			ResourceKey.create(Registries.PLACED_FEATURE, JaymosPowers.id("web_crater")));
 
 		WebNet.register();
+		WebCut.register();
 		WebTraps.register();
 		WebHitches.register();
 		WebBridges.register();
@@ -225,6 +229,12 @@ public final class WebPower implements Power {
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.ChargeHold.TYPE, (payload, ctx) -> {
 			if (Powers.has(ctx.player(), INSTANCE)) {
 				state(ctx.player()).chargeHold = payload.held() && WebSymbiote.suitShown(ctx.player());
+				// everyone sees it coil (while it's on the ground)
+				if (state(ctx.player()).chargeHold && ctx.player().onGround()) {
+					ctx.player().setAttached(CHARGING, true);
+				} else {
+					ctx.player().removeAttached(CHARGING);
+				}
 			}
 		});
 		// a held target that hits anything breaks free
@@ -410,6 +420,9 @@ public final class WebPower implements Power {
 		if (state.tetherId >= 0) {
 			tickTether(player, state);
 		}
+		if (player.getAttached(CHARGING) != null && (!state.chargeHold || !player.onGround())) {
+			player.removeAttached(CHARGING);
+		}
 		if (state.chargeHold) {
 			// the symbiote braces for the landing
 			player.resetFallDistance();
@@ -521,6 +534,36 @@ public final class WebPower implements Power {
 			state.wingsTicks = 0;
 			player.removeAttached(WINGS);
 		}
+	}
+
+	/** Someone punched one of this player's lines (the one ending near {@code end}): it breaks. */
+	static boolean cutLine(ServerPlayer player, Vec3 end) {
+		State state = player.getAttached(STATE);
+		for (int hand = WebNet.MAIN; hand <= WebNet.OFF; hand++) {
+			WebLine line = player.getAttached(line(hand));
+			if (line == null) {
+				continue;
+			}
+			Vec3 anchor = line.entityId() >= 0 && player.level().getEntity(line.entityId()) != null
+				? player.level().getEntity(line.entityId()).getBoundingBox().getCenter() : line.anchor();
+			if (anchor.distanceTo(end) > 2.5) {
+				continue;
+			}
+			if (state != null && state.swinging[hand]) {
+				dropSwing(player, state, hand);
+				ServerPlayNetworking.send(player, new WebNet.SwingReject(hand));
+			} else {
+				player.removeAttached(line(hand));
+				if (hand == WebNet.MAIN && state != null) {
+					state.lineTicks = 0;
+				}
+			}
+			if (hand == WebNet.MAIN && state != null && state.tetherId >= 0) {
+				snapTether(player, state);
+			}
+			return true;
+		}
+		return false;
 	}
 
 	private static void dropSwing(ServerPlayer player, State state, int hand) {
