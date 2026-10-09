@@ -285,6 +285,10 @@ public final class WebArms {
 		Vec3 end;
 		if (player == minecraft.player && WebPowerClient.isActive(minecraft.player)) {
 			end = WebPowerClient.INSTANCE.swing.lineEnd(hand, partialTick);
+			if (end == null && hand == WebNet.MAIN) {
+				// a line the server put out from the main hand (a webline being strung, a yank) draws like any other
+				end = syncedEnd(level, player, hand, partialTick);
+			}
 		} else {
 			end = syncedEnd(level, player, hand, partialTick);
 		}

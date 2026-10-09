@@ -15,6 +15,12 @@ public class WebBridgeBlock extends Block {
 		super(properties);
 	}
 
+	/** Unseen: the webline itself is drawn as a line between its ends (see WebLineRenderer). */
+	@Override
+	protected net.minecraft.world.level.block.RenderShape getRenderShape(final BlockState state) {
+		return net.minecraft.world.level.block.RenderShape.INVISIBLE;
+	}
+
 	@Override
 	protected VoxelShape getShape(final BlockState state, final BlockGetter level, final BlockPos pos, final CollisionContext context) {
 		return SHAPE;

@@ -22,6 +22,8 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -124,6 +126,22 @@ public final class GravityPower implements Power {
 	static final double CRUSH_SLAM = 1.6;
 	static final int CRUSH_COOLDOWN_MIN = 120, CRUSH_COOLDOWN_MAX = 400;
 
+	// ---- Choke and Slam (right click while lifting, once R is unlocked) ----
+	/** The choke holds it this far out, its head at your hand; the squeeze's damage, every so often. */
+	static final double CHOKE_DISTANCE = 1.7;
+	static final float CHOKE_DAMAGE = 1.0F;
+	static final int CHOKE_DAMAGE_EVERY = 20;
+	/** The slam: straight down this fast, under this much extra weight (times its gravity), for at most this long. */
+	static final double SLAM_SPEED = 2.2;
+	static final double SLAM_WEIGHT_BASE = 2.0, SLAM_WEIGHT_PER_LEVEL = 1.0;
+	static final int SLAM_MAX_TICKS = 30;
+	/** Damage: base, per ability unlocked, more once ascended. */
+	static final float SLAM_DAMAGE_BASE = 4.0F, SLAM_DAMAGE_PER_LEVEL = 3.0F, SLAM_DAMAGE_ASCENDED = 4.0F;
+	/** The block it hits breaks once the power has grown: the hardest it can break at 3 and 4 abilities, and ascended (stone is 1.5). */
+	static final float SLAM_BREAK_LEVEL_3 = 1.5F, SLAM_BREAK_LEVEL_4 = 3.0F, SLAM_BREAK_ASCENDED = 5.0F;
+
+	private static final Identifier SLAM_ID = JaymosPowers.id("gravity_slam");
+
 	// ---- fate ----
 	/** Deaths by your weight (a fall after Lift, Crush, the Singularity) within this long of your touch count. */
 	static final int TOUCH_MEMORY_TICKS = 200;
@@ -177,6 +195,9 @@ public final class GravityPower implements Power {
 	/** On a player: weightless right now (everyone sees the drift). */
 	public static final AttachmentType<Boolean> WEIGHTLESS_ON = AttachmentRegistry.create(JaymosPowers.id("gravity_weightless"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** On a gravity user: what their Lift holds (entity id), so everyone sees the arm reach for it. */
+	public static final AttachmentType<Integer> GRIP = AttachmentRegistry.create(JaymosPowers.id("gravity_grip"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 	/** On a creature: held by someone's Lift (clients let it hang limp). */
 	public static final AttachmentType<Boolean> LIFTED = AttachmentRegistry.create(JaymosPowers.id("gravity_lifted"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
@@ -194,7 +215,15 @@ public final class GravityPower implements Power {
 		int weightlessTotal;
 		int levitating;
 		boolean curedHint;
+		/** Lift became a choke (right click while holding R, once R is truly yours). */
+		boolean choking;
 	}
+
+	/** A creature being slammed down: who threw it, how hard, and what it can break. */
+	private record Slam(ResourceKey<Level> dimension, UUID entity, UUID player, float damage, float breakHardness, long started) {
+	}
+
+	private static final List<Slam> SLAMS = new ArrayList<>();
 
 	private record Well(ResourceKey<Level> dimension, Vec3 at, UUID owner, long until, boolean singularity) {
 	}
@@ -217,7 +246,14 @@ public final class GravityPower implements Power {
 
 	public static void init() {
 		Powers.register(INSTANCE);
-		JaymosPowers.LOGGER.debug("gravity attachments: {} {} {} {}", COOLDOWNS, WEIGHTLESS_ON, LIFTED, KILLS);
+		JaymosPowers.LOGGER.debug("gravity attachments: {} {} {} {} {}", COOLDOWNS, WEIGHTLESS_ON, LIFTED, KILLS, GRIP);
+		net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.serverboundPlay().register(GravityGrip.TYPE, GravityGrip.CODEC);
+		net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(GravityGrip.TYPE, (payload, ctx) -> {
+			ServerPlayer player = ctx.player();
+			if (Powers.has(player, INSTANCE) && player.isAlive() && !player.isSpectator()) {
+				grip(player, state(player));
+			}
+		});
 		ServerTickEvents.END_SERVER_TICK.register(GravityPower::serverTick);
 		ServerLivingEntityEvents.AFTER_DEATH.register(GravityPower::afterDeath);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
@@ -230,6 +266,7 @@ public final class GravityPower implements Power {
 			STATES.clear();
 			WELLS.clear();
 			PINNED.clear();
+			SLAMS.clear();
 			TOUCHED.clear();
 		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> GravityDebugCommand.register(dispatcher));
@@ -248,6 +285,12 @@ public final class GravityPower implements Power {
 	@Override
 	public ItemStack icon() {
 		return new ItemStack(Items.HEAVY_CORE);
+	}
+
+	/** The starter, on R: the same Lift (the choke and slam come once R is truly unlocked). */
+	@Override
+	public PowerKey starterKey() {
+		return PowerKey.ABILITY_1;
 	}
 
 	/** Lift first, then Weightless and the Well; Crush, the charged one, comes last. */
@@ -365,6 +408,8 @@ public final class GravityPower implements Power {
 		}
 		state.liftTarget = target.getId();
 		state.liftTicks = 0;
+		state.choking = false;
+		player.setAttached(GRIP, target.getId());
 		state.liftHold = Mth.clamp(player.getEyePosition().distanceTo(target.getBoundingBox().getCenter()), LIFT_MIN_HOLD, LIFT_MAX_HOLD);
 		modifier(target, Attributes.GRAVITY, LIFT_ID, -1.0, true);
 		target.setAttached(LIFTED, true);
@@ -382,7 +427,14 @@ public final class GravityPower implements Power {
 			dropLift(player, state, true);
 			return;
 		}
-		Vec3 hold = player.getEyePosition().add(player.getViewVector(1.0F).scale(state.liftHold));
+		Vec3 hold = player.getEyePosition().add(player.getViewVector(1.0F).scale(state.choking ? CHOKE_DISTANCE : state.liftHold));
+		if (state.choking) {
+			// by the throat: its head at your hand
+			hold = hold.subtract(0.0, target.getEyeHeight() - target.getBbHeight() * 0.5, 0.0);
+			if (state.liftTicks % CHOKE_DAMAGE_EVERY == 0) {
+				target.hurtServer(player.level(), player.damageSources().playerAttack(player), CHOKE_DAMAGE);
+			}
+		}
 		Vec3 center = target.getBoundingBox().getCenter();
 		Vec3 to = hold.subtract(center);
 		Vec3 v = target.getDeltaMovement().scale(0.8).add(to.scale(LIFT_STEER));
@@ -410,6 +462,8 @@ public final class GravityPower implements Power {
 		}
 		Entity entity = player.level().getEntity(state.liftTarget);
 		state.liftTarget = -1;
+		state.choking = false;
+		player.removeAttached(GRIP);
 		if (cooldown) {
 			cool(player, LIFT, LIFT_COOLDOWN);
 		}
@@ -425,6 +479,103 @@ public final class GravityPower implements Power {
 			player.level().playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.9F, 0.5F);
 		}
 	}
+
+	// ---------------------------------------------------------------- Choke and Slam
+
+	/**
+	 * Right click while holding something with Lift (R unlocked; the starter's Lift can't): the first pulls it in by the
+	 * throat, the second slams it into the ground. The slam grows with the power: more damage and more weight per
+	 * ability unlocked (and ascended), and from three abilities up, the block it hits breaks.
+	 */
+	private static void grip(ServerPlayer player, State state) {
+		if (state.liftTarget < 0 || !com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_1)) {
+			return;
+		}
+		Entity entity = player.level().getEntity(state.liftTarget);
+		if (!(entity instanceof LivingEntity target) || !target.isAlive()) {
+			return;
+		}
+		ServerLevel level = player.level();
+		if (!state.choking) {
+			state.choking = true;
+			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.8F, 0.6F);
+			level.sendParticles(ParticleTypes.REVERSE_PORTAL, target.getX(), target.getEyeY(), target.getZ(), 15, 0.2, 0.2, 0.2, 0.05);
+			return;
+		}
+		// the slam
+		int abilities = com.jaymospowers.core.Mastery.unlocked(player);
+		boolean ascended = Fate.isAscended(player);
+		float damage = (SLAM_DAMAGE_BASE + SLAM_DAMAGE_PER_LEVEL * abilities + (ascended ? SLAM_DAMAGE_ASCENDED : 0.0F))
+			* (Fate.isCorrupted(player) ? COLLAPSE_DAMAGE : 1.0F);
+		float breakHardness = ascended ? SLAM_BREAK_ASCENDED : abilities >= 4 ? SLAM_BREAK_LEVEL_4 : abilities >= 3 ? SLAM_BREAK_LEVEL_3 : 0.0F;
+		double weight = SLAM_WEIGHT_BASE + SLAM_WEIGHT_PER_LEVEL * abilities + (ascended ? SLAM_WEIGHT_PER_LEVEL : 0.0);
+		// let go of it (no throw), then drive it down
+		state.choking = false;
+		dropLiftQuietly(player, state, target);
+		touch(target, player);
+		modifier(target, Attributes.GRAVITY, SLAM_ID, weight, true);
+		target.setDeltaMovement(0.0, -SLAM_SPEED, 0.0);
+		target.needsSync = true;
+		target.syncVelocity = true;
+		SLAMS.removeIf(s -> s.entity().equals(target.getUUID()));
+		SLAMS.add(new Slam(level.dimension(), target.getUUID(), player.getUUID(), damage, breakHardness, level.getGameTime()));
+		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 1.0F, 0.6F);
+	}
+
+	/** Lift ends for a slam: weight back on, cooldown, no Collapse fling. */
+	private static void dropLiftQuietly(ServerPlayer player, State state, Entity target) {
+		state.liftTarget = -1;
+		player.removeAttached(GRIP);
+		cool(player, LIFT, LIFT_COOLDOWN);
+		modifier(target, Attributes.GRAVITY, LIFT_ID, 0.0, false);
+		target.removeAttached(LIFTED);
+	}
+
+	/** Slams land: on the ground (or after a moment), the damage and the crater. */
+	private static void tickSlams(MinecraftServer server) {
+		for (Iterator<Slam> it = SLAMS.iterator(); it.hasNext(); ) {
+			Slam slam = it.next();
+			ServerLevel level = server.getLevel(slam.dimension());
+			Entity entity = level == null ? null : level.getEntity(slam.entity());
+			if (!(entity instanceof LivingEntity target) || !target.isAlive()) {
+				it.remove();
+				continue;
+			}
+			long age = level.getGameTime() - slam.started();
+			boolean landed = age > 1 && (target.onGround() || target.verticalCollision || target.isInWater());
+			if (!landed && age < SLAM_MAX_TICKS) {
+				if (age % 2 == 0) {
+					level.sendParticles(ParticleTypes.REVERSE_PORTAL, target.getX(), target.getY() + target.getBbHeight(), target.getZ(), 3, 0.2, 0.1, 0.2, 0.02);
+				}
+				continue;
+			}
+			it.remove();
+			modifier(target, Attributes.GRAVITY, SLAM_ID, 0.0, false);
+			ServerPlayer player = server.getPlayerList().getPlayer(slam.player());
+			DamageSource source = player != null ? level.damageSources().playerAttack(player) : level.damageSources().fall();
+			target.setInvulnerableTime(0);
+			crushing = true;
+			try {
+				target.hurtServer(level, source, slam.damage());
+			} finally {
+				crushing = false;
+			}
+			BlockPos under = BlockPos.containing(target.getX(), target.getY() - 0.2, target.getZ());
+			BlockState hit = level.getBlockState(under);
+			if (slam.breakHardness() > 0.0F && !hit.isAir() && !hit.hasBlockEntity()) {
+				float hardness = hit.getDestroySpeed(level, under);
+				if (hardness >= 0.0F && hardness <= slam.breakHardness()) {
+					level.destroyBlock(under, true, player);
+				}
+			}
+			BlockState shown = hit.isAir() ? net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState() : hit;
+			level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, shown),
+				target.getX(), target.getY(), target.getZ(), 40, 0.6, 0.1, 0.6, 0.2);
+			level.sendParticles(ParticleTypes.EXPLOSION, target.getX(), target.getY(), target.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.3F, 0.7F);
+		}
+	}
+
 
 	// ---------------------------------------------------------------- Weightless
 
@@ -651,6 +802,9 @@ public final class GravityPower implements Power {
 	}
 
 	private static void serverTick(MinecraftServer server) {
+		if (!SLAMS.isEmpty()) {
+			tickSlams(server);
+		}
 		if (!WELLS.isEmpty()) {
 			for (Iterator<Well> it = WELLS.iterator(); it.hasNext(); ) {
 				Well well = it.next();

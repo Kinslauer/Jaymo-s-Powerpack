@@ -115,7 +115,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 			// in survival there's nothing to see until your power has awakened (but an unmade affinity choice comes back)
 			if (power != null || player.isCreative()) {
 				minecraft.gui.setScreen(new PowerScreen());
-			} else if (!com.jaymospowers.core.Affinity.chosen(player)) {
+			} else if (com.jaymospowers.core.Affinity.ENABLED && !com.jaymospowers.core.Affinity.chosen(player)) {
 				minecraft.gui.setScreen(new AffinityScreen());
 			}
 		}

@@ -31,6 +31,8 @@ public final class Affinity {
 		builder -> builder.persistent(Identifier.CODEC).copyOnDeath().syncWith(Identifier.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
 	/** "Let fate decide": a random power awakens. */
 	public static final Identifier FATE = JaymosPowers.id("fate");
+	/** The choice is offered at all (switched off for now: awakenings are random again). */
+	public static final boolean ENABLED = false;
 	/** How often (ticks) a powerless survival player without an affinity is offered the choice. */
 	private static final int PROMPT_EVERY = 100;
 
@@ -51,12 +53,12 @@ public final class Affinity {
 	/** The power the player's affinity leans to, or null (none chosen, fate, or an unknown id). */
 	public static @Nullable Power power(Player player) {
 		Identifier id = of(player);
-		return id == null || id.equals(FATE) ? null : Powers.get(id);
+		return !ENABLED || id == null || id.equals(FATE) ? null : Powers.get(id);
 	}
 
 	/** Every so often: a powerless survival player who hasn't chosen yet is shown the choice (once per session). */
 	static void tick(ServerPlayer player) {
-		if (player.tickCount % PROMPT_EVERY != 0 || chosen(player) || player.isCreative() || player.isSpectator()
+		if (!ENABLED || player.tickCount % PROMPT_EVERY != 0 || chosen(player) || player.isCreative() || player.isSpectator()
 			|| PROMPTED.contains(player.getUUID())) {
 			return;
 		}
@@ -70,7 +72,7 @@ public final class Affinity {
 
 	/** From the affinity screen: a choice, made once (only a command changes it after). */
 	static void choose(ServerPlayer player, String id) {
-		if (chosen(player) || Powers.of(player) != null) {
+		if (!ENABLED || chosen(player) || Powers.of(player) != null) {
 			return;
 		}
 		Identifier parsed = Identifier.tryParse(id);

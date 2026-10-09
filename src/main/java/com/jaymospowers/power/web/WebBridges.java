@@ -43,10 +43,26 @@ public final class WebBridges {
 
 	public static Block BRIDGE;
 
+	/** A webline's two ends, for drawing: on each level, synced to everyone (the planks themselves are invisible). */
+	public record Span(Vec3 from, Vec3 to) {
+		public static final net.minecraft.network.codec.StreamCodec<io.netty.buffer.ByteBuf, Span> STREAM_CODEC =
+			net.minecraft.network.codec.StreamCodec.composite(Vec3.STREAM_CODEC, Span::from, Vec3.STREAM_CODEC, Span::to, Span::new);
+	}
+
+	public static final net.fabricmc.fabric.api.attachment.v1.AttachmentType<List<Span>> SPANS =
+		net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry.create(JaymosPowers.id("web_weblines"),
+			builder -> builder.syncWith(Span.STREAM_CODEC.apply(net.minecraft.network.codec.ByteBufCodecs.list()),
+				net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate.all()));
+
 	private record Plank(ResourceKey<Level> dimension, BlockPos pos, long until) {
 	}
 
+	/** A webline still standing: its ends, and when it frays away. */
+	private record Line(ResourceKey<Level> dimension, Span span, long until) {
+	}
+
 	private static final List<Plank> PLANKS = new ArrayList<>();
+	private static final List<Line> LINES = new ArrayList<>();
 	private static long clock;
 
 	private WebBridges() {
@@ -72,6 +88,10 @@ public final class WebBridges {
 				}
 			}
 			PLANKS.clear();
+			LINES.clear();
+			for (ServerLevel level : server.getAllLevels()) {
+				level.removeAttached(SPANS);
+			}
 		});
 	}
 
@@ -94,14 +114,40 @@ public final class WebBridges {
 				PLANKS.add(new Plank(level.dimension(), pos.immutable(), clock + BRIDGE_TICKS));
 			}
 		}
+		LINES.add(new Line(level.dimension(), new Span(from, to), clock + BRIDGE_TICKS));
+		syncSpans(level);
 		level.playSound(null, to.x, to.y, to.z, SoundEvents.LEAD_TIED, SoundSource.PLAYERS, 1.0F, 1.3F);
 		level.sendParticles(ParticleTypes.ITEM_COBWEB, from.x, from.y, from.z, 6, 0.1, 0.1, 0.1, 0.02);
 		level.sendParticles(ParticleTypes.ITEM_COBWEB, to.x, to.y, to.z, 6, 0.1, 0.1, 0.1, 0.02);
 		return true;
 	}
 
+	private static void syncSpans(ServerLevel level) {
+		List<Span> spans = new ArrayList<>();
+		for (Line line : LINES) {
+			if (line.dimension() == level.dimension()) {
+				spans.add(line.span());
+			}
+		}
+		if (spans.isEmpty()) {
+			level.removeAttached(SPANS);
+		} else {
+			level.setAttached(SPANS, spans);
+		}
+	}
+
 	private static void tick(MinecraftServer server) {
 		clock++;
+		for (Iterator<Line> it = LINES.iterator(); it.hasNext(); ) {
+			Line line = it.next();
+			if (clock >= line.until()) {
+				it.remove();
+				ServerLevel level = server.getLevel(line.dimension());
+				if (level != null) {
+					syncSpans(level);
+				}
+			}
+		}
 		for (Iterator<Plank> it = PLANKS.iterator(); it.hasNext(); ) {
 			Plank plank = it.next();
 			if (clock < plank.until()) {

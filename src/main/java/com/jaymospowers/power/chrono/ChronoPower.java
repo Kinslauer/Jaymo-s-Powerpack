@@ -69,6 +69,10 @@ public final class ChronoPower implements Power {
 	/** Attack speed while overclocked: x1.6 of the total (a sword goes from 1.6 to ~2.56 swings a second). */
 	static final double OVERCLOCK_ATTACK_SPEED = 0.6;
 	static final int BLOOM_COOLDOWN = 800;
+	/** Overclock's drag on everyone around you: radius, Slowness amplifier (1 = Slowness II), refreshed this often. */
+	static final double OVERCLOCK_DRAG_RADIUS = 6.0;
+	static final int OVERCLOCK_DRAG_AMPLIFIER = 1;
+	static final int OVERCLOCK_DRAG_EVERY = 10;
 	/** The starter, Nudge: reach, how long Slowness I / Speed I lasts, and the cooldown. */
 	static final double NUDGE_RANGE = 16.0;
 	static final int NUDGE_TICKS = 80;
@@ -279,6 +283,9 @@ public final class ChronoPower implements Power {
 		if (state.overclockLeft > 0) {
 			state.overclockLeft--;
 			overclockFx(player, level, state.overclockLeft);
+			if (state.overclockLeft % OVERCLOCK_DRAG_EVERY == 0) {
+				overclockDrag(player, level);
+			}
 			if (state.overclockLeft == 0) {
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.6F, 1.7F);
 				state.synced = false;
@@ -496,6 +503,22 @@ public final class ChronoPower implements Power {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 1.8F);
 		level.sendParticles(ParticleTypes.WAX_ON, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.7, 0.4, 0.6);
 		return true;
+	}
+
+	/**
+	 * While overclocked, time around you drags: every creature and player close by is slowed, so your own speed stands
+	 * out all the more. Refreshed as you move, so it follows you.
+	 */
+	private static void overclockDrag(ServerPlayer player, ServerLevel level) {
+		AABB area = player.getBoundingBox().inflate(OVERCLOCK_DRAG_RADIUS);
+		for (net.minecraft.world.entity.LivingEntity living : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, area,
+			e -> e != player && e.isAlive() && !e.isSpectator() && e.distanceToSqr(player) <= OVERCLOCK_DRAG_RADIUS * OVERCLOCK_DRAG_RADIUS
+				&& !(e instanceof net.minecraft.world.entity.decoration.ArmorStand))) {
+			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, OVERCLOCK_DRAG_EVERY + 10, OVERCLOCK_DRAG_AMPLIFIER, false, false, true), player);
+			if (level.getRandom().nextInt(3) == 0) {
+				level.sendParticles(ParticleTypes.ENCHANT, living.getX(), living.getY() + living.getBbHeight() * 0.6, living.getZ(), 3, 0.3, 0.3, 0.3, 0.2);
+			}
+		}
 	}
 
 	private static void setOverclockModifier(ServerPlayer player, boolean on) {

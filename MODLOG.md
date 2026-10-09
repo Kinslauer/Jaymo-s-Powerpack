@@ -174,3 +174,18 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     - **Air brake:** S at speed holds the palms out with a gust ahead and bleeds momentum to a hover; others see
       the pose.
   - The powers screen shows the starter line, plus corrupted key text (`.key.ability_N.corrupted`).
+- **0.4.1:**
+  - **H menu:** outside creative it shows only your own power. The affinity choice is switched off
+    (`Affinity.ENABLED`), so awakenings are random again.
+  - **Gravity:**
+    - The starter now includes Lift on R.
+    - Once R is unlocked, right click while lifting chokes the target: it's pulled to arm's length by the throat,
+      the arm reaches for its head, and it takes 1 damage/s.
+    - A second right click slams it straight down under extra weight. Damage is 4 + 3 per ability (+4 ascended);
+      from 3 abilities it breaks the block it hits (hardness 1.5, 4 abilities 3.0, ascended 5.0).
+  - **Web:**
+    - The reticle shows only when something's in reach.
+    - Weblines are drawn as one line between their ends, the same line as the swings. The planks are invisible
+      but still walkable; the ends sync through a level attachment.
+    - The local player now sees their own webline line while stringing it.
+  - **Chrono:** Overclock slows everyone within 6 blocks (Slowness II, refreshed as you move).

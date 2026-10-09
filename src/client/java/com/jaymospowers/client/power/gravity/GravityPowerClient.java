@@ -48,6 +48,18 @@ public final class GravityPowerClient implements PowerClient {
 		PowerClients.register(GravityPower.ID, INSTANCE);
 		// every gravity user's aura, on every client
 		ClientTickEvents.END_CLIENT_TICK.register(GravityPowerClient::auras);
+		// right click while holding something with Lift: choke, then slam (and the click does nothing else)
+		ClientTickEvents.START_CLIENT_TICK.register(minecraft -> {
+			LocalPlayer player = minecraft.player;
+			if (player == null || !Powers.has(player, GravityPower.INSTANCE) || player.getAttached(GravityPower.GRIP) == null
+				|| minecraft.gui.screen() != null) {
+				return;
+			}
+			while (minecraft.options.keyUse.consumeClick()) {
+				net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new com.jaymospowers.power.gravity.GravityGrip());
+			}
+			minecraft.options.keyUse.setDown(false);
+		});
 	}
 
 	@Override

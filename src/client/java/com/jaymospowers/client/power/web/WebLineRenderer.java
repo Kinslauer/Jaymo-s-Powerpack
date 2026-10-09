@@ -84,6 +84,15 @@ final class WebLineRenderer {
 				draw(context.poseStack(), context, from.subtract(camera), anchor.subtract(camera), width, false);
 			}
 		}
+		// weblines: the same line, strung taut between their two ends
+		java.util.List<com.jaymospowers.power.web.WebBridges.Span> spans = level.getAttached(com.jaymospowers.power.web.WebBridges.SPANS);
+		if (spans != null) {
+			for (com.jaymospowers.power.web.WebBridges.Span span : spans) {
+				if (span.from().distanceToSqr(camera) < 128.0 * 128.0 || span.to().distanceToSqr(camera) < 128.0 * 128.0) {
+					draw(context.poseStack(), context, span.from().subtract(camera), span.to().subtract(camera), width, false);
+				}
+			}
+		}
 		for (Player player : level.players()) {
 			// a symbiote's webs are black, with a purple sheen running along them
 			boolean dark = com.jaymospowers.power.web.WebSymbiote.suitShown(player);

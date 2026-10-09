@@ -1,7 +1,7 @@
 {
 	"power.jaymospowers.gravity": "Gravity",
 	"power.jaymospowers.gravity.desc": "Take the weight out of things, or pile it on. Lift creatures, float yourself, pull and crush.",
-	"power.jaymospowers.gravity.key.ability_1": "Hold: Lift (it floats where you point; let go and it falls)",
+	"power.jaymospowers.gravity.key.ability_1": "Hold: Lift. Right click: choke it; again: slam it down",
 	"power.jaymospowers.gravity.key.ability_2": "Gravity Well (pull everything to a point)",
 	"power.jaymospowers.gravity.key.ability_3": "Weightless (toggle: jump high, fall slow)",
 	"power.jaymospowers.gravity.key.ability_4": "Hold: Crush (charge, then release)",
@@ -12,5 +12,5 @@
 	"message.jaymospowers.gravity_ascend.0": "Everything you drop falls a little further.",
 	"message.jaymospowers.gravity_ascend.1": "The ground feels very far below you now.",
 	"message.jaymospowers.gravity_cure_hint": "For a moment, something else carries the weight...",
-	"power.jaymospowers.gravity.key.starter": "Small things drift toward you, and you jump a little higher"
+	"power.jaymospowers.gravity.key.starter": "Hold: Lift (weightless where you point). Small things drift toward you; you jump a little higher"
 }

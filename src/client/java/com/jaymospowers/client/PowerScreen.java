@@ -35,6 +35,13 @@ public class PowerScreen extends Screen {
 
 	public PowerScreen() {
 		super(Component.translatable("screen.jaymospowers.title"));
+		// outside creative, the screen is about your own power only
+		net.minecraft.client.player.LocalPlayer player = net.minecraft.client.Minecraft.getInstance().player;
+		Power own = player == null ? null : Powers.of(player);
+		if (player != null && !player.isCreative() && own != null) {
+			this.powers.clear();
+			this.powers.add(own);
+		}
 	}
 
 	private boolean creative() {
@@ -47,6 +54,9 @@ public class PowerScreen extends Screen {
 
 	/** Three columns when the screen is wide enough (five powers), else two. */
 	private int cols() {
+		if (powers.size() == 1) {
+			return 1;
+		}
 		return powers.size() > 4 && this.width >= 3 * CARD_W + 4 * GAP + 8 ? 3 : 2;
 	}
 

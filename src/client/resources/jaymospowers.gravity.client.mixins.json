@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"package": "com.jaymospowers.client.power.gravity.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"GravityModelFeatureRendererMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

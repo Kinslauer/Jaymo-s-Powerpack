@@ -136,7 +136,8 @@ public final class WebPowerClient implements PowerClient {
 			color = RETICLE_ATTACHED;
 			r = 5;
 		} else if (preview == null) {
-			color = RETICLE_NONE;
+			// nothing in reach: no box at all
+			color = 0;
 			r = 7;
 		} else {
 			color = preview.assisted() ? RETICLE_ASSIST : RETICLE_LIVE;
