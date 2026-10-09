@@ -83,6 +83,15 @@ public interface Power {
 		return null;
 	}
 
+	/**
+	 * The power's own named state for the HUD badge and the powers screen, as a lang suffix (e.g. {@code ".symbiote"}
+	 * for {@code power.jaymospowers.web.symbiote}), or null to name it by its fate ({@code .ascended}, {@code .corrupted},
+	 * {@code .ascended_corrupted}). Both sides.
+	 */
+	default @org.jspecify.annotations.Nullable String statusSuffix(net.minecraft.world.entity.player.Player player) {
+		return null;
+	}
+
 	/** The Power Mode key (Z by default) went down or up. Sent for every power. */
 	default void onMode(ServerPlayer player, boolean down) {
 	}

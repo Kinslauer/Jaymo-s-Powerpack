@@ -1,8 +1,8 @@
 {
 	"power.jaymospowers.wind": "Wind Control",
 	"power.jaymospowers.wind.ascended": "Tempest",
-	"power.jaymospowers.wind.corrupted": "Stormbound Wind",
-	"power.jaymospowers.wind.ascended_corrupted": "Stormbound Tempest",
+	"power.jaymospowers.wind.corrupted": "Stormbound",
+	"power.jaymospowers.wind.ascended_corrupted": "Thunderhead",
 	"power.jaymospowers.wind.desc": "Fly like a superhero: Sprint to cruise, Sneak to lock speed. Hold a key to channel the wind.",
 	"power.jaymospowers.wind.key.ability_1": "Flight on/off",
 	"power.jaymospowers.wind.key.ability_2": "Hold up to 5s: Tailwind / on ground: gust blast (full = TNT)",

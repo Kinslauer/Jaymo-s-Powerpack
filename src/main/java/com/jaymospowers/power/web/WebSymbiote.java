@@ -213,6 +213,9 @@ public final class WebSymbiote {
 	/** Consume takes its time: the jaws chomp {@code EAT_CHOMPS} times over {@code EAT_TICKS}, then it's gone. */
 	public static final int EAT_TICKS = 40;
 	public static final int EAT_CHOMPS = 4;
+	/** What a meal does for your own hunger: food points per point healed, and the saturation modifier. */
+	public static final float CONSUME_HUNGER_PER_HEAL = 0.75F;
+	public static final float CONSUME_SATURATION = 0.6F;
 	/** A meal in progress (game time it began): synced to everyone, who see the jaws work. */
 	public static final AttachmentType<Long> EATING = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_eating"),
 		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
@@ -1082,6 +1085,8 @@ public final class WebSymbiote {
 		food.discard();
 		player.heal(live.eatHeal);
 		feed(player, live.eatFeed, CONSUME_CALM);
+		// and you're fed too: about a hunger point per half-heart it healed
+		player.getFoodData().eat(Math.max(2, Math.round(live.eatHeal * CONSUME_HUNGER_PER_HEAL)), CONSUME_SATURATION);
 		live.eatTarget = -1;
 		player.removeAttached(EATING);
 	}

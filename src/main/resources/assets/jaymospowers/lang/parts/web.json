@@ -33,5 +33,7 @@
 	"message.jaymospowers.web_ascend.0": "The air hums against the back of your neck.",
 	"message.jaymospowers.web_ascend.1": "The hum sharpens into a tingle.",
 	"power.jaymospowers.web.key.starter": "Hold on one block, let go on another: a walkable webline",
-	"block.jaymospowers.web_bridge": "Webline"
+	"block.jaymospowers.web_bridge": "Webline",
+	"power.jaymospowers.web.symbiote": "Symbiote",
+	"power.jaymospowers.web.symbiote_ascended": "Venom"
 }

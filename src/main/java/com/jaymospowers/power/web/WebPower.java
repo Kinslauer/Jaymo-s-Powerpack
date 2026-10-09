@@ -266,6 +266,15 @@ public final class WebPower implements Power {
 		WebAscension.onLost(player);
 	}
 
+	/** Bonded to a symbiote, the badge says so (and something worse once ascended too). */
+	@Override
+	public String statusSuffix(Player player) {
+		if (!WebSymbiote.isBonded(player)) {
+			return null;
+		}
+		return com.jaymospowers.core.Fate.isAscended(player) ? ".symbiote_ascended" : ".symbiote";
+	}
+
 	/** The Power Mode key (Z) is Web Zip; it unlocks with the second web (G). */
 	@Override
 	public void onMode(ServerPlayer player, boolean down) {

@@ -25,8 +25,13 @@ final class PowerHud {
 	 * The power's name as its fate has shaped it: lang {@code power.jaymospowers.<p>.ascended}, {@code .corrupted} and
 	 * {@code .ascended_corrupted}, when the power defines them.
 	 */
-	static Component title(Power power, Fate.State fate) {
+	static Component title(Power power, Fate.State fate, net.minecraft.world.entity.player.Player player) {
 		String base = "power." + power.id().getNamespace() + "." + power.id().getPath();
+		// a power's own state comes first (Web's symbiote, say)
+		String own = power.statusSuffix(player);
+		if (own != null && Language.getInstance().has(base + own)) {
+			return Component.translatable(base + own);
+		}
 		String suffix = fate.ascended() && fate.corrupted() ? ".ascended_corrupted" : fate.corrupted() ? ".corrupted" : fate.ascended() ? ".ascended" : null;
 		if (suffix != null && Language.getInstance().has(base + suffix)) {
 			return Component.translatable(base + suffix);
@@ -48,7 +53,7 @@ final class PowerHud {
 			return;
 		}
 		Fate.State fate = Fate.state(player);
-		Component name = title(power, fate);
+		Component name = title(power, fate, player);
 		int right = 24 + minecraft.font.width(name) + 4;
 		int pips = 4 * 5;
 		graphics.fill(2, 2, right + pips + 2, 22, fate.corrupted() ? 0x90140A1E : 0x60000000);

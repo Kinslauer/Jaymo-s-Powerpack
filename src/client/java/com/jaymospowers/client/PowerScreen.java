@@ -176,7 +176,7 @@ public class PowerScreen extends Screen {
 		}
 		graphics.fill(x, y, x + 2, y + CARD_H, accent);
 		graphics.item(power.icon(), x + 5, y + 4);
-		Component name = active && this.minecraft.player != null ? PowerHud.title(power, Fate.state(this.minecraft.player)) : power.name();
+		Component name = active && this.minecraft.player != null ? PowerHud.title(power, Fate.state(this.minecraft.player), this.minecraft.player) : power.name();
 		graphics.text(this.font, name, x + 25, y + 8, accent);
 
 		int lineY = y + 24;
