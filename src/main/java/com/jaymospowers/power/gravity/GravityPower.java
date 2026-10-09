@@ -160,6 +160,8 @@ public final class GravityPower implements Power {
 	static final double SLAM_RISE_SPEED = 0.75, SLAM_SPEED_PER_LEVEL = 0.7;
 	static final double SLAM_WEIGHT_BASE = 2.0, SLAM_WEIGHT_PER_LEVEL = 1.0;
 	static final int SLAM_MAX_TICKS = 30;
+	/** Width × height (blocks) past which a slammed creature counts as heavy (a cow is 0.9 × 1.4). */
+	static final float HEAVY_SLAM_SIZE = 1.27F;
 	/**
 	 * A slam buries what it hits: one block deep, two, or three. The chance of three is {@code BURY_3_BASE} plus
 	 * {@code BURY_3_PER_LEVEL} per ability mastered (and once more ascended); of what's left, half the time it's two.
@@ -169,6 +171,8 @@ public final class GravityPower implements Power {
 	static final float BURY_HARDNESS = 1.5F;
 	/** The ring of ground around the impact that kicks up debris. */
 	static final int IMPACT_RING = 2;
+	/** How big the debris puffs are (a broken block's, and the ring's). */
+	static final float IMPACT_DEBRIS = 2.2F, BURY_DEBRIS = 2.8F;
 	/** Damage: base, per ability unlocked, more once ascended. */
 	static final float SLAM_DAMAGE_BASE = 4.0F, SLAM_DAMAGE_PER_LEVEL = 3.0F, SLAM_DAMAGE_ASCENDED = 4.0F;
 	/** The block it hits breaks once the power has grown: the hardest it can break at 3 and 4 abilities, and ascended (stone is 1.5). */
@@ -240,10 +244,10 @@ public final class GravityPower implements Power {
 	public static final AttachmentType<Integer> GRIP = AttachmentRegistry.create(JaymosPowers.id("gravity_grip"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 	/** On a gravity user: a slam under way (when, how long the haul up, when it hit), so everyone sees the arm come down. */
-	public record SlamPose(long start, int rise, long landed) {
+	public record SlamPose(long start, int rise, long landed, boolean heavy) {
 		public static final net.minecraft.network.codec.StreamCodec<io.netty.buffer.ByteBuf, SlamPose> STREAM_CODEC =
 			net.minecraft.network.codec.StreamCodec.composite(ByteBufCodecs.VAR_LONG, SlamPose::start, ByteBufCodecs.VAR_INT, SlamPose::rise,
-				ByteBufCodecs.VAR_LONG, SlamPose::landed, SlamPose::new);
+				ByteBufCodecs.VAR_LONG, SlamPose::landed, ByteBufCodecs.BOOL, SlamPose::heavy, SlamPose::new);
 	}
 
 	public static final AttachmentType<SlamPose> SLAM_POSE = AttachmentRegistry.create(JaymosPowers.id("gravity_slam_pose"),
@@ -615,7 +619,9 @@ public final class GravityPower implements Power {
 		float roll = level.getRandom().nextFloat();
 		int depth = roll < three ? 3 : roll < three + (1.0F - three) * 0.5F ? 2 : 1;
 		SLAMS.add(new Slam(level.dimension(), target.getUUID(), player.getUUID(), damage, breakHardness, level.getGameTime(), rise, down, depth));
-		player.setAttached(SLAM_POSE, new SlamPose(level.getGameTime(), rise, -1L));
+		// something bigger than a cow takes the whole body: both arms up, then bent double to drive it down
+		boolean heavy = target.getBbWidth() * target.getBbHeight() > HEAVY_SLAM_SIZE;
+		player.setAttached(SLAM_POSE, new SlamPose(level.getGameTime(), rise, -1L, heavy));
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 1.0F, 0.6F);
 	}
 
@@ -750,8 +756,8 @@ public final class GravityPower implements Power {
 			if (grounded && target.isAlive()) {
 				bury(level, target, slam.depth(), Math.max(BURY_HARDNESS, slam.breakHardness()));
 			}
-			level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, shown),
-				target.getX(), target.getY() + 0.2, target.getZ(), 40, 0.6, 0.1, 0.6, 0.2);
+			// the heart of the impact: the biggest puff, the colour of what it hit
+			com.jaymospowers.core.Debris.puff(level, under, shown, IMPACT_DEBRIS * 1.6F);
 			level.sendParticles(ParticleTypes.EXPLOSION, target.getX(), target.getY(), target.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.3F, 0.7F);
 		}
@@ -763,7 +769,7 @@ public final class GravityPower implements Power {
 		ServerPlayer player = server.getPlayerList().getPlayer(slam.player());
 		SlamPose pose = player == null ? null : player.getAttached(SLAM_POSE);
 		if (pose != null && pose.start() == slam.started()) {
-			player.setAttached(SLAM_POSE, new SlamPose(pose.start(), pose.rise(), level.getGameTime()));
+			player.setAttached(SLAM_POSE, new SlamPose(pose.start(), pose.rise(), level.getGameTime(), pose.heavy()));
 		}
 	}
 
@@ -797,8 +803,10 @@ public final class GravityPower implements Power {
 			for (int x = minX; x <= maxX; x++) {
 				for (int z = minZ; z <= maxZ; z++) {
 					BlockPos pos = new BlockPos(x, y, z);
-					if (!level.getBlockState(pos).isAir()) {
+					BlockState broken = level.getBlockState(pos);
+					if (!broken.isAir()) {
 						level.destroyBlock(pos, false);
+						com.jaymospowers.core.Debris.puff(level, pos, broken, BURY_DEBRIS);
 					}
 				}
 			}
@@ -815,31 +823,9 @@ public final class GravityPower implements Power {
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.ROOTED_DIRT_BREAK, SoundSource.PLAYERS, 1.2F, 0.5F);
 	}
 
-	/** Debris thrown up from every bit of ground in a ring around the impact. */
+	/** Debris thrown up from every bit of ground in a ring around the impact, a big block-coloured puff each. */
 	private static void impactRing(ServerLevel level, BlockPos center, LivingEntity target) {
-		for (int dx = -IMPACT_RING; dx <= IMPACT_RING; dx++) {
-			for (int dz = -IMPACT_RING; dz <= IMPACT_RING; dz++) {
-				if (dx * dx + dz * dz > IMPACT_RING * IMPACT_RING + 1) {
-					continue;
-				}
-				// the surface here: the top solid block within a step of the impact's level
-				for (int dy = 1; dy >= -1; dy--) {
-					BlockPos pos = center.offset(dx, dy, dz);
-					BlockState state = level.getBlockState(pos);
-					if (state.isAir() || !level.getBlockState(pos.above()).isAir()) {
-						continue;
-					}
-					double distance = Math.sqrt(dx * dx + dz * dz);
-					level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, state),
-						pos.getX() + 0.5, pos.getY() + 1.05, pos.getZ() + 0.5, 6 + (int)((IMPACT_RING + 1 - distance) * 3),
-						0.35, 0.05, 0.35, 0.25);
-					if ((dx + dz) % 2 == 0) {
-						level.sendParticles(ParticleTypes.DUST_PLUME, pos.getX() + 0.5, pos.getY() + 1.1, pos.getZ() + 0.5, 2, 0.3, 0.05, 0.3, 0.02);
-					}
-					break;
-				}
-			}
-		}
+		com.jaymospowers.core.Debris.ring(level, center, IMPACT_RING + 1, IMPACT_DEBRIS);
 	}
 
 	// ---------------------------------------------------------------- Weightless

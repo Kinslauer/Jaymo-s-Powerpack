@@ -78,9 +78,64 @@ public final class GravityArmPose {
 		}
 		boolean right = avatar.mainArm != HumanoidArm.LEFT;
 		ModelPart arm = right ? humanoid.rightArm : humanoid.leftArm;
+		if (pose.heavy()) {
+			heavy(humanoid, right, t, pose.rise());
+			return true;
+		}
 		arm.xRot = x;
 		arm.yRot = 0.0F;
 		arm.zRot = right ? 0.08F : -0.08F;
 		return true;
+	}
+
+	/** A heavy slam: the whole body (from the hip) leans back with both arms flung up, then bends double, hand to the ground. */
+	private static final float LEAN_BACK = -0.3F, BEND = 1.3F;
+	/** The hip, in model pixels below the neck (the body bends around it, the legs stay put). */
+	private static final float HIP = 12.0F;
+
+	private static void heavy(HumanoidModel<?> humanoid, boolean right, float t, int rise) {
+		ModelPart main = right ? humanoid.rightArm : humanoid.leftArm;
+		ModelPart off = right ? humanoid.leftArm : humanoid.rightArm;
+		float out = right ? 1.0F : -1.0F;
+		float bend;
+		float mainWorld;
+		float offWorld;
+		float offOut;
+		if (t < rise) {
+			// wound up: leaning back, the throwing arm thrust high overhead, the other flung up and out behind
+			float s = Mth.clamp(t / RAISE_TICKS, 0.0F, 1.0F);
+			bend = Mth.lerp(s, 0.0F, LEAN_BACK);
+			mainWorld = Mth.lerp(s, CHOKE, -Mth.PI + 0.35F);
+			offWorld = Mth.lerp(s, 0.0F, -2.3F);
+			offOut = Mth.lerp(s, 0.0F, 0.7F);
+		} else {
+			// and down: bent double at the hip, the hand almost to the ground, the other arm swung back
+			float s = Mth.clamp((t - rise) / (SWING_TICKS + 1.0F), 0.0F, 1.0F);
+			float e = s * s;
+			bend = Mth.lerp(e, LEAN_BACK, BEND);
+			mainWorld = Mth.lerp(e, -Mth.PI + 0.35F, 0.15F);
+			offWorld = Mth.lerp(e, -2.3F, 0.9F);
+			offOut = Mth.lerp(e, 0.7F, 0.35F);
+		}
+		// everything above the hip turns about it
+		float cos = Mth.cos(bend);
+		float sin = Mth.sin(bend);
+		humanoid.body.xRot = bend;
+		humanoid.body.y = HIP - HIP * cos;
+		humanoid.body.z = -HIP * sin;
+		humanoid.head.xRot = humanoid.head.xRot + bend * 0.5F;
+		humanoid.head.y = humanoid.body.y;
+		humanoid.head.z = humanoid.body.z;
+		for (ModelPart arm : new ModelPart[] {main, off}) {
+			// the shoulder sits 10 above the hip
+			arm.y = HIP - (HIP - 2.0F) * cos;
+			arm.z = -(HIP - 2.0F) * sin;
+		}
+		main.xRot = mainWorld - bend;
+		main.yRot = 0.0F;
+		main.zRot = out * 0.1F;
+		off.xRot = offWorld - bend;
+		off.yRot = 0.0F;
+		off.zRot = -out * offOut;
 	}
 }

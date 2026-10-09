@@ -34,6 +34,8 @@ public final class WebImpacts {
 	static final float SMASH_POWER_PER_SPEED = 1.6F;
 	/** Chance a broken block drops itself (like an explosion's). */
 	static final float SMASH_DROP_CHANCE = 0.3F;
+	/** The block-coloured debris puff from each block the smash breaks. */
+	static final float SMASH_DEBRIS = 1.6F;
 	/** Screen shake per block/tick of landing speed (Living Armor), up to a cap. */
 	static final float SHAKE_PER_SPEED = 0.9F, SHAKE_MAX = 2.5F;
 
@@ -144,6 +146,7 @@ public final class WebImpacts {
 			float chance = Mth.clamp(1.0F - hardness / Math.max(0.01F, strength), 0.0F, 1.0F);
 			if (random.nextFloat() < chance) {
 				level.destroyBlock(pos, random.nextFloat() < SMASH_DROP_CHANCE, cause);
+				com.jaymospowers.core.Debris.puff(level, pos, state, SMASH_DEBRIS);
 			}
 		}
 		level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y + 0.5, at.z, 1, 0.0, 0.0, 0.0, 0.0);
