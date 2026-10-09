@@ -162,6 +162,8 @@ public final class GravityPower implements Power {
 	static final int SLAM_MAX_TICKS = 30;
 	/** Width × height (blocks) past which a slammed creature counts as heavy (a cow is 0.9 × 1.4). */
 	static final float HEAVY_SLAM_SIZE = 1.27F;
+	/** How many full-body slam animations there are to pick from (see SlamPose). */
+	public static final int SLAM_STYLES = 4;
 	/**
 	 * A slam buries what it hits: one block deep, two, or three. The chance of three is {@code BURY_3_BASE} plus
 	 * {@code BURY_3_PER_LEVEL} per ability mastered (and once more ascended); of what's left, half the time it's two.
@@ -244,10 +246,14 @@ public final class GravityPower implements Power {
 	public static final AttachmentType<Integer> GRIP = AttachmentRegistry.create(JaymosPowers.id("gravity_grip"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 	/** On a gravity user: a slam under way (when, how long the haul up, when it hit), so everyone sees the arm come down. */
-	public record SlamPose(long start, int rise, long landed, boolean heavy) {
+	/**
+	 * {@code style}: 0, the plain one-armed slam; otherwise one of the {@link #SLAM_STYLES} full-body slams (1 one hand
+	 * overhead, 2 two-handed hammer, 3 one hand twisting in from the side, 4 both arms up in a V).
+	 */
+	public record SlamPose(long start, int rise, long landed, int style) {
 		public static final net.minecraft.network.codec.StreamCodec<io.netty.buffer.ByteBuf, SlamPose> STREAM_CODEC =
 			net.minecraft.network.codec.StreamCodec.composite(ByteBufCodecs.VAR_LONG, SlamPose::start, ByteBufCodecs.VAR_INT, SlamPose::rise,
-				ByteBufCodecs.VAR_LONG, SlamPose::landed, ByteBufCodecs.BOOL, SlamPose::heavy, SlamPose::new);
+				ByteBufCodecs.VAR_LONG, SlamPose::landed, ByteBufCodecs.VAR_INT, SlamPose::style, SlamPose::new);
 	}
 
 	public static final AttachmentType<SlamPose> SLAM_POSE = AttachmentRegistry.create(JaymosPowers.id("gravity_slam_pose"),
@@ -619,9 +625,11 @@ public final class GravityPower implements Power {
 		float roll = level.getRandom().nextFloat();
 		int depth = roll < three ? 3 : roll < three + (1.0F - three) * 0.5F ? 2 : 1;
 		SLAMS.add(new Slam(level.dimension(), target.getUUID(), player.getUUID(), damage, breakHardness, level.getGameTime(), rise, down, depth));
-		// something bigger than a cow takes the whole body: both arms up, then bent double to drive it down
-		boolean heavy = target.getBbWidth() * target.getBbHeight() > HEAVY_SLAM_SIZE;
-		player.setAttached(SLAM_POSE, new SlamPose(level.getGameTime(), rise, -1L, heavy));
+		// zombies, players and anything bigger than a cow take the whole body: one of the full overhead slams, at random
+		boolean heavy = target.getBbWidth() * target.getBbHeight() > HEAVY_SLAM_SIZE || target instanceof Player
+			|| target instanceof net.minecraft.world.entity.monster.zombie.Zombie;
+		int style = heavy ? 1 + level.getRandom().nextInt(SLAM_STYLES) : 0;
+		player.setAttached(SLAM_POSE, new SlamPose(level.getGameTime(), rise, -1L, style));
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 1.0F, 0.6F);
 	}
 
@@ -769,7 +777,7 @@ public final class GravityPower implements Power {
 		ServerPlayer player = server.getPlayerList().getPlayer(slam.player());
 		SlamPose pose = player == null ? null : player.getAttached(SLAM_POSE);
 		if (pose != null && pose.start() == slam.started()) {
-			player.setAttached(SLAM_POSE, new SlamPose(pose.start(), pose.rise(), level.getGameTime(), pose.heavy()));
+			player.setAttached(SLAM_POSE, new SlamPose(pose.start(), pose.rise(), level.getGameTime(), pose.style()));
 		}
 	}
 
