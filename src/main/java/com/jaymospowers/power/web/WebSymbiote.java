@@ -829,7 +829,13 @@ public final class WebSymbiote {
 		if (ability == SUIT_TOGGLE && isBonded(player)) {
 			WebSymbioteState state = state(player);
 			boolean on = !state.has(WebSymbioteState.SUIT);
-			set(player, state.withFlag(WebSymbioteState.SUIT, on));
+			WebSymbioteState next = state.withFlag(WebSymbioteState.SUIT, on);
+			if (!on && next.has(WebSymbioteState.ARMOR)) {
+				// the suit comes off, and Living Armor with it
+				next = next.withFlag(WebSymbioteState.ARMOR, false);
+				removeArmor(player);
+			}
+			set(player, next);
 			ServerLevel level = player.level();
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), on ? SoundEvents.SLIME_BLOCK_PLACE : SoundEvents.HONEY_BLOCK_SLIDE,
 				SoundSource.PLAYERS, 0.8F, on ? 0.6F : 1.2F);
@@ -942,7 +948,12 @@ public final class WebSymbiote {
 	private static boolean toggle(ServerPlayer player, int flag) {
 		WebSymbioteState state = state(player);
 		boolean on = !state.has(flag);
-		set(player, state.withFlag(flag, on));
+		WebSymbioteState next = state.withFlag(flag, on);
+		if (flag == WebSymbioteState.ARMOR && on) {
+			// Living Armor is the suit, swollen: it puts the suit on
+			next = next.withFlag(WebSymbioteState.SUIT, true);
+		}
+		set(player, next);
 		ServerLevel level = player.level();
 		if (flag == WebSymbioteState.ARMOR) {
 			if (on) {
@@ -1018,7 +1029,7 @@ public final class WebSymbiote {
 		if (!armor) {
 			if (random.nextFloat() < INSTINCT_ARMOR_CHANCE) {
 				// it hardens around you, unasked
-				state = state.withFlag(WebSymbioteState.ARMOR, true);
+				state = state.withFlag(WebSymbioteState.ARMOR, true).withFlag(WebSymbioteState.SUIT, true);
 				applyArmor(player);
 				player.setAbsorptionAmount((float)Math.max(player.getAbsorptionAmount(), ARMOR_ABSORPTION * 0.5));
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_PLACE, SoundSource.PLAYERS, 1.0F, 0.5F);

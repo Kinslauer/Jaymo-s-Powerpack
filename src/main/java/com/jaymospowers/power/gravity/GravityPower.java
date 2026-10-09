@@ -160,6 +160,13 @@ public final class GravityPower implements Power {
 	static final double SLAM_RISE_SPEED = 0.75, SLAM_SPEED_PER_LEVEL = 0.7;
 	static final double SLAM_WEIGHT_BASE = 2.0, SLAM_WEIGHT_PER_LEVEL = 1.0;
 	static final int SLAM_MAX_TICKS = 30;
+	/**
+	 * A slam begun in mid-air: your fall stops while you haul it up and bring it down (the rise and
+	 * {@code AERIAL_HANG} ticks more), it does {@code AERIAL_DAMAGE} times the damage, always buries three deep through
+	 * anything up to {@code AERIAL_HARDNESS}, smashes the ground around it, and throws up more debris and smoke.
+	 */
+	static final float AERIAL_DAMAGE = 1.6F, AERIAL_HARDNESS = 5.0F, AERIAL_DEBRIS = 1.6F;
+	static final int AERIAL_HANG = 4;
 	/** Width × height (blocks) past which a slammed creature counts as heavy (a cow is 0.9 × 1.4). */
 	static final float HEAVY_SLAM_SIZE = 1.27F;
 	/** How many full-body slam animations there are to pick from (see SlamPose). */
@@ -250,10 +257,10 @@ public final class GravityPower implements Power {
 	 * {@code style}: 0, the plain one-armed slam; otherwise one of the {@link #SLAM_STYLES} full-body slams (1 one hand
 	 * overhead, 2 two-handed hammer, 3 one hand twisting in from the side, 4 both arms up in a V).
 	 */
-	public record SlamPose(long start, int rise, long landed, int style) {
+	public record SlamPose(long start, int rise, long landed, int style, boolean aerial) {
 		public static final net.minecraft.network.codec.StreamCodec<io.netty.buffer.ByteBuf, SlamPose> STREAM_CODEC =
 			net.minecraft.network.codec.StreamCodec.composite(ByteBufCodecs.VAR_LONG, SlamPose::start, ByteBufCodecs.VAR_INT, SlamPose::rise,
-				ByteBufCodecs.VAR_LONG, SlamPose::landed, ByteBufCodecs.VAR_INT, SlamPose::style, SlamPose::new);
+				ByteBufCodecs.VAR_LONG, SlamPose::landed, ByteBufCodecs.VAR_INT, SlamPose::style, ByteBufCodecs.BOOL, SlamPose::aerial, SlamPose::new);
 	}
 
 	public static final AttachmentType<SlamPose> SLAM_POSE = AttachmentRegistry.create(JaymosPowers.id("gravity_slam_pose"),
@@ -285,7 +292,7 @@ public final class GravityPower implements Power {
 
 	/** A creature being slammed down: who threw it, how hard, and what it can break. */
 	private record Slam(ResourceKey<Level> dimension, UUID entity, UUID player, float damage, float breakHardness, long started, int rise, double down,
-		int depth) {
+		int depth, boolean aerial) {
 	}
 
 	private static final List<Slam> SLAMS = new ArrayList<>();
@@ -624,12 +631,21 @@ public final class GravityPower implements Power {
 		float three = BURY_3_BASE + BURY_3_PER_LEVEL * (abilities + (ascended ? 1 : 0));
 		float roll = level.getRandom().nextFloat();
 		int depth = roll < three ? 3 : roll < three + (1.0F - three) * 0.5F ? 2 : 1;
-		SLAMS.add(new Slam(level.dimension(), target.getUUID(), player.getUUID(), damage, breakHardness, level.getGameTime(), rise, down, depth));
+		// from mid-air: you hang there, flip over with it, and it hits far harder (always three deep)
+		boolean aerial = !player.onGround() && !player.isInWater();
+		if (aerial) {
+			damage *= AERIAL_DAMAGE;
+			depth = 3;
+			breakHardness = Math.max(breakHardness, AERIAL_HARDNESS);
+			stall(player);
+		}
+		SLAMS.add(new Slam(level.dimension(), target.getUUID(), player.getUUID(), damage, breakHardness, level.getGameTime(), rise, down, depth,
+			aerial));
 		// zombies, players and anything bigger than a cow take the whole body: one of the full overhead slams, at random
 		boolean heavy = target.getBbWidth() * target.getBbHeight() > HEAVY_SLAM_SIZE || target instanceof Player
 			|| target instanceof net.minecraft.world.entity.monster.zombie.Zombie;
 		int style = heavy ? 1 + level.getRandom().nextInt(SLAM_STYLES) : 0;
-		player.setAttached(SLAM_POSE, new SlamPose(level.getGameTime(), rise, -1L, style));
+		player.setAttached(SLAM_POSE, new SlamPose(level.getGameTime(), rise, -1L, style, aerial));
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 1.0F, 0.6F);
 	}
 
@@ -716,6 +732,12 @@ public final class GravityPower implements Power {
 				continue;
 			}
 			long age = level.getGameTime() - slam.started();
+			if (slam.aerial() && age <= slam.rise() + AERIAL_HANG) {
+				ServerPlayer slammer = server.getPlayerList().getPlayer(slam.player());
+				if (slammer != null && !slammer.onGround()) {
+					stall(slammer);
+				}
+			}
 			if (age < slam.rise()) {
 				// hauled up into the air...
 				target.setDeltaMovement(0.0, SLAM_RISE_SPEED, 0.0);
@@ -760,24 +782,41 @@ public final class GravityPower implements Power {
 			BlockState hit = level.getBlockState(under);
 			BlockState shown = hit.isAir() ? net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState() : hit;
 			// the ground all around kicks up
-			impactRing(level, under, target);
+			float debris = slam.aerial() ? AERIAL_DEBRIS : 1.0F;
+			com.jaymospowers.core.Debris.ring(level, under, IMPACT_RING + 1 + (slam.aerial() ? 2 : 0), IMPACT_DEBRIS * debris);
 			if (grounded && target.isAlive()) {
 				bury(level, target, slam.depth(), Math.max(BURY_HARDNESS, slam.breakHardness()));
 			}
+			if (slam.aerial()) {
+				// and from that height it breaks the ground around it like a blast
+				com.jaymospowers.core.Debris.smash(level, Vec3.atCenterOf(under), slam.down(), player);
+				level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, target.getX(), target.getY() + 0.3, target.getZ(), 14, 1.2, 0.3, 1.2, 0.03);
+				level.sendParticles(ParticleTypes.LARGE_SMOKE, target.getX(), target.getY() + 0.3, target.getZ(), 30, 1.5, 0.4, 1.5, 0.05);
+				level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.2F, 0.7F);
+			}
 			// the heart of the impact: the biggest puff, the colour of what it hit
-			com.jaymospowers.core.Debris.puff(level, under, shown, IMPACT_DEBRIS * 1.6F);
+			com.jaymospowers.core.Debris.puff(level, under, shown, IMPACT_DEBRIS * 1.6F * debris);
 			level.sendParticles(ParticleTypes.EXPLOSION, target.getX(), target.getY(), target.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.3F, 0.7F);
 		}
 	}
 
 
+	/** Hanging in the air for an aerial slam: the fall stops dead (sent to the player, whose client moves them). */
+	private static void stall(ServerPlayer player) {
+		Vec3 v = player.getDeltaMovement();
+		player.setDeltaMovement(v.x * 0.3, 0.0, v.z * 0.3);
+		player.resetFallDistance();
+		player.needsSync = true;
+		player.syncVelocity = true;
+	}
+
 	/** The slam has hit (or failed): the thrower's arm stays down a moment, then relaxes (see SlamPose). */
 	private static void slamPoseLanded(MinecraftServer server, Slam slam, ServerLevel level) {
 		ServerPlayer player = server.getPlayerList().getPlayer(slam.player());
 		SlamPose pose = player == null ? null : player.getAttached(SLAM_POSE);
 		if (pose != null && pose.start() == slam.started()) {
-			player.setAttached(SLAM_POSE, new SlamPose(pose.start(), pose.rise(), level.getGameTime(), pose.style()));
+			player.setAttached(SLAM_POSE, new SlamPose(pose.start(), pose.rise(), level.getGameTime(), pose.style(), pose.aerial()));
 		}
 	}
 
@@ -829,11 +868,6 @@ public final class GravityPower implements Power {
 		target.needsSync = true;
 		target.syncVelocity = true;
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.ROOTED_DIRT_BREAK, SoundSource.PLAYERS, 1.2F, 0.5F);
-	}
-
-	/** Debris thrown up from every bit of ground in a ring around the impact, a big block-coloured puff each. */
-	private static void impactRing(ServerLevel level, BlockPos center, LivingEntity target) {
-		com.jaymospowers.core.Debris.ring(level, center, IMPACT_RING + 1, IMPACT_DEBRIS);
 	}
 
 	// ---------------------------------------------------------------- Weightless

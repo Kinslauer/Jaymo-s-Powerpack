@@ -28,16 +28,13 @@ public final class WebImpacts {
 	static final double LEAP_SPEED = 0.6, LAND_SPEED = 0.55;
 	/** From this speed (blocks/tick), an impact breaks the ground around it. */
 	public static final double SMASH_SPEED = 1.1;
-	/** The smash's reach (blocks) per block/tick of speed over {@link #SMASH_SPEED}, plus a base, up to a cap. */
-	static final double SMASH_RADIUS_BASE = 1.2, SMASH_RADIUS_PER_SPEED = 1.6, SMASH_RADIUS_MAX = 3.5;
-	/** How hard a block the smash can break per block/tick of speed (dirt 0.5, stone 1.5, deepslate 3). */
-	static final float SMASH_POWER_PER_SPEED = 1.6F;
-	/** Chance a broken block drops itself (like an explosion's). */
-	static final float SMASH_DROP_CHANCE = 0.3F;
-	/** The block-coloured debris puff from each block the smash breaks. */
-	static final float SMASH_DEBRIS = 1.6F;
-	/** Screen shake per block/tick of landing speed (Living Armor), up to a cap. */
-	static final float SHAKE_PER_SPEED = 0.9F, SHAKE_MAX = 2.5F;
+	/** Screen shake (degrees) per block/tick of landing speed, up to a cap: Living Armor, and the plain suit. */
+	static final float SHAKE_PER_SPEED = 3.5F, SHAKE_MAX = 9.0F, SUIT_SHAKE = 0.4F;
+	/**
+	 * Landing dust: the fall-damage puff (block particles of what you land on), far more of it. Per block/tick of
+	 * speed with the suit, and with Living Armor; capped.
+	 */
+	static final int SUIT_DUST = 70, ARMOR_DUST = 220, DUST_MAX = 600;
 
 	private record Track(double lastVy, boolean ground) {
 	}
@@ -86,19 +83,25 @@ public final class WebImpacts {
 	private static void land(ServerPlayer player, double speed, boolean armor) {
 		ServerLevel level = player.level();
 		BlockState under = under(level, player.blockPosition().below());
-		int count = (int)Math.min(120, (armor ? 40 : 18) * speed);
-		double spread = Math.min(2.5, 0.5 + speed * (armor ? 0.9 : 0.5));
+		int count = (int)Math.min(DUST_MAX, (armor ? ARMOR_DUST : SUIT_DUST) * speed);
+		double spread = Math.min(armor ? 3.5 : 2.0, 0.5 + speed * (armor ? 1.4 : 0.7));
+		// the fall-damage puff (the same block particles), many times over and thrown wide
 		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, under), player.getX(), player.getY() + 0.1, player.getZ(),
-			count, spread, 0.05, spread, 0.2);
-		level.sendParticles(ParticleTypes.DUST_PLUME, player.getX(), player.getY() + 0.1, player.getZ(), (int)((armor ? 10 : 5) * speed), spread * 0.7,
+			count, spread * 0.5, 0.05, spread * 0.5, 0.15);
+		level.sendParticles(new BlockParticleOption(ParticleTypes.DUST_PILLAR, under), player.getX(), player.getY() + 0.1, player.getZ(),
+			count / 4, spread * 0.6, 0.05, spread * 0.6, 0.3);
+		level.sendParticles(ParticleTypes.DUST_PLUME, player.getX(), player.getY() + 0.1, player.getZ(), (int)((armor ? 24 : 8) * speed), spread * 0.7,
 			0.05, spread * 0.7, 0.04);
+		if (armor) {
+			com.jaymospowers.core.Debris.ring(level, player.blockPosition().below(), (int)Math.min(4, 1 + speed * 1.5), (float)Math.min(2.5, speed));
+		}
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.MACE_SMASH_GROUND, SoundSource.PLAYERS,
 			(float)Math.min(1.2, 0.3 + speed * 0.4), armor ? 0.6F : 0.9F);
 		if (armor) {
-			goo(level, player.position(), (int)(10 * speed));
-			float shake = (float)Math.min(SHAKE_MAX, speed * SHAKE_PER_SPEED);
-			ServerPlayNetworking.send(player, new WebNet.Shake(shake));
+			goo(level, player.position(), (int)(30 * speed));
 		}
+		float shake = (float)Math.min(SHAKE_MAX, speed * SHAKE_PER_SPEED) * (armor ? 1.0F : SUIT_SHAKE);
+		ServerPlayNetworking.send(player, new WebNet.Shake(shake));
 		if (speed >= SMASH_SPEED) {
 			smash(level, player.position().add(0.0, -0.5, 0.0), speed, player);
 		}
@@ -115,41 +118,10 @@ public final class WebImpacts {
 		return state.isAir() ? Blocks.DIRT.defaultBlockState() : state;
 	}
 
-	/**
-	 * A hard impact at {@code at}, at {@code speed} blocks/tick: like a small explosion, the blocks around it break,
-	 * the softer ones more readily and further out. The faster, the wider and the harder the blocks it breaks.
-	 */
+	/** A hard impact (see {@link com.jaymospowers.core.Debris#smash}); below {@link #SMASH_SPEED} nothing breaks. */
 	public static void smash(ServerLevel level, Vec3 at, double speed, @Nullable Entity cause) {
-		if (speed < SMASH_SPEED) {
-			return;
+		if (speed >= SMASH_SPEED) {
+			com.jaymospowers.core.Debris.smash(level, at, speed, cause);
 		}
-		double radius = Math.min(SMASH_RADIUS_MAX, SMASH_RADIUS_BASE + (speed - SMASH_SPEED) * SMASH_RADIUS_PER_SPEED);
-		float power = (float)(speed * SMASH_POWER_PER_SPEED);
-		var random = level.getRandom();
-		int r = Mth.ceil(radius);
-		BlockPos center = BlockPos.containing(at);
-		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-r, -r, -r), center.offset(r, r, r))) {
-			double distance = Math.sqrt(pos.distToCenterSqr(at));
-			if (distance > radius) {
-				continue;
-			}
-			BlockState state = level.getBlockState(pos);
-			if (state.isAir() || !state.getFluidState().isEmpty() || state.hasBlockEntity()) {
-				continue;
-			}
-			float hardness = state.getDestroySpeed(level, pos);
-			if (hardness < 0.0F) {
-				continue;
-			}
-			// the blast weakens outward; a soft block goes where a hard one holds
-			float strength = power * (float)(1.0 - distance / (radius + 0.5));
-			float chance = Mth.clamp(1.0F - hardness / Math.max(0.01F, strength), 0.0F, 1.0F);
-			if (random.nextFloat() < chance) {
-				level.destroyBlock(pos, random.nextFloat() < SMASH_DROP_CHANCE, cause);
-				com.jaymospowers.core.Debris.puff(level, pos, state, SMASH_DEBRIS);
-			}
-		}
-		level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y + 0.5, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, (float)Math.min(1.0, 0.3 + speed * 0.25), 1.3F);
 	}
 }

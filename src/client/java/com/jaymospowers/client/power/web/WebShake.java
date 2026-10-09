@@ -8,7 +8,7 @@ import com.mojang.math.Axis;
  * {@link #DURATION_MS}. Applied to the camera with the hurt bob (see the GameRenderer mixin).
  */
 public final class WebShake {
-	private static final long DURATION_MS = 450;
+	private static final long DURATION_MS = 700;
 	private static float strength;
 	private static long started;
 

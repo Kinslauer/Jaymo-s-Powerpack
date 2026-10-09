@@ -80,12 +80,30 @@ public final class GravityArmPose {
 		ModelPart arm = right ? humanoid.rightArm : humanoid.leftArm;
 		if (pose.style() > 0) {
 			heavy(humanoid, right, t, pose.rise(), STYLES[(pose.style() - 1) % STYLES.length]);
-			return true;
+		} else {
+			arm.xRot = x;
+			arm.yRot = 0.0F;
+			arm.zRot = right ? 0.08F : -0.08F;
 		}
-		arm.xRot = x;
-		arm.yRot = 0.0F;
-		arm.zRot = right ? 0.08F : -0.08F;
+		if (pose.aerial()) {
+			flip(humanoid, t, pose.rise());
+		}
 		return true;
+	}
+
+	/** In mid-air, the slam throws the whole body over: heels over head as it comes down (turning about the middle). */
+	private static final float FLIP = Mth.PI * 0.95F, FLIP_TICKS = 5.0F, MIDDLE = 12.0F;
+
+	private static void flip(HumanoidModel<?> humanoid, float t, int rise) {
+		if (t < rise) {
+			return;
+		}
+		float s = Mth.clamp((t - rise) / FLIP_TICKS, 0.0F, 1.0F);
+		float a = FLIP * (1.0F - (1.0F - s) * (1.0F - s));
+		ModelPart root = humanoid.root();
+		root.xRot += a;
+		root.y += MIDDLE - MIDDLE * Mth.cos(a);
+		root.z += -MIDDLE * Mth.sin(a);
 	}
 
 	/**
