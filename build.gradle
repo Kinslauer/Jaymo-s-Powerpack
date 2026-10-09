@@ -190,9 +190,14 @@ tasks.register("profileMods") {
 		}
 		wanted.each { w ->
 			def target = new File(profileMods, w.jar.name)
-			if (!target.exists() || target.length() != w.jar.length() || w.prefix == "jaymos-powers-") {
-				java.nio.file.Files.copy(w.jar.toPath(), target.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
-				logger.lifecycle("Updated your CurseForge profile with ${w.jar.name}")
+			// only when it actually changed (a rebuild of the same version too); the running game locks its jars
+			if (!target.exists() || java.nio.file.Files.mismatch(target.toPath(), w.jar.toPath()) != -1L) {
+				try {
+					java.nio.file.Files.copy(w.jar.toPath(), target.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+					logger.lifecycle("Updated your CurseForge profile with ${w.jar.name}")
+				} catch (java.nio.file.FileSystemException e) {
+					logger.warn("Minecraft is running: ${w.jar.name} in your CurseForge profile was NOT updated. Close the game, then run Build Modpack again.")
+				}
 			}
 		}
 	}
