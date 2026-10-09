@@ -132,6 +132,10 @@ public final class WebSymbioteClient {
 	/** From the avatar renderer's extractRenderState: does this player wear the suit. */
 	public static void extract(Entity entity, AvatarRenderState state) {
 		state.setData(SUIT, entity instanceof Player player && WebSymbiote.suitShown(player) ? Boolean.TRUE : null);
+		if (state.getData(SUIT) != null || entity instanceof Player p && WebSymbiote.isToggled(p, WebSymbioteState.ARMOR)) {
+			// no cape poking out through the suit
+			state.showCape = false;
+		}
 		// Living Armor grows tendrils (whether or not the suit is showing)
 		if (entity instanceof Player player && WebSymbiote.isBonded(player) && WebSymbiote.isToggled(player, WebSymbioteState.ARMOR)) {
 			long now = player.level().getGameTime();

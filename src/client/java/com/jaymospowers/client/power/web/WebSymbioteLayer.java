@@ -21,6 +21,10 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 	private static final float BULK = 0.7F;
 	private final PlayerModel bulkWide;
 	private final PlayerModel bulkSlim;
+	/** The plain suit sits just over the skin (not on it, where it would flicker against it). */
+	private static final float SKIN_GAP = 0.12F;
+	private final PlayerModel suitWide;
+	private final PlayerModel suitSlim;
 
 	WebSymbioteLayer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
 		super(renderer);
@@ -28,6 +32,10 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			PlayerModel.createMesh(new net.minecraft.client.model.geom.builders.CubeDeformation(BULK), false), 64, 64).bakeRoot(), false);
 		this.bulkSlim = new PlayerModel(net.minecraft.client.model.geom.builders.LayerDefinition.create(
 			PlayerModel.createMesh(new net.minecraft.client.model.geom.builders.CubeDeformation(BULK), true), 64, 64).bakeRoot(), true);
+		this.suitWide = new PlayerModel(net.minecraft.client.model.geom.builders.LayerDefinition.create(
+			PlayerModel.createMesh(new net.minecraft.client.model.geom.builders.CubeDeformation(SKIN_GAP), false), 64, 64).bakeRoot(), false);
+		this.suitSlim = new PlayerModel(net.minecraft.client.model.geom.builders.LayerDefinition.create(
+			PlayerModel.createMesh(new net.minecraft.client.model.geom.builders.CubeDeformation(SKIN_GAP), true), 64, 64).bakeRoot(), true);
 	}
 
 	@Override
@@ -41,6 +49,7 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 		if (state.getData(WebSymbioteClient.SUIT) == null) {
 			return;
 		}
-		coloredCutoutModelCopyLayerRender(this.getParentModel(), TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
+		PlayerModel suit = state.skin.model() == net.minecraft.world.entity.player.PlayerModelType.SLIM ? this.suitSlim : this.suitWide;
+		coloredCutoutModelCopyLayerRender(suit, TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
 	}
 }

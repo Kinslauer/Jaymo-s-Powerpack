@@ -57,9 +57,39 @@ final class WebLineRenderer {
 		if (minecraft.level == null) {
 			return;
 		}
+		if (!minecraft.isPaused()) {
+			drip(minecraft);
+		}
 		for (net.minecraft.world.entity.Entity entity : minecraft.level.entitiesForRendering()) {
 			if (entity.getAttached(com.jaymospowers.power.web.WebPower.HITCH) != null) {
 				HITCHED.add(entity);
+			}
+		}
+	}
+
+	/** How much thicker a symbiote's line is than a web's, and how often goo drips off it (per line, per tick). */
+	private static final float DARK_WIDTH = 2.6F;
+	private static final float DRIP_CHANCE = 0.6F;
+	private static final net.minecraft.core.particles.DustParticleOptions GOO = new net.minecraft.core.particles.DustParticleOptions(0x0B0910, 1.3F);
+
+	/** Black goo dripping off a symbiote's lines, along their length. */
+	private static void drip(Minecraft minecraft) {
+		ClientLevel level = minecraft.level;
+		net.minecraft.util.RandomSource random = level.getRandom();
+		for (Player player : level.players()) {
+			if (!com.jaymospowers.power.web.WebSymbiote.suitShown(player) || player.distanceToSqr(minecraft.player) > 64.0 * 64.0) {
+				continue;
+			}
+			for (int handIndex = WebNet.MAIN; handIndex <= WebNet.OFF; handIndex++) {
+				Vec3 end = WebArms.lineEnd(minecraft, level, player, handIndex, 1.0F);
+				if (end == null || random.nextFloat() > DRIP_CHANCE) {
+					continue;
+				}
+				Vec3 at = handPos(minecraft, player, handIndex, 1.0F).lerp(end, random.nextDouble());
+				level.addParticle(GOO, at.x, at.y - 0.05, at.z, 0.0, -0.08, 0.0);
+				if (random.nextInt(4) == 0) {
+					level.addParticle(net.minecraft.core.particles.ParticleTypes.FALLING_OBSIDIAN_TEAR, at.x, at.y - 0.05, at.z, 0.0, 0.0, 0.0);
+				}
 			}
 		}
 	}
@@ -105,7 +135,8 @@ final class WebLineRenderer {
 				if (hand.distanceToSqr(end) > 96.0 * 96.0) {
 					continue;
 				}
-				draw(context.poseStack(), context, hand.subtract(camera), end.subtract(camera), width, dark);
+				// a symbiote's lines are thick, living cords
+				draw(context.poseStack(), context, hand.subtract(camera), end.subtract(camera), dark ? width * DARK_WIDTH : width, dark);
 			}
 			float spread = WebArms.wings(player, partialTick);
 			if (spread > 0.02F && !(player == minecraft.player && minecraft.options.getCameraType().isFirstPerson())) {
