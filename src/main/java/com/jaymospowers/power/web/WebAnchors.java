@@ -40,8 +40,8 @@ public final class WebAnchors {
 	public static @Nullable Anchor find(Player player) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getViewVector(1.0F);
-		// a symbiote's webs reach further
-		double scale = WebSymbiote.reachScale(player);
+		// a symbiote's webs reach further; its tendrils (the suit on) don't reach far at all
+		double scale = WebSymbiote.swingScale(player);
 		BlockHitResult hit = clip(player, eye, eye.add(look.scale(SWING_RANGE * scale)));
 		Vec3 direct = hit.getType() == HitResult.Type.MISS ? null : hit.getLocation();
 		if (direct != null && direct.y >= eye.y - DIRECT_MAX_DROP) {

@@ -384,7 +384,7 @@ final class WebSwing {
 			if (input.jump()) {
 				strand.rope = Math.max(ROPE_MIN, strand.rope - REEL_IN * boost);
 			} else if (input.shift()) {
-				strand.rope = Math.min(WebAnchors.SWING_RANGE * com.jaymospowers.power.web.WebSymbiote.reachScale(player), strand.rope + LET_OUT);
+				strand.rope = Math.min(WebAnchors.SWING_RANGE * com.jaymospowers.power.web.WebSymbiote.swingScale(player), strand.rope + LET_OUT);
 			}
 			Vec3 to = strand.anchor.subtract(body);
 			if (to.lengthSqr() > 1.0E-8) {

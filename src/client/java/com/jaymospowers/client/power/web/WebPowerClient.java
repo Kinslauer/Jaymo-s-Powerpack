@@ -90,12 +90,27 @@ public final class WebPowerClient implements PowerClient {
 			return;
 		}
 		int hand;
+		boolean tendrils = com.jaymospowers.power.web.WebSymbiote.suitShown(player);
 		if (key == PowerKey.ABILITY_1) {
 			hand = WebNet.MAIN;
-		} else if (key == PowerKey.ABILITY_2 && (!down || WebPower.offHandFree(player))) {
+		} else if (key == PowerKey.ABILITY_2 && (!down || tendrils || WebPower.offHandFree(player))) {
 			// G is the off-hand web (it needs an empty off hand)
 			hand = WebNet.OFF;
 		} else {
+			return;
+		}
+		// the suit on: the keys are tendrils. On something grabbable, they grab it (and throw it on release)
+		if (tendrils && down) {
+			net.minecraft.world.entity.Entity target = grabTarget(player);
+			if (target != null) {
+				grabbing[hand] = true;
+				net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new com.jaymospowers.power.web.WebTendrils.Grab(hand, target.getId()));
+				return;
+			}
+		}
+		if (!down && grabbing[hand]) {
+			grabbing[hand] = false;
+			net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new com.jaymospowers.power.web.WebTendrils.Grab(hand, -1));
 			return;
 		}
 		if (down) {
@@ -103,6 +118,25 @@ public final class WebPowerClient implements PowerClient {
 		} else {
 			swing.releaseKey(player, hand);
 		}
+	}
+
+	/** Which tendril is holding something (so its key's release throws instead of ending a swing). */
+	private final boolean[] grabbing = new boolean[2];
+
+	/** What a tendril would grab: the creature, player, item or corpse under the crosshair, close by. */
+	private static net.minecraft.world.entity.@org.jspecify.annotations.Nullable Entity grabTarget(LocalPlayer player) {
+		net.minecraft.world.phys.Vec3 eye = player.getEyePosition();
+		net.minecraft.world.phys.Vec3 look = player.getViewVector(1.0F);
+		net.minecraft.world.phys.Vec3 end = eye.add(look.scale(com.jaymospowers.power.web.WebTendrils.GRAB_RANGE));
+		net.minecraft.world.phys.BlockHitResult block = player.level().clip(new net.minecraft.world.level.ClipContext(eye, end,
+			net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, player));
+		if (block.getType() != net.minecraft.world.phys.HitResult.Type.MISS) {
+			end = block.getLocation();
+		}
+		net.minecraft.world.phys.EntityHitResult hit = net.minecraft.world.entity.projectile.ProjectileUtil.getEntityHitResult(player, eye, end,
+			player.getBoundingBox().expandTowards(look.scale(com.jaymospowers.power.web.WebTendrils.GRAB_RANGE)).inflate(1.0),
+			e -> com.jaymospowers.power.web.WebTendrils.grabbable(player, e), eye.distanceToSqr(end));
+		return hit == null ? null : hit.getEntity();
 	}
 
 	@Override

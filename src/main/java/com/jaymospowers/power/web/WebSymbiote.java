@@ -272,6 +272,17 @@ public final class WebSymbiote {
 		return isBonded(player) ? REACH_SCALE : 1.0;
 	}
 
+	/**
+	 * How far a swing reaches: wearing the suit, the swing is the tendrils' (most of one side's, grabbing close by),
+	 * a short-range swing; bonded but bare, the symbiote's webs reach further than a plain web's.
+	 */
+	public static double swingScale(Player player) {
+		return suitShown(player) ? TENDRIL_SWING_SCALE : reachScale(player);
+	}
+
+	/** The tendrils' swing reach, as a share of a web's. */
+	public static final double TENDRIL_SWING_SCALE = 0.3;
+
 	public static double pullScale(Player player) {
 		return isBonded(player) ? PULL_SCALE : 1.0;
 	}
@@ -778,7 +789,7 @@ public final class WebSymbiote {
 			return;
 		}
 		boolean done = switch (ability) {
-			case TENDRIL -> tendril(player);
+			case TENDRIL -> WebTendrils.radialGrab(player);
 			case ARMOR -> toggle(player, WebSymbioteState.ARMOR);
 			case CRAWL -> toggle(player, WebSymbioteState.CRAWL);
 			case CONSUME -> consume(player);

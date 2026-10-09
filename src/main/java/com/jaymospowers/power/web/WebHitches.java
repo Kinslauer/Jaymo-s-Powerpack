@@ -34,10 +34,10 @@ import net.minecraft.world.phys.Vec3;
 public final class WebHitches {
 	/** Longest a hitch lasts. */
 	public static final int MAX_TICKS = 1200;
-	/** Shortest and longest line a hitch can be tied with. */
-	public static final double MIN_LENGTH = 1.5, MAX_LENGTH = 16.0;
-	/** Wrenched this far past the line's length, it snaps. */
-	public static final double SNAP_OVER = 6.0;
+	/** Shortest and longest line a hitch can be tied with; hung from a ceiling, it's shorter still. */
+	public static final double MIN_LENGTH = 1.0, MAX_LENGTH = 3.0, CEILING_MAX_LENGTH = 2.0;
+	/** Pulled this far past the line's length, it snaps. */
+	public static final double SNAP_OVER = 1.5;
 	/** How hard the line pulls back (per block over), at most per tick. */
 	private static final double SPRING = 0.3;
 	private static final double MAX_PULL = 0.9;
@@ -87,9 +87,10 @@ public final class WebHitches {
 	}
 
 	/** Ties {@code entity} to the point {@code anchor} on {@code block}, at the line's current length. */
-	static void hitch(ServerLevel level, Entity entity, Vec3 anchor, BlockPos block) {
+	static void hitch(ServerLevel level, Entity entity, Vec3 anchor, BlockPos block, net.minecraft.core.Direction face) {
 		HITCHES.removeIf(h -> h.entity().equals(entity.getUUID()));
-		double length = Math.clamp(center(entity).distanceTo(anchor), MIN_LENGTH, MAX_LENGTH);
+		double max = face == net.minecraft.core.Direction.DOWN ? CEILING_MAX_LENGTH : MAX_LENGTH;
+		double length = Math.clamp(center(entity).distanceTo(anchor), MIN_LENGTH, max);
 		HITCHES.add(new Hitch(level.dimension(), entity.getUUID(), anchor, block.immutable(), length, clock + MAX_TICKS));
 		entity.setAttached(WebPower.HITCH, anchor);
 		STRAIN.put(entity.getUUID(), new int[] {0, entity instanceof LivingEntity living && living.isSwinging() ? 1 : 0});

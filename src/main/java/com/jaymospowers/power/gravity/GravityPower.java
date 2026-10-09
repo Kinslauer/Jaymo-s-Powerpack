@@ -1019,7 +1019,7 @@ public final class GravityPower implements Power {
 	}
 
 	/** Jaymo's Kitchen's corpses (not living, but Lift can take them too). */
-	static boolean isCorpse(Entity entity) {
+	public static boolean isCorpse(Entity entity) {
 		net.minecraft.resources.Identifier type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
 		return type.getNamespace().equals("jaymoskitchen") && type.getPath().contains("corpse");
 	}

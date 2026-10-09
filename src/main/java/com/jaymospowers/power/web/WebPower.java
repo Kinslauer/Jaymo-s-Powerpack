@@ -70,10 +70,10 @@ public final class WebPower implements Power {
 	 * you (springy, at most {@code TETHER_MAX_PULL} b/t a tick), so you can drag it along or let it hang under you. The
 	 * line snaps if it's stretched past {@code TETHER_BREAK}, or if the target hits something (a player: swings).
 	 */
-	public static final double TETHER_LENGTH = 4.0;
+	public static final double TETHER_LENGTH = 3.0;
 	public static final double TETHER_SPRING = 0.25;
 	public static final double TETHER_MAX_PULL = 0.9;
-	public static final double TETHER_BREAK = 16.0;
+	public static final double TETHER_BREAK = 4.5;
 	/**
 	 * A <i>player</i> on the Yank line can fight it: they're pulled more gently than a mob ({@code PLAYER_TETHER_*}),
 	 * so they can lean away against it, and holding it stretched past {@code TETHER_LENGTH + PLAYER_STRAIN_OVER} for
@@ -195,6 +195,11 @@ public final class WebPower implements Power {
 		WebTraps.register();
 		WebHitches.register();
 		WebBridges.register();
+		WebTendrils.register();
+		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			WebTendrils.releaseAll(handler.player, false);
+			WebTendrils.forget(handler.player);
+		});
 		WebSymbiote.register();
 		WebAscension.register();
 		WebDebugCommand.register();
@@ -256,6 +261,7 @@ public final class WebPower implements Power {
 		player.removeAttached(WINGS);
 		player.removeAttached(TETHER);
 		player.removeAttached(COOLDOWNS);
+		WebTendrils.releaseAll(player, false);
 		WebSymbiote.onLost(player);
 		WebAscension.onLost(player);
 	}
@@ -345,6 +351,7 @@ public final class WebPower implements Power {
 		}
 		State state = player.getAttached(STATE);
 		WebSymbiote.tick(player);
+		WebTendrils.tick(player);
 		WebAscension.tick(player, state != null && swinging(state));
 		if (state == null) {
 			return;
@@ -505,7 +512,7 @@ public final class WebPower implements Power {
 					Vec3 eye = player.getEyePosition();
 					BlockHitResult hit = WebAnchors.clip(player, eye, eye.add(player.getViewVector(1.0F).scale(HITCH_REACH * WebSymbiote.reachScale(player))));
 					if (hit.getType() == HitResult.Type.BLOCK) {
-						WebHitches.hitch(player.level(), target, hit.getLocation(), hit.getBlockPos());
+						WebHitches.hitch(player.level(), target, hit.getLocation(), hit.getBlockPos(), hit.getDirection());
 						thwip(player);
 					}
 				}
