@@ -51,6 +51,19 @@ public final class PowerPayloads {
 		}
 	}
 
+	/** Client → server: the Power Mode key (Z) went down or up. */
+	public record ModeKey(boolean down) implements CustomPacketPayload {
+		public static final Type<ModeKey> TYPE = new Type<>(JaymosPowers.id("mode_key"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, ModeKey> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeBoolean(p.down),
+			buf -> new ModeKey(buf.readBoolean()));
+
+		@Override
+		public Type<ModeKey> type() {
+			return TYPE;
+		}
+	}
+
 	/** Client → server: the ascended ability's key went down or up. */
 	public record UltimateKey(boolean down) implements CustomPacketPayload {
 		public static final Type<UltimateKey> TYPE = new Type<>(JaymosPowers.id("ultimate_key"));
@@ -81,6 +94,7 @@ public final class PowerPayloads {
 		PayloadTypeRegistry.serverboundPlay().register(KeyInput.TYPE, KeyInput.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ChoosePower.TYPE, ChoosePower.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(UltimateKey.TYPE, UltimateKey.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(ModeKey.TYPE, ModeKey.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ChooseAffinity.TYPE, ChooseAffinity.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(OpenAffinity.TYPE, OpenAffinity.CODEC);
 	}

@@ -19,6 +19,10 @@ public interface PowerClient {
 	default void onKey(LocalPlayer player, PowerKey key, boolean down) {
 	}
 
+	/** The Power Mode key (Z by default) went down or up. The server hears it too ({@code Power.onMode}). */
+	default void onMode(LocalPlayer player, boolean down) {
+	}
+
 	/** The ascended ability's key (C by default) went down or up. Only called while the power is ascended. */
 	default void onUltimate(LocalPlayer player, boolean down) {
 	}

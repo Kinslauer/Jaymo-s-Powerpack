@@ -20,6 +20,8 @@ public final class PowerEvents {
 				Powers.key(ctx.player(), key, payload.down());
 			}
 		});
+		ServerPlayNetworking.registerGlobalReceiver(PowerPayloads.ModeKey.TYPE,
+			(payload, ctx) -> Powers.mode(ctx.player(), payload.down()));
 		ServerPlayNetworking.registerGlobalReceiver(PowerPayloads.UltimateKey.TYPE,
 			(payload, ctx) -> Powers.ultimate(ctx.player(), payload.down()));
 		ServerPlayNetworking.registerGlobalReceiver(PowerPayloads.ChooseAffinity.TYPE,

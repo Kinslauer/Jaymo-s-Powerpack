@@ -91,7 +91,7 @@ public final class Fate {
 
 	/** A power can ascend once every ability is mastered (creative/command powers come mastered). */
 	public static boolean canAscend(Player player) {
-		return Powers.of(player) != null && !isAscended(player) && Mastery.unlocked(player) >= Mastery.UNLOCK_AT.length;
+		return Powers.of(player) != null && !isAscended(player) && Mastery.unlocked(player) >= Mastery.ALL;
 	}
 
 	/**
@@ -162,7 +162,7 @@ public final class Fate {
 		player.level().sendParticles(ParticleTypes.TOTEM_OF_UNDYING, player.getX(), player.getY() + 1.0, player.getZ(), 120, 0.5, 1.0, 0.5, 0.4);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.ascended_chat", Component.keybind("key.jaymospowers.ultimate"))
 			.withStyle(ChatFormatting.GOLD));
-		power.onLevelUp(player, Mastery.UNLOCK_AT.length + 1);
+		power.onLevelUp(player, Mastery.ALL + 1);
 		return true;
 	}
 

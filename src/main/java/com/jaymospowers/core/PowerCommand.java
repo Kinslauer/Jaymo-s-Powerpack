@@ -58,7 +58,7 @@ public final class PowerCommand {
 					})))
 			.then(Commands.literal("level")
 				.then(Commands.argument("targets", EntityArgument.players())
-					.then(Commands.argument("abilities", IntegerArgumentType.integer(1, 4))
+					.then(Commands.argument("abilities", IntegerArgumentType.integer(0, 4))
 						.executes(c -> {
 							int abilities = IntegerArgumentType.getInteger(c, "abilities");
 							Collection<ServerPlayer> players = EntityArgument.getPlayers(c, "targets");

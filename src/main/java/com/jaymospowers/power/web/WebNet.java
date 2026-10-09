@@ -75,17 +75,6 @@ public final class WebNet {
 		}
 	}
 
-	/** Client → server: the Web Zip key (Z by default) was pressed. */
-	public record Zip() implements CustomPacketPayload {
-		public static final Type<Zip> TYPE = new Type<>(JaymosPowers.id("web_zip"));
-		public static final StreamCodec<ByteBuf, Zip> CODEC = StreamCodec.unit(new Zip());
-
-		@Override
-		public Type<Zip> type() {
-			return TYPE;
-		}
-	}
-
 	/** Client → server: picked a symbiote ability from the radial menu (see {@link WebSymbiote}'s ability indices). */
 	public record SymbioteUse(int ability) implements CustomPacketPayload {
 		public static final Type<SymbioteUse> TYPE = new Type<>(JaymosPowers.id("web_symbiote_use"));
@@ -138,7 +127,6 @@ public final class WebNet {
 		PayloadTypeRegistry.clientboundPlay().register(Takeover.TYPE, Takeover.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Nudge.TYPE, Nudge.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Sense.TYPE, Sense.CODEC);
-		PayloadTypeRegistry.serverboundPlay().register(Zip.TYPE, Zip.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Wings.TYPE, Wings.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Swing.TYPE, Swing.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(SwingReject.TYPE, SwingReject.CODEC);

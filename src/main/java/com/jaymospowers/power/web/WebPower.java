@@ -197,19 +197,6 @@ public final class WebPower implements Power {
 		WebDebugCommand.register();
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Swing.TYPE, (payload, ctx) -> INSTANCE.onSwing(ctx.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Wings.TYPE, (payload, ctx) -> INSTANCE.onWings(ctx.player(), payload.open()));
-		// Web Zip has its own key (Z); it unlocks with the second web (G)
-		ServerPlayNetworking.registerGlobalReceiver(WebNet.Zip.TYPE, (payload, ctx) -> {
-			ServerPlayer player = ctx.player();
-			if (!Powers.has(player, INSTANCE) || !player.isAlive() || player.isSpectator()) {
-				return;
-			}
-			if (!com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_2)) {
-				player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymospowers.locked")
-					.withStyle(net.minecraft.ChatFormatting.GRAY));
-				return;
-			}
-			INSTANCE.zip(player);
-		});
 		// a held target that hits anything breaks free
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			Entity attacker = source.getEntity();
@@ -268,6 +255,20 @@ public final class WebPower implements Power {
 		player.removeAttached(COOLDOWNS);
 		WebSymbiote.onLost(player);
 		WebAscension.onLost(player);
+	}
+
+	/** The Power Mode key (Z) is Web Zip; it unlocks with the second web (G). */
+	@Override
+	public void onMode(ServerPlayer player, boolean down) {
+		if (!down) {
+			return;
+		}
+		if (!com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_2)) {
+			player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymospowers.locked")
+				.withStyle(net.minecraft.ChatFormatting.GRAY));
+			return;
+		}
+		zip(player);
 	}
 
 	/** The ascended ability (C): Web Strike. */
@@ -507,7 +508,7 @@ public final class WebPower implements Power {
 			return;
 		}
 		switch (key) {
-			// G is the off-hand swing web (all client-side); Zip has its own key now (see WebNet.Zip)
+			// G is the off-hand swing web (all client-side); Zip is on the Power Mode key (see onMode)
 			case ABILITY_4 -> yank(player);
 			default -> {
 			}

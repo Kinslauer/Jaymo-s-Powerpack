@@ -33,6 +33,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 	/** The ascended ability's key (C by default): silent until the power ascends. */
 	private static KeyMapping ultimateKey;
 	private static boolean ultimateWasDown;
+	/** The Power Mode key (Z by default): each power's own special (Web's Zip, Wind's modes...). */
+	private static KeyMapping modeKey;
+	private static boolean modeWasDown;
 
 	private static final boolean[] wasDown = new boolean[PowerKey.values().length];
 	private static @Nullable Identifier lastPower;
@@ -46,6 +49,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 		}
 		menuKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.menu", InputConstants.KEY_H, CATEGORY));
 		ultimateKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.ultimate", InputConstants.KEY_C, CATEGORY));
+		modeKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.mode", InputConstants.KEY_Z, CATEGORY));
+		// once per install: move other mods' (and vanilla's) defaults off the power keys
+		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(KeyConflicts::resolveOnce);
 
 		ClientTickEvents.END_CLIENT_TICK.register(JaymosPowersClient::tick);
 		// the affinity choice waits until no other screen is open
@@ -62,6 +68,11 @@ public class JaymosPowersClient implements ClientModInitializer {
 	/** The key mapping for an ability key (to show its bound key in a HUD, say). */
 	public static KeyMapping keyMapping(PowerKey key) {
 		return ABILITY_KEYS[key.ordinal()];
+	}
+
+	/** The Power Mode key mapping. */
+	public static KeyMapping modeKey() {
+		return modeKey;
 	}
 
 	/** The ascended ability's key mapping. */
@@ -124,9 +135,17 @@ public class JaymosPowersClient implements ClientModInitializer {
 			if (down != wasDown[key.ordinal()]) {
 				wasDown[key.ordinal()] = down;
 				ClientPlayNetworking.send(new PowerPayloads.KeyInput(key.ordinal(), down));
-				if (client != null && Mastery.isUnlocked(player, key)) {
+				if (client != null && Mastery.isUsable(player, key)) {
 					client.onKey(player, key, down);
 				}
+			}
+		}
+		boolean mode = power != null && minecraft.gui.screen() == null && modeKey.isDown();
+		if (mode != modeWasDown) {
+			modeWasDown = mode;
+			ClientPlayNetworking.send(new PowerPayloads.ModeKey(mode));
+			if (client != null) {
+				client.onMode(player, mode);
 			}
 		}
 		boolean ultimate = power != null && Fate.isAscended(player) && minecraft.gui.screen() == null && ultimateKey.isDown();

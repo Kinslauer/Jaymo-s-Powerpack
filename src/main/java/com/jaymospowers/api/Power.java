@@ -76,6 +76,18 @@ public interface Power {
 	}
 
 	/**
+	 * The key a fresh awakening's starter answers to, before any ability unlocks (null: the starter is passive, or
+	 * there isn't one). While {@code Mastery.starterOnly(player)}, presses of this key reach {@link #onKey}.
+	 */
+	default @org.jspecify.annotations.Nullable PowerKey starterKey() {
+		return null;
+	}
+
+	/** The Power Mode key (Z by default) went down or up. Sent for every power. */
+	default void onMode(ServerPlayer player, boolean down) {
+	}
+
+	/**
 	 * The order the abilities unlock in when the power awakens naturally (see Mastery): the first is there from the
 	 * start. Charged abilities go last.
 	 */

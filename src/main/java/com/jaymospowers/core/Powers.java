@@ -167,7 +167,7 @@ public final class Powers {
 
 	static void key(ServerPlayer player, PowerKey key, boolean down) {
 		Power power = of(player);
-		if (power != null && !Mastery.isUnlocked(player, key)) {
+		if (power != null && !Mastery.isUsable(player, key)) {
 			if (down) {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.locked").withStyle(ChatFormatting.GRAY));
 			}
@@ -179,6 +179,14 @@ public final class Powers {
 			if (down) {
 				Mastery.used(player);
 			}
+		}
+	}
+
+	/** The Power Mode key (Z): each power decides what it does (Web: Zip; Wind: its storm or tempest mode). */
+	static void mode(ServerPlayer player, boolean down) {
+		Power power = of(player);
+		if (power != null && player.isAlive() && !player.isSpectator()) {
+			power.onMode(player, down);
 		}
 	}
 

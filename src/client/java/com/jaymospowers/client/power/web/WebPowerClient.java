@@ -37,21 +37,8 @@ public final class WebPowerClient implements PowerClient {
 	}
 
 	/** Called once from {@link com.jaymospowers.client.JaymosPowersClient}: renderers, client packets, the PowerClient. */
-	/** Web Zip's own key (Z by default), under Controls → Powers. */
-	private static net.minecraft.client.KeyMapping zipKey;
-
 	public static void init() {
 		PowerClients.register(WebPower.ID, INSTANCE);
-		zipKey = net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper.registerKeyMapping(new net.minecraft.client.KeyMapping(
-			"key.jaymospowers.web_zip", com.mojang.blaze3d.platform.InputConstants.KEY_Z, JaymosPowersClient.CATEGORY));
-		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
-			while (zipKey.consumeClick()) {
-				LocalPlayer player = minecraft.player;
-				if (player != null && isActive(player) && minecraft.gui.screen() == null && !player.isSpectator()) {
-					ClientPlayNetworking.send(new WebNet.Zip());
-				}
-			}
-		});
 		WebSymbioteClient.init();
 		EntityRenderers.register(WebPower.WEB_BALL, context -> new ThrownItemRenderer<>(context, 0.85F, false));
 		LevelRenderEvents.COLLECT_SUBMITS.register(WebLineRenderer::render);
@@ -231,7 +218,7 @@ public final class WebPowerClient implements PowerClient {
 
 	/** Web Zip's chip: its own key, unlocked along with G. */
 	private static void zipChip(GuiGraphicsExtractor graphics, Font font, int x, int y, long left, int totalTicks) {
-		String label = font.plainSubstrByWidth(zipKey.getTranslatedKeyMessage().getString(), CHIP - 2);
+		String label = font.plainSubstrByWidth(JaymosPowersClient.modeKey().getTranslatedKeyMessage().getString(), CHIP - 2);
 		if (!JaymosPowersClient.isUnlocked(PowerKey.ABILITY_2)) {
 			graphics.fill(x, y, x + CHIP, y + CHIP, 0xB0000000);
 			graphics.outline(x, y, CHIP, CHIP, 0x60505050);
