@@ -77,6 +77,13 @@ final class ArsenalDebugCommand {
 								c.getSource().sendSuccess(() -> Component.literal(done + " blinked"), true);
 								return done;
 							})))
+					.then(Commands.literal("relic")
+						.executes(c -> {
+							ServerPlayer self = c.getSource().getPlayerOrException();
+							self.getInventory().add(ArsenalRelics.make(self.level(), self.getRandom()));
+							c.getSource().sendSuccess(() -> Component.literal("A relic, as found in a chest."), false);
+							return 1;
+						}))
 					.then(Commands.literal("ready")
 						.then(Commands.argument("targets", EntityArgument.players())
 							.executes(c -> {

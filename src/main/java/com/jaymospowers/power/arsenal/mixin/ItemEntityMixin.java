@@ -40,7 +40,10 @@ public abstract class ItemEntityMixin extends Entity {
 			return;
 		}
 		this.setNeverPickUp();
-		if (this.getAge() >= ArsenalPower.DROPPED_TICKS || level.getGameTime() >= summoned.expires()) {
+		// a relic goes straight home when dropped (to wait in its owner's pocket dimension)
+		boolean relic = com.jaymospowers.power.arsenal.ArsenalRelics.is(this.getItem());
+		if (relic || this.getAge() >= ArsenalPower.DROPPED_TICKS || level.getGameTime() >= summoned.expires()) {
+			com.jaymospowers.power.arsenal.ArsenalRelics.reclaim(level.getServer(), this.getItem());
 			Summoned.dissolveEffects(level, this.position().add(0, 0.2, 0));
 			this.discard();
 			ci.cancel();

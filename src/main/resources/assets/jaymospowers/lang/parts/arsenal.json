@@ -36,5 +36,7 @@
 	"message.jaymospowers.arsenal.whisper_3": "They are learning the way through.",
 	"message.jaymospowers.arsenal.whisper_end": "The void was waiting for you.",
 	"message.jaymospowers.arsenal.purge_start": "Its death is pulling something out of you.",
-	"power.jaymospowers.arsenal.key.starter": "Rummage: reach in and see what turns up"
+	"power.jaymospowers.arsenal.key.starter": "Rummage: reach in and see what turns up",
+	"item.jaymospowers.arsenal_relic.lore": "It hums, as if it remembers being somewhere else.",
+	"message.jaymospowers.arsenal.relic_kept": "%s slips into your pocket dimension. It's yours now."
 }

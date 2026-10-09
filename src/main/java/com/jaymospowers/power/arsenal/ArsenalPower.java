@@ -116,6 +116,7 @@ public final class ArsenalPower implements Power {
 
 	/** Called once from {@link JaymosPowers#onInitialize()}: register the power and everything it needs. */
 	public static void init() {
+		ArsenalRelics.init();
 		ArsenalReach.init();
 		Summoned.TYPE = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("arsenal_summoned"),
 			DataComponentType.<Summoned>builder().persistent(Summoned.CODEC).networkSynchronized(Summoned.STREAM_CODEC).build());
@@ -198,6 +199,7 @@ public final class ArsenalPower implements Power {
 	@Override
 	public void tick(ServerPlayer player) {
 		ArsenalVoid.tick(player);
+		ArsenalRelics.tick(player);
 		HundredBlades.tick(player);
 		Pending pending = PENDING.get(player.getUUID());
 		if (pending == null) {
@@ -247,7 +249,12 @@ public final class ArsenalPower implements Power {
 		}
 		player.setAttached(COOLDOWNS, cd.withReach(now + REACH_COOLDOWN));
 		// decided now, so the weapon everyone sees coming out of the portal is the one you get
-		List<ItemStack> stacks = ArsenalArmory.rollFor(player, level, player.getRandom());
+		List<ItemStack> stacks = new ArrayList<>(ArsenalArmory.rollFor(player, level, player.getRandom()));
+		// a relic kept in the pocket dimension always comes out first
+		ItemStack relic = ArsenalRelics.takeFirst(player);
+		if (!relic.isEmpty()) {
+			stacks.addFirst(relic);
+		}
 		if (com.jaymospowers.core.Fate.isCorrupted(player)) {
 			stacks.forEach(ArsenalVoid::voidTouched);
 		}
@@ -483,6 +490,7 @@ public final class ArsenalPower implements Power {
 			Summoned s = Summoned.of(stack);
 			if (s != null && which.test(s)) {
 				gone.add(stack.copy());
+				ArsenalRelics.reclaim(player.level().getServer(), stack);
 				setter.accept(ItemStack.EMPTY);
 			}
 		});
@@ -506,6 +514,7 @@ public final class ArsenalPower implements Power {
 					if (names.isEmpty()) {
 						names.add(stack.getHoverName());
 					}
+					ArsenalRelics.reclaim(server, stack);
 					setter.accept(ItemStack.EMPTY);
 				}
 			});
