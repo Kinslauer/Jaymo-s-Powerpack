@@ -51,6 +51,9 @@ def packMods = [
 	[dep: "maven.modrinth:xaeros-minimap:B2aG1aya", cf: [263420, 9067206]],
 	[dep: "maven.modrinth:sodium:bAZQdGpg", cf: [394468, 8888037]],
 	[dep: "maven.modrinth:ok-zoomer:3UXOK2JF", cf: [354047, 8899781]],
+	// Moog's Voyager Structures (MIT): new structures in world generation, and its library (LGPL-3.0)
+	[dep: "maven.modrinth:moogs-voyager-structures:PiFoSPXI", cf: [656977, 8970306]],
+	[dep: "maven.modrinth:moogs-structure-lib:SkD4H9XM", cf: [1337167, 9047029]],
 ]
 // not on CurseForge: shipped inside the pack as overrides
 def kitchenJar = fileTree("libs") { include "jaymos-kitchen-*.jar" }
