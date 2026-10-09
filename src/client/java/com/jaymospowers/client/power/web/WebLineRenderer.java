@@ -74,11 +74,111 @@ final class WebLineRenderer {
 
 	/** Three thick black cords, from around the shoulder and arm, gathering on the same point. */
 	private static void bundle(LevelRenderContext context, Vec3 from, Vec3 to, float width) {
-		float w = width * DARK_WIDTH;
-		draw(context.poseStack(), context, from, to, w, true);
-		draw(context.poseStack(), context, from.add(0.0, 0.4, 0.0), to.add(0.0, 0.12, 0.0), w * 0.8F, true);
-		draw(context.poseStack(), context, from.add(0.0, -0.3, 0.0), to.add(0.0, -0.1, 0.0), w * 0.7F, true);
+		rope(context, from, to, ROPE_STRANDS, ROPE_STRAND_RADIUS, ROPE_TWIST_RADIUS);
+		// where it holds on, the black web spreads
+		splat(context, to, to.subtract(from).normalize(), width * DARK_WIDTH, true);
 	}
+
+	/** A symbiote's cord: strands this thick (blocks), twisted this far about the middle, a turn per this many blocks. */
+	private static final int ROPE_STRANDS = 3;
+	private static final double ROPE_STRAND_RADIUS = 0.055;
+	private static final double ROPE_TWIST_RADIUS = 0.06;
+	private static final double ROPE_TURN_LENGTH = 1.4;
+	private static final int ROPE_SIDES = 6;
+	private static final double ROPE_STEP = 0.2;
+	private static final int ROPE_DARK = 0x150F1C;
+	private static final int ROPE_SHEEN = 0x5A3480;
+
+	/**
+	 * Twisted strands of black, like corded rope or tentacles, as solid tubes. Each face is shaded by which way it
+	 * faces, with a purple sheen along the top, so it reads as round without any lighting.
+	 */
+	static void rope(LevelRenderContext context, Vec3 from, Vec3 to, int strands, double radius, double twist) {
+		Vec3 delta = to.subtract(from);
+		double length = delta.length();
+		if (length < 1.0E-3) {
+			return;
+		}
+		Vec3 dir = delta.scale(1.0 / length);
+		Vec3 u = Math.abs(dir.y) < 0.95 ? dir.cross(new Vec3(0.0, 1.0, 0.0)).normalize() : dir.cross(new Vec3(1.0, 0.0, 0.0)).normalize();
+		Vec3 v = dir.cross(u).normalize();
+		int steps = Math.max(2, (int)Math.ceil(length / ROPE_STEP));
+		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.debugQuads(), (pose, buffer) -> {
+			for (int k = 0; k < strands; k++) {
+				double phase = k * Math.PI * 2.0 / strands;
+				Vec3[] prev = null;
+				for (int i = 0; i <= steps; i++) {
+					double t = i / (double)steps;
+					double angle = phase + t * length / ROPE_TURN_LENGTH * Math.PI * 2.0;
+					// tapering a little toward the far end, like a tentacle
+					double r = radius * (1.0 - 0.35 * t);
+					Vec3 center = from.add(delta.scale(t)).add(u.scale(Math.cos(angle) * twist)).add(v.scale(Math.sin(angle) * twist));
+					Vec3[] ring = new Vec3[ROPE_SIDES];
+					for (int j = 0; j < ROPE_SIDES; j++) {
+						double a = j * Math.PI * 2.0 / ROPE_SIDES;
+						ring[j] = center.add(u.scale(Math.cos(a) * r)).add(v.scale(Math.sin(a) * r));
+					}
+					if (prev != null) {
+						for (int j = 0; j < ROPE_SIDES; j++) {
+							int n = (j + 1) % ROPE_SIDES;
+							// lit from above: the side whose middle faces up gets the sheen
+							double a = (j + 0.5) * Math.PI * 2.0 / ROPE_SIDES;
+							double up = u.scale(Math.cos(a)).add(v.scale(Math.sin(a))).y;
+							int color = shade(up);
+							quad(buffer, pose, prev[j], prev[n], ring[n], ring[j], color);
+						}
+					}
+					prev = ring;
+				}
+			}
+		});
+	}
+
+	private static int shade(double up) {
+		float light = (float)Math.max(0.0, up);
+		int r = (int)Mth.lerp(light, ROPE_DARK >> 16 & 0xFF, ROPE_SHEEN >> 16 & 0xFF);
+		int g = (int)Mth.lerp(light, ROPE_DARK >> 8 & 0xFF, ROPE_SHEEN >> 8 & 0xFF);
+		int b = (int)Mth.lerp(light, ROPE_DARK & 0xFF, ROPE_SHEEN & 0xFF);
+		return 0xFF000000 | r << 16 | g << 8 | b;
+	}
+
+	private static void quad(VertexConsumer buffer, PoseStack.Pose pose, Vec3 a, Vec3 b, Vec3 c, Vec3 d, int color) {
+		buffer.addVertex(pose, (float)a.x, (float)a.y, (float)a.z).setColor(color);
+		buffer.addVertex(pose, (float)b.x, (float)b.y, (float)b.z).setColor(color);
+		buffer.addVertex(pose, (float)c.x, (float)c.y, (float)c.z).setColor(color);
+		buffer.addVertex(pose, (float)d.x, (float)d.y, (float)d.z).setColor(color);
+	}
+
+	/**
+	 * Where a line sticks: a little cobweb, spokes fanning out across the line with two rings of thread between them.
+	 */
+	static void splat(LevelRenderContext context, Vec3 at, Vec3 dir, float width, boolean dark) {
+		Vec3 across = Math.abs(dir.y) < 0.95 ? dir.cross(new Vec3(0.0, 1.0, 0.0)).normalize() : dir.cross(new Vec3(1.0, 0.0, 0.0)).normalize();
+		Vec3 across2 = dir.cross(across).normalize();
+		int color = dark ? DARK : SPLAT_COLOR;
+		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.lines(), (pose, buffer) -> {
+			Vec3[] inner = new Vec3[SPLAT_SPOKES];
+			Vec3[] outer = new Vec3[SPLAT_SPOKES];
+			for (int k = 0; k < SPLAT_SPOKES; k++) {
+				double angle = k * Math.PI * 2.0 / SPLAT_SPOKES + 0.3;
+				// a little irregular, like a real web
+				double reach = SPLAT_RADIUS * (0.8 + 0.2 * Math.sin(k * 2.7));
+				Vec3 spoke = across.scale(Math.cos(angle)).add(across2.scale(Math.sin(angle)));
+				Vec3 tip = at.add(spoke.scale(reach)).subtract(dir.scale(0.08));
+				inner[k] = at.add(spoke.scale(reach * 0.45)).subtract(dir.scale(0.04));
+				outer[k] = at.add(spoke.scale(reach * 0.85)).subtract(dir.scale(0.07));
+				segment(buffer, pose, at, tip, spoke, color, width * 0.7F);
+			}
+			for (int k = 0; k < SPLAT_SPOKES; k++) {
+				int n = (k + 1) % SPLAT_SPOKES;
+				segment(buffer, pose, inner[k], inner[n], inner[n].subtract(inner[k]).normalize(), color, width * 0.5F);
+				segment(buffer, pose, outer[k], outer[n], outer[n].subtract(outer[k]).normalize(), color, width * 0.5F);
+			}
+		});
+	}
+
+	private static final int SPLAT_SPOKES = 8;
+	private static final double SPLAT_RADIUS = 0.42;
 
 	/** Black goo dripping off a symbiote's lines, along their length. */
 	private static void drip(Minecraft minecraft) {
@@ -113,13 +213,20 @@ final class WebLineRenderer {
 		float width = minecraft.gameRenderer.gameRenderState().windowRenderState.appropriateLineWidth * WIDTH_SCALE;
 		// creatures hitched to blocks: a line from each to where it's tied
 		for (net.minecraft.world.entity.Entity entity : HITCHED) {
-			Vec3 anchor = entity.getAttached(com.jaymospowers.power.web.WebPower.HITCH);
-			if (anchor == null || entity.isRemoved() || entity.level() != level) {
+			java.util.List<com.jaymospowers.power.web.WebHitches.Line> lines = entity.getAttached(com.jaymospowers.power.web.WebPower.HITCH);
+			if (lines == null || entity.isRemoved() || entity.level() != level) {
 				continue;
 			}
 			Vec3 from = entity.getPosition(partialTick).add(0.0, entity.getBbHeight() * 0.5, 0.0);
-			if (from.distanceToSqr(camera) < 96.0 * 96.0) {
-				draw(context.poseStack(), context, from.subtract(camera), anchor.subtract(camera), width, false);
+			if (from.distanceToSqr(camera) > 96.0 * 96.0) {
+				continue;
+			}
+			for (com.jaymospowers.power.web.WebHitches.Line line : lines) {
+				if (line.dark()) {
+					bundle(context, from.subtract(camera), line.anchor().subtract(camera), width);
+				} else {
+					draw(context.poseStack(), context, from.subtract(camera), line.anchor().subtract(camera), width, false);
+				}
 			}
 		}
 		// weblines: the same line, strung taut between their two ends
@@ -253,14 +360,9 @@ final class WebLineRenderer {
 				Vec3 b = from.add(delta.scale((double)(i + 1) / SEGMENTS));
 				segment(buffer, pose, a, b, dir, dark ? sheen((i + 0.5F) / SEGMENTS) : COLOR, width);
 			}
-			// splat: six short strands fanning out where the web sticks
-			for (int k = 0; k < 6; k++) {
-				double angle = k * Math.PI / 3.0 + 0.4;
-				Vec3 spoke = across.scale(Math.cos(angle)).add(across2.scale(Math.sin(angle))).scale(0.35).subtract(dir.scale(0.12));
-				Vec3 tip = to.add(spoke);
-				segment(buffer, pose, to, tip, spoke.normalize(), dark ? DARK : SPLAT_COLOR, width * 0.7F);
-			}
 		});
+		// a little cobweb where it sticks
+		splat(context, to, dir, width, dark);
 	}
 
 	private static void segment(VertexConsumer buffer, PoseStack.Pose pose, Vec3 a, Vec3 b, Vec3 normal, int color, float width) {

@@ -56,8 +56,20 @@ public final class WebHitches {
 	private static final java.util.Map<UUID, int[]> STRAIN = new java.util.HashMap<>();
 	private static final Identifier SLOWED = JaymosPowers.id("web_hitched");
 
-	private record Hitch(ResourceKey<Level> dimension, UUID entity, Vec3 anchor, BlockPos block, double length, long until) {
+	private record Hitch(ResourceKey<Level> dimension, UUID entity, Vec3 anchor, BlockPos block, double length, long until, UUID owner, boolean dark) {
 	}
+
+	/** One line on a hitched creature, for drawing: where it's tied, and whether it's a symbiote's black cord. */
+	public record Line(Vec3 anchor, boolean dark) {
+		public static final net.minecraft.network.codec.StreamCodec<io.netty.buffer.ByteBuf, Line> STREAM_CODEC =
+			net.minecraft.network.codec.StreamCodec.composite(Vec3.STREAM_CODEC, Line::anchor,
+				net.minecraft.network.codec.ByteBufCodecs.BOOL, Line::dark, Line::new);
+	}
+
+	/** Lines one slinger can have out at once: one, or {@code MASTERED_LINES} once Web is mastered. */
+	public static final int LINES = 1, MASTERED_LINES = 5;
+	/** More lines than this on one creature, and it's webbed up like Web Shot does (Slowness, cobwebs). */
+	public static final int WEBBED_AT = 2;
 
 	private static final List<Hitch> HITCHES = new ArrayList<>();
 	private static long clock;
@@ -75,24 +87,36 @@ public final class WebHitches {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			Entity attacker = source.getEntity();
 			if (attacker != null && attacker.getAttached(WebPower.HITCH) != null && attacker.level() instanceof ServerLevel level) {
-				for (Iterator<Hitch> it = HITCHES.iterator(); it.hasNext(); ) {
-					Hitch hitch = it.next();
-					if (hitch.entity().equals(attacker.getUUID())) {
-						it.remove();
-						release(level, attacker, true);
-					}
-				}
+				HITCHES.removeIf(h -> h.entity().equals(attacker.getUUID()));
+				release(level, attacker, true);
 			}
 		});
 	}
 
 	/** Ties {@code entity} to the point {@code anchor} on {@code block}, at the line's current length. */
-	static void hitch(ServerLevel level, Entity entity, Vec3 anchor, BlockPos block, net.minecraft.core.Direction face) {
-		HITCHES.removeIf(h -> h.entity().equals(entity.getUUID()));
+	static void hitch(ServerLevel level, net.minecraft.server.level.ServerPlayer owner, Entity entity, Vec3 anchor, BlockPos block,
+		net.minecraft.core.Direction face) {
+		// one line out (five once mastered): the oldest comes loose to make room
+		int cap = com.jaymospowers.core.Mastery.unlocked(owner) >= com.jaymospowers.core.Mastery.ALL ? MASTERED_LINES : LINES;
+		List<Hitch> mine = HITCHES.stream().filter(h -> h.owner().equals(owner.getUUID())).toList();
+		for (int i = 0; i <= mine.size() - cap; i++) {
+			Hitch oldest = mine.get(i);
+			HITCHES.remove(oldest);
+			Entity tied = level.getEntity(oldest.entity());
+			if (tied != null) {
+				sync(level, tied);
+			}
+		}
 		double max = face == net.minecraft.core.Direction.DOWN ? CEILING_MAX_LENGTH : MAX_LENGTH;
 		double length = Math.clamp(center(entity).distanceTo(anchor), MIN_LENGTH, max);
-		HITCHES.add(new Hitch(level.dimension(), entity.getUUID(), anchor, block.immutable(), length, clock + MAX_TICKS));
-		entity.setAttached(WebPower.HITCH, anchor);
+		boolean dark = WebSymbiote.suitShown(owner);
+		HITCHES.add(new Hitch(level.dimension(), entity.getUUID(), anchor, block.immutable(), length, clock + MAX_TICKS, owner.getUUID(), dark));
+		sync(level, entity);
+		// webbed up: too many lines on one creature and it's ensnared like a Web Shot
+		long onIt = HITCHES.stream().filter(h -> h.entity().equals(entity.getUUID())).count();
+		if (onIt > WEBBED_AT && entity instanceof LivingEntity living) {
+			WebTraps.ensnare(level, living, WebBall.SLOWNESS_AMPLIFIER, WebBall.SLOWNESS_MAX_TICKS);
+		}
 		STRAIN.put(entity.getUUID(), new int[] {0, entity instanceof LivingEntity living && living.isSwinging() ? 1 : 0});
 		if (entity instanceof LivingEntity living) {
 			AttributeInstance speed = living.getAttribute(Attributes.MOVEMENT_SPEED);
@@ -102,7 +126,22 @@ public final class WebHitches {
 			}
 		}
 		level.playSound(null, anchor.x, anchor.y, anchor.z, SoundEvents.LEAD_TIED, SoundSource.PLAYERS, 1.0F, 0.9F);
-		level.sendParticles(ParticleTypes.ITEM_COBWEB, anchor.x, anchor.y, anchor.z, 8, 0.1, 0.1, 0.1, 0.02);
+		level.sendParticles(dark ? WebSymbiote.dust(1.2F) : ParticleTypes.ITEM_COBWEB, anchor.x, anchor.y, anchor.z, 8, 0.1, 0.1, 0.1, 0.02);
+	}
+
+	/** The creature's lines, for everyone to draw (none left: it's free). */
+	private static void sync(ServerLevel level, Entity entity) {
+		List<Line> lines = new ArrayList<>();
+		for (Hitch h : HITCHES) {
+			if (h.entity().equals(entity.getUUID())) {
+				lines.add(new Line(h.anchor(), h.dark()));
+			}
+		}
+		if (lines.isEmpty()) {
+			release(level, entity, false);
+		} else {
+			entity.setAttached(WebPower.HITCH, List.copyOf(lines));
+		}
 	}
 
 	private static Vec3 center(Entity entity) {
@@ -123,8 +162,11 @@ public final class WebHitches {
 			double distance = to.length();
 			boolean blockGone = !level.isLoaded(hitch.block()) || level.getBlockState(hitch.block()).getCollisionShape(level, hitch.block()).isEmpty();
 			if (blockGone || clock >= hitch.until() || distance > hitch.length() + SNAP_OVER) {
+				// this line snaps; any others hold
 				it.remove();
-				release(level, entity, true);
+				Vec3 at = center(entity);
+				level.playSound(null, at.x, at.y, at.z, SoundEvents.LEAD_BREAK, SoundSource.PLAYERS, 1.0F, 1.0F);
+				syncLater.add(entity);
 				continue;
 			}
 			if (entity instanceof Mob mob) {
@@ -144,8 +186,9 @@ public final class WebHitches {
 				}
 				if (cut || strain[0] >= PLAYER_STRAIN_TICKS) {
 					it.remove();
+					HITCHES.removeIf(h -> h != hitch && h.entity().equals(entity.getUUID()));
 					release(level, entity, true);
-					continue;
+					return;
 				}
 			}
 			if (distance > hitch.length()) {
@@ -163,10 +206,18 @@ public final class WebHitches {
 			}
 			if (clock % 8 == 0) {
 				Vec3 mid = center(entity).add(to.scale(0.5));
-				level.sendParticles(ParticleTypes.ITEM_COBWEB, mid.x, mid.y, mid.z, 1, 0.05, 0.05, 0.05, 0.0);
+				level.sendParticles(hitch.dark() ? WebSymbiote.dust(1.0F) : ParticleTypes.ITEM_COBWEB, mid.x, mid.y, mid.z, 1, 0.05, 0.05, 0.05, 0.0);
 			}
 		}
+		for (Entity entity : syncLater) {
+			if (entity.level() instanceof ServerLevel level) {
+				sync(level, entity);
+			}
+		}
+		syncLater.clear();
 	}
+
+	private static final List<Entity> syncLater = new ArrayList<>();
 
 	private static void release(ServerLevel level, Entity entity, boolean snapped) {
 		entity.removeAttached(WebPower.HITCH);

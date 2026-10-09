@@ -110,8 +110,8 @@ public final class WebPower implements Power {
 	public static final AttachmentType<Boolean> HELD = AttachmentRegistry.create(JaymosPowers.id("web_held"),
 		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	/** On a creature hitched to a block by a web: where the line is tied (clients draw it, and ragdoll the creature). */
-	public static final AttachmentType<Vec3> HITCH = AttachmentRegistry.create(JaymosPowers.id("web_hitch"),
-		builder -> builder.syncWith(Vec3.STREAM_CODEC, AttachmentSyncPredicate.all()));
+	public static final AttachmentType<java.util.List<WebHitches.Line>> HITCH = AttachmentRegistry.create(JaymosPowers.id("web_hitch"),
+		builder -> builder.syncWith(WebHitches.Line.STREAM_CODEC.apply(net.minecraft.network.codec.ByteBufCodecs.list()), AttachmentSyncPredicate.all()));
 	/** Reach for tying a held creature off to a block (release Yank while aiming at it). */
 	public static final double HITCH_REACH = 24.0;
 	/** The off-hand swing web, if one's out. */
@@ -521,7 +521,7 @@ public final class WebPower implements Power {
 					Vec3 eye = player.getEyePosition();
 					BlockHitResult hit = WebAnchors.clip(player, eye, eye.add(player.getViewVector(1.0F).scale(HITCH_REACH * WebSymbiote.reachScale(player))));
 					if (hit.getType() == HitResult.Type.BLOCK) {
-						WebHitches.hitch(player.level(), target, hit.getLocation(), hit.getBlockPos(), hit.getDirection());
+						WebHitches.hitch(player.level(), player, target, hit.getLocation(), hit.getBlockPos(), hit.getDirection());
 						thwip(player);
 					}
 				}
@@ -542,6 +542,15 @@ public final class WebPower implements Power {
 			default -> {
 			}
 		}
+	}
+
+	/** Mastered (every ability): B has no cooldown at all, and up to five lines can be out (see WebHitches). */
+	static boolean mastered(Player player) {
+		return com.jaymospowers.core.Mastery.unlocked(player) >= com.jaymospowers.core.Mastery.ALL;
+	}
+
+	static int yankCooldown(Player player) {
+		return mastered(player) ? 0 : YANK_COOLDOWN;
 	}
 
 	/** The starter, on B (kept for good): weblines. */
@@ -580,7 +589,8 @@ public final class WebPower implements Power {
 			return;
 		}
 		WebCooldowns cooldowns = cooldowns(player);
-		player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), cooldowns.shot(), player.level().getGameTime() + WebBridges.COOLDOWN));
+		player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), cooldowns.shot(),
+			player.level().getGameTime() + (mastered(player) ? 0 : WebBridges.COOLDOWN)));
 		thwip(player);
 	}
 
@@ -811,7 +821,7 @@ public final class WebPower implements Power {
 			player.setAttached(TETHER, target.getId());
 			target.setAttached(HELD, true);
 		}
-		player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), cooldowns.shot(), now + YANK_COOLDOWN));
+		player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), cooldowns.shot(), now + yankCooldown(player)));
 		thwip(player);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.LEAD_TIED, SoundSource.PLAYERS, 1.0F, 1.2F);
 		level.sendParticles(ParticleTypes.ITEM_COBWEB, center.x, center.y, center.z, 8, 0.2, 0.2, 0.2, 0.02);

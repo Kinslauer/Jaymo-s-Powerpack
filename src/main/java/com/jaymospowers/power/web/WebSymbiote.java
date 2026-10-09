@@ -342,7 +342,7 @@ public final class WebSymbiote {
 		return state.withHint(hint);
 	}
 
-	private static DustParticleOptions dust(float scale) {
+	static DustParticleOptions dust(float scale) {
 		return new DustParticleOptions(BLACK, scale);
 	}
 

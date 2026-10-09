@@ -133,15 +133,30 @@ public final class WebPowerClient implements PowerClient {
 		if (block.getType() != net.minecraft.world.phys.HitResult.Type.MISS) {
 			end = block.getLocation();
 		}
-		net.minecraft.world.phys.EntityHitResult hit = net.minecraft.world.entity.projectile.ProjectileUtil.getEntityHitResult(player, eye, end,
-			player.getBoundingBox().expandTowards(look.scale(com.jaymospowers.power.web.WebTendrils.GRAB_RANGE)).inflate(1.0),
-			e -> com.jaymospowers.power.web.WebTendrils.grabbable(player, e), eye.distanceToSqr(end));
-		return hit == null ? null : hit.getEntity();
+		// a generous aim: every candidate's box is fattened up for the tendrils
+		net.minecraft.world.entity.Entity best = null;
+		double bestDistance = eye.distanceToSqr(end);
+		for (net.minecraft.world.entity.Entity e : player.level().getEntities(player,
+			player.getBoundingBox().expandTowards(look.scale(com.jaymospowers.power.web.WebTendrils.GRAB_RANGE)).inflate(GRAB_AIM_INFLATE + 1.0),
+			e -> com.jaymospowers.power.web.WebTendrils.grabbable(player, e))) {
+			java.util.Optional<net.minecraft.world.phys.Vec3> at = e.getBoundingBox().inflate(GRAB_AIM_INFLATE).clip(eye, end);
+			if (at.isPresent() && eye.distanceToSqr(at.get()) < bestDistance) {
+				bestDistance = eye.distanceToSqr(at.get());
+				best = e;
+			}
+		}
+		return best;
 	}
+
+	/** How much fatter things are to the tendrils' aim (blocks, each side). */
+	private static final double GRAB_AIM_INFLATE = 0.7;
+	/** What the tendrils would grab right now (worked out each tick, for the red crosshair). */
+	private net.minecraft.world.entity.@org.jspecify.annotations.Nullable Entity grabAim;
 
 	@Override
 	public void tick(Minecraft minecraft, LocalPlayer player) {
 		swing.tick(minecraft, player);
+		grabAim = com.jaymospowers.power.web.WebSymbiote.suitShown(player) ? grabTarget(player) : null;
 		WebSymbioteClient.tick(minecraft, player, swing);
 		if (swing.attached() || swing.pull != null || player.isSpectator()) {
 			preview = null;
@@ -181,6 +196,12 @@ public final class WebPowerClient implements PowerClient {
 		corner(graphics, cx + r, cy - r, -1, 1, color);
 		corner(graphics, cx - r, cy + r, 1, -1, color);
 		corner(graphics, cx + r, cy + r, -1, -1, color);
+		if (grabAim != null) {
+			// something the tendrils can take: the crosshair goes red
+			graphics.fill(cx - 5, cy, cx + 6, cy + 1, 0xFFE02020);
+			graphics.fill(cx, cy - 5, cx + 1, cy + 6, 0xFFE02020);
+			graphics.outline(cx - 3, cy - 3, 7, 7, 0xC0E02020);
+		}
 
 		// cooldown chips right of the hotbar (same corner and style as Wind Control's)
 		WebCooldowns cooldowns = player.getAttached(WebPower.COOLDOWNS);
