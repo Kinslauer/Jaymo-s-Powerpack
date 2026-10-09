@@ -34,6 +34,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -57,6 +58,13 @@ public final class WebTendrils {
 	static final double THROW_SPEED = 2.4, THROW_LIFT = 0.25;
 	static final float IMPACT_DAMAGE_MIN = 4.0F, IMPACT_DAMAGE_PER_SPEED = 6.0F;
 	static final int THROWN_TICKS = 40;
+	/**
+	 * A thrown body bowls through creatures in its way: each it hits (once) takes {@code BOWL_DAMAGE_PER_SPEED} per
+	 * block/tick of speed (at least {@code IMPACT_DAMAGE_MIN}) and is knocked along; the body takes {@code BOWL_SELF}
+	 * of that and slows by {@code BOWL_SLOW}. Below {@code BOWL_MIN_SPEED} it's just falling and hits nothing.
+	 */
+	static final float BOWL_DAMAGE_PER_SPEED = 5.0F, BOWL_SELF = 0.5F;
+	static final double BOWL_SLOW = 0.7, BOWL_MIN_SPEED = 0.5, BOWL_KNOCK = 0.6;
 
 	private static final Identifier HOLD_GRAVITY = JaymosPowers.id("web_tendril_hold");
 
@@ -97,7 +105,7 @@ public final class WebTendrils {
 	private record Hold(UUID player, int hand, long since, long throwAt) {
 	}
 
-	private record Thrown(ResourceKey<Level> dimension, UUID entity, UUID thrower, long until) {
+	private record Thrown(ResourceKey<Level> dimension, UUID entity, UUID thrower, long until, java.util.Set<Integer> struck) {
 	}
 
 	private static final java.util.Map<UUID, Hold[]> HOLDS = new java.util.HashMap<>();
@@ -217,7 +225,8 @@ public final class WebTendrils {
 				ServerPlayNetworking.send(other, new WebNet.Nudge(v));
 			}
 			THROWN.removeIf(t -> t.entity().equals(target.getUUID()));
-			THROWN.add(new Thrown(player.level().dimension(), target.getUUID(), player.getUUID(), player.level().getGameTime() + THROWN_TICKS));
+			THROWN.add(new Thrown(player.level().dimension(), target.getUUID(), player.getUUID(), player.level().getGameTime() + THROWN_TICKS,
+				new java.util.HashSet<>()));
 			ServerLevel level = player.level();
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_THROW.value(), SoundSource.PLAYERS, 1.0F, 0.5F);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_JUMP, SoundSource.PLAYERS, 1.0F, 0.5F);
@@ -313,6 +322,9 @@ public final class WebTendrils {
 				continue;
 			}
 			double speed = living.getDeltaMovement().length();
+			if (speed >= BOWL_MIN_SPEED) {
+				bowl(server, level, thrown, living, speed);
+			}
 			if (living.horizontalCollision || living.verticalCollision && living.getDeltaMovement().y <= 0.0 && level.getGameTime() + THROWN_TICKS - thrown.until() > 3) {
 				it.remove();
 				float damage = (float)Math.max(IMPACT_DAMAGE_MIN, speed * IMPACT_DAMAGE_PER_SPEED);
@@ -321,6 +333,33 @@ public final class WebTendrils {
 				level.sendParticles(ParticleTypes.POOF, living.getX(), living.getY() + living.getBbHeight() * 0.5, living.getZ(), 8, 0.3, 0.3, 0.3, 0.05);
 				level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.PLAYER_BIG_FALL, SoundSource.PLAYERS, 1.0F, 0.8F);
 			}
+		}
+	}
+
+	/** The flying body hits whoever's in its way (each once), knocking them along and slowing down itself. */
+	private static void bowl(MinecraftServer server, ServerLevel level, Thrown thrown, LivingEntity body, double speed) {
+		Vec3 v = body.getDeltaMovement();
+		AABB sweep = body.getBoundingBox().expandTowards(v).inflate(0.3);
+		for (LivingEntity hit : level.getEntitiesOfClass(LivingEntity.class, sweep,
+			e -> e != body && e.isAlive() && !e.isSpectator() && !e.getUUID().equals(thrown.thrower())
+				&& !(e instanceof net.minecraft.world.entity.decoration.ArmorStand) && !thrown.struck().contains(e.getId()))) {
+			thrown.struck().add(hit.getId());
+			float damage = (float)Math.max(IMPACT_DAMAGE_MIN, speed * BOWL_DAMAGE_PER_SPEED);
+			ServerPlayer thrower = server.getPlayerList().getPlayer(thrown.thrower());
+			hit.hurtServer(level, thrower != null ? level.damageSources().playerAttack(thrower) : level.damageSources().flyIntoWall(), damage);
+			Vec3 push = v.normalize().scale(BOWL_KNOCK * speed);
+			hit.setDeltaMovement(hit.getDeltaMovement().add(push.x, 0.3, push.z));
+			hit.needsSync = true;
+			hit.syncVelocity = true;
+			body.setInvulnerableTime(0);
+			body.hurtServer(level, thrower != null ? level.damageSources().playerAttack(thrower) : level.damageSources().flyIntoWall(), damage * BOWL_SELF);
+			v = v.scale(BOWL_SLOW);
+			body.setDeltaMovement(v);
+			body.needsSync = true;
+			body.syncVelocity = true;
+			Vec3 at = hit.position().add(0.0, hit.getBbHeight() * 0.5, 0.0);
+			level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 10, 0.3, 0.3, 0.3, 0.2);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.0F, 0.7F);
 		}
 	}
 

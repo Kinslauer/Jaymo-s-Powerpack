@@ -21,15 +21,19 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 /**
- * The symbiote's jaws, while it eats (Consume): the face splits open over the lower head, a row of teeth above and a
- * hinged jaw below that chomps {@link WebSymbiote#EAT_CHOMPS} times. Everyone sees it.
+ * The symbiote's maw, while it eats (Consume): the whole head morphs into it. A skull and a jaw, bigger than the head
+ * and closing right over it, rimmed with fangs, hinged at the back of the head. With each of the
+ * {@link WebSymbiote#EAT_CHOMPS} chomps they gape wide, the whole maw swelling and lunging forward as if to swallow
+ * what's in front, then snap shut. Everyone sees it. Texture: {@code tools/gen_web_maw.py}.
  */
 final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	private static final Identifier TEXTURE = JaymosPowers.id("textures/entity/web_symbiote_mouth.png");
-	/** How far in front of the head's face the jaws sit (the suit, and Living Armor's bulk, stand proud of it). */
-	private static final float FACE = -4.9F;
-	/** The widest the jaw drops (radians). */
-	private static final float GAPE = 1.0F;
+	/** How far the skull lifts and the jaw drops at the widest (radians). */
+	private static final float SKULL_GAPE = 0.95F, JAW_GAPE = 0.8F;
+	/** At the widest, the maw is this much bigger, and this far forward (pixels). */
+	private static final float SWELL = 0.45F, LUNGE = 3.0F;
+	/** It grows out of the head over this much of the meal, and sinks back over the last of it. */
+	private static final float MORPH = 0.08F;
 
 	private final MouthModel model;
 
@@ -37,14 +41,25 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		super(renderer);
 		MeshDefinition mesh = new MeshDefinition();
 		PartDefinition root = mesh.getRoot();
-		// the dark-red inside of the mouth, set back a little
-		root.addOrReplaceChild("maw", CubeListBuilder.create().texOffs(0, 8).addBox(-3.0F, -3.4F, 0.4F, 6.0F, 3.4F, 0.4F), PartPose.offset(0.0F, 0.0F, FACE));
-		// upper teeth, fixed
-		root.addOrReplaceChild("upper", CubeListBuilder.create().texOffs(0, 0).addBox(-3.5F, -3.8F, -0.3F, 7.0F, 1.6F, 1.0F), PartPose.offset(0.0F, 0.0F, FACE));
-		// lower jaw, hinged at the back of the cheeks
-		root.addOrReplaceChild("jaw", CubeListBuilder.create().texOffs(0, 4).addBox(-3.5F, -0.2F, -1.0F, 7.0F, 1.6F, 1.6F),
-			PartPose.offset(0.0F, -2.2F, FACE + 0.6F));
-		this.model = new MouthModel(LayerDefinition.create(mesh, 16, 16).bakeRoot());
+		// the throat, closing off the face behind it
+		root.addOrReplaceChild("throat", CubeListBuilder.create().texOffs(32, 40).addBox(-5.0F, -5.5F, -5.0F, 10.0F, 5.0F, 0.5F), PartPose.ZERO);
+		// the skull over the head: fangs down along its rim, a red palate inside
+		root.addOrReplaceChild("skull", CubeListBuilder.create()
+				.texOffs(0, 0).addBox(-5.5F, -8.5F, -10.5F, 11.0F, 8.5F, 11.0F)
+				.texOffs(32, 40).addBox(-4.5F, -0.6F, -10.0F, 9.0F, 0.5F, 7.0F)
+				.texOffs(0, 40).addBox(-5.0F, 0.0F, -10.3F, 10.0F, 3.0F, 1.0F)
+				.texOffs(0, 40).addBox(-5.0F, 0.0F, -9.3F, 1.0F, 3.0F, 8.0F)
+				.texOffs(0, 40).addBox(4.0F, 0.0F, -9.3F, 1.0F, 3.0F, 8.0F),
+			PartPose.offset(0.0F, -3.0F, 5.0F));
+		// the jaw under it: fangs up, a tongue
+		root.addOrReplaceChild("jaw", CubeListBuilder.create()
+				.texOffs(0, 20).addBox(-5.5F, 0.0F, -10.5F, 11.0F, 3.5F, 11.0F)
+				.texOffs(32, 40).addBox(-4.5F, -0.4F, -10.0F, 9.0F, 0.5F, 7.0F)
+				.texOffs(0, 52).addBox(-5.0F, -3.0F, -10.3F, 10.0F, 3.0F, 1.0F)
+				.texOffs(0, 52).addBox(-5.0F, -3.0F, -9.3F, 1.0F, 3.0F, 8.0F)
+				.texOffs(0, 52).addBox(4.0F, -3.0F, -9.3F, 1.0F, 3.0F, 8.0F),
+			PartPose.offset(0.0F, -3.0F, 5.0F));
+		this.model = new MouthModel(LayerDefinition.create(mesh, 64, 64).bakeRoot());
 	}
 
 	@Override
@@ -60,13 +75,15 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	}
 
 	private static final class MouthModel extends Model<AvatarRenderState> {
+		private final ModelPart root;
+		private final ModelPart skull;
 		private final ModelPart jaw;
-		private final ModelPart maw;
 
 		MouthModel(ModelPart root) {
 			super(root, RenderTypes::entityCutout);
+			this.root = root;
+			this.skull = root.getChild("skull");
 			this.jaw = root.getChild("jaw");
-			this.maw = root.getChild("maw");
 		}
 
 		@Override
@@ -79,8 +96,15 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			// wide on the way in, snapping shut on each bite
 			float chomp = Math.abs(Mth.sin(phase * WebSymbiote.EAT_CHOMPS * Mth.PI));
 			float open = (float)Math.pow(chomp, 0.6);
-			this.jaw.xRot = open * GAPE;
-			this.maw.yScale = 0.3F + 0.7F * open;
+			this.skull.xRot = -open * SKULL_GAPE;
+			this.jaw.xRot = open * JAW_GAPE;
+			// it grows out of the head, swells with every gape, and sinks back at the end
+			float morph = Mth.clamp(Math.min(phase, 1.0F - phase) / MORPH, 0.0F, 1.0F);
+			float scale = Mth.lerp(morph, 0.8F, 1.0F) * (1.0F + SWELL * open);
+			this.root.xScale = scale;
+			this.root.yScale = scale;
+			this.root.zScale = scale;
+			this.root.z = -LUNGE * open;
 		}
 	}
 }

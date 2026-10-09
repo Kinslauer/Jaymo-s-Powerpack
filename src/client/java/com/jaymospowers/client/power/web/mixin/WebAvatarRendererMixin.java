@@ -19,4 +19,13 @@ abstract class WebAvatarRendererMixin {
 		WebArms.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebSymbioteClient.extract(entity, state);
 	}
+
+	/** First person: the suit's sleeve over your own hand (see WebSymbioteHand). */
+	@Inject(method = "renderHand", at = @At("TAIL"))
+	private void jaymospowers$suitHand(com.mojang.blaze3d.vertex.PoseStack poseStack, net.minecraft.client.renderer.SubmitNodeCollector collector,
+		int lightCoords, net.minecraft.resources.Identifier skinTexture, net.minecraft.client.model.geom.ModelPart arm, boolean hasSleeve,
+		CallbackInfo ci) {
+		com.jaymospowers.client.power.web.WebSymbioteHand.render(poseStack, collector, lightCoords, arm,
+			((AvatarRenderer<?>)(Object)this).getModel());
+	}
 }

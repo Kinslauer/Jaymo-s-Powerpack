@@ -22,9 +22,9 @@ final class WebLineRenderer {
 	private static final int COLOR = 0xFFEDEDED;
 	private static final int SPLAT_COLOR = 0xFFD8D8D8;
 	private static final int SEGMENTS = 12;
-	/** A symbiote's webs: near-black, with a purple sheen that runs along them. */
-	private static final int DARK = 0xFF100C16;
-	private static final int SHEEN = 0xFF6A3C92;
+	/** A symbiote's webs: black, with a faint grey sheen that runs along them. */
+	private static final int DARK = 0xFF0A0A0C;
+	private static final int SHEEN = 0xFF34313A;
 	/** How fast the sheen runs (cycles per tick) and how much of the line it lights. */
 	private static final float SHEEN_SPEED = 0.03F;
 	private static final float SHEEN_WIDTH = 0.18F;
@@ -86,12 +86,12 @@ final class WebLineRenderer {
 	private static final double ROPE_TURN_LENGTH = 1.4;
 	private static final int ROPE_SIDES = 6;
 	private static final double ROPE_STEP = 0.2;
-	private static final int ROPE_DARK = 0x150F1C;
-	private static final int ROPE_SHEEN = 0x5A3480;
+	private static final int ROPE_DARK = 0x09090B;
+	private static final int ROPE_SHEEN = 0x3A3740;
 
 	/**
 	 * Twisted strands of black, like corded rope or tentacles, as solid tubes. Each face is shaded by which way it
-	 * faces, with a purple sheen along the top, so it reads as round without any lighting.
+	 * faces, with a faint grey sheen along the top, so it reads as round without any lighting.
 	 */
 	static void rope(LevelRenderContext context, Vec3 from, Vec3 to, int strands, double radius, double twist) {
 		Vec3 delta = to.subtract(from);
@@ -239,7 +239,7 @@ final class WebLineRenderer {
 			}
 		}
 		for (Player player : level.players()) {
-			// a symbiote's webs are black, with a purple sheen running along them
+			// a symbiote's webs are black, with a faint sheen running along them
 			boolean dark = com.jaymospowers.power.web.WebSymbiote.suitShown(player);
 			for (int handIndex = WebNet.MAIN; handIndex <= WebNet.OFF; handIndex++) {
 				Vec3 end = WebArms.lineEnd(minecraft, level, player, handIndex, partialTick);
