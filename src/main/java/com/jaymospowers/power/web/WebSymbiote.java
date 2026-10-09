@@ -210,6 +210,13 @@ public final class WebSymbiote {
 	public static final AttachmentType<Strike> STRIKE = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_strike"),
 		builder -> builder.syncWith(Strike.STREAM_CODEC, AttachmentSyncPredicate.all()));
 
+	/** Consume takes its time: the jaws chomp {@code EAT_CHOMPS} times over {@code EAT_TICKS}, then it's gone. */
+	public static final int EAT_TICKS = 40;
+	public static final int EAT_CHOMPS = 4;
+	/** A meal in progress (game time it began): synced to everyone, who see the jaws work. */
+	public static final AttachmentType<Long> EATING = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_eating"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
+
 	private static final class Live {
 		long noiseReadyAt;
 		boolean burning;
@@ -230,6 +237,11 @@ public final class WebSymbiote {
 		boolean rampage;
 		int rampageStrikes;
 		long nextStrikeAt;
+		/** The meal: what, until when, and what it gives. */
+		int eatTarget = -1;
+		long eatUntil;
+		float eatHeal;
+		int eatFeed;
 	}
 
 	private WebSymbiote() {
@@ -394,6 +406,10 @@ public final class WebSymbiote {
 			if (player.tickCount % 20 == 0) {
 				removeArmor(player);
 			}
+		}
+
+		if (live.eatTarget >= 0) {
+			tickEating(player, live, now);
 		}
 
 		// Shroud runs out
@@ -973,16 +989,12 @@ public final class WebSymbiote {
 		ServerLevel level = player.level();
 		// a corpse you're carrying, whatever its size, goes down whole
 		Entity corpse = KitchenCompat.carriedCorpse(player);
+		if (live(player).eatTarget >= 0) {
+			return false;
+		}
 		if (corpse != null) {
-			Vec3 at = corpse.getBoundingBox().getCenter();
 			float size = Mth.clamp(corpse.getBbWidth() * corpse.getBbWidth() * corpse.getBbHeight() / 2.0F, 0.0F, 1.0F);
-			level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 30, 0.5, 0.4, 0.5, 0.05);
-			level.sendParticles(dust(1.8F), at.x, at.y, at.z, 35, 0.6, 0.5, 0.6, 0.0);
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.PHANTOM_BITE, SoundSource.PLAYERS, 1.2F, 0.4F);
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 1.2F, 0.4F);
-			corpse.discard();
-			player.heal(Mth.lerp(size, CORPSE_HEAL_MIN, CORPSE_HEAL_MAX));
-			feed(player, Math.round(Mth.lerp(size, CONSUME_FEED, CORPSE_FEED_MAX)), CONSUME_CALM);
+			startEating(player, corpse, Mth.lerp(size, CORPSE_HEAL_MIN, CORPSE_HEAL_MAX), Math.round(Mth.lerp(size, CONSUME_FEED, CORPSE_FEED_MAX)));
 			return true;
 		}
 		Vec3 eye = player.getEyePosition();
@@ -1008,18 +1020,70 @@ public final class WebSymbiote {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.5F, 1.4F);
 			return false;
 		}
-		Vec3 at = best.getBoundingBox().getCenter();
-		level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 20, best.getBbWidth() * 0.4, best.getBbHeight() * 0.4, best.getBbWidth() * 0.4, 0.05);
-		level.sendParticles(dust(1.6F), at.x, at.y, at.z, 25, best.getBbWidth() * 0.5, best.getBbHeight() * 0.5, best.getBbWidth() * 0.5, 0.0);
-		level.playSound(null, at.x, at.y, at.z, SoundEvents.PHANTOM_BITE, SoundSource.PLAYERS, 1.0F, 0.5F);
-		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 1.0F, 0.5F);
-		trail(level, eye.add(0.0, -0.3, 0.0), at);
-		// swallowed whole: nothing left behind
-		best.discard();
-		player.heal(CONSUME_HEAL);
-		WebSymbioteState state = state(player);
-		set(player, state.withSatiety(Math.min(SATIETY_MAX, state.satiety() + CONSUME_FEED)).withStress(Math.max(0, state.stress() - CONSUME_CALM)));
+		trail(level, eye.add(0.0, -0.3, 0.0), best.getBoundingBox().getCenter());
+		startEating(player, best, CONSUME_HEAL, CONSUME_FEED);
 		return true;
+	}
+
+	/** The jaws open on it: it's held where it is while they chomp, thrashing, and then it's gone. */
+	private static void startEating(ServerPlayer player, Entity food, float heal, int feed) {
+		Live live = live(player);
+		long now = player.level().getGameTime();
+		live.eatTarget = food.getId();
+		live.eatUntil = now + EAT_TICKS;
+		live.eatHeal = heal;
+		live.eatFeed = feed;
+		player.setAttached(EATING, now);
+		ServerLevel level = player.level();
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 0.5F, 1.6F);
+	}
+
+	private static void tickEating(ServerPlayer player, Live live, long now) {
+		ServerLevel level = player.level();
+		Entity food = level.getEntity(live.eatTarget);
+		if (food == null || !food.isAlive() || food.distanceTo(player) > CONSUME_RANGE + 3.0) {
+			live.eatTarget = -1;
+			player.removeAttached(EATING);
+			return;
+		}
+		long left = live.eatUntil - now;
+		long t = EAT_TICKS - left;
+		Vec3 at = food.getBoundingBox().getCenter();
+		// held still in the jaws (a carried corpse is already held), shaking with every bite
+		if (food instanceof LivingEntity living) {
+			living.setDeltaMovement(Vec3.ZERO);
+			living.syncVelocity = true;
+			if (living instanceof Mob mob) {
+				mob.getNavigation().stop();
+			}
+		}
+		if (t % 3 == 0) {
+			KitchenCompat.jolt(food);
+			if (food instanceof LivingEntity living) {
+				living.hurtTime = 6;
+				level.broadcastEntityEvent(living, (byte)2);
+			}
+		}
+		int every = EAT_TICKS / EAT_CHOMPS;
+		if (t % every == every / 2) {
+			// a bite
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.PHANTOM_BITE, SoundSource.PLAYERS, 1.1F, 0.4F + player.getRandom().nextFloat() * 0.2F);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 1.0F, 0.5F);
+			level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 10, food.getBbWidth() * 0.4, food.getBbHeight() * 0.3, food.getBbWidth() * 0.4, 0.06);
+			level.sendParticles(dust(1.6F), at.x, at.y, at.z, 14, food.getBbWidth() * 0.5, food.getBbHeight() * 0.4, food.getBbWidth() * 0.5, 0.0);
+			level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(0x7A0A0A, 1.2F), at.x, at.y, at.z, 10, 0.3, 0.3, 0.3, 0.0);
+		}
+		if (left > 0) {
+			return;
+		}
+		// swallowed whole: nothing left behind
+		level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 25, food.getBbWidth() * 0.4, food.getBbHeight() * 0.4, food.getBbWidth() * 0.4, 0.05);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 0.8F, 0.6F);
+		food.discard();
+		player.heal(live.eatHeal);
+		feed(player, live.eatFeed, CONSUME_CALM);
+		live.eatTarget = -1;
+		player.removeAttached(EATING);
 	}
 
 	/** Feeds the symbiote (and calms it). */

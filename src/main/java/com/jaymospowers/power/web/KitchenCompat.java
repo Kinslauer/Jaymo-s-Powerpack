@@ -16,10 +16,23 @@ final class KitchenCompat {
 		return LOADED ? Kitchen.carried(player) : null;
 	}
 
+	/** A corpse's limbs jerk violently (a hard jolt), if it is one. */
+	static void jolt(Entity entity) {
+		if (LOADED) {
+			Kitchen.jolt(entity);
+		}
+	}
+
 	/** Only touched when Jaymo's Kitchen is loaded. */
 	private static final class Kitchen {
 		static @Nullable Entity carried(Player player) {
 			return com.jaymoskitchen.corpse.CorpseEntity.carriedBy(player);
+		}
+
+		static void jolt(Entity entity) {
+			if (entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse) {
+				corpse.jolt(true);
+			}
 		}
 	}
 }

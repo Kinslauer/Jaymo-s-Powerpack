@@ -48,6 +48,9 @@ public final class WebSymbioteClient {
 	public record Tendrils(float growth, float time, float strike, float aimYaw, float aimPitch, float side) {
 	}
 
+	/** A meal in progress: how far through it (0-1), for the jaws. */
+	public static final RenderStateDataKey<Float> EATING = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_eating");
+
 	/** Player entity id → game time their Living Armor came up (for the tendrils' growth). */
 	private static final java.util.Map<Integer, Long> ARMOR_SINCE = new java.util.HashMap<>();
 
@@ -117,6 +120,7 @@ public final class WebSymbioteClient {
 			if (renderer instanceof AvatarRenderer<?> avatar) {
 				helper.register(new WebSymbioteLayer(avatar));
 				helper.register(new WebTendrilLayer(avatar));
+				helper.register(new WebMouthLayer(avatar));
 			}
 		});
 	}
@@ -132,6 +136,9 @@ public final class WebSymbioteClient {
 	/** From the avatar renderer's extractRenderState: does this player wear the suit. */
 	public static void extract(Entity entity, AvatarRenderState state) {
 		state.setData(SUIT, entity instanceof Player player && WebSymbiote.suitShown(player) ? Boolean.TRUE : null);
+		Long eating = entity.getAttached(WebSymbiote.EATING);
+		state.setData(EATING, eating == null ? null
+			: net.minecraft.util.Mth.clamp((entity.level().getGameTime() - eating) / (float)WebSymbiote.EAT_TICKS, 0.0F, 1.0F));
 		if (state.getData(SUIT) != null || entity instanceof Player p && WebSymbiote.isToggled(p, WebSymbioteState.ARMOR)) {
 			// no cape poking out through the suit
 			state.showCape = false;

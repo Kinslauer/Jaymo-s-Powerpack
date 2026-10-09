@@ -244,3 +244,24 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
       second weapon.
     - Barrage rifts open in turn, 10 ticks apart, and each weapon slides out of its rift over 9 ticks before firing.
   - **Wind:** once mastered, flight only tumbles when you look 150°+ off your path at speed.
+- **0.4.5:**
+  - **Distant Horizons removed:** from this pack (manifest, server, profile) and from the Kitchen setup. The jars were
+    moved into `removed-mods` in `Desktop\Minecraft Server`, `Serverfiles` and the Kitchen CurseForge profile. The
+    Powers profile's copy moves out on the next build with the game closed (`removedFromProfile`).
+  - **Suit:**
+    - The plain suit is drawn on a model inflated by 0.12, just over the skin; drawn on the skin itself it z-fought
+      and seemed invisible.
+    - The cape is hidden under the suit or Living Armor.
+    - Symbiote lines (suit on) are 2.6× thicker and drip black goo and obsidian tears.
+  - **Tendrils (suit on), `WebTendrils`:**
+    - R and G are the right and left tendrils. Held on a creature, player, item or corpse within 9 blocks, they grab
+      it and hold it in front of you, weightless (gravity modifier or NoGravity). Releasing throws it at 2.4 b/t; its
+      first knock hurts for max(4, speed×6).
+    - Aimed at nothing grabbable, they swing at 0.3× a web's range (`WebSymbiote.swingScale`).
+    - Cords are drawn as a bundle of three thick black lines (synced `web_tendril_grips`).
+    - The radial Tendril Grab snatches from 20 blocks and hurls by itself after 2.5 s.
+  - **Consume:** a 40-tick meal. A head layer opens jaws that chomp 4 times; the food is held still, and a carried
+    corpse jolts hard every 3 ticks (Kitchen's `jolt`), with bites, ink and blood dust. Then it's gone, and you heal
+    and the symbiote feeds.
+  - **Tether and hitches:** Yank holds at 3 and snaps at 4.5. Hitches are 1-3 long (1-2 when tied to a ceiling) and
+    snap 1.5 past their length; attacking still breaks them.
