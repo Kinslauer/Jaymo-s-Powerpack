@@ -561,23 +561,19 @@ public final class WebSwing {
 	}
 
 	/**
-	 * Wearing the suit: hold Jump to coil (on the ground it builds, up to {@link #CHARGE_FULL}); let go on the ground to
-	 * leap, as high and far as the charge. Held through a fall, the charge keeps and the landing doesn't hurt, so you
-	 * can let it go the moment you touch down.
+	 * Wearing the suit: hold Jump to coil. The charge builds while it's held (up to {@link #CHARGE_FULL}), on the ground
+	 * or in the air, and keeps for as long as it's held: landing doesn't spend it (and doesn't hurt). Let go on the
+	 * ground to leap, as high and far as the charge; let go in the air and the charge is lost.
 	 */
 	private void tickChargeJump(LocalPlayer player) {
 		boolean jump = player.input.keyPresses.jump();
 		boolean ground = player.onGround();
 		if (jump && !attached()) {
-			if (ground && chargeTicks < CHARGE_FULL) {
+			if (chargeTicks < CHARGE_FULL) {
 				chargeTicks++;
 				if (chargeTicks % 6 == 0) {
 					play(player, SoundEvents.SLIME_SQUISH_SMALL, 0.4F, 0.6F + chargeTicks / (float)CHARGE_FULL);
 				}
-			}
-			if (chargeTicks == 0 && !ground) {
-				// held from mid-air: it braces for the landing
-				chargeTicks = 1;
 			}
 			if (!chargeSent) {
 				chargeSent = true;

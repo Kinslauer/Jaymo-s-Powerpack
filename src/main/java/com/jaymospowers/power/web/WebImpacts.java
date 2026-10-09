@@ -36,7 +36,7 @@ public final class WebImpacts {
 	 */
 	static final int SUIT_DUST = 70, ARMOR_DUST = 220, DUST_MAX = 600;
 
-	private record Track(double lastVy, boolean ground) {
+	private record Track(double lastY, double lastVy, boolean ground) {
 	}
 
 	private static final Map<UUID, Track> TRACKS = new HashMap<>();
@@ -51,9 +51,10 @@ public final class WebImpacts {
 			TRACKS.remove(player.getUUID());
 			return;
 		}
-		double vy = player.getY() - player.yo;
-		boolean ground = player.onGround();
+		// our own record of where they were (yo is already reset to now by the time a power ticks)
 		Track last = TRACKS.get(player.getUUID());
+		double vy = last == null ? 0.0 : player.getY() - last.lastY();
+		boolean ground = player.onGround();
 		if (last != null) {
 			if (last.ground() && !ground && vy > LEAP_SPEED) {
 				leap(player, vy, armor);
@@ -61,7 +62,7 @@ public final class WebImpacts {
 				land(player, -last.lastVy(), armor);
 			}
 		}
-		TRACKS.put(player.getUUID(), new Track(vy, ground));
+		TRACKS.put(player.getUUID(), new Track(player.getY(), vy, ground));
 	}
 
 	static void forget(ServerPlayer player) {

@@ -229,12 +229,7 @@ public final class WebPower implements Power {
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.ChargeHold.TYPE, (payload, ctx) -> {
 			if (Powers.has(ctx.player(), INSTANCE)) {
 				state(ctx.player()).chargeHold = payload.held() && WebSymbiote.suitShown(ctx.player());
-				// everyone sees it coil (while it's on the ground)
-				if (state(ctx.player()).chargeHold && ctx.player().onGround()) {
-					ctx.player().setAttached(CHARGING, true);
-				} else {
-					ctx.player().removeAttached(CHARGING);
-				}
+
 			}
 		});
 		// a held target that hits anything breaks free
@@ -420,7 +415,11 @@ public final class WebPower implements Power {
 		if (state.tetherId >= 0) {
 			tickTether(player, state);
 		}
-		if (player.getAttached(CHARGING) != null && (!state.chargeHold || !player.onGround())) {
+		// everyone sees the suit coil for a charged leap while it's held on the ground (suit or Living Armor)
+		boolean coiling = state.chargeHold && player.onGround();
+		if (coiling && player.getAttached(CHARGING) == null) {
+			player.setAttached(CHARGING, true);
+		} else if (!coiling && player.getAttached(CHARGING) != null) {
 			player.removeAttached(CHARGING);
 		}
 		if (state.chargeHold) {
