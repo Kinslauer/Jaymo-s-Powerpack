@@ -43,7 +43,7 @@ public final class ChronoPowerClient implements PowerClient {
 	/** Gap between dials. The row sits right of the hotbar, like the other powers' ability chips. */
 	private static final int GAP = 2;
 	private static final int OVERCLOCK = 2;
-	/** Paradox Cut's chip: its glyph's place on the sheet, and its rim colours. */
+	/** Chrono Punch's chip: its glyph's place on the sheet, and its rim colours. */
 	private static final int ULT_GLYPH_U = 40;
 	private static final int ULT_RIM = 0xFF9FE6FF;
 	private static final int ULT_RIM_DIM = 0xFF4A6878;
@@ -90,6 +90,7 @@ public final class ChronoPowerClient implements PowerClient {
 		ClientPlayNetworking.registerGlobalReceiver(ChronoSync.TYPE, (payload, ctx) -> INSTANCE.accept(payload));
 		EntityRendererRegistry.register(ChronoEchoes.ECHO, ChronoEchoRenderer::new);
 		ClientTickEvents.END_CLIENT_TICK.register(ChronoPowerClient::timelessHands);
+		ChronoFlowClient.init();
 	}
 
 	/** Every Timeless player in view gets two slow clock hands circling them (yours too, in third person). */
@@ -194,6 +195,7 @@ public final class ChronoPowerClient implements PowerClient {
 
 	@Override
 	public void renderHud(GuiGraphicsExtractor graphics, DeltaTracker delta, LocalPlayer player) {
+		ChronoFlowClient.renderHud(graphics, player);
 		Minecraft minecraft = Minecraft.getInstance();
 		Font font = minecraft.font;
 		float partial = delta.getGameTimeDeltaPartialTick(false);
@@ -222,7 +224,7 @@ public final class ChronoPowerClient implements PowerClient {
 		}
 	}
 
-	/** Paradox Cut's chip: a square (not a dial, it's not one of the four), pale cyan rim, the C key in the corner. */
+	/** Chrono Punch's chip: a square (not a dial, it's not one of the four), pale cyan rim, the C key in the corner. */
 	private void drawParadox(GuiGraphicsExtractor graphics, Font font, int fx, int fy, float partial) {
 		boolean cooling = ultimateLeft > 0;
 		graphics.fill(fx, fy, fx + FACE, fy + FACE, ULT_BACK);

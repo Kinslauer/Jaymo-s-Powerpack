@@ -2,6 +2,8 @@
 	"required": true,
 	"package": "com.jaymospowers.client.power.chrono.mixin",
 	"compatibilityLevel": "JAVA_25",
-	"client": [],
+	"client": [
+		"ChronoAvatarRendererMixin"
+	],
 	"injectors": { "defaultRequire": 1 }
 }

@@ -46,7 +46,8 @@ public final class WebSymbioteClient {
 	 * @param side     which side's tendrils strike (+1 left, -1 right)
 	 */
 	/** {@code held}: bit 1, the right shoulder's tendril is holding something (drawn reaching out instead); bit 2, the left's. */
-	public record Tendrils(float growth, float time, float strike, float aimYaw, float aimPitch, float side, float run, int held) {
+	/** {@code armor}: Living Armor's (it hunches, swells); otherwise only the tendrils, out on their own for a moment. */
+	public record Tendrils(float growth, float time, float strike, float aimYaw, float aimPitch, float side, float run, int held, boolean armor) {
 	}
 
 	/** A meal in progress: how far through it (0-1), for the jaws. */
@@ -200,10 +201,16 @@ public final class WebSymbioteClient {
 			state.showCape = false;
 		}
 		// Living Armor grows tendrils (whether or not the suit is showing)
-		if (entity instanceof Player player && WebSymbiote.isBonded(player) && WebSymbiote.isToggled(player, WebSymbioteState.ARMOR)) {
+		boolean armored = entity instanceof Player p && WebSymbiote.isBonded(p) && WebSymbiote.isToggled(p, WebSymbioteState.ARMOR);
+		long out = entity instanceof Player p && WebSymbiote.isBonded(p) ? WebSymbiote.tendrilsOut(p) : -1L;
+		if (entity instanceof Player player && (armored || out >= 0)) {
 			long now = player.level().getGameTime();
 			long since = ARMOR_SINCE.computeIfAbsent(player.getId(), id -> now);
 			float growth = Math.min(1.0F, (now - since) / WebTendrilLayer.GROWN_TICKS);
+			if (!armored) {
+				// out on their own: they lash out, then draw back in
+				growth = Math.min(growth * 1.6F, Math.max(0.0F, (out - now) / 8.0F));
+			}
 			// a strike of their own (the server picks the target)
 			float strike = -1.0F, aimYaw = 0.0F, aimPitch = 0.0F, side = 1.0F;
 			WebSymbiote.Strike s = player.getAttached(WebSymbiote.STRIKE);
@@ -227,7 +234,7 @@ public final class WebSymbioteClient {
 					}
 				}
 			}
-			state.setData(TENDRILS, new Tendrils(growth, player.tickCount, strike, aimYaw, aimPitch, side, smoothRun(player), held));
+			state.setData(TENDRILS, new Tendrils(growth, player.tickCount, strike, aimYaw, aimPitch, side, smoothRun(player), held, armored));
 		} else {
 			ARMOR_SINCE.remove(entity.getId());
 			state.setData(TENDRILS, null);

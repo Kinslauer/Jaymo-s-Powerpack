@@ -57,7 +57,8 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			}
 			return;
 		}
-		if (state.getData(WebSymbioteClient.TENDRILS) != null) {
+		WebSymbioteClient.Tendrils tendrils = state.getData(WebSymbioteClient.TENDRILS);
+		if (tendrils != null && tendrils.armor()) {
 			// Living Armor: the suit swells over the whole body, whether or not it was showing
 			PlayerModel bulk = state.skin.model() == net.minecraft.world.entity.player.PlayerModelType.SLIM ? this.bulkSlim : this.bulkWide;
 			coloredCutoutModelCopyLayerRender(bulk, TEXTURE, poseStack, collector, lightCoords, state, -1, 1);

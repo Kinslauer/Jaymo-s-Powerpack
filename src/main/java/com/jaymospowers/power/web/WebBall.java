@@ -39,8 +39,15 @@ public class WebBall extends ThrowableItemProjectile {
 	public static final int SLOWNESS_AMPLIFIER = 2;
 	public static final int SLOWNESS_MIN_TICKS = 60, SLOWNESS_MAX_TICKS = 220;
 
+	/**
+	 * A tapped V: a webshooter pellet, fast and light, a sting and nothing more (no splash, no webs). Damage on a direct
+	 * hit: a web's, and the symbiote's.
+	 */
+	public static final float PELLET_DAMAGE = 1.5F, DARK_PELLET_DAMAGE = 2.5F;
+
 	/** 0-1: how long it was charged. Server only. */
 	private float charge;
+	private boolean pellet;
 	private boolean burst;
 	/** Gravity per tick (a snowball is 0.03): it flies nearly flat. */
 	private static final double GRAVITY = 0.012;
@@ -57,6 +64,12 @@ public class WebBall extends ThrowableItemProjectile {
 
 	public WebBall charged(float charge) {
 		this.charge = Math.clamp(charge, 0.0F, 1.0F);
+		return this;
+	}
+
+	/** A quick webshooter pellet (see {@link #PELLET_DAMAGE}). */
+	public WebBall pellet() {
+		this.pellet = true;
 		return this;
 	}
 
@@ -91,6 +104,14 @@ public class WebBall extends ThrowableItemProjectile {
 	private void burst(ServerLevel level, @org.jspecify.annotations.Nullable Entity direct) {
 		this.burst = true;
 		boolean dark = this.dark();
+		if (this.pellet) {
+			// a pellet stings what it hits, and that's all
+			if (direct != null && direct != this.getOwner()) {
+				direct.hurtServer(level, this.damageSources().thrown(this, this.getOwner()), dark ? DARK_PELLET_DAMAGE : PELLET_DAMAGE);
+			}
+			level.sendParticles(dark ? WebSymbiote.dust(0.9F) : ParticleTypes.ITEM_COBWEB, this.getX(), this.getY(), this.getZ(), 5, 0.1, 0.1, 0.1, 0.03);
+			return;
+		}
 		float damage = dark ? net.minecraft.util.Mth.lerp(this.charge, DARK_DAMAGE_MIN, DARK_DAMAGE_MAX)
 			: net.minecraft.util.Mth.lerp(this.charge, DAMAGE_MIN, DAMAGE_MAX);
 		double radius = net.minecraft.util.Mth.lerp(this.charge, SPLASH_MIN, SPLASH_MAX);

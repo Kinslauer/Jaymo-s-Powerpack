@@ -33,6 +33,10 @@ public final class WebFeral {
 		Float charge = avatar.getData(WebSymbioteClient.CHARGE);
 		WebSymbioteClient.Tendrils tendrils = avatar.getData(WebSymbioteClient.TENDRILS);
 		// Living Armor on the run keeps galloping while it charges a leap; standing (or the plain suit), it coils
+		if (tendrils != null && !tendrils.armor()) {
+			// only the tendrils are out: no beast in the body
+			tendrils = null;
+		}
 		boolean galloping = tendrils != null && tendrils.run() > 0.3F && avatar.walkAnimationSpeed > 0.3F;
 		if (charge != null && !galloping) {
 			coil(humanoid, avatar, charge, slim);

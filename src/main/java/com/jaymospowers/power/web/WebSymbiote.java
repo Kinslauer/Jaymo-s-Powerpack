@@ -213,14 +213,12 @@ public final class WebSymbiote {
 
 	/**
 	 * Instinct: the symbiote keeps itself (and so you) alive. Every {@code INSTINCT_CHECK_TICKS} it looks for danger:
-	 * fire close by, a long fall about to end, something hostile on you, or your health running low. Then, now and
-	 * then ({@code INSTINCT_ARMOR_CHANCE}), it throws Living Armor up by itself; and while the armour is up it acts on
-	 * its own: shoving you clear of fire (and smothering flames on you), catching a fall just before the ground,
-	 * shoving you away from an attacker or snatching the attacker and flinging it, and sometimes, as you run,
-	 * catapulting you along.
+	 * fire close by, something about to blow, a long fall about to end, something hostile on you, or your health running
+	 * low. Then it acts on its own: shoving you clear of fire (and smothering flames on you) or of a blast, catching a
+	 * fall just before the ground, shoving you away from an attacker or snatching the attacker and flinging it. It never
+	 * swells into Living Armor unasked: out of it, its tendrils burst from your back to do it, then withdraw.
 	 */
 	public static final int INSTINCT_CHECK_TICKS = 10;
-	public static final float INSTINCT_ARMOR_CHANCE = 0.7F;
 	public static final float INSTINCT_LOW_HEALTH = 8.0F;
 	public static final double INSTINCT_THREAT_RANGE = 3.0;
 	public static final int INSTINCT_COOLDOWN = 30;
@@ -261,6 +259,20 @@ public final class WebSymbiote {
 	/** Whether it'll eat this (a creature, or a corpse by what it was). */
 	static boolean edible(Entity food) {
 		return !inedible(com.jaymospowers.power.gravity.GravityPower.isCorpse(food) ? KitchenCompat.sourceType(food) : food.getType());
+	}
+
+	/**
+	 * Out of the armour, its instinct uses only its tendrils: they burst from your back for {@code TENDRILS_OUT_TICKS}
+	 * to act, then withdraw. Until this game time (synced to everyone, who see them).
+	 */
+	public static final int TENDRILS_OUT_TICKS = 30;
+	public static final AttachmentType<Long> TENDRILS_OUT = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_tendrils_out"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
+
+	/** The tendrils are out on their own (not the armour's): until when, else -1. */
+	public static long tendrilsOut(Player player) {
+		Long until = player.getAttached(TENDRILS_OUT);
+		return until == null || player.level().getGameTime() >= until ? -1L : until;
 	}
 
 	/** Sulking right now (the suit won't come). */
@@ -320,6 +332,9 @@ public final class WebSymbiote {
 		/** When it can strike back again; whether it has already turned on you this time your hunger ran out. */
 		long retaliateReadyAt;
 		boolean sulkedThisTime;
+		/** It swelled into the armour only to eat: once the meal's done it goes back (the suit as it was). */
+		boolean feedingArmor;
+		boolean suitBeforeFeeding;
 		/** The meal: what, until when, and what it gives. */
 		int eatTarget = -1;
 		long eatUntil;
@@ -511,9 +526,6 @@ public final class WebSymbiote {
 			}
 			live.armorTicks++;
 			tickStrikes(player, live, now);
-			if (next.satiety() < SELF_FEED_BELOW && live.eatTarget < 0 && live.takeoverTicks <= 0 && player.tickCount % SELF_FEED_EVERY == 0) {
-				selfFeed(player);
-			}
 			if (player.tickCount % INSTINCT_CHECK_TICKS == 0 && live.takeoverTicks <= 0) {
 				catapult(player, live, now);
 			}
@@ -527,8 +539,25 @@ public final class WebSymbiote {
 			}
 		}
 
+		// hungry, it feeds itself on a corpse in reach (swelling into the armour for the meal, if it wasn't)
+		if (next.satiety() < SELF_FEED_BELOW && live.eatTarget < 0 && live.takeoverTicks <= 0 && !sulking(player)
+			&& player.tickCount % SELF_FEED_EVERY == 0 && selfFeed(player) && !armor) {
+			live.feedingArmor = true;
+			live.suitBeforeFeeding = next.has(WebSymbioteState.SUIT);
+			next = next.withFlag(WebSymbioteState.ARMOR, true).withFlag(WebSymbioteState.SUIT, true);
+			applyArmor(player);
+			armor = true;
+		}
 		if (live.eatTarget >= 0) {
 			tickEating(player, live, now);
+		}
+		if (live.feedingArmor && live.eatTarget < 0) {
+			// fed: it settles back, the tendrils withdrawing
+			live.feedingArmor = false;
+			next = next.withFlag(WebSymbioteState.ARMOR, false).withFlag(WebSymbioteState.SUIT, live.suitBeforeFeeding);
+			removeArmor(player);
+			armor = false;
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_BREAK, SoundSource.PLAYERS, 0.8F, 0.8F);
 		}
 		if (player.onGround() || player.isInWater()) {
 			live.caughtFall = false;
@@ -1101,25 +1130,15 @@ public final class WebSymbiote {
 		if (!danger) {
 			return state;
 		}
-		boolean armor = state.has(WebSymbioteState.ARMOR);
-		if (!armor) {
-			if (random.nextFloat() < INSTINCT_ARMOR_CHANCE && !sulking(player)) {
-				// it hardens around you, unasked
-				state = state.withFlag(WebSymbioteState.ARMOR, true).withFlag(WebSymbioteState.SUIT, true);
-				applyArmor(player);
-				player.setAbsorptionAmount((float)Math.max(player.getAbsorptionAmount(), ARMOR_ABSORPTION * 0.5));
-				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_PLACE, SoundSource.PLAYERS, 1.0F, 0.5F);
-				level.sendParticles(dust(1.4F), player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.8, 0.4, 0.0);
-				state = hintOnce(player, state, HINT_INSTINCT, "instinct");
-			}
-			// fire and blasts it flees even in the plain suit; everything else needs the armour
-			if (!(state.has(WebSymbioteState.SUIT) && (burning || blast != null))) {
-				return state;
-			}
+		if (sulking(player)) {
+			return state;
 		}
+		// it never swells into the armour unasked: out of it, its tendrils burst from your back to act
+		state = hintOnce(player, state, HINT_INSTINCT, "instinct");
 		// a fall about to end: it reaches for the ground and takes the blow
 		if (falling && !live.caughtFall && groundWithin(player, INSTINCT_FALL_CATCH_HEIGHT)) {
 			live.caughtFall = true;
+			tendrilsOut(player);
 			player.resetFallDistance();
 			ServerPlayNetworking.send(player, new WebNet.Nudge(new Vec3(0.0, -0.12, 0.0)));
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_FALL, SoundSource.PLAYERS, 1.0F, 0.5F);
@@ -1132,6 +1151,7 @@ public final class WebSymbiote {
 		if (blast != null) {
 			// something's about to go off: it hurls you clear
 			live.instinctReadyAt = now + INSTINCT_COOLDOWN;
+			tendrilsOut(player);
 			Vec3 away = player.position().subtract(blast);
 			away = new Vec3(away.x, 0.0, away.z);
 			away = away.lengthSqr() < 1.0E-4 ? player.getLookAngle().reverse().horizontal() : away.normalize();
@@ -1143,6 +1163,7 @@ public final class WebSymbiote {
 		if (burning) {
 			// it fears fire: it smothers the flames and shoves you clear
 			live.instinctReadyAt = now + INSTINCT_COOLDOWN;
+			tendrilsOut(player);
 			player.clearFire();
 			Vec3 away = fire == null ? player.getLookAngle().reverse() : player.position().subtract(Vec3.atCenterOf(fire));
 			away = new Vec3(away.x, 0.0, away.z);
@@ -1153,6 +1174,7 @@ public final class WebSymbiote {
 		}
 		if (threat != null) {
 			live.instinctReadyAt = now + INSTINCT_COOLDOWN;
+			tendrilsOut(player);
 			if (random.nextFloat() < INSTINCT_GRAB_CHANCE && WebTendrils.grabbable(player, threat)) {
 				// it snatches the attacker and flings it off
 				WebTendrils.snatch(player, threat);
@@ -1221,8 +1243,8 @@ public final class WebSymbiote {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.9F, 1.3F);
 	}
 
-	/** Hungry, the armour feeds itself: a corpse you carry, else one lying within reach. */
-	private static void selfFeed(ServerPlayer player) {
+	/** Hungry, it feeds itself: a corpse you carry, else one lying within reach. Returns true if it started a meal. */
+	private static boolean selfFeed(ServerPlayer player) {
 		Entity corpse = KitchenCompat.carriedCorpse(player);
 		if (corpse != null && !edible(corpse)) {
 			corpse = null;
@@ -1239,12 +1261,20 @@ public final class WebSymbiote {
 			}
 		}
 		if (corpse == null) {
-			return;
+			return false;
 		}
 		float size = Mth.clamp(corpse.getBbWidth() * corpse.getBbWidth() * corpse.getBbHeight() / 2.0F, 0.0F, 1.0F);
 		trail(player.level(), player.getEyePosition().add(0.0, -0.3, 0.0), corpse.getBoundingBox().getCenter());
 		startEating(player, corpse, Mth.lerp(size, CORPSE_HEAL_MIN, CORPSE_HEAL_MAX), Math.round(Mth.lerp(size, CONSUME_FEED, CORPSE_FEED_MAX)));
 		whisper(player, "self_feed");
+		return true;
+	}
+
+	/** Out of the armour, the tendrils burst out to act (and withdraw after). */
+	private static void tendrilsOut(ServerPlayer player) {
+		if (!armored(player)) {
+			player.setAttached(TENDRILS_OUT, player.level().getGameTime() + TENDRILS_OUT_TICKS);
+		}
 	}
 
 	/** Your hunger ran out: it turns on you, tears the suit away, and won't come back until it's calmed (the bond decides how long). */

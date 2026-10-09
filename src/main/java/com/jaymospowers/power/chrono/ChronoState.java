@@ -31,7 +31,7 @@ final class ChronoState {
 	final int[] readyAt = new int[ChronoSync.ABILITIES];
 	final int[] cooldownTotal = new int[ChronoSync.ABILITIES];
 
-	/** Paradox Cut (the ascended ability): server tick when it's ready again, and how long its cooldown was. */
+	/** Chrono Punch (the ascended ability): server tick when it's ready again, and how long its cooldown was. */
 	int ultimateReadyAt;
 	int ultimateTotal;
 

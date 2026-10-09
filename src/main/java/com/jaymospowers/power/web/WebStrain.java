@@ -54,7 +54,10 @@ public final class WebStrain {
 		ServerPlayNetworking.registerGlobalReceiver(Strain.TYPE, (payload, ctx) -> strain(ctx.player(), payload));
 	}
 
-	/** The blocks the body presses on: behind it at feet and head height (a 3 x 3 patch for Living Armor). */
+	/**
+	 * The blocks the strain grinds into: the wall behind at feet and head height, and the floor under you and under
+	 * that wall (three wide for Living Armor, and three high).
+	 */
 	public static List<BlockPos> behind(net.minecraft.world.entity.player.Player player, Vec3 dir, boolean armored) {
 		Vec3 back = new Vec3(dir.x, 0.0, dir.z);
 		back = back.lengthSqr() < 1.0E-6 ? new Vec3(0.0, 0.0, 1.0) : back.normalize();
@@ -67,6 +70,13 @@ public final class WebStrain {
 				BlockPos pos = BlockPos.containing(base.add(side.scale(across)).add(0.0, 0.5 + up, 0.0));
 				if (!blocks.contains(pos)) {
 					blocks.add(pos);
+				}
+			}
+			// and the ground: under you, and under the wall
+			for (Vec3 at : new Vec3[] {player.position(), base}) {
+				BlockPos floor = BlockPos.containing(at.add(side.scale(across)).add(0.0, -0.5, 0.0));
+				if (!blocks.contains(floor)) {
+					blocks.add(floor);
 				}
 			}
 		}

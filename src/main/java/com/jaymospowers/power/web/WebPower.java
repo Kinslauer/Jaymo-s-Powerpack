@@ -58,6 +58,13 @@ public final class WebPower implements Power {
 	/** Web Shot charges for up to this long (hold V); the cooldown grows from SHOT_COOLDOWN to this at a full charge. */
 	public static final int SHOT_CHARGE_TICKS = 60;
 	public static final int SHOT_COOLDOWN_MAX = 160;
+	/**
+	 * Let go of V before {@code SHOT_TAP_TICKS} (a second) and it's a webshooter pellet instead: {@code PELLET_SPEED},
+	 * {@code PELLET_COOLDOWN} (0.2 s) between them, so they can be tapped out fast. Held longer, it's the charged blast,
+	 * charging from when it was pressed.
+	 */
+	public static final int SHOT_TAP_TICKS = 20, PELLET_COOLDOWN = 4;
+	public static final float PELLET_SPEED = 3.6F;
 	public static final int YANK_COOLDOWN = 120;
 	/** Zip reach, and how fast the client reels you in (blocks/tick; used here to time the zip). */
 	public static final double ZIP_RANGE = 48.0;
@@ -849,7 +856,8 @@ public final class WebPower implements Power {
 		if (state == null || state.shotChargeStart < 0) {
 			return;
 		}
-		float charge = Math.min(1.0F, (now - state.shotChargeStart) / (float)SHOT_CHARGE_TICKS);
+		long held = now - state.shotChargeStart;
+		float charge = Math.min(1.0F, held / (float)SHOT_CHARGE_TICKS);
 		state.shotChargeStart = -1;
 		WebCooldowns cooldowns = cooldowns(player);
 		if (now < cooldowns.shot()) {
@@ -857,6 +865,14 @@ public final class WebPower implements Power {
 		}
 		// wearing the suit, it's a black mass of the symbiote instead
 		boolean dark = WebSymbiote.suitShown(player) || WebSymbiote.isToggled(player, WebSymbioteState.ARMOR);
+		if (held < SHOT_TAP_TICKS) {
+			// a tap: a quick webshooter pellet
+			Projectile.spawnProjectileFromRotation((lvl, owner, stack) -> new WebBall(lvl, owner, stack).pellet(), level,
+				new ItemStack(dark ? SYMBIOTE_MASS_ITEM : WEB_BALL_ITEM), player, 0.0F, PELLET_SPEED, 0.3F);
+			player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), now + PELLET_COOLDOWN, cooldowns.yank()));
+			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 0.6F, 1.9F);
+			return;
+		}
 		Projectile.spawnProjectileFromRotation((lvl, owner, stack) -> new WebBall(lvl, owner, stack).charged(charge), level,
 			new ItemStack(dark ? SYMBIOTE_MASS_ITEM : WEB_BALL_ITEM), player, 0.0F, SHOT_SPEED, 0.5F);
 		int cooldown = Mth.lerpInt(charge, SHOT_COOLDOWN, SHOT_COOLDOWN_MAX);

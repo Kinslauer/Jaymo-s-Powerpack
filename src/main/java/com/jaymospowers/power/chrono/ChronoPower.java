@@ -45,14 +45,16 @@ import net.minecraft.world.phys.Vec3;
  * <li>R, Rewind: snap back to where you were 3 s ago (health restored if it was higher, fire put out).</li>
  * <li>G, Stasis Field: stop time for mobs and projectiles in a 6-block bubble for 4 s.</li>
  * <li>V, Overclock: 6 s of Speed III, Haste II and faster attacks.</li>
- * <li>B, Time Bloom: 5 s of fast-forward for crops, saplings, furnaces, smokers and ovens within 5 blocks.</li>
+ * <li>B, Time Bloom: 5 s of fast-forward for crops, saplings, furnaces, smokers and ovens within 5 blocks, and for
+ * your own wounds (they mend {@code BLOOM_HEAL} every {@code BLOOM_HEAL_EVERY} ticks meanwhile).</li>
  * </ul>
  * The HUD is fed by {@link ChronoSync}.
  *
  * <p>0.2.0: <b>echoes</b>, Chrono's curse (one turns up after every level-up; see {@link ChronoEchoes} and
  * {@link ChronoEcho}), and <b>ascension</b>: enough time spent in Stasis or rewound, a night's sleep, and the Stopped
  * Clock appears in your hands ({@link StoppedClockItem}). Ascended (Timeless), cooldowns recover faster and C is
- * {@link ParadoxCut}. Chrono has no corruption meter: the echoes are its corruption.
+ * {@link ChronoPunch}. Chrono has no corruption meter: the echoes are its corruption. Timeless and corrupted both, Z
+ * enters {@link ChronoFlow}, free-flowing combat.
  */
 public final class ChronoPower implements Power {
 	public static final ChronoPower INSTANCE = new ChronoPower();
@@ -69,6 +71,9 @@ public final class ChronoPower implements Power {
 	/** Attack speed while overclocked: x1.6 of the total (a sword goes from 1.6 to ~2.56 swings a second). */
 	static final double OVERCLOCK_ATTACK_SPEED = 0.6;
 	static final int BLOOM_COOLDOWN = 800;
+	/** Time Bloom mends you too: this much health every this many ticks while it runs (5 hearts over its 5 s). */
+	static final float BLOOM_HEAL = 1.0F;
+	static final int BLOOM_HEAL_EVERY = 10;
 	/** Overclock's drag on everyone around you: radius, Slowness amplifier (1 = Slowness II), refreshed this often. */
 	static final double OVERCLOCK_DRAG_RADIUS = 6.0;
 	static final int OVERCLOCK_DRAG_AMPLIFIER = 1;
@@ -81,7 +86,7 @@ public final class ChronoPower implements Power {
 	// ---- 0.2.0 tuning ----
 	/** Time in Stasis or rewound (ticks) before the Stopped Clock can come: 10 minutes. */
 	public static final int ASCEND_STOPPED_TICKS = 10 * 1200;
-	/** Timeless: cooldowns recover this many times as fast (1.25 = 25% faster). Paradox Cut keeps its own. */
+	/** Timeless: cooldowns recover this many times as fast (1.25 = 25% faster). Chrono Punch keeps its own. */
 	static final double TIMELESS_COOLDOWN_RATE = 1.25;
 	/** How often the held item is noted, and how often (and how far apart) walked positions are. */
 	static final int HELD_SAMPLE_INTERVAL = 20;
@@ -112,7 +117,8 @@ public final class ChronoPower implements Power {
 		StoppedClockItem.init();
 		// touch the attachment types so they register at startup
 		JaymosPowers.LOGGER.debug("chrono attachments: {} {}", ChronoMemory.MEMORY, ChronoEchoes.ORPHANS);
-		ServerTickEvents.END_SERVER_TICK.register(ParadoxCut::tick);
+		ServerTickEvents.END_SERVER_TICK.register(ChronoPunch::tick);
+		ChronoFlow.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ChronoDebugCommand.register(dispatcher));
 		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, blockEntity) -> {
 			if (player instanceof ServerPlayer serverPlayer && Powers.has(serverPlayer, INSTANCE)) {
@@ -135,7 +141,8 @@ public final class ChronoPower implements Power {
 				}
 			}
 			StasisField.releaseAll();
-			ParadoxCut.clear();
+			ChronoPunch.clear();
+			ChronoFlow.clear();
 			STATES.clear();
 		});
 	}
@@ -187,6 +194,7 @@ public final class ChronoPower implements Power {
 			stopAll(player, state);
 			STATES.remove(player.getUUID());
 		}
+		ChronoFlow.stop(player);
 		// the echoes go with the power, and so does everything time remembered
 		ChronoEchoes.fadeAll(player);
 		ChronoMemory.forget(player);
@@ -203,7 +211,15 @@ public final class ChronoPower implements Power {
 		ChronoEchoes.owe(player);
 	}
 
-	/** Paradox Cut. */
+	/** Time Flow: in and out (Timeless and corrupted both). */
+	@Override
+	public void onMode(ServerPlayer player, boolean down) {
+		if (down) {
+			ChronoFlow.toggle(player);
+		}
+	}
+
+	/** Chrono Punch. */
 	@Override
 	public void onUltimate(ServerPlayer player, boolean down) {
 		if (!down) {
@@ -214,9 +230,9 @@ public final class ChronoPower implements Power {
 		if (state.ultimateLeft(now) > 0) {
 			return; // the client shows "not ready" itself
 		}
-		if (ParadoxCut.cut(player)) {
-			state.ultimateReadyAt = now + ParadoxCut.COOLDOWN;
-			state.ultimateTotal = ParadoxCut.COOLDOWN;
+		if (ChronoPunch.punch(player)) {
+			state.ultimateReadyAt = now + ChronoPunch.COOLDOWN;
+			state.ultimateTotal = ChronoPunch.COOLDOWN;
 			state.synced = false;
 			sync(player, state, now);
 		}
@@ -280,6 +296,12 @@ public final class ChronoPower implements Power {
 			state.bloom = null;
 			state.synced = false;
 		}
+		if (state.bloom != null && player.tickCount % BLOOM_HEAL_EVERY == 0 && player.getHealth() < player.getMaxHealth()) {
+			// your own wounds run forward too, to healed
+			player.heal(BLOOM_HEAL);
+			level.sendParticles(ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 1.0, player.getZ(), 3, 0.3, 0.5, 0.3, 0.0);
+		}
+		ChronoFlow.tickPlayer(player);
 		if (state.overclockLeft > 0) {
 			state.overclockLeft--;
 			overclockFx(player, level, state.overclockLeft);

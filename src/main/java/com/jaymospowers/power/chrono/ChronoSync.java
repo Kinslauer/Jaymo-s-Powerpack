@@ -7,7 +7,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 /**
  * Server → client: the chrono player's cooldowns and active durations, in ticks, for the HUD. Index = ability
- * (0 Rewind, 1 Stasis, 2 Overclock, 3 Bloom), plus Paradox Cut's (the ascended ability's) cooldown. The client counts
+ * (0 Rewind, 1 Stasis, 2 Overclock, 3 Bloom), plus Chrono Punch's (the ascended ability's) cooldown. The client counts
  * every value down by itself between updates.
  */
 public record ChronoSync(int[] cooldownLeft, int[] cooldownTotal, int[] activeLeft, int[] activeTotal, int ultimateLeft, int ultimateTotal) implements CustomPacketPayload {
