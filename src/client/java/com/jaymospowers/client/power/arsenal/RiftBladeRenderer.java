@@ -33,6 +33,10 @@ public class RiftBladeRenderer extends EntityRenderer<RiftBlade, RiftBladeRender
 	private static final double RIFT_RADIUS = 0.5;
 	private static final double RIFT_BEHIND = 0.45;
 	private static final float RIFT_OPEN_TICKS = 5.0F;
+	/** After the rift opens, the weapon slides out of it over this many ticks (like Reach's draw). */
+	private static final float EMERGE_TICKS = 9.0F;
+	/** How far back inside the rift it starts. */
+	private static final double EMERGE_DEPTH = 0.9;
 
 	private final ItemModelResolver itemModelResolver;
 
@@ -72,9 +76,21 @@ public class RiftBladeRenderer extends EntityRenderer<RiftBlade, RiftBladeRender
 			RiftPortals.disc(collector, poseStack, dir.scale(-RIFT_BEHIND), right, up, dir.scale(-1.0), r, r, state.ageInTicks * 0.15, state.voidBlade);
 		}
 		poseStack.pushPose();
+		float emerge = 1.0F;
+		if (state.hovering && !state.skyBlade) {
+			// out of the rift: from deep inside it, sliding forward, as the rift finishes opening
+			emerge = Mth.clamp((state.ageInTicks - RIFT_OPEN_TICKS * 0.6F) / EMERGE_TICKS, 0.0F, 1.0F);
+			emerge = 1.0F - (1.0F - emerge) * (1.0F - emerge);
+			float yaw = state.yRot * Mth.DEG_TO_RAD;
+			float pitch = state.xRot * Mth.DEG_TO_RAD;
+			Vec3 dir = new Vec3(Mth.sin(yaw) * Mth.cos(pitch), Mth.sin(pitch), Mth.cos(yaw) * Mth.cos(pitch));
+			Vec3 back = dir.scale(-(RIFT_BEHIND + EMERGE_DEPTH) * (1.0 - emerge));
+			poseStack.translate(back.x, back.y, back.z);
+		}
 		poseStack.rotateDegrees(Axis.YP, state.yRot - 90.0F);
 		poseStack.rotateDegrees(Axis.ZP, state.xRot - 45.0F);
-		poseStack.scale(1.4F, 1.4F, 1.4F);
+		float scale = 1.4F * (0.35F + 0.65F * emerge);
+		poseStack.scale(scale, scale, scale);
 		state.item.submit(poseStack, collector, state.voidBlade ? RiftPortals.VOID_LIGHT : state.lightCoords, OverlayTexture.NO_OVERLAY,
 			state.outlineColor);
 		poseStack.popPose();

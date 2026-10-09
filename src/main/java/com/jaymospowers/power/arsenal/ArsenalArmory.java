@@ -77,16 +77,16 @@ public final class ArsenalArmory {
 		return false;
 	}
 
-	/** What a Reach brings: the pinned weapon first (if any), then the usual random pull. */
-	static List<ItemStack> rollFor(ServerPlayer player, ServerLevel level, RandomSource random) {
+	/**
+	 * What a Reach brings: the pinned weapon when it's the first of the three you can hold ({@code first}: nothing
+	 * summoned is out), otherwise the usual random pull.
+	 */
+	static List<ItemStack> rollFor(ServerPlayer player, ServerLevel level, RandomSource random, boolean first) {
 		Item pin = pinned(player);
-		List<ItemStack> random1 = ArsenalPool.roll(level, random);
-		if (pin == null) {
-			return random1;
+		if (first && pin != null) {
+			return new ArrayList<>(ArsenalPool.stacksFor(level, random, pin));
 		}
-		List<ItemStack> out = new ArrayList<>(ArsenalPool.stacksFor(level, random, pin));
-		out.addAll(random1);
-		return out;
+		return ArsenalPool.roll(level, random);
 	}
 
 	static void onLost(ServerPlayer player) {

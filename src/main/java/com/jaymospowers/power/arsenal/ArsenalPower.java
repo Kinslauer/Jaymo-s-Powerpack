@@ -71,6 +71,18 @@ public final class ArsenalPower implements Power {
 	public static final int BARRAGE_COOLDOWN = 600;
 	public static final int BARRAGE_RANGE = 48;
 	public static final float BARRAGE_DAMAGE = 7.0F;
+	/**
+	 * The Barrage's rifts open one after another, this many ticks apart; each weapon slides out of its rift and hangs
+	 * there for {@code BARRAGE_HOVER} ticks (so you see it come out, as with Reach) before it fires.
+	 */
+	static final int BARRAGE_GAP = 10;
+	static final int BARRAGE_HOVER = 18;
+
+	/** A Barrage blade still to come out of its rift. */
+	private record QueuedBlade(long at, Vec3 pos, Vec3 aim, int targetId, ItemStack dress, boolean corrupted, float damage) {
+	}
+
+	private static final Map<UUID, List<QueuedBlade>> BARRAGES = new HashMap<>();
 	/** A dropped summoned weapon lies on the ground this long before it dissolves. */
 	public static final int DROPPED_TICKS = 60;
 
@@ -191,6 +203,7 @@ public final class ArsenalPower implements Power {
 		ArsenalArmory.onLost(player);
 		HundredBlades.onLost(player);
 		PENDING.remove(player.getUUID());
+		BARRAGES.remove(player.getUUID());
 		player.removeAttached(ArsenalReach.REACH);
 		// the doorway closes: everything this player summoned goes home
 		dissolveWhere(player, s -> s.ownedBy(player.getUUID()), true);
@@ -198,6 +211,7 @@ public final class ArsenalPower implements Power {
 
 	@Override
 	public void tick(ServerPlayer player) {
+		tickBarrage(player);
 		ArsenalVoid.tick(player);
 		ArsenalRelics.tick(player);
 		HundredBlades.tick(player);
@@ -249,11 +263,16 @@ public final class ArsenalPower implements Power {
 		}
 		player.setAttached(COOLDOWNS, cd.withReach(now + REACH_COOLDOWN));
 		// decided now, so the weapon everyone sees coming out of the portal is the one you get
-		List<ItemStack> stacks = new ArrayList<>(ArsenalArmory.rollFor(player, level, player.getRandom()));
-		// a relic kept in the pocket dimension always comes out first
-		ItemStack relic = ArsenalRelics.takeFirst(player);
+		// the first of the three you can hold: your pinned weapon, or else a relic from the Pocket Stash
+		boolean first = heldBatches(player) == 0;
+		ItemStack relic = first && ArsenalArmory.pinned(player) == null ? ArsenalRelics.takeFromStash(player) : ItemStack.EMPTY;
+		List<ItemStack> stacks;
 		if (!relic.isEmpty()) {
-			stacks.addFirst(relic);
+			// the relic itself, with whatever it fires (arrows for a bow, say)
+			stacks = new ArrayList<>(ArsenalPool.stacksFor(level, player.getRandom(), relic.getItem()));
+			stacks.set(0, relic);
+		} else {
+			stacks = new ArrayList<>(ArsenalArmory.rollFor(player, level, player.getRandom(), first));
 		}
 		if (com.jaymospowers.core.Fate.isCorrupted(player)) {
 			stacks.forEach(ArsenalVoid::voidTouched);
@@ -441,25 +460,53 @@ public final class ArsenalPower implements Power {
 		Vec3 flat = new Vec3(look.x, 0, look.z);
 		flat = flat.lengthSqr() < 1.0E-4 ? new Vec3(0, 0, 1) : flat.normalize();
 		Vec3 right = rightOf(flat);
+		List<QueuedBlade> queue = new ArrayList<>();
+		boolean corrupted = com.jaymospowers.core.Fate.isCorrupted(player);
 		for (int i = 0; i < count; i++) {
+			// left to right, one rift at a time
 			double t = count == 1 ? 0 : (i / (count - 1.0)) * 2 - 1; // -1..1, left to right
-			Vec3 pos = player.position()
-				.add(right.scale(t * 1.9))
-				.add(flat.scale(-0.7 + 0.4 * Math.abs(t)))
-				.add(0, 2.3 - 0.6 * Math.abs(t), 0);
-			boolean corrupted = com.jaymospowers.core.Fate.isCorrupted(player);
+			Vec3 offset = right.scale(t * 1.9).add(flat.scale(-0.7 + 0.4 * Math.abs(t))).add(0, 2.3 - 0.6 * Math.abs(t), 0);
 			ItemStack dress = ArsenalPool.randomBlade(player.getRandom());
-			RiftBlade blade = RiftBlade.create(level, player, corrupted ? ArsenalVoid.voidTouched(dress) : dress, pos, aim, target,
-				10 + i * 4, BARRAGE_DAMAGE * (corrupted ? ArsenalVoid.DAMAGE_MULTIPLIER : 1.0F));
-			if (corrupted) {
+			queue.add(new QueuedBlade(now + (long)i * BARRAGE_GAP, offset, aim, target == null ? -1 : target.getId(),
+				corrupted ? ArsenalVoid.voidTouched(dress) : dress, corrupted, BARRAGE_DAMAGE * (corrupted ? ArsenalVoid.DAMAGE_MULTIPLIER : 1.0F)));
+		}
+		BARRAGES.put(player.getUUID(), queue);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 1.0F, 0.9F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.6F, 0.5F);
+	}
+
+	/** The Barrage's rifts, opening in turn (each blade placed where it was meant to be, relative to you now). */
+	private static void tickBarrage(ServerPlayer player) {
+		List<QueuedBlade> queue = BARRAGES.get(player.getUUID());
+		if (queue == null) {
+			return;
+		}
+		ServerLevel level = player.level();
+		if (!player.isAlive()) {
+			BARRAGES.remove(player.getUUID());
+			return;
+		}
+		long now = level.getGameTime();
+		for (java.util.Iterator<QueuedBlade> it = queue.iterator(); it.hasNext(); ) {
+			QueuedBlade q = it.next();
+			if (now < q.at()) {
+				break;
+			}
+			it.remove();
+			Vec3 pos = player.position().add(q.pos());
+			Entity target = q.targetId() < 0 ? null : level.getEntity(q.targetId());
+			RiftBlade blade = RiftBlade.create(level, player, q.dress(), pos, q.aim(), target, BARRAGE_HOVER, q.damage());
+			if (q.corrupted()) {
 				blade.makeVoid();
 			}
 			level.addFreshEntity(blade);
 			level.sendParticles(ParticleTypes.REVERSE_PORTAL, pos.x, pos.y, pos.z, 16, 0.25, 0.25, 0.25, 0.03);
 			level.sendParticles(ParticleTypes.PORTAL, pos.x, pos.y, pos.z, 10, 0.1, 0.1, 0.1, 0.5);
+			level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.35F, 0.6F + level.getRandom().nextFloat() * 0.3F);
 		}
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 1.0F, 0.9F);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.6F, 0.5F);
+		if (queue.isEmpty()) {
+			BARRAGES.remove(player.getUUID());
+		}
 	}
 
 	private static void denied(ServerPlayer player, String key, long ticks) {
@@ -481,6 +528,18 @@ public final class ArsenalPower implements Power {
 			visitor.visit(inventory.getItem(slot), stack -> inventory.setItem(s, stack));
 		}
 		visitor.visit(player.containerMenu.getCarried(), stack -> player.containerMenu.setCarried(stack));
+	}
+
+	/** How many separate summons (batches) of the player's own they're holding right now. */
+	private static int heldBatches(ServerPlayer player) {
+		java.util.Set<Integer> batches = new java.util.HashSet<>();
+		forEachHeld(player, (stack, setter) -> {
+			Summoned s = Summoned.of(stack);
+			if (s != null && s.ownedBy(player.getUUID())) {
+				batches.add(s.batch());
+			}
+		});
+		return batches.size();
 	}
 
 	/** Removes every held summoned stack matching {@code which}; returns how many went. */

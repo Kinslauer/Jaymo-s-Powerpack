@@ -37,9 +37,12 @@ import net.minecraft.world.level.storage.loot.LootTable;
 /**
  * Relics: weapons lying about the world (in dungeon, temple, mineshaft, bastion, end-city and ancient-city chests) that
  * were pulled out of the pocket dimension once and never went back. Anyone can swing one. An Arsenal user who picks one
- * up takes it into their pocket dimension for good: from then on it's the first thing Reach brings out, ahead of the
- * random pull. Dropped, sent back, or timed out, it slips home again. It's only ever lost by wearing it out
- * (durability), or by losing the power.
+ * up claims it: it slips into their Pocket Stash (B), and from then on, whenever they have nothing summoned, Reach brings
+ * the first relic in the stash out first (the first of the three they can hold; the next two are the usual random
+ * pulls). Dropped, sent back, or timed out, it goes back into the stash. It's only ever lost by wearing it out.
+ *
+ * <p>The {@code arsenal_relic} component is {@code true} on an unclaimed relic and {@code false} once claimed (a
+ * claimed relic taken out of the stash by hand stays a plain weapon in your hands).
  */
 public final class ArsenalRelics {
 	/** Chance a chest of each kind holds a relic. */
@@ -91,8 +94,47 @@ public final class ArsenalRelics {
 		});
 	}
 
+	/** A relic, claimed or not. */
 	public static boolean is(ItemStack stack) {
+		return !stack.isEmpty() && stack.has(RELIC);
+	}
+
+	/** A relic nobody has claimed yet. */
+	static boolean unclaimed(ItemStack stack) {
 		return !stack.isEmpty() && Boolean.TRUE.equals(stack.get(RELIC));
+	}
+
+	private static net.minecraft.core.NonNullList<ItemStack> stash(ServerPlayer player) {
+		net.minecraft.core.NonNullList<ItemStack> items = net.minecraft.core.NonNullList.withSize(ArsenalStash.SIZE, ItemStack.EMPTY);
+		player.getAttachedOrElse(ArsenalStash.STASH, net.minecraft.world.item.component.ItemContainerContents.EMPTY).copyInto(items);
+		return items;
+	}
+
+	/** Into the first free slot of the Pocket Stash; false if it's full. */
+	private static boolean putInStash(ServerPlayer player, ItemStack relic) {
+		net.minecraft.core.NonNullList<ItemStack> items = stash(player);
+		for (int i = 0; i < items.size(); i++) {
+			if (items.get(i).isEmpty()) {
+				items.set(i, relic);
+				player.setAttached(ArsenalStash.STASH, net.minecraft.world.item.component.ItemContainerContents.fromItems(items));
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** The first relic in the Pocket Stash, taken out (empty if there's none). */
+	static ItemStack takeFromStash(ServerPlayer player) {
+		net.minecraft.core.NonNullList<ItemStack> items = stash(player);
+		for (int i = 0; i < items.size(); i++) {
+			if (is(items.get(i))) {
+				ItemStack relic = items.get(i);
+				items.set(i, ItemStack.EMPTY);
+				player.setAttached(ArsenalStash.STASH, net.minecraft.world.item.component.ItemContainerContents.fromItems(items));
+				return relic;
+			}
+		}
+		return ItemStack.EMPTY;
 	}
 
 	/** A fresh relic: one weapon from the pocket dimension's pool, still shimmering. */
@@ -113,21 +155,6 @@ public final class ArsenalRelics {
 	static List<ItemStack> stored(ServerPlayer player) {
 		List<ItemStack> stored = player.getAttached(STORED);
 		return stored == null ? List.of() : stored;
-	}
-
-	/**
-	 * The relic Reach brings out first, if the pocket dimension keeps one (it's taken out of storage; it comes back
-	 * through {@link #reclaim}). Empty if there's none.
-	 */
-	static ItemStack takeFirst(ServerPlayer player) {
-		List<ItemStack> stored = stored(player);
-		if (stored.isEmpty()) {
-			return ItemStack.EMPTY;
-		}
-		List<ItemStack> rest = new ArrayList<>(stored);
-		ItemStack first = rest.removeFirst();
-		set(player, rest);
-		return first;
 	}
 
 	/**
@@ -156,13 +183,12 @@ public final class ArsenalRelics {
 	}
 
 	private static void store(ServerPlayer player, ItemStack relic) {
-		List<ItemStack> stored = new ArrayList<>(stored(player));
-		if (stored.size() < MAX_STORED) {
-			stored.add(relic);
-			set(player, stored);
-		} else {
-			// no room: it's left at their feet as an ordinary (if strange) weapon
-			player.spawnAtLocation(player.level(), relic);
+		relic.set(RELIC, false);
+		if (!putInStash(player, relic)) {
+			// the stash is full: it's left in their hands (or at their feet)
+			if (!player.getInventory().add(relic)) {
+				player.spawnAtLocation(player.level(), relic);
+			}
 		}
 	}
 
@@ -196,15 +222,22 @@ public final class ArsenalRelics {
 				overworld.setAttached(RETURNS, rest);
 			}
 		}
+		// relics kept the old way (before the stash took them) move into the stash
+		if (!stored(player).isEmpty()) {
+			List<ItemStack> old = new ArrayList<>(stored(player));
+			set(player, List.of());
+			old.forEach(relic -> store(player, relic));
+		}
 		Inventory inventory = player.getInventory();
 		for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
 			ItemStack stack = inventory.getItem(slot);
-			if (is(stack) && !Summoned.is(stack) && stored(player).size() < MAX_STORED) {
-				inventory.setItem(slot, ItemStack.EMPTY);
-				store(player, stack.copyWithCount(1));
-				if (stack.getCount() > 1) {
-					inventory.setItem(slot, stack.copyWithCount(stack.getCount() - 1));
+			if (unclaimed(stack) && !Summoned.is(stack)) {
+				ItemStack relic = stack.copyWithCount(1);
+				relic.set(RELIC, false);
+				if (!putInStash(player, relic)) {
+					continue;
 				}
+				inventory.setItem(slot, stack.getCount() > 1 ? stack.copyWithCount(stack.getCount() - 1) : ItemStack.EMPTY);
 				ServerLevel level = player.level();
 				Summoned.dissolveEffects(level, player.position().add(0.0, 1.0, 0.0));
 				level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.3, 0.5, 0.3, 0.05);

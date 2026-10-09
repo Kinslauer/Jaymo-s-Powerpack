@@ -69,6 +69,11 @@ public final class WindFlightController {
 	static final double TUMBLE_MIN_FRACTION = 0.35;
 	static final double TUMBLE_ANGLE_SLOW = 110.0;
 	static final double TUMBLE_ANGLE_FAST = 60.0;
+	/**
+	 * Once the power is mastered (every ability unlocked), only a real reversal tumbles you: looking this far off the
+	 * flight path (degrees) at speed, like snapping round 180°. Dips and climbs are yours to make.
+	 */
+	static final double MASTERED_TUMBLE_ANGLE = 150.0;
 	public static final int TUMBLE_TICKS = 40;
 	/** Momentum kept per tick while tumbling (vanilla air is 0.91; a tumbling body carries further). */
 	static final double TUMBLE_DRAG = 0.975;
@@ -320,7 +325,9 @@ public final class WindFlightController {
 		double angle = Math.acos(Mth.clamp(dir.dot(look), -1.0, 1.0));
 		if (fractionNow >= TUMBLE_MIN_FRACTION) {
 			double t = (fractionNow - TUMBLE_MIN_FRACTION) / (1.0 - TUMBLE_MIN_FRACTION);
-			double limit = Math.toRadians(Math.min(179.0, Mth.lerp(t, TUMBLE_ANGLE_SLOW, TUMBLE_ANGLE_FAST) * this.turnBonus));
+			double limit = com.jaymospowers.core.Mastery.unlocked(player) >= com.jaymospowers.core.Mastery.ALL
+				? Math.toRadians(MASTERED_TUMBLE_ANGLE)
+				: Math.toRadians(Math.min(179.0, Mth.lerp(t, TUMBLE_ANGLE_SLOW, TUMBLE_ANGLE_FAST) * this.turnBonus));
 			if (angle > limit) {
 				// wrenched round far harder than this speed allows: control is lost
 				this.velocity = dir.scale(this.speed);
