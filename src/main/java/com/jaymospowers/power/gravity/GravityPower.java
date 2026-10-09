@@ -115,6 +115,16 @@ public final class GravityPower implements Power {
 	public static final int WEIGHTLESS_COOLDOWN = 200;
 	static final float WEIGHTLESS_EXHAUSTION = 0.015F;
 
+	/**
+	 * While you're weightless, everything else near you gets heavier: creatures and players within
+	 * {@code HEAVY_AURA_RADIUS} weigh {@code HEAVY_AURA_WEIGHT} times more (falling hard, jumping low) and are slowed,
+	 * refreshed as you move, like Chrono's Overclock.
+	 */
+	static final double HEAVY_AURA_RADIUS = 6.0;
+	static final double HEAVY_AURA_WEIGHT = 1.5;
+	static final double HEAVY_AURA_JUMP = -0.35;
+	static final int HEAVY_AURA_REFRESH = 5;
+
 	// ---- Crush (B, charged) ----
 	static final double CRUSH_RANGE = 24.0;
 	public static final int CRUSH_FULL_CHARGE = 60;
@@ -128,11 +138,18 @@ public final class GravityPower implements Power {
 
 	// ---- Choke and Slam (right click while lifting, once R is unlocked) ----
 	/** The choke holds it this far out, its head at your hand; the squeeze's damage, every so often. */
-	static final double CHOKE_DISTANCE = 1.7;
+	static final double CHOKE_DISTANCE = 0.75;
 	static final float CHOKE_DAMAGE = 1.0F;
 	static final int CHOKE_DAMAGE_EVERY = 20;
 	/** The slam: straight down this fast, under this much extra weight (times its gravity), for at most this long. */
 	static final double SLAM_SPEED = 2.2;
+	/**
+	 * Before it comes down, it's hauled up: for {@code SLAM_RISE_TICKS} (fewer per ability mastered, at least
+	 * {@code SLAM_RISE_MIN}) at {@code SLAM_RISE_SPEED}; then down at {@code SLAM_SPEED} plus {@code SLAM_SPEED_PER_LEVEL}
+	 * per ability (and once more ascended). The more mastered, the faster the whole thing.
+	 */
+	static final int SLAM_RISE_TICKS = 10, SLAM_RISE_MIN = 4;
+	static final double SLAM_RISE_SPEED = 0.75, SLAM_SPEED_PER_LEVEL = 0.7;
 	static final double SLAM_WEIGHT_BASE = 2.0, SLAM_WEIGHT_PER_LEVEL = 1.0;
 	static final int SLAM_MAX_TICKS = 30;
 	/** Damage: base, per ability unlocked, more once ascended. */
@@ -141,6 +158,13 @@ public final class GravityPower implements Power {
 	static final float SLAM_BREAK_LEVEL_3 = 1.5F, SLAM_BREAK_LEVEL_4 = 3.0F, SLAM_BREAK_ASCENDED = 5.0F;
 
 	private static final Identifier SLAM_ID = JaymosPowers.id("gravity_slam");
+	private static final Identifier HEAVY_AURA_ID = JaymosPowers.id("gravity_heavy_aura");
+	private static final Identifier HEAVY_AURA_JUMP_ID = JaymosPowers.id("gravity_heavy_aura_jump");
+	/** Who's weighed down by someone's weightlessness, and until when (game time). */
+	private record Weighed(ResourceKey<Level> dimension, UUID entity, long until) {
+	}
+
+	private static final java.util.Map<UUID, Weighed> WEIGHED = new java.util.HashMap<>();
 
 	// ---- fate ----
 	/** Deaths by your weight (a fall after Lift, Crush, the Singularity) within this long of your touch count. */
@@ -220,7 +244,7 @@ public final class GravityPower implements Power {
 	}
 
 	/** A creature being slammed down: who threw it, how hard, and what it can break. */
-	private record Slam(ResourceKey<Level> dimension, UUID entity, UUID player, float damage, float breakHardness, long started) {
+	private record Slam(ResourceKey<Level> dimension, UUID entity, UUID player, float damage, float breakHardness, long started, int rise, double down) {
 	}
 
 	private static final List<Slam> SLAMS = new ArrayList<>();
@@ -267,6 +291,7 @@ public final class GravityPower implements Power {
 			WELLS.clear();
 			PINNED.clear();
 			SLAMS.clear();
+			WEIGHED.clear();
 			TOUCHED.clear();
 		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> GravityDebugCommand.register(dispatcher));
@@ -437,7 +462,7 @@ public final class GravityPower implements Power {
 		if (state.choking && !(target instanceof LivingEntity)) {
 			state.choking = false;
 		}
-		Vec3 hold = player.getEyePosition().add(player.getViewVector(1.0F).scale(state.choking ? CHOKE_DISTANCE : state.liftHold));
+		Vec3 hold = player.getEyePosition().add(player.getViewVector(1.0F).scale(state.choking ? CHOKE_DISTANCE + target.getBbWidth() * 0.5 : state.liftHold));
 		if (state.choking) {
 			// by the throat: its head at your hand
 			hold = hold.subtract(0.0, target.getEyeHeight() - target.getBbHeight() * 0.5, 0.0);
@@ -529,11 +554,13 @@ public final class GravityPower implements Power {
 		dropLiftQuietly(player, state, target);
 		touch(target, player);
 		modifier(target, Attributes.GRAVITY, SLAM_ID, weight, true);
-		target.setDeltaMovement(0.0, -SLAM_SPEED, 0.0);
+		int rise = Math.max(SLAM_RISE_MIN, SLAM_RISE_TICKS - abilities - (ascended ? 1 : 0));
+		double down = SLAM_SPEED + SLAM_SPEED_PER_LEVEL * (abilities + (ascended ? 1 : 0));
+		target.setDeltaMovement(0.0, SLAM_RISE_SPEED, 0.0);
 		target.needsSync = true;
 		target.syncVelocity = true;
 		SLAMS.removeIf(s -> s.entity().equals(target.getUUID()));
-		SLAMS.add(new Slam(level.dimension(), target.getUUID(), player.getUUID(), damage, breakHardness, level.getGameTime()));
+		SLAMS.add(new Slam(level.dimension(), target.getUUID(), player.getUUID(), damage, breakHardness, level.getGameTime(), rise, down));
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 1.0F, 0.6F);
 	}
 
@@ -557,8 +584,28 @@ public final class GravityPower implements Power {
 				continue;
 			}
 			long age = level.getGameTime() - slam.started();
-			boolean landed = age > 1 && (target.onGround() || target.verticalCollision || target.isInWater());
-			if (!landed && age < SLAM_MAX_TICKS) {
+			if (age < slam.rise()) {
+				// hauled up into the air...
+				target.setDeltaMovement(0.0, SLAM_RISE_SPEED, 0.0);
+				target.needsSync = true;
+				target.syncVelocity = true;
+				continue;
+			}
+			if (age == slam.rise()) {
+				// ...and driven into the ground
+				target.setDeltaMovement(0.0, -slam.down(), 0.0);
+				target.needsSync = true;
+				target.syncVelocity = true;
+				level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 0.6F, 2.0F);
+			} else if (!target.onGround()) {
+				Vec3 v = target.getDeltaMovement();
+				if (v.y > -slam.down()) {
+					target.setDeltaMovement(v.x * 0.5, -slam.down(), v.z * 0.5);
+					target.syncVelocity = true;
+				}
+			}
+			boolean landed = age > slam.rise() + 1 && (target.onGround() || target.verticalCollision || target.isInWater());
+			if (!landed && age < SLAM_MAX_TICKS + slam.rise()) {
 				if (age % 2 == 0) {
 					level.sendParticles(ParticleTypes.REVERSE_PORTAL, target.getX(), target.getY() + target.getBbHeight(), target.getZ(), 3, 0.2, 0.1, 0.2, 0.02);
 				}
@@ -713,6 +760,9 @@ public final class GravityPower implements Power {
 		}
 		if (player.getAttached(WEIGHTLESS_ON) != null) {
 			state.weightlessTicks++;
+			if (player.tickCount % HEAVY_AURA_REFRESH == 0) {
+				heavyAura(player);
+			}
 			player.causeFoodExhaustion(WEIGHTLESS_EXHAUSTION);
 			if (++state.weightlessTotal >= CORRUPT_WEIGHTLESS_TICKS) {
 				state.weightlessTotal = 0;
@@ -816,9 +866,47 @@ public final class GravityPower implements Power {
 		}
 	}
 
+	/** Weightless: the weight you shed lands on everyone around you. */
+	private static void heavyAura(ServerPlayer player) {
+		ServerLevel level = player.level();
+		long until = level.getGameTime() + HEAVY_AURA_REFRESH * 2L + 1;
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(HEAVY_AURA_RADIUS),
+			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand)
+				&& e.distanceToSqr(player) <= HEAVY_AURA_RADIUS * HEAVY_AURA_RADIUS)) {
+			modifier(living, Attributes.GRAVITY, HEAVY_AURA_ID, HEAVY_AURA_WEIGHT, true);
+			AttributeInstance jump = living.getAttribute(Attributes.JUMP_STRENGTH);
+			if (jump != null && !jump.hasModifier(HEAVY_AURA_JUMP_ID)) {
+				jump.addOrUpdateTransientModifier(new AttributeModifier(HEAVY_AURA_JUMP_ID, HEAVY_AURA_JUMP, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+			}
+			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, HEAVY_AURA_REFRESH * 2 + 4, 0, false, false, true), player);
+			WEIGHED.put(living.getUUID(), new Weighed(level.dimension(), living.getUUID(), until));
+			if (level.getRandom().nextInt(4) == 0) {
+				level.sendParticles(ParticleTypes.REVERSE_PORTAL, living.getX(), living.getY() + 0.1, living.getZ(), 3, 0.3, 0.05, 0.3, 0.0);
+			}
+		}
+	}
+
 	private static void serverTick(MinecraftServer server) {
 		if (!SLAMS.isEmpty()) {
 			tickSlams(server);
+		}
+		if (!WEIGHED.isEmpty()) {
+			for (Iterator<Weighed> it = WEIGHED.values().iterator(); it.hasNext(); ) {
+				Weighed weighed = it.next();
+				ServerLevel level = server.getLevel(weighed.dimension());
+				if (level != null && level.getGameTime() < weighed.until()) {
+					continue;
+				}
+				it.remove();
+				Entity entity = level == null ? null : level.getEntity(weighed.entity());
+				if (entity instanceof LivingEntity living) {
+					modifier(living, Attributes.GRAVITY, HEAVY_AURA_ID, 0.0, false);
+					AttributeInstance jump = living.getAttribute(Attributes.JUMP_STRENGTH);
+					if (jump != null) {
+						jump.removeModifier(HEAVY_AURA_JUMP_ID);
+					}
+				}
+			}
 		}
 		if (!WELLS.isEmpty()) {
 			for (Iterator<Well> it = WELLS.iterator(); it.hasNext(); ) {
