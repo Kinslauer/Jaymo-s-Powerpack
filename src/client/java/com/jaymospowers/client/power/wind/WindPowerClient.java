@@ -40,6 +40,7 @@ public final class WindPowerClient implements PowerClient {
 	/** Called once from {@link com.jaymospowers.client.JaymosPowersClient}: renderers, client packets, the PowerClient. */
 	public static void init() {
 		PowerClients.register(WindPower.ID, INSTANCE);
+		WindCycloneClient.init();
 		ClientPlayNetworking.registerGlobalReceiver(WindNet.Status.TYPE, (payload, ctx) -> INSTANCE.onStatus(ctx.client(), payload));
 		// screen washes and lightning flashes reach anyone near a mode, wind or not
 		ClientPlayNetworking.registerGlobalReceiver(WindNet.ScreenFx.TYPE, (payload, ctx) -> WindScreenFx.onPacket(payload));
@@ -51,6 +52,7 @@ public final class WindPowerClient implements PowerClient {
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			if (!minecraft.isPaused()) {
 				WindPose.tick(minecraft);
+				WindCycloneClient.tickSounds(minecraft);
 				WindAura.tick(minecraft);
 				WindWisps.tick(minecraft);
 				WindScreenFx.tick();
@@ -113,6 +115,7 @@ public final class WindPowerClient implements PowerClient {
 	public void tick(Minecraft minecraft, LocalPlayer player) {
 		WindWeather.tick(player);
 		this.flight.tick(minecraft, player);
+		WindCycloneClient.root(player);
 		// the cloak of wind (every wind user, from the start): holding Jump in mid-air slows the fall
 		if (!this.flight.state().flying() && !player.onGround() && !player.isInWater() && !player.isFallFlying()
 			&& !player.getAbilities().flying && player.input.keyPresses.jump()
@@ -138,7 +141,7 @@ public final class WindPowerClient implements PowerClient {
 
 	@Override
 	public void onKey(LocalPlayer player, PowerKey key, boolean down) {
-		if (key == PowerKey.ABILITY_1 && down) {
+		if (key == PowerKey.ABILITY_1 && down && !com.jaymospowers.power.wind.WindCyclone.isActive(player)) {
 			this.flight.toggle(Minecraft.getInstance(), player);
 		}
 	}

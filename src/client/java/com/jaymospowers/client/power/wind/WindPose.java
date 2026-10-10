@@ -96,6 +96,7 @@ public final class WindPose {
 	static void tick(Minecraft minecraft) {
 		WindHoverSway.tick(minecraft);
 		WindTumble.tick(minecraft);
+		WindCyclonePose.tick(minecraft);
 		ClientLevel level = minecraft.level;
 		if (level == null) {
 			AMOUNTS.clear();
@@ -181,6 +182,20 @@ public final class WindPose {
 			state.setData(BANK_KEY, null);
 			state.setData(WindHoverSway.KEY, null);
 			state.setData(WindTumble.KEY, null);
+			state.setData(WindCyclonePose.KEY, null);
+			return;
+		}
+		WindCyclonePose.Stance stance = WindCyclonePose.extract(entity, partialTicks);
+		state.setData(WindCyclonePose.KEY, stance);
+		if (stance != null) {
+			// down on one knee: the landing has the whole body
+			state.isCrouching = false;
+			state.setData(KICK_KEY, null);
+			state.setData(KEY, null);
+			state.setData(BRAKE_KEY, null);
+			state.setData(BANK_KEY, null);
+			state.setData(WindHoverSway.KEY, null);
+			state.setData(WindTumble.KEY, null);
 			return;
 		}
 		com.jaymospowers.power.wind.WindKick.Kicking kicked = entity.getAttached(com.jaymospowers.power.wind.WindKick.KICKING);
@@ -213,6 +228,7 @@ public final class WindPose {
 		WindHoverSway.rotate(state, poseStack, entityScale);
 		WindTumble.rotate(state, poseStack, entityScale);
 		kickLean(state, poseStack);
+		WindCyclonePose.rotate(state, poseStack);
 		Float amount = state.getData(KEY);
 		if (amount == null || !(state instanceof AvatarRenderState) || state.deathTime > 0.0F) {
 			return;
@@ -378,6 +394,11 @@ public final class WindPose {
 		WindHoverSway.applyModel(model, state);
 		WindTumble.applyModel(model, state);
 		if (!(state instanceof AvatarRenderState avatar) || !(model instanceof HumanoidModel<?> humanoid)) {
+			return;
+		}
+		WindCyclonePose.Stance stance = avatar.getData(WindCyclonePose.KEY);
+		if (stance != null) {
+			WindCyclonePose.applyModel(humanoid, stance);
 			return;
 		}
 		KickPose kick = avatar.getData(KICK_KEY);

@@ -108,6 +108,7 @@ public final class WindPower implements Power {
 		WindTempest.init();
 		SorasDagger.register();
 		WindKick.init();
+		WindCyclone.init();
 		WindDebug.register();
 		ServerPlayNetworking.registerGlobalReceiver(WindNet.Flight.TYPE, (payload, ctx) -> INSTANCE.onFlightPacket(ctx.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(WindNet.Impact.TYPE, (payload, ctx) -> INSTANCE.onImpact(ctx.player(), payload));
@@ -200,6 +201,7 @@ public final class WindPower implements Power {
 
 	@Override
 	public void onLost(ServerPlayer player) {
+		WindCyclone.stop(player);
 		State s = this.states.remove(player.getUUID());
 		player.removeAttached(FLIGHT);
 		player.removeAttached(BRAKING);
@@ -423,6 +425,7 @@ public final class WindPower implements Power {
 			s.gustCooldown--;
 		}
 		s.weather = WindWeather.tick(player);
+		WindCyclone.tick(player);
 
 		if (!player.isAlive() || player.isSpectator()) {
 			if (s.flight.flying()) {

@@ -402,6 +402,56 @@ whisper in the action bar.
 - The crescent itself is unchanged in range, damage and speed; it now starts on the hit tick, following the kicker
   until then.
 
+## 0.8.0: Cyclone (hold X; `WindCyclone`, client `WindCycloneClient`, `WindCyclonePose`, `WindCycloneSound`)
+- **Key:** the power skill key (X, `key.jaymospowers.web_symbiote`). A **tap** is still the Tempest Kick; **holding**
+  it `WindCyclone.HOLD_TICKS` 8 (0.4 s) forms the Cyclone, which lasts while X stays down.
+- **Tap or hold is decided on the client** (`WindCycloneClient`), because X's mapping and its old kick send live in
+  `WebSymbioteClient` (Web's file). For a wind user, X's clicks are consumed at `START_CLIENT_TICK`, before the
+  symbiote's `END_CLIENT_TICK` handler can see them, so that old send never fires for wind. The client sends
+  `WindKick.Kick` on a release before the threshold (the kick now goes off on release, not on press), and
+  `wind_cyclone` (`WindCyclone.Hold(down)`) at the threshold and on release. A press and release inside one tick
+  counts as a tap. Holding past the threshold with no Cyclone available does nothing.
+  *Lead:* once merged, the kick branch in `WebSymbioteClient`'s X handler is dead code for wind users and can go.
+- **Mastery (decided):** the Cyclone needs `MIN_MASTERY` 1 unlocked ability, not everything mastered like the kick.
+  It levels with you anyway: radius `RADIUS_MIN` 3 → `RADIUS_MAX` 6 and height `HEIGHT_MIN` 6 → `HEIGHT_MAX` 12, in
+  even steps from 1 to 4 unlocked abilities (creative and `/power set` count as all 4).
+- **Starting** needs you on the ground, not flying, not carrying or carried, not riding, and off cooldown; otherwise a
+  soft breeze sigh. Flight (R) can't be toggled while it lasts; anything that ends it (death, taking flight, being
+  picked up, a dimension change, losing the power, logging out) stops it like letting go.
+- **Stance** (`jaymospowers:wind_cyclone`, a synced `Stance(start, left)`; `left` rolls which knee goes down): a
+  superhero landing. `WindCyclonePose` lowers the whole model `DROP` 0.45 in the `PoseStack`, turns it `TWIST` 10°
+  toward the raised arm, and tips it `HUNCH` 40° forward about the hips. The legs are turned back against the tip:
+  each is set at the angle that puts its end on the ground (`acos((HIP - DROP) / LEG)`), the kneeling one back (the
+  knee on the ground) and the other forward (the foot planted). One arm sweeps up and back over the shoulder
+  (`HIGH_ARM_*`), the other reaches down by the ground (`LOW_ARM_*`), the head bows (`HEAD_DOWN`), and the arms
+  tremble. It drops in fast (`DROP_IN`) and rises slower (`RISE_OUT`). Other wind poses are off while it shows.
+- **Rooted:** while it lasts, `MOVEMENT_SPEED` and `JUMP_STRENGTH` get a -100% modifier (`wind_cyclone_root`), and
+  the client keeps no sideways momentum.
+- **The tornado** (server particles, so everyone sees it): `RINGS` 6 rings of cloud turning at `TURN_RATE`, from
+  `FOOT_SHARE` 35% of the radius at the foot to the full radius at the top, with gusts and dust at the foot; it rises
+  to full size over `FORM_TICKS` 8. Corrupted, it carries purple storm dust and crawling sparks, with distant
+  thunder. Sound: the landing thump, a roaring loop on every client in range (`WindCycloneSound`, the elytra wind,
+  low), a breeze whirl every `ROAR_INTERVAL` 16 ticks, and a burst on release.
+- **Caught creatures** (anything alive in the funnel but you): spun round at `SPIN_SPEED`, drawn toward a ring just
+  outside you (`PULL`), lifted to `LIFT_HEIGHT` 1.4 above your feet; knockback resistance holds them down. Letting go
+  flings them outward (`RELEASE_FLING`).
+- **Damage:**
+
+| Tier | Others | You (suffocation) |
+|---|---|---|
+| Base | `DAMAGE` 4 every `DAMAGE_INTERVAL` 20 ticks (wind-charge damage) | `SELF_DAMAGE` 1 every `SELF_INTERVAL` 40 ticks |
+| Ascended | 4 every `DAMAGE_INTERVAL_ASCENDED` 10 ticks | 1 every `SELF_INTERVAL_ASCENDED` 80 ticks |
+| Corrupted (and ascended + corrupted) | 4 every 10 ticks, as **shock** (`LIGHTNING_BOLT` damage type) with sparks | 1 every 80 ticks |
+
+  Your own damage is `damageSources().inWall()` (suffocation: it ignores armour). Any Resistance (Gale Barrier's
+  included) is made up for, and if a fresh hit's invulnerability blocks it, it lands on the next tick instead.
+  Creative takes none. The corrupted shock has a `// FLAMES:` comment where `Flames.touch(...)` goes after merging.
+- **Costs:** `EXHAUSTION_PER_TICK` 0.06 hunger a tick while held (outside creative), and `COOLDOWN` 60 ticks after
+  letting go.
+- **HUD:** a Cyclone chip (a guster banner pattern) after G / V / B with the bound key and the cooldown; it pulses
+  while the Cyclone lasts, and "Cyclone" shows over the crosshair with a swirling band.
+- **Queries for synergies:** `WindCyclone.isActive(player)`, `radius(player)`, `height(player)`, `isAvailable(player)`.
+
 ## 0.8.0: carrying while flying (see `docs/carry.md`)
 - A Wind user carrying someone can take off and fly as usual, at `Carry.FLIGHT_SPEED` ×0.8 of the top cruise speed
   (`WindFlightController`) and `Carry.FLIGHT_HUNGER` ×1.3 the flight hunger (`WindPower`).
@@ -420,3 +470,13 @@ whisper in the action bar.
 2. A second client sees the same side and arms as the kicker.
 3. Carry someone while flying: cruise speed tops out lower, hunger drains faster, and the held body lies along the
    flight with you.
+4. Cyclone (`/power set @s wind`): tap X, the kick still fires (on release). Hold X: after 0.4 s you drop into the
+   superhero landing (F5: knee on the ground, other foot planted ahead, hunched, one arm up and back, other hand by
+   the ground) and the funnel rises. WASD and Space do nothing. Let go: the funnel bursts, the HUD chip shows a 3 s
+   cooldown.
+5. Summon a few zombies and pigs nearby: they're spun round you and lifted a little, taking 4 a second (base). In
+   survival you take ½ heart every 2 s, even with Gale Barrier up. `/power ascend @s`: 4 every 0.5 s to them, ½ heart
+   every 4 s to you. `/power corrupt @s`: sparks on each hit, lightning damage, purple dust in the funnel.
+6. `/power level @s 1` (or a fresh awakening with one unlock): a 3-block funnel; at 4 unlocked, 6 blocks. At 0
+   unlocked, holding X does nothing.
+7. A second client sees the stance, the funnel and hears the roar; mobs on the server take the damage.

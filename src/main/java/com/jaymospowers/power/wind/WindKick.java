@@ -38,7 +38,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Tempest Kick (the power's special key, X; every ability mastered): a roundhouse kick that throws a white crescent of
+ * Tempest Kick (a tap of the power's special key, X; every ability mastered; holding X is the {@link WindCyclone}): a roundhouse kick that throws a white crescent of
  * wind out sideways-flat ahead of you. It flies {@link #RANGE} blocks for {@link #DAMAGE}; ascended (the Tempest),
  * {@link #RANGE_ASCENDED} blocks for {@link #DAMAGE_ASCENDED}. It cuts through everything in its path (each once) and
  * stops at walls.
@@ -90,7 +90,7 @@ public final class WindKick {
 	public static final AttachmentType<Kicking> KICKING = AttachmentRegistry.create(JaymosPowers.id("wind_kick"),
 		builder -> builder.syncWith(Kicking.STREAM_CODEC, AttachmentSyncPredicate.all()));
 
-	/** Client → server: X pressed. */
+	/** Client → server: X tapped (released before {@link WindCyclone#HOLD_TICKS}). */
 	public record Kick() implements CustomPacketPayload {
 		public static final Type<Kick> TYPE = new Type<>(JaymosPowers.id("wind_kick"));
 		public static final StreamCodec<ByteBuf, Kick> CODEC = StreamCodec.unit(new Kick());
@@ -141,7 +141,8 @@ public final class WindKick {
 	}
 
 	private static void kick(ServerPlayer player) {
-		if (!Powers.has(player, WindPower.INSTANCE) || Mastery.unlocked(player) < Mastery.ALL || !player.isAlive() || player.isSpectator()) {
+		if (!Powers.has(player, WindPower.INSTANCE) || Mastery.unlocked(player) < Mastery.ALL || !player.isAlive() || player.isSpectator()
+			|| WindCyclone.isActive(player)) {
 			return;
 		}
 		ServerLevel level = player.level();

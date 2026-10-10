@@ -48,6 +48,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.gravity.GravityPower",
 			"power.web.WebAscension", "power.web.WebBridges", "power.web.WebPower", "power.web.WebSymbiote", "power.web.WebTendrils",
 			"power.wind.WindModes", "power.wind.WindPower", "power.wind.WindStorm", "power.wind.WindTempest",
+			"power.wind.WindCyclone",
 		};
 		for (String holder : holders) {
 			try {
