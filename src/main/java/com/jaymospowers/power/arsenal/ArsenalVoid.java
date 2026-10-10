@@ -235,7 +235,7 @@ public final class ArsenalVoid {
 			DRAGON_FIGHTERS.computeIfAbsent(dragon.getUUID(), k -> new HashSet<>()).add(player.getUUID());
 		}
 		// a heavy blow can knock a corrupted user loose from this world for a moment
-		if (entity instanceof ServerPlayer player && isVoid(player) && damageTaken >= BLINK_MIN_DAMAGE && player.isAlive()
+		if (entity instanceof ServerPlayer player && isVoid(player) && damageTaken >= BLINK_MIN_DAMAGE && player.isAlive() && !VoidCrown.wearing(player)
 			&& player.getRandom().nextFloat() < BLINK_CHANCE) {
 			blink(player);
 		}

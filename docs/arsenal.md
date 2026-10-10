@@ -414,3 +414,65 @@ taken from the creative tab have no enchantment.
 - **Gram's armour pierce** is worked out after the fact (base − taken), so it also gives back part of what Protection,
   Resistance or absorption stopped.
 - **Frost Lance** is moved by the server every tick (`updateInterval 1`); check it looks smooth for other players.
+
+## 0.8.3
+
+### Void Crown (`VoidCrown`, Void Arsenal only)
+- **Item:** `jaymospowers:void_crown`, a helmet worn in the HEAD slot (Jaymo's Kingdoms looks for this id there and
+  reads every faction's reputation as its lowest while it's worn; nothing in Powers knows about Kingdoms). Epic,
+  fireproof, in the Combat tab beside the other relics. `/give @s jaymospowers:void_crown` works.
+- **Armour:** a custom `ArmorMaterial` through `Item.Properties.humanoidArmor(material, HELMET)`: 6 armour (`ARMOR`),
+  3 toughness (`TOUGHNESS`), durability 11 × 45 = 495 (`DURABILITY_MULTIPLIER`), repaired with netherite. The
+  `equippable` component is then replaced with one allowed on players only, not dispensable, using the
+  `jaymospowers:void_crown` equipment asset.
+- **Curse of Binding:** a default `enchantments` component, built with `delayedComponent` once the enchantment registry
+  is loaded, so every crown (found, `/give`n or from the tab) has it.
+- **Finding it:** a full Reach (not Rummage) by a corrupted Arsenal user has a 2% chance (`FIND_CHANCE`) of the crown
+  coming through behind the weapon into the inventory, with ink, reverse-portal motes, an Enderman stare and a
+  whisper. Not while they already have one on their head, in their inventory or in the Pocket Stash. It's an ordinary
+  item, never summoned, so it doesn't dissolve.
+- **Only the void's:** three layers, because 26.3's `Equippable` can only restrict by entity type:
+  1. `ArsenalLivingEntityMixin` makes `LivingEntity.isEquippableInSlot` refuse it for the head of anyone who isn't a
+     corrupted Arsenal user. That covers armour-slot clicks and shift-clicks, on both sides (the power and Fate are
+     synced to every client).
+  2. `VoidCrown.Crown.use` refuses the right-click equip with a whisper.
+  3. Every 10 ticks (`CHECK_INTERVAL`) the server checks every player's head; a crown on a head that isn't the void's
+     (put there by a command, or its wearer was purified or lost the power) slips off into the inventory, or to the
+     ground, with a whisper. So purification also frees you of the binding.
+- **Tooltip:** two lore lines (grey flavour, purple hint). Held by anyone the void hasn't taken, a third grey line
+  says it isn't waiting for them (client-side, `ArsenalPowerClient`).
+- **Ender step:** when the wearer takes damage (after armour, more than 0) from an entity or a projectile (not
+  themselves; falls, the void, starvation, drowning and the like have no entity), they teleport like an Enderman: up
+  to 16 tries (`STEP_ATTEMPTS`) of a random spot within ±16 blocks across (`STEP_RANGE`) and ±8 up or down
+  (`STEP_HEIGHT`), dropped to the floor below it, with room to stand and no liquid (`LivingEntity.randomTeleport` with
+  `BlockTags.ENDERMAN_DOES_NOT_TELEPORT_TO`, as Endermen do). Enderman teleport sound and portal particles at both
+  ends; fall distance reset; dismounts first. Then 30 ticks (`STEP_COOLDOWN`) before it can happen again. While the
+  crown is worn, the Void Arsenal's random heavy-hit blink (`ArsenalVoid.blink`) is skipped: the crown's step
+  replaces it.
+- **Art:** `tools/gen_void_crown.py` (original): the 32x32 icon (a jagged void-iron circlet, violet-lit points, a slit
+  eye on the brow, a rift splitting the tallest point), `textures/entity/equipment/humanoid/void_crown.png` (a band
+  with small teeth and the eye on the head layer, taller points on the hat layer, a rim on top), `items/`,
+  `models/item/` and `equipment/void_crown.json` (`humanoid` layer only).
+
+### How to test (0.8.3)
+1. `/power set @s arsenal`, `/power corrupt @s` (survival), `/give @s jaymospowers:void_crown`. The tooltip shows two
+   lore lines and Curse of Binding. Put it on (right click or the armour slot): 6 armour and 3 toughness on the bar.
+   Check how it looks in F5 (band on the head, points standing off it, eye on the brow).
+2. Try to take it off: Binding holds it (outside creative).
+3. Let a zombie or skeleton hit you: you vanish and reappear on safe ground up to 16 blocks away, with the sound and
+   particles. Hits within 1.5 s don't step again. `/damage @s 4` with no source, falling, and drowning don't step.
+4. `/power purify @s`: within half a second the crown slips into your inventory with a whisper. Now try to put it on:
+   refused (right click and armour slot), and the tooltip has the cold line.
+5. As a second player without the power, try the same, and check a dispenser won't put it on anyone.
+6. Finding: corrupted, Reach many times (`/powerdebug arsenal ready @s` between); about 1 in 50 brings the crown too,
+   never a second one while you have it.
+
+### Risky or untested at runtime (0.8.3)
+- **The worn layer:** the texture follows the humanoid armour layout (head at 0,0, hat at 32,0); check the points sit
+  over the forehead and the eye faces forward.
+- **`delayedComponent` for the enchantment:** resolved when registries load (server and client); if the tooltip
+  shows no Binding, this is why.
+- **Creative inventory:** creative players can take bound items off (vanilla); the head-slot refusal also applies
+  there.
+- **Ender step on players:** `randomTeleport` on a `ServerPlayer` from inside `AFTER_DAMAGE` (same as the existing
+  blink).
