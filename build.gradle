@@ -7,7 +7,9 @@ plugins {
 
 // build output lives outside OneDrive (its syncing locks files and breaks rebuilds);
 // one folder per checkout, so parallel worktrees don't share a build dir
-layout.buildDirectory = file("E:/jaymospowers-build/${rootDir.name.replace(' ', '-')}")
+if (file("E:/").exists()) {
+	layout.buildDirectory = file("E:/jaymospowers-build/${rootDir.name.replace(' ', '-')}")
+}
 
 repositories {
 	mavenCentral()
