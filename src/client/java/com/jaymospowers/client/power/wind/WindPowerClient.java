@@ -28,11 +28,18 @@ public final class WindPowerClient implements PowerClient {
 	private final int[] cooldownTotals = new int[WindAbility.values().length];
 	private @Nullable WindAbility channel;
 	private int channelTicks;
+	/** Ticks to the channel's full charge (the server's; longer in the cold). */
+	private int channelMax = 1;
 	/** Cyclone Lance's cooldown (ascended). */
 	private int lanceCooldown;
 	/** The ground Gust's own cooldown (Tailwind, in the air, keeps the ability's). */
 	private int gustCooldown;
 	private int gustCooldownTotal = 1;
+	/** Stood in the cold last tick (a line on the action bar when it first takes hold). */
+	private boolean wasCold;
+	private int lastColdNotice = -100000;
+	/** The cold's line shows at most this often (ticks), however often a biome edge is crossed. */
+	private static final int COLD_NOTICE_SPACING = 1200;
 
 	private WindPowerClient() {
 	}
@@ -101,6 +108,10 @@ public final class WindPowerClient implements PowerClient {
 		return this.channelTicks;
 	}
 
+	int channelMax() {
+		return this.channelMax;
+	}
+
 	/** While flying, pressing Jump in mid-air must not deploy an elytra (see LocalPlayerMixin). */
 	public static boolean suppressElytra(LocalPlayer player) {
 		return INSTANCE.flight.state().flying() && INSTANCE.flight.player() == player && isActive(player);
@@ -114,6 +125,13 @@ public final class WindPowerClient implements PowerClient {
 	@Override
 	public void tick(Minecraft minecraft, LocalPlayer player) {
 		WindWeather.tick(player);
+		boolean cold = com.jaymospowers.power.wind.WindCold.isCold(player);
+		if (cold && !this.wasCold && player.tickCount - this.lastColdNotice >= COLD_NOTICE_SPACING) {
+			this.lastColdNotice = player.tickCount;
+			player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymospowers.wind.cold")
+				.withColor(0xA8E4FF));
+		}
+		this.wasCold = cold;
 		this.flight.tick(minecraft, player);
 		WindCycloneClient.root(player);
 		// the cloak of wind (every wind user, from the start): holding Jump in mid-air slows the fall
@@ -134,7 +152,7 @@ public final class WindPowerClient implements PowerClient {
 				this.cooldowns[i]--;
 			}
 		}
-		if (this.channel != null && this.channelTicks < this.channel.maxChannel) {
+		if (this.channel != null && this.channelTicks < this.channelMax) {
 			this.channelTicks++;
 		}
 	}
@@ -151,7 +169,7 @@ public final class WindPowerClient implements PowerClient {
 		if (down && this.lanceCooldown <= 0) {
 			// the server throws the lance; the thrower feels it
 			WindCamera.shake(1.2F, 8);
-			this.lanceCooldown = WindTempest.LANCE_COOLDOWN;
+			this.lanceCooldown = com.jaymospowers.power.wind.WindCold.cooldown(player, WindTempest.LANCE_COOLDOWN);
 		}
 	}
 
@@ -198,6 +216,7 @@ public final class WindPowerClient implements PowerClient {
 		this.gustCooldown = status.gustCooldown();
 		this.channel = WindAbility.byId(status.channel());
 		this.channelTicks = status.channelTicks();
+		this.channelMax = status.channelMax();
 		LocalPlayer player = minecraft.player;
 		if (player == null) {
 			return;

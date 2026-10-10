@@ -51,5 +51,8 @@
 	"message.jaymospowers.wind.cured_days": "Three days on, the storm in you has blown itself out.",
 	"message.jaymospowers.wind.cured_snow": "The snow smothers the storm in you. The static is gone.",
 	"power.jaymospowers.wind.key.special": "Tap X: Tempest Kick (everything mastered), a white crescent of wind, 5 blocks (ascended: 20). Hold X: Cyclone, a superhero landing in a tornado that spins, lifts and batters everything around you (radius 3-6 with mastery) while it chokes you",
-	"hud.jaymospowers.wind.cyclone": "Cyclone"
+	"hud.jaymospowers.wind.cyclone": "Cyclone",
+	"hud.jaymospowers.wind.cold": "COLD",
+	"message.jaymospowers.wind.cold": "The cold stiffens the wind: slower to gather, slower to return.",
+	"message.jaymospowers.wind.fumble": "The wind tugs %s from your grip!"
 }

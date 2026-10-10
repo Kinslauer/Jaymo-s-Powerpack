@@ -192,7 +192,7 @@ public final class SorasDagger extends Item {
 		boolean wind = this.stage == TEMPEST;
 		int slashes = wind ? FLURRY_SLASHES_WIND : this.stage == TEMPEST ? FLURRY_SLASHES_TEMPEST : FLURRY_SLASHES;
 		FLURRIES.put(player.getUUID(), new Flurry(serverLevel, player.getUUID(), this.stage, wind, slashes, 0));
-		player.getCooldowns().addCooldown(stack, this.stage == TEMPEST ? FLURRY_COOLDOWN_TEMPEST : FLURRY_COOLDOWN);
+		player.getCooldowns().addCooldown(stack, WindCold.cooldown(player, this.stage == TEMPEST ? FLURRY_COOLDOWN_TEMPEST : FLURRY_COOLDOWN));
 		serverLevel.playSound(null, player.getX(), player.getY(), player.getZ(), wind ? SoundEvents.BREEZE_CHARGE : SoundEvents.PLAYER_ATTACK_SWEEP,
 			SoundSource.PLAYERS, 0.9F, 1.3F);
 		return InteractionResult.SUCCESS;

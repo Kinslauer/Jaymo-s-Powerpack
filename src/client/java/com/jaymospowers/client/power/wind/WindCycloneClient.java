@@ -45,6 +45,8 @@ final class WindCycloneClient {
 	/** The server formed this hold's Cyclone (the cooldown only follows a real one). */
 	private static boolean formed;
 	private static int cooldown;
+	/** How long the running cooldown was when it began, for the HUD's shading. */
+	private static int cooldownTotal = 1;
 	private static boolean wasActive;
 	/** entity id → its roar. */
 	private static final Map<Integer, WindCycloneSound> SOUNDS = new HashMap<>();
@@ -76,6 +78,10 @@ final class WindCycloneClient {
 
 	static int cooldown() {
 		return cooldown;
+	}
+
+	static int cooldownTotal() {
+		return Math.max(1, cooldownTotal);
 	}
 
 	private static void input(Minecraft minecraft) {
@@ -121,7 +127,7 @@ final class WindCycloneClient {
 				if (!down) {
 					ClientPlayNetworking.send(new WindKick.Kick());
 					phase = Phase.IDLE;
-				} else if (++heldTicks >= WindCyclone.HOLD_TICKS) {
+				} else if (++heldTicks >= com.jaymospowers.power.wind.WindCold.windup(player, WindCyclone.HOLD_TICKS)) {
 					if (WindCyclone.isAvailable(player) && cooldown <= 0) {
 						ClientPlayNetworking.send(new WindCyclone.Hold(true));
 						formed = false;
@@ -135,7 +141,8 @@ final class WindCycloneClient {
 				if (!down) {
 					ClientPlayNetworking.send(new WindCyclone.Hold(false));
 					if (formed) {
-						cooldown = WindCyclone.COOLDOWN;
+						cooldown = com.jaymospowers.power.wind.WindCold.cooldown(player, WindCyclone.COOLDOWN);
+						cooldownTotal = cooldown;
 					}
 					phase = Phase.IDLE;
 				}

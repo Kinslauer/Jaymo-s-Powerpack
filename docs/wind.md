@@ -480,3 +480,57 @@ whisper in the action bar.
 6. `/power level @s 1` (or a fresh awakening with one unlock): a 3-block funnel; at 4 unlocked, 6 blocks. At 0
    unlocked, holding X does nothing.
 7. A second client sees the stance, the funnel and hears the roar; mobs on the server take the damage.
+
+## 0.8.3: heavier Tempest Kick, the cold, heavy weapons, fumbling
+
+### Tempest Kick: more weight (`WindKick`, `WindPose` KICK branch)
+- **Timing:** `WINDUP_TICKS` 3 → 6 (the lean builds and the leg chambers), the snap through the arc (`SNAP_TICKS`
+  1.5) with the crescent leaving on the hit tick (the server's crescent delay is the same wind-up), then about 8 ticks
+  of follow-through and recovery (`RECOVER_TICKS`). `KICK_TICKS` 11 → 16. The lean holds `KICK_LEAN_HOLD` past the
+  snap, then eases out.
+- **Bend at the hip:** on top of the whole-body lean about the standing foot, everything above the hip (torso, head,
+  arms) bends `KICK_HIP_BEND` (30°, ±`KICK_HIP_BEND_JITTER`) further away from the kicking leg, pivoting at the hip
+  (`WindPose.hipBend`: each upper part's pivot swings round the hip and the part tips with it, so the arms and head stay
+  attached). The neck turns back `KICK_HIP_HEAD_LEVEL` of it. With the whole-body lean, the leg's apex
+  (`LEG_APEX_X` -1.95 → -2.05) is level with the head at the snap.
+- `Kicking` gains a `windup` field (the cold's longer wind-up); `Kicking.length()` is the whole kick's length. In a long
+  wind-up the pose holds the chambered leg (trembling, `KICK_HOLD_SHAKE`) and the kick's beats run as usual after it.
+
+### The cold slows the wind (`WindCold`)
+- Where it would snow at the player's eye (`Biome.coldEnoughToSnow(pos, seaLevel)`: the biome's temperature at that
+  height, weather or not; a snowy mountain top counts), every Wind ability winds up `EXTRA_WINDUP_TICKS` (60) longer and
+  cools down `EXTRA_COOLDOWN_TICKS` (60) longer:
+  - **Wind-ups:** the channels (G / V / B: the full charge takes 60 ticks more; it's stored per channel and sent to
+    the client in `WindNet.Status.channelMax`, so the HUD bar matches), the Cyclone's hold threshold on X (client),
+    the Tempest Kick's wind-up.
+  - **Cooldowns:** G / V / B, the ground Gust, Call Lightning, Cyclone Lance, the Cyclone, the Tempest Kick, the
+    Flurry of Sora's Dagger.
+- **HUD:** a pale-blue frost mark (a snowflake) left of the weather glyph while it's cold, a "COLD" tag on the charge
+  meter's label, and an action-bar line when the cold first takes hold (at most once a minute).
+
+### Heavy weapons (`WindHeavy`, `mixin/WindPlayerAttackMixin`)
+- A Wind user's melee hits with an axe (`#minecraft:axes`) or a mace (`minecraft:mace`; 26.3 has no maces tag) deal
+  `DAMAGE_SCALE` ×0.6: the main hit and the sweep (`@ModifyArg` on `hurtOrSimulate` and `doSweepAttack` in
+  `Player.attack`). The mace's smash bonus is in the hit's damage, so it's scaled too.
+
+### Fumbling (`WindFumble`)
+- Until `Mastery.unlocked` reaches `MASTERED` (3), each Wind ability used (a channel's release, Cyclone Lance, the
+  Cyclone) has a `CAST_CHANCE` (8%) chance, and each second of flight a `FLIGHT_CHANCE_PER_SECOND` (2%) one, of the
+  main-hand item slipping: thrown ahead as an item entity (`ServerPlayer.drop`, pickup delay
+  `PICKUP_DELAY_TICKS`), with a sound and an action-bar line. Never in creative; nothing is destroyed.
+
+### Testing (0.8.3)
+1. Tempest Kick (F5, all abilities): slower to chamber (about 0.3 s), the snap, then a visible recovery. The torso,
+   head and arms bend sideways at the hip away from the kick, on top of the lean; the arms and head stay on the
+   shoulders; the kicking foot comes up to head height at the snap. The crescent leaves at the snap.
+2. A snowy biome (`/locate biome minecraft:snowy_plains`) or a snowy peak: the frost mark shows; a G / V / B charge
+   takes 3 s longer to fill; cooldowns are 3 s longer; holding X takes 3.4 s to become a Cyclone; a kick holds its
+   chamber 3 s before snapping (a second client sees the same). Back in plains, all normal.
+3. As a Wind user hit a zombie with an iron axe, then with no power: the Wind hit is about 60% of the other. A mace too.
+4. `/power level @s 2` (two unlocked), survival, holding a stack: fly for a minute and use abilities; now and then the
+   item is thrown ahead with a line on the action bar. At 3 unlocked, or in creative, it never happens.
+
+### Risky (0.8.3)
+- The mixin's two `@ModifyArg` targets must match 26.3's `Player.attack` (checked against the jar); a mismatch crashes
+  on start (`defaultRequire` 1).
+- `Status` and `Kicking` changed shape: client and server must both be on this build.

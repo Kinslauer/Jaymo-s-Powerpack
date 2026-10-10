@@ -200,6 +200,7 @@ public final class WindCyclone {
 		player.setAttached(CYCLONE, new Stance(now, player.getRandom().nextBoolean()));
 		root(player);
 		Mastery.used(player);
+		WindFumble.onCast(player);
 		WindStorm.onCast(player);
 		WindModes.onCast(player);
 		// the landing: a thump into the ground and a ring of dust kicked out
@@ -223,7 +224,7 @@ public final class WindCyclone {
 			return;
 		}
 		ServerLevel level = player.level();
-		READY_AT.put(player.getUUID(), level.getGameTime() + COOLDOWN);
+		READY_AT.put(player.getUUID(), level.getGameTime() + WindCold.cooldown(player, COOLDOWN));
 		if (level.dimension() != active.dimension) {
 			return;
 		}

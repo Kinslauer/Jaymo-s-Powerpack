@@ -1,6 +1,7 @@
 package com.jaymospowers.client.power.wind;
 
 import com.jaymospowers.power.wind.WindFlight;
+import com.jaymospowers.power.wind.WindKick;
 import com.jaymospowers.power.wind.WindPower;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -52,8 +53,24 @@ public final class WindPose {
 	/** A Tempest Kick under way: how far through it (ticks since it began), which leg, and its seed. */
 	public static final RenderStateDataKey<KickPose> KICK_KEY = RenderStateDataKey.create(() -> "jaymospowers:wind_kick");
 
-	/** {@code ticks} since the kick began (with the partial tick), the kicking leg, and the arm variant and jitter seed. */
-	public record KickPose(float ticks, boolean left, int seed) {
+	/**
+	 * {@code ticks} since the kick began (with the partial tick), the kicking leg, the arm variant and jitter seed, and
+	 * the wind-up's length (ticks; longer in the cold).
+	 */
+	public record KickPose(float ticks, boolean left, int seed, int windup) {
+		/**
+		 * The kick's own clock: the ticks with a cold wind-up's extra spent holding the chambered pose, so the beats
+		 * below always fall where they do in a plain kick.
+		 */
+		float t() {
+			return this.ticks - Mth.clamp(this.ticks - WindKick.WINDUP_TICKS, 0.0F, Math.max(0, this.windup - WindKick.WINDUP_TICKS));
+		}
+
+		/** Holding the chambered leg through a cold wind-up. */
+		boolean holding() {
+			return this.ticks > WindKick.WINDUP_TICKS && this.ticks < this.windup;
+		}
+
 		/** The arm variant, as on the server's {@code WindKick.Kicking}. */
 		int arms() {
 			return this.seed & 3;
@@ -77,11 +94,23 @@ public final class WindPose {
 	private static final float KICK_TWIST_WINDUP = -12.0F, KICK_TWIST_THROUGH = 28.0F, KICK_RISE = 0.07F;
 	/** Where the standing foot is, out from the body's middle (blocks). */
 	private static final float KICK_FOOT_OFFSET = 0.12F;
-	/** The kick's beats (ticks): the snap starts at the end of the wind-up, the recovery at {@code KICK_RECOVER}. */
-	private static final float KICK_SNAP_END = com.jaymospowers.power.wind.WindKick.WINDUP_TICKS + 1.5F, KICK_RECOVER = 6.5F;
+	/**
+	 * The kick's beats (ticks): the snap starts at the end of the wind-up and ends at {@code KICK_SNAP_END}; the lean
+	 * holds {@code KICK_LEAN_HOLD} past it, then eases out until the kick ends; the twist runs over {@code KICK_TWIST_TICKS}.
+	 */
+	private static final float KICK_SNAP_END = WindKick.WINDUP_TICKS + WindKick.SNAP_TICKS, KICK_LEAN_HOLD = 2.0F;
+	private static final float KICK_RECOVER = KICK_SNAP_END + KICK_LEAN_HOLD, KICK_TWIST_TICKS = 2.5F;
+	/**
+	 * The bend at the hip: on top of the whole-body lean, everything above the hip (torso, head, arms) leans this much
+	 * further away from the kick (degrees, before jitter), pivoting at the hip ({@code KICK_HIP_Y} model units below the
+	 * neck). That's what brings the kicking leg up level with the head. The neck turns back a share of it.
+	 */
+	private static final float KICK_HIP_BEND = 30.0F, KICK_HIP_BEND_JITTER = 4.0F, KICK_HIP_Y = 12.0F, KICK_HIP_HEAD_LEVEL = 0.4F;
+	/** Held in the chamber through a cold wind-up, the leg trembles (radians, and how fast). */
+	private static final float KICK_HOLD_SHAKE = 0.05F, KICK_HOLD_SHAKE_SPEED = 2.3F;
 	/** Kicking leg: chambered, at the top of the arc (out to the side, head high) and swept through across the front. */
 	private static final float LEG_CHAMBER_X = -1.25F, LEG_CHAMBER_Y = 0.35F, LEG_CHAMBER_Z = 0.25F;
-	private static final float LEG_APEX_X = -1.95F, LEG_APEX_Y = 1.25F, LEG_APEX_Z = 0.15F;
+	private static final float LEG_APEX_X = -2.05F, LEG_APEX_Y = 1.25F, LEG_APEX_Z = 0.15F;
 	private static final float LEG_THROUGH_X = -1.75F, LEG_THROUGH_Y = -0.45F, LEG_THROUGH_Z = 0.1F;
 	private static final float LIMB_JITTER = 0.15F;
 	/** The high arm: up and back over the head. How much of the lean the standing leg turns back against. */
@@ -200,8 +229,8 @@ public final class WindPose {
 		}
 		com.jaymospowers.power.wind.WindKick.Kicking kicked = entity.getAttached(com.jaymospowers.power.wind.WindKick.KICKING);
 		float kick = kicked == null ? -1.0F : entity.level().getGameTime() - kicked.start() + partialTicks;
-		state.setData(KICK_KEY, kick >= 0.0F && kick < com.jaymospowers.power.wind.WindKick.KICK_TICKS
-			? new KickPose(kick, kicked.left(), kicked.seed()) : null);
+		state.setData(KICK_KEY, kick >= 0.0F && kick < kicked.length()
+			? new KickPose(kick, kicked.left(), kicked.seed(), kicked.windup()) : null);
 		WindHoverSway.extract(entity, state, partialTicks);
 		WindTumble.extract(entity, state, partialTicks);
 		float[] amount = AMOUNTS.get(entity.getId());
@@ -275,9 +304,8 @@ public final class WindPose {
 
 	/** How far into the kick's lean (0-1): eased in over the wind-up, held through the snap, eased out in the recovery. */
 	private static float kickAmount(float ticks) {
-		float in = Mth.clamp(ticks / com.jaymospowers.power.wind.WindKick.WINDUP_TICKS, 0.0F, 1.0F);
-		float out = Mth.clamp((com.jaymospowers.power.wind.WindKick.KICK_TICKS - ticks)
-			/ (com.jaymospowers.power.wind.WindKick.KICK_TICKS - KICK_RECOVER), 0.0F, 1.0F);
+		float in = Mth.clamp(ticks / WindKick.WINDUP_TICKS, 0.0F, 1.0F);
+		float out = Mth.clamp((WindKick.KICK_TICKS - ticks) / (WindKick.KICK_TICKS - KICK_RECOVER), 0.0F, 1.0F);
 		return smooth(Math.min(in, out));
 	}
 
@@ -295,11 +323,11 @@ public final class WindPose {
 		if (kick == null || !(state instanceof AvatarRenderState) || state.deathTime > 0.0F) {
 			return;
 		}
-		float amount = kickAmount(kick.ticks());
+		float amount = kickAmount(kick.t());
 		// +1: the right leg kicks, so the left foot stands and the body leans left (local +X is the body's right)
 		float side = kick.left() ? -1.0F : 1.0F;
 		float lean = (KICK_LEAN + kick.jitter(0) * KICK_LEAN_JITTER) * amount;
-		float through = smooth(Mth.clamp((kick.ticks() - com.jaymospowers.power.wind.WindKick.WINDUP_TICKS + 0.5F) / 2.5F, 0.0F, 1.0F));
+		float through = smooth(Mth.clamp((kick.t() - WindKick.WINDUP_TICKS + 0.5F) / KICK_TWIST_TICKS, 0.0F, 1.0F));
 		float twist = Mth.lerp(through, KICK_TWIST_WINDUP, KICK_TWIST_THROUGH + kick.jitter(1) * 6.0F) * amount;
 		float footX = -side * KICK_FOOT_OFFSET;
 		poseStack.translate(footX, KICK_RISE * amount, 0.0F);
@@ -316,12 +344,12 @@ public final class WindPose {
 	 * opposite ways in one of four variants.
 	 */
 	private static void kickLimbs(HumanoidModel<?> h, KickPose kick) {
-		float t = kick.ticks();
+		float t = kick.t();
 		float amount = kickAmount(t);
 		float side = kick.left() ? -1.0F : 1.0F;
 		ModelPart kicking = kick.left() ? h.leftLeg : h.rightLeg;
 		ModelPart standing = kick.left() ? h.rightLeg : h.leftLeg;
-		float windup = com.jaymospowers.power.wind.WindKick.WINDUP_TICKS;
+		float windup = WindKick.WINDUP_TICKS;
 		float j = kick.jitter(2) * LIMB_JITTER;
 		float x, y, z;
 		if (t < windup) {
@@ -346,10 +374,14 @@ public final class WindPose {
 			}
 		} else {
 			// follow-through, then down again
-			float down = smooth(Mth.clamp((t - KICK_SNAP_END) / (com.jaymospowers.power.wind.WindKick.KICK_TICKS - KICK_SNAP_END), 0.0F, 1.0F));
+			float down = smooth(Mth.clamp((t - KICK_SNAP_END) / (WindKick.KICK_TICKS - KICK_SNAP_END), 0.0F, 1.0F));
 			x = Mth.lerp(down, LEG_THROUGH_X, 0.0F);
 			y = Mth.lerp(down, LEG_THROUGH_Y, 0.0F);
 			z = Mth.lerp(down, LEG_THROUGH_Z, 0.0F);
+		}
+		if (kick.holding()) {
+			// the cold won't let it go: the chambered leg trembles, waiting
+			x += Mth.sin(kick.ticks() * KICK_HOLD_SHAKE_SPEED) * KICK_HOLD_SHAKE;
 		}
 		pose(kicking, x, side * y, side * z, 1.0F);
 		// the standing leg straight, a little more upright than the leaning body (the foot stays planted)
@@ -381,11 +413,34 @@ public final class WindPose {
 			}
 		}
 		// the head stays on the target: turned back against the twist, levelled against some of the lean
-		float through = smooth(Mth.clamp((t - windup + 0.5F) / 2.5F, 0.0F, 1.0F));
+		float through = smooth(Mth.clamp((t - windup + 0.5F) / KICK_TWIST_TICKS, 0.0F, 1.0F));
 		float twist = Mth.lerp(through, KICK_TWIST_WINDUP, KICK_TWIST_THROUGH) * Mth.DEG_TO_RAD;
 		h.head.yRot += side * twist * amount;
 		h.head.zRot -= side * lean * 0.5F * amount;
 		h.body.yRot = 0.0F;
+		hipBend(h, side * (KICK_HIP_BEND + kick.jitter(6) * KICK_HIP_BEND_JITTER) * Mth.DEG_TO_RAD * amount);
+	}
+
+	/**
+	 * Bends everything above the hip sideways by {@code bend} radians (positive: the top goes to the body's left, model
+	 * +X), pivoting about the hip: each upper part's pivot swings round the hip and the part tips with it, so the arms
+	 * and head stay on the shoulders. The legs stay where they are.
+	 */
+	private static void hipBend(HumanoidModel<?> h, float bend) {
+		if (Math.abs(bend) < 1.0E-4F) {
+			return;
+		}
+		float hipX = h.body.x, hipY = h.body.y + KICK_HIP_Y;
+		float cos = Mth.cos(bend), sin = Mth.sin(bend);
+		for (ModelPart part : new ModelPart[] {h.body, h.head, h.rightArm, h.leftArm}) {
+			float dx = part.x - hipX, dy = part.y - hipY;
+			part.x = hipX + dx * cos - dy * sin;
+			part.y = hipY + dx * sin + dy * cos;
+			// (zRot is applied outermost, so this tips the part, already posed, about its new pivot)
+			part.zRot += bend;
+		}
+		// the neck keeps the eyes nearer level
+		h.head.zRot -= bend * KICK_HIP_HEAD_LEVEL;
 	}
 
 	/** After the model animates: the limbs. */

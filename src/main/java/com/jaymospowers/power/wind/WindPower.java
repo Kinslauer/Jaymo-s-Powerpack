@@ -169,6 +169,8 @@ public final class WindPower implements Power {
 		int lastSmashTick = -1000;
 		WindAbility channel;
 		int channelTicks;
+		/** Ticks to a full charge of this channel (longer in the cold, see {@link WindCold}). */
+		int channelMax = 1;
 		final int[] cooldowns = new int[WindAbility.values().length];
 		int barrierTicks;
 		/** Ticks left of the post-dash movement-check grace. */
@@ -213,7 +215,7 @@ public final class WindPower implements Power {
 		WindTempest.setBreezeKills(player, 0);
 		if (s != null && s.flight.flying()) {
 			// the client also drops its flight when it sees the power go; this covers a slow attachment sync
-			ServerPlayNetworking.send(player, new WindNet.Status(-1, 0, new int[WindAbility.values().length], 0.0F, true, 0, 0));
+			ServerPlayNetworking.send(player, new WindNet.Status(-1, 0, 1, new int[WindAbility.values().length], 0.0F, true, 0, 0));
 		}
 	}
 
@@ -249,7 +251,8 @@ public final class WindPower implements Power {
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_IDLE_GROUND, SoundSource.PLAYERS, 0.25F, 0.6F);
 			return;
 		}
-		s.lanceCooldown = WindTempest.LANCE_COOLDOWN;
+		s.lanceCooldown = WindCold.cooldown(player, WindTempest.LANCE_COOLDOWN);
+		WindFumble.onCast(player);
 		WindStorm.onCast(player);
 		WindModes.onCast(player);
 		WindTempest.lance(player, s.weather);
@@ -488,6 +491,7 @@ public final class WindPower implements Power {
 					player.causeFoodExhaustion((float)(FLIGHT_EXHAUSTION_BASE + FLIGHT_EXHAUSTION_PER_SPEED * speed)
 						* (com.jaymospowers.core.Carry.isCarrying(player) ? com.jaymospowers.core.Carry.FLIGHT_HUNGER : 1.0F));
 				}
+				WindFumble.flightTick(player);
 			}
 		}
 		if (s.fallProtected) {
@@ -502,7 +506,7 @@ public final class WindPower implements Power {
 		if (s.channel != null) {
 			s.channelTicks++;
 			this.channelEffects(player, level, s);
-			if (s.channelTicks >= s.channel.maxChannel || !PowerInput.isDown(player, s.channel.key)) {
+			if (s.channelTicks >= s.channelMax || !PowerInput.isDown(player, s.channel.key)) {
 				this.release(player, s);
 			}
 		}
@@ -536,6 +540,8 @@ public final class WindPower implements Power {
 			}
 			s.channel = ability;
 			s.channelTicks = 0;
+			// the cold makes the wind slow to gather
+			s.channelMax = WindCold.windup(player, ability.maxChannel);
 			WindStorm.onChannel(player);
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_INHALE, SoundSource.PLAYERS, 0.8F, 1.0F);
 			this.sendStatus(player, s, 0.0F, false);
@@ -645,7 +651,7 @@ public final class WindPower implements Power {
 	// ---- channelled abilities ---------------------------------------------------------------------------------
 
 	private void channelEffects(ServerPlayer player, ServerLevel level, State s) {
-		float f = Math.min(1.0F, s.channelTicks / (float)s.channel.maxChannel);
+		float f = Math.min(1.0F, s.channelTicks / (float)Math.max(1, s.channelMax));
 		// two wisps spiralling up and in around the body
 		for (int i = 0; i < 2; i++) {
 			double angle = s.channelTicks * 0.45 + i * Math.PI;
@@ -679,7 +685,7 @@ public final class WindPower implements Power {
 			return;
 		}
 		s.channel = null;
-		float f = Mth.clamp(s.channelTicks / (float)ability.maxChannel, 0.1F, 1.0F);
+		float f = Mth.clamp(s.channelTicks / (float)Math.max(1, s.channelMax), 0.1F, 1.0F);
 		// G's two halves cool down apart: on the ground the Gust (if it's gathered again), else the Tailwind
 		boolean gust = ability == WindAbility.TAILWIND && player.onGround() && !s.flight.flying() && s.gustCooldown <= 0;
 		if (ability == WindAbility.TAILWIND && !gust && s.cooldowns[ability.ordinal()] > 0) {
@@ -689,9 +695,10 @@ public final class WindPower implements Power {
 			return;
 		}
 		if (!gust) {
-			s.cooldowns[ability.ordinal()] = ability.cooldown;
+			s.cooldowns[ability.ordinal()] = WindCold.cooldown(player, ability.cooldown);
 		}
 		ServerLevel level = player.level();
+		WindFumble.onCast(player);
 		// the weather governs the wind's strength (and the Tempest mode adds to it)
 		float w = s.weather * WindModes.abilityScale(player);
 		boolean stormbound = Fate.isCorrupted(player);
@@ -706,7 +713,7 @@ public final class WindPower implements Power {
 					}
 					this.gust(player, level, f, w);
 					// the bigger the blast, the longer the wind takes to gather again: up to 3 minutes for a full charge
-					s.gustCooldown = Mth.lerpInt(f * f, GUST_COOLDOWN_MIN, GUST_COOLDOWN_MAX);
+					s.gustCooldown = WindCold.cooldown(player, Mth.lerpInt(f * f, GUST_COOLDOWN_MIN, GUST_COOLDOWN_MAX));
 					break;
 				}
 				if (stormbound) {
@@ -742,7 +749,8 @@ public final class WindPower implements Power {
 				if (stormbound && WindModes.thunderPower(level) > 0.0F) {
 					// Stormbound in the rain has no breath to give: B calls the lightning down instead (under a clear sky
 					// it's the Tempest's breath again)
-					s.cooldowns[ability.ordinal()] = WindModes.callLightning(player, f, WindModes.abilityScale(player)) ? CALL_LIGHTNING_COOLDOWN : 20;
+					s.cooldowns[ability.ordinal()] = WindModes.callLightning(player, f, WindModes.abilityScale(player))
+						? WindCold.cooldown(player, CALL_LIGHTNING_COOLDOWN) : 20;
 					break;
 				}
 				int fall = (int)(Mth.lerpInt(f, ZEPHYR_FALL_MIN, ZEPHYR_FALL_MAX) * w);
@@ -909,7 +917,7 @@ public final class WindPower implements Power {
 	}
 
 	private void sendStatus(ServerPlayer player, State s, float dash, boolean stopFlight) {
-		ServerPlayNetworking.send(player, new WindNet.Status(s.channel == null ? -1 : s.channel.ordinal(), s.channelTicks, s.cooldowns.clone(), dash, stopFlight,
-			s.lanceCooldown, s.gustCooldown));
+		ServerPlayNetworking.send(player, new WindNet.Status(s.channel == null ? -1 : s.channel.ordinal(), s.channelTicks, s.channelMax, s.cooldowns.clone(), dash,
+			stopFlight, s.lanceCooldown, s.gustCooldown));
 	}
 }

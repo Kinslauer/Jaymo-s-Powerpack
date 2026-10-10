@@ -52,11 +52,14 @@ public final class WindKick {
 	static final int COOLDOWN = 60, COOLDOWN_ASCENDED = 40;
 	/**
 	 * How long the kick is drawn (ticks): {@link #WINDUP_TICKS} of wind-up (the lean, the leg chambering), the snap
-	 * through the arc on the hit tick, then the follow-through and recovery.
+	 * through the arc on the hit tick ({@link #SNAP_TICKS}), then {@link #RECOVER_TICKS} of follow-through and recovery.
+	 * In the cold the wind-up is held longer (see {@link Kicking#windup}), and the whole kick with it.
 	 */
-	public static final int KICK_TICKS = 11;
+	public static final int KICK_TICKS = 16;
 	/** The crescent leaves the foot this many ticks after the key, at the top of the snap. */
-	public static final int WINDUP_TICKS = 3;
+	public static final int WINDUP_TICKS = 6;
+	/** The snap through the arc, and the recovery after it (ticks; the pose's beats). */
+	public static final float SNAP_TICKS = 1.5F, RECOVER_TICKS = 8.0F;
 	/** The swing trail drawn round the body on the hit tick: its radius, height (share of the body) and points. */
 	static final double SWING_RADIUS = 1.1, SWING_HEIGHT = 0.8;
 	static final int SWING_POINTS = 10;
@@ -66,19 +69,27 @@ public final class WindKick {
 
 	/**
 	 * A kick under way: when it began (game time), which leg kicks ({@code left}: the left leg, everything mirrored),
-	 * and a seed that picks the arm variant (its low 2 bits) and jitters the angles.
+	 * a seed that picks the arm variant (its low 2 bits) and jitters the angles, and how long its wind-up is (ticks:
+	 * {@link #WINDUP_TICKS}, longer in the cold).
 	 */
-	public record Kicking(long start, boolean left, int seed) {
+	public record Kicking(long start, boolean left, int seed, int windup) {
 		public static final Codec<Kicking> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.LONG.fieldOf("start").forGetter(Kicking::start),
 			Codec.BOOL.fieldOf("left").forGetter(Kicking::left),
-			Codec.INT.fieldOf("seed").forGetter(Kicking::seed)
+			Codec.INT.fieldOf("seed").forGetter(Kicking::seed),
+			Codec.INT.fieldOf("windup").forGetter(Kicking::windup)
 		).apply(i, Kicking::new));
 		public static final StreamCodec<ByteBuf, Kicking> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, Kicking::start,
 			ByteBufCodecs.BOOL, Kicking::left,
 			ByteBufCodecs.INT, Kicking::seed,
+			ByteBufCodecs.VAR_INT, Kicking::windup,
 			Kicking::new);
+
+		/** How long the whole kick is drawn (ticks), the wind-up's extra included. */
+		public int length() {
+			return KICK_TICKS + Math.max(0, this.windup - WINDUP_TICKS);
+		}
 
 		/** Which of the four arm variants (0: the reference, 1: mirrored, 2: both flung wide, 3: low arm swung back). */
 		public int arms() {
@@ -151,8 +162,10 @@ public final class WindKick {
 			return;
 		}
 		boolean ascended = Fate.isAscended(player);
-		READY_AT.put(player.getUUID(), now + (ascended ? COOLDOWN_ASCENDED : COOLDOWN));
-		Kicking kicking = new Kicking(now, player.getRandom().nextBoolean(), player.getRandom().nextInt());
+		// the cold holds the wind-up (and the cooldown after) longer
+		int windup = WindCold.windup(player, WINDUP_TICKS);
+		READY_AT.put(player.getUUID(), now + windup - WINDUP_TICKS + WindCold.cooldown(player, ascended ? COOLDOWN_ASCENDED : COOLDOWN));
+		Kicking kicking = new Kicking(now, player.getRandom().nextBoolean(), player.getRandom().nextInt(), windup);
 		player.setAttached(KICKING, kicking);
 		Vec3 look = player.getLookAngle();
 		Vec3 flat = new Vec3(look.x, 0.0, look.z);
@@ -161,7 +174,7 @@ public final class WindKick {
 		Vec3 side = new Vec3(-flat.z, 0.0, flat.x);
 		Vec3 start = player.position().add(0.0, player.getBbHeight() * 0.55, 0.0).add(flat.scale(0.8));
 		CRESCENTS.add(new Crescent(level.dimension(), player.getUUID(), start, flat, side, ascended ? RANGE_ASCENDED : RANGE,
-			(ascended ? DAMAGE_ASCENDED : DAMAGE) * WindModes.abilityScale(player), kicking.left() ? -1.0 : 1.0, WINDUP_TICKS));
+			(ascended ? DAMAGE_ASCENDED : DAMAGE) * WindModes.abilityScale(player), kicking.left() ? -1.0 : 1.0, windup));
 		// the wind-up: a low draw of breath before the snap
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_INHALE, SoundSource.PLAYERS, 0.6F, 1.6F);
 	}
