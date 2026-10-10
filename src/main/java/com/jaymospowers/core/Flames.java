@@ -21,6 +21,8 @@ import org.jspecify.annotations.Nullable;
  * symbiote within {@code SYMBIOTE_RANGE} of the flames flinches as if its host were burning.
  */
 public final class Flames {
+	/** Marks a primed TNT whose fuse fire has already shortened. */
+	private static final String TNT_LIT_TAG = "jaymospowers_fire_lit";
 	/** How close (blocks) a symbiote has to be to the flames to flinch. */
 	public static final double SYMBIOTE_RANGE = 4.0;
 	/** Primed TNT's fuse is cut to this share of what's left, but never below {@code TNT_MIN_FUSE_TICKS}. */
@@ -84,7 +86,8 @@ public final class Flames {
 		}
 		if (entity instanceof PrimedTnt tnt) {
 			int fuse = tnt.getFuse();
-			if (fuse > TNT_MIN_FUSE_TICKS) {
+			// once per TNT: a lingering flame (the meteor's trail) mustn't halve it every tick
+			if (fuse > TNT_MIN_FUSE_TICKS && tnt.addTag(TNT_LIT_TAG)) {
 				tnt.setFuse(Math.max(TNT_MIN_FUSE_TICKS, (int)(fuse * TNT_FUSE_SHARE)));
 			}
 			return true;
