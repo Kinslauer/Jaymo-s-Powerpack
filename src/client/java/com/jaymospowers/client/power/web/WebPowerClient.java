@@ -352,7 +352,7 @@ public final class WebPowerClient implements PowerClient {
 		graphics.outline(x, y, CHIP, CHIP, 0xFF000000 | CHIP_COLOR);
 		graphics.item(new ItemStack(Items.PHANTOM_MEMBRANE), x + 2, y + 2);
 		if (open) {
-			int w = (int)Math.ceil((CHIP - 2) * swing.wingsTicks / (double)WebPower.WINGS_TICKS);
+			int w = CHIP - 2;
 			graphics.fill(x + 1, y + CHIP - 3, x + 1 + w, y + CHIP - 1, 0xFF000000 | CHIP_COLOR);
 		}
 		String label = font.plainSubstrByWidth(minecraft.options.keyJump.getTranslatedKeyMessage().getString(), CHIP - 2);

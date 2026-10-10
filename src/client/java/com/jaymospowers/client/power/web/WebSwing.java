@@ -148,6 +148,8 @@ public final class WebSwing {
 	private int swingLockout;
 	// wings
 	int wingsTicks;
+	/** Jump has been let go since the wings spread (the next press folds them). */
+	private boolean wingsJumpReleased;
 	private int jumpHeldAir;
 	private boolean wingsNeedRelease;
 	/** The highest point since you last stood, rose, or folded the wings: falls for the wings count from here. */
@@ -333,7 +335,7 @@ public final class WebSwing {
 			apexY = player.getY();
 		}
 		if (pull != null) {
-			foldWings();
+			// (a Zip while gliding keeps the wings spread: when the pull lets go, the glide carries on with its speed)
 			tickPull(player);
 			return;
 		}
@@ -702,9 +704,21 @@ public final class WebSwing {
 		}
 	}
 
-	/** Holding Jump in mid-air (falling, no web out) spreads the wings, if they're off cooldown. */
+	/**
+	 * Holding Jump in mid-air (falling, no web out) spreads the wings. Spread, they stay until you land (or hit water),
+	 * or you fold them: let go of Jump and tap it again.
+	 */
 	private void tickWingsInput(LocalPlayer player) {
 		boolean jump = player.input.keyPresses.jump();
+		if (wingsTicks > 0) {
+			if (!jump) {
+				wingsJumpReleased = true;
+			} else if (wingsJumpReleased) {
+				foldWings();
+				play(player, SoundEvents.PHANTOM_FLAP, 0.6F, 0.8F);
+			}
+			return;
+		}
 		if (!jump) {
 			wingsNeedRelease = false;
 		}
@@ -716,6 +730,7 @@ public final class WebSwing {
 		boolean fallenFarEnough = apexY - player.getY() > WINGS_MIN_DROP;
 		if (++jumpHeldAir >= WINGS_HOLD_TICKS && fallenFarEnough) {
 			wingsTicks = WebPower.WINGS_TICKS;
+			wingsJumpReleased = false;
 			jumpHeldAir = 0;
 			flying = false;
 			ClientPlayNetworking.send(new WebNet.Wings(true));
@@ -726,7 +741,8 @@ public final class WebSwing {
 
 	/** Gliding like an elytra: from how you actually moved last tick, vanilla's glide step, so walls and pitch play fair. */
 	private void tickWings(LocalPlayer player) {
-		if (--wingsTicks <= 0 || player.onGround() || player.isInWater() || player.isInLava() || player.onClimbable()) {
+		// (wingsTicks only marks them open now: they never run out)
+		if (player.onGround() || player.isInWater() || player.isInLava() || player.onClimbable()) {
 			foldWings();
 			return;
 		}
@@ -755,7 +771,7 @@ public final class WebSwing {
 			m = m.normalize().scale(WINGS_MAX_SPEED);
 		}
 		player.setDeltaMovement(m);
-		if (wingsTicks % 4 == 0) {
+		if (player.tickCount % 4 == 0) {
 			play(player, SoundEvents.ELYTRA_FLYING, 0.08F, 1.6F);
 		}
 	}

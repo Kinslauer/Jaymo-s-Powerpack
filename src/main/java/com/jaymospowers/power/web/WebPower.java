@@ -464,7 +464,7 @@ public final class WebPower implements Power {
 				player.level().sendParticles(WebSymbiote.dust(1.0F), player.getX(), player.getY() + 0.2, player.getZ(), 2, 0.3, 0.05, 0.3, 0.0);
 			}
 		}
-		if (state.wingsTicks > 0 && (++state.wingsTicks > WINGS_TICKS + 20 || player.isInWater() || player.onGround() && state.wingsTicks > 3)) {
+		if (state.wingsTicks > 0 && (player.isInWater() || player.onGround() && ++state.wingsTicks > 3)) {
 			state.wingsTicks = 0;
 			player.removeAttached(WINGS);
 		}
