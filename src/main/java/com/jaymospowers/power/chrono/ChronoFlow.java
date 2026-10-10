@@ -48,6 +48,12 @@ import net.minecraft.world.phys.Vec3;
  * <li><b>Counters:</b> an enemy's blow doesn't land at once. Time holds it for {@link #PARRY_WINDOW} ticks, a white
  * flash over the attacker; right click inside that window (or just before the blow) and you counter it: the blow is
  * turned aside and they're struck and staggered. Every blow held at that moment is countered together.</li>
+ * <li><b>Sets of four:</b> blows 1-3 of every four landed don't shove: they stun ({@link #STUN_TICKS}, refreshed each
+ * blow: a mob's AI and movement stop, a player's movement keys go dead). Blow 4 is the finisher, the style's full push
+ * x{@link #FINISHER_PUSH} with its lift.</li>
+ * <li><b>Counter variants:</b> against a single attacker the counter is one of three longer moves, the caster untouchable
+ * throughout: {@link #CIRCLE} (round to its back, then the blow), {@link #SLIP} (sidestep, then a body blow) or
+ * {@link #DEFLECT} (one of {@link #DEFLECTS} arm parries, the attacker staggers, then the riposte).</li>
  * <li>Getting hit for real, or {@link #COMBO_TIMEOUT} without a blow, ends the combo.</li>
  * </ul>
  * The client finds the target and carries you there (movement is the client's); the server checks it and lands the
@@ -72,6 +78,19 @@ public final class ChronoFlow {
 	public static final int PARRY_WINDOW = 14, PARRY_EARLY = 5;
 	/** A countered attacker is staggered: Slowness and Weakness this long. */
 	static final int STAGGER_TICKS = 40;
+	/** Blows 1-3 of each set stun for this long (refreshed each blow); blow {@code SET_SIZE} is the finisher, its push scaled up. */
+	public static final int STUN_TICKS = 15, SET_SIZE = 4;
+	static final double FINISHER_PUSH = 1.3;
+	/** Counter variants (single attacker): the old quick counter (a crowd), circle to the back, slip aside, deflect. */
+	public static final int CROWD = 0, CIRCLE = 1, SLIP = 2, DEFLECT = 3;
+	/** Deflects: high forearm block, outside sweep, slap-down, cross block, elbow guard. */
+	public static final int HIGH_BLOCK = 0, OUTSIDE_SWEEP = 1, SLAP_DOWN = 2, CROSS_BLOCK = 3, ELBOW_GUARD = 4, DEFLECTS = 5;
+	/** Each counter variant's length and when its blow lands (ticks); the crowd counter matches {@code COUNTER}'s. */
+	public static final int[] COUNTER_DURATION = {10, 24, 20, 26};
+	public static final int[] COUNTER_HIT_AT = {4, 17, 12, 18};
+	/** The countered attacker stays stunned this many ticks past the blow; a deflect knocks it back this hard. */
+	static final int COUNTER_STUN_SLACK = 3;
+	static final double DEFLECT_SHOVE = 0.25;
 	/** The mode's hunger, per tick. */
 	static final float EXHAUSTION = 0.006F;
 
@@ -82,11 +101,33 @@ public final class ChronoFlow {
 	public static final AttachmentType<Boolean> ON = AttachmentRegistry.create(JaymosPowers.id("chrono_flow"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 
-	/** A blow under way: its style, when it began (game time), at whom, and with which hand (1 right, -1 left). Synced to all, who see it. */
-	public record Move(int style, long start, int target, int side) {
+	/**
+	 * A blow under way: its style, when it began (game time), at whom, and with which hand (1 right, -1 left). A counter
+	 * also has its variant ({@link #CROWD}..{@link #DEFLECT}) and, for a deflect, which parry. Synced to all, who see it.
+	 */
+	public record Move(int style, long start, int target, int side, int variant, int deflect) {
 		public static final StreamCodec<ByteBuf, Move> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, Move::style,
-			ByteBufCodecs.VAR_LONG, Move::start, ByteBufCodecs.VAR_INT, Move::target, ByteBufCodecs.VAR_INT, Move::side, Move::new);
+			ByteBufCodecs.VAR_LONG, Move::start, ByteBufCodecs.VAR_INT, Move::target, ByteBufCodecs.VAR_INT, Move::side,
+			ByteBufCodecs.VAR_INT, Move::variant, ByteBufCodecs.VAR_INT, Move::deflect, Move::new);
+
+		public Move(int style, long start, int target, int side) {
+			this(style, start, target, side, CROWD, 0);
+		}
+
+		/** How long this move's animation runs (ticks). */
+		public int duration() {
+			return style == COUNTER ? COUNTER_DURATION[Math.clamp(variant, CROWD, DEFLECT)] : DURATION[style];
+		}
+
+		/** When its blow lands (ticks after the start). */
+		public int hitAt() {
+			return style == COUNTER ? COUNTER_HIT_AT[Math.clamp(variant, CROWD, DEFLECT)] : HIT_AT[style];
+		}
 	}
+
+	/** Stunned by a Time Flow blow until this game time (synced to all: a stunned player's own client locks their keys). */
+	public static final AttachmentType<Long> STUN = AttachmentRegistry.create(JaymosPowers.id("chrono_flow_stun"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
 
 	public static final AttachmentType<Move> MOVE = AttachmentRegistry.create(JaymosPowers.id("chrono_flow_move"),
 		builder -> builder.syncWith(Move.STREAM_CODEC, AttachmentSyncPredicate.all()));
@@ -129,11 +170,15 @@ public final class ChronoFlow {
 		int combo;
 		long lastBlow;
 		long parryAt = -100;
+		/** Untouchable until then: a counter's animation. */
+		long counterUntil;
 	}
 
 	private static final List<Held> HELD = new ArrayList<>();
 	private static final List<Blow> BLOWS = new ArrayList<>();
 	private static final java.util.Map<UUID, Fighter> FIGHTERS = new java.util.HashMap<>();
+	/** Everything carrying a stun, so it's taken off when it runs out. */
+	private static final List<LivingEntity> STUNNED = new ArrayList<>();
 	/** True while a held blow is let through (so it isn't held again). */
 	private static boolean landing;
 
@@ -151,6 +196,34 @@ public final class ChronoFlow {
 
 	public static boolean on(net.minecraft.world.entity.player.Player player) {
 		return player.getAttached(ON) != null;
+	}
+
+	/** Whether a Time Flow blow has this entity stunned (either side: the stun is synced). */
+	public static boolean stunned(LivingEntity entity) {
+		Long until = entity.getAttached(STUN);
+		return until != null && entity.level().getGameTime() < until;
+	}
+
+	/** Stuns {@code target} for {@code ticks} (or longer, if it's already stunned longer): it stops where it stands. */
+	static void stun(LivingEntity target, int ticks) {
+		long until = target.level().getGameTime() + ticks;
+		Long now = target.getAttached(STUN);
+		if (now != null && now >= until) {
+			return;
+		}
+		if (now == null) {
+			STUNNED.add(target);
+		}
+		target.setAttached(STUN, until);
+		if (target instanceof net.minecraft.world.entity.Mob mob) {
+			mob.getNavigation().stop();
+		}
+	}
+
+	private static void unstun(LivingEntity target) {
+		if (target.removeAttached(STUN) != null) {
+			STUNNED.remove(target);
+		}
 	}
 
 	/** Whether the power can enter Time Flow: Timeless and corrupted both. */
@@ -254,30 +327,46 @@ public final class ChronoFlow {
 		Fighter fighter = fighter(player);
 		float bonus = Math.min(COMBO_MAX_BONUS, fighter.combo * COMBO_BONUS);
 		float damage = Math.max(DAMAGE[style], (float)player.getAttributeValue(Attributes.ATTACK_DAMAGE)) * (1.0F + bonus);
+		// blows 1-3 of each four stun; the fourth (and every counter's answer) throws
+		boolean finisher = (fighter.combo + 1) % SET_SIZE == 0;
+		boolean pushes = finisher || style == COUNTER;
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		target.setInvulnerableTime(0);
+		Vec3 before = target.getDeltaMovement();
 		if (!target.hurtServer(level, player.damageSources().playerAttack(player), damage)) {
 			return;
 		}
-		Vec3 away = target.position().subtract(player.position()).horizontal();
-		away = away.lengthSqr() < 1.0E-4 ? player.getLookAngle().horizontal() : away.normalize();
-		double push = switch (style) {
-			case KICK -> 1.1;
-			case LUNGE, COUNTER -> 0.7;
-			default -> 0.35;
-		};
-		double lift = style == UPPERCUT ? 0.55 : style == KICK ? 0.3 : 0.12;
-		target.setDeltaMovement(target.getDeltaMovement().add(away.scale(push)).add(0.0, lift, 0.0));
+		if (pushes) {
+			Vec3 away = target.position().subtract(player.position()).horizontal();
+			away = away.lengthSqr() < 1.0E-4 ? player.getLookAngle().horizontal() : away.normalize();
+			double push = switch (style) {
+				case KICK -> 1.1;
+				case LUNGE, COUNTER -> 0.7;
+				default -> 0.35;
+			};
+			if (finisher && style != COUNTER) {
+				push *= FINISHER_PUSH;
+			}
+			double lift = style == UPPERCUT ? 0.55 : style == KICK ? 0.3 : 0.12;
+			unstun(target);
+			target.setDeltaMovement(before.add(away.scale(push)).add(0.0, lift, 0.0));
+		} else {
+			// no shove, no lift (the hit's own knockback undone too): they're stopped where they stand
+			target.setDeltaMovement(0.0, Math.min(0.0, before.y), 0.0);
+			stun(target, STUN_TICKS);
+		}
 		target.syncVelocity = true;
-		// caught in the flow: slowed, so the next blow finds them
-		target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 20, 1, false, false, false), player);
 		fighter.lastBlow = level.getGameTime();
 		setCombo(player, fighter, fighter.combo + 1);
 		Vec3 at = target.getBoundingBox().getCenter();
 		level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 8, 0.25, 0.3, 0.25, 0.3);
 		level.sendParticles(GOLD, at.x, at.y, at.z, 6, 0.2, 0.3, 0.2, 0.0);
-		level.playSound(null, at.x, at.y, at.z, style == KICK || style == COUNTER ? SoundEvents.PLAYER_ATTACK_KNOCKBACK : SoundEvents.PLAYER_ATTACK_STRONG,
+		level.playSound(null, at.x, at.y, at.z, pushes ? SoundEvents.PLAYER_ATTACK_KNOCKBACK : SoundEvents.PLAYER_ATTACK_STRONG,
 			SoundSource.PLAYERS, 1.0F, 0.8F + Math.min(0.6F, fighter.combo * 0.04F));
+		if (finisher && style != COUNTER) {
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.0F, 0.7F);
+			level.sendParticles(ParticleTypes.SWEEP_ATTACK, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+		}
 		if (fighter.combo % 5 == 0) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.9F,
 				1.0F + Math.min(0.8F, fighter.combo * 0.03F));
@@ -288,6 +377,12 @@ public final class ChronoFlow {
 
 	/** A blow on someone in Time Flow is held for the counter (or countered at once, if they pressed just before). */
 	private static boolean allowDamage(LivingEntity entity, DamageSource source, float amount) {
+		if (!landing && entity instanceof ServerPlayer countering) {
+			Fighter f = FIGHTERS.get(countering.getUUID());
+			if (f != null && countering.level().getGameTime() < f.counterUntil) {
+				return false; // mid-counter: nothing lands
+			}
+		}
 		if (landing || !(entity instanceof ServerPlayer player) || !on(player) || !(source.getEntity() instanceof LivingEntity attacker)
 			|| source.getDirectEntity() != attacker || attacker == player) {
 			return true;
@@ -320,6 +415,9 @@ public final class ChronoFlow {
 		}
 		Fighter fighter = fighter(player);
 		ServerLevel level = player.level();
+		if (level.getGameTime() < fighter.counterUntil) {
+			return; // already countering
+		}
 		fighter.parryAt = level.getGameTime();
 		List<LivingEntity> attackers = new ArrayList<>();
 		for (Iterator<Held> it = HELD.iterator(); it.hasNext(); ) {
@@ -339,8 +437,12 @@ public final class ChronoFlow {
 		}
 	}
 
-	/** Turned aside: each attacker is struck and staggered, the first with the counter's blow. */
+	/** Turned aside: each attacker is struck and staggered, the first with the counter's blow. One attacker gets a longer counter. */
 	private static void counter(ServerPlayer player, List<LivingEntity> attackers) {
+		if (attackers.size() == 1) {
+			counterOne(player, attackers.get(0));
+			return;
+		}
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		player.setAttached(MOVE, new Move(COUNTER, now, attackers.get(0).getId(), 1));
@@ -352,6 +454,48 @@ public final class ChronoFlow {
 			BLOWS.add(new Blow(player.getUUID(), attacker.getId(), COUNTER, now + HIT_AT[COUNTER]));
 			Vec3 at = attacker.getEyePosition();
 			level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 0.3, at.z, 8, 0.2, 0.2, 0.2, 0.05);
+		}
+	}
+
+	/**
+	 * A single attacker's counter: circle to its back, slip aside or deflect (picked at random), then the blow. The caster
+	 * can't be touched for the whole move, and the attacker is stunned until the blow lands. The client moves the caster
+	 * (circle, slip) from the synced move.
+	 */
+	private static void counterOne(ServerPlayer player, LivingEntity attacker) {
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		var random = level.getRandom();
+		int variant = CIRCLE + random.nextInt(3);
+		int deflect = random.nextInt(DEFLECTS);
+		int side = random.nextBoolean() ? 1 : -1;
+		Move move = new Move(COUNTER, now, attacker.getId(), side, variant, deflect);
+		player.setAttached(MOVE, move);
+		fighter(player).counterUntil = now + move.duration();
+		BLOWS.add(new Blow(player.getUUID(), attacker.getId(), COUNTER, now + move.hitAt()));
+		attacker.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, STAGGER_TICKS, 3, false, false, false), player);
+		attacker.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, STAGGER_TICKS, 1, false, false, false), player);
+		stun(attacker, move.hitAt() + COUNTER_STUN_SLACK);
+		Vec3 eye = attacker.getEyePosition();
+		level.sendParticles(ParticleTypes.END_ROD, eye.x, eye.y + 0.3, eye.z, 8, 0.2, 0.2, 0.2, 0.05);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 0.7F, 1.8F);
+		switch (variant) {
+			case CIRCLE -> {
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8F, 0.7F);
+				level.sendParticles(GOLD, player.getX(), player.getY() + 1.0, player.getZ(), 10, 0.4, 0.5, 0.4, 0.0);
+			}
+			case SLIP -> level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS, 1.0F, 0.8F);
+			default -> {
+				// the blow knocked aside: the attacker reels back a step
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SHIELD_BLOCK.value(), SoundSource.PLAYERS, 1.0F, 1.2F);
+				Vec3 away = attacker.position().subtract(player.position()).horizontal();
+				if (away.lengthSqr() > 1.0E-4) {
+					attacker.setDeltaMovement(attacker.getDeltaMovement().add(away.normalize().scale(DEFLECT_SHOVE)));
+					attacker.syncVelocity = true;
+				}
+				Vec3 at = player.getEyePosition().add(player.getLookAngle().scale(0.6));
+				level.sendParticles(ParticleTypes.CRIT, at.x, at.y - 0.3, at.z, 6, 0.15, 0.15, 0.15, 0.2);
+			}
 		}
 	}
 
@@ -379,6 +523,16 @@ public final class ChronoFlow {
 	}
 
 	private static void tick(MinecraftServer server) {
+		if (!STUNNED.isEmpty()) {
+			for (Iterator<LivingEntity> it = STUNNED.iterator(); it.hasNext(); ) {
+				LivingEntity entity = it.next();
+				Long until = entity.getAttached(STUN);
+				if (until == null || entity.isRemoved() || !entity.isAlive() || entity.level().getGameTime() >= until) {
+					it.remove();
+					entity.removeAttached(STUN);
+				}
+			}
+		}
 		if (!HELD.isEmpty()) {
 			for (Iterator<Held> it = HELD.iterator(); it.hasNext(); ) {
 				Held held = it.next();
@@ -432,6 +586,7 @@ public final class ChronoFlow {
 		HELD.clear();
 		BLOWS.clear();
 		FIGHTERS.clear();
+		STUNNED.clear();
 	}
 
 	/** A strike's style for a target this far away (and the n-th close blow of the combo). */

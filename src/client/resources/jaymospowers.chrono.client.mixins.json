@@ -3,7 +3,8 @@
 	"package": "com.jaymospowers.client.power.chrono.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
-		"ChronoAvatarRendererMixin"
+		"ChronoAvatarRendererMixin",
+		"ChronoStunInputMixin"
 	],
 	"injectors": { "defaultRequire": 1 }
 }
