@@ -20,11 +20,15 @@ public final class FreefallPose {
 	/** Falling at least this fast (blocks/tick: about five blocks' drop) it starts; by {@code FULL} it's all limbs. */
 	static final float START = 0.8F, FULL = 1.3F;
 
-	record Fall(float strength, float time, boolean dive) {
+	/** {@code tip}: how far over a wind's dive has gone (0-1), growing slowly with the speed of the fall. */
+	record Fall(float strength, float time, boolean dive, float tip) {
 	}
 
-	/** How far over a wind's dive tips them, head first (degrees, at full speed). */
-	static final float DIVE_PITCH = 80.0F;
+	/**
+	 * A wind's dive tips over gradually as the fall speeds up: from {@code DIVE_START} degrees as it begins to
+	 * {@code DIVE_PITCH} (head pointing down at the ground, not lying flat) by a fall of {@code DIVE_FULL} blocks/tick.
+	 */
+	static final float DIVE_START = 20.0F, DIVE_PITCH = 150.0F, DIVE_FULL = 2.6F;
 
 	static final RenderStateDataKey<Fall> KEY = RenderStateDataKey.create(() -> "jaymospowers:freefall");
 
@@ -41,7 +45,8 @@ public final class FreefallPose {
 		float falling = (float)(player.yo - player.getY());
 		float strength = Mth.clamp((falling - START) / (FULL - START), 0.0F, 1.0F);
 		boolean dive = com.jaymospowers.core.Powers.has(player, com.jaymospowers.power.wind.WindPower.INSTANCE);
-		state.setData(KEY, strength <= 0.0F ? null : new Fall(strength, player.tickCount + partialTicks, dive));
+		float tip = Mth.clamp((falling - START) / (DIVE_FULL - START), 0.0F, 1.0F);
+		state.setData(KEY, strength <= 0.0F ? null : new Fall(strength, player.tickCount + partialTicks, dive, tip * tip * (3.0F - 2.0F * tip)));
 	}
 
 	/** Falling on purpose: a wind's flight, web wings or lines, a rock slab, Weightless. */
@@ -63,7 +68,7 @@ public final class FreefallPose {
 		float middle = state.boundingBoxHeight / Math.max(entityScale, 0.01F) * 0.5F;
 		poseStack.translate(0.0F, middle, 0.0F);
 		// (a negative turn about X tips the top forward)
-		poseStack.rotateDegrees(com.mojang.math.Axis.XP, -DIVE_PITCH * fall.strength());
+		poseStack.rotateDegrees(com.mojang.math.Axis.XP, -Mth.lerp(fall.tip(), DIVE_START * fall.strength(), DIVE_PITCH));
 		poseStack.translate(0.0F, -middle, 0.0F);
 	}
 
