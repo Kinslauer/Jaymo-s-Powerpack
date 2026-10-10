@@ -59,6 +59,8 @@ public final class WindCyclone {
 	public static final int MIN_MASTERY = 1;
 	/** After you let go (ticks). */
 	public static final int COOLDOWN = 60;
+	/** Corrupted: how long the shock sets a creature alight (seconds). */
+	static final int SHOCK_BURN_SECONDS = 2;
 	/** The funnel at the least and the most mastery: radius and height (blocks). */
 	static final double RADIUS_MIN = 3.0, RADIUS_MAX = 6.0;
 	static final double HEIGHT_MIN = 6.0, HEIGHT_MAX = 12.0;
@@ -345,7 +347,7 @@ public final class WindCyclone {
 		if (corrupted) {
 			DamageSource shock = player.damageSources().source(DamageTypes.LIGHTNING_BOLT, player);
 			target.hurtServer(level, shock, DAMAGE);
-			// FLAMES: corrupted Cyclone shock lands here; after merging core/Flames, add Flames.touch(level, target, ..., player)
+			com.jaymospowers.core.Flames.touch(level, target, SHOCK_BURN_SECONDS, player);
 			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), y, target.getZ(), 12, target.getBbWidth() * 0.6, target.getBbHeight() * 0.4,
 				target.getBbWidth() * 0.6, 0.3);
 			level.playSound(null, target.getX(), y, target.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.4F, 1.6F);

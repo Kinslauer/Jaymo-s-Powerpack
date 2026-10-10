@@ -103,7 +103,7 @@ dependencies {
 
 	// the rest of the modpack, loaded in the dev game only (fabric-api is already on the classpath)
 	localRuntime kitchenJar
-	// compiled against (for its corpses), but never required at runtime (see power/web/KitchenCompat)
+	// compiled against (for its corpses); required at runtime since 0.8 (fabric.mod.json), touched only via power/web/KitchenCompat
 	compileOnly kitchenJar
 	packMods.drop(1).each { localRuntime it.dep }
 	packMods.each { packJars it.dep }
