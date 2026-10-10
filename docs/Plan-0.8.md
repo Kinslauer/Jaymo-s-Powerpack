@@ -182,10 +182,10 @@ Also:
 - **Timing:** about 3 ticks of wind-up (lean starts, leg chambers), the snap through the arc at the hit tick, then about 4 ticks of recovery. Make `KICK_TICKS` 9 → ~11 if the extra recovery needs room.
 - `KICKING` changes from a `Long` to a small record (start, side, swing seed). That's a new packet shape, covered by the 0.8.0 bump.
 
-### 5.2 Carry living players (everyone)
+### 5.2 Carry players and small animals (everyone)
 **New:** `core/Carry` (server) + `client/CarryPose` (both bodies). The carried player follows a carry point on the carrier each tick, the way Kitchen's corpse carry works. No vanilla riding, so there are no mount quirks.
 
-- **Pick up (decided):** **everyone** can do it, with **sneak + right-click on a player**, empty hand or not. One player at a time. You can't pick someone up while carrying a corpse, or while already carrying someone.
+- **Pick up (decided):** **everyone** can do it, with **sneak + right-click on a player or small animal** (`jaymospowers:carryable` entity tag: wolf, cat, ocelot, fox, chicken, rabbit, parrot, frog, armadillo, baby animals), empty hand or not. One player at a time. You can't pick someone up while carrying a corpse, or while already carrying someone.
 - **Letting go (decided):** the same controls as Kitchen's corpses, so it feels the same. While carrying, **right-click drops** them and **sneak + right-click throws** them a short way ahead.
 - **Thrown:** the thrown player goes into a **short ragdoll** (~1 s) while flying, with limbs flopping the way `WebRagdoll` does it for webbed creatures. Normal fall damage applies when they land (house rule).
 - **Escaping (decided):** the carried player gets out with **one jump**, at any time. They can't while **stunned or otherwise unable to act**, e.g. Gravity's held stun, Chrono's new hit-stun, or a ragdoll still playing. Add a shared query `Carry.canStruggle(player)` that those powers' stun states feed into.
@@ -228,8 +228,9 @@ Add both to `packMods` in `build.gradle`. Their CurseForge project and file ids 
 7. One jump frees a carried player, unless they're stunned or otherwise unable to act (5.2).
 10. Wind users can fly while carrying, slightly slower, with all 4 holds; on foot only fireman's and bridal (5.2).
 11. First-person Model joins the pack; living tendrils must be visible in first person (5.3).
+13. Players **and small animals** (wolves, cats, chickens, foxes, rabbits, parrots and the like) can be carried. Animals don't jump free; they stay until dropped or thrown (5.2).
 12. Tempest Kick reference received: a high roundhouse with the body leaning hard away and the arms thrown opposite ways (5.1).
 
 ## Open questions
 
-8. **Carrying mobs:** players only for now? (Assumed yes.)
+None.
