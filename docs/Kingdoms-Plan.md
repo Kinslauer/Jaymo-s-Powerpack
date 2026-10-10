@@ -1,7 +1,8 @@
 # Kingdoms (after 0.7.0)
 
 Start from *Tale of Kingdoms: A New Conquest* (Fabric, 1.21.1, LGPL-3.0: keep the license, publish our modified
-source), port it to 26.3, and rework it for a multiplayer server. A separate mod, like Jaymo's Kitchen.
+source), port it to 26.3, and rework it for a multiplayer server. A separate mod, like Jaymo's Kitchen, in
+`Desktop\Kingdoms Mod` (the upstream source, untouched, is in `Kingdoms Mod\upstream\tale-of-kingdoms`).
 
 ## Wanted (from the user)
 - **Several kingdoms**, each with a banner and a capital, possibly built on the villages Towns and Towers spawns.
@@ -11,6 +12,31 @@ source), port it to 26.3, and rework it for a multiplayer server. A separate mod
 - **Rulers are bosses:** every king or fiefdom leader is a boss fight, behind real defences (walls, guards, armies,
   the best weapons and armour). Defeating one raises or lowers your reputation with the other kingdoms and groups
   (their allies resent it, their rivals reward it).
+
+## What upstream is
+- 266 Java files, about 15,800 lines; 41 MB of data (88 schematics: the guild castle, the player kingdom's buildings
+  and their upgrade tiers), 6 MB of assets (entity textures, GUIs).
+- Single-player at heart: one guild, one player's kingdom (built tier by tier with the city builder), the guild's
+  quests and its worthiness, shops, workers (foremen, farmers, miners, lumberjacks), the Reficule mages, bandits.
+- Written against 1.21.1 with **Yarn** names. 26.3 uses Mojang's own names and has changed rendering (render
+  states), GUIs (extractRenderState), entities, networking and items since then. Every file needs touching: in
+  practice a rewrite on 26.3 that keeps upstream's designs, schematics, textures and data.
+
+## How to build it (proposed)
+1. **Foundation:** a new Fabric 26.3 project (Kitchen's setup). Bring over upstream's assets and schematics, and
+   rebuild its core on 26.3: the guild and its entities (guildmaster, guards, archers, banker, shopkeepers,
+   blacksmith), coins and shops, the schematic placer, worthiness.
+2. **Kingdoms for a server:** several kingdoms instead of one player's. Each has a capital (upstream's kingdom
+   buildings, or a Towns and Towers village claimed as one), a banner, a treasury, ranks and claimed land (chunks).
+   Players pledge; the king (player or NPC) sets ranks.
+3. **Rulers as bosses:** every NPC king or fiefdom lord holds a keep with walls, guard posts and armies, wearing the
+   best gear, with a boss bar and phases. Reputation per player (and per kingdom), shifted by kills, raids, trade
+   and quests; allies and rivals react.
+4. **War and land:** declarations (with a warm-up), rules for what can be claimed (adjacent land, a banner planted
+   and held), war score, peace terms.
+5. **Barbarians:** camps that spawn in the wild and grow, and raids on kingdoms (bigger as kingdoms grow); clearing
+   a camp is a deed every kingdom rewards.
+6. Upstream's single-player features that still fit (quests, workers, the city builder) come back one by one.
 
 ## Open questions (to settle when we start)
 - What happens to a kingdom whose ruler falls: a successor, a vassal of the victor, or ruin?
