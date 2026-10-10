@@ -49,6 +49,17 @@ public final class GravityPowerClient implements PowerClient {
 		GravityHeldClient.init();
 		// every gravity user's aura, on every client
 		ClientTickEvents.END_CLIENT_TICK.register(GravityPowerClient::auras);
+		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
+			LocalPlayer player = minecraft.player;
+			if (player == null || minecraft.isPaused()) {
+				return;
+			}
+			// straining to tear a block loose: the view shudders
+			if (player.getAttached(GravityPower.RIPPING) != null && player.tickCount % 3 == 0) {
+				com.jaymospowers.client.power.web.WebShake.start(0.35F);
+			}
+			GravityRockFlightClient.tick(minecraft, player);
+		});
 		// left click while Lift holds a chunk of the world (or anything else that can't be choked): it's thrown
 		net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> {
 			Integer grip = player.getAttached(GravityPower.GRIP);
@@ -56,11 +67,11 @@ public final class GravityPowerClient implements PowerClient {
 				return false;
 			}
 			net.minecraft.world.entity.Entity held = player.level().getEntity(grip);
-			if (held instanceof net.minecraft.world.entity.LivingEntity && !(held instanceof net.minecraft.world.entity.decoration.ArmorStand)
-				|| held instanceof net.minecraft.world.entity.item.ItemEntity || held == null) {
+			if (held instanceof net.minecraft.world.entity.item.ItemEntity || held == null) {
 				return false;
 			}
-			net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new com.jaymospowers.power.gravity.GravityGrip());
+			// a creature is pushed away; anything else is thrown
+			net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new com.jaymospowers.power.gravity.GravityGrip(true));
 			return true;
 		});
 		// right click while holding something with Lift: choke, then slam (and the click does nothing else)
@@ -71,7 +82,7 @@ public final class GravityPowerClient implements PowerClient {
 				return;
 			}
 			while (minecraft.options.keyUse.consumeClick()) {
-				net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new com.jaymospowers.power.gravity.GravityGrip());
+				net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new com.jaymospowers.power.gravity.GravityGrip(false));
 			}
 			minecraft.options.keyUse.setDown(false);
 		});
@@ -137,7 +148,7 @@ public final class GravityPowerClient implements PowerClient {
 		long now = player.level().getGameTime();
 		int width = graphics.guiWidth();
 		int height = graphics.guiHeight();
-		boolean ascended = Fate.isAscended(player);
+		boolean ascended = Fate.isAscended(player) || Fate.isCorrupted(player);
 		int chips = ascended ? 5 : 4;
 		int total = CHIP * chips + CHIP_GAP * (chips - 1);
 		// right of the hotbar, past the off-hand slot; above the hunger bar on narrow screens
@@ -161,7 +172,7 @@ public final class GravityPowerClient implements PowerClient {
 		float charge = crushFrom >= 0 ? Mth.clamp((now - crushFrom) / (float)GravityPower.CRUSH_FULL_CHARGE, 0.0F, 1.0F) : -1.0F;
 		chip(graphics, font, x + (CHIP + CHIP_GAP) * 3, y, PowerKey.ABILITY_4, Items.ANVIL, cooldowns.crush() - now, cooldowns.crushLength(), charge);
 		if (ascended) {
-			ultimateChip(graphics, font, x + (CHIP + CHIP_GAP) * 4, y, cooldowns.singularity() - now);
+			ultimateChip(graphics, font, x + (CHIP + CHIP_GAP) * 4, y, cooldowns.singularity() - now, GravityPower.ultimateCooldown(player));
 		}
 	}
 
@@ -190,14 +201,14 @@ public final class GravityPowerClient implements PowerClient {
 		graphics.text(font, label, x + CHIP - 1 - font.width(label), y + CHIP - 8, ready ? 0xFFFFFFFF : 0xFF909090);
 	}
 
-	/** The Singularity (C): gold rim, its own key. */
-	private static void ultimateChip(GuiGraphicsExtractor graphics, Font font, int x, int y, long left) {
+	/** The C (Meteor, black hole or Skyfall): gold rim, its own key. */
+	private static void ultimateChip(GuiGraphicsExtractor graphics, Font font, int x, int y, long left, int total) {
 		boolean ready = left <= 0;
 		graphics.fill(x, y, x + CHIP, y + CHIP, 0x90000000);
 		graphics.outline(x, y, CHIP, CHIP, ready ? 0xFF000000 | ULT_COLOR : 0xA0505050);
 		graphics.item(new ItemStack(Items.ECHO_SHARD), x + 2, y + 2);
 		if (!ready) {
-			int shade = (int)Math.ceil(16 * Math.min(1.0, left / (double)GravityPower.SINGULARITY_COOLDOWN));
+			int shade = (int)Math.ceil(16 * Math.min(1.0, left / (double)Math.max(1, total)));
 			graphics.fill(x + 2, y + 2 + 16 - shade, x + 18, y + 18, 0xB0000000);
 			String seconds = Long.toString((left + 19) / 20);
 			graphics.text(font, seconds, x + CHIP / 2 - font.width(seconds) / 2, y + 4, 0xFFFFFFFF);

@@ -140,6 +140,27 @@ public final class GravityPower implements Power {
 	static final int CRUSH_PIN_TICKS = 60;
 	static final double CRUSH_SLAM = 1.6;
 	static final int CRUSH_COOLDOWN_MIN = 120, CRUSH_COOLDOWN_MAX = 400;
+	/**
+	 * Crush doesn't hurt: it pins. Caught, a creature is too heavy to move ({@code CRUSH_PIN_SLOWNESS}, no jumping) for the
+	 * pin; only armour suffers under the pressure: {@code CRUSH_ARMOR_DAMAGE} per point of armour worn (with the charge).
+	 */
+	static final int CRUSH_PIN_SLOWNESS = 6;
+	static final float CRUSH_ARMOR_DAMAGE = 0.6F;
+	/**
+	 * R at a block is a struggle: held {@code RIP_CHARGE} it comes loose (when you let go, or once it's as big as it can
+	 * get), the longer the bigger: a block more every {@code RIP_GROW}, up to 1 + {@code RIP_PER_LEVEL} per ability.
+	 * Torn loose, it hangs in your hold without R held, until thrown (left click), pocketed (right click) or dropped (R).
+	 */
+	static final int RIP_CHARGE = 40, RIP_GROW = 12, RIP_PER_LEVEL = 2;
+	/** Rock flight: V held this long (ascended or corrupted) instead of tapped. */
+	static final int ROCK_HOLD_TICKS = 8;
+	/** How high a rock slab can fly over the ground (the rider's client keeps it there). */
+	public static final double ROCK_MAX_ALTITUDE = GravityRockFlight.MAX_ALTITUDE;
+	/** Collapse letting go: it's driven down this fast, and the landing hurts this much more per block fallen. */
+	static final double PLUMMET_SPEED = 2.5;
+	static final float PLUMMET_PER_BLOCK = 1.0F;
+	/** Surviving a fall this hard (half-hearts) counts toward ascension like a kill by weight. */
+	static final float ASCEND_FALL = 10.0F;
 
 	// ---- Choke and Slam (right click while lifting, once R is unlocked) ----
 	/** The choke holds it this far out, its head at your hand; the squeeze's damage, every so often. */
@@ -242,7 +263,7 @@ public final class GravityPower implements Power {
 	/** The cure: this long levitating (from something else) while collapsed. */
 	public static final int CURE_LEVITATION_TICKS = 200;
 	/** Event Horizon: projectiles this close are bent away. */
-	static final double HORIZON_DEFLECT_RADIUS = 3.0;
+	static final double HORIZON_DEFLECT_RADIUS = 6.0;
 
 	// ---- Singularity (C, ascended) ----
 	static final double SINGULARITY_RANGE = 32.0;
@@ -257,7 +278,7 @@ public final class GravityPower implements Power {
 
 	// ---- the starter (kept for good): the pull of small things ----
 	/** Loose items this close drift toward you, this hard (b/t per tick); and your jump is this much stronger. */
-	static final double PULL_RADIUS = 4.0;
+	static final double PULL_RADIUS = 4.0, PULL_RADIUS_PER_LEVEL = 2.0;
 	static final double PULL_STRENGTH = 0.035;
 	static final double PULL_JUMP = 0.06;
 
@@ -303,6 +324,12 @@ public final class GravityPower implements Power {
 
 	public static final AttachmentType<Held> HELD = AttachmentRegistry.create(JaymosPowers.id("gravity_held"),
 		builder -> builder.syncWith(Held.STREAM_CODEC, AttachmentSyncPredicate.all()));
+	/** Tearing a block loose with R (since when): synced to the owner, whose view shakes with the struggle. */
+	public static final AttachmentType<Long> RIPPING = AttachmentRegistry.create(JaymosPowers.id("gravity_ripping"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.targetOnly()));
+	/** Riding a rock slab (its chunk's id): synced to everyone; its rider's client flies it. */
+	public static final AttachmentType<Integer> ROCK_FLIGHT = AttachmentRegistry.create(JaymosPowers.id("gravity_rock_flight"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 	/** Deaths by weight so far (toward ascension). */
 	public static final AttachmentType<Integer> KILLS = AttachmentRegistry.create(JaymosPowers.id("gravity_kills"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath());
@@ -323,7 +350,21 @@ public final class GravityPower implements Power {
 		boolean curedHint;
 		/** Lift became a choke (right click while holding R, once R is truly yours). */
 		boolean choking;
+		/** A torn-out chunk held without R (see {@link #RIP_CHARGE}). */
+		boolean chunkHold;
+		/** Tearing a block loose: since when, where, and the blocks that would come with it (in order). */
+		long ripFrom = -1;
+		@Nullable BlockHitResult ripHit;
+		List<BlockPos> ripBlocks = List.of();
+		/** V went down at (game time), for tap or hold. */
+		long vDownAt = -1;
 	}
+
+	/** Dropped by Collapse: driven down, and hurt more for every block it falls. */
+	private record Plummet(ResourceKey<Level> dimension, UUID entity, UUID player, double fromY, long until) {
+	}
+
+	private static final List<Plummet> PLUMMETS = new ArrayList<>();
 
 	/** A creature being slammed down: who threw it, how hard, and what it can break. */
 	private record Slam(ResourceKey<Level> dimension, UUID entity, UUID player, float damage, float breakHardness, long started, int rise, double down,
@@ -394,16 +435,25 @@ public final class GravityPower implements Power {
 		net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(GravityGrip.TYPE, (payload, ctx) -> {
 			ServerPlayer player = ctx.player();
 			if (Powers.has(player, INSTANCE) && player.isAlive() && !player.isSpectator()) {
-				grip(player, state(player));
+				grip(player, state(player), payload.left());
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(GravityPower::serverTick);
 		ServerLivingEntityEvents.AFTER_DEATH.register(GravityPower::afterDeath);
+		// surviving a hard fall is a step toward ascension, like a kill by weight
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
+			if (entity instanceof ServerPlayer player && source.is(DamageTypeTags.IS_FALL) && damageTaken >= ASCEND_FALL && player.isAlive()
+				&& Powers.has(player, INSTANCE)) {
+				countTowardAscension(player);
+			}
+		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			State state = STATES.remove(handler.player.getUUID());
 			if (state != null) {
 				dropLift(handler.player, state, false);
 			}
+			GravityOrbit.drop(handler.player);
+			GravityRockFlight.stop(handler.player);
 		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			STATES.clear();
@@ -413,6 +463,11 @@ public final class GravityPower implements Power {
 			SLAMS.clear();
 			WEIGHED.clear();
 			TOUCHED.clear();
+			PLUMMETS.clear();
+			GravityPush.clear();
+			GravityMeteor.clear();
+			GravitySkyfall.clear();
+			GravityOrbit.clear();
 		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> GravityDebugCommand.register(dispatcher));
 	}
@@ -509,8 +564,15 @@ public final class GravityPower implements Power {
 		switch (key) {
 			case ABILITY_1 -> {
 				if (down) {
-					startLift(player, state);
-				} else {
+					if (state.chunkHold && state.liftTarget >= 0) {
+						// R again drops a chunk held on its own
+						dropLift(player, state, true);
+					} else {
+						startLift(player, state);
+					}
+				} else if (state.ripFrom >= 0) {
+					finishRip(player, state);
+				} else if (!state.chunkHold) {
 					dropLift(player, state, true);
 				}
 			}
@@ -521,8 +583,24 @@ public final class GravityPower implements Power {
 			}
 			case ABILITY_3 -> {
 				// held down before Weightless is yours: the item pull (see tick)
-				if (down && com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_3)) {
-					toggleWeightless(player, state);
+				if (!com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_3)) {
+					return;
+				}
+				boolean rocks = Fate.isAscended(player) || Fate.isCorrupted(player);
+				if (!rocks) {
+					if (down) {
+						toggleWeightless(player, state);
+					}
+				} else if (down) {
+					// tapped: Weightless; held: rock flight (see tick)
+					state.vDownAt = player.level().getGameTime();
+				} else {
+					if (player.getAttached(ROCK_FLIGHT) != null) {
+						GravityRockFlight.stop(player);
+					} else if (state.vDownAt >= 0) {
+						toggleWeightless(player, state);
+					}
+					state.vDownAt = -1;
 				}
 			}
 			case ABILITY_4 -> {
@@ -540,11 +618,36 @@ public final class GravityPower implements Power {
 		}
 	}
 
+	/** Collapse has a C of its own (the black hole), corrupted or not ascended. */
+	@Override
+	public boolean ultimateWhenCorrupted() {
+		return true;
+	}
+
+	/** C: the Meteor (ascended), the black hole (corrupted), Skyfall (both). */
 	@Override
 	public void onUltimate(ServerPlayer player, boolean down) {
-		if (down) {
+		if (!down || !ready(player, SINGULARITY)) {
+			return;
+		}
+		boolean ascended = Fate.isAscended(player), corrupted = Fate.isCorrupted(player);
+		if (ascended && corrupted) {
+			if (GravitySkyfall.call(player)) {
+				cool(player, SINGULARITY, GravitySkyfall.COOLDOWN);
+			}
+		} else if (ascended) {
+			if (GravityMeteor.call(player)) {
+				cool(player, SINGULARITY, GravityMeteor.COOLDOWN);
+			}
+		} else if (corrupted) {
 			singularity(player);
 		}
+	}
+
+	/** The C's cooldown for this player's form (for the HUD). */
+	public static int ultimateCooldown(Player player) {
+		boolean ascended = Fate.isAscended(player), corrupted = Fate.isCorrupted(player);
+		return ascended && corrupted ? GravitySkyfall.COOLDOWN : ascended ? GravityMeteor.COOLDOWN : SINGULARITY_COOLDOWN;
 	}
 
 	// ---------------------------------------------------------------- Lift
@@ -555,13 +658,25 @@ public final class GravityPower implements Power {
 		}
 		Entity target = liftableInSight(player, liftRange(player));
 		if (target == null) {
-			// aimed at a wall or the ground: a chunk of it is torn up and lifted
-			target = ripChunk(player);
+			// aimed at a wall or the ground: a struggle to tear it loose (see finishRip)
+			if (!startRip(player, state)) {
+				fizzle(player);
+			}
+			return;
 		}
-		if (target == null || !target.isAlive()) {
+		if (!target.isAlive()) {
 			fizzle(player);
 			return;
 		}
+		if (target instanceof com.jaymospowers.core.BlockCluster cluster && cluster.scripted()) {
+			// a block out of Collapsing Horizon's ring (or anyone's)
+			GravityOrbit.taken(player, target);
+		}
+		hold(player, state, target);
+	}
+
+	/** Lift takes hold of {@code target}. */
+	private static void hold(ServerPlayer player, State state, Entity target) {
 		state.liftTarget = target.getId();
 		state.liftTicks = 0;
 		state.choking = false;
@@ -590,7 +705,7 @@ public final class GravityPower implements Power {
 	private static void tickLift(ServerPlayer player, State state) {
 		Entity entity = player.level().getEntity(state.liftTarget);
 		if (entity == null || !entity.isAlive() || entity.level() != player.level()
-			|| ++state.liftTicks > LIFT_MAX_TICKS || !PowerInput.isDown(player, PowerKey.ABILITY_1)
+			|| ++state.liftTicks > LIFT_MAX_TICKS || !state.chunkHold && !PowerInput.isDown(player, PowerKey.ABILITY_1)
 			|| entity.distanceToSqr(player) > (liftRange(player) + 8.0) * (liftRange(player) + 8.0)) {
 			dropLift(player, state, true);
 			return;
@@ -665,6 +780,7 @@ public final class GravityPower implements Power {
 		Entity entity = player.level().getEntity(state.liftTarget);
 		state.liftTarget = -1;
 		state.choking = false;
+		state.chunkHold = false;
 		player.removeAttached(GRIP);
 		if (cooldown) {
 			cool(player, LIFT, LIFT_COOLDOWN);
@@ -678,11 +794,46 @@ public final class GravityPower implements Power {
 		}
 		entity.removeAttached(LIFTED);
 		entity.removeAttached(HELD);
-		if (Fate.isCorrupted(player) && entity.isAlive()) {
-			entity.setDeltaMovement(player.getViewVector(1.0F).scale(COLLAPSE_FLING));
-			entity.needsSync = true;
-			entity.syncVelocity = true;
-			player.level().playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.9F, 0.5F);
+		if (Fate.isCorrupted(player) && entity.isAlive() && entity instanceof LivingEntity living && !(entity instanceof ArmorStand)) {
+			// Collapse: let go, and it's driven into the ground under a crushing weight
+			ServerLevel level = player.level();
+			living.setDeltaMovement(0.0, -PLUMMET_SPEED, 0.0);
+			living.needsSync = true;
+			living.syncVelocity = true;
+			if (living instanceof ServerPlayer held) {
+				net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(held, new com.jaymospowers.power.web.WebNet.Nudge(new Vec3(0.0, -PLUMMET_SPEED, 0.0)));
+			}
+			touch(living, player);
+			PLUMMETS.removeIf(p -> p.entity().equals(living.getUUID()));
+			PLUMMETS.add(new Plummet(level.dimension(), living.getUUID(), player.getUUID(), living.getY(), level.getGameTime() + 100));
+			level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 0.9F, 0.5F);
+		}
+	}
+
+	/** Collapse's dropped: driven down until they land, then the extra weight of the fall lands on them. */
+	private static void tickPlummets(MinecraftServer server) {
+		for (Iterator<Plummet> it = PLUMMETS.iterator(); it.hasNext(); ) {
+			Plummet plummet = it.next();
+			ServerLevel level = server.getLevel(plummet.dimension());
+			Entity entity = level == null ? null : level.getEntity(plummet.entity());
+			if (!(entity instanceof LivingEntity living) || !living.isAlive() || level.getGameTime() > plummet.until()) {
+				it.remove();
+				continue;
+			}
+			if (!living.onGround() && !living.isInWater()) {
+				living.setDeltaMovement(living.getDeltaMovement().x * 0.5, Math.min(living.getDeltaMovement().y, -PLUMMET_SPEED), living.getDeltaMovement().z * 0.5);
+				living.syncVelocity = true;
+				continue;
+			}
+			it.remove();
+			double fell = Math.max(0.0, plummet.fromY() - living.getY());
+			if (fell > 1.0) {
+				living.setInvulnerableTime(0);
+				living.hurtServer(level, level.damageSources().fall(), (float)fell * PLUMMET_PER_BLOCK);
+				BlockPos under = living.blockPosition().below();
+				com.jaymospowers.core.Debris.puff(level, under, level.getBlockState(under), 1.8F);
+				level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.2F, 0.7F);
+			}
 		}
 	}
 
@@ -693,11 +844,29 @@ public final class GravityPower implements Power {
 	 * throat, the second slams it into the ground. The slam grows with the power: more damage and more weight per
 	 * ability unlocked (and ascended), and from three abilities up, the block it hits breaks.
 	 */
-	private static void grip(ServerPlayer player, State state) {
+	private static void grip(ServerPlayer player, State state, boolean left) {
 		if (state.liftTarget < 0) {
 			return;
 		}
 		Entity entity = player.level().getEntity(state.liftTarget);
+		if (left) {
+			if (entity != null && throwable(entity)) {
+				hurl(player, state, entity);
+			} else if (entity instanceof LivingEntity living && living.isAlive() && com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_1)) {
+				// the Push: away, far, and through
+				state.choking = false;
+				dropLiftQuietly(player, state, living);
+				touch(living, player);
+				GravityPush.push(player, living);
+			}
+			return;
+		}
+		if (entity instanceof com.jaymospowers.core.BlockCluster chunk) {
+			// a chunk (or a block from the ring): into your pockets
+			dropLiftQuietly(player, state, chunk);
+			chunk.pocket(player);
+			return;
+		}
 		if ((entity instanceof ItemEntity || entity != null && isCorpse(entity)) && !state.drawing) {
 			// a dropped item (or a corpse): drawn in to you and pocketed (a corpse too big for a bag, carried)
 			state.drawing = true;
@@ -772,16 +941,93 @@ public final class GravityPower implements Power {
 	static final int CHUNK_PIECES_BASE = 3;
 	static final float CHUNK_HARDEST_BASE = 1.5F, CHUNK_HARDEST_PER_LEVEL = 0.75F;
 
-	private static @Nullable Entity ripChunk(ServerPlayer player) {
+	/** R at a block: the struggle begins (cracks spread, your view shakes). False if there's nothing there to take. */
+	private static boolean startRip(ServerPlayer player, State state) {
 		Vec3 eye = player.getEyePosition();
 		BlockHitResult hit = player.level().clip(new ClipContext(eye, eye.add(player.getViewVector(1.0F).scale(liftRange(player))),
 			ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
 		if (hit.getType() != HitResult.Type.BLOCK || !player.mayBuild()) {
-			return null;
+			return false;
 		}
 		int abilities = com.jaymospowers.core.Mastery.unlocked(player);
-		return com.jaymospowers.core.BlockCluster.rip(player.level(), hit, CHUNK_PIECES_BASE + abilities,
+		List<BlockPos> blocks = com.jaymospowers.core.BlockCluster.crater(player.level(), hit.getBlockPos(), ripMax(player),
 			CHUNK_HARDEST_BASE + CHUNK_HARDEST_PER_LEVEL * abilities, player);
+		if (blocks.isEmpty()) {
+			return false;
+		}
+		state.ripFrom = player.level().getGameTime();
+		state.ripHit = hit;
+		state.ripBlocks = blocks;
+		player.setAttached(RIPPING, state.ripFrom);
+		return true;
+	}
+
+	/** The most a struggle can tear loose. */
+	private static int ripMax(ServerPlayer player) {
+		return Math.min(com.jaymospowers.core.BlockCluster.MAX_PIECES, 1 + RIP_PER_LEVEL * com.jaymospowers.core.Mastery.unlocked(player));
+	}
+
+	/** How many blocks the struggle has worked loose so far. */
+	private static int ripCount(ServerPlayer player, State state) {
+		long held = player.level().getGameTime() - state.ripFrom;
+		if (held < RIP_CHARGE) {
+			return 0;
+		}
+		return (int)Math.min(Math.min(ripMax(player), state.ripBlocks.size()), 1 + (held - RIP_CHARGE) / RIP_GROW);
+	}
+
+	/** Still straining: the cracks spread to every block that would come; at its biggest, it comes loose on its own. */
+	private static void tickRip(ServerPlayer player, State state) {
+		ServerLevel level = player.level();
+		long held = level.getGameTime() - state.ripFrom;
+		int coming = Math.max(1, ripCount(player, state));
+		for (int i = 0; i < state.ripBlocks.size(); i++) {
+			int stage = i < coming ? (int)Math.min(9, held * 9 / Math.max(1, RIP_CHARGE + RIP_GROW * i)) : -1;
+			level.destroyBlockProgress(ripCrackId(player, i), state.ripBlocks.get(i), stage);
+		}
+		if (held % 8 == 0) {
+			BlockPos pos = state.ripBlocks.getFirst();
+			level.playSound(null, pos, level.getBlockState(pos).getSoundType().getHitSound(), SoundSource.BLOCKS, 1.0F, 0.5F);
+			level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, level.getBlockState(pos)),
+				pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 6, 0.4, 0.4, 0.4, 0.05);
+		}
+		if (ripCount(player, state) >= Math.min(ripMax(player), state.ripBlocks.size())) {
+			finishRip(player, state);
+		}
+	}
+
+	private static int ripCrackId(ServerPlayer player, int i) {
+		return player.getId() * 43 + 3000 + i;
+	}
+
+	/** The struggle ends: long enough, and it tears loose and hangs in your hold; too soon, and nothing comes. */
+	private static void finishRip(ServerPlayer player, State state) {
+		ServerLevel level = player.level();
+		int count = ripCount(player, state);
+		for (int i = 0; i < state.ripBlocks.size(); i++) {
+			level.destroyBlockProgress(ripCrackId(player, i), state.ripBlocks.get(i), -1);
+		}
+		List<BlockPos> blocks = new ArrayList<>();
+		for (int i = 0; i < count && i < state.ripBlocks.size(); i++) {
+			if (com.jaymospowers.core.BlockCluster.takeable(level, state.ripBlocks.get(i), 50.0F, player)) {
+				blocks.add(state.ripBlocks.get(i));
+			}
+		}
+		BlockHitResult hit = state.ripHit;
+		state.ripFrom = -1;
+		state.ripHit = null;
+		state.ripBlocks = List.of();
+		player.removeAttached(RIPPING);
+		if (blocks.isEmpty() || hit == null) {
+			fizzle(player);
+			return;
+		}
+		com.jaymospowers.core.BlockCluster chunk = com.jaymospowers.core.BlockCluster.of(level, blocks, hit.getDirection().getUnitVec3().scale(0.9), player);
+		if (chunk == null) {
+			return;
+		}
+		hold(player, state, chunk);
+		state.chunkHold = true;
 	}
 
 	/** Things Lift can't pocket or choke: anything that isn't alive (bar items and corpses), and armour stands. */
@@ -1220,7 +1466,9 @@ public final class GravityPower implements Power {
 			}
 		}
 		double radius = Mth.lerp(charge, CRUSH_RADIUS_MIN, CRUSH_RADIUS_MAX) + (collapsed ? COLLAPSE_RADIUS_BONUS : 0.0);
-		float damage = Mth.lerp(charge, CRUSH_DAMAGE_MIN, CRUSH_DAMAGE_MAX) * (collapsed ? COLLAPSE_DAMAGE : 1.0F);
+		float pressure = (0.5F + 0.5F * charge) * (collapsed ? COLLAPSE_DAMAGE : 1.0F);
+		// Collapsing Horizon's ring comes down with it, in a shockwave
+		GravityOrbit.shockwave(player, at, radius);
 		AABB area = new AABB(at, at).inflate(radius, radius + 3.0, radius);
 		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area,
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand))) {
@@ -1232,13 +1480,19 @@ public final class GravityPower implements Power {
 			target.setDeltaMovement(v.x * 0.3, -CRUSH_SLAM * (0.4 + charge), v.z * 0.3);
 			target.needsSync = true;
 			target.syncVelocity = true;
-			crushing = true;
-			try {
-				target.hurtServer(level, level.damageSources().playerAttack(player), damage);
-			} finally {
-				crushing = false;
+			// no harm to them, only to what they wear
+			int armor = target.getArmorValue();
+			if (armor > 0) {
+				crushing = true;
+				try {
+					target.hurtServer(level, level.damageSources().playerAttack(player), armor * CRUSH_ARMOR_DAMAGE * pressure);
+				} finally {
+					crushing = false;
+				}
 			}
-			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, CRUSH_PIN_TICKS, 1), player);
+			// too heavy to move
+			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, CRUSH_PIN_TICKS, CRUSH_PIN_SLOWNESS), player);
+			target.addEffect(new MobEffectInstance(MobEffects.JUMP_BOOST, CRUSH_PIN_TICKS, 128, false, false), player);
 			modifier(target, Attributes.GRAVITY, CRUSH_ID, CRUSH_WEIGHT, true);
 			PINNED.removeIf(p -> p.entity().equals(target.getUUID()));
 			PINNED.add(new Pinned(level.dimension(), target.getUUID(), level.getGameTime() + CRUSH_PIN_TICKS));
@@ -1303,7 +1557,8 @@ public final class GravityPower implements Power {
 				for (int dy = 3; dy >= -6; dy--) {
 					BlockPos pos = middle.offset(dx, dy, dz);
 					BlockState state = level.getBlockState(pos);
-					if (state.isAir() || !level.getBlockState(pos.above()).isAir()) {
+					BlockState above = level.getBlockState(pos.above());
+					if (state.isAir() || !(above.isAir() || snow(above)) || snow(state)) {
 						continue;
 					}
 					float hardness = state.getDestroySpeed(level, pos);
@@ -1315,6 +1570,8 @@ public final class GravityPower implements Power {
 			}
 		}
 		java.util.Collections.shuffle(ground, new java.util.Random(level.getRandom().nextLong()));
+		// the heavy ground (stone, dirt) first, if there's enough of it
+		ground.sort(java.util.Comparator.comparingInt(pos -> level.getBlockState(pos).getDestroySpeed(level, pos) >= 0.5F ? 0 : 1));
 		List<Integer> blocks = new ArrayList<>();
 		for (BlockPos pos : ground.subList(0, Math.min(want, ground.size()))) {
 			BlockState state = level.getBlockState(pos);
@@ -1331,6 +1588,11 @@ public final class GravityPower implements Power {
 		CAVE_INS.add(new CaveIn(level.dimension(), center, player.getUUID(), level.getGameTime(), damage, radius, blocks));
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.WARDEN_EMERGE, SoundSource.PLAYERS, 1.4F, 0.7F);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.ROOTED_DIRT_BREAK, SoundSource.PLAYERS, 1.5F, 0.4F);
+	}
+
+	private static boolean snow(BlockState state) {
+		return state.is(net.minecraft.world.level.block.Blocks.SNOW) || state.is(net.minecraft.world.level.block.Blocks.SNOW_BLOCK)
+			|| state.is(net.minecraft.world.level.block.Blocks.POWDER_SNOW);
 	}
 
 	private static void tickCaveIns(MinecraftServer server) {
@@ -1418,10 +1680,43 @@ public final class GravityPower implements Power {
 			if (player.getAttached(WEIGHTLESS_ON) != null) {
 				setWeightless(player, false);
 			}
+			if (player.getAttached(ROCK_FLIGHT) != null) {
+				GravityRockFlight.stop(player);
+			}
 			return;
 		}
 		State state = state(player);
 		smallThings(player);
+		if (state.ripFrom >= 0) {
+			if (PowerInput.isDown(player, PowerKey.ABILITY_1)) {
+				tickRip(player, state);
+			} else {
+				finishRip(player, state);
+			}
+		}
+		Integer slab = player.getAttached(ROCK_FLIGHT);
+		if (slab != null) {
+			GravityRockFlight.tick(player, slab);
+		} else if (state.vDownAt >= 0 && player.level().getGameTime() - state.vDownAt >= ROCK_HOLD_TICKS
+			&& PowerInput.isDown(player, PowerKey.ABILITY_3)) {
+			// held, not tapped: up on a slab of the ground
+			state.vDownAt = -1;
+			if (player.getAttached(WEIGHTLESS_ON) != null) {
+				endWeightless(player, state, WEIGHTLESS_EARLY_COOLDOWN);
+			}
+			if (!GravityRockFlight.start(player)) {
+				fizzle(player);
+			}
+		}
+		if (GravityOrbit.collapsingHorizon(player)) {
+			GravityOrbit.tick(player);
+		} else if (player.tickCount % 20 == 0) {
+			GravityOrbit.drop(player);
+		}
+		// the Nether's weight takes hold of the power: corrupted on arrival
+		if (player.level().dimension() == Level.NETHER && Fate.canCorrupt(player) && !player.isCreative()) {
+			Fate.corrupt(player);
+		}
 		if (!com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_3) && PowerInput.isDown(player, PowerKey.ABILITY_3)) {
 			magnet(player);
 		}
@@ -1439,10 +1734,6 @@ public final class GravityPower implements Power {
 				heavyAura(player);
 			}
 			player.causeFoodExhaustion(WEIGHTLESS_EXHAUSTION);
-			if (++state.weightlessTotal >= CORRUPT_WEIGHTLESS_TICKS) {
-				state.weightlessTotal = 0;
-				Fate.addCorruption(player, 1);
-			}
 			if (state.weightlessTicks >= WEIGHTLESS_MAX_TICKS || player.isInWater() || player.getFoodData().getFoodLevel() <= 0) {
 				endWeightless(player, state, WEIGHTLESS_COOLDOWN);
 			}
@@ -1477,11 +1768,12 @@ public final class GravityPower implements Power {
 		}
 		Vec3 me = player.position().add(0.0, 0.5, 0.0);
 		boolean pulled = false;
-		for (ItemEntity item : player.level().getEntitiesOfClass(ItemEntity.class, player.getBoundingBox().inflate(PULL_RADIUS),
+		double radius = PULL_RADIUS + PULL_RADIUS_PER_LEVEL * com.jaymospowers.core.Mastery.unlocked(player);
+		for (ItemEntity item : player.level().getEntitiesOfClass(ItemEntity.class, player.getBoundingBox().inflate(radius),
 			e -> e.isAlive() && !e.hasPickUpDelay())) {
 			Vec3 to = me.subtract(item.position());
 			double d = to.length();
-			if (d > 0.5 && d <= PULL_RADIUS) {
+			if (d > 0.5 && d <= radius) {
 				item.setDeltaMovement(item.getDeltaMovement().add(to.scale(PULL_STRENGTH * 2.0 / d)));
 				item.needsSync = true;
 				pulled = true;
@@ -1586,6 +1878,7 @@ public final class GravityPower implements Power {
 		Vec3 at = aimPoint(player, CRUSH_RANGE);
 		double radius = Mth.lerp(charge, CRUSH_RADIUS_MIN, CRUSH_RADIUS_MAX) + (Fate.isCorrupted(player) ? COLLAPSE_RADIUS_BONUS : 0.0);
 		weighDown(player, at, radius);
+		GravityOrbit.drawTo(player, at);
 	}
 
 	/** Everyone (but the user) within {@code radius} of {@code center} is heavy for a moment (refresh it to keep them so). */
@@ -1659,6 +1952,12 @@ public final class GravityPower implements Power {
 				tickWell(level, well, owner, left);
 			}
 		}
+		if (!PLUMMETS.isEmpty()) {
+			tickPlummets(server);
+		}
+		GravityPush.tick(server);
+		GravityMeteor.tick(server);
+		GravitySkyfall.tick(server);
 		if (!PINNED.isEmpty()) {
 			for (Iterator<Pinned> it = PINNED.iterator(); it.hasNext(); ) {
 				Pinned pinned = it.next();
@@ -1748,7 +2047,18 @@ public final class GravityPower implements Power {
 
 	// ---------------------------------------------------------------- deaths by weight
 
-	private static void touch(LivingEntity target, ServerPlayer player) {
+	/** A camera shake for everyone within {@code range} of {@code at}, weaker with distance. */
+	static void shake(ServerLevel level, Vec3 at, double range, float strength) {
+		for (ServerPlayer player : level.players()) {
+			double d = player.position().distanceTo(at);
+			if (d <= range) {
+				net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player,
+					new com.jaymospowers.power.web.WebNet.Shake(strength * (float)(1.0 - d / range)));
+			}
+		}
+	}
+
+	static void touch(LivingEntity target, ServerPlayer player) {
 		TOUCHED.put(target.getUUID(), new Touch(player.getUUID(), player.level().getGameTime()));
 	}
 
@@ -1765,7 +2075,11 @@ public final class GravityPower implements Power {
 		if (!byWeight || player == null || !Powers.has(player, INSTANCE) || entity == player) {
 			return;
 		}
-		Fate.addCorruption(player, CORRUPT_PER_KILL);
+		countTowardAscension(player);
+	}
+
+	/** A death by weight, or a hard fall survived: one closer to the Event Horizon. */
+	static void countTowardAscension(ServerPlayer player) {
 		if (!Fate.canAscend(player)) {
 			return;
 		}
@@ -1812,7 +2126,7 @@ public final class GravityPower implements Power {
 	}
 
 	/** Where the crosshair lands (a block, a creature, or open air at {@code range}). */
-	private static Vec3 aimPoint(ServerPlayer player, double range) {
+	static Vec3 aimPoint(ServerPlayer player, double range) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 end = eye.add(player.getViewVector(1.0F).scale(range));
 		BlockHitResult block = player.level().clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));

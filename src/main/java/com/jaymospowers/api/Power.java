@@ -53,6 +53,11 @@ public interface Power {
 	 * The ascended ability's key (C by default; see {@link com.jaymospowers.core.Fate}) went down or up. Only sent
 	 * while the power is ascended.
 	 */
+	/** Whether the C key answers a corrupted (not ascended) power too. */
+	default boolean ultimateWhenCorrupted() {
+		return false;
+	}
+
 	default void onUltimate(ServerPlayer player, boolean down) {
 	}
 

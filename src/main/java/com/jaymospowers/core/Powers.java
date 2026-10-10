@@ -193,7 +193,8 @@ public final class Powers {
 	/** The ascended ability's key: only an ascended power answers it (anyone else's press does nothing at all). */
 	static void ultimate(ServerPlayer player, boolean down) {
 		Power power = of(player);
-		if (power != null && Fate.isAscended(player) && player.isAlive() && !player.isSpectator()) {
+		if (power != null && (Fate.isAscended(player) || power.ultimateWhenCorrupted() && Fate.isCorrupted(player)) && player.isAlive()
+			&& !player.isSpectator()) {
 			power.onUltimate(player, down);
 		}
 	}

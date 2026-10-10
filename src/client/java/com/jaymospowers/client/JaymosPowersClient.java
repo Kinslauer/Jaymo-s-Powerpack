@@ -160,7 +160,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 				client.onMode(player, mode);
 			}
 		}
-		boolean ultimate = power != null && Fate.isAscended(player) && minecraft.gui.screen() == null && ultimateKey.isDown();
+		boolean ultimate = power != null && (Fate.isAscended(player) || power.ultimateWhenCorrupted() && Fate.isCorrupted(player))
+			&& minecraft.gui.screen() == null && ultimateKey.isDown();
 		if (ultimate != ultimateWasDown) {
 			ultimateWasDown = ultimate;
 			ClientPlayNetworking.send(new PowerPayloads.UltimateKey(ultimate));

@@ -59,7 +59,9 @@ public class BlockCluster extends Entity {
 	/** Left lying (not held, not flying) it crumbles after this long; nothing lasts longer than {@code MAX_AGE}. */
 	static final int IDLE_TICKS = 100, MAX_AGE = 2400;
 	/** A broken chunk drops each of its blocks this often. */
-	static final float DROP_CHANCE = 0.35F;
+	static final float DROP_CHANCE = 0.3F;
+	/** How ragged a torn-out chunk is: the jitter on each block's distance when choosing which come with it. */
+	static final double RAGGED = 1.3;
 
 	/** One block of the chunk: its state, and where it sits relative to the chunk's middle (blocks). */
 	public record Piece(int state, int x, int y, int z) {
@@ -70,6 +72,10 @@ public class BlockCluster extends Entity {
 			return Block.stateById(this.state);
 		}
 	}
+
+	/** Steered by a power (a slab you ride, a block orbiting you, a meteor): drawn without tumbling unless it's falling. */
+	public static final AttachmentType<Boolean> STEADY = AttachmentRegistry.create(JaymosPowers.id("block_cluster_steady"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 
 	/** The chunk's blocks (synced to everyone, who draw them). */
 	public static final AttachmentType<List<Piece>> PIECES = AttachmentRegistry.create(JaymosPowers.id("block_cluster_pieces"),
@@ -82,6 +88,8 @@ public class BlockCluster extends Entity {
 	private Vec3 lastVelocity = Vec3.ZERO;
 	private final Set<Integer> struck = new HashSet<>();
 	private int idle;
+	/** Moved by whoever owns it (setPos each tick): no physics of its own, no crumbling. */
+	private boolean scripted;
 
 	public BlockCluster(EntityType<? extends BlockCluster> type, Level level) {
 		super(type, level);
@@ -108,26 +116,52 @@ public class BlockCluster extends Entity {
 	 * there would come loose.
 	 */
 	public static @Nullable BlockCluster rip(ServerLevel level, BlockHitResult hit, int max, float hardest, @Nullable Player by) {
-		BlockPos center = hit.getBlockPos();
+		List<BlockPos> taken = crater(level, hit.getBlockPos(), max, hardest, by);
+		if (taken.isEmpty()) {
+			return null;
+		}
+		return of(level, taken, hit.getDirection().getUnitVec3().scale(0.9), by);
+	}
+
+	/**
+	 * The blocks a chunk torn out at {@code center} would take, in order: up to {@code max}, nearest first but ragged
+	 * (like a small blast's crater), none harder than {@code hardest}, nothing with contents, no fluids.
+	 */
+	public static List<BlockPos> crater(ServerLevel level, BlockPos center, int max, float hardest, @Nullable Player by) {
 		List<BlockPos> around = new ArrayList<>();
-		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-1, -1, -1), center.offset(1, 1, 1))) {
+		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-2, -2, -2), center.offset(2, 2, 2))) {
 			around.add(pos.immutable());
 		}
-		around.sort(Comparator.comparingDouble(p -> p.distSqr(center) + level.getRandom().nextDouble() * 0.6));
+		java.util.Map<BlockPos, Double> rank = new java.util.HashMap<>();
+		for (BlockPos pos : around) {
+			rank.put(pos, Math.sqrt(pos.distSqr(center)) + level.getRandom().nextDouble() * RAGGED);
+		}
+		around.sort(Comparator.comparingDouble(rank::get));
 		List<BlockPos> taken = new ArrayList<>();
-		List<BlockState> states = new ArrayList<>();
 		for (BlockPos pos : around) {
 			if (taken.size() >= Math.min(max, MAX_PIECES)) {
 				break;
 			}
-			BlockState state = level.getBlockState(pos);
-			float hardness = state.getDestroySpeed(level, pos);
-			if (state.isAir() || !state.getFluidState().isEmpty() || state.hasBlockEntity() || hardness < 0.0F || hardness > hardest
-				|| by != null && !level.mayInteract(by, pos)) {
-				continue;
+			if (takeable(level, pos, hardest, by)) {
+				taken.add(pos);
 			}
-			taken.add(pos);
-			states.add(state);
+		}
+		return taken;
+	}
+
+	/** A block that can come loose: something solid, not too hard, with no contents and no fluid. */
+	public static boolean takeable(ServerLevel level, BlockPos pos, float hardest, @Nullable Player by) {
+		BlockState state = level.getBlockState(pos);
+		float hardness = state.getDestroySpeed(level, pos);
+		return !state.isAir() && state.getFluidState().isEmpty() && !state.hasBlockEntity() && hardness >= 0.0F && hardness <= hardest
+			&& (by == null || level.mayInteract(by, pos));
+	}
+
+	/** A chunk made of the blocks at {@code taken} (they're torn out), set down at their middle plus {@code out}. */
+	public static @Nullable BlockCluster of(ServerLevel level, List<BlockPos> taken, Vec3 out, @Nullable Player by) {
+		List<BlockState> states = new ArrayList<>();
+		for (BlockPos pos : taken) {
+			states.add(level.getBlockState(pos));
 		}
 		if (taken.isEmpty()) {
 			return null;
@@ -138,6 +172,7 @@ public class BlockCluster extends Entity {
 		}
 		middle = middle.scale(1.0 / taken.size());
 		BlockPos base = BlockPos.containing(middle);
+		// (base: the chunk's middle block; each piece sits relative to it)
 		List<Piece> pieces = new ArrayList<>();
 		for (int i = 0; i < taken.size(); i++) {
 			BlockPos pos = taken.get(i);
@@ -147,13 +182,55 @@ public class BlockCluster extends Entity {
 		}
 		BlockCluster cluster = new BlockCluster(TYPE, level);
 		// out of the hole it came from
-		Vec3 out = Vec3.atCenterOf(base).add(hit.getDirection().getUnitVec3().scale(0.9)).subtract(0.0, 0.7, 0.0);
-		cluster.setPos(out);
+		Vec3 at = Vec3.atCenterOf(base).add(out).subtract(0.0, 0.7, 0.0);
+		cluster.setPos(at);
 		cluster.setAttached(PIECES, pieces);
 		level.addFreshEntity(cluster);
-		level.playSound(null, out.x, out.y, out.z, SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.PLAYERS, 1.0F, 0.6F);
-		level.playSound(null, out.x, out.y, out.z, states.get(0).getSoundType().getBreakSound(), SoundSource.BLOCKS, 1.2F, 0.7F);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.PLAYERS, 1.0F, 0.6F);
+		level.playSound(null, at.x, at.y, at.z, states.get(0).getSoundType().getBreakSound(), SoundSource.BLOCKS, 1.2F, 0.7F);
 		return cluster;
+	}
+
+	/** A chunk made of blocks that were never placed (a meteor's rock): {@code states} in a rough ball at {@code at}. */
+	public static BlockCluster made(ServerLevel level, List<BlockState> states, Vec3 at) {
+		List<Piece> pieces = new ArrayList<>();
+		int[][] spots = {{0, 0, 0}, {1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1}, {1, 1, 0}, {-1, -1, 0}};
+		for (int i = 0; i < states.size() && i < spots.length; i++) {
+			pieces.add(new Piece(Block.getId(states.get(i)), spots[i][0], spots[i][1], spots[i][2]));
+		}
+		BlockCluster cluster = new BlockCluster(TYPE, level);
+		cluster.setPos(at);
+		cluster.setAttached(PIECES, pieces);
+		level.addFreshEntity(cluster);
+		return cluster;
+	}
+
+	/** Steered from now on (or let go of): it moves only where it's put, and never crumbles on its own. */
+	public void script(boolean on, boolean steady) {
+		this.scripted = on;
+		this.setNoGravity(on);
+		this.noPhysics = on;
+		if (steady) {
+			this.setAttached(STEADY, true);
+		} else if (this.getAttached(STEADY) != null) {
+			this.removeAttached(STEADY);
+		}
+	}
+
+	public boolean scripted() {
+		return this.scripted;
+	}
+
+	/** Into {@code player}'s inventory as its blocks (what doesn't fit drops at their feet), and the chunk is gone. */
+	public void pocket(Player player) {
+		for (Piece piece : this.pieces()) {
+			ItemStack stack = new ItemStack(piece.blockState().getBlock());
+			if (!stack.isEmpty() && !player.getInventory().add(stack) && this.level() instanceof ServerLevel level) {
+				level.addFreshEntity(new ItemEntity(level, player.getX(), player.getY() + 0.5, player.getZ(), stack));
+			}
+		}
+		this.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.8F, 0.7F);
+		this.discard();
 	}
 
 	/** Thrown (by whoever): it now batters what it flies into, and breaks on what stops it. */
@@ -248,6 +325,13 @@ public class BlockCluster extends Entity {
 	@Override
 	public void tick() {
 		super.tick();
+		if (this.scripted) {
+			// put where its owner puts it
+			if (this.level() instanceof ServerLevel level && this.pieces().isEmpty() && this.tickCount > 5) {
+				this.discard();
+			}
+			return;
+		}
 		if (!this.isNoGravity()) {
 			this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.06, 0.0));
 		}

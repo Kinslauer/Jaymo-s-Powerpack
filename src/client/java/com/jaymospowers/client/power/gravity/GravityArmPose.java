@@ -92,7 +92,7 @@ public final class GravityArmPose {
 	}
 
 	/** In mid-air, the slam pitches the whole body forward (about 40 degrees, legs swinging up behind), about the middle. */
-	private static final float FLIP = 40.0F * Mth.DEG_TO_RAD, FLIP_TICKS = 5.0F, MIDDLE = 12.0F;
+	private static final float FLIP = 30.0F * Mth.DEG_TO_RAD, FLIP_TICKS = 5.0F, MIDDLE = 12.0F;
 
 	private static void flip(HumanoidModel<?> humanoid, float t, int rise) {
 		if (t < rise) {
