@@ -29,11 +29,12 @@ import net.minecraft.world.phys.Vec3;
  * {@code STRUGGLE_TICKS}, comes free, drifts in (faster as it nears) and joins the {@code MAX_ORBIT} at most that
  * circle you. Lift (R) can take one from the ring; right click while holding it pockets it. Charging Crush (B) draws
  * the ring to the target, and the release flings them outward in a shockwave that hurts ({@code SHOCK_PER_BLOCK} for
- * each).
+ * each). Crush released inside your own Gravity Well (the cave-in) rains them instead: one every {@code RAIN_EVERY},
+ * each lining up over the nearest creature the well caught and plummeting onto it.
  */
 final class GravityOrbit {
 	static final double TEAR_RADIUS = 5.0;
-	static final int TEAR_EVERY = 30, STRUGGLE_TICKS = 25, MAX_ORBIT = 8;
+	static final int TEAR_EVERY = 30, STRUGGLE_TICKS = 25, MAX_ORBIT = 3;
 	static final float TEAR_CHANCE = 0.6F, HEAVY_SHARE = 0.1F;
 	/** Heavy: at least this hard (stone is 1.5), and not wood. */
 	static final float HEAVY_HARDNESS = 1.5F;
@@ -42,6 +43,9 @@ final class GravityOrbit {
 	/** The Crush shockwave: hurt per orbiting block, to everything in the blast, and how hard they're thrown out. */
 	static final float SHOCK_PER_BLOCK = 2.0F;
 	static final double SHOCK_THROW = 1.4;
+	/** The rain (G+B): one block let go this often (ticks), how long it takes to line up over its target, how high above it, how fast it comes down. */
+	static final int RAIN_EVERY = 8, RAIN_ALIGN_TICKS = 5;
+	static final double RAIN_HEIGHT = 5.0, RAIN_SPEED = 2.2, RAIN_HOVER = 3.0;
 
 	/** A block coming loose: where, and since when. */
 	private record Struggle(BlockPos pos, long since) {
@@ -56,6 +60,31 @@ final class GravityOrbit {
 	}
 
 	private static final Map<UUID, Ring> RINGS = new HashMap<>();
+
+	/** A ring raining down on a cave-in, one block at a time. */
+	private static final class Rain {
+		final net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimension;
+		final UUID owner;
+		final Vec3 center;
+		final double radius;
+		final List<Integer> queue;
+		long next;
+		/** The block lining up now (-1: none), since when, and from where. */
+		int aligning = -1;
+		long alignFrom;
+		Vec3 alignStart = Vec3.ZERO;
+
+		Rain(net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimension, UUID owner, Vec3 center, double radius, List<Integer> queue, long next) {
+			this.dimension = dimension;
+			this.owner = owner;
+			this.center = center;
+			this.radius = radius;
+			this.queue = queue;
+			this.next = next;
+		}
+	}
+
+	private static final List<Rain> RAINS = new ArrayList<>();
 
 	private GravityOrbit() {
 	}
@@ -212,6 +241,122 @@ final class GravityOrbit {
 		return spent;
 	}
 
+	/**
+	 * Crush released inside your own Gravity Well ({@code center}, {@code radius}): the ring (orbiting and drifting
+	 * alike) is let go one block at a time, each onto the nearest creature the well caught (see {@link #tickRain}).
+	 */
+	static void rain(ServerPlayer player, Vec3 center, double radius) {
+		Ring ring = RINGS.get(player.getUUID());
+		if (ring == null) {
+			return;
+		}
+		ring.crushAt = null;
+		List<Integer> queue = new ArrayList<>(ring.orbiting);
+		queue.addAll(ring.drifting);
+		ring.orbiting.clear();
+		ring.drifting.clear();
+		if (queue.isEmpty()) {
+			return;
+		}
+		ServerLevel level = player.level();
+		RAINS.add(new Rain(level.dimension(), player.getUUID(), center, radius, queue, level.getGameTime() + RAIN_EVERY));
+		level.playSound(null, center.x, center.y + RAIN_HOVER, center.z, SoundEvents.RESPAWN_ANCHOR_DEPLETE.value(), SoundSource.PLAYERS, 1.2F, 0.5F);
+	}
+
+	static void tickRain(net.minecraft.server.MinecraftServer server) {
+		if (RAINS.isEmpty()) {
+			return;
+		}
+		for (Iterator<Rain> it = RAINS.iterator(); it.hasNext(); ) {
+			Rain rain = it.next();
+			ServerLevel level = server.getLevel(rain.dimension);
+			if (level == null) {
+				it.remove();
+				continue;
+			}
+			long now = level.getGameTime();
+			ServerPlayer owner = server.getPlayerList().getPlayer(rain.owner);
+			// the rest hang over the well, waiting their turn
+			rain.queue.removeIf(id -> !(level.getEntity(id) instanceof BlockCluster cluster) || !cluster.scripted());
+			int n = rain.queue.size(), i = 0;
+			for (int id : rain.queue) {
+				Entity block = level.getEntity(id);
+				double a = now * ORBIT_TURN * 2.0 + i * Math.PI * 2.0 / Math.max(1, n);
+				Vec3 spot = rain.center.add(Math.cos(a) * 1.5, RAIN_HOVER + Math.sin(a * 2.0) * 0.4, Math.sin(a) * 1.5);
+				move(block, block.position().add(spot.subtract(block.position()).scale(0.25)));
+				i++;
+			}
+			if (rain.aligning >= 0) {
+				Entity block = level.getEntity(rain.aligning);
+				if (!(block instanceof BlockCluster cluster) || !cluster.scripted()) {
+					rain.aligning = -1;
+				} else {
+					// over the nearest creature still in the well (or the middle, if none)
+					LivingEntity target = nearest(level, rain, owner, block.position());
+					Vec3 over = above(level, target != null ? target.position() : rain.center, target != null ? target.getBbHeight() : 0.0);
+					double p = Math.min(1.0, (now - rain.alignFrom) / (double)RAIN_ALIGN_TICKS);
+					p = p * p * (3.0 - 2.0 * p);
+					move(block, rain.alignStart.lerp(over, p));
+					if (now - rain.alignFrom >= RAIN_ALIGN_TICKS) {
+						// and straight down onto it
+						cluster.script(false, false);
+						cluster.setDeltaMovement(0.0, -RAIN_SPEED, 0.0);
+						cluster.needsSync = true;
+						cluster.syncVelocity = true;
+						cluster.launch(owner);
+						if (target != null && owner != null) {
+							GravityPower.touch(target, owner);
+						}
+						level.sendParticles(ParticleTypes.REVERSE_PORTAL, over.x, over.y + 0.5, over.z, 8, 0.3, 0.3, 0.3, 0.05);
+						level.playSound(null, over.x, over.y, over.z, SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 0.6F, 1.8F);
+						rain.aligning = -1;
+					}
+				}
+			}
+			if (rain.aligning < 0 && now >= rain.next && !rain.queue.isEmpty()) {
+				int id = rain.queue.remove(0);
+				Entity block = level.getEntity(id);
+				rain.aligning = id;
+				rain.alignFrom = now;
+				rain.alignStart = block.position();
+				rain.next = now + RAIN_EVERY;
+				level.playSound(null, block.getX(), block.getY(), block.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.8F, 0.6F);
+			}
+			if (rain.aligning < 0 && rain.queue.isEmpty()) {
+				it.remove();
+			}
+		}
+	}
+
+	/** The living thing in the rain's well nearest {@code from}, not its owner. */
+	private static LivingEntity nearest(ServerLevel level, Rain rain, ServerPlayer owner, Vec3 from) {
+		LivingEntity best = null;
+		double bestD = Double.MAX_VALUE;
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(rain.center, rain.center).inflate(rain.radius),
+			e -> e != owner && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && e.position().distanceTo(rain.center) <= rain.radius)) {
+			double d = living.position().distanceToSqr(from);
+			if (d < bestD) {
+				bestD = d;
+				best = living;
+			}
+		}
+		return best;
+	}
+
+	/** Up to {@code RAIN_HEIGHT} over the top of something {@code height} tall at {@code at}, under any ceiling. */
+	private static Vec3 above(ServerLevel level, Vec3 at, double height) {
+		double y = at.y + height + 1.0;
+		double top = at.y + height + RAIN_HEIGHT;
+		while (y + 1.0 < top) {
+			BlockPos pos = BlockPos.containing(at.x, y + 1.5, at.z);
+			if (!level.getBlockState(pos).getCollisionShape(level, pos).isEmpty()) {
+				break;
+			}
+			y += 1.0;
+		}
+		return new Vec3(at.x, y, at.z);
+	}
+
 	/** The form is gone (or the player): the ring falls apart. */
 	static void drop(ServerPlayer player) {
 		Ring ring = RINGS.remove(player.getUUID());
@@ -245,6 +390,7 @@ final class GravityOrbit {
 
 	static void clear() {
 		RINGS.clear();
+		RAINS.clear();
 	}
 
 	/** (for HUD/debug) how many circle this player. */

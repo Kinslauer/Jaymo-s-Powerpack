@@ -38,6 +38,28 @@ mid-ability. The HUD is in `client/power/gravity/GravityPowerClient.java`: chips
 - **Cure:** spend 10 continuous seconds under Levitation from something else (a Shulker) while collapsed. The first
   time you levitate, you get a one-line whisper.
 
+## 0.8.0: Collapsing Horizon (ascended + corrupted)
+- **Skyfall (C) + Weightless:** if Weightless is on when you cast, or you switch it on during the 3 s rise (within
+  20 blocks of where you cast), you rise with everything else. You're never slammed and never hurt by it. After the
+  rise you hang where it left you, with no weight at all, for as long as Weightless lasts (up to 30 s). Touching down
+  on something also ends the hang. When Weightless ends (timeout, V, water, hunger), you drift down at Weightless's
+  weight and land without fall damage. Rock flight, flying, gliding, water or lava end the ride.
+  `GravitySkyfall.airborne(Entity)` and `GravitySkyfall.riding(ServerPlayer)` let other powers check who is up there.
+- **Staggered slam:** nothing comes down together. Each creature and each block drops at its own random moment in the
+  1.5 s (`STAGGER_TICKS` = 30) after the rise, and hangs there until its turn. Each creature's landing damage (fall
+  height × size × 0.4) is multiplied by its own roll of ×0.6–1.5. Every landing (creature or block) gets its own heavy
+  mace thud and a small shake. The sonic boom, the explosion and the big shake come when the last one lands. Cleanup
+  waits up to 200 ticks after the stagger window.
+- **Orbit:** at most 3 blocks circle you (orbiting plus drifting in). Plain Crush (B) still flings them out in a
+  shockwave. **G+B** (Crush released inside your own Gravity Well, the cave-in) now rains them instead. They gather
+  over the well, then every 8 ticks one is released. It lines up (in 5 ticks) up to 5 blocks over the nearest
+  creature the well caught, staying under any ceiling, and drops straight onto it at 2.2 blocks/tick. Before 0.8 they
+  were never released on that path.
+- **Soft blocks** (hardness ≤ 0.6 (`BlockCluster.SOFT_HARDNESS`): dirt, grass, sand, gravel, clay, soul sand, snow,
+  concrete powder, leaves; plus wool, which is 0.8 but listed as soft) deal at most 1.0 (half a heart). This applies
+  to any thrown `BlockCluster` made only of soft blocks, from any power, and to cave-in falling blocks. A chunk with
+  any hard block keeps the normal formula.
+
 ## Testing
 - `/power set @s gravity`
 - `/powerdebug gravity ready` clears every cooldown.
