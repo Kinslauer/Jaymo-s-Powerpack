@@ -325,6 +325,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			(target, level) -> this.combatant() && target instanceof Enemy && !(target instanceof net.minecraft.world.entity.monster.Creeper)));
 		// barbarians hunt everyone else's people, and realms' folk hunt barbarians
 		Barbarians.addGoals(this, this.goalSelector, this.targetSelector);
+		// realms at war: each other's folk (and sworn players) on sight
+		Wars.addGoals(this, this.targetSelector);
 	}
 
 	/** {@code other} is on its side: the same faction, or one allied with it. */

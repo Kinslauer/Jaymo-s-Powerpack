@@ -378,6 +378,10 @@ public final class KingdomEvents {
 		}
 		announce(server, Component.translatable(lord ? "message.jaymoskingdoms.lord_fallen" : "message.jaymoskingdoms.king_fallen", faction.name(),
 			killer == null ? Component.translatable("message.jaymoskingdoms.someone") : killer.getDisplayName()).withStyle(ChatFormatting.RED));
+		// a ruler killed by the other side of a war: the war decides
+		if (Wars.rulerFell(level, faction, source)) {
+			return;
+		}
 		// one of three fates, at random
 		Faction victor = killer == null ? null : Factions.of(server, killer.getUUID());
 		int fate = level.getRandom().nextInt(3);

@@ -50,5 +50,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Buildings.register();
 		Construction.register();
 		Theft.register();
+		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
+		LOGGER.debug("war attachment: {}", WarData.WARS);
+		Wars.register();
 	}
 }

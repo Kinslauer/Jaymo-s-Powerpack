@@ -227,6 +227,10 @@ public final class Theft {
 			int lost = Math.max(0, open.pack.getOrDefault(e.getKey(), 0) - pack.getOrDefault(e.getKey(), 0));
 			given += Math.min(in, lost);
 		}
+		if (taken > given && Wars.plunder(player, level, f, taken - given)) {
+			// (at war: plunder, not theft)
+			return;
+		}
 		if (given > taken) {
 			gift(player, level, f, given - taken);
 		} else if (!exempt(player, f)) {
@@ -358,6 +362,10 @@ public final class Theft {
 	 * cry, guards after them (medium), outlawry (heavy). If not, and it was a theft ({@code noticeable}), it's noticed later.
 	 */
 	static void commit(ServerPlayer player, ServerLevel level, Faction f, Crime crime, BlockPos pos, @Nullable Weight weight, boolean noticeable) {
+		if (Wars.enemy(player, f)) {
+			// (no crime against a realm at war with yours)
+			return;
+		}
 		Weight w = weight != null ? weight : crime.weight;
 		List<LivingEntity> seen = witnesses(level, f, player);
 		if (seen.isEmpty()) {

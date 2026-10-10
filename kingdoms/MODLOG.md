@@ -386,3 +386,127 @@ belong to realms and villages (they need claimed land).
 **Theft API:** `Theft.wanted(player, factionId)` and `Theft.outlaw(player, factionId)`.
 
 **Attachments:** `Works.WORKS` (Overworld) and `Theft.WANTED` (players). Both are listed in `JaymosKingdoms`.
+
+## 0.3.0, track 4: war
+Built, not yet seen in game. The plan is `docs/Kingdoms-Plan-0.3.md` section E. New classes: `Wars` (sides, declaring,
+NPC kings, the score, peace and its terms, war-time goals), `WarData` (the saved state: attachment `WARS` on the
+Overworld), `Banners` (planting, holding, claiming, tearing down), `WarParties` (NPC soldiers on the march) and
+`WarCommands` (`/kingdom war ...`). Shared files got one-line hooks: `JaymosKingdoms` (`Wars.register()`, the
+attachment), `KingdomCommands` (`.then(WarCommands.command())`), `Folk.registerGoals` (`Wars.addGoals`),
+`KingdomEvents.folkDied` (`Wars.rulerFell` before the fates), `Theft` (plunder, and no crimes against a realm at war
+with yours), and a block at the end of `en_us.json`. Every number is a constant at the top of its class.
+
+### What's new
+- **Sides.** A war is between two **principals**, the realms at the head of each side. Every fiefdom beneath a
+  principal fights with it:
+  - a war declared by a fiefdom is declared in its overlord's name;
+  - a war declared on a fiefdom is against its overlord's whole side.
+  
+  While the war is on, every pair of realms across the two sides is stored as `WAR`, so `Economy.atPeace` stops
+  construction on both sides. `Wars.syncRelations` keeps this in step: a realm that changes sides mid-war is at war with
+  its old side. A stored war that no war accounts for (an operator's `/kingdom relation a b war`) becomes a war under
+  way at once. Barbarians and villages take no part.
+- **Declaring.** A member **lord** declares with `/kingdom war declare <name>`. NPC kings decide on their own:
+  - once a day, neighbouring kingdoms (seats within 800) with nothing between them may become **rivals** (15% a pair,
+    announced);
+  - every minute, a kingdom at peace gets its share of a 30%-a-day chance to declare on its weakest rival within 1000,
+    if its own army is at least 1.25 times the rival's. The army is the guards and archers of the whole side, with
+    each leader worth 4.
+  
+  A declaration is announced to everyone. After a **warm-up of one day**, the war begins (announced, with war horns).
+  A declaration is refused against an ally, a realm on the same side, a realm already in a war with you, or during a
+  **truce** (3 days after a peace).
+- **During war.** Fighting folk attack the folk of realms at war with theirs on sight, and those realms' sworn players
+  too (`HUNT_ENEMY_PLAYERS`).
+- **War parties** (`WarParties`, modelled on `Raids`):
+  - Every 10 s, each side may send a party (15% chance, at most once a quarter day) against the nearest enemy realm
+    with a player within 96 of its seat.
+  - A party is 3, plus 1 per 3 of the sending realm's guards and archers, up to 9. They're dressed as its guards.
+  - It musters on the enemy's land on the attacker's side, on a claimable frontier chunk if one is loaded, and is
+    announced with horns.
+  - The bearer plants their banner on the first claimable chunk he stands on, and 2 soldiers stay to hold it.
+  - The rest march on the seat (2 minutes at most), plant a banner within 24 of it (a siege), and fight round it for
+    3 minutes. Then they withdraw and vanish once out of sight.
+  - Parties aren't on the roster, so their dead aren't replaced. They aren't saved: soldiers left after a restart
+    vanish.
+- **Unseen battles.** If nobody is near a war (no player within 128 of either principal's seat, no party out), it's
+  fought out of sight. Every quarter day there are 4 blows, each a kill for one side, with odds by army size.
+- **Banners** (`Banners`):
+  - **Planting:** a sworn player plants a banner of their realm's colour in the land of a realm on the other side. The
+    colour can be the realm's own, the colour its folk wear, or its principal's.
+  - **Which chunks:** only a chunk bordering land their side holds, or on the enemy's **frontier** (bordering land
+    nobody holds), can be claimed. Otherwise the player is told why.
+  - **Sieges:** a banner within 24 of an enemy realm's seat **besieges** it.
+  - **Holding:** every second, if none of the enemy side's fighting folk or sworn players (not creative) are within 16,
+    the hold goes on. If one is, it pauses. A boss bar shows to players within 64: yellow, or red when contested.
+  - **Claiming:** held for 60 s, the chunk passes to the planter's realm (+1 chunk to the score). Held for 4 minutes at
+    a seat, the seat falls.
+  - **Tearing down:** enemy fighting folk within 40 go to tear it down. Up to 3 go per banner; their post moves to it
+    until it's down, then they're put back (also on shutdown). Anyone breaking it ends the claim.
+  - NPC parties plant banners in their realm's folk colour.
+  - Banners and their progress are saved. Banners of a finished war stay as plain banners.
+- **The score** (`WarData.Side`):
+  - 2 per enemy folk killed, by a player or a folk of the side;
+  - 40 per enemy leader (a lord);
+  - 10 per chunk taken (a vassal's seat counts as 3 chunks);
+  - 1 per 16 items plundered.
+  
+  **Plunder:** when a sworn player takes from the storage of a realm at war with theirs, it counts for the score and
+  isn't theft. None of their crimes against that realm count while the war lasts, though killing its folk still costs
+  the usual reputation with it.
+  
+  `/kingdom war status` shows, for each war: the warm-up or time left, both sides' scores, armies and allies, any
+  standing offer, the terms peace would bring now, and the banners being held.
+- **Peace** comes in three ways:
+  - when a side has 120 and leads by 50;
+  - after 5 days, on the terms the score gives;
+  - when a lord offers it (`/kingdom war peace offer [enemy]`) and a lord of the other side accepts
+    (`... accept [enemy]`, or a clickable line sent to its lords). An offer stands for 2 minutes. A side without lords
+    answers through its ruler after 10 s: he accepts when the terms favour him, when he's 30 behind, or for a white
+    peace once the war is 2 days old. Otherwise he refuses, and it's announced.
+- **Terms**, by the winner's lead:
+  - under 15: a white peace;
+  - from 15: **tribute**. That's 30% of the loser's treasury (at least 10 emeralds, as far as it goes), and 6 loads of
+    real goods of up to a stack each, valuables first half the time, moved from its storage to the winner's. When
+    either storage isn't loaded, each load is paid as 4 emeralds instead;
+  - from 45: tribute and **4 chunks ceded**, nearest the winner, never within 2 chunks of the loser's seat;
+  - from 90: **vassalage**, with tribute. `Relations.vassalize` makes the loser the winner's fiefdom.
+- **Decisive ends.** Either of these ends the war at once with vassalage:
+  - killing the enemy principal's ruler, by a player or folk of the other side (a player sworn to neither side takes
+    the other side by doing it). The realm then skips the usual three fates, and a lord succeeds in a day;
+  - holding a banner at the enemy principal's seat.
+  
+  Holding the seat of a *vassal* on the other side makes it the taker's fiefdom instead, so it changes sides.
+- **After a peace,** the two principals are rivals (unless one is now the other's vassal) under a 3-day truce. A war
+  whose principal falls, or whose sides become one, ends with nothing changing hands.
+- **Reputation:**
+  - killing enemy folk: +6 with every realm of the side the player helps (+50 for a leader), on top of the usual loss
+    with the victim's realm;
+  - planting a banner that takes a chunk: +15 with the side, and -10 with the land's owner. Sworn players holding it
+    with them get +5;
+  - tearing down an enemy banner: +8;
+  - plunder: +1 per 16 items (at most 8).
+  
+  Each time, realms outside the war that are allied with the side helped gain 2, and those allied with the side hurt
+  lose 2.
+- **Commands:** `/kingdom war status | declare <name> | peace offer|accept [name]`. For operators:
+  - `war start <a> <b>`: no warm-up;
+  - `war end <name>`: a white peace;
+  - `war party`: a war sends a party now, wherever the enemy's seat is loaded;
+  - `war npc`: kings consider their rivals now.
+
+### Notes for the lead and testers
+- `WarData.WARS` is a new persistent (not synced) attachment, class-loaded from `JaymosKingdoms.onInitialize`.
+- **Deviation:** the plan says only chunks next to land you hold can be claimed. Realms' lands are 100+ blocks apart, so
+  the enemy's frontier chunks (bordering unclaimed land) count too, and a banner near the seat can besiege it from
+  anywhere. From there, land is taken chunk by chunk inward.
+- A realm vassalized by treaty keeps its living king (in the king's role and its old colours) until he dies. Its next
+  ruler is a lord, as with the "vassal" fate.
+- **Check first:**
+  - a lord declaring, and the warm-up announcement;
+  - `war start`, then `war party` near the enemy's seat: the frontier banner, the march, the siege banner and its bar;
+  - planting a banner by hand on a frontier chunk and holding it for 60 s, and guards tearing it down;
+  - plunder from the enemy's storehouse (no "Thief!");
+  - `war status`;
+  - a peace offer and acceptance, and each kind of terms (`war start`, then kill folk or take chunks to move the
+    score).
