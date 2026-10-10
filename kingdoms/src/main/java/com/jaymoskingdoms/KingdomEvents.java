@@ -351,7 +351,8 @@ public final class KingdomEvents {
 		ServerPlayer killer = source.getEntity() instanceof ServerPlayer p ? p : null;
 		if (!folk.leader()) {
 			Economy.lost(server, faction.id(), folk.role());
-			if (killer != null) {
+			// a camp's hatred of you changes nothing: barbarians are at war with everyone already
+			if (killer != null && faction.type() != FactionType.BARBARIAN) {
 				Reputation.change(killer, faction, Folk.isBuilder(folk.role()) ? REP_KILL_BUILDER : REP_KILL_GUARD);
 			}
 			return;
@@ -406,7 +407,8 @@ public final class KingdomEvents {
 	static void audience(ServerPlayer player, Folk folk) {
 		MinecraftServer server = player.level().getServer();
 		Faction faction = Factions.get(server, folk.factionId());
-		if (faction == null) {
+		// barbarians don't hold court
+		if (faction == null || faction.type() == FactionType.BARBARIAN) {
 			return;
 		}
 		int rep = Reputation.get(player, faction.id());
