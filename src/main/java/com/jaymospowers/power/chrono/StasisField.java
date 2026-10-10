@@ -33,8 +33,8 @@ import net.minecraft.world.phys.Vec3;
  */
 final class StasisField {
 	static final double RADIUS = 6.0;
-	/** As long as Rewind's window: time stops for the same 3 seconds Rewind can undo. */
-	static final int DURATION = ChronoPower.REWIND_TICKS;
+	/** Time stops for 3 s on a fresh power (Rewind's window), growing with each ability unlocked to 6 s. */
+	static final int DURATION = ChronoPower.REWIND_TICKS, DURATION_MASTERED = 120;
 	/** Released knockback is capped to this speed (blocks/tick), so stacked hits can't fling a mob across the map. */
 	private static final double MAX_RELEASE_SPEED = 1.4;
 	private static final DustParticleOptions GOLD_DUST = new DustParticleOptions(0xF2C14E, 1.1F);
@@ -47,14 +47,23 @@ final class StasisField {
 	final Vec3 center;
 	/** The caster, who moves freely in their own stopped time. */
 	final java.util.UUID owner;
-	int ticksLeft = DURATION;
+	final int duration;
+	int ticksLeft;
 	private int age;
 	private final List<Entity> held = new ArrayList<>();
 
-	StasisField(ServerLevel level, Vec3 center, java.util.UUID owner) {
+	StasisField(ServerLevel level, Vec3 center, java.util.UUID owner, int duration) {
 		this.level = level;
 		this.center = center;
 		this.owner = owner;
+		this.duration = duration;
+		this.ticksLeft = duration;
+	}
+
+	/** How long a field of this player's lasts. */
+	static int duration(net.minecraft.world.entity.player.Player player) {
+		return net.minecraft.util.Mth.lerpInt(com.jaymospowers.core.Mastery.unlocked(player) / (float)com.jaymospowers.core.Mastery.ALL,
+			DURATION, DURATION_MASTERED);
 	}
 
 	/** A stopped player can't act: no attacking, mining, building, using items or interacting. */

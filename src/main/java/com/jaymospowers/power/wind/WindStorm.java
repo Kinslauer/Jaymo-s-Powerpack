@@ -43,7 +43,9 @@ import net.minecraft.world.phys.Vec3;
  * <li><b>The lightning</b> is a visual-only bolt plus this class's own damage, so it never sets blocks alight (no
  * burnt-down bases) and never hurts its caster. Mobs it hits still burn.</li>
  * <li><b>The cure:</b> hover at {@link #EYE_MIN_Y}+ in the Overworld during a thunderstorm for {@link #EYE_TICKS}
- * without casting.</li>
+ * without casting. Or wait it out: the storm blows itself out {@link #CURE_TICKS} (three Minecraft days) after it
+ * took you, counted in world time from {@link #STORMBOUND_SINCE} (so it runs while you're away too). Or stand in falling
+ * snow for {@link #SNOW_TICKS}: a snowstorm smothers it.</li>
  * </ul>
  */
 public final class WindStorm {
@@ -67,6 +69,10 @@ public final class WindStorm {
 	/** The Eye of the Storm: how high, and how long (60 s), hovering in a thunderstorm without casting. */
 	static final double EYE_MIN_Y = 192.0;
 	public static final int EYE_TICKS = 1200;
+	/** Stormbound blows itself out this long (3 Minecraft days) after it took hold. */
+	public static final long CURE_TICKS = 3L * 24000L;
+	/** Standing in falling snow this long (10 s, without a break) smothers the storm. */
+	public static final int SNOW_TICKS = 200;
 	/** The calm is synced in this many steps (so others see the static fade). */
 	public static final int CALM_STEPS = 20;
 
@@ -76,12 +82,21 @@ public final class WindStorm {
 	public static final AttachmentType<Integer> CALM = AttachmentRegistry.create(JaymosPowers.id("wind_calm"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 
+	/**
+	 * When (overworld game time) this wind turned Stormbound. Saved and kept through death; set on the first tick it's
+	 * missing while Stormbound (a corruption from before 0.7 starts its count then).
+	 */
+	public static final AttachmentType<Long> STORMBOUND_SINCE = AttachmentRegistry.create(JaymosPowers.id("wind_stormbound_since"),
+		builder -> builder.persistent(com.mojang.serialization.Codec.LONG).copyOnDeath());
+
 	private static final Map<UUID, Data> DATA = new HashMap<>();
 
 	private static final class Data {
 		int activeTicks;
 		int drainTicks;
 		int calmTicks;
+		/** Ticks in a row stood in falling snow while Stormbound. */
+		int snowTicks;
 		int sinceCast = 1000;
 		/** The whisper has been given this storm. */
 		boolean hinted;
@@ -143,6 +158,9 @@ public final class WindStorm {
 			d.hinted = false;
 		}
 		if (corrupted) {
+			if (timedCure(player, level, d)) {
+				return;
+			}
 			if (thunder && !d.hinted && flight.flying()) {
 				d.hinted = true;
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.wind.whisper").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
@@ -160,12 +178,51 @@ public final class WindStorm {
 			}
 		} else {
 			d.calmTicks = 0;
+			d.snowTicks = 0;
+			if (player.getAttached(STORMBOUND_SINCE) != null) {
+				player.removeAttached(STORMBOUND_SINCE);
+			}
 		}
 		syncCalm(player, d);
 	}
 
+	/**
+	 * The two cures that need no climb: three days gone by, or a snowstorm. Returns true if the player was purified
+	 * (nothing else this tick).
+	 */
+	private static boolean timedCure(ServerPlayer player, ServerLevel level, Data d) {
+		long now = level.getServer().overworld().getGameTime();
+		Long since = player.getAttached(STORMBOUND_SINCE);
+		if (since == null || since > now) {
+			player.setAttached(STORMBOUND_SINCE, now);
+			since = now;
+		}
+		boolean snowing = level.precipitationAt(net.minecraft.core.BlockPos.containing(player.getEyePosition()))
+			== net.minecraft.world.level.biome.Biome.Precipitation.SNOW;
+		d.snowTicks = snowing ? d.snowTicks + 1 : 0;
+		if (snowing && d.snowTicks % 10 == 0) {
+			// the snow hisses where it meets the static
+			level.sendParticles(net.minecraft.core.particles.ParticleTypes.SNOWFLAKE, player.getX(), player.getY() + 1.0, player.getZ(), 6, 0.5, 0.7, 0.5, 0.02);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.25F, 1.6F);
+		}
+		boolean blownOut = now - since >= CURE_TICKS;
+		if (!blownOut && d.snowTicks < SNOW_TICKS) {
+			return false;
+		}
+		d.snowTicks = 0;
+		d.calmTicks = 0;
+		player.sendSystemMessage(Component.translatable(blownOut ? "message.jaymospowers.wind.cured_days" : "message.jaymospowers.wind.cured_snow")
+			.withStyle(ChatFormatting.AQUA, ChatFormatting.ITALIC));
+		Fate.purify(player);
+		removeSlow(player);
+		player.removeAttached(STORMBOUND_SINCE);
+		syncCalm(player, d);
+		return true;
+	}
+
 	private static void syncCalm(ServerPlayer player, Data d) {
-		int calm = Math.min(CALM_STEPS, d.calmTicks * CALM_STEPS / EYE_TICKS);
+		// the eye's calm or the snow's, whichever is further along
+		int calm = Math.min(CALM_STEPS, Math.max(d.calmTicks * CALM_STEPS / EYE_TICKS, d.snowTicks * CALM_STEPS / SNOW_TICKS));
 		Integer current = player.getAttached(CALM);
 		if (calm == 0) {
 			if (current != null) {
@@ -247,7 +304,19 @@ public final class WindStorm {
 		Data d = DATA.get(player.getUUID());
 		if (d != null) {
 			d.calmTicks = 0;
+			d.snowTicks = 0;
 		}
+	}
+
+	/** How long this wind has been Stormbound, in ticks (0 if it isn't). */
+	static long stormboundTicks(ServerPlayer player) {
+		Long since = player.getAttached(STORMBOUND_SINCE);
+		return since == null ? 0L : Math.max(0L, player.level().getServer().overworld().getGameTime() - since);
+	}
+
+	/** Debug: pretend the storm took hold {@code ticks} ago. */
+	static void setStormboundTicks(ServerPlayer player, long ticks) {
+		player.setAttached(STORMBOUND_SINCE, player.level().getServer().overworld().getGameTime() - Math.max(0L, ticks));
 	}
 
 	static void forget(ServerPlayer player) {

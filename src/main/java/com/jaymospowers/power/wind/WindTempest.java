@@ -40,14 +40,12 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Ascension: the Tempest. Breezes killed on the wing are counted; the fifth gives up a Gale Heart, which ascends a wind
- * that has mastered everything. The ascended ability, Cyclone Lance, is here too.
+ * Ascension: the Tempest. A breeze killed by a wind that hasn't ascended gives up a Gale Heart {@link #HEART_CHANCE} of
+ * the time; the heart ascends a wind that has mastered everything. The ascended ability, Cyclone Lance, is here too.
  */
 public final class WindTempest {
-	/** Breezes needed (killed while flying) before one gives up its heart; it happens again on every multiple. */
-	public static final int BREEZES_FOR_HEART = 5;
-	/** A kill still counts this long (3 s) after leaving flight. */
-	static final int FLEW_RECENTLY_TICKS = 60;
+	/** The chance a breeze killed by a wind (not yet ascended) gives up its heart. No flight needed, no mastery to get it. */
+	public static final float HEART_CHANCE = 0.66F;
 
 	/** Cyclone Lance: reach, hit radius around the line, damage (bypasses armour), knockback along the line, cooldown. */
 	static final double LANCE_RANGE = 32.0;
@@ -63,7 +61,7 @@ public final class WindTempest {
 	/** Spiral particles per block of lance, per strand. */
 	static final int LANCE_PARTICLES_PER_BLOCK = 2;
 
-	/** Breezes killed in flight (while able to ascend). Saved, kept through death; reset when the power goes. */
+	/** Breezes killed (counted for the chime's pitch only since 0.7). Saved, kept through death; reset when the power goes. */
 	public static final AttachmentType<Integer> BREEZE_KILLS = AttachmentRegistry.create(JaymosPowers.id("wind_breeze_kills"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath());
 
@@ -102,15 +100,15 @@ public final class WindTempest {
 		if (!(entity instanceof Breeze breeze) || !(source.getEntity() instanceof ServerPlayer player) || !(breeze.level() instanceof ServerLevel level)) {
 			return;
 		}
-		if (!Powers.has(player, WindPower.INSTANCE) || !Fate.canAscend(player) || !WindPower.INSTANCE.flewRecently(player, FLEW_RECENTLY_TICKS)) {
+		if (!Powers.has(player, WindPower.INSTANCE) || Fate.isAscended(player)) {
 			return;
 		}
 		int kills = breezeKills(player) + 1;
 		setBreezeKills(player, kills);
 		// a faint answering chime from the dying breeze, a little higher each time
-		float pitch = 0.6F + 0.15F * Math.min(kills, BREEZES_FOR_HEART);
+		float pitch = 0.6F + 0.15F * Math.min(kills, 5);
 		level.playSound(null, breeze.getX(), breeze.getY(), breeze.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.8F, pitch);
-		if (kills % BREEZES_FOR_HEART == 0) {
+		if (player.getRandom().nextFloat() < HEART_CHANCE) {
 			ItemStack heart = new ItemStack(GALE_HEART);
 			breeze.spawnAtLocation(level, heart);
 			level.sendParticles(ParticleTypes.GUST_EMITTER_SMALL, breeze.getX(), breeze.getY() + 0.5, breeze.getZ(), 1, 0.0, 0.0, 0.0, 0.0);

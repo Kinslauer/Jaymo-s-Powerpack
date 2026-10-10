@@ -22,7 +22,7 @@
 	"hud.jaymospowers.wind.tumble": "OUT OF CONTROL",
 	"item.jaymospowers.wind_gale_heart": "Gale Heart",
 	"item.jaymospowers.wind_gale_heart.lore1": "Still turning, though nothing turns it.",
-	"item.jaymospowers.wind_gale_heart.lore2": "The fifth one let go.",
+	"item.jaymospowers.wind_gale_heart.lore2": "A breeze let it go.",
 	"message.jaymospowers.wind.whisper": "The storm is quieter above...",
 	"death.attack.jaymospowers.wind_lance": "%1$s was run through by a gale",
 	"death.attack.jaymospowers.wind_lance.player": "%1$s was run through by %2$s's gale",
@@ -47,5 +47,8 @@
 	"message.jaymospowers.soras_dagger.forged": "The winds take the blade. Sora's Dagger is Tempest-forged.",
 	"message.jaymospowers.wind.no_storm": "No storm overhead to call down.",
 	"message.jaymospowers.wind.shield_blown": "Your wind tears the shield from your grip.",
+	"message.jaymospowers.wind.no_eating": "The storm won't sit still long enough to eat.",
+	"message.jaymospowers.wind.cured_days": "Three days on, the storm in you has blown itself out.",
+	"message.jaymospowers.wind.cured_snow": "The snow smothers the storm in you. The static is gone.",
 	"power.jaymospowers.wind.key.special": "Tempest Kick (X, everything mastered): a white crescent of wind, 5 blocks (ascended: 20)"
 }

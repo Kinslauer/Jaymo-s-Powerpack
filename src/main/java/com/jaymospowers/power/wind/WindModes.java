@@ -57,11 +57,15 @@ import net.minecraft.world.phys.Vec3;
  * whenever you use an ability.</li>
  * <li><b>Tempest mode</b> (ascended): a circling wind deflects projectiles, and your other abilities are
  * {@link #TEMPEST_ABILITY_SCALE} times as strong.</li>
- * <li>Both (ascended and corrupted): one mode with all of it.</li>
+ * <li>Both (ascended and corrupted): one mode with all of it, the <b>Thunderhead</b>: now and then lightning flashes
+ * across the screens of everyone nearby (white, then black) with thunder, and it's the hungriest.</li>
+ * <li>Any mode: no eating while it's on. Turning one on washes the screens of everyone near in its colour (blue for the
+ * storm, white for the tempest).</li>
  * <li><b>Call Lightning</b> (B while Stormbound, replacing Zephyr's Breath): a bolt where you aim, for moderate damage, a
  * good bite of hunger, and a little static that arcs back into you.</li>
  * <li><b>The starter</b>: a faint cloak of wind, kept for good: slightly quicker on foot, and holding Jump in mid-air
- * slows your fall (client side; here, a slow descent isn't counted as a fall).</li>
+ * slows your fall (client side; here, a slow descent isn't counted as a fall, and {@link #DRIFTING} is synced so everyone
+ * sees the wisps of cloud).</li>
  * </ul>
  */
 public final class WindModes {
@@ -82,8 +86,9 @@ public final class WindModes {
 	static final float CAST_ZAP_CHANCE = 0.35F;
 	static final float IDLE_ZAP_DAMAGE = 1.5F;
 	static final float CAST_ZAP_DAMAGE = 3.0F;
-	/** The mode's hunger, per tick; at or below this much food (three shanks) it gives out, and won't start. */
+	/** The mode's hunger, per tick (the Thunderhead's is the most); at or below this much food (three shanks) it gives out, and won't start. */
 	static final float MODE_EXHAUSTION = 0.01F;
+	static final float THUNDERHEAD_EXHAUSTION = 0.025F;
 	static final int MODE_MIN_FOOD = 6;
 	/**
 	 * A wind can only call thunder down out of real weather: none under a clear sky, {@code RAIN_THUNDER} of its full
@@ -102,6 +107,14 @@ public final class WindModes {
 	 */
 	static final int THUNDERHEAD_BOLTS = 5, THUNDERHEAD_DARK_TICKS = 70;
 	static final double THUNDERHEAD_DARK_RANGE = 48.0;
+	/** While the Thunderhead lasts: a lightning flash (and thunder) every this many ticks, give or take. */
+	static final int THUNDERHEAD_FLASH_MIN = 90, THUNDERHEAD_FLASH_MAX = 260;
+	/** Turning a mode on: everyone this close gets the vignette, for this long. */
+	static final double MODE_VIGNETTE_RANGE = 24.0;
+	static final int MODE_VIGNETTE_TICKS = 40;
+	static final int STORM_VIGNETTE = 0x2F6BFF, TEMPEST_VIGNETTE = 0xFFFFFF;
+	/** Tempest mode: a gust of sound off you about every this many ticks. */
+	static final int TEMPEST_GUST_SOUND_TICKS = 35;
 
 	// ---- Tempest mode ----
 	public static final float TEMPEST_ABILITY_SCALE = 1.25F;
@@ -128,6 +141,9 @@ public final class WindModes {
 	/** The mode a player has on (0 none, else STORM | TEMPEST bits). Synced to everyone, who see it. */
 	public static final AttachmentType<Integer> MODE = AttachmentRegistry.create(JaymosPowers.id("wind_mode"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+	/** On a wind user: drifting down on the cloak right now (clients draw the wisps, and let them fade after). */
+	public static final AttachmentType<Boolean> DRIFTING = AttachmentRegistry.create(JaymosPowers.id("wind_drifting"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	/** On a creature: rooted by a shock (clients draw it crackling). */
 	public static final AttachmentType<Boolean> SHOCKED = AttachmentRegistry.create(JaymosPowers.id("wind_shocked"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
@@ -140,6 +156,8 @@ public final class WindModes {
 
 	private static final Map<UUID, Charge> STATIC = new HashMap<>();
 	private static final List<Shock> SHOCKS = new ArrayList<>();
+	/** Thunderhead: ticks to each player's next flash. */
+	private static final Map<UUID, Integer> NEXT_FLASH = new HashMap<>();
 
 	private WindModes() {
 	}
@@ -149,6 +167,19 @@ public final class WindModes {
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			STATIC.clear();
 			SHOCKS.clear();
+			NEXT_FLASH.clear();
+		});
+		// no eating with a mode on: the storm won't sit still for it (client and server both, so it never starts)
+		net.fabricmc.fabric.api.event.player.UseItemCallback.EVENT.register((player, world, hand) -> {
+			if (mode(player) == NONE || !player.getItemInHand(hand).has(net.minecraft.core.component.DataComponents.FOOD)
+				|| !Powers.has(player, WindPower.INSTANCE)) {
+				return net.minecraft.world.InteractionResult.PASS;
+			}
+			if (player instanceof ServerPlayer serverPlayer) {
+				serverPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymospowers.wind.no_eating")
+					.withStyle(net.minecraft.ChatFormatting.GRAY));
+			}
+			return net.minecraft.world.InteractionResult.FAIL;
 		});
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			// melee only: the attacker struck it themselves
@@ -187,6 +218,7 @@ public final class WindModes {
 		ServerLevel level = player.level();
 		if (mode(player) != NONE) {
 			player.removeAttached(MODE);
+			NEXT_FLASH.remove(player.getUUID());
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_DEATH, SoundSource.PLAYERS, 0.6F, 1.4F);
 			return;
 		}
@@ -200,8 +232,20 @@ public final class WindModes {
 			return;
 		}
 		player.setAttached(MODE, mode);
-		if (mode == BOTH && thunderPower(level) > 0.0F) {
-			thunderhead(player, level);
+		if (mode == BOTH) {
+			if (thunderPower(level) > 0.0F) {
+				thunderhead(player, level);
+			}
+			// the first flash comes with it
+			screenFx(player, THUNDERHEAD_DARK_RANGE, WindNet.ScreenFx.LIGHTNING, 0, 0);
+			NEXT_FLASH.put(player.getUUID(), Mth.nextInt(player.getRandom(), THUNDERHEAD_FLASH_MIN, THUNDERHEAD_FLASH_MAX));
+		}
+		// the mode washes over everyone near: blue for the storm, white for the tempest
+		if ((mode & STORM) != 0) {
+			screenFx(player, MODE_VIGNETTE_RANGE, WindNet.ScreenFx.VIGNETTE, STORM_VIGNETTE, MODE_VIGNETTE_TICKS);
+		}
+		if ((mode & TEMPEST) != 0) {
+			screenFx(player, MODE_VIGNETTE_RANGE, WindNet.ScreenFx.VIGNETTE, TEMPEST_VIGNETTE, MODE_VIGNETTE_TICKS);
 		}
 		if ((mode & STORM) != 0) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 1.5F, 1.6F);
@@ -217,6 +261,7 @@ public final class WindModes {
 	static void tick(ServerPlayer player) {
 		ServerLevel level = player.level();
 		cloak(player, true);
+		drift(player);
 		// a slow, held descent (the cloak) isn't a fall; the rest still is
 		if (!player.onGround() && player.getY() < player.yo && player.getY() - player.yo > -CLOAK_SAFE_SINK) {
 			player.fallDistance = Math.min(player.fallDistance, 1.0);
@@ -226,6 +271,7 @@ public final class WindModes {
 		}
 		int mode = mode(player);
 		if (mode == NONE) {
+			NEXT_FLASH.remove(player.getUUID());
 			return;
 		}
 		// a form that's gone (purified, say) takes its half of the mode with it
@@ -246,12 +292,86 @@ public final class WindModes {
 				.withStyle(net.minecraft.ChatFormatting.GRAY));
 			return;
 		}
-		player.causeFoodExhaustion(MODE_EXHAUSTION);
+		player.causeFoodExhaustion(mode == BOTH ? THUNDERHEAD_EXHAUSTION : MODE_EXHAUSTION);
+		if (mode == BOTH) {
+			thunderheadTick(player, level);
+		} else {
+			NEXT_FLASH.remove(player.getUUID());
+		}
 		if ((mode & STORM) != 0 && player.tickCount % 20 == 0 && player.getRandom().nextFloat() < IDLE_ZAP_CHANCE) {
 			zap(player, IDLE_ZAP_DAMAGE);
 		}
 		if ((mode & TEMPEST) != 0) {
 			deflect(player, level);
+			// the wind never quite settles around a Tempest
+			if (player.tickCount % TEMPEST_GUST_SOUND_TICKS == 0) {
+				var random = player.getRandom();
+				net.minecraft.sounds.SoundEvent gust = switch (random.nextInt(3)) {
+					case 0 -> SoundEvents.BREEZE_WHIRL;
+					case 1 -> SoundEvents.BREEZE_IDLE_AIR;
+					default -> SoundEvents.BREEZE_SLIDE;
+				};
+				level.playSound(null, player.getX(), player.getY() + 1.0, player.getZ(), gust, SoundSource.PLAYERS, 0.7F, 0.7F + random.nextFloat() * 0.4F);
+				if (random.nextInt(3) == 0) {
+					level.playSound(null, player.getX(), player.getY() + 1.0, player.getZ(), SoundEvents.WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 0.3F,
+						0.5F + random.nextFloat() * 0.3F);
+				}
+			}
+		}
+	}
+
+	/** The cloak's drift: on while Jump holds a slow descent in mid-air (the client slows the fall), off otherwise. */
+	private static void drift(ServerPlayer player) {
+		double sink = player.getY() - player.yo;
+		boolean drifting = !player.onGround() && player.getLastClientInput().jump() && sink < -0.02 && sink > -CLOAK_SAFE_SINK
+			&& !player.isInWater() && !player.isFallFlying() && !player.getAbilities().flying && player.getAttached(WindPower.FLIGHT) == null;
+		if (drifting != (player.getAttached(DRIFTING) != null)) {
+			if (drifting) {
+				player.setAttached(DRIFTING, true);
+			} else {
+				player.removeAttached(DRIFTING);
+			}
+		}
+	}
+
+	/** While the Thunderhead lasts: every so often lightning (a bolt only out of real weather) and a flash for all near. */
+	private static void thunderheadTick(ServerPlayer player, ServerLevel level) {
+		int left = NEXT_FLASH.getOrDefault(player.getUUID(), THUNDERHEAD_FLASH_MIN) - 1;
+		if (left > 0) {
+			NEXT_FLASH.put(player.getUUID(), left);
+			return;
+		}
+		var random = player.getRandom();
+		NEXT_FLASH.put(player.getUUID(), Mth.nextInt(random, THUNDERHEAD_FLASH_MIN, THUNDERHEAD_FLASH_MAX));
+		if (thunderPower(level) > 0.0F) {
+			double angle = random.nextDouble() * Math.PI * 2.0;
+			double distance = 8.0 + random.nextDouble() * 16.0;
+			double x = player.getX() + Math.cos(angle) * distance;
+			double z = player.getZ() + Math.sin(angle) * distance;
+			int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, (int)Math.floor(x), (int)Math.floor(z));
+			LightningBolt bolt = EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
+			if (bolt != null) {
+				bolt.snapTo(new Vec3(x, y, z));
+				bolt.setVisualOnly(true);
+				bolt.setCause(player);
+				level.addFreshEntity(bolt);
+			}
+		} else {
+			// dry thunder: no bolt out of a clear sky, but the flash and the roll all the same
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 3.0F,
+				0.6F + random.nextFloat() * 0.3F);
+		}
+		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.5, 0.9, 0.5, 0.3);
+		screenFx(player, THUNDERHEAD_DARK_RANGE, WindNet.ScreenFx.LIGHTNING, 0, 0);
+	}
+
+	/** A screen effect for everyone (the wind user included) within {@code range} of {@code source}. */
+	static void screenFx(ServerPlayer source, double range, int kind, int color, int ticks) {
+		WindNet.ScreenFx fx = new WindNet.ScreenFx(kind, color, ticks);
+		for (ServerPlayer near : source.level().players()) {
+			if (near.distanceToSqr(source) <= range * range) {
+				net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(near, fx);
+			}
 		}
 	}
 
@@ -507,6 +627,8 @@ public final class WindModes {
 	/** The power went: everything off. */
 	static void clear(ServerPlayer player) {
 		player.removeAttached(MODE);
+		player.removeAttached(DRIFTING);
+		NEXT_FLASH.remove(player.getUUID());
 		cloak(player, false);
 	}
 }

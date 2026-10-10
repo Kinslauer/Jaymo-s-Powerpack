@@ -311,10 +311,33 @@ public final class ChronoEchoes {
 		if (player != null) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.chrono_echo_collapsed")
 				.withStyle(ChatFormatting.AQUA, ChatFormatting.ITALIC));
+			if (level.dimension() == net.minecraft.world.level.Level.NETHER && com.jaymospowers.core.Powers.has(player, ChronoPower.INSTANCE)
+				&& com.jaymospowers.core.Fate.canCorrupt(player)) {
+				unravel(level, echo, player);
+			}
 			if (player.level() != level || player.distanceToSqr(echo) > 32.0 * 32.0) {
 				soundFor(player, SoundEvents.BELL_RESONATE, 0.5F, 0.5F);
 			}
 		}
+	}
+
+	/**
+	 * Corruption: an echo destroyed for good in the Nether tears a hole in its owner's timeline. The moment rings out
+	 * across the dimension, the owner's sky flickers (blindness, then darkness) and their power is corrupted.
+	 */
+	private static void unravel(ServerLevel level, ChronoEcho echo, ServerPlayer player) {
+		double x = echo.getX();
+		double y = echo.getY() + 1.0;
+		double z = echo.getZ();
+		level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, x, y, z, 120, 1.2, 1.6, 1.2, 0.2);
+		level.sendParticles(ParticleTypes.SONIC_BOOM, x, y, z, 1, 0.0, 0.0, 0.0, 0.0);
+		level.sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 120, 0.6, 1.2, 0.6, 0.6);
+		level.playSound(null, x, y, z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.HOSTILE, 2.0F, 0.5F);
+		level.playSound(null, x, y, z, SoundEvents.END_PORTAL_SPAWN, SoundSource.HOSTILE, 1.5F, 0.6F);
+		player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.BLINDNESS, 30, 0), player);
+		player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.DARKNESS, 140, 0), player);
+		player.sendSystemMessage(Component.translatable("message.jaymospowers.chrono_echo_unravelled").withStyle(ChatFormatting.DARK_PURPLE));
+		com.jaymospowers.core.Fate.corrupt(player);
 	}
 
 	static void shatterFx(ServerLevel level, Entity echo) {

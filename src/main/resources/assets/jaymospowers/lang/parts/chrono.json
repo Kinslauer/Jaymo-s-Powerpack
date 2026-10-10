@@ -20,5 +20,6 @@
 	"power.jaymospowers.chrono.key.starter": "Nudge time: slow what you look at (sneak: speed yourself)",
 	"power.jaymospowers.chrono.key.mode": "Time Flow (Timeless and corrupted): strike toward foes, right click to counter",
 	"message.jaymospowers.chrono_flow_unavailable": "Time won't flow for you like that. Not yet.",
-	"hud.jaymospowers.chrono_flow_combo": "%s HIT COMBO"
+	"hud.jaymospowers.chrono_flow_combo": "%s HIT COMBO",
+	"message.jaymospowers.chrono_echo_unravelled": "Your echo is gone for good, and the hole it leaves runs straight through you. Time comes loose."
 }

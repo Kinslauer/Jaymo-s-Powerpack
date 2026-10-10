@@ -30,6 +30,9 @@ public final class WindPowerClient implements PowerClient {
 	private int channelTicks;
 	/** Cyclone Lance's cooldown (ascended). */
 	private int lanceCooldown;
+	/** The ground Gust's own cooldown (Tailwind, in the air, keeps the ability's). */
+	private int gustCooldown;
+	private int gustCooldownTotal = 1;
 
 	private WindPowerClient() {
 	}
@@ -38,11 +41,19 @@ public final class WindPowerClient implements PowerClient {
 	public static void init() {
 		PowerClients.register(WindPower.ID, INSTANCE);
 		ClientPlayNetworking.registerGlobalReceiver(WindNet.Status.TYPE, (payload, ctx) -> INSTANCE.onStatus(ctx.client(), payload));
+		// screen washes and lightning flashes reach anyone near a mode, wind or not
+		ClientPlayNetworking.registerGlobalReceiver(WindNet.ScreenFx.TYPE, (payload, ctx) -> WindScreenFx.onPacket(payload));
+		net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry.attachElementAfter(
+			net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements.MISC_OVERLAYS,
+			com.jaymospowers.JaymosPowers.id("wind_screen_fx"), WindScreenFx::render);
+		net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> WindScreenFx.clear());
 		// poses of everyone in view (other players may fly even when the local player has another power)
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			if (!minecraft.isPaused()) {
 				WindPose.tick(minecraft);
 				WindAura.tick(minecraft);
+				WindWisps.tick(minecraft);
+				WindScreenFx.tick();
 			}
 		});
 	}
@@ -56,12 +67,24 @@ public final class WindPowerClient implements PowerClient {
 	}
 
 	int cooldown(WindAbility ability) {
+		if (ability == WindAbility.TAILWIND && groundedGust()) {
+			return this.gustCooldown;
+		}
 		return this.cooldowns[ability.ordinal()];
 	}
 
 	/** How long the current cooldown was when it started, for the HUD. */
 	public int cooldownTotal(WindAbility ability) {
+		if (ability == WindAbility.TAILWIND && groundedGust()) {
+			return Math.max(1, this.gustCooldownTotal);
+		}
 		return Math.max(1, this.cooldownTotals[ability.ordinal()]);
+	}
+
+	/** G on the ground is the Gust, with its own cooldown; in the air (or flying) it's Tailwind. */
+	private boolean groundedGust() {
+		LocalPlayer player = Minecraft.getInstance().player;
+		return player != null && player.onGround() && !this.flight.state().flying();
 	}
 
 	int lanceCooldown() {
@@ -96,12 +119,12 @@ public final class WindPowerClient implements PowerClient {
 			&& player.getDeltaMovement().y < -com.jaymospowers.power.wind.WindModes.CLOAK_FALL_SPEED) {
 			net.minecraft.world.phys.Vec3 v = player.getDeltaMovement();
 			player.setDeltaMovement(v.x, -com.jaymospowers.power.wind.WindModes.CLOAK_FALL_SPEED, v.z);
-			if (player.tickCount % 4 == 0) {
-				player.level().addParticle(net.minecraft.core.particles.ParticleTypes.CLOUD, player.getX(), player.getY(), player.getZ(), 0.0, -0.05, 0.0);
-			}
 		}
 		if (this.lanceCooldown > 0) {
 			this.lanceCooldown--;
+		}
+		if (this.gustCooldown > 0) {
+			this.gustCooldown--;
 		}
 		for (int i = 0; i < this.cooldowns.length; i++) {
 			if (this.cooldowns[i] > 0) {
@@ -151,6 +174,7 @@ public final class WindPowerClient implements PowerClient {
 			// (not on gaining it: the server's cooldown update may already have arrived this tick)
 			java.util.Arrays.fill(this.cooldowns, 0);
 			this.lanceCooldown = 0;
+			this.gustCooldown = 0;
 			this.channel = null;
 			this.channelTicks = 0;
 		}
@@ -165,6 +189,10 @@ public final class WindPowerClient implements PowerClient {
 			this.cooldowns[i] = status.cooldowns()[i];
 		}
 		this.lanceCooldown = status.lanceCooldown();
+		if (status.gustCooldown() > this.gustCooldown) {
+			this.gustCooldownTotal = status.gustCooldown();
+		}
+		this.gustCooldown = status.gustCooldown();
 		this.channel = WindAbility.byId(status.channel());
 		this.channelTicks = status.channelTicks();
 		LocalPlayer player = minecraft.player;

@@ -180,6 +180,8 @@ public final class WindPower implements Power {
 		int lastFlightTick = -100000;
 		/** Cyclone Lance's cooldown. */
 		int lanceCooldown;
+		/** The ground Gust's own cooldown (G on the ground); Tailwind (G in the air) keeps the ability's slot. */
+		int gustCooldown;
 		/** The eased weather factor, this tick. */
 		float weather = 1.0F;
 	}
@@ -205,10 +207,11 @@ public final class WindPower implements Power {
 		removeBarrierModifier(player);
 		WindStorm.clear(player);
 		WindStorm.forget(player);
+		player.removeAttached(WindStorm.STORMBOUND_SINCE);
 		WindTempest.setBreezeKills(player, 0);
 		if (s != null && s.flight.flying()) {
 			// the client also drops its flight when it sees the power go; this covers a slow attachment sync
-			ServerPlayNetworking.send(player, new WindNet.Status(-1, 0, new int[WindAbility.values().length], 0.0F, true, 0));
+			ServerPlayNetworking.send(player, new WindNet.Status(-1, 0, new int[WindAbility.values().length], 0.0F, true, 0, 0));
 		}
 	}
 
@@ -219,6 +222,8 @@ public final class WindPower implements Power {
 
 	@Override
 	public void onCorrupted(ServerPlayer player) {
+		// the three days start now
+		player.setAttached(WindStorm.STORMBOUND_SINCE, player.level().getServer().overworld().getGameTime());
 		// the sky answers
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 4.0F, 0.6F);
 	}
@@ -268,6 +273,7 @@ public final class WindPower implements Power {
 		State s = this.state(player);
 		java.util.Arrays.fill(s.cooldowns, 0);
 		s.lanceCooldown = 0;
+		s.gustCooldown = 0;
 		this.sendStatus(player, s, 0.0F, false);
 	}
 
@@ -413,6 +419,9 @@ public final class WindPower implements Power {
 		if (s.lanceCooldown > 0) {
 			s.lanceCooldown--;
 		}
+		if (s.gustCooldown > 0) {
+			s.gustCooldown--;
+		}
 		s.weather = WindWeather.tick(player);
 
 		if (!player.isAlive() || player.isSpectator()) {
@@ -517,7 +526,7 @@ public final class WindPower implements Power {
 			if (s.channel != null) {
 				return;
 			}
-			if (s.cooldowns[ability.ordinal()] > 0) {
+			if (this.coolingDown(player, s, ability)) {
 				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_IDLE_GROUND, SoundSource.PLAYERS, 0.25F, 0.6F);
 				return;
 			}
@@ -529,6 +538,15 @@ public final class WindPower implements Power {
 		} else if (s.channel == ability) {
 			this.release(player, s);
 		}
+	}
+
+	/** Whether G (or V, B) can't be channelled yet. G is refused only if neither of its halves could go off. */
+	private boolean coolingDown(ServerPlayer player, State s, WindAbility ability) {
+		if (ability != WindAbility.TAILWIND) {
+			return s.cooldowns[ability.ordinal()] > 0;
+		}
+		boolean grounded = player.onGround() && !s.flight.flying();
+		return s.cooldowns[ability.ordinal()] > 0 && (!grounded || s.gustCooldown > 0);
 	}
 
 	// ---- flight -----------------------------------------------------------------------------------------------
@@ -658,7 +676,17 @@ public final class WindPower implements Power {
 		}
 		s.channel = null;
 		float f = Mth.clamp(s.channelTicks / (float)ability.maxChannel, 0.1F, 1.0F);
-		s.cooldowns[ability.ordinal()] = ability.cooldown;
+		// G's two halves cool down apart: on the ground the Gust (if it's gathered again), else the Tailwind
+		boolean gust = ability == WindAbility.TAILWIND && player.onGround() && !s.flight.flying() && s.gustCooldown <= 0;
+		if (ability == WindAbility.TAILWIND && !gust && s.cooldowns[ability.ordinal()] > 0) {
+			// (took off mid-channel with only the Gust ready, or the like): nothing to release
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_IDLE_GROUND, SoundSource.PLAYERS, 0.25F, 0.6F);
+			this.sendStatus(player, s, 0.0F, false);
+			return;
+		}
+		if (!gust) {
+			s.cooldowns[ability.ordinal()] = ability.cooldown;
+		}
 		ServerLevel level = player.level();
 		// the weather governs the wind's strength (and the Tempest mode adds to it)
 		float w = s.weather * WindModes.abilityScale(player);
@@ -668,13 +696,13 @@ public final class WindPower implements Power {
 		float dash = 0.0F;
 		switch (ability) {
 			case TAILWIND -> {
-				if (player.onGround() && !s.flight.flying()) {
+				if (gust) {
 					if (stormbound) {
 						WindStorm.strike(player, this.gustImpact(player, f));
 					}
 					this.gust(player, level, f, w);
 					// the bigger the blast, the longer the wind takes to gather again: up to 3 minutes for a full charge
-					s.cooldowns[ability.ordinal()] = Mth.lerpInt(f * f, GUST_COOLDOWN_MIN, GUST_COOLDOWN_MAX);
+					s.gustCooldown = Mth.lerpInt(f * f, GUST_COOLDOWN_MIN, GUST_COOLDOWN_MAX);
 					break;
 				}
 				if (stormbound) {
@@ -878,6 +906,6 @@ public final class WindPower implements Power {
 
 	private void sendStatus(ServerPlayer player, State s, float dash, boolean stopFlight) {
 		ServerPlayNetworking.send(player, new WindNet.Status(s.channel == null ? -1 : s.channel.ordinal(), s.channelTicks, s.cooldowns.clone(), dash, stopFlight,
-			s.lanceCooldown));
+			s.lanceCooldown, s.gustCooldown));
 	}
 }

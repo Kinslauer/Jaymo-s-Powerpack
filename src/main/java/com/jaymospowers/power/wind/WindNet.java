@@ -39,8 +39,10 @@ public final class WindNet {
 	 * @param dash      a Tailwind dash to apply now (blocks/tick), or 0
 	 * @param stopFlight the server ended (or refused) the flight
 	 * @param lanceCooldown ticks left on Cyclone Lance (the ascended ability)
+	 * @param gustCooldown ticks left on the ground Gust (G on the ground; Tailwind, G in the air, has its own)
 	 */
-	public record Status(int channel, int channelTicks, int[] cooldowns, float dash, boolean stopFlight, int lanceCooldown) implements CustomPacketPayload {
+	public record Status(int channel, int channelTicks, int[] cooldowns, float dash, boolean stopFlight, int lanceCooldown,
+		int gustCooldown) implements CustomPacketPayload {
 		public static final Type<Status> TYPE = new Type<>(JaymosPowers.id("wind_status"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Status> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
@@ -53,6 +55,7 @@ public final class WindNet {
 				buf.writeFloat(p.dash);
 				buf.writeBoolean(p.stopFlight);
 				buf.writeVarInt(p.lanceCooldown);
+				buf.writeVarInt(p.gustCooldown);
 			},
 			buf -> {
 				int channel = buf.readVarInt() - 1;
@@ -64,7 +67,7 @@ public final class WindNet {
 				}
 				float dash = buf.readFloat();
 				boolean stop = buf.readBoolean();
-				return new Status(channel, channelTicks, cooldowns, dash, stop, buf.readVarInt());
+				return new Status(channel, channelTicks, cooldowns, dash, stop, buf.readVarInt(), buf.readVarInt());
 			});
 
 		@Override
@@ -111,10 +114,37 @@ public final class WindNet {
 		}
 	}
 
+	/**
+	 * Server → client: a screen effect for this player (they needn't have the wind themselves: modes and the Thunderhead
+	 * reach everyone nearby).
+	 *
+	 * @param kind  {@link #VIGNETTE} (a coloured frame that fades out) or {@link #LIGHTNING} (a white flash, a black
+	 *              after-image, a second flicker)
+	 * @param color 0xRRGGBB of a vignette
+	 * @param ticks how long it lasts
+	 */
+	public record ScreenFx(int kind, int color, int ticks) implements CustomPacketPayload {
+		public static final int VIGNETTE = 0, LIGHTNING = 1;
+		public static final Type<ScreenFx> TYPE = new Type<>(JaymosPowers.id("wind_screen_fx"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, ScreenFx> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> {
+				buf.writeVarInt(p.kind);
+				buf.writeInt(p.color);
+				buf.writeVarInt(p.ticks);
+			},
+			buf -> new ScreenFx(buf.readVarInt(), buf.readInt(), Math.min(buf.readVarInt(), 400)));
+
+		@Override
+		public Type<ScreenFx> type() {
+			return TYPE;
+		}
+	}
+
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(Flight.TYPE, Flight.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Impact.TYPE, Impact.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Ram.TYPE, Ram.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Status.TYPE, Status.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(ScreenFx.TYPE, ScreenFx.CODEC);
 	}
 }

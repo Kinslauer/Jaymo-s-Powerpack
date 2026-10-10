@@ -27,7 +27,7 @@ import net.minecraft.world.phys.Vec3;
  * lands harder than the last, and every punch grows with mastery; the last one throws them.
  */
 final class ChronoPunch {
-	static final int PUNCHES = 10, EVERY = 2;
+	static final int PUNCHES = 10, EVERY = 1;
 	static final double REACH = 3.5;
 	/** Cosine of how wide the flurry reaches either side of where you look. */
 	static final double CONE = 0.45;

@@ -14,7 +14,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Test commands (gamemasters), all acting on the player running them:
  * <ul>
- * <li>{@code /powerdebug wind breezes <n>}: set the in-flight breeze kill count (the next kill is n+1);</li>
+ * <li>{@code /powerdebug wind stormbound <minutes>}: pretend you turned Stormbound that many minutes ago (the storm blows
+ * itself out after 3 Minecraft days, 60 minutes);</li>
  * <li>{@code /powerdebug wind weather}: the sky, the eased factor, corruption and the calm;</li>
  * <li>{@code /powerdebug wind calm <seconds>}: set the Eye of the Storm's progress;</li>
  * <li>{@code /powerdebug wind cooldowns}: clear every cooldown, the lance's too;</li>
@@ -30,23 +31,23 @@ final class WindDebug {
 			Commands.literal("powerdebug")
 				.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.then(Commands.literal("wind")
-					.then(Commands.literal("breezes")
-						.then(Commands.argument("n", IntegerArgumentType.integer(0, 1000))
+					.then(Commands.literal("stormbound")
+						.then(Commands.argument("minutes", IntegerArgumentType.integer(0, 1000))
 							.executes(c -> {
 								ServerPlayer player = c.getSource().getPlayerOrException();
-								int n = IntegerArgumentType.getInteger(c, "n");
-								WindTempest.setBreezeKills(player, n);
-								c.getSource().sendSuccess(() -> Component.literal("Breeze kills in flight: " + n + " (heart every "
-									+ WindTempest.BREEZES_FOR_HEART + "; can ascend: " + Fate.canAscend(player) + ")"), false);
-								return n;
+								int minutes = IntegerArgumentType.getInteger(c, "minutes");
+								WindStorm.setStormboundTicks(player, minutes * 1200L);
+								c.getSource().sendSuccess(() -> Component.literal("Stormbound for " + minutes + " min (blows out at "
+									+ WindStorm.CURE_TICKS / 1200 + "; stormbound: " + Fate.isCorrupted(player) + ")"), false);
+								return minutes;
 							})))
 					.then(Commands.literal("weather")
 						.executes(c -> {
 							ServerPlayer player = c.getSource().getPlayerOrException();
-							String text = String.format(Locale.ROOT, "sky %s, target %s (%.2f), factor %.2f, corruption %d, stormbound %s, calm %.1f/%ds, kills %d",
+							String text = String.format(Locale.ROOT, "sky %s, target %s (%.2f), factor %.2f, corruption %d, stormbound %s, calm %.1f/%ds, stormbound %d/%d min, kills %d",
 								WindWeather.sky(player), WindWeather.kind(player), WindWeather.kind(player).factor, WindWeather.factor(player),
 								Fate.corruption(player), Fate.isCorrupted(player), WindStorm.calmTicks(player) / 20.0F, WindStorm.EYE_TICKS / 20,
-								WindTempest.breezeKills(player));
+								WindStorm.stormboundTicks(player) / 1200, WindStorm.CURE_TICKS / 1200, WindTempest.breezeKills(player));
 							c.getSource().sendSuccess(() -> Component.literal(text), false);
 							return 1;
 						}))

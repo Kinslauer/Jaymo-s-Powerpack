@@ -361,12 +361,12 @@ public final class ChronoPower implements Power {
 	}
 
 	/**
-	 * The starter, Nudge: the creature under the crosshair (within {@code NUDGE_RANGE}) is slowed slightly; with nothing
-	 * there, or sneaking, you're the one sped up slightly.
+	 * The starter, Nudge: you're sped up slightly; sneaking, the creature under the crosshair (within
+	 * {@code NUDGE_RANGE}) is slowed slightly instead (with nothing there, you're sped up after all).
 	 */
 	private static boolean nudge(ServerPlayer player) {
 		ServerLevel level = player.level();
-		net.minecraft.world.entity.LivingEntity target = player.isShiftKeyDown() ? null : lookedAt(player, NUDGE_RANGE);
+		net.minecraft.world.entity.LivingEntity target = player.isShiftKeyDown() ? lookedAt(player, NUDGE_RANGE) : null;
 		if (target != null) {
 			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, NUDGE_TICKS, 0), player);
 			level.sendParticles(ParticleTypes.ENCHANT, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 20, 0.3, 0.4, 0.3, 0.4);
@@ -508,7 +508,7 @@ public final class ChronoPower implements Power {
 		if (state.stasis != null) {
 			state.stasis.end();
 		}
-		state.stasis = new StasisField(player.level(), player.position(), player.getUUID());
+		state.stasis = new StasisField(player.level(), player.position(), player.getUUID(), StasisField.duration(player));
 		state.stasis.start();
 		return true;
 	}
@@ -603,7 +603,7 @@ public final class ChronoPower implements Power {
 		}
 		if (state.stasis != null) {
 			activeLeft[STASIS] = state.stasis.ticksLeft;
-			activeTotal[STASIS] = StasisField.DURATION;
+			activeTotal[STASIS] = state.stasis.duration;
 		}
 		if (state.overclockLeft > 0) {
 			activeLeft[OVERCLOCK] = state.overclockLeft;
