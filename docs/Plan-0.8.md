@@ -9,17 +9,15 @@ Work is split into tracks so agents can run in parallel without touching the sam
 ## Track 1 — Gravity (Collapsing Horizon)
 
 ### 1.1 Skyfall + Weightless synergy
-**Files:** `GravitySkyfall`, `GravityPower` (`toggleWeightless`, `setWeightless`)
+**Files:** `GravitySkyfall`, `GravityPower` (`toggleWeightless`, `setWeightless`, the weightless tick)
 
-**What happens now:** Skyfall only lifts *other* entities. The caster isn't in the lifted list. So if the caster is weightless (gravity −0.7), they float up with everyone else, but the slam phase never touches them. They just drift down.
+**Decided:** a Weightless caster rises with the inversion, is **never slammed and takes no damage**, and stays airborne for the rest of Weightless's duration.
 
 **Change:**
-- If the caster has Weightless on during the rise (cast while weightless, or toggled on in the first 60 ticks), add them to the Skyfall as a **rider**.
-- At slam time, the rider gets slammed too. Weightless turns off, they get the downward velocity, and their landing becomes a **ground-pound**:
-  - AoE damage scaled by fall height
-  - Debris ring
-  - The caster takes normal fall damage (house rule: fall damage always applies outside creative); see question 1
-- Add a small public query, `GravitySkyfall.airborne(Entity)` / `riding(ServerPlayer)`. Other powers can use it later for synergies, for example Wind or Web hitting someone mid-Skyfall.
+- If the caster has Weightless on during the rise (cast while weightless, or toggled on in the first 60 ticks), add them to the Skyfall as a **rider**. They're lifted with everyone else.
+- At slam time, riders are skipped: no downward velocity, no impact damage.
+- After the slam, the rider **holds their altitude** (a gentle hover, no sinking) for whatever is left of Weightless (up to `WEIGHTLESS_MAX_TICKS`). When Weightless ends (timeout, toggled off, water, hunger), they drift down at normal Weightless gravity with no fall damage, as Weightless already allows.
+- Add a small public query, `GravitySkyfall.airborne(Entity)` / `riding(ServerPlayer)`, so other powers can react later (e.g. Wind or Web hitting someone mid-Skyfall).
 
 ### 1.2 Staggered slam with varied damage
 **File:** `GravitySkyfall.tick`
@@ -46,9 +44,14 @@ Work is split into tracks so agents can run in parallel without touching the sam
 - Plain B (Crush with no well) keeps the current shockwave.
 
 ### 1.4 Soft blocks do ~half a heart
-**File:** `core/BlockCluster.serverTick` (thrown-hit damage, currently 2.5 + 2.5×speed, up to 12)
+**Files:** `core/BlockCluster.serverTick` (thrown-hit damage, currently 2.5 + 2.5×speed, up to 12), `GravityPower.caveIn` (`setHurtsEntities(2.0F, 40)`)
 
-**Change:** If a cluster is made of falling-type blocks (sand, gravel, concrete powder, i.e. `instanceof FallingBlock`), cap its hit damage at **1.0** (half a heart). This affects orbit, throws and Skyfall blocks. *(See question 5 if you want it limited to the orbit only.)*
+**Decided:** applies to **every** thrown or dropped soft block, from any power.
+
+**Change:**
+- A block is **soft** if its hardness is ≤ 0.6: dirt, grass, sand, gravel, clay, soul sand, snow, concrete powder, leaves, wool and the like. Put the 0.6 threshold in a constant.
+- A cluster made only of soft blocks caps its hit damage at **1.0** (half a heart). A cluster with any hard block keeps the normal formula.
+- This covers Gravity throws, the orbit, Skyfall, cave-ins and Web tendril throws, since they all go through `BlockCluster` or falling blocks.
 
 ---
 
@@ -101,9 +104,14 @@ Each sword also gets one fitting vanilla enchant baked in at draw time (e.g. Lae
 **Change:** For single-target counters, pick one of 3 variants at random. Each is ~20–28 ticks, and the caster is invulnerable for the whole animation.
 1. **Circle**: dash in an arc around the enemy to its back, then strike from behind.
 2. **Slip**: lean or sidestep out of the attack, then a quick body hit.
-3. **Parry**: lead arm swings across to deflect, the enemy staggers back, then the riposte.
+3. **Deflect**: the arms knock the attack aside, the enemy staggers, then the riposte. It picks one of **5 canned arm animations** at random:
+   1. **High forearm block**: lead forearm snaps up across the face, then pushes out.
+   2. **Outside sweep**: lead arm sweeps outward from the centre line, turning the blow away.
+   3. **Slap-down**: open hand drives the attack down and across the body.
+   4. **Cross block**: both forearms cross in an X in front of the chest, then spread apart.
+   5. **Elbow guard**: elbow raised to the side to catch the hit, then the forearm swings out.
 
-This needs a `variant` field added to `ChronoFlow.Move`, including its stream codec. Counters against several attackers keep the current behavior.
+This needs `variant` and `deflect` fields added to `ChronoFlow.Move`, including its stream codec. Counters against several attackers keep the current behavior.
 
 ---
 
@@ -135,7 +143,11 @@ This needs a `variant` field added to `ChronoFlow.Move`, including its stream co
 Also:
 - **Remove `devour()`** and the eating path for corpses that aren't carried.
 - The whole episode keeps the 4.1 screen effect running: darkening, vignette and growls.
-- Corpses come from Jaymo's Kitchen (`CorpseEntity`). See question 4.
+- Corpses come from Jaymo's Kitchen (`CorpseEntity`), which is now required.
+
+**Decided:** the carry-first rule also applies to the **manual Consume** ability. Consume on a living target finishes it off if it's at or below 10 HP (`CONSUME_MAX_HEALTH`), then grabs, carries and feeds on the corpse. Consume on a corpse grabs, carries and feeds on it. Nothing is eaten while alive.
+
+**Decided:** **Jaymo's Kitchen is required.** Add `"jaymoskitchen": "*"` to `depends` in `fabric.mod.json` (moving it out of `suggests`). Keep `KitchenCompat` as the only place that touches Kitchen's classes.
 
 ### 4.3 Living Armor heavy debris strikes
 **Files:** `WebSymbiote.tickStrikes`, `client/power/web/WebTendrilLayer`, `WebSymbioteClient`
@@ -183,13 +195,15 @@ Also:
 - **Version:** bump to 0.8.0 (new packets: `ChronoFlow.Move` gains a field, plus a new screen-effect kind). Each track ends with a `./gradlew build`, plus the in-game checks listed in each section.
 - **Usage limits:** the last 4-agent run stopped on usage limits. Consider running 2 tracks at a time.
 
+## Answered
+1. Skyfall + Weightless: the caster isn't slammed and takes no damage; they stay airborne for Weightless's duration (1.1).
+2. Deflect counters: up to 5 canned arm animations (3.2).
+3. Carry-before-feed applies to manual Consume too (4.2).
+4. Jaymo's Kitchen becomes a required dependency (4.2).
+5. The soft-block damage cap applies to every thrown or dropped soft block (1.4).
+
 ## Open questions
 
-1. **Skyfall + Weightless:** is 1.1 right, that *you* ride up and get slammed down as a ground-pound? Or did you mean the lifted *enemies* weren't being slammed? And should the caster take fall damage from that landing?
-2. **Parry counter:** your note ended with "arm animate s]=[". What should the arm do? I assumed it swings across to deflect.
-3. **Manual Consume** (the symbiote's Consume ability, which eats small living mobs up to 10 HP): should it also follow carry-before-feed, or is the rule only for autonomous feeding?
-4. **Jaymo's Kitchen:** corpses only exist with Kitchen installed. Should Powers *require* Kitchen? If it doesn't, autonomous feeding can't happen at all under the carry rule.
-5. **Soft-block damage:** should the half-heart cap apply to every thrown or dropped block, or only to Collapsing Horizon's orbit?
 6. **Carrying players:** who can do it: everyone (like Kitchen's corpse carry), or one power? Which control picks someone up (e.g. sneak + right-click with empty hands)? Can you throw them, or only drop them?
 7. **Escaping a carry:** can the carried player struggle free (e.g. mashing jump), or are they held until let go? Does it work on mobs and villagers too, or only players?
 8. **Tempest Kick reference:** the Discord image link returns "Forbidden" outside Discord. Please upload it here directly.
