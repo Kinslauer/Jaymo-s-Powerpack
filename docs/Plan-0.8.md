@@ -162,7 +162,7 @@ Also:
 
 ---
 
-## Track 5 — Wind and everyone
+## Track 5 — Wind, carrying and first person
 
 ### 5.1 Tempest Kick, varied every time
 **Files:** `power/wind/WindKick` (`KICKING` attachment), `client/power/wind/WindPose` (the `KICK_KEY` branch)
@@ -184,8 +184,28 @@ Also:
 - **Thrown:** the thrown player goes into a **short ragdoll** (~1 s) while flying, with limbs flopping the way `WebRagdoll` does it for webbed creatures. Normal fall damage applies when they land (house rule).
 - **Escaping (decided):** the carried player gets out with **one jump**, at any time. They can't while **stunned or otherwise unable to act**, e.g. Gravity's held stun, Chrono's new hit-stun, or a ragdoll still playing. Add a shared query `Carry.canStruggle(player)` that those powers' stun states feed into.
 - **Safety:** the carry also ends when either player dies, logs out, changes dimension, or gets too far apart (teleport). The carrier moves a little slower (weight). The carried player can't attack, use items or break blocks.
+- **Hold:** each pickup rolls a hold. Each hold has its own carrier pose, carried position and carried-body pose:
+  1. **Fireman's carry**: over one shoulder, head and arms hanging down the back, legs in front. *(on foot and in flight)*
+  2. **Bridal carry**: across both arms in front. *(on foot and in flight)*
+  3. **Shoulder grab**: held up by the shoulder at your side, legs dangling below. *(flight only)*
+  4. **Over the back**: slung behind, facing up. *(flight only)*
+- **On foot** only the fireman's and bridal carry are rolled.
+- **Wind flight (decided):** a Wind user carrying someone can take off. In flight, any of the 4 holds can be rolled: a new roll on take-off, and a switch back to fireman's or bridal on landing if the flight hold was a flight-only one. Flight is **slightly slower** while carrying (`CARRY_FLIGHT_SPEED` ≈ ×0.8 of top speed, plus a little extra hunger cost).
+- **Carried body:** arms and legs drift loosely, swinging with the carrier's movement (sine sway plus inertia from turning and stopping), so they look like they're floating. In flight they trail in the wind.
 - Both pose sets go through the existing pose path (`WebModelFeatureRendererMixin.prepareModel` + render-state extraction), like `WebBodyPose` and `ChronoFlowPose`.
 - First person: the carrier's hands show the hold; the carried player's camera follows their body.
+
+### 5.3 First-person Model, and living tendrils in first person
+**Mods (decided):** add **First-person Model** by tr7zw (MIT) to the pack. It needs **Not Enough Animations** (tr7zw Protective License: fine to ship in a pack, no code reuse). Both have 26.3 Fabric builds on Modrinth:
+- `maven.modrinth:first-person-model:Z05WZTy2` (2.7.3)
+- `maven.modrinth:not-enough-animations:EhSk2OTD` (1.12.6)
+
+Add both to `packMods` in `build.gradle`. Their CurseForge project and file ids still need filling in: CurseForge is blocked from the cloud session, so look them up on the home PC.
+
+**Tendrils in first person:** Living Armor's tendrils, held debris, strikes and the feeding grab must be visible from your own view.
+- **With First-person Model**, your body is drawn in first person, so `WebTendrilLayer` already renders. Check that FPM doesn't hide that layer; if it does, mark it visible through FPM's API through a small compat class (`FirstPersonCompat`, loaded only when FPM is present).
+- In first person, tendrils **reach further forward**, curving over the shoulders into view. Idle tendrils sway at the edges of the screen. Strikes and grabs extend out in front, longer than in third person if that's what it takes to be seen.
+- **Without FPM**, a fallback draws the tendrils in first person next to the hands, the way `WebSymbioteHand` draws the suit sleeve.
 
 ## Before coding starts
 
@@ -200,8 +220,10 @@ Also:
 5. The soft-block damage cap applies to every thrown or dropped soft block (1.4).
 6. Everyone can carry players with sneak + right-click; drop and throw like corpses; a throw ragdolls the thrown player (5.2).
 7. One jump frees a carried player, unless they're stunned or otherwise unable to act (5.2).
+10. Wind users can fly while carrying, slightly slower, with all 4 holds; on foot only fireman's and bridal (5.2).
+11. First-person Model joins the pack; living tendrils must be visible in first person (5.3).
 
 ## Open questions
 
 8. **Carrying mobs:** players only for now? (Assumed yes.)
-9. **Tempest Kick reference:** the Discord image link returns "Forbidden" outside Discord. Please upload it here directly.
+9. **Tempest Kick reference:** the Discord link returned "Forbidden", and the image didn't come through when re-sent. Please attach it directly to a message.
