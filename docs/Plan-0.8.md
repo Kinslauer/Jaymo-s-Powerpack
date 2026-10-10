@@ -169,11 +169,17 @@ Also:
 
 **What happens now:** one fixed roundhouse. The right leg sweeps from side to front, the body twists the same way every time, and both arms are flung straight out.
 
-**Change:** each kick rolls a random **side** (left or right) and **arm swing**, and syncs it with the kick.
-- The torso shifts and leans toward the rolled side, instead of always twisting one way.
-- The kicking leg follows the side: left kicks use the left leg.
-- The arms swing across in either direction, with a little random variation in height and angle, so no two kicks look the same.
-- **Exact pose to match the user's reference image** (still needed; the Discord link couldn't be downloaded).
+**Reference (from the user):** a manga-style high roundhouse. The kick is so fast the leg is mostly the white crescent trail wrapping round to the target's head, and the body does the selling:
+- **Whole body leans hard away from the kick**, tilted sideways about 25–35° and twisted, pivoting over the standing foot. This is the "offset torso".
+- **Standing leg** straight and planted, up on the ball of the foot.
+- **Kicking leg** swings up and round in a high arc to head height, then comes back down. It's the existing white crescent that sells it.
+- **Arms thrown in opposite directions:** one flung up and back above the head, fist clenched, for balance; the other pulled down and across the hip.
+
+**Change:** each kick rolls a random **side** (left or right) and an **arm variant**, and syncs them with the kick.
+- **Side** mirrors the whole pose: which leg kicks, which way the body leans and twists, and which side the crescent sweeps from.
+- **The lean** is done by tilting the whole model in the `PoseStack` around the standing foot, not by rotating `body` alone (that would leave the arms and head floating). The lean eases in over the wind-up and recovers after.
+- **Arm variants** (random each kick): (1) the reference, high arm up and back, low arm across the hip; (2) mirrored, the other arm up; (3) both arms flung wide and high; (4) high arm up, low arm swung back behind. Plus a little random angle on each, so no two kicks look exactly alike.
+- **Timing:** about 3 ticks of wind-up (lean starts, leg chambers), the snap through the arc at the hit tick, then about 4 ticks of recovery. Make `KICK_TICKS` 9 → ~11 if the extra recovery needs room.
 - `KICKING` changes from a `Long` to a small record (start, side, swing seed). That's a new packet shape, covered by the 0.8.0 bump.
 
 ### 5.2 Carry living players (everyone)
@@ -222,8 +228,8 @@ Add both to `packMods` in `build.gradle`. Their CurseForge project and file ids 
 7. One jump frees a carried player, unless they're stunned or otherwise unable to act (5.2).
 10. Wind users can fly while carrying, slightly slower, with all 4 holds; on foot only fireman's and bridal (5.2).
 11. First-person Model joins the pack; living tendrils must be visible in first person (5.3).
+12. Tempest Kick reference received: a high roundhouse with the body leaning hard away and the arms thrown opposite ways (5.1).
 
 ## Open questions
 
 8. **Carrying mobs:** players only for now? (Assumed yes.)
-9. **Tempest Kick reference:** the Discord link returned "Forbidden", and the image didn't come through when re-sent. Please attach it directly to a message.
