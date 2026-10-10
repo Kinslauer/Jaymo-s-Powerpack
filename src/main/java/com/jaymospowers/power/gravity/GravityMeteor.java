@@ -1,6 +1,7 @@
 package com.jaymospowers.power.gravity;
 
 import com.jaymospowers.core.BlockCluster;
+import com.jaymospowers.core.Flames;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -36,6 +37,12 @@ final class GravityMeteor {
 	static final int FALL_TICKS = 40, COOLDOWN = 900;
 	static final float POWER = 7.0F, DAMAGE_MAX = 40.0F;
 	static final double THROW = 2.2;
+	/** Its burning trail sets alight whatever it passes within this reach (blocks), for this long (seconds). */
+	static final double TRAIL_FIRE_RADIUS = 2.5;
+	static final int TRAIL_FIRE_SECONDS = 5;
+	/** The impact sets alight everything within this reach (blocks) of where it lands, for this long (seconds). */
+	static final double IMPACT_FIRE_RADIUS = 10.0;
+	static final int IMPACT_FIRE_SECONDS = 8;
 	private static final List<BlockState> ROCK = List.of(Blocks.MAGMA_BLOCK.defaultBlockState(), Blocks.BLACKSTONE.defaultBlockState(),
 		Blocks.MAGMA_BLOCK.defaultBlockState(), Blocks.BASALT.defaultBlockState(), Blocks.OBSIDIAN.defaultBlockState(),
 		Blocks.MAGMA_BLOCK.defaultBlockState(), Blocks.BLACKSTONE.defaultBlockState(), Blocks.TUFF.defaultBlockState(),
@@ -90,6 +97,7 @@ final class GravityMeteor {
 			level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y + 0.5, at.z, 8, 0.6, 0.6, 0.6, 0.02);
 			level.sendParticles(ParticleTypes.FLAME, at.x, at.y + 0.5, at.z, 10, 0.8, 0.8, 0.8, 0.05);
 			level.sendParticles(ParticleTypes.LAVA, at.x, at.y + 0.5, at.z, 2, 0.5, 0.5, 0.5, 0.0);
+			Flames.area(level, at, TRAIL_FIRE_RADIUS, TRAIL_FIRE_SECONDS, server.getPlayerList().getPlayer(meteor.owner()), e -> e != rock);
 			Vec3 ground = meteor.to();
 			double shadow = 1.0 + p * RADIUS * 0.35;
 			for (int i = 0; i < 12; i++) {
@@ -134,6 +142,8 @@ final class GravityMeteor {
 				net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new com.jaymospowers.power.web.WebNet.Nudge(push));
 			}
 		}
+		// everything flammable near the strike catches
+		Flames.area(level, at, IMPACT_FIRE_RADIUS, IMPACT_FIRE_SECONDS, owner, e -> true);
 		// the shockwave running out along the ground, and the dust
 		for (int ring = 1; ring <= 4; ring++) {
 			double r = RADIUS * ring / 4.0;

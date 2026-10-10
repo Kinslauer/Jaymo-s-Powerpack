@@ -58,6 +58,11 @@ coloured blocks (terracotta, beds, banners, carpets) have no `Blocks.X` fields: 
 - The user reads the `docs/Abilities.md` table to request changes.
 
 ## Where things stand
+- **Powers 0.8.0** is built on branch `plan-0.8` (not merged to master, not packaged, not playtested): everything in
+  `docs/Plan-0.8.md`, built by agent tracks (briefed by `docs/AGENT_BRIEF_0.8.md`) and merged by the lead. The jar went
+  to the user's tester. Jaymo's Kitchen is now a required dependency; First-person Model and Not Enough Animations are
+  in `packModsNoCf` in `build.gradle` until their CurseForge ids are filled in. Each power's doc has a 0.8 section with
+  what to check first in game.
 - **Powers 0.7.1** is built and packaged (not yet on the server: the user must stop it and run Build Modpack).
   The changelog was given in chat; add "Wind users dive head-first instead of flailing, and pull out of it with
   their flight" under Wind.

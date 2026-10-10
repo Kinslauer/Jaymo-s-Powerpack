@@ -1,6 +1,8 @@
 package com.jaymospowers.client.power.web;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.power.web.WebSymbiote;
+import com.jaymospowers.power.web.WebTendrilCombos;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
@@ -23,6 +25,11 @@ import net.minecraft.util.Mth;
  * Living Armor's tendrils: thick black cords growing out of the wearer's back and shoulders, arching up and out and
  * swaying on their own. The longer the armour is up, the thicker and longer they get (to {@link #GROWN_TICKS}); every
  * swing of the wearer's arm, they whip forward over the shoulders. Everyone sees them.
+ *
+ * <p>A strike is a slam (reared high over the head, then crashing straight down onto the target) or a swipe (drawn out
+ * wide to one side, then swept across through the target), as the server picked it (see {@link WebSymbiote.Strike});
+ * swinging held debris it's slower and reaches much further. In first person (your own body drawn by First-person
+ * Model, or {@link #submitFirstPerson} next to the hands without it) they reach forward over the shoulders into view.
  */
 final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	private static final Identifier TEXTURE = JaymosPowers.id("textures/entity/web_symbiote_tendril.png");
@@ -42,11 +49,33 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		{-2.0F, 8.0F, 2.0F, -1.25F, -0.15F},
 		{2.0F, 8.0F, 2.0F, 1.25F, -0.15F},
 	};
-	/** A strike: rearing back until this share of it, lashing out until the next, then easing back. */
-	private static final float STRIKE_REAR = 0.42F;
-	private static final float STRIKE_OUT = 0.55F;
+	/** Roots higher than this (model y) are the upper ones: the strikers, and the ones seen in first person. */
+	private static final float UPPER_ROOT_Y = 6.0F;
+
+	// ---- strikes ----
+	/** A slam: reared to this elevation (radians; past straight up, so it's over the head), and it comes down this far below the target. */
+	private static final float SLAM_HIGH = 1.95F, SLAM_DIP = 0.25F;
+	/** A swipe: drawn out this far to its side (radians of yaw past the target), a little above it. */
+	private static final float SWIPE_WIDE = 1.4F, SWIPE_LIFT = 0.15F;
+	/** After the hit it follows through this much further (share of the swing), then eases back to rest. */
+	private static final float FOLLOW_THROUGH = 0.35F;
+	/** Each segment's curl: reared (back over), striking (whipping down), and a swipe's trailing bend. */
+	private static final float CURL_REARED = 0.15F, CURL_STRIKE = -0.12F, CURL_SWIPE = 0.1F;
+	/** How much longer a striking tendril gets: a plain lash, swinging debris, and extra from your own eyes. */
+	private static final float STRETCH = 0.35F, STRETCH_HEAVY = 0.9F, STRETCH_FIRST_PERSON = 0.4F;
+	/** Combos: a clap's tendrils hauled out this wide each side (yaw) and this much up; a shatter's reared this far apart. */
+	private static final float CLAP_WIDE = 1.5F, CLAP_LIFT = 0.25F, SHATTER_SPREAD = 0.6F;
+
+	// ---- first person ----
+	/** Your own upper tendrils: out to the side this far (yaw), rising this steeply, curling forward and inward into view. */
+	private static final float FP_YAW = 1.1F, FP_PITCH = 0.95F, FP_CURL_DOWN = -0.22F, FP_CURL_IN = 0.12F;
+	/** They reach this much further than in third person, and sway this much at the edges of the screen. */
+	private static final float FP_LENGTH = 1.35F, FP_SWAY = 0.12F;
+	/** Without First-person Model: where they root (camera space: right, up, back, in blocks) and how big they're drawn. */
+	private static final float FP_ROOT_UP = -0.28F, FP_ROOT_BACK = 0.05F, FP_SCALE = 0.6F;
 
 	private final TendrilModel model;
+	private static TendrilModel firstPersonModel;
 
 	WebTendrilLayer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
 		super(renderer);
@@ -83,6 +112,55 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		poseStack.popPose();
 	}
 
+	/**
+	 * Without First-person Model: your own tendrils drawn from your eyes, after the hands (camera space), rising from
+	 * behind your shoulders and curling in at the edges of the screen; strikes and grabs reach out in front.
+	 */
+	static void submitFirstPerson(PoseStack poseStack, SubmitNodeCollector collector, AvatarRenderState avatar) {
+		WebSymbioteClient.Tendrils tendrils = avatar.getData(WebSymbioteClient.TENDRILS);
+		if (tendrils == null || avatar.isInvisible || FirstPersonCompat.bodyShown()) {
+			return;
+		}
+		if (firstPersonModel == null) {
+			firstPersonModel = new TendrilModel(createLayer().bakeRoot());
+		}
+		// the strike's aim is worked out against the body; here everything is against the view
+		float yaw = tendrils.aimYaw() - avatar.yRot * Mth.DEG_TO_RAD;
+		float pitch = tendrils.aimPitch() + avatar.xRot * Mth.DEG_TO_RAD;
+		float wallYaw = tendrils.wallYaw() - avatar.yRot * Mth.DEG_TO_RAD;
+		float wallPitch = tendrils.wallPitch() + avatar.xRot * Mth.DEG_TO_RAD;
+		AvatarRenderState own = new AvatarRenderState();
+		own.setData(WebSymbioteClient.TENDRILS, new WebSymbioteClient.Tendrils(tendrils.growth(), tendrils.time(), tendrils.strike(), yaw, pitch,
+			yaw >= 0.0F ? -1.0F : 1.0F, 0.0F, tendrils.held(), tendrils.armor(), tendrils.wall(), wallYaw, wallPitch, tendrils.heavy(),
+			tendrils.variant(), true, tendrils.combo()));
+		poseStack.pushPose();
+		poseStack.translate(0.0F, FP_ROOT_UP, FP_ROOT_BACK);
+		// camera space to model space: model -Z is ahead, -Y up, +X the wearer's left
+		poseStack.scale(-FP_SCALE, -FP_SCALE, FP_SCALE);
+		collector.submitModel(firstPersonModel, own, poseStack, RenderTypes.entityCutout(TEXTURE), avatar.lightCoords, OverlayTexture.NO_OVERLAY, 0);
+		poseStack.popPose();
+	}
+
+	/** Eases 0-1. */
+	private static float smooth(float x) {
+		x = Mth.clamp(x, 0.0F, 1.0F);
+		return x * x * (3.0F - 2.0F * x);
+	}
+
+	/**
+	 * The base yaw that points a tendril {@code yaw} radians off straight ahead (+ to the wearer's right, as the strike's
+	 * aim is measured), taken the short way round from {@code rest} (a right-hand tendril, rest below 0, doesn't swing
+	 * round the left of the body). With it, the base's xRot is simply the elevation (+ up): the cords are built
+	 * pointing back (+Z), and model space has +Y down and +X on the wearer's left.
+	 */
+	private static float aimYaw(float yaw, float rest) {
+		float aim = Mth.PI + yaw;
+		if (rest < 0.0F && aim > 0.0F) {
+			aim -= Mth.TWO_PI;
+		}
+		return aim;
+	}
+
 	/** The tendrils' pose, worked out per wearer at draw time. */
 	private static final class TendrilModel extends Model<AvatarRenderState> {
 		private final ModelPart[][] parts = new ModelPart[ROOTS.length][SEGMENTS];
@@ -108,51 +186,116 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 			}
 			float growth = tendrils.growth();
 			float time = tendrils.time();
+			boolean fp = tendrils.firstPerson();
 			// they bud from tiny pods on the back and grow out to their full thickness and length
 			float eased = growth * growth * (3.0F - 2.0F * growth);
 			float thick = Mth.lerp(Mth.sqrt(growth), 0.3F, 1.3F);
 			float length = Mth.lerp(eased, 0.04F, 1.3F);
+
+			// the strike's swing (the same for every striker)
+			float strike = tendrils.strike();
+			boolean heavy = tendrils.heavy();
+			int variant = tendrils.variant();
+			int combo = tendrils.combo();
+			float rearShare = heavy ? WebSymbiote.HEAVY_STRIKE_REAR : WebSymbiote.STRIKE_REAR;
+			float hitShare = heavy ? WebSymbiote.HEAVY_STRIKE_HIT / (float)WebSymbiote.HEAVY_STRIKE_TICKS
+				: WebSymbiote.STRIKE_HIT / (float)WebSymbiote.STRIKE_TICKS;
+			if (combo >= 0) {
+				rearShare = WebTendrilCombos.REAR_TICKS / (float)WebTendrilCombos.TICKS;
+				hitShare = WebTendrilCombos.HIT_TICKS / (float)WebTendrilCombos.TICKS;
+			}
+			float weight = 0.0F, swing = 0.0F;
+			if (strike >= 0.0F) {
+				if (strike < rearShare) {
+					// rearing (or drawing out to the side)
+					weight = smooth(strike / rearShare);
+				} else if (strike < hitShare) {
+					// coming in, faster and faster: lands at the hit
+					weight = 1.0F;
+					float k = (strike - rearShare) / (hitShare - rearShare);
+					swing = k * k;
+				} else {
+					// following through, then easing back to rest
+					float f = (strike - hitShare) / (1.0F - hitShare);
+					weight = 1.0F - smooth(f * 1.4F - 0.4F);
+					swing = 1.0F + FOLLOW_THROUGH * Math.min(1.0F, f * 3.0F);
+				}
+			}
+			float strikeYaw, strikePitch, curlX, curlY;
+			float sweepSide = variant == WebSymbiote.STRIKE_SWIPE_LEFT ? 1.0F : -1.0F;
+			if (variant == WebSymbiote.STRIKE_SLAM) {
+				strikeYaw = tendrils.aimYaw();
+				strikePitch = Mth.lerp(swing, SLAM_HIGH, tendrils.aimPitch() - SLAM_DIP);
+				curlX = Mth.lerp(Math.min(1.0F, swing), CURL_REARED, CURL_STRIKE);
+				curlY = 0.0F;
+			} else {
+				strikeYaw = tendrils.aimYaw() - sweepSide * SWIPE_WIDE * (1.0F - swing);
+				strikePitch = tendrils.aimPitch() + SWIPE_LIFT;
+				curlX = CURL_STRIKE * 0.5F;
+				// the cord trails behind the sweep
+				curlY = -sweepSide * CURL_SWIPE * (swing > 1.0F ? -1.0F : 1.0F);
+			}
+			// a slam strikes with the tendrils on the target's side; a swipe with those on the side it sweeps from
+			float strikers = variant == WebSymbiote.STRIKE_SLAM ? tendrils.side() : sweepSide;
+			float stretch = 1.0F + (heavy ? STRETCH_HEAVY : STRETCH) * weight * Math.min(1.0F, swing) + (fp ? STRETCH_FIRST_PERSON * weight : 0.0F);
+
 			for (int t = 0; t < ROOTS.length; t++) {
 				float[] r = ROOTS[t];
+				boolean upper = r[1] < UPPER_ROOT_Y;
+				float side = Math.signum(r[0]);
 				ModelPart base = this.parts[t][0];
 				// the top two (right, left) are the ones that reach out and hold: while holding, they're drawn reaching
 				base.visible = !(t == 0 && (tendrils.held() & 1) != 0 || t == 1 && (tendrils.held() & 2) != 0);
 				float sway = Mth.sin(time * 0.07F + t * 1.3F) * 0.2F;
 				float restYaw = r[3] + sway * 0.5F;
 				float restPitch = r[4] + sway;
-				// the strikers: the upper tendrils on the target's side
-				float strike = tendrils.strike() >= 0.0F && Math.signum(r[0]) == tendrils.side() && r[1] < 6.0F ? tendrils.strike() : -1.0F;
-				float aim = 0.0F;
-				float rear = 0.0F;
-				if (strike >= 0.0F) {
-					if (strike < STRIKE_REAR) {
-						rear = Mth.sin(strike / STRIKE_REAR * Mth.HALF_PI);
-					} else if (strike < STRIKE_OUT) {
-						float p = (strike - STRIKE_REAR) / (STRIKE_OUT - STRIKE_REAR);
-						rear = 1.0F - p;
-						aim = p * p;
-					} else {
-						aim = 1.0F - (strike - STRIKE_OUT) / (1.0F - STRIKE_OUT);
-						aim = aim * aim * (3.0F - 2.0F * aim);
-					}
+				float restCurlX = 0.28F;
+				float restCurlY = 0.0F;
+				float restLength = length;
+				if (fp && upper) {
+					// your own, from your eyes: forward over the shoulders, curling in at the edges of the view
+					float fpSway = Mth.sin(time * 0.09F + t * 1.7F) * FP_SWAY;
+					restYaw = aimYaw(-side * (FP_YAW + fpSway), side);
+					restPitch = FP_PITCH + fpSway * 0.5F;
+					restCurlX = FP_CURL_DOWN;
+					restCurlY = side * FP_CURL_IN;
+					restLength = length * FP_LENGTH;
 				}
-				// rearing: lifted high and drawn back; striking: flung over the shoulder at the target
-				float aimYaw = Mth.PI - tendrils.aimYaw();
-				float aimPitch = -Mth.HALF_PI - 1.0F - tendrils.aimPitch();
-				base.yRot = Mth.lerp(aim, restYaw + rear * r[3] * 0.4F, aimYaw);
-				base.xRot = Mth.lerp(aim, restPitch - rear * 0.55F, aimPitch);
+				// a combo: every upper tendril joins in, from both sides
+				boolean striking = weight > 0.0F && upper && (side == strikers || combo >= 0);
+				float w = striking ? weight : 0.0F;
+				float tYaw = strikeYaw, tPitch = strikePitch, tCurlX = curlX, tCurlY = curlY;
+				if (combo == WebTendrilCombos.CLAP) {
+					// each side hauled out wide, then clapped in to meet in the middle (crossing a little after)
+					tYaw = tendrils.aimYaw() - side * CLAP_WIDE * (1.0F - swing);
+					tPitch = tendrils.aimPitch() + CLAP_LIFT * (1.0F - Math.min(1.0F, swing));
+					tCurlX = CURL_STRIKE * 0.5F;
+					tCurlY = -side * CURL_SWIPE * (swing > 1.0F ? -1.0F : 1.0F);
+				} else if (combo == WebTendrilCombos.SHATTER) {
+					// both reared high and wide, then brought down together
+					tYaw = tendrils.aimYaw() - side * SHATTER_SPREAD * (1.0F - Math.min(1.0F, swing));
+				}
+				base.yRot = Mth.lerp(w, restYaw, aimYaw(tYaw, restYaw));
+				base.xRot = Mth.lerp(w, restPitch, tPitch);
 				base.xScale = thick;
 				base.yScale = thick;
-				base.zScale = length * (1.0F + 0.25F * aim);
+				base.zScale = restLength * (striking ? stretch : 1.0F);
+				float segCurlX = Mth.lerp(w, restCurlX, tCurlX);
+				float segCurlY = Mth.lerp(w, restCurlY, tCurlY);
+				float calm = 1.0F - w;
 				if (tendrils.wall() == 1) {
 					// every one of them reaching for the wall, spread a little
-					aim = 1.0F;
-					base.yRot = Mth.PI - tendrils.wallYaw() + r[3] * 0.25F;
-					base.xRot = -Mth.HALF_PI - 1.0F - tendrils.wallPitch() + (r[1] - 4.0F) * 0.04F;
-					base.zScale = length * 1.6F;
+					calm = 0.0F;
+					segCurlX = CURL_STRIKE * 0.3F;
+					segCurlY = 0.0F;
+					base.yRot = aimYaw(tendrils.wallYaw() - r[3] * 0.25F, r[3]);
+					base.xRot = tendrils.wallPitch() - (r[1] - 4.0F) * 0.04F;
+					base.zScale = length * 1.6F * (fp ? 1.0F + STRETCH_FIRST_PERSON : 1.0F);
 				} else if (tendrils.wall() == 2) {
 					// back to the wall: fanned out straight behind, driven into it
-					aim = 1.0F;
+					calm = 0.0F;
+					segCurlX = 0.0F;
+					segCurlY = 0.0F;
 					base.yRot = r[3] * 0.85F;
 					base.xRot = (r[1] - 4.0F) * 0.13F;
 					base.zScale = length * 1.15F;
@@ -160,9 +303,9 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 				for (int k = 1; k < SEGMENTS; k++) {
 					ModelPart segment = this.parts[t][k];
 					float wave = Mth.sin(time * 0.12F + t * 0.9F + k * 0.7F) * (0.18F + 0.07F * k);
-					// each segment curls further over, rippling; rearing coils them; striking straightens them into a whip
-					segment.xRot = Mth.lerp(aim, 0.28F + wave * 0.5F + rear * 0.25F, wave * 0.15F);
-					segment.yRot = wave * 0.55F * (1.0F - aim);
+					// each segment curls further over, rippling; striking straightens them into a whip
+					segment.xRot = segCurlX + wave * 0.5F * calm + wave * 0.1F * (1.0F - calm);
+					segment.yRot = segCurlY + wave * 0.55F * calm;
 					segment.xScale = 0.9F;
 					segment.yScale = 0.9F;
 				}

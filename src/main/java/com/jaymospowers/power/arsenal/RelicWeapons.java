@@ -1,6 +1,7 @@
 package com.jaymospowers.power.arsenal;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.Flames;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -70,6 +71,8 @@ public final class RelicWeapons {
 	static final double SLASH_RANGE = 14.0, SLASH_WIDTH = 1.3;
 	static final float SLASH_DAMAGE = 6.0F;
 	static final int SLASH_COOLDOWN = 40;
+	/** Soul Saber: seconds alight for everything the soul-fire slash passes through. */
+	static final int SLASH_FIRE_SECONDS = 2;
 	/** Grand Shield: how close a projectile has to come while it's raised to be sent back, and how much faster. */
 	static final double REFLECT_RANGE = 3.5, REFLECT_SPEEDUP = 1.2;
 	/** Voidreaver: blindness on a cut; the blink's reach and cooldown. */
@@ -87,6 +90,8 @@ public final class RelicWeapons {
 	static final double RIPTIDE_SPEED = 1.6;
 	/** Sunfang: seconds alight on a cut; the sand blast's reach, cone, damage, cooldown. */
 	static final int SUN_FIRE_SECONDS = 4;
+	/** Sunfang: the flames of a cut lick this far (blocks) around what it struck, catching whatever's there. */
+	static final double SUN_SPLASH = 1.0;
 	static final double SAND_RANGE = 6.0, SAND_CONE = 0.6;
 	static final float SAND_DAMAGE = 3.0F;
 	static final int SAND_COOLDOWN = 80;
@@ -149,7 +154,11 @@ public final class RelicWeapons {
 						level.sendParticles(ParticleTypes.SPLASH, entity.getX(), entity.getY() + entity.getBbHeight() * 0.6, entity.getZ(), 20, 0.3, 0.3, 0.3, 0.1);
 					}
 				}
-				case SUNFANG -> entity.igniteForSeconds(SUN_FIRE_SECONDS);
+				case SUNFANG -> {
+					Flames.touch(level, entity, SUN_FIRE_SECONDS, attacker);
+					Flames.area(level, entity.getBoundingBox().inflate(SUN_SPLASH), SUN_FIRE_SECONDS, attacker,
+						e -> e != entity && !(e instanceof net.minecraft.world.entity.OwnableEntity pet && pet.getOwner() == attacker));
+				}
 				default -> {
 				}
 			}
@@ -214,13 +223,14 @@ public final class RelicWeapons {
 	private static List<LivingEntity> alongLine(ServerLevel level, LivingEntity self, Vec3 from, Vec3 dir, double range, double width) {
 		Vec3 to = from.add(dir.scale(range));
 		return level.getEntitiesOfClass(LivingEntity.class, new AABB(from, to).inflate(width), e -> {
-			if (e == self || !e.isAlive() || e.isSpectator()) {
-				return false;
-			}
-			Vec3 c = e.getBoundingBox().getCenter();
-			double t = net.minecraft.util.Mth.clamp(c.subtract(from).dot(dir), 0.0, range);
-			return c.distanceTo(from.add(dir.scale(t))) <= width + e.getBbWidth() * 0.5;
+			return e != self && e.isAlive() && !e.isSpectator() && onLine(e, from, dir, range, width);
 		});
+	}
+
+	private static boolean onLine(Entity e, Vec3 from, Vec3 dir, double range, double width) {
+		Vec3 c = e.getBoundingBox().getCenter();
+		double t = net.minecraft.util.Mth.clamp(c.subtract(from).dot(dir), 0.0, range);
+		return c.distanceTo(from.add(dir.scale(t))) <= width + e.getBbWidth() * 0.5;
 	}
 
 	/** A relic sword: its gift on right click. */
@@ -262,8 +272,10 @@ public final class RelicWeapons {
 			Vec3 dir = player.getLookAngle();
 			for (LivingEntity target : alongLine(level, player, eye, dir, SLASH_RANGE, SLASH_WIDTH)) {
 				target.hurtServer(level, level.damageSources().playerAttack(player), SLASH_DAMAGE);
-				target.igniteForSeconds(2);
 			}
+			// the soul fire catches everything it passes through
+			Flames.area(level, new AABB(eye, eye.add(dir.scale(SLASH_RANGE))).inflate(SLASH_WIDTH), SLASH_FIRE_SECONDS, player,
+				e -> onLine(e, eye, dir, SLASH_RANGE, SLASH_WIDTH));
 			for (double d = 1.0; d <= SLASH_RANGE; d += 0.5) {
 				Vec3 at = eye.add(dir.scale(d));
 				level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, at.x, at.y, at.z, 2, 0.25, 0.05, 0.25, 0.01);

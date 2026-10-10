@@ -301,3 +301,80 @@ hostile to everything.
 - **Paradox Cut** follows targets across dimensions only while their chunk is loaded. A target in an unloaded chunk
   when the second hit is due is spared.
 - Echoes block sleeping nearby, like any monster.
+
+## 0.8.0: Time Flow (the Z mode of a Timeless, corrupted Chrono)
+
+### Sets of four (`ChronoFlow.land`)
+- The existing combo counter splits landed blows into sets of four (`SET_SIZE`).
+- **Blows 1–3** do no push and no lift. Even the hit's own vanilla knockback is undone: horizontal motion is zeroed.
+  Each blow **stuns** the target for `STUN_TICKS` (15), refreshed on every hit.
+  - The stun is the synced attachment `jaymospowers:chrono_flow_stun` (`ChronoFlow.STUN`, the game time it ends).
+    It lives in `ChronoFlow`, which is already listed in `JaymosPowers.registerAttachments()`.
+  - **Mobs:** `ChronoMobStunMixin` cancels `Mob.serverAiStep` (goals, navigation, move control), stops the path and
+    zeroes the walk inputs. Gravity and thrown motion still apply.
+  - **Players:** `ChronoStunInputMixin` (client, on `KeyboardInput.tick`) empties their movement keys and jump, the
+    same way Gravity's held stun does.
+  - The old 20-tick Slowness on every blow is gone; the stun replaces it.
+- **Blow 4** is the finisher: the style's full push ×`FINISHER_PUSH` (1.3) plus its lift (uppercut, kick). It ends
+  the stun so the target flies, with an extra crit sound and a sweep puff.
+- Counters always push with their own riposte (0.7, no ×1.3). They still count as landed blows for the combo.
+- Other systems can call **`ChronoFlow.stunned(LivingEntity)`**. It works on both sides, since the stun is synced.
+
+### Counters (`ChronoFlow.counterOne`, `ChronoFlowClient.counterMotion`, `ChronoFlowPose.counter`)
+- Countering **one** attacker picks one of three variants at random on the server. Countering several attackers at
+  once keeps the old 10-tick crowd counter.
+- `Move` has two new fields, `variant` (`CROWD`, `CIRCLE`, `SLIP`, `DEFLECT`) and `deflect` (0–4), both in its
+  stream codec. `Move.duration()` / `Move.hitAt()` replace direct `DURATION[style]` / `HIT_AT[style]` lookups for
+  poses and blows.
+- The caster can't be damaged by anything for the whole animation (`Fighter.counterUntil`, checked first in
+  `ALLOW_DAMAGE`). Right clicks during it are ignored.
+- The attacker is staggered (Slowness IV and Weakness II, as before) and **stunned** until `COUNTER_STUN_SLACK`
+  ticks after the blow, so it holds still for the move.
+
+| Variant | Length / blow at | What happens |
+|---|---|---|
+| Circle | 24 / 17 | Guard up and a brief crouch. Then the client carries you round the attacker in a half-circle (radius 1.6–2.6, `CIRCLE_TICKS` 10, either direction) to its back, facing it, and you strike from behind with a running stride. |
+| Slip | 20 / 12 | A 3-tick sidestep with a touch of back-step, leaning out of the blow with the guard high. Then a short hook to the body, turned through the hips. |
+| Deflect | 26 / 18 | One of 5 parries (below). The attacker is knocked back a step (`DEFLECT_SHOVE`) with a shield clank and sparks. Then a palm-strike riposte. You keep control of your view. |
+
+The five deflects (`HIGH_BLOCK`, `OUTSIDE_SWEEP`, `SLAP_DOWN`, `CROSS_BLOCK`, `ELBOW_GUARD`):
+1. **High forearm block:** the lead forearm snaps up across the face, then pushes up and out.
+2. **Outside sweep:** the lead arm sweeps from the centre line outward, and the body turns with it.
+3. **Slap-down:** an open hand drives the blow down and across the body.
+4. **Cross block:** both forearms cross in an X before the chest, then spread apart.
+5. **Elbow guard:** the elbow is raised to the side to take the hit, then the forearm swings out front.
+
+Movement stays client-authoritative. The client watches its own synced `MOVE`, and on a new circle or slip counter
+it drives the motion itself, the same way the lunge dash works. No packet is involved.
+
+### Tuning constants (0.8.0)
+
+| Where | Constant | Value |
+|---|---|---|
+| `ChronoFlow` | `STUN_TICKS` / `SET_SIZE` / `FINISHER_PUSH` | 15 / 4 / 1.3 |
+| `ChronoFlow` | `COUNTER_DURATION` / `COUNTER_HIT_AT` (crowd, circle, slip, deflect) | 10, 24, 20, 26 / 4, 17, 12, 18 |
+| `ChronoFlow` | `COUNTER_STUN_SLACK` / `DEFLECT_SHOVE` | 3 / 0.25 |
+| `ChronoFlowClient` | `CIRCLE_DELAY` / `CIRCLE_TICKS` / `CIRCLE_MIN_RADIUS` / `CIRCLE_MAX_RADIUS` / `CIRCLE_MAX_STEP` | 2 / 10 / 1.6 / 2.6 / 1.0 |
+| `ChronoFlowClient` | `SLIP_TICKS` / `SLIP_SPEED` / `SLIP_BACK` | 3 / 0.42 / 0.12 |
+
+### How to test (0.8.0)
+1. Run `/power set @s chrono`, `/power ascend @s` and `/power corrupt @s`, then press Z to enter Time Flow.
+2. **Sets of four:** `/summon zombie` and strike it up close.
+   - Blows 1–3 should not move it, and it should stand frozen (no walking or turning to path) between blows.
+   - Blow 4 should throw it further than before, and an uppercut finisher should launch it.
+   - Stop hitting: it should move again about 0.75 s after the last blow.
+3. **Players:** with a second player, land blows 1–3 on them. Their WASD and jump should do nothing for about 0.75 s
+   after each blow. Blow 4 should knock them back.
+4. **Counters:** let a single zombie swing at you and right click in the white-flash window. Repeat several times:
+   - you should see circles (you run round to its back and hit it from behind), slips (sidestep, body hook), and
+     deflects with different arm parries;
+   - nothing should hurt you during the animation (have a second zombie or a skeleton hit you mid-counter).
+5. With two or more attackers held at once, right click: you should get the old quick counter on all of them.
+
+### Risky at runtime
+- **Circle near walls:** the arc is driven by velocity, so a wall in the way stops you short. The blow then lands
+  only if you're still within `HIT_REACH` (3.8).
+- **Latency:** the circle starts when the synced move arrives, and its progress is measured from the server's start
+  tick. On a laggy connection it runs faster (capped at 1 block/tick) and may finish later than the blow.
+- **Bosses and odd mobs:** the stun cancels `Mob.serverAiStep`. Mobs that act outside it (the Ender Dragon's phases,
+  some modded mobs) won't be fully stopped.

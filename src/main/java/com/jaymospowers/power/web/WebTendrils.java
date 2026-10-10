@@ -95,6 +95,20 @@ public final class WebTendrils {
 		builder -> builder.syncWith(Grips.STREAM_CODEC, AttachmentSyncPredicate.all()));
 
 	/**
+	 * A tendril combo in progress (see {@link WebTendrilCombos}): which ({@link WebTendrilCombos#CLAP}, CRUSH, SHATTER),
+	 * when it began (game time), and the two things in it (clap: main, off; crush: the debris, then what it lands on;
+	 * shatter: main, off). Synced to everyone, who see the tendrils perform it.
+	 */
+	public record Combo(int kind, long start, int first, int second) {
+		public static final StreamCodec<ByteBuf, Combo> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_INT, Combo::kind, ByteBufCodecs.VAR_LONG, Combo::start,
+			ByteBufCodecs.VAR_INT, Combo::first, ByteBufCodecs.VAR_INT, Combo::second, Combo::new);
+	}
+
+	public static final AttachmentType<Combo> COMBO = AttachmentRegistry.create(JaymosPowers.id("web_tendril_combo"),
+		builder -> builder.syncWith(Combo.STREAM_CODEC, AttachmentSyncPredicate.all()));
+
+	/**
 	 * Sneak + a tendril key at a wall or the ground (within {@code GRAB_RANGE}): the tendril tears a chunk loose, up to
 	 * {@code RIP_PIECES} blocks no harder than {@code RIP_HARDEST}, and holds it like anything else.
 	 */
@@ -163,6 +177,7 @@ public final class WebTendrils {
 		});
 		PayloadTypeRegistry.serverboundPlay().register(Smash.TYPE, Smash.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Smash.TYPE, (payload, ctx) -> smash(ctx.player(), payload.hand() == WebNet.OFF ? WebNet.OFF : WebNet.MAIN));
+		WebTendrilCombos.register();
 		ServerTickEvents.END_SERVER_TICK.register(WebTendrils::serverTick);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -197,7 +212,7 @@ public final class WebTendrils {
 	}
 
 	/** Left or right click while that tendril holds a chunk: it's swung at what's in front of you. */
-	private static void smash(ServerPlayer player, int hand) {
+	static void smash(ServerPlayer player, int hand) {
 		Grips grips = player.getAttached(GRIPS);
 		if (grips == null || !WebSymbiote.armored(player) || !player.isAlive()) {
 			return;
@@ -256,6 +271,17 @@ public final class WebTendrils {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 0.8F, 0.7F);
 	}
 
+	/** That tendril has reached what it holds (or holds nothing). */
+	static boolean reached(ServerPlayer player, int hand) {
+		Hold[] holds = HOLDS.get(player.getUUID());
+		return holds == null || holds[hand] == null || player.level().getGameTime() >= holds[hand].reachAt();
+	}
+
+	/** Some tendril (anyone's) holds this. */
+	static boolean held(Entity target) {
+		return heldBySomeone(target);
+	}
+
 	private static boolean heldBySomeone(Entity target) {
 		if (!(target.level() instanceof ServerLevel level)) {
 			return false;
@@ -271,6 +297,21 @@ public final class WebTendrils {
 
 	/** Lets go of what a tendril holds: thrown where you look ({@code hurl}), or just dropped. */
 	static void release(ServerPlayer player, int hand, boolean hurl) {
+		letGo(player, hand, hurl ? player.getLookAngle().scale(THROW_SPEED).add(0.0, THROW_LIFT, 0.0) : null);
+	}
+
+	/** Lets go of what a tendril holds, flung at {@code v} (blocks/tick) instead of where you look. */
+	static void fling(ServerPlayer player, int hand, Vec3 v) {
+		letGo(player, hand, v);
+	}
+
+	/** A tendril holding nothing (main first), or -1 if both are full. */
+	static int freeHand(ServerPlayer player) {
+		Grips grips = player.getAttachedOrElse(GRIPS, Grips.NONE);
+		return grips.right() < 0 ? WebNet.MAIN : grips.left() < 0 ? WebNet.OFF : -1;
+	}
+
+	private static void letGo(ServerPlayer player, int hand, @org.jspecify.annotations.Nullable Vec3 thrown) {
 		Grips grips = player.getAttached(GRIPS);
 		Hold[] holds = HOLDS.get(player.getUUID());
 		if (holds != null) {
@@ -290,8 +331,8 @@ public final class WebTendrils {
 			return;
 		}
 		weightless(target, false);
-		if (hurl) {
-			Vec3 v = player.getLookAngle().scale(THROW_SPEED).add(0.0, THROW_LIFT, 0.0);
+		if (thrown != null) {
+			Vec3 v = thrown;
 			target.setDeltaMovement(v);
 			target.needsSync = true;
 			target.syncVelocity = true;
@@ -337,6 +378,7 @@ public final class WebTendrils {
 
 	/** Every tick, per web slinger: whatever the tendrils hold hangs where it's held (and the radial grab throws). */
 	static void tick(ServerPlayer player) {
+		WebTendrilCombos.tick(player);
 		Grips grips = player.getAttached(GRIPS);
 		if (grips == null) {
 			return;
@@ -360,11 +402,13 @@ public final class WebTendrils {
 				release(player, hand, false);
 				continue;
 			}
-			if (hold != null && hold.throwAt() > 0 && now >= hold.throwAt()) {
+			// a combo steers what it uses (and nothing's thrown out from under it)
+			Vec3 combo = WebTendrilCombos.point(player, target, hand, now);
+			if (combo == null && hold != null && hold.throwAt() > 0 && now >= hold.throwAt()) {
 				release(player, hand, true);
 				continue;
 			}
-			if (hold != null && now < hold.reachAt()) {
+			if (combo == null && hold != null && now < hold.reachAt()) {
 				// still reaching for it
 				continue;
 			}
@@ -377,11 +421,23 @@ public final class WebTendrils {
 			double up = both && hold != null ? hold.up() : 0.0;
 			Vec3 point = player.getEyePosition().add(look.scale(HOLD_FORWARD + target.getBbWidth() * 0.5)).add(right.scale(side))
 				.add(0.0, up - HOLD_DROP, 0.0);
+			// held debris is swung along with a heavy strike (see WebSymbiote.debrisStrikePoint)
+			Vec3 swing = WebSymbiote.debrisStrikePoint(player, target, now);
+			double maxSpeed = HOLD_MAX_SPEED;
+			double steer = HOLD_STEER;
+			if (combo != null) {
+				point = combo;
+				maxSpeed = WebTendrilCombos.SPEED;
+				steer = WebTendrilCombos.STEER;
+			} else if (swing != null) {
+				point = swing;
+				maxSpeed = WebSymbiote.HEAVY_DEBRIS_SPEED;
+			}
 			Vec3 to = point.subtract(target.getBoundingBox().getCenter());
-			Vec3 v = to.scale(HOLD_STEER);
+			Vec3 v = to.scale(steer);
 			double speed = v.length();
-			if (speed > HOLD_MAX_SPEED) {
-				v = v.scale(HOLD_MAX_SPEED / speed);
+			if (speed > maxSpeed) {
+				v = v.scale(maxSpeed / speed);
 			}
 			target.setDeltaMovement(v);
 			target.needsSync = true;

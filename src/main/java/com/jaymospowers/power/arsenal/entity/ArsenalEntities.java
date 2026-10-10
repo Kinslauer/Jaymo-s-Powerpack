@@ -11,6 +11,7 @@ import net.minecraft.world.entity.MobCategory;
 /** Pocket Arsenal's entities. */
 public final class ArsenalEntities {
 	public static EntityType<RiftBlade> RIFT_BLADE;
+	public static EntityType<FrostLance> FROST_LANCE;
 
 	private ArsenalEntities() {
 	}
@@ -26,5 +27,14 @@ public final class ArsenalEntities {
 				.clientTrackingRange(6)
 				.updateInterval(2)
 				.build(key));
+		ResourceKey<EntityType<?>> lanceKey = ResourceKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("arsenal_frost_lance"));
+		FROST_LANCE = Registry.register(BuiltInRegistries.ENTITY_TYPE, lanceKey,
+			EntityType.Builder.<FrostLance>of(FrostLance::new, MobCategory.MISC)
+				.noLootTable()
+				.noSummon()
+				.sized(0.5F, 0.5F)
+				.clientTrackingRange(8)
+				.updateInterval(1)
+				.build(lanceKey));
 	}
 }

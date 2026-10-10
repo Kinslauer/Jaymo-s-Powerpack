@@ -64,6 +64,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		ClientPlayNetworking.registerGlobalReceiver(PowerPayloads.OpenAffinity.TYPE, (payload, context) -> affinityPending = true);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("power_hud"), PowerHud::render);
 
+		CarryClient.init();
 		WindPowerClient.init();
 		ArsenalPowerClient.init();
 		WebPowerClient.init();

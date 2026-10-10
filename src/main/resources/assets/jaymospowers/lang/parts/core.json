@@ -53,5 +53,9 @@
 	"commands.jaymospowers.affinity": "Set affinity %s for %s player(s)",
 	"commands.jaymospowers.get_affinity": "(affinity: %s)",
 	"key.jaymospowers.mode": "Power Mode",
-	"screen.jaymospowers.passive": "(always)"
+	"screen.jaymospowers.passive": "(always)",
+	"message.jaymospowers.carry.carrying": "Right-click to put them down, sneak + right-click to throw",
+	"message.jaymospowers.carry.carried": "%s has picked you up. Jump to break free!",
+	"message.jaymospowers.carry.cant_struggle": "You can't move!",
+	"message.jaymospowers.carry.lifting": "It weighs nothing. Right-click to set it down, sneak + right-click to heave it"
 }

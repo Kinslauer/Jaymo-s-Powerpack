@@ -146,9 +146,11 @@ public final class WindHoverSway {
 		float amount = sway.amount();
 		float drift = Mth.sin(avatar.ageInTicks * 0.12F) * 0.05F;
 		float trail = sway.pitch();
-		// arms hang loose a little out from the sides, trailing the swing
-		set(humanoid.rightArm, trail * 0.7F + drift, 0.0F, 0.12F + sway.roll() * 0.3F, amount);
-		set(humanoid.leftArm, trail * 0.7F - drift, 0.0F, -0.12F + sway.roll() * 0.3F, amount);
+		// arms hang loose a little out from the sides, trailing the swing (unless they're carrying someone)
+		if (avatar.getData(com.jaymospowers.client.CarryPose.CARRIER_KEY) == null) {
+			set(humanoid.rightArm, trail * 0.7F + drift, 0.0F, 0.12F + sway.roll() * 0.3F, amount);
+			set(humanoid.leftArm, trail * 0.7F - drift, 0.0F, -0.12F + sway.roll() * 0.3F, amount);
+		}
 		// legs dangle together, toes down, trailing a bit more than the body
 		set(humanoid.rightLeg, trail * 0.5F + 0.08F + drift * 0.6F, 0.0F, 0.03F, amount);
 		set(humanoid.leftLeg, trail * 0.4F - 0.02F - drift * 0.6F, 0.0F, -0.03F, amount);

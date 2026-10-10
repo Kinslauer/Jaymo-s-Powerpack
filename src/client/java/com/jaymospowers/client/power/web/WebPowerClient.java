@@ -39,8 +39,26 @@ public final class WebPowerClient implements PowerClient {
 	/** Called once from {@link com.jaymospowers.client.JaymosPowersClient}: renderers, client packets, the PowerClient. */
 	public static void init() {
 		WebCutClient.register();
-		// a chunk of wall in a tendril's grip: left click swings the main one's, right click the other's
+		// a chunk of wall in a tendril's grip: left click swings the main one's, right click the other's; with the
+		// tendrils full (two creatures, debris and a creature, two clumps), left click is a combo instead
 		net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> {
+			com.jaymospowers.power.web.WebTendrils.Grips grips = player.getAttached(com.jaymospowers.power.web.WebTendrils.GRIPS);
+			if (grips != null && com.jaymospowers.power.web.WebTendrilCombos.active(player)) {
+				// mid-combo: the click is swallowed
+				return true;
+			}
+			if (clicks > 0 && grips != null) {
+				int kind = com.jaymospowers.power.web.WebTendrilCombos.kind(player, null);
+				net.minecraft.world.entity.LivingEntity target = null;
+				if (kind < 0) {
+					target = com.jaymospowers.power.web.WebTendrilCombos.crosshairTarget(player);
+					kind = com.jaymospowers.power.web.WebTendrilCombos.kind(player, target);
+				}
+				if (kind >= 0) {
+					ClientPlayNetworking.send(new com.jaymospowers.power.web.WebTendrilCombos.Attack(target == null ? -1 : target.getId()));
+					return true;
+				}
+			}
 			if (clicks > 0 && holdsChunk(player, WebNet.MAIN)) {
 				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebTendrils.Smash(WebNet.MAIN));
 				return true;

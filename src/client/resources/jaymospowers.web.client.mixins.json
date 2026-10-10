@@ -5,10 +5,12 @@
 	"client": [
 		"WebAvatarRendererMixin",
 		"WebEntityRendererMixin",
+		"WebFirstPersonHandsMixin",
 		"WebJumpMixin",
 		"WebLivingEntityRendererMixin",
 		"WebModelFeatureRendererMixin",
-		"WebShakeMixin"
+		"WebShakeMixin",
+		"WebSprintMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -410,6 +410,9 @@ public final class GravityPower implements Power {
 	/** How hard a block it can tear up (deepslate is 3), and how high they're lifted (blocks/tick). */
 	static final float CAVE_IN_HARDNESS = 3.0F;
 	static final double CAVE_IN_LIFT = 0.42;
+	/** A falling block's hurt per block fallen, and its cap (soft blocks: half a heart at most, see BlockCluster.SOFT_HIT_DAMAGE). */
+	static final float CAVE_IN_BLOCK_HURT = 2.0F;
+	static final int CAVE_IN_BLOCK_HURT_MAX = 40, CAVE_IN_SOFT_HURT_MAX = 1;
 	private static final List<CaveIn> CAVE_INS = new ArrayList<>();
 
 	private record Pinned(ResourceKey<Level> dimension, UUID entity, long until) {
@@ -454,6 +457,7 @@ public final class GravityPower implements Power {
 			}
 			GravityOrbit.drop(handler.player);
 			GravityRockFlight.stop(handler.player);
+			GravitySkyfall.land(handler.player);
 		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			STATES.clear();
@@ -541,6 +545,7 @@ public final class GravityPower implements Power {
 		if (jump != null) {
 			jump.removeModifier(PULL_JUMP_ID);
 		}
+		GravityWeight.clear(player);
 		player.removeAttached(COOLDOWNS);
 		player.removeAttached(KILLS);
 	}
@@ -553,7 +558,7 @@ public final class GravityPower implements Power {
 
 	@Override
 	public boolean allowsFloating(ServerPlayer player) {
-		return player.getAttached(WEIGHTLESS_ON) != null;
+		return player.getAttached(WEIGHTLESS_ON) != null || GravitySkyfall.riding(player);
 	}
 
 	// ---------------------------------------------------------------- keys
@@ -1578,7 +1583,7 @@ public final class GravityPower implements Power {
 			com.jaymospowers.core.Debris.puff(level, pos, state, 1.4F);
 			net.minecraft.world.entity.item.FallingBlockEntity falling = net.minecraft.world.entity.item.FallingBlockEntity.fall(level, pos, state);
 			falling.disableDrop();
-			falling.setHurtsEntities(2.0F, 40);
+			falling.setHurtsEntities(CAVE_IN_BLOCK_HURT, com.jaymospowers.core.BlockCluster.soft(state) ? CAVE_IN_SOFT_HURT_MAX : CAVE_IN_BLOCK_HURT_MAX);
 			falling.setDeltaMovement(0.0, CAVE_IN_LIFT * (0.8 + level.getRandom().nextDouble() * 0.4), 0.0);
 			falling.needsSync = true;
 			falling.syncVelocity = true;
@@ -1586,6 +1591,8 @@ public final class GravityPower implements Power {
 		}
 		float damage = Mth.lerp(charge, CAVE_IN_DAMAGE_MIN, CAVE_IN_DAMAGE_MAX) * (Fate.isCorrupted(player) ? COLLAPSE_DAMAGE : 1.0F);
 		CAVE_INS.add(new CaveIn(level.dimension(), center, player.getUUID(), level.getGameTime(), damage, radius, blocks));
+		// Collapsing Horizon's ring rains down on what the well caught, one block at a time
+		GravityOrbit.rain(player, center, radius);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.WARDEN_EMERGE, SoundSource.PLAYERS, 1.4F, 0.7F);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.ROOTED_DIRT_BREAK, SoundSource.PLAYERS, 1.5F, 0.4F);
 	}
@@ -1687,6 +1694,7 @@ public final class GravityPower implements Power {
 		}
 		State state = state(player);
 		smallThings(player);
+		GravityWeight.tick(player);
 		if (state.ripFrom >= 0) {
 			if (PowerInput.isDown(player, PowerKey.ABILITY_1)) {
 				tickRip(player, state);
@@ -1958,6 +1966,7 @@ public final class GravityPower implements Power {
 		GravityPush.tick(server);
 		GravityMeteor.tick(server);
 		GravitySkyfall.tick(server);
+		GravityOrbit.tickRain(server);
 		if (!PINNED.isEmpty()) {
 			for (Iterator<Pinned> it = PINNED.iterator(); it.hasNext(); ) {
 				Pinned pinned = it.next();
@@ -2105,7 +2114,7 @@ public final class GravityPower implements Power {
 
 	// ---------------------------------------------------------------- helpers
 
-	private static void modifier(Entity entity, Holder<Attribute> attribute, Identifier id, double amount, boolean on) {
+	static void modifier(Entity entity, Holder<Attribute> attribute, Identifier id, double amount, boolean on) {
 		if (!(entity instanceof LivingEntity living)) {
 			return;
 		}

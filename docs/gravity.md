@@ -38,11 +38,56 @@ mid-ability. The HUD is in `client/power/gravity/GravityPowerClient.java`: chips
 - **Cure:** spend 10 continuous seconds under Levitation from something else (a Shulker) while collapsed. The first
   time you levitate, you get a one-line whisper.
 
+## 0.8.0: Collapsing Horizon (ascended + corrupted)
+- **Skyfall (C) + Weightless:** if Weightless is on when you cast, or you switch it on during the 3 s rise (within
+  20 blocks of where you cast), you rise with everything else. You're never slammed and never hurt by it. After the
+  rise you hang where it left you, with no weight at all, for as long as Weightless lasts (up to 30 s). Touching down
+  on something also ends the hang. When Weightless ends (timeout, V, water, hunger), you drift down at Weightless's
+  weight and land without fall damage. Rock flight, flying, gliding, water or lava end the ride.
+  `GravitySkyfall.airborne(Entity)` and `GravitySkyfall.riding(ServerPlayer)` let other powers check who is up there.
+- **Staggered slam:** nothing comes down together. Each creature and each block drops at its own random moment in the
+  1.5 s (`STAGGER_TICKS` = 30) after the rise, and hangs there until its turn. Each creature's landing damage (fall
+  height × size × 0.4) is multiplied by its own roll of ×0.6–1.5. Every landing (creature or block) gets its own heavy
+  mace thud and a small shake. The sonic boom, the explosion and the big shake come when the last one lands. Cleanup
+  waits up to 200 ticks after the stagger window.
+- **Orbit:** at most 3 blocks circle you (orbiting plus drifting in). Plain Crush (B) still flings them out in a
+  shockwave. **G+B** (Crush released inside your own Gravity Well, the cave-in) now rains them instead. They gather
+  over the well, then every 8 ticks one is released. It lines up (in 5 ticks) up to 5 blocks over the nearest
+  creature the well caught, staying under any ceiling, and drops straight onto it at 2.2 blocks/tick. Before 0.8 they
+  were never released on that path.
+- **Soft blocks** (hardness ≤ 0.6 (`BlockCluster.SOFT_HARDNESS`): dirt, grass, sand, gravel, clay, soul sand, snow,
+  concrete powder, leaves; plus wool, which is 0.8 but listed as soft) deal at most 1.0 (half a heart). This applies
+  to any thrown `BlockCluster` made only of soft blocks, from any power, and to cave-in falling blocks. A chunk with
+  any hard block keeps the normal formula.
+- **Meteor fire** (`core/Flames`): the falling rock sets alight everything within 2.5 blocks of it for 5 s
+  (`TRAIL_FIRE_*`), and the impact sets alight everything within 10 blocks for 8 s (`IMPACT_FIRE_*`): creatures,
+  corpses, items, armor stands, arrows; creepers are lit, TNT minecarts go off, primed TNT burns faster. Never you.
+  Damage is unchanged.
+
+## 0.8.1: Gravity ignores weight
+A Gravity user lightens whatever they hold, at every mastery level (`GravityWeight`):
+- **Carrying** (see `docs/carry.md`): with an empty hand, sneak + right-click picks up any living mob but a boss (Ender
+  Dragon, Wither, `c:bosses`), an armor stand, something over 4 blocks wide or 6 tall, or something in Lift's grip.
+  No carry slowdown at all, players included. A mob bigger than 0.8 × 1.0 blocks is held up **overhead** on raised
+  arms, floating and bobbing; a throw from there is a slow, heavy heave. A carried mob's AI is paused.
+- **Kitchen carts** (`mixin/GravityCartMixin`, in the new `jaymospowers.gravity.mixins.json`): pulling a cart by
+  hand puts no drag on them (`CartEntity.drag` returns 0), and a loaded supply cart can be taken by the shafts and
+  kept (`tooHeavyByHand()` reads false for a Gravity puller in `serverHitch` and `interact`). A drag left on from
+  before the power came is lifted within a second.
+- **Armor weight**: every second Gravity's tick adds up the negative movement-speed modifiers that come from equipped
+  armor and held items (and are on the player), and cancels them with counter-modifiers (`gravity_unburden_add`,
+  `_base`, `_total`; a multiplying one is countered down to ×0.05 at most). Removed when the power is lost. Nothing
+  in the pack adds such weight yet.
+
 ## Testing
 - `/power set @s gravity`
 - `/powerdebug gravity ready` clears every cooldown.
 - `/powerdebug gravity kills 29`, then `/power level @s 4`, then make a lifted mob die from its fall.
 - `/power corrupt @s`, then `/powerdebug gravity levitate 12`.
+- Weight: with an empty hand, sneak + right-click a zombie, cow, iron golem or ghast (overhead, full walking speed);
+  try the Ender Dragon (nothing). Fill a Kitchen supply cart and take it by the shafts: it comes, with no slowdown.
+  Armor weight: `/give @s iron_chestplate[attribute_modifiers=[{type:"movement_speed",amount:-0.5,operation:"add_multiplied_total",id:"test",slot:"chest"}]]`,
+  wear it: no slower after a second; `/power clear @s` and it slows you.
 
 ## Notes and risks
 - Lifting a *player* sends them velocity updates every tick, so it may look jittery on their screen.

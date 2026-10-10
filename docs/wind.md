@@ -381,3 +381,156 @@ whisper in the action bar.
 - Weather and sky darkness (`isBrightOutside`) are synced to clients by vanilla. On a dedicated server the client's
   glyph and flight factor may lag the server's by a tick or two. Ability strength is always the server's value.
 - The Gale Heart drop uses `spawnAtLocation` from the `AFTER_DEATH` event. It drops even when `doMobLoot` is off.
+
+## 0.8.0: Tempest Kick, varied every time (`WindKick`, `WindPose` KICK branch)
+- **The reference:** a manga high roundhouse. The leg is so fast it's mostly the white crescent; the body sells it.
+- **Each kick rolls** (server, synced in `jaymospowers:wind_kick`, now a `WindKick.Kicking(start, left, seed)` record
+  with a codec and a stream codec):
+  - a **side**: which leg kicks. It mirrors everything: the leg, the lean, the twist, and the crescent (the snap's
+    swing arc comes round from the kicking side, and the flying crescent is tipped low on that side).
+  - an **arm variant** (`seed & 3`): 0 the reference (the arm on the leaning side flung up and back over the head,
+    the kicking side's arm pulled down across the hip); 1 mirrored; 2 both arms flung wide and high; 3 high arm up,
+    low arm swung back behind. The rest of the seed jitters the lean, the twist, the leg's height and the arms.
+- **Timing** (`KICK_TICKS` 9 → 11): `WINDUP_TICKS` 3 of wind-up (the lean eases in, the knee chambers, a breeze
+  inhale), the **snap** on the hit tick (the leg whips out to head height and round across the front, the swing arc
+  and the sweep sound, and the crescent leaves the foot), then follow-through and recovery to tick 11.
+- **The lean** is done on the whole model in the `PoseStack` (`WindPose.kickLean`, from `setupRotations`), pivoting
+  on the standing foot: tipped `KICK_LEAN` 30° (±5) away from the kicking leg, `KICK_LEAN_BACK` 8° back, twisted from
+  `KICK_TWIST_WINDUP` -12° to `KICK_TWIST_THROUGH` 28°, and up `KICK_RISE` 0.07 on the ball of the foot. The head turns
+  back against the twist and levels against half the lean, so it stays on the target.
+- The leg's three key poses are `LEG_CHAMBER_*`, `LEG_APEX_*` and `LEG_THROUGH_*` (model radians; mirrored by side).
+- The crescent itself is unchanged in range, damage and speed; it now starts on the hit tick, following the kicker
+  until then.
+
+## 0.8.0: Cyclone (hold X; `WindCyclone`, client `WindCycloneClient`, `WindCyclonePose`, `WindCycloneSound`)
+- **Key:** the power skill key (X, `key.jaymospowers.web_symbiote`). A **tap** is still the Tempest Kick; **holding**
+  it `WindCyclone.HOLD_TICKS` 8 (0.4 s) forms the Cyclone, which lasts while X stays down.
+- **Tap or hold is decided on the client** (`WindCycloneClient`), because X's mapping and its old kick send live in
+  `WebSymbioteClient` (Web's file). For a wind user, X's clicks are consumed at `START_CLIENT_TICK`, before the
+  symbiote's `END_CLIENT_TICK` handler can see them, so that old send never fires for wind. The client sends
+  `WindKick.Kick` on a release before the threshold (the kick now goes off on release, not on press), and
+  `wind_cyclone` (`WindCyclone.Hold(down)`) at the threshold and on release. A press and release inside one tick
+  counts as a tap. Holding past the threshold with no Cyclone available does nothing.
+  *Lead:* once merged, the kick branch in `WebSymbioteClient`'s X handler is dead code for wind users and can go.
+- **Mastery (decided):** the Cyclone needs `MIN_MASTERY` 1 unlocked ability, not everything mastered like the kick.
+  It levels with you anyway: radius `RADIUS_MIN` 3 → `RADIUS_MAX` 6 and height `HEIGHT_MIN` 6 → `HEIGHT_MAX` 12, in
+  even steps from 1 to 4 unlocked abilities (creative and `/power set` count as all 4).
+- **Starting** needs you on the ground, not flying, not carrying or carried, not riding, and off cooldown; otherwise a
+  soft breeze sigh. Flight (R) can't be toggled while it lasts; anything that ends it (death, taking flight, being
+  picked up, a dimension change, losing the power, logging out) stops it like letting go.
+- **Stance** (`jaymospowers:wind_cyclone`, a synced `Stance(start, left)`; `left` rolls which knee goes down): a
+  superhero landing. `WindCyclonePose` lowers the whole model `DROP` 0.45 in the `PoseStack`, turns it `TWIST` 10°
+  toward the raised arm, and tips it `HUNCH` 40° forward about the hips. The legs are turned back against the tip:
+  each is set at the angle that puts its end on the ground (`acos((HIP - DROP) / LEG)`), the kneeling one back (the
+  knee on the ground) and the other forward (the foot planted). One arm sweeps up and back over the shoulder
+  (`HIGH_ARM_*`), the other reaches down by the ground (`LOW_ARM_*`), the head bows (`HEAD_DOWN`), and the arms
+  tremble. It drops in fast (`DROP_IN`) and rises slower (`RISE_OUT`). Other wind poses are off while it shows.
+- **Rooted:** while it lasts, `MOVEMENT_SPEED` and `JUMP_STRENGTH` get a -100% modifier (`wind_cyclone_root`), and
+  the client keeps no sideways momentum.
+- **The tornado** (server particles, so everyone sees it): `RINGS` 6 rings of cloud turning at `TURN_RATE`, from
+  `FOOT_SHARE` 35% of the radius at the foot to the full radius at the top, with gusts and dust at the foot; it rises
+  to full size over `FORM_TICKS` 8. Corrupted, it carries purple storm dust and crawling sparks, with distant
+  thunder. Sound: the landing thump, a roaring loop on every client in range (`WindCycloneSound`, the elytra wind,
+  low), a breeze whirl every `ROAR_INTERVAL` 16 ticks, and a burst on release.
+- **Caught creatures** (anything alive in the funnel but you): spun round at `SPIN_SPEED`, drawn toward a ring just
+  outside you (`PULL`), lifted to `LIFT_HEIGHT` 1.4 above your feet; knockback resistance holds them down. Letting go
+  flings them outward (`RELEASE_FLING`).
+- **Damage:**
+
+| Tier | Others | You (suffocation) |
+|---|---|---|
+| Base | `DAMAGE` 4 every `DAMAGE_INTERVAL` 20 ticks (wind-charge damage) | `SELF_DAMAGE` 1 every `SELF_INTERVAL` 40 ticks |
+| Ascended | 4 every `DAMAGE_INTERVAL_ASCENDED` 10 ticks | 1 every `SELF_INTERVAL_ASCENDED` 80 ticks |
+| Corrupted (and ascended + corrupted) | 4 every 10 ticks, as **shock** (`LIGHTNING_BOLT` damage type) with sparks | 1 every 80 ticks |
+
+  Your own damage is `damageSources().inWall()` (suffocation: it ignores armour). Any Resistance (Gale Barrier's
+  included) is made up for, and if a fresh hit's invulnerability blocks it, it lands on the next tick instead.
+  Creative takes none. The corrupted shock has a `// FLAMES:` comment where `Flames.touch(...)` goes after merging.
+- **Costs:** `EXHAUSTION_PER_TICK` 0.06 hunger a tick while held (outside creative), and `COOLDOWN` 60 ticks after
+  letting go.
+- **HUD:** a Cyclone chip (a guster banner pattern) after G / V / B with the bound key and the cooldown; it pulses
+  while the Cyclone lasts, and "Cyclone" shows over the crosshair with a swirling band.
+- **Queries for synergies:** `WindCyclone.isActive(player)`, `radius(player)`, `height(player)`, `isAvailable(player)`.
+
+## 0.8.0: carrying while flying (see `docs/carry.md`)
+- A Wind user carrying someone can take off and fly as usual, at `Carry.FLIGHT_SPEED` ×0.8 of the top cruise speed
+  (`WindFlightController`) and `Carry.FLIGHT_HUNGER` ×1.3 the flight hunger (`WindPower`).
+- In the air any of the four holds can be rolled; take-off rolls a new one, and landing with a flight-only hold
+  (shoulder grab, over the back) switches to fireman's or bridal.
+- A cruising carrier's tilt is shared with the body they hold (`WindPose.tiltLike`), so the two lie along the flight
+  together. While carrying, the superman pose and the hover sway leave the arms to the hold.
+- Being carried ends your own flight (`WindFlight.canFly` is false while carried), and a carried wind user shows no
+  wind poses.
+
+### Testing (0.8.0)
+1. Tempest Kick (`/power set @s wind`, all abilities): kick a dozen times in third person (F5). Both legs should
+   appear, the body tipping hard away from the kicking leg about the planted foot, the arms in four different
+   arrangements. The swing arc comes round from the kicking side on the hit tick (about 0.15 s after the key), then
+   the crescent flies, tipped low on that side.
+2. A second client sees the same side and arms as the kicker.
+3. Carry someone while flying: cruise speed tops out lower, hunger drains faster, and the held body lies along the
+   flight with you.
+4. Cyclone (`/power set @s wind`): tap X, the kick still fires (on release). Hold X: after 0.4 s you drop into the
+   superhero landing (F5: knee on the ground, other foot planted ahead, hunched, one arm up and back, other hand by
+   the ground) and the funnel rises. WASD and Space do nothing. Let go: the funnel bursts, the HUD chip shows a 3 s
+   cooldown.
+5. Summon a few zombies and pigs nearby: they're spun round you and lifted a little, taking 4 a second (base). In
+   survival you take ½ heart every 2 s, even with Gale Barrier up. `/power ascend @s`: 4 every 0.5 s to them, ½ heart
+   every 4 s to you. `/power corrupt @s`: sparks on each hit, lightning damage, purple dust in the funnel.
+6. `/power level @s 1` (or a fresh awakening with one unlock): a 3-block funnel; at 4 unlocked, 6 blocks. At 0
+   unlocked, holding X does nothing.
+7. A second client sees the stance, the funnel and hears the roar; mobs on the server take the damage.
+
+## 0.8.3: heavier Tempest Kick, the cold, heavy weapons, fumbling
+
+### Tempest Kick: more weight (`WindKick`, `WindPose` KICK branch)
+- **Timing:** `WINDUP_TICKS` 3 → 6 (the lean builds and the leg chambers), the snap through the arc (`SNAP_TICKS`
+  1.5) with the crescent leaving on the hit tick (the server's crescent delay is the same wind-up), then about 8 ticks
+  of follow-through and recovery (`RECOVER_TICKS`). `KICK_TICKS` 11 → 16. The lean holds `KICK_LEAN_HOLD` past the
+  snap, then eases out.
+- **Bend at the hip:** on top of the whole-body lean about the standing foot, everything above the hip (torso, head,
+  arms) bends `KICK_HIP_BEND` (30°, ±`KICK_HIP_BEND_JITTER`) further away from the kicking leg, pivoting at the hip
+  (`WindPose.hipBend`: each upper part's pivot swings round the hip and the part tips with it, so the arms and head stay
+  attached). The neck turns back `KICK_HIP_HEAD_LEVEL` of it. With the whole-body lean, the leg's apex
+  (`LEG_APEX_X` -1.95 → -2.05) is level with the head at the snap.
+- `Kicking` gains a `windup` field (the cold's longer wind-up); `Kicking.length()` is the whole kick's length. In a long
+  wind-up the pose holds the chambered leg (trembling, `KICK_HOLD_SHAKE`) and the kick's beats run as usual after it.
+
+### The cold slows the wind (`WindCold`)
+- Where it would snow at the player's eye (`Biome.coldEnoughToSnow(pos, seaLevel)`: the biome's temperature at that
+  height, weather or not; a snowy mountain top counts), every Wind ability winds up `EXTRA_WINDUP_TICKS` (60) longer and
+  cools down `EXTRA_COOLDOWN_TICKS` (60) longer:
+  - **Wind-ups:** the channels (G / V / B: the full charge takes 60 ticks more; it's stored per channel and sent to
+    the client in `WindNet.Status.channelMax`, so the HUD bar matches), the Cyclone's hold threshold on X (client),
+    the Tempest Kick's wind-up.
+  - **Cooldowns:** G / V / B, the ground Gust, Call Lightning, Cyclone Lance, the Cyclone, the Tempest Kick, the
+    Flurry of Sora's Dagger.
+- **HUD:** a pale-blue frost mark (a snowflake) left of the weather glyph while it's cold, a "COLD" tag on the charge
+  meter's label, and an action-bar line when the cold first takes hold (at most once a minute).
+
+### Heavy weapons (`WindHeavy`, `mixin/WindPlayerAttackMixin`)
+- A Wind user's melee hits with an axe (`#minecraft:axes`) or a mace (`minecraft:mace`; 26.3 has no maces tag) deal
+  `DAMAGE_SCALE` ×0.6: the main hit and the sweep (`@ModifyArg` on `hurtOrSimulate` and `doSweepAttack` in
+  `Player.attack`). The mace's smash bonus is in the hit's damage, so it's scaled too.
+
+### Fumbling (`WindFumble`)
+- Until `Mastery.unlocked` reaches `MASTERED` (3), each Wind ability used (a channel's release, Cyclone Lance, the
+  Cyclone) has a `CAST_CHANCE` (8%) chance, and each second of flight a `FLIGHT_CHANCE_PER_SECOND` (2%) one, of the
+  main-hand item slipping: thrown ahead as an item entity (`ServerPlayer.drop`, pickup delay
+  `PICKUP_DELAY_TICKS`), with a sound and an action-bar line. Never in creative; nothing is destroyed.
+
+### Testing (0.8.3)
+1. Tempest Kick (F5, all abilities): slower to chamber (about 0.3 s), the snap, then a visible recovery. The torso,
+   head and arms bend sideways at the hip away from the kick, on top of the lean; the arms and head stay on the
+   shoulders; the kicking foot comes up to head height at the snap. The crescent leaves at the snap.
+2. A snowy biome (`/locate biome minecraft:snowy_plains`) or a snowy peak: the frost mark shows; a G / V / B charge
+   takes 3 s longer to fill; cooldowns are 3 s longer; holding X takes 3.4 s to become a Cyclone; a kick holds its
+   chamber 3 s before snapping (a second client sees the same). Back in plains, all normal.
+3. As a Wind user hit a zombie with an iron axe, then with no power: the Wind hit is about 60% of the other. A mace too.
+4. `/power level @s 2` (two unlocked), survival, holding a stack: fly for a minute and use abilities; now and then the
+   item is thrown ahead with a line on the action bar. At 3 unlocked, or in creative, it never happens.
+
+### Risky (0.8.3)
+- The mixin's two `@ModifyArg` targets must match 26.3's `Player.attack` (checked against the jar); a mismatch crashes
+  on start (`defaultRequire` 1).
+- `Status` and `Kicking` changed shape: client and server must both be on this build.

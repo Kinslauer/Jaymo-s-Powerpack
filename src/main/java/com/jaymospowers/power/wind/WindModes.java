@@ -72,6 +72,8 @@ public final class WindModes {
 	public static final int NONE = 0, STORM = 1, TEMPEST = 2, BOTH = 3;
 
 	// ---- Stormbound mode ----
+	/** How long Call Lightning sets things alight (seconds). */
+	static final int CALL_BURN_SECONDS = 3;
 	/** Melee stun: Slowness at this amplifier for this long, and a little extra knockback. */
 	static final int STUN_TICKS = 16;
 	static final int STUN_AMPLIFIER = 3;
@@ -591,13 +593,12 @@ public final class WindModes {
 		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area, e -> e.isAlive() && e != player && !e.isSpectator())) {
 			target.hurtServer(level, source, damage);
 			chargeCreeper(target);
-			if (!target.fireImmune()) {
-				target.setRemainingFireTicks(Math.max(target.getRemainingFireTicks(), 60));
-			}
 			if (storm(player)) {
 				charge(player, target);
 			}
 		}
+		// the bolt sets alight everything flammable it reaches, not just the creatures
+		com.jaymospowers.core.Flames.area(level, area, CALL_BURN_SECONDS, player, e -> true);
 		player.causeFoodExhaustion(Mth.lerp(f, CALL_EXHAUSTION_MIN, CALL_EXHAUSTION_MAX));
 		// the air was thick with static: some of it finds you
 		if (!player.isCreative()) {

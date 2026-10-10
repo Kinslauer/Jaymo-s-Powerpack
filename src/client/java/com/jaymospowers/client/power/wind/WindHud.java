@@ -23,8 +23,9 @@ import net.minecraft.world.item.Items;
  * <ul>
  * <li>above the G / V / B chips while flying: the flight state (+ LOCKED), speed, and a speed bar with the sonic mark;</li>
  * <li>over the crosshair while channelling: the ability name and a charge meter;</li>
- * <li>right of the hotbar: G / V / B chips with their bound keys and cooldowns, plus the Cyclone Lance chip (C) once
- * ascended;</li>
+ * <li>right of the hotbar: G / V / B chips with their bound keys and cooldowns, the Cyclone chip (hold X) once grown
+ * into, plus the Cyclone Lance chip (C) once ascended;</li>
+ * <li>over the crosshair while a Cyclone lasts: its name and a swirling band;</li>
  * <li>at the right end of the flight readout's row: a tiny weather glyph (sun, moon, roof, rain, storm...) with a thin
  * line under it showing how strong the wind is right now.</li>
  * </ul>
@@ -41,6 +42,7 @@ final class WindHud {
 	private static final int GLYPH = 7;
 	private static final int GLYPH_SPACE = GLYPH + 3;
 	private static final int LANCE_COLOR = 0xE6F7FF;
+	private static final int CYCLONE_COLOR = 0x9FE8D8;
 	private static final int STORMBOUND_COLOR = 0xB070FF;
 	private static final String[][] GLYPHS = {
 		// CLEAR_DAY: sun
@@ -59,6 +61,9 @@ final class WindHud {
 		{"...##..", "..##...", ".##....", "#####..", "..##...", ".##....", "##....."},
 	};
 	private static final int[] GLYPH_COLORS = {0xFFD45A, 0xC8D0FF, 0x9A9A9A, 0xB088FF, 0x7FB8FF, 0xFFF27A, STORMBOUND_COLOR};
+	/** In the cold (wind-ups and cooldowns stretched, see {@code WindCold}): a frost mark left of the weather glyph. */
+	private static final String[] FROST = {"#..#..#", ".#.#.#.", "..###..", "#######", "..###..", ".#.#.#.", "#..#..#"};
+	private static final int FROST_COLOR = 0xA8E4FF;
 
 	private WindHud() {
 	}
@@ -74,15 +79,26 @@ final class WindHud {
 		boolean lance = Fate.isAscended(player);
 		// the Power Mode (Z) chip, once there's a form to enter
 		boolean mode = Fate.isAscended(player) || Fate.isCorrupted(player);
-		int count = WindAbility.values().length + (lance ? 1 : 0) + (mode ? 1 : 0);
+		// the Cyclone (hold X), once grown into
+		boolean cyclone = com.jaymospowers.power.wind.WindCyclone.isAvailable(player);
+		int count = WindAbility.values().length + (cyclone ? 1 : 0) + (lance ? 1 : 0) + (mode ? 1 : 0);
 		int[] chipsAt = chipsOrigin(width, height, count);
 		int right = chipsAt[0] + chipsWidth(count);
 		weather(graphics, player, right, chipsAt[1] - 15, time);
-		flight(graphics, font, client.flight(), right - GLYPH_SPACE, chipsAt[1], time);
-		channel(graphics, font, client, cx, cy, time);
+		boolean cold = com.jaymospowers.power.wind.WindCold.isCold(player);
+		if (cold) {
+			frost(graphics, right - GLYPH_SPACE, chipsAt[1] - 15, time);
+		}
+		flight(graphics, font, client.flight(), right - GLYPH_SPACE * (cold ? 2 : 1), chipsAt[1], time);
+		channel(graphics, font, client, cx, cy, time, cold);
 		chips(graphics, font, client, chipsAt[0], chipsAt[1], time);
+		int next = WindAbility.values().length;
+		if (cyclone) {
+			cycloneChip(graphics, font, player, chipsAt[0] + next++ * (CHIP + CHIP_GAP), chipsAt[1], time);
+			cycloneLabel(graphics, font, player, cx, cy, time);
+		}
 		if (lance) {
-			lanceChip(graphics, font, client, chipsAt[0] + WindAbility.values().length * (CHIP + CHIP_GAP), chipsAt[1], time);
+			lanceChip(graphics, font, client, chipsAt[0] + next * (CHIP + CHIP_GAP), chipsAt[1], time);
 		}
 		if (mode) {
 			modeChip(graphics, font, player, chipsAt[0] + (count - 1) * (CHIP + CHIP_GAP), chipsAt[1], time);
@@ -127,6 +143,58 @@ final class WindHud {
 		graphics.fill(x0, y + GLYPH + 1, x0 + Mth.ceil(GLYPH * strength), y + GLYPH + 2, 0xB0000000 | color);
 	}
 
+	/** The frost mark: the cold has the wind (slower wind-ups, longer cooldowns). It glints now and then. */
+	private static void frost(GuiGraphicsExtractor graphics, int right, int y, float time) {
+		int color = pulse(FROST_COLOR, 0xFFFFFF, time * 0.15F);
+		int x0 = right - GLYPH;
+		for (int row = 0; row < GLYPH; row++) {
+			for (int col = 0; col < GLYPH; col++) {
+				if (FROST[row].charAt(col) == '#') {
+					graphics.fill(x0 + col, y + row, x0 + col + 1, y + row + 1, 0xE0000000 | color);
+				}
+			}
+		}
+	}
+
+	/** The Cyclone (hold the power skill key): lit while it lasts, shaded through its cooldown. */
+	private static void cycloneChip(GuiGraphicsExtractor graphics, Font font, LocalPlayer player, int x, int y, float time) {
+		boolean active = com.jaymospowers.power.wind.WindCyclone.isActive(player);
+		int cooldown = WindCycloneClient.cooldown();
+		boolean ready = cooldown <= 0;
+		int color = Fate.isCorrupted(player) ? STORMBOUND_COLOR : CYCLONE_COLOR;
+		int border = active ? pulse(0xFFFFFF, color, time * 0.8F) : ready ? color : 0x505050;
+		graphics.fill(x, y, x + CHIP, y + CHIP, active ? 0xB0203040 : 0x90000000);
+		graphics.outline(x, y, CHIP, CHIP, (ready ? 0xFF000000 : 0xA0000000) | border);
+		graphics.item(new ItemStack(Items.GUSTER_BANNER_PATTERN), x + 2, y + 2);
+		if (!ready) {
+			float share = Mth.clamp(cooldown / (float)WindCycloneClient.cooldownTotal(), 0.0F, 1.0F);
+			int shade = Mth.ceil(16 * share);
+			graphics.fill(x + 2, y + 2 + 16 - shade, x + 18, y + 18, 0xB0000000);
+			String seconds = String.format(Locale.ROOT, "%.1f", cooldown / 20.0F);
+			graphics.text(font, seconds, x + CHIP / 2 - font.width(seconds) / 2, y + 4, 0xFFFFFFFF);
+		}
+		String key = font.plainSubstrByWidth(WindCycloneClient.keyLabel(Minecraft.getInstance()), CHIP - 2);
+		graphics.text(font, key, x + CHIP - 1 - font.width(key), y + CHIP - 8, ready ? 0xFFFFFFFF : 0xFF909090);
+	}
+
+	/** While the Cyclone lasts: its name over the crosshair, the line under it swirling. */
+	private static void cycloneLabel(GuiGraphicsExtractor graphics, Font font, LocalPlayer player, int cx, int cy, float time) {
+		if (!com.jaymospowers.power.wind.WindCyclone.isActive(player)) {
+			return;
+		}
+		int color = Fate.isCorrupted(player) ? STORMBOUND_COLOR : CYCLONE_COLOR;
+		int barWidth = 52;
+		int x0 = cx - barWidth / 2;
+		int y = cy - 20;
+		graphics.fill(x0 - 1, y - 1, x0 + barWidth + 1, y + 4, 0x90000000);
+		// a bright band running round and round
+		int band = 14;
+		int at = (int)(time * 3.0F) % (barWidth + band) - band;
+		graphics.fill(x0, y, x0 + barWidth, y + 3, 0x80000000 | color);
+		graphics.fill(Math.max(x0, x0 + at), y, Math.min(x0 + barWidth, x0 + at + band), y + 3, 0xFFFFFFFF);
+		graphics.centeredText(font, WindCycloneClient.label().copy().withColor(color), cx, y - 11, 0xFFFFFFFF);
+	}
+
 	/** Cyclone Lance (ascended): its chip, with the ultimate key and the cooldown. */
 	private static void lanceChip(GuiGraphicsExtractor graphics, Font font, WindPowerClient client, int x, int y, float time) {
 		int cooldown = client.lanceCooldown();
@@ -136,7 +204,7 @@ final class WindHud {
 		graphics.outline(x, y, CHIP, CHIP, (ready ? 0xFF000000 : 0xA0000000) | border);
 		graphics.item(new ItemStack(Items.BREEZE_ROD), x + 2, y + 2);
 		if (!ready) {
-			float share = Mth.clamp(cooldown / (float)WindTempest.LANCE_COOLDOWN, 0.0F, 1.0F);
+			float share = Mth.clamp(cooldown / (float)Math.max(cooldown, WindTempest.LANCE_COOLDOWN), 0.0F, 1.0F);
 			int shade = Mth.ceil(16 * share);
 			graphics.fill(x + 2, y + 2 + 16 - shade, x + 18, y + 18, 0xB0000000);
 			String seconds = String.format(Locale.ROOT, "%.1f", cooldown / 20.0F);
@@ -214,19 +282,24 @@ final class WindHud {
 		graphics.text(font, label, right - font.width(label), y, 0xE0FFFFFF);
 	}
 
-	private static void channel(GuiGraphicsExtractor graphics, Font font, WindPowerClient client, int cx, int cy, float time) {
+	private static void channel(GuiGraphicsExtractor graphics, Font font, WindPowerClient client, int cx, int cy, float time, boolean cold) {
 		WindAbility ability = client.channel();
 		if (ability == null) {
 			return;
 		}
-		float charge = Mth.clamp(client.channelTicks() / (float)ability.maxChannel, 0.0F, 1.0F);
+		float charge = Mth.clamp(client.channelTicks() / (float)client.channelMax(), 0.0F, 1.0F);
 		int barWidth = 52;
 		int x0 = cx - barWidth / 2;
 		int y = cy - 20;
 		graphics.fill(x0 - 1, y - 1, x0 + barWidth + 1, y + 4, 0x90000000);
 		int color = charge >= 1.0F ? pulse(0xFFFFFF, ability.color, time * 0.6F) : ability.color;
 		graphics.fill(x0, y, x0 + Mth.ceil(barWidth * charge), y + 3, 0xFF000000 | color);
-		graphics.centeredText(font, Component.translatable(ability.langKey()).withColor(ability.color), cx, y - 11, 0xFFFFFFFF);
+		MutableComponent label = Component.translatable(ability.langKey()).withColor(ability.color);
+		if (cold) {
+			// so it's clear why the charge crawls
+			label.append(Component.literal("  ")).append(Component.translatable("hud.jaymospowers.wind.cold").withColor(FROST_COLOR));
+		}
+		graphics.centeredText(font, label, cx, y - 11, 0xFFFFFFFF);
 	}
 
 	private static void chips(GuiGraphicsExtractor graphics, Font font, WindPowerClient client, int x, int y, float time) {
@@ -261,7 +334,7 @@ final class WindHud {
 			String seconds = cooldown >= 200 ? Integer.toString(Mth.ceil(cooldown / 20.0F)) : String.format(Locale.ROOT, "%.1f", cooldown / 20.0F);
 			graphics.text(font, seconds, x + CHIP / 2 - font.width(seconds) / 2, y + 4, 0xFFFFFFFF);
 		} else if (channelling) {
-			float charge = Mth.clamp(client.channelTicks() / (float)ability.maxChannel, 0.0F, 1.0F);
+			float charge = Mth.clamp(client.channelTicks() / (float)client.channelMax(), 0.0F, 1.0F);
 			graphics.fill(x + 1, y + CHIP - 3, x + 1 + Mth.ceil((CHIP - 2) * charge), y + CHIP - 1, 0xFF000000 | ability.color);
 		}
 		// the bound key, bottom-right like an item count

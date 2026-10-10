@@ -11,8 +11,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 /**
- * Time Flow's blows, drawn: a jab, a hook, an uppercut, a lunging punch, a flying kick, the counter (guard up, then
- * the strike) and Chrono Punch's quick jabs. Everything is set outright from the blow's progress, so applying it twice
+ * Time Flow's blows, drawn: a jab, a hook, an uppercut, a lunging punch, a flying kick, the counters (a crowd's quick
+ * guard and strike; against one attacker the circle, the slip, or one of five deflects, each then the answer) and
+ * Chrono Punch's quick jabs. Everything is set outright from the blow's progress, so applying it twice
  * changes nothing.
  */
 public final class ChronoFlowPose {
@@ -35,7 +36,7 @@ public final class ChronoFlowPose {
 			state.setData(KEY, null);
 			return;
 		}
-		float p = (entity.level().getGameTime() - move.start() + partialTicks) / ChronoFlow.DURATION[move.style()];
+		float p = (entity.level().getGameTime() - move.start() + partialTicks) / move.duration();
 		state.setData(KEY, p >= 0.0F && p < 1.0F ? new Pose(move, p) : null);
 	}
 
@@ -91,7 +92,9 @@ public final class ChronoFlowPose {
 				h.body.xRot = -0.3F * e;
 			}
 			case ChronoFlow.COUNTER -> {
-				if (p < 0.4F) {
+				if (pose.move().variant() != ChronoFlow.CROWD) {
+					counter(h, pose.move(), p, side, lead, guard, frontLeg, backLeg);
+				} else if (p < 0.4F) {
 					// guard up: the forearm across the face, catching the blow
 					float g = p / 0.4F;
 					set(lead, -2.0F, side * -0.7F, 0.0F, Math.min(1.0F, g * 2.0F));
@@ -107,6 +110,113 @@ public final class ChronoFlowPose {
 			default -> {
 			}
 		}
+	}
+
+	/** A counter against one attacker: the evasion or the parry, then the answering blow when it lands. */
+	private static void counter(HumanoidModel<?> h, ChronoFlow.Move move, float p, int side, ModelPart lead, ModelPart guard,
+		ModelPart frontLeg, ModelPart backLeg) {
+		float hit = move.hitAt() / (float)move.duration();
+		// the answer: drawn back just before the blow, driven out on it, then eased off
+		float windUp = seg(p, hit - 0.16F, hit - 0.05F) * (1.0F - seg(p, hit - 0.05F, hit));
+		float strike = seg(p, hit - 0.05F, hit) * (1.0F - seg(p, hit + 0.1F, 1.0F));
+		switch (move.variant()) {
+			case ChronoFlow.CIRCLE -> {
+				// a crouch with the guard up, then running round them, leaning in
+				float g = seg(p, 0.0F, 0.08F) * (1.0F - seg(p, 0.5F, 0.58F));
+				set(lead, -1.3F, -side * 0.3F, 0.0F, g);
+				set(guard, -1.3F, side * 0.3F, 0.0F, g);
+				float run = seg(p, 0.06F, 0.14F) * (1.0F - seg(p, 0.46F, 0.56F));
+				float stride = Mth.sin(p * Mth.PI * 10.0F) * 0.9F;
+				set(h.rightLeg, stride, 0.0F, 0.0F, run);
+				set(h.leftLeg, -stride, 0.0F, 0.0F, run);
+				h.body.xRot = 0.3F * Math.max(run, g * 0.5F);
+				h.body.zRot = side * 0.2F * run;
+				h.head.zRot = side * 0.15F * run;
+				// from behind: the lead fist cocked back, then driven in
+				set(lead, 0.7F, 0.0F, side * 0.2F, windUp);
+				set(lead, -Mth.HALF_PI - 0.15F, 0.0F, 0.0F, strike);
+				set(guard, -1.2F, side * 0.4F, 0.0F, strike);
+				set(frontLeg, -0.45F, 0.0F, 0.0F, strike);
+				set(backLeg, 0.35F, 0.0F, 0.0F, strike);
+				h.body.yRot = side * -0.45F * strike;
+			}
+			case ChronoFlow.SLIP -> {
+				// leaning out of the blow, the step's way, guard high
+				float lean = seg(p, 0.0F, 0.12F) * (1.0F - seg(p, 0.45F, 0.58F));
+				set(lead, -1.45F, -side * 0.35F, -side * 0.3F, lean);
+				set(guard, -1.45F, side * 0.35F, -side * 0.3F, lean);
+				h.body.zRot = -side * 0.38F * lean;
+				h.head.zRot = -side * 0.3F * lean;
+				set(side > 0 ? h.rightLeg : h.leftLeg, 0.0F, 0.0F, side * 0.35F, lean);
+				// and a short hook to the body: low, turned through the hips
+				set(lead, 0.4F, 0.0F, side * 0.3F, windUp);
+				set(lead, -1.15F, -side * 0.25F, 0.0F, strike);
+				set(guard, -1.3F, side * 0.35F, 0.0F, strike);
+				h.body.xRot = 0.2F * strike;
+				h.body.yRot = side * -0.55F * strike;
+			}
+			default -> {
+				deflect(h, move.deflect(), p, side, lead, guard);
+				// the riposte: a palm strike straight back
+				set(lead, 0.5F, 0.0F, 0.0F, windUp);
+				set(lead, -Mth.HALF_PI, 0.0F, 0.0F, strike);
+				set(guard, -1.25F, side * 0.3F, side * 0.25F, strike);
+				set(frontLeg, -0.35F, 0.0F, 0.0F, strike);
+				h.body.yRot = side * -0.45F * strike;
+			}
+		}
+	}
+
+	/**
+	 * The five parries: each arm goes to its catch, then on to where it turns the blow away, and lets go before the riposte.
+	 * For the lead arm "in" (toward the centre line) is a yaw of {@code -side}, out to the side a roll of {@code side}.
+	 */
+	private static void deflect(HumanoidModel<?> h, int which, float p, int side, ModelPart lead, ModelPart guard) {
+		float amount = seg(p, 0.0F, 0.1F) * (1.0F - seg(p, 0.42F, 0.55F));
+		float out = seg(p, 0.16F, 0.36F);
+		switch (which) {
+			case ChronoFlow.HIGH_BLOCK -> {
+				// the lead forearm snaps up across the face, then pushes up and out
+				arm(lead, -2.2F, -side * 0.9F, 0.0F, -1.85F, -side * 0.15F, side * 0.3F, out, amount);
+				set(guard, -1.0F, side * 0.3F, 0.0F, amount);
+			}
+			case ChronoFlow.OUTSIDE_SWEEP -> {
+				// from the centre line, swept outward, the body turning with it
+				arm(lead, -1.5F, -side * 0.6F, 0.0F, -1.3F, side * 1.0F, side * 0.2F, out, amount);
+				set(guard, -1.2F, side * 0.35F, 0.0F, amount);
+				h.body.yRot = side * 0.25F * out * amount;
+			}
+			case ChronoFlow.SLAP_DOWN -> {
+				// an open hand high in front, driving the blow down and across the body
+				arm(lead, -1.9F, -side * 0.2F, 0.0F, -0.5F, -side * 0.9F, -side * 0.3F, out, amount);
+				set(guard, -1.25F, side * 0.3F, 0.0F, amount);
+				h.body.xRot = 0.2F * out * amount;
+				h.body.yRot = side * -0.2F * out * amount;
+			}
+			case ChronoFlow.CROSS_BLOCK -> {
+				// both forearms crossed in an X before the chest, then thrown apart
+				arm(lead, -1.45F, -side * 0.75F, 0.0F, -1.2F, side * 0.55F, side * 0.35F, out, amount);
+				arm(guard, -1.45F, side * 0.75F, 0.0F, -1.2F, -side * 0.55F, -side * 0.35F, out, amount);
+				h.body.xRot = 0.12F * amount * (1.0F - out);
+			}
+			default -> {
+				// the elbow raised to the side to take it, then the forearm swung out front
+				arm(lead, -0.4F, 0.0F, side * 1.7F, -1.5F, side * 0.8F, side * 0.4F, out, amount);
+				set(guard, -1.2F, side * 0.35F, 0.0F, amount);
+				h.body.zRot = -side * 0.12F * amount * (1.0F - out);
+			}
+		}
+	}
+
+	/** An arm from one pose to another ({@code t}), applied by {@code amount}. */
+	private static void arm(ModelPart part, float x0, float y0, float z0, float x1, float y1, float z1, float t, float amount) {
+		set(part, Mth.lerp(t, x0, x1), Mth.lerp(t, y0, y1), Mth.lerp(t, z0, z1), amount);
+	}
+
+	/** 0 before {@code a}, 1 after {@code b}, eased between. */
+	private static float seg(float p, float a, float b) {
+		float t = Mth.clamp((p - a) / (b - a), 0.0F, 1.0F);
+		return t * t * (3.0F - 2.0F * t);
 	}
 
 	private static void set(ModelPart part, float x, float y, float z, float amount) {

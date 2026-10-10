@@ -140,6 +140,7 @@ public final class ArsenalPower implements Power {
 		ArsenalVoid.init();
 		SwordStone.register();
 		RelicWeapons.register();
+		VoidCrown.register();
 		ArsenalFlintlock.register();
 		ArsenalItems.init();
 		ArsenalDebugCommand.init();
@@ -409,6 +410,10 @@ public final class ArsenalPower implements Power {
 		if (!stacks.isEmpty()) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal.pulled", stacks.getFirst().getHoverName())
 				.withStyle(ChatFormatting.LIGHT_PURPLE));
+		}
+		// a full Reach (not Rummage) into the void: sometimes something else follows the weapon out
+		if (life == SUMMON_TICKS && com.jaymospowers.core.Fate.isCorrupted(player)) {
+			VoidCrown.maybeFind(player, rift);
 		}
 	}
 

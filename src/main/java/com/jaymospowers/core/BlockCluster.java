@@ -62,6 +62,8 @@ public class BlockCluster extends Entity {
 	static final float DROP_CHANCE = 0.3F;
 	/** How ragged a torn-out chunk is: the jitter on each block's distance when choosing which come with it. */
 	static final double RAGGED = 1.3;
+	/** Soft blocks (dirt, sand, gravel, leaves, snow... and wool): no harder than this. A chunk made only of them hits for at most {@code SOFT_HIT_DAMAGE}. */
+	public static final float SOFT_HARDNESS = 0.6F, SOFT_HIT_DAMAGE = 1.0F;
 
 	/** One block of the chunk: its state, and where it sits relative to the chunk's middle (blocks). */
 	public record Piece(int state, int x, int y, int z) {
@@ -147,6 +149,26 @@ public class BlockCluster extends Entity {
 			}
 		}
 		return taken;
+	}
+
+	/** Soft: it does little more than dust you when it lands (see {@link #SOFT_HARDNESS}). */
+	public static boolean soft(BlockState state) {
+		float hardness = state.getDestroySpeed(net.minecraft.world.level.EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
+		return hardness >= 0.0F && hardness <= SOFT_HARDNESS || state.is(net.minecraft.tags.BlockTags.WOOL);
+	}
+
+	/** Every block of the chunk is soft. */
+	public boolean allSoft() {
+		List<Piece> pieces = this.pieces();
+		if (pieces.isEmpty()) {
+			return false;
+		}
+		for (Piece piece : pieces) {
+			if (!soft(piece.blockState())) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/** A block that can come loose: something solid, not too hard, with no contents and no fluid. */
@@ -352,10 +374,11 @@ public class BlockCluster extends Entity {
 			Entity by = this.thrower == null ? null : level.getEntity(this.thrower);
 			if (speed > 0.4) {
 				float weight = Mth.clamp(this.pieces().size() / 4.0F, 0.5F, 2.0F);
+				boolean soft = this.allSoft();
 				for (LivingEntity hit : level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(0.2).expandTowards(this.lastVelocity),
 					e -> e.isAlive() && !e.isSpectator() && e != by && !this.struck.contains(e.getId()))) {
 					this.struck.add(hit.getId());
-					float damage = Math.min(HIT_DAMAGE_MAX, (HIT_DAMAGE_BASE + HIT_DAMAGE_PER_SPEED * (float)speed) * weight);
+					float damage = Math.min(soft ? SOFT_HIT_DAMAGE : HIT_DAMAGE_MAX, (HIT_DAMAGE_BASE + HIT_DAMAGE_PER_SPEED * (float)speed) * weight);
 					DamageSource source = by instanceof Player p ? level.damageSources().mobProjectile(this, p) : level.damageSources().fallingBlock(this);
 					hit.hurtServer(level, source, damage);
 					hit.setDeltaMovement(hit.getDeltaMovement().add(this.lastVelocity.scale(0.5)).add(0.0, 0.25, 0.0));

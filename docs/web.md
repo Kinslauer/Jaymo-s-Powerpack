@@ -317,7 +317,7 @@ action bar, each heard once.
 | 0 | Tendril Grab | 100 | 2 | Pulls the creature under the crosshair within `TENDRIL_RANGE` 20 to you. Things over `TENDRIL_HEAVY_VOLUME` 8 pull you to them instead. Aimed at a block, it zips you there. |
 | 1 | Living Armor (toggle) | 40 | 0 | +`ARMOR_ABSORPTION` 16 max absorption (8 hearts), regrowing `ARMOR_REGEN` 1 every `ARMOR_REGEN_TICKS` 40, and +0.6 knockback resistance. Satiety drains �`ARMOR_DRAIN_MULT` 3. |
 | 2 | Wall Crawl (toggle) | 20 | 0 | Client movement (`WebSymbioteClient.tickCrawl`). Next to a wall in the air, you stick; Jump or forward climbs at `CRAWL_CLIMB` 0.2, Sneak goes down. Under a ceiling, Jump sticks you to it, you move with the movement keys, and Sneak drops you. Climbing over a top edge hops you onto the ledge. The server allows floating while it's on and resets fall distance while you're touching a wall or ceiling. |
-| 3 | Consume | 160 | 0 | Swallows a non-player creature with max health = `CONSUME_MAX_HEALTH` 10 within `CONSUME_RANGE` 3, preferring the one you're looking at. It's removed with no drops. Heals 6, feeds +30, calms -10. Tamed and name-tagged creatures are never eaten. |
+| 3 | Consume | 160 | 0 | Nothing is eaten alive (0.8). A corpse you carry is eaten. Else a free corpse within `CONSUME_CORPSE_RANGE` 6 (the one you look at first) is grabbed by a tendril, carried, then eaten. Else a non-player creature at **current** health <= `CONSUME_MAX_HEALTH` 10 within `CONSUME_RANGE` 3 is finished off by a lash (`CONSUME_FINISH_LAG` 8 ticks), and its corpse grabbed, carried and eaten. Tamed, name-tagged, inedible and corpse-less creatures are never taken. A corpse heals 6-16 and feeds 30-80 by size. |
 | 4 | Spike Burst | 240 | 8 | Everything within `SPIKE_RADIUS` 5 takes `SPIKE_DAMAGE` 8 (player attack) and is thrown `SPIKE_KNOCKBACK` 1.3 outward and 0.45 up. Rays of black dust. |
 | 5 | Shroud | 600 | 5 | Invisibility (no particles) until you damage anything, or `SHROUD_TICKS` 400. |
 
@@ -334,14 +334,167 @@ action bar, each heard once.
 - When starving with stress = `TAKEOVER_STRESS` 50, every `TAKEOVER_CHECK_TICKS` 200 there's a
   `TAKEOVER_CHANCE` 35% chance. It's at most once per `TAKEOVER_COOLDOWN` 1200, and never in creative.
 - It picks the nearest mob within 12 (not tamed or name-tagged; never players) and takes over for 60�100 ticks.
-- The client wrenches your view and drags you at the mob (`TAKEOVER_SPEED` 0.34, hopping over steps), with a pulsing
-  dark vignette.
+- The client wrenches your view and drags you at the mob (`TAKEOVER_SPEED` 0.34), with a pulsing dark vignette.
+  Since 0.8.x it walks a real path round walls, or rips through them (see **Takeover pathing** below).
 - The server swings and attacks with `player.attack` every 10 ticks when within reach 3.
 - Afterwards stress drops by 20.
+
+**Takeover pathing (0.8.x, `WebTakeoverPath`, client `WebSymbioteClient.followPath`).** Everywhere the symbiote
+drives you (rampage and hunger takeovers, a curious one on its way to look, the feeding hunt, the run for its life)
+it no longer lurches in a straight line into walls.
+- **The path (server):** a bounded A* over block positions sized for a player (feet + head clear, something to stand
+  on; steps up of 1 with headroom, charged leaps up taller ledges (below), drops of up to `MAX_DROP` 3; no
+  corner-cutting diagonals; never through or onto
+  fire, lava, campfires, cactus, magma, berry bushes, powder snow, wither roses or cobwebs; slabs/carpets count as
+  floor). Budget `MAX_NODES` 1600 within `SEARCH_RADIUS` 32. The goal is the ground under the target (searched down
+  `GROUND_SEARCH` 6), reached within `GOAL_REACH` 1.6 and 2 blocks of height. Re-pathed every `REPATH_TICKS` 10, or at
+  once when the target has moved `REPATH_TARGET_MOVE` 3. A partial path is walked only if it ends
+  `PARTIAL_MIN_GAIN` 2.5 blocks closer. Waypoints go to the client in `WebNet.TakeoverPath` (`web_takeover_path`; at
+  most `PATH_SEND_MAX` 48) with a mode: PATH, DIRECT, RIP or FALLBACK.
+- **Straight line** only when the target is within `DIRECT_RANGE` 7, within `DIRECT_MAX_DY` 1.2 of your height, in
+  clear sight at the eyes and the feet, and there's ground all along the line (no lurching into a ravine).
+- **Running:** a flood fill (`FLEE_NODES` 1400, cost up to `FLEE_MAX_COST` 40) for the reachable spot that scores best:
+  distance from the threat − `FLEE_COST_WEIGHT` 0.35 × path cost, + `FLEE_SKY_BONUS` 3 under open sky. A spot must
+  gain `FLEE_MIN_GAIN` 4 blocks of distance, else it's trapped and rips away from the threat.
+- **Walking it (client):** faces and moves toward the next waypoint (reached within `WAYPOINT_REACH` 0.7, or
+  `CORNER_REACH` 0.45 at a corner; skips up to 2 ahead), hops (a plain jump, `JUMP_SPEED` 0.42) for a waypoint
+  `STEP_JUMP` 0.4+ higher or on bumping a wall, swims up, and creeps (`LEDGE_CREEP` 0.25) at an edge the path doesn't
+  drop down. Chasing, the eyes stay on the prey. The old straight lurch (with its detours) is the fallback.
+- **Sprinting (0.8.3):** it sprints whenever it can, in every mode (chasing, hunting, curious, running): the sprint
+  flag is on (so the gallop shows and the server sees it; `WebSprintMixin` keeps vanilla from cancelling a sprint with
+  no forward key held) at `TAKEOVER_SPEED` 0.38 blocks/tick, × `FLEE_SPEED_SCALE` 1.2 running. It drops to a walk
+  (`WALK_SPEED` 0.24) on a tight corner (within `CORNER_SLOW_RANGE` 1.2 of a turn sharper than `CORNER_COS`), on a
+  step up, at an edge, before and during a leap, in water, and when you're too hungry to sprint (vanilla's rule: food
+  above 6, or flight allowed). It costs hunger as any sprint does.
+- **Steps and leaps (0.8.3):** while a takeover has the legs, the suit's charged jump stands aside
+  (`WebSymbioteClient.driving()`: `WebSwing.holdingCharge` is false so `WebJumpMixin` lets plain jumps through, and
+  `tickChargeJump` ignores your Jump key), so 1-block steps are plain hops. A ledge taller than that is climbed with a
+  **charged leap**: the A* has a leap move up `LEAP_MIN_RISE` 2 to `LEAP_MAX_RISE` blocks onto the lowest ledge on that
+  side, with headroom above where it coils (up to the ledge's height + 2) and over the ledge; it costs `COST_LEAP` 3 +
+  `COST_LEAP_PER_BLOCK` 0.5 a block on top of the step, so walking round wins unless the leap saves real distance or is
+  the only way. `LEAP_MAX_RISE` is `WebLeap.TAKEOVER_MAX_RISE`: the height a **3/4 charge** (`TAKEOVER_MAX_CHARGE`)
+  clears with `CLEARANCE` 0.6 to spare, worked out from the leap's own physics (up speed `CHARGE_UP_MIN` 0.45 →
+  `CHARGE_UP_MAX` 1.65 blocks/tick, gravity 0.08, drag 0.98): 9 blocks. Too high even for that, and it walks round or
+  rips as before. On the client, a waypoint more than `LEAP_MIN_RISE` 1.4 above your feet is a ledge: it walks to its
+  foot (`LEAP_START_RANGE` 1.3, or until it bumps the wall), coils only as much charge as the rise needs
+  (`WebLeap.chargeFor`, at your gravity; e.g. about 0.15 for 2 blocks, 0.26 for 3, 0.35 for 4, never above 0.75) for that share
+  of `CHARGE_FULL` 30 ticks, crouching (`ChargeHold`, so everyone sees the coil; the server accepts it during a
+  takeover even with the suit hidden) and squelching, then leaps, nudged on at `LEAP_FORWARD` 0.12 and steered onto the
+  ledge in the air. Coiling counts as progress for the stuck check. The leap numbers live in `power/web/WebLeap`,
+  shared with the suit's own charged jump (`WebSwing`).
+- **Stuck:** moved less than `STUCK_MOVE` 0.9 in `STUCK_TICKS` 30 (and not in reach of the prey): it re-paths at once
+  (and stays off the straight line for `DIRECT_BAN_TICKS` 60). Stuck `STUCK_RIP_AFTER` 2 times running: it rips.
+- **Ripping through (debris-style since 0.8.3):** no path within the budget, a sealed room, or stuck: the tendrils
+  tear out the blocks in the first blocked cell toward the target (or away from the threat), up to `RIP_LOOKAHEAD` 3
+  cells along the main axis (then the other): a 1×2 slot, or a step (the block above the step and over your head) when
+  the target is higher, a step down when it's lower. The whole slot comes out as **one clump**, the way Living Armor's
+  tendrils tear a chunk loose: the tendrils dig in (the `web_symbiote_ripping` attachment, synced, draws every tendril
+  reaching into the block nearest your eyes) and work it loose over `RIP_LASH_TICKS` 8 + `RIP_TICKS_PER_HARDNESS` 2 ×
+  the hardest block's hardness + `RIP_TICKS_PER_BLOCK` 3 per extra block (at most `RIP_LASH_MAX_TICKS` 30), every
+  block cracking, with hit sounds, small debris puffs (`RIP_DEBRIS` 0.3) and the black `trail`. Then the blocks are
+  torn out through the shared code path, `BlockCluster.of` (the same puffs and wrench sounds as Living Armor's
+  sneak-rip; no item drops at the tear), and a free tendril takes the clump with `WebTendrils.grab` (it reaches, hauls
+  it up out of the hole and holds it, cords drawn as for any grab). After `RIP_HOLD_TICKS` 6 held (or
+  `RIP_HOLD_TIMEOUT` 40 after the tear) it's **flung aside** with `WebTendrils.fling`: square to the way through, to
+  the side (level, or up and over) with the most open room within `RIP_FLING_LOOK` 4 blocks, at `RIP_FLING_SPEED` 1.2
+  with `RIP_FLING_LIFT` 0.25, so never ahead into your path and never back at you. It's a launched clump: it batters
+  whatever it hits (never you) and shatters into dust, a few blocks dropping as items (`BlockCluster.DROP_CHANCE`). In a
+  tight tunnel it shatters against the wall beside you. Both tendrils full: the clump is shoved aside at once. Then it
+  re-paths. You're held still facing the block, and the dread overlay is refreshed every `RIP_FX_EVERY` 40. The first
+  rip in a takeover whispers "Walls won't stop it. It tears through." A takeover ending with a clump held flings it
+  aside.
+- **What it won't break:** unbreakable blocks, anything harder than `RIP_MAX_HARDNESS` 20 (obsidian and harder),
+  blocks with block entities (chests, furnaces, spawners...), fluids and waterlogged blocks, blocks you may not interact with
+  (`ServerPlayer.mayInteract`: spawn protection, world border) or act on in your game mode (`blockActionRestricted`),
+  and anything a protection mod refuses through Fabric's `PlayerBlockBreakEvents.BEFORE` (it fires `AFTER` too). At most
+  `RIP_MAX_BLOCKS` 32 per takeover (a clump is trimmed to what's left), within `RIP_REACH` 4.5. Nothing breakable in the way (a ravine, bedrock, a chest
+  wall): the blind fallback, and no new rip for `RIP_RETRY_TICKS` 40.
+
+**Feeding (0.8): kill, grab, carry, then feed.** Jaymo's Kitchen is now a required dependency (corpses).
+- The symbiote never feeds on anything living. Hungry (`SELF_FEED_BELOW` 50, checked every `SELF_FEED_EVERY` 20) it
+  runs a state machine (`WebSymbiote.tickFeeding`, server-side `Live.feedStage`):
+  1. **Seek:** a corpse you're carrying (edible) goes straight to Feed; else the nearest free corpse within
+     `SELF_FEED_RANGE` 14 (edible, nobody carrying it, no tendril holding it); else the nearest creature there that
+     leaves a corpse (no pets, no named ones; players only in a rampage).
+  2. **Kill:** it takes the wheel (a "hunt" takeover: no big body) and attacks; the tendril strikes go for the prey
+     first. Gives up after `KILL_TICKS` 400 or if the prey escapes. A hungry or rampage takeover that kills its own prey
+     also goes on into feeding.
+  3. Once the prey is dead, its Kitchen corpse must appear within `CORPSE_WAIT_TICKS` 60, within `CORPSE_FIND_RADIUS`
+     3 of where it fell.
+  4. **Grab:** a tendril (`WebTendrils.grab`) reaches for it and hauls it in (reach + `GRAB_HAUL_TICKS` 8, at most
+     `GRAB_TIMEOUT` 80).
+  5. **Carry:** `KitchenCompat.carry` puts it in your arms (Kitchen's private arms-carry, reached by reflection, since
+     its `takeBy` pockets small corpses; falls back to `takeBy`).
+  6. **Feed:** eating starts only once `KitchenCompat.carriedCorpse(player)` is that corpse. If the corpse leaves your
+     arms mid-meal, the maw closes and nothing is eaten.
+- `devour()` (eating weak creatures alive in a rampage) is gone, and a rampage bite on a player no longer heals or
+  feeds it. Player corpses (they hold belongings) are never eaten.
+- The whole episode keeps the dread screen effect up (refreshed every `FEED_FX_EVERY` 40 ticks).
+- Debug: `/powerdebug web symbiote` now prints `feeding[stage=... target=...]` (1 kill, 2 grab, 3 carry, 4 feed).
+
+**Its voice (0.8):** every `whisper` (hints included) also sends `web_symbiote_dread` (`WebNet.Dread`): for
+`WHISPER_FX_TICKS` 60 the screen darkens 35%, a pulsing blackish-purple (#1A0A26) vignette closes in, and a low growl
+(warden ambient + ravager ambient at pitch 0.5, at most once per 2 s) plays as a UI sound for that player only
+(`client/.../WebSymbioteDread`, its own HUD element after the misc overlays).
+
+**Tendril strikes (0.8):**
+- Each strike rolls a variant, synced in the `Strike` attachment (`variant`, plus `heavy`): a **slam** (reared high
+  over the head, crashing straight down; little push, and an airborne target is driven down) or a **swipe** from the
+  left or the right (a wide sweep through the target; knocks it sideways along the sweep). The hit lands at
+  `STRIKE_HIT_SHARE` 0.5 of the strike (rear until `STRIKE_REAR` 0.4).
+- **Heavy debris strikes:** while a tendril grip holds a `BlockCluster` or a falling block, strikes search
+  `HEAVY_STRIKE_RANGE` 8.5, last `HEAVY_STRIKE_TICKS` 60 (rear until 0.5, hit at 0.58), reset `HEAVY_STRIKE_EVERY` 90,
+  and deal `HEAVY_STRIKE_DAMAGE` 11 × (0.6 + 0.1 per block, 0.7-1.5). Knockback ~10 blocks (`HEAVY_KNOCK` 1.0 +
+  `HEAVY_LIFT` 0.45; a slam 0.75 + 0.2), a mace thud and anvil, block dust, and a shake for you and a struck player.
+  The held debris itself is swung along (`WebSymbiote.debrisStrikePoint`, steered in `WebTendrils.tick`): reared above
+  you or out to the side, then brought down or across onto the target.
+- Client (`WebTendrilLayer`): the strike curve follows the variant; a heavy strike stretches the striking tendrils far
+  further. The aim math was fixed: in model space a cord built along +Z points at relative yaw `a` (+ right) and
+  elevation `p` (+ up) with `yRot = PI + a`, `xRot = p` (the old `-PI/2 - 1 - p` pointed strikes back and down).
+
+**Tendril combos (0.8, `WebTendrilCombos`):** attack (left click) while the tendrils hold things and it's a combo
+instead of a swing. The client (`WebPowerClient`'s `ClientPreAttackCallback`) works out whether one fits
+(`WebTendrilCombos.kind`, plus `crosshairTarget`: the living thing under the crosshair within `CRUSH_REACH` 6, seen past
+held things) and sends `web_tendril_combo_attack` (`Attack(target)`); the server re-checks it (target within reach +
+`REACH_SLACK` 2 and in front), else falls back to the old chunk swing (`WebTendrils.smash`). Both tendrils must have
+reached what they hold.
+
+| Holding | Combo |
+|---|---|
+| A creature in each tendril | **Clap**: hauled out `CLAP_WIDE` 2.6 to each side, slammed together `CLAP_FORWARD` 2.3 ahead; `CLAP_DAMAGE` 12 each, then dropped and bounced apart (`CLAP_BOUNCE` 0.75 out, `CLAP_LIFT` 0.4 up). |
+| Debris + a creature in the other tendril, or under the crosshair | **Crush**: the debris reared `CRUSH_REAR_UP` 2.8 over your head, carried over the target and brought straight down on it. `CRUSH_DAMAGE` 15 × size (0.6 + 0.1 a block, 0.7-1.5), driven down if airborne, Slowness II 1.5 s. A held victim is pinned low in front for it. |
+| Debris in both | **Shatter**: hauled out wide and up, smashed together `SHATTER_FORWARD` 2.4 ahead, bursting into a cone (`SHATTER_RANGE` 6, half-angle 30°) of their blocks. Everything in it (line of sight from the burst) takes `SHATTER_DAMAGE` 10 × size (to 1.8), falling off 40% at the far end, and is knocked along the cone. |
+
+- Timing: hauled out until `REAR_TICKS` 12 (a sweep and mace whoosh at the turn), impact at `HIT_TICKS` 18, slow reset to
+  `TICKS` 50 (no new combo, no autonomous strike; clicks are swallowed while the tendrils still hold something).
+- Synced in `WebTendrils.COMBO` (`Combo(kind, start, first, second)`) to everyone. The server steers the held things
+  through it (`WebTendrilCombos.point`, steered hard in `WebTendrils.tick`), so their cords move with them; in
+  `WebTendrilLayer` every upper tendril joins in (clap: both sides hauled wide, then clapped in; crush and shatter: a
+  heavy two-sided slam).
+- Used debris is spent at the impact: `BlockCluster.shatter` (dust, the usual 30% drops) plus falling grit; a held
+  falling block puffs, may drop (`SPENT_DROP_CHANCE` 0.3) and is gone. Soft debris (`BlockCluster.allSoft` / `soft`)
+  hits for no more than `BlockCluster.SOFT_HIT_DAMAGE`; a shatter's damage scales by its share of hard blocks.
+- Impact: heavy sounds (mace, anvil, crit, a blast for the shatter), block dust from the ground, a screen shake for you
+  (`SHAKE` 1.8, shatter 2.2) and for a struck player (`TARGET_SHAKE` 2.5). You're never hurt by your own combo; other
+  players are.
+
+**First person (0.8):** First-person Model (`firstperson`) and Not Enough Animations join the pack (`packModsNoCf`
+in `build.gradle`, CurseForge ids still to fill in).
+- With FPM drawing your body (`FirstPersonCompat.bodyShown`: loaded, first-person camera, `FirstPersonAPI.isEnabled()`
+  by reflection), `WebTendrilLayer` renders as usual (FPM hides no layer unless its `hiddenLayers` config names it);
+  your own upper tendrils take a first-person pose: out to the side, rising forward over the shoulders and curling in
+  at the screen edges, longer, swaying; strikes stretch further still.
+- Without it, `WebFirstPersonHandsMixin` (TAIL of `FirstPersonHandsAndItemsRenderer.submitHandsWithItems`) draws the
+  same model in camera space next to the hands (`WebTendrilLayer.submitFirstPerson`), with the strike and wall aim
+  turned from body-relative to view-relative.
+- Held things (grabs, debris, the feeding grab) already showed their cords in first person (`WebLineRenderer.tentacle`).
 
 **Weaknesses ? rejection:**
 - **Fire:** being on fire or in lava counts as **one** exposure per burning episode. An episode ends after
   `FIRE_EPISODE_GAP` 60 ticks without fire.
+  - While the suit or Living Armor is out, a power's fire effect within 4 blocks (`Flames.SYMBIOTE_RANGE`: Laevateinn,
+    Sunfang, Soul Saber, the Meteor) counts the same, even if you aren't burning (`WebSymbiote.nearFlames`, called
+    from `core/Flames`).
 - **Noise** (`WebServerLevelMixin` on `ServerLevel.gameEvent`):
   - a bell ringing (`block_change` at a bell) within 16;
   - `note_block_play` within 8;
@@ -420,6 +573,19 @@ action bar, each heard once.
 - **Radial:** the key-up poll uses `InputConstants.isKeyDown(scancode)`. A mouse-button binding falls back to
   click-to-choose.
 - **Takeover:** steering fights the player's own mouse each tick. It may feel jerky on high-FPS clients.
+- **Takeover pathing:** the path is computed from the server's view of your position (client-authoritative movement),
+  so lag can make the first waypoint lag a little (the client picks the nearest of the first four). Check: a mob
+  behind a wall (it should walk round), a mob in a sealed stone room (it should rip a 1×2 slot in, never through
+  chests or obsidian, and not inside spawn protection), a mob up a hill or down a pit (steps), and a run for its life
+  in a cave (it heads for the best open spot, ripping only if walled in). The A* runs every 10 ticks per driven player
+  (bounded at 1600 nodes).
+- **0.8.3 takeover checks:** it sprints (gallop, speed, hunger drain) chasing, hunting and running, walks at corners,
+  steps and edges, and walks with an empty belly (food 6 or less). A 1-block step is a plain hop, never a coil, even
+  holding Jump. A 2-4 block ledge with no stairs nearby: it walks to the wall, crouches briefly (longer for taller) and
+  leaps just over it; with stairs a few blocks off it should prefer them. A 10+ block cliff: walks round or rips. A
+  sealed room: each 1×2 slot is worked loose (all blocks cracking), torn out as one clump, hauled up by a tendril and
+  flung sideways (not down the tunnel, not at you); it should shatter nearby with some drops. Check that a leap that
+  misses its ledge (laggy server) only falls the clearance, and that protection mods still stop the tear.
 
 ### Known gaps / upgrade ideas
 - Feeding when your own hunger bar is full isn't possible: vanilla won't start eating.

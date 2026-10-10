@@ -22,16 +22,17 @@
 		{ "config": "jaymospowers.web.client.mixins.json", "environment": "client" },
 		"jaymospowers.chrono.mixins.json",
 		{ "config": "jaymospowers.chrono.client.mixins.json", "environment": "client" },
+		"jaymospowers.gravity.mixins.json",
 		{ "config": "jaymospowers.gravity.client.mixins.json", "environment": "client" }
 	],
 	"depends": {
 		"fabricloader": ">=0.19.5",
 		"minecraft": "~26.3",
 		"java": ">=25",
-		"fabric-api": "*"
+		"fabric-api": "*",
+		"jaymoskitchen": "*"
 	},
 	"suggests": {
-		"jaymoskitchen": "*",
 		"weaponmod": "*"
 	}
 }

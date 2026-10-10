@@ -66,6 +66,16 @@ def packMods = [
 	[dep: "maven.modrinth:sound-physics-remastered:9loJgQlO", cf: [535489, 8909383]],
 	[dep: "maven.modrinth:lootr:gVwn7m2v", cf: [615106, 8987242]],
 ]
+// First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
+// Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge
+// manifest needs ids for every entry there.
+// TODO(home PC): look up their CurseForge [project id, file id] (CurseForge is blocked from the cloud), add a cf entry
+// to each and move both lines into packMods; until then they're in modpack/mods (server, hand-made profile) and the dev
+// game, but not in the CurseForge import zip.
+def packModsNoCf = [
+	[dep: "maven.modrinth:first-person-model:Z05WZTy2", cf: null],
+	[dep: "maven.modrinth:not-enough-animations:EhSk2OTD", cf: null],
+]
 // not on CurseForge: shipped inside the pack as overrides
 def kitchenJar = fileTree("libs") { include "jaymos-kitchen-*.jar" }
 // on CurseForge but not on a maven we use: the jar sits in libs/ (git-ignored, copied from the Jaymo's Kitchen
@@ -93,10 +103,11 @@ dependencies {
 
 	// the rest of the modpack, loaded in the dev game only (fabric-api is already on the classpath)
 	localRuntime kitchenJar
-	// compiled against (for its corpses), but never required at runtime (see power/web/KitchenCompat)
+	// compiled against (for its corpses); required at runtime since 0.8 (fabric.mod.json), touched only via power/web/KitchenCompat
 	compileOnly kitchenJar
 	packMods.drop(1).each { localRuntime it.dep }
 	packMods.each { packJars it.dep }
+	packModsNoCf.each { localRuntime it.dep; packJars it.dep }
 }
 
 // gradlew packageModpack:

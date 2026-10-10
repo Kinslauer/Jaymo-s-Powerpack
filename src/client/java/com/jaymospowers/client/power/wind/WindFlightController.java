@@ -199,7 +199,9 @@ public final class WindFlightController {
 		this.top = TOP_SPEED * WindWeather.factor(player) * (Fate.isCorrupted(player) ? WindStorm.STORMBOUND_CRUISE_MULTIPLIER : 1.0)
 			* (com.jaymospowers.power.wind.WindModes.tempest(player) ? com.jaymospowers.power.wind.WindModes.TEMPEST_ABILITY_SCALE : 1.0)
 			// heavy armour weighs the flight down (anything above chainmail)
-			* com.jaymospowers.power.wind.WindArmor.speedFactor(player);
+			* com.jaymospowers.power.wind.WindArmor.speedFactor(player)
+			// someone in your arms slows you a little
+			* (com.jaymospowers.core.Carry.isCarrying(player) ? com.jaymospowers.core.Carry.FLIGHT_SPEED : 1.0);
 		if (!this.state.fast()) {
 			this.braking = false;
 		}

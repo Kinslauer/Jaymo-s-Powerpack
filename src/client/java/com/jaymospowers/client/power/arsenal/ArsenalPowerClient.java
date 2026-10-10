@@ -9,6 +9,7 @@ import com.jaymospowers.power.arsenal.ArsenalArmory;
 import com.jaymospowers.power.arsenal.ArsenalPower;
 import com.jaymospowers.power.arsenal.HundredBlades;
 import com.jaymospowers.power.arsenal.Summoned;
+import com.jaymospowers.power.arsenal.VoidCrown;
 import com.jaymospowers.power.arsenal.entity.ArsenalEntities;
 import java.util.HashSet;
 import java.util.Set;
@@ -41,6 +42,7 @@ public final class ArsenalPowerClient implements PowerClient {
 	public static void init() {
 		PowerClients.register(ArsenalPower.ID, INSTANCE);
 		EntityRendererRegistry.register(ArsenalEntities.RIFT_BLADE, RiftBladeRenderer::new);
+		EntityRendererRegistry.register(ArsenalEntities.FROST_LANCE, FrostLanceRenderer::new);
 		// Reach Through: the portal and the weapon coming out of it, for everyone in view
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalReachRenderer::render);
 		// Hundred Blades: the rifts in the sky
@@ -48,8 +50,14 @@ public final class ArsenalPowerClient implements PowerClient {
 		// the Void Arsenal's aura, on every corrupted arsenal user in view
 		ClientTickEvents.END_CLIENT_TICK.register(ArsenalAura::tick);
 		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
-			Summoned summoned = Summoned.of(stack);
 			Minecraft minecraft = Minecraft.getInstance();
+			if (VoidCrown.is(stack) && minecraft.player != null && !VoidCrown.mayWear(minecraft.player)) {
+				// the crown, in hands it doesn't want
+				lines.add(Math.min(1, lines.size()), Component.translatable("tooltip.jaymospowers.void_crown.cold")
+					.withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+				return;
+			}
+			Summoned summoned = Summoned.of(stack);
 			if (summoned == null || minecraft.level == null) {
 				return;
 			}

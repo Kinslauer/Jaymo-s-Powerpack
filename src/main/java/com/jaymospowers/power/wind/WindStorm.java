@@ -277,10 +277,9 @@ public final class WindStorm {
 		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area, e -> e.isAlive() && e != caster && !e.isSpectator())) {
 			target.hurtServer(level, source, LIGHTNING_DAMAGE * sky);
 			WindModes.chargeCreeper(target);
-			if (!target.fireImmune()) {
-				target.setRemainingFireTicks(Math.max(target.getRemainingFireTicks(), LIGHTNING_BURN_TICKS));
-			}
 		}
+		// the bolt sets alight everything flammable it reaches, not just the creatures
+		com.jaymospowers.core.Flames.area(level, area, Math.max(1, LIGHTNING_BURN_TICKS / 20), caster, e -> true);
 	}
 
 	private static void applySlow(ServerPlayer player) {

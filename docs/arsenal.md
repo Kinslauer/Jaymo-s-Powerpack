@@ -332,3 +332,147 @@ None of this has been run in game.
 - **Blink:** a server-side `randomTeleport` on a player, from inside the damage event.
 - **Hundred Blades targets:** it hits every living thing in the radius except the caster, including other players and
   pets.
+
+## 0.8.0
+
+### Void Flintlock in hand (`ArsenalFlintlock`, `client/power/arsenal/ArsenalArmPose`)
+- **Art** (`tools/gen_flintlock.py`, original void palette: ebony stock, violet gunmetal, amethyst fittings, a pan lit
+  with void fire; nothing from WeaponMod):
+  - `textures/item/flintlock.png` / `flintlock_spent.png`: the 32x32 inventory icons (spent: hammer down, pan burnt
+    out). The flintlock was moved out of `gen_relics.py`.
+  - `flintlock_held.png` / `flintlock_held_spent.png`: 16x16 sprites laid out like our `held_guns` flintlock, voxelised
+    into `models/item/flintlock_held.json` / `flintlock_held_spent.json` (stock 3 px thick, metal 2, lock parts 1.5). The
+    spent one has its hammer down on the pan.
+- **Item definition** (`items/flintlock.json`): `minecraft:condition` on `minecraft:has_component`
+  `jaymospowers:spent`; each side is a `minecraft:select` on `minecraft:display_context`: the flat icon in
+  gui/ground/fixed/on_shelf, the 3D model everywhere else.
+- **Third-person holds:** loaded uses the `held_guns` flintlock's hold (barrel along the arm, made for a raised arm);
+  spent uses its reload hold (barrel forward in a lowered hand).
+- **Aim pose** (`ArsenalArmPose.AIM_KEY`): each hand holding a loaded flintlock raises it level with the look (arm
+  pitch and yaw follow the head, turned in by `AIM_INWARD`), easing up over `AIM_RAISE_TICKS` 4. Dual-wielding raises
+  both arms. Not while swimming, gliding, sleeping or spectating.
+- **Recoil:** when the held stack turns spent (seen client-side, so everyone sees it), the arm kicks up `RECOIL_KICK`
+  0.55 rad within `RECOIL_RISE_TICKS` 1, settles over `RECOIL_SETTLE_TICKS` 6, then lowers over `SPENT_LOWER_TICKS` 8.
+- **Held item follows the arm:** in 26.3 the held-item layer reads the arm as animated in
+  `LivingEntityRenderer.submit`, before the deferred `ModelFeatureRenderer.prepareModel`. A new
+  `ArsenalLivingEntityRendererMixin` puts the aim on right after that `setupAnim`, and the existing
+  `ArsenalModelFeatureRendererMixin` puts it on again for the body draw.
+
+### Swords in the Stone get their gifts (`StoneSwords`, `entity/FrostLance`)
+`SwordStone` keeps the stones and worldgen; `StoneSwords` holds the five blades' passives and actives. All five are
+still netherite 4 / -2.6. Lore: flavour, passive (blue), active (purple), then the relic line. Each is drawn from its
+stone with one enchantment (`StoneSwords.enchant`, from `SwordStone.draw`), so it glints. Swords drawn before 0.8 or
+taken from the creative tab have no enchantment.
+
+| Sword | Drawn with | Passive (melee hits with it in the main hand) | Right click | Cooldown |
+|---|---|---|---|---|
+| **Durandal** | Sharpness II | Unbreakable (item component). +1 knockback resistance in the main hand (attribute). | **Plant**: 7-tick wind-up (you're slowed), then a shockwave r 4: 6 damage at the centre to 3 at the edge, pushed out and up, Slowness IV 30 t (stagger), mob paths stopped. Three rings of ground dust. | 120 t |
+| **Laevateinn** | Fire Aspect II | Sets the target alight 5 s. While held in either hand, fire and lava don't hurt you (`ALLOW_DAMAGE`, `IS_FIRE`). | **Flame Wave**: 4-tick wind-up, then a 100° arc of fire rolls out to 8 blocks at 0.9 b/t; each thing it reaches takes 5, burns 6 s, is pushed a little. | 140 t |
+| **Caladbolg** | Sweeping Edge III | The cut arcs to the 2 nearest foes within 5 blocks (monsters, or mobs targeting you; never your pets), 40% of the damage each. | **Rainbow Reach**: the blade stretches out to one side over 5 ticks, then sweeps a 150° arc, 10 blocks long, over 6 ticks (side rolled each time); 8 damage and a sideways shove to each. Prismatic dust. | 180 t |
+| **Gram** | Looting II | 50% of what armour (and other reductions) stopped comes through as a follow-up magic hit; +50% of the hit against bosses (max health ≥ 100) and big things (width² × height ≥ 3). | **Sunder** (needs a target in 4.5 blocks): 9-tick overhead wind-up, then 9 damage; strips 25 durability from each armour piece, 60 from a held shield (and locks a player's shield for 5 s), Slowness III 20 t. | 160 t |
+| **Hrunting** | Unbreaking III | Adds 50 frost (vanilla freezing, up to 60 past frozen) and Slowness II 40 t. | **Frost Lance**: throws an ice spear (`jaymospowers:arsenal_frost_lance`, 1.7 b/t, 24 blocks). It runs through up to 2 things (7 damage, +160 frost, Slowness III 60 t), turns back at a wall, its 2nd hit or its range, flies back at 1.4 b/t and shatters in your hand. | 100 t |
+
+- Every number is a constant at the top of `StoneSwords` (lance numbers in `FrostLance`).
+- Wind-ups, waves and sweeps are server tasks in `StoneSwords.TASKS`, ticked each server tick and cleared on server
+  stop; they end if the caster dies, logs out or changes dimension.
+- Caladbolg's arcs and sweep set a guard so their own hits don't arc again.
+- The Frost Lance is a server-driven projectile (no gravity, no physics, never saved), drawn by `FrostLanceRenderer`
+  from the `arsenal_frost_lance` item sprite (`tools/gen_frost_lance.py`).
+- New ids: item `jaymospowers:arsenal_frost_lance` (render only, in no tab), entity `jaymospowers:arsenal_frost_lance`.
+
+### Fire touches everything flammable (`core/Flames`)
+- Laevateinn's and Sunfang's cuts set alight the target and everything within 1 block of it (`LAEV_SPLASH`,
+  `SUN_SPLASH`), except you and your pets. Flame Wave sets alight everything its arc reaches, not just creatures (each
+  thing once per wave). The Soul Saber's slash sets alight everything along its line for 2 s (`SLASH_FIRE_SECONDS`).
+- "Everything" follows `Flames`: creatures, players, corpses, dropped items, armor stands and arrows catch fire; a
+  creeper's fuse is lit; a TNT minecart is set off; primed TNT's fuse is halved. Damage and other tuning are unchanged.
+- Test: drop some sticks, an arrow and a TNT minecart in front of a creeper and Flame Wave them.
+
+### How to test (0.8.0)
+1. Flintlock: `/power set @s arsenal`, `/power ascend @s`, `/power corrupt @s`, then Reach until the pair comes (or
+   `/give @s jaymospowers:flintlock`).
+   - Inventory icon is flat and purple; in hand (F5) it's 3D, the arm raised and level with your look, following
+     pitch and turning.
+   - Right click: the arm kicks up, the gun switches to hammer-down, then the arm lowers. Hold one in each hand.
+   - A second player should see the aim and the kick.
+2. Swords: `/give @s jaymospowers:durandal` (etc.) shows the lore; draw one from a stone (`/setblock ~ ~ ~2
+   jaymospowers:sword_in_stone`, right click as an arsenal user) to get the enchantment and glint.
+   - Durandal: let a zombie or `/damage` hit you, no knockback; right click near mobs.
+   - Laevateinn: stand in lava holding it; right click toward a group.
+   - Caladbolg: hit one zombie in a group; right click with mobs around you.
+   - Gram: hit an iron golem or armoured zombie (compare); right click on a player blocking with a shield.
+   - Hrunting: hit a mob a few times (frost overlay on players); right click and watch the lance come back.
+
+### Risky or untested at runtime (0.8.0)
+- **Flintlock holds:** the loaded/spent display transforms are the `held_guns` (WeaponMod-derived) numbers, made for
+  WeaponMod's raised-arm aim; check the barrel points along the look when aiming and forward when lowered. Tune in
+  `tools/gen_flintlock.py` (`DISPLAY`, `DISPLAY_SPENT`) and rerun it.
+- **`ArsenalLivingEntityRendererMixin`** targets the only `EntityModel.setupAnim` call in `LivingEntityRenderer.submit`;
+  it only runs when the entity has layers.
+- **Recoil detection** is client-side (the held stack's `spent` component flipping); a player out of view when firing
+  shows no kick.
+- **Gram's armour pierce** is worked out after the fact (base − taken), so it also gives back part of what Protection,
+  Resistance or absorption stopped.
+- **Frost Lance** is moved by the server every tick (`updateInterval 1`); check it looks smooth for other players.
+
+## 0.8.3
+
+### Void Crown (`VoidCrown`, Void Arsenal only)
+- **Item:** `jaymospowers:void_crown`, a helmet worn in the HEAD slot (Jaymo's Kingdoms looks for this id there and
+  reads every faction's reputation as its lowest while it's worn; nothing in Powers knows about Kingdoms). Epic,
+  fireproof, in the Combat tab beside the other relics. `/give @s jaymospowers:void_crown` works.
+- **Armour:** a custom `ArmorMaterial` through `Item.Properties.humanoidArmor(material, HELMET)`: 6 armour (`ARMOR`),
+  3 toughness (`TOUGHNESS`), durability 11 × 45 = 495 (`DURABILITY_MULTIPLIER`), repaired with netherite. The
+  `equippable` component is then replaced with one allowed on players only, not dispensable, using the
+  `jaymospowers:void_crown` equipment asset.
+- **Curse of Binding:** a default `enchantments` component, built with `delayedComponent` once the enchantment registry
+  is loaded, so every crown (found, `/give`n or from the tab) has it.
+- **Finding it:** a full Reach (not Rummage) by a corrupted Arsenal user has a 2% chance (`FIND_CHANCE`) of the crown
+  coming through behind the weapon into the inventory, with ink, reverse-portal motes, an Enderman stare and a
+  whisper. Not while they already have one on their head, in their inventory or in the Pocket Stash. It's an ordinary
+  item, never summoned, so it doesn't dissolve.
+- **Only the void's:** three layers, because 26.3's `Equippable` can only restrict by entity type:
+  1. `ArsenalLivingEntityMixin` makes `LivingEntity.isEquippableInSlot` refuse it for the head of anyone who isn't a
+     corrupted Arsenal user. That covers armour-slot clicks and shift-clicks, on both sides (the power and Fate are
+     synced to every client).
+  2. `VoidCrown.Crown.use` refuses the right-click equip with a whisper.
+  3. Every 10 ticks (`CHECK_INTERVAL`) the server checks every player's head; a crown on a head that isn't the void's
+     (put there by a command, or its wearer was purified or lost the power) slips off into the inventory, or to the
+     ground, with a whisper. So purification also frees you of the binding.
+- **Tooltip:** two lore lines (grey flavour, purple hint). Held by anyone the void hasn't taken, a third grey line
+  says it isn't waiting for them (client-side, `ArsenalPowerClient`).
+- **Ender step:** when the wearer takes damage (after armour, more than 0) from an entity or a projectile (not
+  themselves; falls, the void, starvation, drowning and the like have no entity), they teleport like an Enderman: up
+  to 16 tries (`STEP_ATTEMPTS`) of a random spot within ±16 blocks across (`STEP_RANGE`) and ±8 up or down
+  (`STEP_HEIGHT`), dropped to the floor below it, with room to stand and no liquid (`LivingEntity.randomTeleport` with
+  `BlockTags.ENDERMAN_DOES_NOT_TELEPORT_TO`, as Endermen do). Enderman teleport sound and portal particles at both
+  ends; fall distance reset; dismounts first. Then 30 ticks (`STEP_COOLDOWN`) before it can happen again. While the
+  crown is worn, the Void Arsenal's random heavy-hit blink (`ArsenalVoid.blink`) is skipped: the crown's step
+  replaces it.
+- **Art:** `tools/gen_void_crown.py` (original): the 32x32 icon (a jagged void-iron circlet, violet-lit points, a slit
+  eye on the brow, a rift splitting the tallest point), `textures/entity/equipment/humanoid/void_crown.png` (a band
+  with small teeth and the eye on the head layer, taller points on the hat layer, a rim on top), `items/`,
+  `models/item/` and `equipment/void_crown.json` (`humanoid` layer only).
+
+### How to test (0.8.3)
+1. `/power set @s arsenal`, `/power corrupt @s` (survival), `/give @s jaymospowers:void_crown`. The tooltip shows two
+   lore lines and Curse of Binding. Put it on (right click or the armour slot): 6 armour and 3 toughness on the bar.
+   Check how it looks in F5 (band on the head, points standing off it, eye on the brow).
+2. Try to take it off: Binding holds it (outside creative).
+3. Let a zombie or skeleton hit you: you vanish and reappear on safe ground up to 16 blocks away, with the sound and
+   particles. Hits within 1.5 s don't step again. `/damage @s 4` with no source, falling, and drowning don't step.
+4. `/power purify @s`: within half a second the crown slips into your inventory with a whisper. Now try to put it on:
+   refused (right click and armour slot), and the tooltip has the cold line.
+5. As a second player without the power, try the same, and check a dispenser won't put it on anyone.
+6. Finding: corrupted, Reach many times (`/powerdebug arsenal ready @s` between); about 1 in 50 brings the crown too,
+   never a second one while you have it.
+
+### Risky or untested at runtime (0.8.3)
+- **The worn layer:** the texture follows the humanoid armour layout (head at 0,0, hat at 32,0); check the points sit
+  over the forehead and the eye faces forward.
+- **`delayedComponent` for the enchantment:** resolved when registries load (server and client); if the tooltip
+  shows no Binding, this is why.
+- **Creative inventory:** creative players can take bound items off (vanilla); the head-slot refusal also applies
+  there.
+- **Ender step on players:** `randomTeleport` on a `ServerPlayer` from inside `AFTER_DAMAGE` (same as the existing
+  blink).

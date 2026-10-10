@@ -1,6 +1,51 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "jaymospowers:item/flintlock"
+    "type": "minecraft:condition",
+    "property": "minecraft:has_component",
+    "component": "jaymospowers:spent",
+    "on_false": {
+      "type": "minecraft:select",
+      "property": "minecraft:display_context",
+      "cases": [
+        {
+          "when": [
+            "gui",
+            "ground",
+            "fixed",
+            "on_shelf"
+          ],
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/flintlock"
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/flintlock_held"
+      }
+    },
+    "on_true": {
+      "type": "minecraft:select",
+      "property": "minecraft:display_context",
+      "cases": [
+        {
+          "when": [
+            "gui",
+            "ground",
+            "fixed",
+            "on_shelf"
+          ],
+          "model": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/flintlock_spent"
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "jaymospowers:item/flintlock_held_spent"
+      }
+    }
   }
 }
