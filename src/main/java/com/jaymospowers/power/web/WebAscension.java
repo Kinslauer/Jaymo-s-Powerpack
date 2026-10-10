@@ -53,6 +53,8 @@ public final class WebAscension {
 	public static final double SENSE_RANGE = 16.0;
 	public static final int SENSE_TICKS = 10;
 	public static final int DODGE_COOLDOWN = 400;
+	/** Spider-Sense holds this many dodges, each recharging on its own ({@link #DODGE_COOLDOWN}). */
+	public static final int DODGE_CHARGES = 5;
 	/** The dodge's sidestep (blocks/tick sideways, and up). */
 	private static final double DODGE_SIDESTEP = 0.85;
 	private static final double DODGE_HOP = 0.22;
@@ -80,7 +82,8 @@ public final class WebAscension {
 		double pending;
 		/** Speed over the last few ticks (blocks/tick), measured here. */
 		final double[] speeds = new double[3];
-		long dodgeReadyAt;
+		/** When each dodge charge is ready again. */
+		final long[] dodgeReadyAt = new long[DODGE_CHARGES];
 		int strikeTarget = -1;
 		int strikeTicks;
 		boolean sensing;
@@ -192,17 +195,35 @@ public final class WebAscension {
 		Live live = live(player);
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
-		if (now < live.dodgeReadyAt) {
+		int charge = -1;
+		for (int i = 0; i < DODGE_CHARGES; i++) {
+			if (now >= live.dodgeReadyAt[i]) {
+				charge = i;
+				break;
+			}
+		}
+		if (charge < 0) {
 			return true;
 		}
-		live.dodgeReadyAt = now + DODGE_COOLDOWN;
-		// sidestep, square to where it came from
+		live.dodgeReadyAt[charge] = now + DODGE_COOLDOWN;
+		// out of the way, square to where it came from, with one of four moves
 		Entity from = source.getDirectEntity() != null ? source.getDirectEntity() : attacker;
 		Vec3 away = player.position().subtract(from.position());
 		Vec3 flat = new Vec3(away.x, 0.0, away.z);
 		flat = flat.lengthSqr() < 1.0E-4 ? player.getViewVector(1.0F).horizontal() : flat.normalize();
-		Vec3 side = new Vec3(-flat.z, 0.0, flat.x).scale(player.getRandom().nextBoolean() ? 1.0 : -1.0);
-		Vec3 velocity = side.scale(DODGE_SIDESTEP).add(flat.scale(DODGE_SIDESTEP * 0.3)).add(0.0, DODGE_HOP, 0.0);
+		int sideSign = player.getRandom().nextBoolean() ? 1 : -1;
+		Vec3 side = new Vec3(-flat.z, 0.0, flat.x).scale(sideSign);
+		int kind = player.getRandom().nextInt(WebPose.DODGES);
+		Vec3 velocity = switch (kind) {
+			// back and up, over in a flip, landing in a crouch
+			case WebPose.BACKFLIP -> flat.scale(DODGE_SIDESTEP * 0.9).add(0.0, DODGE_HOP * 2.2, 0.0);
+			// low and sideways along the ground
+			case WebPose.ROLL -> side.scale(DODGE_SIDESTEP * 1.1).add(flat.scale(DODGE_SIDESTEP * 0.2));
+			// barely a step: the blow just misses
+			case WebPose.WEAVE -> side.scale(DODGE_SIDESTEP * 0.45).add(0.0, 0.05, 0.0);
+			default -> side.scale(DODGE_SIDESTEP).add(flat.scale(DODGE_SIDESTEP * 0.3)).add(0.0, DODGE_HOP, 0.0);
+		};
+		WebPower.pose(player, kind, sideSign);
 		ServerPlayNetworking.send(player, new WebNet.Nudge(velocity));
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 1.9F);
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 2.0F);

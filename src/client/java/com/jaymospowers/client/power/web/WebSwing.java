@@ -560,8 +560,11 @@ public final class WebSwing {
 			&& target.subtract(player.position()).dot(back) > 0.2
 			&& !player.level().noCollision(player, player.getBoundingBox().move(back.normalize().scale(0.15)));
 		if (blocked) {
-			// a wall behind: no further back. The webs grind you into it, and it cracks
+			// a wall behind: no further back. The webs grind you into it
 			v = new Vec3(0.0, v.y, 0.0);
+		}
+		if (jump && player.onGround()) {
+			// the draw always grinds into the floor under you (and the wall behind, if there's one), and it cracks
 			strainTicks++;
 			int needed = com.jaymospowers.power.web.WebSymbiote.armored(player) ? STRAIN_TICKS_ARMOR : STRAIN_TICKS;
 			float progress = Math.min(1.0F, strainTicks / (float)needed);

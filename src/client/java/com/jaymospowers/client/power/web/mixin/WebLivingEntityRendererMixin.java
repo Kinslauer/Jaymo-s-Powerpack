@@ -18,6 +18,7 @@ abstract class WebLivingEntityRendererMixin {
 	private void jaymospowers$webGlideLean(LivingEntityRenderState state, PoseStack poseStack, float bodyRot, float entityScale, CallbackInfo ci) {
 		WebArms.rotate(state, poseStack, entityScale);
 		WebRagdoll.rotate(state, poseStack, entityScale);
+		com.jaymospowers.client.power.web.WebBodyPose.rotate(state, poseStack, entityScale);
 	}
 
 	/** Creatures on the end of a web go limp (see WebRagdoll). */
@@ -26,5 +27,6 @@ abstract class WebLivingEntityRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$webRagdoll(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
 		WebRagdoll.extract(entity, state, partialTicks);
+		com.jaymospowers.client.power.web.WebBodyPose.extract(entity, state, partialTicks);
 	}
 }

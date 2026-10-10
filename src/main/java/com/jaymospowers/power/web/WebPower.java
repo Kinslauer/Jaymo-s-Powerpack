@@ -600,6 +600,22 @@ public final class WebPower implements Power {
 		return false;
 	}
 
+	/** Both swing lines snap at once (the floor gave way under a slingshot). */
+	static void snapLines(ServerPlayer player) {
+		State state = player.getAttached(STATE);
+		for (int hand = WebNet.MAIN; hand <= WebNet.OFF; hand++) {
+			if (state != null && state.swinging[hand]) {
+				dropSwing(player, state, hand);
+			} else {
+				player.removeAttached(line(hand));
+			}
+			ServerPlayNetworking.send(player, new WebNet.SwingReject(hand));
+		}
+		if (state != null) {
+			state.lineTicks = 0;
+		}
+	}
+
 	private static void dropSwing(ServerPlayer player, State state, int hand) {
 		state.swinging[hand] = false;
 		state.graceTicks = 0;

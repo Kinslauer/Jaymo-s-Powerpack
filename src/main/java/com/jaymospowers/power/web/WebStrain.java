@@ -119,6 +119,13 @@ public final class WebStrain {
 				BlockPos first = blocks.get(0);
 				com.jaymospowers.core.Debris.puff(level, first, level.getBlockState(first.below()), armored ? 2.0F : 1.2F);
 			}
+			// the floor went out from under you: the lines snap and you go down in a heap
+			if (level.getBlockState(BlockPos.containing(player.position().add(0.0, -0.3, 0.0))).getCollisionShape(level,
+				BlockPos.containing(player.position().add(0.0, -0.3, 0.0))).isEmpty()) {
+				WebPower.snapLines(player);
+				WebPower.pose(player, WebPose.RAGDOLL, 1);
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LEAD_BREAK, SoundSource.PLAYERS, 1.0F, 0.6F);
+			}
 			return;
 		}
 		int stage = Math.min(9, (int)(progress * 10.0F));
