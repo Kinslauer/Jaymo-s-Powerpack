@@ -56,6 +56,14 @@ public final class WebSwing {
 	static final double RELEASE_UP = 0.5;
 	/** Horizontal velocity kept per tick in the air after a release, until you land (vanilla air is 0.91). */
 	static final double FLIGHT_DRAG = 0.985;
+	/**
+	 * Pendulum: while a rope is taut the swing keeps its energy (speed² / 2 + gravity × height), so it speeds up
+	 * through the bottom of the arc and slows to a stall at the top, as a real pendulum does. {@code PENDULUM_DRAG}
+	 * is the share of the moving energy kept each tick; Jump and the pump add to it.
+	 */
+	static final double PENDULUM_DRAG = 0.996;
+	/** A rope counts as taut within this much of its length. */
+	static final double TAUT_SLACK = 0.15;
 	/** Holding a swing key in the air with nothing to stick to retries every this many ticks. */
 	static final int RETRY_TICKS = 3;
 	// ===== slingshot (two webs out: hold Sneak to brace, hold Jump to draw back, let Jump go to fire) ================
@@ -123,6 +131,8 @@ public final class WebSwing {
 	}
 
 	final Strand[] strands = {new Strand(WebNet.MAIN), new Strand(WebNet.OFF)};
+	/** The swing's energy per unit mass (see {@link #PENDULUM_DRAG}); NaN until the swing has measured it. */
+	private double swingEnergy = Double.NaN;
 	// after a release
 	boolean flying;
 	/** Speed cap for the current free flight (a slingshot launch may exceed the swing cap). */
@@ -220,6 +230,7 @@ public final class WebSwing {
 		}
 		strand.attached = true;
 		flying = false;
+		swingEnergy = Double.NaN;
 		foldWings();
 		strand.anchor = found.pos();
 		strand.swingTicks = 0;
@@ -398,6 +409,11 @@ public final class WebSwing {
 			v = new Vec3(v.x / VANILLA_AIR_DRAG, v.y / VANILLA_AIR_DRAG_Y, v.z / VANILLA_AIR_DRAG).scale(SWING_DRAG).add(0.0, -SWING_GRAVITY, 0.0);
 		}
 		Vec3 body = player.position().add(0.0, ROPE_HEIGHT, 0.0);
+		double gravity = player.getGravity() + SWING_GRAVITY;
+		if (Double.isNaN(swingEnergy)) {
+			swingEnergy = 0.5 * v.lengthSqr() + gravity * body.y;
+		}
+		double before = v.lengthSqr();
 		Vec3 pullDir = Vec3.ZERO;
 		for (Strand strand : strands) {
 			if (!strand.attached || strand.travel > 0) {
@@ -429,6 +445,8 @@ public final class WebSwing {
 				v = v.add(tangent.normalize().scale(PUMP * boost));
 			}
 		}
+		// what Jump and the pump put in stays in the swing
+		swingEnergy += 0.5 * (v.lengthSqr() - before);
 		// each rope: no moving further away than its length, and a springy pull back when stretched. Two passes, so
 		// two webs settle against each other instead of fighting
 		for (int pass = 0; pass < 2; pass++) {
@@ -449,11 +467,50 @@ public final class WebSwing {
 				}
 			}
 		}
+		v = pendulum(v, body, gravity, air);
 		player.setDeltaMovement(cap(v));
 		int ticks = Math.max(strands[0].swingTicks, strands[1].swingTicks);
 		if (air && v.lengthSqr() > 1.2 * 1.2 && ticks % 12 == 0) {
 			play(player, SoundEvents.PLAYER_ATTACK_SWEEP, 0.25F, 0.6F + (float)Math.min(0.6, v.length() * 0.2));
 		}
+	}
+
+	/**
+	 * On a taut rope the speed along the arc is whatever the swing's energy leaves after its height: fast through the
+	 * bottom, stalling at the top. Slack (or on the ground), the energy is just measured again from the motion.
+	 */
+	private Vec3 pendulum(Vec3 v, Vec3 body, double gravity, boolean air) {
+		Vec3 radial = Vec3.ZERO;
+		boolean taut = false;
+		for (Strand strand : strands) {
+			if (!strand.attached || strand.travel > 0) {
+				continue;
+			}
+			Vec3 toAnchor = strand.anchor.subtract(body);
+			double distance = toAnchor.length();
+			if (distance > 1.0E-4 && distance >= strand.rope - TAUT_SLACK) {
+				taut = true;
+				radial = radial.add(toAnchor.scale(1.0 / distance));
+			}
+		}
+		if (!air || !taut || radial.lengthSqr() < 1.0E-6) {
+			swingEnergy = 0.5 * v.lengthSqr() + gravity * body.y;
+			return v;
+		}
+		radial = radial.normalize();
+		// the rope's pull (and any spring back) stays as it is; only the speed along the arc is set from the energy
+		Vec3 along = radial.scale(v.dot(radial));
+		Vec3 tangent = v.subtract(along);
+		double moving = Math.max(0.0, swingEnergy - gravity * body.y);
+		swingEnergy = gravity * body.y + moving * PENDULUM_DRAG;
+		// never more than the speed cap's worth
+		swingEnergy = Math.min(swingEnergy, gravity * body.y + 0.5 * MAX_SPEED * MAX_SPEED);
+		double speed = Math.sqrt(2.0 * Math.max(0.0, swingEnergy - gravity * body.y));
+		if (tangent.lengthSqr() < 1.0E-6) {
+			// dead still at the top of the arc: gravity starts it back down next tick
+			return v;
+		}
+		return along.add(tangent.normalize().scale(speed));
 	}
 
 	/** No longer drawing into a wall: its cracks fade. */

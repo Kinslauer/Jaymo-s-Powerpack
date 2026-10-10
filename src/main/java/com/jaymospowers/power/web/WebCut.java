@@ -18,12 +18,38 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Anyone can punch a web line to break it: a swing line, a Yank, a hitch, a webline. The client finds the line under
  * the crosshair (anywhere along it, the shooter's end or the anchor) and says which; the server checks it's real and
- * in reach, and cuts it.
+ * in reach, and cuts it. Each line takes one to four punches (rolled per line) before it gives.
  */
 public final class WebCut {
 	public static final byte SWING = 0, HITCH = 1, BRIDGE = 2;
 	/** How far from the eyes a line can be punched (blocks), with a little slack for lag. */
 	public static final double REACH = 4.5;
+	/**
+	 * Each line takes {@code MIN_HITS} to {@code MAX_HITS} punches to break (rolled per line, the first time it's hit).
+	 * A punched line remembers its hits for {@code MEMORY_TICKS} after the last one.
+	 */
+	public static final int MIN_HITS = 1, MAX_HITS = 4, MEMORY_TICKS = 200;
+
+	/** A line that has been punched but held: which (kind, whose, about where), how many hits it takes, has taken. */
+	private static final class Frayed {
+		final net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimension;
+		final byte kind;
+		final int entity;
+		Vec3 at;
+		final int needed;
+		int hits;
+		long last;
+
+		Frayed(net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimension, byte kind, int entity, Vec3 at, int needed) {
+			this.dimension = dimension;
+			this.kind = kind;
+			this.entity = entity;
+			this.at = at;
+			this.needed = needed;
+		}
+	}
+
+	private static final java.util.List<Frayed> FRAYED = new java.util.ArrayList<>();
 
 	/** Client → server: punch the line {@code kind} (whose player or hitched creature is {@code entity}) between {@code a} and {@code b}. */
 	public record Cut(byte kind, int entity, Vec3 a, Vec3 b) implements CustomPacketPayload {
@@ -54,6 +80,13 @@ public final class WebCut {
 		if (distanceToSegment(eye, cut.a(), cut.b()) > REACH + 1.5) {
 			return;
 		}
+		// it may hold for a punch or three first
+		if (!giveWay(level, cut)) {
+			Vec3 at = closestPoint(eye, cut.a(), cut.b());
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.LEAD_TIED, SoundSource.PLAYERS, 0.8F, 0.6F);
+			level.sendParticles(ParticleTypes.ITEM_COBWEB, at.x, at.y, at.z, 4, 0.1, 0.1, 0.1, 0.02);
+			return;
+		}
 		boolean done = switch (cut.kind()) {
 			case SWING -> level.getEntity(cut.entity()) instanceof ServerPlayer owner && WebPower.cutLine(owner, cut.b());
 			case HITCH -> {
@@ -68,6 +101,30 @@ public final class WebCut {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.LEAD_BREAK, SoundSource.PLAYERS, 1.0F, 1.2F);
 			level.sendParticles(ParticleTypes.ITEM_COBWEB, at.x, at.y, at.z, 10, 0.15, 0.15, 0.15, 0.05);
 		}
+	}
+
+	/** Counts a punch on the line: true once it has taken as many as it can (and then it's forgotten). */
+	private static boolean giveWay(ServerLevel level, Cut cut) {
+		long now = level.getGameTime();
+		FRAYED.removeIf(f -> now - f.last > MEMORY_TICKS);
+		Frayed line = null;
+		for (Frayed f : FRAYED) {
+			if (f.dimension == level.dimension() && f.kind == cut.kind() && f.entity == cut.entity() && f.at.distanceTo(cut.b()) < 2.5) {
+				line = f;
+				break;
+			}
+		}
+		if (line == null) {
+			line = new Frayed(level.dimension(), cut.kind(), cut.entity(), cut.b(), MIN_HITS + level.getRandom().nextInt(MAX_HITS - MIN_HITS + 1));
+			FRAYED.add(line);
+		}
+		line.at = cut.b();
+		line.last = now;
+		if (++line.hits < line.needed) {
+			return false;
+		}
+		FRAYED.remove(line);
+		return true;
 	}
 
 	/** The point on segment a-b nearest to {@code p}. */
