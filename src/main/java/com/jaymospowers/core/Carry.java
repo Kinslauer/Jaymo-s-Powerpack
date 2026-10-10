@@ -291,9 +291,8 @@ public final class Carry {
 		if (jump != null && jump.getValue() < MIN_JUMP) {
 			return false;
 		}
-		// ---- TODO(0.8 lead, after merging Chrono): Chrono's new hit-stun goes here, e.g.
-		// if (com.jaymospowers.power.chrono.ChronoStun.isStunned(player)) return false;
-		return true;
+		// Time Flow's hit-stun
+		return !com.jaymospowers.power.chrono.ChronoFlow.stunned(player);
 	}
 
 	/** Server: a carried (or just released) player moves however the carry puts them, without being kicked for it. */
