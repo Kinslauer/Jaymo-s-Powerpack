@@ -41,6 +41,7 @@ public final class ArsenalPowerClient implements PowerClient {
 	public static void init() {
 		PowerClients.register(ArsenalPower.ID, INSTANCE);
 		EntityRendererRegistry.register(ArsenalEntities.RIFT_BLADE, RiftBladeRenderer::new);
+		EntityRendererRegistry.register(ArsenalEntities.FROST_LANCE, FrostLanceRenderer::new);
 		// Reach Through: the portal and the weapon coming out of it, for everyone in view
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalReachRenderer::render);
 		// Hundred Blades: the rifts in the sky

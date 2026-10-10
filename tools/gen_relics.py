@@ -1,5 +1,5 @@
 """Generates the relic weapons' sprites (32x32) and item models: Soul Saber, Grand Shield, Voidreaver, Echo Cleaver,
-Tidebreaker, Sunfang, and the Void Armory's flintlock. Each weapon is drawn analytically along the diagonal (like
+Tidebreaker and Sunfang (the Void Armory's flintlock is in gen_flintlock.py). Each weapon is drawn analytically along the diagonal (like
 Durandal in gen_sword_stone.py): u runs from the grip (bottom left) to the tip (top right), v across it.
 Run from the project root."""
 from PIL import Image, ImageDraw
@@ -141,18 +141,5 @@ d.line([(8, 11), (24, 11)], fill=(220, 180, 60), width=2)
 d.ellipse([(12.5, 7.5), (19.5, 14.5)], fill=(240, 200, 80), outline=(160, 110, 30))
 save("grand_shield", outline(img), "minecraft:item/generated")
 
-# the flintlock: dark walnut stock, a long iron barrel, brass fittings, purple void glow in the pan
-img = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
-d = ImageDraw.Draw(img)
-d.polygon([(6, 12), (28, 12), (28, 15), (6, 15)], fill=(110, 112, 120))     # barrel
-d.line([(6, 12), (28, 12)], fill=(170, 172, 180))
-d.rectangle([(26, 11), (28, 16)], fill=(190, 150, 60))                     # muzzle band
-d.polygon([(4, 15), (16, 15), (16, 18), (10, 18), (6, 27), (1, 26), (4, 17)], fill=(96, 56, 30))  # stock and grip
-d.line([(6, 18), (2, 25)], fill=(130, 80, 44))
-d.ellipse([(0, 24), (5, 28)], fill=(190, 150, 60))                          # pommel cap
-d.polygon([(9, 18), (13, 18), (12, 22), (10, 22)], outline=(190, 150, 60))  # trigger guard
-d.line([(11, 18), (11, 20)], fill=(60, 60, 64))                             # trigger
-d.polygon([(12, 9), (15, 11), (14, 12), (11, 10)], fill=(70, 70, 76))       # the hammer
-d.rectangle([(15, 11), (17, 12)], fill=(170, 80, 220))                      # the pan, void-lit
-save("flintlock", outline(img))
+# the Void Armory's flintlock is drawn by gen_flintlock.py
 print("relics drawn")

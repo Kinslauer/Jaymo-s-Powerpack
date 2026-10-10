@@ -14,7 +14,6 @@ import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -33,8 +32,6 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.ToolMaterial;
-import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.WorldGenLevel;
@@ -61,7 +58,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * Stash, and Reach brings it out first. The empty stone stays where it was. Each blade has its own home
  * ({@link Variant}): Durandal on the Overworld's surface, Laevateinn in the Nether, Caladbolg on the End's outer
  * islands, Gram in the Deep Dark, Hrunting in the frozen mountains. Placed by {@code worldgen/placed_feature/<id>.json};
- * art from {@code tools/gen_sword_stone.py}.
+ * art from {@code tools/gen_sword_stone.py}. Each blade's gifts are in {@link StoneSwords}.
  */
 public final class SwordStone {
 	/** Each sword, its stone, where it lies and what it's set in. */
@@ -146,16 +143,11 @@ public final class SwordStone {
 			Item stoneItem = Registry.register(BuiltInRegistries.ITEM, stoneItemKey, new BlockItem(variant.stone, new Item.Properties().setId(stoneItemKey)
 				.useBlockDescriptionPrefix().rarity(Rarity.EPIC)));
 			ResourceKey<Item> swordKey = ResourceKey.create(Registries.ITEM, JaymosPowers.id(variant.sword));
-			Item.Properties sword = new Item.Properties().setId(swordKey)
-				.sword(ToolMaterial.NETHERITE, 4.0F, -2.6F)
-				.rarity(Rarity.EPIC)
-				.component(DataComponents.LORE, new ItemLore(List.of(
-					Component.translatable("item.jaymospowers." + variant.sword + ".lore1").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC),
-					Component.translatable("item.jaymospowers.durandal.lore2").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC))));
+			Item.Properties sword = StoneSwords.properties(variant, new Item.Properties().setId(swordKey).rarity(Rarity.EPIC));
 			if (variant != Variant.HRUNTING) {
 				sword.fireResistant();
 			}
-			variant.item = Registry.register(BuiltInRegistries.ITEM, swordKey, new Item(sword));
+			variant.item = Registry.register(BuiltInRegistries.ITEM, swordKey, new StoneSwords.Blade(sword, variant));
 			CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 				output.accept(variant.item);
 				output.accept(stoneItem);
@@ -166,12 +158,14 @@ public final class SwordStone {
 		}
 		BLOCK = Variant.DURANDAL.stone;
 		DURANDAL = Variant.DURANDAL.item;
+		StoneSwords.register();
 	}
 
-	/** The relic drawn from a stone: its sword, marked as an unclaimed relic. */
-	static ItemStack draw(Variant variant) {
+	/** The relic drawn from a stone: its sword, marked as an unclaimed relic, with its enchantment baked in. */
+	static ItemStack draw(ServerLevel level, Variant variant) {
 		ItemStack sword = new ItemStack(variant.item);
 		sword.set(ArsenalRelics.RELIC, true);
+		StoneSwords.enchant(level, variant, sword);
 		return sword;
 	}
 
@@ -217,7 +211,7 @@ public final class SwordStone {
 			}
 			Variant variant = BY_BLOCK.getOrDefault(state.getBlock(), Variant.DURANDAL);
 			serverLevel.setBlock(pos, state.setValue(SWORD, false), Block.UPDATE_ALL);
-			ItemStack sword = draw(variant);
+			ItemStack sword = draw(serverLevel, variant);
 			if (!player.getInventory().add(sword) && player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
 				serverPlayer.drop(sword, false, net.minecraft.util.Prediction.SERVER_ONLY);
 			}
