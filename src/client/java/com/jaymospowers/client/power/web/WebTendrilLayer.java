@@ -2,6 +2,7 @@ package com.jaymospowers.client.power.web;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.power.web.WebSymbiote;
+import com.jaymospowers.power.web.WebTendrilCombos;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
@@ -62,6 +63,8 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 	private static final float CURL_REARED = 0.15F, CURL_STRIKE = -0.12F, CURL_SWIPE = 0.1F;
 	/** How much longer a striking tendril gets: a plain lash, swinging debris, and extra from your own eyes. */
 	private static final float STRETCH = 0.35F, STRETCH_HEAVY = 0.9F, STRETCH_FIRST_PERSON = 0.4F;
+	/** Combos: a clap's tendrils hauled out this wide each side (yaw) and this much up; a shatter's reared this far apart. */
+	private static final float CLAP_WIDE = 1.5F, CLAP_LIFT = 0.25F, SHATTER_SPREAD = 0.6F;
 
 	// ---- first person ----
 	/** Your own upper tendrils: out to the side this far (yaw), rising this steeply, curling forward and inward into view. */
@@ -129,7 +132,7 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		AvatarRenderState own = new AvatarRenderState();
 		own.setData(WebSymbioteClient.TENDRILS, new WebSymbioteClient.Tendrils(tendrils.growth(), tendrils.time(), tendrils.strike(), yaw, pitch,
 			yaw >= 0.0F ? -1.0F : 1.0F, 0.0F, tendrils.held(), tendrils.armor(), tendrils.wall(), wallYaw, wallPitch, tendrils.heavy(),
-			tendrils.variant(), true));
+			tendrils.variant(), true, tendrils.combo()));
 		poseStack.pushPose();
 		poseStack.translate(0.0F, FP_ROOT_UP, FP_ROOT_BACK);
 		// camera space to model space: model -Z is ahead, -Y up, +X the wearer's left
@@ -193,9 +196,14 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 			float strike = tendrils.strike();
 			boolean heavy = tendrils.heavy();
 			int variant = tendrils.variant();
+			int combo = tendrils.combo();
 			float rearShare = heavy ? WebSymbiote.HEAVY_STRIKE_REAR : WebSymbiote.STRIKE_REAR;
 			float hitShare = heavy ? WebSymbiote.HEAVY_STRIKE_HIT / (float)WebSymbiote.HEAVY_STRIKE_TICKS
 				: WebSymbiote.STRIKE_HIT / (float)WebSymbiote.STRIKE_TICKS;
+			if (combo >= 0) {
+				rearShare = WebTendrilCombos.REAR_TICKS / (float)WebTendrilCombos.TICKS;
+				hitShare = WebTendrilCombos.HIT_TICKS / (float)WebTendrilCombos.TICKS;
+			}
 			float weight = 0.0F, swing = 0.0F;
 			if (strike >= 0.0F) {
 				if (strike < rearShare) {
@@ -253,15 +261,27 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 					restCurlY = side * FP_CURL_IN;
 					restLength = length * FP_LENGTH;
 				}
-				boolean striking = weight > 0.0F && upper && side == strikers;
+				// a combo: every upper tendril joins in, from both sides
+				boolean striking = weight > 0.0F && upper && (side == strikers || combo >= 0);
 				float w = striking ? weight : 0.0F;
-				base.yRot = Mth.lerp(w, restYaw, aimYaw(strikeYaw, restYaw));
-				base.xRot = Mth.lerp(w, restPitch, strikePitch);
+				float tYaw = strikeYaw, tPitch = strikePitch, tCurlX = curlX, tCurlY = curlY;
+				if (combo == WebTendrilCombos.CLAP) {
+					// each side hauled out wide, then clapped in to meet in the middle (crossing a little after)
+					tYaw = tendrils.aimYaw() - side * CLAP_WIDE * (1.0F - swing);
+					tPitch = tendrils.aimPitch() + CLAP_LIFT * (1.0F - Math.min(1.0F, swing));
+					tCurlX = CURL_STRIKE * 0.5F;
+					tCurlY = -side * CURL_SWIPE * (swing > 1.0F ? -1.0F : 1.0F);
+				} else if (combo == WebTendrilCombos.SHATTER) {
+					// both reared high and wide, then brought down together
+					tYaw = tendrils.aimYaw() - side * SHATTER_SPREAD * (1.0F - Math.min(1.0F, swing));
+				}
+				base.yRot = Mth.lerp(w, restYaw, aimYaw(tYaw, restYaw));
+				base.xRot = Mth.lerp(w, restPitch, tPitch);
 				base.xScale = thick;
 				base.yScale = thick;
 				base.zScale = restLength * (striking ? stretch : 1.0F);
-				float segCurlX = Mth.lerp(w, restCurlX, curlX);
-				float segCurlY = Mth.lerp(w, restCurlY, curlY);
+				float segCurlX = Mth.lerp(w, restCurlX, tCurlX);
+				float segCurlY = Mth.lerp(w, restCurlY, tCurlY);
 				float calm = 1.0F - w;
 				if (tendrils.wall() == 1) {
 					// every one of them reaching for the wall, spread a little

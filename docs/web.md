@@ -381,6 +381,32 @@ action bar, each heard once.
   further. The aim math was fixed: in model space a cord built along +Z points at relative yaw `a` (+ right) and
   elevation `p` (+ up) with `yRot = PI + a`, `xRot = p` (the old `-PI/2 - 1 - p` pointed strikes back and down).
 
+**Tendril combos (0.8, `WebTendrilCombos`):** attack (left click) while the tendrils hold things and it's a combo
+instead of a swing. The client (`WebPowerClient`'s `ClientPreAttackCallback`) works out whether one fits
+(`WebTendrilCombos.kind`, plus `crosshairTarget`: the living thing under the crosshair within `CRUSH_REACH` 6, seen past
+held things) and sends `web_tendril_combo_attack` (`Attack(target)`); the server re-checks it (target within reach +
+`REACH_SLACK` 2 and in front), else falls back to the old chunk swing (`WebTendrils.smash`). Both tendrils must have
+reached what they hold.
+
+| Holding | Combo |
+|---|---|
+| A creature in each tendril | **Clap**: hauled out `CLAP_WIDE` 2.6 to each side, slammed together `CLAP_FORWARD` 2.3 ahead; `CLAP_DAMAGE` 12 each, then dropped and bounced apart (`CLAP_BOUNCE` 0.75 out, `CLAP_LIFT` 0.4 up). |
+| Debris + a creature in the other tendril, or under the crosshair | **Crush**: the debris reared `CRUSH_REAR_UP` 2.8 over your head, carried over the target and brought straight down on it. `CRUSH_DAMAGE` 15 × size (0.6 + 0.1 a block, 0.7-1.5), driven down if airborne, Slowness II 1.5 s. A held victim is pinned low in front for it. |
+| Debris in both | **Shatter**: hauled out wide and up, smashed together `SHATTER_FORWARD` 2.4 ahead, bursting into a cone (`SHATTER_RANGE` 6, half-angle 30°) of their blocks. Everything in it (line of sight from the burst) takes `SHATTER_DAMAGE` 10 × size (to 1.8), falling off 40% at the far end, and is knocked along the cone. |
+
+- Timing: hauled out until `REAR_TICKS` 12 (a sweep and mace whoosh at the turn), impact at `HIT_TICKS` 18, slow reset to
+  `TICKS` 50 (no new combo, no autonomous strike; clicks are swallowed while the tendrils still hold something).
+- Synced in `WebTendrils.COMBO` (`Combo(kind, start, first, second)`) to everyone. The server steers the held things
+  through it (`WebTendrilCombos.point`, steered hard in `WebTendrils.tick`), so their cords move with them; in
+  `WebTendrilLayer` every upper tendril joins in (clap: both sides hauled wide, then clapped in; crush and shatter: a
+  heavy two-sided slam).
+- Used debris is spent at the impact: `BlockCluster.shatter` (dust, the usual 30% drops) plus falling grit; a held
+  falling block puffs, may drop (`SPENT_DROP_CHANCE` 0.3) and is gone. Soft debris (`BlockCluster.allSoft` / `soft`)
+  hits for no more than `BlockCluster.SOFT_HIT_DAMAGE`; a shatter's damage scales by its share of hard blocks.
+- Impact: heavy sounds (mace, anvil, crit, a blast for the shatter), block dust from the ground, a screen shake for you
+  (`SHAKE` 1.8, shatter 2.2) and for a struck player (`TARGET_SHAKE` 2.5). You're never hurt by your own combo; other
+  players are.
+
 **First person (0.8):** First-person Model (`firstperson`) and Not Enough Animations join the pack (`packModsNoCf`
 in `build.gradle`, CurseForge ids still to fill in).
 - With FPM drawing your body (`FirstPersonCompat.bodyShown`: loaded, first-person camera, `FirstPersonAPI.isEnabled()`

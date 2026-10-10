@@ -49,13 +49,14 @@ public final class WebSymbioteClient {
 	/** {@code armor}: Living Armor's (it hunches, swells); otherwise only the tendrils, out on their own for a moment. */
 	/** {@code heavy}: the strike swings held debris (slower, further); {@code variant}: a slam or a swipe (see WebSymbiote.STRIKE_SLAM). */
 	/** {@code firstPerson}: your own, drawn in first person (by First-person Model, or next to the hands): they reach further forward. */
+	/** {@code combo}: a tendril combo (WebTendrilCombos.CLAP, CRUSH, SHATTER; -1 none): {@code strike} is then how far through it. */
 	public record Tendrils(float growth, float time, float strike, float aimYaw, float aimPitch, float side, float run, int held, boolean armor,
-		int wall, float wallYaw, float wallPitch, boolean heavy, int variant, boolean firstPerson) {
+		int wall, float wallYaw, float wallPitch, boolean heavy, int variant, boolean firstPerson, int combo) {
 		/** {@code wall}: 0 none, 1 reaching for a wall (aimed by wallYaw/wallPitch), 2 fanned back into it. */
 
 		/** The same, drawn from your own eyes. */
 		public Tendrils inFirstPerson() {
-			return new Tendrils(growth, time, strike, aimYaw, aimPitch, side, run, held, armor, wall, wallYaw, wallPitch, heavy, variant, true);
+			return new Tendrils(growth, time, strike, aimYaw, aimPitch, side, run, held, armor, wall, wallYaw, wallPitch, heavy, variant, true, combo);
 		}
 	}
 	/** Ticks into a meal (partial ticks included), for the maw. */
@@ -261,6 +262,24 @@ public final class WebSymbioteClient {
 				aimPitch = (float)net.minecraft.util.Mth.atan2(to.y, Math.sqrt(to.x * to.x + to.z * to.z));
 				side = aimYaw >= 0.0F ? -1.0F : 1.0F;
 			}
+			// a combo outranks a strike: every upper tendril joins in (clap, crush or shatter)
+			int combo = -1;
+			com.jaymospowers.power.web.WebTendrils.Combo c = player.getAttached(com.jaymospowers.power.web.WebTendrils.COMBO);
+			if (c != null) {
+				float partial = net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
+				combo = c.kind();
+				strike = net.minecraft.util.Mth.clamp((now - c.start() + partial) / (float)com.jaymospowers.power.web.WebTendrilCombos.TICKS, 0.0F, 1.0F);
+				heavy = true;
+				variant = WebSymbiote.STRIKE_SLAM;
+				Entity victim = combo == com.jaymospowers.power.web.WebTendrilCombos.CRUSH ? player.level().getEntity(c.second()) : null;
+				net.minecraft.world.phys.Vec3 at = victim != null ? victim.getBoundingBox().getCenter()
+					: player.getEyePosition().add(player.getLookAngle().horizontal().normalize().scale(2.4)).subtract(0.0, 0.3, 0.0);
+				net.minecraft.world.phys.Vec3 to = at.subtract(player.getEyePosition());
+				float yaw = (float)(net.minecraft.util.Mth.atan2(to.z, to.x) * net.minecraft.util.Mth.RAD_TO_DEG) - 90.0F;
+				aimYaw = net.minecraft.util.Mth.wrapDegrees(yaw - player.yBodyRot) * net.minecraft.util.Mth.DEG_TO_RAD;
+				aimPitch = (float)net.minecraft.util.Mth.atan2(to.y, Math.sqrt(to.x * to.x + to.z * to.z));
+				side = aimYaw >= 0.0F ? -1.0F : 1.0F;
+			}
 			int held = 0;
 			com.jaymospowers.power.web.WebTendrils.Grips grips = player.getAttached(com.jaymospowers.power.web.WebTendrils.GRIPS);
 			if (grips != null) {
@@ -284,7 +303,7 @@ public final class WebSymbioteClient {
 			}
 			boolean firstPerson = player == net.minecraft.client.Minecraft.getInstance().player && FirstPersonCompat.bodyShown();
 			state.setData(TENDRILS, new Tendrils(growth, player.tickCount, strike, aimYaw, aimPitch, side, smoothRun(player), held, bulk,
-				wallMode, wallYaw, wallPitch, heavy, variant, firstPerson));
+				wallMode, wallYaw, wallPitch, heavy, variant, firstPerson, combo));
 		} else {
 			ARMOR_SINCE.remove(entity.getId());
 			state.setData(TENDRILS, null);

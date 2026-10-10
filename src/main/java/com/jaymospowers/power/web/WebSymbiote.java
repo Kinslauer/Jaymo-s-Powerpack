@@ -2101,7 +2101,8 @@ public final class WebSymbiote {
 			}
 			return;
 		}
-		if (now < live.nextStrikeAt || live.takeoverTicks > 0 && !live.rampage && !live.hunting || live.fleeing) {
+		if (now < live.nextStrikeAt || live.takeoverTicks > 0 && !live.rampage && !live.hunting || live.fleeing
+			|| WebTendrilCombos.active(player)) {
 			return;
 		}
 		live.nextStrikeAt = now + 10;
