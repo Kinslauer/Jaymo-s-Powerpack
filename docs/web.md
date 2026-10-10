@@ -421,6 +421,9 @@ in `build.gradle`, CurseForge ids still to fill in).
 **Weaknesses ? rejection:**
 - **Fire:** being on fire or in lava counts as **one** exposure per burning episode. An episode ends after
   `FIRE_EPISODE_GAP` 60 ticks without fire.
+  - While the suit or Living Armor is out, a power's fire effect within 4 blocks (`Flames.SYMBIOTE_RANGE`: Laevateinn,
+    Sunfang, Soul Saber, the Meteor) counts the same, even if you aren't burning (`WebSymbiote.nearFlames`, called
+    from `core/Flames`).
 - **Noise** (`WebServerLevelMixin` on `ServerLevel.gameEvent`):
   - a bell ringing (`block_change` at a bell) within 16;
   - `note_block_play` within 8;

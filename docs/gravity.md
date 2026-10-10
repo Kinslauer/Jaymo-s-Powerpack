@@ -59,6 +59,10 @@ mid-ability. The HUD is in `client/power/gravity/GravityPowerClient.java`: chips
   concrete powder, leaves; plus wool, which is 0.8 but listed as soft) deal at most 1.0 (half a heart). This applies
   to any thrown `BlockCluster` made only of soft blocks, from any power, and to cave-in falling blocks. A chunk with
   any hard block keeps the normal formula.
+- **Meteor fire** (`core/Flames`): the falling rock sets alight everything within 2.5 blocks of it for 5 s
+  (`TRAIL_FIRE_*`), and the impact sets alight everything within 10 blocks for 8 s (`IMPACT_FIRE_*`): creatures,
+  corpses, items, armor stands, arrows; creepers are lit, TNT minecarts go off, primed TNT burns faster. Never you.
+  Damage is unchanged.
 
 ## Testing
 - `/power set @s gravity`

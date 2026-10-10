@@ -1061,6 +1061,22 @@ public final class WebSymbiote {
 		}
 	}
 
+	/**
+	 * Flames close by (any fire effect, through {@code core/Flames}): while it's out (suit or Living Armor) it flinches
+	 * just as when you burn, once per burning episode.
+	 */
+	public static void nearFlames(ServerPlayer player) {
+		if (!(suitShown(player) || armored(player)) || !player.isAlive() || player.isSpectator()) {
+			return;
+		}
+		Live live = live(player);
+		live.coolTicks = 0;
+		if (!live.burning) {
+			live.burning = true;
+			expose(player, Exposure.FIRE);
+		}
+	}
+
 	/** Fire or noise: a painful shudder, stress, and one step closer to it leaving. */
 	private static void expose(ServerPlayer player, Exposure kind) {
 		WebSymbioteState state = state(player);

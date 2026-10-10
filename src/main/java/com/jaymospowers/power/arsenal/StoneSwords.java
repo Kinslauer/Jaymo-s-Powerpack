@@ -1,6 +1,7 @@
 package com.jaymospowers.power.arsenal;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.Flames;
 import com.jaymospowers.power.arsenal.SwordStone.Variant;
 import com.jaymospowers.power.arsenal.entity.FrostLance;
 import java.util.ArrayList;
@@ -92,6 +93,8 @@ public final class StoneSwords {
 
 	/** Laevateinn: seconds alight on a cut. */
 	static final int LAEV_BURN_SECONDS = 5;
+	/** Laevateinn: the flames of a cut lick this far (blocks) around what it struck, catching whatever's there. */
+	static final double LAEV_SPLASH = 1.0;
 	/** Flame Wave: wind-up, reach, half-angle of the arc (degrees), speed (blocks a tick), damage, burn, push, cooldown. */
 	static final int FLAME_WINDUP_TICKS = 4;
 	static final double FLAME_RANGE = 8.0, FLAME_HALF_ARC = 50.0, FLAME_SPEED = 0.9, FLAME_HEIGHT = 2.5;
@@ -222,7 +225,9 @@ public final class StoneSwords {
 		}
 		switch (variant) {
 			case LAEVATEINN -> {
-				entity.igniteForSeconds(LAEV_BURN_SECONDS);
+				Flames.touch(level, entity, LAEV_BURN_SECONDS, attacker);
+				Flames.area(level, entity.getBoundingBox().inflate(LAEV_SPLASH), LAEV_BURN_SECONDS, attacker,
+					e -> e != entity && !(e instanceof OwnableEntity pet && pet.getOwner() == attacker));
 				level.sendParticles(ParticleTypes.FLAME, entity.getX(), entity.getY() + entity.getBbHeight() * 0.6, entity.getZ(), 6, 0.2, 0.3, 0.2, 0.02);
 			}
 			case CALADBOLG -> {
@@ -454,6 +459,7 @@ public final class StoneSwords {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 1.0F, 0.7F);
 		TASKS.add(new Task(player) {
 			final Set<Integer> hit = new HashSet<>();
+			final Set<Integer> lit = new HashSet<>();
 
 			@Override
 			boolean step(long t) {
@@ -477,20 +483,23 @@ public final class StoneSwords {
 						this.level.sendParticles(ParticleTypes.LAVA, at.x, at.y + 0.2, at.z, 1, 0.1, 0.1, 0.1, 0.0);
 					}
 				}
-				for (LivingEntity target : this.level.getEntitiesOfClass(LivingEntity.class, new AABB(origin, origin).inflate(outer + 1.0, FLAME_HEIGHT, outer + 1.0),
-					e -> catchable(this.player, e) && !this.hit.contains(e.getId()))) {
-					Vec3 to = target.position().subtract(origin);
+				AABB box = new AABB(origin, origin).inflate(outer + 1.0, FLAME_HEIGHT, outer + 1.0);
+				java.util.function.Predicate<Entity> inFront = e -> {
+					Vec3 to = e.position().subtract(origin);
 					double dist = to.horizontalDistance();
-					if (dist < inner - 0.5 || dist > outer + 0.5 || Math.abs(to.y) > FLAME_HEIGHT || dist > 1.0E-3
-						&& Math.toDegrees(Math.acos(Mth.clamp(to.horizontal().normalize().dot(dir), -1.0, 1.0))) > FLAME_HALF_ARC) {
-						continue;
-					}
+					return !(dist < inner - 0.5 || dist > outer + 0.5 || Math.abs(to.y) > FLAME_HEIGHT || dist > 1.0E-3
+						&& Math.toDegrees(Math.acos(Mth.clamp(to.horizontal().normalize().dot(dir), -1.0, 1.0))) > FLAME_HALF_ARC);
+				};
+				for (LivingEntity target : this.level.getEntitiesOfClass(LivingEntity.class, box,
+					e -> catchable(this.player, e) && !this.hit.contains(e.getId()) && inFront.test(e))) {
 					this.hit.add(target.getId());
 					target.hurtServer(this.level, this.level.damageSources().playerAttack(this.player), FLAME_DAMAGE);
-					target.igniteForSeconds(FLAME_FIRE_SECONDS);
 					target.push(dir.x * FLAME_PUSH, 0.2, dir.z * FLAME_PUSH);
 					target.syncVelocity = true;
 				}
+				// the whole arc catches: creatures, corpses, items, creepers, TNT, arrows, armor stands
+				Flames.area(this.level, box, FLAME_FIRE_SECONDS, this.player, e -> !this.lit.contains(e.getId()) && inFront.test(e)
+					&& !(e instanceof OwnableEntity pet && pet.getOwner() == this.player) && this.lit.add(e.getId()));
 				return outer >= FLAME_RANGE;
 			}
 		});

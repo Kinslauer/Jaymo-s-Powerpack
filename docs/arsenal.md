@@ -380,6 +380,14 @@ taken from the creative tab have no enchantment.
   from the `arsenal_frost_lance` item sprite (`tools/gen_frost_lance.py`).
 - New ids: item `jaymospowers:arsenal_frost_lance` (render only, in no tab), entity `jaymospowers:arsenal_frost_lance`.
 
+### Fire touches everything flammable (`core/Flames`)
+- Laevateinn's and Sunfang's cuts set alight the target and everything within 1 block of it (`LAEV_SPLASH`,
+  `SUN_SPLASH`), except you and your pets. Flame Wave sets alight everything its arc reaches, not just creatures (each
+  thing once per wave). The Soul Saber's slash sets alight everything along its line for 2 s (`SLASH_FIRE_SECONDS`).
+- "Everything" follows `Flames`: creatures, players, corpses, dropped items, armor stands and arrows catch fire; a
+  creeper's fuse is lit; a TNT minecart is set off; primed TNT's fuse is halved. Damage and other tuning are unchanged.
+- Test: drop some sticks, an arrow and a TNT minecart in front of a creeper and Flame Wave them.
+
 ### How to test (0.8.0)
 1. Flintlock: `/power set @s arsenal`, `/power ascend @s`, `/power corrupt @s`, then Reach until the pair comes (or
    `/give @s jaymospowers:flintlock`).
