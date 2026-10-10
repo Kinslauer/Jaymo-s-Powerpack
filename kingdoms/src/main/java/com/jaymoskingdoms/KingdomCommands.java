@@ -49,6 +49,7 @@ final class KingdomCommands {
 				.then(Commands.literal("castle").executes(c -> found(c, Castle.Kind.CASTLE)))
 				.then(Commands.literal("tower").executes(c -> found(c, Castle.Kind.TOWER)))
 				.then(Commands.literal("village").executes(KingdomCommands::foundVillage)))
+			.then(Camps.command())
 			.then(Commands.literal("storage").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(c -> storage(c, null))
 				.then(Commands.argument("name", StringArgumentType.word()).executes(c -> storage(c, StringArgumentType.getString(c, "name")))))
 			.then(Commands.literal("produce").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(c -> produce(c, null))

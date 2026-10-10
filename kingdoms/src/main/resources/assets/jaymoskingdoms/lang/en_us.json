@@ -68,5 +68,13 @@
 	"message.jaymoskingdoms.elder_died": "The elder of %s is dead. The village mourns.",
 	"message.jaymoskingdoms.lord_fallen": "The Lord of %s has fallen to %s!",
 	"message.jaymoskingdoms.fate.successor_lord": "%s mourns its lord. Another will take his seat by tomorrow.",
-	"message.jaymoskingdoms.succession.lord": "A new lord takes the seat of %s."
+	"message.jaymoskingdoms.succession.lord": "A new lord takes the seat of %s.",
+	"entity.jaymoskingdoms.barbarian_of": "Raider of %s",
+	"entity.jaymoskingdoms.chief_of": "Chief of %s",
+	"message.jaymoskingdoms.raid.announce": "War horns! A war party from %s marches on %s!",
+	"message.jaymoskingdoms.raid.arrive": "The raiders of %s fall upon %s!",
+	"message.jaymoskingdoms.raid.beaten": "The war party of %s is beaten off.",
+	"message.jaymoskingdoms.raid.withdraw": "The war party of %s withdraws with its plunder.",
+	"message.jaymoskingdoms.camp.cleared": "The chief of %s has fallen to %s! The camp scatters.",
+	"message.jaymoskingdoms.camp.thanks": "Word of the chief's death spreads: every kingdom and village thinks better of you."
 }

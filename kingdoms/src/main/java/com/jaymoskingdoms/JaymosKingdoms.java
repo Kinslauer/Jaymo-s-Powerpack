@@ -39,6 +39,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// the attachments (registered as their classes load)
 		LOGGER.debug("kingdom attachments: {} {} {}", Factions.ALL, Factions.KEEPS, Reputation.REPUTATION);
 		KingdomEvents.register();
+		// barbarian camps, their raiders and raids (and their attachment)
+		LOGGER.debug("camp attachment: {}", Camps.CAMPS);
+		Camps.register();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> KingdomCommands.register(dispatcher));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> KingdomEvents.forget(handler.player));
 	}

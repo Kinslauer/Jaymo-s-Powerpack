@@ -185,3 +185,65 @@ Built, not yet seen in game. The plan is `docs/Kingdoms-Plan-0.3.md` (sections A
 - Production at 30%, and `Economy.needed` (4 + villagers / 6, at most 20).
 - `crown` spawns `Folk.CHIEF` through `spawn`, near the seat when there's no keep.
 - The automatic storehouse skips camps. A chief's death clears only the faction's leader: no realm fates.
+
+## 0.3.0, track 3: barbarians (camps, raiders and chiefs, raids, clearing)
+Built, not yet seen in game. The plan is `docs/Kingdoms-Plan-0.3.md` section D. New classes: `Camps` (founding,
+growth, clearing, rot, `/faction camp`), `CampBuildings` (designs and the growth catalogue), `Barbarians` (roles and
+targeting), `Raids` (war parties); client `CampSkins`; `tools/gen_barbarians.py`. Shared files got one-line hooks:
+`JaymosKingdoms` (`Camps.register()`, the `Camps.CAMPS` attachment), `Folk.registerGoals` (`Barbarians.addGoals`),
+`KingdomCommands` (`.then(Camps.command())`), `JaymosKingdomsClient` (`CampSkins.register()`), and a block at the end
+of `en_us.json`.
+
+### What's new
+- **Camps** rise in the wild, 150-300 blocks from a kingdom or fiefdom: at most 2 standing camps within 360 of it,
+  camps 160 apart, 150 from any settlement, never on claimed land, no village bell within 96. Every minute each realm
+  with room has a 20% chance; the site is tried round a player near the realm, 56-128 blocks from them (loaded, but
+  out of sight), on open natural ground (no water, trees or anything built; the ground within 4 blocks of level).
+  The camp gets a name (Skarfang, Gormtusk), a colour, 3 x 3 chunks of land, and is allied with every other camp
+  (barbarians help barbarians). Its seat is the campfire.
+- **The camp** (`CampBuildings.build`): the ground levelled and cleared in a 16 block radius; a jagged log palisade
+  (radius 14) with a gate facing the kingdom between two tall posts topped with skulls; a campfire with log benches;
+  the **chief's tent** at the back (a striped wool tent, skull posts at its porch, a carpet to his seat, his hoard
+  chest behind it: emeralds, gold, iron, a saddle, a golden apple); three hide tents; and the **loot pile** on the
+  right (2 chests and 5 barrels under a log lean-to), registered as the faction's storage with its depot in front.
+  It starts with 32 logs, 16 hides (wool), 16 mutton and 3 emeralds. The chief is crowned (`KingdomEvents.crown`) and
+  sent to his tent; 4 raiders and a builder crew (in furs) arrive.
+- **Barbarians** (`Folk.BARBARIAN`, role 6): 30 health, stone and iron axes and swords, hide armour (dyed leather),
+  sometimes a fur cap, named "Raider of X". **The chief** (`Folk.CHIEF`, role 7): 160 health, 8 damage, a diamond
+  axe, chainmail and furs, leggings in the camp's colour, a red boss bar and the leaders' rally at 40%. Raiders and
+  chiefs attack players (not creative), villagers, iron golems and every non-barbarian folk on sight; realms' and
+  villages' fighting folk attack barbarians on sight. Alerts stay on their own side.
+- **Skins** (`python -I tools/gen_barbarians.py`): a raider and a chief per dye colour
+  (`textures/entity/barbarian/<dye>.png`, `chief/<dye>.png`), their war paint in the camp's colour. Original art.
+- **Growth** (once a day while the camp is loaded; up to 3 missed days): the camp takes in its own hides (12 wool, 2
+  in its colour), 6 fences, 8 planks, 3 ladders, a fence gate, 2 hay, a bone block, 6 mutton and 2 leather (on top of
+  `Production`'s 30% share), and a new raider joins every 2 days of its age, up to 12. Its builders' catalogue
+  (`Blueprint.register(BARBARIAN, ...)`, in order): `camp_totem` (1), `camp_tent` (5), `camp_watch_post` (2),
+  `camp_palisade` sections (8), `camp_pen` (2). Growth blueprints use only those materials, logs and cobblestone.
+- **War parties** (`Raids`): every 10 s each standing camp with a chief, off its 2-day cooldown, looks for the
+  nearest kingdom, fiefdom or village within 420 blocks with a player within 80 of its seat (and not raided in the
+  last day); 12% chance it raids. The party (3 + 1 per 2 raiders in the camp, at most 8) musters 48 blocks out from
+  the seat on the camp's side; war horns sound and it's announced to players within 160. It marches on the seat
+  (waypoints 16 blocks ahead), falls on it (announced; the target is `Economy.noteAttack`ed while they're there, and
+  its golems turn on them), then each raider walks to the storage and takes up to 32 of one item (valuables first,
+  half the time) with `Storage.take`, carrying it visibly. After 2 minutes (or once all carry something) they head
+  home; a raider is home at the camp's fire, or as soon as no player is within 48 of him: his load goes into the loot
+  pile (`Storage.put`), or is kept in the camp's data until the pile is loaded. A raider who dies drops his load; a
+  player who kills one gains 5 reputation with the target. A war party is a war band mustered for the raid: it isn't
+  on the camp's roster and its dead aren't replaced. Raids aren't saved; leftover raiders go home when they load.
+- **Clearing a camp** (its chief killed): announced to everyone; the killer gains 100 reputation with every standing
+  kingdom, fiefdom and village (players within 48 who fought beside them, 40). Its raiders flee (dropping their
+  loot), its people scatter (gone in a puff), the faction falls (no land, leader, roster or storage: the loot pile
+  and the chief's hoard are anyone's), and its alliances end. The tents rot: every 30 s while it's loaded (time away
+  counts), 4 of its wool, carpets, hay, fences, slabs, skulls, lanterns and ladders go (the fire goes out first). The
+  palisade and benches stay as ruins.
+- **Commands** (ops): `/faction camp found` (a camp at your feet, its gate the way you face; no site checks),
+  `/faction camp raid` (the nearest camp raids the nearest settlement now), `/faction camp grow` (a day's growth).
+
+### Notes for the lead and later tracks
+- `Camps.CAMPS` is a new persistent (not synced) attachment, class-loaded from `JaymosKingdoms.onInitialize`.
+- Camp builders work from the catalogue above through the shared brain; the loot pile is ordinary `Storage` with a
+  depot. Growth blueprints face north (entrance at z = 0), y = 0 the first layer on the ground.
+- Killing a camp's raiders still costs reputation with the camp itself (`KingdomEvents.folkDied`), so after three
+  kills the camp "counts you an enemy" in chat: harmless, but `folkDied` could skip barbarian factions. Right-clicking
+  a barbarian gives the usual "audience" line.
