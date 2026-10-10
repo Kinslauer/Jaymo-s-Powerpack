@@ -11,10 +11,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 
 /**
- * Reputation, the first of the two systems: what every kingdom thinks of a player, member or not (-1000 to 1000).
+ * Reputation, the first of the two systems: what every faction (kingdom, fiefdom, village, camp) thinks of a player, member or not (-1000 to 1000).
  * Kill a kingdom's people and it hates you; fight its monsters, fill its coffers, and it warms to you. A kingdom
  * at {@link #HOSTILE} or below has its guards attack you on sight. (The second system is each kingdom's own record
- * of its members: rank and standing, in {@link Kingdom.Member}.)
+ * of its members: rank and standing, in {@link Faction.Member}.)
  */
 public final class Reputation {
 	public static final int MIN = -1000, MAX = 1000;
@@ -34,7 +34,7 @@ public final class Reputation {
 	}
 
 	/** Shifts {@code player}'s reputation with {@code kingdom} by {@code by}; tells them when it crosses a threshold. */
-	public static void change(ServerPlayer player, Kingdom kingdom, int by) {
+	public static void change(ServerPlayer player, Faction kingdom, int by) {
 		if (by == 0) {
 			return;
 		}

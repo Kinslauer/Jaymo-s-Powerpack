@@ -2,7 +2,7 @@
 
 An original mod (own code, art and buildings) for Minecraft 26.3 (Fabric). Ideas inspired by Tale of Kingdoms, but
 nothing taken from it (its code is GPL-3.0 and its assets all rights reserved).
-Plan and the user's answers: `Origins Mod/docs/Kingdoms-Plan.md`.
+Plan and the user's answers: `docs/Kingdoms-Plan.md` (0.3: `docs/Kingdoms-Plan-0.3.md`).
 
 ## Testing
 `run/` holds an offline dev server (port 25597, RCON 25598, password `kingdomsdev`) and ops.json for the dev
@@ -56,3 +56,132 @@ localhost:25597"`, and drive it with RCON.
   (mossy stone, jungle), swamp (mud brick, mangrove), cherry (stone, calcite, cherry).
 - Epic Structures: Villages (all rights reserved; the author invites its use in modpacks) is loaded in the dev game:
   kingdoms rise in its towns. It goes into the pack with Kingdoms.
+
+## 0.3.0, track 1: the foundation (factions, storehouses, production, economy, builder folk)
+Built, not yet seen in game. The plan is `docs/Kingdoms-Plan-0.3.md` (sections A and the storage part of B).
+
+### What's new
+- **Factions.** `Kingdom` became `Faction` (`Kingdoms` became `Factions`), with a `FactionType`: `KINGDOM`, `FIEFDOM`,
+  `VILLAGE`, `BARBARIAN`. 0.2 saves load unchanged: the attachment id and field names (`capital`, `king`) are the same,
+  new fields are optional, and `Factions.migrate` (on server start) turns a vassal kingdom into a fiefdom allied to its
+  overlord and gives realms a roster (8 guards plus an archer for each post).
+- **Relations** (`Relation`: allied, neutral, rival, war), stored on both sides. A vassal and its overlord count as
+  allied, and barbarians are implicitly at war with everyone. Folk only answer an attack on their own side (the same
+  faction or an ally): `HurtByTargetGoal.alertOther` is filtered.
+- **Fiefdoms.** The "vassal" fate makes a fiefdom of the victor's realm. Its next ruler is a **lord** (`Folk.LORD`):
+  220 health, diamond gear, a purple boss bar, the same rally at 40%. Its folk wear the overlord's colour. A fiefdom
+  sends 30% of its taxes to its overlord.
+- **Villages.** A bell becomes a capital only if no realm's seat is within **320** blocks (it was 160). A bell nearer
+  than that becomes a **village**, unless it lies within 64 blocks of any seat, in which case it's part of that town.
+  A village gets a name (e.g. Brinbrook), 5 x 5 chunks of unclaimed land, an **elder** (its nearest grown villager,
+  named "Elder of X"; a new one is chosen when he dies, and killing him costs 150 reputation), a **shed**, and a builder
+  crew. Its iron golems are its guards: they attack players the village counts as hostile.
+- **Storehouses.** Each realm gets a timber hall on a stone course with a gabled roof, built in its `Palette` near the
+  keep's gate. Inside are 4 chests and 7 barrels. A village gets an open lean-to with 2 chests and 2 barrels. Both are
+  built only on open natural ground: every replaced block is air, a plant or the land's own dirt and stone, never logs,
+  paths or anything built. Their containers and the door (the **depot**) are registered in the faction's `Holdings`.
+  0.2 kingdoms build one when a player comes within 96 blocks of the seat. If no site is found, it tries again a day
+  later.
+- **Production** happens once per day on the Overworld clock. Labour is 4 + 2 per villager + 1 per folk. It yields 2
+  materials per unit of labour (at most 192 a day): the palette's logs in proportion to the woodland share of the land,
+  the rest as cobblestone and stone (1 in 4 is stone). Food is 2 + 1 per villager + 1 per 4 crop blocks, at most 128,
+  as bread, carrots, potatoes, beetroot and apples. Production is scaled by type: kingdom 100%, fiefdom 80%, village
+  60%, camp 30%. Realms also collect taxes into the treasury: 2 + 1 per 2 villagers + 1 per member. The land is surveyed
+  each time it produces with the seat loaded. A storehouse that's unloaded at the turn of the day catches up later, up
+  to 3 days. Everything that doesn't fit is lost.
+- **Economy health** (`Economy`), shown in `/kingdom info`:
+  - **Healthy:** the next project's materials are in storage, plus 32 food.
+  - **Personnel:** roster ≥ need (kingdom 12, fiefdom 10, village 2, camp 4, plus 1 per 6 villagers, capped). A dead
+    folk leaves a vacancy. Every quarter day, one vacancy is filled by a villager stepping into service (in a puff; the
+    village keeps at least 3 villagers). If there are no villagers at all, someone comes from the countryside. Settlements
+    short of their need also take on new hands. Hiring pauses while the faction is under attack.
+  - **Peace:** no stored war, and no attack on its folk, villagers, golems or leader in the last 30 s.
+- **Builder folk.** `Folk.FOREMAN` and `Folk.WORKER` have 20 health and don't fight: they flee when hurt and their side
+  answers. Their look depends on the faction type: a tabard in the kingdom's colour (a fiefdom uses its overlord's);
+  villager smocks with leather aprons and a straw hat for the foreman; furs, hide and war paint for barbarians, with a
+  wolf hood for the foreman. A crew of 3 (a foreman and 2 workers) arrives with the storehouse and grows to 6 with the
+  population. Their load is visible: the real items, shown in hand, and dropped if they die.
+- **Skins.** `tools/gen_folk.py` now also draws a lord in each of the 16 dye colours (`textures/entity/lord/<dye>.png`)
+  and the builders (`textures/entity/builder/kingdom_{foreman,worker}_<dye>.png`, `village_*`, `barbarian_*`). Run it
+  with `python -I tools/gen_folk.py lord builder`. Original art.
+- **Commands.** `/faction` is an alias of `/kingdom`. `list` and `info` cover every type. `info` shows the type,
+  relations, and the three health lines (+ green / - red). `pledge` only works for realms. Operator commands:
+  `found village`, `storage [name]`, `produce [name]`, `storehouse`, `crew`, `hire`, and
+  `relation <a> <b> allied|neutral|rival|war`.
+
+### API for the next tracks (all in `com.jaymoskingdoms`; stay in this package)
+**Factions**
+- `Faction` is an immutable record. Its fields are:
+  - `id`, `type`, `name`, `color`, `seat` (the bell or fire)
+  - `leader` (an entity UUID: a king, lord, elder villager or chief)
+  - `members`, `treasury`, `claims`, `overlord`, `fallen`, `successionAt`
+  - `relations` (other id as a string → `Relation`)
+  - `holdings`
+- Change a faction with the `with...` methods. `styleColor(server)` gives the colour its folk wear.
+- `Faction.create(id, type, name, color, seat, claims)` makes a new one. Store it with `Factions.put`.
+- `Factions` reads and writes them:
+  - `all(server[, type])`, `get(server, id)`, `byName`
+  - `put`, and `update(server, id, f -> ...)`, which re-reads the stored copy first. **Always prefer `update`**: many
+    systems write the same faction.
+  - `at(server, level, pos)`: whose land this is.
+  - `around(server, level, pos, radius)`: whose land, or the nearest seat.
+  - `of(server, player)`: the faction they're sworn to.
+  - `storageOwner(server, pos)`: which faction owns this container.
+  - `keep(server, id)`, `level(server)` (the Overworld, where every faction lives), `nextId`.
+  - `KingdomEvents.claim(server, center, radius)`: unclaimed chunks around a point.
+
+**Relations**
+- `Relations.between(a, b)` is the full rule (allied overlord, barbarians always at war). `set(server, a, b, rel)` sets
+  both sides.
+- `atWar`, `enemies(server, f)`, `vassalize(server, vassal, overlord)` (turns a kingdom into a fiefdom) and
+  `overlord(server, f)`.
+
+**Storage** (only loaded containers count; check `Storage.loaded(level, f)` first)
+- Reading: `containers`, `contents`, `totals` (item → count), `count(level, f, item | predicate)`, `food`,
+  `has(level, f, needs)`, `missing(level, f, needs)`, `freeSlots`.
+- `itemsFor(List<BlockState>)` turns a block list into item needs.
+- `take(level, f, item | predicate, max)` returns the stack taken. `put(level, f, stack)` returns what didn't fit;
+  `put(level, f, item, count)` returns the count that didn't fit.
+- `mayTake(player, f)`: a member of knight rank or above.
+- `register(server, id, positions, depot)` replaces all of a faction's storage. `add(server, id, positions)` adds to
+  it (for camps' loot piles). `Storehouse.build(level, f)` builds storage now.
+
+**Economy**
+- `healthy(level, f[, materials])`, `hasFood`, `needed(f)`, `staff(f)`, `adequatePersonnel(f)`.
+- `atPeace(server, f)`, `atWar`, `underAttack`, `recentAttackers(server, f)` (entity UUIDs).
+- `noteAttack(server, f, attacker)` records an attack (attacks are noted automatically through `AFTER_DAMAGE`).
+- `lost(server, id, role)` records a death (`Folk.die` already calls it). `hire(level, f)` fills one vacancy now.
+- **Hook:** set `Economy.nextNeeds = (level, f) -> itemMap` to tell the economy what the next building needs.
+
+**Production**
+- `produce(level, f, days)`, `survey(level, f)`, `day(server)`, `logItem(level, f)`.
+
+**Folk**
+- Roles (ints): `GUARD 0`, `KING 1`, `ARCHER 2`, `LORD 3`, `FOREMAN 4`, `WORKER 5`. `BARBARIAN 6` and `CHIEF 7` are
+  reserved but not defined: the camps track defines them.
+- `Folk.defineRole(new Folk.Role(id, name, combatant, leader, bossBarColour, (folk, faction) -> outfit))` adds a role.
+  The outfit sets gear, health and name.
+- `setup(role, faction, home, radius)`, `factionId()`, `style()` (a `FactionType`), `colorId()`, `combatant()`,
+  `leader()`, `sameSide(other)`.
+- Builders only:
+  - `setCarried(stack)`, `carried()`, `takeCarried()`, `isCarrying()`
+  - `site()` / `setSite(pos)` and `task()` / `setTask(text)`: both saved, free for the construction code to use.
+- Client: `JaymosKingdomsClient.SKINS.put(roleId, state -> texture)` adds skins for new roles. `FolkState` has
+  `role`, `style` and `color`.
+- Spawning:
+  - `KingdomEvents.spawn(level, f, role)` places a folk at its post and adds it to the roster (leaders aren't counted).
+  - `spawnArcher(level, f)` places an archer on a free post.
+  - `leaderRole(type)` gives the leader's role for a faction type. `crown(level, f)` seats a new leader.
+
+**Builders**
+- `Builders.setBrain((level, builder) -> ...)` sets the per-tick AI for every builder. The default is idle: they stay
+  within 16 blocks of the depot.
+- `crew(level, f)` lists the loaded crew, foreman first. `foreman`, `crewCount`, `crewTarget`.
+- `depot(f)`: where they load.
+- `spawn(level, f, role, at)` adds one builder to the roster. `spawnCrew(level, f)` spawns a whole crew.
+
+**Barbarian hooks**
+- `FactionType.BARBARIAN`, the reserved roles, and `Storage.add` for loot piles.
+- Production at 30%, and `Economy.needed` (4 + villagers / 6, at most 20).
+- `crown` spawns `Folk.CHIEF` through `spawn`, near the seat when there's no keep.
+- The automatic storehouse skips camps. A chief's death clears only the faction's leader: no realm fates.

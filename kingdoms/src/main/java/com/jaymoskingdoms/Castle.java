@@ -108,14 +108,14 @@ final class Castle {
 	}
 
 	/** Ground the land made, not the village. */
-	private static boolean natural(BlockState state) {
+	static boolean natural(BlockState state) {
 		return state.is(BlockTags.DIRT) || state.is(BlockTags.SAND) || state.is(BlockTags.BASE_STONE_OVERWORLD) || state.is(Blocks.DIRT_PATH)
 			|| state.is(Blocks.SNOW) || state.is(Blocks.SNOW_BLOCK) || state.is(Blocks.GRAVEL) || state.is(BlockTags.TERRACOTTA)
 			|| state.is(Blocks.SANDSTONE) || state.is(BlockTags.ICE) || state.is(BlockTags.LEAVES) || state.is(BlockTags.LOGS);
 	}
 
 	/** Builds the kingdom's seat (a random kind) and its watchtowers, in the village's materials. */
-	static Keep build(ServerLevel level, Kingdom kingdom, BlockPos bell, @org.jspecify.annotations.Nullable Kind forced) {
+	static Keep build(ServerLevel level, Faction kingdom, BlockPos bell, @org.jspecify.annotations.Nullable Kind forced) {
 		RandomSource random = level.getRandom();
 		Kind kind = forced != null ? forced : Kind.values()[random.nextInt(Kind.values().length)];
 		int half = switch (kind) {
@@ -172,7 +172,7 @@ final class Castle {
 	static final int KEEP_HALF = 7, KEEP_DEPTH = 14, KEEP_WALL = 10, KEEP_UPPER = 5;
 
 	/** The keep, its gate at frame z = {@code z0}. */
-	private static Keep keep(ServerLevel level, Frame f, Palette p, Kingdom kingdom, RandomSource random, int z0) {
+	private static Keep keep(ServerLevel level, Frame f, Palette p, Faction kingdom, RandomSource random, int z0) {
 		int h = KEEP_HALF, d = KEEP_DEPTH;
 		for (int x = -h; x <= h; x++) {
 			for (int z = z0; z <= z0 + d; z++) {
@@ -246,7 +246,7 @@ final class Castle {
 	 * A throne room on the floor at frame y = {@code y}: the carpet aisle from {@code zFront} to the dais, the dais
 	 * (x {@code x0..x1}) at the back ({@code zBack}), the throne, the banners. Returns where the king stands.
 	 */
-	private static BlockPos throneRoom(ServerLevel level, Frame f, Palette p, Kingdom kingdom, int x0, int x1, int zFront, int zBack, int y) {
+	private static BlockPos throneRoom(ServerLevel level, Frame f, Palette p, Faction kingdom, int x0, int x1, int zFront, int zBack, int y) {
 		BlockState carpet = byName(kingdom.color().getName() + "_carpet", Blocks.AIR);
 		for (int z = zFront; z <= zBack - 3; z++) {
 			f.set(level, 0, y, z, carpet);
@@ -303,7 +303,7 @@ final class Castle {
 
 	static final int CASTLE_HALF = 15, CASTLE_DEPTH = 32, CURTAIN = 8;
 
-	private static Keep castle(ServerLevel level, Frame f, Palette p, Kingdom kingdom, RandomSource random) {
+	private static Keep castle(ServerLevel level, Frame f, Palette p, Faction kingdom, RandomSource random) {
 		int h = CASTLE_HALF, d = CASTLE_DEPTH;
 		prepare(level, f, p, -h - 2, h + 2, -2, d + 2);
 		// the curtain wall, with a walk along its top
@@ -404,7 +404,7 @@ final class Castle {
 
 	static final int TOWER_SIZE = 12, STOREY = 6, STOREYS = 4;
 
-	private static Keep tower(ServerLevel level, Frame f, Palette p, Kingdom kingdom, RandomSource random) {
+	private static Keep tower(ServerLevel level, Frame f, Palette p, Faction kingdom, RandomSource random) {
 		int h = TOWER_SIZE / 2, d = TOWER_SIZE, top = STOREY * STOREYS;
 		prepare(level, f, p, -h - 2, h + 2, -2, d + 2);
 		for (int y = 0; y <= top + 2; y++) {
@@ -501,13 +501,13 @@ final class Castle {
 		return f.at(0, high + 2, 1);
 	}
 
-	private static BlockState byName(String name, Block fallback) {
+	static BlockState byName(String name, Block fallback) {
 		Block block = BuiltInRegistries.BLOCK.getValue(Identifier.withDefaultNamespace(name));
 		return (block == Blocks.AIR ? fallback : block).defaultBlockState();
 	}
 
 	/** A piece's own frame: x across, z inward from its gate, y from its floor; turned to face the bell. */
-	private record Frame(BlockPos center, Direction facing, int floor, int middle) {
+	record Frame(BlockPos center, Direction facing, int floor, int middle) {
 		/** The gate is at z = 0, facing {@code facing}; the piece runs back from it (its middle at z = {@code middle}). */
 		BlockPos at(int x, int y, int z) {
 			Direction back = this.facing.getOpposite();

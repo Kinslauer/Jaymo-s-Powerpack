@@ -37,7 +37,7 @@ public final class JaymosKingdoms implements ModInitializer {
 			.build(key));
 		FabricDefaultAttributeRegistry.register(FOLK, Folk.guardAttributes());
 		// the attachments (registered as their classes load)
-		LOGGER.debug("kingdom attachments: {} {}", Kingdoms.ALL, Reputation.REPUTATION);
+		LOGGER.debug("kingdom attachments: {} {} {}", Factions.ALL, Factions.KEEPS, Reputation.REPUTATION);
 		KingdomEvents.register();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> KingdomCommands.register(dispatcher));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> KingdomEvents.forget(handler.player));
