@@ -140,6 +140,25 @@ public final class WebSymbiote {
 	public static final int CURIOUS_STRESS = 20;
 	public static final float CURIOUS_CHANCE = 0.06F, CURIOUS_ATTACK = 0.5F;
 	public static final int STARE_MIN = 40, STARE_MAX = 160;
+	/**
+	 * Tendril Grab at a block: every tendril reaches for the wall and hauls you in; there, you're turned with your back
+	 * to it and they fan out and slam into it, cracking it where each one hits, holding for {@code WALL_HOLD} ticks.
+	 */
+	public static final int WALL_HOLD = 50, WALL_CRACKS = 7;
+
+	/** A wall grab: the anchor, when it began, and when you got there (-1 on the way). Synced: everyone sees the tendrils. */
+	public record Wall(Vec3 anchor, long start, long landed) {
+		public static final net.minecraft.network.codec.StreamCodec<io.netty.buffer.ByteBuf, Wall> STREAM_CODEC =
+			net.minecraft.network.codec.StreamCodec.composite(
+				Vec3.STREAM_CODEC, Wall::anchor,
+				net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, Wall::start,
+				net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, Wall::landed,
+				Wall::new);
+	}
+
+	public static final AttachmentType<Wall> WALL = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_wall"),
+		builder -> builder.syncWith(Wall.STREAM_CODEC, AttachmentSyncPredicate.all()));
+
 	/** Staring at something it grabbed (when it began). Synced to everyone, who see the head swell. */
 	public static final AttachmentType<Long> STARING = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_staring"),
 		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
@@ -370,6 +389,11 @@ public final class WebSymbiote {
 		long stareUntil;
 		/** When it can swell to save itself again. */
 		long defendReadyAt;
+		/** A wall grab: where your feet are headed, the face, how long the haul may take, and the cracked blocks. */
+		Vec3 wallFeet = Vec3.ZERO;
+		Direction wallFace = Direction.UP;
+		int wallMaxTicks;
+		final List<BlockPos> wallCracks = new java.util.ArrayList<>();
 		int rampageStrikes;
 		long nextStrikeAt;
 		/** Instinct: when it can act on its own again, and whether it has caught this fall already. */
@@ -625,6 +649,10 @@ public final class WebSymbiote {
 		}
 		if (player.onGround() || player.isInWater()) {
 			live.caughtFall = false;
+		}
+		Wall wall = player.getAttached(WALL);
+		if (wall != null) {
+			tickWall(player, live, wall, now);
 		}
 		if (player.tickCount % FLEE_CHECK_TICKS == 0 && now >= live.fleeReadyAt && live.bondTicks <= 0 && !player.isCreative()) {
 			fleeFire(player, live, now);
@@ -1138,7 +1166,7 @@ public final class WebSymbiote {
 			return;
 		}
 		boolean done = switch (ability) {
-			case TENDRIL -> WebTendrils.radialGrab(player);
+			case TENDRIL -> WebTendrils.radialGrab(player) || tendril(player);
 			case ARMOR -> toggle(player, WebSymbioteState.ARMOR);
 			case CRAWL -> toggle(player, WebSymbioteState.CRAWL);
 			case CONSUME -> consume(player);
@@ -1204,6 +1232,16 @@ public final class WebSymbiote {
 		WebPower.startPull(player, new WebNet.Pull(anchor, feet, -1, maxTicks, (byte)face.ordinal()), new WebLine(WebLine.ZIP, anchor, -1));
 		trail(level, eye, anchor);
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.SLIME_JUMP, SoundSource.PLAYERS, 1.0F, 0.5F);
+		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 1.0F, 0.6F);
+		// every tendril reaches for it (see tickWall)
+		Live live = live(player);
+		clearWall(player, live);
+		live.wallFeet = feet;
+		live.wallFace = face;
+		live.wallMaxTicks = maxTicks;
+		long now = level.getGameTime();
+		player.setAttached(WALL, new Wall(anchor, now, -1L));
+		player.setAttached(TENDRILS_OUT, now + maxTicks + WALL_HOLD);
 		return true;
 	}
 
@@ -1365,6 +1403,64 @@ public final class WebSymbiote {
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_JUMP, SoundSource.PLAYERS, 1.0F, 0.4F);
 		level.sendParticles(dust(1.4F), player.getX(), player.getY() + 0.2, player.getZ(), 14, 0.4, 0.1, 0.4, 0.0);
+	}
+
+	/** A wall grab under way: arriving, you're turned to the wall's back and the tendrils slam in; then they let go. */
+	private static void tickWall(ServerPlayer player, Live live, Wall wall, long now) {
+		ServerLevel level = player.level();
+		if (wall.landed() < 0L) {
+			if (player.position().distanceTo(live.wallFeet) > 1.4 && now - wall.start() <= live.wallMaxTicks) {
+				return;
+			}
+			if (player.position().distanceTo(live.wallFeet) > 3.0) {
+				// never got there
+				clearWall(player, live);
+				return;
+			}
+			// there: back to the wall, the tendrils fanned out and driven into it
+			player.setAttached(WALL, new Wall(wall.anchor(), wall.start(), now));
+			player.setAttached(TENDRILS_OUT, now + WALL_HOLD);
+			if (live.wallFace.getAxis().isHorizontal()) {
+				Vec3 out = live.wallFace.getUnitVec3();
+				float yaw = (float)(Mth.atan2(out.z, out.x) * Mth.RAD_TO_DEG) - 90.0F;
+				player.connection.send(new net.minecraft.network.protocol.game.ClientboundPlayerRotationPacket(yaw, false, 0.0F, true));
+			}
+			BlockPos center = BlockPos.containing(wall.anchor().subtract(live.wallFace.getUnitVec3().scale(0.1)));
+			var random = player.getRandom();
+			for (int i = 0; i < WALL_CRACKS * 3 && live.wallCracks.size() < WALL_CRACKS; i++) {
+				BlockPos pos = center.offset(random.nextInt(3) - 1, random.nextInt(3) - 1, random.nextInt(3) - 1);
+				net.minecraft.world.level.block.state.BlockState block = level.getBlockState(pos);
+				if (!block.isAir() && block.getDestroySpeed(level, pos) >= 0.0F && !live.wallCracks.contains(pos)) {
+					live.wallCracks.add(pos);
+				}
+			}
+			for (int i = 0; i < live.wallCracks.size(); i++) {
+				BlockPos pos = live.wallCracks.get(i);
+				level.destroyBlockProgress(crackId(player, i), pos, 3 + random.nextInt(4));
+				level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, level.getBlockState(pos)),
+					pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.1);
+			}
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_ATTACK, SoundSource.PLAYERS, 1.2F, 0.5F);
+			level.playSound(null, center, level.getBlockState(center).getSoundType().getBreakSound(), SoundSource.BLOCKS, 1.0F, 0.6F);
+			player.resetFallDistance();
+			return;
+		}
+		if (now - wall.landed() >= WALL_HOLD || player.position().distanceTo(live.wallFeet) > 3.0) {
+			clearWall(player, live);
+		}
+	}
+
+	private static int crackId(ServerPlayer player, int i) {
+		return player.getId() * 37 + 1000 + i;
+	}
+
+	/** The tendrils let go of the wall, and its cracks fade. */
+	private static void clearWall(ServerPlayer player, Live live) {
+		for (int i = 0; i < live.wallCracks.size(); i++) {
+			player.level().destroyBlockProgress(crackId(player, i), live.wallCracks.get(i), -1);
+		}
+		live.wallCracks.clear();
+		player.removeAttached(WALL);
 	}
 
 	/** Your screen washes with how it feels (see {@link #FIRE_VIGNETTE}). */

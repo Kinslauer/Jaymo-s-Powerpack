@@ -47,7 +47,9 @@ public final class WebSymbioteClient {
 	 */
 	/** {@code held}: bit 1, the right shoulder's tendril is holding something (drawn reaching out instead); bit 2, the left's. */
 	/** {@code armor}: Living Armor's (it hunches, swells); otherwise only the tendrils, out on their own for a moment. */
-	public record Tendrils(float growth, float time, float strike, float aimYaw, float aimPitch, float side, float run, int held, boolean armor) {
+	public record Tendrils(float growth, float time, float strike, float aimYaw, float aimPitch, float side, float run, int held, boolean armor,
+		int wall, float wallYaw, float wallPitch) {
+		/** {@code wall}: 0 none, 1 reaching for a wall (aimed by wallYaw/wallPitch), 2 fanned back into it. */
 	}
 	/** Ticks into a meal (partial ticks included), for the maw. */
 	public static final RenderStateDataKey<Float> EATING = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_eating");
@@ -241,7 +243,18 @@ public final class WebSymbioteClient {
 					}
 				}
 			}
-			state.setData(TENDRILS, new Tendrils(growth, player.tickCount, strike, aimYaw, aimPitch, side, smoothRun(player), held, bulk));
+			int wallMode = 0;
+			float wallYaw = 0.0F, wallPitch = 0.0F;
+			WebSymbiote.Wall wall = player.getAttached(WebSymbiote.WALL);
+			if (wall != null) {
+				wallMode = wall.landed() < 0L ? 1 : 2;
+				net.minecraft.world.phys.Vec3 to = wall.anchor().subtract(player.getEyePosition());
+				float yaw = (float)(net.minecraft.util.Mth.atan2(to.z, to.x) * net.minecraft.util.Mth.RAD_TO_DEG) - 90.0F;
+				wallYaw = net.minecraft.util.Mth.wrapDegrees(yaw - player.yBodyRot) * net.minecraft.util.Mth.DEG_TO_RAD;
+				wallPitch = (float)net.minecraft.util.Mth.atan2(to.y, Math.sqrt(to.x * to.x + to.z * to.z));
+			}
+			state.setData(TENDRILS, new Tendrils(growth, player.tickCount, strike, aimYaw, aimPitch, side, smoothRun(player), held, bulk,
+				wallMode, wallYaw, wallPitch));
 		} else {
 			ARMOR_SINCE.remove(entity.getId());
 			state.setData(TENDRILS, null);

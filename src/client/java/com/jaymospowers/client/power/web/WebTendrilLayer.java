@@ -143,6 +143,19 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 				base.xScale = thick;
 				base.yScale = thick;
 				base.zScale = length * (1.0F + 0.25F * aim);
+				if (tendrils.wall() == 1) {
+					// every one of them reaching for the wall, spread a little
+					aim = 1.0F;
+					base.yRot = Mth.PI - tendrils.wallYaw() + r[3] * 0.25F;
+					base.xRot = -Mth.HALF_PI - 1.0F - tendrils.wallPitch() + (r[1] - 4.0F) * 0.04F;
+					base.zScale = length * 1.6F;
+				} else if (tendrils.wall() == 2) {
+					// back to the wall: fanned out straight behind, driven into it
+					aim = 1.0F;
+					base.yRot = r[3] * 0.85F;
+					base.xRot = (r[1] - 4.0F) * 0.13F;
+					base.zScale = length * 1.15F;
+				}
 				for (int k = 1; k < SEGMENTS; k++) {
 					ModelPart segment = this.parts[t][k];
 					float wave = Mth.sin(time * 0.12F + t * 0.9F + k * 0.7F) * (0.18F + 0.07F * k);
