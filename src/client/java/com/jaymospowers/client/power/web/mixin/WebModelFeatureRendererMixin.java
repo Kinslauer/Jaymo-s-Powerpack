@@ -14,6 +14,7 @@ abstract class WebModelFeatureRendererMixin {
 	@Inject(method = "prepareModel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/Model;setupAnim(Ljava/lang/Object;)V",
 		shift = At.Shift.AFTER))
 	private void jaymospowers$webArms(ModelFeatureRenderer.Submit<?> submit, CallbackInfo ci) {
+		com.jaymospowers.client.FreefallPose.applyModel(submit.model(), submit.state());
 		WebArms.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.power.web.WebFeral.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.power.web.WebSuitGrowth.applyModel(submit.model(), submit.state());

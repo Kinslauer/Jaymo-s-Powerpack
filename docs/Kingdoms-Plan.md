@@ -38,7 +38,10 @@ source), port it to 26.3, and rework it for a multiplayer server. A separate mod
    a camp is a deed every kingdom rewards.
 6. Upstream's single-player features that still fit (quests, workers, the city builder) come back one by one.
 
-## Open questions (to settle when we start)
-- What happens to a kingdom whose ruler falls: a successor, a vassal of the victor, or ruin?
-- Is reputation per player, per kingdom you're pledged to, or both?
-- Do NPC kingdoms (no players pledged) wage war on their own?
+## Answers
+1. **A fallen ruler's kingdom:** any of the three, chosen at random: a successor takes the throne, it becomes the
+   victor's vassal, or it falls to ruin.
+2. **Reputation is two systems working together:** every player has a reputation with each faction and kingdom, and
+   every kingdom you join keeps its own standing for you as well (rank, trust).
+3. **NPC kingdoms fight on their own:** autonomous battles between kingdoms; intervening wins or loses you
+   reputation with each side.
