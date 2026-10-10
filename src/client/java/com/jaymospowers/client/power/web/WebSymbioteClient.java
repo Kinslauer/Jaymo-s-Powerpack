@@ -89,6 +89,8 @@ public final class WebSymbioteClient {
 		return run.value;
 	}
 
+	/** Ticks into a curious stare (the head swollen, staring), for the maw. */
+	public static final RenderStateDataKey<Float> STARE = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_stare");
 	/** A two-bite meal (cow-sized), for the maw. */
 	public static final RenderStateDataKey<Boolean> MEAL_BIG = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_meal_big");
 
@@ -197,12 +199,16 @@ public final class WebSymbioteClient {
 		WebSymbiote.Meal meal = entity.getAttached(WebSymbiote.EATING);
 		state.setData(EATING, meal == null ? null : Math.max(0.0F, entity.level().getGameTime() - meal.start() + net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false)));
 		state.setData(MEAL_BIG, meal != null && meal.big());
-		if (state.getData(SUIT) != null || entity instanceof Player p && WebSymbiote.isToggled(p, WebSymbioteState.ARMOR)) {
+		if (state.getData(SUIT) != null || entity instanceof Player p && WebSymbiote.isToggled(p, WebSymbioteState.BULK)) {
 			// no cape poking out through the suit
 			state.showCape = false;
 		}
-		// Living Armor grows tendrils (whether or not the suit is showing)
-		boolean armored = entity instanceof Player p && WebSymbiote.isBonded(p) && WebSymbiote.isToggled(p, WebSymbioteState.ARMOR);
+		// Living Armor grows tendrils (whether or not the suit is showing); the big body swells under them
+		boolean armored = entity instanceof Player p && WebSymbiote.armored(p);
+		boolean bulk = entity instanceof Player p && WebSymbiote.bulked(p);
+		Long staring = entity.getAttached(WebSymbiote.STARING);
+		state.setData(STARE, staring == null ? null : Math.max(0.0F, entity.level().getGameTime() - staring
+			+ net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false)));
 		long out = entity instanceof Player p && WebSymbiote.isBonded(p) ? WebSymbiote.tendrilsOut(p) : -1L;
 		if (entity instanceof Player player && (armored || out >= 0)) {
 			long now = player.level().getGameTime();
@@ -235,7 +241,7 @@ public final class WebSymbioteClient {
 					}
 				}
 			}
-			state.setData(TENDRILS, new Tendrils(growth, player.tickCount, strike, aimYaw, aimPitch, side, smoothRun(player), held, armored));
+			state.setData(TENDRILS, new Tendrils(growth, player.tickCount, strike, aimYaw, aimPitch, side, smoothRun(player), held, bulk));
 		} else {
 			ARMOR_SINCE.remove(entity.getId());
 			state.setData(TENDRILS, null);

@@ -126,6 +126,23 @@ public final class WebSymbiote {
 	public static final double TAKEOVER_ESCAPE = 30.0;
 	public static final int TAKEOVER_LIMIT = 1200;
 	public static final int TAKEOVER_RELIEF = 20;
+	/**
+	 * Near death (at or under {@code DEFEND_HEALTH}), it swells into the big body and takes over to save itself,
+	 * going for whatever hurt you; it costs the bond {@code DEFEND_STRESS}, and can't happen again for {@code DEFEND_COOLDOWN}.
+	 */
+	public static final float DEFEND_HEALTH = 6.0F;
+	public static final int DEFEND_STRESS = 15, DEFEND_COOLDOWN = 1200;
+	/**
+	 * A good bond (stress under {@code CURIOUS_STRESS}, fed) is curious: each takeover check has a
+	 * {@code CURIOUS_CHANCE} it takes over just to look, grabbing something and staring at it with its own head for
+	 * {@code STARE_MIN}-{@code STARE_MAX} ticks, then setting it down (or, {@code CURIOUS_ATTACK} of the time, not).
+	 */
+	public static final int CURIOUS_STRESS = 20;
+	public static final float CURIOUS_CHANCE = 0.06F, CURIOUS_ATTACK = 0.5F;
+	public static final int STARE_MIN = 40, STARE_MAX = 160;
+	/** Staring at something it grabbed (when it began). Synced to everyone, who see the head swell. */
+	public static final AttachmentType<Long> STARING = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_staring"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
 
 	/** Weaknesses: what each exposure does to you and to the bond, and how many it takes to break it. */
 	public static final float EXPOSURE_DAMAGE = 3.0F;
@@ -348,6 +365,11 @@ public final class WebSymbiote {
 		int armorTicks;
 		/** This takeover is a rampage (from wearing the armour too long): longer, and players aren't spared. */
 		boolean rampage;
+		/** This takeover is only curiosity (a good bond): it looks, and maybe sets them down. Until when it stares. */
+		boolean curious;
+		long stareUntil;
+		/** When it can swell to save itself again. */
+		long defendReadyAt;
 		int rampageStrikes;
 		long nextStrikeAt;
 		/** Instinct: when it can act on its own again, and whether it has caught this fall already. */
@@ -408,9 +430,17 @@ public final class WebSymbiote {
 		return state.bonded() && state.has(WebSymbioteState.SUIT) && Powers.has(player, WebPower.INSTANCE);
 	}
 
-	/** Living Armor is up (the tendrils grab and hold; the plain suit only swings). */
+	/**
+	 * Living Armor's tendrils are out (they grab, hold, strike and tear chunks; the plain suit only swings), over any
+	 * suit or none, or the big body is up.
+	 */
 	public static boolean armored(Player player) {
-		return isToggled(player, WebSymbioteState.ARMOR);
+		return isToggled(player, WebSymbioteState.ARMOR) || isToggled(player, WebSymbioteState.BULK);
+	}
+
+	/** The big body is up: swollen, galloping, absorbing hits, three times as hungry. Only near death or in a takeover. */
+	public static boolean bulked(Player player) {
+		return isToggled(player, WebSymbioteState.BULK);
 	}
 
 	public static boolean isToggled(Player player, int flag) {
@@ -506,10 +536,11 @@ public final class WebSymbiote {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		WebSymbioteState next = state;
-		boolean armor = state.has(WebSymbioteState.ARMOR);
+		boolean armor = state.has(WebSymbioteState.ARMOR) || state.has(WebSymbioteState.BULK);
+		boolean bulk = state.has(WebSymbioteState.BULK);
 
-		// hunger
-		int drainTicks = armor ? Math.max(1, SATIETY_DRAIN_TICKS / ARMOR_DRAIN_MULT) : SATIETY_DRAIN_TICKS;
+		// hunger (the big body eats three times as fast)
+		int drainTicks = bulk ? Math.max(1, SATIETY_DRAIN_TICKS / ARMOR_DRAIN_MULT) : SATIETY_DRAIN_TICKS;
 		if (!player.isCreative() && player.tickCount % drainTicks == 0 && next.satiety() > 0) {
 			next = next.withSatiety(next.satiety() - 1);
 		}
@@ -533,6 +564,7 @@ public final class WebSymbiote {
 				live.sulkedThisTime = true;
 				next = sulk(player, next, now);
 				armor = false;
+				bulk = false;
 			}
 		} else {
 			live.sulkedThisTime = false;
@@ -542,19 +574,25 @@ public final class WebSymbiote {
 			if (now >= sulkUntil) {
 				player.removeAttached(SULK);
 				whisper(player, "sulk_over");
-			} else if (next.has(WebSymbioteState.SUIT) || next.has(WebSymbioteState.ARMOR)) {
-				next = next.withFlag(WebSymbioteState.SUIT, false).withFlag(WebSymbioteState.ARMOR, false);
+			} else if (next.has(WebSymbioteState.SUIT) || next.has(WebSymbioteState.ARMOR) || next.has(WebSymbioteState.BULK)) {
+				next = next.withFlag(WebSymbioteState.SUIT, false).withFlag(WebSymbioteState.ARMOR, false).withFlag(WebSymbioteState.BULK, false);
 				removeArmor(player);
 				armor = false;
+				bulk = false;
 			}
 		}
 
-		// Living Armor: absorption that grows back, and planted feet
-		if (armor) {
+		// the big body: absorption that grows back, and planted feet
+		if (bulk) {
 			applyArmor(player);
 			if (player.tickCount % ARMOR_REGEN_TICKS == 0 && player.getAbsorptionAmount() < ARMOR_ABSORPTION) {
 				player.setAbsorptionAmount((float)Math.min(ARMOR_ABSORPTION, player.getAbsorptionAmount() + ARMOR_REGEN));
 			}
+		} else if (player.tickCount % 20 == 0) {
+			removeArmor(player);
+		}
+		// the tendrils (out on their own, or with the big body): they strike on their own
+		if (armor) {
 			live.armorTicks++;
 			tickStrikes(player, live, now);
 			if (player.tickCount % INSTINCT_CHECK_TICKS == 0 && live.takeoverTicks <= 0) {
@@ -565,9 +603,6 @@ public final class WebSymbiote {
 			if (player.getAttached(STRIKE) != null) {
 				player.removeAttached(STRIKE);
 			}
-			if (player.tickCount % 20 == 0) {
-				removeArmor(player);
-			}
 		}
 
 		// hungry, it feeds itself on a corpse in reach (swelling into the armour for the meal, if it wasn't)
@@ -575,8 +610,7 @@ public final class WebSymbiote {
 			&& player.tickCount % SELF_FEED_EVERY == 0 && selfFeed(player) && !armor) {
 			live.feedingArmor = true;
 			live.suitBeforeFeeding = next.has(WebSymbioteState.SUIT);
-			next = next.withFlag(WebSymbioteState.ARMOR, true).withFlag(WebSymbioteState.SUIT, true);
-			applyArmor(player);
+			next = next.withFlag(WebSymbioteState.ARMOR, true);
 			armor = true;
 		}
 		if (player.getAttached(EATING) != null) {
@@ -586,8 +620,7 @@ public final class WebSymbiote {
 			// fed: it settles back, the tendrils withdrawing
 			live.feedingArmor = false;
 			next = next.withFlag(WebSymbioteState.ARMOR, false).withFlag(WebSymbioteState.SUIT, live.suitBeforeFeeding);
-			removeArmor(player);
-			armor = false;
+			armor = next.has(WebSymbioteState.BULK);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_BREAK, SoundSource.PLAYERS, 0.8F, 0.8F);
 		}
 		if (player.onGround() || player.isInWater()) {
@@ -643,10 +676,48 @@ public final class WebSymbiote {
 				: Math.min(ARMOR_TAKEOVER_MAX, (live.armorTicks - ARMOR_RESTLESS_TICKS) / 1200.0F * ARMOR_TAKEOVER_PER_MINUTE);
 			if (restless > 0.0F && player.getRandom().nextFloat() < restless) {
 				live.rampage = true;
+				live.curious = false;
 				startTakeover(player, live, now);
 			} else if (starving && next.stress() >= TAKEOVER_STRESS && player.getRandom().nextFloat() < TAKEOVER_CHANCE) {
 				live.rampage = false;
+				live.curious = false;
 				startTakeover(player, live, now);
+			} else if (!starving && next.stress() < CURIOUS_STRESS && next.satiety() >= SELF_FEED_BELOW && !sulking(player)
+				&& player.getRandom().nextFloat() < CURIOUS_CHANCE) {
+				// a good bond: it only wants a look
+				live.rampage = false;
+				live.curious = true;
+				startTakeover(player, live, now);
+			}
+		}
+		// near death: it swells over you and fights for its own life (whatever you wanted)
+		if (live.takeoverTicks <= 0 && player.getHealth() <= DEFEND_HEALTH && now >= live.defendReadyAt && !sulking(player)) {
+			LivingEntity attacker = player.getLastHurtByMob();
+			if (attacker == null || !attacker.isAlive() || attacker.distanceTo(player) > TAKEOVER_ESCAPE) {
+				attacker = prey(player, false);
+			}
+			live.defendReadyAt = now + DEFEND_COOLDOWN;
+			if (attacker != null) {
+				live.rampage = false;
+				live.curious = false;
+				startTakeover(player, live, now, attacker);
+				next = next.withStress(Math.min(STRESS_MAX, next.stress() + DEFEND_STRESS));
+				player.setAbsorptionAmount((float)ARMOR_ABSORPTION);
+				whisper(player, "defend");
+			}
+		}
+		// the big body is up exactly while it has the wheel for a fight
+		boolean bulkWanted = live.takeoverTicks > 0 && !live.curious;
+		if (bulkWanted != next.has(WebSymbioteState.BULK)) {
+			next = next.withFlag(WebSymbioteState.BULK, bulkWanted);
+			if (bulkWanted) {
+				applyArmor(player);
+				player.setAbsorptionAmount((float)Math.max(player.getAbsorptionAmount(), ARMOR_ABSORPTION * 0.5));
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_PLACE, SoundSource.PLAYERS, 1.2F, 0.5F);
+			} else {
+				removeArmor(player);
+				whisper(player, "bulk_down");
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_BREAK, SoundSource.PLAYERS, 1.0F, 0.8F);
 			}
 		}
 
@@ -902,12 +973,17 @@ public final class WebSymbiote {
 	}
 
 	private static void startTakeover(ServerPlayer player, Live live, long now) {
-		LivingEntity target = prey(player, live.rampage);
+		startTakeover(player, live, now, prey(player, live.rampage || live.curious));
+	}
+
+	private static void startTakeover(ServerPlayer player, Live live, long now, @org.jspecify.annotations.Nullable LivingEntity target) {
 		live.takeoverReadyAt = now + TAKEOVER_COOLDOWN;
 		if (target == null) {
+			live.curious = false;
 			return;
 		}
 		live.rampageStrikes = 0;
+		live.stareUntil = 0L;
 		live.takeoverTicks = TAKEOVER_LIMIT;
 		live.takeoverTarget = target.getId();
 		ServerPlayNetworking.send(player, new WebNet.Takeover(target.getId(), live.takeoverTicks));
@@ -915,18 +991,81 @@ public final class WebSymbiote {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 2.0F, 1.3F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.8F, 0.6F);
 		level.sendParticles(dust(1.6F), player.getX(), player.getY() + 1.0, player.getZ(), 25, 0.4, 0.8, 0.4, 0.0);
-		whisper(player, "takeover");
+		whisper(player, live.curious ? "curious" : "takeover");
+	}
+
+	/** It hands control back. */
+	private static void endTakeover(ServerPlayer player, Live live) {
+		live.rampage = false;
+		live.curious = false;
+		live.stareUntil = 0L;
+		live.takeoverTicks = 0;
+		live.takeoverTarget = -1;
+		player.removeAttached(STARING);
+		ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0));
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.8F, 1.4F);
+	}
+
+	/** Curiosity: up close it grabs them, holds them up to its face and stares; then sets them down, or doesn't. */
+	private static void tickCurious(ServerPlayer player, Live live, long now, Entity target) {
+		ServerLevel level = player.level();
+		if (live.stareUntil == 0L) {
+			if (player.distanceTo(target) - target.getBbWidth() * 0.5 > TAKEOVER_REACH + 1.0) {
+				return;
+			}
+			live.stareUntil = now + STARE_MIN + player.getRandom().nextInt(STARE_MAX - STARE_MIN + 1);
+			player.setAttached(STARING, now);
+			tendrilsOut(player);
+			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SLIME_JUMP, SoundSource.PLAYERS, 1.0F, 0.6F);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SNIFF, SoundSource.PLAYERS, 1.0F, 0.8F);
+		}
+		// held up in front of its face
+		Vec3 look = player.getViewVector(1.0F).horizontal();
+		look = look.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : look.normalize();
+		Vec3 hold = player.getEyePosition().add(look.scale(1.1 + target.getBbWidth() * 0.5)).add(0.0, -target.getBbHeight() * 0.5, 0.0);
+		Vec3 pull = hold.subtract(target.position()).scale(0.5);
+		target.setDeltaMovement(pull);
+		target.syncVelocity = true;
+		target.resetFallDistance();
+		if (target instanceof Mob mob) {
+			mob.getNavigation().stop();
+		}
+		if (target instanceof ServerPlayer other) {
+			ServerPlayNetworking.send(other, new WebNet.Nudge(pull));
+		}
+		if ((now - live.stareUntil) % 30 == 0) {
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SNIFF, SoundSource.PLAYERS, 0.7F, 0.9F);
+		}
+		if (now < live.stareUntil) {
+			return;
+		}
+		if (player.getRandom().nextFloat() < CURIOUS_ATTACK && target instanceof LivingEntity living) {
+			// it didn't like what it saw
+			living.hurtServer(level, level.damageSources().playerAttack(player), STRIKE_DAMAGE);
+			Vec3 away = living.position().subtract(player.position()).horizontal();
+			away = away.lengthSqr() < 1.0E-4 ? look : away.normalize();
+			living.setDeltaMovement(away.scale(0.9).add(0.0, 0.35, 0.0));
+			living.syncVelocity = true;
+			level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.0F, 0.5F);
+			whisper(player, "not_looking");
+		} else {
+			// set down, gently
+			target.setDeltaMovement(Vec3.ZERO);
+			target.syncVelocity = true;
+			whisper(player, "just_looking");
+		}
+		endTakeover(player, live);
 	}
 
 	private static void tickTakeover(ServerPlayer player, Live live, long now) {
 		Entity target = player.level().getEntity(live.takeoverTarget);
 		// it lets go once its prey is dead, or has got away
 		if (target == null || !target.isAlive() || target.distanceTo(player) > TAKEOVER_ESCAPE || --live.takeoverTicks <= 0) {
-			live.rampage = false;
-			live.takeoverTicks = 0;
-			live.takeoverTarget = -1;
-			ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0));
-			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.8F, 1.4F);
+			endTakeover(player, live);
+			return;
+		}
+		if (live.curious) {
+			tickCurious(player, live, now, target);
 			return;
 		}
 		if (live.takeoverTicks % TAKEOVER_ATTACK_TICKS == 0 && player.distanceTo(target) - target.getBbWidth() * 0.5 <= TAKEOVER_REACH) {
@@ -966,11 +1105,7 @@ public final class WebSymbiote {
 			WebSymbioteState state = state(player);
 			boolean on = !state.has(WebSymbioteState.SUIT);
 			WebSymbioteState next = state.withFlag(WebSymbioteState.SUIT, on);
-			if (!on && next.has(WebSymbioteState.ARMOR)) {
-				// the suit comes off, and Living Armor with it
-				next = next.withFlag(WebSymbioteState.ARMOR, false);
-				removeArmor(player);
-			}
+			// (the tendrils stay out: they work over any suit, or none)
 			set(player, next);
 			ServerLevel level = player.level();
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), on ? SoundEvents.SLIME_BLOCK_PLACE : SoundEvents.HONEY_BLOCK_SLIDE,
@@ -1085,19 +1220,10 @@ public final class WebSymbiote {
 		WebSymbioteState state = state(player);
 		boolean on = !state.has(flag);
 		WebSymbioteState next = state.withFlag(flag, on);
-		if (flag == WebSymbioteState.ARMOR && on) {
-			// Living Armor is the suit, swollen: it puts the suit on
-			next = next.withFlag(WebSymbioteState.SUIT, true);
-		}
 		set(player, next);
 		ServerLevel level = player.level();
 		if (flag == WebSymbioteState.ARMOR) {
-			if (on) {
-				applyArmor(player);
-				player.setAbsorptionAmount((float)Math.max(player.getAbsorptionAmount(), ARMOR_ABSORPTION * 0.5));
-			} else {
-				removeArmor(player);
-			}
+			// the tendrils (over whatever suit, or none): the big body only comes on its own
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), on ? SoundEvents.SLIME_BLOCK_PLACE : SoundEvents.SLIME_BLOCK_BREAK,
 				SoundSource.PLAYERS, 1.0F, on ? 0.5F : 0.8F);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 1.0F, 0.5F);
@@ -1427,7 +1553,7 @@ public final class WebSymbiote {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.4, 0.8, 0.4, 0.05);
 		whisper(player, "sulk");
-		return state.withFlag(WebSymbioteState.SUIT, false).withFlag(WebSymbioteState.ARMOR, false)
+		return state.withFlag(WebSymbioteState.SUIT, false).withFlag(WebSymbioteState.ARMOR, false).withFlag(WebSymbioteState.BULK, false)
 			.withStress(Math.min(STRESS_MAX, state.stress() + 10));
 	}
 

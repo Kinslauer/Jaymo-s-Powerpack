@@ -16,6 +16,15 @@ import net.minecraft.resources.Identifier;
  */
 final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	private static final Identifier TEXTURE = JaymosPowers.id("textures/entity/web_symbiote_suit.png");
+	/** Veins coursing over the big body ({@code tools/gen_web_veins.py}): frames cycled every {@code VEIN_TICKS}. */
+	private static final Identifier[] VEINS = {
+		JaymosPowers.id("textures/entity/web_symbiote_veins_0.png"), JaymosPowers.id("textures/entity/web_symbiote_veins_1.png"),
+		JaymosPowers.id("textures/entity/web_symbiote_veins_2.png"), JaymosPowers.id("textures/entity/web_symbiote_veins_3.png")};
+	private static final int VEIN_TICKS = 4;
+	/** The veins sit just over the bulk. */
+	private static final float VEIN_GAP = 0.04F;
+	private final PlayerModel veinsWide;
+	private final PlayerModel veinsSlim;
 
 	/** The suit swollen by Living Armor: the player model inflated, thick and muscular (wide and slim arms). */
 	private static final float BULK = 0.7F;
@@ -36,6 +45,10 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			PlayerModel.createMesh(new net.minecraft.client.model.geom.builders.CubeDeformation(SKIN_GAP), false), 64, 64).bakeRoot(), false);
 		this.suitSlim = new PlayerModel(net.minecraft.client.model.geom.builders.LayerDefinition.create(
 			PlayerModel.createMesh(new net.minecraft.client.model.geom.builders.CubeDeformation(SKIN_GAP), true), 64, 64).bakeRoot(), true);
+		this.veinsWide = new PlayerModel(net.minecraft.client.model.geom.builders.LayerDefinition.create(
+			PlayerModel.createMesh(new net.minecraft.client.model.geom.builders.CubeDeformation(BULK + VEIN_GAP), false), 64, 64).bakeRoot(), false);
+		this.veinsSlim = new PlayerModel(net.minecraft.client.model.geom.builders.LayerDefinition.create(
+			PlayerModel.createMesh(new net.minecraft.client.model.geom.builders.CubeDeformation(BULK + VEIN_GAP), true), 64, 64).bakeRoot(), true);
 		WebSuitGrowth.register(this.bulkWide, true);
 		WebSuitGrowth.register(this.bulkSlim, true);
 		WebSuitGrowth.register(this.suitWide, false);
@@ -62,6 +75,10 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			// Living Armor: the suit swells over the whole body, whether or not it was showing
 			PlayerModel bulk = state.skin.model() == net.minecraft.world.entity.player.PlayerModelType.SLIM ? this.bulkSlim : this.bulkWide;
 			coloredCutoutModelCopyLayerRender(bulk, TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
+			// veins coursing over it, writhing as the frames cycle
+			PlayerModel veins = slim ? this.veinsSlim : this.veinsWide;
+			Identifier frame = VEINS[(int)(state.ageInTicks / VEIN_TICKS) % VEINS.length];
+			coloredCutoutModelCopyLayerRender(veins, frame, poseStack, collector, lightCoords, state, -1, 1);
 			return;
 		}
 		if (state.getData(WebSymbioteClient.SUIT) == null) {

@@ -20,6 +20,8 @@ public record WebSymbioteState(boolean bonded, int satiety, int stress, int reje
 	public static final int ARMOR = 2;
 	/** Wall Crawl is on. */
 	public static final int CRAWL = 4;
+	/** The big body: the symbiote swollen over you (near death, or when it takes over). Not a toggle. */
+	public static final int BULK = 8;
 
 	public static final WebSymbioteState NONE = new WebSymbioteState(false, 0, 0, 0, 0, 0);
 

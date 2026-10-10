@@ -64,7 +64,7 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 
 	@Override
 	public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
-		if (state.getData(WebSymbioteClient.EATING) == null || state.isInvisible) {
+		if (state.getData(WebSymbioteClient.EATING) == null && state.getData(WebSymbioteClient.STARE) == null || state.isInvisible) {
 			return;
 		}
 		poseStack.pushPose();
@@ -91,6 +91,20 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
 			Float ticks = state.getData(WebSymbioteClient.EATING);
+			Float stare = state.getData(WebSymbioteClient.STARE);
+			if (ticks == null && stare != null) {
+				// staring at what it holds: swollen, the jaw hanging a little open, breathing
+				float morph = Mth.clamp(stare / 8.0F, 0.0F, 1.0F);
+				float breath = 0.12F + 0.06F * Mth.sin(stare * 0.25F);
+				this.skull.xRot = -breath * SKULL_GAPE;
+				this.jaw.xRot = breath * JAW_GAPE;
+				float scale = Mth.lerp(morph, 0.8F, 1.15F);
+				this.root.xScale = scale;
+				this.root.yScale = scale;
+				this.root.zScale = scale;
+				this.root.z = -1.0F * morph;
+				return;
+			}
 			if (ticks == null) {
 				return;
 			}

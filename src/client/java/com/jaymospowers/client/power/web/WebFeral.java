@@ -143,7 +143,7 @@ public final class WebFeral {
 
 	/** How far this player's Living Armor is bent right now (0 if it isn't up), for things drawn outside the model. */
 	public static float bend(Player player, float partialTick) {
-		if (!WebSymbiote.armored(player) || player.isCrouching() || player.isFallFlying() || player.isSwimming() || player.isPassenger()) {
+		if (!WebSymbiote.bulked(player) || player.isCrouching() || player.isFallFlying() || player.isSwimming() || player.isPassenger()) {
 			return 0.0F;
 		}
 		float run = WebSymbioteClient.run(player) * Mth.clamp(0.4F + player.walkAnimation.speed(partialTick), 0.0F, 1.0F);

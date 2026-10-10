@@ -37,7 +37,7 @@ public final class WebSymbioteHand {
 		if (player == null) {
 			return;
 		}
-		boolean armor = WebSymbiote.isBonded(player) && WebSymbiote.isToggled(player, WebSymbioteState.ARMOR);
+		boolean armor = WebSymbiote.bulked(player);
 		if (!armor && !WebSymbiote.suitShown(player)) {
 			return;
 		}

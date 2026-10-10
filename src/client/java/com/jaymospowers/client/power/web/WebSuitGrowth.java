@@ -51,9 +51,9 @@ public final class WebSuitGrowth {
 		}
 	}
 
-	/** 0 bare, 1 the suit, 2 Living Armor. */
+	/** 0 bare, 1 the suit, 2 the big body. */
 	static int level(Player player) {
-		return WebSymbiote.armored(player) ? 2 : WebSymbiote.suitShown(player) ? 1 : 0;
+		return WebSymbiote.bulked(player) ? 2 : WebSymbiote.suitShown(player) ? 1 : 0;
 	}
 
 	/** While extracting a player's render state: notes a change, and puts the one under way on the state. */
