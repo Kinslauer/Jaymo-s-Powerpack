@@ -11,7 +11,8 @@ import net.minecraft.world.entity.player.Player;
 
 /**
  * Falling a long way (anyone, for everyone to see): past the speed of about five blocks' drop, the arms fly up and
- * out, flailing, the legs kick, and the head looks down at what's coming. It eases in with the speed. Worked out from
+ * out, flailing, the legs kick, and the head looks down at what's coming. A wind user doesn't flail: they dive,
+ * head first and sure of it, arms swept back, legs together, until they call the wind (their flight) and pull out. It eases in with the speed. Worked out from
  * the actual motion, so it shows on every player in view, not only your own; anything else that has the body (a glide,
  * a swing, a ragdoll, an elytra, a power's own pose) is applied after and wins.
  */
@@ -19,8 +20,11 @@ public final class FreefallPose {
 	/** Falling at least this fast (blocks/tick: about five blocks' drop) it starts; by {@code FULL} it's all limbs. */
 	static final float START = 0.8F, FULL = 1.3F;
 
-	record Fall(float strength, float time) {
+	record Fall(float strength, float time, boolean dive) {
 	}
+
+	/** How far over a wind's dive tips them, head first (degrees, at full speed). */
+	static final float DIVE_PITCH = 80.0F;
 
 	static final RenderStateDataKey<Fall> KEY = RenderStateDataKey.create(() -> "jaymospowers:freefall");
 
@@ -36,7 +40,8 @@ public final class FreefallPose {
 		}
 		float falling = (float)(player.yo - player.getY());
 		float strength = Mth.clamp((falling - START) / (FULL - START), 0.0F, 1.0F);
-		state.setData(KEY, strength <= 0.0F ? null : new Fall(strength, player.tickCount + partialTicks));
+		boolean dive = com.jaymospowers.core.Powers.has(player, com.jaymospowers.power.wind.WindPower.INSTANCE);
+		state.setData(KEY, strength <= 0.0F ? null : new Fall(strength, player.tickCount + partialTicks, dive));
 	}
 
 	/** Falling on purpose: a wind's flight, web wings or lines, a rock slab, Weightless. */
@@ -47,6 +52,19 @@ public final class FreefallPose {
 			|| player.getAttached(com.jaymospowers.power.web.WebPower.LINE_OFF) != null
 			|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.ROCK_FLIGHT) != null
 			|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.WEIGHTLESS_ON) != null;
+	}
+
+	/** After the body faces its way: a wind's dive tips the whole body over, head first, about its middle. */
+	public static void rotate(LivingEntityRenderState state, com.mojang.blaze3d.vertex.PoseStack poseStack, float entityScale) {
+		Fall fall = state.getData(KEY);
+		if (fall == null || !fall.dive()) {
+			return;
+		}
+		float middle = state.boundingBoxHeight / Math.max(entityScale, 0.01F) * 0.5F;
+		poseStack.translate(0.0F, middle, 0.0F);
+		// (a negative turn about X tips the top forward)
+		poseStack.rotateDegrees(com.mojang.math.Axis.XP, -DIVE_PITCH * fall.strength());
+		poseStack.translate(0.0F, -middle, 0.0F);
 	}
 
 	/** After the model animates (and before any power's pose, which may take the body over). */
@@ -60,6 +78,15 @@ public final class FreefallPose {
 		}
 		float s = fall.strength();
 		float t = fall.time();
+		if (fall.dive()) {
+			// streamlined: arms swept back along the sides, legs together, chin up to see where it's going
+			set(h.rightArm, 0.35F, 0.0F, 0.25F, s);
+			set(h.leftArm, 0.35F, 0.0F, -0.25F, s);
+			set(h.rightLeg, 0.05F + Mth.sin(t * 0.3F) * 0.04F, 0.0F, 0.03F, s);
+			set(h.leftLeg, 0.05F - Mth.sin(t * 0.3F) * 0.04F, 0.0F, -0.03F, s);
+			h.head.xRot = Mth.lerp(s, h.head.xRot, -0.9F);
+			return;
+		}
 		// arms thrown up and out, windmilling
 		set(h.rightArm, -2.6F + Mth.sin(t * 0.9F) * 0.5F, 0.0F, 0.9F + Mth.cos(t * 0.7F) * 0.35F, s);
 		set(h.leftArm, -2.6F + Mth.sin(t * 0.9F + 2.0F) * 0.5F, 0.0F, -0.9F - Mth.cos(t * 0.7F + 1.0F) * 0.35F, s);

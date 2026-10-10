@@ -18,6 +18,7 @@ abstract class WebLivingEntityRendererMixin {
 	private void jaymospowers$webGlideLean(LivingEntityRenderState state, PoseStack poseStack, float bodyRot, float entityScale, CallbackInfo ci) {
 		WebArms.rotate(state, poseStack, entityScale);
 		WebRagdoll.rotate(state, poseStack, entityScale);
+		com.jaymospowers.client.FreefallPose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.power.web.WebBodyPose.rotate(state, poseStack, entityScale);
 	}
 
