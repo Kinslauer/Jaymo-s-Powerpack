@@ -247,3 +247,142 @@ of `en_us.json`.
 - Killing a camp's raiders still costs reputation with the camp itself (`KingdomEvents.folkDied`), so after three
   kills the camp "counts you an enemy" in chat: harmless, but `folkDied` could skip barbarian factions. Right-clicking
   a barbarian gives the usual "audience" line.
+
+## 0.3.0, track 2: builders, plots and theft
+Built, not yet seen in game. The plan is `docs/Kingdoms-Plan-0.3.md` (section C, and the theft part of B).
+
+### What's new
+- **The building catalogue** (`Buildings`). Every design is original and drawn in code from the faction's `Palette` and
+  colour. Each is drawn with its door to the north and y = 0 as the floor. The builders turn it so the door faces the
+  seat.
+  - **Villages:** house (7 x 7, timber on a cobble footing, gabled roof, a bed in the village's colour), farm (9 x 7:
+    a log kerb, farmland round a water hole, wheat, carrots and potatoes, a fence, a gate, a composter), well (5 x 5),
+    market stall (5 x 5, a striped wool awning), crossroads (9 x 9 dirt paths with lamp posts), and later a log
+    palisade on a cobble footing.
+  - **Kingdoms and fiefdoms:** house (a stone course, stone-stair roof), farm, smithy (blast furnace, smithing table,
+    anvil, grindstone, a smoking chimney), crossroads in the realm's road stone, well, mason's yard (stonecutter),
+    market square (four striped stalls), stable (two stalls, hay, troughs), barracks (four bunks, a parapet), and at
+    the edge of town wall sections (9 x 3, five courses, crenellated), wall towers (7 x 7, ten courses, a ladder to the
+    top) and gatehouses (a three-wide arch).
+  - **Growth order with gates.** An entry may come back with a higher count and a bigger settlement needed (villagers
+    plus folk), so towns grow in stages. Village: 2 houses, a farm and a well, then stalls and roads at 8, more houses
+    at 12, and so on up to the palisade at 22. Realm: houses, farm, smithy, roads and well first, then the mason's yard
+    at 20, the market at 24, the stable at 28, the barracks at 32, and walls, towers and gatehouses at 40.
+- **What it costs** (`Materials`). Storage only holds what production makes (logs and cobblestone), so blocks are
+  priced in those raw materials and the foreman works them up on site. The unit is an eighth of an item:
+  - a log costs a log;
+  - planks, stairs, fences and doors cost a quarter of a log, and a wooden slab an eighth;
+  - stonework costs one cobblestone (stone will do too), and a stone slab half of one;
+  - fittings (glass, torches, wool, beds) cost a quarter of a log;
+  - soil, paths, water and plants cost nothing.
+  
+  A house costs about 50 logs and 25 cobble in a village, or about 30 logs and 90 cobble in a realm.
+- **The planner** (`Planner`). The foreman starts a project when the faction has:
+  - a healthy economy (the next building's materials in storage, and food);
+  - adequate personnel;
+  - peace.
+  
+  It runs one project at a time (`PROJECTS_AT_ONCE`). It takes the first entry in the growth order that's still short
+  and allowed at the settlement's size, and looks for a site ring by ring out from the seat (walls have their own
+  rings, at the edge of town). The best site in the first few rings that have one wins: the nearer the ring and the
+  closer to a road (a dirt path or the realm's road stone), the better.
+  
+  A site must be open natural ground inside the faction's land, or within 44 blocks of its seat if it has none:
+  - every column is the land's own soil or stone (no logs, no paths, nothing placed);
+  - the margin of 1 around it is the same, or a road;
+  - it's dry;
+  - the ground is within 2 of the floor;
+  - there's open air above (plants, snow and air only);
+  - it's clear of the seat;
+  - it keeps a gap of 2 from every building, project and plot.
+  
+  If no site is found, the faction looks again 2 minutes later. `Economy.nextNeeds` is set: it's what's left of the
+  project under way (less what's already on site), or the whole of the next building.
+- **Real-time construction** (`Construction`, the builders' brain):
+  - **Staking:** the foreman walks to the site and puts a fence post at each corner and a sign on the corner nearest
+    the seat ("<faction> / House / being built"). The stakes come out when the building's done.
+  - **Hauling:** each worker looks at the next few blocks and works out what's short, counting what's already on site
+    and what others are carrying. He walks to the depot, loads for 2 s, and takes the load out of the real containers
+    (at most 16 items). He carries it in his hands to the site and drops it on the pile (the project's saved credit).
+  - **Readying the ground:** column by column, he digs out natural ground and plants above the floor and fills
+    hollows under the floor with cobblestone (counted as materials, up to 4 deep).
+  - **Building:** he lays the blocks bottom up, each layer's materials together, about 4 a trip with a block every 1.2
+    to 1.8 s. Each block has its own place sound and block chips; fences, walls, panes and stairs join up with their
+    neighbours. Then he goes back for more.
+  - **Pausing:** if the storage runs out of something, the crew waits 30 s and looks again. If the faction is attacked
+    or at war, they stop, take their loads back, and resume once there's peace.
+  - **Getting about:** paths are walked in 20-block legs. A builder who makes no progress for 10 s is moved to his goal
+    in a puff of smoke. Anyone standing where a block goes is moved aside, but a player is waited for.
+  - **Being careful:** outside a plot, blocks that aren't natural are never broken. Anything placed on the site since
+    it was chosen is left alone.
+  - **Speed:** a village house takes roughly half a day to a day for a crew of three (by the constants; untested).
+  - **Saving:** progress (stage, index, materials on site, stakes) is saved with the faction (`Works`, on the
+    Overworld), so half-built buildings resume after a restart. A builder carrying a load when the world was saved
+    carries on.
+- **Plots** (`Plots`). A lord of the faction (creative players too) marks a plot while standing in the faction's land:
+  - `/kingdom plot mark` marks the chunk; `/kingdom plot mark <width> <depth>` marks a rectangle of 5 to 32 centred on
+    you, at the height you stand. All of it must be in the faction's land, and plots may not overlap.
+  - A **Plot Stake** marks an 11 x 11 plot round the block it's used on, or the chunk when you sneak. It's crafted from
+    2 sticks and a wool (makes 2), and is in the Tools tab. Its sprite is drawn by `tools/gen_items.py`.
+  - Plots come before open ground. On a plot the builders clear whatever stands in the building's way, even the lord's
+    own builds; it goes into the faction's storage, containers' contents included, and what doesn't fit is dropped at
+    the depot.
+  - `/kingdom plot build <building>` chooses what goes up (it must be in the catalogue and fit). Otherwise the plot gets
+    the next building in the growth order that fits.
+  - `/kingdom plot list` lists plots and shows their edges. `/kingdom plot clear` unmarks the plot you're on and stops
+    its project.
+- **`/kingdom project`** shows what the builders are on: the stage, how far along, what's still to haul, and whether
+  it's paused or short of materials. When there's no project, it names the next building. Operators also have
+  `project start [building]` (now, ignoring the economy), `project finish` (completes it at once, for free) and
+  `project cancel` (what was on site goes back to storage).
+- **Theft and crime** (`Theft`, our own system; nothing from the Thief mod). Inside a faction's land, or within 48
+  blocks of its seat, these are crimes:
+  - **Light:** rummaging in its storage without taking anything, breaking its crops, or killing its livestock.
+  - **Medium:** taking from its storage, or breaking its beds, job blocks or other chests.
+  - **Heavy:** breaking its storage or its bell, or killing its villagers or golems. Taking 32 or more items at once is
+    also heavy.
+  - Killing its folk is medium, on top of the old reputation loss for a kill.
+  - Only what moved between the container and the player's own pack counts, so a builder loading from the same chest
+    isn't blamed on you.
+  - Crimes against storage and its blocks don't count for members of knight rank or above, or for creative players.
+    Camps keep no law.
+  
+  **Witnesses:** a crime counts only if one of the faction's folk, villagers or golems sees it: in line of sight within
+  16 blocks (8 if you sneak), and facing you or within 4 blocks. Villagers and golems are witnesses only where that
+  faction's law holds, and sleeping villagers see nothing.
+  
+  **When a crime is seen:**
+  - The nearest witness cries out, heard within 24 blocks ("Thief! Stop, thief!", "Murder! Guards, to arms!"...).
+  - Your reputation with the faction drops: -10 for light, -35 for medium, -90 for heavy.
+  - A medium crime sets its guards, archers and golems on you for 2 minutes. A heavy one makes you an outlaw for 2
+    days. Wanted players are hunted by guards and golems within 32 blocks. This is saved on the player (`WANTED`).
+  
+  **Unseen theft** is noticed 5 minutes later. It costs -3 reputation and a vague message.
+  
+  **Gifts:** putting things into a faction's storage gives a point of reputation (and a member's standing) per 8 items,
+  up to 25 a day per faction.
+
+### Construction API (for camps and anything else that builds)
+A faction type plugs in with no change to the construction code:
+1. Register its growth order: `Blueprint.register(type, new Blueprint.Entry(id, (level, faction) -> blueprint, max,
+   minSize))`. `minSize` is compared with `Planner.size(f)`, its villagers plus folk.
+   - A `Blueprint` lists offsets from the plot's lowest north-west corner. Draw the door to the north (z = 0), with y = 0
+     as the floor laid in place of the ground.
+   - Makers should be deterministic (no random): a project's layout is drawn again after a restart.
+   - Two-block things need both halves listed: doors (`DOUBLE_BLOCK_HALF`) and beds (`BED_PART`). Only the first half
+     is charged.
+   - Same-id entries share a count, so an entry can come back with a higher `max` and gate.
+2. Optionally, `Planner.setRings(id, min, max)`: how far from the seat that building goes (the default is 12 to the
+   edge of the land). A faction without claims builds within 44 of its seat.
+3. Optionally, `Materials.override(type, (level, faction, state) -> new Materials.Cost(item, eighths) | null)` prices
+   its blocks differently, for example wool paid in loot.
+4. Needs: storage registered (`Storage.register`/`add`, e.g. a loot pile), a crew (`Builders.spawnCrew`), its seat
+   loaded, and `Economy` healthy, staffed and at peace.
+
+The rest happens on its own. Useful calls: `Works.of(server, id)` (projects, built, plots), `Construction.layout`,
+`Construction.cancel`, `Construction.finishNow`, `Planner.plan(level, f, force, onlyId)`, `Planner.eligible`. Plots
+belong to realms and villages (they need claimed land).
+
+**Theft API:** `Theft.wanted(player, factionId)` and `Theft.outlaw(player, factionId)`.
+
+**Attachments:** `Works.WORKS` (Overworld) and `Theft.WANTED` (players). Both are listed in `JaymosKingdoms`.

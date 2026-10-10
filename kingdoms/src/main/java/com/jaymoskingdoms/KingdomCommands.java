@@ -44,6 +44,8 @@ final class KingdomCommands {
 			.then(Commands.literal("deposit").then(Commands.argument("emeralds", IntegerArgumentType.integer(1, 2304)).executes(KingdomCommands::deposit)))
 			.then(Commands.literal("withdraw").then(Commands.argument("emeralds", IntegerArgumentType.integer(1, 2304)).executes(KingdomCommands::withdraw)))
 			.then(Commands.literal("reputation").executes(KingdomCommands::reputation))
+			// (builders: plots and projects)
+			.then(BuildCommands.plot()).then(BuildCommands.project())
 			.then(Commands.literal("found").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(c -> found(c, null))
 				.then(Commands.literal("keep").executes(c -> found(c, Castle.Kind.KEEP)))
 				.then(Commands.literal("castle").executes(c -> found(c, Castle.Kind.CASTLE)))
