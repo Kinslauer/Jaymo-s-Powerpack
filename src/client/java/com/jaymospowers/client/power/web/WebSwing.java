@@ -86,14 +86,12 @@ public final class WebSwing {
 	/** The wings only open once you've fallen more than this far from your highest point. Each time they fold, Jump
 	 * must be let go and you must fall this far again before they open again (there's no cooldown). */
 	static final double WINGS_MIN_DROP = 2.0;
-	/** Glide: steady sink rate, extra sink per unit of looking down, and how fast the path swings to the look. */
-	static final double WINGS_SINK = 0.07;
-	static final double WINGS_DIVE = 0.4;
-	static final double WINGS_STEER = 0.12;
-	/** Glide speed: the slowest it settles to, the fastest it builds to, speed gained per block/tick of sink. */
-	static final double WINGS_MIN_SPEED = 0.45;
-	static final double WINGS_MAX_SPEED = 1.8;
-	static final double WINGS_DIVE_GAIN = 0.05;
+	/**
+	 * The wings fly like an elytra (vanilla's own glide): pitch down to dive and gain speed, pull up to trade it for
+	 * height, level out to glide. {@code WINGS_GRAVITY} is the pull they work against; {@code WINGS_MAX_SPEED} caps it.
+	 */
+	static final double WINGS_GRAVITY = 0.08;
+	static final double WINGS_MAX_SPEED = 2.0;
 	// ===== zip / yank-to ===========================================================================================
 	/** How quickly the reel-in steers your velocity onto the line (0..1 per tick). */
 	static final double ZIP_STEER = 0.55;
@@ -726,27 +724,37 @@ public final class WebSwing {
 		}
 	}
 
-	/** Gliding: a steady sink, diving trades height for speed, the path follows the look. */
+	/** Gliding like an elytra: from how you actually moved last tick, vanilla's glide step, so walls and pitch play fair. */
 	private void tickWings(LocalPlayer player) {
 		if (--wingsTicks <= 0 || player.onGround() || player.isInWater() || player.isInLava() || player.onClimbable()) {
 			foldWings();
 			return;
 		}
-		Vec3 v = player.getDeltaMovement();
+		Vec3 m = new Vec3(player.getX() - player.xo, player.getY() - player.yo, player.getZ() - player.zo);
 		Vec3 look = player.getLookAngle();
-		double h = Math.sqrt(v.x * v.x + v.z * v.z) / VANILLA_AIR_DRAG;
-		double vy = v.y;
-		double sink = -WINGS_SINK + Math.min(0.0, look.y) * WINGS_DIVE;
-		if (vy < sink) {
-			vy = Mth.lerp(0.35, vy, sink);
-		} else {
-			vy = Math.max(sink, vy - 0.04);
+		float lean = player.getXRot() * Mth.DEG_TO_RAD;
+		double lookHorizontal = Math.sqrt(look.x * look.x + look.z * look.z);
+		double moveHorizontal = m.horizontalDistance();
+		double lift = Mth.square(Math.cos(lean));
+		m = m.add(0.0, WINGS_GRAVITY * (-1.0 + lift * 0.75), 0.0);
+		if (m.y < 0.0 && lookHorizontal > 0.0) {
+			// falling turns into forward speed
+			double convert = m.y * -0.1 * lift;
+			m = m.add(look.x * convert / lookHorizontal, convert, look.z * convert / lookHorizontal);
 		}
-		h = Mth.clamp((h + Math.max(0.0, -vy) * WINGS_DIVE_GAIN) * 0.995, WINGS_MIN_SPEED, WINGS_MAX_SPEED);
-		Vec3 heading = look.horizontal().lengthSqr() > 1.0E-4 ? look.horizontal().normalize() : new Vec3(v.x, 0.0, v.z).normalize();
-		Vec3 current = v.horizontal().lengthSqr() > 1.0E-6 ? v.horizontal().normalize() : heading;
-		Vec3 dir = current.lerp(heading, WINGS_STEER).normalize();
-		player.setDeltaMovement(dir.x * h, vy, dir.z * h);
+		if (lean < 0.0F && lookHorizontal > 0.0) {
+			// pulling up turns speed into height
+			double convert = moveHorizontal * -Mth.sin(lean) * 0.04;
+			m = m.add(-look.x * convert / lookHorizontal, convert * 3.2, -look.z * convert / lookHorizontal);
+		}
+		if (lookHorizontal > 0.0) {
+			m = m.add((look.x / lookHorizontal * moveHorizontal - m.x) * 0.1, 0.0, (look.z / lookHorizontal * moveHorizontal - m.z) * 0.1);
+		}
+		m = m.multiply(0.99, 0.98, 0.99);
+		if (m.length() > WINGS_MAX_SPEED) {
+			m = m.normalize().scale(WINGS_MAX_SPEED);
+		}
+		player.setDeltaMovement(m);
 		if (wingsTicks % 4 == 0) {
 			play(player, SoundEvents.ELYTRA_FLYING, 0.08F, 1.6F);
 		}
