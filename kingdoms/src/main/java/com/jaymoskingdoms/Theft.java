@@ -66,6 +66,8 @@ public final class Theft {
 	static final int PURSUIT_TICKS = 20;
 	/** Unseen theft is noticed this much later (ticks), and costs this much reputation. */
 	static final long NOTICE_TICKS = 6000L;
+	/** The chance a theft nobody saw is noticed at all (later); otherwise it goes unnoticed. */
+	static final float NOTICE_CHANCE = 0.3F;
 	static final int REP_UNSEEN = -3;
 	/** A gift to storage: a point of reputation (and standing) per this many items, at most this much a day per faction. */
 	static final int GIFT_ITEMS_PER_POINT = 8, GIFT_DAILY_CAP = 25;
@@ -369,7 +371,7 @@ public final class Theft {
 		Weight w = weight != null ? weight : crime.weight;
 		List<LivingEntity> seen = witnesses(level, f, player);
 		if (seen.isEmpty()) {
-			if (noticeable) {
+			if (noticeable && level.getRandom().nextFloat() < NOTICE_CHANCE) {
 				NOTICES.add(new Notice(player.getUUID(), f.id(), level.getGameTime() + NOTICE_TICKS));
 			}
 			return;
