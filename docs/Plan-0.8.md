@@ -279,6 +279,33 @@ Add both to `packMods` in `build.gradle`. Their CurseForge project and file ids 
 - **Cyclone (corrupted):** its shock damage.
 - Any new fire effect added later uses it too.
 
+## Track 7 — 0.8.3 playtest round
+
+### 7.1 Takeover: sprint and debris-style ripping (Web)
+- The symbiote's takeover **sprints whenever it can**: chasing, hunting and fleeing alike. It still walks on tight corners, on step-ups and at edges, and when hunger blocks sprinting.
+- **Ripping walls uses the debris mechanic.** Today it breaks blocks one at a time into drops. Instead, the tendrils tear blocks out the same way Living Armor's tendrils pull up a debris clump (`BlockCluster`), with the same logic and animation. The torn clump is then flung aside out of the tunnel. The safety rules stay: no block entities, nothing at obsidian hardness or harder, protection respected.
+
+### 7.2 Void Crown (Arsenal, Void Arsenal only)
+- A relic helmet that only a **corrupted (Void Arsenal)** user can find and wear. It comes from the void, like the other relics.
+- **Curse of Binding.**
+- **Armor:** great for a helmet, around 6 armor and 3 toughness.
+- **Ender step:** when you're hit, you teleport like an enderman, to a random safe spot a short way off.
+- **Reputation:** while it's worn, your reputation with every faction reads as its lowest. That applies to Jaymo's Kingdoms factions (kingdoms, fiefdoms, villages). Kingdoms checks for the crown by item id, so neither mod needs the other installed.
+
+### 7.3 Tempest Kick: more weight (Wind)
+- **Longer timing:** a slower wind-up and a longer recovery. The current kick is too quick.
+- **Bend at the hip:** the upper body leans about **30° to the side at the hip**, away from the kick. Today only the whole body tilts. That bend is what lifts the kicking leg as high as in the reference picture, to head height.
+
+### 7.4 Wind in the cold
+- **Cold biomes slow Wind down:** in a cold biome (one where it snows), every Wind ability's **wind-up is 3 s longer** and every **cooldown is 3 s longer**.
+
+### 7.5 Heavy weapons in a Wind user's hands
+- **Axes and maces** deal reduced damage when held by a Wind user (×0.6, a constant). The weight works against the wind.
+
+### 7.6 Fumbling (Wind, early game)
+- Until a Wind user has mastered **3 abilities**, there's a chance (a constant per use, plus a small one per second of flight) that the **held item slips from their hand** while flying or using a Wind ability.
+- It drops as an item entity in front of them. Nothing is destroyed.
+
 ## Before coding starts
 
 - **Version:** bump to 0.8.0 (new packets: `ChronoFlow.Move` gains a field, plus a new screen-effect kind). Each track ends with a `./gradlew build`, plus the in-game checks listed in each section.
