@@ -53,6 +53,12 @@ Work is split into tracks so agents can run in parallel without touching the sam
 - A cluster made only of soft blocks caps its hit damage at **1.0** (half a heart). A cluster with any hard block keeps the normal formula.
 - This covers Gravity throws, the orbit, Skyfall, cave-ins and Web tendril throws, since they all go through `BlockCluster` or falling blocks.
 
+### 1.5 Gravity ignores weight (0.8.1)
+**Decided:** a Gravity user lightens whatever they're holding, so weight never slows them. This applies at every mastery level.
+- **Carrying (5.2):** they can pick up **any mob**, not just players and small animals. Bosses are the exception (the Ender Dragon, the Wither, and the `c:bosses` tag if present). There's **no carry slowdown**, whatever they hold. Mobs too big for the normal holds get an **overhead lift**: held up above the head with one or both hands, floating as if weightless. A carried mob's AI is paused while it's held.
+- **Carts and carriages (Jaymo's Kitchen):** they pull any Kitchen cart or wagon by hand with **no drag**, including a **loaded supply cart**, which is normally too heavy to pull by hand. This is done with a mixin from Powers into Kitchen's `CartEntity` (`drag`, `tooHeavyByHand`), so Kitchen itself doesn't change.
+- **Armor weight:** any equipment-based slowdown is cancelled for them, meaning a negative movement-speed modifier coming from an equipped armor or held item. Nothing in the pack adds armor weight today, so this guards against a mod added later.
+
 ---
 
 ## Track 2 — Arsenal
@@ -288,6 +294,7 @@ Add both to `packMods` in `build.gradle`. Their CurseForge project and file ids 
 7. One jump frees a carried player, unless they're stunned or otherwise unable to act (5.2).
 10. Wind users can fly while carrying, slightly slower, with all 4 holds; on foot only fireman's and bridal (5.2).
 11. First-person Model joins the pack; living tendrils must be visible in first person (5.3).
+18. Gravity users ignore weight: carry any mob (not bosses) at full speed, pull any Kitchen cart (even a loaded supply cart) with no drag, no armor slowdowns (1.5).
 17. Every fire effect sets alight the flammable entities it reaches: creatures, corpses, dropped items, creepers, TNT minecarts, projectiles and armor stands (Track 6).
 16. Wind gets Cyclone on hold X, in a superhero-landing stance, with the damage table in 5.4.
 15. Tendrils holding creatures or debris turn an attack into a combo: clap, crush or shatter (4.4).
