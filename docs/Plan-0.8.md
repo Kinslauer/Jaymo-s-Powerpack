@@ -164,6 +164,22 @@ Also:
 
 **Strike variants (decided):** every tendril strike, heavy debris strikes and ordinary autonomous ones alike, randomly picks an **overhead slam** (rears up high and crashes straight down onto the target) or a **sideways swipe** (a wide horizontal sweep from either side). The variant is picked on the server and synced in the `Strike` attachment so everyone sees the same swing. The hit lands when the slam comes down or the swipe crosses the target; a slam knocks mostly down and back, a swipe knocks along the sweep. Debris strikes use the slower heavy timing; ordinary ones keep their normal speed.
 
+### 4.4 Tendril combos with what you're holding
+**Files:** `WebTendrils` (grips, throws), `WebSymbiote`, `client/power/web/WebTendrilLayer`, `WebSymbioteClient`
+
+When you **attack** (left click) while tendrils hold things, the attack becomes a combo instead of a normal swing. Which combo depends on what each tendril holds:
+
+| Holding | Combo |
+|---|---|
+| A creature in each tendril | **Clap**: both are slammed into each other in front of you. Both take heavy damage, then drop and bounce apart. |
+| Debris in one tendril, and a creature directly in front of you (your crosshair target, within reach) | **Crush**: the debris is slammed down onto that creature. The clump collapses and shatters, and the creature takes heavy damage. |
+| Debris in one tendril, a creature in the other | **Crush** onto the held creature, the same way. |
+| Debris in both tendrils | **Shatter**: the two clumps are smashed together and burst into a **cone of debris** in front of you (about 6 blocks, about 60°), damaging everything in it. |
+
+- Each combo uses the heavy timing (wind-up, impact, slow reset), a screen shake, block dust and heavy sounds.
+- The debris used is spent: it collapses into falling debris, and like any thrown block it may drop.
+- Soft debris (dirt, sand, gravel...) hits for much less, by the same soft-block rule as everywhere else.
+
 ## Track 5 — Wind, carrying and first person
 
 ### 5.1 Tempest Kick, varied every time
@@ -215,6 +231,26 @@ Add both to `packMods` in `build.gradle`. Their CurseForge project and file ids 
 - In first person, tendrils **reach further forward**, curving over the shoulders into view. Idle tendrils sway at the edges of the screen. Strikes and grabs extend out in front, longer than in third person if that's what it takes to be seen.
 - **Without FPM**, a fallback draws the tendrils in first person next to the hands, the way `WebSymbioteHand` draws the suit sleeve.
 
+### 5.4 Cyclone (Wind)
+**Key (decided by the lead, all of Wind's keys were taken):** **hold X**, the power skill key. A tap still does Tempest Kick; holding about 0.4 s forms the Cyclone instead. It's the same tap-or-hold split Gravity uses on V.
+
+- **Stance:** the user drops into a **superhero landing** (the user's reference image):
+  - one knee on the ground, the other leg bent forward with the foot planted
+  - torso hunched forward, head down
+  - one arm swept up and back over the shoulder, the other hand down near the ground
+  You stay rooted in the stance while you hold.
+- **Tornado:** a column of wind forms around you: particles, a funnel and a roaring loop sound. Creatures inside are caught, spun and lifted a little.
+- **Damage to everything in it, and to you (suffocation from the vortex):**
+
+| Tier | Damage to others | Damage to you |
+|---|---|---|
+| Base | 2 hearts per second (4 every 20 ticks) | ½ heart every 2 s (1 every 40 ticks) |
+| Ascended | 2 hearts every 0.5 s (4 every 10 ticks) | ½ heart every 4 s (1 every 80 ticks) |
+| Corrupted | the same as Ascended, as **shock** (lightning) damage, with sparks | the same as Ascended |
+
+- **Levels with the player:** the tornado's radius and height grow with mastery level, from about 3 blocks at the first level to about 6 when fully mastered. The damage per tier is as in the table.
+- Your own damage is what limits how long you hold it. Add a short cooldown after you let go, and a hunger cost.
+
 ## Before coding starts
 
 - **Version:** bump to 0.8.0 (new packets: `ChronoFlow.Move` gains a field, plus a new screen-effect kind). Each track ends with a `./gradlew build`, plus the in-game checks listed in each section.
@@ -230,6 +266,8 @@ Add both to `packMods` in `build.gradle`. Their CurseForge project and file ids 
 7. One jump frees a carried player, unless they're stunned or otherwise unable to act (5.2).
 10. Wind users can fly while carrying, slightly slower, with all 4 holds; on foot only fireman's and bridal (5.2).
 11. First-person Model joins the pack; living tendrils must be visible in first person (5.3).
+16. Wind gets Cyclone on hold X, in a superhero-landing stance, with the damage table in 5.4.
+15. Tendrils holding creatures or debris turn an attack into a combo: clap, crush or shatter (4.4).
 14. Tendril strikes (heavy and autonomous) vary between overhead slams and sideways swipes (4.3).
 13. Players **and small animals** (wolves, cats, chickens, foxes, rabbits, parrots and the like) can be carried. Animals don't jump free; they stay until dropped or thrown (5.2).
 12. Tempest Kick reference received: a high roundhouse with the body leaning hard away and the arms thrown opposite ways (5.1).
