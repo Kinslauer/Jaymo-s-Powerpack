@@ -2,6 +2,7 @@ package com.jaymospowers.core;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.power.gravity.GravityPower;
+import com.jaymospowers.power.gravity.GravityWeight;
 import com.jaymospowers.power.web.KitchenCompat;
 import com.jaymospowers.power.web.WebPower;
 import com.jaymospowers.power.wind.WindFlight;
@@ -67,10 +68,15 @@ import org.jspecify.annotations.Nullable;
  * There's no vanilla riding: every tick the carried body is put at the carrier's feet (the server moves animals; a
  * carried player's own client moves them, and every client draws the body in the hold, see {@code CarryPose}). Each
  * pickup rolls a hold ({@link #FIREMAN}, {@link #BRIDAL}; in Wind flight also {@link #SHOULDER}, {@link #BACK}).
+ * <p>
+ * A Gravity user ({@link GravityWeight}) carries any mob but a boss, with no slowdown; one too big for the arms goes up
+ * {@link #OVERHEAD}. A carried mob's AI is on hold ({@code GravityCarriedMobMixin}).
  */
 public final class Carry {
 	/** The holds: over one shoulder, across both arms, held up by the shoulder at your side, slung over your back. */
 	public static final int FIREMAN = 0, BRIDAL = 1, SHOULDER = 2, BACK = 3;
+	/** Gravity only: a big mob held up above the head, weightless. Never rolled; kept through take-off and landing. */
+	public static final int OVERHEAD = 4;
 	/** On foot only the first two are rolled; in flight any of the four. */
 	public static final int FOOT_HOLDS = 2, FLIGHT_HOLDS = 4;
 	/** Weight: the carrier walks this much slower (share of their speed) with a person, or with a small animal. */
@@ -105,7 +111,12 @@ public final class Carry {
 		{0.0, 0.4, 0.7},
 		{0.8, -0.2, 0.0},
 		{0.0, 0.3, -0.6},
+		{0.0, 1.4, 0.7},
 	};
+	/** Overhead, it's let go this much further ahead per block of its width, so it clears you. */
+	static final double OVERHEAD_RELEASE_PER_WIDTH = 0.5;
+	/** Thrown from overhead it's heavy: it goes this fast ahead and up (b/t), a short, low heave. */
+	static final double HEAVE_AHEAD = 0.38, HEAVE_UP = 0.18;
 	static final Identifier WEIGHT_ID = JaymosPowers.id("carry_weight");
 
 	/** Small animals anyone can pick up (wolves, cats, chickens...). Babies of any animal count too. */
@@ -179,13 +190,16 @@ public final class Carry {
 		int hold;
 		boolean flying;
 		Vec3 lastCarrierPos;
+		/** Only a Gravity user could pick this up: if they stop being one, it's dropped. */
+		final boolean gravityOnly;
 
-		Entry(UUID carrier, Entity carried, int hold, boolean flying, Vec3 at) {
+		Entry(UUID carrier, Entity carried, int hold, boolean flying, Vec3 at, boolean gravityOnly) {
 			this.carrier = carrier;
 			this.carried = carried;
 			this.hold = hold;
 			this.flying = flying;
 			this.lastCarrierPos = at;
+			this.gravityOnly = gravityOnly;
 		}
 	}
 
@@ -263,6 +277,15 @@ public final class Carry {
 			|| entity instanceof Animal animal && animal.isBaby());
 	}
 
+	/**
+	 * Whether this player could pick this up: what anyone can ({@link #canBeCarried}), or for a Gravity user any mob
+	 * but a boss ({@link GravityWeight#liftable}), with an empty hand (so sneak-feeding, shearing and the like still
+	 * work on them).
+	 */
+	public static boolean canBeCarriedBy(Player player, Entity entity) {
+		return canBeCarried(entity) || GravityWeight.lightens(player) && player.getMainHandItem().isEmpty() && GravityWeight.liftable(entity);
+	}
+
 	/** Whether this carrier is up in Wind flight (it changes which holds can be rolled). */
 	public static boolean flying(Player player) {
 		Integer state = player.getAttached(WindPower.FLIGHT);
@@ -315,7 +338,7 @@ public final class Carry {
 			// (the same click seen twice)
 			return InteractionResult.SUCCESS;
 		}
-		if (hand != InteractionHand.MAIN_HAND || !player.isShiftKeyDown() || player.isSpectator() || !canBeCarried(target)) {
+		if (hand != InteractionHand.MAIN_HAND || !player.isShiftKeyDown() || player.isSpectator() || !canBeCarriedBy(player, target)) {
 			return InteractionResult.PASS;
 		}
 		if (isCarrying(player) || KitchenCompat.isCarryingCorpse(player) || player.isPassenger() || player.isSleeping()) {
@@ -336,8 +359,10 @@ public final class Carry {
 
 	private static void pickUp(ServerPlayer carrier, Entity target) {
 		boolean flying = flying(carrier);
-		int hold = carrier.getRandom().nextInt(flying ? FLIGHT_HOLDS : FOOT_HOLDS);
-		Entry entry = new Entry(carrier.getUUID(), target, hold, flying, carrier.position());
+		boolean light = GravityWeight.lightens(carrier);
+		boolean overhead = light && GravityWeight.overhead(target);
+		int hold = overhead ? OVERHEAD : carrier.getRandom().nextInt(flying ? FLIGHT_HOLDS : FOOT_HOLDS);
+		Entry entry = new Entry(carrier.getUUID(), target, hold, flying, carrier.position(), !canBeCarried(target));
 		CARRIES.put(carrier.getUUID(), entry);
 		carrier.setAttached(CARRYING, new Carrying(target.getId(), hold));
 		target.setAttached(CARRIED_BY, carrier.getId());
@@ -350,16 +375,24 @@ public final class Carry {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.carry.carried", carrier.getDisplayName()).withStyle(ChatFormatting.GRAY));
 		} else if (target instanceof Mob mob) {
 			mob.getNavigation().stop();
+			mob.setTarget(null);
 		}
-		carrier.sendOverlayMessage(Component.translatable("message.jaymospowers.carry.carrying").withStyle(ChatFormatting.GRAY));
+		carrier.sendOverlayMessage(Component.translatable(overhead ? "message.jaymospowers.carry.lifting" : "message.jaymospowers.carry.carrying")
+			.withStyle(ChatFormatting.GRAY));
 		AttributeInstance speed = carrier.getAttribute(Attributes.MOVEMENT_SPEED);
-		if (speed != null) {
+		// a Gravity user feels no weight at all
+		if (speed != null && !light) {
 			speed.addOrUpdateTransientModifier(new AttributeModifier(WEIGHT_ID, -(target instanceof Player ? PLAYER_WEIGHT : ANIMAL_WEIGHT),
 				AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 		}
 		ServerLevel level = carrier.level();
 		level.playSound(null, carrier.getX(), carrier.getY(), carrier.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 0.8F, 0.8F);
 		level.playSound(null, carrier.getX(), carrier.getY(), carrier.getZ(), SoundEvents.PLAYER_ATTACK_WEAK, SoundSource.PLAYERS, 0.5F, 0.6F);
+		if (overhead) {
+			// hauled up, and its weight drops away
+			level.playSound(null, carrier.getX(), carrier.getY(), carrier.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.6F, 0.6F);
+			level.playSound(null, carrier.getX(), carrier.getY() + 2.0, carrier.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.35F, 1.6F);
+		}
 	}
 
 	// ---- letting go
@@ -425,14 +458,17 @@ public final class Carry {
 				momentum = Vec3.ZERO;
 			}
 			double[] offset = RELEASE_AT[Math.clamp(entry.hold, 0, RELEASE_AT.length - 1)];
-			at = carrier.position().add(right.scale(offset[0])).add(0.0, offset[1], 0.0).add(ahead.scale(offset[2]));
+			double forward = offset[2] + (entry.hold == OVERHEAD ? carried.getBbWidth() * OVERHEAD_RELEASE_PER_WIDTH : 0.0);
+			at = carrier.position().add(right.scale(offset[0])).add(0.0, offset[1], 0.0).add(ahead.scale(forward));
 			AABB box = carried.getBoundingBox().move(at.subtract(carried.position()));
 			if (!level.noCollision(carried, box)) {
 				at = carrier.position();
 			}
 			velocity = switch (how) {
 				case DROP -> momentum.add(ahead.scale(DROP_AHEAD)).add(0.0, DROP_UP, 0.0);
-				case THROW -> momentum.multiply(1.0, 0.0, 1.0).add(ahead.scale(THROW_AHEAD)).add(0.0, THROW_UP, 0.0);
+				case THROW -> entry.hold == OVERHEAD
+					? momentum.multiply(1.0, 0.0, 1.0).add(ahead.scale(HEAVE_AHEAD)).add(0.0, HEAVE_UP, 0.0)
+					: momentum.multiply(1.0, 0.0, 1.0).add(ahead.scale(THROW_AHEAD)).add(0.0, THROW_UP, 0.0);
 				case ESCAPE -> momentum.multiply(1.0, 0.0, 1.0).add(ahead.scale(-ESCAPE_BACK)).add(0.0, ESCAPE_UP, 0.0);
 				default -> Vec3.ZERO;
 			};
@@ -455,6 +491,11 @@ public final class Carry {
 			carried.setPos(at.x, at.y, at.z);
 			carried.setDeltaMovement(velocity);
 			carried.syncVelocity = true;
+		}
+		if (how == Let.THROW && entry.hold == OVERHEAD) {
+			// a heave: a heavy grunt of a swing, and the weight coming back as it leaves your hands
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 0.9F, 0.55F);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 0.5F, 0.7F);
 		}
 		switch (how) {
 			case THROW -> level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.7F, 0.8F);
@@ -488,7 +529,8 @@ public final class Carry {
 			end(carrier, entry, Let.SET_DOWN);
 			return;
 		}
-		if (!carrier.isAlive() || carrier.isSpectator() || carrier.isSleeping() || carrier.isPassenger()) {
+		if (!carrier.isAlive() || carrier.isSpectator() || carrier.isSleeping() || carrier.isPassenger()
+			|| entry.gravityOnly && !GravityWeight.lightens(carrier)) {
 			end(carrier, entry, Let.DROP);
 			return;
 		}
@@ -517,7 +559,7 @@ public final class Carry {
 		}
 		// take off and every hold is open (a new roll); land with a flight-only hold and it shifts to one for walking
 		boolean flying = flying(carrier);
-		if (flying != entry.flying) {
+		if (flying != entry.flying && entry.hold != OVERHEAD) {
 			entry.flying = flying;
 			if (flying) {
 				entry.hold = carrier.getRandom().nextInt(FLIGHT_HOLDS);

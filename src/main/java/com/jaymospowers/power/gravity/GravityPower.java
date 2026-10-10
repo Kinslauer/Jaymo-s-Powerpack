@@ -545,6 +545,7 @@ public final class GravityPower implements Power {
 		if (jump != null) {
 			jump.removeModifier(PULL_JUMP_ID);
 		}
+		GravityWeight.clear(player);
 		player.removeAttached(COOLDOWNS);
 		player.removeAttached(KILLS);
 	}
@@ -1693,6 +1694,7 @@ public final class GravityPower implements Power {
 		}
 		State state = state(player);
 		smallThings(player);
+		GravityWeight.tick(player);
 		if (state.ripFrom >= 0) {
 			if (PowerInput.isDown(player, PowerKey.ABILITY_1)) {
 				tickRip(player, state);

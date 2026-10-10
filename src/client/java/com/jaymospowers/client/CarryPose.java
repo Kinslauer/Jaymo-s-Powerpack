@@ -25,7 +25,9 @@ import org.jspecify.annotations.Nullable;
  * How a carry looks, on both bodies. The carried body stands at its carrier's feet (see {@code CarryClient}); here it's
  * turned to the carrier's facing and moved into the hold (and tipped with the carrier when they cruise in Wind
  * flight), its limbs hanging loose and swaying; the carrier's arms take the hold. A thrown body tumbles and flops for
- * a moment. Distances are blocks in the body's frame before the model is drawn (+X its right, +Y up, -Z its front).
+ * a moment. A Gravity user holds a big mob up overhead, arms raised, the body floating and bobbing there. Distances are
+ * blocks (world-sized, whatever the body's scale) in the body's frame before the model is drawn (+X its right, +Y up,
+ * -Z its front).
  */
 public final class CarryPose {
 	/** On a carried body: how it's held. */
@@ -40,7 +42,8 @@ public final class CarryPose {
 		float time, float width, float height) {
 	}
 
-	public record Holding(int hold, boolean animal, float time) {
+	/** {@code width}: of what's held (blocks), so the arms spread round a wide one overhead. */
+	public record Holding(int hold, boolean animal, float time, float width) {
 	}
 
 	/** Where a player's body joins sit, in its own frame (the model is drawn 0.9375 of its size): hip, chest, eyes. */
@@ -57,6 +60,14 @@ public final class CarryPose {
 	static final float BODY_SWAY = 7.0F, LIMB_SWAY = 0.55F;
 	/** A thrown body: how far it turns over in the air (degrees), and how hard its limbs flop. */
 	static final float THROWN_SPIN = 160.0F, THROWN_FLOP = 0.9F;
+	/** Overhead (Gravity): the underside this high over the carrier's feet, bobbing this far (blocks) at this pace. */
+	static final float OVERHEAD_Y = 2.15F, OVERHEAD_BOB = 0.07F, OVERHEAD_BOB_SPEED = 0.09F;
+	/** Overhead: it slowly drifts this far (degrees) round and over, and its limbs float this loosely. */
+	static final float OVERHEAD_DRIFT_YAW = 9.0F, OVERHEAD_DRIFT_TILT = 4.0F, OVERHEAD_FLOAT = 0.22F;
+	/** Overhead: something this much taller than it's wide (a zombie, an enderman) is held up lying across. */
+	static final float OVERHEAD_LIE_RATIO = 1.4F;
+	/** Overhead: the carrier's arms straight up (radians from hanging), spread this much per block of its width. */
+	static final float OVERHEAD_ARMS = -2.95F, OVERHEAD_SPREAD = 0.14F, OVERHEAD_SPREAD_MAX = 0.5F;
 	/** First person: how the carrier's arms sit for each hold. */
 	public static final float FIRST_PERSON_EQUIP = 0.12F;
 
@@ -75,8 +86,9 @@ public final class CarryPose {
 	/** From the living and avatar renderers' extractRenderState (last, so the carry wins). */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
 		Carry.Carrying carrying = entity.getAttached(Carry.CARRYING);
+		Entity target = carrying == null ? null : entity.level().getEntity(carrying.target());
 		state.setData(CARRIER_KEY, carrying == null ? null
-			: new Holding(carrying.hold(), !(entity.level().getEntity(carrying.target()) instanceof Player), entity.tickCount + partialTicks));
+			: new Holding(carrying.hold(), !(target instanceof Player), entity.tickCount + partialTicks, target == null ? 0.6F : target.getBbWidth()));
 		Long thrown = entity.getAttached(Carry.THROWN);
 		float since = thrown == null ? -1.0F : entity.level().getGameTime() - thrown + partialTicks;
 		state.setData(THROWN_KEY, since >= 0.0F && since < Carry.THROWN_TICKS ? since : null);
@@ -114,6 +126,9 @@ public final class CarryPose {
 	public static void rotate(LivingEntityRenderState state, PoseStack poseStack, float entityScale) {
 		Held held = state.getData(HELD_KEY);
 		if (held != null) {
+			// the hold is laid out in world blocks: undo the body's own scale (a baby's, say) around it
+			float scale = Math.max(entityScale, 0.01F);
+			poseStack.scale(1.0F / scale, 1.0F / scale, 1.0F / scale);
 			Minecraft minecraft = Minecraft.getInstance();
 			Entity carrier = minecraft.level == null ? null : minecraft.level.getEntity(held.carrierId());
 			if (carrier != null) {
@@ -121,6 +136,7 @@ public final class CarryPose {
 				WindPose.tiltLike(carrier, held.partialTicks(), poseStack);
 			}
 			hold(poseStack, held);
+			poseStack.scale(scale, scale, scale);
 			return;
 		}
 		Float thrown = state.getData(THROWN_KEY);
@@ -139,6 +155,10 @@ public final class CarryPose {
 	/** Moves a body from its carrier's feet into the hold. */
 	private static void hold(PoseStack poseStack, Held held) {
 		float back = held.back(), left = held.left();
+		if (held.hold() == Carry.OVERHEAD) {
+			overheadHold(poseStack, held);
+			return;
+		}
 		if (held.animal()) {
 			animalHold(poseStack, held);
 			return;
@@ -177,6 +197,27 @@ public final class CarryPose {
 				poseStack.rotateDegrees(Axis.ZP, left * BODY_SWAY * 0.5F);
 			}
 		}
+	}
+
+	/**
+	 * Gravity's overhead lift: up above the carrier's head on their raised hands, weightless, bobbing and slowly
+	 * drifting round. A tall, thin body (a zombie) lies across the hands face up, head to the left.
+	 */
+	private static void overheadHold(PoseStack poseStack, Held held) {
+		float w = held.width(), h = held.height(), t = held.time();
+		boolean lying = h > w * OVERHEAD_LIE_RATIO;
+		float thick = lying ? w : h;
+		float bob = Mth.sin(t * OVERHEAD_BOB_SPEED) * OVERHEAD_BOB;
+		// to its middle, up over the head
+		poseStack.translate(0.0F, OVERHEAD_Y + bob + thick * 0.5F, 0.0F);
+		poseStack.rotateDegrees(Axis.YP, Mth.sin(t * 0.021F) * OVERHEAD_DRIFT_YAW);
+		poseStack.rotateDegrees(Axis.XP, held.back() * BODY_SWAY * 0.6F + Mth.sin(t * 0.05F) * OVERHEAD_DRIFT_TILT);
+		poseStack.rotateDegrees(Axis.ZP, -held.left() * BODY_SWAY * 0.6F + Mth.sin(t * 0.037F + 1.0F) * OVERHEAD_DRIFT_TILT);
+		if (lying) {
+			poseStack.rotateDegrees(Axis.ZP, 90.0F);
+			poseStack.rotateDegrees(Axis.YP, -90.0F);
+		}
+		poseStack.translate(0.0F, -h * 0.5F, 0.0F);
 	}
 
 	/** A small animal: a simpler cradle for each hold, set by its size. */
@@ -224,7 +265,10 @@ public final class CarryPose {
 		}
 		Held held = living.getData(HELD_KEY);
 		if (held != null) {
-			if (model instanceof HumanoidModel<?> h && !held.animal()) {
+			if (held.hold() == Carry.OVERHEAD) {
+				// weightless: everything drifts slowly, as if underwater
+				flop(model.root(), held.time() * 0.45F, OVERHEAD_FLOAT + Math.min(0.3F, Math.abs(held.back()) + Math.abs(held.left())) * 0.5F);
+			} else if (model instanceof HumanoidModel<?> h && !held.animal()) {
 				carriedLimbs(h, held);
 			} else {
 				flop(model.root(), held.time(), 0.25F + Math.min(0.6F, Math.abs(held.back()) + Math.abs(held.left()) + held.trail()));
@@ -293,6 +337,14 @@ public final class CarryPose {
 
 	/** The carrier's arms in the hold (players), or round the little animal. */
 	private static void carrierArms(HumanoidModel<?> h, Holding holding) {
+		if (holding.hold() == Carry.OVERHEAD) {
+			// both arms straight up under it, spread round a wide one, giving a little with its bob
+			float spread = Math.min(OVERHEAD_SPREAD_MAX, 0.08F + holding.width() * OVERHEAD_SPREAD);
+			float give = Mth.sin(holding.time() * OVERHEAD_BOB_SPEED) * 0.05F;
+			set(h.rightArm, OVERHEAD_ARMS + give, 0.0F, -spread);
+			set(h.leftArm, OVERHEAD_ARMS + give, 0.0F, spread);
+			return;
+		}
 		if (holding.animal()) {
 			switch (holding.hold()) {
 				case Carry.FIREMAN -> set(h.rightArm, -2.3F, -0.25F, -0.2F);
@@ -376,6 +428,13 @@ public final class CarryPose {
 	/** First person, carrying: how one arm sits for the hold ({@code right}: the right arm), or false to leave it out. */
 	public static boolean firstPersonArm(PoseStack poseStack, int hold, boolean animal, boolean right) {
 		float side = right ? 1.0F : -1.0F;
+		if (hold == Carry.OVERHEAD) {
+			// both arms up out of sight overhead: only the wrists at the top edge, wide apart
+			poseStack.translate(side * 0.16F, 0.5F, 0.1F);
+			poseStack.rotateDegrees(Axis.XP, -60.0F);
+			poseStack.rotateDegrees(Axis.ZP, side * 8.0F);
+			return true;
+		}
 		switch (animal ? -1 - hold : hold) {
 			case Carry.FIREMAN, -1 - Carry.FIREMAN, -1 - Carry.SHOULDER, Carry.SHOULDER -> {
 				if (!right) {

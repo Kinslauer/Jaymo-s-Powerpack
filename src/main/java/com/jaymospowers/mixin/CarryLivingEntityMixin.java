@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * A carried body shares its carrier's spot: they don't shove each other apart, and it's out of the way of crosshairs
- * and projectiles (the carrier's own arrows would hit it first).
+ * and projectiles (the carrier's own arrows would hit it first), and it doesn't suffocate in a low ceiling.
  */
 @Mixin(LivingEntity.class)
 abstract class CarryLivingEntityMixin {
@@ -19,6 +19,14 @@ abstract class CarryLivingEntityMixin {
 	private void jaymospowers$carryNoShove(Entity other, CallbackInfo ci) {
 		if (Carry.linked((Entity)(Object)this, other)) {
 			ci.cancel();
+		}
+	}
+
+	/** A carried body is drawn in the hold, not at the carrier's feet where it really is: it never chokes in a wall there. */
+	@Inject(method = "isInWall", at = @At("HEAD"), cancellable = true)
+	private void jaymospowers$carriedNotInWall(CallbackInfoReturnable<Boolean> cir) {
+		if (Carry.isCarried((Entity)(Object)this)) {
+			cir.setReturnValue(false);
 		}
 	}
 

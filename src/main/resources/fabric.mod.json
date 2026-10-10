@@ -22,6 +22,7 @@
 		{ "config": "jaymospowers.web.client.mixins.json", "environment": "client" },
 		"jaymospowers.chrono.mixins.json",
 		{ "config": "jaymospowers.chrono.client.mixins.json", "environment": "client" },
+		"jaymospowers.gravity.mixins.json",
 		{ "config": "jaymospowers.gravity.client.mixins.json", "environment": "client" }
 	],
 	"depends": {

@@ -64,11 +64,30 @@ mid-ability. The HUD is in `client/power/gravity/GravityPowerClient.java`: chips
   corpses, items, armor stands, arrows; creepers are lit, TNT minecarts go off, primed TNT burns faster. Never you.
   Damage is unchanged.
 
+## 0.8.1: Gravity ignores weight
+A Gravity user lightens whatever they hold, at every mastery level (`GravityWeight`):
+- **Carrying** (see `docs/carry.md`): with an empty hand, sneak + right-click picks up any living mob but a boss (Ender
+  Dragon, Wither, `c:bosses`), an armor stand, something over 4 blocks wide or 6 tall, or something in Lift's grip.
+  No carry slowdown at all, players included. A mob bigger than 0.8 × 1.0 blocks is held up **overhead** on raised
+  arms, floating and bobbing; a throw from there is a slow, heavy heave. A carried mob's AI is paused.
+- **Kitchen carts** (`mixin/GravityCartMixin`, in the new `jaymospowers.gravity.mixins.json`): pulling a cart by
+  hand puts no drag on them (`CartEntity.drag` returns 0), and a loaded supply cart can be taken by the shafts and
+  kept (`tooHeavyByHand()` reads false for a Gravity puller in `serverHitch` and `interact`). A drag left on from
+  before the power came is lifted within a second.
+- **Armor weight**: every second Gravity's tick adds up the negative movement-speed modifiers that come from equipped
+  armor and held items (and are on the player), and cancels them with counter-modifiers (`gravity_unburden_add`,
+  `_base`, `_total`; a multiplying one is countered down to ×0.05 at most). Removed when the power is lost. Nothing
+  in the pack adds such weight yet.
+
 ## Testing
 - `/power set @s gravity`
 - `/powerdebug gravity ready` clears every cooldown.
 - `/powerdebug gravity kills 29`, then `/power level @s 4`, then make a lifted mob die from its fall.
 - `/power corrupt @s`, then `/powerdebug gravity levitate 12`.
+- Weight: with an empty hand, sneak + right-click a zombie, cow, iron golem or ghast (overhead, full walking speed);
+  try the Ender Dragon (nothing). Fill a Kitchen supply cart and take it by the shafts: it comes, with no slowdown.
+  Armor weight: `/give @s iron_chestplate[attribute_modifiers=[{type:"movement_speed",amount:-0.5,operation:"add_multiplied_total",id:"test",slot:"chest"}]]`,
+  wear it: no slower after a second; `/power clear @s` and it slows you.
 
 ## Notes and risks
 - Lifting a *player* sends them velocity updates every tick, so it may look jittery on their screen.
