@@ -162,6 +162,8 @@ Also:
 
 ---
 
+**Strike variants (decided):** every tendril strike, heavy debris strikes and ordinary autonomous ones alike, randomly picks an **overhead slam** (rears up high and crashes straight down onto the target) or a **sideways swipe** (a wide horizontal sweep from either side). The variant is picked on the server and synced in the `Strike` attachment so everyone sees the same swing. The hit lands when the slam comes down or the swipe crosses the target; a slam knocks mostly down and back, a swipe knocks along the sweep. Debris strikes use the slower heavy timing; ordinary ones keep their normal speed.
+
 ## Track 5 — Wind, carrying and first person
 
 ### 5.1 Tempest Kick, varied every time
@@ -228,6 +230,7 @@ Add both to `packMods` in `build.gradle`. Their CurseForge project and file ids 
 7. One jump frees a carried player, unless they're stunned or otherwise unable to act (5.2).
 10. Wind users can fly while carrying, slightly slower, with all 4 holds; on foot only fireman's and bridal (5.2).
 11. First-person Model joins the pack; living tendrils must be visible in first person (5.3).
+14. Tendril strikes (heavy and autonomous) vary between overhead slams and sideways swipes (4.3).
 13. Players **and small animals** (wolves, cats, chickens, foxes, rabbits, parrots and the like) can be carried. Animals don't jump free; they stay until dropped or thrown (5.2).
 12. Tempest Kick reference received: a high roundhouse with the body leaning hard away and the arms thrown opposite ways (5.1).
 
