@@ -2,7 +2,7 @@
 
 Based on a full read of the 0.7.1 jar. Class names are the real ones in `src/`. Player-facing text goes in `lang/parts/<power>.json`. Default keys: R = Lift / Ability 1, G = Ability 2, V = Ability 3, B = Ability 4, C = Ultimate, Z = Mode, H = Menu.
 
-Work is split into 4 tracks so 4 agents can run in parallel without touching the same files.
+Work is split into tracks so agents can run in parallel without touching the same files.
 
 ---
 
@@ -150,6 +150,34 @@ Also:
 
 ---
 
+## Track 5 — Wind and everyone
+
+### 5.1 Tempest Kick, varied every time
+**Files:** `power/wind/WindKick` (`KICKING` attachment), `client/power/wind/WindPose` (the `KICK_KEY` branch)
+
+**What happens now:** one fixed roundhouse. The right leg sweeps from side to front, the body twists the same way every time, and both arms are flung straight out.
+
+**Change:** each kick rolls a random **side** (left or right) and **arm swing**, and syncs it with the kick.
+- The torso shifts and leans toward the rolled side, instead of always twisting one way.
+- The kicking leg follows the side: left kicks use the left leg.
+- The arms swing across in either direction, with a little random variation in height and angle, so no two kicks look the same.
+- **Exact pose to match the user's reference image** (still needed; the Discord link couldn't be downloaded).
+- `KICKING` changes from a `Long` to a small record (start, side, swing seed). That's a new packet shape, covered by the 0.8.0 bump.
+
+### 5.2 Carry living players
+**New:** `core/Carry` (server) + `client/CarryPose` (both bodies). The carried player follows a carry point on the carrier each tick, the way Kitchen's corpse carry works. No vanilla riding, so there are no mount quirks.
+
+- **Pick up:** see question 6 for the control. One player at a time. You can't carry while already carrying a corpse.
+- **Hold:** each pickup rolls one of several holds. Each hold has its own carrier pose, carried position and carried-body pose:
+  1. **Fireman's carry**: over one shoulder, head and arms hanging down the back, legs in front.
+  2. **Shoulder grab**: dragged along by the shoulder at your side, feet trailing.
+  3. **Bridal carry**: across both arms in front.
+  4. **Over the back**: slung behind, facing up.
+- **Carried body:** arms and legs drift loosely, swinging with the carrier's movement (sine sway plus inertia from turning and stopping), so they look like they're floating.
+- **Ending it:** the carrier drops them, or throws them (see question 6). Whether the carried player can struggle free is question 7.
+- Both pose sets go through the existing pose path (`WebModelFeatureRendererMixin.prepareModel` + render-state extraction), like `WebBodyPose` and `ChronoFlowPose`.
+- First person: the carrier's hands show the hold; the carried player's camera follows their body.
+
 ## Before coding starts
 
 - **Version:** bump to 0.8.0 (new packets: `ChronoFlow.Move` gains a field, plus a new screen-effect kind). Each track ends with a `./gradlew build`, plus the in-game checks listed in each section.
@@ -162,3 +190,6 @@ Also:
 3. **Manual Consume** (the symbiote's Consume ability, which eats small living mobs up to 10 HP): should it also follow carry-before-feed, or is the rule only for autonomous feeding?
 4. **Jaymo's Kitchen:** corpses only exist with Kitchen installed. Should Powers *require* Kitchen? If it doesn't, autonomous feeding can't happen at all under the carry rule.
 5. **Soft-block damage:** should the half-heart cap apply to every thrown or dropped block, or only to Collapsing Horizon's orbit?
+6. **Carrying players:** who can do it: everyone (like Kitchen's corpse carry), or one power? Which control picks someone up (e.g. sneak + right-click with empty hands)? Can you throw them, or only drop them?
+7. **Escaping a carry:** can the carried player struggle free (e.g. mashing jump), or are they held until let go? Does it work on mobs and villagers too, or only players?
+8. **Tempest Kick reference:** the Discord image link returns "Forbidden" outside Discord. Please upload it here directly.
