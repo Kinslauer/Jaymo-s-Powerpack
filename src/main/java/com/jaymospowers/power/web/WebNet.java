@@ -112,6 +112,26 @@ public final class WebNet {
 		}
 	}
 
+	/**
+	 * Server → client, during a takeover: how it moves you. {@link #PATH}: along {@code nodes} (feet block positions,
+	 * from where you are); {@link #DIRECT}: straight at the target (in reach, in clear sight); {@link #RIP}: hold still
+	 * while the tendrils tear out {@code focus}; {@link #FALLBACK}: no path and nothing it may break (the old blind lurch).
+	 */
+	public record TakeoverPath(java.util.List<net.minecraft.core.BlockPos> nodes, int mode, net.minecraft.core.BlockPos focus) implements CustomPacketPayload {
+		public static final int PATH = 0, DIRECT = 1, RIP = 2, FALLBACK = 3;
+		public static final Type<TakeoverPath> TYPE = new Type<>(JaymosPowers.id("web_takeover_path"));
+		public static final StreamCodec<ByteBuf, TakeoverPath> CODEC = StreamCodec.composite(
+			net.minecraft.core.BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()), TakeoverPath::nodes,
+			ByteBufCodecs.VAR_INT, TakeoverPath::mode,
+			net.minecraft.core.BlockPos.STREAM_CODEC, TakeoverPath::focus,
+			TakeoverPath::new);
+
+		@Override
+		public Type<TakeoverPath> type() {
+			return TYPE;
+		}
+	}
+
 	/** Server → client: set your own velocity (a dodge's sidestep, a recoil). Player motion is client-authoritative. */
 	public record Nudge(Vec3 velocity) implements CustomPacketPayload {
 		public static final Type<Nudge> TYPE = new Type<>(JaymosPowers.id("web_nudge"));
@@ -166,6 +186,7 @@ public final class WebNet {
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(SymbioteUse.TYPE, SymbioteUse.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Takeover.TYPE, Takeover.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(TakeoverPath.TYPE, TakeoverPath.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Nudge.TYPE, Nudge.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Sense.TYPE, Sense.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Shake.TYPE, Shake.CODEC);

@@ -391,6 +391,10 @@ public final class WebSymbiote {
 	public static final AttachmentType<Long> TENDRILS_OUT = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_tendrils_out"),
 		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
 
+	/** A takeover's tendrils tearing a way through: the block they're at (synced, so everyone sees them reach for it). */
+	public static final AttachmentType<BlockPos> RIPPING = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_ripping"),
+		builder -> builder.syncWith(BlockPos.STREAM_CODEC, AttachmentSyncPredicate.all()));
+
 	/** The tendrils are out on their own (not the armour's): until when, else -1. */
 	public static long tendrilsOut(Player player) {
 		Long until = player.getAttached(TENDRILS_OUT);
@@ -457,6 +461,8 @@ public final class WebSymbiote {
 		int takeoverTicks;
 		int takeoverTarget = -1;
 		long takeoverReadyAt;
+		/** How this takeover moves you (the path, stuck checks, ripping through); null when it isn't driving. */
+		WebTakeoverPath.@org.jspecify.annotations.Nullable Route route;
 		long shroudUntil;
 		boolean clinging;
 		/** Ticks of Living Armor worn without a break. */
@@ -969,6 +975,8 @@ public final class WebSymbiote {
 		abortFeeding(player, live);
 		if (live.takeoverTicks > 0) {
 			live.takeoverTicks = 0;
+			WebTakeoverPath.stop(player, live.route);
+			live.route = null;
 			ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0, false));
 		}
 		set(player, new WebSymbioteState(false, 0, 0, 0, 0, old.hints()));
@@ -1143,6 +1151,8 @@ public final class WebSymbiote {
 		live.stareUntil = 0L;
 		live.takeoverTicks = TAKEOVER_LIMIT;
 		live.takeoverTarget = target.getId();
+		WebTakeoverPath.stop(player, live.route);
+		live.route = new WebTakeoverPath.Route();
 		ServerPlayNetworking.send(player, new WebNet.Takeover(target.getId(), live.takeoverTicks, live.fleeing));
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 2.0F, 1.3F);
@@ -1202,9 +1212,19 @@ public final class WebSymbiote {
 		live.stareUntil = 0L;
 		live.takeoverTicks = 0;
 		live.takeoverTarget = -1;
+		WebTakeoverPath.stop(player, live.route);
+		live.route = null;
 		player.removeAttached(STARING);
 		ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0, false));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.8F, 1.4F);
+	}
+
+	/** Moves you along the takeover's way (see {@link WebTakeoverPath}). */
+	private static void drive(ServerPlayer player, Live live, Entity target, boolean flee, long now) {
+		if (live.route == null) {
+			live.route = new WebTakeoverPath.Route();
+		}
+		WebTakeoverPath.tick(player, live.route, target, flee, live.curious ? TAKEOVER_REACH + 1.0 : TAKEOVER_REACH, now);
 	}
 
 	/** Curiosity: up close it grabs them, holds them up to its face and stares; then sets them down, or doesn't. */
@@ -1263,9 +1283,13 @@ public final class WebSymbiote {
 			LivingEntity threat = threat(player);
 			if (--live.takeoverTicks <= 0 || threat == null || threat.distanceTo(player) > FLEE_SAFE) {
 				endTakeover(player, live);
-			} else if (threat != target && threat.getId() != live.takeoverTarget) {
-				live.takeoverTarget = threat.getId();
-				ServerPlayNetworking.send(player, new WebNet.Takeover(threat.getId(), live.takeoverTicks, true));
+			} else {
+				if (threat != target && threat.getId() != live.takeoverTarget) {
+					live.takeoverTarget = threat.getId();
+					ServerPlayNetworking.send(player, new WebNet.Takeover(threat.getId(), live.takeoverTicks, true));
+				}
+				// a way out: the safest spot it can reach (tearing out of a dead end)
+				drive(player, live, threat, true, now);
 			}
 			return;
 		}
@@ -1279,6 +1303,10 @@ public final class WebSymbiote {
 				startKill(player, live, now, prey, false);
 			}
 			return;
+		}
+		if (!live.curious || live.stareUntil == 0L) {
+			// on its way: round walls, or through them
+			drive(player, live, target, false, now);
 		}
 		if (live.curious) {
 			tickCurious(player, live, now, target);
@@ -1428,7 +1456,7 @@ public final class WebSymbiote {
 		return true;
 	}
 
-	private static void trail(ServerLevel level, Vec3 from, Vec3 to) {
+	static void trail(ServerLevel level, Vec3 from, Vec3 to) {
 		Vec3 d = to.subtract(from);
 		int steps = Math.max(2, (int)(d.length() * 1.5));
 		for (int i = 1; i <= steps; i++) {

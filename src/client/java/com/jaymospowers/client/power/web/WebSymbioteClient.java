@@ -122,6 +122,28 @@ public final class WebSymbioteClient {
 	/** How fast it drags you at its prey, and how hard it wrenches your view around (0..1 per tick). */
 	static final double TAKEOVER_SPEED = 0.34;
 	static final float TAKEOVER_TURN = 0.35F;
+	/** Running: this much faster than the chase, and the view swings round this hard. */
+	static final double FLEE_SPEED_SCALE = 1.3;
+	static final float FLEE_TURN = 0.5F;
+	/** A waypoint counts as reached this close (blocks, horizontally; tighter at a corner) and this close in height. */
+	static final double WAYPOINT_REACH = 0.7, CORNER_REACH = 0.45, WAYPOINT_REACH_Y = 1.2;
+	/** It skips ahead to a later waypoint (up to this many) if you're already that close to it. */
+	static final int WAYPOINT_SKIP = 2;
+	/** A corner (the way turns by more than acos of this) slows it to this share, from this far out (blocks). */
+	static final double CORNER_COS = 0.7, CORNER_SLOW = 0.65, CORNER_SLOW_RANGE = 1.2;
+	/** It jumps for a waypoint this much higher than your feet (blocks), from this close. */
+	static final double STEP_JUMP = 0.4, STEP_JUMP_RANGE = 1.6, JUMP_SPEED = 0.42;
+	/** Edge guard: it looks this many ticks of movement ahead for ground within this drop, else it creeps. */
+	static final double LEDGE_LOOK_TICKS = 3.0, LEDGE_DROP = 1.1, LEDGE_CREEP = 0.25;
+	/** Swimming up along a path (or toward it), per tick. */
+	static final double SWIM_UP = 0.06, FLEE_SWIM_UP = 0.08;
+	/** Close enough to its prey to stop walking (blocks, horizontally). */
+	static final double TAKEOVER_STOP = 1.5;
+	/** Held still while the tendrils rip: horizontal speed kept per tick. */
+	static final double RIP_HOLD = 0.5;
+	/** The straight-line fallback: how far ahead it looks for a way (blocks), and the turns it tries, nearest first (degrees). */
+	private static final double TAKEOVER_LOOK = 0.7;
+	private static final float[] TAKEOVER_DETOURS = {0.0F, 30.0F, -30.0F, 60.0F, -60.0F, 90.0F, -90.0F, 125.0F, -125.0F};
 	// ===== spider-sense ============================================================================================
 	/** Red outline colour, and how long a server threat list stays good without a refresh. */
 	static final int SENSE_COLOR = 0xFFE02424;
@@ -136,6 +158,11 @@ public final class WebSymbioteClient {
 	private static int takeoverTarget = -1;
 	/** Running from {@code takeoverTarget}, not at it. */
 	private static boolean takeoverFlee;
+	/** The server's way for the takeover (see WebNet.TakeoverPath): the mode, the waypoints (feet, centred), the next one, and the block being torn out. */
+	private static int pathMode = WebNet.TakeoverPath.FALLBACK;
+	private static java.util.List<Vec3> pathNodes = java.util.List.of();
+	private static int pathIndex;
+	private static net.minecraft.core.BlockPos ripFocus = net.minecraft.core.BlockPos.ZERO;
 	private static final Set<Integer> THREATS = new HashSet<>();
 	private static long threatsAt;
 
@@ -163,8 +190,33 @@ public final class WebSymbioteClient {
 			takeoverTarget = payload.entityId();
 			takeoverTicks = payload.entityId() < 0 ? 0 : payload.ticks();
 			takeoverFlee = payload.flee();
+			if (takeoverTicks <= 0) {
+				clearPath();
+			}
 			if (takeoverTicks > 0 && context.client().gui.screen() instanceof WebSymbioteScreen) {
 				context.client().gui.setScreen(null);
+			}
+		});
+		ClientPlayNetworking.registerGlobalReceiver(WebNet.TakeoverPath.TYPE, (payload, context) -> {
+			pathMode = payload.mode();
+			ripFocus = payload.focus();
+			java.util.List<Vec3> nodes = new java.util.ArrayList<>(payload.nodes().size());
+			for (net.minecraft.core.BlockPos pos : payload.nodes()) {
+				nodes.add(Vec3.atBottomCenterOf(pos));
+			}
+			pathNodes = nodes;
+			pathIndex = 0;
+			LocalPlayer player = context.player();
+			if (player != null && !nodes.isEmpty()) {
+				// pick up from the nearest of the first few (the path starts where the server last saw you)
+				double best = Double.MAX_VALUE;
+				for (int i = 0; i < Math.min(4, nodes.size()); i++) {
+					double d = nodes.get(i).distanceToSqr(player.position());
+					if (d < best) {
+						best = d;
+						pathIndex = i;
+					}
+				}
 			}
 		});
 		ClientPlayNetworking.registerGlobalReceiver(WebNet.Shake.TYPE, (payload, context) -> WebShake.start(payload.strength()));
@@ -204,6 +256,7 @@ public final class WebSymbioteClient {
 		ceilingClinging = false;
 		takeoverTicks = 0;
 		takeoverTarget = -1;
+		clearPath();
 		THREATS.clear();
 	}
 
@@ -300,6 +353,13 @@ public final class WebSymbioteClient {
 				float yaw = (float)(net.minecraft.util.Mth.atan2(to.z, to.x) * net.minecraft.util.Mth.RAD_TO_DEG) - 90.0F;
 				wallYaw = net.minecraft.util.Mth.wrapDegrees(yaw - player.yBodyRot) * net.minecraft.util.Mth.DEG_TO_RAD;
 				wallPitch = (float)net.minecraft.util.Mth.atan2(to.y, Math.sqrt(to.x * to.x + to.z * to.z));
+			} else if (player.getAttached(WebSymbiote.RIPPING) instanceof net.minecraft.core.BlockPos ripping) {
+				// tearing a way through: every tendril reaching into the block
+				wallMode = 1;
+				net.minecraft.world.phys.Vec3 to = net.minecraft.world.phys.Vec3.atCenterOf(ripping).subtract(player.getEyePosition());
+				float yaw = (float)(net.minecraft.util.Mth.atan2(to.z, to.x) * net.minecraft.util.Mth.RAD_TO_DEG) - 90.0F;
+				wallYaw = net.minecraft.util.Mth.wrapDegrees(yaw - player.yBodyRot) * net.minecraft.util.Mth.DEG_TO_RAD;
+				wallPitch = (float)net.minecraft.util.Mth.atan2(to.y, Math.sqrt(to.x * to.x + to.z * to.z));
 			}
 			boolean firstPerson = player == net.minecraft.client.Minecraft.getInstance().player && FirstPersonCompat.bodyShown();
 			state.setData(TENDRILS, new Tendrils(growth, player.tickCount, strike, aimYaw, aimPitch, side, smoothRun(player), held, bulk,
@@ -333,17 +393,147 @@ public final class WebSymbioteClient {
 		tickCrawl(player, swing);
 	}
 
-	/** It's steering: straight at its prey, view and all. */
+	private static void clearPath() {
+		pathMode = WebNet.TakeoverPath.FALLBACK;
+		pathNodes = java.util.List.of();
+		pathIndex = 0;
+	}
+
+	/** It's steering, view and all: along the server's path, straight at its prey when it's right there, or still while it rips. */
 	private static void tickTakeover(LocalPlayer player) {
 		Entity target = player.level().getEntity(takeoverTarget);
 		if (target == null || !target.isAlive() || --takeoverTicks <= 0) {
 			takeoverTicks = 0;
+			clearPath();
+			return;
+		}
+		if (pathMode == WebNet.TakeoverPath.RIP) {
+			holdForRip(player);
+			return;
+		}
+		if (pathMode == WebNet.TakeoverPath.PATH && followPath(player, target)) {
 			return;
 		}
 		if (takeoverFlee) {
 			flee(player, target);
 			return;
 		}
+		straight(player, target);
+	}
+
+	/** The tendrils are tearing a way through: it stands its ground and stares at the block. */
+	private static void holdForRip(LocalPlayer player) {
+		Vec3 to = Vec3.atCenterOf(ripFocus).subtract(player.getEyePosition());
+		turnToward(player, to, TAKEOVER_TURN, true);
+		Vec3 v = player.getDeltaMovement();
+		player.setDeltaMovement(v.x * RIP_HOLD, v.y, v.z * RIP_HOLD);
+	}
+
+	/** Turns the view toward {@code to} (a share of the way each tick); {@code pitch}: up and down too, else levels out. */
+	private static void turnToward(LocalPlayer player, Vec3 to, float share, boolean pitch) {
+		float yaw = (float)(Mth.atan2(to.z, to.x) * Mth.RAD_TO_DEG) - 90.0F;
+		player.setYRot(player.getYRot() + Mth.wrapDegrees(yaw - player.getYRot()) * share);
+		if (pitch) {
+			float p = (float)(-Mth.atan2(to.y, to.horizontalDistance()) * Mth.RAD_TO_DEG);
+			player.setXRot(Mth.clamp(player.getXRot() + (p - player.getXRot()) * share, -90.0F, 90.0F));
+		} else {
+			player.setXRot(player.getXRot() * 0.8F);
+		}
+	}
+
+	/**
+	 * Walks the server's waypoints: faces and moves toward the next, hops up steps, eases off at corners, and won't
+	 * walk off an edge the path doesn't drop down. False once the path has run out (the caller takes over).
+	 */
+	private static boolean followPath(LocalPlayer player, Entity target) {
+		Vec3 pos = player.position();
+		if (!takeoverFlee && target.position().subtract(pos).horizontalDistance() <= TAKEOVER_STOP && Math.abs(target.getY() - pos.y) < 1.5) {
+			straight(player, target);
+			return true;
+		}
+		int n = pathNodes.size();
+		// reached (or already past) the next waypoint: on to the one after
+		for (int j = Math.min(n - 1, pathIndex + WAYPOINT_SKIP); j >= pathIndex; j--) {
+			Vec3 node = pathNodes.get(j);
+			double reach = j + 1 < n && corner(j) ? CORNER_REACH : WAYPOINT_REACH;
+			if (node.subtract(pos).horizontalDistance() <= reach && Math.abs(node.y - pos.y) <= WAYPOINT_REACH_Y) {
+				pathIndex = j + 1;
+				break;
+			}
+		}
+		if (pathIndex >= n) {
+			return false;
+		}
+		Vec3 node = pathNodes.get(pathIndex);
+		Vec3 flat = new Vec3(node.x - pos.x, 0.0, node.z - pos.z);
+		double dh = flat.length();
+		Vec3 dir = dh < 1.0E-4 ? Vec3.ZERO : flat.scale(1.0 / dh);
+		if (takeoverFlee) {
+			turnToward(player, flat, FLEE_TURN, false);
+			player.setSprinting(true);
+		} else {
+			// it walks the way but its eyes stay on the prey
+			Vec3 at = target.getBoundingBox().getCenter().subtract(player.getEyePosition());
+			turnToward(player, dir.lengthSqr() > 0.0 ? dir : at, TAKEOVER_TURN, false);
+			float p = (float)(-Mth.atan2(at.y, at.horizontalDistance()) * Mth.RAD_TO_DEG);
+			player.setXRot(Mth.clamp(player.getXRot() + (p - player.getXRot()) * TAKEOVER_TURN, -90.0F, 90.0F));
+		}
+		double speed = TAKEOVER_SPEED * (takeoverFlee ? FLEE_SPEED_SCALE : 1.0);
+		if (pathIndex + 1 < n && dh < CORNER_SLOW_RANGE && corner(pathIndex)) {
+			speed *= CORNER_SLOW;
+		}
+		// never faster than it takes to land on the waypoint
+		Vec3 move = dir.scale(Math.min(speed, Math.max(dh, speed * 0.5)));
+		Vec3 v = player.getDeltaMovement();
+		double up = v.y;
+		boolean higher = node.y > pos.y + STEP_JUMP;
+		if (player.isInWater()) {
+			up = Math.max(up, takeoverFlee ? FLEE_SWIM_UP : SWIM_UP);
+		} else if (player.onGround() && (higher && dh < STEP_JUMP_RANGE || player.horizontalCollision)) {
+			up = JUMP_SPEED;
+		} else if (player.onGround() && node.y >= pos.y - 0.5 && !groundAhead(player, move)) {
+			// an edge the path doesn't go over: creep, straight for the waypoint
+			move = move.scale(LEDGE_CREEP);
+		}
+		player.setDeltaMovement(move.x, up, move.z);
+		return true;
+	}
+
+	/** Whether the way turns sharply at waypoint {@code i} (coming from where you are, or from the one before). */
+	private static boolean corner(int i) {
+		if (i + 1 >= pathNodes.size()) {
+			return false;
+		}
+		Vec3 here = pathNodes.get(i);
+		Vec3 before = i > 0 ? pathNodes.get(i - 1) : null;
+		if (before == null) {
+			LocalPlayer player = Minecraft.getInstance().player;
+			if (player == null) {
+				return false;
+			}
+			before = player.position();
+		}
+		Vec3 in = new Vec3(here.x - before.x, 0.0, here.z - before.z);
+		Vec3 out = new Vec3(pathNodes.get(i + 1).x - here.x, 0.0, pathNodes.get(i + 1).z - here.z);
+		if (in.lengthSqr() < 1.0E-4 || out.lengthSqr() < 1.0E-4) {
+			return false;
+		}
+		return in.normalize().dot(out.normalize()) < CORNER_COS;
+	}
+
+	/** Ground (or water) within a short drop where {@code move} takes you in a few ticks. */
+	private static boolean groundAhead(LocalPlayer player, Vec3 move) {
+		AABB ahead = player.getBoundingBox().move(move.x * LEDGE_LOOK_TICKS, 0.0, move.z * LEDGE_LOOK_TICKS);
+		AABB below = new AABB(ahead.minX, ahead.minY - LEDGE_DROP, ahead.minZ, ahead.maxX, ahead.minY - 0.01, ahead.maxZ);
+		if (!player.level().noCollision(player, below)) {
+			return true;
+		}
+		net.minecraft.core.BlockPos under = net.minecraft.core.BlockPos.containing(ahead.getCenter().x, ahead.minY - 0.5, ahead.getCenter().z);
+		return !player.level().getFluidState(under).isEmpty();
+	}
+
+	/** Straight at its prey (it's right there, or there's no path): round small things if it can, hopping steps. */
+	private static void straight(LocalPlayer player, Entity target) {
 		Vec3 to = target.getBoundingBox().getCenter().subtract(player.getEyePosition());
 		float yaw = (float)(Mth.atan2(to.z, to.x) * Mth.RAD_TO_DEG) - 90.0F;
 		float pitch = (float)(-Mth.atan2(to.y, to.horizontalDistance()) * Mth.RAD_TO_DEG);
@@ -373,9 +563,9 @@ public final class WebSymbioteClient {
 			Vec3 v = player.getDeltaMovement();
 			double up = v.y;
 			if (player.isInWater()) {
-				up = Math.max(up, 0.06);
+				up = Math.max(up, SWIM_UP);
 			} else if (player.onGround() && (hop || player.horizontalCollision)) {
-				up = 0.42;
+				up = JUMP_SPEED;
 			}
 			Vec3 move = way.scale(TAKEOVER_SPEED);
 			player.setDeltaMovement(move.x, up, move.z);
@@ -421,23 +611,19 @@ public final class WebSymbioteClient {
 			}
 		}
 		float yaw = (float)(Mth.atan2(best.z, best.x) * Mth.RAD_TO_DEG) - 90.0F;
-		player.setYRot(player.getYRot() + Mth.wrapDegrees(yaw - player.getYRot()) * 0.5F);
+		player.setYRot(player.getYRot() + Mth.wrapDegrees(yaw - player.getYRot()) * FLEE_TURN);
 		player.setXRot(player.getXRot() * 0.8F);
 		Vec3 v = player.getDeltaMovement();
 		double up = v.y;
 		if (player.isInWater()) {
-			up = Math.max(up, 0.08);
+			up = Math.max(up, FLEE_SWIM_UP);
 		} else if (player.onGround() && (hop || player.horizontalCollision)) {
-			up = 0.42;
+			up = JUMP_SPEED;
 		}
 		player.setSprinting(true);
-		Vec3 move = best.scale(TAKEOVER_SPEED * 1.3);
+		Vec3 move = best.scale(TAKEOVER_SPEED * FLEE_SPEED_SCALE);
 		player.setDeltaMovement(move.x, up, move.z);
 	}
-
-	/** How far ahead the takeover looks for a way (blocks), and the turns it tries, nearest first (degrees). */
-	private static final double TAKEOVER_LOOK = 0.7;
-	private static final float[] TAKEOVER_DETOURS = {0.0F, 30.0F, -30.0F, 60.0F, -60.0F, 90.0F, -90.0F, 125.0F, -125.0F};
 
 	/** Wall Crawl: stick to walls and ceilings and climb them. */
 	private static void tickCrawl(LocalPlayer player, WebSwing swing) {

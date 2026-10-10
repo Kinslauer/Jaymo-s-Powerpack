@@ -334,10 +334,49 @@ action bar, each heard once.
 - When starving with stress = `TAKEOVER_STRESS` 50, every `TAKEOVER_CHECK_TICKS` 200 there's a
   `TAKEOVER_CHANCE` 35% chance. It's at most once per `TAKEOVER_COOLDOWN` 1200, and never in creative.
 - It picks the nearest mob within 12 (not tamed or name-tagged; never players) and takes over for 60�100 ticks.
-- The client wrenches your view and drags you at the mob (`TAKEOVER_SPEED` 0.34, hopping over steps), with a pulsing
-  dark vignette.
+- The client wrenches your view and drags you at the mob (`TAKEOVER_SPEED` 0.34), with a pulsing dark vignette.
+  Since 0.8.x it walks a real path round walls, or rips through them (see **Takeover pathing** below).
 - The server swings and attacks with `player.attack` every 10 ticks when within reach 3.
 - Afterwards stress drops by 20.
+
+**Takeover pathing (0.8.x, `WebTakeoverPath`, client `WebSymbioteClient.followPath`).** Everywhere the symbiote
+drives you (rampage and hunger takeovers, a curious one on its way to look, the feeding hunt, the run for its life)
+it no longer lurches in a straight line into walls.
+- **The path (server):** a bounded A* over block positions sized for a player (feet + head clear, something to stand
+  on; steps up of 1 with headroom, drops of up to `MAX_DROP` 3; no corner-cutting diagonals; never through or onto
+  fire, lava, campfires, cactus, magma, berry bushes, powder snow, wither roses or cobwebs; slabs/carpets count as
+  floor). Budget `MAX_NODES` 1600 within `SEARCH_RADIUS` 32. The goal is the ground under the target (searched down
+  `GROUND_SEARCH` 6), reached within `GOAL_REACH` 1.6 and 2 blocks of height. Re-pathed every `REPATH_TICKS` 10, or at
+  once when the target has moved `REPATH_TARGET_MOVE` 3. A partial path is walked only if it ends
+  `PARTIAL_MIN_GAIN` 2.5 blocks closer. Waypoints go to the client in `WebNet.TakeoverPath` (`web_takeover_path`; at
+  most `PATH_SEND_MAX` 48) with a mode: PATH, DIRECT, RIP or FALLBACK.
+- **Straight line** only when the target is within `DIRECT_RANGE` 7, within `DIRECT_MAX_DY` 1.2 of your height, in
+  clear sight at the eyes and the feet, and there's ground all along the line (no lurching into a ravine).
+- **Running:** a flood fill (`FLEE_NODES` 1400, cost up to `FLEE_MAX_COST` 40) for the reachable spot that scores best:
+  distance from the threat − `FLEE_COST_WEIGHT` 0.35 × path cost, + `FLEE_SKY_BONUS` 3 under open sky. A spot must
+  gain `FLEE_MIN_GAIN` 4 blocks of distance, else it's trapped and rips away from the threat.
+- **Walking it (client):** faces and moves toward the next waypoint (reached within `WAYPOINT_REACH` 0.7, or
+  `CORNER_REACH` 0.45 at a corner; skips up to 2 ahead), slows to `CORNER_SLOW` 0.65 near corners, jumps
+  (`JUMP_SPEED` 0.42) for a waypoint `STEP_JUMP` 0.4+ higher or on bumping a wall, swims up, and creeps
+  (`LEDGE_CREEP` 0.25) at an edge the path doesn't drop down. Chasing, the eyes stay on the prey; running, it
+  sprints at `FLEE_SPEED_SCALE` 1.3. The old straight lurch (with its detours) is the fallback.
+- **Stuck:** moved less than `STUCK_MOVE` 0.9 in `STUCK_TICKS` 30 (and not in reach of the prey): it re-paths at once
+  (and stays off the straight line for `DIRECT_BAN_TICKS` 60). Stuck `STUCK_RIP_AFTER` 2 times running: it rips.
+- **Ripping through:** no path within the budget, a sealed room, or stuck: the tendrils tear out the blocks in the
+  first blocked cell toward the target (or away from the threat), up to `RIP_LOOKAHEAD` 3 cells along the main axis
+  (then the other): a 1×2 slot, or a step (the block above the step and over your head) when the target is higher,
+  a step down when it's lower. One block at a time: the tendril reaches for it (the `web_symbiote_ripping` attachment,
+  synced, draws every tendril reaching into it), it cracks over `RIP_LASH_TICKS` 6 + `RIP_TICKS_PER_HARDNESS` 2 ×
+  hardness (at most 24) with hit sounds, small debris puffs and the black `trail`, then breaks with drops, a debris
+  puff, black dust and a strong-attack thud; `RIP_GAP_TICKS` 3 between blocks. Then it re-paths. You're held still
+  facing the block, and the dread overlay is refreshed every `RIP_FX_EVERY` 40. The first rip in a takeover whispers
+  "Walls won't stop it. It tears through."
+- **What it won't break:** unbreakable blocks, anything harder than `RIP_MAX_HARDNESS` 20 (obsidian and harder),
+  blocks with block entities (chests, furnaces, spawners...), fluids, blocks you may not interact with
+  (`ServerPlayer.mayInteract`: spawn protection, world border) or act on in your game mode (`blockActionRestricted`),
+  and anything a protection mod refuses through Fabric's `PlayerBlockBreakEvents.BEFORE` (it fires `AFTER` too). At most
+  `RIP_MAX_BLOCKS` 32 per takeover, within `RIP_REACH` 4.5. Nothing breakable in the way (a ravine, bedrock, a chest
+  wall): the blind fallback, and no new rip for `RIP_RETRY_TICKS` 40.
 
 **Feeding (0.8): kill, grab, carry, then feed.** Jaymo's Kitchen is now a required dependency (corpses).
 - The symbiote never feeds on anything living. Hungry (`SELF_FEED_BELOW` 50, checked every `SELF_FEED_EVERY` 20) it
@@ -502,6 +541,12 @@ in `build.gradle`, CurseForge ids still to fill in).
 - **Radial:** the key-up poll uses `InputConstants.isKeyDown(scancode)`. A mouse-button binding falls back to
   click-to-choose.
 - **Takeover:** steering fights the player's own mouse each tick. It may feel jerky on high-FPS clients.
+- **Takeover pathing:** the path is computed from the server's view of your position (client-authoritative movement),
+  so lag can make the first waypoint lag a little (the client picks the nearest of the first four). Check: a mob
+  behind a wall (it should walk round), a mob in a sealed stone room (it should rip a 1×2 slot in, never through
+  chests or obsidian, and not inside spawn protection), a mob up a hill or down a pit (steps), and a run for its life
+  in a cave (it heads for the best open spot, ripping only if walled in). Ripping drops the blocks as items. The A*
+  runs every 10 ticks per driven player (bounded at 1600 nodes).
 
 ### Known gaps / upgrade ideas
 - Feeding when your own hunger bar is full isn't possible: vanilla won't start eating.
