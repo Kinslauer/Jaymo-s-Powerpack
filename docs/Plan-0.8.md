@@ -251,6 +251,28 @@ Add both to `packMods` in `build.gradle`. Their CurseForge project and file ids 
 - **Levels with the player:** the tornado's radius and height grow with mastery level, from about 3 blocks at the first level to about 6 when fully mastered. The damage per tier is as in the table.
 - Your own damage is what limits how long you hold it. Add a short cooldown after you let go, and a hunger cost.
 
+## Track 6 — Fire touches everything flammable
+
+**Decided:** every fire effect sets alight the flammable entities it reaches, not just the creature it was aimed at.
+
+**New `core/Flames`** (one shared rule): `Flames.touch(level, entity, seconds, by)` decides what fire does to any entity. Every fire effect calls it on everything in its area:
+- **Creatures and players:** set alight, unless fire-immune.
+- **Jaymo's Kitchen corpses:** set alight. They already burn to ash, and a burning creeper corpse explodes.
+- **Dropped items:** set alight. Non-fireproof items burn up, as in vanilla.
+- **Creepers:** their fuse is lit, as with flint and steel.
+- **TNT minecarts:** explode. **Primed TNT:** its fuse is shortened.
+- **Arrows and other projectiles in flight:** become flaming, so they set alight what they hit.
+- **Armor stands:** burn and break, as in vanilla.
+- A Web user whose symbiote is near a fire effect gets the existing fire flinch, not only when they're burning themselves.
+
+**Fire effects that switch to it:**
+- **Laevateinn:** its hits, and Flame Wave's whole arc.
+- **Gravity's Meteor:** the burning trail and the impact.
+- **Relics:** Sunfang, and the soul-fire relic.
+- **Wind:** lightning from the storm and Stormbound.
+- **Cyclone (corrupted):** its shock damage.
+- Any new fire effect added later uses it too.
+
 ## Before coding starts
 
 - **Version:** bump to 0.8.0 (new packets: `ChronoFlow.Move` gains a field, plus a new screen-effect kind). Each track ends with a `./gradlew build`, plus the in-game checks listed in each section.
@@ -266,6 +288,7 @@ Add both to `packMods` in `build.gradle`. Their CurseForge project and file ids 
 7. One jump frees a carried player, unless they're stunned or otherwise unable to act (5.2).
 10. Wind users can fly while carrying, slightly slower, with all 4 holds; on foot only fireman's and bridal (5.2).
 11. First-person Model joins the pack; living tendrils must be visible in first person (5.3).
+17. Every fire effect sets alight the flammable entities it reaches: creatures, corpses, dropped items, creepers, TNT minecarts, projectiles and armor stands (Track 6).
 16. Wind gets Cyclone on hold X, in a superhero-landing stance, with the damage table in 5.4.
 15. Tendrils holding creatures or debris turn an attack into a combo: clap, crush or shatter (4.4).
 14. Tendril strikes (heavy and autonomous) vary between overhead slams and sideways swipes (4.3).
