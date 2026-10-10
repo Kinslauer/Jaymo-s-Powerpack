@@ -59,10 +59,7 @@ def packMods = [
 	// YDM's Weapon Master (CC0): hotbar weapons shown on the body; LambDynamicLights (MIT): held torches etc. light the area
 	[dep: "maven.modrinth:weaponmaster:M0qt6sse", cf: [608235, 8905060]],
 	[dep: "maven.modrinth:lambdynamiclights:rylKnJ4M", cf: [393442, 8890400]],
-	// Towns and Towers (villages and pillager outposts reworked) and its library; Sound Physics Remastered (echoes,
-	// muffling); Lootr (every loot chest has its own loot for each player)
-	[dep: "maven.modrinth:towns-and-towers:yajFnGZS", cf: [626761, 8895612]],
-	[dep: "maven.modrinth:cristel-lib:rWxmPrGC", cf: [856996, 8921504]],
+	// Sound Physics Remastered (echoes, muffling); Lootr (every loot chest has its own loot for each player)
 	[dep: "maven.modrinth:sound-physics-remastered:9loJgQlO", cf: [535489, 8909383]],
 	[dep: "maven.modrinth:lootr:gVwn7m2v", cf: [615106, 8987242]],
 ]
@@ -75,6 +72,11 @@ def packMods = [
 def packModsNoCf = [
 	[dep: "maven.modrinth:first-person-model:Z05WZTy2", cf: null],
 	[dep: "maven.modrinth:not-enough-animations:EhSk2OTD", cf: null],
+	// ATi Structures and Grim Kingdoms, Vanilla Editions (all rights reserved; "feel free to add to any modpack"):
+	// big medieval castles, forts and ruins built from vanilla blocks, with vanilla mobs and loot. Server-side
+	// worldgen, so the server having them is what counts. TODO(home PC): their CurseForge ids, as above.
+	[dep: "maven.modrinth:ati-structures-vanilla-edition:3NkwZrUy", cf: null],
+	[dep: "maven.modrinth:grim-kingdoms-lost-structures-ruins-vanilla-edition:Hn8zuckE", cf: null],
 ]
 // not on CurseForge: shipped inside the pack as overrides
 def kitchenJar = fileTree("libs") { include "jaymos-kitchen-*.jar" }
@@ -84,7 +86,8 @@ def localPackMods = [
 	// (none right now; Distant Horizons was here until 0.4.5)
 ]
 // mods taken out of the pack: moved out of your CurseForge profile's mods folder (into removed-mods) on the next build
-def removedFromProfile = ["DistantHorizons-"]
+// (Towns and Towers left in 0.8.4: its villages fought Epic Structures: Villages, where kingdoms are founded)
+def removedFromProfile = ["DistantHorizons-", "t_and_t-", "cristellib-"]
 def localPackJars = files(localPackMods.collect { it.file })
 
 
