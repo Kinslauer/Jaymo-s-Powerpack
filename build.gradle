@@ -2,8 +2,11 @@ plugins {
 	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 }
 
-// build output lives outside OneDrive: its syncing locks files and breaks rebuilds
-layout.buildDirectory = file("E:/jaymos-kingdoms-build")
+// build output lives outside OneDrive on the home PC (its syncing locks files and breaks rebuilds); elsewhere
+// (a cloud session) the usual build/ folder
+if (file("E:/").exists()) {
+	layout.buildDirectory = file("E:/jaymos-kingdoms-build")
+}
 
 repositories {
 	mavenCentral()
