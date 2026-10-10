@@ -140,6 +140,16 @@ public final class WebSymbiote {
 	public static final int NOISE_GRACE_TICKS = 100;
 	/** A burning episode ends after this long without fire (so it's one exposure per episode, not per tick). */
 	public static final int FIRE_EPISODE_GAP = 60;
+	/**
+	 * It's terrified of fire: every {@code FLEE_CHECK_TICKS} with fire or lava close (or you burning) it shoves you
+	 * clear, toward open ground away from it (or, with nowhere to go, up and out), at most every {@code FLEE_TICKS}.
+	 */
+	public static final int FLEE_CHECK_TICKS = 5, FLEE_TICKS = 12;
+	/** Your screen when it flinches: orange-red from fire, a bright bluish white from noise (colour, ticks). */
+	public static final int FIRE_VIGNETTE = 0xFF4A10, NOISE_VIGNETTE = 0xCFE4FF, VIGNETTE_TICKS = 50;
+	/** Striking a flint (or throwing a fire charge) near it: a scream, stress, and it does something you didn't ask for. */
+	public static final int FLINT_STRESS = 10;
+	public static final float FLINT_LASH_DAMAGE = 4.0F;
 
 	/** Bonded, your webs reach this much further, pull this much harder, and Zip cools down this much faster. */
 	public static final double REACH_SCALE = 1.5;
@@ -349,6 +359,9 @@ public final class WebSymbiote {
 		/** It swelled into the armour only to eat: once the meal's done it goes back (the suit as it was). */
 		boolean feedingArmor;
 		boolean suitBeforeFeeding;
+		/** When it can shove you from fire again; the last stress band it spoke up about (0-4). */
+		long fleeReadyAt;
+		int stressBand;
 		/** The meal: what (-1 once swallowed), whether it's two bites, where it was picked up, and what it gives. */
 		int eatTarget = -1;
 		boolean eatBig;
@@ -362,6 +375,9 @@ public final class WebSymbiote {
 
 	static void register() {
 		UseBlockCallback.EVENT.register(WebSymbiote::onUseBlock);
+		// a flint struck (or a fire charge) in its hands: it panics
+		UseBlockCallback.EVENT.register((player, world, hand, hit) -> flint(player, hand));
+		net.fabricmc.fabric.api.event.player.UseItemCallback.EVENT.register(WebSymbiote::flint);
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.SymbioteUse.TYPE, (payload, ctx) -> use(ctx.player(), payload.ability()));
 		// attacking anything breaks the Shroud
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
@@ -577,6 +593,15 @@ public final class WebSymbiote {
 		if (player.onGround() || player.isInWater()) {
 			live.caughtFall = false;
 		}
+		if (player.tickCount % FLEE_CHECK_TICKS == 0 && now >= live.fleeReadyAt && live.bondTicks <= 0 && !player.isCreative()) {
+			fleeFire(player, live, now);
+		}
+		// it speaks up as it gets more wound up
+		int band = Math.min(4, next.stress() / 25);
+		if (band > live.stressBand && band > 0) {
+			whisper(player, "stress_" + band);
+		}
+		live.stressBand = band;
 		if (live.takeoverTicks <= 0 && live.bondTicks <= 0 && !player.isCreative() && player.tickCount % INSTINCT_CHECK_TICKS == 0) {
 			next = instinct(player, live, next, now);
 		}
@@ -840,8 +865,9 @@ public final class WebSymbiote {
 		level.sendParticles(dust(1.5F), player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.5, 0.8, 0.5, 0.0);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 1.2F, 0.4F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.5F, 1.8F);
-		// the suit flinches off you for a moment: a little jolt upward
+		// the suit flinches off you for a moment: a little jolt upward, and your sight swims
 		ServerPlayNetworking.send(player, new WebNet.Nudge(new Vec3(0.0, 0.25, 0.0)));
+		vignette(player, kind == Exposure.FIRE ? FIRE_VIGNETTE : NOISE_VIGNETTE);
 		if (rejections >= REJECT_AT) {
 			set(player, next);
 			reject(player);
@@ -1213,6 +1239,113 @@ public final class WebSymbiote {
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_JUMP, SoundSource.PLAYERS, 1.0F, 0.4F);
 		level.sendParticles(dust(1.4F), player.getX(), player.getY() + 0.2, player.getZ(), 14, 0.4, 0.1, 0.4, 0.0);
+	}
+
+	/** Your screen washes with how it feels (see {@link #FIRE_VIGNETTE}). */
+	static void vignette(ServerPlayer player, int color) {
+		ServerPlayNetworking.send(player, new com.jaymospowers.power.wind.WindNet.ScreenFx(
+			com.jaymospowers.power.wind.WindNet.ScreenFx.VIGNETTE, color, VIGNETTE_TICKS));
+	}
+
+	/** Fire close by: it shoves you toward the clearest open ground away from it, or straight up if there's none. */
+	private static void fleeFire(ServerPlayer player, Live live, long now) {
+		BlockPos fire = nearFire(player);
+		if (fire == null && !player.isOnFire()) {
+			return;
+		}
+		live.fleeReadyAt = now + FLEE_TICKS;
+		ServerLevel level = player.level();
+		tendrilsOut(player);
+		player.clearFire();
+		Vec3 away = fire == null ? player.getLookAngle().reverse() : player.position().subtract(Vec3.atCenterOf(fire));
+		away = new Vec3(away.x, 0.0, away.z);
+		away = away.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : away.normalize();
+		Vec3 best = null;
+		double bestScore = -2.0;
+		for (int i = 0; i < 16; i++) {
+			double a = i / 16.0 * Math.PI * 2.0;
+			Vec3 dir = new Vec3(Math.cos(a), 0.0, Math.sin(a));
+			double score = dir.dot(away);
+			if (score <= bestScore || score < -0.2) {
+				continue;
+			}
+			// room to go, and no fire where it lands
+			AABB there = player.getBoundingBox().move(dir.scale(1.6)).move(0.0, 0.1, 0.0);
+			BlockPos landing = BlockPos.containing(player.position().add(dir.scale(1.6)));
+			if (level.noCollision(player, there) && !level.getBlockState(landing).is(net.minecraft.tags.BlockTags.FIRE)) {
+				best = dir;
+				bestScore = score;
+			}
+		}
+		Vec3 shove = best == null ? new Vec3(0.0, 0.75, 0.0) : best.scale(INSTINCT_FIRE_SHOVE).add(0.0, 0.4, 0.0);
+		ServerPlayNetworking.send(player, new WebNet.Nudge(shove));
+		vignette(player, FIRE_VIGNETTE);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.7F, 1.4F);
+		level.sendParticles(dust(1.3F), player.getX(), player.getY() + 0.4, player.getZ(), 10, 0.3, 0.2, 0.3, 0.0);
+	}
+
+	/** A flint and steel or a fire charge used while bonded: it won't let you, and it panics. */
+	private static InteractionResult flint(Player player, net.minecraft.world.level.Level level, InteractionHand hand) {
+		return flint(player, hand);
+	}
+
+	private static InteractionResult flint(Player player, InteractionHand hand) {
+		ItemStack held = player.getItemInHand(hand);
+		if (!(held.is(Items.FLINT_AND_STEEL) || held.is(Items.FIRE_CHARGE)) || !isBonded(player) || player.isSpectator()) {
+			return InteractionResult.PASS;
+		}
+		if (!(player instanceof ServerPlayer serverPlayer)) {
+			// let the use reach the server, which refuses it
+			return InteractionResult.PASS;
+		}
+		panic(serverPlayer, hand);
+		return InteractionResult.FAIL;
+	}
+
+	/** It screams, and does one thing you didn't ask for: drops what's in your hand, lashes out, or bolts. */
+	private static void panic(ServerPlayer player, InteractionHand hand) {
+		ServerLevel level = player.level();
+		WebSymbioteState state = state(player);
+		set(player, state.withStress(Math.min(STRESS_MAX, state.stress() + FLINT_STRESS)));
+		tendrilsOut(player);
+		vignette(player, FIRE_VIGNETTE);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GHAST_SCREAM, SoundSource.PLAYERS, 1.2F, 1.5F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 0.8F, 1.8F);
+		level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.7, 0.4, 0.06);
+		whisper(player, "flint");
+		var random = player.getRandom();
+		switch (random.nextInt(3)) {
+			case 0 -> {
+				// it flings the thing out of your hand
+				ItemStack stack = player.getItemInHand(hand);
+				player.setItemInHand(hand, ItemStack.EMPTY);
+				player.drop(stack, true, net.minecraft.util.Prediction.SERVER_ONLY);
+			}
+			case 1 -> {
+				// it lashes out at whatever's nearest (you, if there's nothing else)
+				LivingEntity nearest = null;
+				double best = 5.0 * 5.0;
+				for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(5.0),
+					e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand))) {
+					double d = living.distanceToSqr(player);
+					if (d < best) {
+						best = d;
+						nearest = living;
+					}
+				}
+				if (nearest != null) {
+					player.setAttached(STRIKE, new Strike(nearest.getId(), level.getGameTime() - (STRIKE_HIT - RETALIATE_LAG)));
+					nearest.hurtServer(level, level.damageSources().playerAttack(player), FLINT_LASH_DAMAGE);
+				} else {
+					player.hurtServer(level, level.damageSources().magic(), FLINT_LASH_DAMAGE * 0.5F);
+				}
+			}
+			default -> {
+				// it bolts, dragging you with it
+				double a = random.nextDouble() * Math.PI * 2.0;
+				ServerPlayNetworking.send(player, new WebNet.Nudge(new Vec3(Math.cos(a) * 1.3, 0.45, Math.sin(a) * 1.3)));
+			}
+		}
 	}
 
 	/** A lit creeper or primed TNT close by: where it is. */

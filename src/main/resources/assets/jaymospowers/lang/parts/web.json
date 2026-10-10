@@ -43,5 +43,15 @@
 	"message.jaymospowers.web_symbiote.sulking": "It won't come. It's still angry with you.",
 	"message.jaymospowers.web_symbiote.sulk_over": "It creeps back to you, calmer now.",
 	"message.jaymospowers.web_symbiote.inedible": "It recoils. It won't touch that.",
-	"message.jaymospowers.web_symbiote.self_feed": "It's hungry. It feeds."
+	"message.jaymospowers.web_symbiote.self_feed": "It's hungry. It feeds.",
+	"message.jaymospowers.web_symbiote.stress_1": "It shifts under your skin, restless.",
+	"message.jaymospowers.web_symbiote.stress_2": "It's irritable. It doesn't like this.",
+	"message.jaymospowers.web_symbiote.stress_3": "It seethes. Something will have to give.",
+	"message.jaymospowers.web_symbiote.stress_4": "It hates you right now. It wants out, or it wants blood.",
+	"message.jaymospowers.web_symbiote.flint": "It SCREAMS. Not fire. Never fire.",
+	"message.jaymospowers.web_symbiote.curious": "It wants a closer look.",
+	"message.jaymospowers.web_symbiote.just_looking": "It sets them down. It was only looking.",
+	"message.jaymospowers.web_symbiote.not_looking": "It didn't like what it saw.",
+	"message.jaymospowers.web_symbiote.defend": "You're dying. It isn't. It takes over to save itself.",
+	"message.jaymospowers.web_symbiote.bulk_down": "The bulk sinks back into the tendrils."
 }
