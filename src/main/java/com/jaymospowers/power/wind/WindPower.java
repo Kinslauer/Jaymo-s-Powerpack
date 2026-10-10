@@ -482,7 +482,8 @@ public final class WindPower implements Power {
 				// (the Tempest rides the wind for free)
 				if (!Fate.isAscended(player)) {
 					double speed = s.lastPos == null ? 0.0 : Math.min(moved.length(), 3.0);
-					player.causeFoodExhaustion((float)(FLIGHT_EXHAUSTION_BASE + FLIGHT_EXHAUSTION_PER_SPEED * speed));
+					player.causeFoodExhaustion((float)(FLIGHT_EXHAUSTION_BASE + FLIGHT_EXHAUSTION_PER_SPEED * speed)
+						* (com.jaymospowers.core.Carry.isCarrying(player) ? com.jaymospowers.core.Carry.FLIGHT_HUNGER : 1.0F));
 				}
 			}
 		}

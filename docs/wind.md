@@ -381,3 +381,42 @@ whisper in the action bar.
 - Weather and sky darkness (`isBrightOutside`) are synced to clients by vanilla. On a dedicated server the client's
   glyph and flight factor may lag the server's by a tick or two. Ability strength is always the server's value.
 - The Gale Heart drop uses `spawnAtLocation` from the `AFTER_DEATH` event. It drops even when `doMobLoot` is off.
+
+## 0.8.0: Tempest Kick, varied every time (`WindKick`, `WindPose` KICK branch)
+- **The reference:** a manga high roundhouse. The leg is so fast it's mostly the white crescent; the body sells it.
+- **Each kick rolls** (server, synced in `jaymospowers:wind_kick`, now a `WindKick.Kicking(start, left, seed)` record
+  with a codec and a stream codec):
+  - a **side**: which leg kicks. It mirrors everything: the leg, the lean, the twist, and the crescent (the snap's
+    swing arc comes round from the kicking side, and the flying crescent is tipped low on that side).
+  - an **arm variant** (`seed & 3`): 0 the reference (the arm on the leaning side flung up and back over the head,
+    the kicking side's arm pulled down across the hip); 1 mirrored; 2 both arms flung wide and high; 3 high arm up,
+    low arm swung back behind. The rest of the seed jitters the lean, the twist, the leg's height and the arms.
+- **Timing** (`KICK_TICKS` 9 → 11): `WINDUP_TICKS` 3 of wind-up (the lean eases in, the knee chambers, a breeze
+  inhale), the **snap** on the hit tick (the leg whips out to head height and round across the front, the swing arc
+  and the sweep sound, and the crescent leaves the foot), then follow-through and recovery to tick 11.
+- **The lean** is done on the whole model in the `PoseStack` (`WindPose.kickLean`, from `setupRotations`), pivoting
+  on the standing foot: tipped `KICK_LEAN` 30° (±5) away from the kicking leg, `KICK_LEAN_BACK` 8° back, twisted from
+  `KICK_TWIST_WINDUP` -12° to `KICK_TWIST_THROUGH` 28°, and up `KICK_RISE` 0.07 on the ball of the foot. The head turns
+  back against the twist and levels against half the lean, so it stays on the target.
+- The leg's three key poses are `LEG_CHAMBER_*`, `LEG_APEX_*` and `LEG_THROUGH_*` (model radians; mirrored by side).
+- The crescent itself is unchanged in range, damage and speed; it now starts on the hit tick, following the kicker
+  until then.
+
+## 0.8.0: carrying while flying (see `docs/carry.md`)
+- A Wind user carrying someone can take off and fly as usual, at `Carry.FLIGHT_SPEED` ×0.8 of the top cruise speed
+  (`WindFlightController`) and `Carry.FLIGHT_HUNGER` ×1.3 the flight hunger (`WindPower`).
+- In the air any of the four holds can be rolled; take-off rolls a new one, and landing with a flight-only hold
+  (shoulder grab, over the back) switches to fireman's or bridal.
+- A cruising carrier's tilt is shared with the body they hold (`WindPose.tiltLike`), so the two lie along the flight
+  together. While carrying, the superman pose and the hover sway leave the arms to the hold.
+- Being carried ends your own flight (`WindFlight.canFly` is false while carried), and a carried wind user shows no
+  wind poses.
+
+### Testing (0.8.0)
+1. Tempest Kick (`/power set @s wind`, all abilities): kick a dozen times in third person (F5). Both legs should
+   appear, the body tipping hard away from the kicking leg about the planted foot, the arms in four different
+   arrangements. The swing arc comes round from the kicking side on the hit tick (about 0.15 s after the key), then
+   the crescent flies, tipped low on that side.
+2. A second client sees the same side and arms as the kicker.
+3. Carry someone while flying: cruise speed tops out lower, hunger drains faster, and the held body lies along the
+   flight with you.

@@ -4,6 +4,8 @@ import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,13 +50,45 @@ public final class WindKick {
 	static final double SPEED = 1.6, HALF_WIDTH = 1.8, HALF_HEIGHT = 0.7;
 	static final double PUSH = 0.8, LIFT = 0.25;
 	static final int COOLDOWN = 60, COOLDOWN_ASCENDED = 40;
-	/** How long the kick itself is drawn (ticks). */
-	public static final int KICK_TICKS = 9;
+	/**
+	 * How long the kick is drawn (ticks): {@link #WINDUP_TICKS} of wind-up (the lean, the leg chambering), the snap
+	 * through the arc on the hit tick, then the follow-through and recovery.
+	 */
+	public static final int KICK_TICKS = 11;
+	/** The crescent leaves the foot this many ticks after the key, at the top of the snap. */
+	public static final int WINDUP_TICKS = 3;
+	/** The swing trail drawn round the body on the hit tick: its radius, height (share of the body) and points. */
+	static final double SWING_RADIUS = 1.1, SWING_HEIGHT = 0.8;
+	static final int SWING_POINTS = 10;
+	/** How far the crescent tips, its kicking-side tip low and the other high (blocks at each tip). */
+	static final double CRESCENT_TILT = 0.35;
 	private static final DustParticleOptions WHITE = new DustParticleOptions(0xFFFFFF, 1.4F);
 
-	/** On a kicking player: when the kick began (game time). Synced to everyone, who see the roundhouse. */
-	public static final AttachmentType<Long> KICKING = AttachmentRegistry.create(JaymosPowers.id("wind_kick"),
-		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
+	/**
+	 * A kick under way: when it began (game time), which leg kicks ({@code left}: the left leg, everything mirrored),
+	 * and a seed that picks the arm variant (its low 2 bits) and jitters the angles.
+	 */
+	public record Kicking(long start, boolean left, int seed) {
+		public static final Codec<Kicking> CODEC = RecordCodecBuilder.create(i -> i.group(
+			Codec.LONG.fieldOf("start").forGetter(Kicking::start),
+			Codec.BOOL.fieldOf("left").forGetter(Kicking::left),
+			Codec.INT.fieldOf("seed").forGetter(Kicking::seed)
+		).apply(i, Kicking::new));
+		public static final StreamCodec<ByteBuf, Kicking> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_LONG, Kicking::start,
+			ByteBufCodecs.BOOL, Kicking::left,
+			ByteBufCodecs.INT, Kicking::seed,
+			Kicking::new);
+
+		/** Which of the four arm variants (0: the reference, 1: mirrored, 2: both flung wide, 3: low arm swung back). */
+		public int arms() {
+			return this.seed & 3;
+		}
+	}
+
+	/** On a kicking player: the kick (see {@link Kicking}). Synced to everyone, who see the roundhouse. */
+	public static final AttachmentType<Kicking> KICKING = AttachmentRegistry.create(JaymosPowers.id("wind_kick"),
+		builder -> builder.syncWith(Kicking.STREAM_CODEC, AttachmentSyncPredicate.all()));
 
 	/** Client → server: X pressed. */
 	public record Kick() implements CustomPacketPayload {
@@ -74,10 +108,14 @@ public final class WindKick {
 		final Vec3 dir, side;
 		final double range;
 		final float damage;
+		/** +1 kicked with the right leg (it sweeps in from the right), -1 the left. */
+		final double sweep;
+		/** Ticks of wind-up left before it leaves the foot. */
+		int delay;
 		double travelled;
 		final Set<Integer> hit = new HashSet<>();
 
-		Crescent(ResourceKey<Level> dimension, UUID owner, Vec3 pos, Vec3 dir, Vec3 side, double range, float damage) {
+		Crescent(ResourceKey<Level> dimension, UUID owner, Vec3 pos, Vec3 dir, Vec3 side, double range, float damage, double sweep, int delay) {
 			this.dimension = dimension;
 			this.owner = owner;
 			this.pos = pos;
@@ -85,6 +123,8 @@ public final class WindKick {
 			this.side = side;
 			this.range = range;
 			this.damage = damage;
+			this.sweep = sweep;
+			this.delay = delay;
 		}
 	}
 
@@ -111,16 +151,32 @@ public final class WindKick {
 		}
 		boolean ascended = Fate.isAscended(player);
 		READY_AT.put(player.getUUID(), now + (ascended ? COOLDOWN_ASCENDED : COOLDOWN));
-		player.setAttached(KICKING, now);
+		Kicking kicking = new Kicking(now, player.getRandom().nextBoolean(), player.getRandom().nextInt());
+		player.setAttached(KICKING, kicking);
 		Vec3 look = player.getLookAngle();
 		Vec3 flat = new Vec3(look.x, 0.0, look.z);
 		flat = flat.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, player.getYRot()) : flat.normalize();
+		// (the player's right, in the world)
 		Vec3 side = new Vec3(-flat.z, 0.0, flat.x);
 		Vec3 start = player.position().add(0.0, player.getBbHeight() * 0.55, 0.0).add(flat.scale(0.8));
 		CRESCENTS.add(new Crescent(level.dimension(), player.getUUID(), start, flat, side, ascended ? RANGE_ASCENDED : RANGE,
-			(ascended ? DAMAGE_ASCENDED : DAMAGE) * WindModes.abilityScale(player)));
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0F, 0.7F);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 1.0F, 1.2F);
+			(ascended ? DAMAGE_ASCENDED : DAMAGE) * WindModes.abilityScale(player), kicking.left() ? -1.0 : 1.0, WINDUP_TICKS));
+		// the wind-up: a low draw of breath before the snap
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_INHALE, SoundSource.PLAYERS, 0.6F, 1.6F);
+	}
+
+	/** The snap: the leg whips round from the kicking side to the front, leaving a white arc at head height. */
+	private static void snap(ServerLevel level, Crescent c) {
+		Vec3 centre = c.pos.subtract(c.dir.scale(0.8)).add(0.0, (SWING_HEIGHT - 0.55) * 1.8, 0.0);
+		for (int i = 0; i <= SWING_POINTS; i++) {
+			// from straight out on the kicking side (90 degrees) round to dead ahead, rising as it goes
+			double a = Math.PI * 0.5 * (1.0 - i / (double)SWING_POINTS);
+			Vec3 at = centre.add(c.side.scale(Math.sin(a) * SWING_RADIUS * c.sweep)).add(c.dir.scale(Math.cos(a) * SWING_RADIUS))
+				.add(0.0, -0.25 * Math.sin(a), 0.0);
+			level.sendParticles(WHITE, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+		}
+		level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0F, 0.7F);
+		level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 1.0F, 1.2F);
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -130,6 +186,16 @@ public final class WindKick {
 			ServerPlayer owner = server.getPlayerList().getPlayer(c.owner);
 			if (level == null || c.travelled >= c.range) {
 				it.remove();
+				continue;
+			}
+			if (c.delay > 0) {
+				// still winding up: it follows the kicker until it leaves the foot
+				if (owner != null && owner.level() == level) {
+					c.pos = owner.position().add(0.0, owner.getBbHeight() * 0.55, 0.0).add(c.dir.scale(0.8));
+				}
+				if (--c.delay == 0) {
+					snap(level, c);
+				}
 				continue;
 			}
 			Vec3 next = c.pos.add(c.dir.scale(SPEED));
@@ -144,7 +210,8 @@ public final class WindKick {
 			// a flat crescent, swept back at its tips
 			for (int i = -6; i <= 6; i++) {
 				double t = i / 6.0;
-				Vec3 at = c.pos.add(c.side.scale(t * HALF_WIDTH)).subtract(c.dir.scale(t * t * 0.9));
+				// tipped: low on the side it was kicked from, high on the other
+				Vec3 at = c.pos.add(c.side.scale(t * HALF_WIDTH)).subtract(c.dir.scale(t * t * 0.9)).add(0.0, -t * c.sweep * CRESCENT_TILT, 0.0);
 				level.sendParticles(WHITE, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 			}
 			level.sendParticles(ParticleTypes.CLOUD, c.pos.x, c.pos.y, c.pos.z, 2, HALF_WIDTH * 0.4, 0.1, HALF_WIDTH * 0.4, 0.01);

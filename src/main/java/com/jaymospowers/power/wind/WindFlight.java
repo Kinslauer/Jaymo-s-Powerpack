@@ -36,13 +36,14 @@ public enum WindFlight {
 
 	/**
 	 * Whether the player may be flying right now. Flight ends when the player dies, rides something, sleeps, goes
-	 * under water (eyes submerged) or wades into lava past the knees. Same rule on both sides.
+	 * under water (eyes submerged), wades into lava past the knees, or is picked up and carried. Same rule on both sides.
 	 */
 	public static boolean canFly(Player player) {
 		return player.isAlive()
 			&& !player.isSpectator()
 			&& !player.isPassenger()
 			&& !player.isSleeping()
+			&& !com.jaymospowers.core.Carry.isCarried(player)
 			&& !player.isEyeInFluid(FluidTags.WATER)
 			&& player.getFluidHeight(FluidTags.LAVA) < 0.4;
 	}

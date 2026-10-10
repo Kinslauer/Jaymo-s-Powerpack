@@ -19,6 +19,11 @@ public final class KitchenCompat {
 		return LOADED ? Kitchen.carried(player) : null;
 	}
 
+	/** Whether this player has a corpse in their arms (either side): their hands are full. */
+	public static boolean isCarryingCorpse(Player player) {
+		return carriedCorpse(player) != null;
+	}
+
 	/** A corpse drawn in by a power: pocketed if it fits, otherwise carried. */
 	public static void take(Player player, Entity corpse) {
 		if (LOADED) {

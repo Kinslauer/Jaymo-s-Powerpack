@@ -2,6 +2,14 @@
 	"required": true,
 	"package": "com.jaymospowers.client.mixin",
 	"compatibilityLevel": "JAVA_25",
-	"client": [],
+	"client": [
+		"CarryArmInvoker",
+		"CarryAvatarRendererMixin",
+		"CarryCameraMixin",
+		"CarryFirstPersonMixin",
+		"CarryLivingEntityRendererMixin",
+		"CarryModelFeatureRendererMixin",
+		"CarryUseMixin"
+	],
 	"injectors": { "defaultRequire": 1 }
 }
