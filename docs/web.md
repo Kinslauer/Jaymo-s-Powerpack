@@ -343,7 +343,8 @@ action bar, each heard once.
 drives you (rampage and hunger takeovers, a curious one on its way to look, the feeding hunt, the run for its life)
 it no longer lurches in a straight line into walls.
 - **The path (server):** a bounded A* over block positions sized for a player (feet + head clear, something to stand
-  on; steps up of 1 with headroom, drops of up to `MAX_DROP` 3; no corner-cutting diagonals; never through or onto
+  on; steps up of 1 with headroom, charged leaps up taller ledges (below), drops of up to `MAX_DROP` 3; no
+  corner-cutting diagonals; never through or onto
   fire, lava, campfires, cactus, magma, berry bushes, powder snow, wither roses or cobwebs; slabs/carpets count as
   floor). Budget `MAX_NODES` 1600 within `SEARCH_RADIUS` 32. The goal is the ground under the target (searched down
   `GROUND_SEARCH` 6), reached within `GOAL_REACH` 1.6 and 2 blocks of height. Re-pathed every `REPATH_TICKS` 10, or at
@@ -356,26 +357,57 @@ it no longer lurches in a straight line into walls.
   distance from the threat − `FLEE_COST_WEIGHT` 0.35 × path cost, + `FLEE_SKY_BONUS` 3 under open sky. A spot must
   gain `FLEE_MIN_GAIN` 4 blocks of distance, else it's trapped and rips away from the threat.
 - **Walking it (client):** faces and moves toward the next waypoint (reached within `WAYPOINT_REACH` 0.7, or
-  `CORNER_REACH` 0.45 at a corner; skips up to 2 ahead), slows to `CORNER_SLOW` 0.65 near corners, jumps
-  (`JUMP_SPEED` 0.42) for a waypoint `STEP_JUMP` 0.4+ higher or on bumping a wall, swims up, and creeps
-  (`LEDGE_CREEP` 0.25) at an edge the path doesn't drop down. Chasing, the eyes stay on the prey; running, it
-  sprints at `FLEE_SPEED_SCALE` 1.3. The old straight lurch (with its detours) is the fallback.
+  `CORNER_REACH` 0.45 at a corner; skips up to 2 ahead), hops (a plain jump, `JUMP_SPEED` 0.42) for a waypoint
+  `STEP_JUMP` 0.4+ higher or on bumping a wall, swims up, and creeps (`LEDGE_CREEP` 0.25) at an edge the path doesn't
+  drop down. Chasing, the eyes stay on the prey. The old straight lurch (with its detours) is the fallback.
+- **Sprinting (0.8.3):** it sprints whenever it can, in every mode (chasing, hunting, curious, running): the sprint
+  flag is on (so the gallop shows and the server sees it; `WebSprintMixin` keeps vanilla from cancelling a sprint with
+  no forward key held) at `TAKEOVER_SPEED` 0.38 blocks/tick, × `FLEE_SPEED_SCALE` 1.2 running. It drops to a walk
+  (`WALK_SPEED` 0.24) on a tight corner (within `CORNER_SLOW_RANGE` 1.2 of a turn sharper than `CORNER_COS`), on a
+  step up, at an edge, before and during a leap, in water, and when you're too hungry to sprint (vanilla's rule: food
+  above 6, or flight allowed). It costs hunger as any sprint does.
+- **Steps and leaps (0.8.3):** while a takeover has the legs, the suit's charged jump stands aside
+  (`WebSymbioteClient.driving()`: `WebSwing.holdingCharge` is false so `WebJumpMixin` lets plain jumps through, and
+  `tickChargeJump` ignores your Jump key), so 1-block steps are plain hops. A ledge taller than that is climbed with a
+  **charged leap**: the A* has a leap move up `LEAP_MIN_RISE` 2 to `LEAP_MAX_RISE` blocks onto the lowest ledge on that
+  side, with headroom above where it coils (up to the ledge's height + 2) and over the ledge; it costs `COST_LEAP` 3 +
+  `COST_LEAP_PER_BLOCK` 0.5 a block on top of the step, so walking round wins unless the leap saves real distance or is
+  the only way. `LEAP_MAX_RISE` is `WebLeap.TAKEOVER_MAX_RISE`: the height a **3/4 charge** (`TAKEOVER_MAX_CHARGE`)
+  clears with `CLEARANCE` 0.6 to spare, worked out from the leap's own physics (up speed `CHARGE_UP_MIN` 0.45 →
+  `CHARGE_UP_MAX` 1.65 blocks/tick, gravity 0.08, drag 0.98): 9 blocks. Too high even for that, and it walks round or
+  rips as before. On the client, a waypoint more than `LEAP_MIN_RISE` 1.4 above your feet is a ledge: it walks to its
+  foot (`LEAP_START_RANGE` 1.3, or until it bumps the wall), coils only as much charge as the rise needs
+  (`WebLeap.chargeFor`, at your gravity; e.g. about 0.15 for 2 blocks, 0.26 for 3, 0.35 for 4, never above 0.75) for that share
+  of `CHARGE_FULL` 30 ticks, crouching (`ChargeHold`, so everyone sees the coil; the server accepts it during a
+  takeover even with the suit hidden) and squelching, then leaps, nudged on at `LEAP_FORWARD` 0.12 and steered onto the
+  ledge in the air. Coiling counts as progress for the stuck check. The leap numbers live in `power/web/WebLeap`,
+  shared with the suit's own charged jump (`WebSwing`).
 - **Stuck:** moved less than `STUCK_MOVE` 0.9 in `STUCK_TICKS` 30 (and not in reach of the prey): it re-paths at once
   (and stays off the straight line for `DIRECT_BAN_TICKS` 60). Stuck `STUCK_RIP_AFTER` 2 times running: it rips.
-- **Ripping through:** no path within the budget, a sealed room, or stuck: the tendrils tear out the blocks in the
-  first blocked cell toward the target (or away from the threat), up to `RIP_LOOKAHEAD` 3 cells along the main axis
-  (then the other): a 1×2 slot, or a step (the block above the step and over your head) when the target is higher,
-  a step down when it's lower. One block at a time: the tendril reaches for it (the `web_symbiote_ripping` attachment,
-  synced, draws every tendril reaching into it), it cracks over `RIP_LASH_TICKS` 6 + `RIP_TICKS_PER_HARDNESS` 2 ×
-  hardness (at most 24) with hit sounds, small debris puffs and the black `trail`, then breaks with drops, a debris
-  puff, black dust and a strong-attack thud; `RIP_GAP_TICKS` 3 between blocks. Then it re-paths. You're held still
-  facing the block, and the dread overlay is refreshed every `RIP_FX_EVERY` 40. The first rip in a takeover whispers
-  "Walls won't stop it. It tears through."
+- **Ripping through (debris-style since 0.8.3):** no path within the budget, a sealed room, or stuck: the tendrils
+  tear out the blocks in the first blocked cell toward the target (or away from the threat), up to `RIP_LOOKAHEAD` 3
+  cells along the main axis (then the other): a 1×2 slot, or a step (the block above the step and over your head) when
+  the target is higher, a step down when it's lower. The whole slot comes out as **one clump**, the way Living Armor's
+  tendrils tear a chunk loose: the tendrils dig in (the `web_symbiote_ripping` attachment, synced, draws every tendril
+  reaching into the block nearest your eyes) and work it loose over `RIP_LASH_TICKS` 8 + `RIP_TICKS_PER_HARDNESS` 2 ×
+  the hardest block's hardness + `RIP_TICKS_PER_BLOCK` 3 per extra block (at most `RIP_LASH_MAX_TICKS` 30), every
+  block cracking, with hit sounds, small debris puffs (`RIP_DEBRIS` 0.3) and the black `trail`. Then the blocks are
+  torn out through the shared code path, `BlockCluster.of` (the same puffs and wrench sounds as Living Armor's
+  sneak-rip; no item drops at the tear), and a free tendril takes the clump with `WebTendrils.grab` (it reaches, hauls
+  it up out of the hole and holds it, cords drawn as for any grab). After `RIP_HOLD_TICKS` 6 held (or
+  `RIP_HOLD_TIMEOUT` 40 after the tear) it's **flung aside** with `WebTendrils.fling`: square to the way through, to
+  the side (level, or up and over) with the most open room within `RIP_FLING_LOOK` 4 blocks, at `RIP_FLING_SPEED` 1.2
+  with `RIP_FLING_LIFT` 0.25, so never ahead into your path and never back at you. It's a launched clump: it batters
+  whatever it hits (never you) and shatters into dust, a few blocks dropping as items (`BlockCluster.DROP_CHANCE`). In a
+  tight tunnel it shatters against the wall beside you. Both tendrils full: the clump is shoved aside at once. Then it
+  re-paths. You're held still facing the block, and the dread overlay is refreshed every `RIP_FX_EVERY` 40. The first
+  rip in a takeover whispers "Walls won't stop it. It tears through." A takeover ending with a clump held flings it
+  aside.
 - **What it won't break:** unbreakable blocks, anything harder than `RIP_MAX_HARDNESS` 20 (obsidian and harder),
-  blocks with block entities (chests, furnaces, spawners...), fluids, blocks you may not interact with
+  blocks with block entities (chests, furnaces, spawners...), fluids and waterlogged blocks, blocks you may not interact with
   (`ServerPlayer.mayInteract`: spawn protection, world border) or act on in your game mode (`blockActionRestricted`),
   and anything a protection mod refuses through Fabric's `PlayerBlockBreakEvents.BEFORE` (it fires `AFTER` too). At most
-  `RIP_MAX_BLOCKS` 32 per takeover, within `RIP_REACH` 4.5. Nothing breakable in the way (a ravine, bedrock, a chest
+  `RIP_MAX_BLOCKS` 32 per takeover (a clump is trimmed to what's left), within `RIP_REACH` 4.5. Nothing breakable in the way (a ravine, bedrock, a chest
   wall): the blind fallback, and no new rip for `RIP_RETRY_TICKS` 40.
 
 **Feeding (0.8): kill, grab, carry, then feed.** Jaymo's Kitchen is now a required dependency (corpses).
@@ -545,8 +577,15 @@ in `build.gradle`, CurseForge ids still to fill in).
   so lag can make the first waypoint lag a little (the client picks the nearest of the first four). Check: a mob
   behind a wall (it should walk round), a mob in a sealed stone room (it should rip a 1×2 slot in, never through
   chests or obsidian, and not inside spawn protection), a mob up a hill or down a pit (steps), and a run for its life
-  in a cave (it heads for the best open spot, ripping only if walled in). Ripping drops the blocks as items. The A*
-  runs every 10 ticks per driven player (bounded at 1600 nodes).
+  in a cave (it heads for the best open spot, ripping only if walled in). The A* runs every 10 ticks per driven player
+  (bounded at 1600 nodes).
+- **0.8.3 takeover checks:** it sprints (gallop, speed, hunger drain) chasing, hunting and running, walks at corners,
+  steps and edges, and walks with an empty belly (food 6 or less). A 1-block step is a plain hop, never a coil, even
+  holding Jump. A 2-4 block ledge with no stairs nearby: it walks to the wall, crouches briefly (longer for taller) and
+  leaps just over it; with stairs a few blocks off it should prefer them. A 10+ block cliff: walks round or rips. A
+  sealed room: each 1×2 slot is worked loose (all blocks cracking), torn out as one clump, hauled up by a tendril and
+  flung sideways (not down the tunnel, not at you); it should shatter nearby with some drops. Check that a leap that
+  misses its ledge (laggy server) only falls the clearance, and that protection mods still stop the tear.
 
 ### Known gaps / upgrade ideas
 - Feeding when your own hunger bar is full isn't possible: vanilla won't start eating.

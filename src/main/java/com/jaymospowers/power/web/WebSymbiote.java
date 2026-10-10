@@ -599,6 +599,12 @@ public final class WebSymbiote {
 
 	// ---- server ------------------------------------------------------------------------------------------------------
 
+	/** A takeover has the wheel (it walks you, and coils your leaps). */
+	static boolean driving(ServerPlayer player) {
+		Live live = player.getAttached(LIVE);
+		return live != null && live.takeoverTicks > 0;
+	}
+
 	private static Live live(ServerPlayer player) {
 		Live live = player.getAttached(LIVE);
 		if (live == null) {

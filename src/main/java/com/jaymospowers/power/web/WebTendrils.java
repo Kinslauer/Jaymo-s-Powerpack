@@ -297,6 +297,21 @@ public final class WebTendrils {
 
 	/** Lets go of what a tendril holds: thrown where you look ({@code hurl}), or just dropped. */
 	static void release(ServerPlayer player, int hand, boolean hurl) {
+		letGo(player, hand, hurl ? player.getLookAngle().scale(THROW_SPEED).add(0.0, THROW_LIFT, 0.0) : null);
+	}
+
+	/** Lets go of what a tendril holds, flung at {@code v} (blocks/tick) instead of where you look. */
+	static void fling(ServerPlayer player, int hand, Vec3 v) {
+		letGo(player, hand, v);
+	}
+
+	/** A tendril holding nothing (main first), or -1 if both are full. */
+	static int freeHand(ServerPlayer player) {
+		Grips grips = player.getAttachedOrElse(GRIPS, Grips.NONE);
+		return grips.right() < 0 ? WebNet.MAIN : grips.left() < 0 ? WebNet.OFF : -1;
+	}
+
+	private static void letGo(ServerPlayer player, int hand, @org.jspecify.annotations.Nullable Vec3 thrown) {
 		Grips grips = player.getAttached(GRIPS);
 		Hold[] holds = HOLDS.get(player.getUUID());
 		if (holds != null) {
@@ -316,8 +331,8 @@ public final class WebTendrils {
 			return;
 		}
 		weightless(target, false);
-		if (hurl) {
-			Vec3 v = player.getLookAngle().scale(THROW_SPEED).add(0.0, THROW_LIFT, 0.0);
+		if (thrown != null) {
+			Vec3 v = thrown;
 			target.setDeltaMovement(v);
 			target.needsSync = true;
 			target.syncVelocity = true;

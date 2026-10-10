@@ -647,17 +647,17 @@ public final class WebSwing {
 
 	// ===== the suit's charged jump ===================================================================================
 	/** Ticks to a full charge; the leap from a tap to a full charge (up, and forward along the look). */
-	static final int CHARGE_FULL = 30;
-	static final double CHARGE_UP_MIN = 0.45, CHARGE_UP_MAX = 1.65;
-	static final double CHARGE_FORWARD_MAX = 1.1;
+	static final int CHARGE_FULL = com.jaymospowers.power.web.WebLeap.CHARGE_FULL;
+	static final double CHARGE_FORWARD_MAX = com.jaymospowers.power.web.WebLeap.CHARGE_FORWARD_MAX;
 	/** Charge held (ticks); whether the server's been told it's held. */
 	int chargeTicks;
 	private boolean chargeSent;
 
 	/** True while Jump is being held to charge a leap on the ground (the plain jump is held back; see the mixin). */
 	public static boolean holdingCharge(LocalPlayer player) {
+		// (not while a takeover has the legs: its steps are plain hops, its leaps its own)
 		return com.jaymospowers.power.web.WebSymbiote.suitShown(player) && WebPowerClient.isActive(player)
-			&& Minecraft.getInstance().options.keyJump.isDown();
+			&& Minecraft.getInstance().options.keyJump.isDown() && !WebSymbioteClient.driving();
 	}
 
 	/**
@@ -666,6 +666,13 @@ public final class WebSwing {
 	 * ground to leap, as high and far as the charge; let go in the air and the charge is lost.
 	 */
 	private void tickChargeJump(LocalPlayer player) {
+		if (WebSymbioteClient.driving()) {
+			// a takeover has the legs (it coils its own leaps)
+			if (chargeTicks > 0 || chargeSent) {
+				endCharge();
+			}
+			return;
+		}
 		boolean jump = player.input.keyPresses.jump();
 		boolean ground = player.onGround();
 		if (jump && !attached()) {
@@ -687,7 +694,7 @@ public final class WebSwing {
 			Vec3 flat = new Vec3(look.x, 0.0, look.z);
 			flat = flat.lengthSqr() < 1.0E-4 ? Vec3.ZERO : flat.normalize().scale(CHARGE_FORWARD_MAX * c);
 			Vec3 v = player.getDeltaMovement();
-			player.setDeltaMovement(v.x + flat.x, Mth.lerp(c, CHARGE_UP_MIN, CHARGE_UP_MAX), v.z + flat.z);
+			player.setDeltaMovement(v.x + flat.x, com.jaymospowers.power.web.WebLeap.speed(c), v.z + flat.z);
 			play(player, SoundEvents.SLIME_JUMP, 1.0F, 0.6F);
 			if (c > 0.5F) {
 				play(player, SoundEvents.WIND_CHARGE_BURST.value(), 0.6F, 0.6F);

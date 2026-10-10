@@ -119,20 +119,33 @@ public final class WebSymbioteClient {
 	static final double LEDGE_HOP = 0.35;
 	static final double LEDGE_FORWARD = 0.18;
 	// ===== takeover ================================================================================================
-	/** How fast it drags you at its prey, and how hard it wrenches your view around (0..1 per tick). */
-	static final double TAKEOVER_SPEED = 0.34;
+	/**
+	 * How fast it drags you (blocks/tick): sprinting whenever it can, chasing, hunting or running; walking on tight
+	 * corners, step-ups and edges, mid-leap, in water, or when you're too hungry to sprint. And how hard it wrenches
+	 * your view around (0..1 per tick).
+	 */
+	static final double TAKEOVER_SPEED = 0.38, WALK_SPEED = 0.24;
 	static final float TAKEOVER_TURN = 0.35F;
 	/** Running: this much faster than the chase, and the view swings round this hard. */
-	static final double FLEE_SPEED_SCALE = 1.3;
+	static final double FLEE_SPEED_SCALE = 1.2;
 	static final float FLEE_TURN = 0.5F;
 	/** A waypoint counts as reached this close (blocks, horizontally; tighter at a corner) and this close in height. */
 	static final double WAYPOINT_REACH = 0.7, CORNER_REACH = 0.45, WAYPOINT_REACH_Y = 1.2;
 	/** It skips ahead to a later waypoint (up to this many) if you're already that close to it. */
 	static final int WAYPOINT_SKIP = 2;
-	/** A corner (the way turns by more than acos of this) slows it to this share, from this far out (blocks). */
-	static final double CORNER_COS = 0.7, CORNER_SLOW = 0.65, CORNER_SLOW_RANGE = 1.2;
-	/** It jumps for a waypoint this much higher than your feet (blocks), from this close. */
+	/** A corner (the way turns by more than acos of this) slows it to a walk, from this far out (blocks). */
+	static final double CORNER_COS = 0.7, CORNER_SLOW_RANGE = 1.2;
+	/** It hops (a plain jump, never the suit's charged leap) for a waypoint this much higher than your feet (blocks), from this close. */
 	static final double STEP_JUMP = 0.4, STEP_JUMP_RANGE = 1.6, JUMP_SPEED = 0.42;
+	/**
+	 * A waypoint more than {@code LEAP_MIN_RISE} above your feet (blocks) is a ledge: it walks to its foot (within
+	 * {@code LEAP_START_RANGE}), coils only as much charge as the height needs (see {@link com.jaymospowers.power.web.WebLeap},
+	 * never more than its {@code TAKEOVER_MAX_CHARGE}), holding still but for {@code LEAP_HOLD} of its speed a tick, and
+	 * leaps, nudged on over the edge at {@code LEAP_FORWARD} (blocks/tick).
+	 */
+	static final double LEAP_MIN_RISE = 1.4, LEAP_START_RANGE = 1.3, LEAP_HOLD = 0.3, LEAP_FORWARD = 0.12;
+	/** A coil's squelch every this many ticks. */
+	static final int LEAP_SOUND_EVERY = 6;
 	/** Edge guard: it looks this many ticks of movement ahead for ground within this drop, else it creeps. */
 	static final double LEDGE_LOOK_TICKS = 3.0, LEDGE_DROP = 1.1, LEDGE_CREEP = 0.25;
 	/** Swimming up along a path (or toward it), per tick. */
@@ -163,6 +176,13 @@ public final class WebSymbioteClient {
 	private static java.util.List<Vec3> pathNodes = java.util.List.of();
 	private static int pathIndex;
 	private static net.minecraft.core.BlockPos ripFocus = net.minecraft.core.BlockPos.ZERO;
+	/** A takeover's leap: ticks coiled (-1 none), ticks it coils for, the charge it leaps with; and whether this tick touched it. */
+	private static int leapCoil = -1;
+	private static int leapTicks;
+	private static float leapCharge;
+	private static boolean leapTouched;
+	/** The takeover has you sprinting (vanilla mustn't stop it for want of a forward key; see WebSprintMixin). */
+	private static boolean sprintHeld;
 	private static final Set<Integer> THREATS = new HashSet<>();
 	private static long threatsAt;
 
@@ -397,6 +417,36 @@ public final class WebSymbioteClient {
 		pathMode = WebNet.TakeoverPath.FALLBACK;
 		pathNodes = java.util.List.of();
 		pathIndex = 0;
+		sprintHeld = false;
+		endLeap();
+	}
+
+	/** A takeover has the legs right now: the suit's own charged jump stands aside (its steps are plain hops). */
+	public static boolean driving() {
+		return takeoverTicks > 0;
+	}
+
+	/** The takeover wants you sprinting. */
+	public static boolean holdsSprint() {
+		return takeoverTicks > 0 && sprintHeld;
+	}
+
+	/** Food enough (or flight) to sprint, and not swimming. */
+	private static boolean canSprint(LocalPlayer player) {
+		return (player.getFoodData().hasEnoughFood() || player.getAbilities().mayfly) && !player.isInWater();
+	}
+
+	private static void sprint(LocalPlayer player, boolean on) {
+		sprintHeld = on;
+		player.setSprinting(on);
+	}
+
+	/** Lets go of a coil (the server stops showing the crouch). */
+	private static void endLeap() {
+		if (leapCoil >= 0 && ClientPlayNetworking.canSend(WebNet.ChargeHold.TYPE)) {
+			ClientPlayNetworking.send(new WebNet.ChargeHold(false));
+		}
+		leapCoil = -1;
 	}
 
 	/** It's steering, view and all: along the server's path, straight at its prey when it's right there, or still while it rips. */
@@ -407,24 +457,26 @@ public final class WebSymbioteClient {
 			clearPath();
 			return;
 		}
+		leapTouched = false;
 		if (pathMode == WebNet.TakeoverPath.RIP) {
 			holdForRip(player);
-			return;
-		}
-		if (pathMode == WebNet.TakeoverPath.PATH && followPath(player, target)) {
-			return;
-		}
-		if (takeoverFlee) {
+		} else if (pathMode == WebNet.TakeoverPath.PATH && followPath(player, target)) {
+			// on its way
+		} else if (takeoverFlee) {
 			flee(player, target);
-			return;
+		} else {
+			straight(player, target);
 		}
-		straight(player, target);
+		if (!leapTouched && leapCoil >= 0) {
+			endLeap();
+		}
 	}
 
 	/** The tendrils are tearing a way through: it stands its ground and stares at the block. */
 	private static void holdForRip(LocalPlayer player) {
 		Vec3 to = Vec3.atCenterOf(ripFocus).subtract(player.getEyePosition());
 		turnToward(player, to, TAKEOVER_TURN, true);
+		sprint(player, false);
 		Vec3 v = player.getDeltaMovement();
 		player.setDeltaMovement(v.x * RIP_HOLD, v.y, v.z * RIP_HOLD);
 	}
@@ -470,7 +522,6 @@ public final class WebSymbioteClient {
 		Vec3 dir = dh < 1.0E-4 ? Vec3.ZERO : flat.scale(1.0 / dh);
 		if (takeoverFlee) {
 			turnToward(player, flat, FLEE_TURN, false);
-			player.setSprinting(true);
 		} else {
 			// it walks the way but its eyes stay on the prey
 			Vec3 at = target.getBoundingBox().getCenter().subtract(player.getEyePosition());
@@ -478,18 +529,28 @@ public final class WebSymbioteClient {
 			float p = (float)(-Mth.atan2(at.y, at.horizontalDistance()) * Mth.RAD_TO_DEG);
 			player.setXRot(Mth.clamp(player.getXRot() + (p - player.getXRot()) * TAKEOVER_TURN, -90.0F, 90.0F));
 		}
-		double speed = TAKEOVER_SPEED * (takeoverFlee ? FLEE_SPEED_SCALE : 1.0);
-		if (pathIndex + 1 < n && dh < CORNER_SLOW_RANGE && corner(pathIndex)) {
-			speed *= CORNER_SLOW;
+		// a ledge too tall to step: a charged leap (charged only as far as it needs)
+		double rise = landing(player, node) - pos.y;
+		boolean ledge = rise > LEAP_MIN_RISE && !player.isInWater();
+		if (ledge && (player.onGround() || leapCoil >= 0) && leapUp(player, dir, dh, rise)) {
+			return true;
 		}
+		// sprinting, but for a tight corner, a step up, an edge, a leap or an empty belly
+		double sprintSpeed = TAKEOVER_SPEED * (takeoverFlee ? FLEE_SPEED_SCALE : 1.0);
+		boolean step = node.y > pos.y + STEP_JUMP && dh < STEP_JUMP_RANGE;
+		boolean corner = pathIndex + 1 < n && dh < CORNER_SLOW_RANGE && corner(pathIndex);
+		boolean edge = player.onGround() && node.y >= pos.y - 0.5 && !groundAhead(player, dir.scale(sprintSpeed));
+		boolean sprinting = canSprint(player) && !step && !corner && !edge && !ledge;
+		sprint(player, sprinting);
+		double speed = sprinting ? sprintSpeed : WALK_SPEED;
 		// never faster than it takes to land on the waypoint
 		Vec3 move = dir.scale(Math.min(speed, Math.max(dh, speed * 0.5)));
 		Vec3 v = player.getDeltaMovement();
 		double up = v.y;
-		boolean higher = node.y > pos.y + STEP_JUMP;
 		if (player.isInWater()) {
 			up = Math.max(up, takeoverFlee ? FLEE_SWIM_UP : SWIM_UP);
-		} else if (player.onGround() && (higher && dh < STEP_JUMP_RANGE || player.horizontalCollision)) {
+		} else if (player.onGround() && !ledge && (step || player.horizontalCollision)) {
+			// a step: a plain hop
 			up = JUMP_SPEED;
 		} else if (player.onGround() && node.y >= pos.y - 0.5 && !groundAhead(player, move)) {
 			// an edge the path doesn't go over: creep, straight for the waypoint
@@ -497,6 +558,53 @@ public final class WebSymbioteClient {
 		}
 		player.setDeltaMovement(move.x, up, move.z);
 		return true;
+	}
+
+	/**
+	 * A ledge too tall to step: on to its foot, then coil (only as much charge as the rise needs, never more than
+	 * {@link com.jaymospowers.power.web.WebLeap#TAKEOVER_MAX_CHARGE}) and leap. False while it's still walking to the foot.
+	 */
+	private static boolean leapUp(LocalPlayer player, Vec3 dir, double dh, double rise) {
+		leapTouched = true;
+		if (leapCoil < 0) {
+			if (dh > LEAP_START_RANGE && !player.horizontalCollision) {
+				return false;
+			}
+			double gravity = player.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.GRAVITY);
+			leapCharge = com.jaymospowers.power.web.WebLeap.chargeFor(rise, gravity, com.jaymospowers.power.web.WebLeap.TAKEOVER_MAX_CHARGE);
+			leapTicks = Math.max(1, Mth.ceil(leapCharge * com.jaymospowers.power.web.WebLeap.CHARGE_FULL));
+			leapCoil = 0;
+			if (ClientPlayNetworking.canSend(WebNet.ChargeHold.TYPE)) {
+				ClientPlayNetworking.send(new WebNet.ChargeHold(true));
+			}
+		}
+		if (!player.onGround()) {
+			endLeap();
+			return false;
+		}
+		sprint(player, false);
+		Vec3 v = player.getDeltaMovement();
+		if (++leapCoil < leapTicks) {
+			if (leapCoil % LEAP_SOUND_EVERY == 0) {
+				WebSwing.play(player, net.minecraft.sounds.SoundEvents.SLIME_SQUISH_SMALL, 0.4F, 0.6F + leapCoil / (float)com.jaymospowers.power.web.WebLeap.CHARGE_FULL);
+			}
+			player.setDeltaMovement(v.x * LEAP_HOLD, v.y, v.z * LEAP_HOLD);
+			return true;
+		}
+		player.setDeltaMovement(dir.x * LEAP_FORWARD, com.jaymospowers.power.web.WebLeap.speed(leapCharge), dir.z * LEAP_FORWARD);
+		WebSwing.play(player, net.minecraft.sounds.SoundEvents.SLIME_JUMP, 1.0F, 0.6F);
+		if (leapCharge > 0.5F) {
+			WebSwing.play(player, net.minecraft.sounds.SoundEvents.WIND_CHARGE_BURST.value(), 0.6F, 0.6F);
+		}
+		endLeap();
+		return true;
+	}
+
+	/** Where your feet land on waypoint {@code node}: on top of whatever's in its block (a slab, a snow layer). */
+	private static double landing(LocalPlayer player, Vec3 node) {
+		net.minecraft.core.BlockPos at = net.minecraft.core.BlockPos.containing(node.x, node.y + 0.01, node.z);
+		net.minecraft.world.phys.shapes.VoxelShape shape = player.level().getBlockState(at).getCollisionShape(player.level(), at);
+		return node.y + (shape.isEmpty() ? 0.0 : shape.max(net.minecraft.core.Direction.Axis.Y));
 	}
 
 	/** Whether the way turns sharply at waypoint {@code i} (coming from where you are, or from the one before). */
@@ -540,6 +648,7 @@ public final class WebSymbioteClient {
 		player.setYRot(player.getYRot() + Mth.wrapDegrees(yaw - player.getYRot()) * TAKEOVER_TURN);
 		player.setXRot(Mth.clamp(player.getXRot() + (pitch - player.getXRot()) * TAKEOVER_TURN, -90.0F, 90.0F));
 		Vec3 flat = new Vec3(to.x, 0.0, to.z);
+		sprint(player, false);
 		if (flat.lengthSqr() > 1.5 * 1.5) {
 			// find a way: straight at it if it's open (or a step it can hop), else the nearest open way round
 			Vec3 dir = flat.normalize();
@@ -567,7 +676,9 @@ public final class WebSymbioteClient {
 			} else if (player.onGround() && (hop || player.horizontalCollision)) {
 				up = JUMP_SPEED;
 			}
-			Vec3 move = way.scale(TAKEOVER_SPEED);
+			boolean sprinting = canSprint(player) && !hop;
+			sprint(player, sprinting);
+			Vec3 move = way.scale(sprinting ? TAKEOVER_SPEED : WALK_SPEED);
 			player.setDeltaMovement(move.x, up, move.z);
 		}
 	}
@@ -620,8 +731,9 @@ public final class WebSymbioteClient {
 		} else if (player.onGround() && (hop || player.horizontalCollision)) {
 			up = JUMP_SPEED;
 		}
-		player.setSprinting(true);
-		Vec3 move = best.scale(TAKEOVER_SPEED * FLEE_SPEED_SCALE);
+		boolean sprinting = canSprint(player) && !hop;
+		sprint(player, sprinting);
+		Vec3 move = best.scale((sprinting ? TAKEOVER_SPEED : WALK_SPEED) * FLEE_SPEED_SCALE);
 		player.setDeltaMovement(move.x, up, move.z);
 	}
 
