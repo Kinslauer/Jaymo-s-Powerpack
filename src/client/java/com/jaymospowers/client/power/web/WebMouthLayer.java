@@ -22,9 +22,9 @@ import net.minecraft.util.Mth;
 
 /**
  * The symbiote's maw, while it eats (Consume): the whole head morphs into it. A skull and a jaw, bigger than the head
- * and closing right over it, rimmed with fangs, hinged at the back of the head. With each of the
- * {@link WebSymbiote#EAT_CHOMPS} chomps they gape wide, the whole maw swelling and lunging forward as if to swallow
- * what's in front, then snap shut. Everyone sees it. Texture: {@code tools/gen_web_maw.py}.
+ * and closing right over it, rimmed with fangs, hinged at the back of the head. It swells out as the tendril brings
+ * the meal up, gapes to its widest and snaps shut on each bite (one, or two for something cow-sized), chews a while,
+ * and sinks back (timings in {@link WebSymbiote#EAT_REACH} and on). Everyone sees it. Texture: {@code tools/gen_web_maw.py}.
  */
 final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	private static final Identifier TEXTURE = JaymosPowers.id("textures/entity/web_symbiote_mouth.png");
@@ -32,8 +32,8 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	private static final float SKULL_GAPE = 0.95F, JAW_GAPE = 0.8F;
 	/** At the very widest, the maw is this much bigger, and this far forward (pixels). */
 	private static final float SWELL = 0.45F, LUNGE = 3.0F;
-	/** It grows out of the head over this much of the meal, and sinks back over the last of it. */
-	private static final float MORPH = 0.08F;
+	/** How many ticks before a bite the maw starts to gape, and how wide a chew opens it. */
+	private static final float GAPE_TICKS = 8.0F, CHEW_OPEN = 0.18F;
 
 	private final MouthModel model;
 
@@ -90,22 +90,31 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		@Override
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
-			Float phase = state.getData(WebSymbioteClient.EATING);
-			if (phase == null) {
+			Float ticks = state.getData(WebSymbioteClient.EATING);
+			if (ticks == null) {
 				return;
 			}
-			// wide on the way in, snapping shut on each bite; each bite its own size
-			float chomp = Math.abs(Mth.sin(phase * WebSymbiote.EAT_CHOMPS * Mth.PI));
-			int bite = Math.min(WebSymbiote.EAT_CHOMPS - 1, (int)(phase * WebSymbiote.EAT_CHOMPS));
-			// each bite a random size (WebSymbiote#biteSize, the same the server rolls: a full last bite swallows it whole)
-			Long start = state.getData(WebSymbioteClient.EATING_SEED);
-			Integer eater = state.getData(WebSymbioteClient.EATER);
-			float size = start == null || eater == null ? 1.0F : WebSymbiote.biteSize(start, eater, bite);
-			float open = (float)Math.pow(chomp, 0.6) * size;
-			this.skull.xRot = -open * SKULL_GAPE - (float)Math.pow(chomp, 0.6) * 0.25F;
-			this.jaw.xRot = open * JAW_GAPE + (float)Math.pow(chomp, 0.6) * 0.2F;
-			// it grows out of the head, swells with every gape, and sinks back at the end
-			float morph = Mth.clamp(Math.min(phase, 1.0F - phase) / MORPH, 0.0F, 1.0F);
+			float t = ticks;
+			boolean big = Boolean.TRUE.equals(state.getData(WebSymbioteClient.MEAL_BIG));
+			int last = WebSymbiote.biteAt(big ? 1 : 0);
+			int end = WebSymbiote.mealTicks(big);
+			// gaping wide toward each bite, snapping shut on it
+			float open = 0.0F;
+			for (int n = 0; n <= (big ? 1 : 0); n++) {
+				float before = WebSymbiote.biteAt(n) - t;
+				if (before >= 0.0F && before < GAPE_TICKS) {
+					float g = 1.0F - before / GAPE_TICKS;
+					open = Math.max(open, g * g * (3.0F - 2.0F * g));
+				}
+			}
+			// then chewing
+			if (t > last && t < end - WebSymbiote.EAT_SHRINK) {
+				open = Math.max(open, CHEW_OPEN * Math.abs(Mth.sin((t - last) * 0.45F)));
+			}
+			this.skull.xRot = -open * SKULL_GAPE;
+			this.jaw.xRot = open * JAW_GAPE;
+			// it grows out of the head as the meal comes up, swells with every gape, and sinks back at the end
+			float morph = Mth.clamp(Math.min(t / WebSymbiote.EAT_REACH, (end - t) / WebSymbiote.EAT_SHRINK), 0.0F, 1.0F);
 			float scale = Mth.lerp(morph, 0.8F, 1.0F) * (1.0F + SWELL * open);
 			this.root.xScale = scale;
 			this.root.yScale = scale;

@@ -284,30 +284,41 @@ public final class WebSymbiote {
 		return until != null && player.level().getGameTime() < until;
 	}
 
-	/** Consume takes its time: the jaws chomp {@code EAT_CHOMPS} times over {@code EAT_TICKS}, then it's gone. */
-	public static final int EAT_TICKS = 40;
-	public static final int EAT_CHOMPS = 4;
 	/**
-	 * How wide each bite gapes (0-1 of the maw's full, engulfing size): random from {@code BITE_MIN} up. The last bite
-	 * has a {@code LAST_BITE_FULL} chance of going all the way, and then it swallows the meal whole right there.
+	 * A meal, in order: a tendril picks it up and brings it to the head as the head swells into a maw
+	 * ({@code EAT_REACH}); one huge bite takes something small whole, while anything cow-sized is bitten in half (blood
+	 * everywhere) and finished with a second chomp {@code EAT_BITE_GAP} later; then it chews for {@code EAT_CHEW} and
+	 * the head shrinks back over {@code EAT_SHRINK}.
 	 */
-	public static final float BITE_MIN = 0.15F, LAST_BITE_FULL = 0.25F;
+	public static final int EAT_REACH = 14, EAT_BITE_GAP = 12, EAT_CHEW = 40, EAT_SHRINK = 8;
+	/** At or above this size (width² × height / 2, clamped 0-1) a meal takes two bites. */
+	public static final float BIG_MEAL = 0.5F;
 
-	/** Bite {@code bite}'s size for the meal begun at {@code start} by entity {@code id}: the same on the server and every client. */
-	public static float biteSize(long start, int id, int bite) {
-		net.minecraft.util.RandomSource random = net.minecraft.util.RandomSource.create((start * 31L + id) * 7919L + bite);
-		float roll = random.nextFloat();
-		if (bite == EAT_CHOMPS - 1 && roll < LAST_BITE_FULL) {
-			return 1.0F;
-		}
-		return Mth.lerp(random.nextFloat(), BITE_MIN, 1.0F) * 0.999F;
+	/** When bite {@code n} (0 or 1) lands, in ticks from the meal's start. */
+	public static int biteAt(int n) {
+		return EAT_REACH + 4 + n * EAT_BITE_GAP;
 	}
+
+	/** The meal's whole length, chewing and shrinking back included. */
+	public static int mealTicks(boolean big) {
+		return biteAt(big ? 1 : 0) + EAT_CHEW + EAT_SHRINK;
+	}
+
 	/** What a meal does for your own hunger: food points per point healed, and the saturation modifier. */
 	public static final float CONSUME_HUNGER_PER_HEAL = 0.75F;
 	public static final float CONSUME_SATURATION = 0.6F;
-	/** A meal in progress (game time it began): synced to everyone, who see the jaws work. */
-	public static final AttachmentType<Long> EATING = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_eating"),
-		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
+
+	/** A meal in progress: when it began, and whether it takes two bites. Synced to everyone, who see the maw work. */
+	public record Meal(long start, boolean big) {
+		public static final net.minecraft.network.codec.StreamCodec<io.netty.buffer.ByteBuf, Meal> STREAM_CODEC =
+			net.minecraft.network.codec.StreamCodec.composite(
+				net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, Meal::start,
+				net.minecraft.network.codec.ByteBufCodecs.BOOL, Meal::big,
+				Meal::new);
+	}
+
+	public static final AttachmentType<Meal> EATING = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_eating"),
+		builder -> builder.syncWith(Meal.STREAM_CODEC, AttachmentSyncPredicate.all()));
 
 	private static final class Live {
 		long noiseReadyAt;
@@ -338,9 +349,10 @@ public final class WebSymbiote {
 		/** It swelled into the armour only to eat: once the meal's done it goes back (the suit as it was). */
 		boolean feedingArmor;
 		boolean suitBeforeFeeding;
-		/** The meal: what, until when, and what it gives. */
+		/** The meal: what (-1 once swallowed), whether it's two bites, where it was picked up, and what it gives. */
 		int eatTarget = -1;
-		long eatUntil;
+		boolean eatBig;
+		Vec3 eatFrom = Vec3.ZERO;
 		float eatHeal;
 		int eatFeed;
 	}
@@ -543,7 +555,7 @@ public final class WebSymbiote {
 		}
 
 		// hungry, it feeds itself on a corpse in reach (swelling into the armour for the meal, if it wasn't)
-		if (next.satiety() < SELF_FEED_BELOW && live.eatTarget < 0 && live.takeoverTicks <= 0 && !sulking(player)
+		if (next.satiety() < SELF_FEED_BELOW && player.getAttached(EATING) == null && live.takeoverTicks <= 0 && !sulking(player)
 			&& player.tickCount % SELF_FEED_EVERY == 0 && selfFeed(player) && !armor) {
 			live.feedingArmor = true;
 			live.suitBeforeFeeding = next.has(WebSymbioteState.SUIT);
@@ -551,10 +563,10 @@ public final class WebSymbiote {
 			applyArmor(player);
 			armor = true;
 		}
-		if (live.eatTarget >= 0) {
+		if (player.getAttached(EATING) != null) {
 			tickEating(player, live, now);
 		}
-		if (live.feedingArmor && live.eatTarget < 0) {
+		if (live.feedingArmor && player.getAttached(EATING) == null) {
 			// fed: it settles back, the tendrils withdrawing
 			live.feedingArmor = false;
 			next = next.withFlag(WebSymbioteState.ARMOR, false).withFlag(WebSymbioteState.SUIT, live.suitBeforeFeeding);
@@ -1357,7 +1369,7 @@ public final class WebSymbiote {
 		ServerLevel level = player.level();
 		// a corpse you're carrying, whatever its size, goes down whole
 		Entity corpse = KitchenCompat.carriedCorpse(player);
-		if (live(player).eatTarget >= 0) {
+		if (player.getAttached(EATING) != null) {
 			return false;
 		}
 		if (corpse != null && edible(corpse)) {
@@ -1399,36 +1411,70 @@ public final class WebSymbiote {
 		return true;
 	}
 
-	/** The jaws open on it: it's held where it is while they chomp, thrashing, and then it's gone. */
+	/** A tendril takes it and brings it to the maw (see {@link #EAT_REACH}). */
 	private static void startEating(ServerPlayer player, Entity food, float heal, int feed) {
 		Live live = live(player);
 		long now = player.level().getGameTime();
+		float size = Mth.clamp(food.getBbWidth() * food.getBbWidth() * food.getBbHeight() / 2.0F, 0.0F, 1.0F);
 		live.eatTarget = food.getId();
-		live.eatUntil = now + EAT_TICKS;
+		live.eatBig = size >= BIG_MEAL;
+		live.eatFrom = food.position();
 		live.eatHeal = heal;
 		live.eatFeed = feed;
-		player.setAttached(EATING, now);
+		player.setAttached(EATING, new Meal(now, live.eatBig));
+		tendrilsOut(player);
 		ServerLevel level = player.level();
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 0.5F, 1.6F);
+	}
+
+	/** Where the meal is held: just in front of the maw. */
+	private static Vec3 mouth(ServerPlayer player, Entity food) {
+		Vec3 look = player.getViewVector(1.0F).horizontal();
+		look = look.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : look.normalize();
+		return player.getEyePosition().add(look.scale(0.6 + food.getBbWidth() * 0.5)).add(0.0, -food.getBbHeight() * 0.5 - 0.1, 0.0);
 	}
 
 	private static void tickEating(ServerPlayer player, Live live, long now) {
 		ServerLevel level = player.level();
+		Meal meal = player.getAttached(EATING);
+		long t = now - meal.start();
+		if (t >= mealTicks(meal.big())) {
+			// chewed, and the head settles back
+			player.removeAttached(EATING);
+			live.eatTarget = -1;
+			return;
+		}
+		if (live.eatTarget < 0) {
+			// swallowed: chewing (a crunch now and then)
+			if (t % 9 == 0 && t < mealTicks(meal.big()) - EAT_SHRINK) {
+				level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 0.8F,
+					0.5F + player.getRandom().nextFloat() * 0.2F);
+			}
+			return;
+		}
 		Entity food = level.getEntity(live.eatTarget);
-		if (food == null || !food.isAlive() || food.distanceTo(player) > CONSUME_RANGE + 3.0) {
+		if (food == null || !food.isAlive() || food.distanceTo(player) > CONSUME_RANGE + 4.0) {
+			// it got away (or was taken): the maw just closes
 			live.eatTarget = -1;
 			player.removeAttached(EATING);
 			return;
 		}
-		long left = live.eatUntil - now;
-		long t = EAT_TICKS - left;
-		Vec3 at = food.getBoundingBox().getCenter();
-		// held still in the jaws (a carried corpse is already held), shaking with every bite
-		if (food instanceof LivingEntity living) {
-			living.setDeltaMovement(Vec3.ZERO);
-			living.syncVelocity = true;
-			if (living instanceof Mob mob) {
+		// the tendril brings it up to the maw, and holds it there, thrashing
+		boolean carried = food == KitchenCompat.carriedCorpse(player);
+		if (!carried) {
+			float reach = Mth.clamp(t / (float)EAT_REACH, 0.0F, 1.0F);
+			reach = reach * reach * (3.0F - 2.0F * reach);
+			Vec3 at = live.eatFrom.lerp(mouth(player, food), reach);
+			food.setPos(at.x, at.y, at.z);
+			food.setDeltaMovement(Vec3.ZERO);
+			food.syncVelocity = true;
+			food.resetFallDistance();
+			if (food instanceof Mob mob) {
 				mob.getNavigation().stop();
+			}
+			if (t % 3 == 0) {
+				trail(level, player.position().add(0.0, player.getBbHeight() * 0.6, 0.0), food.getBoundingBox().getCenter());
 			}
 		}
 		if (t % 3 == 0) {
@@ -1438,35 +1484,32 @@ public final class WebSymbiote {
 				level.broadcastEntityEvent(living, (byte)2);
 			}
 		}
-		int every = EAT_TICKS / EAT_CHOMPS;
-		if (t % every == every / 2) {
-			// a bite
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.PHANTOM_BITE, SoundSource.PLAYERS, 1.1F, 0.4F + player.getRandom().nextFloat() * 0.2F);
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 1.0F, 0.5F);
-			level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 10, food.getBbWidth() * 0.4, food.getBbHeight() * 0.3, food.getBbWidth() * 0.4, 0.06);
-			level.sendParticles(dust(1.6F), at.x, at.y, at.z, 14, food.getBbWidth() * 0.5, food.getBbHeight() * 0.4, food.getBbWidth() * 0.5, 0.0);
-			level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(0x7A0A0A, 1.2F), at.x, at.y, at.z, 10, 0.3, 0.3, 0.3, 0.0);
-		}
-		Long started = player.getAttached(EATING);
-		boolean gulp = started != null && t % every == every / 2 && t / every == EAT_CHOMPS - 1
-			&& biteSize(started, player.getId(), EAT_CHOMPS - 1) >= 1.0F;
-		if (gulp) {
-			// the maw opened all the way: it takes the whole thing in one
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 0.6F, 1.6F);
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 1.3F, 0.3F);
-		} else if (left > 0) {
+		Vec3 at = food.getBoundingBox().getCenter();
+		DustParticleOptions blood = new DustParticleOptions(0x7A0A0A, 1.4F);
+		if (meal.big() && t == biteAt(0)) {
+			// bitten clean in half
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.PHANTOM_BITE, SoundSource.PLAYERS, 1.4F, 0.35F);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.0F, 0.5F);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 1.2F, 0.4F);
+			level.sendParticles(blood, at.x, at.y, at.z, 60, food.getBbWidth() * 0.5, food.getBbHeight() * 0.5, food.getBbWidth() * 0.5, 0.0);
+			level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, at.x, at.y, at.z, 10, 0.3, 0.3, 0.3, 0.2);
+			level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 12, food.getBbWidth() * 0.4, food.getBbHeight() * 0.3, food.getBbWidth() * 0.4, 0.06);
 			return;
 		}
-		// swallowed whole: nothing left behind
-		level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 25, food.getBbWidth() * 0.4, food.getBbHeight() * 0.4, food.getBbWidth() * 0.4, 0.05);
-		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 0.8F, 0.6F);
+		if (t < biteAt(meal.big() ? 1 : 0)) {
+			return;
+		}
+		// the last bite: gone
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.PHANTOM_BITE, SoundSource.PLAYERS, 1.2F, 0.45F);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 1.3F, 0.4F);
+		level.sendParticles(blood, at.x, at.y, at.z, meal.big() ? 30 : 14, food.getBbWidth() * 0.4, food.getBbHeight() * 0.4, food.getBbWidth() * 0.4, 0.0);
+		level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 20, food.getBbWidth() * 0.4, food.getBbHeight() * 0.4, food.getBbWidth() * 0.4, 0.05);
 		food.discard();
 		player.heal(live.eatHeal);
 		feed(player, live.eatFeed, CONSUME_CALM);
 		// and you're fed too: about a hunger point per half-heart it healed
 		player.getFoodData().eat(Math.max(2, Math.round(live.eatHeal * CONSUME_HUNGER_PER_HEAL)), CONSUME_SATURATION);
 		live.eatTarget = -1;
-		player.removeAttached(EATING);
 	}
 
 	/** Feeds the symbiote (and calms it). */

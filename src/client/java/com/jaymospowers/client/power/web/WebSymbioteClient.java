@@ -49,8 +49,7 @@ public final class WebSymbioteClient {
 	/** {@code armor}: Living Armor's (it hunches, swells); otherwise only the tendrils, out on their own for a moment. */
 	public record Tendrils(float growth, float time, float strike, float aimYaw, float aimPitch, float side, float run, int held, boolean armor) {
 	}
-
-	/** A meal in progress: how far through it (0-1), for the jaws. */
+	/** Ticks into a meal (partial ticks included), for the maw. */
 	public static final RenderStateDataKey<Float> EATING = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_eating");
 	/** Which meal this is (when it started), so each bite's size is random but the same for everyone. */
 	/** The suit's charged jump coiling: how far (0-1), for the crouch. */
@@ -90,8 +89,8 @@ public final class WebSymbioteClient {
 		return run.value;
 	}
 
-	public static final RenderStateDataKey<Long> EATING_SEED = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_eating_seed");
-	public static final RenderStateDataKey<Integer> EATER = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_eater");
+	/** A two-bite meal (cow-sized), for the maw. */
+	public static final RenderStateDataKey<Boolean> MEAL_BIG = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_meal_big");
 
 	/** Player entity id → game time their Living Armor came up (for the tendrils' growth). */
 	private static final java.util.Map<Integer, Long> ARMOR_SINCE = new java.util.HashMap<>();
@@ -195,11 +194,9 @@ public final class WebSymbioteClient {
 			COILING.remove(entity.getId());
 			state.setData(CHARGE, null);
 		}
-		Long eating = entity.getAttached(WebSymbiote.EATING);
-		state.setData(EATING, eating == null ? null
-			: net.minecraft.util.Mth.clamp((entity.level().getGameTime() - eating) / (float)WebSymbiote.EAT_TICKS, 0.0F, 1.0F));
-		state.setData(EATING_SEED, eating);
-		state.setData(EATER, entity.getId());
+		WebSymbiote.Meal meal = entity.getAttached(WebSymbiote.EATING);
+		state.setData(EATING, meal == null ? null : Math.max(0.0F, entity.level().getGameTime() - meal.start() + net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false)));
+		state.setData(MEAL_BIG, meal != null && meal.big());
 		if (state.getData(SUIT) != null || entity instanceof Player p && WebSymbiote.isToggled(p, WebSymbioteState.ARMOR)) {
 			// no cape poking out through the suit
 			state.showCape = false;
