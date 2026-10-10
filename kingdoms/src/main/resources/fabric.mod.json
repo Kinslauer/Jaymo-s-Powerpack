@@ -1,0 +1,20 @@
+{
+	"schemaVersion": 1,
+	"id": "jaymoskingdoms",
+	"version": "${version}",
+	"name": "Jaymo's Kingdoms",
+	"description": "Kingdoms rise at the villages of the world, each under a king who is a boss to be reckoned with. Pledge yourself to one, climb its ranks, fill its treasury, and mind your reputation: every kingdom remembers what you've done.",
+	"authors": [],
+	"license": "MIT",
+	"environment": "*",
+	"entrypoints": {
+		"main": ["com.jaymoskingdoms.JaymosKingdoms"],
+		"client": ["com.jaymoskingdoms.client.JaymosKingdomsClient"]
+	},
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
