@@ -67,7 +67,8 @@ public final class ArsenalPower implements Power {
 	public static final int REACH_COOLDOWN = 160;
 	public static final int SUMMON_TICKS = 1500;
 	public static final int MAX_HELD = 3;
-	public static final int RETURN_REFUND = 80;
+	/** Return refunds this share of Reach's cooldown for a weapon sent back fresh, less the longer it was out. */
+	public static final float RETURN_REFUND_MAX = 0.9F;
 	public static final int BARRAGE_COOLDOWN = 600;
 	public static final int BARRAGE_RANGE = 48;
 	public static final float BARRAGE_DAMAGE = 7.0F;
@@ -138,6 +139,8 @@ public final class ArsenalPower implements Power {
 		HundredBlades.init();
 		ArsenalVoid.init();
 		SwordStone.register();
+		RelicWeapons.register();
+		ArsenalFlintlock.register();
 		ArsenalItems.init();
 		ArsenalDebugCommand.init();
 		Powers.register(INSTANCE);
@@ -289,7 +292,8 @@ public final class ArsenalPower implements Power {
 			stacks = new ArrayList<>(ArsenalPool.stacksFor(level, player.getRandom(), relic.getItem()));
 			stacks.set(0, relic);
 		} else {
-			stacks = new ArrayList<>(ArsenalArmory.rollFor(player, level, player.getRandom(), first));
+			List<ItemStack> pair = ArsenalFlintlock.pairFor(player, player.getRandom());
+			stacks = pair != null ? pair : new ArrayList<>(ArsenalArmory.rollFor(player, level, player.getRandom(), first));
 		}
 		if (com.jaymospowers.core.Fate.isCorrupted(player)) {
 			stacks.forEach(ArsenalVoid::voidTouched);
@@ -315,6 +319,13 @@ public final class ArsenalPower implements Power {
 	private static final net.minecraft.world.item.Item[] RUMMAGE_WEAPONS = {
 		net.minecraft.world.item.Items.STONE_SWORD, net.minecraft.world.item.Items.STONE_AXE, net.minecraft.world.item.Items.STONE_SPEAR};
 	static final float RUMMAGE_WEAPON_CHANCE = 0.1F;
+	/** Now and then ({@link #RUMMAGE_TOOL_CHANCE}) something useful instead. */
+	private static final net.minecraft.world.item.Item[] RUMMAGE_TOOLS = {
+		net.minecraft.world.item.Items.FLINT_AND_STEEL, net.minecraft.world.item.Items.FISHING_ROD, net.minecraft.world.item.Items.SHEARS,
+		net.minecraft.world.item.Items.COMPASS, net.minecraft.world.item.Items.CLOCK, net.minecraft.world.item.Items.SPYGLASS,
+		net.minecraft.world.item.Items.BUCKET, net.minecraft.world.item.Items.LEAD, net.minecraft.world.item.Items.IRON_PICKAXE,
+		net.minecraft.world.item.Items.TORCH};
+	static final float RUMMAGE_TOOL_CHANCE = 0.25F;
 	/** How long a rummaged thing lasts, and Rummage's cooldown. */
 	static final int RUMMAGE_LIFE = 600;
 	static final int RUMMAGE_COOLDOWN = 600;
@@ -336,8 +347,10 @@ public final class ArsenalPower implements Power {
 		}
 		player.setAttached(COOLDOWNS, cd.withReach(now + RUMMAGE_COOLDOWN));
 		var random = player.getRandom();
-		net.minecraft.world.item.Item item = random.nextFloat() < RUMMAGE_WEAPON_CHANCE
-			? RUMMAGE_WEAPONS[random.nextInt(RUMMAGE_WEAPONS.length)] : RUMMAGE_JUNK[random.nextInt(RUMMAGE_JUNK.length)];
+		float roll = random.nextFloat();
+		net.minecraft.world.item.Item item = roll < RUMMAGE_WEAPON_CHANCE ? RUMMAGE_WEAPONS[random.nextInt(RUMMAGE_WEAPONS.length)]
+			: roll < RUMMAGE_WEAPON_CHANCE + RUMMAGE_TOOL_CHANCE ? RUMMAGE_TOOLS[random.nextInt(RUMMAGE_TOOLS.length)]
+			: RUMMAGE_JUNK[random.nextInt(RUMMAGE_JUNK.length)];
 		List<ItemStack> stacks = new java.util.ArrayList<>(List.of(new ItemStack(item)));
 		PENDING.put(player.getUUID(), new Pending(now, stacks, RUMMAGE_LIFE));
 		player.setAttached(ArsenalReach.REACH, new ArsenalReach.Reach(now, stacks.getFirst().copy()));
@@ -442,7 +455,9 @@ public final class ArsenalPower implements Power {
 		if (sent.ownedBy(player.getUUID())) {
 			long now = player.level().getGameTime();
 			Cooldowns cd = cooldowns(player);
-			player.setAttached(COOLDOWNS, cd.withReach(Math.max(now, cd.reach() - RETURN_REFUND)));
+			float left = net.minecraft.util.Mth.clamp((sent.expires() - now) / (float)SUMMON_TICKS, 0.0F, 1.0F);
+			int refund = Math.round(REACH_COOLDOWN * RETURN_REFUND_MAX * left);
+			player.setAttached(COOLDOWNS, cd.withReach(Math.max(now, cd.reach() - refund)));
 		}
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal.returned").withStyle(ChatFormatting.LIGHT_PURPLE));
 	}

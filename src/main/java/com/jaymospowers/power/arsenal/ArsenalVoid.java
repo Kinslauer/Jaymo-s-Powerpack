@@ -76,6 +76,12 @@ public final class ArsenalVoid {
 	public static final double CURE_RADIUS = 160.0;
 	/** How long the void takes to be torn out (ticks) before the purification lands. */
 	public static final int PURGE_TICKS = 70;
+	/** Or it wears off on its own: three Minecraft days after it took you (world time, so it runs while you're away). */
+	public static final long CURE_TICKS = 3L * 24000L;
+	/** When the void took this player (Overworld game time). Saved, kept through death. */
+	public static final net.fabricmc.fabric.api.attachment.v1.AttachmentType<Long> VOID_SINCE =
+		net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry.create(com.jaymospowers.JaymosPowers.id("arsenal_void_since"),
+			builder -> builder.persistent(com.mojang.serialization.Codec.LONG).copyOnDeath());
 
 	/** Dragon → the players who hurt it this fight. Server memory only. */
 	private static final Map<UUID, Set<UUID>> DRAGON_FIGHTERS = new HashMap<>();
@@ -154,7 +160,25 @@ public final class ArsenalVoid {
 				whisper(player, "message.jaymospowers.arsenal.whisper_end", SoundEvents.ENDERMAN_STARE, 0.8F, 0.6F);
 			}
 		}
-		if (!Fate.isCorrupted(player) || !player.isAlive() || player.isCreative() || player.isSpectator()) {
+		if (!Fate.isCorrupted(player)) {
+			if (player.getAttached(VOID_SINCE) != null) {
+				player.removeAttached(VOID_SINCE);
+			}
+			return;
+		}
+		long worldTime = level.getServer().overworld().getGameTime();
+		Long since = player.getAttached(VOID_SINCE);
+		if (since == null) {
+			player.setAttached(VOID_SINCE, worldTime);
+		} else if (worldTime - since >= CURE_TICKS && player.isAlive()) {
+			// three days on, the void lets go of you
+			player.removeAttached(VOID_SINCE);
+			Fate.purify(player);
+			player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.jaymospowers.arsenal.void_faded")
+				.withStyle(net.minecraft.ChatFormatting.LIGHT_PURPLE));
+			return;
+		}
+		if (!player.isAlive() || player.isCreative() || player.isSpectator()) {
 			return;
 		}
 		// water and rain burn like they burn an Enderman

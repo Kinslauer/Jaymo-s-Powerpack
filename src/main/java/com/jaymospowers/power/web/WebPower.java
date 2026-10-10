@@ -846,7 +846,7 @@ public final class WebPower implements Power {
 	}
 
 	/** The entity under the crosshair within {@code range} (not behind a block), or null. */
-	static @org.jspecify.annotations.Nullable Entity entityInSight(ServerPlayer player, double range) {
+	public static @org.jspecify.annotations.Nullable Entity entityInSight(ServerPlayer player, double range) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getViewVector(1.0F);
 		Vec3 end = eye.add(look.scale(range));

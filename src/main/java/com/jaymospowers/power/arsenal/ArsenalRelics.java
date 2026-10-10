@@ -53,9 +53,14 @@ public final class ArsenalRelics {
 
 	private static final Set<ResourceKey<LootTable>> COMMON = Set.of(BuiltInLootTables.SIMPLE_DUNGEON, BuiltInLootTables.ABANDONED_MINESHAFT,
 		BuiltInLootTables.DESERT_PYRAMID, BuiltInLootTables.JUNGLE_TEMPLE, BuiltInLootTables.PILLAGER_OUTPOST, BuiltInLootTables.SHIPWRECK_TREASURE,
-		BuiltInLootTables.RUINED_PORTAL, BuiltInLootTables.WOODLAND_MANSION);
+		BuiltInLootTables.RUINED_PORTAL, BuiltInLootTables.WOODLAND_MANSION, BuiltInLootTables.NETHER_BRIDGE, BuiltInLootTables.BURIED_TREASURE,
+		BuiltInLootTables.UNDERWATER_RUIN_BIG, BuiltInLootTables.BASTION_BRIDGE, BuiltInLootTables.BASTION_HOGLIN_STABLE);
 	private static final Set<ResourceKey<LootTable>> RARE = Set.of(BuiltInLootTables.BASTION_OTHER, BuiltInLootTables.END_CITY_TREASURE,
-		BuiltInLootTables.ANCIENT_CITY, BuiltInLootTables.STRONGHOLD_CORRIDOR);
+		BuiltInLootTables.ANCIENT_CITY, BuiltInLootTables.STRONGHOLD_CORRIDOR, BuiltInLootTables.BASTION_TREASURE);
+	/** Where a relic weapon ({@link RelicWeapons}) has a home, a relic found there is that one this often. */
+	static final float THEMED_CHANCE = 0.75F;
+	/** Elsewhere, a relic is one of the relic weapons this often (else a plain weapon from the pool, shimmering). */
+	static final float WEAPON_CHANCE = 0.35F;
 
 	/** The {@code jaymospowers:arsenal_relic} component: this weapon is a relic. */
 	public static DataComponentType<Boolean> RELIC;
@@ -89,7 +94,7 @@ public final class ArsenalRelics {
 			}
 			float chance = RARE.contains(key) ? CHANCE_RARE : COMMON.contains(key) ? CHANCE_COMMON : 0.0F;
 			if (chance > 0.0F && context.getRandom().nextFloat() < chance) {
-				drops.add(make(context.getLevel(), context.getRandom()));
+				drops.add(make(context.getLevel(), context.getRandom(), key));
 			}
 		});
 	}
@@ -135,6 +140,17 @@ public final class ArsenalRelics {
 			}
 		}
 		return ItemStack.EMPTY;
+	}
+
+	/** A fresh relic for a chest of {@code table}: the relic weapon that lives there, or one from the pool, shimmering. */
+	static ItemStack make(ServerLevel level, RandomSource random, @org.jspecify.annotations.Nullable ResourceKey<LootTable> table) {
+		boolean themed = table != null && RelicWeapons.THEMES.containsKey(table);
+		if (random.nextFloat() < (themed ? THEMED_CHANCE : WEAPON_CHANCE)) {
+			ItemStack weapon = RelicWeapons.make(table, random);
+			weapon.set(RELIC, true);
+			return weapon;
+		}
+		return make(level, random);
 	}
 
 	/** A fresh relic: one weapon from the pocket dimension's pool, still shimmering. */
