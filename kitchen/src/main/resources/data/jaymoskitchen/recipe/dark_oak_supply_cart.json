@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "pcp",
+    "pcp",
+    "wpw"
+  ],
+  "key": {
+    "c": "minecraft:chest",
+    "p": "minecraft:dark_oak_planks",
+    "w": "jaymoskitchen:wheel"
+  },
+  "result": {
+    "id": "jaymoskitchen:dark_oak_supply_cart"
+  }
+}

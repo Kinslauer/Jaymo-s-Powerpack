@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "LSL",
+    "#P#",
+    "###"
+  ],
+  "key": {
+    "L": "minecraft:lead",
+    "S": "minecraft:stick",
+    "#": "#minecraft:planks",
+    "P": "minecraft:oak_pressure_plate"
+  },
+  "result": {
+    "id": "jaymoskitchen:horse_press"
+  }
+}

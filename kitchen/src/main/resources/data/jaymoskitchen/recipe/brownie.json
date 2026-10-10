@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskitchen:baking_tray",
+    "jaymoskitchen:flour",
+    "minecraft:cocoa_beans",
+    "minecraft:sugar",
+    "#minecraft:eggs"
+  ],
+  "result": {
+    "id": "jaymoskitchen:brownie",
+    "count": 4
+  }
+}

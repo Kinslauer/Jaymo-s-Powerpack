@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "sss",
+    "psp",
+    "wpw"
+  ],
+  "key": {
+    "p": "minecraft:cherry_planks",
+    "s": "minecraft:stick",
+    "w": "jaymoskitchen:wheel"
+  },
+  "result": {
+    "id": "jaymoskitchen:cherry_plow"
+  }
+}

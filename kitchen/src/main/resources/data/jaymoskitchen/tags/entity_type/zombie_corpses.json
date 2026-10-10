@@ -1,0 +1,15 @@
+{
+  "values": [
+    "minecraft:zombie",
+    "minecraft:husk",
+    "minecraft:drowned",
+    "minecraft:zombie_villager",
+    "minecraft:zombified_piglin",
+    "minecraft:zombie_horse",
+    {
+      "id": "minecraft:zombie_nautilus",
+      "required": false
+    },
+    "jaymoskitchen:zombie_player"
+  ]
+}

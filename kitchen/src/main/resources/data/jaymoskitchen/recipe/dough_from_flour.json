@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskitchen:flour",
+    "jaymoskitchen:flour",
+    "jaymoskitchen:flour",
+    "minecraft:water_bucket"
+  ],
+  "result": {
+    "id": "jaymoskitchen:dough",
+    "count": 2
+  }
+}

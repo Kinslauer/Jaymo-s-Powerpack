@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "s c",
+    "ppp",
+    "w w"
+  ],
+  "key": {
+    "s": "minecraft:stick",
+    "c": "minecraft:chest",
+    "p": "minecraft:birch_planks",
+    "w": "jaymoskitchen:wheel"
+  },
+  "result": {
+    "id": "jaymoskitchen:birch_wagon"
+  }
+}

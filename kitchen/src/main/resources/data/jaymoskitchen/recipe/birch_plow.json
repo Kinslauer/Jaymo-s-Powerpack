@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "sss",
+    "psp",
+    "wpw"
+  ],
+  "key": {
+    "p": "minecraft:birch_planks",
+    "s": "minecraft:stick",
+    "w": "jaymoskitchen:wheel"
+  },
+  "result": {
+    "id": "jaymoskitchen:birch_plow"
+  }
+}

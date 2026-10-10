@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ppp",
+    "ppp",
+    "wpw"
+  ],
+  "key": {
+    "p": "minecraft:oak_planks",
+    "w": "jaymoskitchen:wheel"
+  },
+  "result": {
+    "id": "jaymoskitchen:oak_animal_cart"
+  }
+}

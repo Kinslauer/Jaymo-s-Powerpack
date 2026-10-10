@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskitchen:saucepan",
+    "minecraft:milk_bucket",
+    "minecraft:cocoa_beans",
+    "minecraft:sugar",
+    "minecraft:glass_bottle"
+  ],
+  "result": {
+    "id": "jaymoskitchen:hot_chocolate"
+  }
+}

@@ -1,0 +1,171 @@
+package com.jaymoskitchen.corpse;
+
+import com.jaymoskitchen.JaymosKitchen;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.storage.TagValueOutput;
+
+/**
+ * Corpses: mobs no longer vanish when they die, they leave a body that has to be dealt with (see
+ * {@link CorpseKind}). Registers the corpse entity, the carried-corpse item, the butcher block, and the tags.
+ */
+public final class Corpses {
+	/** Mobs that die the vanilla way: bosses, slimes (they split), and so on. */
+	public static final TagKey<EntityType<?>> NO_CORPSE = tag("no_corpse");
+	public static final TagKey<EntityType<?>> ZOMBIE_CORPSES = tag("zombie_corpses");
+	public static final TagKey<EntityType<?>> SKELETON_CORPSES = tag("skeleton_corpses");
+	/** Animals too big for one butcher block: they need a 2x2 table, and are heavier to carry. */
+	public static final TagKey<EntityType<?>> BIG_CARCASSES = tag("big_carcasses");
+
+	/** A corpse's look is the mob's saved data as text; anything longer than this is cut down to the basics. */
+	public static final int MAX_LOOK_LENGTH = 30000;
+	/** Saved data that's large and has nothing to do with how the mob looks. */
+	private static final Set<String> HEAVY_KEYS = Set.of("Brain", "brain", "Offers", "offers", "Gossips", "gossips",
+		"attributes", "Attributes", "active_effects", "ActiveEffects", "Passengers", "Leash", "leash");
+
+	public static EntityType<CorpseEntity> CORPSE;
+	public static DataComponentType<CorpseData> CORPSE_DATA;
+	public static Item CORPSE_ITEM;
+	/** The oak butcher block (the original one); every wood has its own, all in {@link #BUTCHER_BLOCKS}. */
+	public static Block BUTCHER_BLOCK;
+	/** Woods with a butcher block, in creative-tab order. Oak's is plain "butcher_block". */
+	public static final List<String> WOODS = List.of("oak", "spruce", "birch", "jungle", "acacia", "dark_oak", "mangrove",
+		"cherry", "pale_oak", "crimson", "warped");
+	public static final TagKey<Block> BUTCHER_BLOCKS = TagKey.create(Registries.BLOCK, JaymosKitchen.id("butcher_blocks"));
+
+	private Corpses() {
+	}
+
+	private static TagKey<EntityType<?>> tag(String name) {
+		return TagKey.create(Registries.ENTITY_TYPE, JaymosKitchen.id(name));
+	}
+
+	public static void register() {
+		ResourceKey<EntityType<?>> corpseKey = ResourceKey.create(Registries.ENTITY_TYPE, JaymosKitchen.id("corpse"));
+		CORPSE = Registry.register(BuiltInRegistries.ENTITY_TYPE, corpseKey,
+			EntityType.Builder.<CorpseEntity>of(CorpseEntity::new, MobCategory.MISC)
+				.sized(1.0F, 0.4F)
+				.clientTrackingRange(8)
+				.noSummon()
+				.build(corpseKey));
+
+		CORPSE_DATA = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosKitchen.id("corpse"),
+			DataComponentType.<CorpseData>builder()
+				.persistent(CorpseData.CODEC)
+				.networkSynchronized(CorpseData.STREAM_CODEC)
+				.build());
+
+		ResourceKey<Item> corpseItemKey = ResourceKey.create(Registries.ITEM, JaymosKitchen.id("corpse"));
+		CORPSE_ITEM = Registry.register(BuiltInRegistries.ITEM, corpseItemKey,
+			new CorpseItem(new Item.Properties().stacksTo(1).setId(corpseItemKey)));
+
+		List<Item> butcherBlocks = new ArrayList<>();
+		for (String wood : WOODS) {
+			String id = wood.equals("oak") ? "butcher_block" : wood + "_butcher_block";
+			boolean nether = wood.equals("crimson") || wood.equals("warped");
+			ResourceKey<Block> blockKey = ResourceKey.create(Registries.BLOCK, JaymosKitchen.id(id));
+			BlockBehaviour.Properties properties = BlockBehaviour.Properties.of()
+				.mapColor(MapColor.WOOD)
+				.instrument(NoteBlockInstrument.BASS)
+				.strength(2.5F)
+				.sound(nether ? SoundType.STEM : SoundType.WOOD)
+				.setId(blockKey);
+			Block block = Registry.register(BuiltInRegistries.BLOCK, blockKey, new Block(nether ? properties : properties.ignitedByLava()));
+			if (wood.equals("oak")) {
+				BUTCHER_BLOCK = block;
+			}
+			ResourceKey<Item> blockItemKey = ResourceKey.create(Registries.ITEM, JaymosKitchen.id(id));
+			butcherBlocks.add(Registry.register(BuiltInRegistries.ITEM, blockItemKey,
+				new BlockItem(block, new Item.Properties().useBlockDescriptionPrefix().setId(blockItemKey))));
+		}
+
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
+			ItemStack after = new ItemStack(Items.CRAFTING_TABLE);
+			// (stacks are made here, not at registration: items can't be stacked before components are bound)
+			for (Item item : butcherBlocks) {
+				ItemStack stack = new ItemStack(item);
+				output.insertAfter(after, stack);
+				after = stack;
+			}
+		});
+	}
+
+	/** Any wood's butcher block. */
+	public static boolean isButcherBlock(BlockState state) {
+		return state.is(BUTCHER_BLOCKS);
+	}
+
+	/** Whether this entity leaves a corpse when it dies (players and listed mobs don't). */
+	public static boolean leavesCorpse(LivingEntity entity) {
+		return entity instanceof Mob && !(entity instanceof Player) && !entity.is(NO_CORPSE)
+			&& entity.level() instanceof ServerLevel;
+	}
+
+	/** Replaces a mob that has finished dying with its corpse, holding the loot it would have dropped. */
+	public static void spawnCorpse(LivingEntity mob, List<ItemStack> loot) {
+		if (!(mob.level() instanceof ServerLevel level)) {
+			return;
+		}
+		CorpseEntity corpse = new CorpseEntity(CORPSE, level);
+		corpse.snapTo(mob.getX(), mob.getY(), mob.getZ(), mob.yBodyRot, 0.0F);
+		CorpseKind kind = CorpseKind.of(mob);
+		List<ItemStack> kept = new ArrayList<>();
+		for (ItemStack stack : loot) {
+			// a skeleton's bones come out by hand, one at a time, instead
+			if (!stack.isEmpty() && !(kind == CorpseKind.SKELETON && stack.is(Items.BONE))) {
+				kept.add(stack);
+			}
+		}
+		corpse.setUp(look(mob), kind, kept, level.getRandom().nextInt(3) + 1);
+		if (mob.isOnFire() && kind.burns()) {
+			// died burning (a zombie in the sun): keeps burning on the ground
+			corpse.setRemainingFireTicks(mob.getRemainingFireTicks());
+		}
+		level.addFreshEntity(corpse);
+	}
+
+	/** The mob's saved data, trimmed, with its type id: enough for clients to draw it and for a zombie to rise. */
+	public static String look(LivingEntity mob) {
+		TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, mob.registryAccess());
+		mob.saveWithoutId(output);
+		CompoundTag tag = output.buildResult();
+		for (String key : HEAVY_KEYS) {
+			tag.remove(key);
+		}
+		tag.putString("id", EntityType.getKey(mob.getType()).toString());
+		String look = tag.toString();
+		if (look.length() > MAX_LOOK_LENGTH) {
+			CompoundTag minimal = new CompoundTag();
+			minimal.putString("id", EntityType.getKey(mob.getType()).toString());
+			look = minimal.toString();
+		}
+		return look;
+	}
+}

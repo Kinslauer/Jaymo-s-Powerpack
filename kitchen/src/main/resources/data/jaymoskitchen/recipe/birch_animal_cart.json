@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ppp",
+    "ppp",
+    "wpw"
+  ],
+  "key": {
+    "p": "minecraft:birch_planks",
+    "w": "jaymoskitchen:wheel"
+  },
+  "result": {
+    "id": "jaymoskitchen:birch_animal_cart"
+  }
+}

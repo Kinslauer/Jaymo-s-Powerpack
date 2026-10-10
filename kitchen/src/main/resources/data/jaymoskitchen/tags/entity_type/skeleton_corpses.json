@@ -1,0 +1,10 @@
+{
+  "values": [
+    "minecraft:skeleton",
+    "minecraft:stray",
+    "minecraft:bogged",
+    "minecraft:wither_skeleton",
+    "minecraft:skeleton_horse",
+    { "id": "minecraft:parched", "required": false }
+  ]
+}

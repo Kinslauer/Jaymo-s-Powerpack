@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "LSL",
+    "B B"
+  ],
+  "key": {
+    "L": "minecraft:leather",
+    "S": "minecraft:string",
+    "B": "#minecraft:bundles"
+  },
+  "result": {
+    "id": "jaymoskitchen:saddlebag"
+  }
+}

@@ -1,0 +1,38 @@
+{
+	"schemaVersion": 1,
+	"id": "jaymoskitchen",
+	"version": "${version}",
+	"name": "Jaymo's Kitchen",
+	"description": "Cooking minigames (at Cooking for Blockheads' oven and kitchens, which this mod requires), cookware, corpses and butchering, a wearable quiver, horse gear and carts, and horse-powered mill machines. Includes the carts of NiftyCarts (MIT, by MennoMax, paul101 and jmb19905; see LICENSE_niftycarts) and the machines of Horse Power (LGPL-3.0, by Gory_Moon; see LICENSE_horsepower).",
+	"authors": [],
+	"license": "MIT",
+	"icon": "assets/jaymoskitchen/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.jaymoskitchen.JaymosKitchen"
+		],
+		"client": [
+			"com.jaymoskitchen.client.JaymosKitchenClient"
+		]
+	},
+	"mixins": [
+		"jaymoskitchen.mixins.json",
+		{
+			"config": "jaymoskitchen.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*",
+		"cookingforblockheads": ">=26.3.0.2",
+		"balm": "*"
+	},
+	"contributors": [
+		"MennoMax, paul101, jmb19905 (NiftyCarts carts, MIT)",
+		"Gory_Moon (Horse Power machines, LGPL-3.0)"
+	]
+}

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskitchen:cooking_pot",
+    "jaymoskitchen:pasta",
+    "minecraft:brown_mushroom",
+    "minecraft:red_mushroom",
+    "minecraft:bowl"
+  ],
+  "result": {
+    "id": "jaymoskitchen:mushroom_pasta"
+  }
+}

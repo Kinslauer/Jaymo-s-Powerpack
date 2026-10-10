@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jaymoskitchen:block/chopping_block"
+    },
+    "facing=east": {
+      "model": "jaymoskitchen:block/chopping_block",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jaymoskitchen:block/chopping_block",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jaymoskitchen:block/chopping_block",
+      "y": 270
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jaymoskitchen:block/grindstone"
+    },
+    "facing=east": {
+      "model": "jaymoskitchen:block/grindstone",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jaymoskitchen:block/grindstone",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jaymoskitchen:block/grindstone",
+      "y": 270
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "part=hand_grindstone_center": {
+      "model": "jaymoskitchen:block/hand_grindstone_center"
+    },
+    "part=chopper_blade": {
+      "model": "jaymoskitchen:block/chopper_blade"
+    },
+    "part=press_top": {
+      "model": "jaymoskitchen:block/press_top"
+    },
+    "part=grindstone_flour": {
+      "model": "jaymoskitchen:block/grindstone_flour"
+    }
+  }
+}

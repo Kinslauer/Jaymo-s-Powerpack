@@ -1,0 +1,17 @@
+{
+  "values": [
+    "minecraft:ender_dragon",
+    "minecraft:wither",
+    "minecraft:slime",
+    "minecraft:magma_cube",
+    "minecraft:creaking",
+    "minecraft:cod",
+    "minecraft:salmon",
+    "minecraft:tropical_fish",
+    "minecraft:pufferfish",
+    {
+      "id": "minecraft:sulfur_cube",
+      "required": false
+    }
+  ]
+}

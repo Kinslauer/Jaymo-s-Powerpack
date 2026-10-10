@@ -1,0 +1,49 @@
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+// build output lives outside OneDrive on the home PC (its syncing locks files and breaks rebuilds); elsewhere
+// (a cloud session) the usual build/ folder
+if (file("E:/").exists()) {
+	layout.buildDirectory = file("E:/jaymos-kitchen-build")
+}
+
+repositories {
+	mavenCentral()
+	// Cooking for Blockheads and Balm (required alongside this mod; not bundled)
+	exclusiveContent {
+		forRepository { maven { url = "https://api.modrinth.com/maven" } }
+		filter { includeGroup "maven.modrinth" }
+	}
+}
+
+loom {
+	splitEnvironmentSourceSets()
+	mods {
+		"jaymoskitchen" {
+			sourceSet sourceSets.main
+			sourceSet sourceSets.client
+		}
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	implementation "maven.modrinth:balm:26.3.0.3+fabric-26.3"
+	implementation "maven.modrinth:cooking-for-blockheads:26.3.0.2+fabric-26.3"
+}
+
+processResources {
+	def version = project.version
+	inputs.property "version", version
+	filesMatching("fabric.mod.json") { expand "version": version }
+}
+
+tasks.withType(JavaCompile).configureEach { it.options.release = 25 }
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}

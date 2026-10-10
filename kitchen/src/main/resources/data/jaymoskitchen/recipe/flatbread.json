@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskitchen:rolling_pin",
+    "jaymoskitchen:dough"
+  ],
+  "result": {
+    "id": "jaymoskitchen:flatbread",
+    "count": 2
+  }
+}

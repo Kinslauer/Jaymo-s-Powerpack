@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "  S",
+    "###",
+    "###"
+  ],
+  "key": {
+    "S": "minecraft:stick",
+    "#": "minecraft:stone"
+  },
+  "result": {
+    "id": "jaymoskitchen:hand_grindstone"
+  }
+}

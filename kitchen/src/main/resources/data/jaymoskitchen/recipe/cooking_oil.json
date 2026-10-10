@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "#c:seeds",
+    "#c:seeds",
+    "#c:seeds"
+  ],
+  "result": {
+    "id": "jaymoskitchen:cooking_oil"
+  }
+}

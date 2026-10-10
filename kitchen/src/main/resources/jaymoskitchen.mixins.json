@@ -1,0 +1,30 @@
+{
+	"required": true,
+	"package": "com.jaymoskitchen.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"AbstractArrowMixin",
+		"AbstractCraftingMenuAccessor",
+		"AbstractHorseMixin",
+		"BaseKitchenBlockMixin",
+		"BlockMixin",
+		"CraftingMenuMixin",
+		"CraftingOperationAccessor",
+		"CraftingTableBlockMixin",
+		"EntityMixin",
+		"ItemAccessor",
+		"KitchenMenuMixin",
+		"LivingEntityMixin",
+		"MobAccessor",
+		"OvenBlockCollisionMixin",
+		"OvenBlockEntityMixin",
+		"OvenMenuMixin",
+		"PlayerMixin",
+		"ProjectileWeaponItemMixin",
+		"RangedAttackMobMixin",
+		"SlotOvenToolMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

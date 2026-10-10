@@ -1,0 +1,1346 @@
+package com.jaymoskitchen.corpse;
+
+import com.jaymoskitchen.horse.CartEntity;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.util.Mth;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.attribute.EnvironmentAttributes;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
+
+/**
+ * A dead mob's body. It looks like the mob, fallen over (clients rebuild the mob from its saved data, see
+ * {@code CorpseRenderer}), and holds the loot the mob would have dropped. How it's disposed of depends on its
+ * {@link CorpseKind}.
+ */
+public class CorpseEntity extends Entity {
+	/** How the corpse looks: the dead mob's saved data as SNBT, with its type id. */
+	private static final EntityDataAccessor<String> LOOK = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.STRING);
+	/** Entity id of the player carrying this corpse in front of them, or -1. Never saved: a reload drops it. */
+	private static final EntityDataAccessor<Integer> CARRIER = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.INT);
+	/** A player's corpse: whose it is (UUID as text, and name), so clients can draw them. */
+	private static final EntityDataAccessor<String> OWNER = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.STRING);
+	/** How the body lies (clients sprawl it from this); rolled again each time it's set down. */
+	/** Dropped from someone's arms and not landed yet: it tumbles limp through the air (see CorpseRenderer). */
+	private static final EntityDataAccessor<Boolean> TUMBLING = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Integer> POSE = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.INT);
+	private static final EntityDataAccessor<String> OWNER_NAME = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.STRING);
+
+	/** Animals at most this big (wide and tall, after baby scaling) go in a pocket; bigger ones are carried. */
+	private static final float POCKET_WIDTH = 0.5F, POCKET_HEIGHT = 0.8F;
+	/** Where a carried corpse sits: this far in front of the carrier, at this height (across the arms). */
+	private static final double CARRY_FORWARD = 0.55, CARRY_HEIGHT = 0.9;
+	/** Further than this from its carrier (teleported, fell, ...) and it's dropped. */
+	private static final double CARRY_LEASH_SQ = 4.0 * 4.0;
+
+	/** A zombie left this long (5 minutes) gets back up. */
+	private static final int REANIMATE_TICKS = 6000;
+	/** Everything else rots away (to rotten flesh) after 10 minutes. */
+	private static final int ROT_TICKS = 12000;
+	/** Hostile mobs take twice as long to rot (zombies get up first, creepers never do); now and then their loot survives. */
+	private static final int HOSTILE_ROT_TICKS = 24000;
+	private static final float HOSTILE_LOOT_CHANCE = 0.1F;
+	/** Ticks of burning to reduce a corpse to ash. */
+	private static final int BURN_TICKS = 300;
+	/** A burning ghast corpse wails (its hurt sound) every this many ticks, this loud (1 is normal). */
+	private static final int GHAST_WAIL_EVERY = 25;
+	private static final float GHAST_WAIL_VOLUME = 4.0F;
+	/** In lava it goes much faster: this many ticks and it's gone. */
+	private static final int LAVA_BURN_TICKS = 30;
+	/** Bodies at least this big standing (the smaller of width and height; a ghast is 4) lie as big as they are. */
+	private static final float HUGE = 1.9F;
+	/** A burning creeper corpse explodes after this many ticks alight. */
+	private static final int CREEPER_FUSE = 160;
+	/** Axe chops on the butcher block to break an animal down. */
+	private static final int CHOPS = 3;
+
+	private CorpseKind kind = CorpseKind.OTHER;
+	private List<ItemStack> loot = new ArrayList<>();
+	private int bones;
+	private boolean searched;
+	private int chops;
+	private int burnTicks;
+	private int age;
+	/** A player's corpse: their hotbar when they died, and the slot they had selected. */
+	private final List<ItemStack> hotbar = new ArrayList<>(java.util.Collections.nCopies(9, ItemStack.EMPTY));
+	/** Client: the hanging limbs' swing (see {@link #swingLimbs}). */
+	private float swingBack, swingBackO, swingBackVel, swingLeft, swingLeftO, swingLeftVel;
+	private double lastVx, lastVz;
+	/** Client: a falling body's turning over (radians) and how fast it's turning, and how far the air drags its limbs. */
+	private boolean tumbling;
+	private float tumblePitch, tumblePitchO, tumbleRoll, tumbleRollO, spinPitch, spinRoll, fallTrail;
+	/** Client: a jolt from a blow or rummaging, dying away. */
+	private static final int JOLT_TICKS = 10;
+	private float joltTicks, joltTicksO, joltStrength, joltSide = 1.0F;
+	private static final float SWING_STIFFNESS = 0.2F, SWING_DAMPING = 0.86F, SWING_SHOVE = 14.0F;
+	/** How far behind the limbs trail per block a tick of speed (a sprint is about 0.28), and each step's jolt. */
+	private static final float SWING_TRAIL = 3.2F, SWING_STEP = 0.09F;
+	private int selected;
+
+	/** Client side: the mob rebuilt from {@link #LOOK}, for drawing. */
+	private @Nullable Entity body;
+
+	public CorpseEntity(EntityType<? extends CorpseEntity> type, Level level) {
+		super(type, level);
+		// a body makes no noise of its own (catching, burning, going out, splashing): only what this class plays
+		setSilent(true);
+	}
+
+	void setUp(String look, CorpseKind kind, List<ItemStack> loot, int bones) {
+		this.entityData.set(POSE, random.nextInt());
+		this.entityData.set(LOOK, look);
+		this.kind = kind;
+		this.loot = new ArrayList<>(loot);
+		this.bones = bones;
+		refreshDimensions();
+	}
+
+	/** A dead player's body, with their hotbar. */
+	void setUpPlayer(java.util.UUID owner, String name, List<ItemStack> hotbar, int selected) {
+		this.entityData.set(POSE, random.nextInt());
+		this.entityData.set(LOOK, "{id:\"minecraft:player\"}");
+		this.entityData.set(OWNER, owner.toString());
+		this.entityData.set(OWNER_NAME, name);
+		this.kind = CorpseKind.PLAYER;
+		for (int i = 0; i < this.hotbar.size(); i++) {
+			this.hotbar.set(i, i < hotbar.size() ? hotbar.get(i).copy() : ItemStack.EMPTY);
+		}
+		this.selected = selected;
+		refreshDimensions();
+	}
+
+	/** A slim-skinned player's body (or their zombie's): it sounds higher. */
+	private boolean slim;
+
+	void setSlim(boolean slim) {
+		this.slim = slim;
+	}
+
+	boolean slim() {
+		// a zombie player's body keeps the zombie's saved voice in its look
+		return slim || look().contains("Slim:1b");
+	}
+
+	/** The pitch its groans are raised by. */
+	private float voice() {
+		return slim() ? PlayerCorpses.SLIM_PITCH : 1.0F;
+	}
+
+	public boolean isPlayerCorpse() {
+		return kind == CorpseKind.PLAYER || "{id:\"minecraft:player\"}".equals(look());
+	}
+
+	/** In open daylight where monsters burn (as a zombie or skeleton would, alive). */
+	private boolean inSunlight(ServerLevel level) {
+		return level.environmentAttributes().getValue(EnvironmentAttributes.MONSTERS_BURN, position())
+			&& getLightLevelDependentMagicValue() > 0.5F && !isInWaterOrRain()
+			&& level.canSeeSky(BlockPos.containing(getX(), getY() + getBbHeight(), getZ()));
+	}
+
+	/** What a body can be wearing or holding, in the order it's taken off. */
+	private static final String[] GEAR = {"head", "chest", "legs", "feet", "body", "mainhand", "offhand"};
+
+	/**
+	 * Takes one piece of armour (or a held item) off the body and hands it over; it's gone from the body too, since
+	 * clients draw the body from its look. Its gear has seen use: a skeleton's weapon comes off at under half its
+	 * durability, anything else that wears out somewhere between well-worn and nearly new (see {@link #wear}). False
+	 * if it has nothing on.
+	 */
+	private boolean takeGear(ServerLevel level, Player player) {
+		CompoundTag tag = parse(look());
+		if (tag == null) {
+			return false;
+		}
+		CompoundTag gear = tag.getCompoundOrEmpty("equipment");
+		for (String slot : GEAR) {
+			if (!gear.contains(slot)) {
+				continue;
+			}
+			ItemStack stack = ItemStack.CODEC.parse(registryAccess().createSerializationContext(NbtOps.INSTANCE), gear.get(slot))
+				.result().orElse(ItemStack.EMPTY);
+			gear.remove(slot);
+			if (!stack.isEmpty() && stack.isDamageableItem() && !preserved(tag, slot)) {
+				wear(stack, kind == CorpseKind.SKELETON && slot.equals("mainhand"));
+			}
+			if (gear.isEmpty()) {
+				tag.remove("equipment");
+			} else {
+				tag.put("equipment", gear);
+			}
+			this.entityData.set(LOOK, tag.toString());
+			if (stack.isEmpty()) {
+				continue;
+			}
+			if (!player.getInventory().add(stack)) {
+				spawnAtLocation(level, stack, 0.3F);
+			}
+			jolt(false);
+			play(level, SoundEvents.ARMOR_EQUIP_GENERIC.value(), 0.9F);
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Wears a piece of the body's gear: a skeleton's weapon is left with 10-49% of its durability, anything else with
+	 * 15-90%. Never repairs what was already more worn than that.
+	 */
+	private void wear(ItemStack stack, boolean skeletonWeapon) {
+		int max = stack.getMaxDamage();
+		float left = skeletonWeapon ? 0.10F + random.nextFloat() * 0.39F : 0.15F + random.nextFloat() * 0.75F;
+		int remaining = Math.max(1, Math.round(max * left));
+		if (skeletonWeapon) {
+			remaining = Math.min(remaining, Math.max(1, (max - 1) / 2));
+		}
+		stack.setDamageValue(Math.max(stack.getDamageValue(), max - remaining));
+	}
+
+	/** Whether the mob's gear in that slot was something it picked up (vanilla keeps those as they were). */
+	private static boolean preserved(CompoundTag look, String slot) {
+		return look.getCompoundOrEmpty("drop_chances").getFloatOr(slot, 0.0F) > 1.0F;
+	}
+
+	/** Entity events: the body jolts, hard (an axe blow) or lightly (rummaged through). */
+	private static final byte JOLT_HARD = 70, JOLT_LIGHT = 71;
+
+	/** Server: the body jolts with the blow (an axe) or the rummaging (looting it). */
+	public void jolt(boolean hard) {
+		level().broadcastEntityEvent(this, hard ? JOLT_HARD : JOLT_LIGHT);
+	}
+
+	@Override
+	public void handleEntityEvent(byte id) {
+		if (id == JOLT_HARD || id == JOLT_LIGHT) {
+			joltTicks = joltTicksO = JOLT_TICKS;
+			joltStrength = id == JOLT_HARD ? 1.0F : 0.3F;
+			joltSide = random.nextBoolean() ? 1.0F : -1.0F;
+		} else {
+			super.handleEntityEvent(id);
+		}
+	}
+
+	/** Client: how hard it's jolting this frame (0 when still), and the way the jolt rocks it (+1 or -1). */
+	public float jolt(float partialTicks) {
+		return Mth.lerp(partialTicks, joltTicksO, joltTicks) / JOLT_TICKS * joltStrength;
+	}
+
+	/** Client: ticks since the jolt. */
+	public float joltTime(float partialTicks) {
+		return JOLT_TICKS - Mth.lerp(partialTicks, joltTicksO, joltTicks);
+	}
+
+	/** Client: which way the jolt flops it first (+1 or -1). */
+	public float joltSide() {
+		return joltSide;
+	}
+
+	/** The seed for how the body sprawls where it lies. */
+	public int poseSeed() {
+		return this.entityData.get(POSE);
+	}
+
+	/**
+	 * Client: a dropped or thrown body falls like a ragdoll. It starts turning over (the way it was let go), the spin
+	 * builds the longer and faster it falls (uneven drag on a limp body), and its limbs are dragged up behind it by the
+	 * air as it picks up speed, flailing. Nothing holds it level: a long fall turns it over and over.
+	 */
+	private void tumble() {
+		tumblePitchO = tumblePitch;
+		tumbleRollO = tumbleRoll;
+		swingBackO = swingBack;
+		swingLeftO = swingLeft;
+		if (!tumbling) {
+			tumbling = true;
+			tumblePitch = tumblePitchO = tumbleRoll = tumbleRollO = 0.0F;
+			java.util.Random seeded = new java.util.Random(poseSeed());
+			spinPitch = (0.05F + seeded.nextFloat() * 0.08F) * (seeded.nextBoolean() ? 1.0F : -1.0F);
+			spinRoll = (seeded.nextFloat() - 0.5F) * 0.12F;
+			fallTrail = 0.0F;
+		}
+		float falling = (float) Math.max(0.0, yo - getY());
+		// falling faster spins it up; the air slows it a little
+		spinPitch = (spinPitch + Math.signum(spinPitch) * falling * 0.035F) * 0.985F;
+		spinRoll = (spinRoll + Math.signum(spinRoll) * falling * 0.015F) * 0.985F;
+		tumblePitch += Mth.clamp(spinPitch, -0.6F, 0.6F);
+		tumbleRoll += Mth.clamp(spinRoll, -0.4F, 0.4F);
+		// limbs: dragged up behind the fall as it speeds up, flailing as they go
+		fallTrail += (Mth.clamp(falling * 5.0F, 0.0F, 2.6F) - fallTrail) * 0.3F;
+		swingLeft = fallTrail + Mth.sin(tickCount * 1.3F) * (0.25F + fallTrail * 0.15F);
+		swingBack = Mth.sin(tickCount * 0.9F + 0.7F) * (0.45F + fallTrail * 0.2F);
+	}
+
+	/** Client: how far a falling body has turned over, end over end and side to side (degrees). */
+	public float tumblePitch(float partialTicks) {
+		return Mth.lerp(partialTicks, tumblePitchO, tumblePitch) * Mth.RAD_TO_DEG;
+	}
+
+	public float tumbleRoll(float partialTicks) {
+		return Mth.lerp(partialTicks, tumbleRollO, tumbleRoll) * Mth.RAD_TO_DEG;
+	}
+
+	/** Client: how far the hanging limbs have swung, toward the carrier's back and to their left (radians). */
+	public float swingBack(float partialTicks) {
+		return Mth.lerp(partialTicks, swingBackO, swingBack);
+	}
+
+	public float swingLeft(float partialTicks) {
+		return Mth.lerp(partialTicks, swingLeftO, swingLeft);
+	}
+
+	/**
+	 * Client: the limbs of a carried body swing like pendulums. When the body speeds up, slows or swings round as its
+	 * carrier turns, they lag behind and swing back, settling under gravity; each step jogs them a little.
+	 */
+	private void swingLimbs(Entity carrier) {
+		swingBackO = swingBack;
+		swingLeftO = swingLeft;
+		double vx = getX() - xo, vz = getZ() - zo;
+		double ax = vx - lastVx, az = vz - lastVz;
+		lastVx = vx;
+		lastVz = vz;
+		float yaw = carrier.getYRot() * Mth.DEG_TO_RAD;
+		double forwardX = -Mth.sin(yaw), forwardZ = Mth.cos(yaw);
+		double rightX = -Mth.cos(yaw), rightZ = -Mth.sin(yaw);
+		float ahead = (float) (ax * forwardX + az * forwardZ);
+		float right = (float) (ax * rightX + az * rightZ);
+		float speedAhead = (float) (vx * forwardX + vz * forwardZ);
+		float speedRight = (float) (vx * rightX + vz * rightZ);
+		float stepBack = 0.0F, stepSide = 0.0F;
+		if (carrier instanceof LivingEntity walker) {
+			// every footfall jolts them (twice a stride), harder the faster the carrier goes
+			float phase = walker.walkAnimation.position() * 0.6662F;
+			float stride = Math.min(1.2F, walker.walkAnimation.speed());
+			stepBack = Mth.sin(phase * 2.0F) * SWING_STEP * stride;
+			stepSide = Mth.sin(phase) * SWING_STEP * 0.7F * stride;
+		}
+		// a damped pendulum: gravity pulls it back to hanging down, the air pushes it out behind as fast as the body
+		// moves (most at a sprint), and every change of pace or direction shoves it the other way
+		float trailBack = Mth.clamp(speedAhead * SWING_TRAIL, -1.0F, 1.0F);
+		float trailLeft = Mth.clamp(speedRight * SWING_TRAIL, -1.0F, 1.0F);
+		swingBackVel += -SWING_STIFFNESS * (swingBack - trailBack) + ahead * SWING_SHOVE + stepBack;
+		swingLeftVel += -SWING_STIFFNESS * (swingLeft - trailLeft) + right * SWING_SHOVE + stepSide;
+		swingBackVel *= SWING_DAMPING;
+		swingLeftVel *= SWING_DAMPING;
+		swingBack = Mth.clamp(swingBack + swingBackVel, -1.4F, 1.4F);
+		swingLeft = Mth.clamp(swingLeft + swingLeftVel, -1.4F, 1.4F);
+	}
+
+	public String ownerId() {
+		return this.entityData.get(OWNER);
+	}
+
+	public Optional<java.util.UUID> owner() {
+		try {
+			return Optional.of(java.util.UUID.fromString(ownerId()));
+		} catch (IllegalArgumentException e) {
+			return Optional.empty();
+		}
+	}
+
+	public String ownerName() {
+		return this.entityData.get(OWNER_NAME);
+	}
+
+	public String look() {
+		return this.entityData.get(LOOK);
+	}
+
+	@Override
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		builder.define(LOOK, "");
+		builder.define(CARRIER, -1);
+		builder.define(OWNER, "");
+		builder.define(POSE, 0);
+		builder.define(TUMBLING, false);
+		builder.define(OWNER_NAME, "");
+	}
+
+	@Override
+	public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
+		super.onSyncedDataUpdated(accessor);
+		if (LOOK.equals(accessor)) {
+			this.body = null;
+			this.typeKnown = false;
+			refreshDimensions();
+		}
+	}
+
+	private static @Nullable CompoundTag parse(String look) {
+		if (look.isEmpty()) {
+			return null;
+		}
+		try {
+			return TagParser.parseCompoundFully(look);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	private static Optional<EntityType<?>> typeOf(@Nullable CompoundTag tag) {
+		if (tag == null) {
+			return Optional.empty();
+		}
+		Identifier id = Identifier.tryParse(tag.getStringOr("id", ""));
+		return id == null ? Optional.empty() : BuiltInRegistries.ENTITY_TYPE.getOptional(id);
+	}
+
+	/** Rebuilds the dead mob from its look (not added to the world). */
+	private @Nullable Entity rebuild() {
+		if (isPlayerCorpse()) {
+			// players can't be rebuilt from saved data: CorpseRenderer draws them itself
+			return null;
+		}
+		CompoundTag tag = parse(look());
+		Optional<EntityType<?>> type = typeOf(tag);
+		if (type.isEmpty()) {
+			return null;
+		}
+		Entity entity = type.get().create(level(), EntitySpawnReason.LOAD);
+		if (entity != null) {
+			entity.load(TagValueInput.create(ProblemReporter.DISCARDING, level().registryAccess(), tag));
+		}
+		return entity;
+	}
+
+	/** Client side: the body to draw, posed where this corpse is. */
+	public @Nullable Entity clientBody() {
+		return clientBody(getYRot());
+	}
+
+	/** Client side: the body to draw, posed where this corpse is, facing {@code yaw}. */
+	public @Nullable Entity clientBody(float yaw) {
+		if (this.body == null) {
+			this.body = rebuild();
+			if (this.body != null) {
+				// never added to the world, so it has no id; renderers need one (negative: can't clash with real ones)
+				this.body.setId(-1000 - getId());
+			}
+		}
+		Entity entity = this.body;
+		if (entity != null) {
+			entity.setPos(getX(), getY(), getZ());
+			entity.xo = this.xo;
+			entity.yo = this.yo;
+			entity.zo = this.zo;
+			entity.xOld = this.xOld;
+			entity.yOld = this.yOld;
+			entity.zOld = this.zOld;
+			entity.setYRot(yaw);
+			entity.yRotO = yaw;
+			entity.setXRot(0.0F);
+			entity.xRotO = 0.0F;
+			if (entity instanceof LivingEntity living) {
+				living.setYBodyRot(yaw);
+				living.yBodyRotO = yaw;
+				living.setYHeadRot(yaw);
+				living.yHeadRotO = yaw;
+				// fully keeled over, as at the end of the death animation
+				living.deathTime = 20;
+				living.hurtTime = 0;
+			}
+		}
+		return entity;
+	}
+
+	/** Client: flames licking up out of the body and embers drifting off it, instead of a sheet of fire. */
+	private void smoulder() {
+		double w = getBbWidth() * 0.35;
+		double h = getBbHeight();
+		double x = getX() + (random.nextDouble() * 2.0 - 1.0) * w;
+		double z = getZ() + (random.nextDouble() * 2.0 - 1.0) * w;
+		double y = getY() + h * (0.2 + random.nextDouble() * 0.5);
+		level().addParticle(ParticleTypes.SMALL_FLAME, x, y, z, 0.0, 0.02, 0.0);
+		level().addParticle(ParticleTypes.SMALL_FLAME,
+			getX() + (random.nextDouble() * 2.0 - 1.0) * w, y, getZ() + (random.nextDouble() * 2.0 - 1.0) * w, 0.0, 0.02, 0.0);
+		if (random.nextInt(3) == 0) {
+			// now and then a real tongue of flame
+			level().addParticle(ParticleTypes.FLAME, x, y + h * 0.2, z, 0.0, 0.03, 0.0);
+		}
+		if (random.nextInt(2) == 0) {
+			level().addParticle(ParticleTypes.LAVA, x, y, z, 0.0, 0.0, 0.0);
+		}
+		if (random.nextInt(2) == 0) {
+			level().addParticle(random.nextInt(4) == 0 ? ParticleTypes.LARGE_SMOKE : ParticleTypes.SMOKE,
+				x, getY() + h, z, 0.0, 0.05, 0.0);
+		}
+	}
+
+	/** Lying down: about as long as the mob was tall, and low. */
+	@Override
+	public EntityDimensions getDimensions(Pose pose) {
+		EntityType<?> source = sourceType();
+		if (source == null) {
+			return super.getDimensions(pose);
+		}
+		EntityDimensions standing = source.getDimensions();
+		float size = Math.min(standing.width(), standing.height());
+		if (size >= HUGE) {
+			// something huge (a ghast) lies as big as it is, so you can get hold of it
+			return EntityDimensions.fixed(size * 0.85F, size * 0.7F);
+		}
+		// narrow, so it never catches on the edge of a neighbouring block and hangs over the air: it drops to the ground
+		float width = Mth.clamp(Math.min(standing.width(), standing.height()) * 0.9F, 0.4F, 0.9F);
+		float height = Mth.clamp(Math.min(standing.width(), standing.height()) * 0.6F, 0.2F, 1.0F);
+		return EntityDimensions.fixed(width, height);
+	}
+
+	@Override
+	public void tick() {
+		super.tick();
+		if (level().isClientSide() && isOnFire()) {
+			smoulder();
+		}
+		if (level().isClientSide()) {
+			joltTicksO = joltTicks;
+			joltTicks = Math.max(0.0F, joltTicks - 1.0F);
+		}
+		Entity carrier = carrier();
+		if (level().isClientSide()) {
+			if (carrier != null) {
+				swingLimbs(carrier);
+			} else if (isTumbling() && !isPassenger()) {
+				tumble();
+			} else {
+				swingBack = swingBackO = swingLeft = swingLeftO = swingBackVel = swingLeftVel = 0.0F;
+				tumbling = false;
+			}
+		}
+		if (carrier != null) {
+			// held across the carrier's arms, in front of them
+			Vec3 at = carryPosition(carrier, carrier.getYRot(), carrier.getX(), carrier.getY(), carrier.getZ(), getBbWidth());
+			setPos(at.x, at.y, at.z);
+			setYRot(carrier.getYRot() + 90.0F);
+			setDeltaMovement(Vec3.ZERO);
+			if (level() instanceof ServerLevel level) {
+				if (!carrier.isAlive() || carrier.level() != level() || carrier.isSpectator()
+					|| carrier.distanceToSqr(this) > CARRY_LEASH_SQ) {
+					setCarrier(null);
+				} else if (carrier instanceof Player player && tickCount % 20 == 0) {
+					// heavy: slows whoever is carrying it
+					player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, isBigCarcass() ? 2 : 0, false, false, true));
+				}
+				serverTick(level);
+			}
+			return;
+		}
+		if (grabCooldown > 0 && !level().isClientSide()) {
+			grabCooldown--;
+		}
+		if (isPassenger()) {
+			// lying in a cart: the cart moves it
+			if (level() instanceof ServerLevel level) {
+				serverTick(level);
+			}
+			return;
+		}
+		if (isTumbling() && !level().isClientSide() && landInCart()) {
+			return;
+		}
+		// fall and settle; corpses don't slide around. A body already lying on something solid skips the collision
+		// work (most corpses, most of the time); the moment the block under it goes, it falls again at once
+		if (isNoGravity()) {
+			// held up by something (a gravity power, say): it drifts where it's pushed, and still bumps into things
+			move(MoverType.SELF, getDeltaMovement());
+			setDeltaMovement(getDeltaMovement().scale(0.85));
+		} else if (!restingOnSolid()) {
+			setDeltaMovement(getDeltaMovement().add(0.0, -0.04, 0.0));
+			move(MoverType.SELF, getDeltaMovement());
+			double drag = onGround() ? 0.5 : 0.91;
+			setDeltaMovement(getDeltaMovement().multiply(drag, onGround() ? 0.0 : 0.98, drag));
+		}
+		if (onGround() && !isNoGravity() && level() instanceof ServerLevel here) {
+			int overhang = overhang();
+			Vec3 slide = null;
+			if (overhang != 0) {
+				// lying across an edge with an end over nothing: it slides off that way, still falling, until it lies
+				// flat on blocks along its whole length (or drops off altogether)
+				float yaw = getYRot() * Mth.DEG_TO_RAD;
+				slide = new Vec3(Mth.cos(yaw) * overhang, 0.0, Mth.sin(yaw) * overhang);
+			} else if (!solidUnder(0.0)) {
+				// its middle is over nothing but its edge is caught on a block's rim: pushed off, away from that block
+				slide = awayFromRim();
+			}
+			if (slide != null) {
+				setDeltaMovement(slide.x * 0.12, getDeltaMovement().y, slide.z * 0.12);
+				this.entityData.set(TUMBLING, true);
+			} else if (isTumbling()) {
+				// down flat: it lies as it fell
+				this.entityData.set(TUMBLING, false);
+				play(here, SoundEvents.PLAYER_SMALL_FALL, 0.7F);
+			}
+		}
+
+		if (level() instanceof ServerLevel level) {
+			serverTick(level);
+		}
+	}
+
+	/** How often a corpse looks for a flame it's lying in or on (lava, fire, a lit campfire). */
+	private static final int FLAME_CHECK_TICKS = 10;
+
+	/** In or on lava, fire, or a lit campfire. */
+	private boolean touchesFlame(ServerLevel level) {
+		net.minecraft.world.phys.AABB box = getBoundingBox().inflate(0.0, 0.1, 0.0).move(0.0, -0.1, 0.0);
+		for (BlockPos pos : BlockPos.betweenClosed(BlockPos.containing(box.minX, box.minY, box.minZ), BlockPos.containing(box.maxX, box.maxY, box.maxZ))) {
+			net.minecraft.world.level.block.state.BlockState state = level.getBlockState(pos);
+			if (state.is(net.minecraft.tags.BlockTags.FIRE) || state.getFluidState().is(net.minecraft.tags.FluidTags.LAVA)
+				|| state.is(net.minecraft.tags.BlockTags.CAMPFIRES) && state.getValueOrElse(net.minecraft.world.level.block.CampfireBlock.LIT, false)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** On the ground and still, with something solid right under its middle: nothing for physics to do this tick. */
+	private boolean restingOnSolid() {
+		if (!onGround() || getDeltaMovement().lengthSqr() > 1.0E-6) {
+			return false;
+		}
+		return solidUnder(0.0) && overhang() == 0;
+	}
+
+	/** Whether there's a block to lie on under the body's line, {@code along} blocks from its middle toward its head. */
+	private boolean solidUnder(double along) {
+		float yaw = getYRot() * Mth.DEG_TO_RAD;
+		BlockPos below = BlockPos.containing(getX() + Mth.cos(yaw) * along, getY() - 0.05, getZ() + Mth.sin(yaw) * along);
+		return !level().getBlockState(below).getCollisionShape(level(), below).isEmpty();
+	}
+
+	/** Which way to push a body that's caught on the rim of a block under its edge: from those blocks toward its middle. */
+	private Vec3 awayFromRim() {
+		AABB box = getBoundingBox();
+		double sumX = 0.0, sumZ = 0.0;
+		int found = 0;
+		for (double x : new double[] {box.minX + 0.01, box.maxX - 0.01}) {
+			for (double z : new double[] {box.minZ + 0.01, box.maxZ - 0.01}) {
+				BlockPos below = BlockPos.containing(x, getY() - 0.05, z);
+				if (!level().getBlockState(below).getCollisionShape(level(), below).isEmpty()) {
+					sumX += below.getX() + 0.5;
+					sumZ += below.getZ() + 0.5;
+					found++;
+				}
+			}
+		}
+		Vec3 away = found == 0 ? Vec3.ZERO : new Vec3(getX() - sumX / found, 0.0, getZ() - sumZ / found);
+		if (away.lengthSqr() < 1.0E-4) {
+			float yaw = getYRot() * Mth.DEG_TO_RAD;
+			away = new Vec3(Mth.cos(yaw), 0.0, Mth.sin(yaw));
+		}
+		return away.normalize();
+	}
+
+	/**
+	 * A body lies along its facing ((cos, sin) of its yaw), as long as the mob stood tall. With its middle on a block but
+	 * an end over nothing, it isn't lying flat: +1 or -1 for the end that hangs out (it slides off that way), 0 if it's
+	 * lying on blocks all along (or its middle isn't on anything, which gravity sees to). Laid on a butcher block, the
+	 * block holds it however far it hangs over.
+	 */
+	private int overhang() {
+		BlockPos centre = BlockPos.containing(getX(), getY() - 0.05, getZ());
+		if (!solidUnder(0.0) || Corpses.isButcherBlock(level().getBlockState(centre))) {
+			return 0;
+		}
+		EntityType<?> type = sourceType();
+		float length = isPlayerCorpse() ? 1.8F : type == null ? 0.5F : type.getDimensions().height();
+		double half = Mth.clamp(length * 0.5 - 0.15, 0.0, 1.5);
+		if (half < 0.2) {
+			return 0;
+		}
+		boolean head = solidUnder(half), feet = solidUnder(-half);
+		if (head && feet) {
+			return 0;
+		}
+		return !head && !feet ? (poseSeed() & 1) == 0 ? 1 : -1 : head ? -1 : 1;
+	}
+
+	private void serverTick(ServerLevel level) {
+		age++;
+		if (kind.burns() && !isOnFire() && tickCount % FLAME_CHECK_TICKS == 0 && touchesFlame(level)) {
+			igniteForSeconds(8.0F);
+		}
+		if (kind == CorpseKind.ZOMBIE && carrier() == null && tickCount % 20 == 0 && inSunlight(level)) {
+			// left out in the daylight, the undead burn as they would alive
+			igniteForSeconds(8.0F);
+		}
+		if (kind.burns() && isOnFire() && (isInWater() || isUnderWater())) {
+			// dunked: the flames go out for good (until something lights it again)
+			clearFire();
+			burnTicks = 0;
+			play(level, SoundEvents.FIRE_EXTINGUISH, 0.8F);
+		}
+		if (burnTicks > 0 && kind.burns() && getRemainingFireTicks() < 10 && !isInWaterOrRain()) {
+			// once a body catches, it keeps burning until it's gone (only water or rain puts it out). Topped up before
+			// it can go out, or it would fizz out and catch again every second
+			setRemainingFireTicks(40);
+		}
+		if (kind.burns() && burnTicks < BURN_TICKS - LAVA_BURN_TICKS && isInLava()) {
+			// lava makes short work of it
+			burnTicks = BURN_TICKS - LAVA_BURN_TICKS;
+			play(level, SoundEvents.LAVA_EXTINGUISH, 0.8F);
+		}
+		if (isOnFire() && kind.burns()) {
+			burnTicks++;
+			if (isCreeper()) {
+				if (burnTicks == 1 || burnTicks == CREEPER_FUSE - 30) {
+					// hisses when it catches, and again just before it goes
+					play(level, SoundEvents.CREEPER_PRIMED, burnTicks == 1 ? 0.8F : 1.2F);
+				}
+				if (burnTicks >= CREEPER_FUSE) {
+					// the fire reaches whatever made it a creeper
+					discard();
+					level.explode(this, getX(), getY() + 0.3, getZ(), isChargedCreeper() ? 6.0F : 3.0F,
+						Level.ExplosionInteraction.MOB);
+					return;
+				}
+			}
+			if (random.nextInt(3) == 0) {
+				level.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 0.3, getZ(), 1, 0.3, 0.1, 0.3, 0.01);
+			}
+			if (burnTicks % GHAST_WAIL_EVERY == 1 && sourceType() == net.minecraft.world.entity.EntityTypes.GHAST) {
+				// a burning ghast still screams, louder than it ever did alive
+				level.playSound(null, getX(), getY(), getZ(), SoundEvents.GHAST_HURT, SoundSource.HOSTILE, GHAST_WAIL_VOLUME,
+					0.8F + random.nextFloat() * 0.4F);
+			}
+			if (burnTicks >= BURN_TICKS) {
+				level.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 0.2, getZ(), 20, 0.4, 0.2, 0.4, 0.02);
+				level.sendParticles(ParticleTypes.WHITE_ASH, getX(), getY() + 0.2, getZ(), 30, 0.4, 0.2, 0.4, 0.02);
+				play(level, SoundEvents.FIRE_EXTINGUISH, 1.0F);
+				// whatever wasn't searched off it burns too; a skeleton's bones don't
+				if (kind == CorpseKind.SKELETON && bones > 0) {
+					spawnAtLocation(level, new ItemStack(Items.BONE, bones), 0.2F);
+				}
+				discard();
+				return;
+			}
+		}
+		if (kind == CorpseKind.ZOMBIE || kind == CorpseKind.PLAYER) {
+			if (age > REANIMATE_TICKS - 200 && random.nextInt(40) == 0) {
+				// twitching: it's about to get up
+				play(level, SoundEvents.ZOMBIE_AMBIENT, 0.6F * voice());
+				level.sendParticles(ParticleTypes.SOUL, getX(), getY() + 0.3, getZ(), 2, 0.3, 0.1, 0.3, 0.01);
+			}
+			if (age >= REANIMATE_TICKS) {
+				reanimate(level);
+			}
+		} else if (!isCreeper() && kind != CorpseKind.SKELETON && age >= (isHostile() ? HOSTILE_ROT_TICKS : ROT_TICKS)) {
+			level.sendParticles(ParticleTypes.SMOKE, getX(), getY() + 0.2, getZ(), 15, 0.4, 0.1, 0.4, 0.01);
+			play(level, SoundEvents.SLIME_SQUISH, 0.8F);
+			if (isHostile() && random.nextFloat() < HOSTILE_LOOT_CHANCE) {
+				// once in a while what it had survives the rot
+				dropLoot(level);
+			} else {
+				spawnAtLocation(level, new ItemStack(Items.ROTTEN_FLESH, 1 + random.nextInt(2)), 0.2F);
+			}
+			discard();
+		}
+	}
+
+	/** An unburned zombie gets back up, empty-handed (its gear was left in the corpse); a player, as a zombie. */
+	private void reanimate(ServerLevel level) {
+		if (kind == CorpseKind.PLAYER) {
+			PlayerCorpses.reanimate(this, level, hotbar, selected);
+			level.sendParticles(ParticleTypes.SOUL, getX(), getY() + 0.5, getZ(), 10, 0.3, 0.4, 0.3, 0.02);
+			discard();
+			return;
+		}
+		Entity risen = rebuild();
+		if (risen instanceof LivingEntity living) {
+			living.setUUID(java.util.UUID.randomUUID());
+			living.snapTo(getX(), getY(), getZ(), getYRot(), 0.0F);
+			living.setHealth(living.getMaxHealth());
+			living.deathTime = 0;
+			living.hurtTime = 0;
+			living.clearFire();
+			if (living instanceof Mob mob) {
+				for (EquipmentSlot slot : EquipmentSlot.values()) {
+					mob.setItemSlot(slot, ItemStack.EMPTY);
+				}
+			}
+			level.addFreshEntity(living);
+			play(level, SoundEvents.ZOMBIE_INFECT, voice());
+			level.sendParticles(ParticleTypes.SOUL, getX(), getY() + 0.5, getZ(), 10, 0.3, 0.4, 0.3, 0.02);
+		}
+		discard();
+	}
+
+	@Override
+	public InteractionResult interact(Player player, InteractionHand hand, Vec3 location) {
+		if (hand != InteractionHand.MAIN_HAND) {
+			return InteractionResult.PASS;
+		}
+		if (grabCooldown > 0 || isTumbling()) {
+			// just let go of (thrown, dropped, tipped out): not caught again in the same click
+			return InteractionResult.PASS;
+		}
+		if (!(level() instanceof ServerLevel level)) {
+			return InteractionResult.SUCCESS;
+		}
+		ItemStack held = player.getItemInHand(hand);
+
+		// anything that burns can be set alight
+		if (kind.burns() && (held.is(Items.FLINT_AND_STEEL) || held.is(Items.FIRE_CHARGE))) {
+			igniteForSeconds(8.0F);
+			if (held.is(Items.FLINT_AND_STEEL)) {
+				held.hurtAndBreak(1, player, hand);
+				play(level, SoundEvents.FLINTANDSTEEL_USE, 1.0F);
+			} else {
+				held.consume(1, player);
+				play(level, SoundEvents.FIRECHARGE_USE, 1.0F);
+			}
+			return InteractionResult.SUCCESS_SERVER;
+		}
+
+		// sneak with an empty hand: carry any corpse in your arms (a skeleton, a spider, a chicken...)
+		if (player.isShiftKeyDown() && held.isEmpty()) {
+			return carry(level, player);
+		}
+		// an empty hand on anything small enough (whatever it was): into a bag in your pocket
+		if (held.isEmpty() && kind != CorpseKind.PLAYER && fitsInPocket()) {
+			return pickUp(level, player);
+		}
+
+		switch (kind) {
+			case ANIMAL -> {
+				return interactAnimal(level, player, held);
+			}
+			case PLAYER -> {
+				PlayerCorpses.restore(this, player, hotbar, selected);
+				return InteractionResult.SUCCESS_SERVER;
+			}
+			case SKELETON -> {
+				// its gear comes off first, then its bones
+				if (!takeGear(level, player)) {
+					pullBone(level);
+				}
+				return InteractionResult.SUCCESS_SERVER;
+			}
+			default -> {
+				return search(level, player);
+			}
+		}
+	}
+
+	private InteractionResult interactAnimal(ServerLevel level, Player player, ItemStack held) {
+		// an axe butchers it anywhere; on a butcher block it's done properly and pays better
+		if (held.is(ItemTags.AXES)) {
+			held.hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
+			chops++;
+			jolt(true);
+			play(level, SoundEvents.AXE_STRIP.value(), 0.8F + chops * 0.1F);
+			level.sendParticles(ParticleTypes.CRIT, getX(), getY() + 0.3, getZ(), 8, 0.3, 0.1, 0.3, 0.1);
+			if (chops >= CHOPS) {
+				boolean onBlock = onButcherBlock();
+				butcher(level, onBlock);
+				if (!onBlock) {
+					player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.rough_job"));
+				}
+			}
+			return InteractionResult.SUCCESS_SERVER;
+		}
+		if (!held.isEmpty()) {
+			player.sendOverlayMessage(Component.translatable(onButcherBlock()
+				? "message.jaymoskitchen.corpse.need_axe" : "message.jaymoskitchen.corpse.carry"));
+			return InteractionResult.SUCCESS_SERVER;
+		}
+		return pickUp(level, player);
+	}
+
+	/**
+	 * Takes the corpse: a small animal goes in your pocket; anything else (big animals, and any other corpse) is
+	 * carried in front of you, one at a time.
+	 */
+	private InteractionResult pickUp(ServerLevel level, Player player) {
+		if (!fitsInPocket()) {
+			return carry(level, player);
+		}
+		ItemStack pocketed = CorpseItem.of(this);
+		if (!player.getInventory().add(pocketed)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.no_room"));
+			return InteractionResult.SUCCESS_SERVER;
+		}
+		play(level, SoundEvents.ARMOR_EQUIP_LEATHER.value(), 1.0F);
+		discard();
+		return InteractionResult.SUCCESS_SERVER;
+	}
+
+	/**
+	 * Taken by something other than a click (Jaymo's Powers: Gravity draws a corpse in to you): into a pocket if it
+	 * fits (never a player's), otherwise carried in your arms.
+	 */
+	public void takeBy(Player player) {
+		if (!(level() instanceof ServerLevel level) || isRemoved()) {
+			return;
+		}
+		if (kind != CorpseKind.PLAYER && fitsInPocket()) {
+			pickUp(level, player);
+		} else {
+			carry(level, player);
+		}
+	}
+
+	/** Carried in your arms, in front of you (one at a time). */
+	private InteractionResult carry(ServerLevel level, Player player) {
+		if (carriedBy(player) != null) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.one_at_a_time"));
+			return InteractionResult.SUCCESS_SERVER;
+		}
+		setCarrier(player);
+		this.entityData.set(TUMBLING, false);
+		play(level, SoundEvents.ARMOR_EQUIP_LEATHER.value(), 0.8F);
+		return InteractionResult.SUCCESS_SERVER;
+	}
+
+	/** Chopped up on the butcher block: out comes the loot, plus a bit extra for doing it properly. */
+	/**
+	 * Chopped up. On a butcher block: everything it would have dropped, extra meat, and the block-only extras (see
+	 * {@link ButcheringBonus}). On the ground: a rough job, about half the usual.
+	 */
+	private void butcher(ServerLevel level, boolean onBlock) {
+		if (onBlock) {
+			for (ItemStack stack : loot) {
+				if (stack.has(DataComponents.FOOD)) {
+					spawnAtLocation(level, stack.copyWithCount(1 + random.nextInt(2)), 0.4F);
+					break;
+				}
+			}
+			for (ItemStack extra : ButcheringBonus.roll(sourceType(), random)) {
+				spawnAtLocation(level, extra, 0.4F);
+			}
+		} else {
+			List<ItemStack> rough = new ArrayList<>();
+			for (ItemStack stack : loot) {
+				int count = stack.getCount() / 2;
+				if (count == 0 && random.nextBoolean()) {
+					count = 1;
+				}
+				if (count > 0) {
+					rough.add(stack.copyWithCount(count));
+				}
+			}
+			loot = rough;
+		}
+		dropLoot(level);
+		level.sendParticles(ParticleTypes.CRIT, getX(), getY() + 0.3, getZ(), 20, 0.4, 0.2, 0.4, 0.2);
+		play(level, SoundEvents.PLAYER_ATTACK_SWEEP, 1.0F);
+		discard();
+	}
+
+	private boolean onButcherBlock() {
+		BlockPos below = BlockPos.containing(getX(), getY() - 0.2, getZ());
+		return Corpses.isButcherBlock(level().getBlockState(below));
+	}
+
+	private void pullBone(ServerLevel level) {
+		if (bones > 0) {
+			bones--;
+			jolt(false);
+			spawnAtLocation(level, new ItemStack(Items.BONE), 0.3F);
+			play(level, SoundEvents.SKELETON_HURT, 1.2F);
+		}
+		if (bones <= 0) {
+			// nothing left holding it together
+			dropLoot(level);
+			level.sendParticles(ParticleTypes.POOF, getX(), getY() + 0.2, getZ(), 10, 0.3, 0.1, 0.3, 0.02);
+			play(level, SoundEvents.SKELETON_DEATH, 0.9F);
+			discard();
+		}
+	}
+
+	private InteractionResult search(ServerLevel level, Player player) {
+		if (searched || loot.isEmpty()) {
+			searched = true;
+			// searched: what it's wearing and holding comes off next, a piece at a time
+			if (takeGear(level, player)) {
+				return InteractionResult.SUCCESS_SERVER;
+			}
+			player.sendOverlayMessage(Component.translatable(kind == CorpseKind.ZOMBIE ? "message.jaymoskitchen.corpse.burn_zombie"
+				: isHostile() ? "message.jaymoskitchen.corpse.burn_hostile" : "message.jaymoskitchen.corpse.searched"));
+			return InteractionResult.SUCCESS_SERVER;
+		}
+		dropLoot(level);
+		searched = true;
+		jolt(false);
+		play(level, SoundEvents.BUNDLE_DROP_CONTENTS, 1.0F);
+		return InteractionResult.SUCCESS_SERVER;
+	}
+
+	private void dropLoot(ServerLevel level) {
+		for (ItemStack stack : loot) {
+			spawnAtLocation(level, stack.copy(), 0.3F);
+		}
+		loot.clear();
+	}
+
+	private void play(ServerLevel level, SoundEvent sound, float pitch) {
+		level.playSound(null, getX(), getY(), getZ(), sound, SoundSource.NEUTRAL, 1.0F, pitch);
+	}
+
+	/** What the carried-corpse item needs to put this corpse back down later. */
+	CorpseData toData() {
+		List<ItemStackTemplate> templates = new ArrayList<>();
+		for (ItemStack stack : loot) {
+			if (!stack.isEmpty()) {
+				templates.add(ItemStackTemplate.fromNonEmptyStack(stack));
+			}
+		}
+		return new CorpseData(look(), templates);
+	}
+
+	/** A cow-sized carcass: needs a 2x2 butcher table, and is slower to carry. */
+	public boolean isBigCarcass() {
+		EntityType<?> type = sourceType();
+		return type != null && type.builtInRegistryHolder().is(Corpses.BIG_CARCASSES);
+	}
+
+	/**
+	 * Where a corpse goes when set down on the butcher block at {@code clicked}: the middle of that block, or for a
+	 * big carcass the middle of a 2x2 of butcher blocks including it (the one nearest {@code hit}), or null if
+	 * there isn't one.
+	 */
+	public static @Nullable Vec3 tableSpot(Level level, BlockPos clicked, Vec3 hit, boolean big) {
+		if (!big) {
+			return new Vec3(clicked.getX() + 0.5, clicked.getY() + 1.0, clicked.getZ() + 0.5);
+		}
+		Vec3 best = null;
+		for (int dx = -1; dx <= 0; dx++) {
+			for (int dz = -1; dz <= 0; dz++) {
+				BlockPos corner = clicked.offset(dx, 0, dz);
+				if (Corpses.isButcherBlock(level.getBlockState(corner))
+					&& Corpses.isButcherBlock(level.getBlockState(corner.east()))
+					&& Corpses.isButcherBlock(level.getBlockState(corner.south()))
+					&& Corpses.isButcherBlock(level.getBlockState(corner.east().south()))) {
+					Vec3 spot = new Vec3(corner.getX() + 1.0, clicked.getY() + 1.0, corner.getZ() + 1.0);
+					if (best == null || spot.distanceToSqr(hit) < best.distanceToSqr(hit)) {
+						best = spot;
+					}
+				}
+			}
+		}
+		return best;
+	}
+
+	/** A hostile mob's corpse never rots away: it has to be burned. */
+	private boolean isHostile() {
+		EntityType<?> type = sourceType();
+		return type != null && type.getCategory() == MobCategory.MONSTER;
+	}
+
+	private boolean isCreeper() {
+		return sourceType() == EntityTypes.CREEPER;
+	}
+
+	private boolean isChargedCreeper() {
+		CompoundTag tag = parse(look());
+		return tag != null && tag.getBooleanOr("powered", false);
+	}
+
+	/**
+	 * What kind of mob the look is, worked out once per look: parsing the look (the mob's whole saved data, gear and
+	 * all) is far too slow to do every tick, and the tick asks (is it a creeper? hostile?) every tick. No initial values:
+	 * the look is set while the entity is still being built, before field initialisers would run.
+	 */
+	private @Nullable EntityType<?> sourceTypeCache;
+	private boolean typeKnown;
+
+	/** The type of mob this was, for naming the carried corpse. */
+	public @Nullable EntityType<?> sourceType() {
+		if (!typeKnown) {
+			sourceTypeCache = typeOf(parse(look())).orElse(null);
+			typeKnown = true;
+		}
+		return sourceTypeCache;
+	}
+
+	/** Puts a carried animal corpse back into the world. */
+	void restore(CorpseData data) {
+		List<ItemStack> stacks = new ArrayList<>();
+		for (ItemStackTemplate template : data.loot()) {
+			stacks.add(template.create());
+		}
+		// a bagged corpse comes back as what it was (a bagged zombie still gets up one day)
+		CorpseKind restored = CorpseKind.ANIMAL;
+		if (rebuildFrom(data.look()) instanceof LivingEntity body) {
+			restored = CorpseKind.of(body);
+		}
+		setUp(data.look(), restored, stacks, 0);
+	}
+
+	private @Nullable Entity rebuildFrom(String look) {
+		CompoundTag tag = parse(look);
+		Optional<EntityType<?>> type = typeOf(tag);
+		if (type.isEmpty()) {
+			return null;
+		}
+		Entity entity = type.get().create(level(), EntitySpawnReason.LOAD);
+		if (entity != null) {
+			entity.load(TagValueInput.create(ProblemReporter.DISCARDING, level().registryAccess(), tag));
+		}
+		return entity;
+	}
+
+	@Override
+	public boolean fireImmune() {
+		return !kind.burns() || super.fireImmune();
+	}
+
+	@Override
+	public boolean isPickable() {
+		// a carried corpse is see-through to the crosshair, so you can aim at where to put it down
+		return !isRemoved() && carrier() == null;
+	}
+
+	/** Small animals (a chicken, a rabbit, any baby) can be pocketed; anything bigger has to be carried. */
+	private boolean fitsInPocket() {
+		Entity body = rebuild();
+		return body != null && body.getBbWidth() <= POCKET_WIDTH && body.getBbHeight() <= POCKET_HEIGHT;
+	}
+
+	public @Nullable Entity carrier() {
+		int id = this.entityData.get(CARRIER);
+		return id < 0 ? null : level().getEntity(id);
+	}
+
+	private void setCarrier(@Nullable Entity carrier) {
+		if (carrier != null && isPassenger()) {
+			// lifted out of a cart
+			stopRiding();
+		}
+		this.entityData.set(CARRIER, carrier == null ? -1 : carrier.getId());
+		setNoGravity(carrier != null);
+		this.noPhysics = carrier != null;
+	}
+
+	/** Where a carried corpse sits for a carrier at the given position and facing. */
+	public static Vec3 carryPosition(Entity carrier, float yaw, double x, double y, double z) {
+		return carryPosition(carrier, yaw, x, y, z, 0.0F);
+	}
+
+	/** The same, for a corpse this wide: a big one is held further out (and lower), in front of you, not around you. */
+	public static Vec3 carryPosition(Entity carrier, float yaw, double x, double y, double z, float width) {
+		float radians = yaw * Mth.DEG_TO_RAD;
+		double forward = CARRY_FORWARD + Math.max(0.0, width * 0.5 - 0.45);
+		double height = width > 1.0F ? 0.3 : CARRY_HEIGHT;
+		return new Vec3(x - Mth.sin(radians) * forward, y + height, z + Mth.cos(radians) * forward);
+	}
+
+	/** The corpse this player is carrying, if any (either side). */
+	public static @Nullable CorpseEntity carriedBy(Player player) {
+		for (CorpseEntity corpse : player.level().getEntitiesOfClass(CorpseEntity.class,
+			player.getBoundingBox().inflate(4.0), corpse -> corpse.entityData.get(CARRIER) == player.getId())) {
+			return corpse;
+		}
+		return null;
+	}
+
+	/** Whether it's falling from someone's arms, not landed yet. */
+	public boolean isTumbling() {
+		return this.entityData.get(TUMBLING);
+	}
+
+	/** Server: the carrier lets go. It drops from where it was held, carried on by their momentum, tumbling limp. */
+	public void drop(Player player) {
+		setCarrier(null);
+		grabCooldown = GRAB_COOLDOWN;
+		setOnGround(false);
+		// it lands differently each time
+		this.entityData.set(POSE, random.nextInt());
+		this.entityData.set(TUMBLING, true);
+		Vec3 ahead = player.getViewVector(1.0F).multiply(1.0, 0.0, 1.0).normalize().scale(0.12);
+		setDeltaMovement(player.getDeltaMovement().multiply(1.0, 0.0, 1.0).add(ahead.x, 0.08, ahead.z));
+		if (level() instanceof ServerLevel level) {
+			play(level, SoundEvents.ARMOR_EQUIP_LEATHER.value(), 0.6F);
+		}
+	}
+
+	/** Ticks after being let go before it can be grabbed again. */
+	private static final int GRAB_COOLDOWN = 20;
+	private int grabCooldown;
+
+	/**
+	 * Server: tipped out of a cart. Put down clear of it on the side it tips to ({@code away}, a unit vector), and
+	 * flung on outward, tumbling, so it doesn't land under the cart.
+	 */
+	public void tipOut(CartEntity cart, Vec3 away) {
+		stopRiding();
+		grabCooldown = GRAB_COOLDOWN;
+		setOnGround(false);
+		this.entityData.set(POSE, random.nextInt());
+		this.entityData.set(TUMBLING, true);
+		double out = cart.getBbWidth() * 0.5 + 0.6 + random.nextDouble() * 0.3;
+		setPos(cart.getX() + away.x * out, cart.getY() + 0.7, cart.getZ() + away.z * out);
+		setDeltaMovement(away.x * (0.14 + random.nextDouble() * 0.06), 0.12, away.z * (0.14 + random.nextDouble() * 0.06));
+	}
+
+	/** Server: thrown a short way ahead of the carrier, tumbling; it lands on the ground or in a cart it hits. */
+	public void toss(Player player) {
+		drop(player);
+		Vec3 ahead = player.getViewVector(1.0F).multiply(1.0, 0.0, 1.0).normalize();
+		setDeltaMovement(player.getDeltaMovement().multiply(1.0, 0.0, 1.0).add(ahead.x * 0.42, 0.28, ahead.z * 0.42));
+		if (level() instanceof ServerLevel level) {
+			play(level, SoundEvents.PLAYER_ATTACK_SWEEP, 0.7F);
+		}
+	}
+
+	/**
+	 * Room it takes in a cart: 3 for anything cow-sized or bigger (standing a block and a fifth tall or wide: cows,
+	 * sheep, people, zombies), 1 for small ones (chickens, fish, pigs, rabbits); 0 if it won't fit in a cart at all.
+	 */
+	public int cartRoom() {
+		if (isPlayerCorpse()) {
+			return 3;
+		}
+		EntityType<?> type = sourceType();
+		if (type == null) {
+			return 0;
+		}
+		EntityDimensions standing = type.getDimensions();
+		if (Math.max(standing.width(), standing.height()) > 2.2F) {
+			return 0;
+		}
+		return standing.height() >= 1.2F || standing.width() >= 1.2F ? 3 : 1;
+	}
+
+	/** Server: a thrown (or dropped) body that hits an animal or supply cart lands in it, if there's room. */
+	private boolean landInCart() {
+		for (CartEntity cart : level().getEntitiesOfClass(CartEntity.class, getBoundingBox().inflate(0.25))) {
+			if (cart.takesCorpse(this) && startRiding(cart)) {
+				this.entityData.set(TUMBLING, false);
+				setDeltaMovement(Vec3.ZERO);
+				if (level() instanceof ServerLevel level) {
+					play(level, SoundEvents.WOOD_FALL, 0.8F);
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Sets a carried corpse down at {@code at} (on top of a butcher block, or on the ground). */
+	public void putDown(Vec3 at, float yaw) {
+		setCarrier(null);
+		this.entityData.set(TUMBLING, false);
+		// set down off a ledge (or against the side of a block), it drops to the ground
+		setOnGround(false);
+		// it lands differently each time
+		this.entityData.set(POSE, random.nextInt());
+		snapTo(at.x, at.y, at.z, yaw, 0.0F);
+		setDeltaMovement(Vec3.ZERO);
+		if (level() instanceof ServerLevel level) {
+			play(level, SoundEvents.ARMOR_EQUIP_LEATHER.value(), 0.7F);
+		}
+	}
+
+	@Override
+	public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
+		if (!source.is(net.minecraft.tags.DamageTypeTags.IS_EXPLOSION) || isRemoved() || carrier() != null) {
+			return false;
+		}
+		if (isCreeper()) {
+			// the blast sets off whatever made it a creeper
+			discard();
+			level.explode(this, getX(), getY() + 0.3, getZ(), isChargedCreeper() ? 6.0F : 3.0F, Level.ExplosionInteraction.MOB);
+			return true;
+		}
+		level.sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + 0.3, getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+		level.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 0.3, getZ(), 12, 0.4, 0.2, 0.4, 0.05);
+		play(level, SoundEvents.SLIME_SQUISH, 0.6F);
+		if (kind == CorpseKind.SKELETON && bones > 0) {
+			spawnAtLocation(level, new ItemStack(Items.BONE, bones), 0.2F);
+		} else if (kind != CorpseKind.SKELETON) {
+			spawnAtLocation(level, new ItemStack(Items.ROTTEN_FLESH, 1 + random.nextInt(2)), 0.2F);
+		}
+		dropLoot(level);
+		discard();
+		return true;
+	}
+
+	@Override
+	protected void readAdditionalSaveData(ValueInput input) {
+		this.entityData.set(LOOK, input.getStringOr("Look", ""));
+		this.kind = CorpseKind.byName(input.getStringOr("Kind", CorpseKind.OTHER.name()));
+		this.loot = new ArrayList<>(input.read("Loot", ItemStack.CODEC.listOf()).orElse(List.of()));
+		this.bones = input.getIntOr("Bones", 0);
+		this.searched = input.getBooleanOr("Searched", false);
+		this.chops = input.getIntOr("Chops", 0);
+		this.burnTicks = input.getIntOr("Burned", 0);
+		this.age = input.getIntOr("Age", 0);
+		this.entityData.set(OWNER, input.getStringOr("Owner", ""));
+		this.entityData.set(OWNER_NAME, input.getStringOr("OwnerName", ""));
+		this.slim = input.getBooleanOr("Slim", false);
+		List<ItemStack> savedHotbar = input.read("Hotbar", ItemStack.OPTIONAL_CODEC.listOf()).orElse(List.of());
+		for (int i = 0; i < this.hotbar.size(); i++) {
+			this.hotbar.set(i, i < savedHotbar.size() ? savedHotbar.get(i) : ItemStack.EMPTY);
+		}
+		this.selected = input.getIntOr("Selected", 0);
+		// whatever held it up (a gravity power) is gone after a reload
+		setNoGravity(false);
+		refreshDimensions();
+	}
+
+	@Override
+	protected void addAdditionalSaveData(ValueOutput output) {
+		output.putString("Look", look());
+		output.putString("Kind", kind.name());
+		output.store("Loot", ItemStack.CODEC.listOf(), loot);
+		output.putInt("Bones", bones);
+		output.putBoolean("Searched", searched);
+		output.putInt("Chops", chops);
+		output.putInt("Burned", burnTicks);
+		output.putInt("Age", age);
+		output.putString("Owner", ownerId());
+		output.putString("OwnerName", ownerName());
+		output.store("Hotbar", ItemStack.OPTIONAL_CODEC.listOf(), hotbar);
+		output.putInt("Selected", selected);
+		output.putBoolean("Slim", slim);
+	}
+}

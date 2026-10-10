@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ppp",
+    "ppp",
+    "wpw"
+  ],
+  "key": {
+    "p": "minecraft:mangrove_planks",
+    "w": "jaymoskitchen:wheel"
+  },
+  "result": {
+    "id": "jaymoskitchen:mangrove_animal_cart"
+  }
+}

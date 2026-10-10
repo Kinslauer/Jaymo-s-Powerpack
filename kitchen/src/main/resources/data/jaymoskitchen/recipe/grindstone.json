@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "LSL",
+    "###",
+    "###"
+  ],
+  "key": {
+    "L": "minecraft:lead",
+    "S": "minecraft:stick",
+    "#": "minecraft:stone"
+  },
+  "result": {
+    "id": "jaymoskitchen:grindstone"
+  }
+}

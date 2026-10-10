@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskitchen:frying_pan",
+    "minecraft:potato",
+    "jaymoskitchen:cooking_oil"
+  ],
+  "result": {
+    "id": "jaymoskitchen:fries",
+    "count": 2
+  }
+}

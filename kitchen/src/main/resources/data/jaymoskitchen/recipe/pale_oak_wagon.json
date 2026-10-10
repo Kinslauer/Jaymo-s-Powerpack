@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "s c",
+    "ppp",
+    "w w"
+  ],
+  "key": {
+    "s": "minecraft:stick",
+    "c": "minecraft:chest",
+    "p": "minecraft:pale_oak_planks",
+    "w": "jaymoskitchen:wheel"
+  },
+  "result": {
+    "id": "jaymoskitchen:pale_oak_wagon"
+  }
+}

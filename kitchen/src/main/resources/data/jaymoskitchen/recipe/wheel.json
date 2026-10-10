@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "sss",
+    "sps",
+    "sss"
+  ],
+  "key": {
+    "p": "#minecraft:planks",
+    "s": "minecraft:stick"
+  },
+  "result": {
+    "id": "jaymoskitchen:wheel"
+  }
+}

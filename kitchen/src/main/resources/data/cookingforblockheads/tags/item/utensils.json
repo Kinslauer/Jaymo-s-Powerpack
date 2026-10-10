@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "jaymoskitchen:cooking_pot",
+    "jaymoskitchen:frying_pan",
+    "jaymoskitchen:saucepan",
+    "jaymoskitchen:baking_tray",
+    "jaymoskitchen:rolling_pin"
+  ]
+}

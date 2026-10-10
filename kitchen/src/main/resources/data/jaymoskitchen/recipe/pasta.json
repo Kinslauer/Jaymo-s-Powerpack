@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskitchen:rolling_pin",
+    "jaymoskitchen:dough",
+    "#minecraft:eggs"
+  ],
+  "result": {
+    "id": "jaymoskitchen:pasta",
+    "count": 2
+  }
+}

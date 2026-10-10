@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " S ",
+    "#P#",
+    "###"
+  ],
+  "key": {
+    "S": "minecraft:stick",
+    "#": "#minecraft:planks",
+    "P": "minecraft:oak_pressure_plate"
+  },
+  "result": {
+    "id": "jaymoskitchen:press"
+  }
+}

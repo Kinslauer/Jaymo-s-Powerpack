@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskitchen:frying_pan",
+    "minecraft:porkchop"
+  ],
+  "result": {
+    "id": "jaymoskitchen:bacon",
+    "count": 3
+  }
+}
