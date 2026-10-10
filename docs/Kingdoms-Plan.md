@@ -1,7 +1,9 @@
 # Kingdoms (after 0.7.0)
 
-Start from *Tale of Kingdoms: A New Conquest* (Fabric, 1.21.1, LGPL-3.0: keep the license, publish our modified
-source), port it to 26.3, and rework it for a multiplayer server. A separate mod, like Jaymo's Kitchen, in
+Inspired by *Tale of Kingdoms: A New Conquest* (Fabric, 1.21.1). **Licence check (from its repository):** the code
+is GPL-3.0 (not LGPL as Modrinth lists), and its README says everything else (textures, structures, sounds) is All
+Rights Reserved by Convallyria. So its art and buildings can't be reused, and copying its code would make our mod
+GPL-3.0. Recommended: an original mod (our own code, art and buildings) that only takes ideas from it. A separate mod, like Jaymo's Kitchen, in
 `Desktop\Kingdoms Mod` (the upstream source, untouched, is in `Kingdoms Mod\upstream\tale-of-kingdoms`).
 
 ## Wanted (from the user)
