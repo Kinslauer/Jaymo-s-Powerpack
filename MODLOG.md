@@ -27,3 +27,18 @@ localhost:25597"`, and drive it with RCON.
   reputation | found (ops)`. Right-clicking one of the folk gives an audience (and the king offers a clickable pledge).
 - Entering a kingdom's land shows its name and your reputation.
 - Verified on the dev server: a kingdom founded at a desert village (king + 5 guards), pledge, info, reputation.
+
+## 0.1.1: keeps
+- **Every new kingdom builds a keep** (`Castle`) beside its village: the flattest spot 18-40 blocks from the bell
+  with the fewest village buildings in the way, its gate facing the bell. A foundation under it, the air cleared.
+  Walls 10 high (weathered: mossy and cracked), battlements, four taller corner towers, a 3 x 4 arched gate, arrow
+  slits, an upper floor (ladder up).
+- **The throne room**: a carpet aisle in the kingdom's colour, steps up a dais, a quartz throne with gold arms and
+  back, four wall banners in its colour, torches and a hanging lantern.
+- **The panic room**: under the dais, walled in polished deepslate (blackstone bricks in a desert), reached by a
+  trapdoor flush with the dais beside the throne and a ladder; the treasury chest is there.
+- Desert and badlands kingdoms build in sandstone.
+- **Who's where**: the king on his throne (or a third of the time hiding in the panic room), keeping close to it;
+  two guards in the throne room, the rest at the gate. Keeps are stored per kingdom (`Kingdoms.KEEPS`).
+- Verified on the dev server: a plains kingdom's keep (throne, arms, trapdoor and ladder, banners, carpet), the king
+  on his throne.

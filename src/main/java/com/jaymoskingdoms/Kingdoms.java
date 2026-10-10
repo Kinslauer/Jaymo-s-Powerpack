@@ -20,7 +20,22 @@ public final class Kingdoms {
 	static final AttachmentType<List<Kingdom>> ALL = AttachmentRegistry.create(JaymosKingdoms.id("kingdoms"),
 		builder -> builder.persistent(Kingdom.CODEC.listOf()));
 
+	/** Each kingdom's keep (kingdom id → where its king and guards belong). */
+	static final AttachmentType<java.util.Map<String, Castle.Keep>> KEEPS = AttachmentRegistry.create(JaymosKingdoms.id("keeps"),
+		builder -> builder.persistent(com.mojang.serialization.Codec.unboundedMap(com.mojang.serialization.Codec.STRING, Castle.Keep.CODEC)));
+
 	private Kingdoms() {
+	}
+
+	static Castle.@Nullable Keep keep(MinecraftServer server, int id) {
+		java.util.Map<String, Castle.Keep> keeps = store(server).getAttached(KEEPS);
+		return keeps == null ? null : keeps.get(Integer.toString(id));
+	}
+
+	static void putKeep(MinecraftServer server, int id, Castle.Keep keep) {
+		java.util.Map<String, Castle.Keep> keeps = new java.util.HashMap<>(store(server).getAttachedOrElse(KEEPS, java.util.Map.of()));
+		keeps.put(Integer.toString(id), keep);
+		store(server).setAttached(KEEPS, java.util.Map.copyOf(keeps));
 	}
 
 	private static ServerLevel store(MinecraftServer server) {

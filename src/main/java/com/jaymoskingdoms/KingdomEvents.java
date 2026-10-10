@@ -136,11 +136,15 @@ public final class KingdomEvents {
 			-1, false, -1L);
 		Kingdoms.put(server, kingdom);
 		raiseBanner(level, kingdom);
+		// the keep, beside the village, its gate toward the bell
+		Castle.Keep keep = Castle.build(level, kingdom, Castle.site(level, capital));
+		Kingdoms.putKeep(server, kingdom.id(), keep);
 		kingdom = crown(level, kingdom);
 		for (int i = 0; i < GUARDS; i++) {
 			spawn(level, kingdom, Folk.GUARD);
 		}
-		JaymosKingdoms.LOGGER.info("Kingdom of {} founded at {}", kingdom.name(), capital);
+		JaymosKingdoms.LOGGER.info("Kingdom of {} founded at {}; its keep's throne at {}, panic room at {}", kingdom.name(), capital, keep.throne(),
+			keep.cellar());
 		return kingdom;
 	}
 
@@ -155,9 +159,35 @@ public final class KingdomEvents {
 		return crowned;
 	}
 
-	/** One of the kingdom's people, standing by the capital. */
+	/**
+	 * One of the kingdom's people, where they belong: the king on his throne (or, a third of the time, hiding in the
+	 * panic room below it); guards two to the throne room, the rest at the gate. Without a keep, by the capital.
+	 */
 	static Folk spawn(ServerLevel level, Kingdom kingdom, int role) {
 		var random = level.getRandom();
+		Castle.Keep keep = Kingdoms.keep(level.getServer(), kingdom.id());
+		if (keep != null) {
+			Folk folk = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.STRUCTURE);
+			if (folk == null) {
+				return null;
+			}
+			BlockPos at;
+			int radius;
+			if (role == Folk.KING) {
+				boolean hiding = random.nextInt(3) == 0;
+				at = hiding ? keep.cellar() : keep.throne();
+				radius = hiding ? 2 : 3;
+			} else {
+				long inside = level.getEntitiesOfClass(Folk.class, new net.minecraft.world.phys.AABB(keep.hall()).inflate(8.0),
+					f -> f.kingdomId() == kingdom.id() && f.role() == Folk.GUARD).size();
+				at = inside < 2 ? keep.hall().offset(random.nextInt(5) - 2, 0, random.nextInt(3) - 1) : keep.gate().offset(random.nextInt(5) - 2, 0, 0);
+				radius = inside < 2 ? 5 : 8;
+			}
+			folk.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
+			folk.setup(role, kingdom, at, radius);
+			level.addFreshEntity(folk);
+			return folk;
+		}
 		for (int tries = 0; tries < 12; tries++) {
 			BlockPos at = kingdom.capital().offset(random.nextInt(13) - 6, 0, random.nextInt(13) - 6);
 			at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at);
@@ -169,7 +199,7 @@ public final class KingdomEvents {
 				return null;
 			}
 			folk.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
-			folk.setup(role, kingdom);
+			folk.setup(role, kingdom, kingdom.capital(), Folk.HOME_RADIUS);
 			level.addFreshEntity(folk);
 			return folk;
 		}

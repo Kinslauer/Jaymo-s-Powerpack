@@ -1,6 +1,5 @@
 package com.jaymoskingdoms;
 
-import java.util.Optional;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -84,11 +83,11 @@ public class Folk extends PathfinderMob {
 		return this.entityData.get(KINGDOM);
 	}
 
-	/** Set up as {@code role} of {@code kingdom}: their gear, their home. */
-	void setup(int role, Kingdom kingdom) {
+	/** Set up as {@code role} of {@code kingdom}: their gear, and the post they keep to ({@code radius} of {@code home}). */
+	void setup(int role, Kingdom kingdom, BlockPos home, int radius) {
 		this.entityData.set(ROLE, role);
 		this.entityData.set(KINGDOM, kingdom.id());
-		this.setHomeTo(kingdom.capital(), HOME_RADIUS);
+		this.setHomeTo(home, radius);
 		if (role == KING) {
 			this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(300.0);
 			this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(9.0);
@@ -225,10 +224,5 @@ public class Folk extends PathfinderMob {
 		this.entityData.set(ROLE, input.getIntOr("role", GUARD));
 		this.entityData.set(KINGDOM, input.getIntOr("kingdom", -1));
 		this.rallied = input.getBooleanOr("rallied", false);
-	}
-
-	/** (unused for now: kingdoms place their people by their capital) */
-	static Optional<BlockPos> none() {
-		return Optional.empty();
 	}
 }
