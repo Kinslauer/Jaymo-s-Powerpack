@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "sword=true": {
+      "model": "jaymospowers:block/end_sword_stone"
+    },
+    "sword=false": {
+      "model": "jaymospowers:block/end_sword_stone_empty"
+    }
+  }
+}

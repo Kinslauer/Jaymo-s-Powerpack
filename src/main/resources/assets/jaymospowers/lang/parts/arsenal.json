@@ -49,7 +49,7 @@
 	"item.jaymospowers.durandal.lore1": "Drawn from the stone it was driven into.",
 	"item.jaymospowers.durandal.lore2": "A relic: the rift keeps it for whoever drew it.",
 	"message.jaymospowers.sword_stone.stuck": "It won't budge. It's waiting for someone the rift knows.",
-	"message.jaymospowers.sword_stone.drawn": "The stone lets go. Durandal is yours.",
+	"message.jaymospowers.sword_stone.drawn": "The stone lets go. %s is yours.",
 	"item.jaymospowers.soul_saber": "Soul Saber",
 	"item.jaymospowers.soul_saber.lore1": "It drinks a little of every wound.",
 	"item.jaymospowers.soul_saber.lore2": "Right click: a slash of soul fire",
@@ -70,5 +70,17 @@
 	"item.jaymospowers.sunfang.lore2": "Right click: a blast of scouring sand",
 	"item.jaymospowers.flintlock": "Void Flintlock",
 	"item.jaymospowers.flintlock.lore": "One shot. Drop it spent; another is already in your hand.",
-	"message.jaymospowers.arsenal.void_faded": "Three days on, the void loses its grip on you. It's gone."
+	"message.jaymospowers.arsenal.void_faded": "Three days on, the void loses its grip on you. It's gone.",
+	"block.jaymospowers.nether_sword_stone": "Sword in the Blackstone",
+	"block.jaymospowers.end_sword_stone": "Sword in the End Stone",
+	"block.jaymospowers.deep_sword_stone": "Sword in the Deepslate",
+	"block.jaymospowers.frost_sword_stone": "Sword in the Ice",
+	"item.jaymospowers.laevateinn": "Laevateinn",
+	"item.jaymospowers.laevateinn.lore1": "Still warm from the fire it was forged in.",
+	"item.jaymospowers.caladbolg": "Caladbolg",
+	"item.jaymospowers.caladbolg.lore1": "Thin as starlight, and as cold.",
+	"item.jaymospowers.gram": "Gram",
+	"item.jaymospowers.gram.lore1": "It hums with something listening in the dark.",
+	"item.jaymospowers.hrunting": "Hrunting",
+	"item.jaymospowers.hrunting.lore1": "Frost never quite melts from its edge."
 }

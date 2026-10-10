@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "sword=true": {
+      "model": "jaymospowers:block/frost_sword_stone"
+    },
+    "sword=false": {
+      "model": "jaymospowers:block/frost_sword_stone_empty"
+    }
+  }
+}
