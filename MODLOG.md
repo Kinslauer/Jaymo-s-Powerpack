@@ -42,3 +42,17 @@ localhost:25597"`, and drive it with RCON.
   two guards in the throne room, the rest at the gate. Keeps are stored per kingdom (`Kingdoms.KEEPS`).
 - Verified on the dev server: a plains kingdom's keep (throne, arms, trapdoor and ladder, banners, carpet), the king
   on his throne.
+
+## 0.2.0: three seats, bigger kingdoms, village materials (built; not yet seen in game)
+- **Three kinds of seat** (`Castle.Kind`, chosen at random; `/kingdom found keep|castle|tower` for ops):
+  the **keep** (as before); the **castle** (a 31 x 33 curtain wall with walk, corner towers, a gatehouse with a raised
+  portcullis, ladders to the walls, a courtyard road, barracks with beds, a training yard, a well, the keep at the
+  back); the **tower** (a 12 x 12 donjon, four storeys: guard room, the throne room, the king's chamber, the roof).
+- **Watchtowers**: three, 56-88 blocks from the bell round the town's edge, each with an archer on top.
+- **Archers** (`Folk.ARCHER`): bows, posted on walls, towers and watchtowers (they stay put and shoot within 28).
+- **Bigger kingdoms**: land 13 x 13 chunks; 8 guards (two in the hall, three at the gate, the rest about the town).
+- **Village materials** (`Palette`): plains (stone brick, oak), taiga (cobble, spruce), snowy (stone brick, spruce,
+  packed ice), savanna (terracotta, acacia), desert (sandstone, jungle), badlands (red sandstone, dark oak), jungle
+  (mossy stone, jungle), swamp (mud brick, mangrove), cherry (stone, calcite, cherry).
+- Epic Structures: Villages (all rights reserved; the author invites its use in modpacks) is loaded in the dev game:
+  kingdoms rise in its towns. It goes into the pack with Kingdoms.

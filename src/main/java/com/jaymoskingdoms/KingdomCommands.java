@@ -31,7 +31,10 @@ final class KingdomCommands {
 			.then(Commands.literal("deposit").then(Commands.argument("emeralds", IntegerArgumentType.integer(1, 2304)).executes(KingdomCommands::deposit)))
 			.then(Commands.literal("withdraw").then(Commands.argument("emeralds", IntegerArgumentType.integer(1, 2304)).executes(KingdomCommands::withdraw)))
 			.then(Commands.literal("reputation").executes(KingdomCommands::reputation))
-			.then(Commands.literal("found").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(KingdomCommands::found)));
+			.then(Commands.literal("found").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(c -> found(c, null))
+				.then(Commands.literal("keep").executes(c -> found(c, Castle.Kind.KEEP)))
+				.then(Commands.literal("castle").executes(c -> found(c, Castle.Kind.CASTLE)))
+				.then(Commands.literal("tower").executes(c -> found(c, Castle.Kind.TOWER)))));
 	}
 
 	private static int list(CommandContext<CommandSourceStack> c) {
@@ -188,9 +191,9 @@ final class KingdomCommands {
 		return 1;
 	}
 
-	private static int found(CommandContext<CommandSourceStack> c) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+	private static int found(CommandContext<CommandSourceStack> c, Castle.Kind kind) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
 		ServerPlayer player = c.getSource().getPlayerOrException();
-		Kingdom k = KingdomEvents.found(player.level(), player.blockPosition());
+		Kingdom k = KingdomEvents.found(player.level(), player.blockPosition(), kind);
 		c.getSource().sendSuccess(() -> Component.literal("Founded " + k.name()), true);
 		return 1;
 	}

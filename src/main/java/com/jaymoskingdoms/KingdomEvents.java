@@ -42,8 +42,9 @@ public final class KingdomEvents {
 	/** A bell this close to a player becomes a capital (if no capital is within {@code CAPITAL_SPACING}). */
 	static final int FOUND_RANGE = 48, CAPITAL_SPACING = 160;
 	/** Land claimed around a new capital: a square this many chunks out each way. */
-	static final int CLAIM_RADIUS = 3;
-	static final int GUARDS = 5;
+	static final int CLAIM_RADIUS = 6;
+	/** Guards on foot (two in the hall, the rest at the gate and about the town); an archer on every post. */
+	static final int GUARDS = 8;
 	/** Reputation changes. */
 	static final int REP_KILL_GUARD = -40, REP_KILL_KING = -400, REP_KILL_KING_RIVALS = 60, REP_KILL_MONSTER = 2;
 	/** A successor takes the throne this long after the king falls (game ticks: one day). */
@@ -112,6 +113,11 @@ public final class KingdomEvents {
 
 	/** A new kingdom at {@code capital}: named, coloured, its land claimed, its banner raised, its king and guards. */
 	static Kingdom found(ServerLevel level, BlockPos capital) {
+		return found(level, capital, null);
+	}
+
+	/** (with {@code kind}, its seat is that kind rather than a random one) */
+	static Kingdom found(ServerLevel level, BlockPos capital, Castle.@org.jspecify.annotations.Nullable Kind kind) {
 		MinecraftServer server = level.getServer();
 		var random = level.getRandom();
 		DyeColor color = DyeColor.values()[random.nextInt(DyeColor.values().length)];
@@ -137,11 +143,19 @@ public final class KingdomEvents {
 		Kingdoms.put(server, kingdom);
 		raiseBanner(level, kingdom);
 		// the keep, beside the village, its gate toward the bell
-		Castle.Keep keep = Castle.build(level, kingdom, Castle.site(level, capital));
+		Castle.Keep keep = Castle.build(level, kingdom, capital, kind);
 		Kingdoms.putKeep(server, kingdom.id(), keep);
 		kingdom = crown(level, kingdom);
 		for (int i = 0; i < GUARDS; i++) {
 			spawn(level, kingdom, Folk.GUARD);
+		}
+		for (BlockPos post : keep.posts()) {
+			Folk archer = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.STRUCTURE);
+			if (archer != null) {
+				archer.snapTo(post.getX() + 0.5, post.getY(), post.getZ() + 0.5, level.getRandom().nextFloat() * 360.0F, 0.0F);
+				archer.setup(Folk.ARCHER, kingdom, post, 1);
+				level.addFreshEntity(archer);
+			}
 		}
 		JaymosKingdoms.LOGGER.info("Kingdom of {} founded at {}; its keep's throne at {}, panic room at {}", kingdom.name(), capital, keep.throne(),
 			keep.cellar());
@@ -180,8 +194,20 @@ public final class KingdomEvents {
 			} else {
 				long inside = level.getEntitiesOfClass(Folk.class, new net.minecraft.world.phys.AABB(keep.hall()).inflate(8.0),
 					f -> f.kingdomId() == kingdom.id() && f.role() == Folk.GUARD).size();
-				at = inside < 2 ? keep.hall().offset(random.nextInt(5) - 2, 0, random.nextInt(3) - 1) : keep.gate().offset(random.nextInt(5) - 2, 0, 0);
-				radius = inside < 2 ? 5 : 8;
+				long atGate = level.getEntitiesOfClass(Folk.class, new net.minecraft.world.phys.AABB(keep.gate()).inflate(6.0),
+					f -> f.kingdomId() == kingdom.id() && f.role() == Folk.GUARD).size();
+				if (inside < 2) {
+					at = keep.hall().offset(random.nextInt(5) - 2, 0, random.nextInt(3) - 1);
+					radius = 5;
+				} else if (atGate < 3) {
+					at = keep.gate().offset(random.nextInt(5) - 2, 0, 0);
+					radius = 8;
+				} else {
+					// about the town
+					at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+						kingdom.capital().offset(random.nextInt(41) - 20, 0, random.nextInt(41) - 20));
+					radius = 32;
+				}
 			}
 			folk.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
 			folk.setup(role, kingdom, at, radius);

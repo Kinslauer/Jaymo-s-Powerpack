@@ -7,6 +7,10 @@ layout.buildDirectory = file("E:/jaymos-kingdoms-build")
 
 repositories {
 	mavenCentral()
+	exclusiveContent {
+		forRepository { maven { url = "https://api.modrinth.com/maven" } }
+		filter { includeGroup "maven.modrinth" }
+	}
 }
 
 loom {
@@ -23,6 +27,9 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	// Epic Structures: Villages (all rights reserved; "feel free to add to any modpack"): its sprawling towns are where
+	// kingdoms rise in the pack. Only loaded in the dev game, to found kingdoms in them.
+	localRuntime "maven.modrinth:epic-structures-villages:hCRa4eFr"
 }
 
 processResources {

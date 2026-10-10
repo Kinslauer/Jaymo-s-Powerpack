@@ -42,8 +42,12 @@ import net.minecraft.world.level.storage.ValueOutput;
  * phases as he weakens) and its {@link #GUARD}s, who keep to the capital, cut down monsters, and attack anyone the
  * kingdom counts as hostile ({@link Reputation#HOSTILE}) or who strikes one of their own. Never despawn.
  */
-public class Folk extends PathfinderMob {
-	public static final int GUARD = 0, KING = 1;
+public class Folk extends PathfinderMob implements net.minecraft.world.entity.monster.RangedAttackMob {
+	/** Guards fight hand to hand; archers keep their posts on walls and towers and shoot; the king is the boss. */
+	public static final int GUARD = 0, KING = 1, ARCHER = 2;
+	/** An archer's reach, and how often they loose (ticks). */
+	static final double ARCHER_RANGE = 28.0;
+	static final int ARCHER_INTERVAL = 30;
 	/** How far from the capital they wander. */
 	static final int HOME_RADIUS = 24;
 	/** The king's second wind: at this share of his health he rallies (strength, resistance, his guards called in). */
@@ -99,6 +103,12 @@ public class Folk extends PathfinderMob {
 			this.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.NETHERITE_LEGGINGS));
 			this.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.NETHERITE_BOOTS));
 			this.setCustomName(Component.translatable("entity.jaymoskingdoms.king_of", kingdom.name()));
+		} else if (role == ARCHER) {
+			this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
+			this.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.CHAINMAIL_HELMET));
+			this.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.LEATHER_CHESTPLATE));
+			this.getAttribute(Attributes.FOLLOW_RANGE).setBaseValue(ARCHER_RANGE + 4.0);
+			this.setCustomName(Component.translatable("entity.jaymoskingdoms.archer_of", kingdom.name()));
 		} else {
 			this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
 			this.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
@@ -115,7 +125,13 @@ public class Folk extends PathfinderMob {
 	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
-		this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.15, true));
+		this.goalSelector.addGoal(1, new Shoot(this));
+		this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.15, true) {
+			@Override
+			public boolean canUse() {
+				return Folk.this.role() != ARCHER && super.canUse();
+			}
+		});
 		this.goalSelector.addGoal(4, new MoveTowardsRestrictionGoal(this, 1.0));
 		this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.6));
 		this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
@@ -201,6 +217,58 @@ public class Folk extends PathfinderMob {
 			KingdomEvents.folkDied(level, this, source);
 			if (this.bossBar != null) {
 				this.bossBar.removeAllPlayers();
+			}
+		}
+	}
+
+	/** An archer's shot (as a skeleton looses one). */
+	@Override
+	public void performRangedAttack(LivingEntity target, float power) {
+		ItemStack bow = this.getMainHandItem();
+		ItemStack arrowStack = new ItemStack(Items.ARROW);
+		net.minecraft.world.entity.projectile.arrow.AbstractArrow arrow = net.minecraft.world.entity.projectile.ProjectileUtil.getMobArrow(this, arrowStack, power, bow);
+		double xd = target.getX() - this.getX();
+		double yd = target.getY(0.3333333333333333) - arrow.getY();
+		double zd = target.getZ() - this.getZ();
+		double distance = Math.sqrt(xd * xd + zd * zd);
+		if (this.level() instanceof ServerLevel level) {
+			net.minecraft.world.entity.projectile.Projectile.spawnProjectileUsingShoot(arrow, level, arrowStack, xd, yd + distance * 0.2F, zd, 1.6F, 4.0F);
+		}
+		this.playSound(net.minecraft.sounds.SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+	}
+
+	/** An archer at its post: it stays put, faces its target, and looses an arrow every so often while it can see it. */
+	static final class Shoot extends net.minecraft.world.entity.ai.goal.Goal {
+		private final Folk archer;
+		private int cooldown;
+
+		Shoot(Folk archer) {
+			this.archer = archer;
+			this.setFlags(java.util.EnumSet.of(Flag.MOVE, Flag.LOOK));
+		}
+
+		@Override
+		public boolean canUse() {
+			LivingEntity target = this.archer.getTarget();
+			return this.archer.role() == ARCHER && target != null && target.isAlive() && this.archer.distanceTo(target) <= ARCHER_RANGE;
+		}
+
+		@Override
+		public boolean requiresUpdateEveryTick() {
+			return true;
+		}
+
+		@Override
+		public void tick() {
+			LivingEntity target = this.archer.getTarget();
+			if (target == null) {
+				return;
+			}
+			this.archer.getNavigation().stop();
+			this.archer.getLookControl().setLookAt(target, 30.0F, 30.0F);
+			if (--this.cooldown <= 0 && this.archer.getSensing().hasLineOfSight(target)) {
+				this.cooldown = ARCHER_INTERVAL;
+				this.archer.performRangedAttack(target, 1.0F);
 			}
 		}
 	}
