@@ -176,17 +176,14 @@ Also:
 - **Exact pose to match the user's reference image** (still needed; the Discord link couldn't be downloaded).
 - `KICKING` changes from a `Long` to a small record (start, side, swing seed). That's a new packet shape, covered by the 0.8.0 bump.
 
-### 5.2 Carry living players
+### 5.2 Carry living players (everyone)
 **New:** `core/Carry` (server) + `client/CarryPose` (both bodies). The carried player follows a carry point on the carrier each tick, the way Kitchen's corpse carry works. No vanilla riding, so there are no mount quirks.
 
-- **Pick up:** see question 6 for the control. One player at a time. You can't carry while already carrying a corpse.
-- **Hold:** each pickup rolls one of several holds. Each hold has its own carrier pose, carried position and carried-body pose:
-  1. **Fireman's carry**: over one shoulder, head and arms hanging down the back, legs in front.
-  2. **Shoulder grab**: dragged along by the shoulder at your side, feet trailing.
-  3. **Bridal carry**: across both arms in front.
-  4. **Over the back**: slung behind, facing up.
-- **Carried body:** arms and legs drift loosely, swinging with the carrier's movement (sine sway plus inertia from turning and stopping), so they look like they're floating.
-- **Ending it:** the carrier drops them, or throws them (see question 6). Whether the carried player can struggle free is question 7.
+- **Pick up (decided):** **everyone** can do it, with **sneak + right-click on a player**, empty hand or not. One player at a time. You can't pick someone up while carrying a corpse, or while already carrying someone.
+- **Letting go (decided):** the same controls as Kitchen's corpses, so it feels the same. While carrying, **right-click drops** them and **sneak + right-click throws** them a short way ahead.
+- **Thrown:** the thrown player goes into a **short ragdoll** (~1 s) while flying, with limbs flopping the way `WebRagdoll` does it for webbed creatures. Normal fall damage applies when they land (house rule).
+- **Escaping (decided):** the carried player gets out with **one jump**, at any time. They can't while **stunned or otherwise unable to act**, e.g. Gravity's held stun, Chrono's new hit-stun, or a ragdoll still playing. Add a shared query `Carry.canStruggle(player)` that those powers' stun states feed into.
+- **Safety:** the carry also ends when either player dies, logs out, changes dimension, or gets too far apart (teleport). The carrier moves a little slower (weight). The carried player can't attack, use items or break blocks.
 - Both pose sets go through the existing pose path (`WebModelFeatureRendererMixin.prepareModel` + render-state extraction), like `WebBodyPose` and `ChronoFlowPose`.
 - First person: the carrier's hands show the hold; the carried player's camera follows their body.
 
@@ -201,9 +198,10 @@ Also:
 3. Carry-before-feed applies to manual Consume too (4.2).
 4. Jaymo's Kitchen becomes a required dependency (4.2).
 5. The soft-block damage cap applies to every thrown or dropped soft block (1.4).
+6. Everyone can carry players with sneak + right-click; drop and throw like corpses; a throw ragdolls the thrown player (5.2).
+7. One jump frees a carried player, unless they're stunned or otherwise unable to act (5.2).
 
 ## Open questions
 
-6. **Carrying players:** who can do it: everyone (like Kitchen's corpse carry), or one power? Which control picks someone up (e.g. sneak + right-click with empty hands)? Can you throw them, or only drop them?
-7. **Escaping a carry:** can the carried player struggle free (e.g. mashing jump), or are they held until let go? Does it work on mobs and villagers too, or only players?
-8. **Tempest Kick reference:** the Discord image link returns "Forbidden" outside Discord. Please upload it here directly.
+8. **Carrying mobs:** players only for now? (Assumed yes.)
+9. **Tempest Kick reference:** the Discord image link returns "Forbidden" outside Discord. Please upload it here directly.
