@@ -93,6 +93,8 @@ public final class WebSymbioteClient {
 
 	/** Ticks into a curious stare (the head swollen, staring), for the maw. */
 	public static final RenderStateDataKey<Float> STARE = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_stare");
+	/** How long the meal's carry in takes (ticks), for the maw. */
+	public static final RenderStateDataKey<Integer> MEAL_REACH = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_meal_reach");
 	/** A two-bite meal (cow-sized), for the maw. */
 	public static final RenderStateDataKey<Boolean> MEAL_BIG = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_meal_big");
 
@@ -124,6 +126,8 @@ public final class WebSymbioteClient {
 	private static boolean ceilingClinging;
 	private static int takeoverTicks;
 	private static int takeoverTarget = -1;
+	/** Running from {@code takeoverTarget}, not at it. */
+	private static boolean takeoverFlee;
 	private static final Set<Integer> THREATS = new HashSet<>();
 	private static long threatsAt;
 
@@ -150,6 +154,7 @@ public final class WebSymbioteClient {
 		ClientPlayNetworking.registerGlobalReceiver(WebNet.Takeover.TYPE, (payload, context) -> {
 			takeoverTarget = payload.entityId();
 			takeoverTicks = payload.entityId() < 0 ? 0 : payload.ticks();
+			takeoverFlee = payload.flee();
 			if (takeoverTicks > 0 && context.client().gui.screen() instanceof WebSymbioteScreen) {
 				context.client().gui.setScreen(null);
 			}
@@ -199,6 +204,7 @@ public final class WebSymbioteClient {
 			state.setData(CHARGE, null);
 		}
 		WebSymbiote.Meal meal = entity.getAttached(WebSymbiote.EATING);
+		state.setData(MEAL_REACH, meal == null ? null : meal.reach());
 		state.setData(EATING, meal == null ? null : Math.max(0.0F, entity.level().getGameTime() - meal.start() + net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false)));
 		state.setData(MEAL_BIG, meal != null && meal.big());
 		if (state.getData(SUIT) != null || entity instanceof Player p && WebSymbiote.isToggled(p, WebSymbioteState.BULK)) {
@@ -264,6 +270,12 @@ public final class WebSymbioteClient {
 	// ---- per tick (while the web power is active) --------------------------------------------------------------------
 
 	static void tick(Minecraft minecraft, LocalPlayer player, WebSwing swing) {
+		// tethered to a wall by the tendrils: held right where you are
+		WebSymbiote.Wall wall = player.getAttached(WebSymbiote.WALL);
+		if (wall != null && wall.landed() >= 0L && !player.input.keyPresses.jump()) {
+			player.setDeltaMovement(Vec3.ZERO);
+			player.resetFallDistance();
+		}
 		if (takeoverTicks > 0) {
 			tickTakeover(player);
 		}
@@ -275,6 +287,10 @@ public final class WebSymbioteClient {
 		Entity target = player.level().getEntity(takeoverTarget);
 		if (target == null || !target.isAlive() || --takeoverTicks <= 0) {
 			takeoverTicks = 0;
+			return;
+		}
+		if (takeoverFlee) {
+			flee(player, target);
 			return;
 		}
 		Vec3 to = target.getBoundingBox().getCenter().subtract(player.getEyePosition());
@@ -313,6 +329,59 @@ public final class WebSymbioteClient {
 			Vec3 move = way.scale(TAKEOVER_SPEED);
 			player.setDeltaMovement(move.x, up, move.z);
 		}
+	}
+
+	/**
+	 * Running for its life: of the ways round (every 30 degrees), it takes the one most away from the threat that's
+	 * clear for a few blocks, liking those under open sky; it sprints, hops steps, and swims up.
+	 */
+	private static void flee(LocalPlayer player, Entity threat) {
+		Vec3 away = player.position().subtract(threat.position()).horizontal();
+		away = away.lengthSqr() < 1.0E-4 ? player.getLookAngle().horizontal().reverse() : away.normalize();
+		Vec3 best = away;
+		double bestScore = -10.0;
+		boolean hop = false;
+		for (int i = 0; i < 12; i++) {
+			Vec3 dir = away.yRot(i * 30.0F * Mth.DEG_TO_RAD);
+			double score = dir.dot(away) * 2.0;
+			boolean blocked = false, step = false;
+			for (int d = 1; d <= 3; d++) {
+				AABB ahead = player.getBoundingBox().move(dir.scale(d * 0.9));
+				if (!player.level().noCollision(player, ahead)) {
+					if (d == 1 && player.level().noCollision(player, ahead.move(0.0, 1.1, 0.0))) {
+						step = true;
+						continue;
+					}
+					blocked = true;
+					break;
+				}
+			}
+			if (blocked) {
+				continue;
+			}
+			net.minecraft.core.BlockPos there = net.minecraft.core.BlockPos.containing(player.position().add(dir.scale(3.0)));
+			if (player.level().canSeeSky(there.above())) {
+				score += 1.0;
+			}
+			if (score > bestScore) {
+				bestScore = score;
+				best = dir;
+				hop = step;
+			}
+		}
+		float yaw = (float)(Mth.atan2(best.z, best.x) * Mth.RAD_TO_DEG) - 90.0F;
+		player.setYRot(player.getYRot() + Mth.wrapDegrees(yaw - player.getYRot()) * 0.5F);
+		player.setXRot(player.getXRot() * 0.8F);
+		Vec3 v = player.getDeltaMovement();
+		double up = v.y;
+		if (player.isInWater()) {
+			up = Math.max(up, 0.08);
+		} else if (player.onGround() && (hop || player.horizontalCollision)) {
+			up = 0.42;
+		}
+		player.setSprinting(true);
+		Vec3 move = best.scale(TAKEOVER_SPEED * 1.3);
+		player.setDeltaMovement(move.x, up, move.z);
 	}
 
 	/** How far ahead the takeover looks for a way (blocks), and the turns it tries, nearest first (degrees). */

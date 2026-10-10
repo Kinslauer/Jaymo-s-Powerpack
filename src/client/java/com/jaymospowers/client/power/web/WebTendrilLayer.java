@@ -27,7 +27,7 @@ import net.minecraft.util.Mth;
 final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	private static final Identifier TEXTURE = JaymosPowers.id("textures/entity/web_symbiote_tendril.png");
 	/** Ticks of Living Armor until the tendrils are fully grown. */
-	static final float GROWN_TICKS = 200.0F;
+	static final float GROWN_TICKS = 80.0F;
 	/** Segments per tendril, and each one's length (model pixels). */
 	private static final int SEGMENTS = 7;
 	private static final float SEGMENT_LENGTH = 4.5F;
@@ -108,9 +108,10 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 			}
 			float growth = tendrils.growth();
 			float time = tendrils.time();
-			// thicker and longer as they grow
-			float thick = 0.6F + 0.7F * growth;
-			float length = 0.6F + 0.7F * growth;
+			// they bud from tiny pods on the back and grow out to their full thickness and length
+			float eased = growth * growth * (3.0F - 2.0F * growth);
+			float thick = Mth.lerp(Mth.sqrt(growth), 0.3F, 1.3F);
+			float length = Mth.lerp(eased, 0.04F, 1.3F);
 			for (int t = 0; t < ROOTS.length; t++) {
 				float[] r = ROOTS[t];
 				ModelPart base = this.parts[t][0];

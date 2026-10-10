@@ -98,11 +98,12 @@ public final class WebNet {
 	}
 
 	/** Server → client: the symbiote takes over for {@code ticks}, lurching at entity {@code entityId} (-1: it lets go). */
-	public record Takeover(int entityId, int ticks) implements CustomPacketPayload {
+	public record Takeover(int entityId, int ticks, boolean flee) implements CustomPacketPayload {
 		public static final Type<Takeover> TYPE = new Type<>(JaymosPowers.id("web_takeover"));
 		public static final StreamCodec<ByteBuf, Takeover> CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_INT, Takeover::entityId,
 			ByteBufCodecs.VAR_INT, Takeover::ticks,
+			ByteBufCodecs.BOOL, Takeover::flee,
 			Takeover::new);
 
 		@Override

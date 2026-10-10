@@ -133,6 +133,18 @@ public final class WebSymbiote {
 	public static final float DEFEND_HEALTH = 6.0F;
 	public static final int DEFEND_STRESS = 15, DEFEND_COOLDOWN = 1200;
 	/**
+	 * It will stop at nothing to live. At or under {@code DESPERATE_HEALTH} with a threat about, every
+	 * {@code DESPERATE_EVERY} it throws everything it has: a Spike Burst whenever it's ready, its tendrils lashing
+	 * without pause. At or under {@link #DEFEND_HEALTH} it goes into the Shroud and runs: it takes over and flees
+	 * the fight, around whatever's in the way, for open sky, until nothing's within {@code FLEE_SAFE} (or
+	 * {@code RUN_TICKS} have gone).
+	 */
+	public static final float DESPERATE_HEALTH = 10.0F;
+	public static final int DESPERATE_EVERY = 20, RUN_TICKS = 300;
+	public static final double FLEE_SAFE = 24.0, THREAT_RANGE = 16.0;
+	/** Hungry, it goes looking for a corpse this far off, and a tendril carries it in. */
+	public static final double SELF_FEED_RANGE = 14.0;
+	/**
 	 * A good bond (stress under {@code CURIOUS_STRESS}, fed) is curious: each takeover check has a
 	 * {@code CURIOUS_CHANCE} it takes over just to look, grabbing something and staring at it with its own head for
 	 * {@code STARE_MIN}-{@code STARE_MAX} ticks, then setting it down (or, {@code CURIOUS_ATTACK} of the time, not).
@@ -145,6 +157,8 @@ public final class WebSymbiote {
 	 * to it and they fan out and slam into it, cracking it where each one hits, holding for {@code WALL_HOLD} ticks.
 	 */
 	public static final int WALL_HOLD = 50, WALL_CRACKS = 7;
+	/** Tethered to a wall: how far you can drift from the spot before it pulls you back. */
+	public static final double WALL_TETHER = 0.6;
 
 	/** A wall grab: the anchor, when it began, and when you got there (-1 on the way). Synced: everyone sees the tendrils. */
 	public record Wall(Vec3 anchor, long start, long landed) {
@@ -341,13 +355,18 @@ public final class WebSymbiote {
 	public static final float BIG_MEAL = 0.5F;
 
 	/** When bite {@code n} (0 or 1) lands, in ticks from the meal's start. */
-	public static int biteAt(int n) {
-		return EAT_REACH + 4 + n * EAT_BITE_GAP;
+	public static int biteAt(int n, int reach) {
+		return reach + 4 + n * EAT_BITE_GAP;
 	}
 
 	/** The meal's whole length, chewing and shrinking back included. */
-	public static int mealTicks(boolean big) {
-		return biteAt(big ? 1 : 0) + EAT_CHEW + EAT_SHRINK;
+	public static int mealTicks(boolean big, int reach) {
+		return biteAt(big ? 1 : 0, reach) + EAT_CHEW + EAT_SHRINK;
+	}
+
+	/** How long the tendril takes to bring a meal in from {@code distance} blocks off (at least {@link #EAT_REACH}). */
+	public static int reachTicks(double distance) {
+		return Math.max(EAT_REACH, (int)Math.ceil(distance / 0.6) + 6);
 	}
 
 	/** What a meal does for your own hunger: food points per point healed, and the saturation modifier. */
@@ -355,11 +374,12 @@ public final class WebSymbiote {
 	public static final float CONSUME_SATURATION = 0.6F;
 
 	/** A meal in progress: when it began, and whether it takes two bites. Synced to everyone, who see the maw work. */
-	public record Meal(long start, boolean big) {
+	public record Meal(long start, boolean big, int reach) {
 		public static final net.minecraft.network.codec.StreamCodec<io.netty.buffer.ByteBuf, Meal> STREAM_CODEC =
 			net.minecraft.network.codec.StreamCodec.composite(
 				net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, Meal::start,
 				net.minecraft.network.codec.ByteBufCodecs.BOOL, Meal::big,
+				net.minecraft.network.codec.ByteBufCodecs.VAR_INT, Meal::reach,
 				Meal::new);
 	}
 
@@ -387,8 +407,10 @@ public final class WebSymbiote {
 		/** This takeover is only curiosity (a good bond): it looks, and maybe sets them down. Until when it stares. */
 		boolean curious;
 		long stareUntil;
-		/** When it can swell to save itself again. */
+		/** When it can swell to save itself again; whether this takeover is it running for its life. */
 		long defendReadyAt;
+		boolean fleeing;
+		long desperateAt;
 		/** A wall grab: where your feet are headed, the face, how long the haul may take, and the cracked blocks. */
 		Vec3 wallFeet = Vec3.ZERO;
 		Direction wallFace = Direction.UP;
@@ -718,21 +740,26 @@ public final class WebSymbiote {
 				startTakeover(player, live, now);
 			}
 		}
-		// near death: it swells over you and fights for its own life (whatever you wanted)
-		if (live.takeoverTicks <= 0 && player.getHealth() <= DEFEND_HEALTH && now >= live.defendReadyAt && !sulking(player)) {
-			LivingEntity attacker = player.getLastHurtByMob();
-			if (attacker == null || !attacker.isAlive() || attacker.distanceTo(player) > TAKEOVER_ESCAPE) {
-				attacker = prey(player, false);
-			}
+		// near death it will stop at nothing: everything it has, and under three hearts, the Shroud and a run for it
+		LivingEntity threat = sulking(player) ? null : threat(player);
+		if (threat != null && player.getHealth() <= DEFEND_HEALTH && now >= live.defendReadyAt && (live.takeoverTicks <= 0 || !live.fleeing)) {
 			live.defendReadyAt = now + DEFEND_COOLDOWN;
-			if (attacker != null) {
-				live.rampage = false;
-				live.curious = false;
-				startTakeover(player, live, now, attacker);
-				next = next.withStress(Math.min(STRESS_MAX, next.stress() + DEFEND_STRESS));
-				player.setAbsorptionAmount((float)ARMOR_ABSORPTION);
-				whisper(player, "defend");
+			if (live.takeoverTicks > 0) {
+				endTakeover(player, live);
 			}
+			live.rampage = false;
+			live.curious = false;
+			live.fleeing = true;
+			shroud(player);
+			startTakeover(player, live, now, threat);
+			live.takeoverTicks = RUN_TICKS;
+			ServerPlayNetworking.send(player, new WebNet.Takeover(threat.getId(), RUN_TICKS, true));
+			next = next.withStress(Math.min(STRESS_MAX, next.stress() + DEFEND_STRESS));
+			player.setAbsorptionAmount((float)ARMOR_ABSORPTION);
+			whisper(player, "flee");
+		} else if (threat != null && player.getHealth() <= DESPERATE_HEALTH && !live.fleeing && now >= live.desperateAt) {
+			live.desperateAt = now + DESPERATE_EVERY;
+			desperate(player, live, now, threat);
 		}
 		// the big body is up exactly while it has the wheel for a fight
 		boolean bulkWanted = live.takeoverTicks > 0 && !live.curious;
@@ -860,7 +887,7 @@ public final class WebSymbiote {
 		Live live = live(player);
 		if (live.takeoverTicks > 0) {
 			live.takeoverTicks = 0;
-			ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0));
+			ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0, false));
 		}
 		set(player, new WebSymbioteState(false, 0, 0, 0, 0, old.hints()));
 		removeArmor(player);
@@ -1014,23 +1041,66 @@ public final class WebSymbiote {
 		live.stareUntil = 0L;
 		live.takeoverTicks = TAKEOVER_LIMIT;
 		live.takeoverTarget = target.getId();
-		ServerPlayNetworking.send(player, new WebNet.Takeover(target.getId(), live.takeoverTicks));
+		ServerPlayNetworking.send(player, new WebNet.Takeover(target.getId(), live.takeoverTicks, live.fleeing));
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 2.0F, 1.3F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.8F, 0.6F);
 		level.sendParticles(dust(1.6F), player.getX(), player.getY() + 1.0, player.getZ(), 25, 0.4, 0.8, 0.4, 0.0);
-		whisper(player, live.curious ? "curious" : "takeover");
+		if (!live.fleeing) {
+			whisper(player, live.curious ? "curious" : "takeover");
+		}
+	}
+
+	/** The nearest thing set on hurting you: whatever hit you last (if it's still close), or a hostile after you. */
+	private static @org.jspecify.annotations.Nullable LivingEntity threat(ServerPlayer player) {
+		LivingEntity attacker = player.getLastHurtByMob();
+		if (attacker != null && attacker.isAlive() && attacker.distanceTo(player) <= THREAT_RANGE) {
+			return attacker;
+		}
+		LivingEntity best = null;
+		double bestD = THREAT_RANGE * THREAT_RANGE;
+		for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(THREAT_RANGE),
+			m -> m.isAlive() && m.getTarget() == player)) {
+			double d = mob.distanceToSqr(player);
+			if (d < bestD) {
+				bestD = d;
+				best = mob;
+			}
+		}
+		return best;
+	}
+
+	/** Low and losing: a Spike Burst whenever it can, and the tendrils lash out with nothing held back. */
+	private static void desperate(ServerPlayer player, Live live, long now, LivingEntity threat) {
+		tendrilsOut(player);
+		player.setAttached(TENDRILS_OUT, now + DESPERATE_EVERY * 2L);
+		WebSymbioteState.Cooldowns cooldowns = player.getAttachedOrElse(COOLDOWNS, WebSymbioteState.Cooldowns.NONE);
+		if (now >= cooldowns.end(SPIKES) && threat.distanceTo(player) <= SPIKE_RADIUS + 1.0) {
+			spikes(player);
+			player.setAttached(COOLDOWNS, cooldowns.with(SPIKES, now + COOLDOWN[SPIKES], ABILITIES));
+		}
+		if (player.getAttached(STRIKE) == null && threat.distanceTo(player) <= STRIKE_RANGE + 1.0) {
+			// a lash, almost at once
+			player.setAttached(STRIKE, new Strike(threat.getId(), now - (STRIKE_HIT - RETALIATE_LAG)));
+		} else if (threat.distanceTo(player) <= TENDRIL_RANGE && WebTendrils.grabbable(player, threat)) {
+			WebTendrils.snatch(player, threat);
+		}
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.9F, 1.5F);
 	}
 
 	/** It hands control back. */
 	private static void endTakeover(ServerPlayer player, Live live) {
+		if (live.curious) {
+			WebTendrils.release(player, WebNet.MAIN, false);
+		}
 		live.rampage = false;
 		live.curious = false;
+		live.fleeing = false;
 		live.stareUntil = 0L;
 		live.takeoverTicks = 0;
 		live.takeoverTarget = -1;
 		player.removeAttached(STARING);
-		ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0));
+		ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0, false));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.8F, 1.4F);
 	}
 
@@ -1043,24 +1113,16 @@ public final class WebSymbiote {
 			}
 			live.stareUntil = now + STARE_MIN + player.getRandom().nextInt(STARE_MAX - STARE_MIN + 1);
 			player.setAttached(STARING, now);
-			tendrilsOut(player);
+			// the tendrils stay out (and connected) for the whole look
+			player.setAttached(TENDRILS_OUT, live.stareUntil + 10);
+			WebTendrils.grab(player, WebNet.MAIN, target, -1L);
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SLIME_JUMP, SoundSource.PLAYERS, 1.0F, 0.6F);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SNIFF, SoundSource.PLAYERS, 1.0F, 0.8F);
 		}
-		// held up in front of its face
+		// held up in front of its face by the tendril (see WebTendrils)
 		Vec3 look = player.getViewVector(1.0F).horizontal();
 		look = look.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : look.normalize();
-		Vec3 hold = player.getEyePosition().add(look.scale(1.1 + target.getBbWidth() * 0.5)).add(0.0, -target.getBbHeight() * 0.5, 0.0);
-		Vec3 pull = hold.subtract(target.position()).scale(0.5);
-		target.setDeltaMovement(pull);
-		target.syncVelocity = true;
 		target.resetFallDistance();
-		if (target instanceof Mob mob) {
-			mob.getNavigation().stop();
-		}
-		if (target instanceof ServerPlayer other) {
-			ServerPlayNetworking.send(other, new WebNet.Nudge(pull));
-		}
 		if ((now - live.stareUntil) % 30 == 0) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SNIFF, SoundSource.PLAYERS, 0.7F, 0.9F);
 		}
@@ -1077,8 +1139,14 @@ public final class WebSymbiote {
 			level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.0F, 0.5F);
 			whisper(player, "not_looking");
 		} else {
-			// set down, gently
+			// set down, gently: lowered to the ground, not dropped
+			WebTendrils.release(player, WebNet.MAIN, false);
+			BlockPos ground = level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, target.blockPosition());
+			if (ground.getY() <= target.getY() && target.getY() - ground.getY() < 4.0) {
+				target.teleportTo(target.getX(), ground.getY(), target.getZ());
+			}
 			target.setDeltaMovement(Vec3.ZERO);
+			target.resetFallDistance();
 			target.syncVelocity = true;
 			whisper(player, "just_looking");
 		}
@@ -1087,6 +1155,17 @@ public final class WebSymbiote {
 
 	private static void tickTakeover(ServerPlayer player, Live live, long now) {
 		Entity target = player.level().getEntity(live.takeoverTarget);
+		if (live.fleeing) {
+			// running: until nothing's after it any more, or it's far enough off
+			LivingEntity threat = threat(player);
+			if (--live.takeoverTicks <= 0 || threat == null || threat.distanceTo(player) > FLEE_SAFE) {
+				endTakeover(player, live);
+			} else if (threat != target && threat.getId() != live.takeoverTarget) {
+				live.takeoverTarget = threat.getId();
+				ServerPlayNetworking.send(player, new WebNet.Takeover(threat.getId(), live.takeoverTicks, true));
+			}
+			return;
+		}
 		// it lets go once its prey is dead, or has got away
 		if (target == null || !target.isAlive() || target.distanceTo(player) > TAKEOVER_ESCAPE || --live.takeoverTicks <= 0) {
 			endTakeover(player, live);
@@ -1166,7 +1245,7 @@ public final class WebSymbiote {
 			return;
 		}
 		boolean done = switch (ability) {
-			case TENDRIL -> WebTendrils.radialGrab(player) || tendril(player);
+			case TENDRIL -> letGoOfWall(player) || WebTendrils.radialGrab(player) || tendril(player);
 			case ARMOR -> toggle(player, WebSymbioteState.ARMOR);
 			case CRAWL -> toggle(player, WebSymbioteState.CRAWL);
 			case CONSUME -> consume(player);
@@ -1419,7 +1498,7 @@ public final class WebSymbiote {
 			}
 			// there: back to the wall, the tendrils fanned out and driven into it
 			player.setAttached(WALL, new Wall(wall.anchor(), wall.start(), now));
-			player.setAttached(TENDRILS_OUT, now + WALL_HOLD);
+			player.setAttached(TENDRILS_OUT, now + 20);
 			if (live.wallFace.getAxis().isHorizontal()) {
 				Vec3 out = live.wallFace.getUnitVec3();
 				float yaw = (float)(Mth.atan2(out.z, out.x) * Mth.RAD_TO_DEG) - 90.0F;
@@ -1445,9 +1524,29 @@ public final class WebSymbiote {
 			player.resetFallDistance();
 			return;
 		}
-		if (now - wall.landed() >= WALL_HOLD || player.position().distanceTo(live.wallFeet) > 3.0) {
+		// tethered: held on the wall (the tendrils dug in) until you jump off, or use the grab again
+		player.setAttached(TENDRILS_OUT, now + 20);
+		player.resetFallDistance();
+		if (player.getLastClientInput().jump() && now - wall.landed() > 5 || player.position().distanceTo(live.wallFeet) > 3.0) {
 			clearWall(player, live);
+			if (player.getLastClientInput().jump()) {
+				// kicked off it, away from the wall
+				Vec3 out = live.wallFace.getUnitVec3().scale(0.5).add(0.0, 0.45, 0.0);
+				ServerPlayNetworking.send(player, new WebNet.Nudge(out));
+			}
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_BREAK, SoundSource.PLAYERS, 0.8F, 1.2F);
 		}
+	}
+
+	/** Using Tendril Grab while tethered to a wall lets go of it (and does nothing else). */
+	private static boolean letGoOfWall(ServerPlayer player) {
+		Wall wall = player.getAttached(WALL);
+		if (wall == null || wall.landed() < 0L) {
+			return false;
+		}
+		clearWall(player, live(player));
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_BREAK, SoundSource.PLAYERS, 0.8F, 1.2F);
+		return true;
 	}
 
 	private static int crackId(ServerPlayer player, int i) {
@@ -1611,8 +1710,8 @@ public final class WebSymbiote {
 			corpse = null;
 		}
 		if (corpse == null) {
-			double best = (CONSUME_RANGE + 1.0) * (CONSUME_RANGE + 1.0);
-			for (Entity e : player.level().getEntities(player, player.getBoundingBox().inflate(CONSUME_RANGE + 1.0),
+			double best = SELF_FEED_RANGE * SELF_FEED_RANGE;
+			for (Entity e : player.level().getEntities(player, player.getBoundingBox().inflate(SELF_FEED_RANGE),
 				e -> e.isAlive() && com.jaymospowers.power.gravity.GravityPower.isCorpse(e) && edible(e))) {
 				double d = e.distanceToSqr(player);
 				if (d < best) {
@@ -1698,7 +1797,7 @@ public final class WebSymbiote {
 			}
 			return;
 		}
-		if (now < live.nextStrikeAt || live.takeoverTicks > 0 && !live.rampage) {
+		if (now < live.nextStrikeAt || live.takeoverTicks > 0 && !live.rampage || live.fleeing) {
 			return;
 		}
 		live.nextStrikeAt = now + 10;
@@ -1776,8 +1875,10 @@ public final class WebSymbiote {
 		live.eatFrom = food.position();
 		live.eatHeal = heal;
 		live.eatFeed = feed;
-		player.setAttached(EATING, new Meal(now, live.eatBig));
-		tendrilsOut(player);
+		int reach = reachTicks(food.distanceTo(player));
+		player.setAttached(EATING, new Meal(now, live.eatBig, reach));
+		// the tendrils out for the carry and the meal
+		player.setAttached(TENDRILS_OUT, now + reach + 20);
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 0.5F, 1.6F);
@@ -1794,7 +1895,7 @@ public final class WebSymbiote {
 		ServerLevel level = player.level();
 		Meal meal = player.getAttached(EATING);
 		long t = now - meal.start();
-		if (t >= mealTicks(meal.big())) {
+		if (t >= mealTicks(meal.big(), meal.reach())) {
 			// chewed, and the head settles back
 			player.removeAttached(EATING);
 			live.eatTarget = -1;
@@ -1802,14 +1903,14 @@ public final class WebSymbiote {
 		}
 		if (live.eatTarget < 0) {
 			// swallowed: chewing (a crunch now and then)
-			if (t % 9 == 0 && t < mealTicks(meal.big()) - EAT_SHRINK) {
+			if (t % 9 == 0 && t < mealTicks(meal.big(), meal.reach()) - EAT_SHRINK) {
 				level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 0.8F,
 					0.5F + player.getRandom().nextFloat() * 0.2F);
 			}
 			return;
 		}
 		Entity food = level.getEntity(live.eatTarget);
-		if (food == null || !food.isAlive() || food.distanceTo(player) > CONSUME_RANGE + 4.0) {
+		if (food == null || !food.isAlive() || food.distanceTo(player) > SELF_FEED_RANGE + 4.0) {
 			// it got away (or was taken): the maw just closes
 			live.eatTarget = -1;
 			player.removeAttached(EATING);
@@ -1818,7 +1919,7 @@ public final class WebSymbiote {
 		// the tendril brings it up to the maw, and holds it there, thrashing
 		boolean carried = food == KitchenCompat.carriedCorpse(player);
 		if (!carried) {
-			float reach = Mth.clamp(t / (float)EAT_REACH, 0.0F, 1.0F);
+			float reach = Mth.clamp(t / (float)meal.reach(), 0.0F, 1.0F);
 			reach = reach * reach * (3.0F - 2.0F * reach);
 			Vec3 at = live.eatFrom.lerp(mouth(player, food), reach);
 			food.setPos(at.x, at.y, at.z);
@@ -1841,7 +1942,7 @@ public final class WebSymbiote {
 		}
 		Vec3 at = food.getBoundingBox().getCenter();
 		DustParticleOptions blood = new DustParticleOptions(0x7A0A0A, 1.4F);
-		if (meal.big() && t == biteAt(0)) {
+		if (meal.big() && t == biteAt(0, meal.reach())) {
 			// bitten clean in half
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.PHANTOM_BITE, SoundSource.PLAYERS, 1.4F, 0.35F);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.0F, 0.5F);
@@ -1851,7 +1952,7 @@ public final class WebSymbiote {
 			level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 12, food.getBbWidth() * 0.4, food.getBbHeight() * 0.3, food.getBbWidth() * 0.4, 0.06);
 			return;
 		}
-		if (t < biteAt(meal.big() ? 1 : 0)) {
+		if (t < biteAt(meal.big() ? 1 : 0, meal.reach())) {
 			return;
 		}
 		// the last bite: gone

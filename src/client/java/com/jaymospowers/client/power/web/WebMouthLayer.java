@@ -110,12 +110,14 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			}
 			float t = ticks;
 			boolean big = Boolean.TRUE.equals(state.getData(WebSymbioteClient.MEAL_BIG));
-			int last = WebSymbiote.biteAt(big ? 1 : 0);
-			int end = WebSymbiote.mealTicks(big);
+			Integer reachData = state.getData(WebSymbioteClient.MEAL_REACH);
+			int reach = reachData == null ? WebSymbiote.EAT_REACH : reachData;
+			int last = WebSymbiote.biteAt(big ? 1 : 0, reach);
+			int end = WebSymbiote.mealTicks(big, reach);
 			// gaping wide toward each bite, snapping shut on it
 			float open = 0.0F;
 			for (int n = 0; n <= (big ? 1 : 0); n++) {
-				float before = WebSymbiote.biteAt(n) - t;
+				float before = WebSymbiote.biteAt(n, reach) - t;
 				if (before >= 0.0F && before < GAPE_TICKS) {
 					float g = 1.0F - before / GAPE_TICKS;
 					open = Math.max(open, g * g * (3.0F - 2.0F * g));
@@ -128,7 +130,7 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			this.skull.xRot = -open * SKULL_GAPE;
 			this.jaw.xRot = open * JAW_GAPE;
 			// it grows out of the head as the meal comes up, swells with every gape, and sinks back at the end
-			float morph = Mth.clamp(Math.min(t / WebSymbiote.EAT_REACH, (end - t) / WebSymbiote.EAT_SHRINK), 0.0F, 1.0F);
+			float morph = Mth.clamp(Math.min(t / reach, (end - t) / WebSymbiote.EAT_SHRINK), 0.0F, 1.0F);
 			float scale = Mth.lerp(morph, 0.8F, 1.0F) * (1.0F + SWELL * open);
 			this.root.xScale = scale;
 			this.root.yScale = scale;

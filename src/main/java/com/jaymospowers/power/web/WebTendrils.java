@@ -233,7 +233,7 @@ public final class WebTendrils {
 		return true;
 	}
 
-	private static void grab(ServerPlayer player, int hand, Entity target, long throwAt) {
+	static void grab(ServerPlayer player, int hand, Entity target, long throwAt) {
 		if (!grabbable(player, target) || heldBySomeone(target)) {
 			return;
 		}
@@ -244,7 +244,8 @@ public final class WebTendrils {
 		long reach = (long)Math.ceil(target.distanceTo(player) / TENDRIL_SPEED);
 		// off to one side when both are full: this one's side, at a random spot (the middle of the view stays clear)
 		Hold other = holds[hand == WebNet.OFF ? WebNet.MAIN : WebNet.OFF];
-		double sign = other != null ? -Math.signum(other.side()) : player.getRandom().nextBoolean() ? 1.0 : -1.0;
+		// R's tendril (main) holds to the right, G's (off) to the left, so neither crosses the view
+		double sign = hand == WebNet.OFF ? -1.0 : 1.0;
 		double side = sign * (HOLD_SIDE_MIN + player.getRandom().nextDouble() * (HOLD_SIDE_MAX - HOLD_SIDE_MIN));
 		double up = HOLD_UP_MIN + player.getRandom().nextDouble() * (HOLD_UP_MAX - HOLD_UP_MIN);
 		holds[hand] = new Hold(player.getUUID(), hand, now, throwAt < 0 ? throwAt : throwAt + reach, now + reach, side, up);
@@ -340,7 +341,8 @@ public final class WebTendrils {
 		if (grips == null) {
 			return;
 		}
-		if (!player.isAlive() || player.isSpectator() || !WebSymbiote.armored(player)) {
+		if (!player.isAlive() || player.isSpectator()
+			|| !WebSymbiote.armored(player) && WebSymbiote.tendrilsOut(player) < player.level().getGameTime()) {
 			releaseAll(player, false);
 			return;
 		}
