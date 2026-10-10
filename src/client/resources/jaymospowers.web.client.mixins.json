@@ -5,6 +5,7 @@
 	"client": [
 		"WebAvatarRendererMixin",
 		"WebEntityRendererMixin",
+		"WebFirstPersonHandsMixin",
 		"WebJumpMixin",
 		"WebLivingEntityRendererMixin",
 		"WebModelFeatureRendererMixin",

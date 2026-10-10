@@ -256,6 +256,11 @@ public final class WebTendrils {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 0.8F, 0.7F);
 	}
 
+	/** Some tendril (anyone's) holds this. */
+	static boolean held(Entity target) {
+		return heldBySomeone(target);
+	}
+
 	private static boolean heldBySomeone(Entity target) {
 		if (!(target.level() instanceof ServerLevel level)) {
 			return false;
@@ -377,11 +382,18 @@ public final class WebTendrils {
 			double up = both && hold != null ? hold.up() : 0.0;
 			Vec3 point = player.getEyePosition().add(look.scale(HOLD_FORWARD + target.getBbWidth() * 0.5)).add(right.scale(side))
 				.add(0.0, up - HOLD_DROP, 0.0);
+			// held debris is swung along with a heavy strike (see WebSymbiote.debrisStrikePoint)
+			Vec3 swing = WebSymbiote.debrisStrikePoint(player, target, now);
+			double maxSpeed = HOLD_MAX_SPEED;
+			if (swing != null) {
+				point = swing;
+				maxSpeed = WebSymbiote.HEAVY_DEBRIS_SPEED;
+			}
 			Vec3 to = point.subtract(target.getBoundingBox().getCenter());
 			Vec3 v = to.scale(HOLD_STEER);
 			double speed = v.length();
-			if (speed > HOLD_MAX_SPEED) {
-				v = v.scale(HOLD_MAX_SPEED / speed);
+			if (speed > maxSpeed) {
+				v = v.scale(maxSpeed / speed);
 			}
 			target.setDeltaMovement(v);
 			target.needsSync = true;

@@ -317,7 +317,7 @@ action bar, each heard once.
 | 0 | Tendril Grab | 100 | 2 | Pulls the creature under the crosshair within `TENDRIL_RANGE` 20 to you. Things over `TENDRIL_HEAVY_VOLUME` 8 pull you to them instead. Aimed at a block, it zips you there. |
 | 1 | Living Armor (toggle) | 40 | 0 | +`ARMOR_ABSORPTION` 16 max absorption (8 hearts), regrowing `ARMOR_REGEN` 1 every `ARMOR_REGEN_TICKS` 40, and +0.6 knockback resistance. Satiety drains �`ARMOR_DRAIN_MULT` 3. |
 | 2 | Wall Crawl (toggle) | 20 | 0 | Client movement (`WebSymbioteClient.tickCrawl`). Next to a wall in the air, you stick; Jump or forward climbs at `CRAWL_CLIMB` 0.2, Sneak goes down. Under a ceiling, Jump sticks you to it, you move with the movement keys, and Sneak drops you. Climbing over a top edge hops you onto the ledge. The server allows floating while it's on and resets fall distance while you're touching a wall or ceiling. |
-| 3 | Consume | 160 | 0 | Swallows a non-player creature with max health = `CONSUME_MAX_HEALTH` 10 within `CONSUME_RANGE` 3, preferring the one you're looking at. It's removed with no drops. Heals 6, feeds +30, calms -10. Tamed and name-tagged creatures are never eaten. |
+| 3 | Consume | 160 | 0 | Nothing is eaten alive (0.8). A corpse you carry is eaten. Else a free corpse within `CONSUME_CORPSE_RANGE` 6 (the one you look at first) is grabbed by a tendril, carried, then eaten. Else a non-player creature at **current** health <= `CONSUME_MAX_HEALTH` 10 within `CONSUME_RANGE` 3 is finished off by a lash (`CONSUME_FINISH_LAG` 8 ticks), and its corpse grabbed, carried and eaten. Tamed, name-tagged, inedible and corpse-less creatures are never taken. A corpse heals 6-16 and feeds 30-80 by size. |
 | 4 | Spike Burst | 240 | 8 | Everything within `SPIKE_RADIUS` 5 takes `SPIKE_DAMAGE` 8 (player attack) and is thrown `SPIKE_KNOCKBACK` 1.3 outward and 0.45 up. Rays of black dust. |
 | 5 | Shroud | 600 | 5 | Invisibility (no particles) until you damage anything, or `SHROUD_TICKS` 400. |
 
@@ -338,6 +338,59 @@ action bar, each heard once.
   dark vignette.
 - The server swings and attacks with `player.attack` every 10 ticks when within reach 3.
 - Afterwards stress drops by 20.
+
+**Feeding (0.8): kill, grab, carry, then feed.** Jaymo's Kitchen is now a required dependency (corpses).
+- The symbiote never feeds on anything living. Hungry (`SELF_FEED_BELOW` 50, checked every `SELF_FEED_EVERY` 20) it
+  runs a state machine (`WebSymbiote.tickFeeding`, server-side `Live.feedStage`):
+  1. **Seek:** a corpse you're carrying (edible) goes straight to Feed; else the nearest free corpse within
+     `SELF_FEED_RANGE` 14 (edible, nobody carrying it, no tendril holding it); else the nearest creature there that
+     leaves a corpse (no pets, no named ones; players only in a rampage).
+  2. **Kill:** it takes the wheel (a "hunt" takeover: no big body) and attacks; the tendril strikes go for the prey
+     first. Gives up after `KILL_TICKS` 400 or if the prey escapes. A hungry or rampage takeover that kills its own prey
+     also goes on into feeding.
+  3. Once the prey is dead, its Kitchen corpse must appear within `CORPSE_WAIT_TICKS` 60, within `CORPSE_FIND_RADIUS`
+     3 of where it fell.
+  4. **Grab:** a tendril (`WebTendrils.grab`) reaches for it and hauls it in (reach + `GRAB_HAUL_TICKS` 8, at most
+     `GRAB_TIMEOUT` 80).
+  5. **Carry:** `KitchenCompat.carry` puts it in your arms (Kitchen's private arms-carry, reached by reflection, since
+     its `takeBy` pockets small corpses; falls back to `takeBy`).
+  6. **Feed:** eating starts only once `KitchenCompat.carriedCorpse(player)` is that corpse. If the corpse leaves your
+     arms mid-meal, the maw closes and nothing is eaten.
+- `devour()` (eating weak creatures alive in a rampage) is gone, and a rampage bite on a player no longer heals or
+  feeds it. Player corpses (they hold belongings) are never eaten.
+- The whole episode keeps the dread screen effect up (refreshed every `FEED_FX_EVERY` 40 ticks).
+- Debug: `/powerdebug web symbiote` now prints `feeding[stage=... target=...]` (1 kill, 2 grab, 3 carry, 4 feed).
+
+**Its voice (0.8):** every `whisper` (hints included) also sends `web_symbiote_dread` (`WebNet.Dread`): for
+`WHISPER_FX_TICKS` 60 the screen darkens 35%, a pulsing blackish-purple (#1A0A26) vignette closes in, and a low growl
+(warden ambient + ravager ambient at pitch 0.5, at most once per 2 s) plays as a UI sound for that player only
+(`client/.../WebSymbioteDread`, its own HUD element after the misc overlays).
+
+**Tendril strikes (0.8):**
+- Each strike rolls a variant, synced in the `Strike` attachment (`variant`, plus `heavy`): a **slam** (reared high
+  over the head, crashing straight down; little push, and an airborne target is driven down) or a **swipe** from the
+  left or the right (a wide sweep through the target; knocks it sideways along the sweep). The hit lands at
+  `STRIKE_HIT_SHARE` 0.5 of the strike (rear until `STRIKE_REAR` 0.4).
+- **Heavy debris strikes:** while a tendril grip holds a `BlockCluster` or a falling block, strikes search
+  `HEAVY_STRIKE_RANGE` 8.5, last `HEAVY_STRIKE_TICKS` 60 (rear until 0.5, hit at 0.58), reset `HEAVY_STRIKE_EVERY` 90,
+  and deal `HEAVY_STRIKE_DAMAGE` 11 × (0.6 + 0.1 per block, 0.7-1.5). Knockback ~10 blocks (`HEAVY_KNOCK` 1.0 +
+  `HEAVY_LIFT` 0.45; a slam 0.75 + 0.2), a mace thud and anvil, block dust, and a shake for you and a struck player.
+  The held debris itself is swung along (`WebSymbiote.debrisStrikePoint`, steered in `WebTendrils.tick`): reared above
+  you or out to the side, then brought down or across onto the target.
+- Client (`WebTendrilLayer`): the strike curve follows the variant; a heavy strike stretches the striking tendrils far
+  further. The aim math was fixed: in model space a cord built along +Z points at relative yaw `a` (+ right) and
+  elevation `p` (+ up) with `yRot = PI + a`, `xRot = p` (the old `-PI/2 - 1 - p` pointed strikes back and down).
+
+**First person (0.8):** First-person Model (`firstperson`) and Not Enough Animations join the pack (`packModsNoCf`
+in `build.gradle`, CurseForge ids still to fill in).
+- With FPM drawing your body (`FirstPersonCompat.bodyShown`: loaded, first-person camera, `FirstPersonAPI.isEnabled()`
+  by reflection), `WebTendrilLayer` renders as usual (FPM hides no layer unless its `hiddenLayers` config names it);
+  your own upper tendrils take a first-person pose: out to the side, rising forward over the shoulders and curling in
+  at the screen edges, longer, swaying; strikes stretch further still.
+- Without it, `WebFirstPersonHandsMixin` (TAIL of `FirstPersonHandsAndItemsRenderer.submitHandsWithItems`) draws the
+  same model in camera space next to the hands (`WebTendrilLayer.submitFirstPerson`), with the strike and wall aim
+  turned from body-relative to view-relative.
+- Held things (grabs, debris, the feeding grab) already showed their cords in first person (`WebLineRenderer.tentacle`).
 
 **Weaknesses ? rejection:**
 - **Fire:** being on fire or in lava counts as **one** exposure per burning episode. An episode ends after

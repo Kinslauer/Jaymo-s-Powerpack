@@ -134,6 +134,24 @@ public final class WebNet {
 		}
 	}
 
+	/**
+	 * Server → client: the symbiote presses in on you for {@code ticks}: the screen darkens under a pulsing
+	 * blackish-purple vignette, and (if {@code growl}) a low growl plays for you alone. Sent with every whisper, and
+	 * kept up through a whole feeding.
+	 */
+	public record Dread(int ticks, boolean growl) implements CustomPacketPayload {
+		public static final Type<Dread> TYPE = new Type<>(JaymosPowers.id("web_symbiote_dread"));
+		public static final StreamCodec<ByteBuf, Dread> CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_INT, Dread::ticks,
+			ByteBufCodecs.BOOL, Dread::growl,
+			Dread::new);
+
+		@Override
+		public Type<Dread> type() {
+			return TYPE;
+		}
+	}
+
 	/** Server → client: the creatures that mean you harm right now (Spider-Sense draws them outlined). */
 	public record Sense(java.util.List<Integer> ids) implements CustomPacketPayload {
 		public static final Type<Sense> TYPE = new Type<>(JaymosPowers.id("web_sense"));
@@ -151,6 +169,7 @@ public final class WebNet {
 		PayloadTypeRegistry.clientboundPlay().register(Nudge.TYPE, Nudge.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Sense.TYPE, Sense.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Shake.TYPE, Shake.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(Dread.TYPE, Dread.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Wings.TYPE, Wings.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ChargeHold.TYPE, ChargeHold.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Swing.TYPE, Swing.CODEC);

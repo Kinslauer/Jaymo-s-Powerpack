@@ -41,15 +41,22 @@ public final class WebSymbioteClient {
 
 	/**
 	 * @param strike   how far through a strike (0-1), or -1
-	 * @param aimYaw   where the strike goes, relative to the body (radians, + to the wearer's left)
+	 * @param aimYaw   where the strike goes, relative to the body (radians, + to the wearer's right, as Minecraft's yaw turns)
 	 * @param aimPitch and how high (radians, + up)
 	 * @param side     which side's tendrils strike (+1 left, -1 right)
 	 */
 	/** {@code held}: bit 1, the right shoulder's tendril is holding something (drawn reaching out instead); bit 2, the left's. */
 	/** {@code armor}: Living Armor's (it hunches, swells); otherwise only the tendrils, out on their own for a moment. */
+	/** {@code heavy}: the strike swings held debris (slower, further); {@code variant}: a slam or a swipe (see WebSymbiote.STRIKE_SLAM). */
+	/** {@code firstPerson}: your own, drawn in first person (by First-person Model, or next to the hands): they reach further forward. */
 	public record Tendrils(float growth, float time, float strike, float aimYaw, float aimPitch, float side, float run, int held, boolean armor,
-		int wall, float wallYaw, float wallPitch) {
+		int wall, float wallYaw, float wallPitch, boolean heavy, int variant, boolean firstPerson) {
 		/** {@code wall}: 0 none, 1 reaching for a wall (aimed by wallYaw/wallPitch), 2 fanned back into it. */
+
+		/** The same, drawn from your own eyes. */
+		public Tendrils inFirstPerson() {
+			return new Tendrils(growth, time, strike, aimYaw, aimPitch, side, run, held, armor, wall, wallYaw, wallPitch, heavy, variant, true);
+		}
 	}
 	/** Ticks into a meal (partial ticks included), for the maw. */
 	public static final RenderStateDataKey<Float> EATING = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_eating");
@@ -160,6 +167,17 @@ public final class WebSymbioteClient {
 			}
 		});
 		ClientPlayNetworking.registerGlobalReceiver(WebNet.Shake.TYPE, (payload, context) -> WebShake.start(payload.strength()));
+		// its voice darkens your screen (whispers, and a whole feeding)
+		ClientPlayNetworking.registerGlobalReceiver(WebNet.Dread.TYPE, (payload, context) -> WebSymbioteDread.onPacket(payload));
+		net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry.attachElementAfter(
+			net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements.MISC_OVERLAYS,
+			com.jaymospowers.JaymosPowers.id("web_symbiote_dread"), WebSymbioteDread::render);
+		net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> WebSymbioteDread.clear());
+		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
+			if (!minecraft.isPaused()) {
+				WebSymbioteDread.tick();
+			}
+		});
 		ClientPlayNetworking.registerGlobalReceiver(WebNet.Nudge.TYPE, (payload, context) -> {
 			LocalPlayer player = context.player();
 			if (player != null) {
@@ -228,10 +246,15 @@ public final class WebSymbioteClient {
 			}
 			// a strike of their own (the server picks the target)
 			float strike = -1.0F, aimYaw = 0.0F, aimPitch = 0.0F, side = 1.0F;
+			boolean heavy = false;
+			int variant = WebSymbiote.STRIKE_SLAM;
 			WebSymbiote.Strike s = player.getAttached(WebSymbiote.STRIKE);
 			Entity target = s == null ? null : player.level().getEntity(s.target());
 			if (s != null && target != null) {
-				strike = net.minecraft.util.Mth.clamp((now - s.start()) / (float)WebSymbiote.STRIKE_TICKS, 0.0F, 1.0F);
+				float partial = net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
+				strike = net.minecraft.util.Mth.clamp((now - s.start() + partial) / (float)s.ticks(), 0.0F, 1.0F);
+				heavy = s.heavy();
+				variant = s.variant();
 				net.minecraft.world.phys.Vec3 to = target.getBoundingBox().getCenter().subtract(player.getEyePosition());
 				float yaw = (float)(net.minecraft.util.Mth.atan2(to.z, to.x) * net.minecraft.util.Mth.RAD_TO_DEG) - 90.0F;
 				aimYaw = net.minecraft.util.Mth.wrapDegrees(yaw - player.yBodyRot) * net.minecraft.util.Mth.DEG_TO_RAD;
@@ -259,11 +282,20 @@ public final class WebSymbioteClient {
 				wallYaw = net.minecraft.util.Mth.wrapDegrees(yaw - player.yBodyRot) * net.minecraft.util.Mth.DEG_TO_RAD;
 				wallPitch = (float)net.minecraft.util.Mth.atan2(to.y, Math.sqrt(to.x * to.x + to.z * to.z));
 			}
+			boolean firstPerson = player == net.minecraft.client.Minecraft.getInstance().player && FirstPersonCompat.bodyShown();
 			state.setData(TENDRILS, new Tendrils(growth, player.tickCount, strike, aimYaw, aimPitch, side, smoothRun(player), held, bulk,
-				wallMode, wallYaw, wallPitch));
+				wallMode, wallYaw, wallPitch, heavy, variant, firstPerson));
 		} else {
 			ARMOR_SINCE.remove(entity.getId());
 			state.setData(TENDRILS, null);
+		}
+	}
+
+	/** First person, after the hands: your own tendrils, unless First-person Model is already drawing your body. */
+	public static void firstPersonTendrils(com.mojang.blaze3d.vertex.PoseStack poseStack, net.minecraft.client.renderer.SubmitNodeCollector collector,
+		@org.jspecify.annotations.Nullable AvatarRenderState avatar) {
+		if (avatar != null) {
+			WebTendrilLayer.submitFirstPerson(poseStack, collector, avatar);
 		}
 	}
 

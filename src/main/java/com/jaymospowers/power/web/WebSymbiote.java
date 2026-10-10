@@ -142,8 +142,23 @@ public final class WebSymbiote {
 	public static final float DESPERATE_HEALTH = 10.0F;
 	public static final int DESPERATE_EVERY = 20, RUN_TICKS = 300;
 	public static final double FLEE_SAFE = 24.0, THREAT_RANGE = 16.0;
-	/** Hungry, it goes looking for a corpse this far off, and a tendril carries it in. */
+	/** Hungry, it goes looking for a corpse this far off (else for something to kill), and a tendril carries it in. */
 	public static final double SELF_FEED_RANGE = 14.0;
+	/**
+	 * Feeding: it never eats anything living. SEEK a corpse (else the nearest creature), KILL it (at most
+	 * {@code KILL_TICKS}; then its corpse must turn up within {@code CORPSE_WAIT_TICKS}, within {@code CORPSE_FIND_RADIUS}
+	 * of where it fell), GRAB it with a tendril (the reach, then {@code GRAB_HAUL_TICKS} hauling it in, at most
+	 * {@code GRAB_TIMEOUT}), CARRY it in your arms (Jaymo's Kitchen; {@code CARRY_TIMEOUT}), and only then FEED.
+	 */
+	public static final int FEED_NONE = 0, FEED_KILL = 1, FEED_GRAB = 2, FEED_CARRY = 3, FEED_FEED = 4;
+	public static final int KILL_TICKS = 400, CORPSE_WAIT_TICKS = 60, GRAB_HAUL_TICKS = 8, GRAB_TIMEOUT = 80, CARRY_TIMEOUT = 20;
+	public static final double CORPSE_FIND_RADIUS = 3.0;
+	/** Consume: a corpse a tendril can take from this far; something weak enough is finished off by a lash landing {@code CONSUME_FINISH_LAG} later. */
+	public static final double CONSUME_CORPSE_RANGE = 6.0;
+	public static final int CONSUME_FINISH_LAG = 8;
+	public static final float CONSUME_FINISH_DAMAGE = 100.0F;
+	/** Its voice takes over your screen: each whisper for {@code WHISPER_FX_TICKS}; a feeding keeps it up, refreshed every {@code FEED_FX_EVERY}. */
+	public static final int WHISPER_FX_TICKS = 60, FEED_FX_EVERY = 40, FEED_FX_TICKS = 60;
 	/**
 	 * A good bond (stress under {@code CURIOUS_STRESS}, fed) is curious: each takeover check has a
 	 * {@code CURIOUS_CHANCE} it takes over just to look, grabbing something and staring at it with its own head for
@@ -242,9 +257,31 @@ public final class WebSymbiote {
 	 * the whole strike (slow and deliberate), and how hard it hits. */
 	public static final int STRIKE_EVERY = 50;
 	public static final double STRIKE_RANGE = 5.5;
-	public static final int STRIKE_HIT = 18;
 	public static final int STRIKE_TICKS = 40;
+	/** Shares of a strike: it rears until {@code STRIKE_REAR}, comes in until {@code STRIKE_HIT_SHARE} (where it lands), then eases back. */
+	public static final float STRIKE_REAR = 0.4F, STRIKE_HIT_SHARE = 0.5F;
+	public static final int STRIKE_HIT = Math.round(STRIKE_TICKS * STRIKE_HIT_SHARE);
 	public static final float STRIKE_DAMAGE = 6.0F;
+	/** Each strike rolls one: a slam (reared high, crashing straight down) or a swipe across from your left or your right. */
+	public static final int STRIKE_SLAM = 0, STRIKE_SWIPE_LEFT = 1, STRIKE_SWIPE_RIGHT = 2, STRIKE_VARIANTS = 3;
+	/** A slam's push away and lift (an airborne target is driven down instead); a swipe's sideways fling, its share away from you, and lift. */
+	public static final double SLAM_PUSH = 0.3, SLAM_LIFT = 0.05, SLAM_DOWN = -0.45;
+	public static final double SWIPE_PUSH = 0.7, SWIPE_AWAY = 0.25, SWIPE_LIFT = 0.25;
+	/**
+	 * A tendril holding debris (a torn-out chunk or a falling block) strikes with it: further, slower, and far harder,
+	 * scaled by the chunk's size (× {@code HEAVY_SIZE_BASE} + {@code HEAVY_SIZE_PER_PIECE} a block, clamped), knocking
+	 * the target about ten blocks, with a heavy thud and a shake.
+	 */
+	public static final double HEAVY_STRIKE_RANGE = 8.5;
+	public static final int HEAVY_STRIKE_TICKS = 60, HEAVY_STRIKE_EVERY = 90;
+	public static final float HEAVY_STRIKE_REAR = 0.5F, HEAVY_STRIKE_HIT_SHARE = 0.58F;
+	public static final int HEAVY_STRIKE_HIT = Math.round(HEAVY_STRIKE_TICKS * HEAVY_STRIKE_HIT_SHARE);
+	public static final float HEAVY_STRIKE_DAMAGE = 11.0F;
+	public static final float HEAVY_SIZE_BASE = 0.6F, HEAVY_SIZE_PER_PIECE = 0.1F, HEAVY_SIZE_MIN = 0.7F, HEAVY_SIZE_MAX = 1.5F;
+	public static final double HEAVY_KNOCK = 1.0, HEAVY_LIFT = 0.45, HEAVY_SLAM_KNOCK = 0.75, HEAVY_SLAM_LIFT = 0.2;
+	public static final float HEAVY_SHAKE = 1.6F, HEAVY_TARGET_SHAKE = 2.5F;
+	/** The held debris is swung along with the tendril: how fast it may move (blocks/tick), how high it's reared for a slam, how far out for a swipe. */
+	public static final double HEAVY_DEBRIS_SPEED = 2.6, HEAVY_REAR_UP = 2.2, HEAVY_REAR_SIDE = 2.0;
 	/**
 	 * Worn too long, it wants out: after {@code ARMOR_RESTLESS_TICKS} of Living Armor, each takeover check (every
 	 * {@link #TAKEOVER_CHECK_TICKS}) has a chance that climbs by {@code ARMOR_TAKEOVER_PER_MINUTE} a minute, up to
@@ -262,13 +299,34 @@ public final class WebSymbiote {
 
 	private static final Identifier ARMOR_SCALE_ID = JaymosPowers.id("web_symbiote_bulk");
 
-	/** A tendril strike in progress: at what, and when it began (game time). Synced to everyone, who see it. */
-	public record Strike(int target, long start) {
+	/**
+	 * A tendril strike in progress: at what, when it began (game time), whether it swings held debris, and how
+	 * ({@link #STRIKE_SLAM} or a swipe). Synced to everyone, who see the same swing.
+	 */
+	public record Strike(int target, long start, boolean heavy, int variant) {
 		public static final net.minecraft.network.codec.StreamCodec<io.netty.buffer.ByteBuf, Strike> STREAM_CODEC =
 			net.minecraft.network.codec.StreamCodec.composite(
 				net.minecraft.network.codec.ByteBufCodecs.VAR_INT, Strike::target,
 				net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, Strike::start,
+				net.minecraft.network.codec.ByteBufCodecs.BOOL, Strike::heavy,
+				net.minecraft.network.codec.ByteBufCodecs.VAR_INT, Strike::variant,
 				Strike::new);
+
+		public int ticks() {
+			return heavy ? HEAVY_STRIKE_TICKS : STRIKE_TICKS;
+		}
+
+		public int hitAt() {
+			return heavy ? HEAVY_STRIKE_HIT : STRIKE_HIT;
+		}
+
+		public float rearShare() {
+			return heavy ? HEAVY_STRIKE_REAR : STRIKE_REAR;
+		}
+
+		public float hitShare() {
+			return hitAt() / (float)ticks();
+		}
 	}
 
 	public static final AttachmentType<Strike> STRIKE = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_strike"),
@@ -321,7 +379,8 @@ public final class WebSymbiote {
 
 	/** Whether it'll eat this (a creature, or a corpse by what it was). */
 	static boolean edible(Entity food) {
-		return !inedible(com.jaymospowers.power.gravity.GravityPower.isCorpse(food) ? KitchenCompat.sourceType(food) : food.getType());
+		// a player's corpse holds their belongings: it's never eaten
+		return !KitchenCompat.isPlayerCorpse(food) && !inedible(com.jaymospowers.power.gravity.GravityPower.isCorpse(food) ? KitchenCompat.sourceType(food) : food.getType());
 	}
 
 	/**
@@ -436,6 +495,17 @@ public final class WebSymbiote {
 		Vec3 eatFrom = Vec3.ZERO;
 		float eatHeal;
 		int eatFeed;
+		/** The feeding (see {@link #FEED_KILL}): its stage, its prey or corpse, when the stage began, when the prey was seen dead. */
+		int feedStage;
+		int feedTarget = -1;
+		long feedStageAt;
+		long feedDeadAt = -1L;
+		Vec3 feedDeathPos = Vec3.ZERO;
+		/** Consume's finishing lash lands then (0: none); the tendril that grabs; it swelled for the hunt; when the dread is next refreshed. */
+		long feedFinishAt;
+		int feedHand;
+		boolean hunting;
+		long feedFxAt;
 	}
 
 	private WebSymbiote() {
@@ -538,9 +608,16 @@ public final class WebSymbiote {
 		}
 	}
 
-	private static void whisper(ServerPlayer player, String key) {
+	/** It speaks: the line, and your screen darkens under it with a growl only you hear (see {@link WebNet.Dread}). */
+	public static void whisper(ServerPlayer player, String key) {
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_symbiote." + key)
 			.withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
+		dread(player, WHISPER_FX_TICKS, true);
+	}
+
+	/** Your screen, for {@code ticks}: darkened, the purple-black vignette pulsing, and (if {@code growl}) the growl. */
+	static void dread(ServerPlayer player, int ticks, boolean growl) {
+		ServerPlayNetworking.send(player, new WebNet.Dread(ticks, growl));
 	}
 
 	/** Whispers {@code key} the first time {@code hint} comes up. Returns the state with the hint recorded. */
@@ -651,18 +728,21 @@ public final class WebSymbiote {
 			}
 		}
 
-		// hungry, it feeds itself on a corpse in reach (swelling into the armour for the meal, if it wasn't)
-		if (next.satiety() < SELF_FEED_BELOW && player.getAttached(EATING) == null && live.takeoverTicks <= 0 && !sulking(player)
-			&& player.tickCount % SELF_FEED_EVERY == 0 && selfFeed(player) && !armor) {
+		// hungry, it feeds itself: a corpse, or something it kills first (swelling into the armour for it, if it wasn't)
+		if (next.satiety() < SELF_FEED_BELOW && player.getAttached(EATING) == null && live.takeoverTicks <= 0 && live.feedStage == FEED_NONE
+			&& !sulking(player) && player.tickCount % SELF_FEED_EVERY == 0 && selfFeed(player, live, now) && !armor) {
 			live.feedingArmor = true;
 			live.suitBeforeFeeding = next.has(WebSymbioteState.SUIT);
 			next = next.withFlag(WebSymbioteState.ARMOR, true);
 			armor = true;
 		}
+		if (live.feedStage != FEED_NONE) {
+			tickFeeding(player, live, now);
+		}
 		if (player.getAttached(EATING) != null) {
 			tickEating(player, live, now);
 		}
-		if (live.feedingArmor && player.getAttached(EATING) == null) {
+		if (live.feedingArmor && live.feedStage == FEED_NONE && player.getAttached(EATING) == null) {
 			// fed: it settles back, the tendrils withdrawing
 			live.feedingArmor = false;
 			next = next.withFlag(WebSymbioteState.ARMOR, false).withFlag(WebSymbioteState.SUIT, live.suitBeforeFeeding);
@@ -720,7 +800,7 @@ public final class WebSymbiote {
 			if (live.takeoverTicks == 0) {
 				next = next.withStress(Math.max(0, next.stress() - TAKEOVER_RELIEF));
 			}
-		} else if (now >= live.takeoverReadyAt && player.tickCount % TAKEOVER_CHECK_TICKS == 0 && !player.isCreative()) {
+		} else if (live.feedStage == FEED_NONE && now >= live.takeoverReadyAt && player.tickCount % TAKEOVER_CHECK_TICKS == 0 && !player.isCreative()) {
 			// hungry and stressed, it may grab the wheel; worn as armour too long, it grows restless whatever its mood
 			float restless = live.armorTicks <= ARMOR_RESTLESS_TICKS ? 0.0F
 				: Math.min(ARMOR_TAKEOVER_MAX, (live.armorTicks - ARMOR_RESTLESS_TICKS) / 1200.0F * ARMOR_TAKEOVER_PER_MINUTE);
@@ -744,6 +824,7 @@ public final class WebSymbiote {
 		LivingEntity threat = sulking(player) ? null : threat(player);
 		if (threat != null && player.getHealth() <= DEFEND_HEALTH && now >= live.defendReadyAt && (live.takeoverTicks <= 0 || !live.fleeing)) {
 			live.defendReadyAt = now + DEFEND_COOLDOWN;
+			abortFeeding(player, live);
 			if (live.takeoverTicks > 0) {
 				endTakeover(player, live);
 			}
@@ -762,7 +843,7 @@ public final class WebSymbiote {
 			desperate(player, live, now, threat);
 		}
 		// the big body is up exactly while it has the wheel for a fight
-		boolean bulkWanted = live.takeoverTicks > 0 && !live.curious;
+		boolean bulkWanted = live.takeoverTicks > 0 && !live.curious && !live.hunting;
 		if (bulkWanted != next.has(WebSymbioteState.BULK)) {
 			next = next.withFlag(WebSymbioteState.BULK, bulkWanted);
 			if (bulkWanted) {
@@ -885,6 +966,7 @@ public final class WebSymbiote {
 		}
 		endShroud(player);
 		Live live = live(player);
+		abortFeeding(player, live);
 		if (live.takeoverTicks > 0) {
 			live.takeoverTicks = 0;
 			ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0, false));
@@ -939,6 +1021,10 @@ public final class WebSymbiote {
 	/** The power is going away: so is the bond's grip on the body (the bond itself is dropped). */
 	static void onLost(ServerPlayer player) {
 		endShroud(player);
+		Live live = player.getAttached(LIVE);
+		if (live != null) {
+			abortFeeding(player, live);
+		}
 		removeArmor(player);
 		player.removeAttached(STATE);
 		player.removeAttached(COOLDOWNS);
@@ -1047,7 +1133,7 @@ public final class WebSymbiote {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.8F, 0.6F);
 		level.sendParticles(dust(1.6F), player.getX(), player.getY() + 1.0, player.getZ(), 25, 0.4, 0.8, 0.4, 0.0);
 		if (!live.fleeing) {
-			whisper(player, live.curious ? "curious" : "takeover");
+			whisper(player, live.curious ? "curious" : live.hunting ? "hunt" : "takeover");
 		}
 	}
 
@@ -1081,7 +1167,7 @@ public final class WebSymbiote {
 		}
 		if (player.getAttached(STRIKE) == null && threat.distanceTo(player) <= STRIKE_RANGE + 1.0) {
 			// a lash, almost at once
-			player.setAttached(STRIKE, new Strike(threat.getId(), now - (STRIKE_HIT - RETALIATE_LAG)));
+			lash(player, threat, now, RETALIATE_LAG);
 		} else if (threat.distanceTo(player) <= TENDRIL_RANGE && WebTendrils.grabbable(player, threat)) {
 			WebTendrils.snatch(player, threat);
 		}
@@ -1096,6 +1182,7 @@ public final class WebSymbiote {
 		live.rampage = false;
 		live.curious = false;
 		live.fleeing = false;
+		live.hunting = false;
 		live.stareUntil = 0L;
 		live.takeoverTicks = 0;
 		live.takeoverTarget = -1;
@@ -1168,7 +1255,13 @@ public final class WebSymbiote {
 		}
 		// it lets go once its prey is dead, or has got away
 		if (target == null || !target.isAlive() || target.distanceTo(player) > TAKEOVER_ESCAPE || --live.takeoverTicks <= 0) {
+			boolean killed = target != null && !target.isAlive() && !live.curious && !live.hunting;
 			endTakeover(player, live);
+			if (killed && live.feedStage == FEED_NONE && player.getAttached(EATING) == null && state(player).satiety() < SATIETY_MAX
+				&& target instanceof LivingEntity prey && edible(prey) && !sulking(player)) {
+				// a kill of its own: now it feeds, on the corpse
+				startKill(player, live, now, prey, false);
+			}
 			return;
 		}
 		if (live.curious) {
@@ -1180,16 +1273,11 @@ public final class WebSymbiote {
 			player.attack(target);
 			if (live.rampage && target instanceof LivingEntity living && living.isAlive()) {
 				if (living instanceof Player && ++live.rampageStrikes % RAMPAGE_BITE_EVERY == 0) {
-					// it bites: tearing into them, and feeding on it
+					// it bites: tearing into them (it feeds on nothing living: only on what it kills, carried)
 					living.hurtServer(player.level(), player.level().damageSources().playerAttack(player), RAMPAGE_BITE_DAMAGE);
-					player.heal(RAMPAGE_BITE_DAMAGE * 0.5F);
-					feed(player, 10, 0);
 					ServerLevel level = player.level();
 					level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.PHANTOM_BITE, SoundSource.PLAYERS, 1.2F, 0.4F);
 					level.sendParticles(ParticleTypes.SQUID_INK, living.getX(), living.getY() + 1.0, living.getZ(), 15, 0.3, 0.4, 0.3, 0.05);
-				} else if (!(living instanceof Player) && living.getHealth() <= CONSUME_MAX_HEALTH && edible(living)) {
-					// anything weak enough, it simply devours
-					devour(player, living);
 				}
 			}
 		}
@@ -1655,7 +1743,7 @@ public final class WebSymbiote {
 					}
 				}
 				if (nearest != null) {
-					player.setAttached(STRIKE, new Strike(nearest.getId(), level.getGameTime() - (STRIKE_HIT - RETALIATE_LAG)));
+					lash(player, nearest, level.getGameTime(), RETALIATE_LAG);
 					nearest.hurtServer(level, level.damageSources().playerAttack(player), FLINT_LASH_DAMAGE);
 				} else {
 					player.hurtServer(level, level.damageSources().magic(), FLINT_LASH_DAMAGE * 0.5F);
@@ -1694,7 +1782,7 @@ public final class WebSymbiote {
 		double distance = attacker.distanceTo(player) - attacker.getBbWidth() * 0.5;
 		if (distance <= STRIKE_RANGE + 1.0) {
 			// a lash, almost at once
-			player.setAttached(STRIKE, new Strike(attacker.getId(), now - (STRIKE_HIT - RETALIATE_LAG)));
+			lash(player, attacker, now, RETALIATE_LAG);
 		} else if (distance <= TENDRIL_RANGE && WebTendrils.grabbable(player, attacker)) {
 			WebTendrils.snatch(player, attacker);
 		} else {
@@ -1703,31 +1791,255 @@ public final class WebSymbiote {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.9F, 1.3F);
 	}
 
-	/** Hungry, it feeds itself: a corpse you carry, else one lying within reach. Returns true if it started a meal. */
-	private static boolean selfFeed(ServerPlayer player) {
-		Entity corpse = KitchenCompat.carriedCorpse(player);
-		if (corpse != null && !edible(corpse)) {
-			corpse = null;
+	/**
+	 * Hungry, it feeds itself (SEEK): a corpse you carry, else one lying within {@link #SELF_FEED_RANGE}, else it hunts
+	 * the nearest creature there and kills it first. Returns true if a feeding began.
+	 */
+	private static boolean selfFeed(ServerPlayer player, Live live, long now) {
+		Entity carried = KitchenCompat.carriedCorpse(player);
+		if (carried != null) {
+			// already in your arms: straight to the meal (one it won't touch, and it waits)
+			if (!edible(carried)) {
+				return false;
+			}
+			whisper(player, "self_feed");
+			startMeal(player, live, now, carried);
+			return true;
 		}
-		if (corpse == null) {
-			double best = SELF_FEED_RANGE * SELF_FEED_RANGE;
-			for (Entity e : player.level().getEntities(player, player.getBoundingBox().inflate(SELF_FEED_RANGE),
-				e -> e.isAlive() && com.jaymospowers.power.gravity.GravityPower.isCorpse(e) && edible(e))) {
-				double d = e.distanceToSqr(player);
-				if (d < best) {
-					best = d;
-					corpse = e;
-				}
+		Entity corpse = null;
+		double best = SELF_FEED_RANGE * SELF_FEED_RANGE;
+		for (Entity e : player.level().getEntities(player, player.getBoundingBox().inflate(SELF_FEED_RANGE), e -> freeCorpse(e))) {
+			double d = e.distanceToSqr(player);
+			if (d < best) {
+				best = d;
+				corpse = e;
 			}
 		}
-		if (corpse == null) {
+		if (corpse != null) {
+			whisper(player, "self_feed");
+			return startGrab(player, live, now, corpse);
+		}
+		LivingEntity prey = null;
+		best = SELF_FEED_RANGE * SELF_FEED_RANGE;
+		for (LivingEntity living : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(SELF_FEED_RANGE),
+			e -> e != player && huntable(player, e, live.rampage))) {
+			double d = living.distanceToSqr(player);
+			if (d < best) {
+				best = d;
+				prey = living;
+			}
+		}
+		if (prey == null) {
 			return false;
 		}
-		float size = Mth.clamp(corpse.getBbWidth() * corpse.getBbWidth() * corpse.getBbHeight() / 2.0F, 0.0F, 1.0F);
-		trail(player.level(), player.getEyePosition().add(0.0, -0.3, 0.0), corpse.getBoundingBox().getCenter());
-		startEating(player, corpse, Mth.lerp(size, CORPSE_HEAL_MIN, CORPSE_HEAL_MAX), Math.round(Mth.lerp(size, CONSUME_FEED, CORPSE_FEED_MAX)));
-		whisper(player, "self_feed");
+		startKill(player, live, now, prey, false);
 		return true;
+	}
+
+	/** A corpse lying free for the taking: edible, nobody carrying it, no tendril holding it. */
+	private static boolean freeCorpse(Entity e) {
+		return e.isAlive() && com.jaymospowers.power.gravity.GravityPower.isCorpse(e) && edible(e) && !KitchenCompat.isCarried(e)
+			&& !WebTendrils.held(e);
+	}
+
+	/** Something it may hunt for food: a creature that leaves a corpse (no pets, no named ones); players only in a rampage. */
+	private static boolean huntable(ServerPlayer player, LivingEntity e, boolean rampage) {
+		if (!e.isAlive() || e.isSpectator() || e instanceof ArmorStand || !edible(e)) {
+			return false;
+		}
+		if (e instanceof Player p) {
+			return rampage && !p.isCreative() && p != player;
+		}
+		return e instanceof Mob m && !(m instanceof TamableAnimal tame && tame.isTame()) && !m.hasCustomName() && KitchenCompat.leavesCorpse(e);
+	}
+
+	/**
+	 * KILL: it goes after {@code prey} until it dies (a lash from Consume, {@code manual}; else it takes the wheel and
+	 * hunts it). A prey already dead (a kill of its own) only waits for the corpse.
+	 */
+	private static void startKill(ServerPlayer player, Live live, long now, LivingEntity prey, boolean manual) {
+		live.feedStage = FEED_KILL;
+		live.feedTarget = prey.getId();
+		live.feedStageAt = now;
+		live.feedDeathPos = prey.position();
+		live.feedDeadAt = prey.isAlive() ? -1L : now;
+		live.feedFinishAt = 0L;
+		live.feedFxAt = now;
+		if (!prey.isAlive()) {
+			return;
+		}
+		if (manual) {
+			// a lash finishes it off
+			live.feedFinishAt = now + CONSUME_FINISH_LAG;
+			lash(player, prey, now, CONSUME_FINISH_LAG);
+			tendrilsOut(player);
+			trail(player.level(), player.getEyePosition().add(0.0, -0.3, 0.0), prey.getBoundingBox().getCenter());
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 1.0F, 0.6F);
+		} else {
+			// it takes the wheel and hunts it down
+			live.rampage = false;
+			live.curious = false;
+			live.hunting = true;
+			startTakeover(player, live, now, prey);
+		}
+	}
+
+	/** GRAB: a tendril reaches for the corpse and hauls it in. */
+	private static boolean startGrab(ServerPlayer player, Live live, long now, Entity corpse) {
+		WebTendrils.Grips grips = player.getAttachedOrElse(WebTendrils.GRIPS, WebTendrils.Grips.NONE);
+		int hand = grips.right() < 0 ? WebNet.MAIN : grips.left() < 0 ? WebNet.OFF : WebNet.MAIN;
+		tendrilsOut(player);
+		player.setAttached(TENDRILS_OUT, now + GRAB_TIMEOUT + 20);
+		WebTendrils.grab(player, hand, corpse, -1L);
+		if (player.getAttachedOrElse(WebTendrils.GRIPS, WebTendrils.Grips.NONE).get(hand) != corpse.getId()) {
+			abortFeeding(player, live);
+			return false;
+		}
+		live.feedStage = FEED_GRAB;
+		live.feedTarget = corpse.getId();
+		live.feedHand = hand;
+		live.feedStageAt = now;
+		live.feedFxAt = Math.min(live.feedFxAt, now);
+		trail(player.level(), player.getEyePosition().add(0.0, -0.3, 0.0), corpse.getBoundingBox().getCenter());
+		return true;
+	}
+
+	/** FEED: carried, so it eats (by the corpse's size). */
+	private static void startMeal(ServerPlayer player, Live live, long now, Entity corpse) {
+		float size = Mth.clamp(corpse.getBbWidth() * corpse.getBbWidth() * corpse.getBbHeight() / 2.0F, 0.0F, 1.0F);
+		startEating(player, corpse, Mth.lerp(size, CORPSE_HEAL_MIN, CORPSE_HEAL_MAX), Math.round(Mth.lerp(size, CONSUME_FEED, CORPSE_FEED_MAX)));
+		live.feedStage = FEED_FEED;
+		live.feedTarget = corpse.getId();
+		live.feedStageAt = now;
+		live.feedFxAt = Math.min(live.feedFxAt, now);
+	}
+
+	/** The feeding, a tick at a time: kill, grab, carry, feed. The dread stays on your screen throughout. */
+	private static void tickFeeding(ServerPlayer player, Live live, long now) {
+		ServerLevel level = player.level();
+		if (sulking(player) || live.fleeing) {
+			abortFeeding(player, live);
+			return;
+		}
+		if (now >= live.feedFxAt) {
+			live.feedFxAt = now + FEED_FX_EVERY;
+			dread(player, FEED_FX_TICKS, true);
+		}
+		if (!armored(player) && player.tickCount % 10 == 0 && live.feedStage != FEED_FEED) {
+			player.setAttached(TENDRILS_OUT, now + 30);
+		}
+		Entity target = level.getEntity(live.feedTarget);
+		long t = now - live.feedStageAt;
+		switch (live.feedStage) {
+			case FEED_KILL -> {
+				if (target instanceof LivingEntity prey && prey.isAlive()) {
+					live.feedDeathPos = prey.position();
+					if (live.feedFinishAt > 0L) {
+						// Consume's lash lands
+						if (now >= live.feedFinishAt) {
+							live.feedFinishAt = 0L;
+							if (prey.distanceTo(player) > CONSUME_RANGE + 2.0 + prey.getBbWidth() * 0.5) {
+								abortFeeding(player, live);
+								return;
+							}
+							prey.hurtServer(level, level.damageSources().playerAttack(player), CONSUME_FINISH_DAMAGE);
+							level.playSound(null, prey.getX(), prey.getY(), prey.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.0F, 0.5F);
+							level.sendParticles(dust(1.4F), prey.getX(), prey.getY() + prey.getBbHeight() * 0.6, prey.getZ(), 14, 0.3, 0.3, 0.3, 0.0);
+						}
+					} else if (live.takeoverTicks <= 0 || t > KILL_TICKS) {
+						// it got away (or took too long)
+						abortFeeding(player, live);
+					}
+					return;
+				}
+				if (live.feedDeadAt < 0L) {
+					live.feedDeadAt = now;
+				}
+				// dead: its corpse turns up where it fell (Jaymo's Kitchen leaves one once it has finished dying)
+				Entity corpse = null;
+				double best = CORPSE_FIND_RADIUS * CORPSE_FIND_RADIUS;
+				long since = now - live.feedDeadAt;
+				for (Entity e : level.getEntities(player, AABB.ofSize(live.feedDeathPos, CORPSE_FIND_RADIUS * 2.0, CORPSE_FIND_RADIUS * 2.0,
+					CORPSE_FIND_RADIUS * 2.0), e -> freeCorpse(e) && e.tickCount <= since + 40)) {
+					double d = e.position().distanceToSqr(live.feedDeathPos);
+					if (d < best) {
+						best = d;
+						corpse = e;
+					}
+				}
+				if (corpse != null) {
+					if (live.hunting && live.takeoverTicks > 0) {
+						endTakeover(player, live);
+					}
+					startGrab(player, live, now, corpse);
+				} else if (since > CORPSE_WAIT_TICKS) {
+					abortFeeding(player, live);
+				}
+			}
+			case FEED_GRAB -> {
+				WebTendrils.Grips grips = player.getAttachedOrElse(WebTendrils.GRIPS, WebTendrils.Grips.NONE);
+				if (target == null || !target.isAlive() || grips.get(live.feedHand) != target.getId()) {
+					// taken from it, or gone
+					abortFeeding(player, live);
+					return;
+				}
+				long reach = (long)Math.ceil(target.distanceTo(player) / WebTendrils.TENDRIL_SPEED);
+				if (t >= Math.min(GRAB_TIMEOUT, reach + GRAB_HAUL_TICKS) && t >= GRAB_HAUL_TICKS || t >= GRAB_TIMEOUT) {
+					// hauled in: into your arms
+					WebTendrils.release(player, live.feedHand, false);
+					live.feedStage = FEED_CARRY;
+					live.feedStageAt = now;
+					KitchenCompat.carry(player, target);
+				}
+			}
+			case FEED_CARRY -> {
+				if (target == null || !target.isAlive()) {
+					abortFeeding(player, live);
+					return;
+				}
+				// it eats only once the corpse is carried
+				if (KitchenCompat.carriedCorpse(player) == target) {
+					startMeal(player, live, now, target);
+				} else if (t > CARRY_TIMEOUT) {
+					abortFeeding(player, live);
+				} else {
+					KitchenCompat.carry(player, target);
+				}
+			}
+			case FEED_FEED -> {
+				if (player.getAttached(EATING) == null) {
+					live.feedStage = FEED_NONE;
+					live.feedTarget = -1;
+				}
+			}
+			default -> live.feedStage = FEED_NONE;
+		}
+	}
+
+	/** The feeding stops where it is (the hunt ends, a grabbed corpse is let go). */
+	private static void abortFeeding(ServerPlayer player, Live live) {
+		if (live.feedStage == FEED_NONE) {
+			return;
+		}
+		if (live.feedStage == FEED_GRAB) {
+			WebTendrils.Grips grips = player.getAttachedOrElse(WebTendrils.GRIPS, WebTendrils.Grips.NONE);
+			if (grips.get(live.feedHand) == live.feedTarget) {
+				WebTendrils.release(player, live.feedHand, false);
+			}
+		}
+		if (live.hunting && live.takeoverTicks > 0) {
+			endTakeover(player, live);
+		}
+		live.hunting = false;
+		live.feedStage = FEED_NONE;
+		live.feedTarget = -1;
+		live.feedFinishAt = 0L;
+	}
+
+	/** Where the feeding is (for debug output). */
+	public static String describeFeeding(ServerPlayer player) {
+		Live live = player.getAttached(LIVE);
+		return live == null ? "none" : "stage=" + live.feedStage + " target=" + live.feedTarget;
 	}
 
 	/** Out of the armour, the tendrils burst out to act (and withdraw after). */
@@ -1778,60 +2090,184 @@ public final class WebSymbiote {
 		if (strike != null) {
 			long t = now - strike.start();
 			Entity target = level.getEntity(strike.target());
-			if (t == STRIKE_HIT && target instanceof LivingEntity living && living.isAlive()
-				&& living.distanceTo(player) <= STRIKE_RANGE + 1.5 + living.getBbWidth() * 0.5) {
-				living.hurtServer(level, level.damageSources().playerAttack(player), STRIKE_DAMAGE);
-				Vec3 away = living.position().subtract(player.position()).horizontal();
-				if (away.lengthSqr() > 1.0E-4) {
-					Vec3 push = away.normalize().scale(0.6);
-					living.push(push.x, 0.25, push.z);
-					living.syncVelocity = true;
-				}
-				level.sendParticles(dust(1.4F), living.getX(), living.getY() + living.getBbHeight() * 0.6, living.getZ(), 14, 0.3, 0.3, 0.3, 0.0);
-				level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.0F, 0.5F);
-				level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.SLIME_ATTACK, SoundSource.PLAYERS, 1.0F, 0.5F);
+			double range = strike.heavy() ? HEAVY_STRIKE_RANGE : STRIKE_RANGE;
+			if (t == strike.hitAt() && target instanceof LivingEntity living && living.isAlive()
+				&& living.distanceTo(player) <= range + 1.5 + living.getBbWidth() * 0.5) {
+				land(player, strike, living);
 			}
-			if (t >= STRIKE_TICKS || target == null) {
+			if (t >= strike.ticks() || target == null) {
 				player.removeAttached(STRIKE);
-				live.nextStrikeAt = now + STRIKE_EVERY;
+				live.nextStrikeAt = now + (strike.heavy() ? HEAVY_STRIKE_EVERY : STRIKE_EVERY);
 			}
 			return;
 		}
-		if (now < live.nextStrikeAt || live.takeoverTicks > 0 && !live.rampage || live.fleeing) {
+		if (now < live.nextStrikeAt || live.takeoverTicks > 0 && !live.rampage && !live.hunting || live.fleeing) {
 			return;
 		}
 		live.nextStrikeAt = now + 10;
+		boolean heavy = heldDebris(player) != null;
+		double range = heavy ? HEAVY_STRIKE_RANGE : STRIKE_RANGE;
 		LivingEntity target = null;
-		double best = STRIKE_RANGE * STRIKE_RANGE;
-		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(STRIKE_RANGE),
-			e -> e != player && e.isAlive() && !e.isSpectator() && (e instanceof net.minecraft.world.entity.monster.Enemy
-				|| live.rampage && (e instanceof Mob || e instanceof Player p && !p.isCreative())))) {
-			double d = living.distanceToSqr(player);
-			if (d < best) {
-				best = d;
-				target = living;
+		// what it's hunting comes first
+		if (live.feedStage == FEED_KILL && level.getEntity(live.feedTarget) instanceof LivingEntity prey && prey.isAlive()
+			&& prey.distanceTo(player) <= range) {
+			target = prey;
+		}
+		double best = range * range;
+		if (target == null) {
+			for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(range),
+				e -> e != player && e.isAlive() && !e.isSpectator() && (e instanceof net.minecraft.world.entity.monster.Enemy
+					|| live.rampage && (e instanceof Mob || e instanceof Player p && !p.isCreative())))) {
+				double d = living.distanceToSqr(player);
+				if (d < best) {
+					best = d;
+					target = living;
+				}
 			}
 		}
 		if (target != null) {
-			player.setAttached(STRIKE, new Strike(target.getId(), now));
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 1.0F, 0.6F);
+			player.setAttached(STRIKE, new Strike(target.getId(), now, heavy, player.getRandom().nextInt(STRIKE_VARIANTS)));
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 1.0F,
+				heavy ? 0.4F : 0.6F);
+			if (heavy) {
+				// the weight of it, hauled up
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_JUMP, SoundSource.PLAYERS, 1.0F, 0.4F);
+			}
 		}
 	}
 
-	/** Consume: something small within reach (the one you look at, else the nearest) is swallowed whole. */
+	/** A quick lash (instinct, retaliation, panic, Consume's finishing blow): it lands {@code lag} ticks from now. */
+	private static void lash(ServerPlayer player, Entity target, long now, int lag) {
+		player.setAttached(STRIKE, new Strike(target.getId(), now - (STRIKE_HIT - lag), false, player.getRandom().nextInt(STRIKE_VARIANTS)));
+	}
+
+	/** A strike lands: a slam drives down, a swipe flings sideways; with debris, far harder, with a thud and a shake. */
+	private static void land(ServerPlayer player, Strike strike, LivingEntity living) {
+		ServerLevel level = player.level();
+		Entity debris = strike.heavy() ? heldDebris(player) : null;
+		boolean heavy = strike.heavy();
+		float damage = STRIKE_DAMAGE;
+		if (heavy) {
+			int pieces = debris instanceof com.jaymospowers.core.BlockCluster chunk ? chunk.pieces().size() : 1;
+			damage = HEAVY_STRIKE_DAMAGE * Mth.clamp(HEAVY_SIZE_BASE + HEAVY_SIZE_PER_PIECE * pieces, HEAVY_SIZE_MIN, HEAVY_SIZE_MAX);
+		}
+		living.hurtServer(level, level.damageSources().playerAttack(player), damage);
+		Vec3 away = living.position().subtract(player.position()).horizontal();
+		if (away.lengthSqr() < 1.0E-4) {
+			away = player.getLookAngle().horizontal();
+		}
+		away = away.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : away.normalize();
+		Vec3 push;
+		if (strike.variant() == STRIKE_SLAM) {
+			double up = living.onGround() ? heavy ? HEAVY_SLAM_LIFT : SLAM_LIFT : SLAM_DOWN;
+			push = away.scale(heavy ? HEAVY_SLAM_KNOCK : SLAM_PUSH).add(0.0, up, 0.0);
+		} else {
+			// along the sweep: from your left across to your right, or back
+			Vec3 right = new Vec3(-away.z, 0.0, away.x);
+			Vec3 sweep = strike.variant() == STRIKE_SWIPE_LEFT ? right : right.reverse();
+			Vec3 dir = sweep.add(away.scale(SWIPE_AWAY)).normalize();
+			push = heavy ? dir.scale(HEAVY_KNOCK).add(0.0, HEAVY_LIFT, 0.0) : dir.scale(SWIPE_PUSH).add(0.0, SWIPE_LIFT, 0.0);
+		}
+		living.setDeltaMovement(living.getDeltaMovement().add(push));
+		living.needsSync = true;
+		living.syncVelocity = true;
+		if (living instanceof ServerPlayer other) {
+			ServerPlayNetworking.send(other, new WebNet.Nudge(living.getDeltaMovement()));
+		}
+		level.sendParticles(dust(1.4F), living.getX(), living.getY() + living.getBbHeight() * 0.6, living.getZ(), 14, 0.3, 0.3, 0.3, 0.0);
+		level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.0F, 0.5F);
+		level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.SLIME_ATTACK, SoundSource.PLAYERS, 1.0F, 0.5F);
+		if (heavy) {
+			level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.3F, 0.6F);
+			level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.5F, 0.5F);
+			net.minecraft.world.level.block.state.BlockState chunkState = debris instanceof com.jaymospowers.core.BlockCluster chunk
+				&& !chunk.pieces().isEmpty() ? chunk.pieces().get(0).blockState()
+				: debris instanceof net.minecraft.world.entity.item.FallingBlockEntity falling ? falling.getBlockState() : null;
+			if (chunkState != null) {
+				com.jaymospowers.core.Debris.puff(level, living.blockPosition().above(), chunkState, 1.6F);
+			}
+			ServerPlayNetworking.send(player, new WebNet.Shake(HEAVY_SHAKE));
+			if (living instanceof ServerPlayer other) {
+				ServerPlayNetworking.send(other, new WebNet.Shake(HEAVY_TARGET_SHAKE));
+			}
+		}
+	}
+
+	/** What a tendril holds that's debris (a torn-out chunk or a falling block), if any. */
+	static @org.jspecify.annotations.Nullable Entity heldDebris(Player player) {
+		WebTendrils.Grips grips = player.getAttached(WebTendrils.GRIPS);
+		if (grips == null) {
+			return null;
+		}
+		for (int hand = WebNet.MAIN; hand <= WebNet.OFF; hand++) {
+			Entity held = grips.get(hand) < 0 ? null : player.level().getEntity(grips.get(hand));
+			if (held instanceof com.jaymospowers.core.BlockCluster || held instanceof net.minecraft.world.entity.item.FallingBlockEntity) {
+				return held;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Where held debris goes during a heavy strike (null: back to the usual hold): reared high above you for a slam,
+	 * or out to the side a swipe comes from, then brought down or across onto the target as the strike lands.
+	 */
+	static @org.jspecify.annotations.Nullable Vec3 debrisStrikePoint(ServerPlayer player, Entity held, long now) {
+		Strike strike = player.getAttached(STRIKE);
+		if (strike == null || !strike.heavy() || heldDebris(player) != held) {
+			return null;
+		}
+		Entity target = player.level().getEntity(strike.target());
+		if (target == null) {
+			return null;
+		}
+		float p = (now - strike.start()) / (float)strike.ticks();
+		float hit = strike.hitShare();
+		Vec3 aim = target.getBoundingBox().getCenter();
+		if (p >= hit + 0.08F) {
+			return null;
+		}
+		if (p >= hit) {
+			return aim;
+		}
+		Vec3 eye = player.getEyePosition();
+		Vec3 dir = aim.subtract(eye).horizontal();
+		dir = dir.lengthSqr() < 1.0E-4 ? player.getLookAngle().horizontal() : dir;
+		dir = dir.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : dir.normalize();
+		Vec3 right = new Vec3(-dir.z, 0.0, dir.x);
+		Vec3 rear = strike.variant() == STRIKE_SLAM ? eye.add(0.0, HEAVY_REAR_UP, 0.0).add(dir.scale(-0.3))
+			: eye.add(right.scale(strike.variant() == STRIKE_SWIPE_LEFT ? -HEAVY_REAR_SIDE : HEAVY_REAR_SIDE)).add(dir.scale(0.8)).add(0.0, 0.4, 0.0);
+		float rearShare = strike.rearShare();
+		if (p < rearShare) {
+			return rear;
+		}
+		float k = Mth.clamp((p - rearShare) / (hit - rearShare), 0.0F, 1.0F);
+		if (strike.variant() == STRIKE_SLAM) {
+			// over the top, then straight down onto it
+			Vec3 above = aim.add(0.0, HEAVY_REAR_UP, 0.0);
+			return k < 0.5F ? rear.lerp(above, k * 2.0F) : above.lerp(aim, (k - 0.5F) * 2.0F);
+		}
+		return rear.lerp(aim, k * k);
+	}
+
+	/**
+	 * Consume: nothing is eaten alive. A corpse you carry is eaten; else a corpse within {@link #CONSUME_CORPSE_RANGE}
+	 * (the one you look at, else the nearest) is grabbed, carried and eaten; else something within {@link #CONSUME_RANGE}
+	 * at or under {@link #CONSUME_MAX_HEALTH} is finished off by a lash, and its corpse grabbed, carried and eaten.
+	 */
 	private static boolean consume(ServerPlayer player) {
 		ServerLevel level = player.level();
-		// a corpse you're carrying, whatever its size, goes down whole
-		Entity corpse = KitchenCompat.carriedCorpse(player);
-		if (player.getAttached(EATING) != null) {
+		Live live = live(player);
+		long now = level.getGameTime();
+		if (player.getAttached(EATING) != null || live.feedStage != FEED_NONE) {
 			return false;
 		}
-		if (corpse != null && edible(corpse)) {
-			float size = Mth.clamp(corpse.getBbWidth() * corpse.getBbWidth() * corpse.getBbHeight() / 2.0F, 0.0F, 1.0F);
-			startEating(player, corpse, Mth.lerp(size, CORPSE_HEAL_MIN, CORPSE_HEAL_MAX), Math.round(Mth.lerp(size, CONSUME_FEED, CORPSE_FEED_MAX)));
+		Entity carried = KitchenCompat.carriedCorpse(player);
+		if (carried != null && edible(carried)) {
+			startMeal(player, live, now, carried);
 			return true;
 		}
-		if (corpse != null) {
+		if (carried != null) {
 			// it recoils from that one
 			whisper(player, "inedible");
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.6F, 0.5F);
@@ -1839,11 +2275,27 @@ public final class WebSymbiote {
 		}
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getViewVector(1.0F);
-		LivingEntity best = null;
+		Entity corpse = null;
 		double bestScore = Double.MAX_VALUE;
+		for (Entity e : level.getEntities(player, player.getBoundingBox().inflate(CONSUME_CORPSE_RANGE), WebSymbiote::freeCorpse)) {
+			Vec3 to = e.getBoundingBox().getCenter().subtract(eye);
+			double distance = to.length();
+			if (distance > CONSUME_CORPSE_RANGE + e.getBbWidth() * 0.5) {
+				continue;
+			}
+			double score = distance - 2.0 * Math.max(0.0, to.normalize().dot(look));
+			if (score < bestScore) {
+				bestScore = score;
+				corpse = e;
+			}
+		}
+		if (corpse != null) {
+			return startGrab(player, live, now, corpse);
+		}
+		LivingEntity best = null;
+		bestScore = Double.MAX_VALUE;
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(CONSUME_RANGE),
-			e -> e != player && e.isAlive() && !(e instanceof Player) && !(e instanceof ArmorStand) && e.getMaxHealth() <= CONSUME_MAX_HEALTH
-				&& !(e instanceof TamableAnimal tame && tame.isTame()) && !e.hasCustomName() && edible(e))) {
+			e -> e != player && !(e instanceof Player) && huntable(player, e, false) && e.getHealth() <= CONSUME_MAX_HEALTH)) {
 			Vec3 to = living.getBoundingBox().getCenter().subtract(eye);
 			double distance = to.length();
 			if (distance > CONSUME_RANGE + living.getBbWidth() * 0.5) {
@@ -1860,8 +2312,7 @@ public final class WebSymbiote {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.5F, 1.4F);
 			return false;
 		}
-		trail(level, eye.add(0.0, -0.3, 0.0), best.getBoundingBox().getCenter());
-		startEating(player, best, CONSUME_HEAL, CONSUME_FEED);
+		startKill(player, live, now, best, true);
 		return true;
 	}
 
@@ -1882,13 +2333,6 @@ public final class WebSymbiote {
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 0.5F, 1.6F);
-	}
-
-	/** Where the meal is held: just in front of the maw. */
-	private static Vec3 mouth(ServerPlayer player, Entity food) {
-		Vec3 look = player.getViewVector(1.0F).horizontal();
-		look = look.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : look.normalize();
-		return player.getEyePosition().add(look.scale(0.6 + food.getBbWidth() * 0.5)).add(0.0, -food.getBbHeight() * 0.5 - 0.1, 0.0);
 	}
 
 	private static void tickEating(ServerPlayer player, Live live, long now) {
@@ -1916,22 +2360,11 @@ public final class WebSymbiote {
 			player.removeAttached(EATING);
 			return;
 		}
-		// the tendril brings it up to the maw, and holds it there, thrashing
-		boolean carried = food == KitchenCompat.carriedCorpse(player);
-		if (!carried) {
-			float reach = Mth.clamp(t / (float)meal.reach(), 0.0F, 1.0F);
-			reach = reach * reach * (3.0F - 2.0F * reach);
-			Vec3 at = live.eatFrom.lerp(mouth(player, food), reach);
-			food.setPos(at.x, at.y, at.z);
-			food.setDeltaMovement(Vec3.ZERO);
-			food.syncVelocity = true;
-			food.resetFallDistance();
-			if (food instanceof Mob mob) {
-				mob.getNavigation().stop();
-			}
-			if (t % 3 == 0) {
-				trail(level, player.position().add(0.0, player.getBbHeight() * 0.6, 0.0), food.getBoundingBox().getCenter());
-			}
+		// it only ever eats what you carry: dropped (or taken), the maw just closes
+		if (food != KitchenCompat.carriedCorpse(player)) {
+			live.eatTarget = -1;
+			player.removeAttached(EATING);
+			return;
 		}
 		if (t % 3 == 0) {
 			KitchenCompat.jolt(food);
@@ -1972,17 +2405,6 @@ public final class WebSymbiote {
 	private static void feed(ServerPlayer player, int satiety, int calm) {
 		WebSymbioteState state = state(player);
 		set(player, state.withSatiety(Math.min(SATIETY_MAX, state.satiety() + satiety)).withStress(Math.max(0, state.stress() - calm)));
-	}
-
-	/** Swallowed whole in a rampage. */
-	private static void devour(ServerPlayer player, LivingEntity living) {
-		ServerLevel level = player.level();
-		Vec3 at = living.getBoundingBox().getCenter();
-		level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 20, living.getBbWidth() * 0.4, living.getBbHeight() * 0.4, living.getBbWidth() * 0.4, 0.05);
-		level.playSound(null, at.x, at.y, at.z, SoundEvents.PHANTOM_BITE, SoundSource.PLAYERS, 1.0F, 0.5F);
-		living.discard();
-		player.heal(CONSUME_HEAL);
-		feed(player, CONSUME_FEED, CONSUME_CALM);
 	}
 
 	/** Spike Burst: black spikes burst out all around, hurting and hurling everything near. */
@@ -2049,6 +2471,7 @@ public final class WebSymbiote {
 	/** Who's holding a symbiote's attention, for debug output. */
 	public static String describe(Player player) {
 		WebSymbioteState s = state(player);
-		return "bonded=" + s.bonded() + " satiety=" + s.satiety() + " stress=" + s.stress() + " rejections=" + s.rejections() + " flags=" + s.flags();
+		return "bonded=" + s.bonded() + " satiety=" + s.satiety() + " stress=" + s.stress() + " rejections=" + s.rejections() + " flags=" + s.flags()
+			+ (player instanceof ServerPlayer sp ? " feeding[" + describeFeeding(sp) + "]" : "");
 	}
 }
