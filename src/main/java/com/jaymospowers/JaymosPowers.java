@@ -30,6 +30,7 @@ public class JaymosPowers implements ModInitializer {
 		WebPower.init();
 		ChronoPower.init();
 		GravityPower.init();
+		com.jaymospowers.power.resonance.ResonancePower.init();
 		registerAttachments();
 	}
 
@@ -49,6 +50,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.web.WebAscension", "power.web.WebBehemoth", "power.web.WebBridges", "power.web.WebPower", "power.web.WebSymbiote", "power.web.WebTendrils",
 			"power.wind.WindModes", "power.wind.WindPower", "power.wind.WindStorm", "power.wind.WindTempest",
 			"power.wind.WindCyclone",
+			"power.resonance.ResonancePower", "power.resonance.ResonanceHush",
 		};
 		for (String holder : holders) {
 			try {

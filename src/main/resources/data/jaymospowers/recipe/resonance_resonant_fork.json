@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:smithing_transform",
+  "base": "jaymospowers:resonance_tuning_fork",
+  "addition": "minecraft:echo_shard",
+  "result": {
+    "id": "jaymospowers:resonance_resonant_fork"
+  }
+}

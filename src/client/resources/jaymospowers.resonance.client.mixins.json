@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"package": "com.jaymospowers.client.power.resonance.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"ResonanceGlowMixin",
+		"ResonanceScrollMixin",
+		"ResonanceSoundMixin"
+	],
+	"injectors": { "defaultRequire": 1 }
+}
