@@ -126,7 +126,8 @@ final class KeyGuide {
 		return null;
 	}
 
-	private static Object[] keyNames() {
+	/** The bound keys, as arguments for key lines: R G V B, Z, C, X. */
+	static Object[] keyNames() {
 		Object[] names = new Object[7];
 		for (PowerKey key : PowerKey.values()) {
 			names[key.ordinal()] = name(JaymosPowersClient.keyMapping(key));

@@ -6,11 +6,13 @@ import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.net.PowerPayloads;
 import java.util.ArrayList;
+import com.jaymospowers.api.PowerKey;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 
@@ -50,7 +52,7 @@ public class PowerScreen extends Screen {
 		return this.minecraft.player != null && power == current() ? this.minecraft.player : null;
 	}
 
-	/** Tall enough for the description, every key line (wrapped), the mastery line and a creative Choose button. */
+	/** In survival, tall enough for the description, every key line (wrapped) and the mastery line. */
 	private int cardH = CARD_MIN_H;
 
 	private int cardH() {
@@ -60,12 +62,17 @@ public class PowerScreen extends Screen {
 	/** Re-measures the cards (fate, mastery and key bindings can change while the screen is open). */
 	private void measure() {
 		int tallest = CARD_MIN_H;
+		if (creative()) {
+			// the creative picker keeps its fixed cards
+			cardH = tallest;
+			return;
+		}
 		for (Power power : powers) {
 			int h = 24 + Math.min(3, this.font.split(power.description(), CARD_W - 10).size()) * 9 + 3;
 			for (KeyGuide.Line line : KeyGuide.lines(power, owner(power))) {
 				h += this.font.split(line.full(), CARD_W - 10).size() * 9;
 			}
-			h += 11 + (creative() ? 20 : 4);
+			h += 15;
 			tallest = Math.max(tallest, h);
 		}
 		cardH = tallest;
@@ -217,16 +224,49 @@ public class PowerScreen extends Screen {
 			lineY += 9;
 		}
 		lineY += 3;
-		// what each key does right now: your own power's lines follow its fate and mastery
-		for (KeyGuide.Line line : KeyGuide.lines(power, owner(power))) {
-			for (FormattedCharSequence part : this.font.split(line.full(), CARD_W - 10)) {
-				graphics.text(this.font, part, x + 6, lineY, line.color());
-				lineY += 9;
+		if (creative()) {
+			lineY = drawPickerKeys(graphics, power, x, lineY, active);
+		} else {
+			// survival: what each of your keys does right now, following your fate and mastery
+			for (KeyGuide.Line line : KeyGuide.lines(power, owner(power))) {
+				for (FormattedCharSequence part : this.font.split(line.full(), CARD_W - 10)) {
+					graphics.text(this.font, part, x + 6, lineY, line.color());
+					lineY += 9;
+				}
 			}
 		}
 		float progress = active && this.minecraft.player != null ? Mastery.progress(this.minecraft.player) : -1.0F;
 		if (progress >= 0.0F) {
 			graphics.text(this.font, Component.translatable("screen.jaymospowers.mastery", Math.round(progress * 100.0F)), x + 6, lineY + 2, COLOR_DIM);
+		}
+	}
+
+	/** Creative's power picker keeps its short lines: one per ability key, cut to the card's width. */
+	private int drawPickerKeys(GuiGraphicsExtractor graphics, Power power, int x, int lineY, boolean active) {
+		Object[] args = KeyGuide.keyNames();
+		String base = "power." + power.id().getNamespace() + "." + power.id().getPath() + ".key.";
+		boolean corrupted = active && this.minecraft.player != null && Fate.isCorrupted(this.minecraft.player);
+		for (PowerKey key : PowerKey.values()) {
+			if (!Language.getInstance().has(base + key.id())) {
+				continue;
+			}
+			// a corrupted power's keys can change (Stormbound's B, say)
+			String text = corrupted && Language.getInstance().has(base + key.id() + ".corrupted") ? base + key.id() + ".corrupted" : base + key.id();
+			drawPickerLine(graphics, JaymosPowersClient.keyMapping(key).getTranslatedKeyMessage(), Component.translatable(text, args), x, lineY, COLOR_TEXT);
+			lineY += 9;
+		}
+		// the ascended ability shows up only once it's yours
+		if (active && this.minecraft.player != null && Fate.isAscended(this.minecraft.player) && Language.getInstance().has(base + "ultimate")) {
+			drawPickerLine(graphics, JaymosPowersClient.ultimateKey().getTranslatedKeyMessage(), Component.translatable(base + "ultimate", args), x, lineY, 0xFFFFD54A);
+			lineY += 9;
+		}
+		return lineY;
+	}
+
+	private void drawPickerLine(GuiGraphicsExtractor graphics, Component key, Component text, int x, int y, int color) {
+		List<FormattedCharSequence> split = this.font.split(Component.literal("[").append(key).append("] ").append(text), CARD_W - 10);
+		if (!split.isEmpty()) {
+			graphics.text(this.font, split.getFirst(), x + 6, y, color);
 		}
 	}
 }
