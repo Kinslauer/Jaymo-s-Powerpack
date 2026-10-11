@@ -512,7 +512,7 @@ in `build.gradle`, CurseForge ids still to fill in).
   heat.", one exposure from rejection "It's had almost enough of you.", first starving "It's hungry.", first meat
   "It took that for itself.", takeover "Not you. It.", rejection "It tears itself away.".
 
-### Symbiote rework (0.8.6)
+### Symbiote rework (0.8.9)
 **Bond** (`WebSymbioteState.bond`, 0-`BOND_MAX` 100, synced; old saves load at 50):
 - A new bond starts at a random 0-`BOND_START_MAX` 50. A rejection resets it to 0.
 - It grows 1 every `BOND_GAIN_TICKS` 2400 while fed and calm (stress under `BOND_CALM` 50) and drops 1 as often
