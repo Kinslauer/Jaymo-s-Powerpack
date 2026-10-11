@@ -14,8 +14,9 @@ import net.minecraft.world.entity.LivingEntity;
 
 /**
  * A web slinger's whole-body moves ({@link WebPower#POSE}), drawn for everyone: Spider-Sense's dodges (a spinning
- * sidestep, a backflip into a crouch, a duck and roll, a weave) and the limp sprawl after a slingshot's floor gives
- * way. The body turns about its middle ({@link #rotate}); the limbs tuck and reach to match ({@link #applyModel}).
+ * sidestep, a backflip into a crouch, a duck and roll, a weave), the limp sprawl after a slingshot's floor gives
+ * way, and the swing tricks (front flip, corkscrew, cartwheel, twirl, giant swing, superhero landing, landing roll,
+ * the wings' flare and spin). Your own tricks don't show in first person: the camera would turn with them. The body turns about its middle ({@link #rotate}); the limbs tuck and reach to match ({@link #applyModel}).
  */
 public final class WebBodyPose {
 	/** The move, which way it goes, and how far through it (0-1). */
@@ -35,13 +36,27 @@ public final class WebBodyPose {
 		}
 		float time = entity.level().getGameTime() + partialTicks;
 		float p = pose.progress(time);
-		state.setData(KEY, p >= 0.0F && p < 1.0F ? new Pose(pose.kind(), pose.side(), p, time) : null);
+		net.minecraft.client.Minecraft minecraft = net.minecraft.client.Minecraft.getInstance();
+		boolean ownView = entity == minecraft.player && minecraft.options.getCameraType().isFirstPerson();
+		boolean show = p >= 0.0F && p < 1.0F && !(ownView && WebPose.trick(pose.kind()));
+		state.setData(KEY, show ? new Pose(pose.kind(), pose.side(), p, time) : null);
 	}
 
 	/** Eased 0-1-0 over the move: in fast, out slower. */
 	private static float swell(float p) {
 		float e = p < 0.3F ? p / 0.3F : 1.0F - (p - 0.3F) / 0.7F;
 		return e * e * (3.0F - 2.0F * e);
+	}
+
+	/** Smoothstep of {@code x} clamped to 0-1. */
+	private static float ease(float x) {
+		x = Mth.clamp(x, 0.0F, 1.0F);
+		return x * x * (3.0F - 2.0F * x);
+	}
+
+	/** 0 → 1 over {@code in}, held, then 1 → 0 from {@code out} to the end (eased). */
+	private static float hold(float p, float in, float out) {
+		return p < in ? ease(p / in) : p > out ? ease(1.0F - (p - out) / (1.0F - out)) : 1.0F;
 	}
 
 	/** After the body faces its way: the whole body spins, flips, rolls or sways about its middle. */
@@ -87,6 +102,67 @@ public final class WebBodyPose {
 				poseStack.rotateDegrees(Axis.XP, -20.0F * swell(p));
 				poseStack.translate(0.0F, -middle - 0.25F * swell(p), 0.0F);
 			}
+			case WebPose.FRONT_FLIP -> {
+				// tucked, over forwards, popping up a little off the release
+				poseStack.translate(0.0F, middle + 0.3F * swell(p), 0.0F);
+				poseStack.rotateDegrees(Axis.XP, -360.0F * ease(p / 0.85F));
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
+			case WebPose.CORKSCREW -> {
+				// laid out flat ahead like a dive, twisting a full turn along the body
+				float lay = Mth.sin(p * Mth.PI);
+				poseStack.translate(0.0F, middle, 0.0F);
+				poseStack.rotateDegrees(Axis.XP, -70.0F * lay);
+				poseStack.rotateDegrees(Axis.YP, pose.side() * 360.0F * turn);
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
+			case WebPose.CARTWHEEL -> {
+				// an aerial cartwheel: over sideways, arms and legs spread like a star
+				poseStack.translate(0.0F, middle + 0.2F * swell(p), 0.0F);
+				poseStack.rotateDegrees(Axis.ZP, pose.side() * 360.0F * ease(p / 0.9F));
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
+			case WebPose.TWIRL -> {
+				// still on the web: a full turn around the line, hanging from the hand
+				float hand = middle * 1.9F;
+				poseStack.translate(0.0F, hand, 0.0F);
+				poseStack.rotateDegrees(Axis.YP, pose.side() * 360.0F * turn);
+				poseStack.rotateDegrees(Axis.ZP, pose.side() * 12.0F * swell(p));
+				poseStack.translate(0.0F, -hand, 0.0F);
+			}
+			case WebPose.GIANT -> {
+				// a gymnast's giant swing: the body goes right round over the hand on the web
+				float hand = middle * 2.2F;
+				poseStack.translate(0.0F, hand, 0.0F);
+				poseStack.rotateDegrees(Axis.XP, -360.0F * turn);
+				poseStack.translate(0.0F, -hand, 0.0F);
+			}
+			case WebPose.HERO_LAND -> {
+				// slammed down onto one knee and a fist, head bowed, then up
+				float low = hold(p, 0.1F, 0.72F);
+				float hips = middle * 0.85F;
+				poseStack.translate(0.0F, -0.55F * low, 0.0F);
+				poseStack.translate(0.0F, hips, 0.0F);
+				poseStack.rotateDegrees(Axis.XP, -28.0F * low);
+				poseStack.translate(0.0F, -hips, 0.0F);
+			}
+			case WebPose.LAND_ROLL -> {
+				// carried straight on into a forward roll along the ground, up at the end of it
+				float low = swell(p);
+				poseStack.translate(0.0F, middle * (1.0F - 0.55F * low), 0.0F);
+				poseStack.rotateDegrees(Axis.XP, -360.0F * ease((p - 0.1F) / 0.75F));
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
+			case WebPose.WINGS_LAND -> {
+				// the wings flare (leaning back to brake), then a spin down into a crouch as they fold
+				float flare = p < 0.3F ? ease(p / 0.15F) : ease(1.0F - (p - 0.3F) / 0.2F);
+				float crouch = hold(p, 0.45F, 0.8F) * ease((p - 0.25F) / 0.2F);
+				poseStack.translate(0.0F, -0.35F * crouch, 0.0F);
+				poseStack.translate(0.0F, middle, 0.0F);
+				poseStack.rotateDegrees(Axis.YP, pose.side() * 360.0F * ease((p - 0.2F) / 0.5F));
+				poseStack.rotateDegrees(Axis.XP, 30.0F * flare - 15.0F * crouch);
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
 			case WebPose.RAGDOLL -> {
 				// flat on the back, a little twitch to it
 				float fall = Math.min(1.0F, p * 6.0F);
@@ -128,6 +204,62 @@ public final class WebBodyPose {
 				set(h.rightArm, -1.4F, -0.4F, 0.2F, e);
 				set(h.leftArm, -1.4F, 0.4F, -0.2F, e);
 				set(h.rightLeg, -0.4F, 0.0F, 0.1F, e);
+			}
+			case WebPose.FRONT_FLIP, WebPose.LAND_ROLL -> {
+				set(h.rightLeg, -1.9F, 0.0F, 0.1F, e);
+				set(h.leftLeg, -1.9F, 0.0F, -0.1F, e);
+				set(h.rightArm, -1.6F, -0.3F, 0.2F, e);
+				set(h.leftArm, -1.6F, 0.3F, -0.2F, e);
+				h.head.xRot = Mth.lerp(e, h.head.xRot, 0.6F);
+			}
+			case WebPose.CORKSCREW -> {
+				// arms crossed tight on the chest, legs straight together: the twist goes faster for it
+				set(h.rightArm, -1.3F, -0.9F, 0.0F, e);
+				set(h.leftArm, -1.3F, 0.9F, 0.0F, e);
+				set(h.rightLeg, 0.1F, 0.0F, 0.02F, e);
+				set(h.leftLeg, 0.1F, 0.0F, -0.02F, e);
+				h.head.xRot = Mth.lerp(e, h.head.xRot, -0.4F);
+			}
+			case WebPose.CARTWHEEL -> {
+				// a star: arms up and out, legs split
+				set(h.rightArm, 0.0F, 0.0F, 2.5F, e);
+				set(h.leftArm, 0.0F, 0.0F, -2.5F, e);
+				set(h.rightLeg, 0.0F, 0.0F, 0.7F, e);
+				set(h.leftLeg, 0.0F, 0.0F, -0.7F, e);
+			}
+			case WebPose.TWIRL -> {
+				// one knee drawn up, the other leg pointed (the arms stay on the web)
+				set(h.rightLeg, -1.2F, 0.0F, 0.15F, e);
+				set(h.leftLeg, 0.2F, 0.0F, -0.05F, e);
+			}
+			case WebPose.GIANT -> {
+				// straight through the bottom, tucked over the top
+				float tuck = Mth.sin(pose.p() * Mth.PI);
+				set(h.rightLeg, -1.6F * tuck, 0.0F, 0.05F, e);
+				set(h.leftLeg, -1.6F * tuck, 0.0F, -0.05F, e);
+			}
+			case WebPose.HERO_LAND -> {
+				float low = hold(pose.p(), 0.1F, 0.72F);
+				// right knee down behind, left foot planted ahead
+				set(h.rightLeg, 1.35F, 0.0F, 0.1F, low);
+				set(h.leftLeg, -1.35F, 0.0F, -0.15F, low);
+				// right fist on the ground, left arm out behind for balance
+				set(h.rightArm, -0.25F, 0.0F, 0.15F, low);
+				set(h.leftArm, 0.7F, 0.0F, -0.6F, low);
+				// head bowed at the impact, looking up before rising
+				h.head.xRot = Mth.lerp(low, h.head.xRot, pose.p() < 0.45F ? 0.7F : -0.2F);
+			}
+			case WebPose.WINGS_LAND -> {
+				float p = pose.p();
+				float flare = p < 0.3F ? ease(p / 0.15F) : ease(1.0F - (p - 0.3F) / 0.2F);
+				float crouch = hold(p, 0.45F, 0.8F) * ease((p - 0.25F) / 0.2F);
+				// wings thrown up and wide to catch the air, then wrapped down and in as you spin
+				set(h.rightArm, 0.2F, 0.0F, 2.3F, flare);
+				set(h.leftArm, 0.2F, 0.0F, -2.3F, flare);
+				set(h.rightArm, 0.5F, 0.0F, 0.9F, crouch * (1.0F - flare));
+				set(h.leftArm, 0.5F, 0.0F, -0.9F, crouch * (1.0F - flare));
+				set(h.rightLeg, -1.1F, 0.0F, 0.2F, crouch);
+				set(h.leftLeg, 0.6F, 0.0F, -0.2F, crouch);
 			}
 			case WebPose.RAGDOLL -> {
 				float t = pose.time();

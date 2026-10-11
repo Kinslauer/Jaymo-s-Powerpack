@@ -601,12 +601,17 @@ public final class GravityPower implements Power {
 						toggleWeightless(player, state);
 					}
 				} else if (down) {
-					// tapped: Weightless; held: rock flight (see tick)
-					state.vDownAt = player.level().getGameTime();
-				} else {
 					if (player.getAttached(ROCK_FLIGHT) != null) {
+						// riding: V again steps off (the release that follows does nothing)
 						GravityRockFlight.stop(player);
-					} else if (state.vDownAt >= 0) {
+						state.vDownAt = -1;
+					} else {
+						// tapped: Weightless; held: rock flight (see tick)
+						state.vDownAt = player.level().getGameTime();
+					}
+				} else {
+					// once the board is up, letting go of V keeps you on it
+					if (player.getAttached(ROCK_FLIGHT) == null && state.vDownAt >= 0) {
 						toggleWeightless(player, state);
 					}
 					state.vDownAt = -1;
