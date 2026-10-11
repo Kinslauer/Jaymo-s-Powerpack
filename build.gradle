@@ -62,6 +62,20 @@ def packMods = [
 	// Sound Physics Remastered (echoes, muffling); Lootr (every loot chest has its own loot for each player)
 	[dep: "maven.modrinth:sound-physics-remastered:9loJgQlO", cf: [535489, 8909383]],
 	[dep: "maven.modrinth:lootr:gVwn7m2v", cf: [615106, 8987242]],
+	// ATi Structures, Vanilla Edition (all rights reserved; "feel free to add to any modpack"): big medieval castles,
+	// forts and ruins from vanilla blocks, with vanilla mobs and loot
+	[dep: "maven.modrinth:ati-structures-vanilla-edition:3NkwZrUy", cf: [1158208, 8984306]],
+	// Moog's Paths (CC0): biome-styled roads, trails and bridges across the overworld, for carts and carriages
+	[dep: "maven.modrinth:mp-moogs-paths:NKtkFzI1", cf: [1546855, 9106149]],
+	// Grindstone Sharper Tools and its library Collective (all rights reserved; modpacks allowed while the downloads
+	// stay on CurseForge/Modrinth): sneak+right-click a grindstone with a tool for sharpened hits
+	[dep: "maven.modrinth:grindstone-sharper-tools:L4PcjMdo", cf: [347346, 9034113]],
+	[dep: "maven.modrinth:collective:oPyHSBXE", cf: [342584, 9122800]],
+	// Combat Roll (GPL-3.0, by Better Combat's author): the dodge roll
+	[dep: "maven.modrinth:combat-roll:OuZGcMyV", cf: [678036, 8906551]],
+	// Traveler's Backpack (LGPL-3.0) and Forge Config API Port (MPL-2.0), which it needs: wearable backpacks
+	[dep: "maven.modrinth:travelersbackpack:SmhjfeWr", cf: [541171, 9008280]],
+	[dep: "maven.modrinth:forge-config-api-port:JpKvrr9J", cf: [547434, 8938808]],
 ]
 // First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
 // Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge
@@ -72,10 +86,9 @@ def packMods = [
 def packModsNoCf = [
 	[dep: "maven.modrinth:first-person-model:Z05WZTy2", cf: null],
 	[dep: "maven.modrinth:not-enough-animations:EhSk2OTD", cf: null],
-	// ATi Structures and Grim Kingdoms, Vanilla Editions (all rights reserved; "feel free to add to any modpack"):
-	// big medieval castles, forts and ruins built from vanilla blocks, with vanilla mobs and loot. Server-side
-	// worldgen, so the server having them is what counts. TODO(home PC): their CurseForge ids, as above.
-	[dep: "maven.modrinth:ati-structures-vanilla-edition:3NkwZrUy", cf: null],
+	// Grim Kingdoms, Vanilla Edition (all rights reserved; "feel free to add to any modpack"): castles, citadels and
+	// ruins from vanilla blocks. Server-side worldgen, so the server having it is what counts.
+	// TODO(home PC): its CurseForge [project id, file id], as above.
 	[dep: "maven.modrinth:grim-kingdoms-lost-structures-ruins-vanilla-edition:Hn8zuckE", cf: null],
 ]
 // not on CurseForge: shipped inside the pack as overrides
