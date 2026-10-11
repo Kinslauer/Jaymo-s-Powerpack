@@ -249,6 +249,18 @@ cobweb.
 - G is now only the off-hand web (it needs an empty off hand).
 - **HUD row:** wings · G · V · B · Z. G's chip dims while the off hand is full.
 
+## Swing tricks (0.8.9)
+The slinger's client knows when a web lets go and when the feet land, so it picks a trick and asks the server
+(`WebTricks.Trick`), which checks it and starts a `WebPose` everyone sees. Your own tricks are hidden in first person.
+Tuning is at the top of `client/power/web/WebTrickClient`; the shapes are in `WebBodyPose`.
+- **Off a released web** (moving 0.5+ b/t): tucked **front flip**, laid-out **corkscrew**, aerial **cartwheel**
+  (thrown upward favours the front flip). Never the same one twice running.
+- **On the web:** through the bottom of a fast arc (30%) a **twirl** round the line or a **giant swing** over the
+  hand; when the next web catches mid-air (40%) a twirl.
+- **Landing** (after 8+ ticks in the air off a web or the wings): a 2.5+ block drop lands **three-point** (superhero
+  landing); fast across the ground, a **forward roll**; off the wings, the **flare and spin** into a crouch (a roll if
+  very fast). A landing cuts into a flip still going; dodges, ragdolls and takeovers are never interrupted.
+
 ## 0.2.0: Ascension & Corruption
 
 The web power doesn't use the Fate corruption meter. Its dark path is the **symbiote**, a separate system with its
@@ -572,6 +584,9 @@ one is within `CORPSE_RANGE` 24. Every `SCAN_EVERY` 20 ticks it looks within `SE
 zombie player, then any web slinger without a symbiote (chased up to `LEASH` 32 from home), and leaps on at
 `BOND_REACH`. A player gets a fresh bond (`bond`). Only fire, lava, explosions and `/kill` hurt it (20 health); other
 blows splash it back. It never despawns.
+A Gravity meteor (`GravityMeteor.impact`) carries one `METEOR_CHANCE` 20% of the time, unless a symbiote (a blob, a
+behemoth or a bonded player) is already within `METEOR_VICINITY` 128. It crawls out of the crater with
+`FIRE_GRACE` 300 ticks of immunity to the fire and lava there.
 
 **Behemoth (`WebBehemoth`):** a zombie player it takes gets the `web_behemoth` attachment and permanent modifiers
 (+80 health, +6 damage, x1.7 size, x1.3 speed, 0.8 knockback resistance), the big body and veins drawn over it, and

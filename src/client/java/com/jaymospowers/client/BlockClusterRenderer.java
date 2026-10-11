@@ -25,6 +25,7 @@ public final class BlockClusterRenderer extends EntityRenderer<BlockCluster, Blo
 		float tumble;
 		float yaw;
 		boolean steady;
+		float scale = 1.0F;
 	}
 
 	public BlockClusterRenderer(EntityRendererProvider.Context context) {
@@ -64,12 +65,15 @@ public final class BlockClusterRenderer extends EntityRenderer<BlockCluster, Blo
 		state.tumble = (entity.tickCount + partialTicks) * (float)Math.min(25.0, 2.0 + speed * 18.0);
 		state.yaw = entity.getId() * 37.0F;
 		state.steady = entity.getAttached(BlockCluster.STEADY) != null;
+		Float scale = entity.getAttached(BlockCluster.SCALE);
+		state.scale = scale == null ? 1.0F : scale;
 	}
 
 	@Override
 	public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
 		poseStack.pushPose();
-		poseStack.translate(0.0F, 0.7F, 0.0F);
+		poseStack.translate(0.0F, 0.7F * state.scale, 0.0F);
+		poseStack.scale(state.scale, state.scale, state.scale);
 		if (!state.steady) {
 			poseStack.rotateDegrees(Axis.YP, state.yaw);
 			poseStack.rotateDegrees(Axis.XP, state.tumble * 0.6F);

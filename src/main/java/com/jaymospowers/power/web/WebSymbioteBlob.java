@@ -56,8 +56,18 @@ public class WebSymbioteBlob extends PathfinderMob {
 	/** A player's body this far from home becomes its home. */
 	static final double CORPSE_RANGE = 24.0;
 	static final double SEEK_SPEED = 1.4, ROAM_SPEED = 0.8;
+	/**
+	 * A Gravity meteor carries one this often, unless a symbiote (roaming, a behemoth, or bonded to a player) is
+	 * already within {@code METEOR_VICINITY}. Out of the burning crater, fire can't touch it for {@code FIRE_GRACE} ticks.
+	 */
+	static final float METEOR_CHANCE = 0.2F;
+	static final double METEOR_VICINITY = 128.0;
+	static final int FIRE_GRACE = 300;
 
 	public static EntityType<WebSymbioteBlob> TYPE;
+
+	/** Ticks left that fire can't hurt it (it came down in a meteor). */
+	private int fireGrace;
 
 	/** Who (or what) it's after right now; worked out again every {@link #SCAN_EVERY}. */
 	private @Nullable Entity quarry;
@@ -99,6 +109,23 @@ public class WebSymbioteBlob extends PathfinderMob {
 		return blob;
 	}
 
+	/** A meteor has struck at {@code at}: maybe a symbiote crawls out of the rock. Returns whether one did. */
+	public static boolean fromMeteor(ServerLevel level, Vec3 at) {
+		if (level.getRandom().nextFloat() >= METEOR_CHANCE) {
+			return false;
+		}
+		net.minecraft.world.phys.AABB vicinity = new net.minecraft.world.phys.AABB(at, at).inflate(METEOR_VICINITY);
+		boolean taken = !level.getEntities((Entity)null, vicinity, e -> e instanceof WebSymbioteBlob || WebBehemoth.isHost(e)
+			|| e instanceof Player p && WebSymbiote.state(p).bonded()).isEmpty();
+		if (taken) {
+			return false;
+		}
+		WebSymbioteBlob blob = release(level, at.add(0.0, 0.5, 0.0));
+		blob.fireGrace = FIRE_GRACE;
+		blob.clearFire();
+		return true;
+	}
+
 	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
@@ -113,6 +140,10 @@ public class WebSymbioteBlob extends PathfinderMob {
 		super.tick();
 		if (!(this.level() instanceof ServerLevel level)) {
 			return;
+		}
+		if (this.fireGrace > 0) {
+			this.fireGrace--;
+			this.clearFire();
 		}
 		if (this.tickCount % HOME_EVERY == 0) {
 			// it keeps close to its old host's body, wherever that's carried
@@ -173,6 +204,10 @@ public class WebSymbioteBlob extends PathfinderMob {
 
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
+		if (this.fireGrace > 0 && (source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypeTags.IS_EXPLOSION))
+			&& !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+			return false;
+		}
 		if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypeTags.IS_EXPLOSION)) {
 			return super.hurtServer(level, source, damage);
 		}

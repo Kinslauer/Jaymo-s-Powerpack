@@ -160,6 +160,8 @@ public final class WebSwing {
 	private int pullTicks;
 	private int stuckTicks;
 	private Vec3 lastPos = Vec3.ZERO;
+	/** Flips and twirls off the webs, on them, and on landing. */
+	private final WebTrickClient tricks = new WebTrickClient();
 
 	void reset() {
 		for (Strand strand : strands) {
@@ -176,6 +178,7 @@ public final class WebSwing {
 		wingsTicks = 0;
 		wingsNeedRelease = false;
 		swingLockout = 0;
+		tricks.reset();
 	}
 
 	private static LocalPlayer player() {
@@ -229,6 +232,7 @@ public final class WebSwing {
 		if (found == null) {
 			return false;
 		}
+		boolean midAir = !player.onGround() && (flying || attached() || wingsTicks > 0);
 		strand.attached = true;
 		flying = false;
 		swingEnergy = Double.NaN;
@@ -241,6 +245,9 @@ public final class WebSwing {
 		ClientPlayNetworking.send(new WebNet.Swing(strand.hand, true, strand.anchor));
 		play(player, SoundEvents.FISHING_BOBBER_THROW, 0.9F, 1.7F + player.getRandom().nextFloat() * 0.2F);
 		puff(player, strand.anchor, 5);
+		if (midAir) {
+			tricks.caught(player);
+		}
 		return true;
 	}
 
@@ -261,6 +268,7 @@ public final class WebSwing {
 		if (!timed || player.onGround()) {
 			return;
 		}
+		tricks.released(player);
 		Vec3 v = player.getDeltaMovement();
 		double speed = v.length();
 		if (speed < 0.4 || v.y <= 0.0) {
@@ -331,6 +339,7 @@ public final class WebSwing {
 		if (swingLockout > 0) {
 			swingLockout--;
 		}
+		tricks.tick(player, attached(), flying, wingsTicks > 0, apexY);
 		// the highest point of the current fall (resets on the ground, while rising, on a web or in water)
 		if (player.onGround() || player.getDeltaMovement().y >= 0.0 || attached() || pull != null || player.isInWater() || player.onClimbable()) {
 			apexY = player.getY();

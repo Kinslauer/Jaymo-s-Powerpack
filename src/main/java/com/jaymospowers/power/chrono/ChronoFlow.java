@@ -51,9 +51,11 @@ import net.minecraft.world.phys.Vec3;
  * <li><b>Sets of four:</b> blows 1-3 of every four landed don't shove: they stun ({@link #STUN_TICKS}, refreshed each
  * blow: a mob's AI and movement stop, a player's movement keys go dead). Blow 4 is the finisher, the style's full push
  * x{@link #FINISHER_PUSH} with its lift.</li>
- * <li><b>Counter variants:</b> against a single attacker the counter is one of three longer moves, the caster untouchable
- * throughout: {@link #CIRCLE} (round to its back, then the blow), {@link #SLIP} (sidestep, then a body blow) or
- * {@link #DEFLECT} (one of {@link #DEFLECTS} arm parries, the attacker staggers, then the riposte).</li>
+ * <li><b>Counter variants:</b> against a single attacker the counter is one of six longer moves, the caster untouchable
+ * throughout: {@link #CIRCLE} (round to its back, then the blow), {@link #SLIP} (sidestep, then a body blow),
+ * {@link #DEFLECT} (one of {@link #DEFLECTS} arm parries, the attacker staggers, then the riposte), {@link #VAULT}
+ * (over its head, then a hammer fist from behind), {@link #SWEEP} (drop and spin, its legs swept, then a rising palm
+ * that launches it) or {@link #THROW} (catch the arm, turn in, and throw it over your shoulder).</li>
  * <li>Getting hit for real, or {@link #COMBO_TIMEOUT} without a blow, ends the combo.</li>
  * </ul>
  * The client finds the target and carries you there (movement is the client's); the server checks it and lands the
@@ -69,10 +71,12 @@ public final class ChronoFlow {
 	/** How long each style's animation runs, and when its blow lands (ticks). */
 	public static final int[] DURATION = {6, 7, 8, 9, 12, 10, 3};
 	public static final int[] HIT_AT = {2, 3, 4, 5, 8, 4, 1};
-	/** Each style's damage (before the combo). */
-	static final float[] DAMAGE = {4.0F, 4.5F, 5.0F, 5.0F, 6.0F, 6.0F, 0.0F};
-	/** The combo adds this share per blow, up to {@code COMBO_MAX_BONUS}. */
-	static final float COMBO_BONUS = 0.08F, COMBO_MAX_BONUS = 1.0F;
+	/** Each style's damage (before the combo): low, so a zombie takes eight or nine blows from a fresh combo. */
+	static final float[] DAMAGE = {1.5F, 1.75F, 2.0F, 2.0F, 2.5F, 2.5F, 0.0F};
+	/** The combo adds this share per blow, up to {@code COMBO_MAX_BONUS} (triple damage from blow 17 on). */
+	static final float COMBO_BONUS = 0.12F, COMBO_MAX_BONUS = 2.0F;
+	/** A held weapon adds this share of its damage above the bare fist's 1 (a diamond sword: +1.5). */
+	static final float WEAPON_SHARE = 0.25F;
 	static final int COMBO_TIMEOUT = 80;
 	/** How long a held blow waits for the counter, and how early a right click still counts. */
 	public static final int PARRY_WINDOW = 14, PARRY_EARLY = 5;
@@ -81,16 +85,21 @@ public final class ChronoFlow {
 	/** Blows 1-3 of each set stun for this long (refreshed each blow); blow {@code SET_SIZE} is the finisher, its push scaled up. */
 	public static final int STUN_TICKS = 15, SET_SIZE = 4;
 	static final double FINISHER_PUSH = 1.3;
-	/** Counter variants (single attacker): the old quick counter (a crowd), circle to the back, slip aside, deflect. */
-	public static final int CROWD = 0, CIRCLE = 1, SLIP = 2, DEFLECT = 3;
+	/**
+	 * Counter variants (single attacker): the old quick counter (a crowd), circle to the back, slip aside, deflect, vault
+	 * over, leg sweep, shoulder throw.
+	 */
+	public static final int CROWD = 0, CIRCLE = 1, SLIP = 2, DEFLECT = 3, VAULT = 4, SWEEP = 5, THROW = 6;
 	/** Deflects: high forearm block, outside sweep, slap-down, cross block, elbow guard. */
 	public static final int HIGH_BLOCK = 0, OUTSIDE_SWEEP = 1, SLAP_DOWN = 2, CROSS_BLOCK = 3, ELBOW_GUARD = 4, DEFLECTS = 5;
 	/** Each counter variant's length and when its blow lands (ticks); the crowd counter matches {@code COUNTER}'s. */
-	public static final int[] COUNTER_DURATION = {10, 24, 20, 26};
-	public static final int[] COUNTER_HIT_AT = {4, 17, 12, 18};
+	public static final int[] COUNTER_DURATION = {10, 24, 20, 26, 24, 22, 26};
+	public static final int[] COUNTER_HIT_AT = {4, 17, 12, 18, 16, 13, 17};
 	/** The countered attacker stays stunned this many ticks past the blow; a deflect knocks it back this hard. */
 	static final int COUNTER_STUN_SLACK = 3;
 	static final double DEFLECT_SHOVE = 0.25;
+	/** The sweep's rising palm launches its target (lift, small push); the throw sends it back over you (push, lift). */
+	static final double SWEEP_LIFT = 0.75, SWEEP_PUSH = 0.2, THROW_PUSH = 0.85, THROW_LIFT = 0.5;
 	/** The mode's hunger, per tick. */
 	static final float EXHAUSTION = 0.006F;
 
@@ -103,7 +112,7 @@ public final class ChronoFlow {
 
 	/**
 	 * A blow under way: its style, when it began (game time), at whom, and with which hand (1 right, -1 left). A counter
-	 * also has its variant ({@link #CROWD}..{@link #DEFLECT}) and, for a deflect, which parry. Synced to all, who see it.
+	 * also has its variant ({@link #CROWD}..{@link #THROW}) and, for a deflect, which parry. Synced to all, who see it.
 	 */
 	public record Move(int style, long start, int target, int side, int variant, int deflect) {
 		public static final StreamCodec<ByteBuf, Move> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, Move::style,
@@ -116,12 +125,12 @@ public final class ChronoFlow {
 
 		/** How long this move's animation runs (ticks). */
 		public int duration() {
-			return style == COUNTER ? COUNTER_DURATION[Math.clamp(variant, CROWD, DEFLECT)] : DURATION[style];
+			return style == COUNTER ? COUNTER_DURATION[Math.clamp(variant, CROWD, THROW)] : DURATION[style];
 		}
 
 		/** When its blow lands (ticks after the start). */
 		public int hitAt() {
-			return style == COUNTER ? COUNTER_HIT_AT[Math.clamp(variant, CROWD, DEFLECT)] : HIT_AT[style];
+			return style == COUNTER ? COUNTER_HIT_AT[Math.clamp(variant, CROWD, THROW)] : HIT_AT[style];
 		}
 	}
 
@@ -163,7 +172,7 @@ public final class ChronoFlow {
 	}
 
 	/** A blow on its way: lands at {@code due} if the target's still in reach. */
-	private record Blow(UUID player, int target, int style, long due) {
+	private record Blow(UUID player, int target, int style, int variant, long due) {
 	}
 
 	private static final class Fighter {
@@ -311,22 +320,23 @@ public final class ChronoFlow {
 		long now = level.getGameTime();
 		int side = level.getRandom().nextBoolean() ? 1 : -1;
 		player.setAttached(MOVE, new Move(style, now, targetId, side));
-		BLOWS.add(new Blow(player.getUUID(), targetId, style, now + HIT_AT[style]));
+		BLOWS.add(new Blow(player.getUUID(), targetId, style, CROWD, now + HIT_AT[style]));
 		if (style >= LUNGE) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.5F, 1.6F);
 			level.sendParticles(GOLD, player.getX(), player.getY() + 1.0, player.getZ(), 8, 0.3, 0.5, 0.3, 0.0);
 		}
 	}
 
-	/** A blow comes due: if the target's still in reach it lands, harder with the combo. */
-	private static void land(ServerPlayer player, LivingEntity target, int style) {
+	/** A blow comes due: if the target's still in reach it lands, harder with the combo (a counter's by its variant). */
+	private static void land(ServerPlayer player, LivingEntity target, int style, int variant) {
 		ServerLevel level = player.level();
 		if (!target.isAlive() || target.distanceTo(player) - target.getBbWidth() * 0.5 > HIT_REACH) {
 			return;
 		}
 		Fighter fighter = fighter(player);
 		float bonus = Math.min(COMBO_MAX_BONUS, fighter.combo * COMBO_BONUS);
-		float damage = Math.max(DAMAGE[style], (float)player.getAttributeValue(Attributes.ATTACK_DAMAGE)) * (1.0F + bonus);
+		float weapon = Math.max(0.0F, (float)player.getAttributeValue(Attributes.ATTACK_DAMAGE) - 1.0F) * WEAPON_SHARE;
+		float damage = (DAMAGE[style] + weapon) * (1.0F + bonus);
 		// blows 1-3 of each four stun; the fourth (and every counter's answer) throws
 		boolean finisher = (fighter.combo + 1) % SET_SIZE == 0;
 		boolean pushes = finisher || style == COUNTER;
@@ -348,6 +358,14 @@ public final class ChronoFlow {
 				push *= FINISHER_PUSH;
 			}
 			double lift = style == UPPERCUT ? 0.55 : style == KICK ? 0.3 : 0.12;
+			if (style == COUNTER && variant == SWEEP) {
+				push = SWEEP_PUSH;
+				lift = SWEEP_LIFT;
+			} else if (style == COUNTER && variant == THROW) {
+				// over the shoulder: back past you, not away
+				push = -THROW_PUSH;
+				lift = THROW_LIFT;
+			}
 			unstun(target);
 			target.setDeltaMovement(before.add(away.scale(push)).add(0.0, lift, 0.0));
 		} else {
@@ -451,7 +469,7 @@ public final class ChronoFlow {
 		for (LivingEntity attacker : attackers) {
 			attacker.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, STAGGER_TICKS, 3, false, false, false), player);
 			attacker.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, STAGGER_TICKS, 1, false, false, false), player);
-			BLOWS.add(new Blow(player.getUUID(), attacker.getId(), COUNTER, now + HIT_AT[COUNTER]));
+			BLOWS.add(new Blow(player.getUUID(), attacker.getId(), COUNTER, CROWD, now + HIT_AT[COUNTER]));
 			Vec3 at = attacker.getEyePosition();
 			level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 0.3, at.z, 8, 0.2, 0.2, 0.2, 0.05);
 		}
@@ -466,13 +484,13 @@ public final class ChronoFlow {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		var random = level.getRandom();
-		int variant = CIRCLE + random.nextInt(3);
+		int variant = CIRCLE + random.nextInt(THROW - CROWD);
 		int deflect = random.nextInt(DEFLECTS);
 		int side = random.nextBoolean() ? 1 : -1;
 		Move move = new Move(COUNTER, now, attacker.getId(), side, variant, deflect);
 		player.setAttached(MOVE, move);
 		fighter(player).counterUntil = now + move.duration();
-		BLOWS.add(new Blow(player.getUUID(), attacker.getId(), COUNTER, now + move.hitAt()));
+		BLOWS.add(new Blow(player.getUUID(), attacker.getId(), COUNTER, variant, now + move.hitAt()));
 		attacker.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, STAGGER_TICKS, 3, false, false, false), player);
 		attacker.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, STAGGER_TICKS, 1, false, false, false), player);
 		stun(attacker, move.hitAt() + COUNTER_STUN_SLACK);
@@ -485,6 +503,16 @@ public final class ChronoFlow {
 				level.sendParticles(GOLD, player.getX(), player.getY() + 1.0, player.getZ(), 10, 0.4, 0.5, 0.4, 0.0);
 			}
 			case SLIP -> level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS, 1.0F, 0.8F);
+			case VAULT -> {
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8F, 1.3F);
+				level.sendParticles(GOLD, player.getX(), player.getY() + 0.2, player.getZ(), 12, 0.4, 0.1, 0.4, 0.0);
+			}
+			case SWEEP -> {
+				// the legs taken out: a low sweep along the ground
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0F, 0.6F);
+				level.sendParticles(ParticleTypes.SWEEP_ATTACK, attacker.getX(), attacker.getY() + 0.3, attacker.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+			}
+			case THROW -> level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS, 1.0F, 0.6F);
 			default -> {
 				// the blow knocked aside: the attacker reels back a step
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SHIELD_BLOCK.value(), SoundSource.PLAYERS, 1.0F, 1.2F);
@@ -576,7 +604,7 @@ public final class ChronoFlow {
 				}
 				it.remove();
 				if (player.level().getEntity(blow.target()) instanceof LivingEntity target) {
-					land(player, target, blow.style());
+					land(player, target, blow.style(), blow.variant());
 				}
 			}
 		}

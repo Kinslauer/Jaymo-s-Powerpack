@@ -76,6 +76,9 @@ def packMods = [
 	// Traveler's Backpack (LGPL-3.0) and Forge Config API Port (MPL-2.0), which it needs: wearable backpacks
 	[dep: "maven.modrinth:travelersbackpack:SmhjfeWr", cf: [541171, 9008280]],
 	[dep: "maven.modrinth:forge-config-api-port:JpKvrr9J", cf: [547434, 8938808]],
+	// Epic Structures: Villages (all rights reserved; "feel free to add to any modpack"): the sprawling towns Jaymo's
+	// Kingdoms founds its capitals in
+	[dep: "maven.modrinth:epic-structures-villages:hCRa4eFr", cf: [1308486, 8830175]],
 ]
 // First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
 // Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge
@@ -93,6 +96,16 @@ def packModsNoCf = [
 ]
 // not on CurseForge: shipped inside the pack as overrides
 def kitchenJar = fileTree("libs") { include "jaymos-kitchen-*.jar" }
+// Jaymo's Kingdoms (kingdoms/, its own Gradle project): built by the pack tasks, then shipped as an override like Kitchen.
+// Its build output goes where kingdoms/build.gradle puts it (E:\ on the home PC).
+def kingdomsProps = new Properties()
+file("kingdoms/gradle.properties").withInputStream { kingdomsProps.load(it) }
+tasks.register("buildKingdoms", GradleBuild) {
+	dir = file("kingdoms")
+	tasks = ["build"]
+}
+def kingdomsLibs = file(file("E:/").exists() ? "E:/jaymos-kingdoms-build/libs" : "kingdoms/build/libs")
+def kingdomsJar = fileTree(kingdomsLibs) { include "jaymos-kingdoms-${kingdomsProps.version}.jar" }.builtBy("buildKingdoms")
 // on CurseForge but not on a maven we use: the jar sits in libs/ (git-ignored, copied from the Jaymo's Kitchen
 // profile) and the CurseForge import downloads it by id. Not loaded in the dev game (too heavy for quick tests).
 def localPackMods = [
@@ -134,6 +147,7 @@ tasks.register("modpackMods", Sync) {
 	from configurations.packJars
 	from tasks.named("jar")
 	from kitchenJar
+	from kingdomsJar
 	from localPackJars
 	into new File(packDir, "mods")
 }
@@ -162,6 +176,7 @@ tasks.register("curseforgePack", Zip) {
 	into("overrides/mods") {
 		from tasks.named("jar")
 		from kitchenJar
+		from kingdomsJar
 	}
 }
 // the friends' server (Desktop\Serverfiles): its mods folder is kept identical to the pack, but never while it's
@@ -188,6 +203,7 @@ tasks.register("serverMods", Sync) {
 	from configurations.packJars
 	from tasks.named("jar")
 	from kitchenJar
+	from kingdomsJar
 	from localPackJars
 	into new File(serverDir, "mods")
 }
@@ -196,11 +212,12 @@ tasks.register("serverMods", Sync) {
 // running (its jars are locked).
 def profileMods = new File(System.getProperty("user.home"), "curseforge/minecraft/Instances/Jaymo's Powers/mods")
 tasks.register("profileMods") {
-	dependsOn "jar"
+	dependsOn "jar", "buildKingdoms"
 	onlyIf { profileMods.isDirectory() }
 	doLast {
 		def wanted = [[jar: tasks.named("jar").get().archiveFile.get().asFile, prefix: "jaymos-powers-"]]
 		kitchenJar.files.each { wanted << [jar: it, prefix: "jaymos-kitchen-"] }
+		kingdomsJar.files.each { wanted << [jar: it, prefix: "jaymos-kingdoms-"] }
 		localPackMods.each { wanted << [jar: file(it.file), prefix: it.prefix] }
 		def old = profileMods.listFiles().findAll { f -> f.name.endsWith(".jar") && wanted.any { w -> f.name.startsWith(w.prefix) && f.name != w.jar.name } }
 		if (old.any { !it.renameTo(new File(it.path + ".old")) }) {
