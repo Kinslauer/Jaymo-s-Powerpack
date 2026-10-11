@@ -3,8 +3,10 @@ package com.jaymospowers.power.gravity;
 import com.jaymospowers.core.BlockCluster;
 import com.jaymospowers.core.Flames;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -27,42 +29,83 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * The Event Horizon's C: the Meteor. Held, it gathers ({@code FULL_CHARGE} to its fullest): let go and, where you aim
- * ({@code RANGE_MIN} out to {@code RANGE_MAX} with the charge), a rock is torn out of the sky and pulled down onto
- * it over {@code FALL_TICKS}: a tumbling mass of stone and magma, burning and trailing smoke, its shadow spreading on
- * the ground below. It hits like the end of the world: a {@code POWER} blast that tears a crater, up to
- * {@code DAMAGE_MAX} at the centre falling off to nothing at {@code RADIUS}, everything thrown outward, a ring of
- * debris and a shockwave. A full charge brings one {@code SIZE_MAX} times the size, and everything about the impact
- * grows with it (see {@link #grown}). {@code COOLDOWN} before another.
+ * ({@code RANGE_MIN} out to {@code RANGE_MAX} with the charge), a rock is torn out of the sky and pulled down onto it
+ * over {@code FALL_TICKS}: a tumbling mass of stone and magma, burning and trailing smoke, its shadow spreading on the
+ * ground below. A tap brings the small, narrow one; a full charge one {@code SIZE_MAX} times the size (over 30 blocks
+ * across). It hits like the end of the world: a {@code POWER} blast, up to {@code DAMAGE_MIN}..{@code DAMAGE_MAX} at
+ * the centre falling off to nothing at {@code RADIUS_MIN}..{@code RADIUS_MAX}, then a shockwave racing out along the
+ * ground ({@code WAVE_SPEED}) that throws everything it passes. A charged one tears a wide, shallow crater: rings of
+ * lighter blasts ({@code CRATER_RING_POWER}) go off as the shockwave reaches them, up to {@code CRATER_RINGS} rings
+ * {@code CRATER_RING_STEP} apart. {@code COOLDOWN_MIN} (a tap) to {@code COOLDOWN} (a full charge) before another.
  */
 final class GravityMeteor {
-	static final double RANGE_MIN = 48.0, RANGE_MAX = 128.0, HEIGHT = 70.0, RADIUS = 25.0;
-	static final int FALL_TICKS = 40, COOLDOWN = 3600;
+	static final double RANGE_MIN = 48.0, RANGE_MAX = 128.0, HEIGHT = 70.0;
+	static final int FALL_TICKS = 40, COOLDOWN_MIN = 900, COOLDOWN = 3600;
 	/** C held this long for the biggest, furthest meteor; a tap brings the small one at {@code RANGE_MIN}. */
 	static final int FULL_CHARGE = 60;
-	/** A full charge: the rock drawn this many times bigger. */
-	static final float SIZE_MAX = 3.0F;
-	/** At {@code SIZE_MAX}, the impact's blast power, reach and damage are this many times the small one's. */
-	static final float BLAST_GROWTH = 1.6F, RADIUS_GROWTH = 1.5F, DAMAGE_GROWTH = 1.5F;
-	static final float POWER = 7.0F, DAMAGE_MAX = 40.0F;
-	static final double THROW = 2.2;
-	/** Its burning trail sets alight whatever it passes within this reach (blocks), for this long (seconds). */
+	/** A full charge: the rock drawn this many times bigger (the small one is about 2.4 blocks across). */
+	static final float SIZE_MAX = 14.0F;
+	/** How far the impact hurts (blocks), and how much at the centre, from a tap to a full charge. */
+	static final double RADIUS_MIN = 25.0, RADIUS_MAX = 60.0;
+	static final float DAMAGE_MIN = 40.0F, DAMAGE_MAX = 60.0F;
+	/** The blast at the centre (kept the same at every size, so the crater widens instead of deepening). */
+	static final float POWER = 7.0F;
+	/** The shockwave: how fast it runs out (blocks/tick), and how hard it throws (blocks/tick) a tap's and a full charge's. */
+	static final double WAVE_SPEED = 1.5, THROW_MIN = 2.2, THROW_MAX = 3.5;
+	/** The crater's rings: at most this many, this far apart (blocks), a blast every this many blocks around each. */
+	static final int CRATER_RINGS = 3;
+	static final double CRATER_RING_STEP = 8.0, CRATER_RING_SPACING = 7.0;
+	static final float CRATER_RING_POWER = 5.0F;
+	/** Its burning trail sets alight whatever it passes within this reach (blocks) of its surface, for this long (seconds). */
 	static final double TRAIL_FIRE_RADIUS = 2.5;
 	static final int TRAIL_FIRE_SECONDS = 5;
-	/** The impact sets alight everything within this reach (blocks) of where it lands, for this long (seconds). */
+	/** The impact sets alight everything within this reach (blocks) of where it lands (a tap's), for this long (seconds). */
 	static final double IMPACT_FIRE_RADIUS = 10.0;
 	static final int IMPACT_FIRE_SECONDS = 8;
+	/** Half the small rock's width (blocks), as drawn. */
+	private static final double ROCK_HALF = 1.2;
 	private static final List<BlockState> ROCK = List.of(Blocks.MAGMA_BLOCK.defaultBlockState(), Blocks.BLACKSTONE.defaultBlockState(),
 		Blocks.MAGMA_BLOCK.defaultBlockState(), Blocks.BASALT.defaultBlockState(), Blocks.OBSIDIAN.defaultBlockState(),
 		Blocks.MAGMA_BLOCK.defaultBlockState(), Blocks.BLACKSTONE.defaultBlockState(), Blocks.TUFF.defaultBlockState(),
 		Blocks.MAGMA_BLOCK.defaultBlockState());
 	private static final DustParticleOptions SHADOW = new DustParticleOptions(0x120A1A, 2.0F);
 
-	private record Meteor(ResourceKey<Level> dimension, UUID owner, int rock, Vec3 from, Vec3 to, long start, float size) {
+	private record Meteor(ResourceKey<Level> dimension, UUID owner, int rock, Vec3 from, Vec3 to, long start, float charge) {
+		float size() {
+			return 1.0F + (SIZE_MAX - 1.0F) * this.charge;
+		}
+	}
+
+	/** The shockwave running out from an impact, and the crater rings it sets off. */
+	private static final class Wave {
+		final ResourceKey<Level> dimension;
+		final UUID owner;
+		final Vec3 at;
+		final long start;
+		final float charge;
+		final double radius;
+		final Set<Integer> hit = new HashSet<>();
+		int rings;
+
+		Wave(ResourceKey<Level> dimension, UUID owner, Vec3 at, long start, float charge) {
+			this.dimension = dimension;
+			this.owner = owner;
+			this.at = at;
+			this.start = start;
+			this.charge = charge;
+			this.radius = GravityMeteor.radius(charge);
+		}
 	}
 
 	private static final List<Meteor> METEORS = new ArrayList<>();
+	private static final List<Wave> WAVES = new ArrayList<>();
 
 	private GravityMeteor() {
+	}
+
+	/** How long before another, after one called with this much of a charge (0 to 1). */
+	static int cooldown(float charge) {
+		return Math.round(Mth.lerp(charge, COOLDOWN_MIN, COOLDOWN));
 	}
 
 	/** How far it can be called with this much of a charge (0 to 1). */
@@ -70,18 +113,24 @@ final class GravityMeteor {
 		return Mth.lerp(charge, RANGE_MIN, RANGE_MAX);
 	}
 
-	/** How much bigger a meteor of this size (1 to {@code SIZE_MAX}) makes something that grows to {@code growth} at the biggest. */
-	private static float grown(float size, float growth) {
-		return 1.0F + (growth - 1.0F) * (size - 1.0F) / (SIZE_MAX - 1.0F);
+	/** How far its impact reaches with this much of a charge. */
+	static double radius(float charge) {
+		return Mth.lerp(charge, RADIUS_MIN, RADIUS_MAX);
+	}
+
+	/** How many crater rings a charge this big tears (a tap: none, just the blast in the middle). */
+	private static int craterRings(float charge) {
+		return Math.round(charge * CRATER_RINGS);
 	}
 
 	/** C still held: where it would land shows (to you), and the hum rises. */
 	static void charging(ServerPlayer player, float charge, long held) {
 		ServerLevel level = player.level();
 		Vec3 to = GravityPower.aimPoint(player, range(charge));
-		double r = 1.0 + charge * 2.0;
-		for (int i = 0; i < 8; i++) {
-			double a = i / 8.0 * Math.PI * 2.0 + held * 0.15;
+		double r = 1.0 + charge * (radius(1.0F) * 0.25);
+		int points = 8 + Math.round(charge * 16);
+		for (int i = 0; i < points; i++) {
+			double a = i / (double)points * Math.PI * 2.0 + held * 0.15;
 			level.sendParticles(player, SHADOW, true, false, to.x + Math.cos(a) * r, to.y + 0.2, to.z + Math.sin(a) * r, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 		if (held % 10 == 0 && charge < 1.0F) {
@@ -94,18 +143,19 @@ final class GravityMeteor {
 		ServerLevel level = player.level();
 		float size = 1.0F + (SIZE_MAX - 1.0F) * charge;
 		Vec3 to = GravityPower.aimPoint(player, range(charge));
-		// down out of the sky, at a slant from behind you
+		// down out of the sky, at a slant from behind you (a big one from higher up, so it's all in the sky to begin with)
+		double height = HEIGHT + ROCK_HALF * size;
 		Vec3 back = player.getLookAngle().horizontal();
 		back = back.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : back.normalize();
-		Vec3 from = to.add(back.scale(-HEIGHT * 0.45)).add(0.0, HEIGHT, 0.0);
+		Vec3 from = to.add(back.scale(-height * 0.45)).add(0.0, height, 0.0);
 		from = new Vec3(from.x, Math.min(from.y, level.getMaxY() - 2), from.z);
 		BlockCluster rock = BlockCluster.made(level, ROCK, from);
 		rock.script(true, false);
 		if (size > 1.0F) {
 			rock.setAttached(BlockCluster.SCALE, size);
 		}
-		METEORS.add(new Meteor(level.dimension(), player.getUUID(), rock.getId(), from, to, level.getGameTime(), size));
-		level.playSound(null, to.x, to.y, to.z, SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 2.0F + size, 0.4F);
+		METEORS.add(new Meteor(level.dimension(), player.getUUID(), rock.getId(), from, to, level.getGameTime(), charge));
+		level.playSound(null, to.x, to.y, to.z, SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 2.0F + 4.0F * charge, 0.4F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.5F, 0.4F);
 		return true;
 	}
@@ -129,22 +179,23 @@ final class GravityMeteor {
 				rock.setDeltaMovement(at.subtract(was));
 				rock.syncVelocity = true;
 			}
-			// burning and smoking; the shadow spreads under it
-			float size = meteor.size();
-			double spread = size, up = 0.5 * size;
-			int more = Math.round(size * size);
-			level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y + up, at.z, 8 * more, 0.6 * spread, 0.6 * spread, 0.6 * spread, 0.02);
-			level.sendParticles(ParticleTypes.FLAME, at.x, at.y + up, at.z, 10 * more, 0.8 * spread, 0.8 * spread, 0.8 * spread, 0.05);
-			level.sendParticles(ParticleTypes.LAVA, at.x, at.y + up, at.z, 2 * more, 0.5 * spread, 0.5 * spread, 0.5 * spread, 0.0);
-			Flames.area(level, at, TRAIL_FIRE_RADIUS * size, TRAIL_FIRE_SECONDS, server.getPlayerList().getPlayer(meteor.owner()), e -> e != rock);
+			// burning and smoking all over its surface; the shadow spreads under it
+			double half = ROCK_HALF * meteor.size();
+			int more = 1 + Math.round(meteor.charge() * 6.0F);
+			double spread = half * 0.7;
+			level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y + half * 0.5, at.z, 8 * more, spread, spread, spread, 0.02);
+			level.sendParticles(ParticleTypes.FLAME, at.x, at.y + half * 0.5, at.z, 10 * more, spread, spread, spread, 0.05);
+			level.sendParticles(ParticleTypes.LAVA, at.x, at.y + half * 0.5, at.z, 2 * more, spread, spread, spread, 0.0);
+			Flames.area(level, at, TRAIL_FIRE_RADIUS + half, TRAIL_FIRE_SECONDS, server.getPlayerList().getPlayer(meteor.owner()), e -> e != rock);
 			Vec3 ground = meteor.to();
-			double shadow = 1.0 + p * RADIUS * grown(size, RADIUS_GROWTH) * 0.35;
-			for (int i = 0; i < 12; i++) {
-				double a = i / 12.0 * Math.PI * 2.0 + t * 0.1;
+			double shadow = 1.0 + p * Math.max(radius(meteor.charge()) * 0.35, half);
+			int points = 12 + Math.round(meteor.charge() * 24);
+			for (int i = 0; i < points; i++) {
+				double a = i / (double)points * Math.PI * 2.0 + t * 0.1;
 				level.sendParticles(SHADOW, ground.x + Math.cos(a) * shadow, ground.y + 0.1, ground.z + Math.sin(a) * shadow, 1, 0.1, 0.0, 0.1, 0.0);
 			}
 			if (t % 8 == 0) {
-				level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 2.0F, 0.4F + p * 0.3F);
+				level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 2.0F + 4.0F * meteor.charge(), 0.4F + p * 0.3F);
 			}
 			if (t < FALL_TICKS) {
 				continue;
@@ -153,19 +204,25 @@ final class GravityMeteor {
 			if (rock != null) {
 				rock.discard();
 			}
-			impact(level, server.getPlayerList().getPlayer(meteor.owner()), ground, size);
+			impact(level, server.getPlayerList().getPlayer(meteor.owner()), ground, meteor.charge());
+		}
+		for (Iterator<Wave> it = WAVES.iterator(); it.hasNext(); ) {
+			Wave wave = it.next();
+			ServerLevel level = server.getLevel(wave.dimension);
+			if (level == null || wave(level, server.getPlayerList().getPlayer(wave.owner), wave)) {
+				it.remove();
+			}
 		}
 	}
 
-	/** It lands: the crater, the blast, everything thrown, the shockwave. */
-	private static void impact(ServerLevel level, ServerPlayer owner, Vec3 at, float size) {
-		double radius = RADIUS * grown(size, RADIUS_GROWTH);
-		float damageMax = DAMAGE_MAX * grown(size, DAMAGE_GROWTH);
-		level.explode(owner, at.x, at.y, at.z, POWER * grown(size, BLAST_GROWTH), true, Level.ExplosionInteraction.TNT);
+	/** It lands: the blast and the hurt; the shockwave sets off from here (see {@link #wave}). */
+	private static void impact(ServerLevel level, ServerPlayer owner, Vec3 at, float charge) {
+		double radius = radius(charge);
+		float damageMax = Mth.lerp(charge, DAMAGE_MIN, DAMAGE_MAX);
+		level.explode(owner, at.x, at.y, at.z, POWER, true, Level.ExplosionInteraction.TNT);
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(radius),
 			e -> e.isAlive() && !e.isSpectator() && e != owner && !(e instanceof ArmorStand))) {
-			Vec3 away = living.getBoundingBox().getCenter().subtract(at);
-			double d = away.length();
+			double d = living.getBoundingBox().getCenter().distanceTo(at);
 			if (d > radius) {
 				continue;
 			}
@@ -176,33 +233,78 @@ final class GravityMeteor {
 				GravityPower.touch(living, owner);
 			}
 			living.hurtServer(level, source, damageMax * share * share + 2.0F * share);
-			Vec3 push = (d < 0.3 ? new Vec3(0.0, 1.0, 0.0) : away.normalize()).scale(THROW * share).add(0.0, 0.6 * share + 0.2, 0.0);
-			living.setDeltaMovement(push);
-			living.syncVelocity = true;
-			if (living instanceof ServerPlayer player) {
-				net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new com.jaymospowers.power.web.WebNet.Nudge(push));
-			}
 		}
 		// everything flammable near the strike catches
-		Flames.area(level, at, IMPACT_FIRE_RADIUS * grown(size, RADIUS_GROWTH), IMPACT_FIRE_SECONDS, owner, e -> true);
-		// the shockwave running out along the ground, and the dust
-		for (int ring = 1; ring <= 4; ring++) {
-			double r = radius * ring / 4.0;
-			for (int i = 0; i < 20 + ring * 8; i++) {
-				double a = i / (20.0 + ring * 8) * Math.PI * 2.0;
-				level.sendParticles(ParticleTypes.EXPLOSION, at.x + Math.cos(a) * r, at.y + 0.3, at.z + Math.sin(a) * r, 1, 0.0, 0.0, 0.0, 0.0);
+		Flames.area(level, at, IMPACT_FIRE_RADIUS * radius / RADIUS_MIN, IMPACT_FIRE_SECONDS, owner, e -> true);
+		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y + 1.0, at.z, 3 + Math.round(charge * 12), 2.0 + charge * 8.0, 1.0 + charge * 3.0,
+			2.0 + charge * 8.0, 0.0);
+		level.sendParticles(ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, at.x, at.y + 1.0, at.z, 60 + Math.round(charge * 140), 4.0 + charge * 10.0, 2.0 + charge * 4.0,
+			4.0 + charge * 10.0, 0.05);
+		level.sendParticles(ParticleTypes.LAVA, at.x, at.y + 1.0, at.z, 60 + Math.round(charge * 100), 3.0 + charge * 8.0, 1.0, 3.0 + charge * 8.0, 0.0);
+		float loud = 1.0F + charge * 1.5F;
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 6.0F * loud, 0.4F - charge * 0.1F);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 4.0F * loud, 0.5F - charge * 0.1F);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 4.0F * loud, 0.5F);
+		GravityPower.shake(level, at, radius * 2.0, 1.5F + charge * 1.5F);
+		WAVES.add(new Wave(level.dimension(), owner == null ? new UUID(0L, 0L) : owner.getUUID(), at, level.getGameTime(), charge));
+	}
+
+	/**
+	 * The shockwave a tick further out: a ring of blasts and dust along the ground, throwing everything it passes outward
+	 * and up, and setting off each crater ring as it reaches it. True once it has run out to the impact's reach.
+	 */
+	private static boolean wave(ServerLevel level, ServerPlayer owner, Wave wave) {
+		long t = level.getGameTime() - wave.start + 1;
+		double r = Math.min(wave.radius, t * WAVE_SPEED);
+		double inner = Math.max(0.0, r - WAVE_SPEED * 1.5);
+		Vec3 at = wave.at;
+		double push = Mth.lerp(wave.charge, THROW_MIN, THROW_MAX);
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(r + 2.0, 8.0, r + 2.0),
+			e -> e.isAlive() && !e.isSpectator() && e != owner && !(e instanceof ArmorStand))) {
+			Vec3 away = living.position().subtract(at);
+			double d = Math.sqrt(away.x * away.x + away.z * away.z);
+			if (d < inner || d > r + 1.0 || !wave.hit.add(living.getId())) {
+				continue;
+			}
+			float share = (float)(1.0 - 0.6 * d / wave.radius);
+			Vec3 out = d < 0.3 ? Vec3.ZERO : new Vec3(away.x / d, 0.0, away.z / d);
+			Vec3 throwVec = out.scale(push * share).add(0.0, 0.5 + 0.4 * share, 0.0);
+			living.setDeltaMovement(throwVec);
+			living.syncVelocity = true;
+			if (living instanceof ServerPlayer player) {
+				net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new com.jaymospowers.power.web.WebNet.Nudge(throwVec));
 			}
 		}
-		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y + 1.0, at.z, Math.round(3 * size), 2.0 * size, 1.0 * size, 2.0 * size, 0.0);
-		level.sendParticles(ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, at.x, at.y + 1.0, at.z, 60, 4.0, 2.0, 4.0, 0.05);
-		level.sendParticles(ParticleTypes.LAVA, at.x, at.y + 1.0, at.z, 60, 3.0, 1.0, 3.0, 0.0);
-		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 6.0F, 0.4F);
-		level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 4.0F, 0.5F);
-		level.playSound(null, at.x, at.y, at.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 4.0F, 0.5F);
-		GravityPower.shake(level, at, radius * 2.0, 1.5F * grown(size, BLAST_GROWTH));
+		// the ring itself: blasts and thrown-up dust along the ground
+		int points = Math.max(12, (int)(r * 1.6));
+		int every = Math.max(1, points / 120);
+		for (int i = 0; i < points; i += every) {
+			double a = i / (double)points * Math.PI * 2.0;
+			double x = at.x + Math.cos(a) * r, z = at.z + Math.sin(a) * r;
+			level.sendParticles(ParticleTypes.EXPLOSION, x, at.y + 0.4, z, 1, 0.0, 0.0, 0.0, 0.0);
+			if (i % (every * 3) == 0) {
+				level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, at.y + 0.6, z, 1, 0.3, 0.3, 0.3, 0.02);
+			}
+		}
+		if (t % 5 == 0) {
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 2.0F + 4.0F * wave.charge, 0.5F + (float)(r / wave.radius) * 0.4F);
+		}
+		// the crater widens as it passes: each ring of lighter blasts goes off when the wave reaches it
+		int rings = craterRings(wave.charge);
+		while (wave.rings < rings && (wave.rings + 1) * CRATER_RING_STEP <= r) {
+			wave.rings++;
+			double ringR = wave.rings * CRATER_RING_STEP;
+			int blasts = Math.max(4, (int)Math.round(ringR * Math.PI * 2.0 / CRATER_RING_SPACING));
+			for (int i = 0; i < blasts; i++) {
+				double a = (i + 0.5 * wave.rings) / blasts * Math.PI * 2.0;
+				level.explode(owner, at.x + Math.cos(a) * ringR, at.y, at.z + Math.sin(a) * ringR, CRATER_RING_POWER, true, Level.ExplosionInteraction.TNT);
+			}
+		}
+		return r >= wave.radius && wave.rings >= rings;
 	}
 
 	static void clear() {
 		METEORS.clear();
+		WAVES.clear();
 	}
 }

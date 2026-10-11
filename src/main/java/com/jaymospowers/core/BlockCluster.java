@@ -247,6 +247,13 @@ public class BlockCluster extends Entity {
 		return this.scripted;
 	}
 
+	/** A big one (see {@link #SCALE}) is seen from as far off as its size deserves. */
+	@Override
+	public boolean shouldRenderAtSqrDistance(double distance) {
+		Float scale = this.getAttached(SCALE);
+		return scale != null && scale > 1.0F ? distance < 256.0 * 256.0 : super.shouldRenderAtSqrDistance(distance);
+	}
+
 	/** Into {@code player}'s inventory as its blocks (what doesn't fit drops at their feet), and the chunk is gone. */
 	public void pocket(Player player) {
 		for (Piece piece : this.pieces()) {
