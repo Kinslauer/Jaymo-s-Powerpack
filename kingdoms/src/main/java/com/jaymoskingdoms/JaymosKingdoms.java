@@ -56,6 +56,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.2: the mine the builders dig first (it wraps their brain; Debris wraps it in turn) and its attachment
 		LOGGER.debug("mine attachment: {}", Mines.MINES);
 		Mines.register();
+		// 0.5.4: living trees (saplings grow up by stages, trees fell whole, the woods seed themselves) and their attachment
+		LOGGER.debug("growing tree attachment: {}", Trees.GROWING);
+		Trees.register();
 		Theft.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
 		LOGGER.debug("war attachment: {}", WarData.WARS);

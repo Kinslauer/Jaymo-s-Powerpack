@@ -59,6 +59,8 @@ public final class Nights {
 	/** {@code ticks} of every settlement's work, done at once. */
 	static void pass(ServerLevel level, long ticks) {
 		MinecraftServer server = level.getServer();
+		// the growing trees grown on (0.5.4)
+		Trees.grow(level, ticks);
 		for (Faction f : Factions.all(server)) {
 			if (f.fallen() || !level.isPositionEntityTicking(f.seat())) {
 				continue;

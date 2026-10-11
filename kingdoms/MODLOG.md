@@ -1152,3 +1152,19 @@ Fixed along the way:
   they get no nearer for a while.
 - A farmer's and a woodcutter's home is on the farm's own ground, not on whatever stands over its middle.
 - Gatherers reach the depot from a floor above or below it (3 blocks of slack).
+
+## 0.5.4: living trees (our own take on Dynamic Trees)
+Dynamic Trees has no Fabric build for 26.3, so Kingdoms grows its own (original code, nothing copied):
+- **Saplings grow up in stages.** In the Overworld a plain sapling (not dark oak, pale oak or a 2x2) sprouts a sapling
+  tree (2 logs and a tuft), then a young tree (4 logs and a crown), then the full tree of its kind, a stage every
+  6000-10000 ticks in daylight with room above. Bone meal still grows a sapling at once.
+- **Trees fall whole.** Chop a natural tree's log (not sneaking, not in creative) and everything above it comes down
+  a few blocks a tick from the foot up, with the leaves no other tree holds; the axe wears a point per log. Placed
+  logs and leaves (buildings) aren't trees.
+- **The woods seed themselves.** Near players, natural trees now and then drop a sapling 3-7 blocks away on open,
+  lit ground that isn't crowded, inside a hold, or on a building site.
+- **Woodcutters** fell whole trees the same way (into their bag) and leave young trees to grow.
+- **Sleep** grows the trees on by the time slept.
+Tested on the dev server: oak, birch, spruce and cherry saplings sprouted, grew young, and grew full over two skipped
+days, and the woodcutter felled a whole tree in his tree farm and carried the wood to the storehouse. Not yet seen in
+game: a player felling a tree, and saplings seeding by themselves.

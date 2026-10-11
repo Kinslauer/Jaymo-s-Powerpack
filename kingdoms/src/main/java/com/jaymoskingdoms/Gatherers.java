@@ -54,7 +54,7 @@ public final class Gatherers {
 	/** They carry this many items before taking them to storage. */
 	static final int ARMFUL = 48;
 	/** A block of stone takes this long to dig, an ore this long, a log this long (ticks); from this far. */
-	static final int STONE_TICKS = 30, ORE_TICKS = 50, LOG_TICKS = 16, FELL_START_TICKS = 30;
+	static final int STONE_TICKS = 30, ORE_TICKS = 50, LOG_TICKS = 16, FELL_START_TICKS = 30, FELL_WAIT_TICKS = 40;
 	static final double REACH = 4.5, STAND_REACH = 1.5, DEPOT_REACH = 2.5, VERTICAL_SLACK = 3.0;
 	/** With nothing else to dig, a miner quarries the rock this far round the mine's end. */
 	static final int QUARRY_REACH = 6;
@@ -176,6 +176,7 @@ public final class Gatherers {
 		final List<BlockPos> logs = new ArrayList<>();
 		final Set<BlockPos> skip = new HashSet<>();
 		@Nullable BlockState sapling;
+		boolean felled;
 		long actAt;
 	}
 
@@ -352,6 +353,7 @@ public final class Gatherers {
 			job.goal = base;
 			job.stand = Construction.standable(level, base.relative(Direction.Plane.HORIZONTAL.getRandomDirection(level.getRandom())), 2);
 			job.logs.clear();
+			job.felled = false;
 			job.phase = FELL;
 			folk.setTask("felling a tree");
 		}
@@ -537,7 +539,7 @@ public final class Gatherers {
 				while (level.getBlockState(base.below()).is(BlockTags.LOGS) && top.getY() - base.getY() < 40) {
 					base = base.below();
 				}
-				if (job.skip.contains(base) || !level.getBlockState(base.below()).is(BlockTags.DIRT) || !wild(level, top) || inside(others, base)) {
+				if (job.skip.contains(base) || Trees.young(level.getServer(), base) || !level.getBlockState(base.below()).is(BlockTags.DIRT) || !wild(level, top) || inside(others, base)) {
 					continue;
 				}
 				// (his tree farm's trees count as nearer)
@@ -605,20 +607,22 @@ public final class Gatherers {
 			}
 			return;
 		}
-		// the trunk comes down a log at a time, from the foot up
-		BlockPos log = job.logs.removeFirst();
-		BlockState state = level.getBlockState(log);
-		if (state.is(BlockTags.LOGS)) {
-			for (ItemStack d : Block.getDrops(state, level, log, null, folk, new ItemStack(Items.IRON_AXE))) {
-				job.bag.add(folk, d);
+		// the whole tree comes down (Trees: its logs from the foot up, then the leaves no other tree holds), into his bag
+		if (!job.felled) {
+			int logs = Trees.fell(level, base, folk, new ItemStack(Items.IRON_AXE), d -> job.bag.add(folk, d), false);
+			if (logs == 0) {
+				job.skip.add(base);
+				job.logs.clear();
+				job.phase = IDLE;
+				return;
 			}
-			level.levelEvent(2001, log, Block.getId(state));
-			level.setBlock(log, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
-		}
-		job.actAt = now + LOG_TICKS;
-		if (!job.logs.isEmpty()) {
+			folk.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+			job.felled = true;
+			job.actAt = now + FELL_WAIT_TICKS;
 			return;
 		}
+		job.logs.clear();
+		job.felled = false;
 		// and a sapling where it stood
 		if (job.sapling != null && level.getBlockState(base).isAir() && job.sapling.canSurvive(level, base)) {
 			level.setBlock(base, job.sapling, Block.UPDATE_ALL);
