@@ -23,7 +23,9 @@
 		"jaymospowers.chrono.mixins.json",
 		{ "config": "jaymospowers.chrono.client.mixins.json", "environment": "client" },
 		"jaymospowers.gravity.mixins.json",
-		{ "config": "jaymospowers.gravity.client.mixins.json", "environment": "client" }
+		{ "config": "jaymospowers.gravity.client.mixins.json", "environment": "client" },
+		"jaymospowers.darktide.mixins.json",
+		{ "config": "jaymospowers.darktide.client.mixins.json", "environment": "client" }
 	],
 	"depends": {
 		"fabricloader": ">=0.19.5",

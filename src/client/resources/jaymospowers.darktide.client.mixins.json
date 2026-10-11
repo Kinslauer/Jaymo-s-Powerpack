@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"package": "com.jaymospowers.client.power.darktide.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"DarktideInputMixin",
+		"DarktideLivingEntityRendererMixin",
+		"DarktideModelFeatureRendererMixin"
+	],
+	"injectors": { "defaultRequire": 1 }
+}
