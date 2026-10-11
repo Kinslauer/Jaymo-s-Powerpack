@@ -152,6 +152,8 @@ public final class GravityPower implements Power {
 	 * Torn loose, it hangs in your hold without R held, until thrown (left click), pocketed (right click) or dropped (R).
 	 */
 	static final int RIP_CHARGE = 40, RIP_GROW = 12, RIP_PER_LEVEL = 2;
+	/** Fully mastered, the whole struggle (to its biggest) is over within this many ticks: everything above runs faster to fit. */
+	static final int RIP_MASTERED_TICKS = 20;
 	/** Rock flight: V held this long (ascended or corrupted) instead of tapped. */
 	static final int ROCK_HOLD_TICKS = 8;
 	/** How high a rock slab can fly over the ground (the rider's client keeps it there). */
@@ -358,6 +360,8 @@ public final class GravityPower implements Power {
 		List<BlockPos> ripBlocks = List.of();
 		/** V went down at (game time), for tap or hold. */
 		long vDownAt = -1;
+		/** C went down at (game time): the Meteor gathering (see {@link GravityMeteor#FULL_CHARGE}). */
+		long meteorFrom = -1;
 	}
 
 	/** Dropped by Collapse: driven down, and hurt more for every block it falls. */
@@ -632,21 +636,36 @@ public final class GravityPower implements Power {
 	/** C: the Meteor (ascended), the black hole (corrupted), Skyfall (both). */
 	@Override
 	public void onUltimate(ServerPlayer player, boolean down) {
+		boolean ascended = Fate.isAscended(player), corrupted = Fate.isCorrupted(player);
+		State state = state(player);
+		if (ascended && !corrupted) {
+			// the Meteor: held, it gathers; let go, it comes
+			if (down) {
+				state.meteorFrom = ready(player, SINGULARITY) ? player.level().getGameTime() : -1;
+			} else if (state.meteorFrom >= 0) {
+				float charge = meteorCharge(player, state);
+				state.meteorFrom = -1;
+				if (ready(player, SINGULARITY) && GravityMeteor.call(player, charge)) {
+					cool(player, SINGULARITY, GravityMeteor.COOLDOWN);
+				}
+			}
+			return;
+		}
 		if (!down || !ready(player, SINGULARITY)) {
 			return;
 		}
-		boolean ascended = Fate.isAscended(player), corrupted = Fate.isCorrupted(player);
-		if (ascended && corrupted) {
+		if (ascended) {
 			if (GravitySkyfall.call(player)) {
 				cool(player, SINGULARITY, GravitySkyfall.COOLDOWN);
-			}
-		} else if (ascended) {
-			if (GravityMeteor.call(player)) {
-				cool(player, SINGULARITY, GravityMeteor.COOLDOWN);
 			}
 		} else if (corrupted) {
 			singularity(player);
 		}
+	}
+
+	/** How far the Meteor has gathered: 0 (a tap) to 1. */
+	private static float meteorCharge(ServerPlayer player, State state) {
+		return Mth.clamp((player.level().getGameTime() - state.meteorFrom) / (float)GravityMeteor.FULL_CHARGE, 0.0F, 1.0F);
 	}
 
 	/** The C's cooldown for this player's form (for the HUD). */
@@ -972,9 +991,19 @@ public final class GravityPower implements Power {
 		return Math.min(com.jaymospowers.core.BlockCluster.MAX_PIECES, 1 + RIP_PER_LEVEL * com.jaymospowers.core.Mastery.unlocked(player));
 	}
 
+	/** How long the struggle has gone on, in ticks of an unmastered struggle (a master's runs faster, see RIP_MASTERED_TICKS). */
+	private static long ripHeld(ServerPlayer player, State state) {
+		long held = player.level().getGameTime() - state.ripFrom;
+		if (com.jaymospowers.core.Mastery.unlocked(player) < com.jaymospowers.core.Mastery.ALL) {
+			return held;
+		}
+		int whole = RIP_CHARGE + RIP_GROW * (Math.min(ripMax(player), state.ripBlocks.size()) - 1);
+		return held * Math.max(whole, RIP_MASTERED_TICKS) / RIP_MASTERED_TICKS;
+	}
+
 	/** How many blocks the struggle has worked loose so far. */
 	private static int ripCount(ServerPlayer player, State state) {
-		long held = player.level().getGameTime() - state.ripFrom;
+		long held = ripHeld(player, state);
 		if (held < RIP_CHARGE) {
 			return 0;
 		}
@@ -984,13 +1013,13 @@ public final class GravityPower implements Power {
 	/** Still straining: the cracks spread to every block that would come; at its biggest, it comes loose on its own. */
 	private static void tickRip(ServerPlayer player, State state) {
 		ServerLevel level = player.level();
-		long held = level.getGameTime() - state.ripFrom;
+		long held = ripHeld(player, state);
 		int coming = Math.max(1, ripCount(player, state));
 		for (int i = 0; i < state.ripBlocks.size(); i++) {
 			int stage = i < coming ? (int)Math.min(9, held * 9 / Math.max(1, RIP_CHARGE + RIP_GROW * i)) : -1;
 			level.destroyBlockProgress(ripCrackId(player, i), state.ripBlocks.get(i), stage);
 		}
-		if (held % 8 == 0) {
+		if ((level.getGameTime() - state.ripFrom) % 8 == 0) {
 			BlockPos pos = state.ripBlocks.getFirst();
 			level.playSound(null, pos, level.getBlockState(pos).getSoundType().getHitSound(), SoundSource.BLOCKS, 1.0F, 0.5F);
 			level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, level.getBlockState(pos)),
@@ -1695,6 +1724,13 @@ public final class GravityPower implements Power {
 		State state = state(player);
 		smallThings(player);
 		GravityWeight.tick(player);
+		if (state.meteorFrom >= 0) {
+			if (Fate.isAscended(player) && !Fate.isCorrupted(player)) {
+				GravityMeteor.charging(player, meteorCharge(player, state), player.level().getGameTime() - state.meteorFrom);
+			} else {
+				state.meteorFrom = -1;
+			}
+		}
 		if (state.ripFrom >= 0) {
 			if (PowerInput.isDown(player, PowerKey.ABILITY_1)) {
 				tickRip(player, state);
