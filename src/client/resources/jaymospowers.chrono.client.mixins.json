@@ -5,6 +5,8 @@
 	"client": [
 		"ChronoAvatarRendererMixin",
 		"ChronoCameraMixin",
+		"ChronoLivingEntityRendererMixin",
+		"ChronoModelFeatureRendererMixin",
 		"ChronoStunInputMixin"
 	],
 	"injectors": { "defaultRequire": 1 }

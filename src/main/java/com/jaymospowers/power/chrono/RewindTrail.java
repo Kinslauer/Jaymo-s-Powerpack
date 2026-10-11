@@ -18,11 +18,14 @@ final class RewindTrail {
 
 	private final ServerLevel level;
 	private final List<Vec3> path;
+	/** Its owner's particle style ({@link ChronoFx#style}). */
+	private final int fx;
 	private int tick;
 
-	RewindTrail(ServerLevel level, List<Vec3> path) {
+	RewindTrail(ServerLevel level, List<Vec3> path, int fx) {
 		this.level = level;
 		this.path = path;
+		this.fx = fx;
 	}
 
 	/** One tick of playback. Returns false when done. */
@@ -35,12 +38,12 @@ final class RewindTrail {
 		int to = n * (tick + 1) / PLAYBACK_TICKS;
 		for (int i = from; i < to; i++) {
 			Vec3 p = path.get(i);
-			level.sendParticles(GOLD_DUST, p.x, p.y + 1.0, p.z, 1, 0.0, 0.0, 0.0, 0.0);
+			ChronoFx.particles(level, fx, GOLD_DUST, p.x, p.y + 1.0, p.z, 1, 0.0, 0.0, 0.0, 0.0);
 			if (i % 2 == 0) {
-				level.sendParticles(ParticleTypes.END_ROD, p.x, p.y + 0.9, p.z, 1, 0.05, 0.25, 0.05, 0.0);
+				ChronoFx.particles(level, fx, ParticleTypes.END_ROD, p.x, p.y + 0.9, p.z, 1, 0.05, 0.25, 0.05, 0.0);
 			}
 			if (i % 5 == 0) {
-				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, p.x, p.y + 1.2, p.z, 1, 0.15, 0.3, 0.15, 0.0);
+				ChronoFx.particles(level, fx, ParticleTypes.ELECTRIC_SPARK, p.x, p.y + 1.2, p.z, 1, 0.15, 0.3, 0.15, 0.0);
 			}
 		}
 		Vec3 at = path.get(Math.min(n - 1, Math.max(0, to - 1)));
@@ -51,7 +54,7 @@ final class RewindTrail {
 		if (tick >= PLAYBACK_TICKS) {
 			Vec3 end = path.get(n - 1);
 			level.playSound(null, end.x, end.y, end.z, SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 0.7F, 2.0F);
-			level.sendParticles(ParticleTypes.WAX_ON, end.x, end.y + 1.0, end.z, 12, 0.4, 0.7, 0.4, 0.4);
+			ChronoFx.particles(level, fx, ParticleTypes.WAX_ON, end.x, end.y + 1.0, end.z, 12, 0.4, 0.7, 0.4, 0.4);
 			return false;
 		}
 		return true;

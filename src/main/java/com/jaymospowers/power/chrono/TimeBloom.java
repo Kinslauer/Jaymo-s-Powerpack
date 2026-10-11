@@ -58,14 +58,17 @@ final class TimeBloom {
 	private static final Set<BlockEntityType<?>> BROKEN = new HashSet<>();
 
 	final ServerLevel level;
+	/** Its owner's particle style ({@link ChronoFx#style}). */
+	final int fx;
 	final BlockPos center;
 	int ticksLeft = DURATION;
 	private int age;
 	private final List<BlockPos> randomTickers = new ArrayList<>();
 	private final List<BlockPos> blockEntities = new ArrayList<>();
 
-	TimeBloom(ServerLevel level, BlockPos center) {
+	TimeBloom(ServerLevel level, BlockPos center, int fx) {
 		this.level = level;
+		this.fx = fx;
 		this.center = center;
 	}
 
@@ -73,8 +76,8 @@ final class TimeBloom {
 		Vec3 c = Vec3.atCenterOf(center);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 1.2F);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.BONE_MEAL_USE, SoundSource.PLAYERS, 1.0F, 0.8F);
-		level.sendParticles(ParticleTypes.HAPPY_VILLAGER, c.x, c.y, c.z, 30, RADIUS * 0.5, 0.6, RADIUS * 0.5, 0.0);
-		level.sendParticles(ParticleTypes.WAX_ON, c.x, c.y + 0.5, c.z, 20, 1.0, 0.5, 1.0, 0.5);
+		ChronoFx.particles(level, fx, ParticleTypes.HAPPY_VILLAGER, c.x, c.y, c.z, 30, RADIUS * 0.5, 0.6, RADIUS * 0.5, 0.0);
+		ChronoFx.particles(level, fx, ParticleTypes.WAX_ON, c.x, c.y + 0.5, c.z, 20, 1.0, 0.5, 1.0, 0.5);
 		scan();
 	}
 
@@ -156,9 +159,9 @@ final class TimeBloom {
 			state.randomTick(level, pos, random);
 			if (level.getBlockState(pos) != state) {
 				// it grew (or otherwise changed): a little green-gold puff
-				level.sendParticles(ParticleTypes.HAPPY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.6, pos.getZ() + 0.5, 3, 0.3, 0.3, 0.3, 0.0);
+				ChronoFx.particles(level, fx, ParticleTypes.HAPPY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.6, pos.getZ() + 0.5, 3, 0.3, 0.3, 0.3, 0.0);
 				if (random.nextInt(3) == 0) {
-					level.sendParticles(ParticleTypes.WAX_ON, pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5, 1, 0.2, 0.2, 0.2, 0.0);
+					ChronoFx.particles(level, fx, ParticleTypes.WAX_ON, pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5, 1, 0.2, 0.2, 0.2, 0.0);
 				}
 			}
 		}
@@ -175,8 +178,8 @@ final class TimeBloom {
 				}
 			}
 			if ((age + i) % 10 == 0) {
-				level.sendParticles(ParticleTypes.WAX_ON, pos.getX() + 0.5, pos.getY() + 1.05, pos.getZ() + 0.5, 2, 0.25, 0.05, 0.25, 0.0);
-				level.sendParticles(GOLD_DUST, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 2, 0.45, 0.45, 0.45, 0.0);
+				ChronoFx.particles(level, fx, ParticleTypes.WAX_ON, pos.getX() + 0.5, pos.getY() + 1.05, pos.getZ() + 0.5, 2, 0.25, 0.05, 0.25, 0.0);
+				ChronoFx.particles(level, fx, GOLD_DUST, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 2, 0.45, 0.45, 0.45, 0.0);
 			}
 		}
 	}
@@ -221,7 +224,7 @@ final class TimeBloom {
 				double x = center.getX() + 0.5 + (random.nextDouble() * 2 - 1) * RADIUS;
 				double z = center.getZ() + 0.5 + (random.nextDouble() * 2 - 1) * RADIUS;
 				double y = center.getY() + random.nextDouble() * 2.0;
-				level.sendParticles(i % 2 == 0 ? BLOOM_DUST : GOLD_DUST, x, y, z, 1, 0.0, 0.0, 0.0, 0.0);
+				ChronoFx.particles(level, fx, i % 2 == 0 ? BLOOM_DUST : GOLD_DUST, x, y, z, 1, 0.0, 0.0, 0.0, 0.0);
 			}
 		}
 		if (age % 5 == 0) {
@@ -229,7 +232,7 @@ final class TimeBloom {
 			double a0 = age * 0.05;
 			for (int h = 0; h < 12; h++) {
 				double a = a0 + h / 12.0 * Math.PI * 2.0;
-				level.sendParticles(h % 3 == 0 ? ParticleTypes.WAX_ON : ParticleTypes.COMPOSTER,
+				ChronoFx.particles(level, fx, h % 3 == 0 ? ParticleTypes.WAX_ON : ParticleTypes.COMPOSTER,
 					center.getX() + 0.5 + Math.sin(a) * RADIUS, center.getY() + 0.15, center.getZ() + 0.5 - Math.cos(a) * RADIUS,
 					1, 0.0, 0.0, 0.0, 0.0);
 			}

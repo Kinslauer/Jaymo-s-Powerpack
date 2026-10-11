@@ -49,7 +49,7 @@ public final class StoppedClockItem extends Item {
 			if (Powers.has(serverPlayer, ChronoPower.INSTANCE) && Fate.canAscend(serverPlayer)) {
 				ItemStack stack = serverPlayer.getItemInHand(hand);
 				stack.shrink(1);
-				serverLevel.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.4, 0.8, 0.4, 0.2);
+				ChronoFx.particles(serverLevel, player, ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.4, 0.8, 0.4, 0.2);
 				serverLevel.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 1.0F, 0.5F);
 				Fate.ascend(serverPlayer);
 			} else {

@@ -13,7 +13,8 @@ import net.minecraft.world.entity.LivingEntity;
 /**
  * A creature on the end of a web (held by Yank, or hitched to a block) goes limp like a ragdoll, the way Jaymo's
  * Kitchen's jolted corpses do: its body tips along the way it's being dragged, and every limb it has (whatever the
- * model: arms, legs, wings, tails) flops on its own beat. The faster it's dragged, the wilder it gets.
+ * model: arms, legs, wings, tails) flops on its own beat. The faster it's dragged, the wilder it gets. A creature thrown
+ * by a Time Flow blow goes limp the same way until it lands.
  */
 public final class WebRagdoll {
 	public static final RenderStateDataKey<Rag> KEY = RenderStateDataKey.create(() -> "jaymospowers:web_ragdoll");
@@ -39,7 +40,8 @@ public final class WebRagdoll {
 	/** From the living renderer's extractRenderState. */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
 		if (entity.getAttached(WebPower.HELD) == null && entity.getAttached(WebPower.HITCH) == null
-			&& entity.getAttached(com.jaymospowers.power.gravity.GravityPower.LIFTED) == null) {
+			&& entity.getAttached(com.jaymospowers.power.gravity.GravityPower.LIFTED) == null
+			&& !com.jaymospowers.power.chrono.ChronoFlow.flung(entity)) {
 			state.setData(KEY, null);
 			return;
 		}

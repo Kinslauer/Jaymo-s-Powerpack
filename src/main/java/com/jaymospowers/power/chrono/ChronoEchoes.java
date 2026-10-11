@@ -86,6 +86,22 @@ public final class ChronoEchoes {
 	static final AttachmentType<List<Orphan>> ORPHANS = AttachmentRegistry.create(JaymosPowers.id("chrono_orphans"),
 		builder -> builder.persistent(Orphan.CODEC.listOf()));
 
+	/** A Nether echo that blinked out mid-fight: its health, its bond, and the ticks (in the Nether) until it's back. */
+	record NetherReturn(float health, long bond, int ticks) {
+		static final Codec<NetherReturn> CODEC = RecordCodecBuilder.create(i -> i.group(
+				Codec.FLOAT.fieldOf("health").forGetter(NetherReturn::health),
+				Codec.LONG.fieldOf("bond").forGetter(NetherReturn::bond),
+				Codec.INT.fieldOf("ticks").forGetter(NetherReturn::ticks))
+			.apply(i, NetherReturn::new));
+	}
+
+	/** On a Chrono player whose Nether echo blinked out: it comes back to finish the fight while they're in the Nether. */
+	static final AttachmentType<NetherReturn> NETHER_RETURN = AttachmentRegistry.create(JaymosPowers.id("chrono_nether_return"),
+		builder -> builder.persistent(NetherReturn.CODEC));
+	/** A blinked-out Nether echo is back after this long in the Nether (ticks: 20 s to 2 min), this close. */
+	static final int NETHER_RETURN_MIN = 400, NETHER_RETURN_MAX = 2400;
+	static final int NETHER_SPAWN_MIN = 8, NETHER_SPAWN_MAX = 16;
+
 	private ChronoEchoes() {
 	}
 
@@ -103,10 +119,28 @@ public final class ChronoEchoes {
 
 	// ---------------------------------------------------------------- timers
 
-	/** A level-up: an echo is owed. */
+	/** A level-up: an echo is owed, unless one is already out there (or on its way): one echo per Chrono. */
 	static void owe(ServerPlayer player) {
 		ChronoMemory memory = ChronoMemory.of(player);
+		if (hasEcho(player, memory)) {
+			return;
+		}
 		memory.echoesDue.add(between(player.getRandom(), ECHO_DELAY_MIN, ECHO_DELAY_MAX));
+	}
+
+	/** Whether the player's one echo exists: owed, on its way back, blinked out of a Nether fight, or loaded somewhere. */
+	static boolean hasEcho(ServerPlayer player, ChronoMemory memory) {
+		return !memory.echoesDue.isEmpty() || !memory.returnsDue.isEmpty() || player.getAttached(NETHER_RETURN) != null
+			|| loadedEcho(player);
+	}
+
+	private static boolean loadedEcho(ServerPlayer player) {
+		for (ServerLevel level : player.level().getServer().getAllLevels()) {
+			if (!level.getEntities(ECHO, e -> e.isAlive() && e.isEchoOf(player)).isEmpty()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Every tick for a Chrono player: count the timers down (survival only) and pick up orphans. */
@@ -117,8 +151,37 @@ public final class ChronoEchoes {
 		if (!player.isAlive() || player.isCreative() || player.isSpectator()) {
 			return;
 		}
+		// one echo per Chrono: older saves may still owe several; only the first is kept
+		while (memory.echoesDue.size() + memory.returnsDue.size() > 1 && !memory.echoesDue.isEmpty()) {
+			memory.echoesDue.remove(memory.echoesDue.size() - 1);
+		}
 		countDown(player, memory, memory.echoesDue);
 		countDown(player, memory, memory.returnsDue);
+		netherReturn(player, memory);
+	}
+
+	/** A blinked-out Nether echo counts down while its owner is in the Nether, then appears around them, as hurt as it left. */
+	private static void netherReturn(ServerPlayer player, ChronoMemory memory) {
+		NetherReturn pending = player.getAttached(NETHER_RETURN);
+		if (pending == null || player.level().dimension() != Level.NETHER) {
+			return;
+		}
+		if (pending.bond() != memory.bond) {
+			player.removeAttached(NETHER_RETURN); // a new bond: that echo is gone
+			return;
+		}
+		if (pending.ticks() > 1) {
+			player.setAttached(NETHER_RETURN, new NetherReturn(pending.health(), pending.bond(), pending.ticks() - 1));
+			return;
+		}
+		ChronoEcho echo = spawnAt(player, memory, findSpot(player, NETHER_SPAWN_MIN, NETHER_SPAWN_MAX, false));
+		if (echo == null) {
+			player.setAttached(NETHER_RETURN, new NetherReturn(pending.health(), pending.bond(), SPAWN_RETRY));
+			return;
+		}
+		player.removeAttached(NETHER_RETURN);
+		echo.returnWithHealth(pending.health());
+		echo.setTarget(player);
 	}
 
 	private static void countDown(ServerPlayer player, ChronoMemory memory, List<Integer> timers) {
@@ -126,7 +189,8 @@ public final class ChronoEchoes {
 			int left = timers.get(i) - 1;
 			if (left > 0) {
 				timers.set(i, left);
-			} else if (spawn(player, memory) != null) {
+			} else if (loadedEcho(player) || spawn(player, memory) != null) {
+				// (one echo per Chrono: with one already out there, this one is dropped)
 				timers.remove(i--);
 			} else {
 				timers.set(i, SPAWN_RETRY);
@@ -183,8 +247,11 @@ public final class ChronoEchoes {
 
 	/** Spawns one of the player's echoes near them, now. Returns null if there was nowhere to put it. */
 	static @Nullable ChronoEcho spawn(ServerPlayer player, ChronoMemory memory) {
+		return spawnAt(player, memory, findSpot(player, SPAWN_MIN_DISTANCE, SPAWN_MAX_DISTANCE, true));
+	}
+
+	private static @Nullable ChronoEcho spawnAt(ServerPlayer player, ChronoMemory memory, @Nullable BlockPos spot) {
 		ServerLevel level = player.level();
-		BlockPos spot = findSpot(player, SPAWN_MIN_DISTANCE, SPAWN_MAX_DISTANCE, true);
 		if (spot == null) {
 			return null;
 		}
@@ -291,15 +358,15 @@ public final class ChronoEchoes {
 		double x = echo.getX();
 		double y = echo.getY() + 1.0;
 		double z = echo.getZ();
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, x, y, z, 80, 0.5, 0.9, 0.5, 0.3);
-		level.sendParticles(ChronoEcho.SHARD, x, y, z, 60, 0.6, 1.0, 0.6, 0.0);
-		level.sendParticles(ParticleTypes.SCULK_SOUL, x, y, z, 10, 0.4, 0.6, 0.4, 0.05);
+		ChronoFx.particles(level, echo.ownerPlayer(), ParticleTypes.REVERSE_PORTAL, x, y, z, 80, 0.5, 0.9, 0.5, 0.3);
+		ChronoFx.particles(level, echo.ownerPlayer(), ChronoEcho.SHARD, x, y, z, 60, 0.6, 1.0, 0.6, 0.0);
+		ChronoFx.particles(level, echo.ownerPlayer(), ParticleTypes.SCULK_SOUL, x, y, z, 10, 0.4, 0.6, 0.4, 0.05);
 		// a ring of light rushing inwards: the moment folding shut
 		for (int i = 0; i < 32; i++) {
 			double a = i / 32.0 * Math.PI * 2.0;
 			double dx = Math.cos(a);
 			double dz = Math.sin(a);
-			level.sendParticles(ParticleTypes.END_ROD, x + dx * 3.0, y, z + dz * 3.0, 0, -dx, 0.0, -dz, 0.25);
+			ChronoFx.particles(level, echo.ownerPlayer(), ParticleTypes.END_ROD, x + dx * 3.0, y, z + dz * 3.0, 0, -dx, 0.0, -dz, 0.25);
 		}
 		level.playSound(null, x, y, z, SoundEvents.BELL_BLOCK, SoundSource.HOSTILE, 1.5F, 0.5F);
 		level.playSound(null, x, y, z, SoundEvents.BEACON_DEACTIVATE, SoundSource.HOSTILE, 1.2F, 0.5F);
@@ -329,9 +396,9 @@ public final class ChronoEchoes {
 		double x = echo.getX();
 		double y = echo.getY() + 1.0;
 		double z = echo.getZ();
-		level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, x, y, z, 120, 1.2, 1.6, 1.2, 0.2);
-		level.sendParticles(ParticleTypes.SONIC_BOOM, x, y, z, 1, 0.0, 0.0, 0.0, 0.0);
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 120, 0.6, 1.2, 0.6, 0.6);
+		ChronoFx.particles(level, player, ParticleTypes.SOUL_FIRE_FLAME, x, y, z, 120, 1.2, 1.6, 1.2, 0.2);
+		ChronoFx.particles(level, player, ParticleTypes.SONIC_BOOM, x, y, z, 1, 0.0, 0.0, 0.0, 0.0);
+		ChronoFx.particles(level, player, ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 120, 0.6, 1.2, 0.6, 0.6);
 		level.playSound(null, x, y, z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.HOSTILE, 2.0F, 0.5F);
 		level.playSound(null, x, y, z, SoundEvents.END_PORTAL_SPAWN, SoundSource.HOSTILE, 1.5F, 0.6F);
 		player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.BLINDNESS, 30, 0), player);
@@ -340,14 +407,18 @@ public final class ChronoEchoes {
 		com.jaymospowers.core.Fate.corrupt(player);
 	}
 
+	private static net.minecraft.world.entity.player.@Nullable Player owner(Entity echo) {
+		return echo instanceof ChronoEcho chronoEcho ? chronoEcho.ownerPlayer() : null;
+	}
+
 	static void shatterFx(ServerLevel level, Entity echo) {
 		double x = echo.getX();
 		double y = echo.getY() + 1.0;
 		double z = echo.getZ();
-		level.sendParticles(ChronoEcho.SHARD, x, y, z, 40, 0.4, 0.8, 0.4, 0.0);
-		level.sendParticles(ChronoEcho.SHARD_GREY, x, y, z, 20, 0.5, 0.9, 0.5, 0.0);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, y, z, 16, 0.4, 0.7, 0.4, 0.15);
-		level.sendParticles(ParticleTypes.END_ROD, x, y, z, 8, 0.3, 0.6, 0.3, 0.12);
+		ChronoFx.particles(level, owner(echo), ChronoEcho.SHARD, x, y, z, 40, 0.4, 0.8, 0.4, 0.0);
+		ChronoFx.particles(level, owner(echo), ChronoEcho.SHARD_GREY, x, y, z, 20, 0.5, 0.9, 0.5, 0.0);
+		ChronoFx.particles(level, owner(echo), ParticleTypes.ELECTRIC_SPARK, x, y, z, 16, 0.4, 0.7, 0.4, 0.15);
+		ChronoFx.particles(level, owner(echo), ParticleTypes.END_ROD, x, y, z, 8, 0.3, 0.6, 0.3, 0.12);
 		level.playSound(null, x, y, z, SoundEvents.GLASS_BREAK, SoundSource.HOSTILE, 1.0F, 1.4F);
 		level.playSound(null, x, y, z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.HOSTILE, 1.0F, 0.6F);
 		level.playSound(null, x, y, z, SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.HOSTILE, 0.8F, 0.6F);
@@ -357,14 +428,14 @@ public final class ChronoEchoes {
 		double x = echo.getX();
 		double y = echo.getY() + 1.0;
 		double z = echo.getZ();
-		level.sendParticles(ChronoEcho.SHARD_GREY, x, y, z, 24, 0.35, 0.8, 0.35, 0.0);
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, x, y, z, 12, 0.3, 0.6, 0.3, 0.05);
+		ChronoFx.particles(level, owner(echo), ChronoEcho.SHARD_GREY, x, y, z, 24, 0.35, 0.8, 0.35, 0.0);
+		ChronoFx.particles(level, owner(echo), ParticleTypes.REVERSE_PORTAL, x, y, z, 12, 0.3, 0.6, 0.3, 0.05);
 		level.playSound(null, x, y, z, SoundEvents.BEACON_DEACTIVATE, SoundSource.HOSTILE, 0.5F, 1.6F);
 	}
 
 	static void arriveFx(ServerLevel level, Vec3 at) {
-		level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y + 1.0, at.z, 30, 0.3, 0.8, 0.3, 0.1);
-		level.sendParticles(ChronoEcho.SHARD, at.x, at.y + 1.0, at.z, 16, 0.3, 0.8, 0.3, 0.0);
+		ChronoFx.particles(level, ChronoFx.PLAIN, ParticleTypes.REVERSE_PORTAL, at.x, at.y + 1.0, at.z, 30, 0.3, 0.8, 0.3, 0.1);
+		ChronoFx.particles(level, ChronoFx.PLAIN, ChronoEcho.SHARD, at.x, at.y + 1.0, at.z, 16, 0.3, 0.8, 0.3, 0.0);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.HOSTILE, 0.6F, 0.5F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.COMPARATOR_CLICK, SoundSource.HOSTILE, 0.5F, 0.7F);
 	}

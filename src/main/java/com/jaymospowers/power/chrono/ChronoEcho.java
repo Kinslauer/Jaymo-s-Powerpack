@@ -62,7 +62,7 @@ import org.jspecify.annotations.Nullable;
  * Chrono's curse: a time remnant of its owner, wearing their face. It walks the routes they walked, holds what they
  * hold, mines what they mine (no drops), places what they place, and attacks every living thing near it, its owner
  * included. Outside the Nether any hurt shatters it, and it comes back later near its owner; only in the Nether can it
- * die, for good. See {@link ChronoEchoes} for spawning, returning and following.
+ * die, for good, and there it fights with its owner's own abilities ({@link ChronoEchoFight}). See {@link ChronoEchoes} for spawning, returning and following.
  */
 public class ChronoEcho extends Monster {
 	// ---- tuning ----
@@ -123,6 +123,10 @@ public class ChronoEcho extends Monster {
 	private List<BlockPos> route = new ArrayList<>();
 	/** Shattered, faded or collapsed: it's leaving, ignore anything else that happens to it. */
 	private boolean gone;
+	/** In the Nether: the real fight, with its owner's abilities (not saved; it picks up again on load). */
+	private @Nullable ChronoEchoFight fight;
+	/** Back from a Nether blink with this health (0 for none). */
+	private float returnHealth;
 	// client-side ticking
 	private int tickRun;
 
@@ -198,6 +202,12 @@ public class ChronoEcho extends Monster {
 		return player.getUUID().equals(this.owner);
 	}
 
+	/** Its owner, when they're in the same world (either side). */
+	@Nullable Player ownerPlayer() {
+		Optional<UUID> id = this.level().isClientSide() ? this.ownerId() : Optional.ofNullable(this.owner);
+		return id.map(uuid -> this.level().getPlayerByUUID(uuid)).orElse(null);
+	}
+
 	/** The owner's profile (for their skin), synced to clients. */
 	public ResolvableProfile getProfile() {
 		return this.entityData.get(DATA_PROFILE);
@@ -226,6 +236,15 @@ public class ChronoEcho extends Monster {
 		}
 		if (this.tickCount % OWNER_CHECK_INTERVAL == 0 && !checkOwner(level)) {
 			return;
+		}
+		if (level.dimension() == Level.NETHER) {
+			if (this.fight == null) {
+				this.fight = new ChronoEchoFight(this);
+			}
+			this.fight.tick(level);
+		} else if (this.fight != null) {
+			this.fight.end();
+			this.fight = null;
 		}
 		RandomSource random = this.getRandom();
 		boolean idle = this.getTarget() == null;
@@ -300,7 +319,7 @@ public class ChronoEcho extends Monster {
 		this.getLookControl().setLookAt(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
 		this.swingForAttack(InteractionHand.MAIN_HAND);
 		level.destroyBlock(pos, false, this);
-		level.sendParticles(SHARD, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.0);
+		ChronoFx.particles(level, this.ownerPlayer(), SHARD, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.0);
 	}
 
 	/** No block entities (chests, furnaces, spawners...), nothing unbreakable or too hard. */
@@ -344,7 +363,7 @@ public class ChronoEcho extends Monster {
 			level.setBlockAndUpdate(pos, state);
 			SoundEvent sound = state.getSoundType().getPlaceSound();
 			level.playSound(null, pos, sound, SoundSource.HOSTILE, 0.8F, 0.8F);
-			level.sendParticles(SHARD, pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5, 4, 0.3, 0.2, 0.3, 0.0);
+			ChronoFx.particles(level, this.ownerPlayer(), SHARD, pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5, 4, 0.3, 0.2, 0.3, 0.0);
 			return;
 		}
 	}
@@ -354,11 +373,11 @@ public class ChronoEcho extends Monster {
 		RandomSource random = this.getRandom();
 		Level level = this.level();
 		if (this.tickCount % 3 == 0) {
-			level.addParticle(random.nextInt(3) == 0 ? SHARD_GREY : SHARD, this.getX() + (random.nextDouble() - 0.5) * 0.8,
+			ChronoFx.particle(level, this.ownerPlayer(), random.nextInt(3) == 0 ? SHARD_GREY : SHARD, this.getX() + (random.nextDouble() - 0.5) * 0.8,
 				this.getY() + random.nextDouble() * 1.9, this.getZ() + (random.nextDouble() - 0.5) * 0.8, 0.0, 0.01, 0.0);
 		}
 		if (random.nextInt(50) == 0) {
-			level.addParticle(ParticleTypes.ELECTRIC_SPARK, this.getX(), this.getY() + 1.0 + random.nextDouble() * 0.6, this.getZ(),
+			ChronoFx.particle(level, this.ownerPlayer(), ParticleTypes.ELECTRIC_SPARK, this.getX(), this.getY() + 1.0 + random.nextDouble() * 0.6, this.getZ(),
 				(random.nextDouble() - 0.5) * 0.1, 0.02, (random.nextDouble() - 0.5) * 0.1);
 		}
 		if (this.tickRun == 0 && random.nextInt(200) == 0) {
@@ -382,6 +401,10 @@ public class ChronoEcho extends Monster {
 				living.knockback(0.4, this.getX() - target.getX(), this.getZ() - target.getZ(), source, ATTACK_DAMAGE);
 			}
 			this.setLastHurtMob(target);
+			if (target instanceof ServerPlayer player) {
+				// a blow from out of time: it may pour Time Flow into a Chrono not yet ready for it
+				ChronoFlow.echoStruck(player);
+			}
 			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.HOSTILE, 0.7F, 0.7F);
 		}
 		return hurt;
@@ -415,10 +438,54 @@ public class ChronoEcho extends Monster {
 	@Override
 	public void die(DamageSource source) {
 		super.die(source);
+		if (this.fight != null) {
+			this.fight.end();
+			this.fight = null;
+		}
 		if (!this.gone && this.level() instanceof ServerLevel level) {
 			this.gone = true;
 			ChronoEchoes.collapse(level, this);
 		}
+	}
+
+	@Override
+	public void remove(Entity.RemovalReason reason) {
+		if (this.fight != null) {
+			// no boss bar left hanging when it's unloaded or discarded
+			this.fight.end();
+			this.fight = null;
+		}
+		super.remove(reason);
+	}
+
+		/**
+	 * In the Nether, below half health: it blinks out like a shattered echo, and comes back around its owner, as hurt as
+	 * it left, while they're in the Nether. With its owner offline it simply shatters (and returns the usual way).
+	 */
+	void blinkAway(ServerLevel level) {
+		if (this.gone) {
+			return;
+		}
+		ServerPlayer player = this.owner == null ? null : level.getServer().getPlayerList().getPlayer(this.owner);
+		if (player == null) {
+			shatter(level);
+			return;
+		}
+		this.gone = true;
+		ChronoEchoes.shatterFx(level, this);
+		player.setAttached(ChronoEchoes.NETHER_RETURN, new ChronoEchoes.NetherReturn(this.getHealth(), this.bond,
+			ChronoEchoes.NETHER_RETURN_MIN + this.getRandom().nextInt(ChronoEchoes.NETHER_RETURN_MAX - ChronoEchoes.NETHER_RETURN_MIN + 1)));
+		this.discard();
+	}
+
+	/** Back from a blink, to finish the fight: this hurt (once its Nether health is in place). */
+	void returnWithHealth(float health) {
+		this.returnHealth = health;
+	}
+
+	/** The health it comes back with from a blink (0: a fresh echo, at full health). */
+	float returnHealth() {
+		return this.returnHealth;
 	}
 
 	/** Hurt outside the Nether: it breaks apart and is sent back to its owner's future. */

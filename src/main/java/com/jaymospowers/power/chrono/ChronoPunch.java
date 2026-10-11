@@ -44,10 +44,13 @@ final class ChronoPunch {
 	private ChronoPunch() {
 	}
 
-	/** Starts the flurry (in Time Flow, the barrage locked onto the enemy you look at, if there is one). Returns true (the cooldown starts). */
+	/**
+	 * Starts the flurry. In Time Flow it's a grab instead: the barrage, locked onto the enemy close in front of you, and
+	 * with no one in reach nothing happens. Returns whether it started (and the cooldown with it).
+	 */
 	static boolean punch(ServerPlayer player) {
-		if (ChronoFlow.on(player) && ChronoFlow.barrage(player)) {
-			return true;
+		if (ChronoFlow.on(player)) {
+			return ChronoFlow.barrage(player);
 		}
 		FLURRIES.put(player.getUUID(), 0);
 		ServerLevel level = player.level();
@@ -87,7 +90,7 @@ final class ChronoPunch {
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getLookAngle();
 		Vec3 fist = eye.add(look.scale(1.4)).add(0.0, -0.3, 0.0);
-		level.sendParticles(GOLD, fist.x, fist.y, fist.z, 3, 0.25, 0.2, 0.25, 0.0);
+		ChronoFx.particles(level, player, GOLD, fist.x, fist.y, fist.z, 3, 0.25, 0.2, 0.25, 0.0);
 		boolean any = false;
 		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(REACH + 1.0),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && !player.isAlliedTo(e)
@@ -107,7 +110,8 @@ final class ChronoPunch {
 			if (last) {
 				Vec3 away = to.horizontal().lengthSqr() < 1.0E-4 ? look.horizontal() : to.horizontal().normalize();
 				target.setDeltaMovement(away.scale(FINISH_PUSH).add(0.0, 0.45, 0.0));
-				level.sendParticles(ParticleTypes.EXPLOSION, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+				ChronoFlow.reel(target, ChronoFlow.FLUNG, 0);
+				ChronoFx.particles(level, player, ParticleTypes.EXPLOSION, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 			} else {
 				// held in the moment: the punches pin them where they stand
 				target.setDeltaMovement(before.scale(0.2));
@@ -115,7 +119,8 @@ final class ChronoPunch {
 			}
 			target.syncVelocity = true;
 			Vec3 at = target.getBoundingBox().getCenter();
-			level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 4, 0.25, 0.3, 0.25, 0.25);
+			ChronoFx.crackSound(level, player, at.x, at.y, at.z);
+			ChronoFx.particles(level, player, ParticleTypes.CRIT, at.x, at.y, at.z, 4, 0.25, 0.3, 0.25, 0.25);
 		}
 		float pitch = 1.0F + n * 0.06F;
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), any ? SoundEvents.PLAYER_ATTACK_STRONG : SoundEvents.PLAYER_ATTACK_WEAK,

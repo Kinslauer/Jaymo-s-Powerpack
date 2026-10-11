@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.chrono;
 
+import com.jaymospowers.power.chrono.ChronoFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.client.JaymosPowersClient;
@@ -117,9 +118,9 @@ public final class ChronoPowerClient implements PowerClient {
 			double y = player.getY() + TIMELESS_HEIGHT;
 			double minute = t * TIMELESS_MINUTE_SPEED;
 			double hour = t * TIMELESS_HOUR_SPEED;
-			level.addParticle(MINUTE_HAND, player.getX() + Math.sin(minute) * TIMELESS_RADIUS, y, player.getZ() - Math.cos(minute) * TIMELESS_RADIUS,
+			ChronoFx.particle(level, player, MINUTE_HAND, player.getX() + Math.sin(minute) * TIMELESS_RADIUS, y, player.getZ() - Math.cos(minute) * TIMELESS_RADIUS,
 				0.0, 0.0, 0.0);
-			level.addParticle(HOUR_HAND, player.getX() + Math.sin(hour) * TIMELESS_RADIUS * 0.65, y + 0.02,
+			ChronoFx.particle(level, player, HOUR_HAND, player.getX() + Math.sin(hour) * TIMELESS_RADIUS * 0.65, y + 0.02,
 				player.getZ() - Math.cos(hour) * TIMELESS_RADIUS * 0.65, 0.0, 0.0, 0.0);
 		}
 	}
