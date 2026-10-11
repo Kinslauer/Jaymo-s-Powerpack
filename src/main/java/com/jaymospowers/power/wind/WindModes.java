@@ -89,8 +89,8 @@ public final class WindModes {
 	static final float IDLE_ZAP_DAMAGE = 1.5F;
 	static final float CAST_ZAP_DAMAGE = 3.0F;
 	/** The mode's hunger, per tick (the Thunderhead's is the most); at or below this much food (three shanks) it gives out, and won't start. */
-	static final float MODE_EXHAUSTION = 0.01F;
-	static final float THUNDERHEAD_EXHAUSTION = 0.025F;
+	static final float MODE_EXHAUSTION = 0.04F;
+	static final float THUNDERHEAD_EXHAUSTION = 0.05F;
 	static final int MODE_MIN_FOOD = 6;
 	/**
 	 * A wind can only call thunder down out of real weather: none under a clear sky, {@code RAIN_THUNDER} of its full
