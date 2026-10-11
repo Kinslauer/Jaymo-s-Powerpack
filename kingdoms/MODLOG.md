@@ -510,3 +510,22 @@ with yours), and a block at the end of `en_us.json`. Every number is a constant 
   - `war status`;
   - a peace offer and acceptance, and each kind of terms (`war start`, then kill folk or take chunks to move the
     score).
+
+## 0.3.0: first playtest fixes (dev server and client, with Epic Structures: Villages)
+Played on a dev server with a client joined: kingdoms founded naturally at Epic towns (plains, savanna) and by command
+(castle, tower, keep), production, builders, and a war party. Fixed:
+- **Storehouses never built** (nor builder crews, so no projects): in 26.3 `#minecraft:dirt` no longer holds grass,
+  podzol or mycelium (they moved to `#grass_blocks`), so every grassy site counted as built ground. `Castle.natural`
+  and `Materials.free` now use `#substrate_overworld` (dirt, grass, mud, moss). This also changes where seats are
+  sited (grass no longer counts against a spot), and helps camps, plots and the planner.
+- In a big town the first ring round the gate (8-40 blocks) is all houses and roads; the storehouse now looks out to
+  96 blocks when that ring has no site.
+- A savanna castle's storehouse went in its courtyard (plain terracotta, its floor, counted as the land's ground).
+- A seat on a slope stood on a sheer foundation with no way up to its gate: now steps run down from the gate to the
+  land (three wide, in the palette's stairs), or a path is cut through when the seat is dug into a rise.
+- Building a seat dropped dozens of items (flowers, crops, torches popped off), now mostly none.
+- The palette came from the bell's biome, and Epic towns often have a river through the middle (a savanna town got
+  plains stone): a bell on a river, beach or shore now takes the town's commonest other biome round it.
+
+Still to look at: seats in dense towns cut through houses (their tops left floating); theft, plots and the plot stake,
+and Villages were not tried.

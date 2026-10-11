@@ -88,7 +88,7 @@ public final class Materials {
 
 	/** Soil, paths, water and plants: dug or gathered on site. */
 	static boolean free(BlockState state) {
-		return !state.getFluidState().isEmpty() || state.is(BlockTags.DIRT) || state.is(BlockTags.SAND) || state.is(Blocks.DIRT_PATH)
+		return !state.getFluidState().isEmpty() || state.is(BlockTags.SUBSTRATE_OVERWORLD) || state.is(BlockTags.SAND) || state.is(Blocks.DIRT_PATH)
 			|| state.is(Blocks.FARMLAND) || state.is(Blocks.GRAVEL) || state.is(Blocks.SNOW) || state.is(Blocks.COARSE_DIRT)
 			|| state.is(BlockTags.CROPS) || state.is(BlockTags.FLOWERS) || state.is(BlockTags.SAPLINGS) || state.canBeReplaced();
 	}

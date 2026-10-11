@@ -29,6 +29,8 @@ import org.jspecify.annotations.Nullable;
 public final class Storehouse {
 	/** Looks for a site this far from the anchor (the keep's gate, or the bell). */
 	static final int SITE_MIN = 8, SITE_MAX = 40, SITE_STEP = 4, SITE_ANGLES = 16;
+	/** A big town (Epic Structures' towns fill the first ring) looks further out, up to this far. */
+	static final int SITE_FAR = 96;
 	/** The most the ground may rise or fall across a site. */
 	static final int MAX_SPREAD = 3;
 	/** The storehouse: half its width (x), its depth (z), its wall height. */
@@ -81,7 +83,7 @@ public final class Storehouse {
 			JaymosKingdoms.LOGGER.info("{} found no open ground for its {}", faction.name(), shed ? "shed" : "storehouse");
 			return null;
 		}
-		Palette p = Palette.of(level.getBiome(faction.seat()));
+		Palette p = Palette.at(level, faction.seat());
 		List<BlockPos> containers = new ArrayList<>();
 		BlockPos depot = shed ? shed(level, frame, p, containers) : hall(level, frame, p, containers);
 		Storage.register(level.getServer(), faction.id(), containers, depot);
@@ -93,11 +95,14 @@ public final class Storehouse {
 		return depot;
 	}
 
-	/** The best open, natural, flat site {@code SITE_MIN}-{@code SITE_MAX} from {@code anchor}, its door facing it; null if none. */
+	/**
+	 * The best open, natural, flat site {@code SITE_MIN}-{@code SITE_MAX} from {@code anchor} (or, if there's none, the nearest
+	 * out to {@code SITE_FAR}), its door facing it; null if none.
+	 */
 	static Castle.@Nullable Frame site(ServerLevel level, BlockPos anchor, int half, int depth) {
 		Castle.Frame best = null;
 		double bestScore = Double.MAX_VALUE;
-		for (int r = SITE_MIN; r <= SITE_MAX; r += SITE_STEP) {
+		for (int r = SITE_MIN; r <= SITE_FAR && (best == null || r <= SITE_MAX); r += SITE_STEP) {
 			for (int i = 0; i < SITE_ANGLES; i++) {
 				double a = (i + (r / SITE_STEP) * 0.5) / SITE_ANGLES * Math.PI * 2.0;
 				BlockPos center = anchor.offset((int)Math.round(Math.cos(a) * r), 0, (int)Math.round(Math.sin(a) * r));
@@ -165,9 +170,13 @@ public final class Storehouse {
 		return hi - lo;
 	}
 
-	/** The land's own ground (no logs or leaves: a site isn't cleared of trees). */
+	/**
+	 * The land's own ground (no logs or leaves: a site isn't cleared of trees). Plain terracotta is a savanna castle's floor,
+	 * not the land's, so nothing is built in its courtyard.
+	 */
 	static boolean ground(BlockState state) {
-		return Castle.natural(state) && !state.is(BlockTags.LOGS) && !state.is(BlockTags.LEAVES) && !state.is(Blocks.DIRT_PATH);
+		return Castle.natural(state) && !state.is(BlockTags.LOGS) && !state.is(BlockTags.LEAVES) && !state.is(Blocks.DIRT_PATH)
+			&& !state.is(Blocks.TERRACOTTA);
 	}
 
 	/** Levels the footprint: solid ground under it, the air cleared above (only plants and the land's own ground are ever replaced). */

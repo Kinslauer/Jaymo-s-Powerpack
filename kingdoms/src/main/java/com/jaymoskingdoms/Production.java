@@ -130,7 +130,7 @@ public final class Production {
 
 	/** The log its people cut: its palette's (oak on the plains, spruce in the taiga, ...). */
 	public static Item logItem(ServerLevel level, Faction faction) {
-		return Palette.of(level.getBiome(faction.seat())).log().getBlock().asItem();
+		return Palette.at(level, faction.seat()).log().getBlock().asItem();
 	}
 
 	/**

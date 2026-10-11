@@ -109,7 +109,7 @@ final class Castle {
 
 	/** Ground the land made, not the village. */
 	static boolean natural(BlockState state) {
-		return state.is(BlockTags.DIRT) || state.is(BlockTags.SAND) || state.is(BlockTags.BASE_STONE_OVERWORLD) || state.is(Blocks.DIRT_PATH)
+		return state.is(BlockTags.SUBSTRATE_OVERWORLD) || state.is(BlockTags.SAND) || state.is(BlockTags.BASE_STONE_OVERWORLD) || state.is(Blocks.DIRT_PATH)
 			|| state.is(Blocks.SNOW) || state.is(Blocks.SNOW_BLOCK) || state.is(Blocks.GRAVEL) || state.is(BlockTags.TERRACOTTA)
 			|| state.is(Blocks.SANDSTONE) || state.is(BlockTags.ICE) || state.is(BlockTags.LEAVES) || state.is(BlockTags.LOGS);
 	}
@@ -124,16 +124,22 @@ final class Castle {
 			case TOWER -> 6;
 		};
 		Site site = site(level, bell, half, kind == Kind.CASTLE ? SITE_MIN + 10 : SITE_MIN, SITE_MAX + (kind == Kind.CASTLE ? 12 : 0), 0.0);
-		Palette p = Palette.of(level.getBiome(bell));
+		Palette p = Palette.at(level, bell);
+		Frame frame = new Frame(site.center(), site.facing(), site.floor(), switch (kind) {
+			case KEEP -> KEEP_DEPTH / 2;
+			case CASTLE -> CASTLE_DEPTH / 2;
+			case TOWER -> TOWER_SIZE / 2;
+		});
 		Keep keep = switch (kind) {
 			case KEEP -> {
-				Frame f = new Frame(site.center(), site.facing(), site.floor(), KEEP_DEPTH / 2);
-				prepare(level, f, p, -KEEP_HALF - 1, KEEP_HALF + 1, -1, KEEP_DEPTH + 1);
-				yield keep(level, f, p, kingdom, random, 0);
+				prepare(level, frame, p, -KEEP_HALF - 1, KEEP_HALF + 1, -1, KEEP_DEPTH + 1);
+				yield keep(level, frame, p, kingdom, random, 0);
 			}
-			case CASTLE -> castle(level, new Frame(site.center(), site.facing(), site.floor(), CASTLE_DEPTH / 2), p, kingdom, random);
-			case TOWER -> tower(level, new Frame(site.center(), site.facing(), site.floor(), TOWER_SIZE / 2), p, kingdom, random);
+			case CASTLE -> castle(level, frame, p, kingdom, random);
+			case TOWER -> tower(level, frame, p, kingdom, random);
 		};
+		// a way to the gate from the land in front of it (just outside the foundation)
+		approach(level, frame, p, kind == Kind.KEEP ? -2 : -3);
 		// watchtowers round the town's edge
 		List<BlockPos> posts = new ArrayList<>(keep.posts());
 		double turn = random.nextDouble() * Math.PI * 2.0;
@@ -143,6 +149,49 @@ final class Castle {
 		}
 		JaymosKingdoms.LOGGER.info("{} builds a {} at {}", kingdom.name(), kind.name().toLowerCase(java.util.Locale.ROOT), site.center());
 		return new Keep(keep.throne(), keep.cellar(), keep.gate(), keep.hall(), List.copyOf(posts));
+	}
+
+	/** The longest approach: steps down to (or a cutting through) the land in front of the gate. */
+	static final int APPROACH_MAX = 24;
+
+	/**
+	 * A seat on a slope stands above the land in front of its gate, or is dug into it: three-wide steps from {@code z0}
+	 * outward (frame z falling) down to the ground, or a path cut through the rise, until the land meets the gate's level.
+	 */
+	private static void approach(ServerLevel level, Frame f, Palette p, int z0) {
+		BlockState stairs = f.turn(p.stairs().setValue(StairBlock.FACING, Direction.SOUTH));
+		for (int i = 0; i < APPROACH_MAX; i++) {
+			int z = z0 - i;
+			// the land's height here (the first air above it), relative to the floor
+			int ground = Integer.MIN_VALUE;
+			for (int x = -1; x <= 1; x++) {
+				ground = Math.max(ground, level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, f.at(x, 0, z)).getY() - f.floor());
+			}
+			int step = -1 - i;
+			if (ground > 0) {
+				// dug in: cut the path through at the floor's level
+				for (int x = -1; x <= 1; x++) {
+					f.set(level, x, -1, z, p.path());
+					for (int y = 0; y < ground && y <= 4; y++) {
+						f.set(level, x, y, z, Blocks.AIR.defaultBlockState());
+					}
+				}
+				continue;
+			}
+			if (ground >= step + 1) {
+				// the land has come up to meet the steps
+				return;
+			}
+			for (int x = -1; x <= 1; x++) {
+				f.set(level, x, step, z, stairs);
+				for (int y = step - 1; y >= ground - 1; y--) {
+					f.set(level, x, y, z, p.wall());
+				}
+				for (int y = step + 1; y <= step + 3; y++) {
+					f.set(level, x, y, z, Blocks.AIR.defaultBlockState());
+				}
+			}
+		}
 	}
 
 	/** The ground made ready in {@code x0..x1, z0..z1}: a foundation under it, the air cleared above. */
@@ -529,7 +578,7 @@ final class Castle {
 		}
 
 		void set(ServerLevel level, int x, int y, int z, BlockState state) {
-			level.setBlock(this.at(x, y, z), state, Block.UPDATE_CLIENTS);
+			level.setBlock(this.at(x, y, z), state, Block.UPDATE_CLIENTS | Block.UPDATE_SUPPRESS_DROPS);
 		}
 	}
 }

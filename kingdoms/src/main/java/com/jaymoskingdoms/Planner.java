@@ -298,7 +298,7 @@ public final class Planner {
 	static @Nullable Placing site(ServerLevel level, Faction f, String entry, Blueprint bp) {
 		int[] rings = RINGS.getOrDefault(entry, new int[] {RING_MIN, MAX_RADIUS});
 		int reach = Math.min(rings[1], landRadius(f));
-		Palette palette = Palette.of(level.getBiome(f.seat()));
+		Palette palette = Palette.at(level, f.seat());
 		List<int[]> taken = taken(level, f);
 		Placing best = null;
 		int firstRing = -1, candidates = 0, ringIndex = 0;
