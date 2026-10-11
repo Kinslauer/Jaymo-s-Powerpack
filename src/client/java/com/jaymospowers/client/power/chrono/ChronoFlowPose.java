@@ -14,7 +14,7 @@ import net.minecraft.world.entity.Entity;
  * Time Flow's blows, drawn: a jab, a hook, an uppercut, a lunging punch, a flying kick, the counters (a crowd's quick
  * guard and strike; against one attacker the circle, the slip, one of five deflects, the vault, the leg sweep or the
  * shoulder throw, each then the answer) and
- * Chrono Punch's quick jabs. Everything is set outright from the blow's progress, so applying it twice
+ * Chrono Punch's quick jabs and its Time Flow barrage. Everything is set outright from the blow's progress, so applying it twice
  * changes nothing.
  */
 public final class ChronoFlowPose {
@@ -63,6 +63,24 @@ public final class ChronoFlowPose {
 				set(lead, -Mth.HALF_PI, 0.0F, 0.0F, e);
 				set(guard, -1.25F, side * 0.3F, side * 0.25F, Math.max(e, 0.6F));
 				h.body.yRot = side * -0.35F * e;
+			}
+			case ChronoFlow.BARRAGE -> {
+				// a punch every few ticks, fists alternating: each driven out fast and drawn back, the body twisting into it
+				float beat = p * ChronoFlow.BARRAGE_PUNCHES;
+				int n = Math.min(ChronoFlow.BARRAGE_PUNCHES - 1, (int)beat);
+				float q = beat - n;
+				float out = q < 0.4F ? q / 0.4F : 1.0F - (q - 0.4F) / 0.6F;
+				out = out * out * (3.0F - 2.0F * out);
+				int s = n % 2 == 0 ? 1 : -1;
+				ModelPart punching = s > 0 ? h.rightArm : h.leftArm;
+				ModelPart drawn = s > 0 ? h.leftArm : h.rightArm;
+				set(punching, -1.25F, s * -0.3F, s * -0.25F, 1.0F);
+				set(punching, -Mth.HALF_PI - 0.05F, s * 0.1F, 0.0F, out);
+				set(drawn, -1.25F, s * 0.3F, s * 0.25F, 1.0F);
+				set(h.leftLeg, -0.25F, 0.0F, 0.0F, 1.0F);
+				set(h.rightLeg, 0.3F, 0.0F, 0.0F, 1.0F);
+				h.body.yRot = s * -0.35F * out;
+				h.body.xRot = 0.15F;
 			}
 			case ChronoFlow.HOOK -> {
 				// swung round from the side

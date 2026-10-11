@@ -44,7 +44,7 @@ import net.minecraft.world.phys.Vec3;
  * <ul>
  * <li>R, Rewind: snap back to where you were 3 s ago (health restored if it was higher, fire put out).</li>
  * <li>G, Stasis Field: stop time for mobs and projectiles in a 6-block bubble for 4 s.</li>
- * <li>V, Overclock: 6 s of Speed III, Haste II and faster attacks.</li>
+ * <li>V, Overclock: 6 s as a speedster: Speed V, Haste II and faster attacks, everyone near you slowed hard.</li>
  * <li>B, Time Bloom: 5 s of fast-forward for crops, saplings, furnaces, smokers and ovens within 5 blocks, and for
  * your own wounds (they mend {@code BLOOM_HEAL} every {@code BLOOM_HEAL_EVERY} ticks meanwhile).</li>
  * </ul>
@@ -74,9 +74,11 @@ public final class ChronoPower implements Power {
 	/** Time Bloom mends you too: this much health every this many ticks while it runs (5 hearts over its 5 s). */
 	static final float BLOOM_HEAL = 1.0F;
 	static final int BLOOM_HEAL_EVERY = 10;
-	/** Overclock's drag on everyone around you: radius, Slowness amplifier (1 = Slowness II), refreshed this often. */
-	static final double OVERCLOCK_DRAG_RADIUS = 6.0;
-	static final int OVERCLOCK_DRAG_AMPLIFIER = 1;
+	/** Overclock makes you a speedster: Speed amplifier (4 = Speed V). */
+	static final int OVERCLOCK_SPEED_AMPLIFIER = 4;
+	/** Overclock's drag on everyone around you: radius, Slowness amplifier (3 = Slowness IV), refreshed this often. */
+	static final double OVERCLOCK_DRAG_RADIUS = 8.0;
+	static final int OVERCLOCK_DRAG_AMPLIFIER = 3;
 	static final int OVERCLOCK_DRAG_EVERY = 10;
 	/** The starter, Nudge: reach, how long Slowness I / Speed I lasts, and the cooldown. */
 	static final double NUDGE_RANGE = 16.0;
@@ -188,7 +190,7 @@ public final class ChronoPower implements Power {
 		ChronoState state = STATES.get(player.getUUID());
 		if (state != null) {
 			if (state.overclockLeft > 0) {
-				removeOverclockEffect(player, MobEffects.SPEED, 2, state.overclockLeft);
+				removeOverclockEffect(player, MobEffects.SPEED, OVERCLOCK_SPEED_AMPLIFIER, state.overclockLeft);
 				removeOverclockEffect(player, MobEffects.HASTE, 1, state.overclockLeft);
 			}
 			stopAll(player, state);
@@ -299,7 +301,7 @@ public final class ChronoPower implements Power {
 		if (state.bloom != null && player.tickCount % BLOOM_HEAL_EVERY == 0 && player.getHealth() < player.getMaxHealth()) {
 			// your own wounds run forward too, to healed
 			player.heal(BLOOM_HEAL);
-			level.sendParticles(ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 1.0, player.getZ(), 3, 0.3, 0.5, 0.3, 0.0);
+			ChronoFx.particles(level, player, ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 1.0, player.getZ(), 3, 0.3, 0.5, 0.3, 0.0);
 		}
 		ChronoFlow.tickPlayer(player);
 		if (state.overclockLeft > 0) {
@@ -369,11 +371,11 @@ public final class ChronoPower implements Power {
 		net.minecraft.world.entity.LivingEntity target = player.isShiftKeyDown() ? lookedAt(player, NUDGE_RANGE) : null;
 		if (target != null) {
 			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, NUDGE_TICKS, 0), player);
-			level.sendParticles(ParticleTypes.ENCHANT, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 20, 0.3, 0.4, 0.3, 0.4);
+			ChronoFx.particles(level, player, ParticleTypes.ENCHANT, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 20, 0.3, 0.4, 0.3, 0.4);
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.4F, 0.6F);
 		} else {
 			player.addEffect(new MobEffectInstance(MobEffects.SPEED, NUDGE_TICKS, 0), player);
-			level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.3, 0.5, 0.3, 0.4);
+			ChronoFx.particles(level, player, ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.3, 0.5, 0.3, 0.4);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.4F, 1.6F);
 		}
 		return true;
@@ -476,7 +478,7 @@ public final class ChronoPower implements Power {
 		var path = state.path(chosen);
 
 		level.playSound(null, here.x, here.y, here.z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.PLAYERS, 1.0F, 1.5F);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, here.x, here.y + 1.0, here.z, 16, 0.3, 0.6, 0.3, 0.05);
+		ChronoFx.particles(level, player, ParticleTypes.ELECTRIC_SPARK, here.x, here.y + 1.0, here.z, 16, 0.3, 0.6, 0.3, 0.05);
 
 		if (player.isPassenger()) {
 			player.stopRiding();
@@ -486,13 +488,13 @@ public final class ChronoPower implements Power {
 		player.extinguishFire();
 		if (pastHealth > player.getHealth()) {
 			player.setHealth(Math.min(pastHealth, player.getMaxHealth()));
-			level.sendParticles(ParticleTypes.HAPPY_VILLAGER, target.x, target.y + 1.0, target.z, 6, 0.3, 0.5, 0.3, 0.0);
+			ChronoFx.particles(level, player, ParticleTypes.HAPPY_VILLAGER, target.x, target.y + 1.0, target.z, 6, 0.3, 0.5, 0.3, 0.0);
 		}
 		level.playSound(null, target.x, target.y, target.z, SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.8F, 1.4F);
 
 		ChronoMemory.of(player).stoppedTime += chosen; // time undone counts as time outside time
 		state.clearHistory(); // the jump itself shouldn't be part of the next rewind
-		state.trail = new RewindTrail(level, path);
+		state.trail = new RewindTrail(level, path, ChronoFx.style(player));
 		return true;
 	}
 
@@ -508,7 +510,7 @@ public final class ChronoPower implements Power {
 		if (state.stasis != null) {
 			state.stasis.end();
 		}
-		state.stasis = new StasisField(player.level(), player.position(), player.getUUID(), StasisField.duration(player));
+		state.stasis = new StasisField(player.level(), player.position(), player.getUUID(), StasisField.duration(player), ChronoFx.style(player));
 		state.stasis.start();
 		return true;
 	}
@@ -516,14 +518,14 @@ public final class ChronoPower implements Power {
 	// ---------------------------------------------------------------- Overclock
 
 	private static boolean overclock(ServerPlayer player, ChronoState state) {
-		player.addEffect(new MobEffectInstance(MobEffects.SPEED, OVERCLOCK_TICKS, 2, false, false, true));
+		player.addEffect(new MobEffectInstance(MobEffects.SPEED, OVERCLOCK_TICKS, OVERCLOCK_SPEED_AMPLIFIER, false, false, true));
 		player.addEffect(new MobEffectInstance(MobEffects.HASTE, OVERCLOCK_TICKS, 1, false, false, true));
 		state.overclockLeft = OVERCLOCK_TICKS;
 		setOverclockModifier(player, true);
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.8F, 2.0F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 1.8F);
-		level.sendParticles(ParticleTypes.WAX_ON, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.7, 0.4, 0.6);
+		ChronoFx.particles(level, player, ParticleTypes.WAX_ON, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.7, 0.4, 0.6);
 		return true;
 	}
 
@@ -538,7 +540,7 @@ public final class ChronoPower implements Power {
 				&& !(e instanceof net.minecraft.world.entity.decoration.ArmorStand))) {
 			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, OVERCLOCK_DRAG_EVERY + 10, OVERCLOCK_DRAG_AMPLIFIER, false, false, true), player);
 			if (level.getRandom().nextInt(3) == 0) {
-				level.sendParticles(ParticleTypes.ENCHANT, living.getX(), living.getY() + living.getBbHeight() * 0.6, living.getZ(), 3, 0.3, 0.3, 0.3, 0.2);
+				ChronoFx.particles(level, player, ParticleTypes.ENCHANT, living.getX(), living.getY() + living.getBbHeight() * 0.6, living.getZ(), 3, 0.3, 0.3, 0.3, 0.2);
 			}
 		}
 	}
@@ -570,10 +572,10 @@ public final class ChronoPower implements Power {
 		}
 		double a = left * 0.55;
 		double r = 0.55;
-		level.sendParticles(ParticleTypes.WAX_ON, player.getX() + Math.cos(a) * r, player.getY() + 0.3 + (left % 10) * 0.15,
+		ChronoFx.particles(level, player, ParticleTypes.WAX_ON, player.getX() + Math.cos(a) * r, player.getY() + 0.3 + (left % 10) * 0.15,
 			player.getZ() + Math.sin(a) * r, 1, 0.0, 0.0, 0.0, 0.0);
 		if (left % 6 == 0) {
-			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 0.2, player.getZ(), 2, 0.25, 0.1, 0.25, 0.02);
+			ChronoFx.particles(level, player, ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 0.2, player.getZ(), 2, 0.25, 0.1, 0.25, 0.02);
 		}
 		if (left % 20 == 0) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.COMPARATOR_CLICK, SoundSource.PLAYERS, 0.35F, 2.0F);
@@ -583,7 +585,7 @@ public final class ChronoPower implements Power {
 	// ---------------------------------------------------------------- Time Bloom
 
 	private static boolean bloom(ServerPlayer player, ChronoState state) {
-		state.bloom = new TimeBloom(player.level(), player.blockPosition());
+		state.bloom = new TimeBloom(player.level(), player.blockPosition(), ChronoFx.style(player));
 		state.bloom.start();
 		return true;
 	}

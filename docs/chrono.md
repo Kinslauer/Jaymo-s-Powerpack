@@ -425,3 +425,65 @@ Vault and throw move the caster on the client (`ChronoFlowClient.counterMotion`)
 - **Vault under a low ceiling:** the hop is velocity-driven, so a ceiling cuts it short and you may end up beside it,
   not behind. The blow still lands if you're within `HIT_REACH`.
 - **Throw into a wall behind you:** the target is flung toward where you stand; a wall there just stops it.
+
+## 0.8.26: Time Flow camera, locked animations, cone parries, the barrage
+
+Andy's asks (2026-10-11), all built (not yet compiled in the cloud: no JDK 25 there, so build on the home PC first):
+- **Over-the-shoulder view.** While Time Flow is on, the camera is held in third person (`THIRD_PERSON_BACK`), pulled
+  in to 2.6 blocks and 0.75 to the right (`ChronoCameraMixin`, `alignWithEntity` TAIL, clipped against walls). F5 is
+  reverted each tick while the mode lasts; turning it off (or the mode stopping on death or relog) restores the view
+  you had before Z (`ChronoFlowClient.view`).
+- **A counter plays through.** After a counter starts, strikes are refused until its animation ends (server
+  `Fighter.busyUntil`, mirrored by the client's `busyUntil`, which now also covers the crowd counter).
+- **Parry mid-animation.** A counter is no longer an untouchable window: a blow from anyone during it (or during a
+  strike, or the barrage) is held as usual, and right click counters it, cutting the current move short (its pending
+  blow is dropped) and playing the new counter (`beginCounter`). The guard against nothing is only raised when no
+  move is playing.
+- **Cone parries.** A counter within `CHAIN_TICKS` (30, 1.5 s) of the last, or against several attackers at once,
+  knocks everything hostile in a short cone in front of you away when its blow lands (`shoveCone`: reach 4, cos 0.5
+  ≈ 60° each side, push 1.0, lift 0.3).
+- **The barrage (C in Time Flow).** Locks onto the enemy nearest your look within 9 blocks (none: the normal Chrono
+  Punch). 10 punches, one every 2 ticks (1 s), damage as Chrono Punch's; the target is stunned throughout and you're
+  held 1.3 blocks in front of it, facing it, movement keys dead. Only a counter breaks it off. The last punch throws
+  the target (1.3, lift 0.45) and shoves the cone. Each landed punch counts toward the combo. Pose: `BARRAGE` in
+  `ChronoFlowPose` (alternating fists).
+
+### Risky at runtime
+- **Camera:** assumes vanilla sets the third-person position inside `Camera.alignWithEntity` (as the Carry and Wind
+  camera mixins do). If the camera ends up at vanilla's distance, the zoom happens later in `setup`; move the
+  injection there.
+- **Other mods' cameras** (First-person Model, Shoulder Surfing) may fight the forced third person.
+
+## 0.8.26: grab C, reactions, particles by fate, the Nether echo fight
+
+Andy's change table (agreed 2026-10-11 before the commit). Rows 1-4 are the section above; row 5 replaces its
+long-range barrage with a close grab. Not yet compiled or seen in game.
+
+**not committed** until you OK this table. None of it has been compiled yet (no JDK 25 in the cloud).
+
+| # | Round | Key / trigger | Change | What it does in game | Numbers | Code |
+|---|---|---|---|---|---|---|
+| 1 | 1 | Z (Time Flow) | Over-the-shoulder view | Pressing Z holds the camera in third person, behind your right shoulder, and keeps it out of walls. F5 does nothing while the mode is on. When the mode ends (Z, death, relog), the view you had before comes back. | 2.6 back, 0.75 right, 0.15 up | `ChronoCameraMixin`, `ChronoFlowClient.view` |
+| 2 | 1 | Right click | A counter plays through | After a successful parry you can't strike again until the whole counter animation has finished, so your clicks can't cut it short. | counter lengths 10-26 ticks | `ChronoFlow.beginCounter`, `Fighter.busyUntil` |
+| 3 | 1 | Right click mid-move | Parry cancels a move | If someone swings at you mid-move (a strike, a counter or the barrage), right click cancels that move and plays the new counter. Single-attacker counters no longer make you untouchable, so a blow mid-counter has to be parried. | parry window 14 ticks, early press 5 | `ChronoFlow.parry`, `allowDamage` |
+| 4 | 1 | Right click, quickly | Cone parry | A parry within 1.5 s of your last one, or a parry against several attackers at once, knocks away every enemy in a short cone in front of you when its blow lands. Each one ragdolls (#7). | reach 4, about 60° each side, push 1.0, lift 0.3, chain 30 ticks | `ChronoFlow.shoveCone`, `CHAIN_TICKS` |
+| 5 | 2 (replaces round 1's long-range C) | C in Time Flow | **C is a grab** | It only works on an enemy close in front of you. It locks you onto them for 10 punches over 1 s. You're held in front of them, facing them, with your movement keys dead, and they're stunned throughout. Only a parry breaks it off. With nobody in reach, nothing happens and **no cooldown starts** (action bar: "No one close enough to seize."). Outside Time Flow, C is still the old Chrono Punch. | grab range 3 blocks (+ half their width), 10 punches every 2 ticks, damage as Chrono Punch (about 21 hearts total at full mastery), 8 s cooldown | `ChronoFlow.barrage` / `lockOn` / `tickBarrage`, `ChronoPunch.punch` |
+| 6 | 2 | C hits | Ticking clock, final blast | Every punch leaves a faint gold clock face over the hit, facing you, with a white hand that ticks a twelfth further round on each punch, plus a soft click. The last punch sets off one big gold flash, a burst and a boom, and throws the target. The cone in front of you gets shoved too. | clock radius 0.35, finisher push 1.3 / lift 0.45 | `ChronoFlow.clockFace`, `GOLD_FLASH` |
+| 7 | 2 | Any Time Flow hit | Enemies react | **Flinch:** a blow that holds them (a stunning blow, a barrage punch) jolts the whole body back and twists it to one side, while anything with a head and arms snaps its head back and flings its arms up. **Ragdoll:** anything knocked back (a combo finisher, counter blows, the cone shove, the barrage's last punch, Chrono Punch's last punch) goes limp and flops until it lands, using the same ragdoll as Web's held creatures. | flinch 7 ticks; ragdoll at least 5 ticks, until it lands, at most 40 | `ChronoFlow.reel` / `REEL`, `ChronoReelPose`, `WebRagdoll` |
+| 8 | 2 | Hit by a time echo | Echoes lend Time Flow | A Chrono who doesn't have Time Flow yet has a 50% chance, each time an echo's blow lands, of Time Flow switching on for up to 5 minutes (chat: "...time begins to flow through you."). Pressing Z ends it early and the lent flow is gone. When it runs out: "The flow drains out of you." | 50%, 6000 ticks | `ChronoFlow.echoStruck`, `ChronoEcho.doHurtTarget` |
+| 9 | 2 | 50-hit combo | New way to corrupt | Reaching a 50-hit combo in Time Flow corrupts the power on the spot. If you're also ascended, you keep Time Flow for good. | 50 | `ChronoFlow.setCombo`, `CORRUPT_COMBO` |
+| 10 | 2, reworked 3 | Every Chrono ability | Particles by fate | Every Chrono particle (Nudge, Rewind, Stasis, Overclock, Bloom, echoes, Time Flow, Chrono Punch, Timeless clock hands, the Stopped Clock) takes on its owner's fate. **Corrupted:** a black clone of each effect a little off to one side, with dark glass splintering off it (a fractured timeline). **Ascended:** clear glass shatters off every effect, and every punch lands with a faint glass-break crack (space-time cracking). **Both:** black clones with clear and dark glass together. **Neither:** plain. An echo's effects follow its owner's fate. | clone at half the count, up to 0.25 off; glass at a quarter of the count (1 in 4 for single particles); crack volume 0.35 | `ChronoFx.style` / `particles` / `crackSound` |
+| 11 | 2 | V (Overclock) | Speedster | You go much faster and everyone near you is slowed much harder. Haste and faster attacks stay. | Speed III → **Speed V**; Slowness II → **IV** on others; radius 6 → **8**; still 6 s, 25 s cooldown | `ChronoPower.OVERCLOCK_SPEED_AMPLIFIER`, `OVERCLOCK_DRAG_*` |
+| 12 | 3-4 | Nether echo | A real fight | In the Nether you have to fight the echo and kill it. It's tougher there, a boss bar shows its health, and it turns your own abilities on you: whatever you've unlocked (all of them while you're offline). **Rewind:** badly hurt, it snaps back 3 s with the health it had then. **Stasis:** freezes you in place up close ("Your own stillness, turned on you."). **Overclock:** Speed III on itself, and slows everything near it. **Bloom:** heals itself when hurt. **Chrono Punch** (if you're ascended): a 10-punch flurry up close that ends by throwing you, ragdolled. **Blink:** the first time it drops below half health, there's a 60% chance it blinks out like an overworld echo, ending the fight. Then, whenever you're in the Nether, it reappears somewhere around you after a random wait, as hurt as it left, to finish the fight. If it comes back already below half, it won't blink again. Killing it still corrupts you as before. | blink below 50%, 60% chance, once per appearance; returns 20 s to 2 min (counted only while you're in the Nether), 8-16 blocks away; health 30 → 70; Rewind below 35%, 20 s cooldown; Stasis 6 blocks, 2.5 s, 30 s cooldown; Overclock 6 s, 25 s cooldown, drag radius 6; Bloom below 60%, 7.5 hearts over 5 s, 40 s cooldown; flurry 1-2 dmg a punch, 12 s cooldown | `ChronoEchoFight`, `ChronoEcho.customServerAiStep` |
+| 13 | 4 | Level-ups | One echo per Chrono | You only ever have one echo. A level-up only owes one if none is already owed, out in the world, on its way back, or waiting to finish a Nether fight. Older saves that owe several keep just the first. | 1 (was one per level-up, 5 in all) | `ChronoEchoes.owe` / `hasEcho` |
+| 14 | 1-4 | H menu | Key lines | Z, C and V lines in the powers menu describe the new behaviour. | | `lang/parts/chrono.json` |
+
+## Calls I made where your message left it open (say if any should change)
+- **Echo-lent flow needs no ascension.** Any Chrono can get it, even before ascending. A corrupted Chrono who isn't
+  ascended keeps Time Flow only until the 5 minutes run out.
+- **Both corruption paths stay:** killing your echo in the Nether (now a real fight, #12) and the 50-hit combo.
+- **Flinch arms and head** only on models with a head and arms (zombies, skeletons, players, villagers, Kingdoms folk).
+  Everything else just gets the body jolt.
+- **Players flinch and ragdoll too** in PvP, the same as mobs.
+- **Only loaded echoes count** toward the one-echo limit. An echo sitting in unloaded chunks far away isn't seen, so in
+  that rare case a second one could be owed.

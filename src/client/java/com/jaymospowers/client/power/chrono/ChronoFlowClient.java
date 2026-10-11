@@ -1,9 +1,11 @@
 package com.jaymospowers.client.power.chrono;
 
+import com.jaymospowers.power.chrono.ChronoFx;
 import com.jaymospowers.power.chrono.ChronoFlow;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -18,7 +20,9 @@ import org.jspecify.annotations.Nullable;
 /**
  * Time Flow on the client: an attack aimed toward an enemy picks it (the one nearest where you look, within
  * {@link ChronoFlow#RANGE}) and carries you to it for the blow (movement is the client's); right click is the counter;
- * the combo count shows over the crosshair.
+ * the combo count shows over the crosshair. While the mode is on the view is held over your shoulder in third person
+ * (so you see the fight), and goes back to what it was when the mode ends. A counter or the barrage plays through before
+ * another strike; the barrage holds you on its target.
  */
 public final class ChronoFlowClient {
 	/** How far off your look a target can be (cosine), and how much nearness counts against aim when choosing. */
@@ -38,6 +42,8 @@ public final class ChronoFlowClient {
 	/** Throw counter: a quick step in, to this close, to catch the arm. */
 	private static final int THROW_TICKS = 3;
 	private static final double THROW_CLOSE = 0.9;
+	/** Barrage: held this far from its target, closing at most this much a tick. */
+	private static final double BARRAGE_GAP = 1.3, BARRAGE_MAX_STEP = 0.6;
 
 	/** Your own blow, shown at once (the server's copy arrives a moment later). */
 	static ChronoFlow.@Nullable Move local;
@@ -50,6 +56,10 @@ public final class ChronoFlowClient {
 	private static ChronoFlow.@Nullable Move counter;
 	private static long counterSeen = Long.MIN_VALUE;
 	private static double arcAngle, arcRadius;
+	/** The barrage under way (from the server). */
+	private static ChronoFlow.@Nullable Move barrage;
+	/** The view before Time Flow took it over the shoulder (null while the mode is off). */
+	private static @Nullable CameraType viewBefore;
 
 	private ChronoFlowClient() {
 	}
@@ -57,25 +67,123 @@ public final class ChronoFlowClient {
 	static void init() {
 		ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> clicks > 0 && ChronoFlow.on(player) && strike(minecraft, player));
 		ClientTickEvents.START_CLIENT_TICK.register(minecraft -> {
+			view(minecraft);
 			LocalPlayer player = minecraft.player;
 			if (player == null || !ChronoFlow.on(player) || minecraft.gui.screen() != null || player.isShiftKeyDown()) {
 				return;
 			}
-			// right click is the counter
+			// right click is the counter: always sent (mid-move it answers a blow held on you); the guard is only shown when free
 			boolean pressed = false;
 			while (minecraft.options.keyUse.consumeClick()) {
 				pressed = true;
 			}
-			if (pressed && counter == null) {
+			if (pressed) {
 				ClientPlayNetworking.send(new ChronoFlow.Parry());
-				local = new ChronoFlow.Move(ChronoFlow.COUNTER, player.level().getGameTime(), -1, 1);
+				long now = player.level().getGameTime();
+				if (now >= busyUntil && counter == null && barrage == null) {
+					local = new ChronoFlow.Move(ChronoFlow.COUNTER, now, -1, 1);
+				}
 			}
 			minecraft.options.keyUse.setDown(false);
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
+			track(minecraft);
 			dash(minecraft);
 			counterMotion(minecraft);
+			barrageMotion(minecraft);
 		});
+	}
+
+	/** Time Flow holds the view over your shoulder; when it ends, the view you had comes back. */
+	private static void view(Minecraft minecraft) {
+		boolean on = minecraft.player != null && ChronoFlow.on(minecraft.player);
+		if (on) {
+			if (viewBefore == null) {
+				viewBefore = minecraft.options.getCameraType();
+			}
+			if (minecraft.options.getCameraType() != CameraType.THIRD_PERSON_BACK) {
+				minecraft.options.setCameraType(CameraType.THIRD_PERSON_BACK);
+			}
+		} else if (viewBefore != null) {
+			minecraft.options.setCameraType(viewBefore);
+			viewBefore = null;
+		}
+	}
+
+	/** Whether the camera should sit over your shoulder now (Time Flow on, its third-person view in place). */
+	public static boolean overShoulder(Minecraft minecraft) {
+		return viewBefore != null && minecraft.player != null && minecraft.getCameraEntity() == minecraft.player
+			&& ChronoFlow.on(minecraft.player) && minecraft.options.getCameraType() == CameraType.THIRD_PERSON_BACK;
+	}
+
+	/** Movement keys are dead while the barrage holds you on its target. */
+	public static boolean inputLocked() {
+		return barrage != null;
+	}
+
+	/**
+	 * A counter or the barrage from the server: strikes wait until it has played through, and whatever was under way (a
+	 * dash, an earlier counter's motion, the barrage) gives way to it.
+	 */
+	private static void track(Minecraft minecraft) {
+		LocalPlayer player = minecraft.player;
+		if (player == null) {
+			counter = null;
+			barrage = null;
+			return;
+		}
+		ChronoFlow.Move move = player.getAttached(ChronoFlow.MOVE);
+		boolean locks = move != null && (move.style() == ChronoFlow.BARRAGE || move.style() == ChronoFlow.COUNTER && move.target() >= 0);
+		if (barrage != null && (move == null || move.start() != barrage.start())) {
+			barrage = null; // ended early, or broken off by a counter
+		}
+		if (!locks || move.start() == counterSeen) {
+			return;
+		}
+		counterSeen = move.start();
+		busyUntil = move.start() + move.duration();
+		dashTicks = 0;
+		counter = null;
+		if (local != null && local.style() == ChronoFlow.COUNTER) {
+			local = null; // the server's counter replaces the raised guard
+		}
+		if (move.style() == ChronoFlow.BARRAGE) {
+			barrage = move;
+		} else if (move.variant() != ChronoFlow.CROWD) {
+			counter = move;
+			Entity target = player.level().getEntity(move.target());
+			if (target != null) {
+				Vec3 from = player.position().subtract(target.position());
+				arcAngle = Math.atan2(from.z, from.x);
+				arcRadius = Math.clamp(from.horizontalDistance(), CIRCLE_MIN_RADIUS, CIRCLE_MAX_RADIUS);
+			}
+		}
+	}
+
+	/** The barrage: held close in front of its target, eyes on it, until the last punch. */
+	private static void barrageMotion(Minecraft minecraft) {
+		LocalPlayer player = minecraft.player;
+		if (player == null || barrage == null) {
+			return;
+		}
+		long t = player.level().getGameTime() - barrage.start();
+		Entity target = player.level().getEntity(barrage.target());
+		if (t >= barrage.duration() || target == null || !player.isAlive()) {
+			barrage = null;
+			return;
+		}
+		Vec3 to = target.position().subtract(player.position());
+		Vec3 flat = to.horizontal();
+		double gap = flat.length() - target.getBbWidth() * 0.5 - BARRAGE_GAP;
+		Vec3 step = flat.lengthSqr() < 1.0E-4 ? Vec3.ZERO : flat.normalize().scale(Math.clamp(gap, -BARRAGE_MAX_STEP, BARRAGE_MAX_STEP));
+		player.setDeltaMovement(step.x, player.getDeltaMovement().y, step.z);
+		player.resetFallDistance();
+		Vec3 eyes = target.getBoundingBox().getCenter().subtract(player.getEyePosition());
+		float yaw = (float)(Math.atan2(eyes.z, eyes.x) * 180.0 / Math.PI) - 90.0F;
+		float pitch = (float)(-Math.atan2(eyes.y, eyes.horizontalDistance()) * 180.0 / Math.PI);
+		player.setYRot(yaw);
+		player.setYHeadRot(yaw);
+		player.setXRot(Math.clamp(pitch, -90.0F, 90.0F));
 	}
 
 	/** An attack in Time Flow: at an enemy, a strike (and the swing is ours, not vanilla's). */
@@ -130,7 +238,7 @@ public final class ChronoFlowClient {
 		player.setDeltaMovement(dashVelocity.x, player.getDeltaMovement().y, dashVelocity.z);
 		player.resetFallDistance();
 		if (player.tickCount % 2 == 0) {
-			player.level().addParticle(net.minecraft.core.particles.ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.0, player.getZ(), 0.0, 0.0, 0.0);
+			ChronoFx.particle(player.level(), player, net.minecraft.core.particles.ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.0, player.getZ(), 0.0, 0.0, 0.0);
 		}
 	}
 
@@ -145,22 +253,6 @@ public final class ChronoFlowClient {
 			return;
 		}
 		long now = player.level().getGameTime();
-		ChronoFlow.Move move = player.getAttached(ChronoFlow.MOVE);
-		if (move != null && move.style() == ChronoFlow.COUNTER && move.variant() != ChronoFlow.CROWD && move.start() != counterSeen) {
-			counterSeen = move.start();
-			counter = move;
-			if (local != null && local.style() == ChronoFlow.COUNTER) {
-				local = null; // the server's counter replaces the raised guard
-			}
-			busyUntil = Math.max(busyUntil, move.start() + move.duration());
-			dashTicks = 0;
-			Entity target = player.level().getEntity(move.target());
-			if (target != null) {
-				Vec3 from = player.position().subtract(target.position());
-				arcAngle = Math.atan2(from.z, from.x);
-				arcRadius = Math.clamp(from.horizontalDistance(), CIRCLE_MIN_RADIUS, CIRCLE_MAX_RADIUS);
-			}
-		}
 		if (counter == null) {
 			return;
 		}
@@ -190,7 +282,7 @@ public final class ChronoFlowClient {
 				}
 				player.setDeltaMovement(step.x, player.getDeltaMovement().y, step.z);
 				if (t % 2 == 0) {
-					player.level().addParticle(net.minecraft.core.particles.ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.0, player.getZ(), 0.0, 0.0, 0.0);
+					ChronoFx.particle(player.level(), player, net.minecraft.core.particles.ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.0, player.getZ(), 0.0, 0.0, 0.0);
 				}
 			}
 		} else if (counter.variant() == ChronoFlow.SLIP && t <= SLIP_TICKS) {
@@ -218,7 +310,7 @@ public final class ChronoFlowClient {
 				double y = t == VAULT_DELAY ? VAULT_HOP + target.getBbHeight() * 0.1 : player.getDeltaMovement().y;
 				player.setDeltaMovement(step.x, y, step.z);
 				player.resetFallDistance();
-				player.level().addParticle(net.minecraft.core.particles.ParticleTypes.ENCHANT, player.getX(), player.getY() + 0.5, player.getZ(), 0.0, 0.0, 0.0);
+				ChronoFx.particle(player.level(), player, net.minecraft.core.particles.ParticleTypes.ENCHANT, player.getX(), player.getY() + 0.5, player.getZ(), 0.0, 0.0, 0.0);
 			}
 		} else if (counter.variant() == ChronoFlow.THROW && t < THROW_TICKS) {
 			double gap = to.horizontalDistance() - THROW_CLOSE;
