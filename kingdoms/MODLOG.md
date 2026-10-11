@@ -1136,3 +1136,19 @@ Stage 2 of Andy's living-economy ask: the storehouse filled by people seen gathe
   raw iron and copper) and woodcutters (logs) would have; tree farm saplings grow a stage per 5000 ticks. Players near
   the seat are told.
 - Only compiled: none of it has been seen in game yet.
+
+## 0.5.3: first in-game test of 0.5.1-0.5.2, and its fixes
+Tested on the dev server with a client (plains village, seed 8675309): the kingdom founded in the village, the mine
+dug 7 steps into a hill until it met a cave, miners took it over (ore, a side tunnel), stone and raw iron reached the
+storehouse, then the tree farm and the pen went up in that order, the woodcutter felled and replanted, the pen got
+its beasts, and a night skipped with `/time add` laid the rest of the tree farm and brought in the gatherers' goods.
+Fixed along the way:
+- A mine stopped at the first pocket of air beside it. Now only a real cave (48+ blocks of open air joined to the
+  tunnel, not under the sky) stops it, and not before the tunnel has turned down.
+- A cliff site needs ground over the whole level stretch of the tunnel and past it (5+ blocks up), not just a rise.
+- Miners with nothing in reach (ore, side tunnels) quarry the rock round the mine's end instead of standing idle.
+- Miners, woodcutters, farmers and the king stood still when they had no path (shut in a house, a farmer put on top
+  of a tower, the king penned by a fence gate). Like builders, they now turn up where they were going in a puff when
+  they get no nearer for a while.
+- A farmer's and a woodcutter's home is on the farm's own ground, not on whatever stands over its middle.
+- Gatherers reach the depot from a floor above or below it (3 blocks of slack).

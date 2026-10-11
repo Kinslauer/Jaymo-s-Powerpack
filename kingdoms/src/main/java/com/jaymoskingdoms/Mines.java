@@ -40,8 +40,8 @@ import org.jspecify.annotations.Nullable;
  * there is one (they tunnel {@link #INTO_CLIFF} blocks straight in, then down), else open ground (a stair shaft straight
  * down). The tunnel is {@link #WIDE} wide and {@link #HIGH} high, a step at a time, its mouth framed in logs and roofed
  * over, with posts every {@link #SUPPORT_EVERY} steps and torches between. They stop when they break into a cave (that's
- * the point: the cave is the mine's floor now), or reach water or lava, bedrock, {@link #LONGEST} steps or near the
- * world's floor. What they dig (stone and any ore it holds; never dirt) they carry to storage. While a mine is being dug,
+ * the point: the cave is the mine's floor now; a pocket of air under {@link #CAVE_LEAST} blocks isn't one), or reach water or lava, bedrock, {@link #LONGEST} steps or near the
+ * world's floor. (A cave met before the tunnel turns down is dug through: it's no mine yet.) What they dig (stone and any ore it holds; never dirt) they carry to storage. While a mine is being dug,
  * nothing else is started unless the crew is {@link #CREW_TO_SHARE} or more (then {@link #DIGGERS} of them dig and the
  * rest build); once it's done the settlement takes on {@link Gatherers#MINERS_PER_MINE} miners. Kept on the Overworld,
  * by faction id.
@@ -51,11 +51,13 @@ public final class Mines {
 	static final int SITE_MIN = 14, SITE_MIN_REALM = Citadel.HALF + Citadel.TOWER_HALF + 6, SITE_MAX = 72, SITE_STEP = 3;
 	static final long LOOK_TICKS = 400L, RETRY_TICKS = 6000L;
 	/** A cliff: the land this many blocks ahead rises at least this high, and this many of the blocks it digs first are rock. */
-	static final int CLIFF_AHEAD = 3, CLIFF_HIGH = 4, CLIFF_ROCK = 5;
+	static final int CLIFF_AHEAD = 3, CLIFF_HIGH = 5, CLIFF_ROCK = 5;
 	/** Straight in this far into a cliff before going down (open ground goes down at once). */
 	static final int INTO_CLIFF = 6;
 	/** The tunnel: its width (odd), its height; the mouth roofed over this many steps; the most steps; how far above the world's floor it stops. */
 	static final int WIDE = 3, HIGH = 3, COVER = 3, LONGEST = 40, FLOOR_MARGIN = 10;
+	/** A cave: at least this much open air joined to the tunnel (within this far of where it broke through); less is a pocket, dug past. */
+	static final int CAVE_LEAST = 48, CAVE_REACH = 16;
 	/** Posts every this many steps, torches between. */
 	static final int SUPPORT_EVERY = 4;
 	/** A crew this big (or bigger) digs and builds at once: this many of them dig. */
@@ -291,9 +293,17 @@ public final class Mines {
 
 	/** A face of rock rising ahead: the land {@link #CLIFF_AHEAD} on stands {@link #CLIFF_HIGH} higher, and the first blocks in are mostly rock. */
 	private static boolean cliff(ServerLevel level, Mine m) {
-		BlockPos ahead = m.entrance().relative(m.facing(), CLIFF_AHEAD);
-		if (!level.isLoaded(ahead) || level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ahead).getY() < m.entrance().getY() + CLIFF_HIGH) {
-			return false;
+		// (and the hill goes on over the whole level stretch and past where it turns down, with ground over the roof all
+		// the way: a hill, not a thin ridge)
+		for (int a = CLIFF_AHEAD; a <= INTO_CLIFF + CLIFF_AHEAD; a++) {
+			BlockPos ahead = m.entrance().relative(m.facing(), a);
+			for (int s = -WIDE / 2 - 1; s <= WIDE / 2 + 1; s++) {
+				BlockPos column = ahead.relative(m.side(), s);
+				if (!level.isLoaded(column)
+					|| level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column).getY() < m.entrance().getY() + CLIFF_HIGH) {
+					return false;
+				}
+			}
 		}
 		int rock = 0;
 		for (int i = 1; i <= CLIFF_AHEAD; i++) {
@@ -426,11 +436,11 @@ public final class Mines {
 		}
 		if (!mining || job.bag.count() >= ARMFUL) {
 			b.setTask("delivering");
-			if (Gatherers.walk(b, job.trip, Builders.depot(f), Construction.DEPOT_REACH, WALK_SPEED, now)) {
+			if (Gatherers.walk(b, job.trip, Builders.depot(f), Construction.DEPOT_REACH, WALK_SPEED, now)
+				|| now - job.trip.improvedAt > STUCK_TICKS * 2) {
 				job.bag.unload(level, f, b);
 				job.trip.reset(now);
-			} else if (now - job.trip.improvedAt > STUCK_TICKS * 2) {
-				job.bag.unload(level, f, b);
+				b.setTask("idle");
 			}
 			return true;
 		}
@@ -539,11 +549,15 @@ public final class Mines {
 			shell.add(c.relative(side, s).above(HIGH));
 		}
 		shell.addAll(m.section(i + 1));
+		Set<BlockPos> tunnel = new HashSet<>();
+		for (int k = 0; k <= i; k++) {
+			tunnel.addAll(m.section(k));
+		}
 		for (BlockPos q : shell) {
 			if (!level.getFluidState(q).isEmpty()) {
 				wet = true;
 			}
-			if (i >= COVER - 1 && level.getBlockState(q).isAir() && !level.canSeeSky(q)) {
+			if (!cave && i >= Math.max(COVER - 1, m.flat()) && level.getBlockState(q).isAir() && !level.canSeeSky(q) && cave(level, q, tunnel)) {
 				cave = true;
 			}
 		}
@@ -580,6 +594,26 @@ public final class Mines {
 			finish(level, f, after, quiet);
 		}
 		return after;
+	}
+
+	/** Open air from {@code from} (not the tunnel's own, not under open sky) that goes on for {@link #CAVE_LEAST} blocks: a cave, not a pocket. */
+	private static boolean cave(ServerLevel level, BlockPos from, Set<BlockPos> tunnel) {
+		Set<BlockPos> seen = new HashSet<>();
+		java.util.ArrayDeque<BlockPos> open = new java.util.ArrayDeque<>();
+		open.add(from);
+		seen.add(from);
+		while (!open.isEmpty() && seen.size() < CAVE_LEAST) {
+			BlockPos at = open.poll();
+			for (Direction d : Direction.values()) {
+				BlockPos n = at.relative(d);
+				if (seen.contains(n) || tunnel.contains(n) || n.distManhattan(from) > CAVE_REACH || !level.getBlockState(n).isAir() || level.canSeeSky(n)) {
+					continue;
+				}
+				seen.add(n);
+				open.add(n);
+			}
+		}
+		return seen.size() >= CAVE_LEAST;
 	}
 
 	/** Posts (fence below a plank, each side) every {@link #SUPPORT_EVERY} steps, a torch on the wall between. */

@@ -27,7 +27,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -122,7 +121,8 @@ public final class Farmers {
 		Works.Built farm = farms.stream().min(Comparator.comparingLong(b -> farmers.stream().filter(f -> inside(b, field(f))).count()))
 			.orElseThrow();
 		BlockPos middle = new BlockPos((farm.min().getX() + farm.max().getX()) / 2, farm.min().getY(), (farm.min().getZ() + farm.max().getZ()) / 2);
-		BlockPos home = Construction.standable(level, level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, middle), 4);
+		// (on the farm's own ground: not on top of whatever stands over its middle, a tree or a tower)
+		BlockPos home = Construction.standable(level, middle.above(), 4);
 		BlockPos at = from != null ? from : home;
 		Folk folk = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.MOB_SUMMONED);
 		if (folk == null) {
@@ -423,6 +423,18 @@ public final class Farmers {
 		if (d < job.best - 0.5) {
 			job.best = d;
 			job.improvedAt = now;
+		}
+		if (now - job.improvedAt > STUCK_TICKS) {
+			// (no way there: he turns up there in a puff, as builders do)
+			ServerLevel level = (ServerLevel)farmer.level();
+			BlockPos at = Construction.standable(level, to, 3);
+			level.sendParticles(ParticleTypes.POOF, farmer.getX(), farmer.getY() + 1.0, farmer.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
+			farmer.getNavigation().stop();
+			farmer.teleportTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+			level.sendParticles(ParticleTypes.POOF, at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 12, 0.3, 0.5, 0.3, 0.02);
+			job.best = Double.MAX_VALUE;
+			job.improvedAt = now;
+			return false;
 		}
 		if (farmer.getNavigation().isDone() || now % 20 == 0) {
 			BlockPos leg = Construction.leg((ServerLevel)farmer.level(), farmer, to);

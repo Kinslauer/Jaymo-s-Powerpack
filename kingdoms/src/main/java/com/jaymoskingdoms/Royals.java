@@ -216,8 +216,12 @@ public final class Royals {
 				this.king.getNavigation().stop();
 				this.greeting = GREET_TICKS;
 			} else if (now - this.improvedAt > STUCK_TICKS) {
-				// (no way there: on to the next)
-				this.stops.removeFirst();
+				// (no way there, penned in by a fence or a gate: he turns up there in a puff, as builders do; his escort follows)
+				BlockPos at = Construction.standable(level, stop, 3);
+				poof(level, this.king);
+				this.king.getNavigation().stop();
+				this.king.teleportTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+				poof(level, this.king);
 				this.goal = null;
 			}
 		}

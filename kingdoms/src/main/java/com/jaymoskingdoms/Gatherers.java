@@ -55,7 +55,9 @@ public final class Gatherers {
 	static final int ARMFUL = 48;
 	/** A block of stone takes this long to dig, an ore this long, a log this long (ticks); from this far. */
 	static final int STONE_TICKS = 30, ORE_TICKS = 50, LOG_TICKS = 16, FELL_START_TICKS = 30;
-	static final double REACH = 4.5, STAND_REACH = 1.5, DEPOT_REACH = 2.5;
+	static final double REACH = 4.5, STAND_REACH = 1.5, DEPOT_REACH = 2.5, VERTICAL_SLACK = 3.0;
+	/** With nothing else to dig, a miner quarries the rock this far round the mine's end. */
+	static final int QUARRY_REACH = 6;
 	/** Side tunnels: off every {@link Mines#SUPPORT_EVERY}th step (between the posts), both ways, this long, two high. */
 	static final int BRANCH_LONG = 16;
 	/** Ore is sought this far either side of the tunnel, and this far round the end of a mine that found a cave. */
@@ -132,10 +134,12 @@ public final class Gatherers {
 		}
 	}
 
-	/** Walks {@code folk} toward {@code to} (a leg at a time); true once within {@code reach}. */
+	/** Walks {@code folk} toward {@code to} (a leg at a time); true once within {@code reach} across and {@link #VERTICAL_SLACK} up or down. */
 	static boolean walk(Folk folk, Trip trip, BlockPos to, double reach, double speed, long now) {
-		double d = Math.sqrt(folk.distanceToSqr(Vec3.atBottomCenterOf(to)));
-		if (d <= reach) {
+		Vec3 goal = Vec3.atBottomCenterOf(to);
+		double dx = folk.getX() - goal.x, dz = folk.getZ() - goal.z;
+		double d = Math.sqrt(folk.distanceToSqr(goal));
+		if (Math.sqrt(dx * dx + dz * dz) <= reach && Math.abs(folk.getY() - goal.y) <= VERTICAL_SLACK) {
 			folk.getNavigation().stop();
 			return true;
 		}
@@ -143,8 +147,19 @@ public final class Gatherers {
 			trip.best = d;
 			trip.improvedAt = now;
 		}
+		ServerLevel level = (ServerLevel)folk.level();
+		if (now - trip.improvedAt > STUCK_TICKS) {
+			// (no way there, shut in a house or up a hill: he turns up there in a puff, as builders do)
+			BlockPos at = Construction.standable(level, to, 3);
+			level.sendParticles(net.minecraft.core.particles.ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
+			folk.getNavigation().stop();
+			folk.teleportTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+			level.sendParticles(net.minecraft.core.particles.ParticleTypes.POOF, at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 12, 0.3, 0.5, 0.3, 0.02);
+			trip.reset(now);
+			return false;
+		}
 		if (folk.getNavigation().isDone() || now % 20 == 0) {
-			BlockPos leg = Construction.leg((ServerLevel)folk.level(), folk, to);
+			BlockPos leg = Construction.leg(level, folk, to);
 			folk.getNavigation().moveTo(leg.getX() + 0.5, leg.getY(), leg.getZ() + 0.5, speed);
 		}
 		return false;
@@ -224,7 +239,7 @@ public final class Gatherers {
 				x -> x.isAlive() && x.factionId() == f.id() && x.role() == Folk.WOODCUTTER);
 			Works.Built farm = farms.stream().min(Comparator.comparingLong(b -> cutters.stream().filter(x -> middle(b).closerThan(x.getHomePosition(), 3)).count()))
 				.orElseThrow();
-			home = Construction.standable(level, level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, middle(farm)), 4);
+			home = Construction.standable(level, middle(farm).above(), 4);
 			site = home;
 		}
 		Folk folk = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.MOB_SUMMONED);
@@ -287,7 +302,7 @@ public final class Gatherers {
 			case FELL -> fell(level, folk, job, now);
 			case DELIVER -> {
 				folk.setTask("delivering");
-				if (walk(folk, job.trip, Builders.depot(f), DEPOT_REACH, WALK_SPEED, now) || now - job.trip.improvedAt > STUCK_TICKS * 2) {
+				if (walk(folk, job.trip, Builders.depot(f), DEPOT_REACH, WALK_SPEED, now)) {
 					job.bag.unload(level, f, folk);
 					job.phase = IDLE;
 					folk.setTask("idle");
@@ -410,7 +425,23 @@ public final class Gatherers {
 				}
 			}
 		}
-		return false;
+		// nothing else: the rock round the mine's end (or its cave), quarried back a block at a time
+		BlockPos end = m.end();
+		BlockPos rock = null;
+		double rockD = Double.MAX_VALUE;
+		for (BlockPos q : BlockPos.betweenClosed(end.offset(-QUARRY_REACH, -1, -QUARRY_REACH), end.offset(QUARRY_REACH, Mines.HIGH, QUARRY_REACH))) {
+			BlockState state = level.getBlockState(q);
+			if (!(state.is(BlockTags.BASE_STONE_OVERWORLD) || state.is(BlockTags.ORES)) || job.skip.contains(q) || level.canSeeSky(q.above())
+				|| wet(level, q) || open(level, q) == null || q.getY() < end.getY()) {
+				continue;
+			}
+			double d = q.distSqr(end);
+			if (d < rockD) {
+				rockD = d;
+				rock = q.immutable();
+			}
+		}
+		return rock != null && aim(level, job, rock, null);
 	}
 
 	private static boolean aim(ServerLevel level, Job job, BlockPos target, @Nullable BlockPos stand) {
@@ -449,8 +480,9 @@ public final class Gatherers {
 		}
 		if (folk.getEyePosition().distanceToSqr(Vec3.atCenterOf(target)) > REACH * REACH) {
 			BlockPos stand = job.stand != null ? job.stand : target;
-			if (!walk(folk, job.trip, stand, STAND_REACH, WALK_SPEED, now) && now - job.trip.improvedAt > STUCK_TICKS) {
-				// (no way there: leave it be)
+			boolean there = walk(folk, job.trip, stand, STAND_REACH, WALK_SPEED, now);
+			if (there || (job.trip.best < 2.0 && now - job.trip.improvedAt > STUCK_TICKS / 2)) {
+				// (there, but it can't be reached from where he stands: leave it be)
 				job.skip.add(target);
 				job.phase = IDLE;
 			}
@@ -552,7 +584,8 @@ public final class Gatherers {
 			}
 			BlockPos stand = job.stand != null ? job.stand : base;
 			if (folk.getEyePosition().distanceToSqr(Vec3.atCenterOf(base)) > REACH * REACH) {
-				if (!walk(folk, job.trip, stand, STAND_REACH + 1.0, WALK_SPEED, now) && now - job.trip.improvedAt > STUCK_TICKS) {
+				boolean there = walk(folk, job.trip, stand, STAND_REACH + 1.0, WALK_SPEED, now);
+				if (there || (job.trip.best < 2.0 && now - job.trip.improvedAt > STUCK_TICKS / 2)) {
 					job.skip.add(base);
 					job.phase = IDLE;
 				}
