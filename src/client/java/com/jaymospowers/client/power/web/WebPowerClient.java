@@ -42,6 +42,13 @@ public final class WebPowerClient implements PowerClient {
 		// a chunk of wall in a tendril's grip: left click swings the main one's, right click the other's; with the
 		// tendrils full (two creatures, debris and a creature, two clumps), left click is a combo instead
 		net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> {
+			if (WebSymbioteClient.inputLocked()) {
+				// the symbiote has the body: a click only struggles against it
+				if (clicks > 0) {
+					WebSymbioteClient.struggle();
+				}
+				return true;
+			}
 			com.jaymospowers.power.web.WebTendrils.Grips grips = player.getAttached(com.jaymospowers.power.web.WebTendrils.GRIPS);
 			if (grips != null && com.jaymospowers.power.web.WebTendrilCombos.active(player)) {
 				// mid-combo: the click is swallowed
@@ -67,7 +74,7 @@ public final class WebPowerClient implements PowerClient {
 		});
 		ClientTickEvents.START_CLIENT_TICK.register(minecraft -> {
 			LocalPlayer player = minecraft.player;
-			if (player == null || minecraft.gui.screen() != null || !holdsChunk(player, WebNet.OFF)) {
+			if (player == null || minecraft.gui.screen() != null || WebSymbioteClient.inputLocked() || !holdsChunk(player, WebNet.OFF)) {
 				return;
 			}
 			boolean pressed = false;
@@ -80,6 +87,8 @@ public final class WebPowerClient implements PowerClient {
 		});
 		PowerClients.register(WebPower.ID, INSTANCE);
 		WebSymbioteClient.init();
+		WebBehemothClient.init();
+		EntityRenderers.register(com.jaymospowers.power.web.WebSymbioteBlob.TYPE, WebBlobRenderer::new);
 		EntityRenderers.register(WebPower.WEB_BALL, context -> new ThrownItemRenderer<>(context, 0.85F, false));
 		LevelRenderEvents.COLLECT_SUBMITS.register(WebLineRenderer::render);
 		// every player's arms and legs (theirs and others'), whether or not we're a web slinger ourselves

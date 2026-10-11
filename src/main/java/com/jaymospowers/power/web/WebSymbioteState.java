@@ -11,9 +11,10 @@ import net.minecraft.network.codec.StreamCodec;
 /**
  * A web slinger's bond with a symbiote. Saved, kept through death, and synced to everyone (others see the suit).
  * {@code flags} holds the toggles ({@link #SUIT}, {@link #ARMOR}, {@link #CRAWL}); {@code hints} records which
- * one-time whispers have already been heard.
+ * one-time whispers have already been heard. {@code bond} (0-{@link WebSymbiote#BOND_MAX}) is how far it trusts you: it
+ * starts somewhere from nothing to halfway, grows with time and meals, and opens up its abilities as it climbs.
  */
-public record WebSymbioteState(boolean bonded, int satiety, int stress, int rejections, int flags, int hints) {
+public record WebSymbioteState(boolean bonded, int satiety, int stress, int rejections, int flags, int hints, int bond) {
 	/** The suit is showing (off: the powers still work, but you look like yourself). */
 	public static final int SUIT = 1;
 	/** Living Armor is on. */
@@ -23,7 +24,7 @@ public record WebSymbioteState(boolean bonded, int satiety, int stress, int reje
 	/** The big body: the symbiote swollen over you (near death, or when it takes over). Not a toggle. */
 	public static final int BULK = 8;
 
-	public static final WebSymbioteState NONE = new WebSymbioteState(false, 0, 0, 0, 0, 0);
+	public static final WebSymbioteState NONE = new WebSymbioteState(false, 0, 0, 0, 0, 0, 0);
 
 	public static final Codec<WebSymbioteState> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.BOOL.optionalFieldOf("bonded", false).forGetter(WebSymbioteState::bonded),
@@ -31,7 +32,9 @@ public record WebSymbioteState(boolean bonded, int satiety, int stress, int reje
 			Codec.INT.optionalFieldOf("stress", 0).forGetter(WebSymbioteState::stress),
 			Codec.INT.optionalFieldOf("rejections", 0).forGetter(WebSymbioteState::rejections),
 			Codec.INT.optionalFieldOf("flags", 0).forGetter(WebSymbioteState::flags),
-			Codec.INT.optionalFieldOf("hints", 0).forGetter(WebSymbioteState::hints))
+			Codec.INT.optionalFieldOf("hints", 0).forGetter(WebSymbioteState::hints),
+			// bonds made before the bond meter existed start halfway
+			Codec.INT.optionalFieldOf("bond", WebSymbiote.BOND_MAX / 2).forGetter(WebSymbioteState::bond))
 		.apply(i, WebSymbioteState::new));
 
 	public static final StreamCodec<ByteBuf, WebSymbioteState> STREAM_CODEC = StreamCodec.composite(
@@ -41,6 +44,7 @@ public record WebSymbioteState(boolean bonded, int satiety, int stress, int reje
 		ByteBufCodecs.VAR_INT, WebSymbioteState::rejections,
 		ByteBufCodecs.VAR_INT, WebSymbioteState::flags,
 		ByteBufCodecs.VAR_INT, WebSymbioteState::hints,
+		ByteBufCodecs.VAR_INT, WebSymbioteState::bond,
 		WebSymbioteState::new);
 
 	public boolean has(int flag) {
@@ -48,23 +52,27 @@ public record WebSymbioteState(boolean bonded, int satiety, int stress, int reje
 	}
 
 	public WebSymbioteState withFlag(int flag, boolean on) {
-		return new WebSymbioteState(bonded, satiety, stress, rejections, on ? flags | flag : flags & ~flag, hints);
+		return new WebSymbioteState(bonded, satiety, stress, rejections, on ? flags | flag : flags & ~flag, hints, bond);
 	}
 
 	public WebSymbioteState withSatiety(int value) {
-		return new WebSymbioteState(bonded, value, stress, rejections, flags, hints);
+		return new WebSymbioteState(bonded, value, stress, rejections, flags, hints, bond);
 	}
 
 	public WebSymbioteState withStress(int value) {
-		return new WebSymbioteState(bonded, satiety, value, rejections, flags, hints);
+		return new WebSymbioteState(bonded, satiety, value, rejections, flags, hints, bond);
 	}
 
 	public WebSymbioteState withRejections(int value) {
-		return new WebSymbioteState(bonded, satiety, stress, value, flags, hints);
+		return new WebSymbioteState(bonded, satiety, stress, value, flags, hints, bond);
+	}
+
+	public WebSymbioteState withBond(int value) {
+		return new WebSymbioteState(bonded, satiety, stress, rejections, flags, hints, value);
 	}
 
 	public WebSymbioteState withHint(int hint) {
-		return new WebSymbioteState(bonded, satiety, stress, rejections, flags, hints | hint);
+		return new WebSymbioteState(bonded, satiety, stress, rejections, flags, hints | hint, bond);
 	}
 
 	/** The game time each symbiote ability is ready again (index = ability). Synced to the owner only, for the menu. */

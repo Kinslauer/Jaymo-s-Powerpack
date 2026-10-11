@@ -142,10 +142,19 @@ public class JaymosPowersClient implements ClientModInitializer {
 		}
 		PowerClient client = PowerClients.get(powerId);
 
+		// while the symbiote holds the body every power key is "up" and a fresh press struggles against it instead
+		boolean seized = com.jaymospowers.client.power.web.WebSymbioteClient.inputLocked();
+		if (seized) {
+			for (PowerKey key : PowerKey.values()) {
+				com.jaymospowers.client.power.web.WebSymbioteClient.strugglePowerKey(key.ordinal(), ABILITY_KEYS[key.ordinal()].isDown());
+			}
+			com.jaymospowers.client.power.web.WebSymbioteClient.strugglePowerKey(6, modeKey.isDown());
+			com.jaymospowers.client.power.web.WebSymbioteClient.strugglePowerKey(7, ultimateKey.isDown());
+		}
 		// report ability key changes (a key held while a screen opens counts as released)
 		for (PowerKey key : PowerKey.values()) {
 			// a locked ability's key does nothing here; the server still says it's locked when it's pressed
-			boolean down = power != null && minecraft.gui.screen() == null && ABILITY_KEYS[key.ordinal()].isDown();
+			boolean down = power != null && !seized && minecraft.gui.screen() == null && ABILITY_KEYS[key.ordinal()].isDown();
 			if (down != wasDown[key.ordinal()]) {
 				wasDown[key.ordinal()] = down;
 				ClientPlayNetworking.send(new PowerPayloads.KeyInput(key.ordinal(), down));
@@ -154,7 +163,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 				}
 			}
 		}
-		boolean mode = power != null && minecraft.gui.screen() == null && modeKey.isDown();
+		boolean mode = power != null && !seized && minecraft.gui.screen() == null && modeKey.isDown();
 		if (mode != modeWasDown) {
 			modeWasDown = mode;
 			ClientPlayNetworking.send(new PowerPayloads.ModeKey(mode));
@@ -163,7 +172,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 			}
 		}
 		boolean ultimate = power != null && (Fate.isAscended(player) || power.ultimateWhenCorrupted() && Fate.isCorrupted(player))
-			&& minecraft.gui.screen() == null && ultimateKey.isDown();
+			&& !seized && minecraft.gui.screen() == null && ultimateKey.isDown();
 		if (ultimate != ultimateWasDown) {
 			ultimateWasDown = ultimate;
 			ClientPlayNetworking.send(new PowerPayloads.UltimateKey(ultimate));

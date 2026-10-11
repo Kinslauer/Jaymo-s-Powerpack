@@ -38,6 +38,14 @@ public final class BlockClusterRenderer extends EntityRenderer<BlockCluster, Blo
 		return new State();
 	}
 
+	/** Drawn bigger (see {@link BlockCluster#SCALE}): culled by the size it's drawn at, not its little box. */
+	@Override
+	protected AABB getBoundingBoxForCulling(BlockCluster entity, float partialTicks) {
+		AABB box = super.getBoundingBoxForCulling(entity, partialTicks);
+		Float scale = entity.getAttached(BlockCluster.SCALE);
+		return scale != null && scale > 1.0F ? box.inflate(2.0 * scale) : box;
+	}
+
 	@Override
 	public void extractRenderState(BlockCluster entity, State state, float partialTicks) {
 		super.extractRenderState(entity, state, partialTicks);

@@ -23,13 +23,17 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Drawing a slingshot back on the ground with a wall behind you: you can't go back, so the webs grind you into it. The
- * blocks behind crack as the strain builds (the usual mining cracks), and held long enough ({@code progress} 1) they
- * give way: the two your body is against, or with Living Armor a 3 x 3 patch. Only blocks up to {@code MAX_HARDNESS}
- * (or {@code ARMOR_MAX_HARDNESS}) can be broken; the client reports the strain, the server checks and breaks.
+ * Drawing a slingshot (0.8.6: you stay where you braced; nothing pulls you back): the webs grind you into whatever
+ * you're against, the floor under you and anything behind. Those blocks crack as the strain builds (the usual mining
+ * cracks), up to {@code ALMOST} (all but broken) and no further. Only Living Armor breaks them: held
+ * {@code progress} 1 (the client sends it after 5 s of drawing), they give way, a 3 x 3 patch, and the client fires
+ * you off as if you'd let go. Only blocks up to {@code MAX_HARDNESS} (or {@code ARMOR_MAX_HARDNESS}) crack; the client
+ * reports the strain, the server checks and breaks.
  */
 public final class WebStrain {
 	static final float MAX_HARDNESS = 3.0F, ARMOR_MAX_HARDNESS = 5.0F;
+	/** The furthest the cracks go without Living Armor: all but broken. */
+	public static final float ALMOST = 0.9F;
 
 	/** Client → server: straining against the wall {@code behind} (a direction) this far, 0-1 (0: let go). */
 	public record Strain(float progress, Vec3 behind) implements CustomPacketPayload {
@@ -98,6 +102,10 @@ public final class WebStrain {
 			return;
 		}
 		boolean armored = WebSymbiote.armored(player);
+		if (!armored) {
+			// only the armour breaks through
+			progress = Math.min(progress, ALMOST);
+		}
 		float hardest = armored ? ARMOR_MAX_HARDNESS : MAX_HARDNESS;
 		List<BlockPos> blocks = new ArrayList<>();
 		for (BlockPos pos : behind(player, payload.behind(), armored)) {
@@ -109,26 +117,19 @@ public final class WebStrain {
 			}
 		}
 		if (progress >= 1.0F) {
-			// it gives way
+			// Living Armor: it gives way, and you're fired off (the client launches you)
 			for (BlockPos pos : blocks) {
 				level.destroyBlock(pos, true, player);
 			}
 			if (!blocks.isEmpty()) {
-				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.PLAYERS,
-					armored ? 1.2F : 0.8F, armored ? 0.6F : 0.9F);
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.PLAYERS, 1.2F, 0.6F);
 				BlockPos first = blocks.get(0);
-				com.jaymospowers.core.Debris.puff(level, first, level.getBlockState(first.below()), armored ? 2.0F : 1.2F);
+				com.jaymospowers.core.Debris.puff(level, first, level.getBlockState(first.below()), 2.0F);
 			}
-			// the floor went out from under you: the lines snap and you go down in a heap
-			if (level.getBlockState(BlockPos.containing(player.position().add(0.0, -0.3, 0.0))).getCollisionShape(level,
-				BlockPos.containing(player.position().add(0.0, -0.3, 0.0))).isEmpty()) {
-				WebPower.snapLines(player);
-				WebPower.pose(player, WebPose.RAGDOLL, 1);
-				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LEAD_BREAK, SoundSource.PLAYERS, 1.0F, 0.6F);
-			}
+			WebSymbiote.narrate(player, "sling");
 			return;
 		}
-		int stage = Math.min(9, (int)(progress * 10.0F));
+		int stage = Math.min(8, (int)(progress * 10.0F));
 		for (int i = 0; i < blocks.size(); i++) {
 			level.destroyBlockProgress(crackId + i, blocks.get(i), stage);
 		}

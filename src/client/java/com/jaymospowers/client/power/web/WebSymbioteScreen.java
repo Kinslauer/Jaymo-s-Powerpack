@@ -172,6 +172,12 @@ final class WebSymbioteScreen extends Screen {
 			} else if (!affordable) {
 				graphics.fill(x + 1, y + 1, x + TILE - 1, y + TILE - 1, 0x90000000);
 			}
+			if (!WebSymbiote.unlocked(player, i)) {
+				// not given to you yet: nearly black, with the bond it takes
+				graphics.fill(x + 1, y + 1, x + TILE - 1, y + TILE - 1, 0xD8000000);
+				String need = Integer.toString(WebSymbiote.UNLOCK_BOND[i]);
+				graphics.text(font, need, x + TILE / 2 - font.width(need) / 2, y + TILE / 2 - 4, 0xFF8070A0);
+			}
 			if (on) {
 				// a toggle that's on: a lit strip along the bottom
 				graphics.fill(x + 2, y + TILE - 3, x + TILE - 2, y + TILE - 1, ACCENT);
@@ -193,6 +199,12 @@ final class WebSymbioteScreen extends Screen {
 		graphics.fill(maskX + 3, maskY + 5, maskX + 5, maskY + 6, eye);
 		graphics.fill(maskX + MASK_W - 5, maskY + 3, maskX + MASK_W - 2, maskY + 5, eye);
 		graphics.fill(maskX + MASK_W - 5, maskY + 5, maskX + MASK_W - 3, maskY + 6, eye);
+		if (!suit && !WebSymbiote.suitAllowed(player)) {
+			// it won't come yet: shaded, with how many abilities it has given you of the ones it takes
+			graphics.fill(maskX, maskY, maskX + MASK_W, maskY + MASK_H, 0xD8000000);
+			String need = WebSymbiote.unlockedCount(player) + "/" + WebSymbiote.SUIT_ABILITIES;
+			graphics.text(font, need, maskX + MASK_W / 2 - font.width(need) / 2, maskY + MASK_H + 2, 0xFF8070A0);
+		}
 		int barWidth = 34;
 		float fed = Mth.clamp(state.satiety() / (float)WebSymbiote.SATIETY_MAX, 0.0F, 1.0F);
 		boolean starving = state.satiety() <= WebSymbiote.STARVING;
@@ -200,5 +212,8 @@ final class WebSymbioteScreen extends Screen {
 		graphics.fill(cx - barWidth / 2 - 1, cy + 4, cx + barWidth / 2 + 1, cy + 8, 0xFF000000);
 		graphics.fill(cx - barWidth / 2, cy + 5, cx - barWidth / 2 + Math.round(barWidth * fed), cy + 7, barColor);
 		graphics.outline(cx - barWidth / 2 - 1, cy + 4, barWidth + 2, 4, DIM);
+		// the bond, under the hunger
+		Component bond = Component.translatable("gui.jaymospowers.web_symbiote.bond", state.bond(), WebSymbiote.BOND_MAX);
+		graphics.centeredText(font, bond, cx, cy + 11, 0xFFA090C0);
 	}
 }

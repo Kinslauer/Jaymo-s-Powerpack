@@ -67,9 +67,10 @@ public final class WebSwing {
 	/** Holding a swing key in the air with nothing to stick to retries every this many ticks. */
 	static final int RETRY_TICKS = 3;
 	// ===== slingshot (two webs out: hold Sneak to brace, hold Jump to draw back, let Jump go to fire) ================
-	/** Ticks of Jump to a full draw, and how far the full draw pulls you back from where you braced. */
+	/** Ticks of Jump to a full draw (you stay where you braced: the draw grinds into what's under and behind you instead). */
 	static final int SLING_DRAW_TICKS = 30;
-	static final double SLING_PULLBACK = 2.5;
+	/** Living Armor drawing this long (5 s) breaks what it's ground into and fires you off as if you'd let go. */
+	static final int SLING_ARMOR_BREAK_TICKS = 100;
 	/** Launch speed at no draw and at a full draw (blocks/tick; the swing cap is lifted for the flight). */
 	static final double SLING_MIN_SPEED = 0.9;
 	static final double SLING_MAX_SPEED = 3.4;
@@ -144,7 +145,7 @@ public final class WebSwing {
 	private int strainTicks;
 	private float sentStrain;
 	/** Ticks of grinding into a wall before it gives way (Living Armor tears through faster). */
-	static final int STRAIN_TICKS = 50, STRAIN_TICKS_ARMOR = 30;
+	static final int STRAIN_TICKS = 60, STRAIN_TICKS_ARMOR = 60;
 	private int swingLockout;
 	// wings
 	int wingsTicks;
@@ -561,28 +562,29 @@ public final class WebSwing {
 			}
 			slingDraw = 0.0F;
 		}
-		// held in place, drawn back away from the webs by the draw
-		Vec3 target = braced.subtract(forward.scale(SLING_PULLBACK * slingDraw));
-		Vec3 v = target.subtract(player.position()).scale(0.4);
+		// held where you braced (no drawing back): the draw grinds into what's under and behind you instead
+		Vec3 v = braced.subtract(player.position()).scale(0.4);
 		Vec3 back = new Vec3(-forward.x, 0.0, -forward.z);
-		boolean blocked = jump && player.onGround() && back.lengthSqr() > 1.0E-6
-			&& target.subtract(player.position()).dot(back) > 0.2
-			&& !player.level().noCollision(player, player.getBoundingBox().move(back.normalize().scale(0.15)));
-		if (blocked) {
-			// a wall behind: no further back. The webs grind you into it
-			v = new Vec3(0.0, v.y, 0.0);
-		}
 		if (jump && player.onGround()) {
-			// the draw always grinds into the floor under you (and the wall behind, if there's one), and it cracks
+			// the floor under you (and the wall behind, if there's one) cracks more and more, to all but breaking
 			strainTicks++;
-			int needed = com.jaymospowers.power.web.WebSymbiote.armored(player) ? STRAIN_TICKS_ARMOR : STRAIN_TICKS;
-			float progress = Math.min(1.0F, strainTicks / (float)needed);
-			if (progress >= 1.0F) {
+			boolean armored = com.jaymospowers.power.web.WebSymbiote.armored(player);
+			int needed = armored ? STRAIN_TICKS_ARMOR : STRAIN_TICKS;
+			float progress = Math.min(com.jaymospowers.power.web.WebStrain.ALMOST, strainTicks / (float)needed);
+			if (armored && strainTicks >= SLING_ARMOR_BREAK_TICKS) {
+				// Living Armor: it gives way, and you go as if you'd let go
 				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebStrain.Strain(1.0F, back));
 				strainTicks = 0;
 				sentStrain = 0.0F;
-				WebShake.start(0.6F);
-			} else if (progress - sentStrain >= 0.1F) {
+				WebShake.start(0.9F);
+				slingJumpHeld = false;
+				fireSling(player, forward);
+				return;
+			}
+			if (strainTicks % 10 == 0) {
+				WebShake.start(0.15F + 0.35F * progress);
+			}
+			if (progress - sentStrain >= 0.1F) {
 				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebStrain.Strain(progress, back));
 				sentStrain = progress;
 			}

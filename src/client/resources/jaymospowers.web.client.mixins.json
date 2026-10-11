@@ -10,7 +10,8 @@
 		"WebLivingEntityRendererMixin",
 		"WebModelFeatureRendererMixin",
 		"WebShakeMixin",
-		"WebSprintMixin"
+		"WebSprintMixin",
+		"WebTakeoverInputMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
