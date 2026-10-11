@@ -72,6 +72,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		ChronoPowerClient.init();
 		GravityPowerClient.init();
 		com.jaymospowers.client.power.resonance.ResonancePowerClient.init();
+		com.jaymospowers.client.power.darktide.DarktidePowerClient.init();
 	}
 
 	/** The key mapping for an ability key (to show its bound key in a HUD, say). */
