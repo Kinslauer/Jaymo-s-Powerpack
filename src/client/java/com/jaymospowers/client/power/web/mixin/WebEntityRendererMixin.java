@@ -16,6 +16,7 @@ abstract class WebEntityRendererMixin {
 		method = "extractRenderState(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/client/renderer/entity/state/EntityRenderState;F)V",
 		at = @At("TAIL"))
 	private void jaymospowers$webSpiderSense(Entity entity, EntityRenderState state, float partialTicks, CallbackInfo ci) {
+		com.jaymospowers.client.power.web.WebBehemothClient.extract(entity, state);
 		int color = WebSymbioteClient.senseColor(entity);
 		if (color != 0) {
 			state.outlineColor = color;

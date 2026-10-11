@@ -4,6 +4,7 @@
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
 		"WebFoodPropertiesMixin",
+		"WebHostZombieMixin",
 		"WebServerLevelMixin"
 	],
 	"injectors": { "defaultRequire": 1 }

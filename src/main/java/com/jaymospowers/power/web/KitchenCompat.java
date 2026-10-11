@@ -49,6 +49,11 @@ public final class KitchenCompat {
 		return LOADED && Kitchen.playerCorpse(entity);
 	}
 
+	/** A dead player who got back up (Kitchen's zombie player): what a roaming symbiote bonds with. */
+	static boolean isZombiePlayer(Entity entity) {
+		return LOADED && Kitchen.zombiePlayer(entity);
+	}
+
 	/** Whether this creature leaves a corpse when it dies (without Kitchen: nothing does). */
 	static boolean leavesCorpse(net.minecraft.world.entity.LivingEntity entity) {
 		return LOADED && Kitchen.leavesCorpse(entity);
@@ -123,6 +128,10 @@ public final class KitchenCompat {
 
 		static boolean playerCorpse(Entity entity) {
 			return entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse && corpse.isPlayerCorpse();
+		}
+
+		static boolean zombiePlayer(Entity entity) {
+			return entity instanceof com.jaymoskitchen.corpse.ZombiePlayer;
 		}
 
 		static boolean leavesCorpse(net.minecraft.world.entity.LivingEntity entity) {

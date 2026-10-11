@@ -578,6 +578,12 @@ public final class WebSymbiote {
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.SymbioteUse.TYPE, (payload, ctx) -> use(ctx.player(), payload.ability()));
 		// fighting its hold during a takeover
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Struggle.TYPE, (payload, ctx) -> struggle(ctx.player()));
+		// it never dies with you: it pours out of your body and stays near it, looking for someone new
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+			if (entity instanceof ServerPlayer player && state(player).bonded()) {
+				withdraw(player);
+			}
+		});
 		// attacking anything breaks the Shroud
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (source.getEntity() instanceof ServerPlayer attacker && attacker != entity) {
@@ -1157,6 +1163,28 @@ public final class WebSymbiote {
 		live.crawlAwayPos = player.position();
 		live.crawlAwayTicks = CRAWL_AWAY_TICKS;
 		whisper(player, "reject");
+	}
+
+	/**
+	 * You died: it lets go of you for good (the bond is gone; earn it back from scratch with this one or another) and
+	 * crawls out of your body as a {@link WebSymbioteBlob}, which stays near where you fell.
+	 */
+	static void withdraw(ServerPlayer player) {
+		WebSymbioteState old = state(player);
+		endShroud(player);
+		Live live = live(player);
+		abortFeeding(player, live);
+		if (live.takeoverTicks > 0) {
+			live.takeoverTicks = 0;
+			WebTakeoverPath.stop(player, live.route);
+			live.route = null;
+			ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0, false));
+		}
+		WebTendrils.releaseAll(player, false);
+		set(player, new WebSymbioteState(false, 0, 0, old.rejections(), 0, old.hints(), 0));
+		removeArmor(player);
+		player.removeAttached(COOLDOWNS);
+		WebSymbioteBlob.release(player.level(), player.position());
 	}
 
 	/** Fills it up and calms it down (a command, for testing). */

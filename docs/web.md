@@ -565,12 +565,30 @@ hauls you up.
 **Slingshot:** no more pulling back. Holding the draw cracks the blocks under and behind you, up to `WebStrain.ALMOST`
 90%. In Living Armor, holding `SLING_ARMOR_BREAK_TICKS` 100 (5 s) breaks them and fires you as if you'd let go.
 
+**The suit put away stays away.** With the suit off, Living Armor and the big body still work (tendrils, size,
+powers) but no suit, bulk or veins are drawn, in third person or on your arm.
+
+**Death (`WebSymbiote.withdraw`):** when a bonded player dies the bond ends for good and the symbiote pours out as a
+`jaymospowers:web_symbiote_blob` (`WebSymbioteBlob`): a black blob that hauls itself around on tendrils
+(`WebBlobRenderer`). It roams `ROAM_RADIUS` 10 around where you fell, moving its home onto your body (Kitchen) if
+one is within `CORPSE_RANGE` 24. Every `SCAN_EVERY` 20 ticks it looks within `SEEK_RANGE` 16 for, first, a Kitchen
+zombie player, then any web slinger without a symbiote (chased up to `LEASH` 32 from home), and leaps on at
+`BOND_REACH`. A player gets a fresh bond (`bond`). Only fire, lava, explosions and `/kill` hurt it (20 health); other
+blows splash it back. It never despawns.
+
+**Behemoth (`WebBehemoth`):** a zombie player it takes gets the `web_behemoth` attachment and permanent modifiers
+(+80 health, +6 damage, x1.7 size, x1.3 speed, 0.8 knockback resistance), the big body and veins drawn over it, and
+six back tendrils. It targets anything living it can see within `SIGHT` 24 (not creative players, other behemoths
+or blobs) and lashes with tendrils (`STRIKE_TICKS` 16, landing at 8, 12 damage, every 12 ticks, reach 6.5). The sun
+doesn't burn it and it never turns into a drowned (`WebHostZombieMixin`). When it dies the blob crawls out again.
+
 **Testing:** `/powerdebug web symbiote level <0-100>` sets the bond (unlocks and the bulk follow). Check: a fresh bond
 has only Shroud; a low bond ignores the menu sometimes; spam keys during a curious takeover (nothing happens until 3
 abilities, then the meter fills and you break free); takeover fights are tendril-heavy; a chunk cross winds up and
 recovers slowly; Sneak+R at stone hesitates before pulling; thrash a held corpse (with Kitchen) for the drops; Wall
 Crawl drags rather than floats; a takeover through stone throws clumps forward; hold a slingshot draw on stone (with
-and without Living Armor). None of this has been run in game yet.
+and without Living Armor); turn the suit off with Living Armor on (no suit drawn); die bonded (a blob crawls out,
+roams, bonds a nearby web user, or with Kitchen waits for the body to rise and turns it into the behemoth). None of this has been run in game yet.
 
 ### Ascension: Spider-Sense
 - **Trigger:**

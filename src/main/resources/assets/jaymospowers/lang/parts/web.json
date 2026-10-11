@@ -115,5 +115,6 @@
 	"message.jaymospowers.web_symbiote.say.snatch.3": "Away with you.",
 	"message.jaymospowers.web_symbiote.say.tug.1": "Stuck... pull.",
 	"message.jaymospowers.web_symbiote.say.tug.2": "Give. GIVE.",
-	"message.jaymospowers.web_symbiote.say.tug.3": "It comes loose."
+	"message.jaymospowers.web_symbiote.say.tug.3": "It comes loose.",
+	"entity.jaymospowers.web_symbiote_blob": "Symbiote"
 }

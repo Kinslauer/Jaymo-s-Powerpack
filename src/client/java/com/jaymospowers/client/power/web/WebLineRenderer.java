@@ -230,6 +230,7 @@ final class WebLineRenderer {
 				}
 			}
 		}
+		WebBehemothClient.render(context, level, camera, partialTick);
 		// weblines: the same line, strung taut between their two ends
 		java.util.List<com.jaymospowers.power.web.WebBridges.Span> spans = level.getAttached(com.jaymospowers.power.web.WebBridges.SPANS);
 		if (spans != null) {
@@ -374,11 +375,11 @@ final class WebLineRenderer {
 		});
 	}
 
-	private static final net.minecraft.resources.Identifier TENDRIL_TEXTURE =
+	static final net.minecraft.resources.Identifier TENDRIL_TEXTURE =
 		com.jaymospowers.JaymosPowers.id("textures/entity/web_symbiote_tendril.png");
 
 	/** One square, textured length of tendril from {@code a} to {@code b} (the segments alternate texture rows, like the model's). */
-	private static void tube(VertexConsumer buffer, PoseStack.Pose pose, Vec3 a, Vec3 b, double ra, double rb, int index, int light) {
+	static void tube(VertexConsumer buffer, PoseStack.Pose pose, Vec3 a, Vec3 b, double ra, double rb, int index, int light) {
 		Vec3 dir = b.subtract(a);
 		if (dir.lengthSqr() < 1.0E-6) {
 			return;
@@ -402,7 +403,7 @@ final class WebLineRenderer {
 		}
 	}
 
-	private static void vertex(VertexConsumer buffer, PoseStack.Pose pose, Vec3 p, float u, float v, Vec3 n, int light) {
+	static void vertex(VertexConsumer buffer, PoseStack.Pose pose, Vec3 p, float u, float v, Vec3 n, int light) {
 		buffer.addVertex(pose, (float)p.x, (float)p.y, (float)p.z).setColor(-1).setUv(u, v)
 			.setOverlay(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, (float)n.x, (float)n.y, (float)n.z);
 	}
