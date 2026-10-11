@@ -73,7 +73,7 @@ final class CampBuildings {
 	}
 
 	static Palette palette(ServerLevel level, Faction f) {
-		return Palette.of(level.getBiome(f.seat()));
+		return Palette.at(level, f.seat());
 	}
 
 	static BlockState log(ServerLevel level, Faction f) {

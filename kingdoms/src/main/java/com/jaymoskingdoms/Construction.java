@@ -439,7 +439,7 @@ public final class Construction {
 			decide(level, f, cur == null ? p : cur, l, b, job, now);
 			return;
 		}
-		Palette palette = Palette.of(level.getBiome(f.seat()));
+		Palette palette = Palette.at(level, f.seat());
 		Direction toSeat = Direction.getApproximateNearest(f.seat().getX() - l.center().getX(), 0, f.seat().getZ() - l.center().getZ());
 		List<BlockPos> stakes = new ArrayList<>();
 		int[][] corners = {{l.min().getX() - 1, l.min().getZ() - 1}, {l.max().getX() + 1, l.min().getZ() - 1}, {l.min().getX() - 1, l.max().getZ() + 1},

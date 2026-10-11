@@ -466,7 +466,7 @@ final class Buildings {
 		}
 
 		static Kit of(ServerLevel level, Faction faction) {
-			Palette p = Palette.of(level.getBiome(faction.seat()));
+			Palette p = Palette.at(level, faction.seat());
 			String planks = BuiltInRegistries.BLOCK.getKey(p.planks().getBlock()).getPath();
 			String wood = planks.endsWith("_planks") ? planks.substring(0, planks.length() - "_planks".length()) : "oak";
 			return new Kit(p, faction.type() == FactionType.VILLAGE, wood, faction.styleColor(level.getServer()).getName());

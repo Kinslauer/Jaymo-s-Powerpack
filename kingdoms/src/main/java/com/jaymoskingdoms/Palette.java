@@ -1,6 +1,8 @@
 package com.jaymoskingdoms;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -63,6 +65,33 @@ record Palette(BlockState wall, BlockState mossy, BlockState cracked, BlockState
 	/** A coloured block (they're looked up by name: 26.3 keeps them in collections, not fields). */
 	private static BlockState named(String name) {
 		return net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace(name)).defaultBlockState();
+	}
+
+	/**
+	 * The palette for the village whose bell is at {@code pos}. A bell often stands on a river, a beach or a shore that runs
+	 * through its town, so those don't count: the town's biome is the commonest other one round the bell.
+	 */
+	static Palette at(ServerLevel level, BlockPos pos) {
+		Holder<Biome> here = level.getBiome(pos);
+		if (!waterside(here)) {
+			return of(here);
+		}
+		java.util.Map<Palette, Integer> votes = new java.util.LinkedHashMap<>();
+		for (int r = 16; r <= 48; r += 16) {
+			for (int i = 0; i < 8; i++) {
+				double a = i / 8.0 * Math.PI * 2.0;
+				Holder<Biome> biome = level.getBiome(pos.offset((int)Math.round(Math.cos(a) * r), 0, (int)Math.round(Math.sin(a) * r)));
+				if (!waterside(biome)) {
+					votes.merge(of(biome), 1, Integer::sum);
+				}
+			}
+		}
+		return votes.entrySet().stream().max(java.util.Map.Entry.comparingByValue()).map(java.util.Map.Entry::getKey).orElse(of(here));
+	}
+
+	private static boolean waterside(Holder<Biome> biome) {
+		String name = biome.unwrapKey().map(key -> key.identifier().getPath()).orElse("");
+		return name.contains("river") || name.contains("beach") || name.contains("ocean") || name.contains("shore");
 	}
 
 	/** The palette for the village standing in {@code biome}. */
