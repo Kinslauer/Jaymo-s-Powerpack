@@ -177,6 +177,24 @@ final class Seats {
 		return out;
 	}
 
+	/** (0.5.1) A village's farms: its crop fields, then its animal pens, each kind nearest {@code toward} first. */
+	static List<BoundingBox> farms(StructureStart start, BlockPos toward) {
+		List<BoundingBox> fields = new ArrayList<>(), pens = new ArrayList<>();
+		for (StructurePiece piece : start.getPieces()) {
+			String name = name(piece);
+			if (name.contains("animal_pen")) {
+				pens.add(piece.getBoundingBox());
+			} else if (name.contains("farm")) {
+				fields.add(piece.getBoundingBox());
+			}
+		}
+		Comparator<BoundingBox> nearest = Comparator.comparingDouble(b -> b.getCenter().distSqr(toward));
+		fields.sort(nearest);
+		pens.sort(nearest);
+		fields.addAll(pens);
+		return fields;
+	}
+
 	/** Every piece's box (for a hold's guarded ground). */
 	static List<BoundingBox> boxes(StructureStart start) {
 		List<BoundingBox> out = new ArrayList<>();

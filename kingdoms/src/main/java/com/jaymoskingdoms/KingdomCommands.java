@@ -40,6 +40,7 @@ final class KingdomCommands {
 			.then(Commands.literal("info").executes(c -> info(c, null))
 				.then(Commands.argument("name", StringArgumentType.word()).executes(c -> info(c, StringArgumentType.getString(c, "name")))))
 			.then(Commands.literal("pledge").then(Commands.argument("name", StringArgumentType.word()).executes(KingdomCommands::pledge)))
+			.then(Commands.literal("serve").then(Commands.argument("name", StringArgumentType.word()).executes(KingdomCommands::serve)))
 			.then(Commands.literal("leave").executes(KingdomCommands::leave))
 			.then(Commands.literal("deposit").then(Commands.argument("emeralds", IntegerArgumentType.integer(1, 2304)).executes(KingdomCommands::deposit)))
 			.then(Commands.literal("withdraw").then(Commands.argument("emeralds", IntegerArgumentType.integer(1, 2304)).executes(KingdomCommands::withdraw)))
@@ -190,6 +191,22 @@ final class KingdomCommands {
 		return 1;
 	}
 
+	/** (0.5.1) Takes up a ruler's offer to be his warden ({@link Wardens}). */
+	private static int serve(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
+		ServerPlayer player = c.getSource().getPlayerOrException();
+		Faction k = Factions.byName(c.getSource().getServer(), StringArgumentType.getString(c, "name"));
+		if (k == null || k.fallen()) {
+			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.no_such"));
+			return 0;
+		}
+		String failure = Wardens.serve(player, k);
+		if (failure != null) {
+			c.getSource().sendFailure(Component.translatable(failure));
+			return 0;
+		}
+		return 1;
+	}
+
 	private static int leave(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
 		ServerPlayer player = c.getSource().getPlayerOrException();
 		MinecraftServer server = c.getSource().getServer();
@@ -199,6 +216,7 @@ final class KingdomCommands {
 			return 0;
 		}
 		Factions.update(server, k.id(), f -> f.withMember(player.getUUID(), null));
+		Wardens.dismiss(server, k.id(), player.getUUID());
 		// leaving stings
 		Reputation.change(player, k, -50);
 		c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.left", k.name()), false);
