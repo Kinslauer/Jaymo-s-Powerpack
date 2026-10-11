@@ -3,9 +3,7 @@ package com.jaymoskingdoms;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -27,14 +25,15 @@ import org.jspecify.annotations.Nullable;
  * The ruler's day (0.5.1): a king (or a fiefdom's lord) doesn't sit on his throne all day. After dawn he comes down
  * from it (up from the panic room if he slept there) and walks his town, stop by stop among his people, greeting the
  * villagers he meets (they stop and look at him, glad of it); his escort of {@link #ESCORT_LEAST} to {@link #ESCORT_MOST}
- * guards walks in pairs behind him. Before dusk he heads back to the seat, takes his throne again, and his guards go
+ * guards walks in pairs behind him; with fewer than that about he dares not go out at all, unless one of his sworn
+ * wardens among the players is at his side ({@link Wardens}). Before dusk he heads back to the seat, takes his throne again, and his guards go
  * back to their posts. A fight comes first: a ruler or guard with a foe drops all this until it's over.
  */
 public final class Royals {
 	/** The day, by the Overworld's clock (ticks into the day): out after this, home from this on. */
 	static final long DAWN = 1000L, DUSK = 11000L;
-	/** The guards at his back: at least (more are raised if the kingdom has fewer), at most. */
-	static final int ESCORT_LEAST = 3, ESCORT_MOST = 8;
+	/** The guards at his back: at least (with fewer he keeps to his hall, {@link Wardens}), at most. */
+	static final int ESCORT_LEAST = Wardens.GUARDS_LEAST, ESCORT_MOST = 8;
 	/** A guard posted this close to the gate keeps it (unless he's needed to make up the least). */
 	static final double GATE_POST = 8.0;
 	/** Guards are called to his side from this far round the seat. */
@@ -53,9 +52,6 @@ public final class Royals {
 	static final int ROAM_RADIUS = 160;
 	/** An escort further than this from him is brought to him (fallen far behind, or blocked). */
 	static final double ESCORT_LOST = 40.0;
-
-	/** Faction id → the day its escort was last made up to strength (guards raised at most once a day). */
-	private static final Map<Integer, Long> RAISED = new HashMap<>();
 
 	private Royals() {
 	}
@@ -76,7 +72,6 @@ public final class Royals {
 	}
 
 	static void clear() {
-		RAISED.clear();
 	}
 
 	// ---- the ruler's round ------------------------------------------------------------------------------------------
@@ -105,8 +100,10 @@ public final class Royals {
 			if (keep == null) {
 				return false;
 			}
-			// out by day; by night only to get home
-			return daytime(level) || this.out || this.king.distanceToSqr(Vec3.atBottomCenterOf(keep.throne())) > 4.0;
+			// out by day (unless he's too few guards to dare it); by night, or kept in, only to get home
+			Faction faction = Factions.get(level.getServer(), this.king.factionId());
+			boolean out = daytime(level) && faction != null && !Wardens.confined(level, faction, this.king);
+			return out || this.out || this.king.distanceToSqr(Vec3.atBottomCenterOf(keep.throne())) > 4.0;
 		}
 
 		@Override
@@ -134,14 +131,14 @@ public final class Royals {
 				return;
 			}
 			long now = level.getGameTime();
-			if (daytime(level)) {
+			if (daytime(level) && !Wardens.confined(level, faction, this.king)) {
 				if (!this.out) {
 					this.setOut(level, faction, keep);
 				}
 				this.walkRound(level, faction, now);
 				return;
 			}
-			// night: home to the throne
+			// night (or too few guards to stay out): home to the throne
 			if (this.out) {
 				this.out = false;
 				this.stops.clear();
@@ -267,24 +264,11 @@ public final class Royals {
 
 	// ---- his escort -------------------------------------------------------------------------------------------------
 
-	/**
-	 * Calls up to {@link #ESCORT_MOST} of the faction's guards (the nearest) to {@code king}'s back; with fewer than
-	 * {@link #ESCORT_LEAST} about, the kingdom raises guards to make them up (once a day).
-	 */
+	/** Calls up to {@link #ESCORT_MOST} of the faction's guards (the nearest) to {@code king}'s back. */
 	static void escort(ServerLevel level, Faction faction, Folk king) {
 		List<Folk> guards = new ArrayList<>(level.getEntitiesOfClass(Folk.class, new AABB(faction.seat()).inflate(ESCORT_CALL),
 			g -> g.isAlive() && g.factionId() == faction.id() && g.role() == Folk.GUARD && g.getTarget() == null
 				&& (g.escort() == null || g.escort().equals(king.getUUID()))));
-		long day = Production.day(level.getServer());
-		if (guards.size() < ESCORT_LEAST && RAISED.getOrDefault(faction.id(), -1L) != day) {
-			RAISED.put(faction.id(), day);
-			for (int i = guards.size(); i < ESCORT_LEAST; i++) {
-				Folk raised = KingdomEvents.spawn(level, faction, Folk.GUARD);
-				if (raised != null) {
-					guards.add(raised);
-				}
-			}
-		}
 		// the hall's and the town's guards first; the gate's keep it, unless they're needed to make up the least
 		Castle.Keep keep = Factions.keep(level.getServer(), faction.id());
 		java.util.function.Predicate<Folk> atGate = g -> keep != null && g.escort() == null && g.getHomePosition().closerThan(keep.gate(), GATE_POST);

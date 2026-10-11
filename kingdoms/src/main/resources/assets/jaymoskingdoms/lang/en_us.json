@@ -211,5 +211,14 @@
 	"message.jaymoskingdoms.grim.camp": "Barbarians have taken an old ruin near %2$s: the camp of %1$s.",
 	"message.jaymoskingdoms.grim.cleared": "The builders of %s have cleared the rubble from their hold.",
 	"message.jaymoskingdoms.grim.erect": "The builders of %s begin raising a new hall beside their hold.",
-	"message.jaymoskingdoms.overnight": "While you slept, the builders of %s laid %s blocks."
+	"message.jaymoskingdoms.overnight": "While you slept, the builders of %s laid %s blocks.",
+	"message.jaymoskingdoms.warden.confined": "%s: \"With but %s guards left to me, I dare not leave this hall.\"",
+	"message.jaymoskingdoms.warden.offer": "%s: \"You have the look of someone I could trust. Will you serve me as %s, and keep me safe?\"",
+	"message.jaymoskingdoms.warden.accept": "[Swear to keep the ruler safe]",
+	"message.jaymoskingdoms.warden.no_offer": "No such offer stands for you.",
+	"message.jaymoskingdoms.warden.sworn": "%s has sworn to keep the ruler of %s safe, as %s.",
+	"message.jaymoskingdoms.warden.failed": "The ruler of %s fell while in your keeping. Your good name with the realm and its allies is gone.",
+	"warden.jaymoskingdoms.guardsman": "a royal guardsman",
+	"warden.jaymoskingdoms.vassal": "a sworn vassal",
+	"warden.jaymoskingdoms.lord": "a lord of the realm"
 }

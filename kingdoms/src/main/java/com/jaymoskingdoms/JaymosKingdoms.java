@@ -66,10 +66,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("hold attachment: {}", Holds.HOLDS);
 		GrimSites.register();
 		// 0.5.1: a night slept through made up at once (building, fields), farmers, rulers' days out
+		LOGGER.debug("warden attachment: {}", Wardens.WARDENS);
 		Nights.register();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();
 			Royals.clear();
+			Wardens.clear();
 		});
 	}
 }

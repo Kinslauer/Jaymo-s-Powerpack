@@ -501,6 +501,8 @@ public final class KingdomEvents {
 		if (!wasLeader) {
 			return;
 		}
+		// (0.5.1) his wardens failed him
+		Wardens.rulerFell(level, faction);
 		announce(server, Component.translatable(lord ? "message.jaymoskingdoms.lord_fallen" : "message.jaymoskingdoms.king_fallen", faction.name(),
 			killer == null ? Component.translatable("message.jaymoskingdoms.someone") : killer.getDisplayName()).withStyle(ChatFormatting.RED));
 		// a ruler killed by the other side of a war: the war decides
@@ -553,6 +555,8 @@ public final class KingdomEvents {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.audience.offer").withStyle(style -> style.withColor(ChatFormatting.GREEN)
 				.withUnderlined(true).withClickEvent(new ClickEvent.RunCommand(command)).withHoverEvent(new HoverEvent.ShowText(Component.literal(command)))));
 		}
+		// (0.5.1) a ruler short of guards keeps to his hall, and may ask for a sworn protector
+		Wardens.audience(player.level(), player, faction, folk);
 		player.level().playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.VILLAGER_AMBIENT, SoundSource.NEUTRAL, 1.0F, 0.7F);
 	}
 

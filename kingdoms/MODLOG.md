@@ -1038,11 +1038,26 @@ builders dig soil on site for nothing), and food: bread, now **wheat**, carrots,
   targets), says yes, and green sparkles show; he raises a hand. Out, he may roam 160 from the seat.
 - **His escort**: at dawn, up to 8 of the faction's guards (within 96 of the seat, not fighting) fall in behind him in
   pairs, the hall's and the town's first; the gate's guards keep the gate unless they're needed to make up 3. With
-  fewer than 3 guards about, the kingdom raises guards to make up 3 (once a day). An escort fallen 40 behind is
+  fewer than 3 guards about he stays in (see Wardens). An escort fallen 40 behind is
   brought to him. At dusk he heads for his throne; when he's there (or at night, his way blocked for 12 s: taken
   there) his escort goes back to their posts (each guard keeps its old post, saved).
 - A ruler who slept in his panic room comes up to his throne at dawn. A fight comes first, for him and his guards.
 - Every folk now opens (and closes) wooden doors on its way.
+
+### Wardens: a ruler short of guards (`Wardens`)
+Andy's follow-up: with fewer than 3 guards the king dares not leave and says so, and may offer you a place.
+- A ruler with fewer than 3 of his guards within 96 of the seat keeps to his hall (or heads back to it), unless one
+  of his wardens is within 24 of him. (He no longer raises guards for himself; the usual hiring replaces the dead.)
+- At an audience he says so ("With but N guards left to me, I dare not leave this hall."). Once a day for each player
+  (welcome, not sworn to another realm) he may offer a place: the chance is 10%, +20% per guard short of 3, +15% with
+  fewer than 10 villagers, +25% at a reputation of 1000 (scaled). The place: a royal guardsman (welcome; soldier's
+  standing), a sworn vassal (200; knight's) or a lord of the realm (500; lord's). A clickable line runs
+  `/kingdom serve <name>`, which stands for 2 minutes.
+- Accepting swears them to the realm at that standing (or keeps theirs if higher) and makes them a **warden**
+  (`jaymoskingdoms:wardens` on the Overworld, faction id → players, logged in `JaymosKingdoms`). Announced to all.
+- **If he falls** while a warden is in the world (any cause, a war included), the warden loses all their good name
+  with his realm and every realm allied with it (positive reputation to 0; a bad name stays), and every warden's charge
+  ends. Leaving the realm (`/kingdom leave`) ends the charge.
 
 ### Farmers (`Farmers`, `Folk.FARMER`)
 - A new folk role (id 8, `farmer`): a hoe, a leather cap, a worker's clothes; doesn't fight (flees when hurt).
