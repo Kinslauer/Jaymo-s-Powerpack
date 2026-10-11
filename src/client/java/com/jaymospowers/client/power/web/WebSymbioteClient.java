@@ -111,6 +111,11 @@ public final class WebSymbioteClient {
 
 	/** Player entity id → game time their Living Armor came up (for the tendrils' growth). */
 	private static final java.util.Map<Integer, Long> ARMOR_SINCE = new java.util.HashMap<>();
+	/** Player entity id → how grown their tendrils last were, and when they began drawing back in after the armour dropped. */
+	private static final java.util.Map<Integer, Float> LAST_GROWTH = new java.util.HashMap<>();
+	private static final java.util.Map<Integer, Long> WITHDRAW = new java.util.HashMap<>();
+	/** Ticks for fully grown tendrils to sink back into the body when Living Armor ends (the growth, run backwards). */
+	static final float WITHDRAW_TICKS = 40.0F;
 
 	// ===== wall crawl ===============================================================================================
 	/**
@@ -160,6 +165,8 @@ public final class WebSymbioteClient {
 	static final double LEDGE_LOOK_TICKS = 3.0, LEDGE_DROP = 1.1, LEDGE_CREEP = 0.25;
 	/** Swimming up along a path (or toward it), per tick. */
 	static final double SWIM_UP = 0.06, FLEE_SWIM_UP = 0.08;
+	/** Fleeing into a wall: the tendrils haul you up it at this speed (blocks/tick) instead of running into it. */
+	static final double FLEE_CLIMB = 0.3;
 	/** Close enough to its prey to stop walking (blocks, horizontally). */
 	static final double TAKEOVER_STOP = 1.5;
 	/** Held still while the tendrils rip: horizontal speed kept per tick. */
@@ -355,7 +362,10 @@ public final class WebSymbioteClient {
 			long now = player.level().getGameTime();
 			long since = ARMOR_SINCE.computeIfAbsent(player.getId(), id -> now);
 			float growth = Math.min(1.0F, (now - since) / WebTendrilLayer.GROWN_TICKS);
-			if (!armored) {
+			WITHDRAW.remove(player.getId());
+			if (armored) {
+				LAST_GROWTH.put(player.getId(), growth);
+			} else {
 				// out on their own: they lash out, then draw back in
 				growth = Math.min(growth * 1.6F, Math.max(0.0F, (out - now) / 8.0F));
 			}
@@ -444,8 +454,30 @@ public final class WebSymbioteClient {
 				1.0F - WebSymbiote.state(player).bond() / (float)WebSymbiote.BOND_MAX));
 		} else {
 			ARMOR_SINCE.remove(entity.getId());
-			state.setData(TENDRILS, null);
+			state.setData(TENDRILS, withdrawing(entity));
 		}
+	}
+
+	/** Living Armor just ended: the tendrils shrink back into the body the way they grew, or null once they're in. */
+	private static @org.jspecify.annotations.Nullable Tendrils withdrawing(Entity entity) {
+		Float last = LAST_GROWTH.get(entity.getId());
+		if (!(entity instanceof Player player) || last == null || !WebSymbiote.isBonded(player)) {
+			LAST_GROWTH.remove(entity.getId());
+			WITHDRAW.remove(entity.getId());
+			return null;
+		}
+		long now = player.level().getGameTime();
+		long start = WITHDRAW.computeIfAbsent(player.getId(), id -> now);
+		float growth = last - (now - start) / WITHDRAW_TICKS;
+		if (growth <= 0.0F) {
+			LAST_GROWTH.remove(player.getId());
+			WITHDRAW.remove(player.getId());
+			return null;
+		}
+		boolean firstPerson = player == net.minecraft.client.Minecraft.getInstance().player && FirstPersonCompat.bodyShown();
+		return new Tendrils(growth, player.tickCount, -1.0F, 0.0F, 0.0F, 1.0F, smoothRun(player), 0, WebSymbiote.bulked(player),
+			0, 0.0F, 0.0F, false, WebSymbiote.STRIKE_SLAM, firstPerson, -1, WebSymbiote.STRIKE_REAR,
+			WebSymbiote.STRIKE_HIT / (float)WebSymbiote.STRIKE_TICKS, 1.0F - WebSymbiote.state(player).bond() / (float)WebSymbiote.BOND_MAX);
 	}
 
 	/** First person, after the hands: your own tendrils, unless First-person Model is already drawing your body. */
@@ -831,8 +863,11 @@ public final class WebSymbioteClient {
 		double up = v.y;
 		if (player.isInWater()) {
 			up = Math.max(up, FLEE_SWIM_UP);
-		} else if (player.onGround() && (hop || player.horizontalCollision)) {
+		} else if (player.onGround() && hop) {
 			up = JUMP_SPEED;
+		} else if (player.horizontalCollision) {
+			// against a wall: the tendrils dig in and climb it (the server rips through if there's no way up)
+			up = Math.max(up, FLEE_CLIMB);
 		}
 		boolean sprinting = canSprint(player) && !hop;
 		sprint(player, sprinting);

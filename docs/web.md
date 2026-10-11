@@ -604,6 +604,28 @@ Crawl drags rather than floats; a takeover through stone throws clumps forward; 
 and without Living Armor); die bonded (a blob crawls out,
 roams, bonds a nearby web user, or with Kitchen waits for the body to rise and turns it into the behemoth). None of this has been run in game yet.
 
+### Symbiote rework, part 2 (0.8.16)
+
+- **Suit at bonding:** the suit shows itself when the symbiote bonds (`SUIT_DEBUT_TICKS` after the bonding), then
+  withdraws ("suit_withdraw"). The mask won't bring it back until `SUIT_ABILITIES` (4) abilities are unlocked
+  (`suitAllowed`; creative always can). The menu shades the mask and shows "n/4" until then.
+- **Engulf on every takeover:** each takeover (low-health last-ditch included) forces the suit and the big body on,
+  then puts the suit back the way it was when the takeover ends.
+- **Alarms:** recoiling from fire or noise whispers an alarming line every time (`alarm_fire.N`, `alarm_noise.N`)
+  with the dread vignette; the edge-of-rejection warning still comes once.
+- **Cooldowns:** every radial ability runs its own cooldown. Shroud's starts when it ends (`COOLDOWN + SHROUD_TICKS`).
+  Living Armor goes on cooldown (`COOLDOWN[ARMOR]`, 10 s) when it ends, and switches off after `ARMOR_IDLE_TICKS`
+  (5 s) with no tendril use while the suit is off, or after `ARMOR_MAX_TICKS` (60 s) regardless. When it ends the
+  tendrils sink back into the body over `WITHDRAW_TICKS` (client), the growth run backwards.
+- **Feeding:** it only feeds itself below `SELF_FEED_BELOW` (30) satiety. Once it starts wanting a meal (`craving`)
+  it keeps hunting until it has actually eaten, even if satiety climbs back over the line.
+- **No fall damage** while the suit shows or Living Armor is up.
+- **Last-ditch mode** (low health): a different panicked line each time (`panic.1-8`), then in order: Spike Burst
+  if mobs are within `SPIKE_RADIUS`, Shroud, a leap away from the threat (`LEAP_SPEED`, `LEAP_UP`), and the takeover
+  flee. Fleeing into a wall, the tendrils climb it (`FLEE_CLIMB`, client); dead ends are ripped through as before
+  (`WebTakeoverPath`). If it takes `EMERGENCY_HITS` hits while fleeing, or is stuck `STUCK_TICKS` with the threat
+  within `STUCK_NEAR`, it hardens: `EMERGENCY_ABSORPTION` absorption, once per flee ("harden").
+
 ### Ascension: Spider-Sense
 - **Trigger:**
   - The server adds up distance travelled while airborne with a swing web stuck, from per-tick position deltas.

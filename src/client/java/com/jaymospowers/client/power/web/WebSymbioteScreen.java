@@ -199,6 +199,12 @@ final class WebSymbioteScreen extends Screen {
 		graphics.fill(maskX + 3, maskY + 5, maskX + 5, maskY + 6, eye);
 		graphics.fill(maskX + MASK_W - 5, maskY + 3, maskX + MASK_W - 2, maskY + 5, eye);
 		graphics.fill(maskX + MASK_W - 5, maskY + 5, maskX + MASK_W - 3, maskY + 6, eye);
+		if (!suit && !WebSymbiote.suitAllowed(player)) {
+			// it won't come yet: shaded, with how many abilities it has given you of the ones it takes
+			graphics.fill(maskX, maskY, maskX + MASK_W, maskY + MASK_H, 0xD8000000);
+			String need = WebSymbiote.unlockedCount(player) + "/" + WebSymbiote.SUIT_ABILITIES;
+			graphics.text(font, need, maskX + MASK_W / 2 - font.width(need) / 2, maskY + MASK_H + 2, 0xFF8070A0);
+		}
 		int barWidth = 34;
 		float fed = Mth.clamp(state.satiety() / (float)WebSymbiote.SATIETY_MAX, 0.0F, 1.0F);
 		boolean starving = state.satiety() <= WebSymbiote.STARVING;
