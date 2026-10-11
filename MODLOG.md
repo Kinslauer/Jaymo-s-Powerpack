@@ -11,7 +11,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   - **Commands** (gamemasters): `/power set <players> <wind|arsenal|web|chrono>`, `/power clear <players>`,
     `/power awaken <players>` (a random power right now), `/power get <player>`.
 - **Controls:** four shared ability keys, **R, G, V and B** by default, rebindable under Controls → Powers. **H**
-  opens the powers screen, which lists every power and what its keys do.
+  opens the powers screen, which lists what each of your keys does right now (R G V B, Z, C, X): the lines follow
+  your fate (ascended, corrupted, both; Web's symbiote) and mastery, from lang `power.jaymospowers.<p>.key.<slot>`
+  plus `.ascended`/`.corrupted`/`.ascended_corrupted` or the power's own `statusSuffix` (see `client/KeyGuide`).
 - **Powers:** Wind Control, Pocket Arsenal, Web Slinger, Chronokinesis. Each has its own file in `docs/`.
 
 ## Architecture

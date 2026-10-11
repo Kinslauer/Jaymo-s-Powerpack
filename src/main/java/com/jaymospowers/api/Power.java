@@ -97,6 +97,14 @@ public interface Power {
 		return null;
 	}
 
+	/**
+	 * Whether the Z ({@code "mode"}) or X ({@code "special"}) key does anything yet for this player's mastery, for the
+	 * powers screen (H). Both sides.
+	 */
+	default boolean slotUnlocked(net.minecraft.world.entity.player.Player player, String slot) {
+		return true;
+	}
+
 	/** The Power Mode key (Z by default) went down or up. Sent for every power. */
 	default void onMode(ServerPlayer player, boolean down) {
 	}
