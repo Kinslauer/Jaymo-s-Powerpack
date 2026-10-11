@@ -24,6 +24,7 @@ import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 /**
  * A barbarian camp's buildings, all original designs: hide tents (wool A-frames with a ridge in the camp's colour), the
@@ -441,6 +442,77 @@ final class CampBuildings {
 		BlockPos chest = chief.at(CHIEF_CHEST);
 		stockChiefChest(level, chest, random);
 		return new Layout(fire, storage, loot.at(LOOT_DEPOT), chief.at(CHIEF_SPOT), chest);
+	}
+
+	/** (0.5.6) A camp beside a ruin: its ground levelled this far round its fire, and how uneven that ground may be. */
+	static final int SETTLE_RADIUS = 11, SETTLE_SPREAD = 4;
+
+	/**
+	 * (0.5.6) The small camp barbarians pitch beside a ruin they have taken ({@link GrimSites}): a fire with log benches,
+	 * the loot pile (its storage) to one side, two tents round it, no palisade (the ruin is their walls). {@code front}
+	 * is the side the fire looks out on. The chief's spot is by the fire; there's no chief's chest.
+	 */
+	static Layout settle(ServerLevel level, Faction f, BlockPos fire, Direction front) {
+		Placer camp = new Placer(fire, front, 0);
+		level(level, fire, SETTLE_RADIUS, CLEAR_HEIGHT);
+		BlockState log = palette(level, f).log();
+		level.setBlock(fire, Blocks.CAMPFIRE.defaultBlockState(), Block.UPDATE_CLIENTS);
+		BlockState alongZ = log.trySetValue(RotatedPillarBlock.AXIS, front.getAxis());
+		BlockState alongX = log.trySetValue(RotatedPillarBlock.AXIS, front.getClockWise().getAxis());
+		for (int z = 0; z <= 1; z++) {
+			level.setBlock(camp.at(-3, 0, z), alongZ, Block.UPDATE_CLIENTS);
+		}
+		for (int x = -1; x <= 1; x++) {
+			level.setBlock(camp.at(x, 0, 3), alongX, Block.UPDATE_CLIENTS);
+		}
+		Placer loot = new Placer(camp.at(5, 0, 0), front.getCounterClockWise(), 7);
+		List<BlockPos> storage = place(level, lootPile(level, f), loot);
+		Blueprint tent = tent(level, f);
+		place(level, tent, new Placer(camp.at(-5, 0, 0), front.getClockWise(), 5));
+		place(level, tent, new Placer(camp.at(0, 0, 5), front, 5));
+		BlockPos chief = camp.at(0, 0, 2);
+		return new Layout(fire, storage, loot.at(LOOT_DEPOT), chief, chief);
+	}
+
+	/**
+	 * (0.5.6) Whether a camp can be pitched round {@code fire}: the ground {@code radius} round it loaded, dry, natural,
+	 * no more than {@code maxSpread} uneven, and none of it within a block of {@code keepOff} (a ruin's pieces). The
+	 * floor (median ground height) if so, else {@link Integer#MIN_VALUE}.
+	 */
+	static int clearing(ServerLevel level, BlockPos fire, int radius, int maxSpread, List<BoundingBox> keepOff) {
+		List<Integer> heights = new ArrayList<>();
+		for (int dx = -radius; dx <= radius; dx++) {
+			for (int dz = -radius; dz <= radius; dz++) {
+				if (dx * dx + dz * dz > radius * radius) {
+					continue;
+				}
+				BlockPos column = fire.offset(dx, 0, dz);
+				if (!level.isLoaded(column)) {
+					return Integer.MIN_VALUE;
+				}
+				for (BoundingBox box : keepOff) {
+					if (column.getX() >= box.minX() - 1 && column.getX() <= box.maxX() + 1 && column.getZ() >= box.minZ() - 1
+						&& column.getZ() <= box.maxZ() + 1) {
+						return Integer.MIN_VALUE;
+					}
+				}
+				BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
+				// down a tree's trunk to the ground under it (the trees are felled when the ground is levelled)
+				while (level.getBlockState(top.below()).is(BlockTags.LOGS) && top.getY() > level.getMinY()) {
+					top = top.below();
+				}
+				if (!level.getFluidState(top.below()).isEmpty() || !level.getFluidState(top).isEmpty()
+					|| !Storehouse.ground(level.getBlockState(top.below()))) {
+					return Integer.MIN_VALUE;
+				}
+				heights.add(top.getY());
+			}
+		}
+		heights.sort(Integer::compare);
+		if (heights.isEmpty() || heights.getLast() - heights.getFirst() > maxSpread) {
+			return Integer.MIN_VALUE;
+		}
+		return heights.get(heights.size() / 2);
 	}
 
 	/**

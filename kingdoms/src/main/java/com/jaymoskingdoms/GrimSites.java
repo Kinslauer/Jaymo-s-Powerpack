@@ -48,8 +48,10 @@ import org.jspecify.annotations.Nullable;
  * are looked over; one within {@link #RANGE} of a standing kingdom's seat, on nobody's land and out of everyone's
  * sight, is taken: a big hold (a keep, citadel, fortress...) becomes a {@link FactionType#FIEFDOM} of that kingdom (a
  * lord on a throne in its largest building, guards, archers), a small or wild one (a camp, an outpost, a watch tower, a
- * ruin) a barbarian camp (its chief and raiders seated there instead of in tents). A kingdom gets at most
- * {@link #FIEFS_PER_KINGDOM} and {@link #CAMPS_PER_KINGDOM} of them. Each takes one of the structure's buildings for its
+ * ruin) a barbarian camp: its chief and raiders move in and pitch a fire, tents and their loot pile beside it
+ * ({@link CampBuildings#settle}), and keep about both. A kingdom gets at most {@link #FIEFS_PER_KINGDOM} and
+ * {@link #CAMPS_PER_KINGDOM} of them; since 0.5.6 a small ruin far from any kingdom is taken too, if no other camp
+ * stands within {@link Camps#CAMP_SPACING}. Each takes one of the structure's buildings for its
  * storehouse ({@link Storehouse#adopt}) and gets a builder crew, who first clear the ruin's rubble ({@link Debris}) and
  * then grow it like any other settlement; the structure itself is never torn down ({@link Holds}). After
  * {@link #ERECT_AFTER_TICKS}, the builders raise one more Grim building nearby, block by block like any project (its
@@ -74,6 +76,10 @@ public final class GrimSites {
 	static final long RETRY_TICKS = 6000L;
 	/** The second building: begun this long after the hold was taken, looked for this often, again this long after a miss. */
 	static final long ERECT_AFTER_TICKS = 3 * 24000L, ERECT_CHECK_TICKS = 1200L, ERECT_RETRY_TICKS = 24000L;
+	/** (0.5.6) A camp's fire is looked for this far out past the ruin's edge, in rings this far apart. */
+	static final int CAMP_SITE_REACH = 20, CAMP_SITE_STEP = 3;
+	/** (0.5.6) Each raider keeps within this of the spot he's given (the fire, the ruin, its hall or its gate). */
+	static final int RAIDER_ROAM = 8;
 	/** The biggest Grim template its builders will raise: blocks across, blocks in all. */
 	static final int ERECT_MAX_SIDE = 26, ERECT_MAX_BLOCKS = 5000;
 
@@ -234,7 +240,10 @@ public final class GrimSites {
 				best = d;
 			}
 		}
-		if (kingdom == null || count(server, kingdom, hold) >= (hold ? FIEFS_PER_KINGDOM : CAMPS_PER_KINGDOM)) {
+		// a fiefdom needs a kingdom with room; a camp a kingdom with room, or (out in the wild) no other camp near
+		boolean full = kingdom == null ? hold || campNear(server, center)
+			: count(server, kingdom, hold) >= (hold ? FIEFS_PER_KINGDOM : CAMPS_PER_KINGDOM);
+		if (full) {
 			PASSED.put(key, now + RETRY_TICKS);
 			return;
 		}
@@ -260,6 +269,16 @@ public final class GrimSites {
 			}
 		}
 		return n;
+	}
+
+	/** (0.5.6) A standing barbarian camp within {@link Camps#CAMP_SPACING} of {@code at}. */
+	private static boolean campNear(MinecraftServer server, BlockPos at) {
+		for (Faction f : Factions.all(server, FactionType.BARBARIAN)) {
+			if (!f.fallen() && Raids.horizontal(f.seat(), at) < Camps.CAMP_SPACING * Camps.CAMP_SPACING) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -355,36 +374,93 @@ public final class GrimSites {
 		return Factions.get(server, id);
 	}
 
-	/** A barbarian camp in a small Grim structure: its chief and raiders seated there, a storehouse, a builder crew. */
-	static @Nullable Faction foundCamp(ServerLevel level, StructureStart start, String path, Faction kingdom) {
+	/**
+	 * A barbarian camp in a small Grim structure (near {@code kingdom}, or out in the wild if it's null): its chief seated
+	 * in its best building if it has one, else by the fire they pitch beside it ({@link CampBuildings#settle}: their loot
+	 * pile is their storage), its raiders spread between the fire and the ruin, a builder crew.
+	 */
+	static @Nullable Faction foundCamp(ServerLevel level, StructureStart start, String path, @Nullable Faction kingdom) {
 		MinecraftServer server = level.getServer();
 		RandomSource random = level.getRandom();
-		Seats.Pick pick = Seats.pick(level, Seats.buildings(start), kingdom.seat(), false);
 		BlockPos middle = start.getBoundingBox().getCenter();
-		BlockPos seat = pick != null ? pick.seat().middle()
-			: Construction.standable(level, level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, middle), 6);
+		Seats.Pick pick = Seats.pick(level, Seats.buildings(start), kingdom != null ? kingdom.seat() : middle, false);
+		BlockPos ruin = Construction.standable(level, level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, middle), 6);
+		BlockPos fire = clearing(level, start);
+		BlockPos seat = pick != null ? pick.seat().middle() : fire != null ? fire : ruin;
 		DyeColor color = DyeColor.values()[random.nextInt(DyeColor.values().length)];
 		Faction camp = Faction.create(Factions.nextId(server), FactionType.BARBARIAN, Camps.name(server, random), color, seat,
 			KingdomEvents.claim(server, seat, CAMP_CLAIM));
 		Factions.put(server, camp);
 		int id = camp.id();
 		hold(server, camp, start, path);
-		Castle.Keep keep = pick != null ? Seats.keep(level, camp, pick.seat(), seat, false, false) : new Castle.Keep(seat, seat, seat, seat, List.of());
+		CampBuildings.Layout layout = null;
+		if (fire != null) {
+			Direction front = Direction.getApproximateNearest(middle.getX() - fire.getX(), 0, middle.getZ() - fire.getZ());
+			layout = CampBuildings.settle(level, Factions.get(server, id), fire, front);
+		}
+		// no building to seat the chief in: he keeps by the fire; raiders are first sent to the fire (the hall), then the ruin
+		Castle.Keep keep = pick != null ? Seats.keep(level, camp, pick.seat(), seat, false, false)
+			: layout != null ? new Castle.Keep(layout.chiefSpot(), layout.chiefSpot(), ruin, layout.fire(), List.of())
+			: new Castle.Keep(seat, seat, seat, seat, List.of());
 		Factions.putKeep(server, id, keep);
-		Direction gate = Direction.getApproximateNearest(kingdom.seat().getX() - seat.getX(), 0, kingdom.seat().getZ() - seat.getZ());
+		BlockPos home = fire != null ? fire : seat;
+		Direction gate = kingdom != null ? Direction.getApproximateNearest(kingdom.seat().getX() - home.getX(), 0, kingdom.seat().getZ() - home.getZ())
+			: Direction.getApproximateNearest(middle.getX() - home.getX(), 0, middle.getZ() - home.getZ());
 		long now = level.getGameTime();
-		Camps.putData(server, id, new Camps.CampData(seat, gate, now, now, Production.day(server), -1L, List.of(), 0L, Map.of(), Camps.BARBARIAN, 0, 0));
+		Camps.putData(server, id, new Camps.CampData(home, gate, now, now, Production.day(server), -1L, List.of(), 0L, Map.of(), Camps.BARBARIAN, 0, 0));
 		Camps.takeSides(server, id, Camps.BARBARIAN);
 		KingdomEvents.crown(level, Factions.get(server, id));
-		for (int i = 0; i < Camps.START_BARBARIANS; i++) {
-			KingdomEvents.spawn(level, Factions.get(server, id), Folk.BARBARIAN);
+		// each raider keeps to a spot of his own: the fire, the ruin's middle, its hall, its gate, round in turn
+		List<BlockPos> spots = new ArrayList<>();
+		if (fire != null) {
+			spots.add(fire);
 		}
-		storehouse(level, camp, pick, keep);
+		spots.add(ruin);
+		spots.add(keep.hall());
+		spots.add(keep.gate());
+		for (int i = 0; i < Camps.START_BARBARIANS; i++) {
+			Folk raider = KingdomEvents.spawn(level, Factions.get(server, id), Folk.BARBARIAN);
+			if (raider != null) {
+				BlockPos spot = Construction.standable(level, spots.get(i % spots.size()), 4);
+				raider.snapTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
+				raider.setHomeTo(spot, RAIDER_ROAM);
+			}
+		}
+		if (layout != null) {
+			Storage.register(server, id, layout.storage(), layout.depot());
+			Builders.spawnCrew(level, Factions.get(server, id));
+		} else {
+			storehouse(level, camp, pick, keep);
+		}
 		Camps.stock(level, Factions.get(server, id));
-		KingdomEvents.announce(server, Component.translatable("message.jaymoskingdoms.grim.camp", camp.name(), kingdom.name())
-			.withStyle(ChatFormatting.RED));
-		JaymosKingdoms.LOGGER.info("A barbarian camp, {}, took the Grim {} at {} near {}", camp.name(), path, seat, kingdom.name());
+		KingdomEvents.announce(server, (kingdom != null
+			? Component.translatable("message.jaymoskingdoms.grim.camp", camp.name(), kingdom.name())
+			: Component.translatable("message.jaymoskingdoms.grim.camp_wild", camp.name())).withStyle(ChatFormatting.RED));
+		JaymosKingdoms.LOGGER.info("A barbarian camp, {}, took the Grim {} at {} ({}); its fire at {}", camp.name(), path, seat,
+			kingdom != null ? "near " + kingdom.name() : "in the wild", fire);
 		return Factions.get(server, id);
+	}
+
+	/**
+	 * (0.5.6) Where barbarians pitch their fire beside a ruin: even, open, natural ground clear of its pieces, in rings
+	 * out from its middle (nearest first). Null if there's none loaded.
+	 */
+	private static @Nullable BlockPos clearing(ServerLevel level, StructureStart start) {
+		List<BoundingBox> pieces = Seats.boxes(start);
+		BoundingBox area = start.getBoundingBox();
+		BlockPos middle = area.getCenter();
+		int edge = Math.max(area.getXSpan(), area.getZSpan()) / 2;
+		for (int out = CampBuildings.SETTLE_RADIUS; out <= edge + CampBuildings.SETTLE_RADIUS + CAMP_SITE_REACH; out += CAMP_SITE_STEP) {
+			for (int i = 0; i < 16; i++) {
+				double a = Math.PI * 2.0 * i / 16.0;
+				BlockPos column = middle.offset((int) Math.round(Math.cos(a) * out), 0, (int) Math.round(Math.sin(a) * out));
+				int floor = CampBuildings.clearing(level, column, CampBuildings.SETTLE_RADIUS, CampBuildings.SETTLE_SPREAD, pieces);
+				if (floor != Integer.MIN_VALUE) {
+					return column.atY(floor);
+				}
+			}
+		}
+		return null;
 	}
 
 	// ---- the second building -----------------------------------------------------------------------------------------
