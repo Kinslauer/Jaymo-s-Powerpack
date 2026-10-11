@@ -651,7 +651,8 @@ public final class GravityPower implements Power {
 				float charge = meteorCharge(player, state);
 				state.meteorFrom = -1;
 				if (ready(player, SINGULARITY) && GravityMeteor.call(player, charge)) {
-					cool(player, SINGULARITY, GravityMeteor.COOLDOWN);
+					int cooldown = GravityMeteor.cooldown(charge);
+					player.setAttached(COOLDOWNS, cooldowns(player).withSingularity(player.level().getGameTime() + cooldown, cooldown));
 				}
 			}
 			return;
