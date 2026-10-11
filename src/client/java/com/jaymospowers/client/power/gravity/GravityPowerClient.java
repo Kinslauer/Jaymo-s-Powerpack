@@ -172,7 +172,8 @@ public final class GravityPowerClient implements PowerClient {
 		float charge = crushFrom >= 0 ? Mth.clamp((now - crushFrom) / (float)GravityPower.CRUSH_FULL_CHARGE, 0.0F, 1.0F) : -1.0F;
 		chip(graphics, font, x + (CHIP + CHIP_GAP) * 3, y, PowerKey.ABILITY_4, Items.ANVIL, cooldowns.crush() - now, cooldowns.crushLength(), charge);
 		if (ascended) {
-			ultimateChip(graphics, font, x + (CHIP + CHIP_GAP) * 4, y, cooldowns.singularity() - now, GravityPower.ultimateCooldown(player));
+			ultimateChip(graphics, font, x + (CHIP + CHIP_GAP) * 4, y, cooldowns.singularity() - now,
+				Fate.isAscended(player) && !Fate.isCorrupted(player) ? cooldowns.singularityLength() : GravityPower.ultimateCooldown(player));
 		}
 	}
 

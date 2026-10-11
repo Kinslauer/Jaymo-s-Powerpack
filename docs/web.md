@@ -249,6 +249,12 @@ cobweb.
 - G is now only the off-hand web (it needs an empty off hand).
 - **HUD row:** wings · G · V · B · Z. G's chip dims while the off hand is full.
 
+## Two-handed Zip (0.8.16)
+A Web Zip shoots from both hands at the one target (two lines, both arms aimed). Once it catches
+(`WebArms.ZIP_SHOOT_TICKS`), both hands haul back on it and sweep behind you, trailing opposite your flight and a little
+down, while the lines still run from them to the target. Everyone sees it; in first person both lines leave the screen
+corners. Works off the `WebLine.ZIP` line, so a Yank's pull is unchanged.
+
 ## Swing tricks (0.8.9)
 The slinger's client knows when a web lets go and when the feet land, so it picks a trick and asks the server
 (`WebTricks.Trick`), which checks it and starts a `WebPose` everyone sees. Your own tricks are hidden in first person.
@@ -604,7 +610,7 @@ Crawl drags rather than floats; a takeover through stone throws clumps forward; 
 and without Living Armor); die bonded (a blob crawls out,
 roams, bonds a nearby web user, or with Kitchen waits for the body to rise and turns it into the behemoth). None of this has been run in game yet.
 
-### Symbiote rework, part 2 (0.8.16)
+### Symbiote rework, part 2 (0.8.19)
 
 - **Suit at bonding:** the suit shows itself when the symbiote bonds (`SUIT_DEBUT_TICKS` after the bonding), then
   withdraws ("suit_withdraw"). The mask won't bring it back until `SUIT_ABILITIES` (4) abilities are unlocked

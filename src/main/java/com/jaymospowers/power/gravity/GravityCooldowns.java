@@ -9,8 +9,8 @@ import net.minecraft.network.codec.StreamCodec;
  * Index: {@link GravityPower#LIFT}, {@link GravityPower#WELL}, {@link GravityPower#WEIGHTLESS}, {@link GravityPower#CRUSH},
  * {@link GravityPower#SINGULARITY}.
  */
-public record GravityCooldowns(long lift, long well, long weightless, long crush, long singularity, int crushLength) {
-	public static final GravityCooldowns NONE = new GravityCooldowns(0L, 0L, 0L, 0L, 0L, 1);
+public record GravityCooldowns(long lift, long well, long weightless, long crush, long singularity, int crushLength, int singularityLength) {
+	public static final GravityCooldowns NONE = new GravityCooldowns(0L, 0L, 0L, 0L, 0L, 1, 1);
 
 	public static final StreamCodec<ByteBuf, GravityCooldowns> STREAM_CODEC = StreamCodec.composite(
 		ByteBufCodecs.VAR_LONG, GravityCooldowns::lift,
@@ -19,6 +19,7 @@ public record GravityCooldowns(long lift, long well, long weightless, long crush
 		ByteBufCodecs.VAR_LONG, GravityCooldowns::crush,
 		ByteBufCodecs.VAR_LONG, GravityCooldowns::singularity,
 		ByteBufCodecs.VAR_INT, GravityCooldowns::crushLength,
+		ByteBufCodecs.VAR_INT, GravityCooldowns::singularityLength,
 		GravityCooldowns::new);
 
 	public long get(int ability) {
@@ -38,10 +39,15 @@ public record GravityCooldowns(long lift, long well, long weightless, long crush
 			ability == GravityPower.WEIGHTLESS ? until : weightless,
 			ability == GravityPower.CRUSH ? until : crush,
 			ability == GravityPower.SINGULARITY ? until : singularity,
-			crushLength);
+			crushLength, singularityLength);
 	}
 
 	public GravityCooldowns withCrush(long until, int length) {
-		return new GravityCooldowns(lift, well, weightless, until, singularity, Math.max(1, length));
+		return new GravityCooldowns(lift, well, weightless, until, singularity, Math.max(1, length), singularityLength);
+	}
+
+	/** The C's cooldown, when it's as long as the Meteor's charge made it. */
+	public GravityCooldowns withSingularity(long until, int length) {
+		return new GravityCooldowns(lift, well, weightless, crush, until, crushLength, Math.max(1, length));
 	}
 }
