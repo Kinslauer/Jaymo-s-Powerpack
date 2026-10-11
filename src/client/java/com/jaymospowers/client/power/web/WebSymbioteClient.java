@@ -340,7 +340,7 @@ public final class WebSymbioteClient {
 		state.setData(MEAL_REACH, meal == null ? null : meal.reach());
 		state.setData(EATING, meal == null ? null : Math.max(0.0F, entity.level().getGameTime() - meal.start() + net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false)));
 		state.setData(MEAL_BIG, meal != null && meal.big());
-		if (state.getData(SUIT) != null) {
+		if (state.getData(SUIT) != null || entity instanceof Player p && WebSymbiote.isToggled(p, WebSymbioteState.BULK)) {
 			// no cape poking out through the suit
 			state.showCape = false;
 		}

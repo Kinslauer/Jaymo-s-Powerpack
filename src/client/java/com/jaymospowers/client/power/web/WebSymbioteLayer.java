@@ -71,18 +71,17 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			return;
 		}
 		WebSymbioteClient.Tendrils tendrils = state.getData(WebSymbioteClient.TENDRILS);
-		if (state.getData(WebSymbioteClient.SUIT) == null) {
-			// the suit is put away: it stays away (Living Armor and the big body still work, only their tendrils show)
-			return;
-		}
 		if (tendrils != null && tendrils.armor()) {
-			// Living Armor: the suit swells over the whole body
+			// Living Armor: the suit swells over the whole body, whether or not it was showing
 			PlayerModel bulk = state.skin.model() == net.minecraft.world.entity.player.PlayerModelType.SLIM ? this.bulkSlim : this.bulkWide;
 			coloredCutoutModelCopyLayerRender(bulk, TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
 			// veins coursing over it, writhing as the frames cycle
 			PlayerModel veins = slim ? this.veinsSlim : this.veinsWide;
 			Identifier frame = VEINS[(int)(state.ageInTicks / VEIN_TICKS) % VEINS.length];
 			coloredCutoutModelCopyLayerRender(veins, frame, poseStack, collector, lightCoords, state, -1, 1);
+			return;
+		}
+		if (state.getData(WebSymbioteClient.SUIT) == null) {
 			return;
 		}
 		PlayerModel suit = state.skin.model() == net.minecraft.world.entity.player.PlayerModelType.SLIM ? this.suitSlim : this.suitWide;

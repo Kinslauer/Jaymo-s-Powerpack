@@ -565,9 +565,6 @@ hauls you up.
 **Slingshot:** no more pulling back. Holding the draw cracks the blocks under and behind you, up to `WebStrain.ALMOST`
 90%. In Living Armor, holding `SLING_ARMOR_BREAK_TICKS` 100 (5 s) breaks them and fires you as if you'd let go.
 
-**The suit put away stays away.** With the suit off, Living Armor and the big body still work (tendrils, size,
-powers) but no suit, bulk or veins are drawn, in third person or on your arm.
-
 **Death (`WebSymbiote.withdraw`):** when a bonded player dies the bond ends for good and the symbiote pours out as a
 `jaymospowers:web_symbiote_blob` (`WebSymbioteBlob`): a black blob that hauls itself around on tendrils
 (`WebBlobRenderer`). It roams `ROAM_RADIUS` 10 around where you fell, moving its home onto your body (Kitchen) if
@@ -587,7 +584,7 @@ has only Shroud; a low bond ignores the menu sometimes; spam keys during a curio
 abilities, then the meter fills and you break free); takeover fights are tendril-heavy; a chunk cross winds up and
 recovers slowly; Sneak+R at stone hesitates before pulling; thrash a held corpse (with Kitchen) for the drops; Wall
 Crawl drags rather than floats; a takeover through stone throws clumps forward; hold a slingshot draw on stone (with
-and without Living Armor); turn the suit off with Living Armor on (no suit drawn); die bonded (a blob crawls out,
+and without Living Armor); die bonded (a blob crawls out,
 roams, bonds a nearby web user, or with Kitchen waits for the body to rise and turns it into the behemoth). None of this has been run in game yet.
 
 ### Ascension: Spider-Sense

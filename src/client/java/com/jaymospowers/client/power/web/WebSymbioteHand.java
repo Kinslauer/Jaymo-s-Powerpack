@@ -37,11 +37,10 @@ public final class WebSymbioteHand {
 		if (player == null) {
 			return;
 		}
-		// the suit put away stays away: the big body's powers work bare, without its look
-		if (!WebSymbiote.suitShown(player)) {
+		boolean armor = WebSymbiote.bulked(player);
+		if (!armor && !WebSymbiote.suitShown(player)) {
 			return;
 		}
-		boolean armor = WebSymbiote.bulked(player);
 		if (suitWide == null) {
 			suitWide = model(0.12F, false);
 			suitSlim = model(0.12F, true);
