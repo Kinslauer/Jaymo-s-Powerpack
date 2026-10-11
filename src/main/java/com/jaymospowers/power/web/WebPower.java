@@ -340,6 +340,11 @@ public final class WebPower implements Power {
 		return com.jaymospowers.core.Fate.isAscended(player) ? ".symbiote_ascended" : ".symbiote";
 	}
 
+	@Override
+	public boolean slotUnlocked(Player player, String slot) {
+		return !"mode".equals(slot) || com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_2);
+	}
+
 	/** The Power Mode key (Z) is Web Zip; it unlocks with the second web (G). */
 	@Override
 	public void onMode(ServerPlayer player, boolean down) {

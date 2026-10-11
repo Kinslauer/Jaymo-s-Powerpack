@@ -8,7 +8,7 @@
 	"power.jaymospowers.arsenal.ascended": "Armory",
 	"power.jaymospowers.arsenal.corrupted": "Void Arsenal",
 	"power.jaymospowers.arsenal.ascended_corrupted": "Void Armory",
-	"power.jaymospowers.arsenal.key.ultimate": "Hundred Blades",
+	"power.jaymospowers.arsenal.key.ultimate": "Hundred Blades: rifts rain weapons where you aim",
 	"entity.jaymospowers.arsenal_rift_blade": "Rift Blade",
 	"item.jaymospowers.arsenal_dimensional_key": "Dimensional Key",
 	"item.jaymospowers.arsenal_dimensional_key.lore_1": "Cut for a lock you already carry.",
@@ -39,7 +39,7 @@
 	"power.jaymospowers.arsenal.key.starter": "Rummage: reach in and see what turns up",
 	"item.jaymospowers.arsenal_relic.lore": "It hums, as if it remembers being somewhere else.",
 	"message.jaymospowers.arsenal.relic_kept": "%s slips into your Pocket Stash. It's yours now.",
-	"power.jaymospowers.arsenal.key.ability_3.corrupted": "Void Gates: V fixes a gate where you aim (up to 5); Sneak+V steps through to the one you aim at; hold Sneak+V with none to cast one ahead",
+	"power.jaymospowers.arsenal.key.ability_3.corrupted": "Void Gates: %3$s fixes a gate where you aim (up to 5); Sneak + %3$s steps through to the one you aim at; hold Sneak + %3$s with none to cast one ahead",
 	"message.jaymospowers.arsenal_gate_placed": "Gate fixed (%s/%s).",
 	"message.jaymospowers.arsenal_gate_too_far": "Nothing there for a gate to hold to.",
 	"message.jaymospowers.arsenal_gate_none_aimed": "No gate that way.",
@@ -101,5 +101,8 @@
 	"tooltip.jaymospowers.void_crown.cold": "It is cold in your hands. It is not waiting for you.",
 	"message.jaymospowers.arsenal.crown_found": "Something else came through behind it.",
 	"message.jaymospowers.arsenal.crown_refuses": "It will not sit on your brow.",
-	"message.jaymospowers.arsenal.crown_slips": "The crown lets go of you."
+	"message.jaymospowers.arsenal.crown_slips": "The crown lets go of you.",
+	"power.jaymospowers.arsenal.key.ability_1.ascended": "Reach Through (your pinned weapon first). Sneak + %1$s: pin the held weapon (empty hand: unpin)",
+	"power.jaymospowers.arsenal.key.ability_1.corrupted": "Reach Through: void-touched weapons, 1.3x harder",
+	"power.jaymospowers.arsenal.key.ability_1.ascended_corrupted": "Reach Through: void-touched, pinned first, sometimes flintlocks. Sneak + %1$s: pin (empty hand: unpin)"
 }
