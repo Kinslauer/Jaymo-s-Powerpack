@@ -585,8 +585,10 @@ zombie player, then any web slinger without a symbiote (chased up to `LEASH` 32 
 `BOND_REACH`. A player gets a fresh bond (`bond`). Only fire, lava, explosions and `/kill` hurt it (20 health); other
 blows splash it back. It never despawns.
 A Gravity meteor (`GravityMeteor.impact`) carries one `METEOR_CHANCE` 20% of the time, unless a symbiote (a blob, a
-behemoth or a bonded player) is already within `METEOR_VICINITY` 128. It crawls out of the crater with
-`FIRE_GRACE` 300 ticks of immunity to the fire and lava there.
+behemoth or a bonded player) is already within `METEOR_VICINITY` 128. `METEOR_ALIVE` 30% of those crawl out of
+the crater as a blob with `FIRE_GRACE` 300 ticks of immunity to the fire and lava there; the rest lie on the crater
+floor as goo (Black Ooze) on obsidian, bonded like a natural crater's (Sneak + right-click). Goo blocks nearby don't
+count toward the vicinity check.
 
 **Behemoth (`WebBehemoth`):** a zombie player it takes gets the `web_behemoth` attachment and permanent modifiers
 (+80 health, +6 damage, x1.7 size, x1.3 speed, 0.8 knockback resistance), the big body and veins drawn over it, and

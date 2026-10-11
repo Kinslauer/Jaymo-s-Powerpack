@@ -61,6 +61,8 @@ public class WebSymbioteBlob extends PathfinderMob {
 	 * already within {@code METEOR_VICINITY}. Out of the burning crater, fire can't touch it for {@code FIRE_GRACE} ticks.
 	 */
 	static final float METEOR_CHANCE = 0.2F;
+	/** Of those, this share crawls out alive; the rest lies in the crater as goo (Black Ooze), as craters have it. */
+	static final float METEOR_ALIVE = 0.3F;
 	static final double METEOR_VICINITY = 128.0;
 	static final int FIRE_GRACE = 300;
 
@@ -120,10 +122,32 @@ public class WebSymbioteBlob extends PathfinderMob {
 		if (taken) {
 			return false;
 		}
+		if (level.getRandom().nextFloat() >= METEOR_ALIVE) {
+			return gooAt(level, at);
+		}
 		WebSymbioteBlob blob = release(level, at.add(0.0, 0.5, 0.0));
 		blob.fireGrace = FIRE_GRACE;
 		blob.clearFire();
 		return true;
+	}
+
+	/** The goo on the crater floor below {@code at}, on a glassy seat, the way the natural craters hold it. */
+	private static boolean gooAt(ServerLevel level, Vec3 at) {
+		if (WebPower.GOO == null) {
+			return false;
+		}
+		BlockPos.MutableBlockPos pos = BlockPos.containing(at.x, at.y + 2.0, at.z).mutable();
+		for (int i = 0; i < 12 && pos.getY() > level.getMinY(); i++, pos.move(0, -1, 0)) {
+			if (level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), net.minecraft.core.Direction.UP)
+				&& (level.getBlockState(pos).isAir() || level.getBlockState(pos).canBeReplaced())) {
+				level.setBlock(pos.below(), net.minecraft.world.level.block.Blocks.OBSIDIAN.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_ALL);
+				level.setBlock(pos, WebPower.GOO.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_ALL);
+				level.sendParticles(ParticleTypes.SQUID_INK, pos.getX() + 0.5, pos.getY() + 0.3, pos.getZ() + 0.5, 20, 0.3, 0.2, 0.3, 0.05);
+				level.playSound(null, pos, SoundEvents.SLIME_BLOCK_PLACE, SoundSource.BLOCKS, 1.0F, 0.5F);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override

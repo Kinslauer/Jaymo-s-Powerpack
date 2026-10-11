@@ -554,7 +554,8 @@ public final class WebSymbioteClient {
 	/** It's steering, view and all: along the server's path, straight at its prey when it's right there, or still while it rips. */
 	private static void tickTakeover(LocalPlayer player) {
 		Entity target = player.level().getEntity(takeoverTarget);
-		if (target == null || !target.isAlive() || --takeoverTicks <= 0) {
+		// (the symbiote gone, a power swapped away: it can't be driving any more)
+		if (target == null || !target.isAlive() || --takeoverTicks <= 0 || !WebSymbiote.isBonded(player)) {
 			takeoverTicks = 0;
 			clearPath();
 			return;

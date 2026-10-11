@@ -1219,6 +1219,13 @@ public final class WebSymbiote {
 		Live live = player.getAttached(LIVE);
 		if (live != null) {
 			abortFeeding(player, live);
+			if (live.takeoverTicks > 0) {
+				// mid-takeover: it lets go of the body (and the client stops steering)
+				live.takeoverTicks = 0;
+				WebTakeoverPath.stop(player, live.route);
+				live.route = null;
+				ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0, false));
+			}
 		}
 		removeArmor(player);
 		player.removeAttached(STATE);
