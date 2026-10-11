@@ -46,9 +46,10 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * Cyclone (hold X, the power skill key; a tap is still the Tempest Kick): you drop into a superhero landing and a
- * column of wind rises round you for as long as you hold. Creatures inside are caught, spun and lifted a little, and
- * battered: {@link #DAMAGE} every {@link #DAMAGE_INTERVAL} ticks ({@link #DAMAGE_INTERVAL_ASCENDED} ascended or
- * corrupted; corrupted, as shock). The vortex steals your breath too: {@link #SELF_DAMAGE} suffocation every
+ * column of wind rises round you for as long as you hold. It's a "get off me", not a weapon: each creature it catches
+ * is swept into orbit round you, spiralling up and out for {@link #ORBIT_TICKS} ticks while the wind nicks at it
+ * ({@link #DAMAGE} every {@link #DAMAGE_INTERVAL} ticks, {@link #DAMAGE_ASCENDED} ascended or corrupted; corrupted, as
+ * shock), then hurled away ({@link #FLING}). A thrown creature can't be caught again for {@link #RECATCH_TICKS}. The vortex steals your breath too: {@link #SELF_DAMAGE} suffocation every
  * {@link #SELF_INTERVAL} ticks ({@link #SELF_INTERVAL_ASCENDED}), which is what limits how long you can hold it.
  * Available from the first unlocked ability; its radius and height grow with mastery.
  */
@@ -68,18 +69,24 @@ public final class WindCyclone {
 	static final double FOOT_SHARE = 0.35;
 	/** How long the funnel takes to rise to full size, while you drop into the stance (ticks). */
 	public static final int FORM_TICKS = 8;
-	/** Damage to everything else inside, and how often (ticks). */
-	static final float DAMAGE = 4.0F;
-	static final int DAMAGE_INTERVAL = 20, DAMAGE_INTERVAL_ASCENDED = 10;
+	/** Light damage to everything else in orbit (ascended or corrupted: more), and how often (ticks). */
+	static final float DAMAGE = 1.5F, DAMAGE_ASCENDED = 2.5F;
+	static final int DAMAGE_INTERVAL = 10;
 	/** The vortex's toll on you (suffocation), and how often (ticks). */
 	static final float SELF_DAMAGE = 1.0F;
 	static final int SELF_INTERVAL = 40, SELF_INTERVAL_ASCENDED = 80;
 	/** Hunger per tick while held (full sonic flight is about 0.105). */
 	static final float EXHAUSTION_PER_TICK = 0.06F;
-	/** Caught creatures: spin speed (blocks/tick along the circle), pull toward the eye, lift and how high (blocks). */
-	static final double SPIN_SPEED = 0.38, PULL = 0.06, LIFT_SPEED = 0.12, LIFT_HEIGHT = 1.4;
-	/** Letting go: what was caught is flung outward this hard. */
-	static final double RELEASE_FLING = 0.7, RELEASE_FLING_UP = 0.3;
+	/** How long a caught creature orbits before it's thrown (ticks, 2 s). */
+	static final int ORBIT_TICKS = 40;
+	/** The orbit: speed along the circle (blocks/tick), and its radius from start to throw (the end as a share of the funnel's). */
+	static final double SPIN_SPEED = 0.45, ORBIT_START = 1.8, ORBIT_END_SHARE = 0.65;
+	/** How high the orbit carries a creature above your feet by the throw (blocks; never above the funnel), and how fast it may climb. */
+	static final double RISE_HEIGHT = 4.0, RISE_SPEED = 0.35;
+	/** The throw: outward and up (blocks/tick), and how much of the spin it keeps, like a sling. */
+	static final double FLING = 1.4, FLING_UP = 0.5, FLING_SPIN = 0.4;
+	/** After a throw, how long before the same creature can be caught again (ticks). */
+	static final int RECATCH_TICKS = 30;
 	/** The funnel's particles: rings up its height, points on each ring per tick, and how fast it turns (radians/tick). */
 	static final int RINGS = 6, RING_POINTS = 3;
 	static final double TURN_RATE = 0.55;
@@ -120,6 +127,10 @@ public final class WindCyclone {
 		final long start;
 		long nextHit;
 		long nextSelf;
+		/** Who's in orbit, and since when (game time). */
+		final Map<UUID, Long> orbiting = new HashMap<>();
+		/** Who was just thrown, and until when they can't be caught again. */
+		final Map<UUID, Long> thrown = new HashMap<>();
 
 		Active(ResourceKey<Level> dimension, long start, long nextHit, long nextSelf) {
 			this.dimension = dimension;
@@ -195,8 +206,7 @@ public final class WindCyclone {
 			return;
 		}
 		boolean fast = Fate.isAscended(player) || Fate.isCorrupted(player);
-		ACTIVE.put(player.getUUID(), new Active(level.dimension(), now, now + (fast ? DAMAGE_INTERVAL_ASCENDED : DAMAGE_INTERVAL),
-			now + (fast ? SELF_INTERVAL_ASCENDED : SELF_INTERVAL)));
+		ACTIVE.put(player.getUUID(), new Active(level.dimension(), now, now + DAMAGE_INTERVAL, now + (fast ? SELF_INTERVAL_ASCENDED : SELF_INTERVAL)));
 		player.setAttached(CYCLONE, new Stance(now, player.getRandom().nextBoolean()));
 		root(player);
 		Mastery.used(player);
@@ -230,12 +240,8 @@ public final class WindCyclone {
 		}
 		double radius = radius(player);
 		for (LivingEntity target : caught(player, level, radius, height(player))) {
-			Vec3 away = new Vec3(target.getX() - player.getX(), 0.0, target.getZ() - player.getZ());
-			away = away.lengthSqr() < 1.0E-4 ? player.getLookAngle().horizontal() : away.normalize();
-			double resist = 1.0 - target.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
-			if (resist > 0.0) {
-				target.push(away.x * RELEASE_FLING * resist, RELEASE_FLING_UP * resist, away.z * RELEASE_FLING * resist);
-				target.syncVelocity = true;
+			if (active.orbiting.containsKey(target.getUUID())) {
+				fling(player, level, target);
 			}
 		}
 		level.sendParticles(ParticleTypes.GUST_EMITTER_LARGE, player.getX(), player.getY() + 0.5, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
@@ -279,14 +285,31 @@ public final class WindCyclone {
 
 		boolean hit = now >= active.nextHit;
 		if (hit) {
-			active.nextHit = now + (fast ? DAMAGE_INTERVAL_ASCENDED : DAMAGE_INTERVAL);
+			active.nextHit = now + DAMAGE_INTERVAL;
 		}
+		active.thrown.values().removeIf(until -> now >= until);
+		java.util.Set<UUID> inside = new java.util.HashSet<>();
 		for (LivingEntity target : caught(player, level, radius, height)) {
-			spin(player, target);
+			UUID id = target.getUUID();
+			if (active.thrown.containsKey(id)) {
+				continue;
+			}
+			inside.add(id);
+			long since = active.orbiting.computeIfAbsent(id, k -> now);
+			if (now - since >= ORBIT_TICKS) {
+				// round and up, and off it goes
+				fling(player, level, target);
+				active.orbiting.remove(id);
+				active.thrown.put(id, now + RECATCH_TICKS);
+				continue;
+			}
+			orbit(player, target, (now - since) / (double)ORBIT_TICKS, radius, height);
 			if (hit) {
-				batter(player, level, target, corrupted);
+				batter(player, level, target, corrupted, fast ? DAMAGE_ASCENDED : DAMAGE);
 			}
 		}
+		// (anything that slipped out of the funnel starts over if it's caught again)
+		active.orbiting.keySet().retainAll(inside);
 
 		if (now >= active.nextSelf) {
 			if (player.isCreative()) {
@@ -315,45 +338,62 @@ public final class WindCyclone {
 		});
 	}
 
-	/** Round and round, drawn in toward the eye, lifted off its feet a little. */
-	private static void spin(ServerPlayer player, LivingEntity target) {
+	/**
+	 * Round and round you, spiralling out from {@link #ORBIT_START} to most of the funnel's radius and climbing to
+	 * {@link #RISE_HEIGHT} as {@code progress} runs 0 → 1. Knockback resistance holds a creature back in proportion.
+	 */
+	private static void orbit(ServerPlayer player, LivingEntity target, double progress, double radius, double height) {
 		double resist = 1.0 - target.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
 		if (resist <= 0.0) {
 			return;
 		}
 		Vec3 out = new Vec3(target.getX() - player.getX(), 0.0, target.getZ() - player.getZ());
 		double distance = out.length();
-		Vec3 tangent;
-		Vec3 inward;
-		if (distance < 1.0E-3) {
-			tangent = player.getLookAngle().horizontal();
-			inward = Vec3.ZERO;
-		} else {
-			out = out.scale(1.0 / distance);
-			// counter-clockwise seen from above
-			tangent = new Vec3(-out.z, 0.0, out.x);
-			// drawn in toward a ring just outside you, never into your arms
-			inward = out.scale(distance > 1.6 ? -PULL : PULL);
-		}
-		double lift = Mth.clamp((player.getY() + LIFT_HEIGHT - target.getY()) * 0.2, -0.1, LIFT_SPEED);
+		out = distance < 1.0E-3 ? player.getLookAngle().horizontal().normalize() : out.scale(1.0 / distance);
+		// counter-clockwise seen from above
+		Vec3 tangent = new Vec3(-out.z, 0.0, out.x);
+		// held on the spiral: pulled in or pushed out toward this moment's ring
+		double ring = Mth.lerp(progress, ORBIT_START, Math.max(ORBIT_START, radius * ORBIT_END_SHARE));
+		Vec3 radial = out.scale(Mth.clamp((ring - distance) * 0.3, -0.3, 0.3));
+		double top = Math.min(RISE_HEIGHT, height - target.getBbHeight());
+		double want = player.getY() + 0.3 + Math.max(0.0, top - 0.3) * progress;
+		double lift = Mth.clamp((want - target.getY()) * 0.4, -0.15, RISE_SPEED);
 		Vec3 v = target.getDeltaMovement();
-		Vec3 swirl = tangent.scale(SPIN_SPEED).add(inward);
+		Vec3 swirl = tangent.scale(SPIN_SPEED).add(radial);
 		target.setDeltaMovement(Mth.lerp(resist, v.x, swirl.x), Mth.lerp(resist, v.y, lift), Mth.lerp(resist, v.z, swirl.z));
 		target.syncVelocity = true;
 		target.fallDistance = 0.0;
 	}
 
-	private static void batter(ServerPlayer player, ServerLevel level, LivingEntity target, boolean corrupted) {
+	/** Thrown clear: outward, up, and a little along the spin, with a gust where it leaves. */
+	private static void fling(ServerPlayer player, ServerLevel level, LivingEntity target) {
+		double resist = 1.0 - target.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
+		if (resist <= 0.0) {
+			return;
+		}
+		Vec3 away = new Vec3(target.getX() - player.getX(), 0.0, target.getZ() - player.getZ());
+		away = away.lengthSqr() < 1.0E-4 ? player.getLookAngle().horizontal().normalize() : away.normalize();
+		Vec3 tangent = new Vec3(-away.z, 0.0, away.x);
+		Vec3 throwDir = away.add(tangent.scale(FLING_SPIN)).normalize();
+		target.setDeltaMovement(throwDir.x * FLING * resist, FLING_UP * resist, throwDir.z * FLING * resist);
+		target.syncVelocity = true;
+		target.fallDistance = 0.0;
+		double y = target.getY() + target.getBbHeight() * 0.5;
+		level.sendParticles(ParticleTypes.GUST, target.getX(), y, target.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+		level.playSound(null, target.getX(), y, target.getZ(), SoundEvents.WIND_CHARGE_BURST, SoundSource.PLAYERS, 0.6F, 1.1F);
+	}
+
+	private static void batter(ServerPlayer player, ServerLevel level, LivingEntity target, boolean corrupted, float damage) {
 		double y = target.getY() + target.getBbHeight() * 0.5;
 		if (corrupted) {
 			DamageSource shock = player.damageSources().source(DamageTypes.LIGHTNING_BOLT, player);
-			target.hurtServer(level, shock, DAMAGE);
+			target.hurtServer(level, shock, damage);
 			com.jaymospowers.core.Flames.touch(level, target, SHOCK_BURN_SECONDS, player);
 			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), y, target.getZ(), 12, target.getBbWidth() * 0.6, target.getBbHeight() * 0.4,
 				target.getBbWidth() * 0.6, 0.3);
 			level.playSound(null, target.getX(), y, target.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.4F, 1.6F);
 		} else {
-			target.hurtServer(level, player.damageSources().windCharge(player, player), DAMAGE);
+			target.hurtServer(level, player.damageSources().windCharge(player, player), damage);
 			level.sendParticles(ParticleTypes.SMALL_GUST, target.getX(), y, target.getZ(), 1, 0.1, 0.1, 0.1, 0.0);
 		}
 	}
