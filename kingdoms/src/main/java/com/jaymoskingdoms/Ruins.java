@@ -25,12 +25,12 @@ import net.minecraft.world.level.levelgen.structure.StructureStart;
  * inside one of its pieces; only structures whose start chunk is loaded are seen, so anything unseen is left alone.
  * What's never torn down, whatever piece it's in: a bell, a bed or job block a living villager has claimed (a site with
  * one is refused outright, so a living village keeps its homes), anything unbreakable; and no site on old structures
- * comes near any faction's seat, keep, archer posts or storage (their own builds are already kept apart as taken
- * ground). Player builds outside plots stay safe because a block outside every piece must still be the land's own.
+ * comes near any faction's seat, keep, archer posts or storage, or touches a building a faction holds ({@link Holds}:
+ * a village seat or storehouse, a Grim structure; their own builds are already kept apart as taken ground). Player builds outside plots stay safe because a block outside every piece must still be the land's own.
  */
 final class Ruins {
 	/** How near (blocks) a site on old structures may come to a seat (bell or fire), a camp's fire, a keep's heart, an archer's post, a storage block. */
-	static final int SEAT_GUARD = 10, CAMP_GUARD = 26, KEEP_GUARD = 22, POST_GUARD = 5, STORE_GUARD = 10;
+	static final int SEAT_GUARD = 10, HOLD_GUARD = 2, CAMP_GUARD = 26, KEEP_GUARD = 22, POST_GUARD = 5, STORE_GUARD = 10;
 	/** How far down through a structure the ground under it is looked for. */
 	static final int GROUND_SCAN = 24;
 	/** The most blocks above the floor torn out of a structure's pieces in a building's columns (no floating remains). */
@@ -110,7 +110,8 @@ final class Ruins {
 
 	/** A block the builders may tear out of an old structure: inside a piece, breakable, no bell, not a living villager's. */
 	static boolean tearable(ServerLevel level, BlockPos at, BlockState state) {
-		if (state.isAir() || state.is(Blocks.BELL) || state.getDestroySpeed(level, at) < 0 || !inPiece(level, at)) {
+		if (state.isAir() || state.is(Blocks.BELL) || state.getDestroySpeed(level, at) < 0 || !inPiece(level, at)
+			|| Holds.guarded(level.getServer(), at)) {
 			return false;
 		}
 		return level.getPoiManager().getType(at).isEmpty()
@@ -133,6 +134,10 @@ final class Ruins {
 			return true;
 		}
 		MinecraftServer server = level.getServer();
+		// a building a faction took for its seat or storehouse, or the Grim structure it holds
+		if (Holds.guarded(server, x0, z0, x1, z1, HOLD_GUARD)) {
+			return true;
+		}
 		for (Faction f : Factions.all(server)) {
 			if (near(f.seat(), f.type() == FactionType.BARBARIAN ? CAMP_GUARD : SEAT_GUARD, x0, z0, x1, z1)) {
 				return true;

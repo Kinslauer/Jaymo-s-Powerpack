@@ -827,3 +827,87 @@ optional field: old saves read as false), `JaymosKingdoms` (one line), `fabric.m
   in the storehouse, nothing left floating in the new building's columns.
 - A kingdom at a living village: its villagers' houses, beds, job blocks and the bell stay; the keep, storehouse and
   watchtowers are never touched.
+
+## 0.5.0, track: kingdoms in their villages, Grim holds
+Built, not yet seen in game. The user's ask: "the structure that it loads does not fit the epic villages it loads within,
+can you make the kingdoms spawn strictly within villages, designating the church or largest building to the king, and
+another building to the storehouse, so the builders can expand. the barbarians and fiefdoms should spawn in grim
+kingdom structures near kingdoms, but please make sure they also get a storehouse to start clearing debris and
+expanding on the structures. possibly erecting another grim structure nearby." New classes: `Seats` (reading a
+structure's pieces, rooms, a seat made from a building), `Holds` (a new attachment, `jaymoskingdoms:holds`, listed in
+`JaymosKingdoms`), `GrimSites` (Grim Kingdoms compat), `Debris` (rubble clearing). Changed: `KingdomEvents` (founding),
+`Storehouse` (`adopt`), `Ruins` (held buildings are never torn down), `Planner.ready` (waits for the rubble), `Builders`
+(a `brain()` getter), `Camps` (`stock`, `name` opened up; the Grim preference; a Grim camp doesn't rot), the lang file.
+
+### Kingdoms only in villages (`KingdomEvents.tryFound`, `Seats`)
+- **A bell founds anything (kingdom or village) only inside a village the world generated**: a structure in
+  `#minecraft:village` (or any `minecraft:village_*`; Epic Structures: Villages keeps those ids) with a piece within 2
+  blocks of the bell. Read from loaded chunks only: while the village's start chunk, or its ground within 112 of the
+  bell, isn't loaded, it waits (no castle fallback). A bell outside every village is looked at again after 5 minutes.
+- **No more castle beside the village.** The seat is the village's **church** (a piece whose template path has
+  `temple`), else its **largest building** (streets, town centres, farms, pens, decorations, lamps, wells and trees
+  aren't buildings). Its main floor is the storey with the most open cells (two high, a sturdy floor, a roof within 12).
+  - **The throne**: a stair in the village's materials at the open cell furthest from the door with a wall behind it
+    and floor in front; the king stands in front of it; the kingdom's wall banner above it (if there's air).
+  - **The panic room**: a 3 x 3 x 3 cell of fortified stone dug under the floor beside the throne, a trapdoor laid in
+    the floor, a ladder down, the treasury chest (weaponsmith loot) and a lantern. Only dug through the land's own
+    ground (nothing built, no block entities, nothing wet); otherwise the king has no hiding place.
+  - **The hall** (two guards): the open cell nearest the building's middle. **The gate** (three guards): just outside
+    the door nearest the bell (or, with no door, the ground outside on the bell's side).
+  - **Archers' posts** (up to 3, 6 apart): rooftops round the seat and round the bell at least 4 above the seat's
+    floor, topped up with open ground near the bell. No watchtowers are built.
+  - Only air is ever replaced in the building: beds and job blocks stay, so its villagers stay.
+- **The storehouse** (`Storehouse.adopt`): another building, one nobody sleeps in first (library, smiths, mason,
+  tannery, stable, butcher..., or a large/big/medium house), else the next largest; else the seat's own building, away
+  from the throne. Up to 10 chests and barrels (barrels two high) along its walls at the end away from the door, only
+  where there's air, never boxing in a spot; the depot just inside the door; fewer than 3 and it isn't used. Open
+  ground (the old storehouse) is the fallback. The builder crew comes as before.
+- **Both buildings are held** (`Holds`): `Ruins` never tears them down (a site within 2 of one is refused). The village's
+  other empty houses are ground for the builders as in 0.4.1, so the town grows on from the bell.
+- `/kingdom found` (operators) with no kind takes the village's buildings if you stand in one; `keep|castle|tower`
+  build the old castles as before. Villages (bells near a capital) keep their shed.
+
+### Grim Kingdoms: fiefdoms and camps in its ruins (`GrimSites`, only with `mr_grim_kingdomsloststructuresruinsvanillaedition`)
+- Every 30 s the Grim structures referenced in the chunks within 5 of each player are looked over (by id; nothing of
+  Grim's is copied). One whose middle is within 600 of a standing kingdom's seat, on nobody's land, 96 from every
+  settlement, wholly loaded and with nobody within 40 is taken:
+  - **big holds** (the fortresses, citadels, keeps, the grain sack keep/fort/hold, bastion, onion forts, Zweiberg,
+    Eldermoor, the hall manor, the colosseum) become a **fiefdom** of the nearest kingdom (vassal, allied, in its
+    colours): its largest roofed building the seat, made like a village kingdom's (throne, banner, panic room, posts), a
+    lord crowned, 5 guards, archers; land 4 chunks out. "The lord of X raises the banner of Y over an old ruin..."
+  - **small and wild ones** (camps 1-3, the outposts, the watches, Tor tower, the spur towers, the meadow ruins,
+    Bramblepath, the travelers' lodge) become a **barbarian camp** (the usual camp data, a chief and 4 raiders, allied
+    with the other barbarian camps): the chief at the back of its largest roofed building (or the structure's middle),
+    the raiders in it; land 2 chunks out; a camp's starting stock. "Barbarians have taken an old ruin near Y..."
+  - at most **2 fiefdoms and 2 camps per kingdom**. A structure passed over is looked at again in 5 minutes.
+- **Its storehouse**: another of its buildings, else its seat's building away from the throne, else a shed on open
+  ground; then its builder crew.
+- **Rubble first** (`Debris`): the builders walk the structure's pieces (not its bare terrain) pulling out cobwebs,
+  vines, dead bushes and lichen, and loose heaps on floors (gravel, cobble, mossy or cracked stone, andesite, tuff,
+  coarse dirt, cobble or stone slabs lying on a floor, open above and on three sides: never part of a wall, a merlon or
+  a column); gravel and cobble go into storage. They patch one-block holes in walls (wall left and right, above and
+  below, open on both faces) with the wall's own block, 48 at most. Up to 4 passes; the planner waits until it's done
+  (or 5 days on). "The builders of X have cleared the rubble from their hold." Then they grow it through the planner
+  like anyone else; the Grim structure itself is held (never torn down).
+- **A second Grim building**: 3 days after the hold was taken, its rubble cleared and no project under way, the
+  builders begin one more nearby **block by block** as an ordinary project (the planner's site rules: its own land,
+  level natural ground, nothing built in the way): a fiefdom a grain sack hold, thatch outpost, travelers' lodge or
+  Zweiberg; a camp one of the camps, the old timber watch or the thatch outpost. Its template (the first of the
+  structure's start pool, from the game's template manager) becomes a `Blueprint` (no air, voids or jigsaws; its
+  lowest layer laid in place of the ground; containers come empty), at most 26 across and 5000 blocks. Once per hold
+  (`erected`, saved); with no site it looks again a day later. "The builders of X begin raising a new hall..."
+- **Wild barbarian camps** still rise, but with Grim loaded a kingdom with a free Grim camp site seen in its reach
+  waits for that instead. Illager camps are unchanged. Without Grim none of this runs (the rubble brain idles).
+
+### Notes for the lead and testers
+- `Holds` is a new persistent attachment on the Overworld (logged in `JaymosKingdoms` so it loads). Old saves: no holds.
+- The Grim catalogue entries (`grim_<structure>`, at most 0) show in the build command's suggestions; the planner
+  never picks them by itself.
+- **Check first:**
+  - a new world with Epic Structures, walking into a village: the king on a throne in the church (or largest house),
+    the banner above, the trapdoor beside it and the panic room below, guards at the door and in the hall, archers on
+    the roofs; chests and barrels in another building, the builders there; a bell in the wild founds nothing;
+  - the builders' first projects: nothing of the church or the storehouse torn down;
+  - with Grim: 150-500 blocks from a kingdom near a Grim keep: the fiefdom's message, its lord on his throne, guards;
+    a Grim camp's barbarians; builders pulling cobwebs and heaps; wall holes patched (arrow slits may be filled too);
+    `/time add 72000` near one: the second building staked out and raised.

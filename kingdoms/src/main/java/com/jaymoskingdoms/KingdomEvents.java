@@ -32,13 +32,16 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
  * How factions come to be and what moves them: a village's bell becomes a capital the first time someone comes near
  * ({@link #FOUND_RANGE}) if no other capital is close ({@link #CAPITAL_SPACING}), with a king, guards, a banner, a
- * storehouse and land around it; otherwise it becomes a village ({@link Villages}). Deaths shift reputation and
+ * storehouse and land around it, its seat and storehouse in the village's own buildings ({@link Seats}); otherwise it
+ * becomes a village ({@link Villages}). Only a bell inside a village the world generated founds anything. Deaths shift reputation and
  * standing, and leave places to fill; a fallen ruler's realm meets one of three fates (a successor, vassalage to the
  * victor's kingdom as a fiefdom, or ruin); crossing into a faction's land announces it. Also drives the other
  * systems' ticks (storehouses, production, hiring, villages).
@@ -62,8 +65,15 @@ public final class KingdomEvents {
 	/** When a realm falls to ruin, its folk this close to the one who died scatter. */
 	static final double RUIN_SCATTER = 96.0;
 
+	/** A bell found outside any village is looked at again only after this long (ticks). */
+	static final long NOT_VILLAGE_TICKS = 6000L;
+	/** A village is founded only when it's loaded this far round its bell (its buildings further out aren't considered). */
+	static final int LOAD_REACH = 112;
+
 	/** Per player: the faction whose land they were last in (for the "entering" message). */
 	private static final Map<UUID, Integer> WHERE = new HashMap<>();
+	/** Bells outside any village (packed position → game time to look again). */
+	private static final Map<Long, Long> NOT_VILLAGE = new HashMap<>();
 
 	private KingdomEvents() {
 	}
@@ -73,6 +83,7 @@ public final class KingdomEvents {
 		ServerLifecycleEvents.SERVER_STARTED.register(Factions::migrate);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			WHERE.clear();
+			NOT_VILLAGE.clear();
 			Economy.clear();
 			Storehouse.clear();
 		});
@@ -134,7 +145,11 @@ public final class KingdomEvents {
 		}
 	}
 
-	/** A village's bell near {@code player} that belongs to no settlement yet becomes a capital, or (near another capital) a village. */
+	/**
+	 * A village's bell near {@code player} that belongs to no settlement yet becomes a capital, or (near another capital) a
+	 * village; but only a bell inside a village the world generated (0.5): anywhere else it founds nothing. While the
+	 * village's pieces can't all be read yet (chunks not loaded), it waits.
+	 */
 	private static void tryFound(ServerLevel level, ServerPlayer player) {
 		Optional<BlockPos> bell = level.getPoiManager().findClosest(holder -> holder.is(PoiTypes.MEETING), player.blockPosition(), FOUND_RANGE,
 			PoiManager.Occupancy.ANY);
@@ -142,8 +157,31 @@ public final class KingdomEvents {
 		if (bell.isEmpty() || Factions.near(server, bell.get(), TOWN_RADIUS) != null) {
 			return;
 		}
+		long now = level.getGameTime();
+		long key = bell.get().asLong();
+		if (NOT_VILLAGE.getOrDefault(key, Long.MIN_VALUE) > now) {
+			return;
+		}
+		Seats.Found village = Seats.structureAt(level, bell.get(), Seats::village);
+		if (village.status() == Seats.Status.UNREADY) {
+			return;
+		}
+		if (village.status() == Seats.Status.NONE || village.start() == null) {
+			NOT_VILLAGE.put(key, now + NOT_VILLAGE_TICKS);
+			return;
+		}
+		// (the village must be loaded round the bell to choose its buildings: a great town's far end may be left out)
+		BoundingBox area = village.start().getBoundingBox();
+		BlockPos b = bell.get();
+		if (!level.hasChunksAt(Math.max(area.minX(), b.getX() - LOAD_REACH), Math.max(area.minZ(), b.getZ() - LOAD_REACH),
+			Math.min(area.maxX(), b.getX() + LOAD_REACH), Math.min(area.maxZ(), b.getZ() + LOAD_REACH))) {
+			return;
+		}
 		if (Factions.realmNear(server, bell.get(), CAPITAL_SPACING) == null) {
-			found(level, bell.get());
+			if (foundIn(level, bell.get(), village.start()) == null) {
+				// no building there with a floor under a roof: the village is a village
+				Villages.found(level, bell.get());
+			}
 		} else {
 			Villages.found(level, bell.get());
 		}
@@ -176,8 +214,66 @@ public final class KingdomEvents {
 		return found(level, capital, null);
 	}
 
-	/** (with {@code kind}, its seat is that kind rather than a random one) */
+	/**
+	 * (with {@code kind}, its seat is that kind of castle, built beside the village as before 0.5; without, it takes the
+	 * village's own buildings if {@code capital} is in a village, else a castle of a random kind: operators only)
+	 */
 	static Faction found(ServerLevel level, BlockPos capital, Castle.@Nullable Kind kind) {
+		if (kind == null) {
+			Seats.Found village = Seats.structureAt(level, capital, Seats::village);
+			if (village.status() == Seats.Status.FOUND && village.start() != null) {
+				Faction k = foundIn(level, capital, village.start());
+				if (k != null) {
+					return k;
+				}
+			}
+		}
+		MinecraftServer server = level.getServer();
+		Faction kingdom = create(level, capital);
+		// the keep, beside the village, its gate toward the bell
+		Castle.Keep keep = Castle.build(level, kingdom, capital, kind);
+		Factions.putKeep(server, kingdom.id(), keep);
+		kingdom = man(level, kingdom, keep);
+		// its storehouse (and its builders)
+		Storehouse.build(level, Factions.get(server, kingdom.id()));
+		JaymosKingdoms.LOGGER.info("Kingdom of {} founded at {}; its keep's throne at {}, panic room at {}", kingdom.name(), capital, keep.throne(),
+			keep.cellar());
+		return Factions.get(server, kingdom.id());
+	}
+
+	/**
+	 * A new kingdom at {@code bell} in its village's own buildings (0.5): its church (or largest house) is the seat, with
+	 * a throne, a panic room and archers on the roofs round it ({@link Seats#keep}); another building is the storehouse
+	 * ({@link Storehouse#adopt}; open ground if none will do). Both are kept from the builders ({@link Holds}), who grow
+	 * the town from there. Null (and nothing founded) if no building in the village has a floor under a roof.
+	 */
+	static @Nullable Faction foundIn(ServerLevel level, BlockPos bell, StructureStart village) {
+		MinecraftServer server = level.getServer();
+		Seats.Pick pick = Seats.pick(level, Seats.buildings(village), bell, true);
+		if (pick == null) {
+			JaymosKingdoms.LOGGER.info("The village at {} has no building fit for a seat", bell);
+			return null;
+		}
+		Faction kingdom = create(level, bell);
+		Castle.Keep keep = Seats.keep(level, kingdom, pick.seat(), bell, true, true);
+		Factions.putKeep(server, kingdom.id(), keep);
+		Holds.guard(server, kingdom.id(), pick.seat().box());
+		kingdom = man(level, kingdom, keep);
+		Faction stored = Factions.get(server, kingdom.id());
+		BlockPos depot = pick.store() != null ? Storehouse.adopt(level, stored, pick.store(), null) : null;
+		if (depot == null) {
+			depot = Storehouse.adopt(level, stored, pick.seat(), keep.throne());
+		}
+		if (depot == null) {
+			Storehouse.build(level, stored);
+		}
+		JaymosKingdoms.LOGGER.info("Kingdom of {} founded at {} in its village's {} (throne {}, panic room {}, {} archers' posts)", kingdom.name(), bell,
+			pick.seat().name(), keep.throne(), keep.cellar(), keep.posts().size());
+		return Factions.get(server, kingdom.id());
+	}
+
+	/** A new kingdom's faction at {@code capital}: named, coloured, its land claimed, its banner raised. */
+	private static Faction create(ServerLevel level, BlockPos capital) {
 		MinecraftServer server = level.getServer();
 		var random = level.getRandom();
 		DyeColor color = DyeColor.values()[random.nextInt(DyeColor.values().length)];
@@ -185,9 +281,12 @@ public final class KingdomEvents {
 			claim(server, capital, CLAIM_RADIUS));
 		Factions.put(server, kingdom);
 		raiseBanner(level, kingdom);
-		// the keep, beside the village, its gate toward the bell
-		Castle.Keep keep = Castle.build(level, kingdom, capital, kind);
-		Factions.putKeep(server, kingdom.id(), keep);
+		return kingdom;
+	}
+
+	/** Its king crowned, its guards and an archer on every post of {@code keep}. Returns it as stored. */
+	private static Faction man(ServerLevel level, Faction kingdom, Castle.Keep keep) {
+		MinecraftServer server = level.getServer();
 		kingdom = crown(level, kingdom);
 		for (int i = 0; i < GUARDS; i++) {
 			spawn(level, kingdom, Folk.GUARD);
@@ -195,10 +294,6 @@ public final class KingdomEvents {
 		for (int i = 0; i < keep.posts().size(); i++) {
 			spawnArcher(level, Factions.get(server, kingdom.id()));
 		}
-		// its storehouse (and its builders)
-		Storehouse.build(level, Factions.get(server, kingdom.id()));
-		JaymosKingdoms.LOGGER.info("Kingdom of {} founded at {}; its keep's throne at {}, panic room at {}", kingdom.name(), capital, keep.throne(),
-			keep.cellar());
 		return Factions.get(server, kingdom.id());
 	}
 

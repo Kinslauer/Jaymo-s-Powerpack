@@ -117,9 +117,10 @@ public final class Planner {
 		return faction.holdings().population() + faction.holdings().staff();
 	}
 
-	/** It may start a project now: healthy, staffed, at peace, room for another project. */
+	/** It may start a project now: healthy, staffed, at peace, room for another project, no rubble left to clear ({@link Debris}). */
 	static boolean ready(ServerLevel level, Faction f) {
-		return Works.of(level.getServer(), f.id()).projects().size() < PROJECTS_AT_ONCE && Economy.adequatePersonnel(f)
+		return Works.of(level.getServer(), f.id()).projects().size() < PROJECTS_AT_ONCE && !Debris.busy(level.getServer(), f.id())
+			&& Economy.adequatePersonnel(f)
 			&& Economy.atPeace(level.getServer(), f) && Economy.healthy(level, f);
 	}
 

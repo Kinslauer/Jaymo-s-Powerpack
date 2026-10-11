@@ -25,6 +25,8 @@ import org.jspecify.annotations.Nullable;
  * village's <b>shed</b> by its bell (a lean-to with a few chests). Built on open natural ground only: every block it
  * replaces is air, a plant, or the land's own dirt and stone, never anything someone built. Its containers and its
  * door are registered as the faction's storage ({@link Storage#register}). Camps' loot piles are the barbarians' own.
+ * Since 0.5 a new kingdom (and a fiefdom or camp seated in a Grim ruin) takes one of the buildings already there instead
+ * ({@link #adopt}); building on open ground is the fallback.
  */
 public final class Storehouse {
 	/** Looks for a site this far from the anchor (the keep's gate, or the bell). */
@@ -37,6 +39,12 @@ public final class Storehouse {
 	static final int HALL_HALF = 4, HALL_DEPTH = 6, HALL_WALL = 3;
 	/** The shed: half its width, its depth, its height. */
 	static final int SHED_HALF = 2, SHED_DEPTH = 3, SHED_HIGH = 2;
+	/**
+	 * A building taken for a storehouse ({@link #adopt}): the most containers (a stack of two barrels counts two), the
+	 * fewest it's worth having, how far they may spread from the first, and how far they keep from its door and from
+	 * the throne room when the seat shares the building.
+	 */
+	static final int ADOPT_CONTAINERS = 10, ADOPT_MIN = 3, ADOPT_SPREAD = 6, ADOPT_DOOR_CLEAR = 2, ADOPT_AVOID = 5;
 	/** How long to wait before looking for a site again when none was found (ticks). */
 	static final long RETRY_TICKS = 24000L;
 	/** A faction without storage builds one when a player comes this close to its seat (so the ground is loaded). */
@@ -88,6 +96,81 @@ public final class Storehouse {
 		BlockPos depot = shed ? shed(level, frame, p, containers) : hall(level, frame, p, containers);
 		Storage.register(level.getServer(), faction.id(), containers, depot);
 		JaymosKingdoms.LOGGER.info("{} built its {} at {} ({} containers)", faction.name(), shed ? "shed" : "storehouse", depot, containers.size());
+		Faction now = Factions.get(level.getServer(), faction.id());
+		if (now != null && Builders.crewCount(now) == 0) {
+			Builders.spawnCrew(level, now);
+		}
+		return depot;
+	}
+
+	/**
+	 * Takes one of the world's buildings for {@code faction}'s storehouse (0.5: a village's, or a Grim structure's): chests
+	 * and barrels along its walls (only where there's air, away from its door and from {@code avoid}, the throne room when
+	 * the seat shares the building), registered as its storage with the depot just inside the door; the building is
+	 * guarded from the builders ({@link Holds}), and the builder crew comes if it has none. Returns the depot, or null if
+	 * the building has too little wall to stand them against.
+	 */
+	public static @Nullable BlockPos adopt(ServerLevel level, Faction faction, Seats.Room room, @Nullable BlockPos avoid) {
+		BlockPos door = room.inside() != null ? room.inside() : room.outside();
+		List<BlockPos> spots = new ArrayList<>();
+		Map<BlockPos, Direction> walls = new HashMap<>();
+		for (BlockPos c : room.cells()) {
+			if (!level.getBlockState(c).isAir() || !level.getBlockState(c.above()).isAir() || c.distSqr(door) < ADOPT_DOOR_CLEAR * ADOPT_DOOR_CLEAR
+				|| (avoid != null && c.distSqr(avoid) < ADOPT_AVOID * ADOPT_AVOID) || c.equals(room.outside())) {
+				continue;
+			}
+			for (Direction d : Direction.Plane.HORIZONTAL) {
+				if (Seats.wall(level, c.relative(d)) && !level.getBlockState(c.relative(d.getOpposite())).is(BlockTags.DOORS)) {
+					spots.add(c);
+					walls.put(c, d);
+					break;
+				}
+			}
+		}
+		// furthest from the door first, kept to one end of the building
+		spots.sort((a, b) -> Double.compare(b.distSqr(door), a.distSqr(door)));
+		List<BlockPos> containers = new ArrayList<>();
+		List<BlockPos> chests = new ArrayList<>();
+		BlockPos first = spots.isEmpty() ? null : spots.getFirst();
+		for (BlockPos c : spots) {
+			if (containers.size() >= ADOPT_CONTAINERS || first.distSqr(c) > ADOPT_SPREAD * ADOPT_SPREAD) {
+				continue;
+			}
+			// keep the way through: never a spot with containers on both sides
+			int beside = 0;
+			for (Direction d : Direction.Plane.HORIZONTAL) {
+				if (containers.contains(c.relative(d))) {
+					beside++;
+				}
+			}
+			if (beside > 1) {
+				continue;
+			}
+			Direction wall = walls.get(c);
+			boolean chest = chests.stream().noneMatch(q -> q.distManhattan(c) <= 1) && containers.size() % 2 == 0;
+			if (chest) {
+				level.setBlock(c, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, wall.getOpposite()), Block.UPDATE_CLIENTS);
+				chests.add(c.immutable());
+			} else {
+				level.setBlock(c, Blocks.BARREL.defaultBlockState(), Block.UPDATE_CLIENTS);
+				if (Seats.roofed(level, c.above()) && level.getBlockState(c.above(2)).isAir()) {
+					level.setBlock(c.above(), Blocks.BARREL.defaultBlockState(), Block.UPDATE_CLIENTS);
+					containers.add(c.above().immutable());
+				}
+			}
+			containers.add(c.immutable());
+		}
+		if (containers.size() < ADOPT_MIN) {
+			for (BlockPos c : containers) {
+				level.setBlock(c, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+			}
+			return null;
+		}
+		BlockPos depot = door;
+		Storage.register(level.getServer(), faction.id(), containers, depot);
+		Holds.guard(level.getServer(), faction.id(), room.box());
+		JaymosKingdoms.LOGGER.info("{} took the {} at {} for its storehouse ({} containers)", faction.name(), room.name(), room.box().getCenter(),
+			containers.size());
 		Faction now = Factions.get(level.getServer(), faction.id());
 		if (now != null && Builders.crewCount(now) == 0) {
 			Builders.spawnCrew(level, now);
