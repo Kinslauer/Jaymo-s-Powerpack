@@ -249,7 +249,7 @@ cobweb.
 - G is now only the off-hand web (it needs an empty off hand).
 - **HUD row:** wings · G · V · B · Z. G's chip dims while the off hand is full.
 
-## Swing tricks (0.8.6)
+## Swing tricks (0.8.9)
 The slinger's client knows when a web lets go and when the feet land, so it picks a trick and asks the server
 (`WebTricks.Trick`), which checks it and starts a `WebPose` everyone sees. Your own tricks are hidden in first person.
 Tuning is at the top of `client/power/web/WebTrickClient`; the shapes are in `WebBodyPose`.
