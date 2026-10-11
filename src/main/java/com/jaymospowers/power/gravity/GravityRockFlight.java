@@ -15,11 +15,13 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Rock flight (ascended or corrupted; hold V, a tap still toggles Weightless). You stomp, and the ground under you
+ * Rock flight, the earthboard (ascended or corrupted; hold V to raise it, a tap still toggles Weightless). You stomp, and the ground under you
  * (the solid blocks of the 3 x 3 below) tears up and clumps together under your feet; you ride the slab, steering it
  * like a wind's flight (the client flies it: {@code GravityRockFlightClient}), but it hugs the ground: it can't climb
  * far ({@link #MAX_ALTITUDE}) and is always sinking a little, like falling debris. Dust and grit pour from its
- * underside. Let go of V and it crumbles. The slab is {@link GravityPower#ROCK_FLIGHT}'s chunk, carried under you.
+ * underside. Once it's up you stay on it with V let go; press V again to step off and it crumbles. The rider stands
+ * in a surfing pose, leaning into turns ({@code GravityBoardPose}). The slab is {@link GravityPower#ROCK_FLIGHT}'s
+ * chunk, carried under you.
  */
 final class GravityRockFlight {
 	/** How high over the ground it can go, and how far below the feet the slab rides. */
