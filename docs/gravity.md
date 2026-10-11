@@ -79,9 +79,43 @@ A Gravity user lightens whatever they hold, at every mastery level (`GravityWeig
   `_base`, `_total`; a multiplying one is countered down to ×0.05 at most). Removed when the power is lost. Nothing
   in the pack adds such weight yet.
 
+## 0.8.25: Pull, shockwave, kneeling, the earthboard, the meteor's wreck
+- **Lift (R)** reaches 44 blocks, +4 per ability mastered, 60 at full (`LIFT_RANGE_BASE`, `LIFT_RANGE`). Players are
+  easier to catch: their box is widened by `LIFT_PLAYER_SLACK` (0.9) plus `LIFT_PLAYER_SLACK_PER_BLOCK` (0.012) per
+  block away (anything else 0.3). While R is ready, four purple corners show round the crosshair (first person) when
+  something Lift could take is in reach, brighter and wider on a player (`GravityPowerClient.liftMark`, which runs the
+  same `GravityPower.liftableInSight` as the server).
+- **Gravity Well (G)** goes off as a bubble (`GravityShockwave`): it swells to 8 blocks over 12 ticks, purple dust
+  shell, the ground's block particles blasted up where it meets the ground, purple streaks and dark shards rising.
+  As it passes, 24 lumps (rings of 5, 8, 11 at 3, 5.4, 7.6 blocks) of the ground's own blocks (made, never torn out of
+  the world) shove up out of the earth, leaning out 20-60 degrees. They lie 8 s (`DEBRIS_LINGER`), Lift can take and
+  throw them, then they crumble away a block every 3 ticks; they never drop anything and pocketing one only breaks it.
+  The well's pull leaves them alone. Its pull still works as before.
+- **Kneeling**: anyone Crush pins, or a Gravity Well holds, gets `GravityPower.KNEEL` (a random style of 4, since when),
+  synced to everyone; it's taken off when the weight is (the well's 6 ticks after they leave it). Players and humanoid
+  mobs (anything drawn with a `HumanoidModel`) fight it for 18 ticks (knees buckling, trembling, arms shoved up),
+  drop in 5, then stay down heaving; they get back up over 14 ticks after (`client/.../GravityKneelPose`). Poses:
+  hunched with both hands planted; one knee, forearm on the other; both arms over the head; slumped, head hanging.
+- **Earthboard (hold V)** is anyone's once Weightless is unlocked. It tears up a ragged bowl about a creeper's blast
+  (`CRATER_RADIUS` 2.8, 2 deep, at most 45 blocks) and rides up to 19 blocks over the ground (`MAX_ALTITUDE`); in the
+  top 3 (`STRUGGLE_BAND`) the climb weakens, it shudders and sags, the rider's view shakes, and it sheds more grit.
+  Until fully mastered (or ascended, or corrupted: `GravityRockFlight.toggles`) you ride only while V is held;
+  after that it's the old toggle. Stepping off, the board drops whole (`BlockCluster.BOARD`: solid, its box as big as
+  its blocks) and lies 8 s, then crumbles (30% of its blocks drop, as they were real). Holding V while standing on a
+  lying board rides that board again. A V tap now toggles Weightless on release for everyone.
+- **Meteor**: the rock bursts apart where it lands (`GravityMeteor.wreck`) into 4-30 lumps (more with the charge) of
+  iron ore, deepslate iron ore, raw iron, obsidian, crying obsidian, blackstone, gilded blackstone, basalt, tuff,
+  deepslate and a little magma, thrown out over the crater; they tumble, lie 8 s and crumble (no drops). Lingering
+  debris rides out explosions, so the crater rings don't take it. Less fire: the blasts no longer light the ground,
+  the impact sets alight only 4 blocks around (was 10), fewer flames and lava drops. The symbiote now rides in one of
+  the lumps and comes out (or is left as goo) when it breaks up; `WebSymbioteBlob.METEOR_CHANCE` is 10% (was 20%).
+
 ## Testing
 - `/power set @s gravity`
 - `/powerdebug gravity ready` clears every cooldown.
+- 0.8.25: aim R at a player 50 blocks off (corners show); G on grass (lumps rise, take one with R); B a zombie
+  (it kneels, gets up after 3 s); hold V (rides while held at `/power level @s 3`, toggles at 4); climb to the top;
+  step off and hold V on the dropped board; call a meteor (`/power ascend @s`) and watch the wreck.
 - `/powerdebug gravity kills 29`, then `/power level @s 4`, then make a lifted mob die from its fall.
 - `/power corrupt @s`, then `/powerdebug gravity levitate 12`.
 - Weight: with an empty hand, sneak + right-click a zombie, cow, iron golem or ghast (overhead, full walking speed);

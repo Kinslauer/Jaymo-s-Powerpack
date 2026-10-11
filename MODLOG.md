@@ -313,3 +313,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   drives the leg straight out behind, looks over the shoulder, and spins on round to face it again). The fists stay
   up in a guard by the face instead of being flung out. Same timing, crescent and damage (see `docs/wind.md`). In the
   cold the kick winds up only 1 s longer (was 3 s), with white wind swirling round you and a blowing wind sound.
+- **0.8.25, Gravity's weight:** Lift reaches 60 blocks at full mastery, catches players more easily and marks the
+  crosshair when something is in reach. The Gravity Well bursts out as a 16-block bubble that shoves lumps of the
+  ground up out of the earth (they lie 8 s, Lift can take them, then crumble). Players and humanoid mobs under Crush
+  or a Well fight the weight, drop to their knees in one of 4 poses, and get up when it lifts. The earthboard is
+  anyone's with Weightless (held to ride until mastered, toggled after), tears up a creeper-sized crater, climbs 19
+  blocks with a struggle at the top, and drops whole for 8 s when you step off (hold V on it to ride it again). The
+  meteor bursts into debris (iron ore, obsidian, blackstone...) with less fire; the symbiote rarely rides in a lump.
+  `core/BlockCluster` gained lingering debris (`linger`, `REST`, `BOARD`). See `docs/gravity.md`.

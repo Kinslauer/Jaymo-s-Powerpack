@@ -26,6 +26,8 @@ public final class BlockClusterRenderer extends EntityRenderer<BlockCluster, Blo
 		float yaw;
 		boolean steady;
 		float scale = 1.0F;
+		/** Resting debris: its fixed lean (degrees), and how far it has turned in flight; NaN if it isn't debris. */
+		float restYaw = Float.NaN, restTilt, spin;
 	}
 
 	public BlockClusterRenderer(EntityRendererProvider.Context context) {
@@ -72,7 +74,11 @@ public final class BlockClusterRenderer extends EntityRenderer<BlockCluster, Blo
 		double speed = entity.getDeltaMovement().length();
 		state.tumble = (entity.tickCount + partialTicks) * (float)Math.min(25.0, 2.0 + speed * 18.0);
 		state.yaw = entity.getId() * 37.0F;
-		state.steady = entity.getAttached(BlockCluster.STEADY) != null;
+		state.steady = entity.getAttached(BlockCluster.STEADY) != null || entity.board();
+		BlockCluster.Rest rest = entity.getAttached(BlockCluster.REST);
+		state.restYaw = rest == null ? Float.NaN : rest.yaw();
+		state.restTilt = rest == null ? 0.0F : rest.tilt();
+		state.spin = net.minecraft.util.Mth.lerp(partialTicks, entity.spinO, entity.spin);
 		Float scale = entity.getAttached(BlockCluster.SCALE);
 		state.scale = scale == null ? 1.0F : scale;
 	}
@@ -82,7 +88,11 @@ public final class BlockClusterRenderer extends EntityRenderer<BlockCluster, Blo
 		poseStack.pushPose();
 		poseStack.translate(0.0F, 0.7F * state.scale, 0.0F);
 		poseStack.scale(state.scale, state.scale, state.scale);
-		if (!state.steady) {
+		if (!Float.isNaN(state.restYaw)) {
+			// debris: leaning where it lies, turning over only while it flies
+			poseStack.rotateDegrees(Axis.YP, state.restYaw);
+			poseStack.rotateDegrees(Axis.XP, state.restTilt + state.spin);
+		} else if (!state.steady) {
 			poseStack.rotateDegrees(Axis.YP, state.yaw);
 			poseStack.rotateDegrees(Axis.XP, state.tumble * 0.6F);
 			poseStack.rotateDegrees(Axis.ZP, state.tumble * 0.25F);

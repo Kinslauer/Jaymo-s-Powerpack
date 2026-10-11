@@ -40,6 +40,8 @@ public final class GravityPowerClient implements PowerClient {
 	private long crushFrom = -1;
 	/** Game time R went down, while lifting (for the lift's own timer bar), or -1. */
 	private long liftFrom = -1;
+	/** What Lift would take right now, if R went down (for the mark over the crosshair): 0 nothing, 1 a thing, 2 a player. */
+	private static int liftMark;
 
 	private GravityPowerClient() {
 	}
@@ -59,6 +61,7 @@ public final class GravityPowerClient implements PowerClient {
 				com.jaymospowers.client.power.web.WebShake.start(0.35F);
 			}
 			GravityRockFlightClient.tick(minecraft, player);
+			liftMark = liftMark(player);
 		});
 		// left click while Lift holds a chunk of the world (or anything else that can't be choked): it's thrown
 		net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> {
@@ -110,6 +113,19 @@ public final class GravityPowerClient implements PowerClient {
 		return cooldowns == null ? GravityCooldowns.NONE : cooldowns;
 	}
 
+	/** Whether something Lift can take is under the crosshair and in reach, with R ready (see {@link #liftMark}). */
+	private static int liftMark(LocalPlayer player) {
+		if (!Powers.has(player, GravityPower.INSTANCE) || player.getAttached(GravityPower.GRIP) != null
+			|| !com.jaymospowers.core.Mastery.isUsable(player, PowerKey.ABILITY_1) || player.level().getGameTime() < cooldowns(player).lift()) {
+			return 0;
+		}
+		net.minecraft.world.entity.Entity target = GravityPower.liftableInSight(player, GravityPower.liftRange(player));
+		if (target == null || !target.isAlive()) {
+			return 0;
+		}
+		return target instanceof net.minecraft.world.entity.player.Player ? 2 : 1;
+	}
+
 	/** Weightless players shed slow motes; collapsed ones draw a faint darkness in. Client-side, near you only. */
 	private static void auras(Minecraft minecraft) {
 		ClientLevel level = minecraft.level;
@@ -144,6 +160,9 @@ public final class GravityPowerClient implements PowerClient {
 	public void renderHud(GuiGraphicsExtractor graphics, DeltaTracker delta, LocalPlayer player) {
 		Minecraft minecraft = Minecraft.getInstance();
 		Font font = minecraft.font;
+		if (liftMark > 0 && minecraft.options.getCameraType().isFirstPerson()) {
+			mark(graphics, graphics.guiWidth() / 2, graphics.guiHeight() / 2, liftMark == 2);
+		}
 		GravityCooldowns cooldowns = cooldowns(player);
 		long now = player.level().getGameTime();
 		int width = graphics.guiWidth();
@@ -174,6 +193,20 @@ public final class GravityPowerClient implements PowerClient {
 		if (ascended) {
 			ultimateChip(graphics, font, x + (CHIP + CHIP_GAP) * 4, y, cooldowns.singularity() - now,
 				Fate.isAscended(player) && !Fate.isCorrupted(player) ? cooldowns.singularityLength() : GravityPower.ultimateCooldown(player));
+		}
+	}
+
+	/** Lift's mark: four purple corners round the crosshair (brighter and wider on a player). */
+	private static void mark(GuiGraphicsExtractor graphics, int cx, int cy, boolean player) {
+		int r = player ? 8 : 6, arm = 3;
+		int color = player ? 0xFFC9A6FF : 0xD08A6CFF;
+		for (int sx = -1; sx <= 1; sx += 2) {
+			for (int sy = -1; sy <= 1; sy += 2) {
+				int x = cx + sx * r, y = cy + sy * r;
+				// a corner: one stroke along, one down
+				graphics.fill(Math.min(x, x - sx * arm), y, Math.max(x, x - sx * arm) + 1, y + 1, color);
+				graphics.fill(x, Math.min(y, y - sy * arm), x + 1, Math.max(y, y - sy * arm) + 1, color);
+			}
 		}
 	}
 
