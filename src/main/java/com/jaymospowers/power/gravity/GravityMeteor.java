@@ -37,6 +37,10 @@ import net.minecraft.world.phys.Vec3;
  * ground ({@code WAVE_SPEED}) that throws everything it passes. A charged one tears a wide, shallow crater: rings of
  * lighter blasts ({@code CRATER_RING_POWER}) go off as the shockwave reaches them, up to {@code CRATER_RINGS} rings
  * {@code CRATER_RING_STEP} apart. {@code COOLDOWN_MIN} (a tap) to {@code COOLDOWN} (a full charge) before another.
+ * The rock doesn't vanish when it hits: it bursts apart into {@code WRECK_MIN} to {@code WRECK_MAX} lumps of debris
+ * (obsidian, blackstone, basalt and the like, now and then a bit of iron ore; more the bigger it was) thrown out over the crater, where they
+ * lie for {@code WRECK_LINGER_MIN} to {@code WRECK_LINGER_MAX} ticks (Lift can take them) and then crumble away. Once in a long while one of them
+ * carries a symbiote, which crawls out (or is left as goo) when it breaks up.
  */
 final class GravityMeteor {
 	static final double RANGE_MIN = 48.0, RANGE_MAX = 128.0, HEIGHT = 70.0;
@@ -60,7 +64,23 @@ final class GravityMeteor {
 	static final double TRAIL_FIRE_RADIUS = 2.5;
 	static final int TRAIL_FIRE_SECONDS = 5;
 	/** The impact sets alight everything within this reach (blocks) of where it lands (a tap's), for this long (seconds). */
-	static final double IMPACT_FIRE_RADIUS = 10.0;
+	static final double IMPACT_FIRE_RADIUS = 4.0;
+	/** The wreck: how many lumps the rock bursts into (a tap's, a full charge's), how long they lie (ticks), how hard they fly out. */
+	static final int WRECK_MIN = 4, WRECK_MAX = 30, WRECK_LINGER_MIN = 100, WRECK_LINGER_MAX = 220;
+	static final double WRECK_OUT_MIN = 0.35, WRECK_OUT_MAX = 0.9, WRECK_UP_MIN = 0.45, WRECK_UP_MAX = 1.05;
+	/** What the lumps are made of (repeats are more common): mostly rock... */
+	private static final List<BlockState> WRECK = List.of(
+		Blocks.OBSIDIAN.defaultBlockState(), Blocks.OBSIDIAN.defaultBlockState(), Blocks.OBSIDIAN.defaultBlockState(),
+		Blocks.CRYING_OBSIDIAN.defaultBlockState(), Blocks.BLACKSTONE.defaultBlockState(), Blocks.BLACKSTONE.defaultBlockState(),
+		Blocks.BLACKSTONE.defaultBlockState(), Blocks.BASALT.defaultBlockState(), Blocks.BASALT.defaultBlockState(),
+		Blocks.SMOOTH_BASALT.defaultBlockState(), Blocks.TUFF.defaultBlockState(), Blocks.TUFF.defaultBlockState(),
+		Blocks.DEEPSLATE.defaultBlockState(), Blocks.DEEPSLATE.defaultBlockState(), Blocks.COBBLED_DEEPSLATE.defaultBlockState(),
+		Blocks.MAGMA_BLOCK.defaultBlockState());
+	/** ...and now and then ({@code WRECK_ORE_CHANCE} per block) a bit of ore. */
+	private static final List<BlockState> WRECK_ORE = List.of(
+		Blocks.IRON_ORE.defaultBlockState(), Blocks.DEEPSLATE_IRON_ORE.defaultBlockState(), Blocks.DEEPSLATE_IRON_ORE.defaultBlockState(),
+		Blocks.RAW_IRON_BLOCK.defaultBlockState(), Blocks.GILDED_BLACKSTONE.defaultBlockState());
+	static final float WRECK_ORE_CHANCE = 0.08F;
 	static final int IMPACT_FIRE_SECONDS = 8;
 	/** Half the small rock's width (blocks), as drawn. */
 	private static final double ROCK_HALF = 1.2;
@@ -184,8 +204,8 @@ final class GravityMeteor {
 			int more = 1 + Math.round(meteor.charge() * 6.0F);
 			double spread = half * 0.7;
 			level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y + half * 0.5, at.z, 8 * more, spread, spread, spread, 0.02);
-			level.sendParticles(ParticleTypes.FLAME, at.x, at.y + half * 0.5, at.z, 10 * more, spread, spread, spread, 0.05);
-			level.sendParticles(ParticleTypes.LAVA, at.x, at.y + half * 0.5, at.z, 2 * more, spread, spread, spread, 0.0);
+			level.sendParticles(ParticleTypes.FLAME, at.x, at.y + half * 0.5, at.z, 4 * more, spread, spread, spread, 0.05);
+			level.sendParticles(ParticleTypes.LAVA, at.x, at.y + half * 0.5, at.z, more, spread, spread, spread, 0.0);
 			Flames.area(level, at, TRAIL_FIRE_RADIUS + half, TRAIL_FIRE_SECONDS, server.getPlayerList().getPlayer(meteor.owner()), e -> e != rock);
 			Vec3 ground = meteor.to();
 			double shadow = 1.0 + p * Math.max(radius(meteor.charge()) * 0.35, half);
@@ -201,10 +221,12 @@ final class GravityMeteor {
 				continue;
 			}
 			it.remove();
+			impact(level, server.getPlayerList().getPlayer(meteor.owner()), ground, meteor.charge());
+			// after the blast, so the wreck isn't caught in it
+			wreck(level, ground, meteor.charge());
 			if (rock != null) {
 				rock.discard();
 			}
-			impact(level, server.getPlayerList().getPlayer(meteor.owner()), ground, meteor.charge());
 		}
 		for (Iterator<Wave> it = WAVES.iterator(); it.hasNext(); ) {
 			Wave wave = it.next();
@@ -219,7 +241,7 @@ final class GravityMeteor {
 	private static void impact(ServerLevel level, ServerPlayer owner, Vec3 at, float charge) {
 		double radius = radius(charge);
 		float damageMax = Mth.lerp(charge, DAMAGE_MIN, DAMAGE_MAX);
-		level.explode(owner, at.x, at.y, at.z, POWER, true, Level.ExplosionInteraction.TNT);
+		level.explode(owner, at.x, at.y, at.z, POWER, false, Level.ExplosionInteraction.TNT);
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(radius),
 			e -> e.isAlive() && !e.isSpectator() && e != owner && !(e instanceof ArmorStand))) {
 			double d = living.getBoundingBox().getCenter().distanceTo(at);
@@ -236,19 +258,57 @@ final class GravityMeteor {
 		}
 		// everything flammable near the strike catches
 		Flames.area(level, at, IMPACT_FIRE_RADIUS * radius / RADIUS_MIN, IMPACT_FIRE_SECONDS, owner, e -> true);
-		// now and then something came down inside the rock (see WebSymbioteBlob.METEOR_CHANCE)
-		com.jaymospowers.power.web.WebSymbioteBlob.fromMeteor(level, at);
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y + 1.0, at.z, 3 + Math.round(charge * 12), 2.0 + charge * 8.0, 1.0 + charge * 3.0,
 			2.0 + charge * 8.0, 0.0);
 		level.sendParticles(ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, at.x, at.y + 1.0, at.z, 60 + Math.round(charge * 140), 4.0 + charge * 10.0, 2.0 + charge * 4.0,
 			4.0 + charge * 10.0, 0.05);
-		level.sendParticles(ParticleTypes.LAVA, at.x, at.y + 1.0, at.z, 60 + Math.round(charge * 100), 3.0 + charge * 8.0, 1.0, 3.0 + charge * 8.0, 0.0);
+		level.sendParticles(ParticleTypes.LAVA, at.x, at.y + 1.0, at.z, 15 + Math.round(charge * 30), 3.0 + charge * 8.0, 1.0, 3.0 + charge * 8.0, 0.0);
 		float loud = 1.0F + charge * 1.5F;
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 6.0F * loud, 0.4F - charge * 0.1F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 4.0F * loud, 0.5F - charge * 0.1F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 4.0F * loud, 0.5F);
 		GravityPower.shake(level, at, radius * 2.0, 1.5F + charge * 1.5F);
 		WAVES.add(new Wave(level.dimension(), owner == null ? new UUID(0L, 0L) : owner.getUUID(), at, level.getGameTime(), charge));
+	}
+
+	/**
+	 * The rock bursts apart where it hit: lumps of its ore and stone thrown out over the crater, more the bigger it was,
+	 * lying there a while before they crumble. One of them may carry a symbiote (see WebSymbioteBlob.METEOR_CHANCE).
+	 */
+	private static void wreck(ServerLevel level, Vec3 at, float charge) {
+		var random = level.getRandom();
+		int lumps = Math.round(Mth.lerp(charge, WRECK_MIN, WRECK_MAX));
+		double size = 1.0 + charge * 2.0;
+		BlockCluster carrier = null;
+		for (int i = 0; i < lumps; i++) {
+			int pieces = 1 + random.nextInt(charge > 0.5F ? 4 : 3);
+			List<BlockState> states = new ArrayList<>();
+			for (int k = 0; k < pieces; k++) {
+				List<BlockState> from = random.nextFloat() < WRECK_ORE_CHANCE ? WRECK_ORE : WRECK;
+				states.add(from.get(random.nextInt(from.size())));
+			}
+			double a = random.nextDouble() * Math.PI * 2.0;
+			Vec3 from = at.add(Math.cos(a) * random.nextDouble() * size, 1.2 + random.nextDouble() * size, Math.sin(a) * random.nextDouble() * size);
+			BlockCluster lump = BlockCluster.made(level, states, from);
+			double out = Mth.lerp(random.nextDouble(), WRECK_OUT_MIN, WRECK_OUT_MAX) * (1.0 + charge);
+			lump.setDeltaMovement(Math.cos(a) * out, Mth.lerp(random.nextDouble(), WRECK_UP_MIN, WRECK_UP_MAX), Math.sin(a) * out);
+			lump.setAttached(BlockCluster.REST, new BlockCluster.Rest(random.nextFloat() * 360.0F, (random.nextFloat() - 0.5F) * 120.0F));
+			if (charge > 0.3F && random.nextFloat() < charge * 0.5F) {
+				lump.setAttached(BlockCluster.SCALE, 1.0F + random.nextFloat() * charge * 1.2F);
+			}
+			lump.linger(WRECK_LINGER_MIN + random.nextInt(WRECK_LINGER_MAX - WRECK_LINGER_MIN + 1), true);
+			if (carrier == null || random.nextInt(i + 1) == 0) {
+				carrier = lump;
+			}
+			level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, states.get(0)), from.x, from.y, from.z, 10,
+				0.5, 0.5, 0.5, 0.3);
+		}
+		if (carrier != null) {
+			// now and then something came down inside the rock: it crawls out when its lump breaks up
+			BlockCluster from = carrier;
+			carrier.onGone(() -> com.jaymospowers.power.web.WebSymbioteBlob.fromMeteor(level, from.position()));
+		}
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.ANCIENT_DEBRIS_BREAK, SoundSource.PLAYERS, 3.0F, 0.5F);
 	}
 
 	/**
@@ -299,7 +359,7 @@ final class GravityMeteor {
 			int blasts = Math.max(4, (int)Math.round(ringR * Math.PI * 2.0 / CRATER_RING_SPACING));
 			for (int i = 0; i < blasts; i++) {
 				double a = (i + 0.5 * wave.rings) / blasts * Math.PI * 2.0;
-				level.explode(owner, at.x + Math.cos(a) * ringR, at.y, at.z + Math.sin(a) * ringR, CRATER_RING_POWER, true, Level.ExplosionInteraction.TNT);
+				level.explode(owner, at.x + Math.cos(a) * ringR, at.y, at.z + Math.sin(a) * ringR, CRATER_RING_POWER, false, Level.ExplosionInteraction.TNT);
 			}
 		}
 		return r >= wave.radius && wave.rings >= rings;

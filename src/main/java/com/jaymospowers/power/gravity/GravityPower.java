@@ -90,9 +90,14 @@ public final class GravityPower implements Power {
 	public static final int SINGULARITY = 4;
 
 	// ---- Lift (R) ----
-	public static final double LIFT_RANGE = 30.0;
+	public static final double LIFT_RANGE = 60.0;
 	/** Lift's reach grows with the power: {@code LIFT_RANGE_BASE} plus this per ability mastered, up to {@code LIFT_RANGE}. */
-	static final double LIFT_RANGE_BASE = 14.0, LIFT_RANGE_PER_LEVEL = 4.0;
+	static final double LIFT_RANGE_BASE = 44.0, LIFT_RANGE_PER_LEVEL = 4.0;
+	/**
+	 * How forgiving Lift's aim is on a player (blocks added round them), growing this much per block away so a far
+	 * one is still easy to catch. Anything else gets {@code LIFT_SLACK}.
+	 */
+	static final double LIFT_SLACK = 0.3, LIFT_PLAYER_SLACK = 0.9, LIFT_PLAYER_SLACK_PER_BLOCK = 0.012;
 	/** Held distance is clamped to this range (blocks from the eyes). */
 	static final double LIFT_MIN_HOLD = 3.0, LIFT_MAX_HOLD = 14.0;
 	/** How hard a lifted creature is steered toward the held point, and its top speed (b/t). */
@@ -158,6 +163,8 @@ public final class GravityPower implements Power {
 	static final int ROCK_HOLD_TICKS = 8;
 	/** How high a rock slab can fly over the ground (the rider's client keeps it there). */
 	public static final double ROCK_MAX_ALTITUDE = GravityRockFlight.MAX_ALTITUDE;
+	/** The band under that height where the board fights to stay up, shuddering and sagging. */
+	public static final double ROCK_STRUGGLE_BAND = GravityRockFlight.STRUGGLE_BAND;
 	/** Collapse letting go: it's driven down this fast, and the landing hurts this much more per block fallen. */
 	static final double PLUMMET_SPEED = 2.5;
 	static final float PLUMMET_PER_BLOCK = 1.0F;
@@ -332,6 +339,23 @@ public final class GravityPower implements Power {
 	/** Riding a rock slab (its chunk's id): synced to everyone; its rider's client flies it. */
 	public static final AttachmentType<Integer> ROCK_FLIGHT = AttachmentRegistry.create(JaymosPowers.id("gravity_rock_flight"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+	/**
+	 * On a creature or player under Gravity's weight (Crush's pin, a Gravity Well's pull): forced to its knees, in one
+	 * of {@link #KNEEL_STYLES} poses, since {@code since} (game time). Players and humanoid mobs are drawn resisting,
+	 * then dropping to their knees; when it's taken off they get back up (see GravityKneelPose).
+	 */
+	public record Kneel(int style, long since) {
+		public static final net.minecraft.network.codec.StreamCodec<io.netty.buffer.ByteBuf, Kneel> STREAM_CODEC =
+			net.minecraft.network.codec.StreamCodec.composite(ByteBufCodecs.VAR_INT, Kneel::style, ByteBufCodecs.VAR_LONG, Kneel::since, Kneel::new);
+	}
+
+	public static final AttachmentType<Kneel> KNEEL = AttachmentRegistry.create(JaymosPowers.id("gravity_kneel"),
+		builder -> builder.syncWith(Kneel.STREAM_CODEC, AttachmentSyncPredicate.all()));
+	/** How many kneeling poses there are to pick from (see GravityKneelPose). */
+	public static final int KNEEL_STYLES = 4;
+	/** A Gravity Well keeps those it holds kneeling this long after they leave it (ticks). */
+	static final int KNEEL_WELL_LINGER = 6;
+
 	/** Deaths by weight so far (toward ascension). */
 	public static final AttachmentType<Integer> KILLS = AttachmentRegistry.create(JaymosPowers.id("gravity_kills"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath());
@@ -422,6 +446,12 @@ public final class GravityPower implements Power {
 	private record Pinned(ResourceKey<Level> dimension, UUID entity, long until) {
 	}
 
+	/** Who's on their knees under Gravity's weight, and until when (game time). */
+	private record Kneeling(ResourceKey<Level> dimension, UUID entity, long until) {
+	}
+
+	private static final Map<UUID, Kneeling> KNEELING = new HashMap<>();
+
 	private record Touch(UUID player, long at) {
 	}
 
@@ -437,7 +467,7 @@ public final class GravityPower implements Power {
 
 	public static void init() {
 		Powers.register(INSTANCE);
-		JaymosPowers.LOGGER.debug("gravity attachments: {} {} {} {} {}", COOLDOWNS, WEIGHTLESS_ON, LIFTED, KILLS, GRIP, SLAM_POSE);
+		JaymosPowers.LOGGER.debug("gravity attachments: {} {} {} {} {} {}", COOLDOWNS, WEIGHTLESS_ON, LIFTED, KILLS, GRIP, SLAM_POSE, KNEEL);
 		net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.serverboundPlay().register(GravityGrip.TYPE, GravityGrip.CODEC);
 		net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(GravityGrip.TYPE, (payload, ctx) -> {
 			ServerPlayer player = ctx.player();
@@ -468,6 +498,8 @@ public final class GravityPower implements Power {
 			WELLS.clear();
 			CAVE_INS.clear();
 			PINNED.clear();
+			KNEELING.clear();
+			GravityShockwave.clear();
 			SLAMS.clear();
 			WEIGHED.clear();
 			TOUCHED.clear();
@@ -595,23 +627,22 @@ public final class GravityPower implements Power {
 				if (!com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_3)) {
 					return;
 				}
-				boolean rocks = Fate.isAscended(player) || Fate.isCorrupted(player);
-				if (!rocks) {
-					if (down) {
-						toggleWeightless(player, state);
-					}
-				} else if (down) {
-					if (player.getAttached(ROCK_FLIGHT) != null) {
-						// riding: V again steps off (the release that follows does nothing)
+				// tapped: Weightless; held: the earthboard (see tick)
+				boolean toggles = GravityRockFlight.toggles(player);
+				boolean riding = player.getAttached(ROCK_FLIGHT) != null;
+				if (down) {
+					if (riding) {
+						// riding (the toggle, once mastered): V again steps off (the release that follows does nothing)
 						GravityRockFlight.stop(player);
 						state.vDownAt = -1;
 					} else {
-						// tapped: Weightless; held: rock flight (see tick)
 						state.vDownAt = player.level().getGameTime();
 					}
 				} else {
-					// once the board is up, letting go of V keeps you on it
-					if (player.getAttached(ROCK_FLIGHT) == null && state.vDownAt >= 0) {
+					if (riding && !toggles) {
+						// not yet mastered: you ride only while V is held
+						GravityRockFlight.stop(player);
+					} else if (!riding && state.vDownAt >= 0) {
 						toggleWeightless(player, state);
 					}
 					state.vDownAt = -1;
@@ -798,7 +829,7 @@ public final class GravityPower implements Power {
 	}
 
 	/** How far Lift reaches: further with every ability mastered. */
-	static double liftRange(ServerPlayer player) {
+	public static double liftRange(Player player) {
 		return Math.min(LIFT_RANGE, LIFT_RANGE_BASE + LIFT_RANGE_PER_LEVEL * com.jaymospowers.core.Mastery.unlocked(player));
 	}
 
@@ -1183,7 +1214,7 @@ public final class GravityPower implements Power {
 	}
 
 	/** Anything Lift can take: whatever's under the crosshair (small things like dropped items count, with a little slack). */
-	private static @Nullable Entity liftableInSight(ServerPlayer player, double range) {
+	public static @Nullable Entity liftableInSight(Player player, double range) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getViewVector(1.0F);
 		Vec3 end = eye.add(look.scale(range));
@@ -1197,7 +1228,9 @@ public final class GravityPower implements Power {
 			e -> !e.isSpectator() && e != player.getVehicle() && !(e instanceof net.minecraft.world.entity.Marker)
 				&& !(e instanceof net.minecraft.world.entity.Display) && !(e instanceof net.minecraft.world.entity.LightningBolt)
 				&& !(e instanceof net.minecraft.world.entity.AreaEffectCloud) && !player.isPassengerOfSameVehicle(e))) {
-			AABB box = e.getBoundingBox().inflate(Math.max(0.3, e.getPickRadius()));
+			// a player is easier to catch, the further off the more so
+			double slack = e instanceof Player ? LIFT_PLAYER_SLACK + LIFT_PLAYER_SLACK_PER_BLOCK * eye.distanceTo(e.position()) : LIFT_SLACK;
+			AABB box = e.getBoundingBox().inflate(Math.max(slack, e.getPickRadius()));
 			java.util.Optional<Vec3> hit = box.contains(eye) ? java.util.Optional.of(eye) : box.clip(eye, end);
 			if (hit.isPresent()) {
 				double d = eye.distanceToSqr(hit.get());
@@ -1482,6 +1515,8 @@ public final class GravityPower implements Power {
 		WELLS.add(new Well(player.level().dimension(), at, player.getUUID(), player.level().getGameTime() + WELL_TICKS, false));
 		cool(player, WELL, WELL_COOLDOWN);
 		player.level().playSound(null, at.x, at.y, at.z, SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.5F, 1.8F);
+		// it goes off in a swelling bubble that shoves the ground up around it
+		GravityShockwave.start(player.level(), at);
 	}
 
 	// ---------------------------------------------------------------- Crush
@@ -1536,6 +1571,7 @@ public final class GravityPower implements Power {
 			modifier(target, Attributes.GRAVITY, CRUSH_ID, CRUSH_WEIGHT, true);
 			PINNED.removeIf(p -> p.entity().equals(target.getUUID()));
 			PINNED.add(new Pinned(level.dimension(), target.getUUID(), level.getGameTime() + CRUSH_PIN_TICKS));
+			kneel(target, level.getGameTime() + CRUSH_PIN_TICKS);
 		}
 		flatten(level, at, radius, player);
 		// a ring slamming outward along the ground
@@ -1745,7 +1781,10 @@ public final class GravityPower implements Power {
 			}
 		}
 		Integer slab = player.getAttached(ROCK_FLIGHT);
-		if (slab != null) {
+		if (slab != null && !GravityRockFlight.toggles(player) && !PowerInput.isDown(player, PowerKey.ABILITY_3)) {
+			// held-only riding, and V's no longer down
+			GravityRockFlight.stop(player);
+		} else if (slab != null) {
 			GravityRockFlight.tick(player, slab);
 		} else if (state.vDownAt >= 0 && player.level().getGameTime() - state.vDownAt >= ROCK_HOLD_TICKS
 			&& PowerInput.isDown(player, PowerKey.ABILITY_3)) {
@@ -1932,6 +1971,18 @@ public final class GravityPower implements Power {
 	}
 
 	/** Everyone (but the user) within {@code radius} of {@code center} is heavy for a moment (refresh it to keep them so). */
+	/** Forced to its knees until {@code until} (or longer, if it's already kneeling for longer). */
+	static void kneel(LivingEntity living, long until) {
+		Kneeling was = KNEELING.get(living.getUUID());
+		if (was != null && was.until() >= until) {
+			return;
+		}
+		KNEELING.put(living.getUUID(), new Kneeling(living.level().dimension(), living.getUUID(), until));
+		if (living.getAttached(KNEEL) == null) {
+			living.setAttached(KNEEL, new Kneel(living.getRandom().nextInt(KNEEL_STYLES), living.level().getGameTime()));
+		}
+	}
+
 	private static void weighDown(ServerPlayer player, Vec3 center, double radius) {
 		ServerLevel level = player.level();
 		long until = level.getGameTime() + HEAVY_AURA_REFRESH * 2L + 1;
@@ -2006,6 +2057,7 @@ public final class GravityPower implements Power {
 			tickPlummets(server);
 		}
 		GravityPush.tick(server);
+		GravityShockwave.tick(server);
 		GravityMeteor.tick(server);
 		GravitySkyfall.tick(server);
 		GravityOrbit.tickRain(server);
@@ -2018,6 +2070,20 @@ public final class GravityPower implements Power {
 					it.remove();
 					if (entity != null) {
 						modifier(entity, Attributes.GRAVITY, CRUSH_ID, 0.0, false);
+					}
+				}
+			}
+		}
+		if (!KNEELING.isEmpty()) {
+			for (Iterator<Kneeling> it = KNEELING.values().iterator(); it.hasNext(); ) {
+				Kneeling kneeling = it.next();
+				ServerLevel level = server.getLevel(kneeling.dimension());
+				Entity entity = level == null ? null : level.getEntity(kneeling.entity());
+				if (entity == null || !entity.isAlive() || level.getGameTime() >= kneeling.until()) {
+					it.remove();
+					if (entity != null) {
+						// the weight's off: they get back up
+						entity.removeAttached(KNEEL);
 					}
 				}
 			}
@@ -2038,7 +2104,8 @@ public final class GravityPower implements Power {
 		AABB area = new AABB(at, at).inflate(radius);
 		boolean hit = well.singularity() && left % SINGULARITY_HIT_EVERY == 0;
 		for (Entity e : level.getEntities((Entity)null, area, e -> e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand)
-			&& (owner == null || e != owner) && !(e instanceof Player p && (p.isCreative() || p.isSpectator())))) {
+			&& (owner == null || e != owner) && !(e instanceof Player p && (p.isCreative() || p.isSpectator()))
+			&& !(e instanceof com.jaymospowers.core.BlockCluster cluster && cluster.lingering()))) {
 			Vec3 to = at.subtract(e.getBoundingBox().getCenter());
 			double d = to.length();
 			if (d > radius || d < 0.05) {
@@ -2051,6 +2118,10 @@ public final class GravityPower implements Power {
 			if (e instanceof LivingEntity living) {
 				if (owner != null) {
 					touch(living, owner);
+				}
+				if (!well.singularity()) {
+					// the pull bears down on them: to their knees
+					kneel(living, level.getGameTime() + KNEEL_WELL_LINGER);
 				}
 				if (hit && d <= SINGULARITY_CORE) {
 					DamageSource source = owner != null ? level.damageSources().indirectMagic(owner, owner) : level.damageSources().magic();
