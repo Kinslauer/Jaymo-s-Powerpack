@@ -323,7 +323,7 @@ whisper in the action bar.
 - **Cyclone Lance** (`onUltimate`, C):
   - An instant line from the eyes along the look direction, `LANCE_RANGE` 32 blocks. Solid blocks stop it.
   - Every living entity (and projectile) within `LANCE_RADIUS` 0.6 of the line is hit.
-  - Damage is `LANCE_DAMAGE` 14 × max(1, weather), so 14 to 18.2. It never drops below 14 and has no randomness.
+  - Damage is `LANCE_DAMAGE` 10 × max(1, weather), so 10 to 13 (14 before 0.8.27). It never drops below 10 and has no randomness.
     - The damage type is `jaymospowers:wind_lance` (`data/jaymospowers/damage_type/wind_lance.json`, scaling
       "never"). It's tagged `minecraft:bypasses_armor` (`data/minecraft/tags/damage_type/bypasses_armor.json`,
       `replace: false`).

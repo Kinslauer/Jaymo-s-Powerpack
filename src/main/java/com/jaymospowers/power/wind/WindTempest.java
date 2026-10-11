@@ -50,7 +50,7 @@ public final class WindTempest {
 	/** Cyclone Lance: reach, hit radius around the line, damage (bypasses armour), knockback along the line, cooldown. */
 	static final double LANCE_RANGE = 32.0;
 	static final double LANCE_RADIUS = 0.6;
-	static final float LANCE_DAMAGE = 14.0F;
+	static final float LANCE_DAMAGE = 10.0F;
 	static final double LANCE_KNOCKBACK = 1.6;
 	static final double LANCE_LIFT = 0.25;
 	public static final int LANCE_COOLDOWN = 120;
