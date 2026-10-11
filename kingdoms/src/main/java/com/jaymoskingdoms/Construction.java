@@ -124,6 +124,7 @@ public final class Construction {
 		NEXT_PLAN.clear();
 		Planner.clear();
 		Ruins.clear();
+		Townscape.clear();
 	}
 
 	/** Every so often, each faction whose seat and storage are loaded and whose crew is about looks for its next project. */
@@ -150,7 +151,7 @@ public final class Construction {
 
 	/** A project's layout (its blueprint drawn and set down), or null if its catalogue entry is gone. */
 	public static Planner.@Nullable Layout layout(ServerLevel level, Faction f, Works.Project p) {
-		String key = f.id() + "|" + p.entry() + "|" + p.origin().asLong() + "|" + p.rotation();
+		String key = f.id() + "|" + p.entry() + "|" + p.origin().asLong() + "|" + p.rotation() + "|" + p.variant();
 		Planner.Layout l = LAYOUTS.get(key);
 		if (l != null) {
 			return l;
@@ -159,7 +160,7 @@ public final class Construction {
 		if (entry == null) {
 			return null;
 		}
-		l = Planner.layout(level, f, p.entry(), entry.maker().make(level, f), p.origin(), p.rotation(), p.plot() >= 0, p.ruins());
+		l = Planner.layout(level, f, p.entry(), entry.maker().make(level, f, p.variant()), p.origin(), p.rotation(), p.plot() >= 0, p.ruins());
 		LAYOUTS.put(key, l);
 		return l;
 	}
@@ -767,7 +768,8 @@ public final class Construction {
 			List<Works.Project> projects = new ArrayList<>(s.projects());
 			projects.removeIf(x -> x.same(p));
 			List<Works.Built> built = new ArrayList<>(s.built());
-			built.add(new Works.Built(p.entry(), l.min(), l.max()));
+			// (0.5.7) with its full height, so beds and job sites upstairs count as its own
+			built.add(new Works.Built(p.entry(), l.min(), l.max().above(Math.max(0, l.height() - 1))));
 			List<Works.Plot> plots = new ArrayList<>(s.plots());
 			plots.replaceAll(plot -> plot.id() == p.plot() ? plot.withBuilding(plot.building(), true) : plot);
 			return s.withProjects(projects).withBuilt(built).withPlots(plots);

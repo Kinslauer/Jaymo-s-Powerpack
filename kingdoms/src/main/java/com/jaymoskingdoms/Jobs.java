@@ -110,7 +110,7 @@ final class Jobs {
 
 	private static boolean inside(List<Works.Built> built, BlockPos pos) {
 		for (Works.Built b : built) {
-			if (pos.getX() >= b.min().getX() && pos.getX() <= b.max().getX() && pos.getY() >= b.min().getY() && pos.getY() <= b.max().getY()
+			if (pos.getX() >= b.min().getX() && pos.getX() <= b.max().getX() && pos.getY() >= b.min().getY() && pos.getY() <= b.top().getY()
 				&& pos.getZ() >= b.min().getZ() && pos.getZ() <= b.max().getZ()) {
 				return true;
 			}

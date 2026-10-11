@@ -24,6 +24,8 @@ import org.jspecify.annotations.Nullable;
 public final class Works {
 	/** A project's stages: the site staked out, the ground readied (dug and filled), the building going up. */
 	public static final int STAKE = 0, PREP = 1, BUILD = 2;
+	/** How tall a building recorded before 0.5.7 is taken to be (only its floor was kept). */
+	static final int OLD_BUILT_HEIGHT = 14;
 
 	/**
 	 * A building under way: which catalogue entry, its plot's lowest north-west corner ({@code origin}, its y the floor),
@@ -32,7 +34,7 @@ public final class Works {
 	 * its site is on an old structure the builders tear down as they go ({@code ruins}, see {@link Ruins}).
 	 */
 	public record Project(String entry, BlockPos origin, Rotation rotation, int stage, int index, Map<String, Integer> credit, List<BlockPos> stakes,
-		int plot, long started, boolean ruins) {
+		int plot, long started, boolean ruins, long variant) {
 		public static final Codec<Project> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.STRING.fieldOf("entry").forGetter(Project::entry),
 				BlockPos.CODEC.fieldOf("origin").forGetter(Project::origin),
@@ -43,21 +45,23 @@ public final class Works {
 				BlockPos.CODEC.listOf().optionalFieldOf("stakes", List.of()).forGetter(Project::stakes),
 				Codec.INT.optionalFieldOf("plot", -1).forGetter(Project::plot),
 				Codec.LONG.optionalFieldOf("started", 0L).forGetter(Project::started),
-				Codec.BOOL.optionalFieldOf("ruins", false).forGetter(Project::ruins))
+				Codec.BOOL.optionalFieldOf("ruins", false).forGetter(Project::ruins),
+				// (0.5.7) which variant of its building (0: as first designed, for projects saved before variants)
+				Codec.LONG.optionalFieldOf("variant", 0L).forGetter(Project::variant))
 			.apply(i, Project::new));
 
 		public Project at(int stage, int index) {
-			return new Project(this.entry, this.origin, this.rotation, stage, index, this.credit, this.stakes, this.plot, this.started, this.ruins);
+			return new Project(this.entry, this.origin, this.rotation, stage, index, this.credit, this.stakes, this.plot, this.started, this.ruins, this.variant);
 		}
 
 		public Project withCredit(Map<String, Integer> credit) {
 			Map<String, Integer> clean = new HashMap<>(credit);
 			clean.values().removeIf(n -> n <= 0);
-			return new Project(this.entry, this.origin, this.rotation, this.stage, this.index, Map.copyOf(clean), this.stakes, this.plot, this.started, this.ruins);
+			return new Project(this.entry, this.origin, this.rotation, this.stage, this.index, Map.copyOf(clean), this.stakes, this.plot, this.started, this.ruins, this.variant);
 		}
 
 		public Project withStakes(List<BlockPos> stakes) {
-			return new Project(this.entry, this.origin, this.rotation, this.stage, this.index, this.credit, List.copyOf(stakes), this.plot, this.started, this.ruins);
+			return new Project(this.entry, this.origin, this.rotation, this.stage, this.index, this.credit, List.copyOf(stakes), this.plot, this.started, this.ruins, this.variant);
 		}
 
 		/** The same building (two projects are the same one when they share an origin and an entry). */
@@ -73,6 +77,11 @@ public final class Works {
 				BlockPos.CODEC.fieldOf("min").forGetter(Built::min),
 				BlockPos.CODEC.fieldOf("max").forGetter(Built::max))
 			.apply(i, Built::new));
+
+		/** A building's highest block: {@code max} keeps its full height since 0.5.7; older ones kept only the floor. */
+		public BlockPos top() {
+			return this.max.getY() > this.min.getY() ? this.max : this.max.atY(this.min.getY() + OLD_BUILT_HEIGHT);
+		}
 	}
 
 	/**

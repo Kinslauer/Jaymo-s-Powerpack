@@ -206,7 +206,7 @@ public final class Plots {
 			return false;
 		}
 		Blueprint.Entry entry = Planner.entry(f, building);
-		if (entry != null && Planner.onPlot(f, plot, entry.maker().make(Factions.level(server), f)) == null) {
+		if (entry != null && Planner.onPlot(f, plot, entry.maker().make(Factions.level(server), f, 0L)) == null) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.plot.too_small", plot.id()).withStyle(ChatFormatting.RED));
 			return false;
 		}

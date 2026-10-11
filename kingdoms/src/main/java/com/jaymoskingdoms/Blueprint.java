@@ -26,8 +26,21 @@ public record Blueprint(String id, int width, int depth, int height, List<Placem
 		Blueprint make(ServerLevel level, Faction faction);
 	}
 
+	/**
+	 * (0.5.7) Makes one variant of a building: the same {@code variant} always draws the same building, so a project
+	 * keeps its look once staked. Variant 0 is the building as first designed (projects saved before variants).
+	 */
+	@FunctionalInterface
+	public interface Varied {
+		Blueprint make(ServerLevel level, Faction faction, long variant);
+	}
+
 	/** One entry in a faction type's growth order: a building, how many of it at most, and from what settlement size. */
-	public record Entry(String id, Maker maker, int max, int minPopulation) {
+	public record Entry(String id, Varied maker, int max, int minPopulation) {
+		/** A building that's always drawn the same way (camps, ruins). */
+		public Entry(String id, Maker maker, int max, int minPopulation) {
+			this(id, (level, faction, variant) -> maker.make(level, faction), max, minPopulation);
+		}
 	}
 
 	private static final Map<FactionType, List<Entry>> CATALOGUE = new EnumMap<>(FactionType.class);

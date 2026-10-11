@@ -1204,3 +1204,32 @@ test village has none), a villager moving into a new house.
   kingdom (camp pitched 49 blocks south, raiders at the fire, the tower's base, its top and its gate), and the
   stonyfell_outpost_plains at -777,952 taken in the wild, a jungle clearing cut for its camp.
 
+
+## 0.5.7: no two buildings alike, each taking after its neighbours
+- **Every building is its own variant.** A project now keeps a variant seed (`Works.Project.variant`, saved; picked by
+  `Planner.variant` from the world, the faction, the building and how many it has built, and up to
+  `Planner.VARIANT_TRIES` (3) are tried for a site). The same seed always redraws the same building; variant 0 is each
+  design exactly as before, so projects saved before 0.5.7 finish as they were staked.
+- **Materials come from the buildings around them** (`Townscape`): the blocks of the structure the settlement was
+  founded in (its village's houses, its ruin's halls; with no structure, the made blocks round the seat) are counted
+  once a few days: the woods (planks), the roofing (stairs), the stonework, the colours (wool, beds, terracotta,
+  concrete, glass). Each building picks its wood, stone, roofing and colours from these, weighted by how common they
+  are, with the land's own palette in the mix (`Kit.HOME_SHARE`).
+- **Houses:** 5-9 wide and 7-9 deep; maybe a porch with posts, a rail and a lamp, maybe a second storey with a ladder
+  and beds upstairs; timber, plank, stone, timber-framed (with a light infill the town uses) or two-toned walls; a
+  gabled roof either way, a hipped roof or a flat one with a parapet (flat roofs are common in the desert, savanna and
+  badlands); maybe a smoking chimney; one or two beds, a rug, a chest, books, a furnace or a lamp by the walls, a
+  potted flower; windows single, paired or tall, sometimes stained glass in its colour.
+- **The rest:** fields of 2-3 crops (beetroots too) in halves, rows or quarters, some with a water channel or a
+  scarecrow; tree farms planted in a dice, square or cross; pens with a lean-to; wells flat-roofed, peaked or open with
+  lamps, some with a chain; stalls and market stalls with checked, striped or bordered awnings in the town's colours,
+  their own wares, a basin or a lamp post in the middle; crossroads with lamp posts in different corners, patchy
+  paving, benches; smithies of stone or wood with the forge at either end and a flat or gabled roof; masons, stables
+  and barracks with flat, gabled or hipped roofs.
+- **Defences match each other:** walls, towers, gatehouses and the palisade take one look for the whole settlement
+  (`Buildings.townSeed`), so they join up, and vary only in their details: weathering, lamps, towers crenellated,
+  lamp-lit or under a pointed roof, palisade logs of uneven height.
+- **Finished buildings keep their full height** (`Works.Built`, its `top()` for older ones), so beds and job sites
+  above the floor count as the building's own: house beds were only found through the fallback, and job sites in the
+  settlement's own buildings (the smithy's forge, the mason's stonecutter) were never matched before.
+- Not yet seen in game.

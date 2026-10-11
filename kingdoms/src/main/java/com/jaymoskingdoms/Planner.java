@@ -33,6 +33,8 @@ import org.jspecify.annotations.Nullable;
  * structures win when the natural ground is much further out, so the town grows through them instead of round them.
  */
 public final class Planner {
+	/** (0.5.7) How many variants of a building are tried for a site before the next building in line. */
+	static final int VARIANT_TRIES = 3;
 	/** Projects a faction runs at once. */
 	public static final int PROJECTS_AT_ONCE = 1;
 	/** How far the ground under a site may rise or fall from its floor. */
@@ -187,10 +189,13 @@ public final class Planner {
 				if (only != null && !only.equals(e.id())) {
 					continue;
 				}
-				Blueprint bp = e.maker().make(level, f);
-				Placing at = onPlot(f, plot, bp);
-				if (at != null) {
-					return start(level, f, e.id(), at, plot.id());
+				// a few of its variants, then the plain design (the one a plot was measured for)
+				for (int attempt = 0; attempt <= VARIANT_TRIES; attempt++) {
+					long variant = attempt < VARIANT_TRIES ? variant(level, f, e.id(), attempt) : 0L;
+					Placing at = onPlot(f, plot, e.maker().make(level, f, variant));
+					if (at != null) {
+						return start(level, f, e.id(), at, plot.id(), variant);
+					}
 				}
 			}
 		}
@@ -201,18 +206,34 @@ public final class Planner {
 			choices.add(entry(f, only));
 		}
 		for (Blueprint.Entry e : choices) {
-			Blueprint bp = e.maker().make(level, f);
-			Placing at = site(level, f, e.id(), bp);
-			if (at != null) {
-				return start(level, f, e.id(), at, -1);
+			for (int attempt = 0; attempt < VARIANT_TRIES; attempt++) {
+				long variant = variant(level, f, e.id(), attempt);
+				Placing at = site(level, f, e.id(), e.maker().make(level, f, variant));
+				if (at != null) {
+					return start(level, f, e.id(), at, -1, variant);
+				}
 			}
 		}
 		return null;
 	}
 
-	private static Works.Project start(ServerLevel level, Faction f, String entry, Placing at, int plot) {
+	/**
+	 * (0.5.7) The variant of {@code f}'s next {@code entry}: different for every building it puts up (and every world),
+	 * never 0 (the plain design). {@code attempt} gives the alternatives tried when one doesn't fit anywhere.
+	 */
+	static long variant(ServerLevel level, Faction f, String entry, int attempt) {
+		Works.Site works = Works.of(level.getServer(), f.id());
+		long v = level.getSeed() * 0x9E3779B97F4A7C15L + f.id() * 0xC2B2AE3D27D4EB4FL + entry.hashCode() * 0x165667B19E3779F9L
+			+ (works.built().size() + works.projects().size()) * 0x27D4EB2F165667C5L + attempt * 0x94D049BB133111EBL;
+		v ^= v >>> 31;
+		v *= 0xBF58476D1CE4E5B9L;
+		v ^= v >>> 29;
+		return v == 0L ? 1L : v;
+	}
+
+	private static Works.Project start(ServerLevel level, Faction f, String entry, Placing at, int plot, long variant) {
 		Works.Project project = new Works.Project(entry, at.origin(), at.rotation(), Works.STAKE, 0, Map.of(), List.of(), plot, level.getGameTime(),
-			at.ruins());
+			at.ruins(), variant);
 		Works.update(level.getServer(), f.id(), s -> {
 			List<Works.Project> list = new ArrayList<>(s.projects());
 			list.add(project);
@@ -563,7 +584,7 @@ public final class Planner {
 		if (next.isEmpty()) {
 			return Map.of();
 		}
-		Blueprint bp = next.getFirst().maker().make(level, f);
+		Blueprint bp = next.getFirst().maker().make(level, f, variant(level, f, next.getFirst().id(), 0));
 		List<BlockState> states = new ArrayList<>();
 		for (Blueprint.Placement pl : bp.blocks()) {
 			states.add(pl.state());

@@ -133,7 +133,7 @@ final class Homes {
 			if (!b.entry().equals("house") && !b.entry().equals("barracks")) {
 				continue;
 			}
-			for (BlockPos p : BlockPos.betweenClosed(b.min(), b.max())) {
+			for (BlockPos p : BlockPos.betweenClosed(b.min(), b.top())) {
 				if (head(level.getBlockState(p)) && free(level, p) && !taken(id, p)) {
 					double d = p.distSqr(folk.blockPosition()) - 1_000_000;
 					if (d < bestD) {
