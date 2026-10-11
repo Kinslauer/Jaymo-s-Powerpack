@@ -257,12 +257,7 @@ public final class Camps {
 		int id = camp.id();
 		CampBuildings.Layout layout = CampBuildings.build(level, camp, center, floor, gate);
 		Storage.register(server, id, layout.storage(), layout.depot());
-		Faction stocked = Factions.get(server, id);
-		Palette p = CampBuildings.palette(level, stocked);
-		Storage.put(level, stocked, p.log().getBlock().asItem(), START_LOGS);
-		Storage.put(level, stocked, hide(stocked), START_HIDES);
-		Storage.put(level, stocked, Items.COOKED_MUTTON, START_MEAT);
-		Storage.put(level, stocked, Items.EMERALD, START_EMERALDS);
+		stock(level, Factions.get(server, id));
 		putData(server, id, new CampData(fire, gate, level.getGameTime(), level.getGameTime(), Production.day(server), -1L, List.of(), 0L, Map.of(),
 			BARBARIAN, 0, 0));
 		takeSides(server, id, BARBARIAN);
@@ -280,6 +275,18 @@ public final class Camps {
 		return Factions.get(server, id);
 	}
 
+	/** What a new camp's storage starts with (its land's logs, hides, meat, a few emeralds). */
+	static void stock(ServerLevel level, @Nullable Faction camp) {
+		if (camp == null || camp.holdings().storage().isEmpty()) {
+			return;
+		}
+		Palette p = CampBuildings.palette(level, camp);
+		Storage.put(level, camp, p.log().getBlock().asItem(), START_LOGS);
+		Storage.put(level, camp, hide(camp), START_HIDES);
+		Storage.put(level, camp, Items.COOKED_MUTTON, START_MEAT);
+		Storage.put(level, camp, Items.EMERALD, START_EMERALDS);
+	}
+
 	/** Camps of a kind stand together (barbarians help barbarians, illagers illagers), and the two kinds are at war. */
 	static void takeSides(MinecraftServer server, int id, String kind) {
 		for (Faction other : Factions.all(server, FactionType.BARBARIAN)) {
@@ -289,7 +296,7 @@ public final class Camps {
 		}
 	}
 
-	private static String name(MinecraftServer server, RandomSource random) {
+	static String name(MinecraftServer server, RandomSource random) {
 		String name = "";
 		for (int tries = 0; tries < 20; tries++) {
 			name = NAME_FIRST[random.nextInt(NAME_FIRST.length)] + NAME_SECOND[random.nextInt(NAME_SECOND.length)];
@@ -314,7 +321,9 @@ public final class Camps {
 			if (players.isEmpty()) {
 				continue;
 			}
-			if (campsNear(server, realm, BARBARIAN) < CAMPS_PER_KINGDOM && random.nextFloat() < CAMP_CHANCE && trySite(server, level, realm, players, false)) {
+			// (with Grim Kingdoms, a barbarian camp waits for a Grim ruin in reach rather than pitching tents in the wild)
+			if (campsNear(server, realm, BARBARIAN) < CAMPS_PER_KINGDOM && random.nextFloat() < CAMP_CHANCE && !GrimSites.prefersGrim(server, realm)
+				&& trySite(server, level, realm, players, false)) {
 				return;
 			}
 			if (level.getDifficulty() != Difficulty.PEACEFUL && campsNear(server, realm, IllagerCamps.KIND) < IllagerCamps.CAMPS_PER_KINGDOM
@@ -557,8 +566,11 @@ public final class Camps {
 		List<Long> rot = new ArrayList<>();
 		int reach = illagers ? IllagerBuildings.CLEAR_RADIUS : CampBuildings.CLEAR_RADIUS;
 		int high = illagers ? IllagerBuildings.CLEAR_HEIGHT : 8;
+		// (a camp in a Grim ruin leaves the ruin as it stands: nothing of it rots)
+		Holds.Hold held = Holds.get(server, camp.id());
+		boolean grim = held != null && held.isGrim();
 		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-reach, -1, -reach), center.offset(reach, high, reach))) {
-			if (level.isLoaded(pos) && CampBuildings.perishable(level.getBlockState(pos))) {
+			if (!grim && level.isLoaded(pos) && CampBuildings.perishable(level.getBlockState(pos))) {
 				rot.add(pos.asLong());
 			}
 		}

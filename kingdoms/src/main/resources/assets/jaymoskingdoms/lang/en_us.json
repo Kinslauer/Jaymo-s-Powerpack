@@ -204,5 +204,9 @@
 	"message.jaymoskingdoms.warlord_rallies": "%s sounds the horn! His illagers close in.",
 	"message.jaymoskingdoms.raid.announce.illager": "Raid horns! The illagers of %s ride on %s!",
 	"message.jaymoskingdoms.illager_camp.cleared": "The warlord of %s has fallen to %s! The illagers scatter.",
-	"message.jaymoskingdoms.illager_camp.thanks": "Word of the warlord's death spreads: every kingdom and village thinks better of you."
+	"message.jaymoskingdoms.illager_camp.thanks": "Word of the warlord's death spreads: every kingdom and village thinks better of you.",
+	"message.jaymoskingdoms.grim.fiefdom": "The lord of %s raises the banner of %s over an old ruin: a new fiefdom.",
+	"message.jaymoskingdoms.grim.camp": "Barbarians have taken an old ruin near %2$s: the camp of %1$s.",
+	"message.jaymoskingdoms.grim.cleared": "The builders of %s have cleared the rubble from their hold.",
+	"message.jaymoskingdoms.grim.erect": "The builders of %s begin raising a new hall beside their hold."
 }
