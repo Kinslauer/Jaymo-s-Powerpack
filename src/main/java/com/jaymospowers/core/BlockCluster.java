@@ -79,6 +79,10 @@ public class BlockCluster extends Entity {
 	public static final AttachmentType<Boolean> STEADY = AttachmentRegistry.create(JaymosPowers.id("block_cluster_steady"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 
+	/** Drawn this many times its size (a big meteor's rock); unset is 1. */
+	public static final AttachmentType<Float> SCALE = AttachmentRegistry.create(JaymosPowers.id("block_cluster_scale"),
+		builder -> builder.syncWith(ByteBufCodecs.FLOAT, AttachmentSyncPredicate.all()));
+
 	/** The chunk's blocks (synced to everyone, who draw them). */
 	public static final AttachmentType<List<Piece>> PIECES = AttachmentRegistry.create(JaymosPowers.id("block_cluster_pieces"),
 		builder -> builder.syncWith(Piece.STREAM_CODEC.apply(ByteBufCodecs.list()), AttachmentSyncPredicate.all()));
