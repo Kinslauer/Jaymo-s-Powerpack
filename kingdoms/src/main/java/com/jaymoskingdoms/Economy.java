@@ -139,7 +139,11 @@ public final class Economy {
 		long now = level.getGameTime();
 		Faction grown = faction;
 		if (grown.holdings().vacant() == 0 && staff(grown) < needed(grown)) {
-			int role = Builders.crewCount(grown) < Builders.crewTarget(grown) || !grown.type().isRealm() ? Folk.WORKER : Folk.GUARD;
+			// a builder while the crew is short; a farmer for a farm nobody keeps (0.5.1); a miner or woodcutter for a
+			// mine or tree farm short of them (0.5.2); else a guard
+			boolean crewShort = Builders.crewCount(grown) < Builders.crewTarget(grown);
+			int role = crewShort ? Folk.WORKER : Farmers.wanted(server, grown) ? Folk.FARMER : Gatherers.wanted(server, grown, Folk.MINER) ? Folk.MINER
+				: Gatherers.wanted(server, grown, Folk.WOODCUTTER) ? Folk.WOODCUTTER : grown.type().isRealm() ? Folk.GUARD : Folk.WORKER;
 			if (grown.type() == FactionType.BARBARIAN || (role == Folk.WORKER && Builders.crewCount(grown) >= Builders.CREW_MAX)) {
 				// (camps raise their own; a full crew takes no more)
 				return null;
@@ -173,6 +177,10 @@ public final class Economy {
 		Folk hired;
 		if (Folk.isBuilder(role)) {
 			hired = Builders.spawn(level, ready, role, from);
+		} else if (role == Folk.FARMER) {
+			hired = Farmers.spawn(level, ready, from);
+		} else if (Gatherers.isGatherer(role)) {
+			hired = Gatherers.spawn(level, ready, role, from);
 		} else if (role == Folk.ARCHER) {
 			hired = KingdomEvents.spawnArcher(level, ready);
 		} else {
@@ -184,9 +192,27 @@ public final class Economy {
 		return hired;
 	}
 
+	/**
+	 * One of the settlement's villagers taken into service (gone in a puff, with a nod) if it can spare one (it keeps
+	 * {@link #MIN_VILLAGERS_KEPT}): where they stood, or null (then a new hand comes instead).
+	 */
+	static @Nullable BlockPos recruit(ServerLevel level, Faction f) {
+		List<Villager> villagers = level.getEntitiesOfClass(Villager.class, new AABB(f.seat()).inflate(POPULATION_RANGE),
+			v -> v.isAlive() && !v.isBaby() && (f.leader().isEmpty() || !f.leader().get().equals(v.getUUID())));
+		if (villagers.size() <= MIN_VILLAGERS_KEPT) {
+			return null;
+		}
+		Villager recruit = villagers.get(level.getRandom().nextInt(villagers.size()));
+		BlockPos from = recruit.blockPosition();
+		level.sendParticles(ParticleTypes.POOF, recruit.getX(), recruit.getY() + 1.0, recruit.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
+		level.playSound(null, from, SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 1.0F);
+		recruit.discard();
+		return from;
+	}
+
 	/** The vacancy filled first: a foreman, then guards, archers, workers, anything else. */
 	private static int nextVacancy(Faction f) {
-		for (int role : new int[] {Folk.FOREMAN, Folk.GUARD, Folk.ARCHER, Folk.WORKER}) {
+		for (int role : new int[] {Folk.FOREMAN, Folk.GUARD, Folk.ARCHER, Folk.WORKER, Folk.FARMER, Folk.MINER, Folk.WOODCUTTER}) {
 			if (f.holdings().vacancies().getOrDefault(Folk.roleName(role), 0) > 0) {
 				return role;
 			}

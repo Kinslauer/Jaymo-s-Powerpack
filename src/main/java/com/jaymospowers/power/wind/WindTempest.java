@@ -50,7 +50,9 @@ public final class WindTempest {
 	/** Cyclone Lance: reach, hit radius around the line, damage (bypasses armour), knockback along the line, cooldown. */
 	static final double LANCE_RANGE = 32.0;
 	static final double LANCE_RADIUS = 0.6;
-	static final float LANCE_DAMAGE = 14.0F;
+	static final float LANCE_DAMAGE = 6.0F;
+	/** The lance's damage climbs from {@code LANCE_DAMAGE} at weather 1 (rain) to {@code LANCE_DAMAGE_MAX} at {@code LANCE_WEATHER_TOP} (a thunderstorm). */
+	static final float LANCE_DAMAGE_MAX = 12.0F, LANCE_WEATHER_TOP = 1.3F;
 	static final double LANCE_KNOCKBACK = 1.6;
 	static final double LANCE_LIFT = 0.25;
 	public static final int LANCE_COOLDOWN = 120;
@@ -157,7 +159,7 @@ public final class WindTempest {
 			bolts.forEach(at -> WindStorm.strike(player, at));
 		}
 
-		float damage = LANCE_DAMAGE * Math.max(1.0F, weather);
+		float damage = net.minecraft.util.Mth.clampedMap(weather, 1.0F, LANCE_WEATHER_TOP, LANCE_DAMAGE, LANCE_DAMAGE_MAX);
 		DamageSource source = player.damageSources().source(LANCE_DAMAGE_TYPE, player);
 		for (Entity hit : hits) {
 			if (hit instanceof LivingEntity living) {

@@ -69,6 +69,14 @@ public final class Reputation {
 		}
 	}
 
+	/** (0.5.1) All the good name {@code player} had with {@code kingdom} gone (a bad one stays). */
+	public static void wipe(ServerPlayer player, Faction kingdom) {
+		int stored = stored(player, kingdom.id());
+		if (stored > 0) {
+			change(player, kingdom, -stored);
+		}
+	}
+
 	/** A word for a reputation. */
 	public static String word(int rep) {
 		return rep <= -500 ? "hated" : rep <= HOSTILE ? "hostile" : rep < 100 ? "neutral" : rep < 400 ? "friendly" : rep < 800 ? "honoured" : "revered";

@@ -53,6 +53,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		Plots.register();
 		Buildings.register();
 		Construction.register();
+		// 0.5.2: the mine the builders dig first (it wraps their brain; Debris wraps it in turn) and its attachment
+		LOGGER.debug("mine attachment: {}", Mines.MINES);
+		Mines.register();
+		// 0.5.4: living trees (saplings grow up by stages, trees fell whole, the woods seed themselves) and their attachment
+		LOGGER.debug("growing tree attachment: {}", Trees.GROWING);
+		Trees.register();
 		Theft.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
 		LOGGER.debug("war attachment: {}", WarData.WARS);
@@ -65,5 +71,14 @@ public final class JaymosKingdoms implements ModInitializer {
 		// Grim loaded), their builders clearing its rubble first (after Construction, whose brain it wraps)
 		LOGGER.debug("hold attachment: {}", Holds.HOLDS);
 		GrimSites.register();
+		// 0.5.1: a night slept through made up at once (building, fields), farmers, rulers' days out
+		LOGGER.debug("warden attachment: {}", Wardens.WARDENS);
+		Nights.register();
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			Farmers.clear();
+			Gatherers.clear();
+			Royals.clear();
+			Wardens.clear();
+		});
 	}
 }

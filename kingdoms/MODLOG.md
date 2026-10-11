@@ -1003,3 +1003,168 @@ structure's pieces, rooms, a seat made from a building), `Holds` (a new attachme
   - with Grim: 150-500 blocks from a kingdom near a Grim keep: the fiefdom's message, its lord on his throne, guards;
     a Grim camp's barbarians; builders pulling cobwebs and heaps; wall holes patched (arrow slits may be filled too);
     `/time add 72000` near one: the second building staked out and raised.
+
+## 0.5.1: nights slept through, kings' days out, farmers, the citadel (built; not yet seen in game)
+Andy's ask (2026-10-11): sleeping should move the kingdoms on; the storehouse should hold basic blocks (stone, wood,
+not dirt) and food; kings should leave their halls by day with 3 to 8 guards, greet their people and come home at
+night; the king, a builder and a farmer should take the village's own buildings (the largest for the king, a farm for
+the farmer, a building with room for chests for the builders), with one built in the village's style where there's
+none; a seat built from nothing should be a castle of several floors, defended, at least 60 blocks across. Gatherers,
+mines, tree farms and villagers keeping houses are the next stages. New classes: `Nights`, `Royals`, `Farmers`,
+`Citadel`. Changed: `Construction` (`advance`, `leg`), `Folk` (the farmer role, escorts, doors), `Production` (wheat,
+meat), `Economy` (farmers hired), `KingdomEvents` (founding), `Seats` (`farms`), `Castle` (`Kind.CITADEL`, the site
+prefers loaded ground), the client (farmers wear workers' clothes), the lang file.
+
+### What the storehouse holds
+Unchanged in kind: once a day (`Production`), logs of the land's wood, cobblestone and smooth stone (never dirt; the
+builders dig soil on site for nothing), and food: bread, now **wheat**, carrots, potatoes, beetroot, apples, and now
+**raw beef, pork, mutton or chicken** for each kind of livestock grazing within 64 of the seat. What farmers bring
+(below) comes on top.
+
+### Nights slept through (`Nights`)
+- The Overworld's clock jumping ahead of the game's ticks (sleeping, or `/time add`) by 1200 or more is time that
+  passed in a moment; up to a day of it is made up at once by every settlement whose seat is loaded:
+  - its builders lay what they would have laid (`Construction.advance`): a block per 60 ticks per builder about (at
+    most 1500), readying columns and laying blocks in order, paid from the pile on site and then storage a load at a
+    time, silently; it stops where storage runs short or a player stands in the way; a staked-out site starts without
+    its stakes; a finished building is announced as ever. "While you slept, the builders of X laid N blocks."
+  - its crops (within 48 of the seat) grow a stage per 2500 ticks.
+  - production already counts days by the clock, so the new day's goods come too (up to 3 missed days, as before).
+
+### A ruler's day (`Royals`)
+- A king or a fiefdom's lord with a seat: from 1000 ticks into the day (just after sunrise) until 11000 he walks a
+  round: his gate, up to four of his villagers (picked at random, nearest first), the bell, his gate again; then
+  another round. At each stop the nearest villager within 7 stops, looks at him (its brain's look and interaction
+  targets), says yes, and green sparkles show; he raises a hand. Out, he may roam 160 from the seat.
+- **His escort**: at dawn, up to 8 of the faction's guards (within 96 of the seat, not fighting) fall in behind him in
+  pairs, the hall's and the town's first; the gate's guards keep the gate unless they're needed to make up 3. With
+  fewer than 3 guards about he stays in (see Wardens). An escort fallen 40 behind is
+  brought to him. At dusk he heads for his throne; when he's there (or at night, his way blocked for 12 s: taken
+  there) his escort goes back to their posts (each guard keeps its old post, saved).
+- A ruler who slept in his panic room comes up to his throne at dawn. A fight comes first, for him and his guards.
+- Every folk now opens (and closes) wooden doors on its way.
+
+### Wardens: a ruler short of guards (`Wardens`)
+Andy's follow-up: with fewer than 3 guards the king dares not leave and says so, and may offer you a place.
+- A ruler with fewer than 3 of his guards within 96 of the seat keeps to his hall (or heads back to it), unless one
+  of his wardens is within 24 of him. (He no longer raises guards for himself; the usual hiring replaces the dead.)
+- At an audience he says so ("With but N guards left to me, I dare not leave this hall."). Once a day for each player
+  (welcome, not sworn to another realm) he may offer a place: the chance is 10%, +20% per guard short of 3, +15% with
+  fewer than 10 villagers, +25% at a reputation of 1000 (scaled). The place: a royal guardsman (welcome; soldier's
+  standing), a sworn vassal (200; knight's) or a lord of the realm (500; lord's). A clickable line runs
+  `/kingdom serve <name>`, which stands for 2 minutes.
+- Accepting swears them to the realm at that standing (or keeps theirs if higher) and makes them a **warden**
+  (`jaymoskingdoms:wardens` on the Overworld, faction id → players, logged in `JaymosKingdoms`). Announced to all.
+- **If he falls** while a warden is in the world (any cause, a war included), the warden loses all their good name
+  with his realm and every realm allied with it (positive reputation to 0; a bad name stays), and every warden's charge
+  ends. Leaving the realm (`/kingdom leave`) ends the charge.
+
+### Farmers (`Farmers`, `Folk.FARMER`)
+- A new folk role (id 8, `farmer`): a hoe, a leather cap, a worker's clothes; doesn't fight (flees when hurt).
+- He keeps one farm: a village's farm piece (`village_farm`, recorded among the faction's buildings and held from
+  the builders) or a farm the builders put up. By day he harvests ripe crops in his farm's reach and sows them again
+  (one seed kept back from what it gave), sows bare farmland with wheat, and at a pen keeps the herd at 6 head a kind:
+  he butchers one when there are more (its meat, and leather, wool or feathers), pairs two off when there are fewer than
+  5. What he gathers shows in his hands; at 32 items (or when the work runs out) he takes it to the storehouse's depot.
+- A farm with nobody keeping it is a reason to take on a new hand (`Economy.hire`: a farmer before another guard,
+  after the builders' crew is full).
+
+### Founding in a village (`KingdomEvents.foundIn`, `settle`)
+- The seat is now the village's **largest** building (a church no longer comes first). The storehouse as before (a
+  building nobody sleeps in first: room for 3 to 10 chests and barrels).
+- **The farmer**: the village's farm piece nearest the bell (`Seats.farms`: pieces named `farm`, then `animal_pen`),
+  held from the builders; with none, the builders' `farm` goes up at once in the village's style (the planner's site
+  rules); then the farmer.
+- **No building fit for a king**: the kingdom builds a **citadel** beside the village (before, the bell only founded
+  a village). `/kingdom found` with no kind does the same outside a village; `keep|castle|tower` still build the old
+  kinds.
+
+### The citadel (`Citadel`, `Castle.Kind.CITADEL`)
+61 x 61 in the village's materials, 52-100 blocks from the bell on the flattest loaded ground, its gate toward it:
+- the **curtain wall**, 3 thick and 10 high, a wall walk on top behind battlements, lanterns along it; a flight of
+  steps (two wide) up to it inside each side wall;
+- **towers** (7 x 7, 16 high) at the corners, half way along the sides and at the back: a lower room, a floor at the
+  wall walk (doorways where the walk meets them), a battlemented roof, arrow slits, a ladder through all three;
+- the **gatehouse**: two towers either side of a 5-wide, 5-high gate, the portcullis raised, a gallery over the
+  passage (murder holes) reached from the towers' lower rooms;
+- the **courtyard**: a road to the keep, barracks, a smithy (blast furnace, anvil, smithing table, grindstone), a
+  well, a training yard, a stable;
+- the **keep** (25 x 23) at the back: three storeys of 6 and a battlemented roof, turrets at the corners, a straight
+  flight of stairs inside its right wall on every storey: the throne room (dais, throne, banners, the panic room
+  beneath), the king's chamber (a bed in the kingdom's colour, books, a chest) and bunks for the household guard, the
+  armoury (barrels, anvil, grindstone, smithing and fletching tables).
+- Archers on the four corner towers, both gatehouse towers and the keep's roof (8). No outlying watchtowers.
+
+### Notes for testers
+- Only compiled. **Check first**: sleep in a kingdom with a project under way (the message, the blocks); a king
+  leaving his hall after sunrise with guards behind him and villagers stopping to look at him, home at dusk; the
+  farmer harvesting and carrying to the storehouse; a village with no roofed building (or `/kingdom found` in the
+  open) raising the citadel: walk the wall walk, the towers' doorways and ladders, the keep's stairs to the roof.
+
+## 0.5.2: mines, miners and woodcutters (built; not yet seen in game)
+Stage 2 of Andy's living-economy ask: the storehouse filled by people seen gathering, and the builders' order of work.
+- **The mine comes first** (`Mines`, kept on the Overworld by faction id). A settlement with a crew looks for a rock
+  or cliff face 14-72 blocks from its seat (39 or more for a realm, clear of its castle), on natural ground, clear of
+  its buildings, plots and held buildings; failing one, open level ground for a shaft. Into a cliff they tunnel 6
+  blocks straight in, then down a block a step; a shaft goes down at once. The tunnel is 3 wide and 3 high, its mouth
+  framed in logs, walled and roofed in planks over its first 3 steps with a lantern; fence-and-plank posts every 4
+  steps and a wall torch between; a cobblestone floor where there's a gap. It stops when it breaks into a cave (open
+  air round it that isn't open sky), or short of water or lava, at bedrock, at 40 steps, or 10 above the world's
+  floor. Each block takes a builder about 1.5 s; they carry what they dig (stone, ore; dirt thrown away) to storage
+  48 items at a time. The mouth is kept among the buildings (`mine`), so nothing is built over it.
+- **While it's dug nothing else starts**, unless the crew is 5 or more: then the last 2 workers dig and the rest
+  build (`Planner.ready` asks `Mines.mayBuild`). Mines wraps the builders' brain after Construction; Debris (rubble)
+  still wraps both.
+- **Miners** (`Folk.MINER`, id 9, iron pickaxe, leather cap; `Gatherers`): 2 are taken on when the mine is done
+  (villagers turned to it if the settlement can spare them, `Economy.recruit`, else new hands). By day each takes ore
+  he can see from the tunnel (3 either side) or in the cave it found (8 round its end), follows any vein he uncovers,
+  and otherwise drives side tunnels (2 high, 16 long, both ways off every 4th step, between the posts), leaving
+  anything beside water or lava. Loads of 48 to storage; at night he goes home to the mine's mouth.
+- **Woodcutters** (`Folk.WOODCUTTER`, id 10, iron axe): one per tree farm. He fells the nearest tree (his tree farm's
+  first, then wild ones within 28): a trunk standing on soil with grown (not placed) leaves, so no building's logs; the
+  trunk comes down a log at a time from the foot up, and he plants the tree's own sapling where it stood.
+- **New buildings, in this order** after the mine: a **tree farm** (11 x 11: grass, a log kerb and fence with a gate,
+  five saplings of the land's wood, corner torches), an **animal pen** (11 x 9: grass, a fence with a gate, a water
+  trough, hay; 2 cows, 2 sheep, 2 pigs and 2 chickens bought in when it's done), the field, then houses and the rest.
+  A finished tree farm takes on its woodcutter, a pen or field its farmer (`Gatherers.built`). Pens count as farms, so
+  their farmer keeps the herd and does the butchering.
+- **Hiring**: a short crew first, then a farmer, miner or woodcutter where one is wanted, then guards (villages:
+  workers). Vacancies for the new roles are filled like the others.
+- **Daily production** now only makes up what nobody gathers by hand: no logs with a woodcutter, no rock with a
+  miner, half the food with a farmer.
+- **Sleep** digs the mine on (a block per 45 ticks per digger) and brings in what the miners (stone with some coal,
+  raw iron and copper) and woodcutters (logs) would have; tree farm saplings grow a stage per 5000 ticks. Players near
+  the seat are told.
+- Only compiled: none of it has been seen in game yet.
+
+## 0.5.3: first in-game test of 0.5.1-0.5.2, and its fixes
+Tested on the dev server with a client (plains village, seed 8675309): the kingdom founded in the village, the mine
+dug 7 steps into a hill until it met a cave, miners took it over (ore, a side tunnel), stone and raw iron reached the
+storehouse, then the tree farm and the pen went up in that order, the woodcutter felled and replanted, the pen got
+its beasts, and a night skipped with `/time add` laid the rest of the tree farm and brought in the gatherers' goods.
+Fixed along the way:
+- A mine stopped at the first pocket of air beside it. Now only a real cave (48+ blocks of open air joined to the
+  tunnel, not under the sky) stops it, and not before the tunnel has turned down.
+- A cliff site needs ground over the whole level stretch of the tunnel and past it (5+ blocks up), not just a rise.
+- Miners with nothing in reach (ore, side tunnels) quarry the rock round the mine's end instead of standing idle.
+- Miners, woodcutters, farmers and the king stood still when they had no path (shut in a house, a farmer put on top
+  of a tower, the king penned by a fence gate). Like builders, they now turn up where they were going in a puff when
+  they get no nearer for a while.
+- A farmer's and a woodcutter's home is on the farm's own ground, not on whatever stands over its middle.
+- Gatherers reach the depot from a floor above or below it (3 blocks of slack).
+
+## 0.5.4: living trees (our own take on Dynamic Trees)
+Dynamic Trees has no Fabric build for 26.3, so Kingdoms grows its own (original code, nothing copied):
+- **Saplings grow up in stages.** In the Overworld a plain sapling (not dark oak, pale oak or a 2x2) sprouts a sapling
+  tree (2 logs and a tuft), then a young tree (4 logs and a crown), then the full tree of its kind, a stage every
+  6000-10000 ticks in daylight with room above. Bone meal still grows a sapling at once.
+- **Trees fall whole.** Chop a natural tree's log (not sneaking, not in creative) and everything above it comes down
+  a few blocks a tick from the foot up, with the leaves no other tree holds; the axe wears a point per log. Placed
+  logs and leaves (buildings) aren't trees.
+- **The woods seed themselves.** Near players, natural trees now and then drop a sapling 3-7 blocks away on open,
+  lit ground that isn't crowded, inside a hold, or on a building site.
+- **Woodcutters** fell whole trees the same way (into their bag) and leave young trees to grow.
+- **Sleep** grows the trees on by the time slept.
+Tested on the dev server: oak, birch, spruce and cherry saplings sprouted, grew young, and grew full over two skipped
+days, and the woodcutter felled a whole tree in his tree farm and carried the wood to the storehouse. Not yet seen in
+game: a player felling a tree, and saplings seeding by themselves.

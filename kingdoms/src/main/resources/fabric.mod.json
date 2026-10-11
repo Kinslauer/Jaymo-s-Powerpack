@@ -15,6 +15,7 @@
 		"jaymoskingdoms.combat.mixins.json",
 		"jaymoskingdoms.worldgen.mixins.json",
 		"jaymoskingdoms.mca.mixins.json",
+		"jaymoskingdoms.trees.mixins.json",
 		{ "config": "jaymoskingdoms.combat.client.mixins.json", "environment": "client" }
 	],
 	"depends": {
