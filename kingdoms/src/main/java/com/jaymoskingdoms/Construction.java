@@ -685,12 +685,14 @@ public final class Construction {
 				}
 			}
 		}
-		level.levelEvent(2001, at, Block.getId(state));
+		if (!quiet) {
+			level.levelEvent(2001, at, Block.getId(state));
+		}
 		level.setBlock(at, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
 	}
 
 	/** Lays one block. False if a player stands in the way (he'll try again). */
-	private static boolean place(ServerLevel level, Faction f, Planner.Layout l, Planner.Op op, Folk b) {
+	private static boolean place(ServerLevel level, Faction f, Planner.Layout l, Planner.Op op, @Nullable Folk b) {
 		BlockPos at = op.pos();
 		BlockState there = level.getBlockState(at);
 		if (there == op.state()) {
@@ -740,6 +742,9 @@ public final class Construction {
 
 	/** The sound of a block going down, and a few chips of it. */
 	private static void effects(ServerLevel level, BlockPos at, BlockState state) {
+		if (quiet) {
+			return;
+		}
 		var sound = state.getSoundType();
 		level.playSound(null, at, sound.getPlaceSound(), SoundSource.BLOCKS, (sound.getVolume() + 1.0F) / 2.0F, sound.getPitch() * 0.8F);
 		if (!state.isAir()) {
@@ -778,6 +783,7 @@ public final class Construction {
 			}
 		}
 		JaymosKingdoms.LOGGER.info("{} finished its {} at {}", f.name(), p.entry(), p.origin());
+		Gatherers.built(level, f, p.entry(), l.min(), l.max());
 	}
 
 	/** Drops a project (half-built as it stands); its stakes are pulled and what was on site goes back to storage. */
@@ -820,6 +826,94 @@ public final class Construction {
 		}
 		finish(level, f, Works.project(level.getServer(), f.id(), p) == null ? p : Works.project(level.getServer(), f.id(), p), l);
 	}
+
+	/** Sleep's catch-up ({@link Nights}): a builder's ticks a block, on average (fetching and hauling included), and the most done at once. */
+	static final int CATCH_UP_TICKS_PER_BLOCK = 60, CATCH_UP_MOST = 1500;
+
+	/**
+	 * The night the players slept through (0.5.1, {@link Nights}): up to {@code blocks} more of the project done at once,
+	 * columns readied and blocks laid just as the crew would have, each paid from what's on site and then from storage
+	 * (a load at a time). It stops where storage runs short; a site that isn't wholly loaded is left alone. Returns how
+	 * many it did.
+	 */
+	static int advance(ServerLevel level, Faction f, Works.Project p, int blocks) {
+		MinecraftServer server = level.getServer();
+		Planner.Layout l = layout(level, f, p);
+		Works.Project cur = Works.project(server, f.id(), p);
+		if (l == null || cur == null || blocks <= 0 || !level.hasChunksAt(l.min().getX() - 1, l.min().getZ() - 1, l.max().getX() + 1, l.max().getZ() + 1)) {
+			return 0;
+		}
+		if (cur.stage() == Works.STAKE) {
+			// (no stakes for a site that went up overnight)
+			cur = cur.at(Works.PREP, 0);
+		}
+		Map<String, Integer> credit = new HashMap<>(cur.credit());
+		int done = 0;
+		quiet = true;
+		try {
+			while (done < blocks) {
+				int total = cur.stage() == Works.PREP ? l.columns() : l.ops().size();
+				int i = cur.index();
+				if (i >= total) {
+					if (cur.stage() == Works.PREP) {
+						cur = cur.at(Works.BUILD, 0);
+						continue;
+					}
+					Works.putProject(server, f.id(), cur.withCredit(credit));
+					finish(level, f, cur, l);
+					return done;
+				}
+				if (cur.stage() == Works.PREP ? !needsPrep(level, l, i) : !wanted(level, l, l.ops().get(i))) {
+					cur = cur.at(cur.stage(), i + 1);
+					continue;
+				}
+				Materials.Cost cost = cost(level, l, cur.stage(), i);
+				if (cost != null && !pay(level, f, credit, cost)) {
+					break;
+				}
+				if (cur.stage() == Works.PREP) {
+					prep(level, f, l, i);
+				} else if (!place(level, f, l, l.ops().get(i), null)) {
+					// (a player standing in it: the crew will lay it in the morning)
+					if (cost != null) {
+						credit.merge(Materials.key(cost.item()), cost.eighths(), Integer::sum);
+					}
+					break;
+				}
+				cur = cur.at(cur.stage(), i + 1);
+				done++;
+			}
+		} finally {
+			quiet = false;
+		}
+		Works.putProject(server, f.id(), cur.withCredit(credit));
+		return done;
+	}
+
+	/** A block of the layout still to lay (what {@link #work} stops at). */
+	private static boolean wanted(ServerLevel level, Planner.Layout l, Planner.Op op) {
+		BlockState there = level.getBlockState(op.pos());
+		return there != op.state() && (l.plot() || there.isAir() || clearable(there) || (l.ruins() && Ruins.tearable(level, op.pos(), there)));
+	}
+
+	/** Takes {@code cost} off the site's pile ({@code credit}), topping it up from storage a load at a time. False if storage is short. */
+	private static boolean pay(ServerLevel level, Faction f, Map<String, Integer> credit, Materials.Cost cost) {
+		String key = Materials.key(cost.item());
+		int have = credit.getOrDefault(key, 0);
+		while (have < cost.eighths()) {
+			ItemStack load = Storage.take(level, f, Materials.accepts(cost.item()), LOAD_MAX);
+			if (load.isEmpty()) {
+				credit.put(key, have);
+				return false;
+			}
+			have += load.getCount() * Materials.WHOLE;
+		}
+		credit.put(key, have - cost.eighths());
+		return true;
+	}
+
+	/** (sleep's catch-up lays its blocks without a sound) */
+	private static boolean quiet;
 
 	// ---- getting about --------------------------------------------------------------------------------------------
 
@@ -866,6 +960,17 @@ public final class Construction {
 			b.getNavigation().moveTo(leg.getX() + 0.5, leg.getY(), leg.getZ() + 0.5, WALK_SPEED);
 		}
 		return false;
+	}
+
+	/** (0.5.1) Where to walk next on the way to {@code goal}: the goal itself when it's near, else a spot {@link #LEG} along the way (paths are short). */
+	static BlockPos leg(ServerLevel level, net.minecraft.world.entity.Entity walker, BlockPos goal) {
+		double dx = goal.getX() + 0.5 - walker.getX(), dz = goal.getZ() + 0.5 - walker.getZ();
+		double across = Math.sqrt(dx * dx + dz * dz);
+		if (across <= LEG) {
+			return goal;
+		}
+		return level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+			BlockPos.containing(walker.getX() + dx / across * LEG, walker.getY(), walker.getZ() + dz / across * LEG));
 	}
 
 	/** A spot near {@code near} where one can stand (solid below, two blocks of room); the surface there if none. */
