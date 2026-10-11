@@ -1100,3 +1100,39 @@ Andy's follow-up: with fewer than 3 guards the king dares not leave and says so,
   leaving his hall after sunrise with guards behind him and villagers stopping to look at him, home at dusk; the
   farmer harvesting and carrying to the storehouse; a village with no roofed building (or `/kingdom found` in the
   open) raising the citadel: walk the wall walk, the towers' doorways and ladders, the keep's stairs to the roof.
+
+## 0.5.2: mines, miners and woodcutters (built; not yet seen in game)
+Stage 2 of Andy's living-economy ask: the storehouse filled by people seen gathering, and the builders' order of work.
+- **The mine comes first** (`Mines`, kept on the Overworld by faction id). A settlement with a crew looks for a rock
+  or cliff face 14-72 blocks from its seat (39 or more for a realm, clear of its castle), on natural ground, clear of
+  its buildings, plots and held buildings; failing one, open level ground for a shaft. Into a cliff they tunnel 6
+  blocks straight in, then down a block a step; a shaft goes down at once. The tunnel is 3 wide and 3 high, its mouth
+  framed in logs, walled and roofed in planks over its first 3 steps with a lantern; fence-and-plank posts every 4
+  steps and a wall torch between; a cobblestone floor where there's a gap. It stops when it breaks into a cave (open
+  air round it that isn't open sky), or short of water or lava, at bedrock, at 40 steps, or 10 above the world's
+  floor. Each block takes a builder about 1.5 s; they carry what they dig (stone, ore; dirt thrown away) to storage
+  48 items at a time. The mouth is kept among the buildings (`mine`), so nothing is built over it.
+- **While it's dug nothing else starts**, unless the crew is 5 or more: then the last 2 workers dig and the rest
+  build (`Planner.ready` asks `Mines.mayBuild`). Mines wraps the builders' brain after Construction; Debris (rubble)
+  still wraps both.
+- **Miners** (`Folk.MINER`, id 9, iron pickaxe, leather cap; `Gatherers`): 2 are taken on when the mine is done
+  (villagers turned to it if the settlement can spare them, `Economy.recruit`, else new hands). By day each takes ore
+  he can see from the tunnel (3 either side) or in the cave it found (8 round its end), follows any vein he uncovers,
+  and otherwise drives side tunnels (2 high, 16 long, both ways off every 4th step, between the posts), leaving
+  anything beside water or lava. Loads of 48 to storage; at night he goes home to the mine's mouth.
+- **Woodcutters** (`Folk.WOODCUTTER`, id 10, iron axe): one per tree farm. He fells the nearest tree (his tree farm's
+  first, then wild ones within 28): a trunk standing on soil with grown (not placed) leaves, so no building's logs; the
+  trunk comes down a log at a time from the foot up, and he plants the tree's own sapling where it stood.
+- **New buildings, in this order** after the mine: a **tree farm** (11 x 11: grass, a log kerb and fence with a gate,
+  five saplings of the land's wood, corner torches), an **animal pen** (11 x 9: grass, a fence with a gate, a water
+  trough, hay; 2 cows, 2 sheep, 2 pigs and 2 chickens bought in when it's done), the field, then houses and the rest.
+  A finished tree farm takes on its woodcutter, a pen or field its farmer (`Gatherers.built`). Pens count as farms, so
+  their farmer keeps the herd and does the butchering.
+- **Hiring**: a short crew first, then a farmer, miner or woodcutter where one is wanted, then guards (villages:
+  workers). Vacancies for the new roles are filled like the others.
+- **Daily production** now only makes up what nobody gathers by hand: no logs with a woodcutter, no rock with a
+  miner, half the food with a farmer.
+- **Sleep** digs the mine on (a block per 45 ticks per digger) and brings in what the miners (stone with some coal,
+  raw iron and copper) and woodcutters (logs) would have; tree farm saplings grow a stage per 5000 ticks. Players near
+  the seat are told.
+- Only compiled: none of it has been seen in game yet.

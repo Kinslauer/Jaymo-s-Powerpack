@@ -35,8 +35,11 @@ final class Buildings {
 
 	static void register() {
 		for (FactionType type : new FactionType[] {FactionType.KINGDOM, FactionType.FIEFDOM}) {
-			realm(type, "house", Buildings::house, 2, 0);
+			// (0.5.2) after the mine ({@link Mines}): a tree farm, a pen, a field, then homes and the rest
+			realm(type, "tree_farm", Buildings::treeFarm, 1, 0);
+			realm(type, "pen", Buildings::pen, 1, 0);
 			realm(type, "farm", Buildings::farm, 1, 0);
+			realm(type, "house", Buildings::house, 2, 0);
 			realm(type, "smithy", Buildings::smithy, 1, 0);
 			realm(type, "road", Buildings::road, 2, 0);
 			realm(type, "well", Buildings::well, 1, 0);
@@ -56,8 +59,10 @@ final class Buildings {
 			realm(type, "wall", Buildings::wall, 24, 56);
 			realm(type, "tower", Buildings::tower, 8, 56);
 		}
-		realm(FactionType.VILLAGE, "house", Buildings::house, 2, 0);
+		realm(FactionType.VILLAGE, "tree_farm", Buildings::treeFarm, 1, 0);
+		realm(FactionType.VILLAGE, "pen", Buildings::pen, 1, 0);
 		realm(FactionType.VILLAGE, "farm", Buildings::farm, 1, 0);
+		realm(FactionType.VILLAGE, "house", Buildings::house, 2, 0);
 		realm(FactionType.VILLAGE, "well", Buildings::well, 1, 0);
 		realm(FactionType.VILLAGE, "stall", Buildings::stall, 1, 8);
 		realm(FactionType.VILLAGE, "road", Buildings::road, 2, 8);
@@ -135,6 +140,58 @@ final class Buildings {
 		}
 		s.set(4, 1, 0, Sketch.facing(k.gate, Direction.NORTH));
 		s.set(8, 1, 6, Blocks.COMPOSTER.defaultBlockState());
+		return s.done();
+	}
+
+	/**
+	 * A tree farm (11 x 11, 0.5.2): grass inside a log kerb and a fence with a gate, five saplings of the land's own
+	 * wood spaced to grow, torches on the corner posts (saplings want light). Its woodcutter fells what grows and plants again.
+	 */
+	static Blueprint treeFarm(Kit k) {
+		Sketch s = new Sketch("tree_farm", 11, 11, 3);
+		BlockState sapling = Gatherers.sapling(k.p.log());
+		for (int x = 0; x < 11; x++) {
+			for (int z = 0; z < 11; z++) {
+				boolean edge = x == 0 || x == 10 || z == 0 || z == 10;
+				s.set(x, 0, z, edge ? k.p.log() : Blocks.GRASS_BLOCK.defaultBlockState());
+				if (edge) {
+					s.set(x, 1, z, k.p.fence());
+				}
+			}
+		}
+		for (int[] at : new int[][] {{3, 3}, {7, 3}, {5, 5}, {3, 7}, {7, 7}}) {
+			s.set(at[0], 1, at[1], sapling != null ? sapling : Blocks.OAK_SAPLING.defaultBlockState());
+		}
+		s.set(5, 1, 0, Sketch.facing(k.gate, Direction.NORTH));
+		for (int[] c : new int[][] {{0, 0}, {10, 0}, {0, 10}, {10, 10}}) {
+			s.set(c[0], 2, c[1], Blocks.TORCH.defaultBlockState());
+		}
+		return s.done();
+	}
+
+	/**
+	 * A pen (11 x 9, 0.5.2): grass inside a log kerb and a fence with a gate, a water trough, hay. Its first beasts are
+	 * bought in when it's done ({@link Gatherers#built}); a farmer keeps the herd (and butchers from it).
+	 */
+	static Blueprint pen(Kit k) {
+		Sketch s = new Sketch("pen", 11, 9, 3);
+		for (int x = 0; x < 11; x++) {
+			for (int z = 0; z < 9; z++) {
+				boolean edge = x == 0 || x == 10 || z == 0 || z == 8;
+				s.set(x, 0, z, edge ? k.p.log() : Blocks.GRASS_BLOCK.defaultBlockState());
+				if (edge) {
+					s.set(x, 1, z, k.p.fence());
+				}
+			}
+		}
+		s.set(8, 0, 6, Blocks.WATER.defaultBlockState());
+		s.set(8, 0, 7, Blocks.WATER.defaultBlockState());
+		s.set(1, 1, 7, Blocks.HAY_BLOCK.defaultBlockState());
+		s.set(2, 1, 7, Blocks.HAY_BLOCK.defaultBlockState());
+		s.set(5, 1, 0, Sketch.facing(k.gate, Direction.NORTH));
+		for (int[] c : new int[][] {{0, 0}, {10, 0}, {0, 8}, {10, 8}}) {
+			s.set(c[0], 2, c[1], Blocks.TORCH.defaultBlockState());
+		}
 		return s.done();
 	}
 

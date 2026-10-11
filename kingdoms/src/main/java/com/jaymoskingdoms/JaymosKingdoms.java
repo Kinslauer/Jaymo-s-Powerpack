@@ -53,6 +53,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Plots.register();
 		Buildings.register();
 		Construction.register();
+		// 0.5.2: the mine the builders dig first (it wraps their brain; Debris wraps it in turn) and its attachment
+		LOGGER.debug("mine attachment: {}", Mines.MINES);
+		Mines.register();
 		Theft.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
 		LOGGER.debug("war attachment: {}", WarData.WARS);
@@ -70,6 +73,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Nights.register();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();
+			Gatherers.clear();
 			Royals.clear();
 			Wardens.clear();
 		});

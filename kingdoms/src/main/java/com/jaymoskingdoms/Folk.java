@@ -55,6 +55,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	public static final int GUARD = 0, KING = 1, ARCHER = 2, LORD = 3, FOREMAN = 4, WORKER = 5, BARBARIAN = 6, CHIEF = 7;
 	/** (0.5.1) A settlement's farmer: tends its fields and herds and carries what they give to its storage ({@link Farmers}). */
 	public static final int FARMER = 8;
+	/** (0.5.2) A settlement's miner and woodcutter: they work its mine and its trees and carry what they get to its storage ({@link Gatherers}). */
+	public static final int MINER = 9, WOODCUTTER = 10;
 
 	/**
 	 * A role: its saved name, whether it fights ({@code combatant}: melee unless it's an archer; non-combatants flee
@@ -150,6 +152,15 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_HOE));
 			folk.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
 			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.farmer_of", faction.name()));
+		}));
+		defineRole(new Role(MINER, "miner", false, false, null, (folk, faction) -> {
+			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_PICKAXE));
+			folk.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
+			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.miner_of", faction.name()));
+		}));
+		defineRole(new Role(WOODCUTTER, "woodcutter", false, false, null, (folk, faction) -> {
+			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_AXE));
+			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.woodcutter_of", faction.name()));
 		}));
 		defineRole(new Role(FOREMAN, "foreman", false, false, null, (folk, faction) -> {
 			folk.getAttribute(Attributes.MAX_HEALTH).setBaseValue(BUILDER_HEALTH);
@@ -276,10 +287,16 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		this.post = null;
 	}
 
-	/** A builder's tool, or a farmer's (back in hand when he isn't carrying). */
+	/** A builder's tool, or a farmer's, miner's or woodcutter's (back in hand when he isn't carrying). */
 	ItemStack tool() {
 		if (this.role() == FARMER) {
 			return new ItemStack(Items.IRON_HOE);
+		}
+		if (this.role() == MINER) {
+			return new ItemStack(Items.IRON_PICKAXE);
+		}
+		if (this.role() == WOODCUTTER) {
+			return new ItemStack(Items.IRON_AXE);
 		}
 		boolean wild = this.style() == FactionType.BARBARIAN;
 		if (this.role() == FOREMAN) {
@@ -303,7 +320,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	 */
 	public void setCarried(ItemStack load) {
 		this.carrying = !load.isEmpty();
-		this.setItemSlot(EquipmentSlot.MAINHAND, this.carrying ? load : isBuilder(this.role()) || this.role() == FARMER ? this.tool() : ItemStack.EMPTY);
+		this.setItemSlot(EquipmentSlot.MAINHAND, this.carrying ? load : isBuilder(this.role()) || this.role() == FARMER || Gatherers.isGatherer(this.role()) ? this.tool() : ItemStack.EMPTY);
 	}
 
 	/** Takes the load out of its hands (returned), its tool back in them. */
@@ -424,6 +441,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			Builders.tick(level, this);
 		} else if (this.role() == FARMER) {
 			Farmers.tick(level, this);
+		} else if (Gatherers.isGatherer(this.role())) {
+			Gatherers.tick(level, this);
 		}
 		if (this.leader() && !this.rallied && this.getHealth() <= this.getMaxHealth() * RALLY_AT) {
 			// his second wind: he rallies, and calls his guards in

@@ -19,7 +19,8 @@ import net.minecraft.world.level.levelgen.Heightmap;
  * the Overworld's clock jumps while the game's own ticks don't, so nothing that works by the tick would see those hours.
  * Every settlement makes them up at once: its builders lay what they would have laid in that time
  * ({@link Construction#advance}: a block per {@link Construction#CATCH_UP_TICKS_PER_BLOCK} per builder, paid from storage
- * as ever), and its fields grow a stage per {@link #CROP_TICKS_PER_STAGE}. A day's production is counted by the clock's
+ * as ever), and its fields grow a stage per {@link #CROP_TICKS_PER_STAGE}. Since 0.5.2 its mine is dug on
+ * ({@link Mines#catchUp}) and its miners and woodcutters bring in what they would have ({@link Gatherers#overnight}). A day's production is counted by the clock's
  * day already ({@link Production#day}), so sleeping brings the next day's goods as well. Only what's loaded catches up.
  */
 public final class Nights {
@@ -72,8 +73,24 @@ public final class Nights {
 				}
 				Construction.stopWaiting(f);
 			}
+			// its mine dug on (all hands while nothing else is built, else its diggers), its gatherers' takings (0.5.2)
+			int dug = 0;
+			if (crew > 0 && Mines.digging(server, f) && Storage.loaded(level, f) && Economy.atPeace(server, f)) {
+				int diggers = projects.isEmpty() ? crew : Builders.crewCount(f) >= Mines.CREW_TO_SHARE ? Math.min(Mines.DIGGERS, crew) : 0;
+				dug = Mines.catchUp(level, f, (int)Math.min(Construction.CATCH_UP_MOST, ticks * diggers / Mines.CATCH_UP_TICKS_PER_BLOCK));
+			}
+			int gathered = Gatherers.overnight(level, f, ticks);
 			int grown = grow(level, f.seat(), (int)(ticks / CROP_TICKS_PER_STAGE));
-			JaymosKingdoms.LOGGER.debug("{} made up {} ticks overnight: {} blocks laid, {} crops grown", f.name(), ticks, laid, grown);
+			JaymosKingdoms.LOGGER.debug("{} made up {} ticks overnight: {} blocks laid, {} dug, {} gathered, {} crops grown", f.name(), ticks, laid, dug,
+				gathered, grown);
+			if (dug + gathered > 0) {
+				Component news = Component.translatable("message.jaymoskingdoms.overnight_gathered", f.name(), dug, gathered).withStyle(ChatFormatting.GRAY);
+				for (ServerPlayer player : level.players()) {
+					if (player.distanceToSqr(f.seat().getX(), f.seat().getY(), f.seat().getZ()) <= TELL_RANGE * TELL_RANGE) {
+						player.sendSystemMessage(news);
+					}
+				}
+			}
 			if (laid > 0) {
 				Component news = Component.translatable("message.jaymoskingdoms.overnight", f.name(), laid).withStyle(ChatFormatting.GRAY);
 				for (ServerPlayer player : level.players()) {

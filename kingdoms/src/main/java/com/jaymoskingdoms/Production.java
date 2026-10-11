@@ -25,7 +25,8 @@ import net.minecraft.world.phys.AABB;
  * vegetables, apples, and since 0.5.1 raw meat of each kind of livestock about the seat), scaled by how many work (its
  * villagers and folk); and a realm taxes emeralds into its treasury (a fiefdom sends a share of them to its overlord).
  * Villages produce less, camps much less (they live on loot). A faction whose storehouse isn't loaded at day's turn
- * catches up when it is (up to {@link #MAX_CATCH_UP} days). Its land is surveyed (villagers, crops, woodland) whenever
+ * catches up when it is (up to {@link #MAX_CATCH_UP} days). Since 0.5.2 this is only what nobody gathers by hand: a
+ * settlement with a woodcutter gets no logs this way, one with a miner no rock, one with a farmer half the food. Its land is surveyed (villagers, crops, woodland) whenever
  * it produces with its seat loaded; otherwise the last survey stands.
  */
 public final class Production {
@@ -103,10 +104,13 @@ public final class Production {
 		Faction.Holdings h = f.holdings();
 		int labour = LABOUR_BASE + h.population() * LABOUR_PER_VILLAGER + h.staff() * LABOUR_PER_FOLK;
 		int materials = Math.min(MATERIALS_MOST, labour * MATERIALS_PER_LABOUR) * share / 100 * days;
-		int logs = materials * h.forest() / 100;
-		int rock = materials - logs;
+		// (0.5.2) what its own gatherers bring in by hand isn't counted twice: no logs with a woodcutter, no rock with a
+		// miner, half the food with a farmer
+		int logs = h.count(Folk.WOODCUTTER) > 0 ? 0 : materials * h.forest() / 100;
+		int rock = h.count(Folk.MINER) > 0 ? 0 : materials - materials * h.forest() / 100;
 		int stone = rock / STONE_ONE_IN;
-		int food = Math.min(FOOD_MOST, FOOD_BASE + h.population() * FOOD_PER_VILLAGER + h.farms() / CROPS_PER_FOOD) * share / 100 * days;
+		int food = Math.min(FOOD_MOST, FOOD_BASE + h.population() * FOOD_PER_VILLAGER + h.farms() / CROPS_PER_FOOD) * share / 100 * days
+			/ (h.count(Folk.FARMER) > 0 ? 2 : 1);
 		int lost = 0;
 		lost += Storage.put(level, f, logItem(level, f), logs);
 		lost += Storage.put(level, f, Items.COBBLESTONE, rock - stone);

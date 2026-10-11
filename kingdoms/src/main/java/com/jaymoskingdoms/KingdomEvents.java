@@ -297,7 +297,8 @@ public final class KingdomEvents {
 			}
 		}
 		Faction now = Factions.get(server, kingdom.id());
-		if (now != null && Farmers.spawn(level, now, null) != null) {
+		// (a farm just built has its farmer already: {@link Gatherers#built})
+		if (now != null && Farmers.wanted(server, now) && Farmers.spawn(level, now, null) != null) {
 			JaymosKingdoms.LOGGER.info("{} has its farmer at {}", now.name(), farms.isEmpty() ? "a new farm" : farms.getFirst().getCenter());
 		}
 	}

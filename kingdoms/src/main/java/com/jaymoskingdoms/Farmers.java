@@ -82,11 +82,11 @@ public final class Farmers {
 
 	// ---- the farms --------------------------------------------------------------------------------------------------
 
-	/** The faction's farms (village farms and the ones its builders put up). */
+	/** The faction's farms (village farms and the ones its builders put up, fields and pens). */
 	static List<Works.Built> farms(MinecraftServer server, Faction faction) {
 		List<Works.Built> out = new ArrayList<>();
 		for (Works.Built b : Works.of(server, faction.id()).built()) {
-			if (b.entry().equals(VILLAGE_FARM) || b.entry().equals("farm")) {
+			if (b.entry().equals(VILLAGE_FARM) || b.entry().equals("farm") || b.entry().equals("pen")) {
 				out.add(b);
 			}
 		}
