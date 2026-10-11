@@ -12,7 +12,8 @@ import net.minecraft.world.entity.Entity;
 
 /**
  * Time Flow's blows, drawn: a jab, a hook, an uppercut, a lunging punch, a flying kick, the counters (a crowd's quick
- * guard and strike; against one attacker the circle, the slip, or one of five deflects, each then the answer) and
+ * guard and strike; against one attacker the circle, the slip, one of five deflects, the vault, the leg sweep or the
+ * shoulder throw, each then the answer) and
  * Chrono Punch's quick jabs. Everything is set outright from the blow's progress, so applying it twice
  * changes nothing.
  */
@@ -154,6 +155,70 @@ public final class ChronoFlowPose {
 				set(guard, -1.3F, side * 0.35F, 0.0F, strike);
 				h.body.xRot = 0.2F * strike;
 				h.body.yRot = side * -0.55F * strike;
+			}
+			case ChronoFlow.VAULT -> {
+				// a crouch, arms swung back to spring
+				float crouch = seg(p, 0.0F, 0.08F) * (1.0F - seg(p, 0.12F, 0.18F));
+				set(h.rightArm, 0.8F, 0.0F, 0.15F, crouch);
+				set(h.leftArm, 0.8F, 0.0F, -0.15F, crouch);
+				h.body.xRot = 0.45F * crouch;
+				// over the top: knees tucked up, arms flung high
+				float air = seg(p, 0.14F, 0.22F) * (1.0F - seg(p, hit - 0.2F, hit - 0.1F));
+				set(h.rightLeg, -1.3F, 0.0F, 0.1F, air);
+				set(h.leftLeg, -1.3F, 0.0F, -0.1F, air);
+				set(h.rightArm, -2.6F, 0.0F, 0.35F, air);
+				set(h.leftArm, -2.6F, 0.0F, -0.35F, air);
+				h.body.xRot = Mth.lerp(air, h.body.xRot, -0.25F);
+				// coming down behind it: both fists raised overhead, then a hammer fist driven down
+				float raise = seg(p, hit - 0.2F, hit - 0.06F) * (1.0F - seg(p, hit - 0.04F, hit));
+				set(lead, -2.9F, -side * 0.2F, 0.0F, raise);
+				set(guard, -2.9F, side * 0.2F, 0.0F, raise);
+				float hammer = seg(p, hit - 0.04F, hit) * (1.0F - seg(p, hit + 0.12F, 1.0F));
+				set(lead, -0.8F, -side * 0.15F, 0.0F, hammer);
+				set(guard, -0.9F, side * 0.15F, 0.0F, hammer);
+				set(frontLeg, -0.5F, 0.0F, 0.0F, hammer);
+				set(backLeg, 0.4F, 0.0F, 0.0F, hammer);
+				h.body.xRot = Mth.lerp(hammer, h.body.xRot, 0.45F);
+			}
+			case ChronoFlow.SWEEP -> {
+				// dropped low, the sweeping leg thrown out wide and swung round, arms out for balance
+				float low = seg(p, 0.0F, 0.1F) * (1.0F - seg(p, hit - 0.18F, hit - 0.06F));
+				float round = seg(p, 0.08F, 0.42F);
+				h.body.xRot = 0.5F * low;
+				h.body.yRot = side * Mth.lerp(round, 0.6F, -0.9F) * low;
+				set(frontLeg, -0.25F, 0.0F, side * Mth.lerp(round, -0.4F, -1.4F), low);
+				set(backLeg, 0.9F, 0.0F, 0.0F, low);
+				set(lead, -0.35F, 0.0F, side * 1.3F, low);
+				set(guard, 0.2F, 0.0F, -side * 0.6F, low);
+				h.head.xRot = Mth.lerp(low, h.head.xRot, -0.3F);
+				// up from the crouch: the palm drawn low, then driven up under the chin
+				set(lead, 0.6F, 0.0F, side * 0.2F, windUp);
+				h.body.xRot = Mth.lerp(windUp, h.body.xRot, 0.3F);
+				set(lead, -2.75F, -side * 0.1F, side * -0.1F, strike);
+				set(guard, -1.2F, side * 0.35F, 0.0F, strike);
+				set(frontLeg, -0.3F, 0.0F, 0.0F, strike);
+				h.body.xRot = Mth.lerp(strike, h.body.xRot, -0.2F);
+			}
+			case ChronoFlow.THROW -> {
+				// both hands catch the arm out front
+				float grab = seg(p, 0.0F, 0.1F) * (1.0F - seg(p, hit - 0.06F, hit));
+				set(h.rightArm, -1.4F, -0.25F, 0.0F, grab);
+				set(h.leftArm, -1.4F, 0.25F, 0.0F, grab);
+				// turned in, back to its chest, the arm hauled up over the shoulder
+				float load = seg(p, 0.18F, hit - 0.12F) * (1.0F - seg(p, hit - 0.05F, hit));
+				set(lead, -2.75F, side * 0.3F, 0.0F, load);
+				set(guard, -2.5F, side * 0.5F, 0.0F, load);
+				h.body.yRot = side * 0.9F * load;
+				h.body.xRot = 0.15F * load;
+				set(frontLeg, -0.3F, 0.0F, 0.0F, load);
+				set(backLeg, 0.3F, 0.0F, 0.0F, load);
+				// and over: bent double, hands driven down in front where it lands
+				float over = seg(p, hit - 0.05F, hit) * (1.0F - seg(p, hit + 0.15F, 1.0F));
+				set(h.rightArm, -0.5F, -0.2F, 0.0F, over);
+				set(h.leftArm, -0.5F, 0.2F, 0.0F, over);
+				h.body.xRot = Mth.lerp(over, h.body.xRot, 0.65F);
+				h.body.yRot = Mth.lerp(over, h.body.yRot, side * -0.3F);
+				h.head.xRot = Mth.lerp(over, h.head.xRot, 0.4F);
 			}
 			default -> {
 				deflect(h, move.deflect(), p, side, lead, guard);
