@@ -15,4 +15,12 @@ final class Names {
 	static String kingdom(RandomSource random) {
 		return FIRST[random.nextInt(FIRST.length)] + SECOND[random.nextInt(SECOND.length)];
 	}
+
+	/** Village names: a homelier second half, like Brinbrook or Ashley. */
+	private static final String[] HAMLET = {"brook", "ley", "ton", "by", "thorpe", "field", "well", "combe", "stow", "hurst", "worth", "bury",
+		"ham", "wood", "green", "cross"};
+
+	static String village(RandomSource random) {
+		return FIRST[random.nextInt(FIRST.length)] + HAMLET[random.nextInt(HAMLET.length)];
+	}
 }

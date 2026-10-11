@@ -37,9 +37,24 @@ public final class JaymosKingdoms implements ModInitializer {
 			.build(key));
 		FabricDefaultAttributeRegistry.register(FOLK, Folk.guardAttributes());
 		// the attachments (registered as their classes load)
-		LOGGER.debug("kingdom attachments: {} {}", Kingdoms.ALL, Reputation.REPUTATION);
+		LOGGER.debug("kingdom attachments: {} {} {}", Factions.ALL, Factions.KEEPS, Reputation.REPUTATION);
 		KingdomEvents.register();
+		// barbarian camps, their raiders and raids (and their attachment)
+		LOGGER.debug("camp attachment: {}", Camps.CAMPS);
+		LOGGER.debug("illager attachment: {}", Illagers.TAG);
+		Camps.register();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> KingdomCommands.register(dispatcher));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> KingdomEvents.forget(handler.player));
+		// 0.3, builders and theft: the building catalogue, real-time construction, plots and the plot stake, crime
+		LOGGER.debug("builder and theft attachments: {} {}", Works.WORKS, Theft.WANTED);
+		Plots.register();
+		Buildings.register();
+		Construction.register();
+		Theft.register();
+		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
+		LOGGER.debug("war attachment: {}", WarData.WARS);
+		Wars.register();
+		// 0.4, combat: Better Combat's weapon moves for humanoid mobs, and folk's sidestep (only with Better Combat)
+		MobCombat.register();
 	}
 }

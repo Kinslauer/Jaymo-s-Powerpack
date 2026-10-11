@@ -6,18 +6,23 @@ import java.util.Map;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.EquipmentSlot;
 
 /**
- * Reputation, the first of the two systems: what every kingdom thinks of a player, member or not (-1000 to 1000).
+ * Reputation, the first of the two systems: what every faction (kingdom, fiefdom, village, camp) thinks of a player, member or not (-1000 to 1000).
  * Kill a kingdom's people and it hates you; fight its monsters, fill its coffers, and it warms to you. A kingdom
  * at {@link #HOSTILE} or below has its guards attack you on sight. (The second system is each kingdom's own record
- * of its members: rank and standing, in {@link Kingdom.Member}.)
+ * of its members: rank and standing, in {@link Faction.Member}.)
  */
 public final class Reputation {
 	public static final int MIN = -1000, MAX = 1000;
+	/** Jaymo's Powers' Void Crown: while it's worn, every faction thinks the worst of you. */
+	static final Identifier VOID_CROWN = Identifier.fromNamespaceAndPath("jaymospowers", "void_crown");
 	/** At or under this, a kingdom's guards attack you on sight; at or over {@link #WELCOME} it will take your pledge. */
 	public static final int HOSTILE = -100, WELCOME = 0;
 
@@ -28,17 +33,28 @@ public final class Reputation {
 	private Reputation() {
 	}
 
+	/** What {@code kingdom} thinks of {@code player} now: at its lowest while they wear the Void Crown (Jaymo's Powers). */
 	public static int get(ServerPlayer player, int kingdom) {
+		return voidCrowned(player) ? MIN : stored(player, kingdom);
+	}
+
+	/** The reputation earned, whatever's worn (the crown hides it but doesn't wipe it). */
+	private static int stored(ServerPlayer player, int kingdom) {
 		Map<String, Integer> map = player.getAttached(REPUTATION);
 		return map == null ? 0 : map.getOrDefault(Integer.toString(kingdom), 0);
 	}
 
+	/** Jaymo's Powers' Void Crown on their head: looked up by id, so neither mod needs the other. */
+	static boolean voidCrowned(ServerPlayer player) {
+		return VOID_CROWN.equals(BuiltInRegistries.ITEM.getKey(player.getItemBySlot(EquipmentSlot.HEAD).getItem()));
+	}
+
 	/** Shifts {@code player}'s reputation with {@code kingdom} by {@code by}; tells them when it crosses a threshold. */
-	public static void change(ServerPlayer player, Kingdom kingdom, int by) {
+	public static void change(ServerPlayer player, Faction kingdom, int by) {
 		if (by == 0) {
 			return;
 		}
-		int before = get(player, kingdom.id());
+		int before = stored(player, kingdom.id());
 		int after = Mth.clamp(before + by, MIN, MAX);
 		Map<String, Integer> map = new HashMap<>(player.getAttachedOrElse(REPUTATION, Map.of()));
 		map.put(Integer.toString(kingdom.id()), after);
