@@ -307,3 +307,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Fabric 26.3 one is out. Its Chat AI and TTS are off unless someone turns them on in its config. Jaymo's Kingdoms
   0.4.2 ties into it (hearts count as reputation, faction rank counts as village rank;
   see `kingdoms/MODLOG.md`).
+- **0.8.23, Tempest Kick looks like a real kick:** a roundhouse (the body pivots so the kicking hip faces the
+  target, leans hard away, and the leg snaps straight out to the side at head height, holds, pulls back and drops)
+  or, one kick in three, a spinning back kick (dwit chagi: the body spins its back to the target, pitches forward,
+  drives the leg straight out behind, looks over the shoulder, and spins on round to face it again). The fists stay
+  up in a guard by the face instead of being flung out. Same timing, crescent and damage (see `docs/wind.md`). In the
+  cold the kick winds up only 1 s longer (was 3 s), with white wind swirling round you and a blowing wind sound.

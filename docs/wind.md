@@ -540,3 +540,26 @@ whisper in the action bar.
 - The mixin's two `@ModifyArg` targets must match 26.3's `Player.attack` (checked against the jar); a mismatch crashes
   on start (`defaultRequire` 1).
 - `Status` and `Kicking` changed shape: client and server must both be on this build.
+
+## 0.8.23: Tempest Kick as a roundhouse or a dwit chagi (`WindPose` KICK branch)
+- **The reference (from the user):** a high side roundhouse (standing leg planted, torso leaning away, leg out level
+  with the head, guard up) and a dwit chagi (back kick). Replaces 0.8.0's flung-arm variants.
+- **Style** from the seed (`KickPose.back()`, client only): a spinning back kick one time in `BACK_KICK_ONE_IN` (3),
+  else a roundhouse. The side (which leg) still mirrors everything. `WindKick.Kicking.arms()` is gone.
+- **Roundhouse:** the body pivots on the standing foot (`kickTurn`) away from the kicking leg, `KICK_TURN_CHAMBER` 35°
+  by the end of the chamber and `KICK_TURN_APEX` 75° (±8) at the snap, so the kicking hip faces the target; tipped
+  `KICK_LEAN` 30° away, `KICK_LEAN_BACK` 6° back, and bent `KICK_HIP_BEND` 20° at the hip. The leg chambers knee-up
+  and out (`LEG_CHAMBER_*`), snaps straight out to the side (`LEG_APEX_*`), holds `KICK_LEAN_HOLD`, pulls back to the
+  chamber over `KICK_RETRACT_TICKS` and drops. The head turns back by the whole body turn, so it stays on the target.
+- **Back kick:** the body spins toward the kicking side, `BACK_TURN_CHAMBER` 110° then `BACK_TURN_APEX` 175° (its back
+  to the target), pitches `BACK_PITCH` 30° forward and tips `BACK_LEAN` 8°; the leg tucks (`BACK_CHAMBER_*`) and drives
+  straight out behind (`BACK_APEX_*`). The head looks back over the kicking-side shoulder (`BACK_HEAD_TURN`). In the
+  recovery the body carries on spinning the same way round to 360°, facing the target again.
+- **Guard:** both fists up by the face, turned in toward the chin; the lead (kicking-side) arm higher
+  (`GUARD_LEAD_X`, `GUARD_REAR_X`, `GUARD_IN`, `GUARD_REAR_IN`). In the roundhouse the guard turns `GUARD_TRACK` of
+  the way back toward the target.
+- Timing, the crescent, the swing trail and the cold's held chamber are unchanged.
+- **The cold's kick wind-up** (`WindKick.COLD_EXTRA_WINDUP_TICKS`): 20 ticks (1 s) extra, not the 60 the other
+  abilities take. While it's held, the server swirls white dust in a rising spiral round the kicker
+  (`COLD_SWIRL_*`, thickening as it builds) with snowflakes, and plays a blowing wind (breeze air and whirl) every
+  `COLD_SOUND_EVERY` ticks (`WindKick.coldSwirl`). The cooldown's cold extra is unchanged.
