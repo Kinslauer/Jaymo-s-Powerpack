@@ -1,0 +1,7 @@
+{
+	"required": true,
+	"package": "com.jaymoskingdoms.client.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": ["MobSwingLivingEntityRendererMixin", "MobSwingModelFeatureRendererMixin", "IllagerModelAccessor"],
+	"injectors": { "defaultRequire": 1 }
+}

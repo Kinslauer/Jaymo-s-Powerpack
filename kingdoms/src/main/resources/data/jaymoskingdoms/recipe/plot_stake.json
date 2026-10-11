@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:stick",
+    "minecraft:stick",
+    "#minecraft:wool"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:plot_stake",
+    "count": 2
+  }
+}

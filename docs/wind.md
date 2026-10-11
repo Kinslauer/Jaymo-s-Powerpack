@@ -432,16 +432,20 @@ whisper in the action bar.
   to full size over `FORM_TICKS` 8. Corrupted, it carries purple storm dust and crawling sparks, with distant
   thunder. Sound: the landing thump, a roaring loop on every client in range (`WindCycloneSound`, the elytra wind,
   low), a breeze whirl every `ROAR_INTERVAL` 16 ticks, and a burst on release.
-- **Caught creatures** (anything alive in the funnel but you): spun round at `SPIN_SPEED`, drawn toward a ring just
-  outside you (`PULL`), lifted to `LIFT_HEIGHT` 1.4 above your feet; knockback resistance holds them down. Letting go
-  flings them outward (`RELEASE_FLING`).
-- **Damage:**
+- **Caught creatures** (anything alive in the funnel but you; 0.8.6: a "get off me", not a damage move): each one is
+  swept into an orbit round you at `SPIN_SPEED` 0.45, spiralling out from `ORBIT_START` 1.8 blocks to
+  `ORBIT_END_SHARE` 65% of the funnel's radius and rising to `RISE_HEIGHT` 4 blocks above your feet (never above the
+  funnel) over `ORBIT_TICKS` 40 (2 s). Then it's thrown: `FLING` 1.4 outward, `FLING_UP` 0.5 up, bent `FLING_SPIN`
+  40% along the spin like a sling, with a gust and a wind-charge burst. A thrown creature can't be caught again for
+  `RECATCH_TICKS` 30. Anything that leaves the funnel early starts its orbit over. Knockback resistance scales all
+  of it (full resistance: it stays put and only takes the damage). Letting go throws whatever is still in orbit.
+- **Damage:** light, while orbiting.
 
 | Tier | Others | You (suffocation) |
 |---|---|---|
-| Base | `DAMAGE` 4 every `DAMAGE_INTERVAL` 20 ticks (wind-charge damage) | `SELF_DAMAGE` 1 every `SELF_INTERVAL` 40 ticks |
-| Ascended | 4 every `DAMAGE_INTERVAL_ASCENDED` 10 ticks | 1 every `SELF_INTERVAL_ASCENDED` 80 ticks |
-| Corrupted (and ascended + corrupted) | 4 every 10 ticks, as **shock** (`LIGHTNING_BOLT` damage type) with sparks | 1 every 80 ticks |
+| Base | `DAMAGE` 1.5 every `DAMAGE_INTERVAL` 10 ticks (wind-charge damage): 6 over a full orbit | `SELF_DAMAGE` 1 every `SELF_INTERVAL` 40 ticks |
+| Ascended | `DAMAGE_ASCENDED` 2.5 every 10 ticks: 10 over a full orbit | 1 every `SELF_INTERVAL_ASCENDED` 80 ticks |
+| Corrupted (and ascended + corrupted) | 2.5 every 10 ticks, as **shock** (`LIGHTNING_BOLT` damage type) with sparks | 1 every 80 ticks |
 
   Your own damage is `damageSources().inWall()` (suffocation: it ignores armour). Any Resistance (Gale Barrier's
   included) is made up for, and if a fresh hit's invulnerability blocks it, it lands on the next tick instead.
@@ -474,6 +478,8 @@ whisper in the action bar.
    superhero landing (F5: knee on the ground, other foot planted ahead, hunched, one arm up and back, other hand by
    the ground) and the funnel rises. WASD and Space do nothing. Let go: the funnel bursts, the HUD chip shows a 3 s
    cooldown.
+   With a few zombies close by: each is swept round you, spiralling up and out to about head height over 2 s,
+   takes a few small hits, and is slung away; it walks back and gets caught again after 1.5 s.
 5. Summon a few zombies and pigs nearby: they're spun round you and lifted a little, taking 4 a second (base). In
    survival you take ½ heart every 2 s, even with Gale Barrier up. `/power ascend @s`: 4 every 0.5 s to them, ½ heart
    every 4 s to you. `/power corrupt @s`: sparks on each hit, lightning damage, purple dust in the funnel.
