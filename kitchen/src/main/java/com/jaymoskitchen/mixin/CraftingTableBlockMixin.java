@@ -6,22 +6,28 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CraftingTableBlock;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** The crafting table keeps its grid ({@link CraftingTableEntity}), and turns away a second player. */
+/**
+ * The crafting table keeps its grid ({@link CraftingTableEntity}), and turns away a second player. The smithing table
+ * extends {@link CraftingTableBlock} too, so it (and any modded table) gets no grid: its state would fail the entity's
+ * type check and crash the server whenever a generated structure with one loaded.
+ */
 @Mixin(CraftingTableBlock.class)
 abstract class CraftingTableBlockMixin implements EntityBlock {
 	@Override
-	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-		return new CraftingTableEntity(pos, state);
+	public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+		return state.is(Blocks.CRAFTING_TABLE) ? new CraftingTableEntity(pos, state) : null;
 	}
 
 	@Inject(method = "useWithoutItem", at = @At("HEAD"), cancellable = true)

@@ -73,9 +73,6 @@ def packMods = [
 	[dep: "maven.modrinth:collective:oPyHSBXE", cf: [342584, 9122800]],
 	// Combat Roll (GPL-3.0, by Better Combat's author): the dodge roll
 	[dep: "maven.modrinth:combat-roll:OuZGcMyV", cf: [678036, 8906551]],
-	// Traveler's Backpack (LGPL-3.0) and Forge Config API Port (MPL-2.0), which it needs: wearable backpacks
-	[dep: "maven.modrinth:travelersbackpack:SmhjfeWr", cf: [541171, 9008280]],
-	[dep: "maven.modrinth:forge-config-api-port:JpKvrr9J", cf: [547434, 8938808]],
 	// Epic Structures: Villages (all rights reserved; "feel free to add to any modpack"): the sprawling towns Jaymo's
 	// Kingdoms founds its capitals in
 	[dep: "maven.modrinth:epic-structures-villages:hCRa4eFr", cf: [1308486, 8830175]],
@@ -112,8 +109,21 @@ def localPackMods = [
 	// (none right now; Distant Horizons was here until 0.4.5)
 ]
 // mods taken out of the pack: moved out of your CurseForge profile's mods folder (into removed-mods) on the next build
-// (Towns and Towers left in 0.8.4: its villages fought Epic Structures: Villages, where kingdoms are founded)
-def removedFromProfile = ["DistantHorizons-", "t_and_t-", "cristellib-"]
+// (Towns and Towers left in 0.8.4: its villages fought Epic Structures: Villages, where kingdoms are founded;
+// Traveler's Backpack and Forge Config API Port left in 0.8.14)
+def removedFromProfile = ["DistantHorizons-", "t_and_t-", "towns-and-towers-", "cristellib-", "cristel-lib-",
+	"travelersbackpack-", "forge-config-api-port-"]
+// a jar's Fabric mod id (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's
+def modId = { File jar ->
+	try {
+		new java.util.zip.ZipFile(jar).withCloseable { zip ->
+			def entry = zip.getEntry("fabric.mod.json")
+			entry == null ? null : new JsonSlurper().parse(zip.getInputStream(entry)).id
+		}
+	} catch (IOException ignored) {
+		null
+	}
+}
 def localPackJars = files(localPackMods.collect { it.file })
 
 
@@ -232,6 +242,16 @@ tasks.register("profileMods") {
 			removedDir.mkdirs()
 			if (f.renameTo(new File(removedDir, f.name))) {
 				logger.lifecycle("Moved ${f.name} out of your CurseForge profile (into removed-mods)")
+			}
+		}
+		// mods that joined the pack join the profile too (any pack mod whose id the profile doesn't have yet)
+		def have = profileMods.listFiles().findAll { it.name.endsWith(".jar") }.collect { modId(it) } as Set
+		configurations.packJars.files.each { jar ->
+			def id = modId(jar)
+			if (id != null && !have.contains(id)) {
+				java.nio.file.Files.copy(jar.toPath(), new File(profileMods, jar.name).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+				have << id
+				logger.lifecycle("Added ${jar.name} to your CurseForge profile")
 			}
 		}
 		wanted.each { w ->
