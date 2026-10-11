@@ -44,8 +44,11 @@ final class ChronoPunch {
 	private ChronoPunch() {
 	}
 
-	/** Starts the flurry. Returns true (the cooldown starts). */
+	/** Starts the flurry (in Time Flow, the barrage locked onto the enemy you look at, if there is one). Returns true (the cooldown starts). */
 	static boolean punch(ServerPlayer player) {
+		if (ChronoFlow.on(player) && ChronoFlow.barrage(player)) {
+			return true;
+		}
 		FLURRIES.put(player.getUUID(), 0);
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 1.0F, 1.8F);

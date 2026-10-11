@@ -21,5 +21,6 @@
 	"message.jaymospowers.chrono_flow_unavailable": "Time won't flow for you like that. Not yet.",
 	"hud.jaymospowers.chrono_flow_combo": "%s HIT COMBO",
 	"message.jaymospowers.chrono_echo_unravelled": "Your echo is gone for good, and the hole it leaves runs straight through you. Time comes loose.",
-	"power.jaymospowers.chrono.key.mode.ascended_corrupted": "Time Flow on/off: attack toward a foe to fly at it; right click to counter held blows"
+	"power.jaymospowers.chrono.key.mode.ascended_corrupted": "Time Flow on/off (over-the-shoulder view): attack toward a foe to fly at it; right click to counter held blows, even mid-move",
+	"power.jaymospowers.chrono.key.ultimate.ascended_corrupted": "Chrono Punch (in Time Flow: lock onto a foe for a barrage, only a counter breaks it; the last punch throws everything in front away)"
 }

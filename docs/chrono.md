@@ -425,3 +425,31 @@ Vault and throw move the caster on the client (`ChronoFlowClient.counterMotion`)
 - **Vault under a low ceiling:** the hop is velocity-driven, so a ceiling cuts it short and you may end up beside it,
   not behind. The blow still lands if you're within `HIT_REACH`.
 - **Throw into a wall behind you:** the target is flung toward where you stand; a wall there just stops it.
+
+## 0.8.24: Time Flow camera, locked animations, cone parries, the barrage
+
+Andy's asks (2026-10-11), all built (not yet compiled in the cloud: no JDK 25 there, so build on the home PC first):
+- **Over-the-shoulder view.** While Time Flow is on, the camera is held in third person (`THIRD_PERSON_BACK`), pulled
+  in to 2.6 blocks and 0.75 to the right (`ChronoCameraMixin`, `alignWithEntity` TAIL, clipped against walls). F5 is
+  reverted each tick while the mode lasts; turning it off (or the mode stopping on death or relog) restores the view
+  you had before Z (`ChronoFlowClient.view`).
+- **A counter plays through.** After a counter starts, strikes are refused until its animation ends (server
+  `Fighter.busyUntil`, mirrored by the client's `busyUntil`, which now also covers the crowd counter).
+- **Parry mid-animation.** A counter is no longer an untouchable window: a blow from anyone during it (or during a
+  strike, or the barrage) is held as usual, and right click counters it, cutting the current move short (its pending
+  blow is dropped) and playing the new counter (`beginCounter`). The guard against nothing is only raised when no
+  move is playing.
+- **Cone parries.** A counter within `CHAIN_TICKS` (30, 1.5 s) of the last, or against several attackers at once,
+  knocks everything hostile in a short cone in front of you away when its blow lands (`shoveCone`: reach 4, cos 0.5
+  ≈ 60° each side, push 1.0, lift 0.3).
+- **The barrage (C in Time Flow).** Locks onto the enemy nearest your look within 9 blocks (none: the normal Chrono
+  Punch). 10 punches, one every 2 ticks (1 s), damage as Chrono Punch's; the target is stunned throughout and you're
+  held 1.3 blocks in front of it, facing it, movement keys dead. Only a counter breaks it off. The last punch throws
+  the target (1.3, lift 0.45) and shoves the cone. Each landed punch counts toward the combo. Pose: `BARRAGE` in
+  `ChronoFlowPose` (alternating fists).
+
+### Risky at runtime
+- **Camera:** assumes vanilla sets the third-person position inside `Camera.alignWithEntity` (as the Carry and Wind
+  camera mixins do). If the camera ends up at vanilla's distance, the zoom happens later in `setup`; move the
+  injection there.
+- **Other mods' cameras** (First-person Model, Shoulder Surfing) may fight the forced third person.

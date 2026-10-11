@@ -4,6 +4,7 @@
 	"compatibilityLevel": "JAVA_25",
 	"client": [
 		"ChronoAvatarRendererMixin",
+		"ChronoCameraMixin",
 		"ChronoStunInputMixin"
 	],
 	"injectors": { "defaultRequire": 1 }
