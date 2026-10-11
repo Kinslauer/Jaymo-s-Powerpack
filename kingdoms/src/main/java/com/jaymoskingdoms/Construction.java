@@ -123,6 +123,7 @@ public final class Construction {
 		WAITING.clear();
 		NEXT_PLAN.clear();
 		Planner.clear();
+		Ruins.clear();
 	}
 
 	/** Every so often, each faction whose seat and storage are loaded and whose crew is about looks for its next project. */
@@ -158,7 +159,7 @@ public final class Construction {
 		if (entry == null) {
 			return null;
 		}
-		l = Planner.layout(level, f, p.entry(), entry.maker().make(level, f), p.origin(), p.rotation(), p.plot() >= 0);
+		l = Planner.layout(level, f, p.entry(), entry.maker().make(level, f), p.origin(), p.rotation(), p.plot() >= 0, p.ruins());
 		LAYOUTS.put(key, l);
 		return l;
 	}
@@ -507,7 +508,7 @@ public final class Construction {
 		for (int skip = 0; skip < SKIP_PER_TICK && cur.stage() == Works.BUILD && cur.index() < l.ops().size(); skip++) {
 			Planner.Op op = l.ops().get(cur.index());
 			BlockState there = level.getBlockState(op.pos());
-			if (there != op.state() && (l.plot() || there.isAir() || clearable(there))) {
+			if (there != op.state() && (l.plot() || there.isAir() || clearable(there) || (l.ruins() && Ruins.tearable(level, op.pos(), there)))) {
 				break;
 			}
 			cur = cur.at(Works.BUILD, cur.index() + 1);
@@ -566,6 +567,37 @@ public final class Construction {
 		return state.isAir() || Storehouse.ground(state) || (state.canBeReplaced() && state.getFluidState().isEmpty());
 	}
 
+	/** What may be broken where the building goes: anything breakable on a plot; else natural ground, or an old structure's blocks on a site over one. */
+	private static boolean breakable(ServerLevel level, Planner.Layout l, BlockPos at, BlockState state) {
+		if (l.plot()) {
+			return state.getDestroySpeed(level, at) >= 0;
+		}
+		return clearable(state) || (l.ruins() && Ruins.tearable(level, at, state));
+	}
+
+	/** A block readying the ground breaks: {@link #breakable} up to the usual height; above it (an old structure's columns) only the structure's own. */
+	private static boolean inWay(ServerLevel level, Planner.Layout l, BlockPos at, BlockState state) {
+		int floor = l.min().getY();
+		if (at.getY() > floor + l.height() + CLEAR_ABOVE) {
+			return l.ruins() && Ruins.tearable(level, at, state);
+		}
+		return breakable(level, l, at, state);
+	}
+
+	/** A broken block goes into storage: anything on a plot; an old structure's blocks (not the land's own dirt and stone). */
+	private static boolean salvaged(Planner.Layout l, BlockState state) {
+		return l.plot() || (l.ruins() && !clearable(state));
+	}
+
+	/** How high a column is cleared: the building and a little air over it; on an old structure, as high as its pieces reach there. */
+	private static int clearTop(ServerLevel level, Planner.Layout l, BlockPos column) {
+		int top = column.getY() + l.height() + CLEAR_ABOVE;
+		if (l.ruins()) {
+			top = Math.max(top, Math.min(Ruins.pieceTop(level, column.getX(), column.getZ()), column.getY() + Ruins.TEAR_HEIGHT));
+		}
+		return top;
+	}
+
 	/** How many blocks of fill column {@code i} needs under its floor (only where the building has a floor block). */
 	private static int fill(ServerLevel level, Planner.Layout l, int i) {
 		BlockPos column = l.column(i);
@@ -589,10 +621,10 @@ public final class Construction {
 			return true;
 		}
 		BlockPos column = l.column(i);
-		for (int y = column.getY(); y <= column.getY() + l.height() + CLEAR_ABOVE; y++) {
+		for (int y = column.getY(), top = clearTop(level, l, column); y <= top; y++) {
 			BlockPos at = column.atY(y);
 			BlockState state = level.getBlockState(at);
-			if (!state.isAir() && !l.filled().contains(at) && (l.plot() ? state.getDestroySpeed(level, at) >= 0 : clearable(state))) {
+			if (!state.isAir() && !l.filled().contains(at) && inWay(level, l, at, state)) {
 				return true;
 			}
 		}
@@ -603,14 +635,14 @@ public final class Construction {
 	private static boolean prep(ServerLevel level, Faction f, Planner.Layout l, int i) {
 		BlockPos column = l.column(i);
 		int floor = column.getY();
-		for (int y = floor + l.height() + CLEAR_ABOVE; y >= floor; y--) {
+		for (int y = clearTop(level, l, column); y >= floor; y--) {
 			BlockPos at = column.atY(y);
 			BlockState state = level.getBlockState(at);
 			if (state.isAir() || l.filled().contains(at)) {
 				continue;
 			}
-			if (l.plot() ? state.getDestroySpeed(level, at) >= 0 : clearable(state)) {
-				remove(level, f, at, state, l.plot());
+			if (inWay(level, l, at, state)) {
+				remove(level, f, at, state, salvaged(l, state), !l.plot());
 			}
 		}
 		int fill = fill(level, l, i);
@@ -622,20 +654,31 @@ public final class Construction {
 		return true;
 	}
 
-	/** Breaks a block out of the way: on a plot, it (and anything in it) goes into the faction's storage. */
-	private static void remove(ServerLevel level, Faction f, BlockPos at, BlockState state, boolean keep) {
+	/**
+	 * Breaks a block out of the way: on a plot or an old structure, it (and anything in it) goes into the faction's
+	 * storage. What doesn't fit is dropped at the depot, except an old structure's {@code rubble} (its blocks, not what
+	 * its chests held), which is left.
+	 */
+	private static void remove(ServerLevel level, Faction f, BlockPos at, BlockState state, boolean keep, boolean rubble) {
 		if (keep) {
 			BlockEntity entity = level.getBlockEntity(at);
 			List<ItemStack> drops = new ArrayList<>(Block.getDrops(state, level, at, entity));
+			List<ItemStack> held = new ArrayList<>();
 			if (entity instanceof Container container) {
 				for (int slot = 0; slot < container.getContainerSize(); slot++) {
 					if (!container.getItem(slot).isEmpty()) {
-						drops.add(container.getItem(slot).copy());
+						held.add(container.getItem(slot).copy());
 					}
 				}
 				container.clearContent();
 			}
 			for (ItemStack stack : drops) {
+				ItemStack left = Storage.put(level, f, stack);
+				if (!left.isEmpty() && !rubble) {
+					Block.popResource(level, Builders.depot(f), left);
+				}
+			}
+			for (ItemStack stack : held) {
 				ItemStack left = Storage.put(level, f, stack);
 				if (!left.isEmpty()) {
 					Block.popResource(level, Builders.depot(f), left);
@@ -654,11 +697,11 @@ public final class Construction {
 			return true;
 		}
 		if (!there.isAir() && !there.canBeReplaced()) {
-			if (!l.plot() && !clearable(there)) {
+			if (!breakable(level, l, at, there)) {
 				// built since the site was chosen: left alone
 				return true;
 			}
-			remove(level, f, at, there, l.plot());
+			remove(level, f, at, there, salvaged(l, there), !l.plot());
 		}
 		if (!op.state().getCollisionShape(level, at).isEmpty()) {
 			for (LivingEntity in : level.getEntitiesOfClass(LivingEntity.class, new AABB(at), LivingEntity::isAlive)) {
@@ -768,9 +811,9 @@ public final class Construction {
 		for (int i = p.stage() == Works.BUILD ? p.index() : 0; i < l.ops().size(); i++) {
 			Planner.Op op = l.ops().get(i);
 			BlockState there = level.getBlockState(op.pos());
-			if (there != op.state() && (l.plot() || clearable(there))) {
-				if (!there.isAir() && l.plot()) {
-					remove(level, f, op.pos(), there, true);
+			if (there != op.state() && (l.plot() || clearable(there) || (l.ruins() && Ruins.tearable(level, op.pos(), there)))) {
+				if (!there.isAir() && salvaged(l, there)) {
+					remove(level, f, op.pos(), there, true, !l.plot());
 				}
 				level.setBlock(op.pos(), shaped(level, op.pos(), op.state()), Block.UPDATE_CLIENTS);
 			}

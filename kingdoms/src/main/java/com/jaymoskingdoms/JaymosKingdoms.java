@@ -56,5 +56,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Wars.register();
 		// 0.4, combat: Better Combat's weapon moves for humanoid mobs, and folk's sidestep (only with Better Combat)
 		MobCombat.register();
+		// 0.4.1: ATi Structures' above-ground buildings in compounds (only with ATi loaded)
+		AtiCompounds.register();
 	}
 }
