@@ -334,7 +334,7 @@ action bar, each heard once.
 |---|---|---|---|---|
 | 0 | Tendril Grab | 100 | 2 | Pulls the creature under the crosshair within `TENDRIL_RANGE` 20 to you. Things over `TENDRIL_HEAVY_VOLUME` 8 pull you to them instead. Aimed at a block, it zips you there. |
 | 1 | Living Armor (toggle) | 40 | 0 | +`ARMOR_ABSORPTION` 16 max absorption (8 hearts), regrowing `ARMOR_REGEN` 1 every `ARMOR_REGEN_TICKS` 40, and +0.6 knockback resistance. Satiety drains �`ARMOR_DRAIN_MULT` 3. |
-| 2 | Wall Crawl (toggle) | 20 | 0 | Client movement (`WebSymbioteClient.tickCrawl`). Next to a wall in the air, you stick; Jump or forward climbs at `CRAWL_CLIMB` 0.2, Sneak goes down. Under a ceiling, Jump sticks you to it, you move with the movement keys, and Sneak drops you. Climbing over a top edge hops you onto the ledge. The server allows floating while it's on and resets fall distance while you're touching a wall or ceiling. |
+| 2 | Wall Crawl (toggle) | 20 | 0 | Client movement (`WebSymbioteClient.tickCrawl`). Next to a wall in the air, tendrils latch on and drag you the way you're moving (0.8.6: see below); Sneak goes down. Under a ceiling, Jump sticks you to it, you move with the movement keys, and Sneak drops you. Climbing over a top edge hops you onto the ledge. The server allows floating while it's on and resets fall distance while you're touching a wall or ceiling. |
 | 3 | Consume | 160 | 0 | Nothing is eaten alive (0.8). A corpse you carry is eaten. Else a free corpse within `CONSUME_CORPSE_RANGE` 6 (the one you look at first) is grabbed by a tendril, carried, then eaten. Else a non-player creature at **current** health <= `CONSUME_MAX_HEALTH` 10 within `CONSUME_RANGE` 3 is finished off by a lash (`CONSUME_FINISH_LAG` 8 ticks), and its corpse grabbed, carried and eaten. Tamed, name-tagged, inedible and corpse-less creatures are never taken. A corpse heals 6-16 and feeds 30-80 by size. |
 | 4 | Spike Burst | 240 | 8 | Everything within `SPIKE_RADIUS` 5 takes `SPIKE_DAMAGE` 8 (player attack) and is thrown `SPIKE_KNOCKBACK` 1.3 outward and 0.45 up. Rays of black dust. |
 | 5 | Shroud | 600 | 5 | Invisibility (no particles) until you damage anything, or `SHROUD_TICKS` 400. |
@@ -529,6 +529,108 @@ in `build.gradle`, CurseForge ids still to fill in).
 - **Whispers** (each once per player): first noise "It shudders at the sound.", first fire "It writhes from the
   heat.", one exposure from rejection "It's had almost enough of you.", first starving "It's hungry.", first meat
   "It took that for itself.", takeover "Not you. It.", rejection "It tears itself away.".
+
+### Symbiote rework (0.8.9)
+**Bond** (`WebSymbioteState.bond`, 0-`BOND_MAX` 100, synced; old saves load at 50):
+- A new bond starts at a random 0-`BOND_START_MAX` 50. A rejection resets it to 0.
+- It grows 1 every `BOND_GAIN_TICKS` 2400 while fed and calm (stress under `BOND_CALM` 50) and drops 1 as often
+  while starving. +`BOND_MEAL` 2 per meal; each exposure costs `BOND_EXPOSURE` 3, breaking a takeover
+  `BOND_BREAK_FREE` 2.
+- Abilities unlock at `UNLOCK_BOND` (tendril 15, armor 60, crawl 30, consume 45, spikes 75, shroud 0). Each unlock
+  is whispered. The radial menu darkens locked tiles with the bond they need and shows the bond under the hunger
+  bar. Creative gets everything.
+- A low bond means it ignores you (up to `IGNORE_MAX` 45% of uses below `IGNORE_BOND` 60; putting a toggle away is
+  never ignored) and takes over on a whim (`FERAL_CHANCE`, below `FERAL_BOND`; whisper "feral"). At full bond it no
+  longer rampages when restless, and Living Armor wears the big bulk body with you in control.
+- Its tendrils look wilder at low bond: quicker sway, sudden jerks, a stronger bulge travelling along each one
+  (`WebTendrilLayer.FERAL_*`).
+
+**Narration:** `WebSymbiote.narrate(player, act)` speaks `say.<act>.1-3` with a chance from `NARRATE_MIN` 0.1 to
+`NARRATE_MAX` 0.9 by bond, at most every `NARRATE_GAP_MAX` 600 to `NARRATE_GAP_MIN` 100 ticks. Every line is a
+whisper, so the vignette, dark screen and growl play each time.
+
+**Takeovers can't be interrupted.** `WebTakeoverInputMixin` zeroes movement while it drives, and clicks, power keys,
+mode, ultimate and the menu key are swallowed. Each fresh press is a struggle (`WebNet.Struggle`): once you've
+earned `BREAK_FREE_ABILITIES` 3 abilities, `BREAK_FREE_BASE` 36 - 4 per ability presses (12 with all six; the
+count fades by `STRUGGLE_FADE` per tick) break its hold, which adds `BREAK_FREE_STRESS` 10 stress. A meter shows on
+the HUD.
+
+**Takeover combat:** the tendrils do the fighting: `FRENZY_TICKS` 18 strikes every `FRENZY_EVERY` 4 ticks for
+`FRENZY_DAMAGE` 9, with a `FRENZY_SNATCH` 18% chance to snatch and hurl the prey. Its own punches slowed to
+`TAKEOVER_ATTACK_TICKS` 20.
+
+**Charged cross (click Smash with a chunk, `WebTendrils.smash`):** `CROSS_WINDUP` 22 ticks drawing the chunk back and
+across, `CROSS_SWING` 5 whipping it through, `CROSS_FOLLOW` 8, then `CROSS_RECOVER` 18 before anything else. Damage
+6 + 1.5 per piece (max 16).
+
+**Debris pull (Sneak+R/G at a wall):** the tendril reaches in, then hesitates and struggles (`TUG_MIN` 20 to `TUG_MAX`
+60 ticks, longer for harder blocks), cracking the blocks, before it tears the chunk out and hauls it in. Letting go
+of the key first cancels it. The cord to the wall shows (`WebTendrils.TUG`).
+
+**Corpse thrash (`WebTendrilCombos.THRASH`):** click while a tendril holds a corpse (one or two). Each slam is a
+`THRASH_CYCLE` 14-tick cycle: hauled overhead, smashed down `THRASH_FORWARD` 2 ahead with blood and ground debris,
+splash damage 5. 1-4 slams; a second corpse runs `THRASH_OFFSET` 7 behind. Then it's dropped and butchered as by
+hand with no block (`KitchenCompat.butcherRough`, Jaymo's Kitchen only).
+
+**Wall Crawl:** the tendrils latch onto the wall (`WebNet.ClimbLatch`, drawn from `WebTendrils.CLIMB`) up to
+`CLIMB_REACH` 2.3 ahead in the direction you're moving, then drag you there, alternating hands (`REACH_TICKS` 3,
+`PULL_TICKS` 9, `PULL_MAX` 0.42). With no keys it hangs and sags slightly. At a ledge one bites over the top and
+hauls you up.
+
+**Takeover digging:** each block in the way is torn out by one tendril in `RIP_LASH_TICKS` 3 + hardness ticks
+(max 10), thrown straight ahead, and the other arm starts on the next block at once, alternating R and G.
+
+**Slingshot:** no more pulling back. Holding the draw cracks the blocks under and behind you, up to `WebStrain.ALMOST`
+90%. In Living Armor, holding `SLING_ARMOR_BREAK_TICKS` 100 (5 s) breaks them and fires you as if you'd let go.
+
+**Death (`WebSymbiote.withdraw`):** when a bonded player dies the bond ends for good and the symbiote pours out as a
+`jaymospowers:web_symbiote_blob` (`WebSymbioteBlob`): a black blob that hauls itself around on tendrils
+(`WebBlobRenderer`). It roams `ROAM_RADIUS` 10 around where you fell, moving its home onto your body (Kitchen) if
+one is within `CORPSE_RANGE` 24. Every `SCAN_EVERY` 20 ticks it looks within `SEEK_RANGE` 16 for, first, a Kitchen
+zombie player, then any web slinger without a symbiote (chased up to `LEASH` 32 from home), and leaps on at
+`BOND_REACH`. A player gets a fresh bond (`bond`). Only fire, lava, explosions and `/kill` hurt it (20 health); other
+blows splash it back. It never despawns.
+A Gravity meteor (`GravityMeteor.impact`) carries one `METEOR_CHANCE` 20% of the time, unless a symbiote (a blob, a
+behemoth or a bonded player) is already within `METEOR_VICINITY` 128. `METEOR_ALIVE` 30% of those crawl out of
+the crater as a blob with `FIRE_GRACE` 300 ticks of immunity to the fire and lava there; the rest lie on the crater
+floor as goo (Black Ooze) on obsidian, bonded like a natural crater's (Sneak + right-click). Goo blocks nearby don't
+count toward the vicinity check.
+
+**Behemoth (`WebBehemoth`):** a zombie player it takes gets the `web_behemoth` attachment and permanent modifiers
+(+80 health, +6 damage, x1.7 size, x1.3 speed, 0.8 knockback resistance), the big body and veins drawn over it, and
+six back tendrils. It targets anything living it can see within `SIGHT` 24 (not creative players, other behemoths
+or blobs) and lashes with tendrils (`STRIKE_TICKS` 16, landing at 8, 12 damage, every 12 ticks, reach 6.5). The sun
+doesn't burn it and it never turns into a drowned (`WebHostZombieMixin`). When it dies the blob crawls out again.
+
+**Testing:** `/powerdebug web symbiote level <0-100>` sets the bond (unlocks and the bulk follow). Check: a fresh bond
+has only Shroud; a low bond ignores the menu sometimes; spam keys during a curious takeover (nothing happens until 3
+abilities, then the meter fills and you break free); takeover fights are tendril-heavy; a chunk cross winds up and
+recovers slowly; Sneak+R at stone hesitates before pulling; thrash a held corpse (with Kitchen) for the drops; Wall
+Crawl drags rather than floats; a takeover through stone throws clumps forward; hold a slingshot draw on stone (with
+and without Living Armor); die bonded (a blob crawls out,
+roams, bonds a nearby web user, or with Kitchen waits for the body to rise and turns it into the behemoth). None of this has been run in game yet.
+
+### Symbiote rework, part 2 (0.8.19)
+
+- **Suit at bonding:** the suit shows itself when the symbiote bonds (`SUIT_DEBUT_TICKS` after the bonding), then
+  withdraws ("suit_withdraw"). The mask won't bring it back until `SUIT_ABILITIES` (4) abilities are unlocked
+  (`suitAllowed`; creative always can). The menu shades the mask and shows "n/4" until then.
+- **Engulf on every takeover:** each takeover (low-health last-ditch included) forces the suit and the big body on,
+  then puts the suit back the way it was when the takeover ends.
+- **Alarms:** recoiling from fire or noise whispers an alarming line every time (`alarm_fire.N`, `alarm_noise.N`)
+  with the dread vignette; the edge-of-rejection warning still comes once.
+- **Cooldowns:** every radial ability runs its own cooldown. Shroud's starts when it ends (`COOLDOWN + SHROUD_TICKS`).
+  Living Armor goes on cooldown (`COOLDOWN[ARMOR]`, 10 s) when it ends, and switches off after `ARMOR_IDLE_TICKS`
+  (5 s) with no tendril use while the suit is off, or after `ARMOR_MAX_TICKS` (60 s) regardless. When it ends the
+  tendrils sink back into the body over `WITHDRAW_TICKS` (client), the growth run backwards.
+- **Feeding:** it only feeds itself below `SELF_FEED_BELOW` (30) satiety. Once it starts wanting a meal (`craving`)
+  it keeps hunting until it has actually eaten, even if satiety climbs back over the line.
+- **No fall damage** while the suit shows or Living Armor is up.
+- **Last-ditch mode** (low health): a different panicked line each time (`panic.1-8`), then in order: Spike Burst
+  if mobs are within `SPIKE_RADIUS`, Shroud, a leap away from the threat (`LEAP_SPEED`, `LEAP_UP`), and the takeover
+  flee. Fleeing into a wall, the tendrils climb it (`FLEE_CLIMB`, client); dead ends are ripped through as before
+  (`WebTakeoverPath`). If it takes `EMERGENCY_HITS` hits while fleeing, or is stuck `STUCK_TICKS` with the threat
+  within `STUCK_NEAR`, it hardens: `EMERGENCY_ABSORPTION` absorption, once per flee ("harden").
 
 ### Ascension: Spider-Sense
 - **Trigger:**

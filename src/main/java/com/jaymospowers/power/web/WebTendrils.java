@@ -116,6 +116,61 @@ public final class WebTendrils {
 	static final float RIP_HARDEST = 4.0F;
 	/** The {@link Grab} entity id that means "the block I'm aiming at". */
 	public static final int GRAB_BLOCK = -2;
+	/**
+	 * Tearing a chunk loose isn't instant: the tendril reaches the wall, digs in and struggles with it, the blocks
+	 * cracking and your view jarring, for {@code TUG_MIN} + {@code TUG_PER_HARDNESS} x the hardest block's hardness + up
+	 * to {@code TUG_RANDOM} more ticks (never more than {@code TUG_MAX}, 3 s), then it tears loose and is hauled in, held.
+	 * Let go of the key before then and nothing comes (as Gravity's Lift struggles).
+	 */
+	static final int TUG_MIN = 20, TUG_MAX = 60, TUG_RANDOM = 16;
+	static final float TUG_PER_HARDNESS = 8.0F;
+	/**
+	 * A chunk swung with a click is a heavy cross, not a jab: hauled back behind that shoulder over {@code CROSS_WINDUP}
+	 * ticks (slowly, at {@code CROSS_DRAW_SPEED}), whipped across in {@code CROSS_SWING} onto whatever's in front within
+	 * {@code CROSS_REACH} ({@code CROSS_DAMAGE} + {@code CROSS_DAMAGE_PER_PIECE} a block, at most {@code CROSS_DAMAGE_MAX},
+	 * knocked {@code CROSS_KNOCK} away), carried through to the other side for {@code CROSS_FOLLOW}, and only after
+	 * {@code CROSS_RECOVER} more can anything be swung again.
+	 */
+	static final int CROSS_WINDUP = 22, CROSS_SWING = 5, CROSS_FOLLOW = 8, CROSS_RECOVER = 18;
+	static final double CROSS_REACH = 5.0, CROSS_KNOCK = 1.1, CROSS_LIFT = 0.35, CROSS_DRAW_SPEED = 0.25, CROSS_WHIP_SPEED = 3.2;
+	/** Where it's drawn back to: this far out to that side, behind you, and up (blocks). */
+	static final double CROSS_SIDE = 1.5, CROSS_BACK = 1.3, CROSS_UP = 0.7;
+	static final float CROSS_DAMAGE = 6.0F, CROSS_DAMAGE_PER_PIECE = 1.5F, CROSS_DAMAGE_MAX = 16.0F, CROSS_SHAKE = 1.2F;
+	/** Wall Crawl's latches may be no further than this from your eyes. */
+	static final double CLIMB_LATCH_REACH = 4.5;
+
+	/**
+	 * Where tendrils have latched onto the world (holding no thing): {@code mask} bit 1 the right (R) side's, at
+	 * {@code right}; bit 2 the left (G) side's, at {@code left}. Synced to everyone, who draw the cords.
+	 */
+	public record Latch(Vec3 right, Vec3 left, int mask) {
+		public static final Latch NONE = new Latch(Vec3.ZERO, Vec3.ZERO, 0);
+		public static final StreamCodec<ByteBuf, Latch> STREAM_CODEC = StreamCodec.composite(
+			Vec3.STREAM_CODEC, Latch::right, Vec3.STREAM_CODEC, Latch::left, ByteBufCodecs.VAR_INT, Latch::mask, Latch::new);
+
+		public boolean has(int hand) {
+			return (mask & (hand == WebNet.OFF ? 2 : 1)) != 0;
+		}
+
+		public Vec3 get(int hand) {
+			return hand == WebNet.OFF ? left : right;
+		}
+
+		Latch with(int hand, Vec3 at) {
+			return hand == WebNet.OFF ? new Latch(right, at, mask | 2) : new Latch(at, left, mask | 1);
+		}
+
+		Latch without(int hand) {
+			return new Latch(right, left, mask & ~(hand == WebNet.OFF ? 2 : 1));
+		}
+	}
+
+	/** Wall Crawl's tendrils latched onto the wall (the client climbs; it reports where they bite). */
+	public static final AttachmentType<Latch> CLIMB = AttachmentRegistry.create(JaymosPowers.id("web_tendril_climb"),
+		builder -> builder.syncWith(Latch.STREAM_CODEC, AttachmentSyncPredicate.all()));
+	/** A tendril dug into a wall, struggling to tear a chunk loose. */
+	public static final AttachmentType<Latch> TUG = AttachmentRegistry.create(JaymosPowers.id("web_tendril_tug"),
+		builder -> builder.syncWith(Latch.STREAM_CODEC, AttachmentSyncPredicate.all()));
 
 	/** Client → server: swing the chunk this tendril holds at what's in front (left click: main, right click: off). */
 	public record Smash(int hand) implements CustomPacketPayload {
@@ -154,6 +209,21 @@ public final class WebTendrils {
 	private static final java.util.Map<UUID, Hold[]> HOLDS = new java.util.HashMap<>();
 	private static final List<Thrown> THROWN = new ArrayList<>();
 
+	/** A chunk being struggled loose: where the tendril bit, the blocks that will come, when it gets there, and when they tear. */
+	private record Tug(net.minecraft.world.phys.BlockHitResult hit, List<net.minecraft.core.BlockPos> blocks, long reachAt, long tearAt) {
+	}
+
+	/** A cross in progress: which tendril, its chunk, and when it began. */
+	private record Cross(int hand, int chunk, long start) {
+	}
+
+	/** Where a cross puts the chunk this tick, and how fast it may get there. */
+	private record Aim(Vec3 point, double speed) {
+	}
+
+	private static final java.util.Map<UUID, Tug[]> TUGS = new java.util.HashMap<>();
+	private static final java.util.Map<UUID, Cross> CROSSES = new java.util.HashMap<>();
+
 	private WebTendrils() {
 	}
 
@@ -162,6 +232,15 @@ public final class WebTendrils {
 		ServerPlayNetworking.registerGlobalReceiver(Grab.TYPE, (payload, ctx) -> {
 			ServerPlayer player = ctx.player();
 			int hand = payload.hand() == WebNet.OFF ? WebNet.OFF : WebNet.MAIN;
+			if (WebSymbiote.driving(player)) {
+				// a takeover has your hands: nothing you press reaches them
+				return;
+			}
+			if (payload.entityId() < 0 && payload.entityId() != GRAB_BLOCK && tugging(player, hand)) {
+				// let go before it came loose: nothing comes
+				cancelTug(player, hand);
+				return;
+			}
 			if (payload.entityId() == GRAB_BLOCK) {
 				if (WebSymbiote.armored(player) && player.isAlive() && !player.isSpectator()) {
 					rip(player, hand);
@@ -176,7 +255,12 @@ public final class WebTendrils {
 			}
 		});
 		PayloadTypeRegistry.serverboundPlay().register(Smash.TYPE, Smash.CODEC);
-		ServerPlayNetworking.registerGlobalReceiver(Smash.TYPE, (payload, ctx) -> smash(ctx.player(), payload.hand() == WebNet.OFF ? WebNet.OFF : WebNet.MAIN));
+		ServerPlayNetworking.registerGlobalReceiver(Smash.TYPE, (payload, ctx) -> {
+			if (!WebSymbiote.driving(ctx.player())) {
+				smash(ctx.player(), payload.hand() == WebNet.OFF ? WebNet.OFF : WebNet.MAIN);
+			}
+		});
+		ServerPlayNetworking.registerGlobalReceiver(WebNet.ClimbLatch.TYPE, (payload, ctx) -> climbLatch(ctx.player(), payload));
 		WebTendrilCombos.register();
 		ServerTickEvents.END_SERVER_TICK.register(WebTendrils::serverTick);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
@@ -185,6 +269,8 @@ public final class WebTendrils {
 			}
 			HOLDS.clear();
 			THROWN.clear();
+			TUGS.clear();
+			CROSSES.clear();
 		});
 	}
 
@@ -196,7 +282,7 @@ public final class WebTendrils {
 				|| entity instanceof com.jaymospowers.core.BlockCluster || com.jaymospowers.power.gravity.GravityPower.isCorpse(entity));
 	}
 
-	/** Sneak + a tendril key at a block: a chunk of it torn loose, and held. */
+	/** Sneak + a tendril key at a block: the tendril reaches it and struggles a chunk loose (see {@link #TUG_MIN}). */
 	private static void rip(ServerPlayer player, int hand) {
 		Vec3 eye = player.getEyePosition();
 		net.minecraft.world.phys.BlockHitResult hit = player.level().clip(new net.minecraft.world.level.ClipContext(eye,
@@ -205,25 +291,266 @@ public final class WebTendrils {
 		if (hit.getType() != net.minecraft.world.phys.HitResult.Type.BLOCK || !player.mayBuild()) {
 			return;
 		}
-		com.jaymospowers.core.BlockCluster chunk = com.jaymospowers.core.BlockCluster.rip(player.level(), hit, RIP_PIECES, RIP_HARDEST, player);
-		if (chunk != null) {
-			grab(player, hand, chunk, -1L);
+		ServerLevel level = player.level();
+		List<net.minecraft.core.BlockPos> blocks = com.jaymospowers.core.BlockCluster.crater(level, hit.getBlockPos(), RIP_PIECES, RIP_HARDEST, player);
+		if (blocks.isEmpty()) {
+			return;
+		}
+		release(player, hand, false);
+		cancelTug(player, hand);
+		float hardest = 0.0F;
+		for (net.minecraft.core.BlockPos pos : blocks) {
+			hardest = Math.max(hardest, level.getBlockState(pos).getDestroySpeed(level, pos));
+		}
+		long now = level.getGameTime();
+		long reach = (long)Math.ceil(hit.getLocation().distanceTo(eye) / TENDRIL_SPEED);
+		int struggle = Mth.clamp(TUG_MIN + Math.round(hardest * TUG_PER_HARDNESS) + player.getRandom().nextInt(TUG_RANDOM + 1), TUG_MIN, TUG_MAX);
+		TUGS.computeIfAbsent(player.getUUID(), k -> new Tug[2])[hand] = new Tug(hit, blocks, now + reach, now + reach + struggle);
+		player.setAttached(TUG, player.getAttachedOrElse(TUG, Latch.NONE).with(hand, hit.getLocation()));
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 0.9F, 0.6F);
+	}
+
+	/** That tendril is struggling with a chunk of wall. */
+	static boolean tugging(ServerPlayer player, int hand) {
+		Tug[] tugs = TUGS.get(player.getUUID());
+		return tugs != null && tugs[hand] != null;
+	}
+
+	/** The struggle's off: its cracks fade and the tendril lets go of the wall. */
+	private static void cancelTug(ServerPlayer player, int hand) {
+		Tug[] tugs = TUGS.get(player.getUUID());
+		if (tugs != null && tugs[hand] != null) {
+			for (int i = 0; i < tugs[hand].blocks().size(); i++) {
+				player.level().destroyBlockProgress(tugCrack(player, hand, i), tugs[hand].blocks().get(i), -1);
+			}
+			tugs[hand] = null;
+			if (tugs[0] == null && tugs[1] == null) {
+				TUGS.remove(player.getUUID());
+			}
+		}
+		Latch latch = player.getAttached(TUG);
+		if (latch != null) {
+			Latch next = latch.without(hand);
+			if (next.mask() == 0) {
+				player.removeAttached(TUG);
+			} else {
+				player.setAttached(TUG, next);
+			}
 		}
 	}
 
-	/** Left or right click while that tendril holds a chunk: it's swung at what's in front of you. */
-	static void smash(ServerPlayer player, int hand) {
-		Grips grips = player.getAttached(GRIPS);
-		if (grips == null || !WebSymbiote.armored(player) || !player.isAlive()) {
+	private static int tugCrack(ServerPlayer player, int hand, int i) {
+		return player.getId() * 47 + 4000 + hand * 16 + i;
+	}
+
+	/** The struggles, a tick at a time: dug in, the blocks crack and shudder; long enough, and they tear loose and are held. */
+	private static void tickTugs(ServerPlayer player, long now) {
+		Tug[] tugs = TUGS.get(player.getUUID());
+		if (tugs == null) {
 			return;
 		}
-		if (player.level().getEntity(grips.get(hand)) instanceof com.jaymospowers.core.BlockCluster chunk) {
-			player.swing(hand == WebNet.OFF ? net.minecraft.world.InteractionHand.OFF_HAND : net.minecraft.world.InteractionHand.MAIN_HAND,
-				net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
-			chunk.swingFrom(player);
-			if (!chunk.isAlive()) {
-				release(player, hand, false);
+		ServerLevel level = player.level();
+		for (int hand = WebNet.MAIN; hand <= WebNet.OFF; hand++) {
+			Tug tug = tugs[hand];
+			if (tug == null) {
+				continue;
 			}
+			if (!player.isAlive() || player.isSpectator() || !WebSymbiote.armored(player)
+				|| tug.hit().getLocation().distanceTo(player.getEyePosition()) > GRAB_RANGE + 3.0) {
+				cancelTug(player, hand);
+				continue;
+			}
+			if (now < tug.reachAt()) {
+				// still reaching for the wall
+				continue;
+			}
+			long t = now - tug.reachAt();
+			long total = Math.max(1L, tug.tearAt() - tug.reachAt());
+			if (now < tug.tearAt()) {
+				// it strains: every block cracking, the tendril wrenching at it, your view jarring with it
+				int stage = (int)Math.min(8L, t * 9L / total);
+				for (int i = 0; i < tug.blocks().size(); i++) {
+					level.destroyBlockProgress(tugCrack(player, hand, i), tug.blocks().get(i), stage);
+				}
+				if (t % 5 == 0) {
+					net.minecraft.core.BlockPos at = tug.blocks().get((int)(t / 5 % tug.blocks().size()));
+					net.minecraft.world.level.block.state.BlockState state = level.getBlockState(at);
+					level.playSound(null, at, state.getSoundType().getHitSound(), SoundSource.BLOCKS, 1.0F, 0.5F);
+					com.jaymospowers.core.Debris.puff(level, at, state, 0.4F);
+				}
+				if (t % 8 == 0) {
+					ServerPlayNetworking.send(player, new WebNet.Shake(0.35F + 0.4F * t / total));
+					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.6F, 0.5F);
+				}
+				if (t == total / 2) {
+					WebSymbiote.narrate(player, "tug");
+				}
+				continue;
+			}
+			// it gives: torn out, and hauled in
+			List<net.minecraft.core.BlockPos> loose = new ArrayList<>();
+			for (net.minecraft.core.BlockPos pos : tug.blocks()) {
+				if (com.jaymospowers.core.BlockCluster.takeable(level, pos, RIP_HARDEST, player)) {
+					loose.add(pos);
+				}
+			}
+			cancelTug(player, hand);
+			com.jaymospowers.core.BlockCluster chunk = com.jaymospowers.core.BlockCluster.of(level, loose,
+				tug.hit().getDirection().getUnitVec3().scale(0.9), player);
+			if (chunk != null) {
+				grab(player, hand, chunk, -1L, true);
+				ServerPlayNetworking.send(player, new WebNet.Shake(0.9F));
+			}
+		}
+	}
+
+	/** Left or right click while that tendril holds a chunk: a heavy cross (see {@link #CROSS_WINDUP}). */
+	static void smash(ServerPlayer player, int hand) {
+		Grips grips = player.getAttached(GRIPS);
+		if (grips == null || !WebSymbiote.armored(player) || !player.isAlive() || CROSSES.containsKey(player.getUUID())) {
+			return;
+		}
+		if (player.level().getEntity(grips.get(hand)) instanceof com.jaymospowers.core.BlockCluster chunk && reached(player, hand)) {
+			CROSSES.put(player.getUUID(), new Cross(hand, chunk.getId(), player.level().getGameTime()));
+			// the weight of it, dragged back
+			ServerLevel level = player.level();
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 1.0F, 0.4F);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_JUMP, SoundSource.PLAYERS, 1.0F, 0.4F);
+		}
+	}
+
+	/** A cross is under way (or still recovering): no other swing until it's done. */
+	static boolean crossing(Player player) {
+		return CROSSES.containsKey(player.getUUID());
+	}
+
+	/** Where the cross puts its chunk now (null: back to the usual hold). */
+	private static @org.jspecify.annotations.Nullable Aim crossAim(ServerPlayer player, Entity held, int hand, long now) {
+		Cross cross = CROSSES.get(player.getUUID());
+		if (cross == null || cross.hand() != hand || cross.chunk() != held.getId()) {
+			return null;
+		}
+		long t = now - cross.start();
+		Vec3 eye = player.getEyePosition();
+		Vec3 dir = player.getLookAngle().horizontal();
+		dir = dir.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : dir.normalize();
+		Vec3 right = new Vec3(-dir.z, 0.0, dir.x);
+		double sign = hand == WebNet.OFF ? -1.0 : 1.0;
+		Vec3 back = eye.add(right.scale(sign * (CROSS_SIDE + held.getBbWidth() * 0.5))).subtract(dir.scale(CROSS_BACK)).add(0.0, CROSS_UP, 0.0);
+		if (t < CROSS_WINDUP) {
+			// drawn back, slow and grinding, and held there trembling
+			double tremble = t > CROSS_WINDUP / 2 ? (player.getRandom().nextDouble() - 0.5) * 0.12 : 0.0;
+			return new Aim(back.add(0.0, tremble, 0.0), CROSS_DRAW_SPEED);
+		}
+		LivingEntity target = crossTarget(player);
+		Vec3 aim = target != null ? target.getBoundingBox().getCenter() : eye.add(player.getLookAngle().scale(2.4));
+		if (t < CROSS_WINDUP + CROSS_SWING) {
+			double k = (t - CROSS_WINDUP + 1) / (double)CROSS_SWING;
+			return new Aim(back.lerp(aim, k * k), CROSS_WHIP_SPEED);
+		}
+		if (t < CROSS_WINDUP + CROSS_SWING + CROSS_FOLLOW) {
+			// carried on through, across to the other side
+			Vec3 through = eye.add(right.scale(-sign * 1.4)).add(dir.scale(1.6)).subtract(0.0, 0.4, 0.0);
+			return new Aim(through, 1.2);
+		}
+		return null;
+	}
+
+	/** What a cross lands on: the nearest creature in front within {@link #CROSS_REACH}. */
+	private static @org.jspecify.annotations.Nullable LivingEntity crossTarget(ServerPlayer player) {
+		Vec3 eye = player.getEyePosition();
+		Vec3 look = player.getLookAngle();
+		LivingEntity best = null;
+		double bestD = Double.MAX_VALUE;
+		Grips grips = player.getAttachedOrElse(GRIPS, Grips.NONE);
+		for (LivingEntity living : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(CROSS_REACH + 1.0),
+			e -> e != player && e.isAlive() && !e.isSpectator() && !player.isAlliedTo(e) && e.getId() != grips.right() && e.getId() != grips.left())) {
+			Vec3 to = living.getBoundingBox().getCenter().subtract(eye);
+			double d = to.length();
+			if (d > CROSS_REACH + living.getBbWidth() * 0.5 || d > 1.0E-3 && to.scale(1.0 / d).dot(look) < 0.3) {
+				continue;
+			}
+			if (d < bestD) {
+				bestD = d;
+				best = living;
+			}
+		}
+		return best;
+	}
+
+	/** The cross, a tick at a time: the whoosh as it comes, the hit, and the end of the recovery. */
+	private static void tickCross(ServerPlayer player, long now) {
+		Cross cross = CROSSES.get(player.getUUID());
+		if (cross == null) {
+			return;
+		}
+		long t = now - cross.start();
+		ServerLevel level = player.level();
+		Grips grips = player.getAttachedOrElse(GRIPS, Grips.NONE);
+		boolean holding = grips.get(cross.hand()) == cross.chunk() && level.getEntity(cross.chunk()) instanceof com.jaymospowers.core.BlockCluster;
+		if (!holding && t < CROSS_WINDUP + CROSS_SWING || t >= CROSS_WINDUP + CROSS_SWING + CROSS_FOLLOW + CROSS_RECOVER || !player.isAlive()) {
+			CROSSES.remove(player.getUUID());
+			return;
+		}
+		if (t == CROSS_WINDUP) {
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.2F, 0.45F);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.MACE_SMASH_AIR, SoundSource.PLAYERS, 1.0F, 0.5F);
+			player.swing(cross.hand() == WebNet.OFF ? net.minecraft.world.InteractionHand.OFF_HAND : net.minecraft.world.InteractionHand.MAIN_HAND,
+				net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		}
+		if (t != CROSS_WINDUP + CROSS_SWING || !(level.getEntity(cross.chunk()) instanceof com.jaymospowers.core.BlockCluster chunk)) {
+			return;
+		}
+		LivingEntity target = crossTarget(player);
+		if (target == null) {
+			return;
+		}
+		float damage = chunk.allSoft() ? com.jaymospowers.core.BlockCluster.SOFT_HIT_DAMAGE
+			: Math.min(CROSS_DAMAGE_MAX, CROSS_DAMAGE + CROSS_DAMAGE_PER_PIECE * chunk.pieces().size());
+		target.hurtServer(level, level.damageSources().playerAttack(player), damage);
+		Vec3 away = target.position().subtract(player.position()).horizontal();
+		away = away.lengthSqr() < 1.0E-4 ? player.getLookAngle().horizontal() : away;
+		away = away.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : away.normalize();
+		Vec3 push = away.scale(CROSS_KNOCK).add(0.0, CROSS_LIFT, 0.0);
+		target.setDeltaMovement(target.getDeltaMovement().add(push));
+		target.needsSync = true;
+		target.syncVelocity = true;
+		if (target instanceof ServerPlayer other) {
+			ServerPlayNetworking.send(other, new WebNet.Nudge(target.getDeltaMovement()));
+			ServerPlayNetworking.send(other, new WebNet.Shake(CROSS_SHAKE * 1.5F));
+		}
+		Vec3 at = target.getBoundingBox().getCenter();
+		level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 14, 0.3, 0.3, 0.3, 0.2);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.2F, 0.5F);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.1F, 0.7F);
+		ServerPlayNetworking.send(player, new WebNet.Shake(CROSS_SHAKE));
+		WebSymbiote.narrate(player, "smash");
+		chunk.chip(level);
+		if (!chunk.isAlive()) {
+			release(player, cross.hand(), false);
+		}
+	}
+
+	/** Wall Crawl's client reports where a tendril bit into the wall (or let go). */
+	private static void climbLatch(ServerPlayer player, WebNet.ClimbLatch payload) {
+		int hand = payload.hand() == WebNet.OFF ? WebNet.OFF : WebNet.MAIN;
+		Latch latch = player.getAttachedOrElse(CLIMB, Latch.NONE);
+		Latch next;
+		if (payload.on() && WebSymbiote.isToggled(player, WebSymbioteState.CRAWL) && player.isAlive() && !WebSymbiote.driving(player)
+			&& payload.at().distanceTo(player.getEyePosition()) <= CLIMB_LATCH_REACH) {
+			next = latch.with(hand, payload.at());
+			ServerLevel level = player.level();
+			level.playSound(null, payload.at().x, payload.at().y, payload.at().z, SoundEvents.SLIME_ATTACK, SoundSource.PLAYERS, 0.5F, 0.6F);
+			if (player.getRandom().nextInt(4) == 0) {
+				WebSymbiote.narrate(player, "climb");
+			}
+		} else {
+			next = latch.without(hand);
+		}
+		if (next.mask() == 0) {
+			player.removeAttached(CLIMB);
+		} else {
+			player.setAttached(CLIMB, next);
 		}
 	}
 
@@ -249,6 +576,11 @@ public final class WebTendrils {
 	}
 
 	static void grab(ServerPlayer player, int hand, Entity target, long throwAt) {
+		grab(player, hand, target, throwAt, false);
+	}
+
+	/** {@code attached}: the tendril is already on it (it tore it loose), so there's no reach out first. */
+	static void grab(ServerPlayer player, int hand, Entity target, long throwAt, boolean attached) {
 		if (!grabbable(player, target) || heldBySomeone(target)) {
 			return;
 		}
@@ -256,7 +588,7 @@ public final class WebTendrils {
 		weightless(target, true);
 		Hold[] holds = HOLDS.computeIfAbsent(player.getUUID(), k -> new Hold[2]);
 		long now = player.level().getGameTime();
-		long reach = (long)Math.ceil(target.distanceTo(player) / TENDRIL_SPEED);
+		long reach = attached ? 0L : (long)Math.ceil(target.distanceTo(player) / TENDRIL_SPEED);
 		// off to one side when both are full: this one's side, at a random spot (the middle of the view stays clear)
 		Hold other = holds[hand == WebNet.OFF ? WebNet.MAIN : WebNet.OFF];
 		// R's tendril (main) holds to the right, G's (off) to the left, so neither crosses the view
@@ -379,6 +711,12 @@ public final class WebTendrils {
 	/** Every tick, per web slinger: whatever the tendrils hold hangs where it's held (and the radial grab throws). */
 	static void tick(ServerPlayer player) {
 		WebTendrilCombos.tick(player);
+		long gameTime = player.level().getGameTime();
+		tickTugs(player, gameTime);
+		tickCross(player, gameTime);
+		if (player.getAttached(CLIMB) != null && (!WebSymbiote.isToggled(player, WebSymbioteState.CRAWL) || !player.isAlive())) {
+			player.removeAttached(CLIMB);
+		}
 		Grips grips = player.getAttached(GRIPS);
 		if (grips == null) {
 			return;
@@ -404,6 +742,10 @@ public final class WebTendrils {
 			}
 			// a combo steers what it uses (and nothing's thrown out from under it)
 			Vec3 combo = WebTendrilCombos.point(player, target, hand, now);
+			Aim cross = combo == null ? crossAim(player, target, hand, now) : null;
+			if (cross != null) {
+				combo = cross.point();
+			}
 			if (combo == null && hold != null && hold.throwAt() > 0 && now >= hold.throwAt()) {
 				release(player, hand, true);
 				continue;
@@ -427,7 +769,7 @@ public final class WebTendrils {
 			double steer = HOLD_STEER;
 			if (combo != null) {
 				point = combo;
-				maxSpeed = WebTendrilCombos.SPEED;
+				maxSpeed = cross != null ? cross.speed() : WebTendrilCombos.SPEED;
 				steer = WebTendrilCombos.STEER;
 			} else if (swing != null) {
 				point = swing;
@@ -512,6 +854,8 @@ public final class WebTendrils {
 
 	static void forget(ServerPlayer player) {
 		HOLDS.remove(player.getUUID());
+		TUGS.remove(player.getUUID());
+		CROSSES.remove(player.getUUID());
 	}
 
 	static double clampSide(double v) {

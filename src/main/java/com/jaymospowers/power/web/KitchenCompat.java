@@ -49,6 +49,11 @@ public final class KitchenCompat {
 		return LOADED && Kitchen.playerCorpse(entity);
 	}
 
+	/** A dead player who got back up (Kitchen's zombie player): what a roaming symbiote bonds with. */
+	static boolean isZombiePlayer(Entity entity) {
+		return LOADED && Kitchen.zombiePlayer(entity);
+	}
+
 	/** Whether this creature leaves a corpse when it dies (without Kitchen: nothing does). */
 	static boolean leavesCorpse(net.minecraft.world.entity.LivingEntity entity) {
 		return LOADED && Kitchen.leavesCorpse(entity);
@@ -64,6 +69,14 @@ public final class KitchenCompat {
 		if (LOADED) {
 			Kitchen.jolt(entity);
 		}
+	}
+
+	/**
+	 * A corpse torn apart where it lies (the symbiote's thrash): the same as butchering it without a butcher block, a
+	 * rough job, about half its loot. Returns whether it was.
+	 */
+	static boolean butcherRough(Entity entity) {
+		return LOADED && Kitchen.butcherRough(entity);
 	}
 
 	/** Only touched when Jaymo's Kitchen is loaded. */
@@ -117,12 +130,44 @@ public final class KitchenCompat {
 			return entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse && corpse.isPlayerCorpse();
 		}
 
+		static boolean zombiePlayer(Entity entity) {
+			return entity instanceof com.jaymoskitchen.corpse.ZombiePlayer;
+		}
+
 		static boolean leavesCorpse(net.minecraft.world.entity.LivingEntity entity) {
 			return com.jaymoskitchen.corpse.Corpses.leavesCorpse(entity);
 		}
 
 		static net.minecraft.world.entity.@Nullable EntityType<?> sourceType(Entity entity) {
 			return entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse ? corpse.sourceType() : null;
+		}
+
+		private static java.lang.reflect.@Nullable Method butcherMethod;
+		private static boolean butcherLooked;
+
+		static boolean butcherRough(Entity entity) {
+			if (!(entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse) || !(entity.level() instanceof net.minecraft.server.level.ServerLevel level)
+				|| corpse.isPlayerCorpse()) {
+				return false;
+			}
+			if (!butcherLooked) {
+				butcherLooked = true;
+				try {
+					butcherMethod = com.jaymoskitchen.corpse.CorpseEntity.class.getDeclaredMethod("butcher", net.minecraft.server.level.ServerLevel.class, boolean.class);
+					butcherMethod.setAccessible(true);
+				} catch (ReflectiveOperationException | RuntimeException e) {
+					butcherMethod = null;
+				}
+			}
+			if (butcherMethod == null) {
+				return false;
+			}
+			try {
+				butcherMethod.invoke(corpse, level, false);
+				return true;
+			} catch (ReflectiveOperationException | RuntimeException e) {
+				return false;
+			}
 		}
 
 		static void jolt(Entity entity) {

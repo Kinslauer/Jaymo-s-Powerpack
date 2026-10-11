@@ -88,24 +88,25 @@ final class WebTakeoverPath {
 	/** Nothing harder than this is torn out (obsidian, 50, and harder stay); nothing unbreakable, nothing with a block entity. */
 	static final float RIP_MAX_HARDNESS = 20.0F;
 	/**
-	 * The tendrils dig into the blocking blocks and work them loose for {@code RIP_LASH_TICKS} (+ {@code RIP_TICKS_PER_HARDNESS}
-	 * x the hardest one's hardness, + {@code RIP_TICKS_PER_BLOCK} for each block after the first; at most
-	 * {@code RIP_LASH_MAX_TICKS}), then tear them out as one clump ({@link BlockCluster}, as Living Armor's tendrils do).
+	 * It digs fast (0.8.6): the tendrils rip into the blocking blocks for only {@code RIP_LASH_TICKS} (+
+	 * {@code RIP_TICKS_PER_HARDNESS} x the hardest one's hardness, + {@code RIP_TICKS_PER_BLOCK} for each block after the
+	 * first; at most {@code RIP_LASH_MAX_TICKS}), then tear them out as one clump ({@link BlockCluster}, as Living Armor's
+	 * tendrils do), the R and G sides taking turns, and go straight on to the next blocks in the way.
 	 */
-	static final int RIP_LASH_TICKS = 8;
-	static final float RIP_TICKS_PER_HARDNESS = 2.0F;
-	static final int RIP_TICKS_PER_BLOCK = 3;
-	static final int RIP_LASH_MAX_TICKS = 30;
+	static final int RIP_LASH_TICKS = 3;
+	static final float RIP_TICKS_PER_HARDNESS = 1.0F;
+	static final int RIP_TICKS_PER_BLOCK = 1;
+	static final int RIP_LASH_MAX_TICKS = 10;
 	/** The clump comes away this far toward you (blocks) out of the hole, before the tendril takes it. */
 	static final double RIP_CLUMP_OUT = 0.15;
-	/** Held up once the tendril has it (ticks), then flung aside; flung anyway this long after the tear (ticks). */
-	static final int RIP_HOLD_TICKS = 6;
-	static final int RIP_HOLD_TIMEOUT = 40;
+	/** Yanked out and held only this long (ticks), then let go of, thrown; thrown anyway this long after the tear (ticks). */
+	static final int RIP_HOLD_TICKS = 2;
+	static final int RIP_HOLD_TIMEOUT = 10;
 	/**
-	 * The fling: sideways, or up and sideways (whichever way is most open within {@code RIP_FLING_LOOK} blocks), never
-	 * ahead along the tunnel nor back at you; this fast, lifted this much (blocks/tick).
+	 * The throw: forward, on along the way it's digging, this fast and lifted this much (blocks/tick). A clump that
+	 * meets the next wall just shatters there (it's too slow to smash anything).
 	 */
-	static final double RIP_FLING_SPEED = 1.2, RIP_FLING_LIFT = 0.25, RIP_FLING_LOOK = 4.0;
+	static final double RIP_FLING_SPEED = 1.0, RIP_FLING_LIFT = 0.35;
 	/** Cells along the line it looks through for the blocking ones, and how far it can reach (blocks, from the eyes). */
 	static final int RIP_LOOKAHEAD = 3;
 	static final double RIP_REACH = 4.5;
@@ -143,13 +144,27 @@ final class WebTakeoverPath {
 		long ripStart;
 		long ripFxAt;
 		int ripLashTicks;
-		/** The torn clump a tendril holds before flinging it aside (-1 none), which tendril, when it was torn, when it was held. */
-		int clumpId = -1;
-		int clumpHand;
-		long tornAt;
-		long heldAt = -1L;
+		/** Torn clumps the tendrils hold before throwing them (several at once while it digs); the side that tears next. */
+		final List<Clump> clumps = new ArrayList<>();
+		int nextHand;
+		/** Where it's digging toward, so it can go straight on to the next blocks in the way. */
+		Vec3 ripToward = Vec3.ZERO;
 		int ripped;
 		boolean whispered;
+	}
+
+	/** A torn clump in a tendril: its id, which tendril, when it was torn, when it was held (-1 not yet). */
+	static final class Clump {
+		final int id;
+		final int hand;
+		final long tornAt;
+		long heldAt = -1L;
+
+		Clump(int id, int hand, long tornAt) {
+			this.id = id;
+			this.hand = hand;
+			this.tornAt = tornAt;
+		}
 	}
 
 	/**
@@ -158,7 +173,8 @@ final class WebTakeoverPath {
 	 */
 	static void tick(ServerPlayer player, Route route, Entity target, boolean flee, double reach, long now) {
 		ServerLevel level = player.level();
-		if (route.ripping != null || route.clumpId >= 0) {
+		tickFlings(player, route, now);
+		if (route.ripping != null) {
 			tickRip(player, route, now);
 			return;
 		}
@@ -226,10 +242,12 @@ final class WebTakeoverPath {
 	static void stop(ServerPlayer player, @Nullable Route route) {
 		if (route != null) {
 			clearCracks(player, route);
-			if (route.clumpId >= 0 && player.level().getEntity(route.clumpId) instanceof BlockCluster chunk && holds(player, route.clumpHand, chunk)) {
-				WebTendrils.fling(player, route.clumpHand, flingVelocity(player, chunk, route.ripDir));
+			for (Clump clump : route.clumps) {
+				if (player.level().getEntity(clump.id) instanceof BlockCluster chunk && holds(player, clump.hand, chunk)) {
+					WebTendrils.fling(player, clump.hand, flingVelocity(player, chunk, route.ripDir));
+				}
 			}
-			route.clumpId = -1;
+			route.clumps.clear();
 		}
 		if (player.getAttached(WebSymbiote.RIPPING) != null) {
 			player.removeAttached(WebSymbiote.RIPPING);
@@ -581,6 +599,7 @@ final class WebTakeoverPath {
 			blocks = blocks.subList(0, RIP_MAX_BLOCKS - route.ripped);
 		}
 		ServerLevel level = player.level();
+		route.ripToward = toward;
 		route.ripSlot = new ArrayList<>(blocks);
 		Vec3 middle = Vec3.ZERO;
 		float hardest = 0.0F;
@@ -692,10 +711,6 @@ final class WebTakeoverPath {
 			WebSymbiote.dread(player, RIP_FX_TICKS, true);
 		}
 		player.setAttached(WebSymbiote.TENDRILS_OUT, now + 12);
-		if (route.clumpId >= 0) {
-			tickFling(player, route, now);
-			return;
-		}
 		// what's gone (or no longer allowed) since it started drops out of the clump
 		List<BlockPos> slot = new ArrayList<>();
 		for (BlockPos pos : route.ripSlot) {
@@ -716,9 +731,9 @@ final class WebTakeoverPath {
 		for (int i = 0; i < slot.size(); i++) {
 			level.destroyBlockProgress(crackId(player, i), slot.get(i), crack);
 		}
-		if (t % 3 == 0) {
-			// the tendrils gouging at it, working it loose
-			BlockPos at = slot.get((int)(t / 3 % slot.size()));
+		if (t % 2 == 0) {
+			// the tendrils gouging at it, ripping it loose
+			BlockPos at = slot.get((int)(t / 2 % slot.size()));
 			BlockState state = level.getBlockState(at);
 			level.playSound(null, at, state.getSoundType().getHitSound(), SoundSource.BLOCKS, 1.0F, 0.6F);
 			Debris.puff(level, at, state, RIP_DEBRIS);
@@ -763,70 +778,61 @@ final class WebTakeoverPath {
 		Vec3 at = chunk.getBoundingBox().getCenter();
 		level.sendParticles(WebSymbiote.dust(1.2F), at.x, at.y, at.z, 10, 0.4, 0.4, 0.4, 0.0);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.9F, 0.5F);
-		int hand = WebTendrils.freeHand(player);
+		WebSymbiote.narrate(player, "dig");
+		// R's side and G's take turns, so one is always free to tear out the next
+		int hand = WebTendrils.freeHand(player) < 0 ? -1 : route.nextHand;
+		if (hand >= 0 && player.getAttachedOrElse(WebTendrils.GRIPS, WebTendrils.Grips.NONE).get(hand) >= 0) {
+			hand = WebTendrils.freeHand(player);
+		}
 		if (hand >= 0) {
-			WebTendrils.grab(player, hand, chunk, -1L);
+			WebTendrils.grab(player, hand, chunk, -1L, true);
+			route.nextHand = hand == WebNet.MAIN ? WebNet.OFF : WebNet.MAIN;
 		}
 		if (hand < 0 || !holds(player, hand, chunk)) {
-			// both tendrils full: it's shoved aside where it is
+			// both tendrils full: it's shoved on ahead where it is
 			chunk.setDeltaMovement(flingVelocity(player, chunk, route.ripDir));
 			chunk.syncVelocity = true;
 			chunk.launch(player);
-			finishRip(player, route);
-			return;
+		} else {
+			route.clumps.add(new Clump(chunk.getId(), hand, now));
 		}
-		route.clumpId = chunk.getId();
-		route.clumpHand = hand;
-		route.tornAt = now;
-		route.heldAt = -1L;
+		// and straight on to the next blocks in the way (or, nothing more within reach, the path again)
+		route.ripping = null;
+		route.ripSlot = List.of();
+		if (!startRip(player, route, route.ripToward, now)) {
+			finishRip(player, route);
+			// the moment it's stuck again it digs again
+			route.stuck = STUCK_RIP_AFTER - 1;
+			route.ripRetryAt = now;
+		}
 	}
 
-	/** The tendril hauls the clump up out of the hole, holds it a moment, then flings it aside. */
-	private static void tickFling(ServerPlayer player, Route route, long now) {
-		if (!(player.level().getEntity(route.clumpId) instanceof BlockCluster chunk) || !chunk.isAlive() || !holds(player, route.clumpHand, chunk)) {
-			route.clumpId = -1;
-			finishRip(player, route);
-			return;
+	/** Each torn clump: yanked out of the hole, held a moment, then thrown on ahead, freeing its tendril for the next. */
+	private static void tickFlings(ServerPlayer player, Route route, long now) {
+		for (java.util.Iterator<Clump> it = route.clumps.iterator(); it.hasNext(); ) {
+			Clump clump = it.next();
+			if (!(player.level().getEntity(clump.id) instanceof BlockCluster chunk) || !chunk.isAlive() || !holds(player, clump.hand, chunk)) {
+				it.remove();
+				continue;
+			}
+			if (clump.heldAt < 0L && WebTendrils.reached(player, clump.hand)) {
+				clump.heldAt = now;
+			}
+			boolean ready = clump.heldAt >= 0L && now - clump.heldAt >= RIP_HOLD_TICKS;
+			if (!ready && now - clump.tornAt < RIP_HOLD_TIMEOUT) {
+				continue;
+			}
+			WebTendrils.fling(player, clump.hand, flingVelocity(player, chunk, route.ripDir));
+			player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.SLIME_JUMP, SoundSource.PLAYERS, 0.8F, 0.5F);
+			it.remove();
 		}
-		if (route.heldAt < 0L && WebTendrils.reached(player, route.clumpHand)) {
-			route.heldAt = now;
-		}
-		boolean ready = route.heldAt >= 0L && now - route.heldAt >= RIP_HOLD_TICKS;
-		if (!ready && now - route.tornAt < RIP_HOLD_TIMEOUT) {
-			return;
-		}
-		WebTendrils.fling(player, route.clumpHand, flingVelocity(player, chunk, route.ripDir));
-		player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.SLIME_JUMP, SoundSource.PLAYERS, 0.8F, 0.5F);
-		route.clumpId = -1;
-		finishRip(player, route);
 	}
 
-	/**
-	 * Aside: square to the way through ({@code dir}), to whichever side (level, or up and over) has the most open room
-	 * within {@code RIP_FLING_LOOK} blocks. Never along the tunnel, never back at you.
-	 */
+	/** Thrown on ahead, the way it's digging (and up a little). */
 	private static Vec3 flingVelocity(ServerPlayer player, BlockCluster chunk, Vec3 dir) {
-		ServerLevel level = player.level();
-		Vec3 side = dir.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : new Vec3(-dir.z, 0.0, dir.x).normalize();
-		Vec3 from = chunk.getBoundingBox().getCenter();
-		Vec3[] ways = {side, side.reverse(), side.add(0.0, 1.0, 0.0).normalize(), side.reverse().add(0.0, 1.0, 0.0).normalize()};
-		Vec3 best = player.getRandom().nextBoolean() ? ways[0] : ways[1];
-		double bestRoom = -1.0;
-		for (Vec3 way : ways) {
-			double room = 0.0;
-			while (room < RIP_FLING_LOOK) {
-				BlockPos at = BlockPos.containing(from.add(way.scale(room + 0.5)));
-				if (!level.getBlockState(at).getCollisionShape(level, at).isEmpty()) {
-					break;
-				}
-				room += 0.5;
-			}
-			if (room > bestRoom + 0.25) {
-				bestRoom = room;
-				best = way;
-			}
-		}
-		return best.scale(RIP_FLING_SPEED).add(0.0, RIP_FLING_LIFT, 0.0);
+		Vec3 ahead = dir.lengthSqr() < 1.0E-4 ? player.getLookAngle().horizontal() : dir;
+		ahead = ahead.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : ahead.normalize();
+		return ahead.scale(RIP_FLING_SPEED).add(0.0, RIP_FLING_LIFT, 0.0);
 	}
 
 	/** That tendril of yours holds {@code chunk}. */

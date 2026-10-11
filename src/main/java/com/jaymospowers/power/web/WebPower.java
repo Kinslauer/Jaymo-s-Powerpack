@@ -253,6 +253,8 @@ public final class WebPower implements Power {
 			WebTendrils.forget(handler.player);
 		});
 		WebSymbiote.register();
+		WebSymbioteBlob.init();
+		WebBehemoth.register();
 		WebAscension.register();
 		WebDebugCommand.register();
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Swing.TYPE, (payload, ctx) -> INSTANCE.onSwing(ctx.player(), payload));

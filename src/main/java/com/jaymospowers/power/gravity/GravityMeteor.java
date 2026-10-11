@@ -236,6 +236,8 @@ final class GravityMeteor {
 		}
 		// everything flammable near the strike catches
 		Flames.area(level, at, IMPACT_FIRE_RADIUS * radius / RADIUS_MIN, IMPACT_FIRE_SECONDS, owner, e -> true);
+		// now and then something came down inside the rock (see WebSymbioteBlob.METEOR_CHANCE)
+		com.jaymospowers.power.web.WebSymbioteBlob.fromMeteor(level, at);
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y + 1.0, at.z, 3 + Math.round(charge * 12), 2.0 + charge * 8.0, 1.0 + charge * 3.0,
 			2.0 + charge * 8.0, 0.0);
 		level.sendParticles(ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, at.x, at.y + 1.0, at.z, 60 + Math.round(charge * 140), 4.0 + charge * 10.0, 2.0 + charge * 4.0,

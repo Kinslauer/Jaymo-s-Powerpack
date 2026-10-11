@@ -63,6 +63,10 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 	private static final float CURL_REARED = 0.15F, CURL_STRIKE = -0.12F, CURL_SWIPE = 0.1F;
 	/** How much longer a striking tendril gets: a plain lash, swinging debris, and extra from your own eyes. */
 	private static final float STRETCH = 0.35F, STRETCH_HEAVY = 0.9F, STRETCH_FIRST_PERSON = 0.4F;
+	/** Feral (a young bond): extra sway speed, how hard a sudden jerk throws a tendril, and how much the bulge swells. */
+	private static final float FERAL_SWAY = 0.08F, FERAL_JERK = 0.9F, FERAL_PULSE = 0.06F;
+	/** The bulge (thickness pulse) every tendril has, wild or not. */
+	private static final float PULSE = 0.04F;
 	/** Combos: a clap's tendrils hauled out this wide each side (yaw) and this much up; a shatter's reared this far apart. */
 	private static final float CLAP_WIDE = 1.5F, CLAP_LIFT = 0.25F, SHATTER_SPREAD = 0.6F;
 
@@ -132,7 +136,7 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		AvatarRenderState own = new AvatarRenderState();
 		own.setData(WebSymbioteClient.TENDRILS, new WebSymbioteClient.Tendrils(tendrils.growth(), tendrils.time(), tendrils.strike(), yaw, pitch,
 			yaw >= 0.0F ? -1.0F : 1.0F, 0.0F, tendrils.held(), tendrils.armor(), tendrils.wall(), wallYaw, wallPitch, tendrils.heavy(),
-			tendrils.variant(), true, tendrils.combo()));
+			tendrils.variant(), true, tendrils.combo(), tendrils.rear(), tendrils.hit(), tendrils.feral()));
 		poseStack.pushPose();
 		poseStack.translate(0.0F, FP_ROOT_UP, FP_ROOT_BACK);
 		// camera space to model space: model -Z is ahead, -Y up, +X the wearer's left
@@ -197,13 +201,10 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 			boolean heavy = tendrils.heavy();
 			int variant = tendrils.variant();
 			int combo = tendrils.combo();
-			float rearShare = heavy ? WebSymbiote.HEAVY_STRIKE_REAR : WebSymbiote.STRIKE_REAR;
-			float hitShare = heavy ? WebSymbiote.HEAVY_STRIKE_HIT / (float)WebSymbiote.HEAVY_STRIKE_TICKS
-				: WebSymbiote.STRIKE_HIT / (float)WebSymbiote.STRIKE_TICKS;
-			if (combo >= 0) {
-				rearShare = WebTendrilCombos.REAR_TICKS / (float)WebTendrilCombos.TICKS;
-				hitShare = WebTendrilCombos.HIT_TICKS / (float)WebTendrilCombos.TICKS;
-			}
+			// where it stops rearing and where it lands (a strike's own, a frenzy's quick one, a combo's, a thrash's cycle)
+			float rearShare = tendrils.rear();
+			float hitShare = tendrils.hit();
+			float feral = tendrils.feral();
 			float weight = 0.0F, swing = 0.0F;
 			if (strike >= 0.0F) {
 				if (strike < rearShare) {
@@ -246,7 +247,11 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 				ModelPart base = this.parts[t][0];
 				// the top two (right, left) are the ones that reach out and hold: while holding, they're drawn reaching
 				base.visible = !(t == 0 && (tendrils.held() & 1) != 0 || t == 1 && (tendrils.held() & 2) != 0);
-				float sway = Mth.sin(time * 0.07F + t * 1.3F) * 0.2F;
+				// a wild one never settles: quicker sway, and now and then a tendril jerks out on its own
+				float sway = Mth.sin(time * (0.07F + FERAL_SWAY * feral) + t * 1.3F) * 0.2F;
+				float jerk = (float)Math.pow(Math.max(0.0F, Mth.sin(time * 0.31F + t * 2.7F) * Mth.sin(time * 0.13F + t * 1.1F)), 8.0)
+					* FERAL_JERK * feral;
+				sway += jerk;
 				float restYaw = r[3] + sway * 0.5F;
 				float restPitch = r[4] + sway;
 				float restCurlX = 0.28F;
@@ -306,8 +311,10 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 					// each segment curls further over, rippling; striking straightens them into a whip
 					segment.xRot = segCurlX + wave * 0.5F * calm + wave * 0.1F * (1.0F - calm);
 					segment.yRot = segCurlY + wave * 0.55F * calm;
-					segment.xScale = 0.9F;
-					segment.yScale = 0.9F;
+					// a slow swallow-like bulge travels out along each one, faster and harder the wilder it is
+					float pulse = 0.9F + (PULSE + FERAL_PULSE * feral) * Mth.sin(time * (0.2F + 0.15F * feral) - k * 0.8F + t * 1.9F);
+					segment.xScale = pulse;
+					segment.yScale = pulse;
 				}
 			}
 		}
