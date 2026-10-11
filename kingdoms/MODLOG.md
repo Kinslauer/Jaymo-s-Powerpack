@@ -529,3 +529,195 @@ Played on a dev server with a client joined: kingdoms founded naturally at Epic 
 
 Still to look at: seats in dense towns cut through houses (their tops left floating); theft, plots and the plot stake,
 and Villages were not tried.
+
+## 0.4.0, track: faction armor and mob combat
+Built, not yet seen in game. Two optional compats, each off unless its mod is loaded: `KnightsCompat` (Epic Knights)
+and `MobCombat` (Better Combat for mobs; `BetterCombatBridge` is the only class touching Better Combat, client
+`MobAnimations` and `PalMobAnimator` the only ones touching Player Animation Library). Shared files got one-line hooks:
+`Folk.setup` (`KnightsCompat.dress` after the role's outfit), `JaymosKingdoms` (`MobCombat.register()`), the client
+entrypoint (`MobAnimations.register()`), and `fabric.mod.json` (two mixin configs, `suggests`). `build.gradle` compiles
+against Better Combat and Player Animation Library (`compileOnly`) and runs them in the dev game (`localRuntime`, with
+Cloth Config). Every number is a constant at the top of its class. Nothing new to translate.
+
+### Faction armour (Epic Knights)
+- **Epic Knights** ("Shields, Armor and Weapons", mod id `magistuarmory`, all rights reserved: nothing copied) has no
+  26.3 build yet (the newest Fabric one is 10.16 for 26.1.2, needing Architectury and Cloth Config). So there's no
+  dependency: items are looked up by registry id when a folk is outfitted, and any id that's missing is skipped (the
+  role's vanilla piece stays). A renamed or reworked item in the 26.3 build just falls back the same way.
+- **How it decorates armour** (read from the 26.1.2 jar):
+  - a surcoat (its heraldry recipe) is a banner's `base_color` and `banner_patterns` on the chestplate, as on a shield.
+    Folk wear their realm's banner: a plain field of `styleColor` (a fiefdom's overlord's colour);
+  - dyeable cloth (gambeson, coif, pantyhose, crusader tabard) takes `dyed_color`;
+  - helmet decorations are entries `{name: "magistuarmory:<decoration>", dyeable, color}` in the `Items` list of its
+    `magistuarmory:armor_decoration` component (custom data). It's only set if that component exists and accepts
+    custom data.
+- **Loadouts** (first id that exists wins):
+
+  | Who | Head | Body | Hands |
+  |---|---|---|---|
+  | Kingdom guard | bascinet / sallet | platemail (surcoat), platemail legs and boots | steel bastard sword, steel heater shield (banner) |
+  | Kingdom archer | kettle hat | gambeson, pantyhose, gambeson boots, all dyed | longbow |
+  | King (kingdom or fiefdom) | armet with torse and mantle and a crown, in the realm's colour | gothic plate (surcoat) | netherite claymore |
+  | Lord | grand bascinet with a big plume, dyed | Maximilian plate (surcoat) | diamond bastard sword, diamond kite shield (banner) |
+  | Fiefdom guard | Norman helmet | chainmail (surcoat) | iron morgenstern, iron kite shield (banner) |
+  | Fiefdom archer | quilted coif, dyed | gambeson, pantyhose, gambeson boots, dyed | longbow |
+  | Fiefdom lord | greathelm with two plumes, dyed | crusader harness, tabard and boots dyed | steel bastard sword, steel heater shield (banner) |
+  | Barbarian | 60%: a rusted kettle hat, Norman helmet, barbute or mail coif | 70% each: rusted mail or half-armour or lamellar, rusted mail legs, rusted or lamellar boots | club, barbed club, rusted mace or bastard sword, stone morgenstern or chain morgenstern; 30% a round shield |
+  | Chief | rusted greathelm with viking horns | lamellar and lamellar boots (his war-painted leggings stay) | diamond lochaber axe |
+
+  Builders and villages are unchanged. War parties, dressed as guards, get the guards' kit.
+- **Ids relied on** (all in the 26.1.2 jar): `bascinet sallet platemail_chestplate platemail_leggings platemail_boots
+  chainmail_helmet chainmail_chestplate chainmail_leggings chainmail_boots steel_bastardsword iron_bastardsword
+  steel_heatershield iron_heatershield heatershield kettlehat gambeson_chestplate pantyhose gambeson_boots longbow
+  armet gothic_chestplate gothic_leggings gothic_boots knight_chestplate knight_leggings knight_boots netherite_claymore
+  noble_sword grand_bascinet maximilian_chestplate maximilian_leggings maximilian_boots diamond_bastardsword
+  diamond_kiteshield kiteshield norman_helmet iron_morgenstern iron_shortsword iron_kiteshield coif greathelm
+  crusader_chestplate crusader_leggings crusader_boots rustedkettlehat rustednorman_helmet rustedbarbute
+  rustedchainmail_helmet rustedchainmail_chestplate rustedhalfarmor_chestplate lamellar_chestplate
+  rustedchainmail_leggings rustedchainmail_boots lamellar_boots club barbedclub rusted_heavymace rusted_bastardsword
+  stone_morgenstern iron_chainmorgenstern wood_roundshield roundshield rustedgreathelm diamond_lochaberaxe
+  iron_lochaberaxe`; decorations `torse_and_mantle crown big_plume two_plumes viking_horns`.
+- Epic Knights ships Better Combat attributes for its weapons, so with both mods the knights fight with their own
+  weapons' combos.
+
+### Mob combat (Better Combat for mobs)
+Better Mob Combat (MIT, Fabric only to 1.20.1) let humanoid mobs fight with Better Combat. This is our own take on it.
+- **Who:** humanoid melee mobs whose melee goal is vanilla's `MeleeAttackGoal`, holding a weapon Better Combat has
+  attributes for. That's our fighting folk (not archers or builders), and armed zombies (husks, drowned, zombified
+  piglins), vindicators and wither skeletons. Piglins and brutes (their brains attack without a goal) keep vanilla's
+  blow. Unarmed mobs and other mobs are untouched. `MeleeAttackGoalMixin` hands the attack to `MobCombat.attackTick`.
+- **A swing:**
+  - The weapon's attributes come from Better Combat's own registry (data packs, so other weapon mods count too).
+  - **Reach** is 3 plus the weapon's range bonus (or its own attack range). A swing starts within 90% of it, in sight.
+  - **Length** is 20 / the weapon's attack speed (a player's 4 plus its modifiers), x1.35 for mobs, clamped to 10-40
+    ticks. A sword is about 17 ticks, a claymore about 27. Then a 4-tick pause.
+  - **Wind-up:** the blow lands at the attack's `upswing` share of the swing (at least 4 ticks in), so it can be seen
+    coming and rolled away from.
+  - **Combo:** each swing is the weapon's next attack (a sword: slash right, slash left, stab). Attacks that need a
+    shield in the off hand, or an empty one, are skipped when that doesn't hold; dual-wield and mounted attacks are
+    never used. The combo starts over 2 s after a swing.
+  - **The blow** strikes every foe in reach and in the arc, up to 5:
+    - a horizontal slash: the attack's angle;
+    - an overhead: a 28 degree half-width;
+    - a stab: an 18 degree half-width.
+    
+    The target is always struck if it's still in reach. Each hit is the mob's own attack (enchantments, knockback,
+    fire) at the attack's damage multiplier. The swing sound plays.
+  - **Foes:** the target, anyone fighting the mob, and those it would fight anyway: for folk, monsters (not creepers),
+    folk of realms at war with theirs, and players they're hostile to or who are wanted; for monsters, players. A sweep
+    never strikes the mob's own side.
+  - **Moving:** the mob moves at the attack's movement multiplier while swinging.
+- **Animations:** Player Animation Library only animates players' models, but its animation core isn't tied to them.
+  The server sends watchers `MobSwing` (the mob, the animation id, the swing's length). Their client plays Better
+  Combat's animation on a humanoid controller of its own for that mob, stretched over the swing. After vanilla poses
+  the model, the animation's bones are laid onto its head, body, arms and legs. That covers the body and each armour
+  piece (`ModelFeatureRenderer`) and the model as the layers see it (`LivingEntityRenderer.submit`, so held items
+  follow). Humanoid models get the whole animation; an illager's limbs get it while attacking. Without the library, or
+  if its controller can't be built, the mob does vanilla's arm swing. The library's Molang engine type isn't on our
+  compile path (it's nested in its jar), so the controller is built by reflection.
+- **Sidestep:** a fighting folk on the ground and not mid-swing may dodge a player's melee blow. The blow does nothing
+  and he hops aside (0.55 sideways, 0.2 back, 0.22 up), with a whiff sound and a puff. Odds: guards 15%, archers and
+  barbarians 10%, kings, lords and chiefs 25%, once every 3 s at most. Better Combat players' blows land at the end of
+  their wind-up, so this is the dodge as the swing comes in. Only with Better Combat loaded.
+
+### Notes for the lead and testers
+- No new attachments or saved data. Swings and dodges are kept in memory only.
+- `MobSwing` is registered whether or not Better Combat is loaded, so clients and servers always agree.
+- Epic Knights can't be tested on 26.3 until it has a build. Check first when it does: a new kingdom's guards, archers
+  and king; a fiefdom's (overlord's colours on the surcoats, shields and plumes); a camp's barbarians and chief.
+  Then see whether the decorations show, and whether the log says pieces were skipped.
+- **Check first (Better Combat):**
+  - `/summon zombie ~ ~ ~ {equipment:{mainhand:{id:"iron_sword"}}}` or a vindicator. It should swing slash, slash,
+    stab, animated, from about 3 blocks away, and the blow should land mid-swing. Roll out of it with Combat Roll.
+  - Kingdom guards fighting a group of zombies: a slash should catch several, and never hurt their fellow guards.
+  - A king's claymore combo (slam), against the wind-up.
+  - Hitting a guard over and over: about one blow in seven is dodged.
+  - Armour and the held sword should follow the animated arm.
+
+## 0.4.0, track: illager camps
+Built, not yet seen in game. The user's ask: "there should be illager camps as well that work like the barbarians"
+(Illager Invasion as the flavour; nothing taken from it). New classes: `Illagers` (the camp illagers, their tag
+attachment, hunting, the warlord's boss bar and rally), `IllagerCamps` (founding, growth, replacing a lost warlord),
+`IllagerBuildings` (designs and layout). Changed (owned by this track): `Camps`, `CampBuildings`, `Raids`, `Barbarians`.
+Shared files got one-line hooks: `JaymosKingdoms` (`LOGGER.debug(... Illagers.TAG)`, class-loading the attachment) and
+a block at the end of `en_us.json`. No client code, art or tools script: every mob you see is vanilla's.
+
+### What's new
+- **An illager camp is a camp** (a `FactionType.BARBARIAN` faction) whose `Camps.CampData.kind` is `"illager"`
+  (`"barbarian"` for the rest; old saves read as barbarian). So it rides on everything camps already do: no court, no
+  theft, no builders' plans, at war with every settlement, raiding through `Raids`, cleared through
+  `Camps.chiefSlain`. Camps of a kind ally with each other and **barbarian and illager camps are at war**
+  (`Camps.takeSides`); barbarians fall on any illager on sight, and camp illagers hunt barbarians.
+- **Real vanilla illagers**, each carrying `Illagers.TAG` (a persistent entity attachment: camp id, role, raid flag,
+  rallied): pillagers (crossbows), vindicators (iron axes), evokers in older camps and a ravager. Roles (roster keys,
+  defined as `Folk` roles only for their names): `PILLAGER 20`, `VINDICATOR 21`, `EVOKER 22`, `WARLORD 23`,
+  `RAVAGER 24`. They're made persistent, can't pick up loot, keep within 16 of the fire (strays walk back every 5 s),
+  and **never join a vanilla raid** (`setCanJoinRaid(false)`, never patrol leaders: no Bad Omen, no captain drops).
+  Vanilla gives them their hatred of players, villagers and golems and their alerts (illagers call only illagers);
+  every second each one with no target also picks the nearest folk it can see within 32 (kingdom, village or
+  barbarian). Kingdom folk already attack them on sight (they're monsters). On peaceful they vanish like any monster:
+  camps don't rise, grow or raid then, and the roster is recounted (and a lost warlord replaced) once it's back up.
+- **The warlord** (`Illagers.crown`): a vindicator with 200 health, base damage 6 plus a diamond axe, armour 8,
+  toughness 2, knockback resistance 0.6, the ominous banner on his head (it drops when he dies), named "Warlord of X",
+  a white notched boss bar for players within 48. At 40% health he rallies once: Strength II, Resistance II and Speed
+  for a minute, a raid horn, and every illager of his camp within 48 sent at his foe. A warlord missing for 2 minutes
+  while his whole camp is loaded (discarded, not killed) is replaced; a second warlord who loads is dismissed.
+- **Where they rise** (`Camps.spawnCamps`): next to the barbarian roll, each kingdom with no standing illager camp
+  within 360 has a 15% chance a minute, on the same terms (150-300 from it, 56-128 from a player near it, out of sight,
+  nobody's land, 160 from other camps), but only in pillager country (`BiomeTags.HAS_PILLAGER_OUTPOST`: plains,
+  savanna, desert, snowy and mountain lands, cherry groves; plus taigas, the dark forest and the pale garden). **Trees
+  are allowed**: the ground is read under trunks, leaves and huge mushrooms (`IllagerBuildings.floor`, at most 5 up and
+  down) and they're felled when the camp is built. The site check now keeps 22 blocks clear for either kind.
+- **The camp** (`IllagerBuildings.build`, original designs in dark oak, cobblestone, grey and white wool, ominous banners
+  everywhere): the ground levelled and cleared 22 round the fire and 18 up; a dark oak fence ring (radius 20, 2 high)
+  with lantern-topped log posts and a gate facing the kingdom between two posts flying the banner; a campfire with
+  three benches; **the warlord's pavilion** at the back (9 x 10: a porch of bannered posts, grey walls on log posts, a
+  stepped white-and-grey roof with a banner on its peak, a carpet to his seat, his hoard chest behind it: emeralds,
+  iron, a crossbow, arrows, lapis, a golden apple, logs, bread); a **watchtower** (5 x 5, 13 high: a ladder up a plank
+  spine, a railed lookout with a pillager sentry, a slab roof, a banner on top); an **iron cage** holding an **allay**
+  (free it once the camp is cleared); the **loot pile** (barrels and chests under a dark oak lean-to: the camp's
+  storage, its depot in front); three bell tents and two banner poles. Stock: 32 dark oak logs, 32 arrows, 16 bread,
+  5 emeralds. People: the warlord, 3 pillagers (one on the tower), 2 vindicators.
+- **Growth** (daily while loaded; up to 3 missed days): it takes in 8 dark oak logs, 8 planks, 6 white and 4 grey wool,
+  4 fences, 8 cobblestone, 8 arrows, 4 bread and an iron ingot (plus `Production`'s camp share). Its age is the days
+  it has grown (`CampData.grown`, so `/time add` and `/faction camp grow` age it): one more fighter every 2 days up to
+  12 (2 pillagers to each vindicator); an evoker at 3 days and a second at 7; a ravager at 5. It grows **without
+  builders** (folk builders would look wrong among illagers): at most one building per day grown, when no player is
+  within 24 of the spot and the loot pile holds 6 logs, 8 planks and 6 white wool, it raises the next of
+  `IllagerBuildings.GROWTH`: a banner pole, a practice range (targets on hay, a fletching table), a tent, a pole, a
+  tent, a second watchtower behind the pavilion, two poles, a tent (9 in all; a blocked spot is skipped).
+- **War parties** (`Raids`, now for either kind): the same rules (10 s checks, 12%, 2-day cooldown, 420 reach, a player
+  within 80 of the target). An illager party is 3 + 1 per 2 fighters (at most 8), every third a vindicator, announced
+  with "Raid horns! The illagers of X ride on Y!". Plunder is carried in the off hand (it always drops if they die)
+  and goes into the loot pile when they get home.
+- **Clearing** (killing the warlord): "The warlord of X has fallen to Y! The illagers scatter." The same rewards as a
+  barbarian camp (100 reputation with every standing kingdom, fiefdom and village; 40 for players within 48). Its
+  illagers within 160 vanish (dropping plunder); those away come back to nothing and slink off when they load. It
+  rots like a barbarian camp, now also losing its banners and targets: the fence ring, wool and banners go; log posts,
+  the watchtower frames, the cage and the pavilion's posts stay as a ruin.
+- **Commands** (ops): `/faction camp found illager` (`found barbarian` is the same as plain `found`), `/faction camp
+  info` (the nearest standing camp: kind, age, buildings raised, roster, whether its leader is loaded, whether it's
+  raiding, whom it would raid now). `raid` and `grow` work on either kind (`grow` also raises the next building if
+  it can, even with you standing by).
+
+### Notes for the lead and testers
+- `Illagers.TAG` is a new persistent (not synced) entity attachment, class-loaded from `JaymosKingdoms.onInitialize`.
+  `Camps.CampData` gained `kind`, `built` and `grown` (optional fields: old saves are fine).
+- Signatures changed: `Camps.chiefSlain(level, LivingEntity chief, int campId, source)`,
+  `Raids.raiderDied(level, LivingEntity raider, int camp, source, boolean folk)`; `CampBuildings.level(...)` takes a
+  radius and a height, and its `Draft` is package-visible.
+- Faction lists still call an illager camp a "barbarian camp" (`faction_type.jaymoskingdoms.barbarian`): a new
+  `FactionType` would have needed edits across Economy, Production, KingdomEvents, Relations, Storehouse, Theft and
+  Wars. Rumours and talk can tell the kinds apart with `Camps.illager(server, id)`.
+- Killing an illager on a faction's land (the camp's own included) still gives `KingdomEvents`' small monster-kill
+  reputation with that land's owner: harmless.
+- **Check first:**
+  - `/faction camp found illager` in a dark forest: trees felled, the layout facing the way you look, banners ominous
+    (not plain white), fences joined up, the allay in its cage, the sentry on the tower;
+  - the warlord's boss bar, his rally at 40%, and killing him: the announcement, reputation, the scatter, the rot;
+  - kingdom guards and illagers fighting on sight; barbarians and illagers fighting when the two kinds of camp meet;
+  - `/faction camp raid` from an illager camp near a kingdom: the horn, the march, plunder in off hands, the loot
+    pile filling;
+  - a vanilla raid (Bad Omen at a village) near a camp: camp illagers must not join it;
+  - `/faction camp grow` a few times and `/faction camp info`: new illagers (evokers from the third), a building each
+    time; then `/time add 24000` while standing more than 24 from the camp: a day's growth on its own.

@@ -83,7 +83,7 @@ final class CampBuildings {
 	// ---- designs -------------------------------------------------------------------------------------------------
 
 	/** Blocks drawn at their offsets, then laid bottom up. */
-	private static final class Draft {
+	static final class Draft {
 		final Map<BlockPos, BlockState> blocks = new LinkedHashMap<>();
 
 		void set(int x, int y, int z, BlockState state) {
@@ -388,7 +388,7 @@ final class CampBuildings {
 		RandomSource random = level.getRandom();
 		BlockPos fire = new BlockPos(center.getX(), floor, center.getZ());
 		Placer camp = new Placer(fire, gate, 0);
-		level(level, fire);
+		level(level, fire, CLEAR_RADIUS, CLEAR_HEIGHT);
 		Palette p = palette(level, f);
 		BlockState log = p.log();
 		// the palisade, jagged, with a gap for the gate between two tall skull-topped posts
@@ -443,12 +443,15 @@ final class CampBuildings {
 		return new Layout(fire, storage, loot.at(LOOT_DEPOT), chief.at(CHIEF_SPOT), chest);
 	}
 
-	/** Levels the camp's ground to {@code fire}'s height and clears the air above it (plants, leaves, snow). */
-	private static void level(ServerLevel level, BlockPos fire) {
+	/**
+	 * Levels the camp's ground ({@code radius} round {@code fire}) to the fire's height and clears the air above it
+	 * ({@code height} up: plants, leaves, trees, huge mushrooms, snow).
+	 */
+	static void level(ServerLevel level, BlockPos fire, int radius, int height) {
 		int floor = fire.getY();
-		for (int dx = -CLEAR_RADIUS; dx <= CLEAR_RADIUS; dx++) {
-			for (int dz = -CLEAR_RADIUS; dz <= CLEAR_RADIUS; dz++) {
-				if (dx * dx + dz * dz > CLEAR_RADIUS * CLEAR_RADIUS) {
+		for (int dx = -radius; dx <= radius; dx++) {
+			for (int dz = -radius; dz <= radius; dz++) {
+				if (dx * dx + dz * dz > radius * radius) {
 					continue;
 				}
 				BlockPos column = fire.offset(dx, 0, dz);
@@ -469,10 +472,11 @@ final class CampBuildings {
 					level.setBlock(column.atY(floor - 1), surface, Block.UPDATE_CLIENTS);
 				}
 				// and clear the air above: plants, leaves, snow, overhangs
-				for (int y = floor; y <= floor + CLEAR_HEIGHT; y++) {
+				for (int y = floor; y <= floor + height; y++) {
 					BlockPos at = column.atY(y);
 					BlockState there = level.getBlockState(at);
-					if (!there.isAir() && (there.canBeReplaced() || Castle.natural(there) || there.is(BlockTags.FLOWERS) || there.is(BlockTags.SAPLINGS))) {
+					if (!there.isAir() && (there.canBeReplaced() || Castle.natural(there) || there.is(BlockTags.FLOWERS) || there.is(BlockTags.SAPLINGS)
+						|| there.is(Blocks.MUSHROOM_STEM) || there.is(Blocks.BROWN_MUSHROOM_BLOCK) || there.is(Blocks.RED_MUSHROOM_BLOCK))) {
 						level.setBlock(at, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
 					}
 				}
@@ -500,10 +504,10 @@ final class CampBuildings {
 		c.setChanged();
 	}
 
-	/** What rots away once a camp is cleared: its wool, carpets, hay, fences, skulls, lanterns, ladders and fire. */
+	/** What rots away once a camp is cleared: its wool, carpets, hay, fences, skulls, lanterns, ladders, banners, targets and fire. */
 	static boolean perishable(BlockState state) {
 		return state.is(BlockTags.WOOL) || state.is(BlockTags.WOOL_CARPETS) || state.is(Blocks.HAY_BLOCK) || state.is(BlockTags.FENCES)
 			|| state.is(BlockTags.FENCE_GATES) || state.is(Blocks.SKELETON_SKULL) || state.is(Blocks.LANTERN) || state.is(Blocks.LADDER)
-			|| state.is(Blocks.CAMPFIRE) || state.is(BlockTags.WOODEN_SLABS);
+			|| state.is(Blocks.CAMPFIRE) || state.is(BlockTags.WOODEN_SLABS) || state.is(BlockTags.BANNERS) || state.is(Blocks.TARGET);
 	}
 }

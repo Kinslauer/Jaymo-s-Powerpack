@@ -41,6 +41,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		KingdomEvents.register();
 		// barbarian camps, their raiders and raids (and their attachment)
 		LOGGER.debug("camp attachment: {}", Camps.CAMPS);
+		LOGGER.debug("illager attachment: {}", Illagers.TAG);
 		Camps.register();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> KingdomCommands.register(dispatcher));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> KingdomEvents.forget(handler.player));
@@ -53,5 +54,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
 		LOGGER.debug("war attachment: {}", WarData.WARS);
 		Wars.register();
+		// 0.4, combat: Better Combat's weapon moves for humanoid mobs, and folk's sidestep (only with Better Combat)
+		MobCombat.register();
 	}
 }

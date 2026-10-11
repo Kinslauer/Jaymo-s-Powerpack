@@ -199,5 +199,10 @@
 	"message.jaymoskingdoms.banner.bar.contested": "%s's banner is contested by %s",
 	"message.jaymoskingdoms.banner.taken": "%s has taken land from %s at %s.",
 	"message.jaymoskingdoms.banner.seat_taken": "The banner of %s flies over the seat of %s!",
-	"message.jaymoskingdoms.banner.torn": "The banner of %s at %s is torn down."
+	"message.jaymoskingdoms.banner.torn": "The banner of %s at %s is torn down.",
+	"entity.jaymoskingdoms.warlord_of": "Warlord of %s",
+	"message.jaymoskingdoms.warlord_rallies": "%s sounds the horn! His illagers close in.",
+	"message.jaymoskingdoms.raid.announce.illager": "Raid horns! The illagers of %s ride on %s!",
+	"message.jaymoskingdoms.illager_camp.cleared": "The warlord of %s has fallen to %s! The illagers scatter.",
+	"message.jaymoskingdoms.illager_camp.thanks": "Word of the warlord's death spreads: every kingdom and village thinks better of you."
 }
