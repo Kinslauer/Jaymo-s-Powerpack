@@ -13,6 +13,7 @@
 	},
 	"mixins": [
 		"jaymoskingdoms.combat.mixins.json",
+		"jaymoskingdoms.worldgen.mixins.json",
 		{ "config": "jaymoskingdoms.combat.client.mixins.json", "environment": "client" }
 	],
 	"depends": {
@@ -23,6 +24,7 @@
 	},
 	"suggests": {
 		"bettercombat": "*",
-		"magistuarmory": "*"
+		"magistuarmory": "*",
+		"mr_ati_structuresvanillaedition": "*"
 	}
 }

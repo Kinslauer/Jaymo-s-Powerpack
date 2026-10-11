@@ -28,10 +28,11 @@ public final class Works {
 	/**
 	 * A building under way: which catalogue entry, its plot's lowest north-west corner ({@code origin}, its y the floor),
 	 * how it's turned, its stage and how far through it ({@code index}: columns readied, or blocks laid), the materials
-	 * already on site ({@code credit}: item id → eighths), its stakes, and the plot it stands on (-1 for none).
+	 * already on site ({@code credit}: item id → eighths), its stakes, the plot it stands on (-1 for none), and whether
+	 * its site is on an old structure the builders tear down as they go ({@code ruins}, see {@link Ruins}).
 	 */
 	public record Project(String entry, BlockPos origin, Rotation rotation, int stage, int index, Map<String, Integer> credit, List<BlockPos> stakes,
-		int plot, long started) {
+		int plot, long started, boolean ruins) {
 		public static final Codec<Project> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.STRING.fieldOf("entry").forGetter(Project::entry),
 				BlockPos.CODEC.fieldOf("origin").forGetter(Project::origin),
@@ -41,21 +42,22 @@ public final class Works {
 				Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("credit", Map.of()).forGetter(Project::credit),
 				BlockPos.CODEC.listOf().optionalFieldOf("stakes", List.of()).forGetter(Project::stakes),
 				Codec.INT.optionalFieldOf("plot", -1).forGetter(Project::plot),
-				Codec.LONG.optionalFieldOf("started", 0L).forGetter(Project::started))
+				Codec.LONG.optionalFieldOf("started", 0L).forGetter(Project::started),
+				Codec.BOOL.optionalFieldOf("ruins", false).forGetter(Project::ruins))
 			.apply(i, Project::new));
 
 		public Project at(int stage, int index) {
-			return new Project(this.entry, this.origin, this.rotation, stage, index, this.credit, this.stakes, this.plot, this.started);
+			return new Project(this.entry, this.origin, this.rotation, stage, index, this.credit, this.stakes, this.plot, this.started, this.ruins);
 		}
 
 		public Project withCredit(Map<String, Integer> credit) {
 			Map<String, Integer> clean = new HashMap<>(credit);
 			clean.values().removeIf(n -> n <= 0);
-			return new Project(this.entry, this.origin, this.rotation, this.stage, this.index, Map.copyOf(clean), this.stakes, this.plot, this.started);
+			return new Project(this.entry, this.origin, this.rotation, this.stage, this.index, Map.copyOf(clean), this.stakes, this.plot, this.started, this.ruins);
 		}
 
 		public Project withStakes(List<BlockPos> stakes) {
-			return new Project(this.entry, this.origin, this.rotation, this.stage, this.index, this.credit, List.copyOf(stakes), this.plot, this.started);
+			return new Project(this.entry, this.origin, this.rotation, this.stage, this.index, this.credit, List.copyOf(stakes), this.plot, this.started, this.ruins);
 		}
 
 		/** The same building (two projects are the same one when they share an origin and an entry). */
