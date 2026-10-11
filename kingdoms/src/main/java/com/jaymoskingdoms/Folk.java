@@ -423,9 +423,18 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		return server != null && Relations.between(server, this.factionId(), other.factionId()) == Relation.ALLIED;
 	}
 
+	/** Asleep, it lies still (its goals wait too). */
+	@Override
+	protected boolean isImmobile() {
+		return super.isImmobile() || this.isSleeping();
+	}
+
 	@Override
 	public void aiStep() {
 		super.aiStep();
+		if (this.isSleeping() && this.level() instanceof ServerLevel level) {
+			Homes.asleep(level, this);
+		}
 		if (this.bossBar != null) {
 			this.bossBar.setProgress(this.getHealth() / this.getMaxHealth());
 		}
@@ -437,7 +446,9 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		if (this.outfit < Outfits.VERSION) {
 			this.restyle(level);
 		}
-		if (isBuilder(this.role())) {
+		if (Homes.tick(level, this)) {
+			// (0.5.5) bedtime: its work waits till morning
+		} else if (isBuilder(this.role())) {
 			Builders.tick(level, this);
 		} else if (this.role() == FARMER) {
 			Farmers.tick(level, this);

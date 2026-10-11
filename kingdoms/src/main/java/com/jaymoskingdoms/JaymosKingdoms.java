@@ -59,6 +59,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.4: living trees (saplings grow up by stages, trees fell whole, the woods seed themselves) and their attachment
 		LOGGER.debug("growing tree attachment: {}", Trees.GROWING);
 		Trees.register();
+		// 0.5.5: the working folk sleep in beds at night; villagers take a trade at the settlement's job sites and work it
+		Homes.register();
+		Jobs.register();
 		Theft.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
 		LOGGER.debug("war attachment: {}", WarData.WARS);

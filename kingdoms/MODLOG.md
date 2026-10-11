@@ -1168,3 +1168,24 @@ Dynamic Trees has no Fabric build for 26.3, so Kingdoms grows its own (original 
 Tested on the dev server: oak, birch, spruce and cherry saplings sprouted, grew young, and grew full over two skipped
 days, and the woodcutter felled a whole tree in his tree farm and carried the wood to the storehouse. Not yet seen in
 game: a player felling a tree, and saplings seeding by themselves.
+
+## 0.5.5: stage 3, homes and jobs
+- **The working folk sleep at night.** From dusk (12500) to just before dawn, builders, farmers, miners and
+  woodcutters walk home and sleep in a bed: one in the settlement's own houses or barracks first, else any bed near
+  the seat that no villager has claimed. With no bed they wait out the night at home. They get up at dawn, or if a
+  fight starts. A player who uses a bed one of them is sleeping in turfs them out. Guards and archers keep the night
+  watch, and the king keeps his own hours. Builders no longer build through the night (sleep still makes up the
+  work).
+- **New houses bring villagers.** Each house the builders finish brings a villager to live in it, while the
+  settlement has more beds than villagers.
+- **Villagers take a trade and work it.** A villager without a trade is sent to a free job site in one of the
+  settlement's own buildings (the smithy's forge, the mason's stonecutter, the farm's composter, the stall's barrel,
+  ...). In working hours (2000-9000), a villager at its job site is seen working (its trade's sound, smoke at a forge
+  or smoker), and every 1200 ticks turns storehouse goods into products: smiths smelt 8 raw iron, copper or gold
+  with a coal; the butcher cooks 8 raw meat or fish; the mason cuts 8 cobblestone into stone bricks while there are
+  more than 256; the fletcher makes 4 arrows from a stick, a flint and a feather; the fisherman brings in 1-2 fish; a
+  farmer hands over the crops it carries beyond 12 of each.
+Tested on the dev server: at night two builders, three farmers and a miner went to bed (sleeping in house beds), the
+rest walked home; all were back at work at dawn. By day an unemployed villager took a trade, the butchers cooked all
+38 raw porkchops, and the farmers handed their spare carrots to the storehouse. Not yet seen in game: a smith (the
+test village has none), a villager moving into a new house.
