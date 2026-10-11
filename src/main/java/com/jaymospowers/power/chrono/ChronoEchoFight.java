@@ -256,7 +256,7 @@ final class ChronoEchoFight {
 		}
 		boolean last = n == PUNCHES - 1;
 		this.echo.getLookControl().setLookAt(target);
-		this.echo.swing(n % 2 == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
+		this.echo.swing(n % 2 == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		target.setInvulnerableTime(0);
 		Vec3 before = target.getDeltaMovement();
 		if (target.hurtServer(level, this.echo.damageSources().mobAttack(this.echo), PUNCH_DAMAGE * (1.0F + 0.1F * n))) {
