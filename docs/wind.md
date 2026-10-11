@@ -559,3 +559,7 @@ whisper in the action bar.
   (`GUARD_LEAD_X`, `GUARD_REAR_X`, `GUARD_IN`, `GUARD_REAR_IN`). In the roundhouse the guard turns `GUARD_TRACK` of
   the way back toward the target.
 - Timing, the crescent, the swing trail and the cold's held chamber are unchanged.
+- **The cold's kick wind-up** (`WindKick.COLD_EXTRA_WINDUP_TICKS`): 20 ticks (1 s) extra, not the 60 the other
+  abilities take. While it's held, the server swirls white dust in a rising spiral round the kicker
+  (`COLD_SWIRL_*`, thickening as it builds) with snowflakes, and plays a blowing wind (breeze air and whirl) every
+  `COLD_SOUND_EVERY` ticks (`WindKick.coldSwirl`). The cooldown's cold extra is unchanged.

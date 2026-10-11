@@ -311,4 +311,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   target, leans hard away, and the leg snaps straight out to the side at head height, holds, pulls back and drops)
   or, one kick in three, a spinning back kick (dwit chagi: the body spins its back to the target, pitches forward,
   drives the leg straight out behind, looks over the shoulder, and spins on round to face it again). The fists stay
-  up in a guard by the face instead of being flung out. Same timing, crescent and damage (see `docs/wind.md`).
+  up in a guard by the face instead of being flung out. Same timing, crescent and damage (see `docs/wind.md`). In the
+  cold the kick winds up only 1 s longer (was 3 s), with white wind swirling round you and a blowing wind sound.

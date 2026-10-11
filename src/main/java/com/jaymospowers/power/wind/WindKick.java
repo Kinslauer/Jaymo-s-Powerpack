@@ -66,6 +66,14 @@ public final class WindKick {
 	/** How far the crescent tips, its kicking-side tip low and the other high (blocks at each tip). */
 	static final double CRESCENT_TILT = 0.35;
 	private static final DustParticleOptions WHITE = new DustParticleOptions(0xFFFFFF, 1.4F);
+	/**
+	 * The cold's extra wind-up for the kick (ticks, 1 s; the other Wind abilities take {@link WindCold#EXTRA_WINDUP_TICKS}).
+	 * While it lasts, white wind swirls round the kicker ({@code COLD_SWIRL_*}: points on the ring, its radius in blocks,
+	 * how fast it turns in radians a tick) with snowflakes, and the wind blows every {@code COLD_SOUND_EVERY} ticks.
+	 */
+	static final int COLD_EXTRA_WINDUP_TICKS = 20;
+	static final int COLD_SWIRL_POINTS = 10, COLD_SOUND_EVERY = 8;
+	static final double COLD_SWIRL_RADIUS = 0.9, COLD_SWIRL_SPIN = 0.45;
 
 	/**
 	 * A kick under way: when it began (game time), which leg kicks ({@code left}: the left leg, everything mirrored),
@@ -117,8 +125,9 @@ public final class WindKick {
 		final float damage;
 		/** +1 kicked with the right leg (it sweeps in from the right), -1 the left. */
 		final double sweep;
-		/** Ticks of wind-up left before it leaves the foot. */
+		/** Ticks of wind-up left before it leaves the foot, and the whole wind-up. */
 		int delay;
+		final int windup;
 		double travelled;
 		final Set<Integer> hit = new HashSet<>();
 
@@ -132,6 +141,7 @@ public final class WindKick {
 			this.damage = damage;
 			this.sweep = sweep;
 			this.delay = delay;
+			this.windup = delay;
 		}
 	}
 
@@ -159,7 +169,7 @@ public final class WindKick {
 		}
 		boolean ascended = Fate.isAscended(player);
 		// the cold holds the wind-up (and the cooldown after) longer
-		int windup = WindCold.windup(player, WINDUP_TICKS);
+		int windup = WindCold.isCold(player) ? WINDUP_TICKS + COLD_EXTRA_WINDUP_TICKS : WINDUP_TICKS;
 		READY_AT.put(player.getUUID(), now + windup - WINDUP_TICKS + WindCold.cooldown(player, ascended ? COOLDOWN_ASCENDED : COOLDOWN));
 		Kicking kicking = new Kicking(now, player.getRandom().nextBoolean(), player.getRandom().nextInt(), windup);
 		player.setAttached(KICKING, kicking);
@@ -189,6 +199,30 @@ public final class WindKick {
 		level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 1.0F, 1.2F);
 	}
 
+	/**
+	 * The cold's held wind-up: white wind swirling round the kicker, thickening as it builds, with snowflakes and a
+	 * blowing wind.
+	 */
+	private static void coldSwirl(ServerLevel level, ServerPlayer owner, Crescent c) {
+		int elapsed = c.windup - c.delay;
+		double build = elapsed / (double)c.windup;
+		int points = 3 + (int)Math.round((COLD_SWIRL_POINTS - 3) * build);
+		for (int i = 0; i < points; i++) {
+			double a = elapsed * COLD_SWIRL_SPIN + i * Math.PI * 2.0 / points;
+			// a spiral up the body, round and round
+			double y = owner.getBbHeight() * (0.15 + 0.7 * ((i / (double)points + elapsed * 0.07) % 1.0));
+			level.sendParticles(WHITE, owner.getX() + Math.cos(a) * COLD_SWIRL_RADIUS, owner.getY() + y,
+				owner.getZ() + Math.sin(a) * COLD_SWIRL_RADIUS, 1, 0.0, 0.0, 0.0, 0.0);
+		}
+		level.sendParticles(ParticleTypes.SNOWFLAKE, owner.getX(), owner.getY() + owner.getBbHeight() * 0.5, owner.getZ(),
+			1 + (int)(build * 3), COLD_SWIRL_RADIUS * 0.6, 0.6, COLD_SWIRL_RADIUS * 0.6, 0.03);
+		if (elapsed % COLD_SOUND_EVERY == 0) {
+			level.playSound(null, owner.getX(), owner.getY(), owner.getZ(), SoundEvents.BREEZE_IDLE_AIR, SoundSource.PLAYERS,
+				0.7F + 0.3F * (float)build, 0.8F + 0.3F * (float)build);
+			level.playSound(null, owner.getX(), owner.getY(), owner.getZ(), SoundEvents.BREEZE_WHIRL, SoundSource.PLAYERS, 0.5F, 1.1F);
+		}
+	}
+
 	private static void tick(MinecraftServer server) {
 		for (Iterator<Crescent> it = CRESCENTS.iterator(); it.hasNext(); ) {
 			Crescent c = it.next();
@@ -202,6 +236,9 @@ public final class WindKick {
 				// still winding up: it follows the kicker until it leaves the foot
 				if (owner != null && owner.level() == level) {
 					c.pos = owner.position().add(0.0, owner.getBbHeight() * 0.55, 0.0).add(c.dir.scale(0.8));
+					if (c.windup > WINDUP_TICKS) {
+						coldSwirl(level, owner, c);
+					}
 				}
 				if (--c.delay == 0) {
 					snap(level, c);
