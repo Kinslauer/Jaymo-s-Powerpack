@@ -19,8 +19,9 @@ import net.minecraft.world.item.component.DyedItemColor;
  * The barbarians: a camp's raiders ({@link Folk#BARBARIAN}: axes and swords, hide armour, war paint in their camp's
  * colour) and its chief ({@link Folk#CHIEF}: a mini-boss with a red boss bar, who rallies when hurt). They attack
  * players, every other faction's folk, villagers and iron golems on sight; a kingdom's (or fiefdom's) fighting folk
- * attack them on sight in turn. Their alerts only call their own side (see {@link Folk#sameSide}: camps are allied with
- * each other, so barbarians help barbarians).
+ * attack them on sight in turn. Their alerts only call their own side (see {@link Folk#sameSide}: camps of a kind are
+ * allied with each other, so barbarians help barbarians). They are at war with the illager camps ({@link Illagers}), and
+ * fall on any illager they see.
  */
 public final class Barbarians {
 	/** A raider: health, blows, pace. */
@@ -102,6 +103,8 @@ public final class Barbarians {
 		if (target instanceof Folk other) {
 			return !isBarbarian(other);
 		}
-		return target instanceof Villager || target instanceof IronGolem;
+		// (and illagers: the camps' old feud)
+		return target instanceof Villager || target instanceof IronGolem || target instanceof net.minecraft.world.entity.monster.illager.AbstractIllager
+			|| Illagers.isCampIllager(target);
 	}
 }

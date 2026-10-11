@@ -510,3 +510,91 @@ with yours), and a block at the end of `en_us.json`. Every number is a constant 
   - `war status`;
   - a peace offer and acceptance, and each kind of terms (`war start`, then kill folk or take chunks to move the
     score).
+
+## 0.4.0, track: illager camps
+Built, not yet seen in game. The user's ask: "there should be illager camps as well that work like the barbarians"
+(Illager Invasion as the flavour; nothing taken from it). New classes: `Illagers` (the camp illagers, their tag
+attachment, hunting, the warlord's boss bar and rally), `IllagerCamps` (founding, growth, replacing a lost warlord),
+`IllagerBuildings` (designs and layout). Changed (owned by this track): `Camps`, `CampBuildings`, `Raids`, `Barbarians`.
+Shared files got one-line hooks: `JaymosKingdoms` (`LOGGER.debug(... Illagers.TAG)`, class-loading the attachment) and
+a block at the end of `en_us.json`. No client code, art or tools script: every mob you see is vanilla's.
+
+### What's new
+- **An illager camp is a camp** (a `FactionType.BARBARIAN` faction) whose `Camps.CampData.kind` is `"illager"`
+  (`"barbarian"` for the rest; old saves read as barbarian). So it rides on everything camps already do: no court, no
+  theft, no builders' plans, at war with every settlement, raiding through `Raids`, cleared through
+  `Camps.chiefSlain`. Camps of a kind ally with each other and **barbarian and illager camps are at war**
+  (`Camps.takeSides`); barbarians fall on any illager on sight, and camp illagers hunt barbarians.
+- **Real vanilla illagers**, each carrying `Illagers.TAG` (a persistent entity attachment: camp id, role, raid flag,
+  rallied): pillagers (crossbows), vindicators (iron axes), evokers in older camps and a ravager. Roles (roster keys,
+  defined as `Folk` roles only for their names): `PILLAGER 20`, `VINDICATOR 21`, `EVOKER 22`, `WARLORD 23`,
+  `RAVAGER 24`. They're made persistent, can't pick up loot, keep within 16 of the fire (strays walk back every 5 s),
+  and **never join a vanilla raid** (`setCanJoinRaid(false)`, never patrol leaders: no Bad Omen, no captain drops).
+  Vanilla gives them their hatred of players, villagers and golems and their alerts (illagers call only illagers);
+  every second each one with no target also picks the nearest folk it can see within 32 (kingdom, village or
+  barbarian). Kingdom folk already attack them on sight (they're monsters). On peaceful they vanish like any monster:
+  camps don't rise, grow or raid then, and the roster is recounted (and a lost warlord replaced) once it's back up.
+- **The warlord** (`Illagers.crown`): a vindicator with 200 health, base damage 6 plus a diamond axe, armour 8,
+  toughness 2, knockback resistance 0.6, the ominous banner on his head (it drops when he dies), named "Warlord of X",
+  a white notched boss bar for players within 48. At 40% health he rallies once: Strength II, Resistance II and Speed
+  for a minute, a raid horn, and every illager of his camp within 48 sent at his foe. A warlord missing for 2 minutes
+  while his whole camp is loaded (discarded, not killed) is replaced; a second warlord who loads is dismissed.
+- **Where they rise** (`Camps.spawnCamps`): next to the barbarian roll, each kingdom with no standing illager camp
+  within 360 has a 15% chance a minute, on the same terms (150-300 from it, 56-128 from a player near it, out of sight,
+  nobody's land, 160 from other camps), but only in pillager country (`BiomeTags.HAS_PILLAGER_OUTPOST`: plains,
+  savanna, desert, snowy and mountain lands, cherry groves; plus taigas, the dark forest and the pale garden). **Trees
+  are allowed**: the ground is read under trunks, leaves and huge mushrooms (`IllagerBuildings.floor`, at most 5 up and
+  down) and they're felled when the camp is built. The site check now keeps 22 blocks clear for either kind.
+- **The camp** (`IllagerBuildings.build`, original designs in dark oak, cobblestone, grey and white wool, ominous banners
+  everywhere): the ground levelled and cleared 22 round the fire and 18 up; a dark oak fence ring (radius 20, 2 high)
+  with lantern-topped log posts and a gate facing the kingdom between two posts flying the banner; a campfire with
+  three benches; **the warlord's pavilion** at the back (9 x 10: a porch of bannered posts, grey walls on log posts, a
+  stepped white-and-grey roof with a banner on its peak, a carpet to his seat, his hoard chest behind it: emeralds,
+  iron, a crossbow, arrows, lapis, a golden apple, logs, bread); a **watchtower** (5 x 5, 13 high: a ladder up a plank
+  spine, a railed lookout with a pillager sentry, a slab roof, a banner on top); an **iron cage** holding an **allay**
+  (free it once the camp is cleared); the **loot pile** (barrels and chests under a dark oak lean-to: the camp's
+  storage, its depot in front); three bell tents and two banner poles. Stock: 32 dark oak logs, 32 arrows, 16 bread,
+  5 emeralds. People: the warlord, 3 pillagers (one on the tower), 2 vindicators.
+- **Growth** (daily while loaded; up to 3 missed days): it takes in 8 dark oak logs, 8 planks, 6 white and 4 grey wool,
+  4 fences, 8 cobblestone, 8 arrows, 4 bread and an iron ingot (plus `Production`'s camp share). Its age is the days
+  it has grown (`CampData.grown`, so `/time add` and `/faction camp grow` age it): one more fighter every 2 days up to
+  12 (2 pillagers to each vindicator); an evoker at 3 days and a second at 7; a ravager at 5. It grows **without
+  builders** (folk builders would look wrong among illagers): at most one building per day grown, when no player is
+  within 24 of the spot and the loot pile holds 6 logs, 8 planks and 6 white wool, it raises the next of
+  `IllagerBuildings.GROWTH`: a banner pole, a practice range (targets on hay, a fletching table), a tent, a pole, a
+  tent, a second watchtower behind the pavilion, two poles, a tent (9 in all; a blocked spot is skipped).
+- **War parties** (`Raids`, now for either kind): the same rules (10 s checks, 12%, 2-day cooldown, 420 reach, a player
+  within 80 of the target). An illager party is 3 + 1 per 2 fighters (at most 8), every third a vindicator, announced
+  with "Raid horns! The illagers of X ride on Y!". Plunder is carried in the off hand (it always drops if they die)
+  and goes into the loot pile when they get home.
+- **Clearing** (killing the warlord): "The warlord of X has fallen to Y! The illagers scatter." The same rewards as a
+  barbarian camp (100 reputation with every standing kingdom, fiefdom and village; 40 for players within 48). Its
+  illagers within 160 vanish (dropping plunder); those away come back to nothing and slink off when they load. It
+  rots like a barbarian camp, now also losing its banners and targets: the fence ring, wool and banners go; log posts,
+  the watchtower frames, the cage and the pavilion's posts stay as a ruin.
+- **Commands** (ops): `/faction camp found illager` (`found barbarian` is the same as plain `found`), `/faction camp
+  info` (the nearest standing camp: kind, age, buildings raised, roster, whether its leader is loaded, whether it's
+  raiding, whom it would raid now). `raid` and `grow` work on either kind (`grow` also raises the next building if
+  it can, even with you standing by).
+
+### Notes for the lead and testers
+- `Illagers.TAG` is a new persistent (not synced) entity attachment, class-loaded from `JaymosKingdoms.onInitialize`.
+  `Camps.CampData` gained `kind`, `built` and `grown` (optional fields: old saves are fine).
+- Signatures changed: `Camps.chiefSlain(level, LivingEntity chief, int campId, source)`,
+  `Raids.raiderDied(level, LivingEntity raider, int camp, source, boolean folk)`; `CampBuildings.level(...)` takes a
+  radius and a height, and its `Draft` is package-visible.
+- Faction lists still call an illager camp a "barbarian camp" (`faction_type.jaymoskingdoms.barbarian`): a new
+  `FactionType` would have needed edits across Economy, Production, KingdomEvents, Relations, Storehouse, Theft and
+  Wars. Rumours and talk can tell the kinds apart with `Camps.illager(server, id)`.
+- Killing an illager on a faction's land (the camp's own included) still gives `KingdomEvents`' small monster-kill
+  reputation with that land's owner: harmless.
+- **Check first:**
+  - `/faction camp found illager` in a dark forest: trees felled, the layout facing the way you look, banners ominous
+    (not plain white), fences joined up, the allay in its cage, the sentry on the tower;
+  - the warlord's boss bar, his rally at 40%, and killing him: the announcement, reputation, the scatter, the rot;
+  - kingdom guards and illagers fighting on sight; barbarians and illagers fighting when the two kinds of camp meet;
+  - `/faction camp raid` from an illager camp near a kingdom: the horn, the march, plunder in off hands, the loot
+    pile filling;
+  - a vanilla raid (Bad Omen at a village) near a camp: camp illagers must not join it;
+  - `/faction camp grow` a few times and `/faction camp info`: new illagers (evokers from the third), a building each
+    time; then `/time add 24000` while standing more than 24 from the camp: a day's growth on its own.
