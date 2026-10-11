@@ -21,6 +21,8 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -37,6 +39,10 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>A war party is the camp's war band, mustered for the raid: it isn't counted in the camp's roster, and the camp
  * doesn't lose (or replace) the raiders who fall. Raids aren't saved: raiders left over after a restart go home.
+ *
+ * <p>A barbarian camp's party is its raiders ({@link Folk}); an illager camp's is pillagers and vindicators
+ * ({@link Illagers}: one vindicator to every {@link #PILLAGERS_PER_VINDICATOR} pillagers), who carry their plunder in
+ * their off hands.
  */
 final class Raids {
 	/** How often a camp considers a raid (ticks), the chance it does when it can, and the wait after one (ticks: two days). */
@@ -75,6 +81,8 @@ final class Raids {
 	static final int REP_RAIDER_SLAIN = 5;
 	/** What raiders' {@link Folk#task} says. */
 	static final String TASK = "raid";
+	/** An illager war party: pillagers to each vindicator. */
+	static final int PILLAGERS_PER_VINDICATOR = 2;
 
 	enum Phase {
 		MARCH, PLUNDER, RETURN
@@ -106,7 +114,7 @@ final class Raids {
 	/** Camps whose raider fell (the roster's loss is undone next tick: raiders aren't on it). */
 	private static final List<Integer> UNDO = new ArrayList<>();
 	/** Raiders loaded with no raid to belong to (sent home next tick). */
-	private static final List<Folk> STRAYS = new ArrayList<>();
+	private static final List<Mob> STRAYS = new ArrayList<>();
 
 	private Raids() {
 	}
@@ -117,6 +125,33 @@ final class Raids {
 
 	static boolean isRaider(Folk folk) {
 		return folk.task().equals(TASK);
+	}
+
+	/** A raider of either kind: a barbarian on a raid, or an illager mustered for one. */
+	static boolean isRaider(Entity entity) {
+		if (entity instanceof Folk folk) {
+			return isRaider(folk);
+		}
+		Illagers.Tag tag = entity instanceof Mob ? Illagers.tag(entity) : null;
+		return tag != null && tag.raid();
+	}
+
+	// ---- what raiders carry (a barbarian in his hands, an illager in his off hand) ---------------------------------------
+
+	static boolean carrying(Mob raider) {
+		return raider instanceof Folk folk ? folk.isCarrying() : !Illagers.carried(raider).isEmpty();
+	}
+
+	static void setCarried(Mob raider, ItemStack load) {
+		if (raider instanceof Folk folk) {
+			folk.setCarried(load);
+		} else {
+			Illagers.setCarried(raider, load);
+		}
+	}
+
+	static ItemStack takeCarried(Mob raider) {
+		return raider instanceof Folk folk ? folk.takeCarried() : Illagers.takeCarried(raider);
 	}
 
 	// ---- starting ------------------------------------------------------------------------------------------------
@@ -130,7 +165,8 @@ final class Raids {
 				continue;
 			}
 			Camps.CampData data = Camps.data(server, camp.id());
-			if (data == null || data.clearedAt() >= 0 || now - data.lastRaid() < COOLDOWN_TICKS) {
+			if (data == null || data.clearedAt() >= 0 || now - data.lastRaid() < COOLDOWN_TICKS
+				|| (data.illager() && level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL)) {
 				continue;
 			}
 			Faction target = target(server, level, camp);
@@ -189,13 +225,23 @@ final class Raids {
 		ACTIVE.put(camp.id(), raid);
 		RAIDED.put(target.id(), now);
 		Camps.noteRaid(server, camp.id(), now);
-		int size = Math.min(PARTY_MAX, PARTY_BASE + camp.holdings().count(Folk.BARBARIAN) / PARTY_PER);
+		boolean illagers = Camps.illager(server, camp.id());
+		int band = illagers ? Illagers.fighters(camp) : camp.holdings().count(Folk.BARBARIAN);
+		int size = Math.min(PARTY_MAX, PARTY_BASE + band / PARTY_PER);
 		for (int i = 0; i < size; i++) {
+			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, muster.offset(random.nextInt(7) - 3, 0, random.nextInt(7) - 3));
+			if (illagers) {
+				int role = i % (PILLAGERS_PER_VINDICATOR + 1) == PILLAGERS_PER_VINDICATOR ? Illagers.VINDICATOR : Illagers.PILLAGER;
+				Mob raider = Illagers.spawn(level, camp, role, at, target.seat(), RAID_HOME_RADIUS, true);
+				if (raider != null) {
+					raid.party.add(raider.getUUID());
+				}
+				continue;
+			}
 			Folk raider = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.EVENT);
 			if (raider == null) {
 				continue;
 			}
-			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, muster.offset(random.nextInt(7) - 3, 0, random.nextInt(7) - 3));
 			raider.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
 			raider.setup(Folk.BARBARIAN, camp, target.seat(), RAID_HOME_RADIUS);
 			level.addFreshEntity(raider);
@@ -203,7 +249,8 @@ final class Raids {
 			raider.setTask(TASK);
 			raid.party.add(raider.getUUID());
 		}
-		tell(level, target.seat(), Component.translatable("message.jaymoskingdoms.raid.announce", camp.name(), target.name()).withStyle(ChatFormatting.RED));
+		tell(level, target.seat(), Component.translatable(illagers ? "message.jaymoskingdoms.raid.announce.illager" : "message.jaymoskingdoms.raid.announce",
+			camp.name(), target.name()).withStyle(ChatFormatting.RED));
 		for (ServerPlayer player : players(level, target.seat(), ANNOUNCE_RANGE)) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAID_HORN.value(), SoundSource.HOSTILE, 2.0F, 0.8F);
 		}
@@ -238,11 +285,13 @@ final class Raids {
 		}
 		UNDO.clear();
 		if (!STRAYS.isEmpty()) {
-			List<Folk> strays = List.copyOf(STRAYS);
+			List<Mob> strays = List.copyOf(STRAYS);
 			STRAYS.clear();
-			for (Folk stray : strays) {
-				if (stray.isAlive()) {
-					goHome(level, Factions.get(server, stray.factionId()), stray);
+			for (Mob stray : strays) {
+				Raid raid = ACTIVE.get(campOf(stray));
+				// (looked at a tick late: a new war party's illagers load before they're on its roll)
+				if (stray.isAlive() && !stray.isRemoved() && (raid == null || !raid.party.contains(stray.getUUID()))) {
+					goHome(level, Factions.get(server, campOf(stray)), stray);
 				}
 			}
 		}
@@ -262,10 +311,10 @@ final class Raids {
 		MinecraftServer server = level.getServer();
 		Faction camp = Factions.get(server, raid.camp);
 		Faction target = Factions.get(server, raid.target);
-		List<Folk> party = new ArrayList<>();
+		List<Mob> party = new ArrayList<>();
 		for (UUID id : raid.party) {
-			if (level.getEntity(id) instanceof Folk folk && folk.isAlive()) {
-				party.add(folk);
+			if (level.getEntity(id) instanceof Mob raider && raider.isAlive()) {
+				party.add(raider);
 			}
 		}
 		if (camp == null || camp.fallen()) {
@@ -290,7 +339,7 @@ final class Raids {
 		switch (raid.phase) {
 			case MARCH -> {
 				boolean arrived = now - raid.phaseAt > MARCH_TICKS;
-				for (Folk raider : party) {
+				for (Mob raider : party) {
 					if (raider.getTarget() == null) {
 						walk(level, raider, target.seat());
 					}
@@ -308,12 +357,12 @@ final class Raids {
 				Economy.noteAttack(server, target, party.getFirst());
 				BlockPos depot = Builders.depot(target);
 				boolean done = true;
-				for (Folk raider : party) {
+				for (Mob raider : party) {
 					for (IronGolem golem : level.getEntitiesOfClass(IronGolem.class, raider.getBoundingBox().inflate(GOLEM_RANGE),
 						g -> g.isAlive() && g.getTarget() == null)) {
 						golem.setTarget(raider);
 					}
-					if (raider.isCarrying() || raid.emptyHanded.contains(raider.getUUID())) {
+					if (carrying(raider) || raid.emptyHanded.contains(raider.getUUID())) {
 						continue;
 					}
 					done = false;
@@ -329,13 +378,13 @@ final class Raids {
 				if (done || now - raid.phaseAt > PLUNDER_TICKS) {
 					raid.phase = Phase.RETURN;
 					raid.phaseAt = now;
-					for (Folk raider : party) {
+					for (Mob raider : party) {
 						raider.setHomeTo(camp.seat(), Folk.HOME_RADIUS);
 					}
 				}
 			}
 			case RETURN -> {
-				for (Folk raider : party) {
+				for (Mob raider : party) {
 					if (raider.distanceToSqr(Vec3.atCenterOf(camp.seat())) < HOME_REACH * HOME_REACH || !playerNear(level, raider.blockPosition(), VANISH_RANGE)) {
 						goHome(level, camp, raider);
 						raid.party.remove(raider.getUUID());
@@ -346,7 +395,7 @@ final class Raids {
 				}
 				// (raiders who wandered out of loaded land are home: they'll be sent on when they load)
 				int before = raid.party.size();
-				raid.party.removeIf(id -> !(level.getEntity(id) instanceof Folk));
+				raid.party.removeIf(id -> !(level.getEntity(id) instanceof Mob));
 				raid.home += before - raid.party.size();
 				if (raid.party.isEmpty() && target != null) {
 					tell(level, target.seat(), raid.home > 0
@@ -357,7 +406,7 @@ final class Raids {
 		}
 	}
 
-	private static boolean nearStorage(Folk raider, Faction target) {
+	private static boolean nearStorage(Mob raider, Faction target) {
 		for (BlockPos pos : target.holdings().storage()) {
 			if (raider.distanceToSqr(Vec3.atCenterOf(pos)) <= LOOT_REACH * LOOT_REACH) {
 				return true;
@@ -367,7 +416,7 @@ final class Raids {
 	}
 
 	/** A raider at the storage takes what he can carry (the valuables first, half the time). */
-	private static void plunder(ServerLevel level, Folk raider, Faction target, Raid raid) {
+	private static void plunder(ServerLevel level, Mob raider, Faction target, Raid raid) {
 		List<ItemStack> contents = Storage.contents(level, target);
 		if (contents.isEmpty()) {
 			raid.emptyHanded.add(raider.getUUID());
@@ -383,12 +432,12 @@ final class Raids {
 			raid.emptyHanded.add(raider.getUUID());
 			return;
 		}
-		raider.setCarried(taken);
+		setCarried(raider, taken);
 		level.playSound(null, raider.getX(), raider.getY(), raider.getZ(), SoundEvents.BARREL_OPEN, SoundSource.HOSTILE, 1.0F, 0.8F);
 	}
 
 	/** Sends {@code raider} toward {@code to}, a waypoint at a time (long paths fail). */
-	private static void walk(ServerLevel level, Folk raider, BlockPos to) {
+	private static void walk(ServerLevel level, Mob raider, BlockPos to) {
 		if (!raider.getNavigation().isDone() && level.getGameTime() % (TICK * 4) != 0) {
 			return;
 		}
@@ -403,8 +452,8 @@ final class Raids {
 	}
 
 	/** A raider is home: what he carries goes into the loot pile (or is kept for it), and he rejoins the camp. */
-	private static void goHome(ServerLevel level, @Nullable Faction camp, Folk raider) {
-		ItemStack load = raider.takeCarried();
+	private static void goHome(ServerLevel level, @Nullable Faction camp, Mob raider) {
+		ItemStack load = takeCarried(raider);
 		if (camp != null && !camp.fallen() && !load.isEmpty()) {
 			Camps.deposit(level, camp, load);
 		} else if (!load.isEmpty()) {
@@ -413,19 +462,24 @@ final class Raids {
 		raider.discard();
 	}
 
-	private static void end(ServerLevel level, Raid raid, List<Folk> party, @Nullable Faction camp) {
+	private static void end(ServerLevel level, Raid raid, List<Mob> party, @Nullable Faction camp) {
 		ACTIVE.remove(raid.camp);
-		for (Folk raider : party) {
+		for (Mob raider : party) {
 			goHome(level, camp, raider);
 		}
 	}
 
 	// ---- events ------------------------------------------------------------------------------------------------------
 
-	/** A raider fell: off the party; the camp doesn't count the loss; a player who killed him earns the target's thanks. */
-	static void raiderDied(ServerLevel level, Folk raider, DamageSource source) {
-		UNDO.add(raider.factionId());
-		Raid raid = ACTIVE.get(raider.factionId());
+	/**
+	 * A raider of {@code camp} fell: off the party; the camp doesn't count the loss (a barbarian's death is undone on its
+	 * roster: {@code folk}); a player who killed him earns the target's thanks.
+	 */
+	static void raiderDied(ServerLevel level, LivingEntity raider, int camp, DamageSource source, boolean folk) {
+		if (folk) {
+			UNDO.add(camp);
+		}
+		Raid raid = ACTIVE.get(camp);
 		if (raid == null) {
 			return;
 		}
@@ -438,12 +492,21 @@ final class Raids {
 
 	/** A raider loaded: if his raid is over (or was lost to a restart), he's sent home next tick. */
 	static void loaded(Entity entity) {
-		if (entity instanceof Folk folk && isRaider(folk)) {
-			Raid raid = ACTIVE.get(folk.factionId());
-			if (raid == null || !raid.party.contains(folk.getUUID())) {
-				STRAYS.add(folk);
+		if (entity instanceof Mob raider && isRaider(entity)) {
+			Raid raid = ACTIVE.get(campOf(raider));
+			if (raid == null || !raid.party.contains(raider.getUUID())) {
+				STRAYS.add(raider);
 			}
 		}
+	}
+
+	/** The camp a raider (of either kind) belongs to. */
+	private static int campOf(Mob raider) {
+		if (raider instanceof Folk folk) {
+			return folk.factionId();
+		}
+		Illagers.Tag tag = Illagers.tag(raider);
+		return tag == null ? -1 : tag.camp();
 	}
 
 	/** {@code camp}'s chief is dead: its raiders lose heart and flee, dropping their plunder. */
@@ -453,8 +516,8 @@ final class Raids {
 			return;
 		}
 		for (UUID id : raid.party) {
-			if (level.getEntity(id) instanceof Folk raider && raider.isAlive()) {
-				ItemStack load = raider.takeCarried();
+			if (level.getEntity(id) instanceof Mob raider && raider.isAlive()) {
+				ItemStack load = takeCarried(raider);
 				if (!load.isEmpty()) {
 					raider.spawnAtLocation(level, load);
 				}

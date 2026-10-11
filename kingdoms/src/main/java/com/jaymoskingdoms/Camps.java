@@ -33,7 +33,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.item.DyeColor;
@@ -99,11 +101,13 @@ public final class Camps {
 
 	/**
 	 * What's known of a camp beyond its {@link Faction}: its fire and gate, when it was founded, last raided and last
-	 * grew (a day number), when it was cleared (-1: standing), the blocks still to rot, when it last rotted, and loot
-	 * waiting for its pile to be loaded (item id → count).
+	 * grew (a day number), when it was cleared (-1: standing), the blocks still to rot, when it last rotted, loot
+	 * waiting for its pile to be loaded (item id → count), what kind of camp it is ({@link Camps#BARBARIAN} or
+	 * {@link IllagerCamps#KIND}), and (illager camps) how many of its growth buildings it has raised by its own hands and
+	 * how many days it has grown.
 	 */
 	public record CampData(BlockPos center, Direction gate, long founded, long lastRaid, long lastDay, long clearedAt, List<Long> rot,
-		long lastRot, Map<String, Integer> pending) {
+		long lastRot, Map<String, Integer> pending, String kind, int built, int grown) {
 		public static final Codec<CampData> CODEC = RecordCodecBuilder.create(i -> i.group(
 				BlockPos.CODEC.fieldOf("center").forGetter(CampData::center),
 				Direction.CODEC.optionalFieldOf("gate", Direction.NORTH).forGetter(CampData::gate),
@@ -113,30 +117,54 @@ public final class Camps {
 				Codec.LONG.optionalFieldOf("cleared_at", -1L).forGetter(CampData::clearedAt),
 				Codec.LONG.listOf().optionalFieldOf("rot", List.of()).forGetter(CampData::rot),
 				Codec.LONG.optionalFieldOf("last_rot", 0L).forGetter(CampData::lastRot),
-				Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("pending", Map.of()).forGetter(CampData::pending))
+				Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("pending", Map.of()).forGetter(CampData::pending),
+				Codec.STRING.optionalFieldOf("kind", BARBARIAN).forGetter(CampData::kind),
+				Codec.INT.optionalFieldOf("built", 0).forGetter(CampData::built),
+				Codec.INT.optionalFieldOf("grown", 0).forGetter(CampData::grown))
 			.apply(i, CampData::new));
 
+		boolean illager() {
+			return IllagerCamps.KIND.equals(this.kind);
+		}
+
 		CampData withLastRaid(long at) {
-			return new CampData(this.center, this.gate, this.founded, at, this.lastDay, this.clearedAt, this.rot, this.lastRot, this.pending);
+			return new CampData(this.center, this.gate, this.founded, at, this.lastDay, this.clearedAt, this.rot, this.lastRot, this.pending,
+				this.kind, this.built, this.grown);
 		}
 
 		CampData withLastDay(long day) {
-			return new CampData(this.center, this.gate, this.founded, this.lastRaid, day, this.clearedAt, this.rot, this.lastRot, this.pending);
+			return new CampData(this.center, this.gate, this.founded, this.lastRaid, day, this.clearedAt, this.rot, this.lastRot, this.pending,
+				this.kind, this.built, this.grown);
 		}
 
 		CampData withCleared(long at, List<Long> rot) {
-			return new CampData(this.center, this.gate, this.founded, this.lastRaid, this.lastDay, at, List.copyOf(rot), at, this.pending);
+			return new CampData(this.center, this.gate, this.founded, this.lastRaid, this.lastDay, at, List.copyOf(rot), at, this.pending,
+				this.kind, this.built, this.grown);
 		}
 
 		CampData withRot(List<Long> rot, long at) {
-			return new CampData(this.center, this.gate, this.founded, this.lastRaid, this.lastDay, this.clearedAt, List.copyOf(rot), at, this.pending);
+			return new CampData(this.center, this.gate, this.founded, this.lastRaid, this.lastDay, this.clearedAt, List.copyOf(rot), at, this.pending,
+				this.kind, this.built, this.grown);
 		}
 
 		CampData withPending(Map<String, Integer> pending) {
 			return new CampData(this.center, this.gate, this.founded, this.lastRaid, this.lastDay, this.clearedAt, this.rot, this.lastRot,
-				Map.copyOf(pending));
+				Map.copyOf(pending), this.kind, this.built, this.grown);
+		}
+
+		CampData withBuilt(int built) {
+			return new CampData(this.center, this.gate, this.founded, this.lastRaid, this.lastDay, this.clearedAt, this.rot, this.lastRot, this.pending,
+				this.kind, built, this.grown);
+		}
+
+		CampData withGrown(int grown) {
+			return new CampData(this.center, this.gate, this.founded, this.lastRaid, this.lastDay, this.clearedAt, this.rot, this.lastRot, this.pending,
+				this.kind, this.built, grown);
 		}
 	}
+
+	/** {@link CampData#kind} of a barbarian camp. */
+	static final String BARBARIAN = "barbarian";
 
 	/** Every camp's data (faction id → it), kept on the Overworld. */
 	static final AttachmentType<Map<String, CampData>> CAMPS = AttachmentRegistry.create(JaymosKingdoms.id("camps"),
@@ -153,17 +181,23 @@ public final class Camps {
 	/** Roles, the catalogue and the events (call once at init). */
 	static void register() {
 		Barbarians.init();
+		Illagers.init();
 		CampBuildings.registerCatalogue();
 		ServerTickEvents.END_SERVER_TICK.register(Camps::tick);
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> Raids.clear());
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			Raids.clear();
+			IllagerCamps.clear();
+		});
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> Raids.loaded(entity));
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof Folk folk && folk.level() instanceof ServerLevel level) {
 				if (folk.role() == Folk.CHIEF) {
-					chiefSlain(level, folk, source);
+					chiefSlain(level, folk, folk.factionId(), source);
 				} else if (Raids.isRaider(folk)) {
-					Raids.raiderDied(level, folk, source);
+					Raids.raiderDied(level, folk, folk.factionId(), source, true);
 				}
+			} else if (entity.level() instanceof ServerLevel level && Illagers.isCampIllager(entity)) {
+				Illagers.died(level, entity, source);
 			}
 		});
 	}
@@ -195,6 +229,16 @@ public final class Camps {
 		}
 	}
 
+	/** What kind of camp {@code id} is ({@link #BARBARIAN} for anything unknown). */
+	static String kind(MinecraftServer server, int id) {
+		CampData data = data(server, id);
+		return data == null ? BARBARIAN : data.kind();
+	}
+
+	static boolean illager(MinecraftServer server, int id) {
+		return IllagerCamps.KIND.equals(kind(server, id));
+	}
+
 	static void noteRaid(MinecraftServer server, int id, long at) {
 		updateData(server, id, d -> d.withLastRaid(at));
 	}
@@ -219,12 +263,9 @@ public final class Camps {
 		Storage.put(level, stocked, hide(stocked), START_HIDES);
 		Storage.put(level, stocked, Items.COOKED_MUTTON, START_MEAT);
 		Storage.put(level, stocked, Items.EMERALD, START_EMERALDS);
-		// camps stand together
-		for (Faction other : Factions.all(server, FactionType.BARBARIAN)) {
-			if (other.id() != id && !other.fallen()) {
-				Relations.set(server, id, other.id(), Relation.ALLIED);
-			}
-		}
+		putData(server, id, new CampData(fire, gate, level.getGameTime(), level.getGameTime(), Production.day(server), -1L, List.of(), 0L, Map.of(),
+			BARBARIAN, 0, 0));
+		takeSides(server, id, BARBARIAN);
 		Faction crowned = KingdomEvents.crown(level, Factions.get(server, id));
 		if (crowned.leader().isPresent() && level.getEntity(crowned.leader().get()) instanceof Folk chief) {
 			BlockPos spot = layout.chiefSpot();
@@ -235,10 +276,17 @@ public final class Camps {
 			KingdomEvents.spawn(level, Factions.get(server, id), Folk.BARBARIAN);
 		}
 		Builders.spawnCrew(level, Factions.get(server, id));
-		long now = level.getGameTime();
-		putData(server, id, new CampData(fire, gate, now, now, Production.day(server), -1L, List.of(), 0L, Map.of()));
 		JaymosKingdoms.LOGGER.info("A barbarian camp, {}, rose at {}", camp.name(), fire);
 		return Factions.get(server, id);
+	}
+
+	/** Camps of a kind stand together (barbarians help barbarians, illagers illagers), and the two kinds are at war. */
+	static void takeSides(MinecraftServer server, int id, String kind) {
+		for (Faction other : Factions.all(server, FactionType.BARBARIAN)) {
+			if (other.id() != id && !other.fallen()) {
+				Relations.set(server, id, other.id(), kind(server, other.id()).equals(kind) ? Relation.ALLIED : Relation.WAR);
+			}
+		}
 	}
 
 	private static String name(MinecraftServer server, RandomSource random) {
@@ -252,40 +300,61 @@ public final class Camps {
 		return name + (Factions.nextId(server));
 	}
 
-	/** Every so often a kingdom with room for a camp may get one, out in the wild near a player passing through. */
+	/**
+	 * Every so often a kingdom with room for a camp may get one, out in the wild near a player passing through: a
+	 * barbarian camp anywhere, an illager camp in pillager country ({@link IllagerCamps#land}).
+	 */
 	private static void spawnCamps(MinecraftServer server, ServerLevel level) {
 		RandomSource random = level.getRandom();
 		for (Faction realm : Factions.all(server)) {
 			if (!realm.type().isRealm() || realm.fallen()) {
 				continue;
 			}
-			long near = Factions.all(server, FactionType.BARBARIAN).stream()
-				.filter(c -> !c.fallen() && Raids.horizontal(c.seat(), realm.seat()) <= CAMP_AREA * CAMP_AREA).count();
-			if (near >= CAMPS_PER_KINGDOM || random.nextFloat() >= CAMP_CHANCE) {
-				continue;
-			}
 			List<ServerPlayer> players = Raids.players(level, realm.seat(), MAX_DISTANCE + SITE_SPREAD + HIDE_RANGE);
 			if (players.isEmpty()) {
 				continue;
 			}
-			for (int tries = 0; tries < SITE_TRIES; tries++) {
-				ServerPlayer player = players.get(random.nextInt(players.size()));
-				double angle = random.nextDouble() * Math.PI * 2.0;
-				int r = HIDE_RANGE + random.nextInt(SITE_SPREAD);
-				BlockPos at = player.blockPosition().offset((int)Math.round(Math.cos(angle) * r), 0, (int)Math.round(Math.sin(angle) * r));
-				double d = Math.sqrt(Raids.horizontal(at, realm.seat()));
-				if (d < MIN_DISTANCE || d > MAX_DISTANCE || !open(server, level, at)) {
-					continue;
-				}
-				int floor = CampBuildings.floor(level, at, MAX_SPREAD);
-				if (floor == Integer.MIN_VALUE) {
-					continue;
-				}
-				Direction gate = Direction.getApproximateNearest(realm.seat().getX() - at.getX(), 0, realm.seat().getZ() - at.getZ());
-				found(level, at, floor, gate);
+			if (campsNear(server, realm, BARBARIAN) < CAMPS_PER_KINGDOM && random.nextFloat() < CAMP_CHANCE && trySite(server, level, realm, players, false)) {
+				return;
+			}
+			if (level.getDifficulty() != Difficulty.PEACEFUL && campsNear(server, realm, IllagerCamps.KIND) < IllagerCamps.CAMPS_PER_KINGDOM
+				&& random.nextFloat() < IllagerCamps.CAMP_CHANCE && trySite(server, level, realm, players, true)) {
 				return;
 			}
 		}
+	}
+
+	/** Standing camps of {@code kind} within {@link #CAMP_AREA} of {@code realm}'s seat. */
+	private static long campsNear(MinecraftServer server, Faction realm, String kind) {
+		return Factions.all(server, FactionType.BARBARIAN).stream()
+			.filter(c -> !c.fallen() && kind(server, c.id()).equals(kind) && Raids.horizontal(c.seat(), realm.seat()) <= CAMP_AREA * CAMP_AREA).count();
+	}
+
+	/** Looks for a site for a camp round the players near {@code realm}, and founds one there. */
+	private static boolean trySite(MinecraftServer server, ServerLevel level, Faction realm, List<ServerPlayer> players, boolean illager) {
+		RandomSource random = level.getRandom();
+		for (int tries = 0; tries < SITE_TRIES; tries++) {
+			ServerPlayer player = players.get(random.nextInt(players.size()));
+			double angle = random.nextDouble() * Math.PI * 2.0;
+			int r = HIDE_RANGE + random.nextInt(SITE_SPREAD);
+			BlockPos at = player.blockPosition().offset((int)Math.round(Math.cos(angle) * r), 0, (int)Math.round(Math.sin(angle) * r));
+			double d = Math.sqrt(Raids.horizontal(at, realm.seat()));
+			if (d < MIN_DISTANCE || d > MAX_DISTANCE || !open(server, level, at) || (illager && !IllagerCamps.land(level, at))) {
+				continue;
+			}
+			int floor = illager ? IllagerBuildings.floor(level, at, IllagerCamps.MAX_SPREAD) : CampBuildings.floor(level, at, MAX_SPREAD);
+			if (floor == Integer.MIN_VALUE) {
+				continue;
+			}
+			Direction gate = Direction.getApproximateNearest(realm.seat().getX() - at.getX(), 0, realm.seat().getZ() - at.getZ());
+			if (illager) {
+				IllagerCamps.found(level, at, floor, gate);
+			} else {
+				found(level, at, floor, gate);
+			}
+			return true;
+		}
+		return false;
 	}
 
 	/** {@code at} is free for a camp: loaded, nobody's land, far from every settlement and camp, out of every player's sight, no bell near. */
@@ -293,7 +362,7 @@ public final class Camps {
 		if (!level.isPositionEntityTicking(at)) {
 			return false;
 		}
-		int reach = CampBuildings.CLEAR_RADIUS;
+		int reach = IllagerBuildings.CLEAR_RADIUS;
 		for (BlockPos corner : new BlockPos[] {at, at.offset(-reach, 0, -reach), at.offset(reach, 0, -reach), at.offset(-reach, 0, reach),
 			at.offset(reach, 0, reach)}) {
 			if (Factions.at(server, level, corner) != null) {
@@ -349,12 +418,23 @@ public final class Camps {
 				grow(level, camp, (int)Math.min(MAX_CATCH_UP, today - data.lastDay()));
 				updateData(server, id, d -> d.withLastDay(today));
 			}
+			if (data.illager()) {
+				Faction grown = Factions.get(server, id);
+				CampData fresh = data(server, id);
+				if (grown != null && fresh != null) {
+					IllagerCamps.tick(level, grown, fresh, now, false);
+				}
+			}
 		}
 	}
 
 	/** {@code days}' growth: what the camp takes in by its own hands, and (as it ages) another raider. */
 	static void grow(ServerLevel level, Faction camp, int days) {
 		MinecraftServer server = level.getServer();
+		if (illager(server, camp.id())) {
+			IllagerCamps.grow(level, camp, days);
+			return;
+		}
 		Palette p = CampBuildings.palette(level, camp);
 		Map<Item, Integer> takings = new LinkedHashMap<>();
 		takings.put(hide(camp), DAY_HIDES);
@@ -428,14 +508,16 @@ public final class Camps {
 	 * beside them); his people scatter and his raiders flee; the camp falls (its land, roster and storage gone: the loot
 	 * is anyone's), and its tents start to rot.
 	 */
-	static void chiefSlain(ServerLevel level, Folk chief, DamageSource source) {
+	static void chiefSlain(ServerLevel level, LivingEntity chief, int campId, DamageSource source) {
 		MinecraftServer server = level.getServer();
-		Faction camp = Factions.get(server, chief.factionId());
+		Faction camp = Factions.get(server, campId);
 		if (camp == null || camp.fallen() || camp.type() != FactionType.BARBARIAN) {
 			return;
 		}
+		boolean illagers = illager(server, camp.id());
 		ServerPlayer killer = source.getEntity() instanceof ServerPlayer p ? p : null;
-		KingdomEvents.announce(server, Component.translatable("message.jaymoskingdoms.camp.cleared", camp.name(),
+		KingdomEvents.announce(server, Component.translatable(illagers ? "message.jaymoskingdoms.illager_camp.cleared" : "message.jaymoskingdoms.camp.cleared",
+			camp.name(),
 			killer == null ? Component.translatable("message.jaymoskingdoms.someone") : killer.getDisplayName()).withStyle(ChatFormatting.GOLD));
 		if (killer != null) {
 			List<ServerPlayer> heroes = new ArrayList<>(Raids.players(level, chief.blockPosition(), HELPER_RANGE));
@@ -449,7 +531,8 @@ public final class Camps {
 					Reputation.change(helper, f, REP_CLEAR_HELPER);
 				}
 			}
-			killer.sendSystemMessage(Component.translatable("message.jaymoskingdoms.camp.thanks").withStyle(ChatFormatting.GREEN));
+			killer.sendSystemMessage(Component.translatable(illagers ? "message.jaymoskingdoms.illager_camp.thanks" : "message.jaymoskingdoms.camp.thanks")
+				.withStyle(ChatFormatting.GREEN));
 			level.playSound(null, killer.getX(), killer.getY(), killer.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0F, 0.6F);
 		}
 		Raids.scatter(level, camp.id());
@@ -461,6 +544,7 @@ public final class Camps {
 			level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 1.0, folk.getZ(), 10, 0.3, 0.5, 0.3, 0.02);
 			folk.discard();
 		}
+		Illagers.scatter(level, camp.id(), camp.seat(), SCATTER_RANGE, chief);
 		Factions.update(server, camp.id(), f -> f.withFallen(true).withLeader(Optional.empty())
 			.withHoldings(f.holdings().withRoster(Map.of()).withVacancies(Map.of()).withStorage(List.of(), Optional.empty())));
 		for (Faction other : Factions.all(server, FactionType.BARBARIAN)) {
@@ -471,15 +555,16 @@ public final class Camps {
 		CampData data = data(server, camp.id());
 		BlockPos center = data != null ? data.center() : camp.seat();
 		List<Long> rot = new ArrayList<>();
-		int reach = CampBuildings.CLEAR_RADIUS;
-		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-reach, -1, -reach), center.offset(reach, 8, reach))) {
+		int reach = illagers ? IllagerBuildings.CLEAR_RADIUS : CampBuildings.CLEAR_RADIUS;
+		int high = illagers ? IllagerBuildings.CLEAR_HEIGHT : 8;
+		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-reach, -1, -reach), center.offset(reach, high, reach))) {
 			if (level.isLoaded(pos) && CampBuildings.perishable(level.getBlockState(pos))) {
 				rot.add(pos.asLong());
 			}
 		}
 		long now = level.getGameTime();
 		if (data == null) {
-			putData(server, camp.id(), new CampData(center, Direction.NORTH, now, now, -1L, now, List.copyOf(rot), now, Map.of()));
+			putData(server, camp.id(), new CampData(center, Direction.NORTH, now, now, -1L, now, List.copyOf(rot), now, Map.of(), BARBARIAN, 0, 0));
 		} else {
 			updateData(server, camp.id(), d -> d.withCleared(now, rot));
 		}
@@ -513,15 +598,18 @@ public final class Camps {
 
 	// ---- commands (operators; debug: plain text) -----------------------------------------------------------------
 
-	/** {@code /faction camp found | raid | grow}. */
+	/** {@code /faction camp found [barbarian | illager] | raid | grow | info}. */
 	static LiteralArgumentBuilder<CommandSourceStack> command() {
 		return Commands.literal("camp").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
-			.then(Commands.literal("found").executes(Camps::foundHere))
+			.then(Commands.literal("found").executes(c -> foundHere(c, false))
+				.then(Commands.literal("barbarian").executes(c -> foundHere(c, false)))
+				.then(Commands.literal("illager").executes(c -> foundHere(c, true))))
 			.then(Commands.literal("raid").executes(Camps::raidNow))
-			.then(Commands.literal("grow").executes(Camps::growNow));
+			.then(Commands.literal("grow").executes(Camps::growNow))
+			.then(Commands.literal("info").executes(Camps::info));
 	}
 
-	private static int foundHere(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
+	private static int foundHere(CommandContext<CommandSourceStack> c, boolean illager) throws CommandSyntaxException {
 		ServerPlayer player = c.getSource().getPlayerOrException();
 		ServerLevel level = Factions.level(c.getSource().getServer());
 		if (player.level() != level) {
@@ -529,8 +617,9 @@ public final class Camps {
 			return 0;
 		}
 		BlockPos at = player.blockPosition();
-		Faction camp = found(level, at, at.getY(), player.getDirection());
-		c.getSource().sendSuccess(() -> Component.literal("Founded the camp of " + camp.name() + " (gate " + player.getDirection().getName() + ")"), true);
+		Faction camp = illager ? IllagerCamps.found(level, at, at.getY(), player.getDirection()) : found(level, at, at.getY(), player.getDirection());
+		c.getSource().sendSuccess(() -> Component.literal("Founded the " + (illager ? "illager" : "barbarian") + " camp of " + camp.name() + " (gate "
+			+ player.getDirection().getName() + ")" + (illager && level.getDifficulty() == Difficulty.PEACEFUL ? "; on peaceful its illagers vanish" : "")), true);
 		return 1;
 	}
 
@@ -573,9 +662,51 @@ public final class Camps {
 		if (camp == null) {
 			return 0;
 		}
-		grow(Factions.level(c.getSource().getServer()), camp, 1);
-		Faction after = Factions.get(c.getSource().getServer(), camp.id());
-		c.getSource().sendSuccess(() -> Component.literal(camp.name() + " grew a day (" + after.holdings().count(Folk.BARBARIAN) + " raiders)"), true);
+		MinecraftServer server = c.getSource().getServer();
+		ServerLevel level = Factions.level(server);
+		grow(level, camp, 1);
+		boolean illagers = illager(server, camp.id());
+		if (illagers) {
+			// (and its next building, if it has the makings and its age allows)
+			CampData data = data(server, camp.id());
+			if (data != null) {
+				IllagerCamps.tick(level, Factions.get(server, camp.id()), data, level.getGameTime(), true);
+			}
+		}
+		Faction after = Factions.get(server, camp.id());
+		int fighters = illagers ? Illagers.fighters(after) : after.holdings().count(Folk.BARBARIAN);
+		c.getSource().sendSuccess(() -> Component.literal(camp.name() + " grew a day (" + fighters + (illagers ? " illagers)" : " raiders)")), true);
+		return 1;
+	}
+
+	/** {@code /faction camp info}: the nearest standing camp, what kind it is, its roster, age, growth and raids. */
+	private static int info(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
+		Faction camp = nearestCamp(c);
+		if (camp == null) {
+			return 0;
+		}
+		MinecraftServer server = c.getSource().getServer();
+		ServerLevel level = Factions.level(server);
+		CampData data = data(server, camp.id());
+		long now = level.getGameTime();
+		StringBuilder out = new StringBuilder();
+		out.append(camp.name()).append(" (").append(data == null ? BARBARIAN : data.kind()).append(" camp, id ").append(camp.id()).append(") at ")
+			.append(camp.seat().toShortString());
+		if (data != null) {
+			out.append(", ").append((now - data.founded()) / DAY_TICKS).append(" days old");
+			if (data.illager()) {
+				out.append(", ").append(data.built()).append('/').append(IllagerBuildings.GROWTH.size()).append(" buildings raised, grown ")
+					.append(data.grown()).append(" days");
+			}
+			out.append(", last raid ").append((now - data.lastRaid()) / 20).append(" s ago");
+		}
+		out.append("\nroster: ").append(camp.holdings().roster());
+		boolean leaderHere = camp.leader().isPresent() && level.getEntity(camp.leader().get()) != null;
+		out.append("\nleader: ").append(camp.leader().isEmpty() ? "none" : leaderHere ? "here" : "not loaded");
+		out.append(Raids.raiding(camp.id()) ? ", raiding now" : "");
+		Faction target = Raids.target(server, level, camp);
+		out.append("\nwould raid: ").append(target == null ? "nobody now (no settlement in reach with a player near it)" : target.name());
+		c.getSource().sendSuccess(() -> Component.literal(out.toString()), false);
 		return 1;
 	}
 }
