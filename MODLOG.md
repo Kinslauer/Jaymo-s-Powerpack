@@ -305,5 +305,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   so the pack ships a jar built from its authors' 26.3 branch (`libs/mca-fabric-7.8.0-dev.3badc42+26.3.jar`, an
   override like Kitchen; see `mcaJar` in `build.gradle`). Swap it for the CurseForge file (project 535291) once a
   Fabric 26.3 one is out. Its Chat AI and TTS are off unless someone turns them on in its config. Jaymo's Kingdoms
-  0.4.2 ties into it (hearts count as reputation, faction rank counts as village rank, recruiting spares families;
+  0.4.2 ties into it (hearts count as reputation, faction rank counts as village rank;
   see `kingdoms/MODLOG.md`).

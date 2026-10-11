@@ -22,8 +22,6 @@ import org.jspecify.annotations.Nullable;
  * <li>Your place in a faction is your place in its village: a soldier counts as an MCA merchant, a knight as a noble, a
  * lord as a mayor; and a faction that's hostile to you makes you an outlaw there ({@link #rankSay}, used by
  * {@code McaTasksMixin}). Monarch stays MCA's own crown to earn.</li>
- * <li>A settlement taking one of its villagers into service never takes a child, someone married or engaged, a
- * player's child, or a player's friend ({@link #spareable}).</li>
  * <li>A village's elder keeps their own name (an MCA villager's name is who they are; renaming one renames them in
  * the family tree too).</li>
  * </ul>
@@ -115,11 +113,6 @@ public final class McaCompat {
 			case KNIGHT -> MCA_NOBLE;
 			case LORD -> MCA_MAYOR;
 		};
-	}
-
-	/** Whether a settlement may take {@code villager} into its service (always, without MCA). */
-	static boolean spareable(Villager villager) {
-		return !LOADED || McaBridge.spareable(villager);
 	}
 
 	/** Whether {@code villager} keeps their own name on becoming an elder (MCA's villagers do). */

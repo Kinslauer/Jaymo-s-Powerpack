@@ -153,7 +153,7 @@ public final class Economy {
 		int role = nextVacancy(f);
 		// from the settlement's own people, if it can spare one
 		List<Villager> villagers = level.getEntitiesOfClass(Villager.class, new AABB(f.seat()).inflate(POPULATION_RANGE),
-			v -> v.isAlive() && !v.isBaby() && McaCompat.spareable(v) && (f.leader().isEmpty() || !f.leader().get().equals(v.getUUID())));
+			v -> v.isAlive() && !v.isBaby() && (f.leader().isEmpty() || !f.leader().get().equals(v.getUUID())));
 		BlockPos from = null;
 		if (villagers.size() > MIN_VILLAGERS_KEPT) {
 			Villager recruit = villagers.get(level.getRandom().nextInt(villagers.size()));

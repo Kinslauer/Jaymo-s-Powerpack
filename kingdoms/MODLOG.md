@@ -737,13 +737,11 @@ recruits or protects villagers already sees them.
   the realm whose land it's on): a soldier counts at least as an MCA merchant, a knight as a noble, a lord as a mayor.
   If either faction is hostile to you (-100 or worse) you're an outlaw in that village whatever MCA says. Monarch
   stays MCA's own to earn (its rank tasks: reputation, population, buildings, the Grim Reaper).
-- **Recruiting spares families:** when a settlement takes one of its villagers into service it never takes an MCA
-  child or teen, anyone married or engaged, a player's child, or anyone who counts a player as a friend (MCA's
-  `heartsToBeConsideredAsFriend`, 40 hearts).
+- **Recruiting:** settlements draft MCA villagers into service like any other, spouses, kids and friends included
+  (Andy: "builds character").
 - **Elders keep their names:** an MCA villager chosen as a village's elder isn't renamed "Elder of ..." (MCA would
   rename them in its family tree too, and a dedicated server would write the untranslated key).
 - **Check first:**
   - walk into an Epic Structures village: humans, not vanilla villagers; `/faction info` there still counts them;
   - gift and chat with a few villagers in a Kingdoms village, then `/kingdom reputation`: it should have risen;
   - pledge to a kingdom and climb to knight, then open MCA's village screen in its capital: rank noble or better;
-  - marry a villager in a settlement short of guards: your spouse must never vanish into a guard.
