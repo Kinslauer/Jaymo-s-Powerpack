@@ -309,7 +309,7 @@ public class BlockCluster extends Entity {
 	}
 
 	/** A block knocked off (in a puff of its dust); the last one and the chunk is gone. */
-	private void chip(ServerLevel level) {
+	public void chip(ServerLevel level) {
 		List<Piece> pieces = new ArrayList<>(this.pieces());
 		if (pieces.isEmpty()) {
 			this.discard();

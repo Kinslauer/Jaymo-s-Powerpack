@@ -43,6 +43,8 @@ import org.jspecify.annotations.Nullable;
  * <li>Debris in one, and a creature in the other or under your crosshair (within {@link #CRUSH_REACH}): a <b>crush</b>,
  * the debris brought down on it and spent.</li>
  * <li>Debris in both: a <b>shatter</b>, the two smashed together and burst into a cone of debris ahead.</li>
+ * <li>A corpse in either (or both): a <b>thrash</b>, the corpse slammed into the ground in front one to four times,
+ * blood everywhere, until it comes apart into what butchering it on the ground gives.</li>
  * </ul>
  * Each is heavy: hauled out (until {@link #REAR_TICKS}), slammed in (impact at {@link #HIT_TICKS}), then a slow reset (to
  * {@link #TICKS}) before the next. The server runs it and syncs it in {@link WebTendrils#COMBO}; everyone sees the held
@@ -50,7 +52,7 @@ import org.jspecify.annotations.Nullable;
  * {@link BlockCluster#SOFT_HIT_DAMAGE}, as every soft block does. You're never hurt by your own combo.
  */
 public final class WebTendrilCombos {
-	public static final int CLAP = 0, CRUSH = 1, SHATTER = 2;
+	public static final int CLAP = 0, CRUSH = 1, SHATTER = 2, THRASH = 3;
 	/** Timing (ticks from the click): hauled out until {@code REAR_TICKS}, slammed in to the impact at {@code HIT_TICKS}, reset until {@code TICKS}. */
 	public static final int REAR_TICKS = 12, HIT_TICKS = 18, TICKS = 50;
 	/** How far your crosshair target may be for a crush (blocks, plus its half width), and the slack the server allows. */
@@ -83,6 +85,19 @@ public final class WebTendrilCombos {
 	static final double SHATTER_KNOCK = 0.9, SHATTER_LIFT = 0.35;
 	/** Puffs of debris sprayed through the cone. */
 	static final int SHATTER_SPRAY = 36;
+
+	/**
+	 * Thrash: each slam is a {@code THRASH_CYCLE}-tick cycle, the corpse hauled up overhead (until {@code THRASH_RAISE})
+	 * and brought down onto the ground {@code THRASH_FORWARD} ahead ({@code THRASH_DOWN} ticks later), 1 to
+	 * {@code THRASH_MAX_SLAMS} slams (see {@link #thrashSlams}). Two held: the second slams {@code THRASH_OFFSET} behind
+	 * the first. Creatures within {@code THRASH_SPLASH} of a slam take {@code THRASH_SPLASH_DAMAGE}. A
+	 * {@code THRASH_RECOVER} reset after the last.
+	 */
+	public static final int THRASH_CYCLE = 14, THRASH_RAISE = 8, THRASH_DOWN = 3, THRASH_MAX_SLAMS = 4, THRASH_OFFSET = 7, THRASH_RECOVER = 12;
+	public static final double THRASH_FORWARD = 2.0, THRASH_SIDE = 0.7, THRASH_UP = 1.8, THRASH_SPLASH = 1.6;
+	static final float THRASH_SPLASH_DAMAGE = 5.0F, THRASH_SHAKE = 0.8F;
+	/** Blood (dust colour). */
+	static final int BLOOD = 0x7A0A0A;
 
 	/** Damage scales with the debris' size: × ({@code SIZE_BASE} + {@code SIZE_PER_PIECE} a block), clamped. */
 	static final float SIZE_BASE = 0.6F, SIZE_PER_PIECE = 0.1F, SIZE_MIN = 0.7F, SIZE_MAX = 1.5F, SHATTER_SIZE_MAX = 1.8F;
@@ -123,6 +138,30 @@ public final class WebTendrilCombos {
 		return player.getAttached(WebTendrils.COMBO) != null;
 	}
 
+	/** A Jaymo's Kitchen corpse. */
+	private static boolean corpse(@Nullable Entity entity) {
+		return entity != null && entity.isAlive() && com.jaymospowers.power.gravity.GravityPower.isCorpse(entity);
+	}
+
+	/** How many times a thrash slams (1 to {@link #THRASH_MAX_SLAMS}): random, but the same on every side. */
+	public static int thrashSlams(WebTendrils.Combo combo) {
+		return 1 + (int)Math.floorMod(combo.start() * 31L + combo.first() * 7L + combo.second() * 13L, (long)THRASH_MAX_SLAMS);
+	}
+
+	/** A combo's whole length, reset included. */
+	public static int ticks(WebTendrils.Combo combo) {
+		if (combo.kind() != THRASH) {
+			return TICKS;
+		}
+		boolean both = combo.first() >= 0 && combo.second() >= 0;
+		return thrashSlams(combo) * THRASH_CYCLE + (both ? THRASH_OFFSET : 0) + THRASH_RECOVER;
+	}
+
+	/** Ticks into its own slams for the corpse with id {@code held} (the second of two runs behind), from {@code t} into the thrash. */
+	public static long thrashTime(WebTendrils.Combo combo, int held, long t) {
+		return held == combo.second() && combo.first() >= 0 ? t - THRASH_OFFSET : t;
+	}
+
 	/**
 	 * Which combo an attack makes now (-1: none), from what the tendrils hold and the creature under the crosshair (may
 	 * be null). Works on both sides.
@@ -134,6 +173,9 @@ public final class WebTendrilCombos {
 		}
 		Entity main = grips.right() < 0 ? null : player.level().getEntity(grips.right());
 		Entity off = grips.left() < 0 ? null : player.level().getEntity(grips.left());
+		if (corpse(main) || corpse(off)) {
+			return THRASH;
+		}
 		if (debris(main) && debris(off)) {
 			return SHATTER;
 		}
@@ -165,7 +207,8 @@ public final class WebTendrilCombos {
 
 	/** The attack key with the tendrils full: a combo if one fits, else the plain swing of a held chunk. */
 	private static void attack(ServerPlayer player, int targetId) {
-		if (!WebSymbiote.armored(player) || !player.isAlive() || player.isSpectator() || active(player)) {
+		if (!WebSymbiote.armored(player) || !player.isAlive() || player.isSpectator() || active(player) || WebSymbiote.driving(player)
+			|| WebTendrils.crossing(player)) {
 			return;
 		}
 		ServerLevel level = player.level();
@@ -184,6 +227,16 @@ public final class WebTendrilCombos {
 		WebTendrils.Grips grips = player.getAttached(WebTendrils.GRIPS);
 		Entity main = grips.right() < 0 ? null : level.getEntity(grips.right());
 		Entity off = grips.left() < 0 ? null : level.getEntity(grips.left());
+		if (kind == THRASH) {
+			// whichever tendrils hold a corpse thrash it (whatever the other holds stays held)
+			long now = level.getGameTime();
+			player.setAttached(WebTendrils.COMBO, new WebTendrils.Combo(THRASH, now, corpse(main) ? main.getId() : -1, corpse(off) ? off.getId() : -1));
+			player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 1.2F, 0.4F);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.7F, 0.8F);
+			WebSymbiote.narrate(player, "thrash");
+			return;
+		}
 		Entity first, second;
 		if (kind == CRUSH) {
 			first = debris(main) ? main : off;
@@ -237,6 +290,9 @@ public final class WebTendrilCombos {
 			return null;
 		}
 		long t = now - combo.start();
+		if (combo.kind() == THRASH) {
+			return thrashPoint(player, combo, held, hand, thrashTime(combo, held.getId(), t));
+		}
 		if (t >= HIT_TICKS) {
 			return null;
 		}
@@ -284,6 +340,86 @@ public final class WebTendrilCombos {
 		}
 	}
 
+	/** Where a thrashed corpse goes {@code tt} ticks into its slams: hauled up overhead, then down onto the ground ahead. */
+	private static @Nullable Vec3 thrashPoint(ServerPlayer player, WebTendrils.Combo combo, Entity held, int hand, long tt) {
+		if (tt < 0 || tt >= (long)thrashSlams(combo) * THRASH_CYCLE) {
+			return null;
+		}
+		long c = tt % THRASH_CYCLE;
+		Vec3 eye = player.getEyePosition();
+		Vec3 dir = ahead(player);
+		Vec3 right = new Vec3(-dir.z, 0.0, dir.x);
+		double sign = combo.first() >= 0 && combo.second() >= 0 ? (hand == WebNet.OFF ? -1.0 : 1.0) : 0.0;
+		Vec3 over = eye.add(dir.scale(0.6)).add(right.scale(sign * THRASH_SIDE)).add(0.0, THRASH_UP, 0.0);
+		if (c < THRASH_RAISE) {
+			return over;
+		}
+		return thrashGround(player, dir, right, sign).add(0.0, held.getBbHeight() * 0.5, 0.0);
+	}
+
+	/** The spot on the ground ahead a corpse is slammed onto. */
+	private static Vec3 thrashGround(ServerPlayer player, Vec3 dir, Vec3 right, double sign) {
+		Vec3 spot = player.getEyePosition().add(dir.scale(THRASH_FORWARD)).add(right.scale(sign * THRASH_SIDE));
+		BlockHitResult ground = player.level().clip(new ClipContext(spot, spot.subtract(0.0, 5.0, 0.0), ClipContext.Block.COLLIDER,
+			ClipContext.Fluid.NONE, player));
+		return ground.getType() == HitResult.Type.BLOCK ? ground.getLocation() : spot.subtract(0.0, 1.6, 0.0);
+	}
+
+	/** A thrash, a tick at a time: the whoosh up, each slam into the ground, and the end, when it comes apart. */
+	private static void tickThrash(ServerPlayer player, WebTendrils.Combo combo, long t) {
+		ServerLevel level = player.level();
+		int slams = thrashSlams(combo);
+		for (int id : new int[] {combo.first(), combo.second()}) {
+			Entity held = id < 0 ? null : level.getEntity(id);
+			if (held == null || handOf(player, held) < 0) {
+				continue;
+			}
+			long tt = thrashTime(combo, id, t);
+			if (tt < 0) {
+				continue;
+			}
+			long c = tt % THRASH_CYCLE;
+			if (tt < (long)slams * THRASH_CYCLE && c == THRASH_RAISE - 2) {
+				level.playSound(null, held.getX(), held.getY(), held.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0F, 0.5F);
+			}
+			if (tt < (long)slams * THRASH_CYCLE && c == THRASH_RAISE + THRASH_DOWN) {
+				slam(player, held);
+			}
+			if (tt == (long)slams * THRASH_CYCLE) {
+				// it comes apart
+				Vec3 at = held.getBoundingBox().getCenter();
+				letGo(player, held);
+				level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(BLOOD, 1.8F), at.x, at.y, at.z, 50, 0.5, 0.3, 0.5, 0.0);
+				level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, at.x, at.y, at.z, 8, 0.3, 0.2, 0.3, 0.2);
+				level.playSound(null, at.x, at.y, at.z, SoundEvents.PHANTOM_BITE, SoundSource.PLAYERS, 1.2F, 0.4F);
+				level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_DEATH, SoundSource.PLAYERS, 1.0F, 0.5F);
+				KitchenCompat.butcherRough(held);
+			}
+		}
+	}
+
+	/** A corpse slammed into the ground: blood and earth fly, everything close is battered, and the corpse jerks. */
+	private static void slam(ServerPlayer player, Entity held) {
+		ServerLevel level = player.level();
+		Vec3 at = new Vec3(held.getX(), held.getBoundingBox().minY, held.getZ());
+		KitchenCompat.jolt(held);
+		level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(BLOOD, 1.6F), at.x, at.y + 0.2, at.z, 36, held.getBbWidth() * 0.6, 0.2,
+			held.getBbWidth() * 0.6, 0.0);
+		level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(BLOOD, 1.0F), at.x, at.y + 0.5, at.z, 18, 0.9, 0.6, 0.9, 0.0);
+		groundDust(level, at.add(0.0, 0.5, 0.0));
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.3F, 0.45F);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 1.3F, 0.4F);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.MACE_SMASH_GROUND, SoundSource.PLAYERS, 0.9F, 0.6F);
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(THRASH_SPLASH),
+			e -> e != player && e.isAlive() && !e.isSpectator() && handOf(player, e) < 0)) {
+			living.hurtServer(level, level.damageSources().playerAttack(player), THRASH_SPLASH_DAMAGE);
+			Vec3 out = living.position().subtract(at).horizontal();
+			out = out.lengthSqr() < 1.0E-4 ? ahead(player) : out.normalize();
+			knock(living, living.getDeltaMovement().add(out.scale(0.5)).add(0.0, 0.3, 0.0));
+		}
+		ServerPlayNetworking.send(player, new WebNet.Shake(THRASH_SHAKE));
+	}
+
 	/** Every tick, per web slinger (from {@link WebTendrils#tick}): the impact, and the end of the reset. */
 	static void tick(ServerPlayer player) {
 		WebTendrils.Combo combo = player.getAttached(WebTendrils.COMBO);
@@ -291,8 +427,12 @@ public final class WebTendrilCombos {
 			return;
 		}
 		long t = player.level().getGameTime() - combo.start();
-		if (!player.isAlive() || t < 0 || t >= TICKS) {
+		if (!player.isAlive() || t < 0 || t >= ticks(combo)) {
 			player.removeAttached(WebTendrils.COMBO);
+			return;
+		}
+		if (combo.kind() == THRASH) {
+			tickThrash(player, combo, t);
 			return;
 		}
 		if (t == REAR_TICKS) {

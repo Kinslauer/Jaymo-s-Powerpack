@@ -49,14 +49,17 @@ public final class WebSymbioteClient {
 	/** {@code armor}: Living Armor's (it hunches, swells); otherwise only the tendrils, out on their own for a moment. */
 	/** {@code heavy}: the strike swings held debris (slower, further); {@code variant}: a slam or a swipe (see WebSymbiote.STRIKE_SLAM). */
 	/** {@code firstPerson}: your own, drawn in first person (by First-person Model, or next to the hands): they reach further forward. */
-	/** {@code combo}: a tendril combo (WebTendrilCombos.CLAP, CRUSH, SHATTER; -1 none): {@code strike} is then how far through it. */
+	/** {@code combo}: a tendril combo (WebTendrilCombos.CLAP, CRUSH, SHATTER, THRASH; -1 none): {@code strike} is then how far through it. */
+	/** {@code rear}, {@code hit}: the shares of {@code strike} where it stops rearing and where it lands. */
+	/** {@code feral}: how wild it still is (1 a fresh bond, 0 a full one): twitchier, restless tendrils. */
 	public record Tendrils(float growth, float time, float strike, float aimYaw, float aimPitch, float side, float run, int held, boolean armor,
-		int wall, float wallYaw, float wallPitch, boolean heavy, int variant, boolean firstPerson, int combo) {
+		int wall, float wallYaw, float wallPitch, boolean heavy, int variant, boolean firstPerson, int combo, float rear, float hit, float feral) {
 		/** {@code wall}: 0 none, 1 reaching for a wall (aimed by wallYaw/wallPitch), 2 fanned back into it. */
 
 		/** The same, drawn from your own eyes. */
 		public Tendrils inFirstPerson() {
-			return new Tendrils(growth, time, strike, aimYaw, aimPitch, side, run, held, armor, wall, wallYaw, wallPitch, heavy, variant, true, combo);
+			return new Tendrils(growth, time, strike, aimYaw, aimPitch, side, run, held, armor, wall, wallYaw, wallPitch, heavy, variant, true, combo,
+				rear, hit, feral);
 		}
 	}
 	/** Ticks into a meal (partial ticks included), for the maw. */
@@ -110,9 +113,16 @@ public final class WebSymbioteClient {
 	private static final java.util.Map<Integer, Long> ARMOR_SINCE = new java.util.HashMap<>();
 
 	// ===== wall crawl ===============================================================================================
-	/** Climbing speed up and down walls, and crawling speed along walls and ceilings (blocks/tick). */
-	static final double CRAWL_CLIMB = 0.2;
-	static final double CRAWL_SPEED = 0.17;
+	/**
+	 * Wall Crawl (0.8.6): you don't float, the tendrils drag you. One reaches {@code CLIMB_REACH} blocks ahead along the
+	 * wall (or ceiling) the way you're going, takes {@code CLIMB_REACH_TICKS} to bite in (you hang, sagging a touch),
+	 * then hauls you there for at most {@code CLIMB_PULL_TICKS}: {@code CLIMB_PULL_STEER} of the gap a tick, never faster
+	 * than {@code CLIMB_PULL_MAX}, stopping {@code CLIMB_SHORT} short (the cord taut). Then the other side's reaches on.
+	 */
+	static final double CLIMB_REACH = 2.3, CLIMB_PULL_STEER = 0.32, CLIMB_PULL_MAX = 0.42, CLIMB_SHORT = 0.45, CLIMB_ARRIVE = 0.25;
+	static final int CLIMB_REACH_TICKS = 3, CLIMB_PULL_TICKS = 9;
+	/** While a tendril reaches: you sag this much a tick; and you hang this far out from the wall. */
+	static final double CLIMB_SAG = -0.03, CLIMB_OFF_WALL = 0.4;
 	/** Pressed up into a ceiling this hard each tick to stay stuck. */
 	static final double CEILING_PRESS = 0.1;
 	/** Climbing off the top of a wall: a little hop forward onto the ledge. */
@@ -167,6 +177,18 @@ public final class WebSymbioteClient {
 
 	private static boolean wallClinging;
 	private static boolean ceilingClinging;
+	/** The climb: which side's tendril bit last, where (null: none), the way it pulls, whether it bit the top of a ledge, and ticks since it reached out. */
+	private static int climbHand;
+	private static @org.jspecify.annotations.Nullable Vec3 climbAt;
+	private static Vec3 climbWant = Vec3.ZERO;
+	private static boolean climbLedge;
+	private static int climbPhase;
+	private static boolean climbSent;
+	/** Keys pressed against a takeover's hold: last tick's movement keys (for presses), the last tick one was sent, and a local tally for the meter. */
+	private static Input heldKeys = Input.EMPTY;
+	private static int struggleTick = -1;
+	private static float struggleMeter;
+	private static final boolean[] powerKeysWere = new boolean[8];
 	private static int takeoverTicks;
 	private static int takeoverTarget = -1;
 	/** Running from {@code takeoverTarget}, not at it. */
@@ -197,6 +219,10 @@ public final class WebSymbioteClient {
 			sensing = self != null && WebPowerClient.isActive(self) && Fate.isAscended(self);
 			while (menuKey.consumeClick()) {
 				LocalPlayer player = minecraft.player;
+				if (inputLocked()) {
+					struggle();
+					continue;
+				}
 				if (player != null && minecraft.gui.screen() == null && !player.isSpectator() && WebSymbiote.isBonded(player) && takeoverTicks <= 0) {
 					minecraft.gui.setScreen(new WebSymbioteScreen());
 				} else if (player != null && minecraft.gui.screen() == null && !player.isSpectator()
@@ -206,12 +232,24 @@ public final class WebSymbioteClient {
 				}
 			}
 		});
+		// a takeover has your hands too: clicks are struggles, and nothing is used
+		ClientTickEvents.START_CLIENT_TICK.register(minecraft -> {
+			if (!inputLocked()) {
+				return;
+			}
+			while (minecraft.options.keyUse.consumeClick()) {
+				struggle();
+			}
+			minecraft.options.keyUse.setDown(false);
+			minecraft.options.keyAttack.setDown(false);
+		});
 		ClientPlayNetworking.registerGlobalReceiver(WebNet.Takeover.TYPE, (payload, context) -> {
 			takeoverTarget = payload.entityId();
 			takeoverTicks = payload.entityId() < 0 ? 0 : payload.ticks();
 			takeoverFlee = payload.flee();
 			if (takeoverTicks <= 0) {
 				clearPath();
+				struggleMeter = 0.0F;
 			}
 			if (takeoverTicks > 0 && context.client().gui.screen() instanceof WebSymbioteScreen) {
 				context.client().gui.setScreen(null);
@@ -274,6 +312,9 @@ public final class WebSymbioteClient {
 	static void reset() {
 		wallClinging = false;
 		ceilingClinging = false;
+		climbAt = null;
+		climbSent = false;
+		struggleMeter = 0.0F;
 		takeoverTicks = 0;
 		takeoverTarget = -1;
 		clearPath();
@@ -322,6 +363,7 @@ public final class WebSymbioteClient {
 			float strike = -1.0F, aimYaw = 0.0F, aimPitch = 0.0F, side = 1.0F;
 			boolean heavy = false;
 			int variant = WebSymbiote.STRIKE_SLAM;
+			float rear = WebSymbiote.STRIKE_REAR, hit = WebSymbiote.STRIKE_HIT / (float)WebSymbiote.STRIKE_TICKS;
 			WebSymbiote.Strike s = player.getAttached(WebSymbiote.STRIKE);
 			Entity target = s == null ? null : player.level().getEntity(s.target());
 			if (s != null && target != null) {
@@ -329,6 +371,8 @@ public final class WebSymbioteClient {
 				strike = net.minecraft.util.Mth.clamp((now - s.start() + partial) / (float)s.ticks(), 0.0F, 1.0F);
 				heavy = s.heavy();
 				variant = s.variant();
+				rear = s.rearShare();
+				hit = s.hitShare();
 				net.minecraft.world.phys.Vec3 to = target.getBoundingBox().getCenter().subtract(player.getEyePosition());
 				float yaw = (float)(net.minecraft.util.Mth.atan2(to.z, to.x) * net.minecraft.util.Mth.RAD_TO_DEG) - 90.0F;
 				aimYaw = net.minecraft.util.Mth.wrapDegrees(yaw - player.yBodyRot) * net.minecraft.util.Mth.DEG_TO_RAD;
@@ -341,11 +385,24 @@ public final class WebSymbioteClient {
 			if (c != null) {
 				float partial = net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
 				combo = c.kind();
-				strike = net.minecraft.util.Mth.clamp((now - c.start() + partial) / (float)com.jaymospowers.power.web.WebTendrilCombos.TICKS, 0.0F, 1.0F);
+				strike = net.minecraft.util.Mth.clamp((now - c.start() + partial) / (float)com.jaymospowers.power.web.WebTendrilCombos.ticks(c), 0.0F, 1.0F);
 				heavy = true;
 				variant = WebSymbiote.STRIKE_SLAM;
+				rear = com.jaymospowers.power.web.WebTendrilCombos.REAR_TICKS / (float)com.jaymospowers.power.web.WebTendrilCombos.TICKS;
+				hit = com.jaymospowers.power.web.WebTendrilCombos.HIT_TICKS / (float)com.jaymospowers.power.web.WebTendrilCombos.TICKS;
+				if (combo == com.jaymospowers.power.web.WebTendrilCombos.THRASH) {
+					// the rest of the upper tendrils slam along with each blow, one cycle at a time
+					int lead = c.first() >= 0 ? c.first() : c.second();
+					float tt = com.jaymospowers.power.web.WebTendrilCombos.thrashTime(c, lead, now - c.start()) + partial;
+					int cycle = com.jaymospowers.power.web.WebTendrilCombos.THRASH_CYCLE;
+					strike = tt < 0.0F || tt >= com.jaymospowers.power.web.WebTendrilCombos.thrashSlams(c) * cycle ? -1.0F : (tt % cycle) / cycle;
+					rear = com.jaymospowers.power.web.WebTendrilCombos.THRASH_RAISE / (float)cycle;
+					hit = (com.jaymospowers.power.web.WebTendrilCombos.THRASH_RAISE + com.jaymospowers.power.web.WebTendrilCombos.THRASH_DOWN) / (float)cycle;
+				}
 				Entity victim = combo == com.jaymospowers.power.web.WebTendrilCombos.CRUSH ? player.level().getEntity(c.second()) : null;
 				net.minecraft.world.phys.Vec3 at = victim != null ? victim.getBoundingBox().getCenter()
+					: combo == com.jaymospowers.power.web.WebTendrilCombos.THRASH
+						? player.position().add(player.getLookAngle().horizontal().normalize().scale(com.jaymospowers.power.web.WebTendrilCombos.THRASH_FORWARD))
 					: player.getEyePosition().add(player.getLookAngle().horizontal().normalize().scale(2.4)).subtract(0.0, 0.3, 0.0);
 				net.minecraft.world.phys.Vec3 to = at.subtract(player.getEyePosition());
 				float yaw = (float)(net.minecraft.util.Mth.atan2(to.z, to.x) * net.minecraft.util.Mth.RAD_TO_DEG) - 90.0F;
@@ -383,7 +440,8 @@ public final class WebSymbioteClient {
 			}
 			boolean firstPerson = player == net.minecraft.client.Minecraft.getInstance().player && FirstPersonCompat.bodyShown();
 			state.setData(TENDRILS, new Tendrils(growth, player.tickCount, strike, aimYaw, aimPitch, side, smoothRun(player), held, bulk,
-				wallMode, wallYaw, wallPitch, heavy, variant, firstPerson, combo));
+				wallMode, wallYaw, wallPitch, heavy, variant, firstPerson, combo, rear, hit,
+				1.0F - WebSymbiote.state(player).bond() / (float)WebSymbiote.BOND_MAX));
 		} else {
 			ARMOR_SINCE.remove(entity.getId());
 			state.setData(TENDRILS, null);
@@ -409,8 +467,52 @@ public final class WebSymbioteClient {
 		}
 		if (takeoverTicks > 0) {
 			tickTakeover(player);
+			struggleMeter = Math.max(0.0F, struggleMeter - WebSymbiote.STRUGGLE_FADE);
+		} else {
+			tickCrawl(player, swing);
 		}
-		tickCrawl(player, swing);
+	}
+
+	/** A takeover has you: no key you press does what it would (each is a struggle against its hold instead). */
+	public static boolean inputLocked() {
+		return takeoverTicks > 0;
+	}
+
+	/** The movement keys during a takeover: each new press is a struggle. */
+	public static void struggleKeys(Input keys) {
+		boolean pressed = keys.forward() && !heldKeys.forward() || keys.backward() && !heldKeys.backward() || keys.left() && !heldKeys.left()
+			|| keys.right() && !heldKeys.right() || keys.jump() && !heldKeys.jump() || keys.shift() && !heldKeys.shift()
+			|| keys.sprint() && !heldKeys.sprint();
+		heldKeys = keys;
+		if (pressed) {
+			struggle();
+		}
+	}
+
+	/** The power keys during a takeover (from the power key loop): each new press is a struggle. */
+	public static void strugglePowerKey(int index, boolean down) {
+		if (index < 0 || index >= powerKeysWere.length) {
+			return;
+		}
+		if (down && !powerKeysWere[index]) {
+			struggle();
+		}
+		powerKeysWere[index] = down;
+	}
+
+	/** One press against its hold (at most one a tick reaches the server; see WebSymbiote.breakFreeNeeded). */
+	public static void struggle() {
+		LocalPlayer player = Minecraft.getInstance().player;
+		if (player == null || !inputLocked() || player.tickCount == struggleTick) {
+			return;
+		}
+		struggleTick = player.tickCount;
+		if (WebSymbiote.breakFreeNeeded(player) > 0) {
+			struggleMeter += 1.0F;
+		}
+		if (ClientPlayNetworking.canSend(WebNet.Struggle.TYPE)) {
+			ClientPlayNetworking.send(new WebNet.Struggle());
+		}
 	}
 
 	private static void clearPath() {
@@ -737,12 +839,18 @@ public final class WebSymbioteClient {
 		player.setDeltaMovement(move.x, up, move.z);
 	}
 
-	/** Wall Crawl: stick to walls and ceilings and climb them. */
+	/**
+	 * Wall Crawl: stuck to walls and ceilings, and dragged along them by the tendrils (see {@link #CLIMB_REACH}): forward
+	 * or Jump climbs, Sneak or back goes down, strafing goes along the wall; on a ceiling (Jump sticks you to it, Sneak
+	 * drops you) the movement keys drag you about upside down. Over the top of a wall, a tendril bites the ledge and
+	 * hauls you onto it.
+	 */
 	private static void tickCrawl(LocalPlayer player, WebSwing swing) {
 		if (!WebSymbiote.isToggled(player, WebSymbioteState.CRAWL) || player.getAbilities().flying || player.isPassenger() || player.isInWater()
 			|| player.isInLava() || swing.attached() || swing.pull != null || swing.wingsTicks > 0 || player.isFallFlying()) {
 			wallClinging = false;
 			ceilingClinging = false;
+			letGoOfWall();
 			return;
 		}
 		AABB box = player.getBoundingBox();
@@ -751,28 +859,170 @@ public final class WebSymbioteClient {
 		Input input = player.input.keyPresses;
 		Vec3 move = inputDirection(player, input);
 		if (ceiling && !input.shift() && (input.jump() || ceilingClinging)) {
-			// on the ceiling: pressed up into it, crawling about upside down
+			// on the ceiling: dragged about upside down
 			ceilingClinging = true;
 			wallClinging = false;
-			player.setDeltaMovement(move.x * CRAWL_SPEED, CEILING_PRESS, move.z * CRAWL_SPEED);
+			drag(player, move, new Vec3(0.0, -1.0, 0.0));
 			player.resetFallDistance();
 			return;
 		}
 		ceilingClinging = false;
 		if (wall && (!player.onGround() || input.forward() && player.horizontalCollision)) {
-			double vy = input.jump() || input.forward() ? CRAWL_CLIMB : input.shift() ? -CRAWL_CLIMB : 0.0;
-			player.setDeltaMovement(move.x * CRAWL_SPEED, vy, move.z * CRAWL_SPEED);
-			player.resetFallDistance();
+			Vec3 out = wallNormal(player);
+			// the way you want to go along the wall: up or down, and sideways
+			double vertical = (input.jump() || input.forward() ? 1.0 : 0.0) - (input.shift() || input.backward() ? 1.0 : 0.0);
+			Vec3 along = out.cross(new Vec3(0.0, 1.0, 0.0));
+			along = along.lengthSqr() < 1.0E-4 ? Vec3.ZERO : along.normalize();
+			Vec3 want = new Vec3(0.0, vertical, 0.0).add(along.scale(move.dot(along)));
 			wallClinging = true;
+			drag(player, want.lengthSqr() < 1.0E-4 ? Vec3.ZERO : want.normalize(), out);
+			player.resetFallDistance();
 			return;
 		}
+		if (wallClinging && climbLedge && climbAt != null && !player.onGround()) {
+			// hauled up over the edge: the tendril drags you onto the ledge
+			drag(player, climbWant, Vec3.ZERO);
+			if (player.getBoundingBox().minY < climbAt.y + 0.05) {
+				return;
+			}
+		}
 		if (wallClinging && !player.onGround() && player.getDeltaMovement().y > 0.0) {
-			// over the top: hop onto the ledge
+			// over the top: a hop onto the ledge
 			Vec3 forward = player.getLookAngle().horizontal();
 			forward = forward.lengthSqr() < 1.0E-4 ? Vec3.ZERO : forward.normalize();
 			player.setDeltaMovement(forward.x * LEDGE_FORWARD, LEDGE_HOP, forward.z * LEDGE_FORWARD);
 		}
 		wallClinging = false;
+		letGoOfWall();
+	}
+
+	/** Which way the wall you're on faces (out of it, toward you): the side your box is pressed against. */
+	private static Vec3 wallNormal(LocalPlayer player) {
+		AABB box = player.getBoundingBox().deflate(0.0, 0.1, 0.0);
+		Vec3 look = player.getLookAngle().horizontal();
+		Vec3 best = Vec3.ZERO;
+		double bestDot = -2.0;
+		for (net.minecraft.core.Direction dir : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+			Vec3 d = dir.getUnitVec3();
+			if (!player.level().noCollision(player, box.move(d.scale(0.15)))) {
+				// the one you're facing wins
+				double dot = d.dot(look);
+				if (dot > bestDot) {
+					bestDot = dot;
+					best = d.reverse();
+				}
+			}
+		}
+		if (best.lengthSqr() < 1.0E-4) {
+			best = look.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, -1.0) : look.normalize().reverse();
+		}
+		return best;
+	}
+
+	/**
+	 * One tick of the drag: a tendril reaches on ahead ({@code want}, along the surface facing {@code out}; zero: hang
+	 * where you are), bites in, and hauls you to it; then the other side's reaches on.
+	 */
+	private static void drag(LocalPlayer player, Vec3 want, Vec3 out) {
+		boolean ceiling = out.y < -0.5;
+		Vec3 center = player.getBoundingBox().getCenter();
+		if (want.lengthSqr() < 1.0E-4 && !climbLedge) {
+			// still: hanging on, pressed to the surface
+			player.setDeltaMovement(ceiling ? new Vec3(0.0, CEILING_PRESS, 0.0) : out.scale(-0.02));
+			climbPhase = 0;
+			return;
+		}
+		boolean turned = climbAt == null || want.lengthSqr() > 1.0E-4 && want.dot(climbWant) < 0.5;
+		Vec3 goal = climbAt == null ? center : climbGoal(player, out);
+		boolean arrived = climbPhase > CLIMB_REACH_TICKS && goal.distanceTo(center) < CLIMB_ARRIVE;
+		if (turned || arrived || climbPhase >= CLIMB_REACH_TICKS + CLIMB_PULL_TICKS) {
+			if (want.lengthSqr() < 1.0E-4) {
+				// a ledge pull with nowhere further to go
+				climbLedge = false;
+				return;
+			}
+			reachOn(player, want, out);
+			goal = climbGoal(player, out);
+		}
+		climbPhase++;
+		if (climbPhase <= CLIMB_REACH_TICKS) {
+			// reaching on ahead: you hang, sagging a little
+			player.setDeltaMovement(ceiling ? new Vec3(0.0, CEILING_PRESS, 0.0) : out.scale(-0.02).add(0.0, CLIMB_SAG, 0.0));
+			return;
+		}
+		// bitten in: hauled to it, hard at first, easing as it nears
+		Vec3 v = goal.subtract(center).scale(CLIMB_PULL_STEER);
+		if (v.length() > CLIMB_PULL_MAX) {
+			v = v.normalize().scale(CLIMB_PULL_MAX);
+		}
+		if (ceiling) {
+			v = new Vec3(v.x, Math.max(v.y, CEILING_PRESS), v.z);
+		}
+		player.setDeltaMovement(v);
+		if (climbPhase == CLIMB_REACH_TICKS + 1) {
+			WebSwing.play(player, net.minecraft.sounds.SoundEvents.SLIME_SQUISH_SMALL, 0.5F, 0.6F);
+		}
+	}
+
+	/** The other side's tendril reaches {@link #CLIMB_REACH} on along the surface and bites in (the server shows the cord). */
+	private static void reachOn(LocalPlayer player, Vec3 want, Vec3 out) {
+		climbHand = climbHand == WebNet.MAIN ? WebNet.OFF : WebNet.MAIN;
+		climbWant = want;
+		climbPhase = 0;
+		climbLedge = false;
+		Vec3 center = player.getBoundingBox().getCenter();
+		Vec3 ahead = center.add(want.scale(CLIMB_REACH));
+		Vec3 into = out.lengthSqr() < 1.0E-4 ? want : out.reverse();
+		net.minecraft.world.phys.BlockHitResult hit = player.level().clip(new net.minecraft.world.level.ClipContext(ahead.subtract(into.scale(0.3)),
+			ahead.add(into.scale(1.8)), net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, player));
+		Vec3 at;
+		if (hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK) {
+			at = hit.getLocation();
+		} else {
+			// nothing there to bite: over the top of the wall? It bites the ledge, to haul you up onto it
+			Vec3 over = ahead.add(into.scale(0.7));
+			net.minecraft.world.phys.BlockHitResult top = player.level().clip(new net.minecraft.world.level.ClipContext(over.add(0.0, 1.0, 0.0),
+				over.subtract(0.0, 2.0, 0.0), net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, player));
+			if (top.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK && top.getDirection() == net.minecraft.core.Direction.UP) {
+				at = top.getLocation();
+				climbLedge = true;
+				climbWant = want.add(into).normalize();
+			} else {
+				at = ahead.add(into.scale(0.5));
+			}
+		}
+		climbAt = at;
+		if (ClientPlayNetworking.canSend(WebNet.ClimbLatch.TYPE)) {
+			ClientPlayNetworking.send(new WebNet.ClimbLatch(climbHand, at, true));
+			climbSent = true;
+		}
+		WebSwing.play(player, net.minecraft.sounds.SoundEvents.SLIME_ATTACK, 0.35F, 0.7F + player.getRandom().nextFloat() * 0.2F);
+	}
+
+	/** Where the bite hauls your middle: just short of it, off the surface (onto the ledge, over the top). */
+	private static Vec3 climbGoal(LocalPlayer player, Vec3 out) {
+		Vec3 at = climbAt == null ? player.getBoundingBox().getCenter() : climbAt;
+		double half = player.getBbHeight() * 0.5;
+		if (climbLedge) {
+			return at.add(0.0, half + 0.1, 0.0);
+		}
+		if (out.y < -0.5) {
+			// hanging under the ceiling
+			return at.subtract(0.0, half - 0.1, 0.0).subtract(climbWant.scale(CLIMB_SHORT));
+		}
+		return at.add(out.scale(CLIMB_OFF_WALL)).subtract(climbWant.scale(CLIMB_SHORT));
+	}
+
+	/** Off the wall: the tendrils let go. */
+	private static void letGoOfWall() {
+		climbAt = null;
+		climbLedge = false;
+		climbPhase = 0;
+		if (climbSent && ClientPlayNetworking.canSend(WebNet.ClimbLatch.TYPE)) {
+			ClientPlayNetworking.send(new WebNet.ClimbLatch(WebNet.MAIN, Vec3.ZERO, false));
+			ClientPlayNetworking.send(new WebNet.ClimbLatch(WebNet.OFF, Vec3.ZERO, false));
+		}
+		climbSent = false;
 	}
 
 	/** The movement keys as a world direction (unit or zero), from where the player faces. */
@@ -799,6 +1049,16 @@ public final class WebSymbioteClient {
 		int width = graphics.guiWidth();
 		int height = graphics.guiHeight();
 		float pulse = 0.55F + 0.45F * Mth.sin(player.tickCount * 0.6F);
+		// fighting its hold: a thin bar filling as you struggle (only once you're able to break free)
+		int needed = WebSymbiote.breakFreeNeeded(player);
+		if (needed > 0 && struggleMeter > 0.0F) {
+			int barWidth = 120;
+			int filled = Math.round(barWidth * Math.min(1.0F, struggleMeter / needed));
+			int bx = (width - barWidth) / 2;
+			int by = height - 66;
+			graphics.fill(bx - 1, by - 1, bx + barWidth + 1, by + 4, 0xA0000000);
+			graphics.fill(bx, by, bx + filled, by + 3, 0xFFB050E0);
+		}
 		for (int band = 0; band < 6; band++) {
 			int alpha = (int)((150 - band * 24) * pulse);
 			int color = alpha << 24 | 0x0E0614;

@@ -1,13 +1,14 @@
 package com.jaymospowers.power.web;
 
 import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * Test commands (gamemasters): {@code /powerdebug web symbiote bond|reject|feed}, {@code /powerdebug web swung <blocks>}
+ * Test commands (gamemasters): {@code /powerdebug web symbiote bond|reject|feed}, {@code /powerdebug web symbiote level <0-100>} (the bond's strength), {@code /powerdebug web swung <blocks>}
  * and {@code /powerdebug web crater} (a crater, goo and all, right where you stand).
  */
 final class WebDebugCommand {
@@ -26,6 +27,13 @@ final class WebDebugCommand {
 							WebSymbiote.bond(player, player.position());
 							return 1;
 						}))
+						.then(Commands.literal("level")
+							.then(Commands.argument("bond", IntegerArgumentType.integer(0, WebSymbiote.BOND_MAX)).executes(c -> {
+								ServerPlayer player = c.getSource().getPlayerOrException();
+								WebSymbiote.addBond(player, IntegerArgumentType.getInteger(c, "bond") - WebSymbiote.state(player).bond());
+								c.getSource().sendSuccess(() -> Component.literal(WebSymbiote.describe(player)), false);
+								return 1;
+							})))
 						.then(Commands.literal("reject").executes(c -> {
 							WebSymbiote.reject(c.getSource().getPlayerOrException());
 							return 1;

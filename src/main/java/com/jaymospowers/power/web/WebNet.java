@@ -97,6 +97,32 @@ public final class WebNet {
 		}
 	}
 
+	/** Client → server: a key pressed against a takeover's hold (the client swallows them all while it drives). */
+	public record Struggle() implements CustomPacketPayload {
+		public static final Type<Struggle> TYPE = new Type<>(JaymosPowers.id("web_symbiote_struggle"));
+		public static final StreamCodec<ByteBuf, Struggle> CODEC = StreamCodec.unit(new Struggle());
+
+		@Override
+		public Type<Struggle> type() {
+			return TYPE;
+		}
+	}
+
+	/**
+	 * Client → server: Wall Crawl's tendril on {@code hand}'s side has latched onto the wall at {@code at} and is dragging
+	 * you there ({@code on} false: it let go). Shown to everyone as a cord from your back.
+	 */
+	public record ClimbLatch(int hand, Vec3 at, boolean on) implements CustomPacketPayload {
+		public static final Type<ClimbLatch> TYPE = new Type<>(JaymosPowers.id("web_symbiote_climb_latch"));
+		public static final StreamCodec<ByteBuf, ClimbLatch> CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_INT, ClimbLatch::hand, Vec3.STREAM_CODEC, ClimbLatch::at, ByteBufCodecs.BOOL, ClimbLatch::on, ClimbLatch::new);
+
+		@Override
+		public Type<ClimbLatch> type() {
+			return TYPE;
+		}
+	}
+
 	/** Server → client: the symbiote takes over for {@code ticks}, lurching at entity {@code entityId} (-1: it lets go). */
 	public record Takeover(int entityId, int ticks, boolean flee) implements CustomPacketPayload {
 		public static final Type<Takeover> TYPE = new Type<>(JaymosPowers.id("web_takeover"));
@@ -185,6 +211,8 @@ public final class WebNet {
 
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(SymbioteUse.TYPE, SymbioteUse.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(Struggle.TYPE, Struggle.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(ClimbLatch.TYPE, ClimbLatch.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Takeover.TYPE, Takeover.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(TakeoverPath.TYPE, TakeoverPath.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Nudge.TYPE, Nudge.CODEC);

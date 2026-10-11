@@ -282,6 +282,9 @@ final class WebLineRenderer {
 					}
 				}
 			}
+			// tendrils latched onto a wall to climb, or into a block they're struggling to tear out
+			latchCords(context, minecraft, player, player.getAttached(com.jaymospowers.power.web.WebTendrils.CLIMB), camera, partialTick);
+			latchCords(context, minecraft, player, player.getAttached(com.jaymospowers.power.web.WebTendrils.TUG), camera, partialTick);
 			float spread = WebArms.wings(player, partialTick);
 			if (spread > 0.02F && !(player == minecraft.player && minecraft.options.getCameraType().isFirstPerson())) {
 				for (int side = -1; side <= 1; side += 2) {
@@ -289,6 +292,20 @@ final class WebLineRenderer {
 						WebArms.wingTip(player, side, spread, partialTick).subtract(camera), WebArms.wingHip(player, side, partialTick).subtract(camera),
 						width * 0.8F, dark);
 				}
+			}
+		}
+	}
+
+	private static void latchCords(LevelRenderContext context, Minecraft minecraft, Player player,
+		com.jaymospowers.power.web.WebTendrils.Latch latch, Vec3 camera, float partialTick) {
+		if (latch == null) {
+			return;
+		}
+		for (int handIndex = WebNet.MAIN; handIndex <= WebNet.OFF; handIndex++) {
+			if (latch.has(handIndex)) {
+				Vec3 at = latch.get(handIndex);
+				// a new seed for every new grip point, so each one reaches out afresh
+				tentacle(context, minecraft, player, handIndex, at, java.util.Objects.hash(at.x, at.y, at.z), camera, partialTick);
 			}
 		}
 	}

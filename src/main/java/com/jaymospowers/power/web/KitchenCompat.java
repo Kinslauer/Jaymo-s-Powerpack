@@ -66,6 +66,14 @@ public final class KitchenCompat {
 		}
 	}
 
+	/**
+	 * A corpse torn apart where it lies (the symbiote's thrash): the same as butchering it without a butcher block, a
+	 * rough job, about half its loot. Returns whether it was.
+	 */
+	static boolean butcherRough(Entity entity) {
+		return LOADED && Kitchen.butcherRough(entity);
+	}
+
 	/** Only touched when Jaymo's Kitchen is loaded. */
 	private static final class Kitchen {
 		static @Nullable Entity carried(Player player) {
@@ -123,6 +131,34 @@ public final class KitchenCompat {
 
 		static net.minecraft.world.entity.@Nullable EntityType<?> sourceType(Entity entity) {
 			return entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse ? corpse.sourceType() : null;
+		}
+
+		private static java.lang.reflect.@Nullable Method butcherMethod;
+		private static boolean butcherLooked;
+
+		static boolean butcherRough(Entity entity) {
+			if (!(entity instanceof com.jaymoskitchen.corpse.CorpseEntity corpse) || !(entity.level() instanceof net.minecraft.server.level.ServerLevel level)
+				|| corpse.isPlayerCorpse()) {
+				return false;
+			}
+			if (!butcherLooked) {
+				butcherLooked = true;
+				try {
+					butcherMethod = com.jaymoskitchen.corpse.CorpseEntity.class.getDeclaredMethod("butcher", net.minecraft.server.level.ServerLevel.class, boolean.class);
+					butcherMethod.setAccessible(true);
+				} catch (ReflectiveOperationException | RuntimeException e) {
+					butcherMethod = null;
+				}
+			}
+			if (butcherMethod == null) {
+				return false;
+			}
+			try {
+				butcherMethod.invoke(corpse, level, false);
+				return true;
+			} catch (ReflectiveOperationException | RuntimeException e) {
+				return false;
+			}
 		}
 
 		static void jolt(Entity entity) {
