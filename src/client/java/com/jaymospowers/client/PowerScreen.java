@@ -1,7 +1,6 @@
 package com.jaymospowers.client;
 
 import com.jaymospowers.api.Power;
-import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
@@ -12,7 +11,6 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 
@@ -22,7 +20,8 @@ import net.minecraft.util.FormattedCharSequence;
  */
 public class PowerScreen extends Screen {
 	private static final int CARD_W = 180;
-	private static final int CARD_H = 104;
+	/** The shortest a card gets; each grows to fit its key lines (all as tall as the tallest). */
+	private static final int CARD_MIN_H = 104;
 	/** Pixels per mouse-wheel notch. */
 	private static final int SCROLL_STEP = 24;
 	private static final int GAP = 6;
@@ -44,6 +43,32 @@ public class PowerScreen extends Screen {
 			this.powers.clear();
 			this.powers.add(own);
 		}
+	}
+
+	/** The player, for their own power's card (its lines follow their state); null for the others. */
+	private net.minecraft.world.entity.player.@org.jspecify.annotations.Nullable Player owner(Power power) {
+		return this.minecraft.player != null && power == current() ? this.minecraft.player : null;
+	}
+
+	/** Tall enough for the description, every key line (wrapped), the mastery line and a creative Choose button. */
+	private int cardH = CARD_MIN_H;
+
+	private int cardH() {
+		return cardH;
+	}
+
+	/** Re-measures the cards (fate, mastery and key bindings can change while the screen is open). */
+	private void measure() {
+		int tallest = CARD_MIN_H;
+		for (Power power : powers) {
+			int h = 24 + Math.min(3, this.font.split(power.description(), CARD_W - 10).size()) * 9 + 3;
+			for (KeyGuide.Line line : KeyGuide.lines(power, owner(power))) {
+				h += this.font.split(line.full(), CARD_W - 10).size() * 9;
+			}
+			h += 11 + (creative() ? 20 : 4);
+			tallest = Math.max(tallest, h);
+		}
+		cardH = tallest;
 	}
 
 	private boolean creative() {
@@ -71,7 +96,7 @@ public class PowerScreen extends Screen {
 	}
 
 	private int panelH() {
-		return HEADER + rows() * (CARD_H + GAP) + FOOTER;
+		return HEADER + rows() * (cardH() + GAP) + FOOTER;
 	}
 
 	private int left() {
@@ -104,11 +129,12 @@ public class PowerScreen extends Screen {
 	}
 
 	private int cardY(int i) {
-		return top() + HEADER + (i / cols()) * (CARD_H + GAP);
+		return top() + HEADER + (i / cols()) * (cardH() + GAP);
 	}
 
 	@Override
 	protected void init() {
+		measure();
 		scroll = net.minecraft.util.Mth.clamp(scroll, 0, maxScroll());
 		Power current = current();
 		if (creative()) {
@@ -116,7 +142,7 @@ public class PowerScreen extends Screen {
 				Power power = powers.get(i);
 				Button choose = Button.builder(Component.translatable(power == current ? "screen.jaymospowers.current" : "screen.jaymospowers.choose"),
 						b -> choose(power.id().toString()))
-					.bounds(cardX(i) + CARD_W - 64, cardY(i) + CARD_H - 20, 60, 16)
+					.bounds(cardX(i) + CARD_W - 64, cardY(i) + cardH() - 20, 60, 16)
 					.build();
 				choose.active = power != current;
 				addRenderableWidget(choose);
@@ -141,6 +167,11 @@ public class PowerScreen extends Screen {
 
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+		int was = cardH;
+		measure();
+		if (cardH != was) {
+			rebuildWidgets();
+		}
 		int x = left();
 		int y = top();
 		graphics.fill(x, y, x + panelW(), y + panelH(), COLOR_PANEL);
@@ -167,14 +198,14 @@ public class PowerScreen extends Screen {
 
 	private void drawCard(GuiGraphicsExtractor graphics, Power power, int x, int y, boolean active) {
 		int accent = 0xFF000000 | power.color();
-		graphics.fill(x, y, x + CARD_W, y + CARD_H, COLOR_CARD);
+		graphics.fill(x, y, x + CARD_W, y + cardH(), COLOR_CARD);
 		if (active) {
 			graphics.fill(x, y, x + CARD_W, y + 1, accent);
-			graphics.fill(x, y + CARD_H - 1, x + CARD_W, y + CARD_H, accent);
-			graphics.fill(x, y, x + 1, y + CARD_H, accent);
-			graphics.fill(x + CARD_W - 1, y, x + CARD_W, y + CARD_H, accent);
+			graphics.fill(x, y + cardH() - 1, x + CARD_W, y + cardH(), accent);
+			graphics.fill(x, y, x + 1, y + cardH(), accent);
+			graphics.fill(x + CARD_W - 1, y, x + CARD_W, y + cardH(), accent);
 		}
-		graphics.fill(x, y, x + 2, y + CARD_H, accent);
+		graphics.fill(x, y, x + 2, y + cardH(), accent);
 		graphics.item(power.icon(), x + 5, y + 4);
 		Component name = active && this.minecraft.player != null ? PowerHud.title(power, Fate.state(this.minecraft.player), this.minecraft.player) : power.name();
 		graphics.text(this.font, name, x + 25, y + 8, accent);
@@ -186,46 +217,12 @@ public class PowerScreen extends Screen {
 			lineY += 9;
 		}
 		lineY += 3;
-		String base = "power." + power.id().getNamespace() + "." + power.id().getPath() + ".key.";
-		boolean starter = active && !creative() && JaymosPowersClient.starterOnly();
-		if (starter && Language.getInstance().has(base + "starter")) {
-			// a fresh awakening: only the starter, on its key (or always on, if it's passive)
-			PowerKey key = power.starterKey();
-			Component line = (key == null ? Component.translatable("screen.jaymospowers.passive")
-				: Component.literal("[").append(JaymosPowersClient.keyMapping(key).getTranslatedKeyMessage()).append("]"))
-				.copy().append(" ").append(Component.translatable(base + "starter"));
-			List<FormattedCharSequence> split = this.font.split(line, CARD_W - 10);
-			if (!split.isEmpty()) {
-				graphics.text(this.font, split.getFirst(), x + 6, lineY, 0xFFE8D8A0);
+		// what each key does right now: your own power's lines follow its fate and mastery
+		for (KeyGuide.Line line : KeyGuide.lines(power, owner(power))) {
+			for (FormattedCharSequence part : this.font.split(line.full(), CARD_W - 10)) {
+				graphics.text(this.font, part, x + 6, lineY, line.color());
+				lineY += 9;
 			}
-			lineY += 9;
-		}
-		boolean corrupted = active && this.minecraft.player != null && Fate.isCorrupted(this.minecraft.player);
-		for (PowerKey key : PowerKey.values()) {
-			if (!Language.getInstance().has(base + key.id())) {
-				continue;
-			}
-			// your own power's locked abilities show greyed out
-			boolean locked = active && !creative() && !this.minecraft.player.isCreative() && !com.jaymospowers.core.Mastery.isUnlocked(this.minecraft.player, key);
-			// a corrupted power's keys can change (Stormbound's B, say)
-			String text = corrupted && Language.getInstance().has(base + key.id() + ".corrupted") ? base + key.id() + ".corrupted" : base + key.id();
-			Component line = Component.literal("[").append(JaymosPowersClient.keyMapping(key).getTranslatedKeyMessage()).append("] ")
-				.append(locked ? Component.translatable("screen.jaymospowers.locked") : Component.translatable(text));
-			List<FormattedCharSequence> split = this.font.split(line, CARD_W - 10);
-			if (!split.isEmpty()) {
-				graphics.text(this.font, split.getFirst(), x + 6, lineY, locked ? COLOR_DIM : COLOR_TEXT);
-			}
-			lineY += 9;
-		}
-		// the ascended ability shows up only once it's yours
-		if (active && this.minecraft.player != null && Fate.isAscended(this.minecraft.player) && Language.getInstance().has(base + "ultimate")) {
-			Component line = Component.literal("[").append(JaymosPowersClient.ultimateKey().getTranslatedKeyMessage()).append("] ")
-				.append(Component.translatable(base + "ultimate"));
-			List<FormattedCharSequence> split = this.font.split(line, CARD_W - 10);
-			if (!split.isEmpty()) {
-				graphics.text(this.font, split.getFirst(), x + 6, lineY, 0xFFFFD54A);
-			}
-			lineY += 9;
 		}
 		float progress = active && this.minecraft.player != null ? Mastery.progress(this.minecraft.player) : -1.0F;
 		if (progress >= 0.0F) {

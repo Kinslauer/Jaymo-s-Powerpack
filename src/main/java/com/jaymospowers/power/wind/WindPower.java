@@ -282,6 +282,12 @@ public final class WindPower implements Power {
 		this.sendStatus(player, s, 0.0F, false);
 	}
 
+	/** X: the Cyclone comes with the first ability (the Tempest Kick waits for everything mastered). */
+	@Override
+	public boolean slotUnlocked(Player player, String slot) {
+		return !"special".equals(slot) || com.jaymospowers.core.Mastery.unlocked(player) >= 1;
+	}
+
 	@Override
 	public boolean allowsFloating(ServerPlayer player) {
 		State s = this.states.get(player.getUUID());
