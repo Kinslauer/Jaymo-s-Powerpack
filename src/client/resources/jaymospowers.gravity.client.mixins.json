@@ -3,6 +3,7 @@
 	"package": "com.jaymospowers.client.power.gravity.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
+		"GravityLivingEntityRendererMixin",
 		"GravityModelFeatureRendererMixin",
 		"GravityStunInputMixin"
 	],
