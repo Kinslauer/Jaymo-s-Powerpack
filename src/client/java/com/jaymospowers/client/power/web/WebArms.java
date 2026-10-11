@@ -27,6 +27,8 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li>Each arm with a web out reaches along its web: it springs toward the anchor with a bit of lag and overshoot, so a
  * fresh web snaps the arm up and a swing tugs it around.</li>
+ * <li>A Web Zip fires from both hands at the one target; then, as the web reels you in, both hands haul back on it
+ * and trail behind you while you fly forward.</li>
  * <li>While hanging from a web the legs go limp: they trail behind the swing and flop sideways with it, settling as
  * the swing slows.</li>
  * </ul>
@@ -54,6 +56,13 @@ public final class WebArms {
 	public record Pose(float amount, float @Nullable [] mainArm, float @Nullable [] offArm, float legTrail, float legSide, float wings, float lean,
 		float swayPitch, float swayRoll) {
 	}
+
+	/**
+	 * Web Zip: both arms aim at the target for {@code ZIP_SHOOT_TICKS}, then sweep back over {@code ZIP_SWEEP_TICKS}
+	 * until they trail behind the flight, angled this far down ({@code ZIP_TRAIL_DROP}, as a share of the back sweep).
+	 */
+	private static final int ZIP_SHOOT_TICKS = 5, ZIP_SWEEP_TICKS = 6;
+	private static final double ZIP_TRAIL_DROP = 0.45;
 
 	/** Gliding: the body leans this far forward (degrees), easing in over {@code LEAN_TICKS} of the glide. */
 	private static final float GLIDE_LEAN = 70.0F;
@@ -87,6 +96,8 @@ public final class WebArms {
 		float lean, prevLean;
 		float swayPitch, swayPitchVel, prevSwayPitch;
 		float swayRoll, swayRollVel, prevSwayRoll;
+		/** Ticks into the current Web Zip (0 = not zipping). */
+		int zipAge;
 	}
 
 	private static final Map<Integer, Body> BODIES = new HashMap<>();
@@ -105,10 +116,11 @@ public final class WebArms {
 		for (AbstractClientPlayer player : level.players()) {
 			Vec3 main = lineEnd(minecraft, level, player, WebNet.MAIN, 1.0F);
 			Vec3 off = lineEnd(minecraft, level, player, WebNet.OFF, 1.0F);
+			boolean zipping = zipping(minecraft, player);
 			boolean winged = isWinged(minecraft, player);
 			Body body = BODIES.get(player.getId());
 			if (body == null) {
-				if (main == null && off == null && !winged) {
+				if (main == null && off == null && !winged && !zipping) {
 					continue;
 				}
 				body = new Body();
@@ -121,10 +133,26 @@ public final class WebArms {
 			body.prevLean = body.lean;
 			float t = Math.min(1.0F, body.wingsAge / LEAN_TICKS);
 			body.lean = winged ? t * t * (3.0F - 2.0F * t) : Math.max(0.0F, body.lean - 0.15F);
+			body.zipAge = zipping ? body.zipAge + 1 : 0;
 			tickBody(player, body, main, off);
 		}
 		BODIES.entrySet().removeIf(entry -> entry.getValue().amount <= 0.0F && entry.getValue().prevAmount <= 0.0F
 			&& entry.getValue().wings <= 0.0F && entry.getValue().prevWings <= 0.0F || level.getEntity(entry.getKey()) == null);
+	}
+
+	/**
+	 * On a Web Zip's line right now. The local player: while the reel-in lasts. Others: a zip-style line out while off
+	 * the ground (a webline being strung from where you stand draws the same line, but that's one hand).
+	 */
+	static boolean zipping(Minecraft minecraft, Player player) {
+		WebLine line = player.getAttached(WebPower.LINE);
+		if (line == null || line.kind() != WebLine.ZIP) {
+			return false;
+		}
+		if (player == minecraft.player) {
+			return WebPowerClient.isActive(minecraft.player) && WebPowerClient.INSTANCE.swing.pull != null;
+		}
+		return !player.onGround();
 	}
 
 	private static boolean isWinged(Minecraft minecraft, Player player) {
@@ -243,6 +271,12 @@ public final class WebArms {
 			Vec3 shoulder = shoulder(player, hand, 1.0F);
 			Vec3 want = target.subtract(shoulder);
 			want = want.lengthSqr() < 1.0E-6 ? new Vec3(0.0, 1.0, 0.0) : want.normalize();
+			if (body.zipAge > ZIP_SHOOT_TICKS) {
+				// the zip has caught: haul back on it, the hands trailing behind as the body flies on
+				float sweep = Math.min(1.0F, (body.zipAge - ZIP_SHOOT_TICKS) / (float)ZIP_SWEEP_TICKS);
+				sweep = sweep * sweep * (3.0F - 2.0F * sweep);
+				want = want.lerp(trail(player), sweep).normalize();
+			}
 			if (body.dir[hand] == null) {
 				// a fresh web: the arm starts from hanging at the side and snaps up to it
 				body.dir[hand] = new Vec3(0.0, -1.0, 0.0);
@@ -280,6 +314,19 @@ public final class WebArms {
 		body.side += body.sideVel;
 	}
 
+	/** Straight back from the way the body is flying, and a little down: where a zipping slinger's hands trail. */
+	private static Vec3 trail(Player player) {
+		Vec3 v = new Vec3(player.getX() - player.xo, player.getY() - player.yo, player.getZ() - player.zo);
+		Vec3 back;
+		if (v.lengthSqr() > 1.0E-4) {
+			back = v.normalize().scale(-1.0);
+		} else {
+			float yaw = player.yBodyRot * Mth.DEG_TO_RAD;
+			back = new Vec3(Mth.sin(yaw), 0.0, -Mth.cos(yaw));
+		}
+		return back.add(0.0, -ZIP_TRAIL_DROP, 0.0).normalize();
+	}
+
 	/** Where the hand's web ends for any player: the local player's own state, else the synced lines. */
 	static @Nullable Vec3 lineEnd(Minecraft minecraft, ClientLevel level, Player player, int hand, float partialTick) {
 		Vec3 end;
@@ -299,6 +346,10 @@ public final class WebArms {
 			if (entity != null) {
 				end = entity.getPosition(partialTick).add(0.0, entity.getBbHeight() * 0.5, 0.0);
 			}
+		}
+		if (end == null && hand == WebNet.OFF && zipping(minecraft, player)) {
+			// a Web Zip fires from both hands at the one target
+			end = lineEnd(minecraft, level, player, WebNet.MAIN, partialTick);
 		}
 		return end;
 	}
