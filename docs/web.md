@@ -249,6 +249,18 @@ cobweb.
 - G is now only the off-hand web (it needs an empty off hand).
 - **HUD row:** wings · G · V · B · Z. G's chip dims while the off hand is full.
 
+## Swing tricks (0.8.6)
+The slinger's client knows when a web lets go and when the feet land, so it picks a trick and asks the server
+(`WebTricks.Trick`), which checks it and starts a `WebPose` everyone sees. Your own tricks are hidden in first person.
+Tuning is at the top of `client/power/web/WebTrickClient`; the shapes are in `WebBodyPose`.
+- **Off a released web** (moving 0.5+ b/t): tucked **front flip**, laid-out **corkscrew**, aerial **cartwheel**
+  (thrown upward favours the front flip). Never the same one twice running.
+- **On the web:** through the bottom of a fast arc (30%) a **twirl** round the line or a **giant swing** over the
+  hand; when the next web catches mid-air (40%) a twirl.
+- **Landing** (after 8+ ticks in the air off a web or the wings): a 2.5+ block drop lands **three-point** (superhero
+  landing); fast across the ground, a **forward roll**; off the wings, the **flare and spin** into a crouch (a roll if
+  very fast). A landing cuts into a flip still going; dodges, ragdolls and takeovers are never interrupted.
+
 ## 0.2.0: Ascension & Corruption
 
 The web power doesn't use the Fate corruption meter. Its dark path is the **symbiote**, a separate system with its
