@@ -40,6 +40,7 @@
 	"message.jaymoskingdoms.succession": "A new king takes the throne of %s.",
 	"entity.jaymoskingdoms.lord_of": "Lord of %s",
 	"entity.jaymoskingdoms.foreman_of": "Foreman of %s",
+	"entity.jaymoskingdoms.farmer_of": "Farmer of %s",
 	"entity.jaymoskingdoms.builder_of": "Builder of %s",
 	"entity.jaymoskingdoms.elder_of": "Elder of %s",
 	"faction_type.jaymoskingdoms.kingdom": "kingdom",
@@ -80,6 +81,7 @@
 	"item.jaymoskingdoms.plot_stake": "Plot Stake",
 	"building.jaymoskingdoms.house": "House",
 	"building.jaymoskingdoms.farm": "Farm",
+	"building.jaymoskingdoms.village_farm": "Village farm",
 	"building.jaymoskingdoms.well": "Well",
 	"building.jaymoskingdoms.stall": "Market Stall",
 	"building.jaymoskingdoms.road": "Crossroads",
@@ -208,5 +210,6 @@
 	"message.jaymoskingdoms.grim.fiefdom": "The lord of %s raises the banner of %s over an old ruin: a new fiefdom.",
 	"message.jaymoskingdoms.grim.camp": "Barbarians have taken an old ruin near %2$s: the camp of %1$s.",
 	"message.jaymoskingdoms.grim.cleared": "The builders of %s have cleared the rubble from their hold.",
-	"message.jaymoskingdoms.grim.erect": "The builders of %s begin raising a new hall beside their hold."
+	"message.jaymoskingdoms.grim.erect": "The builders of %s begin raising a new hall beside their hold.",
+	"message.jaymoskingdoms.overnight": "While you slept, the builders of %s laid %s blocks."
 }

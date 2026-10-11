@@ -38,13 +38,14 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
  * (barracks, a training yard, a well), the keep at the back of it.</li>
  * <li><b>The tower</b>: a tall donjon, four storeys: the guard room, the throne room above it, the king's chamber,
  * and the battlements on the roof.</li>
+ * <li><b>The citadel</b> (0.5.1, what a seat built from nothing is now): 61 blocks square, see {@link Citadel}.</li>
  * </ul>
  * Under every throne, behind a hidden trapdoor, a fortified panic room keeps the treasury (and maybe the king). Round
  * the town, watchtowers stand at the kingdom's edge. Each piece is built in its own frame (x across, z inward from
  * its gate, y from its floor) and turned to face the bell.
  */
 final class Castle {
-	enum Kind { KEEP, CASTLE, TOWER }
+	enum Kind { KEEP, CASTLE, TOWER, CITADEL }
 
 	/** Looks for a site this far from the bell; watchtowers this far out. */
 	static final int SITE_MIN = 20, SITE_MAX = 48, TOWER_MIN = 56, TOWER_MAX = 88;
@@ -72,19 +73,29 @@ final class Castle {
 
 	/** The flattest spot {@code min}-{@code max} from the bell, big enough, with the fewest of the village's buildings in the way. */
 	static Site site(ServerLevel level, BlockPos bell, int halfWidth, int min, int max, double turnFrom) {
-		Site best = null;
-		for (int r = min; r <= max; r += 6) {
-			for (int i = 0; i < 16; i++) {
-				double a = turnFrom + i / 16.0 * Math.PI * 2.0;
-				BlockPos center = bell.offset((int)Math.round(Math.cos(a) * r), 0, (int)Math.round(Math.sin(a) * r));
-				Direction facing = Direction.getApproximateNearest(bell.getX() - center.getX(), 0, bell.getZ() - center.getZ());
-				Site site = score(level, center, facing, halfWidth);
-				if (best == null || site.score < best.score) {
-					best = site;
+		// (0.5.1) only ground already loaded, if there's any: a big seat's far candidates would otherwise be generated to look at
+		for (boolean onlyLoaded : new boolean[] {true, false}) {
+			Site best = null;
+			for (int r = min; r <= max; r += 6) {
+				for (int i = 0; i < 16; i++) {
+					double a = turnFrom + i / 16.0 * Math.PI * 2.0;
+					BlockPos center = bell.offset((int)Math.round(Math.cos(a) * r), 0, (int)Math.round(Math.sin(a) * r));
+					if (onlyLoaded && !level.hasChunksAt(center.getX() - halfWidth - 1, center.getZ() - halfWidth - 1, center.getX() + halfWidth + 1,
+						center.getZ() + halfWidth + 1)) {
+						continue;
+					}
+					Direction facing = Direction.getApproximateNearest(bell.getX() - center.getX(), 0, bell.getZ() - center.getZ());
+					Site site = score(level, center, facing, halfWidth);
+					if (best == null || site.score < best.score) {
+						best = site;
+					}
 				}
 			}
+			if (best != null) {
+				return best;
+			}
 		}
-		return best;
+		throw new IllegalStateException("no candidates");
 	}
 
 	private static Site score(ServerLevel level, BlockPos center, Direction facing, int half) {
@@ -117,18 +128,25 @@ final class Castle {
 	/** Builds the kingdom's seat (a random kind) and its watchtowers, in the village's materials. */
 	static Keep build(ServerLevel level, Faction kingdom, BlockPos bell, @org.jspecify.annotations.Nullable Kind forced) {
 		RandomSource random = level.getRandom();
-		Kind kind = forced != null ? forced : Kind.values()[random.nextInt(Kind.values().length)];
+		// (0.5.1: a seat built from nothing is the citadel, unless an operator asks for one of the old kinds)
+		Kind kind = forced != null ? forced : Kind.CITADEL;
 		int half = switch (kind) {
 			case KEEP -> 8;
 			case CASTLE -> 17;
 			case TOWER -> 6;
+			case CITADEL -> Citadel.HALF + Citadel.TOWER_HALF + 1;
 		};
-		Site site = site(level, bell, half, kind == Kind.CASTLE ? SITE_MIN + 10 : SITE_MIN, SITE_MAX + (kind == Kind.CASTLE ? 12 : 0), 0.0);
+		Site site = switch (kind) {
+			case CITADEL -> site(level, bell, half, Citadel.SITE_MIN, Citadel.SITE_MAX, 0.0);
+			case CASTLE -> site(level, bell, half, SITE_MIN + 10, SITE_MAX + 12, 0.0);
+			default -> site(level, bell, half, SITE_MIN, SITE_MAX, 0.0);
+		};
 		Palette p = Palette.at(level, bell);
 		Frame frame = new Frame(site.center(), site.facing(), site.floor(), switch (kind) {
 			case KEEP -> KEEP_DEPTH / 2;
 			case CASTLE -> CASTLE_DEPTH / 2;
 			case TOWER -> TOWER_SIZE / 2;
+			case CITADEL -> Citadel.DEPTH / 2;
 		});
 		Keep keep = switch (kind) {
 			case KEEP -> {
@@ -137,13 +155,14 @@ final class Castle {
 			}
 			case CASTLE -> castle(level, frame, p, kingdom, random);
 			case TOWER -> tower(level, frame, p, kingdom, random);
+			case CITADEL -> Citadel.build(level, frame, p, kingdom, random);
 		};
 		// a way to the gate from the land in front of it (just outside the foundation)
 		approach(level, frame, p, kind == Kind.KEEP ? -2 : -3);
-		// watchtowers round the town's edge
+		// watchtowers round the town's edge (the citadel has towers enough of its own)
 		List<BlockPos> posts = new ArrayList<>(keep.posts());
 		double turn = random.nextDouble() * Math.PI * 2.0;
-		for (int i = 0; i < WATCHTOWERS; i++) {
+		for (int i = 0; i < (kind == Kind.CITADEL ? 0 : WATCHTOWERS); i++) {
 			Site spot = site(level, bell, 3, TOWER_MIN, TOWER_MAX, turn + i * Math.PI * 2.0 / WATCHTOWERS);
 			posts.add(watchtower(level, new Frame(spot.center(), spot.facing(), spot.floor(), 2), p, random));
 		}
@@ -196,6 +215,11 @@ final class Castle {
 
 	/** The ground made ready in {@code x0..x1, z0..z1}: a foundation under it, the air cleared above. */
 	private static void prepare(ServerLevel level, Frame f, Palette p, int x0, int x1, int z0, int z1) {
+		prepare(level, f, p, x0, x1, z0, z1, 18);
+	}
+
+	/** (clearing {@code high} above the floor) */
+	static void prepare(ServerLevel level, Frame f, Palette p, int x0, int x1, int z0, int z1, int high) {
 		for (int x = x0; x <= x1; x++) {
 			for (int z = z0; z <= z1; z++) {
 				for (int y = -CELLAR_DEPTH - 2; y < 0; y++) {
@@ -203,7 +227,7 @@ final class Castle {
 						f.set(level, x, y, z, y == -1 ? p.wall() : Blocks.STONE.defaultBlockState());
 					}
 				}
-				for (int y = 0; y <= 18; y++) {
+				for (int y = 0; y <= high; y++) {
 					f.set(level, x, y, z, Blocks.AIR.defaultBlockState());
 				}
 			}
@@ -211,7 +235,7 @@ final class Castle {
 	}
 
 	/** A weathered wall block. */
-	private static BlockState weathered(Palette p, RandomSource random) {
+	static BlockState weathered(Palette p, RandomSource random) {
 		float roll = random.nextFloat();
 		return roll < 0.15F ? p.mossy() : roll < 0.28F ? p.cracked() : p.wall();
 	}
@@ -262,7 +286,7 @@ final class Castle {
 	}
 
 	/** A solid 3 x 3 column (a corner tower) from the ground to {@code top}, crenellated. */
-	private static void column(ServerLevel level, Frame f, BlockState block, int cx, int cz, int top, boolean battlements) {
+	static void column(ServerLevel level, Frame f, BlockState block, int cx, int cz, int top, boolean battlements) {
 		for (int y = 0; y <= top; y++) {
 			for (int dx = -1; dx <= 1; dx++) {
 				for (int dz = -1; dz <= 1; dz++) {
@@ -284,7 +308,7 @@ final class Castle {
 		f.set(level, 2, high + 1, z, p.trim());
 	}
 
-	private static void torches(ServerLevel level, Frame f, int x0, int x1, int z0, int z1, int y) {
+	static void torches(ServerLevel level, Frame f, int x0, int x1, int z0, int z1, int y) {
 		for (int z = z0; z <= z1; z += 4) {
 			f.set(level, x0, y, z, f.turn(Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.EAST)));
 			f.set(level, x1, y, z, f.turn(Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.WEST)));
@@ -295,7 +319,7 @@ final class Castle {
 	 * A throne room on the floor at frame y = {@code y}: the carpet aisle from {@code zFront} to the dais, the dais
 	 * (x {@code x0..x1}) at the back ({@code zBack}), the throne, the banners. Returns where the king stands.
 	 */
-	private static BlockPos throneRoom(ServerLevel level, Frame f, Palette p, Faction kingdom, int x0, int x1, int zFront, int zBack, int y) {
+	static BlockPos throneRoom(ServerLevel level, Frame f, Palette p, Faction kingdom, int x0, int x1, int zFront, int zBack, int y) {
 		BlockState carpet = byName(kingdom.color().getName() + "_carpet", Blocks.AIR);
 		for (int z = zFront; z <= zBack - 3; z++) {
 			f.set(level, 0, y, z, carpet);
@@ -325,7 +349,7 @@ final class Castle {
 	 * The panic room under a throne: a fortified cellar centred at frame z {@code cz} below floor y {@code y}, reached
 	 * down a ladder at ({@code lx}, {@code lz}) under a trapdoor flush with the floor (y). Returns where one stands in it.
 	 */
-	private static BlockPos panicRoom(ServerLevel level, Frame f, Palette p, RandomSource random, int lx, int lz, int y, int cz) {
+	static BlockPos panicRoom(ServerLevel level, Frame f, Palette p, RandomSource random, int lx, int lz, int y, int cz) {
 		for (int x = -CELLAR_HALF - 1; x <= CELLAR_HALF + 1; x++) {
 			for (int z = cz - CELLAR_HALF - 1; z <= cz + CELLAR_HALF + 1; z++) {
 				for (int dy = -CELLAR_DEPTH - 1; dy <= -2; dy++) {
@@ -433,7 +457,7 @@ final class Castle {
 	}
 
 	/** A lean-to of bunks along the wall: x {@code x0..x1}, z {@code z0..z1}. */
-	private static void barracks(ServerLevel level, Frame f, Palette p, int x0, int x1, int z0, int z1) {
+	static void barracks(ServerLevel level, Frame f, Palette p, int x0, int x1, int z0, int z1) {
 		for (int z = z0; z <= z1; z++) {
 			for (int x = x0; x <= x1; x++) {
 				f.set(level, x, 4, z, p.woodSlab());

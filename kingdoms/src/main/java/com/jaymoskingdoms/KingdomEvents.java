@@ -179,8 +179,8 @@ public final class KingdomEvents {
 		}
 		if (Factions.realmNear(server, bell.get(), CAPITAL_SPACING) == null) {
 			if (foundIn(level, bell.get(), village.start()) == null) {
-				// no building there with a floor under a roof: the village is a village
-				Villages.found(level, bell.get());
+				// (0.5.1) no building there fit for a king: the kingdom raises its citadel beside the village
+				found(level, bell.get(), Castle.Kind.CITADEL);
 			}
 		} else {
 			Villages.found(level, bell.get());
@@ -219,13 +219,12 @@ public final class KingdomEvents {
 	 * village's own buildings if {@code capital} is in a village, else a castle of a random kind: operators only)
 	 */
 	static Faction found(ServerLevel level, BlockPos capital, Castle.@Nullable Kind kind) {
-		if (kind == null) {
-			Seats.Found village = Seats.structureAt(level, capital, Seats::village);
-			if (village.status() == Seats.Status.FOUND && village.start() != null) {
-				Faction k = foundIn(level, capital, village.start());
-				if (k != null) {
-					return k;
-				}
+		Seats.Found village = Seats.structureAt(level, capital, Seats::village);
+		StructureStart start = village.status() == Seats.Status.FOUND ? village.start() : null;
+		if (kind == null && start != null) {
+			Faction k = foundIn(level, capital, start);
+			if (k != null) {
+				return k;
 			}
 		}
 		MinecraftServer server = level.getServer();
@@ -234,8 +233,9 @@ public final class KingdomEvents {
 		Castle.Keep keep = Castle.build(level, kingdom, capital, kind);
 		Factions.putKeep(server, kingdom.id(), keep);
 		kingdom = man(level, kingdom, keep);
-		// its storehouse (and its builders)
+		// its storehouse (and its builders), its farm and farmer
 		Storehouse.build(level, Factions.get(server, kingdom.id()));
+		settle(level, Factions.get(server, kingdom.id()), start, capital);
 		JaymosKingdoms.LOGGER.info("Kingdom of {} founded at {}; its keep's throne at {}, panic room at {}", kingdom.name(), capital, keep.throne(),
 			keep.cellar());
 		return Factions.get(server, kingdom.id());
@@ -249,7 +249,8 @@ public final class KingdomEvents {
 	 */
 	static @Nullable Faction foundIn(ServerLevel level, BlockPos bell, StructureStart village) {
 		MinecraftServer server = level.getServer();
-		Seats.Pick pick = Seats.pick(level, Seats.buildings(village), bell, true);
+		// (0.5.1: the largest building is the king's, a church no more than any other)
+		Seats.Pick pick = Seats.pick(level, Seats.buildings(village), bell, false);
 		if (pick == null) {
 			JaymosKingdoms.LOGGER.info("The village at {} has no building fit for a seat", bell);
 			return null;
@@ -267,9 +268,38 @@ public final class KingdomEvents {
 		if (depot == null) {
 			Storehouse.build(level, stored);
 		}
+		settle(level, Factions.get(server, kingdom.id()), village, bell);
 		JaymosKingdoms.LOGGER.info("Kingdom of {} founded at {} in its village's {} (throne {}, panic room {}, {} archers' posts)", kingdom.name(), bell,
 			pick.seat().name(), keep.throne(), keep.cellar(), keep.posts().size());
 		return Factions.get(server, kingdom.id());
+	}
+
+	/**
+	 * (0.5.1) A new kingdom's farmer: he keeps the village's farm nearest the bell (a crop field first, else an animal
+	 * pen), kept from the builders ({@link Holds}); with none, the builders put up a farm in the village's style there and
+	 * then. Without a farm at all (nowhere to put one) there's no farmer yet: one is taken on when a farm goes up.
+	 */
+	static void settle(ServerLevel level, @Nullable Faction kingdom, @Nullable StructureStart village, BlockPos bell) {
+		if (kingdom == null) {
+			return;
+		}
+		MinecraftServer server = level.getServer();
+		List<BoundingBox> farms = village == null ? List.of() : Seats.farms(village, bell);
+		if (!farms.isEmpty()) {
+			BoundingBox b = farms.getFirst();
+			Farmers.adopt(server, kingdom, new BlockPos(b.minX(), b.minY(), b.minZ()), new BlockPos(b.maxX(), b.maxY(), b.maxZ()));
+			Holds.guard(server, kingdom.id(), b);
+		} else {
+			Works.Project p = Planner.plan(level, kingdom, true, "farm");
+			Faction now = Factions.get(server, kingdom.id());
+			if (p != null && now != null) {
+				Construction.finishNow(level, now, p);
+			}
+		}
+		Faction now = Factions.get(server, kingdom.id());
+		if (now != null && Farmers.spawn(level, now, null) != null) {
+			JaymosKingdoms.LOGGER.info("{} has its farmer at {}", now.name(), farms.isEmpty() ? "a new farm" : farms.getFirst().getCenter());
+		}
 	}
 
 	/** A new kingdom's faction at {@code capital}: named, coloured, its land claimed, its banner raised. */

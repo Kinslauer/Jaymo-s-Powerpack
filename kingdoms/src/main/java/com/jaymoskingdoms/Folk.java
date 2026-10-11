@@ -53,6 +53,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	 * agent defines them with {@link #defineRole}).
 	 */
 	public static final int GUARD = 0, KING = 1, ARCHER = 2, LORD = 3, FOREMAN = 4, WORKER = 5, BARBARIAN = 6, CHIEF = 7;
+	/** (0.5.1) A settlement's farmer: tends its fields and herds and carries what they give to its storage ({@link Farmers}). */
+	public static final int FARMER = 8;
 
 	/**
 	 * A role: its saved name, whether it fights ({@code combatant}: melee unless it's an archer; non-combatants flee
@@ -144,6 +146,11 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			folk.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.DIAMOND_BOOTS));
 			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.lord_of", faction.name()));
 		}));
+		defineRole(new Role(FARMER, "farmer", false, false, null, (folk, faction) -> {
+			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_HOE));
+			folk.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
+			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.farmer_of", faction.name()));
+		}));
 		defineRole(new Role(FOREMAN, "foreman", false, false, null, (folk, faction) -> {
 			folk.getAttribute(Attributes.MAX_HEALTH).setBaseValue(BUILDER_HEALTH);
 			folk.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(BUILDER_DAMAGE);
@@ -165,12 +172,19 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	/** A builder's work: where (a site), and what (free text for {@link Builders}' use). Saved. */
 	private @org.jspecify.annotations.Nullable BlockPos site;
 	private String task = "";
+	/** (0.5.1) The ruler it walks behind (a guard of his escort, {@link Royals}), its place in the column, and the post it goes back to. Saved. */
+	private java.util.@org.jspecify.annotations.Nullable UUID escort;
+	private int escortSlot;
+	private @org.jspecify.annotations.Nullable BlockPos post;
+	private int postRadius;
 	/** Which {@link Outfits#VERSION} dressed it (0: before faction looks, so it's dressed again on its next tick). Saved. */
 	private int outfit;
 
 	public Folk(EntityType<? extends Folk> type, Level level) {
 		super(type, level);
 		this.setPersistenceRequired();
+		// (0.5.1: through doors, so a ruler can leave his hall and his people come and go)
+		this.getNavigation().setCanOpenDoors(true);
 	}
 
 	public static AttributeSupplier.Builder guardAttributes() {
@@ -231,8 +245,42 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		return role != null && role.leader();
 	}
 
-	/** A builder's tool (back in hand when he isn't carrying). */
+	/** The ruler it escorts, or null. */
+	public java.util.@org.jspecify.annotations.Nullable UUID escort() {
+		return this.escort;
+	}
+
+	int escortSlot() {
+		return this.escortSlot;
+	}
+
+	/** Falls in behind {@code leader} at place {@code slot} of his escort; its post is kept to go back to. */
+	void follow(java.util.UUID leader, int slot) {
+		if (this.escort == null) {
+			this.post = this.getHomePosition();
+			this.postRadius = this.getHomeRadius();
+		}
+		this.escort = leader;
+		this.escortSlot = slot;
+	}
+
+	/** Back to its post. */
+	void unfollow() {
+		if (this.escort == null) {
+			return;
+		}
+		this.escort = null;
+		if (this.post != null) {
+			this.setHomeTo(this.post, this.postRadius);
+		}
+		this.post = null;
+	}
+
+	/** A builder's tool, or a farmer's (back in hand when he isn't carrying). */
 	ItemStack tool() {
+		if (this.role() == FARMER) {
+			return new ItemStack(Items.IRON_HOE);
+		}
 		boolean wild = this.style() == FactionType.BARBARIAN;
 		if (this.role() == FOREMAN) {
 			return new ItemStack(wild ? Items.STONE_AXE : Items.WOODEN_AXE);
@@ -255,7 +303,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	 */
 	public void setCarried(ItemStack load) {
 		this.carrying = !load.isEmpty();
-		this.setItemSlot(EquipmentSlot.MAINHAND, this.carrying ? load : isBuilder(this.role()) ? this.tool() : ItemStack.EMPTY);
+		this.setItemSlot(EquipmentSlot.MAINHAND, this.carrying ? load : isBuilder(this.role()) || this.role() == FARMER ? this.tool() : ItemStack.EMPTY);
 	}
 
 	/** Takes the load out of its hands (returned), its tool back in them. */
@@ -319,6 +367,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 				return Folk.this.combatant() && Folk.this.role() != ARCHER && super.canUse();
 			}
 		});
+		// (0.5.1) a ruler's day out and his escort at his back; doors opened (and shut) on the way
+		this.goalSelector.addGoal(3, new Royals.Round(this));
+		this.goalSelector.addGoal(3, new Royals.Follow(this));
+		this.goalSelector.addGoal(3, new net.minecraft.world.entity.ai.goal.OpenDoorGoal(this, true));
 		this.goalSelector.addGoal(4, new MoveTowardsRestrictionGoal(this, 1.0));
 		this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.6));
 		this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
@@ -370,6 +422,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		}
 		if (isBuilder(this.role())) {
 			Builders.tick(level, this);
+		} else if (this.role() == FARMER) {
+			Farmers.tick(level, this);
 		}
 		if (this.leader() && !this.rallied && this.getHealth() <= this.getMaxHealth() * RALLY_AT) {
 			// his second wind: he rallies, and calls his guards in
@@ -534,6 +588,14 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		output.putString("task", this.task);
 		output.putInt("climate", this.entityData.get(CLIMATE));
 		output.putInt("outfit", this.outfit);
+		if (this.escort != null) {
+			output.store("escort", net.minecraft.core.UUIDUtil.CODEC, this.escort);
+			output.putInt("escort_slot", this.escortSlot);
+		}
+		if (this.post != null) {
+			output.putLong("post", this.post.asLong());
+			output.putInt("post_radius", this.postRadius);
+		}
 	}
 
 	@Override
@@ -549,5 +611,9 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		this.task = input.getStringOr("task", "");
 		this.entityData.set(CLIMATE, input.getIntOr("climate", Climate.PLAINS.ordinal()));
 		this.outfit = input.getIntOr("outfit", 0);
+		this.escort = input.read("escort", net.minecraft.core.UUIDUtil.CODEC).orElse(null);
+		this.escortSlot = input.getIntOr("escort_slot", 0);
+		this.post = input.getLong("post").map(BlockPos::of).orElse(null);
+		this.postRadius = input.getIntOr("post_radius", HOME_RADIUS);
 	}
 }

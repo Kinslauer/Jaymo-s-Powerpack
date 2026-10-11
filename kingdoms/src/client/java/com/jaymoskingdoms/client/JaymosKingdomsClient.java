@@ -109,7 +109,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 			return switch (state.role) {
 				case Folk.KING -> KINGS[land][state.variant % KING_FACES];
 				case Folk.LORD -> LORDS[land][dye];
-				case Folk.FOREMAN, Folk.WORKER -> builder(state, land, dye);
+				// (a farmer wears a worker's clothes)
+				case Folk.FOREMAN, Folk.WORKER, Folk.FARMER -> builder(state, land, dye);
 				default -> GUARDS[land][state.variant % GUARD_FACES];
 			};
 		}

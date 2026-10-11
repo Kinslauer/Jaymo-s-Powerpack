@@ -65,5 +65,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		// Grim loaded), their builders clearing its rubble first (after Construction, whose brain it wraps)
 		LOGGER.debug("hold attachment: {}", Holds.HOLDS);
 		GrimSites.register();
+		// 0.5.1: a night slept through made up at once (building, fields), farmers, rulers' days out
+		Nights.register();
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			Farmers.clear();
+			Royals.clear();
+		});
 	}
 }

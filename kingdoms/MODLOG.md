@@ -1003,3 +1003,85 @@ structure's pieces, rooms, a seat made from a building), `Holds` (a new attachme
   - with Grim: 150-500 blocks from a kingdom near a Grim keep: the fiefdom's message, its lord on his throne, guards;
     a Grim camp's barbarians; builders pulling cobwebs and heaps; wall holes patched (arrow slits may be filled too);
     `/time add 72000` near one: the second building staked out and raised.
+
+## 0.5.1: nights slept through, kings' days out, farmers, the citadel (built; not yet seen in game)
+Andy's ask (2026-10-11): sleeping should move the kingdoms on; the storehouse should hold basic blocks (stone, wood,
+not dirt) and food; kings should leave their halls by day with 3 to 8 guards, greet their people and come home at
+night; the king, a builder and a farmer should take the village's own buildings (the largest for the king, a farm for
+the farmer, a building with room for chests for the builders), with one built in the village's style where there's
+none; a seat built from nothing should be a castle of several floors, defended, at least 60 blocks across. Gatherers,
+mines, tree farms and villagers keeping houses are the next stages. New classes: `Nights`, `Royals`, `Farmers`,
+`Citadel`. Changed: `Construction` (`advance`, `leg`), `Folk` (the farmer role, escorts, doors), `Production` (wheat,
+meat), `Economy` (farmers hired), `KingdomEvents` (founding), `Seats` (`farms`), `Castle` (`Kind.CITADEL`, the site
+prefers loaded ground), the client (farmers wear workers' clothes), the lang file.
+
+### What the storehouse holds
+Unchanged in kind: once a day (`Production`), logs of the land's wood, cobblestone and smooth stone (never dirt; the
+builders dig soil on site for nothing), and food: bread, now **wheat**, carrots, potatoes, beetroot, apples, and now
+**raw beef, pork, mutton or chicken** for each kind of livestock grazing within 64 of the seat. What farmers bring
+(below) comes on top.
+
+### Nights slept through (`Nights`)
+- The Overworld's clock jumping ahead of the game's ticks (sleeping, or `/time add`) by 1200 or more is time that
+  passed in a moment; up to a day of it is made up at once by every settlement whose seat is loaded:
+  - its builders lay what they would have laid (`Construction.advance`): a block per 60 ticks per builder about (at
+    most 1500), readying columns and laying blocks in order, paid from the pile on site and then storage a load at a
+    time, silently; it stops where storage runs short or a player stands in the way; a staked-out site starts without
+    its stakes; a finished building is announced as ever. "While you slept, the builders of X laid N blocks."
+  - its crops (within 48 of the seat) grow a stage per 2500 ticks.
+  - production already counts days by the clock, so the new day's goods come too (up to 3 missed days, as before).
+
+### A ruler's day (`Royals`)
+- A king or a fiefdom's lord with a seat: from 1000 ticks into the day (just after sunrise) until 11000 he walks a
+  round: his gate, up to four of his villagers (picked at random, nearest first), the bell, his gate again; then
+  another round. At each stop the nearest villager within 7 stops, looks at him (its brain's look and interaction
+  targets), says yes, and green sparkles show; he raises a hand. Out, he may roam 160 from the seat.
+- **His escort**: at dawn, up to 8 of the faction's guards (within 96 of the seat, not fighting) fall in behind him in
+  pairs, the hall's and the town's first; the gate's guards keep the gate unless they're needed to make up 3. With
+  fewer than 3 guards about, the kingdom raises guards to make up 3 (once a day). An escort fallen 40 behind is
+  brought to him. At dusk he heads for his throne; when he's there (or at night, his way blocked for 12 s: taken
+  there) his escort goes back to their posts (each guard keeps its old post, saved).
+- A ruler who slept in his panic room comes up to his throne at dawn. A fight comes first, for him and his guards.
+- Every folk now opens (and closes) wooden doors on its way.
+
+### Farmers (`Farmers`, `Folk.FARMER`)
+- A new folk role (id 8, `farmer`): a hoe, a leather cap, a worker's clothes; doesn't fight (flees when hurt).
+- He keeps one farm: a village's farm piece (`village_farm`, recorded among the faction's buildings and held from
+  the builders) or a farm the builders put up. By day he harvests ripe crops in his farm's reach and sows them again
+  (one seed kept back from what it gave), sows bare farmland with wheat, and at a pen keeps the herd at 6 head a kind:
+  he butchers one when there are more (its meat, and leather, wool or feathers), pairs two off when there are fewer than
+  5. What he gathers shows in his hands; at 32 items (or when the work runs out) he takes it to the storehouse's depot.
+- A farm with nobody keeping it is a reason to take on a new hand (`Economy.hire`: a farmer before another guard,
+  after the builders' crew is full).
+
+### Founding in a village (`KingdomEvents.foundIn`, `settle`)
+- The seat is now the village's **largest** building (a church no longer comes first). The storehouse as before (a
+  building nobody sleeps in first: room for 3 to 10 chests and barrels).
+- **The farmer**: the village's farm piece nearest the bell (`Seats.farms`: pieces named `farm`, then `animal_pen`),
+  held from the builders; with none, the builders' `farm` goes up at once in the village's style (the planner's site
+  rules); then the farmer.
+- **No building fit for a king**: the kingdom builds a **citadel** beside the village (before, the bell only founded
+  a village). `/kingdom found` with no kind does the same outside a village; `keep|castle|tower` still build the old
+  kinds.
+
+### The citadel (`Citadel`, `Castle.Kind.CITADEL`)
+61 x 61 in the village's materials, 52-100 blocks from the bell on the flattest loaded ground, its gate toward it:
+- the **curtain wall**, 3 thick and 10 high, a wall walk on top behind battlements, lanterns along it; a flight of
+  steps (two wide) up to it inside each side wall;
+- **towers** (7 x 7, 16 high) at the corners, half way along the sides and at the back: a lower room, a floor at the
+  wall walk (doorways where the walk meets them), a battlemented roof, arrow slits, a ladder through all three;
+- the **gatehouse**: two towers either side of a 5-wide, 5-high gate, the portcullis raised, a gallery over the
+  passage (murder holes) reached from the towers' lower rooms;
+- the **courtyard**: a road to the keep, barracks, a smithy (blast furnace, anvil, smithing table, grindstone), a
+  well, a training yard, a stable;
+- the **keep** (25 x 23) at the back: three storeys of 6 and a battlemented roof, turrets at the corners, a straight
+  flight of stairs inside its right wall on every storey: the throne room (dais, throne, banners, the panic room
+  beneath), the king's chamber (a bed in the kingdom's colour, books, a chest) and bunks for the household guard, the
+  armoury (barrels, anvil, grindstone, smithing and fletching tables).
+- Archers on the four corner towers, both gatehouse towers and the keep's roof (8). No outlying watchtowers.
+
+### Notes for testers
+- Only compiled. **Check first**: sleep in a kingdom with a project under way (the message, the blocks); a king
+  leaving his hall after sunrise with guards behind him and villagers stopping to look at him, home at dusk; the
+  farmer harvesting and carrying to the storehouse; a village with no roofed building (or `/kingdom found` in the
+  open) raising the citadel: walk the wall walk, the towers' doorways and ladders, the keep's stairs to the roof.

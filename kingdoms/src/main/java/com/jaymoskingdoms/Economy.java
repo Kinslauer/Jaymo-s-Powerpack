@@ -139,7 +139,9 @@ public final class Economy {
 		long now = level.getGameTime();
 		Faction grown = faction;
 		if (grown.holdings().vacant() == 0 && staff(grown) < needed(grown)) {
-			int role = Builders.crewCount(grown) < Builders.crewTarget(grown) || !grown.type().isRealm() ? Folk.WORKER : Folk.GUARD;
+			// a builder while the crew is short; a farmer for a farm nobody keeps (0.5.1); else a guard
+			int role = Builders.crewCount(grown) < Builders.crewTarget(grown) || !grown.type().isRealm() ? Folk.WORKER
+				: Farmers.wanted(server, grown) ? Folk.FARMER : Folk.GUARD;
 			if (grown.type() == FactionType.BARBARIAN || (role == Folk.WORKER && Builders.crewCount(grown) >= Builders.CREW_MAX)) {
 				// (camps raise their own; a full crew takes no more)
 				return null;
@@ -173,6 +175,8 @@ public final class Economy {
 		Folk hired;
 		if (Folk.isBuilder(role)) {
 			hired = Builders.spawn(level, ready, role, from);
+		} else if (role == Folk.FARMER) {
+			hired = Farmers.spawn(level, ready, from);
 		} else if (role == Folk.ARCHER) {
 			hired = KingdomEvents.spawnArcher(level, ready);
 		} else {
@@ -186,7 +190,7 @@ public final class Economy {
 
 	/** The vacancy filled first: a foreman, then guards, archers, workers, anything else. */
 	private static int nextVacancy(Faction f) {
-		for (int role : new int[] {Folk.FOREMAN, Folk.GUARD, Folk.ARCHER, Folk.WORKER}) {
+		for (int role : new int[] {Folk.FOREMAN, Folk.GUARD, Folk.ARCHER, Folk.WORKER, Folk.FARMER}) {
 			if (f.holdings().vacancies().getOrDefault(Folk.roleName(role), 0) > 0) {
 				return role;
 			}
