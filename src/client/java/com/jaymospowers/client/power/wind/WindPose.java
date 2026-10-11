@@ -54,8 +54,8 @@ public final class WindPose {
 	public static final RenderStateDataKey<KickPose> KICK_KEY = RenderStateDataKey.create(() -> "jaymospowers:wind_kick");
 
 	/**
-	 * {@code ticks} since the kick began (with the partial tick), the kicking leg, the arm variant and jitter seed, and
-	 * the wind-up's length (ticks; longer in the cold).
+	 * {@code ticks} since the kick began (with the partial tick), the kicking leg, the style and jitter seed, and the
+	 * wind-up's length (ticks; longer in the cold).
 	 */
 	public record KickPose(float ticks, boolean left, int seed, int windup) {
 		/**
@@ -71,9 +71,9 @@ public final class WindPose {
 			return this.ticks > WindKick.WINDUP_TICKS && this.ticks < this.windup;
 		}
 
-		/** The arm variant, as on the server's {@code WindKick.Kicking}. */
-		int arms() {
-			return this.seed & 3;
+		/** The style, from the seed: a spinning back kick (dwit chagi) one time in {@code BACK_KICK_ONE_IN}, else a roundhouse. */
+		boolean back() {
+			return Math.floorMod(this.seed >>> 2, BACK_KICK_ONE_IN) == 0;
 		}
 
 		/** A jitter in [-1, 1], different for each {@code slot} of the same kick. */
@@ -86,36 +86,56 @@ public final class WindPose {
 		}
 	}
 
+	/** One kick in this many is a spinning back kick (dwit chagi); the rest are roundhouses. */
+	private static final int BACK_KICK_ONE_IN = 3;
 	/**
-	 * The kick's lean: the whole body tips away from the kicking leg about the standing foot (degrees, before jitter),
-	 * tilts back a little, twists through with the swing, and rises onto the ball of the foot (blocks).
+	 * The roundhouse's whole-body lean, pivoting on the standing foot: the body pivots round so the kicking hip faces
+	 * the target ({@code KICK_TURN_*}, degrees: by the end of the chamber, then at the snap), tips hard away from the
+	 * kicking leg, a little back, and rises onto the ball of the foot (blocks).
 	 */
-	private static final float KICK_LEAN = 30.0F, KICK_LEAN_JITTER = 5.0F, KICK_LEAN_BACK = 8.0F;
-	private static final float KICK_TWIST_WINDUP = -12.0F, KICK_TWIST_THROUGH = 28.0F, KICK_RISE = 0.07F;
+	private static final float KICK_LEAN = 30.0F, KICK_LEAN_JITTER = 5.0F, KICK_LEAN_BACK = 6.0F;
+	private static final float KICK_TURN_CHAMBER = 35.0F, KICK_TURN_APEX = 75.0F, KICK_TURN_JITTER = 8.0F, KICK_RISE = 0.07F;
+	/**
+	 * The spinning back kick: the body spins away from the target toward the kicking side ({@code BACK_TURN_*}, degrees:
+	 * back to the target at the snap) and keeps spinning the same way round to face it again as it recovers. It pitches
+	 * forward over the standing leg and tips a little away; the head looks back over the kicking-side shoulder (radians).
+	 */
+	private static final float BACK_TURN_CHAMBER = 110.0F, BACK_TURN_APEX = 175.0F, BACK_PITCH = 30.0F, BACK_LEAN = 8.0F;
+	private static final float BACK_HEAD_TURN = 1.35F;
 	/** Where the standing foot is, out from the body's middle (blocks). */
 	private static final float KICK_FOOT_OFFSET = 0.12F;
 	/**
-	 * The kick's beats (ticks): the snap starts at the end of the wind-up and ends at {@code KICK_SNAP_END}; the lean
-	 * holds {@code KICK_LEAN_HOLD} past it, then eases out until the kick ends; the twist runs over {@code KICK_TWIST_TICKS}.
+	 * The kick's beats (ticks): the snap starts at the end of the wind-up and ends at {@code KICK_SNAP_END}; the leg and
+	 * the lean hold {@code KICK_LEAN_HOLD} past it, then ease out until the kick ends; the last turn runs over
+	 * {@code KICK_TWIST_TICKS}. The leg pulls back to the chamber over {@code KICK_RETRACT_TICKS} before it drops.
 	 */
 	private static final float KICK_SNAP_END = WindKick.WINDUP_TICKS + WindKick.SNAP_TICKS, KICK_LEAN_HOLD = 2.0F;
-	private static final float KICK_RECOVER = KICK_SNAP_END + KICK_LEAN_HOLD, KICK_TWIST_TICKS = 2.5F;
+	private static final float KICK_RECOVER = KICK_SNAP_END + KICK_LEAN_HOLD, KICK_TWIST_TICKS = 2.5F, KICK_RETRACT_TICKS = 3.0F;
 	/**
-	 * The bend at the hip: on top of the whole-body lean, everything above the hip (torso, head, arms) leans this much
-	 * further away from the kick (degrees, before jitter), pivoting at the hip ({@code KICK_HIP_Y} model units below the
-	 * neck). That's what brings the kicking leg up level with the head. The neck turns back a share of it.
+	 * The roundhouse's bend at the hip: on top of the whole-body lean, everything above the hip (torso, head, arms) leans
+	 * this much further away from the kick (degrees, before jitter), pivoting at the hip ({@code KICK_HIP_Y} model units
+	 * below the neck). That's what brings the kicking leg up level with the head. The neck turns back a share of it.
 	 */
-	private static final float KICK_HIP_BEND = 30.0F, KICK_HIP_BEND_JITTER = 4.0F, KICK_HIP_Y = 12.0F, KICK_HIP_HEAD_LEVEL = 0.4F;
+	private static final float KICK_HIP_BEND = 20.0F, KICK_HIP_BEND_JITTER = 4.0F, KICK_HIP_Y = 12.0F, KICK_HIP_HEAD_LEVEL = 0.4F;
 	/** Held in the chamber through a cold wind-up, the leg trembles (radians, and how fast). */
 	private static final float KICK_HOLD_SHAKE = 0.05F, KICK_HOLD_SHAKE_SPEED = 2.3F;
-	/** Kicking leg: chambered, at the top of the arc (out to the side, head high) and swept through across the front. */
-	private static final float LEG_CHAMBER_X = -1.25F, LEG_CHAMBER_Y = 0.35F, LEG_CHAMBER_Z = 0.25F;
-	private static final float LEG_APEX_X = -2.05F, LEG_APEX_Y = 1.25F, LEG_APEX_Z = 0.15F;
-	private static final float LEG_THROUGH_X = -1.75F, LEG_THROUGH_Y = -0.45F, LEG_THROUGH_Z = 0.1F;
+	/**
+	 * Roundhouse kicking leg (model radians, mirrored by side): chambered (knee up in front and out) and at full
+	 * extension (straight out to the side, a touch forward; the lean and hip bend lift it to head height).
+	 */
+	private static final float LEG_CHAMBER_X = -1.45F, LEG_CHAMBER_Z = 0.55F;
+	private static final float LEG_APEX_X = -0.35F, LEG_APEX_Z = 1.45F;
+	/** Back kick leg: tucked up in front, then driven straight out behind (the forward pitch lifts it). */
+	private static final float BACK_CHAMBER_X = -0.95F, BACK_CHAMBER_Z = 0.1F;
+	private static final float BACK_APEX_X = 1.55F, BACK_APEX_Z = 0.2F;
 	private static final float LIMB_JITTER = 0.15F;
-	/** The high arm: up and back over the head. How much of the lean the standing leg turns back against. */
-	private static final float HIGH_ARM_X = -3.2F, STANDING_LEG_UPRIGHT = 0.3F;
-
+	/**
+	 * The guard: both fists up in front of the face, the lead arm (the kicking side's) higher and further out, turned in
+	 * toward the chin; in the roundhouse the guard turns {@code GUARD_TRACK} of the way back toward the target.
+	 */
+	private static final float GUARD_LEAD_X = -1.95F, GUARD_REAR_X = -1.65F, GUARD_IN = 0.55F, GUARD_REAR_IN = 0.5F, GUARD_TRACK = 0.6F;
+	/** How much of the lean the standing leg turns back against. */
+	private static final float STANDING_LEG_UPRIGHT = 0.3F;
 	/** entity id → {previous heading, heading, previous bank, bank, last x, last z}. */
 	private static final Map<Integer, double[]> PATHS = new HashMap<>();
 
@@ -314,9 +334,31 @@ public final class WindPose {
 	}
 
 	/**
-	 * The kick's whole-body lean: pivoting on the standing foot, the body tips hard away from the kicking leg, a
-	 * little back, and twists through with the swing, up on the ball of the foot. Done on the whole model, so the
-	 * head and arms go with it.
+	 * The kick's body turn (degrees; positive turns the body to its left). The roundhouse turns away from the kicking
+	 * leg so its hip faces the target, and turns back as the lean eases out. The back kick spins the other way until its
+	 * back is to the target, then carries on round to face it again.
+	 */
+	private static float kickTurn(KickPose kick, float amount) {
+		float side = kick.left() ? -1.0F : 1.0F;
+		float through = smooth(Mth.clamp((kick.t() - WindKick.WINDUP_TICKS + 0.5F) / KICK_TWIST_TICKS, 0.0F, 1.0F));
+		if (!kick.back()) {
+			return side * Mth.lerp(through, KICK_TURN_CHAMBER, KICK_TURN_APEX + kick.jitter(1) * KICK_TURN_JITTER) * amount;
+		}
+		float turn;
+		if (kick.t() <= KICK_RECOVER) {
+			turn = Mth.lerp(through, BACK_TURN_CHAMBER, BACK_TURN_APEX) * amount;
+		} else {
+			// spun on round, the same way, to face the target again
+			float on = smooth(Mth.clamp((kick.t() - KICK_RECOVER) / (WindKick.KICK_TICKS - KICK_RECOVER), 0.0F, 1.0F));
+			turn = Mth.lerp(on, BACK_TURN_APEX, 360.0F);
+		}
+		return -side * turn;
+	}
+
+	/**
+	 * The kick's whole-body lean: pivoting on the standing foot, the body turns (see {@link #kickTurn}), and tips: the
+	 * roundhouse hard away from the kicking leg and a little back, the back kick forward over the standing leg. Up on
+	 * the ball of the foot. Done on the whole model, so the head and arms go with it.
 	 */
 	private static void kickLean(LivingEntityRenderState state, PoseStack poseStack) {
 		KickPose kick = state.getData(KICK_KEY);
@@ -326,101 +368,89 @@ public final class WindPose {
 		float amount = kickAmount(kick.t());
 		// +1: the right leg kicks, so the left foot stands and the body leans left (local +X is the body's right)
 		float side = kick.left() ? -1.0F : 1.0F;
-		float lean = (KICK_LEAN + kick.jitter(0) * KICK_LEAN_JITTER) * amount;
-		float through = smooth(Mth.clamp((kick.t() - WindKick.WINDUP_TICKS + 0.5F) / KICK_TWIST_TICKS, 0.0F, 1.0F));
-		float twist = Mth.lerp(through, KICK_TWIST_WINDUP, KICK_TWIST_THROUGH + kick.jitter(1) * 6.0F) * amount;
+		float lean = kick.back() ? BACK_LEAN * amount : (KICK_LEAN + kick.jitter(0) * KICK_LEAN_JITTER) * amount;
+		float pitch = kick.back() ? -BACK_PITCH * amount : KICK_LEAN_BACK * amount;
 		float footX = -side * KICK_FOOT_OFFSET;
 		poseStack.translate(footX, KICK_RISE * amount, 0.0F);
-		// (a positive turn about Y turns the body to its left; about Z it tips the top to the right)
-		poseStack.rotateDegrees(Axis.YP, side * twist);
+		// (a positive turn about Y turns the body to its left; about Z it tips the top to the right; about X, back)
+		poseStack.rotateDegrees(Axis.YP, kickTurn(kick, amount));
 		poseStack.rotateDegrees(Axis.ZP, -side * lean);
-		poseStack.rotateDegrees(Axis.XP, KICK_LEAN_BACK * amount);
+		poseStack.rotateDegrees(Axis.XP, pitch);
 		poseStack.translate(-footX, 0.0F, 0.0F);
 	}
 
 	/**
-	 * The kick's limbs. The kicking leg chambers through the wind-up, whips round to head height at the snap and
-	 * across the front, then drops back; the standing leg stays straight (against the lean); the arms are thrown
-	 * opposite ways in one of four variants.
+	 * The kick's limbs. The kicking leg chambers through the wind-up, snaps out to full extension (the roundhouse out to
+	 * the side at head height, the back kick straight out behind), holds there a moment, pulls back to the chamber and
+	 * drops. The standing leg stays straight (against the lean); the fists stay up in a guard by the face.
 	 */
 	private static void kickLimbs(HumanoidModel<?> h, KickPose kick) {
 		float t = kick.t();
 		float amount = kickAmount(t);
+		boolean back = kick.back();
 		float side = kick.left() ? -1.0F : 1.0F;
 		ModelPart kicking = kick.left() ? h.leftLeg : h.rightLeg;
 		ModelPart standing = kick.left() ? h.rightLeg : h.leftLeg;
 		float windup = WindKick.WINDUP_TICKS;
 		float j = kick.jitter(2) * LIMB_JITTER;
-		float x, y, z;
+		float chamberX = back ? BACK_CHAMBER_X : LEG_CHAMBER_X, chamberZ = back ? BACK_CHAMBER_Z : LEG_CHAMBER_Z;
+		float apexX = back ? BACK_APEX_X - j : LEG_APEX_X, apexZ = back ? BACK_APEX_Z : LEG_APEX_Z + j;
+		float x, z;
 		if (t < windup) {
-			// chambering: knee up and out to the side
+			// chambering: knee up (and out, for the roundhouse)
 			float c = smooth(t / windup);
-			x = LEG_CHAMBER_X * c;
-			y = LEG_CHAMBER_Y * c;
-			z = LEG_CHAMBER_Z * c;
+			x = chamberX * c;
+			z = chamberZ * c;
 		} else if (t < KICK_SNAP_END) {
-			// the snap: out and up to head height, then round across the front
-			float snap = (t - windup) / (KICK_SNAP_END - windup);
-			if (snap < 0.4F) {
-				float u = smooth(snap / 0.4F);
-				x = Mth.lerp(u, LEG_CHAMBER_X, LEG_APEX_X + j);
-				y = Mth.lerp(u, LEG_CHAMBER_Y, LEG_APEX_Y);
-				z = Mth.lerp(u, LEG_CHAMBER_Z, LEG_APEX_Z);
-			} else {
-				float u = smooth((snap - 0.4F) / 0.6F);
-				x = Mth.lerp(u, LEG_APEX_X + j, LEG_THROUGH_X);
-				y = Mth.lerp(u, LEG_APEX_Y, LEG_THROUGH_Y);
-				z = Mth.lerp(u, LEG_APEX_Z, LEG_THROUGH_Z);
-			}
+			// the snap: straight out to full extension
+			float u = smooth((t - windup) / (KICK_SNAP_END - windup));
+			x = Mth.lerp(u, chamberX, apexX);
+			z = Mth.lerp(u, chamberZ, apexZ);
+		} else if (t < KICK_RECOVER) {
+			// held out at full extension
+			x = apexX;
+			z = apexZ;
+		} else if (t < KICK_RECOVER + KICK_RETRACT_TICKS) {
+			// pulled back to the chamber
+			float u = smooth((t - KICK_RECOVER) / KICK_RETRACT_TICKS);
+			x = Mth.lerp(u, apexX, chamberX);
+			z = Mth.lerp(u, apexZ, chamberZ);
 		} else {
-			// follow-through, then down again
-			float down = smooth(Mth.clamp((t - KICK_SNAP_END) / (WindKick.KICK_TICKS - KICK_SNAP_END), 0.0F, 1.0F));
-			x = Mth.lerp(down, LEG_THROUGH_X, 0.0F);
-			y = Mth.lerp(down, LEG_THROUGH_Y, 0.0F);
-			z = Mth.lerp(down, LEG_THROUGH_Z, 0.0F);
+			// and set down
+			float down = smooth(Mth.clamp((t - KICK_RECOVER - KICK_RETRACT_TICKS) / (WindKick.KICK_TICKS - KICK_RECOVER - KICK_RETRACT_TICKS), 0.0F, 1.0F));
+			x = Mth.lerp(down, chamberX, 0.0F);
+			z = Mth.lerp(down, chamberZ, 0.0F);
 		}
 		if (kick.holding()) {
 			// the cold won't let it go: the chambered leg trembles, waiting
 			x += Mth.sin(kick.ticks() * KICK_HOLD_SHAKE_SPEED) * KICK_HOLD_SHAKE;
 		}
-		pose(kicking, x, side * y, side * z, 1.0F);
+		pose(kicking, x, 0.0F, side * z, 1.0F);
 		// the standing leg straight, a little more upright than the leaning body (the foot stays planted)
-		float lean = (KICK_LEAN + kick.jitter(0) * KICK_LEAN_JITTER) * Mth.DEG_TO_RAD;
-		pose(standing, 0.12F, 0.0F, -side * lean * STANDING_LEG_UPRIGHT, amount);
-		// the arms: "high" goes up and back above the head, fist clenched; "low" across the hip (or back behind)
-		ModelPart kickSide = kick.left() ? h.leftArm : h.rightArm;
-		ModelPart leanSide = kick.left() ? h.rightArm : h.leftArm;
-		// outward zRot for each arm: the right arm swings out with +, the left with -
-		float kickOut = kick.left() ? -1.0F : 1.0F;
-		float leanOut = -kickOut;
-		float a1 = kick.jitter(3) * LIMB_JITTER, a2 = kick.jitter(4) * LIMB_JITTER, a3 = kick.jitter(5) * LIMB_JITTER;
-		switch (kick.arms()) {
-			case 0 -> {
-				pose(leanSide, HIGH_ARM_X + a1, 0.0F, leanOut * (0.35F + a2), amount);
-				pose(kickSide, -0.45F + a3, 0.0F, -kickOut * (0.55F + a2), amount);
-			}
-			case 1 -> {
-				pose(kickSide, HIGH_ARM_X + a1, 0.0F, kickOut * (0.35F + a2), amount);
-				pose(leanSide, -0.45F + a3, 0.0F, -leanOut * (0.55F + a2), amount);
-			}
-			case 2 -> {
-				pose(leanSide, -2.2F + a1, 0.0F, leanOut * (0.95F + a2), amount);
-				pose(kickSide, -2.0F + a3, 0.0F, kickOut * (1.05F - a2), amount);
-			}
-			default -> {
-				pose(leanSide, HIGH_ARM_X + a1, 0.0F, leanOut * (0.35F + a2), amount);
-				pose(kickSide, 0.95F + a3, 0.0F, kickOut * (0.25F + a2), amount);
-			}
-		}
-		// the head stays on the target: turned back against the twist, levelled against some of the lean
-		float through = smooth(Mth.clamp((t - windup + 0.5F) / KICK_TWIST_TICKS, 0.0F, 1.0F));
-		float twist = Mth.lerp(through, KICK_TWIST_WINDUP, KICK_TWIST_THROUGH) * Mth.DEG_TO_RAD;
-		h.head.yRot += side * twist * amount;
+		float lean = (back ? BACK_LEAN : KICK_LEAN + kick.jitter(0) * KICK_LEAN_JITTER) * Mth.DEG_TO_RAD;
+		pose(standing, back ? -0.15F : 0.12F, 0.0F, -side * lean * STANDING_LEG_UPRIGHT, amount);
+		// the head stays on the target: the roundhouse turns it back against the body's turn, the back kick looks over
+		// the kicking-side shoulder (a positive head yRot turns it to the right)
+		float turn = kickTurn(kick, amount) * Mth.DEG_TO_RAD;
+		float look = back ? side * BACK_HEAD_TURN * amount : turn;
+		h.head.yRot += look;
 		h.head.zRot -= side * lean * 0.5F * amount;
+		if (back) {
+			// lifted against the forward pitch to keep the eyes up
+			h.head.xRot -= BACK_PITCH * Mth.DEG_TO_RAD * 0.5F * amount;
+		}
+		// the guard: fists up by the face, turned in toward the chin (the right arm turns in with -, the left with +)
+		ModelPart lead = kick.left() ? h.leftArm : h.rightArm;
+		ModelPart rear = kick.left() ? h.rightArm : h.leftArm;
+		float track = back ? 0.0F : turn * GUARD_TRACK;
+		float a1 = kick.jitter(3) * LIMB_JITTER, a2 = kick.jitter(4) * LIMB_JITTER;
+		pose(lead, GUARD_LEAD_X + a1, -side * GUARD_IN + track, 0.0F, amount);
+		pose(rear, GUARD_REAR_X + a2, side * GUARD_REAR_IN + track, 0.0F, amount);
 		h.body.yRot = 0.0F;
-		hipBend(h, side * (KICK_HIP_BEND + kick.jitter(6) * KICK_HIP_BEND_JITTER) * Mth.DEG_TO_RAD * amount);
+		if (!back) {
+			hipBend(h, side * (KICK_HIP_BEND + kick.jitter(6) * KICK_HIP_BEND_JITTER) * Mth.DEG_TO_RAD * amount);
+		}
 	}
-
 	/**
 	 * Bends everything above the hip sideways by {@code bend} radians (positive: the top goes to the body's left, model
 	 * +X), pivoting about the hip: each upper part's pivot swings round the hip and the part tips with it, so the arms

@@ -69,7 +69,8 @@ public final class WindKick {
 
 	/**
 	 * A kick under way: when it began (game time), which leg kicks ({@code left}: the left leg, everything mirrored),
-	 * a seed that picks the arm variant (its low 2 bits) and jitters the angles, and how long its wind-up is (ticks:
+	 * a seed that picks the style (a roundhouse, or now and then a spinning back kick; see the client's {@code WindPose})
+	 * and jitters the angles, and how long its wind-up is (ticks:
 	 * {@link #WINDUP_TICKS}, longer in the cold).
 	 */
 	public record Kicking(long start, boolean left, int seed, int windup) {
@@ -89,11 +90,6 @@ public final class WindKick {
 		/** How long the whole kick is drawn (ticks), the wind-up's extra included. */
 		public int length() {
 			return KICK_TICKS + Math.max(0, this.windup - WINDUP_TICKS);
-		}
-
-		/** Which of the four arm variants (0: the reference, 1: mirrored, 2: both flung wide, 3: low arm swung back). */
-		public int arms() {
-			return this.seed & 3;
 		}
 	}
 
