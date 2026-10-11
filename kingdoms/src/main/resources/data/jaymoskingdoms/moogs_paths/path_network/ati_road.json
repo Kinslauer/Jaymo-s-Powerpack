@@ -1,0 +1,22 @@
+{
+  "path_type": "jaymoskingdoms:kingdom_road",
+  "biomes": "#minecraft:is_overworld",
+  "structure_sets": [
+    "moogs_paths:oak_posts"
+  ],
+  "feature_decorator_sets": [],
+  "bush_decorator_sets": [],
+  "origin": {
+    "structure_set": [
+      "ati_structures:aboveground_small"
+    ],
+    "path_count": 1,
+    "structure": [
+      "ati_structures:old_home",
+      "ati_structures:storage_house",
+      "ati_structures:storage_shack",
+      "ati_structures:nomadic_camp",
+      "ati_structures:ice_tribe"
+    ]
+  }
+}

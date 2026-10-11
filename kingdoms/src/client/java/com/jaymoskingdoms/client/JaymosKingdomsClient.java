@@ -38,25 +38,41 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		public int role;
 		public int style;
 		public int color = -1;
+		/** Its land's skin group ({@link com.jaymoskingdoms.Climate#skinGroup}), and which face it has (from its UUID, the same on every client). */
+		public int skinGroup;
+		public int variant;
 	}
 
 	/** Humanoid, in armour (theirs is real armour), with a skin per role, style and colour. */
 	static final class FolkRenderer extends HumanoidMobRenderer<Folk, FolkState, HumanoidModel<FolkState>> {
-		private static final Identifier GUARD = JaymosKingdoms.id("textures/entity/guard.png");
-		private static final Identifier KING = JaymosKingdoms.id("textures/entity/king.png");
-		private static final Identifier[] LORDS = new Identifier[DyeColor.values().length];
-		private static final Identifier[] KINGDOM_FOREMEN = new Identifier[DyeColor.values().length];
-		private static final Identifier[] KINGDOM_WORKERS = new Identifier[DyeColor.values().length];
+		/** Skin groups' folder names (by {@link com.jaymoskingdoms.Climate#skinGroup}), and faces drawn per group ({@code tools/gen_folk.py}). */
+		private static final String[] LANDS = {"temperate", "sunny", "cold"};
+		static final int GUARD_FACES = 4, KING_FACES = 2;
+		private static final Identifier[][] GUARDS = new Identifier[LANDS.length][GUARD_FACES];
+		private static final Identifier[][] KINGS = new Identifier[LANDS.length][KING_FACES];
+		/** By land, then dye (temperate: the original skins). */
+		private static final Identifier[][] LORDS = new Identifier[LANDS.length][DyeColor.values().length];
+		private static final Identifier[][] KINGDOM_FOREMEN = new Identifier[LANDS.length][DyeColor.values().length];
+		private static final Identifier[][] KINGDOM_WORKERS = new Identifier[LANDS.length][DyeColor.values().length];
 		private static final Identifier VILLAGE_FOREMAN = JaymosKingdoms.id("textures/entity/builder/village_foreman.png");
 		private static final Identifier VILLAGE_WORKER = JaymosKingdoms.id("textures/entity/builder/village_worker.png");
 		private static final Identifier BARBARIAN_FOREMAN = JaymosKingdoms.id("textures/entity/builder/barbarian_foreman.png");
 		private static final Identifier BARBARIAN_WORKER = JaymosKingdoms.id("textures/entity/builder/barbarian_worker.png");
 
 		static {
-			for (DyeColor dye : DyeColor.values()) {
-				LORDS[dye.getId()] = JaymosKingdoms.id("textures/entity/lord/" + dye.getName() + ".png");
-				KINGDOM_FOREMEN[dye.getId()] = JaymosKingdoms.id("textures/entity/builder/kingdom_foreman_" + dye.getName() + ".png");
-				KINGDOM_WORKERS[dye.getId()] = JaymosKingdoms.id("textures/entity/builder/kingdom_worker_" + dye.getName() + ".png");
+			for (int land = 0; land < LANDS.length; land++) {
+				String sub = land == 0 ? "" : LANDS[land] + "/";
+				for (int i = 0; i < GUARD_FACES; i++) {
+					GUARDS[land][i] = JaymosKingdoms.id("textures/entity/guard/" + LANDS[land] + "_" + i + ".png");
+				}
+				for (int i = 0; i < KING_FACES; i++) {
+					KINGS[land][i] = JaymosKingdoms.id("textures/entity/king/" + LANDS[land] + "_" + i + ".png");
+				}
+				for (DyeColor dye : DyeColor.values()) {
+					LORDS[land][dye.getId()] = JaymosKingdoms.id("textures/entity/lord/" + sub + dye.getName() + ".png");
+					KINGDOM_FOREMEN[land][dye.getId()] = JaymosKingdoms.id("textures/entity/builder/" + sub + "kingdom_foreman_" + dye.getName() + ".png");
+					KINGDOM_WORKERS[land][dye.getId()] = JaymosKingdoms.id("textures/entity/builder/" + sub + "kingdom_worker_" + dye.getName() + ".png");
+				}
 			}
 		}
 
@@ -77,6 +93,9 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 			state.role = entity.role();
 			state.style = entity.style().ordinal();
 			state.color = entity.colorId();
+			state.skinGroup = Math.clamp(entity.climate().skinGroup(), 0, LANDS.length - 1);
+			java.util.UUID uuid = entity.getUUID();
+			state.variant = (int)((uuid.getMostSignificantBits() ^ uuid.getLeastSignificantBits()) >>> 33);
 		}
 
 		@Override
@@ -85,23 +104,24 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 			if (custom != null) {
 				return custom.apply(state);
 			}
-			int dye = state.color >= 0 && state.color < LORDS.length ? state.color : DyeColor.WHITE.getId();
+			int dye = state.color >= 0 && state.color < DyeColor.values().length ? state.color : DyeColor.WHITE.getId();
+			int land = state.skinGroup;
 			return switch (state.role) {
-				case Folk.KING -> KING;
-				case Folk.LORD -> LORDS[dye];
-				case Folk.FOREMAN, Folk.WORKER -> builder(state, dye);
-				default -> GUARD;
+				case Folk.KING -> KINGS[land][state.variant % KING_FACES];
+				case Folk.LORD -> LORDS[land][dye];
+				case Folk.FOREMAN, Folk.WORKER -> builder(state, land, dye);
+				default -> GUARDS[land][state.variant % GUARD_FACES];
 			};
 		}
 
-		private static Identifier builder(FolkState state, int dye) {
+		private static Identifier builder(FolkState state, int land, int dye) {
 			boolean foreman = state.role == Folk.FOREMAN;
 			if (state.style == FactionType.VILLAGE.ordinal()) {
 				return foreman ? VILLAGE_FOREMAN : VILLAGE_WORKER;
 			} else if (state.style == FactionType.BARBARIAN.ordinal()) {
 				return foreman ? BARBARIAN_FOREMAN : BARBARIAN_WORKER;
 			}
-			return foreman ? KINGDOM_FOREMEN[dye] : KINGDOM_WORKERS[dye];
+			return foreman ? KINGDOM_FOREMEN[land][dye] : KINGDOM_WORKERS[land][dye];
 		}
 	}
 }

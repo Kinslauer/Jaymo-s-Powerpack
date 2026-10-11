@@ -827,3 +827,95 @@ optional field: old saves read as false), `JaymosKingdoms` (one line), `fabric.m
   in the storehouse, nothing left floating in the new building's columns.
 - A kingdom at a living village: its villagers' houses, beds, job blocks and the bell stay; the keep, storehouse and
   watchtowers are never touched.
+
+## 0.5.0, track: faction looks, skins and roads
+Built, not yet seen in game. The user's asks: "the different kings and guards don't look different right now" (desert
+kingdoms in Epic Knights: Slavic Armory; armour and skins differing by realm), and "make the paths load within or lead
+toward kingdoms and villages" (Moog's Paths). New: `Climate`, `Outfits`, `tools/gen_paths.py`, Moog's Paths data under
+`data/jaymoskingdoms/moogs_paths/` (and two biome tags), skins under `textures/entity/{guard,king}/` and
+`{lord,builder}/{sunny,cold}/`. Shared files got small hooks: `Folk` (a synced `climate`, a saved `outfit` version,
+`Outfits.dress` before `KnightsCompat.dress` in `setup`), `KnightsCompat` (a climate argument, Slavic Armory loadouts,
+the realm's arms on surcoats and shields), the client renderer (skins by land and face).
+
+### Faction looks (vanilla: works today)
+- **Arms** (`Outfits.Heraldry`, worked out from the realm's id, so they never change): its colour for the field, a
+  contrasting tincture, one of 18 charges (cross, saltire, chevron, bend, pale, fess, per pale, per fess, chief,
+  lozenge, roundel, canton, stripes, a curly bordure, a flower, indented, flanks, per bend), a trim pattern, and how its
+  guards are armed: plate, mail under a tabard of its colour, or half-plate. The trim's material follows the colour
+  (red: redstone, blue: lapis, green: emerald, white: quartz, black: netherite...). A fiefdom bears its overlord's arms
+  within a border. Epic Knights' surcoats and shields now bear these arms too (they were a plain field).
+- **Rank:** guards in trimmed iron or mail with a shield of the arms (30% carry a spear; 20% wear the other helmet of
+  their harness); archers in leather of the realm's colour (legs in its tincture); a lord in trimmed diamond,
+  bareheaded (his circlet shows), with his shield; **the king** in a glinting gold crown set with the realm's gem,
+  netherite trimmed in gold in the realm's pattern, a glinting netherite sword and a glinting shield of the arms.
+  Barbarians' hides (half of them) and the chief's mail get rough trims of their camp.
+- **Land** (`Climate`, read as `Palette.at` reads the seat): desert and badlands: linen turbans (dyed leather caps with
+  gold trim), sand or dust trousers and boots, gold boots for the king; snow: white hoods and grey boots; taiga: fur
+  boots; jungle: green leather and mostly spears; swamp: murky leggings; savanna: straw caps and copper boots. A realm's
+  builders get the land's hat.
+- **Old saves:** folk dressed before this are dressed again on their first tick (`outfit` < `Outfits.VERSION`); a
+  builder's or raider's hands are kept.
+- Tuning at the top of `Outfits` (chances, cloth colours). Gear changes armour values a little (a turban is leather).
+
+### Skins
+- `tools/gen_folk.py variants` draws faces by land (our own art, the same generator): `guard/<land>_<0-3>`,
+  `king/<land>_<0-1>` (grey or dark beard), and lords and kingdom builders for the sunny and cold lands
+  (`lord/<land>/<dye>`, `builder/<land>/kingdom_<role>_<dye>`; temperate ones are the originals). Lands: temperate,
+  sunny (desert, badlands, savanna, jungle: darker skin, light linen under the armour), cold (snow: pale skin, fair or
+  red hair, dark wool). The client picks the land from the folk's synced climate and the face from its UUID.
+- `guard.png` and `king.png` are no longer used by the renderer (the generator's defaults still draw them).
+
+### Slavic Armory for desert realms (waits on 26.3 builds)
+- Epic Knights: Slavic Armory (mod id `slavicarmory`, all rights reserved: items named by id only) is an add-on to Epic
+  Knights. Neither has a 26.3 build (Slavic Armory's newest Fabric build is 2.3 for 1.21.1; Epic Knights is at 26.1.2),
+  so neither is in the pack, and this applies only when both are loaded.
+- Desert and badlands realms then wear its eastern harness, Epic Knights' piece as each slot's fallback:
+
+  | Who | Head | Body | Hands |
+  |---|---|---|---|
+  | Kingdom guard | erikhonka / bulgar helmet | bahteretz or Byzantine lamellar (surcoat), Rus mail legs, bahteretz boots | steel Rus sword, heater shield (arms) |
+  | Archer | eastern kettle hat (fiefdom: shapka) | kaftan and kaftan boots, dyed; pantyhose | longbow |
+  | King | gilded shater helmet / gilded erikhonka | gilded yushman or gilded Byzantine scale (surcoat), gilded scale boots | steel Rus sword |
+  | Kingdom lord | gilded erikhonka | gilded bahteretz (surcoat), gilded Byzantine lamellar boots | steel bardiche, kite shield |
+  | Fiefdom guard | bulgar helmet | Byzantine scale (surcoat), Rus mail, scale boots | steel rogatina, iron kite shield |
+  | Fiefdom lord | gilded tagancha | gilded Rus scale (surcoat) and boots | steel winged rogatina, heater shield |
+
+- Ids relied on (its 2.3 jar): `erikhonka bulgar_helmet bahteretz_chestplate byzantine_lamellar_chestplate
+  rus_chainmail_leggings bahteretz_boots byzantine_lamellar_boots steel_rus_sword eastern_kettlehat kaftan kaftan_boots
+  gilded_shater_helmet gilded_erikhonka gilded_yushman_chestplate gilded_byzantine_scale_chestplate
+  gilded_byzantine_scale_boots gilded_rus_scale_boots gilded_eastern_kettlehat gilded_bahteretz_chestplate
+  gilded_lamellar_mail_chestplate gilded_byzantine_lamellar_boots steel_bardiche byzantine_scale_chestplate
+  lamellar_mail_chestplate byzantine_scale_boots lamellar_mail_boots steel_rogatina shapka gilded_tagancha_helmet
+  tagancha_helmet gilded_rus_scale_chestplate rus_scale_chestplate rus_scale_boots steel_winged_rogatina`. Whether the
+  kaftan takes `dyed_color` is a guess (harmless if not).
+
+### Roads (Moog's Paths)
+- Moog's Paths (CC0, in the pack) lays two kinds of path: regional networks (trails wandering across biomes) and
+  structure-anchored ones, which start at a structure (a village: at the ends of its streets) and lead away from it.
+  It doesn't route between structures, so "toward" means: every road added here starts at a settlement, and following
+  one leads you to it. Its path types and networks are its own data registries, so ours are new entries in our
+  namespace (`data/jaymoskingdoms/moogs_paths/`), not overrides of its files: no load-order problem, and without Moog's
+  Paths they're never read. Structure sets that aren't in the game (a mod not installed) are skipped by it.
+- **Kingdom roads** (`path_type`): paved cobble and gravel (stone bricks, mossy cobble), 2-3 wide, 250-700 long;
+  sandstone in the desert; terracotta and packed mud on the savanna; cobble, gravel and planks in the snow. Plank
+  bridges over water.
+- **Networks:** two more roads out of every vanilla village (plains, taiga, snowy, desert, savanna; Epic Structures:
+  Villages keeps vanilla's street pools, so its towns count), besides Moog's own two trails, so a kingdom seated in a
+  village has four; two from each Grim Kingdoms castle, keep, citadel, fort and town (31 structures); two from each ATi
+  compound (`jaymoskingdoms:ati_compounds`: paved off the sand, sandstone on it, by the biome tags
+  `jaymoskingdoms:paved_roads` and `sand_roads`); one from ATi's lone homesteads, storehouses and camps. ATi's absorbed
+  large and medium sets are deliberately not named: they never place, and Moog's Paths would lay roads from buildings
+  that never generate.
+- Regenerate with `python -I tools/gen_paths.py` from `kingdoms/`. Roads only appear in newly generated chunks.
+
+### Pack
+- Epic Structures: Dungeons (all rights reserved; "feel free to add to any modpack"; Modrinth
+  `epic-structures-dungeons:NK6Uptyi`, 1.2.6 for 26.3; CurseForge 1501318 / 8984101; structure ids `epic:*`) joined the
+  root `packMods`. Nothing in Kingdoms keys off it.
+
+### Check first
+- Two realms side by side: different shields, trims and harness; the king's crown, sword and shield glint.
+- A desert realm (turbans, sand trousers, gold trims, darker faces) and a snowy one (white hoods, pale faces).
+- An old world: its folk re-dressed once after loading, builders still holding their loads.
+- `/paths debug` (Moog's) near a village: `jaymoskingdoms:village_road_*` listed, roads leaving the village's street
+  ends in new chunks; a Grim castle and an ATi compound with roads leading off.

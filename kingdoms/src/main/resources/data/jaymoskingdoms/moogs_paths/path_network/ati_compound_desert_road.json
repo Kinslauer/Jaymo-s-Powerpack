@@ -1,0 +1,15 @@
+{
+  "path_type": "jaymoskingdoms:kingdom_road_desert",
+  "biomes": "#jaymoskingdoms:sand_roads",
+  "structure_sets": [
+    "moogs_paths:desert_lamps"
+  ],
+  "feature_decorator_sets": [],
+  "bush_decorator_sets": [],
+  "origin": {
+    "structure_set": [
+      "jaymoskingdoms:ati_compounds"
+    ],
+    "path_count": 2
+  }
+}
