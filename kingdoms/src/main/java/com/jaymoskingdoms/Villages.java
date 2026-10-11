@@ -60,7 +60,9 @@ public final class Villages {
 		BlockPos bell = village.seat();
 		villagers.sort(Comparator.comparingDouble(v -> v.distanceToSqr(bell.getX() + 0.5, bell.getY(), bell.getZ() + 0.5)));
 		Villager elder = villagers.getFirst();
-		elder.setCustomName(Component.translatable("entity.jaymoskingdoms.elder_of", village.name()));
+		if (!McaCompat.keepsOwnName(elder)) {
+			elder.setCustomName(Component.translatable("entity.jaymoskingdoms.elder_of", village.name()));
+		}
 		elder.setPersistenceRequired();
 		Factions.update(level.getServer(), village.id(), f -> f.withLeader(Optional.of(elder.getUUID())));
 		return elder;

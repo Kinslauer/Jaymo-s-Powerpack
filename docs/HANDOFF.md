@@ -89,4 +89,6 @@ coloured blocks (terracotta, beds, banners, carpets) have no `Blocks.X` fields: 
    Folk's HurtByTarget must only alert its own side (barbarians vs kingdom folk).
 3. Later: war between kingdoms and land claiming, kingdoms' own battles (intervening shifts reputation), the
    member-kingdom politics; **Better Mob Combat** rewrite (MIT/CC0, an add-on so humanoid mobs use Better Combat's
-   combos; good for guards and kings); **MCA Reborn** (GPL-3.0) as a companion once it has a 26.3 build.
+   combos; good for guards and kings); **MCA Reborn** (GPL-3.0) is in the pack since Powers 0.8.21 / Kingdoms 0.4.2,
+   built from its authors' dev/26.3 branch (`libs/mca-fabric-*.jar`) until a 26.3 release: swap in the CurseForge
+   file then (see `mcaJar` in `build.gradle`). Kingdoms' tie-in is `McaCompat`/`McaBridge`/`mixin/mca`.
