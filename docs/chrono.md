@@ -378,3 +378,50 @@ it drives the motion itself, the same way the lunge dash works. No packet is inv
   tick. On a laggy connection it runs faster (capped at 1 block/tick) and may finish later than the blow.
 - **Bosses and odd mobs:** the stun cancels `Mob.serverAiStep`. Mobs that act outside it (the Ender Dragon's phases,
   some modded mobs) won't be fully stopped.
+
+## 0.8.8: lighter Time Flow blows, three more counters
+
+### Damage (`ChronoFlow.land`)
+Andy: a 4-hit combo was killing mobs. Blows are now much lighter and the combo matters more.
+- Base damage per style (jab, hook, uppercut, lunge, kick, counter): 1.5, 1.75, 2, 2, 2.5, 2.5 (was 4–6).
+- The combo adds 12% per blow (was 8%), capped at +200% (was +100%), so from blow 17 on everything does triple.
+- A held weapon no longer replaces the base damage. It adds `WEAPON_SHARE` (25%) of its attack damage above the
+  bare fist's 1 (a diamond sword adds 1.5).
+- A fresh 4-hit set does about 8 damage in total. A zombie (20 HP) takes eight or nine blows from a fresh combo.
+
+### New counter variants
+`counterOne` now picks from six variants. `COUNTER_DURATION` / `COUNTER_HIT_AT` grew to match, and `Blow` carries the
+variant so `land` can give each its own throw.
+
+| Variant | Length / blow at | What happens |
+|---|---|---|
+| Vault | 24 / 16 | Crouch with the arms swung back, then a hop over the attacker's head (knees tucked, arms high) to land `VAULT_LAND` past it, facing it. Both fists come down in a hammer blow from behind. |
+| Sweep | 22 / 13 | Drop low and spin with the sweeping leg out wide (a sweep puff at its feet). Then a rising palm under the chin that launches it (`SWEEP_LIFT` 0.75, small push). |
+| Throw | 26 / 17 | Step in close, catch the arm with both hands, turn your back into it and haul the arm over your shoulder. Then bend double and throw it: it flies back over you (`THROW_PUSH` 0.85 toward the far side, `THROW_LIFT` 0.5). |
+
+Vault and throw move the caster on the client (`ChronoFlowClient.counterMotion`), like circle and slip.
+
+### Tuning constants (0.8.8)
+
+| Where | Constant | Value |
+|---|---|---|
+| `ChronoFlow` | `DAMAGE` (jab, hook, uppercut, lunge, kick, counter) | 1.5, 1.75, 2, 2, 2.5, 2.5 |
+| `ChronoFlow` | `COMBO_BONUS` / `COMBO_MAX_BONUS` / `WEAPON_SHARE` | 0.12 / 2.0 / 0.25 |
+| `ChronoFlow` | `COUNTER_DURATION` / `COUNTER_HIT_AT` (vault, sweep, throw) | 24, 22, 26 / 16, 13, 17 |
+| `ChronoFlow` | `SWEEP_LIFT` / `SWEEP_PUSH` / `THROW_PUSH` / `THROW_LIFT` | 0.75 / 0.2 / 0.85 / 0.5 |
+| `ChronoFlowClient` | `VAULT_DELAY` / `VAULT_TICKS` / `VAULT_HOP` / `VAULT_LAND` / `VAULT_MAX_STEP` | 3 / 8 / 0.5 / 1.4 / 0.8 |
+| `ChronoFlowClient` | `THROW_TICKS` / `THROW_CLOSE` | 3 / 0.9 |
+
+### How to test (0.8.8)
+1. Enter Time Flow (see 0.8.0) and punch a fresh zombie: it should survive the first set of four and drop around
+   blow 8 or 9. With a long combo going, the HUD count climbs and each blow hits visibly harder.
+2. Counter a single zombie many times. Besides circle, slip and deflect you should now see:
+   - **vault:** you hop over its head, land behind it and hammer it down;
+   - **sweep:** you drop and spin low, then a rising palm pops it into the air;
+   - **throw:** you step in, turn, and it sails over your shoulder to land behind you.
+3. Nothing should hurt you during any of them.
+
+### Risky at runtime
+- **Vault under a low ceiling:** the hop is velocity-driven, so a ceiling cuts it short and you may end up beside it,
+  not behind. The blow still lands if you're within `HIT_REACH`.
+- **Throw into a wall behind you:** the target is flung toward where you stand; a wall there just stops it.
