@@ -108,14 +108,14 @@ final class Castle {
 	}
 
 	/** Ground the land made, not the village. */
-	private static boolean natural(BlockState state) {
-		return state.is(BlockTags.DIRT) || state.is(BlockTags.SAND) || state.is(BlockTags.BASE_STONE_OVERWORLD) || state.is(Blocks.DIRT_PATH)
+	static boolean natural(BlockState state) {
+		return state.is(BlockTags.SUBSTRATE_OVERWORLD) || state.is(BlockTags.SAND) || state.is(BlockTags.BASE_STONE_OVERWORLD) || state.is(Blocks.DIRT_PATH)
 			|| state.is(Blocks.SNOW) || state.is(Blocks.SNOW_BLOCK) || state.is(Blocks.GRAVEL) || state.is(BlockTags.TERRACOTTA)
 			|| state.is(Blocks.SANDSTONE) || state.is(BlockTags.ICE) || state.is(BlockTags.LEAVES) || state.is(BlockTags.LOGS);
 	}
 
 	/** Builds the kingdom's seat (a random kind) and its watchtowers, in the village's materials. */
-	static Keep build(ServerLevel level, Kingdom kingdom, BlockPos bell, @org.jspecify.annotations.Nullable Kind forced) {
+	static Keep build(ServerLevel level, Faction kingdom, BlockPos bell, @org.jspecify.annotations.Nullable Kind forced) {
 		RandomSource random = level.getRandom();
 		Kind kind = forced != null ? forced : Kind.values()[random.nextInt(Kind.values().length)];
 		int half = switch (kind) {
@@ -124,16 +124,22 @@ final class Castle {
 			case TOWER -> 6;
 		};
 		Site site = site(level, bell, half, kind == Kind.CASTLE ? SITE_MIN + 10 : SITE_MIN, SITE_MAX + (kind == Kind.CASTLE ? 12 : 0), 0.0);
-		Palette p = Palette.of(level.getBiome(bell));
+		Palette p = Palette.at(level, bell);
+		Frame frame = new Frame(site.center(), site.facing(), site.floor(), switch (kind) {
+			case KEEP -> KEEP_DEPTH / 2;
+			case CASTLE -> CASTLE_DEPTH / 2;
+			case TOWER -> TOWER_SIZE / 2;
+		});
 		Keep keep = switch (kind) {
 			case KEEP -> {
-				Frame f = new Frame(site.center(), site.facing(), site.floor(), KEEP_DEPTH / 2);
-				prepare(level, f, p, -KEEP_HALF - 1, KEEP_HALF + 1, -1, KEEP_DEPTH + 1);
-				yield keep(level, f, p, kingdom, random, 0);
+				prepare(level, frame, p, -KEEP_HALF - 1, KEEP_HALF + 1, -1, KEEP_DEPTH + 1);
+				yield keep(level, frame, p, kingdom, random, 0);
 			}
-			case CASTLE -> castle(level, new Frame(site.center(), site.facing(), site.floor(), CASTLE_DEPTH / 2), p, kingdom, random);
-			case TOWER -> tower(level, new Frame(site.center(), site.facing(), site.floor(), TOWER_SIZE / 2), p, kingdom, random);
+			case CASTLE -> castle(level, frame, p, kingdom, random);
+			case TOWER -> tower(level, frame, p, kingdom, random);
 		};
+		// a way to the gate from the land in front of it (just outside the foundation)
+		approach(level, frame, p, kind == Kind.KEEP ? -2 : -3);
 		// watchtowers round the town's edge
 		List<BlockPos> posts = new ArrayList<>(keep.posts());
 		double turn = random.nextDouble() * Math.PI * 2.0;
@@ -143,6 +149,49 @@ final class Castle {
 		}
 		JaymosKingdoms.LOGGER.info("{} builds a {} at {}", kingdom.name(), kind.name().toLowerCase(java.util.Locale.ROOT), site.center());
 		return new Keep(keep.throne(), keep.cellar(), keep.gate(), keep.hall(), List.copyOf(posts));
+	}
+
+	/** The longest approach: steps down to (or a cutting through) the land in front of the gate. */
+	static final int APPROACH_MAX = 24;
+
+	/**
+	 * A seat on a slope stands above the land in front of its gate, or is dug into it: three-wide steps from {@code z0}
+	 * outward (frame z falling) down to the ground, or a path cut through the rise, until the land meets the gate's level.
+	 */
+	private static void approach(ServerLevel level, Frame f, Palette p, int z0) {
+		BlockState stairs = f.turn(p.stairs().setValue(StairBlock.FACING, Direction.SOUTH));
+		for (int i = 0; i < APPROACH_MAX; i++) {
+			int z = z0 - i;
+			// the land's height here (the first air above it), relative to the floor
+			int ground = Integer.MIN_VALUE;
+			for (int x = -1; x <= 1; x++) {
+				ground = Math.max(ground, level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, f.at(x, 0, z)).getY() - f.floor());
+			}
+			int step = -1 - i;
+			if (ground > 0) {
+				// dug in: cut the path through at the floor's level
+				for (int x = -1; x <= 1; x++) {
+					f.set(level, x, -1, z, p.path());
+					for (int y = 0; y < ground && y <= 4; y++) {
+						f.set(level, x, y, z, Blocks.AIR.defaultBlockState());
+					}
+				}
+				continue;
+			}
+			if (ground >= step + 1) {
+				// the land has come up to meet the steps
+				return;
+			}
+			for (int x = -1; x <= 1; x++) {
+				f.set(level, x, step, z, stairs);
+				for (int y = step - 1; y >= ground - 1; y--) {
+					f.set(level, x, y, z, p.wall());
+				}
+				for (int y = step + 1; y <= step + 3; y++) {
+					f.set(level, x, y, z, Blocks.AIR.defaultBlockState());
+				}
+			}
+		}
 	}
 
 	/** The ground made ready in {@code x0..x1, z0..z1}: a foundation under it, the air cleared above. */
@@ -172,7 +221,7 @@ final class Castle {
 	static final int KEEP_HALF = 7, KEEP_DEPTH = 14, KEEP_WALL = 10, KEEP_UPPER = 5;
 
 	/** The keep, its gate at frame z = {@code z0}. */
-	private static Keep keep(ServerLevel level, Frame f, Palette p, Kingdom kingdom, RandomSource random, int z0) {
+	private static Keep keep(ServerLevel level, Frame f, Palette p, Faction kingdom, RandomSource random, int z0) {
 		int h = KEEP_HALF, d = KEEP_DEPTH;
 		for (int x = -h; x <= h; x++) {
 			for (int z = z0; z <= z0 + d; z++) {
@@ -246,7 +295,7 @@ final class Castle {
 	 * A throne room on the floor at frame y = {@code y}: the carpet aisle from {@code zFront} to the dais, the dais
 	 * (x {@code x0..x1}) at the back ({@code zBack}), the throne, the banners. Returns where the king stands.
 	 */
-	private static BlockPos throneRoom(ServerLevel level, Frame f, Palette p, Kingdom kingdom, int x0, int x1, int zFront, int zBack, int y) {
+	private static BlockPos throneRoom(ServerLevel level, Frame f, Palette p, Faction kingdom, int x0, int x1, int zFront, int zBack, int y) {
 		BlockState carpet = byName(kingdom.color().getName() + "_carpet", Blocks.AIR);
 		for (int z = zFront; z <= zBack - 3; z++) {
 			f.set(level, 0, y, z, carpet);
@@ -303,7 +352,7 @@ final class Castle {
 
 	static final int CASTLE_HALF = 15, CASTLE_DEPTH = 32, CURTAIN = 8;
 
-	private static Keep castle(ServerLevel level, Frame f, Palette p, Kingdom kingdom, RandomSource random) {
+	private static Keep castle(ServerLevel level, Frame f, Palette p, Faction kingdom, RandomSource random) {
 		int h = CASTLE_HALF, d = CASTLE_DEPTH;
 		prepare(level, f, p, -h - 2, h + 2, -2, d + 2);
 		// the curtain wall, with a walk along its top
@@ -404,7 +453,7 @@ final class Castle {
 
 	static final int TOWER_SIZE = 12, STOREY = 6, STOREYS = 4;
 
-	private static Keep tower(ServerLevel level, Frame f, Palette p, Kingdom kingdom, RandomSource random) {
+	private static Keep tower(ServerLevel level, Frame f, Palette p, Faction kingdom, RandomSource random) {
 		int h = TOWER_SIZE / 2, d = TOWER_SIZE, top = STOREY * STOREYS;
 		prepare(level, f, p, -h - 2, h + 2, -2, d + 2);
 		for (int y = 0; y <= top + 2; y++) {
@@ -501,13 +550,13 @@ final class Castle {
 		return f.at(0, high + 2, 1);
 	}
 
-	private static BlockState byName(String name, Block fallback) {
+	static BlockState byName(String name, Block fallback) {
 		Block block = BuiltInRegistries.BLOCK.getValue(Identifier.withDefaultNamespace(name));
 		return (block == Blocks.AIR ? fallback : block).defaultBlockState();
 	}
 
 	/** A piece's own frame: x across, z inward from its gate, y from its floor; turned to face the bell. */
-	private record Frame(BlockPos center, Direction facing, int floor, int middle) {
+	record Frame(BlockPos center, Direction facing, int floor, int middle) {
 		/** The gate is at z = 0, facing {@code facing}; the piece runs back from it (its middle at z = {@code middle}). */
 		BlockPos at(int x, int y, int z) {
 			Direction back = this.facing.getOpposite();
@@ -529,7 +578,7 @@ final class Castle {
 		}
 
 		void set(ServerLevel level, int x, int y, int z, BlockState state) {
-			level.setBlock(this.at(x, y, z), state, Block.UPDATE_CLIENTS);
+			level.setBlock(this.at(x, y, z), state, Block.UPDATE_CLIENTS | Block.UPDATE_SUPPRESS_DROPS);
 		}
 	}
 }

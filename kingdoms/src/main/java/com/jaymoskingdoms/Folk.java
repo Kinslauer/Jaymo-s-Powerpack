@@ -38,13 +38,58 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
 /**
- * A kingdom's people: its {@link #KING} (a boss: heavy armour, a great sword, a boss bar, and he hits back hard, with
- * phases as he weakens) and its {@link #GUARD}s, who keep to the capital, cut down monsters, and attack anyone the
- * kingdom counts as hostile ({@link Reputation#HOSTILE}) or who strikes one of their own. Never despawn.
+ * A faction's people: its {@link #KING} (a boss: heavy armour, a great sword, a boss bar, and he hits back hard, with
+ * phases as he weakens) or a fiefdom's {@link #LORD} (the same, a little weaker); its {@link #GUARD}s, who keep to the
+ * seat, cut down monsters, and attack anyone the faction counts as hostile ({@link Reputation#HOSTILE}) or who strikes
+ * one of their own side; its {@link #ARCHER}s; and its builders, a {@link #FOREMAN} and his {@link #WORKER}s, who don't
+ * fight (their work is {@link Builders}'). Each role is a {@link Role} ({@link #defineRole} adds more). They dress in
+ * their faction's style ({@link #style()}: its type) and colour ({@link #colorId()}: a fiefdom's overlord's). Never
+ * despawn.
  */
 public class Folk extends PathfinderMob implements net.minecraft.world.entity.monster.RangedAttackMob {
-	/** Guards fight hand to hand; archers keep their posts on walls and towers and shoot; the king is the boss. */
-	public static final int GUARD = 0, KING = 1, ARCHER = 2;
+	/**
+	 * Guards fight hand to hand; archers keep their posts on walls and towers and shoot; the king (and a fiefdom's lord)
+	 * is the boss; the foreman and workers build. {@link #BARBARIAN} and {@link #CHIEF} are reserved for camps (their
+	 * agent defines them with {@link #defineRole}).
+	 */
+	public static final int GUARD = 0, KING = 1, ARCHER = 2, LORD = 3, FOREMAN = 4, WORKER = 5, BARBARIAN = 6, CHIEF = 7;
+
+	/**
+	 * A role: its saved name, whether it fights ({@code combatant}: melee unless it's an archer; non-combatants flee
+	 * when hurt), whether it leads its faction ({@code leader}: a boss bar of {@code bar}'s colour, a rally), and how it's
+	 * set up ({@code outfit}: its gear, health and name).
+	 */
+	public record Role(int id, String name, boolean combatant, boolean leader, BossEvent.@org.jspecify.annotations.Nullable BossBarColor bar,
+		java.util.function.BiConsumer<Folk, Faction> outfit) {
+	}
+
+	private static final java.util.Map<Integer, Role> ROLES = new java.util.HashMap<>();
+
+	/** Adds (or replaces) a role. */
+	public static void defineRole(Role role) {
+		ROLES.put(role.id(), role);
+	}
+
+	public static @org.jspecify.annotations.Nullable Role role(int id) {
+		return ROLES.get(id);
+	}
+
+	/** A role's saved name (rosters are keyed by it); "folk_N" for one not defined. */
+	public static String roleName(int id) {
+		Role role = ROLES.get(id);
+		return role == null ? "folk_" + id : role.name();
+	}
+
+	public static boolean isBuilder(int role) {
+		return role == FOREMAN || role == WORKER;
+	}
+
+	/** The king's and the lord's health, and their blows. */
+	static final double KING_HEALTH = 300.0, KING_DAMAGE = 9.0, LORD_HEALTH = 220.0, LORD_DAMAGE = 7.5;
+	/** Builders: plain folk. */
+	static final double BUILDER_HEALTH = 20.0, BUILDER_DAMAGE = 2.0;
+	/** How fast a non-combatant flees when hurt. */
+	static final double PANIC_SPEED = 1.3;
 	/** An archer's reach, and how often they loose (ticks). */
 	static final double ARCHER_RANGE = 28.0;
 	static final int ARCHER_INTERVAL = 30;
@@ -55,9 +100,69 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 
 	private static final EntityDataAccessor<Integer> ROLE = SynchedEntityData.defineId(Folk.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> KINGDOM = SynchedEntityData.defineId(Folk.class, EntityDataSerializers.INT);
+	/** Its faction's type (ordinal) and the colour it wears (a dye id, -1 for none): what it looks like. */
+	private static final EntityDataAccessor<Integer> STYLE = SynchedEntityData.defineId(Folk.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Integer> COLOR = SynchedEntityData.defineId(Folk.class, EntityDataSerializers.INT);
+
+	static {
+		defineRole(new Role(GUARD, "guard", true, false, null, (folk, faction) -> {
+			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
+			folk.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
+			folk.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
+			folk.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.CHAINMAIL_LEGGINGS));
+			folk.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
+			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.guard_of", faction.name()));
+		}));
+		defineRole(new Role(ARCHER, "archer", true, false, null, (folk, faction) -> {
+			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
+			folk.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.CHAINMAIL_HELMET));
+			folk.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.LEATHER_CHESTPLATE));
+			folk.getAttribute(Attributes.FOLLOW_RANGE).setBaseValue(ARCHER_RANGE + 4.0);
+			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.archer_of", faction.name()));
+		}));
+		defineRole(new Role(KING, "king", true, true, BossEvent.BossBarColor.YELLOW, (folk, faction) -> {
+			folk.getAttribute(Attributes.MAX_HEALTH).setBaseValue(KING_HEALTH);
+			folk.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(KING_DAMAGE);
+			folk.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(0.8);
+			folk.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(4.0);
+			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.NETHERITE_SWORD));
+			folk.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.NETHERITE_CHESTPLATE));
+			folk.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.NETHERITE_LEGGINGS));
+			folk.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.NETHERITE_BOOTS));
+			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.king_of", faction.name()));
+		}));
+		defineRole(new Role(LORD, "lord", true, true, BossEvent.BossBarColor.PURPLE, (folk, faction) -> {
+			folk.getAttribute(Attributes.MAX_HEALTH).setBaseValue(LORD_HEALTH);
+			folk.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(LORD_DAMAGE);
+			folk.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(0.6);
+			folk.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(2.0);
+			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SWORD));
+			folk.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.DIAMOND_CHESTPLATE));
+			folk.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.DIAMOND_LEGGINGS));
+			folk.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.DIAMOND_BOOTS));
+			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.lord_of", faction.name()));
+		}));
+		defineRole(new Role(FOREMAN, "foreman", false, false, null, (folk, faction) -> {
+			folk.getAttribute(Attributes.MAX_HEALTH).setBaseValue(BUILDER_HEALTH);
+			folk.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(BUILDER_DAMAGE);
+			folk.setItemSlot(EquipmentSlot.MAINHAND, folk.tool());
+			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.foreman_of", faction.name()));
+		}));
+		defineRole(new Role(WORKER, "worker", false, false, null, (folk, faction) -> {
+			folk.getAttribute(Attributes.MAX_HEALTH).setBaseValue(BUILDER_HEALTH);
+			folk.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(BUILDER_DAMAGE);
+			folk.setItemSlot(EquipmentSlot.MAINHAND, folk.tool());
+			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.builder_of", faction.name()));
+		}));
+	}
 
 	private ServerBossEvent bossBar;
 	private boolean rallied;
+	/** A builder carrying a load (it's in his main hand, his tool put away). */
+	private boolean carrying;
+	/** A builder's work: where (a site), and what (free text for {@link Builders}' use). Saved. */
+	private @org.jspecify.annotations.Nullable BlockPos site;
+	private String task = "";
 
 	public Folk(EntityType<? extends Folk> type, Level level) {
 		super(type, level);
@@ -77,46 +182,108 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		super.defineSynchedData(entityData);
 		entityData.define(ROLE, GUARD);
 		entityData.define(KINGDOM, -1);
+		entityData.define(STYLE, FactionType.KINGDOM.ordinal());
+		entityData.define(COLOR, -1);
 	}
 
 	public int role() {
 		return this.entityData.get(ROLE);
 	}
 
-	public int kingdomId() {
+	/** The faction it belongs to. */
+	public int factionId() {
 		return this.entityData.get(KINGDOM);
 	}
 
-	/** Set up as {@code role} of {@code kingdom}: their gear, and the post they keep to ({@code radius} of {@code home}). */
-	void setup(int role, Kingdom kingdom, BlockPos home, int radius) {
-		this.entityData.set(ROLE, role);
-		this.entityData.set(KINGDOM, kingdom.id());
-		this.setHomeTo(home, radius);
-		if (role == KING) {
-			this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(300.0);
-			this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(9.0);
-			this.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(0.8);
-			this.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(4.0);
-			this.setHealth(this.getMaxHealth());
-			this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.NETHERITE_SWORD));
-			this.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.NETHERITE_CHESTPLATE));
-			this.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.NETHERITE_LEGGINGS));
-			this.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.NETHERITE_BOOTS));
-			this.setCustomName(Component.translatable("entity.jaymoskingdoms.king_of", kingdom.name()));
-		} else if (role == ARCHER) {
-			this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
-			this.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.CHAINMAIL_HELMET));
-			this.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.LEATHER_CHESTPLATE));
-			this.getAttribute(Attributes.FOLLOW_RANGE).setBaseValue(ARCHER_RANGE + 4.0);
-			this.setCustomName(Component.translatable("entity.jaymoskingdoms.archer_of", kingdom.name()));
-		} else {
-			this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
-			this.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
-			this.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
-			this.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.CHAINMAIL_LEGGINGS));
-			this.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
-			this.setCustomName(Component.translatable("entity.jaymoskingdoms.guard_of", kingdom.name()));
+	/** (0.2's name for {@link #factionId}) */
+	public int kingdomId() {
+		return this.factionId();
+	}
+
+	/** Its faction's type: how it dresses. */
+	public FactionType style() {
+		int i = this.entityData.get(STYLE);
+		return i >= 0 && i < FactionType.values().length ? FactionType.values()[i] : FactionType.KINGDOM;
+	}
+
+	/** The dye it wears (its faction's colour, or a fiefdom's overlord's), or -1. */
+	public int colorId() {
+		return this.entityData.get(COLOR);
+	}
+
+	public boolean combatant() {
+		Role role = ROLES.get(this.role());
+		return role == null || role.combatant();
+	}
+
+	public boolean leader() {
+		Role role = ROLES.get(this.role());
+		return role != null && role.leader();
+	}
+
+	/** A builder's tool (back in hand when he isn't carrying). */
+	ItemStack tool() {
+		boolean wild = this.style() == FactionType.BARBARIAN;
+		if (this.role() == FOREMAN) {
+			return new ItemStack(wild ? Items.STONE_AXE : Items.WOODEN_AXE);
 		}
+		return new ItemStack(wild ? Items.STONE_SHOVEL : Items.IRON_SHOVEL);
+	}
+
+	/** What it's carrying (the load in its hands, not a copy), or empty. */
+	public ItemStack carried() {
+		return this.carrying ? this.getMainHandItem() : ItemStack.EMPTY;
+	}
+
+	public boolean isCarrying() {
+		return this.carrying && !this.getMainHandItem().isEmpty();
+	}
+
+	/**
+	 * Shows {@code load} in its hands (everyone sees it), its tool put away; empty puts the tool back. The load is the
+	 * real items: it's dropped if the carrier dies.
+	 */
+	public void setCarried(ItemStack load) {
+		this.carrying = !load.isEmpty();
+		this.setItemSlot(EquipmentSlot.MAINHAND, this.carrying ? load : isBuilder(this.role()) ? this.tool() : ItemStack.EMPTY);
+	}
+
+	/** Takes the load out of its hands (returned), its tool back in them. */
+	public ItemStack takeCarried() {
+		ItemStack load = this.carried();
+		this.setCarried(ItemStack.EMPTY);
+		return load;
+	}
+
+	public @org.jspecify.annotations.Nullable BlockPos site() {
+		return this.site;
+	}
+
+	public void setSite(@org.jspecify.annotations.Nullable BlockPos site) {
+		this.site = site == null ? null : site.immutable();
+	}
+
+	public String task() {
+		return this.task;
+	}
+
+	public void setTask(String task) {
+		this.task = task == null ? "" : task;
+	}
+
+	/** Set up as {@code role} of {@code faction}: its look, gear and name, and the post it keeps to ({@code radius} of {@code home}). */
+	public void setup(int role, Faction faction, BlockPos home, int radius) {
+		this.entityData.set(ROLE, role);
+		this.entityData.set(KINGDOM, faction.id());
+		this.entityData.set(STYLE, faction.type().ordinal());
+		net.minecraft.server.MinecraftServer server = this.level().getServer();
+		this.entityData.set(COLOR, server == null ? faction.color().getId() : faction.styleColor(server).getId());
+		this.setHomeTo(home, radius);
+		Role spec = ROLES.getOrDefault(role, ROLES.get(GUARD));
+		spec.outfit().accept(this, faction);
+		// Epic Knights' armour and arms in the faction's style and colours, when it's loaded
+		KnightsCompat.dress(this, faction);
+		this.setHealth(this.getMaxHealth());
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			this.setDropChance(slot, 0.0F);
 		}
@@ -126,23 +293,51 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
 		this.goalSelector.addGoal(1, new Shoot(this));
+		this.goalSelector.addGoal(1, new net.minecraft.world.entity.ai.goal.PanicGoal(this, PANIC_SPEED) {
+			@Override
+			public boolean canUse() {
+				return !Folk.this.combatant() && super.canUse();
+			}
+		});
 		this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.15, true) {
 			@Override
 			public boolean canUse() {
-				return Folk.this.role() != ARCHER && super.canUse();
+				return Folk.this.combatant() && Folk.this.role() != ARCHER && super.canUse();
 			}
 		});
 		this.goalSelector.addGoal(4, new MoveTowardsRestrictionGoal(this, 1.0));
 		this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.6));
 		this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
 		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
-		this.targetSelector.addGoal(1, new HurtByTargetGoal(this, Folk.class).setAlertOthers(Folk.class));
-		// anyone the kingdom counts as hostile
+		// whoever strikes one of them: only their own side (their faction and its allies) answers the call
+		this.targetSelector.addGoal(1, new HurtByTargetGoal(this, Folk.class) {
+			@Override
+			protected void alertOther(net.minecraft.world.entity.Mob other, LivingEntity target) {
+				if (other instanceof Folk folk && folk.combatant() && Folk.this.sameSide(folk)) {
+					super.alertOther(other, target);
+				}
+			}
+		}.setAlertOthers(Folk.class));
+		// anyone the faction counts as hostile
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true,
-			(target, level) -> target instanceof ServerPlayer player && !player.isCreative() && Reputation.get(player, this.kingdomId()) <= Reputation.HOSTILE));
+			(target, level) -> this.combatant() && target instanceof ServerPlayer player && !player.isCreative()
+				&& Reputation.get(player, this.factionId()) <= Reputation.HOSTILE));
 		// and monsters on their land
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.Mob.class, true,
-			(target, level) -> target instanceof Enemy && !(target instanceof net.minecraft.world.entity.monster.Creeper)));
+			(target, level) -> this.combatant() && target instanceof Enemy && !(target instanceof net.minecraft.world.entity.monster.Creeper)));
+		// barbarians hunt everyone else's people, and realms' folk hunt barbarians
+		Barbarians.addGoals(this, this.goalSelector, this.targetSelector);
+		// realms at war: each other's folk (and sworn players) on sight
+		Wars.addGoals(this, this.targetSelector);
+	}
+
+	/** {@code other} is on its side: the same faction, or one allied with it. */
+	public boolean sameSide(Folk other) {
+		if (other.factionId() == this.factionId()) {
+			return true;
+		}
+		net.minecraft.server.MinecraftServer server = this.level().getServer();
+		return server != null && Relations.between(server, this.factionId(), other.factionId()) == Relation.ALLIED;
 	}
 
 	@Override
@@ -156,14 +351,17 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
-		if (this.role() == KING && !this.rallied && this.getHealth() <= this.getMaxHealth() * RALLY_AT) {
+		if (isBuilder(this.role())) {
+			Builders.tick(level, this);
+		}
+		if (this.leader() && !this.rallied && this.getHealth() <= this.getMaxHealth() * RALLY_AT) {
 			// his second wind: he rallies, and calls his guards in
 			this.rallied = true;
 			this.addEffect(new MobEffectInstance(MobEffects.STRENGTH, 20 * 60, 1));
 			this.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 20 * 60, 1));
 			this.addEffect(new MobEffectInstance(MobEffects.SPEED, 20 * 60, 0));
 			LivingEntity foe = this.getTarget();
-			for (Folk guard : level.getEntitiesOfClass(Folk.class, this.getBoundingBox().inflate(48.0), f -> f.kingdomId() == this.kingdomId() && f != this)) {
+			for (Folk guard : level.getEntitiesOfClass(Folk.class, this.getBoundingBox().inflate(48.0), f -> f.factionId() == this.factionId() && f != this && f.combatant())) {
 				if (foe != null) {
 					guard.setTarget(foe);
 				}
@@ -179,7 +377,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	@Override
 	public void startSeenByPlayer(ServerPlayer player) {
 		super.startSeenByPlayer(player);
-		if (this.role() == KING) {
+		if (this.leader()) {
 			this.bar().addPlayer(player);
 		}
 	}
@@ -194,7 +392,9 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 
 	private ServerBossEvent bar() {
 		if (this.bossBar == null) {
-			this.bossBar = new ServerBossEvent(this.getUUID(), this.getDisplayName(), BossEvent.BossBarColor.YELLOW, BossEvent.BossBarOverlay.NOTCHED_10);
+			Role role = ROLES.get(this.role());
+			BossEvent.BossBarColor color = role != null && role.bar() != null ? role.bar() : BossEvent.BossBarColor.YELLOW;
+			this.bossBar = new ServerBossEvent(this.getUUID(), this.getDisplayName(), color, BossEvent.BossBarOverlay.NOTCHED_10);
 		}
 		return this.bossBar;
 	}
@@ -212,6 +412,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 
 	@Override
 	public void die(DamageSource source) {
+		if (this.level() instanceof ServerLevel level && this.isCarrying()) {
+			// whatever he was hauling falls where he does
+			this.spawnAtLocation(level, this.takeCarried());
+		}
 		super.die(source);
 		if (this.level() instanceof ServerLevel level) {
 			KingdomEvents.folkDied(level, this, source);
@@ -284,6 +488,13 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		output.putInt("role", this.role());
 		output.putInt("kingdom", this.kingdomId());
 		output.putBoolean("rallied", this.rallied);
+		output.putInt("style", this.entityData.get(STYLE));
+		output.putInt("color", this.colorId());
+		output.putBoolean("carrying", this.carrying);
+		if (this.site != null) {
+			output.putLong("site", this.site.asLong());
+		}
+		output.putString("task", this.task);
 	}
 
 	@Override
@@ -292,5 +503,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		this.entityData.set(ROLE, input.getIntOr("role", GUARD));
 		this.entityData.set(KINGDOM, input.getIntOr("kingdom", -1));
 		this.rallied = input.getBooleanOr("rallied", false);
+		this.entityData.set(STYLE, input.getIntOr("style", FactionType.KINGDOM.ordinal()));
+		this.entityData.set(COLOR, input.getIntOr("color", -1));
+		this.carrying = input.getBooleanOr("carrying", false);
+		this.site = input.getLong("site").map(BlockPos::of).orElse(null);
+		this.task = input.getStringOr("task", "");
 	}
 }

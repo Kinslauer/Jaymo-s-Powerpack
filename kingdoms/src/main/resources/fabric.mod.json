@@ -11,10 +11,18 @@
 		"main": ["com.jaymoskingdoms.JaymosKingdoms"],
 		"client": ["com.jaymoskingdoms.client.JaymosKingdomsClient"]
 	},
+	"mixins": [
+		"jaymoskingdoms.combat.mixins.json",
+		{ "config": "jaymoskingdoms.combat.client.mixins.json", "environment": "client" }
+	],
 	"depends": {
 		"fabricloader": ">=0.19.5",
 		"minecraft": "~26.3",
 		"java": ">=25",
 		"fabric-api": "*"
+	},
+	"suggests": {
+		"bettercombat": "*",
+		"magistuarmory": "*"
 	}
 }
