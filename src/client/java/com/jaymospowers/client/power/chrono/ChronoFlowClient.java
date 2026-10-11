@@ -32,6 +32,12 @@ public final class ChronoFlowClient {
 	/** Slip counter: a quick sidestep (and a touch back) out of the blow. */
 	private static final int SLIP_TICKS = 3;
 	private static final double SLIP_SPEED = 0.42, SLIP_BACK = 0.12;
+	/** Vault counter: a crouch, then a hop of this height over the attacker, landing this far past it. */
+	private static final int VAULT_DELAY = 3, VAULT_TICKS = 8;
+	private static final double VAULT_HOP = 0.5, VAULT_LAND = 1.4, VAULT_MAX_STEP = 0.8;
+	/** Throw counter: a quick step in, to this close, to catch the arm. */
+	private static final int THROW_TICKS = 3;
+	private static final double THROW_CLOSE = 0.9;
 
 	/** Your own blow, shown at once (the server's copy arrives a moment later). */
 	static ChronoFlow.@Nullable Move local;
@@ -128,7 +134,10 @@ public final class ChronoFlowClient {
 		}
 	}
 
-	/** A counter against one attacker: the circle carries you round to its back, the slip steps you aside. */
+	/**
+	 * A counter against one attacker: the circle carries you round to its back, the slip steps you aside, the vault hops
+	 * you over its head and the throw steps you in to it.
+	 */
 	private static void counterMotion(Minecraft minecraft) {
 		LocalPlayer player = minecraft.player;
 		if (player == null) {
@@ -192,6 +201,32 @@ public final class ChronoFlowClient {
 				Vec3 aside = new Vec3(-flat.z, 0.0, flat.x).scale(counter.side() * SLIP_SPEED).subtract(flat.scale(SLIP_BACK));
 				player.setDeltaMovement(aside.x, player.getDeltaMovement().y, aside.z);
 			}
+		} else if (counter.variant() == ChronoFlow.VAULT && t >= VAULT_DELAY) {
+			if (t > VAULT_DELAY + VAULT_TICKS) {
+				if (t == VAULT_DELAY + VAULT_TICKS + 1) {
+					player.setDeltaMovement(player.getDeltaMovement().multiply(0.2, 1.0, 0.2));
+				}
+			} else {
+				// straight over: to the far side of where it stood when the counter began
+				double a = arcAngle + Math.PI;
+				long left = VAULT_DELAY + VAULT_TICKS + 1 - t;
+				Vec3 step = new Vec3(target.getX() + Math.cos(a) * VAULT_LAND - player.getX(), 0.0,
+					target.getZ() + Math.sin(a) * VAULT_LAND - player.getZ()).scale(1.0 / left);
+				if (step.length() > VAULT_MAX_STEP) {
+					step = step.normalize().scale(VAULT_MAX_STEP);
+				}
+				double y = t == VAULT_DELAY ? VAULT_HOP + target.getBbHeight() * 0.1 : player.getDeltaMovement().y;
+				player.setDeltaMovement(step.x, y, step.z);
+				player.resetFallDistance();
+				player.level().addParticle(net.minecraft.core.particles.ParticleTypes.ENCHANT, player.getX(), player.getY() + 0.5, player.getZ(), 0.0, 0.0, 0.0);
+			}
+		} else if (counter.variant() == ChronoFlow.THROW && t < THROW_TICKS) {
+			double gap = to.horizontalDistance() - THROW_CLOSE;
+			Vec3 flat = to.horizontal().lengthSqr() < 1.0E-4 ? Vec3.ZERO : to.horizontal().normalize();
+			Vec3 step = gap > 0.0 ? flat.scale(gap / (THROW_TICKS - t)) : Vec3.ZERO;
+			player.setDeltaMovement(step.x, player.getDeltaMovement().y, step.z);
+		} else if (counter.variant() == ChronoFlow.THROW && t == THROW_TICKS) {
+			player.setDeltaMovement(player.getDeltaMovement().multiply(0.2, 1.0, 0.2));
 		}
 		if (counter.variant() == ChronoFlow.DEFLECT) {
 			return; // a deflect stands its ground: the view stays yours
