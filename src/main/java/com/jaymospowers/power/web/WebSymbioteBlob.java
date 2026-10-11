@@ -60,7 +60,7 @@ public class WebSymbioteBlob extends PathfinderMob {
 	 * A Gravity meteor carries one this often, unless a symbiote (roaming, a behemoth, or bonded to a player) is
 	 * already within {@code METEOR_VICINITY}. Out of the burning crater, fire can't touch it for {@code FIRE_GRACE} ticks.
 	 */
-	static final float METEOR_CHANCE = 0.2F;
+	static final float METEOR_CHANCE = 0.1F;
 	/** Of those, this share crawls out alive; the rest lies in the crater as goo (Black Ooze), as craters have it. */
 	static final float METEOR_ALIVE = 0.3F;
 	static final double METEOR_VICINITY = 128.0;

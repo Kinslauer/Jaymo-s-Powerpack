@@ -10,12 +10,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** An earthboard rider leans into turns and tips into the speed (see GravityBoardPose). */
+/** An earthboard rider leans into turns and tips into the speed (see GravityBoardPose); the weighed-down kneel (GravityKneelPose). */
 @Mixin(LivingEntityRenderer.class)
 abstract class GravityLivingEntityRendererMixin {
 	@Inject(method = "setupRotations", at = @At("TAIL"))
 	private void jaymospowers$boardLean(LivingEntityRenderState state, PoseStack poseStack, float bodyRot, float entityScale, CallbackInfo ci) {
 		GravityBoardPose.rotate(state, poseStack);
+		com.jaymospowers.client.power.gravity.GravityKneelPose.rotate(state, poseStack);
 	}
 
 	@Inject(
@@ -23,5 +24,6 @@ abstract class GravityLivingEntityRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$boardRide(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
 		GravityBoardPose.extract(entity, state, partialTicks);
+		com.jaymospowers.client.power.gravity.GravityKneelPose.extract(entity, state, partialTicks);
 	}
 }

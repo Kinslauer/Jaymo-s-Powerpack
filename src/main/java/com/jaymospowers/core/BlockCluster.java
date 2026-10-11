@@ -87,6 +87,28 @@ public class BlockCluster extends Entity {
 	public static final AttachmentType<List<Piece>> PIECES = AttachmentRegistry.create(JaymosPowers.id("block_cluster_pieces"),
 		builder -> builder.syncWith(Piece.STREAM_CODEC.apply(ByteBufCodecs.list()), AttachmentSyncPredicate.all()));
 
+	/**
+	 * Debris lying where it fell (a Gravity Well's shockwave, a meteor's wreck): drawn at its own fixed lean instead of
+	 * tumbling, turning only while it flies. {@code yaw} and {@code tilt} in degrees.
+	 */
+	public record Rest(float yaw, float tilt) {
+		public static final StreamCodec<ByteBuf, Rest> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.FLOAT, Rest::yaw,
+			ByteBufCodecs.FLOAT, Rest::tilt, Rest::new);
+	}
+
+	public static final AttachmentType<Rest> REST = AttachmentRegistry.create(JaymosPowers.id("block_cluster_rest"),
+		builder -> builder.syncWith(Rest.STREAM_CODEC, AttachmentSyncPredicate.all()));
+
+	/**
+	 * An earthboard lying on the ground, unridden: as solid as its blocks (it can be stood on, and ridden again), drawn
+	 * level. Absent while it's ridden.
+	 */
+	public static final AttachmentType<Boolean> BOARD = AttachmentRegistry.create(JaymosPowers.id("block_cluster_board"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+
+	/** Lingering debris crumbles a block at a time, one every this many ticks. */
+	static final int CRUMBLE_EVERY = 3;
+
 	public static EntityType<BlockCluster> TYPE;
 
 	private @Nullable UUID thrower;
@@ -96,6 +118,17 @@ public class BlockCluster extends Entity {
 	private int idle;
 	/** Moved by whoever owns it (setPos each tick): no physics of its own, no crumbling. */
 	private boolean scripted;
+	/** Left lying, it lasts this long before it crumbles (see {@link #linger}). */
+	private int lifetime = IDLE_TICKS;
+	/** Lingering: it crumbles away a block at a time rather than shattering, when its time is up. */
+	private boolean lingers;
+	/** Never real blocks (debris conjured from nothing): it gives nothing back, pocketed or broken. */
+	private boolean temporary;
+	private boolean crumbling;
+	/** What happens once it has crumbled or broken away (a symbiote crawling out of a meteor's wreck). */
+	private @Nullable Runnable onGone;
+	/** Client side: how far a resting piece of debris has turned in flight (degrees), this tick and last. */
+	public float spin, spinO;
 
 	public BlockCluster(EntityType<? extends BlockCluster> type, Level level) {
 		super(type, level);
@@ -247,6 +280,63 @@ public class BlockCluster extends Entity {
 		return this.scripted;
 	}
 
+	/**
+	 * Debris that lies where it lands for {@code ticks}, then crumbles away a block at a time into loose rubble.
+	 * {@code temporary}: it was never real blocks, so nothing drops and pocketing it only breaks it up.
+	 */
+	public BlockCluster linger(int ticks, boolean temporary) {
+		this.lifetime = ticks;
+		this.lingers = true;
+		this.temporary = temporary;
+		this.idle = 0;
+		this.crumbling = false;
+		return this;
+	}
+
+	/** Lingering debris (a shockwave's or a meteor's, or a dropped earthboard): wells and the like leave it be. */
+	public boolean lingering() {
+		return this.lingers;
+	}
+
+	/** Something to do when it's gone (crumbled away or broken). */
+	public void onGone(Runnable then) {
+		this.onGone = then;
+	}
+
+	private void gone() {
+		Runnable then = this.onGone;
+		this.onGone = null;
+		if (then != null) {
+			then.run();
+		}
+	}
+
+	/** Its box made again from what it is now (a board's follows its blocks; anything else is the plain one). */
+	public void refreshBox() {
+		this.setBoundingBox(this.makeBoundingBox(this.position()));
+	}
+
+	/** Lying unridden (see {@link #BOARD}): solid, so it can be stood on. */
+	public boolean board() {
+		return this.getAttached(BOARD) != null;
+	}
+
+	@Override
+	public boolean canBeCollidedWith(@Nullable Entity other) {
+		return this.board() && !(other instanceof BlockCluster);
+	}
+
+	/** A lying earthboard is as big as its blocks (as drawn: centred on it, 0.7 up); anything else keeps its little box. */
+	@Override
+	protected AABB makeBoundingBox(Vec3 position) {
+		if (this.getAttached(BOARD) == null) {
+			return super.makeBoundingBox(position);
+		}
+		AABB bounds = bounds(this.pieces());
+		double halfX = bounds.getXsize() * 0.5, halfY = bounds.getYsize() * 0.5, halfZ = bounds.getZsize() * 0.5;
+		return new AABB(position.x - halfX, position.y + 0.7 - halfY, position.z - halfZ, position.x + halfX, position.y + 0.7 + halfY, position.z + halfZ);
+	}
+
 	/** A big one (see {@link #SCALE}) is seen from as far off as its size deserves. */
 	@Override
 	public boolean shouldRenderAtSqrDistance(double distance) {
@@ -256,6 +346,10 @@ public class BlockCluster extends Entity {
 
 	/** Into {@code player}'s inventory as its blocks (what doesn't fit drops at their feet), and the chunk is gone. */
 	public void pocket(Player player) {
+		if (this.temporary && this.level() instanceof ServerLevel level) {
+			this.shatter(level);
+			return;
+		}
 		for (Piece piece : this.pieces()) {
 			ItemStack stack = new ItemStack(piece.blockState().getBlock());
 			if (!stack.isEmpty() && !player.getInventory().add(stack) && this.level() instanceof ServerLevel level) {
@@ -329,6 +423,7 @@ public class BlockCluster extends Entity {
 		Piece off = pieces.remove(level.getRandom().nextInt(pieces.size()));
 		Debris.puff(level, this.blockPosition(), off.blockState(), 1.2F);
 		if (pieces.isEmpty()) {
+			this.gone();
 			this.discard();
 		} else {
 			this.setAttached(PIECES, pieces);
@@ -341,7 +436,7 @@ public class BlockCluster extends Entity {
 			BlockPos at = BlockPos.containing(this.position().add(piece.x(), piece.y() + 0.7, piece.z()));
 			BlockState state = piece.blockState();
 			Debris.puff(level, at, state, 1.6F);
-			if (level.getRandom().nextFloat() < DROP_CHANCE && !state.isAir()) {
+			if (!this.temporary && level.getRandom().nextFloat() < DROP_CHANCE && !state.isAir()) {
 				ItemStack drop = new ItemStack(state.getBlock());
 				if (!drop.isEmpty()) {
 					level.addFreshEntity(new ItemEntity(level, this.getX(), this.getY() + 0.5, this.getZ(), drop));
@@ -352,7 +447,48 @@ public class BlockCluster extends Entity {
 			level.playSound(null, this.getX(), this.getY(), this.getZ(), this.pieces().get(0).blockState().getSoundType().getBreakSound(),
 				SoundSource.BLOCKS, 1.5F, 0.6F);
 		}
+		this.gone();
 		this.discard();
+	}
+
+	/** Its time is up: a block crumbles off into loose rubble every {@link #CRUMBLE_EVERY} ticks until none are left. */
+	private void crumble(ServerLevel level) {
+		List<Piece> pieces = new ArrayList<>(this.pieces());
+		if (pieces.isEmpty()) {
+			this.gone();
+			this.discard();
+			return;
+		}
+		Vec3 middle = this.position().add(0.0, 0.7, 0.0);
+		BlockState state = pieces.get(0).blockState();
+		level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.FALLING_DUST, state),
+			middle.x, middle.y, middle.z, 3, 0.5, 0.4, 0.5, 0.0);
+		if (this.tickCount % CRUMBLE_EVERY != 0) {
+			return;
+		}
+		Piece off = pieces.remove(level.getRandom().nextInt(pieces.size()));
+		BlockState offState = off.blockState();
+		level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK, offState),
+			middle.x + off.x() * 0.6, middle.y, middle.z + off.z() * 0.6, 14, 0.35, 0.3, 0.35, 0.05);
+		if (pieces.size() % 2 == 0) {
+			level.playSound(null, this.getX(), this.getY(), this.getZ(), offState.getSoundType().getBreakSound(), SoundSource.BLOCKS, 0.5F, 0.6F);
+		}
+		if (!this.temporary && level.getRandom().nextFloat() < DROP_CHANCE && !offState.isAir()) {
+			ItemStack drop = new ItemStack(offState.getBlock());
+			if (!drop.isEmpty()) {
+				level.addFreshEntity(new ItemEntity(level, this.getX(), this.getY() + 0.5, this.getZ(), drop));
+			}
+		}
+		if (pieces.isEmpty()) {
+			this.gone();
+			this.discard();
+		} else {
+			this.setAttached(PIECES, pieces);
+			if (this.board()) {
+				// smaller now: its box follows
+				this.setBoundingBox(this.makeBoundingBox(this.position()));
+			}
+		}
 	}
 
 	@Override
@@ -368,10 +504,20 @@ public class BlockCluster extends Entity {
 		if (!this.isNoGravity()) {
 			this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.06, 0.0));
 		}
+		if (this.board()) {
+			// its box follows its blocks (the attachments can arrive after it was made)
+			this.setBoundingBox(this.makeBoundingBox(this.position()));
+		}
 		this.move(MoverType.SELF, this.getDeltaMovement());
 		this.setDeltaMovement(this.getDeltaMovement().scale(this.onGround() ? 0.6 : 0.98));
 		if (this.level() instanceof ServerLevel level) {
 			this.serverTick(level);
+		} else {
+			// resting debris turns only while it flies
+			this.spinO = this.spin;
+			if (!this.onGround()) {
+				this.spin += (float)Math.min(25.0, this.getDeltaMovement().length() * 30.0);
+			}
 		}
 	}
 
@@ -406,10 +552,18 @@ public class BlockCluster extends Entity {
 			this.lastVelocity = this.getDeltaMovement();
 			return;
 		}
+		if (this.crumbling) {
+			this.crumble(level);
+			return;
+		}
 		// left lying (not held: held things have no gravity), it crumbles in a while
 		if (!this.isNoGravity() && this.onGround()) {
-			if (++this.idle > IDLE_TICKS) {
-				this.shatter(level);
+			if (++this.idle > this.lifetime) {
+				if (this.lingers) {
+					this.crumbling = true;
+				} else {
+					this.shatter(level);
+				}
 			}
 		} else {
 			this.idle = 0;
@@ -428,7 +582,10 @@ public class BlockCluster extends Entity {
 
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
-		// a hard enough blow breaks it apart
+		// a hard enough blow breaks it apart (lingering debris rides out blasts: a meteor's crater rings would take it all)
+		if (this.lingers && source.is(net.minecraft.tags.DamageTypeTags.IS_EXPLOSION)) {
+			return false;
+		}
 		if (damage >= 4.0F && !this.isNoGravity()) {
 			this.shatter(level);
 			return true;
