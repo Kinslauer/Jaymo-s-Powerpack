@@ -27,7 +27,8 @@ import org.jspecify.annotations.Nullable;
  * (16 across) over {@link #GROW_TICKS}, blasting the ground's debris up as it passes, purple streaks and dark shards
  * rising inside it. As the shell passes, lumps of the ground ({@link #RINGS}, made of what's there, never torn out of
  * the world) shove up out of the earth, leaning out from the middle. They lie where they rose, and Lift can take them
- * like any chunk, for {@link #DEBRIS_LINGER} ticks, then crumble away into rubble and are gone.
+ * like any chunk, each for its own while ({@link #DEBRIS_LINGER_MIN} to {@link #DEBRIS_LINGER_MAX} ticks, so some go
+ * much sooner than others), then crumble away into rubble and are gone.
  */
 final class GravityShockwave {
 	/** How far the bubble swells (blocks) and how fast. */
@@ -39,7 +40,7 @@ final class GravityShockwave {
 	/** How long a lump takes to shove up out of the ground, from how deep (blocks); how long it lies (ticks). */
 	static final int RISE_TICKS = 5;
 	static final double RISE_DEPTH = 1.3;
-	static final int DEBRIS_LINGER = 160;
+	static final int DEBRIS_LINGER_MIN = 60, DEBRIS_LINGER_MAX = 220;
 	/** How far above and below the well's point the ground is looked for (blocks). */
 	static final int GROUND_UP = 3, GROUND_DOWN = 6;
 	/** How far each lump leans out (degrees). */
@@ -222,7 +223,7 @@ final class GravityShockwave {
 		float yaw = (float)Math.toDegrees(-spot.angle()) + 90.0F + (random.nextFloat() - 0.5F) * 30.0F;
 		float tilt = (random.nextBoolean() ? 1.0F : -1.0F) * Mth.lerp(random.nextFloat(), TILT_MIN, TILT_MAX);
 		lump.setAttached(BlockCluster.REST, new BlockCluster.Rest(yaw, tilt));
-		lump.linger(DEBRIS_LINGER, true);
+		lump.linger(DEBRIS_LINGER_MIN + random.nextInt(DEBRIS_LINGER_MAX - DEBRIS_LINGER_MIN + 1), true);
 		lump.script(true, false);
 		level.addFreshEntity(lump);
 		RISING.add(new Rising(level.dimension(), lump.getId(), toY, level.getGameTime() + RISE_TICKS));

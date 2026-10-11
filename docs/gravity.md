@@ -88,7 +88,7 @@ A Gravity user lightens whatever they hold, at every mastery level (`GravityWeig
 - **Gravity Well (G)** goes off as a bubble (`GravityShockwave`): it swells to 8 blocks over 12 ticks, purple dust
   shell, the ground's block particles blasted up where it meets the ground, purple streaks and dark shards rising.
   As it passes, 24 lumps (rings of 5, 8, 11 at 3, 5.4, 7.6 blocks) of the ground's own blocks (made, never torn out of
-  the world) shove up out of the earth, leaning out 20-60 degrees. They lie 8 s (`DEBRIS_LINGER`), Lift can take and
+  the world) shove up out of the earth, leaning out 20-60 degrees. Each lies its own 3-11 s (`DEBRIS_LINGER_MIN`..`MAX`), Lift can take and
   throw them, then they crumble away a block every 3 ticks; they never drop anything and pocketing one only breaks it.
   The well's pull leaves them alone. Its pull still works as before.
 - **Kneeling**: anyone Crush pins, or a Gravity Well holds, gets `GravityPower.KNEEL` (a random style of 4, since when),
@@ -104,8 +104,8 @@ A Gravity user lightens whatever they hold, at every mastery level (`GravityWeig
   its blocks) and lies 8 s, then crumbles (30% of its blocks drop, as they were real). Holding V while standing on a
   lying board rides that board again. A V tap now toggles Weightless on release for everyone.
 - **Meteor**: the rock bursts apart where it lands (`GravityMeteor.wreck`) into 4-30 lumps (more with the charge) of
-  iron ore, deepslate iron ore, raw iron, obsidian, crying obsidian, blackstone, gilded blackstone, basalt, tuff,
-  deepslate and a little magma, thrown out over the crater; they tumble, lie 8 s and crumble (no drops). Lingering
+  obsidian, crying obsidian, blackstone, basalt, tuff, deepslate and a little magma; each block has an 8% chance
+  (`WRECK_ORE_CHANCE`) to be ore instead (iron ore, deepslate iron ore, raw iron, gilded blackstone). They're thrown out over the crater; they tumble, lie 5-11 s each and crumble (no drops). Lingering
   debris rides out explosions, so the crater rings don't take it. Less fire: the blasts no longer light the ground,
   the impact sets alight only 4 blocks around (was 10), fewer flames and lava drops. The symbiote now rides in one of
   the lumps and comes out (or is left as goo) when it breaks up; `WebSymbioteBlob.METEOR_CHANCE` is 10% (was 20%).

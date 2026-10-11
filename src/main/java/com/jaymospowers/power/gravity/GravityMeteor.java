@@ -38,8 +38,8 @@ import net.minecraft.world.phys.Vec3;
  * lighter blasts ({@code CRATER_RING_POWER}) go off as the shockwave reaches them, up to {@code CRATER_RINGS} rings
  * {@code CRATER_RING_STEP} apart. {@code COOLDOWN_MIN} (a tap) to {@code COOLDOWN} (a full charge) before another.
  * The rock doesn't vanish when it hits: it bursts apart into {@code WRECK_MIN} to {@code WRECK_MAX} lumps of debris
- * (iron ore, obsidian, blackstone, basalt and the like; more the bigger it was) thrown out over the crater, where they
- * lie for {@code WRECK_LINGER} ticks (Lift can take them) and then crumble away. Once in a long while one of them
+ * (obsidian, blackstone, basalt and the like, now and then a bit of iron ore; more the bigger it was) thrown out over the crater, where they
+ * lie for {@code WRECK_LINGER_MIN} to {@code WRECK_LINGER_MAX} ticks (Lift can take them) and then crumble away. Once in a long while one of them
  * carries a symbiote, which crawls out (or is left as goo) when it breaks up.
  */
 final class GravityMeteor {
@@ -66,18 +66,21 @@ final class GravityMeteor {
 	/** The impact sets alight everything within this reach (blocks) of where it lands (a tap's), for this long (seconds). */
 	static final double IMPACT_FIRE_RADIUS = 4.0;
 	/** The wreck: how many lumps the rock bursts into (a tap's, a full charge's), how long they lie (ticks), how hard they fly out. */
-	static final int WRECK_MIN = 4, WRECK_MAX = 30, WRECK_LINGER = 160;
+	static final int WRECK_MIN = 4, WRECK_MAX = 30, WRECK_LINGER_MIN = 100, WRECK_LINGER_MAX = 220;
 	static final double WRECK_OUT_MIN = 0.35, WRECK_OUT_MAX = 0.9, WRECK_UP_MIN = 0.45, WRECK_UP_MAX = 1.05;
-	/** What the lumps are made of (repeats are more common). */
+	/** What the lumps are made of (repeats are more common): mostly rock... */
 	private static final List<BlockState> WRECK = List.of(
-		Blocks.IRON_ORE.defaultBlockState(), Blocks.IRON_ORE.defaultBlockState(), Blocks.DEEPSLATE_IRON_ORE.defaultBlockState(),
-		Blocks.DEEPSLATE_IRON_ORE.defaultBlockState(), Blocks.DEEPSLATE_IRON_ORE.defaultBlockState(), Blocks.RAW_IRON_BLOCK.defaultBlockState(),
 		Blocks.OBSIDIAN.defaultBlockState(), Blocks.OBSIDIAN.defaultBlockState(), Blocks.OBSIDIAN.defaultBlockState(),
 		Blocks.CRYING_OBSIDIAN.defaultBlockState(), Blocks.BLACKSTONE.defaultBlockState(), Blocks.BLACKSTONE.defaultBlockState(),
-		Blocks.BLACKSTONE.defaultBlockState(), Blocks.GILDED_BLACKSTONE.defaultBlockState(), Blocks.BASALT.defaultBlockState(),
-		Blocks.BASALT.defaultBlockState(), Blocks.SMOOTH_BASALT.defaultBlockState(), Blocks.TUFF.defaultBlockState(), Blocks.TUFF.defaultBlockState(),
+		Blocks.BLACKSTONE.defaultBlockState(), Blocks.BASALT.defaultBlockState(), Blocks.BASALT.defaultBlockState(),
+		Blocks.SMOOTH_BASALT.defaultBlockState(), Blocks.TUFF.defaultBlockState(), Blocks.TUFF.defaultBlockState(),
 		Blocks.DEEPSLATE.defaultBlockState(), Blocks.DEEPSLATE.defaultBlockState(), Blocks.COBBLED_DEEPSLATE.defaultBlockState(),
 		Blocks.MAGMA_BLOCK.defaultBlockState());
+	/** ...and now and then ({@code WRECK_ORE_CHANCE} per block) a bit of ore. */
+	private static final List<BlockState> WRECK_ORE = List.of(
+		Blocks.IRON_ORE.defaultBlockState(), Blocks.DEEPSLATE_IRON_ORE.defaultBlockState(), Blocks.DEEPSLATE_IRON_ORE.defaultBlockState(),
+		Blocks.RAW_IRON_BLOCK.defaultBlockState(), Blocks.GILDED_BLACKSTONE.defaultBlockState());
+	static final float WRECK_ORE_CHANCE = 0.08F;
 	static final int IMPACT_FIRE_SECONDS = 8;
 	/** Half the small rock's width (blocks), as drawn. */
 	private static final double ROCK_HALF = 1.2;
@@ -281,7 +284,8 @@ final class GravityMeteor {
 			int pieces = 1 + random.nextInt(charge > 0.5F ? 4 : 3);
 			List<BlockState> states = new ArrayList<>();
 			for (int k = 0; k < pieces; k++) {
-				states.add(WRECK.get(random.nextInt(WRECK.size())));
+				List<BlockState> from = random.nextFloat() < WRECK_ORE_CHANCE ? WRECK_ORE : WRECK;
+				states.add(from.get(random.nextInt(from.size())));
 			}
 			double a = random.nextDouble() * Math.PI * 2.0;
 			Vec3 from = at.add(Math.cos(a) * random.nextDouble() * size, 1.2 + random.nextDouble() * size, Math.sin(a) * random.nextDouble() * size);
@@ -292,7 +296,7 @@ final class GravityMeteor {
 			if (charge > 0.3F && random.nextFloat() < charge * 0.5F) {
 				lump.setAttached(BlockCluster.SCALE, 1.0F + random.nextFloat() * charge * 1.2F);
 			}
-			lump.linger(WRECK_LINGER, true);
+			lump.linger(WRECK_LINGER_MIN + random.nextInt(WRECK_LINGER_MAX - WRECK_LINGER_MIN + 1), true);
 			if (carrier == null || random.nextInt(i + 1) == 0) {
 				carrier = lump;
 			}
