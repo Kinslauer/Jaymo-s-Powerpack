@@ -50,7 +50,7 @@
 	"message.jaymospowers.wind.no_eating": "The storm won't sit still long enough to eat.",
 	"message.jaymospowers.wind.cured_days": "Three days on, the storm in you has blown itself out.",
 	"message.jaymospowers.wind.cured_snow": "The snow smothers the storm in you. The static is gone.",
-	"power.jaymospowers.wind.key.special": "Tap X: Tempest Kick (everything mastered), a white crescent of wind, 5 blocks (ascended: 20). Hold X: Cyclone, a superhero landing in a tornado that spins, lifts and batters everything around you (radius 3-6 with mastery) while it chokes you",
+	"power.jaymospowers.wind.key.special": "Tap X: Tempest Kick (everything mastered), a white crescent of wind, 5 blocks (ascended: 20). Hold X: Cyclone, a superhero landing in a tornado that whirls everything around you up into orbit, then flings it away (radius 3-6 with mastery) while it chokes you",
 	"hud.jaymospowers.wind.cyclone": "Cyclone",
 	"hud.jaymospowers.wind.cold": "COLD",
 	"message.jaymospowers.wind.cold": "The cold stiffens the wind: slower to gather, slower to return.",
