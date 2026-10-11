@@ -1,0 +1,80 @@
+{
+  "surface_blocks": [
+    {
+      "block": "minecraft:cobblestone",
+      "weight": 5
+    },
+    {
+      "block": "minecraft:gravel",
+      "weight": 4
+    },
+    {
+      "block": "minecraft:spruce_planks",
+      "weight": 2
+    },
+    {
+      "block": "minecraft:packed_ice",
+      "weight": 1
+    },
+    {
+      "block": "minecraft:structure_void",
+      "weight": 2
+    }
+  ],
+  "edge_blocks": [
+    {
+      "block": "minecraft:snow_block",
+      "weight": 2
+    },
+    {
+      "block": "minecraft:gravel",
+      "weight": 1
+    },
+    {
+      "block": "minecraft:structure_void",
+      "weight": 6
+    }
+  ],
+  "fill_block": "minecraft:cobblestone",
+  "width": {
+    "min": 2,
+    "max": 3
+  },
+  "rigidness": 0.35,
+  "carver": 0.6,
+  "length": {
+    "type": "minecraft:uniform",
+    "min_inclusive": 200,
+    "max_inclusive": 600
+  },
+  "fade": {
+    "start_blocks": 0,
+    "end_blocks": 6
+  },
+  "water_settings": {
+    "surface_blocks": [
+      {
+        "block": "minecraft:spruce_planks",
+        "weight": 4
+      },
+      {
+        "block": "minecraft:oak_planks",
+        "weight": 3
+      },
+      {
+        "block": "minecraft:stripped_spruce_log",
+        "weight": 1
+      }
+    ],
+    "edge_blocks": [
+      {
+        "block": "minecraft:spruce_planks",
+        "weight": 2
+      },
+      {
+        "block": "minecraft:oak_planks",
+        "weight": 1
+      }
+    ]
+  }
+}

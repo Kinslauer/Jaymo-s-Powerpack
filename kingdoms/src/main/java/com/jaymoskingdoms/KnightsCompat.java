@@ -23,7 +23,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.DyedItemColor;
-import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -39,11 +38,20 @@ import org.jspecify.annotations.Nullable;
  * coif, crusader tabard) uses {@code dyed_color}; plumes, crowns, mantles and horns are entries
  * ({@code {name: "magistuarmory:<decoration>", dyeable, color}}) in the {@code Items} list of its
  * {@code magistuarmory:armor_decoration} component (custom data) on the helmet.
+ * <p>
+ * Desert and badlands realms ({@link Climate#arid}) wear Epic Knights: Slavic Armory's eastern harness instead when
+ * that add-on ({@value #SLAVIC}) is loaded too, and every surcoat and shield bears the realm's arms from {@link Outfits}.
  */
 public final class KnightsCompat {
 	/** Epic Knights' mod id (and item namespace). */
 	public static final String MOD = "magistuarmory";
 	static final boolean LOADED = FabricLoader.getInstance().isModLoaded(MOD);
+	/**
+	 * Epic Knights: Slavic Armory's mod id and item namespace (all rights reserved; nothing of it copied, its items named
+	 * by id only). An add-on to Epic Knights; neither has a 26.3 build yet, so this waits on both.
+	 */
+	public static final String SLAVIC = "slavicarmory";
+	static final boolean SLAVIC_LOADED = FabricLoader.getInstance().isModLoaded(SLAVIC);
 
 	/** Barbarians: chance of each piece of rough gear (else their furs stay), and of a round shield. */
 	static final float BARBARIAN_HELM_CHANCE = 0.6F, BARBARIAN_ARMOUR_CHANCE = 0.7F, BARBARIAN_SHIELD_CHANCE = 0.3F;
@@ -73,6 +81,12 @@ public final class KnightsCompat {
 
 	/** Loadouts by faction type and role. */
 	private static final Map<FactionType, Map<Integer, List<Piece>>> LOADOUTS = new HashMap<>();
+	/**
+	 * Arid realms' loadouts (desert and badlands seats, {@link Climate#arid}) when Epic Knights: Slavic Armory is loaded
+	 * too: its eastern harness (Byzantine and steppe lamellar, scale, yushman and bahteretz, spired and gilded helmets,
+	 * kaftans), with Epic Knights' pieces as the fallback for a slot. Ids written {@code namespace:path}.
+	 */
+	private static final Map<FactionType, Map<Integer, List<Piece>>> ARID_LOADOUTS = new HashMap<>();
 
 	static {
 		// a kingdom: knights in plate under their realm's colours
@@ -142,6 +156,56 @@ public final class KnightsCompat {
 			piece(EquipmentSlot.CHEST, "lamellar_chestplate"),
 			piece(EquipmentSlot.FEET, "lamellar_boots"),
 			piece(EquipmentSlot.MAINHAND, "diamond_lochaberaxe", "iron_lochaberaxe"));
+
+		// the desert's realms, in Slavic Armory's eastern harness (ids read from its 1.21.1 build, 2.3)
+		arid(FactionType.KINGDOM, Folk.GUARD,
+			helm(SLAVIC + ":erikhonka", SLAVIC + ":bulgar_helmet", "bascinet"),
+			chest(true, SLAVIC + ":bahteretz_chestplate", SLAVIC + ":byzantine_lamellar_chestplate", "platemail_chestplate"),
+			piece(EquipmentSlot.LEGS, SLAVIC + ":rus_chainmail_leggings", "chainmail_leggings"),
+			piece(EquipmentSlot.FEET, SLAVIC + ":bahteretz_boots", SLAVIC + ":byzantine_lamellar_boots", "platemail_boots"),
+			piece(EquipmentSlot.MAINHAND, SLAVIC + ":steel_rus_sword", "steel_bastardsword"),
+			shield("steel_heatershield", "iron_heatershield", "heatershield"));
+		arid(FactionType.KINGDOM, Folk.ARCHER,
+			helm(SLAVIC + ":eastern_kettlehat", "kettlehat"),
+			dyed(EquipmentSlot.CHEST, SLAVIC + ":kaftan", "gambeson_chestplate"),
+			dyed(EquipmentSlot.LEGS, "pantyhose"),
+			dyed(EquipmentSlot.FEET, SLAVIC + ":kaftan_boots", "gambeson_boots"),
+			piece(EquipmentSlot.MAINHAND, "longbow"));
+		List<Piece> aridKing = List.of(
+			helm(SLAVIC + ":gilded_shater_helmet", SLAVIC + ":gilded_erikhonka", "armet"),
+			chest(true, SLAVIC + ":gilded_yushman_chestplate", SLAVIC + ":gilded_byzantine_scale_chestplate", "gothic_chestplate"),
+			piece(EquipmentSlot.LEGS, SLAVIC + ":rus_chainmail_leggings", "gothic_leggings"),
+			piece(EquipmentSlot.FEET, SLAVIC + ":gilded_byzantine_scale_boots", SLAVIC + ":gilded_rus_scale_boots", "gothic_boots"),
+			piece(EquipmentSlot.MAINHAND, SLAVIC + ":steel_rus_sword", "netherite_claymore", "noble_sword"));
+		arid(FactionType.KINGDOM, Folk.KING, aridKing);
+		arid(FactionType.FIEFDOM, Folk.KING, aridKing);
+		arid(FactionType.KINGDOM, Folk.LORD,
+			helm(SLAVIC + ":gilded_erikhonka", SLAVIC + ":gilded_eastern_kettlehat", "grand_bascinet"),
+			chest(true, SLAVIC + ":gilded_bahteretz_chestplate", SLAVIC + ":gilded_lamellar_mail_chestplate", "maximilian_chestplate"),
+			piece(EquipmentSlot.LEGS, SLAVIC + ":rus_chainmail_leggings", "maximilian_leggings"),
+			piece(EquipmentSlot.FEET, SLAVIC + ":gilded_byzantine_lamellar_boots", "maximilian_boots"),
+			piece(EquipmentSlot.MAINHAND, SLAVIC + ":steel_bardiche", "diamond_bastardsword"),
+			shield("diamond_kiteshield", "kiteshield"));
+		arid(FactionType.FIEFDOM, Folk.GUARD,
+			helm(SLAVIC + ":bulgar_helmet", SLAVIC + ":eastern_kettlehat", "norman_helmet"),
+			chest(true, SLAVIC + ":byzantine_scale_chestplate", SLAVIC + ":lamellar_mail_chestplate", "chainmail_chestplate"),
+			piece(EquipmentSlot.LEGS, SLAVIC + ":rus_chainmail_leggings", "chainmail_leggings"),
+			piece(EquipmentSlot.FEET, SLAVIC + ":byzantine_scale_boots", SLAVIC + ":lamellar_mail_boots", "chainmail_boots"),
+			piece(EquipmentSlot.MAINHAND, SLAVIC + ":steel_rogatina", "iron_morgenstern"),
+			shield("iron_kiteshield", "kiteshield"));
+		arid(FactionType.FIEFDOM, Folk.ARCHER,
+			helm(SLAVIC + ":shapka", SLAVIC + ":eastern_kettlehat", "kettlehat"),
+			dyed(EquipmentSlot.CHEST, SLAVIC + ":kaftan", "gambeson_chestplate"),
+			dyed(EquipmentSlot.LEGS, "pantyhose"),
+			dyed(EquipmentSlot.FEET, SLAVIC + ":kaftan_boots", "gambeson_boots"),
+			piece(EquipmentSlot.MAINHAND, "longbow"));
+		arid(FactionType.FIEFDOM, Folk.LORD,
+			helm(SLAVIC + ":gilded_tagancha_helmet", SLAVIC + ":tagancha_helmet", "greathelm"),
+			chest(true, SLAVIC + ":gilded_rus_scale_chestplate", SLAVIC + ":rus_scale_chestplate", "crusader_chestplate"),
+			piece(EquipmentSlot.LEGS, SLAVIC + ":rus_chainmail_leggings", "crusader_leggings"),
+			piece(EquipmentSlot.FEET, SLAVIC + ":gilded_rus_scale_boots", SLAVIC + ":rus_scale_boots", "crusader_boots"),
+			piece(EquipmentSlot.MAINHAND, SLAVIC + ":steel_winged_rogatina", "steel_bastardsword"),
+			shield("steel_heatershield", "heatershield"));
 	}
 
 	private KnightsCompat() {
@@ -156,23 +220,27 @@ public final class KnightsCompat {
 	 * Dresses {@code folk} (already in its role's vanilla gear) from Epic Knights, if it's loaded and has a loadout for
 	 * the faction's type and the folk's role. Called by {@link Folk#setup} after the role's outfit.
 	 */
-	public static void dress(Folk folk, Faction faction) {
+	public static void dress(Folk folk, Faction faction, Climate climate) {
 		if (!LOADED) {
 			return;
 		}
-		List<Piece> loadout = LOADOUTS.getOrDefault(faction.type(), Map.of()).get(folk.role());
+		List<Piece> loadout = SLAVIC_LOADED && climate.arid() ? ARID_LOADOUTS.getOrDefault(faction.type(), Map.of()).get(folk.role()) : null;
+		if (loadout == null) {
+			loadout = LOADOUTS.getOrDefault(faction.type(), Map.of()).get(folk.role());
+		}
 		if (loadout == null) {
 			return;
 		}
 		MinecraftServer server = folk.level().getServer();
-		DyeColor color = server == null ? faction.color() : faction.styleColor(server);
+		Outfits.Heraldry arms = Outfits.heraldry(faction, server);
+		DyeColor color = arms.field();
 		RandomSource random = folk.getRandom();
 		for (Piece piece : loadout) {
 			try {
 				if (piece.chance() < 1.0F && random.nextFloat() >= piece.chance()) {
 					continue;
 				}
-				ItemStack stack = make(piece, color, random);
+				ItemStack stack = make(folk, arms, piece, color, random);
 				if (stack != null) {
 					folk.setItemSlot(piece.slot(), stack);
 				}
@@ -184,7 +252,7 @@ public final class KnightsCompat {
 	}
 
 	/** The piece's item, dyed and decorated, or null if none of its ids exists. */
-	private static @Nullable ItemStack make(Piece piece, DyeColor color, RandomSource random) {
+	private static @Nullable ItemStack make(Folk folk, Outfits.Heraldry arms, Piece piece, DyeColor color, RandomSource random) {
 		List<Item> found = new ArrayList<>();
 		for (String id : piece.ids()) {
 			Item item = item(id);
@@ -204,9 +272,9 @@ public final class KnightsCompat {
 			stack.set(DataComponents.DYED_COLOR, new DyedItemColor(rgb));
 		}
 		if (piece.heraldry()) {
-			// the realm's banner (a plain field of its colour), as Epic Knights' heraldry recipe puts it on a surcoat or shield
+			// the realm's arms ({@link Outfits}), as Epic Knights' heraldry recipe puts a banner on a surcoat or shield
 			stack.set(DataComponents.BASE_COLOR, color);
-			stack.set(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY);
+			stack.set(DataComponents.BANNER_PATTERNS, Outfits.layers(folk, arms));
 		}
 		if (!piece.decorations().isEmpty()) {
 			decorate(stack, piece.decorations(), ARGB.opaque(rgb));
@@ -214,9 +282,10 @@ public final class KnightsCompat {
 		return stack;
 	}
 
-	/** An Epic Knights item by id, or null if it isn't registered. */
+	/** An Epic Knights item by id (or another mod's, written {@code namespace:path}), or null if it isn't registered. */
 	static @Nullable Item item(String id) {
-		Identifier key = Identifier.fromNamespaceAndPath(MOD, id);
+		int colon = id.indexOf(':');
+		Identifier key = colon < 0 ? Identifier.fromNamespaceAndPath(MOD, id) : Identifier.fromNamespaceAndPath(id.substring(0, colon), id.substring(colon + 1));
 		if (!BuiltInRegistries.ITEM.containsKey(key)) {
 			return null;
 		}
@@ -259,6 +328,14 @@ public final class KnightsCompat {
 
 	private static void loadout(FactionType type, int role, List<Piece> pieces) {
 		LOADOUTS.computeIfAbsent(type, t -> new HashMap<>()).put(role, pieces);
+	}
+
+	private static void arid(FactionType type, int role, Piece... pieces) {
+		arid(type, role, List.of(pieces));
+	}
+
+	private static void arid(FactionType type, int role, List<Piece> pieces) {
+		ARID_LOADOUTS.computeIfAbsent(type, t -> new HashMap<>()).put(role, pieces);
 	}
 
 	private static Piece piece(EquipmentSlot slot, String... ids) {

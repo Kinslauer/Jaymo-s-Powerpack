@@ -76,6 +76,9 @@ def packMods = [
 	// Epic Structures: Villages (all rights reserved; "feel free to add to any modpack"): the sprawling towns Jaymo's
 	// Kingdoms founds its capitals in
 	[dep: "maven.modrinth:epic-structures-villages:hCRa4eFr", cf: [1308486, 8830175]],
+	// Epic Structures: Dungeons (all rights reserved; "feel free to add to any modpack"): plains, desert and snowy
+	// dungeons of several sizes, vanilla blocks, mobs and loot (structure ids epic:*)
+	[dep: "maven.modrinth:epic-structures-dungeons:NK6Uptyi", cf: [1501318, 8984101]],
 ]
 // First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
 // Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge

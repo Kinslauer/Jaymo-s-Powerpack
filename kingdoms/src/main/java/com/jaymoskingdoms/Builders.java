@@ -44,6 +44,11 @@ public final class Builders {
 		Builders.brain = brain;
 	}
 
+	/** What every builder does each tick now (to wrap it: {@link Debris} sends a Grim hold's crew to clear rubble first). */
+	public static Brain brain() {
+		return brain;
+	}
+
 	/** Called from {@link Folk} every server tick for builders. */
 	static void tick(ServerLevel level, Folk builder) {
 		brain.tick(level, builder);

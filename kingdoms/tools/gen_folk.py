@@ -3,7 +3,8 @@ gambeson under his armour); the king (a greying beard, a gold crown set with rub
 ermine); a fiefdom's lord in each of the 16 dye colours (a silver circlet, a surcoat in his overlord's colour); and the
 builders, a foreman and a worker for each style: kingdom (a tabard in each dye colour over work clothes), village
 (villager-style smocks with leather aprons), barbarian (furs and hide). Original art. Run from the kingdoms project
-root: python -I tools/gen_folk.py [guard king lord builder] (all when none are named)."""
+root: python -I tools/gen_folk.py [guard king lord builder variants] (all when none are named). "variants" draws the
+faces by land the game uses (guard/, king/, and lord/ and builder/ for sunny and cold lands; see GROUPS)."""
 from PIL import Image
 import os
 import random
@@ -11,6 +12,16 @@ import sys
 import zlib
 
 OUT = "src/main/resources/assets/jaymoskingdoms/textures/entity/{}.png"
+
+# a variant's look while variants() draws (None: each role's own original face)
+LOOK = None
+# a variant's gambeson cloth (guards)
+CLOTH = None
+
+
+def sk(default):
+    """The skin of the variant being drawn, else the role's own."""
+    return LOOK["skin"] if LOOK else default
 
 # (x, y, w, h) of each box's faces: top, bottom, right, front, left, back
 def faces(ox, oy, w, h, d):
@@ -38,6 +49,11 @@ def fill_box(img, box, base, seed):
 
 
 def face(img, skin, hair, eyes, beard=None):
+    if LOOK:
+        # a variant's face: its hair and eyes; a beard (if the role has one, or the look insists) in its own or the hair's colour
+        hair, eyes = LOOK["hair"], LOOK["eyes"]
+        if beard or LOOK.get("beard"):
+            beard = LOOK.get("beard") or tuple(min(255, c + 10) for c in hair)
     fill_box(img, HEAD, skin, 1)
     x0, y0, w, h = HEAD["front"]
     # hair on top and the upper rows all round
@@ -49,10 +65,10 @@ def face(img, skin, hair, eyes, beard=None):
     for ex in (x0 + 1, x0 + 5):
         img.putpixel((ex, y0 + 4), (255, 255, 255, 255))
         img.putpixel((ex + 1, y0 + 4), eyes + (255,))
-        img.putpixel((ex, y0 + 3), tuple(c - 30 for c in hair) + (255,))
-        img.putpixel((ex + 1, y0 + 3), tuple(c - 30 for c in hair) + (255,))
-    img.putpixel((x0 + 3, y0 + 5), tuple(c - 25 for c in skin) + (255,))
-    img.putpixel((x0 + 4, y0 + 5), tuple(c - 25 for c in skin) + (255,))
+        img.putpixel((ex, y0 + 3), tuple(max(0, c - 30) for c in hair) + (255,))
+        img.putpixel((ex + 1, y0 + 3), tuple(max(0, c - 30) for c in hair) + (255,))
+    img.putpixel((x0 + 3, y0 + 5), tuple(max(0, c - 25) for c in skin) + (255,))
+    img.putpixel((x0 + 4, y0 + 5), tuple(max(0, c - 25) for c in skin) + (255,))
     for mx in range(x0 + 2, x0 + 6):
         img.putpixel((mx, y0 + 6), (120, 60, 50, 255))
     if beard:
@@ -64,14 +80,14 @@ def face(img, skin, hair, eyes, beard=None):
             noisy(img, (rx, ry + 5, rw, 3), beard, seed=11)
 
 
-def guard():
+def guard(out="guard"):
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
-    face(img, (196, 150, 120), (70, 50, 35), (60, 90, 140))
-    gambeson = (150, 128, 90)
+    face(img, sk((196, 150, 120)), (70, 50, 35), (60, 90, 140))
+    gambeson = CLOTH or (150, 128, 90)
     fill_box(img, BODY, gambeson, 20)
     for arm in ARMS:
         fill_box(img, arm, gambeson, 30)
-        noisy(img, (arm["front"][0], arm["front"][1] + 9, 4, 3), (196, 150, 120), seed=31)
+        noisy(img, (arm["front"][0], arm["front"][1] + 9, 4, 3), sk((196, 150, 120)), seed=31)
     for leg in LEGS:
         fill_box(img, leg, (80, 70, 60), 40)
         noisy(img, (leg["front"][0], leg["front"][1] + 9, 4, 3), (50, 40, 30), seed=41)
@@ -80,12 +96,12 @@ def guard():
     for y in range(y0, y0 + h, 3):
         for x in range(x0, x0 + w):
             img.putpixel((x, y), tuple(c - 25 for c in gambeson) + (255,))
-    img.save(OUT.format("guard"))
+    save(img, out)
 
 
-def king():
+def king(out="king"):
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
-    face(img, (205, 160, 130), (150, 145, 140), (70, 60, 40), beard=(175, 170, 165))
+    face(img, sk((205, 160, 130)), (150, 145, 140), (70, 60, 40), beard=(175, 170, 165))
     # the crown: a gold band round the head with points and rubies
     gold, ruby = (235, 190, 60), (190, 20, 40)
     for name in ("front", "right", "left", "back"):
@@ -111,10 +127,10 @@ def king():
     for arm in ARMS:
         fill_box(img, arm, robe, 80)
         noisy(img, (arm["front"][0], arm["front"][1] + 8, 4, 1), ermine, seed=81)
-        noisy(img, (arm["front"][0], arm["front"][1] + 9, 4, 3), (205, 160, 130), seed=82)
+        noisy(img, (arm["front"][0], arm["front"][1] + 9, 4, 3), sk((205, 160, 130)), seed=82)
     for leg in LEGS:
         fill_box(img, leg, (90, 15, 25), 90)
-    img.save(OUT.format("king"))
+    save(img, out)
 
 
 # the 16 dye colours (their names as the game's DyeColor names them), roughly as dyed cloth looks
@@ -163,10 +179,10 @@ def belt(img, colour, buckle, y_off=8):
     img.putpixel((fx + 4, fy + y_off), buckle + (255,))
 
 
-def lord(colour_name, colour):
+def lord(colour_name, colour, prefix="lord/"):
     """A fiefdom's lord: a trimmed dark beard, a silver circlet, a surcoat in his overlord's colour edged in gold."""
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
-    face(img, (200, 155, 125), (55, 40, 30), (50, 80, 60), beard=(70, 52, 40))
+    face(img, sk((200, 155, 125)), (55, 40, 30), (50, 80, 60), beard=(70, 52, 40))
     silver, gem = (205, 210, 220), shade(colour, 30)
     for name in ("front", "right", "left", "back"):
         rx, ry, rw, rh = HEAD[name]
@@ -190,18 +206,18 @@ def lord(colour_name, colour):
     belt(img, (60, 40, 25), gold)
     for arm in ARMS:
         fill_box(img, arm, shade(colour, -25), 120)
-        noisy(img, (arm["front"][0], arm["front"][1] + 9, 4, 3), (200, 155, 125), seed=121)
+        noisy(img, (arm["front"][0], arm["front"][1] + 9, 4, 3), sk((200, 155, 125)), seed=121)
     for leg in LEGS:
         fill_box(img, leg, (45, 40, 50), 130)
     boots(img, (60, 40, 25), 131)
-    save(img, "lord/" + colour_name)
+    save(img, prefix + colour_name)
 
 
-def kingdom_builder(role, colour_name, colour):
+def kingdom_builder(role, colour_name, colour, prefix="builder/"):
     """A kingdom's builder: work clothes (a rough shirt, breeches, boots) under a short tabard in the kingdom's colour;
     the foreman in a felt cap of the colour with a ruler's notches on his belt, the worker in a cloth coif, sleeves rolled."""
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
-    skin = (198, 152, 118) if role == "worker" else (186, 140, 108)
+    skin = sk((198, 152, 118) if role == "worker" else (186, 140, 108))
     face(img, skin, (95, 65, 40) if role == "worker" else (60, 45, 35), (70, 90, 120), beard=None if role == "worker" else (70, 52, 40))
     shirt, breeches = (150, 130, 100), (95, 80, 60)
     fill_box(img, BODY, shirt, 140)
@@ -240,7 +256,7 @@ def kingdom_builder(role, colour_name, colour):
             noisy(img, (rx, ry, rw, rh if name == "top" else 3 if name != "back" else 6), coif, spread=6, seed=181)
         fx, fy, fw, fh = HEAD["front"]
         noisy(img, (fx, fy, fw, 1), coif, spread=6, seed=182)
-    save(img, "builder/kingdom_{}_{}".format(role, colour_name))
+    save(img, prefix + "kingdom_{}_{}".format(role, colour_name))
 
 
 def village_builder(role):
@@ -350,9 +366,60 @@ def builders():
         barbarian_builder(role)
 
 
+# Faces by the land a realm's seat stands in (the client picks by the folk's Climate.skinGroup() and its UUID):
+# temperate, sunny (desert, badlands, savanna, jungle) and cold (snow). Four guards' faces each; kings use the first two.
+GROUPS = {
+    "temperate": [
+        {"skin": (196, 150, 120), "hair": (70, 50, 35), "eyes": (60, 90, 140)},
+        {"skin": (222, 182, 152), "hair": (200, 160, 85), "eyes": (70, 120, 70), "beard": (190, 150, 80)},
+        {"skin": (172, 124, 92), "hair": (40, 32, 26), "eyes": (90, 60, 35)},
+        {"skin": (210, 165, 135), "hair": (150, 72, 38), "eyes": (60, 100, 150), "beard": (140, 66, 34)},
+    ],
+    "sunny": [
+        {"skin": (150, 100, 66), "hair": (38, 30, 24), "eyes": (80, 55, 30)},
+        {"skin": (118, 78, 50), "hair": (34, 28, 24), "eyes": (70, 48, 28), "beard": (40, 32, 26)},
+        {"skin": (176, 126, 86), "hair": (60, 42, 28), "eyes": (60, 80, 50)},
+        {"skin": (96, 62, 40), "hair": (30, 26, 24), "eyes": (60, 40, 25), "beard": (36, 30, 26)},
+    ],
+    "cold": [
+        {"skin": (232, 198, 178), "hair": (226, 206, 150), "eyes": (80, 130, 170)},
+        {"skin": (216, 176, 152), "hair": (172, 88, 42), "eyes": (90, 120, 140), "beard": (165, 84, 40)},
+        {"skin": (238, 208, 192), "hair": (236, 230, 214), "eyes": (110, 140, 160)},
+        {"skin": (202, 162, 138), "hair": (120, 90, 62), "eyes": (70, 110, 90), "beard": (125, 95, 66)},
+    ],
+}
+# what a guard wears under his armour, by land: undyed wool, light linen, dark wool
+GAMBESONS = {"temperate": (150, 128, 90), "sunny": (222, 212, 186), "cold": (92, 82, 76)}
+# a king's beard: grey with age, or still dark
+KING_BEARDS = [(175, 170, 165), None]
+
+
+def variants():
+    """Guards' and kings' faces for each land (guard/<land>_<n>, king/<land>_<n>); lords and kingdom builders for the
+    sunny and cold lands (lord/<land>/<dye>, builder/<land>/kingdom_<role>_<dye>; temperate ones are the originals)."""
+    global LOOK, CLOTH
+    for land, looks in GROUPS.items():
+        for i, look in enumerate(looks):
+            LOOK, CLOTH = look, GAMBESONS[land]
+            guard("guard/{}_{}".format(land, i))
+        for i, beard in enumerate(KING_BEARDS):
+            LOOK = dict(looks[i], beard=beard or tuple(min(255, c + 10) for c in looks[i]["hair"]))
+            CLOTH = None
+            king("king/{}_{}".format(land, i))
+        if land != "temperate":
+            LOOK = looks[0]
+            for name, colour in DYES.items():
+                lord(name, colour, prefix="lord/{}/".format(land))
+            for role, look in (("worker", looks[2]), ("foreman", looks[1])):
+                LOOK = look
+                for name, colour in DYES.items():
+                    kingdom_builder(role, name, colour, prefix="builder/{}/".format(land))
+    LOOK, CLOTH = None, None
+
+
 if __name__ == "__main__":
-    wanted = sys.argv[1:] or ["guard", "king", "lord", "builder"]
+    wanted = sys.argv[1:] or ["guard", "king", "lord", "builder", "variants"]
     for what in wanted:
-        {"guard": guard, "king": king, "lord": lords, "builder": builders}[what]()
+        {"guard": guard, "king": king, "lord": lords, "builder": builders, "variants": variants}[what]()
     print("folk drawn:", ", ".join(wanted))
 

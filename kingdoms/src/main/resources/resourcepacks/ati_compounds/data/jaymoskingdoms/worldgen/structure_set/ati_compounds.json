@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "jaymoskingdoms:ati_compound",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 1478103217,
+    "spacing": 64,
+    "separation": 32
+  }
+}

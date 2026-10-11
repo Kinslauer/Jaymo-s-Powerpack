@@ -103,6 +103,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	/** Its faction's type (ordinal) and the colour it wears (a dye id, -1 for none): what it looks like. */
 	private static final EntityDataAccessor<Integer> STYLE = SynchedEntityData.defineId(Folk.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> COLOR = SynchedEntityData.defineId(Folk.class, EntityDataSerializers.INT);
+	/** The land its faction's seat is in ({@link Climate} ordinal): its gear and the skins the client picks. */
+	private static final EntityDataAccessor<Integer> CLIMATE = SynchedEntityData.defineId(Folk.class, EntityDataSerializers.INT);
 
 	static {
 		defineRole(new Role(GUARD, "guard", true, false, null, (folk, faction) -> {
@@ -163,6 +165,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	/** A builder's work: where (a site), and what (free text for {@link Builders}' use). Saved. */
 	private @org.jspecify.annotations.Nullable BlockPos site;
 	private String task = "";
+	/** Which {@link Outfits#VERSION} dressed it (0: before faction looks, so it's dressed again on its next tick). Saved. */
+	private int outfit;
 
 	public Folk(EntityType<? extends Folk> type, Level level) {
 		super(type, level);
@@ -184,6 +188,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		entityData.define(KINGDOM, -1);
 		entityData.define(STYLE, FactionType.KINGDOM.ordinal());
 		entityData.define(COLOR, -1);
+		entityData.define(CLIMATE, Climate.PLAINS.ordinal());
 	}
 
 	public int role() {
@@ -209,6 +214,11 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	/** The dye it wears (its faction's colour, or a fiefdom's overlord's), or -1. */
 	public int colorId() {
 		return this.entityData.get(COLOR);
+	}
+
+	/** The land its faction's seat is in. */
+	public Climate climate() {
+		return Climate.byId(this.entityData.get(CLIMATE));
 	}
 
 	public boolean combatant() {
@@ -278,11 +288,15 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		this.entityData.set(STYLE, faction.type().ordinal());
 		net.minecraft.server.MinecraftServer server = this.level().getServer();
 		this.entityData.set(COLOR, server == null ? faction.color().getId() : faction.styleColor(server).getId());
+		Climate climate = this.level() instanceof ServerLevel level ? Climate.at(level, faction.seat()) : Climate.PLAINS;
+		this.entityData.set(CLIMATE, climate.ordinal());
 		this.setHomeTo(home, radius);
 		Role spec = ROLES.getOrDefault(role, ROLES.get(GUARD));
 		spec.outfit().accept(this, faction);
-		// Epic Knights' armour and arms in the faction's style and colours, when it's loaded
-		KnightsCompat.dress(this, faction);
+		// the faction's arms, its rank's and its land's gear (vanilla), then Epic Knights' (and Slavic Armory's) when loaded
+		Outfits.dress(this, faction, climate);
+		KnightsCompat.dress(this, faction, climate);
+		this.outfit = Outfits.VERSION;
 		this.setHealth(this.getMaxHealth());
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			this.setDropChance(slot, 0.0F);
@@ -351,6 +365,9 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
+		if (this.outfit < Outfits.VERSION) {
+			this.restyle(level);
+		}
 		if (isBuilder(this.role())) {
 			Builders.tick(level, this);
 		}
@@ -371,6 +388,26 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, this.getBoundingBox().inflate(32.0))) {
 				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.king_rallies", this.getDisplayName()).withStyle(ChatFormatting.GOLD));
 			}
+		}
+	}
+
+	/** Dressed before its faction's looks (an older save): its land read and its gear put on again; a builder's or raider's hands kept. */
+	private void restyle(ServerLevel level) {
+		this.outfit = Outfits.VERSION;
+		Faction faction = Factions.get(level.getServer(), this.factionId());
+		if (faction == null) {
+			return;
+		}
+		Climate climate = Climate.at(level, faction.seat());
+		this.entityData.set(CLIMATE, climate.ordinal());
+		ItemStack hand = this.getMainHandItem().copy();
+		Outfits.dress(this, faction, climate);
+		KnightsCompat.dress(this, faction, climate);
+		if (!this.combatant() || this.role() == BARBARIAN || this.role() == CHIEF) {
+			this.setItemSlot(EquipmentSlot.MAINHAND, hand);
+		}
+		for (EquipmentSlot slot : EquipmentSlot.values()) {
+			this.setDropChance(slot, 0.0F);
 		}
 	}
 
@@ -495,6 +532,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			output.putLong("site", this.site.asLong());
 		}
 		output.putString("task", this.task);
+		output.putInt("climate", this.entityData.get(CLIMATE));
+		output.putInt("outfit", this.outfit);
 	}
 
 	@Override
@@ -508,5 +547,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		this.carrying = input.getBooleanOr("carrying", false);
 		this.site = input.getLong("site").map(BlockPos::of).orElse(null);
 		this.task = input.getStringOr("task", "");
+		this.entityData.set(CLIMATE, input.getIntOr("climate", Climate.PLAINS.ordinal()));
+		this.outfit = input.getIntOr("outfit", 0);
 	}
 }

@@ -1,0 +1,15 @@
+{
+  "path_type": "jaymoskingdoms:kingdom_road",
+  "biomes": "#jaymoskingdoms:paved_roads",
+  "structure_sets": [
+    "moogs_paths:oak_posts"
+  ],
+  "feature_decorator_sets": [],
+  "bush_decorator_sets": [],
+  "origin": {
+    "structure_set": [
+      "jaymoskingdoms:ati_compounds"
+    ],
+    "path_count": 2
+  }
+}

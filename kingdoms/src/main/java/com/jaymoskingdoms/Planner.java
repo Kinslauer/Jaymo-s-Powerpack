@@ -27,6 +27,10 @@ import org.jspecify.annotations.Nullable;
  * and air; no logs, no paths, nothing placed), not over water or lava, level within {@link #LEVEL_TOLERANCE}, and clear
  * of every other building, project and plot. Sites are looked for ring by ring outward from the seat, so the town grows
  * outward; an entry may have its own rings ({@link #setRings}: walls go up at the edge of town).
+ * <p>
+ * Since 0.4.1 a site may also stand on an old structure the world generated ({@link Ruins}: a village's empty houses,
+ * ATi's ruins): the builders tear it down as they go. Natural ground is preferred ({@link #RUINS_PENALTY}); old
+ * structures win when the natural ground is much further out, so the town grows through them instead of round them.
  */
 public final class Planner {
 	/** Projects a faction runs at once. */
@@ -51,6 +55,8 @@ public final class Planner {
 	static final int MAX_RADIUS = 120;
 	/** A road this close to a site; how far it looks for one; the penalty for none; a ring's weight against roads. */
 	static final int ROAD_REACH = 10, ROAD_STEP = 2, NO_ROAD_PENALTY = 30, RING_WEIGHT = 3;
+	/** A site on an old structure scores this much worse than natural ground (four rings' worth). */
+	static final double RUINS_PENALTY = 12.0;
 	/** How long a faction's next needs are remembered (ticks). */
 	static final long NEEDS_CACHE_TICKS = 100L;
 
@@ -62,7 +68,8 @@ public final class Planner {
 	 * A blueprint set down at a site and turned: its footprint ({@code min} to {@code max}, x and z), its height, its
 	 * blocks in the order they're laid (bottom up, like materials together), and the spots it fills.
 	 */
-	public record Layout(Blueprint blueprint, String entry, BlockPos min, BlockPos max, int height, List<Op> ops, Set<BlockPos> filled, boolean plot) {
+	public record Layout(Blueprint blueprint, String entry, BlockPos min, BlockPos max, int height, List<Op> ops, Set<BlockPos> filled, boolean plot,
+		boolean ruins) {
 		public int width() {
 			return this.max.getX() - this.min.getX() + 1;
 		}
@@ -85,8 +92,12 @@ public final class Planner {
 		}
 	}
 
-	/** Where a building goes: its corner and how it's turned. */
-	record Placing(BlockPos origin, Rotation rotation, double score) {
+	/** Where a building goes: its corner, how it's turned, and whether it's on an old structure to be torn down. */
+	record Placing(BlockPos origin, Rotation rotation, double score, boolean ruins) {
+	}
+
+	/** A site's floor, and whether it stands on an old structure. */
+	record Footing(int floor, boolean ruins) {
 	}
 
 	private static final Map<String, int[]> RINGS = new HashMap<>();
@@ -106,9 +117,10 @@ public final class Planner {
 		return faction.holdings().population() + faction.holdings().staff();
 	}
 
-	/** It may start a project now: healthy, staffed, at peace, room for another project. */
+	/** It may start a project now: healthy, staffed, at peace, room for another project, no rubble left to clear ({@link Debris}). */
 	static boolean ready(ServerLevel level, Faction f) {
-		return Works.of(level.getServer(), f.id()).projects().size() < PROJECTS_AT_ONCE && Economy.adequatePersonnel(f)
+		return Works.of(level.getServer(), f.id()).projects().size() < PROJECTS_AT_ONCE && !Debris.busy(level.getServer(), f.id())
+			&& Economy.adequatePersonnel(f)
 			&& Economy.atPeace(level.getServer(), f) && Economy.healthy(level, f);
 	}
 
@@ -195,14 +207,16 @@ public final class Planner {
 	}
 
 	private static Works.Project start(ServerLevel level, Faction f, String entry, Placing at, int plot) {
-		Works.Project project = new Works.Project(entry, at.origin(), at.rotation(), Works.STAKE, 0, Map.of(), List.of(), plot, level.getGameTime());
+		Works.Project project = new Works.Project(entry, at.origin(), at.rotation(), Works.STAKE, 0, Map.of(), List.of(), plot, level.getGameTime(),
+			at.ruins());
 		Works.update(level.getServer(), f.id(), s -> {
 			List<Works.Project> list = new ArrayList<>(s.projects());
 			list.add(project);
 			return s.withProjects(list);
 		});
 		NEEDS.remove(f.id());
-		JaymosKingdoms.LOGGER.info("{} begins a {} at {} ({})", f.name(), entry, at.origin(), plot >= 0 ? "on plot " + plot : "open ground");
+		JaymosKingdoms.LOGGER.info("{} begins a {} at {} ({})", f.name(), entry, at.origin(),
+			plot >= 0 ? "on plot " + plot : at.ruins() ? "over an old structure" : "open ground");
 		return project;
 	}
 
@@ -236,7 +250,7 @@ public final class Planner {
 	}
 
 	/** Lays {@code bp} out at {@code origin}, turned: its blocks bottom up, each layer's blocks of one material together. */
-	static Layout layout(ServerLevel level, Faction f, String entry, Blueprint bp, BlockPos origin, Rotation rotation, boolean plot) {
+	static Layout layout(ServerLevel level, Faction f, String entry, Blueprint bp, BlockPos origin, Rotation rotation, boolean plot, boolean ruins) {
 		int[] size = turned(bp, rotation);
 		List<Op> ops = new ArrayList<>();
 		Set<BlockPos> filled = new HashSet<>();
@@ -257,7 +271,7 @@ public final class Planner {
 			return ka.compareTo(kb);
 		});
 		BlockPos max = origin.offset(size[0] - 1, 0, size[1] - 1);
-		return new Layout(bp, entry, origin, max, bp.height(), List.copyOf(ops), filled, plot);
+		return new Layout(bp, entry, origin, max, bp.height(), List.copyOf(ops), filled, plot, ruins && !plot);
 	}
 
 	// ---- sites ----------------------------------------------------------------------------------------------------
@@ -273,7 +287,7 @@ public final class Planner {
 			if (size[0] <= plot.width() && size[1] <= plot.depth()) {
 				BlockPos origin = new BlockPos(plot.min().getX() + (plot.width() - size[0]) / 2, plot.min().getY(),
 					plot.min().getZ() + (plot.depth() - size[1]) / 2);
-				return new Placing(origin, r, 0);
+				return new Placing(origin, r, 0, false);
 			}
 		}
 		return null;
@@ -318,15 +332,18 @@ public final class Planner {
 				Rotation rotation = facing(Direction.getApproximateNearest(f.seat().getX() - center.getX(), 0, f.seat().getZ() - center.getZ()));
 				int[] size = turned(bp, rotation);
 				BlockPos corner = center.offset(-size[0] / 2, 0, -size[1] / 2);
-				Integer floor = check(level, f, corner, size[0], size[1], bp.height(), taken);
-				if (floor == null) {
+				Footing footing = check(level, f, corner, size[0], size[1], bp.height(), taken);
+				if (footing == null) {
 					continue;
 				}
-				double score = ringIndex * RING_WEIGHT + road(level, palette, corner.atY(floor), size[0], size[1]);
+				int floor = footing.floor();
+				double score = ringIndex * RING_WEIGHT + road(level, palette, corner.atY(floor), size[0], size[1])
+					+ (footing.ruins() ? RUINS_PENALTY : 0.0);
 				if (best == null || score < best.score()) {
-					best = new Placing(corner.atY(floor), rotation, score);
+					best = new Placing(corner.atY(floor), rotation, score, footing.ruins());
 				}
-				if (firstRing < 0) {
+				// (only natural ground ends the search: old structures nearer in are weighed against it)
+				if (firstRing < 0 && !footing.ruins()) {
 					firstRing = ringIndex;
 				}
 			}
@@ -362,9 +379,12 @@ public final class Planner {
 	/**
 	 * Whether a footprint ({@code w} x {@code d} from {@code corner}) can be built on: in the faction's land, clear of
 	 * the seat and of everything taken, every column (and the margin round it) natural ground, dry, level within
-	 * {@link #LEVEL_TOLERANCE}, and open air above. Returns the floor height (the median ground block), or null.
+	 * {@link #LEVEL_TOLERANCE}, and open air above. A column may instead stand on an old structure ({@link Ruins}): its
+	 * ground is then the land under the structure, and the structure's blocks above count as open (they'll be torn
+	 * down), unless the site is {@link Ruins#guarded} or has a bell. Returns the floor height (the median ground block)
+	 * and whether it's on an old structure, or null.
 	 */
-	static @Nullable Integer check(ServerLevel level, Faction f, BlockPos corner, int w, int d, int height, List<int[]> taken) {
+	static @Nullable Footing check(ServerLevel level, Faction f, BlockPos corner, int w, int d, int height, List<int[]> taken) {
 		int x0 = corner.getX(), z0 = corner.getZ(), x1 = x0 + w - 1, z1 = z0 + d - 1;
 		// in its land
 		for (int[] c : new int[][] {{x0 - MARGIN, z0 - MARGIN}, {x1 + MARGIN, z0 - MARGIN}, {x0 - MARGIN, z1 + MARGIN}, {x1 + MARGIN, z1 + MARGIN}}) {
@@ -384,9 +404,10 @@ public final class Planner {
 				return null;
 			}
 		}
-		// the ground
+		// the ground (a margin column over an old structure is left as it stands, and not looked over)
 		int[] grounds = new int[(w + 2 * MARGIN) * (d + 2 * MARGIN)];
 		List<Integer> inside = new ArrayList<>();
+		boolean ruins = false;
 		int n = 0;
 		for (int x = x0 - MARGIN; x <= x1 + MARGIN; x++) {
 			for (int z = z0 - MARGIN; z <= z1 + MARGIN; z++) {
@@ -400,12 +421,26 @@ public final class Planner {
 				if (!level.getFluidState(top).isEmpty() || !level.getFluidState(top.below()).isEmpty()) {
 					return null;
 				}
-				if (!(Storehouse.ground(ground) || (margin && road(ground, null)))) {
+				int at;
+				if (Storehouse.ground(ground) || (margin && road(ground, null))) {
+					at = top.getY() - 1;
+				} else if (Ruins.inPiece(level, top.below())) {
+					if (margin) {
+						at = Integer.MIN_VALUE;
+					} else {
+						Integer under = underRuins(level, top.below());
+						if (under == null) {
+							return null;
+						}
+						at = under;
+						ruins = true;
+					}
+				} else {
 					return null;
 				}
-				grounds[n++] = top.getY() - 1;
+				grounds[n++] = at;
 				if (!margin) {
-					inside.add(top.getY() - 1);
+					inside.add(at);
 				}
 			}
 		}
@@ -416,20 +451,54 @@ public final class Planner {
 				return null;
 			}
 		}
-		// open air above (no trees, nothing built): plants, snow and air only
+		// open air above (no trees, nothing built): plants, snow and air only; or an old structure's blocks to tear down
 		n = 0;
 		for (int x = x0 - MARGIN; x <= x1 + MARGIN; x++) {
 			for (int z = z0 - MARGIN; z <= z1 + MARGIN; z++) {
 				int ground = grounds[n++];
+				if (ground == Integer.MIN_VALUE) {
+					continue;
+				}
+				boolean margin = x < x0 || x > x1 || z < z0 || z > z1;
 				for (int y = ground + 1; y <= floor + height + CLEARANCE; y++) {
-					BlockState state = level.getBlockState(new BlockPos(x, y, z));
-					if (!state.isAir() && !(state.canBeReplaced() && state.getFluidState().isEmpty())) {
-						return null;
+					BlockPos at = new BlockPos(x, y, z);
+					BlockState state = level.getBlockState(at);
+					if (state.isAir() || (state.canBeReplaced() && state.getFluidState().isEmpty())) {
+						continue;
 					}
+					if (!state.is(Blocks.BELL) && Ruins.inPiece(level, at) && (margin || Ruins.tearable(level, at, state))) {
+						ruins |= !margin;
+						continue;
+					}
+					return null;
 				}
 			}
 		}
-		return floor;
+		if (ruins && Ruins.guarded(level, x0, z0, x1, z1, floor - LEVEL_TOLERANCE, floor + height + CLEARANCE)) {
+			return null;
+		}
+		return new Footing(floor, ruins);
+	}
+
+	/**
+	 * The land's own ground under an old structure's block at {@code from} (looking down through the structure, at most
+	 * {@link Ruins#GROUND_SCAN}); null if there's none, or a street or something not the structure's is in the way.
+	 */
+	private static @Nullable Integer underRuins(ServerLevel level, BlockPos from) {
+		for (int dy = 0; dy <= Ruins.GROUND_SCAN; dy++) {
+			BlockPos at = from.below(dy);
+			BlockState state = level.getBlockState(at);
+			if (state.is(Blocks.DIRT_PATH)) {
+				return null;
+			}
+			if (Storehouse.ground(state)) {
+				return at.getY();
+			}
+			if (!(state.isAir() || state.canBeReplaced() || Ruins.inPiece(level, at))) {
+				return null;
+			}
+		}
+		return null;
 	}
 
 	/** A road or path block (a village's dirt path, or the realm's own road stone). */
