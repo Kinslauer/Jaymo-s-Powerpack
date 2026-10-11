@@ -93,6 +93,12 @@ def packModsNoCf = [
 ]
 // not on CurseForge: shipped inside the pack as overrides
 def kitchenJar = fileTree("libs") { include "jaymos-kitchen-*.jar" }
+// Minecraft Comes Alive (GPL-3.0, by Luke100000 and team): human villagers to befriend, marry and raise children with,
+// village ranks up to monarch. Its newest CurseForge/Modrinth file is for 26.2, so until a 26.3 one comes out the pack
+// ships a jar built from the authors' own 26.3 branch (github.com/Luke100000/minecraft-comes-alive, dev/26.3 at
+// 3badc42; the source is there, as the GPL asks), as an override like Kitchen. Jaymo's Kingdoms ties into it (McaCompat).
+// TODO: once CurseForge project 535291 has a Fabric 26.3 file, move it into packMods and delete the jar from libs/.
+def mcaJar = fileTree("libs") { include "mca-fabric-*.jar" }
 // Jaymo's Kingdoms (kingdoms/, its own Gradle project): built by the pack tasks, then shipped as an override like Kitchen.
 // Its build output goes where kingdoms/build.gradle puts it (E:\ on the home PC).
 def kingdomsProps = new Properties()
@@ -142,6 +148,7 @@ dependencies {
 
 	// the rest of the modpack, loaded in the dev game only (fabric-api is already on the classpath)
 	localRuntime kitchenJar
+	localRuntime mcaJar
 	// compiled against (for its corpses); required at runtime since 0.8 (fabric.mod.json), touched only via power/web/KitchenCompat
 	compileOnly kitchenJar
 	packMods.drop(1).each { localRuntime it.dep }
@@ -157,6 +164,7 @@ tasks.register("modpackMods", Sync) {
 	from configurations.packJars
 	from tasks.named("jar")
 	from kitchenJar
+	from mcaJar
 	from kingdomsJar
 	from localPackJars
 	into new File(packDir, "mods")
@@ -186,6 +194,7 @@ tasks.register("curseforgePack", Zip) {
 	into("overrides/mods") {
 		from tasks.named("jar")
 		from kitchenJar
+		from mcaJar
 		from kingdomsJar
 	}
 }
@@ -213,6 +222,7 @@ tasks.register("serverMods", Sync) {
 	from configurations.packJars
 	from tasks.named("jar")
 	from kitchenJar
+	from mcaJar
 	from kingdomsJar
 	from localPackJars
 	into new File(serverDir, "mods")
@@ -227,6 +237,7 @@ tasks.register("profileMods") {
 	doLast {
 		def wanted = [[jar: tasks.named("jar").get().archiveFile.get().asFile, prefix: "jaymos-powers-"]]
 		kitchenJar.files.each { wanted << [jar: it, prefix: "jaymos-kitchen-"] }
+		mcaJar.files.each { wanted << [jar: it, prefix: "mca-fabric-"] }
 		kingdomsJar.files.each { wanted << [jar: it, prefix: "jaymos-kingdoms-"] }
 		localPackMods.each { wanted << [jar: file(it.file), prefix: it.prefix] }
 		def old = profileMods.listFiles().findAll { f -> f.name.endsWith(".jar") && wanted.any { w -> f.name.startsWith(w.prefix) && f.name != w.jar.name } }

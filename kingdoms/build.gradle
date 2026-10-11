@@ -40,6 +40,9 @@ dependencies {
 	localRuntime "maven.modrinth:better-combat:8Vyq1h9a"
 	localRuntime "maven.modrinth:player-animation-library:xJ30QmpE"
 	localRuntime "maven.modrinth:cloth-config:26.3.158+fabric"
+	// Minecraft Comes Alive (GPL-3.0; McaCompat, McaBridge and the MCA mixins): compiled against the pack's jar in ../libs,
+	// never required
+	compileOnly fileTree("../libs") { include "mca-fabric-*.jar" }
 	// Epic Knights (KnightsCompat) is looked up by registry id only: no build for 26.3 yet, so nothing to compile against.
 }
 

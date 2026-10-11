@@ -44,7 +44,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("illager attachment: {}", Illagers.TAG);
 		Camps.register();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> KingdomCommands.register(dispatcher));
-		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> KingdomEvents.forget(handler.player));
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			KingdomEvents.forget(handler.player);
+			McaCompat.forget(handler.player);
+		});
 		// 0.3, builders and theft: the building catalogue, real-time construction, plots and the plot stake, crime
 		LOGGER.debug("builder and theft attachments: {} {}", Works.WORKS, Theft.WANTED);
 		Plots.register();
