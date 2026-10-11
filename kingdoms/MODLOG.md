@@ -1189,3 +1189,18 @@ Tested on the dev server: at night two builders, three farmers and a miner went 
 rest walked home; all were back at work at dawn. By day an unemployed villager took a trade, the butchers cooked all
 38 raw porkchops, and the farmers handed their spare carrots to the storehouse. Not yet seen in game: a smith (the
 test village has none), a villager moving into a new house.
+
+## 0.5.6: barbarians settle into Grim ruins
+- **Barbarians live in the ruins they take.** When a camp takes a small Grim Kingdoms ruin (`GrimSites.foundCamp`),
+  they pitch a camp beside it (`CampBuildings.settle`): a fire with log benches, their loot pile (the camp's storage,
+  in place of the plank shed) and two tents, on even natural ground just clear of the ruin's pieces (trees there are
+  felled). With no building fit for a chief he keeps by the fire. The raiders are spread out, each keeping within
+  `RAIDER_ROAM` (8) of his own spot: the fire, the ruin's middle, its hall, its gate. Before, they all stood in one
+  spot at the ruin's middle.
+- **Ruins far from any kingdom are taken too.** A small Grim ruin with no kingdom within `RANGE` (600) used to be
+  passed over; now barbarians take it if no other camp stands within `Camps.CAMP_SPACING` (160). These camps are
+  announced as "in the wild". Fiefdoms still need a kingdom nearby.
+- Seen on the dev server (seed 8675309, Grim Kingdoms 2.0.0 in `run/mods`): the tor_tower at -773,-8 taken near a
+  kingdom (camp pitched 49 blocks south, raiders at the fire, the tower's base, its top and its gate), and the
+  stonyfell_outpost_plains at -777,952 taken in the wild, a jungle clearing cut for its camp.
+
