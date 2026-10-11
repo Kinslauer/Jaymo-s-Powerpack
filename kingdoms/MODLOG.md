@@ -721,3 +721,29 @@ a block at the end of `en_us.json`. No client code, art or tools script: every m
   - a vanilla raid (Bad Omen at a village) near a camp: camp illagers must not join it;
   - `/faction camp grow` a few times and `/faction camp info`: new illagers (evokers from the third), a building each
     time; then `/time add 24000` while standing more than 24 from the camp: a day's growth on its own.
+
+## 0.4.2: Minecraft Comes Alive
+The pack now has Minecraft Comes Alive (MCA, GPL-3.0; built from its authors' 26.3 branch until a 26.3 release is
+out): villagers are people with names, moods and personalities who talk, take gifts, marry you and raise your
+children, and its villages have ranks up to monarch. Kingdoms ties into it through `McaCompat` (no MCA classes) and
+`McaBridge` (the MCA calls, only touched while MCA is loaded), plus `mixin/mca/McaTasksMixin` (applied by
+`McaMixinPlugin` only when MCA is loaded). MCA's villagers extend vanilla `Villager`, so everything that counts,
+recruits or protects villagers already sees them.
+- **Hearts are reputation:** a fifth of your village reputation in MCA (every villager's hearts for you, summed) round a
+  faction's seat is added to your reputation with that faction, between -200 and +300 (`REPUTATION_PER_HEART`,
+  `HEARTS_REPUTATION_MOST/LEAST`). Looked up every 5 seconds at most per player and faction. Barbarian and illager
+  camps don't count.
+- **Ranks:** your MCA rank in a village answers to the faction there (the one whose seat is nearest within 48, and
+  the realm whose land it's on): a soldier counts at least as an MCA merchant, a knight as a noble, a lord as a mayor.
+  If either faction is hostile to you (-100 or worse) you're an outlaw in that village whatever MCA says. Monarch
+  stays MCA's own to earn (its rank tasks: reputation, population, buildings, the Grim Reaper).
+- **Recruiting spares families:** when a settlement takes one of its villagers into service it never takes an MCA
+  child or teen, anyone married or engaged, a player's child, or anyone who counts a player as a friend (MCA's
+  `heartsToBeConsideredAsFriend`, 40 hearts).
+- **Elders keep their names:** an MCA villager chosen as a village's elder isn't renamed "Elder of ..." (MCA would
+  rename them in its family tree too, and a dedicated server would write the untranslated key).
+- **Check first:**
+  - walk into an Epic Structures village: humans, not vanilla villagers; `/faction info` there still counts them;
+  - gift and chat with a few villagers in a Kingdoms village, then `/kingdom reputation`: it should have risen;
+  - pledge to a kingdom and climb to knight, then open MCA's village screen in its capital: rank noble or better;
+  - marry a villager in a settlement short of guards: your spouse must never vanish into a guard.

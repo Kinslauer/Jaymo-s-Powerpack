@@ -300,3 +300,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     - Weightless weighs everything within 6 blocks: gravity ×2.5, jump −35%, Slowness I, refreshed every 5 ticks.
   - **Kitchen 0.4.15:** an empty hand bags any small corpse, sneak + empty hand carries any corpse, and bagged
     corpses keep their kind.
+- **0.8.21, Minecraft Comes Alive joins the pack:** human villagers who talk, take gifts, have moods and
+  personalities, marry you and raise your children, and village ranks up to monarch. Its newest release is for 26.2,
+  so the pack ships a jar built from its authors' 26.3 branch (`libs/mca-fabric-7.8.0-dev.3badc42+26.3.jar`, an
+  override like Kitchen; see `mcaJar` in `build.gradle`). Swap it for the CurseForge file (project 535291) once a
+  Fabric 26.3 one is out. Its Chat AI and TTS are off unless someone turns them on in its config. Jaymo's Kingdoms
+  0.4.2 ties into it (hearts count as reputation, faction rank counts as village rank, recruiting spares families;
+  see `kingdoms/MODLOG.md`).

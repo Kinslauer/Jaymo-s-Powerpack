@@ -33,9 +33,12 @@ public final class Reputation {
 	private Reputation() {
 	}
 
-	/** What {@code kingdom} thinks of {@code player} now: at its lowest while they wear the Void Crown (Jaymo's Powers). */
+	/**
+	 * What {@code kingdom} thinks of {@code player} now: at its lowest while they wear the Void Crown (Jaymo's Powers);
+	 * with Minecraft Comes Alive, warmed (or cooled) by the hearts its people have for them ({@link McaCompat}).
+	 */
 	public static int get(ServerPlayer player, int kingdom) {
-		return voidCrowned(player) ? MIN : stored(player, kingdom);
+		return voidCrowned(player) ? MIN : Mth.clamp(stored(player, kingdom) + McaCompat.heartsReputation(player, kingdom), MIN, MAX);
 	}
 
 	/** The reputation earned, whatever's worn (the crown hides it but doesn't wipe it). */
