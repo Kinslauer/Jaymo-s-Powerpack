@@ -71,6 +71,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		WebPowerClient.init();
 		ChronoPowerClient.init();
 		GravityPowerClient.init();
+		com.jaymospowers.client.power.resonance.ResonancePowerClient.init();
+		com.jaymospowers.client.power.darktide.DarktidePowerClient.init();
 	}
 
 	/** The key mapping for an ability key (to show its bound key in a HUD, say). */
@@ -151,6 +153,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 			com.jaymospowers.client.power.web.WebSymbioteClient.strugglePowerKey(6, modeKey.isDown());
 			com.jaymospowers.client.power.web.WebSymbioteClient.strugglePowerKey(7, ultimateKey.isDown());
 		}
+		// inside someone else's Hush every power key goes dead (counts as released); the symbiote acts on its own regardless
+		boolean hushed = power != null && com.jaymospowers.client.power.resonance.ResonanceHushClient.silenced(player);
+		seized |= hushed;
 		// report ability key changes (a key held while a screen opens counts as released)
 		for (PowerKey key : PowerKey.values()) {
 			// a locked ability's key does nothing here; the server still says it's locked when it's pressed

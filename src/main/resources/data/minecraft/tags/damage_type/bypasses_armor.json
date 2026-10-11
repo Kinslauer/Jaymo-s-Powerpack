@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
-    "jaymospowers:wind_lance"
+    "jaymospowers:wind_lance",
+    "jaymospowers:resonance_pulse_deep",
+    "jaymospowers:resonance_sonic_boom"
   ]
 }

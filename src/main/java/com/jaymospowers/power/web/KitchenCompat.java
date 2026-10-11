@@ -64,6 +64,14 @@ public final class KitchenCompat {
 		return LOADED ? Kitchen.sourceType(entity) : null;
 	}
 
+	/**
+	 * For other powers (Darktide's Necromancy): what a corpse lying free was in life, or null if it isn't one, it's a
+	 * player's (their belongings), someone is carrying it, or Jaymo's Kitchen isn't here.
+	 */
+	public static net.minecraft.world.entity.@Nullable EntityType<?> freeCorpseOf(Entity entity) {
+		return LOADED && !Kitchen.playerCorpse(entity) && !Kitchen.carried(entity) ? Kitchen.sourceType(entity) : null;
+	}
+
 	/** A corpse's limbs jerk violently (a hard jolt), if it is one. */
 	static void jolt(Entity entity) {
 		if (LOADED) {

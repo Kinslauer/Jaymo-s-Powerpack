@@ -46,7 +46,28 @@ public final class Powers {
 	public static final int AWAKEN_MIN_TICKS = 24000;
 	public static final int AWAKEN_MAX_TICKS = 72000;
 
+	/**
+	 * Checks that switch a player's power keys off for now (Resonance's Hush). Only presses are stopped: releases still
+	 * go through, so nothing is left held.
+	 */
+	private static final List<java.util.function.Predicate<ServerPlayer>> SILENCERS = new ArrayList<>();
+
 	private Powers() {
+	}
+
+	/** Adds a check that can switch a player's power keys off (see {@link #silenced}). */
+	public static void addSilencer(java.util.function.Predicate<ServerPlayer> silencer) {
+		SILENCERS.add(silencer);
+	}
+
+	/** Whether a press of {@code player}'s power keys (R G V B, Z, C) does nothing right now. */
+	public static boolean silenced(ServerPlayer player) {
+		for (java.util.function.Predicate<ServerPlayer> silencer : SILENCERS) {
+			if (silencer.test(player)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static <P extends Power> P register(P power) {
@@ -173,6 +194,9 @@ public final class Powers {
 			}
 			return;
 		}
+		if (down && power != null && silenced(player)) {
+			return;
+		}
 		PowerInput.set(player, key, down);
 		if (power != null && player.isAlive() && !player.isSpectator()) {
 			power.onKey(player, key, down);
@@ -185,6 +209,9 @@ public final class Powers {
 	/** The Power Mode key (Z): each power decides what it does (Web: Zip; Wind: its storm or tempest mode). */
 	static void mode(ServerPlayer player, boolean down) {
 		Power power = of(player);
+		if (down && power != null && silenced(player)) {
+			return;
+		}
 		if (power != null && player.isAlive() && !player.isSpectator()) {
 			power.onMode(player, down);
 		}
@@ -193,6 +220,9 @@ public final class Powers {
 	/** The ascended ability's key: only an ascended power answers it (anyone else's press does nothing at all). */
 	static void ultimate(ServerPlayer player, boolean down) {
 		Power power = of(player);
+		if (down && power != null && silenced(player)) {
+			return;
+		}
 		if (power != null && (Fate.isAscended(player) || power.ultimateWhenCorrupted() && Fate.isCorrupted(player)) && player.isAlive()
 			&& !player.isSpectator()) {
 			power.onUltimate(player, down);

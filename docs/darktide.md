@@ -1,0 +1,75 @@
+# Darktide
+
+Water and darkness. Spec: section "1. Darktide" of the new-powers table. Colour 0x2F6FB5, icon ink sac.
+All numbers are `static final` constants at the top of the class named in brackets.
+
+## Weapons
+
+- Katana: WeaponMod `weaponmod:katana.<tier>`. Knife: `weaponmod:knife.<tier>`. Sora's Daggers never count.
+- Darktide works bare-handed without WeaponMod; blade-only moves then say "This needs a blade" (`DarktideWeapons`).
+- **Right click with a WeaponMod knife or katana is the guard, not WeaponMod's use.** A Darktide user who is not
+  sneaking gets the item use cancelled (Fabric `UseItemCallback` returns FAIL), so knives don't throw and katanas don't
+  raise WeaponMod's own block. **Shift + right click** throws the knife / uses the katana as normal. WeaponMod itself
+  is not edited.
+
+## Flow (0-100) [DarktideFlow]
+
+- Submerged +4/s; waist-deep water (>= 0.6) or standing in rain +2/s.
+- Dark +2/s, pitch dark (block light <= 4 and no sky light) +3/s.
+- Drowned (night, see below): dark gains x2, no water gain.
+- Daylight under open sky drains 1/s while above 50.
+- Blocking costs 2 Flow per point of damage blocked; parry +8, reflect +6, roll evasion +10.
+- Flow is not saved across relog/restart (cooldowns neither).
+
+## Keys
+
+| Key | What it does |
+|---|---|
+| Right click (starter) | **Guard**: hold with bare hands, katana or knife (off hand empty or a blade). Blocks 75% (starter user: 50%) of melee/projectile damage from the front 150 deg; each blocked point costs 2 Flow, and if Flow runs out the guard breaks (12-tick stagger, stun, 40-tick lock). Slows you to 0.35 (katana 0.75). Raising the guard within 5 ticks of a hit = **parry**: full block, +8 Flow, empowered for 4 s, 1 s parry cooldown. Blades reflect arrows and thrown projectiles back at the shooter (aim and speed improve with ascension); magic projectiles only once ascended. Katana parry with R unlocked against a humanoid: stun 24 ticks, reel, **riposte** for 6 + weapon damage. Each katana parry counts toward ascension. |
+| R | **Dark Strike**: 1.5x, reach 3.5, 3 s. Empowered (after a parry) and 25 Flow: 2.5x with darkness. Ascended with a knife: **Pounce** (hold to aim up to 1 s, release to leap 6 blocks, land on the target's back, 2x; 3 stabs if the target is humanoid and crippled), 6 s. |
+| V | **Undertow**: sink into the ground and surface where you look (12 blocks, 18 ascended) in water, a shadow or a Black Tide puddle. 15 Flow, 6 s. Ascended: surfacing deals 3 around you. |
+| G | Katana: **Crescent** (4 blocks, 120 deg, up to 3 targets, +4 damage, 15 Flow, 8 s). Knife: **Ink Cross** (3 blocks, 1.5x, Slowness III 3 s, 10 Flow, 6 s). Ascended with knives: **Fang Barrage** (hold up to 4 s, 2 damage every 4 ticks to everything in front, held in place, 2 s stun at the end, 40 Flow, 18 s). |
+| B | **Black Tide**: a 10-block, 5-wide wave: 6 damage, push, Slowness II + Blindness 2 s, puts out fire. 40 Flow, 20 s. Ascended leaves a 3 s puddle (Undertow target). Ascended with a knife: **Riptide Dash** (5 blocks, 6 damage, 30 Flow, 12 s); hold R too for an 8-hit flurry on the first foe, ending behind it. |
+| Z | **Veil** on/off: drains 2 Flow/s; mobs lose track of you beyond 6 blocks in the dark / 12 in light; your name tag hides. |
+| X | **Gedan / Stillwater** (all 4 unlocked, katana, hold): you stand rooted while a 10-block field grows over 5 s; parrying while holding cycles kamae (Gedan, Chudan, Jodan, Hasso). Release: you vanish and strike up to 8 foes in the field from below, 6 + 1 per second held (max 5), +1 slash per parry (max 2 extra). 60 s cooldown, max hold 15 s. Routed like Wind's X key; skipped while symbiote-bonded. |
+| C | **Tide Arms**: cycles bare hands, twin daggers, katana of dark water (needs WeaponMod). Your real items are stored and returned. Night: **Drown** (6-block sphere around the target for 4 s, 2 damage/s, pulls foes back from the edge, 45 s). Night + ascended: **Necromancy**: hold on a Kitchen corpse for 1.5 s to take its shadow (max 5), tap to raise one (max 3 risen, they follow you, fight your enemies and melt at sunrise or 48 blocks away); with no corpse or shadow, C is Tide Arms. |
+| Combat Roll | With Combat Roll installed: +2 roll charges (3 total; `combat_roll:count`). A roll that passes a projectile within 2.5 or an attacking mob within 3 without being hit gives +10 Flow once and leaves an ink trail. Nothing happens without the mod. |
+
+Unlock order R, V, G, B. Ascension (**Abyssal Tide**): 40 katana parries with all four unlocked (whispers at 15
+and 30). Night corruption (**Drowned Dark / Drowned Abyss**): night in a dimension with a day cycle, or Fate
+corruption; shown through `statusSuffix` only.
+
+## Crippled [DarktideStatus]
+
+A humanoid (tag `jaymospowers:humanoid`, players always) hit by a Darktide user's melee or ability hit whose aim
+point is in the **lower 40%** (`CRIPPLE_LOW_SHARE`) of its hitbox is crippled for **5 s** (`CRIPPLE_TICKS` 100):
+forced crawl (`Pose.SWIMMING`), movement x0.3 (`CRIPPLE_SPEED`), no jumping, server-synced so everyone sees it.
+The aim point is the user's look ray clipped against the target's box; if the ray misses, the ray's height at the
+target's distance is used. Stun, Ink Cross's slow and Black Tide's slow are not "crippled" (Ink Cross can still
+cripple when it lands low). Pounce's 3 stabs need humanoid AND crippled.
+
+## Files
+
+- `src/main/java/com/jaymospowers/power/darktide/`: `DarktidePower` (keys, ticking, Veil), `DarktideState`
+  (attachments), `DarktideLive` (server state), `DarktideFlow`, `DarktideGuard` (guard, parry, riposte, reflect),
+  `DarktideMoves` (R/G/V/B moves), `DarktideGedan` (X), `DarktideTide` (C: Tide Arms, Drown, Necromancy),
+  `DarktideStatus` (stun, cripple, reel), `DarktideMove` (pose kinds), `DarktideWeapons`, `DarktideNet`,
+  `CombatRollCompat`, `DarktideDebugCommand` (`/powerdebug darktide flow <n> | parries <n> | ready`), `mixin/`.
+- `src/client/java/com/jaymospowers/client/power/darktide/`: `DarktidePowerClient` (guard/X/night keys),
+  `DarktideHud`, `DarktidePose`, `DarktideFx`, `mixin/`.
+- `jaymospowers.darktide.mixins.json`, `jaymospowers.darktide.client.mixins.json`, `lang/parts/darktide.json`,
+  `data/jaymospowers/tags/entity_type/humanoid.json`.
+- Shared (additive): `JaymosPowers`, `JaymosPowersClient`, `KeyGuide` (C line uses the night suffix),
+  `fabric.mod.json`, `KitchenCompat.freeCorpseOf`.
+
+## Check first in game
+
+1. Guard with bare hands / katana / knife: front block, Flow cost, guard break at 0 Flow, parry timing (5 ticks).
+2. Right click with a knife or katana does not throw / WeaponMod-block; shift + right click does.
+3. Katana riposte on a zombie/pillager (it runs inside `applyItemBlocking`).
+4. Arrow and WeaponMod projectile reflection (WeaponMod projectiles go through the damage path).
+5. Crippled crawl: hit a zombie and a player low; both should crawl for 5 s for every viewer.
+6. Gedan: rooting, field particles/tint, release teleports and return.
+7. Tide Arms: items come back on switch, death and logout; conjured blades can't be dropped or stored.
+8. Night switch (C becomes Drown) and Necromancy with Kitchen corpses; risen melting at sunrise.
+9. Combat Roll charges show 3.
