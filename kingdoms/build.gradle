@@ -33,6 +33,14 @@ dependencies {
 	// Epic Structures: Villages (all rights reserved; "feel free to add to any modpack"): its sprawling towns are where
 	// kingdoms rise in the pack. Only loaded in the dev game, to found kingdoms in them.
 	localRuntime "maven.modrinth:epic-structures-villages:hCRa4eFr"
+	// Better Combat (and Player Animation Library, which it needs) are optional: MobCombat gives humanoid mobs its weapon
+	// moves when it's loaded. Compiled against, in the dev game, never required (the same versions as Powers' pack).
+	compileOnly "maven.modrinth:better-combat:8Vyq1h9a"
+	compileOnly "maven.modrinth:player-animation-library:xJ30QmpE"
+	localRuntime "maven.modrinth:better-combat:8Vyq1h9a"
+	localRuntime "maven.modrinth:player-animation-library:xJ30QmpE"
+	localRuntime "maven.modrinth:cloth-config:26.3.158+fabric"
+	// Epic Knights (KnightsCompat) is looked up by registry id only: no build for 26.3 yet, so nothing to compile against.
 }
 
 processResources {

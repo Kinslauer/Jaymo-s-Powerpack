@@ -510,3 +510,107 @@ with yours), and a block at the end of `en_us.json`. Every number is a constant 
   - `war status`;
   - a peace offer and acceptance, and each kind of terms (`war start`, then kill folk or take chunks to move the
     score).
+
+## 0.4.0, track: faction armor and mob combat
+Built, not yet seen in game. Two optional compats, each off unless its mod is loaded: `KnightsCompat` (Epic Knights)
+and `MobCombat` (Better Combat for mobs; `BetterCombatBridge` is the only class touching Better Combat, client
+`MobAnimations` and `PalMobAnimator` the only ones touching Player Animation Library). Shared files got one-line hooks:
+`Folk.setup` (`KnightsCompat.dress` after the role's outfit), `JaymosKingdoms` (`MobCombat.register()`), the client
+entrypoint (`MobAnimations.register()`), and `fabric.mod.json` (two mixin configs, `suggests`). `build.gradle` compiles
+against Better Combat and Player Animation Library (`compileOnly`) and runs them in the dev game (`localRuntime`, with
+Cloth Config). Every number is a constant at the top of its class. Nothing new to translate.
+
+### Faction armour (Epic Knights)
+- **Epic Knights** ("Shields, Armor and Weapons", mod id `magistuarmory`, all rights reserved: nothing copied) has no
+  26.3 build yet (the newest Fabric one is 10.16 for 26.1.2, needing Architectury and Cloth Config). So there's no
+  dependency: items are looked up by registry id when a folk is outfitted, and any id that's missing is skipped (the
+  role's vanilla piece stays). A renamed or reworked item in the 26.3 build just falls back the same way.
+- **How it decorates armour** (read from the 26.1.2 jar):
+  - a surcoat (its heraldry recipe) is a banner's `base_color` and `banner_patterns` on the chestplate, as on a shield.
+    Folk wear their realm's banner: a plain field of `styleColor` (a fiefdom's overlord's colour);
+  - dyeable cloth (gambeson, coif, pantyhose, crusader tabard) takes `dyed_color`;
+  - helmet decorations are entries `{name: "magistuarmory:<decoration>", dyeable, color}` in the `Items` list of its
+    `magistuarmory:armor_decoration` component (custom data). It's only set if that component exists and accepts
+    custom data.
+- **Loadouts** (first id that exists wins):
+
+  | Who | Head | Body | Hands |
+  |---|---|---|---|
+  | Kingdom guard | bascinet / sallet | platemail (surcoat), platemail legs and boots | steel bastard sword, steel heater shield (banner) |
+  | Kingdom archer | kettle hat | gambeson, pantyhose, gambeson boots, all dyed | longbow |
+  | King (kingdom or fiefdom) | armet with torse and mantle and a crown, in the realm's colour | gothic plate (surcoat) | netherite claymore |
+  | Lord | grand bascinet with a big plume, dyed | Maximilian plate (surcoat) | diamond bastard sword, diamond kite shield (banner) |
+  | Fiefdom guard | Norman helmet | chainmail (surcoat) | iron morgenstern, iron kite shield (banner) |
+  | Fiefdom archer | quilted coif, dyed | gambeson, pantyhose, gambeson boots, dyed | longbow |
+  | Fiefdom lord | greathelm with two plumes, dyed | crusader harness, tabard and boots dyed | steel bastard sword, steel heater shield (banner) |
+  | Barbarian | 60%: a rusted kettle hat, Norman helmet, barbute or mail coif | 70% each: rusted mail or half-armour or lamellar, rusted mail legs, rusted or lamellar boots | club, barbed club, rusted mace or bastard sword, stone morgenstern or chain morgenstern; 30% a round shield |
+  | Chief | rusted greathelm with viking horns | lamellar and lamellar boots (his war-painted leggings stay) | diamond lochaber axe |
+
+  Builders and villages are unchanged. War parties, dressed as guards, get the guards' kit.
+- **Ids relied on** (all in the 26.1.2 jar): `bascinet sallet platemail_chestplate platemail_leggings platemail_boots
+  chainmail_helmet chainmail_chestplate chainmail_leggings chainmail_boots steel_bastardsword iron_bastardsword
+  steel_heatershield iron_heatershield heatershield kettlehat gambeson_chestplate pantyhose gambeson_boots longbow
+  armet gothic_chestplate gothic_leggings gothic_boots knight_chestplate knight_leggings knight_boots netherite_claymore
+  noble_sword grand_bascinet maximilian_chestplate maximilian_leggings maximilian_boots diamond_bastardsword
+  diamond_kiteshield kiteshield norman_helmet iron_morgenstern iron_shortsword iron_kiteshield coif greathelm
+  crusader_chestplate crusader_leggings crusader_boots rustedkettlehat rustednorman_helmet rustedbarbute
+  rustedchainmail_helmet rustedchainmail_chestplate rustedhalfarmor_chestplate lamellar_chestplate
+  rustedchainmail_leggings rustedchainmail_boots lamellar_boots club barbedclub rusted_heavymace rusted_bastardsword
+  stone_morgenstern iron_chainmorgenstern wood_roundshield roundshield rustedgreathelm diamond_lochaberaxe
+  iron_lochaberaxe`; decorations `torse_and_mantle crown big_plume two_plumes viking_horns`.
+- Epic Knights ships Better Combat attributes for its weapons, so with both mods the knights fight with their own
+  weapons' combos.
+
+### Mob combat (Better Combat for mobs)
+Better Mob Combat (MIT, Fabric only to 1.20.1) let humanoid mobs fight with Better Combat. This is our own take on it.
+- **Who:** humanoid melee mobs whose melee goal is vanilla's `MeleeAttackGoal`, holding a weapon Better Combat has
+  attributes for. That's our fighting folk (not archers or builders), and armed zombies (husks, drowned, zombified
+  piglins), vindicators and wither skeletons. Piglins and brutes (their brains attack without a goal) keep vanilla's
+  blow. Unarmed mobs and other mobs are untouched. `MeleeAttackGoalMixin` hands the attack to `MobCombat.attackTick`.
+- **A swing:**
+  - The weapon's attributes come from Better Combat's own registry (data packs, so other weapon mods count too).
+  - **Reach** is 3 plus the weapon's range bonus (or its own attack range). A swing starts within 90% of it, in sight.
+  - **Length** is 20 / the weapon's attack speed (a player's 4 plus its modifiers), x1.35 for mobs, clamped to 10-40
+    ticks. A sword is about 17 ticks, a claymore about 27. Then a 4-tick pause.
+  - **Wind-up:** the blow lands at the attack's `upswing` share of the swing (at least 4 ticks in), so it can be seen
+    coming and rolled away from.
+  - **Combo:** each swing is the weapon's next attack (a sword: slash right, slash left, stab). Attacks that need a
+    shield in the off hand, or an empty one, are skipped when that doesn't hold; dual-wield and mounted attacks are
+    never used. The combo starts over 2 s after a swing.
+  - **The blow** strikes every foe in reach and in the arc, up to 5:
+    - a horizontal slash: the attack's angle;
+    - an overhead: a 28 degree half-width;
+    - a stab: an 18 degree half-width.
+    
+    The target is always struck if it's still in reach. Each hit is the mob's own attack (enchantments, knockback,
+    fire) at the attack's damage multiplier. The swing sound plays.
+  - **Foes:** the target, anyone fighting the mob, and those it would fight anyway: for folk, monsters (not creepers),
+    folk of realms at war with theirs, and players they're hostile to or who are wanted; for monsters, players. A sweep
+    never strikes the mob's own side.
+  - **Moving:** the mob moves at the attack's movement multiplier while swinging.
+- **Animations:** Player Animation Library only animates players' models, but its animation core isn't tied to them.
+  The server sends watchers `MobSwing` (the mob, the animation id, the swing's length). Their client plays Better
+  Combat's animation on a humanoid controller of its own for that mob, stretched over the swing. After vanilla poses
+  the model, the animation's bones are laid onto its head, body, arms and legs. That covers the body and each armour
+  piece (`ModelFeatureRenderer`) and the model as the layers see it (`LivingEntityRenderer.submit`, so held items
+  follow). Humanoid models get the whole animation; an illager's limbs get it while attacking. Without the library, or
+  if its controller can't be built, the mob does vanilla's arm swing. The library's Molang engine type isn't on our
+  compile path (it's nested in its jar), so the controller is built by reflection.
+- **Sidestep:** a fighting folk on the ground and not mid-swing may dodge a player's melee blow. The blow does nothing
+  and he hops aside (0.55 sideways, 0.2 back, 0.22 up), with a whiff sound and a puff. Odds: guards 15%, archers and
+  barbarians 10%, kings, lords and chiefs 25%, once every 3 s at most. Better Combat players' blows land at the end of
+  their wind-up, so this is the dodge as the swing comes in. Only with Better Combat loaded.
+
+### Notes for the lead and testers
+- No new attachments or saved data. Swings and dodges are kept in memory only.
+- `MobSwing` is registered whether or not Better Combat is loaded, so clients and servers always agree.
+- Epic Knights can't be tested on 26.3 until it has a build. Check first when it does: a new kingdom's guards, archers
+  and king; a fiefdom's (overlord's colours on the surcoats, shields and plumes); a camp's barbarians and chief.
+  Then see whether the decorations show, and whether the log says pieces were skipped.
+- **Check first (Better Combat):**
+  - `/summon zombie ~ ~ ~ {equipment:{mainhand:{id:"iron_sword"}}}` or a vindicator. It should swing slash, slash,
+    stab, animated, from about 3 blocks away, and the blow should land mid-swing. Roll out of it with Combat Roll.
+  - Kingdom guards fighting a group of zombies: a slash should catch several, and never hurt their fellow guards.
+  - A king's claymore combo (slam), against the wind-up.
+  - Hitting a guard over and over: about one blow in seven is dodged.
+  - Armour and the held sword should follow the animated arm.

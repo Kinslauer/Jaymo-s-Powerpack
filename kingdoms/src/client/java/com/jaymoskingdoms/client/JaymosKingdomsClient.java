@@ -30,6 +30,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		EntityRenderers.register(JaymosKingdoms.FOLK, FolkRenderer::new);
 		CampSkins.register();
+		MobAnimations.register();
 	}
 
 	/** Their render state: which of them it is, its faction's style (type ordinal), and the dye it wears (-1 for none). */

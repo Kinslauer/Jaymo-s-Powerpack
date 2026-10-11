@@ -281,6 +281,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		this.setHomeTo(home, radius);
 		Role spec = ROLES.getOrDefault(role, ROLES.get(GUARD));
 		spec.outfit().accept(this, faction);
+		// Epic Knights' armour and arms in the faction's style and colours, when it's loaded
+		KnightsCompat.dress(this, faction);
 		this.setHealth(this.getMaxHealth());
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			this.setDropChance(slot, 0.0F);
