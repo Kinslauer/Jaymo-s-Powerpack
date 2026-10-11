@@ -282,9 +282,17 @@ tasks.register("profileMods") {
 		}
 	}
 }
+// the server now runs on the user's Steam Deck (deck/README.md): a fresh mods folder to download there on each release
+tasks.register("deckMods", Tar) {
+	dependsOn "modpackMods"
+	archiveFileName = "Deck-mods-${project.version}.tar.gz"
+	compression = Compression.GZIP
+	destinationDirectory = packDir
+	from(new File(packDir, "mods")) { into "mods" }
+}
 tasks.register("packageModpack") {
 	group = "build"
-	dependsOn "modpackMods", "curseforgePack", "serverMods", "profileMods"
+	dependsOn "modpackMods", "curseforgePack", "serverMods", "profileMods", "deckMods"
 }
 
 // each power keeps its own lang file in lang/parts/<power>.json; they're merged into en_us.json here
