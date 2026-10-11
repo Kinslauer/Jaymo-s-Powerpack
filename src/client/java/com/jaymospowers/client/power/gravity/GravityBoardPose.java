@@ -14,10 +14,10 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * Riding the earthboard (rock flight), drawn for everyone: a surfer's stance on the slab, arms flung wide for
- * balance (one forward and high, the other back and low), front foot forward, the body tipped into the speed. It
- * carves: the whole body leans into a turn or a slide, pivoting on the feet, and the inside hand drops while the
- * outside one rises. Worked out from the actual motion (how fast the rider is turning, sliding and going), so other
+ * Riding the earthboard (rock flight), drawn for everyone: a low surfer's crouch on the slab, leaning far forward
+ * (about 30 degrees, from the hips) with both arms reaching out in front and spread, front foot forward, back foot
+ * behind, eyes up ahead. It carves: the whole body leans into a turn or a slide, pivoting on the feet, and the inside
+ * hand drops while the outside one rises. Worked out from the actual motion (how fast the rider is turning, sliding and going), so other
  * players see it too.
  */
 public final class GravityBoardPose {
@@ -25,10 +25,14 @@ public final class GravityBoardPose {
 	static final float TURN_LEAN = 1.8F, SLIDE_LEAN = 45.0F, MAX_LEAN = 30.0F;
 	/** How quickly the lean follows (per tick, 0-1). */
 	static final float LEAN_EASE = 0.22F;
-	/** Tipped forward at rest, and the extra at full speed ({@code TOP_SPEED} blocks/tick). */
-	static final float PITCH = 6.0F, SPEED_PITCH = 12.0F, TOP_SPEED = 0.95F;
-	/** How far each arm is out from the side (radians), and how much the lean swings them. */
-	static final float FRONT_ARM_OUT = 1.45F, BACK_ARM_OUT = 1.2F, ARM_LEAN = 0.6F;
+	/** The forward lean from the hips (degrees), and the little extra at full speed ({@code TOP_SPEED} blocks/tick). */
+	static final float PITCH = 30.0F, SPEED_PITCH = 5.0F, TOP_SPEED = 0.95F;
+	/** The hips (blocks over the feet), and how far the crouch sinks the body. */
+	static final float HIP = 0.75F, CROUCH = 0.12F;
+	/** Both arms reach out in front (radians from hanging, + forward) and spread apart; the lean swings them. */
+	static final float ARM_FORWARD = 0.95F, ARM_SPREAD = 0.6F, ARM_LEAN = 0.5F;
+	/** The stance: front leg forward, back leg behind (radians, before standing them up against the lean). */
+	static final float FRONT_LEG = 0.7F, BACK_LEG = 0.6F;
 
 	/** {@code lean}: degrees, + is to the rider's left; {@code pitch}: degrees forward. */
 	record Ride(float lean, float pitch, float time) {
@@ -69,7 +73,7 @@ public final class GravityBoardPose {
 		state.setData(KEY, new Ride(lean[0], pitch, time));
 	}
 
-	/** After the body faces its way: tipped forward and leaning into the turn, about the feet on the board. */
+	/** After the body faces its way: leaning into the turn about the feet, then bent forward at the hips, crouched. */
 	public static void rotate(LivingEntityRenderState state, PoseStack poseStack) {
 		Ride ride = state.getData(KEY);
 		if (ride == null || state.deathTime > 0.0F) {
@@ -77,7 +81,9 @@ public final class GravityBoardPose {
 		}
 		// (a positive turn about Z tips the top to the left; a negative one about X tips it forward)
 		poseStack.rotateDegrees(Axis.ZP, ride.lean());
+		poseStack.translate(0.0F, HIP - CROUCH, 0.0F);
 		poseStack.rotateDegrees(Axis.XP, -ride.pitch());
+		poseStack.translate(0.0F, -HIP, 0.0F);
 	}
 
 	/** After the model animates: the stance, which holds whatever else the arms and legs were doing. */
@@ -91,17 +97,20 @@ public final class GravityBoardPose {
 		}
 		float lean = ride.lean() * Mth.DEG_TO_RAD;
 		float sway = Mth.sin(ride.time() * 0.12F) * 0.06F;
-		// left arm forward and high, right arm back and low; the inside hand drops in a lean, the outside one rises
-		set(h.leftArm, -0.55F + sway, 0.15F, -(FRONT_ARM_OUT - lean * ARM_LEAN));
-		set(h.rightArm, 0.35F - sway, -0.1F, BACK_ARM_OUT + lean * ARM_LEAN);
-		// front foot forward, back foot behind, a little wide
-		set(h.rightLeg, -0.35F, 0.25F, 0.1F);
-		set(h.leftLeg, 0.3F, -0.15F, -0.1F);
+		float pitch = ride.pitch() * Mth.DEG_TO_RAD;
+		// both arms out in front and spread; the inside hand drops in a lean, the outside one rises
+		set(h.leftArm, -ARM_FORWARD + sway + lean * ARM_LEAN * 0.4F, 0.0F, -ARM_SPREAD);
+		set(h.rightArm, -ARM_FORWARD - sway - lean * ARM_LEAN * 0.4F, 0.0F, ARM_SPREAD);
+		h.leftArm.zRot += lean * ARM_LEAN;
+		h.rightArm.zRot += lean * ARM_LEAN;
+		// the legs stand back up against the forward bend: right foot forward, left foot behind, a little wide
+		set(h.rightLeg, -pitch - FRONT_LEG, 0.15F, 0.08F);
+		set(h.leftLeg, -pitch + BACK_LEG, -0.1F, -0.08F);
 		h.body.xRot = 0.0F;
 		h.body.yRot = 0.0F;
 		h.body.zRot = 0.0F;
-		// eyes up and ahead past the forward tip
-		h.head.xRot -= ride.pitch() * Mth.DEG_TO_RAD * 0.7F;
+		// eyes up and ahead, past the forward bend
+		h.head.xRot -= pitch * 0.85F;
 	}
 
 	private static void set(ModelPart part, float x, float y, float z) {
