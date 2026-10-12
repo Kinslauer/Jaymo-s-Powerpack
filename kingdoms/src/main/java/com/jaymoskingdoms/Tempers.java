@@ -213,15 +213,11 @@ final class Tempers {
 		return false;
 	}
 
-	/** A line of his, heard by players nearby. */
+	/** A line of his, over his head for players nearby. */
 	private static void say(ServerLevel level, Folk king, Faction f, Temper t) {
 		int line = level.getRandom().nextInt(4);
 		Component words = Component.translatable("temper.jaymoskingdoms." + t.key() + ".line" + line);
-		Component said = Component.translatable("message.jaymoskingdoms.ruler_says", king.getDisplayName(), words)
-			.withStyle(t == Temper.TYRANT || t == Temper.PARANOID ? ChatFormatting.RED : ChatFormatting.GOLD);
-		for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, king.getBoundingBox().inflate(SPEECH_RANGE))) {
-			p.sendSystemMessage(said);
-		}
+		Speech.say(level, king, words, t == Temper.TYRANT || t == Temper.PARANOID ? Speech.RED : Speech.GOLD, SPEECH_RANGE);
 	}
 
 	private static void gift(Villager v, ItemStack gift) {
