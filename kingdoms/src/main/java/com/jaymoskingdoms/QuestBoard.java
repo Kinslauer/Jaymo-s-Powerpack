@@ -63,9 +63,9 @@ final class QuestBoard {
 		"abandoned_camp_pale_garden", "abandoned_camp_bamboo_jungle", "swamp_hut", "igloo", "desert_pyramid", "jungle_pyramid", "pillager_outpost");
 	/** The pack's ruin mods (their structures count as ruins, villages aside). */
 	private static final List<String> RUIN_MODS = List.of(GrimSites.NAMESPACE, "ati_structures");
-	/** Where a champion may lair. */
+	/** Where a champion may lair (rooms to fight in: not the buried trail ruins, which get dig quests instead). */
 	private static final List<String> LAIRS = List.of("pillager_outpost", "desert_pyramid", "jungle_pyramid", "stronghold", "trial_chambers", "ancient_city",
-		"ruined_portal", "ruined_portal_desert", "ruined_portal_jungle", "ruined_portal_swamp", "ruined_portal_mountain", "trail_ruins", "igloo", "swamp_hut",
+		"ruined_portal", "ruined_portal_desert", "ruined_portal_jungle", "ruined_portal_swamp", "ruined_portal_mountain", "igloo", "swamp_hut",
 		"mansion", "mineshaft");
 
 	/** A quest a trade can give: its words, kind, target, how many (min..max); for a fetch, the ruins it looks in and the keepsake. */
@@ -251,7 +251,7 @@ final class QuestBoard {
 		}
 		while (!options.isEmpty()) {
 			T t = options.remove(random.nextInt(options.size()));
-			Quest q = make(level, giver, f, who, t, random, trade);
+			Quest q = make(level, giver, f, who, t, random, trade, true);
 			if (q != null) {
 				return q;
 			}
@@ -259,11 +259,24 @@ final class QuestBoard {
 		return mail(level, giver, f, who, random, trade);
 	}
 
-	private static @Nullable Quest make(ServerLevel level, LivingEntity giver, Faction f, Quest.Giver who, T t, RandomSource random, Trade trade) {
+	/** (Testing) A villager's fetch quest at the nearest trail ruins: a dig. Null if their trade has no fetch, or none are near. */
+	static @Nullable Quest dig(ServerLevel level, LivingEntity giver, Faction f, RandomSource random) {
+		String job = job(giver);
+		Trade trade = TRADES.getOrDefault(job, TRADES.get("none"));
+		Quest.Giver who = new Quest.Giver(giver.getUUID(), giver.getName().getString(), f.id(), false, job);
+		for (T t : trade.quests()) {
+			if (t.kind() == Quest.FETCH) {
+				return make(level, giver, f, who, new T(t.key(), t.kind(), t.target(), t.min(), t.max(), List.of("trail_ruins"), t.keepsake()), random, trade, false);
+			}
+		}
+		return null;
+	}
+
+	private static @Nullable Quest make(ServerLevel level, LivingEntity giver, Faction f, Quest.Giver who, T t, RandomSource random, Trade trade, boolean mods) {
 		int count = t.min() + random.nextInt(t.max() - t.min() + 1);
 		Quest.Objective objective;
 		if (t.kind() == Quest.FETCH) {
-			Pair<BlockPos, Holder<Structure>> ruin = locate(level, giver.blockPosition(), t.where(), true, VILLAGER_SEARCH_CHUNKS);
+			Pair<BlockPos, Holder<Structure>> ruin = locate(level, giver.blockPosition(), t.where(), mods, VILLAGER_SEARCH_CHUNKS);
 			if (ruin == null) {
 				return null;
 			}
@@ -400,8 +413,17 @@ final class QuestBoard {
 		return new Quest(UUID.randomUUID().toString(), Quest.CHIEF, illager ? "king.warlord" : "king.chief", who, o, royalReward(random), 0L);
 	}
 
+	/** (Testing) {@code king}'s champion decree, its lair the nearest {@code lair} (a vanilla structure); null with none near. */
+	static @Nullable Quest champion(ServerLevel level, LivingEntity king, Faction f, String lair, RandomSource random) {
+		return champion(level, f, new Quest.Giver(king.getUUID(), king.getName().getString(), f.id(), true, "king"), List.of(lair), false, random);
+	}
+
 	private static @Nullable Quest champion(ServerLevel level, LivingEntity king, Faction f, Quest.Giver who, RandomSource random) {
-		Pair<BlockPos, Holder<Structure>> lair = locate(level, f.seat(), LAIRS, true, KING_SEARCH_CHUNKS);
+		return champion(level, f, who, LAIRS, true, random);
+	}
+
+	private static @Nullable Quest champion(ServerLevel level, Faction f, Quest.Giver who, List<String> lairs, boolean mods, RandomSource random) {
+		Pair<BlockPos, Holder<Structure>> lair = locate(level, f.seat(), lairs, mods, KING_SEARCH_CHUNKS);
 		if (lair == null) {
 			return null;
 		}
