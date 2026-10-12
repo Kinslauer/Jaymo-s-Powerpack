@@ -7,7 +7,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * (0.5.38) The tack a horse wears beyond vanilla's saddle and armour slots: its bridle and its blanket (put on in the
+ * (0.5.40) The tack a horse wears beyond vanilla's saddle and armour slots: its bridle and its blanket (put on in the
  * tack screen, {@link TackMenu}). Saved, and synced so every client draws them.
  */
 public record Tack(ItemStack bridle, ItemStack blanket) {

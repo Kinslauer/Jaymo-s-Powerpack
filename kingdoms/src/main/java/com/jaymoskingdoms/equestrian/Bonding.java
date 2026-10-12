@@ -58,7 +58,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.38) Jaymo's Equestrian, stage 2: bond and tack. A horse trusts each of its riders on their own account
+ * (0.5.40) Jaymo's Equestrian, stage 2: bond and tack. A horse trusts each of its riders on their own account
  * ({@link Bond}): brushing, feeding, watering and riding it raise that trust; spurring it on (sprinting), letting it go
  * hungry or thirsty, leaving it out in the rain without a blanket and hurting it lower it. Below {@link #BUCK_BELOW} it
  * bucks now and then (so a stranger on your war horse is soon on the ground); from {@link #WHISTLE_TRUST} it comes when
@@ -70,7 +70,7 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Bonding {
 	// ---- trust -------------------------------------------------------------------------------------------------------
-	/** What a new owner starts at; what the owner of a horse tamed before 0.5.38 starts at. */
+	/** What a new owner starts at; what the owner of a horse tamed before 0.5.40 starts at. */
 	public static final float TAME_TRUST = 30.0F, LEGACY_TRUST = 50.0F;
 	/** Trust from a brushing (once every {@link #BRUSH_COOLDOWN} ticks), a feed, a drink, a hoof pick, and a minute's easy riding. */
 	public static final float BRUSH_TRUST = 4.0F, FEED_TRUST = 1.5F, WATER_TRUST = 2.0F, PICK_TRUST = 1.0F, RIDE_TRUST = 1.0F;
@@ -262,7 +262,7 @@ public final class Bonding {
 
 	// ---- reading ----------------------------------------------------------------------------------------------------------
 
-	/** Its bond (a new one if it has none; the owner of a horse tamed before 0.5.38 starts well in with it). */
+	/** Its bond (a new one if it has none; the owner of a horse tamed before 0.5.40 starts well in with it). */
 	public static Bond bond(AbstractHorse horse) {
 		Bond b = horse.getAttached(BOND);
 		if (b != null) {

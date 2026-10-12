@@ -16,7 +16,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 
 /**
- * (0.5.38) The tack screen ({@link TackMenu}): saddle, bridle, blanket and barding down the left, the horse in the
+ * (0.5.40) The tack screen ({@link TackMenu}): saddle, bridle, blanket and barding down the left, the horse in the
  * middle, and on the right how much it trusts you, its four disciplines (level and progress), its hunger, thirst and
  * hooves. Drawn plainly in vanilla's grey.
  */

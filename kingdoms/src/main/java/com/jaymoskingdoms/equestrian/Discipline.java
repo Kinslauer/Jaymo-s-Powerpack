@@ -3,7 +3,7 @@ package com.jaymoskingdoms.equestrian;
 import java.util.Locale;
 
 /**
- * (0.5.38) What a horse learns by being ridden, each to level 5 ({@link Bonding}): the trail (distance walked and
+ * (0.5.40) What a horse learns by being ridden, each to level 5 ({@link Bonding}): the trail (distance walked and
  * trotted: more stamina), racing (distance galloped: a faster top speed), jumping (jumps cleared: a higher jump) and war
  * (fights ridden through: more courage, and the kick). Saved by ordinal: only add at the end.
  */

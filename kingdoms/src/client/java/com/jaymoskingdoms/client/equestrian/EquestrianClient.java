@@ -40,7 +40,7 @@ import org.jspecify.annotations.Nullable;
  * (0.5.34) Riding, client side: the scroll wheel shifts gait, sprint bursts at the gallop, and the HUD (bottom right,
  * right of the hotbar, above the powers' chips, in Wind's style) shows the breed, the gait and a stamina bar with the
  * mark where a blown horse gets its wind back. A tamed horse's inventory screen shows its breed and stats.
- * (0.5.38) Bond and tack: the whistle (N) and trick (J; hold back for the kick) keys, hunger and thirst bars over the
+ * (0.5.40) Bond and tack: the whistle (N) and trick (J; hold back for the kick) keys, hunger and thirst bars over the
  * stamina bar (and under the crosshair when you look at your horse), the tack screen and its button on the horse's own
  * screen, and the stats only for a horse that trusts you enough.
  */
@@ -97,7 +97,7 @@ public final class EquestrianClient {
 			}
 		});
 		HudElementRegistry.attachElementAfter(VanillaHudElements.HOTBAR, JaymosKingdoms.id("equestrian"), EquestrianClient::hud);
-		// 0.5.38: bond and tack
+		// 0.5.40: bond and tack
 		KeyMapping.Category category = KeyMapping.Category.register(JaymosKingdoms.id("equestrian"));
 		whistleKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.whistle", InputConstants.KEY_N, category));
 		trickKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.trick", InputConstants.KEY_J, category));
@@ -221,7 +221,7 @@ public final class EquestrianClient {
 			int pip = g.ordinal() <= shown.ordinal() ? 0xFF000000 | GAIT_COLORS[shown.ordinal()] : reach ? 0xFF404040 : 0x60202020;
 			graphics.fill(px, y - 4, px + 3, y - 2, pip);
 		}
-		// (0.5.38) its hunger and thirst, two short bars over the label
+		// (0.5.40) its hunger and thirst, two short bars over the label
 		Bond b = horse.getAttached(Bonding.BOND);
 		// (its owner isn't synced to clients; a horse that knows you is a horse of yours or a friend's)
 		if (b != null && horse.isTamed() && b.knows(player.getUUID()) && !Equestrian.undead(horse)) {
@@ -290,7 +290,7 @@ public final class EquestrianClient {
 		}
 		Font font = Minecraft.getInstance().font;
 		graphics.text(font, Component.translatable(e.breed().key()), x + 2, y + 1, 0xFF404040, false);
-		// (0.5.38) a horse shows you what it's made of only once it trusts you
+		// (0.5.40) a horse shows you what it's made of only once it trusts you
 		Player viewer = Minecraft.getInstance().player;
 		Bond b = horse.getAttached(Bonding.BOND);
 		if (viewer != null && (b == null || b.trustOf(viewer.getUUID()) < Bonding.STATS_TRUST)) {

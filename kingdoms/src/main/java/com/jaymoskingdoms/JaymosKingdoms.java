@@ -115,13 +115,15 @@ public final class JaymosKingdoms implements ModInitializer {
 		Cavalry.register();
 		// 0.5.34: Jaymo's Equestrian, stage 1 (breeds, stats, gaits, stamina, courage, coats, war elephants) and its attachments
 		com.jaymoskingdoms.equestrian.Equestrian.register();
-		// 0.5.38: Jaymo's Equestrian, stage 2 (bond and tack: trust, disciplines, tricks, needs, tack) and its attachments
+		// 0.5.40: Jaymo's Equestrian, stage 2 (bond and tack: trust, disciplines, tricks, needs, tack) and its attachments
 		com.jaymoskingdoms.equestrian.Bonding.register();
 		Carriages.register();
 		Rickshaws.register();
 		Cabs.register();
 		// 0.5.29: quests from villagers and kings, their caches and champions, relics (and their attachments)
 		LOGGER.debug("quest attachments: {} {} {} {}", Quests.LOG, Quests.OFFER, Quests.MARK, QuestFoes.FOE);
+		// 0.5.38: where newcomers and immigrants are from (skin tone by climate)
+		LOGGER.debug("origin attachment: {}", SkinTones.ORIGIN);
 		Quests.register();
 		// 0.5.37: sorcery: camps' shamans and necromancers, courts' wizards, the risen dead, spell scrolls (and the thralls' attachment)
 		Arcana.register();

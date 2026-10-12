@@ -48,7 +48,7 @@ import net.minecraft.world.item.component.DyedItemColor;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.38) A horse's tack drawn on it in 3D ({@link Bonding}): the war and racing saddles (vanilla draws its own
+ * (0.5.40) A horse's tack drawn on it in 3D ({@link Bonding}): the war and racing saddles (vanilla draws its own
  * saddle), the headstall and reins they come with, the bridle, the blanket (in its dye) and horseshoes. The pieces are
  * boxes on the horse model's bones, read from {@code assets/jaymoskingdoms/tack/tack.json} ({@code tools/gen_tack.py});
  * the models follow the horse's own animation (they're equine models themselves). Also carries the kneel onto the render

@@ -40,6 +40,10 @@ public class ToolStationScreen extends AbstractContainerScreen<ToolStationMenu> 
 			lines.addAll(result.getTooltipLines(net.minecraft.world.item.Item.TooltipContext.of(minecraft.level), minecraft.player,
 				net.minecraft.world.item.TooltipFlag.Default.NORMAL).stream().skip(1).toList());
 			SidePanel.draw(graphics, font, leftPos - SidePanel.WIDTH - 2, topPos, result.getHoverName(), lines);
+		} else if (menu.status() != null) {
+			// why a modifier won't go on (no slots, at its max, doesn't fit a weapon)
+			SidePanel.draw(graphics, font, leftPos - SidePanel.WIDTH - 2, topPos,
+				menu.status().copy().withStyle(net.minecraft.ChatFormatting.RED), List.of());
 		} else {
 			List<Component> lines = new ArrayList<>();
 			for (ToolType type : ToolType.values()) {
