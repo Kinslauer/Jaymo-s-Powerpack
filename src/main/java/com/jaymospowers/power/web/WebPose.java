@@ -23,6 +23,11 @@ public record WebPose(int kind, long start, int side) {
 	public static final int FRONT_FLIP = 5, CORKSCREW = 6, CARTWHEEL = 7, TWIRL = 8, GIANT = 9,
 		HERO_LAND = 10, LAND_ROLL = 11, WINGS_LAND = 12;
 	public static final int FIRST_TRICK = FRONT_FLIP, LAST_TRICK = WINGS_LAND;
+	/**
+	 * The symbiote's roar ({@link WebSymbiote#ROAR_TICKS}): hunched and shuddering while the suit pieces itself
+	 * together over you, then thrown back, arms flung wide, as it roars.
+	 */
+	public static final int ROAR = 13;
 
 	/** How long each kind lasts (ticks). */
 	public static final int DODGE_TICKS = 12;
@@ -41,6 +46,7 @@ public record WebPose(int kind, long start, int side) {
 			case CORKSCREW, GIANT -> 16;
 			case TWIRL -> 12;
 			case HERO_LAND, WINGS_LAND -> 20;
+			case ROAR -> WebSymbiote.ROAR_TICKS;
 			default -> DODGE_TICKS;
 		};
 	}

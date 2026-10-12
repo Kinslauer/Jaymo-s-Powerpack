@@ -141,8 +141,8 @@ public final class WebPowerClient implements PowerClient {
 			return;
 		}
 		int hand;
-		// only Living Armor's tendrils grab; the plain suit just swings (on black ropes)
-		boolean tendrils = com.jaymospowers.power.web.WebSymbiote.armored(player);
+		// only Living Armor's tendrils grab (or theirs while they hold you off a wall); the plain suit just swings (on black ropes)
+		boolean tendrils = com.jaymospowers.power.web.WebSymbiote.tendrilKeys(player);
 		if (key == PowerKey.ABILITY_1) {
 			hand = WebNet.MAIN;
 		} else if (key == PowerKey.ABILITY_2 && (!down || tendrils || WebPower.offHandFree(player))) {
@@ -237,7 +237,7 @@ public final class WebPowerClient implements PowerClient {
 	public void tick(Minecraft minecraft, LocalPlayer player) {
 		swing.tick(minecraft, player);
 		wallRun.tick(player, swing);
-		grabAim = com.jaymospowers.power.web.WebSymbiote.armored(player) ? grabTarget(player) : null;
+		grabAim = com.jaymospowers.power.web.WebSymbiote.tendrilKeys(player) ? grabTarget(player) : null;
 		WebSymbioteClient.tick(minecraft, player, swing);
 		if (swing.attached() || swing.pull != null || player.isSpectator()) {
 			preview = null;
