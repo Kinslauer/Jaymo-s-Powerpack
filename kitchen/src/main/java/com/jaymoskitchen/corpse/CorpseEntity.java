@@ -840,6 +840,13 @@ public class CorpseEntity extends Entity {
 			return InteractionResult.SUCCESS_SERVER;
 		}
 
+		// solid iron (an iron golem): too heavy to lift by hand, and nothing to butcher. Only a power moves it
+		// (Jaymo's Powers' Gravity, through takeBy); it can still be searched
+		if (isHeavy() && (held.isEmpty() && player.isShiftKeyDown() || held.is(ItemTags.AXES))) {
+			player.sendOverlayMessage(Component.translatable(held.isEmpty()
+				? "message.jaymoskitchen.corpse.too_heavy" : "message.jaymoskitchen.corpse.no_butchering"));
+			return InteractionResult.SUCCESS_SERVER;
+		}
 		// sneak with an empty hand: carry any corpse in your arms (a skeleton, a spider, a chicken...)
 		if (player.isShiftKeyDown() && held.isEmpty()) {
 			return carry(level, player);
@@ -946,6 +953,9 @@ public class CorpseEntity extends Entity {
 	 * {@link ButcheringBonus}). On the ground: a rough job, about half the usual.
 	 */
 	private void butcher(ServerLevel level, boolean onBlock) {
+		if (isHeavy()) {
+			return;
+		}
 		if (onBlock) {
 			for (ItemStack stack : loot) {
 				if (stack.has(DataComponents.FOOD)) {
@@ -1034,6 +1044,12 @@ public class CorpseEntity extends Entity {
 			}
 		}
 		return new CorpseData(look(), templates);
+	}
+
+	/** Too heavy to lift by hand and can't be butchered (an iron golem): see {@link Corpses#HEAVY_CORPSES}. */
+	public boolean isHeavy() {
+		EntityType<?> type = sourceType();
+		return type != null && type.builtInRegistryHolder().is(Corpses.HEAVY_CORPSES);
 	}
 
 	/** A cow-sized carcass: needs a 2x2 butcher table, and is slower to carry. */

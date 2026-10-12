@@ -43,6 +43,11 @@ public final class Corpses {
 	public static final TagKey<EntityType<?>> SKELETON_CORPSES = tag("skeleton_corpses");
 	/** Animals too big for one butcher block: they need a 2x2 table, and are heavier to carry. */
 	public static final TagKey<EntityType<?>> BIG_CARCASSES = tag("big_carcasses");
+	/**
+	 * Bodies too heavy to lift by hand (iron golems): no carrying, no pocketing, no butchering. A power can still
+	 * take one ({@link CorpseEntity#takeBy}: Jaymo's Powers lets only Gravity do it).
+	 */
+	public static final TagKey<EntityType<?>> HEAVY_CORPSES = tag("heavy_corpses");
 
 	/** A corpse's look is the mob's saved data as text; anything longer than this is cut down to the basics. */
 	public static final int MAX_LOOK_LENGTH = 30000;
