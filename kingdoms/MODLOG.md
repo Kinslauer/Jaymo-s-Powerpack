@@ -1705,3 +1705,16 @@ notice are in `licenses/lootgoblins/`. Its code here stays LGPL-3.0: keep that s
 - Left out: the minor goblins (ore mobs) and their treasure items (Andy didn't want them), the helmet cosmetics and loot
   beams.
 - Seen in game: all eight looks in the original's idle pose and a kill's loot burst.
+
+## 0.5.32: quest foes no longer spawn inside the earth
+Andy's clip: a king's "The Beast" decree at trail ruins set its ravager down inside the buried ruin, walled in by
+earth and roots, and only spectator mode could find it.
+- **Why**: foes were placed where a 1-block column was free, so a ravager (nearly 2 wide) fit into walls; and trail
+  ruins are buried by design, so their "rooms" are pockets in the earth.
+- **Fix** (`QuestFoes`): a spot must fit the mob's whole body (`EntityType.getDimensions()`, `noCollision`, no
+  liquid) on a sturdy floor; a spot in a structure's pieces must open onto at least `OPEN_SPACE` (40) free blocks,
+  so nothing goes in a sealed pocket; structures in `BURIED` (trail ruins) put their champion, cache and guards on
+  the ground over the ruin's middle. Escorts and cache guards check their own size too.
+- **Testing**: `/kingdom quests offer champion <lair>` (op) gives the nearest king a champion decree at that lair.
+- Seen in game: a beast decree at trail ruins (112, 320) set The Beast and its vindicators on the grass over the
+  ruins at 127, 64, 323.

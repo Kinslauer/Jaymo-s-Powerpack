@@ -400,8 +400,17 @@ final class QuestBoard {
 		return new Quest(UUID.randomUUID().toString(), Quest.CHIEF, illager ? "king.warlord" : "king.chief", who, o, royalReward(random), 0L);
 	}
 
+	/** (Testing) {@code king}'s champion decree, its lair the nearest {@code lair} (a vanilla structure); null with none near. */
+	static @Nullable Quest champion(ServerLevel level, LivingEntity king, Faction f, String lair, RandomSource random) {
+		return champion(level, f, new Quest.Giver(king.getUUID(), king.getName().getString(), f.id(), true, "king"), List.of(lair), false, random);
+	}
+
 	private static @Nullable Quest champion(ServerLevel level, LivingEntity king, Faction f, Quest.Giver who, RandomSource random) {
-		Pair<BlockPos, Holder<Structure>> lair = locate(level, f.seat(), LAIRS, true, KING_SEARCH_CHUNKS);
+		return champion(level, f, who, LAIRS, true, random);
+	}
+
+	private static @Nullable Quest champion(ServerLevel level, Faction f, Quest.Giver who, List<String> lairs, boolean mods, RandomSource random) {
+		Pair<BlockPos, Holder<Structure>> lair = locate(level, f.seat(), lairs, mods, KING_SEARCH_CHUNKS);
 		if (lair == null) {
 			return null;
 		}
