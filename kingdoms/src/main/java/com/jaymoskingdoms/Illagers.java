@@ -43,7 +43,6 @@ import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -64,9 +63,8 @@ public final class Illagers {
 	static final double SIGHT = 28.0;
 	/** The warlord: health, his blows (on top of his axe), armour, how hard he is to shove. */
 	static final double WARLORD_HEALTH = 200.0, WARLORD_DAMAGE = 6.0, WARLORD_ARMOR = 8.0, WARLORD_TOUGHNESS = 2.0, WARLORD_KNOCKBACK_RESIST = 0.6;
-	/** He keeps this near his seat; the boss bar shows to players this near him. */
+	/** He keeps this near his seat (his boss bar's range is {@link BossBars#RANGE}). */
 	static final int WARLORD_HOME_RADIUS = 8;
-	static final double BAR_RANGE = 48.0;
 	/** His rally: at this share of his health, for this long (ticks); illagers this near him are called to his foe. */
 	static final float RALLY_AT = 0.4F;
 	static final int RALLY_TICKS = 20 * 60;
@@ -363,23 +361,18 @@ public final class Illagers {
 		}
 	}
 
-	/** The warlord's boss bar: his health, shown to the players near him. */
+	/** The warlord's boss bar: his health, shown to the players who've hit him while they stay near (0.5.19). */
 	private static void bar(ServerLevel level, Mob warlord) {
 		ServerBossEvent bar = BARS.computeIfAbsent(warlord.getUUID(), id -> new ServerBossEvent(id, warlord.getDisplayName(),
 			BossEvent.BossBarColor.WHITE, BossEvent.BossBarOverlay.NOTCHED_10));
 		bar.setProgress(warlord.getHealth() / warlord.getMaxHealth());
-		double r2 = BAR_RANGE * BAR_RANGE;
-		Vec3 at = warlord.position();
-		for (ServerPlayer player : level.players()) {
-			if (!player.isSpectator() && player.position().distanceToSqr(at) <= r2) {
-				bar.addPlayer(player);
-			}
-		}
-		for (ServerPlayer player : List.copyOf(bar.getPlayers())) {
-			if (player.level() != level || player.isSpectator() || player.position().distanceToSqr(at) > r2) {
-				bar.removePlayer(player);
-			}
-		}
+		BossBars.show(level, warlord, bar);
+	}
+
+	/** A camp's warlord (he gets a boss bar). */
+	static boolean warlord(Entity entity) {
+		Tag tag = tag(entity);
+		return tag != null && tag.role() == WARLORD;
 	}
 
 	static void clear() {

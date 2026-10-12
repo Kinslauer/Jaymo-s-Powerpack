@@ -639,6 +639,9 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
   - It stops (and stops tumbling) only when its whole length lies on blocks. Bodies laid on butcher blocks are exempt.
   - Verified: a cow corpse on a 1-block pillar slid off to the ground; one lying along a 3-block platform stayed put; a chicken on a pillar stayed put.
 
-## 0.4.24: iron golem corpses are heavy
+## 0.4.25: grinding stone down to sand
+- **Grindstones grind rock** (`MachineRecipes.GRIND`, hand grindstone and horse mill alike): stone or cobblestone makes 1 gravel, and gravel makes 1 sand.
+
+## 0.4.27: iron golem corpses are heavy
 - **New tag `jaymoskitchen:heavy_corpses`** (iron golems; `CorpseEntity.isHeavy`). A heavy corpse can't be carried or pocketed by hand ("Solid iron: far too heavy to lift.") and can't be butchered: an axe gets "Solid iron: there's nothing to butcher.", and `butcher` does nothing for it. It can still be searched and burnt.
 - A power can still take one through `takeBy`; Jaymo's Powers lets only Gravity's Lift do that.

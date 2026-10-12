@@ -330,7 +330,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   B is the Crush where you aim, or Collapsing Horizon's ring raining on the target (the Cave-in is gone). The meteor tears through roofs and anything else
   it falls through before it explodes. With Web or Gravity, F5 flips between first person and an over-the-shoulder
   view with the crosshair (no front view). See `docs/gravity.md`.
-- **0.8.41, heavy iron golem corpses (Kitchen 0.4.24):** an iron golem's corpse is solid iron. Only Gravity's Lift
+- **0.8.49, /power affinity works again:** `/power affinity <player> <power>` now makes that power the one that
+  awakens 95% of the time (`Affinity.CHANCE`); the other 5% fate picks any power. Before this the command saved the
+  affinity but awakenings ignored it, because the choice screen was switched off. The screen stays off.
+- **0.8.51, heavy iron golem corpses (Kitchen 0.4.27):** an iron golem's corpse is solid iron. Only Gravity's Lift
   can move it (drawn in, it lands in your arms as usual); nobody can carry or pocket it by hand, the symbiote's
   tendrils can't grab it (so it never hunts iron golems), and nothing butchers it: an axe gets "nothing to
   butcher" and the thrash can't tear it apart. It can still be searched and burnt. Kitchen's new

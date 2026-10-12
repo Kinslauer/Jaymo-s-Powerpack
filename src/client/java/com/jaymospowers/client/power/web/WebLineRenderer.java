@@ -55,6 +55,7 @@ final class WebLineRenderer {
 	/** End of every client tick: remember which creatures are hitched. */
 	static void tick(Minecraft minecraft) {
 		HITCHED.clear();
+		WebSpentLines.tick(minecraft);
 		if (minecraft.level == null) {
 			return;
 		}
@@ -231,6 +232,8 @@ final class WebLineRenderer {
 			}
 		}
 		WebBehemothClient.render(context, level, camera, partialTick);
+		// spent zip lines, falling and fading where they were left
+		WebSpentLines.render(context, camera, partialTick, width);
 		// weblines: the same line, strung taut between their two ends
 		java.util.List<com.jaymospowers.power.web.WebBridges.Span> spans = level.getAttached(com.jaymospowers.power.web.WebBridges.SPANS);
 		if (spans != null) {
@@ -450,7 +453,7 @@ final class WebLineRenderer {
 	 * Where the web leaves the hand: in first person, the screen corner the hand is in (as the fishing line does it);
 	 * otherwise the posed hand at the end of the arm (see WebArms), or roughly where the hand would be.
 	 */
-	private static Vec3 handPos(Minecraft minecraft, Player player, int handIndex, float partialTick) {
+	static Vec3 handPos(Minecraft minecraft, Player player, int handIndex, float partialTick) {
 		boolean mainRight = player.getMainArm() == HumanoidArm.RIGHT;
 		int side = (handIndex == WebNet.MAIN) == mainRight ? 1 : -1;
 		if (player == minecraft.player && minecraft.options.getCameraType().isFirstPerson()) {

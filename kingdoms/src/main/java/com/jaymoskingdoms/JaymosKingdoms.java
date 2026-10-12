@@ -74,11 +74,14 @@ public final class JaymosKingdoms implements ModInitializer {
 		Tempers.register();
 		Frights.register();
 		Theft.register();
+		// 0.5.19: a boss's bar shows only to the players who've hit it
+		BossBars.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
 		LOGGER.debug("war attachment: {}", WarData.WARS);
 		Wars.register();
 		// 0.4, combat: Better Combat's weapon moves for humanoid mobs, and folk's sidestep (only with Better Combat)
 		MobCombat.register();
+		Speech.register();
 		// 0.4.1: ATi Structures' above-ground buildings in compounds (only with ATi loaded)
 		AtiCompounds.register();
 		// 0.5: seats in the world's buildings (and their attachment); fiefdoms and camps in Grim Kingdoms' ruins (only with
@@ -88,11 +91,19 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.1: a night slept through made up at once (building, fields), farmers, rulers' days out
 		LOGGER.debug("warden attachment: {}", Wardens.WARDENS);
 		Nights.register();
+		// 0.5.14: horses and wagons: mounted guards and archers for prosperous realms, a wealthy king's carriage, and the
+		// fiefdoms' caravans to their kingdoms (and their attachment)
+		Wagon.register();
+		LOGGER.debug("caravan attachments: {} {}", Caravans.CARAVANS, Carriages.BOUGHT);
+		Caravans.register();
+		Cavalry.register();
+		Carriages.register();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();
 			Gatherers.clear();
 			Royals.clear();
 			Wardens.clear();
+			Focus.clear();
 		});
 	}
 }
