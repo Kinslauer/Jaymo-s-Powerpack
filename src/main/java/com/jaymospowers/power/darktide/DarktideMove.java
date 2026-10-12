@@ -7,6 +7,7 @@ import net.minecraft.world.entity.LivingEntity;
  * everyone through {@link DarktideState#MOVE}.
  */
 public final class DarktideMove {
+	/** Dark Strike's blow; variant bit 0: empowered, bit 1: a blade brought down from overhead (else a punch). */
 	public static final int STRIKE = 1;
 	/** Riposte: a slash from the shoulder across the body (freeze frame and flash on the clients). */
 	public static final int RIPOSTE = 2;
@@ -29,11 +30,17 @@ public final class DarktideMove {
 	public static final int SINK = 14;
 	/** Staggered: the guard broke. */
 	public static final int STAGGER = 15;
+	/** Dark Strike charging (R held); variant {@link #CHARGE_BLADE} (blade raised overhead) or {@link #CHARGE_FIST} (fist drawn back). */
+	public static final int CHARGE = 16;
+	public static final int CHARGE_BLADE = 0, CHARGE_FIST = 1;
 
 	/** The four kamae, in the order a Gedan parry steps through them. */
 	public static final int GEDAN = 0, CHUDAN = 1, JODAN = 2, HASSO = 3;
 
 	public static final int STRIKE_TICKS = 8;
+	/** Dark Strike: ticks to full charge, and the longest it can be held before it strikes on its own. */
+	public static final int CHARGE_FULL_TICKS = 20;
+	public static final int CHARGE_HOLD_MAX = 600;
 	public static final int RIPOSTE_TICKS = 10;
 	public static final int CRESCENT_TICKS = 10;
 	public static final int INK_CROSS_TICKS = 10;
