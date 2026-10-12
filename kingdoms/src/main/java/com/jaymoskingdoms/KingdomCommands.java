@@ -61,6 +61,15 @@ final class KingdomCommands {
 			.then(Commands.literal("storehouse").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(KingdomCommands::storehouse))
 			.then(Commands.literal("crew").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(KingdomCommands::crew))
 			.then(Commands.literal("hire").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(KingdomCommands::hire))
+			// (0.5.14) caravans, carriages, riches and vassals, for operators
+			.then(Commands.literal("caravan").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(c -> caravan(c, null))
+				.then(Commands.argument("name", StringArgumentType.word()).executes(c -> caravan(c, StringArgumentType.getString(c, "name")))))
+			.then(Commands.literal("carriage").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(KingdomCommands::carriage))
+			.then(Commands.literal("treasury").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+				.then(Commands.argument("emeralds", IntegerArgumentType.integer(0, 100000)).executes(KingdomCommands::treasury)))
+			.then(Commands.literal("vassal").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+				.then(Commands.argument("fief", StringArgumentType.word()).then(Commands.argument("overlord", StringArgumentType.word())
+					.executes(KingdomCommands::vassal))))
 			.then(Commands.literal("relation").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.then(Commands.argument("a", StringArgumentType.word()).then(Commands.argument("b", StringArgumentType.word())
 					.then(Commands.literal("allied").executes(c -> relation(c, Relation.ALLIED)))
@@ -104,11 +113,10 @@ final class KingdomCommands {
 			return Factions.byName(server, name);
 		}
 		ServerPlayer player = c.getSource().getPlayer();
-		if (player == null) {
-			return null;
-		}
-		Faction f = Factions.around(server, player.level(), player.blockPosition(), Villages.VILLAGE_RADIUS);
-		return f != null ? f : Factions.of(server, player.getUUID());
+		// (a command block, the console: the realm round where it runs)
+		Faction f = Factions.around(server, c.getSource().getLevel(), net.minecraft.core.BlockPos.containing(c.getSource().getPosition()),
+			Villages.VILLAGE_RADIUS);
+		return f != null || player == null ? f : Factions.of(server, player.getUUID());
 	}
 
 	private static int info(CommandContext<CommandSourceStack> c, @Nullable String name) {
@@ -125,6 +133,19 @@ final class KingdomCommands {
 		Tempers.Temper temper = Tempers.of(f);
 		if (temper != null) {
 			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.temper", Tempers.describe(temper)).withStyle(ChatFormatting.GRAY), false);
+		}
+		// (0.5.14) a fiefdom's focus, a kingdom's riches, caravans on the road
+		Focus.Kind focus = Focus.of(server, f);
+		if (focus != null) {
+			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.focus", Focus.describe(focus)).withStyle(ChatFormatting.GRAY), false);
+		}
+		if (f.type() == FactionType.KINGDOM) {
+			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.wealth", Wealth.describe(Wealth.of(server, f)),
+				Wealth.worth(server, f)).withStyle(ChatFormatting.GRAY), false);
+		}
+		long caravans = Caravans.all(server).stream().filter(x -> x.home() == f.id() || x.lord() == f.id()).count();
+		if (caravans > 0) {
+			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.caravans", caravans).withStyle(ChatFormatting.GRAY), false);
 		}
 		// relations
 		List<String> relations = f.relations().entrySet().stream()
@@ -307,6 +328,66 @@ final class KingdomCommands {
 		ServerPlayer player = c.getSource().getPlayerOrException();
 		Faction v = Villages.found(player.level(), player.blockPosition());
 		c.getSource().sendSuccess(() -> Component.literal("Founded the village of " + v.name()), true);
+		return 1;
+	}
+
+	private static int caravan(CommandContext<CommandSourceStack> c, @Nullable String name) {
+		Faction f = find(c, name);
+		if (f == null || f.type() != FactionType.FIEFDOM) {
+			c.getSource().sendFailure(Component.literal("Not a fiefdom"));
+			return 0;
+		}
+		Caravans.Caravan sent = Caravans.start(Factions.level(c.getSource().getServer()), f, true);
+		if (sent == null) {
+			c.getSource().sendFailure(Component.literal(f.name() + " can't send a caravan now (no overlord, at war, or one already out)"));
+			return 0;
+		}
+		c.getSource().sendSuccess(() -> Component.literal(f.name() + " sent caravan " + sent.id() + ": " + sent.carts().size() + " carts, " + sent.load()
+			+ " goods, " + sent.guards() + " guards" + (sent.mounted() ? " (mounted)" : "")), true);
+		return 1;
+	}
+
+	private static int carriage(CommandContext<CommandSourceStack> c) {
+		Faction f = find(c, null);
+		ServerLevel level = Factions.level(c.getSource().getServer());
+		Castle.Keep keep = f == null ? null : Factions.keep(c.getSource().getServer(), f.id());
+		if (f == null || keep == null) {
+			c.getSource().sendFailure(Component.literal("No realm with a seat here"));
+			return 0;
+		}
+		Wagon w = Carriages.build(level, f, keep);
+		c.getSource().sendSuccess(() -> Component.literal(w == null ? "No carriage" : f.name() + "'s carriage waits at " + keep.gate().toShortString()), true);
+		return w == null ? 0 : 1;
+	}
+
+	private static int treasury(CommandContext<CommandSourceStack> c) {
+		Faction f = find(c, null);
+		if (f == null) {
+			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.no_such"));
+			return 0;
+		}
+		int n = IntegerArgumentType.getInteger(c, "emeralds");
+		MinecraftServer server = c.getSource().getServer();
+		Faction after = Factions.update(server, f.id(), x -> x.withTreasury(n));
+		c.getSource().sendSuccess(() -> Component.literal(f.name() + "'s treasury: " + n + " (worth " + Wealth.worth(server, after) + ", "
+			+ Wealth.of(server, after).key() + ")"), true);
+		return 1;
+	}
+
+	private static int vassal(CommandContext<CommandSourceStack> c) {
+		MinecraftServer server = c.getSource().getServer();
+		Faction fief = Factions.byName(server, StringArgumentType.getString(c, "fief"));
+		Faction lord = Factions.byName(server, StringArgumentType.getString(c, "overlord"));
+		if (fief == null || lord == null || fief.id() == lord.id() || !fief.type().isRealm() || lord.type() != FactionType.KINGDOM) {
+			c.getSource().sendFailure(Component.literal("Name a realm and the kingdom it's to serve"));
+			return 0;
+		}
+		Relations.vassalize(server, fief.id(), lord.id());
+		Wars.syncRelations(server);
+		Focus.clear();
+		Faction after = Factions.get(server, fief.id());
+		c.getSource().sendSuccess(() -> Component.literal(fief.name() + " is now a fiefdom of " + lord.name() + " ("
+			+ Focus.of(server, after).key() + ")"), true);
 		return 1;
 	}
 

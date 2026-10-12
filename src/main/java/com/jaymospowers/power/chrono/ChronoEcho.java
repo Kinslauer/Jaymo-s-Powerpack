@@ -420,6 +420,10 @@ public class ChronoEcho extends Monster {
 			return false;
 		}
 		if (source.is(DamageTypes.GENERIC_KILL) || level.dimension() == Level.NETHER) {
+			if (this.fight != null && source.getEntity() instanceof ServerPlayer player) {
+				// (0.8.50) whoever strikes it (or shoots it, or hits it with a power) sees its bar
+				this.fight.hitBy(player);
+			}
 			return super.hurtServer(level, source, damage);
 		}
 		if (this.isInvulnerableTo(level, source) || damage <= 0.0F) {

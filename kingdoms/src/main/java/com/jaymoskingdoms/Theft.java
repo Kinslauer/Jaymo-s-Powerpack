@@ -56,7 +56,7 @@ import org.jspecify.annotations.Nullable;
  * there for longer. Taking unseen is noticed later, and costs you only a little. Putting things into its storage is a
  * gift: it raises your reputation (and a member's standing). Barbarian camps keep no law.
  *
- * <p>(0.5.15) Lighting a fire there (flint and steel or a fire charge) is arson, punished like a theft. Seen, it also
+ * <p>(0.5.20) Lighting a fire there (flint and steel or a fire charge) is arson, punished like a theft. Seen, it also
  * turns the townsfolk around on you: every grown villager and civilian of the faction within {@link #RIOT_RANGE} runs
  * at you and lays into you with their fists until you hit one of them back, when they scatter (the guards keep on).
  */
@@ -450,12 +450,8 @@ public final class Theft {
 			return;
 		}
 		LivingEntity witness = seen.getFirst();
-		Component cry = Component.translatable("message.jaymoskingdoms.theft.cry", witness.getDisplayName(),
-			Component.translatable("message.jaymoskingdoms.theft.cry." + crime.cry + "." + level.getRandom().nextInt(SHOUT_VARIANTS)))
-			.withStyle(w == Weight.LIGHT ? ChatFormatting.YELLOW : ChatFormatting.RED);
-		for (ServerPlayer near : level.getEntitiesOfClass(ServerPlayer.class, witness.getBoundingBox().inflate(SHOUT_RANGE))) {
-			near.sendSystemMessage(cry);
-		}
+		Component cry = Component.translatable("message.jaymoskingdoms.theft.cry." + crime.cry + "." + level.getRandom().nextInt(SHOUT_VARIANTS));
+		Speech.say(level, witness, cry, w == Weight.LIGHT ? Speech.YELLOW : Speech.RED, SHOUT_RANGE);
 		level.playSound(null, witness.getX(), witness.getY(), witness.getZ(), witness instanceof IronGolem ? SoundEvents.IRON_GOLEM_HURT
 			: SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 1.2F, w == Weight.HEAVY ? 0.8F : 1.0F);
 		Reputation.change(player, f, w.rep);

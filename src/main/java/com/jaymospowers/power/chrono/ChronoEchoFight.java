@@ -4,6 +4,9 @@ import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
 import java.util.ArrayDeque;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -25,7 +28,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * An echo in the Nether fights for real. It's tougher there (a boss bar shows its health to everyone near), and it turns
+ * An echo in the Nether fights for real. It's tougher there (a boss bar shows its health to the players who've hit it), and it turns
  * its owner's own power on them: every Chrono ability its owner has unlocked, used the way a fighter would use it.
  * <ul>
  * <li><b>Rewind (R):</b> badly hurt, it snaps back to where it stood {@link #REWIND_TICKS} ago, with the health it had.</li>
@@ -60,6 +63,8 @@ final class ChronoEchoFight {
 	static final int PUNCHES = 10, PUNCH_COOLDOWN = 240;
 	static final float PUNCH_DAMAGE = 1.0F;
 	static final double PUNCH_THROW = 1.2;
+	/** A player who's hit it keeps its boss bar while within this many blocks. */
+	static final double BAR_RANGE = 32.0;
 
 	private static final Identifier HEALTH_MODIFIER = com.jaymospowers.JaymosPowers.id("echo_nether_health");
 	private static final DustParticleOptions GOLD = new DustParticleOptions(0xFFE08A, 1.0F);
@@ -72,6 +77,8 @@ final class ChronoEchoFight {
 	private int rewindReady, stasisReady, overclockReady, bloomReady, punchReady;
 	private int overclockLeft, bloomLeft, punchStep = -1;
 	private @Nullable ServerBossEvent bar;
+	/** The players who've hit it (by hand, arrow or power) and stayed near since: only they see its bar. */
+	private final Set<UUID> hitters = new HashSet<>();
 	/** Whether it has dropped below {@link #BLINK_BELOW} this appearance (the blink is rolled once, on the way down). */
 	private boolean belowHalf;
 
@@ -183,9 +190,20 @@ final class ChronoEchoFight {
 		}
 	}
 
-	/** Everyone within 32 blocks sees its health while it fights. */
+	/** A player struck it (their arrow or power counts): they see its bar while they stay near. */
+	void hitBy(ServerPlayer player) {
+		this.hitters.add(player.getUUID());
+	}
+
+	/** The players who've hit it see its health while it fights; one who leaves its range has to hit it again. */
 	private void updateBar(ServerLevel level, boolean fighting) {
-		if (!fighting) {
+		if (this.echo.tickCount % 5 == 0) {
+			this.hitters.removeIf(id -> {
+				ServerPlayer player = level.getServer().getPlayerList().getPlayer(id);
+				return player == null || player.level() != level || !player.isAlive() || player.distanceToSqr(this.echo) > BAR_RANGE * BAR_RANGE;
+			});
+		}
+		if (!fighting || this.hitters.isEmpty()) {
 			if (this.bar != null) {
 				this.bar.removeAllPlayers();
 			}
@@ -196,12 +214,16 @@ final class ChronoEchoFight {
 				BossEvent.BossBarOverlay.NOTCHED_10);
 		}
 		this.bar.setProgress(this.echo.getHealth() / this.echo.getMaxHealth());
-		if (this.echo.tickCount % 20 == 0) {
-			for (ServerPlayer player : level.players()) {
-				if (player.distanceToSqr(this.echo) <= 32.0 * 32.0) {
-					this.bar.addPlayer(player);
-				} else {
+		if (this.echo.tickCount % 5 == 0) {
+			for (ServerPlayer player : java.util.List.copyOf(this.bar.getPlayers())) {
+				if (!this.hitters.contains(player.getUUID())) {
 					this.bar.removePlayer(player);
+				}
+			}
+			for (UUID id : this.hitters) {
+				ServerPlayer player = level.getServer().getPlayerList().getPlayer(id);
+				if (player != null) {
+					this.bar.addPlayer(player);
 				}
 			}
 		}
