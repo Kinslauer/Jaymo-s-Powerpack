@@ -3,6 +3,6 @@
 	"package": "com.jaymoskingdoms.client.mixin.mca",
 	"plugin": "com.jaymoskingdoms.mixin.mca.McaMixinPlugin",
 	"compatibilityLevel": "JAVA_25",
-	"client": ["McaVillagerMessageMixin"],
+	"client": ["McaScreensMixin", "McaVillagerMessageMixin"],
 	"injectors": { "defaultRequire": 1 }
 }

@@ -187,11 +187,11 @@ public final class Construction {
 	// ---- the brain ------------------------------------------------------------------------------------------------
 
 	/** One builder's tick. */
-	static void tick(ServerLevel level, Folk b) {
+	static void tick(ServerLevel level, Worker b) {
 		MinecraftServer server = level.getServer();
 		long now = level.getGameTime();
 		Job job = JOBS.computeIfAbsent(b.getUUID(), u -> restore(b));
-		if (b.getLastHurtByMob() != null && b.tickCount - b.getLastHurtByMobTimestamp() < FLEE_TICKS) {
+		if (b.getLastHurtByMob() != null && b.ticksAlive() - b.getLastHurtByMobTimestamp() < FLEE_TICKS) {
 			// (running for his life)
 			return;
 		}
@@ -236,7 +236,7 @@ public final class Construction {
 		}
 	}
 
-	private static Job restore(Folk b) {
+	private static Job restore(Worker b) {
 		Job job = new Job();
 		if (b.isCarrying()) {
 			job.phase = HAUL;
@@ -251,7 +251,7 @@ public final class Construction {
 	}
 
 	/** No work: back to the depot, his load (if any) put back in storage, and loafing about as builders do. */
-	private static void idle(ServerLevel level, @Nullable Faction f, Folk b, Job job, long now, boolean offDuty) {
+	private static void idle(ServerLevel level, @Nullable Faction f, Worker b, Job job, long now, boolean offDuty) {
 		job.phase = IDLE;
 		if (f == null) {
 			return;
@@ -275,7 +275,7 @@ public final class Construction {
 	}
 
 	/** Chooses his next step: stake the site (the foreman), fetch what the next blocks need, or lay them. */
-	private static void decide(ServerLevel level, Faction f, Works.Project p, Planner.Layout l, Folk b, Job job, long now) {
+	private static void decide(ServerLevel level, Faction f, Works.Project p, Planner.Layout l, Worker b, Job job, long now) {
 		job.placed = 0;
 		if (b.isCarrying()) {
 			job.phase = HAUL;
@@ -354,9 +354,9 @@ public final class Construction {
 	}
 
 	/** The loads other builders of the faction are carrying to the site (item → eighths). */
-	private static Map<Item, Integer> inflight(ServerLevel level, Faction f, Folk self) {
+	private static Map<Item, Integer> inflight(ServerLevel level, Faction f, Worker self) {
 		Map<Item, Integer> out = new HashMap<>();
-		for (Folk other : Builders.crew(level, f)) {
+		for (Worker other : Builders.crew(level, f)) {
 			Job job = JOBS.get(other.getUUID());
 			if (other != self && job != null && job.phase == HAUL && other.isCarrying()) {
 				out.merge(job.fetch != null ? job.fetch : raw(other.carried().getItem()), other.carried().getCount() * Materials.WHOLE, Integer::sum);
@@ -366,7 +366,7 @@ public final class Construction {
 	}
 
 	/** At the storage: takes the load out of the real containers (or finds there's none left, and waits). */
-	private static void load(ServerLevel level, Faction f, Works.Project p, Planner.Layout l, Folk b, Job job, long now) {
+	private static void load(ServerLevel level, Faction f, Works.Project p, Planner.Layout l, Worker b, Job job, long now) {
 		BlockPos depot = Builders.depot(f);
 		b.getLookControl().setLookAt(depot.getX() + 0.5, depot.getY() + 0.5, depot.getZ() + 0.5);
 		if (now < job.actAt) {
@@ -394,7 +394,7 @@ public final class Construction {
 	}
 
 	/** Carrying a load to the site: there, it goes onto the pile (the project's credit) and he sets to work. */
-	private static void haul(ServerLevel level, Faction f, Works.Project p, Planner.Layout l, Folk b, Job job, long now) {
+	private static void haul(ServerLevel level, Faction f, Works.Project p, Planner.Layout l, Worker b, Job job, long now) {
 		if (!b.isCarrying()) {
 			decide(level, f, p, l, b, job, now);
 			return;
@@ -433,7 +433,7 @@ public final class Construction {
 	}
 
 	/** The foreman stakes the site out: a fence post at each corner and a sign saying what goes up. */
-	private static void stake(ServerLevel level, Faction f, Works.Project p, Planner.Layout l, Folk b, Job job, long now) {
+	private static void stake(ServerLevel level, Faction f, Works.Project p, Planner.Layout l, Worker b, Job job, long now) {
 		if (!approach(level, b, job, l.center(), PLACE_REACH + 2.0, TALL_REACH, now)) {
 			return;
 		}
@@ -483,7 +483,7 @@ public final class Construction {
 	}
 
 	/** At the site: readies the next column or lays the next block, if what it needs is on the pile; else goes for it. */
-	private static void work(ServerLevel level, Faction f, Works.Project p, Planner.Layout l, Folk b, Job job, long now) {
+	private static void work(ServerLevel level, Faction f, Works.Project p, Planner.Layout l, Worker b, Job job, long now) {
 		MinecraftServer server = level.getServer();
 		Works.Project cur = Works.project(server, f.id(), p);
 		if (cur == null) {
@@ -694,7 +694,7 @@ public final class Construction {
 	}
 
 	/** Lays one block. False if a player stands in the way (he'll try again). */
-	private static boolean place(ServerLevel level, Faction f, Planner.Layout l, Planner.Op op, @Nullable Folk b) {
+	private static boolean place(ServerLevel level, Faction f, Planner.Layout l, Planner.Op op, @Nullable Worker b) {
 		BlockPos at = op.pos();
 		BlockState there = level.getBlockState(at);
 		if (there == op.state()) {
@@ -927,7 +927,7 @@ public final class Construction {
 	 * Walks {@code b} toward {@code goal} (in legs, as paths are short). True once he's within {@code reach} across and
 	 * {@code up} up or down. If he makes no progress for {@link #STUCK_TICKS}, he's moved there in a puff of smoke.
 	 */
-	private static boolean approach(ServerLevel level, Folk b, Job job, BlockPos goal, double reach, double up, long now) {
+	private static boolean approach(ServerLevel level, Worker b, Job job, BlockPos goal, double reach, double up, long now) {
 		if (!goal.equals(job.goal)) {
 			job.goal = goal;
 			job.best = Double.MAX_VALUE;

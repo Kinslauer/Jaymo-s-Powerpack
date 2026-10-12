@@ -30,7 +30,7 @@ public final class Builders {
 	/** What a builder does each tick (server side). Set by the construction code; idle by default. */
 	@FunctionalInterface
 	public interface Brain {
-		void tick(ServerLevel level, Folk builder);
+		void tick(ServerLevel level, Worker builder);
 	}
 
 	private static Brain brain = (level, builder) -> {
@@ -50,7 +50,7 @@ public final class Builders {
 	}
 
 	/** Called from {@link Folk} every server tick for builders. */
-	static void tick(ServerLevel level, Folk builder) {
+	static void tick(ServerLevel level, Worker builder) {
 		brain.tick(level, builder);
 	}
 
@@ -65,15 +65,15 @@ public final class Builders {
 	}
 
 	/** The loaded members of {@code faction}'s crew, foreman first. */
-	public static List<Folk> crew(ServerLevel level, Faction faction) {
-		List<Folk> crew = new ArrayList<>(level.getEntitiesOfClass(Folk.class, new AABB(faction.seat()).inflate(CREW_RANGE),
+	public static List<Worker> crew(ServerLevel level, Faction faction) {
+		List<Worker> crew = new ArrayList<>(Workers.near(level, new AABB(faction.seat()).inflate(CREW_RANGE),
 			f -> f.isAlive() && f.factionId() == faction.id() && Folk.isBuilder(f.role())));
 		crew.sort(Comparator.comparingInt(f -> f.role() == Folk.FOREMAN ? 0 : 1));
 		return crew;
 	}
 
-	public static @Nullable Folk foreman(ServerLevel level, Faction faction) {
-		List<Folk> crew = crew(level, faction);
+	public static @Nullable Worker foreman(ServerLevel level, Faction faction) {
+		List<Worker> crew = crew(level, faction);
 		return !crew.isEmpty() && crew.getFirst().role() == Folk.FOREMAN ? crew.getFirst() : null;
 	}
 
@@ -83,10 +83,10 @@ public final class Builders {
 	}
 
 	/** A new crew for {@code faction}: a foreman and workers, {@link #CREW_START} in all, at its depot. */
-	public static List<Folk> spawnCrew(ServerLevel level, Faction faction) {
-		List<Folk> crew = new ArrayList<>();
+	public static List<Worker> spawnCrew(ServerLevel level, Faction faction) {
+		List<Worker> crew = new ArrayList<>();
 		for (int i = 0; i < CREW_START; i++) {
-			Folk builder = spawn(level, faction, i == 0 ? Folk.FOREMAN : Folk.WORKER, null);
+			Worker builder = spawn(level, faction, i == 0 ? Folk.FOREMAN : Folk.WORKER, null);
 			if (builder != null) {
 				crew.add(builder);
 			}
@@ -95,7 +95,7 @@ public final class Builders {
 	}
 
 	/** One builder for {@code faction} at {@code at} (or by its depot), counted in its roster. */
-	public static @Nullable Folk spawn(ServerLevel level, Faction faction, int role, @Nullable BlockPos at) {
+	public static @Nullable Worker spawn(ServerLevel level, Faction faction, int role, @Nullable BlockPos at) {
 		var random = level.getRandom();
 		BlockPos depot = depot(faction);
 		BlockPos where = at != null ? at
@@ -104,13 +104,10 @@ public final class Builders {
 			// (inside the storehouse, under its roof)
 			where = depot;
 		}
-		Folk folk = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.MOB_SUMMONED);
+		Worker folk = Workers.body(level, faction, role, where, depot, HOME_RADIUS);
 		if (folk == null) {
 			return null;
 		}
-		folk.snapTo(where.getX() + 0.5, where.getY(), where.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
-		folk.setup(role, faction, depot, HOME_RADIUS);
-		level.addFreshEntity(folk);
 		Factions.update(level.getServer(), faction.id(), f -> f.withHoldings(f.holdings().adjust(role, 1)));
 		return folk;
 	}
