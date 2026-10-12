@@ -19,6 +19,7 @@
 		"jaymoskingdoms.villagers.mixins.json",
 		"jaymoskingdoms.lootgoblins.mixins.json",
 		"jaymoskingdoms.equestrian.mixins.json",
+		"jaymoskingdoms.pathing.mixins.json",
 		{ "config": "jaymoskingdoms.combat.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.mca.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.equestrian.client.mixins.json", "environment": "client" }
