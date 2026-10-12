@@ -149,7 +149,7 @@ public final class Corpses {
 			}
 		}
 		corpse.setUp(look(mob), kind, kept, level.getRandom().nextInt(3) + 1);
-		if (mob.isOnFire() && kind.burns()) {
+		if (mob.isOnFire() && corpse.burns()) {
 			// died burning (a zombie in the sun): keeps burning on the ground
 			corpse.setRemainingFireTicks(mob.getRemainingFireTicks());
 		}

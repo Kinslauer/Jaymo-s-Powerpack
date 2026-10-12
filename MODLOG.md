@@ -336,5 +336,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.8.51, heavy iron golem corpses (Kitchen 0.4.27):** an iron golem's corpse is solid iron. Only Gravity's Lift
   can move it (drawn in, it lands in your arms as usual); nobody can carry or pocket it by hand, the symbiote's
   tendrils can't grab it (so it never hunts iron golems), and nothing butchers it: an axe gets "nothing to
-  butcher" and the thrash can't tear it apart. It can still be searched and burnt. Kitchen's new
+  butcher" and the thrash can't tear it apart. It doesn't burn: searched, it drops its loot, falls apart (shuddering, slumping and sinking as iron chips crack off) and disappears. Kitchen's new
   `jaymoskitchen:heavy_corpses` tag lists the heavy ones; Powers checks it in `KitchenCompat.isHeavy`.

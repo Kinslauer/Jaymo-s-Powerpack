@@ -75,6 +75,9 @@ public class CorpseEntity extends Entity {
 		EntityDataSerializers.INT);
 	private static final EntityDataAccessor<String> OWNER_NAME = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.STRING);
+	/** A heavy corpse (an iron golem) falling apart once it's been looted (see {@link #crumble}). */
+	private static final EntityDataAccessor<Boolean> CRUMBLING = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.BOOLEAN);
 
 	/** Animals at most this big (wide and tall, after baby scaling) go in a pocket; bigger ones are carried. */
 	private static final float POCKET_WIDTH = 0.5F, POCKET_HEIGHT = 0.8F;
@@ -101,6 +104,8 @@ public class CorpseEntity extends Entity {
 	private static final float HUGE = 1.9F;
 	/** A burning creeper corpse explodes after this many ticks alight. */
 	private static final int CREEPER_FUSE = 160;
+	/** A looted heavy corpse falls apart over this many ticks, then it's gone (iron doesn't rot or burn). */
+	private static final int CRUMBLE_TICKS = 50;
 	/** Axe chops on the butcher block to break an animal down. */
 	private static final int CHOPS = 3;
 
@@ -111,6 +116,8 @@ public class CorpseEntity extends Entity {
 	private int chops;
 	private int burnTicks;
 	private int age;
+	/** Ticks since it started falling apart (both sides count; see {@link #CRUMBLING}). */
+	private int crumbleTicks;
 	/** A player's corpse: their hotbar when they died, and the slot they had selected. */
 	private final List<ItemStack> hotbar = new ArrayList<>(java.util.Collections.nCopies(9, ItemStack.EMPTY));
 	/** Client: the hanging limbs' swing (see {@link #swingLimbs}). */
@@ -403,6 +410,7 @@ public class CorpseEntity extends Entity {
 		builder.define(POSE, 0);
 		builder.define(TUMBLING, false);
 		builder.define(OWNER_NAME, "");
+		builder.define(CRUMBLING, false);
 	}
 
 	@Override
@@ -537,6 +545,12 @@ public class CorpseEntity extends Entity {
 	@Override
 	public void tick() {
 		super.tick();
+		if (this.entityData.get(CRUMBLING)) {
+			tickCrumbling();
+			if (isRemoved()) {
+				return;
+			}
+		}
 		if (level().isClientSide() && isOnFire()) {
 			smoulder();
 		}
@@ -705,30 +719,30 @@ public class CorpseEntity extends Entity {
 
 	private void serverTick(ServerLevel level) {
 		age++;
-		if (kind.burns() && !isOnFire() && tickCount % FLAME_CHECK_TICKS == 0 && touchesFlame(level)) {
+		if (burns() && !isOnFire() && tickCount % FLAME_CHECK_TICKS == 0 && touchesFlame(level)) {
 			igniteForSeconds(8.0F);
 		}
 		if (kind == CorpseKind.ZOMBIE && carrier() == null && tickCount % 20 == 0 && inSunlight(level)) {
 			// left out in the daylight, the undead burn as they would alive
 			igniteForSeconds(8.0F);
 		}
-		if (kind.burns() && isOnFire() && (isInWater() || isUnderWater())) {
+		if (burns() && isOnFire() && (isInWater() || isUnderWater())) {
 			// dunked: the flames go out for good (until something lights it again)
 			clearFire();
 			burnTicks = 0;
 			play(level, SoundEvents.FIRE_EXTINGUISH, 0.8F);
 		}
-		if (burnTicks > 0 && kind.burns() && getRemainingFireTicks() < 10 && !isInWaterOrRain()) {
+		if (burnTicks > 0 && burns() && getRemainingFireTicks() < 10 && !isInWaterOrRain()) {
 			// once a body catches, it keeps burning until it's gone (only water or rain puts it out). Topped up before
 			// it can go out, or it would fizz out and catch again every second
 			setRemainingFireTicks(40);
 		}
-		if (kind.burns() && burnTicks < BURN_TICKS - LAVA_BURN_TICKS && isInLava()) {
+		if (burns() && burnTicks < BURN_TICKS - LAVA_BURN_TICKS && isInLava()) {
 			// lava makes short work of it
 			burnTicks = BURN_TICKS - LAVA_BURN_TICKS;
 			play(level, SoundEvents.LAVA_EXTINGUISH, 0.8F);
 		}
-		if (isOnFire() && kind.burns()) {
+		if (isOnFire() && burns()) {
 			burnTicks++;
 			if (isCreeper()) {
 				if (burnTicks == 1 || burnTicks == CREEPER_FUSE - 30) {
@@ -771,6 +785,11 @@ public class CorpseEntity extends Entity {
 			}
 			if (age >= REANIMATE_TICKS) {
 				reanimate(level);
+			}
+		} else if (isHeavy()) {
+			// iron doesn't rot: left long enough, it falls apart where it lies (its loot with it)
+			if (age >= ROT_TICKS) {
+				startCrumbling(level);
 			}
 		} else if (!isCreeper() && kind != CorpseKind.SKELETON && age >= (isHostile() ? HOSTILE_ROT_TICKS : ROT_TICKS)) {
 			level.sendParticles(ParticleTypes.SMOKE, getX(), getY() + 0.2, getZ(), 15, 0.4, 0.1, 0.4, 0.01);
@@ -828,7 +847,7 @@ public class CorpseEntity extends Entity {
 		ItemStack held = player.getItemInHand(hand);
 
 		// anything that burns can be set alight
-		if (kind.burns() && (held.is(Items.FLINT_AND_STEEL) || held.is(Items.FIRE_CHARGE))) {
+		if (burns() && (held.is(Items.FLINT_AND_STEEL) || held.is(Items.FIRE_CHARGE))) {
 			igniteForSeconds(8.0F);
 			if (held.is(Items.FLINT_AND_STEEL)) {
 				held.hurtAndBreak(1, player, hand);
@@ -1007,6 +1026,14 @@ public class CorpseEntity extends Entity {
 	}
 
 	private InteractionResult search(ServerLevel level, Player player) {
+		if (isHeavy()) {
+			// stripped of what's worth taking, the iron gives way: it falls apart, then it's gone
+			dropLoot(level);
+			searched = true;
+			play(level, SoundEvents.BUNDLE_DROP_CONTENTS, 1.0F);
+			startCrumbling(level);
+			return InteractionResult.SUCCESS_SERVER;
+		}
 		if (searched || loot.isEmpty()) {
 			searched = true;
 			// searched: what it's wearing and holding comes off next, a piece at a time
@@ -1044,6 +1071,50 @@ public class CorpseEntity extends Entity {
 			}
 		}
 		return new CorpseData(look(), templates);
+	}
+
+	/** Whether fire takes it: everything but a heavy (iron) corpse. */
+	public boolean burns() {
+		return kind.burns() && !isHeavy();
+	}
+
+	/** Client: how far it has fallen apart, 0 (whole) to 1 (gone). */
+	public float crumble(float partialTicks) {
+		return this.entityData.get(CRUMBLING) ? Math.min(1.0F, (crumbleTicks + partialTicks) / CRUMBLE_TICKS) : 0.0F;
+	}
+
+	/** Starts a heavy corpse falling apart (once). */
+	private void startCrumbling(ServerLevel level) {
+		if (!this.entityData.get(CRUMBLING)) {
+			this.entityData.set(CRUMBLING, true);
+			crumbleTicks = 0;
+			jolt(true);
+			play(level, SoundEvents.IRON_GOLEM_DAMAGE, 0.7F);
+		}
+	}
+
+	/** Falling apart: plates of iron crack off with a clank, and at the end the last of it collapses and is gone. */
+	private void tickCrumbling() {
+		crumbleTicks++;
+		if (!(level() instanceof ServerLevel level)) {
+			return;
+		}
+		net.minecraft.core.particles.BlockParticleOption iron = new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK,
+			net.minecraft.world.level.block.Blocks.IRON_BLOCK.defaultBlockState());
+		float w = getBbWidth() / 2.0F;
+		if (crumbleTicks % 8 == 1) {
+			jolt(crumbleTicks > CRUMBLE_TICKS / 2);
+			level.sendParticles(iron, getX(), getY() + 0.3, getZ(), 10, w, 0.2, w, 0.15);
+			level.playSound(null, getX(), getY(), getZ(), random.nextBoolean() ? SoundEvents.CHAIN_BREAK : SoundEvents.IRON_GOLEM_DAMAGE,
+				SoundSource.NEUTRAL, 0.8F, 0.6F + random.nextFloat() * 0.3F);
+		}
+		if (crumbleTicks >= CRUMBLE_TICKS) {
+			level.sendParticles(iron, getX(), getY() + 0.3, getZ(), 50, w, 0.3, w, 0.2);
+			level.sendParticles(ParticleTypes.POOF, getX(), getY() + 0.2, getZ(), 12, w, 0.1, w, 0.02);
+			play(level, SoundEvents.IRON_GOLEM_DEATH, 0.8F);
+			play(level, SoundEvents.ANVIL_LAND, 0.5F);
+			discard();
+		}
 	}
 
 	/** Too heavy to lift by hand and can't be butchered (an iron golem): see {@link Corpses#HEAVY_CORPSES}. */
@@ -1146,7 +1217,7 @@ public class CorpseEntity extends Entity {
 
 	@Override
 	public boolean fireImmune() {
-		return !kind.burns() || super.fireImmune();
+		return !burns() || super.fireImmune();
 	}
 
 	@Override
