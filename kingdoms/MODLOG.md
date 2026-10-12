@@ -1517,7 +1517,65 @@ Andy asked for villagers who rickshaw goods and people about the villages and ki
   The pullers do everything else. Below 300 the cab is let go once it's back and empty.
 - Not yet seen in game: all of it (built only).
 
-## 0.5.27: the realm's armouries (original 3D armour sets)
+## 0.5.27: stables and taverns
+- **Three stable designs** (`Buildings.stable`), mocked up on the dev server and picked from screenshots:
+  - **Row stable** (`stableRow`, 13 x 7), the village one: four open-front stalls (gate, hay manger, water trough) under
+    a sloped slab roof, with a covered walk along the front.
+  - **Coaching yard** (`stableYard`, 13 x 13): four stalls under a gabled roof behind a fenced yard with a trough, a hay
+    stack, lamps on the posts and a 3-wide gate for carts.
+  - **Aisle barn** (`stableBarn`, 11 x 15): a stone-footed barn with a cart-wide aisle end to end, six stalls, a hayloft
+    over them and lanterns over the aisle.
+- Villages now build a stable (from 18 people); kingdoms and fiefdoms still build theirs from 28, now the coaching yard
+  or (half the time) the aisle barn in place of the old two-stall stable.
+- A finished stable gets its horses bought in (`Gatherers.STABLE_HORSES`, 2).
+- **Three tavern designs** (`Buildings.tavern`), mocked up the same way and picked by size (Andy's "mix by size"): the
+  alehouse below `TAVERN_GRAND` (48) people, then the coaching inn or (half the time) the beer-garden tavern:
+  - **Alehouse** (`tavernAlehouse`, 13 x 11): a long hall under a hipped roof, the bar and barrels down one side, a
+    smoker hearth and chimney, three tables, and a covered porch of tables out front.
+  - **Coaching inn** (`tavernInn`, 11 x 9): a stone taproom (bar, barrels, three tables, a smoker hearth and chimney)
+    and a timber floor of three beds above, up a ladder.
+  - **Tavern with a beer garden** (`tavernGarden`, 15 x 11): a two-storey tavern and a fenced garden beside it with
+    tables, lanterns on posts and its own gate.
+- **Only a wealthy kingdom with room to spare builds a tavern** (Andy's rule; `Planner.eligible`): a kingdom (never a
+  fiefdom or village) of 26 or more people, `Wealth` tier WEALTHY, with nothing else in its growth order left to
+  build. The wall doesn't wait for it (`utilitiesDone` skips it). Tables are a fence and a pressure plate of the land's
+  wood (`Kit.plate`).
+- **Sittable stools** (`Cushions`): every stool (a wooden slab beside a table) gets one of 26.3's cushions in the
+  realm's colour, facing the table, when the building is finished (or previewed). Right-click to sit.
+
+## 0.5.28: what guards throw depends on their kingdom's purse; treasuries that rise and fall; march with a war party
+- **Javelins are Balkon's.** Guards of ordinary kingdoms now throw Balkon's WeaponMod javelins
+  (`WeaponModJavelins`), which can't be picked up and hit for about 5 instead of a trident's 8. When and at whom they
+  throw is unchanged.
+- **Tridents for the elite.** Only the guards of the 2 wealthiest kingdoms holding at least 300 emeralds still throw
+  tridents (`Javelins.elite`, tuned by `ELITE_REALMS` and `ELITE_TREASURY`).
+- **Rocks for the poor.** Guards of a kingdom with under 50 emeralds (`POOR_TREASURY`), barbarians and their chiefs
+  throw rocks: a cobblestone thrown like a snowball that hits for 3 (`ROCK_DAMAGE`). Without WeaponMod loaded, everyone
+  but the elite throws rocks.
+- **Treasuries rise and fall** (`Treasuries`). A new kingdom starts with 10 to 700 emeralds instead of none.
+  Trade earns: a player's trade with a villager on a realm's land pays the realm a toll of a quarter of the emeralds in
+  it (at least 1; `VillagerTradeMixin`), and a fiefdom's caravan pays its kingdom 1 emerald per 32 goods delivered.
+  War costs and pays: a war party costs 2 emeralds per soldier when it marches, and a soldier who kills an enemy's
+  folk plunders 3 emeralds from that realm for his own (40 for a leader). The loser's tribute at a war's end, the
+  daily taxes and the tyrant's tithe are unchanged. Existing kingdoms keep their treasuries
+  (an op standing in one can set it with `/kingdom treasury <emeralds>`).
+- **March with a war party** (`/kingdom war join`, `WarParties.join`). A player sworn to a realm at war joins their
+  side's party in the field (told where it is), or, with none out and standing within 64 blocks of their realm's
+  seat, calls one up right there: it marches the whole way to the nearest enemy seat with them (up to 8 minutes'
+  march, 40 for the whole outing).
+- **Spoils carts.** Every war party now takes a horse-drawn storage cart with a carter (a caravan `Wagon`), or it
+  doesn't march. The cart keeps behind the column on the march and back from the fighting at the siege. When a
+  party's siege is over, it sacks the seat: 30% of the enemy's treasury and up to 9 stacks from its storehouse go
+  into the cart, which hauls them home into the storehouse (what won't fit is left at the seat) and treasury. Players
+  who marched with the party share 25% of the emeralds and gain 15 reputation. Break the cart open, or kill its horse
+  or carter, and the spoils spill on the ground for whoever gets there first. If the soldiers fall, a laden cart goes
+  on home alone. A cart that loses its way (stuck on a roof, a wall or a ravine for 12 seconds) is helped over it.
+  A party whose cart is lost can still sack the seat, but takes no goods and only the emeralds its soldiers can carry
+  (8 each, `SOLDIER_CARRIES`). Right-click a cart to see what it carries.
+- **Fix:** a rock hitting an MCA villager crashed the server (the rock's blow was dealt again and again).
+- The Kingdoms dev game loads WeaponMod (and Architectury) too, and Kingdoms compiles against it (`compileOnly`).
+
+## 0.5.29: the realm's armouries (original 3D armour sets)
 Andy asked for Jet and Elia's Armors (Forge only, all rights reserved, no source), then chose "make our own sets".
 Nothing of that mod is used: shapes, art and names are our own, drawn by `tools/gen_armory.py`.
 - **Four sets** (`Armory`), each helmet, chestplate, leggings, boots, crafted like vanilla armour from two ingredients:

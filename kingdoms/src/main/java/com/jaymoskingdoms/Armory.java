@@ -25,7 +25,7 @@ import net.minecraft.world.item.equipment.EquipmentAssets;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.27) The realm's armouries: four original armour sets with raised 3D pieces (drawn by the client's
+ * (0.5.29) The realm's armouries: four original armour sets with raised 3D pieces (drawn by the client's
  * {@code ArmoryLayer} from {@code assets/jaymoskingdoms/armory/<set>.json}; shapes and art from
  * {@code tools/gen_armory.py}). Their cloth (plumes, tabards, lacquered lames, hide kilts) takes dye like leather, so a
  * realm can wear its colour.

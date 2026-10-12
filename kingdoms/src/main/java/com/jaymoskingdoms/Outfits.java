@@ -58,9 +58,9 @@ public final class Outfits {
 	static final float ARCHER_HOOD_CHANCE = 0.6F;
 	/** A barbarian's chance his hides are marked with his camp's trim. */
 	static final float BARBARIAN_TRIM_CHANCE = 0.5F;
-	/** (0.5.27) One realm in this many arms its guards from {@link Armory} (its land's set, in its colour). */
+	/** (0.5.29) One realm in this many arms its guards from {@link Armory} (its land's set, in its colour). */
 	static final int ARMOURY_REALMS = 2;
-	/** (0.5.27) A raider's chance of the warlord's horned cap (the chief always wears the whole set). */
+	/** (0.5.29) A raider's chance of the warlord's horned cap (the chief always wears the whole set). */
 	static final float RAIDER_HORNS_CHANCE = 0.3F;
 
 	/** Cloth colours (RGB) for the land's gear. */
@@ -195,7 +195,7 @@ public final class Outfits {
 			}
 		}
 		if (arms.armoury()) {
-			// (0.5.27) the realm's armoury: its land's set, the cloth in the realm's colour and the trim on the chest
+			// (0.5.29) the realm's armoury: its land's set, the cloth in the realm's colour and the trim on the chest
 			String set = switch (climate) {
 				case DESERT, BADLANDS, SAVANNA -> "gladiator";
 				case JUNGLE, CHERRY -> "ronin";
@@ -283,7 +283,7 @@ public final class Outfits {
 	}
 
 	private static void camp(Folk folk, Heraldry arms, RandomSource random) {
-		// (0.5.27) the chief in the warlord's furs and horns, his kilt in the camp's colour; some raiders in the horned cap
+		// (0.5.29) the chief in the warlord's furs and horns, his kilt in the camp's colour; some raiders in the horned cap
 		if (folk.role() == Folk.CHIEF) {
 			for (ArmorType type : new ArmorType[]{ArmorType.HELMET, ArmorType.CHESTPLATE, ArmorType.LEGGINGS, ArmorType.BOOTS}) {
 				EquipmentSlot slot = type.getSlot();
