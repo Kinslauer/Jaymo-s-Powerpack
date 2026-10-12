@@ -143,7 +143,8 @@ public final class Economy {
 			// mine or tree farm short of them (0.5.2); else a guard
 			boolean crewShort = Builders.crewCount(grown) < Builders.crewTarget(grown);
 			int picked = crewShort ? Folk.WORKER : Farmers.wanted(server, grown) ? Folk.FARMER : Gatherers.wanted(server, grown, Folk.MINER) ? Folk.MINER
-				: Gatherers.wanted(server, grown, Folk.WOODCUTTER) ? Folk.WOODCUTTER : grown.type().isRealm() ? Folk.GUARD : Folk.WORKER;
+				: Gatherers.wanted(server, grown, Folk.WOODCUTTER) ? Folk.WOODCUTTER : Rickshaws.wanted(server, grown) ? Folk.PULLER
+				: grown.type().isRealm() ? Folk.GUARD : Folk.WORKER;
 			if (picked == Folk.GUARD && Focus.enoughGuards(server, grown)) {
 				// (0.5.14) a fiefdom with its few guards: another pair of hands for its fields or its mine instead
 				picked = Focus.of(server, grown) == Focus.Kind.FARMING && !Farmers.farms(server, grown).isEmpty() ? Folk.FARMER
@@ -188,6 +189,9 @@ public final class Economy {
 			hired = Farmers.spawn(level, ready, from);
 		} else if (Gatherers.isGatherer(role)) {
 			hired = Gatherers.spawn(level, ready, role, from);
+		} else if (role == Folk.PULLER) {
+			// (0.5.26) a rickshaw puller
+			hired = Rickshaws.spawn(level, ready, from);
 		} else if (role == Folk.ARCHER) {
 			hired = KingdomEvents.spawnArcher(level, ready);
 		} else if (Workers.inPlace(ready, role) && (hired = McaCompat.enlist(level, ready, role, ready.seat(), ready.seat(), Folk.HOME_RADIUS)) != null) {
@@ -226,7 +230,7 @@ public final class Economy {
 
 	/** The vacancy filled first: a foreman, then guards, archers, workers, anything else. */
 	private static int nextVacancy(Faction f) {
-		for (int role : new int[] {Folk.FOREMAN, Folk.GUARD, Folk.ARCHER, Folk.WORKER, Folk.FARMER, Folk.MINER, Folk.WOODCUTTER}) {
+		for (int role : new int[] {Folk.FOREMAN, Folk.GUARD, Folk.ARCHER, Folk.WORKER, Folk.FARMER, Folk.MINER, Folk.WOODCUTTER, Folk.PULLER}) {
 			if (f.holdings().vacancies().getOrDefault(Folk.roleName(role), 0) > 0) {
 				return role;
 			}

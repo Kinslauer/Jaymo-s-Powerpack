@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "S": "minecraft:stick",
+    "C": "minecraft:string",
+    "F": "minecraft:flint"
+  },
+  "pattern": [
+    "  F",
+    " C ",
+    "S  "
+  ],
+  "result": {
+    "id": "jaymospowers:primitive_spear"
+  }
+}

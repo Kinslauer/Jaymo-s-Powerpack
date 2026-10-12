@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "L": "minecraft:leather",
+    "B": "minecraft:bone"
+  },
+  "pattern": [
+    "LBL",
+    "L L"
+  ],
+  "result": {
+    "id": "jaymospowers:caveman_helmet"
+  }
+}

@@ -59,6 +59,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	public static final int MINER = 9, WOODCUTTER = 10;
 	/** (0.5.14) A fiefdom's carter (a caravan's) or a king's coachman ({@link Caravans}, {@link Carriages}). */
 	public static final int CARTER = 11;
+	/** (0.5.26) A settlement's rickshaw puller: hauls its gatherers' loads, runs errands, carries its people and paying players ({@link Rickshaws}). */
+	public static final int PULLER = 12;
 
 	/**
 	 * A role: its saved name, whether it fights ({@code combatant}: melee unless it's an archer; non-combatants flee
@@ -167,6 +169,11 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		defineRole(new Role(WOODCUTTER, "woodcutter", false, false, null, (folk, faction) -> {
 			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_AXE));
 			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.woodcutter_of", faction.name()));
+		}));
+		defineRole(new Role(PULLER, "puller", false, false, null, (folk, faction) -> {
+			folk.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+			folk.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
+			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.puller_of", faction.name()));
 		}));
 		defineRole(new Role(FOREMAN, "foreman", false, false, null, (folk, faction) -> {
 			folk.getAttribute(Attributes.MAX_HEALTH).setBaseValue(BUILDER_HEALTH);
@@ -465,7 +472,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			// (0.5.21) with MCA, a realm's workers are its villagers: this one is one now
 			return;
 		}
-		if (Homes.tick(level, this)) {
+		if (!Rickshaws.onDuty(this) && Homes.tick(level, this)) {
 			// (0.5.5) bedtime: its work waits till morning
 		} else if (!this.shying) {
 			Workers.work(level, this);
