@@ -123,6 +123,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.38: where newcomers and immigrants are from (skin tone by climate)
 		LOGGER.debug("origin attachment: {}", SkinTones.ORIGIN);
 		Quests.register();
+		// 0.5.39: the townsfolk come over to you: questions, quests, requests, bargains, news
+		Approaches.register();
 		// 0.5.37: sorcery: camps' shamans and necromancers, courts' wizards, the risen dead, spell scrolls (and the thralls' attachment)
 		Arcana.register();
 		LOGGER.debug("thrall attachment: {}", Thralls.TAG);

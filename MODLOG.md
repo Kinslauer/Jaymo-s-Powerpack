@@ -490,3 +490,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.8.77, Skin tones by climate:** ships Jaymo's Kingdoms 0.5.38 (see `kingdoms/MODLOG.md`): new MCA villagers lean
   darker in hot, dry lands and paler in the snow. Some families are newcomers from a nearby climate or immigrants from
   a far one, look it, and sometimes talk about home when you chat with them.
+- **0.8.78, Townsfolk come to you:** ships Jaymo's Kingdoms 0.5.39 (see `kingdoms/MODLOG.md`): villagers, children and
+  guards walk up and start things (questions, quests, accusations, requests, bargains, gifts, news); right-click to
+  answer.

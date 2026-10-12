@@ -1836,3 +1836,29 @@ melanin gene from where the villager's family comes from:
   (`mixin/mca/McaDialogueMixin` on `Dialogues.selectAnswer` for `chat.topic`; lines `dialogue.chat.jaymoskingdoms.*`).
 - Children still inherit from their parents (MCA doesn't randomize them), and villagers already in the world keep their
   skin. Our own folk (guards, lords, kings, builders) already wear climate faces (`Climate.skinGroup`).
+
+## 0.5.39: the townsfolk come to you
+Andy: villagers should be able to confront you with questions, quests and start all kinds of interaction.
+`Approaches` (tuning at the top; packets `TalkNet`, client `TalkScreen`): every so often one of a settlement's people
+who can see you (an MCA or plain villager, a child, a realm's guard) walks over and says something over their head
+(`Speech`). When they're asking, right-click them to answer; walk off and they take it as they will.
+- Paced: one approach per player every 1.5-4 minutes, the same villager once a day, a guard halts a stranger once a day
+  per settlement; never mid-fight, from workers at their work, or from people who hate you (their guards hunt you).
+  By night only guards come over.
+- What they come about suits who they are and what they know of you:
+  - Quests: a giver with work (the gold !) offers it; one whose errand you carry asks how it goes. Right-click opens
+    their quests.
+  - A crime of yours they saw or heard of (`Theft` tells `Approaches.suspect`; held two days): confess and pay a
+    5-emerald fine (reputation back), deny it (believed about half the time, more if you're sworn), or threaten them
+    (they run off crying for the guards). Walking off counts against you.
+  - A guard halts a stranger: trading (fine), looking for work (sent to the nearest giver with a !), or none of their
+    business (reputation down). A guard warns you indoors at nightfall.
+  - A stranger's questions (8: where you're bound, what you make of the place, can you read...), answered warmly
+    (hearts up), plainly, or rudely (hearts and reputation down), each with its own reply.
+  - A hungry villager asks for food (any plain food in your pack); a craftsman offers a bargain from their trade
+    (bread, cod, pork, bookshelves, bottles o' enchanting, iron, a sword, a pickaxe, a compass, arrows, wool, leather,
+    bricks; a friend gets an emerald off); a friend (40+ MCA hearts) brings a small gift.
+  - A realm at war asks if you'll stand with it; gossip; a friend greets you by name.
+  - Children: tag (they run off laughing), "are you a knight?" (you're armoured), "can I see your sword?".
+- Testing (op): `/kingdom talk [topic]`: the nearest who could comes over now (topics: quest_offer, quest_check,
+  accuse, halt, question, hungry, bargain, gift, war, gossip, greet, child, warn).
