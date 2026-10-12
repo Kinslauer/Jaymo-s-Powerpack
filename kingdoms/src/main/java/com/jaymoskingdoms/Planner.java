@@ -130,20 +130,32 @@ public final class Planner {
 			&& Economy.atPeace(level.getServer(), f) && Economy.healthy(level, f);
 	}
 
+	/** (0.5.27) Built only when the rest is (and the wall waits for nothing on its account): see {@link #eligible}. */
+	static final String TAVERN = "tavern";
+
 	/** The catalogue entries it may build next (in growth order), whatever the site. */
 	static List<Blueprint.Entry> eligible(MinecraftServer server, Faction f) {
 		Works.Site works = Works.of(server, f.id());
 		int size = size(f);
 		List<Blueprint.Entry> out = new ArrayList<>();
 		Set<String> seen = new HashSet<>();
+		Blueprint.Entry tavern = null;
 		for (Blueprint.Entry e : Blueprint.catalogue(f.type())) {
 			// (0.5.11) the wall goes up as a whole, round everything, once the rest is built ({@link Enclosure})
 			if (Enclosure.piece(e.id())) {
 				continue;
 			}
+			if (e.id().equals(TAVERN)) {
+				tavern = size >= e.minPopulation() && works.count(e.id()) < e.max() ? e : null;
+				continue;
+			}
 			if (size >= e.minPopulation() && works.count(e.id()) < Focus.max(server, f, e.id(), e.max()) && seen.add(e.id())) {
 				out.add(e);
 			}
+		}
+		// (0.5.27) a tavern only for a wealthy kingdom with room to spare: nothing else of its own is still to build
+		if (tavern != null && out.isEmpty() && Wealth.atLeast(server, f, Wealth.Tier.WEALTHY)) {
+			out.add(tavern);
 		}
 		return out;
 	}
@@ -156,7 +168,7 @@ public final class Planner {
 		Works.Site works = Works.of(server, f.id());
 		Map<String, Integer> most = new HashMap<>();
 		for (Blueprint.Entry e : Blueprint.catalogue(f.type())) {
-			if (!e.id().equals("house") && !Enclosure.piece(e.id()) && e.minPopulation() < Integer.MAX_VALUE) {
+			if (!e.id().equals("house") && !e.id().equals(TAVERN) && !Enclosure.piece(e.id()) && e.minPopulation() < Integer.MAX_VALUE) {
 				most.merge(e.id(), Focus.max(server, f, e.id(), e.max()), Math::max);
 			}
 		}
