@@ -1820,3 +1820,14 @@ take: original spells, art and names (`Sorcery`, `Thralls`, `Arcana`, client `So
 - Testing (op): `/kingdom caster <necromancer|shaman|wizard>` (one for the nearest faction, at your feet).
 - Seen in game: the three side by side; a shaman's fire bolts set a court wizard alight while a necromancer's drain and
   his raised zombie and skeleton closed in; staffs held upright.
+
+## 0.5.38: skin tones by climate
+Andy: villagers in hot, desert climates should be darker-skinned, and the opposite in cold biomes. MCA already leaned
+melanin on the biome's temperature, but one villager in five was an "immigrant" drawn from any climate at all, so snow
+towns had dark faces and desert towns pale ones. `SkinTones` (tuning at the top), applied by
+`mixin/mca/McaGeneticsMixin` after MCA randomizes a newly spawned villager, re-rolls the melanin gene:
+- A lean on the biome's heat: about 0-0.2 in the snow, 0.25-0.55 on the plains, 0.75-1 in the desert, savanna and
+  badlands (0 pale, 1 dark), a little paler high up.
+- One in seven is a newcomer from a neighbouring climate (up to 0.9 biome temperature away), never from the far side.
+- Children still inherit from their parents (MCA doesn't randomize them), and villagers already in the world keep their
+  skin. Our own folk (guards, lords, kings, builders) already wear climate faces (`Climate.skinGroup`).
