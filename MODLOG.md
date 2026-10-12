@@ -330,7 +330,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   B is the Crush where you aim, or Collapsing Horizon's ring raining on the target (the Cave-in is gone). The meteor tears through roofs and anything else
   it falls through before it explodes. With Web or Gravity, F5 flips between first person and an over-the-shoulder
   view with the crosshair (no front view). See `docs/gravity.md`.
-- **0.8.46, Web wall run:** sprint and leap alongside a wall (forward held) and you run along it for a moment, rising
+- **0.8.48, Web wall run:** sprint and leap alongside a wall (forward held) and you run along it for a moment, rising
   a little then dropping slowly; Jump kicks you off it, up and away, still carrying the run's speed. The kick climbs with
   mastery (0.48 to 0.72 up, a vanilla jump is 0.42) and jumps to 0.92 once ascended; runs last longer too (22 to 50
   ticks). Runs chain wall to wall, but not back onto the same wall face until you land. The run itself doesn't count
