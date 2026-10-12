@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "L": "minecraft:leather",
+    "X": "#minecraft:wooden_tool_materials"
+  },
+  "pattern": [
+    "XLX",
+    "XXX",
+    " X "
+  ],
+  "result": {
+    "id": "jaymospowers:wooden_round_shield"
+  }
+}

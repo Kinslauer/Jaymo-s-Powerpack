@@ -1480,7 +1480,102 @@ rebuilt here; none of its code or art is used.
 - Seen in game (dev server + client): a 17-log oak narrowed at its foot chop by chop, the chops moved up the trunk, and it
   fell and broke into wood on the 11th. Not yet seen: woodcutters chopping.
 
-## 0.5.27: goblin villages, and a mask to walk in among them
+## 0.5.26: rickshaws (pullers carry goods and people)
+Andy asked for villagers who rickshaw goods and people about the villages and kingdoms. A rickshaw is a third kind of
+`Wagon` (`Wagon.RICKSHAW`), hitched to a person instead of a horse; the work is `Rickshaws`.
+- **Pullers** (`Folk.PULLER`, the `jaymoskingdoms:puller` profession, a "Rickshaw puller" button on MCA's Professions
+  page): a settlement takes its first once it has a road, a storehouse and `Rickshaws.FIRST_AT` (12) people, its second
+  at `SECOND_AT` (30). With MCA it's one of its villagers promoted in place, like the other workers. They wait at the
+  rank by the bell, park there at dusk and go to bed.
+- **Goods**: a miner, woodcutter or farmer walking a load in from more than `MEET_FROM` (28) blocks from storage is met;
+  the load goes into the rickshaw (shown on its rack) and the gatherer goes straight back to work. The rickshaw hauls
+  to storage at `HAUL_AT` (96) items or when there's nobody else to meet.
+- **Errands**: at most every `ERRAND_TICKS` (3600) a settlement sends up to 64 items to a sister settlement within
+  `ERRAND_RANGE` (220) blocks (its overlord, a vassal, a fellow vassal or an ally): food if it has `FOOD_GAP` more,
+  else whatever it has `ERRAND_GAP` more of.
+- **People**: now and then a waiting puller fetches one of the town's villagers (a child or a grown-up) and drives them
+  to one of its buildings. A ruler with no carriage is fetched on his round and rides it from stop to stop
+  (`Carriages` drives a rickshaw the way it drives his carriage).
+- **Players**: right-click a waiting rickshaw for up to 6 settlements within `RIDE_RANGE` (700) blocks with fares
+  (`FARE_BASE` + 1 per `FARE_PER_BLOCKS`, at most `FARE_MOST` emeralds); clicking one runs `/kingdom ride` and the fare
+  goes to the settlement's treasury. Sneak to get down on the way (no refund). Hostile players and enemies at war are
+  refused. Out of sight of any player after a trip, the puller is back at the rank in a puff.
+- Stuck, a puller hops `HOP` (8) blocks ahead in a puff, never the whole way. A rickshaw whose puller is gone (or given
+  other work) for `ABANDON_TICKS` spills its load and is taken apart.
+- **Worn out** (Andy's follow-up): pullers tire with every block pulled (more laden), spent after `TIRED_BLOCKS`
+  (1800), losing up to `SLOWEST` (half) their speed. They get a little back waiting at the rank and all of it after a
+  night's sleep; spent past `WINDED` they stop now and then to catch their breath (sweat drops, a gasp). A player
+  hailing a worn-out puller is told it'll be a slow ride. The rickshaw syncs its puller and their tiredness (`Wagon.PULLER`,
+  `TIRED`) for the client.
+- **Pose** (`PullerPose`, client, through the same model hooks as `MobAnimations`): bent into the shafts like a crouch,
+  hands down at the hips gripping them, a tug back with each stride; the more tired, the lower the lean, the heavier
+  the tug and the more the head hangs; stood still and spent, their shoulders heave. MCA villagers' clothes layers and
+  breasts follow (`McaPullerPose`).
+- **Cabs** (`Cabs`, `Wagon.CAB`): a realm whose treasury holds more than `Cabs.RICH` (300) emeralds keeps a hired
+  carriage (a driver on a horse, a plain coach in its colours) across the bell from the rickshaw rank. It, not the
+  rickshaws, takes players to other settlements (same fares and offer, faster); a rickshaw there points players to it.
+  The pullers do everything else. Below 300 the cab is let go once it's back and empty.
+- Not yet seen in game: all of it (built only).
+
+## 0.5.27: stables and taverns
+- **Three stable designs** (`Buildings.stable`), mocked up on the dev server and picked from screenshots:
+  - **Row stable** (`stableRow`, 13 x 7), the village one: four open-front stalls (gate, hay manger, water trough) under
+    a sloped slab roof, with a covered walk along the front.
+  - **Coaching yard** (`stableYard`, 13 x 13): four stalls under a gabled roof behind a fenced yard with a trough, a hay
+    stack, lamps on the posts and a 3-wide gate for carts.
+  - **Aisle barn** (`stableBarn`, 11 x 15): a stone-footed barn with a cart-wide aisle end to end, six stalls, a hayloft
+    over them and lanterns over the aisle.
+- Villages now build a stable (from 18 people); kingdoms and fiefdoms still build theirs from 28, now the coaching yard
+  or (half the time) the aisle barn in place of the old two-stall stable.
+- A finished stable gets its horses bought in (`Gatherers.STABLE_HORSES`, 2).
+- **Three tavern designs** (`Buildings.tavern`), mocked up the same way and picked by size (Andy's "mix by size"): the
+  alehouse below `TAVERN_GRAND` (48) people, then the coaching inn or (half the time) the beer-garden tavern:
+  - **Alehouse** (`tavernAlehouse`, 13 x 11): a long hall under a hipped roof, the bar and barrels down one side, a
+    smoker hearth and chimney, three tables, and a covered porch of tables out front.
+  - **Coaching inn** (`tavernInn`, 11 x 9): a stone taproom (bar, barrels, three tables, a smoker hearth and chimney)
+    and a timber floor of three beds above, up a ladder.
+  - **Tavern with a beer garden** (`tavernGarden`, 15 x 11): a two-storey tavern and a fenced garden beside it with
+    tables, lanterns on posts and its own gate.
+- **Only a wealthy kingdom with room to spare builds a tavern** (Andy's rule; `Planner.eligible`): a kingdom (never a
+  fiefdom or village) of 26 or more people, `Wealth` tier WEALTHY, with nothing else in its growth order left to
+  build. The wall doesn't wait for it (`utilitiesDone` skips it). Tables are a fence and a pressure plate of the land's
+  wood (`Kit.plate`).
+- **Sittable stools** (`Cushions`): every stool (a wooden slab beside a table) gets one of 26.3's cushions in the
+  realm's colour, facing the table, when the building is finished (or previewed). Right-click to sit.
+
+## 0.5.28: what guards throw depends on their kingdom's purse; treasuries that rise and fall; march with a war party
+- **Javelins are Balkon's.** Guards of ordinary kingdoms now throw Balkon's WeaponMod javelins
+  (`WeaponModJavelins`), which can't be picked up and hit for about 5 instead of a trident's 8. When and at whom they
+  throw is unchanged.
+- **Tridents for the elite.** Only the guards of the 2 wealthiest kingdoms holding at least 300 emeralds still throw
+  tridents (`Javelins.elite`, tuned by `ELITE_REALMS` and `ELITE_TREASURY`).
+- **Rocks for the poor.** Guards of a kingdom with under 50 emeralds (`POOR_TREASURY`), barbarians and their chiefs
+  throw rocks: a cobblestone thrown like a snowball that hits for 3 (`ROCK_DAMAGE`). Without WeaponMod loaded, everyone
+  but the elite throws rocks.
+- **Treasuries rise and fall** (`Treasuries`). A new kingdom starts with 10 to 700 emeralds instead of none.
+  Trade earns: a player's trade with a villager on a realm's land pays the realm a toll of a quarter of the emeralds in
+  it (at least 1; `VillagerTradeMixin`), and a fiefdom's caravan pays its kingdom 1 emerald per 32 goods delivered.
+  War costs and pays: a war party costs 2 emeralds per soldier when it marches, and a soldier who kills an enemy's
+  folk plunders 3 emeralds from that realm for his own (40 for a leader). The loser's tribute at a war's end, the
+  daily taxes and the tyrant's tithe are unchanged. Existing kingdoms keep their treasuries
+  (an op standing in one can set it with `/kingdom treasury <emeralds>`).
+- **March with a war party** (`/kingdom war join`, `WarParties.join`). A player sworn to a realm at war joins their
+  side's party in the field (told where it is), or, with none out and standing within 64 blocks of their realm's
+  seat, calls one up right there: it marches the whole way to the nearest enemy seat with them (up to 8 minutes'
+  march, 40 for the whole outing).
+- **Spoils carts.** Every war party now takes a horse-drawn storage cart with a carter (a caravan `Wagon`), or it
+  doesn't march. The cart keeps behind the column on the march and back from the fighting at the siege. When a
+  party's siege is over, it sacks the seat: 30% of the enemy's treasury and up to 9 stacks from its storehouse go
+  into the cart, which hauls them home into the storehouse (what won't fit is left at the seat) and treasury. Players
+  who marched with the party share 25% of the emeralds and gain 15 reputation. Break the cart open, or kill its horse
+  or carter, and the spoils spill on the ground for whoever gets there first. If the soldiers fall, a laden cart goes
+  on home alone. A cart that loses its way (stuck on a roof, a wall or a ravine for 12 seconds) is helped over it.
+  A party whose cart is lost can still sack the seat, but takes no goods and only the emeralds its soldiers can carry
+  (8 each, `SOLDIER_CARRIES`). Right-click a cart to see what it carries.
+- **Fix:** a rock hitting an MCA villager crashed the server (the rock's blow was dealt again and again).
+- The Kingdoms dev game loads WeaponMod (and Architectury) too, and Kingdoms compiles against it (`compileOnly`).
+
+## 0.5.29: goblin villages, and a mask to walk in among them
 Andy liked Goblins Tyranny's idea of infiltrating goblin villages. That mod is Forge 1.20.1 only and all rights reserved,
 so goblin villages are rebuilt here as a third kind of camp (`Camps.CampData.kind` "goblin"); none of its code or art is used.
 - **Villages** (`GoblinVillages`, `GoblinBuildings`): up to one per kingdom (`VILLAGE_CHANCE` 0.12 a roll) in forest, taiga,

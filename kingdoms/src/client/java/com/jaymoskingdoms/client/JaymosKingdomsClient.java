@@ -35,6 +35,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		CampSkins.register();
 		GoblinSkins.register();
 		MobAnimations.register();
+		PullerPose.register();
 		SpeechBubbles.register();
 	}
 
@@ -117,7 +118,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 				case Folk.KING -> KINGS[land][state.variant % KING_FACES];
 				case Folk.LORD -> LORDS[land][dye];
 				// (a farmer wears a worker's clothes)
-				case Folk.FOREMAN, Folk.WORKER, Folk.FARMER, Folk.MINER, Folk.WOODCUTTER, Folk.CARTER -> builder(state, land, dye);
+				case Folk.FOREMAN, Folk.WORKER, Folk.FARMER, Folk.MINER, Folk.WOODCUTTER, Folk.CARTER, Folk.PULLER -> builder(state, land, dye);
 				default -> GUARDS[land][state.variant % GUARD_FACES];
 			};
 		}

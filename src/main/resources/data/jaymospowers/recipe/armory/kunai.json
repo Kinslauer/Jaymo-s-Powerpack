@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "C": "minecraft:string",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "I",
+    "C"
+  ],
+  "result": {
+    "id": "jaymospowers:kunai",
+    "count": 4
+  }
+}

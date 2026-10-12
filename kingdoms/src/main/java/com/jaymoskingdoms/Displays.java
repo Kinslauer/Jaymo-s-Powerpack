@@ -74,8 +74,9 @@ final class Displays {
 		};
 	}
 
-	/** A building just finished between {@code min} and {@code top}: its baskets and racks are stocked. */
+	/** A building just finished between {@code min} and {@code top}: its stools get cushions, its baskets and racks are stocked. */
 	static void built(ServerLevel level, Faction f, String entry, BlockPos min, BlockPos top) {
+		Cushions.seat(level, f, min, top);
 		Block basket = block("fruit_basket"), rack = block("tool_rack");
 		if (basket == null && rack == null) {
 			return;
