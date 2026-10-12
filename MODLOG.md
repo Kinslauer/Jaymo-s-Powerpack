@@ -500,3 +500,19 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   never speak, and they beat out fires in settlements.
 - **0.8.84, No rainbow hair:** ships Jaymo's Kingdoms 0.5.43 (see `kingdoms/MODLOG.md`): MCA villagers no longer get
   rainbow hair or random dyed hair; they keep natural colours. MCA's Homosexual trait is off too.
+- **0.8.85, Symbiote fixes (Andy's list):**
+  - **Wall tethers:** your view is held facing away from the wall (80° either side; level or below on a ceiling,
+    `WebWallLookMixin` on `Entity.turn`). You sway on the tethers toward where you look (0.7 blocks along the wall,
+    `WebSymbioteClient.sway`) and the bites slide a little after you; the spring is softer and bouncier.
+  - **First person:** with First-person Model, your own suit's head, the big body's mask and the maw aren't drawn
+    (`WebSymbioteClient.ownFirstPerson`), so they don't cover your view, once the bond reaches 60. Under that the mask
+    still covers it, so you're looking out through it, not quite in control (`WebSymbiote.MASK_CLEAR_BOND`).
+  - **Armour under the suit:** the plain suit and the big body both engulf worn armour (an elytra still shows).
+  - **Wall Crawl walks on tendrils:** four tendrils come out (even without Living Armor) and walk you along walls and
+    ceilings, Doc Ock style: each plants its tip ahead, then lifts and arcs over to plant again, in diagonal pairs,
+    bowed out from the surface (`WebTendrilWalk`, worked out on every client). The old climb cords now show only from
+    your own eyes in plain first person.
+  - **V with the symbiote:** no pellet; V only charges the black blast.
+  - **Dread vignette by bond:** a line or a feeding is fainter at a strong bond, stronger at a weak one; under bond 60
+    a faint vignette lingers, breathing and blinking darker more often as the bond drops. Full strength is kept for a
+    weak bond's own lines (ignored, neglected, at the edge, leaving you) and every takeover (`WebSymbioteDread`).

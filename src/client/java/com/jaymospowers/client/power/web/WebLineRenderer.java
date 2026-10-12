@@ -286,8 +286,11 @@ final class WebLineRenderer {
 					}
 				}
 			}
-			// tendrils latched onto a wall to climb, or into a block they're struggling to tear out
-			latchCords(context, minecraft, player, player.getAttached(com.jaymospowers.power.web.WebTendrils.CLIMB), camera, partialTick);
+			// tendrils latched onto a wall to climb (walking you up it, drawn on the body: only cords from your own eyes, where
+			// the body isn't drawn), or into a block they're struggling to tear out
+			if (player == minecraft.player && minecraft.options.getCameraType().isFirstPerson() && !FirstPersonCompat.bodyShown()) {
+				latchCords(context, minecraft, player, player.getAttached(com.jaymospowers.power.web.WebTendrils.CLIMB), camera, partialTick);
+			}
 			latchCords(context, minecraft, player, player.getAttached(com.jaymospowers.power.web.WebTendrils.TUG), camera, partialTick);
 			float spread = WebArms.wings(player, partialTick);
 			if (spread > 0.02F && !(player == minecraft.player && minecraft.options.getCameraType().isFirstPerson())) {

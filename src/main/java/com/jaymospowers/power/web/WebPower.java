@@ -61,7 +61,7 @@ public final class WebPower implements Power {
 	/**
 	 * Let go of V before {@code SHOT_TAP_TICKS} (a second) and it's a webshooter pellet instead: {@code PELLET_SPEED},
 	 * {@code PELLET_COOLDOWN} (0.2 s) between them, so they can be tapped out fast. Held longer, it's the charged blast,
-	 * charging from when it was pressed.
+	 * charging from when it was pressed. In the symbiote there's no pellet: V only ever charges the black blast.
 	 */
 	public static final int SHOT_TAP_TICKS = 20, PELLET_COOLDOWN = 4;
 	public static final float PELLET_SPEED = 3.6F;
@@ -938,7 +938,7 @@ public final class WebPower implements Power {
 		}
 		// wearing the suit, it's a black mass of the symbiote instead
 		boolean dark = WebSymbiote.suitShown(player) || WebSymbiote.isToggled(player, WebSymbioteState.ARMOR);
-		if (held < SHOT_TAP_TICKS) {
+		if (held < SHOT_TAP_TICKS && !dark) {
 			// a tap: a quick webshooter pellet
 			Projectile.spawnProjectileFromRotation((lvl, owner, stack) -> new WebBall(lvl, owner, stack).pellet(), level,
 				new ItemStack(dark ? SYMBIOTE_MASS_ITEM : WEB_BALL_ITEM), player, 0.0F, PELLET_SPEED, 0.3F);
