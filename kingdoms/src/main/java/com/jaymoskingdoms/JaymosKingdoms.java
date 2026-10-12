@@ -69,6 +69,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.5: the working folk sleep in beds at night; villagers take a trade at the settlement's job sites and work it
 		Homes.register();
 		Jobs.register();
+		// 0.5.12: javelins for guards; rulers' tempers
+		Javelins.register();
+		Tempers.register();
+		Frights.register();
 		Theft.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
 		LOGGER.debug("war attachment: {}", WarData.WARS);

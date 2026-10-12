@@ -103,7 +103,8 @@ public final class Production {
 		};
 		Faction.Holdings h = f.holdings();
 		int labour = LABOUR_BASE + h.population() * LABOUR_PER_VILLAGER + h.staff() * LABOUR_PER_FOLK;
-		int materials = Math.min(MATERIALS_MOST, labour * MATERIALS_PER_LABOUR) * share / 100 * days;
+		// (0.5.12) its ruler's temper: a noble gives his buildings more, a tyrant less
+		int materials = Tempers.materials(f, Math.min(MATERIALS_MOST, labour * MATERIALS_PER_LABOUR) * share / 100 * days);
 		// (0.5.2) what its own gatherers bring in by hand isn't counted twice: no logs with a woodcutter, no rock with a
 		// miner, half the food with a farmer
 		int logs = h.count(Folk.WOODCUTTER) > 0 ? 0 : materials * h.forest() / 100;
@@ -111,6 +112,7 @@ public final class Production {
 		int stone = rock / STONE_ONE_IN;
 		int food = Math.min(FOOD_MOST, FOOD_BASE + h.population() * FOOD_PER_VILLAGER + h.farms() / CROPS_PER_FOOD) * share / 100 * days
 			/ (h.count(Folk.FARMER) > 0 ? 2 : 1);
+		food = Tempers.food(f, food);
 		int lost = 0;
 		lost += Storage.put(level, f, logItem(level, f), logs);
 		lost += Storage.put(level, f, Items.COBBLESTONE, rock - stone);
@@ -127,7 +129,8 @@ public final class Production {
 		}
 		long taxes = 0;
 		if (f.type().isRealm()) {
-			taxes = (long)(TAX_BASE + h.population() / VILLAGERS_PER_TAX + f.members().size() * TAX_PER_MEMBER) * days;
+			taxes = Tempers.taxes(f, (long)(TAX_BASE + h.population() / VILLAGERS_PER_TAX + f.members().size() * TAX_PER_MEMBER) * days);
+			taxes += Tempers.tithe(level, f, days);
 			long tribute = f.type() == FactionType.FIEFDOM && f.overlord() >= 0 ? taxes * TRIBUTE_PERCENT / 100 : 0;
 			long kept = taxes - tribute;
 			Factions.update(server, f.id(), x -> x.withTreasury(x.treasury() + kept));

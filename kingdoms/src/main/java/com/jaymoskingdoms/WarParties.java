@@ -120,7 +120,7 @@ final class WarParties {
 			}
 			for (int side : new int[] {war.attacker().principal(), war.defender().principal()}) {
 				String key = key(war.id(), side);
-				if (ACTIVE.containsKey(key) || now - LAST.getOrDefault(key, -COOLDOWN_TICKS) < COOLDOWN_TICKS || random.nextFloat() >= PARTY_CHANCE) {
+				if (ACTIVE.containsKey(key) || now - LAST.getOrDefault(key, -COOLDOWN_TICKS) < COOLDOWN_TICKS || random.nextFloat() >= Tempers.warChance(server, side, PARTY_CHANCE)) {
 					continue;
 				}
 				send(level, war, side, false);
@@ -169,7 +169,7 @@ final class WarParties {
 		ACTIVE.put(key(war.id(), side), party);
 		LAST.put(key(war.id(), side), now);
 		int army = from.holdings().count(Folk.GUARD) + from.holdings().count(Folk.ARCHER);
-		int size = Math.min(PARTY_MAX, PARTY_BASE + army / PARTY_PER);
+		int size = Math.min(PARTY_MAX, PARTY_BASE + army / PARTY_PER) + Tempers.warExtra(from);
 		for (int i = 0; i < size; i++) {
 			Folk soldier = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.EVENT);
 			if (soldier == null) {

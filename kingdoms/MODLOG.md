@@ -1306,3 +1306,35 @@ test village has none), a villager moving into a new house.
   (`Planner.site`). Wall pieces are no longer ordinary buildings (`Planner.eligible`). `/kingdom project start wall`
   puts up the next piece at once for ops. Seen: Ravnreach walled round its whole village (86 pieces, across a river).
 - The Kingdoms dev game loads Minecraft Comes Alive too (`localRuntime` from `../libs`).
+
+## 0.5.12: war that isn't won by archers alone, rulers' tempers, villagers afraid of monsters
+- **Javelins.** Guards, barbarians and chiefs throw javelins (tridents that can't be picked up) at a foe they can't
+  close with: one 2.5+ blocks above them (on a wall or tower), a bowman more than 7 blocks off, or one they have no
+  path to. Every 70-100 ticks, from 4 to 22 blocks, with line of sight. A javelin never hurts the thrower's own side,
+  and a defender's never hurts villagers or golems. War parties were all guards against a town's archers on its
+  walls; now they can hit back.
+- **Attackers fight harder and destroy.** War-party soldiers and raiders fight with Strength I and carry a torch.
+  One that gets no nearer its foe or goal for 3 seconds breaks the door, gate, fence, trapdoor, bars, glass, wool or
+  leaves in its way, or sets fire to a wooden wall it can't get past and backs off. On enemy land they now and then
+  set fire to wood, wool and hay of anything built within 6 blocks (never trees, never their own side's land).
+  Villagers fight the fires and builders put lost buildings up again.
+- **Rulers' tempers.** Every king or lord has a temper drawn from who he is (his heir may differ), shown in
+  `/kingdom info`:
+  - *Tyrant*: slaps the villagers he meets, takes food from stalls he passes, and tithes 10% of the stores' food and
+    ingots each day for his coffers. Buildings get 75% of the materials, taxes are doubled, and good deeds count half.
+  - *Noble*: greets his people, talks with them and gives them bread. Buildings get 125% of the materials and food,
+    taxes are 75%, and good deeds count half again.
+  - *Warlord*: inspects rather than greets. His guards fight with Strength, and his realm sends war parties twice as
+    often with 3 more soldiers. Taxes are 125%.
+  - *Paranoid*: cuts his rounds short (home by 5000), greets no one, and his guard shoves back any stranger within 5
+    blocks. Good deeds count half and bad ones double.
+  - *Reveler*: greets with cookies and bread, and throws a feast at dusk: villagers gather at the seat, bread for
+    all (so more children), music and fireworks. It eats 24 food, and guests win good name.
+  Each says a line to nearby players as he meets someone.
+- **Villagers fear monsters.** Villagers (MCA's too) who see a monster within 12 blocks run home if home is near
+  and not toward it, else 14 blocks away, some fetching the nearest child first, and stay hidden for 10 seconds.
+  Endermen, zombies, skeletons, creepers, spiders, raiders and barbarians all count.
+Tested on the dev server: a war party of 7 against Garhaven threw javelins (and Garhaven's guards threw back at
+soldiers below them), broke trapdoors in its way and set a dozen fires in the town; the paranoid king of Garhaven
+shoved a player back; a vanilla and an MCA villager ran from an enderman (4 to 11-13 blocks). Not seen in game: the
+other tempers' rounds, the tyrant's tithe, the reveler's feast.
