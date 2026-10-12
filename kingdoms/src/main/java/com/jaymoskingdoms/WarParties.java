@@ -180,6 +180,10 @@ final class WarParties {
 			soldier.setup(Folk.GUARD, from, target.seat(), Raids.RAID_HOME_RADIUS);
 			level.addFreshEntity(soldier);
 			soldier.setTask(TASK);
+			// (0.5.14) a prosperous realm's soldiers ride, some of them
+			if (i % Cavalry.PARTY_RIDER_ONE_IN == 0 && Wealth.atLeast(server, from, Wealth.Tier.PROSPEROUS)) {
+				Cavalry.mount(level, soldier, from, true);
+			}
 			party.soldiers.add(soldier.getUUID());
 		}
 		Banners.tell(level, target.seat(), war, Component.translatable("message.jaymoskingdoms.war.party", from.name(), target.name())
@@ -386,6 +390,7 @@ final class WarParties {
 	}
 
 	private static void vanish(ServerLevel level, Folk soldier) {
+		Cavalry.dismiss(soldier);
 		level.sendParticles(ParticleTypes.POOF, soldier.getX(), soldier.getY() + 1.0, soldier.getZ(), 8, 0.3, 0.5, 0.3, 0.02);
 		soldier.discard();
 	}

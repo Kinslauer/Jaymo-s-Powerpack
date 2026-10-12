@@ -142,8 +142,14 @@ public final class Economy {
 			// a builder while the crew is short; a farmer for a farm nobody keeps (0.5.1); a miner or woodcutter for a
 			// mine or tree farm short of them (0.5.2); else a guard
 			boolean crewShort = Builders.crewCount(grown) < Builders.crewTarget(grown);
-			int role = crewShort ? Folk.WORKER : Farmers.wanted(server, grown) ? Folk.FARMER : Gatherers.wanted(server, grown, Folk.MINER) ? Folk.MINER
+			int picked = crewShort ? Folk.WORKER : Farmers.wanted(server, grown) ? Folk.FARMER : Gatherers.wanted(server, grown, Folk.MINER) ? Folk.MINER
 				: Gatherers.wanted(server, grown, Folk.WOODCUTTER) ? Folk.WOODCUTTER : grown.type().isRealm() ? Folk.GUARD : Folk.WORKER;
+			if (picked == Folk.GUARD && Focus.enoughGuards(server, grown)) {
+				// (0.5.14) a fiefdom with its few guards: another pair of hands for its fields or its mine instead
+				picked = Focus.of(server, grown) == Focus.Kind.FARMING && !Farmers.farms(server, grown).isEmpty() ? Folk.FARMER
+					: Mines.dug(server, grown) ? Folk.MINER : Builders.crewCount(grown) < Builders.CREW_MAX ? Folk.WORKER : Folk.GUARD;
+			}
+			int role = picked;
 			if (grown.type() == FactionType.BARBARIAN || (role == Folk.WORKER && Builders.crewCount(grown) >= Builders.CREW_MAX)) {
 				// (camps raise their own; a full crew takes no more)
 				return null;

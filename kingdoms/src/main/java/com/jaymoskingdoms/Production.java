@@ -104,19 +104,21 @@ public final class Production {
 		Faction.Holdings h = f.holdings();
 		int labour = LABOUR_BASE + h.population() * LABOUR_PER_VILLAGER + h.staff() * LABOUR_PER_FOLK;
 		// (0.5.12) its ruler's temper: a noble gives his buildings more, a tyrant less
-		int materials = Tempers.materials(f, Math.min(MATERIALS_MOST, labour * MATERIALS_PER_LABOUR) * share / 100 * days);
+		int materials = Focus.materials(server, f, Tempers.materials(f, Math.min(MATERIALS_MOST, labour * MATERIALS_PER_LABOUR) * share / 100 * days));
 		// (0.5.2) what its own gatherers bring in by hand isn't counted twice: no logs with a woodcutter, no rock with a
 		// miner, half the food with a farmer
 		int logs = h.count(Folk.WOODCUTTER) > 0 ? 0 : materials * h.forest() / 100;
-		int rock = h.count(Folk.MINER) > 0 ? 0 : materials - materials * h.forest() / 100;
+		// (0.5.14) a mining fiefdom quarries besides what its miners dig
+		int rock = h.count(Folk.MINER) > 0 && Focus.of(server, f) != Focus.Kind.MINING ? 0 : materials - materials * h.forest() / 100;
 		int stone = rock / STONE_ONE_IN;
-		int food = Math.min(FOOD_MOST, FOOD_BASE + h.population() * FOOD_PER_VILLAGER + h.farms() / CROPS_PER_FOOD) * share / 100 * days
+		int food = Focus.food(server, f, Math.min(Focus.foodMost(server, f, FOOD_MOST), FOOD_BASE + h.population() * FOOD_PER_VILLAGER + h.farms() / CROPS_PER_FOOD)) * share / 100 * days
 			/ (h.count(Folk.FARMER) > 0 ? 2 : 1);
 		food = Tempers.food(f, food);
 		int lost = 0;
 		lost += Storage.put(level, f, logItem(level, f), logs);
 		lost += Storage.put(level, f, Items.COBBLESTONE, rock - stone);
 		lost += Storage.put(level, f, Items.STONE, stone);
+		lost += Focus.ores(level, f, rock);
 		// food: bread mostly, then what the fields grow, and meat from the herds kept round the seat (0.5.1)
 		List<Item> crops = new ArrayList<>(List.of(Items.BREAD, Items.BREAD, Items.WHEAT, Items.CARROT, Items.POTATO, Items.BEETROOT, Items.APPLE));
 		crops.addAll(meat(level, f));
