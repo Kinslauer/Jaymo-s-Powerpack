@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "S": "minecraft:stick",
+    "L": "minecraft:leather",
+    "X": "#minecraft:iron_tool_materials"
+  },
+  "pattern": [
+    "  X",
+    " X ",
+    "LS "
+  ],
+  "result": {
+    "id": "jaymospowers:iron_saber"
+  }
+}
