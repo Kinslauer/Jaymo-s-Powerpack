@@ -1,9 +1,0 @@
-{
-  "type": "minecraft:blasting",
-  "cookingtime": 100,
-  "experience": 0.7,
-  "ingredient": "jaymoskingdoms:iron_eye",
-  "result": {
-    "id": "minecraft:iron_ingot"
-  }
-}

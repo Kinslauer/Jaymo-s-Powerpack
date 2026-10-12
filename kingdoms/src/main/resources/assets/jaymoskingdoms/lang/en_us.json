@@ -359,19 +359,5 @@
 	"message.jaymoskingdoms.goblin.greet.1": "Got any shinies?",
 	"message.jaymoskingdoms.goblin.greet.2": "Stew's off. Go 'way.",
 	"message.jaymoskingdoms.goblin.greet.3": "Heh. Nice face.",
-	"entity.jaymoskingdoms.loot_goblin": "Loot Goblin",
-	"entity.jaymoskingdoms.golden_skeleton": "Golden Skeleton",
-	"entity.jaymoskingdoms.lapis_zombie": "Lapis Zombie",
-	"entity.jaymoskingdoms.iron_spider": "Iron Spider",
-	"entity.jaymoskingdoms.redstone_creeper": "Redstone Creeper",
-	"entity.jaymoskingdoms.quartz_hoglin": "Quartz Hoglin",
-	"entity.jaymoskingdoms.emerald_illager": "Emerald Illager",
-	"entity.jaymoskingdoms.prismarine_enderman": "Prismarine Enderman",
-	"item.jaymoskingdoms.gold_bone": "Golden Bone",
-	"item.jaymoskingdoms.iron_eye": "Iron Eye",
-	"item.jaymoskingdoms.stoneflesh": "Stoneflesh",
-	"item.jaymoskingdoms.quartzchop": "Quartzchop",
-	"item.jaymoskingdoms.red_bomb": "Red Bomb",
-	"item.jaymoskingdoms.emerald_crossbow": "Emerald Crossbow",
-	"item.jaymoskingdoms.prismarine_pearl": "Prismarine Pearl"
+	"entity.jaymoskingdoms.loot_goblin": "Loot Goblin"
 }

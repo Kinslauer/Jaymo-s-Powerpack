@@ -3,10 +3,7 @@ package com.jaymoskingdoms.lootgoblins;
 import com.jaymoskingdoms.JaymosKingdoms;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
@@ -20,19 +17,10 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Creeper;
-import net.minecraft.world.entity.monster.Enderman;
-import net.minecraft.world.entity.monster.hoglin.Hoglin;
-import net.minecraft.world.entity.monster.illager.Pillager;
-import net.minecraft.world.entity.monster.skeleton.AbstractSkeleton;
-import net.minecraft.world.entity.monster.spider.Spider;
-import net.minecraft.world.entity.monster.zombie.Zombie;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -41,12 +29,11 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 /**
  * Loot goblins: very rarely, a mob that spawns naturally is a <b>loot goblin</b> instead (a little goblin lugging a treasure
- * chest, in one of eight looks, that runs from players and bursts into a pile of loot when one kills it), or, if it was a
- * skeleton, zombie, spider, creeper, hoglin, pillager or enderman, a <b>minor goblin</b>: that mob made of an ore (a golden
- * skeleton, a lapis zombie...), which drops its own ore treasure and a pile of loot too.
+ * chest, in one of eight looks, that runs from players and bursts into a pile of loot when one kills it). The original's
+ * minor goblins (the ore mobs) and their items are left out.
  *
  * <p>A port to 26.3 of SkylorBeck's Loot Goblins (Fabric 1.19.2, LGPL-3.0, github.com/Skylorbeck/lootgoblins): its loot
- * tables, odds and art (the goblin's model and textures, the ore mobs' skins and the items') are its own, used under its
+ * tables, odds and art (the goblin's model and textures) are its own, used under its
  * licence ({@code licenses/lootgoblins/}); this package is LGPL-3.0 like it. The code is rewritten for 26.3 (no GeckoLib:
  * the model and its two animations are drawn by hand in {@code LootGoblinModel}).
  */
@@ -61,22 +48,10 @@ public final class LootGoblins {
 	/** Up to this many pieces of gear, each this likely; the chance any enchantable thing in the burst comes enchanted. */
 	static final int MOST_GEAR = 2;
 	static final float GEAR_CHANCE = 0.25F, ENCHANT_CHANCE = 0.25F;
-	/** Experience: a loot goblin, a minor goblin. */
-	static final int GOBLIN_XP = 100, MINOR_XP = 50;
+	/** Experience for a loot goblin. */
+	static final int GOBLIN_XP = 100;
 
 	public static EntityType<LootGoblin> LOOT_GOBLIN;
-	public static EntityType<OreMobs.GoldenSkeleton> GOLDEN_SKELETON;
-	public static EntityType<OreMobs.LapisZombie> LAPIS_ZOMBIE;
-	public static EntityType<OreMobs.IronSpider> IRON_SPIDER;
-	public static EntityType<OreMobs.RedstoneCreeper> REDSTONE_CREEPER;
-	public static EntityType<OreMobs.QuartzHoglin> QUARTZ_HOGLIN;
-	public static EntityType<OreMobs.EmeraldIllager> EMERALD_ILLAGER;
-	public static EntityType<OreMobs.PrismarineEnderman> PRISMARINE_ENDERMAN;
-
-	public static Item GOLD_BONE, IRON_EYE, STONEFLESH, QUARTZCHOP, RED_BOMB, EMERALD_CROSSBOW, PRISMARINE_PEARL;
-
-	/** Which vanilla mobs turn into which minor goblin. */
-	private static Map<EntityType<?>, EntityType<? extends Mob>> ORE_MOBS = Map.of();
 
 	private LootGoblins() {
 	}
@@ -124,57 +99,8 @@ public final class LootGoblins {
 	// ---- registration ---------------------------------------------------------------------------------------------
 
 	public static void register() {
-		GOLD_BONE = item("gold_bone", Item::new, new Item.Properties().rarity(net.minecraft.world.item.Rarity.UNCOMMON));
-		IRON_EYE = item("iron_eye", Item::new, new Item.Properties().rarity(net.minecraft.world.item.Rarity.UNCOMMON));
-		STONEFLESH = item("stoneflesh", Item::new, new Item.Properties().rarity(net.minecraft.world.item.Rarity.UNCOMMON));
-		QUARTZCHOP = item("quartzchop", Item::new, LootItems.quartzchop());
-		RED_BOMB = item("red_bomb", LootItems.RedBomb::new, new Item.Properties().rarity(net.minecraft.world.item.Rarity.UNCOMMON));
-		EMERALD_CROSSBOW = item("emerald_crossbow", LootItems.EmeraldCrossbow::new,
-			new Item.Properties().durability(1).rarity(net.minecraft.world.item.Rarity.UNCOMMON));
-		PRISMARINE_PEARL = item("prismarine_pearl", LootItems.PrismarinePearl::new,
-			new Item.Properties().stacksTo(16).rarity(net.minecraft.world.item.Rarity.RARE));
-		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
-			output.accept(GOLD_BONE);
-			output.accept(IRON_EYE);
-			output.accept(STONEFLESH);
-			output.accept(PRISMARINE_PEARL);
-			output.accept(RED_BOMB);
-		});
-		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> output.accept(QUARTZCHOP));
-		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> output.insertAfter(Items.CROSSBOW, EMERALD_CROSSBOW));
-
 		LOOT_GOBLIN = type("loot_goblin", EntityType.Builder.of(LootGoblin::new, MobCategory.MONSTER).sized(0.6F, 1.0F).clientTrackingRange(8));
 		FabricDefaultAttributeRegistry.register(LOOT_GOBLIN, LootGoblin.createAttributes());
-		GOLDEN_SKELETON = type("golden_skeleton", EntityType.Builder.of(OreMobs.GoldenSkeleton::new, MobCategory.MONSTER)
-			.sized(0.6F, 1.99F).eyeHeight(1.74F).ridingOffset(-0.7F).clientTrackingRange(8).notInPeaceful());
-		FabricDefaultAttributeRegistry.register(GOLDEN_SKELETON, AbstractSkeleton.createAttributes());
-		LAPIS_ZOMBIE = type("lapis_zombie", EntityType.Builder.of(OreMobs.LapisZombie::new, MobCategory.MONSTER)
-			.sized(0.6F, 1.95F).eyeHeight(1.74F).passengerAttachments(2.0125F).ridingOffset(-0.7F).clientTrackingRange(8).notInPeaceful());
-		FabricDefaultAttributeRegistry.register(LAPIS_ZOMBIE, Zombie.createAttributes());
-		IRON_SPIDER = type("iron_spider", EntityType.Builder.of(OreMobs.IronSpider::new, MobCategory.MONSTER)
-			.sized(1.4F, 0.9F).eyeHeight(0.65F).passengerAttachments(0.765F).clientTrackingRange(8).notInPeaceful());
-		FabricDefaultAttributeRegistry.register(IRON_SPIDER, Spider.createAttributes());
-		REDSTONE_CREEPER = type("redstone_creeper", EntityType.Builder.of(OreMobs.RedstoneCreeper::new, MobCategory.MONSTER)
-			.sized(0.6F, 1.7F).clientTrackingRange(8).notInPeaceful());
-		FabricDefaultAttributeRegistry.register(REDSTONE_CREEPER, Creeper.createAttributes());
-		QUARTZ_HOGLIN = type("quartz_hoglin", EntityType.Builder.of(OreMobs.QuartzHoglin::new, MobCategory.MONSTER)
-			.sized(1.3964844F, 1.4F).passengerAttachments(1.49375F).clientTrackingRange(8).notInPeaceful());
-		FabricDefaultAttributeRegistry.register(QUARTZ_HOGLIN, Hoglin.createAttributes());
-		EMERALD_ILLAGER = type("emerald_illager", EntityType.Builder.of(OreMobs.EmeraldIllager::new, MobCategory.MONSTER)
-			.sized(0.6F, 1.95F).passengerAttachments(2.0F).ridingOffset(-0.6F).clientTrackingRange(8).notInPeaceful());
-		FabricDefaultAttributeRegistry.register(EMERALD_ILLAGER, Pillager.createAttributes());
-		PRISMARINE_ENDERMAN = type("prismarine_enderman", EntityType.Builder.of(OreMobs.PrismarineEnderman::new, MobCategory.MONSTER)
-			.sized(0.6F, 2.9F).eyeHeight(2.55F).passengerAttachments(2.80625F).clientTrackingRange(8).notInPeaceful());
-		FabricDefaultAttributeRegistry.register(PRISMARINE_ENDERMAN, Enderman.createAttributes());
-
-		ORE_MOBS = Map.of(EntityTypes.SKELETON, GOLDEN_SKELETON, EntityTypes.ZOMBIE, LAPIS_ZOMBIE, EntityTypes.SPIDER, IRON_SPIDER,
-			EntityTypes.CREEPER, REDSTONE_CREEPER, EntityTypes.HOGLIN, QUARTZ_HOGLIN, EntityTypes.PILLAGER, EMERALD_ILLAGER,
-			EntityTypes.ENDERMAN, PRISMARINE_ENDERMAN);
-	}
-
-	private static Item item(String name, Function<Item.Properties, Item> make, Item.Properties properties) {
-		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id(name));
-		return Registry.register(BuiltInRegistries.ITEM, key, make.apply(properties.setId(key)));
 	}
 
 	private static <T extends Entity> EntityType<T> type(String name, EntityType.Builder<T> builder) {
@@ -186,7 +112,7 @@ public final class LootGoblins {
 
 	/**
 	 * What a mob vanilla's natural spawning is about to add becomes: now and then ({@link #CHANCE}) a goblin in its place
-	 * (the matching minor goblin, else a loot goblin of any look); otherwise itself. Mobs riding or ridden (jockeys) are left be.
+	 * (a loot goblin of any look); otherwise itself. Mobs riding or ridden (jockeys) are left be.
 	 */
 	public static Entity replace(ServerLevel level, Entity spawned) {
 		if (!(spawned instanceof Mob mob) || LOOT_GOBLIN == null || level.getRandom().nextFloat() >= CHANCE
@@ -197,15 +123,13 @@ public final class LootGoblins {
 		if (category != MobCategory.MONSTER && category != MobCategory.CREATURE && category != MobCategory.AMBIENT) {
 			return spawned;
 		}
-		Mob goblin = ORE_MOBS.getOrDefault(mob.getType(), LOOT_GOBLIN).create(level, EntitySpawnReason.NATURAL);
+		LootGoblin goblin = LOOT_GOBLIN.create(level, EntitySpawnReason.NATURAL);
 		if (goblin == null) {
 			return spawned;
 		}
 		goblin.snapTo(mob.getX(), mob.getY(), mob.getZ(), mob.getYRot(), 0.0F);
 		goblin.finalizeSpawn(level, level.getCurrentDifficultyAt(goblin.blockPosition()), EntitySpawnReason.NATURAL, null);
-		if (goblin instanceof LootGoblin lootGoblin) {
-			lootGoblin.setVariant(level.getRandom().nextInt(LootGoblin.VARIANTS));
-		}
+		goblin.setVariant(level.getRandom().nextInt(LootGoblin.VARIANTS));
 		JaymosKingdoms.LOGGER.debug("a {} spawned at {} in place of a {}", goblin.getType().getDescriptionId(), goblin.blockPosition(),
 			mob.getType().getDescriptionId());
 		return goblin;

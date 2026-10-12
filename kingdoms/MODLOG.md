@@ -1601,19 +1601,15 @@ so goblin villages are rebuilt here as a third kind of camp (`Camps.CampData.kin
   filling, backstabs, the mask on the player.
 
 ### Loot goblins (from Loot Goblins, LGPL-3.0)
-Andy asked for the goblins from SkylorBeck's Loot Goblins (Fabric 1.19.2, GeckoLib). It's LGPL-3.0, so its models, skins
-and item art are reused and its behaviour ported to 26.3 (package `lootgoblins`, `client.lootgoblins`); the licence and a
+Andy asked for the goblins from SkylorBeck's Loot Goblins (Fabric 1.19.2, GeckoLib). It's LGPL-3.0, so its model and skins
+are reused and its behaviour ported to 26.3 (package `lootgoblins`, `client.lootgoblins`); the licence and a
 notice are in `licenses/lootgoblins/`. Its code here stays LGPL-3.0: keep that source available if the pack is shared.
 - **Loot goblins** (`LootGoblin`): a little goblin with a treasure chest, eight looks (plain, nether (fireproof), ender,
   armourer, cake, plant, Easter, witch). Wanders, flees players, sparks. A player kill bursts it into 1-5 of its own treasure,
   a chance of enchanted books, a disc and enchanted gear, and 5-10 generic loot; 100 xp. The GeckoLib model is rebuilt as a
   vanilla model with its idle and run animations.
-- **Minor goblins** (`OreMobs`): golden skeleton, lapis zombie, iron spider, redstone creeper, quartz hoglin, emerald
-  illager, prismarine enderman. Vanilla mobs in ore skins; a player kill bursts their treasure and loot (50 xp).
-- **Spawning** (`NaturalSpawnerMixin`, `LootGoblins.CHANCE` 0.0001): a natural monster or animal spawn is swapped for the
-  matching ore mob (or a loot goblin for anything else) about 1 in 10,000 times.
-- **Treasures** (`LootItems`): golden bones, iron eyes and stoneflesh smelt into gold, iron and lapis; a quartzchop is
-  food that stings (and smelts into quartz); a red bomb is a rocket that rains redstone (and boosts an elytra); an emerald
-  crossbow pays an emerald when fired and breaks after one shot; a thrown prismarine pearl bursts into prismarine.
-- Left out: the helmet cosmetics and loot beams.
-- Seen in game: all eight looks in the original's idle pose, a kill's loot burst, four of the ore mobs in their skins.
+- **Spawning** (`NaturalSpawnerMixin`, `LootGoblins.CHANCE` 0.0001): about 1 in 10,000 natural monster or animal spawns
+  is a loot goblin instead.
+- Left out: the minor goblins (ore mobs) and their treasure items (Andy didn't want them), the helmet cosmetics and loot
+  beams.
+- Seen in game: all eight looks in the original's idle pose and a kill's loot burst.
