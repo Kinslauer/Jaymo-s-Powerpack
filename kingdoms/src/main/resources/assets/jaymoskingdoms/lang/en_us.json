@@ -303,5 +303,20 @@
 	"message.jaymoskingdoms.caravan.cart": "A cart of %s's, bound for %s: %s.",
 	"message.jaymoskingdoms.caravan.empty_cart": "An empty cart of %s's.",
 	"message.jaymoskingdoms.carriage": "The carriage of %s.",
-	"message.jaymoskingdoms.carriage.bought": "%s has bought its king a carriage."
+	"message.jaymoskingdoms.carriage.bought": "%s has bought its king a carriage.",
+	"entity.jaymoskingdoms.puller_of": "Rickshaw Puller of %s",
+	"entity.minecraft.villager.jaymoskingdoms.puller": "Rickshaw Puller",
+	"gui.button.profession.puller": "Rickshaw puller",
+	"message.jaymoskingdoms.job_nothing.puller": "%2$s has no road and storehouse for %1$s to pull a rickshaw between yet.",
+	"message.jaymoskingdoms.rickshaw.offer": "%s will take you to (click one; you pay in emeralds):",
+	"message.jaymoskingdoms.rickshaw.choice": "  %s (%s blocks): %s emeralds",
+	"message.jaymoskingdoms.rickshaw.hover": "Ride to %s for %s emeralds",
+	"message.jaymoskingdoms.rickshaw.no_puller": "Nobody's pulling this rickshaw.",
+	"message.jaymoskingdoms.rickshaw.refused": "%s won't carry you.",
+	"message.jaymoskingdoms.rickshaw.busy": "%s is busy just now. Try again when the rickshaw's back at its rank.",
+	"message.jaymoskingdoms.rickshaw.nowhere": "There's nowhere near enough for %s to take you.",
+	"message.jaymoskingdoms.rickshaw.too_far": "Stand by the rickshaw to hire it.",
+	"message.jaymoskingdoms.rickshaw.cant_pay": "The fare is %s emeralds, and you don't have them.",
+	"message.jaymoskingdoms.rickshaw.off": "%s takes you to %s for %s emeralds. Sneak to get down on the way.",
+	"message.jaymoskingdoms.rickshaw.arrived": "Here's %s."
 }

@@ -1,5 +1,7 @@
 package com.jaymoskingdoms;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
@@ -28,6 +30,7 @@ import net.minecraft.world.entity.LinearInterpolationHandler;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -40,13 +43,17 @@ import org.jspecify.annotations.Nullable;
  * of its own: it's hitched to a horse (by UUID) and trails behind it on its shafts, swinging round on turns the way a
  * trailer does. It doesn't block anyone; a player can strike it (a cart broken open spills its load: robbing a
  * caravan, {@link Caravans#robbed}) or right-click it to see what it carries.
+ * <p>
+ * (0.5.26) Or a settlement's {@link #RICKSHAW}: two wheels, a seat under a hood in its colours and a rack behind, its
+ * shafts held by one of its people on foot ({@link Rickshaws}) instead of a horse. It carries a load ({@link #cargo()},
+ * kept here) or a passenger; right-clicked, its puller offers a player a ride.
  */
 public final class Wagon extends Entity {
-	public static final int CART = 0, CARRIAGE = 1;
+	public static final int CART = 0, CARRIAGE = 1, RICKSHAW = 2;
 	/** What a cart's load looks like: nothing, stone and ore, food, a bit of everything. */
 	public static final int EMPTY = 0, STONE = 1, FOOD = 2, GOODS = 3;
 	/** How far behind its horse's middle its own middle trails (a cart, a carriage). */
-	static final double CART_HITCH = 2.9, CARRIAGE_HITCH = 3.3;
+	static final double CART_HITCH = 2.9, CARRIAGE_HITCH = 3.3, RICKSHAW_HITCH = 1.75;
 	/** Blows a cart takes from players before it breaks open (a carriage never does). */
 	static final float CART_HEALTH = 24.0F;
 	/** Left without its horse this long (ticks), a caravan's cart is done ({@link Caravans}); a carriage just waits. */
@@ -66,6 +73,10 @@ public final class Wagon extends Entity {
 	private float damage;
 	private int horseLost;
 	private @Nullable Entity horseCache;
+	/** (0.5.26) A rickshaw's load; set down for the night (it stays put); the settlement a player's riding to (-1: none). */
+	private final List<ItemStack> cargo = new ArrayList<>();
+	private boolean parked;
+	private int ride = -1;
 
 	/** Client side: its wheels' turn (radians) now and last tick. */
 	public float wheel, wheelO;
@@ -153,7 +164,59 @@ public final class Wagon extends Entity {
 	}
 
 	private double hitch() {
-		return this.kind() == CARRIAGE ? CARRIAGE_HITCH : CART_HITCH;
+		return switch (this.kind()) {
+			case CARRIAGE -> CARRIAGE_HITCH;
+			case RICKSHAW -> RICKSHAW_HITCH;
+			default -> CART_HITCH;
+		};
+	}
+
+	// ---- a rickshaw's (0.5.26) ----------------------------------------------------------------------------------------
+
+	List<ItemStack> cargo() {
+		return this.cargo;
+	}
+
+	void addCargo(ItemStack stack) {
+		if (stack.isEmpty()) {
+			return;
+		}
+		ItemStack rest = stack.copy();
+		for (ItemStack held : this.cargo) {
+			if (ItemStack.isSameItemSameComponents(held, rest) && held.getCount() < held.getMaxStackSize()) {
+				int n = Math.min(rest.getCount(), held.getMaxStackSize() - held.getCount());
+				held.grow(n);
+				rest.shrink(n);
+			}
+		}
+		if (!rest.isEmpty()) {
+			this.cargo.add(rest);
+		}
+		this.setLoad(Rickshaws.look(this.cargo));
+	}
+
+	/** Its whole load, taken out. */
+	List<ItemStack> takeCargo() {
+		List<ItemStack> all = new ArrayList<>(this.cargo);
+		this.cargo.clear();
+		this.setLoad(EMPTY);
+		return all;
+	}
+
+	boolean parked() {
+		return this.parked;
+	}
+
+	void setParked(boolean parked) {
+		this.parked = parked;
+	}
+
+	int ride() {
+		return this.ride;
+	}
+
+	void setRide(int faction) {
+		this.ride = faction;
 	}
 
 	@Override
@@ -172,6 +235,13 @@ public final class Wagon extends Entity {
 			return;
 		}
 		Entity horse = this.horse();
+		if (this.kind() == RICKSHAW && (horse == null || !Rickshaws.isPuller(horse))) {
+			// (its puller's gone, or given other work: in a while it's taken apart)
+			if (++this.horseLost >= Rickshaws.ABANDON_TICKS) {
+				Rickshaws.abandoned(level, this);
+			}
+			return;
+		}
 		if (horse == null || !horse.isAlive()) {
 			this.horseLost++;
 			if (this.horseLost >= LOST_HORSE_TICKS && this.caravan >= 0) {
@@ -180,6 +250,10 @@ public final class Wagon extends Entity {
 			return;
 		}
 		this.horseLost = 0;
+		if (this.parked) {
+			// (a rickshaw set down for the night)
+			return;
+		}
 		this.trail(horse);
 	}
 
@@ -218,17 +292,18 @@ public final class Wagon extends Entity {
 
 	@Override
 	protected boolean canAddPassenger(Entity passenger) {
-		return this.kind() == CARRIAGE && this.getPassengers().isEmpty();
+		return (this.kind() == CARRIAGE || this.kind() == RICKSHAW) && this.getPassengers().isEmpty();
 	}
 
 	@Override
 	protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float scale) {
-		return new Vec3(0.0, 0.4, -0.45).yRot(-this.getYRot() * Mth.DEG_TO_RAD);
+		Vec3 seat = this.kind() == RICKSHAW ? new Vec3(0.0, 0.42, -0.25) : new Vec3(0.0, 0.4, -0.45);
+		return seat.yRot(-this.getYRot() * Mth.DEG_TO_RAD);
 	}
 
 	@Override
 	public Vec3 getDismountLocationForPassenger(LivingEntity passenger) {
-		Vec3 side = new Vec3(1.6, 0.0, -0.4).yRot(-this.getYRot() * Mth.DEG_TO_RAD);
+		Vec3 side = (this.kind() == RICKSHAW ? new Vec3(1.3, 0.0, -0.2) : new Vec3(1.6, 0.0, -0.4)).yRot(-this.getYRot() * Mth.DEG_TO_RAD);
 		return this.position().add(side);
 	}
 
@@ -264,6 +339,12 @@ public final class Wagon extends Entity {
 		if (hand != InteractionHand.MAIN_HAND) {
 			return InteractionResult.PASS;
 		}
+		if (player instanceof ServerPlayer sp && this.level() instanceof ServerLevel level && this.kind() == RICKSHAW) {
+			if (!player.isPassenger()) {
+				Rickshaws.hail(level, this, sp);
+			}
+			return InteractionResult.SUCCESS;
+		}
 		if (player instanceof ServerPlayer sp && this.level() instanceof ServerLevel level) {
 			Component what = this.kind() == CART ? Caravans.describe(level, this)
 				: Component.translatable("message.jaymoskingdoms.carriage", Caravans.nameOf(level.getServer(), this.faction));
@@ -290,6 +371,10 @@ public final class Wagon extends Entity {
 		this.faction = input.getIntOr("faction", -1);
 		this.caravan = input.getIntOr("caravan", -1);
 		this.slot = input.getIntOr("slot", 0);
+		this.cargo.clear();
+		this.cargo.addAll(input.read("cargo", ItemStack.CODEC.listOf()).orElse(List.of()));
+		this.parked = input.getBooleanOr("parked", false);
+		this.ride = input.getIntOr("ride", -1);
 	}
 
 	@Override
@@ -303,5 +388,10 @@ public final class Wagon extends Entity {
 		output.putInt("faction", this.faction);
 		output.putInt("caravan", this.caravan);
 		output.putInt("slot", this.slot);
+		if (!this.cargo.isEmpty()) {
+			output.store("cargo", ItemStack.CODEC.listOf(), this.cargo);
+		}
+		output.putBoolean("parked", this.parked);
+		output.putInt("ride", this.ride);
 	}
 }
