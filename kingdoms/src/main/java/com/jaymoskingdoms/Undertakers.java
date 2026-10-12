@@ -30,7 +30,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.22) A settlement's guards clear away dead monsters (with Jaymo's Kitchen, whose corpses get back up or lie
+ * (0.5.23) A settlement's guards clear away dead monsters (with Jaymo's Kitchen, whose corpses get back up or lie
  * about). A guard who isn't fighting goes to a monster's corpse in or near the settlement and carries it to the
  * nearest fire pit (fire burning on netherrack, soul sand or magma), lit campfire or lava, and throws it in. With none
  * near, they burn it where it lies, or first carry it a few blocks to bare ground if there's wood or anything else that

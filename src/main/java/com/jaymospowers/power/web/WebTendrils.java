@@ -274,9 +274,9 @@ public final class WebTendrils {
 		});
 	}
 
-	/** Anything a tendril can take: creatures, players (not in creative), items, corpses. Not yourself. */
+	/** Anything a tendril can take: creatures, players (not in creative), items, corpses (not heavy ones). Not yourself. */
 	public static boolean grabbable(Player player, Entity entity) {
-		return entity != player && entity.isAlive() && !entity.isSpectator() && !(entity instanceof ArmorStand)
+		return entity != player && entity.isAlive() && !entity.isSpectator() && !(entity instanceof ArmorStand) && !KitchenCompat.isHeavy(entity)
 			&& !(entity instanceof Player p && p.isCreative()) && entity.getVehicle() == null && !entity.isVehicle()
 			&& (entity instanceof LivingEntity || entity instanceof net.minecraft.world.entity.item.ItemEntity
 				|| entity instanceof com.jaymospowers.core.BlockCluster || com.jaymospowers.power.gravity.GravityPower.isCorpse(entity));

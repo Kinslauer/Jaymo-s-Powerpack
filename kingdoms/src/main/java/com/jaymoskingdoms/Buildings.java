@@ -57,7 +57,7 @@ final class Buildings {
 			realm(type, "well", Buildings::well, 1, 0);
 			realm(type, "house", Buildings::house, 4, 16);
 			realm(type, "mason", Buildings::mason, 1, 20);
-			// (0.5.22) where the guards throw dead monsters ({@link Undertakers})
+			// (0.5.23) where the guards throw dead monsters ({@link Undertakers})
 			realm(type, "fire_pit", Buildings::firePit, 1, 20);
 			realm(type, "market", Buildings::market, 1, 24);
 			realm(type, "stable", Buildings::stable, 1, 28);
@@ -463,7 +463,7 @@ final class Buildings {
 	 * on its rim; maybe a chain hanging down. The plain design: four fence posts and a slab roof.
 	 */
 	/**
-	 * (0.5.22) A fire pit: a campfire (now and then a soul campfire) sunk in the ground in a ring of stone, a path round
+	 * (0.5.23) A fire pit: a campfire (now and then a soul campfire) sunk in the ground in a ring of stone, a path round
 	 * it, and stone posts (or lanterns on them) at its corners. The guards throw dead monsters onto it ({@link Undertakers}).
 	 */
 	static Blueprint firePit(Kit k) {

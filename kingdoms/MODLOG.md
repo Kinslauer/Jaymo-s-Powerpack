@@ -1441,8 +1441,8 @@ jobs (builder farmer guard) in the same way"; then "miners should place torches 
   four new rows and Builder made Nikoll "Caelwold's Builder" in new clothes with a shovel. Not seen: miners' torches,
   guards attacking a hostile player, farmer/miner/woodcutter promotion.
 
-## 0.5.22: guards clear away dead monsters
-- **`Undertakers`** (with Jaymo's Kitchen 0.4.26+, reached by reflection in `KitchenCompat`, so Kingdoms still builds and
+## 0.5.23: guards clear away dead monsters
+- **`Undertakers`** (with Jaymo's Kitchen 0.4.28+, reached by reflection in `KitchenCompat`, so Kingdoms still builds and
   runs without it): every 2 s each standing town or kingdom (not barbarian camps) hands up to 2 monster corpses lying
   within 64 blocks of its seat to its nearest free guard (not fighting, asleep or on another duty). A kingdom's guards
   are its guard folk or, with MCA, its MCA guards; a village's are its iron golems, who only throw corpses into a fire

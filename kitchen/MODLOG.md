@@ -642,13 +642,18 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
 ## 0.4.25: grinding stone down to sand
 - **Grindstones grind rock** (`MachineRecipes.GRIND`, hand grindstone and horse mill alike): stone or cobblestone makes 1 gravel, and gravel makes 1 sand.
 
-## 0.4.26: skeletons get back up, burning corpses spread fire, guards can carry corpses
+## 0.4.27: iron golem corpses are heavy
+- **New tag `jaymoskitchen:heavy_corpses`** (iron golems; `CorpseEntity.isHeavy`). A heavy corpse can't be carried or pocketed by hand ("Solid iron: far too heavy to lift.") and can't be butchered: an axe gets "Solid iron: there's nothing to butcher.", and `butcher` does nothing for it. It can still be searched.
+- A power can still take one through `takeBy`; Jaymo's Powers lets only Gravity's Lift do that.
+- **It doesn't burn and doesn't rot** (`CorpseEntity.burns()` is false for heavy corpses, so fire, lava and flint and steel don't take it). Searched, it drops its loot and **falls apart** (`CRUMBLING`, synced; `CRUMBLE_TICKS` 50): iron-block chips crack off with clanks every 8 ticks while it shudders, slumps flatter and sinks into the ground (`CorpseRenderer`), then a last burst, the golem's death sound and an anvil thud, and it's gone. Left unsearched for 10 minutes, it falls apart the same way with its loot.
+
+## 0.4.28: skeletons get back up, burning corpses spread fire, guards can carry corpses
 - **Skeletons rise like zombies:** a skeleton corpse (skeleton, stray, bogged, wither skeleton, parched, skeleton horse)
   left 5 minutes gets back up empty-handed, rattling for its last 10 s, unless it's burned or all its bones are pulled.
   Searching one says "Burn it before it gets back up!" (`CorpseEntity.rises`).
 - **Burning corpses spread fire:** once a second while alight (not while carried) a burning body tries two random empty
   spots in or around it (a block out, a block up); one beside something that catches (wood, wool, leaves: anything
   lava would light) takes fire. Follows the fire-spread game rules (`spreadFire`, `SPREAD_EVERY`).
-- **For Jaymo's Kingdoms' guards:** `carryBy(Entity)` lets a mob carry a corpse, `throwAt(Vec3)` throws it at a spot,
+- **For Jaymo's Kingdoms' guards:** `carryBy(Entity)` lets a mob carry a corpse (never a heavy one), `throwAt(Vec3)` throws it at a spot,
   and `isHostile()` is public.
 - **Sheep give leather too:** butchered on a butcher block, a sheep now drops 1 leather 15% of the time, as a pig already did.

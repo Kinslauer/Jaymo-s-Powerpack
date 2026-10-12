@@ -7,8 +7,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.22) Jaymo's Kitchen (optional), for {@link Undertakers}: its corpses, reached by reflection so Kingdoms needs no
- * Kitchen jar to build or run. Without Kitchen 0.4.26 or later ({@code CorpseEntity.carryBy} and {@code throwAt}) every
+ * (0.5.23) Jaymo's Kitchen (optional), for {@link Undertakers}: its corpses, reached by reflection so Kingdoms needs no
+ * Kitchen jar to build or run. Without Kitchen 0.4.28 or later ({@code CorpseEntity.carryBy} and {@code throwAt}) every
  * call fails soft: nothing is a corpse.
  */
 final class KitchenCompat {
@@ -27,7 +27,7 @@ final class KitchenCompat {
 				carryBy = corpse.getMethod("carryBy", Entity.class);
 				throwAt = corpse.getMethod("throwAt", Vec3.class);
 			} catch (ReflectiveOperationException e) {
-				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for guards to clear corpses (needs 0.4.26): {}", e.toString());
+				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for guards to clear corpses (needs 0.4.28): {}", e.toString());
 				corpse = null;
 			}
 		}
