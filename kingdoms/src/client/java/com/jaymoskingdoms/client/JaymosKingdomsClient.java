@@ -36,6 +36,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		MobAnimations.register();
 		PullerPose.register();
 		SpeechBubbles.register();
+		// 0.5.29: quest givers' screens, marks and the tracker
+		QuestClient.register();
 		ArmoryLayer.register();
 	}
 

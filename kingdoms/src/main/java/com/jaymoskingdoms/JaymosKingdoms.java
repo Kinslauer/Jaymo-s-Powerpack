@@ -110,6 +110,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Carriages.register();
 		Rickshaws.register();
 		Cabs.register();
+		// 0.5.29: quests from villagers and kings, their caches and champions, relics (and their attachments)
+		LOGGER.debug("quest attachments: {} {} {} {}", Quests.LOG, Quests.OFFER, Quests.MARK, QuestFoes.FOE);
+		Quests.register();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();
 			Gatherers.clear();
