@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.5.35) A necromancer's thralls never take their own side for a foe, nor their side's folk them ({@link Thralls#refuses}).
+ * (0.5.37) A necromancer's thralls never take their own side for a foe, nor their side's folk them ({@link Thralls#refuses}).
  * Every mob's targeting (goals, brains, {@code setTarget}) asks {@code canAttack}.
  */
 @Mixin(LivingEntity.class)

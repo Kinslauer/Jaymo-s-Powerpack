@@ -34,7 +34,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.Wagon.TYPE, WagonRenderer::new);
 		CampSkins.register();
 		GoblinSkins.register();
-		// 0.5.35: the casters
+		// 0.5.37: the casters
 		SorcerySkins.register();
 		com.jaymoskingdoms.client.lootgoblins.LootGoblinRenderer.register();
 		MobAnimations.register();
@@ -43,6 +43,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.5.29: quest givers' screens, marks and the tracker
 		QuestClient.register();
 		ArmoryLayer.register();
+		// 0.5.34: Jaymo's Equestrian (gaits, the stamina HUD, coats, war elephants)
+		com.jaymoskingdoms.client.equestrian.EquestrianClient.register();
 	}
 
 	/** Their render state: which of them it is, its faction's style (type ordinal), and the dye it wears (-1 for none). */
@@ -94,7 +96,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 				context.getEquipmentRenderer()));
 			// (0.5.27) goblins' long ears and hooked noses
 			this.addLayer(new GoblinSkins.Features(this));
-			// (0.5.35) a court wizard's pointed hat
+			// (0.5.37) a court wizard's pointed hat
 			this.addLayer(new SorcerySkins.Hat(this));
 		}
 

@@ -1733,7 +1733,67 @@ with space, and buried trail ruins should get quests that suit them (more variet
   turned the quest to "Return to Prokopios". A Bone Lord decree at trial chambers set the Bone Lord and escort in a
   chamber room at -475, -19, -396.
 
-## 0.5.35: sorcery (necromancers, shamans, court wizards)
+## 0.5.34: Jaymo's Equestrian, stage 1 (riding)
+Andy liked SWEM (Forge/NeoForge only) and asked for our own take, built into Kingdoms; the plan doc and Andy's answers
+are in project memory (`equestrian-plan`). Nothing is taken from SWEM: original code, model and art (the elephant's look is Mo' Creatures', credited below). Package
+`com.jaymoskingdoms.equestrian` (client: `client.equestrian`); tuning numbers at the top of `Equestrian`, `Breed`, `Gait`.
+- **Every horse, skeleton horse and zombie horse is upgraded in place** the first time it loads (`ENTITY_LOAD`), so the
+  stables', cavalry's, caravans', carriages' and cabs' horses get it too. A horse from before keeps its old speed and
+  jump as its stats. Donkeys, mules, llamas and camels are left alone.
+- **Breeds** (`Breed`): destrier, courser, palfrey, draft, steppe pony, desert horse (and the war elephant and woolly mammoth), each with
+  its stat ranges, size (scale attribute) and build (drawn wider/taller/longer), courage, stamina and top gait. Wild
+  horses by biome (`Equestrian.breedAt`): desert/badlands desert horses, savanna ponies and desert horses, cold lands
+  drafts and ponies, plains coursers/palfreys/drafts. Undead horses take any horse breed (size and stats), never
+  spook, tire at half the rate.
+- **Hidden stats** (`Equine`, an attachment saved and synced): speed, stamina, jump, courage, temper (0-1; three dice).
+  Foals take one parent's breed, mostly a parent's coat, each stat between the parents' plus a little luck
+  (`FOAL_LUCK`). Temper sets how long a horse takes to break in. A tamed horse's inventory screen shows them as bars.
+- **Gaits** (`Gait`): halt, walk, trot, canter, gallop on the scroll wheel while riding (the hotbar keeps its number
+  keys); sprint is a burst at the gallop. Drafts top out at the canter.
+- **Stamina** (`Stride`, saved and synced): galloping drains it, walking and standing refill it (also while unridden);
+  run dry, a horse is blown and drops to a trot until it's back to 35%. Coursers tire fast, ponies hardly at all, a
+  palfrey's amble (trot and canter) costs nothing, desert horses don't tire in the heat but do in the cold.
+- **HUD**: bottom right, above the powers' chip row in Wind's style: breed, gait (or Sprint!/Charge!/Blown), five gait
+  pips, the stamina bar with the wind-back mark.
+- **Courage**: fire close by, monsters at night, a blow in a fight and explosions (`ServerExplosionMixin`) test a
+  ridden horse's nerve; a timid one rears, drops to a walk, and may throw its rider. Destriers and brave horses hold
+  steady; steppe ponies never spook.
+- **Coats**: 6 per breed (the last rare, 4%), 3 skeleton, 3 zombie, adult and foal, drawn by `tools/gen_equestrian.py`;
+  vanilla's markings layer is left off (the markings are painted in).
+- **War elephant** (`WarElephant`, `war_elephant_spawn_egg`): tamed, fed, saddled and bred like a horse. It wears the
+  elephant of DrZhark's **Mo' Creatures** (GPL-3.0): its model and animation ported to 26.3 (`WarElephantModel`), and
+  its Indian, African (big ears) and royal (painted, rare) hides. Saddled, it wears Mo' Creatures' harness and wooden
+  war platform (the howdah) with our banner. At the canter and faster it tramples monsters (and whatever targets its
+  rider); sprinting is a trumpeted charge. Desert realms' stables keep one, and a wealthy desert realm puts a guard on
+  one (`Cavalry.ELEPHANTS_ARID`, 20 emeralds).
+- **Woolly mammoth** (breed `woolly_mammoth`, the same entity): bigger and tougher, tires at half the rate in the cold
+  and much faster in the heat (`MAMMOTH_COLD_DRAIN`, `MAMMOTH_HEAT_DRAIN`). Mo' Creatures' mammoth hide (domed head,
+  shaggy skirt), plus russet and a rare frost coat tinted from it. Snowy realms keep and ride mammoths where desert
+  realms keep elephants; a spawn egg used in the snow hatches a mammoth. The hides are built by
+  `tools/gen_elephant_hides.py` from Mo' Creatures' originals in `tools/mocreatures/`; the licence and a notice are in
+  `licenses/mocreatures/`, and `WarElephantModel` stays GPL-3.0.
+- **Kingdoms**: carters, coachmen and cab drivers drive drafts; guards ride destriers, archers coursers (desert horses
+  in desert realms). New stables: a village's palfreys and drafts, a realm's destriers and coursers (desert horses,
+  steppe ponies or a draft by climate).
+- **Death**: a tamed horse that dies leaves a lock of its mane (`mane_lock`, named for it, with its breed, coat, stats
+  and owner in its data, for a necromancer later). No revival yet.
+- **Testing** (op): `/kingdom horse <breed>` gives a tamed, saddled mount of that breed.
+- Seen in game (cloud playtest): elephants and mammoths render; riding not yet tried.
+
+## 0.5.36: Mobs work themselves loose
+Andy: mobs too often get stuck pathing. AI Improvements (suggested) is NeoForge-only and a performance mod, so this is
+our own. `Unstick` (tuning at the top), run from `PathNavigationMixin` after every navigation tick, covers every mob:
+vanilla, MCA villagers and our folk.
+- Vanilla's stuck check resets whenever a goal asks for its path again, and chasing or wandering goals ask every few
+  ticks, so a mob snagged on a corner stayed snagged. `Unstick` watches how far the mob has moved across instead.
+- No headway for 1.5 s: a hop toward its next step (frees it from slabs, carpets, fence-post corners); again every
+  1.5 s while it stays stuck. 3.5 s: a nudge back to the middle of its block and a fresh path. 7 s: the walk is
+  dropped so its AI picks something else.
+- Our folk don't give up: out of a fight, not breaking in on a raid and not on a caravan, after 12 s they turn up
+  where they were going in a puff (as builders, farmers and gatherers already did), which now also covers guards,
+  escorts, banner defenders, firefighters and undertakers.
+
+## 0.5.37: sorcery (necromancers, shamans, court wizards)
 Andy asked for Iron's Spells 'n Spellbooks to fuel necromancy and wizards for the kingdoms and (more so) the barbarians.
 Iron's Spells is Forge/NeoForge 1.21.1 only and all rights reserved (no ports, no reuse of its art), so this is our own
 take: original spells, art and names (`Sorcery`, `Thralls`, `Arcana`, client `SorcerySkins`, `tools/gen_sorcery.py`).
@@ -1745,7 +1805,8 @@ take: original spells, art and names (`Sorcery`, `Thralls`, `Arcana`, client `So
   at anyone close; and whatever dies near him in a fight rises as his thrall (villagers as zombie villagers, horses as
   zombie horses, men and folk as zombies). Up to 5 thralls; they wear a grey rag (no sunburn) and crumble after 90-120 s
   or when he falls. Hood, black robe, skull clasp, bone staff.
-- **Court wizard** (`Sorcery.WIZARD`, every kingdom; a second over 300 emeralds): arcane bolts (double on the undead), a
+- **Court wizard** (`Sorcery.WIZARD`; a second over 300 emeralds). Not every kingdom believes in magic: about 60%
+  (`MAGIC_BELIEF`, fixed per realm) keep a court mage, the rest none at all. Arcane bolts (double on the undead), a
   ward (absorption) on the guards fighting near him, mending, a blast that throws back anyone close, and he banishes
   enemy thralls. Robe in the realm's colour, a beard, a pointed hat (its own model), a crystal staff. A **tyrant** king
   keeps a court necromancer instead (his dead spare the realm's villagers and players it doesn't hold hostile).

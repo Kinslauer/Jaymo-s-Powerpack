@@ -186,7 +186,9 @@ final class WebSymbioteScreen extends Screen {
 
 		// the middle: the pick's name, and how fed it is
 		if (selected >= 0) {
-			Component name = Component.translatable("ability.jaymospowers.web_symbiote." + (selected < NAMES.length ? NAMES[selected] : "suit"));
+			// in the big body, the Spike Burst is a roar
+			String key = selected >= NAMES.length ? "suit" : selected == WebSymbiote.SPIKES && WebSymbiote.bulked(player) ? "roar" : NAMES[selected];
+			Component name = Component.translatable("ability.jaymospowers.web_symbiote." + key);
 			graphics.centeredText(font, name, cx, cy - 10, 0xFFE8E0F0);
 		}
 		// the suit toggle: a little black mask, lit while the suit shows

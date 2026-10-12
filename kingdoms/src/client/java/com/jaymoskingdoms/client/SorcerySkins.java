@@ -16,7 +16,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
 
 /**
- * (0.5.35) The casters' look ({@link Sorcery}): the necromancer's hood and black robe (two faces), the shaman's war paint and
+ * (0.5.37) The casters' look ({@link Sorcery}): the necromancer's hood and black robe (two faces), the shaman's war paint and
  * wolf-skull headdress in his camp's colour, the court wizard's robe in his realm's colour, and the wizard's pointed hat, a
  * model of its own over his head (drawn by {@code tools/gen_sorcery.py}).
  */

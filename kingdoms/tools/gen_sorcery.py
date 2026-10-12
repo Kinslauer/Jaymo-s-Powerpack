@@ -1,4 +1,4 @@
-"""Draws the casters' art for Kingdoms 0.5.35 (Sorcery), all original: the skins (64x64, the humanoid layout) of the
+"""Draws the casters' art for Kingdoms 0.5.37 (Sorcery), all original: the skins (64x64, the humanoid layout) of the
 necromancer (two faces: a hooded black-and-violet robe, a pale sunken face with violet eyes, a bone belt and skull clasp),
 the camp shaman (one per camp colour: war paint in it, a wolf-skull headdress with feathers, a fur mantle, a bone
 necklace, a hide kilt) and the court wizard (one per realm colour: a robe in it with gold trim and stars, a long grey

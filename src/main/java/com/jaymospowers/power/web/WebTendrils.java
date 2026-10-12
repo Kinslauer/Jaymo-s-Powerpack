@@ -242,12 +242,12 @@ public final class WebTendrils {
 				return;
 			}
 			if (payload.entityId() == GRAB_BLOCK) {
-				if (WebSymbiote.armored(player) && player.isAlive() && !player.isSpectator()) {
+				if (WebSymbiote.tendrilKeys(player) && player.isAlive() && !player.isSpectator()) {
 					rip(player, hand);
 				}
 			} else if (payload.entityId() < 0) {
 				release(player, hand, true);
-			} else if (WebSymbiote.armored(player) && player.isAlive() && !player.isSpectator()) {
+			} else if (WebSymbiote.tendrilKeys(player) && player.isAlive() && !player.isSpectator()) {
 				Entity target = player.level().getEntity(payload.entityId());
 				if (target != null && target.distanceTo(player) <= GRAB_RANGE + 2.5) {
 					grab(player, hand, target, -1L);
@@ -355,7 +355,7 @@ public final class WebTendrils {
 			if (tug == null) {
 				continue;
 			}
-			if (!player.isAlive() || player.isSpectator() || !WebSymbiote.armored(player)
+			if (!player.isAlive() || player.isSpectator() || !WebSymbiote.tendrilKeys(player)
 				|| tug.hit().getLocation().distanceTo(player.getEyePosition()) > GRAB_RANGE + 3.0) {
 				cancelTug(player, hand);
 				continue;
@@ -407,7 +407,7 @@ public final class WebTendrils {
 	/** Left or right click while that tendril holds a chunk: a heavy cross (see {@link #CROSS_WINDUP}). */
 	static void smash(ServerPlayer player, int hand) {
 		Grips grips = player.getAttached(GRIPS);
-		if (grips == null || !WebSymbiote.armored(player) || !player.isAlive() || CROSSES.containsKey(player.getUUID())) {
+		if (grips == null || !WebSymbiote.tendrilKeys(player) || !player.isAlive() || CROSSES.containsKey(player.getUUID())) {
 			return;
 		}
 		if (player.level().getEntity(grips.get(hand)) instanceof com.jaymospowers.core.BlockCluster chunk && reached(player, hand)) {

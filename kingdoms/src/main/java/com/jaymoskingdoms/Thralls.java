@@ -38,7 +38,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.35) The risen dead: vanilla zombies, skeletons (and their kin) raised by a necromancer ({@link Sorcery}) or a
+ * (0.5.37) The risen dead: vanilla zombies, skeletons (and their kin) raised by a necromancer ({@link Sorcery}) or a
  * player's Scroll of Raising ({@link Scrolls}). Each carries a {@link #TAG}: the side it fights for (a faction, or a
  * player), who raised it, and when it falls back to dust. A thrall never turns on its own side ({@link #refuses}, through
  * {@code ThrallTargetMixin}), and its side's folk leave it be. It goes for its master's foe, keeps near its master, and

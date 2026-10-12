@@ -203,7 +203,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	private int escortSlot;
 	private @org.jspecify.annotations.Nullable BlockPos post;
 	private int postRadius;
-	/** (0.5.35) A caster's spells' cooldowns ({@link Sorcery}; not saved). */
+	/** (0.5.37) A caster's spells' cooldowns ({@link Sorcery}; not saved). */
 	private final int[] spellTimers = new int[Sorcery.TIMERS];
 	/** Which {@link Outfits#VERSION} dressed it (0: before faction looks, so it's dressed again on its next tick). Saved. */
 	private int outfit;
@@ -273,7 +273,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		return this.role() == ARCHER || Goblins.ranged(this.role()) || Sorcery.isCaster(this.role());
 	}
 
-	/** (0.5.35) A caster's spells' cooldowns (ticks left, by {@link Sorcery}'s slots). */
+	/** (0.5.37) A caster's spells' cooldowns (ticks left, by {@link Sorcery}'s slots). */
 	int[] spellTimers() {
 		return this.spellTimers;
 	}
@@ -491,7 +491,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		} else if (!this.shying) {
 			Workers.work(level, this);
 		}
-		// (0.5.35) a caster's timers, closing in on its foe, its spells for its side
+		// (0.5.37) a caster's timers, closing in on its foe, its spells for its side
 		if (Sorcery.isCaster(this.role())) {
 			Sorcery.tick(level, this);
 		}
@@ -627,7 +627,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		public boolean canUse() {
 			LivingEntity target = this.archer.getTarget();
 			if (Sorcery.isCaster(this.archer.role())) {
-				// (0.5.35) a caster casts from where it stands while it can see its foe in reach; else it closes in (Sorcery.tick)
+				// (0.5.37) a caster casts from where it stands while it can see its foe in reach; else it closes in (Sorcery.tick)
 				return target != null && target.isAlive() && this.archer.distanceTo(target) <= Sorcery.RANGE && this.archer.getSensing().hasLineOfSight(target);
 			}
 			return this.archer.ranged() && target != null && target.isAlive() && this.archer.distanceTo(target) <= ARCHER_RANGE;

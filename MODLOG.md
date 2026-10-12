@@ -391,3 +391,28 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (LGPL-3.0).
 - **0.8.65, riders sit in the saddle:** ships Jaymo's Kingdoms 0.5.32 (see `kingdoms/MODLOG.md`): mounted guards,
   archers, caravan riders and coachmen no longer float above their horses.
+- **0.8.66, the symbiote's roar and wall tethers:**
+  - Near death, before it takes over and runs, the symbiote roars (2 s): you're held hunched and shuddering while
+    the armour pieces itself together over you (the suit, then the tendrils flailing, then the big body; whatever you
+    already wore stays), then it throws its head back, maw wide open, arms flung out, and roars: everything within
+    6 blocks takes 4 hearts and is hurled away, every screen nearby shakes. Resistance III while it roars. The roar
+    replaces the opening Spike Burst. (`WebSymbiote.startRoar`/`tickRoar`/`roarBlast`, pose `WebPose.ROAR`.)
+  - In the big body (full bond), the radial menu's Spike Burst is the same roar ("Roar" on the menu).
+  - Tendril Grab at a block: the tendrils lift you a block off the wall over half a second, and each of the six
+    lower ones bites into its own spot around you, cracking the block there (one a tick). You hang on them like
+    elastic: the movement keys lean you up to 1.4 blocks away, the cracks deepen with the strain, and they haul you
+    back when you let go. Jump kicks off, the grab again lets go, and so does any other radial ability. The two
+    shoulder tendrils stay free: R grabs and Shift+G tears a chunk while you hang there, even without Living Armor.
+- **0.8.69, Overhauled Overworld:** adds William Wythers' Overhauled Overworld 3.0.1 and Cristel Lib 3.1.13 to the
+  pack. Every vanilla biome is redecorated (new trees, undergrowth, boulders, sub-biome patches) but keeps its id, and
+  the terrain and biome map are untouched, so Epic villages (kingdom capitals), Grim and ATi ruins, Moog's roads and
+  Kingdoms' biome checks all work as before. Cristel Lib is no longer swept out of the profile with Towns and Towers.
+- **0.8.70, Jaymo's Equestrian (riding):** ships Jaymo's Kingdoms 0.5.34 (see `kingdoms/MODLOG.md`): six horse
+  breeds with hidden stats foals inherit, five gaits on the scroll wheel, a stamina bar, courage and spooking, new coats;
+  war elephants and woolly mammoths in Mo' Creatures' look (GPL-3.0).
+- **0.8.72, Mobs work themselves loose:** ships Jaymo's Kingdoms 0.5.36 (see `kingdoms/MODLOG.md`): any mob that stops
+  getting closer to where it's walking hops toward its next step, then takes a fresh path, then gives the walk up;
+  our own folk turn up where they were going in a puff instead.
+- **0.8.73, Sorcery:** ships Jaymo's Kingdoms 0.5.37 (see `kingdoms/MODLOG.md`): our own take on Iron's Spells. Barbarian
+  camps keep shamans and necromancers (the dead near a necromancer rise as his thralls), kingdoms keep court wizards (a
+  tyrant a court necromancer), and slain casters drop one-use spell scrolls.

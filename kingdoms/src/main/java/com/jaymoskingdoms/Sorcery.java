@@ -42,7 +42,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.35) Sorcery: the spellcasters of the camps and the courts, our own take on Iron's Spells 'n Spellbooks (that mod is
+ * (0.5.37) Sorcery: the spellcasters of the camps and the courts, our own take on Iron's Spells 'n Spellbooks (that mod is
  * NeoForge-only and all rights reserved, so nothing of it is used: the spells, art and names here are original).
  * <ul>
  * <li>A barbarian camp's <b>shaman</b> ({@link #SHAMAN}): fire bolts, a ring of fire when cornered, a hex on a player
@@ -109,6 +109,8 @@ public final class Sorcery {
 	static final int NECROMANCER_DAYS = 2, SECOND_SHAMAN_DAYS = 5;
 	/** A kingdom with this much in its treasury keeps a second wizard. */
 	static final long SECOND_WIZARD_TREASURY = 300;
+	/** The share of kingdoms that hold with magic at all (the rest keep no court mage). */
+	static final float MAGIC_BELIEF = 0.6F;
 	/** How often the roster is checked for them (ticks). */
 	static final int STAFF_TICKS = 1200;
 
@@ -209,6 +211,9 @@ public final class Sorcery {
 			};
 		}
 		if (f.type() == FactionType.KINGDOM) {
+			if (!believesInMagic(f)) {
+				return 0;
+			}
 			boolean tyrant = Tempers.of(f) == Tempers.Temper.TYRANT;
 			return switch (role) {
 				case NECROMANCER -> tyrant ? 1 : 0;
@@ -217,6 +222,11 @@ public final class Sorcery {
 			};
 		}
 		return 0;
+	}
+
+	/** Not every kingdom believes in magic: whether this one does is fixed for good by its id ({@link #MAGIC_BELIEF} of them do). */
+	public static boolean believesInMagic(Faction f) {
+		return net.minecraft.util.RandomSource.create(f.id() * 0x9E3779B97F4A7C15L ^ 0x5EC12E7L).nextFloat() < MAGIC_BELIEF;
 	}
 
 	/** Places for the casters it lacks (hired as any other hand is, {@link Economy#hire}). */

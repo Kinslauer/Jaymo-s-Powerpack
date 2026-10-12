@@ -195,7 +195,7 @@ public final class Economy {
 		} else if (role == Folk.ARCHER) {
 			hired = KingdomEvents.spawnArcher(level, ready);
 		} else if (Sorcery.isCaster(role)) {
-			// (0.5.35) a court's wizard (or necromancer) in its hall, a camp's shaman or necromancer by its fire
+			// (0.5.37) a court's wizard (or necromancer) in its hall, a camp's shaman or necromancer by its fire
 			hired = Sorcery.spawn(level, ready, role);
 		} else if (Workers.inPlace(ready, role) && (hired = McaCompat.enlist(level, ready, role, ready.seat(), ready.seat(), Folk.HOME_RADIUS)) != null) {
 			// (0.5.21) one of its villagers made an MCA guard (or archer)

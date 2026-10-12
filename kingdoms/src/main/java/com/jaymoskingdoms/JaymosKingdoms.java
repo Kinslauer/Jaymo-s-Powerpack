@@ -113,13 +113,15 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("caravan attachments: {} {}", Caravans.CARAVANS, Carriages.BOUGHT);
 		Caravans.register();
 		Cavalry.register();
+		// 0.5.34: Jaymo's Equestrian, stage 1 (breeds, stats, gaits, stamina, courage, coats, war elephants) and its attachments
+		com.jaymoskingdoms.equestrian.Equestrian.register();
 		Carriages.register();
 		Rickshaws.register();
 		Cabs.register();
 		// 0.5.29: quests from villagers and kings, their caches and champions, relics (and their attachments)
 		LOGGER.debug("quest attachments: {} {} {} {}", Quests.LOG, Quests.OFFER, Quests.MARK, QuestFoes.FOE);
 		Quests.register();
-		// 0.5.35: sorcery: camps' shamans and necromancers, courts' wizards, the risen dead, spell scrolls (and the thralls' attachment)
+		// 0.5.37: sorcery: camps' shamans and necromancers, courts' wizards, the risen dead, spell scrolls (and the thralls' attachment)
 		Arcana.register();
 		LOGGER.debug("thrall attachment: {}", Thralls.TAG);
 		Thralls.register();

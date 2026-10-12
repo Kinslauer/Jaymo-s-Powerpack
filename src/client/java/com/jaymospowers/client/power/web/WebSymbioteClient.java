@@ -53,13 +53,16 @@ public final class WebSymbioteClient {
 	/** {@code rear}, {@code hit}: the shares of {@code strike} where it stops rearing and where it lands. */
 	/** {@code feral}: how wild it still is (1 a fresh bond, 0 a full one): twitchier, restless tendrils. */
 	public record Tendrils(float growth, float time, float strike, float aimYaw, float aimPitch, float side, float run, int held, boolean armor,
-		int wall, float wallYaw, float wallPitch, boolean heavy, int variant, boolean firstPerson, int combo, float rear, float hit, float feral) {
+		int wall, float wallYaw, float wallPitch, boolean heavy, int variant, boolean firstPerson, int combo, float rear, float hit, float feral,
+		float roar, float @org.jspecify.annotations.Nullable [] tethers) {
 		/** {@code wall}: 0 none, 1 reaching for a wall (aimed by wallYaw/wallPitch), 2 fanned back into it. */
+		/** {@code roar}: how far through a roar (0-1), or -1: they flail, then fling out wide. */
+		/** {@code tethers}: hung off a wall, per tendril (yaw, pitch against the body, then its reach in blocks; 0 for a free one). */
 
 		/** The same, drawn from your own eyes. */
 		public Tendrils inFirstPerson() {
 			return new Tendrils(growth, time, strike, aimYaw, aimPitch, side, run, held, armor, wall, wallYaw, wallPitch, heavy, variant, true, combo,
-				rear, hit, feral);
+				rear, hit, feral, roar, tethers);
 		}
 	}
 	/** Ticks into a meal (partial ticks included), for the maw. */
@@ -102,6 +105,8 @@ public final class WebSymbioteClient {
 		return run.value;
 	}
 
+	/** How far through a roar (0-1), for the maw thrown open. */
+	public static final RenderStateDataKey<Float> ROAR = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_roar");
 	/** Ticks into a curious stare (the head swollen, staring), for the maw. */
 	public static final RenderStateDataKey<Float> STARE = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_stare");
 	/** How long the meal's carry in takes (ticks), for the maw. */
@@ -116,6 +121,8 @@ public final class WebSymbioteClient {
 	private static final java.util.Map<Integer, Long> WITHDRAW = new java.util.HashMap<>();
 	/** Ticks for fully grown tendrils to sink back into the body when Living Armor ends (the growth, run backwards). */
 	static final float WITHDRAW_TICKS = 40.0F;
+	/** Roaring, the tendrils burst out to full size this fast (ticks). */
+	static final float ROAR_GROW_TICKS = 8.0F;
 
 	// ===== wall crawl ===============================================================================================
 	/**
@@ -355,6 +362,10 @@ public final class WebSymbioteClient {
 		boolean armored = entity instanceof Player p && WebSymbiote.armored(p);
 		boolean bulk = entity instanceof Player p && WebSymbiote.bulked(p);
 		Long staring = entity.getAttached(WebSymbiote.STARING);
+		com.jaymospowers.power.web.WebPose roarPose = entity.getAttached(com.jaymospowers.power.web.WebPower.POSE);
+		float roarAt = roarPose == null || roarPose.kind() != com.jaymospowers.power.web.WebPose.ROAR ? -1.0F
+			: roarPose.progress(entity.level().getGameTime() + net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false));
+		state.setData(ROAR, roarAt >= 0.0F && roarAt < 1.0F && entity instanceof Player p && WebSymbiote.isBonded(p) ? roarAt : null);
 		state.setData(STARE, staring == null ? null : Math.max(0.0F, entity.level().getGameTime() - staring
 			+ net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false)));
 		long out = entity instanceof Player p && WebSymbiote.isBonded(p) ? WebSymbiote.tendrilsOut(p) : -1L;
@@ -449,9 +460,22 @@ public final class WebSymbioteClient {
 				wallPitch = (float)net.minecraft.util.Mth.atan2(to.y, Math.sqrt(to.x * to.x + to.z * to.z));
 			}
 			boolean firstPerson = player == net.minecraft.client.Minecraft.getInstance().player && FirstPersonCompat.bodyShown();
+			// roaring: they burst out fast and flail
+			float roar = -1.0F;
+			com.jaymospowers.power.web.WebPose pose = player.getAttached(com.jaymospowers.power.web.WebPower.POSE);
+			float partialTick = net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
+			if (pose != null && pose.kind() == com.jaymospowers.power.web.WebPose.ROAR) {
+				float p = pose.progress(now + partialTick);
+				if (p >= 0.0F && p < 1.0F) {
+					roar = p;
+					growth = Math.max(growth, Math.min(1.0F, (now - since + partialTick) / ROAR_GROW_TICKS));
+				}
+			}
+			// hung off a wall: each lower tendril on its own tether
+			float[] tethers = wall != null && wall.landed() >= 0L && !wall.points().isEmpty() ? WebTendrilLayer.tethers(player, wall, partialTick) : null;
 			state.setData(TENDRILS, new Tendrils(growth, player.tickCount, strike, aimYaw, aimPitch, side, smoothRun(player), held, bulk,
 				wallMode, wallYaw, wallPitch, heavy, variant, firstPerson, combo, rear, hit,
-				1.0F - WebSymbiote.state(player).bond() / (float)WebSymbiote.BOND_MAX));
+				1.0F - WebSymbiote.state(player).bond() / (float)WebSymbiote.BOND_MAX, roar, tethers));
 		} else {
 			ARMOR_SINCE.remove(entity.getId());
 			state.setData(TENDRILS, withdrawing(entity));
@@ -477,7 +501,7 @@ public final class WebSymbioteClient {
 		boolean firstPerson = player == net.minecraft.client.Minecraft.getInstance().player && FirstPersonCompat.bodyShown();
 		return new Tendrils(growth, player.tickCount, -1.0F, 0.0F, 0.0F, 1.0F, smoothRun(player), 0, WebSymbiote.bulked(player),
 			0, 0.0F, 0.0F, false, WebSymbiote.STRIKE_SLAM, firstPerson, -1, WebSymbiote.STRIKE_REAR,
-			WebSymbiote.STRIKE_HIT / (float)WebSymbiote.STRIKE_TICKS, 1.0F - WebSymbiote.state(player).bond() / (float)WebSymbiote.BOND_MAX);
+			WebSymbiote.STRIKE_HIT / (float)WebSymbiote.STRIKE_TICKS, 1.0F - WebSymbiote.state(player).bond() / (float)WebSymbiote.BOND_MAX, -1.0F, null);
 	}
 
 	/** First person, after the hands: your own tendrils, unless First-person Model is already drawing your body. */
@@ -491,11 +515,17 @@ public final class WebSymbioteClient {
 	// ---- per tick (while the web power is active) --------------------------------------------------------------------
 
 	static void tick(Minecraft minecraft, LocalPlayer player, WebSwing swing) {
-		// tethered to a wall by the tendrils: held right where you are
+		// tethered to a wall by the tendrils: hung off it on them, leaning against their pull (a web of yours outpulls them)
 		WebSymbiote.Wall wall = player.getAttached(WebSymbiote.WALL);
-		if (wall != null && wall.landed() >= 0L && !player.input.keyPresses.jump()) {
-			player.setDeltaMovement(Vec3.ZERO);
-			player.resetFallDistance();
+		if (wall != null && wall.landed() >= 0L && !player.input.keyPresses.jump() && !swing.attached() && swing.pull == null) {
+			tether(player, wall);
+		} else {
+			lean = Vec3.ZERO;
+		}
+		// roaring: it holds you where you stand
+		if (WebSymbiote.roaring(player)) {
+			Vec3 v = player.getDeltaMovement();
+			player.setDeltaMovement(0.0, Math.min(v.y, 0.0), 0.0);
 		}
 		if (takeoverTicks > 0) {
 			tickTakeover(player);
@@ -503,6 +533,31 @@ public final class WebSymbioteClient {
 		} else {
 			tickCrawl(player, swing);
 		}
+	}
+
+	/** How far you're leaning away from the tether spot right now (eases toward where the keys push). */
+	private static Vec3 lean = Vec3.ZERO;
+
+	/**
+	 * Hung off a wall: a damped spring toward the spot (lifting you off the wall at first), and the movement keys lean
+	 * you away from it (as far as {@link WebSymbiote#WALL_STRETCH}); let go of them and it hauls you back, overshooting a
+	 * little, like elastic.
+	 */
+	private static void tether(LocalPlayer player, WebSymbiote.Wall wall) {
+		Vec3 target = wall.target(player.level().getGameTime() - wall.landed());
+		Input keys = player.input.keyPresses;
+		double forward = (keys.forward() ? 1.0 : 0.0) - (keys.backward() ? 1.0 : 0.0);
+		double strafe = (keys.left() ? 1.0 : 0.0) - (keys.right() ? 1.0 : 0.0);
+		Vec3 ahead = Vec3.directionFromRotation(0.0F, player.getYRot());
+		Vec3 left = new Vec3(ahead.z, 0.0, -ahead.x);
+		Vec3 push = ahead.scale(forward).add(left.scale(strafe));
+		Vec3 want = push.lengthSqr() < 1.0E-4 ? Vec3.ZERO : push.normalize().scale(WebSymbiote.WALL_STRETCH);
+		lean = lean.add(want.subtract(lean).scale(WebSymbiote.WALL_LEAN_RATE));
+		Vec3 gap = target.add(lean).subtract(player.position());
+		Vec3 v = player.getDeltaMovement().scale(WebSymbiote.WALL_CARRY).add(gap.scale(WebSymbiote.WALL_SPRING));
+		// (holding up against gravity's pull this tick)
+		player.setDeltaMovement(v.add(0.0, player.getGravity(), 0.0));
+		player.resetFallDistance();
 	}
 
 	/** A takeover has you: no key you press does what it would (each is a struggle against its hold instead). */

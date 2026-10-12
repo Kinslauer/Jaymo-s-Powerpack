@@ -36,7 +36,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.35) The casters' things ({@link Sorcery}): their staffs (the necromancer's bone staff, the shaman's totem staff,
+ * (0.5.37) The casters' things ({@link Sorcery}): their staffs (the necromancer's bone staff, the shaman's totem staff,
  * the court wizard's staff; carried, never dropped) and the spell scrolls a player takes from a slain caster. A scroll is
  * read once (right-click) and crumbles:
  * <ul>

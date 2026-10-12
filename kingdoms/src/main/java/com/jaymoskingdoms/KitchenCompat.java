@@ -15,7 +15,7 @@ final class KitchenCompat {
 	static final String MOD = "jaymoskitchen";
 	private static final @Nullable Class<?> CORPSE;
 	private static final @Nullable Method HOSTILE, CARRIER, CARRY_BY, THROW_AT;
-	/** (0.5.35) For necromancers: what a corpse was, and whether it's a player's. */
+	/** (0.5.37) For necromancers: what a corpse was, and whether it's a player's. */
 	private static final @Nullable Method SOURCE_TYPE, PLAYER_CORPSE;
 
 	static {
@@ -65,13 +65,13 @@ final class KitchenCompat {
 			&& Boolean.TRUE.equals(call(HOSTILE, entity)) && call(CARRIER, entity) == null;
 	}
 
-	/** (0.5.35) A corpse a necromancer can raise: lying free, not a player's (their things stay safe). */
+	/** (0.5.37) A corpse a necromancer can raise: lying free, not a player's (their things stay safe). */
 	static boolean isRaisableCorpse(Entity entity) {
 		return CORPSE != null && SOURCE_TYPE != null && CORPSE.isInstance(entity) && !entity.isRemoved() && !entity.isPassenger()
 			&& call(CARRIER, entity) == null && !Boolean.TRUE.equals(call(PLAYER_CORPSE, entity));
 	}
 
-	/** (0.5.35) What the corpse was in life, or null. */
+	/** (0.5.37) What the corpse was in life, or null. */
 	static net.minecraft.world.entity.@Nullable EntityType<?> sourceType(Entity corpse) {
 		return call(SOURCE_TYPE, corpse) instanceof net.minecraft.world.entity.EntityType<?> type ? type : null;
 	}
