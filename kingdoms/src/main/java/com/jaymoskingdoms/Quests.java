@@ -369,6 +369,9 @@ public final class Quests {
 		mark(giver, false);
 		if (q.kind() == Quest.DELIVER) {
 			give(player, letter(q));
+		} else if (QuestFoes.dig(q) && count(player, Items.BRUSH) == 0) {
+			// (a dig: the giver lends a brush)
+			give(player, new ItemStack(Items.BRUSH));
 		}
 		Speech.say(level, giver, Component.translatable(q.royal() ? "quest.jaymoskingdoms.said.accept.king" : "quest.jaymoskingdoms.said.accept"),
 			Speech.GOLD, 16.0);
@@ -868,7 +871,8 @@ public final class Quests {
 					if (chest != null) {
 						Quest.Objective o = q.objective();
 						put(player, q.withObjective(new Quest.Objective(o.target(), o.count(), o.progress(), Optional.of(chest), o.other(), o.otherName(), o.place(), true)));
-						player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.cache_near", keepsake(q).getHoverName()).withStyle(ChatFormatting.YELLOW));
+						player.sendSystemMessage(Component.translatable(QuestFoes.dig(q) ? "quest.jaymoskingdoms.dig_near" : "quest.jaymoskingdoms.cache_near",
+							keepsake(q).getHoverName()).withStyle(ChatFormatting.YELLOW));
 						sync(player, true);
 					}
 				} else {
@@ -962,7 +966,8 @@ public final class Quests {
 			case Quest.SLAY -> Component.translatable("quest.jaymoskingdoms.objective.slay", foes(o.target()), o.progress(), o.count());
 			case Quest.GATHER -> Component.translatable("quest.jaymoskingdoms.objective.gather", itemName(o.target()),
 				Math.min(count(player, item(o.target())), o.count()), o.count());
-			case Quest.FETCH -> Component.translatable("quest.jaymoskingdoms.objective.fetch", keepsakeName(q), ruin(o.target()), x(q), z(q));
+			case Quest.FETCH -> Component.translatable(QuestFoes.dig(q) ? "quest.jaymoskingdoms.objective.dig" : "quest.jaymoskingdoms.objective.fetch",
+				keepsakeName(q), ruin(o.target()), x(q), z(q));
 			case Quest.DELIVER -> Component.translatable("quest.jaymoskingdoms.objective.deliver", addressee(q), o.place(), x(q), z(q));
 			case Quest.CHAMPION -> Component.translatable("quest.jaymoskingdoms.objective.champion", Component.translatable("foe.jaymoskingdoms." + o.otherName()),
 				ruin(o.target()), x(q), z(q));
