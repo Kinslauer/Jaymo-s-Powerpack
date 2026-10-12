@@ -1778,4 +1778,4 @@ are in project memory (`equestrian-plan`). Nothing is taken from SWEM: original 
 - **Death**: a tamed horse that dies leaves a lock of its mane (`mane_lock`, named for it, with its breed, coat, stats
   and owner in its data, for a necromancer later). No revival yet.
 - **Testing** (op): `/kingdom horse <breed>` gives a tamed, saddled mount of that breed.
-- Built only, not yet seen in game.
+- Seen in game (cloud playtest): elephants and mammoths render; riding not yet tried.
