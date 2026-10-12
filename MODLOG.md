@@ -516,3 +516,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   - **Dread vignette by bond:** a line or a feeding is fainter at a strong bond, stronger at a weak one; under bond 60
     a faint vignette lingers, breathing and blinking darker more often as the bond drops. Full strength is kept for a
     weak bond's own lines (ignored, neglected, at the edge, leaving you) and every takeover (`WebSymbioteDread`).
+- **0.8.86, Longer tendril Crush:** the Crush combo finds a creature under your crosshair from 12 blocks, up from 6
+  (`WebTendrilCombos.CRUSH_REACH`).
