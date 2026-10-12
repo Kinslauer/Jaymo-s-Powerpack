@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * (0.5.21) MCA's Professions menu: its builder, farmer, miner and woodcutter buttons are the settlement's to answer ({@link McaCompat#promote}).
- * (0.5.28) And the main page's Quests button opens the villager's quests.
+ * (0.5.29) And the main page's Quests button opens the villager's quests.
  */
 @Mixin(VillagerCommandHandler.class)
 abstract class McaCommandMixin extends EntityCommandHandler<VillagerEntityMCA> {
@@ -22,7 +22,7 @@ abstract class McaCommandMixin extends EntityCommandHandler<VillagerEntityMCA> {
 
 	@Inject(method = "handle", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$job(ServerPlayer player, String command, CallbackInfoReturnable<Boolean> cir) {
-		// (0.5.28) the main page's Quests button
+		// (0.5.29) the main page's Quests button
 		if (command.equals("quests")) {
 			com.jaymoskingdoms.Quests.openLater(player, this.entity);
 			cir.setReturnValue(true);

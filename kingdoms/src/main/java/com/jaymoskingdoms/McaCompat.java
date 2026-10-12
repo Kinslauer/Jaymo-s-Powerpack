@@ -128,12 +128,12 @@ public final class McaCompat {
 		return LOADED && McaBridge.isMca(villager);
 	}
 
-	/** (0.5.28) An MCA villager (their own menu has the Quests button). */
+	/** (0.5.29) An MCA villager (their own menu has the Quests button). */
 	static boolean isMca(net.minecraft.world.entity.Entity entity) {
 		return LOADED && entity instanceof Villager v && McaBridge.isMca(v);
 	}
 
-	/** (0.5.28) {@code villager} (if MCA's) warms to {@code player} by {@code hearts}: a quest done for them, a letter brought. */
+	/** (0.5.29) {@code villager} (if MCA's) warms to {@code player} by {@code hearts}: a quest done for them, a letter brought. */
 	static void hearts(LivingEntity villager, ServerPlayer player, int hearts) {
 		if (LOADED && villager instanceof Villager v) {
 			McaBridge.hearts(v, player, hearts);

@@ -42,6 +42,7 @@ final class WarCommands {
 				.then(Commands.argument("a", StringArgumentType.word()).then(Commands.argument("b", StringArgumentType.word()).executes(WarCommands::start))))
 			.then(Commands.literal("end").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.then(Commands.argument("name", StringArgumentType.word()).executes(WarCommands::end)))
+			.then(Commands.literal("join").executes(WarCommands::join))
 			.then(Commands.literal("party").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(WarCommands::party))
 			.then(Commands.literal("npc").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(WarCommands::npc));
 	}
@@ -203,6 +204,18 @@ final class WarCommands {
 		c.getSource().sendFailure(Component.literal("No war could send a party (none under way, parties already out, or no enemy seat loaded near "
 			+ player.getGameProfile().name() + ")"));
 		return 0;
+	}
+
+	/** (0.5.28) Marches with their side's war party ({@link WarParties#join}). */
+	private static int join(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
+		ServerPlayer player = c.getSource().getPlayerOrException();
+		WarParties.Joined joined = WarParties.join(Factions.level(c.getSource().getServer()), player);
+		if (!joined.ok()) {
+			c.getSource().sendFailure(joined.message());
+			return 0;
+		}
+		c.getSource().sendSuccess(joined::message, false);
+		return 1;
 	}
 
 	private static int npc(CommandContext<CommandSourceStack> c) {

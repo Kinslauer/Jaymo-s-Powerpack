@@ -10,7 +10,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * (0.5.28) A giver's quests: each one's story, what's left to do, what it pays (hover an item for its tooltip: a relic's
+ * (0.5.29) A giver's quests: each one's story, what's left to do, what it pays (hover an item for its tooltip: a relic's
  * passive, a book's enchantment), and the buttons to take it, turn it in or give it up. The server decides everything;
  * a choice is sent back and the screen comes again with the result.
  */

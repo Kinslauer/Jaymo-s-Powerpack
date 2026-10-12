@@ -51,6 +51,8 @@ import org.jspecify.annotations.Nullable;
 public final class Wagon extends Entity {
 	/** (0.5.26) {@link #CAB}: a hired carriage of a rich realm's, for players ({@link Cabs}). */
 	public static final int CART = 0, CARRIAGE = 1, RICKSHAW = 2, CAB = 3;
+	/** (0.5.28) Its caravan when it's no caravan's: none (a carriage), or a war party's spoils cart ({@link WarParties}). */
+	static final int NO_CARAVAN = -1, WAR_CART = -2;
 	/** What a cart's load looks like: nothing, stone and ore, food, a bit of everything. */
 	public static final int EMPTY = 0, STONE = 1, FOOD = 2, GOODS = 3;
 	/** How far behind its horse's middle its own middle trails (a cart, a carriage). */
@@ -276,7 +278,7 @@ public final class Wagon extends Entity {
 		}
 		if (horse == null || !horse.isAlive()) {
 			this.horseLost++;
-			if (this.horseLost >= LOST_HORSE_TICKS && this.caravan >= 0) {
+			if (this.horseLost >= LOST_HORSE_TICKS && this.caravan != NO_CARAVAN) {
 				Caravans.cartLost(level, this);
 			}
 			return;

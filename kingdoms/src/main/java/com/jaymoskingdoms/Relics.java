@@ -46,7 +46,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.28) Relics: the special weapons and armour quests pay out, each with a passive. They're plain vanilla items (a
+ * (0.5.29) Relics: the special weapons and armour quests pay out, each with a passive. They're plain vanilla items (a
  * sword, a bow, a helm) with a name, enchantments, the passive written on them, and its key in their custom data, so
  * they need no registry of their own and survive without this mod (as ordinary enchanted gear).
  *

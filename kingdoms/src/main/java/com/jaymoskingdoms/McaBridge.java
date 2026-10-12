@@ -47,7 +47,7 @@ final class McaBridge {
 		return villager instanceof VillagerEntityMCA;
 	}
 
-	/** (0.5.28) Hearts with {@code player} in an MCA villager's memory. */
+	/** (0.5.29) Hearts with {@code player} in an MCA villager's memory. */
 	static void hearts(Villager villager, ServerPlayer player, int hearts) {
 		if (villager instanceof VillagerEntityMCA v) {
 			v.getVillagerBrain().getMemoriesForPlayer(player).modHearts(hearts);

@@ -55,6 +55,12 @@ dependencies {
 	compileOnly fileTree("../libs") { include "mca-fabric-*.jar" }
 	// and in the dev game, to see its villagers in the test world
 	localRuntime fileTree("../libs") { include "mca-fabric-*.jar" }
+	// Balkon's WeaponMod: Legacy (MIT; WeaponModJavelins): guards throw its javelins when it's loaded. Compiled against the
+	// pack's version, in the dev game (with Architectury, which it needs), never required
+	compileOnly "maven.modrinth:balkons-weaponmod-legacy:Fabric-26.3-1.25.1"
+	localRuntime "maven.modrinth:balkons-weaponmod-legacy:Fabric-26.3-1.25.1"
+	compileOnly "maven.modrinth:architectury-api:22.0.4+fabric"
+	localRuntime "maven.modrinth:architectury-api:22.0.4+fabric"
 	// Epic Knights (KnightsCompat) is looked up by registry id only: no build for 26.3 yet, so nothing to compile against.
 }
 

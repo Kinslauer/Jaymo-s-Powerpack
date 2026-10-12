@@ -54,7 +54,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.28) Quests, from villagers and kings and nobody else. A villager with work for you wears a gold <b>!</b> over their
+ * (0.5.29) Quests, from villagers and kings and nobody else. A villager with work for you wears a gold <b>!</b> over their
  * head (a king nearly always has one); talk to them (MCA's menu: Quests; a plain villager: sneak and use; a king: an
  * audience) and their quest is laid out with what it pays. Take it, do it, and come back: they wear a <b>?</b> while
  * you're about their business (gold once it's done). Turning it in pays out (emeralds, the giver's goods, enchanted books,

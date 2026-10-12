@@ -18,7 +18,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.npc.villager.Villager;
 
 /**
- * (0.5.28) {@code /kingdom quests}: your quests and what's left of each, with a way to give one up from afar. For ops:
+ * (0.5.29) {@code /kingdom quests}: your quests and what's left of each, with a way to give one up from afar. For ops:
  * {@code offer} (the nearest giver has work now) and {@code finish} (your quests' counts made up), for testing.
  */
 final class QuestCommands {
