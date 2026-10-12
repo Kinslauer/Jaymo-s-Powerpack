@@ -71,6 +71,7 @@ public class PartBuilderMenu extends AbstractContainerMenu {
 			}
 		});
 		this.addStandardInventorySlots(inventory, 8, 102);
+		StationEntity.open(access, inventory.player, inputs);
 		this.addDataSlot(selected);
 	}
 
@@ -108,6 +109,7 @@ public class PartBuilderMenu extends AbstractContainerMenu {
 		super.slotsChanged(container);
 		if (container == inputs) {
 			update();
+			StationEntity.changed(access, inputs);
 		}
 	}
 
@@ -183,6 +185,6 @@ public class PartBuilderMenu extends AbstractContainerMenu {
 	@Override
 	public void removed(Player player) {
 		super.removed(player);
-		access.execute((level, pos) -> this.clearContainer(player, inputs));
+		StationEntity.close(access, player, inputs, () -> this.clearContainer(player, inputs));
 	}
 }

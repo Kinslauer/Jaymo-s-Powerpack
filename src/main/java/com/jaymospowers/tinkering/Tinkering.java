@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
@@ -28,6 +29,7 @@ import net.minecraft.world.item.component.BlockTransformers;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 
@@ -47,6 +49,7 @@ public final class Tinkering {
 
 	public static Item PATTERN;
 	public static Block PART_BUILDER, TOOL_STATION;
+	public static BlockEntityType<StationEntity> STATION_ENTITY;
 	public static final Map<PartType, Item> PARTS = new EnumMap<>(PartType.class);
 	public static final Map<ToolType, Item> TOOLS = new EnumMap<>(ToolType.class);
 	public static MenuType<PartBuilderMenu> PART_BUILDER_MENU;
@@ -82,6 +85,8 @@ public final class Tinkering {
 		}
 		PART_BUILDER = station("part_builder", StationBlock.Kind.PART_BUILDER);
 		TOOL_STATION = station("tool_station", StationBlock.Kind.TOOL_STATION);
+		STATION_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosPowers.id("tinker_station"),
+			new BlockEntityType<>(StationEntity::new, Set.of(PART_BUILDER, TOOL_STATION)));
 		PART_BUILDER_MENU = Registry.register(BuiltInRegistries.MENU, JaymosPowers.id("part_builder"),
 			new MenuType<>(PartBuilderMenu::new, FeatureFlags.VANILLA_SET));
 		TOOL_STATION_MENU = Registry.register(BuiltInRegistries.MENU, JaymosPowers.id("tool_station"),

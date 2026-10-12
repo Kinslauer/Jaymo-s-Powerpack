@@ -73,6 +73,7 @@ public class ToolStationMenu extends AbstractContainerMenu {
 			}
 		});
 		this.addStandardInventorySlots(inventory, 8, 102);
+		StationEntity.open(access, inventory.player, inputs);
 	}
 
 	public @Nullable Component status() {
@@ -84,6 +85,7 @@ public class ToolStationMenu extends AbstractContainerMenu {
 		super.slotsChanged(container);
 		if (container == inputs) {
 			update();
+			StationEntity.changed(access, inputs);
 		}
 	}
 
@@ -277,6 +279,6 @@ public class ToolStationMenu extends AbstractContainerMenu {
 	@Override
 	public void removed(Player player) {
 		super.removed(player);
-		access.execute((level, pos) -> this.clearContainer(player, inputs));
+		StationEntity.close(access, player, inputs, () -> this.clearContainer(player, inputs));
 	}
 }

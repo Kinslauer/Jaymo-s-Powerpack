@@ -127,6 +127,7 @@ STAT_LANG = {
     "gui.jaymospowers.tool_station.repair": "Repairing with %s",
     "gui.jaymospowers.tool_station.swap": "Swapping in a new %s",
     "gui.jaymospowers.tool_station.recipe": "%s: %s",
+    "message.jaymospowers.tinkering.busy": "Someone else is using this table.",
     "container.jaymospowers.part_builder": "Part Builder",
     "container.jaymospowers.tool_station": "Tool Station",
     "block.jaymospowers.part_builder": "Part Builder",

@@ -416,7 +416,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   `tools/tinkering_assets.py` writes the sprites, models, recipes, tags, loot tables and lang from the unpacked
   TConstruct 1.20.1 jar. Its own creative tab.
   - **Pattern** (2 planks + 2 sticks, 6 of them), **Part Builder** (2 patterns over 2 logs), **Tool Station** (pattern +
-    crafting table). The tables keep nothing when you walk away, like a crafting table.
+    crafting table). Like the pack's crafting tables (Jaymo's Kitchen), what you leave on a table stays there
+    (`StationEntity`), drawn lying on its top (`StationRenderer`); one player works a table at a time ("Someone else is
+    using this table."), and a broken table drops what's on it unless someone has it open (then closing hands it back).
   - **Part Builder:** a pattern and a material in, pick one of 10 parts on Tinkers' screen, take it out (pattern used
     up). Costs in material units: pick head, small axe head, adze head, small blade 2; hammer head, broad blade 8;
     large plate 4; tool handle, binding 1; tough handle 3. A plank or ingot is 1, a log 4, a bone block 3, a block
