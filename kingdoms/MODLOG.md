@@ -1441,7 +1441,25 @@ jobs (builder farmer guard) in the same way"; then "miners should place torches 
   four new rows and Builder made Nikoll "Caelwold's Builder" in new clothes with a shovel. Not seen: miners' torches,
   guards attacking a hostile player, farmer/miner/woodcutter promotion.
 
-## 0.5.22: what guards throw depends on their kingdom's purse; treasuries that rise and fall
+## 0.5.23: guards clear away dead monsters
+- **`Undertakers`** (with Jaymo's Kitchen 0.4.28+, reached by reflection in `KitchenCompat`, so Kingdoms still builds and
+  runs without it): every 2 s each standing town or kingdom (not barbarian camps) hands up to 2 monster corpses lying
+  within 64 blocks of its seat to its nearest free guard (not fighting, asleep or on another duty). A kingdom's guards
+  are its guard folk or, with MCA, its MCA guards; a village's are its iron golems, who only throw corpses into a fire
+  and never light one (with no fire near, a golem leaves it for a guard, or for a player).
+  - With a **fire pit** (fire on netherrack, soul sand or magma: `infiniburn_overworld`), a **lit campfire** or open
+    **lava** within 16 blocks of the corpse, the guard carries it there (Kitchen's `carryBy`) and throws it in from
+    3.5 blocks (`throwAt`); Kitchen lights a corpse lying in flames.
+  - Otherwise they set it alight where it lies (flint-and-steel sound), unless something that catches (`ignitedByLava`)
+    is within 2 blocks: then they first carry it to the nearest bare, solid ground within 12 blocks. With nowhere safe it's
+    left for 60 s and tried again.
+  - A guard called to a fight puts the corpse down at their feet; a duty not done in 60 s is given up.
+- **Fire pit** (`Buildings.firePit`, "fire_pit"): builders put one up in kingdoms and fiefdoms (from 20 people) and
+  villages (from 10). A campfire (a soul campfire a quarter of the time) sunk in a 3x3 stone ring, a path round it,
+  and now and then stone posts with lanterns at the corners. It's what the guards throw corpses on.
+- Tuning is at the top of `Undertakers` (`SWEEP`, `PYRE_REACH`, `SPOT_REACH`, `CLEAR`, `MOST_PER_ROUND`...).
+
+## 0.5.24: what guards throw depends on their kingdom's purse; treasuries that rise and fall
 - **Javelins are Balkon's.** Guards of ordinary kingdoms now throw Balkon's WeaponMod javelins
   (`WeaponModJavelins`), which can't be picked up and hit for about 5 instead of a trident's 8. When and at whom they
   throw is unchanged.

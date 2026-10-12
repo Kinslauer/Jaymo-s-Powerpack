@@ -35,7 +35,7 @@ import org.jspecify.annotations.Nullable;
  * have no path to, or a bowman keeping his distance. So an archer on the wall is no longer safe from the men below.
  * A javelin can't be picked up; it doesn't hurt the thrower's own side, nor (thrown by defenders) the villagers and golems
  * about them.
- * <p>(0.5.22) What's thrown depends on the thrower's purse ({@link #javelin}): the guards of the wealthiest kingdoms
+ * <p>(0.5.24) What's thrown depends on the thrower's purse ({@link #javelin}): the guards of the wealthiest kingdoms
  * ({@link #elite}) throw tridents; poor kingdoms' guards, barbarians and their chiefs throw rocks; everyone else throws
  * Balkon's WeaponMod javelin ({@link WeaponModJavelins}), or rocks without WeaponMod.
  */
@@ -52,10 +52,10 @@ final class Javelins {
 	static final float SPEED = 1.6F, SPREAD = 5.0F;
 	/** How often a path to the foe is checked (ticks). */
 	static final int PATH_CHECK = 20;
-	/** (0.5.22) Tridents are for the guards of the {@link #ELITE_REALMS} wealthiest kingdoms, with this many emeralds or more. */
+	/** (0.5.24) Tridents are for the guards of the {@link #ELITE_REALMS} wealthiest kingdoms, with this many emeralds or more. */
 	static final int ELITE_REALMS = 2;
 	static final long ELITE_TREASURY = 300L;
-	/** (0.5.22) A kingdom with fewer emeralds than this is poor: its guards throw rocks. A rock hits for this much. */
+	/** (0.5.24) A kingdom with fewer emeralds than this is poor: its guards throw rocks. A rock hits for this much. */
 	static final long POOR_TREASURY = 50L;
 	static final float ROCK_DAMAGE = 3.0F;
 
