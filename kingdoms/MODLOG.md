@@ -1459,7 +1459,7 @@ jobs (builder farmer guard) in the same way"; then "miners should place torches 
   and now and then stone posts with lanterns at the corners. It's what the guards throw corpses on.
 - Tuning is at the top of `Undertakers` (`SWEEP`, `PYRE_REACH`, `SPOT_REACH`, `CLEAR`, `MOST_PER_ROUND`...).
 
-## 0.5.25: stables
+## 0.5.25: stables and taverns
 - **Three stable designs** (`Buildings.stable`), mocked up on the dev server and picked from screenshots:
   - **Row stable** (`stableRow`, 13 x 7), the village one: four open-front stalls (gate, hay manger, water trough) under
     a sloped slab roof, with a covered walk along the front.
@@ -1470,3 +1470,12 @@ jobs (builder farmer guard) in the same way"; then "miners should place torches 
 - Villages now build a stable (from 18 people); kingdoms and fiefdoms still build theirs from 28, now the coaching yard
   or (half the time) the aisle barn in place of the old two-stall stable.
 - A finished stable gets its horses bought in (`Gatherers.STABLE_HORSES`, 2).
+- **Three tavern designs** (`Buildings.tavern`), mocked up the same way:
+  - **Alehouse** (`tavernAlehouse`, 13 x 11), the village one: a long hall under a hipped roof, the bar and barrels down
+    one side, a smoker hearth and chimney, three tables, and a covered porch of tables out front.
+  - **Coaching inn** (`tavernInn`, 11 x 9): a stone taproom (bar, barrels, three tables, a smoker hearth and chimney)
+    and a timber floor of three beds above, up a ladder.
+  - **Tavern with a beer garden** (`tavernGarden`, 15 x 11): a two-storey tavern and a fenced garden beside it with
+    tables, lanterns on posts and its own gate.
+- Villages build the alehouse from 16 people; kingdoms and fiefdoms the coaching inn or (half the time) the beer-garden
+  tavern from 26. Tables are a fence and a pressure plate of the land's wood (`Kit.plate`), stools are stairs.

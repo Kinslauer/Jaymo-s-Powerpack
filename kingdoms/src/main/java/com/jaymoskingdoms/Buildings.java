@@ -60,6 +60,8 @@ final class Buildings {
 			// (0.5.23) where the guards throw dead monsters ({@link Undertakers})
 			realm(type, "fire_pit", Buildings::firePit, 1, 20);
 			realm(type, "market", Buildings::market, 1, 24);
+			// (0.5.25) a coaching inn or a tavern with a beer garden
+			realm(type, "tavern", Buildings::tavern, 1, 26);
 			realm(type, "stable", Buildings::stable, 1, 28);
 			realm(type, "farm", Buildings::farm, 2, 28);
 			realm(type, "road", Buildings::road, 4, 28);
@@ -86,6 +88,8 @@ final class Buildings {
 		// (0.5.25) a row stable, its horses bought in when it's done ({@link Gatherers#built})
 		realm(FactionType.VILLAGE, "stable", Buildings::stable, 1, 18);
 		realm(FactionType.VILLAGE, "stall", Buildings::stall, 2, 16);
+		// (0.5.25) an alehouse
+		realm(FactionType.VILLAGE, "tavern", Buildings::tavern, 1, 16);
 		realm(FactionType.VILLAGE, "road", Buildings::road, 4, 16);
 		realm(FactionType.VILLAGE, "house", Buildings::house, 6, 20);
 		town(FactionType.VILLAGE, "palisade", Buildings::palisade, 10, 22);
@@ -868,6 +872,240 @@ final class Buildings {
 	}
 
 	/**
+	 * (0.5.25) A tavern: a village builds the alehouse; a kingdom or fief the coaching inn or (half the time, in a varied
+	 * realm) the tavern with a beer garden.
+	 */
+	static Blueprint tavern(Kit k) {
+		return k.village ? tavernAlehouse(k) : k.classic || k.chance(0.5) ? tavernInn(k) : tavernGarden(k);
+	}
+
+	/** Walls round x0..x1, z0..z1 from y0 to y1: posts at the corners and every {@code bay} blocks, {@code wall} between. */
+	private static void shell(Sketch s, int x0, int x1, int z0, int z1, int y0, int y1, BlockState wall, BlockState post, int bay) {
+		for (int x = x0; x <= x1; x++) {
+			for (int z = z0; z <= z1; z++) {
+				boolean xEdge = x == x0 || x == x1, zEdge = z == z0 || z == z1;
+				if (!xEdge && !zEdge) {
+					continue;
+				}
+				boolean isPost = xEdge && zEdge || zEdge && (x - x0) % bay == 0 || xEdge && (z - z0) % bay == 0;
+				for (int y = y0; y <= y1; y++) {
+					s.set(x, y, z, isPost ? post : wall);
+				}
+			}
+		}
+	}
+
+	/** A table (a post and a plate) with a stool either side, east and west ({@code ew}) or north and south. */
+	private static void table(Sketch s, Kit k, int x, int y, int z, boolean ew) {
+		s.set(x, y, z, k.p.fence());
+		s.set(x, y + 1, z, k.plate());
+		if (ew) {
+			s.set(x - 1, y, z, Sketch.stair(k.woodStairs, Direction.WEST));
+			s.set(x + 1, y, z, Sketch.stair(k.woodStairs, Direction.EAST));
+		} else {
+			s.set(x, y, z - 1, Sketch.stair(k.woodStairs, Direction.NORTH));
+			s.set(x, y, z + 1, Sketch.stair(k.woodStairs, Direction.SOUTH));
+		}
+	}
+
+	/** A chimney from {@code y0} up to {@code y1}, a smoking campfire on top. */
+	private static void chimney(Sketch s, Kit k, int x, int z, int y0, int y1) {
+		for (int y = y0; y <= y1; y++) {
+			s.set(x, y, z, k.p.wall());
+		}
+		s.set(x, y1 + 1, z, Blocks.CAMPFIRE.defaultBlockState());
+	}
+
+	/** A coaching inn (11 x 9): a stone taproom (bar, barrels, tables, a hearth) and a timber floor of rooms above. */
+	static Blueprint tavernInn(Kit k) {
+		Sketch s = new Sketch("tavern", 11, 9, 16);
+		Palette p = k.p;
+		for (int x = 0; x < 11; x++) {
+			for (int z = 0; z < 9; z++) {
+				s.set(x, 0, z, p.floor());
+				s.set(x, 5, z, x == 0 || x == 10 || z == 0 || z == 8 ? p.log() : p.planks());
+			}
+		}
+		shell(s, 0, 10, 0, 8, 1, 4, p.wall(), p.log(), 5);
+		shell(s, 0, 10, 0, 8, 6, 8, k.infill, p.log(), 5);
+		for (int x : new int[] {2, 3, 7, 8}) {
+			s.set(x, 2, 0, k.pane);
+			s.set(x, 3, 0, k.pane);
+		}
+		for (int z : new int[] {3, 5}) {
+			s.set(0, 2, z, k.pane);
+			s.set(10, 2, z, k.pane);
+		}
+		for (int x : new int[] {2, 8}) {
+			s.set(x, 7, 0, k.pane);
+			s.set(x, 7, 8, k.pane);
+		}
+		s.set(0, 7, 3, k.pane);
+		s.set(10, 7, 3, k.pane);
+		s.door(5, 1, 0, Direction.NORTH, k.door);
+		s.gableX(0, 10, 0, 8, 9, k.roofStairs, k.roofSlab, k.infill);
+		// the taproom: the bar along the back, barrels behind it, three tables, the hearth
+		for (int x = 1; x <= 4; x++) {
+			s.set(x, 1, 5, Sketch.top(p.woodSlab()));
+			s.set(x, 1, 7, Blocks.BARREL.defaultBlockState());
+		}
+		s.set(1, 2, 7, Blocks.BARREL.defaultBlockState());
+		s.set(2, 2, 7, Blocks.BARREL.defaultBlockState());
+		table(s, k, 3, 1, 2, true);
+		table(s, k, 7, 1, 2, true);
+		table(s, k, 7, 1, 5, true);
+		s.set(9, 1, 7, Sketch.facing(Blocks.SMOKER, Direction.WEST));
+		chimney(s, k, 9, 7, 2, 12);
+		for (int y = 1; y <= 5; y++) {
+			s.set(1, y, 1, Sketch.facing(Blocks.LADDER, Direction.EAST));
+		}
+		s.set(5, 4, 3, Sketch.hanging(Blocks.LANTERN));
+		// the rooms above
+		for (int x = 1; x <= 9; x++) {
+			s.set(x, 9, 4, Sketch.lying(p.log(), Direction.Axis.X));
+		}
+		s.set(5, 8, 4, Sketch.hanging(Blocks.LANTERN));
+		for (int x : new int[] {3, 5, 7}) {
+			s.bed(x, 6, 6, Direction.SOUTH, k.bed);
+		}
+		s.set(4, 6, 2, k.carpet);
+		s.set(5, 6, 2, k.carpet);
+		s.set(6, 6, 2, k.carpet);
+		return s.done();
+	}
+
+	/** An alehouse (13 x 11): a long hall under a hipped roof, a bar and a hearth, a covered porch of tables out front. */
+	static Blueprint tavernAlehouse(Kit k) {
+		Sketch s = new Sketch("tavern", 13, 11, 12);
+		Palette p = k.p;
+		BlockState boards = k.pick(p.planks(), k.infill);
+		for (int x = 0; x < 13; x++) {
+			for (int z = 0; z < 11; z++) {
+				s.set(x, 0, z, z < 3 ? p.planks() : p.floor());
+				if (z < 3) {
+					s.set(x, 4, z, k.roofSlab);
+				}
+			}
+		}
+		shell(s, 0, 12, 3, 10, 1, 4, boards, p.log(), 4);
+		for (int x : new int[] {0, 4, 8, 12}) {
+			for (int y = 1; y <= 3; y++) {
+				s.set(x, y, 0, p.log());
+			}
+		}
+		for (int x : new int[] {1, 2, 3, 9, 10, 11}) {
+			s.set(x, 1, 0, p.fence());
+		}
+		for (int z : new int[] {5, 8}) {
+			s.set(0, 2, z, k.pane);
+			s.set(12, 2, z, k.pane);
+		}
+		for (int x : new int[] {2, 3, 9, 10}) {
+			s.set(x, 2, 3, k.pane);
+		}
+		for (int x : new int[] {3, 6, 9}) {
+			s.set(x, 2, 10, k.pane);
+		}
+		s.door(6, 1, 3, Direction.NORTH, k.door);
+		s.hip(0, 12, 3, 10, 5, k.roofStairs, k.roofSlab);
+		// the porch
+		table(s, k, 2, 1, 1, true);
+		table(s, k, 10, 1, 1, true);
+		s.set(5, 1, 2, Blocks.BARREL.defaultBlockState());
+		s.set(7, 1, 2, Blocks.BARREL.defaultBlockState());
+		s.set(5, 2, 2, Blocks.LANTERN.defaultBlockState());
+		s.set(7, 2, 2, Blocks.LANTERN.defaultBlockState());
+		// the hall: the bar down the east side, the hearth on the west, four tables
+		for (int z = 5; z <= 8; z++) {
+			s.set(9, 1, z, Sketch.top(p.woodSlab()));
+			s.set(11, 1, z, Blocks.BARREL.defaultBlockState());
+			s.set(11, 2, z, Blocks.BARREL.defaultBlockState());
+		}
+		s.set(1, 1, 6, p.wall());
+		s.set(1, 1, 8, p.wall());
+		s.set(1, 1, 7, Sketch.facing(Blocks.SMOKER, Direction.EAST));
+		chimney(s, k, 1, 7, 2, 8);
+		table(s, k, 4, 1, 5, true);
+		table(s, k, 4, 1, 8, true);
+		table(s, k, 7, 1, 5, false);
+		for (int x = 1; x <= 11; x++) {
+			s.set(x, 5, 6, Sketch.lying(p.log(), Direction.Axis.X));
+		}
+		s.set(4, 4, 6, Sketch.hanging(Blocks.LANTERN));
+		s.set(8, 4, 6, Sketch.hanging(Blocks.LANTERN));
+		return s.done();
+	}
+
+	/** A tavern with a beer garden (15 x 11): a two-storey tavern, and beside it a fenced garden of tables and lamps. */
+	static Blueprint tavernGarden(Kit k) {
+		Sketch s = new Sketch("tavern", 15, 11, 15);
+		Palette p = k.p;
+		for (int x = 0; x < 15; x++) {
+			for (int z = 0; z < 11; z++) {
+				if (x <= 8) {
+					s.set(x, 0, z, p.floor());
+					s.set(x, 5, z, x == 0 || x == 8 || z == 0 || z == 10 ? p.log() : p.planks());
+				} else if (z >= 2) {
+					s.set(x, 0, z, k.chance(0.3) ? k.road : Blocks.GRASS_BLOCK.defaultBlockState());
+					if (x == 14 || z == 2 || z == 10) {
+						s.set(x, 1, z, p.fence());
+					}
+				}
+			}
+		}
+		s.set(11, 1, 2, Sketch.facing(k.gate, Direction.NORTH));
+		shell(s, 0, 8, 0, 10, 1, 4, p.wall(), p.log(), 4);
+		shell(s, 0, 8, 0, 10, 6, 8, k.infill, p.log(), 4);
+		for (int x : new int[] {2, 6}) {
+			s.set(x, 2, 0, k.pane);
+			s.set(x, 7, 0, k.pane);
+			s.set(x, 7, 10, k.pane);
+		}
+		for (int z : new int[] {2, 6, 9}) {
+			s.set(0, 7, z, k.pane);
+			s.set(8, 7, z, k.pane);
+		}
+		s.set(0, 2, 2, k.pane);
+		s.set(8, 2, 3, k.pane);
+		s.set(8, 2, 8, k.pane);
+		s.door(4, 1, 0, Direction.NORTH, k.door);
+		s.door(8, 1, 6, Direction.EAST, k.door);
+		s.gable(0, 8, 0, 10, 9, k.roofStairs, k.roofSlab, k.infill);
+		// the taproom
+		for (int x = 1; x <= 4; x++) {
+			s.set(x, 1, 7, Sketch.top(p.woodSlab()));
+			s.set(x, 1, 9, Blocks.BARREL.defaultBlockState());
+		}
+		s.set(1, 2, 9, Blocks.BARREL.defaultBlockState());
+		table(s, k, 2, 1, 3, false);
+		table(s, k, 6, 1, 3, false);
+		s.set(1, 1, 5, Sketch.facing(Blocks.SMOKER, Direction.EAST));
+		chimney(s, k, 1, 5, 2, 11);
+		for (int y = 1; y <= 5; y++) {
+			s.set(7, y, 9, Sketch.facing(Blocks.LADDER, Direction.WEST));
+		}
+		s.set(4, 4, 5, Sketch.hanging(Blocks.LANTERN));
+		// the rooms above
+		for (int z = 1; z <= 9; z++) {
+			s.set(4, 9, z, Sketch.lying(p.log(), Direction.Axis.Z));
+		}
+		s.set(4, 8, 5, Sketch.hanging(Blocks.LANTERN));
+		s.bed(2, 6, 2, Direction.SOUTH, k.bed);
+		s.bed(6, 6, 2, Direction.SOUTH, k.bed);
+		s.bed(3, 6, 7, Direction.SOUTH, k.bed);
+		// the garden
+		table(s, k, 11, 1, 5, true);
+		table(s, k, 11, 1, 8, true);
+		for (int[] c : new int[][] {{14, 2}, {14, 6}, {14, 10}, {9, 10}}) {
+			s.set(c[0], 2, c[1], p.fence());
+			s.set(c[0], 3, c[1], Blocks.LANTERN.defaultBlockState());
+		}
+		s.set(13, 1, 9, Blocks.BARREL.defaultBlockState());
+		s.set(13, 1, 3, k.flowerPot());
+		return s.done();
+	}
+
+	/**
 	 * A market square (9 x 9): paved, four stalls under awnings (each in its own colours and pattern in a varied
 	 * market; striped in the realm's colour in the plain one), and in the middle a lamp, a basin or a lamp post.
 	 */
@@ -1259,6 +1497,11 @@ final class Buildings {
 		}
 
 		/** A torch, or (in a varied building) sometimes a lantern. */
+		/** A pressure plate of the land's wood (a table top). */
+		BlockState plate() {
+			return or(Townscape.named(woodOf(this.p) + "_pressure_plate"), Blocks.OAK_PRESSURE_PLATE.defaultBlockState());
+		}
+
 		BlockState light() {
 			return this.chance(0.5) ? Blocks.LANTERN.defaultBlockState() : Blocks.TORCH.defaultBlockState();
 		}
