@@ -44,9 +44,10 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * C. Ascended: <b>Tide Arms</b> (bare hands → twin daggers → katana of dark water; your real items are stored and come
- * back), and at night <b>Necromancy</b> (hold on a Jaymo's Kitchen corpse to harvest its shadow; tap to raise one, which
- * follows and defends you until sunrise). The Drowned Dark not ascended: <b>Drown</b>, a sphere of water around a target.
+ * C and Z. Ascended: sneak + C <b>Tide Arms</b> (bare hands draw your own best blade; a real knife → a katana of dark
+ * water of its tier, a real katana → twin daggers of its tier; your real items are stored and come back). While corrupted, Z on a Jaymo's Kitchen corpse takes its shadow; ascended, <b>Necromancy</b>: tap C
+ * to raise one, which follows and defends you until the corruption lifts. Corrupted, not ascended: C is <b>Drown</b>, a
+ * sphere of water around a target.
  */
 final class DarktideTide {
 	// ---- Tide Arms ----
@@ -85,10 +86,35 @@ final class DarktideTide {
 
 	// ---- keys ---------------------------------------------------------------------------------------------------------
 
-	/** C for an ascended Darktide. */
+	/**
+	 * C. Ascended: sneaking, Tide Arms; a tap raises a shadow while corrupted (cured, the shadows are dormant).
+	 * Not ascended: Drown while corrupted.
+	 */
 	static void ultimateKey(ServerPlayer player, boolean down) {
+		if (!down) {
+			return;
+		}
+		boolean ascended = Fate.isAscended(player);
+		boolean corrupted = DarktidePower.corrupted(player);
+		if (ascended && player.isShiftKeyDown()) {
+			cycleArms(player);
+		} else if (!ascended) {
+			if (corrupted) {
+				drownKey(player, true);
+			}
+		} else if (!corrupted) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.shadows_dormant").withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
+		} else if (DarktideState.save(player).shadows().isEmpty()) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.no_shadows").withStyle(ChatFormatting.GRAY));
+		} else {
+			raise(player);
+		}
+	}
+
+	/** Z while corrupted (ascended or not): hold on a corpse to take its shadow. */
+	static void modeKey(ServerPlayer player, boolean down) {
 		DarktideLive live = DarktidePower.live(player);
-		live.ultimateDown = down;
+		live.modeDown = down;
 		if (!down) {
 			if (live.harvesting >= 0) {
 				live.harvesting = -1;
@@ -96,27 +122,21 @@ final class DarktideTide {
 			}
 			return;
 		}
-		if (DarktideFlow.night(player.level())) {
-			Entity corpse = aimedCorpse(player);
-			if (corpse != null) {
-				if (DarktideState.save(player).shadows().size() >= MAX_SHADOWS) {
-					player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.shadows_full").withStyle(ChatFormatting.GRAY));
-					return;
-				}
-				live.harvesting = corpse.getId();
-				live.harvestStart = player.level().getGameTime();
-				DarktideMove.play(player, DarktideMove.CAST, HARVEST_TICKS, 1);
-				return;
-			}
-			if (!DarktideState.save(player).shadows().isEmpty()) {
-				raise(player);
-				return;
-			}
+		Entity corpse = aimedCorpse(player);
+		if (corpse == null) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.no_corpse").withStyle(ChatFormatting.GRAY));
+			return;
 		}
-		cycleArms(player);
+		if (DarktideState.save(player).shadows().size() >= MAX_SHADOWS) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.shadows_full").withStyle(ChatFormatting.GRAY));
+			return;
+		}
+		live.harvesting = corpse.getId();
+		live.harvestStart = player.level().getGameTime();
+		DarktideMove.play(player, DarktideMove.CAST, HARVEST_TICKS, 1);
 	}
 
-	/** C for the Drowned Dark that isn't ascended: Drown. */
+	/** Drown (C, corrupted and not ascended). */
 	static void drownKey(ServerPlayer player, boolean down) {
 		if (!down || !DarktidePower.ready(player, DarktideState.DROWN)) {
 			return;
@@ -165,8 +185,31 @@ final class DarktideTide {
 		if (level.getGameTime() < live.armsSwapAt || !DarktidePower.ready(player, DarktideState.ARMS)) {
 			return;
 		}
-		int next = (live.arms + 1) % 3;
 		Inventory inventory = player.getInventory();
+		if (live.arms == DarktideState.ARMS_BARE) {
+			ItemStack held = player.getItemInHand(InteractionHand.MAIN_HAND);
+			if (held.isEmpty()) {
+				// bare hands: draw your own best blade into your hand first
+				drawBlade(player, live);
+				return;
+			}
+			if (!DarktideWeapons.isKnife(held) && !DarktideWeapons.isKatana(held)) {
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.arms_need_blade").withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
+				return;
+			}
+		}
+		// the real blade in hand sets the tier and the other kind comes first: a knife becomes a katana, a katana twin
+		// daggers, and the next press breaks it back down into what you held
+		ItemStack original = live.arms == DarktideState.ARMS_BARE ? player.getItemInHand(InteractionHand.MAIN_HAND) : stored(player).get(0);
+		String tier = DarktideWeapons.tierOf(original);
+		int next;
+		if (live.arms == DarktideState.ARMS_BARE) {
+			next = DarktideWeapons.isKnife(original) ? DarktideState.ARMS_KATANA : DarktideState.ARMS_DAGGERS;
+		} else if (live.arms == DarktideState.ARMS_DAGGERS) {
+			next = DarktideWeapons.isKatana(original) ? DarktideState.ARMS_BARE : DarktideState.ARMS_KATANA;
+		} else {
+			next = DarktideState.ARMS_BARE;
+		}
 		if (live.arms == DarktideState.ARMS_BARE) {
 			// put the real things away
 			ItemStack main = player.getItemInHand(InteractionHand.MAIN_HAND).copy();
@@ -180,11 +223,11 @@ final class DarktideTide {
 		}
 		switch (next) {
 			case DarktideState.ARMS_DAGGERS -> {
-				player.setItemInHand(InteractionHand.MAIN_HAND, mark(DarktideWeapons.conjure("knife"), player));
-				player.setItemInHand(InteractionHand.OFF_HAND, mark(DarktideWeapons.conjure("knife"), player));
+				player.setItemInHand(InteractionHand.MAIN_HAND, mark(DarktideWeapons.conjure("knife", tier), player));
+				player.setItemInHand(InteractionHand.OFF_HAND, mark(DarktideWeapons.conjure("knife", tier), player));
 			}
 			case DarktideState.ARMS_KATANA -> {
-				player.setItemInHand(InteractionHand.MAIN_HAND, mark(DarktideWeapons.conjure("katana"), player));
+				player.setItemInHand(InteractionHand.MAIN_HAND, mark(DarktideWeapons.conjure("katana", tier), player));
 				restoreOffhand(player);
 			}
 			default -> restoreStored(player);
@@ -197,6 +240,52 @@ final class DarktideTide {
 		level.sendParticles(ParticleTypes.SPLASH, hand.x, hand.y, hand.z, 24, 0.35, 0.3, 0.35, 0.15);
 		level.sendParticles(ParticleTypes.SQUID_INK, hand.x, hand.y, hand.z, 12, 0.3, 0.3, 0.3, 0.03);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BUCKET_FILL, SoundSource.PLAYERS, 0.9F, 0.6F);
+		if (next == DarktideState.ARMS_BARE) {
+			// the water blade dissolves back into what you held
+			Vec3 at = player.getEyePosition().add(player.getLookAngle().scale(0.6)).add(0.0, -0.5, 0.0);
+			level.sendParticles(ParticleTypes.FALLING_WATER, at.x, at.y, at.z, 20, 0.25, 0.3, 0.25, 0.0);
+			level.sendParticles(new DustParticleOptions(0x0A1838, 1.4F), at.x, at.y, at.z, 16, 0.2, 0.3, 0.2, 0.0);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BUCKET_EMPTY, SoundSource.PLAYERS, 0.8F, 1.3F);
+		}
+	}
+
+	/**
+	 * Bare hands: your own Balkon katana or knife (hotbar first, then the rest of the inventory; the highest tier among
+	 * several) is moved into the selected slot. With none, only a hint.
+	 */
+	private static void drawBlade(ServerPlayer player, DarktideLive live) {
+		Inventory inventory = player.getInventory();
+		int selected = inventory.getSelectedSlot();
+		int best = -1;
+		int bestRank = Integer.MIN_VALUE;
+		for (int pass = 0; pass < 2 && best < 0; pass++) {
+			int from = pass == 0 ? 0 : Inventory.SELECTION_SIZE;
+			int to = pass == 0 ? Inventory.SELECTION_SIZE : Inventory.INVENTORY_SIZE;
+			for (int slot = from; slot < to; slot++) {
+				ItemStack stack = inventory.getItem(slot);
+				if (slot == selected || conjured(stack, player) || !DarktideWeapons.isKatana(stack) && !DarktideWeapons.isKnife(stack)) {
+					continue;
+				}
+				int rank = DarktideWeapons.tierRank(DarktideWeapons.tierOf(stack));
+				if (rank > bestRank) {
+					bestRank = rank;
+					best = slot;
+				}
+			}
+		}
+		if (best < 0) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.arms_no_blade").withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
+			return;
+		}
+		ServerLevel level = player.level();
+		ItemStack blade = inventory.getItem(best);
+		inventory.setItem(best, ItemStack.EMPTY);
+		inventory.setItem(selected, blade);
+		live.armsSwapAt = level.getGameTime() + ARMS_SWAP_COOLDOWN;
+		DarktidePower.cooldown(player, DarktideState.ARMS, ARMS_SWAP_COOLDOWN);
+		DarktideMove.play(player, DarktideMove.CAST, DarktideMove.CAST_TICKS, 3);
+		level.sendParticles(ParticleTypes.SPLASH, player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.3, 0.3, 0.3, 0.1);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_IRON.value(), SoundSource.PLAYERS, 0.8F, 1.2F);
 	}
 
 	private static void removeConjured(ServerPlayer player) {
@@ -308,7 +397,7 @@ final class DarktideTide {
 		ServerLevel level = player.level();
 		Entity corpse = level.getEntity(live.harvesting);
 		EntityType<?> type = corpse == null ? null : KitchenCompat.freeCorpseOf(corpse);
-		if (type == null || !live.ultimateDown || corpse.distanceTo(player) > HARVEST_REACH + 1.5 || !DarktideFlow.night(level)) {
+		if (type == null || !live.modeDown || corpse.distanceTo(player) > HARVEST_REACH + 1.5 || !DarktidePower.corrupted(player)) {
 			live.harvesting = -1;
 			DarktideMove.clear(player);
 			return;
@@ -443,8 +532,8 @@ final class DarktideTide {
 				RISEN_OWNER.remove(mob.getUUID());
 				continue;
 			}
-			// they melt at sunrise, and without their master near
-			if (owner == null || owner.level() != mob.level() || !DarktidePower.has(owner) || !DarktideFlow.night(mob.level())
+			// they melt when the corruption lifts (sunrise, for a cured master), and without their master near
+			if (owner == null || owner.level() != mob.level() || !DarktidePower.has(owner) || !DarktidePower.corrupted(owner)
 				|| mob.distanceTo(owner) > RISEN_LEASH) {
 				it.remove();
 				melt(mob);

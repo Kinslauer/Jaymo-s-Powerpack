@@ -9,6 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Balkon's WeaponMod (optional), the only place Darktide looks at its items: katanas ({@code weaponmod:katana.<tier>})
@@ -20,8 +21,10 @@ public final class DarktideWeapons {
 	/** What the hands hold, as far as Darktide cares. */
 	public enum Kit { UNARMED, KATANA, KNIFE, OTHER }
 
-	/** The tier Tide Arms conjures. */
-	static final String TIDE_TIER = "diamond";
+	/** Balkon's tiers, weakest to strongest (fallbacks step down this list). */
+	static final String[] TIERS = {"wood", "gold", "stone", "copper", "iron", "diamond", "netherite"};
+	/** The last fallback when a tier has no blade of the other kind. */
+	static final String DEFAULT_TIER = "iron";
 
 	private static final boolean LOADED = FabricLoader.getInstance().isModLoaded(ArsenalPool.WEAPON_MOD);
 
@@ -72,12 +75,46 @@ public final class DarktideWeapons {
 		return off.isEmpty() || isKnife(off) || isKatana(off);
 	}
 
-	/** A conjurable Balkon blade ({@code "katana"} or {@code "knife"}) of the Tide Arms tier, or empty without WeaponMod. */
-	static ItemStack conjure(String kind) {
+	/** The tier of a Balkon katana or knife ({@code katana.<tier>} / {@code knife.<tier>}), or null for anything else. */
+	static @Nullable String tierOf(ItemStack stack) {
+		if (!isKatana(stack) && !isKnife(stack)) {
+			return null;
+		}
+		String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+		int dot = path.indexOf('.');
+		return dot < 0 || dot == path.length() - 1 ? null : path.substring(dot + 1);
+	}
+
+	/** How strong a tier is (its place in {@link #TIERS}; -1 for an unknown one or null). */
+	static int tierRank(@Nullable String tier) {
+		return tier == null ? -1 : java.util.Arrays.asList(TIERS).indexOf(tier);
+	}
+
+	/**
+	 * A conjurable Balkon blade ({@code "katana"} or {@code "knife"}) of {@code tier} (null: {@link #DEFAULT_TIER}); if
+	 * that tier has none of this kind, the nearest lower tier that does, then {@link #DEFAULT_TIER}. Empty without WeaponMod.
+	 */
+	static ItemStack conjure(String kind, @Nullable String tier) {
 		if (!LOADED) {
 			return ItemStack.EMPTY;
 		}
-		Item item = BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath(ArsenalPool.WEAPON_MOD, kind + "." + TIDE_TIER));
+		String wanted = tier == null ? DEFAULT_TIER : tier;
+		ItemStack exact = blade(kind, wanted);
+		if (!exact.isEmpty()) {
+			return exact;
+		}
+		for (int i = java.util.Arrays.asList(TIERS).indexOf(wanted) - 1; i >= 0; i--) {
+			ItemStack lower = blade(kind, TIERS[i]);
+			if (!lower.isEmpty()) {
+				return lower;
+			}
+		}
+		return blade(kind, DEFAULT_TIER);
+	}
+
+	private static ItemStack blade(String kind, String tier) {
+		Identifier id = Identifier.tryParse(ArsenalPool.WEAPON_MOD + ":" + kind + "." + tier);
+		Item item = id == null ? null : BuiltInRegistries.ITEM.getValue(id);
 		return item == null || item == Items.AIR ? ItemStack.EMPTY : new ItemStack(item);
 	}
 }
