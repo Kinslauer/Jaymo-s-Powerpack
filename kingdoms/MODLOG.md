@@ -1629,3 +1629,40 @@ cultists) and kings give quests.
   host declared war on Ravngard; once it began, `/kingdom war join` called up Dunhaven's party for the unsworn
   Tester, which marched, planted its banner, besieged and sacked Ravngard's seat, and the decree was ready. Not seen: the
   noble's round and his bread.
+
+## 0.5.30: the realm's armouries (original 3D armour sets)
+Andy asked for Jet and Elia's Armors (Forge only, all rights reserved, no source), then chose "make our own sets".
+Nothing of that mod is used: shapes, art and names are our own, drawn by `tools/gen_armory.py`.
+- **Four sets** (`Armory`), each helmet, chestplate, leggings, boots, crafted like vanilla armour from two ingredients:
+  **Paladin** (iron + gold; great helm with a gilt comb and plume, round pauldrons, a tabard with a gilt cross; 18 armour,
+  toughness 1), **Gladiator** (copper + leather; broad-brimmed grille helm with a crest, banded sword arm, studded
+  belt, greaves; 14 armour, enchantability 14), **Ronin** (iron + string; horned kabuto with a neck guard, hanging
+  shoulder plates, plated skirt; 15 armour, toughness 0.5), **Warlord** (leather + bone; horned iron cap, fur mantle and
+  pelt, bone pauldron, hide kilt; 16 armour, knockback resistance 0.1 a piece). Numbers at the top of `Armory`.
+- **Dye**: the cloth (plume, tabard, crest, lacquered lames and lacing, hide kilt) takes dye like leather (a
+  `crafting_dye` recipe per piece with cloth); undyed it's the set's own colour (blue, red, red, brown).
+- **Raised pieces** (client `ArmoryLayer`): each set's 3D pieces are in `assets/jaymoskingdoms/armory/<set>.json`
+  (slot, bone, box, UV, optional pivot/rotation/grow), baked into one model per slot ("main" in its colours, "cloth"
+  greyscale and tinted by the piece's dye) and drawn on every humanoid renderer (players, mannequins, folk, zombies...),
+  following the wearer's head, body and limbs by copying the parent model's pose. The flat part of each set is a normal
+  equipment asset (`equipment/<set>.json`), so trims and enchantment glint work as on vanilla armour.
+- **Kingdoms' folk** (`Outfits`, VERSION 2 so folk already out are dressed again): one realm in `ARMOURY_REALMS` (2)
+  arms its guards from its land's set in the realm's colour (desert, badlands, savanna: gladiator; jungle, cherry:
+  ronin; elsewhere: paladin), the realm's trim on the chest. A barbarian chief wears the whole warlord set, kilt in
+  his camp's colour; `RAIDER_HORNS_CHANCE` (0.3) of raiders wear the horned cap.
+- **Second pass** (Andy: "emulating Epic Knights more, cleaner details, depth"): metal shades top-lit with a sheen and
+  a crisp rim, leather has stitched edges, flat layers get rimmed faces; and every set has raised 3D rivets and studs
+  (`N` in the generator: half-size cubes on a plate's surface, all sharing one UV per material) and ridges, combs and
+  bands (`ridge`): the paladin's helm, gorget, pauldron comb, belt and knee bosses; the gladiator's studded brim,
+  belt, sword arm and greaves; the ronin's ribbed, gilt-riveted kabuto and shin splints; the warlord's banded cap and
+  studded bracers.
+- **Third pass** (Andy: smaller paladin helm rivets, more layers): the paladin's great helm narrows in two steps to the
+  comb and has a faceplate standing proud of the bowl (brow plate and bevor with breaths, the eye slit between them
+  split by a gilt nasal bar); the ronin's do is four lacquered lames stepping out down the chest, laced with raised
+  cords and a gilt mon, the sode's lames raised and corded, the kusazuri three stepped lames; the warlord's cuirass is
+  layered: a cloth tunic hem, three rows of overlapping hide scales front and back, a dyed sash across; the gladiator
+  has leather pteruges tipped with bronze studs. Warlord chestplates now take dye (the sash and tunic).
+- **Helmet holes cut through**: the paladin's eye slit and the gladiator's grille holes are transparent, so the
+  wearer's face shows through them.
+- Seen in game (dev server + client, on mannequins): all four sets, dyed paladins in red, green and white. Not yet
+  seen: guards and chiefs dressed from the armoury.

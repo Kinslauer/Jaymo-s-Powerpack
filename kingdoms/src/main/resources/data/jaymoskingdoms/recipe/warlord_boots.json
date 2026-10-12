@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "X": "minecraft:leather",
+    "A": "minecraft:bone"
+  },
+  "pattern": [
+    "A A",
+    "X X"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:warlord_boots"
+  }
+}

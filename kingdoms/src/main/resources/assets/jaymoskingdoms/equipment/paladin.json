@@ -1,0 +1,23 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "jaymoskingdoms:paladin"
+      },
+      {
+        "texture": "jaymoskingdoms:paladin_tabard",
+        "dyeable": {
+          "color_when_undyed": 3949738
+        }
+      },
+      {
+        "texture": "jaymoskingdoms:paladin_cross"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "jaymoskingdoms:paladin"
+      }
+    ]
+  }
+}

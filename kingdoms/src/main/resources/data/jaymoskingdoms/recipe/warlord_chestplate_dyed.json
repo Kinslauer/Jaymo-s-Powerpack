@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_dye",
+  "dye": "#minecraft:dyes",
+  "group": "dyed_armor",
+  "result": {
+    "id": "jaymoskingdoms:warlord_chestplate"
+  },
+  "target": "jaymoskingdoms:warlord_chestplate"
+}
