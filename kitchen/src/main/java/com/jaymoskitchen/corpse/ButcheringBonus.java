@@ -31,7 +31,8 @@ final class ButcheringBonus {
 		Map.entry(EntityTypes.LLAMA, HIDE),
 		Map.entry(EntityTypes.CAMEL, HIDE),
 		Map.entry(EntityTypes.GOAT, List.of(new Extra(Items.LEATHER, 1, 1, 0.4F), new Extra(Items.BONE, 1, 2, 0.4F))),
-		Map.entry(EntityTypes.SHEEP, List.of(new Extra(Items.BONE, 1, 2, 0.4F), new Extra(Items.STRING, 1, 2, 0.25F))),
+		Map.entry(EntityTypes.SHEEP, List.of(new Extra(Items.BONE, 1, 2, 0.4F), new Extra(Items.STRING, 1, 2, 0.25F),
+			new Extra(Items.LEATHER, 1, 1, 0.15F))),
 		Map.entry(EntityTypes.PIG, List.of(new Extra(Items.BONE, 1, 2, 0.4F), new Extra(Items.LEATHER, 1, 1, 0.15F))),
 		Map.entry(EntityTypes.CHICKEN, List.of(new Extra(Items.FEATHER, 1, 3, 0.7F), new Extra(Items.EGG, 1, 1, 0.15F))),
 		Map.entry(EntityTypes.RABBIT, List.of(new Extra(Items.RABBIT_HIDE, 1, 1, 0.6F), new Extra(Items.RABBIT_FOOT, 1, 1, 0.2F))));
