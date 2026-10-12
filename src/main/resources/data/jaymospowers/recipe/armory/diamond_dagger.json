@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "L": "minecraft:leather",
+    "X": "#minecraft:diamond_tool_materials"
+  },
+  "pattern": [
+    "X",
+    "L"
+  ],
+  "result": {
+    "id": "jaymospowers:diamond_dagger"
+  }
+}

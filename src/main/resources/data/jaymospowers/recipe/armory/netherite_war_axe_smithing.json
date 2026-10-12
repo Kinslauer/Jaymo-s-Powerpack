@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": "#minecraft:netherite_tool_materials",
+  "base": "jaymospowers:diamond_war_axe",
+  "result": {
+    "id": "jaymospowers:netherite_war_axe"
+  },
+  "template": "minecraft:netherite_upgrade_smithing_template"
+}

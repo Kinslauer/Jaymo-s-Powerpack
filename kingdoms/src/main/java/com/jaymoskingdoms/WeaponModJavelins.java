@@ -12,7 +12,7 @@ import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.26) Balkon's WeaponMod: Legacy (mod id {@value Javelins#WEAPONMOD}, MIT; nothing of it is copied here): when it's
+ * (0.5.28) Balkon's WeaponMod: Legacy (mod id {@value Javelins#WEAPONMOD}, MIT; nothing of it is copied here): when it's
  * loaded, guards of kingdoms neither poor nor elite throw its javelins ({@link Javelins}). This names WeaponMod's
  * classes, so it's only touched while {@link Javelins#WEAPONMOD_LOADED}.
  */

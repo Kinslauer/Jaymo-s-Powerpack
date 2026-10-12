@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "S": "minecraft:stick",
+    "X": "#minecraft:stone_tool_materials"
+  },
+  "pattern": [
+    "XX",
+    "XS"
+  ],
+  "result": {
+    "id": "jaymospowers:stone_cudgel"
+  }
+}

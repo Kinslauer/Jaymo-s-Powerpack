@@ -74,6 +74,15 @@ public final class Royals {
 	static void clear() {
 	}
 
+	/** (0.5.26) {@code ruler} is out on his round: daytime, a ruler who walks one, away from his throne. */
+	static boolean out(Folk ruler) {
+		if (!walks(ruler) || !(ruler.level() instanceof ServerLevel level) || !daytime(level)) {
+			return false;
+		}
+		Castle.Keep keep = Factions.keep(level.getServer(), ruler.factionId());
+		return keep != null && ruler.distanceToSqr(Vec3.atBottomCenterOf(keep.throne())) > 16.0 * 16.0;
+	}
+
 	// ---- the ruler's round ------------------------------------------------------------------------------------------
 
 	/** His day: out on his round while it's light, back on his throne when it isn't. */

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "S": "minecraft:stick",
+    "C": "minecraft:string",
+    "X": "#minecraft:iron_tool_materials"
+  },
+  "pattern": [
+    "  X",
+    " X ",
+    "SC "
+  ],
+  "result": {
+    "id": "jaymospowers:iron_ninjato"
+  }
+}

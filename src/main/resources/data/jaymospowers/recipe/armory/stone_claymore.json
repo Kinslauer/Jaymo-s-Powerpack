@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "S": "minecraft:stick",
+    "L": "minecraft:leather",
+    "X": "#minecraft:stone_tool_materials"
+  },
+  "pattern": [
+    " X ",
+    "XXX",
+    "LSL"
+  ],
+  "result": {
+    "id": "jaymospowers:stone_claymore"
+  }
+}

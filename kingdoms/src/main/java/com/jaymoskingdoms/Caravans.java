@@ -979,7 +979,7 @@ final class Caravans {
 		entity.discard();
 	}
 
-	/** (0.5.26) Steers a caravan folk (a war party's carter too) toward {@code to}, or (null) lets it be. */
+	/** (0.5.28) Steers a caravan folk (a war party's carter too) toward {@code to}, or (null) lets it be. */
 	static void steer(Folk folk, @Nullable Vec3 to) {
 		if (to == null) {
 			HEADING.remove(folk.getUUID());

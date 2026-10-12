@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "jaymospowers:caveman"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "jaymospowers:caveman"
+      }
+    ]
+  }
+}

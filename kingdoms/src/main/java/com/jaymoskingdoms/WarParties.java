@@ -36,11 +36,11 @@ import org.jspecify.annotations.Nullable;
  * army of the realm that sends it. A party is mustered for the march: it isn't on the realm's roster, and its dead
  * aren't replaced. Parties aren't saved: soldiers left after a restart go home.
  *
- * <p>(0.5.26) <b>Marching with a party.</b> A player sworn to a realm at war can join its side's party in the field with
+ * <p>(0.5.28) <b>Marching with a party.</b> A player sworn to a realm at war can join its side's party in the field with
  * {@code /kingdom war join}; with none out, standing at their realm's seat, they call one up there, and it marches the
  * whole way to the nearest enemy seat with them ({@link #join}).
  *
- * <p>(0.5.26) <b>The spoils cart.</b> Every party takes a horse-drawn storage cart (a {@link Wagon} with its carter), or
+ * <p>(0.5.28) <b>The spoils cart.</b> Every party takes a horse-drawn storage cart (a {@link Wagon} with its carter), or
  * it doesn't march. When its siege is over, the party sacks the seat ({@link #seize}): a share of the enemy's treasury
  * and goods from its storehouse go into the cart, which hauls them home into the realm's storehouse and treasury; the
  * players who marched get a cut and the realm's thanks ({@link #deliver}). Break the cart open, or kill its horse or
@@ -74,7 +74,7 @@ final class WarParties {
 	static final long PARTY_MAX_TICKS = 20 * 60 * 10;
 	/** What soldiers' {@link Folk#task} says. */
 	static final String TASK = "war";
-	/** (0.5.26) A party called up by a player: it musters within this of their realm's seat; its march may take this long, the whole outing this long (ticks). */
+	/** (0.5.28) A party called up by a player: it musters within this of their realm's seat; its march may take this long, the whole outing this long (ticks). */
 	static final double CALL_RANGE = 64.0;
 	static final long JOINED_MARCH_TICKS = 20 * 60 * 8, JOINED_MAX_TICKS = 20 * 60 * 40;
 	/** The spoils: this share of the enemy's treasury, and up to this many stacks of goods from its storehouse. */
@@ -102,7 +102,7 @@ final class WarParties {
 		final long started;
 		long phaseAt;
 		boolean frontierPlanted, seatPlanted;
-		/** (0.5.26) The players marching with it, and what it carries home. */
+		/** (0.5.28) The players marching with it, and what it carries home. */
 		final Set<UUID> players = new HashSet<>();
 		final List<ItemStack> spoils = new ArrayList<>();
 		long spoilsEmeralds;

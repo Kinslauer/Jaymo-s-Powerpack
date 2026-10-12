@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.5.26) A trade on a realm's land pays the realm its toll ({@link Treasuries#traded}). */
+/** (0.5.28) A trade on a realm's land pays the realm its toll ({@link Treasuries#traded}). */
 @Mixin(AbstractVillager.class)
 abstract class VillagerTradeMixin {
 	@Inject(method = "notifyTrade", at = @At("HEAD"))

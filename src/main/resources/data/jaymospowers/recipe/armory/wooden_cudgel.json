@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "S": "minecraft:stick",
+    "W": "#minecraft:logs"
+  },
+  "pattern": [
+    "W",
+    "S"
+  ],
+  "result": {
+    "id": "jaymospowers:wooden_cudgel"
+  }
+}

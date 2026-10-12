@@ -206,7 +206,7 @@ final class WarCommands {
 		return 0;
 	}
 
-	/** (0.5.26) Marches with their side's war party ({@link WarParties#join}). */
+	/** (0.5.28) Marches with their side's war party ({@link WarParties#join}). */
 	private static int join(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
 		ServerPlayer player = c.getSource().getPlayerOrException();
 		WarParties.Joined joined = WarParties.join(Factions.level(c.getSource().getServer()), player);

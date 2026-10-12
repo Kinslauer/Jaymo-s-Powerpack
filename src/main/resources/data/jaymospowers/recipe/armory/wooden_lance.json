@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "S": "minecraft:stick",
+    "L": "minecraft:leather",
+    "X": "#minecraft:wooden_tool_materials"
+  },
+  "pattern": [
+    "  X",
+    " S ",
+    "SL "
+  ],
+  "result": {
+    "id": "jaymospowers:wooden_lance"
+  }
+}

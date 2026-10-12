@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "S": "minecraft:stick",
+    "L": "minecraft:leather",
+    "X": "#minecraft:diamond_tool_materials"
+  },
+  "pattern": [
+    "  X",
+    " S ",
+    "L  "
+  ],
+  "result": {
+    "id": "jaymospowers:diamond_skewer"
+  }
+}
