@@ -410,3 +410,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.8.70, Jaymo's Equestrian (riding):** ships Jaymo's Kingdoms 0.5.34 (see `kingdoms/MODLOG.md`): six horse
   breeds with hidden stats foals inherit, five gaits on the scroll wheel, a stamina bar, courage and spooking, new coats;
   war elephants and woolly mammoths in Mo' Creatures' look (GPL-3.0).
+- **0.8.71, Mobs work themselves loose:** ships Jaymo's Kingdoms 0.5.36 (see `kingdoms/MODLOG.md`): any mob that stops
+  getting closer to where it's walking hops toward its next step, then takes a fresh path, then gives the walk up;
+  our own folk turn up where they were going in a puff instead.
