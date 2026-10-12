@@ -27,7 +27,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.19) Horses for a realm's folk. A rider's goals steer his horse (a mob riding a mob drives it, as skeleton
+ * (0.5.14) Horses for a realm's folk. A rider's goals steer his horse (a mob riding a mob drives it, as skeleton
  * horsemen do), so a mounted guard keeps his post, fights, and rides at his ruler's back like any other, only faster.
  * A <b>prosperous</b> kingdom ({@link Wealth}) buys horses for {@link #GUARDS_PROSPEROUS} of its guards about the town
  * (never the hall's or the gate's); a <b>wealthy</b> one for {@link #GUARDS_WEALTHY}, and keeps {@link #ARCHERS_WEALTHY}

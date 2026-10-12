@@ -35,7 +35,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.19) A horse-drawn wagon: a caravan's storage cart ({@link #CART}, its load of barrels, hay or ore showing what
+ * (0.5.14) A horse-drawn wagon: a caravan's storage cart ({@link #CART}, its load of barrels, hay or ore showing what
  * it carries) or a wealthy king's carriage ({@link #CARRIAGE}, a cabin in his colours with him inside). It has no legs
  * of its own: it's hitched to a horse (by UUID) and trails behind it on its shafts, swinging round on turns the way a
  * trailer does. It doesn't block anyone; a player can strike it (a cart broken open spills its load: robbing a

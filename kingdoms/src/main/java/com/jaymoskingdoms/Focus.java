@@ -14,7 +14,7 @@ import net.minecraft.world.level.biome.Biome;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.19) What a fiefdom is for: it lives to feed and supply the kingdom it serves, not to hold out against the world.
+ * (0.5.14) What a fiefdom is for: it lives to feed and supply the kingdom it serves, not to hold out against the world.
  * A <b>mining</b> fiefdom (in the hills and mountains, or by its founding) works its mine with more miners and sends
  * stone and ore; a <b>farming</b> one (on the plains, the savanna, by rivers) lays out more fields and pens, keeps more
  * farmers and sends food. Either way it builds no stone wall, towers or barracks, and keeps fewer guards; its surplus

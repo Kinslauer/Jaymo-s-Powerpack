@@ -57,7 +57,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	public static final int FARMER = 8;
 	/** (0.5.2) A settlement's miner and woodcutter: they work its mine and its trees and carry what they get to its storage ({@link Gatherers}). */
 	public static final int MINER = 9, WOODCUTTER = 10;
-	/** (0.5.19) A fiefdom's carter (a caravan's) or a king's coachman ({@link Caravans}, {@link Carriages}). */
+	/** (0.5.14) A fiefdom's carter (a caravan's) or a king's coachman ({@link Caravans}, {@link Carriages}). */
 	public static final int CARTER = 11;
 
 	/**
@@ -391,7 +391,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		// (0.5.1) a ruler's day out and his escort at his back; doors opened (and shut) on the way
 		this.goalSelector.addGoal(3, new Royals.Round(this));
 		this.goalSelector.addGoal(3, new Royals.Follow(this));
-		// (0.5.19) a caravan's carters and guards on the road
+		// (0.5.14) a caravan's carters and guards on the road
 		this.goalSelector.addGoal(3, new Caravans.Drive(this));
 		this.goalSelector.addGoal(3, new net.minecraft.world.entity.ai.goal.OpenDoorGoal(this, true));
 		this.goalSelector.addGoal(4, new MoveTowardsRestrictionGoal(this, 1.0));
@@ -608,7 +608,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	}
 
 	/**
-	 * (0.5.19) A rider (in the saddle, in a carriage) or a caravan's man can't smother in a wall: a horse's head and a
+	 * (0.5.14) A rider (in the saddle, in a carriage) or a caravan's man can't smother in a wall: a horse's head and a
 	 * carriage brush through leaves and eaves, and a stuck caravan is set down further along its road.
 	 */
 	@Override

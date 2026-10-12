@@ -41,7 +41,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.19) Caravans: every fiefdom sends its surplus to the kingdom it serves in horse-drawn storage carts, a few times
+ * (0.5.14) Caravans: every fiefdom sends its surplus to the kingdom it serves in horse-drawn storage carts, a few times
  * a day, and they come back with what it lacks. A mining fiefdom sends stone and ore and gets food back; a farming one
  * sends food and gets timber, coal and iron ({@link Focus}).
  *

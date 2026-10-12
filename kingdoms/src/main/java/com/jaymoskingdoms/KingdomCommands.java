@@ -61,7 +61,7 @@ final class KingdomCommands {
 			.then(Commands.literal("storehouse").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(KingdomCommands::storehouse))
 			.then(Commands.literal("crew").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(KingdomCommands::crew))
 			.then(Commands.literal("hire").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(KingdomCommands::hire))
-			// (0.5.19) caravans, carriages, riches and vassals, for operators
+			// (0.5.14) caravans, carriages, riches and vassals, for operators
 			.then(Commands.literal("caravan").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(c -> caravan(c, null))
 				.then(Commands.argument("name", StringArgumentType.word()).executes(c -> caravan(c, StringArgumentType.getString(c, "name")))))
 			.then(Commands.literal("carriage").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(KingdomCommands::carriage))
@@ -134,7 +134,7 @@ final class KingdomCommands {
 		if (temper != null) {
 			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.temper", Tempers.describe(temper)).withStyle(ChatFormatting.GRAY), false);
 		}
-		// (0.5.19) a fiefdom's focus, a kingdom's riches, caravans on the road
+		// (0.5.14) a fiefdom's focus, a kingdom's riches, caravans on the road
 		Focus.Kind focus = Focus.of(server, f);
 		if (focus != null) {
 			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.focus", Focus.describe(focus)).withStyle(ChatFormatting.GRAY), false);

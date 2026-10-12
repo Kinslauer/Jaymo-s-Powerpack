@@ -1341,7 +1341,7 @@ soldiers below them), broke trapdoors in its way and set a dozen fires in the to
 shoved a player back; a vanilla and an MCA villager ran from an enderman (4 to 11-13 blocks). Not seen in game: the
 other tempers' rounds, the tyrant's tithe, the reveler's feast.
 
-## 0.5.19: fiefdoms that feed their kingdom, caravans, mounted guards and archers, the king's carriage
+## 0.5.14: fiefdoms that feed their kingdom, caravans, mounted guards and archers, the king's carriage
 - **Fiefdoms have a focus** (`Focus`), drawn from their land: *mining* in hills, mountains and badlands, *farming* on
   plains, savanna and by rivers (otherwise by id). Either way a fiefdom builds no wall, towers, gatehouses or
   barracks, and keeps at most 4 guards (the rest of its hands work).

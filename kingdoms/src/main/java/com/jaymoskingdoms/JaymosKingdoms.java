@@ -88,7 +88,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.1: a night slept through made up at once (building, fields), farmers, rulers' days out
 		LOGGER.debug("warden attachment: {}", Wardens.WARDENS);
 		Nights.register();
-		// 0.5.19: horses and wagons: mounted guards and archers for prosperous realms, a wealthy king's carriage, and the
+		// 0.5.14: horses and wagons: mounted guards and archers for prosperous realms, a wealthy king's carriage, and the
 		// fiefdoms' caravans to their kingdoms (and their attachment)
 		Wagon.register();
 		LOGGER.debug("caravan attachments: {} {}", Caravans.CARAVANS, Carriages.BOUGHT);

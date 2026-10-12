@@ -4,7 +4,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 
 /**
- * (0.5.19) How rich a realm is: its treasury, its people and the fiefdoms that serve it. A <b>prosperous</b> kingdom
+ * (0.5.14) How rich a realm is: its treasury, its people and the fiefdoms that serve it. A <b>prosperous</b> kingdom
  * puts some of its guards on horses; a <b>wealthy</b> one also keeps mounted archers, and its king rides out on his
  * rounds in a carriage ({@link Carriages}, {@link Cavalry}). Horses and carriages are bought from the treasury.
  */

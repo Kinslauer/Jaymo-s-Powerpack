@@ -476,7 +476,7 @@ public final class KingdomEvents {
 		}
 		ServerPlayer killer = source.getEntity() instanceof ServerPlayer p ? p : null;
 		if (!folk.leader()) {
-			// (0.5.19) a caravan's carters and guards were never on its roster
+			// (0.5.14) a caravan's carters and guards were never on its roster
 			if (!Caravans.isCaravanFolk(folk)) {
 				Economy.lost(server, faction.id(), folk.role());
 			}

@@ -22,7 +22,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.19) A wealthy king's carriage ({@link Wealth}): a cabin in his colours drawn by a horse in iron barding, a
+ * (0.5.14) A wealthy king's carriage ({@link Wealth}): a cabin in his colours drawn by a horse in iron barding, a
  * coachman in the saddle. It waits at his gate; when he comes out on his round ({@link Royals}) he gets in, and the
  * coachman drives him from stop to stop (he greets his people from the window), his escort riding and marching behind.
  * At dusk he's driven back to his gate and walks in to his throne. A fight comes first: attacked, he gets down to

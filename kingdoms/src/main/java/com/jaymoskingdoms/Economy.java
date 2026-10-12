@@ -145,7 +145,7 @@ public final class Economy {
 			int picked = crewShort ? Folk.WORKER : Farmers.wanted(server, grown) ? Folk.FARMER : Gatherers.wanted(server, grown, Folk.MINER) ? Folk.MINER
 				: Gatherers.wanted(server, grown, Folk.WOODCUTTER) ? Folk.WOODCUTTER : grown.type().isRealm() ? Folk.GUARD : Folk.WORKER;
 			if (picked == Folk.GUARD && Focus.enoughGuards(server, grown)) {
-				// (0.5.19) a fiefdom with its few guards: another pair of hands for its fields or its mine instead
+				// (0.5.14) a fiefdom with its few guards: another pair of hands for its fields or its mine instead
 				picked = Focus.of(server, grown) == Focus.Kind.FARMING && !Farmers.farms(server, grown).isEmpty() ? Folk.FARMER
 					: Mines.dug(server, grown) ? Folk.MINER : Builders.crewCount(grown) < Builders.CREW_MAX ? Folk.WORKER : Folk.GUARD;
 			}

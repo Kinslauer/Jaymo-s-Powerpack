@@ -144,7 +144,7 @@ public final class Royals {
 				this.stops.clear();
 				release(level, this.king);
 			}
-			// (0.5.19) driven home in his carriage: he gets down at his gate and walks in
+			// (0.5.14) driven home in his carriage: he gets down at his gate and walks in
 			if (Carriages.riding(this.king)) {
 				if (this.walk(level, keep.gate(), now, Carriages.ALIGHT_REACH) || now - this.improvedAt > STUCK_TICKS) {
 					Carriages.alight(this.king);
@@ -219,7 +219,7 @@ public final class Royals {
 				}
 				return;
 			}
-			// (0.5.19) a wealthy king rides his round in his carriage, if it's waiting for him
+			// (0.5.14) a wealthy king rides his round in his carriage, if it's waiting for him
 			Carriages.board(level, faction, this.king);
 			BlockPos stop = this.stops.getFirst();
 			if (this.walk(level, stop, now, STOP_REACH)) {
@@ -369,7 +369,7 @@ public final class Royals {
 			// behind him: rows of two, a block and a half either side
 			Vec3 facing = Vec3.directionFromRotation(0.0F, king.getYRot());
 			Vec3 right = new Vec3(-facing.z, 0.0, facing.x);
-			// (0.5.19) wider apart on horseback, and further back behind a carriage
+			// (0.5.14) wider apart on horseback, and further back behind a carriage
 			double spread = Cavalry.mounted(this.guard) ? 1.7 : 1.0;
 			double back = (Carriages.riding(king) ? 4.5 : 2.0) + (slot / 2) * 1.8 * spread;
 			double side = (slot % 2 == 0 ? -1.4 : 1.4) * spread;

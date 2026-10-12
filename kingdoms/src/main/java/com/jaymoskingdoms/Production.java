@@ -108,7 +108,7 @@ public final class Production {
 		// (0.5.2) what its own gatherers bring in by hand isn't counted twice: no logs with a woodcutter, no rock with a
 		// miner, half the food with a farmer
 		int logs = h.count(Folk.WOODCUTTER) > 0 ? 0 : materials * h.forest() / 100;
-		// (0.5.19) a mining fiefdom quarries besides what its miners dig
+		// (0.5.14) a mining fiefdom quarries besides what its miners dig
 		int rock = h.count(Folk.MINER) > 0 && Focus.of(server, f) != Focus.Kind.MINING ? 0 : materials - materials * h.forest() / 100;
 		int stone = rock / STONE_ONE_IN;
 		int food = Focus.food(server, f, Math.min(Focus.foodMost(server, f, FOOD_MOST), FOOD_BASE + h.population() * FOOD_PER_VILLAGER + h.farms() / CROPS_PER_FOOD)) * share / 100 * days

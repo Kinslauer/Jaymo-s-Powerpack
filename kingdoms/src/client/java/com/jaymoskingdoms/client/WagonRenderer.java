@@ -25,7 +25,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
 /**
- * (0.5.19) A wagon drawn from blocks, scaled down and put together: a storage cart (a plank bed with low sides, its load
+ * (0.5.14) A wagon drawn from blocks, scaled down and put together: a storage cart (a plank bed with low sides, its load
  * of barrels, hay or stone showing what it carries, shafts out to its horse) or a king's carriage (a dark cabin open at
  * the windows, a roof and cushion in his colour, gilt edges, lanterns, big wheels behind and small ones in front). Its
  * wheels turn with the ground it covers. Original, no other mod's model.

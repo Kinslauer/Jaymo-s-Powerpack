@@ -180,7 +180,7 @@ final class WarParties {
 			soldier.setup(Folk.GUARD, from, target.seat(), Raids.RAID_HOME_RADIUS);
 			level.addFreshEntity(soldier);
 			soldier.setTask(TASK);
-			// (0.5.19) a prosperous realm's soldiers ride, some of them
+			// (0.5.14) a prosperous realm's soldiers ride, some of them
 			if (i % Cavalry.PARTY_RIDER_ONE_IN == 0 && Wealth.atLeast(server, from, Wealth.Tier.PROSPEROUS)) {
 				Cavalry.mount(level, soldier, from, true);
 			}
