@@ -82,6 +82,11 @@ public final class Quests {
 	static final double CHIEF_CREDIT_RANGE = 160.0;
 	/** A delivered letter: hearts with whoever gets it. */
 	static final int LETTER_HEARTS = 5;
+	/** (0.5.29) A king slain cunningly (under a false oath, or out on his round): emeralds this much more (percent), and this much more good name with the giver's realm. */
+	static final int CUNNING_EMERALDS = 50, CUNNING_REPUTATION = 50;
+	/** (0.5.29) A noble king out on his round stops for one who's been sent for him, when they come this close; once per this many ticks, held this long. */
+	static final double ALMS_RANGE = 5.0;
+	static final int ALMS_EVERY = 20 * 120, ALMS_HOLD = 20 * 8;
 	/** The custom-data key on a quest's letter or keepsake: the quest's id. */
 	static final String KEY = "jaymoskingdoms_quest";
 
@@ -109,6 +114,8 @@ public final class Quests {
 	private static final Map<ServerPlayer, LivingEntity> OPENING = new HashMap<>();
 	/** Givers held still while a player reads their screen (giver → who's reading, until when). */
 	private static final Map<LivingEntity, Hold> HELD = new HashMap<>();
+	/** When each player was last stopped for by a noble king they were sent to kill (player → tick). */
+	private static final Map<UUID, Integer> ALMS = new HashMap<>();
 
 	private record Hold(ServerPlayer player, int until) {
 	}
@@ -143,6 +150,7 @@ public final class Quests {
 			SENT.clear();
 			OPENING.clear();
 			HELD.clear();
+			ALMS.clear();
 		});
 	}
 
@@ -642,6 +650,10 @@ public final class Quests {
 				}
 			}
 		}
+		// (0.5.29) a king some other king wanted dead
+		if (entity instanceof Folk king && king.role() == Folk.KING) {
+			regicide(level, king, source);
+		}
 		// so many slain
 		if (source.getEntity() instanceof ServerPlayer killer) {
 			for (Quest q : log(killer)) {
@@ -651,6 +663,68 @@ public final class Quests {
 					killer.sendOverlayMessage(objective(level, killer, next).copy().withStyle(next.counted() ? ChatFormatting.GREEN : ChatFormatting.YELLOW));
 					sync(killer, true);
 				}
+			}
+		}
+	}
+
+	/**
+	 * {@code king} has fallen: done for each player sent for him who struck him down or stood near. Done cunningly (sworn
+	 * to his realm, so let close; or while he was out on his round) it pays more, and a false oath is broken with it.
+	 */
+	private static void regicide(ServerLevel level, Folk king, DamageSource source) {
+		MinecraftServer server = level.getServer();
+		boolean out = Royals.out(king);
+		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+			for (Quest q : log(p)) {
+				if (q.kind() != Quest.REGICIDE || q.counted() || !q.objective().target().equals("realm:" + king.factionId())
+					|| !(source.getEntity() == p || (p.level() == level && p.distanceToSqr(king) < CHIEF_CREDIT_RANGE * CHIEF_CREDIT_RANGE))) {
+					continue;
+				}
+				Faction sworn = Factions.of(server, p.getUUID());
+				boolean oath = sworn != null && sworn.id() == king.factionId();
+				Quest done = q.withProgress(1);
+				p.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.regicide.done", king.getDisplayName(), q.giver().name())
+					.withStyle(ChatFormatting.GOLD));
+				if (oath || out) {
+					Quest.Reward r = done.reward();
+					done = done.withReward(new Quest.Reward(r.emeralds() * (100 + CUNNING_EMERALDS) / 100, r.items(), r.book(), r.relic(), r.hearts(),
+						r.reputation() + CUNNING_REPUTATION, r.standing()));
+					p.sendSystemMessage(Component.translatable(oath ? "quest.jaymoskingdoms.regicide.cunning.oath" : "quest.jaymoskingdoms.regicide.cunning.round")
+						.withStyle(ChatFormatting.DARK_RED));
+				}
+				if (oath) {
+					// (the oath was false, and now everyone knows it)
+					Factions.update(server, king.factionId(), f -> f.withMember(p.getUUID(), null));
+				}
+				put(p, done);
+				sync(p, true);
+			}
+		}
+	}
+
+	/**
+	 * A noble king out on his round, near a player sent to kill him: he stops for them, as he would for anyone of his,
+	 * and gives them bread. Close enough to touch.
+	 */
+	private static void alms(ServerPlayer player, int tick) {
+		if (!(player.level() instanceof ServerLevel level) || tick - ALMS.getOrDefault(player.getUUID(), -ALMS_EVERY) < ALMS_EVERY) {
+			return;
+		}
+		for (Quest q : log(player)) {
+			if (q.kind() != Quest.REGICIDE || q.counted() || !q.objective().otherName().equals("round")) {
+				continue;
+			}
+			int realm = Integer.parseInt(q.objective().target().substring("realm:".length()));
+			for (Folk king : level.getEntitiesOfClass(Folk.class, player.getBoundingBox().inflate(ALMS_RANGE),
+				k -> k.role() == Folk.KING && k.factionId() == realm && k.isAlive() && Royals.out(k))) {
+				ALMS.put(player.getUUID(), tick);
+				HELD.put(king, new Hold(player, tick + ALMS_HOLD));
+				king.getNavigation().stop();
+				king.getLookControl().setLookAt(player, 30.0F, 30.0F);
+				give(player, new ItemStack(Items.BREAD, 2));
+				Speech.say(level, king, Component.translatable("quest.jaymoskingdoms.regicide.alms"), Speech.GOLD, 16.0);
+				player.sendOverlayMessage(Component.translatable("quest.jaymoskingdoms.regicide.alms.near", king.getDisplayName()).withStyle(ChatFormatting.DARK_RED));
+				return;
 			}
 		}
 	}
@@ -719,6 +793,7 @@ public final class Quests {
 		if (tick % WATCH_TICKS == 0) {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 				watch(player);
+				alms(player, tick);
 			}
 		}
 		if (tick % SYNC_TICKS == 0) {
@@ -769,7 +844,13 @@ public final class Quests {
 	// ---- words -------------------------------------------------------------------------------------------------------
 
 	static Component title(Quest q) {
-		return Component.translatable("quest.jaymoskingdoms." + q.template() + ".title");
+		String key = "quest.jaymoskingdoms." + q.template() + ".title";
+		return switch (q.kind()) {
+			// (who a letter's for and where; whose chief, or whose king)
+			case Quest.DELIVER -> Component.translatable(key, addressee(q), q.objective().place());
+			case Quest.CHIEF, Quest.REGICIDE -> Component.translatable(key, q.objective().place());
+			default -> Component.translatable(key);
+		};
 	}
 
 	private static Component ruin(String id) {
@@ -815,6 +896,7 @@ public final class Quests {
 			case Quest.DELIVER -> Component.translatable(key, addressee(q), o.place(), x(q), z(q));
 			case Quest.CHAMPION -> Component.translatable(key, Component.translatable("foe.jaymoskingdoms." + o.otherName()), ruin(o.target()), x(q), z(q));
 			case Quest.CHIEF -> Component.translatable(key, o.place(), x(q), z(q));
+			case Quest.REGICIDE -> Component.translatable(key, o.place(), x(q), z(q));
 			default -> Component.empty();
 		};
 	}
@@ -834,6 +916,7 @@ public final class Quests {
 			case Quest.CHAMPION -> Component.translatable("quest.jaymoskingdoms.objective.champion", Component.translatable("foe.jaymoskingdoms." + o.otherName()),
 				ruin(o.target()), x(q), z(q));
 			case Quest.CHIEF -> Component.translatable("quest.jaymoskingdoms.objective.chief", o.place(), x(q), z(q));
+			case Quest.REGICIDE -> Component.translatable("quest.jaymoskingdoms.objective.regicide", o.place(), x(q), z(q));
 			default -> Component.empty();
 		};
 	}
@@ -851,6 +934,9 @@ public final class Quests {
 		}
 		if (r.standing() > 0 && f != null && f.member(player.getUUID()) != null) {
 			extras.add(Component.translatable("quest.jaymoskingdoms.reward.standing", r.standing()));
+		}
+		if (q.kind() == Quest.REGICIDE && state != QuestNet.READY) {
+			extras.add(Component.translatable("quest.jaymoskingdoms.regicide.hint." + q.objective().otherName(), CUNNING_EMERALDS));
 		}
 		MutableComponent title = title(q).copy();
 		return new QuestNet.View(q.id(), state, q.royal(), title, text(q), objective(level, player, q), rewards(level, q), extras);

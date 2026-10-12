@@ -43,6 +43,9 @@ final class QuestBoard {
 	/** Villager rewards: MCA hearts, reputation and standing; a king's. */
 	static final int HEARTS = 12, REPUTATION = 15, STANDING = 10;
 	static final int ROYAL_REPUTATION = 150, ROYAL_STANDING = 100;
+	/** (0.5.29) A tyrant's or warlord's decree is a rival king's death this often (when there's a rival within reach). */
+	static final float REGICIDE_CHANCE = 0.4F;
+	static final double REGICIDE_RANGE = 2500.0;
 	/** Chance a villager's quest pays a relic: a smith's, a guard's or fletcher's, and anyone else's. */
 	static final float SMITH_RELIC = 0.35F, ARMS_RELIC = 0.2F, OTHER_RELIC = 0.04F;
 
@@ -354,6 +357,13 @@ final class QuestBoard {
 	/** A king's quest: a camp's chief slain, or a champion put down in its lair; null if neither can be found. */
 	static @Nullable Quest king(ServerLevel level, LivingEntity king, Faction f, RandomSource random) {
 		Quest.Giver who = new Quest.Giver(king.getUUID(), king.getName().getString(), f.id(), true, "king");
+		Tempers.Temper temper = Tempers.of(f);
+		if ((temper == Tempers.Temper.TYRANT || temper == Tempers.Temper.WARLORD) && random.nextFloat() < REGICIDE_CHANCE) {
+			Quest q = regicide(level, f, who, random);
+			if (q != null) {
+				return q;
+			}
+		}
 		Quest q = random.nextFloat() < 0.4F ? chief(level, f, who, random) : null;
 		if (q == null) {
 			q = champion(level, king, f, who, random);
@@ -388,6 +398,47 @@ final class QuestBoard {
 		String foe = QuestFoes.championFor(where, random);
 		Quest.Objective o = new Quest.Objective(where, 1, 0, Optional.of(lair.getFirst()), Optional.empty(), foe, where, false);
 		return new Quest(UUID.randomUUID().toString(), Quest.CHAMPION, "king.champion." + foe, who, o, royalReward(random), 0L);
+	}
+
+	/**
+	 * (0.5.29) A tyrant's or warlord's darkest decree: another realm's king dead. His enemy at war first, then a rival,
+	 * then the nearest crowned realm that isn't his ally. How to get close is in the telling: a noble king walks out among
+	 * his people and stops for strangers; any other must be got at by swearing to him falsely ({@link Quests}).
+	 */
+	/** (Testing) {@code king}'s regicide decree, whatever his temper; null with no realm to send for. */
+	static @Nullable Quest regicide(ServerLevel level, LivingEntity king, Faction f, RandomSource random) {
+		return regicide(level, f, new Quest.Giver(king.getUUID(), king.getName().getString(), f.id(), true, "king"), random);
+	}
+
+	private static @Nullable Quest regicide(ServerLevel level, Faction f, Quest.Giver who, RandomSource random) {
+		MinecraftServer server = level.getServer();
+		Faction best = null;
+		int bestRank = Integer.MAX_VALUE;
+		double bestD = REGICIDE_RANGE * REGICIDE_RANGE;
+		for (Faction other : Factions.all(server, FactionType.KINGDOM)) {
+			if (other.id() == f.id() || other.fallen() || other.leader().isEmpty()) {
+				continue;
+			}
+			Relation relation = Relations.between(f, other);
+			if (relation == Relation.ALLIED) {
+				continue;
+			}
+			int rank = relation == Relation.WAR ? 0 : relation == Relation.RIVAL ? 1 : 2;
+			double d = other.seat().distSqr(f.seat());
+			if (d < REGICIDE_RANGE * REGICIDE_RANGE && (rank < bestRank || (rank == bestRank && d < bestD))) {
+				best = other;
+				bestRank = rank;
+				bestD = d;
+			}
+		}
+		if (best == null) {
+			return null;
+		}
+		String way = Tempers.of(best) == Tempers.Temper.NOBLE ? "round" : "oath";
+		Castle.Keep keep = Factions.keep(server, best.id());
+		BlockPos at = keep != null ? keep.throne() : best.seat();
+		Quest.Objective o = new Quest.Objective("realm:" + best.id(), 1, 0, Optional.of(at), best.leader(), way, best.name(), false);
+		return new Quest(UUID.randomUUID().toString(), Quest.REGICIDE, "king.regicide." + way, who, o, royalReward(random), 0L);
 	}
 
 	private static Quest.Reward royalReward(RandomSource random) {
