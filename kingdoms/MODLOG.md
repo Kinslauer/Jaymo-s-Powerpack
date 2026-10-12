@@ -1264,4 +1264,22 @@ test village has none), a villager moving into a new house.
   (`Names.fiefTitle`, the same every time for its fiefdom); a kingdom's lords stay lords. A barbarian chief goes by
   his own Slavic or Norse name (`Names.chief`, from his UUID, so it never changes), one in `BYNAME_ONE_IN` (8) with a
   byname: "the Terrible", "Bloodaxe", "Skullsplitter"...
-- Built, not yet seen in game (the PC was short of memory for the test client).
+- Seen in the dev client: an acacia and a dark oak toppled away from the cutter, lay a moment and broke apart with
+  their drops; the boss-bar names not yet seen.
+
+## 0.5.10: trees grown like Dynamic Trees'; slower falls
+- **Grown trees** (`GrownTrees`, `TreeFeatureMixin`; our own code, vanilla logs and leaves): every oak, birch, spruce,
+  jungle, acacia, dark (and pale) oak and cherry the world generates, or a sapling grows into, is drawn branch by
+  branch in place of the game's shape: a trunk that leans a little, branches reaching out and up, rounded clumps of
+  leaves at their tips, roots spreading at the foot of old trees. Oaks round-crowned (big ones forking), birches
+  slender, spruces in tiers that shorten toward the top (two by two for the giant ones), jungle trees tall with a crown
+  only at the top, acacias forked into diagonal limbs under flat crowns, dark oaks stout (two by two) under a broad
+  crown held high, cherries arching out. Leaves only within `LEAF_REACH` (6) of the wood, each knowing its distance,
+  so none decay. Bushes, azaleas, mangroves and modded trees are left to the game; a tree with no room is too.
+- **Felling leaves a stump:** roots and the rest of a two-by-two trunk at the cut's own height stay put.
+- **Falls slower and settle:** a tree takes about twice as long to come over (`START_SPEED` 0.3, `WEIGHT` 4), lands
+  with a thud and the crush, lies `LIES` (14) ticks, then breaks apart.
+- **`/kingdomsdev fell`** (dev games only): fells the nearest natural tree as if the tester cut it, and moves the
+  camera to watch. The test client is held to 2.5 GB (`-Xmx2560M`).
+- Seen in the dev client: every kind placed side by side on a test platform (screenshots), a jungle and dark forest
+  generated fresh, and a dark oak felled at half speed (it tipped, lay, broke, its stump and roots stayed).

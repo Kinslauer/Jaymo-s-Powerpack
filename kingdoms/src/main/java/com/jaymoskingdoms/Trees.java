@@ -442,9 +442,10 @@ public final class Trees {
 		List<BlockPos> logs = new ArrayList<>();
 		Set<BlockPos> seen = new HashSet<>();
 		Deque<BlockPos> open = new ArrayDeque<>();
-		for (BlockPos n : BlockPos.betweenClosed(cut.offset(-1, 0, -1), cut.offset(1, 1, 1))) {
+		// (0.5.10) from the logs over the cut: roots and the rest of a wide trunk at the cut's own height stay as a stump
+		for (BlockPos n : BlockPos.betweenClosed(cut.offset(-1, 1, -1), cut.offset(1, 1, 1))) {
 			BlockPos q = n.immutable();
-			if (!q.equals(cut) && level.getBlockState(q).is(BlockTags.LOGS)) {
+			if (level.getBlockState(q).is(BlockTags.LOGS)) {
 				seen.add(q);
 				open.add(q);
 			}
@@ -457,7 +458,7 @@ public final class Trees {
 			BlockPos at = open.poll();
 			logs.add(at);
 			for (BlockPos n : BlockPos.betweenClosed(at.offset(-1, 0, -1), at.offset(1, 1, 1))) {
-				if (n.getY() < cut.getY() || Math.abs(n.getX() - cut.getX()) > FELL_SPREAD || Math.abs(n.getZ() - cut.getZ()) > FELL_SPREAD) {
+				if (n.getY() <= cut.getY() || Math.abs(n.getX() - cut.getX()) > FELL_SPREAD || Math.abs(n.getZ() - cut.getZ()) > FELL_SPREAD) {
 					continue;
 				}
 				BlockPos q = n.immutable();

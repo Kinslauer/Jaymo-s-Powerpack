@@ -55,10 +55,12 @@ import org.jspecify.annotations.Nullable;
  */
 public final class FallingTree extends Entity {
 	/** Its first push (degrees a tick), a steady nudge, and the pull of its own weight (scaled by how far it leans). */
-	static final float START_SPEED = 0.6F, NUDGE = 0.04F, WEIGHT = 9.0F;
+	static final float START_SPEED = 0.3F, NUDGE = 0.03F, WEIGHT = 4.0F;
 	/** It lies flat at this lean; it never takes longer than this to come down (ticks). */
 	static final float FLAT = 90.0F;
-	static final int LONGEST = 160;
+	static final int LONGEST = 200;
+	/** Down, it lies a moment (ticks) before it breaks apart. */
+	static final int LIES = 14;
 	/** What it strikes where it lands: the most damage, and a share of it per log. */
 	static final float CRUSH_MOST = 10.0F, CRUSH_PER_LOG = 0.6F;
 	/** Of its blocks, every this-many'th log and leaf breaks with a puff and a sound (the rest only a puff of chips). */
@@ -87,6 +89,8 @@ public final class FallingTree extends Entity {
 	/** Client side: the lean last tick, to draw it smoothly between ticks. */
 	public float leanO;
 	private float speed = START_SPEED;
+	/** When it came down (-1: still falling). */
+	private int downAt = -1;
 	private float reach = 2.0F;
 	private int logs;
 	private @Nullable Entity cutter;
@@ -198,6 +202,12 @@ public final class FallingTree extends Entity {
 			this.discard();
 			return;
 		}
+		if (this.downAt >= 0) {
+			if (this.tickCount - this.downAt >= LIES) {
+				this.breakApart(level, pieces);
+			}
+			return;
+		}
 		float lean = this.lean();
 		this.speed += NUDGE + WEIGHT * Mth.sin(lean * Mth.DEG_TO_RAD) / this.reach;
 		float next = Math.min(FLAT, lean + this.speed);
@@ -211,6 +221,7 @@ public final class FallingTree extends Entity {
 			return;
 		}
 		this.land(level, pieces, this.strikes(level, pieces, next) ? lean : next);
+		this.downAt = this.tickCount;
 	}
 
 	/** Whether its wood, leaning {@code lean}, runs into anything solid (beyond its own foot). */
@@ -229,13 +240,40 @@ public final class FallingTree extends Entity {
 		return false;
 	}
 
-	/** It's down: it breaks apart where it lies, giving what it would have; anything under it is struck. */
+	/** It comes down: a thud and a cloud of leaves, and anything under it is struck. */
 	private void land(ServerLevel level, List<Piece> pieces, float lean) {
 		this.entityData.set(LEAN, lean);
 		Quaternionf turn = turn(lean, this.heading());
 		Set<LivingEntity> struck = new HashSet<>();
-		int logCount = 0, leafCount = 0;
 		Vec3 middle = Vec3.ZERO;
+		int count = 0;
+		for (Piece p : pieces) {
+			if (!p.blockState().is(BlockTags.LOGS)) {
+				continue;
+			}
+			Vec3 at = this.where(p, turn);
+			middle = middle.add(at);
+			count++;
+			struck.addAll(level.getEntitiesOfClass(LivingEntity.class, new AABB(BlockPos.containing(at)).inflate(0.3),
+				e -> e.isAlive() && e != this.cutter && !e.isSpectator()));
+		}
+		float crush = Math.min(CRUSH_MOST, 2.0F + CRUSH_PER_LOG * this.logs);
+		DamageSource source = level.damageSources().fallingBlock(this);
+		for (LivingEntity e : struck) {
+			e.hurtServer(level, source, crush);
+		}
+		if (count > 0) {
+			middle = middle.scale(1.0 / count);
+			level.playSound(null, middle.x, middle.y, middle.z, SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.BLOCKS, 1.2F, 0.5F);
+			level.playSound(null, middle.x, middle.y, middle.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 0.4F, 1.7F);
+			level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, middle.x, middle.y, middle.z, 6, 1.5, 0.2, 1.5, 0.01);
+		}
+	}
+
+	/** Lain a moment, it breaks apart where it lies, giving what it would have. */
+	private void breakApart(ServerLevel level, List<Piece> pieces) {
+		Quaternionf turn = turn(this.lean(), this.heading());
+		int logCount = 0, leafCount = 0;
 		for (Piece p : pieces) {
 			BlockState state = p.blockState();
 			Vec3 at = this.where(p, turn);
@@ -253,22 +291,6 @@ public final class FallingTree extends Entity {
 			} else {
 				level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), at.x, at.y, at.z, 3, 0.3, 0.3, 0.3, 0.05);
 			}
-			if (log) {
-				middle = middle.add(at);
-				struck.addAll(level.getEntitiesOfClass(LivingEntity.class, new AABB(pos).inflate(0.3),
-					e -> e.isAlive() && e != this.cutter && !e.isSpectator()));
-			}
-		}
-		float crush = Math.min(CRUSH_MOST, 2.0F + CRUSH_PER_LOG * this.logs);
-		DamageSource source = level.damageSources().fallingBlock(this);
-		for (LivingEntity e : struck) {
-			e.hurtServer(level, source, crush);
-		}
-		if (logCount > 0) {
-			middle = middle.scale(1.0 / logCount);
-			level.playSound(null, middle.x, middle.y, middle.z, SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.BLOCKS, 1.2F, 0.5F);
-			level.playSound(null, middle.x, middle.y, middle.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 0.5F, 1.6F);
-			level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, middle.x, middle.y, middle.z, 6, 1.5, 0.2, 1.5, 0.01);
 		}
 		this.discard();
 	}

@@ -21,6 +21,8 @@ loom {
 	// dev games read commands.txt in the run folder (DevCommands), so a test can drive them from outside
 	runs {
 		configureEach { vmArg "-Djaymoskingdoms.devCommands=true" }
+		// the test game kept small: the PC it runs on is short of memory
+		client { vmArg "-Xmx2560M" }
 	}
 	mods {
 		"jaymoskingdoms" {

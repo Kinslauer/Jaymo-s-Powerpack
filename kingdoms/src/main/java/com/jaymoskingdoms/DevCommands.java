@@ -26,6 +26,48 @@ final class DevCommands {
 			return;
 		}
 		ServerTickEvents.END_SERVER_TICK.register(DevCommands::tick);
+		net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> dispatcher.register(
+			net.minecraft.commands.Commands.literal("kingdomsdev")
+				.then(net.minecraft.commands.Commands.literal("fell").executes(c -> fell(c.getSource().getPlayerOrException(), STAND_OFF)))));
+	}
+
+	/** How far from a tree the tester stands to fell it, and how far round it a tree is looked for. */
+	static final int STAND_OFF = 6, TREE_SEARCH = 40;
+
+	/**
+	 * (0.5.9) {@code /kingdomsdev fell}: the natural tree nearest {@code player} is felled as if they'd cut its foot
+	 * (they're moved {@code off} blocks from it first, looking at it, so it falls away from them).
+	 */
+	private static int fell(net.minecraft.server.level.ServerPlayer player, int off) {
+		net.minecraft.server.level.ServerLevel level = player.level();
+		net.minecraft.core.BlockPos best = null;
+		double bestD = Double.MAX_VALUE;
+		net.minecraft.core.BlockPos me = player.blockPosition();
+		for (net.minecraft.core.BlockPos p : net.minecraft.core.BlockPos.betweenClosed(me.offset(-TREE_SEARCH, -12, -TREE_SEARCH),
+			me.offset(TREE_SEARCH, 20, TREE_SEARCH))) {
+			net.minecraft.world.level.block.state.BlockState s = level.getBlockState(p);
+			if (!s.is(net.minecraft.tags.BlockTags.LOGS) || level.getBlockState(p.below()).is(net.minecraft.tags.BlockTags.LOGS)
+				|| !level.getBlockState(p.below()).isSolid() || !level.getBlockState(p.above()).is(net.minecraft.tags.BlockTags.LOGS)) {
+				continue;
+			}
+			double d = p.distSqr(me);
+			if (d < bestD && Trees.natural(level, p.above(3))) {
+				bestD = d;
+				best = p.immutable();
+			}
+		}
+		if (best == null) {
+			JaymosKingdoms.LOGGER.info("[dev] no tree near {}", me);
+			return 0;
+		}
+		double x = best.getX() + 0.5 - off, z = best.getZ() + 0.5;
+		player.teleportTo(level, x, best.getY(), z, java.util.Set.of(), -90.0F, 10.0F, false);
+		player.setPos(x, best.getY(), z);
+		int logs = Trees.fell(level, best, player, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_AXE), null, false);
+		// then off to the side (south of it), to watch it come down eastward
+		player.teleportTo(level, best.getX() + 3.5, best.getY() + 4.0, best.getZ() + 18.5, java.util.Set.of(), 180.0F, 8.0F, false);
+		JaymosKingdoms.LOGGER.info("[dev] felled the tree at {}: {} logs", best, logs);
+		return logs;
 	}
 
 	private static void tick(MinecraftServer server) {
