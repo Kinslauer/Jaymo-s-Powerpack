@@ -1,0 +1,12 @@
+{
+  "gives": {
+    "id": "jaymospowers:small_blade_cast"
+  },
+  "max_uses": 3,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 10
+  },
+  "xp": 15
+}

@@ -1,0 +1,31 @@
+{
+  "gives": {
+    "id": "jaymospowers:large_plate",
+    "components": {
+      "jaymospowers:part_material": "slimesteel",
+      "minecraft:custom_model_data": {
+        "strings": [
+          "slimesteel"
+        ]
+      },
+      "minecraft:item_name": {
+        "translate": "jaymospowers.tinkering.named",
+        "with": [
+          {
+            "translate": "material.jaymospowers.slimesteel"
+          },
+          {
+            "translate": "item.jaymospowers.large_plate"
+          }
+        ]
+      }
+    }
+  },
+  "max_uses": 2,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 16
+  },
+  "xp": 30
+}

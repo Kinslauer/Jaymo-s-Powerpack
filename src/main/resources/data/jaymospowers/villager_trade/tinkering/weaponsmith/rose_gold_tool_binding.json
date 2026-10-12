@@ -1,0 +1,31 @@
+{
+  "gives": {
+    "id": "jaymospowers:tool_binding",
+    "components": {
+      "jaymospowers:part_material": "rose_gold",
+      "minecraft:custom_model_data": {
+        "strings": [
+          "rose_gold"
+        ]
+      },
+      "minecraft:item_name": {
+        "translate": "jaymospowers.tinkering.named",
+        "with": [
+          {
+            "translate": "material.jaymospowers.rose_gold"
+          },
+          {
+            "translate": "item.jaymospowers.tool_binding"
+          }
+        ]
+      }
+    }
+  },
+  "max_uses": 4,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 5
+  },
+  "xp": 15
+}

@@ -1,5 +1,6 @@
 package com.jaymospowers.tinkering;
 
+import com.jaymospowers.armory.Armory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -63,6 +64,13 @@ public final class TraitEffects {
 	}
 
 	static void init() {
+		// (0.8.76) Armory weapons level up from hits too
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
+			if (damageTaken > 0.0F && source.getEntity() instanceof ServerPlayer player && source.getDirectEntity() == player
+				&& Armory.isWeapon(player.getMainHandItem())) {
+				gainXp(player.getMainHandItem(), player, XP_PER_HIT);
+			}
+		});
 		AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) -> {
 			FACES.put(player.getUUID(), direction);
 			return InteractionResult.PASS;
@@ -159,7 +167,7 @@ public final class TraitEffects {
 
 	/** Use earns a tool xp; each level it reaches gives it another modifier slot. */
 	private static void gainXp(ItemStack stack, LivingEntity owner, int amount) {
-		if (!(owner instanceof ServerPlayer player) || !(stack.getItem() instanceof TinkerToolItem)) {
+		if (!(owner instanceof ServerPlayer player) || !Modifier.takes(stack)) {
 			return;
 		}
 		int before = Modifier.xp(stack);
