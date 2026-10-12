@@ -403,3 +403,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     elastic: the movement keys lean you up to 1.4 blocks away, the cracks deepen with the strain, and they haul you
     back when you let go. Jump kicks off, the grab again lets go, and so does any other radial ability. The two
     shoulder tendrils stay free: R grabs and Shift+G tears a chunk while you hang there, even without Living Armor.
+- **0.8.68, Overhauled Overworld:** adds William Wythers' Overhauled Overworld 3.0.1 and Cristel Lib 3.1.13 to the
+  pack. Every vanilla biome is redecorated (new trees, undergrowth, boulders, sub-biome patches) but keeps its id, and
+  the terrain and biome map are untouched, so Epic villages (kingdom capitals), Grim and ATi ruins, Moog's roads and
+  Kingdoms' biome checks all work as before. Cristel Lib is no longer swept out of the profile with Towns and Towers.

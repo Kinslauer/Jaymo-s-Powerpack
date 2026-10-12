@@ -79,6 +79,11 @@ def packMods = [
 	// Epic Structures: Dungeons (all rights reserved; "feel free to add to any modpack"): plains, desert and snowy
 	// dungeons of several sizes, vanilla blocks, mobs and loot (structure ids epic:*)
 	[dep: "maven.modrinth:epic-structures-dungeons:NK6Uptyi", cf: [1501318, 8984101]],
+	// William Wythers' Overhauled Overworld (CC BY-NC-ND 4.0; shipped unchanged, downloaded by id) and its library Cristel
+	// Lib (same licence): every vanilla biome redecorated (trees, foliage, rocks, sub-biomes) under its vanilla id, so
+	// the terrain shape, the biome map and every structure's biome tags stay as they were. Server-side worldgen.
+	[dep: "maven.modrinth:wwoo:23VeM3qz", cf: [921022, 8894114]],
+	[dep: "maven.modrinth:cristel-lib:rWxmPrGC", cf: [856996, 8921504]],
 	// Distant Horizons (LGPL-3.0): far-off terrain drawn as simplified chunks, for a much longer view than the render
 	// distance. Back in 0.8.56 from its Modrinth maven (it was a libs/ jar until 0.4.5). The server builds the far chunks
 	// and sends them to players. dev: false keeps it out of the dev game (too heavy for quick tests).
@@ -134,10 +139,10 @@ def packResourcePacks = [
 	[cf: [667175, 8868890], file: "MCAR_VanillaMedieval_Universal_7.7.36-beta.3+1.21.1.zip"],
 ]
 // mods taken out of the pack: moved out of your CurseForge profile's mods folder (into removed-mods) on the next build
-// (Towns and Towers left in 0.8.4: its villages fought Epic Structures: Villages, where kingdoms are founded;
-// Traveler's Backpack and Forge Config API Port left in 0.8.14)
-def removedFromProfile = ["t_and_t-", "towns-and-towers-", "cristellib-", "cristel-lib-",
-	"travelersbackpack-", "forge-config-api-port-"]
+// (Towns and Towers left in 0.8.4: its villages fought Epic Structures: Villages, where kingdoms are founded; its
+// library Cristel Lib came back in 0.8.68 for Overhauled Overworld. Traveler's Backpack and Forge Config API Port left
+// in 0.8.14)
+def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-", "forge-config-api-port-"]
 // a jar's Fabric mod id (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's
 def modId = { File jar ->
 	try {
