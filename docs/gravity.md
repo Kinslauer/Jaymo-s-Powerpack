@@ -110,6 +110,21 @@ A Gravity user lightens whatever they hold, at every mastery level (`GravityWeig
   the impact sets alight only 4 blocks around (was 10), fewer flames and lava drops. The symbiote now rides in one of
   the lumps and comes out (or is left as goo) when it breaks up; `WebSymbioteBlob.METEOR_CHANCE` is 10% (was 20%).
 
+## 0.8.35: The Well around you, B to launch, the meteor through roofs, the shoulder view
+- **Gravity Well (G)** is no longer aimed: it bursts out around you (the same bubble and risen lumps, from where you
+  stand) and stays on you for 4 s, radius 8 (`WELL_RADIUS`, the bubble's size). It no longer pulls. Everything that
+  touches it is weighed down (the heavy aura's weight, jump cut and Slowness, see `weighDown`) and kneels.
+- **B while your Well is up** launches you straight up about 14 blocks (`WELL_LAUNCH_HEIGHT`, worked out from your
+  own gravity so Collapse's weight doesn't shorten it), once per Well, instead of a Crush. Falls still hurt. The old
+  G+B Cave-in (and Collapsing Horizon's ring raining from it) is gone.
+- **Meteor (C)** tears through every breakable block it passes on the way down (`GravityMeteor.carve`: 0.8 of its
+  width, at most 7 blocks from its middle, 600 blocks a tick, 10% drop as items), so a roof it falls through is
+  gone before the impact blast.
+- **Shoulder view (Web and Gravity)**: F5 flips between first person and an over-the-shoulder third person (2.6
+  blocks back, 0.7 right, 0.15 up, pulled in by walls) with the crosshair shown; the front-facing view is skipped
+  (`client/ShoulderCamera` and the `Shoulder*` mixins in `jaymospowers.client.mixins.json`). Other powers keep
+  vanilla's views.
+
 ## Testing
 - `/power set @s gravity`
 - `/powerdebug gravity ready` clears every cooldown.

@@ -324,3 +324,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.8.27, Wind balance:** a Wind mode (Z) eats a full hunger bar in about 2 minutes (`WindModes.MODE_EXHAUSTION`
   0.01 → 0.04 a tick; the Thunderhead's 0.025 → 0.05), and Cyclone Lance (C) hits for 3 hearts, up to 6 in a
   thunderstorm, instead of 7 to 9 (`WindTempest.LANCE_DAMAGE` 14 → 6, `LANCE_DAMAGE_MAX` 12).
+- **0.8.35, Gravity's Well around you, and the shoulder view:** G is no longer aimed: the bubble bursts out around
+  you and stays on you 4 s, weighing down and kneeling everything that touches it (no pull). B while it's up
+  launches you about 14 blocks straight up (the Cave-in is gone). The meteor tears through roofs and anything else
+  it falls through before it explodes. With Web or Gravity, F5 flips between first person and an over-the-shoulder
+  view with the crosshair (no front view). See `docs/gravity.md`.
