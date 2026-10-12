@@ -93,6 +93,13 @@ public final class WebSwing {
 	 */
 	static final double WINGS_GRAVITY = 0.08;
 	static final double WINGS_MAX_SPEED = 2.0;
+	/**
+	 * Airbrake: hold Sneak while gliding to flare the wings. Speed kept per tick ({@code BRAKE_DRAG}), and the fall
+	 * eases toward {@code BRAKE_SINK} (blocks/tick) at {@code BRAKE_CATCH} a tick, like a parachute catching.
+	 */
+	static final double BRAKE_DRAG = 0.86;
+	static final double BRAKE_SINK = 0.2;
+	static final double BRAKE_CATCH = 0.3;
 	// ===== zip / yank-to ===========================================================================================
 	/** How quickly the reel-in steers your velocity onto the line (0..1 per tick). */
 	static final double ZIP_STEER = 0.55;
@@ -149,6 +156,8 @@ public final class WebSwing {
 	private int swingLockout;
 	// wings
 	int wingsTicks;
+	/** Sneak is held while gliding: the wings are flared to airbrake. */
+	boolean braking;
 	/** Jump has been let go since the wings spread (the next press folds them). */
 	private boolean wingsJumpReleased;
 	private int jumpHeldAir;
@@ -176,6 +185,7 @@ public final class WebSwing {
 			ClientPlayNetworking.send(new WebNet.Wings(false));
 		}
 		wingsTicks = 0;
+		braking = false;
 		wingsNeedRelease = false;
 		swingLockout = 0;
 		tricks.reset();
@@ -785,6 +795,21 @@ public final class WebSwing {
 			m = m.add((look.x / lookHorizontal * moveHorizontal - m.x) * 0.1, 0.0, (look.z / lookHorizontal * moveHorizontal - m.z) * 0.1);
 		}
 		m = m.multiply(0.99, 0.98, 0.99);
+		boolean brake = player.input.keyPresses.shift();
+		if (brake != braking) {
+			braking = brake;
+			ClientPlayNetworking.send(new WebNet.WingsBrake(brake));
+			if (brake) {
+				play(player, SoundEvents.PHANTOM_FLAP, 0.7F, 0.9F);
+			}
+		}
+		if (brake) {
+			// flared: the wings catch the air, bleeding speed and slowing the fall
+			m = m.multiply(BRAKE_DRAG, 1.0, BRAKE_DRAG);
+			if (m.y < -BRAKE_SINK) {
+				m = new Vec3(m.x, Mth.lerp(BRAKE_CATCH, m.y, -BRAKE_SINK), m.z);
+			}
+		}
 		if (m.length() > WINGS_MAX_SPEED) {
 			m = m.normalize().scale(WINGS_MAX_SPEED);
 		}
@@ -797,6 +822,7 @@ public final class WebSwing {
 	private void foldWings() {
 		if (wingsTicks > 0) {
 			wingsTicks = 0;
+			braking = false;
 			// no cooldown, but let go of Jump and fall another couple of blocks before they open again
 			wingsNeedRelease = true;
 			apexY = player().getY();
