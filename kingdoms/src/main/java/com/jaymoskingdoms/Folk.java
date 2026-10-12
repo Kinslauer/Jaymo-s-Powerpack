@@ -457,6 +457,9 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		} else if (Gatherers.isGatherer(this.role())) {
 			Gatherers.tick(level, this);
 		}
+		// (0.5.12) javelins at a foe out of reach; attackers fight harder, break through and burn
+		Javelins.tick(level, this);
+		Assault.tick(level, this);
 		if (this.leader() && !this.rallied && this.getHealth() <= this.getMaxHealth() * RALLY_AT) {
 			// his second wind: he rallies, and calls his guards in
 			this.rallied = true;

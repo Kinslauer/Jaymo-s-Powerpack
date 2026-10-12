@@ -102,7 +102,7 @@ public final class Royals {
 			}
 			// out by day (unless he's too few guards to dare it); by night, or kept in, only to get home
 			Faction faction = Factions.get(level.getServer(), this.king.factionId());
-			boolean out = daytime(level) && faction != null && !Wardens.confined(level, faction, this.king);
+			boolean out = daytime(level) && faction != null && !Wardens.confined(level, faction, this.king) && Tempers.staysOut(level, faction);
 			return out || this.out || this.king.distanceToSqr(Vec3.atBottomCenterOf(keep.throne())) > 4.0;
 		}
 
@@ -131,7 +131,7 @@ public final class Royals {
 				return;
 			}
 			long now = level.getGameTime();
-			if (daytime(level) && !Wardens.confined(level, faction, this.king)) {
+			if (daytime(level) && !Wardens.confined(level, faction, this.king) && Tempers.staysOut(level, faction)) {
 				if (!this.out) {
 					this.setOut(level, faction, keep);
 				}
@@ -231,6 +231,10 @@ public final class Royals {
 			Villager v = level.getEntitiesOfClass(Villager.class, this.king.getBoundingBox().inflate(GREET_RANGE), x -> x.isAlive()).stream()
 				.min(Comparator.comparingDouble(x -> x.distanceToSqr(this.king))).orElse(null);
 			if (v == null) {
+				return;
+			}
+			// (0.5.12) as his temper has it
+			if (Tempers.meet(level, this.king, v)) {
 				return;
 			}
 			this.king.getLookControl().setLookAt(v, 30.0F, 30.0F);
