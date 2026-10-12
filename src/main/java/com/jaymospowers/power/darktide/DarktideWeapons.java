@@ -23,7 +23,7 @@ public final class DarktideWeapons {
 
 	/** Balkon's tiers, weakest to strongest (fallbacks step down this list). */
 	static final String[] TIERS = {"wood", "gold", "stone", "copper", "iron", "diamond", "netherite"};
-	/** The tier Tide Arms conjures from bare hands (or when a tier has no blade of the other kind). */
+	/** The last fallback when a tier has no blade of the other kind. */
 	static final String DEFAULT_TIER = "iron";
 
 	private static final boolean LOADED = FabricLoader.getInstance().isModLoaded(ArsenalPool.WEAPON_MOD);
@@ -83,6 +83,11 @@ public final class DarktideWeapons {
 		String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
 		int dot = path.indexOf('.');
 		return dot < 0 || dot == path.length() - 1 ? null : path.substring(dot + 1);
+	}
+
+	/** How strong a tier is (its place in {@link #TIERS}; -1 for an unknown one or null). */
+	static int tierRank(@Nullable String tier) {
+		return tier == null ? -1 : java.util.Arrays.asList(TIERS).indexOf(tier);
 	}
 
 	/**

@@ -44,8 +44,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * C and Z. Ascended: sneak + C <b>Tide Arms</b> (bare hands → twin daggers → katana of dark water; a real knife → a
- * katana of its tier, a real katana → twin daggers of its tier; your real items are stored and come back). While corrupted, Z on a Jaymo's Kitchen corpse takes its shadow; ascended, <b>Necromancy</b>: tap C
+ * C and Z. Ascended: sneak + C <b>Tide Arms</b> (bare hands draw your own best blade; a real knife → a katana of dark
+ * water of its tier, a real katana → twin daggers of its tier; your real items are stored and come back). While corrupted, Z on a Jaymo's Kitchen corpse takes its shadow; ascended, <b>Necromancy</b>: tap C
  * to raise one, which follows and defends you until the corruption lifts. Corrupted, not ascended: C is <b>Drown</b>, a
  * sphere of water around a target.
  */
@@ -186,8 +186,20 @@ final class DarktideTide {
 			return;
 		}
 		Inventory inventory = player.getInventory();
+		if (live.arms == DarktideState.ARMS_BARE) {
+			ItemStack held = player.getItemInHand(InteractionHand.MAIN_HAND);
+			if (held.isEmpty()) {
+				// bare hands: draw your own best blade into your hand first
+				drawBlade(player, live);
+				return;
+			}
+			if (!DarktideWeapons.isKnife(held) && !DarktideWeapons.isKatana(held)) {
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.arms_need_blade").withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
+				return;
+			}
+		}
 		// the real blade in hand sets the tier and the other kind comes first: a knife becomes a katana, a katana twin
-		// daggers, and the next press breaks it back down into what you held; bare hands go daggers, katana, bare
+		// daggers, and the next press breaks it back down into what you held
 		ItemStack original = live.arms == DarktideState.ARMS_BARE ? player.getItemInHand(InteractionHand.MAIN_HAND) : stored(player).get(0);
 		String tier = DarktideWeapons.tierOf(original);
 		int next;
@@ -235,6 +247,45 @@ final class DarktideTide {
 			level.sendParticles(new DustParticleOptions(0x0A1838, 1.4F), at.x, at.y, at.z, 16, 0.2, 0.3, 0.2, 0.0);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BUCKET_EMPTY, SoundSource.PLAYERS, 0.8F, 1.3F);
 		}
+	}
+
+	/**
+	 * Bare hands: your own Balkon katana or knife (hotbar first, then the rest of the inventory; the highest tier among
+	 * several) is moved into the selected slot. With none, only a hint.
+	 */
+	private static void drawBlade(ServerPlayer player, DarktideLive live) {
+		Inventory inventory = player.getInventory();
+		int selected = inventory.getSelectedSlot();
+		int best = -1;
+		int bestRank = Integer.MIN_VALUE;
+		for (int pass = 0; pass < 2 && best < 0; pass++) {
+			int from = pass == 0 ? 0 : Inventory.SELECTION_SIZE;
+			int to = pass == 0 ? Inventory.SELECTION_SIZE : Inventory.INVENTORY_SIZE;
+			for (int slot = from; slot < to; slot++) {
+				ItemStack stack = inventory.getItem(slot);
+				if (slot == selected || conjured(stack, player) || !DarktideWeapons.isKatana(stack) && !DarktideWeapons.isKnife(stack)) {
+					continue;
+				}
+				int rank = DarktideWeapons.tierRank(DarktideWeapons.tierOf(stack));
+				if (rank > bestRank) {
+					bestRank = rank;
+					best = slot;
+				}
+			}
+		}
+		if (best < 0) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.arms_no_blade").withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
+			return;
+		}
+		ServerLevel level = player.level();
+		ItemStack blade = inventory.getItem(best);
+		inventory.setItem(best, ItemStack.EMPTY);
+		inventory.setItem(selected, blade);
+		live.armsSwapAt = level.getGameTime() + ARMS_SWAP_COOLDOWN;
+		DarktidePower.cooldown(player, DarktideState.ARMS, ARMS_SWAP_COOLDOWN);
+		DarktideMove.play(player, DarktideMove.CAST, DarktideMove.CAST_TICKS, 3);
+		level.sendParticles(ParticleTypes.SPLASH, player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.3, 0.3, 0.3, 0.1);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_IRON.value(), SoundSource.PLAYERS, 0.8F, 1.2F);
 	}
 
 	private static void removeConjured(ServerPlayer player) {
