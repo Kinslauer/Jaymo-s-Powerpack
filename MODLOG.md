@@ -340,3 +340,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   toward fall damage. Everyone sees the Sands of Time run (`WebWallRunPose`): feet on the wall, body slanted out
   and pitched into the run, long pumping strides, the wall-side hand skimming the wall, the outer arm swinging.
   Numbers at the top of `power/web/WebWallRun`; the client side is `WebWallRunClient`.
+- **0.8.52, carrying blocks:** anyone can sneak + right-click a block a player placed, with empty hands, to lift it
+  out of the world and carry it in both arms, like a body: right-click sets it down ahead of you, sneak + right-click
+  throws it, and it lands as a falling block (or breaks into its item if it can't stand where it lands, spilling
+  whatever was in it). Chests, furnaces and the like come along with their contents. It slows you a little (none
+  for Gravity users). Natural terrain never counts: placed blocks are remembered per chunk (`CarryBlock.PLACED`,
+  from `CarryBlockItemMixin`). Not liftable: two-part blocks (doors, beds, tall flowers, double chests), liquids,
+  unbreakable blocks, grass/fire, or a spot you couldn't break. `core/CarryBlock`; the block rides as a tagged
+  display, and a stray one (crash mid-carry) falls back into the world on load.

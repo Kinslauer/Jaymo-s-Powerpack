@@ -71,16 +71,20 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * A Gravity user ({@link GravityWeight}) carries any mob but a boss, with no slowdown; one too big for the arms goes up
  * {@link #OVERHEAD}. A carried mob's AI is on hold ({@code GravityCarriedMobMixin}).
+ * <p>
+ * Single blocks can be carried too, held in front in both arms ({@link #BLOCK}, see {@link CarryBlock}).
  */
 public final class Carry {
 	/** The holds: over one shoulder, across both arms, held up by the shoulder at your side, slung over your back. */
 	public static final int FIREMAN = 0, BRIDAL = 1, SHOULDER = 2, BACK = 3;
 	/** Gravity only: a big mob held up above the head, weightless. Never rolled; kept through take-off and landing. */
 	public static final int OVERHEAD = 4;
+	/** A block ({@link CarryBlock}) held in both arms in front. Never rolled, and kept through take-off and landing. */
+	public static final int BLOCK = 5;
 	/** On foot only the first two are rolled; in flight any of the four. */
 	public static final int FOOT_HOLDS = 2, FLIGHT_HOLDS = 4;
 	/** Weight: the carrier walks this much slower (share of their speed) with a person, or with a small animal. */
-	static final double PLAYER_WEIGHT = 0.15, ANIMAL_WEIGHT = 0.05;
+	static final double PLAYER_WEIGHT = 0.15, ANIMAL_WEIGHT = 0.05, BLOCK_WEIGHT = 0.12;
 	/** A Wind user flying with someone: top speed × {@code FLIGHT_SPEED}, flight hunger × {@code FLIGHT_HUNGER}. */
 	public static final double FLIGHT_SPEED = 0.8;
 	public static final float FLIGHT_HUNGER = 1.3F;
@@ -112,6 +116,7 @@ public final class Carry {
 		{0.8, -0.2, 0.0},
 		{0.0, 0.3, -0.6},
 		{0.0, 1.4, 0.7},
+		{0.0, 0.6, 1.25},
 	};
 	/** Overhead, it's let go this much further ahead per block of its width, so it clears you. */
 	static final double OVERHEAD_RELEASE_PER_WIDTH = 0.5;
@@ -229,6 +234,7 @@ public final class Carry {
 		PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> !isCarried(player));
 		ServerTickEvents.END_SERVER_TICK.register(Carry::tick);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> clear());
+		CarryBlock.init();
 	}
 
 	// ---- queries (both sides, from the synced attachments)
@@ -357,12 +363,13 @@ public final class Carry {
 		return InteractionResult.SUCCESS;
 	}
 
-	private static void pickUp(ServerPlayer carrier, Entity target) {
+	static void pickUp(ServerPlayer carrier, Entity target) {
 		boolean flying = flying(carrier);
 		boolean light = GravityWeight.lightens(carrier);
-		boolean overhead = light && GravityWeight.overhead(target);
-		int hold = overhead ? OVERHEAD : carrier.getRandom().nextInt(flying ? FLIGHT_HOLDS : FOOT_HOLDS);
-		Entry entry = new Entry(carrier.getUUID(), target, hold, flying, carrier.position(), !canBeCarried(target));
+		boolean block = CarryBlock.is(target);
+		boolean overhead = light && !block && GravityWeight.overhead(target);
+		int hold = block ? BLOCK : overhead ? OVERHEAD : carrier.getRandom().nextInt(flying ? FLIGHT_HOLDS : FOOT_HOLDS);
+		Entry entry = new Entry(carrier.getUUID(), target, hold, flying, carrier.position(), !block && !canBeCarried(target));
 		CARRIES.put(carrier.getUUID(), entry);
 		carrier.setAttached(CARRYING, new Carrying(target.getId(), hold));
 		target.setAttached(CARRIED_BY, carrier.getId());
@@ -377,12 +384,13 @@ public final class Carry {
 			mob.getNavigation().stop();
 			mob.setTarget(null);
 		}
-		carrier.sendOverlayMessage(Component.translatable(overhead ? "message.jaymospowers.carry.lifting" : "message.jaymospowers.carry.carrying")
+		carrier.sendOverlayMessage(Component.translatable(block ? "message.jaymospowers.carry.block"
+			: overhead ? "message.jaymospowers.carry.lifting" : "message.jaymospowers.carry.carrying")
 			.withStyle(ChatFormatting.GRAY));
 		AttributeInstance speed = carrier.getAttribute(Attributes.MOVEMENT_SPEED);
 		// a Gravity user feels no weight at all
 		if (speed != null && !light) {
-			speed.addOrUpdateTransientModifier(new AttributeModifier(WEIGHT_ID, -(target instanceof Player ? PLAYER_WEIGHT : ANIMAL_WEIGHT),
+			speed.addOrUpdateTransientModifier(new AttributeModifier(WEIGHT_ID, -(target instanceof Player ? PLAYER_WEIGHT : block ? BLOCK_WEIGHT : ANIMAL_WEIGHT),
 				AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 		}
 		ServerLevel level = carrier.level();
@@ -483,7 +491,10 @@ public final class Carry {
 			carried.setAttached(THROWN, now);
 		}
 		carried.resetFallDistance();
-		if (carried instanceof ServerPlayer player) {
+		if (CarryBlock.is(carried)) {
+			// it goes back into the world as a falling block, ahead of the carrier
+			at = CarryBlock.land(level, carried, carrier != null && carrier.level() == level && how != Let.SET_DOWN ? carrier : null, velocity);
+		} else if (carried instanceof ServerPlayer player) {
 			GRACE.put(player.getUUID(), now + RELEASE_GRACE_TICKS);
 			ServerPlayNetworking.send(player, new Self(-1));
 			player.connection.teleport(new PositionMoveRotation(at, velocity, player.getYRot(), player.getXRot()), Set.of());
@@ -559,7 +570,7 @@ public final class Carry {
 		}
 		// take off and every hold is open (a new roll); land with a flight-only hold and it shifts to one for walking
 		boolean flying = flying(carrier);
-		if (flying != entry.flying && entry.hold != OVERHEAD) {
+		if (flying != entry.flying && entry.hold != OVERHEAD && entry.hold != BLOCK) {
 			entry.flying = flying;
 			if (flying) {
 				entry.hold = carrier.getRandom().nextInt(FLIGHT_HOLDS);
