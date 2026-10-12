@@ -1480,7 +1480,7 @@ rebuilt here; none of its code or art is used.
 - Seen in game (dev server + client): a 17-log oak narrowed at its foot chop by chop, the chops moved up the trunk, and it
   fell and broke into wood on the 11th. Not yet seen: woodcutters chopping.
 
-## 0.5.26: rickshaws (pullers carry goods and people)
+## 0.5.27: rickshaws (pullers carry goods and people)
 Andy asked for villagers who rickshaw goods and people about the villages and kingdoms. A rickshaw is a third kind of
 `Wagon` (`Wagon.RICKSHAW`), hitched to a person instead of a horse; the work is `Rickshaws`.
 - **Pullers** (`Folk.PULLER`, the `jaymoskingdoms:puller` profession, a "Rickshaw puller" button on MCA's Professions

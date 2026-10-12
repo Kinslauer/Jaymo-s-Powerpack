@@ -69,7 +69,7 @@ final class Carriages {
 		return found.isEmpty() ? null : found.getFirst();
 	}
 
-	/** The carriage {@code king} sits in (or, 0.5.26, the rickshaw), or null. */
+	/** The carriage {@code king} sits in (or, 0.5.27, the rickshaw), or null. */
 	static @Nullable Wagon seat(Folk king) {
 		return king.getVehicle() instanceof Wagon w && (w.kind() == Wagon.CARRIAGE || w.kind() == Wagon.RICKSHAW) ? w : null;
 	}
@@ -78,7 +78,7 @@ final class Carriages {
 		return seat(king) != null;
 	}
 
-	/** Its coachman (in its horse's saddle), or a rickshaw's puller (0.5.26), or null. */
+	/** Its coachman (in its horse's saddle), or a rickshaw's puller (0.5.27), or null. */
 	static @Nullable PathfinderMob coachman(Wagon carriage) {
 		if (carriage.kind() == Wagon.RICKSHAW) {
 			return Rickshaws.puller(carriage);

@@ -59,7 +59,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	public static final int MINER = 9, WOODCUTTER = 10;
 	/** (0.5.14) A fiefdom's carter (a caravan's) or a king's coachman ({@link Caravans}, {@link Carriages}). */
 	public static final int CARTER = 11;
-	/** (0.5.26) A settlement's rickshaw puller: hauls its gatherers' loads, runs errands, carries its people and paying players ({@link Rickshaws}). */
+	/** (0.5.27) A settlement's rickshaw puller: hauls its gatherers' loads, runs errands, carries its people and paying players ({@link Rickshaws}). */
 	public static final int PULLER = 12;
 
 	/**

@@ -44,7 +44,7 @@ import org.jspecify.annotations.Nullable;
  * trailer does. It doesn't block anyone; a player can strike it (a cart broken open spills its load: robbing a
  * caravan, {@link Caravans#robbed}) or right-click it to see what it carries.
  * <p>
- * (0.5.26) Or a settlement's {@link #RICKSHAW}: two wheels, a seat under a hood in its colours and a rack behind, its
+ * (0.5.27) Or a settlement's {@link #RICKSHAW}: two wheels, a seat under a hood in its colours and a rack behind, its
  * shafts held by one of its people on foot ({@link Rickshaws}) instead of a horse. It carries a load ({@link #cargo()},
  * kept here) or a passenger; right-clicked, its puller offers a player a ride.
  */
@@ -73,7 +73,7 @@ public final class Wagon extends Entity {
 	private float damage;
 	private int horseLost;
 	private @Nullable Entity horseCache;
-	/** (0.5.26) A rickshaw's load; set down for the night (it stays put); the settlement a player's riding to (-1: none). */
+	/** (0.5.27) A rickshaw's load; set down for the night (it stays put); the settlement a player's riding to (-1: none). */
 	private final List<ItemStack> cargo = new ArrayList<>();
 	private boolean parked;
 	private int ride = -1;
@@ -171,7 +171,7 @@ public final class Wagon extends Entity {
 		};
 	}
 
-	// ---- a rickshaw's (0.5.26) ----------------------------------------------------------------------------------------
+	// ---- a rickshaw's (0.5.27) ----------------------------------------------------------------------------------------
 
 	List<ItemStack> cargo() {
 		return this.cargo;

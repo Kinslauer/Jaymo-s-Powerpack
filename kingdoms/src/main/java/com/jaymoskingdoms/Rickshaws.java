@@ -34,7 +34,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.26) A settlement's rickshaw pullers ({@link Folk#PULLER}): one of its people (with MCA, one of its villagers,
+ * (0.5.27) A settlement's rickshaw pullers ({@link Folk#PULLER}): one of its people (with MCA, one of its villagers,
  * promoted the MCA way) between the shafts of a two-wheeled {@link Wagon#RICKSHAW}. They wait at the rank by the bell
  * and, by day:
  * <ul>

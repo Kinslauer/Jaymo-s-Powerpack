@@ -30,7 +30,7 @@ import net.minecraft.world.phys.AABB;
  * the windows, a roof and cushion in his colour, gilt edges, lanterns, big wheels behind and small ones in front). Its
  * wheels turn with the ground it covers. Original, no other mod's model.
  * <p>
- * (0.5.26) A rickshaw: two tall wheels under a bench seat, a folding hood in the settlement's colour, a footboard, a
+ * (0.5.27) A rickshaw: two tall wheels under a bench seat, a folding hood in the settlement's colour, a footboard, a
  * rack behind for its load, and long shafts out to its puller's hands.
  */
 public final class WagonRenderer extends EntityRenderer<Wagon, WagonRenderer.State> {
