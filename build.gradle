@@ -80,7 +80,7 @@ def packMods = [
 	// dungeons of several sizes, vanilla blocks, mobs and loot (structure ids epic:*)
 	[dep: "maven.modrinth:epic-structures-dungeons:NK6Uptyi", cf: [1501318, 8984101]],
 	// Distant Horizons (LGPL-3.0): far-off terrain drawn as simplified chunks, for a much longer view than the render
-	// distance. Back in 0.8.53 from its Modrinth maven (it was a libs/ jar until 0.4.5). The server builds the far chunks
+	// distance. Back in 0.8.56 from its Modrinth maven (it was a libs/ jar until 0.4.5). The server builds the far chunks
 	// and sends them to players. dev: false keeps it out of the dev game (too heavy for quick tests).
 	[dep: "maven.modrinth:distanthorizons:TGgEbP9A", cf: [508933, 9005667], dev: false],
 	// Iris Shaders (LGPL-3.0): shader packs (Options > Video Settings > Shader Packs); built on the pack's Sodium, and
@@ -122,7 +122,7 @@ def kingdomsJar = fileTree(kingdomsLibs) { include "jaymos-kingdoms-${kingdomsPr
 // on CurseForge but not on a maven we use: the jar sits in libs/ (git-ignored, copied from the Jaymo's Kitchen
 // profile) and the CurseForge import downloads it by id. Not loaded in the dev game (too heavy for quick tests).
 def localPackMods = [
-	// (none right now; Distant Horizons was here until 0.4.5, and is in packMods since 0.8.53)
+	// (none right now; Distant Horizons was here until 0.4.5, and is in packMods since 0.8.56)
 ]
 // mods taken out of the pack: moved out of your CurseForge profile's mods folder (into removed-mods) on the next build
 // (Towns and Towers left in 0.8.4: its villages fought Epic Structures: Villages, where kingdoms are founded;

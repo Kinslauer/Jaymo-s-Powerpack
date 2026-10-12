@@ -641,3 +641,8 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
 
 ## 0.4.25: grinding stone down to sand
 - **Grindstones grind rock** (`MachineRecipes.GRIND`, hand grindstone and horse mill alike): stone or cobblestone makes 1 gravel, and gravel makes 1 sand.
+
+## 0.4.27: iron golem corpses are heavy
+- **New tag `jaymoskitchen:heavy_corpses`** (iron golems; `CorpseEntity.isHeavy`). A heavy corpse can't be carried or pocketed by hand ("Solid iron: far too heavy to lift.") and can't be butchered: an axe gets "Solid iron: there's nothing to butcher.", and `butcher` does nothing for it. It can still be searched.
+- A power can still take one through `takeBy`; Jaymo's Powers lets only Gravity's Lift do that.
+- **It doesn't burn and doesn't rot** (`CorpseEntity.burns()` is false for heavy corpses, so fire, lava and flint and steel don't take it). Searched, it drops its loot and **falls apart** (`CRUMBLING`, synced; `CRUMBLE_TICKS` 50): iron-block chips crack off with clanks every 8 ticks while it shudders, slumps flatter and sinks into the ground (`CorpseRenderer`), then a last burst, the golem's death sound and an anvil thud, and it's gone. Left unsearched for 10 minutes, it falls apart the same way with its loot.

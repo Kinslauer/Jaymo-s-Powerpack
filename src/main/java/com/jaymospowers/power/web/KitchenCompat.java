@@ -36,8 +36,24 @@ public final class KitchenCompat {
 	 * carrying it. Kitchen's own {@code takeBy} pockets small corpses, so its arms-carry is reached directly.
 	 */
 	static boolean carry(Player player, Entity corpse) {
-		return LOADED && Kitchen.carry(player, corpse);
+		return LOADED && !isHeavy(corpse) && Kitchen.carry(player, corpse);
 	}
+
+	/**
+	 * Kitchen's heavy corpses (an iron golem's): only Gravity can lift one ({@link #take}); tendrils can't grab it and
+	 * nothing butchers it.
+	 */
+	public static boolean isHeavy(Entity entity) {
+		return LOADED && heavy(Kitchen.sourceType(entity));
+	}
+
+	/** A creature whose corpse would be too heavy to lift (also true for the living one: an iron golem). */
+	static boolean heavy(net.minecraft.world.entity.@Nullable EntityType<?> type) {
+		return type != null && type.builtInRegistryHolder().is(HEAVY_CORPSES);
+	}
+
+	private static final net.minecraft.tags.TagKey<net.minecraft.world.entity.EntityType<?>> HEAVY_CORPSES = net.minecraft.tags.TagKey.create(
+		net.minecraft.core.registries.Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymoskitchen", "heavy_corpses"));
 
 	/** Someone (anyone) is carrying this corpse right now. */
 	static boolean isCarried(Entity entity) {
@@ -84,7 +100,7 @@ public final class KitchenCompat {
 	 * rough job, about half its loot. Returns whether it was.
 	 */
 	static boolean butcherRough(Entity entity) {
-		return LOADED && Kitchen.butcherRough(entity);
+		return LOADED && !isHeavy(entity) && Kitchen.butcherRough(entity);
 	}
 
 	/** Only touched when Jaymo's Kitchen is loaded. */

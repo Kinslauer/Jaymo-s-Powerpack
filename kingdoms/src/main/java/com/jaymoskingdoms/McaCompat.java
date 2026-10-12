@@ -11,6 +11,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.npc.villager.Villager;
+import java.util.List;
+import java.util.function.Predicate;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -24,6 +29,9 @@ import org.jspecify.annotations.Nullable;
  * {@code McaTasksMixin}). Monarch stays MCA's own crown to earn.</li>
  * <li>A village's elder keeps their own name (an MCA villager's name is who they are; renaming one renames them in
  * the family tree too).</li>
+ * <li>(0.5.21) A realm's workers (builders, farmers, miners, woodcutters) are its MCA villagers, promoted where they
+ * stand ({@link #enlist}) or through MCA's Professions menu ({@link #promote}); its old {@link Folk} workers become
+ * villagers ({@link #becomeVillager}). See {@link Workers}.</li>
  * </ul>
  * Everything that names an MCA class is in {@link McaBridge}, which is only touched while MCA is {@link #LOADED}.
  */
@@ -118,6 +126,70 @@ public final class McaCompat {
 	/** Whether {@code villager} keeps their own name on becoming an elder (MCA's villagers do). */
 	static boolean keepsOwnName(Villager villager) {
 		return LOADED && McaBridge.isMca(villager);
+	}
+
+	/** Tells MCA about the workers' professions (they're kept: not traded with, not made guards, not lost). */
+	static void register() {
+		if (LOADED) {
+			McaBridge.register();
+		}
+	}
+
+	/** One of {@code f}'s MCA villagers made its {@code role} (or a new one who moves in, if none can be spared); null without MCA. */
+	static @Nullable Worker enlist(ServerLevel level, Faction f, int role, BlockPos at, BlockPos home, int radius) {
+		return LOADED ? McaBridge.enlist(level, f, role, at, home, radius) : null;
+	}
+
+	/** The MCA villagers in {@code box} who are workers and pass {@code test}. */
+	static List<Worker> workers(ServerLevel level, AABB box, Predicate<Worker> test) {
+		return LOADED ? McaBridge.workers(level, box, test) : List.of();
+	}
+
+	/** Squares a villager's job with its profession (taken on, or let go); true if it's a worker now. */
+	static boolean reconcile(ServerLevel level, Worker w) {
+		return LOADED && McaBridge.reconcile(level, w);
+	}
+
+	/** Someone's talking to it (MCA's menu is open on it). */
+	static boolean busy(PathfinderMob mob) {
+		return LOADED && McaBridge.busy(mob);
+	}
+
+	/** A worker {@link Folk} of a realm, with MCA loaded: a villager takes its place (same job, same work); true if so. */
+	static boolean becomeVillager(ServerLevel level, Folk folk) {
+		return LOADED && folk.style() != FactionType.BARBARIAN && McaBridge.convert(level, folk);
+	}
+
+	/**
+	 * MCA's Professions menu: {@code player} made {@code villager} a {@code job}. True if it's one of the workers' jobs
+	 * ({@link Professions#JOBS}), whether or not they could take it on (they're told why not).
+	 */
+	public static boolean promote(ServerPlayer player, Villager villager, String job) {
+		int role = Professions.role(job);
+		if (!LOADED || role < 0 || !(villager.level() instanceof ServerLevel level)) {
+			return false;
+		}
+		McaBridge.promote(level, villager, role, player);
+		return true;
+	}
+
+	/**
+	 * (0.5.21) {@code target} is a foe to {@code guard}, an MCA guard in a realm's service: a player the realm counts
+	 * hostile, a barbarian, or the folk of a realm it's at war with. (Monsters MCA's guards fight already.)
+	 */
+	public static boolean foe(LivingEntity guard, LivingEntity target) {
+		if (!(guard instanceof Worker w) || w.role() != Folk.GUARD || guard.level().getServer() == null) {
+			return false;
+		}
+		MinecraftServer server = guard.level().getServer();
+		int faction = w.factionId();
+		if (target instanceof ServerPlayer player) {
+			return !player.isCreative() && !player.isSpectator() && Reputation.get(player, faction) <= Reputation.HOSTILE;
+		}
+		if (target instanceof Folk folk) {
+			return folk.factionId() != faction && (folk.style() == FactionType.BARBARIAN || Relations.between(server, faction, folk.factionId()) == Relation.WAR);
+		}
+		return false;
 	}
 
 	/** A player left: forget what was looked up for them. */

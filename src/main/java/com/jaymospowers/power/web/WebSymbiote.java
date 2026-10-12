@@ -438,8 +438,9 @@ public final class WebSymbiote {
 
 	/** What it won't eat, alive or dead: bone (skeletons), powder (creepers), the End's own (endermen). */
 	static boolean inedible(net.minecraft.world.entity.@org.jspecify.annotations.Nullable EntityType<?> type) {
+		// (nor an iron golem: its corpse is too heavy to carry, so it's never hunted)
 		return type != null && (type.builtInRegistryHolder().is(net.minecraft.tags.EntityTypeTags.SKELETONS) || type == net.minecraft.world.entity.EntityTypes.CREEPER
-			|| type == net.minecraft.world.entity.EntityTypes.ENDERMAN);
+			|| type == net.minecraft.world.entity.EntityTypes.ENDERMAN || KitchenCompat.heavy(type));
 	}
 
 	/** Whether it'll eat this (a creature, or a corpse by what it was). */

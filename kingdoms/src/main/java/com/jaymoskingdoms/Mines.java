@@ -400,7 +400,7 @@ public final class Mines {
 	}
 
 	/** One builder's tick, if the mine wants him (true: it's taken care of). */
-	static boolean tick(ServerLevel level, Folk b) {
+	static boolean tick(ServerLevel level, Worker b) {
 		MinecraftServer server = level.getServer();
 		Faction f = Factions.get(server, b.factionId());
 		if (f == null || f.fallen()) {
@@ -416,7 +416,7 @@ public final class Mines {
 			}
 			return false;
 		}
-		if (b.getLastHurtByMob() != null && b.tickCount - b.getLastHurtByMobTimestamp() < Construction.FLEE_TICKS) {
+		if (b.getLastHurtByMob() != null && b.ticksAlive() - b.getLastHurtByMobTimestamp() < Construction.FLEE_TICKS) {
 			// (running for his life)
 			return true;
 		}
@@ -456,7 +456,7 @@ public final class Mines {
 			}
 		}
 		BlockPos target = job.target;
-		Vec3 eye = b.getEyePosition();
+		Vec3 eye = b.mob().getEyePosition();
 		if (eye.distanceToSqr(Vec3.atCenterOf(target)) > DIG_REACH * DIG_REACH) {
 			BlockPos stand = m.step() == 0 ? m.entrance().relative(m.facing().getOpposite()) : m.cell(m.step() - 1);
 			if (!Gatherers.walk(b, job.trip, stand, STAND_REACH, WALK_SPEED, now) && now - job.trip.improvedAt > STUCK_TICKS) {
@@ -479,7 +479,7 @@ public final class Mines {
 			}
 			return true;
 		}
-		for (ItemStack d : dig(level, target, b, false)) {
+		for (ItemStack d : dig(level, target, b.mob(), false)) {
 			job.bag.add(b, d);
 		}
 		job.target = null;
@@ -487,7 +487,7 @@ public final class Mines {
 	}
 
 	/** The next block of the step being dug (spread among the diggers), or null when the step is open. */
-	private static @Nullable BlockPos next(ServerLevel level, Mine m, Folk b) {
+	private static @Nullable BlockPos next(ServerLevel level, Mine m, Worker b) {
 		List<BlockPos> left = new ArrayList<>();
 		for (BlockPos p : m.section(m.step())) {
 			if (!clear(level, p)) {
@@ -505,7 +505,7 @@ public final class Mines {
 	}
 
 	/** Whether this builder digs: all of them while there's nothing else to build, else the last {@link #DIGGERS} workers (if the crew can share). */
-	private static boolean digger(ServerLevel level, Faction f, Folk b) {
+	private static boolean digger(ServerLevel level, Faction f, Worker b) {
 		if (Works.of(level.getServer(), f.id()).projects().isEmpty()) {
 			return true;
 		}
@@ -514,8 +514,8 @@ public final class Mines {
 		}
 		long now = level.getGameTime();
 		if (now - DIGGERS_AT.getOrDefault(f.id(), Long.MIN_VALUE / 2) > 200L) {
-			List<Folk> workers = new ArrayList<>(Builders.crew(level, f).stream().filter(x -> x.role() == Folk.WORKER).toList());
-			workers.sort(Comparator.comparing(Entity::getUUID));
+			List<Worker> workers = new ArrayList<>(Builders.crew(level, f).stream().filter(x -> x.role() == Folk.WORKER).toList());
+			workers.sort(Comparator.comparing(Worker::getUUID));
 			Set<UUID> set = new HashSet<>();
 			for (int i = 0; i < Math.min(DIGGERS, workers.size()); i++) {
 				set.add(workers.get(workers.size() - 1 - i).getUUID());
