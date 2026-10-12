@@ -1549,5 +1549,7 @@ Nothing of that mod is used: shapes, art and names are our own, drawn by `tools/
   cords and a gilt mon, the sode's lames raised and corded, the kusazuri three stepped lames; the warlord's cuirass is
   layered: a cloth tunic hem, three rows of overlapping hide scales front and back, a dyed sash across; the gladiator
   has leather pteruges tipped with bronze studs. Warlord chestplates now take dye (the sash and tunic).
+- **Helmet holes cut through**: the paladin's eye slit and the gladiator's grille holes are transparent, so the
+  wearer's face shows through them.
 - Seen in game (dev server + client, on mannequins): all four sets, dyed paladins in red, green and white. Not yet
   seen: guards and chiefs dressed from the armoury.

@@ -534,7 +534,7 @@ def paladin_flat():
         c = surface("steel", x, y, w, h, edge=False)
         if face == "front":
             if y == 3:
-                return (18, 18, 22, 255)
+                return None  # the eye slit is cut through: the face shows behind the faceplate's gap
             if x in (3, 4) and y < 7:
                 return surface("gold", x, y, w, h, edge=False)
         if face in ("front", "left", "right", "back") and y == h - 1:
@@ -626,7 +626,7 @@ def gladiator_flat():
     def helm(face, x, y, w, h):
         c = surface("bronze", x, y, w, h, edge=False)
         if face == "front" and 2 <= y <= 6 and 1 <= x <= 6:
-            return (30, 22, 14, 255) if (x % 2 == 0 and y % 2 == 1) else shade(c[:3], 0.85) + (255,)
+            return None if (x % 2 == 0 and y % 2 == 1) else shade(c[:3], 0.85) + (255,)
         if face in ("front", "left", "right", "back") and y == h - 1:
             return shade(c[:3], 0.7) + (255,)
         return c
