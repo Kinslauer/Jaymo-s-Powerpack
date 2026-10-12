@@ -1862,3 +1862,21 @@ who can see you (an MCA or plain villager, a child, a realm's guard) walks over 
   - Children: tag (they run off laughing), "are you a knight?" (you're armoured), "can I see your sword?".
 - Testing (op): `/kingdom talk [topic]`: the nearest who could comes over now (topics: quest_offer, quest_check,
   accuse, halt, question, hungry, bargain, gift, war, gossip, greet, child, warn).
+
+## 0.5.42: golems keep quiet and fight fires
+Andy: iron golems should not be able to speak, and they should beat the fires out instead of watching them burn.
+- `Speech.say` never lets an iron golem speak. A crime seen only by a golem gets its groan and no words; if a villager
+  or folk saw it too, they cry out instead (`Theft.commit`).
+- `Firefighting`: iron golems near a watched fire (and not fighting anyone) stride over and beat it out with an arm
+  swing (`GOLEM_SPEED`), no water and nothing knocked out.
+
+## 0.5.43: no rainbow hair, no Homosexual trait
+Andy: turn off rainbow hair, and the Homosexual trait. Two MCA sources, both off pack-wide in code (no config file to ship or forget):
+- **Rainbow Hair trait** (MCA rolls it for about one villager in twenty): `mixin/mca/McaTraitsMixin` makes
+  `Traits.hasTrait` answer no for `Traits.RAINBOW` and drops it from `getTraits`, so villagers already in the world lose
+  it too and show their natural hair colour. Rainbow Eyes is untouched.
+- **Homosexual trait**: hidden the same way by `McaTraitsMixin` (it never counts and leaves trait lists), for villagers
+  and players alike. Bisexual and Asexual are untouched.
+- **Dyed hair at spawn** (MCA's `coloredHairChance`, 2% of new villagers with pink/blue/green heads):
+  `mixin/mca/McaConfigMixin` forces it to 0 whenever MCA's config is read. Villagers already dyed this way keep it,
+  since a random dye can't be told from one a player chose.

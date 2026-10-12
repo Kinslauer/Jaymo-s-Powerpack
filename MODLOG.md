@@ -493,7 +493,14 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.8.78, Townsfolk come to you:** ships Jaymo's Kingdoms 0.5.39 (see `kingdoms/MODLOG.md`): villagers, children and
   guards walk up and start things (questions, quests, accusations, requests, bargains, gifts, news); right-click to
   answer.
-- **0.8.79, Symbiote fixes (Andy's list):**
+- **0.8.82, Alex's Mobs:** adds Alex's Mobs (Fabric) 26.3-1.0.0 and its library Citadel (Fabric) 26.3-1.0.0, both
+  LGPL-3.0 and pulled from CurseForge by id (cursemaven): about 90 animals and monsters across the overworld, Nether
+  and End. It has no horses; Jaymo's Equestrian still owns those. Its elephant spawns alongside ours.
+- **0.8.83, Golems keep quiet and fight fires:** ships Jaymo's Kingdoms 0.5.42 (see `kingdoms/MODLOG.md`): iron golems
+  never speak, and they beat out fires in settlements.
+- **0.8.84, No rainbow hair:** ships Jaymo's Kingdoms 0.5.43 (see `kingdoms/MODLOG.md`): MCA villagers no longer get
+  rainbow hair or random dyed hair; they keep natural colours. MCA's Homosexual trait is off too.
+- **0.8.85, Symbiote fixes (Andy's list):**
   - **Wall tethers:** your view is held facing away from the wall (80° either side; level or below on a ceiling,
     `WebWallLookMixin` on `Entity.turn`). You sway on the tethers toward where you look (0.7 blocks along the wall,
     `WebSymbioteClient.sway`) and the bites slide a little after you; the spring is softer and bouncier.
