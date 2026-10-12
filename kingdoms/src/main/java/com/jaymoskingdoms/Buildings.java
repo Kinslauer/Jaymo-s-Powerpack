@@ -83,6 +83,8 @@ final class Buildings {
 		realm(FactionType.VILLAGE, "road", Buildings::road, 2, 8);
 		realm(FactionType.VILLAGE, "house", Buildings::house, 4, 12);
 		realm(FactionType.VILLAGE, "farm", Buildings::farm, 2, 14);
+		// (0.5.25) a row stable, its horses bought in when it's done ({@link Gatherers#built})
+		realm(FactionType.VILLAGE, "stable", Buildings::stable, 1, 18);
 		realm(FactionType.VILLAGE, "stall", Buildings::stall, 2, 16);
 		realm(FactionType.VILLAGE, "road", Buildings::road, 4, 16);
 		realm(FactionType.VILLAGE, "house", Buildings::house, 6, 20);
@@ -708,51 +710,159 @@ final class Buildings {
 		return s.done();
 	}
 
-	/** A stable (11 x 7): two stalls behind fences and gates, posts, a flat or gabled roof, hay and troughs. */
+	/**
+	 * (0.5.25) A stable: a village builds the row stable; a kingdom or fief the coaching yard or (half the time, in a varied
+	 * realm) the aisle barn. Its horses are bought in when it's done ({@link Gatherers#built}).
+	 */
 	static Blueprint stable(Kit k) {
-		Sketch s = new Sketch("stable", 11, 7, 10);
+		return k.village ? stableRow(k) : k.classic || k.chance(0.5) ? stableYard(k) : stableBarn(k);
+	}
+
+	/** A row stable (13 x 7): four open-front stalls under a shed roof, a covered walk along the front. */
+	static Blueprint stableRow(Kit k) {
+		Sketch s = new Sketch("stable", 13, 7, 8);
 		Palette p = k.p;
-		boolean flat = k.classic || k.chance(0.4);
-		BlockState boards = k.pick(p.planks(), k.stripped, p.planks());
-		for (int x = 0; x < 11; x++) {
+		BlockState boards = k.pick(p.planks(), k.stripped);
+		for (int x = 0; x < 13; x++) {
 			for (int z = 0; z < 7; z++) {
+				s.set(x, 0, z, z <= 1 ? k.road : Blocks.COARSE_DIRT.defaultBlockState());
+				int roof = 4 + z / 2;
+				s.set(x, roof, z, z % 2 == 0 ? k.roofSlab : Sketch.top(k.roofSlab));
+				boolean post = x % 3 == 0 && (z == 0 || z == 2 || z == 6);
+				int top = z % 2 == 0 ? roof - 1 : roof;
+				if (post) {
+					for (int y = 1; y <= top; y++) {
+						s.set(x, y, z, p.log());
+					}
+				} else if (z == 6 || (z >= 2 && (x == 0 || x == 12))) {
+					for (int y = 1; y <= top; y++) {
+						s.set(x, y, z, boards);
+					}
+				} else if (z > 2 && x % 3 == 0) {
+					s.set(x, 1, z, p.fence());
+					s.set(x, 2, z, p.fence());
+				} else if (z == 2) {
+					s.set(x, 1, z, x % 3 == 1 ? Sketch.facing(k.gate, Direction.NORTH) : p.fence());
+					s.set(x, 3, z, Sketch.lying(p.log(), Direction.Axis.X));
+				}
+			}
+		}
+		for (int x = 1; x < 12; x += 3) {
+			s.set(x, 1, 5, Blocks.HAY_BLOCK.defaultBlockState());
+			s.set(x + 1, 1, 5, Blocks.WATER_CAULDRON.defaultBlockState().setValue(BlockStateProperties.LEVEL_CAULDRON, 3));
+			s.set(x + 1, 3, 1, Sketch.hanging(Blocks.LANTERN));
+		}
+		return s.done();
+	}
+
+	/** An aisle barn (11 x 15): a tall gabled barn, a cart-wide aisle end to end, six stalls, a hayloft. */
+	static Blueprint stableBarn(Kit k) {
+		Sketch s = new Sketch("stable", 11, 15, 11);
+		Palette p = k.p;
+		BlockState boards = k.pick(p.planks(), k.stripped);
+		for (int x = 0; x < 11; x++) {
+			for (int z = 0; z < 15; z++) {
+				boolean aisle = x >= 4 && x <= 6;
+				s.set(x, 0, z, aisle ? k.road : Blocks.COARSE_DIRT.defaultBlockState());
+				boolean wall = x == 0 || x == 10 || z == 0 || z == 14;
+				if (wall) {
+					boolean door = aisle && (z == 0 || z == 14);
+					for (int y = 1; y <= 4; y++) {
+						if (door && y <= 3) {
+							continue;
+						}
+						boolean log = (x == 0 || x == 10) && (z == 0 || z == 14 || z % 4 == 1) || door && y == 4 || (x == 3 || x == 7) && (z == 0 || z == 14);
+						s.set(x, y, z, log ? p.log() : y == 1 ? p.wall() : boards);
+					}
+					if ((x == 0 || x == 10) && z % 4 == 3) {
+						s.set(x, 2, z, k.pane);
+					}
+				} else if (!aisle) {
+					s.set(x, 4, z, Sketch.top(p.woodSlab()));
+					if (x == 3 || x == 7) {
+						if (z % 4 == 1) {
+							for (int y = 1; y <= 3; y++) {
+								s.set(x, y, z, p.log());
+							}
+						} else {
+							s.set(x, 1, z, z % 4 == 3 ? Sketch.facing(k.gate, x == 3 ? Direction.EAST : Direction.WEST) : p.fence());
+						}
+						s.set(x, 5, z, p.fence());
+					} else if (z % 4 == 1) {
+						s.set(x, 1, z, p.fence());
+						s.set(x, 2, z, p.fence());
+					}
+				}
+			}
+		}
+		for (int z = 2; z < 13; z += 4) {
+			for (int x : new int[] {1, 9}) {
+				s.set(x, 1, z, Blocks.HAY_BLOCK.defaultBlockState());
+				s.set(x, 1, z + 2, Blocks.WATER_CAULDRON.defaultBlockState().setValue(BlockStateProperties.LEVEL_CAULDRON, 3));
+				s.set(x, 5, z, Blocks.HAY_BLOCK.defaultBlockState());
+				s.set(x, 5, z + 1, Blocks.HAY_BLOCK.defaultBlockState());
+				s.set(x, 6, z, Blocks.HAY_BLOCK.defaultBlockState());
+			}
+			for (int x = 4; x <= 6; x++) {
+				s.set(x, 5, z + 1, Sketch.lying(p.log(), Direction.Axis.X));
+			}
+			s.set(5, 4, z + 1, Sketch.hanging(Blocks.LANTERN));
+		}
+		s.gable(0, 10, 0, 14, 5, k.roofStairs, k.roofSlab, boards);
+		s.set(5, 7, 0, Blocks.AIR.defaultBlockState());
+		s.set(5, 7, 14, Blocks.AIR.defaultBlockState());
+		return s.done();
+	}
+
+	/** A coaching yard (13 x 13): four stalls under a gabled roof behind a fenced yard with a wide gate. */
+	static Blueprint stableYard(Kit k) {
+		Sketch s = new Sketch("stable", 13, 13, 8);
+		Palette p = k.p;
+		BlockState boards = k.pick(p.planks(), k.stripped);
+		for (int x = 0; x < 13; x++) {
+			for (int z = 0; z < 13; z++) {
+				if (z < 8) {
+					boolean edge = x == 0 || x == 12 || z == 0;
+					s.set(x, 0, z, edge ? k.pick(p.log(), p.wall()) : k.chance(0.35) ? Blocks.GRASS_BLOCK.defaultBlockState() : Blocks.COARSE_DIRT.defaultBlockState());
+					if (edge) {
+						s.set(x, 1, z, x >= 5 && x <= 7 && z == 0 ? Sketch.facing(k.gate, Direction.NORTH) : p.fence());
+					}
+					continue;
+				}
 				s.set(x, 0, z, Blocks.COARSE_DIRT.defaultBlockState());
-				boolean edge = x == 0 || x == 10 || z == 0 || z == 6;
-				boolean post = (x == 0 || x == 5 || x == 10) && (z == 0 || z == 6);
+				boolean post = x % 3 == 0 && (z == 8 || z == 12);
 				if (post) {
 					for (int y = 1; y <= 3; y++) {
 						s.set(x, y, z, p.log());
 					}
-				} else if (edge && z != 0) {
-					s.set(x, 1, z, boards);
-					s.set(x, 2, z, boards);
-					s.set(x, 3, z, boards);
-				} else if (z == 0) {
+				} else if (z == 12 || x == 0 || x == 12) {
+					for (int y = 1; y <= 3; y++) {
+						s.set(x, y, z, boards);
+					}
+				} else if (x % 3 == 0) {
 					s.set(x, 1, z, p.fence());
-					s.set(x, 3, z, boards);
-				} else if (x == 5) {
-					s.set(x, 1, z, p.fence());
-				}
-				if (flat) {
-					s.set(x, 4, z, p.woodSlab());
+					s.set(x, 2, z, p.fence());
+				} else if (z == 8) {
+					s.set(x, 1, z, x % 3 == 1 ? Sketch.facing(k.gate, Direction.NORTH) : p.fence());
+					s.set(x, 3, z, Sketch.lying(p.log(), Direction.Axis.X));
 				}
 			}
 		}
-		s.set(2, 1, 0, Sketch.facing(k.gate, Direction.NORTH));
-		s.set(8, 1, 0, Sketch.facing(k.gate, Direction.NORTH));
-		s.set(1, 1, 5, Blocks.HAY_BLOCK.defaultBlockState());
-		s.set(9, 1, 5, Blocks.HAY_BLOCK.defaultBlockState());
-		s.set(4, 1, 5, Blocks.WATER_CAULDRON.defaultBlockState().setValue(BlockStateProperties.LEVEL_CAULDRON, 3));
-		s.set(6, 1, 5, Blocks.WATER_CAULDRON.defaultBlockState().setValue(BlockStateProperties.LEVEL_CAULDRON, 3));
-		if (!flat) {
-			s.gableX(0, 10, 0, 6, 4, k.roofStairs, k.roofSlab, boards);
-			for (int x = 1; x < 10; x++) {
-				s.set(x, 4, 3, Sketch.lying(p.log(), Direction.Axis.X));
-			}
+		s.gableX(0, 12, 8, 12, 4, k.roofStairs, k.roofSlab, boards);
+		for (int x = 1; x < 12; x += 3) {
+			s.set(x, 1, 11, Blocks.HAY_BLOCK.defaultBlockState());
+			s.set(x + 1, 1, 11, Blocks.WATER_CAULDRON.defaultBlockState().setValue(BlockStateProperties.LEVEL_CAULDRON, 3));
 		}
-		if (k.chance(0.5)) {
-			s.set(2, 3, 3, Sketch.hanging(Blocks.LANTERN));
-			s.set(8, 3, 3, Sketch.hanging(Blocks.LANTERN));
+		// the yard: a trough, a hay stack, lamps on the corners
+		for (int x = 2; x <= 4; x++) {
+			s.set(x, 0, 3, Blocks.WATER.defaultBlockState());
+		}
+		s.set(10, 1, 3, Blocks.HAY_BLOCK.defaultBlockState());
+		s.set(10, 2, 3, Blocks.HAY_BLOCK.defaultBlockState());
+		s.set(10, 1, 4, Blocks.HAY_BLOCK.defaultBlockState());
+		s.set(9, 1, 3, Blocks.HAY_BLOCK.defaultBlockState());
+		for (int[] c : new int[][] {{0, 0}, {12, 0}, {4, 0}, {8, 0}}) {
+			s.set(c[0], 2, c[1], k.light());
 		}
 		return s.done();
 	}

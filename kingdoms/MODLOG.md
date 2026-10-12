@@ -1458,3 +1458,15 @@ jobs (builder farmer guard) in the same way"; then "miners should place torches 
   villages (from 10). A campfire (a soul campfire a quarter of the time) sunk in a 3x3 stone ring, a path round it,
   and now and then stone posts with lanterns at the corners. It's what the guards throw corpses on.
 - Tuning is at the top of `Undertakers` (`SWEEP`, `PYRE_REACH`, `SPOT_REACH`, `CLEAR`, `MOST_PER_ROUND`...).
+
+## 0.5.25: stables
+- **Three stable designs** (`Buildings.stable`), mocked up on the dev server and picked from screenshots:
+  - **Row stable** (`stableRow`, 13 x 7), the village one: four open-front stalls (gate, hay manger, water trough) under
+    a sloped slab roof, with a covered walk along the front.
+  - **Coaching yard** (`stableYard`, 13 x 13): four stalls under a gabled roof behind a fenced yard with a trough, a hay
+    stack, lamps on the posts and a 3-wide gate for carts.
+  - **Aisle barn** (`stableBarn`, 11 x 15): a stone-footed barn with a cart-wide aisle end to end, six stalls, a hayloft
+    over them and lanterns over the aisle.
+- Villages now build a stable (from 18 people); kingdoms and fiefdoms still build theirs from 28, now the coaching yard
+  or (half the time) the aisle barn in place of the old two-stall stable.
+- A finished stable gets its horses bought in (`Gatherers.STABLE_HORSES`, 2).
