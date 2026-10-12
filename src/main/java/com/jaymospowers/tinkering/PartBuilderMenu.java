@@ -118,7 +118,7 @@ public class PartBuilderMenu extends AbstractContainerMenu {
 		ItemStack material = inputs.getItem(MATERIAL);
 		TinkerMaterial kind = TinkerMaterial.of(material);
 		ItemStack out = ItemStack.EMPTY;
-		if (part != null && kind != null && kind.makes(part.kind) && inputs.getItem(PATTERN).is(Tinkering.PATTERN)
+		if (part != null && kind != null && !kind.cast && kind.makes(part.kind) && inputs.getItem(PATTERN).is(Tinkering.PATTERN)
 			&& material.getCount() >= itemsNeeded(part, material)) {
 			out = ToolPartItem.of(part, kind, 1);
 		}

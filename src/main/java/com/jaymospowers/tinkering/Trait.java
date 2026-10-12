@@ -22,7 +22,12 @@ public enum Trait {
 	STRIPPING("stripping", ChatFormatting.GOLD),
 	TILLING("tilling", ChatFormatting.GREEN),
 	SWEEPING("sweeping", ChatFormatting.AQUA),
-	AREA("area", ChatFormatting.AQUA);
+	AREA("area", ChatFormatting.AQUA),
+	SEARING("searing", ChatFormatting.RED),
+	ENHANCED("enhanced", ChatFormatting.LIGHT_PURPLE),
+	CRUMBLING("crumbling", ChatFormatting.LIGHT_PURPLE),
+	TASTY("tasty", ChatFormatting.LIGHT_PURPLE),
+	OVERSLIME("overslime", ChatFormatting.GREEN);
 
 	public final String id;
 	public final ChatFormatting colour;

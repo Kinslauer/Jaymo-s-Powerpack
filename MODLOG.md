@@ -442,3 +442,32 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     repaired (`mixin/TinkerToolWearMixin`). Enchanting works as for vanilla tools for now; modifiers arrive in stage 2.
   - Next: stage 2, the smeltery (melting, casting, alloys, ore doubling) and modifiers with tool levels; stage 3, the
     pack tie-ins (Kingdoms smiths, Powers weapons).
+- **0.8.74, Jaymo's Tinkering, stage 2 (smeltery and modifiers):** metals now come from a Tinkers-style smeltery
+  (`tinkering/smeltery/`), and tools take modifiers and level up.
+  - **Seared blocks:** grout (clay ball + sand + gravel, 2 of them) smelts into seared bricks; 4 make a block of seared
+    bricks. Seared glass (bricks around glass), smeltery controller (8 bricks), drain, faucet (2), casting table and
+    basin (7 each).
+  - **Smeltery:** the controller sits in a wall around an open space up to 7x7 and 8 high, on a seared-brick floor,
+    walled with seared bricks, glass, drains and the controller (corners don't count). One melting slot per inside
+    block (up to 24), a lava-bucket fuel slot (bucket back out below), and the pool on Tinkers' GUI art: liquids stack
+    bottom first, hover for amounts, click one to pour it first. Items thrown in get pulled into free slots;
+    creatures inside cook (2 damage) into blood. An ingot is 90 mB, a nugget 10, a block 810.
+  - **Ore doubling:** raw ore and ore blocks melt into 2 ingots (copper ore 4). Vanilla metal gear, buckets and shears
+    melt back into ingots; tinker parts melt back into their cost.
+  - **Alloys** form in the pool on their own: rose gold (3 copper + 1 gold), amethyst bronze (copper + amethyst), pig
+    iron (iron + blood + honey), slimesteel (iron + slime).
+  - **Casting:** a faucet on a drain (right-click, or a redstone pulse) pours the bottom liquid into the casting table
+    or basin below. Gold poured over an ingot, nugget or part turns it into a gold cast of that shape; casts make
+    ingots, nuggets or parts of any castable metal. The basin makes metal, amethyst, slime and honey blocks.
+  - **Metals leave the Part Builder:** copper, iron and the alloys are cast only. New materials: seared stone (Part
+    Builder, Searing: more damage to things that burn), rose gold (Enhanced: +1 modifier slot), amethyst bronze
+    (Crumbling: faster on blocks that need no tool), pig iron (Tasty: eats itself when you're hungry), slimesteel
+    (Overslime: slowly repairs itself).
+  - **Modifiers** at the Tool Station, a tool plus the items: Haste (redstone block, max 5), Sharpness (quartz block,
+    5), Luck (lapis block, 3; Fortune, or Looting on swords), Silky (cobweb + gold block), Fiery (blaze rod, 2),
+    Knockback (piston, 2), Reinforced (obsidian, 3), plus Diamond (+500 durability, diamond tier), Emerald (+50%
+    durability) and Netherite (needs Diamond: +20%, netherite tier, fireproof). They're written as the vanilla
+    enchantments. Enchanting tinker tools is off now.
+  - **Tool levels:** each hit or block mined is 1 xp; level 2 at 100 xp, doubling, up to level 10. 3 modifier slots,
+    +1 per level after the first.
+  - Next: stage 3, the pack tie-ins (Kingdoms smiths sell parts, Powers weapons take modifiers).

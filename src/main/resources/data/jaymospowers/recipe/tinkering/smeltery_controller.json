@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "b": "jaymospowers:seared_brick"
+  },
+  "pattern": [
+    "bbb",
+    "b b",
+    "bbb"
+  ],
+  "result": {
+    "id": "jaymospowers:smeltery_controller",
+    "count": 1
+  }
+}

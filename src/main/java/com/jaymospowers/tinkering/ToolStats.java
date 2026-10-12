@@ -44,6 +44,8 @@ public final class ToolStats {
 	/** Dwarven: mining speed added per level for every 32 blocks below y=64, up to 4 steps. */
 	static final float DWARVEN_SPEED = 1.0F;
 	static final int DWARVEN_TOP = 64, DWARVEN_STEP = 32, DWARVEN_STEPS = 4;
+	/** Crumbling: extra mining speed per level (a share) on blocks that need no tool. */
+	static final float CRUMBLING_SPEED = 0.5F;
 	/** Stringy and Solar Powered (in sunlight): chance per level that a point of wear doesn't land. */
 	static final float STRINGY_CHANCE = 0.15F, SOLAR_CHANCE = 0.25F;
 	/** One material unit repairs this share of the tool, over the cost of its main part (a pick head: 25% a unit). */
@@ -172,12 +174,14 @@ public final class ToolStats {
 		if (!stack.has(Tinkering.TOOL_MATERIALS)) {
 			stack.set(Tinkering.TOOL_MATERIALS, materials.stream().map(m -> m.id).toList());
 		}
-		stack.set(DataComponents.MAX_DAMAGE, stats.durability());
-		stack.set(DataComponents.DAMAGE, Mth.clamp(stack.getDamageValue(), 0, stats.durability()));
+		int durability = Modifier.durability(stack, stats.durability());
+		stack.set(DataComponents.MAX_DAMAGE, durability);
+		stack.set(DataComponents.DAMAGE, Mth.clamp(stack.getDamageValue(), 0, durability));
 		boolean broken = isBroken(stack);
-		stack.set(DataComponents.TOOL, broken ? new Tool(List.of(), 1.0F, 1, type.style == ToolType.Style.TOOL) : tool(type, stats));
+		stack.set(DataComponents.TOOL, broken ? new Tool(List.of(), 1.0F, 1, type.style == ToolType.Style.TOOL)
+			: tool(type, stats, Modifier.tier(stack, stats.tier())));
 		float worn = worn(stack);
-		float attack = stats.attack() + worn * (stats.level(Trait.JAGGED) * JAGGED_ATTACK - stats.level(Trait.STONEBOUND) * STONEBOUND_ATTACK);
+		float attack = Modifier.attack(stack, stats.attack()) + worn * (stats.level(Trait.JAGGED) * JAGGED_ATTACK - stats.level(Trait.STONEBOUND) * STONEBOUND_ATTACK);
 		ItemAttributeModifiers.Builder attributes = ItemAttributeModifiers.builder();
 		if (!broken) {
 			attributes.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(Item.BASE_ATTACK_DAMAGE_ID, Math.max(0.0F, attack),
@@ -193,7 +197,7 @@ public final class ToolStats {
 			Component.translatable("item.jaymospowers." + type.itemId())));
 	}
 
-	private static Tool tool(ToolType type, Stats stats) {
+	private static Tool tool(ToolType type, Stats stats, TinkerMaterial.Tier tier) {
 		if (type.style == ToolType.Style.SWORD) {
 			return new Tool(List.of(
 				Tool.Rule.minesAndDrops(HolderSet.direct(new Holder[] {Blocks.COBWEB.builtInRegistryHolder()}), 15.0F),
@@ -201,7 +205,7 @@ public final class ToolStats {
 				Tool.Rule.overrideSpeed(tag(BlockTags.SWORD_EFFICIENT), 1.5F)), 1.0F, 2, false);
 		}
 		List<Tool.Rule> rules = new ArrayList<>();
-		rules.add(Tool.Rule.deniesDrops(tag(stats.tier().incorrect)));
+		rules.add(Tool.Rule.deniesDrops(tag(tier.incorrect)));
 		for (TagKey<Block> mines : type.mines) {
 			rules.add(Tool.Rule.minesAndDrops(tag(mines), stats.miningSpeed()));
 		}
@@ -212,7 +216,7 @@ public final class ToolStats {
 		return BuiltInRegistries.BLOCK.getOrThrow(tag);
 	}
 
-	/** Mining speed with the traits that change as you go (Stonebound with wear, Dwarven with depth). */
+	/** Mining speed with the traits that change as you go (Stonebound with wear, Dwarven with depth, Crumbling by block). */
 	public static float liveSpeed(Player player, ItemStack stack, BlockState state, float speed) {
 		if (speed <= 1.0F || !(stack.getItem() instanceof TinkerToolItem)) {
 			return speed;
@@ -222,6 +226,9 @@ public final class ToolStats {
 			return speed;
 		}
 		float bonus = speed * stats.level(Trait.STONEBOUND) * STONEBOUND_SPEED * worn(stack);
+		if (!state.requiresCorrectToolForDrops()) {
+			bonus += speed * stats.level(Trait.CRUMBLING) * CRUMBLING_SPEED;
+		}
 		int dwarven = stats.level(Trait.DWARVEN);
 		if (dwarven > 0) {
 			float steps = Mth.clamp((DWARVEN_TOP - (float) player.getY()) / DWARVEN_STEP, 0.0F, DWARVEN_STEPS);

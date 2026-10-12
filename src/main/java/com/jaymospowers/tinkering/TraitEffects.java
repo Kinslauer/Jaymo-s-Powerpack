@@ -9,9 +9,13 @@ import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
@@ -38,6 +42,13 @@ public final class TraitEffects {
 	/** Magnetic: how long the pull lasts after a block or kill (ticks), its reach (blocks, plus 1 a level) and strength. */
 	static final int MAGNET_TICKS = 40;
 	static final double MAGNET_RANGE = 3.0, MAGNET_PULL = 0.08;
+	/** Searing: extra damage per level against anything that isn't fireproof. */
+	static final float SEARING_DAMAGE = 1.5F;
+	/** Tasty: hunger at or under which it can be nibbled, chance per level a use, food and saturation, durability it costs. */
+	static final int TASTY_HUNGER = 16, TASTY_FOOD = 2, TASTY_COST = 5;
+	static final float TASTY_CHANCE = 0.05F, TASTY_SATURATION = 0.3F;
+	/** Tool xp for each block mined and each hit landed. */
+	static final int XP_PER_BLOCK = 1, XP_PER_HIT = 1;
 	/** Wide swing: a block next to the one you broke goes too if it's at most this much harder. */
 	static final float AREA_HARDNESS_SLACK = 1.5F;
 
@@ -107,11 +118,19 @@ public final class TraitEffects {
 			target.hurtServer(level, attacker instanceof Player player ? level.damageSources().playerAttack(player)
 				: level.damageSources().mobAttack(attacker), smite * SMITE_DAMAGE);
 		}
+		int searing = stats.level(Trait.SEARING);
+		if (searing > 0 && target.isAlive() && !target.fireImmune()) {
+			target.setInvulnerableTime(0);
+			target.hurtServer(level, attacker instanceof Player player ? level.damageSources().playerAttack(player)
+				: level.damageSources().mobAttack(attacker), searing * SEARING_DAMAGE);
+		}
 		int pierce = stats.level(Trait.PIERCE);
 		if (pierce > 0 && target.isAlive()) {
 			target.setInvulnerableTime(0);
 			target.hurtServer(level, level.damageSources().indirectMagic(attacker, attacker), pierce * PIERCE_DAMAGE);
 		}
+		tasty(stack, attacker, stats);
+		gainXp(stack, attacker, XP_PER_HIT);
 	}
 
 	/** After a block is mined: Magnetic starts pulling. */
@@ -120,7 +139,36 @@ public final class TraitEffects {
 			ToolStats.Stats stats = ToolStats.stats(stack);
 			if (stats != null) {
 				magnet(owner, stats);
+				tasty(stack, owner, stats);
+				gainXp(stack, owner, XP_PER_BLOCK);
 			}
+		}
+	}
+
+	/** Tasty: a hungry player sometimes takes a bite of the tool, at the cost of some durability. */
+	private static void tasty(ItemStack stack, LivingEntity owner, ToolStats.Stats stats) {
+		int tasty = stats.level(Trait.TASTY);
+		if (tasty > 0 && owner instanceof ServerPlayer player && player.getFoodData().getFoodLevel() <= TASTY_HUNGER
+			&& player.getRandom().nextFloat() < tasty * TASTY_CHANCE) {
+			player.getFoodData().eat(TASTY_FOOD, TASTY_SATURATION);
+			stack.setDamageValue(Math.min(stack.getMaxDamage(), stack.getDamageValue() + TASTY_COST));
+			ToolStats.apply(stack);
+			player.level().playSound(null, player.blockPosition(), SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 0.5F, 1.0F);
+		}
+	}
+
+	/** Use earns a tool xp; each level it reaches gives it another modifier slot. */
+	private static void gainXp(ItemStack stack, LivingEntity owner, int amount) {
+		if (!(owner instanceof ServerPlayer player) || !(stack.getItem() instanceof TinkerToolItem)) {
+			return;
+		}
+		int before = Modifier.xp(stack);
+		int level = Modifier.toolLevel(before);
+		stack.set(Tinkering.TOOL_XP, before + amount);
+		if (Modifier.toolLevel(before + amount) > level) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.tinkering.level_up", stack.getHoverName(), level + 1)
+				.withStyle(ChatFormatting.GOLD));
+			player.level().playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6F, 1.2F);
 		}
 	}
 

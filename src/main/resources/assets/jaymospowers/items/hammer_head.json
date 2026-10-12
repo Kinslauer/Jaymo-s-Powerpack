@@ -68,6 +68,13 @@
         }
       },
       {
+        "when": "seared_stone",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/part/hammer_head_seared_stone"
+        }
+      },
+      {
         "when": "copper",
         "model": {
           "type": "minecraft:model",
@@ -79,6 +86,34 @@
         "model": {
           "type": "minecraft:model",
           "model": "jaymospowers:item/tinkering/part/hammer_head_iron"
+        }
+      },
+      {
+        "when": "rose_gold",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/part/hammer_head_rose_gold"
+        }
+      },
+      {
+        "when": "amethyst_bronze",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/part/hammer_head_amethyst_bronze"
+        }
+      },
+      {
+        "when": "pig_iron",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/part/hammer_head_pig_iron"
+        }
+      },
+      {
+        "when": "slimesteel",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/part/hammer_head_slimesteel"
         }
       }
     ],
