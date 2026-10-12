@@ -1626,5 +1626,6 @@ cultists) and kings give quests.
   the king's temper). The helm sent back a quarter of an 8-damage hit. Not seen: mail, fetch caches, slay counts,
   the other passives. Regicide: Dunhaven's tyrant sent for the reveler king of Falshire; pledged to Falshire, struck
   him down, and the decree was ready with 51 → 76 emeralds and 150 → 200 reputation, the oath broken. Taking the warlord's
-  host declared war on Ravngard, and `/kingdom war join` used Dunhaven for the unsworn Tester. Not seen: the
+  host declared war on Ravngard; once it began, `/kingdom war join` called up Dunhaven's party for the unsworn
+  Tester, which marched, planted its banner, besieged and sacked Ravngard's seat, and the decree was ready. Not seen: the
   noble's round and his bread.
