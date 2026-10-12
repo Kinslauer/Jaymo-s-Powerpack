@@ -1458,3 +1458,24 @@ jobs (builder farmer guard) in the same way"; then "miners should place torches 
   villages (from 10). A campfire (a soul campfire a quarter of the time) sunk in a 3x3 stone ring, a path round it,
   and now and then stone posts with lanterns at the corners. It's what the guards throw corpses on.
 - Tuning is at the top of `Undertakers` (`SWEEP`, `PYRE_REACH`, `SPOT_REACH`, `CLEAR`, `MOST_PER_ROUND`...).
+
+## 0.5.25: trees take chops to fell (HT's TreeChop, our own code)
+Andy asked for TreeChop's feel in our trees. TreeChop (MIT) has no 26.3 build (its newest Fabric file is 1.21.4), so it's
+rebuilt here; none of its code or art is used.
+- **Chopping** (`Trees.chop`, from `PlayerBlockBreakEvents.BEFORE`): breaking a log of a tree (a trunk under living
+  leaves) in survival is a chop, not a break. The log stays and narrows: it becomes a **`ChoppedLog`**
+  (`jaymoskingdoms:chopped_log`, 1-6 `chops`, an `axis`), drawn by `ChoppedLogRenderer` as the log it was, two pixels
+  thinner a side per chop, with a matching hitbox. Once a log is as thin as it goes (6), further chops go into the nearest
+  log up the trunk. Each chop shows the log's break particles and sound, wears the axe a point and costs a little hunger.
+- **Felling**: a tree comes down on the chop that makes up `Trees.needed(logs)`, TreeChop's logarithmic count
+  `round(1 + 10 ln(1 + (n-1)/10))`: 1 log 1 chop, 5 logs 4, 17 logs 11, 20 logs 12, 100 logs 25. It then topples as
+  before (`FallingTree`, chopped logs falling as the logs they were) from the block being chopped. Chops in the stump
+  under the cut count toward the same tree. Tuning: `Trees.CHOP_SCALE` (0 = one chop per tree; very large = one per log)
+  and `ChoppedLog.MOST`.
+- **Sneak** to break a single log as ever; creative breaks as ever. A chopped log broken on its own (no tree left round it,
+  or sneaking) gives the log it was (`ChoppedLog.getDrops`). Chopped logs are in `minecraft:logs` (leaves keep to them,
+  a tree is still a tree) and `mineable/axe`.
+- **Woodcutters** chop too: a chop every `Gatherers.CHOP_TICKS` (12) at the foot, the trunk narrowing as they go, until
+  it comes down into their bag. Bigger trees take them longer.
+- Seen in game (dev server + client): a 17-log oak narrowed at its foot chop by chop, the chops moved up the trunk, and it
+  fell and broke into wood on the 11th. Not yet seen: woodcutters chopping.
