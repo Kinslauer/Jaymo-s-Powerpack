@@ -130,7 +130,7 @@ public final class Planner {
 			&& Economy.atPeace(level.getServer(), f) && Economy.healthy(level, f);
 	}
 
-	/** (0.5.26) Built only when the rest is (and the wall waits for nothing on its account): see {@link #eligible}. */
+	/** (0.5.27) Built only when the rest is (and the wall waits for nothing on its account): see {@link #eligible}. */
 	static final String TAVERN = "tavern";
 
 	/** The catalogue entries it may build next (in growth order), whatever the site. */
@@ -153,7 +153,7 @@ public final class Planner {
 				out.add(e);
 			}
 		}
-		// (0.5.26) a tavern only for a wealthy kingdom with room to spare: nothing else of its own is still to build
+		// (0.5.27) a tavern only for a wealthy kingdom with room to spare: nothing else of its own is still to build
 		if (tavern != null && out.isEmpty() && Wealth.atLeast(server, f, Wealth.Tier.WEALTHY)) {
 			out.add(tavern);
 		}

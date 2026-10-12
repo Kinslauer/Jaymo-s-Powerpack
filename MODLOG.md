@@ -371,3 +371,18 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.8.59, carried containers are set down, not thrown:** a carried chest, furnace or anything else with a block
   entity is only ever set down: sneak + right-click puts it down like a plain right-click (`CarryBlock.holdsContents`).
   Plain blocks can still be thrown.
+- **0.8.61, Jaymo's Armory (weapons after Age of Weapons):** 113 new items in their own creative tab, rebuilt for 26.3
+  after Age of Weapons - Reforged (by XxRexRaptorxX, MIT; Forge/NeoForge only, newest 1.20.4). Its textures and hand
+  poses are reused under its license (`textures/item/armory/LICENSE-AgeOfWeapons.txt`); nothing past the age of sail.
+  `armory/Armory` registers them; `tools/armory_assets.py` writes their models, recipes, Better Combat attributes and
+  tags from the unpacked AoW jar.
+  - Wooden to netherite (netherite by smithing, like vanilla): dagger, hatchet, skewer, round shield, longsword,
+    glaive, lance, war axe, war scythe, flanged mace, broadsword, claymore, cleaver, ninjato, saber, machete.
+  - One-offs: primitive spear, primitive knife, bone knife, hand axe, wooden and stone cudgels, throwing stick, wooden
+    and iron quarterstaffs, caveman hide armor, recurve bow, harpoon, kunai, throwing stars.
+  - Daggers, hatchets, the primitive spear, the throwing stick and the harpoon are drawn back and thrown like a trident
+    (`ThrowingWeaponItem`, `ThrownWeapon`) and lie where they land for the thrower; kunai and throwing stars (stacks of
+    16) fly at a right-click. The harpoon swims through water and drags its catch back.
+  - The lance, couched on a moving mount, adds up to 8 damage at a gallop and throws the target back. The flanged
+    mace knocks a raised shield down for 4 s (war axes and hatchets as any axe). The machete cuts leaves, vines and
+    plants fast. The round shield blocks like a shield and comes up quicker. The recurve bow's arrows fly 30% faster.

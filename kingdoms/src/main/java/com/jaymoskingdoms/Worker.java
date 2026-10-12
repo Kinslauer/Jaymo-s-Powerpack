@@ -70,6 +70,10 @@ public interface Worker {
 		if (role == Folk.WOODCUTTER) {
 			return new ItemStack(Items.IRON_AXE);
 		}
+		if (role == Folk.PULLER) {
+			// (both hands on the shafts)
+			return ItemStack.EMPTY;
+		}
 		if (role == Folk.FOREMAN) {
 			return new ItemStack(wild ? Items.STONE_AXE : Items.WOODEN_AXE);
 		}
@@ -78,7 +82,7 @@ public interface Worker {
 
 	/** Whether {@code role} is one a worker does (and goes home to bed after). */
 	static boolean isWork(int role) {
-		return Folk.isBuilder(role) || role == Folk.FARMER || role == Folk.MINER || role == Folk.WOODCUTTER;
+		return Folk.isBuilder(role) || role == Folk.FARMER || role == Folk.MINER || role == Folk.WOODCUTTER || role == Folk.PULLER;
 	}
 
 	// ---- the mob's own ----------------------------------------------------------------------------------------------

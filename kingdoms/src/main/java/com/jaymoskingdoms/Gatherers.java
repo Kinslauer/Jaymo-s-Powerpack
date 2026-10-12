@@ -75,7 +75,7 @@ public final class Gatherers {
 	static final double WALK_SPEED = 0.65;
 	/** A pen's first beasts: this many of each kind. */
 	static final int PEN_STOCK = 2;
-	/** (0.5.26) The horses bought in for a new stable. */
+	/** (0.5.27) The horses bought in for a new stable. */
 	static final int STABLE_HORSES = 2;
 	/** Sleep's catch-up ({@link Nights}): a gatherer's ticks an item, the most at once, and a sapling's ticks a stage. */
 	static final int MINER_TICKS_PER_ITEM = 50, WOOD_TICKS_PER_LOG = 40, CATCH_UP_MOST = 256, SAPLING_TICKS_PER_STAGE = 5000;
@@ -195,6 +195,26 @@ public final class Gatherers {
 
 	static void clear() {
 		JOBS.clear();
+	}
+
+	/** (0.5.26) {@code w} is a miner or woodcutter walking a load to storage. */
+	static boolean delivering(Worker w) {
+		Job job = isGatherer(w.role()) ? JOBS.get(w.getUUID()) : null;
+		return job != null && job.phase == DELIVER && !job.bag.isEmpty();
+	}
+
+	/** (0.5.26) A rickshaw met him on his way to storage: his load's taken (returned) and he goes back to work. */
+	static List<ItemStack> handOver(Worker w) {
+		Job job = isGatherer(w.role()) ? JOBS.get(w.getUUID()) : null;
+		if (job == null || job.phase != DELIVER) {
+			return List.of();
+		}
+		List<ItemStack> load = new ArrayList<>(job.bag.items);
+		job.bag.items.clear();
+		w.setCarried(ItemStack.EMPTY);
+		job.phase = IDLE;
+		w.setTask("idle");
+		return load;
 	}
 
 	static boolean isGatherer(int role) {

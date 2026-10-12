@@ -17,7 +17,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.5.26) Seats you can sit on: every stool in a finished building (a bottom wooden slab beside a table, a fence with a
+ * (0.5.27) Seats you can sit on: every stool in a finished building (a bottom wooden slab beside a table, a fence with a
  * pressure plate on it) gets one of 26.3's cushions in the realm's colour, facing the table. Right-click it to sit.
  */
 final class Cushions {

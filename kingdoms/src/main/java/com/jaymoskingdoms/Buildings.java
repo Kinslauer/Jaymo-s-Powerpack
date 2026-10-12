@@ -73,7 +73,7 @@ final class Buildings {
 			town(type, "wall", Buildings::wall, 24, 56);
 			town(type, "tower", Buildings::tower, 8, 56);
 		}
-		// (0.5.26) only a wealthy kingdom with room to spare builds a tavern ({@link Planner#eligible})
+		// (0.5.27) only a wealthy kingdom with room to spare builds a tavern ({@link Planner#eligible})
 		Blueprint.register(FactionType.KINGDOM, new Blueprint.Entry("tavern",
 			(level, faction, variant) -> tavern(Kit.of(level, faction, variant, variant), Planner.size(faction)), 1, 26));
 		realm(FactionType.VILLAGE, "tree_farm", Buildings::treeFarm, 1, 0);
@@ -86,7 +86,7 @@ final class Buildings {
 		realm(FactionType.VILLAGE, "road", Buildings::road, 2, 8);
 		realm(FactionType.VILLAGE, "house", Buildings::house, 4, 12);
 		realm(FactionType.VILLAGE, "farm", Buildings::farm, 2, 14);
-		// (0.5.26) a row stable, its horses bought in when it's done ({@link Gatherers#built})
+		// (0.5.27) a row stable, its horses bought in when it's done ({@link Gatherers#built})
 		realm(FactionType.VILLAGE, "stable", Buildings::stable, 1, 18);
 		realm(FactionType.VILLAGE, "stall", Buildings::stall, 2, 16);
 		realm(FactionType.VILLAGE, "road", Buildings::road, 4, 16);
@@ -714,7 +714,7 @@ final class Buildings {
 	}
 
 	/**
-	 * (0.5.26) A stable: a village builds the row stable; a kingdom or fief the coaching yard or (half the time, in a varied
+	 * (0.5.27) A stable: a village builds the row stable; a kingdom or fief the coaching yard or (half the time, in a varied
 	 * realm) the aisle barn. Its horses are bought in when it's done ({@link Gatherers#built}).
 	 */
 	static Blueprint stable(Kit k) {
@@ -870,11 +870,11 @@ final class Buildings {
 		return s.done();
 	}
 
-	/** (0.5.26) The people a kingdom needs before its tavern is the grand kind (the inn or the beer garden). */
+	/** (0.5.27) The people a kingdom needs before its tavern is the grand kind (the inn or the beer garden). */
 	static final int TAVERN_GRAND = 48;
 
 	/**
-	 * (0.5.26) A tavern, built only by a wealthy kingdom with room to spare ({@link Planner#eligible}), by its size: an
+	 * (0.5.27) A tavern, built only by a wealthy kingdom with room to spare ({@link Planner#eligible}), by its size: an
 	 * alehouse, or from {@link #TAVERN_GRAND} people a coaching inn or (half the time, in a varied realm) a tavern with a
 	 * beer garden.
 	 */
