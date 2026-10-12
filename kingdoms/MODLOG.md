@@ -1338,3 +1338,12 @@ Tested on the dev server: a war party of 7 against Garhaven threw javelins (and 
 soldiers below them), broke trapdoors in its way and set a dozen fires in the town; the paranoid king of Garhaven
 shoved a player back; a vanilla and an MCA villager ran from an enderman (4 to 11-13 blocks). Not seen in game: the
 other tempers' rounds, the tyrant's tithe, the reveler's feast.
+
+## 0.5.18: Balkon's javelins for guards; tridents only for the richest kingdoms
+- **Javelins are Balkon's.** Guards, barbarians and chiefs now throw Balkon's WeaponMod javelins
+  (`WeaponModJavelins`), which can't be picked up and hit for about 5 instead of a trident's 8. When and at whom they
+  throw is unchanged.
+- **Tridents for the elite.** Only the guards of the 2 wealthiest kingdoms holding at least 300 emeralds still throw
+  tridents (`Javelins.elite`, tuned by `ELITE_REALMS` and `ELITE_TREASURY`).
+- Without WeaponMod loaded, ordinary guards and barbarians don't throw at all.
+- The Kingdoms dev game loads WeaponMod (and Architectury) too, and Kingdoms compiles against it (`compileOnly`).
