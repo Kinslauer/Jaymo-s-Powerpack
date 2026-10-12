@@ -333,7 +333,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.8.49, /power affinity works again:** `/power affinity <player> <power>` now makes that power the one that
   awakens 95% of the time (`Affinity.CHANCE`); the other 5% fate picks any power. Before this the command saved the
   affinity but awakenings ignored it, because the choice screen was switched off. The screen stays off.
-- **0.8.50, Web wall run:** sprint and leap alongside a wall (forward held) and you run along it for a moment, rising
+- **0.8.51, Web wall run:** sprint and leap alongside a wall (forward held) and you run along it for a moment, rising
   a little then dropping slowly; Jump kicks you off it, up and away, still carrying the run's speed. The kick climbs with
   mastery (0.48 to 0.72 up, a vanilla jump is 0.42) and jumps to 0.92 once ascended; runs last longer too (22 to 50
   ticks). Runs chain wall to wall, but not back onto the same wall face until you land. The run itself doesn't count
