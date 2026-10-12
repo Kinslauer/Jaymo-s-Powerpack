@@ -79,6 +79,13 @@ def packMods = [
 	// Epic Structures: Dungeons (all rights reserved; "feel free to add to any modpack"): plains, desert and snowy
 	// dungeons of several sizes, vanilla blocks, mobs and loot (structure ids epic:*)
 	[dep: "maven.modrinth:epic-structures-dungeons:NK6Uptyi", cf: [1501318, 8984101]],
+	// Distant Horizons (LGPL-3.0): far-off terrain drawn as simplified chunks, for a much longer view than the render
+	// distance. Back in 0.8.56 from its Modrinth maven (it was a libs/ jar until 0.4.5). The server builds the far chunks
+	// and sends them to players. dev: false keeps it out of the dev game (too heavy for quick tests).
+	[dep: "maven.modrinth:distanthorizons:TGgEbP9A", cf: [508933, 9005667], dev: false],
+	// Iris Shaders (LGPL-3.0): shader packs (Options > Video Settings > Shader Packs); built on the pack's Sodium, and
+	// Distant Horizons draws its far terrain through shaders that support it. Client-only: the server ignores it.
+	[dep: "maven.modrinth:iris:vTN4NRGW", cf: [455508, 9015108], dev: false],
 ]
 // First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
 // Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge
@@ -115,12 +122,12 @@ def kingdomsJar = fileTree(kingdomsLibs) { include "jaymos-kingdoms-${kingdomsPr
 // on CurseForge but not on a maven we use: the jar sits in libs/ (git-ignored, copied from the Jaymo's Kitchen
 // profile) and the CurseForge import downloads it by id. Not loaded in the dev game (too heavy for quick tests).
 def localPackMods = [
-	// (none right now; Distant Horizons was here until 0.4.5)
+	// (none right now; Distant Horizons was here until 0.4.5, and is in packMods since 0.8.56)
 ]
 // mods taken out of the pack: moved out of your CurseForge profile's mods folder (into removed-mods) on the next build
 // (Towns and Towers left in 0.8.4: its villages fought Epic Structures: Villages, where kingdoms are founded;
 // Traveler's Backpack and Forge Config API Port left in 0.8.14)
-def removedFromProfile = ["DistantHorizons-", "t_and_t-", "towns-and-towers-", "cristellib-", "cristel-lib-",
+def removedFromProfile = ["t_and_t-", "towns-and-towers-", "cristellib-", "cristel-lib-",
 	"travelersbackpack-", "forge-config-api-port-"]
 // a jar's Fabric mod id (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's
 def modId = { File jar ->
@@ -154,7 +161,7 @@ dependencies {
 	localRuntime mcaJar
 	// compiled against (for its corpses); required at runtime since 0.8 (fabric.mod.json), touched only via power/web/KitchenCompat
 	compileOnly kitchenJar
-	packMods.drop(1).each { localRuntime it.dep }
+	packMods.drop(1).findAll { it.dev != false }.each { localRuntime it.dep }
 	packMods.each { packJars it.dep }
 	packModsNoCf.each { localRuntime it.dep; packJars it.dep }
 }
