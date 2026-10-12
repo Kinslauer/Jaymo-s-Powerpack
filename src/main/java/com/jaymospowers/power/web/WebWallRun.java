@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -79,6 +82,10 @@ public final class WebWallRun {
 	private record Running(Direction face, int ticks) {
 	}
 
+	/** Running along a wall: the wall's side (a horizontal direction's 3D index), for everyone to draw the run (see {@code WebWallRunPose}). */
+	public static final AttachmentType<Integer> WALL = AttachmentRegistry.create(JaymosPowers.id("web_wall_run"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+
 	/** Players running along a wall right now, and on which side. */
 	private static final Map<UUID, Running> RUNNING = new HashMap<>();
 
@@ -113,10 +120,12 @@ public final class WebWallRun {
 		// (the fall up to here still counts; only the run itself is free)
 		if (side == null || !side.getAxis().isHorizontal() || !Powers.has(player, WebPower.INSTANCE) || !wallAt(player.level(), player, side, 0.6)) {
 			RUNNING.remove(player.getUUID());
+			player.removeAttached(WALL);
 			return;
 		}
 		player.resetFallDistance();
 		RUNNING.put(player.getUUID(), new Running(side, 0));
+		player.setAttached(WALL, side.get3DDataValue());
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -128,6 +137,9 @@ public final class WebWallRun {
 			if (player == null || !player.isAlive() || player.onGround() || running.ticks() >= SERVER_MAX_TICKS
 				|| !Powers.has(player, WebPower.INSTANCE) || !wallAt(player.level(), player, running.face(), 0.6)) {
 				it.remove();
+				if (player != null) {
+					player.removeAttached(WALL);
+				}
 				continue;
 			}
 			// running along the wall isn't falling
