@@ -13,12 +13,13 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** Speech over any entity's head (see SpeechBubbles): its lines go on the render state, then drawn after the entity. */
+/** Speech over any entity's head (see SpeechBubbles), and (0.5.26) quest givers' marks: put on the render state, then drawn after the entity. */
 @Mixin(EntityRenderDispatcher.class)
 abstract class SpeechEntityRenderDispatcherMixin {
 	@Inject(method = "extractEntity", at = @At("RETURN"))
 	private void jaymoskingdoms$speechState(Entity entity, float partialTicks, CallbackInfoReturnable<EntityRenderState> cir) {
 		SpeechBubbles.extract(entity, cir.getReturnValue(), partialTicks);
+		com.jaymoskingdoms.client.QuestClient.extract(entity, cir.getReturnValue(), partialTicks);
 	}
 
 	@Inject(method = "submit", at = @At(value = "INVOKE",
@@ -27,5 +28,6 @@ abstract class SpeechEntityRenderDispatcherMixin {
 	private void jaymoskingdoms$speech(EntityRenderState state, CameraRenderState camera, double x, double y, double z, PoseStack poseStack,
 		SubmitNodeCollector collector, CallbackInfo ci) {
 		SpeechBubbles.submit(state, poseStack, collector, camera);
+		com.jaymoskingdoms.client.QuestClient.submit(state, poseStack, collector, camera);
 	}
 }

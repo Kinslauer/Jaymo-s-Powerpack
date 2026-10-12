@@ -17,7 +17,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * (0.5.19) A boss's bar (a king, a lord, a chief, a warlord) shows only to the players who've hit it: by hand, with an
+ * (0.5.19) A boss's bar (a king, a lord, a chief, a warlord, a quest's champion) shows only to the players who've hit it: by hand, with an
  * arrow or javelin, or with a power. It stays while they're within {@link #RANGE}; once they leave, it's gone until
  * they hit the boss again. Its death or unloading clears it.
  */
@@ -46,7 +46,7 @@ final class BossBars {
 	}
 
 	private static boolean boss(Entity entity) {
-		return entity instanceof Folk folk ? folk.leader() : Illagers.warlord(entity);
+		return entity instanceof Folk folk ? folk.leader() : Illagers.warlord(entity) || QuestFoes.champion(entity);
 	}
 
 	/** The boss's bar goes to the players who've hit it and are still near; anyone else loses it. */

@@ -128,6 +128,18 @@ public final class McaCompat {
 		return LOADED && McaBridge.isMca(villager);
 	}
 
+	/** (0.5.26) An MCA villager (their own menu has the Quests button). */
+	static boolean isMca(net.minecraft.world.entity.Entity entity) {
+		return LOADED && entity instanceof Villager v && McaBridge.isMca(v);
+	}
+
+	/** (0.5.26) {@code villager} (if MCA's) warms to {@code player} by {@code hearts}: a quest done for them, a letter brought. */
+	static void hearts(LivingEntity villager, ServerPlayer player, int hearts) {
+		if (LOADED && villager instanceof Villager v) {
+			McaBridge.hearts(v, player, hearts);
+		}
+	}
+
 	/** Tells MCA about the workers' professions (they're kept: not traded with, not made guards, not lost). */
 	static void register() {
 		if (LOADED) {

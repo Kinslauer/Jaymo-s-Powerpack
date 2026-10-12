@@ -34,6 +34,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		CampSkins.register();
 		MobAnimations.register();
 		SpeechBubbles.register();
+		// 0.5.26: quest givers' screens, marks and the tracker
+		QuestClient.register();
 	}
 
 	/** Their render state: which of them it is, its faction's style (type ordinal), and the dye it wears (-1 for none). */

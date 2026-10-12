@@ -93,7 +93,8 @@ public final class Royals {
 
 		@Override
 		public boolean canUse() {
-			if (!walks(this.king) || this.king.getTarget() != null || !(this.king.level() instanceof ServerLevel level)) {
+			// (nor while a player hears what work he has: Quests holds him)
+			if (!walks(this.king) || this.king.getTarget() != null || Quests.listening(this.king) || !(this.king.level() instanceof ServerLevel level)) {
 				return false;
 			}
 			Castle.Keep keep = Factions.keep(level.getServer(), this.king.factionId());

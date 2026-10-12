@@ -541,6 +541,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		}
 		if (player instanceof ServerPlayer serverPlayer) {
 			KingdomEvents.audience(serverPlayer, this);
+			// (0.5.26) a king also has work for you
+			if (this.role() == KING) {
+				Quests.open(serverPlayer, this);
+			}
 		}
 		return InteractionResult.SUCCESS;
 	}
