@@ -47,7 +47,7 @@ final class McaBridge {
 		return villager instanceof VillagerEntityMCA;
 	}
 
-	/** (0.5.26) Hearts with {@code player} in an MCA villager's memory. */
+	/** (0.5.28) Hearts with {@code player} in an MCA villager's memory. */
 	static void hearts(Villager villager, ServerPlayer player, int hearts) {
 		if (villager instanceof VillagerEntityMCA v) {
 			v.getVillagerBrain().getMemoriesForPlayer(player).modHearts(hearts);
@@ -58,7 +58,7 @@ final class McaBridge {
 
 	/** The workers' professions are important (MCA never makes them guards or lets them lapse), and they don't trade. */
 	static void register() {
-		for (VillagerProfession profession : List.of(Professions.BUILDER, Professions.FARMER, Professions.MINER, Professions.WOODCUTTER)) {
+		for (VillagerProfession profession : List.of(Professions.BUILDER, Professions.FARMER, Professions.MINER, Professions.WOODCUTTER, Professions.PULLER)) {
 			ResourceKey<VillagerProfession> key = BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(profession).orElseThrow();
 			ProfessionsMCA.IS_IMPORTANT.add(key);
 			ProfessionsMCA.CAN_NOT_TRADE.add(key);
@@ -206,6 +206,8 @@ final class McaBridge {
 				hired = Builders.spawn(level, f, Builders.foreman(level, f) == null ? Folk.FOREMAN : Folk.WORKER, null);
 			} else if (role == Folk.FARMER) {
 				hired = Farmers.spawn(level, f, null);
+			} else if (role == Folk.PULLER) {
+				hired = Rickshaws.spawn(level, f, null);
 			} else {
 				hired = Gatherers.spawn(level, f, role, null);
 			}

@@ -9,7 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 
 /**
- * (0.5.26) One quest: what a villager or a king asks of a player, what it takes, and what it pays. Offered by the giver
+ * (0.5.28) One quest: what a villager or a king asks of a player, what it takes, and what it pays. Offered by the giver
  * (kept on them until someone takes it), then carried in the player's log ({@link Quests#LOG}) until it's turned in or
  * given up. Immutable: progress and the like go through the {@code with...} methods.
  *

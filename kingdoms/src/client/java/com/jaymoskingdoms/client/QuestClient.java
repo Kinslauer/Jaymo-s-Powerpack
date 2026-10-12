@@ -32,7 +32,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.26) The client half of {@link Quests}: the giver's screen ({@link QuestScreen}), the marks over givers' heads (a
+ * (0.5.28) The client half of {@link Quests}: the giver's screen ({@link QuestScreen}), the marks over givers' heads (a
  * gold <b>!</b>: work on offer; a <b>?</b>: one of your quests, gold once it's ready to turn in) and the quest tracker on
  * the right of the screen.
  */

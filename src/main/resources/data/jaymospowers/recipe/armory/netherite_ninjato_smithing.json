@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": "#minecraft:netherite_tool_materials",
+  "base": "jaymospowers:diamond_ninjato",
+  "result": {
+    "id": "jaymospowers:netherite_ninjato"
+  },
+  "template": "minecraft:netherite_upgrade_smithing_template"
+}

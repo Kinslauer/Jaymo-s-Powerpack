@@ -59,7 +59,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.26) What waits at a quest's ruin, set out when the player who took it comes near: for a fetch, a chest with the
+ * (0.5.28) What waits at a quest's ruin, set out when the player who took it comes near: for a fetch, a chest with the
  * keepsake in it and a few of the ruin's own kind standing over it; for a king's quest, a <b>champion</b> (a boss far
  * beyond a camp's chief: hundreds of health, plated, unshoveable, a boss bar) and its escort, which calls more to its side
  * when hurt, rages near its end, and throws back whoever crowds it.

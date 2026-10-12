@@ -1458,3 +1458,96 @@ jobs (builder farmer guard) in the same way"; then "miners should place torches 
   villages (from 10). A campfire (a soul campfire a quarter of the time) sunk in a 3x3 stone ring, a path round it,
   and now and then stone posts with lanterns at the corners. It's what the guards throw corpses on.
 - Tuning is at the top of `Undertakers` (`SWEEP`, `PYRE_REACH`, `SPOT_REACH`, `CLEAR`, `MOST_PER_ROUND`...).
+
+## 0.5.25: trees take chops to fell (HT's TreeChop, our own code)
+Andy asked for TreeChop's feel in our trees. TreeChop (MIT) has no 26.3 build (its newest Fabric file is 1.21.4), so it's
+rebuilt here; none of its code or art is used.
+- **Chopping** (`Trees.chop`, from `PlayerBlockBreakEvents.BEFORE`): breaking a log of a tree (a trunk under living
+  leaves) in survival is a chop, not a break. The log stays and narrows: it becomes a **`ChoppedLog`**
+  (`jaymoskingdoms:chopped_log`, 1-6 `chops`, an `axis`), drawn by `ChoppedLogRenderer` as the log it was, two pixels
+  thinner a side per chop, with a matching hitbox. Once a log is as thin as it goes (6), further chops go into the nearest
+  log up the trunk. Each chop shows the log's break particles and sound, wears the axe a point and costs a little hunger.
+- **Felling**: a tree comes down on the chop that makes up `Trees.needed(logs)`, TreeChop's logarithmic count
+  `round(1 + 10 ln(1 + (n-1)/10))`: 1 log 1 chop, 5 logs 4, 17 logs 11, 20 logs 12, 100 logs 25. It then topples as
+  before (`FallingTree`, chopped logs falling as the logs they were) from the block being chopped. Chops in the stump
+  under the cut count toward the same tree. Tuning: `Trees.CHOP_SCALE` (0 = one chop per tree; very large = one per log)
+  and `ChoppedLog.MOST`.
+- **Sneak** to break a single log as ever; creative breaks as ever. A chopped log broken on its own (no tree left round it,
+  or sneaking) gives the log it was (`ChoppedLog.getDrops`). Chopped logs are in `minecraft:logs` (leaves keep to them,
+  a tree is still a tree) and `mineable/axe`.
+- **Woodcutters** chop too: a chop every `Gatherers.CHOP_TICKS` (12) at the foot, the trunk narrowing as they go, until
+  it comes down into their bag. Bigger trees take them longer.
+- Seen in game (dev server + client): a 17-log oak narrowed at its foot chop by chop, the chops moved up the trunk, and it
+  fell and broke into wood on the 11th. Not yet seen: woodcutters chopping.
+
+## 0.5.26: rickshaws (pullers carry goods and people)
+Andy asked for villagers who rickshaw goods and people about the villages and kingdoms. A rickshaw is a third kind of
+`Wagon` (`Wagon.RICKSHAW`), hitched to a person instead of a horse; the work is `Rickshaws`.
+- **Pullers** (`Folk.PULLER`, the `jaymoskingdoms:puller` profession, a "Rickshaw puller" button on MCA's Professions
+  page): a settlement takes its first once it has a road, a storehouse and `Rickshaws.FIRST_AT` (12) people, its second
+  at `SECOND_AT` (30). With MCA it's one of its villagers promoted in place, like the other workers. They wait at the
+  rank by the bell, park there at dusk and go to bed.
+- **Goods**: a miner, woodcutter or farmer walking a load in from more than `MEET_FROM` (28) blocks from storage is met;
+  the load goes into the rickshaw (shown on its rack) and the gatherer goes straight back to work. The rickshaw hauls
+  to storage at `HAUL_AT` (96) items or when there's nobody else to meet.
+- **Errands**: at most every `ERRAND_TICKS` (3600) a settlement sends up to 64 items to a sister settlement within
+  `ERRAND_RANGE` (220) blocks (its overlord, a vassal, a fellow vassal or an ally): food if it has `FOOD_GAP` more,
+  else whatever it has `ERRAND_GAP` more of.
+- **People**: now and then a waiting puller fetches one of the town's villagers (a child or a grown-up) and drives them
+  to one of its buildings. A ruler with no carriage is fetched on his round and rides it from stop to stop
+  (`Carriages` drives a rickshaw the way it drives his carriage).
+- **Players**: right-click a waiting rickshaw for up to 6 settlements within `RIDE_RANGE` (700) blocks with fares
+  (`FARE_BASE` + 1 per `FARE_PER_BLOCKS`, at most `FARE_MOST` emeralds); clicking one runs `/kingdom ride` and the fare
+  goes to the settlement's treasury. Sneak to get down on the way (no refund). Hostile players and enemies at war are
+  refused. Out of sight of any player after a trip, the puller is back at the rank in a puff.
+- Stuck, a puller hops `HOP` (8) blocks ahead in a puff, never the whole way. A rickshaw whose puller is gone (or given
+  other work) for `ABANDON_TICKS` spills its load and is taken apart.
+- **Worn out** (Andy's follow-up): pullers tire with every block pulled (more laden), spent after `TIRED_BLOCKS`
+  (1800), losing up to `SLOWEST` (half) their speed. They get a little back waiting at the rank and all of it after a
+  night's sleep; spent past `WINDED` they stop now and then to catch their breath (sweat drops, a gasp). A player
+  hailing a worn-out puller is told it'll be a slow ride. The rickshaw syncs its puller and their tiredness (`Wagon.PULLER`,
+  `TIRED`) for the client.
+- **Pose** (`PullerPose`, client, through the same model hooks as `MobAnimations`): bent into the shafts like a crouch,
+  hands down at the hips gripping them, a tug back with each stride; the more tired, the lower the lean, the heavier
+  the tug and the more the head hangs; stood still and spent, their shoulders heave. MCA villagers' clothes layers and
+  breasts follow (`McaPullerPose`).
+- **Cabs** (`Cabs`, `Wagon.CAB`): a realm whose treasury holds more than `Cabs.RICH` (300) emeralds keeps a hired
+  carriage (a driver on a horse, a plain coach in its colours) across the bell from the rickshaw rank. It, not the
+  rickshaws, takes players to other settlements (same fares and offer, faster); a rickshaw there points players to it.
+  The pullers do everything else. Below 300 the cab is let go once it's back and empty.
+- Not yet seen in game: all of it (built only).
+
+## 0.5.28: quests from villagers and kings
+Andy asked for Quest Giver's kind of quests. Quest Giver is Forge/NeoForge 1.21.1 only, so this is our own code in
+Kingdoms (nothing taken from it). Only villagers of a kingdom, fiefdom or village (not barbarians, outlaws or
+cultists) and kings give quests.
+- **Who has work**: each giver rolls once a day (`OFFER_CHANCE` 35%) when a player is near. A gold **!** floats over
+  one with work; a **?** over the giver of one of your quests (grey, then gold once it's ready). MCA villagers have a
+  **Quests** button on their main page; plain villagers: sneak and use; kings: talk to them (after the audience).
+  A giver stands still and faces you while their quest screen is open (`HOLD_TICKS`), and a king pauses his round.
+- **Villagers' quests fit their job** (`QuestBoard`): farmers want crops or rabbits killed, butchers and
+  leatherworkers want animal parts, fishermen fish, fletchers feathers and flint, smiths iron and coal, clerics undead slain,
+  librarians and cartographers want a keepsake fetched from a real ruin (trail ruins, ruined portals, shipwrecks,
+  Grim ruins, ATi structures, never one a settlement has taken over), guards want monsters slain. Anyone may ask for
+  **mail** to be taken to a villager in town, or to the king, lord or elder of a settlement nearby (a sealed letter).
+  A fetch quest sets out a chest with the keepsake and 3 guards when you get within 48 blocks; it glints.
+- **Kings' decrees are hard** (one at a time): slay a **champion** in a real lair (trial chambers, outposts,
+  pyramids, strongholds, mansions, ancient cities...; each lair has its foe: warchief, tomb lord, stalker, frost
+  witch, bone lord, brute, beast, plague knight) or the chief of a barbarian camp or illager warlord. A champion has
+  500 health (beast 700), +10 damage, 20 armour, 10 toughness, no knockback, 5 escorts, 4 more at 60% health, rage
+  at 30%, a shockwave, heals when nobody's near, and a red boss bar (once you've hit it).
+- **Rewards suit the giver**: emeralds, the giver's own goods (a farmer gives hay, a mason stone, a woodcutter
+  logs, a smith a weapon or armour piece, a librarian always an enchanted book), MCA hearts with that villager, reputation with their realm and standing.
+  Smiths often give a **relic**: a weapon or armour piece with a passive (weapons: Bloodthirst, Frostbite,
+  Emberbrand, Stormcaller, Executioner, Venomfang; armour: Second Wind, Retribution, Bulwark, Fleetfoot, Flameward;
+  `Relics`). Kings pay 64 emeralds, diamonds, a high book, a royal netherite relic and +150 reputation.
+- Up to 5 quests and 1 decree at once. `/kingdom quests` lists them (click to give one up); a tracker on the right
+  of the screen shows 3 with distance and direction. Ops: `/kingdom quests offer` (nearest giver has work now) and
+  `/kingdom quests finish` (counts made up).
+- Tuning: tops of `Quests`, `QuestBoard`, `QuestFoes`, `Relics`, `QuestClient` (mark size and height).
+- Seen in game (dev server, MCA loaded, Dunhaven): the gold ! and MCA's Quests button; a farmer's gather quest taken,
+  the ? turning gold, turned in for emeralds and a cake (+reputation, +hearts); the king's decree "The Bone Lord" at
+  trial chambers taken; the champion and its escort set out at 48 blocks, boss bar on hitting it, its death made the
+  quest ready; turned in for 64 emeralds, 5 diamonds, Mending, a Retribution netherite helm (+75 reputation after
+  the king's temper). The helm sent back a quarter of an 8-damage hit. Not seen: mail, fetch caches, slay counts,
+  the other passives.

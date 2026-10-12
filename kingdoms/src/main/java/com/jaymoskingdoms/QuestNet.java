@@ -15,7 +15,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * (0.5.26) The quests' packets. The server is the authority: it sends a giver's quests as words and items to show
+ * (0.5.28) The quests' packets. The server is the authority: it sends a giver's quests as words and items to show
  * ({@link Open}), the player's log for their tracker and the givers' marks ({@link Log}), and takes the player's choice
  * back ({@link Act}).
  */

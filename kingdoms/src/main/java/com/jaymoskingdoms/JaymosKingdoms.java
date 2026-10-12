@@ -70,6 +70,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.9: felled trees topple over whole (and their attachments)
 		FallingTree.register();
 		LOGGER.debug("falling tree attachments: {} {}", FallingTree.PIECES, FallingTree.HEADING);
+		// 0.5.25: trees take chops to fell (TreeChop's way), the chopped logs narrowing
+		ChoppedLog.register();
 		Trees.register();
 		// 0.5.5: the working folk sleep in beds at night; villagers take a trade at the settlement's job sites and work it
 		Homes.register();
@@ -105,7 +107,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Caravans.register();
 		Cavalry.register();
 		Carriages.register();
-		// 0.5.26: quests from villagers and kings, their caches and champions, relics (and their attachments)
+		Rickshaws.register();
+		Cabs.register();
+		// 0.5.28: quests from villagers and kings, their caches and champions, relics (and their attachments)
 		LOGGER.debug("quest attachments: {} {} {} {}", Quests.LOG, Quests.OFFER, Quests.MARK, QuestFoes.FOE);
 		Quests.register();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {

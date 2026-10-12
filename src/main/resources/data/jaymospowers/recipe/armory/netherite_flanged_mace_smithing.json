@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": "#minecraft:netherite_tool_materials",
+  "base": "jaymospowers:diamond_flanged_mace",
+  "result": {
+    "id": "jaymospowers:netherite_flanged_mace"
+  },
+  "template": "minecraft:netherite_upgrade_smithing_template"
+}

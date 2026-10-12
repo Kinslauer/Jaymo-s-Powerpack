@@ -124,7 +124,8 @@ public final class FallingTree extends Entity {
 		int top = 1;
 		for (List<BlockPos> part : List.of(logs, leaves)) {
 			for (BlockPos p : part) {
-				BlockState state = level.getBlockState(p);
+				// ((0.5.25) a chopped log falls as the log it was)
+				BlockState state = ChoppedLog.real(level, p, level.getBlockState(p));
 				if (state.isAir()) {
 					continue;
 				}

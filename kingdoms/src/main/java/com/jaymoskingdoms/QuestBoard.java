@@ -23,7 +23,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.26) What a giver asks: quests made up to suit who's asking. A villager's trade decides what they want (a farmer
+ * (0.5.28) What a giver asks: quests made up to suit who's asking. A villager's trade decides what they want (a farmer
  * frets over rabbits in the carrots and pays in hay, a smith wants iron and pays in arms, a librarian wants a lost tome
  * from a ruin and pays in enchanted books); every villager may want a letter carried. A king asks the deadly work: a
  * camp's chief slain, or a champion put down where it lairs in one of the world's own ruins.

@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * (0.5.21) MCA's Professions menu (villager, guard, archer) also offers the settlement's jobs: builder, farmer, miner,
- * woodcutter, one row each below MCA's own. The server answers them ({@code McaCommandMixin}). (0.5.26) The main page
+ * woodcutter, one row each below MCA's own. The server answers them ({@code McaCommandMixin}). (0.5.28) The main page
  * offers Quests.
  */
 @Mixin(MCAScreens.class)
@@ -30,7 +30,7 @@ abstract class McaScreensMixin {
 	@Final
 	private Map<String, MCAButton[]> buttons;
 
-	/** (0.5.26) The main page's Quests button. */
+	/** (0.5.28) The main page's Quests button. */
 	private static final String QUESTS = "gui.button.quests";
 	/** How many rows of buttons MCA's own main page has (talk ... family tree): Quests goes under them. */
 	private static final int MAIN_ROWS = 6;
@@ -62,7 +62,7 @@ abstract class McaScreensMixin {
 		this.buttons.put("professions", all.toArray(MCAButton[]::new));
 	}
 
-	/** (0.5.26) The main page's Quests button, under MCA's own rows (the server opens the villager's quests). */
+	/** (0.5.28) The main page's Quests button, under MCA's own rows (the server opens the villager's quests). */
 	private void jaymoskingdoms$quests() {
 		MCAButton[] page = this.buttons.get("main");
 		if (page == null || Arrays.stream(page).anyMatch(b -> b.identifier().equals(QUESTS))) {

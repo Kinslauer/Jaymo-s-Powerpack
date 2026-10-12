@@ -48,6 +48,8 @@ public final class Workers {
 			Farmers.tick(level, w);
 		} else if (Gatherers.isGatherer(w.role())) {
 			Gatherers.tick(level, w);
+		} else if (w.role() == Folk.PULLER) {
+			Rickshaws.tick(level, w);
 		}
 	}
 
@@ -91,7 +93,7 @@ public final class Workers {
 		if (mob.tickCount % RECONCILE_TICKS == 0 && !McaCompat.reconcile(level, w)) {
 			return false;
 		}
-		if (!Worker.isWork(w.role()) || Homes.bedtime(level) || mob.isSleeping() || mob.isBaby() || Frights.afraid(mob.getUUID())
+		if (!Worker.isWork(w.role()) || Homes.bedtime(level) && !Rickshaws.onDuty(mob) || mob.isSleeping() || mob.isBaby() || Frights.afraid(mob.getUUID())
 			|| mob.getLastHurtByMob() != null && mob.tickCount - mob.getLastHurtByMobTimestamp() < FLEE_TICKS || McaCompat.busy(mob)) {
 			return false;
 		}
