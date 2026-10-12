@@ -493,3 +493,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.8.78, Townsfolk come to you:** ships Jaymo's Kingdoms 0.5.39 (see `kingdoms/MODLOG.md`): villagers, children and
   guards walk up and start things (questions, quests, accusations, requests, bargains, gifts, news); right-click to
   answer.
+- **0.8.80, No rainbow hair:** ships Jaymo's Kingdoms 0.5.41 (see `kingdoms/MODLOG.md`): MCA villagers no longer get
+  rainbow hair or random dyed hair; they keep natural colours.
