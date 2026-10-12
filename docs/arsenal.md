@@ -11,9 +11,10 @@ vanilla weapons. This power adds no weapon items of its own.
 | **R** | **Reach Through.** A rift of portal particles opens in front of you. About 0.5 s later a random weapon (and its ammo) comes out of it into your main hand, or into your inventory if your hand is full, or at your feet if the inventory is full. | 8 s |
 | **G** | **Return.** Sends the summoned weapon in your main hand (or offhand) back, along with its ammo. If it was yours, Reach's cooldown drops by 4 s. | none |
 | **V** | **Barrage.** 3 to 5 rifts open in an arc behind and above you. A weapon hovers in each one, turns to track what you're looking at (up to 48 blocks), then they fly in a staggered volley. Each hit does 7 damage and then the weapon dissolves. | 30 s |
-| **B** | **Pocket Stash.** Opens your personal 27-slot pocket dimension in a chest screen. It's saved, and it's kept through death. | none |
+| **Z** | **Pocket Stash.** Opens your personal 27-slot pocket dimension in a chest screen. It's saved, and it's kept through death. Unlocks with B. | none |
+| **B** | Pocket Stash too (same as Z). Corrupted: **Sword of Damocles** (below). | 45 s corrupted |
 
-HUD (to the right of the hotbar): Reach and Barrage cooldown bars with their bound keys, plus
+HUD (to the right of the hotbar): Reach and Barrage (corrupted: Damocles) cooldown bars with their bound keys, plus
 `Summoned n/3 · Ts`, which shows how many summoned weapons you hold and how long until the soonest one leaves. That
 line turns red under 10 s.
 
@@ -197,6 +198,19 @@ does nothing once the power is corrupted or purified. All numbers are constants 
   - A faint smoke haze every 4 ticks.
   - About every 5.5 s on average, a dark pulse: a ring of squid ink and a quiet heartbeat.
   - In first person, it stays below eye level.
+- **Sword of Damocles** (B, `ArsenalDamocles`; drawn by `ArsenalDamoclesRenderer`)
+  - A void rift (radius 4.5) opens 30 blocks over your feet (lower under the world's ceiling, never less than 18 above
+    the ground). Motes fall from it and it rumbles.
+  - 3 s later a 16-block sword (a netherite sword's model, void-dark with the glint) pushes out of it hilt-first over
+    0.3 s, then falls. It lands about 1 s later, point 4.5 blocks into the first solid ground under where you stood.
+  - On its way down it breaks everything in a 3×3 column above the ground, plus a 7-block-wide slot for the
+    cross-guard: up to hardness 10 (obsidian holds it). No block entities, no fluids, and only where you may build
+    (spawn protection and claim mods through Fabric's break event). Blocks drop 25% of the time.
+  - Falling on a creature: 30 damage plus Darkness and Wither. Striking the ground: up to 16 damage within 6 blocks,
+    thrown back, soft ground (hardness 1 or less) cracked out to 3 blocks, a shake for everyone within 30.
+  - It stands for 12 s, then the void takes it back. You're never hurt by your own sword. 45 s cooldown.
+  - Only the cast time and place are synced (`ArsenalDamocles.FALL`); clients work the sword's height out from the
+    same formulas as the server.
 - **Gameplay trade** (`ArsenalVoid`)
 
   | Effect | Value | Constant |
