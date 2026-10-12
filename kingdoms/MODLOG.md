@@ -1396,3 +1396,13 @@ Tested on the dev client with MCA: hurt villagers' lines and a witness's "Murder
   warlords. A hit by hand, with an arrow or javelin, or with a power that names its player all count. The bar stays
   while that player is within 48 blocks; once they leave (or die, or change dimension) it's gone until they hit the
   boss again. Its death or unloading clears it. Banner capture bars are unchanged (they're not a boss's).
+
+## 0.5.20: arson counts as theft, and the townsfolk mob you
+- **Lighting a fire in a settlement** (flint and steel or a fire charge, once it catches) is arson (`Theft`), a medium
+  crime like stealing: seen, it costs reputation and the guards hunt you. A fire on netherrack (a hearth), relighting
+  a campfire, creative players and members allowed to take from storage don't count.
+- **The townsfolk turn on an arsonist they saw**: every grown villager (vanilla or MCA) and civilian folk within 24
+  blocks runs at you and punches (1 damage; one blow per 30 ticks each, at most one per 10 ticks from the whole
+  crowd). Hit any of them and the crowd scatters; it also ends after 60 s, on death, or 48 blocks away. The guards
+  keep hunting. Rioters leave the fire to the others (`Firefighting`).
+Tested on the dev client: the fire was seen, the crowd closed in and punched, one hit back stopped it.

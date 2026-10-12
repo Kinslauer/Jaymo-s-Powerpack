@@ -122,6 +122,10 @@ public final class Firefighting {
 	private static void answer(ServerLevel level, BlockPos fire, long now) {
 		AABB near = new AABB(fire).inflate(REACH);
 		for (Villager v : level.getEntitiesOfClass(Villager.class, near, LivingEntity::isAlive)) {
+			if (Theft.rioting(v)) {
+				// (busy with the arsonist)
+				continue;
+			}
 			if (v.isBaby()) {
 				run(level, v, fire);
 				continue;
@@ -146,7 +150,7 @@ public final class Firefighting {
 				default -> run(level, v, fire);
 			}
 		}
-		for (Folk folk : level.getEntitiesOfClass(Folk.class, near, f -> f.isAlive() && f.getTarget() == null)) {
+		for (Folk folk : level.getEntitiesOfClass(Folk.class, near, f -> f.isAlive() && f.getTarget() == null && !Theft.rioting(f))) {
 			if (close(folk, fire)) {
 				putOut(level, folk, fire, now);
 				return;
