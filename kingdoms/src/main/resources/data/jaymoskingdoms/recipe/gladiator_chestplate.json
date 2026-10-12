@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "X": "minecraft:copper_ingot",
+    "A": "minecraft:leather"
+  },
+  "pattern": [
+    "X X",
+    "XAX",
+    "XXX"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:gladiator_chestplate"
+  }
+}

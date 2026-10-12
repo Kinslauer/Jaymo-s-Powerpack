@@ -21,7 +21,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * (0.5.21) MCA's Professions menu (villager, guard, archer) also offers the settlement's jobs: builder, farmer, miner,
- * woodcutter, one row each below MCA's own. The server answers them ({@code McaCommandMixin}).
+ * woodcutter, one row each below MCA's own. The server answers them ({@code McaCommandMixin}). (0.5.29) The main page
+ * offers Quests.
  */
 @Mixin(MCAScreens.class)
 abstract class McaScreensMixin {
@@ -29,11 +30,17 @@ abstract class McaScreensMixin {
 	@Final
 	private Map<String, MCAButton[]> buttons;
 
+	/** (0.5.29) The main page's Quests button. */
+	private static final String QUESTS = "gui.button.quests";
+	/** How many rows of buttons MCA's own main page has (talk ... family tree): Quests goes under them. */
+	private static final int MAIN_ROWS = 6;
+
 	/** How many rows of buttons MCA's own Professions page has. */
 	private static final int MCA_ROWS = 3;
 
 	@Inject(method = "apply(Ljava/util/Map;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V", at = @At("TAIL"))
 	private void jaymoskingdoms$jobs(Map<Identifier, JsonElement> data, ResourceManager manager, ProfilerFiller profiler, CallbackInfo ci) {
+		jaymoskingdoms$quests();
 		MCAButton[] page = this.buttons.get("professions");
 		if (page == null) {
 			return;
@@ -53,5 +60,19 @@ abstract class McaScreensMixin {
 		}
 		all.addAll(Arrays.asList(Resources.GSON.fromJson(json.append("]").toString(), MCAButton[].class)));
 		this.buttons.put("professions", all.toArray(MCAButton[]::new));
+	}
+
+	/** (0.5.29) The main page's Quests button, under MCA's own rows (the server opens the villager's quests). */
+	private void jaymoskingdoms$quests() {
+		MCAButton[] page = this.buttons.get("main");
+		if (page == null || Arrays.stream(page).anyMatch(b -> b.identifier().equals(QUESTS))) {
+			return;
+		}
+		int row = MAIN_ROWS;
+		String json = "[{\"identifier\":\"" + QUESTS + "\",\"x\":-90,\"y\":10,\"row\":" + row
+			+ ",\"width\":80,\"height\":20,\"notifyServer\":true,\"targetServer\":false,\"constraints\":\"adult\",\"hideOnFail\":true}]";
+		List<MCAButton> all = new ArrayList<>(Arrays.asList(page));
+		all.addAll(Arrays.asList(Resources.GSON.fromJson(json, MCAButton[].class)));
+		this.buttons.put("main", all.toArray(MCAButton[]::new));
 	}
 }

@@ -559,6 +559,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 				Disguise.greet(level, serverPlayer, this);
 			}
 			KingdomEvents.audience(serverPlayer, this);
+			// (0.5.29) a king also has work for you
+			if (this.role() == KING) {
+				Quests.open(serverPlayer, this);
+			}
 		}
 		return InteractionResult.SUCCESS;
 	}

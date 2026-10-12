@@ -58,6 +58,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.3, builders and theft: the building catalogue, real-time construction, plots and the plot stake, crime
 		LOGGER.debug("builder and theft attachments: {} {}", Works.WORKS, Theft.WANTED);
 		Plots.register();
+		Armory.register();
 		Buildings.register();
 		Construction.register();
 		// 0.5.11: lost buildings put up again; the settlement's people answer fires
@@ -113,6 +114,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Carriages.register();
 		Rickshaws.register();
 		Cabs.register();
+		// 0.5.29: quests from villagers and kings, their caches and champions, relics (and their attachments)
+		LOGGER.debug("quest attachments: {} {} {} {}", Quests.LOG, Quests.OFFER, Quests.MARK, QuestFoes.FOE);
+		Quests.register();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();
 			Gatherers.clear();

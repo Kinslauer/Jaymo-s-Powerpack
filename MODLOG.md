@@ -386,3 +386,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   - The lance, couched on a moving mount, adds up to 8 damage at a gallop and throws the target back. The flanged
     mace knocks a raised shield down for 4 s (war axes and hatchets as any axe). The machete cuts leaves, vines and
     plants fast. The round shield blocks like a shield and comes up quicker. The recurve bow's arrows fly 30% faster.
+- **0.8.64, goblin villages and loot goblins:** ships Jaymo's Kingdoms 0.5.31 (see `kingdoms/MODLOG.md`): goblin
+  villages behind a palisade fort, the goblin mask to walk in among them, and loot goblins ported from Loot Goblins
+  (LGPL-3.0).

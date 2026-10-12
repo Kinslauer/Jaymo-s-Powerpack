@@ -1,0 +1,20 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "jaymoskingdoms:ronin"
+      },
+      {
+        "texture": "jaymoskingdoms:ronin_lacing",
+        "dyeable": {
+          "color_when_undyed": 10365733
+        }
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "jaymoskingdoms:ronin"
+      }
+    ]
+  }
+}

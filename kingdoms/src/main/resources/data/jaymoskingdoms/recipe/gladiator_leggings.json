@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "X": "minecraft:copper_ingot",
+    "A": "minecraft:leather"
+  },
+  "pattern": [
+    "XXX",
+    "A A",
+    "X X"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:gladiator_leggings"
+  }
+}

@@ -1575,7 +1575,99 @@ Andy asked for villagers who rickshaw goods and people about the villages and ki
 - **Fix:** a rock hitting an MCA villager crashed the server (the rock's blow was dealt again and again).
 - The Kingdoms dev game loads WeaponMod (and Architectury) too, and Kingdoms compiles against it (`compileOnly`).
 
-## 0.5.29: goblin villages, and a mask to walk in among them
+## 0.5.29: quests from villagers and kings
+Andy asked for Quest Giver's kind of quests. Quest Giver is Forge/NeoForge 1.21.1 only, so this is our own code in
+Kingdoms (nothing taken from it). Only villagers of a kingdom, fiefdom or village (not barbarians, outlaws or
+cultists) and kings give quests.
+- **Who has work**: each giver rolls once a day (`OFFER_CHANCE` 35%) when a player is near. A gold **!** floats over
+  one with work; a **?** over the giver of one of your quests (grey, then gold once it's ready). MCA villagers have a
+  **Quests** button on their main page; plain villagers: sneak and use; kings: talk to them (after the audience).
+  A giver stands still and faces you while their quest screen is open (`HOLD_TICKS`), and a king pauses his round.
+- **Villagers' quests fit their job** (`QuestBoard`): farmers want crops or rabbits killed, butchers and
+  leatherworkers want animal parts, fishermen fish, fletchers feathers and flint, smiths iron and coal, clerics undead slain,
+  librarians and cartographers want a keepsake fetched from a real ruin (trail ruins, ruined portals, shipwrecks,
+  Grim ruins, ATi structures, never one a settlement has taken over), guards want monsters slain. Anyone may ask for
+  **mail** to be taken to a villager in town, or to the king, lord or elder of a settlement nearby (a sealed letter).
+  A fetch quest sets out a chest with the keepsake and 3 guards when you get within 48 blocks; it glints.
+- **Kings' decrees are hard** (one at a time): slay a **champion** in a real lair (trial chambers, outposts,
+  pyramids, strongholds, mansions, ancient cities...; each lair has its foe: warchief, tomb lord, stalker, frost
+  witch, bone lord, brute, beast, plague knight) or the chief of a barbarian camp or illager warlord. A champion has
+  500 health (beast 700), +10 damage, 20 armour, 10 toughness, no knockback, 5 escorts, 4 more at 60% health, rage
+  at 30%, a shockwave, heals when nobody's near, and a red boss bar (once you've hit it).
+- **Rewards suit the giver**: emeralds, the giver's own goods (a farmer gives hay, a mason stone, a woodcutter
+  logs, a smith a weapon or armour piece, a librarian always an enchanted book), MCA hearts with that villager, reputation with their realm and standing.
+  Smiths often give a **relic**: a weapon or armour piece with a passive (weapons: Bloodthirst, Frostbite,
+  Emberbrand, Stormcaller, Executioner, Venomfang; armour: Second Wind, Retribution, Bulwark, Fleetfoot, Flameward;
+  `Relics`). Kings pay 64 emeralds, diamonds, a high book, a royal netherite relic and +150 reputation.
+- **Regicide** (Andy's ask): any king but a noble may decree another king's death, each for his own reasons (the
+  tyrant's pride, the warlord's contempt for a king who won't fight, the paranoid's fear of plots, the reveler's
+  grudge), how often by temper (`REGICIDE_CHANCE`: tyrant and paranoid 40%, reveler 25%, warlord 10%). The target is
+  his enemy at war first, then a rival, then the nearest crowned realm that isn't his ally (within 2500 blocks). How
+  to get close is in the telling:
+  - **A false oath** (any king but a noble one): swear to his realm (`/kingdom pledge`), walk up to his throne
+    with his guards' leave, and strike. Dying sworn to, he pays the assassin +50% emeralds and +50 good name with
+    the giver; the oath is broken with the blow (you're struck from his realm, and it counts you an enemy).
+  - **The noble's round**: a noble king walks out among his people by day. Come within 5 blocks of him out there and
+    he stops for you, gives you bread and stands still for 8 seconds. Slain out on his round, the same +50%.
+  - Killing a king keeps its usual cost: -400 with his realm, +60 with its rivals, and his realm's fate.
+- **A warlord's host**: a warlord would rather wage the war himself, so half his decrees (`WARBAND_CHANCE`) are to
+  lead his war party against that same rival and sack its seat. Not at war with them yet, he declares it when you
+  say yes. Once the war is on, stand at his seat and `/kingdom war join` (sworn to him or not): the party marches with
+  you, and the quest is done when it sacks the enemy seat (`WarParties.seize`).
+- Ops: `/kingdom quests offer regicide` and `/kingdom quests offer warband` give the nearest king that decree.
+- Up to 5 quests and 1 decree at once. `/kingdom quests` lists them (click to give one up); a tracker on the right
+  of the screen shows 3 with distance and direction. Ops: `/kingdom quests offer` (nearest giver has work now) and
+  `/kingdom quests finish` (counts made up).
+- Tuning: tops of `Quests`, `QuestBoard`, `QuestFoes`, `Relics`, `QuestClient` (mark size and height).
+- Seen in game (dev server, MCA loaded, Dunhaven): the gold ! and MCA's Quests button; a farmer's gather quest taken,
+  the ? turning gold, turned in for emeralds and a cake (+reputation, +hearts); the king's decree "The Bone Lord" at
+  trial chambers taken; the champion and its escort set out at 48 blocks, boss bar on hitting it, its death made the
+  quest ready; turned in for 64 emeralds, 5 diamonds, Mending, a Retribution netherite helm (+75 reputation after
+  the king's temper). The helm sent back a quarter of an 8-damage hit. Not seen: mail, fetch caches, slay counts,
+  the other passives. Regicide: Dunhaven's tyrant sent for the reveler king of Falshire; pledged to Falshire, struck
+  him down, and the decree was ready with 51 → 76 emeralds and 150 → 200 reputation, the oath broken. Taking the warlord's
+  host declared war on Ravngard; once it began, `/kingdom war join` called up Dunhaven's party for the unsworn
+  Tester, which marched, planted its banner, besieged and sacked Ravngard's seat, and the decree was ready. Not seen: the
+  noble's round and his bread.
+
+## 0.5.30: the realm's armouries (original 3D armour sets)
+Andy asked for Jet and Elia's Armors (Forge only, all rights reserved, no source), then chose "make our own sets".
+Nothing of that mod is used: shapes, art and names are our own, drawn by `tools/gen_armory.py`.
+- **Four sets** (`Armory`), each helmet, chestplate, leggings, boots, crafted like vanilla armour from two ingredients:
+  **Paladin** (iron + gold; great helm with a gilt comb and plume, round pauldrons, a tabard with a gilt cross; 18 armour,
+  toughness 1), **Gladiator** (copper + leather; broad-brimmed grille helm with a crest, banded sword arm, studded
+  belt, greaves; 14 armour, enchantability 14), **Ronin** (iron + string; horned kabuto with a neck guard, hanging
+  shoulder plates, plated skirt; 15 armour, toughness 0.5), **Warlord** (leather + bone; horned iron cap, fur mantle and
+  pelt, bone pauldron, hide kilt; 16 armour, knockback resistance 0.1 a piece). Numbers at the top of `Armory`.
+- **Dye**: the cloth (plume, tabard, crest, lacquered lames and lacing, hide kilt) takes dye like leather (a
+  `crafting_dye` recipe per piece with cloth); undyed it's the set's own colour (blue, red, red, brown).
+- **Raised pieces** (client `ArmoryLayer`): each set's 3D pieces are in `assets/jaymoskingdoms/armory/<set>.json`
+  (slot, bone, box, UV, optional pivot/rotation/grow), baked into one model per slot ("main" in its colours, "cloth"
+  greyscale and tinted by the piece's dye) and drawn on every humanoid renderer (players, mannequins, folk, zombies...),
+  following the wearer's head, body and limbs by copying the parent model's pose. The flat part of each set is a normal
+  equipment asset (`equipment/<set>.json`), so trims and enchantment glint work as on vanilla armour.
+- **Kingdoms' folk** (`Outfits`, VERSION 2 so folk already out are dressed again): one realm in `ARMOURY_REALMS` (2)
+  arms its guards from its land's set in the realm's colour (desert, badlands, savanna: gladiator; jungle, cherry:
+  ronin; elsewhere: paladin), the realm's trim on the chest. A barbarian chief wears the whole warlord set, kilt in
+  his camp's colour; `RAIDER_HORNS_CHANCE` (0.3) of raiders wear the horned cap.
+- **Second pass** (Andy: "emulating Epic Knights more, cleaner details, depth"): metal shades top-lit with a sheen and
+  a crisp rim, leather has stitched edges, flat layers get rimmed faces; and every set has raised 3D rivets and studs
+  (`N` in the generator: half-size cubes on a plate's surface, all sharing one UV per material) and ridges, combs and
+  bands (`ridge`): the paladin's helm, gorget, pauldron comb, belt and knee bosses; the gladiator's studded brim,
+  belt, sword arm and greaves; the ronin's ribbed, gilt-riveted kabuto and shin splints; the warlord's banded cap and
+  studded bracers.
+- **Third pass** (Andy: smaller paladin helm rivets, more layers): the paladin's great helm narrows in two steps to the
+  comb and has a faceplate standing proud of the bowl (brow plate and bevor with breaths, the eye slit between them
+  split by a gilt nasal bar); the ronin's do is four lacquered lames stepping out down the chest, laced with raised
+  cords and a gilt mon, the sode's lames raised and corded, the kusazuri three stepped lames; the warlord's cuirass is
+  layered: a cloth tunic hem, three rows of overlapping hide scales front and back, a dyed sash across; the gladiator
+  has leather pteruges tipped with bronze studs. Warlord chestplates now take dye (the sash and tunic).
+- **Helmet holes cut through**: the paladin's eye slit and the gladiator's grille holes are transparent, so the
+  wearer's face shows through them.
+- Seen in game (dev server + client, on mannequins): all four sets, dyed paladins in red, green and white. Not yet
+  seen: guards and chiefs dressed from the armoury.
+
+## 0.5.31: goblin villages, and a mask to walk in among them
 Andy liked Goblins Tyranny's idea of infiltrating goblin villages. That mod is Forge 1.20.1 only and all rights reserved,
 so goblin villages are rebuilt here as a third kind of camp (`Camps.CampData.kind` "goblin"); none of its code or art is used.
 - **Villages** (`GoblinVillages`, `GoblinBuildings`): up to one per kingdom (`VILLAGE_CHANCE` 0.12 a roll) in forest, taiga,
