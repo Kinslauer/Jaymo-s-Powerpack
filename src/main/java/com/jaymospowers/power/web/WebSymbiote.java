@@ -144,6 +144,8 @@ public final class WebSymbiote {
 	/** A weak bond barely listens: a radial pick is ignored up to {@code IGNORE_MAX} of the time (bond 0), falling to never by {@code IGNORE_BOND}. */
 	public static final float IGNORE_MAX = 0.45F;
 	public static final int IGNORE_BOND = 60;
+	/** In first person (First-person Model), its mask covers your view until the bond reaches this: you aren't quite in control. */
+	public static final int MASK_CLEAR_BOND = 60;
 	/**
 	 * It takes the wheel only for a few reasons: starving ({@link #GORGE_FULL}), a look ({@link #CURIOUS_CHANCE}), or
 	 * neglect: under {@code NEGLECT_BOND}, each takeover check has up to {@code NEGLECT_CHANCE} (at bond 0, none at

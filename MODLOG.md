@@ -505,7 +505,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     `WebWallLookMixin` on `Entity.turn`). You sway on the tethers toward where you look (0.7 blocks along the wall,
     `WebSymbioteClient.sway`) and the bites slide a little after you; the spring is softer and bouncier.
   - **First person:** with First-person Model, your own suit's head, the big body's mask and the maw aren't drawn
-    (`WebSymbioteClient.ownFirstPerson`), so they don't cover your view.
+    (`WebSymbioteClient.ownFirstPerson`), so they don't cover your view, once the bond reaches 60. Under that the mask
+    still covers it, so you're looking out through it, not quite in control (`WebSymbiote.MASK_CLEAR_BOND`).
   - **Armour under the suit:** the plain suit and the big body both engulf worn armour (an elytra still shows).
   - **Wall Crawl walks on tendrils:** four tendrils come out (even without Living Armor) and walk you along walls and
     ceilings, Doc Ock style: each plants its tip ahead, then lifts and arcs over to plant again, in diagonal pairs,

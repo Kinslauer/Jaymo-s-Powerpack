@@ -342,12 +342,14 @@ public final class WebSymbioteClient {
 	}
 
 	/**
-	 * This is you, drawn in first person by First-person Model: the suit's head (the mask, the swollen head, the maw)
-	 * isn't drawn, so it doesn't cover your view.
+	 * This is you, drawn in first person by First-person Model, and it trusts you enough to let you see: the suit's head
+	 * (the mask, the swollen head, the maw) isn't drawn, so it doesn't cover your view. Under
+	 * {@link WebSymbiote#MASK_CLEAR_BOND} it is: you're looking out through its mask, not quite in control.
 	 */
 	public static boolean ownFirstPerson(AvatarRenderState state) {
 		net.minecraft.client.player.LocalPlayer self = net.minecraft.client.Minecraft.getInstance().player;
-		return self != null && state.id == self.getId() && FirstPersonCompat.bodyShown();
+		return self != null && state.id == self.getId() && FirstPersonCompat.bodyShown()
+			&& WebSymbiote.state(self).bond() >= WebSymbiote.MASK_CLEAR_BOND;
 	}
 
 	/** From the avatar renderer's extractRenderState: does this player wear the suit. */
