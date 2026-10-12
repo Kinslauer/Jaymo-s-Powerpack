@@ -125,7 +125,11 @@ public final class DarktideStatus {
 			jump.addOrUpdateTransientModifier(new AttributeModifier(CRIPPLE_JUMP_ID, -1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 		}
 		target.setSprinting(false);
-		target.setPose(Pose.SWIMMING);
+		if (target instanceof Player) {
+			// players crawl in the vanilla pose (DarktidePlayerPoseMixin); mobs have no crawl of their own (their swim
+			// pose is arms flung out, standing), so clients lay them on the ground instead (DarktidePose.crawl)
+			target.setPose(Pose.SWIMMING);
+		}
 	}
 
 	private static void uncripple(LivingEntity target) {
