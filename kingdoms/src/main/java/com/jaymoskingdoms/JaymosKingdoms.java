@@ -33,6 +33,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, id("folk"));
 		FOLK = Registry.register(BuiltInRegistries.ENTITY_TYPE, key, EntityType.Builder.<Folk>of(Folk::new, MobCategory.MISC)
 			.sized(0.6F, 1.95F)
+			// 0.5.32: sits down into a saddle or seat like a zombie (without it his feet rested on the saddle: he floated)
+			.ridingOffset(-0.7F)
 			.clientTrackingRange(10)
 			.build(key));
 		FabricDefaultAttributeRegistry.register(FOLK, Folk.guardAttributes());
