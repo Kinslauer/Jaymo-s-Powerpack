@@ -37,7 +37,7 @@ import org.jspecify.annotations.Nullable;
  * <li>Starter: the guard (right click held, {@link DarktideGuard}) with its parry and reflect.</li>
  * <li>R Dark Strike (held to charge) / Pounce (knives, ascended), V Undertow, G Crescent (katana) / Ink Cross (knife) /
  * Fang Barrage (knives, ascended), B Black Tide / Riptide Dash (knives, ascended): {@link DarktideMoves}.</li>
- * <li>Z shadow harvest, X Gedan: Stillwater ({@link DarktideGedan}), C Tide Arms (sneaking) / Necromancy / Drown
+ * <li>Z shadow harvest (corrupted) / Veil (ascended, cured), X Gedan: Stillwater ({@link DarktideGedan}), C Tide Arms (sneaking) / Necromancy / Drown
  * ({@link DarktideTide}).</li>
  * </ul>
  * Ascends after {@link #ASCEND_PARRIES} katana parries with every ability unlocked. Darktide starts corrupted (the
@@ -51,6 +51,10 @@ public final class DarktidePower implements Power {
 	/** Katana parries (with all four abilities unlocked) to ascend, and the whispers on the way. */
 	public static final int ASCEND_PARRIES = 40;
 	static final int[] WHISPER_AT = {15, 30};
+	/** Veil: Flow drained a second. */
+	static final float VEIL_DRAIN_PER_SECOND = 2.0F;
+	/** Veil: mobs past this many blocks lose you, in the dark / in light. */
+	public static final double VEIL_DARK_RANGE = 6.0, VEIL_LIGHT_RANGE = 12.0;
 	/** The cure: this many ticks of Conduit Power in a row (60 s). */
 	static final int CURE_TICKS = 1200;
 	/** The overworld's clock: a day's length and when night falls (ticks into the day). */
@@ -158,8 +162,8 @@ public final class DarktidePower implements Power {
 
 	@Override
 	public boolean slotUnlocked(Player player, String slot) {
-		// Z (shadow harvest) belongs to the ascended
-		return "mode".equals(slot) ? Fate.isAscended(player) : Mastery.unlocked(player) >= Mastery.ALL;
+		// Z: the shadow harvest while corrupted, the Veil once ascended and cured; nothing otherwise
+		return "mode".equals(slot) ? corrupted(player) || Fate.isAscended(player) : Mastery.unlocked(player) >= Mastery.ALL;
 	}
 
 	/** C answers the corrupted too (a Fate corruption through the core; Darktide's own through {@link DarktideNet.NightKey}). */
@@ -286,13 +290,46 @@ public final class DarktidePower implements Power {
 		}
 	}
 
-	/** Z: hold on a corpse to take its shadow (ascended, while corrupted). */
+	/**
+	 * Z. Corrupted (ascended or not): hold on a corpse to take its shadow. Ascended and cured: Veil on and off. Neither:
+	 * only a hint.
+	 */
 	@Override
 	public void onMode(ServerPlayer player, boolean down) {
-		if (down && !slotUnlocked(player, "mode")) {
+		if (!down) {
+			DarktideTide.modeKey(player, false);
 			return;
 		}
-		DarktideTide.modeKey(player, down);
+		if (corrupted(player)) {
+			DarktideTide.modeKey(player, true);
+			return;
+		}
+		if (!Fate.isAscended(player)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.mode_still").withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
+			return;
+		}
+		DarktideLive live = live(player);
+		if (!live.veil && live.flow < 1.0F) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.no_flow").withStyle(ChatFormatting.DARK_AQUA));
+			return;
+		}
+		setVeil(player, !live.veil);
+	}
+
+	static void setVeil(ServerPlayer player, boolean on) {
+		DarktideLive live = live(player);
+		if (live.veil == on) {
+			return;
+		}
+		live.veil = on;
+		if (on) {
+			player.setAttached(DarktideState.VEIL, true);
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SQUID_SQUIRT, SoundSource.PLAYERS, 0.6F, 0.6F);
+			player.level().sendParticles(net.minecraft.core.particles.ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.0, player.getZ(),
+				20, 0.4, 0.6, 0.4, 0.02);
+		} else {
+			player.removeAttached(DarktideState.VEIL);
+		}
 	}
 
 	@Override
@@ -341,6 +378,7 @@ public final class DarktidePower implements Power {
 	/** Ends everything running and hands the real items back (logging out, losing the power, the server stopping). */
 	private static void cleanUp(ServerPlayer player, boolean lost) {
 		DarktideGuard.drop(player);
+		setVeil(player, false);
 		DarktideGedan.cancel(player);
 		DarktideMoves.cancel(player);
 		DarktideTide.revertArms(player, false);
@@ -378,6 +416,16 @@ public final class DarktidePower implements Power {
 			player.setAirSupply(player.getMaxAirSupply());
 		}
 		tickCure(player, live);
+		if (live.veil) {
+			// the Veil is the cured form's: the corruption (nightfall) or losing ascension takes it down
+			live.flow -= VEIL_DRAIN_PER_SECOND / 20.0F;
+			if (live.flow <= 0.0F || corrupted(player) || !Fate.isAscended(player)) {
+				live.flow = Math.max(0.0F, live.flow);
+				setVeil(player, false);
+			} else if (player.tickCount % 5 == 0) {
+				veilTick(player);
+			}
+		}
 		DarktideGuard.tick(player, live);
 		DarktideMoves.tick(player, live);
 		DarktideGedan.tick(player, live);
@@ -447,10 +495,34 @@ public final class DarktidePower implements Power {
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), sound, SoundSource.PLAYERS, 0.8F, 0.6F);
 	}
 
+	/** Mobs that can't see through the veil lose you. */
+	private static void veilTick(ServerPlayer player) {
+		double range = DarktideFlow.dark(player.level(), player.blockPosition().above()) ? VEIL_DARK_RANGE : VEIL_LIGHT_RANGE;
+		for (net.minecraft.world.entity.Mob mob : player.level().getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
+				player.getBoundingBox().inflate(48.0), mob -> mob.getTarget() == player)) {
+			if (mob.distanceTo(player) > range) {
+				mob.setTarget(null);
+			}
+		}
+	}
+
+	/** How far a veiled player can be seen from (for the targeting mixin): the range, or -1 when not veiled. */
+	public static double veilRange(Player player) {
+		if (player.getAttached(DarktideState.VEIL) == null) {
+			return -1.0;
+		}
+		return DarktideFlow.dark(player.level(), player.blockPosition().above()) ? VEIL_DARK_RANGE : VEIL_LIGHT_RANGE;
+	}
+
+	/** A veiled user's name tag hides in the dark (both sides; the veil is synced). */
+	public static boolean veilHidesName(Player player) {
+		return player.getAttached(DarktideState.VEIL) != null && DarktideFlow.dark(player.level(), player.blockPosition().above());
+	}
+
 	static void sync(ServerPlayer player, DarktideLive live) {
 		DarktideState.Save save = DarktideState.save(player);
 		DarktideState.Hud hud = new DarktideState.Hud(Math.round(live.flow), live.until.clone(), live.length.clone(), live.empoweredUntil,
-			live.arms, save.shadows().size(), save.parries(), live.guardLockedUntil, live.risen.size());
+			live.veil, live.arms, save.shadows().size(), save.parries(), live.guardLockedUntil, live.risen.size());
 		if (live.sent == null || !live.sent.same(hud)) {
 			live.sent = hud;
 			player.setAttached(DarktideState.HUD, hud);

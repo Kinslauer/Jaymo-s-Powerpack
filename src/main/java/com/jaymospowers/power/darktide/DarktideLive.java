@@ -25,7 +25,10 @@ final class DarktideLive {
 	// R: Dark Strike's charge, since when (game time; -1: not charging)
 	long strikeStart = -1L;
 
-	// Z: shadow harvest
+	// Z: Veil (ascended, cured)
+	boolean veil;
+
+	// Z: shadow harvest (corrupted)
 	/** The corpse whose shadow is being taken and since when (-1: none); whether Z is held. */
 	int harvesting = -1;
 	long harvestStart;

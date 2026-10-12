@@ -30,13 +30,14 @@ All numbers are `static final` constants at the top of the class named in bracke
 | V | **Undertow**: sink into the ground and surface where you look (12 blocks, 18 ascended) in water, a shadow or a Black Tide puddle. 15 Flow, 6 s. Ascended: surfacing deals 3 around you. |
 | G | Every G hit goes for the legs: a humanoid it hurts is crippled, whatever the aim height. Katana: **Crescent** (4 blocks, 120 deg, up to 3 targets, +4 damage, 15 Flow, 8 s). Knife: **Ink Cross** (3 blocks, 1.5x, Slowness III 3 s, 10 Flow, 6 s). Ascended with knives: **Fang Barrage** (hold up to 4 s, 2 damage every 4 ticks to everything in front, held in place, 2 s stun at the end, 40 Flow, 18 s). |
 | B | **Black Tide**: a 10-block, 5-wide wave: 6 damage, push, Slowness II + Blindness 2 s, puts out fire. 40 Flow, 20 s. Ascended leaves a 3 s puddle (Undertow target). Ascended with a knife: **Riptide Dash** (5 blocks, 6 damage, 30 Flow, 12 s); hold R too for an 8-hit flurry on the first foe, ending behind it. |
-| Z | **Shadow Harvest** (ascended, while corrupted): hold Z aimed at a Kitchen corpse for 1.5 s; soul sand streams into your outstretched hand and its shadow is yours (max 5). Cured: an action-bar hint that the shadows are dormant. |
+| Z | Corrupted (ascended or not): **Shadow Harvest**: hold Z aimed at a Kitchen corpse for 1.5 s; soul sand streams into your outstretched hand and its shadow is yours (max 5). Ascended and cured: **Veil** on/off: drains 2 Flow/s; mobs lose track of you beyond 6 blocks in the dark / 12 in light; your name tag hides in the dark; it drops when the corruption returns (nightfall). Cured and not ascended: only a vague hint. |
 | X | **Gedan / Stillwater** (all 4 unlocked, katana, hold): you stand rooted while a 10-block field grows over 5 s; parrying while holding cycles kamae (Gedan, Chudan, Jodan, Hasso). Release: you vanish and strike up to 8 foes in the field from below, 6 + 1 per second held (max 5), +1 slash per parry (max 2 extra). 60 s cooldown, max hold 15 s. Routed like Wind's X key; skipped while symbiote-bonded. |
 | C | Ascended: **shift + C** is **Tide Arms**: cycles bare hands, twin daggers, katana of dark water (needs WeaponMod). Your real items are stored and returned. **Tap C** while corrupted: **Necromancy**, raise a harvested shadow (max 3 risen, they follow you, fight your enemies and melt when the corruption lifts or 48 blocks away); tap C while cured: only a hint that the shadows are dormant. Corrupted, not ascended: C (sneaking or not) is **Drown** (6-block sphere around the target for 4 s, 2 damage/s, pulls foes back from the edge, 45 s). |
 | Combat Roll | With Combat Roll installed: +2 roll charges (3 total; `combat_roll:count`). A roll that passes a projectile within 2.5 or an attacking mob within 3 without being hit gives +10 Flow once and leaves an ink trail. Nothing happens without the mod. |
 
 Unlock order R, V, G, B. Ascension (**Abyssal Tide**): 40 katana parries with all four unlocked (whispers at 15
-and 30). Z (Shadow Harvest) unlocks with ascension (`slotUnlocked(player, "mode")`).
+and 30). Z follows the state (`slotUnlocked(player, "mode")` = corrupted or ascended; the key guide reads `key.mode.night`
+for the harvest, `key.mode.ascended` for the Veil, and the plain line is empty).
 
 Darktide users **never drown**: air never runs down (`DarktideAirMixin` on `LivingEntity.decreaseAirSupply`, plus a
 refill each tick) and drowning damage is cancelled.
@@ -51,7 +52,8 @@ Fate): `corrupted = Fate.isCorrupted || !cured || (night && !nightReturnPrevente
 - `DarktidePower.nightReturnPrevented(player)` (false for now) is the one place to stop the nightly return; while it's
   true the cure is carried past nightfall.
 - The client reads the synced `CURED` attachment (to everyone) for the name, the HUD, the key guide and C.
-- Corrupted gates: Drown (not ascended), Necromancy (Z harvest, C raise; ascended), risen shadows melting.
+- Corrupted gates: Drown (not ascended), Z harvest (anyone corrupted), C raise (ascended), risen shadows melting.
+  Cured gates: the Veil (ascended).
 - `/powerdebug darktide cure | corrupt` for testing.
 
 ## Crippled [DarktideStatus]
@@ -65,7 +67,7 @@ cripple when it lands low). Pounce's 3 stabs need humanoid AND crippled.
 
 ## Files
 
-- `src/main/java/com/jaymospowers/power/darktide/`: `DarktidePower` (keys, ticking, corruption and cure), `DarktideState`
+- `src/main/java/com/jaymospowers/power/darktide/`: `DarktidePower` (keys, ticking, Veil, corruption and cure), `DarktideState`
   (attachments), `DarktideLive` (server state), `DarktideFlow`, `DarktideGuard` (guard, parry, riposte, reflect),
   `DarktideMoves` (R/G/V/B moves), `DarktideGedan` (X), `DarktideTide` (C: Tide Arms, Drown, raising; Z: shadow harvest),
   `DarktideStatus` (stun, cripple, reel), `DarktideMove` (pose kinds), `DarktideWeapons`, `DarktideNet`,
@@ -87,7 +89,8 @@ cripple when it lands low). Pounce's 3 stabs need humanoid AND crippled.
 6. Gedan: rooting, field particles/tint, release teleports and return.
 7. Tide Arms: items come back on switch, death and logout; conjured blades can't be dropped or stored.
 8. A new Darktide is corrupted by day (C is Drown); 60 s of Conduit Power cures it until dusk (whisper), dusk brings it
-   back (whisper). Z harvest and tap-C raise with Kitchen corpses while corrupted and ascended; shift + C cycles Tide Arms.
+   back (whisper). Z harvest while corrupted, tap-C raise while corrupted and ascended; shift + C cycles Tide Arms.
+   Ascended and cured, Z is the Veil; it drops at nightfall.
 9. Combat Roll charges show 3.
 10. R charge: overhead blade / drawn-back fist seen by another player; release damage scales with the hold.
 11. Underwater: no air bubbles drop, no drowning.

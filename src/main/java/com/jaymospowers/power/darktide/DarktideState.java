@@ -20,10 +20,11 @@ import net.minecraft.world.item.component.ItemContainerContents;
  * <ul>
  * <li>{@link #SAVE}: saved, kept through death, server only: katana parries toward ascension, stored shadows, the
  * real items Tide Arms put away, and until when the corruption is cured;</li>
- * <li>{@link #HUD}: the owner's HUD (Flow, cooldowns, empowerment, Tide Arms...), synced to the owner only;</li>
+ * <li>{@link #HUD}: the owner's HUD (Flow, cooldowns, empowerment, Veil, Tide Arms...), synced to the owner only;</li>
  * <li>{@link #GUARD}: when the guard went up (game time), synced to everyone for the pose;</li>
  * <li>{@link #MOVE}: the move being played (strikes, stances, reels), synced to everyone for the pose;</li>
  * <li>{@link #STUN}, {@link #CRIPPLE}: until when a creature is stunned / crippled (crawling), synced to everyone;</li>
+ * <li>{@link #VEIL}: the veil is up and hides the name tag (synced to everyone);</li>
  * <li>{@link #CURED}: the corruption is cured for now (synced to everyone, for the name and the HUD);</li>
  * <li>{@link #RISEN}: a risen shadow (Necromancy), synced to everyone so it's drawn dark.</li>
  * </ul>
@@ -68,9 +69,9 @@ public final class DarktideState {
 	}
 
 	/** What the owner's HUD shows. Cooldown ends are game times; lengths are for the chips' shading. */
-	public record Hud(int flow, long[] until, int[] length, long empoweredUntil, int arms, int shadows, int parries,
+	public record Hud(int flow, long[] until, int[] length, long empoweredUntil, boolean veil, int arms, int shadows, int parries,
 			long guardLockedUntil, int risen) {
-		public static final Hud NONE = new Hud(0, new long[SLOTS], new int[SLOTS], 0L, 0, 0, 0, 0L, 0);
+		public static final Hud NONE = new Hud(0, new long[SLOTS], new int[SLOTS], 0L, false, 0, 0, 0, 0L, 0);
 		public static final StreamCodec<ByteBuf, Hud> STREAM_CODEC = StreamCodec.of((buf, hud) -> {
 			ByteBufCodecs.VAR_INT.encode(buf, hud.flow);
 			for (int i = 0; i < SLOTS; i++) {
@@ -78,6 +79,7 @@ public final class DarktideState {
 				ByteBufCodecs.VAR_INT.encode(buf, hud.length[i]);
 			}
 			ByteBufCodecs.VAR_LONG.encode(buf, hud.empoweredUntil);
+			ByteBufCodecs.BOOL.encode(buf, hud.veil);
 			ByteBufCodecs.VAR_INT.encode(buf, hud.arms);
 			ByteBufCodecs.VAR_INT.encode(buf, hud.shadows);
 			ByteBufCodecs.VAR_INT.encode(buf, hud.parries);
@@ -91,7 +93,7 @@ public final class DarktideState {
 				until[i] = ByteBufCodecs.VAR_LONG.decode(buf);
 				length[i] = ByteBufCodecs.VAR_INT.decode(buf);
 			}
-			return new Hud(flow, until, length, ByteBufCodecs.VAR_LONG.decode(buf),
+			return new Hud(flow, until, length, ByteBufCodecs.VAR_LONG.decode(buf), ByteBufCodecs.BOOL.decode(buf),
 				ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf),
 				ByteBufCodecs.VAR_LONG.decode(buf), ByteBufCodecs.VAR_INT.decode(buf));
 		});
@@ -102,7 +104,7 @@ public final class DarktideState {
 
 		boolean same(Hud other) {
 			return flow == other.flow && java.util.Arrays.equals(until, other.until) && java.util.Arrays.equals(length, other.length)
-				&& empoweredUntil == other.empoweredUntil && arms == other.arms && shadows == other.shadows
+				&& empoweredUntil == other.empoweredUntil && veil == other.veil && arms == other.arms && shadows == other.shadows
 				&& parries == other.parries && guardLockedUntil == other.guardLockedUntil && risen == other.risen;
 		}
 	}
@@ -129,6 +131,8 @@ public final class DarktideState {
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
 	public static final AttachmentType<Long> CRIPPLE = AttachmentRegistry.create(JaymosPowers.id("darktide_cripple"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
+	public static final AttachmentType<Boolean> VEIL = AttachmentRegistry.create(JaymosPowers.id("darktide_veil"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	public static final AttachmentType<Boolean> CURED = AttachmentRegistry.create(JaymosPowers.id("darktide_cured"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	public static final AttachmentType<Integer> RISEN = AttachmentRegistry.create(JaymosPowers.id("darktide_risen"),

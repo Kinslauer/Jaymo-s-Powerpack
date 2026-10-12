@@ -26,7 +26,7 @@ import net.minecraft.world.item.Items;
 
 /**
  * Darktide's HUD in Wind's chip style, right of the hotbar: the Flow chip (water rising under a line of ink, the number
- * on it), then one chip per key (R G V B, then X Gedan, Z shadow harvest and C once they answer) with its bound key and
+ * on it), then one chip per key (R G V B, then X Gedan, Z shadow harvest or Veil and C once they answer) with its bound key and
  * cooldown.
  * Above the row: "empowered" after a parry, "guard broken" while the guard can't come up. Over the crosshair while
  * holding Gedan: its name and the field spreading.
@@ -124,10 +124,13 @@ final class DarktideHud {
 			chips.add(new Chip(Items.CONDUIT, DarktideState.GEDAN, skill == null ? "X" : skill.getTranslatedKeyMessage().getString(),
 				kit == DarktideWeapons.Kit.KATANA, DarktideMove.current(player) != null && DarktideMove.current(player).kind() == DarktideMove.STANCE));
 		}
-		if (ascended) {
-			// Z: the shadow harvest, awake only while corrupted
-			chips.add(new Chip(Items.SOUL_SAND, -1, JaymosPowersClient.modeKey().getTranslatedKeyMessage().getString(), drowned,
-				move != null && move.kind() == DarktideMove.CAST && move.variant() == 1));
+		String z = JaymosPowersClient.modeKey().getTranslatedKeyMessage().getString();
+		if (drowned) {
+			// Z while corrupted: the shadow harvest
+			chips.add(new Chip(Items.SOUL_SAND, -1, z, true, move != null && move.kind() == DarktideMove.CAST && move.variant() == 1));
+		} else if (ascended) {
+			// Z ascended and cured: the Veil
+			chips.add(new Chip(Items.ECHO_SHARD, -1, z, true, hud.veil()));
 		}
 		String c = JaymosPowersClient.ultimateKey().getTranslatedKeyMessage().getString();
 		if (ascended) {

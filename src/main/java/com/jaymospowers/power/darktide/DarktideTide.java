@@ -45,7 +45,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * C and Z. Ascended: sneak + C <b>Tide Arms</b> (bare hands → twin daggers → katana of dark water; your real items are
- * stored and come back); while corrupted, <b>Necromancy</b>: hold Z on a Jaymo's Kitchen corpse to take its shadow, tap C
+ * stored and come back). While corrupted, Z on a Jaymo's Kitchen corpse takes its shadow; ascended, <b>Necromancy</b>: tap C
  * to raise one, which follows and defends you until the corruption lifts. Corrupted, not ascended: C is <b>Drown</b>, a
  * sphere of water around a target.
  */
@@ -111,7 +111,7 @@ final class DarktideTide {
 		}
 	}
 
-	/** Z (ascended): hold on a corpse to take its shadow, while corrupted. */
+	/** Z while corrupted (ascended or not): hold on a corpse to take its shadow. */
 	static void modeKey(ServerPlayer player, boolean down) {
 		DarktideLive live = DarktidePower.live(player);
 		live.modeDown = down;
@@ -120,10 +120,6 @@ final class DarktideTide {
 				live.harvesting = -1;
 				DarktideMove.clear(player);
 			}
-			return;
-		}
-		if (!DarktidePower.corrupted(player)) {
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.shadows_dormant").withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
 			return;
 		}
 		Entity corpse = aimedCorpse(player);
