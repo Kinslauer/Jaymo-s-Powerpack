@@ -203,6 +203,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	private int escortSlot;
 	private @org.jspecify.annotations.Nullable BlockPos post;
 	private int postRadius;
+	/** (0.5.35) A caster's spells' cooldowns ({@link Sorcery}; not saved). */
+	private final int[] spellTimers = new int[Sorcery.TIMERS];
 	/** Which {@link Outfits#VERSION} dressed it (0: before faction looks, so it's dressed again on its next tick). Saved. */
 	private int outfit;
 
@@ -266,9 +268,14 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		return role == null || role.combatant();
 	}
 
-	/** An archer (or a goblin slinger): it keeps its post and shoots. */
+	/** An archer (or a goblin slinger, or a caster): it keeps its post and shoots. */
 	public boolean ranged() {
-		return this.role() == ARCHER || Goblins.ranged(this.role());
+		return this.role() == ARCHER || Goblins.ranged(this.role()) || Sorcery.isCaster(this.role());
+	}
+
+	/** (0.5.35) A caster's spells' cooldowns (ticks left, by {@link Sorcery}'s slots). */
+	int[] spellTimers() {
+		return this.spellTimers;
 	}
 
 	public boolean leader() {
@@ -484,6 +491,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		} else if (!this.shying) {
 			Workers.work(level, this);
 		}
+		// (0.5.35) a caster's timers, closing in on its foe, its spells for its side
+		if (Sorcery.isCaster(this.role())) {
+			Sorcery.tick(level, this);
+		}
 		// (0.5.12) javelins at a foe out of reach; attackers fight harder, break through and burn
 		Javelins.tick(level, this);
 		Assault.tick(level, this);
@@ -582,9 +593,13 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		}
 	}
 
-	/** An archer's shot (as a skeleton looses one). */
+	/** An archer's shot (as a skeleton looses one); a caster's spell. */
 	@Override
 	public void performRangedAttack(LivingEntity target, float power) {
+		if (Sorcery.isCaster(this.role())) {
+			Sorcery.cast(this, target);
+			return;
+		}
 		ItemStack bow = this.getMainHandItem();
 		ItemStack arrowStack = new ItemStack(Items.ARROW);
 		net.minecraft.world.entity.projectile.arrow.AbstractArrow arrow = net.minecraft.world.entity.projectile.ProjectileUtil.getMobArrow(this, arrowStack, power, bow);
@@ -611,6 +626,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		@Override
 		public boolean canUse() {
 			LivingEntity target = this.archer.getTarget();
+			if (Sorcery.isCaster(this.archer.role())) {
+				// (0.5.35) a caster casts from where it stands while it can see its foe in reach; else it closes in (Sorcery.tick)
+				return target != null && target.isAlive() && this.archer.distanceTo(target) <= Sorcery.RANGE && this.archer.getSensing().hasLineOfSight(target);
+			}
 			return this.archer.ranged() && target != null && target.isAlive() && this.archer.distanceTo(target) <= ARCHER_RANGE;
 		}
 
@@ -628,7 +647,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			this.archer.getNavigation().stop();
 			this.archer.getLookControl().setLookAt(target, 30.0F, 30.0F);
 			if (--this.cooldown <= 0 && this.archer.getSensing().hasLineOfSight(target)) {
-				this.cooldown = ARCHER_INTERVAL;
+				this.cooldown = Sorcery.isCaster(this.archer.role()) ? Sorcery.CAST_TICKS : ARCHER_INTERVAL;
 				this.archer.performRangedAttack(target, 1.0F);
 			}
 		}

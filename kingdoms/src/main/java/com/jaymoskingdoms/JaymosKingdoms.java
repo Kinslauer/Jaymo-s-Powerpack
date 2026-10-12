@@ -119,6 +119,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.29: quests from villagers and kings, their caches and champions, relics (and their attachments)
 		LOGGER.debug("quest attachments: {} {} {} {}", Quests.LOG, Quests.OFFER, Quests.MARK, QuestFoes.FOE);
 		Quests.register();
+		// 0.5.35: sorcery: camps' shamans and necromancers, courts' wizards, the risen dead, spell scrolls (and the thralls' attachment)
+		Arcana.register();
+		LOGGER.debug("thrall attachment: {}", Thralls.TAG);
+		Thralls.register();
+		Sorcery.register();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();
 			Gatherers.clear();

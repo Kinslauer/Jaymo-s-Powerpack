@@ -34,6 +34,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.Wagon.TYPE, WagonRenderer::new);
 		CampSkins.register();
 		GoblinSkins.register();
+		// 0.5.35: the casters
+		SorcerySkins.register();
 		com.jaymoskingdoms.client.lootgoblins.LootGoblinRenderer.register();
 		MobAnimations.register();
 		PullerPose.register();
@@ -92,6 +94,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 				context.getEquipmentRenderer()));
 			// (0.5.27) goblins' long ears and hooked noses
 			this.addLayer(new GoblinSkins.Features(this));
+			// (0.5.35) a court wizard's pointed hat
+			this.addLayer(new SorcerySkins.Hat(this));
 		}
 
 		@Override

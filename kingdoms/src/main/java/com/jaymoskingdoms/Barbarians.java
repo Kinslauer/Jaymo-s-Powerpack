@@ -91,7 +91,7 @@ public final class Barbarians {
 	 * golems and every other faction's folk; a realm's or village's fighting folk hunt barbarians.
 	 */
 	static void addGoals(Folk folk, GoalSelector goals, GoalSelector targets) {
-		targets.addGoal(2, new NearestAttackableTargetGoal<>(folk, LivingEntity.class, true, (target, level) -> isRaider(folk) && prey(target)));
+		targets.addGoal(2, new NearestAttackableTargetGoal<>(folk, LivingEntity.class, true, (target, level) -> (isRaider(folk) || Sorcery.campCaster(folk)) && prey(target)));
 		targets.addGoal(2, new NearestAttackableTargetGoal<>(folk, Folk.class, true,
 			(target, level) -> folk.combatant() && !isBarbarian(folk) && target instanceof Folk other && isBarbarian(other)));
 	}
