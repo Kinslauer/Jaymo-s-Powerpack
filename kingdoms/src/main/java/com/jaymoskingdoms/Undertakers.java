@@ -30,11 +30,11 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.21) A settlement's guards clear away dead monsters (with Jaymo's Kitchen, whose corpses get back up or lie
+ * (0.5.22) A settlement's guards clear away dead monsters (with Jaymo's Kitchen, whose corpses get back up or lie
  * about). A guard who isn't fighting goes to a monster's corpse in or near the settlement and carries it to the
  * nearest fire pit (fire burning on netherrack, soul sand or magma), lit campfire or lava, and throws it in. With none
  * near, they burn it where it lies, or first carry it a few blocks to bare ground if there's wood or anything else that
- * would catch beside it. A kingdom's guards are its {@link Folk} guards; a village's are
+ * would catch beside it. A kingdom's guards are its {@link Folk} guards (or, with MCA, its MCA guards); a village's are
  * its iron golems, who only ever throw a corpse into a fire, never light one. Builders put up a fire pit
  * ({@code Buildings.firePit}) for them.
  */
@@ -177,7 +177,9 @@ public final class Undertakers {
 		if (golems && f.type() == FactionType.VILLAGE) {
 			guards.addAll(level.getEntitiesOfClass(IronGolem.class, box, IronGolem::isAlive));
 		}
-		guards.addAll(level.getEntitiesOfClass(Folk.class, box, g -> g.role() == Folk.GUARD && g.factionId() == f.id()));
+		for (Worker w : Workers.near(level, box, w -> w.role() == Folk.GUARD && w.factionId() == f.id())) {
+			guards.add(w.mob());
+		}
 		PathfinderMob best = null;
 		double bestD = Double.MAX_VALUE;
 		for (PathfinderMob g : guards) {

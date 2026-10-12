@@ -7,7 +7,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.21) Jaymo's Kitchen (optional), for {@link Undertakers}: its corpses, reached by reflection so Kingdoms needs no
+ * (0.5.22) Jaymo's Kitchen (optional), for {@link Undertakers}: its corpses, reached by reflection so Kingdoms needs no
  * Kitchen jar to build or run. Without Kitchen 0.4.26 or later ({@code CorpseEntity.carryBy} and {@code throwAt}) every
  * call fails soft: nothing is a corpse.
  */

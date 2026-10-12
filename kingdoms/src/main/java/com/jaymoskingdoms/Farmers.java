@@ -111,12 +111,12 @@ public final class Farmers {
 	 * A farmer for {@code faction} (counted in its roster) at the farm with fewest farmers, his home in its middle;
 	 * {@code from} where he comes from (a villager taken into service), else he starts there. Null if it has no farm.
 	 */
-	static @Nullable Folk spawn(ServerLevel level, Faction faction, @Nullable BlockPos from) {
+	static @Nullable Worker spawn(ServerLevel level, Faction faction, @Nullable BlockPos from) {
 		List<Works.Built> farms = farms(level.getServer(), faction);
 		if (farms.isEmpty()) {
 			return null;
 		}
-		List<Folk> farmers = level.getEntitiesOfClass(Folk.class, new AABB(faction.seat()).inflate(Builders.CREW_RANGE),
+		List<Worker> farmers = Workers.near(level, new AABB(faction.seat()).inflate(Builders.CREW_RANGE),
 			f -> f.isAlive() && f.factionId() == faction.id() && f.role() == Folk.FARMER);
 		Works.Built farm = farms.stream().min(Comparator.comparingLong(b -> farmers.stream().filter(f -> inside(b, field(f))).count()))
 			.orElseThrow();
@@ -124,14 +124,11 @@ public final class Farmers {
 		// (on the farm's own ground: not on top of whatever stands over its middle, a tree or a tower)
 		BlockPos home = Construction.standable(level, middle.above(), 4);
 		BlockPos at = from != null ? from : home;
-		Folk folk = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.MOB_SUMMONED);
+		Worker folk = Workers.body(level, faction, Folk.FARMER, at, home, ROAM);
 		if (folk == null) {
 			return null;
 		}
-		folk.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360.0F, 0.0F);
-		folk.setup(Folk.FARMER, faction, home, ROAM);
 		folk.setSite(home);
-		level.addFreshEntity(folk);
 		Factions.update(level.getServer(), faction.id(), f -> f.withHoldings(f.holdings().adjust(Folk.FARMER, 1)));
 		return folk;
 	}
@@ -141,12 +138,12 @@ public final class Farmers {
 	}
 
 	/** The middle of his farm. */
-	static BlockPos field(Folk farmer) {
+	static BlockPos field(Worker farmer) {
 		return farmer.site() != null ? farmer.site() : farmer.getHomePosition();
 	}
 
 	/** How far round {@link #field} he works: his farm's half-width and a little (looked up once). */
-	private static int reach(ServerLevel level, Folk farmer, Job job) {
+	private static int reach(ServerLevel level, Worker farmer, Job job) {
 		if (job.reach < 0) {
 			job.reach = 6;
 			Faction f = Factions.get(level.getServer(), farmer.factionId());
@@ -165,8 +162,8 @@ public final class Farmers {
 	// ---- his day ----------------------------------------------------------------------------------------------------
 
 	/** One farmer's tick (from {@link Folk}). */
-	static void tick(ServerLevel level, Folk farmer) {
-		if (farmer.getLastHurtByMob() != null && farmer.tickCount - farmer.getLastHurtByMobTimestamp() < 100) {
+	static void tick(ServerLevel level, Worker farmer) {
+		if (farmer.getLastHurtByMob() != null && farmer.ticksAlive() - farmer.getLastHurtByMobTimestamp() < 100) {
 			// (running for his life)
 			return;
 		}
@@ -189,7 +186,7 @@ public final class Farmers {
 	}
 
 	/** His next job: his arms full (or nothing left to do and something in them) to storage; else the ripest row, or the herd. */
-	private static void decide(ServerLevel level, Folk farmer, Job job, long now) {
+	private static void decide(ServerLevel level, Worker farmer, Job job, long now) {
 		int carried = job.bag.stream().mapToInt(ItemStack::getCount).sum();
 		if (carried == 0 && farmer.isCarrying()) {
 			// (what he held when the world was last saved: only its token was kept)
@@ -222,7 +219,7 @@ public final class Farmers {
 	}
 
 	/** The nearest ripe crop (or bare farmland to sow) in his reach, or null. */
-	private static @Nullable BlockPos crop(ServerLevel level, Folk farmer, int r) {
+	private static @Nullable BlockPos crop(ServerLevel level, Worker farmer, int r) {
 		BlockPos home = field(farmer);
 		BlockPos best = null;
 		double bestD = Double.MAX_VALUE;
@@ -242,7 +239,7 @@ public final class Farmers {
 	}
 
 	/** A beast of his herd to see to: one of a kind he has too many of (to butcher), or two of a kind too few (to pair). */
-	private static @Nullable Animal beast(ServerLevel level, Folk farmer, int r) {
+	private static @Nullable Animal beast(ServerLevel level, Worker farmer, int r) {
 		BlockPos home = field(farmer);
 		List<Animal> herd = level.getEntitiesOfClass(Animal.class, new AABB(home).inflate(r, 3, r), a -> a.isAlive() && livestock(a));
 		Map<Class<?>, List<Animal>> kinds = new HashMap<>();
@@ -268,7 +265,7 @@ public final class Farmers {
 		return a instanceof AbstractCow || a instanceof Pig || a instanceof Sheep || a instanceof Chicken;
 	}
 
-	private static void harvest(ServerLevel level, Faction f, Folk farmer, Job job, long now) {
+	private static void harvest(ServerLevel level, Faction f, Worker farmer, Job job, long now) {
 		BlockPos at = job.goal;
 		if (at == null) {
 			job.phase = IDLE;
@@ -316,7 +313,7 @@ public final class Farmers {
 		decide(level, farmer, job, now);
 	}
 
-	private static void herd(ServerLevel level, Faction f, Folk farmer, Job job, long now) {
+	private static void herd(ServerLevel level, Faction f, Worker farmer, Job job, long now) {
 		Animal beast = job.beast;
 		if (beast == null || !beast.isAlive()) {
 			job.phase = IDLE;
@@ -371,7 +368,7 @@ public final class Farmers {
 	}
 
 	/** To the storage with what he carries; it goes in (what won't fit is dropped there). */
-	private static void deliver(ServerLevel level, Faction f, Folk farmer, Job job, long now) {
+	private static void deliver(ServerLevel level, Faction f, Worker farmer, Job job, long now) {
 		BlockPos depot = Builders.depot(f);
 		if (!walk(farmer, job, depot, DEPOT_REACH, now)) {
 			if (now - job.improvedAt > STUCK_TICKS * 2) {
@@ -395,7 +392,7 @@ public final class Farmers {
 	}
 
 	/** Into his arms (the biggest stack shows in his hands). */
-	private static void bag(Folk farmer, Job job, ItemStack stack) {
+	private static void bag(Worker farmer, Job job, ItemStack stack) {
 		if (stack.isEmpty()) {
 			return;
 		}
@@ -414,7 +411,7 @@ public final class Farmers {
 	}
 
 	/** Walks him toward {@code to}; true once he's within {@code reach}. */
-	private static boolean walk(Folk farmer, Job job, BlockPos to, double reach, long now) {
+	private static boolean walk(Worker farmer, Job job, BlockPos to, double reach, long now) {
 		double d = Math.sqrt(farmer.distanceToSqr(Vec3.atBottomCenterOf(to)));
 		if (d <= reach) {
 			farmer.getNavigation().stop();
@@ -437,7 +434,7 @@ public final class Farmers {
 			return false;
 		}
 		if (farmer.getNavigation().isDone() || now % 20 == 0) {
-			BlockPos leg = Construction.leg((ServerLevel)farmer.level(), farmer, to);
+			BlockPos leg = Construction.leg((ServerLevel)farmer.level(), farmer.mob(), to);
 			farmer.getNavigation().moveTo(leg.getX() + 0.5, leg.getY(), leg.getZ() + 0.5, WALK_SPEED);
 		}
 		return false;

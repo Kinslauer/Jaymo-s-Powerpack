@@ -36,6 +36,9 @@ public final class JaymosKingdoms implements ModInitializer {
 			.clientTrackingRange(10)
 			.build(key));
 		FabricDefaultAttributeRegistry.register(FOLK, Folk.guardAttributes());
+		// 0.5.21: the workers' villager professions (with MCA, a settlement's workers are its villagers), MCA told of them
+		Professions.register();
+		McaCompat.register();
 		// the attachments (registered as their classes load)
 		LOGGER.debug("kingdom attachments: {} {} {}", Factions.ALL, Factions.KEEPS, Reputation.REPUTATION);
 		KingdomEvents.register();
@@ -56,7 +59,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.11: lost buildings put up again; the settlement's people answer fires
 		Rebuilds.register();
 		Firefighting.register();
-		// 0.5.21: guards burn monsters' corpses (with Jaymo's Kitchen), or throw them into a fire pit or lava
+		// 0.5.22: guards burn monsters' corpses (with Jaymo's Kitchen), or throw them into a fire pit or lava
 		Undertakers.register();
 		DevCommands.register();
 		// 0.5.2: the mine the builders dig first (it wraps their brain; Debris wraps it in turn) and its attachment
@@ -75,6 +78,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Javelins.register();
 		Tempers.register();
 		Frights.register();
+		// 0.5.21: monsters hunt the settlements' folk as they do villagers
+		Prey.register();
 		Theft.register();
 		// 0.5.19: a boss's bar shows only to the players who've hit it
 		BossBars.register();
