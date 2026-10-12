@@ -793,5 +793,19 @@
 	"speech.jaymoskingdoms.chant_0": "Blood for the fire!",
 	"speech.jaymoskingdoms.chant_1": "The drums call! Break them!",
 	"speech.jaymoskingdoms.chant_2": "Feel the wolf in you!",
-	"speech.jaymoskingdoms.chant_3": "Hoo! Hoo! HAAA!"
+	"speech.jaymoskingdoms.chant_3": "Hoo! Hoo! HAAA!",
+	"dialogue.chat.jaymoskingdoms.immigrant/1": "I wasn't born here, you know. My family came all the way from %2$s.",
+	"dialogue.chat.jaymoskingdoms.immigrant/2": "Folk here still call me the stranger. I grew up in %2$s, a long way from this place.",
+	"dialogue.chat.jaymoskingdoms.immigrant/3": "Some nights I miss %2$s. It's a long road back.",
+	"dialogue.chat.jaymoskingdoms.immigrant/4": "My grandmother crossed half the world from %2$s to settle here. I've never seen it myself.",
+	"dialogue.chat.jaymoskingdoms.immigrant/5": "Back in %2$s we did things differently, %1$s. I'm still getting used to this place.",
+	"dialogue.chat.jaymoskingdoms.newcomer/1": "We moved here from %2$s, just over the hills. Not so different, really.",
+	"dialogue.chat.jaymoskingdoms.newcomer/2": "I grew up in %2$s, not far from here. I still visit my kin when I can.",
+	"dialogue.chat.jaymoskingdoms.newcomer/3": "My folks are in %2$s, a few days' walk away. They think I'm mad for living here.",
+	"dialogue.chat.jaymoskingdoms.newcomer/4": "Came over from %2$s a few winters back. The weather took some getting used to.",
+	"origin.jaymoskingdoms.desert": "the deserts of the south",
+	"origin.jaymoskingdoms.jungle": "the jungles",
+	"origin.jaymoskingdoms.plains": "the plains",
+	"origin.jaymoskingdoms.taiga": "the northern forests",
+	"origin.jaymoskingdoms.snow": "the frozen north"
 }
