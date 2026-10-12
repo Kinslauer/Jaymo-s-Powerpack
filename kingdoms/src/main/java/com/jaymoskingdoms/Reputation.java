@@ -57,6 +57,8 @@ public final class Reputation {
 		if (by == 0) {
 			return;
 		}
+		// (0.5.12) as its ruler's temper takes it
+		by = Tempers.reputation(kingdom, by);
 		int before = stored(player, kingdom.id());
 		int after = Mth.clamp(before + by, MIN, MAX);
 		Map<String, Integer> map = new HashMap<>(player.getAttachedOrElse(REPUTATION, Map.of()));

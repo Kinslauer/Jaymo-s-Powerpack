@@ -121,6 +121,11 @@ final class KingdomCommands {
 		}
 		Faction f = found;
 		c.getSource().sendSuccess(() -> line(server, f), false);
+		// (0.5.12) its ruler's temper
+		Tempers.Temper temper = Tempers.of(f);
+		if (temper != null) {
+			c.getSource().sendSuccess(() -> Component.translatable("message.jaymoskingdoms.info.temper", Tempers.describe(temper)).withStyle(ChatFormatting.GRAY), false);
+		}
 		// relations
 		List<String> relations = f.relations().entrySet().stream()
 			.map(e -> nameOf(server, Integer.parseInt(e.getKey())) + " (" + e.getValue().id() + ")").toList();
