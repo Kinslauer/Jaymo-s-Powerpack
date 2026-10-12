@@ -17,6 +17,11 @@ repositories {
 		forRepository { maven { url = "https://api.modrinth.com/maven" } }
 		filter { includeGroup "maven.modrinth" }
 	}
+	// CurseForge files by project and file id, for mods that are only on CurseForge
+	exclusiveContent {
+		forRepository { maven { url = "https://cursemaven.com" } }
+		filter { includeGroup "curse.maven" }
+	}
 }
 
 loom {
@@ -91,6 +96,10 @@ def packMods = [
 	// Iris Shaders (LGPL-3.0): shader packs (Options > Video Settings > Shader Packs); built on the pack's Sodium, and
 	// Distant Horizons draws its far terrain through shaders that support it. Client-only: the server ignores it.
 	[dep: "maven.modrinth:iris:vTN4NRGW", cf: [455508, 9015108], dev: false],
+	// Alex's Mobs (Fabric) and its library Citadel (both LGPL-3.0, Astryxion's Fabric port of Alexthe666's mods; only on
+	// CurseForge, so they come from its maven by id): about 90 new animals and monsters across every biome and dimension
+	[dep: "curse.maven:citadel-fabric-1472150:8907805", cf: [1472150, 8907805]],
+	[dep: "curse.maven:alexs-mobs-fabric-1472153:8907935", cf: [1472153, 8907935]],
 ]
 // First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
 // Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge
