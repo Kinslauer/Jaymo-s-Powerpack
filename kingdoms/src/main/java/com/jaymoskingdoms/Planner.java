@@ -137,11 +137,35 @@ public final class Planner {
 		List<Blueprint.Entry> out = new ArrayList<>();
 		Set<String> seen = new HashSet<>();
 		for (Blueprint.Entry e : Blueprint.catalogue(f.type())) {
+			// (0.5.11) the wall goes up as a whole, round everything, once the rest is built ({@link Enclosure})
+			if (Enclosure.piece(e.id())) {
+				continue;
+			}
 			if (size >= e.minPopulation() && works.count(e.id()) < e.max() && seen.add(e.id())) {
 				out.add(e);
 			}
 		}
 		return out;
+	}
+
+	/**
+	 * (0.5.11) Every building in {@code f}'s growth order but houses and the wall's own pieces is up to the most of it the
+	 * order ever asks for: time for the wall ({@link Enclosure}).
+	 */
+	static boolean utilitiesDone(MinecraftServer server, Faction f) {
+		Works.Site works = Works.of(server, f.id());
+		Map<String, Integer> most = new HashMap<>();
+		for (Blueprint.Entry e : Blueprint.catalogue(f.type())) {
+			if (!e.id().equals("house") && !Enclosure.piece(e.id()) && e.minPopulation() < Integer.MAX_VALUE) {
+				most.merge(e.id(), e.max(), Math::max);
+			}
+		}
+		for (Map.Entry<String, Integer> e : most.entrySet()) {
+			if (e.getValue() > 0 && works.count(e.getKey()) < e.getValue()) {
+				return false;
+			}
+		}
+		return !most.isEmpty();
 	}
 
 	/** The catalogue entry {@code id} for this faction's type (or any type, if its own has none). */
@@ -202,8 +226,17 @@ public final class Planner {
 		List<Blueprint.Entry> choices = new ArrayList<>();
 		if (only == null) {
 			choices.addAll(eligible(server, f));
-		} else if (entry(f, only) != null) {
+		} else if (entry(f, only) != null && !Enclosure.piece(only)) {
 			choices.add(entry(f, only));
+		}
+		// (0.5.11) once every other kind of building is up to its full count, the builders wall the settlement in
+		if (only == null && utilitiesDone(server, f) || only != null && Enclosure.piece(only)) {
+			Enclosure.Piece piece = Enclosure.next(level, f);
+			Blueprint.Entry wallEntry = piece == null ? null : entry(f, piece.entry());
+			if (piece != null && wallEntry != null) {
+				return start(level, f, piece.entry(), new Placing(piece.origin(), piece.rotation(), 0.0, true), -1,
+					variant(level, f, piece.entry(), 0));
+			}
 		}
 		for (Blueprint.Entry e : choices) {
 			for (int attempt = 0; attempt < VARIANT_TRIES; attempt++) {
@@ -342,6 +375,7 @@ public final class Planner {
 		Placing best = null;
 		int firstRing = -1, candidates = 0, ringIndex = 0;
 		double start = (f.id() * 0.618) % 1.0 * Math.PI * 2.0;
+		Works.Site works = Works.of(level.getServer(), f.id());
 		for (int r = Math.max(rings[0], SEAT_CLEAR + Math.max(bp.width(), bp.depth())); r <= reach; r += RING_STEP, ringIndex++) {
 			if (firstRing >= 0 && ringIndex > firstRing + RING_LOOKAHEAD) {
 				break;
@@ -357,6 +391,10 @@ public final class Planner {
 				Rotation rotation = facing(Direction.getApproximateNearest(f.seat().getX() - center.getX(), 0, f.seat().getZ() - center.getZ()));
 				int[] size = turned(bp, rotation);
 				BlockPos corner = center.offset(-size[0] / 2, 0, -size[1] / 2);
+				if (!Enclosure.inside(works, corner.getX() - GAP, corner.getZ() - GAP, corner.getX() + size[0] + GAP,
+					corner.getZ() + size[1] + GAP)) {
+					continue;
+				}
 				Footing footing = check(level, f, corner, size[0], size[1], bp.height(), taken);
 				if (footing == null) {
 					continue;

@@ -53,6 +53,8 @@ dependencies {
 	// Minecraft Comes Alive (GPL-3.0; McaCompat, McaBridge and the MCA mixins): compiled against the pack's jar in ../libs,
 	// never required
 	compileOnly fileTree("../libs") { include "mca-fabric-*.jar" }
+	// and in the dev game, to see its villagers in the test world
+	localRuntime fileTree("../libs") { include "mca-fabric-*.jar" }
 	// Epic Knights (KnightsCompat) is looked up by registry id only: no build for 26.3 yet, so nothing to compile against.
 }
 

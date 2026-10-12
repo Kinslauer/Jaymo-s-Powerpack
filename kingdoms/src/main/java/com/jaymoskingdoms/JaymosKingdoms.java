@@ -53,6 +53,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Plots.register();
 		Buildings.register();
 		Construction.register();
+		// 0.5.11: lost buildings put up again; the settlement's people answer fires
+		Rebuilds.register();
+		Firefighting.register();
 		DevCommands.register();
 		// 0.5.2: the mine the builders dig first (it wraps their brain; Debris wraps it in turn) and its attachment
 		LOGGER.debug("mine attachment: {}", Mines.MINES);

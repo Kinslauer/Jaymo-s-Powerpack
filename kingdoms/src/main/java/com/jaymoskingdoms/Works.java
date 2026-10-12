@@ -70,13 +70,29 @@ public final class Works {
 		}
 	}
 
-	/** A finished building: its entry and its footprint (corners, inclusive). */
-	public record Built(String entry, BlockPos min, BlockPos max) {
+	/**
+	 * A finished building: its entry and its footprint (corners, inclusive); (0.5.11) how it was turned and which variant
+	 * it is, so it can be put up again the same if it's lost (empty for buildings finished before, and for mines and
+	 * adopted farms), and since when it's been in ruins (0: it stands; {@link Rebuilds}).
+	 */
+	public record Built(String entry, BlockPos min, BlockPos max, Optional<Rotation> rotation, long variant, long ruined) {
 		public static final Codec<Built> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.STRING.fieldOf("entry").forGetter(Built::entry),
 				BlockPos.CODEC.fieldOf("min").forGetter(Built::min),
-				BlockPos.CODEC.fieldOf("max").forGetter(Built::max))
+				BlockPos.CODEC.fieldOf("max").forGetter(Built::max),
+				Rotation.CODEC.optionalFieldOf("rotation").forGetter(Built::rotation),
+				Codec.LONG.optionalFieldOf("variant", 0L).forGetter(Built::variant),
+				Codec.LONG.optionalFieldOf("ruined", 0L).forGetter(Built::ruined))
 			.apply(i, Built::new));
+
+		/** A building that can't be put up again from a blueprint (a mine, a farm the village already had). */
+		public Built(String entry, BlockPos min, BlockPos max) {
+			this(entry, min, max, Optional.empty(), 0L, 0L);
+		}
+
+		public Built withRuined(long ruined) {
+			return new Built(this.entry, this.min, this.max, this.rotation, this.variant, ruined);
+		}
 
 		/** A building's highest block: {@code max} keeps its full height since 0.5.7; older ones kept only the floor. */
 		public BlockPos top() {
@@ -115,25 +131,33 @@ public final class Works {
 		}
 	}
 
-	/** One faction's works. */
-	public record Site(List<Project> projects, List<Built> built, List<Plot> plots) {
-		public static final Site EMPTY = new Site(List.of(), List.of(), List.of());
+	/**
+	 * One faction's works; (0.5.11) {@code wall}: the ground its enclosing wall goes round, once it's laid out
+	 * ({@link Enclosure}: min x, min z, max x, max z; empty before).
+	 */
+	public record Site(List<Project> projects, List<Built> built, List<Plot> plots, List<Integer> wall) {
+		public static final Site EMPTY = new Site(List.of(), List.of(), List.of(), List.of());
 		public static final Codec<Site> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Project.CODEC.listOf().optionalFieldOf("projects", List.of()).forGetter(Site::projects),
 				Built.CODEC.listOf().optionalFieldOf("built", List.of()).forGetter(Site::built),
-				Plot.CODEC.listOf().optionalFieldOf("plots", List.of()).forGetter(Site::plots))
+				Plot.CODEC.listOf().optionalFieldOf("plots", List.of()).forGetter(Site::plots),
+				Codec.INT.listOf().optionalFieldOf("wall", List.of()).forGetter(Site::wall))
 			.apply(i, Site::new));
 
 		public Site withProjects(List<Project> projects) {
-			return new Site(List.copyOf(projects), this.built, this.plots);
+			return new Site(List.copyOf(projects), this.built, this.plots, this.wall);
 		}
 
 		public Site withBuilt(List<Built> built) {
-			return new Site(this.projects, List.copyOf(built), this.plots);
+			return new Site(this.projects, List.copyOf(built), this.plots, this.wall);
 		}
 
 		public Site withPlots(List<Plot> plots) {
-			return new Site(this.projects, this.built, List.copyOf(plots));
+			return new Site(this.projects, this.built, List.copyOf(plots), this.wall);
+		}
+
+		public Site withWall(List<Integer> wall) {
+			return new Site(this.projects, this.built, this.plots, List.copyOf(wall));
 		}
 
 		/** How many of {@code entry} it has finished. */

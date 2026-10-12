@@ -125,6 +125,7 @@ public final class Construction {
 		Planner.clear();
 		Ruins.clear();
 		Townscape.clear();
+		Rebuilds.clear();
 	}
 
 	/** Every so often, each faction whose seat and storage are loaded and whose crew is about looks for its next project. */
@@ -769,7 +770,8 @@ public final class Construction {
 			projects.removeIf(x -> x.same(p));
 			List<Works.Built> built = new ArrayList<>(s.built());
 			// (0.5.7) with its full height, so beds and job sites upstairs count as its own
-			built.add(new Works.Built(p.entry(), l.min(), l.max().above(Math.max(0, l.height() - 1))));
+			built.add(new Works.Built(p.entry(), l.min(), l.max().above(Math.max(0, l.height() - 1)), java.util.Optional.of(p.rotation()),
+				p.variant(), 0L));
 			List<Works.Plot> plots = new ArrayList<>(s.plots());
 			plots.replaceAll(plot -> plot.id() == p.plot() ? plot.withBuilding(plot.building(), true) : plot);
 			return s.withProjects(projects).withBuilt(built).withPlots(plots);

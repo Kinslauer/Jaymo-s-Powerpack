@@ -1283,3 +1283,26 @@ test village has none), a villager moving into a new house.
   camera to watch. The test client is held to 2.5 GB (`-Xmx2560M`).
 - Seen in the dev client: every kind placed side by side on a test platform (screenshots), a jungle and dark forest
   generated fresh, and a dark oak felled at half speed (it tipped, lay, broke, its stump and roots stayed).
+
+## 0.5.11: fires, rebuilding, walls round the whole town
+- **Fires answered** (`Firefighting`, `BaseFireBlockMixin`): a fire lit within `WATCHED` (96) of a settlement's seat is
+  watched until it's out. Each grown villager near it chooses once: fight it (`FIGHT` 40%: runs to a spot two short of
+  it, then pours water on it, taken up again after `WATER_TICKS`, or beats it out, half the time knocking out the
+  burning block under it), look after the nearest child and lead it away (`GUARD` 30%), or run (`RUN` blocks off).
+  Children run. Folk not already fighting put it out. Seen in the dev client: eight villagers and a child round three
+  fires on a plank floor; the fires were out within seconds (water poured, then taken up), the rest scattered.
+- **Lost buildings put up again** (`Rebuilds`): finished buildings now keep how they were turned and their variant
+  (`Works.Built.rotation`, `variant`, `ruined`). A settlement looks over one building every `CHECK_TICKS`; with
+  `RUINED_SHARE` (35%) of its paid-for blocks gone (crops, plants, water and soil don't count) it lies in ruins
+  (announced), and after `REBUILD_AFTER` (half a day) it's put up again where it stood, clearing what's left first.
+  Mended in the meantime, it's forgotten. Only buildings finished from 0.5.11 on, and not the village it grew from.
+  Seen: a gatehouse cleared away was found in ruins and announced; the rebuild itself not yet seen (it waited on the
+  settlement being "ready", now dropped).
+- **The wall round everything** (`Enclosure`): once every kind of building in a settlement's growth order but houses
+  is up to its full count (`Planner.utilitiesDone`), its builders wall it in: a rectangle round its buildings, the
+  village it grew from and a `MARGIN` (12) for houses to come, squared to whole sections (`Works.Site.wall`). Kingdoms
+  and fiefdoms: stone sections, a tower on each corner, a gatehouse in the middle of each side; villages: a palisade
+  with a gap in the middle of each side. Gatehouses first, then towers, then the sections. Later buildings stay inside
+  (`Planner.site`). Wall pieces are no longer ordinary buildings (`Planner.eligible`). `/kingdom project start wall`
+  puts up the next piece at once for ops. Seen: Ravnreach walled round its whole village (86 pieces, across a river).
+- The Kingdoms dev game loads Minecraft Comes Alive too (`localRuntime` from `../libs`).
