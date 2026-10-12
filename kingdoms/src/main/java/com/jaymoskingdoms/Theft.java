@@ -377,12 +377,8 @@ public final class Theft {
 			return;
 		}
 		LivingEntity witness = seen.getFirst();
-		Component cry = Component.translatable("message.jaymoskingdoms.theft.cry", witness.getDisplayName(),
-			Component.translatable("message.jaymoskingdoms.theft.cry." + crime.cry + "." + level.getRandom().nextInt(SHOUT_VARIANTS)))
-			.withStyle(w == Weight.LIGHT ? ChatFormatting.YELLOW : ChatFormatting.RED);
-		for (ServerPlayer near : level.getEntitiesOfClass(ServerPlayer.class, witness.getBoundingBox().inflate(SHOUT_RANGE))) {
-			near.sendSystemMessage(cry);
-		}
+		Component cry = Component.translatable("message.jaymoskingdoms.theft.cry." + crime.cry + "." + level.getRandom().nextInt(SHOUT_VARIANTS));
+		Speech.say(level, witness, cry, w == Weight.LIGHT ? Speech.YELLOW : Speech.RED, SHOUT_RANGE);
 		level.playSound(null, witness.getX(), witness.getY(), witness.getZ(), witness instanceof IronGolem ? SoundEvents.IRON_GOLEM_HURT
 			: SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 1.2F, w == Weight.HEAVY ? 0.8F : 1.0F);
 		Reputation.change(player, f, w.rep);
