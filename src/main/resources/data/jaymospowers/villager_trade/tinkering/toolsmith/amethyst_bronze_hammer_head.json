@@ -1,0 +1,31 @@
+{
+  "gives": {
+    "id": "jaymospowers:hammer_head",
+    "components": {
+      "jaymospowers:part_material": "amethyst_bronze",
+      "minecraft:custom_model_data": {
+        "strings": [
+          "amethyst_bronze"
+        ]
+      },
+      "minecraft:item_name": {
+        "translate": "jaymospowers.tinkering.named",
+        "with": [
+          {
+            "translate": "material.jaymospowers.amethyst_bronze"
+          },
+          {
+            "translate": "item.jaymospowers.hammer_head"
+          }
+        ]
+      }
+    }
+  },
+  "max_uses": 3,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 14
+  },
+  "xp": 20
+}

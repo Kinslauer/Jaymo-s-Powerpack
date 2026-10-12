@@ -56,7 +56,7 @@ public class ToolStationMenu extends AbstractContainerMenu {
 			this.addSlot(new Slot(inputs, i, SLOT_AT[i][0], SLOT_AT[i][1]) {
 				@Override
 				public boolean mayPlace(ItemStack stack) {
-					return stack.getItem() instanceof ToolPartItem || stack.getItem() instanceof TinkerToolItem || TinkerMaterial.of(stack) != null
+					return stack.getItem() instanceof ToolPartItem || Modifier.takes(stack) || TinkerMaterial.of(stack) != null
 						|| Modifier.ingredient(stack);
 				}
 			});
@@ -106,7 +106,7 @@ public class ToolStationMenu extends AbstractContainerMenu {
 			ItemStack stack = inputs.getItem(i);
 			if (!stack.isEmpty()) {
 				filled++;
-				if (stack.getItem() instanceof TinkerToolItem) {
+				if (Modifier.takes(stack)) {
 					toolSlot = toolSlot == -1 ? i : -2;
 				}
 			}

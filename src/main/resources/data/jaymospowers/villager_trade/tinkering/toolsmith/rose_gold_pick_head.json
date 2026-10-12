@@ -1,0 +1,31 @@
+{
+  "gives": {
+    "id": "jaymospowers:pick_head",
+    "components": {
+      "jaymospowers:part_material": "rose_gold",
+      "minecraft:custom_model_data": {
+        "strings": [
+          "rose_gold"
+        ]
+      },
+      "minecraft:item_name": {
+        "translate": "jaymospowers.tinkering.named",
+        "with": [
+          {
+            "translate": "material.jaymospowers.rose_gold"
+          },
+          {
+            "translate": "item.jaymospowers.pick_head"
+          }
+        ]
+      }
+    }
+  },
+  "max_uses": 4,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 6
+  },
+  "xp": 15
+}

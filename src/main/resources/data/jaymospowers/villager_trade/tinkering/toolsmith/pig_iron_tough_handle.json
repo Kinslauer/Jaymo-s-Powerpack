@@ -1,0 +1,31 @@
+{
+  "gives": {
+    "id": "jaymospowers:tough_handle",
+    "components": {
+      "jaymospowers:part_material": "pig_iron",
+      "minecraft:custom_model_data": {
+        "strings": [
+          "pig_iron"
+        ]
+      },
+      "minecraft:item_name": {
+        "translate": "jaymospowers.tinkering.named",
+        "with": [
+          {
+            "translate": "material.jaymospowers.pig_iron"
+          },
+          {
+            "translate": "item.jaymospowers.tough_handle"
+          }
+        ]
+      }
+    }
+  },
+  "max_uses": 3,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 10
+  },
+  "xp": 20
+}

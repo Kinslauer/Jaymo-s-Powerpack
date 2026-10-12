@@ -162,6 +162,7 @@ SMELTERY_LANG = {
     "gui.jaymospowers.tool_station.no_slots": "No modifier slots free: level the tool up to earn more",
     "gui.jaymospowers.tool_station.clash": "%s and %s don't go together",
     "gui.jaymospowers.tool_station.needs": "Needs %s first",
+    "gui.jaymospowers.tool_station.weapon": "%s doesn't go on this weapon",
     "tooltip.jaymospowers.tinkering.level": "Level %s (%s / %s xp)",
     "tooltip.jaymospowers.tinkering.level_max": "Level %s (top level)",
     "tooltip.jaymospowers.tinkering.slots": "Modifier slots: %s of %s free",
@@ -508,6 +509,49 @@ def smeltery_data():
         write(path, {"values": [v for v in old["values"] if v not in values] + values})
 
 
+# (0.8.76) Stage 3: smiths sell parts and casts (vanilla trade data, so kingdoms' smiths and MCA's sell them too).
+# (profession, level, material or None for a cast, part or cast shape, emeralds, max uses, xp)
+TRADES = [
+    ("toolsmith", 2, "iron", "pick_head", 4, 6, 10),
+    ("toolsmith", 2, None, "ingot", 6, 3, 10),
+    ("toolsmith", 3, "rose_gold", "pick_head", 6, 4, 15),
+    ("toolsmith", 3, None, "pick_head", 10, 3, 15),
+    ("toolsmith", 4, "amethyst_bronze", "hammer_head", 14, 3, 20),
+    ("toolsmith", 4, "pig_iron", "tough_handle", 10, 3, 20),
+    ("toolsmith", 5, "slimesteel", "large_plate", 16, 2, 30),
+    ("weaponsmith", 2, "iron", "small_blade", 4, 6, 10),
+    ("weaponsmith", 3, "rose_gold", "tool_binding", 5, 4, 15),
+    ("weaponsmith", 3, None, "small_blade", 10, 3, 15),
+    ("weaponsmith", 4, "pig_iron", "broad_blade", 14, 3, 20),
+    ("weaponsmith", 5, "slimesteel", "tough_handle", 14, 2, 30),
+    ("armorer", 3, None, "large_plate", 12, 3, 15),
+    ("mason", 2, None, "seared_bricks", 1, 12, 10),
+]
+
+
+def trades_data():
+    tags = {}
+    for prof, level, material, shape, price, uses, xp in TRADES:
+        if shape == "seared_bricks":
+            name, gives = "seared_bricks", {"id": NS + ":seared_bricks", "count": 4}
+        elif material is None:
+            name, gives = shape + "_cast", {"id": NS + ":" + shape + "_cast"}
+        else:
+            name = material + "_" + shape
+            gives = {"id": NS + ":" + shape, "components": {
+                NS + ":part_material": material,
+                "minecraft:custom_model_data": {"strings": [material]},
+                "minecraft:item_name": {"translate": "jaymospowers.tinkering.named", "with": [
+                    {"translate": "material.jaymospowers." + material}, {"translate": "item.jaymospowers." + shape}]}}}
+        trade = NS + ":tinkering/" + prof + "/" + name
+        write(os.path.join(DATA, "villager_trade", "tinkering", prof, name + ".json"), {
+            "gives": gives, "max_uses": uses, "reputation_discount": 0.05,
+            "wants": {"id": "minecraft:emerald", "count": price}, "xp": xp})
+        tags.setdefault((prof, level), []).append(trade)
+    for (prof, level), values in tags.items():
+        write(os.path.join(MC_DATA, "tags", "villager_trade", prof, "level_%d.json" % level), {"values": values})
+
+
 def data():
     write(os.path.join(DATA, "recipe", "tinkering", "pattern.json"), {
         "type": "minecraft:crafting_shaped", "category": "misc",
@@ -579,6 +623,7 @@ def main():
     smeltery(tcon)
     data()
     smeltery_data()
+    trades_data()
     lang()
 
 

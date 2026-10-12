@@ -1,6 +1,11 @@
 package com.jaymospowers.client.tinkering;
 
+import com.jaymospowers.armory.Armory;
+import com.jaymospowers.tinkering.Modifier;
 import com.jaymospowers.tinkering.Tinkering;
+import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
@@ -18,6 +23,19 @@ public final class TinkeringClient {
 		BlockEntityRenderers.register(Tinkering.SMELTERY_ENTITY, SmelteryRenderer::new);
 		BlockEntityRenderers.register(Tinkering.CASTING_ENTITY, CastingRenderer::new);
 		BlockEntityRenderers.register(Tinkering.FAUCET_ENTITY, FaucetRenderer::new);
+		// (0.8.76) Armory weapons level up and take modifiers like tinker tools
+		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
+			if (!Armory.isWeapon(stack)) {
+				return;
+			}
+			int xp = Modifier.xp(stack), level = Modifier.toolLevel(xp);
+			int at = Math.min(1, lines.size());
+			lines.add(at, Component.translatable("tooltip.jaymospowers.tinkering.slots", Modifier.slots(stack) - Modifier.used(stack),
+				Modifier.slots(stack)).withStyle(ChatFormatting.GRAY));
+			lines.add(at, (level >= Modifier.MAX_LEVEL ? Component.translatable("tooltip.jaymospowers.tinkering.level_max", level)
+				: Component.translatable("tooltip.jaymospowers.tinkering.level", level, xp, Modifier.xpFor(level + 1)))
+				.withStyle(ChatFormatting.YELLOW));
+		});
 		Tinkering.traitDetails = () -> Minecraft.getInstance().hasShiftDown();
 	}
 }
