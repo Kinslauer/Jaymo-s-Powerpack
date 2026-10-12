@@ -304,7 +304,11 @@ public final class Gatherers {
 			BlockPos mid = new BlockPos((min.getX() + max.getX()) / 2, min.getY() + 1, (min.getZ() + max.getZ()) / 2);
 			for (int i = 0; i < STABLE_HORSES; i++) {
 				BlockPos at = Construction.standable(level, mid.offset(level.getRandom().nextInt(3) - 1, 0, level.getRandom().nextInt(3) - 1), 2);
-				EntityTypes.HORSE.spawn(level, at, EntitySpawnReason.SPAWN_ITEM_USE);
+				com.jaymoskingdoms.equestrian.Equestrian.spawn(level, stableBreed(level, f, i), at);
+			}
+			if (f.type().isRealm() && Climate.at(level, f.seat()).arid()) {
+				// (0.5.33) a desert realm's stable keeps a war elephant
+				com.jaymoskingdoms.equestrian.Equestrian.spawn(level, com.jaymoskingdoms.equestrian.Breed.WAR_ELEPHANT, Construction.standable(level, mid, 3));
 			}
 		}
 		if ((entry.equals("pen") || entry.equals("farm")) && Farmers.wanted(server, f)) {
@@ -313,6 +317,25 @@ public final class Gatherers {
 				Farmers.spawn(level, now, Economy.recruit(level, now));
 			}
 		}
+	}
+
+	/**
+	 * (0.5.33) The breed of a new stable's {@code i}th horse: a village's palfreys and drafts; a realm's destriers and
+	 * coursers, or desert horses in the desert, steppe ponies on the savanna, drafts in the snow.
+	 */
+	static com.jaymoskingdoms.equestrian.Breed stableBreed(ServerLevel level, Faction f, int i) {
+		Climate climate = Climate.at(level, f.seat());
+		if (climate.arid()) {
+			return com.jaymoskingdoms.equestrian.Breed.DESERT_HORSE;
+		} else if (climate == Climate.SAVANNA) {
+			return com.jaymoskingdoms.equestrian.Breed.STEPPE_PONY;
+		} else if (climate == Climate.SNOWY && i == 0) {
+			return com.jaymoskingdoms.equestrian.Breed.DRAFT;
+		}
+		if (!f.type().isRealm()) {
+			return i % 2 == 0 ? com.jaymoskingdoms.equestrian.Breed.PALFREY : com.jaymoskingdoms.equestrian.Breed.DRAFT;
+		}
+		return i % 2 == 0 ? com.jaymoskingdoms.equestrian.Breed.DESTRIER : com.jaymoskingdoms.equestrian.Breed.COURSER;
 	}
 
 	// ---- a day's work -----------------------------------------------------------------------------------------------
