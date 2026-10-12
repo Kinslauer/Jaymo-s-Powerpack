@@ -384,7 +384,7 @@ public final class Carry {
 			mob.getNavigation().stop();
 			mob.setTarget(null);
 		}
-		carrier.sendOverlayMessage(Component.translatable(block ? "message.jaymospowers.carry.block"
+		carrier.sendOverlayMessage(Component.translatable(block ? (CarryBlock.holdsContents(target) ? "message.jaymospowers.carry.container" : "message.jaymospowers.carry.block")
 			: overhead ? "message.jaymospowers.carry.lifting" : "message.jaymospowers.carry.carrying")
 			.withStyle(ChatFormatting.GRAY));
 		AttributeInstance speed = carrier.getAttribute(Attributes.MOVEMENT_SPEED);
@@ -408,7 +408,8 @@ public final class Carry {
 	private static void release(ServerPlayer carrier, boolean toss) {
 		Entry entry = CARRIES.get(carrier.getUUID());
 		if (entry != null) {
-			end(carrier, entry, toss ? Let.THROW : Let.DROP);
+			// a chest, furnace and the like is only ever set down, never thrown
+			end(carrier, entry, toss && !CarryBlock.holdsContents(entry.carried) ? Let.THROW : Let.DROP);
 		}
 	}
 

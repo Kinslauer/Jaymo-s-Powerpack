@@ -368,3 +368,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   `config/jaymospowers-medieval-villagers-v1` to do that again). Its newest file says 1.21.1, so the resource pack
   screen marks it "made for an older version"; it only retextures MCA's skins, and 1144 of our MCA jar's 1145 skin
   files sit at the same paths. Not on the server (textures are client-only).
+- **0.8.59, carried containers are set down, not thrown:** a carried chest, furnace or anything else with a block
+  entity is only ever set down: sneak + right-click puts it down like a plain right-click (`CarryBlock.holdsContents`).
+  Plain blocks can still be thrown.
