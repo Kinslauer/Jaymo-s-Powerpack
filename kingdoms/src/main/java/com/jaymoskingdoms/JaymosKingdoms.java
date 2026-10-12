@@ -120,6 +120,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Cabs.register();
 		// 0.5.29: quests from villagers and kings, their caches and champions, relics (and their attachments)
 		LOGGER.debug("quest attachments: {} {} {} {}", Quests.LOG, Quests.OFFER, Quests.MARK, QuestFoes.FOE);
+		// 0.5.38: where newcomers and immigrants are from (skin tone by climate)
+		LOGGER.debug("origin attachment: {}", SkinTones.ORIGIN);
 		Quests.register();
 		// 0.5.39: the townsfolk come over to you: questions, quests, requests, bargains, news
 		Approaches.register();
