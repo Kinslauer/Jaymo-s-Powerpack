@@ -140,6 +140,11 @@ public final class McaCompat {
 		}
 	}
 
+	/** (0.5.39) {@code player}'s hearts with {@code villager} (0 without MCA, or for a plain villager). */
+	static int heartsOf(Villager villager, ServerPlayer player) {
+		return LOADED ? McaBridge.heartsOf(villager, player) : 0;
+	}
+
 	/** Tells MCA about the workers' professions (they're kept: not traded with, not made guards, not lost). */
 	static void register() {
 		if (LOADED) {

@@ -459,6 +459,10 @@ public final class Theft {
 		}
 		Weight w = weight != null ? weight : crime.weight;
 		List<LivingEntity> seen = witnesses(level, f, player);
+		if (!seen.isEmpty()) {
+			// (0.5.39) word gets round: its people will ask about it
+			Approaches.suspect(player, f.id(), level.getGameTime());
+		}
 		if (seen.isEmpty()) {
 			if (noticeable && level.getRandom().nextFloat() < NOTICE_CHANCE) {
 				NOTICES.add(new Notice(player.getUUID(), f.id(), level.getGameTime() + NOTICE_TICKS));
@@ -633,6 +637,7 @@ public final class Theft {
 			Faction f = Factions.get(server, n.faction());
 			if (player != null && f != null) {
 				Reputation.change(player, f, REP_UNSEEN);
+				Approaches.suspect(player, f.id(), now);
 				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.theft.noticed", f.name()).withStyle(ChatFormatting.GRAY));
 			}
 		}

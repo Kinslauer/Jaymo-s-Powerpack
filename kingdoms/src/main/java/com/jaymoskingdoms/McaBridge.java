@@ -54,6 +54,11 @@ final class McaBridge {
 		}
 	}
 
+	/** (0.5.39) Hearts with {@code player} in an MCA villager's memory (0 for a plain one). */
+	static int heartsOf(Villager villager, ServerPlayer player) {
+		return villager instanceof VillagerEntityMCA v ? v.getVillagerBrain().getMemoriesForPlayer(player).getHearts() : 0;
+	}
+
 	// ---- workers (0.5.21) -------------------------------------------------------------------------------------------
 
 	/** The workers' professions are important (MCA never makes them guards or lets them lapse), and they don't trade. */

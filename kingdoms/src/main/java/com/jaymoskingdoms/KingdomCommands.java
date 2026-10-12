@@ -58,6 +58,7 @@ final class KingdomCommands {
 				.then(Commands.literal("village").executes(KingdomCommands::foundVillage)))
 			.then(Camps.command())
 			.then(QuestCommands.command())
+			.then(Approaches.command())
 			.then(WarCommands.command())
 			.then(Commands.literal("storage").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(c -> storage(c, null))
 				.then(Commands.argument("name", StringArgumentType.word()).executes(c -> storage(c, StringArgumentType.getString(c, "name")))))

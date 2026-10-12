@@ -487,3 +487,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     +1 a level) and show their level and slots in the tooltip (`Armory.isWeapon`, `Modifier.takes`).
   - The Tool Station's side panel now says why a modifier won't go on (no slots left, at its max, doesn't fit).
   - Next: Andy's call.
+- **0.8.78, Townsfolk come to you:** ships Jaymo's Kingdoms 0.5.39 (see `kingdoms/MODLOG.md`): villagers, children and
+  guards walk up and start things (questions, quests, accusations, requests, bargains, gifts, news); right-click to
+  answer.
