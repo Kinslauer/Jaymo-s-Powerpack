@@ -14,6 +14,10 @@ public final class TinkeringClient {
 		MenuScreens.register(Tinkering.PART_BUILDER_MENU, PartBuilderScreen::new);
 		MenuScreens.register(Tinkering.TOOL_STATION_MENU, ToolStationScreen::new);
 		BlockEntityRenderers.register(Tinkering.STATION_ENTITY, StationRenderer::new);
+		MenuScreens.register(Tinkering.SMELTERY_MENU, SmelteryScreen::new);
+		BlockEntityRenderers.register(Tinkering.SMELTERY_ENTITY, SmelteryRenderer::new);
+		BlockEntityRenderers.register(Tinkering.CASTING_ENTITY, CastingRenderer::new);
+		BlockEntityRenderers.register(Tinkering.FAUCET_ENTITY, FaucetRenderer::new);
 		Tinkering.traitDetails = () -> Minecraft.getInstance().hasShiftDown();
 	}
 }

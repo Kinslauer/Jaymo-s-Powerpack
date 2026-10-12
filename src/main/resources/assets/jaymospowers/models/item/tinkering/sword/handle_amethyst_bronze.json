@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "jaymospowers:item/tinkering/sword/handle_amethyst_bronze"
+  }
+}

@@ -27,7 +27,9 @@ MATERIALS = [
     ("wood", "Wooden", "all"), ("wood_crimson", "Crimson", "all"), ("wood_warped", "Warped", "all"),
     ("rock_stone", "Stone", "all"), ("rock_granite", "Granite", "all"), ("rock_diorite", "Diorite", "all"),
     ("rock_blackstone", "Blackstone", "all"),
-    ("flint", "Flint", "all"), ("bone", "Bone", "all"), ("copper", "Copper", "all"), ("iron", "Iron", "all"),
+    ("flint", "Flint", "all"), ("bone", "Bone", "all"), ("seared_stone", "Seared Stone", "all"),
+    ("copper", "Copper", "all"), ("iron", "Iron", "all"), ("rose_gold", "Rose Gold", "all"),
+    ("amethyst_bronze", "Amethyst Bronze", "all"), ("pig_iron", "Pig Iron", "all"), ("slimesteel", "Slimesteel", "all"),
     ("leather", "Leather", "binding"), ("string", "String", "binding"), ("vine", "Vine", "binding"),
 ]
 HEADS = [m for m, _, use in MATERIALS if use == "all"]
@@ -94,6 +96,76 @@ TRAITS = {
     "tilling": ("Tilling", "Tills soil like a hoe."),
     "sweeping": ("Sweeping", "Its swings cut through a crowd."),
     "area": ("Wide Swing", "Breaks a 3 by 3 face at once."),
+    "searing": ("Searing", "Hits harder on anything that can burn."),
+    "enhanced": ("Enhanced", "One more modifier slot."),
+    "crumbling": ("Crumbling", "Digs faster through blocks that need no tool."),
+    "tasty": ("Tasty", "When you're hungry you sometimes take a bite of it."),
+    "overslime": ("Overslime", "Slowly mends itself while you carry it."),
+}
+
+# modifier id, name, what it does (the items are in com.jaymospowers.tinkering.Modifier)
+MODIFIERS = [
+    ("haste", "Haste", "Mines faster (redstone block)."),
+    ("sharpness", "Sharpness", "Hits harder (quartz block)."),
+    ("luck", "Luck", "Fortune on tools, looting on blades (lapis block)."),
+    ("silky", "Silky", "Silk touch (cobweb and gold block)."),
+    ("fiery", "Fiery", "Sets what it hits alight (blaze rod)."),
+    ("knockback", "Knockback", "Knocks what it hits back (piston)."),
+    ("reinforced", "Reinforced", "Wears more slowly (obsidian)."),
+    ("diamond", "Diamond", "+500 durability, a little more attack, mines like diamond."),
+    ("emerald", "Emerald", "+50% durability, mines at least like iron."),
+    ("netherite", "Netherite", "+20% durability, more attack, mines like netherite, won't burn (needs Diamond)."),
+]
+
+# molten id, name, Tinkers' fluid folder (under textures/fluid), or None for a tinted plain molten texture
+MOLTEN = [
+    ("iron", "Molten Iron", "molten/ore/iron"), ("gold", "Molten Gold", "molten/ore/gold"),
+    ("copper", "Molten Copper", "molten/ore/copper"), ("amethyst", "Molten Amethyst", "molten/ore/amethyst"),
+    ("rose_gold", "Molten Rose Gold", "molten/alloy/rose_gold"),
+    ("amethyst_bronze", "Molten Amethyst Bronze", "molten/alloy/amethyst_bronze"),
+    ("pig_iron", "Molten Pig Iron", "molten/alloy/pig_iron"), ("slimesteel", "Molten Slimesteel", "molten/alloy/slimesteel"),
+    ("slime", "Liquid Slime", "slime/earth"), ("honey", "Honey", "food/honey"), ("blood", "Blood", None),
+]
+BLOOD_TINT = (120, 8, 8)
+
+# alloy ingots: our id, Tinkers' texture
+INGOTS = [("rose_gold_ingot", "Rose Gold Ingot", "rose_gold_ingot"),
+          ("amethyst_bronze_ingot", "Amethyst Bronze Ingot", "amethyst_bronze_ingot"),
+          ("pig_iron_ingot", "Pig Iron Ingot", "pigiron_ingot"), ("slimesteel_ingot", "Slimesteel Ingot", "slimesteel_ingot")]
+CASTS = ["ingot", "nugget"] + [p[0] for p in PARTS]
+
+SMELTERY_LANG = {
+    "block.jaymospowers.grout": "Grout",
+    "block.jaymospowers.seared_bricks": "Seared Bricks",
+    "block.jaymospowers.seared_glass": "Seared Glass",
+    "block.jaymospowers.smeltery_controller": "Smeltery Controller",
+    "block.jaymospowers.seared_drain": "Seared Drain",
+    "block.jaymospowers.seared_faucet": "Seared Faucet",
+    "block.jaymospowers.casting_table": "Casting Table",
+    "block.jaymospowers.casting_basin": "Casting Basin",
+    "item.jaymospowers.seared_brick": "Seared Brick",
+    "container.jaymospowers.smeltery": "Smeltery",
+    "message.jaymospowers.smeltery.unformed": "The smeltery isn't complete yet.",
+    "gui.jaymospowers.smeltery.unformed": "Not a smeltery yet: it needs a floor of seared bricks and seared walls all round an open space, with this controller in the wall.",
+    "gui.jaymospowers.smeltery.to_bottom": "Click to pour this one first",
+    "gui.jaymospowers.smeltery.capacity": "%s of %s",
+    "gui.jaymospowers.smeltery.fuel": "Lava: %s / %s mB",
+    "gui.jaymospowers.smeltery.fuel_hint": "Put lava buckets in the slot above",
+    "molten.jaymospowers.mb": "%s mB",
+    "molten.jaymospowers.ingot": "%s ingot",
+    "molten.jaymospowers.ingots": "%s ingots",
+    "molten.jaymospowers.and": "%s, %s",
+    "tooltip.jaymospowers.tinkering.cast": "Set it on a casting table and pour metal over it.",
+    "gui.jaymospowers.part_builder.cast": "%s parts are cast: melt it in a smeltery and pour it over a cast.",
+    "gui.jaymospowers.tool_station.modify": "Adding %s (%s slots left after)",
+    "gui.jaymospowers.tool_station.max": "%s is as high as it goes",
+    "gui.jaymospowers.tool_station.no_slots": "No modifier slots free: level the tool up to earn more",
+    "gui.jaymospowers.tool_station.clash": "%s and %s don't go together",
+    "gui.jaymospowers.tool_station.needs": "Needs %s first",
+    "tooltip.jaymospowers.tinkering.level": "Level %s (%s / %s xp)",
+    "tooltip.jaymospowers.tinkering.level_max": "Level %s (top level)",
+    "tooltip.jaymospowers.tinkering.slots": "Modifier slots: %s of %s free",
+    "message.jaymospowers.tinkering.level_up": "Your %s reached level %s: one more modifier slot!",
 }
 
 STAT_LANG = {
@@ -303,6 +375,139 @@ def stations(tcon):
                     os.path.join(ASSETS, "textures", "item", "tinkering", "license_tinkers_construct.txt"))
 
 
+def smeltery(tcon):
+    tex = os.path.join(tcon, "assets", "tconstruct", "textures")
+    models_dir = os.path.join(tcon, "assets", "tconstruct", "models", "block", "template")
+    shutil.rmtree(os.path.join(ASSETS, "textures", "block", "tinkering", "molten"), ignore_errors=True)
+    t = NS + ":block/tinkering/"
+    block_tex = {
+        "grout": "block/grout", "seared_bricks": "block/smeltery/seared/bricks", "seared_stone": "block/smeltery/seared/stone",
+        "seared_glass": "block/smeltery/seared_glass", "smeltery_inactive": "block/smeltery/controller/smeltery_inactive",
+        "smeltery_active": "block/smeltery/controller/smeltery_active", "drain": "block/smeltery/io/drain_front_active",
+        "table_top": "block/smeltery/casting/table_top", "table_side": "block/smeltery/casting/table_side",
+        "table_bottom": "block/smeltery/casting/table_bottom", "basin_top": "block/smeltery/casting/basin_top",
+        "basin_side": "block/smeltery/casting/basin_side", "basin_bottom": "block/smeltery/casting/basin_bottom",
+    }
+    for name, rel in block_tex.items():
+        copy_png(os.path.join(tex, rel + ".png"), "block/tinkering/" + name)
+
+    def block_model(name, data):
+        write(os.path.join(ASSETS, "models", "block", "tinkering", name + ".json"), data)
+
+    def simple(block, model_name=None):
+        model_name = model_name or block
+        write(os.path.join(ASSETS, "blockstates", block + ".json"), {"variants": {"": {"model": t + model_name}}})
+        write(os.path.join(ASSETS, "items", block + ".json"), {"model": ref("block/tinkering/" + model_name)})
+
+    for block in ("grout", "seared_bricks", "seared_glass"):
+        block_model(block, {"parent": "minecraft:block/cube_all", "textures": {"all": t + block}})
+        simple(block)
+    rotations = {"north": 0, "east": 90, "south": 180, "west": 270}
+    for lit in ("inactive", "active"):
+        block_model("smeltery_" + lit, {"parent": "minecraft:block/orientable", "textures": {
+            "top": t + "seared_bricks", "side": t + "seared_bricks", "front": t + "smeltery_" + lit}})
+    write(os.path.join(ASSETS, "blockstates", "smeltery_controller.json"), {"variants": {
+        "facing=%s,lit=%s" % (f, str(lit).lower()): {"model": t + ("smeltery_active" if lit else "smeltery_inactive"), "y": r}
+        for f, r in rotations.items() for lit in (False, True)}})
+    write(os.path.join(ASSETS, "items", "smeltery_controller.json"), {"model": ref("block/tinkering/smeltery_inactive")})
+    block_model("seared_drain", {"parent": "minecraft:block/orientable", "textures": {
+        "top": t + "seared_bricks", "side": t + "seared_bricks", "front": t + "drain"}})
+    write(os.path.join(ASSETS, "blockstates", "seared_drain.json"), {"variants": {
+        "facing=" + f: {"model": t + "seared_drain", "y": r} for f, r in rotations.items()}})
+    write(os.path.join(ASSETS, "items", "seared_drain.json"), {"model": ref("block/tinkering/seared_drain")})
+    # Tinkers' own models for the faucet, table and basin (its loader keys dropped; 26.3 picks cutout by itself)
+    for template, name, textures in (("faucet", "seared_faucet", {"tex": t + "seared_stone"}),
+                                     ("table", "casting_table", {"top": t + "table_top", "side": t + "table_side", "bottom": t + "table_bottom"}),
+                                     ("basin", "casting_basin", {"top": t + "basin_top", "side": t + "basin_side", "bottom": t + "basin_bottom"})):
+        tpl = json.load(open(os.path.join(models_dir, template + ".json")))
+        tpl.pop("render_type", None)
+        tpl.pop("comment", None)
+        tpl["parent"] = "minecraft:block/block"
+        tpl["textures"] = dict(tpl.get("textures", {}))
+        tpl["textures"].update(textures)
+        if "particle" in tpl["textures"] and tpl["textures"]["particle"].startswith("#"):
+            tpl["textures"]["particle"] = textures[tpl["textures"]["particle"][1:]]
+        block_model(name, tpl)
+    # the faucet's model faces north (the drain behind it, to the south)
+    write(os.path.join(ASSETS, "blockstates", "seared_faucet.json"), {"variants": {
+        "facing=%s,powered=%s" % (f, p): {"model": t + "seared_faucet", "y": r}
+        for f, r in rotations.items() for p in ("false", "true")}})
+    write(os.path.join(ASSETS, "items", "seared_faucet.json"), {"model": ref("block/tinkering/seared_faucet")})
+    for block in ("casting_table", "casting_basin"):
+        simple(block)
+
+    # items: seared brick, alloy ingots, casts
+    copy_png(os.path.join(tex, "item", "materials", "seared_brick.png"), "item/tinkering/seared_brick")
+    model("item/tinkering/seared_brick", "minecraft:item/generated", "item/tinkering/seared_brick")
+    write(os.path.join(ASSETS, "items", "seared_brick.json"), {"model": ref("item/tinkering/seared_brick")})
+    for item, _, src in INGOTS:
+        copy_png(os.path.join(tex, "item", "materials", src + ".png"), "item/tinkering/" + item)
+        model("item/tinkering/" + item, "minecraft:item/generated", "item/tinkering/" + item)
+        write(os.path.join(ASSETS, "items", item + ".json"), {"model": ref("item/tinkering/" + item)})
+    for cast in CASTS:
+        copy_png(os.path.join(tex, "item", "cast", cast + ".png"), "item/tinkering/cast/" + cast)
+        model("item/tinkering/cast/" + cast, "minecraft:item/generated", "item/tinkering/cast/" + cast)
+        write(os.path.join(ASSETS, "items", cast + "_cast.json"), {"model": ref("item/tinkering/cast/" + cast)})
+
+    # molten metal: animated in the world (block atlas), its first frame for the screen
+    def save_molten(im, mcmeta, mid):
+        dest = os.path.join(ASSETS, "textures", "block", "tinkering", "molten", mid + ".png")
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
+        im.save(dest)
+        write(dest + ".mcmeta", mcmeta)
+        gui = os.path.join(ASSETS, "textures", "gui", "tinkering", "molten", mid + ".png")
+        os.makedirs(os.path.dirname(gui), exist_ok=True)
+        im.crop((0, 0, 16, 16)).save(gui)
+
+    for mid, _, folder in MOLTEN:
+        src = os.path.join(tex, "fluid", folder if folder else "molten", "still.png")
+        im = Image.open(src).convert("RGBA")
+        if folder is None:
+            px = im.load()
+            for y in range(im.size[1]):
+                for x in range(im.size[0]):
+                    r, g, b, a = px[x, y]
+                    px[x, y] = (r * BLOOD_TINT[0] // 255, g * BLOOD_TINT[1] // 255 + 4, b * BLOOD_TINT[2] // 255 + 4, a)
+        save_molten(im, open(src + ".mcmeta").read(), mid)
+    lava = os.path.join(tex, "fluid", "molten", "blaze", "still.png")
+    Image.open(lava).convert("RGBA").crop((0, 0, 16, 16)).save(os.path.join(ASSETS, "textures", "gui", "tinkering", "molten", "lava.png"))
+    copy_png(os.path.join(tex, "gui", "heating_structure.png"), "gui/tinkering/smeltery")
+
+
+def shaped(name, pattern, key, result, count=1):
+    write(os.path.join(DATA, "recipe", "tinkering", name + ".json"), {
+        "type": "minecraft:crafting_shaped", "category": "building", "key": key, "pattern": pattern,
+        "result": {"id": result, "count": count}})
+
+
+def smeltery_data():
+    b = {"b": NS + ":seared_brick"}
+    write(os.path.join(DATA, "recipe", "tinkering", "grout.json"), {
+        "type": "minecraft:crafting_shapeless", "category": "building",
+        "ingredients": ["minecraft:clay_ball", "#minecraft:sand", "minecraft:gravel"], "result": {"id": NS + ":grout", "count": 2}})
+    write(os.path.join(DATA, "recipe", "tinkering", "seared_brick.json"), {
+        "type": "minecraft:smelting", "category": "misc", "ingredient": NS + ":grout",
+        "result": {"id": NS + ":seared_brick"}, "experience": 0.3, "cookingtime": 200})
+    shaped("seared_bricks", ["bb", "bb"], b, NS + ":seared_bricks")
+    shaped("seared_glass", [" b ", "bgb", " b "], dict(b, g="minecraft:glass"), NS + ":seared_glass")
+    shaped("smeltery_controller", ["bbb", "b b", "bbb"], b, NS + ":smeltery_controller")
+    shaped("seared_drain", ["b b", "b b", "b b"], b, NS + ":seared_drain")
+    shaped("seared_faucet", ["b b", " b "], b, NS + ":seared_faucet", 2)
+    shaped("casting_table", ["bbb", "b b", "b b"], b, NS + ":casting_table")
+    shaped("casting_basin", ["b b", "b b", "bbb"], b, NS + ":casting_basin")
+    blocks = ["grout", "seared_bricks", "seared_glass", "smeltery_controller", "seared_drain", "seared_faucet",
+              "casting_table", "casting_basin"]
+    for block in blocks:
+        write(os.path.join(DATA, "loot_table", "blocks", block + ".json"), {
+            "type": "minecraft:block", "random_sequence": NS + ":blocks/" + block,
+            "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": NS + ":" + block}],
+                       "condition": {"type": "minecraft:survives_explosion"}}]})
+    for tag, values in (("pickaxe", [NS + ":" + x for x in blocks if x != "grout"]), ("shovel", [NS + ":grout"])):
+        path = os.path.join(MC_DATA, "tags", "block", "mineable", tag + ".json")
+        old = json.load(open(path)) if os.path.exists(path) else {"values": []}
+        write(path, {"values": [v for v in old["values"] if v not in values] + values})
+
+
 def data():
     write(os.path.join(DATA, "recipe", "tinkering", "pattern.json"), {
         "type": "minecraft:crafting_shaped", "category": "misc",
@@ -348,6 +553,17 @@ def lang():
         out["trait.jaymospowers." + trait] = name
         out["trait.jaymospowers." + trait + ".desc"] = desc
     out.update(STAT_LANG)
+    out.update(SMELTERY_LANG)
+    for mid, name, _ in MOLTEN:
+        out["molten.jaymospowers." + mid] = name
+    for item, name, _ in INGOTS:
+        out["item.jaymospowers." + item] = name
+    for cast in CASTS:
+        base = {"ingot": "Ingot", "nugget": "Nugget"}.get(cast) or next(p[1] for p in PARTS if p[0] == cast)
+        out["item.jaymospowers." + cast + "_cast"] = base + " Cast"
+    for mid, name, desc in MODIFIERS:
+        out["modifier.jaymospowers." + mid] = name
+        out["modifier.jaymospowers." + mid + ".desc"] = desc
     write(os.path.join(ASSETS, "lang", "parts", "tinkering.json"), out)
 
 
@@ -360,7 +576,9 @@ def main():
     tools(tcon)
     parts(tcon)
     stations(tcon)
+    smeltery(tcon)
     data()
+    smeltery_data()
     lang()
 
 

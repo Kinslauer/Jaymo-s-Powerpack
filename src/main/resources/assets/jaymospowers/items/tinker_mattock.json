@@ -71,6 +71,13 @@
             }
           },
           {
+            "when": "seared_stone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/mattock/handle_seared_stone"
+            }
+          },
+          {
             "when": "copper",
             "model": {
               "type": "minecraft:model",
@@ -82,6 +89,34 @@
             "model": {
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/mattock/handle_iron"
+            }
+          },
+          {
+            "when": "rose_gold",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/mattock/handle_rose_gold"
+            }
+          },
+          {
+            "when": "amethyst_bronze",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/mattock/handle_amethyst_bronze"
+            }
+          },
+          {
+            "when": "pig_iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/mattock/handle_pig_iron"
+            }
+          },
+          {
+            "when": "slimesteel",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/mattock/handle_slimesteel"
             }
           }
         ],
@@ -163,6 +198,13 @@
               }
             },
             {
+              "when": "seared_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_broken_seared_stone"
+              }
+            },
+            {
               "when": "copper",
               "model": {
                 "type": "minecraft:model",
@@ -174,6 +216,34 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/mattock/axe_broken_iron"
+              }
+            },
+            {
+              "when": "rose_gold",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_broken_rose_gold"
+              }
+            },
+            {
+              "when": "amethyst_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_broken_amethyst_bronze"
+              }
+            },
+            {
+              "when": "pig_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_broken_pig_iron"
+              }
+            },
+            {
+              "when": "slimesteel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_broken_slimesteel"
               }
             }
           ],
@@ -251,6 +321,13 @@
               }
             },
             {
+              "when": "seared_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_seared_stone"
+              }
+            },
+            {
               "when": "copper",
               "model": {
                 "type": "minecraft:model",
@@ -262,6 +339,34 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/mattock/axe_iron"
+              }
+            },
+            {
+              "when": "rose_gold",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_rose_gold"
+              }
+            },
+            {
+              "when": "amethyst_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_amethyst_bronze"
+              }
+            },
+            {
+              "when": "pig_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_pig_iron"
+              }
+            },
+            {
+              "when": "slimesteel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_slimesteel"
               }
             }
           ],
@@ -344,6 +449,13 @@
               }
             },
             {
+              "when": "seared_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_broken_seared_stone"
+              }
+            },
+            {
               "when": "copper",
               "model": {
                 "type": "minecraft:model",
@@ -355,6 +467,34 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/mattock/pick_broken_iron"
+              }
+            },
+            {
+              "when": "rose_gold",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_broken_rose_gold"
+              }
+            },
+            {
+              "when": "amethyst_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_broken_amethyst_bronze"
+              }
+            },
+            {
+              "when": "pig_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_broken_pig_iron"
+              }
+            },
+            {
+              "when": "slimesteel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_broken_slimesteel"
               }
             }
           ],
@@ -432,6 +572,13 @@
               }
             },
             {
+              "when": "seared_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_seared_stone"
+              }
+            },
+            {
               "when": "copper",
               "model": {
                 "type": "minecraft:model",
@@ -443,6 +590,34 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/mattock/pick_iron"
+              }
+            },
+            {
+              "when": "rose_gold",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_rose_gold"
+              }
+            },
+            {
+              "when": "amethyst_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_amethyst_bronze"
+              }
+            },
+            {
+              "when": "pig_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_pig_iron"
+              }
+            },
+            {
+              "when": "slimesteel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_slimesteel"
               }
             }
           ],

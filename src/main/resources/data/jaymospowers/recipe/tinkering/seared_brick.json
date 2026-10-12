@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "ingredient": "jaymospowers:grout",
+  "result": {
+    "id": "jaymospowers:seared_brick"
+  },
+  "experience": 0.3,
+  "cookingtime": 200
+}

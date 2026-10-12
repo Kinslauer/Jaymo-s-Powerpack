@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "jaymospowers:item/tinkering/mattock/pick_seared_stone"
+  }
+}

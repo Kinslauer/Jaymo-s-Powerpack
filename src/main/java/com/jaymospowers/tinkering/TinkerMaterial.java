@@ -20,6 +20,7 @@ import org.jspecify.annotations.Nullable;
  * <li>Head: durability, mining speed, mining tier and attack, averaged over a tool's head parts.</li>
  * <li>Handle: fractions added to the tool's durability, mining speed, attack and attack speed (0.1 = +10%).</li>
  * <li>Binding-only materials (leather, string, vine) give just their trait.</li>
+ * <li>Metals ({@link #cast}) are cast into parts in a smeltery; their ingots still repair tools.</li>
  * </ul>
  */
 public enum TinkerMaterial {
@@ -32,8 +33,13 @@ public enum TinkerMaterial {
 	ROCK_BLACKSTONE("rock_blackstone", Stats.ROCK, Trait.STONEBOUND),
 	FLINT("flint", Stats.FLINT, Trait.JAGGED),
 	BONE("bone", Stats.BONE, Trait.PIERCE),
-	COPPER("copper", Stats.COPPER, Trait.DWARVEN),
-	IRON("iron", Stats.IRON, Trait.MAGNETIC),
+	SEARED_STONE("seared_stone", Stats.SEARED_STONE, Trait.SEARING),
+	COPPER("copper", Stats.COPPER, Trait.DWARVEN, true),
+	IRON("iron", Stats.IRON, Trait.MAGNETIC, true),
+	ROSE_GOLD("rose_gold", Stats.ROSE_GOLD, Trait.ENHANCED, true),
+	AMETHYST_BRONZE("amethyst_bronze", Stats.AMETHYST_BRONZE, Trait.CRUMBLING, true),
+	PIG_IRON("pig_iron", Stats.PIG_IRON, Trait.TASTY, true),
+	SLIMESTEEL("slimesteel", Stats.SLIMESTEEL, Trait.OVERSLIME, true),
 	LEATHER("leather", null, Trait.TANNED),
 	STRING("string", null, Trait.STRINGY),
 	VINE("vine", null, Trait.SOLAR_POWERED);
@@ -66,6 +72,11 @@ public enum TinkerMaterial {
 		static final Stats BONE = new Stats(100, 2.5F, 1.25F, Tier.STONE, -0.25F, 0.0F, 0.0F, 0.1F);
 		static final Stats COPPER = new Stats(210, 5.0F, 0.5F, Tier.IRON, -0.2F, 0.1F, 0.05F, 0.0F);
 		static final Stats IRON = new Stats(250, 6.0F, 2.0F, Tier.IRON, 0.1F, 0.0F, 0.0F, 0.0F);
+		static final Stats SEARED_STONE = new Stats(225, 6.5F, 1.5F, Tier.IRON, -0.15F, 0.1F, 0.05F, 0.0F);
+		static final Stats ROSE_GOLD = new Stats(175, 9.0F, 1.0F, Tier.WOOD, -0.3F, 0.1F, 0.0F, 0.1F);
+		static final Stats AMETHYST_BRONZE = new Stats(720, 7.0F, 1.5F, Tier.DIAMOND, 0.0F, 0.1F, 0.0F, 0.05F);
+		static final Stats PIG_IRON = new Stats(580, 6.0F, 2.5F, Tier.DIAMOND, 0.1F, -0.15F, 0.15F, 0.0F);
+		static final Stats SLIMESTEEL = new Stats(1040, 6.0F, 2.5F, Tier.DIAMOND, 0.2F, 0.0F, 0.0F, -0.05F);
 	}
 
 	/** Material units per item: a plank or ingot is 1, a log 4, a block of metal 9. */
@@ -96,11 +107,23 @@ public enum TinkerMaterial {
 	public final String id;
 	public final @Nullable Stats stats;
 	public final Trait trait;
+	/** A metal: its parts are cast in a smeltery, not shaped at the Part Builder. */
+	public final boolean cast;
 
 	TinkerMaterial(String id, @Nullable Stats stats, Trait trait) {
+		this(id, stats, trait, false);
+	}
+
+	TinkerMaterial(String id, @Nullable Stats stats, Trait trait, boolean cast) {
 		this.id = id;
 		this.stats = stats;
 		this.trait = trait;
+		this.cast = cast;
+	}
+
+	/** Our own items (seared bricks, alloy ingots), added once they're registered. */
+	static void own(TinkerMaterial material, int units, Item item) {
+		units(material, units, item);
 	}
 
 	private static void units(TinkerMaterial material, int units, Item... items) {

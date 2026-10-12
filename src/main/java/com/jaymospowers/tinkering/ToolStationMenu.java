@@ -2,6 +2,7 @@ package com.jaymospowers.tinkering;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -13,18 +14,22 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
  * The Tool Station: parts in, a tool out, in any slot order. A tool and its head material repairs it (a broken tool
- * too); a tool and one part it uses swaps that part in, the old one is lost.
+ * too); a tool and a modifier's items adds a level of it ({@link Modifier}); a tool and one part it uses swaps that part
+ * in, the old one is lost.
  */
 public class ToolStationMenu extends AbstractContainerMenu {
 	public static final int INPUTS = 4, RESULT = 4;
 	/** Where the part slots sit, around the big result slot of Tinkers' screen. */
 	public static final int[][] SLOT_AT = {{53, 22}, {15, 60}, {33, 41}, {15, 22}};
 	private final ContainerLevelAccess access;
+	/** For writing a modifier's enchantment onto the result. */
+	private final HolderLookup.Provider registries;
 	private final Container inputs = new SimpleContainer(INPUTS) {
 		@Override
 		public void setChanged() {
@@ -46,11 +51,13 @@ public class ToolStationMenu extends AbstractContainerMenu {
 	public ToolStationMenu(int id, Inventory inventory, ContainerLevelAccess access) {
 		super(Tinkering.TOOL_STATION_MENU, id);
 		this.access = access;
+		this.registries = inventory.player.level().registryAccess();
 		for (int i = 0; i < INPUTS; i++) {
 			this.addSlot(new Slot(inputs, i, SLOT_AT[i][0], SLOT_AT[i][1]) {
 				@Override
 				public boolean mayPlace(ItemStack stack) {
-					return stack.getItem() instanceof ToolPartItem || stack.getItem() instanceof TinkerToolItem || TinkerMaterial.of(stack) != null;
+					return stack.getItem() instanceof ToolPartItem || stack.getItem() instanceof TinkerToolItem || TinkerMaterial.of(stack) != null
+						|| Modifier.ingredient(stack);
 				}
 			});
 		}
@@ -107,6 +114,9 @@ public class ToolStationMenu extends AbstractContainerMenu {
 		if (toolSlot >= 0 && filled > 1) {
 			out = repair(toolSlot);
 			if (out.isEmpty()) {
+				out = modify(toolSlot);
+			}
+			if (out.isEmpty() && status == null) {
 				out = swap(toolSlot);
 			}
 		} else if (toolSlot == -1 && filled > 0) {
@@ -195,6 +205,39 @@ public class ToolStationMenu extends AbstractContainerMenu {
 		uses[toolSlot] = 1;
 		status = Component.translatable("gui.jaymospowers.tool_station.repair", used.displayName());
 		return out;
+	}
+
+	/** A tool and a modifier's items: one more level of it, if the tool has a slot free. */
+	private ItemStack modify(int toolSlot) {
+		ItemStack tool = inputs.getItem(toolSlot);
+		List<Item> others = new ArrayList<>();
+		List<Integer> slots = new ArrayList<>();
+		for (int i = 0; i < INPUTS; i++) {
+			if (i != toolSlot && !inputs.getItem(i).isEmpty()) {
+				others.add(inputs.getItem(i).getItem());
+				slots.add(i);
+			}
+		}
+		for (Modifier modifier : Modifier.values()) {
+			if (others.size() != modifier.recipe.size() || !others.containsAll(modifier.recipe) || !modifier.recipe.containsAll(others)) {
+				continue;
+			}
+			Component cannot = Modifier.cannotAdd(tool, modifier);
+			if (cannot != null) {
+				status = cannot;
+				return ItemStack.EMPTY;
+			}
+			ItemStack out = Modifier.add(tool, modifier);
+			Modifier.enchant(out, registries);
+			for (int i : slots) {
+				uses[i] = 1;
+			}
+			uses[toolSlot] = 1;
+			status = Component.translatable("gui.jaymospowers.tool_station.modify", modifier.name(Modifier.level(out, modifier)),
+				Modifier.slots(out) - Modifier.used(out));
+			return out;
+		}
+		return ItemStack.EMPTY;
 	}
 
 	/** A tool and one part it uses: that part swapped in (the first of its kind with another material). */

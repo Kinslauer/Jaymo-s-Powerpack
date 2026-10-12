@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "b": "jaymospowers:seared_brick"
+  },
+  "pattern": [
+    "bb",
+    "bb"
+  ],
+  "result": {
+    "id": "jaymospowers:seared_bricks",
+    "count": 1
+  }
+}

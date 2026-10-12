@@ -81,6 +81,13 @@
                   }
                 },
                 {
+                  "when": "seared_stone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/sledge_hammer/handle_seared_stone"
+                  }
+                },
+                {
                   "when": "copper",
                   "model": {
                     "type": "minecraft:model",
@@ -92,6 +99,34 @@
                   "model": {
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/sledge_hammer/handle_iron"
+                  }
+                },
+                {
+                  "when": "rose_gold",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/sledge_hammer/handle_rose_gold"
+                  }
+                },
+                {
+                  "when": "amethyst_bronze",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/sledge_hammer/handle_amethyst_bronze"
+                  }
+                },
+                {
+                  "when": "pig_iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/sledge_hammer/handle_pig_iron"
+                  }
+                },
+                {
+                  "when": "slimesteel",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/sledge_hammer/handle_slimesteel"
                   }
                 }
               ],
@@ -173,6 +208,13 @@
                     }
                   },
                   {
+                    "when": "seared_stone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_broken_seared_stone"
+                    }
+                  },
+                  {
                     "when": "copper",
                     "model": {
                       "type": "minecraft:model",
@@ -184,6 +226,34 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/head_broken_iron"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_broken_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_broken_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_broken_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_broken_slimesteel"
                     }
                   }
                 ],
@@ -261,6 +331,13 @@
                     }
                   },
                   {
+                    "when": "seared_stone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_seared_stone"
+                    }
+                  },
+                  {
                     "when": "copper",
                     "model": {
                       "type": "minecraft:model",
@@ -272,6 +349,34 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/head_iron"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_slimesteel"
                     }
                   }
                 ],
@@ -354,6 +459,13 @@
                     }
                   },
                   {
+                    "when": "seared_stone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_broken_seared_stone"
+                    }
+                  },
+                  {
                     "when": "copper",
                     "model": {
                       "type": "minecraft:model",
@@ -365,6 +477,34 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/back_broken_iron"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_broken_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_broken_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_broken_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_broken_slimesteel"
                     }
                   }
                 ],
@@ -442,6 +582,13 @@
                     }
                   },
                   {
+                    "when": "seared_stone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_seared_stone"
+                    }
+                  },
+                  {
                     "when": "copper",
                     "model": {
                       "type": "minecraft:model",
@@ -453,6 +600,34 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/back_iron"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_slimesteel"
                     }
                   }
                 ],
@@ -535,6 +710,13 @@
                     }
                   },
                   {
+                    "when": "seared_stone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_broken_seared_stone"
+                    }
+                  },
+                  {
                     "when": "copper",
                     "model": {
                       "type": "minecraft:model",
@@ -546,6 +728,34 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/front_broken_iron"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_broken_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_broken_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_broken_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_broken_slimesteel"
                     }
                   }
                 ],
@@ -623,6 +833,13 @@
                     }
                   },
                   {
+                    "when": "seared_stone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_seared_stone"
+                    }
+                  },
+                  {
                     "when": "copper",
                     "model": {
                       "type": "minecraft:model",
@@ -634,6 +851,34 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/front_iron"
+                    }
+                  },
+                  {
+                    "when": "rose_gold",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_rose_gold"
+                    }
+                  },
+                  {
+                    "when": "amethyst_bronze",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_amethyst_bronze"
+                    }
+                  },
+                  {
+                    "when": "pig_iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_pig_iron"
+                    }
+                  },
+                  {
+                    "when": "slimesteel",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_slimesteel"
                     }
                   }
                 ],
@@ -719,6 +964,13 @@
               }
             },
             {
+              "when": "seared_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sledge_hammer/large/handle_seared_stone"
+              }
+            },
+            {
               "when": "copper",
               "model": {
                 "type": "minecraft:model",
@@ -730,6 +982,34 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/sledge_hammer/large/handle_iron"
+              }
+            },
+            {
+              "when": "rose_gold",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sledge_hammer/large/handle_rose_gold"
+              }
+            },
+            {
+              "when": "amethyst_bronze",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sledge_hammer/large/handle_amethyst_bronze"
+              }
+            },
+            {
+              "when": "pig_iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sledge_hammer/large/handle_pig_iron"
+              }
+            },
+            {
+              "when": "slimesteel",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sledge_hammer/large/handle_slimesteel"
               }
             }
           ],
@@ -811,6 +1091,13 @@
                 }
               },
               {
+                "when": "seared_stone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_broken_seared_stone"
+                }
+              },
+              {
                 "when": "copper",
                 "model": {
                   "type": "minecraft:model",
@@ -822,6 +1109,34 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_broken_iron"
+                }
+              },
+              {
+                "when": "rose_gold",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_broken_rose_gold"
+                }
+              },
+              {
+                "when": "amethyst_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_broken_amethyst_bronze"
+                }
+              },
+              {
+                "when": "pig_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_broken_pig_iron"
+                }
+              },
+              {
+                "when": "slimesteel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_broken_slimesteel"
                 }
               }
             ],
@@ -899,6 +1214,13 @@
                 }
               },
               {
+                "when": "seared_stone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_seared_stone"
+                }
+              },
+              {
                 "when": "copper",
                 "model": {
                   "type": "minecraft:model",
@@ -910,6 +1232,34 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_iron"
+                }
+              },
+              {
+                "when": "rose_gold",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_rose_gold"
+                }
+              },
+              {
+                "when": "amethyst_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_amethyst_bronze"
+                }
+              },
+              {
+                "when": "pig_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_pig_iron"
+                }
+              },
+              {
+                "when": "slimesteel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_slimesteel"
                 }
               }
             ],
@@ -992,6 +1342,13 @@
                 }
               },
               {
+                "when": "seared_stone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_broken_seared_stone"
+                }
+              },
+              {
                 "when": "copper",
                 "model": {
                   "type": "minecraft:model",
@@ -1003,6 +1360,34 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_broken_iron"
+                }
+              },
+              {
+                "when": "rose_gold",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_broken_rose_gold"
+                }
+              },
+              {
+                "when": "amethyst_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_broken_amethyst_bronze"
+                }
+              },
+              {
+                "when": "pig_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_broken_pig_iron"
+                }
+              },
+              {
+                "when": "slimesteel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_broken_slimesteel"
                 }
               }
             ],
@@ -1080,6 +1465,13 @@
                 }
               },
               {
+                "when": "seared_stone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_seared_stone"
+                }
+              },
+              {
                 "when": "copper",
                 "model": {
                   "type": "minecraft:model",
@@ -1091,6 +1483,34 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_iron"
+                }
+              },
+              {
+                "when": "rose_gold",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_rose_gold"
+                }
+              },
+              {
+                "when": "amethyst_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_amethyst_bronze"
+                }
+              },
+              {
+                "when": "pig_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_pig_iron"
+                }
+              },
+              {
+                "when": "slimesteel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_slimesteel"
                 }
               }
             ],
@@ -1173,6 +1593,13 @@
                 }
               },
               {
+                "when": "seared_stone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_broken_seared_stone"
+                }
+              },
+              {
                 "when": "copper",
                 "model": {
                   "type": "minecraft:model",
@@ -1184,6 +1611,34 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_broken_iron"
+                }
+              },
+              {
+                "when": "rose_gold",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_broken_rose_gold"
+                }
+              },
+              {
+                "when": "amethyst_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_broken_amethyst_bronze"
+                }
+              },
+              {
+                "when": "pig_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_broken_pig_iron"
+                }
+              },
+              {
+                "when": "slimesteel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_broken_slimesteel"
                 }
               }
             ],
@@ -1261,6 +1716,13 @@
                 }
               },
               {
+                "when": "seared_stone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_seared_stone"
+                }
+              },
+              {
                 "when": "copper",
                 "model": {
                   "type": "minecraft:model",
@@ -1272,6 +1734,34 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_iron"
+                }
+              },
+              {
+                "when": "rose_gold",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_rose_gold"
+                }
+              },
+              {
+                "when": "amethyst_bronze",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_amethyst_bronze"
+                }
+              },
+              {
+                "when": "pig_iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_pig_iron"
+                }
+              },
+              {
+                "when": "slimesteel",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_slimesteel"
                 }
               }
             ],

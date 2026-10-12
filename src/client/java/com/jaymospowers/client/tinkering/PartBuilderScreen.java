@@ -81,7 +81,9 @@ public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> 
 		if (part == null) {
 			lines.add(Component.translatable("gui.jaymospowers.part_builder.pick"));
 		} else if (material != null) {
-			if (!material.makes(part.kind)) {
+			if (material.cast) {
+				lines.add(Component.translatable("gui.jaymospowers.part_builder.cast", material.displayName()));
+			} else if (!material.makes(part.kind)) {
 				lines.add(Component.translatable("gui.jaymospowers.part_builder.cannot", material.displayName(),
 					Component.translatable("item.jaymospowers." + part.id)));
 			} else {

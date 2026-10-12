@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "b": "jaymospowers:seared_brick",
+    "g": "minecraft:glass"
+  },
+  "pattern": [
+    " b ",
+    "bgb",
+    " b "
+  ],
+  "result": {
+    "id": "jaymospowers:seared_glass",
+    "count": 1
+  }
+}
