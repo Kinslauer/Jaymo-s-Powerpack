@@ -249,7 +249,7 @@ cobweb.
 - G is now only the off-hand web (it needs an empty off hand).
 - **HUD row:** wings · G · V · B · Z. G's chip dims while the off hand is full.
 
-## Fewer takeovers (0.8.34)
+## Fewer takeovers (0.8.37)
 The symbiote takes the wheel only for these reasons (plus the near-death last-ditch mode, unchanged):
 - **Starving** (satiety 15 or less): it gorges, taking over to hunt and kill, then eating, kill after kill, until it's
   back to `GORGE_FULL` (80). Then it's sated: no hunger drain for `SATED_TICKS` (5 minutes). Only starving hunts;
