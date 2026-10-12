@@ -360,3 +360,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   9015108, Modrinth vTN4NRGW; it needs the pack's Sodium) lets everyone load shader packs (Options → Video Settings →
   Shader Packs); it's client-only, so the server ignores it. Distant Horizons draws its far terrain through Iris
   shaders that support it. Both stay out of the dev game (`dev: false`).
+- **0.8.58, medieval MCA villagers:** the pack now brings the resource pack **MCA - Default Medieval** (by DE4THR4SH,
+  CurseForge 667175, file 8868890): MCA's humans get vanilla-style medieval clothes for every profession, gender and
+  age, with Steve/Alex-like faces and hair. It's in the CurseForge manifest (the import downloads it into
+  `resourcepacks/`; the file is all rights reserved, so it's never copied into the pack), Build Modpack downloads it
+  into your own profile, and on first launch `client/MedievalVillagers` switches it on once (delete
+  `config/jaymospowers-medieval-villagers-v1` to do that again). Its newest file says 1.21.1, so the resource pack
+  screen marks it "made for an older version"; it only retextures MCA's skins, and 1144 of our MCA jar's 1145 skin
+  files sit at the same paths. Not on the server (textures are client-only).
