@@ -1233,3 +1233,20 @@ test village has none), a villager moving into a new house.
   above the floor count as the building's own: house beds were only found through the fallback, and job sites in the
   settlement's own buildings (the smithy's forge, the mason's stonecutter) were never matched before.
 - Not yet seen in game.
+
+## 0.5.8: fruit baskets and tool racks (Cooking for Blockheads)
+- **Displays** (`Displays`, looked up by name and filled through their `getContainer()`; nothing of Cooking for
+  Blockheads is compiled against, and without it nothing changes). Market stalls and village stalls set out produce
+  in fruit baskets, up on a counter (a top slab); village stalls also line their counter with baskets. Smithies
+  (two on the back wall), barracks (two inside the front wall), masons and some houses (on a side wall) hang tool
+  racks. When a building is finished its displays are stocked: from the faction's storage where it has the goods
+  (apples, carrots, potatoes, beetroot, melon, berries, bread, pies, cookies; tools and weapons by the building),
+  else a few made on the spot, so a display is never bare.
+- **`/kingdom project preview <building> [count]`** (ops): sets down a row of a building's variants beside you at
+  once, stocked, to see how they differ. Nothing is recorded or paid for.
+- **Dev games only** (`DevCommands`, the `jaymoskingdoms.devCommands` property the Gradle runs set): the lines of
+  `commands.txt` in the run folder are run as server commands once a second, so a test can drive a singleplayer game.
+- Seen in the dev client (seed 8675309, Ravnreach): six house variants (porches, two storeys, chimneys, hipped,
+  gabled and cross-gabled roofs, stone, plank and framed walls), markets with checked, striped and bordered awnings,
+  smithies (flat and gabled) with racks holding a sword, an axe and hoes, barracks with racks of a crossbow, shields
+  and a sword, a market basket of apples and a pie. Baskets up on counters: built, not yet seen.

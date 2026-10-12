@@ -127,8 +127,8 @@ final class Buildings {
 	private static final Roof[] ROOFS = {Roof.GABLE, Roof.GABLE, Roof.GABLE_ACROSS, Roof.GABLE_ACROSS, Roof.HIP, Roof.HIP, Roof.FLAT};
 	private static final Roof[] DRY_ROOFS = {Roof.GABLE, Roof.GABLE_ACROSS, Roof.HIP, Roof.FLAT, Roof.FLAT, Roof.FLAT};
 
-	/** What a house may keep by its walls: nothing, a chest, books, a furnace, a lamp. */
-	private enum Keep { NOTHING, CHEST, BOOKS, FURNACE, LAMP }
+	/** What a house may keep by its walls: nothing, a chest, books, a furnace, a lamp, (0.5.8) a fruit basket, a tool rack. */
+	private enum Keep { NOTHING, CHEST, BOOKS, FURNACE, LAMP, BASKET, RACK }
 
 	/**
 	 * A cottage: 5-9 wide and 7-9 deep, maybe with a porch and a second storey (reached by a ladder); timber, plank,
@@ -275,11 +275,11 @@ final class Buildings {
 		// by the front wall inside: a chest, books, a furnace, a lamp, or nothing
 		if (!k.classic) {
 			if (!upstairs) {
-				keep(k, s, 1, 1, front + 1);
+				keep(k, s, 1, 1, front + 1, Direction.EAST);
 			}
-			keep(k, s, w - 2, 1, front + 1);
+			keep(k, s, w - 2, 1, front + 1, Direction.WEST);
 			if (upstairs) {
-				keep(k, s, w - 2, 5, front + 1);
+				keep(k, s, w - 2, 5, front + 1, Direction.WEST);
 			}
 			if (k.chance(0.5)) {
 				s.set(twoBeds && !upstairs ? mid : tx, 2, d - 2, k.flowerPot());
@@ -306,7 +306,8 @@ final class Buildings {
 		};
 	}
 
-	private static void keep(Kit k, Sketch s, int x, int y, int z) {
+	/** Something by a side wall at x, y, z; {@code out} is the way out from that wall. */
+	private static void keep(Kit k, Sketch s, int x, int y, int z, Direction out) {
 		switch (k.pick(Keep.values())) {
 			case CHEST -> s.set(x, y, z, Sketch.facing(Blocks.CHEST, Direction.SOUTH));
 			case BOOKS -> s.set(x, y, z, Blocks.BOOKSHELF.defaultBlockState());
@@ -314,6 +315,18 @@ final class Buildings {
 			case LAMP -> {
 				s.set(x, y, z, k.p.fence());
 				s.set(x, y + 1, z, Blocks.LANTERN.defaultBlockState());
+			}
+			case BASKET -> {
+				BlockState basket = Displays.basket(out);
+				if (basket != null) {
+					s.set(x, y, z, basket);
+				}
+			}
+			case RACK -> {
+				BlockState rack = Displays.rack(out);
+				if (rack != null) {
+					s.set(x, y + 1, z, rack);
+				}
 			}
 			default -> {
 			}
@@ -508,10 +521,19 @@ final class Buildings {
 			s.set(x, 1, 1, Sketch.top(k.p.woodSlab()));
 		}
 		s.set(1, 1, 3, Blocks.BARREL.defaultBlockState());
-		s.set(3, 1, 3, k.wares());
+		k.display(s, 3, 3);
 		s.set(2, 1, 3, k.carpet);
 		if (k.chance(0.5)) {
 			s.set(k.pickInt(1, 3), 2, 1, k.flowerPot());
+		}
+		// (0.5.8) produce set out in fruit baskets along the counter
+		BlockState basket = Displays.basket(Direction.NORTH);
+		if (basket != null && !k.classic) {
+			for (int x = 1; x <= 3; x++) {
+				if (k.chance(0.55)) {
+					s.set(x, 2, 1, basket);
+				}
+			}
 		}
 		return s.done();
 	}
@@ -605,6 +627,12 @@ final class Buildings {
 		if (k.chance(0.5)) {
 			s.set(mirrored ? 1 : 7, 1, 1, Sketch.facing(Blocks.CHEST, Direction.EAST));
 		}
+		// (0.5.8) its work hung on the back wall
+		BlockState rack = Displays.rack(Direction.NORTH);
+		if (rack != null && k.chance(0.8)) {
+			s.set(3, 2, 5, rack);
+			s.set(5, 2, 5, rack);
+		}
 		return s.done();
 	}
 
@@ -643,6 +671,10 @@ final class Buildings {
 			s.set(5, 1, 1, p.wall());
 			s.set(5, 2, 1, Sketch.stair(p.stairs(), Direction.SOUTH));
 			s.set(4, 1, 1, p.slab());
+		}
+		BlockState rack = Displays.rack(Direction.NORTH);
+		if (rack != null && k.chance(0.7)) {
+			s.set(2, 2, 5, rack);
 		}
 		return s.done();
 	}
@@ -720,7 +752,13 @@ final class Buildings {
 					}
 				}
 			}
-			s.set(c[0] + 1, 1, c[1] + 1, (c[0] + c[1]) % 12 == 0 ? Blocks.BARREL.defaultBlockState() : k.classic ? Sketch.top(k.p.woodSlab()) : k.wares());
+			if ((c[0] + c[1]) % 12 == 0) {
+				s.set(c[0] + 1, 1, c[1] + 1, Blocks.BARREL.defaultBlockState());
+			} else if (k.classic) {
+				s.set(c[0] + 1, 1, c[1] + 1, Sketch.top(k.p.woodSlab()));
+			} else {
+				k.display(s, c[0] + 1, c[1] + 1);
+			}
 		}
 		switch (k.pickInt(0, 1, 2)) {
 			case 1 -> {
@@ -784,6 +822,12 @@ final class Buildings {
 		if (k.chance(0.5)) {
 			s.set(9, 1, 1, Sketch.facing(Blocks.CHEST, Direction.WEST));
 			s.set(1, 1, 1, Blocks.BARREL.defaultBlockState());
+		}
+		// (0.5.8) weapons racked on the front wall
+		BlockState rack = Displays.rack(Direction.SOUTH);
+		if (rack != null && k.chance(0.8)) {
+			s.set(3, 2, 1, rack);
+			s.set(7, 2, 1, rack);
 		}
 		return s.done();
 	}
@@ -1090,10 +1134,23 @@ final class Buildings {
 			return block("potted_" + FLOWERS[this.r.nextInt(FLOWERS.length)], Blocks.FLOWER_POT).defaultBlockState();
 		}
 
-		/** A stall's wares. */
+		/** A stall's wares (with Cooking for Blockheads, often a basket of produce). */
 		BlockState wares() {
-			return this.pick(Blocks.HAY_BLOCK.defaultBlockState(), Blocks.MELON.defaultBlockState(), Blocks.PUMPKIN.defaultBlockState(),
-				Sketch.facing(Blocks.CHEST, Direction.NORTH), Blocks.HAY_BLOCK.defaultBlockState());
+			BlockState basket = Displays.basket(Direction.NORTH);
+			BlockState hay = Blocks.HAY_BLOCK.defaultBlockState();
+			return this.pick(hay, Blocks.MELON.defaultBlockState(), Blocks.PUMPKIN.defaultBlockState(), Sketch.facing(Blocks.CHEST, Direction.NORTH),
+				basket != null ? basket : hay, basket != null ? basket : hay);
+		}
+
+		/** A stall's wares at x, z: set on the ground, or a basket of produce up on a counter (a top slab). */
+		void display(Sketch s, int x, int z) {
+			BlockState wares = this.wares();
+			if (!this.classic && wares.getBlock() != Blocks.HAY_BLOCK && Displays.isBasket(wares)) {
+				s.set(x, 1, z, Sketch.top(this.p.woodSlab()));
+				s.set(x, 2, z, wares);
+			} else {
+				s.set(x, 1, z, wares);
+			}
 		}
 
 		/** Two or three of the field crops, in an order of their own. */

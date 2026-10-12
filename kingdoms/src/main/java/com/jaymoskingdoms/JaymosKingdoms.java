@@ -53,6 +53,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Plots.register();
 		Buildings.register();
 		Construction.register();
+		DevCommands.register();
 		// 0.5.2: the mine the builders dig first (it wraps their brain; Debris wraps it in turn) and its attachment
 		LOGGER.debug("mine attachment: {}", Mines.MINES);
 		Mines.register();

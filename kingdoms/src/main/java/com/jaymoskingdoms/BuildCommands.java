@@ -13,12 +13,15 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -54,7 +57,59 @@ final class BuildCommands {
 				.then(Commands.argument("building", StringArgumentType.word()).suggests(BUILDINGS)
 					.executes(c -> start(c, StringArgumentType.getString(c, "building")))))
 			.then(Commands.literal("finish").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(c -> each(c, true)))
-			.then(Commands.literal("cancel").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(c -> each(c, false)));
+			.then(Commands.literal("cancel").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(c -> each(c, false)))
+			// (0.5.7) a row of a building's variants set down at once beside you, to see how they differ
+			.then(Commands.literal("preview").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+				.then(Commands.argument("building", StringArgumentType.word()).suggests(BUILDINGS)
+					.executes(c -> preview(c, StringArgumentType.getString(c, "building"), PREVIEW_COUNT))
+					.then(Commands.argument("count", IntegerArgumentType.integer(1, PREVIEW_MAX))
+						.executes(c -> preview(c, StringArgumentType.getString(c, "building"), IntegerArgumentType.getInteger(c, "count"))))));
+	}
+
+	/** How many variants a preview sets down (by default, at most), and the gap between them. */
+	static final int PREVIEW_COUNT = 4, PREVIEW_MAX = 12, PREVIEW_GAP = 3;
+
+	/**
+	 * (0.5.7) {@code count} variants of {@code building} for the faction you're at, in a row eastward from 3 blocks in
+	 * front of you (south), on your floor: the ground under each made solid, the space cleared, set down at once and
+	 * stocked like a finished building. For looking at, not for the faction: nothing is recorded or paid for.
+	 */
+	private static int preview(CommandContext<CommandSourceStack> c, String building, int count) throws CommandSyntaxException {
+		ServerPlayer player = c.getSource().getPlayerOrException();
+		Faction f = find(c);
+		Blueprint.Entry entry = f == null ? null : Planner.entry(f, building);
+		if (f == null || entry == null) {
+			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.no_such"));
+			return 0;
+		}
+		ServerLevel level = player.level();
+		BlockPos start = player.blockPosition().offset(0, 0, 3);
+		int x = 0;
+		for (int i = 0; i < count; i++) {
+			long variant = level.getRandom().nextLong();
+			Blueprint bp = entry.maker().make(level, f, variant == 0L ? 1L : variant);
+			BlockPos origin = start.offset(x, 0, 0);
+			for (int dx = 0; dx < bp.width(); dx++) {
+				for (int dz = 0; dz < bp.depth(); dz++) {
+					for (int dy = -3; dy < bp.height() + 2; dy++) {
+						BlockPos at = origin.offset(dx, dy, dz);
+						level.setBlock(at, dy < 0 ? Blocks.DIRT.defaultBlockState() : Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+					}
+				}
+			}
+			for (Blueprint.Placement pl : bp.blocks()) {
+				level.setBlock(origin.offset(pl.offset()), pl.state(), Block.UPDATE_CLIENTS);
+			}
+			for (Blueprint.Placement pl : bp.blocks()) {
+				BlockPos at = origin.offset(pl.offset());
+				level.setBlock(at, Block.updateFromNeighbourShapes(level.getBlockState(at), level, at), Block.UPDATE_CLIENTS);
+			}
+			Displays.built(level, f, entry.id(), origin, origin.offset(bp.width() - 1, bp.height() - 1, bp.depth() - 1));
+			x += bp.width() + PREVIEW_GAP;
+		}
+		int across = x;
+		c.getSource().sendSuccess(() -> Component.literal(count + " " + building + " variant(s) of " + f.name() + " set down, " + across + " blocks east"), true);
+		return count;
 	}
 
 	/** The faction whose land (or seat) you're at; or yours. */
