@@ -30,7 +30,7 @@ import net.minecraft.world.phys.AABB;
  * the windows, a roof and cushion in his colour, gilt edges, lanterns, big wheels behind and small ones in front). Its
  * wheels turn with the ground it covers. Original, no other mod's model.
  * <p>
- * (0.5.27) A rickshaw: two tall wheels under a bench seat, a folding hood in the settlement's colour, a footboard, a
+ * (0.5.26) A rickshaw: two tall wheels under a bench seat, a folding hood in the settlement's colour, a footboard, a
  * rack behind for its load, and long shafts out to its puller's hands.
  */
 public final class WagonRenderer extends EntityRenderer<Wagon, WagonRenderer.State> {
@@ -257,7 +257,7 @@ public final class WagonRenderer extends EntityRenderer<Wagon, WagonRenderer.Sta
 		box(b, pole, -0.42F, 0.72F, 0.3F, 0.42F, 0.79F, 0.36F);
 	}
 
-	/** A king's carriage ({@code royal}: gilt) or (0.5.27) a hired carriage, the same coach in plain wood and its realm's cloth. */
+	/** A king's carriage ({@code royal}: gilt) or (0.5.26) a hired carriage, the same coach in plain wood and its realm's cloth. */
 	private static void carriage(List<Box> b, List<Wheel> wheels, int color, boolean royal) {
 		BlockState wood = block(royal ? "dark_oak_planks" : "spruce_planks"), post = block(royal ? "stripped_dark_oak_log" : "stripped_spruce_log");
 		BlockState pole = block("stripped_spruce_log");

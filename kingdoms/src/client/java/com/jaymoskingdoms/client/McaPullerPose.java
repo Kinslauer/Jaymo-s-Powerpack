@@ -5,7 +5,7 @@ import net.conczin.mca.client.model.VillagerEntityModelMCA;
 import net.minecraft.client.model.Model;
 
 /**
- * (0.5.27) An MCA villager's model, bent into a rickshaw's shafts ({@link PullerPose}): its breasts lean with its body and
+ * (0.5.26) An MCA villager's model, bent into a rickshaw's shafts ({@link PullerPose}): its breasts lean with its body and
  * its clothes layers follow its limbs again. Only loaded with MCA.
  */
 final class McaPullerPose {

@@ -24,7 +24,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.27) A rich realm's hired carriage ({@link Wagon#CAB}): a driver in the saddle of a horse that draws a plain
+ * (0.5.26) A rich realm's hired carriage ({@link Wagon#CAB}): a driver in the saddle of a horse that draws a plain
  * carriage in the realm's colour. While its treasury holds more than {@link #RICH} emeralds a realm keeps one waiting
  * beside its rickshaw rank, and it, not the rickshaws, takes players to other settlements, for the same fares and faster.
  * Its pullers on foot ({@link Rickshaws}) see to everything else. When the treasury runs down the cab is let go (once it's

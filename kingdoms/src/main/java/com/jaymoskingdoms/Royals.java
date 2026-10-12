@@ -74,7 +74,7 @@ public final class Royals {
 	static void clear() {
 	}
 
-	/** (0.5.27) {@code ruler} is out on his round: daytime, a ruler who walks one, away from his throne. */
+	/** (0.5.26) {@code ruler} is out on his round: daytime, a ruler who walks one, away from his throne. */
 	static boolean out(Folk ruler) {
 		if (!walks(ruler) || !(ruler.level() instanceof ServerLevel level) || !daytime(level)) {
 			return false;

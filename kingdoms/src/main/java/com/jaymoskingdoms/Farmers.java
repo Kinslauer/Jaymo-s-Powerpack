@@ -79,13 +79,13 @@ public final class Farmers {
 		JOBS.clear();
 	}
 
-	/** (0.5.27) {@code w} is a farmer walking a load to storage. */
+	/** (0.5.26) {@code w} is a farmer walking a load to storage. */
 	static boolean delivering(Worker w) {
 		Job job = w.role() == Folk.FARMER ? JOBS.get(w.getUUID()) : null;
 		return job != null && job.phase == DELIVER && !job.bag.isEmpty();
 	}
 
-	/** (0.5.27) A rickshaw met him on his way to storage: his load's taken (returned) and he goes back to work. */
+	/** (0.5.26) A rickshaw met him on his way to storage: his load's taken (returned) and he goes back to work. */
 	static List<ItemStack> handOver(Worker w) {
 		Job job = w.role() == Folk.FARMER ? JOBS.get(w.getUUID()) : null;
 		if (job == null || job.phase != DELIVER) {

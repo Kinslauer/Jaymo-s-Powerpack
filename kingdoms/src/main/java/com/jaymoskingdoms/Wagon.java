@@ -44,12 +44,12 @@ import org.jspecify.annotations.Nullable;
  * trailer does. It doesn't block anyone; a player can strike it (a cart broken open spills its load: robbing a
  * caravan, {@link Caravans#robbed}) or right-click it to see what it carries.
  * <p>
- * (0.5.27) Or a settlement's {@link #RICKSHAW}: two wheels, a seat under a hood in its colours and a rack behind, its
+ * (0.5.26) Or a settlement's {@link #RICKSHAW}: two wheels, a seat under a hood in its colours and a rack behind, its
  * shafts held by one of its people on foot ({@link Rickshaws}) instead of a horse. It carries a load ({@link #cargo()},
  * kept here) or a passenger; right-clicked, its puller offers a player a ride.
  */
 public final class Wagon extends Entity {
-	/** (0.5.27) {@link #CAB}: a hired carriage of a rich realm's, for players ({@link Cabs}). */
+	/** (0.5.26) {@link #CAB}: a hired carriage of a rich realm's, for players ({@link Cabs}). */
 	public static final int CART = 0, CARRIAGE = 1, RICKSHAW = 2, CAB = 3;
 	/** What a cart's load looks like: nothing, stone and ore, food, a bit of everything. */
 	public static final int EMPTY = 0, STONE = 1, FOOD = 2, GOODS = 3;
@@ -65,7 +65,7 @@ public final class Wagon extends Entity {
 	private static final EntityDataAccessor<Integer> KIND = SynchedEntityData.defineId(Wagon.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> COLOR = SynchedEntityData.defineId(Wagon.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> LOAD = SynchedEntityData.defineId(Wagon.class, EntityDataSerializers.INT);
-	/** (0.5.27) A rickshaw's puller (entity id, -1 for none) and how worn out they are (0 fresh to 1 spent): how the client poses them. */
+	/** (0.5.26) A rickshaw's puller (entity id, -1 for none) and how worn out they are (0 fresh to 1 spent): how the client poses them. */
 	private static final EntityDataAccessor<Integer> PULLER = SynchedEntityData.defineId(Wagon.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Float> TIRED = SynchedEntityData.defineId(Wagon.class, EntityDataSerializers.FLOAT);
 
@@ -77,7 +77,7 @@ public final class Wagon extends Entity {
 	private float damage;
 	private int horseLost;
 	private @Nullable Entity horseCache;
-	/** (0.5.27) A rickshaw's load; set down for the night (it stays put); the settlement a player's riding to (-1: none). */
+	/** (0.5.26) A rickshaw's load; set down for the night (it stays put); the settlement a player's riding to (-1: none). */
 	private final List<ItemStack> cargo = new ArrayList<>();
 	private boolean parked;
 	private int ride = -1;
@@ -176,7 +176,7 @@ public final class Wagon extends Entity {
 		};
 	}
 
-	// ---- a rickshaw's (0.5.27) ----------------------------------------------------------------------------------------
+	// ---- a rickshaw's (0.5.26) ----------------------------------------------------------------------------------------
 
 	List<ItemStack> cargo() {
 		return this.cargo;

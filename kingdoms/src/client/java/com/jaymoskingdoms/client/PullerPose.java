@@ -14,7 +14,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * (0.5.27) A rickshaw puller's pose: bent forward into the shafts, hands down at their hips gripping them, tugging the
+ * (0.5.26) A rickshaw puller's pose: bent forward into the shafts, hands down at their hips gripping them, tugging the
  * rickshaw along with each stride. The more worn out they are ({@link Wagon#tired()}), the lower they lean, the heavier
  * the tug and the more their head hangs; stood still and spent, they pant. Laid over whatever model draws them (our
  * {@code Folk}, or an MCA villager's) right after it's posed, like {@link MobAnimations}.

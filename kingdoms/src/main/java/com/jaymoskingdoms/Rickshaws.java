@@ -35,7 +35,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.27) A settlement's rickshaw pullers ({@link Folk#PULLER}): one of its people (with MCA, one of its villagers,
+ * (0.5.26) A settlement's rickshaw pullers ({@link Folk#PULLER}): one of its people (with MCA, one of its villagers,
  * promoted the MCA way) between the shafts of a two-wheeled {@link Wagon#RICKSHAW}. They wait at the rank by the bell
  * and, by day:
  * <ul>
@@ -84,7 +84,7 @@ public final class Rickshaws {
 	/** A trip given up after this long (ticks). */
 	static final long TRIP_MOST = 24000L / 2;
 	/**
-	 * (0.5.27) Wearing out: a puller tires with every block pulled (more with a passenger or a load aboard), spent after
+	 * (0.5.26) Wearing out: a puller tires with every block pulled (more with a passenger or a load aboard), spent after
 	 * {@link #TIRED_BLOCKS}; at most {@link #SLOWEST} of their speed is lost. Waiting at the rank they get a little back
 	 * each tick; a night's sleep sets them right. Spent past {@link #WINDED}, now and then they stop to catch their breath.
 	 */
@@ -654,7 +654,7 @@ public final class Rickshaws {
 			return;
 		}
 		if (Cabs.of(level, f) != null) {
-			// (0.5.27) a rich realm's players ride in its hired carriage; its pullers see to everything else
+			// (0.5.26) a rich realm's players ride in its hired carriage; its pullers see to everything else
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.take_the_cab", puller.getName(), f.name()).withStyle(ChatFormatting.GRAY));
 			return;
 		}

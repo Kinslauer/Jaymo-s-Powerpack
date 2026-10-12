@@ -190,7 +190,7 @@ public final class Economy {
 		} else if (Gatherers.isGatherer(role)) {
 			hired = Gatherers.spawn(level, ready, role, from);
 		} else if (role == Folk.PULLER) {
-			// (0.5.27) a rickshaw puller
+			// (0.5.26) a rickshaw puller
 			hired = Rickshaws.spawn(level, ready, from);
 		} else if (role == Folk.ARCHER) {
 			hired = KingdomEvents.spawnArcher(level, ready);
