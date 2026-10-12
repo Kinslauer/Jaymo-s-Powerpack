@@ -43,9 +43,14 @@ final class QuestBoard {
 	/** Villager rewards: MCA hearts, reputation and standing; a king's. */
 	static final int HEARTS = 12, REPUTATION = 15, STANDING = 10;
 	static final int ROYAL_REPUTATION = 150, ROYAL_STANDING = 100;
-	/** (0.5.29) A tyrant's or warlord's decree is a rival king's death this often (when there's a rival within reach). */
-	static final float REGICIDE_CHANCE = 0.4F;
-	static final double REGICIDE_RANGE = 2500.0;
+	/**
+	 * (0.5.29) How often a king's decree is a rival king's death, by temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER):
+	 * never a noble's; seldom a warlord's, who'd rather send you at the head of his war party ({@link #WARBAND_CHANCE}).
+	 */
+	static final float[] REGICIDE_CHANCE = {0.4F, 0.0F, 0.1F, 0.4F, 0.25F};
+	static final float WARBAND_CHANCE = 0.5F;
+	/** How far off the realm he sends you against may be. */
+	static final double RIVAL_RANGE = 2500.0;
 	/** Chance a villager's quest pays a relic: a smith's, a guard's or fletcher's, and anyone else's. */
 	static final float SMITH_RELIC = 0.35F, ARMS_RELIC = 0.2F, OTHER_RELIC = 0.04F;
 
@@ -358,8 +363,14 @@ final class QuestBoard {
 	static @Nullable Quest king(ServerLevel level, LivingEntity king, Faction f, RandomSource random) {
 		Quest.Giver who = new Quest.Giver(king.getUUID(), king.getName().getString(), f.id(), true, "king");
 		Tempers.Temper temper = Tempers.of(f);
-		if ((temper == Tempers.Temper.TYRANT || temper == Tempers.Temper.WARLORD) && random.nextFloat() < REGICIDE_CHANCE) {
-			Quest q = regicide(level, f, who, random);
+		if (temper == Tempers.Temper.WARLORD && random.nextFloat() < WARBAND_CHANCE) {
+			Quest q = warband(level, f, who);
+			if (q != null) {
+				return q;
+			}
+		}
+		if (temper != null && random.nextFloat() < REGICIDE_CHANCE[temper.ordinal()]) {
+			Quest q = regicide(level, f, temper, who, random);
 			if (q != null) {
 				return q;
 			}
@@ -405,17 +416,27 @@ final class QuestBoard {
 	 * then the nearest crowned realm that isn't his ally. How to get close is in the telling: a noble king walks out among
 	 * his people and stops for strangers; any other must be got at by swearing to him falsely ({@link Quests}).
 	 */
-	/** (Testing) {@code king}'s regicide decree, whatever his temper; null with no realm to send for. */
+	/** (Testing) {@code king}'s regicide decree, whatever his temper (a noble's reasons as a tyrant's); null with no realm to send for. */
 	static @Nullable Quest regicide(ServerLevel level, LivingEntity king, Faction f, RandomSource random) {
-		return regicide(level, f, new Quest.Giver(king.getUUID(), king.getName().getString(), f.id(), true, "king"), random);
+		Tempers.Temper temper = Tempers.of(f);
+		return regicide(level, f, temper == null || temper == Tempers.Temper.NOBLE ? Tempers.Temper.TYRANT : temper,
+			new Quest.Giver(king.getUUID(), king.getName().getString(), f.id(), true, "king"), random);
 	}
 
-	private static @Nullable Quest regicide(ServerLevel level, Faction f, Quest.Giver who, RandomSource random) {
-		MinecraftServer server = level.getServer();
+	/** (Testing) {@code king}'s war-party decree, whatever his temper; null with no realm to send it against. */
+	static @Nullable Quest warband(ServerLevel level, LivingEntity king, Faction f) {
+		return warband(level, f, new Quest.Giver(king.getUUID(), king.getName().getString(), f.id(), true, "king"));
+	}
+
+	/**
+	 * (0.5.29) The realm {@code f}'s king would see brought down: his enemy at war first, then a rival, then the nearest
+	 * crowned realm that isn't his ally.
+	 */
+	private static @Nullable Faction rival(ServerLevel level, Faction f) {
 		Faction best = null;
 		int bestRank = Integer.MAX_VALUE;
-		double bestD = REGICIDE_RANGE * REGICIDE_RANGE;
-		for (Faction other : Factions.all(server, FactionType.KINGDOM)) {
+		double bestD = RIVAL_RANGE * RIVAL_RANGE;
+		for (Faction other : Factions.all(level.getServer(), FactionType.KINGDOM)) {
 			if (other.id() == f.id() || other.fallen() || other.leader().isEmpty()) {
 				continue;
 			}
@@ -425,20 +446,43 @@ final class QuestBoard {
 			}
 			int rank = relation == Relation.WAR ? 0 : relation == Relation.RIVAL ? 1 : 2;
 			double d = other.seat().distSqr(f.seat());
-			if (d < REGICIDE_RANGE * REGICIDE_RANGE && (rank < bestRank || (rank == bestRank && d < bestD))) {
+			if (d < RIVAL_RANGE * RIVAL_RANGE && (rank < bestRank || (rank == bestRank && d < bestD))) {
 				best = other;
 				bestRank = rank;
 				bestD = d;
 			}
 		}
+		return best;
+	}
+
+	/**
+	 * (0.5.29) A rival king's death, each temper for its own reasons (the tyrant's pride, the warlord's contempt for one who
+	 * won't fight, the paranoid's fear, the reveler's grudge). How to get close is in the telling: a noble king walks out
+	 * among his people and stops for strangers; any other must be got at by swearing to him falsely ({@link Quests}).
+	 */
+	private static @Nullable Quest regicide(ServerLevel level, Faction f, Tempers.Temper temper, Quest.Giver who, RandomSource random) {
+		Faction best = rival(level, f);
 		if (best == null) {
 			return null;
 		}
 		String way = Tempers.of(best) == Tempers.Temper.NOBLE ? "round" : "oath";
-		Castle.Keep keep = Factions.keep(server, best.id());
+		Castle.Keep keep = Factions.keep(level.getServer(), best.id());
 		BlockPos at = keep != null ? keep.throne() : best.seat();
 		Quest.Objective o = new Quest.Objective("realm:" + best.id(), 1, 0, Optional.of(at), best.leader(), way, best.name(), false);
-		return new Quest(UUID.randomUUID().toString(), Quest.REGICIDE, "king.regicide." + way, who, o, royalReward(random), 0L);
+		return new Quest(UUID.randomUUID().toString(), Quest.REGICIDE, "king.regicide." + temper.key() + "." + way, who, o, royalReward(random), 0L);
+	}
+
+	/**
+	 * (0.5.29) A warlord sends no knives: lead his war party against his rival and sack its seat ({@link WarParties}). Not
+	 * at war with them yet, he declares it when you say yes ({@link Quests}).
+	 */
+	private static @Nullable Quest warband(ServerLevel level, Faction f, Quest.Giver who) {
+		Faction best = rival(level, f);
+		if (best == null) {
+			return null;
+		}
+		Quest.Objective o = new Quest.Objective("realm:" + best.id(), 1, 0, Optional.of(best.seat()), Optional.empty(), "", best.name(), false);
+		return new Quest(UUID.randomUUID().toString(), Quest.WARBAND, "king.warband", who, o, royalReward(level.getRandom()), 0L);
 	}
 
 	private static Quest.Reward royalReward(RandomSource random) {

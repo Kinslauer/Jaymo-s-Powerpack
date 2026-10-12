@@ -358,6 +358,9 @@ public final class Quests {
 				.withStyle(ChatFormatting.RED));
 			return;
 		}
+		if (q.kind() == Quest.WARBAND && !declared(level, player, f, q)) {
+			return;
+		}
 		q = q.withGivenAt(level.getGameTime());
 		List<Quest> list = new ArrayList<>(log(player));
 		list.add(q);
@@ -729,6 +732,47 @@ public final class Quests {
 		}
 	}
 
+	/** The realm a quest's objective names ("realm:<id>"), or -1. */
+	private static int realmOf(Quest q) {
+		String t = q.objective().target();
+		return t.startsWith("realm:") ? Integer.parseInt(t.substring("realm:".length())) : -1;
+	}
+
+	/** (0.5.29) A warlord's war-party decree, taken: at war with its target already, or he declares it now. False if he can't. */
+	private static boolean declared(ServerLevel level, ServerPlayer player, Faction f, Quest q) {
+		MinecraftServer server = level.getServer();
+		Faction target = Factions.get(server, realmOf(q));
+		if (target != null && Wars.enemies(server, f.id(), target.id())) {
+			return true;
+		}
+		if (target == null || Wars.declare(server, f, target, false) != null) {
+			player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.warband.cannot", q.objective().place()).withStyle(ChatFormatting.RED));
+			return false;
+		}
+		return true;
+	}
+
+	/** (0.5.29) The realm whose war party {@code player} was sent to lead (an unfinished war-party decree), or -1. */
+	static int warbandRealm(ServerPlayer player) {
+		for (Quest q : log(player)) {
+			if (q.kind() == Quest.WARBAND && !q.counted()) {
+				return q.giver().faction();
+			}
+		}
+		return -1;
+	}
+
+	/** (0.5.29) {@code realm}'s war party sacked {@code target}'s seat with {@code player} marching in it. */
+	static void sacked(ServerPlayer player, int realm, Faction target) {
+		for (Quest q : log(player)) {
+			if (q.kind() == Quest.WARBAND && !q.counted() && q.giver().faction() == realm) {
+				put(player, q.withProgress(1));
+				player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.warband.done", target.name(), q.giver().name()).withStyle(ChatFormatting.GOLD));
+				sync(player, true);
+			}
+		}
+	}
+
 	/** The camp {@code entity} is chief or warlord of, or -1. */
 	private static int campOf(Entity entity) {
 		if (entity instanceof Folk folk && folk.role() == Folk.CHIEF) {
@@ -848,7 +892,9 @@ public final class Quests {
 		return switch (q.kind()) {
 			// (who a letter's for and where; whose chief, or whose king)
 			case Quest.DELIVER -> Component.translatable(key, addressee(q), q.objective().place());
-			case Quest.CHIEF, Quest.REGICIDE -> Component.translatable(key, q.objective().place());
+			case Quest.CHIEF, Quest.WARBAND -> Component.translatable(key, q.objective().place());
+			// (the reasons differ by the king's temper, the title only by how it's done)
+			case Quest.REGICIDE -> Component.translatable("quest.jaymoskingdoms.king.regicide." + q.objective().otherName() + ".title", q.objective().place());
 			default -> Component.translatable(key);
 		};
 	}
@@ -881,6 +927,11 @@ public final class Quests {
 		return Integer.toString(q.objective().pos().map(BlockPos::getX).orElse(0));
 	}
 
+	private static String realmName(ServerLevel level, int id) {
+		Faction f = Factions.get(level.getServer(), id);
+		return f == null ? "?" : f.name();
+	}
+
 	private static String z(Quest q) {
 		return Integer.toString(q.objective().pos().map(BlockPos::getZ).orElse(0));
 	}
@@ -896,7 +947,7 @@ public final class Quests {
 			case Quest.DELIVER -> Component.translatable(key, addressee(q), o.place(), x(q), z(q));
 			case Quest.CHAMPION -> Component.translatable(key, Component.translatable("foe.jaymoskingdoms." + o.otherName()), ruin(o.target()), x(q), z(q));
 			case Quest.CHIEF -> Component.translatable(key, o.place(), x(q), z(q));
-			case Quest.REGICIDE -> Component.translatable(key, o.place(), x(q), z(q));
+			case Quest.REGICIDE, Quest.WARBAND -> Component.translatable(key, o.place(), x(q), z(q));
 			default -> Component.empty();
 		};
 	}
@@ -917,6 +968,7 @@ public final class Quests {
 				ruin(o.target()), x(q), z(q));
 			case Quest.CHIEF -> Component.translatable("quest.jaymoskingdoms.objective.chief", o.place(), x(q), z(q));
 			case Quest.REGICIDE -> Component.translatable("quest.jaymoskingdoms.objective.regicide", o.place(), x(q), z(q));
+			case Quest.WARBAND -> Component.translatable("quest.jaymoskingdoms.objective.warband", realmName(level, q.giver().faction()), o.place());
 			default -> Component.empty();
 		};
 	}

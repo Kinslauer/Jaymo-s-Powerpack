@@ -1599,16 +1599,22 @@ cultists) and kings give quests.
   Smiths often give a **relic**: a weapon or armour piece with a passive (weapons: Bloodthirst, Frostbite,
   Emberbrand, Stormcaller, Executioner, Venomfang; armour: Second Wind, Retribution, Bulwark, Fleetfoot, Flameward;
   `Relics`). Kings pay 64 emeralds, diamonds, a high book, a royal netherite relic and +150 reputation.
-- **Regicide** (Andy's ask): a tyrant or warlord king's decree is, 40% of the time (`REGICIDE_CHANCE`), another
-  king's death: his enemy at war first, then a rival, then the nearest crowned realm that isn't his ally (within
-  2500 blocks). How to get close is in the telling:
+- **Regicide** (Andy's ask): any king but a noble may decree another king's death, each for his own reasons (the
+  tyrant's pride, the warlord's contempt for a king who won't fight, the paranoid's fear of plots, the reveler's
+  grudge), how often by temper (`REGICIDE_CHANCE`: tyrant and paranoid 40%, reveler 25%, warlord 10%). The target is
+  his enemy at war first, then a rival, then the nearest crowned realm that isn't his ally (within 2500 blocks). How
+  to get close is in the telling:
   - **A false oath** (any king but a noble one): swear to his realm (`/kingdom pledge`), walk up to his throne
     with his guards' leave, and strike. Dying sworn to, he pays the assassin +50% emeralds and +50 good name with
     the giver; the oath is broken with the blow (you're struck from his realm, and it counts you an enemy).
   - **The noble's round**: a noble king walks out among his people by day. Come within 5 blocks of him out there and
     he stops for you, gives you bread and stands still for 8 seconds. Slain out on his round, the same +50%.
   - Killing a king keeps its usual cost: -400 with his realm, +60 with its rivals, and his realm's fate.
-  - Ops: `/kingdom quests offer regicide` gives the nearest king that decree, whatever his temper.
+- **A warlord's host**: a warlord would rather wage the war himself, so half his decrees (`WARBAND_CHANCE`) are to
+  lead his war party against that same rival and sack its seat. Not at war with them yet, he declares it when you
+  say yes. Once the war is on, stand at his seat and `/kingdom war join` (sworn to him or not): the party marches with
+  you, and the quest is done when it sacks the enemy seat (`WarParties.seize`).
+- Ops: `/kingdom quests offer regicide` and `/kingdom quests offer warband` give the nearest king that decree.
 - Up to 5 quests and 1 decree at once. `/kingdom quests` lists them (click to give one up); a tracker on the right
   of the screen shows 3 with distance and direction. Ops: `/kingdom quests offer` (nearest giver has work now) and
   `/kingdom quests finish` (counts made up).
@@ -1619,5 +1625,6 @@ cultists) and kings give quests.
   quest ready; turned in for 64 emeralds, 5 diamonds, Mending, a Retribution netherite helm (+75 reputation after
   the king's temper). The helm sent back a quarter of an 8-damage hit. Not seen: mail, fetch caches, slay counts,
   the other passives. Regicide: Dunhaven's tyrant sent for the reveler king of Falshire; pledged to Falshire, struck
-  him down, and the decree was ready with 51 → 76 emeralds and 150 → 200 reputation, the oath broken. Not seen: the
+  him down, and the decree was ready with 51 → 76 emeralds and 150 → 200 reputation, the oath broken. Taking the warlord's
+  host declared war on Ravngard, and `/kingdom war join` used Dunhaven for the unsworn Tester. Not seen: the
   noble's round and his bread.

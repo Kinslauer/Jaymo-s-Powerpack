@@ -17,7 +17,7 @@ import net.minecraft.core.UUIDUtil;
  */
 public record Quest(String id, int kind, String template, Giver giver, Objective objective, Reward reward, long givenAt) {
 	/** Kinds: carry a letter, slay so many, bring back something from a ruin, bring so many of an item, slay a royal foe, slay a camp's chief. */
-	public static final int DELIVER = 0, SLAY = 1, FETCH = 2, GATHER = 3, CHAMPION = 4, CHIEF = 5, REGICIDE = 6;
+	public static final int DELIVER = 0, SLAY = 1, FETCH = 2, GATHER = 3, CHAMPION = 4, CHIEF = 5, REGICIDE = 6, WARBAND = 7;
 
 	/** Who asked: their UUID and name, their settlement, whether it's its king, and their trade (a profession's path). */
 	public record Giver(UUID uuid, String name, int faction, boolean king, String job) {

@@ -19,7 +19,7 @@ import net.minecraft.world.entity.npc.villager.Villager;
 
 /**
  * (0.5.29) {@code /kingdom quests}: your quests and what's left of each, with a way to give one up from afar. For ops:
- * {@code offer} (the nearest giver has work now; {@code offer regicide}: a king's regicide decree) and {@code finish} (your quests' counts made up), for testing.
+ * {@code offer} (the nearest giver has work now; {@code offer regicide} or {@code warband}: that king's decree) and {@code finish} (your quests' counts made up), for testing.
  */
 final class QuestCommands {
 	private QuestCommands() {
@@ -28,8 +28,9 @@ final class QuestCommands {
 	static LiteralArgumentBuilder<CommandSourceStack> command() {
 		return Commands.literal("quests").executes(QuestCommands::list)
 			.then(Commands.literal("abandon").then(Commands.argument("number", IntegerArgumentType.integer(1, 16)).executes(QuestCommands::abandon)))
-			.then(Commands.literal("offer").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(c -> offer(c, false))
-				.then(Commands.literal("regicide").executes(c -> offer(c, true))))
+			.then(Commands.literal("offer").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(c -> offer(c, 0))
+				.then(Commands.literal("regicide").executes(c -> offer(c, 1)))
+				.then(Commands.literal("warband").executes(c -> offer(c, 2))))
 			.then(Commands.literal("finish").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(QuestCommands::finish));
 	}
 
@@ -69,7 +70,7 @@ final class QuestCommands {
 		return 1;
 	}
 
-	private static int offer(CommandContext<CommandSourceStack> c, boolean regicide) throws CommandSyntaxException {
+	private static int offer(CommandContext<CommandSourceStack> c, int decree) throws CommandSyntaxException {
 		ServerPlayer player = c.getSource().getPlayerOrException();
 		ServerLevel level = (ServerLevel)player.level();
 		Optional<LivingEntity> giver = level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(16.0),
@@ -81,8 +82,9 @@ final class QuestCommands {
 		}
 		LivingEntity g = giver.get();
 		Optional<Quest> q = Optional.empty();
-		if (regicide) {
-			Quest r = g instanceof Folk ? QuestBoard.regicide(level, g, Quests.settlement(level, g), level.getRandom()) : null;
+		if (decree > 0) {
+			Faction f = Quests.settlement(level, g);
+			Quest r = !(g instanceof Folk) ? null : decree == 1 ? QuestBoard.regicide(level, g, f, level.getRandom()) : QuestBoard.warband(level, g, f);
 			if (r == null) {
 				c.getSource().sendFailure(Component.literal("No king near, or no other crowned realm for him to want dead"));
 				return 0;
