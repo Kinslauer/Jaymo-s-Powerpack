@@ -35,6 +35,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.SaplingBlock;
+import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.jspecify.annotations.Nullable;
@@ -50,8 +51,10 @@ import org.jspecify.annotations.Nullable;
  * jungle) and anything that isn't a plain {@code *_sapling} grow as before. Growing trees are kept on the Overworld.</li>
  * <li><b>Felling</b>: cut a log of a tree (a trunk under living leaves, not a building's logs) and everything above the
  * cut comes down, logs and the leaves they held, and (0.5.9) it topples over whole, away from the
- * cutter, breaking apart where it lands and giving its wood there ({@link FallingTree}). The axe takes a point of wear per log. Sneak to cut one log only. Woodcutters fell the same way
- * ({@link Gatherers}).</li>
+ * cutter, breaking apart where it lands and giving its wood there ({@link FallingTree}). (0.5.25) As in HT's TreeChop,
+ * it takes chops, not one break: each stroke at a log narrows it ({@link ChoppedLog}), and the tree comes down on the
+ * chop that makes up what its size needs ({@link #needed}); the axe takes a point of wear per chop. Sneak to break one
+ * log only. Woodcutters chop and fell the same way ({@link Gatherers}).</li>
  * <li><b>Seeding</b>: now and then, round each player, a grown tree drops a sapling of its kind on open grass a few
  * blocks off, where the wood isn't already thick, so forests slowly spread (and grow up as above). Never in a
  * settlement's buildings or plots.</li>
@@ -72,6 +75,11 @@ public final class Trees {
 	static final float SEED_CHANCE = 0.35F;
 	/** No seedling where there are this many logs within {@link #CROWD_RANGE} already. */
 	static final int CROWDED = 3, CROWD_RANGE = 3;
+	/**
+	 * (0.5.25) How steeply the chops a tree needs rise with its size (TreeChop's logarithmic count): bigger trees take
+	 * more chops, but fewer per log. 0 would be one chop for any tree; very large, a chop per log.
+	 */
+	static final double CHOP_SCALE = 10.0;
 
 	/** A growing tree: its foot, its sapling, its step, when it next grows. */
 	record Growing(BlockPos pos, String sapling, int stage, long next) {
@@ -94,7 +102,7 @@ public final class Trees {
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Trees::tick);
-		PlayerBlockBreakEvents.AFTER.register(Trees::broken);
+		PlayerBlockBreakEvents.BEFORE.register(Trees::breaking);
 	}
 
 	// ---- the kinds --------------------------------------------------------------------------------------------------
@@ -423,13 +431,77 @@ public final class Trees {
 		return false;
 	}
 
-	/** A player cut a log: unless they're sneaking, a tree's whole top comes down with it. */
-	private static void broken(Level level, Player player, BlockPos pos, BlockState state, net.minecraft.world.level.block.entity.@Nullable BlockEntity be) {
+	/**
+	 * (0.5.25) A player's axe stroke at a tree's log is a chop, not a break (unless they're sneaking or in creative, or it
+	 * isn't a tree): the log narrows ({@link ChoppedLog}), and the tree comes down whole on the chop that makes up
+	 * {@link #needed} for its size. False keeps the block (the chop was done here instead).
+	 */
+	private static boolean breaking(Level level, Player player, BlockPos pos, BlockState state, net.minecraft.world.level.block.entity.@Nullable BlockEntity be) {
 		if (!(level instanceof ServerLevel server) || player.isShiftKeyDown() || player.isCreative() || !state.is(BlockTags.LOGS)) {
-			return;
+			return true;
 		}
 		ItemStack tool = player.getMainHandItem();
-		fell(server, pos, player, tool, null, true);
+		int felled = chop(server, pos, player, tool, null);
+		if (felled < 0) {
+			return true;
+		}
+		// (a chop costs what breaking the log would: a point of the axe's wear, and a little hunger)
+		if (!tool.isEmpty() && tool.isDamageableItem()) {
+			tool.hurtAndBreak(1, player, EquipmentSlot.MAINHAND);
+		}
+		player.causeFoodExhaustion(0.005F);
+		return false;
+	}
+
+	/** Chops a tree of {@code logs} logs needs to come down: 1 for one log, 4 for five, 12 for twenty, 25 for a hundred. */
+	static int needed(int logs) {
+		return Math.max(1, Math.round((float)(1.0 + CHOP_SCALE * Math.log(1.0 + (logs - 1) / CHOP_SCALE))));
+	}
+
+	/**
+	 * (0.5.25) One chop at the tree whose log is {@code cut}, the way HT's TreeChop fells them: the log narrows (once it's
+	 * as thin as it goes, the chop goes into the next whole-enough log up the trunk), and once the tree has taken
+	 * {@link #needed} chops for its size it comes down from {@code cut} ({@link #fell}). Returns -1 if it isn't a tree
+	 * (break it as ever), 0 for a chop that left it standing, or how many logs came down.
+	 */
+	static int chop(ServerLevel level, BlockPos cut, @Nullable Entity cutter, ItemStack tool, @Nullable Consumer<ItemStack> sink) {
+		BlockState state = level.getBlockState(cut);
+		if (!state.is(BlockTags.LOGS)) {
+			return -1;
+		}
+		List<BlockPos> logs = trunk(level, cut);
+		if (logs.isEmpty() || logs.stream().noneMatch(p -> natural(level, p))) {
+			return -1;
+		}
+		int taken = 0;
+		for (BlockPos p : logs) {
+			taken += ChoppedLog.chops(level.getBlockState(p));
+		}
+		// (and the chops in the stump below the cut, which this tree stood on)
+		for (BlockPos p = cut.below(); level.getBlockState(p).is(ChoppedLog.BLOCK) && cut.getY() - p.getY() <= ChoppedLog.MOST; p = p.below()) {
+			taken += ChoppedLog.chops(level.getBlockState(p));
+		}
+		BlockState real = ChoppedLog.real(level, cut, state);
+		level.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, cut, Block.getId(real));
+		if (taken + 1 >= needed(logs.size())) {
+			return fell(level, cut, cutter, tool, sink, false);
+		}
+		// the chop: into the cut, or once that's as thin as it goes, the nearest log up the trunk with wood to spare
+		BlockPos at = cut;
+		if (ChoppedLog.chops(state) >= ChoppedLog.MOST) {
+			at = null;
+			for (BlockPos p : logs) {
+				if (ChoppedLog.chops(level.getBlockState(p)) < ChoppedLog.MOST && (at == null || p.distSqr(cut) < at.distSqr(cut))) {
+					at = p;
+				}
+			}
+			if (at == null) {
+				return fell(level, cut, cutter, tool, sink, false);
+			}
+		}
+		BlockState there = level.getBlockState(at);
+		ChoppedLog.set(level, at, there, ChoppedLog.chops(there) + 1);
+		return 0;
 	}
 
 	/**
@@ -439,35 +511,7 @@ public final class Trees {
 	 * (0.5.9) It topples over whole, away from the cutter ({@link FallingTree}), and breaks apart where it lands.
 	 */
 	static int fell(ServerLevel level, BlockPos cut, @Nullable Entity cutter, ItemStack tool, @Nullable Consumer<ItemStack> sink, boolean wear) {
-		List<BlockPos> logs = new ArrayList<>();
-		Set<BlockPos> seen = new HashSet<>();
-		Deque<BlockPos> open = new ArrayDeque<>();
-		// (0.5.10) from the logs over the cut: roots and the rest of a wide trunk at the cut's own height stay as a stump
-		for (BlockPos n : BlockPos.betweenClosed(cut.offset(-1, 1, -1), cut.offset(1, 1, 1))) {
-			BlockPos q = n.immutable();
-			if (level.getBlockState(q).is(BlockTags.LOGS)) {
-				seen.add(q);
-				open.add(q);
-			}
-		}
-		if (level.getBlockState(cut).is(BlockTags.LOGS)) {
-			seen.add(cut);
-			open.addFirst(cut);
-		}
-		while (!open.isEmpty() && logs.size() < FELL_MOST) {
-			BlockPos at = open.poll();
-			logs.add(at);
-			for (BlockPos n : BlockPos.betweenClosed(at.offset(-1, 0, -1), at.offset(1, 1, 1))) {
-				if (n.getY() <= cut.getY() || Math.abs(n.getX() - cut.getX()) > FELL_SPREAD || Math.abs(n.getZ() - cut.getZ()) > FELL_SPREAD) {
-					continue;
-				}
-				BlockPos q = n.immutable();
-				if (!seen.contains(q) && level.getBlockState(q).is(BlockTags.LOGS)) {
-					seen.add(q);
-					open.add(q);
-				}
-			}
-		}
+		List<BlockPos> logs = trunk(level, cut);
 		if (logs.isEmpty() || logs.stream().noneMatch(p -> natural(level, p))) {
 			return 0;
 		}
@@ -497,6 +541,40 @@ public final class Trees {
 		FallingTree.topple(level, cut, logs, leaves, FallingTree.away(cutter, cut, level), cutter, tool, sink);
 		// (the growing-tree record, if it was one, is forgotten when its foot is gone)
 		return logs.size();
+	}
+
+	/** The logs that come down when {@code cut} is cut: it and those joined to it above (not far off), lowest-found first. */
+	private static List<BlockPos> trunk(ServerLevel level, BlockPos cut) {
+		List<BlockPos> logs = new ArrayList<>();
+		Set<BlockPos> seen = new HashSet<>();
+		Deque<BlockPos> open = new ArrayDeque<>();
+		// (0.5.10) from the logs over the cut: roots and the rest of a wide trunk at the cut's own height stay as a stump
+		for (BlockPos n : BlockPos.betweenClosed(cut.offset(-1, 1, -1), cut.offset(1, 1, 1))) {
+			BlockPos q = n.immutable();
+			if (level.getBlockState(q).is(BlockTags.LOGS)) {
+				seen.add(q);
+				open.add(q);
+			}
+		}
+		if (level.getBlockState(cut).is(BlockTags.LOGS)) {
+			seen.add(cut);
+			open.addFirst(cut);
+		}
+		while (!open.isEmpty() && logs.size() < FELL_MOST) {
+			BlockPos at = open.poll();
+			logs.add(at);
+			for (BlockPos n : BlockPos.betweenClosed(at.offset(-1, 0, -1), at.offset(1, 1, 1))) {
+				if (n.getY() <= cut.getY() || Math.abs(n.getX() - cut.getX()) > FELL_SPREAD || Math.abs(n.getZ() - cut.getZ()) > FELL_SPREAD) {
+					continue;
+				}
+				BlockPos q = n.immutable();
+				if (!seen.contains(q) && level.getBlockState(q).is(BlockTags.LOGS)) {
+					seen.add(q);
+					open.add(q);
+				}
+			}
+		}
+		return logs;
 	}
 
 	/** Some other log (not the felled tree's) within reach of these leaves: they stay. */

@@ -10,7 +10,7 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.ChunkPos;
 
 /**
- * (0.5.24) Treasuries that rise and fall. A kingdom starts with a purse of its own ({@link #START_MIN} to
+ * (0.5.26) Treasuries that rise and fall. A kingdom starts with a purse of its own ({@link #START_MIN} to
  * {@link #START_MAX} emeralds), and it grows with trade and victory and shrinks with war:
  * <ul>
  * <li><b>Trade.</b> A player's trade with a villager on a realm's land pays the realm a toll ({@link #traded}), and a

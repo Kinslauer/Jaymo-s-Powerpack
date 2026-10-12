@@ -53,6 +53,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.core.BlockCluster.TYPE, BlockClusterRenderer::new);
 		// once per install: move other mods' (and vanilla's) defaults off the power keys
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(KeyConflicts::resolveOnce);
+		// once per install: switch on the medieval MCA villagers resource pack the CurseForge import downloaded
+		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(MedievalVillagers::enableOnce);
 
 		// Balkon's guns get solid 3D models in hand (an always-on built-in pack, above WeaponMod's own assets)
 		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("held_guns"),
