@@ -141,7 +141,7 @@ public final class Planner {
 			if (Enclosure.piece(e.id())) {
 				continue;
 			}
-			if (size >= e.minPopulation() && works.count(e.id()) < e.max() && seen.add(e.id())) {
+			if (size >= e.minPopulation() && works.count(e.id()) < Focus.max(server, f, e.id(), e.max()) && seen.add(e.id())) {
 				out.add(e);
 			}
 		}
@@ -157,7 +157,7 @@ public final class Planner {
 		Map<String, Integer> most = new HashMap<>();
 		for (Blueprint.Entry e : Blueprint.catalogue(f.type())) {
 			if (!e.id().equals("house") && !Enclosure.piece(e.id()) && e.minPopulation() < Integer.MAX_VALUE) {
-				most.merge(e.id(), e.max(), Math::max);
+				most.merge(e.id(), Focus.max(server, f, e.id(), e.max()), Math::max);
 			}
 		}
 		for (Map.Entry<String, Integer> e : most.entrySet()) {
@@ -230,7 +230,8 @@ public final class Planner {
 			choices.add(entry(f, only));
 		}
 		// (0.5.11) once every other kind of building is up to its full count, the builders wall the settlement in
-		if (only == null && utilitiesDone(server, f) || only != null && Enclosure.piece(only)) {
+		// (0.5.19) not a fiefdom: it lives to supply its overlord, not to hold out ({@link Focus})
+		if (only == null && Focus.walled(server, f) && utilitiesDone(server, f) || only != null && Enclosure.piece(only)) {
 			Enclosure.Piece piece = Enclosure.next(level, f);
 			Blueprint.Entry wallEntry = piece == null ? null : entry(f, piece.entry());
 			if (piece != null && wallEntry != null) {

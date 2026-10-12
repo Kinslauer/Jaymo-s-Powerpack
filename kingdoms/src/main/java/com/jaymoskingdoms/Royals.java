@@ -144,12 +144,21 @@ public final class Royals {
 				this.stops.clear();
 				release(level, this.king);
 			}
+			// (0.5.19) driven home in his carriage: he gets down at his gate and walks in
+			if (Carriages.riding(this.king)) {
+				if (this.walk(level, keep.gate(), now, Carriages.ALIGHT_REACH) || now - this.improvedAt > STUCK_TICKS) {
+					Carriages.alight(this.king);
+					this.goal = null;
+				}
+				return;
+			}
 			if (this.walk(level, keep.throne(), now, 1.5)) {
 				this.king.getNavigation().stop();
 				this.king.setHomeTo(keep.throne(), 3);
 			} else if (now - this.improvedAt > STUCK_TICKS) {
 				// (the way in is blocked: his guards see him to his throne)
 				poof(level, this.king);
+				Carriages.alight(this.king);
 				this.king.teleportTo(keep.throne().getX() + 0.5, keep.throne().getY(), keep.throne().getZ() + 0.5);
 				poof(level, this.king);
 				this.king.setHomeTo(keep.throne(), 3);
@@ -210,17 +219,23 @@ public final class Royals {
 				}
 				return;
 			}
+			// (0.5.19) a wealthy king rides his round in his carriage, if it's waiting for him
+			Carriages.board(level, faction, this.king);
 			BlockPos stop = this.stops.getFirst();
 			if (this.walk(level, stop, now, STOP_REACH)) {
 				this.stops.removeFirst();
-				this.king.getNavigation().stop();
+				Carriages.stop(this.king);
 				this.greeting = GREET_TICKS;
 			} else if (now - this.improvedAt > STUCK_TICKS) {
 				// (no way there, penned in by a fence or a gate: he turns up there in a puff, as builders do; his escort follows)
 				BlockPos at = Construction.standable(level, stop, 3);
 				poof(level, this.king);
-				this.king.getNavigation().stop();
-				this.king.teleportTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+				Carriages.stop(this.king);
+				if (Carriages.riding(this.king)) {
+					Carriages.teleport(this.king, at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+				} else {
+					this.king.teleportTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+				}
 				poof(level, this.king);
 				this.goal = null;
 			}
@@ -255,7 +270,7 @@ public final class Royals {
 				this.improvedAt = now;
 			}
 			double d = Math.sqrt(this.king.distanceToSqr(Vec3.atBottomCenterOf(to)));
-			if (d <= reach) {
+			if (d <= reach + Carriages.reach(this.king)) {
 				return true;
 			}
 			if (d < this.best - 0.5) {
@@ -264,7 +279,7 @@ public final class Royals {
 			}
 			if (this.king.getNavigation().isDone() || now % 20 == 0) {
 				BlockPos leg = Construction.leg(level, this.king, to);
-				this.king.getNavigation().moveTo(leg.getX() + 0.5, leg.getY(), leg.getZ() + 0.5, KING_SPEED);
+				Carriages.moveTo(this.king, leg.getX() + 0.5, leg.getY(), leg.getZ() + 0.5, KING_SPEED);
 			}
 			return false;
 		}
@@ -275,7 +290,7 @@ public final class Royals {
 	/** Calls up to {@link #ESCORT_MOST} of the faction's guards (the nearest) to {@code king}'s back. */
 	static void escort(ServerLevel level, Faction faction, Folk king) {
 		List<Folk> guards = new ArrayList<>(level.getEntitiesOfClass(Folk.class, new AABB(faction.seat()).inflate(ESCORT_CALL),
-			g -> g.isAlive() && g.factionId() == faction.id() && g.role() == Folk.GUARD && g.getTarget() == null
+			g -> g.isAlive() && g.factionId() == faction.id() && g.role() == Folk.GUARD && g.getTarget() == null && g.task().isEmpty()
 				&& (g.escort() == null || g.escort().equals(king.getUUID()))));
 		// the hall's and the town's guards first; the gate's keep it, unless they're needed to make up the least
 		Castle.Keep keep = Factions.keep(level.getServer(), faction.id());
@@ -354,8 +369,10 @@ public final class Royals {
 			// behind him: rows of two, a block and a half either side
 			Vec3 facing = Vec3.directionFromRotation(0.0F, king.getYRot());
 			Vec3 right = new Vec3(-facing.z, 0.0, facing.x);
-			double back = 2.0 + (slot / 2) * 1.8;
-			double side = slot % 2 == 0 ? -1.4 : 1.4;
+			// (0.5.19) wider apart on horseback, and further back behind a carriage
+			double spread = Cavalry.mounted(this.guard) ? 1.7 : 1.0;
+			double back = (Carriages.riding(king) ? 4.5 : 2.0) + (slot / 2) * 1.8 * spread;
+			double side = (slot % 2 == 0 ? -1.4 : 1.4) * spread;
 			Vec3 place = king.position().subtract(facing.scale(back)).add(right.scale(side));
 			double d = this.guard.position().distanceTo(place);
 			if (this.guard.tickCount % 20 == 0) {
@@ -365,7 +382,7 @@ public final class Royals {
 				ServerLevel level = (ServerLevel)this.guard.level();
 				BlockPos to = Construction.standable(level, BlockPos.containing(place), 3);
 				poof(level, this.guard);
-				this.guard.teleportTo(to.getX() + 0.5, to.getY(), to.getZ() + 0.5);
+				Cavalry.teleport(this.guard, to.getX() + 0.5, to.getY(), to.getZ() + 0.5);
 				poof(level, this.guard);
 				return;
 			}

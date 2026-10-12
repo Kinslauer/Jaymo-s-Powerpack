@@ -8,6 +8,8 @@ Plan and the user's answers: `docs/Kingdoms-Plan.md` (0.3: `docs/Kingdoms-Plan-0
 `run/` holds an offline dev server (port 25597, RCON 25598, password `kingdomsdev`) and ops.json for the dev
 client's `Tester`. Start `runServer --args="nogui"`, then `runClient --args="--username Tester --quickPlayMultiplayer
 localhost:25597"`, and drive it with RCON.
+With no player on, set `pause-when-empty-seconds=0` in `run/server.properties` (the server otherwise stops
+ticking a minute after it empties) and `/forceload` the area under test.
 
 ## 0.1.0: stage 1
 - **Kingdoms** (`Kingdom`, stored on the Overworld by `Kingdoms`): name, colour, capital (a village bell), king,
@@ -1338,3 +1340,44 @@ Tested on the dev server: a war party of 7 against Garhaven threw javelins (and 
 soldiers below them), broke trapdoors in its way and set a dozen fires in the town; the paranoid king of Garhaven
 shoved a player back; a vanilla and an MCA villager ran from an enderman (4 to 11-13 blocks). Not seen in game: the
 other tempers' rounds, the tyrant's tithe, the reveler's feast.
+
+## 0.5.19: fiefdoms that feed their kingdom, caravans, mounted guards and archers, the king's carriage
+- **Fiefdoms have a focus** (`Focus`), drawn from their land: *mining* in hills, mountains and badlands, *farming* on
+  plains, savanna and by rivers (otherwise by id). Either way a fiefdom builds no wall, towers, gatehouses or
+  barracks, and keeps at most 4 guards (the rest of its hands work).
+  - *Mining*: 5 miners a mine, 160% stone and logs, one ore (coal, iron, copper, gold, redstone, lapis) for every 6
+    stone, and only 1 field and 1 pen (it's fed by its overlord).
+  - *Farming*: up to 6 fields and 3 pens, 200% food (256% at most a day).
+  Shown in `/kingdom info`.
+- **Caravans** (`Caravans`, saved as `jaymoskingdoms:caravans`): by day a fiefdom sends its surplus (all but 16 of
+  each good; at least 32 items, up to 3 carts of 576) to its overlord, at most three times a day. Each cart is a
+  horse-drawn wagon (`Wagon`) driven by a carter, its load showing what it carries (stone and ore, hay and barrels,
+  or a bit of everything), with a guard plus one more for every 2 carts (mounted if the overlord is prosperous).
+  The kingdom unloads into its storehouse (kept for later if the storehouse isn't loaded) and sends the carts back
+  with up to 60% as much of what the fiefdom lacks (food to a mining fiefdom; logs, coal, iron and cobblestone to a
+  farming one), keeping 64 of each. Out of every player's range a caravan goes on in the record at 3.2 blocks a
+  second and comes back into the world where it's got to. Stuck (a river, a cliff, a wall) it's set 8 blocks on;
+  riders get back in the saddle after a river.
+  - Players can strike a cart: its guards turn on them, and a cart broken open (24 damage) spills its load, -60
+    reputation with the fiefdom and its overlord. A cart whose carter or horse dies spills too.
+  - Right-click a cart to see its load.
+- **Wealth** (`Wealth`): a kingdom is *prosperous* at worth 120 and *wealthy* at 260 (worth = treasury + 4 a villager
+  + 60 a fiefdom). Shown in `/kingdom info`.
+- **Mounted guards and archers** (`Cavalry`): a prosperous kingdom buys horses (6 emeralds each, keeping 40) for 2 of
+  its town guards (never those posted at the gate or the throne), a wealthy one for 4, and keeps 2 mounted archers
+  riding round the town. Horses are saddled, in leather barding in the realm's colour, or iron for a wealthy realm.
+  A horse whose rider fell is taken by the next guard. A prosperous realm's war parties put one soldier in 3 on a
+  horse.
+- **The king's carriage** (`Carriages`): a wealthy kingdom buys its king a carriage (40 emeralds; another a day
+  after one is lost): a cabin in his colours with gold trim and lanterns, a coachman on a horse in iron barding. It
+  waits at the gate; on his round the king gets in and is driven from stop to stop, his escort behind, and is driven
+  back to the gate at dusk. Attacked, he gets down to fight.
+- Riders and caravan folk don't smother in walls (a horse's head brushes leaves and eaves), and neither do the
+  realm's horses.
+- Op commands: `/kingdom caravan [fief]` sends one now, `/kingdom carriage` buys the king's carriage now,
+  `/kingdom treasury <n>`, `/kingdom vassal <fief> <overlord>`. Commands that act on "the realm here" now work from
+  the console and command blocks too (at the command's position).
+Tested on the dev server: farming fiefdom Tormoor sent caravans to wealthy Hedvale (about 190 blocks): out across a
+river, unloaded, back home and gone, both in sight and out of every player's range; Hedvale bought its carriage and
+the king rode his round in it; it has 4 mounted guards and 2 mounted archers. The carts' and carriage's models
+seen in the client. Not seen in game: a player robbing a cart, a mining fiefdom's caravan, mounted war parties.

@@ -202,7 +202,7 @@ public final class Gatherers {
 	static boolean wanted(MinecraftServer server, Faction f, int role) {
 		int have = f.holdings().count(role) + f.holdings().vacancies().getOrDefault(Folk.roleName(role), 0);
 		if (role == Folk.MINER) {
-			return Mines.dug(server, f) && have < MINERS_PER_MINE;
+			return Mines.dug(server, f) && have < Focus.miners(server, f, MINERS_PER_MINE);
 		}
 		return role == Folk.WOODCUTTER && have < treeFarms(server, f).size() * WOODCUTTERS_PER_FARM;
 	}
