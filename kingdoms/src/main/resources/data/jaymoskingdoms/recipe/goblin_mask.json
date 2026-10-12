@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "GLG",
+    "LSL"
+  ],
+  "key": {
+    "G": "minecraft:green_dye",
+    "L": "minecraft:leather",
+    "S": "minecraft:string"
+  },
+  "result": {
+    "id": "jaymoskingdoms:goblin_mask",
+    "count": 1
+  }
+}

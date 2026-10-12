@@ -33,6 +33,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(com.jaymoskingdoms.ChoppedLog.ENTITY, ChoppedLogRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.Wagon.TYPE, WagonRenderer::new);
 		CampSkins.register();
+		GoblinSkins.register();
 		MobAnimations.register();
 		SpeechBubbles.register();
 	}
@@ -80,10 +81,22 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 			}
 		}
 
+		/** (0.5.27) A man's shape, and the goblins' (long ears, a hooked nose): swapped in per render. */
+		private final HumanoidModel<FolkState> humanModel;
+		private final HumanoidModel<FolkState> goblinModel = GoblinSkins.model();
+
 		FolkRenderer(EntityRendererProvider.Context context) {
 			super(context, new HumanoidModel<>(context.bakeLayer(ModelLayers.ZOMBIE)), 0.5F);
+			this.humanModel = this.model;
 			this.addLayer(new HumanoidArmorLayer<>(this, ArmorModelSet.bake(ModelLayers.ZOMBIE_ARMOR, context.getModelSet(), HumanoidModel::new),
 				context.getEquipmentRenderer()));
+		}
+
+		@Override
+		public void submit(FolkState state, com.mojang.blaze3d.vertex.PoseStack poseStack, net.minecraft.client.renderer.SubmitNodeCollector collector,
+			net.minecraft.client.renderer.state.level.CameraRenderState camera) {
+			this.model = GoblinSkins.goblin(state.role) ? this.goblinModel : this.humanModel;
+			super.submit(state, poseStack, collector, camera);
 		}
 
 		@Override

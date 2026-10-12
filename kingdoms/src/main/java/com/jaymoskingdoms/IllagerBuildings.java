@@ -345,10 +345,15 @@ final class IllagerBuildings {
 	 * ground height), or {@link Integer#MIN_VALUE} if it can't be built on (unloaded, water, or too uneven).
 	 */
 	static int floor(ServerLevel level, BlockPos center, int maxSpread) {
+		return floor(level, center, maxSpread, CLEAR_RADIUS);
+	}
+
+	/** (0.5.27) The same over {@code radius} (a goblin village's is wider). */
+	static int floor(ServerLevel level, BlockPos center, int maxSpread, int radius) {
 		List<Integer> heights = new ArrayList<>();
-		for (int dx = -CLEAR_RADIUS; dx <= CLEAR_RADIUS; dx += 2) {
-			for (int dz = -CLEAR_RADIUS; dz <= CLEAR_RADIUS; dz += 2) {
-				if (dx * dx + dz * dz > CLEAR_RADIUS * CLEAR_RADIUS) {
+		for (int dx = -radius; dx <= radius; dx += 2) {
+			for (int dz = -radius; dz <= radius; dz += 2) {
+				if (dx * dx + dz * dz > radius * radius) {
 					continue;
 				}
 				BlockPos column = center.offset(dx, 0, dz);

@@ -127,6 +127,10 @@ public final class Camps {
 			return IllagerCamps.KIND.equals(this.kind);
 		}
 
+		boolean goblin() {
+			return GoblinVillages.KIND.equals(this.kind);
+		}
+
 		CampData withLastRaid(long at) {
 			return new CampData(this.center, this.gate, this.founded, at, this.lastDay, this.clearedAt, this.rot, this.lastRot, this.pending,
 				this.kind, this.built, this.grown);
@@ -182,17 +186,21 @@ public final class Camps {
 	static void register() {
 		Barbarians.init();
 		Illagers.init();
+		Goblins.init();
 		CampBuildings.registerCatalogue();
 		ServerTickEvents.END_SERVER_TICK.register(Camps::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Raids.clear();
 			IllagerCamps.clear();
+			GoblinVillages.clear();
 		});
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> Raids.loaded(entity));
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof Folk folk && folk.level() instanceof ServerLevel level) {
-				if (folk.role() == Folk.CHIEF) {
+				if (folk.role() == Folk.CHIEF || folk.role() == Goblins.KING) {
 					chiefSlain(level, folk, folk.factionId(), source);
+				} else if (Goblins.isGoblin(folk)) {
+					Goblins.died(level, folk, source);
 				} else if (Raids.isRaider(folk)) {
 					Raids.raiderDied(level, folk, folk.factionId(), source, true);
 				}
@@ -237,6 +245,10 @@ public final class Camps {
 
 	static boolean illager(MinecraftServer server, int id) {
 		return IllagerCamps.KIND.equals(kind(server, id));
+	}
+
+	static boolean goblin(MinecraftServer server, int id) {
+		return GoblinVillages.KIND.equals(kind(server, id));
 	}
 
 	static void noteRaid(MinecraftServer server, int id, long at) {
@@ -323,11 +335,15 @@ public final class Camps {
 			}
 			// (with Grim Kingdoms, a barbarian camp waits for a Grim ruin in reach rather than pitching tents in the wild)
 			if (campsNear(server, realm, BARBARIAN) < CAMPS_PER_KINGDOM && random.nextFloat() < CAMP_CHANCE && !GrimSites.prefersGrim(server, realm)
-				&& trySite(server, level, realm, players, false)) {
+				&& trySite(server, level, realm, players, BARBARIAN)) {
 				return;
 			}
 			if (level.getDifficulty() != Difficulty.PEACEFUL && campsNear(server, realm, IllagerCamps.KIND) < IllagerCamps.CAMPS_PER_KINGDOM
-				&& random.nextFloat() < IllagerCamps.CAMP_CHANCE && trySite(server, level, realm, players, true)) {
+				&& random.nextFloat() < IllagerCamps.CAMP_CHANCE && trySite(server, level, realm, players, IllagerCamps.KIND)) {
+				return;
+			}
+			if (level.getDifficulty() != Difficulty.PEACEFUL && campsNear(server, realm, GoblinVillages.KIND) < GoblinVillages.VILLAGES_PER_KINGDOM
+				&& random.nextFloat() < GoblinVillages.VILLAGE_CHANCE && trySite(server, level, realm, players, GoblinVillages.KIND)) {
 				return;
 			}
 		}
@@ -340,7 +356,8 @@ public final class Camps {
 	}
 
 	/** Looks for a site for a camp round the players near {@code realm}, and founds one there. */
-	private static boolean trySite(MinecraftServer server, ServerLevel level, Faction realm, List<ServerPlayer> players, boolean illager) {
+	private static boolean trySite(MinecraftServer server, ServerLevel level, Faction realm, List<ServerPlayer> players, String kind) {
+		boolean illager = IllagerCamps.KIND.equals(kind), goblin = GoblinVillages.KIND.equals(kind);
 		RandomSource random = level.getRandom();
 		for (int tries = 0; tries < SITE_TRIES; tries++) {
 			ServerPlayer player = players.get(random.nextInt(players.size()));
@@ -348,15 +365,19 @@ public final class Camps {
 			int r = HIDE_RANGE + random.nextInt(SITE_SPREAD);
 			BlockPos at = player.blockPosition().offset((int)Math.round(Math.cos(angle) * r), 0, (int)Math.round(Math.sin(angle) * r));
 			double d = Math.sqrt(Raids.horizontal(at, realm.seat()));
-			if (d < MIN_DISTANCE || d > MAX_DISTANCE || !open(server, level, at) || (illager && !IllagerCamps.land(level, at))) {
+			if (d < MIN_DISTANCE || d > MAX_DISTANCE || !open(server, level, at) || (illager && !IllagerCamps.land(level, at))
+				|| (goblin && !GoblinVillages.land(level, at))) {
 				continue;
 			}
-			int floor = illager ? IllagerBuildings.floor(level, at, IllagerCamps.MAX_SPREAD) : CampBuildings.floor(level, at, MAX_SPREAD);
+			int floor = goblin ? IllagerBuildings.floor(level, at, GoblinVillages.MAX_SPREAD, GoblinBuildings.CLEAR_RADIUS)
+				: illager ? IllagerBuildings.floor(level, at, IllagerCamps.MAX_SPREAD) : CampBuildings.floor(level, at, MAX_SPREAD);
 			if (floor == Integer.MIN_VALUE) {
 				continue;
 			}
 			Direction gate = Direction.getApproximateNearest(realm.seat().getX() - at.getX(), 0, realm.seat().getZ() - at.getZ());
-			if (illager) {
+			if (goblin) {
+				GoblinVillages.found(level, at, floor, gate);
+			} else if (illager) {
 				IllagerCamps.found(level, at, floor, gate);
 			} else {
 				found(level, at, floor, gate);
@@ -371,7 +392,7 @@ public final class Camps {
 		if (!level.isPositionEntityTicking(at)) {
 			return false;
 		}
-		int reach = IllagerBuildings.CLEAR_RADIUS;
+		int reach = Math.max(IllagerBuildings.CLEAR_RADIUS, GoblinBuildings.CLEAR_RADIUS);
 		for (BlockPos corner : new BlockPos[] {at, at.offset(-reach, 0, -reach), at.offset(reach, 0, -reach), at.offset(-reach, 0, reach),
 			at.offset(reach, 0, reach)}) {
 			if (Factions.at(server, level, corner) != null) {
@@ -433,6 +454,12 @@ public final class Camps {
 				if (grown != null && fresh != null) {
 					IllagerCamps.tick(level, grown, fresh, now, false);
 				}
+			} else if (data.goblin()) {
+				Faction grown = Factions.get(server, id);
+				CampData fresh = data(server, id);
+				if (grown != null && fresh != null) {
+					GoblinVillages.tick(level, grown, fresh, false);
+				}
 			}
 		}
 	}
@@ -442,6 +469,10 @@ public final class Camps {
 		MinecraftServer server = level.getServer();
 		if (illager(server, camp.id())) {
 			IllagerCamps.grow(level, camp, days);
+			return;
+		}
+		if (goblin(server, camp.id())) {
+			GoblinVillages.grow(level, camp, days);
 			return;
 		}
 		Palette p = CampBuildings.palette(level, camp);
@@ -523,9 +554,10 @@ public final class Camps {
 		if (camp == null || camp.fallen() || camp.type() != FactionType.BARBARIAN) {
 			return;
 		}
-		boolean illagers = illager(server, camp.id());
+		boolean illagers = illager(server, camp.id()), goblins = goblin(server, camp.id());
+		String cleared = goblins ? "goblin_village" : illagers ? "illager_camp" : "camp";
 		ServerPlayer killer = source.getEntity() instanceof ServerPlayer p ? p : null;
-		KingdomEvents.announce(server, Component.translatable(illagers ? "message.jaymoskingdoms.illager_camp.cleared" : "message.jaymoskingdoms.camp.cleared",
+		KingdomEvents.announce(server, Component.translatable("message.jaymoskingdoms." + cleared + ".cleared",
 			camp.name(),
 			killer == null ? Component.translatable("message.jaymoskingdoms.someone") : killer.getDisplayName()).withStyle(ChatFormatting.GOLD));
 		if (killer != null) {
@@ -540,7 +572,7 @@ public final class Camps {
 					Reputation.change(helper, f, REP_CLEAR_HELPER);
 				}
 			}
-			killer.sendSystemMessage(Component.translatable(illagers ? "message.jaymoskingdoms.illager_camp.thanks" : "message.jaymoskingdoms.camp.thanks")
+			killer.sendSystemMessage(Component.translatable("message.jaymoskingdoms." + cleared + ".thanks")
 				.withStyle(ChatFormatting.GREEN));
 			level.playSound(null, killer.getX(), killer.getY(), killer.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0F, 0.6F);
 		}
@@ -564,13 +596,13 @@ public final class Camps {
 		CampData data = data(server, camp.id());
 		BlockPos center = data != null ? data.center() : camp.seat();
 		List<Long> rot = new ArrayList<>();
-		int reach = illagers ? IllagerBuildings.CLEAR_RADIUS : CampBuildings.CLEAR_RADIUS;
-		int high = illagers ? IllagerBuildings.CLEAR_HEIGHT : 8;
+		int reach = goblins ? GoblinBuildings.CLEAR_RADIUS : illagers ? IllagerBuildings.CLEAR_RADIUS : CampBuildings.CLEAR_RADIUS;
+		int high = goblins ? GoblinBuildings.CLEAR_HEIGHT : illagers ? IllagerBuildings.CLEAR_HEIGHT : 8;
 		// (a camp in a Grim ruin leaves the ruin as it stands: nothing of it rots)
 		Holds.Hold held = Holds.get(server, camp.id());
 		boolean grim = held != null && held.isGrim();
 		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-reach, -1, -reach), center.offset(reach, high, reach))) {
-			if (!grim && level.isLoaded(pos) && CampBuildings.perishable(level.getBlockState(pos))) {
+			if (!grim && level.isLoaded(pos) && perishable(goblins, level.getBlockState(pos))) {
 				rot.add(pos.asLong());
 			}
 		}
@@ -601,27 +633,34 @@ public final class Camps {
 				continue;
 			}
 			left.remove(pick);
-			if (CampBuildings.perishable(state)) {
+			if (perishable(data.goblin(), state)) {
 				level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 			}
 		}
 		putData(level.getServer(), id, data.withRot(left, now));
 	}
 
+	/** What rots away once a camp of its kind is cleared (a goblin village loses its mushroom roofs too). */
+	private static boolean perishable(boolean goblin, BlockState state) {
+		return goblin ? GoblinBuildings.perishable(state) : CampBuildings.perishable(state);
+	}
+
 	// ---- commands (operators; debug: plain text) -----------------------------------------------------------------
 
-	/** {@code /faction camp found [barbarian | illager] | raid | grow | info}. */
+	/** {@code /faction camp found [barbarian | illager | goblin] | raid | grow | info}. */
 	static LiteralArgumentBuilder<CommandSourceStack> command() {
 		return Commands.literal("camp").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
-			.then(Commands.literal("found").executes(c -> foundHere(c, false))
-				.then(Commands.literal("barbarian").executes(c -> foundHere(c, false)))
-				.then(Commands.literal("illager").executes(c -> foundHere(c, true))))
+			.then(Commands.literal("found").executes(c -> foundHere(c, BARBARIAN))
+				.then(Commands.literal("barbarian").executes(c -> foundHere(c, BARBARIAN)))
+				.then(Commands.literal("illager").executes(c -> foundHere(c, IllagerCamps.KIND)))
+				.then(Commands.literal("goblin").executes(c -> foundHere(c, GoblinVillages.KIND))))
 			.then(Commands.literal("raid").executes(Camps::raidNow))
 			.then(Commands.literal("grow").executes(Camps::growNow))
 			.then(Commands.literal("info").executes(Camps::info));
 	}
 
-	private static int foundHere(CommandContext<CommandSourceStack> c, boolean illager) throws CommandSyntaxException {
+	private static int foundHere(CommandContext<CommandSourceStack> c, String kind) throws CommandSyntaxException {
+		boolean illager = IllagerCamps.KIND.equals(kind);
 		ServerPlayer player = c.getSource().getPlayerOrException();
 		ServerLevel level = Factions.level(c.getSource().getServer());
 		if (player.level() != level) {
@@ -629,8 +668,9 @@ public final class Camps {
 			return 0;
 		}
 		BlockPos at = player.blockPosition();
-		Faction camp = illager ? IllagerCamps.found(level, at, at.getY(), player.getDirection()) : found(level, at, at.getY(), player.getDirection());
-		c.getSource().sendSuccess(() -> Component.literal("Founded the " + (illager ? "illager" : "barbarian") + " camp of " + camp.name() + " (gate "
+		Faction camp = GoblinVillages.KIND.equals(kind) ? GoblinVillages.found(level, at, at.getY(), player.getDirection())
+			: illager ? IllagerCamps.found(level, at, at.getY(), player.getDirection()) : found(level, at, at.getY(), player.getDirection());
+		c.getSource().sendSuccess(() -> Component.literal("Founded the " + kind + " camp of " + camp.name() + " (gate "
 			+ player.getDirection().getName() + ")" + (illager && level.getDifficulty() == Difficulty.PEACEFUL ? "; on peaceful its illagers vanish" : "")), true);
 		return 1;
 	}
@@ -658,6 +698,10 @@ public final class Camps {
 			return 0;
 		}
 		MinecraftServer server = c.getSource().getServer();
+		if (goblin(server, camp.id())) {
+			c.getSource().sendFailure(Component.literal(camp.name() + " is a goblin village: goblins don't raid"));
+			return 0;
+		}
 		Faction target = Raids.nearestTarget(server, camp);
 		if (target == null) {
 			c.getSource().sendFailure(Component.literal("No settlement for " + camp.name() + " to raid"));
@@ -685,8 +729,14 @@ public final class Camps {
 				IllagerCamps.tick(level, Factions.get(server, camp.id()), data, level.getGameTime(), true);
 			}
 		}
+		if (goblin(server, camp.id())) {
+			CampData data = data(server, camp.id());
+			if (data != null) {
+				GoblinVillages.tick(level, Factions.get(server, camp.id()), data, true);
+			}
+		}
 		Faction after = Factions.get(server, camp.id());
-		int fighters = illagers ? Illagers.fighters(after) : after.holdings().count(Folk.BARBARIAN);
+		int fighters = illagers ? Illagers.fighters(after) : goblin(server, camp.id()) ? GoblinVillages.goblins(after) : after.holdings().count(Folk.BARBARIAN);
 		c.getSource().sendSuccess(() -> Component.literal(camp.name() + " grew a day (" + fighters + (illagers ? " illagers)" : " raiders)")), true);
 		return 1;
 	}
@@ -708,6 +758,9 @@ public final class Camps {
 			out.append(", ").append((now - data.founded()) / DAY_TICKS).append(" days old");
 			if (data.illager()) {
 				out.append(", ").append(data.built()).append('/').append(IllagerBuildings.GROWTH.size()).append(" buildings raised, grown ")
+					.append(data.grown()).append(" days");
+			} else if (data.goblin()) {
+				out.append(", ").append(data.built()).append('/').append(GoblinBuildings.GROWTH.size()).append(" huts raised, grown ")
 					.append(data.grown()).append(" days");
 			}
 			out.append(", last raid ").append((now - data.lastRaid()) / 20).append(" s ago");
