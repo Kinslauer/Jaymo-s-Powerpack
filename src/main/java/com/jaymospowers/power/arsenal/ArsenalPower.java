@@ -56,7 +56,8 @@ import org.jspecify.annotations.Nullable;
  * <li>R - Reach Through: open a rift, pull a random weapon (+ ammo) into your hand.</li>
  * <li>G - Return: send the held summoned weapon back; refunds part of Reach's cooldown.</li>
  * <li>V - Barrage: 3-5 rifts open around you and fire weapons at what you're looking at.</li>
- * <li>B - Pocket Stash: your personal 27-slot pocket dimension.</li>
+ * <li>B - Pocket Stash (also on Z). Corrupted: Sword of Damocles ({@link ArsenalDamocles}).</li>
+ * <li>Z - Pocket Stash: your personal 27-slot pocket dimension.</li>
  * </ul>
  */
 public final class ArsenalPower implements Power {
@@ -88,29 +89,35 @@ public final class ArsenalPower implements Power {
 	public static final int DROPPED_TICKS = 60;
 
 	/** When each ability is ready again (game time). Saved, and synced to its owner for the HUD. */
-	public record Cooldowns(long reach, long barrage, long ultimate) {
-		public static final Cooldowns NONE = new Cooldowns(0, 0, 0);
+	public record Cooldowns(long reach, long barrage, long ultimate, long damocles) {
+		public static final Cooldowns NONE = new Cooldowns(0, 0, 0, 0);
 		public static final Codec<Cooldowns> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.LONG.fieldOf("reach").forGetter(Cooldowns::reach),
 				Codec.LONG.fieldOf("barrage").forGetter(Cooldowns::barrage),
-				Codec.LONG.optionalFieldOf("ultimate", 0L).forGetter(Cooldowns::ultimate))
+				Codec.LONG.optionalFieldOf("ultimate", 0L).forGetter(Cooldowns::ultimate),
+				Codec.LONG.optionalFieldOf("damocles", 0L).forGetter(Cooldowns::damocles))
 			.apply(i, Cooldowns::new));
 		public static final StreamCodec<ByteBuf, Cooldowns> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, Cooldowns::reach,
 			ByteBufCodecs.VAR_LONG, Cooldowns::barrage,
 			ByteBufCodecs.VAR_LONG, Cooldowns::ultimate,
+			ByteBufCodecs.VAR_LONG, Cooldowns::damocles,
 			Cooldowns::new);
 
 		public Cooldowns withReach(long ready) {
-			return new Cooldowns(ready, barrage, ultimate);
+			return new Cooldowns(ready, barrage, ultimate, damocles);
 		}
 
 		public Cooldowns withBarrage(long ready) {
-			return new Cooldowns(reach, ready, ultimate);
+			return new Cooldowns(reach, ready, ultimate, damocles);
 		}
 
 		public Cooldowns withUltimate(long ready) {
-			return new Cooldowns(reach, barrage, ready);
+			return new Cooldowns(reach, barrage, ready, damocles);
+		}
+
+		public Cooldowns withDamocles(long ready) {
+			return new Cooldowns(reach, barrage, ultimate, ready);
 		}
 	}
 
@@ -137,6 +144,7 @@ public final class ArsenalPower implements Power {
 		ArsenalStash.init();
 		ArsenalArmory.init();
 		HundredBlades.init();
+		ArsenalDamocles.init();
 		ArsenalVoid.init();
 		SwordStone.register();
 		RelicWeapons.register();
@@ -191,8 +199,29 @@ public final class ArsenalPower implements Power {
 			case ABILITY_1 -> reach(player);
 			case ABILITY_2 -> sendBack(player);
 			case ABILITY_3 -> barrage(player);
-			case ABILITY_4 -> ArsenalStash.open(player);
+			// the Void Arsenal's B drops the Sword of Damocles; the stash lives on Z (B still opens it uncorrupted)
+			case ABILITY_4 -> {
+				if (voided) {
+					ArsenalDamocles.cast(player);
+				} else {
+					ArsenalStash.open(player);
+				}
+			}
 		}
+	}
+
+	/** Z: the Pocket Stash, once B (the ability it used to be) is unlocked. */
+	@Override
+	public void onMode(ServerPlayer player, boolean down) {
+		if (down && slotUnlocked(player, "mode")) {
+			ArsenalStash.open(player);
+		}
+	}
+
+	@Override
+	public boolean slotUnlocked(net.minecraft.world.entity.player.Player player, String slot) {
+		return !"mode".equals(slot) || !com.jaymospowers.core.Mastery.starterOnly(player)
+			&& com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_4);
 	}
 
 	@Override
@@ -220,6 +249,7 @@ public final class ArsenalPower implements Power {
 		ArsenalGates.close(player);
 		ArsenalArmory.onLost(player);
 		HundredBlades.onLost(player);
+		ArsenalDamocles.onLost(player);
 		PENDING.remove(player.getUUID());
 		BARRAGES.remove(player.getUUID());
 		player.removeAttached(ArsenalReach.REACH);
@@ -236,6 +266,7 @@ public final class ArsenalPower implements Power {
 		ArsenalVoid.tick(player);
 		ArsenalRelics.tick(player);
 		HundredBlades.tick(player);
+		ArsenalDamocles.tick(player);
 		Pending pending = PENDING.get(player.getUUID());
 		if (pending == null) {
 			return;

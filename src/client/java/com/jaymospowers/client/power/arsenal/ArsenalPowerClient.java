@@ -6,6 +6,7 @@ import com.jaymospowers.client.PowerClient;
 import com.jaymospowers.client.PowerClients;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.power.arsenal.ArsenalArmory;
+import com.jaymospowers.power.arsenal.ArsenalDamocles;
 import com.jaymospowers.power.arsenal.ArsenalPower;
 import com.jaymospowers.power.arsenal.HundredBlades;
 import com.jaymospowers.power.arsenal.Summoned;
@@ -47,6 +48,8 @@ public final class ArsenalPowerClient implements PowerClient {
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalReachRenderer::render);
 		// Hundred Blades: the rifts in the sky
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalSkyRenderer::render);
+		// the Void Arsenal's Sword of Damocles: its rift and the sword
+		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalDamoclesRenderer::render);
 		// the Void Arsenal's aura, on every corrupted arsenal user in view
 		ClientTickEvents.END_CLIENT_TICK.register(ArsenalAura::tick);
 		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
@@ -87,7 +90,12 @@ public final class ArsenalPowerClient implements PowerClient {
 		int y = graphics.guiHeight() - 34;
 
 		row(graphics, font, x, y, PowerKey.ABILITY_1, "hud.jaymospowers.arsenal.reach", cd.reach() - now, ArsenalPower.REACH_COOLDOWN);
-		row(graphics, font, x, y + 11, PowerKey.ABILITY_3, "hud.jaymospowers.arsenal.barrage", cd.barrage() - now, ArsenalPower.BARRAGE_COOLDOWN);
+		if (Fate.isCorrupted(player)) {
+			// the Void Arsenal's V is its gates (no cooldown to show); its B is the Sword of Damocles
+			row(graphics, font, x, y + 11, PowerKey.ABILITY_4, "hud.jaymospowers.arsenal.damocles", cd.damocles() - now, ArsenalDamocles.COOLDOWN);
+		} else {
+			row(graphics, font, x, y + 11, PowerKey.ABILITY_3, "hud.jaymospowers.arsenal.barrage", cd.barrage() - now, ArsenalPower.BARRAGE_COOLDOWN);
+		}
 
 		// summoned weapons I'm holding: how many, and the soonest to go home
 		Set<Integer> batches = new HashSet<>();
