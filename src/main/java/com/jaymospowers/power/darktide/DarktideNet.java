@@ -39,8 +39,8 @@ public final class DarktideNet {
 	}
 
 	/**
-	 * Client → server: C at night for a Darktide that isn't ascended (Drown). The core only forwards C for ascended (or
-	 * fate-corrupted) powers, and Darktide's night corruption isn't Fate's.
+	 * Client → server: C for a Darktide that's corrupted in its own way but neither ascended nor Fate-corrupted (Drown).
+	 * The core only forwards C for ascended (or Fate-corrupted) powers, and Darktide's own corruption isn't Fate's.
 	 */
 	public record NightKey(boolean down) implements CustomPacketPayload {
 		public static final Type<NightKey> TYPE = new Type<>(JaymosPowers.id("darktide_night_key"));

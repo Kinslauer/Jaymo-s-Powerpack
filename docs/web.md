@@ -249,6 +249,20 @@ cobweb.
 - G is now only the off-hand web (it needs an empty off hand).
 - **HUD row:** wings · G · V · B · Z. G's chip dims while the off hand is full.
 
+## Fewer takeovers (0.8.37)
+The symbiote takes the wheel only for these reasons (plus the near-death last-ditch mode, unchanged):
+- **Starving** (satiety 15 or less): it gorges, taking over to hunt and kill, then eating, kill after kill, until it's
+  back to `GORGE_FULL` (80). Then it's sated: no hunger drain for `SATED_TICKS` (5 minutes). Only starving hunts;
+  merely hungry, it still eats a corpse in reach or in your arms without taking over.
+- **A look** (`CURIOUS_CHANCE`, now 3% per check): grabs something with a tendril, stares, decides, gives control back.
+- **Neglect** (bond under `NEGLECT_BOND`, 25): up to `NEGLECT_CHANCE` (5% at bond 0, falling to none at 25) it says
+  one of four lines about being ignored and goes off tearing into nearby creatures (not players).
+- Gone: the armour-worn-too-long rampage, the old weak-bond takeovers (12% per check up to bond 60), and the starving +
+  stressed random grab.
+- Full bond: Living Armor (the big body) no longer withdraws after 5 s unused; it stays until you put it away.
+- Death: the respawned player is reset to no bond, no suit, no armour (`AFTER_RESPAWN`), on top of the
+  death-time withdraw.
+
 ## Two-handed Zip (0.8.16)
 A Web Zip shoots from both hands at the one target (two lines, both arms aimed). Once it catches
 (`WebArms.ZIP_SHOOT_TICKS`), both hands haul back on it and sweep behind you, trailing opposite your flight and a little

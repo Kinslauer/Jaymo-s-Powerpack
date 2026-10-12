@@ -26,7 +26,8 @@ import net.minecraft.world.item.Items;
 
 /**
  * Darktide's HUD in Wind's chip style, right of the hotbar: the Flow chip (water rising under a line of ink, the number
- * on it), then one chip per key (R G V B, then X Gedan, Z Veil and C once they answer) with its bound key and cooldown.
+ * on it), then one chip per key (R G V B, then X Gedan, Z shadow harvest or Veil and C once they answer) with its bound key and
+ * cooldown.
  * Above the row: "empowered" after a parry, "guard broken" while the guard can't come up. Over the crosshair while
  * holding Gedan: its name and the field spreading.
  */
@@ -52,7 +53,7 @@ final class DarktideHud {
 		float time = player.tickCount + delta.getGameTimeDeltaPartialTick(false);
 		long now = player.level().getGameTime();
 		DarktideState.Hud hud = DarktideState.hud(player);
-		boolean drowned = DarktidePower.drowned(player);
+		boolean drowned = DarktidePower.corrupted(player);
 		List<Chip> chips = chips(player, hud, drowned);
 		int width = FLOW_WIDTH + CHIP_GAP + chips.size() * (CHIP + CHIP_GAP) - CHIP_GAP;
 		int cx = graphics.guiWidth() / 2;
@@ -92,8 +93,11 @@ final class DarktideHud {
 		boolean ascended = Fate.isAscended(player);
 		boolean knives = kit == DarktideWeapons.Kit.KNIFE && ascended;
 		List<Chip> chips = new ArrayList<>();
+		DarktideState.Move move = DarktideMove.current(player);
+		boolean charging = move != null && move.kind() == DarktideMove.CHARGE;
 		chips.add(new Chip(knives ? Items.PRISMARINE_SHARD : Items.INK_SAC, knives ? DarktideState.POUNCE : DarktideState.STRIKE,
-			keyName(PowerKey.ABILITY_1), JaymosPowersClient.isUnlocked(PowerKey.ABILITY_1), false));
+			keyName(PowerKey.ABILITY_1), JaymosPowersClient.isUnlocked(PowerKey.ABILITY_1),
+			charging && player.level().getGameTime() - move.start() >= DarktideMove.CHARGE_FULL_TICKS));
 		Item g;
 		int gSlot;
 		boolean gUsable = true;
@@ -119,11 +123,18 @@ final class DarktideHud {
 			KeyMapping skill = DarktidePowerClient.skillKey(Minecraft.getInstance());
 			chips.add(new Chip(Items.CONDUIT, DarktideState.GEDAN, skill == null ? "X" : skill.getTranslatedKeyMessage().getString(),
 				kit == DarktideWeapons.Kit.KATANA, DarktideMove.current(player) != null && DarktideMove.current(player).kind() == DarktideMove.STANCE));
-			chips.add(new Chip(Items.ECHO_SHARD, -1, JaymosPowersClient.modeKey().getTranslatedKeyMessage().getString(), true, hud.veil()));
+		}
+		String z = JaymosPowersClient.modeKey().getTranslatedKeyMessage().getString();
+		if (drowned) {
+			// Z while corrupted: the shadow harvest
+			chips.add(new Chip(Items.SOUL_SAND, -1, z, true, move != null && move.kind() == DarktideMove.CAST && move.variant() == 1));
+		} else if (ascended) {
+			// Z ascended and cured: the Veil
+			chips.add(new Chip(Items.ECHO_SHARD, -1, z, true, hud.veil()));
 		}
 		String c = JaymosPowersClient.ultimateKey().getTranslatedKeyMessage().getString();
 		if (ascended) {
-			boolean necro = DarktideFlow.night(player.level()) && hud.shadows() > 0;
+			boolean necro = drowned && hud.shadows() > 0 && !player.isShiftKeyDown();
 			chips.add(new Chip(necro ? Items.SOUL_LANTERN : Items.PRISMARINE_SHARD, necro ? DarktideState.RAISE : DarktideState.ARMS, c,
 				DarktideWeapons.loaded() || necro, hud.arms() != DarktideState.ARMS_BARE));
 		} else if (drowned) {

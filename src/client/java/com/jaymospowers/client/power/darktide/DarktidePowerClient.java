@@ -4,7 +4,6 @@ import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.client.JaymosPowersClient;
 import com.jaymospowers.client.PowerClient;
 import com.jaymospowers.client.PowerClients;
-import com.jaymospowers.core.Fate;
 import com.jaymospowers.power.darktide.DarktideMove;
 import com.jaymospowers.power.darktide.DarktideNet;
 import com.jaymospowers.power.darktide.DarktidePower;
@@ -25,8 +24,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Darktide's client half: the guard (right click held, sent to the server), the Power Skill key X for Gedan (taken
- * before the symbiote's menu sees it, the way Wind takes it for the Tempest Kick), C at night before ascending (Drown:
- * the core only forwards C for ascended powers), and the HUD. Effects and poses everyone sees are in {@link DarktideFx}
+ * before the symbiote's menu sees it, the way Wind takes it for the Tempest Kick), C while Darktide's own corruption
+ * holds before ascending (Drown: the core only forwards C for ascended or Fate-corrupted powers), and the HUD. Effects and poses everyone sees are in {@link DarktideFx}
  * and {@link DarktidePose}.
  */
 public final class DarktidePowerClient implements PowerClient {
@@ -105,8 +104,8 @@ public final class DarktidePowerClient implements PowerClient {
 			guardWasUp = guard;
 			ClientPlayNetworking.send(new DarktideNet.Guard(guard));
 		}
-		// C in the Drowned Dark before ascending: Drown
-		boolean night = !Fate.isAscended(player) && DarktidePower.drowned(player) && minecraft.gui.screen() == null
+		// C in the Drowned Dark when the core doesn't forward it (not ascended, not Fate-corrupted): Drown
+		boolean night = !DarktidePower.coreRoutesUltimate(player) && DarktidePower.corrupted(player) && minecraft.gui.screen() == null
 			&& JaymosPowersClient.ultimateKey().isDown();
 		if (night != nightWasDown) {
 			nightWasDown = night;
