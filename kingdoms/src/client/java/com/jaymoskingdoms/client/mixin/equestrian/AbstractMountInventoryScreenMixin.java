@@ -11,15 +11,20 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.5.34) A tamed horse's breed and stats, in the empty space of its inventory screen. */
+/** (0.5.34) A tamed horse's breed and stats, in the empty space of its inventory screen; (0.5.38) its animal, for the Tack button. */
 @Mixin(AbstractMountInventoryScreen.class)
-abstract class AbstractMountInventoryScreenMixin {
+abstract class AbstractMountInventoryScreenMixin implements EquestrianClient.MountScreen {
 	@Shadow
 	@Final
 	protected int inventoryColumns;
 	@Shadow
 	@Final
 	protected LivingEntity mount;
+
+	@Override
+	public LivingEntity jaymoskingdoms$mount() {
+		return this.mount;
+	}
 
 	@Inject(method = "extractBackground", at = @At("TAIL"))
 	private void jaymoskingdoms$stats(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, CallbackInfo ci) {

@@ -290,7 +290,7 @@ public final class Equestrian {
 		horse.setAttached(EQUINE, e);
 		set(horse, Attributes.SCALE, e.breed().scale);
 		set(horse, Attributes.MAX_HEALTH, e.maxHealth());
-		set(horse, Attributes.JUMP_STRENGTH, e.jumpStrength());
+		set(horse, Attributes.JUMP_STRENGTH, Bonding.jump(horse, e));
 		set(horse, Attributes.MOVEMENT_SPEED, e.topSpeed() * 0.75);
 		horse.setHealth(heal ? horse.getMaxHealth() : Math.min(horse.getHealth(), horse.getMaxHealth()));
 		horse.refreshDimensions();
@@ -351,6 +351,14 @@ public final class Equestrian {
 	// ---- riding ----------------------------------------------------------------------------------------------------
 
 	/** (From {@code AbstractHorseMixin}) how fast its rider makes it go: its breed's top speed at his gait, and the land under it. */
+	/** The gait its rider has it at (on the rider's own client, what he's chosen before the server hears of it). */
+	public static Gait gaitFor(AbstractHorse horse, LivingEntity controller) {
+		if (horse.level().isClientSide() && localRider != null && controller instanceof Player p && localRider.controls(p)) {
+			return localRider.gait(horse);
+		}
+		return stride(horse).gaitOf();
+	}
+
 	public static float riddenSpeed(AbstractHorse horse, Player controller, float vanilla) {
 		Equine e = horse.getAttached(EQUINE);
 		if (e == null) {
@@ -368,7 +376,7 @@ public final class Equestrian {
 		}
 		gait = allowed(e, s, gait);
 		sprint &= gait == Gait.GALLOP && !s.blown();
-		double speed = e.topSpeed() * gait.speed / e.breed().topGait.speed;
+		double speed = Bonding.topSpeed(horse, e) * gait.speed / e.breed().topGait.speed;
 		if (sprint) {
 			speed *= SPRINT_SPEED;
 		}
@@ -403,6 +411,8 @@ public final class Equestrian {
 				f *= HEAVY_ARMOUR_SPEED;
 			}
 		}
+		// (0.5.38) its hooves and belly
+		f *= Bonding.feet(horse, horse.level().getBlockState(horse.getBlockPosBelowThatAffectsMyMovement()));
 		return f;
 	}
 
@@ -457,7 +467,7 @@ public final class Equestrian {
 	private static void ride(ServerLevel level, AbstractHorse horse, ServerPlayer rider, long now) {
 		Equine e = equine(horse);
 		Stride s = stride(horse);
-		double capacity = e.capacity();
+		double capacity = Bonding.capacity(horse, e);
 		double stamina = s.stamina() < 0.0F ? capacity : s.stamina();
 		long elapsed = now - s.at();
 		if (s.at() == 0L || elapsed > STEP * 4L) {
@@ -470,7 +480,7 @@ public final class Equestrian {
 		double moved = was == null ? 0.0 : here.subtract(was).horizontalDistance() / elapsed;
 		Gait gait = allowed(e, s, s.gaitOf());
 		boolean sprint = s.sprint() && gait == Gait.GALLOP && !s.blown();
-		double expected = e.topSpeed() * gait.speed / e.breed().topGait.speed;
+		double expected = Bonding.topSpeed(horse, e) * gait.speed / e.breed().topGait.speed;
 		boolean going = moved > 0.03 && moved > expected * 0.3;
 		double rate = going ? (sprint ? SPRINT_DRAIN : gait.perSecond) : Gait.HALT.perSecond;
 		if (rate < 0.0) {
@@ -498,6 +508,10 @@ public final class Equestrian {
 		if (horse instanceof WarElephant && going && gait.ordinal() >= Gait.CANTER.ordinal()) {
 			trample(level, horse, rider, sprint, now);
 		}
+		// (0.5.38) what it learns, what it thinks of its rider, its feet
+		if (horse.getControllingPassenger() == rider) {
+			Bonding.ride(level, horse, rider, gait, sprint, going, moved * elapsed, elapsed);
+		}
 	}
 
 	/** How fast it spends stamina: its breed's rate, its land, and the dead don't tire much. */
@@ -518,6 +532,11 @@ public final class Equestrian {
 			} else if (hot(horse)) {
 				d *= MAMMOTH_HEAT_DRAIN;
 			}
+		}
+		// (0.5.38) a thirsty horse tires twice as fast
+		Bond b = horse.getAttached(Bonding.BOND);
+		if (b != null && b.thirst() < Bonding.THIRSTY && Bonding.kept(horse)) {
+			d *= Bonding.THIRSTY_DRAIN;
 		}
 		return d;
 	}
@@ -550,7 +569,7 @@ public final class Equestrian {
 			double fear = FEAR_BLAST * (1.0 - 0.5 * horse.position().distanceTo(at) / range);
 			if (horse.getControllingPassenger() instanceof ServerPlayer rider) {
 				shy(level, horse, rider, fear, at);
-			} else if (!horse.isVehicle() && !undead(horse) && horse.getRandom().nextDouble() < fear * (1.0 - equine(horse).bravery())) {
+			} else if (!horse.isVehicle() && !undead(horse) && horse.getRandom().nextDouble() < fear * (1.0 - Bonding.bravery(horse, equine(horse)))) {
 				horse.makeMad();
 			}
 		}
@@ -562,7 +581,7 @@ public final class Equestrian {
 			return;
 		}
 		Equine e = equine(horse);
-		double bravery = e.breed() == Breed.STEPPE_PONY ? 1.0 : e.bravery();
+		double bravery = e.breed() == Breed.STEPPE_PONY ? 1.0 : Bonding.bravery(horse, e);
 		long now = level.getGameTime();
 		Long until = SHY.get(horse.getId());
 		if (bravery >= 1.0 || until != null && until > now) {
@@ -579,7 +598,9 @@ public final class Equestrian {
 		ServerPlayNetworking.send(rider, new Shied(horse.getId()));
 		Vec3 away = horse.position().subtract(from).multiply(1.0, 0.0, 1.0);
 		away = away.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, horse.getYRot()) : away.normalize();
-		if (random.nextDouble() < fear * (1.0 - bravery) * THROW_ODDS) {
+		// (0.5.38) a war saddle's high cantle keeps its rider on through blows
+		boolean seated = fear == FEAR_BLOW && horse.getItemBySlot(EquipmentSlot.SADDLE).is(Tackroom.WAR_SADDLE);
+		if (!seated && random.nextDouble() < fear * (1.0 - bravery) * THROW_ODDS) {
 			rider.stopRiding();
 			horse.setDeltaMovement(away.scale(0.6).add(0.0, 0.2, 0.0));
 			horse.syncVelocity = true;
@@ -618,6 +639,7 @@ public final class Equestrian {
 		if (!(entity instanceof AbstractHorse horse) || !covered(horse) || !horse.isTamed() || !(horse.level() instanceof ServerLevel level)) {
 			return;
 		}
+		Bonding.dropTack(level, horse);
 		Equine e = equine(horse);
 		ItemStack lock = new ItemStack(MANE_LOCK);
 		Component name = horse.hasCustomName() ? horse.getCustomName() : Component.translatable(e.breed().key());

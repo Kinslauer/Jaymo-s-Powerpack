@@ -1820,3 +1820,45 @@ take: original spells, art and names (`Sorcery`, `Thralls`, `Arcana`, client `So
 - Testing (op): `/kingdom caster <necromancer|shaman|wizard>` (one for the nearest faction, at your feet).
 - Seen in game: the three side by side; a shaman's fire bolts set a court wizard alight while a necromancer's drain and
   his raised zombie and skeleton closed in; staffs held upright.
+
+## 0.5.38: Jaymo's Equestrian, stage 2 (bond and tack)
+Stage 2 of the equestrian plan (project memory `equestrian-plan`): a horse comes to know its riders, learns by being
+ridden, needs looking after, and wears real tack. Package `com.jaymoskingdoms.equestrian` (`Bonding`, tuning numbers at
+the top; `Bond`, `Tack`, `Discipline`, `Tackroom`, `TackMenu`), client `TackScreen`, `TackLayer`; art by
+`tools/gen_tack.py`.
+- **Trust** (0-100, per player, saved and synced in `Bond`): a new owner starts at 30 (an owner from before 0.5.38 at
+  50). Brushing (vanilla brush, once every 2 minutes; the coat shines for a day), feeding, a water bucket, picking its
+  hooves and easy riding raise it; sprinting (the spurs), going hungry or thirsty, standing in the rain without a
+  blanket and being hit by its own people lower it. Under 20 it bucks now and then, so a stranger on your war horse
+  soon ends up on the ground. From 60 it comes when you whistle (N): your nearest horse within 96 blocks.
+  From 40 its stats show on its inventory screen; before that it's "wary".
+- **Disciplines** (`Discipline`, levels 1-5 at 0/100/300/700/1500 xp): trail (blocks walked or trotted: +8% stamina a
+  level), racing (blocks cantered or galloped: +2.5% top speed), jumping (jumps: +0.04 jump strength), war (blows struck
+  and taken while ridden: +6% courage). A hungry horse stops learning. Level-ups are announced with a chime.
+- **Tricks** (J; hold back for the kick): the rear at level 2 in anything (monsters in front are knocked back and back
+  off), the sliding stop at racing 3 with a bridle (from the canter or gallop straight to a halt), the side-pass at
+  trail 3 (full sideways speed at the walk), the war kick at war 4 (both hind hooves, 7 damage, at whatever's behind),
+  and kneeling: a rider in 20+ armour can only mount a horse at war 3, trail 4 or 80 trust, and it kneels for them.
+- **Needs** (only for player-owned living horses; kingdoms' horses are left alone): hunger and thirst fall slowly
+  standing and faster with every gait (a destrier, draft, elephant or mammoth eats more, a pony less; cold without a
+  blanket makes it eat more, heat makes it drink more, desert horses hardly drink). Left alone it grazes on grass,
+  eats from a hay bale next to it and drinks from water or a full cauldron next to it; rain waters it a little. Feeds:
+  wheat, sugar, apples, carrots, hay bales, oats (8% from grass; also a quarter of its stamina back), golden food
+  (golden food still goes to vanilla too, for breeding). Under 20 it's hungry (stops learning) or thirsty (tires twice
+  as fast); empty, it runs 15% slower and holds it against you. Two small bars over the stamina bar while riding, and
+  under the crosshair when you look at a horse of yours.
+- **Hooves**: unshod hooves wear on stone, gravel, paths and the like (8% slower there; under 25 it's lame, 20% slower
+  anywhere) and grow back slowly at rest; a hoof pick (96 uses) restores them. Horseshoes (4 from 4 iron) put on with a
+  right-click: shod, it runs 5% faster on dirt paths and wears its shoes instead.
+- **Tack screen** (the Tack button on the horse's own screen): saddle, bridle, blanket and barding slots, the horse,
+  and a panel with your trust, its four disciplines and its hunger, thirst and hooves (or shoes).
+  - War saddle (leather and iron): its high cantle keeps you on through blows (no throws from being hit).
+  - Racing saddle (leather and string): 10% faster, but a fall of 3.5+ blocks at the canter or faster may pitch you off.
+  - Bridle (leather, iron nugget, string): without one a horse at the canter or faster turns at most 12 degrees a tick;
+    the sliding stop needs one.
+  - Horse blanket (wool and leather, dyeable): warmth in the cold, keeps the rain off.
+  - Chain barding (armour 4) and plate barding (9, toughness 1); leather is vanilla's horse armour. Saddlebags stay
+    Jaymo's Kitchen's (body slot).
+  - Drawn in 3D on horses, skeleton and zombie horses: the war saddle (deep seat, high cantle, red cloth, stirrups), the
+    racing saddle, the headstall and reins they come with, the black-and-brass bridle, the blanket in its dye, shoes.
+- Death keeps the mane lock; the bridle and blanket drop.

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "I": "minecraft:iron_block",
+    "B": "jaymoskingdoms:chain_barding"
+  },
+  "pattern": [
+    "  I",
+    "IBI",
+    "I I"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:plate_barding"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "C": "minecraft:iron_chain",
+    "L": "minecraft:leather"
+  },
+  "pattern": [
+    "  C",
+    "CLC",
+    "C C"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:chain_barding"
+  }
+}
