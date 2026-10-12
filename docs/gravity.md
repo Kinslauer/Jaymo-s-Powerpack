@@ -110,7 +110,7 @@ A Gravity user lightens whatever they hold, at every mastery level (`GravityWeig
   the impact sets alight only 4 blocks around (was 10), fewer flames and lava drops. The symbiote now rides in one of
   the lumps and comes out (or is left as goo) when it breaks up; `WebSymbioteBlob.METEOR_CHANCE` is 10% (was 20%).
 
-## 0.8.39: The Well around you, B to launch, the meteor through roofs, the shoulder view
+## 0.8.40: The Well around you, B to launch, the meteor through roofs, the shoulder view
 - **Gravity Well (G)** is no longer aimed: it bursts out around you (the same bubble and risen lumps, from where you
   stand) and stays on you for 4 s, radius 8 (`WELL_RADIUS`, the bubble's size). It no longer pulls. Everything that
   touches it is weighed down (the heavy aura's weight, jump cut and Slowness, see `weighDown`) and kneels.
