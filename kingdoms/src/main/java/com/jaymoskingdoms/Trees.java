@@ -49,8 +49,8 @@ import org.jspecify.annotations.Nullable;
  * {@link #GROW_TICKS} or so in loaded land, and needs light and room. Two-by-two trees (dark oak, big spruce, big
  * jungle) and anything that isn't a plain {@code *_sapling} grow as before. Growing trees are kept on the Overworld.</li>
  * <li><b>Felling</b>: cut a log of a tree (a trunk under living leaves, not a building's logs) and everything above the
- * cut comes down, logs and the leaves they held, a few blocks a tick from the foot up, its wood dropped where it was
- * cut. The axe takes a point of wear per log. Sneak to cut one log only. Woodcutters fell the same way
+ * cut comes down, logs and the leaves they held, and (0.5.9) it topples over whole, away from the
+ * cutter, breaking apart where it lands and giving its wood there ({@link FallingTree}). The axe takes a point of wear per log. Sneak to cut one log only. Woodcutters fell the same way
  * ({@link Gatherers}).</li>
  * <li><b>Seeding</b>: now and then, round each player, a grown tree drops a sapling of its kind on open grass a few
  * blocks off, where the wood isn't already thick, so forests slowly spread (and grow up as above). Never in a
@@ -65,8 +65,8 @@ public final class Trees {
 	static final int CHECK_TICKS = 100, LIGHT = 9;
 	/** Steps: a sapling tree, a young tree; after that, the full tree. */
 	static final int SPROUT = 1, YOUNG = 2;
-	/** A felled tree: the most logs, how far from the cut they spread, the most leaves; blocks brought down a tick. */
-	static final int FELL_MOST = 200, FELL_SPREAD = 8, LEAVES_MOST = 600, FELL_PER_TICK = 4;
+	/** A felled tree: the most logs, how far from the cut they spread, the most leaves. */
+	static final int FELL_MOST = 200, FELL_SPREAD = 8, LEAVES_MOST = 600;
 	/** Seeding: tried this often round each player, this far, with this chance; a sapling lands this far from its tree. */
 	static final int SEED_TICKS = 400, SEED_RANGE = 32, SEED_NEAR = 3, SEED_FAR = 7;
 	static final float SEED_CHANCE = 0.35F;
@@ -86,11 +86,6 @@ public final class Trees {
 	static final AttachmentType<List<Growing>> GROWING = AttachmentRegistry.create(JaymosKingdoms.id("growing_trees"),
 		builder -> builder.persistent(Growing.CODEC.listOf()));
 
-	/** A tree coming down: what's left of it, foot first, and where what it gives goes. */
-	private record Fall(ServerLevel level, Deque<BlockPos> blocks, @Nullable Entity cutter, ItemStack tool, Consumer<ItemStack> sink) {
-	}
-
-	private static final List<Fall> FALLING = new ArrayList<>();
 	/** (set while a grown-up sapling grows the game's own tree, so the mixin lets it) */
 	private static boolean growingUp;
 
@@ -100,7 +95,6 @@ public final class Trees {
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Trees::tick);
 		PlayerBlockBreakEvents.AFTER.register(Trees::broken);
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> FALLING.clear());
 	}
 
 	// ---- the kinds --------------------------------------------------------------------------------------------------
@@ -343,7 +337,6 @@ public final class Trees {
 	private static void tick(MinecraftServer server) {
 		ServerLevel level = Factions.level(server);
 		long now = level.getGameTime();
-		fallSome();
 		if (now % CHECK_TICKS == 0) {
 			grow(level, 0);
 		}
@@ -436,15 +429,16 @@ public final class Trees {
 			return;
 		}
 		ItemStack tool = player.getMainHandItem();
-		fell(server, pos, player, tool, stack -> Block.popResource(server, pos, stack), true);
+		fell(server, pos, player, tool, null, true);
 	}
 
 	/**
 	 * Brings down the tree standing above {@code cut} (its logs joined to it at or above that height, not far off, and
 	 * the leaves only they held): nothing if they don't make a tree (no living leaves). What it gives goes to
-	 * {@code sink}. {@code wear}: the tool takes a point per log. Returns how many logs.
+	 * {@code sink} (null: where it lands). {@code wear}: the tool takes a point per log. Returns how many logs.
+	 * (0.5.9) It topples over whole, away from the cutter ({@link FallingTree}), and breaks apart where it lands.
 	 */
-	static int fell(ServerLevel level, BlockPos cut, @Nullable Entity cutter, ItemStack tool, Consumer<ItemStack> sink, boolean wear) {
+	static int fell(ServerLevel level, BlockPos cut, @Nullable Entity cutter, ItemStack tool, @Nullable Consumer<ItemStack> sink, boolean wear) {
 		List<BlockPos> logs = new ArrayList<>();
 		Set<BlockPos> seen = new HashSet<>();
 		Deque<BlockPos> open = new ArrayDeque<>();
@@ -496,13 +490,10 @@ public final class Trees {
 			}
 		}
 		logs.sort(Comparator.comparingInt(BlockPos::getY));
-		Deque<BlockPos> order = new ArrayDeque<>(logs);
-		order.addAll(leaves);
 		if (wear && cutter instanceof Player p && !tool.isEmpty() && tool.isDamageableItem()) {
 			tool.hurtAndBreak(Math.max(0, logs.size() - (level.getBlockState(cut).isAir() ? 1 : 0)), p, EquipmentSlot.MAINHAND);
 		}
-		FALLING.add(new Fall(level, order, cutter, tool.copy(), sink));
-		level.playSound(null, cut, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.0F, 0.6F);
+		FallingTree.topple(level, cut, logs, leaves, FallingTree.away(cutter, cut, level), cutter, tool, sink);
 		// (the growing-tree record, if it was one, is forgotten when its foot is gone)
 		return logs.size();
 	}
@@ -515,27 +506,5 @@ public final class Trees {
 			}
 		}
 		return false;
-	}
-
-	/** A few blocks of every falling tree come down this tick. */
-	private static void fallSome() {
-		for (int i = 0; i < FALLING.size(); i++) {
-			Fall f = FALLING.get(i);
-			for (int n = 0; n < FELL_PER_TICK && !f.blocks().isEmpty(); n++) {
-				BlockPos p = f.blocks().poll();
-				BlockState s = f.level().getBlockState(p);
-				if (!(s.is(BlockTags.LOGS) || s.getBlock() instanceof LeavesBlock)) {
-					continue;
-				}
-				for (ItemStack d : Block.getDrops(s, f.level(), p, f.level().getBlockEntity(p), f.cutter(), f.tool())) {
-					f.sink().accept(d);
-				}
-				f.level().levelEvent(2001, p, Block.getId(s));
-				f.level().setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
-			}
-			if (f.blocks().isEmpty()) {
-				FALLING.remove(i--);
-			}
-		}
 	}
 }

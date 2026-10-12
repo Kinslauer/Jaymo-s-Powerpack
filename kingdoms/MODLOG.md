@@ -1250,3 +1250,18 @@ test village has none), a villager moving into a new house.
   gabled and cross-gabled roofs, stone, plank and framed walls), markets with checked, striped and bordered awnings,
   smithies (flat and gabled) with racks holding a sword, an axe and hoes, barracks with racks of a crossbow, shields
   and a sword, a market basket of apples and a pie. Baskets up on counters: built, not yet seen.
+
+## 0.5.9: trees topple over; leaders by name
+- **Felled trees fall over whole** (`FallingTree`, our own take on Dynamic Trees' falling trees): the moment a tree is
+  cut, its logs and the leaves they held leave the world and become one entity hinged at the cut. It tips away from
+  whoever cut it, slowly at first and faster as it leans (`WEIGHT` scaled by how far over it is, over its height), and
+  stops when its wood strikes solid ground or it lies flat (`FLAT`, at most `LONGEST` ticks). It breaks apart where it
+  lands with a crash: every log and leaf gives its drops there (a woodcutter's go into his bag), with chips, smoke and
+  sounds, and anything under it is struck (`CRUSH_PER_LOG`, at most `CRUSH_MOST`). Drawn block by block, turned about
+  the cut (`FallingTreeRenderer`). Not saved: a tree mid-fall when the server stops is lost. The old way (a few blocks
+  a tick vanishing from the foot up) is gone.
+- **Leaders by name on their boss bars.** Only kingdoms have kings. A fiefdom's ruler is its Baron, Vassal or Lord
+  (`Names.fiefTitle`, the same every time for its fiefdom); a kingdom's lords stay lords. A barbarian chief goes by
+  his own Slavic or Norse name (`Names.chief`, from his UUID, so it never changes), one in `BYNAME_ONE_IN` (8) with a
+  byname: "the Terrible", "Bloodaxe", "Skullsplitter"...
+- Built, not yet seen in game (the PC was short of memory for the test client).

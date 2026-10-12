@@ -146,7 +146,9 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			folk.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.DIAMOND_CHESTPLATE));
 			folk.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.DIAMOND_LEGGINGS));
 			folk.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.DIAMOND_BOOTS));
-			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.lord_of", faction.name()));
+			// (0.5.9) a fiefdom's ruler is its baron, vassal or lord; a kingdom's lords are lords
+			String title = faction.type() == FactionType.FIEFDOM ? Names.fiefTitle(faction.id() * 0x9E3779B97F4A7C15L) : "lord";
+			folk.setCustomName(Component.translatable("entity.jaymoskingdoms." + title + "_of", faction.name()));
 		}));
 		defineRole(new Role(FARMER, "farmer", false, false, null, (folk, faction) -> {
 			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_HOE));

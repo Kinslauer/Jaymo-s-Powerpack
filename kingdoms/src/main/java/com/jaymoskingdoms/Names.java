@@ -23,4 +23,27 @@ final class Names {
 	static String village(RandomSource random) {
 		return FIRST[random.nextInt(FIRST.length)] + HAMLET[random.nextInt(HAMLET.length)];
 	}
+
+	/** (0.5.9) What a fiefdom's ruler is called: a baron, a vassal or a lord (the same every time for its fiefdom). */
+	private static final String[] FIEF_TITLES = {"baron", "vassal", "lord"};
+
+	static String fiefTitle(long seed) {
+		return FIEF_TITLES[RandomSource.create(seed ^ 0xF1EFL).nextInt(FIEF_TITLES.length)];
+	}
+
+	/** (0.5.9) Barbarian chiefs' names: Slavic and Norse, now and then with a byname. */
+	private static final String[] CHIEFS = {"Bogdan", "Borislav", "Dobromir", "Gorazd", "Jaromir", "Kazimir", "Mstislav", "Ratibor",
+		"Radomir", "Svyatoslav", "Vratislav", "Zbigniew", "Miroslav", "Velimir", "Drahomir", "Stanimir", "Yaropolk", "Boleslav", "Vseslav",
+		"Ragnar", "Bjorn", "Halvard", "Ivar", "Sigurd", "Thorvald", "Ulfric", "Eirik", "Gunnar", "Hakon", "Ketil", "Leif", "Orm", "Sten",
+		"Torbjorn", "Vidar", "Asmund", "Egil", "Hrolf", "Skarde", "Grimolf"};
+	/** How often a chief has a byname (one in this many), and the bynames. */
+	static final int BYNAME_ONE_IN = 8;
+	private static final String[] BYNAMES = {"the Terrible", "the Cruel", "the Red", "the Grim", "the Black", "Ironhand", "Bloodaxe",
+		"the Wolf", "Skullsplitter", "the Unbowed", "the Burner", "Bonebreaker"};
+
+	static String chief(long seed) {
+		RandomSource random = RandomSource.create(seed ^ 0xC41EFL);
+		String name = CHIEFS[random.nextInt(CHIEFS.length)];
+		return random.nextInt(BYNAME_ONE_IN) == 0 ? name + " " + BYNAMES[random.nextInt(BYNAMES.length)] : name;
+	}
 }

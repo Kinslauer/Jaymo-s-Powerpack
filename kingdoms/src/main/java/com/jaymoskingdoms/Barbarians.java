@@ -65,7 +65,8 @@ public final class Barbarians {
 			folk.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.CHAINMAIL_CHESTPLATE));
 			folk.setItemSlot(EquipmentSlot.LEGS, dyed(Items.LEATHER_LEGGINGS, faction.color().getTextureDiffuseColor() & 0xFFFFFF));
 			folk.setItemSlot(EquipmentSlot.FEET, dyed(Items.LEATHER_BOOTS, DARK_FUR));
-			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.chief_of", faction.name()));
+			// (0.5.9) a chief goes by his own name (Slavic or Norse, now and then with a byname), the same every time
+			folk.setCustomName(Component.literal(Names.chief(folk.getUUID().getLeastSignificantBits() ^ faction.id())));
 		}));
 	}
 

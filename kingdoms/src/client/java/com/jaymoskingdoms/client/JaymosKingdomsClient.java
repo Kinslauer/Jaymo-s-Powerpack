@@ -29,6 +29,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		EntityRenderers.register(JaymosKingdoms.FOLK, FolkRenderer::new);
+		EntityRenderers.register(com.jaymoskingdoms.FallingTree.TYPE, FallingTreeRenderer::new);
 		CampSkins.register();
 		MobAnimations.register();
 	}

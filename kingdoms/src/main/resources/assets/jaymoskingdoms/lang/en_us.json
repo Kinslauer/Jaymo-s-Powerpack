@@ -39,6 +39,8 @@
 	"message.jaymoskingdoms.fate.ruin": "%s falls into ruin. Its people scatter.",
 	"message.jaymoskingdoms.succession": "A new king takes the throne of %s.",
 	"entity.jaymoskingdoms.lord_of": "Lord of %s",
+	"entity.jaymoskingdoms.baron_of": "Baron of %s",
+	"entity.jaymoskingdoms.vassal_of": "Vassal of %s",
 	"entity.jaymoskingdoms.foreman_of": "Foreman of %s",
 	"entity.jaymoskingdoms.farmer_of": "Farmer of %s",
 	"entity.jaymoskingdoms.miner_of": "Miner of %s",

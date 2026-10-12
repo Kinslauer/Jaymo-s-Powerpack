@@ -59,6 +59,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Mines.register();
 		// 0.5.4: living trees (saplings grow up by stages, trees fell whole, the woods seed themselves) and their attachment
 		LOGGER.debug("growing tree attachment: {}", Trees.GROWING);
+		// 0.5.9: felled trees topple over whole (and their attachments)
+		FallingTree.register();
+		LOGGER.debug("falling tree attachments: {} {}", FallingTree.PIECES, FallingTree.HEADING);
 		Trees.register();
 		// 0.5.5: the working folk sleep in beds at night; villagers take a trade at the settlement's job sites and work it
 		Homes.register();
