@@ -118,6 +118,11 @@ public final class CarryBlock {
 		return entity instanceof Display && entity.entityTags().contains(TAG);
 	}
 
+	/** A carried container (chest, furnace...): it's only ever set down, never thrown. */
+	public static boolean holdsContents(Entity entity) {
+		return is(entity) && entity.getAttached(CONTENTS) != null;
+	}
+
 	/** The carried block's state (air if it isn't one). */
 	public static BlockState stateOf(Entity entity) {
 		BlockState state = entity.getAttached(STATE);
