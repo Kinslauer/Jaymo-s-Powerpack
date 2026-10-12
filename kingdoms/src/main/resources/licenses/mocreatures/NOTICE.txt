@@ -1,0 +1,14 @@
+The war elephant and woolly mammoth in Jaymo's Kingdoms wear the elephant of DrZhark's Mo' Creatures
+(https://github.com/DrZhark/mocreaturesdev, https://www.curseforge.com/minecraft/mc-mods/mo-creatures), by DrZhark
+(code, animation) and BlockDaddy and DrZhark (models, textures), licensed under the GNU General Public License v3
+(LICENSE, beside this file).
+
+Taken from it, under that licence:
+- the elephant model and its animation (MoCModelElephant, 1.10.2 branch), ported to 26.3 as WarElephantModel
+- the elephant textures elephantindian, elephantafrican, elephantindianpretty and mammoth (the originals are in
+  kingdoms/tools/mocreatures/), which became the hides in assets/jaymoskingdoms/textures/entity/war_elephant/:
+  indian, african, royal and woolly as they are, russet and frost tinted from the mammoth; every hide also carries the
+  mammoth's war platform and a banner of ours (kingdoms/tools/gen_elephant_hides.py)
+
+WarElephantModel is likewise licensed under the GNU GPL v3. Its source is in the Jaymo's Powerpack repository
+(kingdoms/src/client/java/com/jaymoskingdoms/client/equestrian/).
