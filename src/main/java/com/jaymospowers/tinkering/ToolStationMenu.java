@@ -1,0 +1,282 @@
+package com.jaymospowers.tinkering;
+
+import java.util.ArrayList;
+import java.util.List;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.ResultContainer;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.Nullable;
+
+/**
+ * The Tool Station: parts in, a tool out, in any slot order. A tool and its head material repairs it (a broken tool
+ * too); a tool and one part it uses swaps that part in, the old one is lost.
+ */
+public class ToolStationMenu extends AbstractContainerMenu {
+	public static final int INPUTS = 4, RESULT = 4;
+	/** Where the part slots sit, around the big result slot of Tinkers' screen. */
+	public static final int[][] SLOT_AT = {{53, 22}, {15, 60}, {33, 41}, {15, 22}};
+	private final ContainerLevelAccess access;
+	private final Container inputs = new SimpleContainer(INPUTS) {
+		@Override
+		public void setChanged() {
+			super.setChanged();
+			ToolStationMenu.this.slotsChanged(this);
+		}
+	};
+	private final ResultContainer result = new ResultContainer();
+	/** How many of each input taking the result uses up. */
+	private int[] uses = new int[INPUTS];
+	/** What the station is doing, for the screen: null (nothing), or a line saying so. */
+	private @Nullable Component status;
+
+	/** Client side. */
+	public ToolStationMenu(int id, Inventory inventory) {
+		this(id, inventory, ContainerLevelAccess.NULL);
+	}
+
+	public ToolStationMenu(int id, Inventory inventory, ContainerLevelAccess access) {
+		super(Tinkering.TOOL_STATION_MENU, id);
+		this.access = access;
+		for (int i = 0; i < INPUTS; i++) {
+			this.addSlot(new Slot(inputs, i, SLOT_AT[i][0], SLOT_AT[i][1]) {
+				@Override
+				public boolean mayPlace(ItemStack stack) {
+					return stack.getItem() instanceof ToolPartItem || stack.getItem() instanceof TinkerToolItem || TinkerMaterial.of(stack) != null;
+				}
+			});
+		}
+		this.addSlot(new Slot(result, RESULT, 114, 38) {
+			@Override
+			public boolean mayPlace(ItemStack stack) {
+				return false;
+			}
+
+			@Override
+			public void onTake(Player player, ItemStack carried) {
+				int[] used = uses;
+				for (int i = 0; i < INPUTS; i++) {
+					if (used[i] > 0) {
+						inputs.removeItem(i, used[i]);
+					}
+				}
+				access.execute((level, pos) -> level.playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.6F, 1.2F));
+				super.onTake(player, carried);
+			}
+		});
+		this.addStandardInventorySlots(inventory, 8, 102);
+	}
+
+	public @Nullable Component status() {
+		return status;
+	}
+
+	@Override
+	public void slotsChanged(Container container) {
+		super.slotsChanged(container);
+		if (container == inputs) {
+			update();
+		}
+	}
+
+	private void update() {
+		uses = new int[INPUTS];
+		status = null;
+		ItemStack out = ItemStack.EMPTY;
+		int toolSlot = -1;
+		int filled = 0;
+		for (int i = 0; i < INPUTS; i++) {
+			ItemStack stack = inputs.getItem(i);
+			if (!stack.isEmpty()) {
+				filled++;
+				if (stack.getItem() instanceof TinkerToolItem) {
+					toolSlot = toolSlot == -1 ? i : -2;
+				}
+			}
+		}
+		if (toolSlot >= 0 && filled > 1) {
+			out = repair(toolSlot);
+			if (out.isEmpty()) {
+				out = swap(toolSlot);
+			}
+		} else if (toolSlot == -1 && filled > 0) {
+			out = assemble();
+		}
+		result.setItem(RESULT, out);
+		broadcastChanges();
+	}
+
+	/** Parts only: the tool whose parts they are. */
+	private ItemStack assemble() {
+		List<Integer> parts = new ArrayList<>();
+		for (int i = 0; i < INPUTS; i++) {
+			ItemStack stack = inputs.getItem(i);
+			if (stack.isEmpty()) {
+				continue;
+			}
+			if (!(stack.getItem() instanceof ToolPartItem) || ToolPartItem.material(stack) == null) {
+				return ItemStack.EMPTY;
+			}
+			parts.add(i);
+		}
+		for (ToolType type : ToolType.values()) {
+			if (type.parts.size() != parts.size()) {
+				continue;
+			}
+			List<Integer> left = new ArrayList<>(parts);
+			List<TinkerMaterial> materials = new ArrayList<>();
+			for (ToolType.Slot slot : type.parts) {
+				Integer match = left.stream().filter(i -> ((ToolPartItem) inputs.getItem(i).getItem()).part == slot.part()).findFirst().orElse(null);
+				if (match == null) {
+					break;
+				}
+				left.remove(match);
+				materials.add(ToolPartItem.material(inputs.getItem(match)));
+			}
+			if (materials.size() == type.parts.size()) {
+				for (int i : parts) {
+					uses[i] = 1;
+				}
+				return ToolStats.build(type, materials);
+			}
+		}
+		return ItemStack.EMPTY;
+	}
+
+	/** A damaged tool and its head material: as much repair as the material covers. */
+	private ItemStack repair(int toolSlot) {
+		ItemStack tool = inputs.getItem(toolSlot);
+		if (!tool.isDamaged() || !(tool.getItem() instanceof TinkerToolItem item)) {
+			return ItemStack.EMPTY;
+		}
+		List<TinkerMaterial> materials = ToolStats.materials(tool);
+		List<TinkerMaterial> heads = new ArrayList<>();
+		for (int i = 0; i < item.type.parts.size(); i++) {
+			if (item.type.parts.get(i).part().kind == PartType.Kind.HEAD) {
+				heads.add(materials.get(i));
+			}
+		}
+		int perUnit = ToolStats.repairPerUnit(tool);
+		int damage = tool.getDamageValue();
+		TinkerMaterial used = null;
+		for (int i = 0; i < INPUTS && damage > 0; i++) {
+			if (i == toolSlot || inputs.getItem(i).isEmpty()) {
+				continue;
+			}
+			ItemStack stack = inputs.getItem(i);
+			TinkerMaterial material = TinkerMaterial.of(stack);
+			if (material == null || material.stats == null || heads.stream().noneMatch(h -> h.stats == material.stats)) {
+				uses = new int[INPUTS];
+				return ItemStack.EMPTY;
+			}
+			used = material;
+			int units = TinkerMaterial.units(stack);
+			while (uses[i] < stack.getCount() && damage > 0) {
+				uses[i]++;
+				damage -= units * perUnit;
+			}
+		}
+		if (used == null) {
+			return ItemStack.EMPTY;
+		}
+		ItemStack out = tool.copy();
+		out.setDamageValue(Math.max(0, damage));
+		ToolStats.apply(out);
+		uses[toolSlot] = 1;
+		status = Component.translatable("gui.jaymospowers.tool_station.repair", used.displayName());
+		return out;
+	}
+
+	/** A tool and one part it uses: that part swapped in (the first of its kind with another material). */
+	private ItemStack swap(int toolSlot) {
+		ItemStack tool = inputs.getItem(toolSlot);
+		if (!(tool.getItem() instanceof TinkerToolItem item)) {
+			return ItemStack.EMPTY;
+		}
+		int partSlot = -1;
+		for (int i = 0; i < INPUTS; i++) {
+			if (i != toolSlot && !inputs.getItem(i).isEmpty()) {
+				if (partSlot != -1 || !(inputs.getItem(i).getItem() instanceof ToolPartItem)) {
+					return ItemStack.EMPTY;
+				}
+				partSlot = i;
+			}
+		}
+		ItemStack partStack = inputs.getItem(partSlot);
+		PartType part = ((ToolPartItem) partStack.getItem()).part;
+		TinkerMaterial material = ToolPartItem.material(partStack);
+		List<TinkerMaterial> materials = new ArrayList<>(ToolStats.materials(tool));
+		int target = -1;
+		for (int i = 0; i < item.type.parts.size(); i++) {
+			if (item.type.parts.get(i).part() == part && materials.get(i) != material && target == -1) {
+				target = i;
+			}
+		}
+		if (material == null || target == -1) {
+			return ItemStack.EMPTY;
+		}
+		materials.set(target, material);
+		ItemStack out = tool.copy();
+		out.set(Tinkering.TOOL_MATERIALS, materials.stream().map(m -> m.id).toList());
+		ToolStats.apply(out);
+		uses[toolSlot] = 1;
+		uses[partSlot] = 1;
+		status = Component.translatable("gui.jaymospowers.tool_station.swap", Component.translatable("item.jaymospowers." + part.id));
+		return out;
+	}
+
+	@Override
+	public boolean stillValid(Player player) {
+		return stillValid(access, player, Tinkering.TOOL_STATION);
+	}
+
+	@Override
+	public boolean canTakeItemForPickAll(ItemStack carried, Slot target) {
+		return target.container != result && super.canTakeItemForPickAll(carried, target);
+	}
+
+	@Override
+	public ItemStack quickMoveStack(Player player, int index) {
+		Slot slot = this.slots.get(index);
+		if (!slot.hasItem()) {
+			return ItemStack.EMPTY;
+		}
+		ItemStack stack = slot.getItem();
+		ItemStack moved = stack.copy();
+		int end = this.slots.size();
+		if (index == RESULT) {
+			if (!this.moveItemStackTo(stack, RESULT + 1, end, true)) {
+				return ItemStack.EMPTY;
+			}
+			slot.onTake(player, moved);
+			return moved;
+		}
+		if (index < INPUTS) {
+			if (!this.moveItemStackTo(stack, RESULT + 1, end, true)) {
+				return ItemStack.EMPTY;
+			}
+		} else if (!slots.get(0).mayPlace(stack) || !this.moveItemStackTo(stack, 0, INPUTS, false)) {
+			return ItemStack.EMPTY;
+		}
+		if (stack.isEmpty()) {
+			slot.setByPlayer(ItemStack.EMPTY);
+		} else {
+			slot.setChanged();
+		}
+		return moved;
+	}
+
+	@Override
+	public void removed(Player player) {
+		super.removed(player);
+		access.execute((level, pos) -> this.clearContainer(player, inputs));
+	}
+}

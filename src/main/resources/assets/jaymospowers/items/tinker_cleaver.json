@@ -1,0 +1,1101 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:display_context",
+    "cases": [
+      {
+        "when": [
+          "gui",
+          "ground",
+          "fixed"
+        ],
+        "model": {
+          "type": "minecraft:composite",
+          "models": [
+            {
+              "type": "minecraft:select",
+              "property": "minecraft:custom_model_data",
+              "index": 1,
+              "cases": [
+                {
+                  "when": "wood",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/handle_wood"
+                  }
+                },
+                {
+                  "when": "wood_crimson",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/handle_wood_crimson"
+                  }
+                },
+                {
+                  "when": "wood_warped",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/handle_wood_warped"
+                  }
+                },
+                {
+                  "when": "rock_stone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/handle_rock_stone"
+                  }
+                },
+                {
+                  "when": "rock_granite",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/handle_rock_granite"
+                  }
+                },
+                {
+                  "when": "rock_diorite",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/handle_rock_diorite"
+                  }
+                },
+                {
+                  "when": "rock_blackstone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/handle_rock_blackstone"
+                  }
+                },
+                {
+                  "when": "flint",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/handle_flint"
+                  }
+                },
+                {
+                  "when": "bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/handle_bone"
+                  }
+                },
+                {
+                  "when": "copper",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/handle_copper"
+                  }
+                },
+                {
+                  "when": "iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/handle_iron"
+                  }
+                }
+              ],
+              "fallback": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/handle_wood"
+              }
+            },
+            {
+              "type": "minecraft:condition",
+              "property": "minecraft:custom_model_data",
+              "index": 0,
+              "on_true": {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 0,
+                "cases": [
+                  {
+                    "when": "wood",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_broken_wood"
+                    }
+                  },
+                  {
+                    "when": "wood_crimson",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_broken_wood_crimson"
+                    }
+                  },
+                  {
+                    "when": "wood_warped",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_broken_wood_warped"
+                    }
+                  },
+                  {
+                    "when": "rock_stone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_broken_rock_stone"
+                    }
+                  },
+                  {
+                    "when": "rock_granite",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_broken_rock_granite"
+                    }
+                  },
+                  {
+                    "when": "rock_diorite",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_broken_rock_diorite"
+                    }
+                  },
+                  {
+                    "when": "rock_blackstone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_broken_rock_blackstone"
+                    }
+                  },
+                  {
+                    "when": "flint",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_broken_flint"
+                    }
+                  },
+                  {
+                    "when": "bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_broken_bone"
+                    }
+                  },
+                  {
+                    "when": "copper",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_broken_copper"
+                    }
+                  },
+                  {
+                    "when": "iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_broken_iron"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/head_broken_wood"
+                }
+              },
+              "on_false": {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 0,
+                "cases": [
+                  {
+                    "when": "wood",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_wood"
+                    }
+                  },
+                  {
+                    "when": "wood_crimson",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_wood_crimson"
+                    }
+                  },
+                  {
+                    "when": "wood_warped",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_wood_warped"
+                    }
+                  },
+                  {
+                    "when": "rock_stone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_rock_stone"
+                    }
+                  },
+                  {
+                    "when": "rock_granite",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_rock_granite"
+                    }
+                  },
+                  {
+                    "when": "rock_diorite",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_rock_diorite"
+                    }
+                  },
+                  {
+                    "when": "rock_blackstone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_rock_blackstone"
+                    }
+                  },
+                  {
+                    "when": "flint",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_flint"
+                    }
+                  },
+                  {
+                    "when": "bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_bone"
+                    }
+                  },
+                  {
+                    "when": "copper",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_copper"
+                    }
+                  },
+                  {
+                    "when": "iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_iron"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/head_wood"
+                }
+              }
+            },
+            {
+              "type": "minecraft:condition",
+              "property": "minecraft:custom_model_data",
+              "index": 0,
+              "on_true": {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 3,
+                "cases": [
+                  {
+                    "when": "wood",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_broken_wood"
+                    }
+                  },
+                  {
+                    "when": "wood_crimson",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_broken_wood_crimson"
+                    }
+                  },
+                  {
+                    "when": "wood_warped",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_broken_wood_warped"
+                    }
+                  },
+                  {
+                    "when": "rock_stone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_broken_rock_stone"
+                    }
+                  },
+                  {
+                    "when": "rock_granite",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_broken_rock_granite"
+                    }
+                  },
+                  {
+                    "when": "rock_diorite",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_broken_rock_diorite"
+                    }
+                  },
+                  {
+                    "when": "rock_blackstone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_broken_rock_blackstone"
+                    }
+                  },
+                  {
+                    "when": "flint",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_broken_flint"
+                    }
+                  },
+                  {
+                    "when": "bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_broken_bone"
+                    }
+                  },
+                  {
+                    "when": "copper",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_broken_copper"
+                    }
+                  },
+                  {
+                    "when": "iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_broken_iron"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/shield_broken_wood"
+                }
+              },
+              "on_false": {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 3,
+                "cases": [
+                  {
+                    "when": "wood",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_wood"
+                    }
+                  },
+                  {
+                    "when": "wood_crimson",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_wood_crimson"
+                    }
+                  },
+                  {
+                    "when": "wood_warped",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_wood_warped"
+                    }
+                  },
+                  {
+                    "when": "rock_stone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_rock_stone"
+                    }
+                  },
+                  {
+                    "when": "rock_granite",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_rock_granite"
+                    }
+                  },
+                  {
+                    "when": "rock_diorite",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_rock_diorite"
+                    }
+                  },
+                  {
+                    "when": "rock_blackstone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_rock_blackstone"
+                    }
+                  },
+                  {
+                    "when": "flint",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_flint"
+                    }
+                  },
+                  {
+                    "when": "bone",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_bone"
+                    }
+                  },
+                  {
+                    "when": "copper",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_copper"
+                    }
+                  },
+                  {
+                    "when": "iron",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_iron"
+                    }
+                  }
+                ],
+                "fallback": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/shield_wood"
+                }
+              }
+            },
+            {
+              "type": "minecraft:select",
+              "property": "minecraft:custom_model_data",
+              "index": 2,
+              "cases": [
+                {
+                  "when": "wood",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/guard_wood"
+                  }
+                },
+                {
+                  "when": "wood_crimson",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/guard_wood_crimson"
+                  }
+                },
+                {
+                  "when": "wood_warped",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/guard_wood_warped"
+                  }
+                },
+                {
+                  "when": "rock_stone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/guard_rock_stone"
+                  }
+                },
+                {
+                  "when": "rock_granite",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/guard_rock_granite"
+                  }
+                },
+                {
+                  "when": "rock_diorite",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/guard_rock_diorite"
+                  }
+                },
+                {
+                  "when": "rock_blackstone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/guard_rock_blackstone"
+                  }
+                },
+                {
+                  "when": "flint",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/guard_flint"
+                  }
+                },
+                {
+                  "when": "bone",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/guard_bone"
+                  }
+                },
+                {
+                  "when": "copper",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/guard_copper"
+                  }
+                },
+                {
+                  "when": "iron",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/guard_iron"
+                  }
+                }
+              ],
+              "fallback": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/guard_wood"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:composite",
+      "models": [
+        {
+          "type": "minecraft:select",
+          "property": "minecraft:custom_model_data",
+          "index": 1,
+          "cases": [
+            {
+              "when": "wood",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/handle_wood"
+              }
+            },
+            {
+              "when": "wood_crimson",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/handle_wood_crimson"
+              }
+            },
+            {
+              "when": "wood_warped",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/handle_wood_warped"
+              }
+            },
+            {
+              "when": "rock_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/handle_rock_stone"
+              }
+            },
+            {
+              "when": "rock_granite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/handle_rock_granite"
+              }
+            },
+            {
+              "when": "rock_diorite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/handle_rock_diorite"
+              }
+            },
+            {
+              "when": "rock_blackstone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/handle_rock_blackstone"
+              }
+            },
+            {
+              "when": "flint",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/handle_flint"
+              }
+            },
+            {
+              "when": "bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/handle_bone"
+              }
+            },
+            {
+              "when": "copper",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/handle_copper"
+              }
+            },
+            {
+              "when": "iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/handle_iron"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/cleaver/large/handle_wood"
+          }
+        },
+        {
+          "type": "minecraft:condition",
+          "property": "minecraft:custom_model_data",
+          "index": 0,
+          "on_true": {
+            "type": "minecraft:select",
+            "property": "minecraft:custom_model_data",
+            "index": 0,
+            "cases": [
+              {
+                "when": "wood",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_wood"
+                }
+              },
+              {
+                "when": "wood_crimson",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_wood_crimson"
+                }
+              },
+              {
+                "when": "wood_warped",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_wood_warped"
+                }
+              },
+              {
+                "when": "rock_stone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_rock_stone"
+                }
+              },
+              {
+                "when": "rock_granite",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_rock_granite"
+                }
+              },
+              {
+                "when": "rock_diorite",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_rock_diorite"
+                }
+              },
+              {
+                "when": "rock_blackstone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_rock_blackstone"
+                }
+              },
+              {
+                "when": "flint",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_flint"
+                }
+              },
+              {
+                "when": "bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_bone"
+                }
+              },
+              {
+                "when": "copper",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_copper"
+                }
+              },
+              {
+                "when": "iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_iron"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_wood"
+            }
+          },
+          "on_false": {
+            "type": "minecraft:select",
+            "property": "minecraft:custom_model_data",
+            "index": 0,
+            "cases": [
+              {
+                "when": "wood",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_wood"
+                }
+              },
+              {
+                "when": "wood_crimson",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_wood_crimson"
+                }
+              },
+              {
+                "when": "wood_warped",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_wood_warped"
+                }
+              },
+              {
+                "when": "rock_stone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_rock_stone"
+                }
+              },
+              {
+                "when": "rock_granite",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_rock_granite"
+                }
+              },
+              {
+                "when": "rock_diorite",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_rock_diorite"
+                }
+              },
+              {
+                "when": "rock_blackstone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_rock_blackstone"
+                }
+              },
+              {
+                "when": "flint",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_flint"
+                }
+              },
+              {
+                "when": "bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_bone"
+                }
+              },
+              {
+                "when": "copper",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_copper"
+                }
+              },
+              {
+                "when": "iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_iron"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/cleaver/large/head_wood"
+            }
+          }
+        },
+        {
+          "type": "minecraft:condition",
+          "property": "minecraft:custom_model_data",
+          "index": 0,
+          "on_true": {
+            "type": "minecraft:select",
+            "property": "minecraft:custom_model_data",
+            "index": 3,
+            "cases": [
+              {
+                "when": "wood",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_wood"
+                }
+              },
+              {
+                "when": "wood_crimson",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_wood_crimson"
+                }
+              },
+              {
+                "when": "wood_warped",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_wood_warped"
+                }
+              },
+              {
+                "when": "rock_stone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_rock_stone"
+                }
+              },
+              {
+                "when": "rock_granite",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_rock_granite"
+                }
+              },
+              {
+                "when": "rock_diorite",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_rock_diorite"
+                }
+              },
+              {
+                "when": "rock_blackstone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_rock_blackstone"
+                }
+              },
+              {
+                "when": "flint",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_flint"
+                }
+              },
+              {
+                "when": "bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_bone"
+                }
+              },
+              {
+                "when": "copper",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_copper"
+                }
+              },
+              {
+                "when": "iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_iron"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_wood"
+            }
+          },
+          "on_false": {
+            "type": "minecraft:select",
+            "property": "minecraft:custom_model_data",
+            "index": 3,
+            "cases": [
+              {
+                "when": "wood",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_wood"
+                }
+              },
+              {
+                "when": "wood_crimson",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_wood_crimson"
+                }
+              },
+              {
+                "when": "wood_warped",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_wood_warped"
+                }
+              },
+              {
+                "when": "rock_stone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_rock_stone"
+                }
+              },
+              {
+                "when": "rock_granite",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_rock_granite"
+                }
+              },
+              {
+                "when": "rock_diorite",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_rock_diorite"
+                }
+              },
+              {
+                "when": "rock_blackstone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_rock_blackstone"
+                }
+              },
+              {
+                "when": "flint",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_flint"
+                }
+              },
+              {
+                "when": "bone",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_bone"
+                }
+              },
+              {
+                "when": "copper",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_copper"
+                }
+              },
+              {
+                "when": "iron",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_iron"
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/cleaver/large/shield_wood"
+            }
+          }
+        },
+        {
+          "type": "minecraft:select",
+          "property": "minecraft:custom_model_data",
+          "index": 2,
+          "cases": [
+            {
+              "when": "wood",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/guard_wood"
+              }
+            },
+            {
+              "when": "wood_crimson",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/guard_wood_crimson"
+              }
+            },
+            {
+              "when": "wood_warped",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/guard_wood_warped"
+              }
+            },
+            {
+              "when": "rock_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/guard_rock_stone"
+              }
+            },
+            {
+              "when": "rock_granite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/guard_rock_granite"
+              }
+            },
+            {
+              "when": "rock_diorite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/guard_rock_diorite"
+              }
+            },
+            {
+              "when": "rock_blackstone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/guard_rock_blackstone"
+              }
+            },
+            {
+              "when": "flint",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/guard_flint"
+              }
+            },
+            {
+              "when": "bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/guard_bone"
+              }
+            },
+            {
+              "when": "copper",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/guard_copper"
+              }
+            },
+            {
+              "when": "iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/guard_iron"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/cleaver/large/guard_wood"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -403,3 +403,30 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     elastic: the movement keys lean you up to 1.4 blocks away, the cracks deepen with the strain, and they haul you
     back when you let go. Jump kicks off, the grab again lets go, and so does any other radial ability. The two
     shoulder tendrils stay free: R grabs and Shift+G tears a chunk while you hang there, even without Living Armor.
+- **0.8.68, Jaymo's Tinkering, stage 1 (tools from parts, after Tinkers' Construct):** Tinkers' Construct has no
+  Fabric or 26.3 build (Forge/NeoForge, newest 1.20.1), so this is our own version in `tinkering/`, with Tinkers'
+  stats and its textures and GUI art reused under its MIT license (`textures/item/tinkering/license_tinkers_construct.txt`).
+  `tools/tinkering_assets.py` writes the sprites, models, recipes, tags, loot tables and lang from the unpacked
+  TConstruct 1.20.1 jar. Its own creative tab.
+  - **Pattern** (2 planks + 2 sticks, 6 of them), **Part Builder** (2 patterns over 2 logs), **Tool Station** (pattern +
+    crafting table). The tables keep nothing when you walk away, like a crafting table.
+  - **Part Builder:** a pattern and a material in, pick one of 10 parts on Tinkers' screen, take it out (pattern used
+    up). Costs in material units: pick head, small axe head, adze head, small blade 2; hammer head, broad blade 8;
+    large plate 4; tool handle, binding 1; tough handle 3. A plank or ingot is 1, a log 4, a bone block 3, a block
+    of iron or copper 9; the rest of the last item is lost. The side panel shows the part's stats and trait.
+  - **Materials** (`TinkerMaterial`, Tinkers' numbers): wood (crimson and warped look different), stone (granite,
+    diorite, blackstone looks), flint, bone, copper, iron for any part; leather, string, vine for bindings only.
+    Heads give durability, mining speed, tier and attack; handles add or take a percentage; bindings only their trait.
+    Iron and copper go straight into the Part Builder until the smeltery comes (stage 2).
+  - **Tool Station:** parts in any slots make the tool: pickaxe, hand axe (strips logs, knocks shields down), mattock
+    (axe + shovel, tills), sword, sledge hammer (3x3, sneak for one block; Smite II), cleaver (Severing II). A tool
+    plus its head's material repairs it (a unit repairs half the tool over its main part's cost, so a pick head's
+    material 25% a unit, Cultivated +50%); a tool plus one part it uses swaps that part in. Big tools are big in hand.
+  - **Traits**, one per part, stacking: Cultivated (wood), Stonebound (stone: faster and softer as it wears),
+    Jagged (flint: harder as it wears), Piercing (bone: +1 armour-piercing damage), Dwarven (copper: faster below
+    y 64), Magnetic (iron: pulls drops in for 2 s), Tanned (leather: never more than 1 wear at once), Stringy
+    (15% no wear), Solar Powered (vine: 25% no wear in sunlight).
+  - **Tools never vanish:** at 0 durability they're broken (no mining rules, no attack, broken-head look) until
+    repaired (`mixin/TinkerToolWearMixin`). Enchanting works as for vanilla tools for now; modifiers arrive in stage 2.
+  - Next: stage 2, the smeltery (melting, casting, alloys, ore doubling) and modifiers with tool levels; stage 3, the
+    pack tie-ins (Kingdoms smiths, Powers weapons).

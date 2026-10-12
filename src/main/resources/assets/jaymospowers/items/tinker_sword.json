@@ -1,0 +1,364 @@
+{
+  "model": {
+    "type": "minecraft:composite",
+    "models": [
+      {
+        "type": "minecraft:select",
+        "property": "minecraft:custom_model_data",
+        "index": 1,
+        "cases": [
+          {
+            "when": "wood",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/handle_wood"
+            }
+          },
+          {
+            "when": "wood_crimson",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/handle_wood_crimson"
+            }
+          },
+          {
+            "when": "wood_warped",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/handle_wood_warped"
+            }
+          },
+          {
+            "when": "rock_stone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/handle_rock_stone"
+            }
+          },
+          {
+            "when": "rock_granite",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/handle_rock_granite"
+            }
+          },
+          {
+            "when": "rock_diorite",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/handle_rock_diorite"
+            }
+          },
+          {
+            "when": "rock_blackstone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/handle_rock_blackstone"
+            }
+          },
+          {
+            "when": "flint",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/handle_flint"
+            }
+          },
+          {
+            "when": "bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/handle_bone"
+            }
+          },
+          {
+            "when": "copper",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/handle_copper"
+            }
+          },
+          {
+            "when": "iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/handle_iron"
+            }
+          }
+        ],
+        "fallback": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/sword/handle_wood"
+        }
+      },
+      {
+        "type": "minecraft:condition",
+        "property": "minecraft:custom_model_data",
+        "index": 0,
+        "on_true": {
+          "type": "minecraft:select",
+          "property": "minecraft:custom_model_data",
+          "index": 0,
+          "cases": [
+            {
+              "when": "wood",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_broken_wood"
+              }
+            },
+            {
+              "when": "wood_crimson",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_broken_wood_crimson"
+              }
+            },
+            {
+              "when": "wood_warped",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_broken_wood_warped"
+              }
+            },
+            {
+              "when": "rock_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_broken_rock_stone"
+              }
+            },
+            {
+              "when": "rock_granite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_broken_rock_granite"
+              }
+            },
+            {
+              "when": "rock_diorite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_broken_rock_diorite"
+              }
+            },
+            {
+              "when": "rock_blackstone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_broken_rock_blackstone"
+              }
+            },
+            {
+              "when": "flint",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_broken_flint"
+              }
+            },
+            {
+              "when": "bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_broken_bone"
+              }
+            },
+            {
+              "when": "copper",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_broken_copper"
+              }
+            },
+            {
+              "when": "iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_broken_iron"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/sword/head_broken_wood"
+          }
+        },
+        "on_false": {
+          "type": "minecraft:select",
+          "property": "minecraft:custom_model_data",
+          "index": 0,
+          "cases": [
+            {
+              "when": "wood",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_wood"
+              }
+            },
+            {
+              "when": "wood_crimson",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_wood_crimson"
+              }
+            },
+            {
+              "when": "wood_warped",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_wood_warped"
+              }
+            },
+            {
+              "when": "rock_stone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_rock_stone"
+              }
+            },
+            {
+              "when": "rock_granite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_rock_granite"
+              }
+            },
+            {
+              "when": "rock_diorite",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_rock_diorite"
+              }
+            },
+            {
+              "when": "rock_blackstone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_rock_blackstone"
+              }
+            },
+            {
+              "when": "flint",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_flint"
+              }
+            },
+            {
+              "when": "bone",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_bone"
+              }
+            },
+            {
+              "when": "copper",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_copper"
+              }
+            },
+            {
+              "when": "iron",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sword/head_iron"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "jaymospowers:item/tinkering/sword/head_wood"
+          }
+        }
+      },
+      {
+        "type": "minecraft:select",
+        "property": "minecraft:custom_model_data",
+        "index": 2,
+        "cases": [
+          {
+            "when": "wood",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/guard_wood"
+            }
+          },
+          {
+            "when": "wood_crimson",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/guard_wood_crimson"
+            }
+          },
+          {
+            "when": "wood_warped",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/guard_wood_warped"
+            }
+          },
+          {
+            "when": "rock_stone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/guard_rock_stone"
+            }
+          },
+          {
+            "when": "rock_granite",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/guard_rock_granite"
+            }
+          },
+          {
+            "when": "rock_diorite",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/guard_rock_diorite"
+            }
+          },
+          {
+            "when": "rock_blackstone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/guard_rock_blackstone"
+            }
+          },
+          {
+            "when": "flint",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/guard_flint"
+            }
+          },
+          {
+            "when": "bone",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/guard_bone"
+            }
+          },
+          {
+            "when": "copper",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/guard_copper"
+            }
+          },
+          {
+            "when": "iron",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/sword/guard_iron"
+            }
+          }
+        ],
+        "fallback": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/sword/guard_wood"
+        }
+      }
+    ]
+  }
+}
