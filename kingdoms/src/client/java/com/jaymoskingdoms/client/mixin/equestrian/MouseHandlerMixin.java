@@ -11,8 +11,8 @@ import org.spongepowered.asm.mixin.injection.At;
 /** (0.5.34) In the saddle the scroll wheel shifts the horse's gait instead of the hotbar slot. */
 @Mixin(MouseHandler.class)
 abstract class MouseHandlerMixin {
-	@WrapOperation(method = "onScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/ScrollWheelHandler;getNextScrollWheelSelection(III)I"))
-	private int jaymoskingdoms$gait(int wheel, int current, int size, Operation<Integer> original) {
-		return EquestrianClient.scroll(wheel) ? current : original.call(wheel, current, size);
+	@WrapOperation(method = "onScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/ScrollWheelHandler;getNextScrollWheelSelection(DII)I"))
+	private int jaymoskingdoms$gait(double wheel, int current, int size, Operation<Integer> original) {
+		return EquestrianClient.scroll((int)Math.signum(wheel)) ? current : original.call(wheel, current, size);
 	}
 }
