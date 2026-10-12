@@ -27,6 +27,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.WallTorchBlock;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -54,6 +56,8 @@ public final class Gatherers {
 	/** They carry this many items before taking them to storage. */
 	static final int ARMFUL = 48;
 	/** A block of stone takes this long to dig, an ore this long, a log this long (ticks); from this far. */
+	/** (0.5.13) A miner puts a torch where he's dug out if the block light there is under this. */
+	static final int TORCH_BELOW = 7;
 	static final int STONE_TICKS = 30, ORE_TICKS = 50, LOG_TICKS = 16, FELL_START_TICKS = 30, FELL_WAIT_TICKS = 40;
 	static final double REACH = 4.5, STAND_REACH = 1.5, DEPOT_REACH = 2.5, VERTICAL_SLACK = 3.0;
 	/** With nothing else to dig, a miner quarries the rock this far round the mine's end. */
@@ -88,7 +92,7 @@ public final class Gatherers {
 			return this.items.isEmpty();
 		}
 
-		void add(Folk folk, ItemStack stack) {
+		void add(Worker folk, ItemStack stack) {
 			if (stack.isEmpty()) {
 				return;
 			}
@@ -108,7 +112,7 @@ public final class Gatherers {
 		}
 
 		/** Into storage (what won't fit is dropped by the depot), his tool back in his hands. */
-		void unload(ServerLevel level, Faction f, Folk folk) {
+		void unload(ServerLevel level, Faction f, Worker folk) {
 			BlockPos depot = Builders.depot(f);
 			for (ItemStack stack : this.items) {
 				ItemStack left = Storage.put(level, f, stack);
@@ -135,7 +139,7 @@ public final class Gatherers {
 	}
 
 	/** Walks {@code folk} toward {@code to} (a leg at a time); true once within {@code reach} across and {@link #VERTICAL_SLACK} up or down. */
-	static boolean walk(Folk folk, Trip trip, BlockPos to, double reach, double speed, long now) {
+	static boolean walk(Worker folk, Trip trip, BlockPos to, double reach, double speed, long now) {
 		Vec3 goal = Vec3.atBottomCenterOf(to);
 		double dx = folk.getX() - goal.x, dz = folk.getZ() - goal.z;
 		double d = Math.sqrt(folk.distanceToSqr(goal));
@@ -159,7 +163,7 @@ public final class Gatherers {
 			return false;
 		}
 		if (folk.getNavigation().isDone() || now % 20 == 0) {
-			BlockPos leg = Construction.leg(level, folk, to);
+			BlockPos leg = Construction.leg(level, folk.mob(), to);
 			folk.getNavigation().moveTo(leg.getX() + 0.5, leg.getY(), leg.getZ() + 0.5, speed);
 		}
 		return false;
@@ -222,7 +226,7 @@ public final class Gatherers {
 	 * tree farm with fewest woodcutters. {@code from} where he comes from (a villager taken into service), else he starts
 	 * at home. Null if there's nothing for him to work.
 	 */
-	static @Nullable Folk spawn(ServerLevel level, Faction f, int role, @Nullable BlockPos from) {
+	static @Nullable Worker spawn(ServerLevel level, Faction f, int role, @Nullable BlockPos from) {
 		BlockPos home, site;
 		if (role == Folk.MINER) {
 			Mines.Mine m = Mines.of(level.getServer(), f.id());
@@ -236,22 +240,18 @@ public final class Gatherers {
 			if (farms.isEmpty()) {
 				return null;
 			}
-			List<Folk> cutters = level.getEntitiesOfClass(Folk.class, new AABB(f.seat()).inflate(Builders.CREW_RANGE),
+			List<Worker> cutters = Workers.near(level, new AABB(f.seat()).inflate(Builders.CREW_RANGE),
 				x -> x.isAlive() && x.factionId() == f.id() && x.role() == Folk.WOODCUTTER);
 			Works.Built farm = farms.stream().min(Comparator.comparingLong(b -> cutters.stream().filter(x -> middle(b).closerThan(x.getHomePosition(), 3)).count()))
 				.orElseThrow();
 			home = Construction.standable(level, middle(farm).above(), 4);
 			site = home;
 		}
-		Folk folk = JaymosKingdoms.FOLK.create(level, EntitySpawnReason.MOB_SUMMONED);
+		Worker folk = Workers.body(level, f, role, from != null ? from : home, home, ROAM);
 		if (folk == null) {
 			return null;
 		}
-		BlockPos at = from != null ? from : home;
-		folk.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360.0F, 0.0F);
-		folk.setup(role, f, home, ROAM);
 		folk.setSite(site);
-		level.addFreshEntity(folk);
 		Factions.update(level.getServer(), f.id(), x -> x.withHoldings(x.holdings().adjust(role, 1)));
 		JaymosKingdoms.LOGGER.debug("{} took on a {}", f.name(), Folk.roleName(role));
 		return folk;
@@ -287,8 +287,8 @@ public final class Gatherers {
 	// ---- a day's work -----------------------------------------------------------------------------------------------
 
 	/** One gatherer's tick (from {@link Folk}). */
-	static void tick(ServerLevel level, Folk folk) {
-		if (folk.getLastHurtByMob() != null && folk.tickCount - folk.getLastHurtByMobTimestamp() < 100) {
+	static void tick(ServerLevel level, Worker folk) {
+		if (folk.getLastHurtByMob() != null && folk.ticksAlive() - folk.getLastHurtByMobTimestamp() < 100) {
 			// (running for his life)
 			return;
 		}
@@ -317,7 +317,7 @@ public final class Gatherers {
 		}
 	}
 
-	private static void decide(ServerLevel level, Faction f, Folk folk, Job job, long now) {
+	private static void decide(ServerLevel level, Faction f, Worker folk, Job job, long now) {
 		if (job.bag.isEmpty() && folk.isCarrying()) {
 			// (what he held when the world was last saved: only its token was kept)
 			folk.setCarried(ItemStack.EMPTY);
@@ -362,7 +362,7 @@ public final class Gatherers {
 	// ---- miners -----------------------------------------------------------------------------------------------------
 
 	/** His next block: an ore of a vein he's on, an ore he can see from the tunnel or in the cave, else the next of a side tunnel. */
-	private static boolean oreOrStone(ServerLevel level, Mines.Mine m, Folk folk, Job job) {
+	private static boolean oreOrStone(ServerLevel level, Mines.Mine m, Worker folk, Job job) {
 		while (!job.vein.isEmpty()) {
 			BlockPos ore = job.vein.poll();
 			if (level.getBlockState(ore).is(BlockTags.ORES)) {
@@ -474,13 +474,13 @@ public final class Gatherers {
 		return false;
 	}
 
-	private static void dig(ServerLevel level, Folk folk, Job job, long now) {
+	private static void dig(ServerLevel level, Worker folk, Job job, long now) {
 		BlockPos target = job.goal;
 		if (target == null || Mines.clear(level, target)) {
 			job.phase = IDLE;
 			return;
 		}
-		if (folk.getEyePosition().distanceToSqr(Vec3.atCenterOf(target)) > REACH * REACH) {
+		if (folk.mob().getEyePosition().distanceToSqr(Vec3.atCenterOf(target)) > REACH * REACH) {
 			BlockPos stand = job.stand != null ? job.stand : target;
 			boolean there = walk(folk, job.trip, stand, STAND_REACH, WALK_SPEED, now);
 			if (there || (job.trip.best < 2.0 && now - job.trip.improvedAt > STUCK_TICKS / 2)) {
@@ -504,9 +504,10 @@ public final class Gatherers {
 			}
 			return;
 		}
-		for (ItemStack d : Mines.dig(level, target, folk, false)) {
+		for (ItemStack d : Mines.dig(level, target, folk.mob(), false)) {
 			job.bag.add(folk, d);
 		}
+		light(level, target);
 		// a vein: any ore it uncovered is next
 		for (Direction d : Direction.values()) {
 			BlockPos n = target.relative(d);
@@ -517,10 +518,39 @@ public final class Gatherers {
 		job.phase = IDLE;
 	}
 
+	/**
+	 * (0.5.13) A miner lights his way: where he's just dug out is dark (underground, block light under
+	 * {@link #TORCH_BELOW}), a torch goes on its floor, or on a wall beside it.
+	 */
+	static void light(ServerLevel level, BlockPos open) {
+		for (BlockPos at : new BlockPos[] {open.below(), open}) {
+			if (!Mines.clear(level, at) || !level.getBlockState(at).isAir() || level.canSeeSky(at)
+				|| level.getBrightness(LightLayer.BLOCK, at) >= TORCH_BELOW) {
+				continue;
+			}
+			BlockState torch = Blocks.TORCH.defaultBlockState();
+			if (!torch.canSurvive(level, at)) {
+				torch = null;
+				for (Direction side : Direction.Plane.HORIZONTAL) {
+					BlockState wall = Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, side);
+					if (wall.canSurvive(level, at)) {
+						torch = wall;
+						break;
+					}
+				}
+			}
+			if (torch != null) {
+				level.setBlock(at, torch, Block.UPDATE_ALL);
+				level.playSound(null, at, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 0.6F, 1.2F);
+				return;
+			}
+		}
+	}
+
 	// ---- woodcutters ------------------------------------------------------------------------------------------------
 
 	/** The nearest tree to fell: a trunk on soil under living (not placed) leaves, his tree farm's first; or null. */
-	private static @Nullable BlockPos tree(ServerLevel level, Faction f, Folk folk, Job job) {
+	private static @Nullable BlockPos tree(ServerLevel level, Faction f, Worker folk, Job job) {
 		BlockPos home = folk.getHomePosition();
 		List<Works.Built> others = Works.of(level.getServer(), f.id()).built().stream().filter(b -> !b.entry().equals("tree_farm")).toList();
 		BlockPos best = null;
@@ -573,7 +603,7 @@ public final class Gatherers {
 		return false;
 	}
 
-	private static void fell(ServerLevel level, Folk folk, Job job, long now) {
+	private static void fell(ServerLevel level, Worker folk, Job job, long now) {
 		BlockPos base = job.goal;
 		if (base == null) {
 			job.phase = IDLE;
@@ -585,7 +615,7 @@ public final class Gatherers {
 				return;
 			}
 			BlockPos stand = job.stand != null ? job.stand : base;
-			if (folk.getEyePosition().distanceToSqr(Vec3.atCenterOf(base)) > REACH * REACH) {
+			if (folk.mob().getEyePosition().distanceToSqr(Vec3.atCenterOf(base)) > REACH * REACH) {
 				boolean there = walk(folk, job.trip, stand, STAND_REACH + 1.0, WALK_SPEED, now);
 				if (there || (job.trip.best < 2.0 && now - job.trip.improvedAt > STUCK_TICKS / 2)) {
 					job.skip.add(base);
@@ -609,7 +639,7 @@ public final class Gatherers {
 		}
 		// the whole tree comes down (Trees: its logs from the foot up, then the leaves no other tree holds), into his bag
 		if (!job.felled) {
-			int logs = Trees.fell(level, base, folk, new ItemStack(Items.IRON_AXE), d -> job.bag.add(folk, d), false);
+			int logs = Trees.fell(level, base, folk.mob(), new ItemStack(Items.IRON_AXE), d -> job.bag.add(folk, d), false);
 			if (logs == 0) {
 				job.skip.add(base);
 				job.logs.clear();
@@ -673,7 +703,7 @@ public final class Gatherers {
 	 * saplings grown on. Returns how many items.
 	 */
 	static int overnight(ServerLevel level, Faction f, long ticks) {
-		List<Folk> folk = level.getEntitiesOfClass(Folk.class, new AABB(f.seat()).inflate(Builders.CREW_RANGE),
+		List<Worker> folk = Workers.near(level, new AABB(f.seat()).inflate(Builders.CREW_RANGE),
 			x -> x.isAlive() && x.factionId() == f.id() && isGatherer(x.role()));
 		long miners = folk.stream().filter(x -> x.role() == Folk.MINER).count();
 		long cutters = folk.size() - miners;

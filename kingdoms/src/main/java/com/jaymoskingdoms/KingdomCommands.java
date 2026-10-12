@@ -360,7 +360,7 @@ final class KingdomCommands {
 			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.no_such"));
 			return 0;
 		}
-		List<Folk> crew = Builders.spawnCrew(player.level(), f);
+		List<Worker> crew = Builders.spawnCrew(player.level(), f);
 		c.getSource().sendSuccess(() -> Component.literal(f.name() + " took on a crew of " + crew.size()), true);
 		return crew.size();
 	}
@@ -372,7 +372,7 @@ final class KingdomCommands {
 			c.getSource().sendFailure(Component.translatable("message.jaymoskingdoms.no_such"));
 			return 0;
 		}
-		Folk hired = Economy.hire(player.level(), f);
+		Worker hired = Economy.hire(player.level(), f);
 		c.getSource().sendSuccess(() -> Component.literal(hired == null ? f.name() + " took no one on"
 			: f.name() + " took on a " + Folk.roleName(hired.role())), true);
 		return hired == null ? 0 : 1;

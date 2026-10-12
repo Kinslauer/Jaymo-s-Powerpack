@@ -1,0 +1,8 @@
+{
+	"required": false,
+	"package": "com.jaymoskingdoms.client.mixin.mca",
+	"plugin": "com.jaymoskingdoms.mixin.mca.McaMixinPlugin",
+	"compatibilityLevel": "JAVA_25",
+	"client": ["McaScreensMixin"],
+	"injectors": { "defaultRequire": 1 }
+}

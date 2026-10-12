@@ -1338,3 +1338,37 @@ Tested on the dev server: a war party of 7 against Garhaven threw javelins (and 
 soldiers below them), broke trapdoors in its way and set a dozen fires in the town; the paranoid king of Garhaven
 shoved a player back; a vanilla and an MCA villager ran from an enderman (4 to 11-13 blocks). Not seen in game: the
 other tempers' rounds, the tyrant's tithe, the reveler's feast.
+
+## 0.5.13: the workers are MCA's villagers; monsters hunt the folk; miners light their way
+Andy: "kingdom miners builders and farmers dont seem to be targetable by hostile mobs, please fix that, and integrate
+them as much as you can with the MCA mobs, i want builders to be interactable in the same way, and promoted to those
+jobs (builder farmer guard) in the same way"; then "miners should place torches as they go".
+- **Why they weren't hunted**: workers were `Folk` (a `PathfinderMob`), and zombies, illagers and ravagers only target
+  `AbstractVillager`. `Prey` now sets zombies (husks, drowned, zombie villagers) on any folk, illagers and ravagers on a
+  realm's; non-combatant folk keep 8 blocks from monsters (`AvoidEntityGoal`, their work waits meanwhile).
+- **Workers are villagers (with MCA)**: the work code (`Construction`, `Mines`, `Debris`, `Farmers`, `Gatherers`)
+  now drives a `Worker` (an interface `Folk` implements, and `McaWorkerMixin` gives MCA's villagers). A realm's new
+  builder, farmer, miner or woodcutter is one of its own MCA villagers promoted where they stand (`Workers.body`,
+  `McaBridge.enlist`: the jobless first, then the unskilled, then anyone grown who isn't its ruler or a guard; nobody
+  is taken away any more), or someone new who moves in. They keep their name, family and hearts and get MCA's menu.
+  New villager professions (`Professions`: `jaymoskingdoms:builder|farmer|miner|woodcutter`) show the job in MCA's
+  UI and dress them (`McaSkinMixin`: mason's, farmer's, MCA miner's and lumberjack's clothes); MCA counts them
+  important, so it never makes them guards or lets the job lapse. By day `VillagerWorkMixin` runs their work in
+  place of their brain (`Workers.step`); at night, frightened, hurt, talked to, or idle, they live as villagers. A
+  worker `Folk` in an old save becomes a villager with the same job on its next tick. Camps keep `Folk`.
+- **MCA's Professions menu** (adult, monarch rank, MCA's own gate) gets Builder, Farmer, Miner and Woodcutter
+  (`McaScreensMixin`, `McaCommandMixin` → `McaCompat.promote`): they join the settlement's crew (its foreman if it has
+  none), or are told why not (no settlement here, no farm, no mine dug, no tree farm). Setting one back to villager
+  or guard frees the place.
+- **Guards** (Andy's card, recommended option while unanswered): a realm's guard vacancies are filled by making a
+  villager an MCA guard (or archer, 1 in 3); MCA's own guards in a realm's village are counted on its roster as
+  `GUARD`. `McaGuardFoesMixin` sets them on its foes too (players it counts hostile, barbarians, enemies' folk in a
+  war). Archers on posts, the starting garrison, escorts and war parties are still `Folk` soldiers.
+- **Miners' torches**: where a miner digs out a dark spot underground (block light under 7), a torch goes on its floor
+  or a wall (`Gatherers.light`).
+- `/kingdomsdev stock`: 256 each of common building stuff into the nearest faction's storage (dev runs only).
+- Seen in game (dev server, MCA loaded, Caelwold at -320,-327): the founding crew were MCA villagers (foreman and two
+  workers, `jaymoskingdoms:builder`, shovels) who fetched, hauled oak logs and built once stocked; MCA guards counted
+  on the roster; a zombie went straight for a faction-less farmer folk, which ran; MCA's Professions page showed the
+  four new rows and Builder made Nikoll "Caelwold's Builder" in new clothes with a shovel. Not seen: miners' torches,
+  guards attacking a hostile player, farmer/miner/woodcutter promotion.

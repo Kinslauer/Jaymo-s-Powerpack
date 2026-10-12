@@ -36,6 +36,9 @@ public final class JaymosKingdoms implements ModInitializer {
 			.clientTrackingRange(10)
 			.build(key));
 		FabricDefaultAttributeRegistry.register(FOLK, Folk.guardAttributes());
+		// 0.5.13: the workers' villager professions (with MCA, a settlement's workers are its villagers), MCA told of them
+		Professions.register();
+		McaCompat.register();
 		// the attachments (registered as their classes load)
 		LOGGER.debug("kingdom attachments: {} {} {}", Factions.ALL, Factions.KEEPS, Reputation.REPUTATION);
 		KingdomEvents.register();
@@ -73,6 +76,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Javelins.register();
 		Tempers.register();
 		Frights.register();
+		// 0.5.13: monsters hunt the settlements' folk as they do villagers
+		Prey.register();
 		Theft.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
 		LOGGER.debug("war attachment: {}", WarData.WARS);
