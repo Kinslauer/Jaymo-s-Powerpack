@@ -34,6 +34,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.Wagon.TYPE, WagonRenderer::new);
 		CampSkins.register();
 		MobAnimations.register();
+		PullerPose.register();
 		SpeechBubbles.register();
 	}
 

@@ -318,5 +318,10 @@
 	"message.jaymoskingdoms.rickshaw.too_far": "Stand by the rickshaw to hire it.",
 	"message.jaymoskingdoms.rickshaw.cant_pay": "The fare is %s emeralds, and you don't have them.",
 	"message.jaymoskingdoms.rickshaw.off": "%s takes you to %s for %s emeralds. Sneak to get down on the way.",
-	"message.jaymoskingdoms.rickshaw.arrived": "Here's %s."
+	"message.jaymoskingdoms.rickshaw.arrived": "Here's %s.",
+	"message.jaymoskingdoms.rickshaw.take_the_cab": "%s carries goods and townsfolk. %s keeps a carriage for travellers: it waits across the bell.",
+	"message.jaymoskingdoms.rickshaw.worn_out": "%s looks worn out. It'll be a slow ride.",
+	"entity.jaymoskingdoms.cab_driver_of": "Carriage Driver of %s",
+	"message.jaymoskingdoms.cab.no_driver": "Nobody's driving this carriage.",
+	"message.jaymoskingdoms.cab.off": "%s drives you to %s for %s emeralds. Sneak to get down on the way."
 }

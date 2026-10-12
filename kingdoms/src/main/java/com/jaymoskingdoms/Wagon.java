@@ -49,7 +49,8 @@ import org.jspecify.annotations.Nullable;
  * kept here) or a passenger; right-clicked, its puller offers a player a ride.
  */
 public final class Wagon extends Entity {
-	public static final int CART = 0, CARRIAGE = 1, RICKSHAW = 2;
+	/** (0.5.27) {@link #CAB}: a hired carriage of a rich realm's, for players ({@link Cabs}). */
+	public static final int CART = 0, CARRIAGE = 1, RICKSHAW = 2, CAB = 3;
 	/** What a cart's load looks like: nothing, stone and ore, food, a bit of everything. */
 	public static final int EMPTY = 0, STONE = 1, FOOD = 2, GOODS = 3;
 	/** How far behind its horse's middle its own middle trails (a cart, a carriage). */
@@ -64,6 +65,9 @@ public final class Wagon extends Entity {
 	private static final EntityDataAccessor<Integer> KIND = SynchedEntityData.defineId(Wagon.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> COLOR = SynchedEntityData.defineId(Wagon.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> LOAD = SynchedEntityData.defineId(Wagon.class, EntityDataSerializers.INT);
+	/** (0.5.27) A rickshaw's puller (entity id, -1 for none) and how worn out they are (0 fresh to 1 spent): how the client poses them. */
+	private static final EntityDataAccessor<Integer> PULLER = SynchedEntityData.defineId(Wagon.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Float> TIRED = SynchedEntityData.defineId(Wagon.class, EntityDataSerializers.FLOAT);
 
 	private @Nullable UUID horse;
 	private int faction = -1;
@@ -167,6 +171,7 @@ public final class Wagon extends Entity {
 		return switch (this.kind()) {
 			case CARRIAGE -> CARRIAGE_HITCH;
 			case RICKSHAW -> RICKSHAW_HITCH;
+			case CAB -> CARRIAGE_HITCH;
 			default -> CART_HITCH;
 		};
 	}
@@ -203,6 +208,20 @@ public final class Wagon extends Entity {
 		return all;
 	}
 
+	/** The entity id of whoever pulls it (client and server), or -1. */
+	public int pullerId() {
+		return this.entityData.get(PULLER);
+	}
+
+	/** How worn out its puller is: 0 fresh, 1 spent. */
+	public float tired() {
+		return this.entityData.get(TIRED);
+	}
+
+	void setTired(float tired) {
+		this.entityData.set(TIRED, net.minecraft.util.Mth.clamp(tired, 0.0F, 1.0F));
+	}
+
 	boolean parked() {
 		return this.parked;
 	}
@@ -235,6 +254,19 @@ public final class Wagon extends Entity {
 			return;
 		}
 		Entity horse = this.horse();
+		if (this.kind() == CAB) {
+			this.horseLost = horse == null || !horse.isAlive() ? this.horseLost + 1 : 0;
+			Cabs.tick(level, this, horse);
+			if (horse == null || !horse.isAlive()) {
+				return;
+			}
+		}
+		if (this.kind() == RICKSHAW) {
+			int id = horse == null ? -1 : horse.getId();
+			if (this.pullerId() != id) {
+				this.entityData.set(PULLER, id);
+			}
+		}
 		if (this.kind() == RICKSHAW && (horse == null || !Rickshaws.isPuller(horse))) {
 			// (its puller's gone, or given other work: in a while it's taken apart)
 			if (++this.horseLost >= Rickshaws.ABANDON_TICKS) {
@@ -292,7 +324,7 @@ public final class Wagon extends Entity {
 
 	@Override
 	protected boolean canAddPassenger(Entity passenger) {
-		return (this.kind() == CARRIAGE || this.kind() == RICKSHAW) && this.getPassengers().isEmpty();
+		return (this.kind() == CARRIAGE || this.kind() == RICKSHAW || this.kind() == CAB) && this.getPassengers().isEmpty();
 	}
 
 	@Override
@@ -339,7 +371,7 @@ public final class Wagon extends Entity {
 		if (hand != InteractionHand.MAIN_HAND) {
 			return InteractionResult.PASS;
 		}
-		if (player instanceof ServerPlayer sp && this.level() instanceof ServerLevel level && this.kind() == RICKSHAW) {
+		if (player instanceof ServerPlayer sp && this.level() instanceof ServerLevel level && (this.kind() == RICKSHAW || this.kind() == CAB)) {
 			if (!player.isPassenger()) {
 				Rickshaws.hail(level, this, sp);
 			}
@@ -360,6 +392,8 @@ public final class Wagon extends Entity {
 		entityData.define(KIND, CART);
 		entityData.define(COLOR, -1);
 		entityData.define(LOAD, EMPTY);
+		entityData.define(PULLER, -1);
+		entityData.define(TIRED, 0.0F);
 	}
 
 	@Override
@@ -375,6 +409,7 @@ public final class Wagon extends Entity {
 		this.cargo.addAll(input.read("cargo", ItemStack.CODEC.listOf()).orElse(List.of()));
 		this.parked = input.getBooleanOr("parked", false);
 		this.ride = input.getIntOr("ride", -1);
+		this.entityData.set(TIRED, input.getFloatOr("tired", 0.0F));
 	}
 
 	@Override
@@ -393,5 +428,6 @@ public final class Wagon extends Entity {
 		}
 		output.putBoolean("parked", this.parked);
 		output.putInt("ride", this.ride);
+		output.putFloat("tired", this.tired());
 	}
 }

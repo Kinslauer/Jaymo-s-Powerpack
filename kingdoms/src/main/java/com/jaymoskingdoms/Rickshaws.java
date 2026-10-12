@@ -21,6 +21,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.npc.villager.Villager;
@@ -82,6 +83,14 @@ public final class Rickshaws {
 	static final int HOP = 8;
 	/** A trip given up after this long (ticks). */
 	static final long TRIP_MOST = 24000L / 2;
+	/**
+	 * (0.5.27) Wearing out: a puller tires with every block pulled (more with a passenger or a load aboard), spent after
+	 * {@link #TIRED_BLOCKS}; at most {@link #SLOWEST} of their speed is lost. Waiting at the rank they get a little back
+	 * each tick; a night's sleep sets them right. Spent past {@link #WINDED}, now and then they stop to catch their breath.
+	 */
+	static final double TIRED_BLOCKS = 1800.0, LADEN = 1.6, SLOWEST = 0.5;
+	static final float RECOVER = 0.00003F, WINDED = 0.75F;
+	static final int BREATHER_CHANCE = 500, BREATHER_TICKS = 70;
 	/** Its puller gone this long (ticks) and a rickshaw is left: its load spilled, the rickshaw taken apart. */
 	static final int ABANDON_TICKS = 600;
 
@@ -99,6 +108,11 @@ public final class Rickshaws {
 		long rankAt;
 		final Gatherers.Trip trip = new Gatherers.Trip();
 		long startedAt;
+		/** Where the puller was last tick (how far they've pulled), and a breather till when. */
+		@Nullable Vec3 last;
+		long breatherUntil;
+		/** How worn out, exactly (the rickshaw carries it to the client a step at a time). */
+		float tired = Float.NaN;
 	}
 
 	private static final Map<UUID, Job> JOBS = new HashMap<>();
@@ -210,6 +224,7 @@ public final class Rickshaws {
 			return;
 		}
 		long now = level.getGameTime();
+		wearOut(puller, job, rickshaw);
 		if (job.phase != WAIT && job.phase != PARK && now - job.startedAt > TRIP_MOST) {
 			// (a trip that's gone on too long: given up, home)
 			end(level, f, puller, job, rickshaw, now);
@@ -252,7 +267,10 @@ public final class Rickshaws {
 			case UNPARK -> {
 				puller.setTask("fetching the rickshaw");
 				if (drive(level, puller, job, rickshaw.blockPosition(), 1.5, PULL_SPEED, now)) {
+					// (a new day, after a night's sleep)
 					rickshaw.setParked(false);
+					rickshaw.setTired(0.0F);
+					job.tired = 0.0F;
 					start(job, WAIT, null, now);
 				}
 			}
@@ -595,7 +613,7 @@ public final class Rickshaws {
 	// ---- players ----------------------------------------------------------------------------------------------------
 
 	/** The settlements a rickshaw of {@code f} would take {@code player} to, nearest first, with their fares. */
-	private static List<Faction> destinations(ServerLevel level, Faction f, ServerPlayer player, Vec3 from) {
+	static List<Faction> destinations(ServerLevel level, Faction f, ServerPlayer player, Vec3 from) {
 		List<Faction> out = new ArrayList<>();
 		for (Faction other : Factions.all(level.getServer())) {
 			double d = Math.sqrt(Vec3.atBottomCenterOf(other.seat()).distanceToSqr(from));
@@ -616,6 +634,10 @@ public final class Rickshaws {
 
 	/** A player right-clicked a rickshaw: where it goes and the fares (each a click to hire it), or why not. */
 	static void hail(ServerLevel level, Wagon rickshaw, ServerPlayer player) {
+		if (rickshaw.kind() == Wagon.CAB) {
+			Cabs.hail(level, rickshaw, player);
+			return;
+		}
 		MinecraftServer server = level.getServer();
 		Faction f = Factions.get(server, rickshaw.faction());
 		Entity puller = rickshaw.horse();
@@ -631,20 +653,55 @@ public final class Rickshaws {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.busy", puller.getName()).withStyle(ChatFormatting.GRAY));
 			return;
 		}
-		List<Faction> to = destinations(level, f, player, rickshaw.position());
-		if (to.isEmpty()) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.nowhere", puller.getName()).withStyle(ChatFormatting.GRAY));
+		if (Cabs.of(level, f) != null) {
+			// (0.5.27) a rich realm's players ride in its hired carriage; its pullers see to everything else
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.take_the_cab", puller.getName(), f.name()).withStyle(ChatFormatting.GRAY));
 			return;
 		}
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.offer", puller.getName()).withStyle(ChatFormatting.GOLD));
+		if (offer(level, f, rickshaw, player, puller) && rickshaw.tired() >= WINDED) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.worn_out", puller.getName()).withStyle(ChatFormatting.GRAY));
+		}
+	}
+
+	/** Where {@code wagon} (a rickshaw or a cab) goes from here and the fares, each a click to hire it; false if nowhere. */
+	static boolean offer(ServerLevel level, Faction f, Wagon wagon, ServerPlayer player, Entity driver) {
+		List<Faction> to = destinations(level, f, player, wagon.position());
+		if (to.isEmpty()) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.nowhere", driver.getName()).withStyle(ChatFormatting.GRAY));
+			return false;
+		}
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.offer", driver.getName()).withStyle(ChatFormatting.GOLD));
 		for (Faction dest : to) {
-			int fare = fare(rickshaw.position(), dest);
-			int blocks = (int)Math.sqrt(Vec3.atBottomCenterOf(dest.seat()).distanceToSqr(rickshaw.position()));
-			String command = "/kingdom ride " + rickshaw.getId() + " " + dest.id();
+			int fare = fare(wagon.position(), dest);
+			int blocks = (int)Math.sqrt(Vec3.atBottomCenterOf(dest.seat()).distanceToSqr(wagon.position()));
+			String command = "/kingdom ride " + wagon.getId() + " " + dest.id();
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.choice", dest.name(), blocks, fare)
 				.withStyle(style -> style.withColor(ChatFormatting.GREEN).withUnderlined(true).withClickEvent(new ClickEvent.RunCommand(command))
 					.withHoverEvent(new HoverEvent.ShowText(Component.translatable("message.jaymoskingdoms.rickshaw.hover", dest.name(), fare)))));
 		}
+		return true;
+	}
+
+	/** {@code player} pays {@code fare} emeralds into {@code f}'s treasury (nothing in creative); false if they can't. */
+	static boolean pay(ServerPlayer player, Faction f, int fare) {
+		if (player.isCreative()) {
+			return true;
+		}
+		if (player.getInventory().countItem(Items.EMERALD) < fare) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.cant_pay", fare).withStyle(ChatFormatting.RED));
+			return false;
+		}
+		int take = fare;
+		for (int slot = 0; slot < player.getInventory().getContainerSize() && take > 0; slot++) {
+			ItemStack stack = player.getInventory().getItem(slot);
+			if (stack.is(Items.EMERALD)) {
+				int n = Math.min(take, stack.getCount());
+				stack.shrink(n);
+				take -= n;
+			}
+		}
+		Factions.update(player.level().getServer(), f.id(), x -> x.withTreasury(x.treasury() + fare));
+		return true;
 	}
 
 	/** The puller's waiting at the rank (or about the town on nothing that can't wait) with nobody aboard. */
@@ -656,6 +713,10 @@ public final class Rickshaws {
 
 	/** {@code /kingdom ride <rickshaw> <settlement>}: the fare paid, the player aboard and away. Returns 1 if so. */
 	static int hire(ServerPlayer player, int rickshawId, int destination) {
+		if (player.level() instanceof ServerLevel level && level.getEntity(rickshawId) instanceof Wagon cab && cab.kind() == Wagon.CAB
+			&& player.distanceTo(cab) <= HIRE_REACH + 2.0) {
+			return Cabs.hire(level, player, cab, destination);
+		}
 		if (!(player.level() instanceof ServerLevel level) || !(level.getEntity(rickshawId) instanceof Wagon rickshaw) || rickshaw.kind() != Wagon.RICKSHAW
 			|| player.distanceTo(rickshaw) > HIRE_REACH) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.too_far").withStyle(ChatFormatting.RED));
@@ -675,6 +736,9 @@ public final class Rickshaws {
 			return 0;
 		}
 		int fare = fare(rickshaw.position(), to);
+		if (Cabs.of(level, f) != null) {
+			return 0;
+		}
 		if (!player.isCreative() && player.getInventory().countItem(Items.EMERALD) < fare) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.cant_pay", fare).withStyle(ChatFormatting.RED));
 			return 0;
@@ -682,18 +746,7 @@ public final class Rickshaws {
 		if (!player.startRiding(rickshaw)) {
 			return 0;
 		}
-		if (!player.isCreative()) {
-			int take = fare;
-			for (int slot = 0; slot < player.getInventory().getContainerSize() && take > 0; slot++) {
-				ItemStack stack = player.getInventory().getItem(slot);
-				if (stack.is(Items.EMERALD)) {
-					int n = Math.min(take, stack.getCount());
-					stack.shrink(n);
-					take -= n;
-				}
-			}
-			Factions.update(server, f.id(), x -> x.withTreasury(x.treasury() + fare));
-		}
+		pay(player, f, fare);
 		rickshaw.setParked(false);
 		rickshaw.setRide(to.id());
 		Job job = JOBS.computeIfAbsent(puller.getUUID(), u -> new Job());
@@ -745,6 +798,22 @@ public final class Rickshaws {
 	 * deep water) it hops ahead {@link #HOP} blocks in a puff, passenger and all, never the whole way at once.
 	 */
 	private static boolean drive(ServerLevel level, Worker puller, Job job, BlockPos to, double reach, double speed, long now) {
+		if (now < job.breatherUntil) {
+			// (catching their breath, hands on their knees)
+			puller.getNavigation().stop();
+			job.trip.improvedAt = now;
+			if (now % 10 == 0) {
+				level.sendParticles(ParticleTypes.SPLASH, puller.getX(), puller.getY() + 1.7, puller.getZ(), 3, 0.2, 0.1, 0.2, 0.0);
+			}
+			return false;
+		}
+		float tired = job.rickshaw == null ? 0.0F : job.rickshaw.tired();
+		if (tired > WINDED && level.getRandom().nextInt(BREATHER_CHANCE) == 0) {
+			job.breatherUntil = now + BREATHER_TICKS;
+			level.playSound(null, puller.blockPosition(), SoundEvents.PLAYER_BREATH, SoundSource.NEUTRAL, 0.8F, 0.8F);
+			return false;
+		}
+		speed *= 1.0 - SLOWEST * tired;
 		Vec3 goal = Vec3.atBottomCenterOf(to);
 		double dx = puller.getX() - goal.x, dz = puller.getZ() - goal.z;
 		double across = Math.sqrt(dx * dx + dz * dz);
@@ -784,6 +853,39 @@ public final class Rickshaws {
 			puller.getNavigation().moveTo(leg.getX() + 0.5, leg.getY(), leg.getZ() + 0.5, speed);
 		}
 		return false;
+	}
+
+	/** Tires them by how far they pulled since last tick (laden or not); standing at the rank, a little back. */
+	private static void wearOut(Worker puller, Job job, Wagon rickshaw) {
+		Vec3 here = puller.position();
+		Vec3 last = job.last;
+		job.last = here;
+		if (last == null || rickshaw.parked()) {
+			return;
+		}
+		double moved = Math.sqrt(Mth.square(here.x - last.x) + Mth.square(here.z - last.z));
+		if (moved > 2.0) {
+			// (a hop or a teleport isn't pulling)
+			return;
+		}
+		boolean laden = rickshaw.isVehicle() || !rickshaw.cargo().isEmpty();
+		if (Float.isNaN(job.tired)) {
+			job.tired = rickshaw.tired();
+		}
+		if (moved > 0.01) {
+			job.tired = Math.min(1.0F, job.tired + (float)(moved * (laden ? LADEN : 1.0) / TIRED_BLOCKS));
+		} else if (job.phase == WAIT) {
+			job.tired = Math.max(0.0F, job.tired - RECOVER);
+		}
+		if (Math.abs(job.tired - rickshaw.tired()) >= 0.01F) {
+			rickshaw.setTired(job.tired);
+		}
+	}
+
+	/** How worn out {@code puller} is (0 fresh, 1 spent), for a word to a player. */
+	static float tired(Entity puller) {
+		Job job = JOBS.get(puller.getUUID());
+		return job == null || job.rickshaw == null ? 0.0F : job.rickshaw.tired();
 	}
 
 	// ---- the rickshaw's own -----------------------------------------------------------------------------------------

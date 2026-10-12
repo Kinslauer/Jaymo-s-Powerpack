@@ -108,6 +108,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Cavalry.register();
 		Carriages.register();
 		Rickshaws.register();
+		Cabs.register();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();
 			Gatherers.clear();

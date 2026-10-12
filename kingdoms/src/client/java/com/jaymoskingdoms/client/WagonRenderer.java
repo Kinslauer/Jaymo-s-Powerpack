@@ -100,8 +100,8 @@ public final class WagonRenderer extends EntityRenderer<Wagon, WagonRenderer.Sta
 		List<Box> boxes = new ArrayList<>();
 		List<Wheel> wheels = new ArrayList<>();
 		BlockState wheelWood;
-		if (state.kind == Wagon.CARRIAGE) {
-			carriage(boxes, wheels, state.color);
+		if (state.kind == Wagon.CARRIAGE || state.kind == Wagon.CAB) {
+			carriage(boxes, wheels, state.color, state.kind == Wagon.CARRIAGE);
 			wheelWood = block("dark_oak_planks");
 		} else if (state.kind == Wagon.RICKSHAW) {
 			rickshaw(boxes, wheels, state.load, state.color);
@@ -257,9 +257,11 @@ public final class WagonRenderer extends EntityRenderer<Wagon, WagonRenderer.Sta
 		box(b, pole, -0.42F, 0.72F, 0.3F, 0.42F, 0.79F, 0.36F);
 	}
 
-	private static void carriage(List<Box> b, List<Wheel> wheels, int color) {
-		BlockState wood = block("dark_oak_planks"), post = block("stripped_dark_oak_log"), pole = block("stripped_spruce_log");
-		BlockState cloth = block(dye(color) + "_wool"), gold = block("gold_block");
+	/** A king's carriage ({@code royal}: gilt) or (0.5.27) a hired carriage, the same coach in plain wood and its realm's cloth. */
+	private static void carriage(List<Box> b, List<Wheel> wheels, int color, boolean royal) {
+		BlockState wood = block(royal ? "dark_oak_planks" : "spruce_planks"), post = block(royal ? "stripped_dark_oak_log" : "stripped_spruce_log");
+		BlockState pole = block("stripped_spruce_log");
+		BlockState cloth = block(dye(color) + "_wool"), gold = block(royal ? "gold_block" : "dark_oak_planks");
 		wheels.add(new Wheel(-0.98F, 0.65F, -0.85F, 0.65F));
 		wheels.add(new Wheel(0.98F, 0.65F, -0.85F, 0.65F));
 		wheels.add(new Wheel(-0.92F, 0.45F, 0.95F, 0.45F));

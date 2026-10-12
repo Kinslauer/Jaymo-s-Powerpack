@@ -1502,4 +1502,17 @@ Andy asked for villagers who rickshaw goods and people about the villages and ki
   refused. Out of sight of any player after a trip, the puller is back at the rank in a puff.
 - Stuck, a puller hops `HOP` (8) blocks ahead in a puff, never the whole way. A rickshaw whose puller is gone (or given
   other work) for `ABANDON_TICKS` spills its load and is taken apart.
+- **Worn out** (Andy's follow-up): pullers tire with every block pulled (more laden), spent after `TIRED_BLOCKS`
+  (1800), losing up to `SLOWEST` (half) their speed. They get a little back waiting at the rank and all of it after a
+  night's sleep; spent past `WINDED` they stop now and then to catch their breath (sweat drops, a gasp). A player
+  hailing a worn-out puller is told it'll be a slow ride. The rickshaw syncs its puller and their tiredness (`Wagon.PULLER`,
+  `TIRED`) for the client.
+- **Pose** (`PullerPose`, client, through the same model hooks as `MobAnimations`): bent into the shafts like a crouch,
+  hands down at the hips gripping them, a tug back with each stride; the more tired, the lower the lean, the heavier
+  the tug and the more the head hangs; stood still and spent, their shoulders heave. MCA villagers' clothes layers and
+  breasts follow (`McaPullerPose`).
+- **Cabs** (`Cabs`, `Wagon.CAB`): a realm whose treasury holds more than `Cabs.RICH` (300) emeralds keeps a hired
+  carriage (a driver on a horse, a plain coach in its colours) across the bell from the rickshaw rank. It, not the
+  rickshaws, takes players to other settlements (same fares and offer, faster); a rickshaw there points players to it.
+  The pullers do everything else. Below 300 the cab is let go once it's back and empty.
 - Not yet seen in game: all of it (built only).
