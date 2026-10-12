@@ -476,7 +476,10 @@ public final class KingdomEvents {
 		}
 		ServerPlayer killer = source.getEntity() instanceof ServerPlayer p ? p : null;
 		if (!folk.leader()) {
-			Economy.lost(server, faction.id(), folk.role());
+			// (0.5.14) a caravan's carters and guards were never on its roster
+			if (!Caravans.isCaravanFolk(folk)) {
+				Economy.lost(server, faction.id(), folk.role());
+			}
 			// a camp's hatred of you changes nothing: barbarians are at war with everyone already
 			if (killer != null && faction.type() != FactionType.BARBARIAN) {
 				Reputation.change(killer, faction, Folk.isBuilder(folk.role()) ? REP_KILL_BUILDER : REP_KILL_GUARD);
