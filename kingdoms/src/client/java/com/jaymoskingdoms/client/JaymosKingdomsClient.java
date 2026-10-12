@@ -33,6 +33,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.Wagon.TYPE, WagonRenderer::new);
 		CampSkins.register();
 		MobAnimations.register();
+		SpeechBubbles.register();
 	}
 
 	/** Their render state: which of them it is, its faction's style (type ordinal), and the dye it wears (-1 for none). */

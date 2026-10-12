@@ -1381,3 +1381,12 @@ Tested on the dev server: farming fiefdom Tormoor sent caravans to wealthy Hedva
 river, unloaded, back home and gone, both in sight and out of every player's range; Hedvale bought its carriage and
 the king rode his round in it; it has 4 mounted guards and 2 mounted archers. The carts' and carriage's models
 seen in the client. Not seen in game: a player robbing a cart, a mining fiefdom's caravan, mounted war parties.
+
+## 0.5.17: villager talk over their heads, not in chat
+- **Speech** (`Speech`, client `SpeechBubbles`): words spoken aloud float over the speaker's head for players within
+  range (newest at the bottom, 3 lines at most, fading after 3-9 s by length) instead of going to chat. A ruler's
+  temper lines and a witness's cry (theft, vandalism, murder, arson) use it; a client without the mod gets chat.
+- **MCA villagers' talk** (to each other, to you, screams and gossip) goes the same way (client mixin on MCA's
+  `ClientHandlerImpl`, only with MCA). It still goes to chat while you're in a villager's talk screen, or when the
+  speaker isn't loaded on your client.
+Tested on the dev client with MCA: hurt villagers' lines and a witness's "Murder!" floated over them, nothing in chat.
