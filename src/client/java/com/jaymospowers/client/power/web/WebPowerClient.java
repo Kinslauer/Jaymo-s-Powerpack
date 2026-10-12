@@ -30,6 +30,7 @@ public final class WebPowerClient implements PowerClient {
 	public static final WebPowerClient INSTANCE = new WebPowerClient();
 
 	final WebSwing swing = new WebSwing();
+	private final WebWallRunClient wallRun = new WebWallRunClient();
 	/** What the swing key would stick to right now, for the reticle (refreshed every other tick). */
 	private WebAnchors.@Nullable Anchor preview;
 
@@ -113,6 +114,7 @@ public final class WebPowerClient implements PowerClient {
 	@Override
 	public void onActiveChanged(LocalPlayer player, boolean active) {
 		swing.reset();
+		wallRun.reset();
 		preview = null;
 		WebSymbioteClient.reset();
 	}
@@ -234,6 +236,7 @@ public final class WebPowerClient implements PowerClient {
 	@Override
 	public void tick(Minecraft minecraft, LocalPlayer player) {
 		swing.tick(minecraft, player);
+		wallRun.tick(player, swing);
 		grabAim = com.jaymospowers.power.web.WebSymbiote.armored(player) ? grabTarget(player) : null;
 		WebSymbioteClient.tick(minecraft, player, swing);
 		if (swing.attached() || swing.pull != null || player.isSpectator()) {
