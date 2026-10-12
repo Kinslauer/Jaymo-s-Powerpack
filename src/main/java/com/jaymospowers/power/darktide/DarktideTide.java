@@ -44,8 +44,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * C and Z. Ascended: sneak + C <b>Tide Arms</b> (bare hands → twin daggers → katana of dark water; your real items are
- * stored and come back). While corrupted, Z on a Jaymo's Kitchen corpse takes its shadow; ascended, <b>Necromancy</b>: tap C
+ * C and Z. Ascended: sneak + C <b>Tide Arms</b> (bare hands → twin daggers → katana of dark water; a real knife → a
+ * katana of its tier, a real katana → twin daggers of its tier; your real items are stored and come back). While corrupted, Z on a Jaymo's Kitchen corpse takes its shadow; ascended, <b>Necromancy</b>: tap C
  * to raise one, which follows and defends you until the corruption lifts. Corrupted, not ascended: C is <b>Drown</b>, a
  * sphere of water around a target.
  */
@@ -185,8 +185,19 @@ final class DarktideTide {
 		if (level.getGameTime() < live.armsSwapAt || !DarktidePower.ready(player, DarktideState.ARMS)) {
 			return;
 		}
-		int next = (live.arms + 1) % 3;
 		Inventory inventory = player.getInventory();
+		// the real blade in hand sets the tier and the other kind comes first: a knife becomes a katana, a katana twin
+		// daggers, and the next press breaks it back down into what you held; bare hands go daggers, katana, bare
+		ItemStack original = live.arms == DarktideState.ARMS_BARE ? player.getItemInHand(InteractionHand.MAIN_HAND) : stored(player).get(0);
+		String tier = DarktideWeapons.tierOf(original);
+		int next;
+		if (live.arms == DarktideState.ARMS_BARE) {
+			next = DarktideWeapons.isKnife(original) ? DarktideState.ARMS_KATANA : DarktideState.ARMS_DAGGERS;
+		} else if (live.arms == DarktideState.ARMS_DAGGERS) {
+			next = DarktideWeapons.isKatana(original) ? DarktideState.ARMS_BARE : DarktideState.ARMS_KATANA;
+		} else {
+			next = DarktideState.ARMS_BARE;
+		}
 		if (live.arms == DarktideState.ARMS_BARE) {
 			// put the real things away
 			ItemStack main = player.getItemInHand(InteractionHand.MAIN_HAND).copy();
@@ -200,11 +211,11 @@ final class DarktideTide {
 		}
 		switch (next) {
 			case DarktideState.ARMS_DAGGERS -> {
-				player.setItemInHand(InteractionHand.MAIN_HAND, mark(DarktideWeapons.conjure("knife"), player));
-				player.setItemInHand(InteractionHand.OFF_HAND, mark(DarktideWeapons.conjure("knife"), player));
+				player.setItemInHand(InteractionHand.MAIN_HAND, mark(DarktideWeapons.conjure("knife", tier), player));
+				player.setItemInHand(InteractionHand.OFF_HAND, mark(DarktideWeapons.conjure("knife", tier), player));
 			}
 			case DarktideState.ARMS_KATANA -> {
-				player.setItemInHand(InteractionHand.MAIN_HAND, mark(DarktideWeapons.conjure("katana"), player));
+				player.setItemInHand(InteractionHand.MAIN_HAND, mark(DarktideWeapons.conjure("katana", tier), player));
 				restoreOffhand(player);
 			}
 			default -> restoreStored(player);
@@ -217,6 +228,13 @@ final class DarktideTide {
 		level.sendParticles(ParticleTypes.SPLASH, hand.x, hand.y, hand.z, 24, 0.35, 0.3, 0.35, 0.15);
 		level.sendParticles(ParticleTypes.SQUID_INK, hand.x, hand.y, hand.z, 12, 0.3, 0.3, 0.3, 0.03);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BUCKET_FILL, SoundSource.PLAYERS, 0.9F, 0.6F);
+		if (next == DarktideState.ARMS_BARE) {
+			// the water blade dissolves back into what you held
+			Vec3 at = player.getEyePosition().add(player.getLookAngle().scale(0.6)).add(0.0, -0.5, 0.0);
+			level.sendParticles(ParticleTypes.FALLING_WATER, at.x, at.y, at.z, 20, 0.25, 0.3, 0.25, 0.0);
+			level.sendParticles(new DustParticleOptions(0x0A1838, 1.4F), at.x, at.y, at.z, 16, 0.2, 0.3, 0.2, 0.0);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BUCKET_EMPTY, SoundSource.PLAYERS, 0.8F, 1.3F);
+		}
 	}
 
 	private static void removeConjured(ServerPlayer player) {
