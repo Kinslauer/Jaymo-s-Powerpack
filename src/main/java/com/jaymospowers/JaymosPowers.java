@@ -34,6 +34,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.power.darktide.DarktidePower.init();
 		// weapons from the Stone Age to the pirates (after Age of Weapons), not a power
 		com.jaymospowers.armory.Armory.init();
+		com.jaymospowers.tinkering.Tinkering.init();
 		registerAttachments();
 	}
 
