@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.equestrian;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -41,6 +42,13 @@ public class WarElephant extends AbstractHorse {
 			.add(Attributes.ARMOR, 6.0)
 			.add(Attributes.STEP_HEIGHT, 1.1)
 			.add(Attributes.SAFE_FALL_DISTANCE, 4.0);
+	}
+
+	/** A mammoth goes by its own name. */
+	@Override
+	protected Component getTypeName() {
+		Equine e = this.getAttached(Equestrian.EQUINE);
+		return e != null && e.breed() == Breed.WOOLLY_MAMMOTH ? Component.translatable(e.breed().key()) : super.getTypeName();
 	}
 
 	/** The charge: a trumpet blast. */

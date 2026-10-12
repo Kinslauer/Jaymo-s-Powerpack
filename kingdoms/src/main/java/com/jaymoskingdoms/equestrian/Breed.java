@@ -26,11 +26,17 @@ public enum Breed {
 	/** Desert kingdoms: doesn't tire in heat, fast on sand; hates cold and snow. */
 	DESERT_HORSE(0.27, 0.33, 0.60, 0.85, 20, 26, 1.0, 1.0, 0.5, 0.96F, 0.92F, 1.02F, 1.0F, Gait.GALLOP,
 		"white_grey", "golden_bay", "fleabitten", "black_star", "chestnut", "gold_shimmer"),
-	/** Desert kingdoms' war elephant ({@link WarElephant}): huge, brave, tramples what it charges; slow, barely jumps. */
-	WAR_ELEPHANT(0.18, 0.22, 0.42, 0.46, 90, 110, 1.4, 0.9, 0.9, 1.75F, 1.0F, 1.0F, 1.0F, Gait.GALLOP,
-		"grey", "dusty", "painted", "albino");
+	/**
+	 * Desert kingdoms' war elephant ({@link WarElephant}): huge, brave, tramples what it charges; slow, barely jumps.
+	 * Its hides are Mo' Creatures' Indian, African (the big ears) and royal (painted) elephants.
+	 */
+	WAR_ELEPHANT(0.18, 0.22, 0.42, 0.46, 90, 110, 1.4, 0.9, 0.9, 1.1F, 1.0F, 1.0F, 1.0F, Gait.GALLOP,
+		"indian", "african", "royal"),
+	/** Snowy kingdoms' woolly mammoth (a {@link WarElephant} too): bigger and tougher still, tireless in the cold, wilts in the heat. */
+	WOOLLY_MAMMOTH(0.17, 0.21, 0.42, 0.46, 110, 130, 1.5, 0.9, 0.95, 1.25F, 1.0F, 1.0F, 1.0F, Gait.GALLOP,
+		"woolly", "russet", "frost");
 
-	/** The horse breeds (every breed but the elephant). */
+	/** The horse breeds (every breed but the elephant and the mammoth). */
 	public static final Breed[] HORSES = {DESTRIER, COURSER, PALFREY, DRAFT, STEPPE_PONY, DESERT_HORSE};
 
 	public final double speedMin, speedMax, jumpMin, jumpMax;
@@ -61,6 +67,11 @@ public enum Breed {
 		this.length = length;
 		this.topGait = topGait;
 		this.coats = coats;
+	}
+
+	/** A war elephant or a mammoth (a {@link WarElephant}, not a horse). */
+	public boolean elephant() {
+		return this == WAR_ELEPHANT || this == WOOLLY_MAMMOTH;
 	}
 
 	public String id() {

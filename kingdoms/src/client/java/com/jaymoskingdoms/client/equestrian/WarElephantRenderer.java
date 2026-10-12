@@ -11,24 +11,29 @@ import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
 
-/** (0.5.34) Draws war elephants: {@link WarElephantModel} in one of the breed's four hides. */
-final class WarElephantRenderer extends MobRenderer<WarElephant, WarElephantRenderer.State, WarElephantModel> {
-	private static final Identifier[] HIDES = new Identifier[Breed.WAR_ELEPHANT.coats.length];
+import java.util.HashMap;
+import java.util.Map;
 
-	static {
-		for (int i = 0; i < HIDES.length; i++) {
-			HIDES[i] = JaymosKingdoms.id("textures/entity/war_elephant/" + Breed.WAR_ELEPHANT.coats[i] + ".png");
-		}
-	}
+/**
+ * (0.5.34) Draws war elephants and woolly mammoths: {@link WarElephantModel} in its breed's hide (Mo' Creatures' Indian,
+ * African and royal elephants; its mammoth, and two coats made from it).
+ */
+final class WarElephantRenderer extends MobRenderer<WarElephant, WarElephantRenderer.State, WarElephantModel> {
+	private static final Map<String, Identifier> HIDES = new HashMap<>();
+	private static final Identifier FALLBACK = hide("indian");
 
 	static final class State extends LivingEntityRenderState {
-		int coat;
-		boolean saddled;
+		Identifier hide = FALLBACK;
+		boolean saddled, mammoth, bigEars, royal;
 		float standAnimation;
 	}
 
+	private static Identifier hide(String coat) {
+		return HIDES.computeIfAbsent(coat, c -> JaymosKingdoms.id("textures/entity/war_elephant/" + c + ".png"));
+	}
+
 	WarElephantRenderer(EntityRendererProvider.Context context) {
-		super(context, new WarElephantModel(WarElephantModel.createBodyLayer().bakeRoot()), 1.0F);
+		super(context, new WarElephantModel(WarElephantModel.createBodyLayer().bakeRoot()), 1.3F);
 	}
 
 	@Override
@@ -40,13 +45,17 @@ final class WarElephantRenderer extends MobRenderer<WarElephant, WarElephantRend
 	public void extractRenderState(WarElephant elephant, State state, float partialTicks) {
 		super.extractRenderState(elephant, state, partialTicks);
 		Equine e = elephant.getAttached(Equestrian.EQUINE);
-		state.coat = e == null ? 0 : e.coat();
+		String coat = e == null ? "indian" : e.coatName();
+		state.hide = hide(coat);
+		state.mammoth = e != null && e.breed() == Breed.WOOLLY_MAMMOTH;
+		state.bigEars = coat.equals("african");
+		state.royal = coat.equals("royal");
 		state.saddled = !elephant.getItemBySlot(EquipmentSlot.SADDLE).isEmpty();
 		state.standAnimation = elephant.getStandAnim(partialTicks);
 	}
 
 	@Override
 	public Identifier getTextureLocation(State state) {
-		return HIDES[Math.floorMod(state.coat, HIDES.length)];
+		return state.hide;
 	}
 }

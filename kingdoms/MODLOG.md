@@ -1735,12 +1735,12 @@ with space, and buried trail ruins should get quests that suit them (more variet
 
 ## 0.5.34: Jaymo's Equestrian, stage 1 (riding)
 Andy liked SWEM (Forge/NeoForge only) and asked for our own take, built into Kingdoms; the plan doc and Andy's answers
-are in project memory (`equestrian-plan`). Nothing is taken from SWEM: original code, model and art. Package
+are in project memory (`equestrian-plan`). Nothing is taken from SWEM: original code, model and art (the elephant's look is Mo' Creatures', credited below). Package
 `com.jaymoskingdoms.equestrian` (client: `client.equestrian`); tuning numbers at the top of `Equestrian`, `Breed`, `Gait`.
 - **Every horse, skeleton horse and zombie horse is upgraded in place** the first time it loads (`ENTITY_LOAD`), so the
   stables', cavalry's, caravans', carriages' and cabs' horses get it too. A horse from before keeps its old speed and
   jump as its stats. Donkeys, mules, llamas and camels are left alone.
-- **Breeds** (`Breed`): destrier, courser, palfrey, draft, steppe pony, desert horse (and the war elephant), each with
+- **Breeds** (`Breed`): destrier, courser, palfrey, draft, steppe pony, desert horse (and the war elephant and woolly mammoth), each with
   its stat ranges, size (scale attribute) and build (drawn wider/taller/longer), courage, stamina and top gait. Wild
   horses by biome (`Equestrian.breedAt`): desert/badlands desert horses, savanna ponies and desert horses, cold lands
   drafts and ponies, plains coursers/palfreys/drafts. Undead horses take any horse breed (size and stats), never
@@ -1760,10 +1760,18 @@ are in project memory (`equestrian-plan`). Nothing is taken from SWEM: original 
   steady; steppe ponies never spook.
 - **Coats**: 6 per breed (the last rare, 4%), 3 skeleton, 3 zombie, adult and foal, drawn by `tools/gen_equestrian.py`;
   vanilla's markings layer is left off (the markings are painted in).
-- **War elephant** (`WarElephant`, `war_elephant_spawn_egg`): tamed, fed, saddled and bred like a horse; saddled it
-  wears a howdah with a banner, a crimson caparison and a forehead plate. At the canter and faster it tramples
-  monsters (and whatever targets its rider); sprinting is a trumpeted charge. Desert realms' stables keep one, and a
-  wealthy desert realm puts a guard on one (`Cavalry.ELEPHANTS_ARID`, 20 emeralds).
+- **War elephant** (`WarElephant`, `war_elephant_spawn_egg`): tamed, fed, saddled and bred like a horse. It wears the
+  elephant of DrZhark's **Mo' Creatures** (GPL-3.0): its model and animation ported to 26.3 (`WarElephantModel`), and
+  its Indian, African (big ears) and royal (painted, rare) hides. Saddled, it wears Mo' Creatures' harness and wooden
+  war platform (the howdah) with our banner. At the canter and faster it tramples monsters (and whatever targets its
+  rider); sprinting is a trumpeted charge. Desert realms' stables keep one, and a wealthy desert realm puts a guard on
+  one (`Cavalry.ELEPHANTS_ARID`, 20 emeralds).
+- **Woolly mammoth** (breed `woolly_mammoth`, the same entity): bigger and tougher, tires at half the rate in the cold
+  and much faster in the heat (`MAMMOTH_COLD_DRAIN`, `MAMMOTH_HEAT_DRAIN`). Mo' Creatures' mammoth hide (domed head,
+  shaggy skirt), plus russet and a rare frost coat tinted from it. Snowy realms keep and ride mammoths where desert
+  realms keep elephants; a spawn egg used in the snow hatches a mammoth. The hides are built by
+  `tools/gen_elephant_hides.py` from Mo' Creatures' originals in `tools/mocreatures/`; the licence and a notice are in
+  `licenses/mocreatures/`, and `WarElephantModel` stays GPL-3.0.
 - **Kingdoms**: carters, coachmen and cab drivers drive drafts; guards ride destriers, archers coursers (desert horses
   in desert realms). New stables: a village's palfreys and drafts, a realm's destriers and coursers (desert horses,
   steppe ponies or a draft by climate).

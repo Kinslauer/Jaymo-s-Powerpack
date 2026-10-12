@@ -715,6 +715,7 @@
 	"breed.jaymoskingdoms.steppe_pony": "Steppe Pony",
 	"breed.jaymoskingdoms.desert_horse": "Desert Horse",
 	"breed.jaymoskingdoms.war_elephant": "War Elephant",
+	"breed.jaymoskingdoms.woolly_mammoth": "Woolly Mammoth",
 	"gait.jaymoskingdoms.halt": "Halt",
 	"gait.jaymoskingdoms.walk": "Walk",
 	"gait.jaymoskingdoms.trot": "Trot",
@@ -766,7 +767,10 @@
 	"coat.jaymoskingdoms.black_star": "Black with Star",
 	"coat.jaymoskingdoms.chestnut": "Chestnut",
 	"coat.jaymoskingdoms.gold_shimmer": "Gold Shimmer",
-	"coat.jaymoskingdoms.dusty": "Dusty",
-	"coat.jaymoskingdoms.painted": "War-painted",
-	"coat.jaymoskingdoms.albino": "Albino"
+	"coat.jaymoskingdoms.indian": "Indian",
+	"coat.jaymoskingdoms.african": "African",
+	"coat.jaymoskingdoms.royal": "Royal",
+	"coat.jaymoskingdoms.woolly": "Woolly",
+	"coat.jaymoskingdoms.russet": "Russet",
+	"coat.jaymoskingdoms.frost": "Frost"
 }

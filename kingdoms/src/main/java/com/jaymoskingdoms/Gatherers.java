@@ -306,9 +306,11 @@ public final class Gatherers {
 				BlockPos at = Construction.standable(level, mid.offset(level.getRandom().nextInt(3) - 1, 0, level.getRandom().nextInt(3) - 1), 2);
 				com.jaymoskingdoms.equestrian.Equestrian.spawn(level, stableBreed(level, f, i), at);
 			}
-			if (f.type().isRealm() && Climate.at(level, f.seat()).arid()) {
-				// (0.5.34) a desert realm's stable keeps a war elephant
-				com.jaymoskingdoms.equestrian.Equestrian.spawn(level, com.jaymoskingdoms.equestrian.Breed.WAR_ELEPHANT, Construction.standable(level, mid, 3));
+			Climate climate = Climate.at(level, f.seat());
+			if (f.type().isRealm() && Cavalry.elephantLand(climate)) {
+				// (0.5.34) a desert realm's stable keeps a war elephant, a snowy realm's a woolly mammoth
+				com.jaymoskingdoms.equestrian.Equestrian.spawn(level, climate == Climate.SNOWY ? com.jaymoskingdoms.equestrian.Breed.WOOLLY_MAMMOTH
+					: com.jaymoskingdoms.equestrian.Breed.WAR_ELEPHANT, Construction.standable(level, mid, 3));
 			}
 		}
 		if ((entry.equals("pen") || entry.equals("farm")) && Farmers.wanted(server, f)) {

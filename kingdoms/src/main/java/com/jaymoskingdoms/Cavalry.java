@@ -53,7 +53,7 @@ final class Cavalry {
 	static final int PARTY_RIDER_ONE_IN = 3;
 	/** Its horses: their speed (a horse's own runs 0.11-0.34), how far round the seat the realm's horses are looked for. */
 	static final double HORSE_SPEED = 0.3, RANGE = 112.0;
-	/** (0.5.34) A wealthy desert realm's war elephants (ridden by its guards), what one costs, and its pace under a rider of the realm. */
+	/** (0.5.34) A wealthy desert (or snowy) realm's war elephants (mammoths in the snow, ridden by its guards), what one costs, and its pace under a rider of the realm. */
 	static final int ELEPHANTS_ARID = 1, ELEPHANT_COST = 20;
 	static final double ELEPHANT_SPEED = 0.24;
 	/** Mounted archers ride round the town within this of the seat. */
@@ -206,10 +206,10 @@ final class Cavalry {
 					if (spare != null) {
 						Cavalry.teleport(rider, spare.getX(), spare.getY(), spare.getZ());
 						rider.startRiding(spare);
-					} else if (tier == Wealth.Tier.WEALTHY && Climate.at(level, f.seat()).arid() && elephants(level, round, f) < ELEPHANTS_ARID) {
-						// (0.5.34) a wealthy desert realm's war elephant
+					} else if (tier == Wealth.Tier.WEALTHY && elephantLand(Climate.at(level, f.seat())) && elephants(level, round, f) < ELEPHANTS_ARID) {
+						// (0.5.34) a wealthy desert realm's war elephant, a snowy one's woolly mammoth
 						if (buy(server, f, ELEPHANT_COST)) {
-							mount(level, rider, f, false, Breed.WAR_ELEPHANT);
+							mount(level, rider, f, false, Climate.at(level, f.seat()) == Climate.SNOWY ? Breed.WOOLLY_MAMMOTH : Breed.WAR_ELEPHANT);
 							neigh(level, rider.blockPosition());
 						}
 					} else if (buy(server, f)) {
@@ -239,6 +239,11 @@ final class Cavalry {
 		}
 		Factions.update(server, f.id(), x -> x.withTreasury(Math.max(0L, x.treasury() - cost)));
 		return true;
+	}
+
+	/** (0.5.34) Land whose realms keep war elephants: the desert (elephants) and the snow (mammoths). */
+	static boolean elephantLand(Climate climate) {
+		return climate.arid() || climate == Climate.SNOWY;
 	}
 
 	/** (0.5.34) How many of {@code f}'s war elephants are about its town. */

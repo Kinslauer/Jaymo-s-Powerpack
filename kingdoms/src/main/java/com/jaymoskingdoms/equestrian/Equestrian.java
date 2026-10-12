@@ -92,6 +92,8 @@ public final class Equestrian {
 	public static final double SAND_SPEED = 1.15, COLD_SPEED = 0.9, HEAVY_ARMOUR_SPEED = 0.85;
 	/** A desert horse's drain in the heat and in the cold; an undead horse's always. */
 	public static final double HEAT_DRAIN = 0.35, COLD_DRAIN = 1.7, UNDEAD_DRAIN = 0.5;
+	/** A mammoth's drain in the cold and in the heat. */
+	public static final double MAMMOTH_COLD_DRAIN = 0.5, MAMMOTH_HEAT_DRAIN = 1.7;
 	/** A coat's chance of being the breed's rare one. */
 	public static final float RARE_COAT_CHANCE = 0.04F;
 	/** How far a foal's stats may stray past its parents' (each side, on 0-1). */
@@ -175,8 +177,8 @@ public final class Equestrian {
 	public static void register() {
 		ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, JaymosKingdoms.id("war_elephant"));
 		WAR_ELEPHANT = Registry.register(BuiltInRegistries.ENTITY_TYPE, key, EntityType.Builder.of(WarElephant::new, MobCategory.CREATURE)
-			.sized(1.0F, 1.55F)
-			.passengerAttachments(1.42F)
+			.sized(1.5F, 2.45F)
+			.passengerAttachments(2.5F)
 			.clientTrackingRange(10)
 			.build(key));
 		FabricDefaultAttributeRegistry.register(WAR_ELEPHANT, WarElephant.createAttributes());
@@ -259,14 +261,14 @@ public final class Equestrian {
 	}
 
 	/**
-	 * A horse without a breed gets one: an elephant is an elephant; a horse a breed for its land, keeping the speed
+	 * A horse without a breed gets one: an elephant is an elephant (a mammoth in the snow); a horse a breed for its land, keeping the speed
 	 * and jump it already had (so a prized horse from before 0.5.34 stays prized); an undead one any horse breed.
 	 */
 	static Equine upgrade(ServerLevel level, AbstractHorse horse) {
 		RandomSource random = horse.getRandom();
 		Equine e;
 		if (horse instanceof WarElephant) {
-			e = Equine.roll(Breed.WAR_ELEPHANT, random);
+			e = Equine.roll(cold(horse) ? Breed.WOOLLY_MAMMOTH : Breed.WAR_ELEPHANT, random);
 		} else if (undead(horse)) {
 			e = Equine.roll(Breed.HORSES[random.nextInt(Breed.HORSES.length)], random);
 		} else {
@@ -319,7 +321,7 @@ public final class Equestrian {
 
 	/** A new mount of {@code breed} (a war elephant or a horse), not yet in the world. */
 	public static @Nullable AbstractHorse create(ServerLevel level, Breed breed, BlockPos at, EntitySpawnReason reason) {
-		AbstractHorse horse = breed == Breed.WAR_ELEPHANT ? WAR_ELEPHANT.create(level, reason) : EntityTypes.HORSE.create(level, reason);
+		AbstractHorse horse = breed.elephant() ? WAR_ELEPHANT.create(level, reason) : EntityTypes.HORSE.create(level, reason);
 		if (horse == null) {
 			return null;
 		}
@@ -509,6 +511,12 @@ public final class Equestrian {
 				d *= HEAT_DRAIN;
 			} else if (cold(horse)) {
 				d *= COLD_DRAIN;
+			}
+		} else if (e.breed() == Breed.WOOLLY_MAMMOTH) {
+			if (cold(horse)) {
+				d *= MAMMOTH_COLD_DRAIN;
+			} else if (hot(horse)) {
+				d *= MAMMOTH_HEAT_DRAIN;
 			}
 		}
 		return d;

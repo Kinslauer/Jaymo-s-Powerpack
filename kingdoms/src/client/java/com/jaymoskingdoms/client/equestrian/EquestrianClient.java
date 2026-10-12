@@ -155,7 +155,7 @@ public final class EquestrianClient {
 		if (s.blown()) {
 			label.append(Component.translatable("hud.jaymoskingdoms.blown").withColor(BLOWN_COLOR));
 		} else if (sprint) {
-			String key = e.breed() == Breed.WAR_ELEPHANT ? "hud.jaymoskingdoms.charge" : "hud.jaymoskingdoms.sprint";
+			String key = e.breed().elephant() ? "hud.jaymoskingdoms.charge" : "hud.jaymoskingdoms.sprint";
 			label.append(Component.translatable(key).withColor(pulse(GAIT_COLORS[4], 0xFFFFFF, time * 0.8F)));
 		} else {
 			label.append(Component.translatable(shown.key()).withColor(GAIT_COLORS[shown.ordinal()]));
