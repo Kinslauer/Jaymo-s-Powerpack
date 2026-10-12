@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "S": "minecraft:stick",
+    "L": "minecraft:leather",
+    "X": "#minecraft:gold_tool_materials"
+  },
+  "pattern": [
+    " X",
+    " X",
+    "SL"
+  ],
+  "result": {
+    "id": "jaymospowers:golden_machete"
+  }
+}
