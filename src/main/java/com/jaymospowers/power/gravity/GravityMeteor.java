@@ -63,6 +63,13 @@ final class GravityMeteor {
 	/** Its burning trail sets alight whatever it passes within this reach (blocks) of its surface, for this long (seconds). */
 	static final double TRAIL_FIRE_RADIUS = 2.5;
 	static final int TRAIL_FIRE_SECONDS = 5;
+	/**
+	 * On the way down it tears through what it passes: this share of its width (blocks from its middle), at most
+	 * {@code CARVE_RADIUS_MAX}, no more than {@code CARVE_MAX_PER_TICK} blocks a tick; this share drop as items.
+	 */
+	static final double CARVE_SHARE = 0.8, CARVE_RADIUS_MAX = 7.0;
+	static final int CARVE_MAX_PER_TICK = 600;
+	static final float CARVE_DROP_CHANCE = 0.1F;
 	/** The impact sets alight everything within this reach (blocks) of where it lands (a tap's), for this long (seconds). */
 	static final double IMPACT_FIRE_RADIUS = 4.0;
 	/** The wreck: how many lumps the rock bursts into (a tap's, a full charge's), how long they lie (ticks), how hard they fly out. */
@@ -193,6 +200,10 @@ final class GravityMeteor {
 			float p = Mth.clamp(t / (float)FALL_TICKS, 0.0F, 1.0F);
 			// accelerating down its line
 			Vec3 at = meteor.from().lerp(meteor.to(), p * p);
+			float pWas = Mth.clamp((t - 1) / (float)FALL_TICKS, 0.0F, 1.0F);
+			// smashing through whatever's in its way (a roof, a tree) before it ever lands
+			carve(level, meteor.from().lerp(meteor.to(), pWas * pWas), at, ROCK_HALF * meteor.size(),
+				server.getPlayerList().getPlayer(meteor.owner()));
 			if (rock != null) {
 				Vec3 was = rock.position();
 				rock.setPos(at);
@@ -234,6 +245,49 @@ final class GravityMeteor {
 			if (level == null || wave(level, server.getPlayerList().getPlayer(wave.owner), wave)) {
 				it.remove();
 			}
+		}
+	}
+
+	/**
+	 * The falling rock tears through every block it passes ({@code CARVE_SHARE} of its width, at most
+	 * {@code CARVE_RADIUS_MAX}), from {@code from} to {@code to}: roofs, trees, overhangs, anything that isn't
+	 * unbreakable. A few drop as items; the rest go up in dust.
+	 */
+	private static void carve(ServerLevel level, Vec3 from, Vec3 to, double half, ServerPlayer owner) {
+		double r = Math.min(CARVE_RADIUS_MAX, Math.max(1.2, half * CARVE_SHARE));
+		double length = from.distanceTo(to);
+		int steps = Math.max(1, (int)Math.ceil(length / Math.max(0.5, r * 0.5)));
+		java.util.Set<net.minecraft.core.BlockPos> done = new HashSet<>();
+		var random = level.getRandom();
+		int broken = 0;
+		for (int i = 1; i <= steps && broken < CARVE_MAX_PER_TICK; i++) {
+			Vec3 c = from.lerp(to, i / (double)steps);
+			if (c.y < level.getMinY() || c.y > level.getMaxY()) {
+				continue;
+			}
+			int ri = Mth.ceil(r);
+			net.minecraft.core.BlockPos center = net.minecraft.core.BlockPos.containing(c);
+			for (net.minecraft.core.BlockPos pos : net.minecraft.core.BlockPos.betweenClosed(center.offset(-ri, -ri, -ri), center.offset(ri, ri, ri))) {
+				if (broken >= CARVE_MAX_PER_TICK) {
+					break;
+				}
+				if (pos.distToCenterSqr(c) > r * r || !done.add(pos.immutable())) {
+					continue;
+				}
+				BlockState state = level.getBlockState(pos);
+				if (state.isAir() || !state.getFluidState().isEmpty() && state.getFluidState().isSource()) {
+					continue;
+				}
+				if (state.getDestroySpeed(level, pos) < 0.0F) {
+					continue;
+				}
+				level.destroyBlock(pos, random.nextFloat() < CARVE_DROP_CHANCE, owner);
+				broken++;
+			}
+		}
+		if (broken > 0) {
+			level.playSound(null, to.x, to.y, to.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 1.5F, 0.7F + random.nextFloat() * 0.3F);
+			level.sendParticles(ParticleTypes.EXPLOSION, to.x, to.y, to.z, 2, r * 0.5, r * 0.5, r * 0.5, 0.0);
 		}
 	}
 

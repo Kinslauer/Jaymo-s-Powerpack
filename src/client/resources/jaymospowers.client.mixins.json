@@ -9,7 +9,10 @@
 		"CarryFirstPersonMixin",
 		"CarryLivingEntityRendererMixin",
 		"CarryModelFeatureRendererMixin",
-		"CarryUseMixin"
+		"CarryUseMixin",
+		"ShoulderCameraMixin",
+		"ShoulderCameraTypeMixin",
+		"ShoulderCrosshairMixin"
 	],
 	"injectors": { "defaultRequire": 1 }
 }
