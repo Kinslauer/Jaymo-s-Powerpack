@@ -263,6 +263,846 @@
   {
    "slot": "head",
    "bone": "head",
+   "layer": "main",
+   "pos": [
+    -5.0,
+    -7.0,
+    -6.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    -2.0,
+    -7.0,
+    -6.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    1.0,
+    -7.0,
+    -6.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    4.0,
+    -7.0,
+    -6.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    -6.5,
+    -7.0,
+    -3.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    -6.5,
+    -7.0,
+    -0.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    -6.5,
+    -7.0,
+    2.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    5.5,
+    -7.0,
+    -3.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    5.5,
+    -7.0,
+    -0.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    5.5,
+    -7.0,
+    2.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    -4.5,
+    -2.5,
+    -5.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    32,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    3.5,
+    -2.5,
+    -5.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    32,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    -1.5,
+    -10.5,
+    -3.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    -1.5,
+    -10.5,
+    2.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    0.5,
+    -10.5,
+    -3.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    0.5,
+    -10.5,
+    2.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    -0.5,
+    -6.5,
+    -5.6
+   ],
+   "size": [
+    1,
+    6,
+    1
+   ],
+   "uv": [
+    36,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "chest",
+   "bone": "body",
+   "layer": "main",
+   "pos": [
+    -5.0,
+    10.0,
+    -4.0
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    40,
+    50
+   ],
+   "grow": -0.15000000000000002
+  },
+  {
+   "slot": "chest",
+   "bone": "body",
+   "layer": "main",
+   "pos": [
+    -3.5,
+    10.0,
+    -4.0
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    40,
+    50
+   ],
+   "grow": -0.15000000000000002
+  },
+  {
+   "slot": "chest",
+   "bone": "body",
+   "layer": "main",
+   "pos": [
+    -2.0,
+    10.0,
+    -4.0
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    40,
+    50
+   ],
+   "grow": -0.15000000000000002
+  },
+  {
+   "slot": "chest",
+   "bone": "body",
+   "layer": "main",
+   "pos": [
+    -0.5,
+    10.0,
+    -4.0
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.15000000000000002
+  },
+  {
+   "slot": "chest",
+   "bone": "body",
+   "layer": "main",
+   "pos": [
+    1.0,
+    10.0,
+    -4.0
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    40,
+    50
+   ],
+   "grow": -0.15000000000000002
+  },
+  {
+   "slot": "chest",
+   "bone": "body",
+   "layer": "main",
+   "pos": [
+    2.5,
+    10.0,
+    -4.0
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    40,
+    50
+   ],
+   "grow": -0.15000000000000002
+  },
+  {
+   "slot": "chest",
+   "bone": "body",
+   "layer": "main",
+   "pos": [
+    4.0,
+    10.0,
+    -4.0
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    40,
+    50
+   ],
+   "grow": -0.15000000000000002
+  },
+  {
+   "slot": "chest",
+   "bone": "right_arm",
+   "layer": "main",
+   "pos": [
+    -4.85,
+    -2.5,
+    -2.0
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "chest",
+   "bone": "right_arm",
+   "layer": "main",
+   "pos": [
+    -4.85,
+    -2.5,
+    1.0
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "chest",
+   "bone": "right_arm",
+   "layer": "main",
+   "pos": [
+    -4.85,
+    0.5,
+    -2.0
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "chest",
+   "bone": "right_arm",
+   "layer": "main",
+   "pos": [
+    -4.85,
+    0.5,
+    1.0
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "chest",
+   "bone": "right_arm",
+   "layer": "main",
+   "pos": [
+    -4.85,
+    3.5,
+    -2.0
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "chest",
+   "bone": "right_arm",
+   "layer": "main",
+   "pos": [
+    -4.85,
+    3.5,
+    1.0
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "chest",
+   "bone": "right_arm",
+   "layer": "main",
+   "pos": [
+    -4.85,
+    6.5,
+    -2.0
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "chest",
+   "bone": "right_arm",
+   "layer": "main",
+   "pos": [
+    -4.85,
+    6.5,
+    1.0
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "chest",
+   "bone": "left_arm",
+   "layer": "main",
+   "pos": [
+    4.0,
+    -3.5,
+    -2.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "chest",
+   "bone": "left_arm",
+   "layer": "main",
+   "pos": [
+    4.0,
+    -3.5,
+    1.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "feet",
+   "bone": "right_leg",
+   "layer": "main",
+   "pos": [
+    -0.5,
+    3.5,
+    -4.1
+   ],
+   "size": [
+    1,
+    7,
+    1
+   ],
+   "uv": [
+    44,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "feet",
+   "bone": "left_leg",
+   "layer": "main",
+   "pos": [
+    -0.5,
+    3.5,
+    -4.1
+   ],
+   "size": [
+    1,
+    7,
+    1
+   ],
+   "uv": [
+    48,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "feet",
+   "bone": "right_leg",
+   "layer": "main",
+   "pos": [
+    -2.5,
+    1.0,
+    -4.4
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "feet",
+   "bone": "left_leg",
+   "layer": "main",
+   "pos": [
+    1.5,
+    1.0,
+    -4.4
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "feet",
+   "bone": "right_leg",
+   "layer": "main",
+   "pos": [
+    -0.5,
+    1.0,
+    -4.4
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "feet",
+   "bone": "left_leg",
+   "layer": "main",
+   "pos": [
+    -0.5,
+    1.0,
+    -4.4
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "feet",
+   "bone": "right_leg",
+   "layer": "main",
+   "pos": [
+    1.5,
+    1.0,
+    -4.4
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "feet",
+   "bone": "left_leg",
+   "layer": "main",
+   "pos": [
+    -2.5,
+    1.0,
+    -4.4
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    28,
+    50
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "head",
+   "bone": "head",
    "layer": "cloth",
    "pos": [
     -1,

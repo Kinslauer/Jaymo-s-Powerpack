@@ -1537,5 +1537,11 @@ Nothing of that mod is used: shapes, art and names are our own, drawn by `tools/
   arms its guards from its land's set in the realm's colour (desert, badlands, savanna: gladiator; jungle, cherry:
   ronin; elsewhere: paladin), the realm's trim on the chest. A barbarian chief wears the whole warlord set, kilt in
   his camp's colour; `RAIDER_HORNS_CHANCE` (0.3) of raiders wear the horned cap.
+- **Second pass** (Andy: "emulating Epic Knights more, cleaner details, depth"): metal shades top-lit with a sheen and
+  a crisp rim, leather has stitched edges, flat layers get rimmed faces; and every set has raised 3D rivets and studs
+  (`N` in the generator: half-size cubes on a plate's surface, all sharing one UV per material) and ridges, combs and
+  bands (`ridge`): the paladin's helm, gorget, pauldron comb, belt and knee bosses; the gladiator's studded brim,
+  belt, sword arm and greaves; the ronin's ribbed, gilt-riveted kabuto and shin splints; the warlord's banded cap and
+  studded bracers.
 - Seen in game (dev server + client, on mannequins): all four sets, dyed paladins in red, green and white. Not yet
   seen: guards and chiefs dressed from the armoury.

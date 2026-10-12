@@ -1,7 +1,7 @@
 {
  "texture_size": [
   64,
-  32
+  64
  ],
  "cloth_texture_size": [
   64,
@@ -199,6 +199,566 @@
     34,
     8
    ]
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    -3.5,
+    -9.6,
+    -5
+   ],
+   "size": [
+    1,
+    1,
+    10
+   ],
+   "uv": [
+    0,
+    17
+   ],
+   "grow": -0.22
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    -1.5,
+    -9.6,
+    -5
+   ],
+   "size": [
+    1,
+    1,
+    10
+   ],
+   "uv": [
+    22,
+    17
+   ],
+   "grow": -0.22
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    0.5,
+    -9.6,
+    -5
+   ],
+   "size": [
+    1,
+    1,
+    10
+   ],
+   "uv": [
+    0,
+    28
+   ],
+   "grow": -0.22
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    2.5,
+    -9.6,
+    -5
+   ],
+   "size": [
+    1,
+    1,
+    10
+   ],
+   "uv": [
+    22,
+    28
+   ],
+   "grow": -0.22
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    -3.5,
+    -9.8,
+    -3.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    44,
+    28
+   ],
+   "grow": -0.28
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    -3.5,
+    -9.8,
+    -0.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    44,
+    28
+   ],
+   "grow": -0.28
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    -3.5,
+    -9.8,
+    2.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    44,
+    28
+   ],
+   "grow": -0.28
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    -1.5,
+    -9.8,
+    -3.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    44,
+    28
+   ],
+   "grow": -0.28
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    -1.5,
+    -9.8,
+    -0.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    44,
+    28
+   ],
+   "grow": -0.28
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    -1.5,
+    -9.8,
+    2.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    44,
+    28
+   ],
+   "grow": -0.28
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    0.5,
+    -9.8,
+    -3.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    44,
+    28
+   ],
+   "grow": -0.28
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    0.5,
+    -9.8,
+    -0.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    44,
+    28
+   ],
+   "grow": -0.28
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    0.5,
+    -9.8,
+    2.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    44,
+    28
+   ],
+   "grow": -0.28
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    2.5,
+    -9.8,
+    -3.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    44,
+    28
+   ],
+   "grow": -0.28
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    2.5,
+    -9.8,
+    -0.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    44,
+    28
+   ],
+   "grow": -0.28
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    2.5,
+    -9.8,
+    2.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    44,
+    28
+   ],
+   "grow": -0.28
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    -7.0,
+    -6.5,
+    -3.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    44,
+    28
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    6.0,
+    -6.5,
+    -3.5
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    44,
+    28
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "chest",
+   "bone": "right_arm",
+   "layer": "main",
+   "pos": [
+    -5.7,
+    -3.3,
+    -2.9
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    44,
+    28
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "chest",
+   "bone": "left_arm",
+   "layer": "main",
+   "pos": [
+    4.7,
+    -3.3,
+    -2.9
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    44,
+    28
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "chest",
+   "bone": "right_arm",
+   "layer": "main",
+   "pos": [
+    -5.7,
+    -3.3,
+    1.9
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    44,
+    28
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "chest",
+   "bone": "left_arm",
+   "layer": "main",
+   "pos": [
+    4.7,
+    -3.3,
+    1.9
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    44,
+    28
+   ],
+   "grow": -0.2
+  },
+  {
+   "slot": "feet",
+   "bone": "right_leg",
+   "layer": "main",
+   "pos": [
+    -1.75,
+    3.5,
+    -4.0
+   ],
+   "size": [
+    1,
+    7,
+    1
+   ],
+   "uv": [
+    48,
+    28
+   ],
+   "grow": -0.25
+  },
+  {
+   "slot": "feet",
+   "bone": "left_leg",
+   "layer": "main",
+   "pos": [
+    0.75,
+    3.5,
+    -4.0
+   ],
+   "size": [
+    1,
+    7,
+    1
+   ],
+   "uv": [
+    52,
+    28
+   ],
+   "grow": -0.25
+  },
+  {
+   "slot": "feet",
+   "bone": "right_leg",
+   "layer": "main",
+   "pos": [
+    -0.5,
+    3.5,
+    -4.0
+   ],
+   "size": [
+    1,
+    7,
+    1
+   ],
+   "uv": [
+    56,
+    28
+   ],
+   "grow": -0.25
+  },
+  {
+   "slot": "feet",
+   "bone": "left_leg",
+   "layer": "main",
+   "pos": [
+    -0.5,
+    3.5,
+    -4.0
+   ],
+   "size": [
+    1,
+    7,
+    1
+   ],
+   "uv": [
+    60,
+    28
+   ],
+   "grow": -0.25
+  },
+  {
+   "slot": "feet",
+   "bone": "right_leg",
+   "layer": "main",
+   "pos": [
+    0.75,
+    3.5,
+    -4.0
+   ],
+   "size": [
+    1,
+    7,
+    1
+   ],
+   "uv": [
+    0,
+    39
+   ],
+   "grow": -0.25
+  },
+  {
+   "slot": "feet",
+   "bone": "left_leg",
+   "layer": "main",
+   "pos": [
+    -1.75,
+    3.5,
+    -4.0
+   ],
+   "size": [
+    1,
+    7,
+    1
+   ],
+   "uv": [
+    4,
+    39
+   ],
+   "grow": -0.25
   },
   {
    "slot": "head",
