@@ -19,11 +19,14 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
-import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.DyedItemColor;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.AABB;
+import com.jaymoskingdoms.equestrian.Breed;
+import com.jaymoskingdoms.equestrian.Equestrian;
+import com.jaymoskingdoms.equestrian.WarElephant;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -35,6 +38,9 @@ import org.jspecify.annotations.Nullable;
  * whose rider fell is ridden again by the next guard without one. Their horses are saddled and wear the realm's
  * colour (leather), or iron for a wealthy realm. War parties of a prosperous realm ride too (a share of them), and
  * caravans' escorts ({@link Caravans}).
+ * <p>(0.5.34) Each horse is of a breed ({@link Equestrian}): guards ride destriers, archers coursers, carters and
+ * coachmen drafts, and a desert realm's riders desert horses; a wealthy desert realm keeps {@link #ELEPHANTS_ARID}
+ * war elephant ridden by one of its guards.
  */
 final class Cavalry {
 	/** Every this many ticks each realm's horses are seen to. */
@@ -47,6 +53,9 @@ final class Cavalry {
 	static final int PARTY_RIDER_ONE_IN = 3;
 	/** Its horses: their speed (a horse's own runs 0.11-0.34), how far round the seat the realm's horses are looked for. */
 	static final double HORSE_SPEED = 0.3, RANGE = 112.0;
+	/** (0.5.34) A wealthy desert (or snowy) realm's war elephants (mammoths in the snow, ridden by its guards), what one costs, and its pace under a rider of the realm. */
+	static final int ELEPHANTS_ARID = 1, ELEPHANT_COST = 20;
+	static final double ELEPHANT_SPEED = 0.24;
 	/** Mounted archers ride round the town within this of the seat. */
 	static final int ARCHER_ROAM = 44;
 	/** A guard posted this close to the gate or the throne keeps his feet (halls and gateways are no place for a horse). */
@@ -86,13 +95,28 @@ final class Cavalry {
 	}
 
 	/** A horse for {@code rider} of {@code f} (saddled, in its colours), and him on it. {@code lent}: gone when he is. */
-	static @Nullable Horse mount(ServerLevel level, Folk rider, Faction f, boolean lent) {
-		Horse horse = net.minecraft.world.entity.EntityTypes.HORSE.create(level, EntitySpawnReason.MOB_SUMMONED);
+	static @Nullable AbstractHorse mount(ServerLevel level, Folk rider, Faction f, boolean lent) {
+		return mount(level, rider, f, lent, breedFor(level, rider, f));
+	}
+
+	/** (0.5.34) The breed {@code rider} of {@code f} rides: a carter or coachman a draft, an archer a courser, a guard a destrier; in a desert realm, desert horses. */
+	static Breed breedFor(ServerLevel level, Folk rider, Faction f) {
+		if (rider.role() == Caravans.CARTER) {
+			return Breed.DRAFT;
+		}
+		if (Climate.at(level, f.seat()).arid() && (rider.role() == Folk.ARCHER || level.getRandom().nextBoolean())) {
+			return Breed.DESERT_HORSE;
+		}
+		return rider.role() == Folk.ARCHER ? Breed.COURSER : Breed.DESTRIER;
+	}
+
+	/** (0.5.34) A mount of {@code breed} for {@code rider} of {@code f} (a horse, or a war elephant), and him on it. */
+	static @Nullable AbstractHorse mount(ServerLevel level, Folk rider, Faction f, boolean lent, Breed breed) {
+		AbstractHorse horse = Equestrian.create(level, breed, rider.blockPosition(), EntitySpawnReason.MOB_SUMMONED);
 		if (horse == null) {
 			return null;
 		}
 		horse.snapTo(rider.getX(), rider.getY(), rider.getZ(), rider.getYRot(), 0.0F);
-		horse.finalizeSpawn(level, level.getCurrentDifficultyAt(rider.blockPosition()), EntitySpawnReason.MOB_SUMMONED, null);
 		dress(level.getServer(), horse, f);
 		horse.addTag(TAG);
 		horse.addTag(OF + f.id());
@@ -108,8 +132,15 @@ final class Cavalry {
 	static void dress(MinecraftServer server, AbstractHorse horse, Faction f) {
 		horse.setTamed(true);
 		horse.setPersistenceRequired();
-		horse.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(HORSE_SPEED);
+		horse.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(horse instanceof WarElephant ? ELEPHANT_SPEED : HORSE_SPEED);
 		horse.setItemSlot(EquipmentSlot.SADDLE, new ItemStack(Items.SADDLE));
+		for (EquipmentSlot slot : EquipmentSlot.values()) {
+			horse.setDropChance(slot, 0.0F);
+		}
+		if (horse instanceof WarElephant) {
+			// (its howdah and caparison come with the saddle: no barding)
+			return;
+		}
 		ItemStack armour;
 		if (Wealth.of(server, f) == Wealth.Tier.WEALTHY) {
 			armour = new ItemStack(Items.IRON_HORSE_ARMOR);
@@ -118,9 +149,6 @@ final class Cavalry {
 			armour.set(DataComponents.DYED_COLOR, new DyedItemColor(f.styleColor(server).getTextureDiffuseColor()));
 		}
 		horse.setItemSlot(EquipmentSlot.BODY, armour);
-		for (EquipmentSlot slot : EquipmentSlot.values()) {
-			horse.setDropChance(slot, 0.0F);
-		}
 	}
 
 	/** One of {@code faction}'s horses. */
@@ -147,7 +175,7 @@ final class Cavalry {
 	private static void tick(MinecraftServer server, ServerLevel level) {
 		// lent horses whose riders are gone (a war party's, a caravan's)
 		// (a caravan sees to its own: its riders get back in the saddle after a river)
-		for (Horse horse : level.getEntities(net.minecraft.world.entity.EntityTypes.HORSE, h -> h.entityTags().contains(LENT) && !h.isVehicle()
+		for (AbstractHorse horse : level.getEntities(EntityTypeTest.forClass(AbstractHorse.class), h -> h.entityTags().contains(LENT) && !h.isVehicle()
 			&& !h.entityTags().contains(Caravans.TAG))) {
 			strayed(level, horse);
 		}
@@ -178,6 +206,12 @@ final class Cavalry {
 					if (spare != null) {
 						Cavalry.teleport(rider, spare.getX(), spare.getY(), spare.getZ());
 						rider.startRiding(spare);
+					} else if (tier == Wealth.Tier.WEALTHY && elephantLand(Climate.at(level, f.seat())) && elephants(level, round, f) < ELEPHANTS_ARID) {
+						// (0.5.34) a wealthy desert realm's war elephant, a snowy one's woolly mammoth
+						if (buy(server, f, ELEPHANT_COST)) {
+							mount(level, rider, f, false, Climate.at(level, f.seat()) == Climate.SNOWY ? Breed.WOOLLY_MAMMOTH : Breed.WAR_ELEPHANT);
+							neigh(level, rider.blockPosition());
+						}
 					} else if (buy(server, f)) {
 						mount(level, rider, f, false);
 						neigh(level, rider.blockPosition());
@@ -195,12 +229,26 @@ final class Cavalry {
 
 	/** Pays for a horse from the treasury, if it can spare it. */
 	private static boolean buy(MinecraftServer server, Faction f) {
+		return buy(server, f, HORSE_COST);
+	}
+
+	private static boolean buy(MinecraftServer server, Faction f, int cost) {
 		Faction now = Factions.get(server, f.id());
-		if (now == null || now.treasury() < TREASURY_KEPT + HORSE_COST) {
+		if (now == null || now.treasury() < TREASURY_KEPT + cost) {
 			return false;
 		}
-		Factions.update(server, f.id(), x -> x.withTreasury(Math.max(0L, x.treasury() - HORSE_COST)));
+		Factions.update(server, f.id(), x -> x.withTreasury(Math.max(0L, x.treasury() - cost)));
 		return true;
+	}
+
+	/** (0.5.34) Land whose realms keep war elephants: the desert (elephants) and the snow (mammoths). */
+	static boolean elephantLand(Climate climate) {
+		return climate.arid() || climate == Climate.SNOWY;
+	}
+
+	/** (0.5.34) How many of {@code f}'s war elephants are about its town. */
+	private static long elephants(ServerLevel level, AABB round, Faction f) {
+		return level.getEntitiesOfClass(WarElephant.class, round, e -> e.isAlive() && ours(e, f.id())).size();
 	}
 
 	/** A mounted archer for a wealthy realm (on its roster), riding round its town. */

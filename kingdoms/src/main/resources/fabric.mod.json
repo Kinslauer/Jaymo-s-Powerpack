@@ -18,8 +18,10 @@
 		"jaymoskingdoms.trees.mixins.json",
 		"jaymoskingdoms.villagers.mixins.json",
 		"jaymoskingdoms.lootgoblins.mixins.json",
+		"jaymoskingdoms.equestrian.mixins.json",
 		{ "config": "jaymoskingdoms.combat.client.mixins.json", "environment": "client" },
-		{ "config": "jaymoskingdoms.mca.client.mixins.json", "environment": "client" }
+		{ "config": "jaymoskingdoms.mca.client.mixins.json", "environment": "client" },
+		{ "config": "jaymoskingdoms.equestrian.client.mixins.json", "environment": "client" }
 	],
 	"depends": {
 		"fabricloader": ">=0.19.5",
