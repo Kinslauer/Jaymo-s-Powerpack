@@ -1390,3 +1390,9 @@ seen in the client. Not seen in game: a player robbing a cart, a mining fiefdom'
   `ClientHandlerImpl`, only with MCA). It still goes to chat while you're in a villager's talk screen, or when the
   speaker isn't loaded on your client.
 Tested on the dev client with MCA: hurt villagers' lines and a witness's "Murder!" floated over them, nothing in chat.
+
+## 0.5.19: boss bars only once you've hit the boss
+- **A boss's bar shows only to the players who've hit it** (`BossBars`): kings, lords, barbarian chiefs and illager
+  warlords. A hit by hand, with an arrow or javelin, or with a power that names its player all count. The bar stays
+  while that player is within 48 blocks; once they leave (or die, or change dimension) it's gone until they hit the
+  boss again. Its death or unloading clears it. Banner capture bars are unchanged (they're not a boss's).
