@@ -1706,7 +1706,13 @@ notice are in `licenses/lootgoblins/`. Its code here stays LGPL-3.0: keep that s
   beams.
 - Seen in game: all eight looks in the original's idle pose and a kill's loot burst.
 
-## 0.5.32: quest foes no longer spawn inside the earth
+## 0.5.32: riders sit in the saddle
+- **Riders no longer float** (Andy's clip: mounted folk hovered high over their horses). The folk entity had no vehicle
+  attachment, so a rider's feet were set on the saddle point and the sitting model hung in the air. It now takes the
+  zombie's `ridingOffset(-0.7F)`, which lowers every folk rider: mounted guards and archers, caravan riders, carriage
+  and cab coachmen, and a ruler in a carriage or rickshaw seat.
+
+## 0.5.33: quest foes no longer spawn inside the earth
 Andy's clip: a king's "The Beast" decree at trail ruins set its ravager down inside the buried ruin, walled in by
 earth and roots, and only spectator mode could find it.
 - **Why**: foes were placed where a 1-block column was free, so a ravager (nearly 2 wide) fit into walls; and trail

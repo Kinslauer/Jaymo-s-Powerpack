@@ -389,3 +389,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.8.64, goblin villages and loot goblins:** ships Jaymo's Kingdoms 0.5.31 (see `kingdoms/MODLOG.md`): goblin
   villages behind a palisade fort, the goblin mask to walk in among them, and loot goblins ported from Loot Goblins
   (LGPL-3.0).
+- **0.8.65, riders sit in the saddle:** ships Jaymo's Kingdoms 0.5.32 (see `kingdoms/MODLOG.md`): mounted guards,
+  archers, caravan riders and coachmen no longer float above their horses.
