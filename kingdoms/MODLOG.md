@@ -1779,3 +1779,16 @@ are in project memory (`equestrian-plan`). Nothing is taken from SWEM: original 
   and owner in its data, for a necromancer later). No revival yet.
 - **Testing** (op): `/kingdom horse <breed>` gives a tamed, saddled mount of that breed.
 - Seen in game (cloud playtest): elephants and mammoths render; riding not yet tried.
+
+## 0.5.36: Mobs work themselves loose
+Andy: mobs too often get stuck pathing. AI Improvements (suggested) is NeoForge-only and a performance mod, so this is
+our own. `Unstick` (tuning at the top), run from `PathNavigationMixin` after every navigation tick, covers every mob:
+vanilla, MCA villagers and our folk.
+- Vanilla's stuck check resets whenever a goal asks for its path again, and chasing or wandering goals ask every few
+  ticks, so a mob snagged on a corner stayed snagged. `Unstick` watches how far the mob has moved across instead.
+- No headway for 1.5 s: a hop toward its next step (frees it from slabs, carpets, fence-post corners); again every
+  1.5 s while it stays stuck. 3.5 s: a nudge back to the middle of its block and a fresh path. 7 s: the walk is
+  dropped so its AI picks something else.
+- Our folk don't give up: out of a fight, not breaking in on a raid and not on a caravan, after 12 s they turn up
+  where they were going in a puff (as builders, farmers and gatherers already did), which now also covers guards,
+  escorts, banner defenders, firefighters and undertakers.
