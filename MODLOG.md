@@ -498,3 +498,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   and End. It has no horses; Jaymo's Equestrian still owns those. Its elephant spawns alongside ours.
 - **0.8.83, Golems keep quiet and fight fires:** ships Jaymo's Kingdoms 0.5.42 (see `kingdoms/MODLOG.md`): iron golems
   never speak, and they beat out fires in settlements.
+- **0.8.84, No rainbow hair:** ships Jaymo's Kingdoms 0.5.43 (see `kingdoms/MODLOG.md`): MCA villagers no longer get
+  rainbow hair or random dyed hair; they keep natural colours. MCA's Homosexual trait is off too.
