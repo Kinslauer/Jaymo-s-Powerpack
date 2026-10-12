@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.5.41) Traits Andy turned off: MCA's Rainbow Hair and Homosexual traits never count, on new villagers or ones already
+ * (0.5.43) Traits Andy turned off: MCA's Rainbow Hair and Homosexual traits never count, on new villagers or ones already
  * in the world, and drop off their trait lists. Villagers keep their natural hair colour.
  */
 @Mixin(Traits.class)

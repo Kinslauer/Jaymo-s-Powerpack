@@ -469,7 +469,8 @@ public final class Theft {
 			}
 			return;
 		}
-		LivingEntity witness = seen.getFirst();
+		// (0.5.42) golems can't speak: one that saw it only groans, unless someone else saw it too and cries out
+		LivingEntity witness = seen.stream().filter(e -> !(e instanceof IronGolem)).findFirst().orElse(seen.getFirst());
 		Component cry = Component.translatable("message.jaymoskingdoms.theft.cry." + crime.cry + "." + level.getRandom().nextInt(SHOUT_VARIANTS));
 		Speech.say(level, witness, cry, w == Weight.LIGHT ? Speech.YELLOW : Speech.RED, SHOUT_RANGE);
 		level.playSound(null, witness.getX(), witness.getY(), witness.getZ(), witness instanceof IronGolem ? SoundEvents.IRON_GOLEM_HURT
