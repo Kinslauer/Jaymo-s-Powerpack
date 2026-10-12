@@ -15,6 +15,8 @@ final class KitchenCompat {
 	static final String MOD = "jaymoskitchen";
 	private static final @Nullable Class<?> CORPSE;
 	private static final @Nullable Method HOSTILE, CARRIER, CARRY_BY, THROW_AT;
+	/** (0.5.37) For necromancers: what a corpse was, and whether it's a player's. */
+	private static final @Nullable Method SOURCE_TYPE, PLAYER_CORPSE;
 
 	static {
 		Class<?> corpse = null;
@@ -36,6 +38,17 @@ final class KitchenCompat {
 		CARRIER = carrier;
 		CARRY_BY = carryBy;
 		THROW_AT = throwAt;
+		Method sourceType = null, playerCorpse = null;
+		if (corpse != null) {
+			try {
+				sourceType = corpse.getMethod("sourceType");
+				playerCorpse = corpse.getMethod("isPlayerCorpse");
+			} catch (ReflectiveOperationException e) {
+				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for necromancers to raise corpses: {}", e.toString());
+			}
+		}
+		SOURCE_TYPE = sourceType;
+		PLAYER_CORPSE = playerCorpse;
 	}
 
 	private KitchenCompat() {
@@ -50,6 +63,17 @@ final class KitchenCompat {
 	static boolean isFreeMonsterCorpse(Entity entity) {
 		return CORPSE != null && CORPSE.isInstance(entity) && !entity.isRemoved() && !entity.isPassenger()
 			&& Boolean.TRUE.equals(call(HOSTILE, entity)) && call(CARRIER, entity) == null;
+	}
+
+	/** (0.5.37) A corpse a necromancer can raise: lying free, not a player's (their things stay safe). */
+	static boolean isRaisableCorpse(Entity entity) {
+		return CORPSE != null && SOURCE_TYPE != null && CORPSE.isInstance(entity) && !entity.isRemoved() && !entity.isPassenger()
+			&& call(CARRIER, entity) == null && !Boolean.TRUE.equals(call(PLAYER_CORPSE, entity));
+	}
+
+	/** (0.5.37) What the corpse was in life, or null. */
+	static net.minecraft.world.entity.@Nullable EntityType<?> sourceType(Entity corpse) {
+		return call(SOURCE_TYPE, corpse) instanceof net.minecraft.world.entity.EntityType<?> type ? type : null;
 	}
 
 	/** Who's carrying this corpse, if anyone. */
