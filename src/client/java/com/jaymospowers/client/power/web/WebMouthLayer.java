@@ -64,7 +64,8 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 
 	@Override
 	public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
-		if (state.getData(WebSymbioteClient.EATING) == null && state.getData(WebSymbioteClient.STARE) == null || state.isInvisible) {
+		if (state.getData(WebSymbioteClient.EATING) == null && state.getData(WebSymbioteClient.STARE) == null && state.getData(WebSymbioteClient.ROAR) == null
+			|| state.isInvisible) {
 			return;
 		}
 		poseStack.pushPose();
@@ -92,6 +93,24 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			super.setupAnim(state);
 			Float ticks = state.getData(WebSymbioteClient.EATING);
 			Float stare = state.getData(WebSymbioteClient.STARE);
+			Float roar = state.getData(WebSymbioteClient.ROAR);
+			if (ticks == null && roar != null) {
+				// roaring: it bulges out of the head snarling as it builds, then the maw is thrown open as wide as it goes
+				float r = roar;
+				float blast = WebSymbiote.ROAR_BLAST_AT / (float)WebSymbiote.ROAR_TICKS;
+				float morph = Mth.clamp(Math.min(r / 0.2F, (1.0F - r) / 0.12F), 0.0F, 1.0F);
+				float snarl = 0.18F + 0.08F * Mth.sin(state.ageInTicks * 1.7F);
+				float gape = r < blast - 0.08F ? 0.0F : r < blast ? (r - blast + 0.08F) / 0.08F : 1.0F - Mth.clamp((r - blast - 0.12F) / 0.12F, 0.0F, 1.0F);
+				float open = Math.max(snarl * morph, gape * gape * (3.0F - 2.0F * gape) * 1.25F);
+				this.skull.xRot = -open * SKULL_GAPE;
+				this.jaw.xRot = open * JAW_GAPE;
+				float scale = Mth.lerp(morph, 0.8F, 1.1F) * (1.0F + SWELL * gape);
+				this.root.xScale = scale;
+				this.root.yScale = scale;
+				this.root.zScale = scale;
+				this.root.z = -LUNGE * gape;
+				return;
+			}
 			if (ticks == null && stare != null) {
 				// staring at what it holds: swollen, the jaw hanging a little open, breathing
 				float morph = Mth.clamp(stare / 8.0F, 0.0F, 1.0F);

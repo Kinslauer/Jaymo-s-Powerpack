@@ -90,6 +90,18 @@ public final class WebSymbiote {
 	public static final double SPIKE_RADIUS = 5.0;
 	public static final float SPIKE_DAMAGE = 8.0F;
 	public static final double SPIKE_KNOCKBACK = 1.3;
+	/**
+	 * The roar: when it takes over to save you (near death), and in place of the Spike Burst while the big body is up.
+	 * It lasts {@code ROAR_TICKS}, holding you hunched and shuddering, its tendrils flailing; near death the armour
+	 * pieces itself together over you as it goes (the suit at {@code ROAR_SUIT_AT}, the tendrils at
+	 * {@code ROAR_TENDRILS_AT}, the big body at {@code ROAR_BULK_AT}; whatever you already wore stays). At
+	 * {@code ROAR_BLAST_AT} it throws its head back and roars: everything within {@code ROAR_RADIUS} takes
+	 * {@code ROAR_DAMAGE} and is hurled away. Near death it shrugs off {@code ROAR_RESISTANCE} levels of harm while it roars.
+	 */
+	public static final int ROAR_TICKS = 40, ROAR_SUIT_AT = 2, ROAR_TENDRILS_AT = 11, ROAR_BULK_AT = 20, ROAR_BLAST_AT = 28;
+	public static final double ROAR_RADIUS = 6.0, ROAR_KNOCKBACK = 1.6;
+	public static final float ROAR_DAMAGE = 8.0F, ROAR_SHAKE = 1.4F;
+	public static final int ROAR_RESISTANCE = 2;
 	/** Shroud: invisible until you attack, or for this long at most. */
 	public static final int SHROUD_TICKS = 400;
 	/**
@@ -236,18 +248,63 @@ public final class WebSymbiote {
 	 * Tendril Grab at a block: every tendril reaches for the wall and hauls you in; there, you're turned with your back
 	 * to it and they fan out and slam into it, cracking it where each one hits, holding for {@code WALL_HOLD} ticks.
 	 */
-	public static final int WALL_HOLD = 50, WALL_CRACKS = 7;
-	/** Tethered to a wall: how far you can drift from the spot before it pulls you back. */
-	public static final double WALL_TETHER = 0.6;
+	public static final int WALL_HOLD = 50;
+	/**
+	 * Tethered: the tendrils lift you {@code WALL_LIFT} blocks off the wall over {@code WALL_LIFT_TICKS}, so each of the
+	 * {@code WALL_TETHERS} lower ones has room to bite into a spot of its own ({@link #TETHER_SPOTS}), one a tick, cracking
+	 * the block there; the two shoulder tendrils stay free for R and G. You can lean up to {@code WALL_STRETCH} blocks
+	 * away on them (the harder they're stretched, the deeper the cracks) and they pull you back like elastic; dragged
+	 * further than {@code WALL_SNAP} from the spot, they tear loose. Any other ability on the radial menu lets go too.
+	 */
+	public static final double WALL_LIFT = 1.0, WALL_STRETCH = 1.4, WALL_SNAP = 3.5;
+	public static final int WALL_LIFT_TICKS = 10, WALL_TETHERS = 6;
+	/** The spring: how much of the gap it closes a tick, how much speed carries over (the give), and how fast you lean. */
+	public static final double WALL_SPRING = 0.22, WALL_CARRY = 0.6, WALL_LEAN_RATE = 0.12;
+	/**
+	 * Where each tether bites, for tendrils 2-7 (the inner, middle and low pairs on the back): blocks to the wearer's
+	 * right along the wall, and up from your middle (on a ceiling or floor, "up" is the way you face).
+	 */
+	public static final double[][] TETHER_SPOTS = {{0.55, 1.3}, {-0.55, 1.3}, {1.35, 0.45}, {-1.35, 0.45}, {0.95, -0.9}, {-0.95, -0.9}};
+	/** A tether's crack: when it bites, then settled, plus a stage per this many blocks it's stretched past its rest. */
+	public static final int TETHER_BITE_STAGE = 6, TETHER_REST_STAGE = 3;
+	public static final double TETHER_STAGE_STRETCH = 0.3;
 
-	/** A wall grab: the anchor, when it began, and when you got there (-1 on the way). Synced: everyone sees the tendrils. */
-	public record Wall(Vec3 anchor, long start, long landed) {
+	/**
+	 * A wall grab: the anchor, when it began, and when you got there (-1 on the way); then where the tendrils hold you
+	 * (your feet, lifted off it), the face, and where each tether bites. Synced: everyone sees the tendrils.
+	 */
+	public record Wall(Vec3 anchor, long start, long landed, Vec3 rest, int face, List<Vec3> points) {
 		public static final net.minecraft.network.codec.StreamCodec<io.netty.buffer.ByteBuf, Wall> STREAM_CODEC =
 			net.minecraft.network.codec.StreamCodec.composite(
 				Vec3.STREAM_CODEC, Wall::anchor,
 				net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, Wall::start,
 				net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, Wall::landed,
+				Vec3.STREAM_CODEC, Wall::rest,
+				net.minecraft.network.codec.ByteBufCodecs.VAR_INT, Wall::face,
+				Vec3.STREAM_CODEC.apply(net.minecraft.network.codec.ByteBufCodecs.list(WALL_TETHERS)), Wall::points,
 				Wall::new);
+
+		/** Where you were when the tendrils got you there, before they lifted you off. */
+		public Vec3 contact() {
+			return rest.subtract(Direction.from3DDataValue(face).getUnitVec3().scale(WALL_LIFT));
+		}
+
+		/** Where the spring pulls you {@code age} ticks after you got there: from the wall, out to the lifted spot. */
+		public Vec3 target(float age) {
+			float t = Mth.clamp(age / WALL_LIFT_TICKS, 0.0F, 1.0F);
+			return contact().lerp(rest, t * t * (3.0F - 2.0F * t));
+		}
+	}
+
+	/** Held off a wall by the tendrils' tethers (not just on the way to it). */
+	public static boolean tethered(Player player) {
+		Wall wall = player.getAttached(WALL);
+		return wall != null && wall.landed() >= 0L && isBonded(player);
+	}
+
+	/** R and G work the tendrils (grab, hold, tear chunks): Living Armor is up, or you hang off a wall on them. */
+	public static boolean tendrilKeys(Player player) {
+		return armored(player) || tethered(player);
 	}
 
 	public static final AttachmentType<Wall> WALL = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_wall"),
@@ -547,6 +604,14 @@ public final class WebSymbiote {
 		Direction wallFace = Direction.UP;
 		int wallMaxTicks;
 		final List<BlockPos> wallCracks = new java.util.ArrayList<>();
+		/** Each tether's crack stage as last shown, how far its tendril reached at rest, and when the cracks were last refreshed. */
+		final int[] wallStages = new int[WALL_TETHERS];
+		final double[] wallRestReach = new double[WALL_TETHERS];
+		long wallRefreshAt;
+		/** The roar: when it began (0: none), whether it's the one near death (the armour building, a run after), and at whom. */
+		long roarAt;
+		boolean roarDefend;
+		int roarThreat = -1;
 		int rampageStrikes;
 		long nextStrikeAt;
 		/** Instinct: when it can act on its own again, and whether it has caught this fall already. */
@@ -985,6 +1050,7 @@ public final class WebSymbiote {
 		// hungry, it feeds itself: a corpse, or something it kills first (swelling into the armour for it, if it wasn't);
 		// once it has started it isn't satisfied until it has actually eaten
 		if ((next.satiety() < SELF_FEED_BELOW || live.craving || live.gorging) && player.getAttached(EATING) == null && live.takeoverTicks <= 0
+			&& live.roarAt <= 0L
 			&& live.feedStage == FEED_NONE && !sulking(player) && player.tickCount % SELF_FEED_EVERY == 0 && selfFeed(player, live, now, live.gorging)) {
 			live.craving = true;
 			if (!armor) {
@@ -1058,7 +1124,8 @@ public final class WebSymbiote {
 			if (live.takeoverTicks == 0) {
 				next = next.withStress(Math.max(0, next.stress() - TAKEOVER_RELIEF));
 			}
-		} else if (live.feedStage == FEED_NONE && now >= live.takeoverReadyAt && player.tickCount % TAKEOVER_CHECK_TICKS == 0 && !player.isCreative()) {
+		} else if (live.feedStage == FEED_NONE && live.roarAt <= 0L && now >= live.takeoverReadyAt && player.tickCount % TAKEOVER_CHECK_TICKS == 0
+			&& !player.isCreative()) {
 			// besides starving (it gorges, above), it only takes the wheel when neglected, or for a look
 			float neglect = next.bond() >= NEGLECT_BOND || sulking(player) || live.gorging ? 0.0F
 				: NEGLECT_CHANCE * (1.0F - next.bond() / (float)NEGLECT_BOND);
@@ -1079,7 +1146,8 @@ public final class WebSymbiote {
 		}
 		// near death it will stop at nothing: everything it has, and under three hearts, the Shroud and a run for it
 		LivingEntity threat = sulking(player) ? null : threat(player);
-		if (threat != null && player.getHealth() <= DEFEND_HEALTH && now >= live.defendReadyAt && (live.takeoverTicks <= 0 || !live.fleeing)) {
+		if (threat != null && player.getHealth() <= DEFEND_HEALTH && now >= live.defendReadyAt && (live.takeoverTicks <= 0 || !live.fleeing)
+			&& !(live.roarAt > 0L && live.roarDefend)) {
 			live.defendReadyAt = now + DEFEND_COOLDOWN;
 			abortFeeding(player, live);
 			if (live.takeoverTicks > 0) {
@@ -1095,32 +1163,27 @@ public final class WebSymbiote {
 			int line = player.getRandom().nextInt(PANIC_LINES - 1);
 			live.lastPanic = line >= live.lastPanic && live.lastPanic >= 0 ? line + 1 : line;
 			whisper(player, "panic." + (1 + live.lastPanic));
-			// first: clear them off with a Spike Burst
-			if (!level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(SPIKE_RADIUS),
-				e -> e != player && e.isAlive() && (e instanceof Mob || e == threat)).isEmpty()) {
-				spikes(player);
-			}
-			// then into the Shroud and away: a leap from the threat, and a run for it (climbing or tearing through walls)
-			shroud(player);
-			startTakeover(player, live, now, threat);
-			live.takeoverTicks = RUN_TICKS;
-			ServerPlayNetworking.send(player, new WebNet.Takeover(threat.getId(), RUN_TICKS, true));
-			Vec3 away = player.position().subtract(threat.position()).horizontal();
-			away = away.lengthSqr() < 1.0E-4 ? player.getLookAngle().horizontal().reverse() : away;
-			ServerPlayNetworking.send(player, new WebNet.Nudge(away.normalize().scale(LEAP_SPEED).add(0.0, LEAP_UP, 0.0)));
+			// first it roars, the armour piecing itself together over you, and the roar clears them off;
+			// then into the Shroud and away (see endRoar)
+			startRoar(player, live, now, true, threat);
 			next = next.withStress(Math.min(STRESS_MAX, next.stress() + DEFEND_STRESS));
 		} else if (threat != null && player.getHealth() <= DESPERATE_HEALTH && !live.fleeing && now >= live.desperateAt) {
 			live.desperateAt = now + DESPERATE_EVERY;
 			desperate(player, live, now, threat);
 		}
+		if (live.roarAt > 0L) {
+			tickRoar(player, live, now);
+		}
+		// the roar near death builds the armour up a piece at a time
+		long roarAge = live.roarAt > 0L && live.roarDefend ? now - live.roarAt : -1L;
 		// whenever it takes over it engulfs you: the suit and the big body over all of you; given back after
-		if (live.takeoverTicks > 0 && !live.engulfed && !sulking(player)) {
+		if ((live.takeoverTicks > 0 || roarAge >= ROAR_SUIT_AT) && !live.engulfed && !sulking(player)) {
 			live.engulfed = true;
 			live.suitBeforeTakeover = next.has(WebSymbioteState.SUIT);
 			next = next.withFlag(WebSymbioteState.SUIT, true);
 			level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.4, 0.8, 0.4, 0.06);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SCULK_BLOCK_SPREAD, SoundSource.PLAYERS, 1.4F, 0.5F);
-		} else if (live.takeoverTicks <= 0 && live.engulfed) {
+		} else if (live.takeoverTicks <= 0 && roarAge < 0L && live.engulfed) {
 			live.engulfed = false;
 			next = next.withFlag(WebSymbioteState.SUIT, live.suitBeforeTakeover);
 		}
@@ -1139,7 +1202,7 @@ public final class WebSymbiote {
 		}
 		// the big body is up exactly while it has the wheel
 		// (and, the bond whole, whenever you wear Living Armor: the big body is yours to drive)
-		boolean bulkWanted = live.takeoverTicks > 0
+		boolean bulkWanted = live.takeoverTicks > 0 || roarAge >= ROAR_BULK_AT
 			|| next.has(WebSymbioteState.ARMOR) && next.bond() >= BOND_MAX && !live.feedingArmor && live.takeoverTicks <= 0;
 		if (bulkWanted != next.has(WebSymbioteState.BULK)) {
 			next = next.withFlag(WebSymbioteState.BULK, bulkWanted);
@@ -1783,7 +1846,7 @@ public final class WebSymbiote {
 			return;
 		}
 		Live live = live(player);
-		if (live.takeoverTicks > 0 || live.bondTicks > 0) {
+		if (live.takeoverTicks > 0 || live.bondTicks > 0 || live.roarAt > 0L) {
 			// it isn't listening right now
 			return;
 		}
@@ -1823,15 +1886,20 @@ public final class WebSymbiote {
 			case ARMOR -> toggle(player, WebSymbioteState.ARMOR);
 			case CRAWL -> toggle(player, WebSymbioteState.CRAWL);
 			case CONSUME -> consume(player);
-			case SPIKES -> spikes(player);
+			// in the big body, the Spike Burst is a roar
+			case SPIKES -> bulked(player) ? startRoar(player, live, now, false, null) : spikes(player);
 			case SHROUD -> shroud(player);
 			default -> false;
 		};
 		if (!done) {
 			return;
 		}
+		if (ability != TENDRIL && player.getAttached(WALL) != null) {
+			// anything else it does, it lets go of the wall for
+			letGo(player, live);
+		}
 		if (ability == SPIKES || ability == SHROUD) {
-			narrate(player, ability == SPIKES ? "spikes" : "shroud");
+			narrate(player, ability == SHROUD ? "shroud" : bulked(player) ? "roar" : "spikes");
 		}
 		int cooldown = COOLDOWN[ability];
 		if (ability == SHROUD) {
@@ -1908,7 +1976,7 @@ public final class WebSymbiote {
 		live.wallFace = face;
 		live.wallMaxTicks = maxTicks;
 		long now = level.getGameTime();
-		player.setAttached(WALL, new Wall(anchor, now, -1L));
+		player.setAttached(WALL, new Wall(anchor, now, -1L, feet, face.get3DDataValue(), List.of()));
 		player.setAttached(TENDRILS_OUT, now + maxTicks + WALL_HOLD);
 		return true;
 	}
@@ -2074,7 +2142,11 @@ public final class WebSymbiote {
 		level.sendParticles(dust(1.4F), player.getX(), player.getY() + 0.2, player.getZ(), 14, 0.4, 0.1, 0.4, 0.0);
 	}
 
-	/** A wall grab under way: arriving, you're turned to the wall's back and the tendrils slam in; then they let go. */
+	/**
+	 * A wall grab under way: arriving, you're turned with your back to the wall and the tendrils lift you off it, each
+	 * lower one biting into its own spot; then you hang there on them (see {@link #WALL_LIFT}) until you jump off, use
+	 * the grab again, use anything else on the radial menu, or get dragged too far.
+	 */
 	private static void tickWall(ServerPlayer player, Live live, Wall wall, long now) {
 		ServerLevel level = player.level();
 		if (wall.landed() < 0L) {
@@ -2086,46 +2158,110 @@ public final class WebSymbiote {
 				clearWall(player, live);
 				return;
 			}
-			// there: back to the wall, the tendrils fanned out and driven into it
-			player.setAttached(WALL, new Wall(wall.anchor(), wall.start(), now));
-			player.setAttached(TENDRILS_OUT, now + 20);
-			if (live.wallFace.getAxis().isHorizontal()) {
-				Vec3 out = live.wallFace.getUnitVec3();
-				float yaw = (float)(Mth.atan2(out.z, out.x) * Mth.RAD_TO_DEG) - 90.0F;
-				player.connection.send(new net.minecraft.network.protocol.game.ClientboundPlayerRotationPacket(yaw, false, 0.0F, true));
-			}
-			BlockPos center = BlockPos.containing(wall.anchor().subtract(live.wallFace.getUnitVec3().scale(0.1)));
-			var random = player.getRandom();
-			for (int i = 0; i < WALL_CRACKS * 3 && live.wallCracks.size() < WALL_CRACKS; i++) {
-				BlockPos pos = center.offset(random.nextInt(3) - 1, random.nextInt(3) - 1, random.nextInt(3) - 1);
-				net.minecraft.world.level.block.state.BlockState block = level.getBlockState(pos);
-				if (!block.isAir() && block.getDestroySpeed(level, pos) >= 0.0F && !live.wallCracks.contains(pos)) {
-					live.wallCracks.add(pos);
-				}
-			}
-			for (int i = 0; i < live.wallCracks.size(); i++) {
-				BlockPos pos = live.wallCracks.get(i);
-				level.destroyBlockProgress(crackId(player, i), pos, 3 + random.nextInt(4));
-				level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, level.getBlockState(pos)),
-					pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.1);
-			}
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_ATTACK, SoundSource.PLAYERS, 1.2F, 0.5F);
-			level.playSound(null, center, level.getBlockState(center).getSoundType().getBreakSound(), SoundSource.BLOCKS, 1.0F, 0.6F);
-			player.resetFallDistance();
+			land(player, live, wall, now);
 			return;
 		}
-		// tethered: held on the wall (the tendrils dug in) until you jump off, or use the grab again
+		// tethered: the tendrils dug in, holding you off the wall
 		player.setAttached(TENDRILS_OUT, now + 20);
 		player.resetFallDistance();
-		if (player.getLastClientInput().jump() && now - wall.landed() > 5 || player.position().distanceTo(live.wallFeet) > 3.0) {
-			clearWall(player, live);
-			if (player.getLastClientInput().jump()) {
+		boolean jumped = player.getLastClientInput().jump() && now - wall.landed() > 5;
+		if (jumped || player.position().distanceTo(wall.rest()) > WALL_SNAP) {
+			if (jumped) {
 				// kicked off it, away from the wall
 				Vec3 out = live.wallFace.getUnitVec3().scale(0.5).add(0.0, 0.45, 0.0);
 				ServerPlayNetworking.send(player, new WebNet.Nudge(out));
 			}
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_BREAK, SoundSource.PLAYERS, 0.8F, 1.2F);
+			letGo(player, live);
+			return;
 		}
+		// each crack bites as its tendril does (one a tick), then deepens the harder that tendril is stretched
+		long age = now - wall.landed();
+		Vec3 middle = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
+		boolean refresh = now >= live.wallRefreshAt;
+		if (refresh) {
+			live.wallRefreshAt = now + 100;
+		}
+		for (int i = 0; i < live.wallCracks.size() && i < wall.points().size(); i++) {
+			if (age < i) {
+				continue;
+			}
+			BlockPos pos = live.wallCracks.get(i);
+			Vec3 point = wall.points().get(i);
+			int stage;
+			if (age == i) {
+				// it bites in
+				stage = TETHER_BITE_STAGE;
+				level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, level.getBlockState(pos)),
+					point.x, point.y, point.z, 8, 0.12, 0.12, 0.12, 0.12);
+				level.playSound(null, point.x, point.y, point.z, level.getBlockState(pos).getSoundType().getHitSound(), SoundSource.BLOCKS, 0.9F,
+					0.6F + 0.08F * i);
+			} else {
+				double stretch = Math.max(0.0, point.distanceTo(middle) - live.wallRestReach[i]);
+				int tension = (int)(stretch / TETHER_STAGE_STRETCH);
+				// settling from the bite to its rest, then deeper with the strain
+				int settle = Math.max(TETHER_REST_STAGE, TETHER_BITE_STAGE - (int)((age - i) / 3));
+				stage = Math.min(9, Math.max(settle, TETHER_REST_STAGE + tension));
+			}
+			if (stage != live.wallStages[i] || refresh) {
+				if (stage > live.wallStages[i] && age > i + 1 && player.getRandom().nextInt(3) == 0) {
+					// it grinds deeper: grit spills from the bite
+					level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, level.getBlockState(pos)),
+						point.x, point.y, point.z, 3, 0.08, 0.08, 0.08, 0.05);
+				}
+				live.wallStages[i] = stage;
+				level.destroyBlockProgress(crackId(player, i), pos, stage);
+			}
+		}
+	}
+
+	/** There: back to the wall, and the tendrils pick their spots to bite into, around you, a block out from it. */
+	private static void land(ServerPlayer player, Live live, Wall wall, long now) {
+		ServerLevel level = player.level();
+		Direction face = live.wallFace;
+		Vec3 normal = face.getUnitVec3();
+		if (face.getAxis().isHorizontal()) {
+			float yaw = (float)(Mth.atan2(normal.z, normal.x) * Mth.RAD_TO_DEG) - 90.0F;
+			player.connection.send(new net.minecraft.network.protocol.game.ClientboundPlayerRotationPacket(yaw, false, 0.0F, true));
+		}
+		Vec3 rest = player.position().add(normal.scale(WALL_LIFT));
+		// the wall's own frame: to the wearer's right along it, and "up" (on a ceiling or floor, the way you face)
+		Vec3 facing = face.getAxis().isHorizontal() ? normal : Vec3.directionFromRotation(0.0F, player.getYRot());
+		Vec3 right = new Vec3(-facing.z, 0.0, facing.x).normalize();
+		Vec3 up = face.getAxis().isHorizontal() ? new Vec3(0.0, 1.0, 0.0) : facing;
+		Vec3 middle = rest.add(0.0, player.getBbHeight() * 0.5, 0.0);
+		Vec3 onWall = middle.subtract(normal.scale(middle.subtract(wall.anchor()).dot(normal)));
+		List<Vec3> points = new java.util.ArrayList<>();
+		clearCracks(player, live);
+		for (double[] spot : TETHER_SPOTS) {
+			Vec3 point = null;
+			BlockPos pos = null;
+			// where it wants to bite, else nearer in, else the anchor itself
+			for (double reach = 1.0; reach >= 0.0 && point == null; reach -= 0.5) {
+				Vec3 at = onWall.add(right.scale(spot[0] * reach)).add(up.scale(spot[1] * reach));
+				BlockHitResult hit = level.clip(new net.minecraft.world.level.ClipContext(at.add(normal.scale(0.8)), at.subtract(normal.scale(1.2)),
+					net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, player));
+				if (hit.getType() == HitResult.Type.BLOCK && level.getBlockState(hit.getBlockPos()).getDestroySpeed(level, hit.getBlockPos()) >= 0.0F) {
+					point = hit.getLocation();
+					pos = hit.getBlockPos();
+				}
+			}
+			if (point == null) {
+				point = wall.anchor();
+				pos = BlockPos.containing(wall.anchor().subtract(normal.scale(0.1)));
+			}
+			points.add(point);
+			live.wallCracks.add(pos);
+			live.wallRestReach[points.size() - 1] = point.distanceTo(middle);
+		}
+		java.util.Arrays.fill(live.wallStages, 0);
+		live.wallRefreshAt = now + 100;
+		player.setAttached(WALL, new Wall(wall.anchor(), wall.start(), now, rest, face.get3DDataValue(), List.copyOf(points)));
+		player.setAttached(TENDRILS_OUT, now + 20);
+		BlockPos center = BlockPos.containing(wall.anchor().subtract(normal.scale(0.1)));
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_ATTACK, SoundSource.PLAYERS, 1.2F, 0.5F);
+		level.playSound(null, center, level.getBlockState(center).getSoundType().getBreakSound(), SoundSource.BLOCKS, 1.0F, 0.6F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 1.0F, 0.7F);
+		player.resetFallDistance();
 	}
 
 	/** Using Tendril Grab while tethered to a wall lets go of it (and does nothing else). */
@@ -2134,9 +2270,14 @@ public final class WebSymbiote {
 		if (wall == null || wall.landed() < 0L) {
 			return false;
 		}
-		clearWall(player, live(player));
-		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_BREAK, SoundSource.PLAYERS, 0.8F, 1.2F);
+		letGo(player, live(player));
 		return true;
+	}
+
+	/** The tendrils tear loose from the wall. */
+	private static void letGo(ServerPlayer player, Live live) {
+		clearWall(player, live);
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_BREAK, SoundSource.PLAYERS, 0.8F, 1.2F);
 	}
 
 	private static int crackId(ServerPlayer player, int i) {
@@ -2145,11 +2286,16 @@ public final class WebSymbiote {
 
 	/** The tendrils let go of the wall, and its cracks fade. */
 	private static void clearWall(ServerPlayer player, Live live) {
+		clearCracks(player, live);
+		player.removeAttached(WALL);
+	}
+
+	private static void clearCracks(ServerPlayer player, Live live) {
 		for (int i = 0; i < live.wallCracks.size(); i++) {
 			player.level().destroyBlockProgress(crackId(player, i), live.wallCracks.get(i), -1);
 		}
 		live.wallCracks.clear();
-		player.removeAttached(WALL);
+		java.util.Arrays.fill(live.wallStages, 0);
 	}
 
 	/** Your screen washes with how it feels (see {@link #FIRE_VIGNETTE}). */
@@ -2937,6 +3083,144 @@ public final class WebSymbiote {
 	private static void feed(ServerPlayer player, int satiety, int calm) {
 		WebSymbioteState state = state(player);
 		set(player, state.withSatiety(Math.min(SATIETY_MAX, state.satiety() + satiety)).withStress(Math.max(0, state.stress() - calm)));
+	}
+
+	/**
+	 * The roar begins (see {@link #ROAR_TICKS}): you're held hunched while it gathers (everyone sees the pose), off any
+	 * wall you were on. {@code defend}: it's taking over to save you, so the armour pieces itself together as it goes,
+	 * and it runs with you after (from {@code threat}).
+	 */
+	private static boolean startRoar(ServerPlayer player, Live live, long now, boolean defend, @org.jspecify.annotations.Nullable LivingEntity threat) {
+		ServerLevel level = player.level();
+		if (player.getAttached(WALL) != null) {
+			letGo(player, live);
+		}
+		live.roarAt = now;
+		live.roarDefend = defend;
+		live.roarThreat = threat == null ? -1 : threat.getId();
+		WebPower.pose(player, WebPose.ROAR, 1);
+		if (defend) {
+			// it has you: your screen goes dark under it, and it shrugs off the worst while it swells
+			dread(player, ROAR_TICKS + 20, true);
+			player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, ROAR_TICKS, ROAR_RESISTANCE, false, false));
+		}
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 1.6F, 0.6F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 1.0F, 0.6F);
+		return true;
+	}
+
+	/** The roar, a tick at a time: the armour building (near death), the tendrils flailing, and at its height, the roar. */
+	private static void tickRoar(ServerPlayer player, Live live, long now) {
+		ServerLevel level = player.level();
+		long age = now - live.roarAt;
+		Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.55, 0.0);
+		if (age >= ROAR_TENDRILS_AT && age < ROAR_BLAST_AT + 8) {
+			// the tendrils burst out and thrash (over whatever it has built so far)
+			player.setAttached(TENDRILS_OUT, now + 10);
+		}
+		if (age == ROAR_SUIT_AT && live.roarDefend) {
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.SCULK_BLOCK_SPREAD, SoundSource.PLAYERS, 1.4F, 0.5F);
+		} else if (age == ROAR_TENDRILS_AT) {
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 1.4F, 0.5F);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_JUMP, SoundSource.PLAYERS, 1.0F, 0.4F);
+		} else if (age == ROAR_BULK_AT && live.roarDefend) {
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.ARMOR_EQUIP_NETHERITE.value(), SoundSource.PLAYERS, 1.2F, 0.5F);
+		} else if (age == ROAR_BLAST_AT) {
+			roarBlast(player);
+		}
+		if (age < ROAR_BLAST_AT && age % 2 == 0) {
+			// black pouring over you, spiralling up as it builds
+			double angle = age * 0.8;
+			double y = player.getY() + (age / (double)ROAR_BLAST_AT) * player.getBbHeight();
+			for (int k = 0; k < 3; k++) {
+				double a = angle + k * Math.PI * 2.0 / 3.0;
+				level.sendParticles(dust(1.5F), player.getX() + Math.cos(a) * 0.5, y, player.getZ() + Math.sin(a) * 0.5, 2, 0.05, 0.08, 0.05, 0.0);
+			}
+			if (age % 6 == 0) {
+				level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 4, 0.35, 0.5, 0.35, 0.02);
+			}
+		}
+		if (age >= ROAR_TICKS) {
+			endRoar(player, live, now);
+		}
+	}
+
+	/** At the roar's height: its head thrown back, a roar that hurts and hurls everything near and shakes every screen about. */
+	private static void roarBlast(ServerPlayer player) {
+		ServerLevel level = player.level();
+		Vec3 center = player.position().add(0.0, player.getBbHeight() * 0.55, 0.0);
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(ROAR_RADIUS),
+			e -> e != player && e.isAlive() && !e.isSpectator())) {
+			Vec3 to = living.getBoundingBox().getCenter().subtract(center);
+			if (to.length() > ROAR_RADIUS + living.getBbWidth() * 0.5) {
+				continue;
+			}
+			living.hurtServer(level, level.damageSources().playerAttack(player), ROAR_DAMAGE);
+			Vec3 flat = new Vec3(to.x, 0.0, to.z);
+			flat = flat.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : flat.normalize();
+			// the nearer, the harder it throws them
+			double force = ROAR_KNOCKBACK * (1.2 - 0.5 * Math.min(1.0, to.length() / ROAR_RADIUS));
+			Vec3 push = flat.scale(force).add(0.0, 0.5, 0.0);
+			living.setDeltaMovement(living.getDeltaMovement().add(push));
+			living.needsSync = true;
+			living.syncVelocity = true;
+			if (living instanceof ServerPlayer other) {
+				ServerPlayNetworking.send(other, new WebNet.Nudge(push));
+			}
+		}
+		// the roar itself: a ring of shock rolling out, and black spray
+		Vec3 look = player.getLookAngle();
+		level.sendParticles(ParticleTypes.SONIC_BOOM, center.x + look.x * 0.8, center.y + 0.4, center.z + look.z * 0.8, 1, 0.0, 0.0, 0.0, 0.0);
+		for (int ring = 1; ring <= 3; ring++) {
+			double r = ring * ROAR_RADIUS / 3.0;
+			int count = 10 + ring * 6;
+			for (int k = 0; k < count; k++) {
+				double a = k * Math.PI * 2.0 / count;
+				level.sendParticles(ring == 3 ? sheen(1.3F) : dust(1.7F - ring * 0.25F), center.x + Math.cos(a) * r, center.y - 0.4, center.z + Math.sin(a) * r,
+					1, 0.0, 0.05, 0.0, 0.0);
+			}
+		}
+		level.sendParticles(ParticleTypes.SQUID_INK, center.x, center.y + 0.4, center.z, 40, 0.5, 0.5, 0.5, 0.3);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 2.0F, 0.8F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 1.6F, 0.55F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 0.6F, 0.7F);
+		// every screen near it shakes, yours most
+		ServerPlayNetworking.send(player, new WebNet.Shake(ROAR_SHAKE));
+		for (ServerPlayer other : level.players()) {
+			if (other != player && other.distanceTo(player) < ROAR_RADIUS * 2.5) {
+				ServerPlayNetworking.send(other, new WebNet.Shake(ROAR_SHAKE * 0.5F));
+			}
+		}
+	}
+
+	/** The roar is over: near death, it wraps you in the Shroud and runs for it with you (climbing or tearing through walls). */
+	private static void endRoar(ServerPlayer player, Live live, long now) {
+		boolean defend = live.roarDefend;
+		live.roarAt = 0L;
+		live.roarDefend = false;
+		if (!defend) {
+			return;
+		}
+		LivingEntity threat = player.level().getEntity(live.roarThreat) instanceof LivingEntity living && living.isAlive() ? living : threat(player);
+		live.roarThreat = -1;
+		if (threat == null || sulking(player)) {
+			// nothing left to run from
+			live.fleeing = false;
+			return;
+		}
+		shroud(player);
+		startTakeover(player, live, now, threat);
+		live.takeoverTicks = RUN_TICKS;
+		ServerPlayNetworking.send(player, new WebNet.Takeover(threat.getId(), RUN_TICKS, true));
+		Vec3 away = player.position().subtract(threat.position()).horizontal();
+		away = away.lengthSqr() < 1.0E-4 ? player.getLookAngle().horizontal().reverse() : away;
+		ServerPlayNetworking.send(player, new WebNet.Nudge(away.normalize().scale(LEAP_SPEED).add(0.0, LEAP_UP, 0.0)));
+	}
+
+	/** Roaring right now (held in the pose, the tendrils flailing). Both sides: the pose is synced. */
+	public static boolean roaring(Player player) {
+		WebPose pose = player.getAttached(WebPower.POSE);
+		return pose != null && pose.kind() == WebPose.ROAR && player.level().getGameTime() - pose.start() < pose.ticks();
 	}
 
 	/** Spike Burst: black spikes burst out all around, hurting and hurling everything near. */
