@@ -47,7 +47,7 @@ final class McaBridge {
 		return villager instanceof VillagerEntityMCA;
 	}
 
-	// ---- workers (0.5.13) -------------------------------------------------------------------------------------------
+	// ---- workers (0.5.21) -------------------------------------------------------------------------------------------
 
 	/** The workers' professions are important (MCA never makes them guards or lets them lapse), and they don't trade. */
 	static void register() {

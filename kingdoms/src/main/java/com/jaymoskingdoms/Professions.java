@@ -15,7 +15,7 @@ import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.13) The villager professions of a settlement's workers (builder, farmer, miner, woodcutter), so an MCA
+ * (0.5.21) The villager professions of a settlement's workers (builder, farmer, miner, woodcutter), so an MCA
  * villager promoted to the work shows it: in their name tag, their clothes, MCA's family tree. No job site takes
  * anyone on as one; only the settlement (or a player, through MCA's Professions menu) does.
  */

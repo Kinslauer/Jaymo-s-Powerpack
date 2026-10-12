@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.5.13) A settlement's workers dress for the work: MCA's clothes for the nearest trade (a builder a mason's, a miner a miner's). */
+/** (0.5.21) A settlement's workers dress for the work: MCA's clothes for the nearest trade (a builder a mason's, a miner a miner's). */
 @Mixin(SkinSelection.class)
 abstract class McaSkinMixin {
 	@Inject(method = "mapProfession", at = @At("HEAD"), cancellable = true)

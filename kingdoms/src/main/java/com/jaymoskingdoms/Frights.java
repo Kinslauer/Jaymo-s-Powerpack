@@ -53,7 +53,7 @@ final class Frights {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> FRIGHTS.clear());
 	}
 
-	/** (0.5.13) It's running from a monster, or hiding from one. */
+	/** (0.5.21) It's running from a monster, or hiding from one. */
 	static boolean afraid(UUID villager) {
 		return FRIGHTS.containsKey(villager);
 	}

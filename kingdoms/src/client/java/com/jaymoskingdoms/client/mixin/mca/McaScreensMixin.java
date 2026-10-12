@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.5.13) MCA's Professions menu (villager, guard, archer) also offers the settlement's jobs: builder, farmer, miner,
+ * (0.5.21) MCA's Professions menu (villager, guard, archer) also offers the settlement's jobs: builder, farmer, miner,
  * woodcutter, one row each below MCA's own. The server answers them ({@code McaCommandMixin}).
  */
 @Mixin(MCAScreens.class)

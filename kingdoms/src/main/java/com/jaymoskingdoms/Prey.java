@@ -10,7 +10,7 @@ import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.monster.zombie.ZombifiedPiglin;
 
 /**
- * (0.5.13) Whatever hunts villagers hunts a settlement's folk too: zombies (and husks, drowned, zombie villagers) go
+ * (0.5.21) Whatever hunts villagers hunts a settlement's folk too: zombies (and husks, drowned, zombie villagers) go
  * for any of them, illagers and ravagers for a realm's (a camp's barbarians are no villagers). Builders, farmers,
  * miners and woodcutters run from them ({@link Folk}); guards fight. (With MCA a realm's workers are villagers
  * already, hunted as villagers are.)

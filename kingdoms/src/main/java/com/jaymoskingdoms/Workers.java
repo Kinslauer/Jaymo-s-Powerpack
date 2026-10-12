@@ -13,7 +13,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.13) A settlement's {@link Worker}s: who they are ({@link #near}), taking one on ({@link #body}), and their day.
+ * (0.5.21) A settlement's {@link Worker}s: who they are ({@link #near}), taking one on ({@link #body}), and their day.
  * With Minecraft Comes Alive a realm's workers are its own MCA villagers ({@link #inPlace}): one is promoted to the
  * job where they stand (the settlement's pick, or a player's through MCA's Professions menu), and keeps their name,
  * family and hearts. A realm's guards are MCA's guards and archers, counted on its roster and fighting its foes

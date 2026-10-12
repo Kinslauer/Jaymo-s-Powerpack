@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.5.13) A villager at work for a settlement (with MCA) works instead of minding its brain ({@link Workers#step}). */
+/** (0.5.21) A villager at work for a settlement (with MCA) works instead of minding its brain ({@link Workers#step}). */
 @Mixin(Villager.class)
 abstract class VillagerWorkMixin {
 	@Inject(method = "customServerAiStep", at = @At("HEAD"), cancellable = true)

@@ -57,6 +57,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	public static final int FARMER = 8;
 	/** (0.5.2) A settlement's miner and woodcutter: they work its mine and its trees and carry what they get to its storage ({@link Gatherers}). */
 	public static final int MINER = 9, WOODCUTTER = 10;
+	/** (0.5.14) A fiefdom's carter (a caravan's) or a king's coachman ({@link Caravans}, {@link Carriages}). */
+	public static final int CARTER = 11;
 
 	/**
 	 * A role: its saved name, whether it fights ({@code combatant}: melee unless it's an archer; non-combatants flee
@@ -94,7 +96,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	static final double BUILDER_HEALTH = 20.0, BUILDER_DAMAGE = 2.0;
 	/** How fast a non-combatant flees when hurt. */
 	static final double PANIC_SPEED = 1.3;
-	/** (0.5.13) How near a monster comes before a non-combatant moves off. */
+	/** (0.5.21) How near a monster comes before a non-combatant moves off. */
 	static final float AVOID_RANGE = 8.0F;
 	/** An archer's reach, and how often they loose (ticks). */
 	static final double ARCHER_RANGE = 28.0;
@@ -182,7 +184,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 
 	private ServerBossEvent bossBar;
 	private boolean rallied;
-	/** (0.5.13) Keeping out of a monster's way (its work waits). */
+	/** (0.5.21) Keeping out of a monster's way (its work waits). */
 	private boolean shying;
 	/** A builder carrying a load (it's in his main hand, his tool put away). */
 	private boolean carrying;
@@ -370,7 +372,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 				return !Folk.this.combatant() && super.canUse();
 			}
 		});
-		// (0.5.13) the working folk keep out of monsters' way, as villagers do
+		// (0.5.21) the working folk keep out of monsters' way, as villagers do
 		this.goalSelector.addGoal(1, new net.minecraft.world.entity.ai.goal.AvoidEntityGoal<>(this, net.minecraft.world.entity.monster.Monster.class, AVOID_RANGE, 0.8, PANIC_SPEED) {
 			@Override
 			public boolean canUse() {
@@ -398,6 +400,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		// (0.5.1) a ruler's day out and his escort at his back; doors opened (and shut) on the way
 		this.goalSelector.addGoal(3, new Royals.Round(this));
 		this.goalSelector.addGoal(3, new Royals.Follow(this));
+		// (0.5.14) a caravan's carters and guards on the road
+		this.goalSelector.addGoal(3, new Caravans.Drive(this));
 		this.goalSelector.addGoal(3, new net.minecraft.world.entity.ai.goal.OpenDoorGoal(this, true));
 		this.goalSelector.addGoal(4, new MoveTowardsRestrictionGoal(this, 1.0));
 		this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.6));
@@ -458,7 +462,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			this.restyle(level);
 		}
 		if (this.tickCount % 20 == 0 && Worker.isWork(this.role()) && McaCompat.becomeVillager(level, this)) {
-			// (0.5.13) with MCA, a realm's workers are its villagers: this one is one now
+			// (0.5.21) with MCA, a realm's workers are its villagers: this one is one now
 			return;
 		}
 		if (Homes.tick(level, this)) {
@@ -469,6 +473,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		// (0.5.12) javelins at a foe out of reach; attackers fight harder, break through and burn
 		Javelins.tick(level, this);
 		Assault.tick(level, this);
+		if (this.leader() && this.tickCount % 5 == 0) {
+			// (0.5.19) his bar: only for the players who've hit him, while they stay near
+			BossBars.show(level, this, this.bar());
+		}
 		if (this.leader() && !this.rallied && this.getHealth() <= this.getMaxHealth() * RALLY_AT) {
 			// his second wind: he rallies, and calls his guards in
 			this.rallied = true;
@@ -506,14 +514,6 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		}
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			this.setDropChance(slot, 0.0F);
-		}
-	}
-
-	@Override
-	public void startSeenByPlayer(ServerPlayer player) {
-		super.startSeenByPlayer(player);
-		if (this.leader()) {
-			this.bar().addPlayer(player);
 		}
 	}
 
@@ -610,6 +610,16 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 				this.archer.performRangedAttack(target, 1.0F);
 			}
 		}
+	}
+
+	/**
+	 * (0.5.14) A rider (in the saddle, in a carriage) or a caravan's man can't smother in a wall: a horse's head and a
+	 * carriage brush through leaves and eaves, and a stuck caravan is set down further along its road.
+	 */
+	@Override
+	public boolean isInvulnerableTo(ServerLevel level, DamageSource source) {
+		return super.isInvulnerableTo(level, source) || source.is(net.minecraft.world.damagesource.DamageTypes.IN_WALL)
+			&& (this.isPassenger() || Caravans.isCaravanFolk(this));
 	}
 
 	@Override

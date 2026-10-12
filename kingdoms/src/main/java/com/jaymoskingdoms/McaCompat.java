@@ -29,7 +29,7 @@ import org.jspecify.annotations.Nullable;
  * {@code McaTasksMixin}). Monarch stays MCA's own crown to earn.</li>
  * <li>A village's elder keeps their own name (an MCA villager's name is who they are; renaming one renames them in
  * the family tree too).</li>
- * <li>(0.5.13) A realm's workers (builders, farmers, miners, woodcutters) are its MCA villagers, promoted where they
+ * <li>(0.5.21) A realm's workers (builders, farmers, miners, woodcutters) are its MCA villagers, promoted where they
  * stand ({@link #enlist}) or through MCA's Professions menu ({@link #promote}); its old {@link Folk} workers become
  * villagers ({@link #becomeVillager}). See {@link Workers}.</li>
  * </ul>
@@ -174,7 +174,7 @@ public final class McaCompat {
 	}
 
 	/**
-	 * (0.5.13) {@code target} is a foe to {@code guard}, an MCA guard in a realm's service: a player the realm counts
+	 * (0.5.21) {@code target} is a foe to {@code guard}, an MCA guard in a realm's service: a player the realm counts
 	 * hostile, a barbarian, or the folk of a realm it's at war with. (Monsters MCA's guards fight already.)
 	 */
 	public static boolean foe(LivingEntity guard, LivingEntity target) {

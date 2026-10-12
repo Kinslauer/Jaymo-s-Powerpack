@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.5.13) MCA's Professions menu: its builder, farmer, miner and woodcutter buttons are the settlement's to answer ({@link McaCompat#promote}). */
+/** (0.5.21) MCA's Professions menu: its builder, farmer, miner and woodcutter buttons are the settlement's to answer ({@link McaCompat#promote}). */
 @Mixin(VillagerCommandHandler.class)
 abstract class McaCommandMixin extends EntityCommandHandler<VillagerEntityMCA> {
 	McaCommandMixin(VillagerEntityMCA entity) {

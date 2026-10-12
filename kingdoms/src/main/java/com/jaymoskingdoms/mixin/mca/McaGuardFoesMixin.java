@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.5.13) A realm's MCA guards also go for its foes: players it counts hostile, barbarians, its enemies' folk in a war ({@link McaCompat#foe}). */
+/** (0.5.21) A realm's MCA guards also go for its foes: players it counts hostile, barbarians, its enemies' folk in a war ({@link McaCompat#foe}). */
 @Mixin(GuardEnemiesSensor.class)
 abstract class McaGuardFoesMixin {
 	/** As keen as on a monster that's after them (MCA's 9), just under. */

@@ -56,7 +56,7 @@ public final class Gatherers {
 	/** They carry this many items before taking them to storage. */
 	static final int ARMFUL = 48;
 	/** A block of stone takes this long to dig, an ore this long, a log this long (ticks); from this far. */
-	/** (0.5.13) A miner puts a torch where he's dug out if the block light there is under this. */
+	/** (0.5.21) A miner puts a torch where he's dug out if the block light there is under this. */
 	static final int TORCH_BELOW = 7;
 	static final int STONE_TICKS = 30, ORE_TICKS = 50, LOG_TICKS = 16, FELL_START_TICKS = 30, FELL_WAIT_TICKS = 40;
 	static final double REACH = 4.5, STAND_REACH = 1.5, DEPOT_REACH = 2.5, VERTICAL_SLACK = 3.0;
@@ -206,7 +206,7 @@ public final class Gatherers {
 	static boolean wanted(MinecraftServer server, Faction f, int role) {
 		int have = f.holdings().count(role) + f.holdings().vacancies().getOrDefault(Folk.roleName(role), 0);
 		if (role == Folk.MINER) {
-			return Mines.dug(server, f) && have < MINERS_PER_MINE;
+			return Mines.dug(server, f) && have < Focus.miners(server, f, MINERS_PER_MINE);
 		}
 		return role == Folk.WOODCUTTER && have < treeFarms(server, f).size() * WOODCUTTERS_PER_FARM;
 	}
@@ -519,7 +519,7 @@ public final class Gatherers {
 	}
 
 	/**
-	 * (0.5.13) A miner lights his way: where he's just dug out is dark (underground, block light under
+	 * (0.5.21) A miner lights his way: where he's just dug out is dark (underground, block light under
 	 * {@link #TORCH_BELOW}), a torch goes on its floor, or on a wall beside it.
 	 */
 	static void light(ServerLevel level, BlockPos open) {

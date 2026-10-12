@@ -15,7 +15,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.13) One of a settlement's working people: a builder ({@link Folk#FOREMAN}, {@link Folk#WORKER}), a
+ * (0.5.21) One of a settlement's working people: a builder ({@link Folk#FOREMAN}, {@link Folk#WORKER}), a
  * {@link Folk#FARMER}, a {@link Folk#MINER} or a {@link Folk#WOODCUTTER}. Without Minecraft Comes Alive (and in
  * barbarian camps) that's a {@link Folk}; with it, a settlement's workers are its own MCA villagers, promoted to the
  * job in place ({@code McaWorkerMixin} makes them workers). The work code ({@link Construction}, {@link Mines},

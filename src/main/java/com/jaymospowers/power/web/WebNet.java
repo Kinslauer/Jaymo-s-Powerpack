@@ -86,6 +86,17 @@ public final class WebNet {
 		}
 	}
 
+	/** Client → server: spread wings flared to airbrake ({@code on}) or not. */
+	public record WingsBrake(boolean on) implements CustomPacketPayload {
+		public static final Type<WingsBrake> TYPE = new Type<>(JaymosPowers.id("web_wings_brake"));
+		public static final StreamCodec<ByteBuf, WingsBrake> CODEC = ByteBufCodecs.BOOL.map(WingsBrake::new, WingsBrake::on);
+
+		@Override
+		public Type<WingsBrake> type() {
+			return TYPE;
+		}
+	}
+
 	/** Client → server: picked a symbiote ability from the radial menu (see {@link WebSymbiote}'s ability indices). */
 	public record SymbioteUse(int ability) implements CustomPacketPayload {
 		public static final Type<SymbioteUse> TYPE = new Type<>(JaymosPowers.id("web_symbiote_use"));
@@ -220,6 +231,7 @@ public final class WebNet {
 		PayloadTypeRegistry.clientboundPlay().register(Shake.TYPE, Shake.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Dread.TYPE, Dread.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Wings.TYPE, Wings.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(WingsBrake.TYPE, WingsBrake.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ChargeHold.TYPE, ChargeHold.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Swing.TYPE, Swing.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(SwingReject.TYPE, SwingReject.CODEC);

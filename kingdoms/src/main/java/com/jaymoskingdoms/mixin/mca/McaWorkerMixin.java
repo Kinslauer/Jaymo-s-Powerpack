@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.5.13) An MCA villager can be one of a settlement's {@link Worker}s: their job, their faction, their work and what
+ * (0.5.21) An MCA villager can be one of a settlement's {@link Worker}s: their job, their faction, their work and what
  * they're carrying are kept here (and saved). Their day is {@link Workers#step}'s ({@code VillagerWorkMixin}).
  */
 @Mixin(VillagerEntityMCA.class)

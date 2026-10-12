@@ -32,7 +32,7 @@ final class DevCommands {
 				.then(net.minecraft.commands.Commands.literal("stock").executes(c -> stock(c.getSource().getPlayerOrException())))));
 	}
 
-	/** (0.5.13) {@code /kingdomsdev stock}: the faction nearest the tester gets a stack or four of common building stuff in storage. */
+	/** (0.5.21) {@code /kingdomsdev stock}: the faction nearest the tester gets a stack or four of common building stuff in storage. */
 	private static int stock(net.minecraft.server.level.ServerPlayer player) {
 		net.minecraft.server.level.ServerLevel level = player.level();
 		Faction f = Factions.around(level.getServer(), level, player.blockPosition(), 200);
