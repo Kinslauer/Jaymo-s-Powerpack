@@ -1491,8 +1491,8 @@ rebuilt here; none of its code or art is used.
 - Villages now build a stable (from 18 people); kingdoms and fiefdoms still build theirs from 28, now the coaching yard
   or (half the time) the aisle barn in place of the old two-stall stable.
 - A finished stable gets its horses bought in (`Gatherers.STABLE_HORSES`, 2).
-- **Three tavern designs** (`Buildings.tavern`), mocked up the same way, any of them for a kingdom (the plain design:
-  the inn):
+- **Three tavern designs** (`Buildings.tavern`), mocked up the same way and picked by size (Andy's "mix by size"): the
+  alehouse below `TAVERN_GRAND` (48) people, then the coaching inn or (half the time) the beer-garden tavern:
   - **Alehouse** (`tavernAlehouse`, 13 x 11): a long hall under a hipped roof, the bar and barrels down one side, a
     smoker hearth and chimney, three tables, and a covered porch of tables out front.
   - **Coaching inn** (`tavernInn`, 11 x 9): a stone taproom (bar, barrels, three tables, a smoker hearth and chimney)
@@ -1502,4 +1502,6 @@ rebuilt here; none of its code or art is used.
 - **Only a wealthy kingdom with room to spare builds a tavern** (Andy's rule; `Planner.eligible`): a kingdom (never a
   fiefdom or village) of 26 or more people, `Wealth` tier WEALTHY, with nothing else in its growth order left to
   build. The wall doesn't wait for it (`utilitiesDone` skips it). Tables are a fence and a pressure plate of the land's
-  wood (`Kit.plate`), stools are stairs.
+  wood (`Kit.plate`).
+- **Sittable stools** (`Cushions`): every stool (a wooden slab beside a table) gets one of 26.3's cushions in the
+  realm's colour, facing the table, when the building is finished (or previewed). Right-click to sit.

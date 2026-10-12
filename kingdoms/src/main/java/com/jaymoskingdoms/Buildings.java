@@ -74,7 +74,8 @@ final class Buildings {
 			town(type, "tower", Buildings::tower, 8, 56);
 		}
 		// (0.5.26) only a wealthy kingdom with room to spare builds a tavern ({@link Planner#eligible})
-		realm(FactionType.KINGDOM, "tavern", Buildings::tavern, 1, 26);
+		Blueprint.register(FactionType.KINGDOM, new Blueprint.Entry("tavern",
+			(level, faction, variant) -> tavern(Kit.of(level, faction, variant, variant), Planner.size(faction)), 1, 26));
 		realm(FactionType.VILLAGE, "tree_farm", Buildings::treeFarm, 1, 0);
 		realm(FactionType.VILLAGE, "pen", Buildings::pen, 1, 0);
 		realm(FactionType.VILLAGE, "farm", Buildings::farm, 1, 0);
@@ -869,15 +870,20 @@ final class Buildings {
 		return s.done();
 	}
 
-	/**
-	 * (0.5.26) A tavern, built only by a wealthy kingdom with room to spare ({@link Planner#eligible}): an alehouse, a
-	 * coaching inn or a tavern with a beer garden (the plain design: the coaching inn).
-	 */
-	static Blueprint tavern(Kit k) {
-		return k.classic ? tavernInn(k) : k.pick(TAVERNS).draw(k);
-	}
+	/** (0.5.26) The people a kingdom needs before its tavern is the grand kind (the inn or the beer garden). */
+	static final int TAVERN_GRAND = 48;
 
-	private static final Design[] TAVERNS = {Buildings::tavernAlehouse, Buildings::tavernInn, Buildings::tavernGarden};
+	/**
+	 * (0.5.26) A tavern, built only by a wealthy kingdom with room to spare ({@link Planner#eligible}), by its size: an
+	 * alehouse, or from {@link #TAVERN_GRAND} people a coaching inn or (half the time, in a varied realm) a tavern with a
+	 * beer garden.
+	 */
+	static Blueprint tavern(Kit k, int people) {
+		if (people < TAVERN_GRAND) {
+			return tavernAlehouse(k);
+		}
+		return k.classic || k.chance(0.5) ? tavernInn(k) : tavernGarden(k);
+	}
 
 	/** Walls round x0..x1, z0..z1 from y0 to y1: posts at the corners and every {@code bay} blocks, {@code wall} between. */
 	private static void shell(Sketch s, int x0, int x1, int z0, int z1, int y0, int y1, BlockState wall, BlockState post, int bay) {
@@ -895,16 +901,15 @@ final class Buildings {
 		}
 	}
 
-	/** A table (a post and a plate) with a stool either side, east and west ({@code ew}) or north and south. */
+	/**
+	 * A table (a post and a plate) with a stool (a slab) either side, east and west ({@code ew}) or north and south. Each
+	 * stool gets a cushion to sit on when the building's finished ({@link Cushions}).
+	 */
 	private static void table(Sketch s, Kit k, int x, int y, int z, boolean ew) {
 		s.set(x, y, z, k.p.fence());
 		s.set(x, y + 1, z, k.plate());
-		if (ew) {
-			s.set(x - 1, y, z, Sketch.stair(k.woodStairs, Direction.WEST));
-			s.set(x + 1, y, z, Sketch.stair(k.woodStairs, Direction.EAST));
-		} else {
-			s.set(x, y, z - 1, Sketch.stair(k.woodStairs, Direction.NORTH));
-			s.set(x, y, z + 1, Sketch.stair(k.woodStairs, Direction.SOUTH));
+		for (int side : new int[] {-1, 1}) {
+			s.set(ew ? x + side : x, y, ew ? z : z + side, k.p.woodSlab());
 		}
 	}
 
