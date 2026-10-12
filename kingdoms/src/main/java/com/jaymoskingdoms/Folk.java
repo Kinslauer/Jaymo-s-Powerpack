@@ -266,6 +266,11 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		return role == null || role.combatant();
 	}
 
+	/** An archer (or a goblin slinger): it keeps its post and shoots. */
+	public boolean ranged() {
+		return this.role() == ARCHER || Goblins.ranged(this.role());
+	}
+
 	public boolean leader() {
 		Role role = ROLES.get(this.role());
 		return role != null && role.leader();
@@ -401,7 +406,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.15, true) {
 			@Override
 			public boolean canUse() {
-				return Folk.this.combatant() && Folk.this.role() != ARCHER && super.canUse();
+				return Folk.this.combatant() && !Folk.this.ranged() && super.canUse();
 			}
 		});
 		// (0.5.1) a ruler's day out and his escort at his back; doors opened (and shut) on the way
@@ -432,6 +437,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			(target, level) -> this.combatant() && target instanceof Enemy && !(target instanceof net.minecraft.world.entity.monster.Creeper)));
 		// barbarians hunt everyone else's people, and realms' folk hunt barbarians
 		Barbarians.addGoals(this, this.goalSelector, this.targetSelector);
+		// (0.5.27) goblins hunt everyone but those passing for one of them
+		Goblins.addGoals(this, this.goalSelector, this.targetSelector);
 		// realms at war: each other's folk (and sworn players) on sight
 		Wars.addGoals(this, this.targetSelector);
 	}
@@ -547,6 +554,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			return InteractionResult.PASS;
 		}
 		if (player instanceof ServerPlayer serverPlayer) {
+			if (Goblins.isGoblin(this) && this.level() instanceof ServerLevel level) {
+				// (0.5.27) a goblin grunts back at one of its own
+				Disguise.greet(level, serverPlayer, this);
+			}
 			KingdomEvents.audience(serverPlayer, this);
 			// (0.5.29) a king also has work for you
 			if (this.role() == KING) {
@@ -600,7 +611,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		@Override
 		public boolean canUse() {
 			LivingEntity target = this.archer.getTarget();
-			return this.archer.role() == ARCHER && target != null && target.isAlive() && this.archer.distanceTo(target) <= ARCHER_RANGE;
+			return this.archer.ranged() && target != null && target.isAlive() && this.archer.distanceTo(target) <= ARCHER_RANGE;
 		}
 
 		@Override

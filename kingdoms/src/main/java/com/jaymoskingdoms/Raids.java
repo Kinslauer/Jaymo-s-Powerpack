@@ -166,7 +166,8 @@ final class Raids {
 			}
 			Camps.CampData data = Camps.data(server, camp.id());
 			if (data == null || data.clearedAt() >= 0 || now - data.lastRaid() < COOLDOWN_TICKS
-				|| (data.illager() && level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL)) {
+				|| (data.illager() && level.getDifficulty() == net.minecraft.world.Difficulty.PEACEFUL) || data.goblin()) {
+				// (goblin villages don't raid: they're somewhere to go)
 				continue;
 			}
 			Faction target = target(server, level, camp);

@@ -33,6 +33,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(com.jaymoskingdoms.ChoppedLog.ENTITY, ChoppedLogRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.Wagon.TYPE, WagonRenderer::new);
 		CampSkins.register();
+		GoblinSkins.register();
+		com.jaymoskingdoms.client.lootgoblins.LootGoblinRenderer.register();
 		MobAnimations.register();
 		PullerPose.register();
 		SpeechBubbles.register();
@@ -88,6 +90,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 			super(context, new HumanoidModel<>(context.bakeLayer(ModelLayers.ZOMBIE)), 0.5F);
 			this.addLayer(new HumanoidArmorLayer<>(this, ArmorModelSet.bake(ModelLayers.ZOMBIE_ARMOR, context.getModelSet(), HumanoidModel::new),
 				context.getEquipmentRenderer()));
+			// (0.5.27) goblins' long ears and hooked noses
+			this.addLayer(new GoblinSkins.Features(this));
 		}
 
 		@Override
