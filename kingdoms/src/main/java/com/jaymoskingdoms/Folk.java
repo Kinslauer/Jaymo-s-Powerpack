@@ -464,6 +464,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		// (0.5.12) javelins at a foe out of reach; attackers fight harder, break through and burn
 		Javelins.tick(level, this);
 		Assault.tick(level, this);
+		if (this.leader() && this.tickCount % 5 == 0) {
+			// (0.5.19) his bar: only for the players who've hit him, while they stay near
+			BossBars.show(level, this, this.bar());
+		}
 		if (this.leader() && !this.rallied && this.getHealth() <= this.getMaxHealth() * RALLY_AT) {
 			// his second wind: he rallies, and calls his guards in
 			this.rallied = true;
@@ -501,14 +505,6 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		}
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			this.setDropChance(slot, 0.0F);
-		}
-	}
-
-	@Override
-	public void startSeenByPlayer(ServerPlayer player) {
-		super.startSeenByPlayer(player);
-		if (this.leader()) {
-			this.bar().addPlayer(player);
 		}
 	}
 

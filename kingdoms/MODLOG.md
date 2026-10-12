@@ -1381,3 +1381,9 @@ Tested on the dev server: farming fiefdom Tormoor sent caravans to wealthy Hedva
 river, unloaded, back home and gone, both in sight and out of every player's range; Hedvale bought its carriage and
 the king rode his round in it; it has 4 mounted guards and 2 mounted archers. The carts' and carriage's models
 seen in the client. Not seen in game: a player robbing a cart, a mining fiefdom's caravan, mounted war parties.
+
+## 0.5.19: boss bars only once you've hit the boss
+- **A boss's bar shows only to the players who've hit it** (`BossBars`): kings, lords, barbarian chiefs and illager
+  warlords. A hit by hand, with an arrow or javelin, or with a power that names its player all count. The bar stays
+  while that player is within 48 blocks; once they leave (or die, or change dimension) it's gone until they hit the
+  boss again. Its death or unloading clears it. Banner capture bars are unchanged (they're not a boss's).
