@@ -19,7 +19,9 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.EntityEvent;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
@@ -38,7 +40,8 @@ import org.jspecify.annotations.Nullable;
  * watched until it's out. Each grown villager near it chooses once how to answer: some fight it (they run to it and
  * put it out, either beating it out, now and then knocking out the burning block under it so it can't spread, or
  * pouring water on it, taken up again a moment later), some run to the nearest child and lead it away, the rest run
- * from it. Children always run. The kingdom's folk (guards, builders, farmers...) not already fighting put it out.
+ * from it. Children always run. The kingdom's folk (guards, builders, farmers...) not already fighting put it out, and
+ * (0.5.42) so do its iron golems, beating it out with their fists.
  */
 public final class Firefighting {
 	/** Villagers and folk this close to a fire answer it; a fire this close to a settlement's seat is watched. */
@@ -56,6 +59,8 @@ public final class Firefighting {
 	/** How fast they go: villagers fighting or fleeing, and folk. */
 	static final float VILLAGER_SPEED = 0.7F;
 	static final double FOLK_SPEED = 1.15;
+	/** How fast golems go to a fire. */
+	static final double GOLEM_SPEED = 1.0;
 
 	enum Answer { FIGHT, GUARD, RUN }
 
@@ -158,6 +163,25 @@ public final class Firefighting {
 			BlockPos to = beside(folk, fire);
 			folk.getNavigation().moveTo(to.getX() + 0.5, to.getY(), to.getZ() + 0.5, FOLK_SPEED);
 		}
+		// (0.5.42) golems not already fighting stride over and beat it out with their fists
+		for (IronGolem golem : level.getEntitiesOfClass(IronGolem.class, near, g -> g.isAlive() && g.getTarget() == null)) {
+			if (close(golem, fire)) {
+				beat(level, golem, fire);
+				return;
+			}
+			BlockPos to = beside(golem, fire);
+			golem.getNavigation().moveTo(to.getX() + 0.5, to.getY(), to.getZ() + 0.5, GOLEM_SPEED);
+		}
+	}
+
+	/** {@code golem} beats out {@code fire}: an arm swung down on it (no water, nothing knocked out). */
+	private static void beat(ServerLevel level, IronGolem golem, BlockPos fire) {
+		golem.getLookControl().setLookAt(fire.getX() + 0.5, fire.getY() + 0.5, fire.getZ() + 0.5);
+		// (the golem's own attack swing and its sound)
+		level.broadcastEntityEvent(golem, EntityEvent.START_ATTACKING);
+		level.setBlock(fire, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+		level.playSound(null, fire, SoundEvents.FIRE_EXTINGUISH, SoundSource.NEUTRAL, 0.7F, 1.2F);
+		FIRES.remove(fire);
 	}
 
 	/** How a grown villager answers: fights it, looks after a child (if one's near), or runs. */
