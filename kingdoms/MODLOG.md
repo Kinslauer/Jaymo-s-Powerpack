@@ -1516,3 +1516,29 @@ Andy asked for villagers who rickshaw goods and people about the villages and ki
   rickshaws, takes players to other settlements (same fares and offer, faster); a rickshaw there points players to it.
   The pullers do everything else. Below 300 the cab is let go once it's back and empty.
 - Not yet seen in game: all of it (built only).
+
+## 0.5.27: stables and taverns
+- **Three stable designs** (`Buildings.stable`), mocked up on the dev server and picked from screenshots:
+  - **Row stable** (`stableRow`, 13 x 7), the village one: four open-front stalls (gate, hay manger, water trough) under
+    a sloped slab roof, with a covered walk along the front.
+  - **Coaching yard** (`stableYard`, 13 x 13): four stalls under a gabled roof behind a fenced yard with a trough, a hay
+    stack, lamps on the posts and a 3-wide gate for carts.
+  - **Aisle barn** (`stableBarn`, 11 x 15): a stone-footed barn with a cart-wide aisle end to end, six stalls, a hayloft
+    over them and lanterns over the aisle.
+- Villages now build a stable (from 18 people); kingdoms and fiefdoms still build theirs from 28, now the coaching yard
+  or (half the time) the aisle barn in place of the old two-stall stable.
+- A finished stable gets its horses bought in (`Gatherers.STABLE_HORSES`, 2).
+- **Three tavern designs** (`Buildings.tavern`), mocked up the same way and picked by size (Andy's "mix by size"): the
+  alehouse below `TAVERN_GRAND` (48) people, then the coaching inn or (half the time) the beer-garden tavern:
+  - **Alehouse** (`tavernAlehouse`, 13 x 11): a long hall under a hipped roof, the bar and barrels down one side, a
+    smoker hearth and chimney, three tables, and a covered porch of tables out front.
+  - **Coaching inn** (`tavernInn`, 11 x 9): a stone taproom (bar, barrels, three tables, a smoker hearth and chimney)
+    and a timber floor of three beds above, up a ladder.
+  - **Tavern with a beer garden** (`tavernGarden`, 15 x 11): a two-storey tavern and a fenced garden beside it with
+    tables, lanterns on posts and its own gate.
+- **Only a wealthy kingdom with room to spare builds a tavern** (Andy's rule; `Planner.eligible`): a kingdom (never a
+  fiefdom or village) of 26 or more people, `Wealth` tier WEALTHY, with nothing else in its growth order left to
+  build. The wall doesn't wait for it (`utilitiesDone` skips it). Tables are a fence and a pressure plate of the land's
+  wood (`Kit.plate`).
+- **Sittable stools** (`Cushions`): every stool (a wooden slab beside a table) gets one of 26.3's cushions in the
+  realm's colour, facing the table, when the building is finished (or previewed). Right-click to sit.

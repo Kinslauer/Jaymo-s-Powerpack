@@ -75,6 +75,8 @@ public final class Gatherers {
 	static final double WALK_SPEED = 0.65;
 	/** A pen's first beasts: this many of each kind. */
 	static final int PEN_STOCK = 2;
+	/** (0.5.27) The horses bought in for a new stable. */
+	static final int STABLE_HORSES = 2;
 	/** Sleep's catch-up ({@link Nights}): a gatherer's ticks an item, the most at once, and a sapling's ticks a stage. */
 	static final int MINER_TICKS_PER_ITEM = 50, WOOD_TICKS_PER_LOG = 40, CATCH_UP_MOST = 256, SAPLING_TICKS_PER_STAGE = 5000;
 
@@ -283,7 +285,7 @@ public final class Gatherers {
 		return new BlockPos((b.min().getX() + b.max().getX()) / 2, b.min().getY(), (b.min().getZ() + b.max().getZ()) / 2);
 	}
 
-	/** A building's just been finished ({@link Construction}): a tree farm gets its woodcutter, a pen its first beasts, either kind of farm its farmer. */
+	/** A building's just been finished ({@link Construction}): a tree farm gets its woodcutter, a pen its first beasts, a stable its horses, either kind of farm its farmer. */
 	static void built(ServerLevel level, Faction f, String entry, BlockPos min, BlockPos max) {
 		MinecraftServer server = level.getServer();
 		if (entry.equals("tree_farm") && wanted(server, f, Folk.WOODCUTTER)) {
@@ -296,6 +298,13 @@ public final class Gatherers {
 					BlockPos at = Construction.standable(level, mid.offset(level.getRandom().nextInt(5) - 2, 0, level.getRandom().nextInt(5) - 2), 2);
 					kind.spawn(level, at, EntitySpawnReason.SPAWN_ITEM_USE);
 				}
+			}
+		}
+		if (entry.equals("stable")) {
+			BlockPos mid = new BlockPos((min.getX() + max.getX()) / 2, min.getY() + 1, (min.getZ() + max.getZ()) / 2);
+			for (int i = 0; i < STABLE_HORSES; i++) {
+				BlockPos at = Construction.standable(level, mid.offset(level.getRandom().nextInt(3) - 1, 0, level.getRandom().nextInt(3) - 1), 2);
+				EntityTypes.HORSE.spawn(level, at, EntitySpawnReason.SPAWN_ITEM_USE);
 			}
 		}
 		if ((entry.equals("pen") || entry.equals("farm")) && Farmers.wanted(server, f)) {
