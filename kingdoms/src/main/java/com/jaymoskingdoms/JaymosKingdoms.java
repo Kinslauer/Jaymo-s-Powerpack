@@ -74,6 +74,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Tempers.register();
 		Frights.register();
 		Theft.register();
+		// 0.5.19: a boss's bar shows only to the players who've hit it
+		BossBars.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
 		LOGGER.debug("war attachment: {}", WarData.WARS);
 		Wars.register();
