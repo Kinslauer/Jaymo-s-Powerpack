@@ -3,6 +3,6 @@
 	"package": "com.jaymoskingdoms.mixin.mca",
 	"plugin": "com.jaymoskingdoms.mixin.mca.McaMixinPlugin",
 	"compatibilityLevel": "JAVA_25",
-	"mixins": ["McaTasksMixin"],
+	"mixins": ["McaTasksMixin", "McaWorkerMixin", "McaCommandMixin", "McaSkinMixin", "McaGuardFoesMixin"],
 	"injectors": { "defaultRequire": 1 }
 }

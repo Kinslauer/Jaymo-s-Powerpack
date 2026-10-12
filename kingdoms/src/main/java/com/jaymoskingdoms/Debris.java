@@ -267,7 +267,7 @@ final class Debris {
 	// ---- the builders --------------------------------------------------------------------------------------------------
 
 	/** One builder's tick: true if he's clearing rubble (or running), false to leave him to the construction brain. */
-	static boolean tick(ServerLevel level, Folk b) {
+	static boolean tick(ServerLevel level, Worker b) {
 		MinecraftServer server = level.getServer();
 		Faction f = Factions.get(server, b.factionId());
 		Work w = f == null ? null : WORK.get(f.id());
@@ -275,7 +275,7 @@ final class Debris {
 			JOBS.remove(b.getUUID());
 			return false;
 		}
-		if (b.getLastHurtByMob() != null && b.tickCount - b.getLastHurtByMobTimestamp() < FLEE_TICKS) {
+		if (b.getLastHurtByMob() != null && b.ticksAlive() - b.getLastHurtByMobTimestamp() < FLEE_TICKS) {
 			return true;
 		}
 		long now = level.getGameTime();
@@ -316,7 +316,7 @@ final class Debris {
 				0.25, 0.25, 0.25, 0.05);
 		} else {
 			BlockState state = level.getBlockState(target);
-			level.destroyBlock(target, false, b);
+			level.destroyBlock(target, false, b.mob());
 			Item salvage = salvage(state);
 			if (salvage != null && Storage.loaded(level, f)) {
 				Storage.put(level, f, salvage, 1);
@@ -366,7 +366,7 @@ final class Debris {
 	}
 
 	/** Walks toward {@code goal}; true once within reach. Stuck too long: a puff of smoke, and he's there. */
-	private static boolean approach(ServerLevel level, Folk b, Job job, BlockPos goal, long now) {
+	private static boolean approach(ServerLevel level, Worker b, Job job, BlockPos goal, long now) {
 		double dx = goal.getX() + 0.5 - b.getX(), dz = goal.getZ() + 0.5 - b.getZ(), dy = goal.getY() - b.getY();
 		double across = Math.sqrt(dx * dx + dz * dz);
 		if (across <= REACH && Math.abs(dy) <= VERTICAL) {

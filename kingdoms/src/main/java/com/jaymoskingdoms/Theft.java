@@ -25,6 +25,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.PoiTypeTags;
 import net.minecraft.world.Container;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Animal;
@@ -32,6 +33,11 @@ import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.SwingAnimation;
+import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
+import net.minecraft.world.entity.ai.behavior.EntityTracker;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -49,6 +55,10 @@ import org.jspecify.annotations.Nullable;
  * witness cries out, a medium crime has its guards (and golems) after you for a while, a heavy one makes you an outlaw
  * there for longer. Taking unseen is noticed later, and costs you only a little. Putting things into its storage is a
  * gift: it raises your reputation (and a member's standing). Barbarian camps keep no law.
+ *
+ * <p>(0.5.20) Lighting a fire there (flint and steel or a fire charge) is arson, punished like a theft. Seen, it also
+ * turns the townsfolk around on you: every grown villager and civilian of the faction within {@link #RIOT_RANGE} runs
+ * at you and lays into you with their fists until you hit one of them back, when they scatter (the guards keep on).
  */
 public final class Theft {
 	/** How far a witness sees a crime (sneaking: this share of it); closer than {@link #HEAR_RANGE} they notice whichever way they face. */
@@ -75,6 +85,15 @@ public final class Theft {
 	static final double SHOUT_RANGE = 24.0;
 	/** Lines a witness may cry, per kind of crime. */
 	static final int SHOUT_VARIANTS = 2;
+	/** Arson: townsfolk this close join in; they give up after this long (ticks) or if you get this far away. */
+	static final double RIOT_RANGE = 24.0, RIOT_GIVE_UP = 48.0;
+	static final long RIOT_TICKS = 1200L;
+	/** A rioter hits you from this close, this hard, at most this often (ticks); how fast they come (villagers, folk). */
+	static final double RIOT_REACH = 2.0, RIOT_FOLK_SPEED = 1.15;
+	static final float RIOT_DAMAGE = 1.0F, RIOT_VILLAGER_SPEED = 0.75F;
+	static final int RIOT_EVERY = 5, RIOT_PUNCH_TICKS = 30;
+	/** However many there are, the crowd lands at most one blow this often (ticks), so it hurts without felling you at once. */
+	static final int RIOT_CROWD_TICKS = 10;
 
 	/** How bad a crime is. */
 	enum Weight {
@@ -91,7 +110,7 @@ public final class Theft {
 	enum Crime {
 		RUMMAGE(Weight.LIGHT, "rummage"), TAKE(Weight.MEDIUM, "theft"), CROP(Weight.LIGHT, "vandal"), BED(Weight.MEDIUM, "vandal"),
 		JOB_BLOCK(Weight.MEDIUM, "vandal"), CHEST(Weight.MEDIUM, "theft"), STOREHOUSE(Weight.HEAVY, "theft"), BELL(Weight.HEAVY, "vandal"),
-		LIVESTOCK(Weight.LIGHT, "livestock"), FOLK(Weight.MEDIUM, "murder"), VILLAGER(Weight.HEAVY, "murder"), GOLEM(Weight.HEAVY, "murder");
+		ARSON(Weight.MEDIUM, "arson"), LIVESTOCK(Weight.LIGHT, "livestock"), FOLK(Weight.MEDIUM, "murder"), VILLAGER(Weight.HEAVY, "murder"), GOLEM(Weight.HEAVY, "murder");
 
 		final Weight weight;
 		final String cry;
@@ -135,6 +154,26 @@ public final class Theft {
 	private static final List<Notice> NOTICES = new ArrayList<>();
 	/** Player + faction → gifts counted today (reputation points), and on which day. */
 	private static final Map<String, int[]> GIFTS = new HashMap<>();
+	/** A fire a player may have just lit (flint and steel or a fire charge), checked a tick later. */
+	private record Kindled(UUID player, BlockPos pos, long at) {
+	}
+
+	/** Townsfolk set on an arsonist: who, until when, and when each may hit next. */
+	private static final class Riot {
+		final int faction;
+		final long until;
+		long nextBlow;
+		final Map<UUID, Long> rioters = new HashMap<>();
+
+		Riot(int faction, long until) {
+			this.faction = faction;
+			this.until = until;
+		}
+	}
+
+	private static final List<Kindled> KINDLED = new ArrayList<>();
+	/** Arsonist → the crowd after them. */
+	private static final Map<UUID, Riot> RIOTS = new HashMap<>();
 
 	private Theft() {
 	}
@@ -143,6 +182,10 @@ public final class Theft {
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			if (player instanceof ServerPlayer sp && level instanceof ServerLevel server && !(sp.isSecondaryUseActive() && !sp.getItemInHand(hand).isEmpty())) {
 				opened(sp, server, hit.getBlockPos());
+			}
+			if (player instanceof ServerPlayer sp && level instanceof ServerLevel server && server == Factions.level(server.getServer())
+				&& (player.getItemInHand(hand).is(Items.FLINT_AND_STEEL) || player.getItemInHand(hand).is(Items.FIRE_CHARGE))) {
+				KINDLED.add(new Kindled(sp.getUUID(), hit.getBlockPos().relative(hit.getDirection()).immutable(), server.getGameTime()));
 			}
 			return InteractionResult.PASS;
 		});
@@ -156,11 +199,18 @@ public final class Theft {
 				killed(killer, level, entity);
 			}
 		});
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damage, blocked) -> {
+			if (source.getEntity() instanceof ServerPlayer player) {
+				hitBack(player, entity);
+			}
+		});
 		ServerTickEvents.END_SERVER_TICK.register(Theft::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			OPEN.clear();
 			NOTICES.clear();
 			GIFTS.clear();
+			KINDLED.clear();
+			RIOTS.clear();
 		});
 	}
 
@@ -176,6 +226,16 @@ public final class Theft {
 	public static boolean outlaw(ServerPlayer player, int faction) {
 		Long until = player.getAttachedOrElse(WANTED, Map.of()).get(Integer.toString(faction));
 		return until != null && until - player.level().getGameTime() > HUNT_TICKS;
+	}
+
+	/** {@code who} is one of a crowd set on an arsonist (they leave the fire to others). */
+	public static boolean rioting(LivingEntity who) {
+		for (Riot riot : RIOTS.values()) {
+			if (riot.rioters.containsKey(who.getUUID())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	// ---- what counts --------------------------------------------------------------------------------------------
@@ -294,6 +354,19 @@ public final class Theft {
 		commit(player, level, f, crime, pos, null, false);
 	}
 
+	/** A fire {@code player} lit at {@code pos} (it caught): arson, where a faction's law holds (a hearth doesn't count). */
+	private static void kindled(ServerPlayer player, ServerLevel level, BlockPos pos) {
+		if (!level.getBlockState(pos).is(BlockTags.FIRE) || level.getBlockState(pos.below()).is(BlockTags.INFINIBURN_OVERWORLD)
+			|| player.isCreative()) {
+			return;
+		}
+		Faction f = lawAt(level, pos);
+		if (f == null || exempt(player, f)) {
+			return;
+		}
+		commit(player, level, f, Crime.ARSON, pos, null, false);
+	}
+
 	private static void killed(ServerPlayer killer, ServerLevel level, LivingEntity victim) {
 		Faction f;
 		Crime crime;
@@ -382,6 +455,9 @@ public final class Theft {
 		level.playSound(null, witness.getX(), witness.getY(), witness.getZ(), witness instanceof IronGolem ? SoundEvents.IRON_GOLEM_HURT
 			: SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 1.2F, w == Weight.HEAVY ? 0.8F : 1.0F);
 		Reputation.change(player, f, w.rep);
+		if (crime == Crime.ARSON) {
+			riot(level, f, player);
+		}
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.theft.seen." + w.name().toLowerCase(java.util.Locale.ROOT), f.name())
 			.withStyle(ChatFormatting.RED));
 		if (w == Weight.LIGHT) {
@@ -414,9 +490,104 @@ public final class Theft {
 		}
 	}
 
+	/** {@code f}'s grown villagers and civilians near {@code player} turn on them. */
+	private static void riot(ServerLevel level, Faction f, ServerPlayer player) {
+		Riot riot = new Riot(f.id(), level.getGameTime() + RIOT_TICKS);
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(RIOT_RANGE), LivingEntity::isAlive)) {
+			if (e.isBaby() || e.isSleeping() || e.distanceTo(player) > RIOT_RANGE) {
+				continue;
+			}
+			boolean ours;
+			if (e instanceof Folk folk) {
+				ours = folk.factionId() == f.id() && !folk.combatant() && !folk.leader();
+			} else if (e instanceof Villager) {
+				Faction theirs = lawAt(level, e.blockPosition());
+				ours = theirs != null && theirs.id() == f.id();
+			} else {
+				ours = false;
+			}
+			if (ours) {
+				riot.rioters.put(e.getUUID(), 0L);
+			}
+		}
+		if (riot.rioters.isEmpty()) {
+			return;
+		}
+		RIOTS.put(player.getUUID(), riot);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.theft.riot", f.name()).withStyle(ChatFormatting.RED));
+	}
+
+	/** {@code player} struck {@code victim}: if it's one of the crowd after them, the crowd scatters. */
+	private static void hitBack(ServerPlayer player, LivingEntity victim) {
+		Riot riot = RIOTS.get(player.getUUID());
+		if (riot != null && riot.rioters.containsKey(victim.getUUID())) {
+			RIOTS.remove(player.getUUID());
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.theft.scatter").withStyle(ChatFormatting.GRAY));
+			if (victim.level() instanceof ServerLevel level) {
+				for (UUID id : riot.rioters.keySet()) {
+					if (level.getEntity(id) instanceof Villager v) {
+						v.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+					} else if (level.getEntity(id) instanceof Folk folk) {
+						folk.getNavigation().stop();
+					}
+				}
+			}
+		}
+	}
+
+	/** The crowds close on their arsonists and hit them. */
+	private static void riots(ServerLevel level, long now) {
+		for (Iterator<Map.Entry<UUID, Riot>> it = RIOTS.entrySet().iterator(); it.hasNext();) {
+			var e = it.next();
+			Riot riot = e.getValue();
+			ServerPlayer player = level.getServer().getPlayerList().getPlayer(e.getKey());
+			if (player == null || now > riot.until || !player.isAlive() || player.isCreative() || player.isSpectator() || player.level() != level) {
+				it.remove();
+				continue;
+			}
+			for (Iterator<Map.Entry<UUID, Long>> r = riot.rioters.entrySet().iterator(); r.hasNext();) {
+				var re = r.next();
+				if (!(level.getEntity(re.getKey()) instanceof net.minecraft.world.entity.Mob mob) || !mob.isAlive() || mob.distanceTo(player) > RIOT_GIVE_UP) {
+					r.remove();
+					continue;
+				}
+				mob.getLookControl().setLookAt(player);
+				if (mob.distanceTo(player) <= RIOT_REACH) {
+					if (now >= re.getValue() && now >= riot.nextBlow) {
+						re.setValue(now + RIOT_PUNCH_TICKS);
+						riot.nextBlow = now + RIOT_CROWD_TICKS;
+						mob.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+						player.hurtServer(level, level.damageSources().mobAttack(mob), RIOT_DAMAGE);
+					}
+				} else if (mob instanceof Villager v) {
+					BehaviorUtils.setWalkAndLookTargetMemories(v, new EntityTracker(player, true), RIOT_VILLAGER_SPEED, 1);
+				} else {
+					mob.getNavigation().moveTo(player, RIOT_FOLK_SPEED);
+				}
+			}
+			if (riot.rioters.isEmpty()) {
+				it.remove();
+			}
+		}
+	}
+
 	private static void tick(MinecraftServer server) {
 		ServerLevel level = Factions.level(server);
 		long now = level.getGameTime();
+		// fires lit
+		for (Iterator<Kindled> it = KINDLED.iterator(); it.hasNext();) {
+			Kindled k = it.next();
+			if (now > k.at()) {
+				it.remove();
+				ServerPlayer player = server.getPlayerList().getPlayer(k.player());
+				if (player != null) {
+					kindled(player, level, k.pos());
+				}
+			}
+		}
+		if (now % RIOT_EVERY == 0 && !RIOTS.isEmpty()) {
+			riots(level, now);
+		}
 		// containers closed
 		for (Iterator<Map.Entry<UUID, Opened>> it = OPEN.entrySet().iterator(); it.hasNext();) {
 			var e = it.next();

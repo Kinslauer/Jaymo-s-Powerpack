@@ -102,6 +102,11 @@ public final class CarryClient {
 		if (carried instanceof LivingEntity living && !(carried instanceof Player)) {
 			living.yBodyRot = carrier.yBodyRot;
 			living.yBodyRotO = carrier.yBodyRotO;
+		} else if (!(carried instanceof LivingEntity)) {
+			// a carried block turns with the carrier's body, held out in front
+			carried.setOldPosAndRot(new Vec3(carrier.xo, carrier.yo, carrier.zo), carrier.yBodyRotO, 0.0F);
+			carried.setYRot(carrier.yBodyRot);
+			carried.setXRot(0.0F);
 		}
 	}
 
