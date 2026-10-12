@@ -1479,3 +1479,26 @@ rebuilt here; none of its code or art is used.
   it comes down into their bag. Bigger trees take them longer.
 - Seen in game (dev server + client): a 17-log oak narrowed at its foot chop by chop, the chops moved up the trunk, and it
   fell and broke into wood on the 11th. Not yet seen: woodcutters chopping.
+
+## 0.5.27: goblin villages, and a mask to walk in among them
+Andy liked Goblins Tyranny's idea of infiltrating goblin villages. That mod is Forge 1.20.1 only and all rights reserved,
+so goblin villages are rebuilt here as a third kind of camp (`Camps.CampData.kind` "goblin"); none of its code or art is used.
+- **Villages** (`GoblinVillages`, `GoblinBuildings`): up to one per kingdom (`VILLAGE_CHANCE` 0.12 a roll) in forest, taiga,
+  jungle, plains, swamp or meadow, inside a stockade with skull posts. Mud-brick and mossy-cobble huts under mushroom
+  domes, the great hut (the king's throne, a hoard chest of gold, emeralds, golden apples and a spare mask), a tavern, a
+  lookout, a junk heap (storage), a mushroom patch, totems and a stewpot. It grows a goblin every 2 days and a slinger every
+  4 (most 16) and raises more huts out of its takings. Goblin villages never raid. `/faction camp found goblin` for ops.
+- **Goblins** (`Goblins`, roles 30-32): Folk at 0.7 scale. Goblins fight in melee, slingers shoot, the **goblin king**
+  (140 health, a boss bar, golden crown and axe) sits on his throne; killing him clears the village like a chief. They
+  attack players, villagers, realm folk and wild iron golems. Skins and the ears and nose (`GoblinSkins.Features`, a
+  layer over the folk model) are drawn by `tools/gen_goblins.py`.
+- **The goblin mask** (`Disguise`, green dye + leather + string, or a 1 in 6 drop from a goblin a player kills): worn with
+  nothing but leather elsewhere, goblins take you for one of them. Right-click one for a line of goblin talk.
+- **Suspicion** (actionbar meter, 0-100): close to the king (+6 per half second) or sprinting where they see you (+4) raises
+  it; calm lowers it. Full, or caught opening a chest or breaking a block where one sees you, and you're **exposed**: a cry,
+  every goblin within 40 on you, and that village sees through the mask for 5 minutes.
+- **Backstab**: a melee hit on a goblin that isn't after you does triple damage. If it lives, or another sees it die, you're
+  exposed.
+- Seen in game (dev server + client): a village built in forest with its king on his throne, small green goblins with ears and
+  noses, a masked player walked in unharmed, and took the mask off and was killed within seconds. Not yet seen: suspicion
+  filling, backstabs, the mask on the player.
