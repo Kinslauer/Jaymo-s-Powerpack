@@ -1806,7 +1806,9 @@ take: original spells, art and names (`Sorcery`, `Thralls`, `Arcana`, client `So
   zombie horses, men and folk as zombies). Up to 5 thralls; they wear a grey rag (no sunburn) and crumble after 90-120 s
   or when he falls. Hood, black robe, skull clasp, bone staff.
 - **Court wizard** (`Sorcery.WIZARD`; a second over 300 emeralds). Not every kingdom believes in magic: about 60%
-  (`MAGIC_BELIEF`, fixed per realm) keep a court mage, the rest none at all. Arcane bolts (double on the undead), a
+  (`MAGIC_BELIEF`, fixed per realm) keep a court mage; the rest keep none and prosecute magic: reading a spell scroll
+  inside their walls is a crime like arson (`Theft.Crime.SORCERY`: "Witchcraft! Not within these walls!", the guards
+  after you), for their own people too, short of the ruler. Arcane bolts (double on the undead), a
   ward (absorption) on the guards fighting near him, mending, a blast that throws back anyone close, and he banishes
   enemy thralls. Robe in the realm's colour, a beard, a pointed hat (its own model), a crystal staff. A **tyrant** king
   keeps a court necromancer instead (his dead spare the realm's villagers and players it doesn't hold hostile).

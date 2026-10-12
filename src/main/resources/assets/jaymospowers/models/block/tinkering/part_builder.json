@@ -1,0 +1,11 @@
+{
+  "parent": "jaymospowers:block/tinkering/table",
+  "textures": {
+    "particle": "jaymospowers:block/tinkering/part_builder_top",
+    "top": "jaymospowers:block/tinkering/part_builder_top",
+    "side": "jaymospowers:block/tinkering/side",
+    "leg": "jaymospowers:block/tinkering/side",
+    "bottom": "jaymospowers:block/tinkering/bottom",
+    "legBottom": "jaymospowers:block/tinkering/bottom"
+  }
+}

@@ -163,6 +163,8 @@
 	"message.jaymoskingdoms.theft.cry.livestock.1": "Hands off our herd!",
 	"message.jaymoskingdoms.theft.cry.arson.0": "Fire! They're setting us alight!",
 	"message.jaymoskingdoms.theft.cry.arson.1": "Firebug! Get them, everyone!",
+	"message.jaymoskingdoms.theft.cry.sorcery.0": "Witchcraft! Not within these walls!",
+	"message.jaymoskingdoms.theft.cry.sorcery.1": "A sorcerer! Guards, seize them!",
 	"message.jaymoskingdoms.theft.riot": "The folk of %s drop what they're doing and come at you! Hit back to scatter them.",
 	"message.jaymoskingdoms.theft.scatter": "You struck back. The crowd scatters.",
 	"message.jaymoskingdoms.theft.cry.murder.0": "Murder! Guards, to arms!",

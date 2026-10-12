@@ -11,6 +11,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.EntityTypeTags;
@@ -128,6 +129,9 @@ public final class Arcana {
 			server.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 0.8F);
 			player.getCooldowns().addCooldown(stack, SCROLL_COOLDOWN);
 			stack.consume(1, player);
+			if (player instanceof ServerPlayer reader) {
+				Theft.sorcery(reader, server, player.blockPosition());
+			}
 			return InteractionResult.SUCCESS;
 		}
 	}
