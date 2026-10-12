@@ -55,6 +55,8 @@
 	"item.jaymoskitchen.joint.torn": "Torn Joint",
 	"message.jaymoskitchen.corpse.carrying": "Carrying it. Set it on a Butcher Block to butcher it.",
 	"message.jaymoskitchen.corpse.one_at_a_time": "You can only carry one at a time.",
+	"message.jaymoskitchen.corpse.too_heavy": "Solid iron: far too heavy to lift.",
+	"message.jaymoskitchen.corpse.no_butchering": "Solid iron: there's nothing to butcher.",
 	"message.jaymoskitchen.corpse.big_table": "Too big: it needs a 2x2 of Butcher Blocks.",
 	"message.jaymoskitchen.corpse.searched_sneak": "Sneak + right-click with an empty hand to pick it up.",
 	"step.jaymoskitchen.pmeh": "Pmeh",

@@ -50,6 +50,9 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		float tumbleRoll;
 		float yaw;
 		boolean faceUp;
+		/** A heavy (iron) corpse falling apart: 0 whole, 1 gone. It shakes, slumps and sinks as it goes. */
+		float crumble;
+		float age;
 		final AvatarRenderState avatar = new AvatarRenderState();
 	}
 
@@ -81,6 +84,8 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		state.body = null;
 		state.bodyRenderer = null;
 		state.player = false;
+		state.crumble = corpse.crumble(partialTicks);
+		state.age = corpse.tickCount + partialTicks;
 		float strength = corpse.jolt(partialTicks);
 		// a blow or rummaging: its limbs flop (see Jolt), the body stays put
 		Jolt jolt = strength > 0.0F ? new Jolt(strength, corpse.joltTime(partialTicks), corpse.joltSide()) : null;
@@ -257,6 +262,19 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 	}
 
 	private void submitWhole(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
+		if (state.crumble > 0.0F && !state.player) {
+			// falling apart: shuddering harder as it goes, slumping flatter and sinking into the ground
+			float c = state.crumble;
+			float shake = 0.04F * c;
+			poseStack.pushPose();
+			poseStack.translate(Mth.sin(state.age * 2.7F) * shake, -0.35F * c * c, Mth.cos(state.age * 3.1F) * shake);
+			poseStack.scale(1.0F + 0.15F * c, 1.0F - 0.6F * c * c, 1.0F + 0.15F * c);
+			state.crumble = 0.0F;
+			submitWhole(state, poseStack, collector, camera);
+			state.crumble = c;
+			poseStack.popPose();
+			return;
+		}
 		if (state.player) {
 			submitPlayer(state, poseStack, collector);
 			return;
