@@ -101,11 +101,13 @@ final class GoblinVillages {
 		Storage.put(level, stocked, Items.EMERALD, START_EMERALDS);
 		Camps.takeSides(server, id, KIND);
 		crown(level, Factions.get(server, id), layout.throne(), gate);
-		// slingers on the lookout and at the gate, drinkers in the tavern, the rest about the fire
+		// slingers on the lookout and up the gate towers, drinkers in the tavern, the rest about the fire
 		spawn(level, id, Goblins.SLINGER, layout.lookout(), layout.lookout(), SLINGER_RADIUS);
-		BlockPos gatePost = new CampBuildings.Placer(fire, gate, 0).at(GoblinBuildings.GATE_HALF + 2, 0, -GoblinBuildings.RING_RADIUS + 2);
 		for (int i = 1; i < START_SLINGERS; i++) {
-			spawn(level, id, Goblins.SLINGER, ground(level, gatePost), gatePost, SLINGER_RADIUS + 2);
+			int side = i % 2 == 1 ? 1 : -1;
+			BlockPos tower = new CampBuildings.Placer(fire, gate, 0)
+				.at(side * (GoblinBuildings.GATE_HALF + 2), GoblinBuildings.TOWER_HIGH + 1, -GoblinBuildings.RING_RADIUS + 1);
+			spawn(level, id, Goblins.SLINGER, tower, tower, 1);
 		}
 		for (int i = 0; i < START_DRINKERS; i++) {
 			spawn(level, id, Goblins.GOBLIN, layout.tavern(), layout.tavern(), DRINKER_RADIUS);

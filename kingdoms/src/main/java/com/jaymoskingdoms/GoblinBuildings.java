@@ -25,17 +25,21 @@ import net.minecraft.world.level.block.state.properties.SlabType;
  * capped with red or brown mushroom domes; the king's <b>great hut</b> (a mushroom-roofed hall, skulls at its door, his
  * throne of mossy stone and gold, his hoard behind it); a <b>tavern</b> of spruce with a barrel bar where the goblins
  * drink; a stilted <b>lookout</b>; the <b>junk heap</b> (chests and barrels under a lean-to: the village's
- * {@link Storage}); mushroom patches, jack-o'-lantern totems, a stewpot on a fire; and a spruce stockade ringed with
- * skull posts. A village grows by its own hands ({@link GoblinVillages}): each day it may raise the next of {@link #GROWTH}.
+ * {@link Storage}); mushroom patches, jack-o'-lantern totems, a stewpot on a fire; and a palisade fort round it all
+ * (sharpened logs, skull posts, a walkway, gate towers). A village grows by its own hands ({@link GoblinVillages}): each day it may raise the next of {@link #GROWTH}.
  *
  * <p>Designs are {@link Blueprint}s facing north (their front on z = 0, y = 0 the first layer on the ground), placed
  * with {@link CampBuildings.Placer} like the camps'.
  */
 final class GoblinBuildings {
-	/** The stockade's radius round the fire, and how far (and how high) the ground is levelled and cleared. */
+	/** The palisade's radius round the fire, and how far (and how high) the ground is levelled and cleared. */
 	static final int RING_RADIUS = 22, CLEAR_RADIUS = RING_RADIUS + 2, CLEAR_HEIGHT = 16;
-	/** The stockade: fences this high, a skull post every {@code POST_EVERY} degrees, the gate's half-width. */
-	static final int RING_HIGH = 2, POST_HIGH = 3, GATE_HALF = 2;
+	/**
+	 * The palisade: a wall of upright logs this high, each topped with a sharpened stake (one fence, or two every other log);
+	 * a skull post every {@code POST_EVERY} degrees rising above it; a walkway inside at {@code WALK_HIGH} (a top slab);
+	 * the gate's half-width; the gate towers' height.
+	 */
+	static final int WALL_HIGH = 6, POST_HIGH = WALL_HIGH + 2, WALK_HIGH = 3, GATE_HALF = 2, TOWER_HIGH = 10;
 	static final double POST_EVERY = 30.0;
 	/** How far round the fire its goblins wander. */
 	static final int HOME_RADIUS = 18;
@@ -396,36 +400,90 @@ final class GoblinBuildings {
 		return GREAT_HUT.placer(fire, gate).at(THRONE);
 	}
 
-	/** The stockade: spruce fences, skull-topped log posts, and a gate between two posts hung with lanterns. */
+	/**
+	 * The palisade, a fort's wall: upright spruce logs {@link #WALL_HIGH} high with sharpened stakes along the top, skull-topped
+	 * posts above them, a slab walkway inside reached by ladders, and a gate under a log lintel between two tall towers hung
+	 * with lanterns.
+	 */
 	private static void ring(ServerLevel level, CampBuildings.Placer village) {
+		List<BlockPos> stakes = new ArrayList<>();
 		for (int x = -RING_RADIUS - 1; x <= RING_RADIUS + 1; x++) {
 			for (int z = -RING_RADIUS - 1; z <= RING_RADIUS + 1; z++) {
 				double d = Math.sqrt(x * x + z * z);
-				if (d < RING_RADIUS - 0.5 || d >= RING_RADIUS + 0.5 || (z < 0 && Math.abs(x) <= GATE_HALF)) {
+				boolean gate = z < 0 && Math.abs(x) <= GATE_HALF;
+				if (d >= RING_RADIUS - 1.5 && d < RING_RADIUS - 0.5 && !gate) {
+					// the walkway, wherever nothing of the village stands
+					BlockPos at = village.at(x, WALK_HIGH, z);
+					if (level.getBlockState(at).isAir()) {
+						level.setBlock(at, Blocks.SPRUCE_SLAB.defaultBlockState().setValue(BlockStateProperties.SLAB_TYPE, SlabType.TOP),
+							Block.UPDATE_CLIENTS);
+					}
+				}
+				if (d < RING_RADIUS - 0.5 || d >= RING_RADIUS + 0.5) {
 					continue;
 				}
-				boolean gatePost = z < 0 && Math.abs(x) == GATE_HALF + 1;
+				if (gate) {
+					// the lintel over the gate, staked like the wall
+					level.setBlock(village.at(x, WALL_HIGH - 1, z), village.turn(log().setValue(BlockStateProperties.AXIS, Direction.Axis.X)), Block.UPDATE_CLIENTS);
+					level.setBlock(village.at(x, WALL_HIGH, z), fence(), Block.UPDATE_CLIENTS);
+					stakes.add(village.at(x, WALL_HIGH, z));
+					continue;
+				}
 				double angle = Math.toDegrees(Math.atan2(z, x)) + 360.0;
-				boolean post = gatePost || angle % POST_EVERY < Math.toDegrees(1.0 / RING_RADIUS);
+				boolean post = angle % POST_EVERY < Math.toDegrees(1.0 / RING_RADIUS);
+				int logs = post ? POST_HIGH : WALL_HIGH;
+				for (int y = 0; y < logs; y++) {
+					level.setBlock(village.at(x, y, z), log(), Block.UPDATE_CLIENTS);
+				}
 				if (post) {
-					for (int y = 0; y < POST_HIGH; y++) {
-						level.setBlock(village.at(x, y, z), log(), Block.UPDATE_CLIENTS);
-					}
-					level.setBlock(village.at(x, POST_HIGH, z), gatePost ? Blocks.LANTERN.defaultBlockState() : skull(), Block.UPDATE_CLIENTS);
+					level.setBlock(village.at(x, POST_HIGH, z), skull(), Block.UPDATE_CLIENTS);
 				} else {
-					for (int y = 0; y < RING_HIGH; y++) {
-						level.setBlock(village.at(x, y, z), fence(), Block.UPDATE_CLIENTS);
+					int high = (x + z & 1) == 0 ? 2 : 1;
+					for (int y = 0; y < high; y++) {
+						level.setBlock(village.at(x, WALL_HIGH + y, z), fence(), Block.UPDATE_CLIENTS);
+						stakes.add(village.at(x, WALL_HIGH + y, z));
 					}
 				}
 			}
 		}
-		for (int x = -RING_RADIUS - 1; x <= RING_RADIUS + 1; x++) {
-			for (int z = -RING_RADIUS - 1; z <= RING_RADIUS + 1; z++) {
-				for (int y = 0; y < RING_HIGH; y++) {
-					joinFence(level, village.at(x, y, z));
+		// ladders up to the walkway at the three far points of the wall (never at the gate)
+		ladder(level, village, RING_RADIUS - 1, 0, Direction.WEST);
+		ladder(level, village, -RING_RADIUS + 1, 0, Direction.EAST);
+		ladder(level, village, 0, RING_RADIUS - 1, Direction.NORTH);
+		tower(level, village, -GATE_HALF - 2);
+		tower(level, village, GATE_HALF + 2);
+		for (BlockPos at : stakes) {
+			joinFence(level, at);
+		}
+	}
+
+	/** A ladder up the inside of the wall at {@code (x, z)} (a walkway cell), facing {@code facing} (north toward the gate). */
+	private static void ladder(ServerLevel level, CampBuildings.Placer village, int x, int z, Direction facing) {
+		BlockState ladder = village.turn(Blocks.LADDER.defaultBlockState().setValue(LadderBlock.FACING, facing));
+		for (int y = 0; y <= WALK_HIGH; y++) {
+			level.setBlock(village.at(x, y, z), ladder, Block.UPDATE_CLIENTS);
+		}
+	}
+
+	/** A gate tower (3 x 3 logs, {@link #TOWER_HIGH} high) beside the gate at {@code x}: a plank top, stakes at its corners, a lantern. */
+	private static void tower(ServerLevel level, CampBuildings.Placer village, int x) {
+		int z = -RING_RADIUS + 1;
+		for (int dx = -1; dx <= 1; dx++) {
+			for (int dz = -1; dz <= 1; dz++) {
+				for (int y = 0; y < TOWER_HIGH; y++) {
+					level.setBlock(village.at(x + dx, y, z + dz), log(), Block.UPDATE_CLIENTS);
+				}
+				level.setBlock(village.at(x + dx, TOWER_HIGH, z + dz), Blocks.SPRUCE_PLANKS.defaultBlockState(), Block.UPDATE_CLIENTS);
+				if (dx != 0 && dz != 0) {
+					level.setBlock(village.at(x + dx, TOWER_HIGH + 1, z + dz), fence(), Block.UPDATE_CLIENTS);
 				}
 			}
 		}
+		level.setBlock(village.at(x, TOWER_HIGH + 1, z), skull(), Block.UPDATE_CLIENTS);
+		// lanterns hung under the gate side of the tower
+		int side = x < 0 ? 2 : -2;
+		level.setBlock(village.at(x + side, WALL_HIGH - 2, z - 1), Blocks.LANTERN.defaultBlockState().setValue(BlockStateProperties.HANGING, true),
+			Block.UPDATE_CLIENTS);
 	}
 
 	private static void joinFence(ServerLevel level, BlockPos at) {
