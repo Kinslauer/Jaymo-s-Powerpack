@@ -330,7 +330,28 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   B is the Crush where you aim, or Collapsing Horizon's ring raining on the target (the Cave-in is gone). The meteor tears through roofs and anything else
   it falls through before it explodes. With Web or Gravity, F5 flips between first person and an over-the-shoulder
   view with the crosshair (no front view). See `docs/gravity.md`.
-- **0.8.44, Distant Horizons back:** Distant Horizons 3.3.4 for 26.3 (CurseForge 508933 / 9005667, Modrinth
-  TGgEbP9A) is in the pack again, from its Modrinth maven, so the CurseForge import, the server and the profile all
-  get it. Far terrain is drawn as simplified chunks well past the render distance; the server builds them and sends
-  them to players. It stays out of the dev game (`dev: false`), and it's no longer in `removedFromProfile`.
+- **0.8.49, /power affinity works again:** `/power affinity <player> <power>` now makes that power the one that
+  awakens 95% of the time (`Affinity.CHANCE`); the other 5% fate picks any power. Before this the command saved the
+  affinity but awakenings ignored it, because the choice screen was switched off. The screen stays off.
+- **0.8.51, Web wall run:** sprint and leap alongside a wall (forward held) and you run along it for a moment, rising
+  a little then dropping slowly; Jump kicks you off it, up and away, still carrying the run's speed. The kick climbs with
+  mastery (0.48 to 0.72 up, a vanilla jump is 0.42) and jumps to 0.92 once ascended; runs last longer too (22 to 50
+  ticks). Runs chain wall to wall, but not back onto the same wall face until you land. The run itself doesn't count
+  toward fall damage. Everyone sees the Sands of Time run (`WebWallRunPose`): feet on the wall, body slanted out
+  and pitched into the run, long pumping strides, the wall-side hand skimming the wall, the outer arm swinging.
+  Numbers at the top of `power/web/WebWallRun`; the client side is `WebWallRunClient`.
+- **0.8.52, carrying blocks:** anyone can sneak + right-click a block a player placed, with empty hands, to lift it
+  out of the world and carry it in both arms, like a body: right-click sets it down ahead of you, sneak + right-click
+  throws it, and it lands as a falling block (or breaks into its item if it can't stand where it lands, spilling
+  whatever was in it). Chests, furnaces and the like come along with their contents. It slows you a little (none
+  for Gravity users). Natural terrain never counts: placed blocks are remembered per chunk (`CarryBlock.PLACED`,
+  from `CarryBlockItemMixin`). Not liftable: two-part blocks (doors, beds, tall flowers, double chests), liquids,
+  unbreakable blocks, grass/fire, or a spot you couldn't break. `core/CarryBlock`; the block rides as a tagged
+  display, and a stray one (crash mid-carry) falls back into the world on load.
+- **0.8.53, Distant Horizons back, and Iris shaders:** Distant Horizons 3.3.4 for 26.3 (CurseForge 508933 / 9005667,
+  Modrinth TGgEbP9A) is in the pack again, from its Modrinth maven, so the CurseForge import, the server and the
+  profile all get it. Far terrain is drawn as simplified chunks well past the render distance; the server builds them
+  and sends them to players. It's no longer in `removedFromProfile`. Iris Shaders 1.11.7 (CurseForge 455508 /
+  9015108, Modrinth vTN4NRGW; it needs the pack's Sodium) lets everyone load shader packs (Options → Video Settings →
+  Shader Packs); it's client-only, so the server ignores it. Distant Horizons draws its far terrain through Iris
+  shaders that support it. Both stay out of the dev game (`dev: false`).

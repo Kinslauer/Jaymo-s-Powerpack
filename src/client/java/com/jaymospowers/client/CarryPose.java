@@ -68,6 +68,8 @@ public final class CarryPose {
 	static final float OVERHEAD_LIE_RATIO = 1.4F;
 	/** Overhead: the carrier's arms straight up (radians from hanging), spread this much per block of its width. */
 	static final float OVERHEAD_ARMS = -2.95F, OVERHEAD_SPREAD = 0.14F, OVERHEAD_SPREAD_MAX = 0.5F;
+	/** Holding a block: both arms raised this far forward (radians). */
+	static final float BLOCK_ARMS = -1.1F;
 	/** First person: how the carrier's arms sit for each hold. */
 	public static final float FIRST_PERSON_EQUIP = 0.12F;
 
@@ -337,6 +339,12 @@ public final class CarryPose {
 
 	/** The carrier's arms in the hold (players), or round the little animal. */
 	private static void carrierArms(HumanoidModel<?> h, Holding holding) {
+		if (holding.hold() == Carry.BLOCK) {
+			// both arms out in front, hands on either side of the block
+			set(h.rightArm, BLOCK_ARMS, -0.1F, 0.0F);
+			set(h.leftArm, BLOCK_ARMS, 0.1F, 0.0F);
+			return;
+		}
 		if (holding.hold() == Carry.OVERHEAD) {
 			// both arms straight up under it, spread round a wide one, giving a little with its bob
 			float spread = Math.min(OVERHEAD_SPREAD_MAX, 0.08F + holding.width() * OVERHEAD_SPREAD);
@@ -433,6 +441,13 @@ public final class CarryPose {
 			poseStack.translate(side * 0.16F, 0.5F, 0.1F);
 			poseStack.rotateDegrees(Axis.XP, -60.0F);
 			poseStack.rotateDegrees(Axis.ZP, side * 8.0F);
+			return true;
+		}
+		if (hold == Carry.BLOCK) {
+			// both forearms out low at the block's sides, holding it up
+			poseStack.translate(side * 0.08F, -0.2F, -0.05F);
+			poseStack.rotateDegrees(Axis.YP, side * 6.0F);
+			poseStack.rotateDegrees(Axis.XP, 8.0F);
 			return true;
 		}
 		switch (animal ? -1 - hold : hold) {

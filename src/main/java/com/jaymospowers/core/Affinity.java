@@ -31,8 +31,10 @@ public final class Affinity {
 		builder -> builder.persistent(Identifier.CODEC).copyOnDeath().syncWith(Identifier.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
 	/** "Let fate decide": a random power awakens. */
 	public static final Identifier FATE = JaymosPowers.id("fate");
-	/** The choice is offered at all (switched off for now: awakenings are random again). */
+	/** The choice screen is offered at all (switched off for now; /power affinity still sets an affinity). */
 	public static final boolean ENABLED = false;
+	/** The chance an awakening gives the affinity's power (the rest of the time fate picks any power). */
+	public static final float CHANCE = 0.95F;
 	/** How often (ticks) a powerless survival player without an affinity is offered the choice. */
 	private static final int PROMPT_EVERY = 100;
 
@@ -53,7 +55,7 @@ public final class Affinity {
 	/** The power the player's affinity leans to, or null (none chosen, fate, or an unknown id). */
 	public static @Nullable Power power(Player player) {
 		Identifier id = of(player);
-		return !ENABLED || id == null || id.equals(FATE) ? null : Powers.get(id);
+		return id == null || id.equals(FATE) ? null : Powers.get(id);
 	}
 
 	/** Every so often: a powerless survival player who hasn't chosen yet is shown the choice (once per session). */

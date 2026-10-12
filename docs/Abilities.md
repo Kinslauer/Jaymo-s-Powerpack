@@ -85,7 +85,7 @@ power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts
 | 85 | Starter | B | Webline | Hold on one block, let go on another: a walkable web bridge (24 blocks, lasts 60 s). Kept for good. Symbiote bridges are black rope (suit) or tendrils (Living Armor). | |
 | 86 | Base | R / G (hold) | Swing | Main- and off-hand swing webs; a real pendulum: speed builds through the bottom of the arc and stalls at the top. Let go on the upswing for a boost. Up to 5 lines when mastered. No fall damage while swinging. | |
 | 87 | Base | both webs + Sneak | Slingshot | Hold Jump to draw back, release to fire. The draw always grinds into the floor under you (and the wall behind): it cracks, then breaks (3×3 with Living Armor). If the floor goes and you're over air, the lines snap and you ragdoll for 2 s. | |
-| 88 | Base | Jump (mid-air) | Web wings | Glide like an elytra: pitch down to dive and build speed, pull up to trade it for height. Feather Falling. | |
+| 88 | Base | Jump (mid-air) | Web wings | Glide like an elytra: pitch down to dive and build speed, pull up to trade it for height. Hold Sneak to airbrake (arms flare forward, legs tuck). Landing from a glide does no fall damage; a fast landing still rolls. | |
 | 89 | Base | Z | Web Zip | Zip to where you aim; let go short and you're flung up. | |
 | 90 | Base | V | Web Shot | **Tap**: a fast webshooter pellet (0.75 heart, 1.25 with the symbiote; 0.2 s cooldown, no webs). **Hold 1 s+**: the charged blast (splash Slowness III, cobwebs, up to 5 hearts; the symbiote's black mass up to 9). | |
 | 91 | Base | B | Yank | **Tap**: web a creature and pull it in. **Hold**: keep it on a lead; release aimed at a block to hitch it there. A big one pulls you to it. | |
