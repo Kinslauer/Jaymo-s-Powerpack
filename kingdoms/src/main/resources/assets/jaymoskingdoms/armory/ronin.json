@@ -1,0 +1,432 @@
+{
+ "texture_size": [
+  64,
+  32
+ ],
+ "cloth_texture_size": [
+  64,
+  64
+ ],
+ "cloth_color": 10365733,
+ "pieces": [
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    -6.5,
+    -8,
+    -4.5
+   ],
+   "size": [
+    1,
+    4,
+    3
+   ],
+   "uv": [
+    0,
+    0
+   ]
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    5.5,
+    -8,
+    -4.5
+   ],
+   "size": [
+    1,
+    4,
+    3
+   ],
+   "uv": [
+    8,
+    0
+   ]
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    -1,
+    -10,
+    -5.6
+   ],
+   "size": [
+    2,
+    2,
+    1
+   ],
+   "uv": [
+    16,
+    0
+   ]
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    -0.5,
+    -7,
+    -0.5
+   ],
+   "size": [
+    1,
+    7,
+    1
+   ],
+   "uv": [
+    22,
+    0
+   ],
+   "pivot": [
+    -1,
+    -9,
+    -5.3
+   ],
+   "rot": [
+    0,
+    0,
+    -0.55
+   ]
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    -0.5,
+    -7,
+    -0.5
+   ],
+   "size": [
+    1,
+    7,
+    1
+   ],
+   "uv": [
+    26,
+    0
+   ],
+   "pivot": [
+    1,
+    -9,
+    -5.3
+   ],
+   "rot": [
+    0,
+    0,
+    0.55
+   ]
+  },
+  {
+   "slot": "chest",
+   "bone": "right_arm",
+   "layer": "main",
+   "pos": [
+    -5,
+    -4.2,
+    -3.5
+   ],
+   "size": [
+    5,
+    1,
+    7
+   ],
+   "uv": [
+    30,
+    0
+   ]
+  },
+  {
+   "slot": "chest",
+   "bone": "left_arm",
+   "layer": "main",
+   "pos": [
+    0,
+    -4.2,
+    -3.5
+   ],
+   "size": [
+    5,
+    1,
+    7
+   ],
+   "uv": [
+    0,
+    8
+   ]
+  },
+  {
+   "slot": "feet",
+   "bone": "right_leg",
+   "layer": "main",
+   "pos": [
+    -2,
+    3,
+    -3.6
+   ],
+   "size": [
+    4,
+    8,
+    1
+   ],
+   "uv": [
+    24,
+    8
+   ]
+  },
+  {
+   "slot": "feet",
+   "bone": "left_leg",
+   "layer": "main",
+   "pos": [
+    -2,
+    3,
+    -3.6
+   ],
+   "size": [
+    4,
+    8,
+    1
+   ],
+   "uv": [
+    34,
+    8
+   ]
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "cloth",
+   "pos": [
+    -5.5,
+    -4,
+    4.5
+   ],
+   "size": [
+    11,
+    3,
+    1
+   ],
+   "uv": [
+    0,
+    0
+   ]
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "cloth",
+   "pos": [
+    -5.5,
+    -4,
+    -3
+   ],
+   "size": [
+    1,
+    3,
+    8
+   ],
+   "uv": [
+    24,
+    0
+   ]
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "cloth",
+   "pos": [
+    4.5,
+    -4,
+    -3
+   ],
+   "size": [
+    1,
+    3,
+    8
+   ],
+   "uv": [
+    42,
+    0
+   ]
+  },
+  {
+   "slot": "head",
+   "bone": "head",
+   "layer": "cloth",
+   "pos": [
+    -6,
+    -1,
+    5
+   ],
+   "size": [
+    12,
+    3,
+    1
+   ],
+   "uv": [
+    0,
+    11
+   ]
+  },
+  {
+   "slot": "chest",
+   "bone": "right_arm",
+   "layer": "cloth",
+   "pos": [
+    -5.2,
+    -3.5,
+    -3.5
+   ],
+   "size": [
+    1,
+    7,
+    7
+   ],
+   "uv": [
+    26,
+    11
+   ]
+  },
+  {
+   "slot": "chest",
+   "bone": "left_arm",
+   "layer": "cloth",
+   "pos": [
+    4.2,
+    -3.5,
+    -3.5
+   ],
+   "size": [
+    1,
+    7,
+    7
+   ],
+   "uv": [
+    42,
+    11
+   ]
+  },
+  {
+   "slot": "legs",
+   "bone": "right_leg",
+   "layer": "cloth",
+   "pos": [
+    -2.5,
+    -1,
+    -3.4
+   ],
+   "size": [
+    5,
+    6,
+    1
+   ],
+   "uv": [
+    0,
+    25
+   ]
+  },
+  {
+   "slot": "legs",
+   "bone": "left_leg",
+   "layer": "cloth",
+   "pos": [
+    -2.5,
+    -1,
+    -3.4
+   ],
+   "size": [
+    5,
+    6,
+    1
+   ],
+   "uv": [
+    12,
+    25
+   ]
+  },
+  {
+   "slot": "legs",
+   "bone": "right_leg",
+   "layer": "cloth",
+   "pos": [
+    -3.4,
+    -1,
+    -2.5
+   ],
+   "size": [
+    1,
+    6,
+    5
+   ],
+   "uv": [
+    24,
+    25
+   ]
+  },
+  {
+   "slot": "legs",
+   "bone": "left_leg",
+   "layer": "cloth",
+   "pos": [
+    2.4,
+    -1,
+    -2.5
+   ],
+   "size": [
+    1,
+    6,
+    5
+   ],
+   "uv": [
+    36,
+    25
+   ]
+  },
+  {
+   "slot": "legs",
+   "bone": "right_leg",
+   "layer": "cloth",
+   "pos": [
+    -2.5,
+    -1,
+    2.4
+   ],
+   "size": [
+    5,
+    6,
+    1
+   ],
+   "uv": [
+    48,
+    25
+   ]
+  },
+  {
+   "slot": "legs",
+   "bone": "left_leg",
+   "layer": "cloth",
+   "pos": [
+    -2.5,
+    -1,
+    2.4
+   ],
+   "size": [
+    5,
+    6,
+    1
+   ],
+   "uv": [
+    0,
+    36
+   ]
+  }
+ ]
+}

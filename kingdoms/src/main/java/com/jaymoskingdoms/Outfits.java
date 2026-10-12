@@ -15,6 +15,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.DyedItemColor;
+import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.item.equipment.trim.ArmorTrim;
 import net.minecraft.world.item.equipment.trim.TrimMaterial;
 import net.minecraft.world.item.equipment.trim.TrimMaterials;
@@ -47,7 +48,7 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Outfits {
 	/** Bumped when the looks change enough that folk already in the world should be dressed again. */
-	public static final int VERSION = 1;
+	public static final int VERSION = 2;
 
 	/** A guard's chance of a spear instead of a sword (jungle realms: {@link #JUNGLE_SPEAR_CHANCE}). */
 	static final float GUARD_SPEAR_CHANCE = 0.3F, JUNGLE_SPEAR_CHANCE = 0.7F;
@@ -57,6 +58,10 @@ public final class Outfits {
 	static final float ARCHER_HOOD_CHANCE = 0.6F;
 	/** A barbarian's chance his hides are marked with his camp's trim. */
 	static final float BARBARIAN_TRIM_CHANCE = 0.5F;
+	/** (0.5.27) One realm in this many arms its guards from {@link Armory} (its land's set, in its colour). */
+	static final int ARMOURY_REALMS = 2;
+	/** (0.5.27) A raider's chance of the warlord's horned cap (the chief always wears the whole set). */
+	static final float RAIDER_HORNS_CHANCE = 0.3F;
 
 	/** Cloth colours (RGB) for the land's gear. */
 	static final int LINEN = 0xEDE4CC, SAND = 0xD8C08A, DUST = 0xB0884F, SNOW = 0xF4F6F8, FROST_GREY = 0xB9C2C9, FUR_BROWN = 0x5A3F2A,
@@ -101,7 +106,7 @@ public final class Outfits {
 	 * a vassal's ({@code bordered}), its trim pattern and material, and how its guards are armed ({@link #PLATE}...).
 	 */
 	record Heraldry(DyeColor field, DyeColor charge, int ordinary, boolean bordered, ResourceKey<TrimPattern> pattern,
-		ResourceKey<TrimMaterial> material, int harness) {
+		ResourceKey<TrimMaterial> material, int harness, boolean armoury) {
 
 		/** The arms of the realm with id {@code id} (an overlord's, for its fiefdoms) in {@code field}. */
 		static Heraldry of(int id, DyeColor field, boolean vassal) {
@@ -111,7 +116,8 @@ public final class Outfits {
 			int ordinary = (int)Math.floorMod(h >>> 8, (long)ORDINARIES.size());
 			ResourceKey<TrimPattern> pattern = PATTERNS.get((int)Math.floorMod(h >>> 20, (long)PATTERNS.size()));
 			int harness = (int)Math.floorMod(h >>> 32, (long)HARNESS_STYLES);
-			return new Heraldry(field, charge, ordinary, vassal, pattern, Outfits.material(field), harness);
+			boolean armoury = Math.floorMod(h >>> 44, (long)ARMOURY_REALMS) == 0;
+			return new Heraldry(field, charge, ordinary, vassal, pattern, Outfits.material(field), harness, armoury);
 		}
 	}
 
@@ -187,6 +193,18 @@ public final class Outfits {
 			}
 			default -> {
 			}
+		}
+		if (arms.armoury()) {
+			// (0.5.27) the realm's armoury: its land's set, the cloth in the realm's colour and the trim on the chest
+			String set = switch (climate) {
+				case DESERT, BADLANDS, SAVANNA -> "gladiator";
+				case JUNGLE, CHERRY -> "ronin";
+				default -> "paladin";
+			};
+			head = armoury(set, ArmorType.HELMET, rgb(arms.field()), head);
+			chest = trimmed(folk, armoury(set, ArmorType.CHESTPLATE, rgb(arms.field()), chest), arms.pattern(), arms.material());
+			legs = armoury(set, ArmorType.LEGGINGS, rgb(arms.field()), legs);
+			feet = armoury(set, ArmorType.BOOTS, rgb(arms.field()), feet);
 		}
 		folk.setItemSlot(EquipmentSlot.HEAD, head);
 		folk.setItemSlot(EquipmentSlot.CHEST, chest);
@@ -265,6 +283,15 @@ public final class Outfits {
 	}
 
 	private static void camp(Folk folk, Heraldry arms, RandomSource random) {
+		// (0.5.27) the chief in the warlord's furs and horns, his kilt in the camp's colour; some raiders in the horned cap
+		if (folk.role() == Folk.CHIEF) {
+			for (ArmorType type : new ArmorType[]{ArmorType.HELMET, ArmorType.CHESTPLATE, ArmorType.LEGGINGS, ArmorType.BOOTS}) {
+				EquipmentSlot slot = type.getSlot();
+				folk.setItemSlot(slot, armoury("warlord", type, rgb(arms.field()), folk.getItemBySlot(slot)));
+			}
+		} else if (random.nextFloat() < RAIDER_HORNS_CHANCE) {
+			folk.setItemSlot(EquipmentSlot.HEAD, armoury("warlord", ArmorType.HELMET, -1, folk.getItemBySlot(EquipmentSlot.HEAD)));
+		}
 		ItemStack chest = folk.getItemBySlot(EquipmentSlot.CHEST);
 		if (chest.isEmpty() || folk.role() == Folk.BARBARIAN && random.nextFloat() >= BARBARIAN_TRIM_CHANCE) {
 			return;
@@ -294,6 +321,19 @@ public final class Outfits {
 			patterns.get(BannerPatterns.BORDER).ifPresent(p -> builder.add(p, arms.charge()));
 		}
 		return builder.build();
+	}
+
+	/** A piece of an {@link Armory} set, its cloth dyed {@code rgb} (-1: the set's own colour); {@code fallback} if there's no such piece. */
+	private static ItemStack armoury(String set, ArmorType type, int rgb, ItemStack fallback) {
+		Item item = Armory.piece(set, type);
+		if (item == null) {
+			return fallback;
+		}
+		ItemStack stack = new ItemStack(item);
+		if (rgb != -1) {
+			stack.set(DataComponents.DYED_COLOR, new DyedItemColor(rgb));
+		}
+		return stack;
 	}
 
 	private static ItemStack trimmed(Folk folk, Item item, ResourceKey<TrimPattern> pattern, ResourceKey<TrimMaterial> material) {

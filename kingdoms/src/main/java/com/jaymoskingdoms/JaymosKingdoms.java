@@ -54,6 +54,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.3, builders and theft: the building catalogue, real-time construction, plots and the plot stake, crime
 		LOGGER.debug("builder and theft attachments: {} {}", Works.WORKS, Theft.WANTED);
 		Plots.register();
+		Armory.register();
 		Buildings.register();
 		Construction.register();
 		// 0.5.11: lost buildings put up again; the settlement's people answer fires

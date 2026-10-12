@@ -1479,3 +1479,26 @@ rebuilt here; none of its code or art is used.
   it comes down into their bag. Bigger trees take them longer.
 - Seen in game (dev server + client): a 17-log oak narrowed at its foot chop by chop, the chops moved up the trunk, and it
   fell and broke into wood on the 11th. Not yet seen: woodcutters chopping.
+
+## 0.5.27: the realm's armouries (original 3D armour sets)
+Andy asked for Jet and Elia's Armors (Forge only, all rights reserved, no source), then chose "make our own sets".
+Nothing of that mod is used: shapes, art and names are our own, drawn by `tools/gen_armory.py`.
+- **Four sets** (`Armory`), each helmet, chestplate, leggings, boots, crafted like vanilla armour from two ingredients:
+  **Paladin** (iron + gold; great helm with a gilt comb and plume, round pauldrons, a tabard with a gilt cross; 18 armour,
+  toughness 1), **Gladiator** (copper + leather; broad-brimmed grille helm with a crest, banded sword arm, studded
+  belt, greaves; 14 armour, enchantability 14), **Ronin** (iron + string; horned kabuto with a neck guard, hanging
+  shoulder plates, plated skirt; 15 armour, toughness 0.5), **Warlord** (leather + bone; horned iron cap, fur mantle and
+  pelt, bone pauldron, hide kilt; 16 armour, knockback resistance 0.1 a piece). Numbers at the top of `Armory`.
+- **Dye**: the cloth (plume, tabard, crest, lacquered lames and lacing, hide kilt) takes dye like leather (a
+  `crafting_dye` recipe per piece with cloth); undyed it's the set's own colour (blue, red, red, brown).
+- **Raised pieces** (client `ArmoryLayer`): each set's 3D pieces are in `assets/jaymoskingdoms/armory/<set>.json`
+  (slot, bone, box, UV, optional pivot/rotation/grow), baked into one model per slot ("main" in its colours, "cloth"
+  greyscale and tinted by the piece's dye) and drawn on every humanoid renderer (players, mannequins, folk, zombies...),
+  following the wearer's head, body and limbs by copying the parent model's pose. The flat part of each set is a normal
+  equipment asset (`equipment/<set>.json`), so trims and enchantment glint work as on vanilla armour.
+- **Kingdoms' folk** (`Outfits`, VERSION 2 so folk already out are dressed again): one realm in `ARMOURY_REALMS` (2)
+  arms its guards from its land's set in the realm's colour (desert, badlands, savanna: gladiator; jungle, cherry:
+  ronin; elsewhere: paladin), the realm's trim on the chest. A barbarian chief wears the whole warlord set, kilt in
+  his camp's colour; `RAIDER_HORNS_CHANCE` (0.3) of raiders wear the horned cap.
+- Seen in game (dev server + client, on mannequins): all four sets, dyed paladins in red, green and white. Not yet
+  seen: guards and chiefs dressed from the armoury.
