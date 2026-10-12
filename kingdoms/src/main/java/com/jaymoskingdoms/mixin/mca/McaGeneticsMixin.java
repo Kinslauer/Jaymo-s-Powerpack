@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.5.38) A new villager's skin leans on the land's heat: darker in the desert, paler in the snow ({@link SkinTones}). */
+/** (0.5.38) A new villager's skin follows where their family is from: darker from the desert, paler from the snow ({@link SkinTones}). */
 @Mixin(Genetics.class)
 abstract class McaGeneticsMixin {
 	@Shadow
@@ -25,8 +25,8 @@ abstract class McaGeneticsMixin {
 	@Inject(method = "randomize", at = @At("TAIL"))
 	private void jaymoskingdoms$climateSkin(CallbackInfo ci) {
 		Mob mob = this.entity.asEntity();
-		if (mob.level() instanceof ServerLevel level) {
-			((Genetics)(Object)this).setGene(Genetics.MELANIN, SkinTones.melanin(level, mob.blockPosition(), this.random));
+		if (mob.level() instanceof ServerLevel) {
+			((Genetics)(Object)this).setGene(Genetics.MELANIN, SkinTones.melanin(mob, this.random));
 		}
 	}
 }

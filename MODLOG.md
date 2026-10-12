@@ -488,4 +488,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   - The Tool Station's side panel now says why a modifier won't go on (no slots left, at its max, doesn't fit).
   - Next: Andy's call.
 - **0.8.77, Skin tones by climate:** ships Jaymo's Kingdoms 0.5.38 (see `kingdoms/MODLOG.md`): new MCA villagers lean
-  darker in hot, dry lands and paler in the snow, with a natural spread and the odd newcomer from a neighbouring climate.
+  darker in hot, dry lands and paler in the snow. Some families are newcomers from a nearby climate or immigrants from
+  a far one, look it, and sometimes talk about home when you chat with them.
