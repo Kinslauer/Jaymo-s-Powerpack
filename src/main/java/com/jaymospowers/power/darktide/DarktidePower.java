@@ -23,6 +23,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -33,12 +35,14 @@ import org.jspecify.annotations.Nullable;
  * (Balkon's WeaponMod) but usable unarmed or with knives. Everything is decided here, on the server.
  * <ul>
  * <li>Starter: the guard (right click held, {@link DarktideGuard}) with its parry and reflect.</li>
- * <li>R Dark Strike / Pounce (knives, ascended), V Undertow, G Crescent (katana) / Ink Cross (knife) / Fang Barrage
- * (knives, ascended), B Black Tide / Riptide Dash (knives, ascended): {@link DarktideMoves}.</li>
- * <li>Z Veil, X Gedan: Stillwater ({@link DarktideGedan}), C Tide Arms / Necromancy / Drown ({@link DarktideTide}).</li>
+ * <li>R Dark Strike (held to charge) / Pounce (knives, ascended), V Undertow, G Crescent (katana) / Ink Cross (knife) /
+ * Fang Barrage (knives, ascended), B Black Tide / Riptide Dash (knives, ascended): {@link DarktideMoves}.</li>
+ * <li>Z shadow harvest (corrupted) / Veil (ascended, cured), X Gedan: Stillwater ({@link DarktideGedan}), C Tide Arms (sneaking) / Necromancy / Drown
+ * ({@link DarktideTide}).</li>
  * </ul>
- * Ascends after {@link #ASCEND_PARRIES} katana parries with every ability unlocked. From dusk to dawn it's always the
- * Drowned Dark ({@link #drowned}): that's Darktide's own state, never written into Fate.
+ * Ascends after {@link #ASCEND_PARRIES} katana parries with every ability unlocked. Darktide starts corrupted (the
+ * Drowned Dark, {@link #corrupted}): {@link #CURE_TICKS} of Conduit Power in a row cure it until the next nightfall, when
+ * it comes back. That's Darktide's own state, never written into Fate. Darktide users never drown.
  */
 public final class DarktidePower implements Power {
 	public static final DarktidePower INSTANCE = new DarktidePower();
@@ -51,6 +55,10 @@ public final class DarktidePower implements Power {
 	static final float VEIL_DRAIN_PER_SECOND = 2.0F;
 	/** Veil: mobs past this many blocks lose you, in the dark / in light. */
 	public static final double VEIL_DARK_RANGE = 6.0, VEIL_LIGHT_RANGE = 12.0;
+	/** The cure: this many ticks of Conduit Power in a row (60 s). */
+	static final int CURE_TICKS = 1200;
+	/** The overworld's clock: a day's length and when night falls (ticks into the day). */
+	static final long DAY_TICKS = 24000L;
 
 	private static final Map<UUID, DarktideLive> LIVE = new HashMap<>();
 
@@ -68,10 +76,14 @@ public final class DarktidePower implements Power {
 		});
 		ServerPlayNetworking.registerGlobalReceiver(DarktideNet.NightKey.TYPE, (payload, ctx) -> {
 			ServerPlayer player = ctx.player();
-			if (has(player) && player.isAlive() && !player.isSpectator() && !Fate.isAscended(player) && drowned(player)) {
-				DarktideTide.drownKey(player, payload.down());
+			// only when the core doesn't forward C itself (so it never arrives twice)
+			if (has(player) && player.isAlive() && !player.isSpectator() && !coreRoutesUltimate(player) && (corrupted(player) || !payload.down())) {
+				DarktideTide.ultimateKey(player, payload.down());
 			}
 		});
+		// never drowns (the air never runs out either: DarktideAirMixin)
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
+			!(entity instanceof Player player && source.is(DamageTypes.DROWN) && has(player)));
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register(DarktideGuard::allowDamage);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register(DarktideGuard::afterDamage);
 		ServerLivingEntityEvents.ALLOW_DEATH.register(DarktideTide::allowDeath);
@@ -142,7 +154,7 @@ public final class DarktidePower implements Power {
 
 	@Override
 	public @Nullable String statusSuffix(Player player) {
-		if (!drowned(player)) {
+		if (!corrupted(player)) {
 			return null;
 		}
 		return Fate.isAscended(player) ? ".night_ascended" : ".night";
@@ -150,16 +162,45 @@ public final class DarktidePower implements Power {
 
 	@Override
 	public boolean slotUnlocked(Player player, String slot) {
-		return Mastery.unlocked(player) >= Mastery.ALL;
+		// Z: the shadow harvest while corrupted, the Veil once ascended and cured; nothing otherwise
+		return "mode".equals(slot) ? corrupted(player) || Fate.isAscended(player) : Mastery.unlocked(player) >= Mastery.ALL;
+	}
+
+	/** C answers the corrupted too (a Fate corruption through the core; Darktide's own through {@link DarktideNet.NightKey}). */
+	@Override
+	public boolean ultimateWhenCorrupted() {
+		return true;
+	}
+
+	/** Whether the core forwards C itself ({@link #onUltimate}); otherwise the client sends {@link DarktideNet.NightKey}. Both sides. */
+	public static boolean coreRoutesUltimate(Player player) {
+		return Fate.isAscended(player) || Fate.isCorrupted(player);
 	}
 
 	public static boolean has(Player player) {
 		return Powers.has(player, INSTANCE);
 	}
 
-	/** The Drowned Dark: always at night (where there is one), and for a power corrupted by command. Both sides. */
-	public static boolean drowned(Player player) {
-		return DarktideFlow.night(player.level()) || Fate.isCorrupted(player);
+	/**
+	 * The Drowned Dark: Darktide starts corrupted and stays so until cured ({@link #cured}); the cure lasts until
+	 * nightfall, and at night the corruption is back regardless (unless {@link #nightReturnPrevented}). A Fate corruption
+	 * (by command) always counts. Both sides.
+	 */
+	public static boolean corrupted(Player player) {
+		return Fate.isCorrupted(player) || !cured(player) || DarktideFlow.night(player.level()) && !nightReturnPrevented(player);
+	}
+
+	/** Cured for now (60 s of Conduit Power, until the next nightfall). Both sides (synced). */
+	public static boolean cured(Player player) {
+		return player.getAttached(DarktideState.CURED) != null;
+	}
+
+	/**
+	 * Whether something keeps the corruption from coming back at night (and the cure from ending at nightfall). Nothing
+	 * does yet: this is the one place to add it. Both sides, so keep anything it reads synced.
+	 */
+	public static boolean nightReturnPrevented(Player player) {
+		return false;
 	}
 
 	static DarktideLive live(ServerPlayer player) {
@@ -213,10 +254,12 @@ public final class DarktidePower implements Power {
 		boolean knives = kit == DarktideWeapons.Kit.KNIFE && Fate.isAscended(player);
 		switch (key) {
 			case ABILITY_1 -> {
-				if (knives) {
+				if (!down && live(player).strikeStart >= 0L) {
+					DarktideMoves.releaseStrike(player);
+				} else if (knives) {
 					DarktideMoves.pounce(player, down);
 				} else if (down) {
-					DarktideMoves.darkStrike(player);
+					DarktideMoves.chargeStrike(player);
 				}
 			}
 			case ABILITY_2 -> {
@@ -247,10 +290,22 @@ public final class DarktidePower implements Power {
 		}
 	}
 
-	/** Veil on and off (once all four abilities are unlocked). */
+	/**
+	 * Z. Corrupted (ascended or not): hold on a corpse to take its shadow. Ascended and cured: Veil on and off. Neither:
+	 * only a hint.
+	 */
 	@Override
 	public void onMode(ServerPlayer player, boolean down) {
-		if (!down || !slotUnlocked(player, "mode")) {
+		if (!down) {
+			DarktideTide.modeKey(player, false);
+			return;
+		}
+		if (corrupted(player)) {
+			DarktideTide.modeKey(player, true);
+			return;
+		}
+		if (!Fate.isAscended(player)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.mode_still").withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
 			return;
 		}
 		DarktideLive live = live(player);
@@ -317,6 +372,7 @@ public final class DarktidePower implements Power {
 		LIVE.remove(player.getUUID());
 		player.removeAttached(DarktideState.HUD);
 		player.removeAttached(DarktideState.SAVE);
+		player.removeAttached(DarktideState.CURED);
 	}
 
 	/** Ends everything running and hands the real items back (logging out, losing the power, the server stopping). */
@@ -355,12 +411,16 @@ public final class DarktidePower implements Power {
 			}
 			return;
 		}
-		boolean drowned = drowned(player);
-		live.flow = Math.max(0.0F, Math.min(DarktideFlow.MAX, live.flow + DarktideFlow.tickGain(player, drowned, live.flow)));
+		live.flow = Math.max(0.0F, Math.min(DarktideFlow.MAX, live.flow + DarktideFlow.tickGain(player, live.flow)));
+		if (player.getAirSupply() < player.getMaxAirSupply()) {
+			player.setAirSupply(player.getMaxAirSupply());
+		}
+		tickCure(player, live);
 		if (live.veil) {
+			// the Veil is the cured form's: the corruption (nightfall) or losing ascension takes it down
 			live.flow -= VEIL_DRAIN_PER_SECOND / 20.0F;
-			if (live.flow <= 0.0F) {
-				live.flow = 0.0F;
+			if (live.flow <= 0.0F || corrupted(player) || !Fate.isAscended(player)) {
+				live.flow = Math.max(0.0F, live.flow);
 				setVeil(player, false);
 			} else if (player.tickCount % 5 == 0) {
 				veilTick(player);
@@ -375,6 +435,64 @@ public final class DarktidePower implements Power {
 		}
 		CombatRollCompat.tickEvasion(player, live);
 		sync(player, live);
+	}
+
+	// ---- the corruption and its cure ----------------------------------------------------------------------------------
+
+	/** The overworld clock time of the first nightfall after {@code clock}. */
+	static long nextNightfall(long clock) {
+		long nightfall = Math.floorDiv(clock, DAY_TICKS) * DAY_TICKS + DarktideFlow.NIGHT_START;
+		return clock >= nightfall ? nightfall + DAY_TICKS : nightfall;
+	}
+
+	/** Conduit Power held long enough cures the corruption; nightfall ends the cure (unless something prevents it). */
+	private static void tickCure(ServerPlayer player, DarktideLive live) {
+		DarktideState.Save save = DarktideState.save(player);
+		long clock = player.level().getOverworldClockTime();
+		long until = save.curedUntil();
+		if (until > 0L) {
+			if (clock >= until && nightReturnPrevented(player)) {
+				until = nextNightfall(clock);
+			} else if (clock >= until) {
+				until = 0L;
+			} else {
+				// the clock was turned back: the cure still ends at the coming nightfall
+				until = Math.min(until, nextNightfall(clock));
+			}
+			if (until != save.curedUntil()) {
+				player.setAttached(DarktideState.SAVE, save.withCuredUntil(until));
+			}
+		}
+		boolean cured = until > 0L;
+		if (!cured && player.hasEffect(MobEffects.CONDUIT_POWER)) {
+			if (++live.conduitTicks >= CURE_TICKS) {
+				live.conduitTicks = 0;
+				cured = true;
+				player.setAttached(DarktideState.SAVE, DarktideState.save(player).withCuredUntil(nextNightfall(clock)));
+			}
+		} else {
+			live.conduitTicks = 0;
+		}
+		if (cured != (player.getAttached(DarktideState.CURED) != null)) {
+			if (cured) {
+				player.setAttached(DarktideState.CURED, true);
+			} else {
+				player.removeAttached(DarktideState.CURED);
+			}
+		}
+		if (cured != live.wasCured) {
+			// whispers only for a change seen while playing (not on the first tick after joining)
+			if (live.cureSeen) {
+				whisper(player, cured ? "cured" : "corruption_returns", cured ? SoundEvents.CONDUIT_ACTIVATE : SoundEvents.CONDUIT_DEACTIVATE);
+			}
+			live.wasCured = cured;
+		}
+		live.cureSeen = true;
+	}
+
+	private static void whisper(ServerPlayer player, String key, net.minecraft.sounds.SoundEvent sound) {
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide." + key).withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), sound, SoundSource.PLAYERS, 0.8F, 0.6F);
 	}
 
 	/** Mobs that can't see through the veil lose you. */
