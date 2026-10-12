@@ -264,6 +264,11 @@ final class WarParties {
 	static Joined join(ServerLevel level, ServerPlayer player) {
 		MinecraftServer server = level.getServer();
 		Faction mine = Factions.of(server, player.getUUID());
+		// (0.5.29) sent by a warlord's decree to lead his party: his realm's, sworn or not
+		int led = Quests.warbandRealm(player);
+		if (led >= 0 && Factions.get(server, led) != null) {
+			mine = Factions.get(server, led);
+		}
 		if (mine == null) {
 			return new Joined(false, Component.translatable("message.jaymoskingdoms.war.join_unsworn"));
 		}
@@ -337,6 +342,13 @@ final class WarParties {
 		}
 		tellPlayers(level, party, Component.translatable(cart ? "message.jaymoskingdoms.war.seized" : "message.jaymoskingdoms.war.seized_no_cart",
 			target.name(), emeralds, goods).withStyle(ChatFormatting.GOLD));
+		// (0.5.29) a warlord's war-party decree done
+		for (UUID id : party.players) {
+			ServerPlayer p = server.getPlayerList().getPlayer(id);
+			if (p != null) {
+				Quests.sacked(p, party.faction, target);
+			}
+		}
 	}
 
 	/** The spoils are home: goods into the storehouse (what won't fit, at the seat), emeralds into the treasury; the players their cut. */
