@@ -48,6 +48,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Camps.register();
 		// 0.5.27: goblin villages' masks, and passing for a goblin in one
 		Disguise.register();
+		// 0.5.29: loot goblins (a port of SkylorBeck's Loot Goblins, LGPL-3.0)
+		com.jaymoskingdoms.lootgoblins.LootGoblins.register();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> KingdomCommands.register(dispatcher));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			KingdomEvents.forget(handler.player);

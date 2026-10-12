@@ -1,0 +1,11 @@
+Loot goblins in Jaymo's Kingdoms are a port to Minecraft 26.3 of Loot Goblins by SkylorBeck
+(https://github.com/Skylorbeck/lootgoblins, https://modrinth.com/mod/loot-goblins), Copyright (c) 2022 SkylorBeck,
+licensed under the GNU Lesser General Public License v3 (LICENSE, beside this file).
+
+Taken from it, under that licence:
+- the textures in assets/jaymoskingdoms/textures/entity/loot_goblin/ (the goblin's eight skins and the minor goblins' skins)
+- the item textures gold_bone, iron_eye, stoneflesh, quartzchop, red_bomb, prismarine_pearl and emerald_crossbow_*
+- the goblin's model and animations (carried over into LootGoblinModel), its loot tables and odds
+
+The Java code in com.jaymoskingdoms.lootgoblins and com.jaymoskingdoms.client.lootgoblins is rewritten for 26.3 and is
+likewise licensed under the LGPL v3. Its source is in the Jaymo's Powerpack repository (kingdoms/src).

@@ -1,0 +1,6 @@
+{
+  "parent": "jaymoskingdoms:item/emerald_crossbow",
+  "textures": {
+    "layer0": "jaymoskingdoms:item/emerald_crossbow_pulling_0"
+  }
+}
