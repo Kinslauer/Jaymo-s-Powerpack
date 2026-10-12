@@ -330,3 +330,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   B is the Crush where you aim, or Collapsing Horizon's ring raining on the target (the Cave-in is gone). The meteor tears through roofs and anything else
   it falls through before it explodes. With Web or Gravity, F5 flips between first person and an over-the-shoulder
   view with the crosshair (no front view). See `docs/gravity.md`.
+- **0.8.44, Distant Horizons back:** Distant Horizons 3.3.4 for 26.3 (CurseForge 508933 / 9005667, Modrinth
+  TGgEbP9A) is in the pack again, from its Modrinth maven, so the CurseForge import, the server and the profile all
+  get it. Far terrain is drawn as simplified chunks well past the render distance; the server builds them and sends
+  them to players. It stays out of the dev game (`dev: false`), and it's no longer in `removedFromProfile`.
