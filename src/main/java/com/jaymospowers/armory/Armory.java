@@ -180,6 +180,15 @@ public final class Armory {
 		});
 	}
 
+	/**
+	 * (0.8.76) One of our melee weapons, which Jaymo's Tinkering's Tool Station gives modifiers: damageable, held alone,
+	 * not armour or the bow.
+	 */
+	public static boolean isWeapon(ItemStack stack) {
+		return ITEMS.containsValue(stack.getItem()) && stack.isDamageableItem() && stack.getMaxStackSize() == 1
+			&& !stack.has(net.minecraft.core.component.DataComponents.EQUIPPABLE) && !(stack.getItem() instanceof RecurveBowItem);
+	}
+
 	static boolean isLance(ItemStack stack) {
 		return LANCES.containsValue(stack.getItem());
 	}

@@ -1,8 +1,11 @@
 package com.jaymospowers.tinkering;
 
+import com.jaymospowers.armory.Armory;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
@@ -49,6 +52,8 @@ public enum Modifier {
 	}
 
 	public static final int BASE_SLOTS = 3;
+	/** (0.8.76) What fits an Armory weapon: the fighting ones (Luck works as Looting). */
+	static final Set<Modifier> WEAPON_MODIFIERS = EnumSet.of(SHARPNESS, LUCK, FIERY, KNOCKBACK, REINFORCED);
 	/** Diamond: durability, attack and the tier it lifts the tool to. Emerald: durability share. Netherite: durability share. */
 	static final int DIAMOND_DURABILITY = 500;
 	static final float DIAMOND_ATTACK = 0.5F, EMERALD_DURABILITY = 0.5F, NETHERITE_DURABILITY = 0.2F, NETHERITE_ATTACK = 1.0F;
@@ -142,8 +147,16 @@ public enum Modifier {
 
 	// --- adding one ---
 
+	/** (0.8.76) What the Tool Station gives modifiers: tinker tools and Armory weapons. */
+	public static boolean takes(ItemStack stack) {
+		return stack.getItem() instanceof TinkerToolItem || Armory.isWeapon(stack);
+	}
+
 	/** Why this modifier can't go on this tool now, or null if it can. */
 	public static @Nullable Component cannotAdd(ItemStack tool, Modifier modifier) {
+		if (!(tool.getItem() instanceof TinkerToolItem) && !WEAPON_MODIFIERS.contains(modifier)) {
+			return Component.translatable("gui.jaymospowers.tool_station.weapon", modifier.name(1));
+		}
 		Map<Modifier, Integer> has = of(tool);
 		int level = has.getOrDefault(modifier, 0);
 		if (level >= modifier.maxLevel) {
@@ -173,12 +186,12 @@ public enum Modifier {
 
 	/** Writes the enchantments the modifiers work as (other enchantments are kept), and Netherite's fireproofing. */
 	public static void enchant(ItemStack stack, HolderLookup.Provider registries) {
-		if (!(stack.getItem() instanceof TinkerToolItem tool)) {
+		if (!takes(stack)) {
 			return;
 		}
 		HolderLookup.RegistryLookup<Enchantment> lookup = registries.lookupOrThrow(Registries.ENCHANTMENT);
 		ItemEnchantments.Mutable enchantments = new ItemEnchantments.Mutable(stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY));
-		boolean sword = tool.type.style == ToolType.Style.SWORD;
+		boolean sword = !(stack.getItem() instanceof TinkerToolItem tool) || tool.type.style == ToolType.Style.SWORD;
 		of(stack).forEach((modifier, level) -> {
 			ResourceKey<Enchantment> key = sword && modifier.swordEnchantment != null ? modifier.swordEnchantment : modifier.enchantment;
 			if (key != null) {

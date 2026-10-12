@@ -152,6 +152,7 @@
   "gui.jaymospowers.tool_station.no_slots": "No modifier slots free: level the tool up to earn more",
   "gui.jaymospowers.tool_station.clash": "%s and %s don't go together",
   "gui.jaymospowers.tool_station.needs": "Needs %s first",
+  "gui.jaymospowers.tool_station.weapon": "%s doesn't go on this weapon",
   "tooltip.jaymospowers.tinkering.level": "Level %s (%s / %s xp)",
   "tooltip.jaymospowers.tinkering.level_max": "Level %s (top level)",
   "tooltip.jaymospowers.tinkering.slots": "Modifier slots: %s of %s free",

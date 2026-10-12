@@ -1,0 +1,31 @@
+{
+  "gives": {
+    "id": "jaymospowers:pick_head",
+    "components": {
+      "jaymospowers:part_material": "iron",
+      "minecraft:custom_model_data": {
+        "strings": [
+          "iron"
+        ]
+      },
+      "minecraft:item_name": {
+        "translate": "jaymospowers.tinkering.named",
+        "with": [
+          {
+            "translate": "material.jaymospowers.iron"
+          },
+          {
+            "translate": "item.jaymospowers.pick_head"
+          }
+        ]
+      }
+    }
+  },
+  "max_uses": 6,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 4
+  },
+  "xp": 10
+}
