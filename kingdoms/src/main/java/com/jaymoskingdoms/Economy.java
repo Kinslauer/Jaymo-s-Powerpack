@@ -134,7 +134,7 @@ public final class Economy {
 	}
 
 	/** Takes one into {@code faction}'s service: a vacancy filled or, if it's short for its size, a new hand. Returns them. */
-	public static @Nullable Folk hire(ServerLevel level, Faction faction) {
+	public static @Nullable Worker hire(ServerLevel level, Faction faction) {
 		MinecraftServer server = level.getServer();
 		long now = level.getGameTime();
 		Faction grown = faction;
@@ -142,8 +142,14 @@ public final class Economy {
 			// a builder while the crew is short; a farmer for a farm nobody keeps (0.5.1); a miner or woodcutter for a
 			// mine or tree farm short of them (0.5.2); else a guard
 			boolean crewShort = Builders.crewCount(grown) < Builders.crewTarget(grown);
-			int role = crewShort ? Folk.WORKER : Farmers.wanted(server, grown) ? Folk.FARMER : Gatherers.wanted(server, grown, Folk.MINER) ? Folk.MINER
+			int picked = crewShort ? Folk.WORKER : Farmers.wanted(server, grown) ? Folk.FARMER : Gatherers.wanted(server, grown, Folk.MINER) ? Folk.MINER
 				: Gatherers.wanted(server, grown, Folk.WOODCUTTER) ? Folk.WOODCUTTER : grown.type().isRealm() ? Folk.GUARD : Folk.WORKER;
+			if (picked == Folk.GUARD && Focus.enoughGuards(server, grown)) {
+				// (0.5.14) a fiefdom with its few guards: another pair of hands for its fields or its mine instead
+				picked = Focus.of(server, grown) == Focus.Kind.FARMING && !Farmers.farms(server, grown).isEmpty() ? Folk.FARMER
+					: Mines.dug(server, grown) ? Folk.MINER : Builders.crewCount(grown) < Builders.CREW_MAX ? Folk.WORKER : Folk.GUARD;
+			}
+			int role = picked;
 			if (grown.type() == FactionType.BARBARIAN || (role == Folk.WORKER && Builders.crewCount(grown) >= Builders.CREW_MAX)) {
 				// (camps raise their own; a full crew takes no more)
 				return null;
@@ -155,8 +161,9 @@ public final class Economy {
 		}
 		Faction f = grown;
 		int role = nextVacancy(f);
-		// from the settlement's own people, if it can spare one
-		List<Villager> villagers = level.getEntitiesOfClass(Villager.class, new AABB(f.seat()).inflate(POPULATION_RANGE),
+		// from the settlement's own people, if it can spare one (0.5.21: with MCA, a worker is one of them promoted where
+		// they stand, so nobody's taken away)
+		List<Villager> villagers = Workers.inPlace(f, role) ? List.of() : level.getEntitiesOfClass(Villager.class, new AABB(f.seat()).inflate(POPULATION_RANGE),
 			v -> v.isAlive() && !v.isBaby() && (f.leader().isEmpty() || !f.leader().get().equals(v.getUUID())));
 		BlockPos from = null;
 		if (villagers.size() > MIN_VILLAGERS_KEPT) {
@@ -174,7 +181,7 @@ public final class Economy {
 		if (ready == null) {
 			return null;
 		}
-		Folk hired;
+		Worker hired;
 		if (Folk.isBuilder(role)) {
 			hired = Builders.spawn(level, ready, role, from);
 		} else if (role == Folk.FARMER) {
@@ -183,6 +190,9 @@ public final class Economy {
 			hired = Gatherers.spawn(level, ready, role, from);
 		} else if (role == Folk.ARCHER) {
 			hired = KingdomEvents.spawnArcher(level, ready);
+		} else if (Workers.inPlace(ready, role) && (hired = McaCompat.enlist(level, ready, role, ready.seat(), ready.seat(), Folk.HOME_RADIUS)) != null) {
+			// (0.5.21) one of its villagers made an MCA guard (or archer)
+			Factions.update(server, ready.id(), x -> x.withHoldings(x.holdings().adjust(role, 1)));
 		} else {
 			hired = KingdomEvents.spawn(level, ready, role);
 		}
@@ -197,6 +207,10 @@ public final class Economy {
 	 * {@link #MIN_VILLAGERS_KEPT}): where they stood, or null (then a new hand comes instead).
 	 */
 	static @Nullable BlockPos recruit(ServerLevel level, Faction f) {
+		if (Workers.inPlace(f, Folk.WORKER)) {
+			// (0.5.21: MCA's villagers are promoted where they stand)
+			return null;
+		}
 		List<Villager> villagers = level.getEntitiesOfClass(Villager.class, new AABB(f.seat()).inflate(POPULATION_RANGE),
 			v -> v.isAlive() && !v.isBaby() && (f.leader().isEmpty() || !f.leader().get().equals(v.getUUID())));
 		if (villagers.size() <= MIN_VILLAGERS_KEPT) {

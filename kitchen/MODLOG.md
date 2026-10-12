@@ -638,3 +638,6 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
   - With an end over nothing, it slides off that way, still tumbling. With its middle over nothing but its hitbox caught on a block's rim, it's pushed away from that block (`awayFromRim`).
   - It stops (and stops tumbling) only when its whole length lies on blocks. Bodies laid on butcher blocks are exempt.
   - Verified: a cow corpse on a 1-block pillar slid off to the ground; one lying along a 3-block platform stayed put; a chicken on a pillar stayed put.
+
+## 0.4.25: grinding stone down to sand
+- **Grindstones grind rock** (`MachineRecipes.GRIND`, hand grindstone and horse mill alike): stone or cobblestone makes 1 gravel, and gravel makes 1 sand.

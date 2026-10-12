@@ -468,6 +468,26 @@ public final class KingdomEvents {
 	 * One of a faction's people died: reputation for whoever did it, and a place to fill; a realm's ruler's death
 	 * decides its fate.
 	 */
+	/** (0.5.21) One of a faction's MCA villagers in a job died ({@link Workers#died}). */
+	static void workerDied(ServerLevel level, Worker w, DamageSource source) {
+		MinecraftServer server = level.getServer();
+		Faction faction = Factions.get(server, w.factionId());
+		if (faction != null && w.role() >= 0) {
+			lostHand(server, faction, w.role(), source.getEntity() instanceof ServerPlayer p ? p : null, true);
+		}
+	}
+
+	/** One of {@code faction}'s people (not its leader) is dead: a place to fill, and their killer remembered. */
+	private static void lostHand(MinecraftServer server, Faction faction, int role, @Nullable ServerPlayer killer, boolean rostered) {
+		if (rostered) {
+			Economy.lost(server, faction.id(), role);
+		}
+		// a camp's hatred of you changes nothing: barbarians are at war with everyone already
+		if (killer != null && faction.type() != FactionType.BARBARIAN) {
+			Reputation.change(killer, faction, Folk.isBuilder(role) ? REP_KILL_BUILDER : REP_KILL_GUARD);
+		}
+	}
+
 	static void folkDied(ServerLevel level, Folk folk, DamageSource source) {
 		MinecraftServer server = level.getServer();
 		Faction faction = Factions.get(server, folk.factionId());
@@ -476,11 +496,8 @@ public final class KingdomEvents {
 		}
 		ServerPlayer killer = source.getEntity() instanceof ServerPlayer p ? p : null;
 		if (!folk.leader()) {
-			Economy.lost(server, faction.id(), folk.role());
-			// a camp's hatred of you changes nothing: barbarians are at war with everyone already
-			if (killer != null && faction.type() != FactionType.BARBARIAN) {
-				Reputation.change(killer, faction, Folk.isBuilder(folk.role()) ? REP_KILL_BUILDER : REP_KILL_GUARD);
-			}
+			// (0.5.14) a caravan's carters and guards were never on its roster
+			lostHand(server, faction, folk.role(), killer, !Caravans.isCaravanFolk(folk));
 			return;
 		}
 		boolean wasLeader = faction.leader().isPresent() && faction.leader().get().equals(folk.getUUID());

@@ -8,6 +8,8 @@ Plan and the user's answers: `docs/Kingdoms-Plan.md` (0.3: `docs/Kingdoms-Plan-0
 `run/` holds an offline dev server (port 25597, RCON 25598, password `kingdomsdev`) and ops.json for the dev
 client's `Tester`. Start `runServer --args="nogui"`, then `runClient --args="--username Tester --quickPlayMultiplayer
 localhost:25597"`, and drive it with RCON.
+With no player on, set `pause-when-empty-seconds=0` in `run/server.properties` (the server otherwise stops
+ticking a minute after it empties) and `/forceload` the area under test.
 
 ## 0.1.0: stage 1
 - **Kingdoms** (`Kingdom`, stored on the Overworld by `Kingdoms`): name, colour, capital (a village bell), king,
@@ -1339,7 +1341,107 @@ soldiers below them), broke trapdoors in its way and set a dozen fires in the to
 shoved a player back; a vanilla and an MCA villager ran from an enderman (4 to 11-13 blocks). Not seen in game: the
 other tempers' rounds, the tyrant's tithe, the reveler's feast.
 
-## 0.5.18: what guards throw depends on their kingdom's purse
+## 0.5.14: fiefdoms that feed their kingdom, caravans, mounted guards and archers, the king's carriage
+- **Fiefdoms have a focus** (`Focus`), drawn from their land: *mining* in hills, mountains and badlands, *farming* on
+  plains, savanna and by rivers (otherwise by id). Either way a fiefdom builds no wall, towers, gatehouses or
+  barracks, and keeps at most 4 guards (the rest of its hands work).
+  - *Mining*: 5 miners a mine, 160% stone and logs, one ore (coal, iron, copper, gold, redstone, lapis) for every 6
+    stone, and only 1 field and 1 pen (it's fed by its overlord).
+  - *Farming*: up to 6 fields and 3 pens, 200% food (256% at most a day).
+  Shown in `/kingdom info`.
+- **Caravans** (`Caravans`, saved as `jaymoskingdoms:caravans`): by day a fiefdom sends its surplus (all but 16 of
+  each good; at least 32 items, up to 3 carts of 576) to its overlord, at most three times a day. Each cart is a
+  horse-drawn wagon (`Wagon`) driven by a carter, its load showing what it carries (stone and ore, hay and barrels,
+  or a bit of everything), with a guard plus one more for every 2 carts (mounted if the overlord is prosperous).
+  The kingdom unloads into its storehouse (kept for later if the storehouse isn't loaded) and sends the carts back
+  with up to 60% as much of what the fiefdom lacks (food to a mining fiefdom; logs, coal, iron and cobblestone to a
+  farming one), keeping 64 of each. Out of every player's range a caravan goes on in the record at 3.2 blocks a
+  second and comes back into the world where it's got to. Stuck (a river, a cliff, a wall) it's set 8 blocks on;
+  riders get back in the saddle after a river.
+  - Players can strike a cart: its guards turn on them, and a cart broken open (24 damage) spills its load, -60
+    reputation with the fiefdom and its overlord. A cart whose carter or horse dies spills too.
+  - Right-click a cart to see its load.
+- **Wealth** (`Wealth`): a kingdom is *prosperous* at worth 120 and *wealthy* at 260 (worth = treasury + 4 a villager
+  + 60 a fiefdom). Shown in `/kingdom info`.
+- **Mounted guards and archers** (`Cavalry`): a prosperous kingdom buys horses (6 emeralds each, keeping 40) for 2 of
+  its town guards (never those posted at the gate or the throne), a wealthy one for 4, and keeps 2 mounted archers
+  riding round the town. Horses are saddled, in leather barding in the realm's colour, or iron for a wealthy realm.
+  A horse whose rider fell is taken by the next guard. A prosperous realm's war parties put one soldier in 3 on a
+  horse.
+- **The king's carriage** (`Carriages`): a wealthy kingdom buys its king a carriage (40 emeralds; another a day
+  after one is lost): a cabin in his colours with gold trim and lanterns, a coachman on a horse in iron barding. It
+  waits at the gate; on his round the king gets in and is driven from stop to stop, his escort behind, and is driven
+  back to the gate at dusk. Attacked, he gets down to fight.
+- Riders and caravan folk don't smother in walls (a horse's head brushes leaves and eaves), and neither do the
+  realm's horses.
+- Op commands: `/kingdom caravan [fief]` sends one now, `/kingdom carriage` buys the king's carriage now,
+  `/kingdom treasury <n>`, `/kingdom vassal <fief> <overlord>`. Commands that act on "the realm here" now work from
+  the console and command blocks too (at the command's position).
+Tested on the dev server: farming fiefdom Tormoor sent caravans to wealthy Hedvale (about 190 blocks): out across a
+river, unloaded, back home and gone, both in sight and out of every player's range; Hedvale bought its carriage and
+the king rode his round in it; it has 4 mounted guards and 2 mounted archers. The carts' and carriage's models
+seen in the client. Not seen in game: a player robbing a cart, a mining fiefdom's caravan, mounted war parties.
+
+## 0.5.17: villager talk over their heads, not in chat
+- **Speech** (`Speech`, client `SpeechBubbles`): words spoken aloud float over the speaker's head for players within
+  range (newest at the bottom, 3 lines at most, fading after 3-9 s by length) instead of going to chat. A ruler's
+  temper lines and a witness's cry (theft, vandalism, murder, arson) use it; a client without the mod gets chat.
+- **MCA villagers' talk** (to each other, to you, screams and gossip) goes the same way (client mixin on MCA's
+  `ClientHandlerImpl`, only with MCA). It still goes to chat while you're in a villager's talk screen, or when the
+  speaker isn't loaded on your client.
+Tested on the dev client with MCA: hurt villagers' lines and a witness's "Murder!" floated over them, nothing in chat.
+
+## 0.5.19: boss bars only once you've hit the boss
+- **A boss's bar shows only to the players who've hit it** (`BossBars`): kings, lords, barbarian chiefs and illager
+  warlords. A hit by hand, with an arrow or javelin, or with a power that names its player all count. The bar stays
+  while that player is within 48 blocks; once they leave (or die, or change dimension) it's gone until they hit the
+  boss again. Its death or unloading clears it. Banner capture bars are unchanged (they're not a boss's).
+
+## 0.5.20: arson counts as theft, and the townsfolk mob you
+- **Lighting a fire in a settlement** (flint and steel or a fire charge, once it catches) is arson (`Theft`), a medium
+  crime like stealing: seen, it costs reputation and the guards hunt you. A fire on netherrack (a hearth), relighting
+  a campfire, creative players and members allowed to take from storage don't count.
+- **The townsfolk turn on an arsonist they saw**: every grown villager (vanilla or MCA) and civilian folk within 24
+  blocks runs at you and punches (1 damage; one blow per 30 ticks each, at most one per 10 ticks from the whole
+  crowd). Hit any of them and the crowd scatters; it also ends after 60 s, on death, or 48 blocks away. The guards
+  keep hunting. Rioters leave the fire to the others (`Firefighting`).
+Tested on the dev client: the fire was seen, the crowd closed in and punched, one hit back stopped it.
+
+## 0.5.21: the workers are MCA's villagers; monsters hunt the folk; miners light their way
+Andy: "kingdom miners builders and farmers dont seem to be targetable by hostile mobs, please fix that, and integrate
+them as much as you can with the MCA mobs, i want builders to be interactable in the same way, and promoted to those
+jobs (builder farmer guard) in the same way"; then "miners should place torches as they go".
+- **Why they weren't hunted**: workers were `Folk` (a `PathfinderMob`), and zombies, illagers and ravagers only target
+  `AbstractVillager`. `Prey` now sets zombies (husks, drowned, zombie villagers) on any folk, illagers and ravagers on a
+  realm's; non-combatant folk keep 8 blocks from monsters (`AvoidEntityGoal`, their work waits meanwhile).
+- **Workers are villagers (with MCA)**: the work code (`Construction`, `Mines`, `Debris`, `Farmers`, `Gatherers`)
+  now drives a `Worker` (an interface `Folk` implements, and `McaWorkerMixin` gives MCA's villagers). A realm's new
+  builder, farmer, miner or woodcutter is one of its own MCA villagers promoted where they stand (`Workers.body`,
+  `McaBridge.enlist`: the jobless first, then the unskilled, then anyone grown who isn't its ruler or a guard; nobody
+  is taken away any more), or someone new who moves in. They keep their name, family and hearts and get MCA's menu.
+  New villager professions (`Professions`: `jaymoskingdoms:builder|farmer|miner|woodcutter`) show the job in MCA's
+  UI and dress them (`McaSkinMixin`: mason's, farmer's, MCA miner's and lumberjack's clothes); MCA counts them
+  important, so it never makes them guards or lets the job lapse. By day `VillagerWorkMixin` runs their work in
+  place of their brain (`Workers.step`); at night, frightened, hurt, talked to, or idle, they live as villagers. A
+  worker `Folk` in an old save becomes a villager with the same job on its next tick. Camps keep `Folk`.
+- **MCA's Professions menu** (adult, monarch rank, MCA's own gate) gets Builder, Farmer, Miner and Woodcutter
+  (`McaScreensMixin`, `McaCommandMixin` → `McaCompat.promote`): they join the settlement's crew (its foreman if it has
+  none), or are told why not (no settlement here, no farm, no mine dug, no tree farm). Setting one back to villager
+  or guard frees the place.
+- **Guards** (Andy's card, recommended option while unanswered): a realm's guard vacancies are filled by making a
+  villager an MCA guard (or archer, 1 in 3); MCA's own guards in a realm's village are counted on its roster as
+  `GUARD`. `McaGuardFoesMixin` sets them on its foes too (players it counts hostile, barbarians, enemies' folk in a
+  war). Archers on posts, the starting garrison, escorts and war parties are still `Folk` soldiers.
+- **Miners' torches**: where a miner digs out a dark spot underground (block light under 7), a torch goes on its floor
+  or a wall (`Gatherers.light`).
+- `/kingdomsdev stock`: 256 each of common building stuff into the nearest faction's storage (dev runs only).
+- Seen in game (dev server, MCA loaded, Caelwold at -320,-327): the founding crew were MCA villagers (foreman and two
+  workers, `jaymoskingdoms:builder`, shovels) who fetched, hauled oak logs and built once stocked; MCA guards counted
+  on the roster; a zombie went straight for a faction-less farmer folk, which ran; MCA's Professions page showed the
+  four new rows and Builder made Nikoll "Caelwold's Builder" in new clothes with a shovel. Not seen: miners' torches,
+  guards attacking a hostile player, farmer/miner/woodcutter promotion.
+
+## 0.5.22: what guards throw depends on their kingdom's purse
 - **Javelins are Balkon's.** Guards of ordinary kingdoms now throw Balkon's WeaponMod javelins
   (`WeaponModJavelins`), which can't be picked up and hit for about 5 instead of a trident's 8. When and at whom they
   throw is unchanged.

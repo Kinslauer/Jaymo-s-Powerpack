@@ -28,7 +28,24 @@ final class DevCommands {
 		ServerTickEvents.END_SERVER_TICK.register(DevCommands::tick);
 		net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> dispatcher.register(
 			net.minecraft.commands.Commands.literal("kingdomsdev")
-				.then(net.minecraft.commands.Commands.literal("fell").executes(c -> fell(c.getSource().getPlayerOrException(), STAND_OFF)))));
+				.then(net.minecraft.commands.Commands.literal("fell").executes(c -> fell(c.getSource().getPlayerOrException(), STAND_OFF)))
+				.then(net.minecraft.commands.Commands.literal("stock").executes(c -> stock(c.getSource().getPlayerOrException())))));
+	}
+
+	/** (0.5.21) {@code /kingdomsdev stock}: the faction nearest the tester gets a stack or four of common building stuff in storage. */
+	private static int stock(net.minecraft.server.level.ServerPlayer player) {
+		net.minecraft.server.level.ServerLevel level = player.level();
+		Faction f = Factions.around(level.getServer(), level, player.blockPosition(), 200);
+		if (f == null) {
+			return 0;
+		}
+		for (net.minecraft.world.item.Item item : java.util.List.of(net.minecraft.world.item.Items.OAK_LOG, net.minecraft.world.item.Items.OAK_PLANKS,
+			net.minecraft.world.item.Items.COBBLESTONE, net.minecraft.world.item.Items.STONE, net.minecraft.world.item.Items.GLASS_PANE,
+			net.minecraft.world.item.Items.TORCH, net.minecraft.world.item.Items.BREAD)) {
+			Storage.put(level, f, item, 256);
+		}
+		JaymosKingdoms.LOGGER.info("[dev] stocked {}", f.name());
+		return 1;
 	}
 
 	/** How far from a tree the tester stands to fell it, and how far round it a tree is looked for. */
