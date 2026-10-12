@@ -109,7 +109,7 @@ def surface(mat, x, y, w, h, salt=0, edge=True):
 
 def nub_pixel(mat, face):
     """A rivet or stud: one bright pixel on top, lit sides, a dark underside."""
-    f = {"top": 1.45, "bottom": 0.5, "front": 1.15, "back": 0.8, "left": 0.95, "right": 0.95}[face]
+    f = {"top": 1.28, "bottom": 0.55, "front": 1.08, "back": 0.8, "left": 0.92, "right": 0.92}[face]
     return shade(MATS[mat], f) + (255,)
 
 
@@ -169,10 +169,16 @@ SETS["paladin"] = dict(
     cloth=0x3C44AA, sound="iron", durability=22, defense=(2, 6, 7, 3), enchant=10, toughness=1.0, knockback=0.05,
     repair="minecraft:repairs_iron_armor",
     pieces=[
-        P("head", "head", (-0.5, -11, -4), (1, 2, 8), "gold"),
-        P("head", "head", (-1, -14, -3), (2, 3, 7), "cloth", layer="cloth"),
-        P("head", "head", (-1, -13, 4), (2, 5, 2), "cloth", layer="cloth"),
-        P("head", "head", (-0.5, -8, -5.6), (1, 7, 1), "steel", deco="ridge"),
+        # the crown narrows in two steps to the comb, the plume rising from it and falling behind
+        P("head", "head", (-4.5, -10, -4.5), (9, 1, 9), "steel", deco="gilt_bottom"),
+        P("head", "head", (-3.5, -11, -3.5), (7, 1, 7), "steel"),
+        P("head", "head", (-0.5, -12.5, -3), (1, 2, 6), "gold"),
+        P("head", "head", (-1, -15.5, -2.5), (2, 3, 6), "cloth", layer="cloth"),
+        P("head", "head", (-1, -14.5, 2.5), (2, 5, 2), "cloth", layer="cloth"),
+        # a faceplate standing proud of the bowl: brow plate and bevor with the eye slit between, split by a nasal bar
+        P("head", "head", (-5, -9.25, -5.8), (10, 4, 1), "steel", deco="gilt_bottom"),
+        P("head", "head", (-5, -4, -5.8), (10, 5, 1), "steel", deco="breaths"),
+        P("head", "head", (-0.5, -9.25, -6.3), (1, 10, 1), "gold", grow=-0.2),
         P("chest", "body", (-5.5, -1.5, -3.5), (11, 2, 7), "steel", deco="gilt_bottom"),
         P("chest", "body", (-3.5, 12, -3.4), (7, 5, 1), "cloth", layer="cloth", deco="hem"),
         P("chest", "body", (-3.5, 12, 2.4), (7, 5, 1), "cloth", layer="cloth", deco="hem"),
@@ -184,8 +190,8 @@ SETS["paladin"] = dict(
         P("legs", "right_leg", (-3, -1, -3.3), (6, 4, 1), "steel", deco="gilt_bottom"),
         P("feet", "right_leg", (-2.5, 11, -4.2), (5, 2, 1), "steel"),
         # rivets on the helm's brow and cheeks, and along the gorget
-        *[N("head", "head", (sx * 3.6, y, -5)) for sx in (-1, 1) for y in (-7.6, -1.6)],
-        *[N("head", "head", (sx * 5, -1.6, z)) for sx in (-1, 1) for z in (-2.6, 2.6)],
+        *[N("head", "head", (sx * 4.2, y, -5.8), r=0.16) for sx in (-1, 1) for y in (-8.4, -0.4)],
+        *[N("head", "head", (sx * 5, -1.6, z), r=0.16) for sx in (-1, 1) for z in (-2.6, 2.6)],
         *[N("chest", "body", (sx * 3.5, -0.5, -3.5), "gold") for sx in (-1, 1)],
         # the breastplate's flanks, a sword belt with a gilt buckle
         *[N("chest", "body", (sx * 4.4, y, -3)) for sx in (-1, 1) for y in (1.2, 6.5)],
@@ -233,6 +239,9 @@ SETS["gladiator"] = dict(
         N("chest", "left_arm", (4.5, -3, -2), "gold", single=True), N("chest", "left_arm", (4.5, -3, 2), "gold", single=True),
         # greaves: a shin ridge and a studded knee guard
         ridge("feet", "right_leg", (-0.5, 3.5, -4.1), (1, 7, 1), "bronze"),
+        # pteruges: leather strips hanging from the belt, in front of the loincloth, each tipped with a bronze stud
+        *[P("chest", "body", (x, 12, -3.8), (1, 4, 1), "leather", grow=-0.05) for x in (-4.5, -3, 2, 3.5)],
+        *[N("chest", "body", (x + 0.5, 15.3, -3.8), "bronze", r=0.25) for x in (-4.5, -3, 2, 3.5)],
         *[N("feet", "right_leg", (x, 1.5, -3.9), "gold") for x in (-2, 0, 2)],
     ],
 )
@@ -252,7 +261,6 @@ SETS["ronin"] = dict(
         P("head", "head", (-0.5, -7, -0.5), (1, 7, 1), "gold", pivot=(1, -9, -5.3), rot=(0, 0, 0.55)),
         P("chest", "right_arm", (-5.2, -3.5, -3.5), (1, 7, 7), "cloth", layer="cloth", deco="lames"),
         P("chest", "right_arm", (-5, -4.2, -3.5), (5, 1, 7), "lacquer"),
-        P("legs", "right_leg", (-2.5, -1, -3.4), (5, 6, 1), "cloth", layer="cloth", deco="lames"),
         P("legs", "right_leg", (-3.4, -1, -2.5), (1, 6, 5), "cloth", layer="cloth", deco="lames"),
         P("legs", "right_leg", (-2.5, -1, 2.4), (5, 6, 1), "cloth", layer="cloth", deco="lames"),
         P("feet", "right_leg", (-2, 3, -3.6), (4, 8, 1), "lacquer"),
@@ -262,6 +270,16 @@ SETS["ronin"] = dict(
         *[N("head", "head", (sx * 6.5, -6, -3), "gold") for sx in (-1, 1)],
         # gilt rivets at the top of each shoulder plate
         N("chest", "right_arm", (-5.2, -2.8, -2.4), "gold"), N("chest", "right_arm", (-5.2, -2.8, 2.4), "gold"),
+        # the do: four lacquered lames stepping out down the chest, laced with raised cords, a gilt mon at the top
+        *[P("chest", "body", (-4.5, 0.5 + 3 * k, -3.5 - 0.15 * k), (9, 3, 1), "cloth", layer="cloth", deco="lame_edge") for k in range(4)],
+        *[ridge("chest", "body", (x - 0.5, 0.5, -4.6), (1, 12, 1), "navy", grow=-0.32) for x in (-3, -1, 1, 3)],
+        P("chest", "body", (-1, 1, -4.4), (2, 2, 1), "gold", deco="mon"),
+        # the sode's lames raised and corded
+        *[ridge("chest", "right_arm", (-5.6, -3 + 2 * k, -3.5), (1, 1, 7), "lacquer", grow=-0.2) for k in range(3)],
+        *[ridge("chest", "right_arm", (-5.95, -3.5, z - 0.5), (1, 7, 1), "navy", grow=-0.32) for z in (-2, 0, 2)],
+        # the kusazuri in three stepped lames, corded
+        *[P("legs", "right_leg", (-2.6, -1 + 2 * k, -3.6 - 0.2 * k), (5, 2, 1), "cloth", layer="cloth", deco="lame_edge") for k in range(3)],
+        *[ridge("legs", "right_leg", (x - 0.5, -1, -4.7), (1, 6, 1), "navy", grow=-0.32) for x in (-1.2, 1.2)],
         # three splints down each shin
         *[ridge("feet", "right_leg", (x, 3.5, -4.0), (1, 7, 1), "dark_steel", grow=-0.25) for x in (-1.75, -0.5, 0.75)],
     ],
@@ -310,6 +328,11 @@ SETS["warlord"] = dict(
         ridge("head", "head", (4.4, -5.5, -5), (1, 1, 10), "dark_steel", grow=-0.1),
         *[N("head", "head", (x, -5, -5.5), "iron") for x in (-3.5, -1.8, 1.8, 3.5)],
         N("head", "head", (0, -9.4, 0), "iron", r=0.45),
+        # the cuirass in layers: a cloth tunic hanging below, three rows of overlapping hide scales, a sash across
+        P("chest", "body", (-4.5, 10, -3.35), (9, 5, 1), "cloth", layer="cloth", deco="ragged"),
+        *[P("chest", "body", (-4.5, 0.5 + 3 * k, -3.45 - 0.15 * k), (9, 3, 1), "leather", deco="scales") for k in range(3)],
+        *[P("chest", "body", (-4.5, 0.5 + 3 * k, 2.45 + 0.15 * k), (9, 3, 1), "leather", deco="scales") for k in range(3)],
+        P("chest", "body", (-1, -6.5, -4.1), (2, 13, 1), "cloth", layer="cloth", pivot=(0, 5.5, 0), rot=(0, 0, 0.6)),
         # a broad belt with a bone buckle
         P("chest", "body", (-5.5, 10, -3.5), (11, 2, 7), "dark_leather", grow=0.05),
         N("chest", "body", (0, 11, -3.7), "bone", r=0.6),
@@ -366,6 +389,24 @@ def deco_pixel(p, face, x, y, fw, fh, c):
         return shade(c[:3], 0.82) + (255,)
     if deco == "splints" and face == "front" and x % 2 == 1:
         return surface("dark_steel", x, y, fw, fh, edge=False)
+    if deco == "breaths" and face == "front" and y in (1, 3) and x in (6, 8) :
+        return (22, 22, 26, 255)
+    if deco == "breaths" and face == "front" and y == 2 and x == 7:
+        return (22, 22, 26, 255)
+    if deco == "lame_edge" and face not in ("top", "bottom"):
+        if y == fh - 1:
+            return surface("gold", x, y, fw, fh, edge=False)
+        if y == 0:
+            return shade(c[:3], 1.25) + (255,)
+    if deco == "mon" and face == "front":
+        return surface("gold", x, y, fw, fh, edge=False) if (x + y) % 2 == 0 else shade(MATS["gold"], 0.6) + (255,)
+    if deco == "scales" and face == "front":
+        if y == fh - 1 or (y == fh - 2 and x % 3 == 1):
+            return shade(c[:3], 0.62) + (255,)
+        if x % 3 == 0:
+            return shade(c[:3], 0.82) + (255,)
+        if x % 3 == 1 and y < fh - 2:
+            return surface("iron", x, y, fw, fh, edge=False)
     if deco == "ragged" and face in ("front", "back", "left", "right") and y == fh - 1 and (x * 7) % 3 == 0:
         return None
     return c
@@ -492,8 +533,8 @@ def paladin_flat():
     def helm(face, x, y, w, h):
         c = surface("steel", x, y, w, h, edge=False)
         if face == "front":
-            if y == 3 and 1 <= x <= 6 and x not in (3, 4):
-                return (24, 24, 28, 255)
+            if y == 3:
+                return (18, 18, 22, 255)
             if x in (3, 4) and y < 7:
                 return surface("gold", x, y, w, h, edge=False)
         if face in ("front", "left", "right", "back") and y == h - 1:

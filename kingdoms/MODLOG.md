@@ -1543,5 +1543,11 @@ Nothing of that mod is used: shapes, art and names are our own, drawn by `tools/
   bands (`ridge`): the paladin's helm, gorget, pauldron comb, belt and knee bosses; the gladiator's studded brim,
   belt, sword arm and greaves; the ronin's ribbed, gilt-riveted kabuto and shin splints; the warlord's banded cap and
   studded bracers.
+- **Third pass** (Andy: smaller paladin helm rivets, more layers): the paladin's great helm narrows in two steps to the
+  comb and has a faceplate standing proud of the bowl (brow plate and bevor with breaths, the eye slit between them
+  split by a gilt nasal bar); the ronin's do is four lacquered lames stepping out down the chest, laced with raised
+  cords and a gilt mon, the sode's lames raised and corded, the kusazuri three stepped lames; the warlord's cuirass is
+  layered: a cloth tunic hem, three rows of overlapping hide scales front and back, a dyed sash across; the gladiator
+  has leather pteruges tipped with bronze studs. Warlord chestplates now take dye (the sash and tunic).
 - Seen in game (dev server + client, on mannequins): all four sets, dyed paladins in red, green and white. Not yet
   seen: guards and chiefs dressed from the armoury.

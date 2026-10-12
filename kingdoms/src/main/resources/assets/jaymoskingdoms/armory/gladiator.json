@@ -981,6 +981,166 @@
    "grow": -0.2
   },
   {
+   "slot": "chest",
+   "bone": "body",
+   "layer": "main",
+   "pos": [
+    -4.5,
+    12,
+    -3.8
+   ],
+   "size": [
+    1,
+    4,
+    1
+   ],
+   "uv": [
+    52,
+    50
+   ],
+   "grow": -0.05
+  },
+  {
+   "slot": "chest",
+   "bone": "body",
+   "layer": "main",
+   "pos": [
+    -3,
+    12,
+    -3.8
+   ],
+   "size": [
+    1,
+    4,
+    1
+   ],
+   "uv": [
+    56,
+    50
+   ],
+   "grow": -0.05
+  },
+  {
+   "slot": "chest",
+   "bone": "body",
+   "layer": "main",
+   "pos": [
+    2,
+    12,
+    -3.8
+   ],
+   "size": [
+    1,
+    4,
+    1
+   ],
+   "uv": [
+    60,
+    50
+   ],
+   "grow": -0.05
+  },
+  {
+   "slot": "chest",
+   "bone": "body",
+   "layer": "main",
+   "pos": [
+    3.5,
+    12,
+    -3.8
+   ],
+   "size": [
+    1,
+    4,
+    1
+   ],
+   "uv": [
+    0,
+    58
+   ],
+   "grow": -0.05
+  },
+  {
+   "slot": "chest",
+   "bone": "body",
+   "layer": "main",
+   "pos": [
+    -4.5,
+    14.8,
+    -4.3
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    40,
+    50
+   ],
+   "grow": -0.25
+  },
+  {
+   "slot": "chest",
+   "bone": "body",
+   "layer": "main",
+   "pos": [
+    -3.0,
+    14.8,
+    -4.3
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    40,
+    50
+   ],
+   "grow": -0.25
+  },
+  {
+   "slot": "chest",
+   "bone": "body",
+   "layer": "main",
+   "pos": [
+    2.0,
+    14.8,
+    -4.3
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    40,
+    50
+   ],
+   "grow": -0.25
+  },
+  {
+   "slot": "chest",
+   "bone": "body",
+   "layer": "main",
+   "pos": [
+    3.5,
+    14.8,
+    -4.3
+   ],
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "uv": [
+    40,
+    50
+   ],
+   "grow": -0.25
+  },
+  {
    "slot": "feet",
    "bone": "right_leg",
    "layer": "main",
