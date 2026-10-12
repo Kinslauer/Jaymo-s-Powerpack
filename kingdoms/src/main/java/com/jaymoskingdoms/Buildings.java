@@ -60,8 +60,6 @@ final class Buildings {
 			// (0.5.23) where the guards throw dead monsters ({@link Undertakers})
 			realm(type, "fire_pit", Buildings::firePit, 1, 20);
 			realm(type, "market", Buildings::market, 1, 24);
-			// (0.5.25) a coaching inn or a tavern with a beer garden
-			realm(type, "tavern", Buildings::tavern, 1, 26);
 			realm(type, "stable", Buildings::stable, 1, 28);
 			realm(type, "farm", Buildings::farm, 2, 28);
 			realm(type, "road", Buildings::road, 4, 28);
@@ -75,6 +73,8 @@ final class Buildings {
 			town(type, "wall", Buildings::wall, 24, 56);
 			town(type, "tower", Buildings::tower, 8, 56);
 		}
+		// (0.5.26) only a wealthy kingdom with room to spare builds a tavern ({@link Planner#eligible})
+		realm(FactionType.KINGDOM, "tavern", Buildings::tavern, 1, 26);
 		realm(FactionType.VILLAGE, "tree_farm", Buildings::treeFarm, 1, 0);
 		realm(FactionType.VILLAGE, "pen", Buildings::pen, 1, 0);
 		realm(FactionType.VILLAGE, "farm", Buildings::farm, 1, 0);
@@ -85,11 +85,9 @@ final class Buildings {
 		realm(FactionType.VILLAGE, "road", Buildings::road, 2, 8);
 		realm(FactionType.VILLAGE, "house", Buildings::house, 4, 12);
 		realm(FactionType.VILLAGE, "farm", Buildings::farm, 2, 14);
-		// (0.5.25) a row stable, its horses bought in when it's done ({@link Gatherers#built})
+		// (0.5.26) a row stable, its horses bought in when it's done ({@link Gatherers#built})
 		realm(FactionType.VILLAGE, "stable", Buildings::stable, 1, 18);
 		realm(FactionType.VILLAGE, "stall", Buildings::stall, 2, 16);
-		// (0.5.25) an alehouse
-		realm(FactionType.VILLAGE, "tavern", Buildings::tavern, 1, 16);
 		realm(FactionType.VILLAGE, "road", Buildings::road, 4, 16);
 		realm(FactionType.VILLAGE, "house", Buildings::house, 6, 20);
 		town(FactionType.VILLAGE, "palisade", Buildings::palisade, 10, 22);
@@ -715,7 +713,7 @@ final class Buildings {
 	}
 
 	/**
-	 * (0.5.25) A stable: a village builds the row stable; a kingdom or fief the coaching yard or (half the time, in a varied
+	 * (0.5.26) A stable: a village builds the row stable; a kingdom or fief the coaching yard or (half the time, in a varied
 	 * realm) the aisle barn. Its horses are bought in when it's done ({@link Gatherers#built}).
 	 */
 	static Blueprint stable(Kit k) {
@@ -872,12 +870,14 @@ final class Buildings {
 	}
 
 	/**
-	 * (0.5.25) A tavern: a village builds the alehouse; a kingdom or fief the coaching inn or (half the time, in a varied
-	 * realm) the tavern with a beer garden.
+	 * (0.5.26) A tavern, built only by a wealthy kingdom with room to spare ({@link Planner#eligible}): an alehouse, a
+	 * coaching inn or a tavern with a beer garden (the plain design: the coaching inn).
 	 */
 	static Blueprint tavern(Kit k) {
-		return k.village ? tavernAlehouse(k) : k.classic || k.chance(0.5) ? tavernInn(k) : tavernGarden(k);
+		return k.classic ? tavernInn(k) : k.pick(TAVERNS).draw(k);
 	}
+
+	private static final Design[] TAVERNS = {Buildings::tavernAlehouse, Buildings::tavernInn, Buildings::tavernGarden};
 
 	/** Walls round x0..x1, z0..z1 from y0 to y1: posts at the corners and every {@code bay} blocks, {@code wall} between. */
 	private static void shell(Sketch s, int x0, int x1, int z0, int z1, int y0, int y1, BlockState wall, BlockState post, int bay) {

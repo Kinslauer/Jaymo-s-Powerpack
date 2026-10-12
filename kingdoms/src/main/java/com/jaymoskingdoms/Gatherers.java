@@ -59,6 +59,8 @@ public final class Gatherers {
 	/** (0.5.21) A miner puts a torch where he's dug out if the block light there is under this. */
 	static final int TORCH_BELOW = 7;
 	static final int STONE_TICKS = 30, ORE_TICKS = 50, LOG_TICKS = 16, FELL_START_TICKS = 30, FELL_WAIT_TICKS = 40;
+	/** (0.5.25) A woodcutter's chops at a tree come this far apart (ticks). */
+	static final int CHOP_TICKS = 12;
 	static final double REACH = 4.5, STAND_REACH = 1.5, DEPOT_REACH = 2.5, VERTICAL_SLACK = 3.0;
 	/** With nothing else to dig, a miner quarries the rock this far round the mine's end. */
 	static final int QUARRY_REACH = 6;
@@ -73,7 +75,7 @@ public final class Gatherers {
 	static final double WALK_SPEED = 0.65;
 	/** A pen's first beasts: this many of each kind. */
 	static final int PEN_STOCK = 2;
-	/** (0.5.25) The horses bought in for a new stable. */
+	/** (0.5.26) The horses bought in for a new stable. */
 	static final int STABLE_HORSES = 2;
 	/** Sleep's catch-up ({@link Nights}): a gatherer's ticks an item, the most at once, and a sapling's ticks a stage. */
 	static final int MINER_TICKS_PER_ITEM = 50, WOOD_TICKS_PER_LOG = 40, CATCH_UP_MOST = 256, SAPLING_TICKS_PER_STAGE = 5000;
@@ -634,28 +636,33 @@ public final class Gatherers {
 			}
 			folk.getNavigation().stop();
 			job.logs.addAll(trunk(level, base));
-			job.sapling = sapling(level.getBlockState(base));
+			job.sapling = sapling(ChoppedLog.real(level, base, level.getBlockState(base)));
 			job.actAt = now + FELL_START_TICKS;
 			folk.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 			return;
 		}
 		folk.getLookControl().setLookAt(base.getX() + 0.5, base.getY() + 1.0, base.getZ() + 0.5);
 		if (now < job.actAt) {
-			if ((job.actAt - now) % 8 == 0) {
+			if ((job.actAt - now) % 8 == 0 && job.actAt - now > CHOP_TICKS) {
 				folk.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 			}
 			return;
 		}
-		// the whole tree comes down (Trees: its logs from the foot up, then the leaves no other tree holds), into his bag
+		// (0.5.25) he chops at its foot as a player would (Trees.chop: the log narrows), a chop every CHOP_TICKS, until the
+		// whole tree comes down (its logs from the foot up, then the leaves no other tree holds), into his bag
 		if (!job.felled) {
-			int logs = Trees.fell(level, base, folk.mob(), new ItemStack(Items.IRON_AXE), d -> job.bag.add(folk, d), false);
+			int logs = Trees.chop(level, base, folk.mob(), new ItemStack(Items.IRON_AXE), d -> job.bag.add(folk, d));
+			folk.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 			if (logs == 0) {
+				job.actAt = now + CHOP_TICKS;
+				return;
+			}
+			if (logs < 0) {
 				job.skip.add(base);
 				job.logs.clear();
 				job.phase = IDLE;
 				return;
 			}
-			folk.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 			job.felled = true;
 			job.actAt = now + FELL_WAIT_TICKS;
 			return;
