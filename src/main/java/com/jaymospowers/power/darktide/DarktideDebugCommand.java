@@ -13,7 +13,8 @@ import net.minecraft.server.level.ServerPlayer;
  * <ul>
  * <li>{@code /powerdebug darktide flow <n>}: sets your Flow;</li>
  * <li>{@code /powerdebug darktide parries <n>}: sets your katana parries toward ascension (ascends at the threshold if it can);</li>
- * <li>{@code /powerdebug darktide ready}: clears every cooldown.</li>
+ * <li>{@code /powerdebug darktide ready}: clears every cooldown;</li>
+ * <li>{@code /powerdebug darktide cure | corrupt}: cures the corruption until nightfall, or ends the cure.</li>
  * </ul>
  */
 final class DarktideDebugCommand {
@@ -62,6 +63,27 @@ final class DarktideDebugCommand {
 						DarktidePower.clearCooldowns(player);
 						DarktidePower.live(player).armsSwapAt = 0L;
 						c.getSource().sendSuccess(() -> Component.literal("Every Darktide cooldown is ready."), false);
+						return 1;
+					}))
+				.then(Commands.literal("cure")
+					.executes(c -> {
+						ServerPlayer player = darktide(c);
+						if (player == null) {
+							return 0;
+						}
+						player.setAttached(DarktideState.SAVE, DarktideState.save(player).withCuredUntil(
+							DarktidePower.nextNightfall(player.level().getOverworldClockTime())));
+						c.getSource().sendSuccess(() -> Component.literal("Darktide cured until nightfall."), false);
+						return 1;
+					}))
+				.then(Commands.literal("corrupt")
+					.executes(c -> {
+						ServerPlayer player = darktide(c);
+						if (player == null) {
+							return 0;
+						}
+						player.setAttached(DarktideState.SAVE, DarktideState.save(player).withCuredUntil(0L));
+						c.getSource().sendSuccess(() -> Component.literal("Darktide corrupted again."), false);
 						return 1;
 					}))));
 	}

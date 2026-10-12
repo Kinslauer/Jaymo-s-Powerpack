@@ -133,11 +133,17 @@ public final class WebSymbiote {
 	public static final float IGNORE_MAX = 0.45F;
 	public static final int IGNORE_BOND = 60;
 	/**
-	 * A weak bond has a mind of its own: each takeover check, hungry or not, there's up to {@code FERAL_CHANCE} (at bond 0;
-	 * none by {@code FERAL_BOND}) that it simply takes the wheel: {@code FERAL_CURIOUS} of the time to look, else to fight.
+	 * It takes the wheel only for a few reasons: starving ({@link #GORGE_FULL}), a look ({@link #CURIOUS_CHANCE}), or
+	 * neglect: under {@code NEGLECT_BOND}, each takeover check has up to {@code NEGLECT_CHANCE} (at bond 0, none at
+	 * {@code NEGLECT_BOND}) that it complains it's been ignored and goes off ripping into whatever's near, its own way.
 	 */
-	public static final float FERAL_CHANCE = 0.12F, FERAL_CURIOUS = 0.3F;
-	public static final int FERAL_BOND = 60;
+	public static final float NEGLECT_CHANCE = 0.05F;
+	public static final int NEGLECT_BOND = 25, NEGLECT_LINES = 4;
+	/**
+	 * Starving, it gorges: it takes over and hunts, kill after kill and meal after meal, until it's back up to
+	 * {@code GORGE_FULL}; then it's sated, and its hunger doesn't drain for {@code SATED_TICKS} (5 minutes).
+	 */
+	public static final int GORGE_FULL = 80, SATED_TICKS = 6000;
 	/**
 	 * Once it takes over it keeps you until it's done with you: no key answers. With {@code BREAK_FREE_ABILITIES} of its
 	 * abilities earned, fighting it (any key, spammed) breaks its hold: {@code BREAK_FREE_BASE} presses,
@@ -172,10 +178,8 @@ public final class WebSymbiote {
 	public static final int STRESS_CALM_TICKS = 100;
 	public static final int STRESS_STARVE_TICKS = 80;
 
-	/** Takeover: starving and this stressed, every so often there's a chance it grabs the wheel. */
-	public static final int TAKEOVER_STRESS = 40;
+	/** Takeover: how often it considers taking the wheel (see {@link #NEGLECT_CHANCE}, {@link #CURIOUS_CHANCE}). */
 	public static final int TAKEOVER_CHECK_TICKS = 140;
-	public static final float TAKEOVER_CHANCE = 0.55F;
 	public static final double TAKEOVER_RANGE = 12.0;
 	public static final double TAKEOVER_REACH = 3.0;
 	public static final int TAKEOVER_ATTACK_TICKS = 20;
@@ -226,7 +230,7 @@ public final class WebSymbiote {
 	 * {@code STARE_MIN}-{@code STARE_MAX} ticks, then setting it down (or, {@code CURIOUS_ATTACK} of the time, not).
 	 */
 	public static final int CURIOUS_STRESS = 20;
-	public static final float CURIOUS_CHANCE = 0.06F, CURIOUS_ATTACK = 0.5F;
+	public static final float CURIOUS_CHANCE = 0.03F, CURIOUS_ATTACK = 0.5F;
 	public static final int STARE_MIN = 40, STARE_MAX = 160;
 	/**
 	 * Tendril Grab at a block: every tendril reaches for the wall and hauls you in; there, you're turned with your back
@@ -350,14 +354,6 @@ public final class WebSymbiote {
 	 */
 	public static final int FRENZY_TICKS = 18, FRENZY_HIT = 9, FRENZY_EVERY = 4;
 	public static final float FRENZY_REAR = 0.35F, FRENZY_DAMAGE = 9.0F, FRENZY_SNATCH = 0.18F;
-	/**
-	 * Worn too long, it wants out: after {@code ARMOR_RESTLESS_TICKS} of Living Armor, each takeover check (every
-	 * {@link #TAKEOVER_CHECK_TICKS}) has a chance that climbs by {@code ARMOR_TAKEOVER_PER_MINUTE} a minute, up to
-	 * {@code ARMOR_TAKEOVER_MAX}, hungry or not. Such a rampage lasts longer, and goes for players too.
-	 */
-	public static final int ARMOR_RESTLESS_TICKS = 800;
-	public static final float ARMOR_TAKEOVER_PER_MINUTE = 0.2F;
-	public static final float ARMOR_TAKEOVER_MAX = 0.6F;
 	/** In a rampage, every this many strikes on a player is a bite: this much more damage, and it feeds. */
 	public static final int RAMPAGE_BITE_EVERY = 3;
 	public static final float RAMPAGE_BITE_DAMAGE = 8.0F;
@@ -563,6 +559,11 @@ public final class WebSymbiote {
 		boolean suitBeforeFeeding;
 		/** Once it has gone looking for food it keeps at it until it has eaten (not just killed). */
 		boolean craving;
+		/** Starving: it hunts and feeds until it's full again ({@link #GORGE_FULL}). */
+		boolean gorging;
+		/** Fed full after gorging: no hunger drain until this game time. */
+		long satedUntil;
+		int lastNeglect = -1;
 		/** The suit showing itself on bonding, until then (0: shown already). */
 		long suitDebutUntil;
 		/** It engulfed you for a takeover: the suit as it was before, put back after. */
@@ -620,6 +621,18 @@ public final class WebSymbiote {
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer player && state(player).bonded()) {
 				withdraw(player);
+			}
+		});
+		// and the body that comes back is nobody's: no bond, no suit, no armour (whatever reached it in between)
+		net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
+			if (!alive) {
+				WebSymbioteState old = state(newPlayer);
+				if (old.bonded() || old.has(WebSymbioteState.SUIT) || old.has(WebSymbioteState.ARMOR) || old.has(WebSymbioteState.BULK)) {
+					newPlayer.setAttached(STATE, new WebSymbioteState(false, 0, 0, old.rejections(), 0, old.hints(), 0));
+				}
+				removeArmor(newPlayer);
+				newPlayer.removeAttached(COOLDOWNS);
+				newPlayer.removeAttached(LIVE);
 			}
 		});
 		// attacking anything breaks the Shroud
@@ -863,10 +876,18 @@ public final class WebSymbiote {
 
 		// hunger (the big body eats three times as fast)
 		int drainTicks = bulk ? Math.max(1, SATIETY_DRAIN_TICKS / ARMOR_DRAIN_MULT) : SATIETY_DRAIN_TICKS;
-		if (!player.isCreative() && player.tickCount % drainTicks == 0 && next.satiety() > 0) {
+		if (!player.isCreative() && player.tickCount % drainTicks == 0 && next.satiety() > 0 && now >= live.satedUntil) {
 			next = next.withSatiety(next.satiety() - 1);
 		}
 		boolean starving = next.satiety() <= STARVING;
+		if (starving && !player.isCreative()) {
+			// it gorges until it's full
+			live.gorging = true;
+		} else if (live.gorging && next.satiety() >= GORGE_FULL) {
+			live.gorging = false;
+			live.satedUntil = now + SATED_TICKS;
+			whisper(player, "sated");
+		}
 		if (starving) {
 			if (player.tickCount % STARVE_TICKS == 0 && !player.isCreative()) {
 				// it feeds on you instead
@@ -921,7 +942,8 @@ public final class WebSymbiote {
 			if (armorInUse(player)) {
 				live.armorUsedAt = now;
 			}
-			boolean idle = !next.has(WebSymbioteState.SUIT) && now - live.armorUsedAt > ARMOR_IDLE_TICKS;
+			// (the bond whole, Living Armor is the big body you drive: it stays until you put it away)
+			boolean idle = !next.has(WebSymbioteState.SUIT) && next.bond() < BOND_MAX && now - live.armorUsedAt > ARMOR_IDLE_TICKS;
 			if (idle || now - live.armorOnAt > ARMOR_MAX_TICKS) {
 				next = next.withFlag(WebSymbioteState.ARMOR, false);
 				armor = next.has(WebSymbioteState.BULK);
@@ -961,8 +983,8 @@ public final class WebSymbiote {
 
 		// hungry, it feeds itself: a corpse, or something it kills first (swelling into the armour for it, if it wasn't);
 		// once it has started it isn't satisfied until it has actually eaten
-		if ((next.satiety() < SELF_FEED_BELOW || live.craving) && player.getAttached(EATING) == null && live.takeoverTicks <= 0
-			&& live.feedStage == FEED_NONE && !sulking(player) && player.tickCount % SELF_FEED_EVERY == 0 && selfFeed(player, live, now)) {
+		if ((next.satiety() < SELF_FEED_BELOW || live.craving || live.gorging) && player.getAttached(EATING) == null && live.takeoverTicks <= 0
+			&& live.feedStage == FEED_NONE && !sulking(player) && player.tickCount % SELF_FEED_EVERY == 0 && selfFeed(player, live, now, live.gorging)) {
 			live.craving = true;
 			if (!armor) {
 				live.feedingArmor = true;
@@ -1036,26 +1058,17 @@ public final class WebSymbiote {
 				next = next.withStress(Math.max(0, next.stress() - TAKEOVER_RELIEF));
 			}
 		} else if (live.feedStage == FEED_NONE && now >= live.takeoverReadyAt && player.tickCount % TAKEOVER_CHECK_TICKS == 0 && !player.isCreative()) {
-			// hungry and stressed, it may grab the wheel; worn as armour too long, it grows restless whatever its mood
-			float restless = live.armorTicks <= ARMOR_RESTLESS_TICKS || next.bond() >= BOND_MAX ? 0.0F
-				: Math.min(ARMOR_TAKEOVER_MAX, (live.armorTicks - ARMOR_RESTLESS_TICKS) / 1200.0F * ARMOR_TAKEOVER_PER_MINUTE);
-			float feral = next.bond() >= FERAL_BOND || sulking(player) ? 0.0F : FERAL_CHANCE * (1.0F - next.bond() / (float)FERAL_BOND);
-			if (restless > 0.0F && player.getRandom().nextFloat() < restless) {
-				live.rampage = true;
-				live.curious = false;
-				startTakeover(player, live, now);
-			} else if (feral > 0.0F && player.getRandom().nextFloat() < feral) {
-				// a weak bond does as it likes: a look, or a fight
+			// besides starving (it gorges, above), it only takes the wheel when neglected, or for a look
+			float neglect = next.bond() >= NEGLECT_BOND || sulking(player) || live.gorging ? 0.0F
+				: NEGLECT_CHANCE * (1.0F - next.bond() / (float)NEGLECT_BOND);
+			if (neglect > 0.0F && player.getRandom().nextFloat() < neglect) {
+				// ignored too long: it does it its own way, tearing into whatever's near
 				live.rampage = false;
-				live.curious = player.getRandom().nextFloat() < FERAL_CURIOUS;
+				live.curious = false;
 				live.feral = true;
 				startTakeover(player, live, now);
 				live.feral = live.takeoverTicks > 0;
-			} else if (starving && next.stress() >= TAKEOVER_STRESS && player.getRandom().nextFloat() < TAKEOVER_CHANCE) {
-				live.rampage = false;
-				live.curious = false;
-				startTakeover(player, live, now);
-			} else if (!starving && next.stress() < CURIOUS_STRESS && next.satiety() >= SELF_FEED_BELOW && !sulking(player)
+			} else if (!starving && !live.gorging && next.stress() < CURIOUS_STRESS && next.satiety() >= SELF_FEED_BELOW && !sulking(player)
 				&& player.getRandom().nextFloat() < CURIOUS_CHANCE) {
 				// a good bond: it only wants a look
 				live.rampage = false;
@@ -1475,7 +1488,14 @@ public final class WebSymbiote {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.8F, 0.6F);
 		level.sendParticles(dust(1.6F), player.getX(), player.getY() + 1.0, player.getZ(), 25, 0.4, 0.8, 0.4, 0.0);
 		if (!live.fleeing) {
-			whisper(player, live.curious ? "curious" : live.hunting ? "hunt" : live.feral ? "feral" : "takeover");
+			if (live.feral && !live.curious && !live.hunting) {
+				// a different complaint each time
+				int line = player.getRandom().nextInt(NEGLECT_LINES - 1);
+				live.lastNeglect = line >= live.lastNeglect && live.lastNeglect >= 0 ? line + 1 : line;
+				whisper(player, "neglect." + (1 + live.lastNeglect));
+			} else {
+				whisper(player, live.curious ? "curious" : live.hunting ? "hunt" : "takeover");
+			}
 		}
 	}
 
@@ -1697,7 +1717,7 @@ public final class WebSymbiote {
 				narrate(player, "kill");
 			}
 			if (killed && live.feedStage == FEED_NONE && player.getAttached(EATING) == null
-				&& (state(player).satiety() < SELF_FEED_BELOW || live.craving)
+				&& (state(player).satiety() < SELF_FEED_BELOW || live.craving || live.gorging)
 				&& target instanceof LivingEntity prey && edible(prey) && !sulking(player)) {
 				// a kill of its own: now it feeds, on the corpse
 				startKill(player, live, now, prey, false);
@@ -2273,10 +2293,11 @@ public final class WebSymbiote {
 	}
 
 	/**
-	 * Hungry, it feeds itself (SEEK): a corpse you carry, else one lying within {@link #SELF_FEED_RANGE}, else it hunts
-	 * the nearest creature there and kills it first. Returns true if a feeding began.
+	 * Hungry, it feeds itself (SEEK): a corpse you carry, else one lying within {@link #SELF_FEED_RANGE}, else, only
+	 * when it's starving ({@code hunt}), it takes over to hunt the nearest creature there and kill it first. Returns
+	 * true if a feeding began.
 	 */
-	private static boolean selfFeed(ServerPlayer player, Live live, long now) {
+	private static boolean selfFeed(ServerPlayer player, Live live, long now, boolean hunt) {
 		Entity carried = KitchenCompat.carriedCorpse(player);
 		if (carried != null) {
 			// already in your arms: straight to the meal (one it won't touch, and it waits)
@@ -2299,6 +2320,9 @@ public final class WebSymbiote {
 		if (corpse != null) {
 			whisper(player, "self_feed");
 			return startGrab(player, live, now, corpse);
+		}
+		if (!hunt) {
+			return false;
 		}
 		LivingEntity prey = null;
 		best = SELF_FEED_RANGE * SELF_FEED_RANGE;

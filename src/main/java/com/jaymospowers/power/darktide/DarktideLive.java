@@ -22,17 +22,29 @@ final class DarktideLive {
 	/** Recent hits blocked on this game tick (so a multi-hit attack doesn't count twice). */
 	long lastBlockTick = -1L;
 
-	// Z
+	// R: Dark Strike's charge, since when (game time; -1: not charging)
+	long strikeStart = -1L;
+
+	// Z: Veil (ascended, cured)
 	boolean veil;
+
+	// Z: shadow harvest (corrupted)
+	/** The corpse whose shadow is being taken and since when (-1: none); whether Z is held. */
+	int harvesting = -1;
+	long harvestStart;
+	boolean modeDown;
 
 	// C
 	int arms;
 	long armsSwapAt;
-	/** Necromancy: the corpse being harvested and since when (-1: none). */
-	int harvesting = -1;
-	long harvestStart;
-	boolean ultimateDown;
 	final List<Integer> risen = new ArrayList<>();
+
+	// the cure: ticks of Conduit Power in a row
+	int conduitTicks;
+	/** Whether the cure held last tick (to whisper when it changes). */
+	boolean wasCured;
+	/** Whether the cure's state has been looked at since joining (no whisper for the state you log in with). */
+	boolean cureSeen;
 
 	// Combat Roll
 	long rollStart = -1L;

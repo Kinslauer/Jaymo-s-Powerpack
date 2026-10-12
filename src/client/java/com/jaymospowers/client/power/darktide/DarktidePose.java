@@ -2,6 +2,9 @@ package com.jaymospowers.client.power.darktide;
 
 import com.jaymospowers.power.darktide.DarktideMove;
 import com.jaymospowers.power.darktide.DarktideState;
+import com.jaymospowers.power.darktide.DarktideStatus;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import com.jaymospowers.power.darktide.DarktideWeapons;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +22,8 @@ import org.jspecify.annotations.Nullable;
  * Darktide drawn on bodies (any humanoid model: players, and the zombies or illagers that reel from a riposte): the
  * guard (a fist guard unarmed, chūdan with a katana, both knives up), the four kendo kamae of Gedan (gedan, chūdan,
  * jōdan, hassō; a parry steps from one to the next and the arms travel there), the riposte's slash from the shoulder
- * across the body, Crescent's sweep, Ink Cross, the knife moves, the cast, reeling and the stagger. Everything is set
+ * across the body, Dark Strike's charge (a blade raised overhead, or a fist drawn back) and its blow, Crescent's sweep,
+ * Ink Cross, the knife moves, the cast, reeling and the stagger. Everything is set
  * outright from the move's progress, after the model's own animation.
  */
 public final class DarktidePose {
@@ -36,10 +40,67 @@ public final class DarktidePose {
 	/** entity id → {last kamae, the one before, game time it changed}. */
 	private static final Map<Integer, long[]> STANCES = new HashMap<>();
 
+	/** A crippled humanoid mob face down on the ground: how far down (0 standing, 1 flat) and its crawl's stride. */
+	record Crawl(float down, float stride, float speed) {
+	}
+
+	static final RenderStateDataKey<Crawl> CRAWL = RenderStateDataKey.create(() -> "jaymospowers:darktide_crawl");
+	/** Ticks to drop to the ground, and to get back up once the cripple wears off. */
+	static final float CRAWL_DROP = 5.0F, CRAWL_GET_UP = 10.0F;
+	/** How high the chest rides off the ground when flat (model units, blocks), so it doesn't sink in. */
+	static final float CRAWL_LIFT = 0.18F;
+	/** entity id → {how far down when last drawn, game time it was last crippled}. */
+	private static final Map<Integer, float[]> CRAWLS = new HashMap<>();
+
 	private DarktidePose() {
 	}
 
+	/**
+	 * A crippled humanoid mob drops face down and drags itself along (players use the vanilla crawl instead): how far
+	 * down it is, easing down when the cripple lands and back up when it wears off.
+	 */
+	public static void extractCrawl(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
+		boolean crippled = !(entity instanceof Player) && DarktideStatus.crippled(entity) && DarktideStatus.humanoid(entity);
+		float[] track = CRAWLS.get(entity.getId());
+		if (!crippled && track == null) {
+			state.setData(CRAWL, null);
+			return;
+		}
+		float now = entity.level().getGameTime() + partialTicks;
+		if (track == null) {
+			track = new float[] {0.0F, now, now};
+			CRAWLS.put(entity.getId(), track);
+		}
+		float dt = Math.max(0.0F, now - track[2]);
+		track[2] = now;
+		if (crippled) {
+			track[0] = Math.min(1.0F, track[0] + dt / CRAWL_DROP);
+			track[1] = now;
+		} else {
+			track[0] = Math.max(0.0F, track[0] - dt / CRAWL_GET_UP);
+		}
+		if (track[0] <= 0.0F && !crippled) {
+			CRAWLS.remove(entity.getId());
+			state.setData(CRAWL, null);
+			return;
+		}
+		state.setData(CRAWL, new Crawl(smooth(track[0]), state.walkAnimationPos, state.walkAnimationSpeed));
+	}
+
+	/** Lays a crawling mob's body on the ground: tipped forward about its feet, centred over where it stands. */
+	public static void rotateCrawl(LivingEntityRenderState state, PoseStack poseStack) {
+		Crawl crawl = state.getData(CRAWL);
+		if (crawl == null || state.deathTime > 0.0F) {
+			return;
+		}
+		float height = state.boundingBoxHeight / Math.max(0.01F, state.scale);
+		float d = crawl.down();
+		poseStack.rotateDegrees(Axis.XP, -90.0F * d);
+		poseStack.translate(0.0F, -height * 0.5F * d, CRAWL_LIFT * d);
+	}
+
 	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
+		extractCrawl(entity, state, partialTicks);
 		state.setData(RISEN, entity.getAttached(DarktideState.RISEN) != null ? Boolean.TRUE : null);
 		DarktideState.Move move = entity.getAttached(DarktideState.MOVE);
 		boolean guarding = entity.getAttached(DarktideState.GUARD) != null;
@@ -81,9 +142,32 @@ public final class DarktidePose {
 			return;
 		}
 		Pose pose = living.getData(KEY);
-		if (pose == null) {
-			return;
+		if (pose != null) {
+			applyPose(h, pose);
 		}
+		Crawl crawl = living.getData(CRAWL);
+		if (crawl != null && living.deathTime <= 0.0F) {
+			crawl(h, crawl);
+		}
+	}
+
+	/**
+	 * Face down, dragging itself: the arms reach out past the head and pull in turn, the legs trail behind with a weak
+	 * kick, the head lifted to look ahead. Blended in by how far down the body is.
+	 */
+	private static void crawl(HumanoidModel<?> h, Crawl crawl) {
+		float d = crawl.down();
+		float pull = Mth.sin(crawl.stride() * 0.6662F) * Math.min(1.0F, 0.35F + crawl.speed() * 2.0F);
+		set(h.rightArm, -2.75F + 0.45F * pull, -0.15F, 0.25F, d);
+		set(h.leftArm, -2.75F - 0.45F * pull, 0.15F, -0.25F, d);
+		set(h.rightLeg, 0.1F * pull, 0.0F, 0.12F, d);
+		set(h.leftLeg, -0.1F * pull, 0.0F, -0.12F, d);
+		h.body.xRot = Mth.lerp(d, h.body.xRot, 0.0F);
+		h.body.yRot = Mth.lerp(d, h.body.yRot, 0.08F * pull);
+		h.head.xRot = Mth.lerp(d, h.head.xRot, -1.1F);
+	}
+
+	private static void applyPose(HumanoidModel<?> h, Pose pose) {
 		if (pose.kind == 0) {
 			guard(h, pose.guardKit);
 			return;
@@ -93,6 +177,17 @@ public final class DarktidePose {
 		e = smooth(Mth.clamp(e, 0.0F, 1.0F));
 		switch (pose.kind) {
 			case DarktideMove.STRIKE -> {
+				if ((pose.variant & 2) != 0) {
+					// the blade brought down from overhead, both hands on it
+					float cut = smooth(seg(p, 0.0F, 0.35F));
+					float hold = 1.0F - seg(p, 0.6F, 1.0F);
+					set(h.rightArm, Mth.lerp(cut, -2.95F, -0.7F), -0.15F, 0.0F, hold);
+					set(h.leftArm, Mth.lerp(cut, -2.85F, -0.75F), 0.35F, 0.0F, hold);
+					h.body.xRot = 0.25F * cut * hold;
+					set(h.rightLeg, -0.4F, 0.0F, 0.0F, hold);
+					set(h.leftLeg, 0.35F, 0.0F, 0.0F, hold);
+					break;
+				}
 				set(h.rightArm, -Mth.HALF_PI - 0.1F, -0.1F, 0.0F, e);
 				set(h.leftArm, -1.2F, 0.4F, 0.2F, Math.max(e, 0.5F));
 				h.body.yRot = -0.4F * e;
@@ -109,6 +204,27 @@ public final class DarktidePose {
 				h.body.xRot = 0.2F * cut * hold;
 				set(h.rightLeg, -0.45F, 0.0F, 0.0F, hold);
 				set(h.leftLeg, 0.4F, 0.0F, 0.0F, hold);
+			}
+			case DarktideMove.CHARGE -> {
+				float up = smooth(seg(pose.ticks, 0.0F, 5.0F));
+				float c = Mth.clamp(pose.ticks / DarktideMove.CHARGE_FULL_TICKS, 0.0F, 1.0F);
+				// at full charge the arms shake with it
+				float shake = c >= 1.0F ? 0.03F * Mth.sin(pose.ticks * 2.5F) : 0.0F;
+				if (pose.variant == DarktideMove.CHARGE_FIST) {
+					// the right fist drawn back by the hip, the left held out before you, the body wound up
+					set(h.rightArm, 0.55F + 0.35F * c + shake, 0.25F, 0.25F, up);
+					set(h.leftArm, -1.3F, 0.45F, 0.0F, up);
+					h.body.yRot = 0.5F * c * up;
+					set(h.rightLeg, 0.35F, 0.0F, 0.0F, up);
+					set(h.leftLeg, -0.35F, 0.0F, 0.0F, up);
+				} else {
+					// the blade raised high overhead in both hands, leaning back into it as the charge builds
+					set(h.rightArm, -2.85F - 0.25F * c + shake, -0.15F, 0.1F, up);
+					set(h.leftArm, -2.75F - 0.25F * c + shake, 0.35F, -0.1F, up);
+					h.body.xRot = -0.12F * c * up;
+					set(h.rightLeg, -0.3F, 0.0F, 0.0F, up);
+					set(h.leftLeg, 0.3F, 0.0F, 0.0F, up);
+				}
 			}
 			case DarktideMove.CRESCENT -> {
 				float sweep = smooth(seg(p, 0.05F, 0.6F));
