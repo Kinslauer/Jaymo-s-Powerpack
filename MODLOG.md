@@ -330,3 +330,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   B is the Crush where you aim, or Collapsing Horizon's ring raining on the target (the Cave-in is gone). The meteor tears through roofs and anything else
   it falls through before it explodes. With Web or Gravity, F5 flips between first person and an over-the-shoulder
   view with the crosshair (no front view). See `docs/gravity.md`.
+- **0.8.42, carrying blocks:** anyone can sneak + right-click a single block with empty hands to lift it out of the
+  world and carry it in both arms, like a body: right-click sets it down ahead of you, sneak + right-click throws
+  it, and it lands as a falling block (or breaks into its item if it can't stand where it lands). It slows you a
+  little (none for Gravity users). Not liftable: anything holding items or data (chests, furnaces, signs), two-part
+  blocks (doors, beds, tall flowers), liquids, unbreakable blocks, grass/fire, or a spot you couldn't break.
+  `core/CarryBlock`; the block rides as a tagged block display, and a stray one (crash mid-carry) falls back into
+  the world on load.

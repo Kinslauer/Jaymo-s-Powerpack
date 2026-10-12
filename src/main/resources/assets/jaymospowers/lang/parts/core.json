@@ -57,5 +57,6 @@
 	"message.jaymospowers.carry.carrying": "Right-click to put them down, sneak + right-click to throw",
 	"message.jaymospowers.carry.carried": "%s has picked you up. Jump to break free!",
 	"message.jaymospowers.carry.cant_struggle": "You can't move!",
-	"message.jaymospowers.carry.lifting": "It weighs nothing. Right-click to set it down, sneak + right-click to heave it"
+	"message.jaymospowers.carry.lifting": "It weighs nothing. Right-click to set it down, sneak + right-click to heave it",
+	"message.jaymospowers.carry.block": "Right-click to set it down, sneak + right-click to throw it"
 }
