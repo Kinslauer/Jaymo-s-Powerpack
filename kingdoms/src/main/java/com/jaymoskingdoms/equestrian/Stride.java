@@ -7,7 +7,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 /**
- * (0.5.33) A horse under way: its rider's gait, whether he's sprinting, its stamina left, whether it's blown (run
+ * (0.5.34) A horse under way: its rider's gait, whether he's sprinting, its stamina left, whether it's blown (run
  * dry: no faster than a trot until it gets its wind back, {@link Equestrian#WIND_BACK}), and when it was last seen to
  * (game time, so stamina refills while it stands unridden). Saved, and synced so its rider's HUD shows it.
  */

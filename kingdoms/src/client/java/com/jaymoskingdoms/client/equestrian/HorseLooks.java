@@ -16,7 +16,7 @@ import net.minecraft.world.entity.animal.equine.ZombieHorse;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.33) How an upgraded horse is drawn: its breed's coat ({@code textures/entity/equine/<breed>/<coat>.png}, drawn by
+ * (0.5.34) How an upgraded horse is drawn: its breed's coat ({@code textures/entity/equine/<breed>/<coat>.png}, drawn by
  * {@code tools/gen_equestrian.py}), or a skeleton's or zombie's own, and its breed's build (wider, taller, longer) on
  * top of its size. Carried on the render state.
  */

@@ -41,7 +41,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.5.29: quest givers' screens, marks and the tracker
 		QuestClient.register();
 		ArmoryLayer.register();
-		// 0.5.33: Jaymo's Equestrian (gaits, the stamina HUD, coats, war elephants)
+		// 0.5.34: Jaymo's Equestrian (gaits, the stamina HUD, coats, war elephants)
 		com.jaymoskingdoms.client.equestrian.EquestrianClient.register();
 	}
 

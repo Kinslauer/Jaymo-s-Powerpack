@@ -38,7 +38,7 @@ import org.jspecify.annotations.Nullable;
  * whose rider fell is ridden again by the next guard without one. Their horses are saddled and wear the realm's
  * colour (leather), or iron for a wealthy realm. War parties of a prosperous realm ride too (a share of them), and
  * caravans' escorts ({@link Caravans}).
- * <p>(0.5.33) Each horse is of a breed ({@link Equestrian}): guards ride destriers, archers coursers, carters and
+ * <p>(0.5.34) Each horse is of a breed ({@link Equestrian}): guards ride destriers, archers coursers, carters and
  * coachmen drafts, and a desert realm's riders desert horses; a wealthy desert realm keeps {@link #ELEPHANTS_ARID}
  * war elephant ridden by one of its guards.
  */
@@ -53,7 +53,7 @@ final class Cavalry {
 	static final int PARTY_RIDER_ONE_IN = 3;
 	/** Its horses: their speed (a horse's own runs 0.11-0.34), how far round the seat the realm's horses are looked for. */
 	static final double HORSE_SPEED = 0.3, RANGE = 112.0;
-	/** (0.5.33) A wealthy desert realm's war elephants (ridden by its guards), what one costs, and its pace under a rider of the realm. */
+	/** (0.5.34) A wealthy desert realm's war elephants (ridden by its guards), what one costs, and its pace under a rider of the realm. */
 	static final int ELEPHANTS_ARID = 1, ELEPHANT_COST = 20;
 	static final double ELEPHANT_SPEED = 0.24;
 	/** Mounted archers ride round the town within this of the seat. */
@@ -99,7 +99,7 @@ final class Cavalry {
 		return mount(level, rider, f, lent, breedFor(level, rider, f));
 	}
 
-	/** (0.5.33) The breed {@code rider} of {@code f} rides: a carter or coachman a draft, an archer a courser, a guard a destrier; in a desert realm, desert horses. */
+	/** (0.5.34) The breed {@code rider} of {@code f} rides: a carter or coachman a draft, an archer a courser, a guard a destrier; in a desert realm, desert horses. */
 	static Breed breedFor(ServerLevel level, Folk rider, Faction f) {
 		if (rider.role() == Caravans.CARTER) {
 			return Breed.DRAFT;
@@ -110,7 +110,7 @@ final class Cavalry {
 		return rider.role() == Folk.ARCHER ? Breed.COURSER : Breed.DESTRIER;
 	}
 
-	/** (0.5.33) A mount of {@code breed} for {@code rider} of {@code f} (a horse, or a war elephant), and him on it. */
+	/** (0.5.34) A mount of {@code breed} for {@code rider} of {@code f} (a horse, or a war elephant), and him on it. */
 	static @Nullable AbstractHorse mount(ServerLevel level, Folk rider, Faction f, boolean lent, Breed breed) {
 		AbstractHorse horse = Equestrian.create(level, breed, rider.blockPosition(), EntitySpawnReason.MOB_SUMMONED);
 		if (horse == null) {
@@ -207,7 +207,7 @@ final class Cavalry {
 						Cavalry.teleport(rider, spare.getX(), spare.getY(), spare.getZ());
 						rider.startRiding(spare);
 					} else if (tier == Wealth.Tier.WEALTHY && Climate.at(level, f.seat()).arid() && elephants(level, round, f) < ELEPHANTS_ARID) {
-						// (0.5.33) a wealthy desert realm's war elephant
+						// (0.5.34) a wealthy desert realm's war elephant
 						if (buy(server, f, ELEPHANT_COST)) {
 							mount(level, rider, f, false, Breed.WAR_ELEPHANT);
 							neigh(level, rider.blockPosition());
@@ -241,7 +241,7 @@ final class Cavalry {
 		return true;
 	}
 
-	/** (0.5.33) How many of {@code f}'s war elephants are about its town. */
+	/** (0.5.34) How many of {@code f}'s war elephants are about its town. */
 	private static long elephants(ServerLevel level, AABB round, Faction f) {
 		return level.getEntitiesOfClass(WarElephant.class, round, e -> e.isAlive() && ours(e, f.id())).size();
 	}

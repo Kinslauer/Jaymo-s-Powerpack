@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.5.33) Horses near a blast may shy ({@link Equestrian#blast}). */
+/** (0.5.34) Horses near a blast may shy ({@link Equestrian#blast}). */
 @Mixin(ServerExplosion.class)
 abstract class ServerExplosionMixin {
 	@Inject(method = "explode", at = @At("HEAD"))

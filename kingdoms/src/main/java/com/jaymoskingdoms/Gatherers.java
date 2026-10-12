@@ -307,7 +307,7 @@ public final class Gatherers {
 				com.jaymoskingdoms.equestrian.Equestrian.spawn(level, stableBreed(level, f, i), at);
 			}
 			if (f.type().isRealm() && Climate.at(level, f.seat()).arid()) {
-				// (0.5.33) a desert realm's stable keeps a war elephant
+				// (0.5.34) a desert realm's stable keeps a war elephant
 				com.jaymoskingdoms.equestrian.Equestrian.spawn(level, com.jaymoskingdoms.equestrian.Breed.WAR_ELEPHANT, Construction.standable(level, mid, 3));
 			}
 		}
@@ -320,7 +320,7 @@ public final class Gatherers {
 	}
 
 	/**
-	 * (0.5.33) The breed of a new stable's {@code i}th horse: a village's palfreys and drafts; a realm's destriers and
+	 * (0.5.34) The breed of a new stable's {@code i}th horse: a village's palfreys and drafts; a realm's destriers and
 	 * coursers, or desert horses in the desert, steppe ponies on the savanna, drafts in the snow.
 	 */
 	static com.jaymoskingdoms.equestrian.Breed stableBreed(ServerLevel level, Faction f, int i) {

@@ -27,7 +27,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.33) Riding, client side: the scroll wheel shifts gait, sprint bursts at the gallop, and the HUD (bottom right,
+ * (0.5.34) Riding, client side: the scroll wheel shifts gait, sprint bursts at the gallop, and the HUD (bottom right,
  * right of the hotbar, above the powers' chips, in Wind's style) shows the breed, the gait and a stamina bar with the
  * mark where a blown horse gets its wind back. A tamed horse's inventory screen shows its breed and stats.
  */

@@ -1732,3 +1732,42 @@ with space, and buried trail ruins should get quests that suit them (more variet
 - Seen in game: a guard's "A Comrade's Blade" at trail ruins buried the sword at 124, 54, 318; brushing it out
   turned the quest to "Return to Prokopios". A Bone Lord decree at trial chambers set the Bone Lord and escort in a
   chamber room at -475, -19, -396.
+
+## 0.5.34: Jaymo's Equestrian, stage 1 (riding)
+Andy liked SWEM (Forge/NeoForge only) and asked for our own take, built into Kingdoms; the plan doc and Andy's answers
+are in project memory (`equestrian-plan`). Nothing is taken from SWEM: original code, model and art. Package
+`com.jaymoskingdoms.equestrian` (client: `client.equestrian`); tuning numbers at the top of `Equestrian`, `Breed`, `Gait`.
+- **Every horse, skeleton horse and zombie horse is upgraded in place** the first time it loads (`ENTITY_LOAD`), so the
+  stables', cavalry's, caravans', carriages' and cabs' horses get it too. A horse from before keeps its old speed and
+  jump as its stats. Donkeys, mules, llamas and camels are left alone.
+- **Breeds** (`Breed`): destrier, courser, palfrey, draft, steppe pony, desert horse (and the war elephant), each with
+  its stat ranges, size (scale attribute) and build (drawn wider/taller/longer), courage, stamina and top gait. Wild
+  horses by biome (`Equestrian.breedAt`): desert/badlands desert horses, savanna ponies and desert horses, cold lands
+  drafts and ponies, plains coursers/palfreys/drafts. Undead horses take any horse breed (size and stats), never
+  spook, tire at half the rate.
+- **Hidden stats** (`Equine`, an attachment saved and synced): speed, stamina, jump, courage, temper (0-1; three dice).
+  Foals take one parent's breed, mostly a parent's coat, each stat between the parents' plus a little luck
+  (`FOAL_LUCK`). Temper sets how long a horse takes to break in. A tamed horse's inventory screen shows them as bars.
+- **Gaits** (`Gait`): halt, walk, trot, canter, gallop on the scroll wheel while riding (the hotbar keeps its number
+  keys); sprint is a burst at the gallop. Drafts top out at the canter.
+- **Stamina** (`Stride`, saved and synced): galloping drains it, walking and standing refill it (also while unridden);
+  run dry, a horse is blown and drops to a trot until it's back to 35%. Coursers tire fast, ponies hardly at all, a
+  palfrey's amble (trot and canter) costs nothing, desert horses don't tire in the heat but do in the cold.
+- **HUD**: bottom right, above the powers' chip row in Wind's style: breed, gait (or Sprint!/Charge!/Blown), five gait
+  pips, the stamina bar with the wind-back mark.
+- **Courage**: fire close by, monsters at night, a blow in a fight and explosions (`ServerExplosionMixin`) test a
+  ridden horse's nerve; a timid one rears, drops to a walk, and may throw its rider. Destriers and brave horses hold
+  steady; steppe ponies never spook.
+- **Coats**: 6 per breed (the last rare, 4%), 3 skeleton, 3 zombie, adult and foal, drawn by `tools/gen_equestrian.py`;
+  vanilla's markings layer is left off (the markings are painted in).
+- **War elephant** (`WarElephant`, `war_elephant_spawn_egg`): tamed, fed, saddled and bred like a horse; saddled it
+  wears a howdah with a banner, a crimson caparison and a forehead plate. At the canter and faster it tramples
+  monsters (and whatever targets its rider); sprinting is a trumpeted charge. Desert realms' stables keep one, and a
+  wealthy desert realm puts a guard on one (`Cavalry.ELEPHANTS_ARID`, 20 emeralds).
+- **Kingdoms**: carters, coachmen and cab drivers drive drafts; guards ride destriers, archers coursers (desert horses
+  in desert realms). New stables: a village's palfreys and drafts, a realm's destriers and coursers (desert horses,
+  steppe ponies or a draft by climate).
+- **Death**: a tamed horse that dies leaves a lock of its mane (`mane_lock`, named for it, with its breed, coat, stats
+  and owner in its data, for a necromancer later). No revival yet.
+- **Testing** (op): `/kingdom horse <breed>` gives a tamed, saddled mount of that breed.
+- Built only, not yet seen in game.

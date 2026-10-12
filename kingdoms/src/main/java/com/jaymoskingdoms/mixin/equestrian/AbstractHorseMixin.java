@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.5.33) Horses ride at their rider's gait, are broken in by their temper, and pass their breed to their foals ({@link Equestrian}). */
+/** (0.5.34) Horses ride at their rider's gait, are broken in by their temper, and pass their breed to their foals ({@link Equestrian}). */
 @Mixin(AbstractHorse.class)
 abstract class AbstractHorseMixin {
 	@Inject(method = "getRiddenSpeed", at = @At("RETURN"), cancellable = true)

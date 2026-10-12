@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.5.33) A horse wears its breed's coat (its markings are painted in, so vanilla's are left off). */
+/** (0.5.34) A horse wears its breed's coat (its markings are painted in, so vanilla's are left off). */
 @Mixin(HorseRenderer.class)
 abstract class HorseRendererMixin {
 	@Inject(method = "getTextureLocation(Lnet/minecraft/client/renderer/entity/state/HorseRenderState;)Lnet/minecraft/resources/Identifier;", at = @At("HEAD"), cancellable = true)

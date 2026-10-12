@@ -22,7 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.33) A war elephant: a mount for desert kingdoms, ridden, tamed, fed and bred like a horse, with the gaits and
+ * (0.5.34) A war elephant: a mount for desert kingdoms, ridden, tamed, fed and bred like a horse, with the gaits and
  * stamina of {@link Equestrian}. Saddled it carries a howdah, a caparison and a forehead plate. It barely jumps, it's
  * hard to frighten (fire still does it), and at the canter or faster it tramples the monsters in its way, harder at a
  * charge (sprint), trumpeting as it goes. Its breed is {@link Breed#WAR_ELEPHANT} (size, health, stats).

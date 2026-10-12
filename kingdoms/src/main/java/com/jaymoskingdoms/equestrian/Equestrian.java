@@ -70,7 +70,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.33) Jaymo's Equestrian, stage 1: riding. Every horse, skeleton horse and zombie horse is upgraded in place the
+ * (0.5.34) Jaymo's Equestrian, stage 1: riding. Every horse, skeleton horse and zombie horse is upgraded in place the
  * first time it's loaded (so the stables', cavalry's, caravans' and carriages' horses get it too): it gets a
  * {@link Breed} (by where it stands), five hidden stats ({@link Equine}) that foals inherit, and a new coat. Its rider
  * shifts through five {@link Gait}s on the scroll wheel (sprint for a burst at the gallop) and watches its stamina
@@ -191,7 +191,7 @@ public final class Equestrian {
 		PayloadTypeRegistry.clientboundPlay().register(Shied.TYPE, Shied.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(SetGait.TYPE, (payload, context) -> setGait(context.player(), payload));
 
-		// a horse first loaded (a new one, or one from before 0.5.33) gets its breed
+		// a horse first loaded (a new one, or one from before 0.5.34) gets its breed
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof AbstractHorse horse && covered(horse) && !horse.hasAttached(EQUINE)) {
 				upgrade(level, horse);
@@ -205,6 +205,25 @@ public final class Equestrian {
 			}
 		});
 		ServerLivingEntityEvents.AFTER_DEATH.register(Equestrian::died);
+		// testing (op): /kingdom horse <breed>: a tamed, saddled mount of that breed at your side
+		net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> dispatcher.register(
+			net.minecraft.commands.Commands.literal("kingdom").then(net.minecraft.commands.Commands.literal("horse")
+				.requires(net.minecraft.commands.Commands.hasPermission(net.minecraft.commands.Commands.LEVEL_GAMEMASTERS))
+				.then(net.minecraft.commands.Commands.argument("breed", com.mojang.brigadier.arguments.StringArgumentType.word())
+					.suggests((c, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
+						java.util.Arrays.stream(Breed.values()).map(Breed::id), builder))
+					.executes(c -> {
+						ServerPlayer player = c.getSource().getPlayerOrException();
+						Breed breed = Breed.byId(com.mojang.brigadier.arguments.StringArgumentType.getString(c, "breed"));
+						AbstractHorse horse = spawn(player.level(), breed, player.blockPosition());
+						if (horse == null) {
+							return 0;
+						}
+						horse.tameWithName(player);
+						horse.setItemSlot(EquipmentSlot.SADDLE, new ItemStack(Items.SADDLE));
+						c.getSource().sendSuccess(() -> Component.translatable(breed.key()), false);
+						return 1;
+					})))));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			LAST.clear();
 			SHY.clear();
@@ -241,7 +260,7 @@ public final class Equestrian {
 
 	/**
 	 * A horse without a breed gets one: an elephant is an elephant; a horse a breed for its land, keeping the speed
-	 * and jump it already had (so a prized horse from before 0.5.33 stays prized); an undead one any horse breed.
+	 * and jump it already had (so a prized horse from before 0.5.34 stays prized); an undead one any horse breed.
 	 */
 	static Equine upgrade(ServerLevel level, AbstractHorse horse) {
 		RandomSource random = horse.getRandom();

@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
 
-/** (0.5.33) Draws war elephants: {@link WarElephantModel} in one of the breed's four hides. */
+/** (0.5.34) Draws war elephants: {@link WarElephantModel} in one of the breed's four hides. */
 final class WarElephantRenderer extends MobRenderer<WarElephant, WarElephantRenderer.State, WarElephantModel> {
 	private static final Identifier[] HIDES = new Identifier[Breed.WAR_ELEPHANT.coats.length];
 

@@ -11,7 +11,7 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
 /**
- * (0.5.33) The war elephant, an original model (texture 128x128, {@code tools/gen_equestrian.py}). Built at horse size
+ * (0.5.34) The war elephant, an original model (texture 128x128, {@code tools/gen_equestrian.py}). Built at horse size
  * and drawn {@link com.jaymoskingdoms.equestrian.Breed#WAR_ELEPHANT}'s scale bigger. Its trunk sways and its ears
  * flap; rearing, it raises its trunk to trumpet. Saddled, it wears a howdah with a banner, a caparison and a forehead plate.
  */

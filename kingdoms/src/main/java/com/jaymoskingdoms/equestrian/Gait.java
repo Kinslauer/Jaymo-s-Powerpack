@@ -1,7 +1,7 @@
 package com.jaymoskingdoms.equestrian;
 
 /**
- * (0.5.33) A horse's five gaits, shifted on the scroll wheel while riding: each a share of the breed's top speed and
+ * (0.5.34) A horse's five gaits, shifted on the scroll wheel while riding: each a share of the breed's top speed and
  * what it does to stamina a second (refilling it walking, draining it galloping). Sprint is a burst on top of the
  * gallop ({@link Equestrian#SPRINT_SPEED}, {@link Equestrian#SPRINT_DRAIN}). Synced by ordinal: only add at the end.
  */

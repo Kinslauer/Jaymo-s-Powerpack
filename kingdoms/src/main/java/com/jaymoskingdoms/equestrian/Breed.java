@@ -3,7 +3,7 @@ package com.jaymoskingdoms.equestrian;
 import java.util.Locale;
 
 /**
- * (0.5.33) The breeds. Each sets the range its hidden stats map onto (a stat of 0 is the bottom of its range, 1 the
+ * (0.5.34) The breeds. Each sets the range its hidden stats map onto (a stat of 0 is the bottom of its range, 1 the
  * top), its size, its natural courage, how fast it tires, its top gait, and its coats (the last one rare, see
  * {@link Equestrian#RARE_COAT_CHANCE}). Saved by id: rename nothing.
  */

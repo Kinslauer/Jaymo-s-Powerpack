@@ -8,7 +8,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.RandomSource;
 
 /**
- * (0.5.33) What a horse is: its breed, its coat (an index into {@link Breed#coats}), and its five hidden stats, each
+ * (0.5.34) What a horse is: its breed, its coat (an index into {@link Breed#coats}), and its five hidden stats, each
  * 0-1: speed, stamina, jump, courage and temper (high temper: harder to break in). Saved on the horse and seen by
  * every client (the coat and size are drawn from it; the stats show to whoever has tamed it).
  */

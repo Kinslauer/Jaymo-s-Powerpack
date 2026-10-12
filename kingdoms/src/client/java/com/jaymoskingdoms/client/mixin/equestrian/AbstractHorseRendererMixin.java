@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.5.33) Each horse's breed coat and build onto its render state ({@link HorseLooks}). */
+/** (0.5.34) Each horse's breed coat and build onto its render state ({@link HorseLooks}). */
 @Mixin(AbstractHorseRenderer.class)
 abstract class AbstractHorseRendererMixin {
 	@Inject(method = "extractRenderState(Lnet/minecraft/world/entity/animal/equine/AbstractHorse;Lnet/minecraft/client/renderer/entity/state/EquineRenderState;F)V", at = @At("TAIL"))
