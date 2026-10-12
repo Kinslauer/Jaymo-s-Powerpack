@@ -191,6 +191,7 @@ final class WarParties {
 		for (ServerPlayer player : Raids.players(level, target.seat(), Raids.ANNOUNCE_RANGE)) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAID_HORN.value(), SoundSource.HOSTILE, 2.0F, 1.1F);
 		}
+		Treasuries.wages(server, from, party.soldiers.size());
 		JaymosKingdoms.LOGGER.info("{} sends {} soldiers against {} from {}", from.name(), party.soldiers.size(), target.name(), muster);
 		return true;
 	}

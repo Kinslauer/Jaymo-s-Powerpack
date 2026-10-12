@@ -309,7 +309,7 @@ public final class KingdomEvents {
 		var random = level.getRandom();
 		DyeColor color = DyeColor.values()[random.nextInt(DyeColor.values().length)];
 		Faction kingdom = Faction.create(Factions.nextId(server), FactionType.KINGDOM, Names.kingdom(random), color, capital,
-			claim(server, capital, CLAIM_RADIUS));
+			claim(server, capital, CLAIM_RADIUS)).withTreasury(Treasuries.start(random));
 		Factions.put(server, kingdom);
 		raiseBanner(level, kingdom);
 		return kingdom;

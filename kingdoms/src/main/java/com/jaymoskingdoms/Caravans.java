@@ -454,6 +454,7 @@ final class Caravans {
 				for (Map<String, Integer> cart : c.carts()) {
 					deliver(level, lord, cart);
 				}
+				Treasuries.dues(server, lord, load);
 				tell(level, lord.seat(), Component.translatable("message.jaymoskingdoms.caravan.arrives", nameOf(server, c.home()), lord.name(), load)
 					.withStyle(ChatFormatting.GOLD));
 			}

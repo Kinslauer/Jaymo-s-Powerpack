@@ -1441,7 +1441,7 @@ jobs (builder farmer guard) in the same way"; then "miners should place torches 
   four new rows and Builder made Nikoll "Caelwold's Builder" in new clothes with a shovel. Not seen: miners' torches,
   guards attacking a hostile player, farmer/miner/woodcutter promotion.
 
-## 0.5.22: what guards throw depends on their kingdom's purse
+## 0.5.22: what guards throw depends on their kingdom's purse; treasuries that rise and fall
 - **Javelins are Balkon's.** Guards of ordinary kingdoms now throw Balkon's WeaponMod javelins
   (`WeaponModJavelins`), which can't be picked up and hit for about 5 instead of a trident's 8. When and at whom they
   throw is unchanged.
@@ -1450,4 +1450,11 @@ jobs (builder farmer guard) in the same way"; then "miners should place torches 
 - **Rocks for the poor.** Guards of a kingdom with under 50 emeralds (`POOR_TREASURY`), barbarians and their chiefs
   throw rocks: a cobblestone thrown like a snowball that hits for 3 (`ROCK_DAMAGE`). Without WeaponMod loaded, everyone
   but the elite throws rocks.
+- **Treasuries rise and fall** (`Treasuries`). A new kingdom starts with 10 to 700 emeralds instead of none.
+  Trade earns: a player's trade with a villager on a realm's land pays the realm a toll of a quarter of the emeralds in
+  it (at least 1; `VillagerTradeMixin`), and a fiefdom's caravan pays its kingdom 1 emerald per 32 goods delivered.
+  War costs and pays: a war party costs 2 emeralds per soldier when it marches, and a soldier who kills an enemy's
+  folk plunders 3 emeralds from that realm for his own (40 for a leader). The loser's tribute at a war's end, the
+  daily taxes and the tyrant's tithe are unchanged. Existing kingdoms keep their treasuries
+  (an op standing in one can set it with `/kingdom treasury <emeralds>`).
 - The Kingdoms dev game loads WeaponMod (and Architectury) too, and Kingdoms compiles against it (`compileOnly`).

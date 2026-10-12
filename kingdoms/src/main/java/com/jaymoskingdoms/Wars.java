@@ -599,6 +599,9 @@ public final class Wars {
 			}
 			boolean leader = folk.leader();
 			credit(server, war.id(), side, leader ? 0 : 1, leader ? 1 : 0, 0, 0);
+			if (source.getEntity() instanceof Folk killer) {
+				Treasuries.plunder(server, killer, folk);
+			}
 			if (source.getEntity() instanceof ServerPlayer player) {
 				reward(server, player, side, victimSide, leader ? REP_WAR_LEADER : REP_WAR_KILL, 0);
 			}
