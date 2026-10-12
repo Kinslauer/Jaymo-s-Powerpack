@@ -1792,3 +1792,31 @@ vanilla, MCA villagers and our folk.
 - Our folk don't give up: out of a fight, not breaking in on a raid and not on a caravan, after 12 s they turn up
   where they were going in a puff (as builders, farmers and gatherers already did), which now also covers guards,
   escorts, banner defenders, firefighters and undertakers.
+
+## 0.5.37: sorcery (necromancers, shamans, court wizards)
+Andy asked for Iron's Spells 'n Spellbooks to fuel necromancy and wizards for the kingdoms and (more so) the barbarians.
+Iron's Spells is Forge/NeoForge 1.21.1 only and all rights reserved (no ports, no reuse of its art), so this is our own
+take: original spells, art and names (`Sorcery`, `Thralls`, `Arcana`, client `SorcerySkins`, `tools/gen_sorcery.py`).
+- **Camp shaman** (`Sorcery.SHAMAN`, every barbarian camp, a second from day 5): fire bolts; a ring of fire when cornered;
+  a hex on a player (weakness, slowness); a war chant (strength and speed for the raiders fighting near him, a drum and a
+  shout); mends the worst hurt. War paint and a wolf-skull headdress in the camp's colour, a totem staff.
+- **Camp necromancer** (`Sorcery.NECROMANCER`, from day 2; at once in a Grim ruin): life drain; raises the dead (Kitchen
+  corpses lying near first, not players'; else a zombie and a skeleton of his land's kind out of the ground); bone spikes
+  at anyone close; and whatever dies near him in a fight rises as his thrall (villagers as zombie villagers, horses as
+  zombie horses, men and folk as zombies). Up to 5 thralls; they wear a grey rag (no sunburn) and crumble after 90-120 s
+  or when he falls. Hood, black robe, skull clasp, bone staff.
+- **Court wizard** (`Sorcery.WIZARD`; a second over 300 emeralds). Not every kingdom believes in magic: about 60%
+  (`MAGIC_BELIEF`, fixed per realm) keep a court mage; the rest keep none and prosecute magic: reading a spell scroll
+  inside their walls is a crime like arson (`Theft.Crime.SORCERY`: "Witchcraft! Not within these walls!", the guards
+  after you), for their own people too, short of the ruler. Arcane bolts (double on the undead), a
+  ward (absorption) on the guards fighting near him, mending, a blast that throws back anyone close, and he banishes
+  enemy thralls. Robe in the realm's colour, a beard, a pointed hat (its own model), a crystal staff. A **tyrant** king
+  keeps a court necromancer instead (his dead spare the realm's villagers and players it doesn't hold hostile).
+- **Thralls** (`Thralls`, attachment `thrall`): never target their own side, and their side's folk leave them be
+  (`ThrallTargetMixin` on `LivingEntity.canAttack`).
+- **Scrolls** (`Arcana`): a player who kills a caster takes a scroll: Raising (two thralls for a minute that fight only
+  monsters and whoever fights you), Draining, Fire, Warding, the Arcane Bolt. Read once (right-click).
+- Casters are hired like any other hand: `Sorcery.staff` opens places for them, `Economy.hire` fills them.
+- Testing (op): `/kingdom caster <necromancer|shaman|wizard>` (one for the nearest faction, at your feet).
+- Seen in game: the three side by side; a shaman's fire bolts set a court wizard alight while a necromancer's drain and
+  his raised zombie and skeleton closed in; staffs held upright.

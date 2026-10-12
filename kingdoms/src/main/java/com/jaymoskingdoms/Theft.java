@@ -59,6 +59,9 @@ import org.jspecify.annotations.Nullable;
  * <p>(0.5.20) Lighting a fire there (flint and steel or a fire charge) is arson, punished like a theft. Seen, it also
  * turns the townsfolk around on you: every grown villager and civilian of the faction within {@link #RIOT_RANGE} runs
  * at you and lays into you with their fists until you hit one of them back, when they scatter (the guards keep on).
+ *
+ * <p>(0.5.37) A kingdom that doesn't believe in magic ({@link Sorcery#believesInMagic}) prosecutes it: reading a spell
+ * scroll inside its walls is a crime like arson, for its own people too (only its ruler may).
  */
 public final class Theft {
 	/** How far a witness sees a crime (sneaking: this share of it); closer than {@link #HEAR_RANGE} they notice whichever way they face. */
@@ -110,7 +113,7 @@ public final class Theft {
 	enum Crime {
 		RUMMAGE(Weight.LIGHT, "rummage"), TAKE(Weight.MEDIUM, "theft"), CROP(Weight.LIGHT, "vandal"), BED(Weight.MEDIUM, "vandal"),
 		JOB_BLOCK(Weight.MEDIUM, "vandal"), CHEST(Weight.MEDIUM, "theft"), STOREHOUSE(Weight.HEAVY, "theft"), BELL(Weight.HEAVY, "vandal"),
-		ARSON(Weight.MEDIUM, "arson"), LIVESTOCK(Weight.LIGHT, "livestock"), FOLK(Weight.MEDIUM, "murder"), VILLAGER(Weight.HEAVY, "murder"), GOLEM(Weight.HEAVY, "murder");
+		ARSON(Weight.MEDIUM, "arson"), SORCERY(Weight.MEDIUM, "sorcery"), LIVESTOCK(Weight.LIGHT, "livestock"), FOLK(Weight.MEDIUM, "murder"), VILLAGER(Weight.HEAVY, "murder"), GOLEM(Weight.HEAVY, "murder");
 
 		final Weight weight;
 		final String cry;
@@ -365,6 +368,19 @@ public final class Theft {
 			return;
 		}
 		commit(player, level, f, Crime.ARSON, pos, null, false);
+	}
+
+	/**
+	 * {@code player} worked magic at {@code pos} (read a spell scroll): a crime where a kingdom that shuns magic holds the
+	 * law, whoever they are, short of its ruler.
+	 */
+	public static void sorcery(ServerPlayer player, ServerLevel level, BlockPos pos) {
+		Faction f = lawAt(level, pos);
+		if (f == null || f.type() != FactionType.KINGDOM || Sorcery.believesInMagic(f) || player.isCreative() || player.isSpectator()
+			|| f.leader().filter(player.getUUID()::equals).isPresent()) {
+			return;
+		}
+		commit(player, level, f, Crime.SORCERY, pos, null, false);
 	}
 
 	private static void killed(ServerPlayer killer, ServerLevel level, LivingEntity victim) {
