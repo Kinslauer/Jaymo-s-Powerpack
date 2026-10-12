@@ -114,8 +114,12 @@ public final class GravityPower implements Power {
 	 */
 	static final double WELL_RADIUS = 8.0;
 	static final int WELL_TICKS = 80;
-	/** B while your well is up: you're launched straight up this high (blocks), once per well. */
+	/** A tap of B while your well is up: you're launched straight up this high (blocks), once per well. */
 	static final double WELL_LAUNCH_HEIGHT = 14.5;
+	/** B let go within this many ticks is a tap: the force kneel around you (in your well, with the launch). */
+	static final int CRUSH_TAP_TICKS = 6;
+	/** How far the tap's force kneel reaches around you (blocks). */
+	static final double CRUSH_TAP_RADIUS = 5.0;
 	public static final int WELL_COOLDOWN = 280;
 
 	// ---- Weightless (V) ----
@@ -635,18 +639,16 @@ public final class GravityPower implements Power {
 				}
 			}
 			case ABILITY_4 -> {
-				if (down && wellLaunch(player, state)) {
-					// B inside your own well: up you go, instead of a Crush
-					state.crushFrom = -1;
-				} else if (down) {
-					if (ready(player, CRUSH)) {
+				if (down) {
+					if (ready(player, CRUSH) || ownWell(player) != null) {
 						state.crushFrom = player.level().getGameTime();
 						player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 0.5F, 1.6F);
 					}
 				} else if (state.crushFrom >= 0) {
-					float charge = Mth.clamp((player.level().getGameTime() - state.crushFrom) / (float)CRUSH_FULL_CHARGE, 0.0F, 1.0F);
+					long held = player.level().getGameTime() - state.crushFrom;
+					float charge = Mth.clamp(held / (float)CRUSH_FULL_CHARGE, 0.0F, 1.0F);
 					state.crushFrom = -1;
-					crush(player, charge);
+					releaseCrush(player, state, held, charge);
 				}
 			}
 		}
@@ -1508,6 +1510,33 @@ public final class GravityPower implements Power {
 		GravityShockwave.start(player.level(), at);
 	}
 
+	/**
+	 * B let go. A tap is a force kneel around you: everything within {@code CRUSH_TAP_RADIUS} is pinned and drops to
+	 * its knees, and inside your own well the tap also launches you ({@link #wellLaunch}). Held, it's the Crush where you
+	 * aim, as charged; Collapsing Horizon rains its ring down on the target instead.
+	 */
+	private static void releaseCrush(ServerPlayer player, State state, long held, float charge) {
+		if (held < CRUSH_TAP_TICKS) {
+			if (ownWell(player) != null) {
+				wellLaunch(player, state);
+			}
+			crush(player, 0.0F, player.position(), CRUSH_TAP_RADIUS);
+			return;
+		}
+		if (GravityOrbit.collapsingHorizon(player)) {
+			if (!ready(player, CRUSH)) {
+				return;
+			}
+			ServerLevel level = player.level();
+			Vec3 at = aimPoint(player, CRUSH_RANGE);
+			GravityOrbit.rain(player, at, Mth.lerp(charge, CRUSH_RADIUS_MIN, CRUSH_RADIUS_MAX) + COLLAPSE_RADIUS_BONUS);
+			int cooldown = Math.round(Mth.lerp(charge, CRUSH_COOLDOWN_MIN, CRUSH_COOLDOWN_MAX));
+			player.setAttached(COOLDOWNS, cooldowns(player).withCrush(level.getGameTime() + cooldown, cooldown));
+			return;
+		}
+		crush(player, charge, aimPoint(player, CRUSH_RANGE), Mth.lerp(charge, CRUSH_RADIUS_MIN, CRUSH_RADIUS_MAX));
+	}
+
 	/** Your own well, still up (and not yet launched out of), or null. */
 	private static @Nullable Well ownWell(ServerPlayer player) {
 		for (Well well : WELLS) {
@@ -1542,14 +1571,13 @@ public final class GravityPower implements Power {
 
 	// ---------------------------------------------------------------- Crush
 
-	private static void crush(ServerPlayer player, float charge) {
+	private static void crush(ServerPlayer player, float charge, Vec3 at, double baseRadius) {
 		if (!ready(player, CRUSH)) {
 			return;
 		}
 		ServerLevel level = player.level();
 		boolean collapsed = Fate.isCorrupted(player);
-		Vec3 at = aimPoint(player, CRUSH_RANGE);
-		double radius = Mth.lerp(charge, CRUSH_RADIUS_MIN, CRUSH_RADIUS_MAX) + (collapsed ? COLLAPSE_RADIUS_BONUS : 0.0);
+		double radius = baseRadius + (collapsed ? COLLAPSE_RADIUS_BONUS : 0.0);
 		float pressure = (0.5F + 0.5F * charge) * (collapsed ? COLLAPSE_DAMAGE : 1.0F);
 		// Collapsing Horizon's ring comes down with it, in a shockwave
 		GravityOrbit.shockwave(player, at, radius);

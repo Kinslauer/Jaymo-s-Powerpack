@@ -114,9 +114,12 @@ A Gravity user lightens whatever they hold, at every mastery level (`GravityWeig
 - **Gravity Well (G)** is no longer aimed: it bursts out around you (the same bubble and risen lumps, from where you
   stand) and stays on you for 4 s, radius 8 (`WELL_RADIUS`, the bubble's size). It no longer pulls. Everything that
   touches it is weighed down (the heavy aura's weight, jump cut and Slowness, see `weighDown`) and kneels.
-- **B while your Well is up** launches you straight up about 14 blocks (`WELL_LAUNCH_HEIGHT`, worked out from your
-  own gravity so Collapse's weight doesn't shorten it), once per Well, instead of a Crush. Falls still hurt. The old
-  G+B Cave-in (and Collapsing Horizon's ring raining from it) is gone.
+- **B is now tap or hold.** A tap (let go within 6 ticks, `CRUSH_TAP_TICKS`) is a force kneel around you: a
+  quick Crush centred on you, radius 5 (`CRUSH_TAP_RADIUS`), pinning and kneeling everything in it. Tapped while
+  your Well is up, it also launches you straight up about 14 blocks (`WELL_LAUNCH_HEIGHT`, worked out from your own
+  gravity so Collapse's weight doesn't shorten it), once per Well. Falls still hurt. Held, it's the charged Crush
+  where you aim, as before; with Collapsing Horizon the held release rains the orbiting ring down on the target
+  (`GravityOrbit.rain`). The old G+B Cave-in is gone.
 - **Meteor (C)** tears through every breakable block it passes on the way down (`GravityMeteor.carve`: 0.8 of its
   width, at most 7 blocks from its middle, 600 blocks a tick, 10% drop as items), so a roof it falls through is
   gone before the impact blast.
