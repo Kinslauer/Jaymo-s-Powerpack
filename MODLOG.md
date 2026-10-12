@@ -353,3 +353,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   tendrils can't grab it (so it never hunts iron golems), and nothing butchers it: an axe gets "nothing to
   butcher" and the thrash can't tear it apart. It doesn't burn: searched, it drops its loot, falls apart (shuddering, slumping and sinking as iron chips crack off) and disappears. Kitchen's new
   `jaymoskitchen:heavy_corpses` tag lists the heavy ones; Powers checks it in `KitchenCompat.isHeavy`.
+- **0.8.55, carried containers are set down, not thrown:** a carried chest, furnace or anything else with a block
+  entity is only ever set down: sneak + right-click puts it down like a plain right-click (`CarryBlock.holdsContents`).
+  Plain blocks can still be thrown.
