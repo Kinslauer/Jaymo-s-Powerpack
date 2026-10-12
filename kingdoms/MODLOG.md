@@ -1406,3 +1406,22 @@ Tested on the dev client with MCA: hurt villagers' lines and a witness's "Murder
   crowd). Hit any of them and the crowd scatters; it also ends after 60 s, on death, or 48 blocks away. The guards
   keep hunting. Rioters leave the fire to the others (`Firefighting`).
 Tested on the dev client: the fire was seen, the crowd closed in and punched, one hit back stopped it.
+
+## 0.5.21: guards clear away dead monsters
+- **`Undertakers`** (with Jaymo's Kitchen 0.4.26+, reached by reflection in `KitchenCompat`, so Kingdoms still builds and
+  runs without it): every 2 s each standing town or kingdom (not barbarian camps) hands up to 2 monster corpses lying
+  within 64 blocks of its seat to its nearest free guard (not fighting, asleep or on another duty). A kingdom's guards
+  are its guard folk; a village's are its iron golems, who only throw corpses into a fire
+  and never light one (with no fire near, a golem leaves it for a guard, or for a player).
+  - With a **fire pit** (fire on netherrack, soul sand or magma: `infiniburn_overworld`), a **lit campfire** or open
+    **lava** within 16 blocks of the corpse, the guard carries it there (Kitchen's `carryBy`) and throws it in from
+    3.5 blocks (`throwAt`); Kitchen lights a corpse lying in flames.
+  - Otherwise they set it alight where it lies (flint-and-steel sound), unless something that catches (`ignitedByLava`)
+    is within 2 blocks: then they first carry it to the nearest bare, solid ground within 12 blocks. With nowhere safe it's
+    left for 60 s and tried again.
+  - A guard called to a fight puts the corpse down at their feet; a duty not done in 60 s is given up.
+- **Fire pit** (`Buildings.firePit`, "fire_pit"): builders put one up in kingdoms and fiefdoms (from 20 people) and
+  villages (from 10). A campfire (a soul campfire a quarter of the time) sunk in a 3x3 stone ring, a path round it,
+  and now and then stone posts with lanterns at the corners. It's what the guards throw corpses on.
+- Tuning is at the top of `Undertakers` (`SWEEP`, `PYRE_REACH`, `SPOT_REACH`, `CLEAR`, `MOST_PER_ROUND`...).
+- Guards here are guard folk only; once MCA guards count (PR #40) they could join in.

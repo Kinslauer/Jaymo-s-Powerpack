@@ -57,6 +57,8 @@ final class Buildings {
 			realm(type, "well", Buildings::well, 1, 0);
 			realm(type, "house", Buildings::house, 4, 16);
 			realm(type, "mason", Buildings::mason, 1, 20);
+			// (0.5.21) where the guards throw dead monsters ({@link Undertakers})
+			realm(type, "fire_pit", Buildings::firePit, 1, 20);
 			realm(type, "market", Buildings::market, 1, 24);
 			realm(type, "stable", Buildings::stable, 1, 28);
 			realm(type, "farm", Buildings::farm, 2, 28);
@@ -77,6 +79,7 @@ final class Buildings {
 		realm(FactionType.VILLAGE, "house", Buildings::house, 2, 0);
 		realm(FactionType.VILLAGE, "well", Buildings::well, 1, 0);
 		realm(FactionType.VILLAGE, "stall", Buildings::stall, 1, 8);
+		realm(FactionType.VILLAGE, "fire_pit", Buildings::firePit, 1, 10);
 		realm(FactionType.VILLAGE, "road", Buildings::road, 2, 8);
 		realm(FactionType.VILLAGE, "house", Buildings::house, 4, 12);
 		realm(FactionType.VILLAGE, "farm", Buildings::farm, 2, 14);
@@ -459,6 +462,32 @@ final class Buildings {
 	 * A well (5 x 5): a stone ring round the water, posts and a little roof (flat or peaked), or an open well with lamps
 	 * on its rim; maybe a chain hanging down. The plain design: four fence posts and a slab roof.
 	 */
+	/**
+	 * (0.5.21) A fire pit: a campfire (now and then a soul campfire) sunk in the ground in a ring of stone, a path round
+	 * it, and stone posts (or lanterns on them) at its corners. The guards throw dead monsters onto it ({@link Undertakers}).
+	 */
+	static Blueprint firePit(Kit k) {
+		Sketch s = new Sketch("fire_pit", 5, 5, 3);
+		BlockState stone = k.pick(k.p.wall(), k.p.mossy(), k.p.cracked());
+		BlockState fire = k.chance(0.25) ? Blocks.SOUL_CAMPFIRE.defaultBlockState() : Blocks.CAMPFIRE.defaultBlockState();
+		boolean posts = k.chance(0.6), lanterns = posts && k.chance(0.5);
+		for (int x = 0; x < 5; x++) {
+			for (int z = 0; z < 5; z++) {
+				boolean edge = x == 0 || x == 4 || z == 0 || z == 4;
+				s.set(x, 0, z, edge ? k.road : x == 2 && z == 2 ? fire : stone);
+			}
+		}
+		if (posts) {
+			for (int[] c : new int[][] {{0, 0}, {4, 0}, {0, 4}, {4, 4}}) {
+				s.set(c[0], 1, c[1], k.wallTop);
+				if (lanterns) {
+					s.set(c[0], 2, c[1], Blocks.LANTERN.defaultBlockState());
+				}
+			}
+		}
+		return s.done();
+	}
+
 	static Blueprint well(Kit k) {
 		Sketch s = new Sketch("well", 5, 5, 6);
 		BlockState stone = k.pick(k.p.wall(), k.p.mossy(), k.p.cracked());
