@@ -30,6 +30,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		EntityRenderers.register(JaymosKingdoms.FOLK, FolkRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.FallingTree.TYPE, FallingTreeRenderer::new);
+		net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(com.jaymoskingdoms.ChoppedLog.ENTITY, ChoppedLogRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.Wagon.TYPE, WagonRenderer::new);
 		CampSkins.register();
 		MobAnimations.register();
