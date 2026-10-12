@@ -194,13 +194,15 @@ public final class WebNet {
 	/**
 	 * Server → client: the symbiote presses in on you for {@code ticks}: the screen darkens under a pulsing
 	 * blackish-purple vignette, and (if {@code growl}) a low growl plays for you alone. Sent with every whisper, and
-	 * kept up through a whole feeding.
+	 * kept up through a whole feeding. It's as strong as the bond is weak; {@code full}: at its strongest, kept for a
+	 * weak bond's own lines (and every takeover).
 	 */
-	public record Dread(int ticks, boolean growl) implements CustomPacketPayload {
+	public record Dread(int ticks, boolean growl, boolean full) implements CustomPacketPayload {
 		public static final Type<Dread> TYPE = new Type<>(JaymosPowers.id("web_symbiote_dread"));
 		public static final StreamCodec<ByteBuf, Dread> CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_INT, Dread::ticks,
 			ByteBufCodecs.BOOL, Dread::growl,
+			ByteBufCodecs.BOOL, Dread::full,
 			Dread::new);
 
 		@Override

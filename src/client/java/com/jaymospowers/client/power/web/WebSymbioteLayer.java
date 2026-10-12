@@ -53,6 +53,8 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 		WebSuitGrowth.register(this.bulkSlim, true);
 		WebSuitGrowth.register(this.suitWide, false);
 		WebSuitGrowth.register(this.suitSlim, false);
+		WebSuitGrowth.register(this.veinsWide, false);
+		WebSuitGrowth.register(this.veinsSlim, false);
 	}
 
 	@Override

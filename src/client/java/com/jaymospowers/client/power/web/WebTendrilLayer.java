@@ -151,7 +151,7 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		AvatarRenderState own = new AvatarRenderState();
 		own.setData(WebSymbioteClient.TENDRILS, new WebSymbioteClient.Tendrils(tendrils.growth(), tendrils.time(), tendrils.strike(), yaw, pitch,
 			yaw >= 0.0F ? -1.0F : 1.0F, 0.0F, tendrils.held(), tendrils.armor(), tendrils.wall(), wallYaw, wallPitch, tendrils.heavy(),
-			tendrils.variant(), true, tendrils.combo(), tendrils.rear(), tendrils.hit(), tendrils.feral(), tendrils.roar(), tendrils.tethers()));
+			tendrils.variant(), true, tendrils.combo(), tendrils.rear(), tendrils.hit(), tendrils.feral(), tendrils.roar(), tendrils.tethers(), null));
 		own.ageInTicks = avatar.ageInTicks;
 		poseStack.pushPose();
 		poseStack.translate(0.0F, FP_ROOT_UP, FP_ROOT_BACK);
@@ -175,19 +175,80 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		net.minecraft.world.phys.Vec3 ahead = new net.minecraft.world.phys.Vec3(-Math.sin(yaw), 0.0, Math.cos(yaw));
 		net.minecraft.world.phys.Vec3 left = new net.minecraft.world.phys.Vec3(ahead.z, 0.0, -ahead.x);
 		float age = player.level().getGameTime() - wall.landed() + partial;
+		// the bites slide a little after you as you sway on them (along the wall only)
+		net.minecraft.world.phys.Vec3 normal = net.minecraft.core.Direction.from3DDataValue(wall.face()).getUnitVec3();
+		net.minecraft.world.phys.Vec3 drift = feet.subtract(wall.rest());
+		drift = drift.subtract(normal.scale(drift.dot(normal))).scale(WebSymbiote.TETHER_FOLLOW);
 		for (int i = 0; i < wall.points().size() && i + FIRST_TETHER < ROOTS.length; i++) {
 			int t = i + FIRST_TETHER;
 			float[] r = ROOTS[t];
 			// model space: +X the wearer's left, +Y down from the neck (24 pixels over the feet), +Z back
 			net.minecraft.world.phys.Vec3 root = feet.add(left.scale(r[0] / 16.0F * scale)).add(0.0, (24.0F - r[1]) / 16.0F * scale, 0.0)
 				.subtract(ahead.scale(r[2] / 16.0F * scale));
-			net.minecraft.world.phys.Vec3 to = wall.points().get(i).subtract(root);
+			net.minecraft.world.phys.Vec3 to = wall.points().get(i).add(drift).subtract(root);
 			float aim = (float)(Mth.atan2(to.z, to.x) * Mth.RAD_TO_DEG) - 90.0F;
 			out[t * 3] = Mth.wrapDegrees(aim - bodyYaw) * Mth.DEG_TO_RAD;
 			out[t * 3 + 1] = (float)Mth.atan2(to.y, to.horizontalDistance());
 			out[t * 3 + 2] = (float)to.length() / scale * Mth.clamp((age - i) / TETHER_REACH_TICKS, 0.0F, 1.0F);
 		}
 		return out;
+	}
+
+	/** Climbing: the walking tendrils' chords and bows (see {@link WebTendrilWalk#legs}), or null when not climbing. */
+	static float @org.jspecify.annotations.Nullable [] walk(net.minecraft.world.entity.player.Player player, float partial) {
+		return WebTendrilWalk.legs(player, partial, ROOTS);
+	}
+
+	/**
+	 * A walking tendril bowed from its root to its planted tip: a curve from the root ({@code chord} away, in blocks,
+	 * model space), bowing {@link WebTendrilWalk#ARCH} of its length toward {@code bow}; each segment is turned
+	 * (against the one before it) to lie along the curve, and the whole cord is scaled evenly to its length.
+	 */
+	private static void bend(ModelPart[] chain, float cx, float cy, float cz, float bx, float by, float bz, float growth) {
+		org.joml.Vector3f chord = new org.joml.Vector3f(cx, cy, cz).mul(16.0F);
+		float len = chord.length();
+		if (len < 1.0E-3F) {
+			return;
+		}
+		// the bow: the surface's outward way, square to the chord
+		org.joml.Vector3f bow = new org.joml.Vector3f(bx, by, bz);
+		bow.sub(new org.joml.Vector3f(chord).mul(bow.dot(chord) / (len * len)));
+		if (bow.lengthSquared() < 1.0E-6F) {
+			bow.set(0.0F, -1.0F, 0.0F);
+		}
+		bow.normalize().mul(2.0F * WebTendrilWalk.ARCH * len);
+		org.joml.Vector3f control = new org.joml.Vector3f(chord).mul(0.5F).add(bow);
+		org.joml.Vector3f[] points = new org.joml.Vector3f[SEGMENTS + 1];
+		float arc = 0.0F;
+		for (int k = 0; k <= SEGMENTS; k++) {
+			float t = k / (float)SEGMENTS;
+			points[k] = new org.joml.Vector3f(control).mul(2.0F * t * (1.0F - t)).add(new org.joml.Vector3f(chord).mul(t * t));
+			if (k > 0) {
+				arc += points[k].distance(points[k - 1]);
+			}
+		}
+		// grown out along the curve as the tendrils bud
+		float size = arc / CHAIN * Math.max(0.05F, growth);
+		org.joml.Quaternionf frame = new org.joml.Quaternionf();
+		org.joml.Quaternionf inverse = new org.joml.Quaternionf();
+		for (int k = 0; k < SEGMENTS; k++) {
+			org.joml.Vector3f along = new org.joml.Vector3f(points[k + 1]).sub(points[k]);
+			if (along.lengthSquared() < 1.0E-8F) {
+				along.set(0.0F, 0.0F, 1.0F);
+			}
+			along.normalize();
+			frame.invert(inverse);
+			inverse.transform(along);
+			ModelPart part = chain[k];
+			part.yRot = (float)Math.atan2(along.x, along.z);
+			part.xRot = (float)-Math.asin(Mth.clamp(along.y, -1.0F, 1.0F));
+			part.zRot = 0.0F;
+			part.xScale = k == 0 ? size : 1.0F;
+			part.yScale = k == 0 ? size : 1.0F;
+			part.zScale = k == 0 ? size : 1.0F;
+			part.visible = true;
+			frame.mul(new org.joml.Quaternionf().rotationZYX(0.0F, part.yRot, part.xRot));
+		}
 	}
 
 	/** Eases 0-1. */
@@ -349,6 +410,12 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 					base.yRot = r[3] * 0.85F;
 					base.xRot = (r[1] - 4.0F) * 0.13F;
 					base.zScale = length * 1.15F;
+				}
+				float[] legs = tendrils.legs();
+				if (legs != null && (legs[t * 6] != 0.0F || legs[t * 6 + 1] != 0.0F || legs[t * 6 + 2] != 0.0F)) {
+					// walking you up the wall: bowed out from the back, its tip planted (or stepping) on the surface
+					bend(this.parts[t], legs[t * 6], legs[t * 6 + 1], legs[t * 6 + 2], legs[t * 6 + 3], legs[t * 6 + 4], legs[t * 6 + 5], eased);
+					continue;
 				}
 				float[] tethers = tendrils.tethers();
 				if (tethers != null && t >= FIRST_TETHER && tethers[t * 3 + 2] > 0.0F) {

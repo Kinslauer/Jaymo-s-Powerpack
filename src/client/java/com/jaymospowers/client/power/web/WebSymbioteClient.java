@@ -54,15 +54,16 @@ public final class WebSymbioteClient {
 	/** {@code feral}: how wild it still is (1 a fresh bond, 0 a full one): twitchier, restless tendrils. */
 	public record Tendrils(float growth, float time, float strike, float aimYaw, float aimPitch, float side, float run, int held, boolean armor,
 		int wall, float wallYaw, float wallPitch, boolean heavy, int variant, boolean firstPerson, int combo, float rear, float hit, float feral,
-		float roar, float @org.jspecify.annotations.Nullable [] tethers) {
+		float roar, float @org.jspecify.annotations.Nullable [] tethers, float @org.jspecify.annotations.Nullable [] legs) {
 		/** {@code wall}: 0 none, 1 reaching for a wall (aimed by wallYaw/wallPitch), 2 fanned back into it. */
 		/** {@code roar}: how far through a roar (0-1), or -1: they flail, then fling out wide. */
 		/** {@code tethers}: hung off a wall, per tendril (yaw, pitch against the body, then its reach in blocks; 0 for a free one). */
+		/** {@code legs}: walking you up a wall (see {@link WebTendrilWalk#legs}), per tendril: its chord and the way it bows. */
 
 		/** The same, drawn from your own eyes. */
 		public Tendrils inFirstPerson() {
 			return new Tendrils(growth, time, strike, aimYaw, aimPitch, side, run, held, armor, wall, wallYaw, wallPitch, heavy, variant, true, combo,
-				rear, hit, feral, roar, tethers);
+				rear, hit, feral, roar, tethers, legs);
 		}
 	}
 	/** Ticks into a meal (partial ticks included), for the maw. */
@@ -335,6 +336,20 @@ public final class WebSymbioteClient {
 		THREATS.clear();
 	}
 
+	/** Worn under the suit: swallowed by it, unless it's an elytra. */
+	private static net.minecraft.world.item.ItemStack engulfed(net.minecraft.world.item.ItemStack worn) {
+		return worn.has(net.minecraft.core.component.DataComponents.GLIDER) ? worn : net.minecraft.world.item.ItemStack.EMPTY;
+	}
+
+	/**
+	 * This is you, drawn in first person by First-person Model: the suit's head (the mask, the swollen head, the maw)
+	 * isn't drawn, so it doesn't cover your view.
+	 */
+	public static boolean ownFirstPerson(AvatarRenderState state) {
+		net.minecraft.client.player.LocalPlayer self = net.minecraft.client.Minecraft.getInstance().player;
+		return self != null && state.id == self.getId() && FirstPersonCompat.bodyShown();
+	}
+
 	/** From the avatar renderer's extractRenderState: does this player wear the suit. */
 	public static void extract(Entity entity, AvatarRenderState state) {
 		state.setData(SUIT, entity instanceof Player player && WebSymbiote.suitShown(player) ? Boolean.TRUE : null);
@@ -355,8 +370,12 @@ public final class WebSymbioteClient {
 		state.setData(EATING, meal == null ? null : Math.max(0.0F, entity.level().getGameTime() - meal.start() + net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false)));
 		state.setData(MEAL_BIG, meal != null && meal.big());
 		if (state.getData(SUIT) != null || entity instanceof Player p && WebSymbiote.isToggled(p, WebSymbioteState.BULK)) {
-			// no cape poking out through the suit
+			// no cape poking out through the suit, and the armour engulfed by it (an elytra still spreads from it)
 			state.showCape = false;
+			state.headEquipment = engulfed(state.headEquipment);
+			state.chestEquipment = engulfed(state.chestEquipment);
+			state.legsEquipment = engulfed(state.legsEquipment);
+			state.feetEquipment = engulfed(state.feetEquipment);
 		}
 		// Living Armor grows tendrils (whether or not the suit is showing); the big body swells under them
 		boolean armored = entity instanceof Player p && WebSymbiote.armored(p);
@@ -369,12 +388,17 @@ public final class WebSymbioteClient {
 		state.setData(STARE, staring == null ? null : Math.max(0.0F, entity.level().getGameTime() - staring
 			+ net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false)));
 		long out = entity instanceof Player p && WebSymbiote.isBonded(p) ? WebSymbiote.tendrilsOut(p) : -1L;
-		if (entity instanceof Player player && (armored || out >= 0)) {
+		boolean climbing = entity instanceof Player p && WebSymbiote.isBonded(p) && WebTendrilWalk.climbing(p);
+		if (entity instanceof Player player && (armored || out >= 0 || climbing)) {
 			long now = player.level().getGameTime();
 			long since = ARMOR_SINCE.computeIfAbsent(player.getId(), id -> now);
 			float growth = Math.min(1.0F, (now - since) / WebTendrilLayer.GROWN_TICKS);
 			WITHDRAW.remove(player.getId());
 			if (armored) {
+				LAST_GROWTH.put(player.getId(), growth);
+			} else if (climbing) {
+				// out on their own to climb: quick to bud, there as long as you climb (then drawn back in)
+				growth = Math.min(1.0F, growth * 1.6F);
 				LAST_GROWTH.put(player.getId(), growth);
 			} else {
 				// out on their own: they lash out, then draw back in
@@ -473,9 +497,11 @@ public final class WebSymbioteClient {
 			}
 			// hung off a wall: each lower tendril on its own tether
 			float[] tethers = wall != null && wall.landed() >= 0L && !wall.points().isEmpty() ? WebTendrilLayer.tethers(player, wall, partialTick) : null;
+			// climbing: four of them walk you along the wall
+			float[] legs = tethers == null && wall == null ? WebTendrilLayer.walk(player, partialTick) : null;
 			state.setData(TENDRILS, new Tendrils(growth, player.tickCount, strike, aimYaw, aimPitch, side, smoothRun(player), held, bulk,
 				wallMode, wallYaw, wallPitch, heavy, variant, firstPerson, combo, rear, hit,
-				1.0F - WebSymbiote.state(player).bond() / (float)WebSymbiote.BOND_MAX, roar, tethers));
+				1.0F - WebSymbiote.state(player).bond() / (float)WebSymbiote.BOND_MAX, roar, tethers, legs));
 		} else {
 			ARMOR_SINCE.remove(entity.getId());
 			state.setData(TENDRILS, withdrawing(entity));
@@ -501,7 +527,7 @@ public final class WebSymbioteClient {
 		boolean firstPerson = player == net.minecraft.client.Minecraft.getInstance().player && FirstPersonCompat.bodyShown();
 		return new Tendrils(growth, player.tickCount, -1.0F, 0.0F, 0.0F, 1.0F, smoothRun(player), 0, WebSymbiote.bulked(player),
 			0, 0.0F, 0.0F, false, WebSymbiote.STRIKE_SLAM, firstPerson, -1, WebSymbiote.STRIKE_REAR,
-			WebSymbiote.STRIKE_HIT / (float)WebSymbiote.STRIKE_TICKS, 1.0F - WebSymbiote.state(player).bond() / (float)WebSymbiote.BOND_MAX, -1.0F, null);
+			WebSymbiote.STRIKE_HIT / (float)WebSymbiote.STRIKE_TICKS, 1.0F - WebSymbiote.state(player).bond() / (float)WebSymbiote.BOND_MAX, -1.0F, null, null);
 	}
 
 	/** First person, after the hands: your own tendrils, unless First-person Model is already drawing your body. */
@@ -539,12 +565,12 @@ public final class WebSymbioteClient {
 	private static Vec3 lean = Vec3.ZERO;
 
 	/**
-	 * Hung off a wall: a damped spring toward the spot (lifting you off the wall at first), and the movement keys lean
-	 * you away from it (as far as {@link WebSymbiote#WALL_STRETCH}); let go of them and it hauls you back, overshooting a
-	 * little, like elastic.
+	 * Hung off a wall: a springy pull toward the spot (lifting you off the wall at first). You sway the way you look
+	 * (up to {@link WebSymbiote#WALL_AIM_SHIFT} along the wall), and the movement keys lean you further (as far as
+	 * {@link WebSymbiote#WALL_STRETCH}); let go of them and it hauls you back, bouncing on the tethers like elastic.
 	 */
 	private static void tether(LocalPlayer player, WebSymbiote.Wall wall) {
-		Vec3 target = wall.target(player.level().getGameTime() - wall.landed());
+		Vec3 target = wall.target(player.level().getGameTime() - wall.landed()).add(sway(player, wall));
 		Input keys = player.input.keyPresses;
 		double forward = (keys.forward() ? 1.0 : 0.0) - (keys.backward() ? 1.0 : 0.0);
 		double strafe = (keys.left() ? 1.0 : 0.0) - (keys.right() ? 1.0 : 0.0);
@@ -558,6 +584,47 @@ public final class WebSymbioteClient {
 		// (holding up against gravity's pull this tick)
 		player.setDeltaMovement(v.add(0.0, player.getGravity(), 0.0));
 		player.resetFallDistance();
+	}
+
+	/** Where you look, along the wall (its plane only): how far you sway that way on the tethers. */
+	static Vec3 sway(net.minecraft.world.entity.player.Player player, WebSymbiote.Wall wall) {
+		Vec3 normal = net.minecraft.core.Direction.from3DDataValue(wall.face()).getUnitVec3();
+		Vec3 look = player.getViewVector(1.0F);
+		Vec3 along = look.subtract(normal.scale(look.dot(normal)));
+		return along.scale(WebSymbiote.WALL_AIM_SHIFT);
+	}
+
+	/**
+	 * Mouse look while hung off a wall: held facing away from it (see {@link WebSymbiote#WALL_LOOK}). The last-frame
+	 * rotation moves with any correction, so the view stops at the edge rather than jittering past it.
+	 */
+	public static void holdLook(net.minecraft.world.entity.Entity entity) {
+		if (entity != net.minecraft.client.Minecraft.getInstance().player) {
+			return;
+		}
+		WebSymbiote.Wall wall = entity.getAttached(WebSymbiote.WALL);
+		if (wall == null || wall.landed() < 0L) {
+			return;
+		}
+		net.minecraft.core.Direction face = net.minecraft.core.Direction.from3DDataValue(wall.face());
+		if (face.getAxis().isHorizontal()) {
+			Vec3 normal = face.getUnitVec3();
+			float out = (float)(Mth.atan2(normal.z, normal.x) * Mth.RAD_TO_DEG) - 90.0F;
+			float off = Mth.wrapDegrees(entity.getYRot() - out);
+			float held = Mth.clamp(off, -WebSymbiote.WALL_LOOK, WebSymbiote.WALL_LOOK);
+			if (held != off) {
+				entity.setYRot(entity.getYRot() + held - off);
+				entity.yRotO += held - off;
+			}
+		} else {
+			// on a ceiling you look no higher than level, on a floor no lower
+			float pitch = entity.getXRot();
+			float held = face == net.minecraft.core.Direction.DOWN ? Math.max(0.0F, pitch) : Math.min(0.0F, pitch);
+			if (held != pitch) {
+				entity.setXRot(held);
+				entity.xRotO += held - pitch;
+			}
+		}
 	}
 
 	/** A takeover has you: no key you press does what it would (each is a struggle against its hold instead). */
