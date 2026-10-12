@@ -403,3 +403,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     elastic: the movement keys lean you up to 1.4 blocks away, the cracks deepen with the strain, and they haul you
     back when you let go. Jump kicks off, the grab again lets go, and so does any other radial ability. The two
     shoulder tendrils stay free: R grabs and Shift+G tears a chunk while you hang there, even without Living Armor.
+- **0.8.67, Jaymo's Equestrian (riding):** ships Jaymo's Kingdoms 0.5.34 (see `kingdoms/MODLOG.md`): six horse
+  breeds with hidden stats foals inherit, five gaits on the scroll wheel, a stamina bar, courage and spooking, new coats;
+  war elephants and woolly mammoths in Mo' Creatures' look (GPL-3.0).
