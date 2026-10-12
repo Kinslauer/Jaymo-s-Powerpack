@@ -48,6 +48,13 @@ public final class WebSwing {
 	static final double LET_OUT = 0.35;
 	/** Speed cap while swinging or flying from a swing (blocks/tick; sprinting is ~0.28). */
 	static final double MAX_SPEED = 2.6;
+	/**
+	 * Momentum: a swing chain starts capped at {@code SWING_START_SPEED} and the cap climbs {@code SWING_RAMP} a tick
+	 * while you're on a web, up to {@code MAX_SPEED} (about 8 s of swinging). It holds through releases and new webs in
+	 * the air, and starts over once you're on the ground off the web.
+	 */
+	static final double SWING_START_SPEED = 0.8;
+	static final double SWING_RAMP = 0.011;
 	/** Release timing: letting go while travelling this many degrees above level is perfect; the window either side. */
 	static final double RELEASE_SWEET_ANGLE = 35.0;
 	static final double RELEASE_WINDOW = 35.0;
@@ -93,6 +100,13 @@ public final class WebSwing {
 	 */
 	static final double WINGS_GRAVITY = 0.08;
 	static final double WINGS_MAX_SPEED = 2.0;
+	/**
+	 * Airbrake: hold Sneak while gliding to flare the wings. Speed kept per tick ({@code BRAKE_DRAG}), and the fall
+	 * eases toward {@code BRAKE_SINK} (blocks/tick) at {@code BRAKE_CATCH} a tick, like a parachute catching.
+	 */
+	static final double BRAKE_DRAG = 0.86;
+	static final double BRAKE_SINK = 0.2;
+	static final double BRAKE_CATCH = 0.3;
 	// ===== zip / yank-to ===========================================================================================
 	/** How quickly the reel-in steers your velocity onto the line (0..1 per tick). */
 	static final double ZIP_STEER = 0.55;
@@ -135,7 +149,9 @@ public final class WebSwing {
 	// after a release
 	boolean flying;
 	/** Speed cap for the current free flight (a slingshot launch may exceed the swing cap). */
-	private double flightCap = MAX_SPEED;
+	private double flightCap = SWING_START_SPEED;
+	/** The swing chain's current speed cap (see {@link #SWING_START_SPEED}). */
+	private double momentum = SWING_START_SPEED;
 	// slingshot
 	boolean slinging;
 	float slingDraw;
@@ -149,6 +165,8 @@ public final class WebSwing {
 	private int swingLockout;
 	// wings
 	int wingsTicks;
+	/** Sneak is held while gliding: the wings are flared to airbrake. */
+	boolean braking;
 	/** Jump has been let go since the wings spread (the next press folds them). */
 	private boolean wingsJumpReleased;
 	private int jumpHeldAir;
@@ -176,6 +194,7 @@ public final class WebSwing {
 			ClientPlayNetworking.send(new WebNet.Wings(false));
 		}
 		wingsTicks = 0;
+		braking = false;
 		wingsNeedRelease = false;
 		swingLockout = 0;
 		tricks.reset();
@@ -264,7 +283,7 @@ public final class WebSwing {
 			return;
 		}
 		flying = !player.onGround();
-		flightCap = MAX_SPEED;
+		flightCap = momentum;
 		if (!timed || player.onGround()) {
 			return;
 		}
@@ -340,6 +359,12 @@ public final class WebSwing {
 			swingLockout--;
 		}
 		tricks.tick(player, attached(), flying, wingsTicks > 0, apexY);
+		// the swing's momentum builds while on a web, and is lost on the ground
+		if (attached()) {
+			momentum = Math.min(MAX_SPEED, momentum + SWING_RAMP);
+		} else if (player.onGround() || player.isInWater() || player.isInLava()) {
+			momentum = SWING_START_SPEED;
+		}
 		// the highest point of the current fall (resets on the ground, while rising, on a web or in water)
 		if (player.onGround() || player.getDeltaMovement().y >= 0.0 || attached() || pull != null || player.isInWater() || player.onClimbable()) {
 			apexY = player.getY();
@@ -514,7 +539,7 @@ public final class WebSwing {
 		double moving = Math.max(0.0, swingEnergy - gravity * body.y);
 		swingEnergy = gravity * body.y + moving * PENDULUM_DRAG;
 		// never more than the speed cap's worth
-		swingEnergy = Math.min(swingEnergy, gravity * body.y + 0.5 * MAX_SPEED * MAX_SPEED);
+		swingEnergy = Math.min(swingEnergy, gravity * body.y + 0.5 * momentum * momentum);
 		double speed = Math.sqrt(2.0 * Math.max(0.0, swingEnergy - gravity * body.y));
 		if (tangent.lengthSqr() < 1.0E-6) {
 			// dead still at the top of the arc: gravity starts it back down next tick
@@ -785,6 +810,21 @@ public final class WebSwing {
 			m = m.add((look.x / lookHorizontal * moveHorizontal - m.x) * 0.1, 0.0, (look.z / lookHorizontal * moveHorizontal - m.z) * 0.1);
 		}
 		m = m.multiply(0.99, 0.98, 0.99);
+		boolean brake = player.input.keyPresses.shift();
+		if (brake != braking) {
+			braking = brake;
+			ClientPlayNetworking.send(new WebNet.WingsBrake(brake));
+			if (brake) {
+				play(player, SoundEvents.PHANTOM_FLAP, 0.7F, 0.9F);
+			}
+		}
+		if (brake) {
+			// flared: the wings catch the air, bleeding speed and slowing the fall
+			m = m.multiply(BRAKE_DRAG, 1.0, BRAKE_DRAG);
+			if (m.y < -BRAKE_SINK) {
+				m = new Vec3(m.x, Mth.lerp(BRAKE_CATCH, m.y, -BRAKE_SINK), m.z);
+			}
+		}
 		if (m.length() > WINGS_MAX_SPEED) {
 			m = m.normalize().scale(WINGS_MAX_SPEED);
 		}
@@ -797,6 +837,7 @@ public final class WebSwing {
 	private void foldWings() {
 		if (wingsTicks > 0) {
 			wingsTicks = 0;
+			braking = false;
 			// no cooldown, but let go of Jump and fall another couple of blocks before they open again
 			wingsNeedRelease = true;
 			apexY = player().getY();
@@ -815,7 +856,7 @@ public final class WebSwing {
 		double speed = next.length();
 		player.setDeltaMovement(speed > flightCap ? next.scale(flightCap / speed) : next);
 		// a slingshot's extra speed bleeds back down to the normal cap
-		flightCap = Math.max(MAX_SPEED, flightCap * 0.99);
+		flightCap = Math.max(momentum, flightCap * 0.99);
 	}
 
 	private void tickPull(LocalPlayer player) {
@@ -887,9 +928,9 @@ public final class WebSwing {
 		return player.level().getBlockState(pos).getCollisionShape(player.level(), pos).isEmpty();
 	}
 
-	private static Vec3 cap(Vec3 v) {
+	private Vec3 cap(Vec3 v) {
 		double speed = v.length();
-		return speed > MAX_SPEED ? v.scale(MAX_SPEED / speed) : v;
+		return speed > momentum ? v.scale(momentum / speed) : v;
 	}
 
 	private static double rnd(LocalPlayer player) {

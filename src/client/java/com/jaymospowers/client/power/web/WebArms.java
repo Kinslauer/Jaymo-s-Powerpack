@@ -54,7 +54,7 @@ public final class WebArms {
 
 	/** This frame's pose: an arm's aim is null when that hand has no web out. Angles are model-part radians. */
 	public record Pose(float amount, float @Nullable [] mainArm, float @Nullable [] offArm, float legTrail, float legSide, float wings, float lean,
-		float swayPitch, float swayRoll) {
+		float brake, float swayPitch, float swayRoll) {
 	}
 
 	/**
@@ -70,6 +70,18 @@ public final class WebArms {
 
 	/** Spread wings: how far the arms are raised out from the sides (radians from hanging down). */
 	private static final float WING_SPREAD = 1.35F;
+	/**
+	 * Airbrake (Sneak while gliding): the body rears up out of the glide, leaning back this far (degrees), the arms
+	 * swept up and out ({@code BRAKE_SPREAD}, radians from hanging) and beating forward, between {@code BRAKE_REACH}
+	 * and {@code BRAKE_REACH + BRAKE_BEAT} radians ahead, {@code BRAKE_BEAT_SPEED} radians of the stroke a tick. The
+	 * legs tuck up ({@code BRAKE_TUCK}).
+	 */
+	private static final float BRAKE_LEAN_BACK = 15.0F;
+	private static final float BRAKE_SPREAD = 2.2F;
+	private static final float BRAKE_REACH = 0.25F;
+	private static final float BRAKE_BEAT = 0.55F;
+	private static final float BRAKE_BEAT_SPEED = 0.7F;
+	private static final float BRAKE_TUCK = 0.9F;
 	/**
 	 * Hanging from a web, the body swings from the shoulders like a pendulum (as a hovering Wind flyer's does): moving
 	 * one way, the legs trail the other. Lean per block/tick of motion, the most it leans, the spring and damping.
@@ -92,6 +104,7 @@ public final class WebArms {
 		float side, sideVel, prevSide;
 		float amount, prevAmount;
 		float wings, prevWings;
+		float brake, prevBrake;
 		int wingsAge;
 		float lean, prevLean;
 		float swayPitch, swayPitchVel, prevSwayPitch;
@@ -118,6 +131,7 @@ public final class WebArms {
 			Vec3 off = lineEnd(minecraft, level, player, WebNet.OFF, 1.0F);
 			boolean zipping = zipping(minecraft, player);
 			boolean winged = isWinged(minecraft, player);
+			boolean braking = winged && isBraking(minecraft, player);
 			Body body = BODIES.get(player.getId());
 			if (body == null) {
 				if (main == null && off == null && !winged && !zipping) {
@@ -127,6 +141,8 @@ public final class WebArms {
 				BODIES.put(player.getId(), body);
 			}
 			body.prevWings = body.wings;
+			body.prevBrake = body.brake;
+			body.brake = braking ? Math.min(1.0F, body.brake + 0.25F) : Math.max(0.0F, body.brake - 0.2F);
 			body.wings = winged ? Math.min(1.0F, body.wings + 0.3F) : Math.max(0.0F, body.wings - 0.2F);
 			// the lean comes on gradually through the glide (smoothstep), and comes back up quickly when the wings fold
 			body.wingsAge = winged ? body.wingsAge + 1 : 0;
@@ -162,6 +178,23 @@ public final class WebArms {
 		return player.getAttached(WebPower.WINGS) != null;
 	}
 
+	private static boolean isBraking(Minecraft minecraft, Player player) {
+		if (player == minecraft.player) {
+			return WebPowerClient.INSTANCE.swing.braking;
+		}
+		return player.getAttached(WebPower.WINGS_BRAKE) != null;
+	}
+
+	/** The glide lean (degrees, tipping the top forward), easing back past upright as the wings flare to brake. */
+	private static float leanDegrees(float lean, float brake) {
+		return GLIDE_LEAN * lean * (1.0F - brake) - BRAKE_LEAN_BACK * brake;
+	}
+
+	/** The airbrake's forward arm beat (radians ahead of the spread), for a player's age in ticks. */
+	private static float brakeReach(float ageInTicks) {
+		return BRAKE_REACH + BRAKE_BEAT * (0.5F + 0.5F * Mth.sin(ageInTicks * BRAKE_BEAT_SPEED));
+	}
+
 	/** How spread a player's wings are this frame (0 = folded). */
 	static float wings(Player player, float partialTick) {
 		Body body = BODIES.get(player.getId());
@@ -172,7 +205,7 @@ public final class WebArms {
 
 	/** This frame's glide lean (radians, tipping the top forward) and swing sway (radians), as drawn. */
 	private static float leanAngle(Body body, float partialTick) {
-		return Mth.lerp(partialTick, body.prevLean, body.lean) * GLIDE_LEAN * Mth.DEG_TO_RAD;
+		return leanDegrees(Mth.lerp(partialTick, body.prevLean, body.lean), Mth.lerp(partialTick, body.prevBrake, body.brake)) * Mth.DEG_TO_RAD;
 	}
 
 	private static float swayPitch(Body body, float partialTick) {
@@ -235,9 +268,15 @@ public final class WebArms {
 		Vec3 right = new Vec3(-Mth.cos(bodyYaw), 0.0, -Mth.sin(bodyYaw));
 		double scale = player.getScale();
 		Vec3 shoulder = player.getPosition(partialTick).add(right.scale(side * SHOULDER_OUT * scale)).add(0.0, SHOULDER_HEIGHT * scale, 0.0);
-		double angle = WING_SPREAD * spread;
-		return posed(player, shoulder.add(right.scale(side * Math.sin(angle) * ARM_LENGTH * 1.25 * scale))
-			.add(0.0, -Math.cos(angle) * ARM_LENGTH * 1.25 * scale, 0.0), partialTick);
+		Body body = BODIES.get(player.getId());
+		float brake = body == null ? 0.0F : Mth.lerp(partialTick, body.prevBrake, body.brake);
+		// the arm swings forward (reach) then out to the side (angle), as the model turns it
+		double angle = Mth.lerp(brake, WING_SPREAD, BRAKE_SPREAD) * spread;
+		double reach = brake * brakeReach(player.tickCount + partialTick) * spread;
+		Vec3 back = new Vec3(Mth.sin(bodyYaw), 0.0, -Mth.cos(bodyYaw));
+		double length = ARM_LENGTH * 1.25 * scale;
+		return posed(player, shoulder.add(right.scale(side * Math.sin(angle) * Math.cos(reach) * length))
+			.add(0.0, -Math.cos(angle) * Math.cos(reach) * length, 0.0).add(back.scale(-Math.sin(reach) * length)), partialTick);
 	}
 
 	/** Where a wing's web meets the body: the hip on that side, and the shoulder. */
@@ -413,12 +452,17 @@ public final class WebArms {
 			state.setData(KEY, null);
 			return;
 		}
+		if (wings > 0.001F) {
+			// Sneak while gliding flares the wings to brake: the glide pose has the body, not a crouch
+			state.isCrouching = false;
+		}
 		float bodyYaw = Mth.lerp(partialTicks, player.yBodyRotO, player.yBodyRot);
 		float[] main = aim(player, body, WebNet.MAIN, bodyYaw, partialTicks);
 		float[] off = aim(player, body, WebNet.OFF, bodyYaw, partialTicks);
 		state.setData(KEY, new Pose(amount, main, off,
 			Mth.lerp(partialTicks, body.prevTrail, body.trail), Mth.lerp(partialTicks, body.prevSide, body.side), wings,
-			Mth.lerp(partialTicks, body.prevLean, body.lean), swayPitch(body, partialTicks), swayRoll(body, partialTicks)));
+			Mth.lerp(partialTicks, body.prevLean, body.lean), Mth.lerp(partialTicks, body.prevBrake, body.brake), swayPitch(body, partialTicks),
+			swayRoll(body, partialTicks)));
 	}
 
 	/** An arm's {xRot, yRot} pointing it along its web, relative to the body (as the bow-aiming pose does it). */
@@ -449,9 +493,10 @@ public final class WebArms {
 			return;
 		}
 		float height = state.boundingBoxHeight / Math.max(entityScale, 0.01F);
-		if (pose.lean() > 0.001F) {
+		float lean = leanDegrees(pose.lean(), pose.brake());
+		if (Math.abs(lean) > 0.05F) {
 			poseStack.translate(0.0F, height * LEAN_PIVOT, 0.0F);
-			poseStack.rotateDegrees(com.mojang.math.Axis.XP, -GLIDE_LEAN * pose.lean());
+			poseStack.rotateDegrees(com.mojang.math.Axis.XP, -lean);
 			poseStack.translate(0.0F, -height * LEAN_PIVOT, 0.0F);
 		}
 		if (Math.abs(pose.swayPitch()) > 1.0E-4F || Math.abs(pose.swayRoll()) > 1.0E-4F) {
@@ -481,7 +526,16 @@ public final class WebArms {
 			set(humanoid.rightLeg, 0.15F, 0.0F, 0.05F, w);
 			set(humanoid.leftLeg, 0.15F, 0.0F, -0.05F, w);
 			// leaning into the glide: head up to look ahead
-			set(humanoid.head, -1.1F * pose.lean(), humanoid.head.yRot, 0.0F, w);
+			set(humanoid.head, -1.1F * pose.lean() * (1.0F - pose.brake()), humanoid.head.yRot, 0.0F, w);
+			if (pose.brake() > 0.001F) {
+				// airbrake: arms swept up and out, beating forward against the air, legs tucked up under
+				float b = pose.brake() * w;
+				float reach = brakeReach(avatar.ageInTicks);
+				set(humanoid.rightArm, -reach, 0.0F, BRAKE_SPREAD, b);
+				set(humanoid.leftArm, -reach, 0.0F, -BRAKE_SPREAD, b);
+				set(humanoid.rightLeg, -BRAKE_TUCK, 0.0F, 0.12F, b);
+				set(humanoid.leftLeg, -BRAKE_TUCK * 0.85F, 0.0F, -0.12F, b);
+			}
 		}
 		float amount = pose.amount();
 		boolean mainRight = avatar.mainArm != HumanoidArm.LEFT;

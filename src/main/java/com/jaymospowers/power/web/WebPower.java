@@ -90,8 +90,8 @@ public final class WebPower implements Power {
 	public static final double PLAYER_TETHER_MAX_PULL = 0.22;
 	public static final double PLAYER_STRAIN_OVER = 1.5;
 	public static final int PLAYER_STRAIN_TICKS = 30;
-	/** Wings spread work like Feather Falling IV: fall damage is cut by this fraction (and for a moment after folding). */
-	public static final double WINGS_FEATHER_FALLING = 0.48;
+	/** Landing out of a wing glide doesn't hurt: fall damage is cut by this fraction while spread (and a moment after folding). */
+	public static final double WINGS_FEATHER_FALLING = 1.0;
 	public static final int WINGS_FEATHER_LINGER = 10;
 	private static final Identifier FEATHER_ID = JaymosPowers.id("web_wings_feather");
 	/** Web Shot launch speed (a snowball is 1.5). */
@@ -112,6 +112,9 @@ public final class WebPower implements Power {
 	public static final AttachmentType<Boolean> CHARGING = AttachmentRegistry.create(JaymosPowers.id("web_charging"),
 		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	public static final AttachmentType<Boolean> WINGS = AttachmentRegistry.create(JaymosPowers.id("web_wings"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** Spread wings flared to airbrake (Sneak while gliding), for everyone to draw. */
+	public static final AttachmentType<Boolean> WINGS_BRAKE = AttachmentRegistry.create(JaymosPowers.id("web_wings_brake"),
 		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	/** Wings last a few seconds; the server folds them itself after this long in case the client never says so. */
 	public static final int WINGS_TICKS = 80;
@@ -260,6 +263,7 @@ public final class WebPower implements Power {
 		WebDebugCommand.register();
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Swing.TYPE, (payload, ctx) -> INSTANCE.onSwing(ctx.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Wings.TYPE, (payload, ctx) -> INSTANCE.onWings(ctx.player(), payload.open()));
+		ServerPlayNetworking.registerGlobalReceiver(WebNet.WingsBrake.TYPE, (payload, ctx) -> INSTANCE.onWingsBrake(ctx.player(), payload.on()));
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.ChargeHold.TYPE, (payload, ctx) -> {
 			if (Powers.has(ctx.player(), INSTANCE)) {
 				state(ctx.player()).chargeHold = payload.held() && (WebSymbiote.suitShown(ctx.player()) || WebSymbiote.driving(ctx.player()));
@@ -453,6 +457,7 @@ public final class WebPower implements Power {
 			player.removeAttached(LINE);
 			player.removeAttached(LINE_OFF);
 			player.removeAttached(WINGS);
+			player.removeAttached(WINGS_BRAKE);
 			player.removeAttached(TETHER);
 			return;
 		}
@@ -476,8 +481,9 @@ public final class WebPower implements Power {
 		if (state.wingsTicks > 0 && (player.isInWater() || player.onGround() && ++state.wingsTicks > 3)) {
 			state.wingsTicks = 0;
 			player.removeAttached(WINGS);
+			player.removeAttached(WINGS_BRAKE);
 		}
-		// the wings break a fall like Feather Falling (fall damage itself still applies)
+		// a landing out of a wing glide doesn't hurt
 		if (player.getAttached(WINGS) != null) {
 			if (state.featherTicks == 0) {
 				feather(player, true);
@@ -576,6 +582,18 @@ public final class WebPower implements Power {
 		} else {
 			state.wingsTicks = 0;
 			player.removeAttached(WINGS);
+			player.removeAttached(WINGS_BRAKE);
+		}
+	}
+
+	private void onWingsBrake(ServerPlayer player, boolean on) {
+		if (!on || player.getAttached(WINGS) == null) {
+			player.removeAttached(WINGS_BRAKE);
+			return;
+		}
+		if (player.getAttached(WINGS_BRAKE) == null) {
+			player.setAttached(WINGS_BRAKE, true);
+			player.level().playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.PHANTOM_FLAP, SoundSource.PLAYERS, 0.6F, 0.9F);
 		}
 	}
 
