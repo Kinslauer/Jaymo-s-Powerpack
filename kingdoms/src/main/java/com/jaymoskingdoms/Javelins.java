@@ -152,6 +152,9 @@ final class Javelins {
 			|| e.getOffhandItem().getItem() instanceof BowItem || e.getOffhandItem().getItem() instanceof CrossbowItem;
 	}
 
+	/** While a rock's blow is being dealt again (so it isn't again and again). */
+	private static boolean redealing;
+
 	/** A javelin spares the thrower's own side (and, from a defender, the villagers and golems he guards). */
 	private static boolean allowDamage(LivingEntity victim, DamageSource source, float amount) {
 		if (!(source.getDirectEntity() instanceof Projectile javelin) || !THROWN.contains(javelin) || !(source.getEntity() instanceof Folk thrower)) {
@@ -165,9 +168,15 @@ final class Javelins {
 		} else {
 			allowed = !(victim instanceof Player p && p.isCreative());
 		}
-		if (allowed && javelin instanceof Snowball && amount < ROCK_DAMAGE && victim.level() instanceof ServerLevel level) {
-			// a snowball does no harm: the rock's blow, dealt again with its weight
-			victim.hurtServer(level, source, ROCK_DAMAGE);
+		if (allowed && !redealing && javelin instanceof Snowball && amount < ROCK_DAMAGE && victim.level() instanceof ServerLevel level) {
+			// a snowball does no harm: the rock's blow, dealt again with its weight (once: some mobs, like MCA's
+			// villagers, soften a blow before it gets here)
+			redealing = true;
+			try {
+				victim.hurtServer(level, source, ROCK_DAMAGE);
+			} finally {
+				redealing = false;
+			}
 			return false;
 		}
 		return allowed;

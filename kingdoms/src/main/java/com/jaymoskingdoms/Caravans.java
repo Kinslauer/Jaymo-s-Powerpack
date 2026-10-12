@@ -667,7 +667,7 @@ final class Caravans {
 	 * A rider out of the saddle (a horse dismounts its rider under water): back on once both are out of it; till then
 	 * his horse wades after him.
 	 */
-	private static void remount(Entity rider, Entity horse) {
+	static void remount(Entity rider, Entity horse) {
 		if (rider.getVehicle() == horse) {
 			return;
 		}
@@ -686,17 +686,7 @@ final class Caravans {
 	/** The column set down further along its road. */
 	private static void hop(ServerLevel level, List<Entity[]> carts, List<Folk> guards, Vec3 to) {
 		for (Entity[] cart : carts) {
-			Vec3 here = cart[1].position();
-			Vec3 flat = new Vec3(to.x - here.x, 0.0, to.z - here.z);
-			double len = flat.length();
-			if (len < 1.0E-3) {
-				continue;
-			}
-			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, BlockPos.containing(here.add(flat.scale(Math.min(HOP, len) / len))));
-			poof(level, cart[1]);
-			Cavalry.teleport(cart[0], at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
-			cart[2].snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, cart[1].getYRot(), 0.0F);
-			poof(level, cart[1]);
+			hop(level, cart[0], cart[1], cart[2], to);
 		}
 		for (Folk g : guards) {
 			Vec3 here = g.position();
@@ -708,6 +698,21 @@ final class Caravans {
 			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, BlockPos.containing(here.add(flat.scale(Math.min(HOP, len) / len))));
 			Cavalry.teleport(g, at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
 		}
+	}
+
+	/** One cart (its carter, horse and wagon) helped over what stops it, toward {@code to}. */
+	static void hop(ServerLevel level, Entity carter, Entity horse, Entity wagon, Vec3 to) {
+		Vec3 here = horse.position();
+		Vec3 flat = new Vec3(to.x - here.x, 0.0, to.z - here.z);
+		double len = flat.length();
+		if (len < 1.0E-3) {
+			return;
+		}
+		BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, BlockPos.containing(here.add(flat.scale(Math.min(HOP, len) / len))));
+		poof(level, horse);
+		Cavalry.teleport(carter, at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+		wagon.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, horse.getYRot(), 0.0F);
+		poof(level, horse);
 	}
 
 	/** Comes into the world where it's got to: its carts in a column along its road, its guards beside them. */
@@ -893,6 +898,9 @@ final class Caravans {
 		Caravan c = get(server, wagon.caravan());
 		level.playSound(null, wagon.blockPosition(), SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.NEUTRAL, 1.0F, 1.0F);
 		level.levelEvent(2001, wagon.blockPosition(), Block.getId(net.minecraft.world.level.block.Blocks.BARREL.defaultBlockState()));
+		if (wagon.caravan() == Wagon.WAR_CART) {
+			WarParties.cartBroken(level, wagon);
+		}
 		if (c != null && wagon.slot() < c.carts().size()) {
 			for (Map.Entry<String, Integer> e : c.carts().get(wagon.slot()).entrySet()) {
 				Item item = item(e.getKey());
@@ -922,6 +930,9 @@ final class Caravans {
 	/** What a cart carries, for a player who looks. */
 	static Component describe(ServerLevel level, Wagon wagon) {
 		MinecraftServer server = level.getServer();
+		if (wagon.caravan() == Wagon.WAR_CART) {
+			return WarParties.describe(level, wagon);
+		}
 		Caravan c = get(server, wagon.caravan());
 		if (c == null || wagon.slot() >= c.carts().size() || c.carts().get(wagon.slot()).isEmpty()) {
 			return Component.translatable("message.jaymoskingdoms.caravan.empty_cart", nameOf(server, wagon.faction()));
@@ -966,6 +977,15 @@ final class Caravans {
 			}
 		}
 		entity.discard();
+	}
+
+	/** (0.5.26) Steers a caravan folk (a war party's carter too) toward {@code to}, or (null) lets it be. */
+	static void steer(Folk folk, @Nullable Vec3 to) {
+		if (to == null) {
+			HEADING.remove(folk.getUUID());
+		} else {
+			HEADING.put(folk.getUUID(), to);
+		}
 	}
 
 	/** Steers a caravan's folk where their caravan sends them. */
