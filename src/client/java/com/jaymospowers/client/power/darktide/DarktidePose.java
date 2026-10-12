@@ -22,7 +22,8 @@ import org.jspecify.annotations.Nullable;
  * Darktide drawn on bodies (any humanoid model: players, and the zombies or illagers that reel from a riposte): the
  * guard (a fist guard unarmed, chūdan with a katana, both knives up), the four kendo kamae of Gedan (gedan, chūdan,
  * jōdan, hassō; a parry steps from one to the next and the arms travel there), the riposte's slash from the shoulder
- * across the body, Crescent's sweep, Ink Cross, the knife moves, the cast, reeling and the stagger. Everything is set
+ * across the body, Dark Strike's charge (a blade raised overhead, or a fist drawn back) and its blow, Crescent's sweep,
+ * Ink Cross, the knife moves, the cast, reeling and the stagger. Everything is set
  * outright from the move's progress, after the model's own animation.
  */
 public final class DarktidePose {
@@ -176,6 +177,17 @@ public final class DarktidePose {
 		e = smooth(Mth.clamp(e, 0.0F, 1.0F));
 		switch (pose.kind) {
 			case DarktideMove.STRIKE -> {
+				if ((pose.variant & 2) != 0) {
+					// the blade brought down from overhead, both hands on it
+					float cut = smooth(seg(p, 0.0F, 0.35F));
+					float hold = 1.0F - seg(p, 0.6F, 1.0F);
+					set(h.rightArm, Mth.lerp(cut, -2.95F, -0.7F), -0.15F, 0.0F, hold);
+					set(h.leftArm, Mth.lerp(cut, -2.85F, -0.75F), 0.35F, 0.0F, hold);
+					h.body.xRot = 0.25F * cut * hold;
+					set(h.rightLeg, -0.4F, 0.0F, 0.0F, hold);
+					set(h.leftLeg, 0.35F, 0.0F, 0.0F, hold);
+					break;
+				}
 				set(h.rightArm, -Mth.HALF_PI - 0.1F, -0.1F, 0.0F, e);
 				set(h.leftArm, -1.2F, 0.4F, 0.2F, Math.max(e, 0.5F));
 				h.body.yRot = -0.4F * e;
@@ -192,6 +204,27 @@ public final class DarktidePose {
 				h.body.xRot = 0.2F * cut * hold;
 				set(h.rightLeg, -0.45F, 0.0F, 0.0F, hold);
 				set(h.leftLeg, 0.4F, 0.0F, 0.0F, hold);
+			}
+			case DarktideMove.CHARGE -> {
+				float up = smooth(seg(pose.ticks, 0.0F, 5.0F));
+				float c = Mth.clamp(pose.ticks / DarktideMove.CHARGE_FULL_TICKS, 0.0F, 1.0F);
+				// at full charge the arms shake with it
+				float shake = c >= 1.0F ? 0.03F * Mth.sin(pose.ticks * 2.5F) : 0.0F;
+				if (pose.variant == DarktideMove.CHARGE_FIST) {
+					// the right fist drawn back by the hip, the left held out before you, the body wound up
+					set(h.rightArm, 0.55F + 0.35F * c + shake, 0.25F, 0.25F, up);
+					set(h.leftArm, -1.3F, 0.45F, 0.0F, up);
+					h.body.yRot = 0.5F * c * up;
+					set(h.rightLeg, 0.35F, 0.0F, 0.0F, up);
+					set(h.leftLeg, -0.35F, 0.0F, 0.0F, up);
+				} else {
+					// the blade raised high overhead in both hands, leaning back into it as the charge builds
+					set(h.rightArm, -2.85F - 0.25F * c + shake, -0.15F, 0.1F, up);
+					set(h.leftArm, -2.75F - 0.25F * c + shake, 0.35F, -0.1F, up);
+					h.body.xRot = -0.12F * c * up;
+					set(h.rightLeg, -0.3F, 0.0F, 0.0F, up);
+					set(h.leftLeg, 0.3F, 0.0F, 0.0F, up);
+				}
 			}
 			case DarktideMove.CRESCENT -> {
 				float sweep = smooth(seg(p, 0.05F, 0.6F));

@@ -21,6 +21,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -41,17 +42,23 @@ import org.jspecify.annotations.Nullable;
 /**
  * R, G, V and B, with their ascended knife versions:
  * <ul>
- * <li>R Dark Strike: {@link #STRIKE_FACTOR}× your hand or weapon; after a parry {@link #EMPOWERED_FACTOR}× for {@link #EMPOWER_FLOW} Flow.</li>
+ * <li>R Dark Strike, held to charge (full at {@link DarktideMove#CHARGE_FULL_TICKS}): a blade raised overhead hits for
+ * 1-{@link #STRIKE_FACTOR}× its damage, a fist drawn back for {@link #PUNCH_MIN}-{@link #PUNCH_MAX}; after a parry
+ * ×{@link #EMPOWERED_FACTOR}/{@link #STRIKE_FACTOR} more for {@link #EMPOWER_FLOW} Flow.</li>
  * <li>R (knives, ascended) Pounce: a stab stance, then a leap onto the enemy's back; three stabs on a crippled humanoid.</li>
  * <li>V Undertow: sink into water or shadow where you look and surface there.</li>
- * <li>G Crescent (katana): a 120° slash; Ink Cross (knife): a crossing slash that slows; Fang Barrage (knives, ascended).</li>
+ * <li>G Crescent (katana): a 120° slash; Ink Cross (knife): a crossing slash that slows; Fang Barrage (knives, ascended).
+ * Every G hit goes for the legs: a humanoid it hits is crippled, wherever you aim.</li>
  * <li>B Black Tide: a rolling wave of dark water; Riptide Dash (knives, ascended), a flurry when R is held.</li>
  * </ul>
  */
 final class DarktideMoves {
 	// ---- R: Dark Strike ----
 	static final double STRIKE_REACH = 3.5;
+	/** A blade at full charge: this many times its damage (1× uncharged); empowered: {@link #EMPOWERED_FACTOR} at full charge. */
 	static final float STRIKE_FACTOR = 1.5F, EMPOWERED_FACTOR = 2.5F;
+	/** A bare fist: damage uncharged and at full charge. */
+	static final float PUNCH_MIN = 1.0F, PUNCH_MAX = 5.0F;
 	static final float EMPOWER_FLOW = 25.0F;
 	static final int STRIKE_COOLDOWN = 60;
 	// ---- V: Undertow ----
@@ -158,6 +165,15 @@ final class DarktideMoves {
 		return hurt;
 	}
 
+	/** A G hit: always at the legs, so a humanoid it hurts is crippled. */
+	static boolean hitLegs(ServerPlayer player, LivingEntity target, float damage) {
+		boolean hurt = hit(player, target, damage);
+		if (hurt && target.isAlive() && DarktideStatus.humanoid(target)) {
+			DarktideStatus.cripple(target);
+		}
+		return hurt;
+	}
+
 	private static List<LivingEntity> around(ServerPlayer player, AABB box) {
 		return player.level().getEntitiesOfClass(LivingEntity.class, box, e -> e.isAlive() && !e.isSpectator() && !friendly(player, e));
 	}
@@ -172,34 +188,74 @@ final class DarktideMoves {
 
 	// ---- R: Dark Strike -----------------------------------------------------------------------------------------------
 
-	static void darkStrike(ServerPlayer player) {
-		if (!readyOrSilent(player, DarktideState.STRIKE)) {
+	/** R down: the blade goes up overhead (or the fist draws back) and the charge builds. */
+	static void chargeStrike(ServerPlayer player) {
+		DarktideLive live = DarktidePower.live(player);
+		if (live.strikeStart >= 0L || !readyOrSilent(player, DarktideState.STRIKE)) {
 			return;
 		}
+		ServerLevel level = player.level();
+		live.strikeStart = level.getGameTime();
+		boolean fist = DarktideWeapons.kit(player) == DarktideWeapons.Kit.UNARMED;
+		DarktideMove.play(player, DarktideMove.CHARGE, DarktideMove.CHARGE_HOLD_MAX, fist ? DarktideMove.CHARGE_FIST : DarktideMove.CHARGE_BLADE);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_GENERIC.value(), SoundSource.PLAYERS, 0.6F, 0.7F);
+	}
+
+	/** How far the charge has built, 0-1. */
+	static float charge(DarktideLive live, long now) {
+		return live.strikeStart < 0L ? 0.0F : Mth.clamp((now - live.strikeStart) / (float) DarktideMove.CHARGE_FULL_TICKS, 0.0F, 1.0F);
+	}
+
+	/** R released: the blow, as hard as the charge built. */
+	static void releaseStrike(ServerPlayer player) {
 		DarktideLive live = DarktidePower.live(player);
+		if (live.strikeStart < 0L) {
+			return;
+		}
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
+		float charge = charge(live, now);
+		live.strikeStart = -1L;
+		boolean fist = DarktideWeapons.kit(player) == DarktideWeapons.Kit.UNARMED;
 		boolean empowered = now < live.empoweredUntil && live.flow >= EMPOWER_FLOW;
-		DarktideMove.play(player, DarktideMove.STRIKE, DarktideMove.STRIKE_TICKS, empowered ? 1 : 0);
+		DarktideMove.play(player, DarktideMove.STRIKE, DarktideMove.STRIKE_TICKS, (empowered ? 1 : 0) | (fist ? 0 : 2));
 		swing(player);
 		LivingEntity target = pick(player, STRIKE_REACH);
 		if (target != null) {
+			float damage = fist ? Mth.lerp(charge, PUNCH_MIN, PUNCH_MAX) : weapon(player) * Mth.lerp(charge, 1.0F, STRIKE_FACTOR);
 			if (empowered) {
 				live.flow -= EMPOWER_FLOW;
 				live.empoweredUntil = 0L;
+				damage *= EMPOWERED_FACTOR / STRIKE_FACTOR;
 			}
-			hit(player, target, weapon(player) * (empowered ? EMPOWERED_FACTOR : STRIKE_FACTOR));
+			hit(player, target, damage);
 			Vec3 at = target.position().add(0.0, target.getBbHeight() * 0.6, 0.0);
 			if (empowered) {
 				level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 24, 0.3, 0.4, 0.3, 0.12);
 				level.sendParticles(new DustParticleOptions(0x0A0F2A, 2.0F), at.x, at.y, at.z, 16, 0.4, 0.4, 0.4, 0.0);
 				level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 0.8F, 1.2F);
 			} else {
-				level.sendParticles(ParticleTypes.SPLASH, at.x, at.y, at.z, 12, 0.3, 0.3, 0.3, 0.2);
+				level.sendParticles(ParticleTypes.SPLASH, at.x, at.y, at.z, 6 + Math.round(12 * charge), 0.3, 0.3, 0.3, 0.2);
 			}
 		}
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.8F, 0.9F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), charge >= 1.0F ? SoundEvents.PLAYER_ATTACK_STRONG : SoundEvents.PLAYER_ATTACK_WEAK,
+			SoundSource.PLAYERS, 0.8F, 0.9F);
 		DarktidePower.cooldown(player, DarktideState.STRIKE, STRIKE_COOLDOWN);
+	}
+
+	private static void tickCharge(ServerPlayer player, DarktideLive live) {
+		long now = player.level().getGameTime();
+		// let go without the key-up arriving (a screen opened, the power changed hands), or held too long
+		if (!PowerInput.isDown(player, PowerKey.ABILITY_1) || now - live.strikeStart >= DarktideMove.CHARGE_HOLD_MAX) {
+			releaseStrike(player);
+			return;
+		}
+		if (now - live.strikeStart == DarktideMove.CHARGE_FULL_TICKS) {
+			// full: a glint on the blade or fist
+			Vec3 hand = player.position().add(0.0, DarktideWeapons.kit(player) == DarktideWeapons.Kit.UNARMED ? 1.0 : 2.3, 0.0);
+			player.level().sendParticles(ParticleTypes.SQUID_INK, hand.x, hand.y, hand.z, 6, 0.15, 0.15, 0.15, 0.02);
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_RETURN, SoundSource.PLAYERS, 0.6F, 1.4F);
+		}
 	}
 
 	// ---- G: Crescent / Ink Cross --------------------------------------------------------------------------------------
@@ -219,7 +275,7 @@ final class DarktideMoves {
 		targets.sort(Comparator.comparingDouble(e -> e.distanceToSqr(player)));
 		float damage = weapon(player) + CRESCENT_BONUS;
 		for (int i = 0; i < Math.min(CRESCENT_TARGETS, targets.size()); i++) {
-			hit(player, targets.get(i), damage);
+			hitLegs(player, targets.get(i), damage);
 		}
 		DarktideMove.play(player, DarktideMove.CRESCENT, DarktideMove.CRESCENT_TICKS, 0);
 		swing(player);
@@ -249,7 +305,7 @@ final class DarktideMoves {
 			return;
 		}
 		ServerLevel level = player.level();
-		hit(player, target, weapon(player) * INK_CROSS_FACTOR);
+		hitLegs(player, target, weapon(player) * INK_CROSS_FACTOR);
 		target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, INK_CROSS_SLOW_TICKS, INK_CROSS_SLOW_AMPLIFIER), player);
 		DarktideMove.play(player, DarktideMove.INK_CROSS, DarktideMove.INK_CROSS_TICKS, 0);
 		swing(player);
@@ -516,7 +572,7 @@ final class DarktideMoves {
 			}
 			for (int id : barrage.held) {
 				if (level.getEntity(id) instanceof LivingEntity target && target.isAlive()) {
-					hit(player, target, BARRAGE_DAMAGE);
+					hitLegs(player, target, BARRAGE_DAMAGE);
 				}
 			}
 			swing(player);
@@ -634,6 +690,9 @@ final class DarktideMoves {
 			live.undertow = null;
 			surface(player, undertow);
 		}
+		if (live.strikeStart >= 0L) {
+			tickCharge(player, live);
+		}
 		if (live.pounce != null) {
 			tickPounce(player, live);
 		}
@@ -682,6 +741,7 @@ final class DarktideMoves {
 			return;
 		}
 		live.undertow = null;
+		live.strikeStart = -1L;
 		live.pounce = null;
 		live.dash = null;
 		if (live.barrage != null) {

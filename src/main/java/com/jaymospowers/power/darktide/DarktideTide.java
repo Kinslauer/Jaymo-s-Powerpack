@@ -44,9 +44,10 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * C. Ascended: <b>Tide Arms</b> (bare hands → twin daggers → katana of dark water; your real items are stored and come
- * back), and at night <b>Necromancy</b> (hold on a Jaymo's Kitchen corpse to harvest its shadow; tap to raise one, which
- * follows and defends you until sunrise). The Drowned Dark not ascended: <b>Drown</b>, a sphere of water around a target.
+ * C and Z. Ascended: sneak + C <b>Tide Arms</b> (bare hands → twin daggers → katana of dark water; your real items are
+ * stored and come back); while corrupted, <b>Necromancy</b>: hold Z on a Jaymo's Kitchen corpse to take its shadow, tap C
+ * to raise one, which follows and defends you until the corruption lifts. Corrupted, not ascended: C is <b>Drown</b>, a
+ * sphere of water around a target.
  */
 final class DarktideTide {
 	// ---- Tide Arms ----
@@ -85,10 +86,35 @@ final class DarktideTide {
 
 	// ---- keys ---------------------------------------------------------------------------------------------------------
 
-	/** C for an ascended Darktide. */
+	/**
+	 * C. Ascended: sneaking, Tide Arms; a tap raises a shadow while corrupted (cured, the shadows are dormant).
+	 * Not ascended: Drown while corrupted.
+	 */
 	static void ultimateKey(ServerPlayer player, boolean down) {
+		if (!down) {
+			return;
+		}
+		boolean ascended = Fate.isAscended(player);
+		boolean corrupted = DarktidePower.corrupted(player);
+		if (ascended && player.isShiftKeyDown()) {
+			cycleArms(player);
+		} else if (!ascended) {
+			if (corrupted) {
+				drownKey(player, true);
+			}
+		} else if (!corrupted) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.shadows_dormant").withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
+		} else if (DarktideState.save(player).shadows().isEmpty()) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.no_shadows").withStyle(ChatFormatting.GRAY));
+		} else {
+			raise(player);
+		}
+	}
+
+	/** Z (ascended): hold on a corpse to take its shadow, while corrupted. */
+	static void modeKey(ServerPlayer player, boolean down) {
 		DarktideLive live = DarktidePower.live(player);
-		live.ultimateDown = down;
+		live.modeDown = down;
 		if (!down) {
 			if (live.harvesting >= 0) {
 				live.harvesting = -1;
@@ -96,27 +122,25 @@ final class DarktideTide {
 			}
 			return;
 		}
-		if (DarktideFlow.night(player.level())) {
-			Entity corpse = aimedCorpse(player);
-			if (corpse != null) {
-				if (DarktideState.save(player).shadows().size() >= MAX_SHADOWS) {
-					player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.shadows_full").withStyle(ChatFormatting.GRAY));
-					return;
-				}
-				live.harvesting = corpse.getId();
-				live.harvestStart = player.level().getGameTime();
-				DarktideMove.play(player, DarktideMove.CAST, HARVEST_TICKS, 1);
-				return;
-			}
-			if (!DarktideState.save(player).shadows().isEmpty()) {
-				raise(player);
-				return;
-			}
+		if (!DarktidePower.corrupted(player)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.shadows_dormant").withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
+			return;
 		}
-		cycleArms(player);
+		Entity corpse = aimedCorpse(player);
+		if (corpse == null) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.no_corpse").withStyle(ChatFormatting.GRAY));
+			return;
+		}
+		if (DarktideState.save(player).shadows().size() >= MAX_SHADOWS) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.shadows_full").withStyle(ChatFormatting.GRAY));
+			return;
+		}
+		live.harvesting = corpse.getId();
+		live.harvestStart = player.level().getGameTime();
+		DarktideMove.play(player, DarktideMove.CAST, HARVEST_TICKS, 1);
 	}
 
-	/** C for the Drowned Dark that isn't ascended: Drown. */
+	/** Drown (C, corrupted and not ascended). */
 	static void drownKey(ServerPlayer player, boolean down) {
 		if (!down || !DarktidePower.ready(player, DarktideState.DROWN)) {
 			return;
@@ -308,7 +332,7 @@ final class DarktideTide {
 		ServerLevel level = player.level();
 		Entity corpse = level.getEntity(live.harvesting);
 		EntityType<?> type = corpse == null ? null : KitchenCompat.freeCorpseOf(corpse);
-		if (type == null || !live.ultimateDown || corpse.distanceTo(player) > HARVEST_REACH + 1.5 || !DarktideFlow.night(level)) {
+		if (type == null || !live.modeDown || corpse.distanceTo(player) > HARVEST_REACH + 1.5 || !DarktidePower.corrupted(player)) {
 			live.harvesting = -1;
 			DarktideMove.clear(player);
 			return;
@@ -443,8 +467,8 @@ final class DarktideTide {
 				RISEN_OWNER.remove(mob.getUUID());
 				continue;
 			}
-			// they melt at sunrise, and without their master near
-			if (owner == null || owner.level() != mob.level() || !DarktidePower.has(owner) || !DarktideFlow.night(mob.level())
+			// they melt when the corruption lifts (sunrise, for a cured master), and without their master near
+			if (owner == null || owner.level() != mob.level() || !DarktidePower.has(owner) || !DarktidePower.corrupted(owner)
 				|| mob.distanceTo(owner) > RISEN_LEASH) {
 				it.remove();
 				melt(mob);
