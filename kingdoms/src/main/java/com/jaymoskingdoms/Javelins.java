@@ -21,6 +21,7 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.entity.projectile.arrow.ThrownTrident;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.Snowball;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
@@ -34,8 +35,9 @@ import org.jspecify.annotations.Nullable;
  * have no path to, or a bowman keeping his distance. So an archer on the wall is no longer safe from the men below.
  * A javelin can't be picked up; it doesn't hurt the thrower's own side, nor (thrown by defenders) the villagers and golems
  * about them.
- * <p>(0.5.18) A javelin is Balkon's WeaponMod javelin ({@link WeaponModJavelins}), lighter than a trident. Only the guards of
- * the wealthiest kingdoms ({@link #elite}) throw tridents. Without WeaponMod, the rest don't throw at all.
+ * <p>(0.5.18) What's thrown depends on the thrower's purse ({@link #javelin}): the guards of the wealthiest kingdoms
+ * ({@link #elite}) throw tridents; poor kingdoms' guards, barbarians and their chiefs throw rocks; everyone else throws
+ * Balkon's WeaponMod javelin ({@link WeaponModJavelins}), or rocks without WeaponMod.
  */
 final class Javelins {
 	/** It's thrown from this far to this far (blocks). */
@@ -53,6 +55,9 @@ final class Javelins {
 	/** (0.5.18) Tridents are for the guards of the {@link #ELITE_REALMS} wealthiest kingdoms, with this many emeralds or more. */
 	static final int ELITE_REALMS = 2;
 	static final long ELITE_TREASURY = 300L;
+	/** (0.5.18) A kingdom with fewer emeralds than this is poor: its guards throw rocks. A rock hits for this much. */
+	static final long POOR_TREASURY = 50L;
+	static final float ROCK_DAMAGE = 3.0F;
 
 	/** Balkon's WeaponMod: Legacy, whose javelins they throw. */
 	static final String WEAPONMOD = "weaponmod";
@@ -112,15 +117,28 @@ final class Javelins {
 		folk.getLookControl().setLookAt(foe, 30.0F, 30.0F);
 		folk.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		Projectile.spawnProjectileUsingShoot(thrown, level, javelin, dx, dy + flat * 0.2, dz, SPEED, SPREAD);
-		level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.TRIDENT_THROW, SoundSource.HOSTILE, 1.0F, 0.9F + level.getRandom().nextFloat() * 0.2F);
+		level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), thrown instanceof Snowball ? SoundEvents.SNOWBALL_THROW : SoundEvents.TRIDENT_THROW.value(),
+			SoundSource.HOSTILE, 1.0F, 0.9F + level.getRandom().nextFloat() * 0.2F);
 	}
 
-	/** What it throws: a trident from an elite guard, else Balkon's javelin (null without WeaponMod). */
+	/**
+	 * What it throws: a trident from an elite kingdom's guard, a rock from a poor kingdom's guard or a barbarian, else
+	 * Balkon's javelin (a rock without WeaponMod).
+	 */
 	private static @Nullable Projectile javelin(ServerLevel level, Folk folk) {
-		if (folk.role() == Folk.GUARD && elite(level.getServer(), folk.factionId())) {
+		MinecraftServer server = level.getServer();
+		Faction f = Factions.get(server, folk.factionId());
+		boolean poor = f == null || !f.type().isRealm() || f.treasury() < POOR_TREASURY;
+		if (!poor && elite(server, folk.factionId())) {
 			return new ThrownTrident(level, folk, new ItemStack(Items.TRIDENT));
 		}
-		return WEAPONMOD_LOADED ? WeaponModJavelins.javelin(level, folk) : null;
+		Projectile javelin = !poor && WEAPONMOD_LOADED ? WeaponModJavelins.javelin(level, folk) : null;
+		return javelin != null ? javelin : rock(level, folk);
+	}
+
+	/** A rock: a thrown cobblestone that hits for {@link #ROCK_DAMAGE} ({@link #allowDamage} gives a snowball its weight). */
+	private static Projectile rock(ServerLevel level, Folk folk) {
+		return new Snowball(level, folk, new ItemStack(Items.COBBLESTONE));
 	}
 
 	/** A kingdom among the {@link #ELITE_REALMS} wealthiest, with at least {@link #ELITE_TREASURY} emeralds. */
@@ -139,12 +157,19 @@ final class Javelins {
 		if (!(source.getDirectEntity() instanceof Projectile javelin) || !THROWN.contains(javelin) || !(source.getEntity() instanceof Folk thrower)) {
 			return true;
 		}
+		boolean allowed;
 		if (victim instanceof Folk other) {
-			return !thrower.sameSide(other);
+			allowed = !thrower.sameSide(other);
+		} else if (victim instanceof Villager || victim instanceof IronGolem) {
+			allowed = Assault.attacker(thrower);
+		} else {
+			allowed = !(victim instanceof Player p && p.isCreative());
 		}
-		if (victim instanceof Villager || victim instanceof IronGolem) {
-			return Assault.attacker(thrower);
+		if (allowed && javelin instanceof Snowball && amount < ROCK_DAMAGE && victim.level() instanceof ServerLevel level) {
+			// a snowball does no harm: the rock's blow, dealt again with its weight
+			victim.hurtServer(level, source, ROCK_DAMAGE);
+			return false;
 		}
-		return !(victim instanceof Player p && p.isCreative());
+		return allowed;
 	}
 }

@@ -13,8 +13,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.5.18) Balkon's WeaponMod: Legacy (mod id {@value Javelins#WEAPONMOD}, MIT; nothing of it is copied here): when it's
- * loaded, guards and barbarians throw its javelins ({@link Javelins}). This names WeaponMod's classes, so it's only
- * touched while {@link Javelins#WEAPONMOD_LOADED}.
+ * loaded, guards of kingdoms neither poor nor elite throw its javelins ({@link Javelins}). This names WeaponMod's
+ * classes, so it's only touched while {@link Javelins#WEAPONMOD_LOADED}.
  */
 final class WeaponModJavelins {
 	private WeaponModJavelins() {
