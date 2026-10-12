@@ -389,7 +389,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.8.64, goblin villages and loot goblins:** ships Jaymo's Kingdoms 0.5.31 (see `kingdoms/MODLOG.md`): goblin
   villages behind a palisade fort, the goblin mask to walk in among them, and loot goblins ported from Loot Goblins
   (LGPL-3.0).
-- **0.8.65, the symbiote's roar and wall tethers:**
+- **0.8.65, riders sit in the saddle:** ships Jaymo's Kingdoms 0.5.32 (see `kingdoms/MODLOG.md`): mounted guards,
+  archers, caravan riders and coachmen no longer float above their horses.
+- **0.8.66, the symbiote's roar and wall tethers:**
   - Near death, before it takes over and runs, the symbiote roars (2 s): you're held hunched and shuddering while
     the armour pieces itself together over you (the suit, then the tendrils flailing, then the big body; whatever you
     already wore stays), then it throws its head back, maw wide open, arms flung out, and roars: everything within

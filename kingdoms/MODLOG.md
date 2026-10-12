@@ -1705,3 +1705,9 @@ notice are in `licenses/lootgoblins/`. Its code here stays LGPL-3.0: keep that s
 - Left out: the minor goblins (ore mobs) and their treasure items (Andy didn't want them), the helmet cosmetics and loot
   beams.
 - Seen in game: all eight looks in the original's idle pose and a kill's loot burst.
+
+## 0.5.32: riders sit in the saddle
+- **Riders no longer float** (Andy's clip: mounted folk hovered high over their horses). The folk entity had no vehicle
+  attachment, so a rider's feet were set on the saddle point and the sitting model hung in the air. It now takes the
+  zombie's `ridingOffset(-0.7F)`, which lowers every folk rider: mounted guards and archers, caravan riders, carriage
+  and cab coachmen, and a ruler in a carriage or rickshaw seat.
