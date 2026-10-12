@@ -51,6 +51,21 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 	};
 	/** Roots higher than this (model y) are the upper ones: the strikers, and the ones seen in first person. */
 	private static final float UPPER_ROOT_Y = 6.0F;
+	/** A whole tendril's length at its rest size (model pixels): the segments overlap a little. */
+	private static final float CHAIN = (SEGMENTS - 1) * (SEGMENT_LENGTH - 0.4F) + SEGMENT_LENGTH;
+
+	// ---- tethers (hung off a wall) ----
+	/** The first tendril on a tether (the two above it, the shoulders', stay free for R and G); each reaches its spot in this long. */
+	static final int FIRST_TETHER = 2;
+	private static final float TETHER_REACH_TICKS = 3.0F;
+	/** A tether's thickness (of a free one's), and how it thrums under the strain. */
+	private static final float TETHER_THICK = 0.8F, TETHER_THRUM = 0.012F;
+
+	// ---- the roar ----
+	/** Flailing: how wild (radians of yaw and pitch) and how fast; flung out at the roar: how wide, and how much longer. */
+	private static final float FLAIL_YAW = 0.9F, FLAIL_PITCH = 0.85F, FLAIL_SPEED = 0.9F, FLING_WIDE = 2.0F, FLING_STRETCH = 0.55F;
+	/** They're flung out over this share of the roar, just before it lands. */
+	private static final float FLING_LEAD = 0.1F;
 
 	// ---- strikes ----
 	/** A slam: reared to this elevation (radians; past straight up, so it's over the head), and it comes down this far below the target. */
@@ -136,13 +151,43 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		AvatarRenderState own = new AvatarRenderState();
 		own.setData(WebSymbioteClient.TENDRILS, new WebSymbioteClient.Tendrils(tendrils.growth(), tendrils.time(), tendrils.strike(), yaw, pitch,
 			yaw >= 0.0F ? -1.0F : 1.0F, 0.0F, tendrils.held(), tendrils.armor(), tendrils.wall(), wallYaw, wallPitch, tendrils.heavy(),
-			tendrils.variant(), true, tendrils.combo(), tendrils.rear(), tendrils.hit(), tendrils.feral()));
+			tendrils.variant(), true, tendrils.combo(), tendrils.rear(), tendrils.hit(), tendrils.feral(), tendrils.roar(), tendrils.tethers()));
+		own.ageInTicks = avatar.ageInTicks;
 		poseStack.pushPose();
 		poseStack.translate(0.0F, FP_ROOT_UP, FP_ROOT_BACK);
 		// camera space to model space: model -Z is ahead, -Y up, +X the wearer's left
 		poseStack.scale(-FP_SCALE, -FP_SCALE, FP_SCALE);
 		collector.submitModel(firstPersonModel, own, poseStack, RenderTypes.entityCutout(TEXTURE), avatar.lightCoords, OverlayTexture.NO_OVERLAY, 0);
 		poseStack.popPose();
+	}
+
+	/**
+	 * Hung off a wall: where each tethered tendril has to point to reach its spot (yaw and pitch against the body, as a
+	 * strike's aim is measured) and how far (blocks; growing out over {@link #TETHER_REACH_TICKS}, one after another).
+	 * The roots are placed roughly: the body upright, turned as it faces.
+	 */
+	static float[] tethers(net.minecraft.world.entity.player.Player player, WebSymbiote.Wall wall, float partial) {
+		float[] out = new float[ROOTS.length * 3];
+		float scale = player.getScale();
+		float bodyYaw = Mth.rotLerp(partial, player.yBodyRotO, player.yBodyRot);
+		net.minecraft.world.phys.Vec3 feet = player.getPosition(partial);
+		double yaw = bodyYaw * Mth.DEG_TO_RAD;
+		net.minecraft.world.phys.Vec3 ahead = new net.minecraft.world.phys.Vec3(-Math.sin(yaw), 0.0, Math.cos(yaw));
+		net.minecraft.world.phys.Vec3 left = new net.minecraft.world.phys.Vec3(ahead.z, 0.0, -ahead.x);
+		float age = player.level().getGameTime() - wall.landed() + partial;
+		for (int i = 0; i < wall.points().size() && i + FIRST_TETHER < ROOTS.length; i++) {
+			int t = i + FIRST_TETHER;
+			float[] r = ROOTS[t];
+			// model space: +X the wearer's left, +Y down from the neck (24 pixels over the feet), +Z back
+			net.minecraft.world.phys.Vec3 root = feet.add(left.scale(r[0] / 16.0F * scale)).add(0.0, (24.0F - r[1]) / 16.0F * scale, 0.0)
+				.subtract(ahead.scale(r[2] / 16.0F * scale));
+			net.minecraft.world.phys.Vec3 to = wall.points().get(i).subtract(root);
+			float aim = (float)(Mth.atan2(to.z, to.x) * Mth.RAD_TO_DEG) - 90.0F;
+			out[t * 3] = Mth.wrapDegrees(aim - bodyYaw) * Mth.DEG_TO_RAD;
+			out[t * 3 + 1] = (float)Mth.atan2(to.y, to.horizontalDistance());
+			out[t * 3 + 2] = (float)to.length() / scale * Mth.clamp((age - i) / TETHER_REACH_TICKS, 0.0F, 1.0F);
+		}
+		return out;
 	}
 
 	/** Eases 0-1. */
@@ -296,7 +341,7 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 					base.yRot = aimYaw(tendrils.wallYaw() - r[3] * 0.25F, r[3]);
 					base.xRot = tendrils.wallPitch() - (r[1] - 4.0F) * 0.04F;
 					base.zScale = length * 1.6F * (fp ? 1.0F + STRETCH_FIRST_PERSON : 1.0F);
-				} else if (tendrils.wall() == 2) {
+				} else if (tendrils.wall() == 2 && tendrils.tethers() == null) {
 					// back to the wall: fanned out straight behind, driven into it
 					calm = 0.0F;
 					segCurlX = 0.0F;
@@ -304,6 +349,53 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 					base.yRot = r[3] * 0.85F;
 					base.xRot = (r[1] - 4.0F) * 0.13F;
 					base.zScale = length * 1.15F;
+				}
+				float[] tethers = tendrils.tethers();
+				if (tethers != null && t >= FIRST_TETHER && tethers[t * 3 + 2] > 0.0F) {
+					// on its tether: drawn straight and taut to its spot, thrumming with the strain
+					base.visible = !fp;
+					float thrum = Mth.sin(state.ageInTicks * 2.3F + t * 1.9F) * TETHER_THRUM;
+					base.yRot = aimYaw(tethers[t * 3], r[3]);
+					base.xRot = tethers[t * 3 + 1] + thrum;
+					base.xScale = thick * TETHER_THICK;
+					base.yScale = thick * TETHER_THICK;
+					base.zScale = tethers[t * 3 + 2] * 16.0F / CHAIN;
+					for (int k = 1; k < SEGMENTS; k++) {
+						ModelPart segment = this.parts[t][k];
+						segment.xRot = thrum * 0.5F;
+						segment.yRot = 0.0F;
+						segment.xScale = 1.0F;
+						segment.yScale = 1.0F;
+					}
+					continue;
+				}
+				if (tethers != null && t >= FIRST_TETHER) {
+					// not bitten in yet: reaching back for the wall
+					base.yRot = r[3] * 0.85F;
+					base.xRot = (r[1] - 4.0F) * 0.13F;
+				}
+				float roar = tendrils.roar();
+				if (roar >= 0.0F) {
+					// roaring: every one of them thrashing wildly, then flung out wide and long as it roars, then settling
+					float blast = WebSymbiote.ROAR_BLAST_AT / (float)WebSymbiote.ROAR_TICKS;
+					float fling = roar < blast - FLING_LEAD ? 0.0F : roar < blast ? smooth((roar - blast + FLING_LEAD) / FLING_LEAD)
+						: 1.0F - smooth((roar - blast) / (1.0F - blast));
+					float thrash = 1.0F - fling;
+					float a = state.ageInTicks * FLAIL_SPEED;
+					float flailYaw = r[3] * 1.3F + Mth.sin(a + t * 2.3F) * FLAIL_YAW + Mth.sin(a * 1.9F + t) * 0.3F;
+					float flailPitch = r[4] * 0.7F + Mth.sin(a * 1.2F + t * 1.7F) * FLAIL_PITCH;
+					base.yRot = Mth.lerp(fling, flailYaw, r[3] * FLING_WIDE);
+					base.xRot = Mth.lerp(fling, flailPitch, r[4] * 0.6F);
+					base.zScale = length * (1.0F + FLING_STRETCH * fling + 0.15F * thrash);
+					for (int k = 1; k < SEGMENTS; k++) {
+						ModelPart segment = this.parts[t][k];
+						// whipping: big waves rolling down each one (straightened as they're flung)
+						segment.xRot = Mth.sin(a * 1.3F + t + k * 0.9F) * 0.45F * thrash;
+						segment.yRot = Mth.cos(a * 1.1F + t * 2.0F + k * 0.8F) * 0.4F * thrash;
+						segment.xScale = 0.9F;
+						segment.yScale = 0.9F;
+					}
+					continue;
 				}
 				for (int k = 1; k < SEGMENTS; k++) {
 					ModelPart segment = this.parts[t][k];

@@ -163,6 +163,16 @@ public final class WebBodyPose {
 				poseStack.rotateDegrees(Axis.XP, 30.0F * flare - 15.0F * crouch);
 				poseStack.translate(0.0F, -middle, 0.0F);
 			}
+			case WebPose.ROAR -> {
+				// hunched over and shuddering while it builds, then reared back as it roars, then upright again
+				float p2 = pose.p();
+				float hunch = roarHunch(p2), rear = roarRear(p2);
+				float shudder = Mth.sin(pose.time() * 2.9F) * 2.5F * hunch;
+				poseStack.translate(0.0F, middle, 0.0F);
+				poseStack.rotateDegrees(Axis.XP, -22.0F * hunch + 18.0F * rear);
+				poseStack.rotateDegrees(Axis.ZP, shudder);
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
 			case WebPose.RAGDOLL -> {
 				// flat on the back, a little twitch to it
 				float fall = Math.min(1.0F, p * 6.0F);
@@ -261,6 +271,22 @@ public final class WebBodyPose {
 				set(h.rightLeg, -1.1F, 0.0F, 0.2F, crouch);
 				set(h.leftLeg, 0.6F, 0.0F, -0.2F, crouch);
 			}
+			case WebPose.ROAR -> {
+				float p = pose.p();
+				float hunch = roarHunch(p), rear = roarRear(p);
+				float t = pose.time();
+				// clutching in, trembling, as the suit crawls over you
+				float tremble = Mth.sin(t * 3.1F) * 0.12F;
+				set(h.rightArm, -0.9F + tremble, -0.5F, 0.35F, hunch);
+				set(h.leftArm, -0.9F - tremble, 0.5F, -0.35F, hunch);
+				h.head.xRot = Mth.lerp(hunch, h.head.xRot, 0.55F);
+				// then flung wide and back, head thrown back, legs braced
+				set(h.rightArm, 0.45F, 0.0F, 1.7F, rear);
+				set(h.leftArm, 0.45F, 0.0F, -1.7F, rear);
+				set(h.rightLeg, 0.0F, 0.0F, 0.32F, Math.max(hunch * 0.5F, rear));
+				set(h.leftLeg, 0.0F, 0.0F, -0.32F, Math.max(hunch * 0.5F, rear));
+				h.head.xRot = Mth.lerp(rear, h.head.xRot, -0.75F);
+			}
 			case WebPose.RAGDOLL -> {
 				float t = pose.time();
 				float give = 1.0F - pose.p() * 0.7F;
@@ -277,6 +303,17 @@ public final class WebBodyPose {
 			default -> {
 			}
 		}
+	}
+
+	/** A roar's two halves: hunched while it builds (to just before it roars), and reared back through the roar. */
+	private static float roarHunch(float p) {
+		float blast = com.jaymospowers.power.web.WebSymbiote.ROAR_BLAST_AT / (float)com.jaymospowers.power.web.WebSymbiote.ROAR_TICKS;
+		return p < blast - 0.06F ? ease(p / 0.15F) : ease(1.0F - (p - blast + 0.06F) / 0.06F);
+	}
+
+	private static float roarRear(float p) {
+		float blast = com.jaymospowers.power.web.WebSymbiote.ROAR_BLAST_AT / (float)com.jaymospowers.power.web.WebSymbiote.ROAR_TICKS;
+		return p < blast - 0.06F ? 0.0F : p < 0.85F ? ease((p - blast + 0.06F) / 0.06F) : ease((1.0F - p) / 0.15F);
 	}
 
 	private static void set(ModelPart part, float x, float y, float z, float amount) {
