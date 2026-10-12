@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.mixin.BrushableBlockEntityAccessor;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
@@ -47,7 +48,9 @@ import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BrushableBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BrushableBlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -90,12 +93,16 @@ final class QuestFoes {
 	/** A cache's guards (and their health). */
 	static final int CACHE_GUARDS = 3;
 	static final double CACHE_GUARD_HEALTH = 32.0;
-	/** Structures that lie buried (their rooms are packed with earth): foes and caches there go on the ground above them. */
-	static final Set<String> BURIED = Set.of("trail_ruins");
 	/** A spot in a structure must open onto at least this much free space, so nothing is set out in a sealed pocket. */
 	static final int OPEN_SPACE = 40;
 	/** How far (blocks, each way) to look about a spot for room when the spot itself is no good. */
 	static final int NEAR_REACH = 6, NEAR_TRIES = 40;
+	/** Ruins that lie buried: a fetch there is a dig (the keepsake is in their suspicious gravel, to brush out), and no guards. */
+	static final Set<String> DIGS = Set.of("minecraft:trail_ruins");
+	/** How many of a dig ruin's pieces, and blocks in each, to look through for its suspicious gravel. */
+	static final int DIG_PIECES = 32, DIG_CHECKS = 20000;
+	/** After a search of a structure finds no room, it's searched again only after this many ticks (it's costly). */
+	static final int RETRY_TICKS = 200;
 
 	/** On a champion or one of the quest's guards: the player and quest it's for, whether it's the champion, how far its fight has gone (0, called, raged). */
 	record Tag(UUID owner, String quest, boolean champion, int phase) {
@@ -116,6 +123,8 @@ final class QuestFoes {
 	/** The champions loaded now, and their bars. */
 	private static final Set<Mob> CHAMPIONS = new HashSet<>();
 	private static final Map<UUID, ServerBossEvent> BARS = new HashMap<>();
+	/** Quests whose structure had no room yet: the tick to look again. */
+	private static final Map<String, Long> RETRY = new HashMap<>();
 
 	private QuestFoes() {
 	}
@@ -234,9 +243,12 @@ final class QuestFoes {
 		if (located == null) {
 			return null;
 		}
+		if (dig(q)) {
+			return bury(level, q, located, keepsake);
+		}
 		RandomSource random = level.getRandom();
 		EntityType<? extends Mob> type = guardType(q.objective().target(), random);
-		BlockPos spot = spot(level, located, q.objective().target(), type);
+		BlockPos spot = search(level, q, located, type);
 		if (spot == null) {
 			return null;
 		}
@@ -257,6 +269,59 @@ final class QuestFoes {
 		return spot;
 	}
 
+	/** Whether fetch quest {@code q} is a dig: its keepsake buried in a ruin's suspicious gravel. */
+	static boolean dig(Quest q) {
+		return q.kind() == Quest.FETCH && DIGS.contains(q.objective().target());
+	}
+
+	/** A dig's keepsake, put in the suspicious gravel (or sand) nearest the buried ruin's middle; where, or null till some is loaded. */
+	private static @Nullable BlockPos bury(ServerLevel level, Quest q, BlockPos located, ItemStack keepsake) {
+		long now = level.getGameTime();
+		Long next = RETRY.get(q.id());
+		if (next != null && now < next) {
+			return null;
+		}
+		BlockPos found = null;
+		Identifier id = Identifier.tryParse(q.objective().target());
+		Structure structure = id == null ? null : level.registryAccess().lookupOrThrow(Registries.STRUCTURE).getValue(id);
+		if (structure != null && level.hasChunk(located.getX() >> 4, located.getZ() >> 4)) {
+			StructureStart start = level.structureManager().getStartForStructure(structure, level.getChunk(located.getX() >> 4, located.getZ() >> 4));
+			if (start != null && start.isValid()) {
+				BlockPos middle = start.getBoundingBox().getCenter();
+				double best = Double.MAX_VALUE;
+				int looked = 0;
+				for (StructurePiece piece : start.getPieces()) {
+					BoundingBox box = piece.getBoundingBox();
+					int checks = 0;
+					for (BlockPos p : BlockPos.betweenClosed(box.minX(), box.minY(), box.minZ(), box.maxX(), box.maxY(), box.maxZ())) {
+						if (++checks > DIG_CHECKS) {
+							break;
+						}
+						double d = p.distSqr(middle);
+						if (d < best && level.isLoaded(p) && level.getBlockState(p).getBlock() instanceof BrushableBlock
+							&& level.getBlockEntity(p) instanceof BrushableBlockEntity) {
+							found = p.immutable();
+							best = d;
+						}
+					}
+					if (++looked >= DIG_PIECES) {
+						break;
+					}
+				}
+			}
+		}
+		if (found == null || !(level.getBlockEntity(found) instanceof BrushableBlockEntity gravel)) {
+			RETRY.put(q.id(), now + RETRY_TICKS);
+			return null;
+		}
+		RETRY.remove(q.id());
+		BrushableBlockEntityAccessor hold = (BrushableBlockEntityAccessor)gravel;
+		hold.jaymoskingdoms$setLootTable(null);
+		hold.jaymoskingdoms$setItem(keepsake);
+		gravel.setChanged();
+		return found;
+	}
+
 	/** A king's champion and its escort, set out in its lair; the champion, or null if no room could be found yet. */
 	static @Nullable Mob champion(ServerLevel level, ServerPlayer player, Quest q) {
 		BlockPos located = q.objective().pos().orElse(null);
@@ -264,7 +329,7 @@ final class QuestFoes {
 			return null;
 		}
 		String foe = q.objective().otherName();
-		BlockPos spot = spot(level, located, q.objective().target(), championType(foe));
+		BlockPos spot = search(level, q, located, championType(foe));
 		if (spot == null) {
 			return null;
 		}
@@ -408,9 +473,25 @@ final class QuestFoes {
 		return null;
 	}
 
+	/** {@link #spot}, but not again for a while after it found no room. */
+	private static @Nullable BlockPos search(ServerLevel level, Quest q, BlockPos located, EntityType<?> type) {
+		long now = level.getGameTime();
+		Long next = RETRY.get(q.id());
+		if (next != null && now < next) {
+			return null;
+		}
+		BlockPos spot = spot(level, located, q.objective().target(), type);
+		if (spot == null) {
+			RETRY.put(q.id(), now + RETRY_TICKS);
+		} else {
+			RETRY.remove(q.id());
+		}
+		return spot;
+	}
+
 	/**
 	 * Room for a {@code type} in the structure that starts at {@code located}: in its pieces nearest its middle, in
-	 * what's loaded; else (or for a buried one) on the ground over it. Null if nothing's loaded there.
+	 * what's loaded (null till a room is found); on the ground there only for a structure with no pieces to search.
 	 */
 	static @Nullable BlockPos spot(ServerLevel level, BlockPos located, String structureId, EntityType<?> type) {
 		if (!level.hasChunk(located.getX() >> 4, located.getZ() >> 4)) {
@@ -425,19 +506,21 @@ final class QuestFoes {
 				BoundingBox all = start.getBoundingBox();
 				BlockPos middle = all.getCenter();
 				over = new BlockPos(middle.getX(), 0, middle.getZ());
-				if (!BURIED.contains(id.getPath())) {
-					List<StructurePiece> pieces = new ArrayList<>(start.getPieces());
-					pieces.sort((a, b) -> Double.compare(a.getBoundingBox().getCenter().distSqr(middle), b.getBoundingBox().getCenter().distSqr(middle)));
-					int looked = 0;
-					for (StructurePiece piece : pieces) {
-						BlockPos found = room(level, piece.getBoundingBox(), type);
-						if (found != null) {
-							return found;
-						}
-						if (++looked >= 24) {
-							break;
-						}
+				List<StructurePiece> pieces = new ArrayList<>(start.getPieces());
+				pieces.sort((a, b) -> Double.compare(a.getBoundingBox().getCenter().distSqr(middle), b.getBoundingBox().getCenter().distSqr(middle)));
+				int looked = 0;
+				for (StructurePiece piece : pieces) {
+					BlockPos found = room(level, piece.getBoundingBox(), type);
+					if (found != null) {
+						return found;
 					}
+					if (++looked >= 24) {
+						break;
+					}
+				}
+				if (!pieces.isEmpty()) {
+					// (in the dungeon, not over it: wait till more of it is loaded)
+					return null;
 				}
 			}
 		}

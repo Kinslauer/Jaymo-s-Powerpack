@@ -1712,15 +1712,23 @@ notice are in `licenses/lootgoblins/`. Its code here stays LGPL-3.0: keep that s
   zombie's `ridingOffset(-0.7F)`, which lowers every folk rider: mounted guards and archers, caravan riders, carriage
   and cab coachmen, and a ruler in a carriage or rickshaw seat.
 
-## 0.5.33: quest foes no longer spawn inside the earth
+## 0.5.33: quest bosses fight in the dungeon; trail ruins become dig quests
 Andy's clip: a king's "The Beast" decree at trail ruins set its ravager down inside the buried ruin, walled in by
-earth and roots, and only spectator mode could find it.
+earth and roots, and only spectator mode could find it. Andy's ruling: the boss belongs inside the dungeon, in a room
+with space, and buried trail ruins should get quests that suit them (more variety).
 - **Why**: foes were placed where a 1-block column was free, so a ravager (nearly 2 wide) fit into walls; and trail
   ruins are buried by design, so their "rooms" are pockets in the earth.
-- **Fix** (`QuestFoes`): a spot must fit the mob's whole body (`EntityType.getDimensions()`, `noCollision`, no
-  liquid) on a sturdy floor; a spot in a structure's pieces must open onto at least `OPEN_SPACE` (40) free blocks,
-  so nothing goes in a sealed pocket; structures in `BURIED` (trail ruins) put their champion, cache and guards on
-  the ground over the ruin's middle. Escorts and cache guards check their own size too.
-- **Testing**: `/kingdom quests offer champion <lair>` (op) gives the nearest king a champion decree at that lair.
-- Seen in game: a beast decree at trail ruins (112, 320) set The Beast and its vindicators on the grass over the
-  ruins at 127, 64, 323.
+- **Room to fight** (`QuestFoes`): a spot must fit the mob's whole body (`EntityType.getDimensions()`, `noCollision`,
+  no liquid) on a sturdy floor, and open onto at least `OPEN_SPACE` (40) free blocks, so nothing goes in a sealed
+  pocket. Champions and caches go only in a structure's own pieces, never on the ground over it: with no room yet
+  loaded, the search waits `RETRY_TICKS` and tries again. Escorts and cache guards check their own size too.
+- **Kings** no longer send champions to trail ruins (`LAIRS`); every other lair has rooms.
+- **Dig quests**: a villager's fetch at trail ruins (`QuestFoes.DIGS`) buries the keepsake in the suspicious gravel
+  nearest the ruin's middle (no guards). The giver lends a brush if you have none; the objective reads "Brush ... out
+  of the suspicious gravel"; near the ruin you're told to dig down. `BrushableBlockEntityAccessor` sets the gravel's
+  item (and clears its loot table).
+- **Testing** (op): `/kingdom quests offer champion <lair>` (the nearest king, a champion at that lair) and
+  `/kingdom quests offer dig` (the nearest villager, a fetch at trail ruins).
+- Seen in game: a guard's "A Comrade's Blade" at trail ruins buried the sword at 124, 54, 318; brushing it out
+  turned the quest to "Return to Prokopios". A Bone Lord decree at trial chambers set the Bone Lord and escort in a
+  chamber room at -475, -19, -396.
