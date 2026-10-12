@@ -21,9 +21,9 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Professions {
 	/** The jobs, by name (MCA's Professions menu sends "profession.&lt;name&gt;"). */
-	public static final List<String> JOBS = List.of("builder", "farmer", "miner", "woodcutter");
+	public static final List<String> JOBS = List.of("builder", "farmer", "miner", "woodcutter", "puller");
 
-	public static VillagerProfession BUILDER, FARMER, MINER, WOODCUTTER;
+	public static VillagerProfession BUILDER, FARMER, MINER, WOODCUTTER, PULLER;
 
 	private Professions() {
 	}
@@ -33,6 +33,8 @@ public final class Professions {
 		FARMER = register("farmer", SoundEvents.VILLAGER_WORK_FARMER);
 		MINER = register("miner", SoundEvents.VILLAGER_WORK_TOOLSMITH);
 		WOODCUTTER = register("woodcutter", SoundEvents.VILLAGER_WORK_FLETCHER);
+		// (0.5.26)
+		PULLER = register("puller", SoundEvents.VILLAGER_WORK_LEATHERWORKER);
 	}
 
 	private static VillagerProfession register(String name, SoundEvent sound) {
@@ -47,7 +49,7 @@ public final class Professions {
 		if (Folk.isBuilder(role)) {
 			return BUILDER;
 		}
-		return role == Folk.FARMER ? FARMER : role == Folk.MINER ? MINER : role == Folk.WOODCUTTER ? WOODCUTTER : null;
+		return role == Folk.FARMER ? FARMER : role == Folk.MINER ? MINER : role == Folk.WOODCUTTER ? WOODCUTTER : role == Folk.PULLER ? PULLER : null;
 	}
 
 	/** The role {@code profession} is (a builder's is {@link Folk#WORKER}), or -1 if it isn't one of these. */
@@ -59,7 +61,8 @@ public final class Professions {
 		if (profession == BUILDER) {
 			return Folk.WORKER;
 		}
-		return profession == FARMER ? Folk.FARMER : profession == MINER ? Folk.MINER : profession == WOODCUTTER ? Folk.WOODCUTTER : -1;
+		return profession == FARMER ? Folk.FARMER : profession == MINER ? Folk.MINER : profession == WOODCUTTER ? Folk.WOODCUTTER
+			: profession == PULLER ? Folk.PULLER : -1;
 	}
 
 	/** The role a job's name (one of {@link #JOBS}) is, or -1. */
@@ -69,6 +72,7 @@ public final class Professions {
 			case "farmer" -> Folk.FARMER;
 			case "miner" -> Folk.MINER;
 			case "woodcutter" -> Folk.WOODCUTTER;
+			case "puller" -> Folk.PULLER;
 			default -> -1;
 		};
 	}
@@ -80,6 +84,7 @@ public final class Professions {
 			case "jaymoskingdoms:farmer" -> "minecraft:farmer";
 			case "jaymoskingdoms:miner" -> "mca:miner";
 			case "jaymoskingdoms:woodcutter" -> "mca:lumberjack";
+			case "jaymoskingdoms:puller" -> "minecraft:leatherworker";
 			default -> null;
 		};
 	}

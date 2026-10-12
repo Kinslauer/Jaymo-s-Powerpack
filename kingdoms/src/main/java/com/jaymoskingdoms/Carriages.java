@@ -16,6 +16,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.phys.AABB;
@@ -68,34 +69,42 @@ final class Carriages {
 		return found.isEmpty() ? null : found.getFirst();
 	}
 
-	/** The carriage {@code king} sits in, or null. */
+	/** The carriage {@code king} sits in (or, 0.5.26, the rickshaw), or null. */
 	static @Nullable Wagon seat(Folk king) {
-		return king.getVehicle() instanceof Wagon w && w.kind() == Wagon.CARRIAGE ? w : null;
+		return king.getVehicle() instanceof Wagon w && (w.kind() == Wagon.CARRIAGE || w.kind() == Wagon.RICKSHAW) ? w : null;
 	}
 
 	static boolean riding(Folk king) {
 		return seat(king) != null;
 	}
 
-	/** Its coachman (in its horse's saddle), or null. */
-	static @Nullable Folk coachman(Wagon carriage) {
+	/** Its coachman (in its horse's saddle), or a rickshaw's puller (0.5.26), or null. */
+	static @Nullable PathfinderMob coachman(Wagon carriage) {
+		if (carriage.kind() == Wagon.RICKSHAW) {
+			return Rickshaws.puller(carriage);
+		}
 		Entity horse = carriage.horse();
 		return horse != null && horse.getFirstPassenger() instanceof Folk f ? f : null;
 	}
 
-	/** Out on his round: he gets in, if his carriage is at hand and waiting. */
+	/** Out on his round: he gets in, if his carriage is at hand and waiting (or, without one, a rickshaw come for him). */
 	static void board(ServerLevel level, Faction f, Folk king) {
 		if (king.isPassenger() || king.getTarget() != null) {
 			return;
 		}
 		Wagon carriage = of(level, f);
+		if (carriage == null) {
+			carriage = Rickshaws.waitingFor(level, king);
+		}
 		if (carriage == null || carriage.isVehicle() || coachman(carriage) == null || king.distanceTo(carriage) > BOARD_REACH) {
 			return;
 		}
 		king.getNavigation().stop();
 		if (king.startRiding(carriage)) {
 			level.playSound(null, carriage.blockPosition(), SoundEvents.WOODEN_DOOR_CLOSE, SoundSource.NEUTRAL, 0.8F, 1.1F);
-			level.playSound(null, carriage.blockPosition(), SoundEvents.HORSE_AMBIENT, SoundSource.NEUTRAL, 0.8F, 1.0F);
+			if (carriage.kind() == Wagon.CARRIAGE) {
+				level.playSound(null, carriage.blockPosition(), SoundEvents.HORSE_AMBIENT, SoundSource.NEUTRAL, 0.8F, 1.0F);
+			}
 		}
 	}
 
@@ -106,7 +115,7 @@ final class Carriages {
 			return;
 		}
 		king.stopRiding();
-		Folk coachman = coachman(carriage);
+		PathfinderMob coachman = coachman(carriage);
 		if (coachman != null) {
 			coachman.getNavigation().stop();
 		}
@@ -121,12 +130,14 @@ final class Carriages {
 	 */
 	static void moveTo(Folk king, double x, double y, double z, double speed) {
 		Wagon carriage = seat(king);
-		Folk coachman = carriage == null ? null : coachman(carriage);
+		PathfinderMob coachman = carriage == null ? null : coachman(carriage);
 		if (coachman == null) {
 			king.getNavigation().moveTo(x, y, z, speed);
 			return;
 		}
-		coachman.setHomeTo(coachman.blockPosition(), Royals.ROAM_RADIUS);
+		if (carriage.kind() == Wagon.CARRIAGE) {
+			coachman.setHomeTo(coachman.blockPosition(), Royals.ROAM_RADIUS);
+		}
 		if (coachman.getNavigation().isDone() || king.tickCount % 20 == 0) {
 			coachman.getNavigation().moveTo(x, y, z, Math.max(speed, Royals.KING_SPEED) * 1.3);
 		}
@@ -134,7 +145,7 @@ final class Carriages {
 
 	static void stop(Folk king) {
 		Wagon carriage = seat(king);
-		Folk coachman = carriage == null ? null : coachman(carriage);
+		PathfinderMob coachman = carriage == null ? null : coachman(carriage);
 		(coachman != null ? coachman : king).getNavigation().stop();
 	}
 
@@ -231,7 +242,7 @@ final class Carriages {
 
 	/** A carriage between rounds waits at the gate; with its king inside it's driven ({@link #moveTo}); attacked, he gets down. */
 	private static void tend(ServerLevel level, Faction f, Castle.Keep keep, Wagon carriage) {
-		Folk coachman = coachman(carriage);
+		PathfinderMob coachman = coachman(carriage);
 		Entity rider = carriage.getFirstPassenger();
 		if (rider instanceof Folk king) {
 			if (king.getTarget() != null || king.getLastHurtByMob() != null && king.tickCount - king.getLastHurtByMobTimestamp() < 60) {

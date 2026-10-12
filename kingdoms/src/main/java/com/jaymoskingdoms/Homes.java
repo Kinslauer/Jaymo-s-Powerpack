@@ -60,7 +60,7 @@ final class Homes {
 
 	/** Its role goes to bed at night (the working folk; the guard keeps watch, rulers keep their own hours). */
 	static boolean sleeper(int role) {
-		return Folk.isBuilder(role) || role == Folk.FARMER || role == Folk.MINER || role == Folk.WOODCUTTER;
+		return Folk.isBuilder(role) || role == Folk.FARMER || role == Folk.MINER || role == Folk.WOODCUTTER || role == Folk.PULLER;
 	}
 
 	static boolean bedtime(ServerLevel level) {

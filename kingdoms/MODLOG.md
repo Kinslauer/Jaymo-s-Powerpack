@@ -1479,3 +1479,40 @@ rebuilt here; none of its code or art is used.
   it comes down into their bag. Bigger trees take them longer.
 - Seen in game (dev server + client): a 17-log oak narrowed at its foot chop by chop, the chops moved up the trunk, and it
   fell and broke into wood on the 11th. Not yet seen: woodcutters chopping.
+
+## 0.5.26: rickshaws (pullers carry goods and people)
+Andy asked for villagers who rickshaw goods and people about the villages and kingdoms. A rickshaw is a third kind of
+`Wagon` (`Wagon.RICKSHAW`), hitched to a person instead of a horse; the work is `Rickshaws`.
+- **Pullers** (`Folk.PULLER`, the `jaymoskingdoms:puller` profession, a "Rickshaw puller" button on MCA's Professions
+  page): a settlement takes its first once it has a road, a storehouse and `Rickshaws.FIRST_AT` (12) people, its second
+  at `SECOND_AT` (30). With MCA it's one of its villagers promoted in place, like the other workers. They wait at the
+  rank by the bell, park there at dusk and go to bed.
+- **Goods**: a miner, woodcutter or farmer walking a load in from more than `MEET_FROM` (28) blocks from storage is met;
+  the load goes into the rickshaw (shown on its rack) and the gatherer goes straight back to work. The rickshaw hauls
+  to storage at `HAUL_AT` (96) items or when there's nobody else to meet.
+- **Errands**: at most every `ERRAND_TICKS` (3600) a settlement sends up to 64 items to a sister settlement within
+  `ERRAND_RANGE` (220) blocks (its overlord, a vassal, a fellow vassal or an ally): food if it has `FOOD_GAP` more,
+  else whatever it has `ERRAND_GAP` more of.
+- **People**: now and then a waiting puller fetches one of the town's villagers (a child or a grown-up) and drives them
+  to one of its buildings. A ruler with no carriage is fetched on his round and rides it from stop to stop
+  (`Carriages` drives a rickshaw the way it drives his carriage).
+- **Players**: right-click a waiting rickshaw for up to 6 settlements within `RIDE_RANGE` (700) blocks with fares
+  (`FARE_BASE` + 1 per `FARE_PER_BLOCKS`, at most `FARE_MOST` emeralds); clicking one runs `/kingdom ride` and the fare
+  goes to the settlement's treasury. Sneak to get down on the way (no refund). Hostile players and enemies at war are
+  refused. Out of sight of any player after a trip, the puller is back at the rank in a puff.
+- Stuck, a puller hops `HOP` (8) blocks ahead in a puff, never the whole way. A rickshaw whose puller is gone (or given
+  other work) for `ABANDON_TICKS` spills its load and is taken apart.
+- **Worn out** (Andy's follow-up): pullers tire with every block pulled (more laden), spent after `TIRED_BLOCKS`
+  (1800), losing up to `SLOWEST` (half) their speed. They get a little back waiting at the rank and all of it after a
+  night's sleep; spent past `WINDED` they stop now and then to catch their breath (sweat drops, a gasp). A player
+  hailing a worn-out puller is told it'll be a slow ride. The rickshaw syncs its puller and their tiredness (`Wagon.PULLER`,
+  `TIRED`) for the client.
+- **Pose** (`PullerPose`, client, through the same model hooks as `MobAnimations`): bent into the shafts like a crouch,
+  hands down at the hips gripping them, a tug back with each stride; the more tired, the lower the lean, the heavier
+  the tug and the more the head hangs; stood still and spent, their shoulders heave. MCA villagers' clothes layers and
+  breasts follow (`McaPullerPose`).
+- **Cabs** (`Cabs`, `Wagon.CAB`): a realm whose treasury holds more than `Cabs.RICH` (300) emeralds keeps a hired
+  carriage (a driver on a horse, a plain coach in its colours) across the bell from the rickshaw rank. It, not the
+  rickshaws, takes players to other settlements (same fares and offer, faster); a rickshaw there points players to it.
+  The pullers do everything else. Below 300 the cab is let go once it's back and empty.
+- Not yet seen in game: all of it (built only).
