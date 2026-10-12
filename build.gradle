@@ -117,6 +117,15 @@ def kingdomsJar = fileTree(kingdomsLibs) { include "jaymos-kingdoms-${kingdomsPr
 def localPackMods = [
 	// (none right now; Distant Horizons was here until 0.4.5)
 ]
+// resource packs, client-only: the CurseForge import downloads them into resourcepacks/ by id, and Jaymo's Powers
+// switches each on once per install (client/MedievalVillagers). The CurseForge files are all rights reserved, so they
+// are never copied into the pack; Build Modpack downloads them into your own profile from CurseForge's CDN.
+def packResourcePacks = [
+	// MCA - Default Medieval (by DE4THR4SH): vanilla-style medieval clothes, faces and hair for MCA's villagers. Its
+	// newest file says 1.21.1, but it only retextures MCA's skins, and 1144 of our 26.3 MCA jar's 1145 skin files are
+	// at the same paths (the last one is MCA's own folder icon).
+	[cf: [667175, 8868890], file: "MCAR_VanillaMedieval_Universal_7.7.36-beta.3+1.21.1.zip"],
+]
 // mods taken out of the pack: moved out of your CurseForge profile's mods folder (into removed-mods) on the next build
 // (Towns and Towers left in 0.8.4: its villages fought Epic Structures: Villages, where kingdoms are founded;
 // Traveler's Backpack and Forge Config API Port left in 0.8.14)
@@ -183,7 +192,7 @@ tasks.register("curseforgeManifest") {
 			name           : "Jaymo's Powers",
 			version        : project.version,
 			author         : "Manigraphic78",
-			files          : (packMods + localPackMods).collect { [projectID: it.cf[0], fileID: it.cf[1], required: true] },
+			files          : (packMods + localPackMods + packResourcePacks).collect { [projectID: it.cf[0], fileID: it.cf[1], required: true] },
 			overrides      : "overrides",
 		]
 		out.get().asFile.text = JsonOutput.prettyPrint(JsonOutput.toJson(manifest))
@@ -266,6 +275,23 @@ tasks.register("profileMods") {
 				java.nio.file.Files.copy(jar.toPath(), new File(profileMods, jar.name).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
 				have << id
 				logger.lifecycle("Added ${jar.name} to your CurseForge profile")
+			}
+		}
+		// resource packs that joined the pack join the profile too (from CurseForge's CDN, as the import would)
+		def profilePacks = new File(profileMods.parentFile, "resourcepacks")
+		packResourcePacks.each { p ->
+			def target = new File(profilePacks, p.file)
+			if (!target.exists()) {
+				def id = p.cf[1] as String
+				def url = "https://mediafilez.forgecdn.net/files/${id.substring(0, 4)}/${id.substring(4).replaceFirst(/^0+(?=.)/, "")}/${URLEncoder.encode(p.file, "UTF-8")}"
+				try {
+					profilePacks.mkdirs()
+					URI.create(url).toURL().withInputStream { java.nio.file.Files.copy(it, target.toPath()) }
+					logger.lifecycle("Added ${p.file} to your CurseForge profile's resource packs")
+				} catch (IOException e) {
+					target.delete()
+					logger.warn("Couldn't download ${p.file} (${e.message}); get it from CurseForge project ${p.cf[0]}")
+				}
 			}
 		}
 		wanted.each { w ->

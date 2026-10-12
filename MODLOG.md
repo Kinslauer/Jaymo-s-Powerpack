@@ -353,3 +353,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   tendrils can't grab it (so it never hunts iron golems), and nothing butchers it: an axe gets "nothing to
   butcher" and the thrash can't tear it apart. It doesn't burn: searched, it drops its loot, falls apart (shuddering, slumping and sinking as iron chips crack off) and disappears. Kitchen's new
   `jaymoskitchen:heavy_corpses` tag lists the heavy ones; Powers checks it in `KitchenCompat.isHeavy`.
+- **0.8.56, medieval MCA villagers:** the pack now brings the resource pack **MCA - Default Medieval** (by DE4THR4SH,
+  CurseForge 667175, file 8868890): MCA's humans get vanilla-style medieval clothes for every profession, gender and
+  age, with Steve/Alex-like faces and hair. It's in the CurseForge manifest (the import downloads it into
+  `resourcepacks/`; the file is all rights reserved, so it's never copied into the pack), Build Modpack downloads it
+  into your own profile, and on first launch `client/MedievalVillagers` switches it on once (delete
+  `config/jaymospowers-medieval-villagers-v1` to do that again). Its newest file says 1.21.1, so the resource pack
+  screen marks it "made for an older version"; it only retextures MCA's skins, and 1144 of our MCA jar's 1145 skin
+  files sit at the same paths. Not on the server (textures are client-only).
