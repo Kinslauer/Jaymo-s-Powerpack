@@ -353,7 +353,14 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   tendrils can't grab it (so it never hunts iron golems), and nothing butchers it: an axe gets "nothing to
   butcher" and the thrash can't tear it apart. It doesn't burn: searched, it drops its loot, falls apart (shuddering, slumping and sinking as iron chips crack off) and disappears. Kitchen's new
   `jaymoskitchen:heavy_corpses` tag lists the heavy ones; Powers checks it in `KitchenCompat.isHeavy`.
-- **0.8.56, medieval MCA villagers:** the pack now brings the resource pack **MCA - Default Medieval** (by DE4THR4SH,
+- **0.8.56, Distant Horizons back, and Iris shaders:** Distant Horizons 3.3.4 for 26.3 (CurseForge 508933 / 9005667,
+  Modrinth TGgEbP9A) is in the pack again, from its Modrinth maven, so the CurseForge import, the server and the
+  profile all get it. Far terrain is drawn as simplified chunks well past the render distance; the server builds them
+  and sends them to players. It's no longer in `removedFromProfile`. Iris Shaders 1.11.7 (CurseForge 455508 /
+  9015108, Modrinth vTN4NRGW; it needs the pack's Sodium) lets everyone load shader packs (Options → Video Settings →
+  Shader Packs); it's client-only, so the server ignores it. Distant Horizons draws its far terrain through Iris
+  shaders that support it. Both stay out of the dev game (`dev: false`).
+- **0.8.58, medieval MCA villagers:** the pack now brings the resource pack **MCA - Default Medieval** (by DE4THR4SH,
   CurseForge 667175, file 8868890): MCA's humans get vanilla-style medieval clothes for every profession, gender and
   age, with Steve/Alex-like faces and hair. It's in the CurseForge manifest (the import downloads it into
   `resourcepacks/`; the file is all rights reserved, so it's never copied into the pack), Build Modpack downloads it
