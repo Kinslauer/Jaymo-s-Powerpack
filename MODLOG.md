@@ -532,3 +532,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   26.3 build, all rights reserved): orc camps rise in rough country near kingdoms, a dark oak stockade round the
   warchief's longhouse, tents, a forge, a fighting pit and a watchtower; grunts, rangers, a shaman and a warchief boss
   with a ground slam. Their war bands raid kingdoms; killing the warchief clears the camp.
+- **0.8.89, fish loot instantly:** ships Jaymo's Kitchen 0.4.29 (see `kitchen/MODLOG.md`): clicking any fish corpse
+  (vanilla or Alex's Mobs, beached flying fish included) drops its loot and the body is gone at once.
