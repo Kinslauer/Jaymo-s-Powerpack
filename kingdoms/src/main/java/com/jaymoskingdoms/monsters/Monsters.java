@@ -13,11 +13,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.EntityTypeTags;
-import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -52,8 +53,12 @@ public final class Monsters {
 	static final double MIMIC_CLEARANCE = 256.0;
 	/** Nether spawn weights (a zombified piglin is 100) and how many come. */
 	static final int FIRE_OGRE_WEIGHT = 2, FLAME_WRAITH_WEIGHT = 4;
-	/** The silver sword: like iron, a little keener and more enchantable, and what it adds against the undead. */
-	static final ToolMaterial SILVER = new ToolMaterial(BlockTags.INCORRECT_FOR_IRON_TOOL, 320, 6.0F, 2.0F, 20, ItemTags.IRON_TOOL_MATERIALS);
+	/**
+	 * The silver sword: like iron, a little keener and more enchantable, and what it adds against the undead. (0.5.57)
+	 * Forged from, and mended with, silver ingots (Jaymo's Tinkering's, by the {@code c:ingots/silver} tag).
+	 */
+	static final ToolMaterial SILVER = new ToolMaterial(BlockTags.INCORRECT_FOR_IRON_TOOL, 320, 6.0F, 2.0F, 20,
+		TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/silver")));
 	static final float SILVER_UNDEAD_BONUS = 4.0F;
 
 	public static EntityType<Werewolf> WEREWOLF;

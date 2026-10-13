@@ -28,7 +28,7 @@ MATERIALS = [
     ("rock_stone", "Stone", "all"), ("rock_granite", "Granite", "all"), ("rock_diorite", "Diorite", "all"),
     ("rock_blackstone", "Blackstone", "all"),
     ("flint", "Flint", "all"), ("bone", "Bone", "all"), ("seared_stone", "Seared Stone", "all"),
-    ("copper", "Copper", "all"), ("iron", "Iron", "all"), ("rose_gold", "Rose Gold", "all"),
+    ("copper", "Copper", "all"), ("iron", "Iron", "all"), ("silver", "Silver", "all"), ("rose_gold", "Rose Gold", "all"),
     ("amethyst_bronze", "Amethyst Bronze", "all"), ("pig_iron", "Pig Iron", "all"), ("slimesteel", "Slimesteel", "all"),
     ("leather", "Leather", "binding"), ("string", "String", "binding"), ("vine", "Vine", "binding"),
 ]
@@ -120,7 +120,8 @@ MODIFIERS = [
 # molten id, name, Tinkers' fluid folder (under textures/fluid), or None for a tinted plain molten texture
 MOLTEN = [
     ("iron", "Molten Iron", "molten/ore/iron"), ("gold", "Molten Gold", "molten/ore/gold"),
-    ("copper", "Molten Copper", "molten/ore/copper"), ("amethyst", "Molten Amethyst", "molten/ore/amethyst"),
+    ("copper", "Molten Copper", "molten/ore/copper"), ("silver", "Molten Silver", "molten/compat_ore/silver"),
+    ("amethyst", "Molten Amethyst", "molten/ore/amethyst"),
     ("rose_gold", "Molten Rose Gold", "molten/alloy/rose_gold"),
     ("amethyst_bronze", "Molten Amethyst Bronze", "molten/alloy/amethyst_bronze"),
     ("pig_iron", "Molten Pig Iron", "molten/alloy/pig_iron"), ("slimesteel", "Molten Slimesteel", "molten/alloy/slimesteel"),

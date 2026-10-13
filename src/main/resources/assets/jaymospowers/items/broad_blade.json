@@ -89,6 +89,13 @@
         }
       },
       {
+        "when": "silver",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/part/broad_blade_silver"
+        }
+      },
+      {
         "when": "rose_gold",
         "model": {
           "type": "minecraft:model",

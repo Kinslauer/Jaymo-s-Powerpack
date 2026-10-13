@@ -102,6 +102,13 @@
                   }
                 },
                 {
+                  "when": "silver",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/sledge_hammer/handle_silver"
+                  }
+                },
+                {
                   "when": "rose_gold",
                   "model": {
                     "type": "minecraft:model",
@@ -229,6 +236,13 @@
                     }
                   },
                   {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_broken_silver"
+                    }
+                  },
+                  {
                     "when": "rose_gold",
                     "model": {
                       "type": "minecraft:model",
@@ -349,6 +363,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/head_iron"
+                    }
+                  },
+                  {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/head_silver"
                     }
                   },
                   {
@@ -480,6 +501,13 @@
                     }
                   },
                   {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_broken_silver"
+                    }
+                  },
+                  {
                     "when": "rose_gold",
                     "model": {
                       "type": "minecraft:model",
@@ -600,6 +628,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/back_iron"
+                    }
+                  },
+                  {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/back_silver"
                     }
                   },
                   {
@@ -731,6 +766,13 @@
                     }
                   },
                   {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_broken_silver"
+                    }
+                  },
+                  {
                     "when": "rose_gold",
                     "model": {
                       "type": "minecraft:model",
@@ -851,6 +893,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/sledge_hammer/front_iron"
+                    }
+                  },
+                  {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/sledge_hammer/front_silver"
                     }
                   },
                   {
@@ -985,6 +1034,13 @@
               }
             },
             {
+              "when": "silver",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/sledge_hammer/large/handle_silver"
+              }
+            },
+            {
               "when": "rose_gold",
               "model": {
                 "type": "minecraft:model",
@@ -1112,6 +1168,13 @@
                 }
               },
               {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_broken_silver"
+                }
+              },
+              {
                 "when": "rose_gold",
                 "model": {
                   "type": "minecraft:model",
@@ -1232,6 +1295,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_iron"
+                }
+              },
+              {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/head_silver"
                 }
               },
               {
@@ -1363,6 +1433,13 @@
                 }
               },
               {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_broken_silver"
+                }
+              },
+              {
                 "when": "rose_gold",
                 "model": {
                   "type": "minecraft:model",
@@ -1483,6 +1560,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_iron"
+                }
+              },
+              {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/back_silver"
                 }
               },
               {
@@ -1614,6 +1698,13 @@
                 }
               },
               {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_broken_silver"
+                }
+              },
+              {
                 "when": "rose_gold",
                 "model": {
                   "type": "minecraft:model",
@@ -1734,6 +1825,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_iron"
+                }
+              },
+              {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/sledge_hammer/large/front_silver"
                 }
               },
               {

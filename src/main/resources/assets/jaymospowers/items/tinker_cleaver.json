@@ -102,6 +102,13 @@
                   }
                 },
                 {
+                  "when": "silver",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/handle_silver"
+                  }
+                },
+                {
                   "when": "rose_gold",
                   "model": {
                     "type": "minecraft:model",
@@ -229,6 +236,13 @@
                     }
                   },
                   {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_broken_silver"
+                    }
+                  },
+                  {
                     "when": "rose_gold",
                     "model": {
                       "type": "minecraft:model",
@@ -349,6 +363,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/cleaver/head_iron"
+                    }
+                  },
+                  {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/head_silver"
                     }
                   },
                   {
@@ -480,6 +501,13 @@
                     }
                   },
                   {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_broken_silver"
+                    }
+                  },
+                  {
                     "when": "rose_gold",
                     "model": {
                       "type": "minecraft:model",
@@ -600,6 +628,13 @@
                     "model": {
                       "type": "minecraft:model",
                       "model": "jaymospowers:item/tinkering/cleaver/shield_iron"
+                    }
+                  },
+                  {
+                    "when": "silver",
+                    "model": {
+                      "type": "minecraft:model",
+                      "model": "jaymospowers:item/tinkering/cleaver/shield_silver"
                     }
                   },
                   {
@@ -724,6 +759,13 @@
                   "model": {
                     "type": "minecraft:model",
                     "model": "jaymospowers:item/tinkering/cleaver/guard_iron"
+                  }
+                },
+                {
+                  "when": "silver",
+                  "model": {
+                    "type": "minecraft:model",
+                    "model": "jaymospowers:item/tinkering/cleaver/guard_silver"
                   }
                 },
                 {
@@ -857,6 +899,13 @@
               }
             },
             {
+              "when": "silver",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/handle_silver"
+              }
+            },
+            {
               "when": "rose_gold",
               "model": {
                 "type": "minecraft:model",
@@ -984,6 +1033,13 @@
                 }
               },
               {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_broken_silver"
+                }
+              },
+              {
                 "when": "rose_gold",
                 "model": {
                   "type": "minecraft:model",
@@ -1104,6 +1160,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/cleaver/large/head_iron"
+                }
+              },
+              {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/head_silver"
                 }
               },
               {
@@ -1235,6 +1298,13 @@
                 }
               },
               {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_broken_silver"
+                }
+              },
+              {
                 "when": "rose_gold",
                 "model": {
                   "type": "minecraft:model",
@@ -1355,6 +1425,13 @@
                 "model": {
                   "type": "minecraft:model",
                   "model": "jaymospowers:item/tinkering/cleaver/large/shield_iron"
+                }
+              },
+              {
+                "when": "silver",
+                "model": {
+                  "type": "minecraft:model",
+                  "model": "jaymospowers:item/tinkering/cleaver/large/shield_silver"
                 }
               },
               {
@@ -1479,6 +1556,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/cleaver/large/guard_iron"
+              }
+            },
+            {
+              "when": "silver",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/cleaver/large/guard_silver"
               }
             },
             {

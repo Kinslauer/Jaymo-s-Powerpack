@@ -6,6 +6,10 @@
     "jaymospowers:seared_drain",
     "jaymospowers:seared_faucet",
     "jaymospowers:casting_table",
-    "jaymospowers:casting_basin"
+    "jaymospowers:casting_basin",
+    "jaymospowers:silver_ore",
+    "jaymospowers:deepslate_silver_ore",
+    "jaymospowers:raw_silver_block",
+    "jaymospowers:silver_block"
   ]
 }

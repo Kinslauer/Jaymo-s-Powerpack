@@ -1,8 +1,11 @@
 package com.jaymoskingdoms.monsters;
 
+import java.util.List;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.resources.Identifier;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
@@ -28,6 +31,7 @@ import net.minecraft.world.entity.animal.wolf.WolfSoundVariant;
 import net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.storage.ValueInput;
@@ -37,13 +41,15 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.5.56) The werewolf (after Mo' Creatures'): by day a plain-looking wanderer in a smock who runs if you hurt them; when
  * night falls they writhe, smoke and become the beast, which hunts players and villagers. The beast shrugs off most
- * blows: only gold or silver bites deep (a weapon with either in its name). At dawn it turns back. Four faces by day,
- * four coats by night (the fiery one rare, and it burns what it bites).
+ * blows: only gold or silver bites deep (a weapon with either in its name, or a Tinkering tool with a head of either).
+ * At dawn it turns back. Four faces by day, four coats by night (the fiery one rare, and it burns what it bites).
  */
 public class Werewolf extends LegendMonster {
 	static final double HEALTH = 40.0, HUMAN_SPEED = 0.25, WOLF_SPEED = 0.36, HUMAN_DAMAGE = 2.0, WOLF_DAMAGE = 7.0;
 	/** What a blow from anything but gold or silver does to the beast, and what silver does. */
 	static final float HIDE = 0.25F, SILVER = 2.0F;
+	/** Jaymo's Tinkering's tool materials (head first), read by id so Kingdoms needs no Powers classes. */
+	private static final Identifier TINKER_MATERIALS = Identifier.fromNamespaceAndPath("jaymospowers", "tool_materials");
 	/** How long the change takes (ticks). */
 	static final int CHANGE_TICKS = 60;
 	/** One coat in this many is the fiery one. */
@@ -158,10 +164,22 @@ public class Werewolf extends LegendMonster {
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
 		if (!this.isHuman() && source.getEntity() instanceof LivingEntity attacker) {
-			String weapon = source.getDirectEntity() == attacker ? BuiltInRegistries.ITEM.getKey(attacker.getMainHandItem().getItem()).getPath() : "";
+			String weapon = source.getDirectEntity() == attacker ? metal(attacker.getMainHandItem()) : "";
 			damage *= weapon.contains("silver") ? SILVER : weapon.contains("gold") ? 1.0F : HIDE;
 		}
 		return super.hurtServer(level, source, damage);
+	}
+
+	/**
+	 * What a weapon is made of, as far as the beast cares: its item id, or for a Jaymo's Tinkering tool (0.5.57) the
+	 * material of its head (its first part), so a silver-bladed tinker sword counts as silver.
+	 */
+	private static String metal(ItemStack weapon) {
+		DataComponentType<?> materials = BuiltInRegistries.DATA_COMPONENT_TYPE.getValue(TINKER_MATERIALS);
+		if (materials != null && weapon.get(materials) instanceof List<?> parts && !parts.isEmpty()) {
+			return String.valueOf(parts.getFirst());
+		}
+		return BuiltInRegistries.ITEM.getKey(weapon.getItem()).getPath();
 	}
 
 	@Override

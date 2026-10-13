@@ -89,6 +89,13 @@
         }
       },
       {
+        "when": "silver",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/part/tool_binding_silver"
+        }
+      },
+      {
         "when": "rose_gold",
         "model": {
           "type": "minecraft:model",

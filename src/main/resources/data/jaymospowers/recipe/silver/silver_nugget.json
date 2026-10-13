@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymospowers:silver_ingot"
+  ],
+  "result": {
+    "id": "jaymospowers:silver_nugget",
+    "count": 9
+  }
+}

@@ -36,6 +36,7 @@ public enum TinkerMaterial {
 	SEARED_STONE("seared_stone", Stats.SEARED_STONE, Trait.SEARING),
 	COPPER("copper", Stats.COPPER, Trait.DWARVEN, true),
 	IRON("iron", Stats.IRON, Trait.MAGNETIC, true),
+	SILVER("silver", Stats.SILVER, Trait.SMITE, true),
 	ROSE_GOLD("rose_gold", Stats.ROSE_GOLD, Trait.ENHANCED, true),
 	AMETHYST_BRONZE("amethyst_bronze", Stats.AMETHYST_BRONZE, Trait.CRUMBLING, true),
 	PIG_IRON("pig_iron", Stats.PIG_IRON, Trait.TASTY, true),
@@ -72,6 +73,7 @@ public enum TinkerMaterial {
 		static final Stats BONE = new Stats(100, 2.5F, 1.25F, Tier.STONE, -0.25F, 0.0F, 0.0F, 0.1F);
 		static final Stats COPPER = new Stats(210, 5.0F, 0.5F, Tier.IRON, -0.2F, 0.1F, 0.05F, 0.0F);
 		static final Stats IRON = new Stats(250, 6.0F, 2.0F, Tier.IRON, 0.1F, 0.0F, 0.0F, 0.0F);
+		static final Stats SILVER = new Stats(300, 5.5F, 2.25F, Tier.IRON, -0.1F, 0.05F, 0.0F, 0.1F);
 		static final Stats SEARED_STONE = new Stats(225, 6.5F, 1.5F, Tier.IRON, -0.15F, 0.1F, 0.05F, 0.0F);
 		static final Stats ROSE_GOLD = new Stats(175, 9.0F, 1.0F, Tier.WOOD, -0.3F, 0.1F, 0.0F, 0.1F);
 		static final Stats AMETHYST_BRONZE = new Stats(720, 7.0F, 1.5F, Tier.DIAMOND, 0.0F, 0.1F, 0.0F, 0.05F);

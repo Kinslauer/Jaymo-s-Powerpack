@@ -8,6 +8,7 @@ import com.jaymospowers.tinkering.smeltery.DrainBlock;
 import com.jaymospowers.tinkering.smeltery.DrainEntity;
 import com.jaymospowers.tinkering.smeltery.FaucetBlock;
 import com.jaymospowers.tinkering.smeltery.FaucetEntity;
+import com.jaymospowers.tinkering.smeltery.Melting;
 import com.jaymospowers.tinkering.smeltery.Molten;
 import com.jaymospowers.tinkering.smeltery.SmelteryBlock;
 import com.jaymospowers.tinkering.smeltery.SmelteryEntity;
@@ -21,6 +22,8 @@ import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
+import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
 import net.fabricmc.fabric.api.menu.v1.ExtendedMenuType;
@@ -47,6 +50,9 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.TransparentBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import net.minecraft.world.level.levelgen.GenerationStep;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.material.MapColor;
 
 /**
@@ -85,6 +91,11 @@ public final class Tinkering {
 	public static final Map<CastItem.Shape, Item> CASTS = new EnumMap<>(CastItem.Shape.class);
 	/** Ingots of the alloys (and the metals vanilla has no ingot for). */
 	public static final Map<Molten, Item> ALLOY_INGOTS = new EnumMap<>(Molten.class);
+	/** (0.8.111) Silver: its ores (stone and deepslate), raw ore, ingot (in {@link #ALLOY_INGOTS}), nugget and blocks. */
+	public static Block SILVER_ORE, DEEPSLATE_SILVER_ORE, RAW_SILVER_BLOCK, SILVER_BLOCK;
+	public static Item RAW_SILVER, SILVER_INGOT, SILVER_NUGGET;
+	/** Where silver ore is placed (veins of up to 9 between the bottom of the world and y 48, most around y -8). */
+	public static final ResourceKey<PlacedFeature> SILVER_ORE_FEATURE = ResourceKey.create(Registries.PLACED_FEATURE, JaymosPowers.id("ore_silver"));
 	/** Whether tooltips spell out what each trait does (the client makes this "Shift is held"). */
 	public static BooleanSupplier traitDetails = () -> true;
 
@@ -143,6 +154,11 @@ public final class Tinkering {
 				output.accept(block);
 			}
 			output.accept(SEARED_BRICK);
+			for (Block block : List.of(SILVER_ORE, DEEPSLATE_SILVER_ORE, RAW_SILVER_BLOCK, SILVER_BLOCK)) {
+				output.accept(block);
+			}
+			output.accept(RAW_SILVER);
+			output.accept(SILVER_NUGGET);
 			ALLOY_INGOTS.values().forEach(output::accept);
 			CASTS.values().forEach(output::accept);
 			for (ToolType type : ToolType.values()) {
@@ -184,6 +200,7 @@ public final class Tinkering {
 			.sound(SoundType.METAL).noOcclusion());
 		CASTING_TABLE = block("casting_table", p -> new CastingBlock(p, false), seared.get().noOcclusion());
 		CASTING_BASIN = block("casting_basin", p -> new CastingBlock(p, true), seared.get().noOcclusion());
+		registerSilver();
 		SEARED_BRICK = item("seared_brick", Item::new, Function.identity());
 		TinkerMaterial.own(TinkerMaterial.SEARED_STONE, 1, SEARED_BRICK);
 		TinkerMaterial.own(TinkerMaterial.SEARED_STONE, 4, SEARED_BRICKS.asItem());
@@ -205,6 +222,27 @@ public final class Tinkering {
 			new BlockEntityType<>(CastingEntity::new, Set.of(CASTING_TABLE, CASTING_BASIN)));
 		SMELTERY_MENU = Registry.register(BuiltInRegistries.MENU, JaymosPowers.id("smeltery"),
 			new ExtendedMenuType<>(SmelteryMenu::new, BlockPos.STREAM_CODEC));
+	}
+
+	/** (0.8.111) Silver ore in the Overworld, smelted like iron or melted (doubled) in the smeltery; a metal for parts. */
+	private static void registerSilver() {
+		SILVER_ORE = block("silver_ore", Block::new, BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
+			.instrument(NoteBlockInstrument.BASEDRUM).strength(3.0F, 3.0F).requiresCorrectToolForDrops());
+		DEEPSLATE_SILVER_ORE = block("deepslate_silver_ore", Block::new, BlockBehaviour.Properties.of().mapColor(MapColor.DEEPSLATE)
+			.instrument(NoteBlockInstrument.BASEDRUM).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE).requiresCorrectToolForDrops());
+		RAW_SILVER_BLOCK = block("raw_silver_block", Block::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL)
+			.instrument(NoteBlockInstrument.BASEDRUM).strength(5.0F, 6.0F).requiresCorrectToolForDrops());
+		SILVER_BLOCK = block("silver_block", Block::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+			.instrument(NoteBlockInstrument.IRON_XYLOPHONE).strength(5.0F, 6.0F).sound(SoundType.METAL).requiresCorrectToolForDrops());
+		RAW_SILVER = item("raw_silver", Item::new, Function.identity());
+		SILVER_INGOT = item("silver_ingot", Item::new, Function.identity());
+		SILVER_NUGGET = item("silver_nugget", Item::new, Function.identity());
+		ALLOY_INGOTS.put(Molten.SILVER, SILVER_INGOT);
+		TinkerMaterial.own(TinkerMaterial.SILVER, 1, SILVER_INGOT);
+		TinkerMaterial.own(TinkerMaterial.SILVER, 9, SILVER_BLOCK.asItem());
+		Melting.silver(SILVER_INGOT, SILVER_NUGGET, SILVER_BLOCK.asItem(), RAW_SILVER, RAW_SILVER_BLOCK.asItem(),
+			SILVER_ORE.asItem(), DEEPSLATE_SILVER_ORE.asItem());
+		BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Decoration.UNDERGROUND_ORES, SILVER_ORE_FEATURE);
 	}
 
 	private static Block block(String id, Function<BlockBehaviour.Properties, Block> factory, BlockBehaviour.Properties properties) {
