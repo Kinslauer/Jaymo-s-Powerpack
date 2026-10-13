@@ -96,8 +96,6 @@ public final class WindFlightController {
 	/** Upward kick on take-off from the ground / in mid-air. */
 	static final double TAKEOFF_BOOST = 0.9;
 	static final double AIR_TAKEOFF_BOOST = 0.5;
-	/** Double-tap window for Jump (while sneaking) to take off. */
-	static final int DOUBLE_TAP_TICKS = 7;
 	/** Horizontal speed lost in one bump that counts as a crash (shake + thud). */
 	static final double IMPACT_SPEED = 0.6;
 	/** Re-send the state this often while flying, in case the server missed something (respawn, lag). */
@@ -109,7 +107,6 @@ public final class WindFlightController {
 	private double speed;
 	private Vec3 velocity = Vec3.ZERO;
 	private int ticks;
-	private int lastJumpTap = -100;
 	/** Sneak only sinks once it has been let go after take-off (take-off is done while sneaking). */
 	private boolean sinkArmed = true;
 	private int lockFlash;
@@ -192,7 +189,6 @@ public final class WindFlightController {
 			this.player = player;
 			this.reset();
 		}
-		int jumpTaps = drain(minecraft.options.keyJump);
 		int sneakTaps = drain(minecraft.options.keyShift);
 		Input input = player.input.keyPresses;
 		// the weather governs the wind: a still clear day flies slower, a storm faster; Stormbound drags at you
@@ -213,14 +209,7 @@ public final class WindFlightController {
 		if (this.state == WindFlight.TUMBLE) {
 			this.tumble(minecraft, player);
 		} else if (!this.state.flying()) {
-			if (jumpTaps > 0 && input.shift()) {
-				if (jumpTaps >= 2 || this.ticks - this.lastJumpTap <= DOUBLE_TAP_TICKS) {
-					this.lastJumpTap = -100;
-					this.takeOff(minecraft, player);
-				} else {
-					this.lastJumpTap = this.ticks;
-				}
-			}
+			// grounded: take-off is R only (Sneak + double Jump is the crawl's)
 		} else if (!WindFlight.canFly(player) || player.isFallFlying()) {
 			this.land(player, false);
 		} else {
@@ -624,7 +613,6 @@ public final class WindFlightController {
 		this.locked = false;
 		this.speed = 0.0;
 		this.velocity = Vec3.ZERO;
-		this.lastJumpTap = -100;
 		this.sinkArmed = true;
 		this.lockFlash = 0;
 		WindCamera.reset();

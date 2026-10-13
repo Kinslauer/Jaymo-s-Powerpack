@@ -24,6 +24,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.SwingAnimation;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -404,7 +405,7 @@ final class Retinue {
 
 	private static void give(ServerPlayer p, ItemStack gift) {
 		if (!p.getInventory().add(gift)) {
-			p.drop(gift, false);
+			p.drop(gift, false, Prediction.SERVER_ONLY);
 		}
 	}
 
