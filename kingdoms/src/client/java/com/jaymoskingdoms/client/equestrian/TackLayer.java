@@ -41,7 +41,7 @@ import net.minecraft.world.item.component.DyedItemColor;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.40) A horse's tack drawn on it in 3D ({@link Bonding}): the war and racing saddles (a vanilla saddle is the Mo'
+ * (0.5.44) A horse's tack drawn on it in 3D ({@link Bonding}): the war and racing saddles (a vanilla saddle is the Mo'
  * Creatures saddle, drawn by {@link MocHorseModel}, which also draws the headstall and reins any saddle comes with), the
  * bridle and its reins, the blanket (in its dye) and horseshoes. The pieces are boxes on {@link MocHorseModel}'s bones,
  * read from {@code assets/jaymoskingdoms/tack/tack.json} ({@code tools/gen_tack.py}); the models follow the horse's own

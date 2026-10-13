@@ -1,4 +1,4 @@
-"""Draws Jaymo's Equestrian's tack (stage 2, 0.5.40), all original and procedural:
+"""Draws Jaymo's Equestrian's tack (stage 2, 0.5.44), all original and procedural:
 
 - the 3D tack's pieces (assets/jaymoskingdoms/tack/tack.json: boxes on the bones of MocHorseModel, Mo' Creatures' horse,
   read by the client's TackLayer) and their textures: textures/entity/tack/tack.png (leather, iron, brass) and

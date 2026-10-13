@@ -411,7 +411,7 @@ public final class Equestrian {
 				f *= HEAVY_ARMOUR_SPEED;
 			}
 		}
-		// (0.5.40) its hooves and belly
+		// (0.5.44) its hooves and belly
 		f *= Bonding.feet(horse, horse.level().getBlockState(horse.getBlockPosBelowThatAffectsMyMovement()));
 		return f;
 	}
@@ -508,7 +508,7 @@ public final class Equestrian {
 		if (horse instanceof WarElephant && going && gait.ordinal() >= Gait.CANTER.ordinal()) {
 			trample(level, horse, rider, sprint, now);
 		}
-		// (0.5.40) what it learns, what it thinks of its rider, its feet
+		// (0.5.44) what it learns, what it thinks of its rider, its feet
 		if (horse.getControllingPassenger() == rider) {
 			Bonding.ride(level, horse, rider, gait, sprint, going, moved * elapsed, elapsed);
 		}
@@ -533,7 +533,7 @@ public final class Equestrian {
 				d *= MAMMOTH_HEAT_DRAIN;
 			}
 		}
-		// (0.5.40) a thirsty horse tires twice as fast
+		// (0.5.44) a thirsty horse tires twice as fast
 		Bond b = horse.getAttached(Bonding.BOND);
 		if (b != null && b.thirst() < Bonding.THIRSTY && Bonding.kept(horse)) {
 			d *= Bonding.THIRSTY_DRAIN;
@@ -598,7 +598,7 @@ public final class Equestrian {
 		ServerPlayNetworking.send(rider, new Shied(horse.getId()));
 		Vec3 away = horse.position().subtract(from).multiply(1.0, 0.0, 1.0);
 		away = away.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, horse.getYRot()) : away.normalize();
-		// (0.5.40) a war saddle's high cantle keeps its rider on through blows
+		// (0.5.44) a war saddle's high cantle keeps its rider on through blows
 		boolean seated = fear == FEAR_BLOW && horse.getItemBySlot(EquipmentSlot.SADDLE).is(Tackroom.WAR_SADDLE);
 		if (!seated && random.nextDouble() < fear * (1.0 - bravery) * THROW_ODDS) {
 			rider.stopRiding();

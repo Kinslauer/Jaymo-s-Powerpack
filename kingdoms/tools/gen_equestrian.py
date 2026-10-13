@@ -1,6 +1,6 @@
 """Jaymo's Equestrian's art, all original and procedural: the coat specs of the six breeds (destrier, courser, palfrey,
 draft, steppe pony, desert horse; six coats each, the last one rare), which tools/gen_moc_horses.py paints onto Mo'
-Creatures' horse (0.5.40; until then this drew them for vanilla's horse model), the noise helpers it uses, and two
+Creatures' horse (0.5.44; until then this drew them for vanilla's horse model), the noise helpers it uses, and two
 16x16 items, the mane lock and the war elephant spawn egg (the war elephant and mammoth hides are Mo' Creatures', built
 by tools/gen_elephant_hides.py). Coat marks: blaze, star, socks, stockings, feather, dapple, roan, flea(bitten), pinto,
 leopard, dorsal (stripe), bars (on the legs), shimmer. Seeded, so every run draws the same pixels. A preview sheet goes

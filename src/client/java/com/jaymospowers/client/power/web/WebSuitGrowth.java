@@ -79,13 +79,20 @@ public final class WebSuitGrowth {
 		}
 	}
 
-	/** After the suit model is posed: each part scaled by how far it has grown. */
+	/** After the suit model is posed: each part scaled by how far it has grown (and no head on your own, in first person). */
 	public static void applyModel(Model<?> model, Object state) {
 		if (!(state instanceof AvatarRenderState avatar) || !(model instanceof PlayerModel player) || !MODELS.contains(model)) {
 			return;
 		}
+		grow(player, avatar);
+		if (WebSymbioteClient.ownFirstPerson(avatar)) {
+			player.head.visible = false;
+		}
+	}
+
+	private static void grow(PlayerModel player, AvatarRenderState avatar) {
 		Growth growth = avatar.getData(KEY);
-		boolean bulk = BULK.contains(model);
+		boolean bulk = BULK.contains(player);
 		if (growth == null || !bulk && Math.max(growth.from(), growth.to()) == 2) {
 			// nothing changing (or the plain suit under armour that's coming or going): whole, as it is
 			for (ModelPart part : new ModelPart[] {player.body, player.rightArm, player.leftArm, player.head, player.rightLeg, player.leftLeg}) {

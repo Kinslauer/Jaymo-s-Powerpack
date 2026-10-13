@@ -144,6 +144,8 @@ public final class WebSymbiote {
 	/** A weak bond barely listens: a radial pick is ignored up to {@code IGNORE_MAX} of the time (bond 0), falling to never by {@code IGNORE_BOND}. */
 	public static final float IGNORE_MAX = 0.45F;
 	public static final int IGNORE_BOND = 60;
+	/** In first person (First-person Model), its mask covers your view until the bond reaches this: you aren't quite in control. */
+	public static final int MASK_CLEAR_BOND = 60;
 	/**
 	 * It takes the wheel only for a few reasons: starving ({@link #GORGE_FULL}), a look ({@link #CURIOUS_CHANCE}), or
 	 * neglect: under {@code NEGLECT_BOND}, each takeover check has up to {@code NEGLECT_CHANCE} (at bond 0, none at
@@ -237,6 +239,11 @@ public final class WebSymbiote {
 	/** Its voice takes over your screen: each whisper for {@code WHISPER_FX_TICKS}; a feeding keeps it up, refreshed every {@code FEED_FX_EVERY}. */
 	public static final int WHISPER_FX_TICKS = 60, FEED_FX_EVERY = 40, FEED_FX_TICKS = 60;
 	/**
+	 * The screen's dread is as strong as the bond is weak, but at full strength only for these lines (a weak bond's own:
+	 * ignored, neglected, at the edge, leaving you) and for every takeover.
+	 */
+	public static final List<String> LOW_BOND_LINES = List.of("ignores", "neglect.", "edge", "reject");
+	/**
 	 * A good bond (stress under {@code CURIOUS_STRESS}, fed) is curious: each takeover check has a
 	 * {@code CURIOUS_CHANCE} it takes over just to look, grabbing something and staring at it with its own head for
 	 * {@code STARE_MIN}-{@code STARE_MAX} ticks, then setting it down (or, {@code CURIOUS_ATTACK} of the time, not).
@@ -259,7 +266,15 @@ public final class WebSymbiote {
 	public static final double WALL_LIFT = 1.0, WALL_STRETCH = 1.4, WALL_SNAP = 3.5;
 	public static final int WALL_LIFT_TICKS = 10, WALL_TETHERS = 6;
 	/** The spring: how much of the gap it closes a tick, how much speed carries over (the give), and how fast you lean. */
-	public static final double WALL_SPRING = 0.22, WALL_CARRY = 0.6, WALL_LEAN_RATE = 0.12;
+	public static final double WALL_SPRING = 0.14, WALL_CARRY = 0.8, WALL_LEAN_RATE = 0.12;
+	/**
+	 * Hung there, your view is held facing away from the wall (on a wall, up to {@code WALL_LOOK} degrees either side
+	 * of straight out; on a ceiling or floor, no higher or lower than level). Where you look, you sway: the tethers let
+	 * you hang up to {@code WALL_AIM_SHIFT} blocks that way along the wall, and their bites slide {@code TETHER_FOLLOW}
+	 * of the way after you.
+	 */
+	public static final float WALL_LOOK = 80.0F;
+	public static final double WALL_AIM_SHIFT = 0.7, TETHER_FOLLOW = 0.3;
 	/**
 	 * Where each tether bites, for tendrils 2-7 (the inner, middle and low pairs on the back): blocks to the wearer's
 	 * right along the wall, and up from your middle (on a ceiling or floor, "up" is the way you face).
@@ -838,7 +853,7 @@ public final class WebSymbiote {
 	public static void whisper(ServerPlayer player, String key) {
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_symbiote." + key)
 			.withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
-		dread(player, WHISPER_FX_TICKS, true);
+		dread(player, WHISPER_FX_TICKS, true, LOW_BOND_LINES.stream().anyMatch(key::startsWith));
 		Live live = player.getAttached(LIVE);
 		if (live != null) {
 			// one voice at a time: its running commentary waits a moment after anything it says
@@ -895,7 +910,12 @@ public final class WebSymbiote {
 
 	/** Your screen, for {@code ticks}: darkened, the purple-black vignette pulsing, and (if {@code growl}) the growl. */
 	static void dread(ServerPlayer player, int ticks, boolean growl) {
-		ServerPlayNetworking.send(player, new WebNet.Dread(ticks, growl));
+		dread(player, ticks, growl, false);
+	}
+
+	/** {@code full}: at its strongest (see {@link #LOW_BOND_LINES}); otherwise as strong as the bond is weak. */
+	static void dread(ServerPlayer player, int ticks, boolean growl, boolean full) {
+		ServerPlayNetworking.send(player, new WebNet.Dread(ticks, growl, full));
 	}
 
 	/** Whispers {@code key} the first time {@code hint} comes up. Returns the state with the hint recorded. */

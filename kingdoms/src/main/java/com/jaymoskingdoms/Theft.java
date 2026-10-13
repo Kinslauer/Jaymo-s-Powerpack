@@ -459,13 +459,18 @@ public final class Theft {
 		}
 		Weight w = weight != null ? weight : crime.weight;
 		List<LivingEntity> seen = witnesses(level, f, player);
+		if (!seen.isEmpty()) {
+			// (0.5.39) word gets round: its people will ask about it
+			Approaches.suspect(player, f.id(), level.getGameTime());
+		}
 		if (seen.isEmpty()) {
 			if (noticeable && level.getRandom().nextFloat() < NOTICE_CHANCE) {
 				NOTICES.add(new Notice(player.getUUID(), f.id(), level.getGameTime() + NOTICE_TICKS));
 			}
 			return;
 		}
-		LivingEntity witness = seen.getFirst();
+		// (0.5.42) golems can't speak: one that saw it only groans, unless someone else saw it too and cries out
+		LivingEntity witness = seen.stream().filter(e -> !(e instanceof IronGolem)).findFirst().orElse(seen.getFirst());
 		Component cry = Component.translatable("message.jaymoskingdoms.theft.cry." + crime.cry + "." + level.getRandom().nextInt(SHOUT_VARIANTS));
 		Speech.say(level, witness, cry, w == Weight.LIGHT ? Speech.YELLOW : Speech.RED, SHOUT_RANGE);
 		level.playSound(null, witness.getX(), witness.getY(), witness.getZ(), witness instanceof IronGolem ? SoundEvents.IRON_GOLEM_HURT
@@ -633,6 +638,7 @@ public final class Theft {
 			Faction f = Factions.get(server, n.faction());
 			if (player != null && f != null) {
 				Reputation.change(player, f, REP_UNSEEN);
+				Approaches.suspect(player, f.id(), now);
 				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.theft.noticed", f.name()).withStyle(ChatFormatting.GRAY));
 			}
 		}

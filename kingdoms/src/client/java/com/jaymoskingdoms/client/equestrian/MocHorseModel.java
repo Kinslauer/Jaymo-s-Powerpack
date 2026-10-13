@@ -11,7 +11,7 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
 /**
- * (0.5.40) Horses, skeleton horses and zombie horses: DrZhark's Mo' Creatures horse (MoCModelNewHorse, GPL-3, see
+ * (0.5.44) Horses, skeleton horses and zombie horses: DrZhark's Mo' Creatures horse (MoCModelNewHorse, GPL-3, see
  * {@code licenses/mocreatures}) ported to 26.3, without its wings, horn, mule ears and bags. Every part hangs off the
  * root and is posed each frame the way the original does: the jointed legs (each lower leg swings from the end of the
  * one above, the cannon bending as the hoof comes forward), the head, neck and mane moving together, the mouth opening

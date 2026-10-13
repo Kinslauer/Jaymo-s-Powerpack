@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.5.34) A tamed horse's breed and stats, in the empty space of its inventory screen; (0.5.40) its animal, for the Tack button. */
+/** (0.5.34) A tamed horse's breed and stats, in the empty space of its inventory screen; (0.5.44) its animal, for the Tack button. */
 @Mixin(AbstractMountInventoryScreen.class)
 abstract class AbstractMountInventoryScreenMixin implements EquestrianClient.MountScreen {
 	@Shadow

@@ -11,7 +11,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 /**
- * (0.5.40) A horse and its people ({@link Bonding}): how much it trusts each rider (0-100, by player), what it has
+ * (0.5.44) A horse and its people ({@link Bonding}): how much it trusts each rider (0-100, by player), what it has
  * learnt ({@link Discipline} experience), how fed and watered it is (0-100), its hooves (worn down on stone without
  * shoes, 0-100) and its shoes (0 unshod, else what's left of them), until when its coat shines from a brushing, when it
  * was last brushed, and when its needs were last seen to (game time). Saved, and synced so its rider's HUD and screens

@@ -17,7 +17,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.5.34) How an upgraded horse is drawn: its breed's coat, or a skeleton's or zombie's own, and its breed's build
- * (wider, taller, longer) on top of its size. Carried on the render state. (0.5.40) The coats are drawn for Mo' Creatures'
+ * (wider, taller, longer) on top of its size. Carried on the render state. (0.5.44) The coats are drawn for Mo' Creatures'
  * horse ({@link MocHorseModel}): {@code textures/entity/moc_horse/<breed>/<coat>.png} ({@code tools/gen_moc_horses.py}),
  * one texture for foals and grown horses alike.
  */

@@ -24,7 +24,7 @@ import net.minecraft.world.item.equipment.Equippable;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.40) Draws horses, skeleton horses and zombie horses as {@link MocHorseModel} (Mo' Creatures' horse) in their coat
+ * (0.5.44) Draws horses, skeleton horses and zombie horses as {@link MocHorseModel} (Mo' Creatures' horse) in their coat
  * ({@link HorseLooks}), with horse armour as an overlay on a slightly larger copy of the model (Mo' Creatures' metal,
  * gold and diamond armour, and ours made from the metal: {@code textures/entity/moc_horse/armor/<namespace>/<asset>.png},
  * by the armour's equipment asset; iron for any we haven't drawn), and the tack ({@link TackLayer}). A foal is the

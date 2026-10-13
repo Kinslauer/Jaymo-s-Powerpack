@@ -1836,12 +1836,57 @@ melanin gene from where the villager's family comes from:
   (`mixin/mca/McaDialogueMixin` on `Dialogues.selectAnswer` for `chat.topic`; lines `dialogue.chat.jaymoskingdoms.*`).
 - Children still inherit from their parents (MCA doesn't randomize them), and villagers already in the world keep their
   skin. Our own folk (guards, lords, kings, builders) already wear climate faces (`Climate.skinGroup`).
-## 0.5.40: Jaymo's Equestrian, stage 2 (bond and tack)
+
+## 0.5.39: the townsfolk come to you
+Andy: villagers should be able to confront you with questions, quests and start all kinds of interaction.
+`Approaches` (tuning at the top; packets `TalkNet`, client `TalkScreen`): every so often one of a settlement's people
+who can see you (an MCA or plain villager, a child, a realm's guard) walks over and says something over their head
+(`Speech`). When they're asking, right-click them to answer; walk off and they take it as they will.
+- Paced: one approach per player every 1.5-4 minutes, the same villager once a day, a guard halts a stranger once a day
+  per settlement; never mid-fight, from workers at their work, or from people who hate you (their guards hunt you).
+  By night only guards come over.
+- What they come about suits who they are and what they know of you:
+  - Quests: a giver with work (the gold !) offers it; one whose errand you carry asks how it goes. Right-click opens
+    their quests.
+  - A crime of yours they saw or heard of (`Theft` tells `Approaches.suspect`; held two days): confess and pay a
+    5-emerald fine (reputation back), deny it (believed about half the time, more if you're sworn), or threaten them
+    (they run off crying for the guards). Walking off counts against you.
+  - A guard halts a stranger: trading (fine), looking for work (sent to the nearest giver with a !), or none of their
+    business (reputation down). A guard warns you indoors at nightfall.
+  - A stranger's questions (8: where you're bound, what you make of the place, can you read...), answered warmly
+    (hearts up), plainly, or rudely (hearts and reputation down), each with its own reply.
+  - A hungry villager asks for food (any plain food in your pack); a craftsman offers a bargain from their trade
+    (bread, cod, pork, bookshelves, bottles o' enchanting, iron, a sword, a pickaxe, a compass, arrows, wool, leather,
+    bricks; a friend gets an emerald off); a friend (40+ MCA hearts) brings a small gift.
+  - A realm at war asks if you'll stand with it; gossip; a friend greets you by name.
+  - Children: tag (they run off laughing), "are you a knight?" (you're armoured), "can I see your sword?".
+- Testing (op): `/kingdom talk [topic]`: the nearest who could comes over now (topics: quest_offer, quest_check,
+  accuse, halt, question, hungry, bargain, gift, war, gossip, greet, child, warn).
+
+## 0.5.42: golems keep quiet and fight fires
+Andy: iron golems should not be able to speak, and they should beat the fires out instead of watching them burn.
+- `Speech.say` never lets an iron golem speak. A crime seen only by a golem gets its groan and no words; if a villager
+  or folk saw it too, they cry out instead (`Theft.commit`).
+- `Firefighting`: iron golems near a watched fire (and not fighting anyone) stride over and beat it out with an arm
+  swing (`GOLEM_SPEED`), no water and nothing knocked out.
+
+## 0.5.43: no rainbow hair, no Homosexual trait
+Andy: turn off rainbow hair, and the Homosexual trait. Two MCA sources, both off pack-wide in code (no config file to ship or forget):
+- **Rainbow Hair trait** (MCA rolls it for about one villager in twenty): `mixin/mca/McaTraitsMixin` makes
+  `Traits.hasTrait` answer no for `Traits.RAINBOW` and drops it from `getTraits`, so villagers already in the world lose
+  it too and show their natural hair colour. Rainbow Eyes is untouched.
+- **Homosexual trait**: hidden the same way by `McaTraitsMixin` (it never counts and leaves trait lists), for villagers
+  and players alike. Bisexual and Asexual are untouched.
+- **Dyed hair at spawn** (MCA's `coloredHairChance`, 2% of new villagers with pink/blue/green heads):
+  `mixin/mca/McaConfigMixin` forces it to 0 whenever MCA's config is read. Villagers already dyed this way keep it,
+  since a random dye can't be told from one a player chose.
+
+## 0.5.44: Jaymo's Equestrian, stage 2 (bond and tack)
 Stage 2 of the equestrian plan (project memory `equestrian-plan`): a horse comes to know its riders, learns by being
 ridden, needs looking after, and wears real tack. Package `com.jaymoskingdoms.equestrian` (`Bonding`, tuning numbers at
 the top; `Bond`, `Tack`, `Discipline`, `Tackroom`, `TackMenu`), client `TackScreen`, `TackLayer`; art by
 `tools/gen_tack.py`.
-- **Trust** (0-100, per player, saved and synced in `Bond`): a new owner starts at 30 (an owner from before 0.5.40 at
+- **Trust** (0-100, per player, saved and synced in `Bond`): a new owner starts at 30 (an owner from before 0.5.44 at
   50). Brushing (vanilla brush, once every 2 minutes; the coat shines for a day), feeding, a water bucket, picking its
   hooves and easy riding raise it; sprinting (the spurs), going hungry or thirsty, standing in the rain without a
   blanket and being hit by its own people lower it. Under 20 it bucks now and then, so a stranger on your war horse

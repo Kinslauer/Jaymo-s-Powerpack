@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.5.34) A horse drawn in its breed's build: a draft broad, a courser slim and long-legged; (0.5.40) kneeling. */
+/** (0.5.34) A horse drawn in its breed's build: a draft broad, a courser slim and long-legged; (0.5.44) kneeling. */
 @Mixin(LivingEntityRenderer.class)
 abstract class LivingEntityRendererMixin {
 	/** How far a kneeling horse goes down (blocks) and tips forward (degrees). */
@@ -23,7 +23,7 @@ abstract class LivingEntityRendererMixin {
 		if (build != null) {
 			poseStack.scale(build[0], build[1], build[2]);
 		}
-		// (0.5.40) kneeling for an armoured rider: down at the front
+		// (0.5.44) kneeling for an armoured rider: down at the front
 		TackLayer.Look look = state.getData(TackLayer.LOOK);
 		if (look != null && look.kneel() > 0.0F) {
 			poseStack.translate(0.0F, -KNEEL_DROP * look.kneel(), 0.0F);

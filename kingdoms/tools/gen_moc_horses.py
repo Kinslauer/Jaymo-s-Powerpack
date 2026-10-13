@@ -1,4 +1,4 @@
-"""Builds the horse coats for MocHorseModel (0.5.40), DrZhark's Mo' Creatures horse (GPL-3, see
+"""Builds the horse coats for MocHorseModel (0.5.44), DrZhark's Mo' Creatures horse (GPL-3, see
 src/main/resources/licenses/mocreatures): 256x256 textures, the model's 128x128 box layout drawn at twice the size.
 
 - Our 36 breed coats (the six breeds' six coats, specs from tools/gen_equestrian.py): each painted per model texel

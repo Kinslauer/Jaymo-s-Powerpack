@@ -65,7 +65,7 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	@Override
 	public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
 		if (state.getData(WebSymbioteClient.EATING) == null && state.getData(WebSymbioteClient.STARE) == null && state.getData(WebSymbioteClient.ROAR) == null
-			|| state.isInvisible) {
+			|| state.isInvisible || WebSymbioteClient.ownFirstPerson(state)) {
 			return;
 		}
 		poseStack.pushPose();

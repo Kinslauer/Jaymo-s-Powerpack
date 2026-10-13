@@ -28,7 +28,7 @@ import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.block.Blocks;
 
 /**
- * (0.5.40) Tack and care, the items of {@link Bonding}: the war and racing saddles (the vanilla saddle is the riding
+ * (0.5.44) Tack and care, the items of {@link Bonding}: the war and racing saddles (the vanilla saddle is the riding
  * saddle), the bridle, the blanket (dyeable), chain and plate barding, horseshoes, the hoof pick, and oats (from tall
  * grass). The brush and the water bucket are vanilla's. Tuning numbers live at the top.
  */

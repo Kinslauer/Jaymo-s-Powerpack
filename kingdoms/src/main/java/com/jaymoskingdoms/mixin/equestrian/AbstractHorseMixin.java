@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * (0.5.34) Horses ride at their rider's gait, are broken in by their temper, and pass their breed to their foals ({@link Equestrian}).
- * (0.5.40) They turn wide at speed without a bridle, side-pass, eat to fill their bellies and bond with whoever tames them ({@link Bonding}).
+ * (0.5.44) They turn wide at speed without a bridle, side-pass, eat to fill their bellies and bond with whoever tames them ({@link Bonding}).
  */
 @Mixin(AbstractHorse.class)
 abstract class AbstractHorseMixin {

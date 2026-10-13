@@ -14,7 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.40) The tack screen ({@link Bonding}): the horse's saddle and barding (vanilla's equipment slots), its bridle and
+ * (0.5.44) The tack screen ({@link Bonding}): the horse's saddle and barding (vanilla's equipment slots), its bridle and
  * its blanket (the {@link Bonding#TACK} attachment) down the left, and what it thinks of you and has learnt on the right
  * ({@code TackScreen} draws that from the synced {@link Bond}). Opened from the "Tack" button on the horse's own screen.
  */
