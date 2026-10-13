@@ -685,7 +685,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   boom (at once); Darktide, stay at sea from dusk to dawn (at dawn).
 
 - **0.9.0, player classes (Kingdoms 0.6.0):** the first time you join you pick a class, for keeps: Thief, Warlord,
-  Mage, Archer, Survivalist, Brute, Marksman or Sorcerer, each good with its own gear (found by item tags, so Armory,
+  Mage, Archer, Survivalist, Brute, Marksman, Sorcerer or Rider, each starting with its kit and good with its own gear (found by item tags, so Armory,
   Balkon's and Tinkering weapons all count) and paying its own price in hearts or speed. A Writ of Rebirth (rare loot,
   or a court wizard's once a week) lets you choose again. Heavy armour now weighs a little on everyone. Stage 1 of
   three: the Mage's casting staff and the Sorcerer's elemental blade come next, then the Marksman's guns. Plan:

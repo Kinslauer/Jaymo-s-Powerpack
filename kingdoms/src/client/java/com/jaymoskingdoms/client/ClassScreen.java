@@ -19,13 +19,13 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.6.0) The class screen ({@link Classes}), laid out like a character-creation screen: a row of cards, each a class's
  * name over a gold rule, its portrait (its signature gear, drawn large), a table of what it's good with
- * ({@link ClassPerks#card}) and the gear it starts with ({@link Classes#kit}). Four cards show at once; the arrows
- * turn to the other four. Pressing a card picks it; a Mage or a Sorcerer then picks their first spell or element from
+ * ({@link ClassPerks#card}) and the gear it starts with ({@link Classes#kit}). Three cards show at once; the arrows
+ * turn to the next three. Pressing a card picks it; a Mage or a Sorcerer then picks their first spell or element from
  * a row under the cards; Choose seals it. Opened by the server the first time a player comes into a world (then it
  * can't be shut without picking) and when a Writ of Rebirth is read.
  */
 final class ClassScreen extends Screen {
-	static final int CARDS_SHOWN = 4, CARD_GAP = 6, CARD_H = 196, PORTRAIT_H = 56, BUTTON_H = 20, PORTRAIT_SCALE = 3;
+	static final int CARDS_SHOWN = 3, CARD_GAP = 6, CARD_H = 196, PORTRAIT_H = 56, BUTTON_H = 20, PORTRAIT_SCALE = 3;
 	static final int COLOR_PANEL = SkillScreen.COLOR_PANEL, COLOR_EDGE = SkillScreen.COLOR_EDGE, COLOR_TEXT = SkillScreen.COLOR_TEXT,
 		COLOR_DIM = SkillScreen.COLOR_DIM, COLOR_GOLD = SkillScreen.COLOR_GOLD, COLOR_CARD = 0xF0141210, COLOR_CARD_PICKED = 0xF0241E14,
 		COLOR_ROW = 0x30FFFFFF;
@@ -57,7 +57,7 @@ final class ClassScreen extends Screen {
 	}
 
 	private int cardW() {
-		return Math.min(112, (this.width - 40 - CARD_GAP * (CARDS_SHOWN - 1)) / CARDS_SHOWN);
+		return Math.min(124, (this.width - 40 - CARD_GAP * (CARDS_SHOWN - 1)) / CARDS_SHOWN);
 	}
 
 	private int rowLeft() {

@@ -34,6 +34,7 @@ cudgels, Balkon's mace, flails and Armory axes), `#guns` (Balkon's musket, blund
 | **Survivalist** | Hunger drains 30% slower, air lasts twice as long, +1 heart, fall damage −30%, +5% move speed | none | exhaustion factor (as Packhorse), oxygen-bonus attribute, max-health, fall-damage multiplier (ADD_MULTIPLIED_TOTAL, so powers that negate fall damage stay at zero, Andy's rule), move speed |
 | **Brute** | Shields block 100% and shrug off axe disables faster; maces, flails and axes +30% damage; +2 hearts | base speed −8%, heavy armour slows twice as much | tags; shield hook; speed and health modifiers |
 | **Marksman** | Guns +30% damage, reload and windup 35% faster, range +50%, slight aim assist (the shot bends up to 3° to the nearest target); each light-armour piece gives +1 armour | −1 heart | Balkon's gun items found by id like `Muskets` does; mixins on WeaponMod's ranged-item use time and projectile spawn (optional mod: all through `WeaponModCompat`) |
+| **Rider** (the ninth, Andy asked for one more) | In the saddle the horse runs 15% faster and tires 25% slower; horses trust you 50% sooner; blows from horseback +20% | on foot 5% slower | transient speed modifier on the mount while ridden; `Equestrian.drain` and `Bonding.addTrust` factors; mounted attack-damage modifier |
 | **Sorcerer** | Imbue a held blade with one of six elements (water, fire, earth, air, lightning, ice); a few short-cooldown bolts of that element | can't cast the big scrolls (Raising, Warding) | an **Imbue** key (default J): the blade takes the element for 2 minutes with its trail. Fire sets alight; water douses and hurts blazes/endermen, slows; earth staggers and knocks down; air launches; lightning chains to 2 neighbours; ice freezes 3 s. The element is chosen on the class screen and swapped at a court wizard |
 
 Heavy-armour weight is new for everyone: each iron/diamond/netherite/plate piece slows 1.5% (6% in full plate), so
@@ -49,7 +50,9 @@ Hearts: Mage 8, Marksman 9, vanilla 10, Survivalist 11, Brute 12. These stack wi
    elements.
 3. **Marksman's guns**: reload, windup, range, aim assist through WeaponMod mixins.
 
-## Open questions for Andy
-1. The list ended in "1." Was there a ninth line coming?
-2. Heavy armour slowing *everyone* a little (so Warlord/Brute differ): yes?
-3. Respec by Writ of Rebirth (rare loot + court wizard once a week): fine, or only at the court wizard?
+## Andy's answers (2026-10-13)
+1. The "1." meant a ninth class: make one up. It's the **Rider**, built on the Equestrian horses.
+2. Heavy armour slows everyone a little: yes.
+3. Respec: keep both the Writ of Rebirth in loot and the court wizard's sale.
+4. The pick screen looks like a character-creation screen (Andy's Elden Ring reference): a card per class with a
+   portrait, a stat table and the starting gear; every class starts with its kit (`Classes.kit`), once per player.

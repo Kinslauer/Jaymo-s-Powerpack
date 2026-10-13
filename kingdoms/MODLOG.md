@@ -2325,4 +2325,9 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   knocked aside. Marksman: -1 heart, +1 armour per light piece (its guns are stage 3). Sorcerer: its blade and element
   are stage 2. Heavy armour now weighs on everyone: -1.5% speed a piece. Fall-damage changes are
   `ADD_MULTIPLIED_TOTAL`, so a power that takes it to nothing keeps it there.
+- The ninth class, the **Rider** (Andy asked for one more): in the saddle the horse runs 15% faster (a transient
+  modifier on the mount's speed) and tires 25% slower (`Equestrian.drain`), horses trust them 50% sooner
+  (`Bonding.addTrust`), blows from horseback +20%; on foot 5% slower. Every class starts with a kit once per player
+  (`Classes.kit`, attachment `kitted`): the Thief a dagger and leather, the Archer a bow and arrows, the Rider a lance,
+  a saddle and wheat, and so on; other mods' items by id with vanilla stand-ins.
 - Not playtested in game. Plan: `docs/Classes-Plan.md`.

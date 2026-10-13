@@ -13,8 +13,8 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
-import net.fabricmc.fabric.api.entity.event.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
@@ -37,11 +37,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -52,7 +52,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.6.0) Player classes: what you're good with. The first time you come into a world a screen asks you to pick one of
- * eight (Thief, Warlord, Mage, Archer, Survivalist, Brute, Marksman, Sorcerer); the pick is for keeps, unless you find a
+ * nine (Thief, Warlord, Mage, Archer, Survivalist, Brute, Marksman, Sorcerer, Rider); the pick is for keeps, unless you find a
  * Writ of Rebirth ({@link #WRIT}: rare chest loot, or a court wizard sells one a week), which unmakes it and asks again.
  * A class sits beside a power and beside the skill tree ({@link Skills}): the class is what you're good with, the tree
  * how far you've practised it.
@@ -79,7 +79,7 @@ public final class Classes {
 	/** The eight classes. {@code options}: what the class picks besides (a Mage's first spell, a Sorcerer's element). */
 	public enum PlayerClass {
 		THIEF, WARLORD, MAGE("fire", "arcane", "warding"), ARCHER, SURVIVALIST, BRUTE, MARKSMAN,
-		SORCERER("water", "fire", "earth", "air", "lightning", "ice");
+		SORCERER("water", "fire", "earth", "air", "lightning", "ice"), RIDER;
 
 		public final List<String> options;
 
@@ -182,12 +182,6 @@ public final class Classes {
 				refresh(sp);
 			}
 		});
-		// an Archer's arrows and bolts hit harder
-		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
-			if (entity instanceof AbstractArrow arrow && arrow.getOwner() instanceof ServerPlayer sp && is(sp, PlayerClass.ARCHER)) {
-				arrow.setBaseDamage(arrow.getBaseDamage() * ClassPerks.ARCHER_DAMAGE);
-			}
-		});
 		ServerTickEvents.END_SERVER_TICK.register(Classes::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			WRIT_OFFERS.clear();
@@ -252,12 +246,12 @@ public final class Classes {
 		player.setAttached(CLASS, new Chosen(cls.key(), option));
 		refresh(player);
 		if (cls == PlayerClass.MAGE && !player.getInventory().contains(new ItemStack(Arcana.WIZARD_STAFF))) {
-			player.getInventory().placeItemBackInInventory(new ItemStack(Arcana.WIZARD_STAFF));
+			player.getInventory().placeItemBackInInventory(new ItemStack(Arcana.WIZARD_STAFF), Prediction.SERVER_ONLY);
 		}
 		if (START_WITH_GEAR && !player.getAttachedOrElse(KITTED, false)) {
 			player.setAttached(KITTED, true);
 			for (ItemStack stack : kit(cls, option)) {
-				player.getInventory().placeItemBackInInventory(stack);
+				player.getInventory().placeItemBackInInventory(stack, Prediction.SERVER_ONLY);
 			}
 		}
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6F, 0.9F);
@@ -292,6 +286,8 @@ public final class Classes {
 			case BRUTE -> List.of(any(1, "jaymospowers:iron_flanged_mace", "minecraft:iron_axe"), new ItemStack(Items.SHIELD), new ItemStack(Items.CHAINMAIL_CHESTPLATE));
 			case MARKSMAN -> List.of(any(1, "weaponmod:musket", "minecraft:crossbow"), any(16, "weaponmod:bullet", "minecraft:arrow"), new ItemStack(Items.LEATHER_CHESTPLATE));
 			case SORCERER -> List.of(new ItemStack(Items.IRON_SWORD), new ItemStack(Items.LEATHER_CHESTPLATE), new ItemStack(Items.LEATHER_LEGGINGS));
+			case RIDER -> List.of(any(1, "jaymospowers:iron_lance", "minecraft:iron_sword"), new ItemStack(Items.SADDLE), new ItemStack(Items.LEATHER_CHESTPLATE),
+				new ItemStack(Items.LEATHER_BOOTS), new ItemStack(Items.WHEAT, 8));
 		};
 	}
 
@@ -363,7 +359,7 @@ public final class Classes {
 		}
 		Approaches.take(player, Items.EMERALD, WRIT_EMERALDS);
 		player.setAttached(WRIT_BOUGHT, player.level().getGameTime());
-		player.getInventory().placeItemBackInInventory(new ItemStack(WRIT));
+		player.getInventory().placeItemBackInInventory(new ItemStack(WRIT), Prediction.SERVER_ONLY);
 		ServerLevel level = (ServerLevel) player.level();
 		Speech.say(level, wizard, Component.translatable("talk.jaymoskingdoms.wizard.writ.done"), Speech.GOLD, 16.0);
 		return true;
