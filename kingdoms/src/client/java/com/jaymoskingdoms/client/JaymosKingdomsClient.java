@@ -41,13 +41,22 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.lootgoblins.LootGoblinRenderer.register();
 		MobAnimations.register();
 		PullerPose.register();
+		// 0.5.50: a pickpocket's arm in the pocket
+		PickpocketPose.register();
 		SpeechBubbles.register();
 		// 0.5.29: quest givers' screens, marks and the tracker
 		QuestClient.register();
+		// 0.5.50: the traveller's journal on M
+		JournalClient.register();
 		TalkScreen.register();
 		ArmoryLayer.register();
 		// 0.5.34: Jaymo's Equestrian (gaits, the stamina HUD, coats, war elephants)
 		com.jaymoskingdoms.client.equestrian.EquestrianClient.register();
+		// 0.5.47: stablehands' and farriers' screens (the scroll kept when one comes again after a button)
+		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(com.jaymoskingdoms.StableNet.Open.TYPE, (payload, context) -> {
+			int scroll = context.client().gui.screen() instanceof StableScreen was && was.workerId() == payload.workerId() ? was.scroll() : 0;
+			context.client().gui.setScreen(new StableScreen(payload, scroll));
+		});
 	}
 
 	/** Their render state: which of them it is, its faction's style (type ordinal), and the dye it wears (-1 for none). */
@@ -140,7 +149,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 				case Folk.KING -> KINGS[land][state.variant % KING_FACES];
 				case Folk.LORD -> LORDS[land][dye];
 				// (a farmer wears a worker's clothes)
-				case Folk.FOREMAN, Folk.WORKER, Folk.FARMER, Folk.MINER, Folk.WOODCUTTER, Folk.CARTER, Folk.PULLER -> builder(state, land, dye);
+				case Folk.FOREMAN, Folk.WORKER, Folk.FARMER, Folk.MINER, Folk.WOODCUTTER, Folk.CARTER, Folk.PULLER, Folk.STABLEHAND, Folk.FARRIER -> builder(state, land, dye);
 				default -> GUARDS[land][state.variant % GUARD_FACES];
 			};
 		}

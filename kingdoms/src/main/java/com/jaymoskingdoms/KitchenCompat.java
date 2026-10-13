@@ -17,6 +17,8 @@ final class KitchenCompat {
 	private static final @Nullable Method HOSTILE, CARRIER, CARRY_BY, THROW_AT;
 	/** (0.5.37) For necromancers: what a corpse was, and whether it's a player's. */
 	private static final @Nullable Method SOURCE_TYPE, PLAYER_CORPSE;
+	/** (0.5.48) For golems: whether fire takes a corpse (a heavy iron one it doesn't, and can't be lifted). */
+	private static final @Nullable Method BURNS;
 
 	static {
 		Class<?> corpse = null;
@@ -49,6 +51,15 @@ final class KitchenCompat {
 		}
 		SOURCE_TYPE = sourceType;
 		PLAYER_CORPSE = playerCorpse;
+		Method burns = null;
+		if (corpse != null) {
+			try {
+				burns = corpse.getMethod("burns");
+			} catch (ReflectiveOperationException e) {
+				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for iron golems to burn corpses: {}", e.toString());
+			}
+		}
+		BURNS = burns;
 	}
 
 	private KitchenCompat() {
@@ -63,6 +74,21 @@ final class KitchenCompat {
 	static boolean isFreeMonsterCorpse(Entity entity) {
 		return CORPSE != null && CORPSE.isInstance(entity) && !entity.isRemoved() && !entity.isPassenger()
 			&& Boolean.TRUE.equals(call(HOSTILE, entity)) && call(CARRIER, entity) == null;
+	}
+
+	/**
+	 * (0.5.48) A corpse an iron golem may take to the fire: lying free, not a player's (their things stay safe), and one
+	 * fire takes (not a heavy iron golem's, which can't be lifted either).
+	 */
+	static boolean isBurnableCorpse(Entity entity) {
+		return CORPSE != null && BURNS != null && PLAYER_CORPSE != null && CORPSE.isInstance(entity) && !entity.isRemoved()
+			&& !entity.isPassenger() && call(CARRIER, entity) == null && !Boolean.TRUE.equals(call(PLAYER_CORPSE, entity))
+			&& Boolean.TRUE.equals(call(BURNS, entity));
+	}
+
+	/** (0.5.48) A monster's corpse. */
+	static boolean isHostile(Entity corpse) {
+		return Boolean.TRUE.equals(call(HOSTILE, corpse));
 	}
 
 	/** (0.5.37) A corpse a necromancer can raise: lying free, not a player's (their things stay safe). */

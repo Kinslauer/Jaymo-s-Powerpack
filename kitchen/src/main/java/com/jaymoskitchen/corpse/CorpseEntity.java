@@ -83,6 +83,8 @@ public class CorpseEntity extends Entity {
 	private static final float POCKET_WIDTH = 0.5F, POCKET_HEIGHT = 0.8F;
 	/** Where a carried corpse sits: this far in front of the carrier, at this height (across the arms). */
 	private static final double CARRY_FORWARD = 0.55, CARRY_HEIGHT = 0.9;
+	/** (0.4.31) The size of carrier the carry spot is set for (a villager); bigger ones hold it further out and higher. */
+	private static final double CARRIER_HALF_WIDTH = 0.3, CARRIER_HEIGHT = 1.95;
 	/** Further than this from its carrier (teleported, fell, ...) and it's dropped. */
 	private static final double CARRY_LEASH_SQ = 4.0 * 4.0;
 
@@ -888,6 +890,10 @@ public class CorpseEntity extends Entity {
 		}
 		ItemStack held = player.getItemInHand(hand);
 
+		// a fish is looted in one go, whatever's in your hand: out comes its loot and the body's gone
+		if (isFish()) {
+			return lootFish(level);
+		}
 		// anything that burns can be set alight
 		if (burns() && (held.is(Items.FLINT_AND_STEEL) || held.is(Items.FIRE_CHARGE))) {
 			igniteForSeconds(8.0F);
@@ -1131,6 +1137,27 @@ public class CorpseEntity extends Entity {
 		return InteractionResult.SUCCESS_SERVER;
 	}
 
+	/** (0.4.29) A fish corpse: its loot drops and it's gone, in one click. */
+	private InteractionResult lootFish(ServerLevel level) {
+		dropLoot(level);
+		level.sendParticles(ParticleTypes.SPLASH, getX(), getY() + 0.2, getZ(), 12, 0.25, 0.1, 0.25, 0.05);
+		play(level, SoundEvents.BUNDLE_DROP_CONTENTS, 1.0F);
+		discard();
+		return InteractionResult.SUCCESS_SERVER;
+	}
+
+	/**
+	 * A fish (see {@link CorpseKind#FISH}). Fish corpses left from before 0.4.29 were saved as {@link CorpseKind#OTHER},
+	 * so those count by their type too.
+	 */
+	public boolean isFish() {
+		if (kind == CorpseKind.FISH) {
+			return true;
+		}
+		EntityType<?> type = kind == CorpseKind.OTHER ? sourceType() : null;
+		return type != null && type.builtInRegistryHolder().is(Corpses.FISH_CORPSES);
+	}
+
 	private void dropLoot(ServerLevel level) {
 		for (ItemStack stack : loot) {
 			spawnAtLocation(level, stack.copy(), 0.3F);
@@ -1332,11 +1359,14 @@ public class CorpseEntity extends Entity {
 		return carryPosition(carrier, yaw, x, y, z, 0.0F);
 	}
 
-	/** The same, for a corpse this wide: a big one is held further out (and lower), in front of you, not around you. */
+	/**
+	 * The same, for a corpse this wide: a big one is held further out (and lower), in front of you, not around you.
+	 * (0.4.31) A carrier bigger than a person (an iron golem) holds it out past its own bulk, up at its own arms.
+	 */
 	public static Vec3 carryPosition(Entity carrier, float yaw, double x, double y, double z, float width) {
 		float radians = yaw * Mth.DEG_TO_RAD;
-		double forward = CARRY_FORWARD + Math.max(0.0, width * 0.5 - 0.45);
-		double height = width > 1.0F ? 0.3 : CARRY_HEIGHT;
+		double forward = CARRY_FORWARD + Math.max(0.0, width * 0.5 - 0.45) + Math.max(0.0, carrier.getBbWidth() * 0.5 - CARRIER_HALF_WIDTH);
+		double height = (width > 1.0F ? 0.3 : CARRY_HEIGHT) * Math.max(1.0, carrier.getBbHeight() / CARRIER_HEIGHT);
 		return new Vec3(x - Mth.sin(radians) * forward, y + height, z + Mth.cos(radians) * forward);
 	}
 

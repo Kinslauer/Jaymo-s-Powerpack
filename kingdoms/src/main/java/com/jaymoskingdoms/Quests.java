@@ -35,6 +35,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.util.Prediction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -55,7 +56,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.5.29) Quests, from villagers and kings and nobody else. A villager with work for you wears a gold <b>!</b> over their
- * head (a king nearly always has one); talk to them (MCA's menu: Quests; a plain villager: sneak and use; a king: an
+ * head (only about one villager in twenty ever has work to give, and a king seldom does; more of them do for one their
+ * settlement thinks well of); talk to them (MCA's menu: Quests; a plain villager: sneak and use; a king: an
  * audience) and their quest is laid out with what it pays. Take it, do it, and come back: they wear a <b>?</b> while
  * you're about their business (gold once it's done). Turning it in pays out (emeralds, the giver's goods, enchanted books,
  * relics with passives) and builds your name: hearts with the MCA villager, reputation with their settlement, standing
@@ -67,8 +69,15 @@ import org.jspecify.annotations.Nullable;
 public final class Quests {
 	/** How many quests a player may carry at once: villagers', and kings'. */
 	static final int MAX_QUESTS = 5, MAX_ROYAL = 1;
-	/** Chance a villager has work on a given day. */
-	static final float OFFER_CHANCE = 0.35F;
+	/**
+	 * (0.5.49) Quests are rare. The share of a settlement's villagers who ever give quests (one in twenty; the rest never
+	 * do), and how much that share grows with a good name there (this much more at the best reputation, scaled down from it).
+	 */
+	static final float GIVER_SHARE = 0.05F, GIVER_SHARE_REPUTED = 0.05F;
+	/** Chance one of those givers has work on a given day. */
+	static final float OFFER_CHANCE = 0.5F;
+	/** (0.5.49) Chance a king has work on a given day, and how much more at the best reputation with his realm. */
+	static final float KING_CHANCE = 0.08F, KING_CHANCE_REPUTED = 0.12F;
 	/** How often givers near players are looked at (ticks); how near (blocks). */
 	static final int OFFER_TICKS = 100;
 	static final double OFFER_RANGE = 40.0;
@@ -80,6 +89,8 @@ public final class Quests {
 	static final int HOLD_TICKS = 20 * 60 * 2;
 	/** A chief's death counts for those with the quest this near it. */
 	static final double CHIEF_CREDIT_RANGE = 160.0;
+	/** (0.5.49) Giving up a quest costs this much reputation with the giver's settlement (a king's, this much). */
+	static final int ABANDON_REPUTATION = 10, ABANDON_ROYAL_REPUTATION = 40;
 	/** A delivered letter: hearts with whoever gets it. */
 	static final int LETTER_HEARTS = 5;
 	/** (0.5.29) A king slain cunningly (under a false oath, or out on his round): emeralds this much more (percent), and this much more good name with the giver's realm. */
@@ -169,7 +180,7 @@ public final class Quests {
 		return null;
 	}
 
-	private static void put(ServerPlayer player, Quest quest) {
+	static void put(ServerPlayer player, Quest quest) {
 		List<Quest> list = new ArrayList<>(log(player));
 		list.replaceAll(q -> q.id().equals(quest.id()) ? quest : q);
 		player.setAttached(LOG, List.copyOf(list));
@@ -186,6 +197,7 @@ public final class Quests {
 		return switch (q.kind()) {
 			case Quest.GATHER -> count(player, item(q.objective().target())) >= q.objective().count();
 			case Quest.FETCH -> find(player, q.id()) >= 0;
+			case Quest.BREAK_IN, Quest.STUD -> Stables.questHorse(player, q) != null;
 			default -> q.counted();
 		};
 	}
@@ -217,17 +229,43 @@ public final class Quests {
 		return level.getOverworldClockTime() / 24000L;
 	}
 
-	/** A new day: the giver rolls whether they have work (a king always has); their mark follows. */
-	private static Offer refresh(ServerLevel level, LivingEntity giver) {
+	/**
+	 * A new day: the giver rolls whether they have work, as {@link #hasWork} decides for a player of {@code rep} with their
+	 * settlement (whoever is about when the day's first roll is made); their mark follows.
+	 */
+	private static Offer refresh(ServerLevel level, LivingEntity giver, int rep) {
 		Offer offer = giver.getAttachedOrElse(OFFER, new Offer(-1L, false, Optional.empty()));
 		long day = day(level);
 		if (offer.nextDay() <= day) {
-			boolean has = giver instanceof Folk || level.getRandom().nextFloat() < OFFER_CHANCE;
-			offer = new Offer(day + 1, has, Optional.empty());
+			offer = new Offer(day + 1, hasWork(giver, rep, level.getRandom()), Optional.empty());
 			giver.setAttached(OFFER, offer);
 		}
 		mark(giver, offer.has());
 		return offer;
+	}
+
+	/**
+	 * (0.5.49) Whether {@code giver} has work today: a king seldom ({@link #KING_CHANCE}); a villager only if they're one
+	 * of the few who ever give quests ({@link #giver}), and then on about half their days. A good name ({@code rep} above
+	 * {@link Reputation#WELCOME}) raises both a little.
+	 */
+	static boolean hasWork(LivingEntity giver, int rep, RandomSource random) {
+		float reputed = Math.max(0, rep - Reputation.WELCOME) / (float) Reputation.MAX;
+		if (giver instanceof Folk) {
+			return random.nextFloat() < KING_CHANCE + KING_CHANCE_REPUTED * reputed;
+		}
+		return giver(giver, reputed) && random.nextFloat() < OFFER_CHANCE;
+	}
+
+	/**
+	 * (0.5.49) Whether this villager is one who gives quests at all: fixed by who they are (their UUID), so the same
+	 * few in each settlement are the ones with work, and a few more of them for one well thought of ({@code reputed}, 0..1).
+	 */
+	static boolean giver(LivingEntity villager, float reputed) {
+		UUID id = villager.getUUID();
+		long mixed = id.getMostSignificantBits() * 0x9E3779B97F4A7C15L ^ id.getLeastSignificantBits();
+		float lot = Math.floorMod(mixed ^ (mixed >>> 31), 10000L) / 10000.0F;
+		return lot < GIVER_SHARE + GIVER_SHARE_REPUTED * reputed;
 	}
 
 	private static void mark(LivingEntity giver, boolean has) {
@@ -241,8 +279,8 @@ public final class Quests {
 	}
 
 	/** The giver's quest, made now if it hasn't been yet (the ruins are looked for once, when someone first asks). */
-	private static @Nullable Quest offered(ServerLevel level, LivingEntity giver, Faction f) {
-		Offer offer = refresh(level, giver);
+	private static @Nullable Quest offered(ServerLevel level, LivingEntity giver, Faction f, int rep) {
+		Offer offer = refresh(level, giver, rep);
 		if (!offer.has()) {
 			return null;
 		}
@@ -283,7 +321,7 @@ public final class Quests {
 			}
 		}
 		if (views.isEmpty()) {
-			Quest q = offered(level, giver, f);
+			Quest q = offered(level, giver, f, rep);
 			if (q != null) {
 				views.add(view(level, player, q, QuestNet.OFFER));
 			}
@@ -392,6 +430,9 @@ public final class Quests {
 			if (slot >= 0) {
 				player.getInventory().getItem(slot).shrink(1);
 			}
+		} else if (q.kind() == Quest.BREAK_IN || q.kind() == Quest.STUD) {
+			// (0.5.47) the horse goes to the giver's stable
+			Stables.questTurnIn(level, player, giver, f, q);
 		}
 		remove(player, q.id());
 		for (ItemStack stack : rewards(level, q)) {
@@ -427,7 +468,19 @@ public final class Quests {
 			}
 		}
 		player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.abandoned", title(q)).withStyle(ChatFormatting.GRAY));
+		disappoint(player, q);
 		sync(player, true);
+	}
+
+	/** (0.5.49) The giver's settlement thinks less of one who gave up their quest. */
+	private static void disappoint(ServerPlayer player, Quest q) {
+		Faction f = Factions.get(player.level().getServer(), q.giver().faction());
+		if (f == null) {
+			return;
+		}
+		int cost = q.giver().king() ? ABANDON_ROYAL_REPUTATION : ABANDON_REPUTATION;
+		Reputation.change(player, f, -cost);
+		player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.abandoned.reputation", cost, f.name()).withStyle(ChatFormatting.RED));
 	}
 
 	/** Gives up quest {@code id} from anywhere ({@code /kingdom quests abandon}). */
@@ -437,6 +490,7 @@ public final class Quests {
 			return false;
 		}
 		remove(player, id);
+		disappoint(player, q);
 		sync(player, true);
 		return true;
 	}
@@ -445,7 +499,7 @@ public final class Quests {
 	static int finishAll(ServerPlayer player) {
 		int n = 0;
 		for (Quest q : log(player)) {
-			if (q.kind() != Quest.GATHER && q.kind() != Quest.FETCH && !q.counted()) {
+			if (q.kind() != Quest.GATHER && q.kind() != Quest.FETCH && q.kind() != Quest.BREAK_IN && q.kind() != Quest.STUD && !q.counted()) {
 				put(player, q.withProgress(q.objective().count()));
 				n++;
 			}
@@ -829,8 +883,9 @@ public final class Quests {
 			for (ServerPlayer player : level.players()) {
 				for (LivingEntity giver : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(OFFER_RANGE),
 					e -> e instanceof Villager || (e instanceof Folk folk && folk.role() == Folk.KING))) {
-					if (settlement(level, giver) != null) {
-						refresh(level, giver);
+					Faction f = settlement(level, giver);
+					if (f != null) {
+						refresh(level, giver, Reputation.get(player, f.id()));
 					} else {
 						mark(giver, false);
 					}
@@ -896,7 +951,8 @@ public final class Quests {
 		return switch (q.kind()) {
 			// (who a letter's for and where; whose chief, or whose king)
 			case Quest.DELIVER -> Component.translatable(key, addressee(q), q.objective().place());
-			case Quest.CHIEF, Quest.WARBAND -> Component.translatable(key, q.objective().place());
+			case Quest.CHIEF, Quest.WARBAND, Quest.RACE -> Component.translatable(key, q.objective().place());
+			case Quest.STUD -> Component.translatable(key, breedName(q));
 			// (the reasons differ by the king's temper, the title only by how it's done)
 			case Quest.REGICIDE -> Component.translatable("quest.jaymoskingdoms.king.regicide." + q.objective().otherName() + ".title", q.objective().place());
 			default -> Component.translatable(key);
@@ -916,6 +972,11 @@ public final class Quests {
 	private static Component foes(String target) {
 		String path = target.startsWith("*") ? target.substring(1) : target.substring(target.indexOf(':') + 1);
 		return Component.translatable("quest.jaymoskingdoms.foes." + path);
+	}
+
+	/** (0.5.47) A stud quest's breed. */
+	private static Component breedName(Quest q) {
+		return Component.translatable(com.jaymoskingdoms.equestrian.Breed.byId(q.objective().target()).key());
 	}
 
 	private static Component itemName(String id) {
@@ -952,6 +1013,9 @@ public final class Quests {
 			case Quest.CHAMPION -> Component.translatable(key, Component.translatable("foe.jaymoskingdoms." + o.otherName()), ruin(o.target()), x(q), z(q));
 			case Quest.CHIEF -> Component.translatable(key, o.place(), x(q), z(q));
 			case Quest.REGICIDE, Quest.WARBAND -> Component.translatable(key, o.place(), x(q), z(q));
+			case Quest.BREAK_IN -> Component.translatable(key, o.place());
+			case Quest.STUD -> Component.translatable(key, breedName(q), o.count());
+			case Quest.RACE -> Component.translatable(key, o.place(), Stables.raceSeconds(q), x(q), z(q));
 			default -> Component.empty();
 		};
 	}
@@ -974,6 +1038,9 @@ public final class Quests {
 			case Quest.CHIEF -> Component.translatable("quest.jaymoskingdoms.objective.chief", o.place(), x(q), z(q));
 			case Quest.REGICIDE -> Component.translatable("quest.jaymoskingdoms.objective.regicide", o.place(), x(q), z(q));
 			case Quest.WARBAND -> Component.translatable("quest.jaymoskingdoms.objective.warband", realmName(level, q.giver().faction()), o.place());
+			case Quest.BREAK_IN -> Component.translatable("quest.jaymoskingdoms.objective.break_in", q.giver().name());
+			case Quest.STUD -> Component.translatable("quest.jaymoskingdoms.objective.stud", breedName(q), o.count(), q.giver().name());
+			case Quest.RACE -> Component.translatable("quest.jaymoskingdoms.objective.race", o.place(), Stables.raceLeft(level, q), x(q), z(q));
 			default -> Component.empty();
 		};
 	}

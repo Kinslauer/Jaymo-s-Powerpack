@@ -532,7 +532,36 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   26.3 build, all rights reserved): orc camps rise in rough country near kingdoms, a dark oak stockade round the
   warchief's longhouse, tents, a forge, a fighting pit and a watchtower; grunts, rangers, a shaman and a warchief boss
   with a ground slam. Their war bands raid kingdoms; killing the warchief clears the camp.
-- **0.8.90, Darktide's shade:** a Darktide user who dies at night rises as their own shadow (drawn dark, shedding black
+- **0.8.89, fish loot instantly:** ships Jaymo's Kitchen 0.4.29 (see `kitchen/MODLOG.md`): clicking any fish corpse
+  (vanilla or Alex's Mobs, beached flying fish included) drops its loot and the body is gone at once.
+- **0.8.90, Your own blocks are no crime:** ships Jaymo's Kingdoms 0.5.46: breaking a block you placed yourself in a
+  settlement (a chest, bed, crafting table, crops you planted), or opening a chest you placed there, no longer makes
+  its people take you for a criminal. Blocks the settlement built still count.
+- **0.8.92, Jaymo's Equestrian, stage 3 (the stables at work):** ships Jaymo's Kingdoms 0.5.47 (see `kingdoms/MODLOG.md`):
+  stables get a stablehand (boards your horse for 4 emeralds a week, sells horses by land and wealth, buys them back)
+  and a farrier (shoes horses, sells tack, the best only in wealthy kingdoms); realms with stables field better
+  cavalry; a fallen knight's destrier or a raider's steppe pony goes wild for you to break in; rifling a caravan
+  horse's saddlebags is theft; and stablehands and kings give horse quests (break one in, bring a stud, ride to
+  another town against the clock). Stablehands and farriers have their own screen: right-click them.
+- **0.8.94, Iron golems burn corpses:** ships Jaymo's Kingdoms 0.5.48 and Jaymo's Kitchen 0.4.31: every iron golem
+  (village, kingdom or home-built) picks up corpses lying near it and carries them in its arms to the nearest fire pit,
+  lit campfire or lava, then drops them in. Monsters at once, other corpses after 5 minutes untouched; never players'
+  or golems' corpses. Golems never light fires, and fire pits on netherrack are no longer beaten out.
+- **0.8.95, crawl anywhere:** any player can press Jump and Sneak together twice quickly to drop flat (the swimming
+  pose) and stays flat while Jump is held, so one-block gaps are passable. Letting go stands you up once there's room;
+  under a low ceiling vanilla keeps you crawling. Holding Jump doesn't hop while crawling; not in water, flying,
+  gliding or riding. Combat Roll's double-tap Sneak ignores Sneak presses made with Jump down (`core/Crawl`,
+  `CrawlPlayerMixin`, `CrawlJumpMixin`, `client/CrawlTaps`).
+- **0.8.96, Quests are rare:** ships Jaymo's Kingdoms 0.5.49 (see `kingdoms/MODLOG.md`): only about one villager in
+  twenty ever gives quests (on about half their days), kings have work only now and then, and a good name with a
+  settlement raises both a little. Giving up a quest costs reputation with the giver's settlement. New: the
+  Traveller's Journal (craft a book with a map): with one in your inventory, M opens your quests, a map with your
+  quests and the settlements on it, and every settlement's opinion of you.
+- **0.8.97, Pickpocketing:** ships Jaymo's Kingdoms 0.5.50 (see `kingdoms/MODLOG.md`): sneak up behind a villager (MCA's
+  too) or a settlement's folk with an empty hand and hold right-click: your hand reaches into their pocket for 1-3 s,
+  longer in bright light, on armoured or cheerful marks, shorter in the dark or on sad ones. Stay behind them till it's
+  done to lift something; if they turn round on you they cry thief, which counts as a theft seen.
+- **0.8.98, Darktide's shade:** a Darktide user who dies at night rises as their own shadow (drawn dark, shedding black
   dust, 10 health, full Flow), once a night. The shade can hide through the day and is flesh again at the next
   nightfall, but sunlight burns it away: the user dies for real, every item they carried is destroyed and only Shadow
   Ash drops. A shade's second death, `/kill` and the void are final; a held totem goes first (`DarktideShade`,

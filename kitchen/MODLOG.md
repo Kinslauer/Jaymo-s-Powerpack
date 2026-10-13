@@ -657,3 +657,16 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
 - **For Jaymo's Kingdoms' guards:** `carryBy(Entity)` lets a mob carry a corpse (never a heavy one), `throwAt(Vec3)` throws it at a spot,
   and `isHostile()` is public.
 - **Sheep give leather too:** butchered on a butcher block, a sheep now drops 1 leather 15% of the time, as a pig already did.
+
+## 0.4.29: fish are looted in one click
+- **New corpse kind `FISH`** (anything built on vanilla's fish class, plus the new tag `jaymoskitchen:fish_corpses`:
+  cod, salmon, tropical fish, pufferfish and Alex's Mobs' flying fish, blobfish, catfish, cosmic cod, Devil's Hole
+  pupfish and mudskipper). Clicking a fish corpse, with anything in hand, drops its loot and the body vanishes with a
+  splash (`CorpseEntity.lootFish`). Before, a fish too big to pocket (a beached flying fish) was searched like any other
+  corpse: its fish dropped and the body stayed behind.
+- Fish corpses saved before 0.4.29 (as `OTHER`) count by their type too (`CorpseEntity.isFish`).
+
+## 0.4.31: iron golems carry corpses in their arms
+- For Jaymo's Kingdoms 0.5.48, where iron golems take corpses to the fire: a carrier bigger than a villager holds a
+  carried corpse out past its own bulk and up at its arms (`carryPosition` scales with the carrier's size). Before, a
+  golem's corpse sat at its knees, half inside it. Players and villagers carry exactly as before.

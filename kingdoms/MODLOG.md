@@ -1962,3 +1962,108 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   ("Drums in the hills! The orcs of X march on Y!"). Raiders' deaths are now undone on the roster by their own role.
 - Killing the warchief clears the camp (every settlement thanks you); its hides, fences, bones and skulls rot, the
   stockade stays as a ruin. A lost warchief is replaced after 2 minutes. `/faction camp found orc` for ops.
+
+## 0.5.46: your own blocks are no crime
+- Andy: breaking your own items in a village made the villagers take you for a criminal. Now every block a player
+  places from an item is remembered as theirs (`Placed`, a per-chunk attachment keyed by position, with the block it
+  was, written by `BlockItemMixin` on `BlockItem.place`'s `setPlacedBy`). `Theft.broke` lets that player break it
+  (a bed's head counts as its foot's), and `Theft.opened` lets them open a chest they placed, without a crime. The
+  mark is dropped when the block breaks, and only matches while the same block stands there, so a block the
+  settlement later puts in that spot is the settlement's again. Other players' blocks and settlement-built ones still
+  count as before.
+## 0.5.47: Jaymo's Equestrian, stage 3 (the stables at work)
+- **Stablehand and farrier** (`Stables`, `Folk.STABLEHAND`/`FARRIER`, MCA professions `jaymoskingdoms:stablehand` and
+  `jaymoskingdoms:farrier`): any settlement with a standing stable takes on a stablehand (the day the stable's finished),
+  and a farrier once it has 8 people. They work about the stable going from horse to horse, brushing them or picking
+  their hooves, and go home at night. Someone the settlement hates gets nothing.
+- **Stable screen** (`StableNet`, client `StableScreen`): right-click a stablehand or farrier (sneak and right-click
+  an MCA one, whose plain click is MCA's own screen), or use `/kingdom stable` / `/kingdom farrier` beside them. The
+  stablehand's screen lists your horses nearby (Board, Sell), those boarded here (Take out, with the fee owed) and
+  today's horses for sale (breed, coat, stats, Buy); the farrier's lists your horses' hooves and shoes (Shoe) and the
+  whole tack shop, the wares your kingdom is too poor for greyed out. What a button did shows under the list; long
+  lists scroll; a Quests button opens their quests. Walking up to one, they greet you with a click that opens it.
+- **Boarding:** the stablehand stalls your horse by one of the stable's hay blocks (the one you ride, lead, or your
+  nearest). It's fed, watered and brushed while it's there, kept in its stall, and can't be ridden or whistled off.
+  The fee is 4 emeralds for each week begun, into the treasury when you take it back out ("Take ... back out", which
+  sets it down beside you). A boarded horse whose stable is ruined walks free.
+- **Horse market:** the stablehand sells 2, 3 or 4 horses a day (poor, prosperous, wealthy), the same for everyone till
+  tomorrow. A poor stable (every village and fief) sells palfreys, steppe ponies and drafts with middling stats at best;
+  richer kingdoms sell their land's horses (desert horses in the desert, ponies on the savanna, drafts in the snow) and
+  coursers, a wealthy one destriers too, each stat the better of two rolls. Price: the breed's (destrier 24, courser 22,
+  desert 18, palfrey and draft 12, pony 10) from half to one and a half times by quality. Bought horses come tamed to
+  you. The stable buys yours back for half its price (a foal 60% of that) if the treasury has it; its tack comes back
+  to you and it becomes one of the realm's horses (a spare for its cavalry).
+- **Farrier:** shoes your horse for 3 emeralds (fresh shoes, hooves trimmed), boarded or not. Tack shop: horseshoes, hoof pick, oats,
+  lead, saddle and bridle anywhere; a brush, a blanket in the realm's colour, the racing saddle and chain barding in
+  prosperous kingdoms; the war saddle and plate barding only in wealthy ones.
+- **Cavalry:** a realm with stables mounts its guards and archers on war saddles with a blanket in its colour; for each
+  standing stable (up to 3) the horse is better (each stat the better of two rolls), a little faster, and more trained
+  in war (level 2, 3, 4); with two or more stables they wear a bridle and chain barding (plate in a wealthy realm).
+- **Knights' destriers:** a mounted guard, archer or ruler cut down by a player leaves his horse wild where it stands,
+  tack and war training kept, for whoever breaks it in. Caravans' horses still go home with the caravan.
+- **Raiders:** every other barbarian raider rides a steppe pony (saddled, no barding); kill him and the pony bolts free.
+- **Saddlebags:** sneak-use a caravan horse with an empty hand to rifle its saddlebags (a few emeralds and goods, once a
+  horse). It's theft (`Theft.Crime.SADDLEBAG`): seen, the caravan's realm cries thief.
+- **Horse quests** (`Quest.BREAK_IN`, `STUD`, `RACE`): a stablehand mostly asks for a wild horse you broke in yourself
+  (not one bought at a stable) or a stud, a horse of a given breed at 45-65% quality or better; either is handed over
+  to the stable when you turn it in. A king with a stable sometimes wants a horse broken in for him, or sends you on a
+  race to another settlement 150-900 blocks off (allowed: distance at 6.5 blocks a second plus 40 seconds): ride in
+  mounted before time's up, then go back to him. Stablehands and farriers also ask for feed, iron, coal and leather.
+  Operators: `/kingdom quests offer horse` beside a stablehand or king.
+
+## 0.5.48: iron golems drop corpses into the fire
+- Andy: "iron golems should pick up and drop the corpses into flame". Since 0.5.23 only a registered village's golems
+  did it, only for monsters, and only with a fire pit, lit campfire or lava within 16 blocks of the corpse, so in
+  practice it hardly ever happened. Now every iron golem does it, wherever it is (a village's, a kingdom's, one a
+  player built at home): a golem that isn't fighting picks up a corpse within 24 blocks of it, carries it in its arms
+  to the nearest fire pit, lit campfire or lava within 24 blocks of the corpse, walks right up to it and drops it in
+  (`Undertakers.golems`). Monsters' corpses at once; any other (an animal, a villager) once it has lain untouched 5
+  minutes (`SETTLE_TICKS`), so a kill you mean to butcher is yours first. Never a player's corpse, nor a heavy golem
+  corpse. Golems still never light a fire: with none near, the corpse is left (tried again a minute later).
+- Folk guards keep clearing monster corpses as before (they may still light one where it lies).
+- Firefighting no longer beats out a fire kept on netherrack (anything that burns forever), so a fire pit stays lit
+  for the golems; and anyone sent to a fire puts down the corpse they were carrying first and is left to the fire for
+  10 seconds (`Undertakers.calledAway`).
+- Needs Jaymo's Kitchen 0.4.31 (golems hold the corpse up at their arms, not at their knees; older Kitchen works but
+  looks wrong, and before 0.4.27 golems leave corpses alone).
+## 0.5.49: Quests are rare
+
+- **One villager in twenty:** only about one villager in twenty is ever a quest giver (fixed by who they are, so the
+  same few in each settlement are the ones with work), and they have work on about half their days
+  (`Quests.GIVER_SHARE`, `OFFER_CHANCE`). Everyone else never wears the gold !.
+- **Kings seldom:** a king has work on about one day in twelve (`Quests.KING_CHANCE`), not every day.
+- **A good name helps a little:** reputation with the settlement raises both, up to one villager in ten and a king's
+  work on one day in five at the best reputation (`GIVER_SHARE_REPUTED`, `KING_CHANCE_REPUTED`). The day's roll is made
+  for whoever is near when it's first made. Operators can still `/kingdom quests offer` anyone.
+- **Giving up costs you:** giving up a quest (the giver's Give up button, or `/kingdom quests abandon`) costs 10
+  reputation with the giver's settlement, 40 for a king's decree (`Quests.ABANDON_REPUTATION`, `ABANDON_ROYAL_REPUTATION`).
+- **Traveller's Journal** (`Journal`, `JournalClient`, `JournalScreen`): craft a book with a map (empty or filled).
+  With it anywhere in your inventory, M (rebindable, "Open Traveller's Journal") or using it opens three pages:
+  **Quests** (each quest, who gave it, its story, what's left and which way it lies), **Map** (the land about you
+  drawn like a map from the chunks you have loaded, blank parchment beyond, zoom 1-32 blocks a cell with +/- or the
+  mouse wheel; you as an arrow, your quests numbered (gold, red for decrees, green when ready to turn in, then
+  pointing home), settlements in their colours; hover for names and reputation) and **Reputation** (each settlement
+  within 3000 blocks or that knows you: its word and a bar from -1000 to 1000). Without a journal, M only says how to
+  make one.
+
+## 0.5.50: pickpocketing
+- Andy asked for pickpocketing, then for it to be held: "shift right clicking and holding, entering an animation where
+  you get close attaching your hand for a random duration up to 3s, and if you are able to match speed with the target
+  or otherwise manage to stay behind them for the duration the pickpocket is successful. it increases in duration
+  dependent on the light level, armor the target is wearing, and target's mood. crying villagers wont be as perceptive".
+- `Pickpocket`: sneak up within 2 blocks behind a grown villager (MCA's included) or any of a settlement's folk short
+  of its ruler (their body facing away: over ~100° from the line to you; a sleeping mark from any side), empty handed,
+  and hold use on them. It runs before `Quests`, so sneak-using a plain villager from the front still opens its quests.
+- The hand stays in for `holdTicks`: a random 1-3 s, times light (x0.6 pitch dark to x1.4 full light), armour (+3% a
+  point), an MCA villager's mood (-15..15, 2.5% a point: a depressed, crying one notices far less), x0.6 if they're
+  panicking, x1.25 for a guard, x0.5 asleep. Holding use repeats every 4 ticks; no repeat for 8 ticks and you've let
+  go (no crime). A progress bar shows on the action bar.
+- Stay behind them (follow them as they walk) and within 2.75 blocks till it's done: you lift half a stack of something
+  a villager carries, else a pocket's worth (emeralds 1-3, gold or iron nuggets, bread, an apple, string, paper,
+  flint) or nothing. A picked pocket is empty for a day. Fall out of reach and they slip away (no crime).
+- If they turn toward you (body more than ~84° round) while your hand's in, you're caught: they cry thief; where a
+  faction's law holds that's `Theft.Crime.PICKPOCKET` (medium) seen: reputation -35 and its guards after you. Done clean,
+  anyone else who sees you is still a witness (the mark doesn't count); unseen, it may be noticed later like any other
+  theft. Outside any faction's law the mark only shouts.
+- The reach is seen by everyone nearby: `Pickpocket.Reach` tells them, and the client's `PickpocketPose` puts the
+  player's main arm forward and down into the pocket, fingers working, the other hand drawn in.
