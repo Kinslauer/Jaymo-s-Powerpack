@@ -1,0 +1,37 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "weaponmod:musket",
+      "required": false
+    },
+    {
+      "id": "weaponmod:blunderbuss",
+      "required": false
+    },
+    {
+      "id": "weaponmod:flintlock",
+      "required": false
+    },
+    {
+      "id": "weaponmod:musketbayonet.wood",
+      "required": false
+    },
+    {
+      "id": "weaponmod:musketbayonet.stone",
+      "required": false
+    },
+    {
+      "id": "weaponmod:musketbayonet.iron",
+      "required": false
+    },
+    {
+      "id": "weaponmod:musketbayonet.gold",
+      "required": false
+    },
+    {
+      "id": "weaponmod:musketbayonet.diamond",
+      "required": false
+    }
+  ]
+}

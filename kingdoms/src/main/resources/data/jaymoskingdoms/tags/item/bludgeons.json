@@ -1,0 +1,135 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:mace",
+    "#minecraft:axes",
+    {
+      "id": "jaymospowers:wooden_flanged_mace",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:stone_flanged_mace",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_flanged_mace",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:golden_flanged_mace",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:diamond_flanged_mace",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:netherite_flanged_mace",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_war_axe",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:stone_war_axe",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_war_axe",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:golden_war_axe",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:diamond_war_axe",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:netherite_war_axe",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_hatchet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:stone_hatchet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_hatchet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:golden_hatchet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:diamond_hatchet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:netherite_hatchet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_cudgel",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:stone_cudgel",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:hand_axe",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:sledge_hammer",
+      "required": false
+    },
+    {
+      "id": "weaponmod:warhammer.wood",
+      "required": false
+    },
+    {
+      "id": "weaponmod:warhammer.stone",
+      "required": false
+    },
+    {
+      "id": "weaponmod:warhammer.iron",
+      "required": false
+    },
+    {
+      "id": "weaponmod:warhammer.gold",
+      "required": false
+    },
+    {
+      "id": "weaponmod:warhammer.diamond",
+      "required": false
+    },
+    {
+      "id": "weaponmod:battleaxe.wood",
+      "required": false
+    },
+    {
+      "id": "weaponmod:battleaxe.stone",
+      "required": false
+    },
+    {
+      "id": "weaponmod:battleaxe.iron",
+      "required": false
+    },
+    {
+      "id": "weaponmod:battleaxe.gold",
+      "required": false
+    },
+    {
+      "id": "weaponmod:battleaxe.diamond",
+      "required": false
+    }
+  ]
+}

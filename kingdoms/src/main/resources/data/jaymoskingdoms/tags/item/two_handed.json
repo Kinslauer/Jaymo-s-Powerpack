@@ -1,0 +1,165 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymospowers:wooden_claymore",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:stone_claymore",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_claymore",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:golden_claymore",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:diamond_claymore",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:netherite_claymore",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_war_axe",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:stone_war_axe",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_war_axe",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:golden_war_axe",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:diamond_war_axe",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:netherite_war_axe",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_glaive",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:stone_glaive",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_glaive",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:golden_glaive",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:diamond_glaive",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:netherite_glaive",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_war_scythe",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:stone_war_scythe",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_war_scythe",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:golden_war_scythe",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:diamond_war_scythe",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:netherite_war_scythe",
+      "required": false
+    },
+    {
+      "id": "weaponmod:halberd.wood",
+      "required": false
+    },
+    {
+      "id": "weaponmod:halberd.stone",
+      "required": false
+    },
+    {
+      "id": "weaponmod:halberd.iron",
+      "required": false
+    },
+    {
+      "id": "weaponmod:halberd.gold",
+      "required": false
+    },
+    {
+      "id": "weaponmod:halberd.diamond",
+      "required": false
+    },
+    {
+      "id": "weaponmod:battleaxe.wood",
+      "required": false
+    },
+    {
+      "id": "weaponmod:battleaxe.stone",
+      "required": false
+    },
+    {
+      "id": "weaponmod:battleaxe.iron",
+      "required": false
+    },
+    {
+      "id": "weaponmod:battleaxe.gold",
+      "required": false
+    },
+    {
+      "id": "weaponmod:battleaxe.diamond",
+      "required": false
+    },
+    {
+      "id": "weaponmod:warhammer.wood",
+      "required": false
+    },
+    {
+      "id": "weaponmod:warhammer.stone",
+      "required": false
+    },
+    {
+      "id": "weaponmod:warhammer.iron",
+      "required": false
+    },
+    {
+      "id": "weaponmod:warhammer.gold",
+      "required": false
+    },
+    {
+      "id": "weaponmod:warhammer.diamond",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:cleaver",
+      "required": false
+    }
+  ]
+}

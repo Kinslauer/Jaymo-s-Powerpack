@@ -72,11 +72,11 @@ public final class Arcana {
 		BONE_STAFF = item("bone_staff", p -> new Item(p.stacksTo(1)));
 		TOTEM_STAFF = item("totem_staff", p -> new Item(p.stacksTo(1)));
 		WIZARD_STAFF = item("wizard_staff", p -> new Item(p.stacksTo(1)));
-		SCROLL_RAISING = item("scroll_of_raising", p -> new Scroll(p, Arcana::raising));
-		SCROLL_DRAINING = item("scroll_of_draining", p -> new Scroll(p, Arcana::draining));
-		SCROLL_FIRE = item("scroll_of_fire", p -> new Scroll(p, Arcana::fire));
-		SCROLL_WARDING = item("scroll_of_warding", p -> new Scroll(p, Arcana::warding));
-		SCROLL_ARCANE = item("scroll_of_arcane_bolt", p -> new Scroll(p, Arcana::arcane));
+		SCROLL_RAISING = item("scroll_of_raising", p -> new Scroll(p, "raising"));
+		SCROLL_DRAINING = item("scroll_of_draining", p -> new Scroll(p, "draining"));
+		SCROLL_FIRE = item("scroll_of_fire", p -> new Scroll(p, "fire"));
+		SCROLL_WARDING = item("scroll_of_warding", p -> new Scroll(p, "warding"));
+		SCROLL_ARCANE = item("scroll_of_arcane_bolt", p -> new Scroll(p, "arcane"));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 			Item after = Items.TOTEM_OF_UNDYING;
 			for (Item item : List.of(SCROLL_RAISING, SCROLL_DRAINING, SCROLL_FIRE, SCROLL_WARDING, SCROLL_ARCANE, BONE_STAFF, TOTEM_STAFF, WIZARD_STAFF)) {
@@ -100,17 +100,40 @@ public final class Arcana {
 		});
 	}
 
-	/** A spell read off a scroll: true if it took (the scroll is spent). */
-	@FunctionalInterface
-	interface Spell {
-		boolean cast(ServerLevel level, Player player);
+	/** The spells by name ({@code raising}, {@code draining}, {@code fire}, {@code warding}, {@code arcane}). */
+	public static final List<String> SPELLS = List.of("fire", "arcane", "warding", "draining", "raising");
+
+	/**
+	 * Casts {@code spell} for {@code player} at {@code power} (1 off a scroll; a Mage's staff casts harder): true if it
+	 * took (a target was there).
+	 */
+	public static boolean cast(String spell, ServerLevel level, Player player, float power) {
+		return switch (spell) {
+			case "raising" -> raising(level, player, power);
+			case "draining" -> draining(level, player, power);
+			case "fire" -> fire(level, player, power);
+			case "warding" -> warding(level, player, power);
+			case "arcane" -> arcane(level, player, power);
+			default -> false;
+		};
 	}
 
-	/** A spell scroll: read once, it crumbles. */
-	static final class Scroll extends Item {
-		private final Spell spell;
+	/** The scroll that teaches {@code spell}. */
+	public static Item scrollOf(String spell) {
+		return switch (spell) {
+			case "raising" -> SCROLL_RAISING;
+			case "draining" -> SCROLL_DRAINING;
+			case "fire" -> SCROLL_FIRE;
+			case "warding" -> SCROLL_WARDING;
+			default -> SCROLL_ARCANE;
+		};
+	}
 
-		Scroll(Item.Properties properties, Spell spell) {
+	/** A spell scroll: read once, it crumbles (a Mage learns it instead, {@link Spellcraft#learn}). */
+	static final class Scroll extends Item {
+		final String spell;
+
+		Scroll(Item.Properties properties, String spell) {
 			super(properties.stacksTo(16));
 			this.spell = spell;
 		}
@@ -121,7 +144,16 @@ public final class Arcana {
 			if (!(level instanceof ServerLevel server)) {
 				return InteractionResult.SUCCESS;
 			}
-			if (!this.spell.cast(server, player)) {
+			if (player instanceof ServerPlayer mage && Spellcraft.learn(mage, this.spell)) {
+				stack.consume(1, player);
+				return InteractionResult.SUCCESS;
+			}
+			// (a Sorcerer's magic is quick and small: the great scrolls are beyond them)
+			if (Classes.is(player, Classes.PlayerClass.SORCERER) && (this.spell.equals("raising") || this.spell.equals("warding"))) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.scroll_beyond"));
+				return InteractionResult.FAIL;
+			}
+			if (!cast(this.spell, server, player, 1.0F)) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.scroll_no_target"));
 				return InteractionResult.FAIL;
 			}
@@ -137,7 +169,7 @@ public final class Arcana {
 	}
 
 	/** What {@code player} is looking at (a living thing within reach), or null. */
-	private static @Nullable LivingEntity sighted(Player player) {
+	static @Nullable LivingEntity sighted(Player player) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 end = eye.add(player.getLookAngle().scale(SCROLL_REACH));
 		AABB box = player.getBoundingBox().expandTowards(player.getLookAngle().scale(SCROLL_REACH)).inflate(1.0);
@@ -147,26 +179,28 @@ public final class Arcana {
 		return e instanceof LivingEntity l && player.hasLineOfSight(l) ? l : null;
 	}
 
-	private static boolean raising(ServerLevel level, Player player) {
+	private static boolean raising(ServerLevel level, Player player, float power) {
 		Climate climate = Climate.at(level, player.blockPosition());
-		Thralls.raise(level, Sorcery.zombieOf(climate), Sorcery.groundNear(level, player), -1, player.getUUID(), true, SCROLL_THRALL_LIFE, null);
-		Thralls.raise(level, Sorcery.skeletonOf(climate), Sorcery.groundNear(level, player), -1, player.getUUID(), true, SCROLL_THRALL_LIFE, null);
+		int life = (int) (SCROLL_THRALL_LIFE * power);
+		Thralls.raise(level, Sorcery.zombieOf(climate), Sorcery.groundNear(level, player), -1, player.getUUID(), true, life, null);
+		Thralls.raise(level, Sorcery.skeletonOf(climate), Sorcery.groundNear(level, player), -1, player.getUUID(), true, life, null);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.PLAYERS, 1.0F, 0.8F);
 		return true;
 	}
 
-	private static boolean draining(ServerLevel level, Player player) {
+	private static boolean draining(ServerLevel level, Player player, float power) {
 		LivingEntity target = sighted(player);
 		if (target == null) {
 			return false;
 		}
-		Sorcery.drain(level, player, target, SCROLL_DRAIN, SCROLL_DRAIN);
+		Sorcery.drain(level, player, target, SCROLL_DRAIN * power, SCROLL_DRAIN * power);
 		return true;
 	}
 
-	private static boolean fire(ServerLevel level, Player player) {
+	private static boolean fire(ServerLevel level, Player player, float power) {
 		Vec3 look = player.getLookAngle();
-		for (int i = -1; i <= 1; i++) {
+		int spread = power > 1.0F ? 2 : 1;
+		for (int i = -spread; i <= spread; i++) {
 			Vec3 dir = look.yRot(i * 0.18F).normalize();
 			SmallFireball bolt = new SmallFireball(level, player, dir);
 			bolt.setPos(player.getX() + dir.x * 0.8, player.getEyeY() - 0.15, player.getZ() + dir.z * 0.8);
@@ -176,16 +210,16 @@ public final class Arcana {
 		return true;
 	}
 
-	private static boolean warding(ServerLevel level, Player player) {
+	private static boolean warding(ServerLevel level, Player player, float power) {
 		for (Player p : level.getEntitiesOfClass(Player.class, player.getBoundingBox().inflate(SCROLL_WARD_RANGE), Entity::isAlive)) {
-			p.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, SCROLL_WARD_TICKS, SCROLL_WARD_LEVEL), player);
+			p.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, (int) (SCROLL_WARD_TICKS * power), SCROLL_WARD_LEVEL), player);
 			level.sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 1.0, p.getZ(), 14, 0.4, 0.6, 0.4, 0.02);
 		}
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1.0F, 1.4F);
 		return true;
 	}
 
-	private static boolean arcane(ServerLevel level, Player player) {
+	private static boolean arcane(ServerLevel level, Player player, float power) {
 		LivingEntity target = sighted(player);
 		if (target == null) {
 			return false;
@@ -198,7 +232,7 @@ public final class Arcana {
 			level.sendParticles(new DustParticleOptions(Sorcery.BOLT_COLOUR, 1.2F), p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
 		}
 		target.hurtServer(level, level.damageSources().indirectMagic(player, player),
-			target.getType().builtInRegistryHolder().is(EntityTypeTags.UNDEAD) ? SCROLL_BOLT * 2.0F : SCROLL_BOLT);
+			(target.getType().builtInRegistryHolder().is(EntityTypeTags.UNDEAD) ? SCROLL_BOLT * 2.0F : SCROLL_BOLT) * power);
 		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), target.getY(0.6), target.getZ(), 12, 0.2, 0.3, 0.2, 0.2);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 1.0F, 1.3F);
 		return true;

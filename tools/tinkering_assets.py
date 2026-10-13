@@ -665,3 +665,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # (0.9.0) the cleaver redrawn short, over Tinkers' great blade
+    import gen_tinker_cleaver
+    gen_tinker_cleaver.main()

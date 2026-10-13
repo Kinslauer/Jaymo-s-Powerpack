@@ -98,6 +98,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.52: the skill tree (Survival, Stealth, Strength), alignment and renown, and their attachments
 		Skills.register();
 		LOGGER.debug("skill attachments: {} {} {} {}", Skills.PROGRESS, SurvivalSkill.LAST_STAND, Renown.TITLE, Renown.KNOWN);
+		// 0.6.0: player classes (picked on first joining; a Writ of Rebirth unmakes the pick) and their attachments
+		Classes.register();
+		LOGGER.debug("class attachments: {} {}", Classes.CLASS, Classes.WRIT_BOUGHT);
 		// 0.5.19: a boss's bar shows only to the players who've hit it
 		BossBars.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
