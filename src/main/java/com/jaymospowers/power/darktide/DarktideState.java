@@ -26,7 +26,8 @@ import net.minecraft.world.item.component.ItemContainerContents;
  * <li>{@link #STUN}, {@link #CRIPPLE}: until when a creature is stunned / crippled (crawling), synced to everyone;</li>
  * <li>{@link #VEIL}: the veil is up and hides the name tag (synced to everyone);</li>
  * <li>{@link #CURED}: the corruption is cured for now (synced to everyone, for the name and the HUD);</li>
- * <li>{@link #RISEN}: a risen shadow (Necromancy), synced to everyone so it's drawn dark.</li>
+ * <li>{@link #RISEN}: a risen shadow (Necromancy), synced to everyone so it's drawn dark;</li>
+ * <li>{@link #SHADE}: a user walking as their own shadow after dying at night (until the next nightfall), synced to everyone so they're drawn dark.</li>
  * </ul>
  */
 public final class DarktideState {
@@ -39,32 +40,38 @@ public final class DarktideState {
 
 	/**
 	 * Saved: katana parries counted toward ascension, stored shadows (entity type ids), Tide Arms' stored items and slot,
-	 * and the overworld clock time the cure lasts until (the next nightfall; 0: corrupted).
+	 * the overworld clock time the cure lasts until (the next nightfall; 0: corrupted), and the overworld clock time a shade
+	 * (died at night and came back as their shadow, {@link DarktideShade}) is flesh again (0: not a shade).
 	 */
-	public record Save(int parries, List<String> shadows, ItemContainerContents stored, int storedSlot, long curedUntil) {
-		public static final Save NONE = new Save(0, List.of(), ItemContainerContents.EMPTY, -1, 0L);
+	public record Save(int parries, List<String> shadows, ItemContainerContents stored, int storedSlot, long curedUntil, long shadeUntil) {
+		public static final Save NONE = new Save(0, List.of(), ItemContainerContents.EMPTY, -1, 0L, 0L);
 		public static final Codec<Save> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.INT.optionalFieldOf("parries", 0).forGetter(Save::parries),
 				Codec.STRING.listOf().optionalFieldOf("shadows", List.of()).forGetter(Save::shadows),
 				ItemContainerContents.CODEC.optionalFieldOf("stored", ItemContainerContents.EMPTY).forGetter(Save::stored),
 				Codec.INT.optionalFieldOf("stored_slot", -1).forGetter(Save::storedSlot),
-				Codec.LONG.optionalFieldOf("cured_until", 0L).forGetter(Save::curedUntil))
+				Codec.LONG.optionalFieldOf("cured_until", 0L).forGetter(Save::curedUntil),
+				Codec.LONG.optionalFieldOf("shade_until", 0L).forGetter(Save::shadeUntil))
 			.apply(i, Save::new));
 
 		Save withParries(int value) {
-			return new Save(value, shadows, stored, storedSlot, curedUntil);
+			return new Save(value, shadows, stored, storedSlot, curedUntil, shadeUntil);
 		}
 
 		Save withShadows(List<String> value) {
-			return new Save(parries, List.copyOf(value), stored, storedSlot, curedUntil);
+			return new Save(parries, List.copyOf(value), stored, storedSlot, curedUntil, shadeUntil);
 		}
 
 		Save withStored(ItemContainerContents value, int slot) {
-			return new Save(parries, shadows, value, slot, curedUntil);
+			return new Save(parries, shadows, value, slot, curedUntil, shadeUntil);
 		}
 
 		Save withCuredUntil(long value) {
-			return new Save(parries, shadows, stored, storedSlot, value);
+			return new Save(parries, shadows, stored, storedSlot, value, shadeUntil);
+		}
+
+		Save withShadeUntil(long value) {
+			return new Save(parries, shadows, stored, storedSlot, curedUntil, value);
 		}
 	}
 
@@ -137,6 +144,9 @@ public final class DarktideState {
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	public static final AttachmentType<Integer> RISEN = AttachmentRegistry.create(JaymosPowers.id("darktide_risen"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+
+	public static final AttachmentType<Boolean> SHADE = AttachmentRegistry.create(JaymosPowers.id("darktide_shade"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 
 	private DarktideState() {
 	}

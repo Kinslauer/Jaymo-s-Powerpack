@@ -101,7 +101,8 @@ public final class DarktidePose {
 
 	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
 		extractCrawl(entity, state, partialTicks);
-		state.setData(RISEN, entity.getAttached(DarktideState.RISEN) != null ? Boolean.TRUE : null);
+		// risen shadows and a user walking as their own shade are drawn the same dark
+		state.setData(RISEN, entity.getAttached(DarktideState.RISEN) != null || entity.getAttached(DarktideState.SHADE) != null ? Boolean.TRUE : null);
 		DarktideState.Move move = entity.getAttached(DarktideState.MOVE);
 		boolean guarding = entity.getAttached(DarktideState.GUARD) != null;
 		if (move == null && !guarding) {
@@ -384,7 +385,7 @@ public final class DarktidePose {
 		}
 	}
 
-	/** A risen shadow is drawn dark. */
+	/** A risen shadow (or a shade) is drawn dark. */
 	public static int tint(LivingEntityRenderState state, int tint) {
 		return state.getData(RISEN) != null ? RISEN_TINT : tint;
 	}
