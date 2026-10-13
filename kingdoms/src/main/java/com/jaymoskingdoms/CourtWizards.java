@@ -239,6 +239,10 @@ public final class CourtWizards {
 	}
 
 	private static boolean sameSide(Enlisted w, int faction) {
+		if (Hermits.is(w)) {
+			// (0.5.60) a hermit has no realm
+			return false;
+		}
 		if (faction == w.factionId()) {
 			return true;
 		}
@@ -260,9 +264,13 @@ public final class CourtWizards {
 			return true;
 		}
 		if (e instanceof ServerPlayer player) {
-			return Reputation.get(player, w.factionId()) <= Reputation.HOSTILE;
+			// (0.5.60) a hermit minds only who strikes them
+			return !Hermits.is(w) && Reputation.get(player, w.factionId()) <= Reputation.HOSTILE;
 		}
 		if (e instanceof Folk folk) {
+			if (Hermits.is(w)) {
+				return folk.style() == FactionType.BARBARIAN;
+			}
 			MinecraftServer server = mob.level().getServer();
 			return folk.style() == FactionType.BARBARIAN || server != null && Relations.between(server, w.factionId(), folk.factionId()) == Relation.WAR;
 		}

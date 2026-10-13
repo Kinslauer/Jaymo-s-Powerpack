@@ -2231,3 +2231,19 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   component by id), so a silver-bladed tinker sword hits for double, and a rose gold one for full.
 - `MythicMounts`: bat horses and nightmares are exceedingly rare: `CHANCE` 1 in 6000 per 30 s check (was 1 in 80),
   about once in 50 hours a player spends at night in the wild or in the Nether, and none while another wild one is out.
+
+## 0.5.60: hermit wizards on floating islands
+- The villager Moog's Voyager Structures puts on its large floating island is no longer a stray: `Hermits` makes them
+  a hermit wizard (an MCA villager found standing in a structure tagged `jaymoskingdoms:sky_hermitage` is checked once
+  a minute; `Hermits.FACTION` -2 marks them, role `Sorcery.WIZARD`). They wear the court wizard's robe, hat and staff,
+  keep within 10 blocks of where they were found, and cast as a court wizard when something comes for them (monsters,
+  barbarians, whoever strikes them; never a player otherwise).
+- Each has a story (from their UUID): a scholar stranded by their own spell, a mage who left the courts for quiet, the
+  warden whose spell holds the island up, or an exiled court wizard. The first time a player comes near each day they
+  greet them aloud with it and hand over a court wizard's spell scroll (warding or arcane bolt) for the climb. MCA's
+  chat brings the story up 70% of the time (`dialogue.chat.jaymoskingdoms.hermit_<story>`). Sneak-use them to unmake
+  skills, as with any court wizard.
+- No kingdom claims them: they're never promoted, drafted, made court wizard, or sent over by `Approaches`.
+- Falling more than 2.5 blocks, they cast slow falling on themselves.
+- MCA's profession label for `jaymoskingdoms:wizard` is now "Wizard" (was "Court Wizard").
+- Not playtested in game.

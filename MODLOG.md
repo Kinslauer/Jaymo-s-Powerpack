@@ -635,3 +635,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   mended with silver ingots, and a Tinkering tool with a silver head counts as silver against werewolves. The bat
   horse and nightmare are now exceedingly rare: about once in 50 hours a player spends where one can turn up, and
   never while another wild one is about.
+- **0.8.114, hermit wizards on floating islands (Kingdoms 0.5.60):** the villager living on Moog's floating island is
+  now a hermit wizard with a reason to be there: a stranded scholar, a mage hiding from the courts, the warden whose
+  spell keeps the island up, or an exiled court wizard. They tell you when you first come near each day, give you a
+  spell scroll for the climb, talk more about it when you chat with them, and can reset your skill tree like a court
+  wizard. Kingdoms leave them alone.
