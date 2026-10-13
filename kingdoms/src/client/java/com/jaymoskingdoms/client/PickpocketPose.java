@@ -17,7 +17,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * (0.5.49) A pickpocket's reach: while a player's hand is in someone's pocket ({@link Pickpocket.Reach}), their main arm
+ * (0.5.50) A pickpocket's reach: while a player's hand is in someone's pocket ({@link Pickpocket.Reach}), their main arm
  * goes forward and down into it, the fingers working, the other arm drawn in. Laid over the player's model right after
  * it's posed, like {@link PullerPose}.
  */

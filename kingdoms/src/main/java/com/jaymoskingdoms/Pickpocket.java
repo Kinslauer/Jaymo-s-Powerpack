@@ -39,7 +39,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.49) Pickpocketing: sneak up close behind a villager (MCA's too) or one of a settlement's civilians or guards, empty
+ * (0.5.50) Pickpocketing: sneak up close behind a villager (MCA's too) or one of a settlement's civilians or guards, empty
  * handed, and hold use on them. Your hand goes into their pocket ({@link Reach}: the arm reaches in, for everyone to see)
  * for a while ({@link #holdTicks}): up to {@value #BASE_MAX_TICKS} ticks to start with, longer in bright light, the
  * more armour they wear, and the better their mood (an MCA villager's; a sad or crying one notices less, so does one

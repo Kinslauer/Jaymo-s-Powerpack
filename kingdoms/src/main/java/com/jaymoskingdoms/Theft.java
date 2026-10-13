@@ -65,7 +65,7 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>(0.5.46) Blocks a player placed themselves ({@link Placed}) are theirs: breaking them or opening them is no crime.
  *
- * <p>(0.5.49) Picking a villager's or civilian's pocket ({@link Pickpocket}) is a theft like taking from its stores.
+ * <p>(0.5.50) Picking a villager's or civilian's pocket ({@link Pickpocket}) is a theft like taking from its stores.
  */
 public final class Theft {
 	/** How far a witness sees a crime (sneaking: this share of it); closer than {@link #HEAR_RANGE} they notice whichever way they face. */

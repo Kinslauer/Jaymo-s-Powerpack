@@ -59,12 +59,12 @@ final class McaBridge {
 		return villager instanceof VillagerEntityMCA v ? v.getVillagerBrain().getMemoriesForPlayer(player).getHearts() : 0;
 	}
 
-	/** (0.5.49) An MCA villager's mood value (-15..15; 0 for a plain one). */
+	/** (0.5.50) An MCA villager's mood value (-15..15; 0 for a plain one). */
 	static int mood(Villager villager) {
 		return villager instanceof VillagerEntityMCA v ? v.getVillagerBrain().getMoodValue() : 0;
 	}
 
-	/** (0.5.49) An MCA villager is panicking. */
+	/** (0.5.50) An MCA villager is panicking. */
 	static boolean panicking(Villager villager) {
 		return villager instanceof VillagerEntityMCA v && v.getVillagerBrain().isPanicking();
 	}
