@@ -2010,3 +2010,13 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   race to another settlement 150-900 blocks off (allowed: distance at 6.5 blocks a second plus 40 seconds): ride in
   mounted before time's up, then go back to him. Stablehands and farriers also ask for feed, iron, coal and leather.
   Operators: `/kingdom quests offer horse` beside a stablehand or king.
+
+## 0.5.49: Quests are rare
+
+- **One villager in twenty:** only about one villager in twenty is ever a quest giver (fixed by who they are, so the
+  same few in each settlement are the ones with work), and they have work on about half their days
+  (`Quests.GIVER_SHARE`, `OFFER_CHANCE`). Everyone else never wears the gold !.
+- **Kings seldom:** a king has work on about one day in twelve (`Quests.KING_CHANCE`), not every day.
+- **A good name helps a little:** reputation with the settlement raises both, up to one villager in ten and a king's
+  work on one day in five at the best reputation (`GIVER_SHARE_REPUTED`, `KING_CHANCE_REPUTED`). The day's roll is made
+  for whoever is near when it's first made. Operators can still `/kingdom quests offer` anyone.
