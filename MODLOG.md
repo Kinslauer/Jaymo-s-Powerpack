@@ -773,8 +773,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   empty station shows each tool's parts in turn (`GHOST_CYCLE_MS` 1.5 s); with some parts in, it cycles the tools
   those parts could make and outlines only what's missing. The tool shown is underlined in the recipe list. Nothing
   shows while a tool or a modifier is in. `ToolStationScreen.ghosts`.
+- **0.9.14, predators eat their kills (Kitchen 0.4.35):** wolves, foxes, bears, zombies and the other scavengers
+  (Kingdoms' and Naturalist's predators too) tear into bodies with a brutal worrying bite, the meat spills on the ground
+  and they eat it from there. Players' kills are left for the player. See Kitchen's MODLOG.
 
-- **0.9.14, lunar events and Bad Omen grudges (Kingdoms 0.6.6):** now and then the night's moon is a Blood Moon
+- **0.9.15, lunar events and Bad Omen grudges (Kingdoms 0.6.6):** now and then the night's moon is a Blood Moon
   (zombies and skeletons climb out of the ground around you, no sleeping), a Super Blood Moon (twice over, a huge red moon), a Harvest Moon
   (crops grow all night) or a Blue Moon (luck, extra experience and gems). Bringing Bad Omen into a settlement wrecks
   your name there, and if it survives the raid it almost never forgets (`kingdoms/MODLOG.md`).

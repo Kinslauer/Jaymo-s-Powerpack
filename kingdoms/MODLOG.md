@@ -2402,7 +2402,7 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
 - Alignment counts experience only up to level 15, so Strength's longer road doesn't decide it.
 - Not playtested in game.
 
-## 0.6.6: lunar events and Bad Omen grudges (pack 0.9.14)
+## 0.6.6: lunar events and Bad Omen grudges (pack 0.9.15)
 - Our own lunar events (`Moons`; ideas from Lunar and Enhanced Celestials, nothing of theirs used). At dusk the
   Overworld rolls for the night (none in a world's first 4 nights); the roll is saved. Sky, fog and night light take
   the moon's colour through a layer added to the game's environment attributes (`EnvironmentAttributeSystemBuilderMixin`),

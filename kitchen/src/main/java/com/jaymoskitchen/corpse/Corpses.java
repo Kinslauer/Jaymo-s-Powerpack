@@ -154,6 +154,10 @@ public final class Corpses {
 			}
 		}
 		corpse.setUp(look(mob), kind, kept, level.getRandom().nextInt(3) + 1);
+		LivingEntity killer = mob.getKillCredit();
+		// a pet's kill is its owner's
+		corpse.setKiller(killer, killer instanceof Player
+			|| killer instanceof net.minecraft.world.entity.TamableAnimal tame && tame.isTame());
 		if (mob.isOnFire() && corpse.burns()) {
 			// died burning (a zombie in the sun): keeps burning on the ground
 			corpse.setRemainingFireTicks(mob.getRemainingFireTicks());
