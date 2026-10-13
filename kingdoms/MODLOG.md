@@ -2482,7 +2482,7 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   climb over -50 (no pledging again), with a 1% chance a day it's finally forgiven. A raid that wipes it out leaves
   no one to remember.
 
-## 0.6.12: natural disasters, stage 1 (storm fronts and tornadoes, pack 0.9.25)
+## 0.6.12: natural disasters, stage 1 (storm fronts and tornadoes, pack 0.9.26)
 Our own take on Weather, Storms & Tornadoes (Corosus; Forge/NeoForge only and all rights reserved, so ideas only).
 Plan: `/mnt/project-files/disasters/Disasters-Plan.md` (stages 2-3: sandstorms, blizzards, wildfires, floods, hail;
 earthquakes, relief quests, forecasts).
@@ -2508,7 +2508,7 @@ earthquakes, relief quests, forecasts).
   8 at once). The tree flies off round the winds, tumbling end over end, falls, and breaks apart where its wood hits
   the ground (logs and saplings drop; anything under it is struck).
 - Villagers (MCA's too) within 110/150 blocks of a tornado run home to bed, or away from it.
-- Jaymo's Powers' Wind (0.9.25): Wind users (tag `jaymospowers_wind`) ride a tornado's winds up to near its top
+- Jaymo's Powers' Wind (0.9.26): Wind users (tag `jaymospowers_wind`) ride a tornado's winds up to near its top
   without damage or fall build-up, and leave it gently; a Cyclone Lance fired at one within 48 blocks shoves it the
   way you aimed (tag `jaymospowers_wind_lance:<time>`). Under a storm cell's thunder Wind counts as in a storm.
 - The client draws the storms as particles: dark cloud decks over each cell within 640 blocks (lower and greener under
