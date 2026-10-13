@@ -58,7 +58,8 @@ import org.jspecify.annotations.Nullable;
  * back (to a butcher block nearby, or somewhere out of the way behind their smoker), chop it up, and walk back to hand
  * you the cuts. Each butcher has a skill of their own, from about what you'd get on a butcher block up to three times
  * that, and it has nothing to do with their price or trade level: you only know how good one is once you've heard it in
- * gossip ({@link #gossip}, which Jaymo's Kingdoms' townsfolk tell) or seen their work for yourself.
+ * gossip ({@link #gossip}, which Jaymo's Kingdoms' townsfolk tell), or, if you're experienced with butchering yourself
+ * ({@link #setExperienced}), from the cuts they hand you.
  */
 public final class Butchers {
 	/** A butcher's skill, fixed for each one: anywhere between these, evenly spread. */
@@ -135,6 +136,9 @@ public final class Butchers {
 	public static final AttachmentType<Map<String, Seen>> LEDGER = AttachmentRegistry.create(JaymosKitchen.id("butcher_ledger"),
 		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Seen.CODEC)));
 
+	/** Who is experienced with butchering (and so judges a butcher's skill from their cuts). Nobody, unless a mod says. */
+	private static java.util.function.Predicate<Player> EXPERIENCED = player -> false;
+
 	/** Butchers on a job in loaded chunks. */
 	private static final Set<Villager> BUSY = new HashSet<>();
 
@@ -202,6 +206,14 @@ public final class Butchers {
 
 	public static int price(Villager butcher, boolean big) {
 		return Math.max(1, Math.round(asking(butcher.getUUID()) * (big ? PRICE_BIG : PRICE_SMALL)));
+	}
+
+	/**
+	 * (0.4.30) For Jaymo's Kingdoms' skill tree (by reflection): who counts as experienced with butchering (the first
+	 * Survival perk). They tell a butcher's skill from the cuts handed back after a job, and know that butcher from then on.
+	 */
+	public static void setExperienced(java.util.function.Predicate<Player> experienced) {
+		EXPERIENCED = experienced;
 	}
 
 	/** Whether {@code player} has heard how good this butcher is (or seen for themselves). */
@@ -573,10 +585,14 @@ public final class Butchers {
 		butcher.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		butcher.playSound(SoundEvents.VILLAGER_YES);
 		play(level, owner.position(), SoundEvents.ITEM_PICKUP, 1.0F);
-		// seen their work for yourself: you know them now
-		learn(owner, butcher.getUUID());
-		owner.sendOverlayMessage(Component.translatable("message.jaymoskitchen.butcher.done", butcher.getDisplayName(),
-			String.format(java.util.Locale.ROOT, "%.1f", job.skill())));
+		// only someone who knows butchering can tell from the cuts how good a job it was
+		if (EXPERIENCED.test(owner)) {
+			learn(owner, butcher.getUUID());
+			owner.sendOverlayMessage(Component.translatable("message.jaymoskitchen.butcher.judged", butcher.getDisplayName(),
+				String.format(java.util.Locale.ROOT, "%.1f", job.skill())));
+		} else {
+			owner.sendOverlayMessage(Component.translatable("message.jaymoskitchen.butcher.done", butcher.getDisplayName()));
+		}
 	}
 
 	private static List<ItemStack> stacks(Job job) {

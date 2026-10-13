@@ -677,7 +677,9 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
 - **Price** is their own asking (1x to 3x, also from their UUID, unrelated to skill) times 1 emerald for a small body,
   2 for a big carcass: 1-3 or 2-6. A pricey butcher can be a hack. Creative pays nothing.
 - **Knowing a butcher** (`jaymoskitchen:known_butchers` on the player, kept on death): you learn how good one is from
-  gossip, or by seeing their work (after your first job with them the screen shows it, and the hand-over says the x).
+  gossip, or, if you're experienced with butchering, from the cuts they hand you (the hand-over says the x). Who's
+  experienced is set by `Butchers.setExperienced(Predicate<Player>)` (Jaymo's Kingdoms' first Survival perk, by
+  reflection); nobody without it.
   `Butchers.gossip(ServerPlayer, Entity)` (public; Jaymo's Kingdoms 0.5.47's townsfolk call it) returns a line: trash
   talk or praise for one of the speaker's own village's butchers (within 64 blocks), or word of a far-off master or a
   botcher to avoid (only the top two and bottom two tiers travel; up to 3000 blocks, with distance and direction), ones

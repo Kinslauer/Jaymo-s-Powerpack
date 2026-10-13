@@ -321,7 +321,7 @@
 	"message.jaymoskitchen.butcher.carcass": "carcass",
 	"message.jaymoskitchen.butcher.cant_pay": "You need %s emeralds.",
 	"message.jaymoskitchen.butcher.taken": "%s takes it out back. Wait here.",
-	"message.jaymoskitchen.butcher.done": "%s hands over your cuts (%sx).",
+	"message.jaymoskitchen.butcher.done": "%s hands over your cuts.",
 	"screen.jaymoskitchen.butcher.skill": "Butcher: %s",
 	"screen.jaymoskitchen.butcher.tier.0": "Clumsy",
 	"screen.jaymoskitchen.butcher.tier.1": "Fair",
@@ -363,5 +363,6 @@
 	"gossip.jaymoskitchen.dir.s": "south",
 	"gossip.jaymoskitchen.dir.sw": "south-west",
 	"gossip.jaymoskitchen.dir.w": "west",
-	"gossip.jaymoskitchen.dir.nw": "north-west"
+	"gossip.jaymoskitchen.dir.nw": "north-west",
+	"message.jaymoskitchen.butcher.judged": "%s hands over your cuts. You can tell: about %sx what you'd have got."
 }
