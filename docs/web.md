@@ -90,6 +90,16 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
 - **Takeover wall ripping** tears a small crater each pull: the blocks in the way plus the breakable ones round them,
   up to `WebTakeoverPath.RIP_CRATER` 9 within 1.8 of the middle, never below the gap's floor or the block under you
   (`RIP_MAX_BLOCKS` 96 per takeover).
+- **It talks more:** narration is likelier and closer together (see Narration). On top of that it **remarks on your
+  surroundings** every `WebSymbiote.REMARK_GAP_MAX` 1400 (weak bond) to `REMARK_GAP_MIN` 500 ticks (+ up to 300):
+  `see.<topic>.1-3` for storm, rain, night, deep, high, hot, cold, water, village, monsters, beasts, player, corpse,
+  lava, or quiet when there's nothing (one picked at random from what applies).
+- **Sightseeing takeovers:** a calm, fed bond has `TOUR_CHANCE` 4% each takeover check (after the neglect roll, before
+  curiosity) to walk you somewhere it wants to see, 10-28 blocks off: a high point (6+ up), the shore of some water,
+  flowers or a villager, never toward lava, only with open sky above. It says why (`tour.<sight>.go.1-3`), drives you
+  there on the takeover path (an invisible `Interaction` marker tagged `TOUR_TAG` is the target; leftovers are
+  discarded on load), and once within `TOUR_REACH` 2.5 turns your head out over it, says so (`tour.<sight>.there.1-3`)
+  and lets go. It doesn't fight on the way; it gives up after `TOUR_TICKS` 600; struggling breaks it as usual.
 - **Landings:** fast across the ground (`ROLL_SPEED` 0.55) is always a roll, however far the drop; slower, a 2.5+ block
   drop eases down into the superhero landing (over `WebBodyPose.HERO_IN` 30% of a 28-tick pose).
 
@@ -647,8 +657,8 @@ in `build.gradle`, CurseForge ids still to fill in).
 - Its tendrils look wilder at low bond: quicker sway, sudden jerks, a stronger bulge travelling along each one
   (`WebTendrilLayer.FERAL_*`).
 
-**Narration:** `WebSymbiote.narrate(player, act)` speaks `say.<act>.1-3` with a chance from `NARRATE_MIN` 0.1 to
-`NARRATE_MAX` 0.9 by bond, at most every `NARRATE_GAP_MAX` 600 to `NARRATE_GAP_MIN` 100 ticks. Every line is a
+**Narration:** `WebSymbiote.narrate(player, act)` speaks `say.<act>.1-3` with a chance from `NARRATE_MIN` 0.25 to
+`NARRATE_MAX` 0.95 by bond (0.9.8; was 0.1-0.9), at most every `NARRATE_GAP_MAX` 400 to `NARRATE_GAP_MIN` 80 ticks. Every line is a
 whisper, so the vignette, dark screen and growl play each time.
 
 **Takeovers can't be interrupted.** `WebTakeoverInputMixin` zeroes movement while it drives, and clicks, power keys,

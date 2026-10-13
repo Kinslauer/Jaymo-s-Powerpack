@@ -758,4 +758,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   and inhabits nearby mobs and villagers (peaceful ones spat out, hostile ones grow strong, lash and waste away),
   settling into goo after 5 minutes alone. The big body grows in agony into a more feral stance and has a held-Jump
   overhead slam. Shift+Space dives at once on the wings. Web block catch pries 1.5 s; tendril pull 0.5 s and breaks
-  spawners; takeover rips tear small craters. Fast landings roll, slow ones ease into the superhero landing. `docs/web.md`.
+  spawners; takeover rips tear small craters. Fast landings roll, slow ones ease into the superhero landing. The symbiote talks more, remarks on your
+  surroundings, and now and then walks you somewhere it wants to see. `docs/web.md`.
