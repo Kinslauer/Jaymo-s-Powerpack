@@ -3,7 +3,10 @@ package com.jaymoskingdoms;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+import net.conczin.mca.Config;
 import net.conczin.mca.entity.VillagerEntityMCA;
+import net.conczin.mca.entity.ai.Pregnancy;
+import net.conczin.mca.entity.ai.relationship.AgeState;
 import net.conczin.mca.entity.VillagerFactory;
 import net.conczin.mca.registry.ProfessionsMCA;
 import net.conczin.mca.server.world.data.VillageManager;
@@ -381,5 +384,65 @@ final class McaBridge {
 		villager.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
 		folk.discard();
 		return true;
+	}
+
+	// ---- families (0.6.9) -------------------------------------------------------------------------------------------
+
+	/**
+	 * {@link Families}: if the settlement in {@code box} has few young ones, a couple there has a baby (born a toddler,
+	 * as MCA's are), soon if there are no young ones at all; with no couple to have one, a toddler is taken in
+	 * ({@code takeIn}). Returns what happened: 0 nothing, 1 a baby on the way, 2 a toddler taken in.
+	 */
+	static int families(ServerLevel level, AABB box, int grownPerYoung, int leastGrown, float chance, int soonUnits, boolean takeIn) {
+		List<VillagerEntityMCA> all = level.getEntitiesOfClass(VillagerEntityMCA.class, box, VillagerEntityMCA::isAlive);
+		List<VillagerEntityMCA> grown = new ArrayList<>();
+		int young = 0;
+		for (VillagerEntityMCA v : all) {
+			if (v.getAgeState() == AgeState.ADULT) {
+				grown.add(v);
+				if (v.getRelationships().getPregnancy().isPregnant()) {
+					young++;
+				}
+			} else {
+				young++;
+			}
+		}
+		if (grown.size() < leastGrown || young * grownPerYoung >= grown.size() || young > 0 && level.getRandom().nextFloat() >= chance) {
+			return 0;
+		}
+		java.util.Collections.shuffle(grown, new java.util.Random(level.getRandom().nextLong()));
+		for (VillagerEntityMCA v : grown) {
+			if (v.getRelationships().getPregnancy().isPregnant() || !v.getRelationships().getPregnancy().tryStartGestation()) {
+				continue;
+			}
+			if (young == 0) {
+				// (the first is due soon: whichever of the two carries it)
+				int due = Config.getInstance().babyItemGrowUpTime;
+				for (VillagerEntityMCA m : grown) {
+					Pregnancy p = m.getRelationships().getPregnancy();
+					if (p.isPregnant()) {
+						p.setBabyAge(Math.max(p.getBabyAge(), due - soonUnits));
+					}
+				}
+			}
+			return 1;
+		}
+		if (young > 0 || !takeIn || grown.isEmpty()) {
+			return 0;
+		}
+		// (no couple to have one: a little one is taken in, beside someone grown)
+		VillagerEntityMCA by = grown.getFirst();
+		VillagerEntityMCA toddler = VillagerFactory.newVillager(level).withPosition(by.position()).withAge(AgeState.TODDLER.toAge())
+			.spawn(EntitySpawnReason.BREEDING);
+		if (toddler == null) {
+			return 0;
+		}
+		level.sendParticles(ParticleTypes.HEART, toddler.getX(), toddler.getY() + 1.0, toddler.getZ(), 5, 0.3, 0.3, 0.3, 0.0);
+		return 2;
+	}
+
+	/** (0.6.9) Where {@code villager} lives (their bed), if MCA knows. */
+	static java.util.Optional<net.minecraft.core.GlobalPos> home(Villager villager) {
+		return villager instanceof VillagerEntityMCA v ? v.getResidency().getHome() : java.util.Optional.empty();
 	}
 }

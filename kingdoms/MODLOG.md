@@ -2402,6 +2402,26 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
 - Alignment counts experience only up to level 15, so Strength's longer road doesn't decide it.
 - Not playtested in game.
 
+## 0.6.9: villagers' days (pack 0.9.18)
+- **Tag** (`Tag`): a child's "wanna play tag?" is a real game now, not one run-off. You're it: the child dodges away
+  whenever you're near (`LandRandomPos.getPosAway`), taunting; catch up, punch (no harm) or right-click to tag them.
+  Then they count to three and chase you until they tag you back. No tag-backs for 1.5 s. 90 s a game, ending at
+  nightfall or if you wander off past 28 blocks; hearts by how many tags (up to 6).
+- **Toddlers** (`Families`, `McaBridge.families`): MCA only has couples conceive while a village has beds to spare,
+  so full villages never had children. Now a realm's settlement with fewer than one young one (or one on the way) per
+  4 grown has a couple conceive now and then (25% a minute); MCA's babies are born toddlers. With no young at all the
+  first is due within ~2.5 minutes, and with no couple to have it a toddler is taken in (once a day at most).
+- **Routines** (`Routines`): townsfolk free of work (anyone with a trade only before 2000 / after 9000) take up
+  something fitting the hour, walk there and stay 15-40 s: dawn water fetching and gardening (flowers, composters);
+  by day the market round the bell, calling on a neighbour to chat (both stop and face each other), strolls round
+  the outskirts; evening campfires (else the bell), going home early. Children play chase in pairs. Landmarks are
+  found on the surface within 40 blocks of the seat every 5 minutes. Short lines (`routine.jaymoskingdoms.*`).
+- **Suspicion at home** (`Trespass`): indoors within 6 blocks of a villager's bed (MCA home, else vanilla HOME) with
+  them seeing you, suspicion builds a point a second (x1.5 at night, x0.5 sneaking): at 2 they stop and stare ("can
+  I help you?"), at 8 they come over and ask what you're doing (-2 hearts; their guards will want to search you), at
+  16 it's trespass, a light crime (`Theft.Crime.TRESPASS`), and again after that the guards are called (medium).
+  Friends (40+ MCA hearts), people of rank and 300+ reputation are welcome.
+
 ## 0.6.8: imbued blades proc (pack 0.9.17)
 - A Sorcerer's imbued blade no longer bursts on every blow: one blow in twenty does (`Spellcraft.PROC_ONE_IN`), the
   rest only spark with the element's colour. A lightning burst also blinds for 0.3 s (`LIGHTNING_BLIND`). Air

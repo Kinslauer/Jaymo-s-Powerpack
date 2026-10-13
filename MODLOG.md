@@ -777,6 +777,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (Kingdoms' and Naturalist's predators too) tear into bodies with a brutal worrying bite, the meat spills on the ground
   and they eat it from there. Players' kills are left for the player. See Kitchen's MODLOG.
 
+- **0.9.18, villagers' days (Kingdoms 0.6.9):** tag with a child is a real game (they run, you catch them, they
+  chase you back); settlements have toddlers again; villagers keep daily routines (water, gardens, market, chats,
+  campfires, kids playing chase); and they grow suspicious of you in their homes, up to calling it trespass.
+
 - **0.9.17, imbued blades proc (Kingdoms 0.6.8):** a Sorcerer's imbued blade bursts with its element on one blow in
   twenty rather than every one (the rest spark), and a lightning burst blinds for a moment; air lifts on every second
   blow instead, for air combos. Thrown bolts always burst.
