@@ -90,6 +90,11 @@ public final class Powers {
 		return Collections.unmodifiableCollection(ALL.values());
 	}
 
+	/** The powers fate can hand out ({@link Power#fated}): for random awakenings and the affinity choice. */
+	public static List<Power> fated() {
+		return ALL.values().stream().filter(Power::fated).toList();
+	}
+
 	public static @Nullable Power get(@Nullable Identifier id) {
 		return id == null ? null : ALL.get(id);
 	}
@@ -135,7 +140,7 @@ public final class Powers {
 
 	/** Awakens a random power (a different one, if they already have one), with the full fanfare. */
 	public static void awaken(ServerPlayer player) {
-		List<Power> choices = new ArrayList<>(ALL.values());
+		List<Power> choices = new ArrayList<>(fated());
 		Power current = of(player);
 		if (choices.size() > 1 && current != null) {
 			choices.remove(current);
@@ -143,7 +148,8 @@ public final class Powers {
 		if (choices.isEmpty()) {
 			return;
 		}
-		// a power that called them (Callings) always wins; then their affinity's, almost always; otherwise fate decides
+		// a power that called them (Callings) always wins (the only way to an unfated power); then their affinity's,
+		// almost always; otherwise fate decides
 		Power called = Callings.power(player);
 		Power leaning = Affinity.power(player);
 		Power power = called != null && called != current ? called

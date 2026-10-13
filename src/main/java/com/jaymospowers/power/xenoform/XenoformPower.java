@@ -273,6 +273,12 @@ public final class XenoformPower implements Power {
 		return LIVES.computeIfAbsent(player.getUUID(), id -> new Live());
 	}
 
+	/** No affinity and no random awakening: the band is the only way in. */
+	@Override
+	public boolean fated() {
+		return false;
+	}
+
 	@Override
 	public Identifier id() {
 		return ID;
