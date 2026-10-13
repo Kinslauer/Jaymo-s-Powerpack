@@ -15,7 +15,7 @@ import net.minecraft.util.FormattedCharSequence;
 
 /**
  * The affinity choice, shown the first time a player is in survival without a power: which power will awaken in them
- * (it still takes its 1-3 days), or "let fate decide". Made once; Esc doesn't dodge it (H brings it back otherwise).
+ * (it still takes its 3-5 days), or "let fate decide". Made once; Esc doesn't dodge it (H brings it back otherwise).
  */
 public class AffinityScreen extends Screen {
 	private static final int CARD_W = 170;

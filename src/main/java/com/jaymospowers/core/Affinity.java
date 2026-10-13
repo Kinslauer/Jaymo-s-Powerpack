@@ -22,7 +22,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * A survival player's affinity: picked once, the first time they're in survival without a power, and it decides which
- * power awakens in them (the awakening itself still takes its 1-3 days). "Let fate decide" ({@link #FATE}) keeps the
+ * power awakens in them (the awakening itself still takes its 3-5 days). "Let fate decide" ({@link #FATE}) keeps the
  * old random awakening.
  */
 public final class Affinity {

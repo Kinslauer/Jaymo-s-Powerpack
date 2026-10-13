@@ -4,8 +4,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 
 ## Design
 - **Getting a power:**
-  - **Survival:** each player's power awakens on its own after a random 1–3 Minecraft days of survival play
-    (24000–72000 ticks; the timer is saved and kept through death). Hints appear 5 minutes and 1 minute out.
+  - **Survival:** each player's power awakens on its own after a random 3–5 Minecraft days of survival play
+    (72000–120000 ticks; the timer is saved and kept through death), sooner through the power's calling (`core/Callings`). Hints appear 5 minutes and 1 minute out.
     The awakening shows a title, a totem sound and particles.
   - **Creative:** press **H** for the powers screen and pick any power, or remove yours.
   - **Commands** (gamemasters): `/power set <players> <wind|arsenal|web|chrono>`, `/power clear <players>`,
@@ -677,3 +677,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   out. A warlord's guards won't have a drawn weapon near him, but salute the well armoured. A noble king greets you
   with bread if you're in his good books, and his guards only ask politely for room. A reveler hands out treats, and
   his guards toss pests away with a laugh. Nobody fights you unless you actually attack.
+- **0.8.123, slower awakenings and callings:** a power now awakens after 3–5 Minecraft days of survival play
+  (72000–120000 ticks; old saved countdowns get 2 days added once). Each power has a calling that picks it and cuts
+  the wait (`core/Callings`): Wind, kill a Breeze (at once); Gravity, land a 40+ block fall (a day off); Chrono, sleep
+  the night holding a clock (a day off); Web, survive a cave spider bite (a day off, once a day); Arsenal, kill with 5
+  kinds of weapon (at once); Resonance, ring a village bell near midnight (a day off) or survive a Warden's sonic
+  boom (at once); Darktide, stay at sea from dusk to dawn (at dawn).
