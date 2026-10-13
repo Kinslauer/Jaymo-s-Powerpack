@@ -716,7 +716,16 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   them to tell you more. The answer screen has "Could you tell me more?" too.
   Guards halt strangers far less often, and have four new encounters shaped by their king's temper: a pack search, a
   toll, a bout for a wager and a loyalty test, where a wrong answer can cost emeralds, good name, or get you arrested.
-- **0.9.5, Xenoform, the Xeno-Band (all three stages; Kingdoms 0.6.4):** a new power from a falling star. On clear nights a glowing rock
+
+- **0.9.3, no floating buildings (Kingdoms 0.6.3):** structures from any mod no longer hover over the ground: a gap of
+  up to 6 blocks under a building is filled with the ground below when the world generates (newly explored land only).
+
+- **0.9.6, Distant Horizons out:** Distant Horizons left the pack (manifest, server, Deck mods and dev game). Build
+  Modpack moves its jar out of the CurseForge profile into removed-mods. Its leftovers are harmless and can be deleted
+  by hand: `config/DistantHorizons.toml`, the `Distant_Horizons_server_data` folder in the game folder, and
+  `DistantHorizons.sqlite` in each world's `data/` folder on the server.
+
+- **0.9.7, Xenoform, the Xeno-Band (all three stages; Kingdoms 0.6.4):** a new power from a falling star. On clear nights a glowing rock
   sometimes comes down near a player (like a Gravity meteor; at most one a day per world) and leaves a Fallen Star in
   its crater. Mine it (iron pickaxe): 15% a Xeno-Band, 7% the symbiote's goo, else raw iron, amethyst and XP. Put the
   band on and it never comes off: tap Z to turn its dial, hold Z to slam it and become the dialled alien for a random

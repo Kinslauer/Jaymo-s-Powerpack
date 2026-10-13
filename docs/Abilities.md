@@ -145,7 +145,7 @@ power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts
 | 143 | Ascension | | How | Spend 10 minutes in Stasis or rewound, sleep through a night: you wake holding the Stopped Clock. Use it with everything mastered. | |
 | 144 | Corruption | | How | Shatter one of your echoes in the Nether: it's destroyed for good, and the hole it leaves corrupts you. Needed for Time Flow. | |
 
-## Xenoform (0.9.5)
+## Xenoform (0.9.7)
 
 | Line | Form | Key | Ability | What it does now | Change to |
 |---|---|---|---|---|---|

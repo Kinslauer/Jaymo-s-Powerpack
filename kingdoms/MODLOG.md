@@ -2377,7 +2377,7 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
     and arrest; paranoid: arrest; warlord: a lot of good name lost).
   Arrest (`Theft.arrest`) makes you wanted for a minute and the guards nearby come for you. Walking off on a search or
   a toll counts as refusing it.
-## 0.6.4: townsfolk and the Xeno-Band's aliens (pack 0.9.5)
+## 0.6.4: townsfolk and the Xeno-Band's aliens (pack 0.9.7)
 - Jaymo's Powers' Xenoform (the Xeno-Band) turns a player into an alien. To a kingdom's people that is a monster:
   villagers run from one as from a zombie (`Frights`), and guards hunt it (`Folk`'s target goal, `MobCombat.foe`),
   unless they know better. A realm's folk or villagers who see you change (within 16 blocks, line of sight) know the
@@ -2385,3 +2385,12 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   and one of them says so. Read by entity tag (`jaymospowers_xenoform`, set by Powers while you're changed), so
   Kingdoms still needs no Powers classes.
 - Not playtested in game.
+
+## 0.6.3: no floating buildings (pack 0.9.3)
+
+- When any mod's surface structure is placed in a chunk, a gap of up to 6 blocks of air under a piece's lowest full
+  block, down to natural ground, is filled with that ground (dirt under grass, sand on a beach): `Foundations`, run from
+  `StructureStartMixin` at the end of `StructureStart.placeInChunk`. Columns over water (docks), deeper drops (bridges,
+  sky structures), unnatural ground and terrain-following street pieces are left alone. New chunks only.
+- (0.5.58, PR #96) Villages generate with `beard_box` terrain adaptation, and one builder of each crew levels the
+  settlement's ground (`Groundwork`: pits, ramps on 2-5 high ledges, plank bridges where roads meet gaps).
