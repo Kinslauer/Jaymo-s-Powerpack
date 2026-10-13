@@ -42,9 +42,18 @@ public final class Powers {
 	public static final AttachmentType<Integer> AWAKEN_IN = AttachmentRegistry.create(JaymosPowers.id("awaken_in"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath());
 
-	/** Awakening comes after 1-3 Minecraft days (20-60 minutes) of survival play. */
-	public static final int AWAKEN_MIN_TICKS = 24000;
-	public static final int AWAKEN_MAX_TICKS = 72000;
+	/**
+	 * Marks a countdown rolled with the 3-5 day timing. A countdown saved before it (rolled at 1-3 days) is stretched
+	 * once by {@link #AWAKEN_STRETCH} so nobody awakens sooner than the new minimum.
+	 */
+	public static final AttachmentType<Boolean> AWAKEN_SLOW = AttachmentRegistry.create(JaymosPowers.id("awaken_slow"),
+		builder -> builder.persistent(Codec.BOOL).copyOnDeath());
+
+	/** Awakening comes after 3-5 Minecraft days (60-100 minutes) of survival play. */
+	public static final int AWAKEN_MIN_TICKS = 72000;
+	public static final int AWAKEN_MAX_TICKS = 120000;
+	/** Added once to a countdown from the old 1-3 day timing (the difference between the old and new minimum). */
+	private static final int AWAKEN_STRETCH = 48000;
 
 	/**
 	 * Checks that switch a player's power keys off for now (Resonance's Hush). Only presses are stopped: releases still
@@ -117,6 +126,7 @@ public final class Powers {
 		} else {
 			player.setAttached(POWER, power.id());
 			player.removeAttached(AWAKEN_IN);
+			player.removeAttached(AWAKEN_SLOW);
 			power.onGained(player);
 		}
 	}
@@ -170,7 +180,13 @@ public final class Powers {
 			if (left == null) {
 				RandomSource random = player.getRandom();
 				player.setAttached(AWAKEN_IN, AWAKEN_MIN_TICKS + random.nextInt(AWAKEN_MAX_TICKS - AWAKEN_MIN_TICKS + 1));
+				player.setAttached(AWAKEN_SLOW, true);
 				continue;
+			}
+			if (player.getAttached(AWAKEN_SLOW) == null) {
+				// rolled under the old 1-3 day timing: stretch it once so it takes at least 3 days in all
+				left += AWAKEN_STRETCH;
+				player.setAttached(AWAKEN_SLOW, true);
 			}
 			left--;
 			if (left <= 0) {
