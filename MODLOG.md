@@ -562,6 +562,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   longer in bright light, on armoured or cheerful marks, shorter in the dark or on sad ones. Stay behind them till it's
   done to lift something; if they turn round on you they cry thief, which counts as a theft seen.
 - **0.8.98, Skill tree:** ships Jaymo's Kingdoms 0.5.51 (see `kingdoms/MODLOG.md`): press **K** for a skill tree with
-  three pillars, Survival, Stealth and Strength. Stealth is in: picking pockets clean and stealing unseen earns Stealth
-  levels, each level shortens how long your hand must stay in a pocket, and each level is a point for perks (Light Fingers,
-  Deep Pockets, Soft Step, Quick Hands, Slip Away, Ghost). Survival and Strength come later (`docs/Skills-Plan.md`).
+  three pillars. Stealth grows as you pick pockets and steal unseen (shorter holds, more loot, slipping away), Survival
+  as you harvest, eat and live through the night (slower hunger, healing, Last Stand), Strength as you fight, mine and
+  chop (heavier blows, knockback, faster mining). Each level is a perk point. A court wizard or a bottle o' enchanting
+  (sneak and drink it) gives your points back. Your best pillar shows over your head (Survivor, Rogue, Warrior) and
+  villagers gossip about it.

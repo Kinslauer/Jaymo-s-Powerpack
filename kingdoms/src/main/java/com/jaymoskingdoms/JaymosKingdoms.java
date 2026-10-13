@@ -92,9 +92,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Theft.register();
 		// 0.5.50: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
 		Pickpocket.register();
-		// 0.5.51: the skill tree (Stealth first) and its attachment
+		// 0.5.51: the skill tree (Survival, Stealth, Strength), alignment and renown, and their attachments
 		Skills.register();
-		LOGGER.debug("skill attachment: {}", Skills.PROGRESS);
+		LOGGER.debug("skill attachments: {} {} {} {}", Skills.PROGRESS, SurvivalSkill.LAST_STAND, Renown.TITLE, Renown.KNOWN);
 		// 0.5.19: a boss's bar shows only to the players who've hit it
 		BossBars.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)

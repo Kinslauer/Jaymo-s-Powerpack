@@ -122,6 +122,8 @@ public final class Approaches {
 		"greet", "child", "warn"};
 	/** How many ways each topic has of opening (lang keys {@code talk.jaymoskingdoms.<topic>.<n>}). */
 	static final int[] OPENINGS = {3, 3, 3, 3, 0, 3, 3, 3, 2, 10, 3, 3, 3};
+	/** (0.5.51) Lines a gossip has about a player whose alignment they've heard of, per pillar. */
+	static final int GOSSIP_ABOUT_YOU = 3;
 	/** Stranger's questions (each with a warm, a plain and a rude answer, and a reply to each). */
 	static final int QUESTIONS = 8;
 	/** A child's: play tag, are you a knight (you're armoured), can I see your sword (you've one in hand). */
@@ -629,6 +631,16 @@ public final class Approaches {
 				a.enemy = enemies.isEmpty() ? "?" : enemies.get(random.nextInt(enemies.size()));
 				a.variant = random.nextInt(OPENINGS[WAR]);
 			}
+			case GOSSIP -> {
+				// (0.5.51) word of what you are has reached them: they talk about you (Renown)
+				Skills.Pillar heard = Renown.heard(player, f.id());
+				if (heard != null && random.nextFloat() < Renown.GOSSIP_CHANCE) {
+					a.enemy = heard.key();
+					a.variant = random.nextInt(GOSSIP_ABOUT_YOU);
+				} else {
+					a.variant = random.nextInt(OPENINGS[GOSSIP]);
+				}
+			}
 			default -> a.variant = OPENINGS[a.topic] > 0 ? random.nextInt(OPENINGS[a.topic]) : 0;
 		}
 	}
@@ -651,6 +663,8 @@ public final class Approaches {
 			case WAR -> Component.translatable(key(a) + "." + a.variant, a.enemy);
 			case HALT -> Component.translatable(key(a) + "." + a.variant, realm);
 			case GREET -> Component.translatable(key(a) + "." + a.variant, name);
+			case GOSSIP -> a.enemy.isEmpty() ? Component.translatable(key(a) + "." + a.variant)
+				: Component.translatable(key(a) + ".you." + a.enemy + "." + a.variant, name);
 			default -> Component.translatable(key(a) + "." + a.variant);
 		};
 		int color = a.topic == ACCUSE ? Speech.RED : a.topic == HALT || a.topic == WARN ? Speech.YELLOW
@@ -700,6 +714,10 @@ public final class Approaches {
 	}
 
 	private static void answer(ServerPlayer player, TalkNet.Answer answer) {
+		if (Skills.answer(player, answer)) {
+			// (0.5.51) a court wizard's offer to unmake your skills
+			return;
+		}
 		Approach a = ACTIVE.get(player.getUUID());
 		if (a == null || a.mob.getId() != answer.entityId() || !a.arrived || a.done || !(player.level() instanceof ServerLevel level)) {
 			return;
@@ -872,7 +890,7 @@ public final class Approaches {
 
 	// ---- the player's pack ---------------------------------------------------------------------------------------------
 
-	private static int emeralds(ServerPlayer player) {
+	static int emeralds(ServerPlayer player) {
 		int n = 0;
 		for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
 			if (stack.is(Items.EMERALD)) {
@@ -882,7 +900,7 @@ public final class Approaches {
 		return n;
 	}
 
-	private static void take(ServerPlayer player, Item item, int n) {
+	static void take(ServerPlayer player, Item item, int n) {
 		for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
 			if (n <= 0) {
 				return;

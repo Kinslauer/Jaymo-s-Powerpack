@@ -10,20 +10,31 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
@@ -33,9 +44,14 @@ import org.jspecify.annotations.Nullable;
  * opens the tree). Practice counts on its own too: each level of a pillar makes you a little better at its work before
  * any point is spent.
  *
- * <p>Stealth is the first pillar built. It grows with every pocket picked clean ({@link Pickpocket}) and every theft
- * nobody saw ({@link Theft}); each level shortens how long your hand must stay in a pocket, and its perks make you
- * lighter fingered, sneakier and harder to pin. Survival and Strength are laid out in {@code docs/Skills-Plan.md} and come later.
+ * <p>Stealth grows with every pocket picked clean ({@link Pickpocket}) and every theft nobody saw ({@link Theft}); each
+ * level shortens how long your hand must stay in a pocket, and its perks make you lighter fingered, sneakier and harder
+ * to pin. Survival ({@link SurvivalSkill}) grows as you live off the land and through the night; Strength
+ * ({@link StrengthSkill}) as you fight, mine and fell. The plan: {@code docs/Skills-Plan.md}.
+ *
+ * <p>Points come back for reinvesting ({@link #respec}) from a kingdom's court wizard, for emeralds, or by drinking a
+ * bottle o' enchanting (sneak and use it). A pillar you've made your own shows over your head as your alignment, and
+ * word of it gets round the villages ({@link Renown}).
  */
 public final class Skills {
 	/** A level's experience: from level {@code l} to the next takes {@code XP_BASE + XP_STEP * l}; the highest level. */
@@ -62,9 +78,12 @@ public final class Skills {
 	/** Slip Away: the chance a mark who feels your hand can't tell it was you. */
 	static final float SLIP_AWAY_CHANCE = 0.5F;
 
+	/** Respec: a court wizard asks this many emeralds, and this many more per rank you've learned. */
+	static final int RESPEC_EMERALDS = 5, RESPEC_PER_RANK = 1;
+
 	/** The three pillars of the tree. Only the open ones have perks yet. */
 	public enum Pillar {
-		SURVIVAL(false), STEALTH(true), STRENGTH(false);
+		SURVIVAL(true), STEALTH(true), STRENGTH(true);
 
 		public final boolean open;
 
@@ -87,7 +106,19 @@ public final class Skills {
 		SOFT_STEP(Pillar.STEALTH, 3, 1, 0, 1, 2, LIGHT_FINGERS),
 		QUICK_HANDS(Pillar.STEALTH, 1, 1, 5, 2, 0, DEEP_POCKETS),
 		SLIP_AWAY(Pillar.STEALTH, 1, 1, 5, 2, 2, SOFT_STEP),
-		GHOST(Pillar.STEALTH, 1, 2, 10, 3, 1, QUICK_HANDS, SLIP_AWAY);
+		GHOST(Pillar.STEALTH, 1, 2, 10, 3, 1, QUICK_HANDS, SLIP_AWAY),
+		FORAGER(Pillar.SURVIVAL, 5, 1, 0, 0, 1),
+		SECOND_WIND(Pillar.SURVIVAL, 3, 1, 0, 1, 0, FORAGER),
+		WEATHERED(Pillar.SURVIVAL, 3, 1, 0, 1, 2, FORAGER),
+		IRON_STOMACH(Pillar.SURVIVAL, 1, 1, 5, 2, 0, SECOND_WIND),
+		HARDY_LANDING(Pillar.SURVIVAL, 1, 1, 5, 2, 2, WEATHERED),
+		LAST_STAND(Pillar.SURVIVAL, 1, 2, 10, 3, 1, IRON_STOMACH, HARDY_LANDING),
+		HEAVY_BLOWS(Pillar.STRENGTH, 5, 1, 0, 0, 1),
+		BRACE(Pillar.STRENGTH, 3, 1, 0, 1, 0, HEAVY_BLOWS),
+		BULLDOZER(Pillar.STRENGTH, 3, 1, 0, 1, 2, HEAVY_BLOWS),
+		QUARRYMAN(Pillar.STRENGTH, 1, 1, 5, 2, 0, BRACE),
+		PACKHORSE(Pillar.STRENGTH, 1, 1, 5, 2, 2, BULLDOZER),
+		TITANS_GRIP(Pillar.STRENGTH, 1, 2, 10, 3, 1, QUARRYMAN, PACKHORSE);
 
 		public final Pillar pillar;
 		public final int maxRank, cost, minLevel, tier, column;
@@ -130,6 +161,15 @@ public final class Skills {
 
 		public int level(Pillar pillar) {
 			return Skills.level(xp(pillar));
+		}
+
+		/** How many ranks are learned, in all pillars. */
+		public int spent() {
+			int n = 0;
+			for (Perk perk : Perk.values()) {
+				n += rank(perk);
+			}
+			return n;
 		}
 
 		/** Points left to spend in {@code pillar}: one per level, less what its perks cost. */
@@ -188,10 +228,111 @@ public final class Skills {
 	private Skills() {
 	}
 
+	/** Player → the court wizard who offered to unmake what they've learned (entity id). */
+	private static final Map<UUID, Integer> RESPEC_OFFERS = new HashMap<>();
+
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(Spend.TYPE, Spend.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Spend.TYPE, (payload, context) -> spend(context.player(), payload.perk()));
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> NEXT_THEFT_XP.clear());
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			NEXT_THEFT_XP.clear();
+			RESPEC_OFFERS.clear();
+		});
+		// (perks that work through attributes are put back on a player whenever they come into the world)
+		ServerPlayerEvents.JOIN.register(Skills::refresh);
+		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> refresh(newPlayer));
+		// a bottle o' enchanting, drunk (sneak and use it), gives back every point
+		UseItemCallback.EVENT.register((player, world, hand) -> {
+			ItemStack stack = player.getItemInHand(hand);
+			if (!stack.is(Items.EXPERIENCE_BOTTLE) || !player.isShiftKeyDown() || of(player).spent() == 0) {
+				return InteractionResult.PASS;
+			}
+			if (player instanceof ServerPlayer sp) {
+				stack.consume(1, sp);
+				sp.level().playSound(null, sp.getX(), sp.getY(), sp.getZ(), SoundEvents.GENERIC_DRINK, SoundSource.PLAYERS, 1.0F, 1.0F);
+				respec(sp);
+				sp.sendSystemMessage(Component.translatable("message.jaymoskingdoms.skills.respec.bottle").withStyle(ChatFormatting.LIGHT_PURPLE));
+			}
+			return InteractionResult.SUCCESS;
+		});
+		SurvivalSkill.register();
+		StrengthSkill.register();
+		Renown.register();
+	}
+
+	/** Puts {@code player}'s attribute perks on them as they stand, and their alignment over their head. */
+	static void refresh(ServerPlayer player) {
+		SurvivalSkill.attributes(player);
+		StrengthSkill.attributes(player);
+		Renown.update(player);
+	}
+
+	/** Puts (or with {@code amount} 0, takes off) the skill tree's modifier {@code id} on {@code player}'s {@code attribute}. */
+	static void modifier(ServerPlayer player, Holder<Attribute> attribute, String id, double amount, AttributeModifier.Operation operation) {
+		AttributeInstance instance = player.getAttribute(attribute);
+		if (instance == null) {
+			return;
+		}
+		Identifier key = JaymosKingdoms.id(id);
+		if (amount == 0.0) {
+			instance.removeModifier(key);
+		} else {
+			instance.addOrUpdateTransientModifier(new AttributeModifier(key, amount, operation));
+		}
+	}
+
+	/** The factor on {@code player}'s food exhaustion: Survival practice and Packhorse make hunger drain slower. */
+	public static float exhaustion(ServerPlayer player) {
+		return SurvivalSkill.exhaustion(player) * StrengthSkill.exhaustion(player);
+	}
+
+	/** Every point {@code player} spent comes back to spend again; their experience and levels stay. */
+	static void respec(ServerPlayer player) {
+		player.setAttached(PROGRESS, new Progress(of(player).xp(), Map.of()));
+		refresh(player);
+	}
+
+	// ---- the court wizard -------------------------------------------------------------------------------------
+
+	/** What a court wizard asks to unmake what {@code player} has learned. */
+	static int respecPrice(Player player) {
+		return RESPEC_EMERALDS + RESPEC_PER_RANK * of(player).spent();
+	}
+
+	/** A player spoke to a court wizard: if they've learned anything, the wizard offers to unmake it, for a price. */
+	static void wizard(ServerPlayer player, Folk wizard) {
+		if (of(player).spent() == 0 || !ServerPlayNetworking.canSend(player, TalkNet.Ask.TYPE)) {
+			return;
+		}
+		int price = respecPrice(player);
+		RESPEC_OFFERS.put(player.getUUID(), wizard.getId());
+		ServerPlayNetworking.send(player, new TalkNet.Ask(wizard.getId(), wizard.getDisplayName(),
+			Component.translatable("talk.jaymoskingdoms.wizard.respec", price),
+			List.of(Component.translatable("talk.jaymoskingdoms.wizard.respec.yes", price), Component.translatable("talk.jaymoskingdoms.wizard.respec.no")),
+			List.of(Approaches.emeralds(player) >= price, true)));
+	}
+
+	/** An answer to the wizard's offer; false when it wasn't one (it's some other talk). */
+	static boolean answer(ServerPlayer player, TalkNet.Answer answer) {
+		Integer offer = RESPEC_OFFERS.get(player.getUUID());
+		if (offer == null || offer != answer.entityId()) {
+			return false;
+		}
+		RESPEC_OFFERS.remove(player.getUUID());
+		if (answer.option() != 0 || !(player.level().getEntity(answer.entityId()) instanceof Folk wizard) || wizard.distanceTo(player) > 8.0) {
+			return true;
+		}
+		int price = respecPrice(player);
+		if (Approaches.emeralds(player) < price) {
+			return true;
+		}
+		Approaches.take(player, Items.EMERALD, price);
+		respec(player);
+		ServerLevel level = (ServerLevel) player.level();
+		Speech.say(level, wizard, Component.translatable("talk.jaymoskingdoms.wizard.respec.done"), Speech.GOLD, 16.0);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 0.8F, 1.2F);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.skills.respec.wizard").withStyle(ChatFormatting.LIGHT_PURPLE));
+		return true;
 	}
 
 	// ---- levels ------------------------------------------------------------------------------------------------
@@ -243,6 +384,7 @@ public final class Skills {
 		player.setAttached(PROGRESS, new Progress(Map.copyOf(xp), p.ranks()));
 		int was = level(before), now = level(after);
 		if (now > was) {
+			refresh(player);
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.skills.level", Component.translatable("skill.jaymoskingdoms." + pillar.key()), now)
 				.withStyle(ChatFormatting.GOLD));
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.4F, 1.3F);
@@ -262,6 +404,7 @@ public final class Skills {
 		Map<String, Integer> ranks = new HashMap<>(p.ranks());
 		ranks.merge(perk.key(), 1, Integer::sum);
 		player.setAttached(PROGRESS, new Progress(p.xp(), Map.copyOf(ranks)));
+		refresh(player);
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.5F, 1.4F);
 	}
 
@@ -277,7 +420,7 @@ public final class Skills {
 			xp *= XP_ASLEEP;
 		}
 		int amount = Math.max(1, Math.round(xp));
-		if (of(player).level(Pillar.STEALTH) >= MAX_LEVEL) {
+		if (of(player).xp(Pillar.STEALTH) >= total(MAX_LEVEL)) {
 			return 0;
 		}
 		grant(player, Pillar.STEALTH, amount);

@@ -215,8 +215,12 @@ public final class Pickpocket {
 		if (mark.isSleeping()) {
 			ticks *= ASLEEP_FACTOR;
 		}
-		// (0.5.51) the more pockets you've picked, the lighter your hand (Skills: practice, Light Fingers)
+		// (0.5.51) the more pockets you've picked, the lighter your hand (Skills: practice, Light Fingers); where they know
+		// you for a Rogue, they keep a hand on their purses (Renown)
 		ticks = Skills.holdTicks(player, ticks);
+		if (Renown.knownRogue(player, law(level, mark))) {
+			ticks *= Renown.ROGUE_WARY;
+		}
 		return Math.max(MIN_TICKS, Math.round(ticks));
 	}
 

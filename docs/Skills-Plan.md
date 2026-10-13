@@ -36,21 +36,35 @@ XP: a pocket picked clean (+10; +2 empty; a guard's ×2, a sleeper's ×½), a th
 - Slip Away: half the time a mark turns on you, they can't tell who: no crime.
 - Ghost: guards take no longer to rob than anyone; unseen thefts never noticed later.
 
-## Survival (later stage, proposal)
-XP: eating, surviving each night outdoors, foraging (berries, crops, fishing), enduring hunger, cold and heat,
-taking and living through damage.
-Practice: hunger drains a little slower per level.
-Perks (draft): Iron Stomach (raw and rotten food safe), Forager (more from crops, berries, fish), Second Wind (heal
-faster at low health), Weathered (cold and heat, rain), Hardy Landing (a little less fall damage, never none: falls
-always hurt outside creative), Last Stand (capstone: once a day, a killing blow leaves you at half a heart).
+## Survival (built, Kingdoms 0.5.51)
+XP: a ripe crop harvested (+1), every 2 hunger points eaten back (+1), a night lived through (+15), taking damage and
+living (+1 per 4, every 5 s at most). Practice: hunger drains 2% slower per level.
+- Forager (5): 8% chance each of an extra harvest.
+- Second Wind (3): under 30% health you start to heal.
+- Weathered (3): burn shorter, freeze slower.
+- Iron Stomach (lvl 5): food never gives you Hunger.
+- Hardy Landing (lvl 5): falls hurt 30% less, never not at all. It scales vanilla fall damage only, so powers that
+  cancel fall damage (Gravity's Weightless and descents, Wind, Web) work exactly as before.
+- Last Stand (lvl 10, 2 pts): once a day, a killing blow leaves you on half a heart.
 
-## Strength (later stage, proposal)
-XP: landing melee blows, kills, mining, chopping (TreeChop felling), carrying corpses and blocks.
-Practice: a little more melee damage per level.
-Perks (draft): Heavy Blows (damage), Brace (less knockback taken), Bulldozer (knockback dealt), Quarryman (mine and
-chop faster), Packhorse (carry heavy corpses and blocks without slowing as much), Titan's Grip (capstone).
+## Strength (built, Kingdoms 0.5.51)
+XP: melee blows landed, monsters killed (+4), stone, ore and wood broken. Practice: +1% melee damage per level.
+- Heavy Blows (5): +4% melee damage each.
+- Brace (3): knocked back less.
+- Bulldozer (3): knock foes back further.
+- Quarryman (lvl 5): break blocks 25% faster.
+- Packhorse (lvl 5): sprinting, mining and fighting tire you less (hunger).
+- Titan's Grip (lvl 10, 2 pts): a full-strength blow may stagger its target.
 
-## Open questions for Andy
-1. Survival and Strength perks above are drafts: keep, change, or swap any?
-2. Should anything reset the tree (a respec item or price at a court wizard)? None for now.
-3. Should a pillar's level show to others (e.g. a reputation as a known thief in Kingdoms)? Not now.
+## Respec (Andy's answer)
+A court wizard unmakes your perks for 5 emeralds + 1 per rank, or drink a bottle o' enchanting (sneak and use it).
+Your XP and levels stay; every point comes back to spend again.
+
+## Alignment and gossip (Andy's answer)
+Your best pillar, at level 5 and ahead of the others, is your alignment: Survivor, Rogue or Warrior ("Master" at
+15). Other players see it over your name tag. Settlements whose people see you learn it, word travels to another
+settlement each day, villagers gossip about you, and where you're known for a Rogue pockets take longer to pick.
+
+## Still open
+- Packhorse was planned as carrying corpses and blocks without slowing; that lives in Powers/Kitchen, so for now it
+  lightens hunger instead. Swap it if you'd rather.

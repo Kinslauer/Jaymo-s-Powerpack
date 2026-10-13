@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.Renown;
 import com.jaymoskingdoms.Skills;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -19,10 +20,10 @@ import net.minecraft.util.FormattedCharSequence;
 
 /**
  * (0.5.51) The skill tree ({@link Skills}), on the {@code K} key: a tab per pillar, its level and experience, and its
- * perks as a tree; press a perk to spend points on it. The server checks every spend and syncs the result back.
+ * perks as a tree; press a perk to spend points on it. Under it, your alignment ({@link Renown}). The server checks every spend and syncs the result back.
  */
 final class SkillScreen extends Screen {
-	static final int PANEL_W = 320, PANEL_H = 250, PAD = 8, TAB_W = 98, PERK_W = 96, PERK_H = 20, TIER_H = 34, COLUMN_GAP = 104;
+	static final int PANEL_W = 320, PANEL_H = 262, PAD = 8, TAB_W = 98, PERK_W = 96, PERK_H = 20, TIER_H = 34, COLUMN_GAP = 104;
 	static final int COLOR_PANEL = 0xE0201812, COLOR_EDGE = 0xFFB08A3C, COLOR_TEXT = 0xFFF2E6CC, COLOR_DIM = 0xFFB8AA90,
 		COLOR_GOLD = 0xFFFFC21A, COLOR_BAR = 0xFF3A3024, COLOR_FILL = 0xFF66C266, COLOR_LINE_ON = 0xFFB08A3C, COLOR_LINE_OFF = 0xFF54483A;
 
@@ -185,6 +186,12 @@ final class SkillScreen extends Screen {
 			}
 		}
 		graphics.centeredText(this.font, Component.translatable("gui.jaymoskingdoms.skills.hint." + pillar.key()), this.width / 2, y + PANEL_H - 38, COLOR_DIM);
+		// (your alignment: the pillar you've made your own, as others see it over your head)
+		Skills.Pillar aligned = Renown.alignment(shown);
+		Component alignment = aligned == null ? Component.translatable("gui.jaymoskingdoms.skills.alignment.none", Renown.ALIGN_LEVEL)
+			: Component.translatable("gui.jaymoskingdoms.skills.alignment", Component.translatable("title.jaymoskingdoms." + aligned.key()
+				+ (shown.level(aligned) >= Skills.MAX_LEVEL ? ".master" : "")));
+		graphics.centeredText(this.font, alignment, this.width / 2, y + PANEL_H - 50, aligned == null ? COLOR_DIM : COLOR_GOLD);
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
