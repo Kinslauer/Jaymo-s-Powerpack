@@ -2394,3 +2394,10 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   sky structures), unnatural ground and terrain-following street pieces are left alone. New chunks only.
 - (0.5.58, PR #96) Villages generate with `beard_box` terrain adaptation, and one builder of each crew levels the
   settlement's ground (`Groundwork`: pits, ramps on 2-5 high ledges, plank bridges where roads meet gaps).
+
+## 0.6.5: Combat Arts, Strength's second page (pack 0.9.10)
+- Strength goes to level 25 and its tree gets a second page of 8 perks (`CombatArts`, `docs/Skills-Plan.md`): combo
+  chains (blows within 2 s), Momentum and Cleave; finishers on every 4th full-strength link by weapon (Earthsplitter,
+  Rend, Executioner); Charge and War Cry on the new Y key; Bladestorm every 8th link. Area blows only hit foes.
+- Alignment counts experience only up to level 15, so Strength's longer road doesn't decide it.
+- Not playtested in game.

@@ -58,6 +58,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.6.0: the class screen (on first joining, and after a Writ of Rebirth)
 		ClassScreen.register();
 		ClassKeys.register();
+		CombatArtKey.register();
 		TalkScreen.register();
 		ArmoryLayer.register();
 		// 0.5.34: Jaymo's Equestrian (gaits, the stamina HUD, coats, war elephants)
