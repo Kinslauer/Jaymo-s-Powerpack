@@ -777,6 +777,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (Kingdoms' and Naturalist's predators too) tear into bodies with a brutal worrying bite, the meat spills on the ground
   and they eat it from there. Players' kills are left for the player. See Kitchen's MODLOG.
 
+- **0.9.20, villagers' days (Kingdoms 0.6.9):** tag with a child is a real game (they run, you catch them, they
+  chase you back); settlements have toddlers again; villagers keep daily routines (water, gardens, market, chats,
+  campfires, housework, reading, sweeping, lunch, shopping, animals, eyeing strangers, dancing; kids play chase, hide
+  and seek, skip stones and tag along); and they grow suspicious of you in their homes, up to calling it trespass.
+
 - **0.9.19, Andy's power fixes (Kitchen 0.4.36):** falling corpses are caught by an empty hand from up to 2 blocks
   off, and no longer get stuck in blocks tumbling forever. Every web that sticks gives one tug: press Jump in midair and
   you haul up and in on it (`WebSwing.TUG_LIFT`/`TUG_PULL`). A Web Whip with both webs on its catch is one web gripped
