@@ -256,6 +256,11 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		return this.entityData.get(KINGDOM);
 	}
 
+	/** (0.5.59) Belongs to {@code id} (-1: to no one, as an assassin after {@link #setup}). */
+	void setFactionId(int id) {
+		this.entityData.set(KINGDOM, id);
+	}
+
 	/** (0.2's name for {@link #factionId}) */
 	public int kingdomId() {
 		return this.factionId();
@@ -443,6 +448,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		// (0.5.1) a ruler's day out and his escort at his back; doors opened (and shut) on the way
 		this.goalSelector.addGoal(3, new Royals.Round(this));
 		this.goalSelector.addGoal(3, new Royals.Follow(this));
+		this.goalSelector.addGoal(3, new Retinue.Harass(this));
 		// (0.5.14) a caravan's carters and guards on the road
 		this.goalSelector.addGoal(3, new Caravans.Drive(this));
 		this.goalSelector.addGoal(3, new net.minecraft.world.entity.ai.goal.OpenDoorGoal(this, true));
@@ -505,6 +511,11 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
+		if (this.role() == Assassins.ASSASSIN) {
+			// (0.5.59) an assassin about his business, and nothing else
+			Assassins.act(level, this);
+			return;
+		}
 		if (this.outfit < Outfits.VERSION) {
 			this.restyle(level);
 		}
@@ -532,6 +543,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		// (0.5.47) an orc's blood rage and war cries, a warchief's slam
 		Orcs.tick(level, this);
 		// (0.5.12) javelins at a foe out of reach; attackers fight harder, break through and burn
+		// (0.5.64) the richest kingdoms' musketeers
+		Muskets.tick(level, this);
 		Javelins.tick(level, this);
 		Assault.tick(level, this);
 		if (this.leader() && this.tickCount % 5 == 0) {
@@ -556,6 +569,11 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.king_rallies", this.getDisplayName()).withStyle(ChatFormatting.GOLD));
 			}
 		}
+	}
+
+	/** (0.5.64) Its gear put on again from its faction's arms (a musketeer's musket sold back). */
+	void rearm(ServerLevel level) {
+		this.restyle(level);
 	}
 
 	/** Dressed before its faction's looks (an older save): its land read and its gear put on again; a builder's or raider's hands kept. */
@@ -601,6 +619,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			return InteractionResult.PASS;
 		}
 		if (player instanceof ServerPlayer serverPlayer) {
+			// (0.5.59) a stranger spoken to; a poisoned ruler cured; a ruler warned of the whispers
+			if (Assassins.interact(serverPlayer, this, player.getItemInHand(hand))) {
+				return InteractionResult.SUCCESS;
+			}
 			if (Goblins.isGoblin(this) && this.level() instanceof ServerLevel level) {
 				// (0.5.27) a goblin grunts back at one of its own
 				Disguise.greet(level, serverPlayer, this);
@@ -623,6 +645,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		if (this.level() instanceof ServerLevel level) {
 			// (0.5.47) a knight's (or a raider's) horse goes wild when a player cuts him down
 			Stables.riderFell(level, this, source);
+			// (0.5.59) an assassin's purse and contract
+			Assassins.died(level, this, source);
 		}
 		if (this.level() instanceof ServerLevel level && this.isCarrying()) {
 			// whatever he was hauling falls where he does
@@ -673,6 +697,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			if (Sorcery.isCaster(this.archer.role())) {
 				// (0.5.37) a caster casts from where it stands while it can see its foe in reach; else it closes in (Sorcery.tick)
 				return target != null && target.isAlive() && this.archer.distanceTo(target) <= Sorcery.RANGE && this.archer.getSensing().hasLineOfSight(target);
+			}
+			if (this.archer.getVehicle() instanceof Cannon && target != null && this.archer.distanceTo(target) >= Cannon.NEAREST) {
+				// (0.5.64) a gunner fires his cannon (Cannon.tick); only a foe too close for it gets his arrows
+				return false;
 			}
 			return this.archer.ranged() && target != null && target.isAlive() && this.archer.distanceTo(target) <= ARCHER_RANGE;
 		}

@@ -2,5 +2,41 @@
   "parent": "minecraft:item/handheld",
   "textures": {
     "layer0": "jaymospowers:item/armory/iron_quarterstaff"
+  },
+  "display": {
+    "thirdperson_righthand": {
+      "rotation": [
+        0,
+        -90,
+        55
+      ],
+      "translation": [
+        0,
+        0,
+        0.5
+      ],
+      "scale": [
+        1.6,
+        1.6,
+        1.0
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        0,
+        90,
+        -55
+      ],
+      "translation": [
+        0,
+        0,
+        0.5
+      ],
+      "scale": [
+        1.6,
+        1.6,
+        1.0
+      ]
+    }
   }
 }

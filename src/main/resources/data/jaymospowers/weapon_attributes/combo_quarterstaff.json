@@ -1,0 +1,58 @@
+{
+  "attributes": {
+    "range_bonus": 0.5,
+    "two_handed": true,
+    "category": "battlestaff",
+    "attacks": [
+      {
+        "hitbox": "VERTICAL_PLANE",
+        "damage_multiplier": 0.8,
+        "angle": 100,
+        "upswing": 0.5,
+        "animation": "jaymospowers:staff_twirl_front",
+        "swing_sound": {
+          "id": "bettercombat:staff_spin"
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.0,
+        "angle": 180,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_slash_horizontal_left",
+        "swing_sound": {
+          "id": "bettercombat:staff_slash"
+        }
+      },
+      {
+        "hitbox": "HORIZONTAL_PLANE",
+        "damage_multiplier": 1.2,
+        "angle": 360,
+        "upswing": 0.5,
+        "animation": "jaymospowers:staff_whirlwind",
+        "swing_sound": {
+          "id": "bettercombat:staff_spin"
+        }
+      },
+      {
+        "hitbox": "FORWARD_BOX",
+        "damage_multiplier": 0.9,
+        "upswing": 0.5,
+        "animation": "bettercombat:two_handed_stab_right",
+        "swing_sound": {
+          "id": "bettercombat:staff_stab"
+        }
+      },
+      {
+        "hitbox": "VERTICAL_PLANE",
+        "damage_multiplier": 1.5,
+        "angle": 150,
+        "upswing": 0.6,
+        "animation": "jaymospowers:staff_twirl_overhead",
+        "swing_sound": {
+          "id": "bettercombat:staff_slam"
+        }
+      }
+    ]
+  }
+}
