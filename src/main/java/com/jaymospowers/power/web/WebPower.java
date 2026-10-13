@@ -248,6 +248,7 @@ public final class WebPower implements Power {
 		WebNet.register();
 		WebCut.register();
 		WebTricks.register();
+		WebWhip.register();
 		WebWallRun.register();
 		WebStrain.register();
 		WebTraps.register();
@@ -257,6 +258,7 @@ public final class WebPower implements Power {
 		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			WebTendrils.releaseAll(handler.player, false);
 			WebTendrils.forget(handler.player);
+			WebWhip.forget(handler.player);
 		});
 		WebSymbiote.register();
 		WebSymbioteBlob.init();
@@ -443,6 +445,7 @@ public final class WebPower implements Power {
 		WebSymbiote.tick(player);
 		WebTendrils.tick(player);
 		WebImpacts.tick(player);
+		WebWhip.tick(player);
 		WebAscension.tick(player, state != null && swinging(state));
 		WebPose pose = player.getAttached(POSE);
 		if (pose != null && player.level().getGameTime() - pose.start() >= pose.ticks()) {
@@ -558,6 +561,8 @@ public final class WebPower implements Power {
 			ServerPlayNetworking.send(player, new WebNet.SwingReject(hand));
 			return;
 		}
+		// a swing web going out lets go of a whip
+		WebWhip.cancel(player);
 		state.swinging[hand] = true;
 		state.grace = true;
 		state.graceTicks = 0;
