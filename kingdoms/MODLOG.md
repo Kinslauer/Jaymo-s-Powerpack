@@ -2481,3 +2481,41 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   brought comes and the settlement wins it, it holds a grudge (saved): reputation gains there count a tenth and never
   climb over -50 (no pledging again), with a 1% chance a day it's finally forgiven. A raid that wipes it out leaves
   no one to remember.
+
+## 0.6.12: natural disasters, stage 1 (storm fronts and tornadoes, pack 0.9.26)
+Our own take on Weather, Storms & Tornadoes (Corosus; Forge/NeoForge only and all rights reserved, so ideas only).
+Plan: `/mnt/project-files/disasters/Disasters-Plan.md` (stages 2-3: sandstorms, blizzards, wildfires, floods, hail;
+earthquakes, relief quests, forecasts).
+- Storm cells (`disasters/Storms`): a cell forms ~300 blocks upwind of someone and drifts across with the wind (which
+  slowly veers). Rain falls on the ground only under it (a `Level.precipitationAt` mixin, both sides); on the client
+  the sky darkens and thunder rolls as you come under one (the camera's rain/thunder level, eased); its lightning
+  strikes only under it (a lightning rod nearby takes it). Ordinary cells about every 1.5 days, from 70 to 130 blocks
+  across. They live in memory only.
+- Supercells, every `jaymoskingdoms:disaster_days` days on average (game rule, default 6, 0 for none): a black cell with
+  a green cast, announced to everyone within 450 blocks. Within 170 blocks of someone it puts down a tornado (one in
+  five a monster). In a dry biome (no rain) the disaster is a dust devil near the player instead.
+- Tornadoes (`disasters/Tornadoes`): dust devil, tornado, monster (cores 2.5/6/11, winds reach 7/20/34, funnels 22/75/115
+  high). They weave under their storm, form and rope out over 10 s, and die when their storm breaks up. Everything in
+  reach is pulled in and spun; in the core it's lifted and thrown out at the top (players carried 4/22/38 blocks up,
+  then fall: fall damage applies), and the living in a tornado's core take a little damage. Unless
+  `jaymoskingdoms:disaster_damage` is off they tear up the land in their path (5/12 blocks a tick): plants, leaves,
+  glass, wool, axe/hoe blocks up to hardness 2.5, and for a monster stone up to hardness 2. Up to 40 blocks per
+  tornado fly as falling blocks, riding the winds for 2.5 seconds and then falling where they're flung (they no longer
+  hang in the air); the rest are smashed (a quarter drop). Block entities are never touched. Settlement
+  buildings it ruins are rebuilt by `Rebuilds` as usual. Touchdowns are announced within 320 blocks; the roar carries.
+- Whole trees (`Trees.uproot`, `FallingTree.fling`): a tornado that strikes a living tree rooted in dirt may tear it
+  out whole (12% a strike for a tornado, trees up to 12 logs, 3 in the air at once; 45% for a monster, up to 64 logs,
+  8 at once). The tree flies off round the winds, tumbling end over end, falls, and breaks apart where its wood hits
+  the ground (logs and saplings drop; anything under it is struck).
+- Villagers (MCA's too) within 110/150 blocks of a tornado run home to bed, or away from it.
+- Jaymo's Powers' Wind (0.9.26): Wind users (tag `jaymospowers_wind`) ride a tornado's winds up to near its top
+  without damage or fall build-up, and leave it gently; a Cyclone Lance fired at one within 48 blocks shoves it the
+  way you aimed (tag `jaymospowers_wind_lance:<time>`). Under a storm cell's thunder Wind counts as in a storm.
+- The client draws the storms as particles: dark cloud decks over each cell within 640 blocks (lower and greener under
+  a supercell), each tornado's whirling funnel and the debris at its foot within 420.
+- Instruments: the **storm bell** (planks, bell, redstone, smooth stone slabs) rings and gives a full redstone signal
+  while a tornado is within 180 blocks; the **weathervane** (copper over iron) tells the wind and the nearest storm on
+  right click; the **barometer** (copper, glass pane, redstone) held shows the sky's mood and the nearest storm or
+  tornado on the action bar. Art: `tools/gen_disasters.py` (models from vanilla's block textures).
+- Ops: `/kingdom disaster <storm|thunder|supercell|dust_devil|tornado|monster|clear>` (a cell overhead, or a
+  tornado 60 blocks ahead coming your way).

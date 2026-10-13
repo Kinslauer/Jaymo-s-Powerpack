@@ -176,6 +176,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("moon and grudge attachments: {} {}", Moons.ROLL, Omens.GRUDGES);
 		Moons.register();
 		Omens.register();
+		// 0.6.12: natural disasters, stage 1: storm fronts, tornadoes, the storm bell, weathervane and barometer
+		com.jaymoskingdoms.disasters.Disasters.register();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();
 			Gatherers.clear();

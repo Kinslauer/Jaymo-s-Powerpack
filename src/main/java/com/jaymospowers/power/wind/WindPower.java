@@ -55,6 +55,9 @@ public final class WindPower implements Power {
 	public static final AttachmentType<Integer> FLIGHT = AttachmentRegistry.create(JaymosPowers.id("wind_flight_state"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 
+	/** (0.9.26) Tags Jaymo's Kingdoms' tornadoes read: a Wind user, and their last Cyclone Lance (+ the game time). */
+	public static final String KINGDOMS_TAG = "jaymospowers_wind", LANCE_TAG = "jaymospowers_wind_lance:";
+
 	private static final Identifier BARRIER_MODIFIER = JaymosPowers.id("wind_gale_barrier");
 
 	// ---- ability tuning ---------------------------------------------------------------------------------------
@@ -204,6 +207,8 @@ public final class WindPower implements Power {
 	@Override
 	public void onLost(ServerPlayer player) {
 		WindCyclone.stop(player);
+		player.removeTag(KINGDOMS_TAG);
+		forgetLance(player);
 		State s = this.states.remove(player.getUUID());
 		player.removeAttached(FLIGHT);
 		player.removeAttached(BRAKING);
@@ -256,7 +261,14 @@ public final class WindPower implements Power {
 		WindStorm.onCast(player);
 		WindModes.onCast(player);
 		WindTempest.lance(player, s.weather);
+		// (0.9.26) Jaymo's Kingdoms reads this: a lance fired into a tornado shoves it off course
+		forgetLance(player);
+		player.addTag(LANCE_TAG + player.level().getGameTime());
 		this.sendStatus(player, s, 0.0F, false);
+	}
+
+	private static void forgetLance(ServerPlayer player) {
+		player.entityTags().stream().filter(t -> t.startsWith(LANCE_TAG)).toList().forEach(player::removeTag);
 	}
 
 	/** The Power Mode key (Z): the Stormbound / Tempest mode (or both), once the power has either form. */
@@ -415,6 +427,8 @@ public final class WindPower implements Power {
 	@Override
 	public void tick(ServerPlayer player) {
 		State s = this.state(player);
+		// (0.9.26) Jaymo's Kingdoms reads this: a Wind user rides a tornado's winds instead of being thrown
+		player.addTag(KINGDOMS_TAG);
 		ServerLevel level = player.level();
 		blowShieldAway(player, level);
 		boolean statusDirty = !s.synced;

@@ -53,6 +53,8 @@ final class KingdomCommands {
 			.then(Stables.stableCommand()).then(Stables.farrierCommand())
 			// (builders: plots and projects)
 			.then(BuildCommands.plot()).then(BuildCommands.project())
+			// (0.6.12) ops: call up a storm or a tornado, or clear them
+			.then(com.jaymoskingdoms.disasters.Disasters.command())
 			.then(Commands.literal("found").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(c -> found(c, null))
 				.then(Commands.literal("keep").executes(c -> found(c, Castle.Kind.KEEP)))
 				.then(Commands.literal("castle").executes(c -> found(c, Castle.Kind.CASTLE)))
