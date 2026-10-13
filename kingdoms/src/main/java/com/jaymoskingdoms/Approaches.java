@@ -439,7 +439,8 @@ public final class Approaches {
 			|| Theft.rioting(mob) || Quests.listening(mob) || talking(mob) || Rickshaws.onDuty(mob)) {
 			return false;
 		}
-		if (mob instanceof PathfinderMob pm && McaCompat.busy(pm)) {
+		if (mob instanceof PathfinderMob pm && McaCompat.busy(pm) || Hermits.is(mob)) {
+			// (0.5.62: a floating island's hermit greets visitors their own way)
 			return false;
 		}
 		if (mob instanceof Folk folk) {

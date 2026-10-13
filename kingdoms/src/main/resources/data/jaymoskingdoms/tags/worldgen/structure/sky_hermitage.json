@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    {"id": "mvs:large_floating_island", "required": false},
+    {"id": "mvs:floating_islands", "required": false}
+  ]
+}

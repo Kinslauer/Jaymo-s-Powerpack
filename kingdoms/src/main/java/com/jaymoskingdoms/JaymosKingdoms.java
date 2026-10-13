@@ -144,6 +144,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("thrall attachment: {}", Thralls.TAG);
 		Thralls.register();
 		Sorcery.register();
+		// 0.5.62: the villager on a floating island is a hermit wizard with a story
+		Hermits.register();
 		// Naturalist's predators as rare wilderness encounters (0.5.55)
 		com.jaymoskingdoms.wild.Wild.register();
 		// monsters of legend after Fangs 'n Claws' list (0.5.56)
