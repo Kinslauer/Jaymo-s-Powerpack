@@ -166,6 +166,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.59: assassins: contracts on rulers and marked players, whispers, the attempt (and the contracts' attachment)
 		LOGGER.debug("contract attachment: {}", Assassins.CONTRACTS);
 		Assassins.register();
+		// 0.6.6: lunar events (blood, harvest, blue moons) and Bad Omen grudges (their attachments)
+		LOGGER.debug("moon and grudge attachments: {} {}", Moons.ROLL, Omens.GRUDGES);
+		Moons.register();
+		Omens.register();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();
 			Gatherers.clear();

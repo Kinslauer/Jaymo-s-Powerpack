@@ -1,0 +1,7 @@
+{
+	"required": true,
+	"package": "com.jaymoskingdoms.mixin.moons",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": ["EnvironmentAttributeSystemBuilderMixin"],
+	"injectors": { "defaultRequire": 1 }
+}

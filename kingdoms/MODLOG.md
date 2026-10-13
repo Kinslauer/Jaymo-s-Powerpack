@@ -2394,3 +2394,23 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   sky structures), unnatural ground and terrain-following street pieces are left alone. New chunks only.
 - (0.5.58, PR #96) Villages generate with `beard_box` terrain adaptation, and one builder of each crew levels the
   settlement's ground (`Groundwork`: pits, ramps on 2-5 high ledges, plank bridges where roads meet gaps).
+
+## 0.6.6: lunar events and Bad Omen grudges (pack 0.9.11)
+- Our own lunar events (`Moons`; ideas from Lunar and Enhanced Celestials, nothing of theirs used). At dusk the
+  Overworld rolls for the night (none in a world's first 4 nights); the roll is saved. Sky, fog and night light take
+  the moon's colour through a layer added to the game's environment attributes (`EnvironmentAttributeSystemBuilderMixin`),
+  and the moon itself is tinted and resized on the client (`MoonSkyMixin`), fading in and out over 10 seconds.
+  - Blood Moon (5% of nights): extra zombies, skeletons, spiders and creepers drawn out of the dark round each player
+    (up to 22 monsters near), monsters out that night get Strength and Speed, no one can sleep, barbarian camps raid
+    twice as readily.
+  - Super Blood Moon (8% of full moons): a huge deep red moon; up to 36 monsters near, two tries a draw, Strength II.
+  - Harvest Moon (30% of full moons): a big golden moon; crops, stems, berries, cocoa and saplings round each player
+    grow all night; at dawn every loaded settlement's fields grow a stage.
+  - Blue Moon (22% of full moons): Luck for everyone under the open sky; monsters slain by a player give 6 extra
+    experience and a 15% chance of an emerald, diamond, amethyst shard or lapis.
+  - Ops: `/kingdom moon <blood|super_blood|harvest|blue|clear>` sets tonight's moon.
+- Bad Omen (`Omens`): walk into a kingdom, fiefdom or village (its land, or 96 blocks of its seat) carrying Bad Omen or
+  Raid Omen and every good word you had there is gone, then 400 more (once a day per settlement). If the raid you
+  brought comes and the settlement wins it, it holds a grudge (saved): reputation gains there count a tenth and never
+  climb over -50 (no pledging again), with a 1% chance a day it's finally forgiven. A raid that wipes it out leaves
+  no one to remember.

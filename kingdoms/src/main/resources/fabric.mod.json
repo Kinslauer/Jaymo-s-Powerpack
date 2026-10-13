@@ -21,9 +21,11 @@
 		"jaymoskingdoms.equestrian.mixins.json",
 		"jaymoskingdoms.pathing.mixins.json",
 		"jaymoskingdoms.weaponmod.mixins.json",
+		"jaymoskingdoms.moons.mixins.json",
 		{ "config": "jaymoskingdoms.combat.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.mca.client.mixins.json", "environment": "client" },
-		{ "config": "jaymoskingdoms.equestrian.client.mixins.json", "environment": "client" }
+		{ "config": "jaymoskingdoms.equestrian.client.mixins.json", "environment": "client" },
+		{ "config": "jaymoskingdoms.moons.client.mixins.json", "environment": "client" }
 	],
 	"depends": {
 		"fabricloader": ">=0.19.5",

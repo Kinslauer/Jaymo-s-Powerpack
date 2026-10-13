@@ -59,8 +59,10 @@ public final class Reputation {
 		}
 		// (0.5.12) as its ruler's temper takes it
 		by = Tempers.reputation(kingdom, by);
+		// (0.6.6) a settlement that survived a raid you brought barely warms to you again
+		by = Omens.gain(player, kingdom, by);
 		int before = stored(player, kingdom.id());
-		int after = Mth.clamp(before + by, MIN, MAX);
+		int after = Mth.clamp(before + by, MIN, by > 0 ? Math.max(before, Omens.ceiling(player, kingdom)) : MAX);
 		Map<String, Integer> map = new HashMap<>(player.getAttachedOrElse(REPUTATION, Map.of()));
 		map.put(Integer.toString(kingdom.id()), after);
 		player.setAttached(REPUTATION, Map.copyOf(map));
