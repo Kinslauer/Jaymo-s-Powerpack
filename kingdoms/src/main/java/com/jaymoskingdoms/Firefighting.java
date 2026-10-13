@@ -42,6 +42,10 @@ import org.jspecify.annotations.Nullable;
  * pouring water on it, taken up again a moment later), some run to the nearest child and lead it away, the rest run
  * from it. Children always run. The kingdom's folk (guards, builders, farmers...) not already fighting put it out, and
  * (0.5.42) so do its iron golems, beating it out with their fists.
+ * <p>
+ * (0.5.48) A fire kept burning on purpose (on netherrack or anything else that burns forever: a fire pit) is left
+ * alone: it's where golems and guards drop corpses ({@link Undertakers}). Anyone sent to a fire puts down the corpse
+ * they were carrying first.
  */
 public final class Firefighting {
 	/** Villagers and folk this close to a fire answer it; a fire this close to a settlement's seat is watched. */
@@ -89,6 +93,10 @@ public final class Firefighting {
 	/** A fire was lit at {@code pos} ({@code BaseFireBlockMixin}): watched if it's in or near a settlement. */
 	public static void lit(Level level, BlockPos pos) {
 		if (!(level instanceof ServerLevel server) || FIRES.size() >= MOST_WATCHED || server != Factions.level(server.getServer())) {
+			return;
+		}
+		if (server.getBlockState(pos.below()).is(BlockTags.INFINIBURN_OVERWORLD)) {
+			// (0.5.48) a kept fire (a fire pit), not one to put out
 			return;
 		}
 		if (Factions.around(server.getServer(), server, pos, WATCHED) != null) {
@@ -145,6 +153,7 @@ public final class Firefighting {
 			}
 			switch (choice.answer()) {
 				case FIGHT -> {
+					Undertakers.calledAway(level, v);
 					if (close(v, fire)) {
 						putOut(level, v, fire, now);
 						return;
@@ -156,6 +165,7 @@ public final class Firefighting {
 			}
 		}
 		for (Folk folk : level.getEntitiesOfClass(Folk.class, near, f -> f.isAlive() && f.getTarget() == null && !Theft.rioting(f))) {
+			Undertakers.calledAway(level, folk);
 			if (close(folk, fire)) {
 				putOut(level, folk, fire, now);
 				return;
@@ -165,6 +175,7 @@ public final class Firefighting {
 		}
 		// (0.5.42) golems not already fighting stride over and beat it out with their fists
 		for (IronGolem golem : level.getEntitiesOfClass(IronGolem.class, near, g -> g.isAlive() && g.getTarget() == null)) {
+			Undertakers.calledAway(level, golem);
 			if (close(golem, fire)) {
 				beat(level, golem, fire);
 				return;

@@ -83,6 +83,8 @@ public class CorpseEntity extends Entity {
 	private static final float POCKET_WIDTH = 0.5F, POCKET_HEIGHT = 0.8F;
 	/** Where a carried corpse sits: this far in front of the carrier, at this height (across the arms). */
 	private static final double CARRY_FORWARD = 0.55, CARRY_HEIGHT = 0.9;
+	/** (0.4.31) The size of carrier the carry spot is set for (a villager); bigger ones hold it further out and higher. */
+	private static final double CARRIER_HALF_WIDTH = 0.3, CARRIER_HEIGHT = 1.95;
 	/** Further than this from its carrier (teleported, fell, ...) and it's dropped. */
 	private static final double CARRY_LEASH_SQ = 4.0 * 4.0;
 
@@ -1357,11 +1359,14 @@ public class CorpseEntity extends Entity {
 		return carryPosition(carrier, yaw, x, y, z, 0.0F);
 	}
 
-	/** The same, for a corpse this wide: a big one is held further out (and lower), in front of you, not around you. */
+	/**
+	 * The same, for a corpse this wide: a big one is held further out (and lower), in front of you, not around you.
+	 * (0.4.31) A carrier bigger than a person (an iron golem) holds it out past its own bulk, up at its own arms.
+	 */
 	public static Vec3 carryPosition(Entity carrier, float yaw, double x, double y, double z, float width) {
 		float radians = yaw * Mth.DEG_TO_RAD;
-		double forward = CARRY_FORWARD + Math.max(0.0, width * 0.5 - 0.45);
-		double height = width > 1.0F ? 0.3 : CARRY_HEIGHT;
+		double forward = CARRY_FORWARD + Math.max(0.0, width * 0.5 - 0.45) + Math.max(0.0, carrier.getBbWidth() * 0.5 - CARRIER_HALF_WIDTH);
+		double height = (width > 1.0F ? 0.3 : CARRY_HEIGHT) * Math.max(1.0, carrier.getBbHeight() / CARRIER_HEIGHT);
 		return new Vec3(x - Mth.sin(radians) * forward, y + height, z + Mth.cos(radians) * forward);
 	}
 
