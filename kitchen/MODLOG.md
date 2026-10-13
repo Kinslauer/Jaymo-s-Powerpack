@@ -665,3 +665,8 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
   splash (`CorpseEntity.lootFish`). Before, a fish too big to pocket (a beached flying fish) was searched like any other
   corpse: its fish dropped and the body stayed behind.
 - Fish corpses saved before 0.4.29 (as `OTHER`) count by their type too (`CorpseEntity.isFish`).
+
+## 0.4.31: iron golems carry corpses in their arms
+- For Jaymo's Kingdoms 0.5.48, where iron golems take corpses to the fire: a carrier bigger than a villager holds a
+  carried corpse out past its own bulk and up at its arms (`carryPosition` scales with the carrier's size). Before, a
+  golem's corpse sat at its knees, half inside it. Players and villagers carry exactly as before.

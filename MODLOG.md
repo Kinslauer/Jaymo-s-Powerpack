@@ -543,6 +543,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   cavalry; a fallen knight's destrier or a raider's steppe pony goes wild for you to break in; rifling a caravan
   horse's saddlebags is theft; and stablehands and kings give horse quests (break one in, bring a stud, ride to
   another town against the clock). Stablehands and farriers have their own screen: right-click them.
-- **0.8.93, Quests are rare:** ships Jaymo's Kingdoms 0.5.49 (see `kingdoms/MODLOG.md`): only about one villager in
+- **0.8.94, Iron golems burn corpses:** ships Jaymo's Kingdoms 0.5.48 and Jaymo's Kitchen 0.4.31: every iron golem
+  (village, kingdom or home-built) picks up corpses lying near it and carries them in its arms to the nearest fire pit,
+  lit campfire or lava, then drops them in. Monsters at once, other corpses after 5 minutes untouched; never players'
+  or golems' corpses. Golems never light fires, and fire pits on netherrack are no longer beaten out.
+- **0.8.95, Quests are rare:** ships Jaymo's Kingdoms 0.5.49 (see `kingdoms/MODLOG.md`): only about one villager in
   twenty ever gives quests (on about half their days), kings have work only now and then, and a good name with a
   settlement raises both a little.

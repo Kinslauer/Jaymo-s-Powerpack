@@ -17,6 +17,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityEvent;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.animal.golem.IronGolem;
@@ -24,6 +25,7 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -37,6 +39,13 @@ import org.jspecify.annotations.Nullable;
  * would catch beside it. A kingdom's guards are its {@link Folk} guards (or, with MCA, its MCA guards); a village's are
  * its iron golems, who only ever throw a corpse into a fire, never light one. Builders put up a fire pit
  * ({@code Buildings.firePit}) for them.
+ * <p>
+ * (0.5.48) Every iron golem now does it, wherever it is (a village's, a kingdom's, one a player built at home): a golem
+ * that isn't fighting picks up a corpse lying near it, carries it to the nearest fire within {@link #GOLEM_PYRE_REACH}
+ * (a fire pit, lit campfire or lava) and drops it in from close by. Monsters' corpses at once; any other (an animal,
+ * a villager) once it has lain untouched {@link #SETTLE_TICKS}, so a kill you mean to butcher is yours first. Never a
+ * player's corpse (their things stay safe), nor a heavy iron golem's (fire doesn't take it). Golems never light a fire,
+ * and a fire to put out ({@link Firefighting}) calls them away from a corpse.
  */
 public final class Undertakers {
 	/** Corpses this close to a settlement's seat are cleared; guards this close to a corpse may answer it. */
@@ -56,6 +65,16 @@ public final class Undertakers {
 	static final double SPEED = 1.0;
 	/** Seconds a lit corpse is set burning for (Kitchen keeps it burning till it's ash once it's caught). */
 	static final float BURN_SECONDS = 8.0F;
+	/** (0.5.48) How far a golem looks for a corpse, and how far from it for a fire to drop it in. */
+	static final double GOLEM_SIGHT = 24.0;
+	static final int GOLEM_PYRE_REACH = 24;
+	/** (0.5.48) How long anything but a monster's corpse lies untouched before a golem takes it (ticks: 5 minutes). */
+	static final long SETTLE_TICKS = 6000L;
+	/** (0.5.48) How close a golem carries a corpse to the fire before it lets go; the most golems sent out per round. */
+	static final double DROP = 1.8;
+	static final int GOLEMS_PER_ROUND = 4;
+	/** (0.5.48) How long a guard called away to a fire is left alone before it's given another corpse (ticks). */
+	static final long CALLED_AWAY = 200L;
 
 	enum Stage { FETCH, HAUL, LIGHT }
 
@@ -79,6 +98,10 @@ public final class Undertakers {
 	private static final Map<UUID, Duty> DUTIES = new HashMap<>();
 	/** Corpses no plan could be made for (or a guard gave up on), and when they may be tried again. */
 	private static final Map<UUID, Long> LEFT = new HashMap<>();
+	/** (0.5.48) Corpses golems have seen lying free: when first, and when last (forgotten once out of sight or picked up). */
+	private static final Map<UUID, long[]> SEEN = new HashMap<>();
+	/** (0.5.48) Guards called away to a fire, and till when they're left to it. */
+	private static final Map<UUID, Long> BUSY = new HashMap<>();
 
 	private Undertakers() {
 	}
@@ -88,6 +111,8 @@ public final class Undertakers {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			DUTIES.clear();
 			LEFT.clear();
+			SEEN.clear();
+			BUSY.clear();
 		});
 	}
 
@@ -106,11 +131,63 @@ public final class Undertakers {
 		}
 		if (now % ASSIGN == 0) {
 			LEFT.values().removeIf(until -> until < now);
+			BUSY.values().removeIf(until -> until < now);
 			for (Faction f : Factions.all(server)) {
 				if (!f.fallen() && f.type() != FactionType.BARBARIAN && level.isLoaded(f.seat())) {
 					assign(level, f, now);
 				}
 			}
+			golems(level, now);
+		}
+	}
+
+	/**
+	 * (0.5.48) {@code guard} is off to put out a fire ({@link Firefighting}): whatever corpse it has is put down where it
+	 * stands, and it's given no other for a while.
+	 */
+	static void calledAway(ServerLevel level, PathfinderMob guard) {
+		long now = level.getGameTime();
+		BUSY.put(guard.getUUID(), now + CALLED_AWAY);
+		Duty d = DUTIES.remove(guard.getUUID());
+		if (d != null && level.getEntity(d.corpse) instanceof Entity corpse && KitchenCompat.carrier(corpse) == guard) {
+			KitchenCompat.throwAt(corpse, guard.position());
+		}
+	}
+
+	/** (0.5.48) Hands free iron golems, wherever they are, the corpses lying near them, to drop into a fire. */
+	private static void golems(ServerLevel level, long now) {
+		SEEN.values().removeIf(seen -> now - seen[1] > ASSIGN * 3L);
+		int taken = 0;
+		for (IronGolem golem : level.getEntities(EntityTypeTest.forClass(IronGolem.class), IronGolem::isAlive)) {
+			boolean free = taken < GOLEMS_PER_ROUND && golem.getTarget() == null && !golem.isPassenger()
+				&& !DUTIES.containsKey(golem.getUUID()) && !BUSY.containsKey(golem.getUUID());
+			Entity best = null;
+			double bestD = Double.MAX_VALUE;
+			for (Entity corpse : level.getEntities((Entity)null, golem.getBoundingBox().inflate(GOLEM_SIGHT, 8.0, GOLEM_SIGHT), KitchenCompat::isBurnableCorpse)) {
+				UUID id = corpse.getUUID();
+				long[] seen = SEEN.computeIfAbsent(id, k -> new long[] {now, now});
+				seen[1] = now;
+				if (!free || LEFT.containsKey(id) || claimed(id) || !KitchenCompat.isHostile(corpse) && now - seen[0] < SETTLE_TICKS) {
+					continue;
+				}
+				double d = golem.distanceToSqr(corpse);
+				if (d < bestD) {
+					bestD = d;
+					best = corpse;
+				}
+			}
+			if (best == null) {
+				continue;
+			}
+			BlockPos pyre = pyre(level, best.blockPosition(), GOLEM_PYRE_REACH);
+			if (pyre == null) {
+				// nothing to drop it in (and a golem never lights a fire): left a while
+				LEFT.put(best.getUUID(), now + RETRY);
+				continue;
+			}
+			DUTIES.put(golem.getUUID(), new Duty(golem.getUUID(), best.getUUID(), pyre, true, now + GIVE_UP));
+			taken++;
+			JaymosKingdoms.LOGGER.debug("an iron golem at {} takes the corpse at {} to the fire at {}", golem.blockPosition(), best.blockPosition(), pyre);
 		}
 	}
 
@@ -125,18 +202,13 @@ public final class Undertakers {
 			if (LEFT.containsKey(corpse.getUUID()) || claimed(corpse.getUUID())) {
 				continue;
 			}
-			BlockPos pyre = pyre(level, corpse.blockPosition());
-			// an iron golem can carry a body to the fire, but can't light one
-			PathfinderMob guard = freeGuard(level, f, corpse, pyre != null);
+			// (0.5.48) iron golems see to corpses on their own (golems)
+			PathfinderMob guard = freeGuard(level, f, corpse);
 			if (guard == null) {
-				if (pyre != null) {
-					// nobody free at all
-					return;
-				}
-				// only golems about, and nothing to throw it in: left a while
-				LEFT.put(corpse.getUUID(), now + RETRY);
-				continue;
+				// nobody free at all
+				return;
 			}
+			BlockPos pyre = pyre(level, corpse.blockPosition(), PYRE_REACH);
 			Duty duty;
 			if (pyre != null) {
 				duty = new Duty(guard.getUUID(), corpse.getUUID(), pyre, true, now + GIVE_UP);
@@ -167,23 +239,17 @@ public final class Undertakers {
 		return false;
 	}
 
-	/**
-	 * The nearest of {@code f}'s guards to {@code corpse} that isn't fighting, asleep or already on a duty; a village's
-	 * iron golems only if {@code golems} (there's a fire to throw it in).
-	 */
-	private static @Nullable PathfinderMob freeGuard(ServerLevel level, Faction f, Entity corpse, boolean golems) {
+	/** The nearest of {@code f}'s guards to {@code corpse} that isn't fighting, asleep, at a fire or already on a duty. */
+	private static @Nullable PathfinderMob freeGuard(ServerLevel level, Faction f, Entity corpse) {
 		AABB box = corpse.getBoundingBox().inflate(GUARD_REACH, 12.0, GUARD_REACH);
 		List<PathfinderMob> guards = new ArrayList<>();
-		if (golems && f.type() == FactionType.VILLAGE) {
-			guards.addAll(level.getEntitiesOfClass(IronGolem.class, box, IronGolem::isAlive));
-		}
 		for (Worker w : Workers.near(level, box, w -> w.role() == Folk.GUARD && w.factionId() == f.id())) {
 			guards.add(w.mob());
 		}
 		PathfinderMob best = null;
 		double bestD = Double.MAX_VALUE;
 		for (PathfinderMob g : guards) {
-			if (!g.isAlive() || g.getTarget() != null || g.isSleeping() || g.isBaby() || DUTIES.containsKey(g.getUUID())) {
+			if (!g.isAlive() || g.getTarget() != null || g.isSleeping() || g.isBaby() || DUTIES.containsKey(g.getUUID()) || BUSY.containsKey(g.getUUID())) {
 				continue;
 			}
 			double d = g.distanceToSqr(corpse);
@@ -230,6 +296,10 @@ public final class Undertakers {
 					// just let go of, or still tumbling: picked up next time round
 					return true;
 				}
+				if (guard instanceof IronGolem) {
+					// (0.5.48) the golem's arms swing down and take it up
+					level.broadcastEntityEvent(guard, EntityEvent.START_ATTACKING);
+				}
 				d.stage = Stage.HAUL;
 			}
 			case HAUL -> {
@@ -239,13 +309,21 @@ public final class Undertakers {
 					return true;
 				}
 				BlockPos to = d.to;
-				double reach = d.pyre ? THROW : PUT_DOWN;
-				if (horizontalDistSqr(guard, to) > reach * reach) {
+				// (0.5.48) a golem carries it right up to the fire and drops it in, unless it can get no nearer than a throw
+				boolean golem = guard instanceof IronGolem;
+				double reach = golem ? DROP : d.pyre ? THROW : PUT_DOWN;
+				double dist = horizontalDistSqr(guard, to);
+				if (dist > reach * reach && !(golem && dist <= THROW * THROW && guard.getNavigation().isDone())) {
 					walk(guard, to);
 					return true;
 				}
+				guard.getNavigation().stop();
 				guard.getLookControl().setLookAt(to.getX() + 0.5, to.getY() + 0.5, to.getZ() + 0.5);
-				guard.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+				if (golem) {
+					level.broadcastEntityEvent(guard, EntityEvent.START_ATTACKING);
+				} else {
+					guard.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+				}
 				KitchenCompat.throwAt(corpse, Vec3.atBottomCenterOf(to));
 				if (d.pyre) {
 					// into the fire: it catches there (Kitchen lights a corpse lying in flames or lava)
@@ -287,11 +365,11 @@ public final class Undertakers {
 		}
 	}
 
-	/** The nearest fire pit, lit campfire or lava to {@code at}, or null. */
-	private static @Nullable BlockPos pyre(ServerLevel level, BlockPos at) {
+	/** The nearest fire pit, lit campfire or lava within {@code reach} of {@code at}, or null. */
+	private static @Nullable BlockPos pyre(ServerLevel level, BlockPos at, int reach) {
 		BlockPos best = null;
 		double bestD = Double.MAX_VALUE;
-		for (BlockPos pos : BlockPos.betweenClosed(at.offset(-PYRE_REACH, -PYRE_DEPTH, -PYRE_REACH), at.offset(PYRE_REACH, PYRE_DEPTH, PYRE_REACH))) {
+		for (BlockPos pos : BlockPos.betweenClosed(at.offset(-reach, -PYRE_DEPTH, -reach), at.offset(reach, PYRE_DEPTH, reach))) {
 			if (!level.isLoaded(pos) || !isPyre(level, pos)) {
 				continue;
 			}
@@ -305,7 +383,7 @@ public final class Undertakers {
 	}
 
 	/** Fire burning on something that burns forever (a fire pit), a lit campfire, or lava open to the sky above it. */
-	private static boolean isPyre(ServerLevel level, BlockPos pos) {
+	static boolean isPyre(ServerLevel level, BlockPos pos) {
 		BlockState state = level.getBlockState(pos);
 		if (state.is(BlockTags.FIRE)) {
 			return level.getBlockState(pos.below()).is(BlockTags.INFINIBURN_OVERWORLD);
