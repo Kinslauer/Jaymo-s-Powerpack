@@ -760,3 +760,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   overhead slam. Shift+Space dives at once on the wings. Web block catch pries 1.5 s; tendril pull 0.5 s and breaks
   spawners; takeover rips tear small craters. Fast landings roll, slow ones ease into the superhero landing. The symbiote talks more, remarks on your
   surroundings, and now and then walks you somewhere it wants to see. `docs/web.md`.
+- **0.9.10, Combat Arts (Kingdoms 0.6.5):** the Strength skill tree gets a second page: combo chains with Momentum and
+  Cleave, weapon finishers (Earthsplitter, Rend, Executioner), Charge and War Cry on Y, and Bladestorm. Strength now
+  levels to 25. See `docs/Skills-Plan.md`.
