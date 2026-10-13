@@ -2417,7 +2417,8 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
     the alien's saved entries are unchanged).
   - Under a blood, super blood, harvest or blue moon those out at night now and then remark on it.
   - Folk who know a changed player (they saw the change) now and then remark on it, unafraid (`KNOWN_TALK`).
-  - Six lines for every sight, fright, moon and bit of gossip.
+  - Twelve lines for every sight, fright, moon and bit of gossip, dealt like a shuffled deck (`Oddities.line`): each
+    is said once before any comes round again.
   - It's all talked about: a gossip's line is often of the nearest strange thing within 1000 blocks in the last three
     days (a star fell 300 blocks north; Andy called the wind down on the square). No one says something strange more
     than once in 30 s (`TALK_GAP`). Tuning at the top of `Oddities`.

@@ -1,6 +1,8 @@
 package com.jaymoskingdoms;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -93,8 +95,8 @@ final class Oddities {
 	/** Those who know a changed player (they saw the change) remark on it with this chance per look, at most this often. */
 	static final float KNOWN_TALK = 0.05F;
 	static final int KNOWN_TALK_GAP = 1200;
-	/** How many lines there are for each sight. */
-	static final int LINES = 6;
+	/** How many lines there are for each sight; each is said once, in a shuffled order, before any comes round again. */
+	static final int LINES = 12;
 	/** How long the strange is talked about (ticks; three days), how many are remembered, and from how far. */
 	static final long NEWS_TICKS = 72000L;
 	static final int MAX_NEWS = 24;
@@ -123,6 +125,8 @@ final class Oddities {
 	private static final Map<UUID, Long> SPOKE = new HashMap<>();
 	private static final Map<UUID, Long> REMARKED = new HashMap<>();
 	private static final List<News> NEWS = new ArrayList<>();
+	private static final Map<String, Deque<Integer>> DECKS = new HashMap<>();
+	private static final Map<String, Integer> LAST = new HashMap<>();
 
 	private Oddities() {
 	}
@@ -134,6 +138,8 @@ final class Oddities {
 			SPOKE.clear();
 			REMARKED.clear();
 			NEWS.clear();
+			DECKS.clear();
+			LAST.clear();
 		});
 	}
 
@@ -309,7 +315,7 @@ final class Oddities {
 			return;
 		}
 		if ("host".equals(kind)) {
-			Speech.say(level, v, Component.translatable("talk.jaymoskingdoms.odd.fear.host." + level.getRandom().nextInt(LINES), monster.getDisplayName()), Speech.RED, 24.0);
+			Speech.say(level, v, Component.translatable(line("talk.jaymoskingdoms.odd.fear.host", level.getRandom()), monster.getDisplayName()), Speech.RED, 24.0);
 			SPOKE.put(v.getUUID(), now + TALK_GAP);
 		} else {
 			say(level, v, "fear." + kind, Speech.RED, now);
@@ -340,13 +346,12 @@ final class Oddities {
 		}
 		int blocks = Math.max(50, Math.round((float)Math.sqrt(bestD) / 50.0F) * 50);
 		Component way = Sightings.direction(villager.blockPosition(), best.pos());
-		int line = level.getRandom().nextInt(LINES);
 		if (best.kind().startsWith(POWER)) {
 			String power = best.kind().substring(POWER.length());
-			String key = POWERS.contains(power) ? "talk.jaymoskingdoms.gossip.odd.power." + power + "." + line : "talk.jaymoskingdoms.gossip.odd.power." + line;
-			return Component.translatable(key, best.who() == null ? Component.literal("?") : best.who());
+			String family = POWERS.contains(power) ? "talk.jaymoskingdoms.gossip.odd.power." + power : "talk.jaymoskingdoms.gossip.odd.power";
+			return Component.translatable(line(family, level.getRandom()), best.who() == null ? Component.literal("?") : best.who());
 		}
-		return Component.translatable("talk.jaymoskingdoms.gossip.odd." + best.kind() + "." + line, blocks, way);
+		return Component.translatable(line("talk.jaymoskingdoms.gossip.odd." + best.kind(), level.getRandom()), blocks, way);
 	}
 
 	private static void news(News news) {
@@ -364,7 +369,38 @@ final class Oddities {
 
 	private static void say(ServerLevel level, LivingEntity p, String what, int color, long now) {
 		SPOKE.put(p.getUUID(), now + TALK_GAP);
-		Speech.say(level, p, Component.translatable("talk.jaymoskingdoms.odd." + what + "." + level.getRandom().nextInt(LINES)), color, 32.0);
+		Speech.say(level, p, Component.translatable(line("talk.jaymoskingdoms.odd." + what, level.getRandom())), color, 32.0);
+	}
+
+	/**
+	 * The next line of {@code family} (its key, {@code .0} to {@code .11} after it): the lines are dealt like a shuffled
+	 * deck, so each is said once before any is said again, and a new round never starts with the line just said.
+	 */
+	static String line(String family, RandomSource random) {
+		Deque<Integer> deck = DECKS.computeIfAbsent(family, f -> new ArrayDeque<>());
+		if (deck.isEmpty()) {
+			int[] order = new int[LINES];
+			for (int i = 0; i < LINES; i++) {
+				order[i] = i;
+			}
+			for (int i = LINES - 1; i > 0; i--) {
+				int j = random.nextInt(i + 1);
+				int t = order[i];
+				order[i] = order[j];
+				order[j] = t;
+			}
+			Integer last = LAST.get(family);
+			if (last != null && order[0] == last) {
+				order[0] = order[LINES - 1];
+				order[LINES - 1] = last;
+			}
+			for (int i : order) {
+				deck.add(i);
+			}
+		}
+		int next = deck.poll();
+		LAST.put(family, next);
+		return family + "." + next;
 	}
 
 	/** {@code p} turns to stare at {@code at}. */
