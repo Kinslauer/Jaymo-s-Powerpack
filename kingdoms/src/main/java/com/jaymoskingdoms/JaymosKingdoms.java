@@ -100,7 +100,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("skill attachments: {} {} {} {}", Skills.PROGRESS, SurvivalSkill.LAST_STAND, Renown.TITLE, Renown.KNOWN);
 		// 0.6.0: player classes (picked on first joining; a Writ of Rebirth unmakes the pick) and their attachments
 		Classes.register();
-		LOGGER.debug("class attachments: {} {}", Classes.CLASS, Classes.WRIT_BOUGHT);
+		LOGGER.debug("class attachments: {} {} {}", Classes.CLASS, Classes.WRIT_BOUGHT, Classes.KITTED);
 		// 0.5.19: a boss's bar shows only to the players who've hit it
 		BossBars.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)

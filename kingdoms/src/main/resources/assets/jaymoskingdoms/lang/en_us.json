@@ -1521,5 +1521,22 @@
 	"command.jaymoskingdoms.class.set": "%s player(s) made %s.",
 	"command.jaymoskingdoms.class.cleared": "%s player(s) have no class now; they'll be asked again.",
 	"command.jaymoskingdoms.class.is": "%s is a %s%s.",
-	"command.jaymoskingdoms.class.none": "%s has no class yet."
+	"command.jaymoskingdoms.class.none": "%s has no class yet.",
+	"gui.jaymoskingdoms.class.stat.hearts": "Hearts %s",
+	"gui.jaymoskingdoms.class.stat.speed": "Speed %s",
+	"gui.jaymoskingdoms.class.stat.blades": "Blades %s",
+	"gui.jaymoskingdoms.class.stat.light_armor": "Light armour %s",
+	"gui.jaymoskingdoms.class.stat.two_handed": "Two-handed %s",
+	"gui.jaymoskingdoms.class.stat.weight": "Armour weight %s",
+	"gui.jaymoskingdoms.class.stat.spells": "Spells %s",
+	"gui.jaymoskingdoms.class.stat.staff": "Staff %s",
+	"gui.jaymoskingdoms.class.stat.bows": "Bows %s",
+	"gui.jaymoskingdoms.class.stat.draw_jump": "Drawn jump %s",
+	"gui.jaymoskingdoms.class.stat.hunger": "Hunger %s",
+	"gui.jaymoskingdoms.class.stat.fall": "Fall damage %s",
+	"gui.jaymoskingdoms.class.stat.bludgeons": "Bludgeons %s",
+	"gui.jaymoskingdoms.class.stat.guns": "Guns %s",
+	"gui.jaymoskingdoms.class.stat.imbue": "Imbue %s",
+	"gui.jaymoskingdoms.class.choose": "Choose",
+	"gui.jaymoskingdoms.class.option": "%s: %s"
 }

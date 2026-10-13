@@ -73,6 +73,8 @@ public final class Classes {
 	static final int WRIT_EMERALDS = 30;
 	/** The chance a rare chest (stronghold library, ancient city, woodland mansion) holds a writ. */
 	static final float WRIT_LOOT_CHANCE = 0.08F;
+	/** Whether a class comes with its starting gear ({@link #kit}) the first time it's picked (a writ's second pick gets none). */
+	static final boolean START_WITH_GEAR = true;
 
 	/** The eight classes. {@code options}: what the class picks besides (a Mage's first spell, a Sorcerer's element). */
 	public enum PlayerClass {
@@ -120,6 +122,8 @@ public final class Classes {
 	/** Each player's class. Saved, kept through death, synced to its own player (the screens). */
 	public static final AttachmentType<Chosen> CLASS = AttachmentRegistry.create(JaymosKingdoms.id("class"),
 		builder -> builder.persistent(Chosen.CODEC).copyOnDeath().syncWith(Chosen.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
+	/** Whether a player has had a class's starting gear (once per player, so a writ isn't a free kit). Saved, kept through death. */
+	static final AttachmentType<Boolean> KITTED = AttachmentRegistry.create(JaymosKingdoms.id("kitted"), builder -> builder.persistent(Codec.BOOL).copyOnDeath());
 	/** When a player last bought a writ from a court wizard (game time). Saved, kept through death. */
 	static final AttachmentType<Long> WRIT_BOUGHT = AttachmentRegistry.create(JaymosKingdoms.id("writ_bought"),
 		builder -> builder.persistent(Codec.LONG).copyOnDeath());
@@ -250,6 +254,12 @@ public final class Classes {
 		if (cls == PlayerClass.MAGE && !player.getInventory().contains(new ItemStack(Arcana.WIZARD_STAFF))) {
 			player.getInventory().placeItemBackInInventory(new ItemStack(Arcana.WIZARD_STAFF));
 		}
+		if (START_WITH_GEAR && !player.getAttachedOrElse(KITTED, false)) {
+			player.setAttached(KITTED, true);
+			for (ItemStack stack : kit(cls, option)) {
+				player.getInventory().placeItemBackInInventory(stack);
+			}
+		}
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6F, 0.9F);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.class.chosen", Component.translatable("class.jaymoskingdoms." + cls.key()))
 			.withStyle(ChatFormatting.GOLD));
@@ -259,6 +269,41 @@ public final class Classes {
 	static void clear(ServerPlayer player) {
 		player.removeAttached(CLASS);
 		refresh(player);
+	}
+
+	// ---- the starting gear ---------------------------------------------------------------------------------------
+
+	/**
+	 * What a class starts with (the first of them is its portrait on the screen). Items of other mods (Armory's dagger,
+	 * Balkon's musket) are looked up by id, with a vanilla stand-in when they're not there.
+	 */
+	public static List<ItemStack> kit(PlayerClass cls, String option) {
+		return switch (cls) {
+			case THIEF -> List.of(any(1, "jaymospowers:iron_dagger", "minecraft:iron_sword"), new ItemStack(Items.LEATHER_CHESTPLATE),
+				new ItemStack(Items.LEATHER_LEGGINGS), new ItemStack(Items.LEATHER_BOOTS));
+			case WARLORD -> List.of(any(1, "jaymospowers:iron_claymore", "minecraft:iron_axe"), new ItemStack(Items.IRON_CHESTPLATE), new ItemStack(Items.IRON_BOOTS));
+			case MAGE -> List.of(new ItemStack(Arcana.WIZARD_STAFF), new ItemStack(switch (option) {
+				case "fire" -> Arcana.SCROLL_FIRE;
+				case "warding" -> Arcana.SCROLL_WARDING;
+				default -> Arcana.SCROLL_ARCANE;
+			}, 3), new ItemStack(Items.LEATHER_HELMET));
+			case ARCHER -> List.of(new ItemStack(Items.BOW), new ItemStack(Items.ARROW, 32), new ItemStack(Items.LEATHER_HELMET), new ItemStack(Items.LEATHER_BOOTS));
+			case SURVIVALIST -> List.of(any(1, "jaymospowers:hand_axe", "minecraft:stone_axe"), new ItemStack(Items.BREAD, 8), new ItemStack(Items.LEATHER_BOOTS));
+			case BRUTE -> List.of(any(1, "jaymospowers:iron_flanged_mace", "minecraft:iron_axe"), new ItemStack(Items.SHIELD), new ItemStack(Items.CHAINMAIL_CHESTPLATE));
+			case MARKSMAN -> List.of(any(1, "weaponmod:musket", "minecraft:crossbow"), any(16, "weaponmod:bullet", "minecraft:arrow"), new ItemStack(Items.LEATHER_CHESTPLATE));
+			case SORCERER -> List.of(new ItemStack(Items.IRON_SWORD), new ItemStack(Items.LEATHER_CHESTPLATE), new ItemStack(Items.LEATHER_LEGGINGS));
+		};
+	}
+
+	/** {@code n} of the first of {@code ids} that is an item here. */
+	private static ItemStack any(int n, String... ids) {
+		for (String id : ids) {
+			java.util.Optional<net.minecraft.core.Holder.Reference<Item>> item = BuiltInRegistries.ITEM.get(net.minecraft.resources.Identifier.parse(id));
+			if (item.isPresent()) {
+				return new ItemStack(item.get().value(), n);
+			}
+		}
+		return ItemStack.EMPTY;
 	}
 
 	// ---- the writ ------------------------------------------------------------------------------------------------

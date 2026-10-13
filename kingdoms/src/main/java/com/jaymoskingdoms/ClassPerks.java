@@ -1,10 +1,13 @@
 package com.jaymoskingdoms;
 
 import com.jaymoskingdoms.Classes.PlayerClass;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -71,6 +74,70 @@ public final class ClassPerks {
 
 	private static TagKey<Item> tag(String name) {
 		return TagKey.create(Registries.ITEM, JaymosKingdoms.id(name));
+	}
+
+	/** A class's card on the screen: its hearts, its speed, what it hits harder with, its armour, each a line. */
+	public static List<Component> card(PlayerClass cls) {
+		List<Component> lines = new ArrayList<>();
+		double health = switch (cls) {
+			case MAGE -> MAGE_HEALTH;
+			case SURVIVALIST -> SURVIVALIST_HEALTH;
+			case BRUTE -> BRUTE_HEALTH;
+			case MARKSMAN -> MARKSMAN_HEALTH;
+			default -> 0.0;
+		};
+		double move = switch (cls) {
+			case ARCHER -> ARCHER_MOVE;
+			case SURVIVALIST -> SURVIVALIST_MOVE;
+			case BRUTE -> BRUTE_MOVE;
+			default -> 0.0;
+		};
+		lines.add(line("hearts", String.valueOf((int) ((20.0 + health) / 2.0))));
+		lines.add(line("speed", pct(move)));
+		switch (cls) {
+			case THIEF -> {
+				lines.add(line("blades", pct(THIEF_DAMAGE)));
+				lines.add(line("light_armor", "+" + (int) THIEF_ARMOR_PER_PIECE));
+			}
+			case WARLORD -> {
+				lines.add(line("two_handed", pct(WARLORD_DAMAGE)));
+				lines.add(line("weight", "x" + WARLORD_WEIGHT));
+			}
+			case MAGE -> {
+				lines.add(line("spells", "+"));
+				lines.add(line("staff", "+"));
+			}
+			case ARCHER -> {
+				lines.add(line("bows", pct(ARCHER_DAMAGE - 1.0)));
+				lines.add(line("draw_jump", "2"));
+			}
+			case SURVIVALIST -> {
+				lines.add(line("hunger", pct(SURVIVALIST_EXHAUSTION - 1.0)));
+				lines.add(line("fall", pct(SURVIVALIST_FALL)));
+			}
+			case BRUTE -> {
+				lines.add(line("bludgeons", pct(BRUTE_DAMAGE)));
+				lines.add(line("weight", "x" + (int) BRUTE_WEIGHT));
+			}
+			case MARKSMAN -> {
+				lines.add(line("guns", "+"));
+				lines.add(line("light_armor", "+" + (int) MARKSMAN_ARMOR_PER_PIECE));
+			}
+			case SORCERER -> {
+				lines.add(line("imbue", "+"));
+				lines.add(line("spells", "-"));
+			}
+		}
+		return lines;
+	}
+
+	private static Component line(String key, String value) {
+		return Component.translatable("gui.jaymoskingdoms.class.stat." + key, value);
+	}
+
+	private static String pct(double share) {
+		int p = (int) Math.round(share * 100.0);
+		return p == 0 ? "0" : (p > 0 ? "+" : "") + p + "%";
 	}
 
 	static void clear() {
