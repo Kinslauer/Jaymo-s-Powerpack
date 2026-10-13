@@ -34,7 +34,12 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ambient.Bat;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -115,6 +120,12 @@ public final class Vampires {
 	static final long NIGHT_FROM = 12800L, NIGHT_TO = 23200L;
 	private static final long DAY = 24000L;
 	private static final int BLOOD = 0x8A0303, EYES = 0xFF1A1A;
+	/** The Elder's bat form: prey further than this he flies to (and he looks this far for it), how fast he flies (blocks a tick), how high over the higher end, how long at most (ticks), how far he flees, how long before he can change again (ticks). */
+	static final double BAT_MIN = 12.0, ELDER_PREY_RANGE = 48.0, BAT_SPEED = 0.7, BAT_CRUISE = 5.0, BAT_FLEE = 32.0;
+	static final int BAT_MAX_TICKS = 20 * 20, BAT_COOLDOWN = 20 * 30;
+	/** A blow to the bat: the Elder takes this many times it, and he's knocked out of the form. */
+	static final float BAT_HURT_FACTOR = 2.0F;
+	static final String BAT_TAG = "jaymoskingdoms_elder_bat";
 
 	// ---- what's kept ---------------------------------------------------------------------------------------------------
 
@@ -185,16 +196,47 @@ public final class Vampires {
 	private static final Map<UUID, PathfinderMob> LOADED = new HashMap<>();
 	private static final Map<UUID, Hunt> HUNTS = new HashMap<>();
 	private static final Map<UUID, Long> EXPOSED = new HashMap<>();
+	/** Elders in flight (by their UUID), and when each may change again (game time). */
+	private static final Map<UUID, Flight> FLIGHTS = new HashMap<>();
+	private static final Map<UUID, Long> BAT_READY = new HashMap<>();
+
+	/** The Elder flying as a bat: the bat, and where he's going (his prey, or a place to hide). */
+	private static final class Flight {
+		final PathfinderMob elder;
+		final Bat bat;
+		final @Nullable LivingEntity prey;
+		Vec3 to;
+		double cruise;
+		int ticks;
+
+		Flight(PathfinderMob elder, Bat bat, @Nullable LivingEntity prey, Vec3 to) {
+			this.elder = elder;
+			this.bat = bat;
+			this.prey = prey;
+			this.to = to;
+			this.cruise = Math.max(elder.getY(), to.y) + BAT_CRUISE;
+		}
+	}
 
 	private Vampires() {
 	}
 
 	static void register() {
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
+			if (entity.entityTags().contains(BAT_TAG) && FLIGHTS.values().stream().noneMatch(f -> f.bat == entity)) {
+				// (a bat left over from a flight cut short by a restart)
+				entity.discard();
+				return;
+			}
 			if (entity instanceof PathfinderMob mob && (mob.hasAttached(VAMPIRE) || mob.hasAttached(BITTEN))) {
 				LOADED.put(mob.getUUID(), mob);
+				if (kind(mob) == Kind.ELDER && !FLIGHTS.containsKey(mob.getUUID()) && mob.isNoGravity()) {
+					human(mob);
+				}
 			}
 		});
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register(Vampires::allowDamage);
+		ServerLifecycleEvents.SERVER_STOPPING.register(server -> new ArrayList<>(FLIGHTS.values()).forEach(f -> land(f, false)));
 		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> LOADED.remove(entity.getUUID()));
 		ServerTickEvents.END_SERVER_TICK.register(Vampires::tick);
 		ServerLivingEntityEvents.AFTER_DEATH.register(Vampires::died);
@@ -206,6 +248,8 @@ public final class Vampires {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			LOADED.clear();
 			HUNTS.clear();
+			FLIGHTS.clear();
+			BAT_READY.clear();
 			EXPOSED.clear();
 		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> dispatcher.register(Commands.literal("kingdom")
@@ -267,6 +311,11 @@ public final class Vampires {
 		if (now % ARRIVE_EVERY == 0 && !night) {
 			arrive(overworld, clock);
 		}
+		if (!FLIGHTS.isEmpty()) {
+			for (Flight f : new ArrayList<>(FLIGHTS.values())) {
+				fly(f, night);
+			}
+		}
 		if (LOADED.isEmpty()) {
 			return;
 		}
@@ -276,7 +325,7 @@ public final class Vampires {
 				LOADED.remove(mob.getUUID());
 				continue;
 			}
-			if ((now + mob.getId()) % 5 != 0) {
+			if ((now + mob.getId()) % 5 != 0 || FLIGHTS.containsKey(mob.getUUID())) {
 				continue;
 			}
 			Long bitten = mob.getAttached(BITTEN);
@@ -322,6 +371,11 @@ public final class Vampires {
 		}
 		if (foe != null && mob.getHealth() < mob.getMaxHealth() * FLEE_AT) {
 			expose(mob, nightNo);
+			if (kind == Kind.ELDER && batReady(mob, now)) {
+				Vec3 away = mob.position().subtract(foe.position()).multiply(1.0, 0.0, 1.0).normalize().scale(BAT_FLEE).add(mob.position());
+				takeOff(level, mob, null, ground(level, away));
+				return;
+			}
 			flee(mob, foe);
 			eyes(level, mob);
 			return;
@@ -360,6 +414,10 @@ public final class Vampires {
 		expose(mob, nightNo);
 		speed(mob, true);
 		eyes(level, mob);
+		if (kind == Kind.ELDER && foe == null && mob.distanceTo(prey) > BAT_MIN && batReady(mob, now)) {
+			takeOff(level, mob, prey, prey.position());
+			return;
+		}
 		chase(mob, prey);
 		if (mob.distanceTo(prey) <= BITE_REACH && now - hunt.lastBite >= BITE_EVERY && mob.hasLineOfSight(prey)) {
 			hunt.lastBite = now;
@@ -385,7 +443,7 @@ public final class Vampires {
 	private static @Nullable LivingEntity findPrey(ServerLevel level, PathfinderMob mob, Kind kind) {
 		LivingEntity best = null;
 		double bestD = Double.MAX_VALUE;
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, mob.getBoundingBox().inflate(PREY_RANGE),
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, mob.getBoundingBox().inflate(kind == Kind.ELDER ? ELDER_PREY_RANGE : PREY_RANGE),
 			e -> e != mob && (kind == Kind.HUNTER ? e.isAlive() && exposed(e) : person(e)))) {
 			double d = e.distanceToSqr(mob);
 			if (d < bestD) {
@@ -400,7 +458,7 @@ public final class Vampires {
 	private static void strike(ServerLevel level, PathfinderMob mob, Vampire v, Kind kind, LivingEntity prey, long nightNo, long now, boolean fighting) {
 		boolean elder = kind == Kind.ELDER;
 		DamageSource source = level.damageSources().mobAttack(mob);
-		mob.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+		mob.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		mob.getLookControl().setLookAt(prey, 30.0F, 30.0F);
 		if (isVampire(prey) || fighting && !person(prey)) {
 			// claws
@@ -506,6 +564,129 @@ public final class Vampires {
 		} else if (speed.getModifier(SPEED) != null) {
 			speed.removeModifier(SPEED);
 		}
+	}
+
+	// ---- the Elder's bat form ------------------------------------------------------------------------------------------
+
+	private static boolean batReady(PathfinderMob mob, long now) {
+		return now >= BAT_READY.getOrDefault(mob.getUUID(), 0L) && !mob.isPassenger() && !mob.isVehicle();
+	}
+
+	private static Vec3 ground(ServerLevel level, Vec3 at) {
+		BlockPos column = BlockPos.containing(at);
+		return Vec3.atBottomCenterOf(level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column));
+	}
+
+	/** He bursts into a bat (in a puff of smoke) and flies for {@code to}, or after {@code prey}. */
+	private static void takeOff(ServerLevel level, PathfinderMob elder, @Nullable LivingEntity prey, Vec3 to) {
+		Bat bat = EntityTypes.BAT.create(level, EntitySpawnReason.TRIGGERED);
+		if (bat == null) {
+			return;
+		}
+		bat.snapTo(elder.getX(), elder.getEyeY() - 0.4, elder.getZ(), elder.getYRot(), 0.0F);
+		bat.setNoAi(true);
+		bat.setNoGravity(true);
+		bat.setResting(false);
+		bat.addTag(BAT_TAG);
+		bat.setCustomName(elder.getName());
+		bat.setCustomNameVisible(false);
+		level.addFreshEntity(bat);
+		release(elder);
+		elder.setInvisible(true);
+		elder.setNoGravity(true);
+		elder.noPhysics = true;
+		FLIGHTS.put(elder.getUUID(), new Flight(elder, bat, prey, to));
+		level.sendParticles(ParticleTypes.LARGE_SMOKE, elder.getX(), elder.getY(0.5), elder.getZ(), 24, 0.3, 0.6, 0.3, 0.03);
+		level.playSound(null, elder.blockPosition(), SoundEvents.BAT_TAKEOFF, SoundSource.HOSTILE, 1.0F, 0.6F);
+	}
+
+	/** A tick of flight: up over the roofs, across, and down on his prey (or wherever he was going); at dawn he lands. */
+	private static void fly(Flight f, boolean night) {
+		PathfinderMob elder = f.elder;
+		Bat bat = f.bat;
+		if (!elder.isAlive() || elder.isRemoved() || !bat.isAlive() || bat.isRemoved() || !night || ++f.ticks > BAT_MAX_TICKS
+			|| f.prey != null && !f.prey.isAlive()) {
+			land(f, true);
+			return;
+		}
+		if (f.prey != null) {
+			f.to = f.prey.position();
+		}
+		Vec3 at = bat.position();
+		Vec3 flat = new Vec3(f.to.x - at.x, 0.0, f.to.z - at.z);
+		double across = flat.length();
+		f.cruise = Math.max(f.cruise, f.to.y + BAT_CRUISE);
+		// (over the roofs while far off, dropping as he nears)
+		double wantY = across > 12.0 ? f.cruise : across > 4.0 ? f.to.y + 1.0 + (f.cruise - f.to.y - 1.0) * (across - 4.0) / 8.0 : f.to.y + 1.0;
+		Vec3 target = across > 1.0 ? new Vec3(f.to.x, wantY, f.to.z) : f.to.add(0.0, 1.0, 0.0);
+		Vec3 step = target.subtract(at);
+		if (step.length() < 1.2 && across < 1.5) {
+			land(f, true);
+			return;
+		}
+		step = step.normalize().scale(BAT_SPEED);
+		// (a little flutter)
+		step = step.add(0.0, Math.sin(f.ticks * 0.9) * 0.08, 0.0);
+		Vec3 next = at.add(step);
+		bat.setDeltaMovement(step);
+		bat.setPos(next.x, next.y, next.z);
+		bat.setYRot((float)(Math.toDegrees(Math.atan2(-step.x, step.z))));
+		bat.setYHeadRot(bat.getYRot());
+		elder.setPos(next.x, next.y - 0.5, next.z);
+		elder.setDeltaMovement(Vec3.ZERO);
+		elder.fallDistance = 0.0;
+		if (f.ticks % 4 == 0 && bat.level() instanceof ServerLevel level) {
+			level.sendParticles(new DustParticleOptions(EYES, 0.4F), next.x, next.y + 0.2, next.z, 1, 0.05, 0.05, 0.05, 0.0);
+		}
+	}
+
+	/** He takes his own shape again where the bat is (on the ground under it, if it's flying free). */
+	private static void land(Flight f, boolean cooldown) {
+		FLIGHTS.remove(f.elder.getUUID());
+		PathfinderMob elder = f.elder;
+		Vec3 at = f.bat.isRemoved() ? elder.position() : f.bat.position();
+		f.bat.discard();
+		if (!elder.isRemoved() && elder.level() instanceof ServerLevel level) {
+			Vec3 feet = f.prey != null && f.prey.isAlive() && f.prey.distanceToSqr(at) < 9.0 ? f.prey.position() : ground(level, at);
+			if (feet.y > at.y + 1.0) {
+				// (under a roof: wherever the bat is)
+				feet = at;
+			}
+			elder.teleportTo(feet.x, feet.y, feet.z);
+			human(elder);
+			level.sendParticles(ParticleTypes.LARGE_SMOKE, feet.x, feet.y + 1.0, feet.z, 24, 0.3, 0.6, 0.3, 0.03);
+			level.playSound(null, elder.blockPosition(), SoundEvents.BAT_TAKEOFF, SoundSource.HOSTILE, 1.0F, 0.5F);
+			if (cooldown) {
+				BAT_READY.put(elder.getUUID(), level.getGameTime() + BAT_COOLDOWN);
+			}
+		}
+	}
+
+	private static void human(PathfinderMob elder) {
+		elder.setInvisible(false);
+		elder.setNoGravity(false);
+		elder.noPhysics = false;
+		elder.fallDistance = 0.0;
+	}
+
+	/** In flight the Elder can't be hurt; a blow to his bat knocks him out of it, and he takes it twice over. */
+	private static boolean allowDamage(LivingEntity entity, DamageSource source, float amount) {
+		if (FLIGHTS.containsKey(entity.getUUID())) {
+			return source.is(DamageTypeTags.BYPASSES_INVULNERABILITY);
+		}
+		if (!entity.entityTags().contains(BAT_TAG)) {
+			return true;
+		}
+		for (Flight f : new ArrayList<>(FLIGHTS.values())) {
+			if (f.bat == entity) {
+				if (source.getEntity() != null && entity.level() instanceof ServerLevel level) {
+					land(f, true);
+					f.elder.hurtServer(level, source, amount * BAT_HURT_FACTOR);
+				}
+				return false;
+			}
+		}
+		return source.is(DamageTypeTags.BYPASSES_INVULNERABILITY);
 	}
 
 	// ---- turning -------------------------------------------------------------------------------------------------------

@@ -2536,4 +2536,9 @@ Plan and open questions: `docs/Vampires-Plan.md`. All in `Vampires` (tuning at t
   (`talk.jaymoskingdoms.vampire.cry.*`), and whoever it attacks fights back. Hurt by someone, it fights them with its
   claws; under 30% health it runs. At night it heals 0.5 a second when left alone. Fire hurts it twice over. By day it
   has Weakness and passes for the living. Villagers are driven by their brain's walk target, folk by their target.
+- **Bat form** (Andy): the Elder, his prey 12-48 blocks off, bursts into a bat (smoke, a no-AI vanilla bat tagged
+  `jaymoskingdoms_elder_bat`; he's hidden: invisible, no gravity, no physics, carried along under it), flies at 0.7
+  blocks a tick 5 blocks over the higher end, drops onto his prey and changes back beside them. Under 30% health he
+  flies 32 blocks away from whoever hurt him. In flight he can't be hurt; a blow to the bat lands him and he takes
+  twice it. 30 s between changes, 20 s at most a flight, and he lands at dawn. A flight cut by a restart ends on load.
 - Ops: `/kingdom vampire elder | turn <feeder|abstainer|hunter> | cure | where`.

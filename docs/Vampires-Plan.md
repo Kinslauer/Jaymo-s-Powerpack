@@ -9,6 +9,10 @@ each stage lands on the same draft PR, and Andy can merge after any stage.
   person he can reach (villagers, guards, lords, kings: he stops at nothing; never children), holds them and drinks
   until they're dead, then looks for the next one. He's tougher than any villager (40 health, heals as he feeds).
   If he's slain, another Elder may come, but not for 30 days.
+- **The Elder's bat form** (Andy): prey more than 12 blocks off (he looks up to 48), he bursts into a bat in a puff of
+  smoke, flies over the roofs and drops onto them; badly hurt, he flies off 32 blocks to hide. He can't be hurt while
+  he's a bat, but a blow to the bat knocks him out of it and he takes it twice over. 30 s between changes; he lands at
+  dawn.
 - **The bite spreads it.** Anyone bitten who lives through the night (they broke free, the guards drove him off, the
   vampire let go) turns at the next nightfall. Killed outright, they stay dead.
 - **What they become** is rolled when they turn:
@@ -49,4 +53,4 @@ each stage lands on the same draft PR, and Andy can merge after any stage.
 3. Does a werewolf's bite spread lycanthropy? [Yes, to survivors, less often than vampirism]
 4. Cures? [Vampirism: a golden apple and a night in a church/priest's care before you've fed; lycanthropy: killing
    the werewolf that bit you, or none for ritual werewolves]
-5. Can the Elder turn into a bat or mist? [Not in stage 1]
+5. ~~Can the Elder turn into a bat?~~ Andy: yes (built in stage 1).
