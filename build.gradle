@@ -148,7 +148,7 @@ def packResourcePacks = [
 // library Cristel Lib came back in 0.8.69 for Overhauled Overworld. Traveler's Backpack and Forge Config API Port left
 // in 0.8.14)
 def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-", "forge-config-api-port-"]
-// the same, by Fabric mod id, for mods whose CurseForge file names we don't know: Alex's Mobs and Citadel (0.8.106,
+// the same, by Fabric mod id, for mods whose CurseForge file names we don't know: Alex's Mobs and Citadel (0.8.107,
 // their models drew black slabs and streaks across the screen with Iris shaders)
 def removedIdsFromProfile = ["alexsmobs", "citadel"]
 // a jar's Fabric mod id (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's
