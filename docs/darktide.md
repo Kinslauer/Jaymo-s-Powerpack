@@ -60,7 +60,7 @@ Fate): `corrupted = Fate.isCorrupted || !cured || (night && !nightReturnPrevente
 
 A Darktide user who dies **at night** (a dimension with a day, so never the Nether or the End) rises as their own
 **shade** instead: back on 10 health (`REBIRTH_HEALTH`) with full Flow, effects and fire cleared, 3 s of Darkness on the
-screen, drawn dark like a risen shadow (`SHADE` attachment, synced; `Save.shade` persisted so logging out dodges
+screen, drawn dark like a risen shadow and shedding black dust and ash (`DUST`; `SHADE` attachment, synced; `Save.shade` persisted so logging out dodges
 nothing). Once a night: a shade that dies again before dawn dies for real. `/kill`, the void and anything else
 through invulnerability are always final, and a held Totem of Undying goes first.
 - The shade lasts until dawn on the overworld clock (`DarktideFlow.NIGHT_END`, 23500), with a whisper 30 s before.

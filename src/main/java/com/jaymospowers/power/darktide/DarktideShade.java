@@ -3,6 +3,7 @@ package com.jaymospowers.power.darktide;
 import com.jaymospowers.JaymosPowers;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -33,6 +34,9 @@ final class DarktideShade {
 	static final int REBIRTH_DARKNESS_TICKS = 60;
 	/** A shade is warned this long before dawn (ticks, 30 s). */
 	static final long DAWN_WARNING_TICKS = 600L;
+	/** The black dust a shade sheds as it moves: colour and size, and how many specks every {@link #DUST_EVERY} ticks. */
+	static final DustParticleOptions DUST = new DustParticleOptions(0x0B0B0F, 1.3F);
+	static final int DUST_EVERY = 2, DUST_COUNT = 3;
 	/** The dawn burning a shade away under open sky: {@code jaymospowers:darktide_dawn}, through everything. */
 	static final ResourceKey<DamageType> DAWN = ResourceKey.create(Registries.DAMAGE_TYPE, JaymosPowers.id("darktide_dawn"));
 
@@ -76,6 +80,7 @@ final class DarktideShade {
 		live.dawnWarned = false;
 		ServerLevel level = player.level();
 		level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.0, player.getZ(), 60, 0.4, 0.8, 0.4, 0.05);
+		level.sendParticles(DUST, player.getX(), player.getY() + 1.0, player.getZ(), 80, 0.5, 0.9, 0.5, 0.0);
 		level.sendParticles(ParticleTypes.SCULK_SOUL, player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.3, 0.6, 0.3, 0.02);
 		whisper(player, "shade_rises", SoundEvents.WARDEN_EMERGE, ChatFormatting.DARK_AQUA);
 	}
@@ -117,8 +122,12 @@ final class DarktideShade {
 				live.dawnWarned = true;
 				whisper(player, "shade_dawn_near", SoundEvents.CONDUIT_AMBIENT_SHORT, ChatFormatting.DARK_AQUA);
 			}
-			if (player.tickCount % 10 == 0) {
-				player.level().sendParticles(ParticleTypes.SMOKE, player.getX(), player.getY() + 1.0, player.getZ(), 2, 0.25, 0.5, 0.25, 0.0);
+			if (player.tickCount % DUST_EVERY == 0) {
+				// black dust off the whole body, drifting down; now and then a wisp of ash
+				player.level().sendParticles(DUST, player.getX(), player.getY() + 0.9, player.getZ(), DUST_COUNT, 0.3, 0.55, 0.3, 0.0);
+				if (player.tickCount % 10 == 0) {
+					player.level().sendParticles(ParticleTypes.ASH, player.getX(), player.getY() + 1.0, player.getZ(), 4, 0.35, 0.6, 0.35, 0.0);
+				}
 			}
 			return;
 		}
@@ -127,6 +136,7 @@ final class DarktideShade {
 		if (outdoors(player) && !player.isCreative()) {
 			ServerLevel level = player.level();
 			level.sendParticles(ParticleTypes.LARGE_SMOKE, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.4, 0.8, 0.4, 0.03);
+			level.sendParticles(DUST, player.getX(), player.getY() + 1.0, player.getZ(), 120, 0.6, 1.0, 0.6, 0.0);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 1.0F, 0.6F);
 			player.hurtServer(level, new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(DAWN)), Float.MAX_VALUE);
 		} else {
