@@ -48,6 +48,9 @@ public final class WebBodyPose {
 		return e * e * (3.0F - 2.0F * e);
 	}
 
+	/** The superhero landing eases down into its pose over this share of it (it used to snap down in a tenth). */
+	static final float HERO_IN = 0.3F;
+
 	/** Smoothstep of {@code x} clamped to 0-1. */
 	private static float ease(float x) {
 		x = Mth.clamp(x, 0.0F, 1.0F);
@@ -139,7 +142,7 @@ public final class WebBodyPose {
 			}
 			case WebPose.HERO_LAND -> {
 				// slammed down onto one knee and a fist, head bowed, then up
-				float low = hold(p, 0.1F, 0.72F);
+				float low = hold(p, HERO_IN, 0.72F);
 				float hips = middle * 0.85F;
 				poseStack.translate(0.0F, -0.55F * low, 0.0F);
 				poseStack.translate(0.0F, hips, 0.0F);
@@ -249,7 +252,7 @@ public final class WebBodyPose {
 				set(h.leftLeg, -1.6F * tuck, 0.0F, -0.05F, e);
 			}
 			case WebPose.HERO_LAND -> {
-				float low = hold(pose.p(), 0.1F, 0.72F);
+				float low = hold(pose.p(), HERO_IN, 0.72F);
 				// right knee down behind, left foot planted ahead
 				set(h.rightLeg, 1.35F, 0.0F, 0.1F, low);
 				set(h.leftLeg, -1.35F, 0.0F, -0.15F, low);

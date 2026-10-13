@@ -59,6 +59,8 @@ public final class WebWhip {
 	/** A block whipped tears out this many blocks around it (a small crater), none harder than {@code HARDEST}. */
 	static final int PIECES = 4;
 	static final float HARDEST = 3.0F;
+	/** A block takes this long to pry loose (ticks) before the chunk comes away on the web, the blocks cracking meanwhile. */
+	static final int PRY_TICKS = 30;
 	/** Ticks before you can whip again, once one ends. */
 	static final int COOLDOWN = 20;
 	/** How long one web holds its catch waiting for the other (ticks), and how much it slows a caught creature (share of its speed kept). */
@@ -133,6 +135,11 @@ public final class WebWhip {
 	private record Catch(int target, int hand, long since) {
 	}
 
+	/** One web on a block, prying a chunk loose ({@link #PRY_TICKS}). */
+	private record Pry(BlockHitResult hit, java.util.List<BlockPos> blocks, int hand, long since) {
+	}
+
+	private static final Map<UUID, Pry> PRIES = new HashMap<>();
 	private static final Map<UUID, Whip> WHIPS = new HashMap<>();
 	private static final Map<UUID, Catch> CATCHES = new HashMap<>();
 	private static final Map<UUID, Long> READY = new HashMap<>();
@@ -192,6 +199,9 @@ public final class WebWhip {
 		if (now < READY.getOrDefault(player.getUUID(), 0L)) {
 			return;
 		}
+		if (PRIES.containsKey(player.getUUID())) {
+			return;
+		}
 		Catch caught = CATCHES.get(player.getUUID());
 		if (caught != null) {
 			if (caught.hand() == hand) {
@@ -212,10 +222,13 @@ public final class WebWhip {
 		if (hit instanceof EntityHitResult entityHit) {
 			target = entityHit.getEntity();
 		} else if (hit instanceof BlockHitResult blockHit) {
-			BlockCluster chunk = BlockCluster.rip(level, blockHit, PIECES, HARDEST, player);
-			if (chunk != null) {
-				chunk.script(true, false);
-				target = chunk;
+			java.util.List<BlockPos> blocks = BlockCluster.crater(level, blockHit.getBlockPos(), PIECES, HARDEST, player);
+			if (!blocks.isEmpty()) {
+				// the web sticks and starts to pry; the chunk comes away after PRY_TICKS
+				PRIES.put(player.getUUID(), new Pry(blockHit, blocks, hand, now));
+				player.setAttached(WebPower.line(hand), new WebLine(WebLine.YANK, blockHit.getLocation(), -1));
+				level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 1.0F, 1.6F);
+				return;
 			}
 		}
 		if (target == null) {
@@ -263,6 +276,70 @@ public final class WebWhip {
 		ServerPlayNetworking.send(player, new WebNet.Nudge(Vec3.ZERO));
 	}
 
+	/** A web prying at a block: it cracks, and at {@link #PRY_TICKS} the chunk tears out and is caught. */
+	private static void tickPry(ServerPlayer player) {
+		Pry pry = PRIES.get(player.getUUID());
+		if (pry == null) {
+			return;
+		}
+		ServerLevel level = player.level();
+		WebLine line = player.getAttached(WebPower.line(pry.hand()));
+		long t = level.getGameTime() - pry.since();
+		if (!player.isAlive() || player.isSpectator() || line == null || line.entityId() != -1
+			|| pry.hit().getLocation().distanceToSqr(player.getEyePosition()) > Mth.square(RANGE * WebSymbiote.reachScale(player) * 2.0)) {
+			dropPry(player);
+			return;
+		}
+		if (t < PRY_TICKS) {
+			int stage = (int)Math.min(8L, t * 9L / PRY_TICKS);
+			for (int i = 0; i < pry.blocks().size(); i++) {
+				level.destroyBlockProgress(pryCrack(player, i), pry.blocks().get(i), stage);
+			}
+			if (t % 6 == 0) {
+				BlockPos at = pry.blocks().get((int)(t / 6 % pry.blocks().size()));
+				net.minecraft.world.level.block.state.BlockState state = level.getBlockState(at);
+				level.playSound(null, at, state.getSoundType().getHitSound(), SoundSource.BLOCKS, 0.9F, 0.6F);
+				Debris.puff(level, at, state, 0.3F);
+			}
+			return;
+		}
+		java.util.List<BlockPos> loose = new java.util.ArrayList<>();
+		for (BlockPos pos : pry.blocks()) {
+			if (BlockCluster.takeable(level, pos, HARDEST, player)) {
+				loose.add(pos);
+			}
+		}
+		dropPry(player);
+		BlockCluster chunk = BlockCluster.of(level, loose, pry.hit().getDirection().getUnitVec3().scale(0.9), player);
+		if (chunk == null) {
+			return;
+		}
+		chunk.script(true, false);
+		long now = level.getGameTime();
+		CATCHES.put(player.getUUID(), new Catch(chunk.getId(), pry.hand(), now));
+		player.setAttached(WebPower.line(pry.hand()), new WebLine(WebLine.YANK, chunk.getBoundingBox().getCenter(), chunk.getId()));
+		level.playSound(null, chunk.getX(), chunk.getY(), chunk.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.PLAYERS, 0.8F, 1.2F);
+	}
+
+	/** The pry's off: the cracks fade (and the web stays off the wall). */
+	private static void dropPry(ServerPlayer player) {
+		Pry pry = PRIES.remove(player.getUUID());
+		if (pry == null) {
+			return;
+		}
+		for (int i = 0; i < pry.blocks().size(); i++) {
+			player.level().destroyBlockProgress(pryCrack(player, i), pry.blocks().get(i), -1);
+		}
+		WebLine line = player.getAttached(WebPower.line(pry.hand()));
+		if (line != null && line.entityId() == -1) {
+			player.removeAttached(WebPower.line(pry.hand()));
+		}
+	}
+
+	private static int pryCrack(ServerPlayer player, int i) {
+		return player.getId() * 47 + 4400 + i;
+	}
+
 	/** One web on its catch: it holds it (a creature dragged nearly to a stop) until the other comes, or gives up. */
 	private static void tickCatch(ServerPlayer player) {
 		Catch caught = CATCHES.get(player.getUUID());
@@ -303,6 +380,7 @@ public final class WebWhip {
 
 	/** Every tick, per web slinger. */
 	static void tick(ServerPlayer player) {
+		tickPry(player);
 		tickCatch(player);
 		Whip whip = WHIPS.get(player.getUUID());
 		if (whip == null) {
@@ -500,6 +578,7 @@ public final class WebWhip {
 
 	/** Cut short: the line let go (a swing web went out instead, or the player left). */
 	static void cancel(ServerPlayer player) {
+		dropPry(player);
 		dropCatch(player);
 		Whip whip = WHIPS.get(player.getUUID());
 		if (whip != null) {

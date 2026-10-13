@@ -70,14 +70,14 @@ public final class WebInhabit {
 	}
 
 	/**
-	 * A mob it could take: a few farm animals (cow, chicken, sheep, pig) or a humanoid hostile (zombies of every kind,
-	 * skeletons, illagers, witches, piglins). Not one taken already, and not a risen player (that one is a behemoth's).
+	 * A mob it could take: villagers, a few farm animals (cow, chicken, sheep, pig) or a humanoid hostile (zombies of
+	 * every kind, skeletons, illagers, witches, piglins). Villagers and animals are always rejected in the end. Not one taken already, and not a risen player (that one is a behemoth's).
 	 */
 	static boolean takeable(Entity entity) {
 		if (!(entity instanceof Mob mob) || !mob.isAlive() || isHost(mob) || WebBehemoth.isHost(mob) || KitchenCompat.isZombiePlayer(mob)) {
 			return false;
 		}
-		return mob instanceof net.minecraft.world.entity.animal.cow.Cow || mob instanceof net.minecraft.world.entity.animal.chicken.Chicken
+		return mob instanceof net.minecraft.world.entity.npc.villager.AbstractVillager || mob instanceof net.minecraft.world.entity.animal.cow.Cow || mob instanceof net.minecraft.world.entity.animal.chicken.Chicken
 			|| mob instanceof net.minecraft.world.entity.animal.sheep.Sheep || mob instanceof net.minecraft.world.entity.animal.pig.Pig
 			|| mob instanceof net.minecraft.world.entity.monster.zombie.Zombie || mob instanceof net.minecraft.world.entity.monster.skeleton.AbstractSkeleton
 			|| mob instanceof net.minecraft.world.entity.monster.illager.AbstractIllager || mob instanceof net.minecraft.world.entity.monster.Witch

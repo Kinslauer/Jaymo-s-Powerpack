@@ -249,6 +249,7 @@ public final class WebPower implements Power {
 		WebCut.register();
 		WebTricks.register();
 		WebWhip.register();
+		WebSlam.register();
 		WebWallRun.register();
 		WebStrain.register();
 		WebTraps.register();
@@ -259,6 +260,7 @@ public final class WebPower implements Power {
 			WebTendrils.releaseAll(handler.player, false);
 			WebTendrils.forget(handler.player);
 			WebWhip.forget(handler.player);
+			WebSlam.forget(handler.player);
 		});
 		WebSymbiote.register();
 		WebSymbioteBlob.init();
@@ -447,6 +449,7 @@ public final class WebPower implements Power {
 		WebTendrils.tick(player);
 		WebImpacts.tick(player);
 		WebWhip.tick(player);
+		WebSlam.tick(player);
 		WebAscension.tick(player, state != null && swinging(state));
 		WebPose pose = player.getAttached(POSE);
 		if (pose != null && player.level().getGameTime() - pose.start() >= pose.ticks()) {

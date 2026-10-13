@@ -70,6 +70,28 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   a roar every `ROAR_EVERY` 300 ticks with prey near and at half and quarter health (10 damage, hurled, Resistance III
   while it roars), a frenzy under half health (lashes twice as often, x1.4, 18% snatch and hurl), and under a quarter
   the Shroud (5 s unseen, Regeneration III, Speed, a leap away) once a minute.
+- **Into the big body:** the bulk takes 3 s (`WebSuitGrowth.BULK_TICKS` 60): doubled over in pain, clutching the
+  middle, spasming, knees buckling, head hanging and jerking (`WebFeral.agony`), then up into a deeper feral idle
+  (`IDLE_BEND` 0.75, arms low and wide, knees bent, head twitching).
+- **Overhead slam (`WebSlam`, big body):** jump and keep holding Space in the air: over `RAISE_TICKS` 10 it rears up,
+  both fists over its head. Land still holding it (held at least `MIN_TICKS` 5) and it slams: `DAMAGE` 12 at the
+  centre (half at the edge, +0.8 per block fallen, up to +10) to everything within `RADIUS` 4.5, hurled out and up, a
+  shallow crater (`Debris.smash` at 1.5+, so dirt and sand go, stone mostly holds), a ring of debris, an explosion
+  burst and shaking screens within 16. Letting go in the air calls it off. `COOLDOWN` 20 ticks.
+- **Villagers too:** the loose blob also takes villagers (always rejected in the end, like the farm animals).
+- **Settles:** a blob with no host for 5 minutes (`WebSymbioteBlob.SETTLE_TICKS` 6000) sinks into the ground as a goo
+  block where it is.
+- **Quick dive:** Shift + Space while gliding on the wings tips you straight into the dive; slowing to `DIVE_AT` still
+  does it too.
+- **Web block catch:** the whip's first web on a block now pries for 1.5 s (`WebWhip.PRY_TICKS` 30), the blocks
+  cracking, before the chunk tears out and hangs there for the second web.
+- **Tendril debris pull** takes a flat 0.5 s (`TUG_MIN`/`TUG_MAX` 10) and can wreck spawners (monster and trial): aimed
+  at one, or in its crater, it's broken as if mined when the chunk tears out.
+- **Takeover wall ripping** tears a small crater each pull: the blocks in the way plus the breakable ones round them,
+  up to `WebTakeoverPath.RIP_CRATER` 9 within 1.8 of the middle, never below the gap's floor or the block under you
+  (`RIP_MAX_BLOCKS` 96 per takeover).
+- **Landings:** fast across the ground (`ROLL_SPEED` 0.55) is always a roll, however far the drop; slower, a 2.5+ block
+  drop eases down into the superhero landing (over `WebBodyPose.HERO_IN` 30% of a 28-tick pose).
 
 ## Controls
 
@@ -343,8 +365,8 @@ Tuning is at the top of `client/power/web/WebTrickClient`; the shapes are in `We
   (thrown upward favours the front flip). Never the same one twice running.
 - **On the web:** through the bottom of a fast arc (30%) a **twirl** round the line or a **giant swing** over the
   hand; when the next web catches mid-air (40%) a twirl.
-- **Landing** (after 8+ ticks in the air off a web or the wings): a 2.5+ block drop lands **three-point** (superhero
-  landing); fast across the ground, a **forward roll**; off the wings, the **flare and spin** into a crouch (a roll if
+- **Landing** (after 8+ ticks in the air off a web or the wings): fast across the ground, a **forward roll**; slower,
+  a 2.5+ block drop eases into a **three-point** superhero landing; off the wings, the **flare and spin** into a crouch (a roll if
   very fast). A landing cuts into a flip still going; dodges, ragdolls and takeovers are never interrupted.
 
 ## 0.2.0: Ascension & Corruption
@@ -643,8 +665,8 @@ the HUD.
 across, `CROSS_SWING` 5 whipping it through, `CROSS_FOLLOW` 8, then `CROSS_RECOVER` 18 before anything else. Damage
 6 + 1.5 per piece (max 16).
 
-**Debris pull (Sneak+R/G at a wall):** the tendril reaches in, then hesitates and struggles (`TUG_MIN` 20 to `TUG_MAX`
-60 ticks, longer for harder blocks), cracking the blocks, before it tears the chunk out and hauls it in. Letting go
+**Debris pull (Sneak+R/G at a wall):** the tendril reaches in, then hesitates and struggles (0.5 s, `TUG_MIN`/`TUG_MAX` 10
+since 0.9.8; spawners are wrecked), cracking the blocks, before it tears the chunk out and hauls it in. Letting go
 of the key first cancels it. The cord to the wall shows (`WebTendrils.TUG`).
 
 **Corpse thrash (`WebTendrilCombos.THRASH`):** click while a tendril holds a corpse (one or two). Each slam is a

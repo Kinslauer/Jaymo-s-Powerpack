@@ -45,7 +45,8 @@ public record WebPose(int kind, long start, int side) {
 			case FRONT_FLIP, CARTWHEEL, LAND_ROLL -> 14;
 			case CORKSCREW, GIANT -> 16;
 			case TWIRL -> 12;
-			case HERO_LAND, WINGS_LAND -> 20;
+			case HERO_LAND -> 28;
+			case WINGS_LAND -> 20;
 			case ROAR -> WebSymbiote.ROAR_TICKS;
 			default -> DODGE_TICKS;
 		};

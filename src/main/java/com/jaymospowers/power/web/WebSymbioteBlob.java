@@ -72,6 +72,8 @@ public class WebSymbioteBlob extends PathfinderMob {
 	/** Ticks left that fire can't hurt it (it came down in a meteor). */
 	private int fireGrace;
 
+	/** With no host this long (ticks; 5 minutes) it gives up and settles where it is as goo, a block, still and waiting. */
+	static final int SETTLE_TICKS = 6000;
 	/** Fresh out of a mob, it rests this long (ticks) before looking for another mob. */
 	static final int MOB_REST_TICKS = 100;
 	/** The mobs it has been in already: it won't take them again. */
@@ -123,6 +125,27 @@ public class WebSymbioteBlob extends PathfinderMob {
 		this.spurned.add(host.getUUID());
 		this.mobRest = MOB_REST_TICKS;
 		return this;
+	}
+
+	/** No host found: it sinks into a puddle of goo where it lies (Black Ooze), if there's room for one. */
+	private boolean settle(ServerLevel level) {
+		if (WebPower.GOO == null) {
+			return false;
+		}
+		BlockPos.MutableBlockPos pos = this.blockPosition().above().mutable();
+		for (int i = 0; i < 4; i++, pos.move(0, -1, 0)) {
+			BlockPos below = pos.below();
+			if (level.getBlockState(below).isFaceSturdy(level, below, net.minecraft.core.Direction.UP)
+				&& (level.getBlockState(pos).isAir() || level.getBlockState(pos).canBeReplaced()) && level.getFluidState(pos).isEmpty()) {
+				level.setBlock(pos, WebPower.GOO.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_ALL);
+				level.sendParticles(ParticleTypes.SQUID_INK, pos.getX() + 0.5, pos.getY() + 0.3, pos.getZ() + 0.5, 25, 0.3, 0.2, 0.3, 0.05);
+				level.playSound(null, pos, SoundEvents.SLIME_BLOCK_PLACE, SoundSource.BLOCKS, 1.0F, 0.5F);
+				level.playSound(null, pos, SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.BLOCKS, 0.8F, 0.5F);
+				this.discard();
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** A meteor has struck at {@code at}: maybe a symbiote crawls out of the rock. Returns whether one did. */
@@ -181,6 +204,9 @@ public class WebSymbioteBlob extends PathfinderMob {
 		}
 		if (this.mobRest > 0) {
 			this.mobRest--;
+		}
+		if (this.tickCount >= SETTLE_TICKS && this.quarry == null && this.onGround() && this.settle(level)) {
+			return;
 		}
 		if (this.fireGrace > 0) {
 			this.fireGrace--;

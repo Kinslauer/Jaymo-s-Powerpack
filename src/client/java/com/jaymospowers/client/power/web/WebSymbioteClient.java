@@ -69,6 +69,8 @@ public final class WebSymbioteClient {
 	/** Ticks into a meal (partial ticks included), for the maw. */
 	public static final RenderStateDataKey<Float> EATING = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_eating");
 	/** Which meal this is (when it started), so each bite's size is random but the same for everyone. */
+	/** The big body rearing up for a slam: how far (0-1), for the overhead stance. */
+	public static final RenderStateDataKey<Float> SLAM = RenderStateDataKey.create(() -> "jaymospowers:web_slam");
 	/** The suit's charged jump coiling: how far (0-1), for the crouch. */
 	public static final RenderStateDataKey<Float> CHARGE = RenderStateDataKey.create(() -> "jaymospowers:web_charge");
 	/** Smoothed per wearer: how far into the gallop (0 standing/walking, 1 all fours), and when each started coiling. */
@@ -372,6 +374,9 @@ public final class WebSymbioteClient {
 		if (entity instanceof Player player) {
 			WebSuitGrowth.extract(player, state, net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false));
 		}
+		Long slam = entity.getAttached(com.jaymospowers.power.web.WebSlam.STANCE);
+		state.setData(SLAM, slam == null ? null : Math.min(1.0F, (entity.level().getGameTime() - slam
+			+ net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false)) / com.jaymospowers.power.web.WebSlam.RAISE_TICKS));
 		// coiling for a charged leap: deeper the longer it's held (WebSwing.CHARGE_FULL)
 		if (entity.getAttached(com.jaymospowers.power.web.WebPower.CHARGING) != null) {
 			long now = System.nanoTime();
