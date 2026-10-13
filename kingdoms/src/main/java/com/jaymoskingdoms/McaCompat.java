@@ -133,6 +133,16 @@ public final class McaCompat {
 		return LOADED && entity instanceof Villager v && McaBridge.isMca(v);
 	}
 
+	/** (0.5.49) An MCA villager's mood, -15 (depressed, crying) to +15 (overjoyed); 0 for a plain one. */
+	static int mood(Villager villager) {
+		return LOADED ? McaBridge.mood(villager) : 0;
+	}
+
+	/** (0.5.49) An MCA villager running scared. */
+	static boolean panicking(Villager villager) {
+		return LOADED && McaBridge.panicking(villager);
+	}
+
 	/** (0.5.29) {@code villager} (if MCA's) warms to {@code player} by {@code hearts}: a quest done for them, a letter brought. */
 	static void hearts(LivingEntity villager, ServerPlayer player, int hearts) {
 		if (LOADED && villager instanceof Villager v) {

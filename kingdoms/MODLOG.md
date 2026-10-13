@@ -2028,17 +2028,26 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   looks wrong, and before 0.4.27 golems leave corpses alone).
 
 ## 0.5.49: pickpocketing
-- Andy asked for pickpocketing. `Pickpocket`: sneak behind a grown villager (MCA's included) or any of a settlement's
-  folk short of its ruler, empty handed, and use them (from behind: their gaze and the line to you over ~100° apart;
-  a sleeping mark from any side). It runs before `Quests`, so sneak-using a plain villager from the front still opens
-  its quests.
-- Loot: half a stack of something a villager carries (a farmer's wheat, bread, seeds), else a pocket's worth
-  (emeralds 1-3, gold or iron nuggets, bread, an apple, string, paper, flint) or nothing. A picked pocket is empty for
-  a day.
-- Caught: 25% awake, 10% asleep (they wake), 50% for a guard. The mark turns and cries thief; where a faction's law
-  holds that's `Theft.Crime.PICKPOCKET` (medium) seen: reputation -35 and its guards after you. Done clean, anyone
-  else who sees you is still a witness (the mark doesn't count); unseen, the theft may be noticed later like any other.
-  Outside any faction's law the mark only shouts.
+- Andy asked for pickpocketing, then for it to be held: "shift right clicking and holding, entering an animation where
+  you get close attaching your hand for a random duration up to 3s, and if you are able to match speed with the target
+  or otherwise manage to stay behind them for the duration the pickpocket is successful. it increases in duration
+  dependent on the light level, armor the target is wearing, and target's mood. crying villagers wont be as perceptive".
+- `Pickpocket`: sneak up within 2 blocks behind a grown villager (MCA's included) or any of a settlement's folk short
+  of its ruler (their body facing away: over ~100° from the line to you; a sleeping mark from any side), empty handed,
+  and hold use on them. It runs before `Quests`, so sneak-using a plain villager from the front still opens its quests.
+- The hand stays in for `holdTicks`: a random 1-3 s, times light (x0.6 pitch dark to x1.4 full light), armour (+3% a
+  point), an MCA villager's mood (-15..15, 2.5% a point: a depressed, crying one notices far less), x0.6 if they're
+  panicking, x1.25 for a guard, x0.5 asleep. Holding use repeats every 4 ticks; no repeat for 8 ticks and you've let
+  go (no crime). A progress bar shows on the action bar.
+- Stay behind them (follow them as they walk) and within 2.75 blocks till it's done: you lift half a stack of something
+  a villager carries, else a pocket's worth (emeralds 1-3, gold or iron nuggets, bread, an apple, string, paper,
+  flint) or nothing. A picked pocket is empty for a day. Fall out of reach and they slip away (no crime).
+- If they turn toward you (body more than ~84° round) while your hand's in, you're caught: they cry thief; where a
+  faction's law holds that's `Theft.Crime.PICKPOCKET` (medium) seen: reputation -35 and its guards after you. Done clean,
+  anyone else who sees you is still a witness (the mark doesn't count); unseen, it may be noticed later like any other
+  theft. Outside any faction's law the mark only shouts.
+- The reach is seen by everyone nearby: `Pickpocket.Reach` tells them, and the client's `PickpocketPose` puts the
+  player's main arm forward and down into the pocket, fingers working, the other hand drawn in.
 
 ## 0.5.50: the skill tree (Stealth)
 - Andy asked for stealth that improves the more you steal successfully, as a skill tree with three pillars:
@@ -2048,18 +2057,19 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   experience per pillar and ranks per perk. Levels 0-15; level l → l+1 takes 30 + 15·l XP (2025 XP to 15). Each level
   is one point to spend in that pillar. **K** opens the tree (`SkillScreen`); a perk button spends a point
   (`Skills.Spend`, checked on the server).
-- Stealth XP: a pocket picked clean +10 (+2 if it was empty; a guard's ×2, a sleeper's ×½; a pocket already picked
+- Stealth XP: a pocket picked clean (held to the end, never turned on) +10 (+2 if it was empty; a guard's ×2, a sleeper's ×½; a pocket already picked
   today gives nothing), a theft nobody saw (stores, chests, saddlebags) +4 at most every 30 seconds. The overlay after
   a pick shows the XP; a level up is announced in chat.
-- Practice: each Stealth level takes 3% off the chance a mark feels your hand (45% off at 15), before any perk.
+- Practice: each Stealth level makes the hold (`Pickpocket.holdTicks`) 3% shorter (45% at 15), before any perk.
 - Perks (15 points in all, so a master has everything):
-  - Light Fingers (5 ranks): 8% less likely to be felt per rank. Floor 2%.
+  - Light Fingers (5 ranks): the hold 8% shorter per rank (never under `Pickpocket.MIN_TICKS`).
   - Deep Pockets (3, needs Light Fingers): +15% of a carried stack per rank, and a reroll per rank on an empty pocket.
   - Soft Step (3, needs Light Fingers): sneaking witnesses see 10% of their range less per rank (50% → 20%).
-  - Quick Hands (1, level 5, needs Deep Pockets): pick pockets from the side (~70° round instead of ~100°).
-  - Slip Away (1, level 5, needs Soft Step): half the time you're felt, they can't tell whose hand it was: a cry, no
-    crime.
-  - Ghost (2 points, level 10, needs Quick Hands and Slip Away): guards are no harder than anyone else (25%, not 50%),
-    and a theft nobody saw is never noticed later.
-- Fully practised with everything: an awake mark 25% → 8%, a guard 50% → 8%, a sleeper 10% → 3%.
+  - Quick Hands (1, level 5, needs Deep Pockets): reach in from the side (~70° round instead of ~100°), and the mark
+    must turn further before they see you (~53° from facing you instead of ~84°).
+  - Slip Away (1, level 5, needs Soft Step): half the time a mark turns and catches you, they can't tell whose hand
+    it was: a cry, no crime.
+  - Ghost (2 points, level 10, needs Quick Hands and Slip Away): guards take no longer to rob than anyone else (no
+    ×1.25), and a theft nobody saw is never noticed later.
+- Fully practised with everything, the hold is about a third as long: 1-3 s becomes roughly 0.3-1 s.
 - Tuning constants are at the top of `Skills`. Not playtested in game.

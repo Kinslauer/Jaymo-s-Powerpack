@@ -29,12 +29,12 @@ XP: a pocket picked clean (+10; +2 empty; a guard's ×2, a sleeper's ×½), a th
             \                 /
               Ghost (lvl 10, 2 pts)
 ```
-- Light Fingers: 8% less likely to be felt per rank.
+- Light Fingers: the hold is 8% shorter per rank (practice: 3% shorter per level).
 - Deep Pockets: more of what a mark carries; another try at an empty pocket per rank.
 - Soft Step: sneaking, onlookers see you from less far away.
-- Quick Hands: pick pockets from the side.
-- Slip Away: half the time you're felt, they can't tell who: no crime.
-- Ghost: guards no harder than anyone; unseen thefts never noticed later.
+- Quick Hands: reach in from the side; marks must turn further to catch you.
+- Slip Away: half the time a mark turns on you, they can't tell who: no crime.
+- Ghost: guards take no longer to rob than anyone; unseen thefts never noticed later.
 
 ## Survival (later stage, proposal)
 XP: eating, surviving each night outdoors, foraging (berries, crops, fishing), enduring hunger, cold and heat,

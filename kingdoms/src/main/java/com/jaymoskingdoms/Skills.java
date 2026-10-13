@@ -34,8 +34,8 @@ import org.jspecify.annotations.Nullable;
  * any point is spent.
  *
  * <p>Stealth is the first pillar built. It grows with every pocket picked clean ({@link Pickpocket}) and every theft
- * nobody saw ({@link Theft}); each level makes marks less likely to feel your hand, and its perks make you lighter
- * fingered, sneakier and harder to pin. Survival and Strength are laid out in {@code docs/Skills-Plan.md} and come later.
+ * nobody saw ({@link Theft}); each level shortens how long your hand must stay in a pocket, and its perks make you
+ * lighter fingered, sneakier and harder to pin. Survival and Strength are laid out in {@code docs/Skills-Plan.md} and come later.
  */
 public final class Skills {
 	/** A level's experience: from level {@code l} to the next takes {@code XP_BASE + XP_STEP * l}; the highest level. */
@@ -46,16 +46,19 @@ public final class Skills {
 	static final float XP_GUARD = 2.0F, XP_ASLEEP = 0.5F;
 	/** Unseen thefts give experience at most this often (ticks), so a chest can't be farmed one item at a time. */
 	static final long THEFT_XP_TICKS = 600L;
-	/** Practice: each Stealth level takes this share off the chance a mark feels your hand. */
+	/** Practice: each Stealth level takes this share off how long your hand must stay in a pocket. */
 	static final float PRACTICE_PER_LEVEL = 0.03F;
-	/** Light Fingers: this share off the chance per rank. However good you get, a mark feels you at least this often. */
-	static final float LIGHT_FINGERS_PER_RANK = 0.08F, CATCH_FLOOR = 0.02F;
+	/** Light Fingers: this share off the hold per rank. */
+	static final float LIGHT_FINGERS_PER_RANK = 0.08F;
 	/** Deep Pockets: per rank, this much more of what a mark carries, and one more try at a pocket that turns up empty. */
 	static final float DEEP_POCKETS_SHARE = 0.15F;
 	/** Soft Step: per rank, sneaking witnesses see you this much less far (a share of their full sight). */
 	static final double SOFT_STEP_PER_RANK = 0.1;
-	/** Quick Hands: you can pick a pocket from the side (the cosine between their gaze and you, at most). */
-	static final double QUICK_HANDS_COS = 0.35;
+	/**
+	 * Quick Hands: you can reach in from the side (the cosine between the way they face and you, at most), and they must
+	 * turn further round before they catch you (the cosine, at most).
+	 */
+	static final double QUICK_HANDS_COS = 0.35, QUICK_HANDS_TURN_COS = 0.6;
 	/** Slip Away: the chance a mark who feels your hand can't tell it was you. */
 	static final float SLIP_AWAY_CHANCE = 0.5F;
 
@@ -290,14 +293,13 @@ public final class Skills {
 		grant(player, Pillar.STEALTH, XP_THEFT);
 	}
 
-	/** The chance a mark feels {@code player}'s hand, from {@code base}: less with practice and with Light Fingers. */
-	static float catchChance(Player player, float base) {
+	/** How long {@code player}'s hand must stay in a pocket, from {@code ticks}: shorter with practice and Light Fingers. */
+	static float holdTicks(Player player, float ticks) {
 		Progress p = of(player);
-		float chance = base * (1.0F - PRACTICE_PER_LEVEL * p.level(Pillar.STEALTH)) * (1.0F - LIGHT_FINGERS_PER_RANK * p.rank(Perk.LIGHT_FINGERS));
-		return Math.max(CATCH_FLOOR, chance);
+		return ticks * (1.0F - PRACTICE_PER_LEVEL * p.level(Pillar.STEALTH)) * (1.0F - LIGHT_FINGERS_PER_RANK * p.rank(Perk.LIGHT_FINGERS));
 	}
 
-	/** Ghost: a guard is no harder to rob than anyone else, and a theft nobody saw is never missed. */
+	/** Ghost: a guard takes no longer to rob than anyone else, and a theft nobody saw is never missed. */
 	static boolean ghost(Player player) {
 		return rank(player, Perk.GHOST) > 0;
 	}
@@ -317,12 +319,17 @@ public final class Skills {
 		return Math.max(0.1, base - SOFT_STEP_PER_RANK * rank(player, Perk.SOFT_STEP));
 	}
 
-	/** How far round the mark {@code player} may stand and still be behind them (Quick Hands: the side will do). */
+	/** How far round the mark {@code player} may stand and still reach in (Quick Hands: the side will do). */
 	static double behindCos(Player player, double base) {
 		return rank(player, Perk.QUICK_HANDS) > 0 ? Math.max(base, QUICK_HANDS_COS) : base;
 	}
 
-	/** Slip Away: the mark felt it, but can't tell who. */
+	/** How far the mark may turn toward {@code player}, hand in their pocket, before they catch them (Quick Hands: further). */
+	static double turnCos(Player player, double base) {
+		return rank(player, Perk.QUICK_HANDS) > 0 ? Math.max(base, QUICK_HANDS_TURN_COS) : base;
+	}
+
+	/** Slip Away: the mark caught a hand, but can't tell whose. */
 	static boolean slipsAway(Player player, RandomSource random) {
 		return rank(player, Perk.SLIP_AWAY) > 0 && random.nextFloat() < SLIP_AWAY_CHANCE;
 	}
