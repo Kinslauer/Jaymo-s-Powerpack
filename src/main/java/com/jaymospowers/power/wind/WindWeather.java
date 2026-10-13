@@ -1,6 +1,9 @@
 package com.jaymospowers.power.wind;
 
 import com.jaymospowers.core.Fate;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -67,7 +70,7 @@ public final class WindWeather {
 		}
 		// rain or snow actually falling here (a dry biome in a storm counts as clear)
 		if (level.precipitationAt(eye) != Biome.Precipitation.NONE) {
-			return level.isThundering() ? Kind.STORM : Kind.RAIN;
+			return level.isThundering() || kingdomsThunder(level, eye) ? Kind.STORM : Kind.RAIN;
 		}
 		return level.isBrightOutside() ? Kind.CLEAR_DAY : Kind.CLEAR_NIGHT;
 	}
@@ -75,6 +78,32 @@ public final class WindWeather {
 	/** What the factor is heading toward: the sky, or the storm itself for a corrupted power. */
 	public static Kind kind(Player player) {
 		return Fate.isCorrupted(player) ? Kind.STORMBOUND : sky(player);
+	}
+
+	/**
+	 * (0.9.26) Jaymo's Kingdoms' storm cells bring thunder to one patch of sky; under one, it's a storm. Looked up by
+	 * name, so it's simply never true without Kingdoms.
+	 */
+	private static final MethodHandle KINGDOMS_THUNDER = findKingdomsThunder();
+
+	private static MethodHandle findKingdomsThunder() {
+		try {
+			Class<?> storms = Class.forName("com.jaymoskingdoms.disasters.Storms");
+			return MethodHandles.publicLookup().findStatic(storms, "thunderAt", MethodType.methodType(boolean.class, Level.class, double.class, double.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			return null;
+		}
+	}
+
+	private static boolean kingdomsThunder(Level level, BlockPos pos) {
+		if (KINGDOMS_THUNDER == null) {
+			return false;
+		}
+		try {
+			return (boolean)KINGDOMS_THUNDER.invokeExact(level, pos.getX() + 0.5, pos.getZ() + 0.5);
+		} catch (Throwable t) {
+			return false;
+		}
 	}
 
 	/** True while a real thunderstorm is overhead (corruption builds only then). */

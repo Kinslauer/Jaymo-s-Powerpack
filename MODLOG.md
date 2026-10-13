@@ -777,7 +777,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (Kingdoms' and Naturalist's predators too) tear into bodies with a brutal worrying bite, the meat spills on the ground
   and they eat it from there. Players' kills are left for the player. See Kitchen's MODLOG.
 
-- **0.9.25, Darktide and Wind fixes, dismemberment (Kitchen 0.4.37):** a Darktide shade that dies (burned by the sun or killed again)
+- **0.9.27, Darktide and Wind fixes, dismemberment (Kitchen 0.4.37):** a Darktide shade that dies (burned by the sun or killed again)
   leaves no body; risen shadows never target their master or each other (`DarktideRisenTargetMixin`, brain targets
   cleared each tick), though their arrows and explosions still hurt you; up to 15 shadows stored. Riptide Dash has no
   cooldown when it lands, 5 s when it misses, and a flurry 1 minute. Every
@@ -857,3 +857,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   install before Camera Utils reads its config (`client/CameraPreset`, a preLaunch entrypoint); F6 is its other custom
   view and Right Alt + F6/F7 edits them. Its zoom is taken off Z, the Mode key (`KeyConflicts` v2; OK Zoomer still
   zooms). While one of its views is on, the Web/Gravity shoulder view stands aside.
+- **0.9.26, natural disasters, stage 1 (Kingdoms 0.6.12):** storm cells drift across the land (rain and lightning
+  only under them), and every few days a supercell puts down a tornado (or a monster) that lifts and flings everything
+  near it and tears up the land, whole trees included; dust devils in deserts. Storm bell, weathervane and barometer. Wind users ride a
+  tornado's winds and shove one off course with the Cyclone Lance (`kingdoms/MODLOG.md`).
