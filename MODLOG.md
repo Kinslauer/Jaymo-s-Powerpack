@@ -647,7 +647,12 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Tinkering can make it, the vanilla recipe goes. Its materials cover wood, stone, copper and iron, and its tools the
   pickaxe, axe (hand axe), shovel and hoe (the mattock digs and tills) and sword, so the vanilla wooden, stone, copper
   and iron pickaxe, axe, shovel, hoe and sword recipes are off (Fabric `fabric:false` load conditions over vanilla's
-  files, with their recipe-book advancements; written by `tools/tinkering_assets.py`). Golden and diamond tools (no
-  tinker gold or diamond heads), spears, armour, smelting and ingot/block crafting stay. Wood needs an axe (Kingdoms
+  files, with their recipe-book advancements; written by `tools/tinkering_assets.py`). Then Andy: golden and diamond
+  tools and armour go too (pickaxe, axe, shovel, hoe, sword, helmet, chestplate, leggings, boots), so netherite gear is
+  loot-only (its smithing needs diamond gear). Spears, iron/copper/leather armour, smelting and ingot/block crafting
+  stay. Sora's Dagger no longer comes from a gold block and a diamond block: the iron dagger is gilded on a casting
+  table under a block's worth (810 mB) of molten gold, and the gilded dagger gets diamonds set along its edge at a Tool
+  Station with a breeze rod and 2 diamonds (`ToolStationMenu.embed`, checked before the weapon recipes). New diamond
+  texture, a steel blade with a diamond edge (`tools/gen_soras_dagger_diamond.py`). Wood needs an axe (Kingdoms
   `Trees.needsAxe`): by hand a log is slow, drops nothing and won't chop, and a hint says to knap a hand axe (3 flint
   and a stick). Leaves broken by hand drop a stick 12% of the time, so the first stick doesn't depend on luck alone.
