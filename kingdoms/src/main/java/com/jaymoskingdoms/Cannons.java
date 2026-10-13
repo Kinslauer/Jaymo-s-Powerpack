@@ -14,7 +14,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 
 /**
- * (0.5.61) The richest kingdoms ({@link Muskets#ARM_TREASURY} emeralds or more) set {@link #FEWEST} to {@link #MOST}
+ * (0.5.63) The richest kingdoms ({@link Muskets#ARM_TREASURY} emeralds or more) set {@link #FEWEST} to {@link #MOST}
  * {@link Cannon}s about their seat: on the archers' posts on the walls and towers first, then beside the gate (or, with
  * no keep, round the seat), each facing out. An archer at the post mans it; a cannon by the gate with no archer near
  * gets a gunner of its own, hired as any archer is. A kingdom that falls below {@link Muskets#KEEP_TREASURY} sells

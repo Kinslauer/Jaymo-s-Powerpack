@@ -81,7 +81,7 @@ final class Javelins {
 		return (role == Folk.GUARD || role == Folk.BARBARIAN || role == Folk.CHIEF || role == Orcs.GRUNT) && !Muskets.armed(folk);
 	}
 
-	/** (0.5.61) A shot of one of the folk's (a musket ball, a cannonball): its damage is known as theirs, and spares their side. */
+	/** (0.5.63) A shot of one of the folk's (a musket ball, a cannonball): its damage is known as theirs, and spares their side. */
 	static void mark(Projectile shot) {
 		THROWN.add(shot);
 	}

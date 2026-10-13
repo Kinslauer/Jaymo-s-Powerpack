@@ -21,7 +21,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.61) The richest kingdoms ({@link #ARM_TREASURY} emeralds or more) arm about one guard in {@link #SHARE} with a
+ * (0.5.63) The richest kingdoms ({@link #ARM_TREASURY} emeralds or more) arm about one guard in {@link #SHARE} with a
  * musket: Balkon's WeaponMod musket with an iron bayonet when it's loaded (a crossbow without it). A musketeer fires at a
  * foe in sight from {@link #NEAREST} to {@link #FURTHEST} blocks, then reloads slowly, closing in with the bayonet
  * meanwhile; he throws no javelins. The shot spares his own side as a javelin does ({@link Javelins#harms}). Should the
