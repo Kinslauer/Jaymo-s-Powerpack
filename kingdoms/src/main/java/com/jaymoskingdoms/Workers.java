@@ -109,7 +109,7 @@ public final class Workers {
 		if (w.role() == Sorcery.WIZARD && w instanceof Enlisted e) {
 			// (0.5.53) a court wizard lives as a villager until a foe comes near
 			if (Hermits.is(e)) {
-				// (0.5.60) a floating island's hermit: their fall caught, visitors greeted
+				// (0.5.62) a floating island's hermit: their fall caught, visitors greeted
 				Hermits.step(level, e);
 			}
 			return !mob.isSleeping() && !McaCompat.busy(mob) && CourtWizards.step(level, e);

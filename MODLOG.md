@@ -661,7 +661,12 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Horizons, both start; Distant Horizons with Chunky alone hangs every time (both hook the server's chunk loading).
   The whole pack without Chunky started a new world (Done in 40 s). Chunky had no task queued, so nothing is lost;
   Build Modpack moves it out of the CurseForge profile. Existing worlds were never affected (their spawn is generated).
-- **0.8.119, hermit wizards on floating islands (Kingdoms 0.5.60):** the villager living on Moog's floating island is
+- **0.8.119, assassins (Kingdoms 0.5.61):** now and then someone pays for a ruler's death, or a player's. Villagers
+  whisper of it for a day or two first (warn the ruler and he parries the blow). Then a stranger walks into town, throws
+  off his cloak and stabs the king with a poisoned blade: cure him with milk, honey or a golden apple, or cut the
+  assassin down for his purse and the sealed contract naming who paid. Rogues, players a realm hates and famous ones
+  can be marked too, at night. `/kingdom assassin [realm]` sends one at once (ops).
+- **0.8.120, hermit wizards on floating islands (Kingdoms 0.5.62):** the villager living on Moog's floating island is
   now a hermit wizard with a reason to be there: a stranded scholar, a mage hiding from the courts, the warden whose
   spell keeps the island up, or an exiled court wizard. They tell you when you first come near each day, give you a
   spell scroll for the climb, talk more about it when you chat with them, and can reset your skill tree like a court

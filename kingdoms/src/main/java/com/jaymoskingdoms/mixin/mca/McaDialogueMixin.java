@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * (0.5.44) Chatting with a newcomer or an immigrant: now and then they talk about where their family is from
  * ({@link SkinTones#ORIGIN}) instead of MCA's own small talk. Said the way MCA says a line with no follow-up question.
- * (0.5.60) A floating island's hermit ({@link Hermits}) mostly talks of why they live up there.
+ * (0.5.62) A floating island's hermit ({@link Hermits}) mostly talks of why they live up there.
  */
 @Mixin(Dialogues.class)
 abstract class McaDialogueMixin {
@@ -23,7 +23,7 @@ abstract class McaDialogueMixin {
 			return;
 		}
 		if (Hermits.is(villager) && villager.getRandom().nextFloat() < Hermits.CHAT_CHANCE) {
-			// (0.5.60) a floating island's hermit talks of why they're up there
+			// (0.5.62) a floating island's hermit talks of why they're up there
 			villager.sendChatMessage(player, "dialogue.chat.jaymoskingdoms.hermit_" + Hermits.story(villager));
 			villager.getInteractions().stopInteracting();
 			ci.cancel();

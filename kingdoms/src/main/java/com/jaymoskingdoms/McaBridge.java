@@ -156,7 +156,7 @@ final class McaBridge {
 		}
 		Enlisted e = worker(villager);
 		if (Hermits.is(e)) {
-			// (0.5.60) a floating island's hermit keeps their robe and their island, whatever MCA's menu says
+			// (0.5.62) a floating island's hermit keeps their robe and their island, whatever MCA's menu says
 			if (villager.getProfession() != Professions.WIZARD) {
 				villager.setProfession(Professions.WIZARD);
 			}
@@ -291,7 +291,7 @@ final class McaBridge {
 		return w;
 	}
 
-	/** (0.5.60) {@code villager}, found on a floating island, made its hermit wizard ({@link Hermits}): no kingdom's. */
+	/** (0.5.62) {@code villager}, found on a floating island, made its hermit wizard ({@link Hermits}): no kingdom's. */
 	private static void hermit(ServerLevel level, VillagerEntityMCA villager, Enlisted e) {
 		if (villager.getProfession() != Professions.WIZARD) {
 			villager.setProfession(Professions.WIZARD);

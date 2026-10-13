@@ -440,7 +440,7 @@ public final class Approaches {
 			return false;
 		}
 		if (mob instanceof PathfinderMob pm && McaCompat.busy(pm) || Hermits.is(mob)) {
-			// (0.5.60: a floating island's hermit greets visitors their own way)
+			// (0.5.62: a floating island's hermit greets visitors their own way)
 			return false;
 		}
 		if (mob instanceof Folk folk) {

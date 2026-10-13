@@ -24,7 +24,7 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.60) The villager living on a floating island (Moog's Voyager Structures' large floating island puts one there)
+ * (0.5.62) The villager living on a floating island (Moog's Voyager Structures' large floating island puts one there)
  * is a hermit wizard, not a stray: they wear the wizard's robe, hat and staff ({@link CourtWizards}' look), cast as a
  * court wizard does when something comes for them, and have a reason to be up there ({@link #STORY}): a scholar
  * stranded by their own spell, a mage who left the courts for quiet, the warden whose spell keeps the island aloft, or

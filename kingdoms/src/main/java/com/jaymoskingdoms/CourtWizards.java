@@ -240,7 +240,7 @@ public final class CourtWizards {
 
 	private static boolean sameSide(Enlisted w, int faction) {
 		if (Hermits.is(w)) {
-			// (0.5.60) a hermit has no realm
+			// (0.5.62) a hermit has no realm
 			return false;
 		}
 		if (faction == w.factionId()) {
@@ -264,7 +264,7 @@ public final class CourtWizards {
 			return true;
 		}
 		if (e instanceof ServerPlayer player) {
-			// (0.5.60) a hermit minds only who strikes them
+			// (0.5.62) a hermit minds only who strikes them
 			return !Hermits.is(w) && Reputation.get(player, w.factionId()) <= Reputation.HOSTILE;
 		}
 		if (e instanceof Folk folk) {
