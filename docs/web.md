@@ -41,7 +41,7 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   every slam throws block dust, smoke and a heavy mace thud, and shakes you, the one slammed and anyone within 12.
   Bosses can't be whipped; Living Armor's tendrils keep their own Sneak grab. `COOLDOWN` 20 ticks after one ends.
 
-## Andy's symbiote and whip changes (0.9.4)
+## Andy's symbiote and whip changes (0.9.8)
 - **Rigid tendrils:** Wall Crawl's walking tendrils are jointed limbs (two straight sections, a knee out from the
   surface, fixed length `WebTendrilWalk.LIMB` 32 px), Doc Ock style. Walking, running or climbing, every other tendril
   stops swaying and holds its curl in two joints (`WebTendrilLayer.JOINTS`, fully stiff at walk speed `RIGID_SPEED`).

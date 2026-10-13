@@ -4,7 +4,8 @@ Written 2026-10-10 at the end of a long local session, so a cloud session can ca
 
 ## What's in this repository
 - **The root: Jaymo's Powers** (`jaymospowers`, Fabric, Minecraft 26.3), now **v0.7.1**. Powers: Gravity, Wind Control,
-  Web Slinger (with the symbiote), Pocket Arsenal, Chronokinesis. Each power owns `power/<name>` (+ client),
+  Web Slinger (with the symbiote), Pocket Arsenal, Chronokinesis, Resonance, Darktide, Xenoform (the Xeno-Band
+  from falling stars; `docs/xenoform.md`). Each power owns `power/<name>` (+ client),
   `lang/parts/<name>.json` and its mixin configs. Core shared code is in `core/`, `api/`.
   - `docs/Abilities.md`: the table of every ability (the user edits the "Change to" column; "Line" = the row's own line
     number in the file). `docs/Plan-0.7.md`: the 0.7 plan and the user's answers (all built).

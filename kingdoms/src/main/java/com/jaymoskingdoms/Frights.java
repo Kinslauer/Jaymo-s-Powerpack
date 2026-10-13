@@ -13,6 +13,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
@@ -70,7 +72,7 @@ final class Frights {
 				continue;
 			}
 			for (Villager v : level.getEntitiesOfClass(Villager.class, new AABB(f.seat()).inflate(WATCHED), Villager::isAlive)) {
-				Mob monster = monster(level, v);
+				LivingEntity monster = monster(level, v, f);
 				Fright fright = FRIGHTS.get(v.getUUID());
 				if (monster != null) {
 					if (fright == null || fright.until() - now < HIDE_TICKS / 2) {
@@ -84,11 +86,15 @@ final class Frights {
 		}
 	}
 
-	/** The nearest monster it can see, close enough to frighten it; null if none. */
-	private static @Nullable Mob monster(ServerLevel level, Villager v) {
-		Mob best = null;
+	/**
+	 * The nearest monster it can see, close enough to frighten it; null if none. (0.6.4) A player changed into one of
+	 * the Xeno-Band's aliens counts, unless {@code f}'s people saw them change ({@link Aliens}).
+	 */
+	private static @Nullable LivingEntity monster(ServerLevel level, Villager v, Faction f) {
+		LivingEntity best = null;
 		double bestD = FRIGHT * FRIGHT;
-		for (Mob m : level.getEntitiesOfClass(Mob.class, v.getBoundingBox().inflate(FRIGHT), m -> m.isAlive() && frightful(m))) {
+		for (LivingEntity m : level.getEntitiesOfClass(LivingEntity.class, v.getBoundingBox().inflate(FRIGHT),
+			m -> m.isAlive() && (m instanceof Mob mob && frightful(mob) || m instanceof ServerPlayer p && Aliens.feared(p, f.id())))) {
 			double d = m.distanceToSqr(v);
 			if (d < bestD && v.hasLineOfSight(m)) {
 				bestD = d;
@@ -106,7 +112,7 @@ final class Frights {
 	}
 
 	/** It takes fright: where it'll run (home if that's near and not toward the monster, else away), and with which child. */
-	private static Fright frighten(ServerLevel level, Villager v, Mob monster, long now) {
+	private static Fright frighten(ServerLevel level, Villager v, LivingEntity monster, long now) {
 		BlockPos to = away(level, v, monster);
 		Optional<GlobalPos> home = v.getBrain().getMemoryInternal(MemoryModuleType.HOME);
 		if (home == null) {
@@ -142,7 +148,7 @@ final class Frights {
 	}
 
 	/** A spot on the ground {@link #RUN} blocks from {@code monster}, the way {@code v} already is from it. */
-	private static BlockPos away(ServerLevel level, Villager v, Mob monster) {
+	private static BlockPos away(ServerLevel level, Villager v, LivingEntity monster) {
 		Vec3 off = v.position().subtract(monster.position()).multiply(1.0, 0.0, 1.0);
 		if (off.lengthSqr() < 1.0E-3) {
 			off = new Vec3(1.0, 0.0, 0.0);
