@@ -635,3 +635,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   mended with silver ingots, and a Tinkering tool with a silver head counts as silver against werewolves. The bat
   horse and nightmare are now exceedingly rare: about once in 50 hours a player spends where one can turn up, and
   never while another wild one is about.
+- **0.8.114, hide armour pieces:** every player gets a small eye button beside each armour slot in the inventory (right
+  of the slot in survival, under it on the creative inventory tab). Click it to hide that piece: it stays worn and still
+  protects, it just isn't drawn, for anyone (the choice is synced to every client, saved, and kept through death). It
+  covers vanilla armour, Kingdoms' armoury sets (their layer reads the same render state), carved pumpkins and mob
+  heads; an elytra still spreads when the chest is hidden. Hidden pieces come off the render state last
+  (`HiddenArmorAvatarRendererMixin`, after the symbiote's engulfing), in `core/HiddenArmor` + `client/HiddenArmorClient`.
