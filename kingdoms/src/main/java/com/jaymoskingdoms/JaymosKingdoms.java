@@ -88,6 +88,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.12: javelins for guards; rulers' tempers
 		Javelins.register();
 		Tempers.register();
+		Retinue.register();
 		Frights.register();
 		// 0.5.21: monsters hunt the settlements' folk as they do villagers
 		Prey.register();
