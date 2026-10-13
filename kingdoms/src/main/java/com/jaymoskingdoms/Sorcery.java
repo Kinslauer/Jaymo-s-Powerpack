@@ -53,7 +53,8 @@ import org.jspecify.annotations.Nullable;
  * as zombie villagers, horses as zombie horses, men as zombies. His thralls crumble when he falls.</li>
  * <li>A kingdom's <b>court wizard</b> ({@link #WIZARD}; a wealthy kingdom keeps two): arcane bolts (twice as hard on the
  * undead), a ward on the guards fighting near him, mending, a blast that throws back anyone too close, and he banishes
- * enemy thralls to dust. A tyrant king keeps a <b>court necromancer</b> instead.</li>
+ * enemy thralls to dust. A tyrant king keeps a <b>court necromancer</b> instead. (0.5.53) With Minecraft Comes Alive the
+ * court wizard is one of the kingdom's own elders, taking the office in old age ({@link CourtWizards}).</li>
  * </ul>
  * Casters keep their distance and cast; a player who kills one takes a spell scroll from the body ({@link Arcana}).
  */
@@ -248,8 +249,14 @@ public final class Sorcery {
 		}
 	}
 
-	/** A caster taken on: a court's in its hall, a camp's by its fire. */
-	static @Nullable Folk spawn(ServerLevel level, Faction faction, int role) {
+	/**
+	 * A caster taken on: a court's in its hall, a camp's by its fire. (0.5.53) With MCA a kingdom's wizard is one of its
+	 * elders instead, or nobody yet if it has none to spare.
+	 */
+	static @Nullable Worker spawn(ServerLevel level, Faction faction, int role) {
+		if (CourtWizards.inPlace(faction, role)) {
+			return CourtWizards.enlist(level, faction, null);
+		}
 		Folk folk = KingdomEvents.spawn(level, faction, role);
 		Castle.Keep keep = Factions.keep(level.getServer(), faction.id());
 		if (folk != null && keep != null && faction.type().isRealm()) {
@@ -268,6 +275,16 @@ public final class Sorcery {
 		if (f == null) {
 			source.sendFailure(Component.translatable("message.jaymoskingdoms.caster_none"));
 			return 0;
+		}
+		if (CourtWizards.inPlace(f, role)) {
+			// (0.5.53) with MCA: the grown villager nearest you is made its court wizard, old or not
+			Worker w = CourtWizards.summon(level, f, player);
+			if (w == null) {
+				source.sendFailure(Component.translatable("message.jaymoskingdoms.wizard_none"));
+				return 0;
+			}
+			source.sendSuccess(() -> Component.translatable("message.jaymoskingdoms.caster_summoned", w.mob().getDisplayName(), f.name()), true);
+			return 1;
 		}
 		Folk folk = KingdomEvents.spawn(level, f, role);
 		if (folk == null) {
@@ -308,12 +325,14 @@ public final class Sorcery {
 				}
 			}
 			case WIZARD -> {
-				if (timers[T_WARD] <= 0 && (target != null || !fightingAllies(level, folk).isEmpty())) {
-					ward(level, folk);
+				List<Folk> fighting = fightingAllies(level, folk);
+				if (timers[T_WARD] <= 0 && (target != null || !fighting.isEmpty())) {
+					fighting.add(folk);
+					ward(level, folk, timers, fighting);
 				} else if (timers[T_MEND] <= 0) {
 					mend(level, folk);
 				} else if (timers[T_BANISH] <= 0) {
-					banish(level, folk);
+					banish(level, folk, timers);
 				}
 			}
 			default -> {
@@ -350,9 +369,9 @@ public final class Sorcery {
 			}
 			case WIZARD -> {
 				if (d <= CLOSE && timers[T_REPULSE] <= 0) {
-					repulse(level, folk);
+					repulse(level, folk, timers, e -> foe(folk, e));
 				} else if (Thralls.isThrall(target) && timers[T_BANISH] <= 0) {
-					banish(level, folk);
+					banish(level, folk, timers);
 				} else {
 					arcaneBolt(level, folk, target);
 				}
@@ -386,7 +405,7 @@ public final class Sorcery {
 	}
 
 	/** A line of {@code particle} from the caster's hand to {@code to}. */
-	private static void beam(ServerLevel level, LivingEntity from, Vec3 to, ParticleOptions particle) {
+	static void beam(ServerLevel level, LivingEntity from, Vec3 to, ParticleOptions particle) {
 		Vec3 start = from.getEyePosition().add(0.0, -0.3, 0.0);
 		Vec3 step = to.subtract(start);
 		int n = Math.max(2, (int)(step.length() * 3.0));
@@ -563,16 +582,21 @@ public final class Sorcery {
 
 	/** Mending: the worst hurt of his side near him (himself too) is healed. */
 	private static void mend(ServerLevel level, Folk folk) {
-		Folk worst = level.getEntitiesOfClass(Folk.class, folk.getBoundingBox().inflate(SUPPORT_RANGE),
-				f -> f.isAlive() && (f == folk || folk.sameSide(f)) && f.getHealth() < f.getMaxHealth() * MEND_BELOW).stream()
-			.min(Comparator.comparingDouble(f -> f.getHealth() / f.getMaxHealth())).orElse(null);
+		mend(level, folk, folk.spellTimers(), level.getEntitiesOfClass(Folk.class, folk.getBoundingBox().inflate(SUPPORT_RANGE),
+			f -> f == folk || folk.sameSide(f)));
+	}
+
+	/** Mending: the worst hurt of {@code side} (the caster's own, near him) is healed. */
+	static void mend(ServerLevel level, LivingEntity caster, int[] timers, List<? extends LivingEntity> side) {
+		LivingEntity worst = side.stream().filter(e -> e.isAlive() && e.getHealth() < e.getMaxHealth() * MEND_BELOW)
+			.min(Comparator.comparingDouble(e -> e.getHealth() / e.getMaxHealth())).orElse(null);
 		if (worst == null) {
 			return;
 		}
-		folk.spellTimers()[T_MEND] = MEND_COOLDOWN;
+		timers[T_MEND] = MEND_COOLDOWN;
 		worst.heal(MEND_HEAL);
-		if (worst != folk) {
-			beam(level, folk, worst.getBoundingBox().getCenter(), ParticleTypes.HAPPY_VILLAGER);
+		if (worst != caster) {
+			beam(level, caster, worst.getBoundingBox().getCenter(), ParticleTypes.HAPPY_VILLAGER);
 		}
 		level.sendParticles(ParticleTypes.HEART, worst.getX(), worst.getY() + 2.0, worst.getZ(), 3, 0.3, 0.2, 0.3, 0.0);
 		level.playSound(null, worst.getX(), worst.getY(), worst.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.NEUTRAL, 1.5F, 1.2F);
@@ -581,7 +605,7 @@ public final class Sorcery {
 	// the wizard's
 
 	/** Arcane bolt: a blue lance of light; twice as hard on the undead. */
-	private static void arcaneBolt(ServerLevel level, Folk folk, LivingEntity target) {
+	static void arcaneBolt(ServerLevel level, LivingEntity folk, LivingEntity target) {
 		beam(level, folk, target.getBoundingBox().getCenter(), new DustParticleOptions(BOLT_COLOUR, 1.2F));
 		float damage = target.getType().builtInRegistryHolder().is(EntityTypeTags.UNDEAD) ? BOLT_DAMAGE * 2.0F : BOLT_DAMAGE;
 		target.hurtServer(level, magic(level, folk), damage);
@@ -589,22 +613,20 @@ public final class Sorcery {
 		level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.NEUTRAL, 0.9F, 1.3F);
 	}
 
-	/** Ward: a shimmer over the guards fighting near him (and himself): absorption hearts. */
-	private static void ward(ServerLevel level, Folk folk) {
-		folk.spellTimers()[T_WARD] = WARD_COOLDOWN;
-		List<Folk> allies = fightingAllies(level, folk);
-		allies.add(folk);
-		for (Folk ally : allies) {
+	/** Ward: a shimmer over {@code allies}, the guards fighting near him (and himself): absorption hearts. */
+	static void ward(ServerLevel level, LivingEntity folk, int[] timers, List<? extends LivingEntity> allies) {
+		timers[T_WARD] = WARD_COOLDOWN;
+		for (LivingEntity ally : allies) {
 			ally.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, WARD_TICKS, WARD_LEVEL), folk);
 			level.sendParticles(ParticleTypes.END_ROD, ally.getX(), ally.getY() + 1.0, ally.getZ(), 10, 0.4, 0.6, 0.4, 0.02);
 		}
 		level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.NEUTRAL, 1.0F, 1.4F);
 	}
 
-	/** Repulse: a ring of force throws everything of the other side away from him, slowed. */
-	private static void repulse(ServerLevel level, Folk folk) {
-		folk.spellTimers()[T_REPULSE] = REPULSE_COOLDOWN;
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, folk.getBoundingBox().inflate(CLOSE), e -> foe(folk, e))) {
+	/** Repulse: a ring of force throws everything of the other side ({@code foe}) away from him, slowed. */
+	static void repulse(ServerLevel level, LivingEntity folk, int[] timers, java.util.function.Predicate<LivingEntity> foe) {
+		timers[T_REPULSE] = REPULSE_COOLDOWN;
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, folk.getBoundingBox().inflate(CLOSE), foe)) {
 			e.knockback(REPULSE_POWER, folk.getX() - e.getX(), folk.getZ() - e.getZ(), magic(level, folk), 0.0F);
 			e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 1), folk);
 		}
@@ -614,13 +636,13 @@ public final class Sorcery {
 	}
 
 	/** Banish: the enemy thralls near him fall back to dust. */
-	private static void banish(ServerLevel level, Folk folk) {
+	static void banish(ServerLevel level, Mob folk, int[] timers) {
 		List<Mob> thralls = level.getEntitiesOfClass(Mob.class, folk.getBoundingBox().inflate(BANISH_RANGE),
 			m -> m.isAlive() && Thralls.isThrall(m) && !Thralls.refuses(folk, m) && folk.getSensing().hasLineOfSight(m));
 		if (thralls.isEmpty()) {
 			return;
 		}
-		folk.spellTimers()[T_BANISH] = BANISH_COOLDOWN;
+		timers[T_BANISH] = BANISH_COOLDOWN;
 		thralls.sort(Comparator.comparingDouble(folk::distanceToSqr));
 		for (Mob thrall : thralls.subList(0, Math.min(BANISH_COUNT, thralls.size()))) {
 			beam(level, folk, thrall.getBoundingBox().getCenter(), ParticleTypes.END_ROD);

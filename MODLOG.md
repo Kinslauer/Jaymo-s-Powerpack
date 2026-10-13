@@ -571,3 +571,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   carry it out back, chop it up and walk back with the cuts, 1x to 3x what you'd get yourself. How good a butcher is
   stays hidden until townsfolk gossip about them (their own village's, or far-off masters and botchers), or, if
   you're experienced with butchering (a Survival perk), you judge it from the cuts they hand you.
+- **0.8.102, Court wizards are MCA villagers:** ships Jaymo's Kingdoms 0.5.53 (see `kingdoms/MODLOG.md`): a kingdom's
+  court wizard is now one of its own elders, an MCA villager who has been grown for 8 days or more, who keeps their
+  name, family and hearts and puts on the cleric's robe, the wizard's hat and staff. They live as villagers until a foe
+  comes near, then fight and ward as the court wizard always has, and mend hurt townsfolk when idle.

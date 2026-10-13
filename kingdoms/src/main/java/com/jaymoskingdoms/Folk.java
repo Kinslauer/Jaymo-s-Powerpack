@@ -500,6 +500,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			// (0.5.21) with MCA, a realm's workers are its villagers: this one is one now
 			return;
 		}
+		if (this.tickCount % 20 == 0 && this.role() == Sorcery.WIZARD && CourtWizards.retire(level, this)) {
+			// (0.5.53) with MCA, a kingdom's court wizard is one of its elders: this one steps down
+			return;
+		}
 		if (!Rickshaws.onDuty(this) && Homes.tick(level, this)) {
 			// (0.5.5) bedtime: its work waits till morning
 		} else if (!this.shying) {
