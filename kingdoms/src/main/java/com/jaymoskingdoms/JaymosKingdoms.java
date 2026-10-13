@@ -141,6 +141,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("thrall attachment: {}", Thralls.TAG);
 		Thralls.register();
 		Sorcery.register();
+		// Naturalist's predators as rare wilderness encounters (0.5.55)
+		Encounters.register();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();
 			Gatherers.clear();

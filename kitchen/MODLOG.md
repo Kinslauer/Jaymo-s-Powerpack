@@ -696,3 +696,9 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
   you're within 20 blocks, or right-click them to collect. The job (cuts worked out at the deal) is saved on the
   villager (`jaymoskitchen:butcher_job`); if they die mid-job the cuts drop where they fall.
 - Tuning: the constants at the top of `Butchers`.
+
+## 0.4.33: Naturalist's animals
+- Tags take Naturalist's mobs (optional entries): its big animals (bears, rhinos, hippos, elephants, mammoths,
+  giraffes, alligators, lions, tigers, komodo dragons, zebras, deer, sharks, whales) are `big_carcasses`; its insects
+  and lizard tails leave no corpse; its snakes, fish, sea creatures, snails and insects are `no_legs`. Its fish are
+  vanilla fish underneath, so they loot in one click already.

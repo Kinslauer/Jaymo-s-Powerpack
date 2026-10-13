@@ -29,6 +29,24 @@
     "minecraft:endermite",
     { "id": "minecraft:nautilus", "required": false },
     { "id": "minecraft:zombie_nautilus", "required": false },
-    { "id": "minecraft:sulfur_cube", "required": false }
+    { "id": "minecraft:sulfur_cube", "required": false },
+    { "id": "naturalist:snake", "required": false },
+    { "id": "naturalist:whale", "required": false },
+    { "id": "naturalist:great_white_shark", "required": false },
+    { "id": "naturalist:ray", "required": false },
+    { "id": "naturalist:jellyfish", "required": false },
+    { "id": "naturalist:starfish", "required": false },
+    { "id": "naturalist:clam", "required": false },
+    { "id": "naturalist:anglerfish", "required": false },
+    { "id": "naturalist:bass", "required": false },
+    { "id": "naturalist:catfish", "required": false },
+    { "id": "naturalist:piranha", "required": false },
+    { "id": "naturalist:blobfish", "required": false },
+    { "id": "naturalist:snail", "required": false },
+    { "id": "naturalist:caterpillar", "required": false },
+    { "id": "naturalist:butterfly", "required": false },
+    { "id": "naturalist:dragonfly", "required": false },
+    { "id": "naturalist:firefly", "required": false },
+    { "id": "naturalist:lizard_tail", "required": false }
   ]
 }

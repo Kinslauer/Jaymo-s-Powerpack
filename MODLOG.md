@@ -591,3 +591,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   the end it goes white. After 24-36 days grown they die peacefully in their sleep, leaving a corpse; with MCA their
   family mourns at the grave. A king or lord who dies of old age is succeeded by an heir the next day, a court wizard
   by the next eldest, and MCA's couples have children to fill the empty beds.
+- **0.8.107, Naturalist and wilderness encounters:** adds Naturalist 2.0.6 (Starfish Studios' own 26.3 Fabric build;
+  code MIT, art all rights reserved, shipped unchanged by id) and ships Jaymo's Kingdoms 0.5.55 and Jaymo's Kitchen
+  0.4.33. Naturalist's wildlife roams as it means to, but its predators (bears, lions, tigers, alligators, komodo
+  dragons, rhinos, scorpions) never spawn on their own: now and then one finds a player out in the wild, well away from
+  any settlement, as a random encounter fitting the biome (see `kingdoms/MODLOG.md`). Its elephants and mammoths stay
+  out too, since Kingdoms has its own. Kitchen corpses cover the new animals.

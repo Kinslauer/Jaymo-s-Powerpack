@@ -12,6 +12,12 @@
     {
       "id": "minecraft:sulfur_cube",
       "required": false
-    }
+    },
+    { "id": "naturalist:butterfly", "required": false },
+    { "id": "naturalist:caterpillar", "required": false },
+    { "id": "naturalist:firefly", "required": false },
+    { "id": "naturalist:dragonfly", "required": false },
+    { "id": "naturalist:ant", "required": false },
+    { "id": "naturalist:lizard_tail", "required": false }
   ]
 }

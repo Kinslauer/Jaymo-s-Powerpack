@@ -2169,3 +2169,18 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   the beds the dead leave; children grow up and are stamped as come-of-age then. One raised from their grave with
   MCA's staff comes back an elder with a full stretch ahead.
 - Not playtested in game.
+
+## 0.5.55: wilderness encounters (Naturalist)
+- `Encounters` (tuning at its top; only with Naturalist loaded, everything by id): Naturalist's bear, lion, tiger,
+  alligator, komodo dragon, rhino and desert/jungle scorpions are taken out of natural spawning (a Fabric biome
+  modification in the REMOVALS phase), and its elephant and mammoth too (Kingdoms has its own). `WILDLIFE = false`
+  would take every Naturalist mob out and leave only the encounters.
+- Every 20 s each player in the Overworld who is out of creative/spectator, on the surface (within 6 blocks of the
+  ground's top) and 256+ blocks from every settlement's seat and off every settlement's land has a 1 in 45 chance
+  (about once per 15 minutes in the wild) of an encounter, then at least 20 minutes' quiet (also after joining).
+- What comes is picked by weight from the beasts whose Naturalist biome tag (`naturalist:has_<mob>`) fits the spot:
+  a bear, a pride of 2-3 lions, a tiger, 1-2 alligators or komodo dragons, a rhino, 2-3 scorpions, 2-4 boars, a
+  rattlesnake or coral snake. They appear 20-32 blocks off on dry ground (never in a settlement's reach), grown, and
+  go for that player (neutral ones angered at them) for 2 minutes, with a vague line on the action bar ("Tawny shapes
+  are slinking through the grass..."). After that they're ordinary animals, and vanish if no player is within 96.
+- Not playtested in game.

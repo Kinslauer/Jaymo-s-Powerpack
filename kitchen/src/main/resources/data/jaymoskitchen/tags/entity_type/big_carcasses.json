@@ -1,6 +1,21 @@
 {
 	"values": [
 		"minecraft:cow",
-		"minecraft:mooshroom"
+		"minecraft:mooshroom",
+		{"id": "naturalist:bear", "required": false},
+		{"id": "naturalist:black_bear", "required": false},
+		{"id": "naturalist:rhino", "required": false},
+		{"id": "naturalist:hippo", "required": false},
+		{"id": "naturalist:elephant", "required": false},
+		{"id": "naturalist:mammoth", "required": false},
+		{"id": "naturalist:giraffe", "required": false},
+		{"id": "naturalist:alligator", "required": false},
+		{"id": "naturalist:lion", "required": false},
+		{"id": "naturalist:tiger", "required": false},
+		{"id": "naturalist:komodo_dragon", "required": false},
+		{"id": "naturalist:zebra", "required": false},
+		{"id": "naturalist:deer", "required": false},
+		{"id": "naturalist:great_white_shark", "required": false},
+		{"id": "naturalist:whale", "required": false}
 	]
 }
