@@ -610,6 +610,27 @@ public class CorpseEntity extends Entity {
 		if (isTumbling() && !level().isClientSide() && landInCart()) {
 			return;
 		}
+		// falling into a block (wedged in a wall, landed half inside the ground): it's eased out the nearest open way, as
+		// a dropped item is, and a fall that stops getting anywhere ends where it is instead of tumbling on forever
+		if (isTumbling() && !isNoGravity()) {
+			boolean inBlock = !level().noCollision(this, getBoundingBox().deflate(1.0E-7));
+			this.noPhysics = inBlock;
+			if (inBlock) {
+				moveTowardsClosestSpace(getX(), (getBoundingBox().minY + getBoundingBox().maxY) / 2.0, getZ());
+			}
+			if (!level().isClientSide()) {
+				stuckTicks = position().distanceToSqr(xo, yo, zo) < STUCK_MOVE * STUCK_MOVE ? stuckTicks + 1 : 0;
+				if (stuckTicks >= STUCK_TICKS) {
+					stuckTicks = 0;
+					this.noPhysics = false;
+					setDeltaMovement(Vec3.ZERO);
+					this.entityData.set(TUMBLING, false);
+				}
+			}
+		} else {
+			this.noPhysics = false;
+			stuckTicks = 0;
+		}
 		// fall and settle; corpses don't slide around. A body already lying on something solid skips the collision
 		// work (most corpses, most of the time); the moment the block under it goes, it falls again at once
 		if (isNoGravity()) {
@@ -886,9 +907,19 @@ public class CorpseEntity extends Entity {
 		if (hand != InteractionHand.MAIN_HAND) {
 			return InteractionResult.PASS;
 		}
-		if (grabCooldown > 0 || isTumbling()) {
+		if (grabCooldown > 0) {
 			// just let go of (thrown, dropped, tipped out): not caught again in the same click
 			return InteractionResult.PASS;
+		}
+		if (isTumbling() || falling()) {
+			// (0.4.36) caught as it falls: an empty hand takes it into your arms (an iron golem is too heavy to catch)
+			if (!player.getItemInHand(hand).isEmpty() || isHeavy()) {
+				return InteractionResult.PASS;
+			}
+			if (!(level() instanceof ServerLevel level)) {
+				return InteractionResult.SUCCESS;
+			}
+			return carry(level, player);
 		}
 		if (!(level() instanceof ServerLevel level)) {
 			return InteractionResult.SUCCESS;
@@ -1487,6 +1518,26 @@ public class CorpseEntity extends Entity {
 		if (level() instanceof ServerLevel level) {
 			play(level, SoundEvents.ARMOR_EQUIP_LEATHER.value(), 0.6F);
 		}
+	}
+
+	/**
+	 * (0.4.36) A body in the air is easy to catch: the crosshair takes it from up to this far off it (blocks), as if it
+	 * were pulled toward your grab.
+	 */
+	private static final float CATCH_RADIUS = 2.0F;
+	/** (0.4.36) A tumbling body that moves less than this a tick for this many ticks is stuck: it stops where it is. */
+	private static final double STUCK_MOVE = 0.01;
+	private static final int STUCK_TICKS = 40;
+	private int stuckTicks;
+
+	@Override
+	public float getPickRadius() {
+		return falling() ? CATCH_RADIUS : super.getPickRadius();
+	}
+
+	/** In the air on its own: dropped, thrown, or falling off something (not held, not in a cart, not lying down). */
+	public boolean falling() {
+		return !onGround() && carrier() == null && !isPassenger() && !isNoGravity();
 	}
 
 	/** Ticks after being let go before it can be grabbed again. */

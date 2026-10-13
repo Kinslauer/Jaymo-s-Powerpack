@@ -84,6 +84,12 @@ public final class WebPower implements Power {
 	public static final double TETHER_MAX_PULL = 0.9;
 	public static final double TETHER_BREAK = 4.5;
 	/**
+	 * A swing web stuck to a creature (see {@link WebAnchors#entityTarget}) lets go past this many times its reach, and
+	 * only drags creatures up to this big (width × height, blocks²: a horse is about 2.2, an iron golem 3.8).
+	 */
+	static final double ENTITY_WEB_BREAK = 1.5;
+	static final double ENTITY_WEB_MAX_SIZE = 3.0;
+	/**
 	 * A <i>player</i> on the Yank line can fight it: they're pulled more gently than a mob ({@code PLAYER_TETHER_*}),
 	 * so they can lean away against it, and holding it stretched past {@code TETHER_LENGTH + PLAYER_STRAIN_OVER} for
 	 * {@code PLAYER_STRAIN_TICKS} snaps it. Attacking (a swing) breaks it outright, as before.
@@ -162,6 +168,9 @@ public final class WebPower implements Power {
 	private static final class State {
 		/** Which hands have a swing web stuck ({@link WebNet#MAIN}, {@link WebNet#OFF}). */
 		final boolean[] swinging = new boolean[2];
+		/** The creature, player or corpse each hand's swing web is stuck to (-1: a block), and the line's length then. */
+		final int[] swingEntity = {-1, -1};
+		final double[] swingLength = new double[2];
 		/** Ticks left of a zip / yank-to pull the client is doing. */
 		int pullTicks;
 		/** No fall damage until landing. */
@@ -512,7 +521,9 @@ public final class WebPower implements Power {
 				continue;
 			}
 			boolean broken = false;
-			if (player.tickCount % 10 == 0) {
+			if (state.swingEntity[hand] >= 0) {
+				broken = !tickEntityWeb(player, state, hand);
+			} else if (player.tickCount % 10 == 0) {
 				// the block it was stuck to is gone
 				WebLine line = player.getAttached(line(hand));
 				broken = line == null || !WebAnchors.nearSolid(player.level(), line.anchor());
@@ -561,10 +572,23 @@ public final class WebPower implements Power {
 			return;
 		}
 		Vec3 anchor = payload.anchor();
-		if (!WebAnchors.valid(player, anchor, WebAnchors.SWING_RANGE * WebSymbiote.reachScale(player) + 4.0) || hand == WebNet.OFF && !offHandFree(player)) {
+		Entity stuckTo = null;
+		if (payload.entityId() >= 0) {
+			// stuck to a creature, a player or a corpse: it must be one, in reach and in sight
+			stuckTo = player.level().getEntity(payload.entityId());
+			if (!WebAnchors.webbable(player, stuckTo)
+				|| stuckTo.distanceTo(player) > WebAnchors.ENTITY_RANGE * WebSymbiote.reachScale(player) + 4.0 || !player.hasLineOfSight(stuckTo)
+				|| hand == WebNet.OFF && !offHandFree(player)) {
+				ServerPlayNetworking.send(player, new WebNet.SwingReject(hand));
+				return;
+			}
+			anchor = stuckTo.getBoundingBox().getCenter();
+		} else if (!WebAnchors.valid(player, anchor, WebAnchors.SWING_RANGE * WebSymbiote.reachScale(player) + 4.0) || hand == WebNet.OFF && !offHandFree(player)) {
 			ServerPlayNetworking.send(player, new WebNet.SwingReject(hand));
 			return;
 		}
+		state.swingEntity[hand] = stuckTo == null ? -1 : stuckTo.getId();
+		state.swingLength[hand] = stuckTo == null ? 0.0 : Math.max(2.0, stuckTo.distanceTo(player));
 		// a swing web going out lets go of a whip
 		WebWhip.cancel(player);
 		state.swinging[hand] = true;
@@ -574,8 +598,11 @@ public final class WebPower implements Power {
 		if (hand == WebNet.MAIN) {
 			state.lineTicks = 0;
 		}
-		player.setAttached(line(hand), new WebLine(WebLine.SWING, anchor, -1));
+		player.setAttached(line(hand), new WebLine(WebLine.SWING, anchor, stuckTo == null ? -1 : stuckTo.getId()));
 		ServerLevel level = player.level();
+		if (stuckTo != null) {
+			level.playSound(null, stuckTo.getX(), stuckTo.getY(), stuckTo.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.PLAYERS, 0.8F, 1.2F);
+		}
 		// the swinger hears their own thwip client-side; this is for everyone else
 		level.playSound(player, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 0.8F, 1.8F);
 		level.sendParticles(ParticleTypes.ITEM_COBWEB, anchor.x, anchor.y, anchor.z, 5, 0.15, 0.15, 0.15, 0.01);
@@ -658,7 +685,34 @@ public final class WebPower implements Power {
 		}
 	}
 
+	/**
+	 * A swing web stuck to a creature, a player or a corpse holds both ends: you swing from it, and if you pull it
+	 * taut past the length it had when it stuck, it's dragged after you (gently for a player, not at all for anything
+	 * too big or heavy to move). False when it's gone, dead or out of reach: the web lets go.
+	 */
+	private static boolean tickEntityWeb(ServerPlayer player, State state, int hand) {
+		Entity target = player.level().getEntity(state.swingEntity[hand]);
+		if (!WebAnchors.webbable(player, target)
+			|| target.distanceTo(player) > WebAnchors.ENTITY_RANGE * WebSymbiote.reachScale(player) * ENTITY_WEB_BREAK) {
+			return false;
+		}
+		double over = target.distanceTo(player) - state.swingLength[hand];
+		boolean movable = !KitchenCompat.isHeavy(target) && target.getBbWidth() * target.getBbHeight() <= ENTITY_WEB_MAX_SIZE
+			&& !(target instanceof Player other && (other.isCreative() || other.isSpectator()));
+		if (over > 0.0 && movable) {
+			boolean isPlayer = target instanceof ServerPlayer;
+			Vec3 pull = player.getBoundingBox().getCenter().subtract(target.getBoundingBox().getCenter()).normalize()
+				.scale(Math.min(over * (isPlayer ? PLAYER_TETHER_SPRING : TETHER_SPRING), isPlayer ? PLAYER_TETHER_MAX_PULL : TETHER_MAX_PULL));
+			target.setDeltaMovement(target.getDeltaMovement().add(pull));
+			target.resetFallDistance();
+			target.needsSync = true;
+			target.syncVelocity = true;
+		}
+		return true;
+	}
+
 	private static void dropSwing(ServerPlayer player, State state, int hand) {
+		state.swingEntity[hand] = -1;
 		state.swinging[hand] = false;
 		state.graceTicks = 0;
 		if (hand == WebNet.OFF || state.lineTicks == 0) {

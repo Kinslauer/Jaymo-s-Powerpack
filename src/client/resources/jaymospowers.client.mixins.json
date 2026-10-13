@@ -6,6 +6,7 @@
 		"CarryArmInvoker",
 		"CarryAvatarRendererMixin",
 		"CrawlAvatarRendererMixin",
+		"CrawlModelFeatureRendererMixin",
 		"CarryCameraMixin",
 		"CarryFirstPersonMixin",
 		"CarryLivingEntityRendererMixin",

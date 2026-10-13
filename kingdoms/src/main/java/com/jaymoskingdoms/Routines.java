@@ -68,15 +68,15 @@ final class Routines {
 	/** Children playing chase: a tag is this close; the runner darts this far. */
 	static final double CHASE_REACH = 1.4;
 	static final int DART = 6;
-	/** (0.6.10) Hide and seek: the seeker counts this long (ticks), hiders go this far; found this close. */
+	/** (0.6.9) Hide and seek: the seeker counts this long (ticks), hiders go this far; found this close. */
 	static final int SEEK_COUNT = 100, HIDE_FAR = 14;
 	static final double FOUND = 2.0;
-	/** (0.6.10) Housework is sought this near their bed; a stranger is eyed from this far; animals and strangers are sought this far from the seat. */
+	/** (0.6.9) Housework is sought this near their bed; a stranger is eyed from this far; animals and strangers are sought this far from the seat. */
 	static final int CHORE_REACH = 6;
 	static final double WATCH_FROM = 5.0, OTHERS_RANGE = 48.0;
-	/** (0.6.10) Lunchtime, by the time of day. */
+	/** (0.6.9) Lunchtime, by the time of day. */
 	static final long LUNCH_FROM = 5000L, LUNCH_TO = 7000L;
-	/** (0.6.10) A stranger is anyone with less reputation than this with the realm. */
+	/** (0.6.9) A stranger is anyone with less reputation than this with the realm. */
 	static final int STRANGER_REP = 50;
 	/** Lines each routine has (lang {@code routine.jaymoskingdoms.<kind>.N}). */
 	static final int LINES = 4;
@@ -85,11 +85,11 @@ final class Routines {
 
 	enum Kind {
 		WATER, GARDEN, MARKET, CHAT, STROLL, FIRE, HOME, PLAY,
-		/** (0.6.10) housework by their bed (barrel, chest, oven, table, cauldron, loom), reading at a lectern, sweeping the doorstep, lunch. */
+		/** (0.6.9) housework by their bed (barrel, chest, oven, table, cauldron, loom), reading at a lectern, sweeping the doorstep, lunch. */
 		CHORES, READ, SWEEP, LUNCH,
-		/** (0.6.10) calling on a tradesperson at their work, seeing to the animals, eyeing a stranger, dancing round the fire. */
+		/** (0.6.9) calling on a tradesperson at their work, seeing to the animals, eyeing a stranger, dancing round the fire. */
 		SHOP, ANIMALS, WATCH, DANCE,
-		/** (0.6.10) children: hide and seek, skipping stones, tagging along after a grown-up. */
+		/** (0.6.9) children: hide and seek, skipping stones, tagging along after a grown-up. */
 		HIDE, STONES, TAGALONG;
 
 		String key() {
@@ -106,7 +106,7 @@ final class Routines {
 		@Nullable Villager with;
 		/** Chasing (not running), playing chase. */
 		boolean chaser;
-		/** (0.6.10) Whom (or what) they're about, not sharing it: a tradesperson, an animal, a stranger, a grown-up to tag along after. */
+		/** (0.6.9) Whom (or what) they're about, not sharing it: a tradesperson, an animal, a stranger, a grown-up to tag along after. */
 		@Nullable Entity other;
 		final long started;
 		long arrived = -1L;
@@ -525,7 +525,7 @@ final class Routines {
 		Speech.say(level, v, Component.translatable("routine.jaymoskingdoms." + kind.key() + "." + random.nextInt(LINES)), Speech.WHITE, SPEECH_RANGE);
 	}
 
-	// ---- (0.6.10) more to do ------------------------------------------------------------------------------------------
+	// ---- (0.6.9) more to do ------------------------------------------------------------------------------------------
 
 	/** What a child gets up to: chase or hide and seek with another, skipping stones, or tagging along after a grown-up. */
 	private static void kid(ServerLevel level, Landmarks marks, Villager v, List<Villager> folk, long t, long now, int linger) {

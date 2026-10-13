@@ -18,7 +18,7 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * The Sword of Damocles, seen by everyone: the great rift in the sky (flat, facing down, the void's starfield) and the
- * giant sword pushing out of it, falling, and standing in the ground. The sword is a netherite sword's item model blown
+ * giant sword pushing out of it, falling, standing in the ground, and hauled back up into it. The sword is a netherite sword's item model blown
  * up to {@link ArsenalDamocles#LENGTH} blocks, point down.
  */
 final class ArsenalDamoclesRenderer {
@@ -62,14 +62,11 @@ final class ArsenalDamoclesRenderer {
 				double r = ArsenalDamocles.PORTAL_RADIUS * open;
 				RiftPortals.disc(context.submitNodeCollector(), context.poseStack(), portal.subtract(camera), RIGHT, FORWARD, DOWN, r, r, t * 0.05, true);
 			}
-			float out = ArsenalDamocles.emerged(t);
-			float fade = ArsenalDamocles.fade(fall, t);
-			if (out > 0.0F && fade > 0.0F) {
-				double length = ArsenalDamocles.LENGTH * out * fade;
+			double length = ArsenalDamocles.shownLength(fall, t);
+			if (length > 0.01) {
+				// the hilt end stays at the rift while it pushes out or is hauled back in
 				double tip = ArsenalDamocles.tipY(fall, t);
-				// fading, it shrinks to its middle; until then the middle is half its length above the point
-				double middle = fade < 1.0F ? tip + ArsenalDamocles.LENGTH * 0.5 : tip + length * 0.5;
-				sword(context, minecraft, new Vec3(fall.x(), middle, fall.z()).subtract(camera), fall.angle(), length, player.getId());
+				sword(context, minecraft, new Vec3(fall.x(), tip + length * 0.5, fall.z()).subtract(camera), fall.angle(), length, player.getId());
 			}
 		}
 	}
