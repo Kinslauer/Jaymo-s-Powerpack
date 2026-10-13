@@ -702,8 +702,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   and a stick). Leaves broken by hand drop a stick 12% of the time, so the first stick doesn't depend on luck alone.
 
 - **0.9.0, player classes (Kingdoms 0.6.0):** the first time you join you pick a class, for keeps: Thief, Warlord,
-  Mage, Archer, Survivalist, Brute, Marksman, Sorcerer or Rider, each starting with its kit and good with its own gear (found by item tags, so Armory,
-  Balkon's and Tinkering weapons all count) and paying its own price in hearts or speed. A Writ of Rebirth (rare loot,
-  or a court wizard's once a week) lets you choose again. Heavy armour now weighs a little on everyone. Stage 1 of
-  three: the Mage's casting staff and the Sorcerer's elemental blade come next, then the Marksman's guns. Plan:
-  `docs/Classes-Plan.md`.
+  Mage, Archer, Survivalist, Brute, Marksman, Sorcerer or Rider, each good with its own gear (found by item tags, so
+  Armory, Balkon's and Tinkering weapons all count) and paying its own price in hearts or speed. No class starts with
+  gear: a Mage learns the wizard's staff recipe from a court wizard or finds one. A Writ of Rebirth (rare loot, or a
+  court wizard's once a week) lets you choose again. Heavy armour now weighs a little on everyone. The Mage casts
+  through the staff, the Sorcerer imbues a blade (J), the Marksman's guns bite harder and reload quicker. Plan:
+  `docs/Classes-Plan.md`. The Armory's cleavers are redrawn short and its quarterstaffs long, the stick running the
+  whole sprite (`tools/gen_cleaver_staff.py`, run after `armory_assets.py`).
