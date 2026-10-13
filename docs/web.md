@@ -10,6 +10,9 @@ Speed has to be built. A swing chain starts capped at 0.55 b/t (was 0.8) and the
 0.011 regardless), while you're on a web moving at 85% of it or more: about half a minute of unbroken, well-driven
 swinging to the 2.6 top speed. A clean release (quality over 0.6) adds up to 0.08 to the cap. Jump thrust on the web
 is halved (0.035) and the forward pump too (0.015). Landing still starts the chain over. Tuning: top of `WebSwing`.
+- **Jump on a web:** holding it (still reels in) braces you: no fall damage while you hold it on a web (server reads
+  the client's input). Letting it go (after 3+ ticks) lets go of the webs and springs you up by 0.2 + 0.45 × your
+  speed, at most 1.4 b/t: the faster the swing, the higher the jump. Web keys must be pressed again after.
 
 ## Controls
 

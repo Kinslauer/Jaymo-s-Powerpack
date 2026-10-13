@@ -43,6 +43,14 @@ public final class WebSwing {
 	/** Holding Jump on a web also thrusts you along the swing this much per tick (on top of reeling in): it rockets
 	 * you round the arc, and a release flings you out of it with the extra speed. */
 	static final double JUMP_THRUST = 0.035;
+	/**
+	 * Let go of Jump on a web (held at least {@code JUMP_OFF_MIN_HOLD} ticks) and you let go of the webs and spring up:
+	 * {@code JUMP_OFF_BASE} plus {@code JUMP_OFF_PER_SPEED} per block/tick you were moving, up to {@code JUMP_OFF_MAX}.
+	 * The faster the swing, the higher you go. (Holding Jump on a web also keeps you from taking fall damage; the
+	 * server checks that.) Held web keys must be pressed again after, and no web for {@code JUMP_OFF_LOCKOUT} ticks.
+	 */
+	static final double JUMP_OFF_BASE = 0.2, JUMP_OFF_PER_SPEED = 0.45, JUMP_OFF_MAX = 1.4;
+	static final int JUMP_OFF_MIN_HOLD = 3, JUMP_OFF_LOCKOUT = 8;
 	/** Jump reels in, sneak lets out (blocks per tick), every web that's out. */
 	static final double REEL_IN = 0.45;
 	static final double LET_OUT = 0.35;
@@ -161,6 +169,8 @@ public final class WebSwing {
 	float slingDraw;
 	private Vec3 braced = Vec3.ZERO;
 	private boolean slingJumpHeld;
+	/** Ticks Jump has been held while on a web (0 = not held). */
+	private int swingJumpTicks;
 	/** Drawn back into a wall: ticks of strain against it so far, and the last strain sent. */
 	private int strainTicks;
 	private float sentStrain;
@@ -257,6 +267,7 @@ public final class WebSwing {
 		}
 		boolean midAir = !player.onGround() && (flying || attached() || wingsTicks > 0);
 		strand.attached = true;
+		swingJumpTicks = 0;
 		flying = false;
 		swingEnergy = Double.NaN;
 		foldWings();
@@ -438,8 +449,19 @@ public final class WebSwing {
 		}
 		Input input = player.input.keyPresses;
 		if (bothAttached() && input.shift()) {
+			swingJumpTicks = 0;
 			tickSling(player, input);
 			return;
+		}
+		if (input.jump()) {
+			swingJumpTicks++;
+		} else if (swingJumpTicks > 0) {
+			boolean jumpOff = swingJumpTicks >= JUMP_OFF_MIN_HOLD && !player.onGround();
+			swingJumpTicks = 0;
+			if (jumpOff) {
+				jumpOff(player);
+				return;
+			}
 		}
 		if (slinging) {
 			endStrain();
@@ -635,6 +657,27 @@ public final class WebSwing {
 			Vec3 at = player.position().add(0.0, 1.0, 0.0);
 			player.level().addParticle(ParticleTypes.ITEM_COBWEB, at.x, at.y, at.z, rnd(player) * 0.05, 0.02, rnd(player) * 0.05);
 		}
+	}
+
+	/** Jump let go on a web: let go of the webs and spring up, higher the faster you were swinging. */
+	private void jumpOff(LocalPlayer player) {
+		Vec3 v = player.getDeltaMovement();
+		double lift = Math.min(JUMP_OFF_MAX, JUMP_OFF_BASE + v.length() * JUMP_OFF_PER_SPEED);
+		for (Strand strand : strands) {
+			if (strand.attached) {
+				strand.attached = false;
+				ClientPlayNetworking.send(new WebNet.Swing(strand.hand, false, Vec3.ZERO));
+			}
+			// held web keys don't snag a new web straight away
+			strand.keyHeld = false;
+		}
+		swingLockout = JUMP_OFF_LOCKOUT;
+		flying = true;
+		Vec3 out = new Vec3(v.x, Math.max(v.y, 0.0) + lift, v.z);
+		flightCap = Math.max(momentum, out.length());
+		player.setDeltaMovement(out);
+		tricks.released(player);
+		play(player, SoundEvents.PLAYER_ATTACK_SWEEP, 0.6F, 1.3F + (float)Math.min(0.5, lift * 0.3));
 	}
 
 	private void fireSling(LocalPlayer player, Vec3 forward) {

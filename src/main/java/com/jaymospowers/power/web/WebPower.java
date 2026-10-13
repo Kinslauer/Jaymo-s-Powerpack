@@ -513,8 +513,12 @@ public final class WebPower implements Power {
 				ServerPlayNetworking.send(player, new WebNet.SwingReject(hand));
 			}
 		}
+		if (swinging(state) && player.getLastClientInput().jump()) {
+			// holding Jump on a web braces you: no fall damage while you do
+			player.resetFallDistance();
+		}
 		if (state.grace || swinging(state) || state.pullTicks > 0) {
-			// fall damage always applies; only a wing glide (slower than 0.5 b/t down) isn't a fall, as with an elytra
+			// fall damage always applies (bar Jump held on a web, above); only a wing glide (slower than 0.5 b/t down) isn't a fall, as with an elytra
 			if (player.getAttached(WINGS) != null && player.getY() - player.yo > -0.5) {
 				player.fallDistance = Math.min(player.fallDistance, 1.0);
 			}
