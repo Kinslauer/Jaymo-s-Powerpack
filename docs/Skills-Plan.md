@@ -57,6 +57,29 @@ XP: melee blows landed, monsters killed (+4), stone, ore and wood broken. Practi
 - Packhorse (lvl 5): sprinting, mining and fighting tire you less (hunger).
 - Titan's Grip (lvl 10, 2 pts): a full-strength blow may stagger its target.
 
+## Combat Arts (Strength's second page, Kingdoms 0.6.5)
+
+Andy, 2026-10-13: "give the strength skill tree access to even more combat combos and skills". `CombatArts` (numbers
+at the top). Strength now goes to level 25 (`Skills.STRENGTH_MAX_LEVEL`; the others stay at 15, and alignment only
+counts experience up to level 15 so Strength doesn't win it by default). The 8 new perks cost 19 points, so with the
+first page's 15 you can't have everything: pick a build.
+
+- **Combo chain:** melee blows that land within 2 s of each other are a combo (one link a swing, however many a sweep
+  or Better Combat arc hits). The count shows on the action bar once you know any chain perk. Works with or without
+  Better Combat: the swing's charge is read in `PlayerAttackMixin`, damage in `LivingEntityHurtMixin`.
+- Tier 4 (level 15, after Titan's Grip): **Momentum** 3 ranks (+4%/rank per link, up to 5 links), **Cleave** 3 ranks
+  (a full-strength blow carries 20%/rank into up to 3 foes beside the target).
+- Tier 5 (level 18), finishers on every 4th link when it's full strength: **Earthsplitter** (axes, mace, two-handed,
+  bludgeons: shockwave, half the blow to foes round the target, thrown up), **Executioner** (any weapon: double damage
+  to a foe under 30%), **Rend** (swords, knives, spears: 1.5 damage a second for 5 s).
+- Tier 6 (level 21), active skills on **Y**: **Charge** (shoulder charge about 8 blocks, steered by where you look;
+  first foe takes 1.5x attack damage, is shoved and staggered; 12 s), **War Cry** (sneak+Y, or Y if it's the only one:
+  foes within 10 weakened and slowed 6 s, you and nearby players Strength I 8 s; 45 s).
+- Tier 7 (level 24): **Bladestorm**, every 8th link you whirl and hit every foe round you for the full blow.
+- Area blows only touch foes (monsters, and anything targeting you), never bystanders or other players, so a fight in
+  town doesn't become a crime.
+- The tree screen pages: Strength's "Combat Arts >" button (bottom right) shows tiers 4-7.
+
 ## Respec (Andy's answer)
 A court wizard unmakes your perks for 5 emeralds + 1 per rank, or drink a bottle o' enchanting (sneak and use it).
 Your XP and levels stay; every point comes back to spend again.
