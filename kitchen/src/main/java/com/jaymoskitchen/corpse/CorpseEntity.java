@@ -1062,13 +1062,7 @@ public class CorpseEntity extends Entity {
 			return;
 		}
 		if (onBlock) {
-			for (ItemStack stack : loot) {
-				if (stack.has(DataComponents.FOOD)) {
-					spawnAtLocation(level, stack.copyWithCount(1 + random.nextInt(2)), 0.4F);
-					break;
-				}
-			}
-			for (ItemStack extra : ButcheringBonus.roll(sourceType(), random)) {
+			for (ItemStack extra : blockExtras()) {
 				spawnAtLocation(level, extra, 0.4F);
 			}
 		} else {
@@ -1088,6 +1082,41 @@ public class CorpseEntity extends Entity {
 		level.sendParticles(ParticleTypes.CRIT, getX(), getY() + 0.3, getZ(), 20, 0.4, 0.2, 0.4, 0.2);
 		play(level, SoundEvents.PLAYER_ATTACK_SWEEP, 1.0F);
 		discard();
+	}
+
+	/** What butchering on a block adds to the loot: a little extra meat, and the block-only extras ({@link ButcheringBonus}). */
+	private List<ItemStack> blockExtras() {
+		List<ItemStack> extras = new ArrayList<>();
+		for (ItemStack stack : loot) {
+			if (stack.has(DataComponents.FOOD)) {
+				extras.add(stack.copyWithCount(1 + random.nextInt(2)));
+				break;
+			}
+		}
+		extras.addAll(ButcheringBonus.roll(sourceType(), random));
+		return extras;
+	}
+
+	/** (0.4.32) Everything a proper job on a butcher block gets out of it (its loot and the extras), without dropping any of it. */
+	List<ItemStack> butcheredDrops() {
+		List<ItemStack> drops = new ArrayList<>();
+		for (ItemStack stack : loot) {
+			drops.add(stack.copy());
+		}
+		drops.addAll(blockExtras());
+		return drops;
+	}
+
+	/** (0.4.32) A passive animal's body, the only kind a butcher villager will take: no monsters, nothing heavy. */
+	public boolean isButcherable() {
+		return kind == CorpseKind.ANIMAL && !isHostile() && !isHeavy();
+	}
+
+	/** (0.4.32) Passed straight from whoever holds it into {@code carrier}'s arms (a butcher villager taking it from a player). */
+	void handTo(Entity carrier) {
+		setCarrier(carrier);
+		this.entityData.set(TUMBLING, false);
+		grabCooldown = 0;
 	}
 
 	private boolean onButcherBlock() {

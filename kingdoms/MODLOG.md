@@ -2067,3 +2067,9 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   theft. Outside any faction's law the mark only shouts.
 - The reach is seen by everyone nearby: `Pickpocket.Reach` tells them, and the client's `PickpocketPose` puts the
   player's main arm forward and down into the pocket, fingers working, the other hand drawn in.
+
+## 0.5.51: gossip about butchers
+- With Jaymo's Kitchen 0.4.32, half the gossip townsfolk walk up with is about a butcher (`BUTCHER_GOSSIP_CHANCE`):
+  trash talk or praise for their own village's butcher, or word of a master far off, or one to avoid, with how far
+  and which way. Hearing it tells you that butcher's skill on Kitchen's butcher screen from then on. Reached through
+  `KitchenCompat.butcherGossip` (reflection on Kitchen's `Butchers.gossip`); without Kitchen, gossip is as before.

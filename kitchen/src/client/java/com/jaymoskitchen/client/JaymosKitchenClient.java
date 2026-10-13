@@ -68,6 +68,7 @@ public class JaymosKitchenClient implements ClientModInitializer {
 			}
 		});
 
+		ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenButcher.TYPE, (payload, ctx) -> ctx.client().gui.setScreen(new ButcherScreen(payload)));
 		ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenKitchen.TYPE, (payload, ctx) -> {
 			Station station = Station.byIndex(payload.station());
 			if (station != null) {
