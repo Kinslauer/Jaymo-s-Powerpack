@@ -67,6 +67,10 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * Answers move hearts (MCA) and reputation a little. It's paced: one approach per player every few minutes, the same
  * villager once a day, never mid-fight, never from people who hate you (their guards hunt you instead).
+ *
+ * <p>(0.6.2) Missed it? For a little while after they've spoken (and while a bit of news is still being told), right-click
+ * them to beg their pardon (they say it again; a question you walked off on is asked again) or to ask them to tell you
+ * more (each line has a follow-up). The answer screen offers "tell me more" too.
  */
 public final class Approaches {
 	/** How often players are looked at for someone to come over (ticks); how far away that someone can be (blocks). */
@@ -95,6 +99,8 @@ public final class Approaches {
 	static final double SPEECH_RANGE = 14.0, TALK_RANGE = 8.0;
 	/** A crime of yours is held against you this long (ticks: two days). */
 	static final long SUSPECT_TICKS = 48000L;
+	/** (0.6.2) After they've had their say, how long you can still beg their pardon (ticks); how long they stay to repeat it. */
+	static final int PARDON_TICKS = 20 * 45, PARDON_HOLD_TICKS = 20 * 15;
 	/** A player hurt by a mob this recently is left alone (ticks). */
 	static final int FIGHT_TICKS = 200;
 
@@ -140,8 +146,13 @@ public final class Approaches {
 		boolean arrived, done;
 		/** Which opening (or question, or child's game) it is. */
 		int variant;
-		/** What they said on arriving (shown again on the answer screen). */
-		Component line = Component.empty();
+		/** What they said on arriving (shown again on the answer screen); (0.6.2) what more they'd say if asked, and its colour. */
+		Component line = Component.empty(), more = Component.empty();
+		int color = Speech.WHITE;
+		/** (0.6.2) They've told you more; you answered them (nothing to beg pardon for); you walked off on them once already. */
+		boolean elaborated, answered, snubbed;
+		/** (0.6.2) Till when you can still beg their pardon. */
+		long pardonUntil;
 		/** A bargain's goods and price; a war's enemy. */
 		ItemStack goods = ItemStack.EMPTY;
 		int price;
@@ -162,6 +173,18 @@ public final class Approaches {
 
 	/** Player → their approach (one at a time). */
 	private static final Map<UUID, Approach> ACTIVE = new HashMap<>();
+	/** (0.6.2) Player → the last one who spoke to them unanswered, while they can still beg their pardon. */
+	private static final Map<UUID, Approach> RECENT = new HashMap<>();
+	/** (0.6.2) Player → the "pardon?" screen they have open: whose, and what each button is. */
+	private static final Map<UUID, Pardon> PARDONING = new HashMap<>();
+
+	/** What a button on the "pardon?" screen does. */
+	private enum Button {
+		PARDON, MORE, BYE
+	}
+
+	private record Pardon(Approach approach, List<Button> buttons) {
+	}
 	/** Player → when someone may next come over (game time). */
 	private static final Map<UUID, Long> NEXT = new HashMap<>();
 	/** "villager/player" or "halt/faction/player" → when they last met (game time). */
@@ -208,12 +231,28 @@ public final class Approaches {
 				return InteractionResult.PASS;
 			}
 			Approach a = ACTIVE.get(sp.getUUID());
-			if (a == null || a.mob != entity || !a.arrived || a.done || !asks(a.topic)) {
-				return InteractionResult.PASS;
+			if (a == null || a.mob != entity || !a.arrived || a.done) {
+				// (0.6.2) someone who spoke to you a moment ago: beg their pardon, or ask them to say more
+				Approach r = RECENT.get(sp.getUUID());
+				if (r == null || r.mob != entity || sp.isShiftKeyDown() || !(world instanceof ServerLevel level) || level.getGameTime() > r.pardonUntil
+					|| !r.mob.isAlive() || r.mob.getTarget() != null || talking(r.mob) || r.mob.distanceTo(sp) > TALK_RANGE) {
+					return InteractionResult.PASS;
+				}
+				pardonScreen(sp, r);
+				return InteractionResult.SUCCESS;
+			}
+			if (!asks(a.topic)) {
+				// (0.6.2) still telling you their news
+				if (sp.isShiftKeyDown()) {
+					return InteractionResult.PASS;
+				}
+				pardonScreen(sp, a);
+				return InteractionResult.SUCCESS;
 			}
 			if (a.topic == QUEST_OFFER || a.topic == QUEST_CHECK) {
 				// (their quests, straight away: the screen holds them still from here)
 				a.done = true;
+				a.answered = true;
 				Quests.open(sp, a.mob);
 			} else {
 				ask(sp, a);
@@ -221,6 +260,8 @@ public final class Approaches {
 			return InteractionResult.SUCCESS;
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			RECENT.remove(handler.player.getUUID());
+			PARDONING.remove(handler.player.getUUID());
 			Approach a = ACTIVE.remove(handler.player.getUUID());
 			if (a != null) {
 				release(a);
@@ -228,6 +269,8 @@ public final class Approaches {
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			ACTIVE.clear();
+			RECENT.clear();
+			PARDONING.clear();
 			NEXT.clear();
 			MET.clear();
 			SUSPECTS.clear();
@@ -277,6 +320,11 @@ public final class Approaches {
 			if (!step(server, level, a, now)) {
 				release(a);
 				it.remove();
+				if (a.arrived && !a.answered) {
+					// (0.6.2) unanswered: for a while you can still ask what they said
+					a.pardonUntil = now + PARDON_TICKS;
+					RECENT.put(a.player, a);
+				}
 			}
 		}
 		if (server.getTickCount() % SCAN_TICKS == 0) {
@@ -285,6 +333,7 @@ public final class Approaches {
 			}
 			if (server.getTickCount() % (SCAN_TICKS * 300) == 0) {
 				MET.values().removeIf(t -> now - t > MET_TICKS);
+				RECENT.values().removeIf(r -> now > r.pardonUntil);
 				SUSPECTS.values().forEach(m -> m.values().removeIf(t -> now - t > SUSPECT_TICKS));
 				SUSPECTS.values().removeIf(Map::isEmpty);
 			}
@@ -659,31 +708,38 @@ public final class Approaches {
 		Faction f = Factions.get(level.getServer(), a.faction);
 		String realm = f == null ? "?" : f.name();
 		Component name = player.getName();
-		a.line = switch (a.topic) {
-			case QUESTION -> Component.translatable("talk.jaymoskingdoms.question." + a.variant);
-			case CHILD -> Component.translatable("talk.jaymoskingdoms.child." + a.variant);
-			case BARGAIN -> Component.translatable(key(a) + "." + a.variant, a.goods.getCount(), a.goods.getHoverName(), a.price);
-			case WAR -> Component.translatable(key(a) + "." + a.variant, a.enemy);
-			case HALT -> Component.translatable(key(a) + "." + a.variant, realm);
-			case GREET -> Component.translatable(key(a) + "." + a.variant, name);
-			case GOSSIP -> {
-				if (!a.enemy.isEmpty()) {
-					// (0.5.52) word of what you are (Renown)
-					yield Component.translatable(key(a) + ".you." + a.enemy + "." + a.variant, name);
-				}
-				// (0.5.56) a monster of legend seen out there
-				Component beast = level.getRandom().nextFloat() < Sightings.GOSSIP_CHANCE ? Sightings.gossip(level, a.mob) : null;
-				if (beast != null) {
-					yield beast;
-				}
-				Component butcher = level.getRandom().nextFloat() < BUTCHER_GOSSIP_CHANCE ? KitchenCompat.butcherGossip(player, a.mob) : null;
-				yield butcher != null ? butcher : Component.translatable(key(a) + "." + a.variant);
-			}
-			default -> Component.translatable(key(a) + "." + a.variant);
+		// (the line's key and its arguments; "<key>.more" is what they'd add if asked)
+		String line = key(a) + "." + a.variant, more = line + ".more";
+		Object[] args = switch (a.topic) {
+			case BARGAIN -> new Object[] {a.goods.getCount(), a.goods.getHoverName(), a.price};
+			case WAR -> new Object[] {a.enemy};
+			case HALT -> new Object[] {realm};
+			case GREET -> new Object[] {name};
+			default -> new Object[0];
 		};
-		int color = a.topic == ACCUSE ? Speech.RED : a.topic == HALT || a.topic == WARN ? Speech.YELLOW
+		Component said = null;
+		if (a.topic == GOSSIP) {
+			if (!a.enemy.isEmpty()) {
+				// (0.5.52) word of what you are (Renown)
+				line = key(a) + ".you." + a.enemy + "." + a.variant;
+				more = key(a) + ".you." + a.enemy + ".more";
+				args = new Object[] {name};
+			} else {
+				// (0.5.56) a monster of legend seen out there; (0.5.51) a butcher
+				said = level.getRandom().nextFloat() < Sightings.GOSSIP_CHANCE ? Sightings.gossip(level, a.mob) : null;
+				if (said == null && level.getRandom().nextFloat() < BUTCHER_GOSSIP_CHANCE) {
+					said = KitchenCompat.butcherGossip(player, a.mob);
+				}
+				if (said != null) {
+					more = key(a) + ".more";
+				}
+			}
+		}
+		a.line = said != null ? said : Component.translatable(line, args);
+		a.more = Component.translatable(more, args);
+		a.color = a.topic == ACCUSE ? Speech.RED : a.topic == HALT || a.topic == WARN ? Speech.YELLOW
 			: a.topic == QUEST_OFFER || a.topic == QUEST_CHECK || a.topic == GIFT ? Speech.GOLD : Speech.WHITE;
-		Speech.say(level, a.mob, a.line, color, SPEECH_RANGE);
+		Speech.say(level, a.mob, a.line, a.color, SPEECH_RANGE);
 		level.playSound(null, a.mob.getX(), a.mob.getY(), a.mob.getZ(), a.mob instanceof Villager ? SoundEvents.VILLAGER_AMBIENT : SoundEvents.VILLAGER_TRADE,
 			SoundSource.NEUTRAL, 0.8F, a.mob.isBaby() ? 1.5F : 1.0F);
 		if (a.topic == GIFT) {
@@ -695,15 +751,102 @@ public final class Approaches {
 		}
 		if (asks(a.topic)) {
 			player.sendOverlayMessage(Component.translatable("talk.jaymoskingdoms.hint", a.mob.getDisplayName()).withStyle(ChatFormatting.GOLD));
+		} else {
+			player.sendOverlayMessage(Component.translatable("talk.jaymoskingdoms.hint.pardon", a.mob.getDisplayName()).withStyle(ChatFormatting.GRAY));
 		}
 	}
 
-	/** The player right-clicked them: the answers. */
+	/** The player right-clicked them: the answers (and, until they've said it, "tell me more"). */
 	private static void ask(ServerPlayer player, Approach a) {
-		List<Option> options = options(player, a);
+		PARDONING.remove(player.getUUID());
+		List<Option> options = new ArrayList<>(options(player, a));
+		if (!a.elaborated) {
+			options.add(new Option(Component.translatable("talk.jaymoskingdoms.pardon.more"), true));
+		}
 		if (ServerPlayNetworking.canSend(player, TalkNet.Ask.TYPE)) {
-			ServerPlayNetworking.send(player, new TalkNet.Ask(a.mob.getId(), a.mob.getDisplayName(), a.line,
+			ServerPlayNetworking.send(player, new TalkNet.Ask(a.mob.getId(), a.mob.getDisplayName(), heard(a),
 				options.stream().map(Option::label).toList(), options.stream().map(Option::enabled).toList()));
+		}
+	}
+
+	/** What they've told you: the line, and what more they said if you asked. */
+	private static Component heard(Approach a) {
+		return a.elaborated ? Component.translatable("talk.jaymoskingdoms.pardon.both", a.line, a.more) : a.line;
+	}
+
+	// ---- (0.6.2) begging their pardon --------------------------------------------------------------------------------
+
+	/** The "pardon?" screen: before they've repeated it, what you can ask; after, what they said, and what more you can ask. */
+	private static void pardonScreen(ServerPlayer player, Approach a) {
+		pardonScreen(player, a, false);
+	}
+
+	private static void pardonScreen(ServerPlayer player, Approach a, boolean repeated) {
+		if (!ServerPlayNetworking.canSend(player, TalkNet.Ask.TYPE)) {
+			return;
+		}
+		List<Button> buttons = new ArrayList<>();
+		if (!repeated && !a.elaborated) {
+			buttons.add(Button.PARDON);
+		}
+		if (!a.elaborated) {
+			buttons.add(Button.MORE);
+		}
+		buttons.add(Button.BYE);
+		Component words = repeated || a.elaborated ? heard(a) : Component.translatable("talk.jaymoskingdoms.pardon.prompt", a.mob.getDisplayName());
+		List<Component> labels = buttons.stream().map(b -> (Component) Component.translatable(switch (b) {
+			case PARDON -> "talk.jaymoskingdoms.pardon.again";
+			case MORE -> "talk.jaymoskingdoms.pardon.more";
+			case BYE -> repeated || a.elaborated ? "talk.jaymoskingdoms.pardon.thanks" : "talk.jaymoskingdoms.pardon.never_mind";
+		})).toList();
+		PARDONING.put(player.getUUID(), new Pardon(a, buttons));
+		ServerPlayNetworking.send(player, new TalkNet.Ask(a.mob.getId(), a.mob.getDisplayName(), words, labels,
+			labels.stream().map(l -> true).toList()));
+	}
+
+	/** The player picked {@code option} on the "pardon?" screen. */
+	private static void pardoned(ServerLevel level, ServerPlayer player, Pardon p, int option) {
+		Approach a = p.approach();
+		if (option < 0 || option >= p.buttons().size() || p.buttons().get(option) == Button.BYE || !a.mob.isAlive()
+			|| a.mob.distanceTo(player) > TALK_RANGE) {
+			return;
+		}
+		long now = level.getGameTime();
+		boolean more = p.buttons().get(option) == Button.MORE;
+		if (more) {
+			a.elaborated = true;
+		}
+		Speech.say(level, a.mob, more ? a.more : a.line, a.color, SPEECH_RANGE);
+		level.playSound(null, a.mob.getX(), a.mob.getY(), a.mob.getZ(), a.mob instanceof Villager ? SoundEvents.VILLAGER_AMBIENT : SoundEvents.VILLAGER_TRADE,
+			SoundSource.NEUTRAL, 0.8F, a.mob.isBaby() ? 1.5F : 1.0F);
+		Approach active = ACTIVE.get(a.player);
+		if (active != null && active != a) {
+			// (someone else is already on their way over: they just say it, and you read it here)
+			pardonScreen(player, a, true);
+			return;
+		}
+		if (active == null && talking(a.mob)) {
+			pardonScreen(player, a, true);
+			return;
+		}
+		// (they stay to say it; a question you walked off on is put to you again)
+		RECENT.remove(a.player);
+		a.done = false;
+		a.until = now + (asks(a.topic) ? ASK_TICKS : PARDON_HOLD_TICKS);
+		ACTIVE.put(a.player, a);
+		hold(a.mob, player);
+		if (!asks(a.topic)) {
+			pardonScreen(player, a, true);
+		} else if (a.topic == QUEST_OFFER || a.topic == QUEST_CHECK) {
+			if (more) {
+				pardonScreen(player, a, true);
+			} else {
+				a.done = true;
+				a.answered = true;
+				Quests.open(player, a.mob);
+			}
+		} else {
+			ask(player, a);
 		}
 	}
 
@@ -732,6 +875,13 @@ public final class Approaches {
 			// (0.5.52) a court wizard's offer to unmake your skills
 			return;
 		}
+		Pardon pardon = PARDONING.remove(player.getUUID());
+		if (pardon != null && pardon.approach().mob.getId() == answer.entityId()) {
+			if (player.level() instanceof ServerLevel level) {
+				pardoned(level, player, pardon, answer.option());
+			}
+			return;
+		}
 		Approach a = ACTIVE.get(player.getUUID());
 		if (a == null || a.mob.getId() != answer.entityId() || !a.arrived || a.done || !(player.level() instanceof ServerLevel level)) {
 			return;
@@ -743,10 +893,19 @@ public final class Approaches {
 			return;
 		}
 		List<Option> options = options(player, a);
+		if (answer.option() == options.size() && !a.elaborated && a.mob.distanceTo(player) <= TALK_RANGE) {
+			// (0.6.2) "tell me more": they do, and wait on your answer a while longer
+			a.elaborated = true;
+			a.until = Math.max(a.until, level.getGameTime() + ASK_TICKS);
+			Speech.say(level, a.mob, a.more, a.color, SPEECH_RANGE);
+			ask(player, a);
+			return;
+		}
 		if (answer.option() >= options.size() || !options.get(answer.option()).enabled() || a.mob.distanceTo(player) > TALK_RANGE) {
 			return;
 		}
 		a.done = true;
+		a.answered = true;
 		Faction f = Factions.get(level.getServer(), a.faction);
 		if (f == null) {
 			return;
@@ -865,7 +1024,9 @@ public final class Approaches {
 
 	/** They asked and the player walked off (or shut them out). */
 	private static void walkedOff(ServerLevel level, Approach a, ServerPlayer player) {
-		Faction f = Factions.get(level.getServer(), a.faction);
+		// (0.6.2) asked again after begging their pardon: walking off a second time costs nothing more
+		Faction f = a.snubbed ? null : Factions.get(level.getServer(), a.faction);
+		a.snubbed = true;
 		switch (a.topic) {
 			case HALT -> {
 				if (f != null) {

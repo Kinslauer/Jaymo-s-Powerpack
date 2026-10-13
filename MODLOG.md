@@ -710,3 +710,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   `docs/Classes-Plan.md`. The Armory's cleavers are redrawn short and its quarterstaffs long, the stick running the
   whole sprite (`tools/gen_cleaver_staff.py`, run after `armory_assets.py`); the Tinkering cleaver takes the same
   short shape in every material (`tools/gen_tinker_cleaver.py`).
+
+- **0.9.2, beg their pardon (Kingdoms 0.6.2):** when someone runs up and you miss what they said, right-click them
+  within 45 seconds to beg their pardon (they say it again, and a question you walked off on is put to you again) or ask
+  them to tell you more. The answer screen has "Could you tell me more?" too.

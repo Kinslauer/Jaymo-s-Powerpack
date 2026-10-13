@@ -2352,3 +2352,13 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   faster (`RangedComponentMixin` on `onUsingTick`/`releaseUsing`, applied by `WeaponModMixinPlugin` only when
   WeaponMod is there).
 - Not playtested in game. Plan: `docs/Classes-Plan.md`.
+
+## 0.6.2: beg their pardon (pack 0.9.2)
+
+- Missed what someone who walked up to you said? For 45 s after they've spoken (`PARDON_TICKS`), and while they're still
+  telling you their news, right-click them (not sneaking) for a small screen: "Beg your pardon?" (they say it again,
+  over their head, and the screen shows it), "Could you tell me more?" (each opening has a `.more` follow-up line) or
+  "Never mind". A question you walked off on is asked again after a pardon (walking off a second time costs no more
+  reputation); a quest giver opens their quests. The answer screen has "Could you tell me more?" too, which adds the
+  follow-up to the question shown. A grey hint ("Missed that? Right-click ...") follows news, gifts and greetings.
+- Not playtested in game.
