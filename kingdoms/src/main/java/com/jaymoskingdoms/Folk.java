@@ -468,7 +468,9 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		// anyone the faction counts as hostile; (0.6.4) and a player changed into an alien they don't know (Aliens)
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true,
 			(target, level) -> this.combatant() && target instanceof ServerPlayer player && !player.isCreative()
-				&& (Reputation.get(player, this.factionId()) <= Reputation.HOSTILE || Aliens.feared(player, this.factionId()))));
+				&& (Reputation.get(player, this.factionId()) <= Reputation.HOSTILE || Aliens.feared(player, this.factionId())
+					// (0.7.0) a vampire player seen hunting tonight
+					|| Vampires.exposed(player))));
 		// and monsters on their land
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.Mob.class, true,
 			(target, level) -> this.combatant() && (target instanceof Enemy && !(target instanceof net.minecraft.world.entity.monster.Creeper)

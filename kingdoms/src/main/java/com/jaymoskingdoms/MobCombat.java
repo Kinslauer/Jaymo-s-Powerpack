@@ -388,7 +388,7 @@ public final class MobCombat {
 			if (other instanceof ServerPlayer player) {
 				return !player.isCreative() && !player.isSpectator()
 					&& (wild || Reputation.get(player, folk.factionId()) <= Reputation.HOSTILE || Theft.wanted(player, folk.factionId())
-						|| Aliens.feared(player, folk.factionId()));
+						|| Aliens.feared(player, folk.factionId()) || Vampires.exposed(player));
 			}
 			return !wild && (other instanceof Enemy && !(other instanceof Creeper) || Oddities.hunted(other) || Vampires.exposed(other));
 		}

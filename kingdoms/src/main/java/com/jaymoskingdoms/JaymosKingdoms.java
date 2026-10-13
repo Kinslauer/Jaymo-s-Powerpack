@@ -184,6 +184,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.0: lycanthropy: the cursed change under the full moon (their attachments)
 		LOGGER.debug("lycan attachments: {} {}", Lycans.CURSE, Lycans.FORCED);
 		Lycans.register();
+		// 0.7.0: players as vampires (by a bite) and werewolves (by ritual)
+		VampirePlayers.register();
+		WerewolfPlayers.register();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();
 			Gatherers.clear();

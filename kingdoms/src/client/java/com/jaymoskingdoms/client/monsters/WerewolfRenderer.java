@@ -55,6 +55,17 @@ final class WerewolfRenderer extends LegendRenderer<Werewolf> {
 		super.submit(state, poseStack, collector, camera);
 	}
 
+	/** (0.7.0) A werewolf player doesn't see their own beast from inside it (the camera's in its chest). */
+	@Override
+	public boolean shouldRender(Werewolf werewolf, net.minecraft.client.renderer.culling.Frustum frustum, double x, double y, double z, float partialTicks) {
+		net.minecraft.client.Minecraft minecraft = net.minecraft.client.Minecraft.getInstance();
+		if (werewolf.isNoAi() && minecraft.player != null && minecraft.options.getCameraType().isFirstPerson()
+			&& werewolf.distanceToSqr(minecraft.player) < 2.0) {
+			return false;
+		}
+		return super.shouldRender(werewolf, frustum, x, y, z, partialTicks);
+	}
+
 	/** (0.7.0) A cursed one's build, and its body swelling as the beast comes out (or shrinking as it goes). */
 	@Override
 	protected void scale(LegendState state, PoseStack poseStack) {

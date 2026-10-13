@@ -59,6 +59,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		ClassScreen.register();
 		ClassKeys.register();
 		CombatArtKey.register();
+		WerewolfKey.register();
 		TalkScreen.register();
 		// 0.6.6: lunar events' colours
 		MoonClient.register();

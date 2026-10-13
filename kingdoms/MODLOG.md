@@ -2563,3 +2563,24 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   the ground: Slowness II and Weakness II for a minute, Nausea. Nobody near (not entity-ticking): they're simply
   back. A restart mid-night puts them back at once; the leftover beast is discarded when it loads.
 - Ops: `/kingdom werewolf curse | change | cure | moon` (nearest within 16 blocks).
+
+### Stage 3: players (still Kingdoms 0.7.0)
+- **Vampire by bite** (`VampirePlayers`): the Elder and feeders now hunt survival players too, and bite them (claws
+  only for vampires, and for a non-person who attacks them). A bitten player turns at the next nightfall (dying first
+  cures it; the wolf-cursed can't turn). At night: Strength I, Speed I, Night Vision. By day under open sky: Weakness;
+  3000-9000 with a bare head they catch fire. Sneak + right-click a grown villager or folk with an empty hand (from the
+  front: Pickpocket has the back) to drink every second: 4 damage, +4 food, +1.5 saturation, +3 health, and the
+  bitten turn if they live. Two nights without blood: Hunger and Weakness till they drink. Seen by that realm's
+  people it's a heavy crime (`Theft.Crime.BLOODLETTING`); at night they show themselves and guards hunt them till dawn
+  (`Folk` player targets, `MobCombat.foe`).
+- **Werewolf by ritual** (`WerewolfPlayers`): full moon, night, Overworld, under the sky, 4+ lit campfires within 5
+  blocks, sneak and use a bone: the curse (`lycanthropy`, kept through death) and the change at once. Every full
+  moon the change is forced and lasts till dawn; after 3 moons `U` changes at will (and back), never against the
+  moon. The change: 2 s doubled over (Nausea, held still, bones cracking), then the beast tears out: a no-AI
+  `Werewolf` puppet (their own size, build, coat; updated every tick, `updateInterval(1)`) stands in for them for
+  everyone else, while they're invisible; the puppet's change animation plays as for villagers. As the beast:
+  Strength II, Speed I, Jump Boost II, Resistance I, Night Vision, Hunger, +10 max health; armour and held items go
+  to the inventory every tick (claws); a kill (not a monster) feeds them 6 + 0.8. Blows to the puppet land on them;
+  guards hunt it, villagers flee it. At dawn it shrinks back (Slowness, Weakness, Nausea after). Their own puppet
+  isn't drawn for them in first person.
+- **The cure** for both: by day, right-click a cleric villager holding a golden apple (the rite takes it).

@@ -173,6 +173,19 @@ public class Werewolf extends LegendMonster {
 		return this.entityData.get(BUILD);
 	}
 
+	/** (0.7.0) A swipe of its claws (a werewolf player's beast, as they strike). */
+	public void claw() {
+		this.swingArm(this.nextArm());
+	}
+
+	/** (0.7.0) A tick of the change, for a beast that has no mind of its own (a werewolf player's). */
+	public void stepChange() {
+		int c = this.change();
+		if (c != 0) {
+			this.entityData.set(CHANGE, c > 0 ? c - 1 : c + 1);
+		}
+	}
+
 	/** (0.7.0) Begins changing back (at dawn). */
 	public void changeBack() {
 		if (this.entityData.get(CHANGE) >= 0) {

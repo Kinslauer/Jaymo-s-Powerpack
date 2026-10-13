@@ -81,16 +81,22 @@ public final class Lycans {
 
 	// ---- what's kept ---------------------------------------------------------------------------------------------------
 
-	/** The curse in someone: their beast's coat, size and build, and the last night they changed. */
-	record Curse(int coat, float scale, int build, long night) {
+	/** The curse in someone: their beast's coat, size and build, the last night they changed, and (a player) how many moons they've changed under. */
+	record Curse(int coat, float scale, int build, long night, int moons) {
 		static final Codec<Curse> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.INT.fieldOf("coat").forGetter(Curse::coat),
 			Codec.FLOAT.fieldOf("scale").forGetter(Curse::scale),
 			Codec.INT.fieldOf("build").forGetter(Curse::build),
-			Codec.LONG.fieldOf("night").forGetter(Curse::night)).apply(i, Curse::new));
+			Codec.LONG.fieldOf("night").forGetter(Curse::night),
+			Codec.INT.optionalFieldOf("moons", 0).forGetter(Curse::moons)).apply(i, Curse::new));
+
+		Curse changedOn(long nightNo) {
+			return new Curse(this.coat, this.scale, this.build, nightNo, this.night == nightNo ? this.moons : this.moons + 1);
+		}
 	}
 
-	static final AttachmentType<Curse> CURSE = AttachmentRegistry.create(JaymosKingdoms.id("lycanthropy"), builder -> builder.persistent(Curse.CODEC));
+	static final AttachmentType<Curse> CURSE = AttachmentRegistry.create(JaymosKingdoms.id("lycanthropy"),
+		builder -> builder.persistent(Curse.CODEC).copyOnDeath());
 	/** On the Overworld: the night an operator called a change for (-1 for none). */
 	static final AttachmentType<Long> FORCED = AttachmentRegistry.create(JaymosKingdoms.id("lycan_moon"), builder -> builder.persistent(Codec.LONG));
 
@@ -106,7 +112,7 @@ public final class Lycans {
 
 	static void register() {
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
-			if (entity instanceof Werewolf w && w.host() != null && !BEASTS.containsKey(w.host())) {
+			if (entity instanceof Werewolf w && w.host() != null && !BEASTS.containsKey(w.host()) && !WerewolfPlayers.current(w)) {
 				// (a beast whose night was cut short: its person shows again when they load)
 				DISCARD.add(w);
 				return;
@@ -171,6 +177,13 @@ public final class Lycans {
 
 	/** The curse laid on {@code mob}: its beast rolled (the coat by the cold or heat of where they live). */
 	static void curse(ServerLevel level, PathfinderMob mob) {
+		mob.setAttached(CURSE, roll(level, mob));
+		mob.removeAttached(Vampires.BITTEN);
+		LOADED.put(mob.getUUID(), mob);
+	}
+
+	/** A beast of their own for {@code e}. */
+	static Curse roll(ServerLevel level, LivingEntity mob) {
 		RandomSource random = level.getRandom();
 		float temperature = level.getBiome(mob.blockPosition()).value().getBaseTemperature();
 		int coat;
@@ -187,9 +200,7 @@ public final class Lycans {
 		float scale = SCALE_MIN + random.nextFloat() * (SCALE_MAX - SCALE_MIN);
 		float b = random.nextFloat();
 		int build = b < LEAN_CHANCE ? 0 : b < LEAN_CHANCE + HEAVY_CHANCE ? 2 : 1;
-		mob.setAttached(CURSE, new Curse(coat, scale, build, -1L));
-		mob.removeAttached(Vampires.BITTEN);
-		LOADED.put(mob.getUUID(), mob);
+		return new Curse(coat, scale, build, -1L, 0);
 	}
 
 	static void cure(PathfinderMob mob) {
@@ -333,13 +344,12 @@ public final class Lycans {
 	}
 
 	/** Jerking, twisting, bones cracking. */
-	private static void convulse(ServerLevel level, PathfinderMob mob, long t) {
+	static void convulse(ServerLevel level, LivingEntity mob, long t) {
 		RandomSource random = level.getRandom();
 		float violence = Math.min(1.0F, 0.3F + t / (float) CONVULSE_TICKS);
-		mob.setYRot(mob.getYRot() + (random.nextFloat() - 0.5F) * 70.0F * violence);
-		mob.setYBodyRot(mob.getYRot());
-		mob.setYHeadRot(mob.getYRot() + (random.nextFloat() - 0.5F) * 90.0F * violence);
-		mob.setXRot(Math.max(-30.0F, Math.min(80.0F, 40.0F + (random.nextFloat() - 0.5F) * 80.0F * violence)));
+		if (!(mob instanceof net.minecraft.world.entity.player.Player)) {
+			convulseBody(mob, random, violence);
+		}
 		if (t % 6 == 0) {
 			level.playSound(null, mob.blockPosition(), SoundEvents.BONE_BLOCK_BREAK, SoundSource.HOSTILE, 1.0F, 0.5F + random.nextFloat() * 0.4F);
 		}
@@ -352,19 +362,38 @@ public final class Lycans {
 		}
 	}
 
+	private static void convulseBody(LivingEntity mob, RandomSource random, float violence) {
+		mob.setYRot(mob.getYRot() + (random.nextFloat() - 0.5F) * 70.0F * violence);
+		mob.setYBodyRot(mob.getYRot());
+		mob.setYHeadRot(mob.getYRot() + (random.nextFloat() - 0.5F) * 90.0F * violence);
+		mob.setXRot(Math.max(-30.0F, Math.min(80.0F, 40.0F + (random.nextFloat() - 0.5F) * 80.0F * violence)));
+	}
+
 	/** The beast tears out: the person hidden inside it, the beast changing on (its own animation). */
 	private static void tearOut(ServerLevel level, PathfinderMob mob, long nightNo) {
 		Curse curse = mob.getAttached(CURSE);
-		Werewolf w = Monsters.WEREWOLF.create(level, EntitySpawnReason.TRIGGERED);
-		if (curse == null || w == null) {
+		Werewolf w = curse == null ? null : beast(level, mob, curse);
+		if (w == null) {
 			mob.setNoAi(false);
 			return;
 		}
-		mob.setAttached(CURSE, new Curse(curse.coat(), curse.scale(), curse.build(), nightNo));
-		w.snapTo(mob.getX(), mob.getY(), mob.getZ(), mob.getYRot(), 0.0F);
+		mob.setAttached(CURSE, curse.changedOn(nightNo));
+		BEASTS.put(mob.getUUID(), w);
+		level.addFreshEntity(w);
+		hide(mob);
+		tearFx(level, mob);
+	}
+
+	/** {@code who}'s beast, changing in, where they stand (not yet in the world). */
+	static @Nullable Werewolf beast(ServerLevel level, LivingEntity who, Curse curse) {
+		Werewolf w = Monsters.WEREWOLF.create(level, EntitySpawnReason.TRIGGERED);
+		if (w == null) {
+			return null;
+		}
+		w.snapTo(who.getX(), who.getY(), who.getZ(), who.getYRot(), 0.0F);
 		// (any face: the cursed are never seen as the legend's wanderer)
 		w.setVariant(curse.coat());
-		w.curse(mob.getUUID(), curse.build());
+		w.curse(who.getUUID(), curse.build());
 		AttributeInstance scale = w.getAttribute(Attributes.SCALE);
 		if (scale != null) {
 			scale.setBaseValue(curse.scale());
@@ -375,13 +404,15 @@ public final class Lycans {
 			health.setBaseValue(health.getBaseValue() * curse.scale() * (curse.build() == 2 ? 1.2 : curse.build() == 0 ? 0.85 : 1.0));
 			w.setHealth(w.getMaxHealth());
 		}
-		if (mob.hasCustomName()) {
-			w.setCustomName(mob.getCustomName());
+		if (who.hasCustomName()) {
+			w.setCustomName(who.getCustomName());
 			w.setCustomNameVisible(false);
 		}
-		level.addFreshEntity(w);
-		hide(mob);
-		BEASTS.put(mob.getUUID(), w);
+		return w;
+	}
+
+	/** The beast's bursting out: smoke, blood, a crack. */
+	static void tearFx(ServerLevel level, LivingEntity mob) {
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, mob.getX(), mob.getY(0.5), mob.getZ(), 20, 0.4, 0.6, 0.4, 0.03);
 		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.REDSTONE_BLOCK.defaultBlockState()), mob.getX(), mob.getY(0.6), mob.getZ(),
 			16, 0.3, 0.4, 0.3, 0.1);
@@ -389,7 +420,7 @@ public final class Lycans {
 	}
 
 	/** The beast changing on: shaking, swelling, growling. */
-	private static void changingIn(ServerLevel level, Werewolf w, int left) {
+	static void changingIn(ServerLevel level, Werewolf w, int left) {
 		RandomSource random = level.getRandom();
 		if (left % 7 == 0) {
 			level.playSound(null, w.blockPosition(), SoundEvents.BONE_BLOCK_BREAK, SoundSource.HOSTILE, 1.0F, 0.45F + random.nextFloat() * 0.3F);
@@ -446,7 +477,7 @@ public final class Lycans {
 
 	/** The beast slain: the person inside dies with it. */
 	private static void died(LivingEntity entity, DamageSource source) {
-		if (entity instanceof Werewolf w && w.host() != null) {
+		if (entity instanceof Werewolf w && w.host() != null && !WerewolfPlayers.puppet(w)) {
 			UUID id = w.host();
 			BEASTS.remove(id);
 			PathfinderMob host = LOADED.get(id);

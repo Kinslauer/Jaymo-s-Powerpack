@@ -124,7 +124,9 @@ public final class Theft {
 		/** (0.5.47) a caravan horse's saddlebags rifled. */
 		SADDLEBAG(Weight.MEDIUM, "theft"),
 		/** (0.6.9) lingering in someone's house ({@link Trespass}). */
-		TRESPASS(Weight.LIGHT, "trespass");
+		TRESPASS(Weight.LIGHT, "trespass"),
+		/** (0.7.0) a vampire player seen feeding ({@link VampirePlayers}). */
+		BLOODLETTING(Weight.HEAVY, "bloodletting");
 
 		final Weight weight;
 		final String cry;

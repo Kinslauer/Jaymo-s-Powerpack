@@ -38,7 +38,7 @@ each stage lands on the same draft PR, and Andy can merge after any stage.
 - The vampires' night look gets the same treatment here: pale skin, red eyes and fangs drawn on the model, not only
   particles (the client render work is shared with the werewolves).
 
-## Stage 3: the player paths
+## Stage 3: the player paths (built; what landed is in the Kingdoms MODLOG)
 - **Vampire by bite.** A player bitten by any vampire turns at the next nightfall: stronger, faster and seeing in the
   dark at night, a blood bar instead of hunger (feed with a bite key on a held victim), weak in sunlight (burning
   without a helmet at noon), no natural healing by day. Villagers and guards who see you feed know you.

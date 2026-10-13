@@ -131,7 +131,9 @@ public final class Vampires {
 
 	/** What a vampire is. */
 	public enum Kind {
-		ELDER, FEEDER, ABSTAINER, HUNTER;
+		ELDER, FEEDER, ABSTAINER, HUNTER,
+		/** (stage 3) a player ({@link VampirePlayers}). */
+		PLAYER;
 
 		String id() {
 			return this.name().toLowerCase(Locale.ROOT);
@@ -168,7 +170,7 @@ public final class Vampires {
 	}
 
 	static final AttachmentType<Vampire> VAMPIRE = AttachmentRegistry.create(JaymosKingdoms.id("vampire"),
-		builder -> builder.persistent(Vampire.CODEC));
+		builder -> builder.persistent(Vampire.CODEC).copyOnDeath());
 	/** On the bitten who aren't turned yet: the Overworld clock when they were bitten. */
 	static final AttachmentType<Long> BITTEN = AttachmentRegistry.create(JaymosKingdoms.id("vampire_bitten"),
 		builder -> builder.persistent(Codec.LONG));
@@ -258,7 +260,7 @@ public final class Vampires {
 				.then(Commands.literal("turn").then(Commands.argument("kind", StringArgumentType.word())
 					.suggests((c, b) -> {
 						for (Kind k : Kind.values()) {
-							if (k != Kind.ELDER) {
+							if (k != Kind.ELDER && k != Kind.PLAYER) {
 								b.suggest(k.id());
 							}
 						}
@@ -289,6 +291,11 @@ public final class Vampires {
 	/** One of the world's people a vampire may feed on: a grown villager (MCA's too), or a realm's folk; not another vampire. */
 	static boolean person(LivingEntity e) {
 		return e.isAlive() && !e.isBaby() && !isVampire(e) && (e instanceof Villager || e instanceof Folk) && !Lycans.changed(e);
+	}
+
+	/** (stage 3) A player a vampire would drink from: in survival, not one of them, not a beast. */
+	static boolean mortal(LivingEntity e) {
+		return e instanceof ServerPlayer p && p.isAlive() && !p.isCreative() && !p.isSpectator() && !isVampire(p) && !WerewolfPlayers.beast(p);
 	}
 
 	static boolean night(long clock) {
@@ -436,6 +443,7 @@ public final class Vampires {
 			case ELDER -> now - v.fedAt() >= ELDER_REST || now < v.fedAt();
 			case FEEDER, HUNTER -> v.fedNight() < nightNo;
 			case ABSTAINER -> nightNo - v.fedNight() >= THIRST_NIGHTS;
+			case PLAYER -> false;
 		};
 	}
 
@@ -444,7 +452,7 @@ public final class Vampires {
 		LivingEntity best = null;
 		double bestD = Double.MAX_VALUE;
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, mob.getBoundingBox().inflate(kind == Kind.ELDER ? ELDER_PREY_RANGE : PREY_RANGE),
-			e -> e != mob && (kind == Kind.HUNTER ? e.isAlive() && exposed(e) : person(e)))) {
+			e -> e != mob && (kind == Kind.HUNTER ? e.isAlive() && exposed(e) : person(e) || mortal(e)))) {
 			double d = e.distanceToSqr(mob);
 			if (d < bestD) {
 				bestD = d;
@@ -460,7 +468,7 @@ public final class Vampires {
 		DamageSource source = level.damageSources().mobAttack(mob);
 		mob.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		mob.getLookControl().setLookAt(prey, 30.0F, 30.0F);
-		if (isVampire(prey) || fighting && !person(prey)) {
+		if (isVampire(prey) || fighting && !person(prey) && !mortal(prey)) {
 			// claws
 			prey.hurtServer(level, source, elder ? ELDER_CLAW : CLAW);
 			level.playSound(null, prey.blockPosition(), SoundEvents.VEX_HURT, SoundSource.HOSTILE, 0.8F, 0.6F);
@@ -491,16 +499,22 @@ public final class Vampires {
 			return;
 		}
 		if (prey instanceof ServerPlayer player) {
-			// (stage 3 turns players; for now a bite drains them)
+			// (a player bitten turns at the next nightfall, VampirePlayers)
 			player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, PLAYER_BITE_TICKS, 0));
 			player.addEffect(new MobEffectInstance(MobEffects.HUNGER, PLAYER_BITE_TICKS, 1));
+			VampirePlayers.bitten(player);
 			return;
 		}
 		// (the wolf's curse in the blood: it won't take)
 		if (!prey.hasAttached(BITTEN) && !Lycans.cursed(prey) && prey instanceof PathfinderMob p) {
-			prey.setAttached(BITTEN, level.getOverworldClockTime());
-			LOADED.put(p.getUUID(), p);
+			bite(p, level.getOverworldClockTime());
 		}
+	}
+
+	/** {@code p} was bitten (at {@code clock}): they turn at the next nightfall. */
+	static void bite(PathfinderMob p, long clock) {
+		p.setAttached(BITTEN, clock);
+		LOADED.put(p.getUUID(), p);
 	}
 
 	private static void fed(PathfinderMob mob, Vampire v, long nightNo, long now) {
@@ -509,7 +523,7 @@ public final class Vampires {
 		release(mob);
 	}
 
-	private static void expose(PathfinderMob mob, long nightNo) {
+	static void expose(LivingEntity mob, long nightNo) {
 		EXPOSED.put(mob.getUUID(), nightNo);
 	}
 
@@ -591,12 +605,13 @@ public final class Vampires {
 		bat.addTag(BAT_TAG);
 		bat.setCustomName(elder.getName());
 		bat.setCustomNameVisible(false);
+		// (known before it's in the world, or the load hook takes it for a leftover)
+		FLIGHTS.put(elder.getUUID(), new Flight(elder, bat, prey, to));
 		level.addFreshEntity(bat);
 		release(elder);
 		elder.setInvisible(true);
 		elder.setNoGravity(true);
 		elder.noPhysics = true;
-		FLIGHTS.put(elder.getUUID(), new Flight(elder, bat, prey, to));
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, elder.getX(), elder.getY(0.5), elder.getZ(), 24, 0.3, 0.6, 0.3, 0.03);
 		level.playSound(null, elder.blockPosition(), SoundEvents.BAT_TAKEOFF, SoundSource.HOSTILE, 1.0F, 0.6F);
 	}
@@ -818,7 +833,7 @@ public final class Vampires {
 
 	private static int turnNearest(CommandSourceStack source, String id) {
 		Kind kind = Kind.parse(id);
-		if (kind == null || kind == Kind.ELDER) {
+		if (kind == null || kind == Kind.ELDER || kind == Kind.PLAYER) {
 			source.sendFailure(Component.literal("feeder, abstainer or hunter"));
 			return 0;
 		}

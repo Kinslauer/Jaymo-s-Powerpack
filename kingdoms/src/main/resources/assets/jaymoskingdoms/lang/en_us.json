@@ -2405,5 +2405,15 @@
 	"talk.jaymoskingdoms.vampire.cry.8": "I knew %s never ate supper with us. I knew it!",
 	"talk.jaymoskingdoms.vampire.cry.9": "%s is feeding! Somebody help!",
 	"talk.jaymoskingdoms.vampire.cry.10": "%s just bit someone! I saw it!",
-	"talk.jaymoskingdoms.vampire.cry.11": "Stay away from %s, they're cursed!"
+	"talk.jaymoskingdoms.vampire.cry.11": "Stay away from %s, they're cursed!",
+	"key.jaymoskingdoms.werewolf_shift": "Werewolf: Change",
+	"key.category.jaymoskingdoms.werewolf": "Jaymo's Werewolves",
+	"message.jaymoskingdoms.vampire.turned": "You wake with a thirst no water will touch. The light stings your eyes.",
+	"message.jaymoskingdoms.cure.night": "\"Not by night. Come back when the sun is up.\"",
+	"message.jaymoskingdoms.cure.done": "The cleric's prayer burns through you, and then it's gone. You're yourself again.",
+	"message.jaymoskingdoms.werewolf.ritual": "The fires gutter. Something in the moonlight looks back at you.",
+	"message.jaymoskingdoms.werewolf.moon": "The moon holds you. There's no changing back tonight.",
+	"message.jaymoskingdoms.werewolf.unmastered": "The wolf won't come at your call. Not yet.",
+	"message.jaymoskingdoms.theft.cry.bloodletting.0": "They're drinking blood! VAMPIRE!",
+	"message.jaymoskingdoms.theft.cry.bloodletting.1": "Get your teeth off them, you monster! Guards!"
 }
