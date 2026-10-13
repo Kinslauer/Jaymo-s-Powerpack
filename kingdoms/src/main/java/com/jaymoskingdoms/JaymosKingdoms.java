@@ -117,6 +117,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.14: horses and wagons: mounted guards and archers for prosperous realms, a wealthy king's carriage, and the
 		// fiefdoms' caravans to their kingdoms (and their attachment)
 		Wagon.register();
+		// 0.5.61: the richest kingdoms' cannons (their musketeers are Muskets, ticked by each guard)
+		Cannon.register();
+		Cannonball.register();
+		Cannons.register();
 		LOGGER.debug("caravan attachments: {} {}", Caravans.CARAVANS, Carriages.BOUGHT);
 		Caravans.register();
 		Cavalry.register();

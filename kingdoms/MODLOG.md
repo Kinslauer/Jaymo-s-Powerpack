@@ -2231,3 +2231,19 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   component by id), so a silver-bladed tinker sword hits for double, and a rose gold one for full.
 - `MythicMounts`: bat horses and nightmares are exceedingly rare: `CHANCE` 1 in 6000 per 30 s check (was 1 in 80),
   about once in 50 hours a player spends at night in the wild or in the Nether, and none while another wild one is out.
+
+## 0.5.61: muskets and cannons for the richest kingdoms
+- `Muskets`: a kingdom with 1000+ emeralds arms about one guard in 3 (picked by UUID, so always the same men) with
+  Balkon's WeaponMod musket with an iron bayonet (a crossbow without WeaponMod). A musketeer fires at a foe in sight
+  from 3 to 26 blocks (a ball hits for 9; WeaponMod's own 20 was too much for a garrison), reloads for 6-8 s, and
+  meanwhile closes in with the bayonet; he throws no javelins. Shots spare his own side like javelins
+  (`Javelins.harms`). Below 800 emeralds the muskets are sold and the guards take their swords and shields back.
+- `Cannons`/`Cannon`/`Cannonball`: such a kingdom sets 2 to 4 cannons (fixed per kingdom) on its archers' wall and
+  tower posts first, then beside the gate (round the seat with no keep), facing out. An archer at the post sits on the
+  trail as gunner (a gate cannon with no archer near gets one hired). The cannon swings to his foe, raises its barrel
+  for the arc, and fires every 8-11 s at 7-32 blocks: a ball that bursts for 14 (falling off over 2.5 blocks) and
+  knocks back, never hurting its own side nor breaking blocks; a foe closer than 7 gets the gunner's arrows. Players
+  break a cannon with 40 worth of blows. Below 800 emeralds the cannons are sold. Drawn from blocks (`CannonRenderer`):
+  dark oak carriage, spoked wheels, cast-iron barrel with copper bands, the realm's colour on the gunner's cushion; the
+  barrel kicks back when it fires. Tuning numbers at the top of each class.
+- Not playtested in game.

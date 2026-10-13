@@ -32,6 +32,9 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.FallingTree.TYPE, FallingTreeRenderer::new);
 		net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(com.jaymoskingdoms.ChoppedLog.ENTITY, ChoppedLogRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.Wagon.TYPE, WagonRenderer::new);
+		// 0.5.61: the richest kingdoms' cannons and their balls
+		EntityRenderers.register(com.jaymoskingdoms.Cannon.TYPE, CannonRenderer::new);
+		EntityRenderers.register(com.jaymoskingdoms.Cannonball.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));
 		CampSkins.register();
 		GoblinSkins.register();
 		// 0.5.45: orcs
