@@ -522,3 +522,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   wears down unshod hooves, and wears war and racing saddles, a bridle, a dyeable blanket and chain or plate barding,
   drawn in 3D. Keys: N whistle, J trick. Every horse, skeleton horse and zombie horse is now Mo' Creatures' horse
   model (GPL-3, credited), with our 36 coats painted onto its texture and its armour over them.
+- **0.8.87, Longer tendril Crush:** the Crush combo finds a creature under your crosshair from 12 blocks, up from 6
+  (`WebTendrilCombos.CRUSH_REACH`).
+- **0.8.87, Escape leap after a takeover's meal:** fed on a kill of its own, the symbiote often coils a full charged
+  jump during the meal or just after it and leaps you clear: 60% of the time, and always in a village or with 3 or
+  more creatures or people within 12 blocks. It leaps the way they're fewest, over open ground (straight up if boxed
+  in); the movement keys don't answer while it coils (`WebSymbiote.escape`, `WebNet.Escape`, `WebSymbioteClient.tickEscape`).

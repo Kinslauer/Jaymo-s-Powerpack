@@ -80,7 +80,7 @@ final class WebSymbioteDread {
 
 	static void tick() {
 		clock++;
-		takeover = Mth.clamp(takeover + (WebSymbioteClient.inputLocked() ? 1.0F : -1.0F) / TAKEOVER_FADE, 0.0F, 1.0F);
+		takeover = Mth.clamp(takeover + (WebSymbioteClient.inputLocked() || WebSymbioteClient.escaping() ? 1.0F : -1.0F) / TAKEOVER_FADE, 0.0F, 1.0F);
 		float low = weakness();
 		if (low <= 0.0F) {
 			nextBlink = 0L;

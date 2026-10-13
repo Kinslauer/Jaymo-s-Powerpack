@@ -486,7 +486,7 @@ it no longer lurches in a straight line into walls.
 
 **Tendril combos (0.8, `WebTendrilCombos`):** attack (left click) while the tendrils hold things and it's a combo
 instead of a swing. The client (`WebPowerClient`'s `ClientPreAttackCallback`) works out whether one fits
-(`WebTendrilCombos.kind`, plus `crosshairTarget`: the living thing under the crosshair within `CRUSH_REACH` 6, seen past
+(`WebTendrilCombos.kind`, plus `crosshairTarget`: the living thing under the crosshair within `CRUSH_REACH` 12, seen past
 held things) and sends `web_tendril_combo_attack` (`Attack(target)`); the server re-checks it (target within reach +
 `REACH_SLACK` 2 and in front), else falls back to the old chunk swing (`WebTendrils.smash`). Both tendrils must have
 reached what they hold.
