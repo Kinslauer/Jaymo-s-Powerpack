@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "L": "minecraft:leather",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "LLL",
+    "LIL",
+    "I I"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:war_saddle"
+  }
+}

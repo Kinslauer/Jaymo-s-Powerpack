@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.5.38) Chatting with a newcomer or an immigrant: now and then they talk about where their family is from
+ * (0.5.44) Chatting with a newcomer or an immigrant: now and then they talk about where their family is from
  * ({@link SkinTones#ORIGIN}) instead of MCA's own small talk. Said the way MCA says a line with no follow-up question.
  */
 @Mixin(Dialogues.class)

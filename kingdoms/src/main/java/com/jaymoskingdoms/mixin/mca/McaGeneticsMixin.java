@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.5.38) A new villager's skin follows where their family is from: darker from the desert, paler from the snow ({@link SkinTones}). */
+/** (0.5.44) A new villager's skin follows where their family is from: darker from the desert, paler from the snow ({@link SkinTones}). */
 @Mixin(Genetics.class)
 abstract class McaGeneticsMixin {
 	@Shadow
