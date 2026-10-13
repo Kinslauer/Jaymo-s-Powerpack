@@ -13,6 +13,7 @@ vanilla weapons. This power adds no weapon items of its own.
 | **V** | **Barrage.** 3 to 5 rifts open in an arc behind and above you. A weapon hovers in each one, turns to track what you're looking at (up to 48 blocks), then they fly in a staggered volley. Each hit does 7 damage and then the weapon dissolves. | 30 s |
 | **Z** | **Pocket Stash.** Opens your personal 27-slot pocket dimension in a chest screen. It's saved, and it's kept through death. Unlocks with B. | none |
 | **B** | Pocket Stash too (same as Z). Corrupted: **Sword of Damocles** (below). | 45 s corrupted |
+| **X** (hold) | **Cannon Battery.** Hold and a rift opens in a fan behind you with a cannon barrel pushing out of it; another every 0.4 s you keep holding, up to 10 (fires on its own after 10 s). They all follow your crosshair. Let go and they fire one after another (0.1 s apart). Each ball bursts on what it hits: 7 damage on a direct hit, less out to 2.5 blocks, with knockback; no block damage, never hurts you. Void Arsenal: ×1.3 and Darkness. Unlocks with B. (`ArsenalCannons`, `RiftCannonball`, drawn by `ArsenalCannonRenderer`) | 15 s |
 
 HUD (to the right of the hotbar): Reach and Barrage (corrupted: Damocles) cooldown bars with their bound keys, plus
 `Summoned n/3 · Ts`, which shows how many summoned weapons you hold and how long until the soonest one leaves. That
