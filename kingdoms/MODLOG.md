@@ -2306,3 +2306,10 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   dark oak carriage, spoked wheels, cast-iron barrel with copper bands, the realm's colour on the gunner's cushion; the
   barrel kicks back when it fires. Tuning numbers at the top of each class.
 - Not playtested in game.
+## 0.5.65: no punching trees
+- Wood needs an axe (Andy): `Trees.needsAxe` is true for logs and chopped logs when the player isn't in creative and
+  holds nothing that cuts oak faster than a hand (axes, the Armory flint hand axe, tinker hand axes and mattocks).
+  `mixin/PlayerLogToolMixin` makes `Player.hasCorrectToolForDrops` false then, so a bare-handed log breaks as slowly as
+  stone without a pickaxe and drops nothing; the chop (`Trees.breaking`) is refused, and starting to punch wood shows
+  "Wood needs an axe. Knap a hand axe from 3 flint and a stick (leaves drop sticks)."
+- Natural leaves broken by an empty hand drop a stick `LEAF_STICK_CHANCE` (12%) of the time, for that first stick.

@@ -14,10 +14,13 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -26,10 +29,12 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -80,6 +85,8 @@ public final class Trees {
 	 * more chops, but fewer per log. 0 would be one chop for any tree; very large, a chop per log.
 	 */
 	static final double CHOP_SCALE = 10.0;
+	/** (0.5.59) Leaves broken by hand: the chance of a stick, for the first hand axe (3 flint and a stick). */
+	static final float LEAF_STICK_CHANCE = 0.12F;
 
 	/** A growing tree: its foot, its sapling, its step, when it next grows. */
 	record Growing(BlockPos pos, String sapling, int stage, long next) {
@@ -103,6 +110,20 @@ public final class Trees {
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Trees::tick);
 		PlayerBlockBreakEvents.BEFORE.register(Trees::breaking);
+		// (0.5.59) said as soon as a bare hand starts on wood, not after the long, empty punch
+		AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) -> {
+			if (!level.isClientSide() && needsAxe(player, level.getBlockState(pos))) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.needs_axe").withStyle(ChatFormatting.GRAY));
+			}
+			return InteractionResult.PASS;
+		});
+		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, be) -> {
+			if (level instanceof ServerLevel server && !player.isCreative() && state.getBlock() instanceof LeavesBlock
+				&& !state.getValue(LeavesBlock.PERSISTENT) && player.getMainHandItem().isEmpty()
+				&& server.getRandom().nextFloat() < LEAF_STICK_CHANCE) {
+				Block.popResource(server, pos, new ItemStack(Items.STICK));
+			}
+		});
 	}
 
 	// ---- the kinds --------------------------------------------------------------------------------------------------
@@ -437,6 +458,10 @@ public final class Trees {
 	 * {@link #needed} for its size. False keeps the block (the chop was done here instead).
 	 */
 	private static boolean breaking(Level level, Player player, BlockPos pos, BlockState state, net.minecraft.world.level.block.entity.@Nullable BlockEntity be) {
+		if (needsAxe(player, state)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.needs_axe").withStyle(ChatFormatting.GRAY));
+			return false;
+		}
 		if (!(level instanceof ServerLevel server) || player.isShiftKeyDown() || player.isCreative() || !state.is(BlockTags.LOGS)) {
 			return true;
 		}
@@ -451,6 +476,19 @@ public final class Trees {
 		}
 		player.causeFoodExhaustion(0.005F);
 		return false;
+	}
+
+	/**
+	 * (0.5.59) Andy: no punching trees, so the first tool is a flint hand axe. Wood (logs, and what's left of a chopped
+	 * one) takes an axe: without one it's slow, drops nothing ({@code PlayerLogToolMixin}) and won't chop.
+	 */
+	public static boolean needsAxe(Player player, BlockState state) {
+		return !player.isCreative() && (state.is(BlockTags.LOGS) || state.is(ChoppedLog.BLOCK)) && !isAxe(player.getMainHandItem());
+	}
+
+	/** Anything that cuts wood faster than a hand: axes, the hand axe, mattocks. */
+	static boolean isAxe(ItemStack tool) {
+		return tool.getDestroySpeed(Blocks.OAK_LOG.defaultBlockState()) > 1.0F;
 	}
 
 	/** Chops a tree of {@code logs} logs needs to come down: 1 for one log, 4 for five, 12 for twenty, 25 for a hundred. */
