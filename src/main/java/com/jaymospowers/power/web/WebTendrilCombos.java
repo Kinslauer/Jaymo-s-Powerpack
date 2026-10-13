@@ -56,7 +56,7 @@ public final class WebTendrilCombos {
 	/** Timing (ticks from the click): hauled out until {@code REAR_TICKS}, slammed in to the impact at {@code HIT_TICKS}, reset until {@code TICKS}. */
 	public static final int REAR_TICKS = 12, HIT_TICKS = 18, TICKS = 50;
 	/** How far your crosshair target may be for a crush (blocks, plus its half width), and the slack the server allows. */
-	public static final double CRUSH_REACH = 6.0;
+	public static final double CRUSH_REACH = 12.0;
 	static final double REACH_SLACK = 2.0, FRONT_DOT = 0.3;
 	/** How hard the held things are steered through a combo (share of the gap a tick) and their top speed (blocks/tick). */
 	static final double STEER = 0.8, SPEED = 2.8;
