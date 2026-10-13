@@ -90,9 +90,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.21: monsters hunt the settlements' folk as they do villagers
 		Prey.register();
 		Theft.register();
-		// 0.5.49: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
+		// 0.5.50: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
 		Pickpocket.register();
-		// 0.5.50: the skill tree (Stealth first) and its attachment
+		// 0.5.51: the skill tree (Stealth first) and its attachment
 		Skills.register();
 		LOGGER.debug("skill attachment: {}", Skills.PROGRESS);
 		// 0.5.19: a boss's bar shows only to the players who've hit it
@@ -132,6 +132,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.38: where newcomers and immigrants are from (skin tone by climate)
 		LOGGER.debug("origin attachment: {}", SkinTones.ORIGIN);
 		Quests.register();
+		// 0.5.50: the traveller's journal (book + map): quests, a map, reputations, on M
+		Journal.register();
 		// 0.5.39: the townsfolk come over to you: questions, quests, requests, bargains, news
 		Approaches.register();
 		// 0.5.37: sorcery: camps' shamans and necromancers, courts' wizards, the risen dead, spell scrolls (and the thralls' attachment)

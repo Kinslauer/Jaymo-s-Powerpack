@@ -28,7 +28,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.50) The skill tree: three pillars, Survival, Stealth and Strength. Each pillar has its own experience, earned by
+ * (0.5.51) The skill tree: three pillars, Survival, Stealth and Strength. Each pillar has its own experience, earned by
  * doing what it's about, and its own levels; every level is a point to spend on that pillar's perks (the {@code K} key
  * opens the tree). Practice counts on its own too: each level of a pillar makes you a little better at its work before
  * any point is spent.

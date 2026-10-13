@@ -39,7 +39,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.49) Pickpocketing: sneak up close behind a villager (MCA's too) or one of a settlement's civilians or guards, empty
+ * (0.5.50) Pickpocketing: sneak up close behind a villager (MCA's too) or one of a settlement's civilians or guards, empty
  * handed, and hold use on them. Your hand goes into their pocket ({@link Reach}: the arm reaches in, for everyone to see)
  * for a while ({@link #holdTicks}): up to {@value #BASE_MAX_TICKS} ticks to start with, longer in bright light, the
  * more armour they wear, and the better their mood (an MCA villager's; a sad or crying one notices less, so does one
@@ -52,7 +52,7 @@ import org.jspecify.annotations.Nullable;
  * else who sees you still counts as a witness; with no one, the mark may miss their purse later
  * ({@link Theft#NOTICE_CHANCE}). A pocket picked is empty for a day. A sleeping mark can be robbed from any side.
  *
- * <p>(0.5.50) Every pocket picked clean is Stealth experience ({@link Skills}): the more you do it, the shorter the hold,
+ * <p>(0.5.51) Every pocket picked clean is Stealth experience ({@link Skills}): the more you do it, the shorter the hold,
  * and Stealth's perks take more, reach in from the side, and let you slip away when a mark turns on you.
  */
 public final class Pickpocket {
@@ -215,7 +215,7 @@ public final class Pickpocket {
 		if (mark.isSleeping()) {
 			ticks *= ASLEEP_FACTOR;
 		}
-		// (0.5.50) the more pockets you've picked, the lighter your hand (Skills: practice, Light Fingers)
+		// (0.5.51) the more pockets you've picked, the lighter your hand (Skills: practice, Light Fingers)
 		ticks = Skills.holdTicks(player, ticks);
 		return Math.max(MIN_TICKS, Math.round(ticks));
 	}
@@ -301,7 +301,7 @@ public final class Pickpocket {
 		boolean fresh = PICKED.getOrDefault(mark.getUUID(), 0L) <= now;
 		ItemStack loot = fresh ? loot(player, mark, random) : ItemStack.EMPTY;
 		PICKED.put(mark.getUUID(), now + EMPTY_TICKS);
-		// (0.5.50) a pocket picked clean is Stealth practice (one already emptied teaches nothing)
+		// (0.5.51) a pocket picked clean is Stealth practice (one already emptied teaches nothing)
 		int xp = fresh ? Skills.pickedClean(player, !loot.isEmpty(), mark instanceof Folk folk && folk.combatant(), mark.isSleeping()) : 0;
 		Component gained = xp > 0 ? Component.translatable("message.jaymoskingdoms.pickpocket.xp", xp).withStyle(ChatFormatting.DARK_GREEN) : Component.empty();
 		if (loot.isEmpty()) {
@@ -328,7 +328,7 @@ public final class Pickpocket {
 			mark.stopSleeping();
 		}
 		if (Skills.slipsAway(player, level.getRandom())) {
-			// (0.5.50, Slip Away) they caught a hand, but not whose: they cry out, and it's no crime of yours
+			// (0.5.51, Slip Away) they caught a hand, but not whose: they cry out, and it's no crime of yours
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.pickpocket.slipped", mark.getDisplayName()).withStyle(ChatFormatting.YELLOW));
 			Speech.say(level, mark, Component.translatable("message.jaymoskingdoms.theft.cry.pickpocket." + level.getRandom().nextInt(Theft.SHOUT_VARIANTS)),
 				Speech.YELLOW, Theft.SHOUT_RANGE);
@@ -372,7 +372,7 @@ public final class Pickpocket {
 		for (Pocket p : POCKETS) {
 			total += p.weight();
 		}
-		// (0.5.50, Deep Pockets) another try for each rank at a pocket that turns up empty
+		// (0.5.51, Deep Pockets) another try for each rank at a pocket that turns up empty
 		for (int tries = Skills.pocketTries(player); tries > 0; tries--) {
 			int roll = random.nextInt(total);
 			for (Pocket p : POCKETS) {

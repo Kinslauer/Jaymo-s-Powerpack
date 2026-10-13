@@ -133,12 +133,12 @@ public final class McaCompat {
 		return LOADED && entity instanceof Villager v && McaBridge.isMca(v);
 	}
 
-	/** (0.5.49) An MCA villager's mood, -15 (depressed, crying) to +15 (overjoyed); 0 for a plain one. */
+	/** (0.5.50) An MCA villager's mood, -15 (depressed, crying) to +15 (overjoyed); 0 for a plain one. */
 	static int mood(Villager villager) {
 		return LOADED ? McaBridge.mood(villager) : 0;
 	}
 
-	/** (0.5.49) An MCA villager running scared. */
+	/** (0.5.50) An MCA villager running scared. */
 	static boolean panicking(Villager villager) {
 		return LOADED && McaBridge.panicking(villager);
 	}

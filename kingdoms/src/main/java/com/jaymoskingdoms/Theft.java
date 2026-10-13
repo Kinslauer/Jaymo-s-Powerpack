@@ -65,9 +65,9 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>(0.5.46) Blocks a player placed themselves ({@link Placed}) are theirs: breaking them or opening them is no crime.
  *
- * <p>(0.5.49) Picking a villager's or civilian's pocket ({@link Pickpocket}) is a theft like taking from its stores.
+ * <p>(0.5.50) Picking a villager's or civilian's pocket ({@link Pickpocket}) is a theft like taking from its stores.
  *
- * <p>(0.5.50) A theft nobody saw is Stealth experience ({@link Skills}); Soft Step hides a sneaking thief from farther
+ * <p>(0.5.51) A theft nobody saw is Stealth experience ({@link Skills}); Soft Step hides a sneaking thief from farther
  * off, and a Ghost's unseen thefts are never missed.
  */
 public final class Theft {
@@ -489,7 +489,7 @@ public final class Theft {
 		}
 		if (seen.isEmpty()) {
 			if (noticeable && crime != Crime.PICKPOCKET) {
-				// (0.5.50) a theft nobody saw is Stealth practice (a pickpocket's counts in Pickpocket)
+				// (0.5.51) a theft nobody saw is Stealth practice (a pickpocket's counts in Pickpocket)
 				Skills.unseenTheft(player, level.getGameTime());
 			}
 			if (noticeable && !Skills.ghost(player) && level.getRandom().nextFloat() < NOTICE_CHANCE) {

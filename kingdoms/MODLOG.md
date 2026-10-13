@@ -2026,8 +2026,27 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   10 seconds (`Undertakers.calledAway`).
 - Needs Jaymo's Kitchen 0.4.31 (golems hold the corpse up at their arms, not at their knees; older Kitchen works but
   looks wrong, and before 0.4.27 golems leave corpses alone).
+## 0.5.49: Quests are rare
 
-## 0.5.49: pickpocketing
+- **One villager in twenty:** only about one villager in twenty is ever a quest giver (fixed by who they are, so the
+  same few in each settlement are the ones with work), and they have work on about half their days
+  (`Quests.GIVER_SHARE`, `OFFER_CHANCE`). Everyone else never wears the gold !.
+- **Kings seldom:** a king has work on about one day in twelve (`Quests.KING_CHANCE`), not every day.
+- **A good name helps a little:** reputation with the settlement raises both, up to one villager in ten and a king's
+  work on one day in five at the best reputation (`GIVER_SHARE_REPUTED`, `KING_CHANCE_REPUTED`). The day's roll is made
+  for whoever is near when it's first made. Operators can still `/kingdom quests offer` anyone.
+- **Giving up costs you:** giving up a quest (the giver's Give up button, or `/kingdom quests abandon`) costs 10
+  reputation with the giver's settlement, 40 for a king's decree (`Quests.ABANDON_REPUTATION`, `ABANDON_ROYAL_REPUTATION`).
+- **Traveller's Journal** (`Journal`, `JournalClient`, `JournalScreen`): craft a book with a map (empty or filled).
+  With it anywhere in your inventory, M (rebindable, "Open Traveller's Journal") or using it opens three pages:
+  **Quests** (each quest, who gave it, its story, what's left and which way it lies), **Map** (the land about you
+  drawn like a map from the chunks you have loaded, blank parchment beyond, zoom 1-32 blocks a cell with +/- or the
+  mouse wheel; you as an arrow, your quests numbered (gold, red for decrees, green when ready to turn in, then
+  pointing home), settlements in their colours; hover for names and reputation) and **Reputation** (each settlement
+  within 3000 blocks or that knows you: its word and a bar from -1000 to 1000). Without a journal, M only says how to
+  make one.
+
+## 0.5.50: pickpocketing
 - Andy asked for pickpocketing, then for it to be held: "shift right clicking and holding, entering an animation where
   you get close attaching your hand for a random duration up to 3s, and if you are able to match speed with the target
   or otherwise manage to stay behind them for the duration the pickpocket is successful. it increases in duration
@@ -2049,7 +2068,7 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
 - The reach is seen by everyone nearby: `Pickpocket.Reach` tells them, and the client's `PickpocketPose` puts the
   player's main arm forward and down into the pocket, fingers working, the other hand drawn in.
 
-## 0.5.50: the skill tree (Stealth)
+## 0.5.51: the skill tree (Survival, Stealth, Strength)
 - Andy asked for stealth that improves the more you steal successfully, as a skill tree with three pillars:
   Survival, Stealth and Strength. Plan: `docs/Skills-Plan.md`. Stealth is built; Survival and Strength show on the
   screen as "coming later" with what they'll be.

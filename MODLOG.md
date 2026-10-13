@@ -547,11 +547,21 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (village, kingdom or home-built) picks up corpses lying near it and carries them in its arms to the nearest fire pit,
   lit campfire or lava, then drops them in. Monsters at once, other corpses after 5 minutes untouched; never players'
   or golems' corpses. Golems never light fires, and fire pits on netherrack are no longer beaten out.
-- **0.8.95, Pickpocketing:** ships Jaymo's Kingdoms 0.5.49 (see `kingdoms/MODLOG.md`): sneak up behind a villager (MCA's
+- **0.8.95, crawl anywhere:** any player can press Jump and Sneak together twice quickly to drop flat (the swimming
+  pose) and stays flat while Jump is held, so one-block gaps are passable. Letting go stands you up once there's room;
+  under a low ceiling vanilla keeps you crawling. Holding Jump doesn't hop while crawling; not in water, flying,
+  gliding or riding. Combat Roll's double-tap Sneak ignores Sneak presses made with Jump down (`core/Crawl`,
+  `CrawlPlayerMixin`, `CrawlJumpMixin`, `client/CrawlTaps`).
+- **0.8.96, Quests are rare:** ships Jaymo's Kingdoms 0.5.49 (see `kingdoms/MODLOG.md`): only about one villager in
+  twenty ever gives quests (on about half their days), kings have work only now and then, and a good name with a
+  settlement raises both a little. Giving up a quest costs reputation with the giver's settlement. New: the
+  Traveller's Journal (craft a book with a map): with one in your inventory, M opens your quests, a map with your
+  quests and the settlements on it, and every settlement's opinion of you.
+- **0.8.97, Pickpocketing:** ships Jaymo's Kingdoms 0.5.50 (see `kingdoms/MODLOG.md`): sneak up behind a villager (MCA's
   too) or a settlement's folk with an empty hand and hold right-click: your hand reaches into their pocket for 1-3 s,
   longer in bright light, on armoured or cheerful marks, shorter in the dark or on sad ones. Stay behind them till it's
   done to lift something; if they turn round on you they cry thief, which counts as a theft seen.
-- **0.8.96, Skill tree:** ships Jaymo's Kingdoms 0.5.50 (see `kingdoms/MODLOG.md`): press **K** for a skill tree with
+- **0.8.98, Skill tree:** ships Jaymo's Kingdoms 0.5.51 (see `kingdoms/MODLOG.md`): press **K** for a skill tree with
   three pillars, Survival, Stealth and Strength. Stealth is in: picking pockets clean and stealing unseen earns Stealth
   levels, each level shortens how long your hand must stay in a pocket, and each level is a point for perks (Light Fingers,
   Deep Pockets, Soft Step, Quick Hands, Slip Away, Ghost). Survival and Strength come later (`docs/Skills-Plan.md`).

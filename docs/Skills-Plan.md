@@ -17,7 +17,7 @@ every player whatever their power: it never touches a power's abilities or maste
   pillar has all of it. Perks have ranks, prerequisites above them, and a few need a pillar level.
 - Progress is saved and kept through death.
 
-## Stealth (built, Kingdoms 0.5.50)
+## Stealth (built, Kingdoms 0.5.51)
 XP: a pocket picked clean (+10; +2 empty; a guard's ×2, a sleeper's ×½), a theft nobody saw (+4, at most every 30 s).
 
 ```
