@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client.mixin;
 
 import com.jaymoskingdoms.client.MobAnimations;
+import com.jaymoskingdoms.client.PickpocketPose;
 import com.jaymoskingdoms.client.PullerPose;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,6 +16,7 @@ abstract class MobSwingModelFeatureRendererMixin {
 		shift = At.Shift.AFTER))
 	private void jaymoskingdoms$swing(ModelFeatureRenderer.Submit<?> submit, CallbackInfo ci) {
 		PullerPose.apply(submit.model(), submit.state());
+		PickpocketPose.apply(submit.model(), submit.state());
 		MobAnimations.apply(submit.model(), submit.state());
 	}
 }

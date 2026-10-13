@@ -2045,3 +2045,25 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   pointing home), settlements in their colours; hover for names and reputation) and **Reputation** (each settlement
   within 3000 blocks or that knows you: its word and a bar from -1000 to 1000). Without a journal, M only says how to
   make one.
+
+## 0.5.50: pickpocketing
+- Andy asked for pickpocketing, then for it to be held: "shift right clicking and holding, entering an animation where
+  you get close attaching your hand for a random duration up to 3s, and if you are able to match speed with the target
+  or otherwise manage to stay behind them for the duration the pickpocket is successful. it increases in duration
+  dependent on the light level, armor the target is wearing, and target's mood. crying villagers wont be as perceptive".
+- `Pickpocket`: sneak up within 2 blocks behind a grown villager (MCA's included) or any of a settlement's folk short
+  of its ruler (their body facing away: over ~100° from the line to you; a sleeping mark from any side), empty handed,
+  and hold use on them. It runs before `Quests`, so sneak-using a plain villager from the front still opens its quests.
+- The hand stays in for `holdTicks`: a random 1-3 s, times light (x0.6 pitch dark to x1.4 full light), armour (+3% a
+  point), an MCA villager's mood (-15..15, 2.5% a point: a depressed, crying one notices far less), x0.6 if they're
+  panicking, x1.25 for a guard, x0.5 asleep. Holding use repeats every 4 ticks; no repeat for 8 ticks and you've let
+  go (no crime). A progress bar shows on the action bar.
+- Stay behind them (follow them as they walk) and within 2.75 blocks till it's done: you lift half a stack of something
+  a villager carries, else a pocket's worth (emeralds 1-3, gold or iron nuggets, bread, an apple, string, paper,
+  flint) or nothing. A picked pocket is empty for a day. Fall out of reach and they slip away (no crime).
+- If they turn toward you (body more than ~84° round) while your hand's in, you're caught: they cry thief; where a
+  faction's law holds that's `Theft.Crime.PICKPOCKET` (medium) seen: reputation -35 and its guards after you. Done clean,
+  anyone else who sees you is still a witness (the mark doesn't count); unseen, it may be noticed later like any other
+  theft. Outside any faction's law the mark only shouts.
+- The reach is seen by everyone nearby: `Pickpocket.Reach` tells them, and the client's `PickpocketPose` puts the
+  player's main arm forward and down into the pocket, fingers working, the other hand drawn in.

@@ -41,10 +41,12 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.lootgoblins.LootGoblinRenderer.register();
 		MobAnimations.register();
 		PullerPose.register();
+		// 0.5.50: a pickpocket's arm in the pocket
+		PickpocketPose.register();
 		SpeechBubbles.register();
 		// 0.5.29: quest givers' screens, marks and the tracker
 		QuestClient.register();
-		// 0.5.49: the traveller's journal on M
+		// 0.5.50: the traveller's journal on M
 		JournalClient.register();
 		TalkScreen.register();
 		ArmoryLayer.register();

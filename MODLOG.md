@@ -557,3 +557,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   settlement raises both a little. Giving up a quest costs reputation with the giver's settlement. New: the
   Traveller's Journal (craft a book with a map): with one in your inventory, M opens your quests, a map with your
   quests and the settlements on it, and every settlement's opinion of you.
+- **0.8.97, Pickpocketing:** ships Jaymo's Kingdoms 0.5.50 (see `kingdoms/MODLOG.md`): sneak up behind a villager (MCA's
+  too) or a settlement's folk with an empty hand and hold right-click: your hand reaches into their pocket for 1-3 s,
+  longer in bright light, on armoured or cheerful marks, shorter in the dark or on sad ones. Stay behind them till it's
+  done to lift something; if they turn round on you they cry thief, which counts as a theft seen.
