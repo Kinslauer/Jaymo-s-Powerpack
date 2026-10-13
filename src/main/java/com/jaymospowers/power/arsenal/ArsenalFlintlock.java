@@ -122,6 +122,21 @@ public final class ArsenalFlintlock {
 		return true;
 	}
 
+	/**
+	 * The player is dropping (Q) what's in their main hand: if it's a summoned flintlock and the off hand holds the
+	 * other of the pair, that goes down with it, so the pair is dropped together (a spent one comes back loaded, see
+	 * {@link #reloadOnDrop}).
+	 */
+	public static void dropPartner(ServerPlayer player) {
+		ItemStack main = player.getMainHandItem();
+		ItemStack off = player.getOffhandItem();
+		if (!main.is(FLINTLOCK) || !off.is(FLINTLOCK) || !Summoned.is(main) || !Summoned.is(off)) {
+			return;
+		}
+		player.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
+		player.drop(off, true, net.minecraft.util.Prediction.PREDICTED);
+	}
+
 	/** A single-shot pistol. */
 	public static final class Flintlock extends Item {
 		Flintlock(Properties properties) {

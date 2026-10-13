@@ -777,6 +777,17 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (Kingdoms' and Naturalist's predators too) tear into bodies with a brutal worrying bite, the meat spills on the ground
   and they eat it from there. Players' kills are left for the player. See Kitchen's MODLOG.
 
+- **0.9.19, Andy's power fixes (Kitchen 0.4.36):** falling corpses are caught by an empty hand from up to 2 blocks
+  off, and no longer get stuck in blocks tumbling forever. Every web that sticks gives one tug: press Jump in midair and
+  you haul up and in on it (`WebSwing.TUG_LIFT`/`TUG_PULL`). A Web Whip with both webs on its catch is one web gripped
+  in both hands. Dropping a summoned flintlock drops its pair from the other hand. The Sword of Damocles is hauled back
+  up into its rift instead of fading. The Cannon Battery's cannons come out half as fast (`GROW_TICKS` 16) at random
+  spots behind you. JEI's cheat mode (click to take items) also switches on while you're opped, in any game mode.
+  Then: R/G webs stick to creatures, players and corpses within 2 blocks of the crosshair (out to 32), which lights
+  up gold when one's in reach; you swing from them and drag light ones after you (`WebAnchors.entityTarget`,
+  `WebPower.tickEntityWeb`). Hanging still in midair with no movement keys, Jump and Sneak raise and lower you slowly
+  (`WebSwing.HANG_REEL`). The limbs not on a web hang limp and trail the sway like the Wind hover's (`WebArms.LIMB_*`).
+
 - **0.9.17, imbued blades proc (Kingdoms 0.6.8):** a Sorcerer's imbued blade bursts with its element on one blow in
   twenty rather than every one (the rest spark), and a lightning burst blinds for a moment; air lifts on every second
   blow instead, for air combos. Thrown bolts always burst.
