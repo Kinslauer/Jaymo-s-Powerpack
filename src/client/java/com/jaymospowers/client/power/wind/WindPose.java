@@ -213,12 +213,22 @@ public final class WindPose {
 	}
 
 	private static boolean isFast(Minecraft minecraft, Player player) {
+		// a flying alien (Xenoform's Pyre, Wyrm, Nadir) cruises the same way
+		if (com.jaymospowers.client.power.xenoform.XenoformFlightPose.cruising(player)) {
+			return true;
+		}
 		if (player == minecraft.player) {
 			return WindPowerClient.INSTANCE.flight().state().fast() && WindPowerClient.isActive(minecraft.player);
 		}
 		Integer state = player.getAttached(WindPower.FLIGHT);
 		WindFlight flight = state == null ? null : WindFlight.byId(state);
 		return flight != null && flight.fast();
+	}
+
+	/** How far into the cruise pose this entity is (0-1), between ticks. */
+	public static float amount(Entity entity, float partialTicks) {
+		float[] amount = AMOUNTS.get(entity.getId());
+		return amount == null ? 0.0F : Mth.lerp(partialTicks, amount[0], amount[1]);
 	}
 
 	/** From the avatar renderer's extractRenderState: put this frame's pose amount on the state. */
@@ -497,7 +507,9 @@ public final class WindPose {
 		}
 		float flutter = Mth.sin(avatar.ageInTicks * 0.9F) * 0.05F;
 		// carrying someone, the arms are busy with the hold (see CarryPose)
-		boolean armsFree = avatar.getData(com.jaymospowers.client.CarryPose.CARRIER_KEY) == null;
+		boolean armsFree = avatar.getData(com.jaymospowers.client.CarryPose.CARRIER_KEY) == null
+			// Pyre flies on its hands too: they stay back as jets (XenoformFlightPose)
+			&& !com.jaymospowers.client.power.xenoform.XenoformFlightPose.handsAsJets(avatar);
 		// head up to look along the flight
 		pose(humanoid.head, -1.15F, 0.0F, 0.0F, amount);
 		ModelPart lead = avatar.mainArm == HumanoidArm.LEFT ? humanoid.leftArm : humanoid.rightArm;

@@ -44,6 +44,9 @@ public class PowerScreen extends Screen {
 		if (player != null && !player.isCreative() && own != null) {
 			this.powers.clear();
 			this.powers.add(own);
+		} else {
+			// a power fate can't give (Xenoform: the band only) isn't offered to pick, unless it's already yours
+			this.powers.removeIf(power -> !power.fated() && power != own);
 		}
 	}
 

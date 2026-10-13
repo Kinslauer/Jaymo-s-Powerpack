@@ -28,7 +28,7 @@ public class AffinityScreen extends Screen {
 	private static final int COLOR_TEXT = 0xFFFFFFFF;
 	private static final int COLOR_DIM = 0xFFA8A8B8;
 
-	private final List<Power> powers = new ArrayList<>(Powers.all());
+	private final List<Power> powers = new ArrayList<>(Powers.fated());
 
 	public AffinityScreen() {
 		super(Component.translatable("screen.jaymospowers.affinity.title"));

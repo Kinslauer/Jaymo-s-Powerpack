@@ -81,6 +81,14 @@ public interface Power {
 	}
 
 	/**
+	 * Whether fate can hand out this power: a random awakening can land on it and it can be chosen as an affinity. A
+	 * power that says no (Xenoform) comes only through its own calling (the band).
+	 */
+	default boolean fated() {
+		return true;
+	}
+
+	/**
 	 * The key a fresh awakening's starter answers to, before any ability unlocks (null: the starter is passive, or
 	 * there isn't one). While {@code Mastery.starterOnly(player)}, presses of this key reach {@link #onKey}.
 	 */
