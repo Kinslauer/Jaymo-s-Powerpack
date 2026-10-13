@@ -777,6 +777,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (Kingdoms' and Naturalist's predators too) tear into bodies with a brutal worrying bite, the meat spills on the ground
   and they eat it from there. Players' kills are left for the player. See Kitchen's MODLOG.
 
+- **0.9.19, more routines (Kingdoms 0.6.10):** villagers also do housework by their beds, read at lecterns, sweep
+  their doorsteps, eat lunch at midday, call on tradespeople at work, see to the animals, eye strangers and dance
+  round the evening fire; children play hide and seek, skip stones and tag along after grown-ups.
+
 - **0.9.18, villagers' days (Kingdoms 0.6.9):** tag with a child is a real game (they run, you catch them, they
   chase you back); settlements have toddlers again; villagers keep daily routines (water, gardens, market, chats,
   campfires, kids playing chase); and they grow suspicious of you in their homes, up to calling it trespass.

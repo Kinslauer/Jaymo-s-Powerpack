@@ -2402,6 +2402,15 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
 - Alignment counts experience only up to level 15, so Strength's longer road doesn't decide it.
 - Not playtested in game.
 
+## 0.6.10: more routines (pack 0.9.19)
+- `Routines` gains 11 more. Grown: **chores** (a barrel, chest, oven, crafting table, cauldron or loom within 6 of
+  their bed: hands busy, the block's sound), **read** (lectern or bookshelf: page turns), **sweep** (their door's
+  step: dust), **lunch** (5000-7000, at home else by the bell: bread or apple crumbs, eating sound), **shop**
+  (follow a tradesperson at their work and haggle), **animals** (follow and fuss over a farm animal or pet: hearts),
+  **watch** (eye a stranger, under 50 reputation, from 5 blocks off), **dance** (evenings round a campfire or the
+  bell: jumps, spins, notes). Children: **hide** (hide and seek in pairs: the seeker counts 5 s, finds, they swap),
+  **stones** (skip stones at the water), **tagalong** (trail after a grown-up). Lines `routine.jaymoskingdoms.*`.
+
 ## 0.6.9: villagers' days (pack 0.9.18)
 - **Tag** (`Tag`): a child's "wanna play tag?" is a real game now, not one run-off. You're it: the child dodges away
   whenever you're near (`LandRandomPos.getPosAway`), taunting; catch up, punch (no harm) or right-click to tag them.
