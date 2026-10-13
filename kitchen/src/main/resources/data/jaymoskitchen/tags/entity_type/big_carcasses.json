@@ -16,6 +16,7 @@
 		{"id": "naturalist:zebra", "required": false},
 		{"id": "naturalist:deer", "required": false},
 		{"id": "naturalist:great_white_shark", "required": false},
-		{"id": "naturalist:whale", "required": false}
+		{"id": "naturalist:whale", "required": false},
+		{"id": "jaymoskingdoms:moose", "required": false}
 	]
 }

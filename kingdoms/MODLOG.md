@@ -2183,4 +2183,13 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   rattlesnake or coral snake. They appear 20-32 blocks off on dry ground (never in a settlement's reach), grown, and
   go for that player (neutral ones angered at them) for 2 minutes, with a vague line on the action bar ("Tawny shapes
   are slinking through the grass..."). After that they're ordinary animals, and vanish if no player is within 96.
+- **Kingdoms' own wild beasts** (`wild/`; models and textures from Better Animals Plus 11.0.10, CC BY-NC-SA 4.0, by
+  cybercat5555, itsmeowdev and Wolverbyte, credited in `textures/entity/wild/CREDITS.txt`; the models carried over to
+  26.3 names by a script, the AI our own): feral wolves (14 health, packs of 3-5 in forests, taiga and snow; six coats,
+  arctic and snowy ones in the cold), coyotes (plains, savanna, badlands, desert; hunt players only at night, when their
+  fangs show and eyes glow; encounters only at night), tarantulas (deserts, badlands, jungles; climb walls, bite, and
+  every 8 s flick stinging hairs at you from up to 12 blocks: blindness and nausea for a moment) and moose (swamp and
+  taiga; 52 health, charges anyone within 15 blocks; drawn 1.5x). They never spawn on their own; they're in the
+  encounter table with biome tags `jaymoskingdoms:has_<beast>`, so they come even without Naturalist. Wolves, coyotes
+  and moose are animals (Kitchen butchers them; the moose is a big carcass); the tarantula is a monster. Vanilla sounds.
 - Not playtested in game.

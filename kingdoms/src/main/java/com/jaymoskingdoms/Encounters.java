@@ -44,7 +44,8 @@ import org.jspecify.annotations.Nullable;
  * hunts that biome (Naturalist's own biome tags: lions in savanna, alligators in swamps...). They come from
  * {@link #MIN_DISTANCE}-{@link #MAX_DISTANCE} blocks off, after that player, for {@link #HUNT_TICKS}; then they're
  * ordinary animals, gone if no one is near. Boars and snakes keep spawning as Naturalist has them and can be encounters
- * too. Everything here is by id, so nothing happens without Naturalist.
+ * too. Kingdoms' own wild beasts (feral wolves, coyotes at night, tarantulas, moose; {@code wild/Wild}) come the same
+ * way. Naturalist's are by id, so without it only Kingdoms' own come.
  */
 public final class Encounters {
 	static final String MOD = "naturalist";
@@ -75,22 +76,38 @@ public final class Encounters {
 	/** How often the hunts are looked over (ticks). */
 	static final int HUNT_CHECK_TICKS = 20;
 
-	/** A beast that can find you: Naturalist's mob, the Naturalist biome tag it hunts in, its weight, and how many come. */
-	record Encounter(String mob, String biomes, int weight, int min, int max) {
+	/**
+	 * A beast that can find you: its entity id, the biome tag it hunts in, its weight, how many come, and whether only at
+	 * night.
+	 */
+	record Encounter(String mob, String biomes, int weight, int min, int max, boolean night) {
+		Encounter(String mob, String biomes, int weight, int min, int max) {
+			this(mob, biomes, weight, min, max, false);
+		}
+
+		/** The beast's name, for its action bar line. */
+		String name() {
+			return this.mob.substring(this.mob.indexOf(':') + 1);
+		}
 	}
 
 	static final List<Encounter> TABLE = List.of(
-		new Encounter("bear", "has_bear", 10, 1, 1),
-		new Encounter("lion", "has_lion", 10, 2, 3),
-		new Encounter("tiger", "has_tiger", 10, 1, 1),
-		new Encounter("alligator", "has_alligator", 10, 1, 2),
-		new Encounter("komodo_dragon", "has_komodo_dragon", 10, 1, 2),
-		new Encounter("rhino", "has_rhino", 6, 1, 1),
-		new Encounter("desert_scorpion", "has_desert_scorpion", 10, 2, 3),
-		new Encounter("jungle_scorpion", "has_jungle_scorpion", 10, 2, 3),
-		new Encounter("boar", "has_boar", 6, 2, 4),
-		new Encounter("snake", "has_rattlesnake", 4, 1, 1),
-		new Encounter("snake", "has_coral_snake", 4, 1, 1));
+		new Encounter("naturalist:bear", "naturalist:has_bear", 10, 1, 1),
+		new Encounter("naturalist:lion", "naturalist:has_lion", 10, 2, 3),
+		new Encounter("naturalist:tiger", "naturalist:has_tiger", 10, 1, 1),
+		new Encounter("naturalist:alligator", "naturalist:has_alligator", 10, 1, 2),
+		new Encounter("naturalist:komodo_dragon", "naturalist:has_komodo_dragon", 10, 1, 2),
+		new Encounter("naturalist:rhino", "naturalist:has_rhino", 6, 1, 1),
+		new Encounter("naturalist:desert_scorpion", "naturalist:has_desert_scorpion", 10, 2, 3),
+		new Encounter("naturalist:jungle_scorpion", "naturalist:has_jungle_scorpion", 10, 2, 3),
+		new Encounter("naturalist:boar", "naturalist:has_boar", 6, 2, 4),
+		new Encounter("naturalist:snake", "naturalist:has_rattlesnake", 4, 1, 1),
+		new Encounter("naturalist:snake", "naturalist:has_coral_snake", 4, 1, 1),
+		// Kingdoms' own, after Better Animals Plus (wild/Wild)
+		new Encounter("jaymoskingdoms:feral_wolf", "jaymoskingdoms:has_feral_wolf", 10, 3, 5),
+		new Encounter("jaymoskingdoms:coyote", "jaymoskingdoms:has_coyote", 10, 2, 3, true),
+		new Encounter("jaymoskingdoms:tarantula", "jaymoskingdoms:has_tarantula", 8, 1, 2),
+		new Encounter("jaymoskingdoms:moose", "jaymoskingdoms:has_moose", 6, 1, 1));
 
 	/** A beast after a player, until {@code until} (game time). */
 	private record Hunt(Mob mob, UUID player, long until) {
@@ -104,6 +121,11 @@ public final class Encounters {
 	}
 
 	static void register() {
+		ServerTickEvents.END_SERVER_TICK.register(Encounters::tick);
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			NEXT.clear();
+			HUNTS.clear();
+		});
 		if (!FabricLoader.getInstance().isModLoaded(MOD)) {
 			return;
 		}
@@ -113,21 +135,16 @@ public final class Encounters {
 				return;
 			}
 			for (String name : NO_NATURAL_SPAWNS) {
-				EntityType<?> type = type(name);
+				EntityType<?> type = type(MOD + ":" + name);
 				if (type != null) {
 					context.getMobSpawnSettings().removeSpawnsOfEntityType(type);
 				}
 			}
 		});
-		ServerTickEvents.END_SERVER_TICK.register(Encounters::tick);
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
-			NEXT.clear();
-			HUNTS.clear();
-		});
 	}
 
-	private static @Nullable EntityType<?> type(String name) {
-		return BuiltInRegistries.ENTITY_TYPE.getOptional(Identifier.fromNamespaceAndPath(MOD, name)).orElse(null);
+	private static @Nullable EntityType<?> type(String id) {
+		return BuiltInRegistries.ENTITY_TYPE.getOptional(Identifier.parse(id)).orElse(null);
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -167,7 +184,7 @@ public final class Encounters {
 			if (spot == null || Factions.around(server, level, spot, SETTLEMENT_CLEARANCE) != null) {
 				continue;
 			}
-			Encounter e = pick(level.getBiome(spot), random);
+			Encounter e = pick(level.getBiome(spot), level.isDarkOutside(), random);
 			EntityType<?> type = e == null ? null : type(e.mob());
 			if (type == null) {
 				continue;
@@ -180,7 +197,7 @@ public final class Encounters {
 				}
 			}
 			if (came > 0) {
-				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.encounter." + e.mob()).withStyle(ChatFormatting.GOLD));
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.encounter." + e.name()).withStyle(ChatFormatting.GOLD));
 				JaymosKingdoms.LOGGER.debug("{} {} came after {} at {}", came, e.mob(), player.getName().getString(), spot);
 				return true;
 			}
@@ -213,11 +230,11 @@ public final class Encounters {
 	}
 
 	/** One of the beasts that hunt {@code biome}, by weight; null if none does. */
-	static @Nullable Encounter pick(Holder<Biome> biome, RandomSource random) {
+	static @Nullable Encounter pick(Holder<Biome> biome, boolean night, RandomSource random) {
 		List<Encounter> fits = new ArrayList<>();
 		int total = 0;
 		for (Encounter e : TABLE) {
-			if (biome.is(TagKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(MOD, e.biomes())))) {
+			if ((night || !e.night()) && type(e.mob()) != null && biome.is(TagKey.create(Registries.BIOME, Identifier.parse(e.biomes())))) {
 				fits.add(e);
 				total += e.weight();
 			}

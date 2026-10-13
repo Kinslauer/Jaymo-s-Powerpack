@@ -701,4 +701,4 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
 - Tags take Naturalist's mobs (optional entries): its big animals (bears, rhinos, hippos, elephants, mammoths,
   giraffes, alligators, lions, tigers, komodo dragons, zebras, deer, sharks, whales) are `big_carcasses`; its insects
   and lizard tails leave no corpse; its snakes, fish, sea creatures, snails and insects are `no_legs`. Its fish are
-  vanilla fish underneath, so they loot in one click already.
+  vanilla fish underneath, so they loot in one click already. Kingdoms' moose is a big carcass too.
