@@ -2193,3 +2193,33 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   encounter table with biome tags `jaymoskingdoms:has_<beast>`, so they come even without Naturalist. Wolves, coyotes
   and moose are animals (Kitchen butchers them; the moose is a big carcass); the tarantula is a monster. Vanilla sounds.
 - Not playtested in game.
+
+## 0.5.56: monsters of legend, beast gossip and quests, bat horse and nightmare
+- **Monsters** (`monsters/`, Fangs 'n Claws' line-up done as our own code; models converted from Mo' Creatures and
+  textures redrawn from its art, GPL-3, in `licenses/mocreatures/NOTICE.txt`; tuning at the top of each class):
+  - **Werewolf** (40 health): a frightened villager-looking human by day, at night it changes over 3 s (smoke, howl)
+    into a beast that hunts players and villagers. Blows hurt the beast at a quarter unless the weapon is gold (full)
+    or silver (double). Four faces, four coats; the rare fire coat (1 in 10) sets you alight and doesn't burn.
+  - **Ogres** (green, cave, fire; 50 health, cave 70; half have two heads): every ~7 s they raise both fists and
+    smash the ground, hurting and throwing everyone within 5 blocks. Fire ogres burn what they hit, and spawn in the
+    Nether as well.
+  - **Wraith / flame wraith**: drift through walls, swoop at you, undead and burn in daylight (wraith); flame wraiths
+    set you alight and spawn in the Nether too.
+  - **Silver skeleton**: fast undead swordsman that sprints at you, burns in daylight.
+  - **Mud golem**: hits slow you (Slowness II, 3 s), heals in water or rain, takes double fire damage when dry.
+  - **Mimic**: when you open a wild loot chest (one with a loot table, 256+ blocks from any settlement) there's a 6%
+    chance it's a mimic instead: it keeps the loot and drops it when killed. It sleeps until you walk up unsneaking,
+    touch it or hit it, and shuts again after 30 s of quiet.
+  - They come as wilderness encounters (`Encounters`, biome tags `jaymoskingdoms:has_<beast>`; most at night only).
+  - **Silver sword**: like iron, +4 damage against undead; 8% drop from monsters of legend killed by a player.
+- **Sightings and gossip** (`Sightings`): encounters, and rumours placed 300-800 blocks from faction seats, are
+  remembered for an hour. Villagers within 1200 blocks of one gossip about it (what, how far, which way).
+- **Beast quests**: a villager near a sighting may give a quest (10-16 emeralds): **hunt** it (go to the spot; it
+  comes for you, and comes again if it got away) or **survive** a night there (at night, 2-3 of its kind come for
+  you; alive at dawn wins, dying fails it).
+- **Mounts of legend** (`equestrian/MythicMounts`, new `Breed`s at the end so old saves keep theirs): the **bat
+  horse** (Mo' Creatures' wings; forests and taiga at night) flies while ridden: hold jump to climb, release to glide
+  down, it keeps cruising forward. The **nightmare** (badlands and deserts at night, and the Nether) has a flickering
+  fiery coat and gives its rider fire resistance. Tame and saddle them like any of our horses; untamed ones leave at
+  dawn.
+- Not playtested in game.
