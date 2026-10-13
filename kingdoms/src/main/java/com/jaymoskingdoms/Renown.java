@@ -57,20 +57,26 @@ public final class Renown {
 		Skills.Pillar best = null;
 		boolean tied = false;
 		for (Skills.Pillar pillar : Skills.Pillar.values()) {
-			if (best == null || p.xp(pillar) > p.xp(best)) {
+			if (best == null || standing(p, pillar) > standing(p, best)) {
 				best = pillar;
 				tied = false;
-			} else if (p.xp(pillar) == p.xp(best)) {
+			} else if (standing(p, pillar) == standing(p, best)) {
 				tied = true;
 			}
 		}
 		return best == null || tied || p.level(best) < ALIGN_LEVEL ? null : best;
 	}
 
+	/** How far along {@code pillar} counts toward alignment: its experience, but only up to the common top level, so
+	 * Strength's longer road (0.6.5) doesn't tip everyone into it. */
+	private static int standing(Skills.Progress p, Skills.Pillar pillar) {
+		return Math.min(p.xp(pillar), Skills.total(Skills.MAX_LEVEL));
+	}
+
 	/** The title code for {@code p} (see {@link #TITLE}). */
 	static int title(Skills.Progress p) {
 		Skills.Pillar pillar = alignment(p);
-		return pillar == null ? 0 : 1 + pillar.ordinal() * 2 + (p.level(pillar) >= Skills.MAX_LEVEL ? 1 : 0);
+		return pillar == null ? 0 : 1 + pillar.ordinal() * 2 + (p.level(pillar) >= pillar.maxLevel ? 1 : 0);
 	}
 
 	/** The title's pillar and whether it's a master's, from its code (null for none). */
