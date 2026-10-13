@@ -45,11 +45,13 @@ import org.jspecify.annotations.Nullable;
  * his realm sends war parties twice as often, and bigger; he taxes for the war chest.</li>
  * <li><b>Paranoid</b>: keeps his rounds short, greets no one and eyes everyone; a stranger who comes close is pushed
  * back by his guard, and one who keeps hanging about him is harassed and then driven out of the city
- * ({@link Paranoia}); good deeds count half with him, bad ones double.</li>
+ * ({@link Retinue}); good deeds count half with him, bad ones double.</li>
  * <li><b>Reveler</b>: greets his people with gifts, and at dusk throws a feast at his seat: the villagers gather, there's
  * music and fireworks, they're given bread (and so have children), and it eats into the stores; players at his feast
  * are remembered fondly.</li>
  * </ul>
+ * How each one's guards take players about him (kneel to the tyrant, sheathe your blade by the warlord, the noble's
+ * bread, the reveler's gifts) is {@link Retinue}'s.
  */
 final class Tempers {
 	enum Temper {
@@ -74,7 +76,7 @@ final class Tempers {
 	/** The warlord's realm: war parties this many times as often, and this many more soldiers. */
 	static final float WAR_CHANCE = 2.0F;
 	static final int WAR_EXTRA = 3;
-	/** The paranoid king's round ends by this time of day (his guards' suspicion is {@link Paranoia}'s). */
+	/** The paranoid king's round ends by this time of day (how his guards take strangers is {@link Retinue}'s). */
 	static final long PARANOID_ROUND_END = 5000L;
 	/** The feast: when (time of day), how far villagers come from, the food it eats, the bread each villager gets, and the good name it wins a guest. */
 	static final long FEAST_FROM = 10000L, FEAST_TO = 11000L;
@@ -297,9 +299,9 @@ final class Tempers {
 				continue;
 			}
 			Folk king = level.getEntity(f.leader().get()) instanceof Folk k && k.isAlive() ? k : null;
+			Retinue.tick(level, f, temper, king, now);
 			switch (temper) {
 				case WARLORD -> drill(level, f);
-				case PARANOID -> Paranoia.tick(level, f, king, now);
 				case REVELER -> {
 					if (t >= FEAST_FROM && t < FEAST_TO && FEASTED.getOrDefault(f.id(), -1L) != day) {
 						FEASTED.put(f.id(), day);
