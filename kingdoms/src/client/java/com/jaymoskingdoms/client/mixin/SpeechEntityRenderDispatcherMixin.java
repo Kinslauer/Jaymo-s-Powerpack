@@ -21,6 +21,8 @@ abstract class SpeechEntityRenderDispatcherMixin {
 		SpeechBubbles.extract(entity, cir.getReturnValue(), partialTicks);
 		com.jaymoskingdoms.client.QuestClient.extract(entity, cir.getReturnValue(), partialTicks);
 		com.jaymoskingdoms.client.SkillTitles.extract(entity, cir.getReturnValue(), partialTicks);
+		// (0.5.53) a villager court wizard's hat
+		com.jaymoskingdoms.client.SorcerySkins.extract(entity, cir.getReturnValue());
 	}
 
 	@Inject(method = "submit", at = @At(value = "INVOKE",

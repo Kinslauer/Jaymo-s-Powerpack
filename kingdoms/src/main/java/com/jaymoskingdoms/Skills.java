@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.Identifier;
@@ -32,7 +33,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.entity.player.Player;
@@ -255,6 +258,20 @@ public final class Skills {
 			}
 			return InteractionResult.SUCCESS;
 		});
+		// (0.5.53) an MCA villager who is a court wizard: sneak and use them (their own menu opens as ever without sneaking;
+		// from behind with an empty hand it's a pickpocket, which is registered first)
+		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
+			if (world.isClientSide() || hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer sp) || !sp.isShiftKeyDown()
+				|| entity instanceof Folk || !(entity instanceof LivingEntity wizard) || !CourtWizards.is(wizard)) {
+				return InteractionResult.PASS;
+			}
+			if (of(sp).spent() == 0) {
+				sp.sendSystemMessage(Component.translatable("message.jaymoskingdoms.skills.respec.nothing", wizard.getDisplayName()).withStyle(ChatFormatting.GRAY));
+			} else {
+				wizard(sp, wizard);
+			}
+			return InteractionResult.SUCCESS;
+		});
 		SurvivalSkill.register();
 		StrengthSkill.register();
 		Renown.register();
@@ -301,7 +318,7 @@ public final class Skills {
 	}
 
 	/** A player spoke to a court wizard: if they've learned anything, the wizard offers to unmake it, for a price. */
-	static void wizard(ServerPlayer player, Folk wizard) {
+	static void wizard(ServerPlayer player, LivingEntity wizard) {
 		if (of(player).spent() == 0 || !ServerPlayNetworking.canSend(player, TalkNet.Ask.TYPE)) {
 			return;
 		}
@@ -320,7 +337,7 @@ public final class Skills {
 			return false;
 		}
 		RESPEC_OFFERS.remove(player.getUUID());
-		if (answer.option() != 0 || !(player.level().getEntity(answer.entityId()) instanceof Folk wizard) || wizard.distanceTo(player) > 8.0) {
+		if (answer.option() != 0 || !(player.level().getEntity(answer.entityId()) instanceof LivingEntity wizard) || !CourtWizards.is(wizard) || wizard.distanceTo(player) > 8.0) {
 			return true;
 		}
 		int price = respecPrice(player);

@@ -24,6 +24,8 @@ public final class Professions {
 	public static final List<String> JOBS = List.of("builder", "farmer", "miner", "woodcutter", "puller", "stablehand", "farrier");
 
 	public static VillagerProfession BUILDER, FARMER, MINER, WOODCUTTER, PULLER, STABLEHAND, FARRIER;
+	/** (0.5.53) A kingdom's court wizard: one of its elders, never a player's pick ({@link CourtWizards}). */
+	public static VillagerProfession WIZARD;
 
 	private Professions() {
 	}
@@ -38,6 +40,8 @@ public final class Professions {
 		// (0.5.47)
 		STABLEHAND = register("stablehand", SoundEvents.VILLAGER_WORK_SHEPHERD);
 		FARRIER = register("farrier", SoundEvents.VILLAGER_WORK_ARMORER);
+		// (0.5.53)
+		WIZARD = register("wizard", SoundEvents.VILLAGER_WORK_CLERIC);
 	}
 
 	private static VillagerProfession register(String name, SoundEvent sound) {
@@ -53,7 +57,7 @@ public final class Professions {
 			return BUILDER;
 		}
 		return role == Folk.FARMER ? FARMER : role == Folk.MINER ? MINER : role == Folk.WOODCUTTER ? WOODCUTTER : role == Folk.PULLER ? PULLER
-			: role == Folk.STABLEHAND ? STABLEHAND : role == Folk.FARRIER ? FARRIER : null;
+			: role == Folk.STABLEHAND ? STABLEHAND : role == Folk.FARRIER ? FARRIER : role == Sorcery.WIZARD ? WIZARD : null;
 	}
 
 	/** The role {@code profession} is (a builder's is {@link Folk#WORKER}), or -1 if it isn't one of these. */
@@ -66,7 +70,8 @@ public final class Professions {
 			return Folk.WORKER;
 		}
 		return profession == FARMER ? Folk.FARMER : profession == MINER ? Folk.MINER : profession == WOODCUTTER ? Folk.WOODCUTTER
-			: profession == PULLER ? Folk.PULLER : profession == STABLEHAND ? Folk.STABLEHAND : profession == FARRIER ? Folk.FARRIER : -1;
+			: profession == PULLER ? Folk.PULLER : profession == STABLEHAND ? Folk.STABLEHAND : profession == FARRIER ? Folk.FARRIER
+			: profession == WIZARD ? Sorcery.WIZARD : -1;
 	}
 
 	/** The role a job's name (one of {@link #JOBS}) is, or -1. */
@@ -93,6 +98,7 @@ public final class Professions {
 			case "jaymoskingdoms:puller" -> "minecraft:leatherworker";
 			case "jaymoskingdoms:stablehand" -> "minecraft:shepherd";
 			case "jaymoskingdoms:farrier" -> "minecraft:armorer";
+			case "jaymoskingdoms:wizard" -> "minecraft:cleric";
 			default -> null;
 		};
 	}

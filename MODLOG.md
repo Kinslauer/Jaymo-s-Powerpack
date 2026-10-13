@@ -582,3 +582,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   chop (heavier blows, knockback, faster mining). Each level is a perk point. A court wizard or a bottle o' enchanting
   (sneak and drink it) gives your points back. Your best pillar shows over your head (Survivor, Rogue, Warrior) and
   villagers gossip about it. Forager, the first Survival perk, also lets you judge a butcher's skill from their cuts.
+- **0.8.104, Court wizards are MCA villagers:** ships Jaymo's Kingdoms 0.5.53 (see `kingdoms/MODLOG.md`): a kingdom's
+  court wizard is now one of its own elders, an MCA villager who has been grown for 8 days or more, who keeps their
+  name, family and hearts and puts on the cleric's robe, the wizard's hat and staff. They live as villagers until a foe
+  comes near, then fight and ward as the court wizard always has, and mend hurt townsfolk when idle.

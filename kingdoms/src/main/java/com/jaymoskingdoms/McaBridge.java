@@ -74,7 +74,7 @@ final class McaBridge {
 	/** The workers' professions are important (MCA never makes them guards or lets them lapse), and they don't trade. */
 	static void register() {
 		for (VillagerProfession profession : List.of(Professions.BUILDER, Professions.FARMER, Professions.MINER, Professions.WOODCUTTER, Professions.PULLER,
-			Professions.STABLEHAND, Professions.FARRIER)) {
+			Professions.STABLEHAND, Professions.FARRIER, Professions.WIZARD)) {
 			ResourceKey<VillagerProfession> key = BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(profession).orElseThrow();
 			ProfessionsMCA.IS_IMPORTANT.add(key);
 			ProfessionsMCA.CAN_NOT_TRADE.add(key);
@@ -173,6 +173,11 @@ final class McaBridge {
 			}
 			return false;
 		}
+		if (job == Sorcery.WIZARD) {
+			// (0.5.53) a wizard's robe on someone who isn't one (the villager editor, say): only a kingdom makes a court wizard
+			noTrade(villager);
+			return false;
+		}
 		if (job == Folk.GUARD) {
 			// an MCA guard of a realm's village: one of its guards, counted on its roster
 			Faction f = settlement(level, villager);
@@ -240,6 +245,60 @@ final class McaBridge {
 		VillagerProfession job = Professions.of(hired.role());
 		tell(player, Component.translatable("message.jaymoskingdoms.job_taken", v.getName(), f.name(), job == null ? Component.empty() : job.name()));
 		return true;
+	}
+
+	// ---- court wizards (0.5.53) -------------------------------------------------------------------------------------
+
+	static @Nullable Worker enlistWizard(ServerLevel level, Faction f, @Nullable PathfinderMob chosen) {
+		VillagerEntityMCA villager = chosen instanceof VillagerEntityMCA v ? v : eldest(level, f);
+		if (villager == null) {
+			return null;
+		}
+		MinecraftServer server = level.getServer();
+		Enlisted w = worker(villager);
+		if (w.role() >= 0) {
+			// (an old hand leaves their work for the office: that place is to be filled)
+			Faction old = Factions.get(server, w.factionId());
+			if (old != null) {
+				Economy.lost(server, old.id(), w.role());
+			}
+			w.discharge();
+		}
+		if (villager.getProfession() != Professions.WIZARD) {
+			villager.setProfession(Professions.WIZARD);
+		}
+		w.enlist(Sorcery.WIZARD, f.id());
+		villager.setItemSlot(EquipmentSlot.MAINHAND, new net.minecraft.world.item.ItemStack(Arcana.WIZARD_STAFF));
+		villager.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
+		villager.setPersistenceRequired();
+		Castle.Keep keep = Factions.keep(server, f.id());
+		villager.setHomeTo(keep != null ? keep.hall() : f.seat(), Folk.HOME_RADIUS);
+		Factions.update(server, f.id(), x -> x.withHoldings(x.holdings().adjust(Sorcery.WIZARD, 1)));
+		level.sendParticles(ParticleTypes.ENCHANT, villager.getX(), villager.getY() + 1.2, villager.getZ(), 40, 0.4, 0.8, 0.4, 0.6);
+		level.playSound(null, villager.blockPosition(), SoundEvents.ILLUSIONER_PREPARE_MIRROR, SoundSource.NEUTRAL, 0.8F, 1.2F);
+		JaymosKingdoms.LOGGER.debug("{} made {} its court wizard", f.name(), villager.getName().getString());
+		return w;
+	}
+
+	/** The eldest of {@code f}'s villagers who is an elder, isn't its ruler, nor at work, nor a guard or anything MCA keeps; or null. */
+	private static @Nullable VillagerEntityMCA eldest(ServerLevel level, Faction f) {
+		VillagerEntityMCA best = null;
+		long bestDays = -1;
+		for (VillagerEntityMCA v : level.getEntitiesOfClass(VillagerEntityMCA.class, new AABB(f.seat()).inflate(Economy.POPULATION_RANGE),
+			v -> v.isAlive() && !v.isBaby() && worker(v).role() < 0 && !v.isProfessionImportant()
+				&& (f.leader().isEmpty() || !f.leader().get().equals(v.getUUID())))) {
+			long days = CourtWizards.grownDays(level, worker(v));
+			if (days >= CourtWizards.ELDER_DAYS && days > bestDays) {
+				best = v;
+				bestDays = days;
+			}
+		}
+		return best;
+	}
+
+	static @Nullable PathfinderMob nearestGrown(ServerLevel level, ServerPlayer player) {
+		return level.getEntitiesOfClass(VillagerEntityMCA.class, player.getBoundingBox().inflate(8.0), v -> v.isAlive() && !v.isBaby()).stream()
+			.min(java.util.Comparator.comparingDouble(player::distanceToSqr)).orElse(null);
 	}
 
 	/** The settlement {@code villager} is in (a standing one, not a camp), or null. */

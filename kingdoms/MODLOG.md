@@ -2119,3 +2119,32 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   `Butchers.setExperienced`, set by reflection in `KitchenCompat.skills`): you judge a butcher's skill from their cuts.
 - A gossip who's heard of you talks about you first; otherwise half of gossip is about butchers, as before.
 - Tuning constants are at the top of `Skills`, `SurvivalSkill`, `StrengthSkill` and `Renown`. Not playtested in game.
+
+## 0.5.53: court wizards are MCA villagers, taken from the elders
+- Andy: "court wizards should be integrated as MCA villagers, maybe once they grow old". With MCA loaded, a kingdom's
+  court wizard (`Sorcery.WIZARD`) is one of its own villagers, promoted in place as workers are (`CourtWizards`,
+  `McaBridge.enlistWizard`): they keep their name, family and hearts, take the profession `jaymoskingdoms:wizard`
+  ("Court Wizard"; MCA dresses them in the cleric's robe, `McaSkinMixin`), hold the wizard's staff and wear the
+  wizard's hat (`SorcerySkins.VillagerHat`, a layer on any humanoid renderer, keyed off the synced profession; blue,
+  since the client doesn't know the realm's colour).
+- MCA has no old age, so a villager's age is counted from when they came of age (`Enlisted.grownSince`, saved as
+  `jaymoskingdoms_grown_since`; noted every second in `Workers.step`). Adults first seen are backdated 0-16 days so
+  villages have elders from the start; children are stamped when they grow up. Grown 8 days (`ELDER_DAYS`) is an
+  elder, and the eldest spare one (not the ruler, not at work, not a guard or anything MCA keeps) takes the office.
+  No elder to spare: the place stays open and is tried again with the roster check (`Sorcery.STAFF_TICKS`).
+- The wizard lives as an MCA villager (talks, sleeps, keeps home) until a foe of the realm is in reach and sight:
+  then their fight replaces their brain (`CourtWizards.step`): they close in or back off to 7 blocks and cast every
+  2 s (repulse up close, banish thralls, else arcane bolts); they ward their side's fighters and, idle or not, mend
+  the worst hurt of the townsfolk, folk and golems near. Foes: players the realm counts hostile (or who just hit them),
+  barbarians and folk of realms at war, monsters, anything going for their side. A player who kills one takes a
+  scroll. Their spells are `Sorcery`'s, generalised from `Folk` to any caster.
+- A kingdom no longer hires the standalone wizard while MCA is loaded; a standing one retires in a puff of sparks
+  (`CourtWizards.retire`) and an elder takes the place. Without MCA nothing changes. Court necromancers stay folk.
+- `/kingdom caster wizard` with MCA makes the grown villager nearest you (8 blocks) the nearest kingdom's wizard, old or
+  not. A wizard's profession on anyone a kingdom didn't make one is taken off again.
+- `Thralls.refuses` treats a realm's MCA villagers in its service (wizards, guards) as its folk, so they spare the
+  thralls of their own side and of players the realm doesn't count hostile.
+- The skill tree's respec works with either kind of wizard (`CourtWizards.is`; `Skills.wizard` and its answer take any
+  living entity): right-click a folk wizard as before, or sneak and right-click an MCA wizard (plain right-click still
+  opens MCA's menu; from behind with an empty hand it's still a pickpocket).
+- Not playtested in game.

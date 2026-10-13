@@ -225,14 +225,15 @@ public final class Thralls {
 		if (attacker.getUUID().equals(t.master())) {
 			return true;
 		}
+		// (0.5.53) a realm's MCA villager in its service (a court wizard) sides as its folk do
 		if (t.player()) {
-			if (attacker instanceof Folk folk) {
+			if (attacker instanceof Worker w && w.factionId() >= 0) {
 				ServerPlayer owner = server == null ? null : server.getPlayerList().getPlayer(t.master());
-				return owner == null || Reputation.get(owner, folk.factionId()) > Reputation.HOSTILE;
+				return owner == null || Reputation.get(owner, w.factionId()) > Reputation.HOSTILE;
 			}
 			return false;
 		}
-		return attacker instanceof Folk folk && side(server, folk.factionId(), t.faction());
+		return attacker instanceof Worker w && w.factionId() >= 0 && side(server, w.factionId(), t.faction());
 	}
 
 	private static void tick(MinecraftServer server) {

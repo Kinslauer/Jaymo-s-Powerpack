@@ -93,8 +93,18 @@ public final class Workers {
 	 */
 	public static boolean step(ServerLevel level, Worker w) {
 		PathfinderMob mob = w.mob();
-		if (mob.tickCount % RECONCILE_TICKS == 0 && !McaCompat.reconcile(level, w)) {
-			return false;
+		if (mob.tickCount % RECONCILE_TICKS == 0) {
+			if (w instanceof Enlisted e) {
+				// (0.5.53) how long they've been grown (elders become court wizards)
+				CourtWizards.age(level, e);
+			}
+			if (!McaCompat.reconcile(level, w)) {
+				return false;
+			}
+		}
+		if (w.role() == Sorcery.WIZARD && w instanceof Enlisted e) {
+			// (0.5.53) a court wizard lives as a villager until a foe comes near
+			return !mob.isSleeping() && !McaCompat.busy(mob) && CourtWizards.step(level, e);
 		}
 		if (!Worker.isWork(w.role()) || Homes.bedtime(level) && !Rickshaws.onDuty(mob) || mob.isSleeping() || mob.isBaby() || Frights.afraid(mob.getUUID())
 			|| mob.getLastHurtByMob() != null && mob.tickCount - mob.getLastHurtByMobTimestamp() < FLEE_TICKS || McaCompat.busy(mob)) {
@@ -114,6 +124,7 @@ public final class Workers {
 			// whatever they were hauling falls where they do
 			w.mob().spawnAtLocation(level, w.takeCarried());
 		}
+		CourtWizards.died(level, w, source);
 		KingdomEvents.workerDied(level, w, source);
 	}
 }

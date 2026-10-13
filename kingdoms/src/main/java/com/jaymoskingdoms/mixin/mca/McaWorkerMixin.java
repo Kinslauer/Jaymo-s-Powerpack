@@ -1,6 +1,8 @@
 package com.jaymoskingdoms.mixin.mca;
 
+import com.jaymoskingdoms.CourtWizards;
 import com.jaymoskingdoms.Enlisted;
+import com.jaymoskingdoms.Sorcery;
 import com.jaymoskingdoms.Worker;
 import com.jaymoskingdoms.Workers;
 import net.conczin.mca.entity.VillagerEntityMCA;
@@ -33,6 +35,11 @@ abstract class McaWorkerMixin implements Enlisted {
 	private String jaymoskingdoms$task = "";
 	@Unique
 	private boolean jaymoskingdoms$carrying;
+	/** (0.5.53) When they came of age, and a court wizard's spell timers. */
+	@Unique
+	private long jaymoskingdoms$grownSince = CourtWizards.UNKNOWN;
+	@Unique
+	private final int[] jaymoskingdoms$spellTimers = new int[Sorcery.TIMERS];
 
 	@Unique
 	private VillagerEntityMCA jaymoskingdoms$self() {
@@ -96,6 +103,21 @@ abstract class McaWorkerMixin implements Enlisted {
 	}
 
 	@Override
+	public long grownSince() {
+		return this.jaymoskingdoms$grownSince;
+	}
+
+	@Override
+	public void setGrownSince(long time) {
+		this.jaymoskingdoms$grownSince = time;
+	}
+
+	@Override
+	public int[] spellTimers() {
+		return this.jaymoskingdoms$spellTimers;
+	}
+
+	@Override
 	public void enlist(int role, int factionId) {
 		this.jaymoskingdoms$role = role;
 		this.jaymoskingdoms$faction = factionId;
@@ -109,7 +131,7 @@ abstract class McaWorkerMixin implements Enlisted {
 			self.spawnAtLocation(level, this.takeCarried());
 		}
 		ItemStack hand = self.getMainHandItem();
-		if (!hand.isEmpty() && hand.is(this.tool().getItem())) {
+		if (!hand.isEmpty() && (hand.is(this.tool().getItem()) || this.jaymoskingdoms$role == Sorcery.WIZARD && CourtWizards.isStaff(hand))) {
 			self.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 		}
 		this.jaymoskingdoms$role = -1;
@@ -130,6 +152,9 @@ abstract class McaWorkerMixin implements Enlisted {
 
 	@Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
 	private void jaymoskingdoms$save(ValueOutput output, CallbackInfo ci) {
+		if (this.jaymoskingdoms$grownSince != CourtWizards.UNKNOWN) {
+			output.putLong("jaymoskingdoms_grown_since", this.jaymoskingdoms$grownSince);
+		}
 		if (this.jaymoskingdoms$role < 0) {
 			return;
 		}
@@ -149,5 +174,6 @@ abstract class McaWorkerMixin implements Enlisted {
 		this.jaymoskingdoms$site = input.getLong("jaymoskingdoms_site").map(BlockPos::of).orElse(null);
 		this.jaymoskingdoms$task = input.getStringOr("jaymoskingdoms_task", "");
 		this.jaymoskingdoms$carrying = input.getBooleanOr("jaymoskingdoms_carrying", false);
+		this.jaymoskingdoms$grownSince = input.getLongOr("jaymoskingdoms_grown_since", CourtWizards.UNKNOWN);
 	}
 }
