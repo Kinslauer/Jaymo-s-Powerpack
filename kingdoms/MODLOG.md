@@ -2074,6 +2074,52 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   and which way. Hearing it tells you that butcher's skill on Kitchen's butcher screen from then on. Reached through
   `KitchenCompat.butcherGossip` (reflection on Kitchen's `Butchers.gossip`); without Kitchen, gossip is as before.
 
+## 0.5.52: the skill tree (Survival, Stealth, Strength)
+- Andy asked for stealth that improves the more you steal successfully, as a skill tree with three pillars:
+  Survival, Stealth and Strength; then for all three pillars ("we can fix later"), a respec at a court wizard or by
+  drinking a bottle o' enchanting, and an alignment other players can see that villagers gossip about.
+  Plan: `docs/Skills-Plan.md`.
+- `Skills`: a player attachment (`jaymoskingdoms:skills`; saved, kept through death, synced to its own player) with
+  experience per pillar and ranks per perk. Levels 0-15; level l → l+1 takes 30 + 15·l XP (2025 XP to 15). Each level
+  is one point to spend in that pillar, and each pillar's six perks cost 15 points, so a master has all of them.
+  **K** opens the tree (`SkillScreen`); a perk button spends a point (`Skills.Spend`, checked on the server). Perks
+  that are attributes (`Skills.modifier`, ids `jaymoskingdoms:skill_*`) are put back on join, respawn and every change.
+- **Stealth** (`Skills`, `Pickpocket`, `Theft`). XP: a pocket picked clean +10 (+2 empty; a guard's ×2, a sleeper's
+  ×½; one already picked today gives nothing), a theft nobody saw +4 at most every 30 s. Practice: the hold
+  (`Pickpocket.holdTicks`) 3% shorter per level. Perks: Light Fingers (5: hold 8% shorter each), Deep Pockets (3: +15%
+  of a carried stack and a reroll on an empty pocket each), Soft Step (3: sneaking witnesses see 10% of their range
+  less each, 50% → 20%), Quick Hands (lvl 5: reach in from the side, ~70° round, and the mark must turn to ~53° of
+  facing you instead of ~84° to catch you), Slip Away (lvl 5: half the time you're caught, they can't tell who: a cry,
+  no crime), Ghost (2 points, lvl 10: guards take no longer than anyone, ×1.25 gone; unseen thefts never noticed).
+  Fully practised with everything the hold is about a third as long.
+- **Survival** (`SurvivalSkill`). XP: a ripe crop or nether wart broken +1, every 2 hunger points eaten back +1, a
+  night lived through in the Overworld without dying +15, taking damage and living +1 per 4 damage (at most every
+  5 s). Practice: hunger drains 2% slower per level (`PlayerExhaustionMixin` on `Player.causeFoodExhaustion`; this
+  also lightens powers' hunger costs). Perks: Forager (5: 8% chance each of an extra harvest), Second Wind (3: under
+  30% health, Regeneration 2.5 s per rank, every 20 s at most), Weathered (3: burning 20% shorter each, `BURNING_TIME`;
+  powder snow freezes 25% slower each), Iron Stomach (lvl 5: Hunger never takes hold), Hardy Landing (lvl 5: fall
+  damage ×0.7 via `FALL_DAMAGE_MULTIPLIER`, `ADD_MULTIPLIED_TOTAL`, so a power that takes it to nothing keeps it at
+  nothing, and Gravity's own modifiers are untouched), Last Stand (2 points, lvl 10: once a day a killing blow leaves
+  you on half a heart with a moment of Regeneration II; not against /kill or the void).
+- **Strength** (`StrengthSkill`). XP: a melee blow landed +1 (at most every half second), a monster killed +4, stone,
+  ore or wood broken (hardness ≥ 1.5 or logs) +1 a quarter of the time. Practice: +1% melee damage per level
+  (`ATTACK_DAMAGE`). Perks: Heavy Blows (5: +4% each), Brace (3: +0.1 knockback resistance each), Bulldozer (3: +0.25
+  attack knockback each), Quarryman (lvl 5: break blocks 25% faster), Packhorse (lvl 5: hunger drains 25% slower),
+  Titan's Grip (2 points, lvl 10: a full-strength blow staggers its target 1 time in 5: Slowness III and Weakness, 2 s).
+- **Respec** (`Skills.respec`): every point comes back, levels and XP stay. Sneak and use a bottle o' enchanting to
+  drink it, or right-click a kingdom's court wizard, who offers it for 5 emeralds + 1 per rank learned
+  (`Skills.wizard`; the answer comes through the talk screen, `Approaches.answer` hands it over).
+- **Alignment** (`Renown`): your best pillar once it's level 5 and ahead of the others (Survivor, Rogue, Warrior;
+  "Master" at 15). It shows over other players' name tags (`SkillTitles`, in the pillar's colour; hidden while they
+  sneak), on the skill screen, and is synced as `jaymoskingdoms:alignment`. A settlement whose people see you (as
+  `Theft.witnesses`) learns it (`jaymoskingdoms:renown`, saved); each day word may travel from each settlement that
+  knows you to one more (50%). Their gossips talk about you half the time (`talk.jaymoskingdoms.gossip.you.*`), and
+  where you're known for a Rogue pockets take 20% longer to pick.
+- Butchering: any rank of Forager, the first Survival perk, makes you experienced with butchering (Kitchen 0.4.32's
+  `Butchers.setExperienced`, set by reflection in `KitchenCompat.skills`): you judge a butcher's skill from their cuts.
+- A gossip who's heard of you talks about you first; otherwise half of gossip is about butchers, as before.
+- Tuning constants are at the top of `Skills`, `SurvivalSkill`, `StrengthSkill` and `Renown`. Not playtested in game.
+
 ## 0.5.53: court wizards are MCA villagers, taken from the elders
 - Andy: "court wizards should be integrated as MCA villagers, maybe once they grow old". With MCA loaded, a kingdom's
   court wizard (`Sorcery.WIZARD`) is one of its own villagers, promoted in place as workers are (`CourtWizards`,
@@ -2098,5 +2144,7 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   not. A wizard's profession on anyone a kingdom didn't make one is taken off again.
 - `Thralls.refuses` treats a realm's MCA villagers in its service (wizards, guards) as its folk, so they spare the
   thralls of their own side and of players the realm doesn't count hostile.
-- `CourtWizards.is(entity)` says whether anything is a court wizard (folk or villager), for the skill tree's respec.
+- The skill tree's respec works with either kind of wizard (`CourtWizards.is`; `Skills.wizard` and its answer take any
+  living entity): right-click a folk wizard as before, or sneak and right-click an MCA wizard (plain right-click still
+  opens MCA's menu; from behind with an empty hand it's still a pickpocket).
 - Not playtested in game.

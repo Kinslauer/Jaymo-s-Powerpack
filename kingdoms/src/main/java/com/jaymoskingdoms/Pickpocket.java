@@ -51,6 +51,9 @@ import org.jspecify.annotations.Nullable;
  * law holds it's a theft seen ({@link Theft.Crime#PICKPOCKET}): reputation, and its guards after you. Done clean, anyone
  * else who sees you still counts as a witness; with no one, the mark may miss their purse later
  * ({@link Theft#NOTICE_CHANCE}). A pocket picked is empty for a day. A sleeping mark can be robbed from any side.
+ *
+ * <p>(0.5.52) Every pocket picked clean is Stealth experience ({@link Skills}): the more you do it, the shorter the hold,
+ * and Stealth's perks take more, reach in from the side, and let you slip away when a mark turns on you.
  */
 public final class Pickpocket {
 	/** The hand stays in the pocket a random while between these (ticks), before light, armour and mood. */
@@ -156,7 +159,7 @@ public final class Pickpocket {
 				return InteractionResult.SUCCESS;
 			}
 			if (lift != null || !markable(mark) || !sp.isShiftKeyDown() || !sp.getMainHandItem().isEmpty() || sp.isSpectator()
-				|| sp.distanceTo(mark) > ATTACH_RANGE || !(mark.isSleeping() || behind(sp, mark, BEHIND_COS))) {
+				|| sp.distanceTo(mark) > ATTACH_RANGE || !(mark.isSleeping() || behind(sp, mark, Skills.behindCos(sp, BEHIND_COS)))) {
 				return InteractionResult.PASS;
 			}
 			if (rest != null && rest.until() > now) {
@@ -206,11 +209,17 @@ public final class Pickpocket {
 				ticks *= PANIC_FACTOR;
 			}
 		}
-		if (mark instanceof Folk folk && folk.combatant()) {
+		if (mark instanceof Folk folk && folk.combatant() && !Skills.ghost(player)) {
 			ticks *= GUARD_FACTOR;
 		}
 		if (mark.isSleeping()) {
 			ticks *= ASLEEP_FACTOR;
+		}
+		// (0.5.52) the more pockets you've picked, the lighter your hand (Skills: practice, Light Fingers); where they know
+		// you for a Rogue, they keep a hand on their purses (Renown)
+		ticks = Skills.holdTicks(player, ticks);
+		if (Renown.knownRogue(player, law(level, mark))) {
+			ticks *= Renown.ROGUE_WARY;
 		}
 		return Math.max(MIN_TICKS, Math.round(ticks));
 	}
@@ -260,7 +269,7 @@ public final class Pickpocket {
 				end(player, mark, now);
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.pickpocket.slipped_away", mark.getDisplayName())
 					.withStyle(ChatFormatting.GRAY));
-			} else if (!mark.isSleeping() && !behind(player, mark, TURN_COS)) {
+			} else if (!mark.isSleeping() && !behind(player, mark, Skills.turnCos(player, TURN_COS))) {
 				it.remove();
 				end(player, mark, now);
 				caught(player, level, mark, law(level, mark));
@@ -293,13 +302,17 @@ public final class Pickpocket {
 	private static void pick(ServerPlayer player, ServerLevel level, LivingEntity mark, long now) {
 		RandomSource random = level.getRandom();
 		Faction f = law(level, mark);
-		ItemStack loot = PICKED.getOrDefault(mark.getUUID(), 0L) > now ? ItemStack.EMPTY : loot(mark, random);
+		boolean fresh = PICKED.getOrDefault(mark.getUUID(), 0L) <= now;
+		ItemStack loot = fresh ? loot(player, mark, random) : ItemStack.EMPTY;
 		PICKED.put(mark.getUUID(), now + EMPTY_TICKS);
+		// (0.5.52) a pocket picked clean is Stealth practice (one already emptied teaches nothing)
+		int xp = fresh ? Skills.pickedClean(player, !loot.isEmpty(), mark instanceof Folk folk && folk.combatant(), mark.isSleeping()) : 0;
+		Component gained = xp > 0 ? Component.translatable("message.jaymoskingdoms.pickpocket.xp", xp).withStyle(ChatFormatting.DARK_GREEN) : Component.empty();
 		if (loot.isEmpty()) {
-			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.pickpocket.empty", mark.getDisplayName()).withStyle(ChatFormatting.GRAY));
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.pickpocket.empty", mark.getDisplayName()).withStyle(ChatFormatting.GRAY).append(gained));
 		} else {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.pickpocket.lifted", loot.getCount(), loot.getHoverName(),
-				mark.getDisplayName()).withStyle(ChatFormatting.GRAY));
+				mark.getDisplayName()).withStyle(ChatFormatting.GRAY).append(gained));
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, 1.4F);
 			if (!player.getInventory().add(loot) && !loot.isEmpty()) {
 				player.drop(loot, false, Prediction.SERVER_ONLY);
@@ -317,6 +330,13 @@ public final class Pickpocket {
 	private static void caught(ServerPlayer player, ServerLevel level, LivingEntity mark, @Nullable Faction f) {
 		if (mark.isSleeping()) {
 			mark.stopSleeping();
+		}
+		if (Skills.slipsAway(player, level.getRandom())) {
+			// (0.5.52, Slip Away) they caught a hand, but not whose: they cry out, and it's no crime of yours
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.pickpocket.slipped", mark.getDisplayName()).withStyle(ChatFormatting.YELLOW));
+			Speech.say(level, mark, Component.translatable("message.jaymoskingdoms.theft.cry.pickpocket." + level.getRandom().nextInt(Theft.SHOUT_VARIANTS)),
+				Speech.YELLOW, Theft.SHOUT_RANGE);
+			return;
 		}
 		if (mark instanceof Mob mob) {
 			mob.getLookControl().setLookAt(player);
@@ -336,7 +356,7 @@ public final class Pickpocket {
 	}
 
 	/** What {@code mark} has on them: a share of something they carry, or else a pocket's worth (or nothing). */
-	private static ItemStack loot(LivingEntity mark, RandomSource random) {
+	private static ItemStack loot(ServerPlayer player, LivingEntity mark, RandomSource random) {
 		if (mark instanceof Villager v) {
 			SimpleContainer bag = v.getInventory();
 			List<Integer> full = new ArrayList<>();
@@ -347,7 +367,7 @@ public final class Pickpocket {
 			}
 			if (!full.isEmpty()) {
 				ItemStack stack = bag.getItem(full.get(random.nextInt(full.size())));
-				int take = Math.max(1, Math.round(stack.getCount() * CARRIED_SHARE));
+				int take = Math.max(1, Math.round(stack.getCount() * Skills.carriedShare(player, CARRIED_SHARE)));
 				bag.setChanged();
 				return stack.split(take);
 			}
@@ -356,11 +376,14 @@ public final class Pickpocket {
 		for (Pocket p : POCKETS) {
 			total += p.weight();
 		}
-		int roll = random.nextInt(total);
-		for (Pocket p : POCKETS) {
-			roll -= p.weight();
-			if (roll < 0) {
-				return new ItemStack(p.item(), p.least() + random.nextInt(p.most() - p.least() + 1));
+		// (0.5.52, Deep Pockets) another try for each rank at a pocket that turns up empty
+		for (int tries = Skills.pocketTries(player); tries > 0; tries--) {
+			int roll = random.nextInt(total);
+			for (Pocket p : POCKETS) {
+				roll -= p.weight();
+				if (roll < 0) {
+					return new ItemStack(p.item(), p.least() + random.nextInt(p.most() - p.least() + 1));
+				}
 			}
 		}
 		return ItemStack.EMPTY;

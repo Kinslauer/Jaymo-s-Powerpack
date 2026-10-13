@@ -594,6 +594,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			if (this.role() == KING) {
 				Quests.open(serverPlayer, this);
 			}
+			// (0.5.52) a court wizard can unmake what you've learned, for a price
+			if (CourtWizards.is(this)) {
+				Skills.wizard(serverPlayer, this);
+			}
 		}
 		return InteractionResult.SUCCESS;
 	}

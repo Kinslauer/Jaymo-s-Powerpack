@@ -212,6 +212,12 @@ public final class WebArms {
 		return BRAKE_REACH + BRAKE_BEAT * (0.5F + 0.5F * Mth.sin(ageInTicks * BRAKE_BEAT_SPEED));
 	}
 
+	/** How far a player's wings are flared to brake this frame (0-1). */
+	static float brake(Player player, float partialTick) {
+		Body body = BODIES.get(player.getId());
+		return body == null ? 0.0F : Mth.lerp(partialTick, body.prevBrake, body.brake);
+	}
+
 	/** How spread a player's wings are this frame (0 = folded). */
 	static float wings(Player player, float partialTick) {
 		Body body = BODIES.get(player.getId());
