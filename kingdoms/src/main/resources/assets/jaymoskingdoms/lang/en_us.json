@@ -1542,5 +1542,18 @@
 	"class.jaymoskingdoms.rider": "Rider",
 	"class.jaymoskingdoms.rider.desc": "Born to the saddle: your horse runs 15% faster and tires slower under you, horses come to trust you sooner, and you strike 20% harder from horseback. On foot you're a touch slower, bow-legged.",
 	"gui.jaymoskingdoms.class.stat.horses": "Horses %s",
-	"gui.jaymoskingdoms.class.stat.mounted": "Mounted blows %s"
+	"gui.jaymoskingdoms.class.stat.mounted": "Mounted blows %s",
+	"key.jaymoskingdoms.imbue": "Imbue blade (Sorcerer)",
+	"key.categories.jaymoskingdoms.classes": "Jaymo's Kingdoms: Classes",
+	"class.jaymoskingdoms.option.draining": "Draining",
+	"class.jaymoskingdoms.option.draining.desc": "Life drawn from what you're looking at, into you.",
+	"class.jaymoskingdoms.option.raising": "Raising",
+	"class.jaymoskingdoms.option.raising.desc": "A zombie and a skeleton climb out of the ground to fight for you a while.",
+	"message.jaymoskingdoms.spell.learned": "You learn %s. Sneak and use your staff to turn to it.",
+	"message.jaymoskingdoms.spell.only": "Your staff knows only %s. Read scrolls to learn more.",
+	"message.jaymoskingdoms.spell.turned": "Staff: %s",
+	"message.jaymoskingdoms.imbue.no_blade": "Hold a blade to imbue it.",
+	"message.jaymoskingdoms.imbue.done": "Your blade burns with %s.",
+	"message.jaymoskingdoms.imbue.faded": "The element fades from your blade.",
+	"message.jaymoskingdoms.scroll_beyond": "This scroll is beyond a Sorcerer's quick magic."
 }

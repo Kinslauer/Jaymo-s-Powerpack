@@ -2330,4 +2330,11 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   (`Bonding.addTrust`), blows from horseback +20%; on foot 5% slower. Every class starts with a kit once per player
   (`Classes.kit`, attachment `kitted`): the Thief a dagger and leather, the Archer a bow and arrows, the Rider a lance,
   a saddle and wheat, and so on; other mods' items by id with vanilla stand-ins.
+- Stage 2, the casters (`Spellcraft`): a Mage's wizard's staff casts the spell on it (right-click; sneak and
+  right-click turns to the next), at 1.5x a scroll's power with its own cooldown per spell (`MAGE_COOLDOWN`); a Mage
+  reading a scroll of a spell they don't know learns it (`Chosen.spells`). `Arcana.cast(spell, level, player, power)`
+  casts any of the five by name. A Sorcerer's `J` key imbues the blade in hand with their element for 2 minutes (every
+  blow carries it: fire burns, water douses and slows and hurts what fears water, earth staggers, air launches, lightning
+  chains to 2 neighbours with a visual-only bolt, ice freezes); sneak and `J` throws a bolt of it (5 damage plus the
+  element, 2 s cooldown). The great scrolls (Raising, Warding) are beyond a Sorcerer.
 - Not playtested in game. Plan: `docs/Classes-Plan.md`.

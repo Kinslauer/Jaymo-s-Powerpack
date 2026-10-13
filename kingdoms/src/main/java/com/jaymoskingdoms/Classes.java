@@ -101,18 +101,41 @@ public final class Classes {
 		}
 	}
 
-	/** A player's class and what they picked with it ("" for nothing). */
-	public record Chosen(String cls, String option) {
-		public static final Chosen NONE = new Chosen("", "");
+	/**
+	 * A player's class, what they picked with it ("" for nothing), the spells a Mage knows (the first is what they picked)
+	 * and which of them is on their staff.
+	 */
+	public record Chosen(String cls, String option, List<String> spells, int selected) {
+		public static final Chosen NONE = new Chosen("", "", List.of(), 0);
 		static final Codec<Chosen> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.STRING.optionalFieldOf("class", "").forGetter(Chosen::cls),
-			Codec.STRING.optionalFieldOf("option", "").forGetter(Chosen::option)
+			Codec.STRING.optionalFieldOf("option", "").forGetter(Chosen::option),
+			Codec.STRING.listOf().optionalFieldOf("spells", List.of()).forGetter(Chosen::spells),
+			Codec.INT.optionalFieldOf("selected", 0).forGetter(Chosen::selected)
 		).apply(i, Chosen::new));
 		static final StreamCodec<RegistryFriendlyByteBuf, Chosen> STREAM_CODEC = StreamCodec.of(
 			(buf, c) -> {
 				buf.writeUtf(c.cls);
 				buf.writeUtf(c.option);
-			}, buf -> new Chosen(buf.readUtf(), buf.readUtf()));
+				buf.writeVarInt(c.spells.size());
+				for (String s : c.spells) {
+					buf.writeUtf(s);
+				}
+				buf.writeVarInt(c.selected);
+			}, buf -> {
+				String cls = buf.readUtf(), option = buf.readUtf();
+				int n = buf.readVarInt();
+				List<String> spells = new java.util.ArrayList<>();
+				for (int i = 0; i < n; i++) {
+					spells.add(buf.readUtf());
+				}
+				return new Chosen(cls, option, List.copyOf(spells), buf.readVarInt());
+			});
+
+		/** The spell on the staff, or "" with none. */
+		public String spell() {
+			return this.spells.isEmpty() ? "" : this.spells.get(Math.floorMod(this.selected, this.spells.size()));
+		}
 
 		public @Nullable PlayerClass playerClass() {
 			return PlayerClass.byKey(this.cls);
@@ -183,9 +206,11 @@ public final class Classes {
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(Classes::tick);
+		Spellcraft.register();
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			WRIT_OFFERS.clear();
 			ClassPerks.clear();
+			Spellcraft.clear();
 		});
 		// a writ in the rarest chests
 		LootTableEvents.MODIFY_DROPS.register((table, context, drops) -> {
@@ -200,6 +225,7 @@ public final class Classes {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			if (player.isAlive() && !player.isSpectator()) {
 				ClassPerks.tick(player);
+				Spellcraft.tick(player);
 			}
 		}
 	}
@@ -243,7 +269,7 @@ public final class Classes {
 
 	/** Makes {@code player} a {@code cls}: their attributes, their first things (a Mage's staff), the word of it. */
 	static void set(ServerPlayer player, PlayerClass cls, String option) {
-		player.setAttached(CLASS, new Chosen(cls.key(), option));
+		player.setAttached(CLASS, new Chosen(cls.key(), option, cls == PlayerClass.MAGE ? List.of(option) : List.of(), 0));
 		refresh(player);
 		if (cls == PlayerClass.MAGE && !player.getInventory().contains(new ItemStack(Arcana.WIZARD_STAFF))) {
 			player.getInventory().placeItemBackInInventory(new ItemStack(Arcana.WIZARD_STAFF), Prediction.SERVER_ONLY);

@@ -46,8 +46,8 @@ Hearts: Mage 8, Marksman 9, vanilla 10, Survivalist 11, Brute 12. These stack wi
 1. **Classes and the choice** (Kingdoms 0.6.0 / pack 0.9.0): the eight classes with every *passive* number above
    (tags, attributes, armour weight, Archer's draw-jump and feather fall, Brute's shield), the first-join screen, the
    Writ of Rebirth, the op commands, the class shown on the K screen.
-2. **Mage and Sorcerer magic**: the castable staff, learning scrolls, the beginner spell; the Imbue key and the six
-   elements.
+2. **Mage and Sorcerer magic** (done, same PR): the castable staff, learning scrolls, the beginner spell; the Imbue
+   key (J; sneak+J the bolt) and the six elements.
 3. **Marksman's guns**: reload, windup, range, aim assist through WeaponMod mixins.
 
 ## Andy's answers (2026-10-13)
