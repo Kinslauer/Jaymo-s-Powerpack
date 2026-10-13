@@ -58,6 +58,7 @@ import org.jspecify.annotations.Nullable;
  * <li>V - Barrage: 3-5 rifts open around you and fire weapons at what you're looking at.</li>
  * <li>B - Pocket Stash (also on Z). Corrupted: Sword of Damocles ({@link ArsenalDamocles}).</li>
  * <li>Z - Pocket Stash: your personal 27-slot pocket dimension.</li>
+ * <li>X - Cannon Battery ({@link ArsenalCannons}): hold to grow a fan of rift cannons, let go to fire them all.</li>
  * </ul>
  */
 public final class ArsenalPower implements Power {
@@ -89,35 +90,41 @@ public final class ArsenalPower implements Power {
 	public static final int DROPPED_TICKS = 60;
 
 	/** When each ability is ready again (game time). Saved, and synced to its owner for the HUD. */
-	public record Cooldowns(long reach, long barrage, long ultimate, long damocles) {
-		public static final Cooldowns NONE = new Cooldowns(0, 0, 0, 0);
+	public record Cooldowns(long reach, long barrage, long ultimate, long damocles, long cannons) {
+		public static final Cooldowns NONE = new Cooldowns(0, 0, 0, 0, 0);
 		public static final Codec<Cooldowns> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.LONG.fieldOf("reach").forGetter(Cooldowns::reach),
 				Codec.LONG.fieldOf("barrage").forGetter(Cooldowns::barrage),
 				Codec.LONG.optionalFieldOf("ultimate", 0L).forGetter(Cooldowns::ultimate),
-				Codec.LONG.optionalFieldOf("damocles", 0L).forGetter(Cooldowns::damocles))
+				Codec.LONG.optionalFieldOf("damocles", 0L).forGetter(Cooldowns::damocles),
+				Codec.LONG.optionalFieldOf("cannons", 0L).forGetter(Cooldowns::cannons))
 			.apply(i, Cooldowns::new));
 		public static final StreamCodec<ByteBuf, Cooldowns> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, Cooldowns::reach,
 			ByteBufCodecs.VAR_LONG, Cooldowns::barrage,
 			ByteBufCodecs.VAR_LONG, Cooldowns::ultimate,
 			ByteBufCodecs.VAR_LONG, Cooldowns::damocles,
+			ByteBufCodecs.VAR_LONG, Cooldowns::cannons,
 			Cooldowns::new);
 
 		public Cooldowns withReach(long ready) {
-			return new Cooldowns(ready, barrage, ultimate, damocles);
+			return new Cooldowns(ready, barrage, ultimate, damocles, cannons);
 		}
 
 		public Cooldowns withBarrage(long ready) {
-			return new Cooldowns(reach, ready, ultimate, damocles);
+			return new Cooldowns(reach, ready, ultimate, damocles, cannons);
 		}
 
 		public Cooldowns withUltimate(long ready) {
-			return new Cooldowns(reach, barrage, ready, damocles);
+			return new Cooldowns(reach, barrage, ready, damocles, cannons);
 		}
 
 		public Cooldowns withDamocles(long ready) {
-			return new Cooldowns(reach, barrage, ultimate, ready);
+			return new Cooldowns(reach, barrage, ultimate, ready, cannons);
+		}
+
+		public Cooldowns withCannons(long ready) {
+			return new Cooldowns(reach, barrage, ultimate, damocles, ready);
 		}
 	}
 
@@ -145,6 +152,7 @@ public final class ArsenalPower implements Power {
 		ArsenalArmory.init();
 		HundredBlades.init();
 		ArsenalDamocles.init();
+		ArsenalCannons.init();
 		ArsenalVoid.init();
 		SwordStone.register();
 		RelicWeapons.register();
@@ -220,8 +228,8 @@ public final class ArsenalPower implements Power {
 
 	@Override
 	public boolean slotUnlocked(net.minecraft.world.entity.player.Player player, String slot) {
-		return !"mode".equals(slot) || !com.jaymospowers.core.Mastery.starterOnly(player)
-			&& com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_4);
+		// Z (the Pocket Stash) and X (Cannon Battery) both come with B
+		return !"mode".equals(slot) && !"special".equals(slot) || ArsenalCannons.unlocked(player);
 	}
 
 	@Override
@@ -250,6 +258,7 @@ public final class ArsenalPower implements Power {
 		ArsenalArmory.onLost(player);
 		HundredBlades.onLost(player);
 		ArsenalDamocles.onLost(player);
+		ArsenalCannons.onLost(player);
 		PENDING.remove(player.getUUID());
 		BARRAGES.remove(player.getUUID());
 		player.removeAttached(ArsenalReach.REACH);
@@ -267,6 +276,7 @@ public final class ArsenalPower implements Power {
 		ArsenalRelics.tick(player);
 		HundredBlades.tick(player);
 		ArsenalDamocles.tick(player);
+		ArsenalCannons.tick(player);
 		Pending pending = PENDING.get(player.getUUID());
 		if (pending == null) {
 			return;

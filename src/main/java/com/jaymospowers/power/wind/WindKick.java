@@ -41,7 +41,8 @@ import net.minecraft.world.phys.Vec3;
  * Tempest Kick (a tap of the power's special key, X; every ability mastered; holding X is the {@link WindCyclone}): a roundhouse kick that throws a white crescent of
  * wind out sideways-flat ahead of you. It flies {@link #RANGE} blocks for {@link #DAMAGE}; ascended (the Tempest),
  * {@link #RANGE_ASCENDED} blocks for {@link #DAMAGE_ASCENDED}. It cuts through everything in its path (each once) and
- * stops at walls.
+ * stops at walls. It flies where you look as the leg snaps: in the air, up or down at anything; on the ground, level
+ * or up (looking down at your feet doesn't drive it into the floor).
  */
 public final class WindKick {
 	static final double RANGE = 5.0, RANGE_ASCENDED = 20.0;
@@ -120,7 +121,7 @@ public final class WindKick {
 		final ResourceKey<Level> dimension;
 		final UUID owner;
 		Vec3 pos;
-		final Vec3 dir, side;
+		Vec3 dir, side;
 		final double range;
 		final float damage;
 		/** +1 kicked with the right leg (it sweeps in from the right), -1 the left. */
@@ -173,16 +174,28 @@ public final class WindKick {
 		READY_AT.put(player.getUUID(), now + windup - WINDUP_TICKS + WindCold.cooldown(player, ascended ? COOLDOWN_ASCENDED : COOLDOWN));
 		Kicking kicking = new Kicking(now, player.getRandom().nextBoolean(), player.getRandom().nextInt(), windup);
 		player.setAttached(KICKING, kicking);
-		Vec3 look = player.getLookAngle();
-		Vec3 flat = new Vec3(look.x, 0.0, look.z);
-		flat = flat.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, player.getYRot()) : flat.normalize();
-		// (the player's right, in the world)
-		Vec3 side = new Vec3(-flat.z, 0.0, flat.x);
-		Vec3 start = player.position().add(0.0, player.getBbHeight() * 0.55, 0.0).add(flat.scale(0.8));
-		CRESCENTS.add(new Crescent(level.dimension(), player.getUUID(), start, flat, side, ascended ? RANGE_ASCENDED : RANGE,
+		Vec3 dir = aim(player);
+		// (the player's right, in the world; level, and square to the aim)
+		Vec3 side = side(player);
+		Vec3 start = player.position().add(0.0, player.getBbHeight() * 0.55, 0.0).add(dir.scale(0.8));
+		CRESCENTS.add(new Crescent(level.dimension(), player.getUUID(), start, dir, side, ascended ? RANGE_ASCENDED : RANGE,
 			(ascended ? DAMAGE_ASCENDED : DAMAGE) * WindModes.abilityScale(player), kicking.left() ? -1.0 : 1.0, windup));
 		// the wind-up: a low draw of breath before the snap
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_INHALE, SoundSource.PLAYERS, 0.6F, 1.6F);
+	}
+
+	/** Where the crescent flies: along the look in the air; on the ground, never below level. */
+	private static Vec3 aim(ServerPlayer player) {
+		Vec3 look = player.getLookAngle();
+		if (player.onGround() && look.y < 0.0) {
+			look = new Vec3(look.x, 0.0, look.z);
+		}
+		return look.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, player.getYRot()) : look.normalize();
+	}
+
+	private static Vec3 side(ServerPlayer player) {
+		Vec3 flat = Vec3.directionFromRotation(0.0F, player.getYRot());
+		return new Vec3(-flat.z, 0.0, flat.x);
 	}
 
 	/** The snap: the leg whips round from the kicking side to the front, leaving a white arc at head height. */
@@ -233,8 +246,10 @@ public final class WindKick {
 				continue;
 			}
 			if (c.delay > 0) {
-				// still winding up: it follows the kicker until it leaves the foot
+				// still winding up: it follows the kicker (and their aim) until it leaves the foot
 				if (owner != null && owner.level() == level) {
+					c.dir = aim(owner);
+					c.side = side(owner);
 					c.pos = owner.position().add(0.0, owner.getBbHeight() * 0.55, 0.0).add(c.dir.scale(0.8));
 					if (c.windup > WINDUP_TICKS) {
 						coldSwirl(level, owner, c);

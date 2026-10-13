@@ -33,39 +33,40 @@ TIERS = [
 KEYS = {"S": "minecraft:stick", "L": "minecraft:leather", "C": "minecraft:string", "B": "minecraft:bone",
         "F": "minecraft:flint", "I": "minecraft:iron_ingot", "N": "minecraft:iron_nugget", "W": "#minecraft:logs"}
 
-# weapon id, name, AoW folder/name, Better Combat preset (None: no attributes), vanilla tag, recipe (X = the tier's material)
+# weapon id, name, AoW folder/name, Better Combat preset (None: no attributes; jaymospowers:combo_* are our own, from
+# tools/combat_animations.py), vanilla tag, recipe (X = the tier's material)
 TIERED = [
-    ("dagger", "Dagger", "antiquity/dagger", "dagger", "swords", ["X", "L"]),
-    ("hatchet", "Hatchet", "antiquity/hatchet", "axe", "axes", ["XX", "SL"]),
-    ("skewer", "Skewer", "antiquity/skewer", "spear", "swords", ["  X", " S ", "L  "]),
+    ("dagger", "Dagger", "antiquity/dagger", "jaymospowers:combo_dagger", "swords", ["X", "L"]),
+    ("hatchet", "Hatchet", "antiquity/hatchet", "jaymospowers:combo_hatchet", "axes", ["XX", "SL"]),
+    ("skewer", "Skewer", "antiquity/skewer", "jaymospowers:combo_spear", "swords", ["  X", " S ", "L  "]),
     ("round_shield", "Round Shield", "middle_ages/shield", None, None, ["XLX", "XXX", " X "]),
-    ("longsword", "Longsword", "middle_ages/longsword", "claymore", "swords", [" X ", " X ", "LSL"]),
-    ("glaive", "Glaive", "middle_ages/glaive", "glaive", "swords", [" XX", " S ", "S  "]),
+    ("longsword", "Longsword", "middle_ages/longsword", "jaymospowers:combo_longsword", "swords", [" X ", " X ", "LSL"]),
+    ("glaive", "Glaive", "middle_ages/glaive", "jaymospowers:combo_glaive", "swords", [" XX", " S ", "S  "]),
     ("lance", "Lance", "middle_ages/lance", "lance", "swords", ["  X", " S ", "SL "]),
-    ("war_axe", "War Axe", "middle_ages/waraxe", "heavy_axe", "axes", ["XSX", " S ", " S "]),
-    ("war_scythe", "War Scythe", "middle_ages/scythe", "scythe", "swords", ["XXS", "  S", "  S"]),
-    ("flanged_mace", "Flanged Mace", "middle_ages/heavy_staff", "mace", "swords", [" XX", " XX", "S  "]),
-    ("broadsword", "Broadsword", "fantasy/broadsword", "sword", "swords", [" X ", " X ", "XSX"]),
-    ("claymore", "Claymore", "fantasy/claymore", "claymore", "swords", [" X ", "XXX", "LSL"]),
-    ("cleaver", "Cleaver", "fantasy/cleaver", "axe", "swords", ["XX", "XX", " S"]),
-    ("ninjato", "Ninjato", "edo_period/ninjato", "katana", "swords", ["  X", " X ", "SC "]),
-    ("saber", "Saber", "piracy/saber", "cutlass", "swords", ["  X", " X ", "LS "]),
-    ("machete", "Machete", "piracy/machete", "cutlass", "swords", [" X", " X", "SL"]),
+    ("war_axe", "War Axe", "middle_ages/waraxe", "jaymospowers:combo_war_axe", "axes", ["XSX", " S ", " S "]),
+    ("war_scythe", "War Scythe", "middle_ages/scythe", "jaymospowers:combo_war_scythe", "swords", ["XXS", "  S", "  S"]),
+    ("flanged_mace", "Flanged Mace", "middle_ages/heavy_staff", "jaymospowers:combo_mace", "swords", [" XX", " XX", "S  "]),
+    ("broadsword", "Broadsword", "fantasy/broadsword", "jaymospowers:combo_broadsword", "swords", [" X ", " X ", "XSX"]),
+    ("claymore", "Claymore", "fantasy/claymore", "jaymospowers:combo_claymore", "swords", [" X ", "XXX", "LSL"]),
+    ("cleaver", "Cleaver", "fantasy/cleaver", "jaymospowers:combo_cleaver", "swords", ["XX", "XX", " S"]),
+    ("ninjato", "Ninjato", "edo_period/ninjato", "jaymospowers:combo_ninjato", "swords", ["  X", " X ", "SC "]),
+    ("saber", "Saber", "piracy/saber", "jaymospowers:combo_saber", "swords", ["  X", " X ", "LS "]),
+    ("machete", "Machete", "piracy/machete", "jaymospowers:combo_machete", "swords", [" X", " X", "SL"]),
 ]
 
 # item id, name, AoW texture, Better Combat preset, vanilla tag, recipe, recipe count
 SINGLES = [
-    ("primitive_spear", "Primitive Spear", "stone_age/caveman_spear", "spear", "swords", ["  F", " C ", "S  "], 1),
-    ("primitive_knife", "Primitive Knife", "stone_age/caveman_knife", "dagger", "swords", ["F", "S"], 1),
-    ("bone_knife", "Bone Knife", "stone_age/bone_knife", "dagger", "swords", ["B", "S"], 1),
-    ("hand_axe", "Hand Axe", "stone_age/hand_ax", "axe", "axes", ["FF", "FS"], 1),
-    ("wooden_cudgel", "Wooden Cudgel", "stone_age/cudgel_wood", "mace", "swords", ["W", "S"], 1),
-    ("stone_cudgel", "Stone Cudgel", "stone_age/cudgel_stone", "mace", "swords", ["XX", "XS"], 1),
+    ("primitive_spear", "Primitive Spear", "stone_age/caveman_spear", "jaymospowers:combo_spear", "swords", ["  F", " C ", "S  "], 1),
+    ("primitive_knife", "Primitive Knife", "stone_age/caveman_knife", "jaymospowers:combo_dagger", "swords", ["F", "S"], 1),
+    ("bone_knife", "Bone Knife", "stone_age/bone_knife", "jaymospowers:combo_dagger", "swords", ["B", "S"], 1),
+    ("hand_axe", "Hand Axe", "stone_age/hand_ax", "jaymospowers:combo_hatchet", "axes", ["FF", "FS"], 1),
+    ("wooden_cudgel", "Wooden Cudgel", "stone_age/cudgel_wood", "jaymospowers:combo_mace", "swords", ["W", "S"], 1),
+    ("stone_cudgel", "Stone Cudgel", "stone_age/cudgel_stone", "jaymospowers:combo_mace", "swords", ["XX", "XS"], 1),
     ("throwing_stick", "Throwing Stick", "stone_age/throw_wood", "mace", "swords", ["S ", " S"], 1),
-    ("wooden_quarterstaff", "Wooden Quarterstaff", "basic/longstick_wood", "battlestaff", "swords", ["  S", " S ", "S  "], 1),
-    ("iron_quarterstaff", "Iron Quarterstaff", "basic/longstick_iron", "battlestaff", "swords", ["  I", " S ", "I  "], 1),
+    ("wooden_quarterstaff", "Wooden Quarterstaff", "basic/longstick_wood", "jaymospowers:combo_quarterstaff", "swords", ["  S", " S ", "S  "], 1),
+    ("iron_quarterstaff", "Iron Quarterstaff", "basic/longstick_iron", "jaymospowers:combo_quarterstaff", "swords", ["  I", " S ", "I  "], 1),
     ("harpoon", "Harpoon", "piracy/harpoon", "trident", "swords", ["  I", " S ", "SC "], 1),
-    ("kunai", "Kunai", "edo_period/kunai", "dagger", None, ["I", "C"], 4),
+    ("kunai", "Kunai", "edo_period/kunai", "jaymospowers:combo_dagger", None, ["I", "C"], 4),
     ("throwing_star", "Throwing Star", "edo_period/throwing_star", None, None, [" N ", "N N", " N "], 2),
 ]
 SINGLE_KEYS = {"stone_cudgel": {"X": "#minecraft:stone_tool_materials"}}
@@ -105,6 +106,11 @@ def write(path, obj):
         f.write("\n")
 
 
+def parent_of(preset):
+    """A weapon's Better Combat parent: one of ours if it names a namespace, else Better Combat's own preset."""
+    return preset if ":" in preset else f"bettercombat:{preset}"
+
+
 def model_of(aow, name):
     """AoW's own item model for `name` (its hand poses), or None."""
     path = os.path.join(aow, "assets", "ageofweapons", "models", "item", name + ".json")
@@ -121,12 +127,22 @@ def copy_texture(aow, src, dest):
     shutil.copyfile(path, out)
 
 
+# quarterstaffs are held by the middle (the grip sits on the stick's centre, not near its end) and drawn longer, so its
+# twirls in tools/combat_animations.py spin round the middle
+STAFF_DISPLAY = {
+    "thirdperson_righthand": {"rotation": [0, -90, 55], "translation": [0, 0, 0.5], "scale": [1.6, 1.6, 1.0]},
+    "thirdperson_lefthand": {"rotation": [0, 90, -55], "translation": [0, 0, 0.5], "scale": [1.6, 1.6, 1.0]},
+}
+
+
 def handheld(aow, item, aow_model, parent="minecraft:item/handheld"):
     """A handheld model using the copied texture, keeping AoW's hand poses (its big two-handers are drawn 2x)."""
     src = model_of(aow, aow_model) or {}
     model = {"parent": parent, "textures": {"layer0": f"{NS}:item/armory/{item}"}}
     if "display" in src:
         model["display"] = src["display"]
+    if item.endswith("quarterstaff"):
+        model["display"] = STAFF_DISPLAY
     write(os.path.join(ASSETS, "models", "item", "armory", item + ".json"), model)
     write(os.path.join(ASSETS, "items", item + ".json"),
           {"model": {"type": "minecraft:model", "model": f"{NS}:item/armory/{item}"}})
@@ -216,7 +232,7 @@ def main(aow):
             else:
                 handheld(aow, item, f"{src.split('/')[1]}_{suffix}")
             if preset:
-                write(os.path.join(DATA, "weapon_attributes", item + ".json"), {"parent": f"bettercombat:{preset}"})
+                write(os.path.join(DATA, "weapon_attributes", item + ".json"), {"parent": parent_of(preset)})
             if tag:
                 tags[tag].append(f"{NS}:{item}")
             if material:
@@ -231,7 +247,7 @@ def main(aow):
         copy_texture(aow, f"item/{src}", f"item/armory/{item}")
         handheld(aow, item, src.split("/")[1])
         if preset:
-            write(os.path.join(DATA, "weapon_attributes", item + ".json"), {"parent": f"bettercombat:{preset}"})
+            write(os.path.join(DATA, "weapon_attributes", item + ".json"), {"parent": parent_of(preset)})
         if tag:
             tags[tag].append(f"{NS}:{item}")
         shaped(item, pattern, dict(KEYS, **SINGLE_KEYS.get(item, {})), count)

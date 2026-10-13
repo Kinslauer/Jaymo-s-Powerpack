@@ -9,7 +9,6 @@ used here. All sounds and particles are vanilla.
 | Key (default) | What it does |
 |---|---|
 | **R** (Ability 1) | Toggle flight on or off. Taking off from the ground gives an upward burst. |
-| **Double-tap Jump while sneaking** | Take off (from NONE to HOVER). |
 | **WASD / Jump / Sneak** (HOVER) | Move slowly; Jump rises and Sneak sinks. Sinking onto the ground lands you. |
 | **Sprint** (hold) | Go to CRUISE, flying fast where you look. Holding it accelerates and keeps your speed. Let go and you slow back down to HOVER. |
 | **Sneak** (CRUISE/SONIC) | Lock the current cruise speed, so you don't have to hold Sprint. Sneak again to unlock. |
@@ -115,7 +114,6 @@ You keep your momentum. The fall that follows is harmless until you land.
 | `CRUISE_BRAKE` | 0.15 | slow-down per tick while holding Back |
 | `CRUISE_TURN_SLOW` / `CRUISE_TURN_FAST` | 0.35 / 0.12 | how fast velocity follows your look, at low and at top speed (lower means more drift) |
 | `TAKEOFF_BOOST` / `AIR_TAKEOFF_BOOST` | 0.9 / 0.5 | upward kick on take-off |
-| `DOUBLE_TAP_TICKS` | 7 | double-tap window for Jump |
 | `IMPACT_SPEED` | 0.6 | horizontal speed lost in one bump that counts as a crash |
 
 **Camera** (`WindCamera`): `MAX_FOV_BOOST` = 0.15 and `MAX_SHAKE` = 3°. The boom shake is 2.2° over 14 ticks and the
@@ -129,7 +127,7 @@ maximum channel are in `WindAbility`.
 ## Testing
 1. `/power set @s wind`. In survival, crashing at speed hurts (see Impacts); creative takes no damage.
 2. **Flight:**
-   - Press R, or sneak and double-tap Space. You should pop up and hover.
+   - Press R. You should pop up and hover.
    - Use WASD, Space and Shift to move. Sink to the ground to land.
 3. **Cruise:**
    - Hold Ctrl (Sprint). The speed bar fills, and at the gold tick you get the boom, shake and flash.
