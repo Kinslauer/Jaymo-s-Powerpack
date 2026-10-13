@@ -95,7 +95,7 @@ public final class Arcana {
 	static ItemStack scrollFor(int role, RandomSource random) {
 		return new ItemStack(switch (role) {
 			case Sorcery.NECROMANCER -> random.nextBoolean() ? SCROLL_RAISING : SCROLL_DRAINING;
-			case Sorcery.SHAMAN -> SCROLL_FIRE;
+			case Sorcery.SHAMAN, Orcs.SHAMAN -> SCROLL_FIRE;
 			default -> random.nextBoolean() ? SCROLL_WARDING : SCROLL_ARCANE;
 		});
 	}

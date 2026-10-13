@@ -100,7 +100,7 @@ final class Frights {
 
 	private static boolean frightful(Mob m) {
 		if (m instanceof Folk folk) {
-			return Assault.attacker(folk) || folk.role() == Folk.BARBARIAN || folk.role() == Folk.CHIEF;
+			return Assault.attacker(folk) || folk.role() == Folk.BARBARIAN || folk.role() == Folk.CHIEF || Orcs.isOrc(folk);
 		}
 		return m instanceof Enemy;
 	}

@@ -83,6 +83,8 @@ final class Raids {
 	static final String TASK = "raid";
 	/** An illager war party: pillagers to each vindicator. */
 	static final int PILLAGERS_PER_VINDICATOR = 2;
+	/** (0.5.45) An orc war band: every this many, one is a ranger. */
+	static final int ORCS_PER_RANGER = 3;
 
 	enum Phase {
 		MARCH, PLUNDER, RETURN
@@ -112,7 +114,7 @@ final class Raids {
 	/** Settlement id → game time it was last raided. */
 	private static final Map<Integer, Long> RAIDED = new HashMap<>();
 	/** Camps whose raider fell (the roster's loss is undone next tick: raiders aren't on it). */
-	private static final List<Integer> UNDO = new ArrayList<>();
+	private static final List<int[]> UNDO = new ArrayList<>();
 	/** Raiders loaded with no raid to belong to (sent home next tick). */
 	private static final List<Mob> STRAYS = new ArrayList<>();
 
@@ -226,8 +228,8 @@ final class Raids {
 		ACTIVE.put(camp.id(), raid);
 		RAIDED.put(target.id(), now);
 		Camps.noteRaid(server, camp.id(), now);
-		boolean illagers = Camps.illager(server, camp.id());
-		int band = illagers ? Illagers.fighters(camp) : camp.holdings().count(Folk.BARBARIAN);
+		boolean illagers = Camps.illager(server, camp.id()), orcs = Camps.orc(server, camp.id());
+		int band = illagers ? Illagers.fighters(camp) : orcs ? OrcCamps.fighters(camp) : camp.holdings().count(Folk.BARBARIAN);
 		int size = Math.min(PARTY_MAX, PARTY_BASE + band / PARTY_PER);
 		for (int i = 0; i < size; i++) {
 			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, muster.offset(random.nextInt(7) - 3, 0, random.nextInt(7) - 3));
@@ -244,13 +246,16 @@ final class Raids {
 				continue;
 			}
 			raider.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
-			raider.setup(Folk.BARBARIAN, camp, target.seat(), RAID_HOME_RADIUS);
+			// (0.5.45) an orc war band: grunts, every third one a ranger
+			int role = !orcs ? Folk.BARBARIAN : i % ORCS_PER_RANGER == ORCS_PER_RANGER - 1 ? Orcs.RANGER : Orcs.GRUNT;
+			raider.setup(role, camp, target.seat(), RAID_HOME_RADIUS);
 			level.addFreshEntity(raider);
 			// (after it's added: its load mustn't take it for a stray)
 			raider.setTask(TASK);
 			raid.party.add(raider.getUUID());
 		}
-		tell(level, target.seat(), Component.translatable(illagers ? "message.jaymoskingdoms.raid.announce.illager" : "message.jaymoskingdoms.raid.announce",
+		tell(level, target.seat(), Component.translatable(illagers ? "message.jaymoskingdoms.raid.announce.illager"
+				: orcs ? "message.jaymoskingdoms.raid.announce.orc" : "message.jaymoskingdoms.raid.announce",
 			camp.name(), target.name()).withStyle(ChatFormatting.RED));
 		for (ServerPlayer player : players(level, target.seat(), ANNOUNCE_RANGE)) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAID_HORN.value(), SoundSource.HOSTILE, 2.0F, 0.8F);
@@ -281,8 +286,10 @@ final class Raids {
 
 	static void tick(MinecraftServer server) {
 		ServerLevel level = Factions.level(server);
-		for (int camp : UNDO) {
-			Factions.update(server, camp, f -> f.withHoldings(f.holdings().adjust(Folk.BARBARIAN, 1).adjustVacancy(Folk.BARBARIAN, -1)));
+		for (int[] lost : UNDO) {
+			// (camp, role: a barbarian, or one of an orc war band)
+			int role = lost[1];
+			Factions.update(server, lost[0], f -> f.withHoldings(f.holdings().adjust(role, 1).adjustVacancy(role, -1)));
 		}
 		UNDO.clear();
 		if (!STRAYS.isEmpty()) {
@@ -478,7 +485,7 @@ final class Raids {
 	 */
 	static void raiderDied(ServerLevel level, LivingEntity raider, int camp, DamageSource source, boolean folk) {
 		if (folk) {
-			UNDO.add(camp);
+			UNDO.add(new int[] {camp, raider instanceof Folk f ? f.role() : Folk.BARBARIAN});
 		}
 		Raid raid = ACTIVE.get(camp);
 		if (raid == null) {

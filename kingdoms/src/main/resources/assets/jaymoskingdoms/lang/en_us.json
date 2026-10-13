@@ -990,5 +990,20 @@
 	"message.jaymoskingdoms.racing_throw": "A bad landing pitches you out of the racing saddle!",
 	"message.jaymoskingdoms.horse_bucks": "%s bucks you off!",
 	"message.jaymoskingdoms.shoes_worn": "%s has worn through its shoes.",
-	"message.jaymoskingdoms.lame": "%s is going lame: pick its hooves or have it shod."
+	"message.jaymoskingdoms.lame": "%s is going lame: pick its hooves or have it shod.",
+	"entity.jaymoskingdoms.orc_grunt_of": "Orc of %s",
+	"entity.jaymoskingdoms.orc_ranger_of": "Orc Ranger of %s",
+	"entity.jaymoskingdoms.orc_shaman_of": "Orc Shaman of %s",
+	"message.jaymoskingdoms.raid.announce.orc": "Drums in the hills! The orcs of %s march on %s!",
+	"message.jaymoskingdoms.orc_camp.cleared": "The warchief of %s has fallen to %s! The orcs break and flee.",
+	"message.jaymoskingdoms.orc_camp.thanks": "Word of the warchief's death spreads: every kingdom and village thinks better of you.",
+	"speech.jaymoskingdoms.orc.cry_0": "Smash 'em!",
+	"speech.jaymoskingdoms.orc.cry_1": "Fresh meat!",
+	"speech.jaymoskingdoms.orc.cry_2": "For the warchief!",
+	"speech.jaymoskingdoms.orc.cry_3": "Crack its bones!",
+	"speech.jaymoskingdoms.orc.cry_4": "Skulls for the stockade!",
+	"speech.jaymoskingdoms.orc.cry_5": "Run, little thing! Run!",
+	"speech.jaymoskingdoms.orc.rage_0": "RRRAAGH! You'll pay for that!",
+	"speech.jaymoskingdoms.orc.rage_1": "Blood! I smell my own blood!",
+	"speech.jaymoskingdoms.orc.rage_2": "Now I'm ANGRY!"
 }

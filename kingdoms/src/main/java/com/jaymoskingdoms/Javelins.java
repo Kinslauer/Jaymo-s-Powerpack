@@ -75,10 +75,10 @@ final class Javelins {
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register(Javelins::allowDamage);
 	}
 
-	/** Its role throws: guards, and barbarians (with their chiefs). */
+	/** Its role throws: guards, barbarians (with their chiefs), and orc grunts. */
 	static boolean thrower(Folk folk) {
 		int role = folk.role();
-		return role == Folk.GUARD || role == Folk.BARBARIAN || role == Folk.CHIEF;
+		return role == Folk.GUARD || role == Folk.BARBARIAN || role == Folk.CHIEF || role == Orcs.GRUNT;
 	}
 
 	/** From {@link Folk#customServerAiStep}: a throw at its foe, when it can't close with it and the javelin's ready. */

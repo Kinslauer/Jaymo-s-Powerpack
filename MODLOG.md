@@ -522,3 +522,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   wears down unshod hooves, and wears war and racing saddles, a bridle, a dyeable blanket and chain or plate barding,
   drawn in 3D. Keys: N whistle, J trick. Every horse, skeleton horse and zombie horse is now Mo' Creatures' horse
   model (GPL-3, credited), with our 36 coats painted onto its texture and its armour over them.
+- **0.8.88, orc war camps:** ships Jaymo's Kingdoms 0.5.45 (see `kingdoms/MODLOG.md`): our own take on The Orcs! (no
+  26.3 build, all rights reserved): orc camps rise in rough country near kingdoms, a dark oak stockade round the
+  warchief's longhouse, tents, a forge, a fighting pit and a watchtower; grunts, rangers, a shaman and a warchief boss
+  with a ground slam. Their war bands raid kingdoms; killing the warchief clears the camp.
