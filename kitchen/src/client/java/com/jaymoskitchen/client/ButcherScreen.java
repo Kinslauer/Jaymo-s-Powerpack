@@ -13,8 +13,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 /**
- * (0.4.30) A butcher villager sizes up the body you brought: how good he is (up to three times what you'd get yourself),
- * what he charges, and whether you hand it over.
+ * (0.4.30) A butcher villager sizes up the body you brought: what he charges, how good he is (up to three times what
+ * you'd get yourself) if you've heard tell of him, and whether you hand it over.
  */
 public class ButcherScreen extends Screen {
 	private static final int PANEL_W = 260;
@@ -81,18 +81,23 @@ public class ButcherScreen extends Screen {
 
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		// his standing as a butcher: a word and five marks
-		Component tier = Component.translatable("screen.jaymoskitchen.butcher.tier." + offer.tier());
-		graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.butcher.skill", tier), cx, y + 22, COLOR_TEXT);
+		// how good they are: only if you've heard (gossip) or seen their work; otherwise every butcher swears they're the best
+		boolean known = offer.tier() >= 0;
+		Component tier = Component.translatable(known ? "screen.jaymoskitchen.butcher.tier." + offer.tier() : "screen.jaymoskitchen.butcher.tier.unknown");
+		graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.butcher.skill", tier), cx, y + 22, known ? COLOR_TEXT : COLOR_DIM);
 		int pipW = 14, pipGap = 3, pipsX = cx - (TIERS * pipW + (TIERS - 1) * pipGap) / 2;
 		for (int i = 0; i < TIERS; i++) {
 			int px = pipsX + i * (pipW + pipGap);
-			graphics.fill(px, y + 34, px + pipW, y + 38, i <= offer.tier() ? COLOR_PIP : COLOR_PIP_EMPTY);
+			graphics.fill(px, y + 34, px + pipW, y + 38, known && i <= offer.tier() ? COLOR_PIP : COLOR_PIP_EMPTY);
 		}
-
-		graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.butcher.yield",
-			String.format(Locale.ROOT, "%.1f", offer.skill())), cx, y + 46, COLOR_GOOD);
-		graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.butcher.flavour." + offer.tier()), cx, y + 60, COLOR_DIM);
+		if (known) {
+			graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.butcher.yield",
+				String.format(Locale.ROOT, "%.1f", offer.skill())), cx, y + 46, COLOR_GOOD);
+			graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.butcher.flavour." + offer.tier()), cx, y + 60, COLOR_DIM);
+		} else {
+			graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.butcher.unheard"), cx, y + 46, COLOR_DIM);
+			graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.butcher.boast"), cx, y + 60, COLOR_DIM);
+		}
 		graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.butcher.body", offer.what()), cx, y + 78, COLOR_TEXT);
 
 		// the price, with an emerald, in red if you can't cover it

@@ -1971,3 +1971,9 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   mark is dropped when the block breaks, and only matches while the same block stands there, so a block the
   settlement later puts in that spot is the settlement's again. Other players' blocks and settlement-built ones still
   count as before.
+
+## 0.5.47: gossip about butchers
+- With Jaymo's Kitchen 0.4.30, half the gossip townsfolk walk up with is about a butcher (`BUTCHER_GOSSIP_CHANCE`):
+  trash talk or praise for their own village's butcher, or word of a master far off, or one to avoid, with how far
+  and which way. Hearing it tells you that butcher's skill on Kitchen's butcher screen from then on. Reached through
+  `KitchenCompat.butcherGossip` (reflection on Kitchen's `Butchers.gossip`); without Kitchen, gossip is as before.

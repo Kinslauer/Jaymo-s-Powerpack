@@ -5,8 +5,10 @@ import com.jaymoskitchen.net.Payloads;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -52,18 +54,24 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.4.30) Butcher villagers (vanilla's and MCA's) butcher passive animals for you, for emeralds. Bring one a body (in
- * your arms or your pocket) and right-click them: a screen shows how good they are and what it costs. Pay, and they take
- * the body, walk out back (to a butcher block nearby, or somewhere out of the way behind their smoker), chop it up, and
- * walk back to hand you the cuts. Their skill comes from their trade level plus a knack of their own: a novice gets about
- * what you would on a butcher block, a master up to three times that from the same body.
+ * your arms or your pocket) and right-click them: a screen shows what it costs. Pay, and they take the body, walk out
+ * back (to a butcher block nearby, or somewhere out of the way behind their smoker), chop it up, and walk back to hand
+ * you the cuts. Each butcher has a skill of their own, from about what you'd get on a butcher block up to three times
+ * that, and it has nothing to do with their price or trade level: you only know how good one is once you've heard it in
+ * gossip ({@link #gossip}, which Jaymo's Kingdoms' townsfolk tell) or seen their work for yourself.
  */
 public final class Butchers {
-	/** How much each trade level above novice adds to the yield, and how far a butcher's own knack moves it either way. */
-	private static final float SKILL_PER_LEVEL = 0.5F;
-	private static final float KNACK = 0.3F;
+	/** A butcher's skill, fixed for each one: anywhere between these, evenly spread. */
 	private static final float MIN_SKILL = 1.0F, MAX_SKILL = 3.0F;
-	/** Emeralds per job, times the butcher's skill (rounded): a small body, and a big carcass (a cow, a horse). */
+	/**
+	 * Emeralds per job for a small body and for a big carcass (a cow, a horse), times what this butcher thinks they're
+	 * worth (1x to {@code MAX_ASKING}x, their own, unrelated to how good they are).
+	 */
 	private static final float PRICE_SMALL = 1.0F, PRICE_BIG = 2.0F;
+	private static final float MAX_ASKING = 3.0F;
+	/** Gossip: butchers within this of whoever's talking are their own village's; further, up to the next, word travels. */
+	private static final double LOCAL_RADIUS = 64.0;
+	private static final double FAR_RADIUS = 3000.0;
 	/** How close you must stand to strike the deal. */
 	private static final double DEAL_REACH_SQ = 6.0 * 6.0;
 	/** Out back: a butcher block within this many blocks, or else a spot this far from his smoker, away from you. */
@@ -111,6 +119,22 @@ public final class Butchers {
 	public static final AttachmentType<Job> JOB = AttachmentRegistry.create(JaymosKitchen.id("butcher_job"),
 		builder -> builder.persistent(Job.CODEC));
 
+	/** The butchers a player has heard about or seen at work (so the screen tells them how good they are). Kept for life. */
+	public static final AttachmentType<List<UUID>> KNOWN = AttachmentRegistry.create(JaymosKitchen.id("known_butchers"),
+		builder -> builder.persistent(UUIDUtil.CODEC.listOf()).copyOnDeath());
+
+	/** Where a butcher was last seen, and by what name, for gossip about far-off butchers. */
+	public record Seen(String name, BlockPos pos) {
+		public static final Codec<Seen> CODEC = RecordCodecBuilder.create(i -> i.group(
+			Codec.STRING.fieldOf("name").forGetter(Seen::name),
+			BlockPos.CODEC.fieldOf("pos").forGetter(Seen::pos)
+		).apply(i, Seen::new));
+	}
+
+	/** Every butcher this dimension has seen loaded (by villager id), saved with the level. */
+	public static final AttachmentType<Map<String, Seen>> LEDGER = AttachmentRegistry.create(JaymosKitchen.id("butcher_ledger"),
+		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Seen.CODEC)));
+
 	/** Butchers on a job in loaded chunks. */
 	private static final Set<Villager> BUSY = new HashSet<>();
 
@@ -124,6 +148,9 @@ public final class Butchers {
 			if (entity instanceof Villager villager && villager.hasAttached(JOB)) {
 				BUSY.add(villager);
 			}
+			if (isButcher(entity)) {
+				note(level, (Villager) entity);
+			}
 		});
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof Villager villager && villager.level() instanceof ServerLevel level) {
@@ -136,6 +163,7 @@ public final class Butchers {
 					discardBody(level, job);
 					villager.removeAttached(JOB);
 				}
+				forget(level, villager);
 			}
 		});
 		ServerPlayNetworking.registerGlobalReceiver(Payloads.ButcherDeal.TYPE, (payload, ctx) -> deal(ctx.player(), payload.villager()));
@@ -147,21 +175,127 @@ public final class Butchers {
 			&& villager.getVillagerData().profession().is(VillagerProfession.BUTCHER);
 	}
 
-	/** How much more a butcher gets out of a body than you would on a block: 1x to 3x. */
+	/** How much more a butcher gets out of a body than you would on a block: 1x to 3x, born with it. */
+	public static float skill(UUID butcher) {
+		return MIN_SKILL + traits(butcher).nextFloat() * (MAX_SKILL - MIN_SKILL);
+	}
+
 	public static float skill(Villager villager) {
-		int level = Mth.clamp(villager.getVillagerData().level(), 1, 5);
-		UUID id = villager.getUUID();
-		float knack = (new java.util.Random(id.getMostSignificantBits() ^ id.getLeastSignificantBits()).nextFloat() * 2.0F - 1.0F) * KNACK;
-		return Mth.clamp(1.0F + (level - 1) * SKILL_PER_LEVEL + knack, MIN_SKILL, MAX_SKILL);
+		return skill(villager.getUUID());
 	}
 
-	/** 0 (clumsy) to 4 (master), for the screen. */
+	/** What they ask for their work: their own idea of their worth, nothing to do with their skill. */
+	private static float asking(UUID butcher) {
+		java.util.Random traits = traits(butcher);
+		traits.nextFloat();
+		return 1.0F + traits.nextFloat() * (MAX_ASKING - 1.0F);
+	}
+
+	private static java.util.Random traits(UUID id) {
+		return new java.util.Random(id.getMostSignificantBits() ^ id.getLeastSignificantBits() ^ 0x5DEECE66DL);
+	}
+
+	/** 0 (clumsy) to 4 (master), a fifth of butchers each, for the screen and for gossip. */
 	public static int tier(float skill) {
-		return Mth.clamp((int) ((skill - MIN_SKILL) / ((MAX_SKILL - MIN_SKILL) / 4.0F) + 0.25F), 0, 4);
+		return Mth.clamp((int) ((skill - MIN_SKILL) / ((MAX_SKILL - MIN_SKILL) / 5.0F)), 0, 4);
 	}
 
-	public static int price(float skill, boolean big) {
-		return Math.max(1, Math.round(skill * (big ? PRICE_BIG : PRICE_SMALL)));
+	public static int price(Villager butcher, boolean big) {
+		return Math.max(1, Math.round(asking(butcher.getUUID()) * (big ? PRICE_BIG : PRICE_SMALL)));
+	}
+
+	/** Whether {@code player} has heard how good this butcher is (or seen for themselves). */
+	public static boolean knows(Player player, UUID butcher) {
+		return player.getAttachedOrElse(KNOWN, List.of()).contains(butcher);
+	}
+
+	private static void learn(Player player, UUID butcher) {
+		List<UUID> known = player.getAttachedOrElse(KNOWN, List.of());
+		if (!known.contains(butcher)) {
+			List<UUID> more = new ArrayList<>(known);
+			more.add(butcher);
+			player.setAttached(KNOWN, more);
+		}
+	}
+
+	private static void note(ServerLevel level, Villager butcher) {
+		Map<String, Seen> ledger = level.getAttachedOrElse(LEDGER, Map.of());
+		String id = butcher.getUUID().toString();
+		Seen seen = new Seen(butcher.getDisplayName().getString(), butcher.blockPosition());
+		Seen was = ledger.get(id);
+		if (was == null || !was.name().equals(seen.name()) || !was.pos().closerThan(seen.pos(), 16.0)) {
+			Map<String, Seen> more = new HashMap<>(ledger);
+			more.put(id, seen);
+			level.setAttached(LEDGER, more);
+		}
+	}
+
+	private static void forget(ServerLevel level, Villager villager) {
+		Map<String, Seen> ledger = level.getAttachedOrElse(LEDGER, Map.of());
+		if (ledger.containsKey(villager.getUUID().toString())) {
+			Map<String, Seen> less = new HashMap<>(ledger);
+			less.remove(villager.getUUID().toString());
+			level.setAttached(LEDGER, less);
+		}
+	}
+
+	/**
+	 * A bit of gossip about a butcher, for {@code listener} from {@code speaker} (Jaymo's Kingdoms' townsfolk call this, by
+	 * reflection): trash talk or praise for one of their own village's butchers, or word of a master far off, or of one to
+	 * steer clear of. The listener knows that butcher's skill from then on. Ones they haven't heard of come first. Null if
+	 * there's nothing to tell.
+	 */
+	public static @Nullable Component gossip(ServerPlayer listener, Entity speaker) {
+		if (!(speaker.level() instanceof ServerLevel level)) {
+			return null;
+		}
+		List<UUID> local = new ArrayList<>();
+		for (Villager butcher : level.getEntitiesOfClass(Villager.class, speaker.getBoundingBox().inflate(LOCAL_RADIUS),
+			v -> v != speaker && isButcher(v) && v.isAlive())) {
+			note(level, butcher);
+			local.add(butcher.getUUID());
+		}
+		Map<String, Seen> ledger = level.getAttachedOrElse(LEDGER, Map.of());
+		List<UUID> far = new ArrayList<>();
+		for (Map.Entry<String, Seen> entry : ledger.entrySet()) {
+			UUID id = UUID.fromString(entry.getKey());
+			double d = Math.sqrt(entry.getValue().pos().distSqr(speaker.blockPosition()));
+			int tier = tier(skill(id));
+			// only the best and the worst are talked about far from home
+			if (d > LOCAL_RADIUS && d <= FAR_RADIUS && !local.contains(id) && (tier <= 1 || tier >= 3)) {
+				far.add(id);
+			}
+		}
+		List<UUID> fresh = new ArrayList<>(local);
+		fresh.addAll(far);
+		fresh.removeIf(id -> knows(listener, id));
+		List<UUID> pool = fresh.isEmpty() ? local : fresh;
+		if (pool.isEmpty()) {
+			return null;
+		}
+		UUID chosen = pool.get(speaker.getRandom().nextInt(pool.size()));
+		learn(listener, chosen);
+		int tier = tier(skill(chosen));
+		int variant = speaker.getRandom().nextInt(2);
+		if (local.contains(chosen) && level.getEntity(chosen) instanceof Villager butcher) {
+			return Component.translatable("gossip.jaymoskitchen.butcher.local." + tier + "." + variant, butcher.getDisplayName());
+		}
+		Seen seen = ledger.get(chosen.toString());
+		if (seen == null) {
+			return null;
+		}
+		Vec3 off = Vec3.atCenterOf(seen.pos()).subtract(speaker.position());
+		int blocks = Math.max(100, (int) Math.round(off.horizontalDistance() / 100.0) * 100);
+		Component way = Component.translatable("gossip.jaymoskitchen.dir." + compass(off));
+		return Component.translatable("gossip.jaymoskitchen.butcher.far." + (tier >= 3 ? "good" : "bad") + "." + variant,
+			seen.name(), blocks, way);
+	}
+
+	/** n, ne, e, se, s, sw, w or nw, for a horizontal offset (north is -z). */
+	private static String compass(Vec3 off) {
+		String[] points = {"s", "sw", "w", "nw", "n", "ne", "e", "se"};
+		double degrees = Math.toDegrees(Math.atan2(-off.x, off.z));
+		return points[Math.floorMod((int) Math.round(degrees / 45.0), 8)];
 	}
 
 	/** Right-clicking a butcher with a body on you opens the deal; going back to one holding your cuts collects them. */
@@ -200,11 +334,14 @@ public final class Butchers {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.butcher.wont", butcher.getDisplayName()));
 			return InteractionResult.SUCCESS_SERVER;
 		}
+		note(server, butcher);
+		boolean known = knows(player, butcher.getUUID());
 		float skill = skill(butcher);
 		EntityType<?> type = body.sourceType();
 		Component what = type != null ? type.getDescription() : Component.translatable("message.jaymoskitchen.butcher.carcass");
+		// how good they are stays hidden until you've heard (or seen)
 		ServerPlayNetworking.send((ServerPlayer) player, new Payloads.OpenButcher(butcher.getId(), butcher.getDisplayName(), what,
-			skill, tier(skill), price(skill, body.isBigCarcass())));
+			known ? skill : 0.0F, known ? tier(skill) : -1, price(butcher, body.isBigCarcass())));
 		return InteractionResult.SUCCESS_SERVER;
 	}
 
@@ -240,7 +377,7 @@ public final class Butchers {
 			return;
 		}
 		float skill = skill(butcher);
-		int price = price(skill, body.isBigCarcass());
+		int price = price(butcher, body.isBigCarcass());
 		if (!player.hasInfiniteMaterials()) {
 			if (ContainerHelper.clearOrCountMatchingItems(player.getInventory(), s -> s.is(Items.EMERALD), price, true) < price) {
 				butcher.playSound(SoundEvents.VILLAGER_NO);
@@ -436,6 +573,8 @@ public final class Butchers {
 		butcher.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		butcher.playSound(SoundEvents.VILLAGER_YES);
 		play(level, owner.position(), SoundEvents.ITEM_PICKUP, 1.0F);
+		// seen their work for yourself: you know them now
+		learn(owner, butcher.getUUID());
 		owner.sendOverlayMessage(Component.translatable("message.jaymoskitchen.butcher.done", butcher.getDisplayName(),
 			String.format(java.util.Locale.ROOT, "%.1f", job.skill())));
 	}

@@ -668,12 +668,21 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
 
 ## 0.4.30: butcher villagers
 - **Butcher villagers butcher for you** (`corpse/Butchers`; vanilla's butchers and MCA's, by profession). Right-click
-  one with a passive animal's corpse in your arms or a bagged one in your hand: a screen (`ButcherScreen`) shows their
-  skill (Clumsy, Fair, Able, Skilled, Master), the yield, and the price. Monsters and heavy (iron) corpses are refused.
-- **Skill** = 1 + 0.5 per trade level above novice, plus a knack of their own (+/-0.3, fixed per villager), clamped to
-  1x-3x of what a proper job on a butcher block gets (`CorpseEntity.butcheredDrops`: the loot, extra meat and the
-  block-only extras). Every count is multiplied, the fraction a chance at one more.
-- **Price** = skill x 1 emerald for a small body, x 2 for a big carcass, rounded (so 1 to 6). Creative pays nothing.
+  one with a passive animal's corpse in your arms or a bagged one in your hand: a screen (`ButcherScreen`) shows the
+  price, and their skill (Clumsy, Fair, Able, Skilled, Master) and yield only if you know them. Monsters and heavy
+  (iron) corpses are refused.
+- **Skill** is born with each butcher (from their UUID), spread evenly from 1x to 3x what a proper job on a butcher
+  block gets (`CorpseEntity.butcheredDrops`: the loot, extra meat and the block-only extras); a fifth of butchers in
+  each tier. Every count is multiplied, the fraction a chance at one more. It has nothing to do with their trade level.
+- **Price** is their own asking (1x to 3x, also from their UUID, unrelated to skill) times 1 emerald for a small body,
+  2 for a big carcass: 1-3 or 2-6. A pricey butcher can be a hack. Creative pays nothing.
+- **Knowing a butcher** (`jaymoskitchen:known_butchers` on the player, kept on death): you learn how good one is from
+  gossip, or by seeing their work (after your first job with them the screen shows it, and the hand-over says the x).
+  `Butchers.gossip(ServerPlayer, Entity)` (public; Jaymo's Kingdoms 0.5.47's townsfolk call it) returns a line: trash
+  talk or praise for one of the speaker's own village's butchers (within 64 blocks), or word of a far-off master or a
+  botcher to avoid (only the top two and bottom two tiers travel; up to 3000 blocks, with distance and direction), ones
+  you haven't heard of first. Far-off butchers come from a per-dimension ledger (`jaymoskitchen:butcher_ledger`) of
+  every butcher that has been loaded.
 - **The errand:** paid, they take the body in their arms and walk out back: to the nearest butcher block within 14
   blocks they can reach, else a reachable spot 5-12 blocks past their smoker (job site) on the side away from you.
   They chop for 5 s (swings, cleaver sounds, the body jolting), the body is gone, and they walk back to you and put
