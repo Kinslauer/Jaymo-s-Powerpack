@@ -2039,3 +2039,27 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   holds that's `Theft.Crime.PICKPOCKET` (medium) seen: reputation -35 and its guards after you. Done clean, anyone
   else who sees you is still a witness (the mark doesn't count); unseen, the theft may be noticed later like any other.
   Outside any faction's law the mark only shouts.
+
+## 0.5.50: the skill tree (Stealth)
+- Andy asked for stealth that improves the more you steal successfully, as a skill tree with three pillars:
+  Survival, Stealth and Strength. Plan: `docs/Skills-Plan.md`. Stealth is built; Survival and Strength show on the
+  screen as "coming later" with what they'll be.
+- `Skills`: a player attachment (`jaymoskingdoms:skills`; saved, kept through death, synced to its own player) with
+  experience per pillar and ranks per perk. Levels 0-15; level l → l+1 takes 30 + 15·l XP (2025 XP to 15). Each level
+  is one point to spend in that pillar. **K** opens the tree (`SkillScreen`); a perk button spends a point
+  (`Skills.Spend`, checked on the server).
+- Stealth XP: a pocket picked clean +10 (+2 if it was empty; a guard's ×2, a sleeper's ×½; a pocket already picked
+  today gives nothing), a theft nobody saw (stores, chests, saddlebags) +4 at most every 30 seconds. The overlay after
+  a pick shows the XP; a level up is announced in chat.
+- Practice: each Stealth level takes 3% off the chance a mark feels your hand (45% off at 15), before any perk.
+- Perks (15 points in all, so a master has everything):
+  - Light Fingers (5 ranks): 8% less likely to be felt per rank. Floor 2%.
+  - Deep Pockets (3, needs Light Fingers): +15% of a carried stack per rank, and a reroll per rank on an empty pocket.
+  - Soft Step (3, needs Light Fingers): sneaking witnesses see 10% of their range less per rank (50% → 20%).
+  - Quick Hands (1, level 5, needs Deep Pockets): pick pockets from the side (~70° round instead of ~100°).
+  - Slip Away (1, level 5, needs Soft Step): half the time you're felt, they can't tell whose hand it was: a cry, no
+    crime.
+  - Ghost (2 points, level 10, needs Quick Hands and Slip Away): guards are no harder than anyone else (25%, not 50%),
+    and a theft nobody saw is never noticed later.
+- Fully practised with everything: an awake mark 25% → 8%, a guard 50% → 8%, a sleeper 10% → 3%.
+- Tuning constants are at the top of `Skills`. Not playtested in game.

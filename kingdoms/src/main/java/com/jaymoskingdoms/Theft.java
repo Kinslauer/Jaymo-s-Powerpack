@@ -66,6 +66,9 @@ import org.jspecify.annotations.Nullable;
  * <p>(0.5.46) Blocks a player placed themselves ({@link Placed}) are theirs: breaking them or opening them is no crime.
  *
  * <p>(0.5.49) Picking a villager's or civilian's pocket ({@link Pickpocket}) is a theft like taking from its stores.
+ *
+ * <p>(0.5.50) A theft nobody saw is Stealth experience ({@link Skills}); Soft Step hides a sneaking thief from farther
+ * off, and a Ghost's unseen thefts are never missed.
  */
 public final class Theft {
 	/** How far a witness sees a crime (sneaking: this share of it); closer than {@link #HEAR_RANGE} they notice whichever way they face. */
@@ -432,7 +435,7 @@ public final class Theft {
 
 	/** The faction's people who see {@code player} now, nearest first. */
 	static List<LivingEntity> witnesses(ServerLevel level, Faction f, ServerPlayer player) {
-		double range = player.isShiftKeyDown() ? WITNESS_RANGE * SNEAK_FACTOR : WITNESS_RANGE;
+		double range = player.isShiftKeyDown() ? WITNESS_RANGE * Skills.sneakFactor(player, SNEAK_FACTOR) : WITNESS_RANGE;
 		List<LivingEntity> out = new ArrayList<>();
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(range), LivingEntity::isAlive)) {
 			boolean ours = e instanceof Folk folk ? folk.factionId() == f.id() : e instanceof Villager || (e instanceof IronGolem g && !g.isPlayerCreated());
@@ -485,7 +488,11 @@ public final class Theft {
 			Approaches.suspect(player, f.id(), level.getGameTime());
 		}
 		if (seen.isEmpty()) {
-			if (noticeable && level.getRandom().nextFloat() < NOTICE_CHANCE) {
+			if (noticeable && crime != Crime.PICKPOCKET) {
+				// (0.5.50) a theft nobody saw is Stealth practice (a pickpocket's counts in Pickpocket)
+				Skills.unseenTheft(player, level.getGameTime());
+			}
+			if (noticeable && !Skills.ghost(player) && level.getRandom().nextFloat() < NOTICE_CHANCE) {
 				NOTICES.add(new Notice(player.getUUID(), f.id(), level.getGameTime() + NOTICE_TICKS));
 			}
 			return;

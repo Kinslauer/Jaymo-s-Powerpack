@@ -550,3 +550,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.8.95, Pickpocketing:** ships Jaymo's Kingdoms 0.5.49 (see `kingdoms/MODLOG.md`): sneak up behind a villager (MCA's
   too) or a settlement's folk with an empty hand and use them to lift something from their pockets. They may feel it
   and cry thief, which counts as a theft seen: reputation, and the guards come after you.
+- **0.8.96, Skill tree:** ships Jaymo's Kingdoms 0.5.50 (see `kingdoms/MODLOG.md`): press **K** for a skill tree with
+  three pillars, Survival, Stealth and Strength. Stealth is in: picking pockets clean and stealing unseen earns Stealth
+  levels, each level makes marks less likely to feel your hand, and each level is a point for perks (Light Fingers,
+  Deep Pockets, Soft Step, Quick Hands, Slip Away, Ghost). Survival and Strength come later (`docs/Skills-Plan.md`).
