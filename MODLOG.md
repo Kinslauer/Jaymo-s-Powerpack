@@ -571,7 +571,12 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   carry it out back, chop it up and walk back with the cuts, 1x to 3x what you'd get yourself. How good a butcher is
   stays hidden until townsfolk gossip about them (their own village's, or far-off masters and botchers), or, if
   you're experienced with butchering (a Survival perk), you judge it from the cuts they hand you.
-- **0.8.101, Skill tree:** ships Jaymo's Kingdoms 0.5.52 (see `kingdoms/MODLOG.md`): press **K** for a skill tree with
+- **0.8.102, JEI cheat mode in creative:** JEI's cheat mode (click an item in its list to take it) starts off every
+  session and its only default switch is Ctrl + left-click on JEI's wrench button, so clicking items in creative just
+  showed recipes. Now it switches on whenever you enter creative (or join in creative) and off when you leave
+  (`client/JeiCheats`). The server still decides who may cheat: JEI allows creative players and ops by default
+  (its `jei-server.properties`).
+- **0.8.103, Skill tree:** ships Jaymo's Kingdoms 0.5.52 (see `kingdoms/MODLOG.md`): press **K** for a skill tree with
   three pillars. Stealth grows as you pick pockets and steal unseen (shorter holds, more loot, slipping away), Survival
   as you harvest, eat and live through the night (slower hunger, healing, Last Stand), Strength as you fight, mine and
   chop (heavier blows, knockback, faster mining). Each level is a perk point. A court wizard or a bottle o' enchanting
