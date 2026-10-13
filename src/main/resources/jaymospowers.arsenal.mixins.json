@@ -9,6 +9,7 @@
 		"HopperBlockEntityMixin",
 		"ItemEntityMixin",
 		"PlayerMixin",
+		"ServerPlayerDropMixin",
 		"ShulkerBoxSlotMixin",
 		"SlotMixin",
 		"WeaponModProjectileSaveMixin"

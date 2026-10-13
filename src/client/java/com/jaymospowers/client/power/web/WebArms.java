@@ -51,6 +51,8 @@ public final class WebArms {
 	private static final double SHOULDER_HEIGHT = 22.0 / 16.0;
 	private static final double SHOULDER_OUT = 5.0 / 16.0;
 	private static final double ARM_LENGTH = 10.0 / 16.0;
+	/** Both webs on one catch (a Web Whip): the hands meet on the one line this far out from the chest. */
+	private static final double GRIP_REACH = 8.0 / 16.0;
 
 	/** This frame's pose: an arm's aim is null when that hand has no web out. Angles are model-part radians. */
 	public record Pose(float amount, float @Nullable [] mainArm, float @Nullable [] offArm, float legTrail, float legSide, float wings, float lean,
@@ -324,8 +326,15 @@ public final class WebArms {
 		body.prevAmount = body.amount;
 		body.amount = hanging ? Math.min(1.0F, body.amount + EASE) : Math.max(0.0F, body.amount - EASE);
 		Vec3[] targets = {main, off};
+		// both webs on the one catch: both hands grip the one line, together in front of the chest
+		Vec3 grip = null;
+		if (main != null && off != null && twoHanded(player)) {
+			Vec3 chest = shoulder(player, WebNet.MAIN, 1.0F).lerp(shoulder(player, WebNet.OFF, 1.0F), 0.5);
+			Vec3 out = main.subtract(chest);
+			grip = out.lengthSqr() < 1.0E-6 ? null : chest.add(out.normalize().scale(GRIP_REACH * player.getScale()));
+		}
 		for (int hand = 0; hand < 2; hand++) {
-			Vec3 target = targets[hand];
+			Vec3 target = grip != null ? grip : targets[hand];
 			if (target == null) {
 				body.dir[hand] = null;
 				body.prevDir[hand] = null;
@@ -416,6 +425,17 @@ public final class WebArms {
 			end = lineEnd(minecraft, level, player, WebNet.MAIN, partialTick);
 		}
 		return end;
+	}
+
+	/**
+	 * Both hands' webs are on the same thing (a Web Whip with both webs on its catch): drawn as one web held in both
+	 * hands, not two.
+	 */
+	static boolean twoHanded(Player player) {
+		WebLine main = player.getAttached(WebPower.line(WebNet.MAIN));
+		WebLine off = player.getAttached(WebPower.line(WebNet.OFF));
+		return main != null && off != null && main.kind() == WebLine.YANK && off.kind() == WebLine.YANK
+			&& main.entityId() >= 0 && main.entityId() == off.entityId();
 	}
 
 	private static @Nullable Vec3 syncedEnd(ClientLevel level, Player player, int hand, float partialTick) {

@@ -51,6 +51,12 @@ public final class WebSwing {
 	 */
 	static final double JUMP_OFF_BASE = 0.2, JUMP_OFF_PER_SPEED = 0.45, JUMP_OFF_MAX = 1.4;
 	static final int JUMP_OFF_MIN_HOLD = 3, JUMP_OFF_LOCKOUT = 8;
+	/**
+	 * Every web that sticks gives you one tug: press Jump in midair once it's stuck and you haul hard on the line, a
+	 * jump up ({@code TUG_LIFT}) and in toward where it's stuck ({@code TUG_PULL}), like a long pull hand over hand
+	 * for height. Stringing web after web, that's a jump each time. Holding Jump on afterwards reels in as before.
+	 */
+	static final double TUG_LIFT = 0.6, TUG_PULL = 0.3;
 	/** Jump reels in, sneak lets out (blocks per tick), every web that's out. */
 	static final double REEL_IN = 0.45;
 	static final double LET_OUT = 0.35;
@@ -186,6 +192,8 @@ public final class WebSwing {
 	private boolean slingJumpHeld;
 	/** Ticks Jump has been held while on a web (0 = not held). */
 	private int swingJumpTicks;
+	/** A web has stuck since the last tug: the next press of Jump in midair hauls on it (see {@link #TUG_LIFT}). */
+	private boolean tugReady;
 	/** Drawn back into a wall: ticks of strain against it so far, and the last strain sent. */
 	private int strainTicks;
 	private float sentStrain;
@@ -287,6 +295,7 @@ public final class WebSwing {
 		boolean midAir = !player.onGround() && (flying || attached() || wingsTicks > 0);
 		strand.attached = true;
 		swingJumpTicks = 0;
+		tugReady = true;
 		flying = false;
 		swingEnergy = Double.NaN;
 		foldWings();
@@ -529,6 +538,14 @@ public final class WebSwing {
 			if (tangent.lengthSqr() > 1.0E-4) {
 				v = v.add(tangent.normalize().scale(JUMP_THRUST * boost));
 			}
+		}
+		// a fresh press of Jump with a tug in hand: haul on the line, up and in
+		if (air && tugReady && swingJumpTicks == 1 && pullDir.lengthSqr() > 1.0E-6) {
+			tugReady = false;
+			Vec3 in = pullDir.normalize();
+			v = new Vec3(v.x, Math.max(v.y, 0.0), v.z).add(in.scale(TUG_PULL * boost)).add(0.0, TUG_LIFT, 0.0);
+			play(player, SoundEvents.FISHING_BOBBER_RETRIEVE, 0.9F, 0.8F + player.getRandom().nextFloat() * 0.2F);
+			play(player, SoundEvents.PLAYER_ATTACK_SWEEP, 0.4F, 1.4F);
 		}
 		// pump: forward on the downswing adds speed along the arc (across the webs' combined pull)
 		if (air && input.forward() && v.y < 0.0 && pullDir.lengthSqr() > 1.0E-6) {
