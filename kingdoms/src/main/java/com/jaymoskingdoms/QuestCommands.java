@@ -33,6 +33,8 @@ final class QuestCommands {
 				.then(Commands.literal("regicide").executes(c -> offer(c, 1)))
 				.then(Commands.literal("warband").executes(c -> offer(c, 2)))
 				.then(Commands.literal("dig").executes(c -> offer(c, 4)))
+				// (0.5.47) a stablehand's or a king's horse quest
+				.then(Commands.literal("horse").executes(c -> offer(c, 5)))
 				.then(Commands.literal("champion").then(Commands.argument("lair", StringArgumentType.word()).executes(c -> offer(c, 3)))))
 			.then(Commands.literal("finish").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(QuestCommands::finish));
 	}
@@ -87,11 +89,14 @@ final class QuestCommands {
 		Optional<Quest> q = Optional.empty();
 		if (decree > 0) {
 			Faction f = Quests.settlement(level, g);
-			Quest r = decree == 4 ? (g instanceof Folk ? null : QuestBoard.dig(level, g, f, level.getRandom()))
+			Quest.Giver who = new Quest.Giver(g.getUUID(), g.getName().getString(), f.id(), g instanceof Folk, QuestBoard.job(g));
+			Quest r = decree == 5 ? (g instanceof Folk ? Stables.kingQuest(level, f, who, QuestBoard.royalReward(level.getRandom()), level.getRandom())
+				: Stables.stablehandQuest(level, f, who, level.getRandom()))
+				: decree == 4 ? (g instanceof Folk ? null : QuestBoard.dig(level, g, f, level.getRandom()))
 				: !(g instanceof Folk) ? null : decree == 1 ? QuestBoard.regicide(level, g, f, level.getRandom())
 				: decree == 2 ? QuestBoard.warband(level, g, f) : QuestBoard.champion(level, g, f, StringArgumentType.getString(c, "lair"), level.getRandom());
 			if (r == null) {
-				c.getSource().sendFailure(Component.literal(decree == 4 ? "No villager near with a fetch in their trade, or no trail ruins near"
+				c.getSource().sendFailure(Component.literal(decree == 5 ? "No stable for the king's horse quests" : decree == 4 ? "No villager near with a fetch in their trade, or no trail ruins near"
 					: decree == 3 ? "No king near, or no such lair near his seat"
 					: "No king near, or no other crowned realm for him to want dead"));
 				return 0;

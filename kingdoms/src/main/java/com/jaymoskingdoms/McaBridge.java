@@ -63,7 +63,8 @@ final class McaBridge {
 
 	/** The workers' professions are important (MCA never makes them guards or lets them lapse), and they don't trade. */
 	static void register() {
-		for (VillagerProfession profession : List.of(Professions.BUILDER, Professions.FARMER, Professions.MINER, Professions.WOODCUTTER, Professions.PULLER)) {
+		for (VillagerProfession profession : List.of(Professions.BUILDER, Professions.FARMER, Professions.MINER, Professions.WOODCUTTER, Professions.PULLER,
+			Professions.STABLEHAND, Professions.FARRIER)) {
 			ResourceKey<VillagerProfession> key = BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(profession).orElseThrow();
 			ProfessionsMCA.IS_IMPORTANT.add(key);
 			ProfessionsMCA.CAN_NOT_TRADE.add(key);
@@ -213,6 +214,8 @@ final class McaBridge {
 				hired = Farmers.spawn(level, f, null);
 			} else if (role == Folk.PULLER) {
 				hired = Rickshaws.spawn(level, f, null);
+			} else if (Stables.isStableWorker(role)) {
+				hired = Stables.spawn(level, f, role, null);
 			} else {
 				hired = Gatherers.spawn(level, f, role, null);
 			}
