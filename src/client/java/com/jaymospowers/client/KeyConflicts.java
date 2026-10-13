@@ -14,8 +14,11 @@ import net.minecraft.client.Minecraft;
  * one of them (at its default) is moved to a free key, or unbound. After that, players' own rebinds are never touched.
  */
 final class KeyConflicts {
-	/** Bump to run the move again (for a new clash in a later pack version). */
-	private static final String MARKER = "jaymospowers-keys-v1";
+	/**
+	 * Bump to run the move again (for a new clash in a later pack version). v2 (0.9.21): Camera Utils' zoom, on Z (the
+	 * pack zooms with OK Zoomer).
+	 */
+	private static final String MARKER = "jaymospowers-keys-v2";
 
 	/** Key mapping name → where it goes (unknown = unbound), applied only while it's still on {@code from}. */
 	private record Move(String from, String to) {
@@ -28,7 +31,8 @@ final class KeyConflicts {
 		"key.ok_zoomer.zoom", new Move("key.keyboard.c", "key.keyboard.left.alt"),
 		"key.quickActions", new Move("key.keyboard.g", "key.keyboard.j"),
 		"key.saveToolbarActivator", new Move("key.keyboard.c", "key.keyboard.unknown"),
-		"key.loadToolbarActivator", new Move("key.keyboard.x", "key.keyboard.unknown"));
+		"key.loadToolbarActivator", new Move("key.keyboard.x", "key.keyboard.unknown"),
+		"key.camerautils.zoom", new Move("key.keyboard.z", "key.keyboard.unknown"));
 
 	private KeyConflicts() {
 	}

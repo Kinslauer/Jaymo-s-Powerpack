@@ -808,3 +808,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   elbow over elbow with the legs trailing, and a roll stretches the arms past the head with the legs together while the
   body turns over. Rolls are quick (a block every quarter second, about walking pace) for safe, quiet movement, and holding A or D after a roll keeps you rolling that way, a block at a time (`client/CrawlPose`,
   `CrawlModelFeatureRendererMixin`).
+- **0.9.21, Camera Utils with the F7 preset:** Camera Utils joins the pack (client-only, downloaded by id). F7 flips to
+  Andy's third-person view (3.4 blocks back, 0.1 up, 0.9 to the side, tipped 3 degrees, GUI shown), set once per
+  install before Camera Utils reads its config (`client/CameraPreset`, a preLaunch entrypoint); F6 is its other custom
+  view and Right Alt + F6/F7 edits them. Its zoom is taken off Z, the Mode key (`KeyConflicts` v2; OK Zoomer still
+  zooms). While one of its views is on, the Web/Gravity shoulder view stands aside.
