@@ -22,5 +22,12 @@ abstract class ModelFeatureRendererMixin {
 		Limp.apply(model, submit.state());
 		CarryPose.apply(model, submit.state());
 		com.jaymoskitchen.client.corpse.CrawlPose.apply(model, submit.state());
+		com.jaymoskitchen.client.corpse.Severed.hide(model, submit.state());
+	}
+
+	/** (0.4.37) Whatever a body's lost parts hid, shown again once it's drawn (see Severed). */
+	@Inject(method = "prepareModel", at = @At("RETURN"))
+	private void jaymoskitchen$showSevered(ModelFeatureRenderer.Submit<?> submit, CallbackInfo ci) {
+		com.jaymoskitchen.client.corpse.Severed.restore();
 	}
 }

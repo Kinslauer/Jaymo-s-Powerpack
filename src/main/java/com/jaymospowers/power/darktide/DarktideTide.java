@@ -32,6 +32,7 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
@@ -57,7 +58,7 @@ final class DarktideTide {
 	// ---- Necromancy ----
 	static final double HARVEST_REACH = 5.0;
 	static final int HARVEST_TICKS = 30;
-	static final int MAX_SHADOWS = 5, MAX_RISEN = 3;
+	static final int MAX_SHADOWS = 15, MAX_RISEN = 3;
 	static final double RISE_REACH = 10.0;
 	static final double RISEN_FOLLOW = 5.0, RISEN_TELEPORT = 20.0, RISEN_LEASH = 48.0;
 	static final double RISEN_SPEED = 1.25;
@@ -68,6 +69,9 @@ final class DarktideTide {
 	static final double DROWN_REACH = 24.0, DROWN_RADIUS = 6.0;
 	static final int DROWN_TICKS = 80, DROWN_COOLDOWN = 900, DROWN_EVERY = 10;
 	static final float DROWN_DAMAGE = 1.0F;
+
+	/** Jaymo's Kitchen leaves no corpse for an entity carrying this tag. */
+	static final String NO_CORPSE_TAG = "jaymoskitchen.no_corpse";
 
 	private record Zone(ServerPlayer owner, ServerLevel level, Vec3 center, long until) {
 	}
@@ -460,6 +464,8 @@ final class DarktideTide {
 			return;
 		}
 		mob.setAttached(DarktideState.RISEN, player.getId());
+		// a shadow leaves no Kitchen corpse, even if it somehow dies instead of melting
+		mob.addTag(NO_CORPSE_TAG);
 		RISEN_OWNER.put(mob.getUUID(), player.getUUID());
 		RISEN.add(mob);
 		live.risen.add(mob.getId());
@@ -478,6 +484,12 @@ final class DarktideTide {
 	static boolean risenOf(Entity entity, ServerPlayer player) {
 		UUID owner = RISEN_OWNER.get(entity.getUUID());
 		return owner != null && owner.equals(player.getUUID());
+	}
+
+	/** Whether {@code mob} is a risen shadow that must leave {@code target} alone: its master, or its master's other shadows. */
+	static boolean spares(Entity mob, @Nullable Entity target) {
+		UUID owner = target == null ? null : RISEN_OWNER.get(mob.getUUID());
+		return owner != null && (owner.equals(target.getUUID()) || owner.equals(RISEN_OWNER.get(target.getUUID())));
 	}
 
 	/** What the risen go for: what hurt you, or what you hit. */
@@ -540,6 +552,12 @@ final class DarktideTide {
 				continue;
 			}
 			mob.clearFire();
+			if (spares(mob, mob.getTarget())) {
+				// (a mob that picks targets through its brain, not setTarget: a piglin, a hoglin, a breeze)
+				mob.setTarget(null);
+				mob.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
+				mob.getBrain().eraseMemory(MemoryModuleType.ANGRY_AT);
+			}
 			Enemy enemy = ENEMIES.get(owner.getUUID());
 			LivingEntity foe = null;
 			if (enemy != null && mob.level().getGameTime() < enemy.until && mob.level().getEntity(enemy.id) instanceof LivingEntity target

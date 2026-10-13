@@ -727,3 +727,10 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
   Powers' tendril grabs and whips find it the same way. Iron golems are still too heavy.
 - A falling body wedged in a block is eased out the nearest open way (as a dropped item is), and one that stops getting
   anywhere for 2 seconds (`STUCK_TICKS`) lies where it is instead of tumbling forever.
+
+## 0.4.37: tagged bodies leave no corpse
+- An entity with the `jaymoskitchen.no_corpse` scoreboard tag leaves no corpse, player or mob
+  (`Corpses.NO_CORPSE_TAG`); a tagged player's hotbar drops with the rest of their things. Jaymo's Powers tags Darktide shades as they die and risen shadows as they rise.
+- Bodies keep their lost parts: a mob or player tagged `jaymoskitchen.missing.<head|right_arm|left_arm|right_leg|left_leg>`
+  (Jaymo's Powers dismemberment) leaves a corpse drawn without those parts (`CorpseEntity#missing`, saved as `Missing`;
+  `client/corpse/Severed` hides them by model part name after the pose and shows them again once drawn).

@@ -9,6 +9,7 @@
 		"CarryPlayerMixin",
 		"CrawlJumpMixin",
 		"CrawlPlayerMixin",
+		"DismemberMobMixin",
 		"ServerGamePacketListenerImplMixin"
 	],
 	"injectors": {

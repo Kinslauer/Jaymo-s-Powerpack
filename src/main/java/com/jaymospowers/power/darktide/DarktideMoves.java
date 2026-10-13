@@ -1,6 +1,7 @@
 package com.jaymospowers.power.darktide;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.PowerInput;
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -47,8 +49,9 @@ import org.jspecify.annotations.Nullable;
  * ×{@link #EMPOWERED_FACTOR}/{@link #STRIKE_FACTOR} more for {@link #EMPOWER_FLOW} Flow.</li>
  * <li>R (knives, ascended) Pounce: a stab stance, then a leap onto the enemy's back; three stabs on a crippled humanoid.</li>
  * <li>V Undertow: sink into water or shadow where you look and surface there.</li>
- * <li>G Crescent (katana): a 120° slash; Ink Cross (knife): a crossing slash that slows; Fang Barrage (knives, ascended).
- * Every G hit goes for the legs: a humanoid it hits is crippled, wherever you aim.</li>
+ * <li>G Crescent (katana): a 120° slash, aimed: low cripples a humanoid (and may take a leg), high may take its head,
+ * between an arm ({@link Dismember#KATANA_CHANCE} against humanoid mobs, players {@link Dismember#PLAYER_CHANCE}); Ink
+ * Cross (knife): a crossing slash that slows, and cripples; Fang Barrage (knives, ascended).</li>
  * <li>B Black Tide: a rolling wave of dark water; Riptide Dash (knives, ascended), a flurry when R is held.</li>
  * </ul>
  */
@@ -57,8 +60,9 @@ final class DarktideMoves {
 	static final double STRIKE_REACH = 3.5;
 	/** A blade at full charge: this many times its damage (1× uncharged); empowered: {@link #EMPOWERED_FACTOR} at full charge. */
 	static final float STRIKE_FACTOR = 1.5F, EMPOWERED_FACTOR = 2.5F;
-	/** A bare fist: damage uncharged and at full charge. */
-	static final float PUNCH_MIN = 1.0F, PUNCH_MAX = 5.0F;
+	/** A bare fist: damage uncharged and at full charge; it lands on anything within PUNCH_RADIUS of the crosshair. */
+	static final float PUNCH_MIN = 2.0F, PUNCH_MAX = 10.0F;
+	static final double PUNCH_RADIUS = 0.9;
 	static final float EMPOWER_FLOW = 25.0F;
 	static final int STRIKE_COOLDOWN = 60;
 	// ---- V: Undertow ----
@@ -96,7 +100,8 @@ final class DarktideMoves {
 	static final double BARRAGE_REACH = 2.2, BARRAGE_HOLD_AT = 1.5;
 	// ---- B: Riptide Dash (knives, ascended) ----
 	static final double DASH_LENGTH = 5.0, DASH_SPEED = 1.0;
-	static final int DASH_TICKS = 5, DASH_COOLDOWN = 240;
+	/** A dash that lands is ready again at once; one that misses waits DASH_MISS_COOLDOWN, a flurry FLURRY_COOLDOWN (ticks). */
+	static final int DASH_TICKS = 5, DASH_MISS_COOLDOWN = 100, FLURRY_COOLDOWN = 1200;
 	static final float DASH_DAMAGE = 6.0F, DASH_FLOW = 30.0F;
 	static final int FLURRY_HITS = 8, FLURRY_EVERY = 2;
 	static final float FLURRY_HIT_DAMAGE = 2.5F;
@@ -147,6 +152,33 @@ final class DarktideMoves {
 		EntityHitResult hit = ProjectileUtil.getEntityHitResult(player, eye, end, box,
 			e -> e instanceof LivingEntity && !e.isSpectator() && e.isPickable() && e.isAlive() && !friendly(player, e), eye.distanceToSqr(end));
 		return hit == null ? null : (LivingEntity) hit.getEntity();
+	}
+
+	/**
+	 * Like {@link #pick}, but a near miss still counts: the nearest living thing within {@code radius} of the crosshair's
+	 * line (that you can see).
+	 */
+	static @Nullable LivingEntity pickWide(ServerPlayer player, double range, double radius) {
+		LivingEntity exact = pick(player, range);
+		if (exact != null) {
+			return exact;
+		}
+		Vec3 eye = player.getEyePosition();
+		Vec3 end = eye.add(player.getLookAngle().scale(range));
+		LivingEntity best = null;
+		double bestDistance = Double.MAX_VALUE;
+		for (LivingEntity e : around(player, player.getBoundingBox().expandTowards(end.subtract(eye)).inflate(radius))) {
+			Optional<Vec3> at = e.getBoundingBox().inflate(radius).clip(eye, end);
+			if (at.isEmpty() || !player.hasLineOfSight(e)) {
+				continue;
+			}
+			double d = eye.distanceToSqr(at.get());
+			if (d < bestDistance) {
+				bestDistance = d;
+				best = e;
+			}
+		}
+		return best;
 	}
 
 	/** Not to be hit: yourself, your own risen shadows, what you ride. */
@@ -220,7 +252,7 @@ final class DarktideMoves {
 		boolean empowered = now < live.empoweredUntil && live.flow >= EMPOWER_FLOW;
 		DarktideMove.play(player, DarktideMove.STRIKE, DarktideMove.STRIKE_TICKS, (empowered ? 1 : 0) | (fist ? 0 : 2));
 		swing(player);
-		LivingEntity target = pick(player, STRIKE_REACH);
+		LivingEntity target = fist ? pickWide(player, STRIKE_REACH, PUNCH_RADIUS) : pick(player, STRIKE_REACH);
 		if (target != null) {
 			float damage = fist ? Mth.lerp(charge, PUNCH_MIN, PUNCH_MAX) : weapon(player) * Mth.lerp(charge, 1.0F, STRIKE_FACTOR);
 			if (empowered) {
@@ -275,12 +307,23 @@ final class DarktideMoves {
 		targets.sort(Comparator.comparingDouble(e -> e.distanceToSqr(player)));
 		float damage = weapon(player) + CRESCENT_BONUS;
 		for (int i = 0; i < Math.min(CRESCENT_TARGETS, targets.size()); i++) {
-			hitLegs(player, targets.get(i), damage);
+			// aimed: low takes the legs (and cripples), high goes for the neck, between for the arms
+			LivingEntity target = targets.get(i);
+			int part = Dismember.aimedPart(player, target);
+			boolean legs = part == Dismember.RIGHT_LEG || part == Dismember.LEFT_LEG;
+			Dismember.cut(player, target, part, Dismember.KATANA_CHANCE, () -> {
+				if (legs) {
+					hitLegs(player, target, damage);
+				} else {
+					hit(player, target, damage);
+				}
+			});
 		}
 		DarktideMove.play(player, DarktideMove.CRESCENT, DarktideMove.CRESCENT_TICKS, 0);
 		swing(player);
-		// the arc trail
-		Vec3 center = player.position().add(0.0, player.getBbHeight() * 0.6, 0.0);
+		// the arc trail, at the height it's aimed
+		double aimed = Mth.clamp(player.getLookAngle().y * 2.6, -player.getBbHeight() * 0.55, player.getBbHeight() * 0.45);
+		Vec3 center = player.position().add(0.0, player.getBbHeight() * 0.6 + aimed, 0.0);
 		for (int i = 0; i <= 16; i++) {
 			float yaw = player.getYRot() - (float) CRESCENT_ARC / 2.0F + (float) CRESCENT_ARC * i / 16.0F;
 			Vec3 p = center.add(Vec3.directionFromRotation(0.0F, yaw).scale(2.6));
@@ -625,6 +668,7 @@ final class DarktideMoves {
 				Vec3 front = first.position().subtract(dir.scale(first.getBbWidth() / 2.0 + 0.8));
 				player.teleportTo(level, front.x, first.getY(), front.z, Set.of(), player.getYRot(), player.getXRot(), false);
 				DarktideMove.play(player, DarktideMove.FLURRY, FLURRY_HITS * FLURRY_EVERY + 2, 0);
+				DarktidePower.cooldown(player, DarktideState.DASH, FLURRY_COOLDOWN);
 			}
 		}
 		if (dash.target < 0) {
@@ -632,7 +676,6 @@ final class DarktideMoves {
 		}
 		live.dash = dash;
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_RIPTIDE_1.value(), SoundSource.PLAYERS, 0.9F, 1.1F);
-		DarktidePower.cooldown(player, DarktideState.DASH, DASH_COOLDOWN);
 	}
 
 	private static void tickDash(ServerPlayer player, DarktideLive live) {
@@ -667,6 +710,10 @@ final class DarktideMoves {
 			player.setDeltaMovement(player.getDeltaMovement().multiply(0.3, 1.0, 0.3));
 			player.syncVelocity = true;
 			live.dash = null;
+			if (dash.hit.isEmpty()) {
+				// a miss: the dash waits; one that lands is ready again at once
+				DarktidePower.cooldown(player, DarktideState.DASH, DASH_MISS_COOLDOWN);
+			}
 			return;
 		}
 		player.setDeltaMovement(dash.dir.scale(DASH_SPEED).add(0.0, Math.max(0.0, player.getDeltaMovement().y), 0.0));

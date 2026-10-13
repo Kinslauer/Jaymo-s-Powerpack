@@ -269,6 +269,7 @@ public final class WindKick {
 			}
 			c.pos = next;
 			c.travelled += SPEED;
+			WindDouse.douse(level, c.pos, HALF_WIDTH, owner);
 			// a flat crescent, swept back at its tips
 			for (int i = -6; i <= 6; i++) {
 				double t = i / 6.0;

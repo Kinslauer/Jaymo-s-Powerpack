@@ -117,6 +117,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		if (corpse.isPlayerCorpse()) {
 			extractPlayer(corpse, state, carrier, yaw, partialTicks);
 			state.avatar.setData(Jolt.KEY, jolt);
+			state.avatar.setData(Severed.KEY, Severed.of(corpse.missing()));
 			return;
 		}
 		Entity body = corpse.clientBody(yaw);
@@ -203,6 +204,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		// no name over a body (a zombie player's, say)
 		bodyState.nameTag = null;
 		bodyState.setData(Jolt.KEY, jolt);
+		bodyState.setData(Severed.KEY, Severed.of(corpse.missing()));
 		state.body = bodyState;
 		state.bodyRenderer = renderer;
 	}

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.wind;
 
+import com.jaymospowers.core.Carry;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import net.minecraft.ChatFormatting;
@@ -16,7 +17,9 @@ import net.minecraft.world.item.ItemStack;
 /**
  * Fumbling: a wind that hasn't yet mastered {@link #MASTERED} abilities can't keep a grip on what it holds. Each Wind
  * ability used has a {@link #CAST_CHANCE} chance, and each second of flight a {@link #FLIGHT_CHANCE_PER_SECOND} one, of
- * the main-hand item slipping out: it's thrown ahead as an item (nothing is destroyed). Never in creative.
+ * the main-hand item slipping out: it's thrown ahead as an item (nothing is destroyed). A player carried in flight can
+ * slip from your arms too, each second at {@link #CARRY_DROP_CHANCE_PER_SECOND}'s chance for your mastery: often for a
+ * fresh wind, rarely near mastery, never once everything is mastered. Never in creative.
  */
 final class WindFumble {
 	/** Abilities mastered before the grip holds. */
@@ -24,6 +27,8 @@ final class WindFumble {
 	/** Chance per ability used, and per second of flight. */
 	static final float CAST_CHANCE = 0.08F;
 	static final float FLIGHT_CHANCE_PER_SECOND = 0.02F;
+	/** Chance per second of flight that a carried player slips from your arms, by abilities unlocked (0-4). */
+	static final float[] CARRY_DROP_CHANCE_PER_SECOND = {0.03F, 0.02F, 0.012F, 0.006F, 0.0F};
 	/** How often flight rolls (ticks; once a second). */
 	static final int FLIGHT_ROLL_TICKS = 20;
 	/** The slipped item can't be caught again straight away (ticks). */
@@ -41,8 +46,21 @@ final class WindFumble {
 
 	/** Every tick in flight. */
 	static void flightTick(ServerPlayer player) {
-		if (player.tickCount % FLIGHT_ROLL_TICKS == 0 && canFumble(player) && player.getRandom().nextFloat() < FLIGHT_CHANCE_PER_SECOND) {
+		if (player.tickCount % FLIGHT_ROLL_TICKS != 0) {
+			return;
+		}
+		if (canFumble(player) && player.getRandom().nextFloat() < FLIGHT_CHANCE_PER_SECOND) {
 			slip(player);
+		}
+		ServerPlayer carried = Carry.carriedPlayer(player);
+		if (carried != null && !player.isCreative() && Powers.has(player, WindPower.INSTANCE)) {
+			int mastery = Math.clamp(Mastery.unlocked(player), 0, CARRY_DROP_CHANCE_PER_SECOND.length - 1);
+			if (player.getRandom().nextFloat() < CARRY_DROP_CHANCE_PER_SECOND[mastery]) {
+				Carry.slip(player);
+				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_IDLE_AIR, SoundSource.PLAYERS, 0.8F, 0.7F);
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.wind.fumble_carried", carried.getDisplayName()).withStyle(ChatFormatting.GRAY));
+				carried.sendOverlayMessage(Component.translatable("message.jaymospowers.wind.slipped_from", player.getDisplayName()).withStyle(ChatFormatting.GRAY));
+			}
 		}
 	}
 

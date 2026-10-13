@@ -66,5 +66,8 @@
 	"button.jaymospowers.armor.head": "helmet",
 	"button.jaymospowers.armor.chest": "chestplate",
 	"button.jaymospowers.armor.legs": "leggings",
-	"button.jaymospowers.armor.feet": "boots"
+	"button.jaymospowers.armor.feet": "boots",
+	"death.attack.jaymospowers.decapitation": "%1$s lost their head",
+	"death.attack.jaymospowers.decapitation.player": "%1$s was beheaded by %2$s",
+	"entity.jaymospowers.severed_part": "Severed Part"
 }

@@ -26,6 +26,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.Carry.init();
 		com.jaymospowers.core.Crawl.init();
 		com.jaymospowers.core.HiddenArmor.init();
+		com.jaymospowers.core.Dismember.init();
 		com.jaymospowers.core.Oddities.init();
 		// each power registers itself (and its items, entities, packets) from its own package
 		WindPower.init();
@@ -49,7 +50,7 @@ public class JaymosPowers implements ModInitializer {
 	 */
 	private static void registerAttachments() {
 		String[] holders = {
-			"core.Affinity", "core.BlockCluster", "core.Callings", "core.Carry", "core.CarryBlock", "core.Crawl", "core.Fate", "core.HiddenArmor", "core.Mastery", "core.Powers",
+			"core.Affinity", "core.BlockCluster", "core.Callings", "core.Carry", "core.CarryBlock", "core.Crawl", "core.Dismember", "core.Fate", "core.HiddenArmor", "core.Mastery", "core.Powers",
 			"power.arsenal.ArsenalArmory", "power.arsenal.ArsenalPower", "power.arsenal.ArsenalReach", "power.arsenal.ArsenalRelics",
 			"power.arsenal.ArsenalStash", "power.arsenal.HundredBlades", "power.arsenal.ArsenalGates", "power.arsenal.ArsenalVoid",
 			"power.arsenal.ArsenalFlintlock", "power.arsenal.ArsenalDamocles", "power.arsenal.ArsenalCannons",

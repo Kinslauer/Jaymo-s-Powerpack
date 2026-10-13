@@ -439,6 +439,20 @@ public final class Carry {
 		end(player.level().getServer().getPlayerList().getPlayer(entry.carrier), entry, Let.ESCAPE);
 	}
 
+	/** The player {@code carrier} has in their arms, if it's a player. */
+	public static @Nullable ServerPlayer carriedPlayer(ServerPlayer carrier) {
+		Entry entry = CARRIES.get(carrier.getUUID());
+		return entry != null && entry.carried instanceof ServerPlayer player ? player : null;
+	}
+
+	/** The carrier loses their grip: whatever they hold drops with their momentum, as if let go. */
+	public static void slip(ServerPlayer carrier) {
+		Entry entry = CARRIES.get(carrier.getUUID());
+		if (entry != null) {
+			end(carrier, entry, Let.DROP);
+		}
+	}
+
 	/** Ends a carry: forgets it, lifts the weight, and puts the body down the way it was let go. */
 	private static void end(@Nullable ServerPlayer carrier, Entry entry, Let how) {
 		CARRIES.remove(entry.carrier);

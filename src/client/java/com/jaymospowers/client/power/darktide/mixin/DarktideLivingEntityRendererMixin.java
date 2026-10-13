@@ -23,6 +23,18 @@ abstract class DarktideLivingEntityRendererMixin {
 		DarktidePose.extract(entity, state, partialTicks);
 	}
 
+	/**
+	 * The held-item layers take the hands from the model as it's animated here, before the body is drawn: the pose goes
+	 * on now too, so a raised blade (or twin daggers) rises with the hands.
+	 */
+	@Inject(
+		method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V",
+		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/EntityModel;setupAnim(Ljava/lang/Object;)V", shift = At.Shift.AFTER))
+	private void jaymospowers$darktideHands(LivingEntityRenderState state, PoseStack poseStack, net.minecraft.client.renderer.SubmitNodeCollector collector,
+		net.minecraft.client.renderer.state.level.CameraRenderState camera, CallbackInfo ci) {
+		DarktidePose.applyModel(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
+	}
+
 	@Inject(method = "setupRotations", at = @At("TAIL"))
 	private void jaymospowers$darktideCrawl(LivingEntityRenderState state, PoseStack poseStack, float bodyRot, float entityScale, CallbackInfo ci) {
 		DarktidePose.rotateCrawl(state, poseStack);

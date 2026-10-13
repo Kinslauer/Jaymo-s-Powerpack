@@ -2,6 +2,6 @@
 	"required": true,
 	"package": "com.jaymospowers.power.darktide.mixin",
 	"compatibilityLevel": "JAVA_25",
-	"mixins": ["DarktideBlockMixin", "DarktideDeflectMixin", "DarktideDropMixin", "DarktideMobStunMixin", "DarktidePlayerPoseMixin", "DarktideVisibilityMixin", "DarktideAirMixin"],
+	"mixins": ["DarktideBlockMixin", "DarktideDeflectMixin", "DarktideDropMixin", "DarktideMobStunMixin", "DarktidePlayerPoseMixin", "DarktideVisibilityMixin", "DarktideAirMixin", "DarktideRisenTargetMixin"],
 	"injectors": { "defaultRequire": 1 }
 }

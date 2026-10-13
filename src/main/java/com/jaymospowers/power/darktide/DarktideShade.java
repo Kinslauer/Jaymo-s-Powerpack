@@ -73,7 +73,12 @@ final class DarktideShade {
 			return true;
 		}
 		// already a shade, day, a dimension without night, /kill or the void: dies for real; a held totem goes first
-		if (DarktideState.save(player).shadeUntil() > 0L || !DarktideFlow.night(player.level()) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)
+		if (DarktideState.save(player).shadeUntil() > 0L) {
+			// a shadow leaves no body behind (Jaymo's Kitchen would lay one down)
+			player.addTag(DarktideTide.NO_CORPSE_TAG);
+			return true;
+		}
+		if (!DarktideFlow.night(player.level()) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)
 				|| player.getMainHandItem().is(Items.TOTEM_OF_UNDYING) || player.getOffhandItem().is(Items.TOTEM_OF_UNDYING)) {
 			return true;
 		}
@@ -127,6 +132,10 @@ final class DarktideShade {
 	}
 
 	static void tick(ServerPlayer player, DarktideLive live) {
+		if (player.isAlive()) {
+			// (only a dead shade's body needs it)
+			player.removeTag(DarktideTide.NO_CORPSE_TAG);
+		}
 		long until = DarktideState.save(player).shadeUntil();
 		if (until > 0L != shade(player)) {
 			// joining as a shade: the drawn-dark flag isn't saved, only the save is
@@ -195,6 +204,8 @@ final class DarktideShade {
 		level.sendParticles(ParticleTypes.WHITE_ASH, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.5, 1.0, 0.5, 0.0);
 		level.sendParticles(DUST, player.getX(), player.getY() + 1.0, player.getZ(), 120, 0.6, 1.0, 0.6, 0.0);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 1.0F, 0.6F);
+		// nothing but ash: no body for Jaymo's Kitchen to lay down
+		player.addTag(DarktideTide.NO_CORPSE_TAG);
 		player.hurtServer(level, new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(DAWN)), Float.MAX_VALUE);
 	}
 

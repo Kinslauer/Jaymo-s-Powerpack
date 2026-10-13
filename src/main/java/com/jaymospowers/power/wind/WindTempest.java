@@ -140,6 +140,8 @@ public final class WindTempest {
 			&& (e.getBoundingBox().inflate(LANCE_RADIUS).contains(eye) || e.getBoundingBox().inflate(LANCE_RADIUS).clip(eye, tip).isPresent())));
 		hits.sort(Comparator.comparingDouble(e -> e.distanceToSqr(eye)));
 
+		// the lance blows out the fire along it (a Stormbound lance's bolts fall after)
+		WindDouse.line(level, eye, tip, LANCE_RADIUS + 1.0, player);
 		// Stormbound only in the rain: under a clear sky it's the Tempest's own lance
 		boolean stormbound = Fate.isCorrupted(player) && WindModes.thunderPower(level) > 0.0F;
 		if (stormbound) {

@@ -70,6 +70,8 @@ public final class WindPower implements Power {
 	static final double BARRIER_PUSH_RADIUS = 6.0, BARRIER_PUSH_MIN = 0.9, BARRIER_PUSH_MAX = 1.8;
 	/** Zephyr's Breath: radius; Slow Falling and Regeneration durations. */
 	static final double ZEPHYR_RADIUS = 6.0;
+	/** Fire the Tailwind's take-off snuffs around you, and the Gale Barrier around you while it's up (blocks). */
+	static final double TAILWIND_DOUSE_RADIUS = 3.0, BARRIER_DOUSE_RADIUS = 2.5;
 	/** Descending slower than this (blocks/tick) while flying doesn't build up fall distance (vanilla's elytra rule). */
 	static final double GLIDE_SAFE_SINK = 0.5;
 	/**
@@ -728,6 +730,7 @@ public final class WindPower implements Power {
 		switch (ability) {
 			case TAILWIND -> {
 				if (gust) {
+					this.douseGust(player, level, f);
 					if (stormbound) {
 						WindStorm.strike(player, this.gustImpact(player, f));
 					}
@@ -736,6 +739,7 @@ public final class WindPower implements Power {
 					s.gustCooldown = WindCold.cooldown(player, Mth.lerpInt(f * f, GUST_COOLDOWN_MIN, GUST_COOLDOWN_MAX));
 					break;
 				}
+				WindDouse.douse(level, player.position().add(0.0, 1.0, 0.0), TAILWIND_DOUSE_RADIUS, player);
 				if (stormbound) {
 					// the bolt falls where you launched from
 					WindStorm.strike(player, player.position());
@@ -751,6 +755,7 @@ public final class WindPower implements Power {
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WIND_CHARGE_BURST, SoundSource.PLAYERS, 1.0F, 1.2F);
 			}
 			case GALE_BARRIER -> {
+				WindDouse.douse(level, player.position().add(0.0, 1.0, 0.0), BARRIER_PUSH_RADIUS, player);
 				if (stormbound) {
 					LivingEntity nearest = this.nearestEnemy(player, level, BARRIER_PUSH_RADIUS);
 					WindStorm.strike(player, nearest != null ? nearest.position() : player.position());
@@ -773,6 +778,7 @@ public final class WindPower implements Power {
 						? WindCold.cooldown(player, CALL_LIGHTNING_COOLDOWN) : 20;
 					break;
 				}
+				WindDouse.douse(level, player.position().add(0.0, 1.0, 0.0), ZEPHYR_RADIUS, player);
 				int fall = (int)(Mth.lerpInt(f, ZEPHYR_FALL_MIN, ZEPHYR_FALL_MAX) * w);
 				int regen = (int)(Mth.lerpInt(f, ZEPHYR_REGEN_MIN, ZEPHYR_REGEN_MAX) * w);
 				int regenAmp = f >= 1.0F ? 1 : 0;
@@ -857,6 +863,18 @@ public final class WindPower implements Power {
 		}
 	}
 
+	/** The ground gust blows out the fire along its cone (before a Stormbound bolt lands at its tip). */
+	private void douseGust(ServerPlayer player, ServerLevel level, float f) {
+		Vec3 eye = player.getEyePosition();
+		Vec3 look = player.getLookAngle();
+		double range = Mth.lerp(f, GUST_RANGE_MIN, GUST_RANGE_MAX);
+		double spread = Math.tan(Math.toRadians(GUST_HALF_ANGLE));
+		for (int i = 0; i <= 6; i++) {
+			double d = range * i / 6.0;
+			WindDouse.douse(level, eye.add(look.scale(d)), 1.0 + d * spread, player);
+		}
+	}
+
 	/** Where a ground gust of this charge lands: the first block along the look, or the cone's tip. */
 	private Vec3 gustImpact(ServerPlayer player, float f) {
 		Vec3 eye = player.getEyePosition();
@@ -917,6 +935,9 @@ public final class WindPower implements Power {
 			}, player, EntityReference.of((Entity)player), false, 1.0);
 			level.sendParticles(ParticleTypes.SMALL_GUST, projectile.getX(), projectile.getY(), projectile.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 			level.playSound(null, projectile.getX(), projectile.getY(), projectile.getZ(), SoundEvents.BREEZE_DEFLECT, SoundSource.PLAYERS, 1.0F, 1.0F);
+		}
+		if (s.barrierTicks % 10 == 0) {
+			WindDouse.douse(level, center, BARRIER_DOUSE_RADIUS, player);
 		}
 		// a faint swirl so everyone can see the barrier is up
 		if (s.barrierTicks % 3 == 0) {
