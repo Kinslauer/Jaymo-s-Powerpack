@@ -310,6 +310,11 @@ final class Oddities {
 			kind = Aliens.fearedAs(player, f.id());
 		} else if (monstrous(monster)) {
 			kind = monster instanceof Villager ? "host" : SYMBIOTE;
+		} else if (Vampires.exposed(monster)) {
+			// (0.7.0) a neighbour out hunting with red eyes
+			Speech.say(level, v, Component.translatable(line("talk.jaymoskingdoms.vampire.cry", level.getRandom()), monster.getDisplayName()), Speech.RED, 24.0);
+			SPOKE.put(v.getUUID(), now + TALK_GAP);
+			return;
 		}
 		if (kind == null) {
 			return;

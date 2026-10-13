@@ -71,7 +71,7 @@ final class Frights {
 			if (f.fallen() || !level.isPositionEntityTicking(f.seat())) {
 				continue;
 			}
-			for (Villager v : level.getEntitiesOfClass(Villager.class, new AABB(f.seat()).inflate(WATCHED), Villager::isAlive)) {
+			for (Villager v : level.getEntitiesOfClass(Villager.class, new AABB(f.seat()).inflate(WATCHED), v -> v.isAlive() && !Vampires.exposed(v))) {
 				LivingEntity monster = monster(level, v, f);
 				Fright fright = FRIGHTS.get(v.getUUID());
 				if (monster != null) {
@@ -114,7 +114,7 @@ final class Frights {
 		if (m instanceof Folk folk) {
 			return Assault.attacker(folk) || folk.role() == Folk.BARBARIAN || folk.role() == Folk.CHIEF || Orcs.isOrc(folk);
 		}
-		return m instanceof Enemy;
+		return m instanceof Enemy || Vampires.exposed(m);
 	}
 
 	/** (0.6.11) Something came down at {@code at} (a meteor, a star): it runs from the spot and hides a while. */

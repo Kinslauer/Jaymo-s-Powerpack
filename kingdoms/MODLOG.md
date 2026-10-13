@@ -2519,3 +2519,21 @@ earthquakes, relief quests, forecasts).
   tornado on the action bar. Art: `tools/gen_disasters.py` (models from vanilla's block textures).
 - Ops: `/kingdom disaster <storm|thunder|supercell|dust_devil|tornado|monster|clear>` (a cell overhead, or a
   tornado 60 blocks ahead coming your way).
+
+## 0.7.0: vampires, stage 1 of the 0.10.0 drop (pack 0.10.0)
+Plan and open questions: `docs/Vampires-Plan.md`. All in `Vampires` (tuning at the top).
+- **The Elder.** One per world (`elder_vampire` on the Overworld). From day 6, by day, a grown villager 20-64 blocks
+  from a player becomes him (+20 max health). By day he's himself; at night (12800-23200) he hunts the nearest grown
+  person within 24 blocks (villagers, MCA's, any realm's folk, rulers included; never children), holds them (Slowness
+  VI) and bites every second for 5 (healing 3/4 of it) until they die, rests 2 minutes, and hunts again. Slain (or
+  cured), another may come 30 days later.
+- **The bite** (`vampire_bitten`): a person bitten who lives turns at the next nightfall, rolled: feeder 50% (hunts
+  each night until it's killed once), abstainer 30% (sleeps; after 3 nights unfed it bites someone once and lets go),
+  hunter 20% (goes for any vampire that's shown itself, with claws). Turned vampires get +8 max health. Killed
+  outright, the victim stays dead. Players bitten only get Weakness and Hunger for now (they turn in stage 3).
+- **Shown.** A vampire hunting or fighting shows red eyes (dust particles) and drains with blood and a drinking sound;
+  till dawn guards go for it (`Folk` targets, `MobCombat.foe`), villagers run from it crying who it is
+  (`talk.jaymoskingdoms.vampire.cry.*`), and whoever it attacks fights back. Hurt by someone, it fights them with its
+  claws; under 30% health it runs. At night it heals 0.5 a second when left alone. Fire hurts it twice over. By day it
+  has Weakness and passes for the living. Villagers are driven by their brain's walk target, folk by their target.
+- Ops: `/kingdom vampire elder | turn <feeder|abstainer|hunter> | cure | where`.
