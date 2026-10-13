@@ -87,7 +87,7 @@ final class Frights {
 	}
 
 	/**
-	 * The nearest monster it can see, close enough to frighten it; null if none. (0.6.1) A player changed into one of
+	 * The nearest monster it can see, close enough to frighten it; null if none. (0.6.4) A player changed into one of
 	 * the Xeno-Band's aliens counts, unless {@code f}'s people saw them change ({@link Aliens}).
 	 */
 	private static @Nullable LivingEntity monster(ServerLevel level, Villager v, Faction f) {

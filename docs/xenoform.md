@@ -113,17 +113,29 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 
 ## Nadir, the void alien, and the two voices
 
-The ninth alien is one no creature carries. Once the power has ascended *and* the band is corrupted, two voices speak
-from it (`XenoVoices`, every 2 s as a human): **Hush**, the still one (aqua, italic), and **Clamour**, the loud one
-(dark red, bold). They never agree. Each asks a yes-or-no question in chat with clickable answers (or
-`/xenovoice hush yes`); the questions conflict (Hush: "when you could strike, will you stay your hand?"; Clamour: "when
-you could stay your hand, will you strike?") and each voice wants a yes, so satisfying both means telling each what it
-wants to hear, which the other remarks on. An answer that displeases a voice is thrown back and asked again a minute
-later. Two pairs of questions, then a deed each: Hush wants `PEACE_FORMS` (3) changes to run their whole course
-(timer out, no knockout) without a blow struck (`live.hurt`, set by the after-damage hook); Clamour wants `KILLS` (12)
-lives ended as an alien (after-death hook, minions excepted). With every requirement met the voices agree for once and
-Nadir is unlocked on the band. The trial (`XenoformState.TRIAL`: stage 0-4, answers, counts) is kept across deaths
-and goes on whatever Fate does after it began. Debug: `/powerdebug xenoform trial show | reset | deeds`.
+The ninth alien is one no creature carries, and it is lent, never owned. Once the power has ascended *and* the band
+is corrupted, two voices speak from it (`XenoVoices`, every 2 s as a human): **Hush**, the still one (aqua, italic),
+and **Clamour**, the loud one (dark red, bold). They never agree, and the trial never ends: it runs in rounds
+(`XenoformState.TRIAL`: stage, round, this round's answers and deed counts; kept across deaths; once begun it goes on
+whatever Fate does after).
+
+- **Questions.** A round opens with a pair of yes-or-no questions, one from each voice, clickable in chat (or
+  `/xenovoice hush yes`). The pair conflicts (Hush: "when you could strike, will you stay your hand?"; Clamour:
+  "when you could stay your hand, will you strike?") and each voice wants a yes, so pleasing both means telling each
+  what it wants to hear, which the other remarks on. An answer that displeases a voice is thrown back and asked again a
+  minute later. Then a second pair. There are `PAIRS` (6) pairs in lang (`voice.jaymospowers.xenoform.<voice>.q<n>`,
+  with `.yes<n>`/`.no<n>` replies); round *r* asks pairs `(r-1)*2` and `(r-1)*2+1` mod 6, so the questions change
+  from round to round and come back around after three rounds.
+- **Deeds**, also by round: odd rounds, Hush wants `PEACE_FORMS` (3) changes to run their whole course without a blow
+  (`live.hurt`) and Clamour `KILLS` (12) lives ended as an alien (after-death hook, minions excepted); even rounds,
+  Hush wants `RESTRAINT` (3) changes ended by your own hand before the timer, Clamour `KNOCKOUTS` (2) knockouts taken.
+  `XenoVoices.formEnded` sorts each ending change into one of those.
+- **Content.** Both deeds done, the voices agree for once: Nadir goes on the dial (the first time) and the band will
+  turn to it **once** (`transform` refuses a hidden form while `!XenoVoices.content`, with the voices saying what's
+  missing). The moment that Nadir change ends, it is spent: the next round begins with the next questions, and Nadir
+  stays on the dial but won't turn until the voices are content again.
+
+Debug: `/powerdebug xenoform trial show | reset | deeds | content`.
 
 **Nadir** (`forms/Nadir`, id `nadir`, `hidden()` so it doesn't count toward a complete band): 1.15x, 60 health, fists
 of 6, a little faster, immovable; no fall, fire or drowning damage. Its look is a tall near-black silhouette with faint

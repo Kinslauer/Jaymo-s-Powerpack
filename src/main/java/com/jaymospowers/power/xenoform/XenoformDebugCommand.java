@@ -111,8 +111,9 @@ final class XenoformDebugCommand {
 						.executes(c -> {
 							ServerPlayer player = c.getSource().getPlayerOrException();
 							XenoformState.Trial trial = XenoformState.trial(player);
-							c.getSource().sendSuccess(() -> Component.literal("The voices' trial: stage " + trial.stage() + " of 4, answers " + trial.answers()
-								+ ", peaceful changes " + trial.peaceForms() + "/" + XenoVoices.PEACE_FORMS + ", lives " + trial.kills() + "/" + XenoVoices.KILLS
+							c.getSource().sendSuccess(() -> Component.literal("The voices' trial: round " + trial.round() + ", stage " + trial.stage() + " of 4, answers "
+								+ trial.answers() + ", Hush's deed " + XenoVoices.hushDeed(trial) + " " + trial.hushCount() + "/" + XenoVoices.hushGoal(trial)
+								+ ", Clamour's deed " + XenoVoices.clamourDeed(trial) + " " + trial.clamourCount() + "/" + XenoVoices.clamourGoal(trial)
 								+ (XenoVoices.eligible(player) ? "" : " (not ascended and corrupted: the voices sleep)")), false);
 							return 1;
 						}))
@@ -123,10 +124,21 @@ final class XenoformDebugCommand {
 							c.getSource().sendSuccess(() -> Component.literal("The voices' trial starts over."), false);
 							return 1;
 						}))
+					.then(Commands.literal("content")
+						.executes(c -> {
+							ServerPlayer player = c.getSource().getPlayerOrException();
+							XenoformState.Trial trial = XenoformState.trial(player);
+							player.setAttached(XenoformState.TRIAL, new XenoformState.Trial(4, Math.max(1, trial.round()), java.util.List.of(), 0, 0));
+							XenoformPower.unlock(player, XenoForms.NADIR);
+							c.getSource().sendSuccess(() -> Component.literal("The voices are content: Nadir may be slammed once."), false);
+							return 1;
+						}))
 					.then(Commands.literal("deeds")
 						.executes(c -> {
 							ServerPlayer player = c.getSource().getPlayerOrException();
-							player.setAttached(XenoformState.TRIAL, new XenoformState.Trial(3, java.util.List.of("hush1=yes", "clamour1=yes", "hush2=yes", "clamour2=yes"), 0, 0));
+							XenoformState.Trial trial = XenoformState.trial(player);
+							player.setAttached(XenoformState.TRIAL, new XenoformState.Trial(3, Math.max(1, trial.round()),
+								java.util.List.of("hush1=yes", "clamour1=yes", "hush2=yes", "clamour2=yes"), 0, 0));
 							c.getSource().sendSuccess(() -> Component.literal("The voices' questions are answered: on to the deeds."), false);
 							return 1;
 						})))));

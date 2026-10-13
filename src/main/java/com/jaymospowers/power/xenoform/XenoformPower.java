@@ -653,6 +653,11 @@ public final class XenoformPower implements Power {
 
 	/** Becomes {@code form}. {@code force} skips the recharge (commands). */
 	public static boolean transform(ServerPlayer player, XenoForm form, boolean force) {
+		if (form.hidden() && !force && !XenoVoices.content(player)) {
+			// the void alien is lent, never owned: the voices must be content first
+			XenoVoices.refuse(player);
+			return false;
+		}
 		Live live = live(player);
 		if (live.form != null || !player.isAlive()) {
 			return false;
@@ -711,8 +716,8 @@ public final class XenoformPower implements Power {
 		if (live.ultimate) {
 			form.onUltimateEnd(player, live);
 		}
-		if (fx && !knockout && live.ticksLeft <= 0 && !live.hurt) {
-			XenoVoices.peacefulForm(player);
+		if (fx) {
+			XenoVoices.formEnded(player, form, knockout, live.ticksLeft <= 0, live.hurt);
 		}
 		form.onExit(player, live);
 		player.removeTag(XenoformState.TAG);

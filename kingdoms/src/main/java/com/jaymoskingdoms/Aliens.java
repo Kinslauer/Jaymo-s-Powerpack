@@ -22,7 +22,7 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.6.1) Jaymo's Powers' Xenoform: a player wearing the Xeno-Band can become an alien. To a kingdom's people that is
+ * (0.6.4) Jaymo's Powers' Xenoform: a player wearing the Xeno-Band can become an alien. To a kingdom's people that is
  * a monster: villagers run from one ({@link Frights}) and guards hunt it ({@link Folk}'s target goals,
  * {@link MobCombat#foe}), unless they know better. A kingdom's folk who <i>see</i> you change (within {@link #WITNESS}
  * blocks, in line of sight) know you for who you are from then on, and that kingdom treats the alien as it treats you.

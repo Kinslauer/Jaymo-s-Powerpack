@@ -26,26 +26,38 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * The two voices in the band, and the void alien they keep ({@link com.jaymospowers.power.xenoform.forms.Nadir}).
+ * The two voices in the band, and the void alien they lend ({@link com.jaymospowers.power.xenoform.forms.Nadir}).
  * Once the power has ascended <i>and</i> the band is corrupted, two voices speak from it: <b>Hush</b>, the still one,
- * and <b>Clamour</b>, the loud one. They never agree. Each asks you a question with a yes or no to it (clickable in
- * chat, or {@code /xenovoice hush yes}); an answer that displeases a voice is thrown back, and it asks again a minute
- * later. When both are content with your first answers they ask a second pair; when both are content with those, each
- * names a deed: Hush wants {@link #PEACE_FORMS} changes run their whole course without a blow struck, Clamour wants
- * {@link #KILLS} lives ended as an alien. With every requirement met, the voices give you Nadir. The trial, once
- * begun, goes on whatever Fate does after: it's kept in {@link XenoformState#TRIAL}, across deaths.
- *
- * <p>Every line is lang {@code voice.jaymospowers.xenoform.<voice>.<what>}.
+ * and <b>Clamour</b>, the loud one. They never agree. The trial never ends: it runs in rounds.
+ * <ul>
+ * <li>A round begins with a pair of conflicting yes-or-no questions, one from each voice (clickable in chat, or
+ * {@code /xenovoice hush yes}); each voice wants a yes, so pleasing both means telling each what it wants to hear. An
+ * answer that displeases a voice is thrown back and asked again a minute later. Then a second pair. The questions
+ * come from {@link #PAIRS} pairs and change from round to round.</li>
+ * <li>Then a deed each, also by round: Hush wants changes that run their whole course without a blow
+ * ({@link #PEACE_FORMS}) or changes you end by hand before the timer does ({@link #RESTRAINT}); Clamour wants lives
+ * ended as an alien ({@link #KILLS}) or knockouts taken ({@link #KNOCKOUTS}).</li>
+ * <li>With both deeds done the voices are content: Nadir goes on the dial (the first time) and may be slammed
+ * <b>once</b>. The moment that change ends, the next round begins, with the next questions: Nadir stays on the dial
+ * but the band refuses it until the voices are content again.</li>
+ * </ul>
+ * The trial is {@link XenoformState#TRIAL} (kept across deaths) and, once begun, goes on whatever Fate does after.
+ * Every line is lang {@code voice.jaymospowers.xenoform.<voice>.<what>}.
  */
 public final class XenoVoices {
 	// ---- tuning ----
-	/** The deeds: changes that run their whole course without a blow (Hush), and lives ended as an alien (Clamour). */
-	public static final int PEACE_FORMS = 3, KILLS = 12;
+	/** The deeds' goals: Hush's two kinds, Clamour's two kinds. */
+	public static final int PEACE_FORMS = 3, RESTRAINT = 3, KILLS = 12, KNOCKOUTS = 2;
+	/** How many question pairs the voices have (lang {@code .q0}..); two pairs are asked a round. */
+	public static final int PAIRS = 6;
 	/** How often (ticks) an unanswered or re-asked question is put again, and how often the trial is looked at. */
 	public static final int ASK_EVERY = 1200, EVERY = 40;
 
 	public static final String HUSH = "hush", CLAMOUR = "clamour";
-	/** What each voice wants to hear at each stage (the questions are written so that both want a yes, and conflict). */
+	public static final String PEACE = "peace", RESTRAIN = "restraint", KILL = "kills", KNOCKOUT = "knockouts";
+	/** The stage at which the voices are content and Nadir may be slammed once. */
+	public static final int CONTENT = 4;
+	/** What each voice wants to hear (every question is written so that both want a yes, and they conflict). */
 	private static final String WANTED = "yes";
 
 	private static final Map<UUID, Map<String, Long>> LAST_ASKED = new HashMap<>();
@@ -58,7 +70,7 @@ public final class XenoVoices {
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (source.getEntity() instanceof ServerPlayer player && player != entity && XenoformPower.formOf(player) != null
 				&& !entity.entityTags().contains(XenoformState.MINION_TAG)) {
-				killed(player, entity);
+				deed(player, CLAMOUR, KILL);
 			}
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> LAST_ASKED.clear());
@@ -82,21 +94,56 @@ public final class XenoVoices {
 					}))));
 	}
 
+	// ---- what this round asks ----
+
+	/** Which question pair {@code voice} puts at {@code stage} (1 or 2) of this round. */
+	static int question(XenoformState.Trial trial, int stage) {
+		return Math.floorMod((trial.round() - 1) * 2 + (stage - 1), PAIRS);
+	}
+
+	public static String hushDeed(XenoformState.Trial trial) {
+		return trial.round() % 2 == 1 ? PEACE : RESTRAIN;
+	}
+
+	public static String clamourDeed(XenoformState.Trial trial) {
+		return trial.round() % 2 == 1 ? KILL : KNOCKOUT;
+	}
+
+	public static int hushGoal(XenoformState.Trial trial) {
+		return hushDeed(trial).equals(PEACE) ? PEACE_FORMS : RESTRAINT;
+	}
+
+	public static int clamourGoal(XenoformState.Trial trial) {
+		return clamourDeed(trial).equals(KILL) ? KILLS : KNOCKOUTS;
+	}
+
+	/** Whether the voices are content right now: Nadir may be slammed. */
+	public static boolean content(Player player) {
+		return XenoformState.trial(player).stage() >= CONTENT;
+	}
+
+	/** Whether this player may ever be asked (for the debug command's readout). */
+	public static boolean eligible(Player player) {
+		return Fate.isAscended(player) && Fate.isCorrupted(player);
+	}
+
+	// ---- the trial's turns ----
+
 	/** Every {@link #EVERY} ticks as a human: the voices speak when they have something to ask. */
 	static void tick(ServerPlayer player) {
 		if (player.tickCount % EVERY != 0) {
 			return;
 		}
 		XenoformState.Trial trial = XenoformState.trial(player);
-		if (trial.stage() >= 4) {
+		if (trial.stage() >= CONTENT) {
 			return;
 		}
 		if (trial.stage() == 0) {
-			if (!Fate.isAscended(player) || !Fate.isCorrupted(player) || player.isCreative()) {
+			if (!eligible(player) || player.isCreative()) {
 				return;
 			}
-			// the voices wake
-			trial = trial.stage(1);
+			// the voices wake: the first round
+			trial = trial.nextRound();
 			player.setAttached(XenoformState.TRIAL, trial);
 			say(player, HUSH, "wake");
 			say(player, CLAMOUR, "wake");
@@ -107,7 +154,7 @@ public final class XenoVoices {
 			for (String voice : new String[] {HUSH, CLAMOUR}) {
 				String key = voice + trial.stage();
 				if (!trial.answered(key) && due(player, key, now)) {
-					ask(player, voice, trial.stage());
+					ask(player, voice, trial);
 				}
 			}
 		} else if (trial.stage() == 3 && due(player, "deeds", now)) {
@@ -125,9 +172,10 @@ public final class XenoVoices {
 		return true;
 	}
 
-	/** A voice puts its question, with the two answers to click. */
-	private static void ask(ServerPlayer player, String voice, int stage) {
-		MutableComponent line = prefix(voice).append(Component.translatable("voice.jaymospowers.xenoform." + voice + ".ask" + stage)
+	/** A voice puts this round's question, with the two answers to click. */
+	private static void ask(ServerPlayer player, String voice, XenoformState.Trial trial) {
+		int q = question(trial, trial.stage());
+		MutableComponent line = prefix(voice).append(Component.translatable("voice.jaymospowers.xenoform." + voice + ".q" + q)
 			.withStyle(voice.equals(HUSH) ? ChatFormatting.ITALIC : ChatFormatting.BOLD));
 		line.append(Component.literal("  "));
 		line.append(choice(voice, "yes")).append(Component.literal(" ")).append(choice(voice, "no"));
@@ -154,75 +202,118 @@ public final class XenoVoices {
 			say(player, voice, "already");
 			return;
 		}
+		int q = question(trial, trial.stage());
 		if (!answer.equals(WANTED)) {
 			// thrown back: the question stands, and comes again
-			say(player, voice, "displeased" + trial.stage());
+			say(player, voice, "no" + q);
 			LAST_ASKED.computeIfAbsent(player.getUUID(), u -> new HashMap<>()).put(key, player.level().getGameTime());
 			return;
 		}
 		trial = trial.with(key, answer);
-		say(player, voice, "pleased" + trial.stage());
+		say(player, voice, "yes" + q);
 		String other = voice.equals(HUSH) ? CLAMOUR : HUSH;
 		if (trial.answered(other + trial.stage())) {
-			// both content, and both told what they wanted to hear: on to the next
-			say(player, other, "contradiction" + trial.stage());
+			// both content with their answers, each told the opposite: on to the next
+			say(player, other, "contradiction");
 			trial = trial.stage(trial.stage() + 1);
 			if (trial.stage() == 3) {
-				say(player, HUSH, "deed");
-				say(player, CLAMOUR, "deed");
+				say(player, HUSH, "deed." + hushDeed(trial), hushGoal(trial));
+				say(player, CLAMOUR, "deed." + clamourDeed(trial), clamourGoal(trial));
 			}
 			fx(player);
 		}
 		player.setAttached(XenoformState.TRIAL, trial);
 	}
 
-	/** A change ran its whole course without a blow: Hush's deed. */
-	static void peacefulForm(ServerPlayer player) {
-		XenoformState.Trial trial = XenoformState.trial(player);
-		if (trial.stage() != 3 || trial.peaceForms() >= PEACE_FORMS) {
+	/**
+	 * A change ended ({@code form}): a knockout, the timer out ({@code timedOut}), or by hand; {@code hurt} says whether a
+	 * blow was struck in it. Counts toward the deeds, and spends Nadir.
+	 */
+	static void formEnded(ServerPlayer player, XenoForm form, boolean knockout, boolean timedOut, boolean hurt) {
+		if (form.hidden()) {
+			spent(player);
 			return;
 		}
-		trial = trial.counts(trial.peaceForms() + 1, trial.kills());
-		player.setAttached(XenoformState.TRIAL, trial);
-		say(player, HUSH, trial.peaceForms() >= PEACE_FORMS ? "deed_done" : "deed_count", trial.peaceForms(), PEACE_FORMS);
-		finishIfDone(player, trial);
+		if (knockout) {
+			deed(player, CLAMOUR, KNOCKOUT);
+		} else if (timedOut) {
+			if (!hurt) {
+				deed(player, HUSH, PEACE);
+			}
+		} else {
+			deed(player, HUSH, RESTRAIN);
+		}
 	}
 
-	/** A life ended as an alien: Clamour's deed. */
-	private static void killed(ServerPlayer player, LivingEntity victim) {
+	/** One step of a deed, if it is the one {@code voice} asked for this round. */
+	private static void deed(ServerPlayer player, String voice, String kind) {
 		XenoformState.Trial trial = XenoformState.trial(player);
-		if (trial.stage() != 3 || trial.kills() >= KILLS) {
+		if (trial.stage() != 3) {
 			return;
 		}
-		trial = trial.counts(trial.peaceForms(), trial.kills() + 1);
+		boolean hush = voice.equals(HUSH);
+		if (!(hush ? hushDeed(trial) : clamourDeed(trial)).equals(kind)) {
+			return;
+		}
+		int goal = hush ? hushGoal(trial) : clamourGoal(trial);
+		int count = (hush ? trial.hushCount() : trial.clamourCount()) + 1;
+		if (count > goal) {
+			return;
+		}
+		trial = hush ? trial.counts(count, trial.clamourCount()) : trial.counts(trial.hushCount(), count);
 		player.setAttached(XenoformState.TRIAL, trial);
-		say(player, CLAMOUR, trial.kills() >= KILLS ? "deed_done" : "deed_count", trial.kills(), KILLS);
-		finishIfDone(player, trial);
+		say(player, voice, count >= goal ? "done." + kind : "count." + kind, count, goal);
+		if (trial.hushCount() >= hushGoal(trial) && trial.clamourCount() >= clamourGoal(trial)) {
+			contented(player, trial);
+		}
 	}
 
 	private static void remind(ServerPlayer player, XenoformState.Trial trial) {
-		if (trial.peaceForms() < PEACE_FORMS) {
-			say(player, HUSH, "deed_count", trial.peaceForms(), PEACE_FORMS);
+		if (trial.hushCount() < hushGoal(trial)) {
+			say(player, HUSH, "count." + hushDeed(trial), trial.hushCount(), hushGoal(trial));
 		}
-		if (trial.kills() < KILLS) {
-			say(player, CLAMOUR, "deed_count", trial.kills(), KILLS);
+		if (trial.clamourCount() < clamourGoal(trial)) {
+			say(player, CLAMOUR, "count." + clamourDeed(trial), trial.clamourCount(), clamourGoal(trial));
 		}
 	}
 
-	/** Every requirement met: the voices agree for once, and the void alien is yours. */
-	private static void finishIfDone(ServerPlayer player, XenoformState.Trial trial) {
-		if (trial.peaceForms() < PEACE_FORMS || trial.kills() < KILLS) {
-			return;
-		}
-		player.setAttached(XenoformState.TRIAL, trial.stage(4));
-		say(player, HUSH, "given");
-		say(player, CLAMOUR, "given");
+	/** Both deeds done: the voices agree for once. Nadir goes on the dial (the first time) and may be slammed once. */
+	private static void contented(ServerPlayer player, XenoformState.Trial trial) {
+		player.setAttached(XenoformState.TRIAL, trial.stage(CONTENT));
+		boolean first = !XenoformState.band(player).has(XenoForms.NADIR.id);
+		say(player, HUSH, first ? "given" : "lent");
+		say(player, CLAMOUR, first ? "given" : "lent");
 		XenoformPower.unlock(player, XenoForms.NADIR);
 		ServerLevel level = player.level();
 		level.sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 120, 0.8, 1.0, 0.8, 0.4);
 		level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.0, player.getZ(), 40, 0.5, 0.8, 0.5, 0.2);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.END_PORTAL_SPAWN, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 0.6F, 0.5F);
+	}
+
+	/** A Nadir change ended: it's spent, and the next round begins with the next questions. */
+	private static void spent(ServerPlayer player) {
+		XenoformState.Trial trial = XenoformState.trial(player);
+		if (trial.stage() < CONTENT) {
+			return;
+		}
+		player.setAttached(XenoformState.TRIAL, trial.nextRound());
+		LAST_ASKED.remove(player.getUUID());
+		say(player, HUSH, "spent");
+		say(player, CLAMOUR, "spent");
+		fx(player);
+	}
+
+	/** The band was slammed on Nadir while the voices aren't content: they say why not. */
+	static void refuse(ServerPlayer player) {
+		XenoformState.Trial trial = XenoformState.trial(player);
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.nadir_refused").withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RESPAWN_ANCHOR_DEPLETE.value(), SoundSource.PLAYERS, 0.8F, 0.6F);
+		if (trial.stage() == 3) {
+			remind(player, trial);
+		} else if (trial.stage() >= 1) {
+			say(player, trial.answered(HUSH + trial.stage()) ? CLAMOUR : HUSH, "unanswered");
+		}
 	}
 
 	// ---- the voices' lines ----
@@ -246,10 +337,5 @@ public final class XenoVoices {
 		level.sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.4, 0.6, 0.4, 0.1);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 0.5F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 1.0F, 1.5F);
-	}
-
-	/** Whether this player may ever be asked (for the debug command's readout). */
-	public static boolean eligible(Player player) {
-		return Fate.isAscended(player) && Fate.isCorrupted(player);
 	}
 }

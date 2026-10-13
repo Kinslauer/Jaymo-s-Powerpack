@@ -69,46 +69,43 @@ public final class XenoformState {
 	}
 
 	/**
-	 * The two voices' trial for the void alien ({@link XenoVoices}): how far the asking has gone ({@code stage}: 0 not
-	 * begun, 1 the first questions, 2 the second, 3 the deeds, 4 done), each voice's answers so far ("hush1=yes"...),
-	 * and the deeds' counts: changes that ran their course without a blow, and lives ended as an alien.
+	 * The two voices' rolling trial for the void alien ({@link XenoVoices}): {@code stage} (0 asleep, 1 the first
+	 * questions, 2 the second, 3 the deeds, 4 content: Nadir may be slammed), {@code round} (how many trials have begun;
+	 * it picks the questions and the deeds), each voice's answers this round ("hush1=yes"...), and each voice's deed
+	 * count this round.
 	 */
-	public record Trial(int stage, List<String> answers, int peaceForms, int kills) {
-		public static final Trial NONE = new Trial(0, List.of(), 0, 0);
+	public record Trial(int stage, int round, List<String> answers, int hushCount, int clamourCount) {
+		public static final Trial NONE = new Trial(0, 0, List.of(), 0, 0);
 		public static final Codec<Trial> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.INT.optionalFieldOf("stage", 0).forGetter(Trial::stage),
+				Codec.INT.optionalFieldOf("round", 0).forGetter(Trial::round),
 				Codec.STRING.listOf().optionalFieldOf("answers", List.of()).forGetter(Trial::answers),
-				Codec.INT.optionalFieldOf("peace_forms", 0).forGetter(Trial::peaceForms),
-				Codec.INT.optionalFieldOf("kills", 0).forGetter(Trial::kills))
+				Codec.INT.optionalFieldOf("hush", 0).forGetter(Trial::hushCount),
+				Codec.INT.optionalFieldOf("clamour", 0).forGetter(Trial::clamourCount))
 			.apply(i, Trial::new));
 
 		public boolean answered(String key) {
 			return answers.stream().anyMatch(a -> a.startsWith(key + "="));
 		}
 
-		public @Nullable String answer(String key) {
-			return answers.stream().filter(a -> a.startsWith(key + "=")).map(a -> a.substring(key.length() + 1)).findFirst().orElse(null);
-		}
-
 		Trial with(String key, String value) {
 			List<String> list = new ArrayList<>(answers);
 			list.removeIf(a -> a.startsWith(key + "="));
 			list.add(key + "=" + value);
-			return new Trial(stage, List.copyOf(list), peaceForms, kills);
-		}
-
-		Trial without(String key) {
-			List<String> list = new ArrayList<>(answers);
-			list.removeIf(a -> a.startsWith(key + "="));
-			return new Trial(stage, List.copyOf(list), peaceForms, kills);
+			return new Trial(stage, round, List.copyOf(list), hushCount, clamourCount);
 		}
 
 		Trial stage(int value) {
-			return new Trial(value, answers, peaceForms, kills);
+			return new Trial(value, round, answers, hushCount, clamourCount);
 		}
 
-		Trial counts(int peace, int killed) {
-			return new Trial(stage, answers, peace, killed);
+		/** A fresh round: the next questions and deeds, nothing answered or done yet. */
+		Trial nextRound() {
+			return new Trial(1, round + 1, List.of(), 0, 0);
+		}
+
+		Trial counts(int hush, int clamour) {
+			return new Trial(stage, round, answers, hush, clamour);
 		}
 	}
 

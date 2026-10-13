@@ -710,7 +710,13 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   `docs/Classes-Plan.md`. The Armory's cleavers are redrawn short and its quarterstaffs long, the stick running the
   whole sprite (`tools/gen_cleaver_staff.py`, run after `armory_assets.py`); the Tinkering cleaver takes the same
   short shape in every material (`tools/gen_tinker_cleaver.py`).
-- **0.9.1, Xenoform, the Xeno-Band (all three stages; Kingdoms 0.6.1):** a new power from a falling star. On clear nights a glowing rock
+
+- **0.9.2, beg their pardon (Kingdoms 0.6.2):** when someone runs up and you miss what they said, right-click them
+  within 45 seconds to beg their pardon (they say it again, and a question you walked off on is put to you again) or ask
+  them to tell you more. The answer screen has "Could you tell me more?" too.
+  Guards halt strangers far less often, and have four new encounters shaped by their king's temper: a pack search, a
+  toll, a bout for a wager and a loyalty test, where a wrong answer can cost emeralds, good name, or get you arrested.
+- **0.9.5, Xenoform, the Xeno-Band (all three stages; Kingdoms 0.6.4):** a new power from a falling star. On clear nights a glowing rock
   sometimes comes down near a player (like a Gravity meteor; at most one a day per world) and leaves a Fallen Star in
   its crater. Mine it (iron pickaxe): 15% a Xeno-Band, 7% the symbiote's goo, else raw iron, amethyst and XP. Put the
   band on and it never comes off: tap Z to turn its dial, hold Z to slam it and become the dialled alien for a random
@@ -728,8 +734,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Ultimate for the rest of the timer: Titan (Bulwark), Sunheart (Pyre), Afterimage (Blur), Geode (Prism), Revenant
   (Wisp, possess a mob), Swarm (Gremlin), the Tolling (Knell), Elder Wyrm. Each alien carries its own flaw while the
   band is corrupted (Blur's dash won't stop, Prism's stance leaks arrows, Knell's shriek wakes shriekers...). Jaymo's
-  Kingdoms 0.6.1: townsfolk flee an alien and guards hunt it, unless that realm saw you change (`docs/xenoform.md`). A ninth alien, Nadir, the void given shape (a dark silhouette, a face of nothing, the xeno insignia
+  Kingdoms 0.6.4: townsfolk flee an alien and guards hunt it, unless that realm saw you change (`docs/xenoform.md`). A ninth alien, Nadir, the void given shape (a dark silhouette, a face of nothing, the xeno insignia
   on its chest): no creature carries it. Ascended and corrupted, two voices speak from the band, Hush and Clamour,
-  with conflicting questions and then a deed each (3 changes without a blow; 12 lives as an alien); satisfy both
-  and Nadir is on the dial. Its Beacon (R) picks any player on the server, lights them through the world, and a hold
+  in rounds that never end: conflicting questions that change each round, then a deed each (changes without a
+  blow or ended by hand; lives as an alien or knockouts taken); satisfy both and Nadir may be slammed once, and when
+  that change ends the next round begins. Its Beacon (R) picks any player on the server, lights them through the world, and a hold
   phases you to them across dimensions; its other moves wait on Andy.
