@@ -773,3 +773,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   empty station shows each tool's parts in turn (`GHOST_CYCLE_MS` 1.5 s); with some parts in, it cycles the tools
   those parts could make and outlines only what's missing. The tool shown is underlined in the recipe list. Nothing
   shows while a tool or a modifier is in. `ToolStationScreen.ghosts`.
+- **0.9.14, predators eat their kills (Kitchen 0.4.35):** wolves, foxes, bears, zombies and the other scavengers
+  (Kingdoms' and Naturalist's predators too) tear into bodies with a brutal worrying bite, the meat spills on the ground
+  and they eat it from there. Players' kills are left for the player. See Kitchen's MODLOG.
