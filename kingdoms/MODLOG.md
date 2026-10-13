@@ -2231,3 +2231,14 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   component by id), so a silver-bladed tinker sword hits for double, and a rose gold one for full.
 - `MythicMounts`: bat horses and nightmares are exceedingly rare: `CHANCE` 1 in 6000 per 30 s check (was 1 in 80),
   about once in 50 hours a player spends at night in the wild or in the Nether, and none while another wild one is out.
+
+## 0.5.59: a paranoid king's guards drive out loiterers
+- `Paranoia`: a paranoid ruler's guards suspect any stranger who hangs about him. Suspicion builds 3 a second within
+  5 blocks of him, 1 a second within 12, +10 for right-clicking him, and cools 1 a second once you keep away.
+  - Too close: his nearest guard shoves you back and warns you (as before).
+  - Suspicion 25: you're watched. Up to 2 town guards walk over, dog you, shove you away from the king and threaten you.
+  - Suspicion 60: you're driven out. The guards see you to the edge of the city (80 blocks from the seat), shoving
+    you away from the seat, and keep you out for 5 minutes; then the slate is clean.
+  - Never a fight: only an actual attack (hitting the king or a guard) makes them hostile. His realm's members, his
+    sworn wardens, and creative players are trusted. Tuning is at the top of `Paranoia`.
+- Not playtested in game.

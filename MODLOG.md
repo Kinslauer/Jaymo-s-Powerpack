@@ -635,3 +635,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   mended with silver ingots, and a Tinkering tool with a silver head counts as silver against werewolves. The bat
   horse and nightmare are now exceedingly rare: about once in 50 hours a player spends where one can turn up, and
   never while another wild one is about.
+- **0.8.113, paranoid kings' guards (Kingdoms 0.5.59):** a paranoid king's guards now shove away and harass anyone who
+  hangs about him, and if you keep at it (or keep laying hands on him) they walk you out of the city and keep you out
+  for 5 minutes. They never fight you unless you actually attack.

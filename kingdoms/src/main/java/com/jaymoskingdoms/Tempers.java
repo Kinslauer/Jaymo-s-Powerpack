@@ -44,7 +44,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Warlord</b>: inspects rather than greets; his guards are drilled (stronger in a fight, quicker with javelins);
  * his realm sends war parties twice as often, and bigger; he taxes for the war chest.</li>
  * <li><b>Paranoid</b>: keeps his rounds short, greets no one and eyes everyone; a stranger who comes close is pushed
- * back by his guard; good deeds count half with him, bad ones double.</li>
+ * back by his guard, and one who keeps hanging about him is harassed and then driven out of the city
+ * ({@link Paranoia}); good deeds count half with him, bad ones double.</li>
  * <li><b>Reveler</b>: greets his people with gifts, and at dusk throws a feast at his seat: the villagers gather, there's
  * music and fireworks, they're given bread (and so have children), and it eats into the stores; players at his feast
  * are remembered fondly.</li>
@@ -73,10 +74,8 @@ final class Tempers {
 	/** The warlord's realm: war parties this many times as often, and this many more soldiers. */
 	static final float WAR_CHANCE = 2.0F;
 	static final int WAR_EXTRA = 3;
-	/** The paranoid king's round ends by this time of day; strangers this close are pushed back, at most once per this many ticks each. */
+	/** The paranoid king's round ends by this time of day (his guards' suspicion is {@link Paranoia}'s). */
 	static final long PARANOID_ROUND_END = 5000L;
-	static final double PARANOID_SPACE = 5.0;
-	static final int PARANOID_WARN_TICKS = 200;
 	/** The feast: when (time of day), how far villagers come from, the food it eats, the bread each villager gets, and the good name it wins a guest. */
 	static final long FEAST_FROM = 10000L, FEAST_TO = 11000L;
 	static final double FEAST_RANGE = 48.0;
@@ -88,7 +87,6 @@ final class Tempers {
 
 	/** Faction id → the day of its last feast. */
 	private static final Map<Integer, Long> FEASTED = new HashMap<>();
-	private static final Map<UUID, Long> WARNED = new HashMap<>();
 
 	private Tempers() {
 	}
@@ -97,7 +95,6 @@ final class Tempers {
 		ServerTickEvents.END_SERVER_TICK.register(Tempers::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			FEASTED.clear();
-			WARNED.clear();
 		});
 	}
 
@@ -302,11 +299,7 @@ final class Tempers {
 			Folk king = level.getEntity(f.leader().get()) instanceof Folk k && k.isAlive() ? k : null;
 			switch (temper) {
 				case WARLORD -> drill(level, f);
-				case PARANOID -> {
-					if (king != null) {
-						keepAway(level, f, king, now);
-					}
-				}
+				case PARANOID -> Paranoia.tick(level, f, king, now);
 				case REVELER -> {
 					if (t >= FEAST_FROM && t < FEAST_TO && FEASTED.getOrDefault(f.id(), -1L) != day) {
 						FEASTED.put(f.id(), day);
@@ -324,26 +317,6 @@ final class Tempers {
 		for (Folk g : level.getEntitiesOfClass(Folk.class, new AABB(f.seat()).inflate(Royals.ESCORT_CALL),
 			x -> x.isAlive() && x.factionId() == f.id() && x.combatant() && x.getTarget() != null)) {
 			g.addEffect(new MobEffectInstance(MobEffects.STRENGTH, TICK * 3, 0, false, false));
-		}
-	}
-
-	/** The paranoid king: a stranger who comes too close is shoved back (and told to keep off). */
-	private static void keepAway(ServerLevel level, Faction f, Folk king, long now) {
-		for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, king.getBoundingBox().inflate(PARANOID_SPACE))) {
-			if (p.isCreative() || p.isSpectator() || f.members().containsKey(p.getUUID())) {
-				continue;
-			}
-			Vec3 away = p.position().subtract(king.position()).multiply(1.0, 0.0, 1.0);
-			if (away.lengthSqr() < 1.0E-4) {
-				away = new Vec3(1.0, 0.0, 0.0);
-			}
-			away = away.normalize();
-			p.push(away.x * 0.8, 0.25, away.z * 0.8);
-			p.syncVelocity = true;
-			if (now - WARNED.getOrDefault(p.getUUID(), -PARANOID_WARN_TICKS * 2L) >= PARANOID_WARN_TICKS) {
-				WARNED.put(p.getUUID(), now);
-				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.paranoid_warning", king.getDisplayName()).withStyle(ChatFormatting.RED));
-			}
 		}
 	}
 
