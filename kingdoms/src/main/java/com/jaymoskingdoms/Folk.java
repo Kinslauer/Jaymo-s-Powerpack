@@ -256,6 +256,11 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		return this.entityData.get(KINGDOM);
 	}
 
+	/** (0.5.59) Belongs to {@code id} (-1: to no one, as an assassin after {@link #setup}). */
+	void setFactionId(int id) {
+		this.entityData.set(KINGDOM, id);
+	}
+
 	/** (0.2's name for {@link #factionId}) */
 	public int kingdomId() {
 		return this.factionId();
@@ -505,6 +510,11 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
+		if (this.role() == Assassins.ASSASSIN) {
+			// (0.5.59) an assassin about his business, and nothing else
+			Assassins.act(level, this);
+			return;
+		}
 		if (this.outfit < Outfits.VERSION) {
 			this.restyle(level);
 		}
@@ -601,6 +611,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			return InteractionResult.PASS;
 		}
 		if (player instanceof ServerPlayer serverPlayer) {
+			// (0.5.59) a stranger spoken to; a poisoned ruler cured; a ruler warned of the whispers
+			if (Assassins.interact(serverPlayer, this, player.getItemInHand(hand))) {
+				return InteractionResult.SUCCESS;
+			}
 			if (Goblins.isGoblin(this) && this.level() instanceof ServerLevel level) {
 				// (0.5.27) a goblin grunts back at one of its own
 				Disguise.greet(level, serverPlayer, this);
@@ -623,6 +637,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		if (this.level() instanceof ServerLevel level) {
 			// (0.5.47) a knight's (or a raider's) horse goes wild when a player cuts him down
 			Stables.riderFell(level, this, source);
+			// (0.5.59) an assassin's purse and contract
+			Assassins.died(level, this, source);
 		}
 		if (this.level() instanceof ServerLevel level && this.isCarrying()) {
 			// whatever he was hauling falls where he does

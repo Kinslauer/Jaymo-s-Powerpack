@@ -2231,3 +2231,26 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   component by id), so a silver-bladed tinker sword hits for double, and a rose gold one for full.
 - `MythicMounts`: bat horses and nightmares are exceedingly rare: `CHANCE` 1 in 6000 per 30 s check (was 1 in 80),
   about once in 50 hours a player spends at night in the wild or in the Nether, and none while another wild one is out.
+
+## 0.5.61: assassins
+- **Contracts** (`Assassins`, tuning at the top): each day a realm's ruler (king or lord) has a 1.5% chance of a price
+  on his head, times his temper (tyrant 2.5, noble 0.5, warlord 1.5, paranoid 0.75, reveler 1) and doubled if a realm
+  is his rival or at war with him. Who paid: that rival (70% when there is one), his own people (a tyrant), an
+  impatient heir, or the guild. Players get marked too: a realm that hates them (2%/day), a Rogue (2%), one known in 4+
+  settlements (1%). At most 3 contracts at once; the blade comes 1-2 days later; a contract lapses after 6 days.
+- **Whispers**: while a contract waits, villagers near a player in that realm's land whisper of it (or warn a marked
+  player). Heard it? Right-click the ruler to warn him (+15 good name): the first blow is parried. A paranoid ruler
+  parries half the time anyway.
+- **The attempt** only happens with a player within 40 blocks of the ruler (a marked player: at night). A "Stranger" in
+  plain clothes walks in and makes for his mark; at reach he throws off the cloak (black leathers, iron sword) and
+  stabs: a quarter of the ruler's health (half if asleep) and a poison that takes 3.5% a second for 30 s; his guards
+  come running. Milk, honey or a golden apple (right-click the ruler) cures it (+40 good name, 16 emeralds from the
+  treasury); his physician may (4% a second). The assassin fights 12 s or until half dead, then smoke, invisibility,
+  and he runs. A marked player feels eyes on them at 9 blocks (Stealth 3+: 22 blocks, "one of your own trade"), then a
+  6-damage stab and Poison II.
+- **After**: killed, he drops his purse (8-20 emeralds) and a Sealed Contract (paper, its lore names the mark and who
+  paid). For a ruler: +50 good name to his killer, news to everyone, and a rival realm's seal makes the two rivals. A
+  murdered ruler is mourned and his heir crowned a day later (no ruin or conquest fate); word may get out of who paid.
+- Right-clicking a stranger: an evasive line (Stealth 3+: you recognise an assassin). `/kingdom assassin [realm]` (op):
+  a blade sent now for that realm's ruler, or for you.
+- Not playtested in game.
