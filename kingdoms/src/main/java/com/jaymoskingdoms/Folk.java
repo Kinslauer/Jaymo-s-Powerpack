@@ -448,6 +448,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		// (0.5.1) a ruler's day out and his escort at his back; doors opened (and shut) on the way
 		this.goalSelector.addGoal(3, new Royals.Round(this));
 		this.goalSelector.addGoal(3, new Royals.Follow(this));
+		this.goalSelector.addGoal(3, new Retinue.Harass(this));
 		// (0.5.14) a caravan's carters and guards on the road
 		this.goalSelector.addGoal(3, new Caravans.Drive(this));
 		this.goalSelector.addGoal(3, new net.minecraft.world.entity.ai.goal.OpenDoorGoal(this, true));

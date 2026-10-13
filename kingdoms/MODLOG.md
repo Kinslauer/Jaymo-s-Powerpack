@@ -2284,3 +2284,25 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   dark oak carriage, spoked wheels, cast-iron barrel with copper bands, the realm's colour on the gunner's cushion; the
   barrel kicks back when it fires. Tuning numbers at the top of each class.
 - Not playtested in game.
+
+## 0.5.63: every king's guards have his temper
+- `Retinue` (was the paranoid-only `Paranoia`): how a ruler's guards take players about him, by his temper. Each
+  stranger builds heat a second close (within 5 blocks) or lingering (within 12), more for right-clicking him, and
+  it cools 1 a second once they give him room. Tuning is the `RULES` table at the top of `Retinue`.
+  - **Paranoid** (3/s close, 1/s lingering, +10 a click): too close, shoved back. At 25, up to 2 town guards dog
+    you, shoving you away from him and threatening you. At 60 they walk you out of the city (80 blocks from the
+    seat) and keep you out for 5 minutes.
+  - **Tyrant**: kneel (sneak) near him or it's insolence (2/s close, +15 a click). Too close standing, a guard
+    demands you kneel. At 20 a guard slaps you (1 damage, only above 5 hearts) and fines you an emerald for his
+    treasury every 5 s; at 50 you're thrown out (5 minutes). Kneeling cools it twice as fast, and once a day wins a
+    nod (+1 good name).
+  - **Warlord**: a weapon in hand near him (sword, axe, bow, crossbow, trident, mace) is a challenge (3/s close, 1/s
+    lingering, +8 a click). Too close armed, shoved and told to put it away; at 15 guards dog you; at 50 you're
+    marched out. Unarmed with 15+ armour, a salute once a day (+1 good name).
+  - **Noble**: greets you once a day, with 2 bread if you have 20+ good name with his realm. Standing right by him
+    (1/s) or pestering him (+6 a click) gets a polite word and a gentle push at 20. Never throws you out.
+  - **Reveler**: a cheer and 3 cookies or a honey bottle once a day. Pester him (+8 a click) and at 20 his guards
+    toss you up and away, laughing, and it's forgotten. Never throws you out.
+  - Guards never draw on you; only hitting the king or a guard makes them hostile. Realm members, sworn wardens and
+    creative players are left alone. Heat and bans live in memory (a restart clears them).
+- Not playtested in game.

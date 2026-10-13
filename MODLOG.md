@@ -671,3 +671,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   spell keeps the island up, or an exiled court wizard. They tell you when you first come near each day, give you a
   spell scroll for the climb, talk more about it when you chat with them, and can reset your skill tree like a court
   wizard. Kingdoms leave them alone.
+- **0.8.121, kings' guards with their king's temper (Kingdoms 0.5.63):** a king's guards now treat players by his
+  temper. A paranoid king's guards shove away anyone who hangs about him, then dog them, then walk them out of the
+  city for 5 minutes. A tyrant wants you to kneel (sneak): stand tall and his guards slap and fine you, then throw you
+  out. A warlord's guards won't have a drawn weapon near him, but salute the well armoured. A noble king greets you
+  with bread if you're in his good books, and his guards only ask politely for room. A reveler hands out treats, and
+  his guards toss pests away with a laugh. Nobody fights you unless you actually attack.
