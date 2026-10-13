@@ -1,0 +1,23 @@
+{
+	"replace": false,
+	"values": [
+		"minecraft:zombie",
+		"minecraft:husk",
+		"minecraft:drowned",
+		"minecraft:zombie_villager",
+		"minecraft:zombified_piglin",
+		"minecraft:skeleton",
+		"minecraft:stray",
+		"minecraft:wither_skeleton",
+		"minecraft:bogged",
+		"minecraft:parched",
+		{
+			"id": "mca:male_zombie_villager",
+			"required": false
+		},
+		{
+			"id": "mca:female_zombie_villager",
+			"required": false
+		}
+	]
+}

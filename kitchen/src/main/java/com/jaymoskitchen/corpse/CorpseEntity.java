@@ -79,6 +79,10 @@ public class CorpseEntity extends Entity {
 	private static final EntityDataAccessor<Boolean> CRUMBLING = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.BOOLEAN);
 
+	/** (0.4.37) Parts the body lost before it died (see {@link Corpses#missingParts}): not drawn. */
+	private static final EntityDataAccessor<Integer> MISSING = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.INT);
+
 	/** Animals at most this big (wide and tall, after baby scaling) go in a pocket; bigger ones are carried. */
 	private static final float POCKET_WIDTH = 0.5F, POCKET_HEIGHT = 0.8F;
 	/** Where a carried corpse sits: this far in front of the carrier, at this height (across the arms). */
@@ -412,6 +416,15 @@ public class CorpseEntity extends Entity {
 		return this.entityData.get(LOOK);
 	}
 
+	/** The parts the body lost (bits: head 1, right arm 2, left arm 4, right leg 8, left leg 16). */
+	public int missing() {
+		return this.entityData.get(MISSING);
+	}
+
+	public void setMissing(int missing) {
+		this.entityData.set(MISSING, missing);
+	}
+
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		builder.define(LOOK, "");
@@ -421,6 +434,7 @@ public class CorpseEntity extends Entity {
 		builder.define(TUMBLING, false);
 		builder.define(OWNER_NAME, "");
 		builder.define(CRUMBLING, false);
+		builder.define(MISSING, 0);
 	}
 
 	@Override
@@ -1663,6 +1677,7 @@ public class CorpseEntity extends Entity {
 		this.killer = input.getStringOr("Killer", "");
 		this.killedByPlayer = input.getBooleanOr("KilledByPlayer", false);
 		this.bites = input.getIntOr("Bites", 0);
+		this.entityData.set(MISSING, input.getIntOr("Missing", 0));
 		// whatever held it up (a gravity power) is gone after a reload
 		setNoGravity(false);
 		refreshDimensions();
@@ -1686,5 +1701,6 @@ public class CorpseEntity extends Entity {
 		output.putBoolean("KilledByPlayer", killedByPlayer);
 		output.putInt("Bites", bites);
 		output.putBoolean("Slim", slim);
+		output.putInt("Missing", missing());
 	}
 }

@@ -784,6 +784,17 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Wind ability blows out fire it sweeps (`WindDouse`: fire blocks and burning things, the caster too; a Stormbound
   bolt still lights what it strikes). A player carried in Wind flight can slip from the wind's arms, each second at a
   chance set by mastery (3% with one ability, never once all are mastered, `WindFumble.CARRY_DROP_CHANCE_PER_SECOND`).
+  Then dismemberment and Darktide blades: twin daggers rise with the hands in the R overhead hold (the pose is also put on
+  as the body is submitted, where the held-item layers read the arms); the charged punch hits harder (2-10) and wider
+  (0.9 hit radius, `DarktideMoves.PUNCH_*`). The katana G crescent is aimed: where you look on a target (legs, body,
+  head) is where it cuts, and on humanoid mobs it severs that part 20% of the time (`Dismember.KATANA_CHANCE`). Any
+  other blade (swords, axes, daggers, katanas, `#jaymospowers:severing`) severs 5% of the time on humanoid mobs and on
+  every player (`Dismember`, `#jaymospowers:dismemberable`). A severed head or limb flies off as a `SeveredPart` drawn
+  from the body it came off, and the body is drawn without it (`Dismembered`; corpses too, through Kitchen's
+  `jaymoskitchen.missing.*` tags). Beheaded: a player dies and watches from their fallen head until they respawn;
+  zombies and skeletons (`#jaymospowers:headless_undead`) fight on, a headless skeleton's arrows going wild; other mobs
+  either drop dead or stagger about blind before falling (`STAGGER_CHANCE`). A lost arm drops what it held; lost legs
+  slow hard. Players get all their limbs back on respawn.
 
 - **0.9.20, villagers' days (Kingdoms 0.6.9):** tag with a child is a real game (they run, you catch them, they
   chase you back); settlements have toddlers again; villagers keep daily routines (water, gardens, market, chats,

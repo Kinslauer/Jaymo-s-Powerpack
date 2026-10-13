@@ -51,6 +51,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		ultimateKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.ultimate", InputConstants.KEY_C, CATEGORY));
 		modeKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.mode", InputConstants.KEY_Z, CATEGORY));
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.core.BlockCluster.TYPE, BlockClusterRenderer::new);
+		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.core.SeveredPart.TYPE, SeveredPartRenderer::new);
+		ClientTickEvents.END_CLIENT_TICK.register(Dismembered::tick);
 		com.jaymospowers.client.tinkering.TinkeringClient.init();
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.armory.ArmoryEntities.THROWN_WEAPON,
 			com.jaymospowers.client.armory.ThrownWeaponRenderer::new);

@@ -137,6 +137,20 @@ public final class Corpses {
 	 * vanish (Jaymo's Powers' Darktide shades and risen shadows).
 	 */
 	public static final String NO_CORPSE_TAG = "jaymoskitchen.no_corpse";
+	/** (0.4.37) Prefix of the tags marking parts a body has lost ({@code head}, {@code right_arm}, ...; Jaymo's Powers sets them). */
+	public static final String MISSING_TAG = "jaymoskitchen.missing.";
+	private static final String[] PARTS = {"head", "right_arm", "left_arm", "right_leg", "left_leg"};
+
+	/** The parts {@code entity} has lost, from its tags, as {@link CorpseEntity#missing()} bits. */
+	public static int missingParts(LivingEntity entity) {
+		int missing = 0;
+		for (int i = 0; i < PARTS.length; i++) {
+			if (entity.entityTags().contains(MISSING_TAG + PARTS[i])) {
+				missing |= 1 << i;
+			}
+		}
+		return missing;
+	}
 
 	/** Whether this entity leaves a corpse when it dies (players, listed mobs and tagged ones don't). */
 	public static boolean leavesCorpse(LivingEntity entity) {
@@ -160,6 +174,7 @@ public final class Corpses {
 			}
 		}
 		corpse.setUp(look(mob), kind, kept, level.getRandom().nextInt(3) + 1);
+		corpse.setMissing(missingParts(mob));
 		LivingEntity killer = mob.getKillCredit();
 		// a pet's kill is its owner's
 		corpse.setKiller(killer, killer instanceof Player
