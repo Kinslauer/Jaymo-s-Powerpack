@@ -53,6 +53,7 @@ import org.jspecify.annotations.Nullable;
  * <li>Resonance: ring a village bell around midnight (a day off, once a night), or live through a Warden's sonic boom
  * (awakens at once).</li>
  * <li>Darktide: stay out at sea, swimming or in a boat, from dusk to dawn. Awakens at dawn.</li>
+ * <li>Xenoform: put on a Xeno-Band from a broken fallen star ({@code power/xenoform}). Awakens at once.</li>
  * </ul>
  */
 public final class Callings {

@@ -41,6 +41,68 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   every slam throws block dust, smoke and a heavy mace thud, and shakes you, the one slammed and anyone within 12.
   Bosses can't be whipped; Living Armor's tendrils keep their own Sneak grab. `COOLDOWN` 20 ticks after one ends.
 
+## Andy's symbiote and whip changes (0.9.8)
+- **Rigid tendrils:** Wall Crawl's walking tendrils are jointed limbs (two straight sections, a knee out from the
+  surface, fixed length `WebTendrilWalk.LIMB` 32 px), Doc Ock style. Walking, running or climbing, every other tendril
+  stops swaying and holds its curl in two joints (`WebTendrilLayer.JOINTS`, fully stiff at walk speed `RIGID_SPEED`).
+- **Whip needs both webs:** the first Sneak + R/G only catches (a creature dragged nearly still, a chunk hanging where
+  it tore); Sneak + the other key within `WebWhip.CATCH_TICKS` 60 puts the second web on it and starts the whip. In
+  midair it's always the lasso and you hang in place for it (no gravity, held still); the seesaw only on a living
+  creature; anything else is the overhead.
+- **Barrage combo:** one creature held by a tendril, the other empty, hold left click: it's pinned in front and every
+  other tendril stabs it in turn, a stab every `BARRAGE_EVERY` 3 ticks (i-frames ignored), 3 damage rising to 9 over
+  `BARRAGE_RAMP_TICKS` 60; letting go of the button (or `BARRAGE_MAX_TICKS` 160) ends it.
+- **Behemoth (symbiote in a zombie player):** all 6 back tendrils thrash wildly and each lashes on its own at a random
+  living thing within `STRIKE_REACH` 7.5 (10 damage, 1-5 ticks between a tendril's lashes; normal i-frames).
+- **Shroud** lasts 5 s (`SHROUD_TICKS` 100); the suit's debut after bonding is 1.5 s (`SUIT_DEBUT_TICKS` 30).
+- **Suit after death:** the suit's grow/withdraw animation now runs on game time; on the player's own age it held a
+  respawned player in the suit until their new age caught up with the old one.
+- **The blob** walks on rigid two-section tendrils (`WebBlobRenderer.LEG_LENGTH`), and reads its movement from its
+  position change (clients don't keep a mob's velocity, so it used to slide with its legs idle).
+- **Blob inhabits mobs (`WebInhabit`):** with no web slinger or risen body in reach, a loose blob takes the nearest mob
+  it can (`takeable`: cow, chicken, sheep, pig; zombies of every kind, skeletons, illagers, witches, piglins). It wears the suit over its own model (`web_symbiote_goo.png`, drawn like
+  glowing eyes). A peaceful host is spat out after `CALM_MIN`-`CALM_MAX` 20-40 s (reels with Nausea, Slowness,
+  Weakness; lives). A hostile one (`Enemy`) keeps it `HOSTILE_MIN`-`HOSTILE_MAX` 60-90 s: +20 health, +4 damage, +25%
+  speed, lashing with behemoth tendrils at everything near, losing `DECAY` 1.2% of max health a second (up to x3 near
+  the end), and killed when its time is up. Whenever a host dies or is rejected the blob drops out there, rests
+  `MOB_REST_TICKS` 100, and never takes that mob again.
+- **Behemoth (your risen body):** never lets go until killed; +160 health, +10 damage, and the near-death takeover moves:
+  a roar every `ROAR_EVERY` 300 ticks with prey near and at half and quarter health (10 damage, hurled, Resistance III
+  while it roars), a frenzy under half health (lashes twice as often, x1.4, 18% snatch and hurl), and under a quarter
+  the Shroud (5 s unseen, Regeneration III, Speed, a leap away) once a minute.
+- **Into the big body:** the bulk takes 3 s (`WebSuitGrowth.BULK_TICKS` 60): doubled over in pain, clutching the
+  middle, spasming, knees buckling, head hanging and jerking (`WebFeral.agony`), then up into a deeper feral idle
+  (`IDLE_BEND` 0.75, arms low and wide, knees bent, head twitching).
+- **Overhead slam (`WebSlam`, big body):** jump and keep holding Space in the air: over `RAISE_TICKS` 10 it rears up,
+  both fists over its head. Land still holding it (held at least `MIN_TICKS` 5) and it slams: `DAMAGE` 12 at the
+  centre (half at the edge, +0.8 per block fallen, up to +10) to everything within `RADIUS` 4.5, hurled out and up, a
+  shallow crater (`Debris.smash` at 1.5+, so dirt and sand go, stone mostly holds), a ring of debris, an explosion
+  burst and shaking screens within 16. Letting go in the air calls it off. `COOLDOWN` 20 ticks.
+- **Villagers too:** the loose blob also takes villagers (always rejected in the end, like the farm animals).
+- **Settles:** a blob with no host for 5 minutes (`WebSymbioteBlob.SETTLE_TICKS` 6000) sinks into the ground as a goo
+  block where it is.
+- **Quick dive:** Shift + Space while gliding on the wings tips you straight into the dive; slowing to `DIVE_AT` still
+  does it too.
+- **Web block catch:** the whip's first web on a block now pries for 1.5 s (`WebWhip.PRY_TICKS` 30), the blocks
+  cracking, before the chunk tears out and hangs there for the second web.
+- **Tendril debris pull** takes a flat 0.5 s (`TUG_MIN`/`TUG_MAX` 10) and can wreck spawners (monster and trial): aimed
+  at one, or in its crater, it's broken as if mined when the chunk tears out.
+- **Takeover wall ripping** tears a small crater each pull: the blocks in the way plus the breakable ones round them,
+  up to `WebTakeoverPath.RIP_CRATER` 9 within 1.8 of the middle, never below the gap's floor or the block under you
+  (`RIP_MAX_BLOCKS` 96 per takeover).
+- **It talks more:** narration is likelier and closer together (see Narration). On top of that it **remarks on your
+  surroundings** every `WebSymbiote.REMARK_GAP_MAX` 1400 (weak bond) to `REMARK_GAP_MIN` 500 ticks (+ up to 300):
+  `see.<topic>.1-3` for storm, rain, night, deep, high, hot, cold, water, village, monsters, beasts, player, corpse,
+  lava, or quiet when there's nothing (one picked at random from what applies).
+- **Sightseeing takeovers:** a calm, fed bond has `TOUR_CHANCE` 4% each takeover check (after the neglect roll, before
+  curiosity) to walk you somewhere it wants to see, 10-28 blocks off: a high point (6+ up), the shore of some water,
+  flowers or a villager, never toward lava, only with open sky above. It says why (`tour.<sight>.go.1-3`), drives you
+  there on the takeover path (an invisible `Interaction` marker tagged `TOUR_TAG` is the target; leftovers are
+  discarded on load), and once within `TOUR_REACH` 2.5 turns your head out over it, says so (`tour.<sight>.there.1-3`)
+  and lets go. It doesn't fight on the way; it gives up after `TOUR_TICKS` 600; struggling breaks it as usual.
+- **Landings:** fast across the ground (`ROLL_SPEED` 0.55) is always a roll, however far the drop; slower, a 2.5+ block
+  drop eases down into the superhero landing (over `WebBodyPose.HERO_IN` 30% of a 28-tick pose).
+
 ## Controls
 
 | Key (default) | Ability | Cooldown |
@@ -313,8 +375,8 @@ Tuning is at the top of `client/power/web/WebTrickClient`; the shapes are in `We
   (thrown upward favours the front flip). Never the same one twice running.
 - **On the web:** through the bottom of a fast arc (30%) a **twirl** round the line or a **giant swing** over the
   hand; when the next web catches mid-air (40%) a twirl.
-- **Landing** (after 8+ ticks in the air off a web or the wings): a 2.5+ block drop lands **three-point** (superhero
-  landing); fast across the ground, a **forward roll**; off the wings, the **flare and spin** into a crouch (a roll if
+- **Landing** (after 8+ ticks in the air off a web or the wings): fast across the ground, a **forward roll**; slower,
+  a 2.5+ block drop eases into a **three-point** superhero landing; off the wings, the **flare and spin** into a crouch (a roll if
   very fast). A landing cuts into a flip still going; dodges, ragdolls and takeovers are never interrupted.
 
 ## 0.2.0: Ascension & Corruption
@@ -387,7 +449,7 @@ action bar, each heard once.
 | 2 | Wall Crawl (toggle) | 20 | 0 | Client movement (`WebSymbioteClient.tickCrawl`). Next to a wall in the air, tendrils latch on and drag you the way you're moving (0.8.6: see below); Sneak goes down. Under a ceiling, Jump sticks you to it, you move with the movement keys, and Sneak drops you. Climbing over a top edge hops you onto the ledge. The server allows floating while it's on and resets fall distance while you're touching a wall or ceiling. |
 | 3 | Consume | 160 | 0 | Nothing is eaten alive (0.8). A corpse you carry is eaten. Else a free corpse within `CONSUME_CORPSE_RANGE` 6 (the one you look at first) is grabbed by a tendril, carried, then eaten. Else a non-player creature at **current** health <= `CONSUME_MAX_HEALTH` 10 within `CONSUME_RANGE` 3 is finished off by a lash (`CONSUME_FINISH_LAG` 8 ticks), and its corpse grabbed, carried and eaten. Tamed, name-tagged, inedible and corpse-less creatures are never taken. A corpse heals 6-16 and feeds 30-80 by size. |
 | 4 | Spike Burst | 240 | 8 | Everything within `SPIKE_RADIUS` 5 takes `SPIKE_DAMAGE` 8 (player attack) and is thrown `SPIKE_KNOCKBACK` 1.3 outward and 0.45 up. Rays of black dust. |
-| 5 | Shroud | 600 | 5 | Invisibility (no particles) until you damage anything, or `SHROUD_TICKS` 400. |
+| 5 | Shroud | 600 | 5 | Invisibility (no particles) until you damage anything, or `SHROUD_TICKS` 100 (5 s). |
 
 **Hunger:**
 - Satiety runs 0�`SATIETY_MAX` 100 and starts at 70. It loses 1 point every `SATIETY_DRAIN_TICKS` 240 (about 20
@@ -595,8 +657,8 @@ in `build.gradle`, CurseForge ids still to fill in).
 - Its tendrils look wilder at low bond: quicker sway, sudden jerks, a stronger bulge travelling along each one
   (`WebTendrilLayer.FERAL_*`).
 
-**Narration:** `WebSymbiote.narrate(player, act)` speaks `say.<act>.1-3` with a chance from `NARRATE_MIN` 0.1 to
-`NARRATE_MAX` 0.9 by bond, at most every `NARRATE_GAP_MAX` 600 to `NARRATE_GAP_MIN` 100 ticks. Every line is a
+**Narration:** `WebSymbiote.narrate(player, act)` speaks `say.<act>.1-3` with a chance from `NARRATE_MIN` 0.25 to
+`NARRATE_MAX` 0.95 by bond (0.9.8; was 0.1-0.9), at most every `NARRATE_GAP_MAX` 400 to `NARRATE_GAP_MIN` 80 ticks. Every line is a
 whisper, so the vignette, dark screen and growl play each time.
 
 **Takeovers can't be interrupted.** `WebTakeoverInputMixin` zeroes movement while it drives, and clicks, power keys,
@@ -613,8 +675,8 @@ the HUD.
 across, `CROSS_SWING` 5 whipping it through, `CROSS_FOLLOW` 8, then `CROSS_RECOVER` 18 before anything else. Damage
 6 + 1.5 per piece (max 16).
 
-**Debris pull (Sneak+R/G at a wall):** the tendril reaches in, then hesitates and struggles (`TUG_MIN` 20 to `TUG_MAX`
-60 ticks, longer for harder blocks), cracking the blocks, before it tears the chunk out and hauls it in. Letting go
+**Debris pull (Sneak+R/G at a wall):** the tendril reaches in, then hesitates and struggles (0.5 s, `TUG_MIN`/`TUG_MAX` 10
+since 0.9.8; spawners are wrecked), cracking the blocks, before it tears the chunk out and hauls it in. Letting go
 of the key first cancels it. The cord to the wall shows (`WebTendrils.TUG`).
 
 **Corpse thrash (`WebTendrilCombos.THRASH`):** click while a tendril holds a corpse (one or two). Each slam is a

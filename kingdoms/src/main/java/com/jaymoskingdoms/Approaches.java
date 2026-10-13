@@ -37,6 +37,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -67,6 +68,15 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * Answers move hearts (MCA) and reputation a little. It's paced: one approach per player every few minutes, the same
  * villager once a day, never mid-fight, never from people who hate you (their guards hunt you instead).
+ *
+ * <p>(0.6.2) Guards have more business than halting strangers (which they now do once in three days per settlement,
+ * and a guard comes over at most once in {@link #GUARD_GAP}), all shaped by their king's temper ({@link Tempers}): a
+ * search of your pack, a toll, a bout for a wager, and a test of your loyalty. How you answer can cost you emeralds,
+ * good name, a slap, or the guards' blades (a tyrant's and a paranoid king's guards arrest those who defy them).
+ *
+ * <p>(0.6.2) Missed it? For a little while after they've spoken (and while a bit of news is still being told), right-click
+ * them to beg their pardon (they say it again; a question you walked off on is asked again) or to ask them to tell you
+ * more (each line has a follow-up). The answer screen offers "tell me more" too.
  */
 public final class Approaches {
 	/** How often players are looked at for someone to come over (ticks); how far away that someone can be (blocks). */
@@ -78,8 +88,34 @@ public final class Approaches {
 	static final float BUTCHER_GOSSIP_CHANCE = 0.5F;
 	/** Between approaches to one player (ticks): at least this, plus up to this; the first after joining. */
 	static final int PLAYER_GAP = 20 * 90, PLAYER_GAP_SPREAD = 20 * 150, FIRST_GAP = 20 * 45;
-	/** The same villager comes to the same player at most once in this long (ticks: a day); a guard halts a stranger once a day per settlement. */
+	/** The same villager comes to the same player at most once in this long (ticks: a day). */
 	static final long MET_TICKS = 24000L;
+	/** (0.6.2) A guard halts a stranger once in this long per settlement (ticks: three days); a guard comes over at most this often. */
+	static final long HALT_TICKS = 72000L;
+	static final int GUARD_GAP = 20 * 60 * 8;
+	/**
+	 * (0.6.2) Guards' other business, by their king's temper (TYRANT, NOBLE, WARLORD, PARANOID, REVELER; last, a place with
+	 * no ruler): how keen they are to search you, ask a toll, offer a bout, test your loyalty.
+	 */
+	static final int[] SEARCH_W = {3, 1, 1, 4, 1, 1}, TOLL_W = {4, 1, 2, 2, 2, 1}, BOUT_W = {1, 1, 4, 1, 3, 1}, LOYALTY_W = {3, 1, 1, 4, 1, 0};
+	/** The toll (emeralds, to the treasury), by temper; the bribe a search can be waved off with; a bout's wager. */
+	static final int[] TOLLS = {3, 1, 2, 2, 1, 1};
+	static final int BRIBE = 2, WAGER = 2;
+	/** How long defying a guard who arrests you keeps you wanted (ticks). */
+	static final long ARREST_TICKS = 1200L;
+	/** Good name, by temper: a clean search, refusing one, refusing a toll, winning a bout, praising the king, keeping quiet, speaking ill. */
+	static final int[] SEARCH_CLEAN_REP = {1, 3, 3, 2, 2, 2}, SEARCH_REFUSE_REP = {-6, -2, -4, -6, 0, -2}, TOLL_REFUSE_REP = {-6, -1, -3, -5, 0, -2},
+		BOUT_WON_REP = {2, 2, 5, 1, 3, 2}, PRAISE_REP = {3, 1, 2, 2, 2, 1}, SILENT_REP = {-1, 0, 0, -2, 0, 0}, ILL_REP = {-8, -2, -6, -8, -1, -2};
+	/** Stolen goods found on a search; a bribe a guard won't take; paying a toll; insulting a guard; haggling and failing. */
+	static final int SEARCH_FOUND_REP = -4, BRIBE_REFUSED_REP = -6, TOLL_PAID_REP = 1, REVELER_TOLL_REP = 3, INSULT_REP = -4, HAGGLE_FAILED_REP = -2;
+	/** Haggling a toll down to half: the chance, by temper. */
+	static final float[] HAGGLE_CHANCE = {0.25F, 0.6F, 0.4F, 0.4F, 0.75F, 0.5F};
+	/** A bout: the chance to win (base, per armour point, per point of attack damage, never under or over). */
+	static final float BOUT_BASE = 0.3F, BOUT_ARMOUR = 0.015F, BOUT_ATTACK = 0.03F, BOUT_MIN = 0.15F, BOUT_MAX = 0.85F;
+	/** A guard's slap (only above this health). */
+	static final float SLAP = 1.0F, SLAP_SPARES = 10.0F;
+	/** How sure a paranoid king's guard is that praise is honest. */
+	static final float PARANOID_BELIEVES = 0.5F;
 	/** Walking over: how close is close enough to talk; how long before they give up; how far off the player may get first. */
 	static final double ARRIVE_RANGE = 2.6, GIVE_UP_RANGE = 28.0;
 	static final int WALK_TICKS = 20 * 20;
@@ -95,6 +131,8 @@ public final class Approaches {
 	static final double SPEECH_RANGE = 14.0, TALK_RANGE = 8.0;
 	/** A crime of yours is held against you this long (ticks: two days). */
 	static final long SUSPECT_TICKS = 48000L;
+	/** (0.6.2) After they've had their say, how long you can still beg their pardon (ticks); how long they stay to repeat it. */
+	static final int PARDON_TICKS = 20 * 45, PARDON_HOLD_TICKS = 20 * 15;
 	/** A player hurt by a mob this recently is left alone (ticks). */
 	static final int FIGHT_TICKS = 200;
 
@@ -119,11 +157,14 @@ public final class Approaches {
 
 	/** What they come over about. */
 	static final int QUEST_OFFER = 0, QUEST_CHECK = 1, ACCUSE = 2, HALT = 3, QUESTION = 4, HUNGRY = 5, BARGAIN = 6, GIFT = 7, WAR = 8,
-		GOSSIP = 9, GREET = 10, CHILD = 11, WARN = 12;
+		GOSSIP = 9, GREET = 10, CHILD = 11, WARN = 12, SEARCH = 13, TOLL = 14, BOUT = 15, LOYALTY = 16;
 	static final String[] TOPICS = {"quest_offer", "quest_check", "accuse", "halt", "question", "hungry", "bargain", "gift", "war", "gossip",
-		"greet", "child", "warn"};
-	/** How many ways each topic has of opening (lang keys {@code talk.jaymoskingdoms.<topic>.<n>}). */
-	static final int[] OPENINGS = {3, 3, 3, 3, 0, 3, 3, 3, 2, 10, 3, 3, 3};
+		"greet", "child", "warn", "search", "toll", "bout", "loyalty"};
+	/** How many ways each topic has of opening (lang keys {@code talk.jaymoskingdoms.<topic>.<n>}); 0 for the guards' own, one per temper. */
+	static final int[] OPENINGS = {3, 3, 3, 3, 0, 3, 3, 3, 2, 10, 3, 3, 3, 0, 0, 0, 0};
+	/** (0.6.2) Temper keys, in {@link Tempers.Temper} order, then a place with no ruler of its own. */
+	static final String[] TEMPERS = {"tyrant", "noble", "warlord", "paranoid", "reveler", "plain"};
+	static final int TYRANT = 0, NOBLE = 1, WARLORD = 2, PARANOID = 3, REVELER = 4, PLAIN = 5;
 	/** (0.5.52) Lines a gossip has about a player whose alignment they've heard of, per pillar. */
 	static final int GOSSIP_ABOUT_YOU = 3;
 	/** Stranger's questions (each with a warm, a plain and a rude answer, and a reply to each). */
@@ -140,8 +181,13 @@ public final class Approaches {
 		boolean arrived, done;
 		/** Which opening (or question, or child's game) it is. */
 		int variant;
-		/** What they said on arriving (shown again on the answer screen). */
-		Component line = Component.empty();
+		/** What they said on arriving (shown again on the answer screen); (0.6.2) what more they'd say if asked, and its colour. */
+		Component line = Component.empty(), more = Component.empty();
+		int color = Speech.WHITE;
+		/** (0.6.2) They've told you more; you answered them (nothing to beg pardon for); you walked off on them once already. */
+		boolean elaborated, answered, snubbed;
+		/** (0.6.2) Till when you can still beg their pardon. */
+		long pardonUntil;
 		/** A bargain's goods and price; a war's enemy. */
 		ItemStack goods = ItemStack.EMPTY;
 		int price;
@@ -162,6 +208,18 @@ public final class Approaches {
 
 	/** Player → their approach (one at a time). */
 	private static final Map<UUID, Approach> ACTIVE = new HashMap<>();
+	/** (0.6.2) Player → the last one who spoke to them unanswered, while they can still beg their pardon. */
+	private static final Map<UUID, Approach> RECENT = new HashMap<>();
+	/** (0.6.2) Player → the "pardon?" screen they have open: whose, and what each button is. */
+	private static final Map<UUID, Pardon> PARDONING = new HashMap<>();
+
+	/** What a button on the "pardon?" screen does. */
+	private enum Button {
+		PARDON, MORE, BYE
+	}
+
+	private record Pardon(Approach approach, List<Button> buttons) {
+	}
 	/** Player → when someone may next come over (game time). */
 	private static final Map<UUID, Long> NEXT = new HashMap<>();
 	/** "villager/player" or "halt/faction/player" → when they last met (game time). */
@@ -208,12 +266,28 @@ public final class Approaches {
 				return InteractionResult.PASS;
 			}
 			Approach a = ACTIVE.get(sp.getUUID());
-			if (a == null || a.mob != entity || !a.arrived || a.done || !asks(a.topic)) {
-				return InteractionResult.PASS;
+			if (a == null || a.mob != entity || !a.arrived || a.done) {
+				// (0.6.2) someone who spoke to you a moment ago: beg their pardon, or ask them to say more
+				Approach r = RECENT.get(sp.getUUID());
+				if (r == null || r.mob != entity || sp.isShiftKeyDown() || !(world instanceof ServerLevel level) || level.getGameTime() > r.pardonUntil
+					|| !r.mob.isAlive() || r.mob.getTarget() != null || talking(r.mob) || r.mob.distanceTo(sp) > TALK_RANGE) {
+					return InteractionResult.PASS;
+				}
+				pardonScreen(sp, r);
+				return InteractionResult.SUCCESS;
+			}
+			if (!asks(a.topic)) {
+				// (0.6.2) still telling you their news
+				if (sp.isShiftKeyDown()) {
+					return InteractionResult.PASS;
+				}
+				pardonScreen(sp, a);
+				return InteractionResult.SUCCESS;
 			}
 			if (a.topic == QUEST_OFFER || a.topic == QUEST_CHECK) {
 				// (their quests, straight away: the screen holds them still from here)
 				a.done = true;
+				a.answered = true;
 				Quests.open(sp, a.mob);
 			} else {
 				ask(sp, a);
@@ -221,6 +295,8 @@ public final class Approaches {
 			return InteractionResult.SUCCESS;
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			RECENT.remove(handler.player.getUUID());
+			PARDONING.remove(handler.player.getUUID());
 			Approach a = ACTIVE.remove(handler.player.getUUID());
 			if (a != null) {
 				release(a);
@@ -228,6 +304,8 @@ public final class Approaches {
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			ACTIVE.clear();
+			RECENT.clear();
+			PARDONING.clear();
 			NEXT.clear();
 			MET.clear();
 			SUSPECTS.clear();
@@ -277,6 +355,11 @@ public final class Approaches {
 			if (!step(server, level, a, now)) {
 				release(a);
 				it.remove();
+				if (a.arrived && !a.answered) {
+					// (0.6.2) unanswered: for a while you can still ask what they said
+					a.pardonUntil = now + PARDON_TICKS;
+					RECENT.put(a.player, a);
+				}
 			}
 		}
 		if (server.getTickCount() % SCAN_TICKS == 0) {
@@ -284,7 +367,8 @@ public final class Approaches {
 				consider(level, player, now, -1, false);
 			}
 			if (server.getTickCount() % (SCAN_TICKS * 300) == 0) {
-				MET.values().removeIf(t -> now - t > MET_TICKS);
+				MET.values().removeIf(t -> now - t > HALT_TICKS);
+				RECENT.values().removeIf(r -> now > r.pardonUntil);
 				SUSPECTS.values().forEach(m -> m.values().removeIf(t -> now - t > SUSPECT_TICKS));
 				SUSPECTS.values().removeIf(Map::isEmpty);
 			}
@@ -423,6 +507,9 @@ public final class Approaches {
 		if (bestTopic == HALT) {
 			MET.put("halt/" + bestFaction.id() + "/" + id, now);
 		}
+		if (guard(best)) {
+			MET.put("guard/" + id, now);
+		}
 		NEXT.put(id, now + PLAYER_GAP + random.nextInt(PLAYER_GAP_SPREAD));
 		walk(best, player);
 		return true;
@@ -503,6 +590,11 @@ public final class Approaches {
 		boolean known = McaCompat.isMca(mob) ? hearts >= GREET_HEARTS : rep >= GREET_REP;
 		int[] w = new int[TOPICS.length];
 		if (guard(mob)) {
+			Long lastGuard = MET.get("guard/" + player.getUUID());
+			if (only < 0 && !suspected && lastGuard != null && now - lastGuard < GUARD_GAP) {
+				// (0.6.2) the guards have had a word with you lately
+				return null;
+			}
 			if (night(level)) {
 				w[WARN] = 3;
 			}
@@ -510,9 +602,17 @@ public final class Approaches {
 				w[ACCUSE] = 6;
 			}
 			Long halted = MET.get("halt/" + f.id() + "/" + player.getUUID());
-			if (!sworn && rep < KNOWN_REP && (halted == null || now - halted >= MET_TICKS)) {
-				w[HALT] = 4;
+			if (!sworn && rep < KNOWN_REP && (halted == null || now - halted >= HALT_TICKS)) {
+				w[HALT] = 2;
 			}
+			// (0.6.2) the rest of a guard's business, by his king's temper
+			int tv = temper(server, f);
+			if (!sworn) {
+				w[SEARCH] = SEARCH_W[tv];
+				w[TOLL] = TOLL_W[tv];
+			}
+			w[BOUT] = BOUT_W[tv];
+			w[LOYALTY] = LOYALTY_W[tv];
 			if (!war(server, f).isEmpty()) {
 				w[WAR] = 1;
 			}
@@ -580,13 +680,23 @@ public final class Approaches {
 	/** (The test command) {@code mob} can be made to come over about {@code topic} whatever they know: anything but quests and wars they haven't got. */
 	private static boolean testable(Mob mob, int topic) {
 		if (guard(mob)) {
-			return topic == HALT || topic == WARN || topic == GOSSIP || topic == ACCUSE;
+			return topic == HALT || topic == WARN || topic == GOSSIP || topic == ACCUSE || topic == SEARCH || topic == TOLL || topic == BOUT
+				|| topic == LOYALTY;
 		}
 		if (mob.isBaby()) {
 			return topic == CHILD;
 		}
 		return topic == QUESTION || topic == HUNGRY || topic == GIFT || topic == GREET || topic == GOSSIP || topic == ACCUSE
 			|| (topic == BARGAIN && mob instanceof Villager v && DEALS.containsKey(profession(v)));
+	}
+
+	/** (0.6.2) {@code f}'s ruler's temper (its liege's, for a fief), as an index into {@link #TEMPERS}. */
+	private static int temper(MinecraftServer server, Faction f) {
+		Tempers.Temper t = Tempers.of(f);
+		if (t == null) {
+			t = Tempers.of(Wars.top(server, f));
+		}
+		return t == null ? PLAIN : t.ordinal();
 	}
 
 	private static int hearts(Mob mob, ServerPlayer player) {
@@ -644,11 +754,21 @@ public final class Approaches {
 					a.variant = random.nextInt(OPENINGS[GOSSIP]);
 				}
 			}
+			case SEARCH, TOLL, BOUT, LOYALTY -> {
+				// (0.6.2) one way of putting it per temper
+				a.variant = temper(level.getServer(), f);
+				a.price = a.topic == SEARCH ? BRIBE : a.topic == TOLL ? TOLLS[a.variant] : WAGER;
+			}
 			default -> a.variant = OPENINGS[a.topic] > 0 ? random.nextInt(OPENINGS[a.topic]) : 0;
 		}
 	}
 
 	// ---- talking ---------------------------------------------------------------------------------------------------------
+
+	/** (0.6.2) The guards' business that's put one way per temper. */
+	private static boolean guardsOwn(int topic) {
+		return topic == SEARCH || topic == TOLL || topic == BOUT || topic == LOYALTY;
+	}
 
 	private static String key(Approach a) {
 		return "talk.jaymoskingdoms." + TOPICS[a.topic];
@@ -659,31 +779,39 @@ public final class Approaches {
 		Faction f = Factions.get(level.getServer(), a.faction);
 		String realm = f == null ? "?" : f.name();
 		Component name = player.getName();
-		a.line = switch (a.topic) {
-			case QUESTION -> Component.translatable("talk.jaymoskingdoms.question." + a.variant);
-			case CHILD -> Component.translatable("talk.jaymoskingdoms.child." + a.variant);
-			case BARGAIN -> Component.translatable(key(a) + "." + a.variant, a.goods.getCount(), a.goods.getHoverName(), a.price);
-			case WAR -> Component.translatable(key(a) + "." + a.variant, a.enemy);
-			case HALT -> Component.translatable(key(a) + "." + a.variant, realm);
-			case GREET -> Component.translatable(key(a) + "." + a.variant, name);
-			case GOSSIP -> {
-				if (!a.enemy.isEmpty()) {
-					// (0.5.52) word of what you are (Renown)
-					yield Component.translatable(key(a) + ".you." + a.enemy + "." + a.variant, name);
-				}
-				// (0.5.56) a monster of legend seen out there
-				Component beast = level.getRandom().nextFloat() < Sightings.GOSSIP_CHANCE ? Sightings.gossip(level, a.mob) : null;
-				if (beast != null) {
-					yield beast;
-				}
-				Component butcher = level.getRandom().nextFloat() < BUTCHER_GOSSIP_CHANCE ? KitchenCompat.butcherGossip(player, a.mob) : null;
-				yield butcher != null ? butcher : Component.translatable(key(a) + "." + a.variant);
-			}
-			default -> Component.translatable(key(a) + "." + a.variant);
+		// (the line's key and its arguments; "<key>.more" is what they'd add if asked)
+		String line = key(a) + "." + (guardsOwn(a.topic) ? TEMPERS[a.variant] : a.variant), more = line + ".more";
+		Object[] args = switch (a.topic) {
+			case SEARCH, TOLL, BOUT -> new Object[] {a.price};
+			case BARGAIN -> new Object[] {a.goods.getCount(), a.goods.getHoverName(), a.price};
+			case WAR -> new Object[] {a.enemy};
+			case HALT -> new Object[] {realm};
+			case GREET -> new Object[] {name};
+			default -> new Object[0];
 		};
-		int color = a.topic == ACCUSE ? Speech.RED : a.topic == HALT || a.topic == WARN ? Speech.YELLOW
+		Component said = null;
+		if (a.topic == GOSSIP) {
+			if (!a.enemy.isEmpty()) {
+				// (0.5.52) word of what you are (Renown)
+				line = key(a) + ".you." + a.enemy + "." + a.variant;
+				more = key(a) + ".you." + a.enemy + ".more";
+				args = new Object[] {name};
+			} else {
+				// (0.5.56) a monster of legend seen out there; (0.5.51) a butcher
+				said = level.getRandom().nextFloat() < Sightings.GOSSIP_CHANCE ? Sightings.gossip(level, a.mob) : null;
+				if (said == null && level.getRandom().nextFloat() < BUTCHER_GOSSIP_CHANCE) {
+					said = KitchenCompat.butcherGossip(player, a.mob);
+				}
+				if (said != null) {
+					more = key(a) + ".more";
+				}
+			}
+		}
+		a.line = said != null ? said : Component.translatable(line, args);
+		a.more = Component.translatable(more, args);
+		a.color = a.topic == ACCUSE ? Speech.RED : a.topic == HALT || a.topic == WARN || a.topic == SEARCH || a.topic == TOLL || a.topic == LOYALTY ? Speech.YELLOW
 			: a.topic == QUEST_OFFER || a.topic == QUEST_CHECK || a.topic == GIFT ? Speech.GOLD : Speech.WHITE;
-		Speech.say(level, a.mob, a.line, color, SPEECH_RANGE);
+		Speech.say(level, a.mob, a.line, a.color, SPEECH_RANGE);
 		level.playSound(null, a.mob.getX(), a.mob.getY(), a.mob.getZ(), a.mob instanceof Villager ? SoundEvents.VILLAGER_AMBIENT : SoundEvents.VILLAGER_TRADE,
 			SoundSource.NEUTRAL, 0.8F, a.mob.isBaby() ? 1.5F : 1.0F);
 		if (a.topic == GIFT) {
@@ -695,15 +823,102 @@ public final class Approaches {
 		}
 		if (asks(a.topic)) {
 			player.sendOverlayMessage(Component.translatable("talk.jaymoskingdoms.hint", a.mob.getDisplayName()).withStyle(ChatFormatting.GOLD));
+		} else {
+			player.sendOverlayMessage(Component.translatable("talk.jaymoskingdoms.hint.pardon", a.mob.getDisplayName()).withStyle(ChatFormatting.GRAY));
 		}
 	}
 
-	/** The player right-clicked them: the answers. */
+	/** The player right-clicked them: the answers (and, until they've said it, "tell me more"). */
 	private static void ask(ServerPlayer player, Approach a) {
-		List<Option> options = options(player, a);
+		PARDONING.remove(player.getUUID());
+		List<Option> options = new ArrayList<>(options(player, a));
+		if (!a.elaborated) {
+			options.add(new Option(Component.translatable("talk.jaymoskingdoms.pardon.more"), true));
+		}
 		if (ServerPlayNetworking.canSend(player, TalkNet.Ask.TYPE)) {
-			ServerPlayNetworking.send(player, new TalkNet.Ask(a.mob.getId(), a.mob.getDisplayName(), a.line,
+			ServerPlayNetworking.send(player, new TalkNet.Ask(a.mob.getId(), a.mob.getDisplayName(), heard(a),
 				options.stream().map(Option::label).toList(), options.stream().map(Option::enabled).toList()));
+		}
+	}
+
+	/** What they've told you: the line, and what more they said if you asked. */
+	private static Component heard(Approach a) {
+		return a.elaborated ? Component.translatable("talk.jaymoskingdoms.pardon.both", a.line, a.more) : a.line;
+	}
+
+	// ---- (0.6.2) begging their pardon --------------------------------------------------------------------------------
+
+	/** The "pardon?" screen: before they've repeated it, what you can ask; after, what they said, and what more you can ask. */
+	private static void pardonScreen(ServerPlayer player, Approach a) {
+		pardonScreen(player, a, false);
+	}
+
+	private static void pardonScreen(ServerPlayer player, Approach a, boolean repeated) {
+		if (!ServerPlayNetworking.canSend(player, TalkNet.Ask.TYPE)) {
+			return;
+		}
+		List<Button> buttons = new ArrayList<>();
+		if (!repeated && !a.elaborated) {
+			buttons.add(Button.PARDON);
+		}
+		if (!a.elaborated) {
+			buttons.add(Button.MORE);
+		}
+		buttons.add(Button.BYE);
+		Component words = repeated || a.elaborated ? heard(a) : Component.translatable("talk.jaymoskingdoms.pardon.prompt", a.mob.getDisplayName());
+		List<Component> labels = buttons.stream().map(b -> (Component) Component.translatable(switch (b) {
+			case PARDON -> "talk.jaymoskingdoms.pardon.again";
+			case MORE -> "talk.jaymoskingdoms.pardon.more";
+			case BYE -> repeated || a.elaborated ? "talk.jaymoskingdoms.pardon.thanks" : "talk.jaymoskingdoms.pardon.never_mind";
+		})).toList();
+		PARDONING.put(player.getUUID(), new Pardon(a, buttons));
+		ServerPlayNetworking.send(player, new TalkNet.Ask(a.mob.getId(), a.mob.getDisplayName(), words, labels,
+			labels.stream().map(l -> true).toList()));
+	}
+
+	/** The player picked {@code option} on the "pardon?" screen. */
+	private static void pardoned(ServerLevel level, ServerPlayer player, Pardon p, int option) {
+		Approach a = p.approach();
+		if (option < 0 || option >= p.buttons().size() || p.buttons().get(option) == Button.BYE || !a.mob.isAlive()
+			|| a.mob.distanceTo(player) > TALK_RANGE) {
+			return;
+		}
+		long now = level.getGameTime();
+		boolean more = p.buttons().get(option) == Button.MORE;
+		if (more) {
+			a.elaborated = true;
+		}
+		Speech.say(level, a.mob, more ? a.more : a.line, a.color, SPEECH_RANGE);
+		level.playSound(null, a.mob.getX(), a.mob.getY(), a.mob.getZ(), a.mob instanceof Villager ? SoundEvents.VILLAGER_AMBIENT : SoundEvents.VILLAGER_TRADE,
+			SoundSource.NEUTRAL, 0.8F, a.mob.isBaby() ? 1.5F : 1.0F);
+		Approach active = ACTIVE.get(a.player);
+		if (active != null && active != a) {
+			// (someone else is already on their way over: they just say it, and you read it here)
+			pardonScreen(player, a, true);
+			return;
+		}
+		if (active == null && talking(a.mob)) {
+			pardonScreen(player, a, true);
+			return;
+		}
+		// (they stay to say it; a question you walked off on is put to you again)
+		RECENT.remove(a.player);
+		a.done = false;
+		a.until = now + (asks(a.topic) ? ASK_TICKS : PARDON_HOLD_TICKS);
+		ACTIVE.put(a.player, a);
+		hold(a.mob, player);
+		if (!asks(a.topic)) {
+			pardonScreen(player, a, true);
+		} else if (a.topic == QUEST_OFFER || a.topic == QUEST_CHECK) {
+			if (more) {
+				pardonScreen(player, a, true);
+			} else {
+				a.done = true;
+				a.answered = true;
+				Quests.open(player, a.mob);
+			}
+		} else {
+			ask(player, a);
 		}
 	}
 
@@ -723,6 +938,14 @@ public final class Approaches {
 			case WAR -> List.of(new Option(Component.translatable(k + "stand"), true), new Option(Component.translatable(k + "refuse"), true));
 			case CHILD -> List.of(new Option(Component.translatable("talk.jaymoskingdoms.child." + a.variant + ".yes"), true),
 				new Option(Component.translatable("talk.jaymoskingdoms.child.answer.no"), true));
+			case SEARCH -> List.of(new Option(Component.translatable(k + "allow"), true), new Option(Component.translatable(k + "refuse"), true),
+				new Option(Component.translatable(k + "bribe", a.price), emeralds(player) >= a.price));
+			case TOLL -> List.of(new Option(Component.translatable(k + "pay", a.price), emeralds(player) >= a.price),
+				new Option(Component.translatable(k + "haggle"), emeralds(player) >= 1), new Option(Component.translatable(k + "refuse"), true));
+			case BOUT -> List.of(new Option(Component.translatable(k + "accept", a.price), emeralds(player) >= a.price),
+				new Option(Component.translatable(k + "decline"), true), new Option(Component.translatable(k + "insult"), true));
+			case LOYALTY -> List.of(new Option(Component.translatable(k + "praise"), true), new Option(Component.translatable(k + "silent"), true),
+				new Option(Component.translatable(k + "ill"), true));
 			default -> List.of();
 		};
 	}
@@ -730,6 +953,13 @@ public final class Approaches {
 	private static void answer(ServerPlayer player, TalkNet.Answer answer) {
 		if (Skills.answer(player, answer)) {
 			// (0.5.52) a court wizard's offer to unmake your skills
+			return;
+		}
+		Pardon pardon = PARDONING.remove(player.getUUID());
+		if (pardon != null && pardon.approach().mob.getId() == answer.entityId()) {
+			if (player.level() instanceof ServerLevel level) {
+				pardoned(level, player, pardon, answer.option());
+			}
 			return;
 		}
 		Approach a = ACTIVE.get(player.getUUID());
@@ -743,10 +973,19 @@ public final class Approaches {
 			return;
 		}
 		List<Option> options = options(player, a);
+		if (answer.option() == options.size() && !a.elaborated && a.mob.distanceTo(player) <= TALK_RANGE) {
+			// (0.6.2) "tell me more": they do, and wait on your answer a while longer
+			a.elaborated = true;
+			a.until = Math.max(a.until, level.getGameTime() + ASK_TICKS);
+			Speech.say(level, a.mob, a.more, a.color, SPEECH_RANGE);
+			ask(player, a);
+			return;
+		}
 		if (answer.option() >= options.size() || !options.get(answer.option()).enabled() || a.mob.distanceTo(player) > TALK_RANGE) {
 			return;
 		}
 		a.done = true;
+		a.answered = true;
 		Faction f = Factions.get(level.getServer(), a.faction);
 		if (f == null) {
 			return;
@@ -858,14 +1097,190 @@ public final class Approaches {
 					reply(level, a, "talk.jaymoskingdoms.child.reply.no", Speech.WHITE);
 				}
 			}
+			case SEARCH, TOLL, BOUT, LOYALTY -> guardsBusiness(level, a, player, f, option);
 			default -> {
 			}
 		}
 	}
 
+	// ---- (0.6.2) the guards' business, by temper -----------------------------------------------------------------------
+
+	/** The player answered a guard's search, toll, bout or loyalty test: what comes of it depends on the king. */
+	private static void guardsBusiness(ServerLevel level, Approach a, ServerPlayer player, Faction f, int option) {
+		int tv = a.variant;
+		String temper = TEMPERS[tv];
+		String k = key(a) + ".reply.";
+		RandomSource random = level.getRandom();
+		long now = level.getGameTime();
+		switch (a.topic) {
+			case SEARCH -> {
+				if (option == 0) {
+					if (suspected(player, f.id(), now)) {
+						// (what was taken turns up: it goes back, with a fine)
+						int fine = Math.min(FINE, emeralds(player));
+						take(player, Items.EMERALD, fine);
+						toTreasury(level, f, fine);
+						clearSuspicion(player, f.id());
+						Reputation.change(player, f, SEARCH_FOUND_REP);
+						reply(level, a, k + "found." + temper, Speech.RED, fine);
+						if (fine < FINE && (tv == TYRANT || tv == PARANOID)) {
+							// (and they can't pay it)
+							Theft.arrest(player, level, f, ARREST_TICKS);
+						}
+					} else {
+						Reputation.change(player, f, SEARCH_CLEAN_REP[tv]);
+						if (tv == TYRANT && emeralds(player) >= 1) {
+							// (a fee for the trouble of searching you)
+							take(player, Items.EMERALD, 1);
+							toTreasury(level, f, 1);
+						}
+						reply(level, a, k + "clean." + temper, Speech.WHITE);
+					}
+				} else if (option == 1) {
+					Reputation.change(player, f, SEARCH_REFUSE_REP[tv]);
+					reply(level, a, k + "refuse." + temper, tv == TYRANT || tv == PARANOID || tv == WARLORD ? Speech.RED : Speech.WHITE);
+					if (tv == TYRANT || tv == PARANOID) {
+						Theft.arrest(player, level, f, ARREST_TICKS);
+					}
+				} else if (tv == TYRANT || tv == REVELER || tv == PLAIN) {
+					// (a bribe they'll take: whatever you carry, they never saw it)
+					take(player, Items.EMERALD, a.price);
+					clearSuspicion(player, f.id());
+					reply(level, a, k + "bribe." + temper, Speech.WHITE);
+				} else {
+					Reputation.change(player, f, BRIBE_REFUSED_REP);
+					reply(level, a, k + "bribe." + temper, Speech.RED);
+					if (tv == PARANOID) {
+						Theft.arrest(player, level, f, ARREST_TICKS);
+					}
+				}
+			}
+			case TOLL -> {
+				if (option == 0 && emeralds(player) >= a.price) {
+					take(player, Items.EMERALD, a.price);
+					toTreasury(level, f, a.price);
+					Reputation.change(player, f, tv == REVELER ? REVELER_TOLL_REP : TOLL_PAID_REP);
+					if (tv == REVELER) {
+						give(player, random.nextBoolean() ? new ItemStack(Items.COOKIE, 3) : new ItemStack(Items.HONEY_BOTTLE));
+					}
+					reply(level, a, k + "paid." + temper, Speech.GOLD);
+				} else if (option == 1) {
+					if (random.nextFloat() < HAGGLE_CHANCE[tv]) {
+						int half = Math.max(1, a.price / 2);
+						half = Math.min(half, emeralds(player));
+						take(player, Items.EMERALD, half);
+						toTreasury(level, f, half);
+						reply(level, a, k + "haggled." + temper, Speech.WHITE, half);
+					} else if (tv == TYRANT) {
+						// (no haggling with the king's men: they take it, and a slap for asking)
+						int all = Math.min(a.price, emeralds(player));
+						take(player, Items.EMERALD, all);
+						toTreasury(level, f, all);
+						slap(level, a.mob, player);
+						reply(level, a, k + "haggle_failed." + temper, Speech.RED);
+					} else {
+						Reputation.change(player, f, HAGGLE_FAILED_REP);
+						reply(level, a, k + "haggle_failed." + temper, Speech.YELLOW);
+					}
+				} else {
+					Reputation.change(player, f, TOLL_REFUSE_REP[tv]);
+					reply(level, a, k + "refuse." + temper, tv == TYRANT || tv == PARANOID ? Speech.RED : Speech.WHITE);
+					if (tv == TYRANT) {
+						Theft.arrest(player, level, f, ARREST_TICKS);
+					}
+				}
+			}
+			case BOUT -> {
+				if (option == 0 && emeralds(player) >= a.price) {
+					float chance = BOUT_BASE + player.getArmorValue() * BOUT_ARMOUR + (float)player.getAttributeValue(Attributes.ATTACK_DAMAGE) * BOUT_ATTACK;
+					a.mob.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+					level.playSound(null, a.mob.getX(), a.mob.getY(), a.mob.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.NEUTRAL, 0.8F, 1.0F);
+					if (random.nextFloat() < Math.clamp(chance, BOUT_MIN, BOUT_MAX)) {
+						give(player, new ItemStack(Items.EMERALD, a.price));
+						Reputation.change(player, f, BOUT_WON_REP[tv]);
+						reply(level, a, k + "won." + temper, Speech.GOLD, a.price);
+					} else {
+						take(player, Items.EMERALD, a.price);
+						slap(level, a.mob, player);
+						if (tv == WARLORD) {
+							// (he respects anyone who'd step up)
+							Reputation.change(player, f, 1);
+						}
+						reply(level, a, k + "lost." + temper, Speech.WHITE, a.price);
+					}
+				} else if (option == 1) {
+					if (tv == WARLORD) {
+						Reputation.change(player, f, -2);
+					}
+					reply(level, a, k + "decline." + temper, Speech.WHITE);
+				} else {
+					Reputation.change(player, f, tv == TYRANT || tv == WARLORD || tv == PARANOID ? INSULT_REP : tv == REVELER ? -1 : -3);
+					reply(level, a, k + "insult." + temper, tv == REVELER || tv == NOBLE ? Speech.WHITE : Speech.RED);
+					if (tv == TYRANT || tv == WARLORD || tv == PARANOID) {
+						// (he draws on you: just him, and only till one of you yields)
+						a.mob.setTarget(player);
+					}
+				}
+			}
+			case LOYALTY -> {
+				if (option == 0) {
+					if (tv == PARANOID && random.nextFloat() >= PARANOID_BELIEVES) {
+						Reputation.change(player, f, -1);
+						reply(level, a, k + "praise_doubted.paranoid", Speech.YELLOW);
+					} else {
+						Reputation.change(player, f, PRAISE_REP[tv]);
+						if (tv == REVELER) {
+							give(player, new ItemStack(Items.COOKIE, 2));
+						}
+						reply(level, a, k + "praise." + temper, Speech.GOLD);
+					}
+				} else if (option == 1) {
+					Reputation.change(player, f, SILENT_REP[tv]);
+					reply(level, a, k + "silent." + temper, tv == PARANOID ? Speech.YELLOW : Speech.WHITE);
+				} else {
+					Reputation.change(player, f, ILL_REP[tv]);
+					reply(level, a, k + "ill." + temper, tv == REVELER || tv == NOBLE ? Speech.WHITE : Speech.RED);
+					if (tv == TYRANT) {
+						slap(level, a.mob, player);
+					}
+					if (tv == TYRANT || tv == PARANOID) {
+						Theft.arrest(player, level, f, ARREST_TICKS);
+					}
+				}
+			}
+			default -> {
+			}
+		}
+	}
+
+	private static void toTreasury(ServerLevel level, Faction f, int n) {
+		if (n > 0) {
+			Factions.update(level.getServer(), f.id(), x -> x.withTreasury(x.treasury() + n));
+		}
+	}
+
+	private static void give(ServerPlayer player, ItemStack stack) {
+		if (!player.getInventory().add(stack)) {
+			player.drop(stack, false, Prediction.SERVER_ONLY);
+		}
+	}
+
+	/** A guard's open hand: a little hurt (never below {@link #SLAP_SPARES}) and a push. */
+	private static void slap(ServerLevel level, Mob guard, ServerPlayer player) {
+		guard.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+		if (player.getHealth() > SLAP_SPARES) {
+			player.hurtServer(level, level.damageSources().mobAttack(guard), SLAP);
+		}
+		Vec3 away = player.position().subtract(guard.position()).normalize().scale(0.6);
+		player.push(away.x, 0.25, away.z);
+		player.syncVelocity = true;
+	}
+
 	/** They asked and the player walked off (or shut them out). */
 	private static void walkedOff(ServerLevel level, Approach a, ServerPlayer player) {
-		Faction f = Factions.get(level.getServer(), a.faction);
+		// (0.6.2) asked again after begging their pardon: walking off a second time costs nothing more
+		Faction f = a.snubbed ? null : Factions.get(level.getServer(), a.faction);
+		a.snubbed = true;
 		switch (a.topic) {
 			case HALT -> {
 				if (f != null) {
@@ -880,6 +1295,14 @@ public final class Approaches {
 				reply(level, a, "talk.jaymoskingdoms.accuse.ignored", Speech.RED);
 			}
 			case QUEST_OFFER, QUEST_CHECK -> {
+			}
+			case SEARCH, TOLL -> {
+				// (0.6.2) walking off on a search or a toll is refusing it
+				if (f != null) {
+					guardsBusiness(level, a, player, f, a.topic == SEARCH ? 1 : 2);
+				} else {
+					reply(level, a, "talk.jaymoskingdoms.halt.ignored", Speech.RED);
+				}
 			}
 			default -> reply(level, a, a.mob.isBaby() ? "talk.jaymoskingdoms.child.ignored" : "talk.jaymoskingdoms.ignored", Speech.WHITE);
 		}

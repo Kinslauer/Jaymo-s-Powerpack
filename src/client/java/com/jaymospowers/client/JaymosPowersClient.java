@@ -81,6 +81,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		GravityPowerClient.init();
 		com.jaymospowers.client.power.resonance.ResonancePowerClient.init();
 		com.jaymospowers.client.power.darktide.DarktidePowerClient.init();
+		com.jaymospowers.client.power.xenoform.XenoformPowerClient.init();
 	}
 
 	/** The key mapping for an ability key (to show its bound key in a HUD, say). */

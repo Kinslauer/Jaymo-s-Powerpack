@@ -28,7 +28,9 @@
 		{ "config": "jaymospowers.resonance.client.mixins.json", "environment": "client" },
 		"jaymospowers.darktide.mixins.json",
 		{ "config": "jaymospowers.darktide.client.mixins.json", "environment": "client" },
-		"jaymospowers.tinkering.mixins.json"
+		"jaymospowers.tinkering.mixins.json",
+		"jaymospowers.xenoform.mixins.json",
+		{ "config": "jaymospowers.xenoform.client.mixins.json", "environment": "client" }
 	],
 	"depends": {
 		"fabricloader": ">=0.19.5",

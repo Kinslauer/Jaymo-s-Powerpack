@@ -34,6 +34,7 @@ public class JaymosPowers implements ModInitializer {
 		GravityPower.init();
 		com.jaymospowers.power.resonance.ResonancePower.init();
 		com.jaymospowers.power.darktide.DarktidePower.init();
+		com.jaymospowers.power.xenoform.XenoformPower.init();
 		// weapons from the Stone Age to the pirates (after Age of Weapons), not a power
 		com.jaymospowers.armory.Armory.init();
 		com.jaymospowers.tinkering.Tinkering.init();
@@ -53,12 +54,13 @@ public class JaymosPowers implements ModInitializer {
 			"power.arsenal.ArsenalFlintlock", "power.arsenal.ArsenalDamocles", "power.arsenal.ArsenalCannons",
 			"power.chrono.ChronoEchoes", "power.chrono.ChronoMemory", "power.chrono.ChronoFlow", "power.wind.WindKick",
 			"power.gravity.GravityPower",
-			"power.web.WebAscension", "power.web.WebBehemoth", "power.web.WebBridges", "power.web.WebPower", "power.web.WebSymbiote", "power.web.WebTendrils",
+			"power.web.WebAscension", "power.web.WebBehemoth", "power.web.WebInhabit", "power.web.WebSlam", "power.web.WebBridges", "power.web.WebPower", "power.web.WebSymbiote", "power.web.WebTendrils",
 			"power.web.WebWallRun",
 			"power.wind.WindModes", "power.wind.WindPower", "power.wind.WindStorm", "power.wind.WindTempest",
 			"power.wind.WindCyclone",
 			"power.resonance.ResonancePower", "power.resonance.ResonanceHush",
 			"power.darktide.DarktideState",
+			"power.xenoform.XenoformState",
 		};
 		for (String holder : holders) {
 			try {

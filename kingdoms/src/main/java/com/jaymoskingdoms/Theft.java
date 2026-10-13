@@ -523,6 +523,21 @@ public final class Theft {
 		pursue(level, f, player);
 	}
 
+	/**
+	 * (0.6.2) {@code f}'s guards are set on {@code player} for {@code ticks} without a crime (defying a tyrant's guard,
+	 * slandering a paranoid king): wanted, and the guards nearby come for them.
+	 */
+	static void arrest(ServerPlayer player, ServerLevel level, Faction f, long ticks) {
+		if (Wars.enemy(player, f)) {
+			return;
+		}
+		Map<String, Long> wanted = new HashMap<>(player.getAttachedOrElse(WANTED, Map.of()));
+		wanted.merge(Integer.toString(f.id()), level.getGameTime() + ticks, Math::max);
+		player.setAttached(WANTED, Map.copyOf(wanted));
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.guard.arrest", f.name(), ticks / 20).withStyle(ChatFormatting.RED));
+		pursue(level, f, player);
+	}
+
 	/** Its guards, archers and golems near {@code player} turn on them. */
 	private static void pursue(ServerLevel level, Faction f, ServerPlayer player) {
 		AABB around = player.getBoundingBox().inflate(PURSUIT_RANGE);

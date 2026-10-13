@@ -80,6 +80,17 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 	private static final float STRETCH = 0.35F, STRETCH_HEAVY = 0.9F, STRETCH_FIRST_PERSON = 0.4F;
 	/** Feral (a young bond): extra sway speed, how hard a sudden jerk throws a tendril, and how much the bulge swells. */
 	private static final float FERAL_SWAY = 0.08F, FERAL_JERK = 0.9F, FERAL_PULSE = 0.06F;
+	/**
+	 * Rigid while you move (or climb): the sway and ripple die away and each tendril locks into a jointed limb, its curl
+	 * gathered into two joints (these segments) with straight sections between. Fully rigid at this walk speed.
+	 */
+	private static final int[] JOINTS = {2, 4};
+	private static final float RIGID_SPEED = 0.35F;
+	/**
+	 * Barrage: every free tendril stabs the pinned creature in turn, each on its own beat. Drawn back (this much shorter,
+	 * cocked this far up and out) until {@code STAB_COCK} of its cycle, thrust in (this much longer) by {@code STAB_HIT}.
+	 */
+	private static final float STAB_COCK = 0.45F, STAB_HIT = 0.6F, STAB_SHORT = 0.6F, STAB_LONG = 1.25F, STAB_UP = 0.5F, STAB_OUT = 0.45F;
 	/** The bulge (thickness pulse) every tendril has, wild or not. */
 	private static final float PULSE = 0.04F;
 	/** Combos: a clap's tendrils hauled out this wide each side (yaw) and this much up; a shatter's reared this far apart. */
@@ -200,9 +211,10 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 	}
 
 	/**
-	 * A walking tendril bowed from its root to its planted tip: a curve from the root ({@code chord} away, in blocks,
-	 * model space), bowing {@link WebTendrilWalk#ARCH} of its length toward {@code bow}; each segment is turned
-	 * (against the one before it) to lie along the curve, and the whole cord is scaled evenly to its length.
+	 * A walking tendril as a rigid limb from its root to its planted tip ({@code chord} away, in blocks, model space):
+	 * straight to a knee, then straight on to the tip. The knee juts out toward {@code bow} (the surface's outward way)
+	 * as far as the limb's fixed length ({@link WebTendrilWalk#LIMB}) needs; only a tip planted further than that
+	 * stretches it. Each segment is turned (against the one before it) to lie along its section.
 	 */
 	private static void bend(ModelPart[] chain, float cx, float cy, float cz, float bx, float by, float bz, float growth) {
 		org.joml.Vector3f chord = new org.joml.Vector3f(cx, cy, cz).mul(16.0F);
@@ -210,38 +222,34 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		if (len < 1.0E-3F) {
 			return;
 		}
-		// the bow: the surface's outward way, square to the chord
 		org.joml.Vector3f bow = new org.joml.Vector3f(bx, by, bz);
 		bow.sub(new org.joml.Vector3f(chord).mul(bow.dot(chord) / (len * len)));
 		if (bow.lengthSquared() < 1.0E-6F) {
 			bow.set(0.0F, -1.0F, 0.0F);
 		}
-		bow.normalize().mul(2.0F * WebTendrilWalk.ARCH * len);
-		org.joml.Vector3f control = new org.joml.Vector3f(chord).mul(0.5F).add(bow);
-		org.joml.Vector3f[] points = new org.joml.Vector3f[SEGMENTS + 1];
-		float arc = 0.0F;
-		for (int k = 0; k <= SEGMENTS; k++) {
-			float t = k / (float)SEGMENTS;
-			points[k] = new org.joml.Vector3f(control).mul(2.0F * t * (1.0F - t)).add(new org.joml.Vector3f(chord).mul(t * t));
-			if (k > 0) {
-				arc += points[k].distance(points[k - 1]);
-			}
-		}
-		// grown out along the curve as the tendrils bud
-		float size = arc / CHAIN * Math.max(0.05F, growth);
+		bow.normalize();
+		float limb = Math.max(WebTendrilWalk.LIMB, len / WebTendrilWalk.STRAIGHTEST);
+		// the knee sits where segment KNEE starts
+		float upper = limb * WebTendrilWalk.KNEE * (SEGMENT_LENGTH - 0.4F) / CHAIN;
+		float lower = limb - upper;
+		float along = (upper * upper - lower * lower + len * len) / (2.0F * len);
+		float out = Mth.sqrt(Math.max(0.0F, upper * upper - along * along));
+		org.joml.Vector3f knee = new org.joml.Vector3f(chord).mul(along / len).add(new org.joml.Vector3f(bow).mul(out));
+		// grown out along the limb as the tendrils bud
+		float size = limb / CHAIN * Math.max(0.05F, growth);
 		org.joml.Quaternionf frame = new org.joml.Quaternionf();
 		org.joml.Quaternionf inverse = new org.joml.Quaternionf();
 		for (int k = 0; k < SEGMENTS; k++) {
-			org.joml.Vector3f along = new org.joml.Vector3f(points[k + 1]).sub(points[k]);
-			if (along.lengthSquared() < 1.0E-8F) {
-				along.set(0.0F, 0.0F, 1.0F);
+			org.joml.Vector3f dir = k < WebTendrilWalk.KNEE ? new org.joml.Vector3f(knee) : new org.joml.Vector3f(chord).sub(knee);
+			if (dir.lengthSquared() < 1.0E-8F) {
+				dir.set(0.0F, 0.0F, 1.0F);
 			}
-			along.normalize();
+			dir.normalize();
 			frame.invert(inverse);
-			inverse.transform(along);
+			inverse.transform(dir);
 			ModelPart part = chain[k];
-			part.yRot = (float)Math.atan2(along.x, along.z);
-			part.xRot = (float)-Math.asin(Mth.clamp(along.y, -1.0F, 1.0F));
+			part.yRot = (float)Math.atan2(dir.x, dir.z);
+			part.xRot = (float)-Math.asin(Mth.clamp(dir.y, -1.0F, 1.0F));
 			part.zRot = 0.0F;
 			part.xScale = k == 0 ? size : 1.0F;
 			part.yScale = k == 0 ? size : 1.0F;
@@ -345,6 +353,8 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 			// a slam strikes with the tendrils on the target's side; a swipe with those on the side it sweeps from
 			float strikers = variant == WebSymbiote.STRIKE_SLAM ? tendrils.side() : sweepSide;
 			float stretch = 1.0F + (heavy ? STRETCH_HEAVY : STRETCH) * weight * Math.min(1.0F, swing) + (fp ? STRETCH_FIRST_PERSON * weight : 0.0F);
+			// moving or climbing, they hold stiff (a wild one less so)
+			float rigid = (tendrils.legs() != null ? 1.0F : smooth(state.walkAnimationSpeed / RIGID_SPEED)) * (1.0F - 0.5F * feral);
 
 			for (int t = 0; t < ROOTS.length; t++) {
 				float[] r = ROOTS[t];
@@ -353,11 +363,44 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 				ModelPart base = this.parts[t][0];
 				// the top two (right, left) are the ones that reach out and hold: while holding, they're drawn reaching
 				base.visible = !(t == 0 && (tendrils.held() & 1) != 0 || t == 1 && (tendrils.held() & 2) != 0);
+				if (combo == WebTendrilCombos.BARRAGE && base.visible && tendrils.legs() == null && tendrils.tethers() == null) {
+					// stabbing, over and over: cocked back, then driven straight into it, each on its own beat
+					float beat = state.ageInTicks / WebTendrilCombos.BARRAGE_CYCLE + t * 0.618F;
+					float p = beat - Mth.floor(beat);
+					float reach;
+					float cock;
+					if (p < STAB_COCK) {
+						cock = smooth(p / STAB_COCK);
+						reach = Mth.lerp(cock, 1.0F, STAB_SHORT);
+					} else if (p < STAB_HIT) {
+						float k = (p - STAB_COCK) / (STAB_HIT - STAB_COCK);
+						cock = 1.0F - k;
+						reach = Mth.lerp(k * k, STAB_SHORT, STAB_LONG);
+					} else {
+						float k = smooth((p - STAB_HIT) / (1.0F - STAB_HIT));
+						cock = 0.0F;
+						reach = Mth.lerp(k, STAB_LONG, 1.0F);
+					}
+					base.yRot = aimYaw(tendrils.aimYaw() - side * STAB_OUT * cock, r[3]);
+					base.xRot = tendrils.aimPitch() + STAB_UP * cock;
+					base.xScale = thick;
+					base.yScale = thick;
+					base.zScale = length * reach * (fp ? 1.0F + STRETCH_FIRST_PERSON : 1.0F);
+					// rigid as a spear
+					for (int k = 1; k < SEGMENTS; k++) {
+						ModelPart segment = this.parts[t][k];
+						segment.xRot = 0.0F;
+						segment.yRot = 0.0F;
+						segment.xScale = 1.0F;
+						segment.yScale = 1.0F;
+					}
+					continue;
+				}
 				// a wild one never settles: quicker sway, and now and then a tendril jerks out on its own
 				float sway = Mth.sin(time * (0.07F + FERAL_SWAY * feral) + t * 1.3F) * 0.2F;
 				float jerk = (float)Math.pow(Math.max(0.0F, Mth.sin(time * 0.31F + t * 2.7F) * Mth.sin(time * 0.13F + t * 1.1F)), 8.0)
 					* FERAL_JERK * feral;
-				sway += jerk;
+				sway = (sway + jerk) * (1.0F - rigid);
 				float restYaw = r[3] + sway * 0.5F;
 				float restPitch = r[4] + sway;
 				float restCurlX = 0.28F;
@@ -464,14 +507,21 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 					}
 					continue;
 				}
+				// held stiff only at rest: a strike or a reach for the wall moves them as usual
+				float stiff = rigid * calm;
 				for (int k = 1; k < SEGMENTS; k++) {
 					ModelPart segment = this.parts[t][k];
 					float wave = Mth.sin(time * 0.12F + t * 0.9F + k * 0.7F) * (0.18F + 0.07F * k);
 					// each segment curls further over, rippling; striking straightens them into a whip
-					segment.xRot = segCurlX + wave * 0.5F * calm + wave * 0.1F * (1.0F - calm);
-					segment.yRot = segCurlY + wave * 0.55F * calm;
+					float flexX = segCurlX + wave * 0.5F * calm + wave * 0.1F * (1.0F - calm);
+					float flexY = segCurlY + wave * 0.55F * calm;
+					// held stiff: the same overall curl, all of it in the joints
+					boolean joint = k == JOINTS[0] || k == JOINTS[1];
+					float share = joint ? (SEGMENTS - 1) / (float)JOINTS.length : 0.0F;
+					segment.xRot = Mth.lerp(stiff, flexX, segCurlX * share);
+					segment.yRot = Mth.lerp(stiff, flexY, segCurlY * share);
 					// a slow swallow-like bulge travels out along each one, faster and harder the wilder it is
-					float pulse = 0.9F + (PULSE + FERAL_PULSE * feral) * Mth.sin(time * (0.2F + 0.15F * feral) - k * 0.8F + t * 1.9F);
+					float pulse = 0.9F + (PULSE + FERAL_PULSE * feral) * (1.0F - stiff) * Mth.sin(time * (0.2F + 0.15F * feral) - k * 0.8F + t * 1.9F);
 					segment.xScale = pulse;
 					segment.yScale = pulse;
 				}

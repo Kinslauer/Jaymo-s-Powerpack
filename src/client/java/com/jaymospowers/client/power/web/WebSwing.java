@@ -415,7 +415,13 @@ public final class WebSwing {
 			tickPull(player);
 			return;
 		}
-		if (com.jaymospowers.power.web.WebSymbiote.suitShown(player)) {
+		if (com.jaymospowers.power.web.WebSymbiote.bulked(player) && tickSlam(player)) {
+			// the big body in the air: Jump held is its overhead slam
+			foldWings();
+			if (chargeTicks > 0 || chargeSent) {
+				endCharge();
+			}
+		} else if (com.jaymospowers.power.web.WebSymbiote.suitShown(player)) {
 			// the suit has no wings: Jump is a charged leap instead
 			foldWings();
 			tickChargeJump(player);
@@ -812,6 +818,45 @@ public final class WebSwing {
 		endCharge();
 	}
 
+	// ===== the big body's slam (see WebSlam) ==========================================================================
+	/** Told the server it's rearing up; after a slam, Jump is spent until it's let go. */
+	private boolean slamSent, slamSpent;
+
+	/** The big body: Jump held in the air rears up for a slam, and landing with it held brings it down. True while it has Jump. */
+	private boolean tickSlam(LocalPlayer player) {
+		boolean jump = player.input.keyPresses.jump();
+		if (slamSpent) {
+			if (!jump) {
+				slamSpent = false;
+			}
+			return jump;
+		}
+		if (WebSymbioteClient.driving() || attached()) {
+			if (slamSent) {
+				slamSent = false;
+				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebSlam.Slam(0));
+			}
+			return false;
+		}
+		if (!player.onGround() && jump && !player.isInWater()) {
+			if (!slamSent) {
+				slamSent = true;
+				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebSlam.Slam(1));
+			}
+			return true;
+		}
+		if (slamSent) {
+			slamSent = false;
+			boolean landed = player.onGround() && jump;
+			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebSlam.Slam(landed ? 2 : 0));
+			if (landed) {
+				slamSpent = true;
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private void endCharge() {
 		chargeTicks = 0;
 		if (chargeSent) {
@@ -829,7 +874,8 @@ public final class WebSwing {
 		if (wingsTicks > 0) {
 			if (!jump) {
 				wingsJumpReleased = true;
-			} else if (wingsJumpReleased) {
+			} else if (wingsJumpReleased && !player.input.keyPresses.shift()) {
+				// (Shift + Jump is the quick dive, not a fold)
 				foldWings();
 				play(player, SoundEvents.PHANTOM_FLAP, 0.6F, 0.8F);
 			}
@@ -890,7 +936,9 @@ public final class WebSwing {
 			double drag = Mth.lerp(flare, 1.0, BRAKE_DRAG);
 			m = m.multiply(drag, 1.0, drag);
 			double rise = diving ? 0.0 : (before - m.horizontalDistance()) * BRAKE_LIFT;
-			if (!diving && m.horizontalDistance() < DIVE_AT) {
+			// Shift + Jump: straight into the dive, without waiting to stop
+			boolean quickDive = input.shift() && input.jump();
+			if (!diving && (m.horizontalDistance() < DIVE_AT || quickDive)) {
 				diving = true;
 				play(player, SoundEvents.PHANTOM_FLAP, 0.6F, 0.6F);
 			}

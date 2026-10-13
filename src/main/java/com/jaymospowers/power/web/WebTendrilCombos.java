@@ -45,6 +45,8 @@ import org.jspecify.annotations.Nullable;
  * <li>Debris in both: a <b>shatter</b>, the two smashed together and burst into a cone of debris ahead.</li>
  * <li>A corpse in either (or both): a <b>thrash</b>, the corpse slammed into the ground in front one to four times,
  * blood everywhere, until it comes apart into what butchering it on the ground gives.</li>
+ * <li>A creature in one and nothing in the other: a <b>barrage</b>, held for as long as you hold the button. The
+ * creature is pinned in front of you and every other tendril stabs it over and over, harder the longer you hold.</li>
  * </ul>
  * Each is heavy: hauled out (until {@link #REAR_TICKS}), slammed in (impact at {@link #HIT_TICKS}), then a slow reset (to
  * {@link #TICKS}) before the next. The server runs it and syncs it in {@link WebTendrils#COMBO}; everyone sees the held
@@ -52,7 +54,7 @@ import org.jspecify.annotations.Nullable;
  * {@link BlockCluster#SOFT_HIT_DAMAGE}, as every soft block does. You're never hurt by your own combo.
  */
 public final class WebTendrilCombos {
-	public static final int CLAP = 0, CRUSH = 1, SHATTER = 2, THRASH = 3;
+	public static final int CLAP = 0, CRUSH = 1, SHATTER = 2, THRASH = 3, BARRAGE = 4;
 	/** Timing (ticks from the click): hauled out until {@code REAR_TICKS}, slammed in to the impact at {@code HIT_TICKS}, reset until {@code TICKS}. */
 	public static final int REAR_TICKS = 12, HIT_TICKS = 18, TICKS = 50;
 	/** How far your crosshair target may be for a crush (blocks, plus its half width), and the slack the server allows. */
@@ -96,6 +98,16 @@ public final class WebTendrilCombos {
 	public static final int THRASH_CYCLE = 14, THRASH_RAISE = 8, THRASH_DOWN = 3, THRASH_MAX_SLAMS = 4, THRASH_OFFSET = 7, THRASH_RECOVER = 12;
 	public static final double THRASH_FORWARD = 2.0, THRASH_SIDE = 0.7, THRASH_UP = 1.8, THRASH_SPLASH = 1.6;
 	static final float THRASH_SPLASH_DAMAGE = 5.0F, THRASH_SHAKE = 0.8F;
+	/**
+	 * Barrage: the held creature pinned this far ahead and below the eyes; a stab every {@code BARRAGE_EVERY} ticks
+	 * (its own i-frames ignored), {@code BARRAGE_DAMAGE} at first, rising to {@code BARRAGE_DAMAGE_MAX} after
+	 * {@code BARRAGE_RAMP_TICKS} of holding. It lets go after {@code BARRAGE_MAX_TICKS} at most. A tendril's stab cycle on
+	 * screen is {@code BARRAGE_CYCLE} ticks.
+	 */
+	public static final double BARRAGE_PIN_FORWARD = 2.0, BARRAGE_PIN_DROP = 0.6;
+	public static final int BARRAGE_EVERY = 3, BARRAGE_RAMP_TICKS = 60, BARRAGE_MAX_TICKS = 160;
+	public static final float BARRAGE_CYCLE = 6.0F;
+	static final float BARRAGE_DAMAGE = 3.0F, BARRAGE_DAMAGE_MAX = 9.0F, BARRAGE_SHAKE = 0.35F;
 	/** Blood (dust colour). */
 	static final int BLOOD = 0x7A0A0A;
 
@@ -117,12 +129,33 @@ public final class WebTendrilCombos {
 		}
 	}
 
+	/** Client → server: the attack key let go (ends a barrage). */
+	public record Release() implements CustomPacketPayload {
+		public static final Type<Release> TYPE = new Type<>(JaymosPowers.id("web_tendril_combo_release"));
+		public static final StreamCodec<ByteBuf, Release> CODEC = StreamCodec.unit(new Release());
+
+		@Override
+		public Type<Release> type() {
+			return TYPE;
+		}
+	}
+
 	private WebTendrilCombos() {
 	}
 
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(Attack.TYPE, Attack.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(Release.TYPE, Release.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Attack.TYPE, (payload, ctx) -> attack(ctx.player(), payload.target()));
+		ServerPlayNetworking.registerGlobalReceiver(Release.TYPE, (payload, ctx) -> release(ctx.player()));
+	}
+
+	/** The attack key let go: a barrage stops. */
+	private static void release(ServerPlayer player) {
+		WebTendrils.Combo combo = player.getAttached(WebTendrils.COMBO);
+		if (combo != null && combo.kind() == BARRAGE) {
+			player.removeAttached(WebTendrils.COMBO);
+		}
 	}
 
 	/** Debris: a torn-out chunk or a falling block. */
@@ -150,6 +183,9 @@ public final class WebTendrilCombos {
 
 	/** A combo's whole length, reset included. */
 	public static int ticks(WebTendrils.Combo combo) {
+		if (combo.kind() == BARRAGE) {
+			return BARRAGE_MAX_TICKS;
+		}
 		if (combo.kind() != THRASH) {
 			return TICKS;
 		}
@@ -181,6 +217,9 @@ public final class WebTendrilCombos {
 		}
 		if (creature(main) && creature(off)) {
 			return CLAP;
+		}
+		if (creature(main) && grips.left() < 0 || creature(off) && grips.right() < 0) {
+			return BARRAGE;
 		}
 		if (debris(main) && creature(off) || debris(off) && creature(main) || (debris(main) || debris(off)) && creature(crosshair)) {
 			return CRUSH;
@@ -235,6 +274,13 @@ public final class WebTendrilCombos {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 1.2F, 0.4F);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.7F, 0.8F);
 			WebSymbiote.narrate(player, "thrash");
+			return;
+		}
+		if (kind == BARRAGE) {
+			Entity held = creature(main) ? main : off;
+			player.setAttached(WebTendrils.COMBO, new WebTendrils.Combo(BARRAGE, level.getGameTime(), held.getId(), -1));
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 1.2F, 0.6F);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.8F, 0.9F);
 			return;
 		}
 		Entity first, second;
@@ -292,6 +338,10 @@ public final class WebTendrilCombos {
 		long t = now - combo.start();
 		if (combo.kind() == THRASH) {
 			return thrashPoint(player, combo, held, hand, thrashTime(combo, held.getId(), t));
+		}
+		if (combo.kind() == BARRAGE) {
+			// pinned in front, to take the stabs
+			return player.getEyePosition().add(ahead(player).scale(BARRAGE_PIN_FORWARD + held.getBbWidth() * 0.5)).subtract(0.0, BARRAGE_PIN_DROP, 0.0);
 		}
 		if (t >= HIT_TICKS) {
 			return null;
@@ -435,6 +485,10 @@ public final class WebTendrilCombos {
 			tickThrash(player, combo, t);
 			return;
 		}
+		if (combo.kind() == BARRAGE) {
+			tickBarrage(player, combo, t);
+			return;
+		}
 		if (t == REAR_TICKS) {
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.2F, 0.45F);
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.MACE_SMASH_AIR, SoundSource.PLAYERS, 1.0F, 0.5F);
@@ -445,6 +499,34 @@ public final class WebTendrilCombos {
 				case CRUSH -> crush(player, combo);
 				default -> shatter(player, combo);
 			}
+		}
+	}
+
+	/** A barrage, a tick at a time: a stab every few ticks into the pinned creature, harder the longer it's held. */
+	private static void tickBarrage(ServerPlayer player, WebTendrils.Combo combo, long t) {
+		ServerLevel level = player.level();
+		Entity held = level.getEntity(combo.first());
+		if (!(held instanceof LivingEntity victim) || !victim.isAlive() || handOf(player, held) < 0) {
+			player.removeAttached(WebTendrils.COMBO);
+			return;
+		}
+		if (t == 0 || t % BARRAGE_EVERY != 0) {
+			return;
+		}
+		float ramp = Math.min(1.0F, t / (float)BARRAGE_RAMP_TICKS);
+		victim.setInvulnerableTime(0);
+		victim.hurtServer(level, level.damageSources().playerAttack(player), Mth.lerp(ramp, BARRAGE_DAMAGE, BARRAGE_DAMAGE_MAX));
+		Vec3 at = victim.getBoundingBox().getCenter();
+		level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(BLOOD, 1.2F), at.x, at.y, at.z, 6 + Math.round(ramp * 10.0F),
+			victim.getBbWidth() * 0.4, victim.getBbHeight() * 0.3, victim.getBbWidth() * 0.4, 0.0);
+		level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 3, 0.2, 0.2, 0.2, 0.05);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.TRIDENT_HIT, SoundSource.PLAYERS, 0.8F, 0.7F + level.getRandom().nextFloat() * 0.4F);
+		if (t % (BARRAGE_EVERY * 2) == 0) {
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.9F, 0.5F + ramp * 0.3F);
+		}
+		ServerPlayNetworking.send(player, new WebNet.Shake(BARRAGE_SHAKE * (1.0F + ramp)));
+		if (victim instanceof ServerPlayer struck) {
+			ServerPlayNetworking.send(struck, new WebNet.Shake(TARGET_SHAKE * 0.5F));
 		}
 	}
 
