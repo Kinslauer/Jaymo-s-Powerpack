@@ -31,7 +31,11 @@ import net.minecraft.world.phys.Vec3;
  * <li>G, Shroud: fade from sight until you strike something.</li>
  * <li>V, Dread Wail: every creature within {@link #WAIL_RADIUS} turns and flees; players are plunged into darkness.</li>
  * <li>B (hold), Glide: fall slowly and drift forward.</li>
+ * <li>C (ascended), Revenant: slip into the creature you look at (within {@link #POSSESS_REACH}) and wear it for
+ * {@link #POSSESS_TICKS}: it goes where you look, jumps for you, and nothing hunts you meanwhile. C again lets go.</li>
  * </ul>
+ * Corrupted: the shroud flickers (you show for a moment every few seconds), and one phase in {@link #CORRUPT_STUCK}
+ * leaves part of you in the wall: {@link #CORRUPT_STUCK_DAMAGE} and a reeling head.
  */
 public final class Wisp extends XenoForm {
 	// ---- tuning ----
@@ -41,6 +45,12 @@ public final class Wisp extends XenoForm {
 	public static final int WAIL_COOLDOWN = 300, WAIL_TICKS = 60, WAIL_DARKNESS_TICKS = 100;
 	public static final double WAIL_RADIUS = 10.0, WAIL_FLEE = 10.0, WAIL_FLEE_SPEED = 1.5;
 	public static final double GLIDE_FALL = -0.12, GLIDE_PUSH = 0.06, GLIDE_MAX = 0.7;
+	/** Revenant: how far you can reach into a creature, how long you wear it, how fast it goes for you, C's cooldown. */
+	public static final double POSSESS_REACH = 8.0, POSSESS_SPEED = 0.32;
+	public static final int POSSESS_TICKS = 200, POSSESS_COOLDOWN = 300;
+	/** Corrupted: the shroud shows you every this many ticks for this long; one phase in this many bites. */
+	public static final int CORRUPT_FLICKER_EVERY = 60, CORRUPT_FLICKER_TICKS = 10, CORRUPT_STUCK = 4;
+	public static final float CORRUPT_STUCK_DAMAGE = 3.0F;
 
 	public Wisp() {
 		super("wisp", 1.0F, 16.0F, 3.0, 0.1, 0.0, 0.0, Items.PHANTOM_MEMBRANE, 0xB8E8F8);
@@ -71,6 +81,11 @@ public final class Wisp extends XenoForm {
 			case ABILITY_1 -> {
 				if (ready(player, live, R) && phase(player)) {
 					cooldown(player, live, R, PHASE_COOLDOWN);
+					if (live.corrupted && player.getRandom().nextInt(CORRUPT_STUCK) == 0) {
+						player.hurtServer(player.level(), player.damageSources().inWall(), CORRUPT_STUCK_DAMAGE);
+						player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 80, 0, false, false));
+						sound(player, SoundEvents.PHANTOM_HURT, 1.0F, 0.6F);
+					}
 				}
 			}
 			case ABILITY_2 -> {
@@ -115,7 +130,13 @@ public final class Wisp extends XenoForm {
 			}
 		}
 		if (live.shroud) {
-			if (!player.hasEffect(MobEffects.INVISIBILITY)) {
+			boolean flicker = live.corrupted && player.tickCount % CORRUPT_FLICKER_EVERY < CORRUPT_FLICKER_TICKS;
+			if (flicker) {
+				if (player.hasEffect(MobEffects.INVISIBILITY)) {
+					player.removeEffect(MobEffects.INVISIBILITY);
+					sound(player, SoundEvents.PHANTOM_FLAP, 0.4F, 2.0F);
+				}
+			} else if (!player.hasEffect(MobEffects.INVISIBILITY)) {
 				player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 6000, 0, false, false));
 			}
 			if (player.tickCount % 5 == 0) {
@@ -150,7 +171,138 @@ public final class Wisp extends XenoForm {
 
 	@Override
 	public boolean allowsFloating(ServerPlayer player, XenoformPower.Live live) {
-		return live.glide;
+		return live.glide || live.possessed >= 0;
+	}
+
+	// ---- Revenant ----
+
+	@Override
+	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
+		return possess(player, live);
+	}
+
+	@Override
+	public void onUltimateAgain(ServerPlayer player, XenoformPower.Live live) {
+		if (live.possessed >= 0) {
+			release(player, live, true);
+		} else if (ultimateReady(player, live)) {
+			possess(player, live);
+		}
+	}
+
+	@Override
+	public void tickUltimate(ServerPlayer player, XenoformPower.Live live) {
+		if (live.possessed < 0) {
+			return;
+		}
+		ServerLevel level = player.level();
+		if (!(level.getEntity(live.possessed) instanceof Mob host) || !host.isAlive() || player.getVehicle() != host
+			|| host.tickCount - hostSince(host) > POSSESS_TICKS) {
+			release(player, live, true);
+			return;
+		}
+		// it goes where you look
+		Vec3 look = player.getLookAngle().horizontal();
+		look = look.lengthSqr() < 1.0E-4 ? Vec3.ZERO : look.normalize().scale(POSSESS_SPEED * (player.getXRot() > 60.0F ? 0.0 : 1.0));
+		Vec3 motion = host.getDeltaMovement();
+		double up = motion.y;
+		if (host.horizontalCollision && host.onGround()) {
+			up = 0.42;
+		}
+		if (host.isInWater()) {
+			up = Math.max(up, 0.1);
+		}
+		host.setDeltaMovement(look.x, up, look.z);
+		host.syncVelocity = true;
+		host.setYRot(player.getYRot());
+		host.setYBodyRot(player.getYRot());
+		host.setYHeadRot(player.getYRot());
+		host.setTarget(null);
+		player.resetFallDistance();
+		host.resetFallDistance();
+		if (player.tickCount % 10 == 0) {
+			for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(24.0), m -> m.getTarget() == player)) {
+				mob.setTarget(null);
+			}
+			if (!player.hasEffect(MobEffects.INVISIBILITY)) {
+				player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 40, 0, false, false));
+			}
+		}
+		if (player.tickCount % 4 == 0) {
+			level.sendParticles(ParticleTypes.SCULK_SOUL, host.getX(), host.getY() + host.getBbHeight() * 0.5, host.getZ(), 1, 0.3, 0.3, 0.3, 0.0);
+		}
+	}
+
+	@Override
+	public void onUltimateEnd(ServerPlayer player, XenoformPower.Live live) {
+		release(player, live, false);
+	}
+
+	private static final String SINCE_TAG = "jaymospowers_xenoform_possessed_at:";
+
+	private static int hostSince(Mob host) {
+		for (String tag : host.entityTags()) {
+			if (tag.startsWith(SINCE_TAG)) {
+				try {
+					return Integer.parseInt(tag.substring(SINCE_TAG.length()));
+				} catch (NumberFormatException ignored) {
+					return host.tickCount;
+				}
+			}
+		}
+		return host.tickCount;
+	}
+
+	private static boolean possess(ServerPlayer player, XenoformPower.Live live) {
+		LivingEntity target = aimed(player, POSSESS_REACH, e -> e instanceof Mob && !(e instanceof Player) && !e.entityTags().contains(com.jaymospowers.power.xenoform.XenoformState.MINION_TAG));
+		if (!(target instanceof Mob host) || host.isVehicle()) {
+			return false;
+		}
+		ServerLevel level = player.level();
+		Vec3 from = player.position();
+		if (!player.startRiding(host, true, true)) {
+			return false;
+		}
+		live.possessed = host.getId();
+		host.setNoAi(true);
+		host.setTarget(null);
+		host.addTag(SINCE_TAG + host.tickCount);
+		player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 40, 0, false, false));
+		level.sendParticles(ParticleTypes.SCULK_SOUL, from.x, from.y + 1.0, from.z, 24, 0.3, 0.6, 0.3, 0.05);
+		level.sendParticles(ParticleTypes.SOUL, host.getX(), host.getY() + host.getBbHeight() * 0.5, host.getZ(), 24, 0.4, 0.5, 0.4, 0.05);
+		sound(player, SoundEvents.PHANTOM_DEATH, 1.0F, 1.5F);
+		sound(player, SoundEvents.WARDEN_HEARTBEAT, 1.0F, 1.2F);
+		ultimateCooldown(player, live, POSSESS_COOLDOWN);
+		return true;
+	}
+
+	/** Out of the creature: it comes to, dazed and marked; you stand beside it. */
+	private static void release(ServerPlayer player, XenoformPower.Live live, boolean fx) {
+		if (live.possessed < 0) {
+			return;
+		}
+		ServerLevel level = player.level();
+		Entity e = level.getEntity(live.possessed);
+		live.possessed = -1;
+		if (player.getVehicle() == e) {
+			player.stopRiding();
+		}
+		if (e instanceof Mob host) {
+			host.setNoAi(false);
+			host.entityTags().removeIf(t -> t.startsWith(SINCE_TAG));
+			if (host.isAlive()) {
+				host.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 200, 1));
+				host.addEffect(new MobEffectInstance(MobEffects.GLOWING, 200, 0));
+				host.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, 2));
+			}
+		}
+		if (!live.shroud) {
+			player.removeEffect(MobEffects.INVISIBILITY);
+		}
+		if (fx) {
+			level.sendParticles(ParticleTypes.SOUL, player.getX(), player.getY() + 1.0, player.getZ(), 16, 0.3, 0.5, 0.3, 0.03);
+			sound(player, SoundEvents.PHANTOM_SWOOP, 1.0F, 0.8F);
+		}
 	}
 
 	/** Through the wall ahead: the first place beyond it, within {@link #PHASE_BLOCKS} of its face, where you fit. */

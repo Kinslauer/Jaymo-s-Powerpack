@@ -33,7 +33,11 @@ import net.minecraft.world.phys.Vec3;
  * <li>G (hold), Flame Jet: jets of fire from your hands lift you; let go and you drift down.</li>
  * <li>V, Fire Nova: everything within {@link #NOVA_RADIUS} is burnt and set alight.</li>
  * <li>B, Magma Trail: for {@link #TRAIL_TICKS} the ground burns where you step.</li>
+ * <li>C (ascended), Sunheart: the jet becomes true flight (hold G, go where you look), and R becomes a held beam of fire
+ * {@link #BEAM_RANGE} blocks long that burns whatever it touches.</li>
  * </ul>
+ * Corrupted: your fire spreads. The nova and the trail light the ground around you, and nothing of yours puts it out.
+ * Water bites twice as hard.
  */
 public final class Pyre extends XenoForm {
 	// ---- tuning ----
@@ -52,6 +56,13 @@ public final class Pyre extends XenoForm {
 	/** In water or rain: this much damage every this many ticks. */
 	public static final float WET_DAMAGE = 1.0F;
 	public static final int WET_EVERY = 20;
+	/** Sunheart: flight speed (blocks/tick) and easing; the beam's reach, bite (every {@link #BEAM_EVERY} ticks) and burn. */
+	public static final double FLIGHT_SPEED = 0.8, FLIGHT_EASE = 0.25;
+	public static final double BEAM_RANGE = 12.0;
+	public static final float BEAM_DAMAGE = 2.0F;
+	public static final int BEAM_EVERY = 4, BEAM_BURN_SECONDS = 3;
+	/** Corrupted: the share of ground round a nova set alight; the water bite's multiplier. */
+	public static final float CORRUPT_SPREAD = 0.3F, CORRUPT_WET = 2.0F;
 
 	public Pyre() {
 		super("pyre", 1.0F, 24.0F, 4.0, 0.0, 0.0, 0.0, Items.MAGMA_BLOCK, 0xFF8A2A);
@@ -70,6 +81,17 @@ public final class Pyre extends XenoForm {
 
 	@Override
 	public void onKey(ServerPlayer player, XenoformPower.Live live, PowerKey key, boolean down) {
+		if (key == PowerKey.ABILITY_1 && live.ultimate) {
+			// Sunheart: the bolt is a beam, held
+			if (down != live.beam) {
+				live.beam = down;
+				if (down) {
+					sound(player, SoundEvents.BLAZE_SHOOT, 1.0F, 0.6F);
+					cooldown(player, live, R, 1);
+				}
+			}
+			return;
+		}
 		if (key == PowerKey.ABILITY_2) {
 			if (down != live.jet) {
 				live.jet = down;
@@ -97,6 +119,9 @@ public final class Pyre extends XenoForm {
 			case ABILITY_3 -> {
 				if (ready(player, live, V)) {
 					nova(player);
+					if (live.corrupted) {
+						spread(player);
+					}
 					cooldown(player, live, V, NOVA_COOLDOWN);
 				}
 			}
@@ -120,6 +145,18 @@ public final class Pyre extends XenoForm {
 			if (player.getFoodData().getFoodLevel() <= JET_MIN_FOOD && !player.isCreative()) {
 				live.jet = false;
 				player.removeEffect(MobEffects.LEVITATION);
+			} else if (live.ultimate) {
+				// Sunheart: real flight
+				Vec3 want = player.getLookAngle().scale(FLIGHT_SPEED);
+				player.setDeltaMovement(player.getDeltaMovement().lerp(want, FLIGHT_EASE));
+				player.syncVelocity = true;
+				player.causeFoodExhaustion(JET_EXHAUSTION);
+				player.resetFallDistance();
+				Vec3 at = player.position();
+				level.sendParticles(ParticleTypes.FLAME, at.x, at.y + 0.2, at.z, 8, 0.3, 0.1, 0.3, 0.06);
+				if (player.tickCount % 8 == 0) {
+					sound(player, SoundEvents.FIRE_AMBIENT, 0.8F, 1.0F);
+				}
 			} else {
 				player.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 6, JET_LIFT, false, false));
 				player.causeFoodExhaustion(JET_EXHAUSTION);
@@ -140,6 +177,9 @@ public final class Pyre extends XenoForm {
 				if (level.getBlockState(at).isAir() && BaseFireBlock.canBePlacedAt(level, at, Direction.NORTH)) {
 					level.setBlock(at, BaseFireBlock.getState(level, at), Block.UPDATE_ALL);
 				}
+				if (live.corrupted) {
+					light(level, at.offset(player.getRandom().nextInt(3) - 1, 0, player.getRandom().nextInt(3) - 1));
+				}
 				level.sendParticles(ParticleTypes.LAVA, player.getX(), player.getY() + 0.1, player.getZ(), 1, 0.2, 0.0, 0.2, 0.0);
 			}
 		}
@@ -152,7 +192,7 @@ public final class Pyre extends XenoForm {
 				level.sendParticles(ParticleTypes.LARGE_SMOKE, player.getX(), player.getY() + 1.0, player.getZ(), 3, 0.3, 0.4, 0.3, 0.02);
 			}
 			if (player.tickCount % WET_EVERY == 0) {
-				player.hurtServer(level, player.damageSources().drown(), WET_DAMAGE);
+				player.hurtServer(level, player.damageSources().drown(), live.corrupted ? WET_DAMAGE * CORRUPT_WET : WET_DAMAGE);
 				sound(player, SoundEvents.FIRE_EXTINGUISH, 0.6F, 1.2F);
 			}
 		}
@@ -171,6 +211,97 @@ public final class Pyre extends XenoForm {
 	@Override
 	public boolean allowsFloating(ServerPlayer player, XenoformPower.Live live) {
 		return live.jet || player.hasEffect(MobEffects.SLOW_FALLING);
+	}
+
+	@Override
+	public boolean skipsMovementCheck(ServerPlayer player, XenoformPower.Live live) {
+		return live.ultimate && live.jet;
+	}
+
+	// ---- Sunheart ----
+
+	@Override
+	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
+		ServerLevel level = player.level();
+		Vec3 at = player.position().add(0.0, 1.0, 0.0);
+		ring(level, ParticleTypes.FLAME, at, 2.0, 24);
+		level.sendParticles(ParticleTypes.LAVA, at.x, at.y, at.z, 30, 0.6, 0.6, 0.6, 0.0);
+		sound(player, SoundEvents.BLAZE_AMBIENT, 2.0F, 0.6F);
+		sound(player, SoundEvents.FIRECHARGE_USE, 1.0F, 0.8F);
+		return true;
+	}
+
+	@Override
+	public void tickUltimate(ServerPlayer player, XenoformPower.Live live) {
+		ServerLevel level = player.level();
+		// the sun inside: it glows
+		if (player.tickCount % 2 == 0) {
+			level.sendParticles(ParticleTypes.SMALL_FLAME, player.getX(), player.getY() + 1.0, player.getZ(), 2, 0.4, 0.6, 0.4, 0.02);
+		}
+		if (live.beam) {
+			beam(player, live);
+		}
+	}
+
+	@Override
+	public void onUltimateEnd(ServerPlayer player, XenoformPower.Live live) {
+		live.beam = false;
+	}
+
+	/** The beam, every tick it's held: a line of fire from your hands to the first thing it meets. */
+	private static void beam(ServerPlayer player, XenoformPower.Live live) {
+		ServerLevel level = player.level();
+		Vec3 eye = player.getEyePosition().add(0.0, -0.3, 0.0);
+		Vec3 look = player.getLookAngle();
+		Vec3 end = eye.add(look.scale(BEAM_RANGE));
+		var blockHit = level.clip(new net.minecraft.world.level.ClipContext(eye, end, net.minecraft.world.level.ClipContext.Block.COLLIDER,
+			net.minecraft.world.level.ClipContext.Fluid.NONE, player));
+		if (blockHit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK) {
+			end = blockHit.getLocation();
+		}
+		var entityHit = net.minecraft.world.entity.projectile.ProjectileUtil.getEntityHitResult(level, player, eye, end,
+			player.getBoundingBox().expandTowards(look.scale(BEAM_RANGE)).inflate(1.0),
+			e -> e instanceof LivingEntity living && living.isAlive() && e != player && !e.isSpectator(), 0.5F);
+		if (entityHit != null) {
+			end = entityHit.getLocation();
+		}
+		double length = end.distanceTo(eye);
+		for (double d = 0.5; d < length; d += 0.5) {
+			Vec3 p = eye.add(look.scale(d));
+			level.sendParticles(ParticleTypes.FLAME, p.x, p.y, p.z, 1, 0.03, 0.03, 0.03, 0.0);
+		}
+		if (player.tickCount % BEAM_EVERY == 0) {
+			if (entityHit != null && entityHit.getEntity() instanceof LivingEntity target) {
+				target.hurtServer(level, player.damageSources().inFire(), BEAM_DAMAGE);
+				target.hurtTime = 0;
+				target.igniteForSeconds(BEAM_BURN_SECONDS);
+			} else if (blockHit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK) {
+				light(level, blockHit.getBlockPos().relative(blockHit.getDirection()));
+			}
+			player.causeFoodExhaustion(0.02F);
+		}
+		if (player.tickCount % 6 == 0) {
+			sound(player, SoundEvents.BLAZE_BURN, 0.6F, 1.5F);
+		}
+	}
+
+	/** Sets {@code pos} alight if fire can stand there. */
+	private static void light(ServerLevel level, BlockPos pos) {
+		if (level.getBlockState(pos).isAir() && BaseFireBlock.canBePlacedAt(level, pos, Direction.NORTH)) {
+			level.setBlock(pos, BaseFireBlock.getState(level, pos), Block.UPDATE_ALL);
+		}
+	}
+
+	/** Corrupted: the nova leaves the ground round you burning. */
+	private static void spread(ServerPlayer player) {
+		ServerLevel level = player.level();
+		BlockPos feet = player.blockPosition();
+		int r = (int)NOVA_RADIUS;
+		for (BlockPos pos : BlockPos.betweenClosed(feet.offset(-r, -1, -r), feet.offset(r, 1, r))) {
+			if (player.getRandom().nextFloat() < CORRUPT_SPREAD && pos.distSqr(feet) <= r * r) {
+				light(level, pos.immutable());
+			}
+		}
 	}
 
 	private static void bolt(ServerPlayer player) {

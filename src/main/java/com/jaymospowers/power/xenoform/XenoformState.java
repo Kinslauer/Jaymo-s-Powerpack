@@ -25,6 +25,14 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  */
 public final class XenoformState {
+	/**
+	 * Entity tags on a changed player, for mods that read players without our classes (Jaymo's Kingdoms' townsfolk and
+	 * guards): {@link #TAG} while any alien, and {@link #TAG}{@code :<alien id>}. Off again the moment they turn back.
+	 */
+	public static final String TAG = "jaymospowers_xenoform";
+	/** The tag on anything a form summons (Swarm's gremlins, Afterimage's decoys): ours to clean up, never loot. */
+	public static final String MINION_TAG = "jaymospowers_xenoform_minion";
+
 	/** The band: the aliens unlocked (form ids, in the order they came) and the one dialled (an index into them). */
 	public record Band(List<String> unlocked, int dial) {
 		public static final Band NONE = new Band(List.of(), 0);

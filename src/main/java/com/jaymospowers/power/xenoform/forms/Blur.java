@@ -25,7 +25,11 @@ import net.minecraft.world.phys.Vec3;
  * <li>G (hold), Wall Run: against a wall, keep running straight up it for up to {@link #WALL_RUN_TICKS}.</li>
  * <li>V, Whirlwind: spin, pulling everything within {@link #SPIN_RADIUS} in and raking it.</li>
  * <li>B, Chain Strike: flicker between up to {@link #CHAIN_TARGETS} foes within {@link #CHAIN_RANGE}, striking each.</li>
+ * <li>C (ascended), Afterimage: a glowing ghost of you (an invisible, glowing horse of your DNA) bolts away and
+ * everything hunting you hunts it instead, for {@link #DECOY_TICKS}; C again sends another every
+ * {@link #DECOY_COOLDOWN}.</li>
  * </ul>
+ * Corrupted: a dash doesn't stop until you hit a wall or something living (up to {@link #CORRUPT_RUNAWAY_TICKS}).
  */
 public final class Blur extends XenoForm {
 	// ---- tuning ----
@@ -39,6 +43,13 @@ public final class Blur extends XenoForm {
 	public static final int CHAIN_COOLDOWN = 240, CHAIN_TARGETS = 5, CHAIN_SPACING = 3;
 	public static final double CHAIN_RANGE = 8.0;
 	public static final float CHAIN_DAMAGE = 5.0F;
+	/** Afterimage: how long a decoy runs, how fast, how far it draws from, and C's cooldown between decoys. */
+	public static final int DECOY_TICKS = 200, DECOY_COOLDOWN = 200;
+	public static final double DECOY_SPEED = 1.8, DECOY_DRAW = 20.0;
+	/** Corrupted: a dash that won't stop runs at this speed for at most this long, and hits for this much. */
+	public static final double CORRUPT_RUNAWAY_SPEED = 1.1;
+	public static final int CORRUPT_RUNAWAY_TICKS = 60;
+	public static final float CORRUPT_RUNAWAY_DAMAGE = 4.0F;
 
 	public Blur() {
 		super("blur", 0.9F, 20.0F, 4.0, 0.6, 0.0, 0.0, Items.FEATHER, 0x7FD0FF);
@@ -88,6 +99,7 @@ public final class Blur extends XenoForm {
 					player.setDeltaMovement(look.scale(DASH_SPEED).add(0.0, 0.15, 0.0));
 					player.syncVelocity = true;
 					live.dashTicks = DASH_TICKS;
+					live.runaway = live.corrupted ? CORRUPT_RUNAWAY_TICKS : 0;
 					burst(player.level(), ParticleTypes.CLOUD, player.position().add(0.0, 0.3, 0.0), 12, 0.4, 0.05);
 					sound(player, SoundEvents.HORSE_GALLOP, 1.0F, 1.5F);
 					cooldown(player, live, R, DASH_COOLDOWN);
@@ -115,6 +127,28 @@ public final class Blur extends XenoForm {
 		if (live.dashTicks > 0) {
 			live.dashTicks--;
 			burst(level, ParticleTypes.CLOUD, player.position().add(0.0, 0.3, 0.0), 2, 0.2, 0.01);
+		}
+		// corrupted: the legs won't stop
+		if (live.runaway > 0) {
+			live.runaway--;
+			List<LivingEntity> hit = around(player, 1.2);
+			if (player.horizontalCollision || !hit.isEmpty() || live.runaway == 0) {
+				for (LivingEntity living : hit) {
+					living.hurtServer(level, player.damageSources().playerAttack(player), CORRUPT_RUNAWAY_DAMAGE);
+					shove(living, player.position(), 1.0, 0.4);
+				}
+				live.runaway = 0;
+				live.dashTicks = 0;
+				player.setDeltaMovement(Vec3.ZERO);
+				player.syncVelocity = true;
+				sound(player, SoundEvents.HORSE_ANGRY, 0.8F, 1.4F);
+			} else {
+				Vec3 look = player.getLookAngle().horizontal();
+				look = look.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : look.normalize();
+				player.setDeltaMovement(look.scale(CORRUPT_RUNAWAY_SPEED).add(0.0, player.getDeltaMovement().y, 0.0));
+				player.syncVelocity = true;
+				live.dashTicks = Math.max(live.dashTicks, 1);
+			}
 		}
 		// the wall run: G held, against a wall, going somewhere
 		boolean running = com.jaymospowers.core.PowerInput.isDown(player, PowerKey.ABILITY_2) && live.wallRun < WALL_RUN_TICKS
@@ -149,7 +183,76 @@ public final class Blur extends XenoForm {
 
 	@Override
 	public boolean skipsMovementCheck(ServerPlayer player, XenoformPower.Live live) {
-		return live.dashTicks > 0 || !live.chain.isEmpty() || live.chainTick > 0;
+		return live.dashTicks > 0 || live.runaway > 0 || !live.chain.isEmpty() || live.chainTick > 0;
+	}
+
+	// ---- Afterimage ----
+
+	@Override
+	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
+		return decoy(player, live);
+	}
+
+	@Override
+	public void onUltimateAgain(ServerPlayer player, XenoformPower.Live live) {
+		if (ultimateReady(player, live)) {
+			decoy(player, live);
+		}
+	}
+
+	@Override
+	public void tickUltimate(ServerPlayer player, XenoformPower.Live live) {
+		ServerLevel level = player.level();
+		for (java.util.Iterator<Integer> it = live.minions.iterator(); it.hasNext();) {
+			Entity e = level.getEntity(it.next());
+			if (!(e instanceof net.minecraft.world.entity.Mob decoy) || !decoy.isAlive() || decoy.tickCount > DECOY_TICKS) {
+				if (e != null) {
+					burst(level, ParticleTypes.CLOUD, e.position().add(0.0, 0.8, 0.0), 12, 0.4, 0.03);
+					e.discard();
+				}
+				it.remove();
+				continue;
+			}
+			// it runs from you, and whoever hunts you hunts it
+			if (decoy.tickCount % 10 == 1) {
+				Vec3 away = decoy.position().subtract(player.position()).horizontal();
+				away = away.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : away.normalize();
+				Vec3 to = decoy.position().add(away.scale(12.0));
+				decoy.getNavigation().moveTo(to.x, to.y, to.z, DECOY_SPEED);
+				for (net.minecraft.world.entity.Mob mob : level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
+					player.getBoundingBox().inflate(DECOY_DRAW), m -> m.getTarget() == player && m != decoy)) {
+					mob.setTarget(decoy);
+				}
+			}
+			if (decoy.tickCount % 2 == 0) {
+				level.sendParticles(ParticleTypes.CLOUD, decoy.getX(), decoy.getY() + 0.6, decoy.getZ(), 1, 0.3, 0.3, 0.3, 0.0);
+			}
+		}
+	}
+
+	@Override
+	public void onUltimateEnd(ServerPlayer player, XenoformPower.Live live) {
+		dismiss(player.level(), live.minions);
+	}
+
+	/** A glowing ghost of you, bolting off. */
+	private static boolean decoy(ServerPlayer player, XenoformPower.Live live) {
+		ServerLevel level = player.level();
+		net.minecraft.world.entity.animal.equine.Horse horse = summon(level, net.minecraft.world.entity.EntityTypes.HORSE, player.position(), player.getYRot());
+		if (horse == null) {
+			return false;
+		}
+		horse.setInvisible(true);
+		horse.setSilent(true);
+		horse.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.GLOWING, DECOY_TICKS + 20, 0, false, false));
+		horse.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SPEED, DECOY_TICKS + 20, 2, false, false));
+		horse.setCustomName(player.getName());
+		live.minions.add(horse.getId());
+		ultimateCooldown(player, live, DECOY_COOLDOWN);
+		burst(level, ParticleTypes.CLOUD, player.position().add(0.0, 0.8, 0.0), 20, 0.5, 0.05);
+		sound(player, SoundEvents.HORSE_GALLOP, 1.2F, 1.8F);
+		sound(player, SoundEvents.ILLUSIONER_MIRROR_MOVE, 1.0F, 1.2F);
+		return true;
 	}
 
 	private static void spin(ServerPlayer player) {

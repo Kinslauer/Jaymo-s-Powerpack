@@ -710,7 +710,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   `docs/Classes-Plan.md`. The Armory's cleavers are redrawn short and its quarterstaffs long, the stick running the
   whole sprite (`tools/gen_cleaver_staff.py`, run after `armory_assets.py`); the Tinkering cleaver takes the same
   short shape in every material (`tools/gen_tinker_cleaver.py`).
-- **0.9.1, Xenoform, the Xeno-Band (stages 1 and 2):** a new power from a falling star. On clear nights a glowing rock
+- **0.9.1, Xenoform, the Xeno-Band (all three stages; Kingdoms 0.6.1):** a new power from a falling star. On clear nights a glowing rock
   sometimes comes down near a player (like a Gravity meteor; at most one a day per world) and leaves a Fallen Star in
   its crater. Mine it (iron pickaxe): 15% a Xeno-Band, 7% the symbiote's goo, else raw iron, amethyst and XP. Put the
   band on and it never comes off: tap Z to turn its dial, hold Z to slam it and become the dialled alien for a random
@@ -724,4 +724,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   levers/doors/redstone at range, bite that steals food, climb), Knell (warden: sonic boom, sense, shriek, burrow),
   Wyrm (ender dragon: dragon's breath cloud, held wings, gust, rift blink). Every knockout corrupts the band (25 of
   100): once corrupted, slams land on the wrong alien a quarter of the time and the band sometimes changes you on
-  its own.
+  its own. Stage 3: the power ascends once all eight are scanned and it's mastered; then C as an alien is its
+  Ultimate for the rest of the timer: Titan (Bulwark), Sunheart (Pyre), Afterimage (Blur), Geode (Prism), Revenant
+  (Wisp, possess a mob), Swarm (Gremlin), the Tolling (Knell), Elder Wyrm. Each alien carries its own flaw while the
+  band is corrupted (Blur's dash won't stop, Prism's stance leaks arrows, Knell's shriek wakes shriekers...). Jaymo's
+  Kingdoms 0.6.1: townsfolk flee an alien and guards hunt it, unless that realm saw you change (`docs/xenoform.md`).

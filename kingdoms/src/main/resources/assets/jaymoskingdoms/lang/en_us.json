@@ -1561,5 +1561,7 @@
 	"message.jaymoskingdoms.class.staff_recipe": "You learn how a wizard's staff is made: gold and amethyst on two blaze rods. It's in your recipe book.",
 	"talk.jaymoskingdoms.wizard.staff": "A Mage without a staff? I can tell you how one is made. And I have a Writ of Rebirth, if you'd be someone else entirely: %s emeralds.",
 	"talk.jaymoskingdoms.wizard.staff.yes": "Teach me the staff",
-	"talk.jaymoskingdoms.wizard.staff.done": "Gold and amethyst, bound to two rods of blaze. Mind your fingers."
+	"talk.jaymoskingdoms.wizard.staff.done": "Gold and amethyst, bound to two rods of blaze. Mind your fingers.",
+	"message.jaymoskingdoms.alien.seen": "The people of %s saw you change. They know the alien is you.",
+	"talk.jaymoskingdoms.alien.seen": "Saints preserve us... that thing is you?"
 }

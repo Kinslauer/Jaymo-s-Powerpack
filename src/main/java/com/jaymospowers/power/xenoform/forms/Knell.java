@@ -34,7 +34,11 @@ import net.minecraft.world.phys.Vec3;
  * <li>G (hold), Tremor Sense: feel everything that moves within {@link #SENSE_RADIUS}; it glows for you.</li>
  * <li>V, Shriek: everything within {@link #SHRIEK_RADIUS} is plunged into darkness and slowed.</li>
  * <li>B, Burrow: sink into the ground and come up where you look, up to {@link #BURROW_RANGE} blocks away.</li>
+ * <li>C (ascended), the Tolling: you plant yourself and toll {@link #TOLLS} times, every {@link #TOLL_EVERY} ticks, each
+ * toll a ring of sonic force through everything within {@link #TOLL_RADIUS}; nothing moves you meanwhile.</li>
  * </ul>
+ * Corrupted: every boom deafens you (darkness), and your shriek sets off every sculk shrieker within
+ * {@link #CORRUPT_SHRIEKER_REACH}, wardens and all.
  */
 public final class Knell extends XenoForm {
 	// ---- tuning ----
@@ -48,6 +52,12 @@ public final class Knell extends XenoForm {
 	public static final float SHRIEK_DAMAGE = 4.0F;
 	public static final int BURROW_COOLDOWN = 240, BURROW_TICKS = 20;
 	public static final double BURROW_RANGE = 16.0;
+	/** The Tolling: how many tolls, how far apart, their reach, bite and push; C's cooldown. */
+	public static final int TOLLS = 5, TOLL_EVERY = 40, TOLL_COOLDOWN = 600;
+	public static final double TOLL_RADIUS = 8.0, TOLL_KNOCKBACK = 1.4;
+	public static final float TOLL_DAMAGE = 6.0F;
+	/** Corrupted: the boom's darkness on yourself; how far a shriek wakes shriekers. */
+	public static final int CORRUPT_DEAF_TICKS = 60, CORRUPT_SHRIEKER_REACH = 12;
 
 	public Knell() {
 		super("knell", 1.3F, 50.0F, 8.0, -0.15, 0.9, 1.0, Items.SCULK_CATALYST, 0x1FB8C8);
@@ -83,12 +93,18 @@ public final class Knell extends XenoForm {
 				if (ready(player, live, R)) {
 					boom(player);
 					cooldown(player, live, R, BOOM_COOLDOWN);
+					if (live.corrupted) {
+						player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, CORRUPT_DEAF_TICKS, 0, false, false));
+					}
 				}
 			}
 			case ABILITY_3 -> {
 				if (ready(player, live, V)) {
 					shriek(player);
 					cooldown(player, live, V, SHRIEK_COOLDOWN);
+					if (live.corrupted) {
+						wakeShriekers(player);
+					}
 				}
 			}
 			case ABILITY_4 -> {
@@ -134,6 +150,85 @@ public final class Knell extends XenoForm {
 	@Override
 	public boolean allowDamage(ServerPlayer player, XenoformPower.Live live, DamageSource source, float amount) {
 		return live.burrow <= 0;
+	}
+
+	// ---- the Tolling ----
+
+	@Override
+	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
+		return toll(player, live);
+	}
+
+	@Override
+	public void onUltimateAgain(ServerPlayer player, XenoformPower.Live live) {
+		if (live.tolls <= 0 && ultimateReady(player, live)) {
+			toll(player, live);
+		}
+	}
+
+	@Override
+	public void tickUltimate(ServerPlayer player, XenoformPower.Live live) {
+		if (live.tolls <= 0) {
+			return;
+		}
+		ServerLevel level = player.level();
+		// planted
+		Vec3 motion = player.getDeltaMovement();
+		if (motion.horizontalDistanceSqr() > 1.0E-4) {
+			player.setDeltaMovement(0.0, motion.y, 0.0);
+			player.syncVelocity = true;
+		}
+		if (player.tickCount % TOLL_EVERY == 0) {
+			live.tolls--;
+			for (LivingEntity living : around(player, TOLL_RADIUS)) {
+				if (living.hurtServer(level, level.damageSources().sonicBoom(player), TOLL_DAMAGE)) {
+					double resist = 1.0 - living.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
+					shove(living, player.position(), TOLL_KNOCKBACK * resist, 0.4 * resist);
+					if (living instanceof net.minecraft.world.entity.player.Player) {
+						living.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 60, 0));
+					}
+				}
+			}
+			Vec3 at = player.position().add(0.0, 1.2, 0.0);
+			ring(level, ParticleTypes.SONIC_BOOM, at, TOLL_RADIUS * 0.35, 8);
+			ring(level, ParticleTypes.SONIC_BOOM, at, TOLL_RADIUS * 0.7, 14);
+			ring(level, ParticleTypes.SCULK_CHARGE_POP, at, TOLL_RADIUS, 24);
+			sound(player, SoundEvents.WARDEN_SONIC_BOOM, 3.0F, 0.6F);
+			sound(player, SoundEvents.BELL_BLOCK, 3.0F, 0.5F);
+			if (live.tolls == 0) {
+				ultimateCooldown(player, live, TOLL_COOLDOWN);
+			}
+		} else if (player.tickCount % 4 == 0) {
+			level.sendParticles(ParticleTypes.SCULK_SOUL, player.getX(), player.getY() + 1.5, player.getZ(), 1, 0.4, 0.4, 0.4, 0.0);
+		}
+	}
+
+	@Override
+	public void onUltimateEnd(ServerPlayer player, XenoformPower.Live live) {
+		live.tolls = 0;
+	}
+
+	private static boolean toll(ServerPlayer player, XenoformPower.Live live) {
+		if (!player.onGround()) {
+			return false;
+		}
+		live.tolls = TOLLS;
+		player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, TOLLS * TOLL_EVERY, 1, false, false));
+		sound(player, SoundEvents.WARDEN_SONIC_CHARGE, 2.0F, 0.7F);
+		sound(player, SoundEvents.WARDEN_HEARTBEAT, 2.0F, 0.8F);
+		return true;
+	}
+
+	/** Corrupted: the shriek is heard by the sculk. Every shrieker near answers, and the deep dark keeps its count. */
+	private static void wakeShriekers(ServerPlayer player) {
+		ServerLevel level = player.level();
+		BlockPos feet = player.blockPosition();
+		int r = CORRUPT_SHRIEKER_REACH;
+		for (BlockPos pos : BlockPos.betweenClosed(feet.offset(-r, -r, -r), feet.offset(r, r, r))) {
+			if (level.getBlockEntity(pos) instanceof net.minecraft.world.level.block.entity.SculkShriekerBlockEntity shrieker) {
+				shrieker.tryShriek(level, player);
+			}
+		}
 	}
 
 	private static void boom(ServerPlayer player) {

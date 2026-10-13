@@ -187,3 +187,14 @@ power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts
 | 185 | Wyrm | V | Wing Gust | 3 damage and a 1.6 shove to all within 6 blocks; you recoil. 6 s. | |
 | 186 | Wyrm | B | Rift | Teleport up to 12 blocks where you look. 4 s. | |
 | 187 | Wyrm | passive | Of the End | Water and rain do 1 hp/s. | |
+| 188 | Any | passive | Ascension | The power ascends once all 8 aliens are scanned and the power is fully mastered. C then works as an alien. | |
+| 189 | Any | C (ascended) | Ultimate | As an alien: become its Ultimate form for the rest of the timer. C again is the Ultimate's own move where it has one. | |
+| 190 | Bulwark | C | Titan | 2x size, +12 armour, +20 health; the Ground Clap smashes walls up to 3 blocks thick ahead of you. | |
+| 191 | Pyre | C | Sunheart | The Flame Jet is true flight toward your look; R is a held 12-block beam of fire (2 damage per 4 ticks, lights blocks). | |
+| 192 | Blur | C | Afterimage | A glowing ghost of you bolts away for 10 s and everything hunting you hunts it. C again: another, every 10 s. | |
+| 193 | Prism | C | Geode | Everything within 6 blocks is cased in crystal for 4 s (held, can't strike); projectiles shatter; you get Resistance III. Every 20 s. | |
+| 194 | Wisp | C | Revenant | Possess the mob you look at (8 blocks) for 10 s: it goes where you look; nothing hunts you. C again lets go. | |
+| 195 | Gremlin | C | Swarm | 3 glowing gremlins follow and bite with you. C again swaps you with the farthest (nearest while sneaking). | |
+| 196 | Knell | C | The Tolling | Rooted for 10 s: 5 tolls, each 6 sonic damage, a shove and darkness to all within 8. Again after 30 s. | |
+| 197 | Wyrm | C | Elder Wyrm | 2x size, +8 armour, wings cost no hunger, breath every 2 s, gust half again as wide. | |
+| 198 | Any | corrupted | Twists | Each alien's moves carry a flaw while the band is corrupted (4 knockouts): see docs/xenoform.md. The line is shown when you change. | |

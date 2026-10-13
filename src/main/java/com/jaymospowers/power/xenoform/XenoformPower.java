@@ -83,6 +83,8 @@ public final class XenoformPower implements Power {
 	/** Corrupted: a slam gives the wrong alien this often, and the band changes you on its own about every this many ticks. */
 	public static final float GLITCH_WRONG_CHANCE = 0.25F;
 	public static final int GLITCH_SELF_TICKS = 7200;
+	/** How often (ticks) a human checks whether the band is complete and the power ready to ascend. */
+	public static final int ASCEND_CHECK_EVERY = 40;
 
 	private static final Identifier SCALE_ID = JaymosPowers.id("xenoform_scale");
 	private static final Identifier HEALTH_ID = JaymosPowers.id("xenoform_health");
@@ -139,6 +141,24 @@ public final class XenoformPower implements Power {
 		public int burrow;
 		public @Nullable Vec3 burrowTo;
 		public boolean wings;
+		// ---- stage 3: the Ultimate and the corruption ----
+		/** In the Ultimate form (C, ascended) for the rest of this timer; the Ultimate's own move's cooldown. */
+		public boolean ultimate;
+		public long ultimateNext;
+		/** The band is corrupted right now: each alien's moves carry their twist. Refreshed every tick. */
+		public boolean corrupted;
+		/** What the Ultimate summoned (entity ids): Swarm's gremlins, Afterimage's decoys. Dismissed when it ends. */
+		public final List<Integer> minions = new ArrayList<>();
+		/** Revenant: the creature possessed (entity id, -1 none). Sunheart: the beam is held. */
+		public int possessed = -1;
+		public boolean beam;
+		/** Geode: the crystal placed and the creatures held in it, and when it shatters. The Tolling: tolls left. */
+		public final List<net.minecraft.core.BlockPos> crystals = new ArrayList<>();
+		public final List<Integer> frozen = new ArrayList<>();
+		public long geodeUntil;
+		public int tolls;
+		/** Corrupted Wyrm: ticks the wings are out; corrupted Blur: ticks of a dash that won't stop. */
+		public int wingStall, runaway;
 
 		void clearForm() {
 			form = null;
@@ -165,6 +185,16 @@ public final class XenoformPower implements Power {
 			burrow = 0;
 			burrowTo = null;
 			wings = false;
+			ultimate = false;
+			ultimateNext = 0L;
+			minions.clear();
+			possessed = -1;
+			beam = false;
+			crystals.clear();
+			frozen.clear();
+			geodeUntil = 0L;
+			tolls = 0;
+			wingStall = runaway = 0;
 			hudDirty = true;
 		}
 	}
@@ -329,7 +359,11 @@ public final class XenoformPower implements Power {
 			if (live.ticksLeft <= 0) {
 				revert(player, false, true);
 			} else {
+				live.corrupted = com.jaymospowers.core.Fate.isCorrupted(player);
 				live.form.tick(player, live);
+				if (live.ultimate && live.form != null) {
+					live.form.tickUltimate(player, live);
+				}
 				// a grabbed creature that got away
 				if (live.grabbed >= 0) {
 					Entity held = player.level().getEntity(live.grabbed);
@@ -345,6 +379,7 @@ public final class XenoformPower implements Power {
 				live.hudDirty = true;
 			}
 			tickScan(player, live);
+			tickAscension(player);
 			// corrupted: now and then the band changes you without being asked
 			if (live.recharge <= 0 && !player.isCreative() && com.jaymospowers.core.Fate.isCorrupted(player)
 				&& player.getRandom().nextInt(GLITCH_SELF_TICKS) == 0) {
@@ -511,11 +546,52 @@ public final class XenoformPower implements Power {
 		}
 	}
 
-	/** Ultimate forms are stage 3: for now C only says so. */
+	/**
+	 * C, once the power has ascended: as an alien, you become its Ultimate form for the rest of the timer (C again is the
+	 * Ultimate's own move, where it has one). As yourself, nothing: slam first.
+	 */
 	@Override
 	public void onUltimate(ServerPlayer player, boolean down) {
-		if (down) {
-			hint(player, live(player), Component.translatable("message.jaymospowers.xenoform.no_ultimate"));
+		if (!down) {
+			return;
+		}
+		Live live = live(player);
+		XenoForm form = live.form;
+		if (form == null) {
+			hint(player, live, Component.translatable("message.jaymospowers.xenoform.ultimate_human"));
+			return;
+		}
+		if (live.ultimate) {
+			form.onUltimateAgain(player, live);
+			return;
+		}
+		if (!form.onUltimate(player, live)) {
+			hint(player, live, Component.translatable("message.jaymospowers.xenoform.ultimate_not_now"));
+			return;
+		}
+		live.ultimate = true;
+		live.hudDirty = true;
+		ServerLevel level = player.level();
+		Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
+		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFF000000 | form.color), at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+		level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 60, 0.6, 1.0, 0.6, 0.15);
+		level.sendParticles(ParticleTypes.TOTEM_OF_UNDYING, at.x, at.y, at.z, 40, 0.5, 0.8, 0.5, 0.3);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.2F, 0.9F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.END_PORTAL_SPAWN, SoundSource.PLAYERS, 0.5F, 1.6F);
+		player.sendOverlayMessage(form.ultimateName().copy().withStyle(style -> style.withColor(TextColor.fromRgb(form.color)).withBold(true)));
+		Mastery.used(player);
+	}
+
+	/**
+	 * Ascension: the band is complete (every alien scanned) and the power fully mastered. Checked now and then as a
+	 * human; {@code Fate.ascend} then tells the player and turns C on.
+	 */
+	private static void tickAscension(ServerPlayer player) {
+		if (player.tickCount % ASCEND_CHECK_EVERY != 0 || com.jaymospowers.core.Fate.isAscended(player)) {
+			return;
+		}
+		if (XenoformState.band(player).unlocked().size() >= XenoForms.all().size() && com.jaymospowers.core.Fate.canAscend(player)) {
+			com.jaymospowers.core.Fate.ascend(player);
 		}
 	}
 
@@ -587,6 +663,9 @@ public final class XenoformPower implements Power {
 		live.total = mastered ? FORM_MAX : FORM_MIN + player.getRandom().nextInt(FORM_MAX - FORM_MIN + 1);
 		live.ticksLeft = live.total;
 		player.setAttached(XenoformState.FORM, form.id);
+		player.addTag(XenoformState.TAG);
+		player.addTag(XenoformState.TAG + ":" + form.id);
+		live.corrupted = com.jaymospowers.core.Fate.isCorrupted(player);
 		apply(player, form);
 		player.setHealth(form.health);
 		player.removeEffect(MobEffects.LEVITATION);
@@ -598,6 +677,9 @@ public final class XenoformPower implements Power {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.PLAYERS, 0.4F, 1.8F);
 		player.sendOverlayMessage(form.name().copy().withStyle(style -> style.withColor(TextColor.fromRgb(form.color)).withBold(true)));
 		form.onEnter(player, live);
+		if (live.corrupted) {
+			player.sendSystemMessage(form.corruptLine().copy().withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
+		}
 		Mastery.used(player);
 		live.hudDirty = true;
 		return true;
@@ -613,7 +695,12 @@ public final class XenoformPower implements Power {
 		if (form == null) {
 			return;
 		}
+		if (live.ultimate) {
+			form.onUltimateEnd(player, live);
+		}
 		form.onExit(player, live);
+		player.removeTag(XenoformState.TAG);
+		player.removeTag(XenoformState.TAG + ":" + form.id);
 		for (Entity passenger : new ArrayList<>(player.getPassengers())) {
 			passenger.stopRiding();
 		}

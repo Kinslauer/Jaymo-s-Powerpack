@@ -5,6 +5,7 @@ import com.jaymospowers.core.Mastery;
 import java.util.List;
 import java.util.function.Predicate;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -89,6 +90,41 @@ public abstract class XenoForm {
 	public void onDealtDamage(ServerPlayer player, XenoformPower.Live live, LivingEntity target) {
 	}
 
+	// ---- the Ultimate (stage 3): C, once the power has ascended ---------------------------------------------------------
+
+	/** The Ultimate form's name: lang {@code xenoform.jaymospowers.<id>.ultimate}. */
+	public Component ultimateName() {
+		return Component.translatable("xenoform.jaymospowers." + id + ".ultimate");
+	}
+
+	/**
+	 * C while the player is this alien and the power is ascended: become the Ultimate for the rest of the timer. Return
+	 * false if it can't start now (nothing to possess, say); the band then stays as it was.
+	 */
+	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
+		return false;
+	}
+
+	/** C again while already the Ultimate (Swarm swaps bodies, Afterimage sends another decoy, ...). */
+	public void onUltimateAgain(ServerPlayer player, XenoformPower.Live live) {
+	}
+
+	/** Every server tick while the Ultimate holds (after {@link #tick}). */
+	public void tickUltimate(ServerPlayer player, XenoformPower.Live live) {
+	}
+
+	/** The Ultimate ends (the form is ending): undo anything of its own. {@link #onExit} follows. */
+	public void onUltimateEnd(ServerPlayer player, XenoformPower.Live live) {
+	}
+
+	/**
+	 * The band's corruption, in this alien ({@code live.corrupted}): the line shown when you change while corrupted,
+	 * lang {@code xenoform.jaymospowers.<id>.corrupt}. The twist itself lives in each form's moves.
+	 */
+	public Component corruptLine() {
+		return Component.translatable("xenoform.jaymospowers." + id + ".corrupt");
+	}
+
 	/** True while the form may hang in the air without the server's floating kick. */
 	public boolean allowsFloating(ServerPlayer player, XenoformPower.Live live) {
 		return false;
@@ -109,6 +145,43 @@ public abstract class XenoForm {
 	/** Whether the move in {@code slot} is off cooldown. */
 	protected static boolean ready(ServerPlayer player, XenoformPower.Live live, int slot) {
 		return live.cooldownUntil[slot] <= player.level().getGameTime();
+	}
+
+	/** Whether the Ultimate's own move (see {@code live.ultimateNext}) is off cooldown. */
+	protected static boolean ultimateReady(ServerPlayer player, XenoformPower.Live live) {
+		return live.ultimateNext <= player.level().getGameTime();
+	}
+
+	protected static void ultimateCooldown(ServerPlayer player, XenoformPower.Live live, int ticks) {
+		live.ultimateNext = player.level().getGameTime() + ticks;
+	}
+
+	/** Spawns {@code type} at {@code at} as something of this form's (tagged, kept, silent about despawning). */
+	protected static <T extends net.minecraft.world.entity.Mob> @Nullable T summon(ServerLevel level, net.minecraft.world.entity.EntityType<T> type, Vec3 at,
+		float yaw) {
+		T mob = type.create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
+		if (mob == null) {
+			return null;
+		}
+		mob.snapTo(at.x, at.y, at.z, yaw, 0.0F);
+		mob.setPersistenceRequired();
+		mob.addTag(XenoformState.MINION_TAG);
+		if (!level.addFreshEntity(mob)) {
+			return null;
+		}
+		return mob;
+	}
+
+	/** Removes every minion in {@code ids} (Swarm's gremlins, Afterimage's decoys) with a puff. */
+	protected static void dismiss(ServerLevel level, List<Integer> ids) {
+		for (int id : ids) {
+			Entity e = level.getEntity(id);
+			if (e != null && e.entityTags().contains(XenoformState.MINION_TAG)) {
+				level.sendParticles(ParticleTypes.POOF, e.getX(), e.getY() + e.getBbHeight() * 0.5, e.getZ(), 8, 0.3, 0.3, 0.3, 0.02);
+				e.discard();
+			}
+		}
+		ids.clear();
 	}
 
 	/** Starts {@code slot}'s cooldown, and counts the use toward mastery. */

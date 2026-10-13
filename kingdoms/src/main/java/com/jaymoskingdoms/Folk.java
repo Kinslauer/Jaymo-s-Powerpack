@@ -465,10 +465,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 				}
 			}
 		}.setAlertOthers(Folk.class));
-		// anyone the faction counts as hostile
+		// anyone the faction counts as hostile; (0.6.1) and a player changed into an alien they don't know (Aliens)
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true,
 			(target, level) -> this.combatant() && target instanceof ServerPlayer player && !player.isCreative()
-				&& Reputation.get(player, this.factionId()) <= Reputation.HOSTILE));
+				&& (Reputation.get(player, this.factionId()) <= Reputation.HOSTILE || Aliens.feared(player, this.factionId()))));
 		// and monsters on their land
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.Mob.class, true,
 			(target, level) -> this.combatant() && target instanceof Enemy && !(target instanceof net.minecraft.world.entity.monster.Creeper)));

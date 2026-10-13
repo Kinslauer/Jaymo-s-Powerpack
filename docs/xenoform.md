@@ -77,7 +77,41 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
   "n/N" above) and the scan chip (X, fills while scanning); as an alien four chips with cooldowns and a timer bar in the
   alien's colour, red through the beeps. A flash of the form's colour round the screen on each change.
 
-## Later (from the plan)
+## Stage 3: ascension, the Ultimates, the twists, the kingdoms
 
-- Stage 3: ultimate forms on C once ascended (Titan, Sunheart, Afterimage, Geode, Revenant, Swarm, and ones for Knell
-  and Wyrm), and Kingdoms reactions through a compat class. The power has no ascension trigger yet.
+- **Ascension.** The power ascends on its own once the band is complete (all eight aliens scanned) and the power fully
+  mastered (`XenoformPower.tickAscension`, checked every 2 s as a human; `/power ascend` for testing). Nothing else
+  changes until you slam.
+- **The Ultimate (C, ascended).** As an alien, C makes you its Ultimate form for the rest of the timer
+  (`XenoForm.onUltimate`; `tickUltimate` every tick; `onUltimateAgain` for C again; `onUltimateEnd` before `onExit`).
+  The Ultimate's own move has a cooldown of its own (`live.ultimateNext`). As yourself C only says to slam first.
+
+| Alien | Ultimate | What it does |
+|---|---|---|
+| Bulwark | Titan | 2x size, +12 armour, +20 health; the clap smashes walls 3 deep, 3 wide, 3 tall (hardness ≤ 6, no block entities). |
+| Pyre | Sunheart | The jet is free flight toward your look; R is a held beam (12 blocks, 2 fire damage every 4 ticks, lights what it ends on). |
+| Blur | Afterimage | An invisible, glowing horse of your DNA bolts away for 10 s; mobs hunting you within 20 blocks retarget to it. C again every 10 s. |
+| Prism | Geode | All within 6 blocks: slowness/weakness/mining fatigue for 4 s, held still, amethyst grown round them (removed after); projectiles shatter; you get Resistance III. Every 20 s. |
+| Wisp | Revenant | Ride inside the mob you look at (8 blocks) for 10 s with its AI off: it walks where you look and jumps at walls; you're invisible and mobs drop you. It wakes dazed, glowing and weak. |
+| Gremlin | Swarm | 3 glowing silverfish follow you, bite what you bite and never attack players. C again swaps places with the farthest (nearest, sneaking), every second. |
+| Knell | The Tolling | Rooted, 5 tolls 2 s apart: 6 sonic damage, a shove and darkness (players) to all within 8; Resistance II meanwhile. Again after 30 s. |
+| Wyrm | Elder Wyrm | 2x size, +8 armour, wings cost nothing, breath every 2 s, gust 1.5x wide. |
+
+- **The corruption, per alien** (`live.corrupted`, refreshed every tick; the line `xenoform.jaymospowers.<id>.corrupt`
+  is sent in chat when you change while corrupted): Bulwark's fists +2 and the slam costs you 3; Pyre's nova and trail
+  light the ground round you and water bites double; Blur's dash runs until a wall or a creature (up to 3 s, 4 damage
+  to what it hits); Prism's reflect lets 1 arrow in 4 through; Wisp's shroud shows you 10 ticks in every 60 and 1 phase
+  in 4 bites (3 in-wall damage, nausea); Gremlin's bite catches everyone within 2.5 of its mark and each sabotage also
+  throws a random lever/button within 6; Knell's boom gives you darkness and its shriek fires every sculk shrieker
+  within 12 (`SculkShriekerBlockEntity.tryShriek`, so the Warden's count climbs); Wyrm's wings give out 1 tick in 100
+  for 30 ticks (no slow falling) and its breath lasts 10 s.
+- **Jaymo's Kingdoms** (`kingdoms/.../Aliens`, by entity tag `jaymospowers_xenoform` and `jaymospowers_xenoform:<id>`,
+  set in `transform` and cleared in `revert`): to a kingdom's people an alien is a monster. Villagers run from one
+  (`Frights`), guards hunt it (`Folk`'s player target goal, `MobCombat.foe`), unless that realm's folk or villagers saw
+  you change (16 blocks, line of sight): then they know, for good (`Aliens.KNOWN`, copied on death), say so once, and
+  treat the alien as they treat you. Minions carry `jaymospowers_xenoform_minion`.
+
+## Later
+
+- Nothing planned from the Omnitrix Power Plan: all three stages are in. Ideas Andy might want: Kingdoms quests that
+  ask for an alien's help, a scan target for the Wither, more Ultimates' second moves.
