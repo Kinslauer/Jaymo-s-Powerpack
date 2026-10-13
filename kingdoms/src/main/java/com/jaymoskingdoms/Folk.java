@@ -469,9 +469,9 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true,
 			(target, level) -> this.combatant() && target instanceof ServerPlayer player && !player.isCreative()
 				&& (Reputation.get(player, this.factionId()) <= Reputation.HOSTILE || Aliens.feared(player, this.factionId()))));
-		// and monsters on their land
+		// and monsters on their land; (0.6.5) creepers only from a distance, by those who shoot
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.Mob.class, true,
-			(target, level) -> this.combatant() && target instanceof Enemy && !(target instanceof net.minecraft.world.entity.monster.Creeper)));
+			(target, level) -> this.combatant() && target instanceof Enemy && (!(target instanceof net.minecraft.world.entity.monster.Creeper) || this.ranged())));
 		// barbarians hunt everyone else's people, and realms' folk hunt barbarians
 		Barbarians.addGoals(this, this.goalSelector, this.targetSelector);
 		// (0.5.27) goblins hunt everyone but those passing for one of them

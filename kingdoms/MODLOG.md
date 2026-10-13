@@ -2394,3 +2394,11 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   sky structures), unnatural ground and terrain-following street pieces are left alone. New chunks only.
 - (0.5.58, PR #96) Villages generate with `beard_box` terrain adaptation, and one builder of each crew levels the
   settlement's ground (`Groundwork`: pits, ramps on 2-5 high ledges, plank bridges where roads meet gaps).
+
+## 0.6.5: creepers go for villagers (pack 0.9.9)
+
+- `Prey` gives every creeper two more target goals at priority 3 (after players and whoever hurt it): any
+  `AbstractVillager` (vanilla and MCA) and any `Folk`, line of sight needed. Vanilla's `SwellGoal` then lights the fuse
+  within 3 blocks as it does for players.
+- `Folk`'s monster target goal no longer skips creepers for ranged folk (`ranged()`: archers, slingers, casters).
+  Melee folk still ignore them; iron golems keep vanilla's rule (never target creepers).

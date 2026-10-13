@@ -749,3 +749,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   blow or ended by hand; lives as an alien or knockouts taken); satisfy both and Nadir may be slammed once, and when
   that change ends the next round begins. Its Beacon (R) picks any player on the server, lights them through the world, and a hold
   phases you to them across dimensions; its other moves wait on Andy.
+
+- **0.9.9, creepers go for villagers (Kingdoms 0.6.5):** creepers now stalk villagers (MCA's too) and every faction's
+  folk the way they stalk players, and blow up beside them. A realm's archers (and casters, slingers) shoot creepers
+  down; melee guards still leave them alone so they don't get blown up.
