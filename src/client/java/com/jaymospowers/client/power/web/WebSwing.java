@@ -120,8 +120,13 @@ public final class WebSwing {
 	static final double BRAKE_DRAG = 0.94;
 	static final double BRAKE_SINK = 0.2;
 	static final double BRAKE_CATCH = 0.3;
-	/** Braking while still climbing: the share of the climb kept each tick (so it stalls, never lifts). */
-	static final double BRAKE_RISE_KEEP = 0.5;
+	/**
+	 * Flaring at speed throws you up, like a bird landing: the speed the brake takes off each tick comes back as lift,
+	 * {@code BRAKE_LIFT} of it. The flare eases in over {@code BRAKE_EASE_IN} ticks (the drag and the lift both build), so
+	 * the climb starts gently, swells, and dies away as the speed runs out; the climb is held under {@code BRAKE_MAX_RISE}.
+	 */
+	static final double BRAKE_LIFT = 1.4, BRAKE_MAX_RISE = 0.9;
+	static final int BRAKE_EASE_IN = 12;
 	/**
 	 * Braked to a stop (forward speed under {@code DIVE_AT}), still holding S: the wings stay out but stop flying, and you
 	 * drop head-first into a freedive, like Wind's, gaining speed down to {@code DIVE_MAX_SPEED}. Let go of S to pull out
@@ -193,6 +198,8 @@ public final class WebSwing {
 	boolean braking;
 	/** Braked to a stop and dropping head-first (wings still out). */
 	boolean diving;
+	/** Ticks the brake has been held (the flare eases in). */
+	private int brakeTicks;
 	/** Jump has been let go since the wings spread (the next press folds them). */
 	private boolean wingsJumpReleased;
 	private int jumpHeldAir;
@@ -873,9 +880,16 @@ public final class WebSwing {
 		if (!brake) {
 			diving = false;
 		}
+		brakeTicks = brake ? brakeTicks + 1 : 0;
 		if (brake) {
-			// flared: the wings stop flying you along and catch the air, bleeding the speed off and slowing the fall
-			m = m.multiply(BRAKE_DRAG, 1.0, BRAKE_DRAG);
+			// flared: the wings stop flying you along and catch the air, bleeding the speed off (more and more as the
+			// flare opens) and turning it into lift
+			double flare = Math.min(1.0, brakeTicks / (double)BRAKE_EASE_IN);
+			flare = flare * flare * (3.0 - 2.0 * flare);
+			double before = m.horizontalDistance();
+			double drag = Mth.lerp(flare, 1.0, BRAKE_DRAG);
+			m = m.multiply(drag, 1.0, drag);
+			double rise = diving ? 0.0 : (before - m.horizontalDistance()) * BRAKE_LIFT;
 			if (!diving && m.horizontalDistance() < DIVE_AT) {
 				diving = true;
 				play(player, SoundEvents.PHANTOM_FLAP, 0.6F, 0.6F);
@@ -884,8 +898,7 @@ public final class WebSwing {
 				// stopped dead: tip over and drop, head-first
 				m = new Vec3(m.x * 0.5, Math.max(-DIVE_MAX_SPEED, (m.y - WINGS_GRAVITY) * 0.98), m.z * 0.5);
 			} else {
-				// a flare never carries you up: any climb you came in with dies off fast
-				m = new Vec3(m.x, (m.y > 0.0 ? m.y * BRAKE_RISE_KEEP : m.y) - WINGS_GRAVITY, m.z);
+				m = new Vec3(m.x, Math.min(BRAKE_MAX_RISE, m.y * 0.98 - WINGS_GRAVITY + rise), m.z);
 				if (m.y < -BRAKE_SINK) {
 					m = new Vec3(m.x, Mth.lerp(BRAKE_CATCH, m.y, -BRAKE_SINK), m.z);
 				}
