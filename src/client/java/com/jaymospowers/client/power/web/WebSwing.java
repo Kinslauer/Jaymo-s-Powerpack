@@ -39,22 +39,34 @@ public final class WebSwing {
 	/** Velocity kept per tick while on the web (replaces vanilla's 0.91 horizontal / 0.98 vertical air drag). */
 	static final double SWING_DRAG = 0.993;
 	/** Holding forward on the downswing pumps this much extra speed along the swing, per tick. */
-	static final double PUMP = 0.03;
+	static final double PUMP = 0.015;
 	/** Holding Jump on a web also thrusts you along the swing this much per tick (on top of reeling in): it rockets
 	 * you round the arc, and a release flings you out of it with the extra speed. */
-	static final double JUMP_THRUST = 0.07;
+	static final double JUMP_THRUST = 0.035;
+	/**
+	 * Let go of Jump on a web (held at least {@code JUMP_OFF_MIN_HOLD} ticks) and you let go of the webs and spring up:
+	 * {@code JUMP_OFF_BASE} plus {@code JUMP_OFF_PER_SPEED} per block/tick you were moving, up to {@code JUMP_OFF_MAX}.
+	 * The faster the swing, the higher you go. (Holding Jump on a web also keeps you from taking fall damage; the
+	 * server checks that.) Held web keys must be pressed again after, and no web for {@code JUMP_OFF_LOCKOUT} ticks.
+	 */
+	static final double JUMP_OFF_BASE = 0.2, JUMP_OFF_PER_SPEED = 0.45, JUMP_OFF_MAX = 1.4;
+	static final int JUMP_OFF_MIN_HOLD = 3, JUMP_OFF_LOCKOUT = 8;
 	/** Jump reels in, sneak lets out (blocks per tick), every web that's out. */
 	static final double REEL_IN = 0.45;
 	static final double LET_OUT = 0.35;
 	/** Speed cap while swinging or flying from a swing (blocks/tick; sprinting is ~0.28). */
 	static final double MAX_SPEED = 2.6;
 	/**
-	 * Momentum: a swing chain starts capped at {@code SWING_START_SPEED} and the cap climbs {@code SWING_RAMP} a tick
-	 * while you're on a web, up to {@code MAX_SPEED} (about 8 s of swinging). It holds through releases and new webs in
-	 * the air, and starts over once you're on the ground off the web.
+	 * Momentum has to be built: a swing chain starts capped at {@code SWING_START_SPEED}, and the cap only climbs
+	 * ({@code SWING_RAMP} a tick) while you're on a web actually moving at {@code RAMP_AT} of it or more, so it takes
+	 * about half a minute of good, unbroken swinging to reach {@code MAX_SPEED}. A clean release (quality over
+	 * {@code RELEASE_GAIN_QUALITY}) adds up to {@code RELEASE_GAIN}. It holds through releases and new webs in the air,
+	 * and starts over once you're on the ground off the web.
 	 */
-	static final double SWING_START_SPEED = 0.8;
-	static final double SWING_RAMP = 0.011;
+	static final double SWING_START_SPEED = 0.55;
+	static final double SWING_RAMP = 0.003;
+	static final double RAMP_AT = 0.85;
+	static final double RELEASE_GAIN = 0.08, RELEASE_GAIN_QUALITY = 0.6;
 	/** Release timing: letting go while travelling this many degrees above level is perfect; the window either side. */
 	static final double RELEASE_SWEET_ANGLE = 35.0;
 	static final double RELEASE_WINDOW = 35.0;
@@ -101,12 +113,20 @@ public final class WebSwing {
 	static final double WINGS_GRAVITY = 0.08;
 	static final double WINGS_MAX_SPEED = 2.0;
 	/**
-	 * Airbrake: hold Sneak while gliding to flare the wings. Speed kept per tick ({@code BRAKE_DRAG}), and the fall
-	 * eases toward {@code BRAKE_SINK} (blocks/tick) at {@code BRAKE_CATCH} a tick, like a parachute catching.
+	 * Airbrake: hold S (or Sneak) while gliding to flare the wings. The glide stops carrying you: forward speed is kept
+	 * per tick ({@code BRAKE_DRAG}, so it bleeds off over a few seconds), and the fall eases toward {@code BRAKE_SINK}
+	 * (blocks/tick) at {@code BRAKE_CATCH} a tick, like a parachute catching.
 	 */
-	static final double BRAKE_DRAG = 0.86;
+	static final double BRAKE_DRAG = 0.94;
 	static final double BRAKE_SINK = 0.2;
 	static final double BRAKE_CATCH = 0.3;
+	/**
+	 * Braked to a stop (forward speed under {@code DIVE_AT}), still holding S: the wings stay out but stop flying, and you
+	 * drop head-first into a freedive, like Wind's, gaining speed down to {@code DIVE_MAX_SPEED}. Let go of S to pull out
+	 * into the glide again (pitch up and the dive's speed turns forward, as an elytra's does).
+	 */
+	static final double DIVE_AT = 0.06;
+	static final double DIVE_MAX_SPEED = 2.5;
 	// ===== zip / yank-to ===========================================================================================
 	/** How quickly the reel-in steers your velocity onto the line (0..1 per tick). */
 	static final double ZIP_STEER = 0.55;
@@ -157,6 +177,8 @@ public final class WebSwing {
 	float slingDraw;
 	private Vec3 braced = Vec3.ZERO;
 	private boolean slingJumpHeld;
+	/** Ticks Jump has been held while on a web (0 = not held). */
+	private int swingJumpTicks;
 	/** Drawn back into a wall: ticks of strain against it so far, and the last strain sent. */
 	private int strainTicks;
 	private float sentStrain;
@@ -167,6 +189,8 @@ public final class WebSwing {
 	int wingsTicks;
 	/** Sneak is held while gliding: the wings are flared to airbrake. */
 	boolean braking;
+	/** Braked to a stop and dropping head-first (wings still out). */
+	boolean diving;
 	/** Jump has been let go since the wings spread (the next press folds them). */
 	private boolean wingsJumpReleased;
 	private int jumpHeldAir;
@@ -253,6 +277,7 @@ public final class WebSwing {
 		}
 		boolean midAir = !player.onGround() && (flying || attached() || wingsTicks > 0);
 		strand.attached = true;
+		swingJumpTicks = 0;
 		flying = false;
 		swingEnergy = Double.NaN;
 		foldWings();
@@ -300,6 +325,11 @@ public final class WebSwing {
 		}
 		Vec3 forward = v.horizontal().normalize();
 		player.setDeltaMovement(v.add(forward.scale(RELEASE_FORWARD * quality)).add(0.0, RELEASE_UP * quality, 0.0));
+		if (quality > RELEASE_GAIN_QUALITY) {
+			// a well-timed release is how you build speed fastest
+			momentum = Math.min(MAX_SPEED, momentum + RELEASE_GAIN * quality);
+			flightCap = momentum;
+		}
 		if (quality > 0.7) {
 			play(player, SoundEvents.PLAYER_ATTACK_SWEEP, 0.7F, 1.6F);
 			Vec3 at = player.position().add(0.0, 1.0, 0.0);
@@ -361,7 +391,9 @@ public final class WebSwing {
 		tricks.tick(player, attached(), flying, wingsTicks > 0, apexY);
 		// the swing's momentum builds while on a web, and is lost on the ground
 		if (attached()) {
-			momentum = Math.min(MAX_SPEED, momentum + SWING_RAMP);
+			if (player.getDeltaMovement().length() >= momentum * RAMP_AT) {
+				momentum = Math.min(MAX_SPEED, momentum + SWING_RAMP);
+			}
 		} else if (player.onGround() || player.isInWater() || player.isInLava()) {
 			momentum = SWING_START_SPEED;
 		}
@@ -427,8 +459,19 @@ public final class WebSwing {
 		}
 		Input input = player.input.keyPresses;
 		if (bothAttached() && input.shift()) {
+			swingJumpTicks = 0;
 			tickSling(player, input);
 			return;
+		}
+		if (input.jump()) {
+			swingJumpTicks++;
+		} else if (swingJumpTicks > 0) {
+			boolean jumpOff = swingJumpTicks >= JUMP_OFF_MIN_HOLD && !player.onGround();
+			swingJumpTicks = 0;
+			if (jumpOff) {
+				jumpOff(player);
+				return;
+			}
 		}
 		if (slinging) {
 			endStrain();
@@ -626,6 +669,27 @@ public final class WebSwing {
 		}
 	}
 
+	/** Jump let go on a web: let go of the webs and spring up, higher the faster you were swinging. */
+	private void jumpOff(LocalPlayer player) {
+		Vec3 v = player.getDeltaMovement();
+		double lift = Math.min(JUMP_OFF_MAX, JUMP_OFF_BASE + v.length() * JUMP_OFF_PER_SPEED);
+		for (Strand strand : strands) {
+			if (strand.attached) {
+				strand.attached = false;
+				ClientPlayNetworking.send(new WebNet.Swing(strand.hand, false, Vec3.ZERO));
+			}
+			// held web keys don't snag a new web straight away
+			strand.keyHeld = false;
+		}
+		swingLockout = JUMP_OFF_LOCKOUT;
+		flying = true;
+		Vec3 out = new Vec3(v.x, Math.max(v.y, 0.0) + lift, v.z);
+		flightCap = Math.max(momentum, out.length());
+		player.setDeltaMovement(out);
+		tricks.released(player);
+		play(player, SoundEvents.PLAYER_ATTACK_SWEEP, 0.6F, 1.3F + (float)Math.min(0.5, lift * 0.3));
+	}
+
 	private void fireSling(LocalPlayer player, Vec3 forward) {
 		endStrain();
 		Vec3 dir = forward.scale(1.0 - SLING_AIM).add(player.getLookAngle().scale(SLING_AIM)).normalize();
@@ -795,22 +859,8 @@ public final class WebSwing {
 		double lookHorizontal = Math.sqrt(look.x * look.x + look.z * look.z);
 		double moveHorizontal = m.horizontalDistance();
 		double lift = Mth.square(Math.cos(lean));
-		m = m.add(0.0, WINGS_GRAVITY * (-1.0 + lift * 0.75), 0.0);
-		if (m.y < 0.0 && lookHorizontal > 0.0) {
-			// falling turns into forward speed
-			double convert = m.y * -0.1 * lift;
-			m = m.add(look.x * convert / lookHorizontal, convert, look.z * convert / lookHorizontal);
-		}
-		if (lean < 0.0F && lookHorizontal > 0.0) {
-			// pulling up turns speed into height
-			double convert = moveHorizontal * -Mth.sin(lean) * 0.04;
-			m = m.add(-look.x * convert / lookHorizontal, convert * 3.2, -look.z * convert / lookHorizontal);
-		}
-		if (lookHorizontal > 0.0) {
-			m = m.add((look.x / lookHorizontal * moveHorizontal - m.x) * 0.1, 0.0, (look.z / lookHorizontal * moveHorizontal - m.z) * 0.1);
-		}
-		m = m.multiply(0.99, 0.98, 0.99);
-		boolean brake = player.input.keyPresses.shift();
+		Input input = player.input.keyPresses;
+		boolean brake = input.backward() || input.shift();
 		if (brake != braking) {
 			braking = brake;
 			ClientPlayNetworking.send(new WebNet.WingsBrake(brake));
@@ -818,12 +868,51 @@ public final class WebSwing {
 				play(player, SoundEvents.PHANTOM_FLAP, 0.7F, 0.9F);
 			}
 		}
+		if (!brake) {
+			diving = false;
+		}
 		if (brake) {
-			// flared: the wings catch the air, bleeding speed and slowing the fall
+			// flared: the wings stop flying you along and catch the air, bleeding the speed off and slowing the fall
 			m = m.multiply(BRAKE_DRAG, 1.0, BRAKE_DRAG);
-			if (m.y < -BRAKE_SINK) {
-				m = new Vec3(m.x, Mth.lerp(BRAKE_CATCH, m.y, -BRAKE_SINK), m.z);
+			if (!diving && m.horizontalDistance() < DIVE_AT) {
+				diving = true;
+				play(player, SoundEvents.PHANTOM_FLAP, 0.6F, 0.6F);
 			}
+			if (diving) {
+				// stopped dead: tip over and drop, head-first
+				m = new Vec3(m.x * 0.5, Math.max(-DIVE_MAX_SPEED, (m.y - WINGS_GRAVITY) * 0.98), m.z * 0.5);
+			} else {
+				m = m.add(0.0, -WINGS_GRAVITY, 0.0);
+				if (m.y < -BRAKE_SINK) {
+					m = new Vec3(m.x, Mth.lerp(BRAKE_CATCH, m.y, -BRAKE_SINK), m.z);
+				}
+			}
+		} else {
+			m = m.add(0.0, WINGS_GRAVITY * (-1.0 + lift * 0.75), 0.0);
+			if (m.y < 0.0 && lookHorizontal > 0.0) {
+				// falling turns into forward speed
+				double convert = m.y * -0.1 * lift;
+				m = m.add(look.x * convert / lookHorizontal, convert, look.z * convert / lookHorizontal);
+			}
+			if (lean < 0.0F && lookHorizontal > 0.0) {
+				// pulling up turns speed into height
+				double convert = moveHorizontal * -Mth.sin(lean) * 0.04;
+				m = m.add(-look.x * convert / lookHorizontal, convert * 3.2, -look.z * convert / lookHorizontal);
+			}
+			if (lookHorizontal > 0.0) {
+				m = m.add((look.x / lookHorizontal * moveHorizontal - m.x) * 0.1, 0.0, (look.z / lookHorizontal * moveHorizontal - m.z) * 0.1);
+			}
+			m = m.multiply(0.99, 0.98, 0.99);
+		}
+		if (diving) {
+			if (m.length() > DIVE_MAX_SPEED) {
+				m = m.normalize().scale(DIVE_MAX_SPEED);
+			}
+			player.setDeltaMovement(m);
+			if (player.tickCount % 3 == 0) {
+				play(player, SoundEvents.ELYTRA_FLYING, (float)Math.min(0.5, 0.1 - m.y * 0.15), 1.0F);
+			}
+			return;
 		}
 		if (m.length() > WINGS_MAX_SPEED) {
 			m = m.normalize().scale(WINGS_MAX_SPEED);
@@ -838,6 +927,7 @@ public final class WebSwing {
 		if (wingsTicks > 0) {
 			wingsTicks = 0;
 			braking = false;
+			diving = false;
 			// no cooldown, but let go of Jump and fall another couple of blocks before they open again
 			wingsNeedRelease = true;
 			apexY = player().getY();
@@ -881,11 +971,13 @@ public final class WebSwing {
 			stuckTicks = 0;
 		}
 		lastPos = player.position();
-		if (distance < arrive || pullTicks > pull.maxTicks() || stuckTicks >= 3 || player.isInWater()) {
+		// gliding, a block zip is a boost: when its time is up (WebPower.GLIDE_ZIP_TICKS) it lets go with the kick up, wings out
+		boolean flingOut = pull.entityId() < 0 && wingsTicks > 0 && pullTicks > pull.maxTicks() && !player.isInWater();
+		if (!flingOut && (distance < arrive || pullTicks > pull.maxTicks() || stuckTicks >= 3 || player.isInWater())) {
 			finishPull(player, pull);
 			return;
 		}
-		if (pull.entityId() < 0 && distance < ZIP_RELEASE_DISTANCE && pullTicks > 2 && !player.isShiftKeyDown()) {
+		if (flingOut || pull.entityId() < 0 && distance < ZIP_RELEASE_DISTANCE && pullTicks > 2 && !player.isShiftKeyDown()) {
 			// let go early: momentum carries on, with a kick up
 			this.pull = null;
 			Vec3 v = player.getDeltaMovement();
