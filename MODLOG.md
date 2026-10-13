@@ -765,8 +765,16 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   twice, then flip the axe end over end overhead and chop down. Sora's Daggers use the Armory dagger combo (cut, flip
   and stab, backhand). New animations `sword_twirl_slash`, `sword_whirl`, `axe_flip_chop`; the vanilla files live in
   `data/minecraft/weapon_attributes`, all written by `tools/combat_animations.py`.
+- **0.9.10, Combat Arts (Kingdoms 0.6.5):** the Strength skill tree gets a second page: combo chains with Momentum and
+  Cleave, weapon finishers (Earthsplitter, Rend, Executioner), Charge and War Cry on Y, and Bladestorm. Strength now
+  levels to 25. See `docs/Skills-Plan.md`.
+- **0.9.13, Tool Station part outlines:** Andy: the empty slots show faint outlines of which part goes where, in
+  Tinkers' layout (head top right, handle bottom left, binding or second head in the middle, extra top left). An
+  empty station shows each tool's parts in turn (`GHOST_CYCLE_MS` 1.5 s); with some parts in, it cycles the tools
+  those parts could make and outlines only what's missing. The tool shown is underlined in the recipe list. Nothing
+  shows while a tool or a modifier is in. `ToolStationScreen.ghosts`.
 
-- **0.9.11, lunar events and Bad Omen grudges (Kingdoms 0.6.6):** now and then the night's moon is a Blood Moon
-  (monsters swarm and hit harder, no sleeping), a Super Blood Moon (twice over, a huge red moon), a Harvest Moon
+- **0.9.14, lunar events and Bad Omen grudges (Kingdoms 0.6.6):** now and then the night's moon is a Blood Moon
+  (zombies and skeletons climb out of the ground around you, no sleeping), a Super Blood Moon (twice over, a huge red moon), a Harvest Moon
   (crops grow all night) or a Blue Moon (luck, extra experience and gems). Bringing Bad Omen into a settlement wrecks
   your name there, and if it survives the raid it almost never forgets (`kingdoms/MODLOG.md`).

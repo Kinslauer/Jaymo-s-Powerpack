@@ -2395,13 +2395,21 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
 - (0.5.58, PR #96) Villages generate with `beard_box` terrain adaptation, and one builder of each crew levels the
   settlement's ground (`Groundwork`: pits, ramps on 2-5 high ledges, plank bridges where roads meet gaps).
 
-## 0.6.6: lunar events and Bad Omen grudges (pack 0.9.11)
+## 0.6.5: Combat Arts, Strength's second page (pack 0.9.10)
+- Strength goes to level 25 and its tree gets a second page of 8 perks (`CombatArts`, `docs/Skills-Plan.md`): combo
+  chains (blows within 2 s), Momentum and Cleave; finishers on every 4th full-strength link by weapon (Earthsplitter,
+  Rend, Executioner); Charge and War Cry on the new Y key; Bladestorm every 8th link. Area blows only hit foes.
+- Alignment counts experience only up to level 15, so Strength's longer road doesn't decide it.
+- Not playtested in game.
+
+## 0.6.6: lunar events and Bad Omen grudges (pack 0.9.14)
 - Our own lunar events (`Moons`; ideas from Lunar and Enhanced Celestials, nothing of theirs used). At dusk the
   Overworld rolls for the night (none in a world's first 4 nights); the roll is saved. Sky, fog and night light take
   the moon's colour through a layer added to the game's environment attributes (`EnvironmentAttributeSystemBuilderMixin`),
   and the moon itself is tinted and resized on the client (`MoonSkyMixin`), fading in and out over 10 seconds.
-  - Blood Moon (5% of nights): extra zombies, skeletons, spiders and creepers drawn out of the dark round each player
-    (up to 22 monsters near), monsters out that night get Strength and Speed, no one can sleep, barbarian camps raid
+  - Blood Moon (5% of nights): extra zombies and skeletons claw up out of the ground round each player (up to 22
+    monsters near; they start 2 blocks down, frozen, and climb out over 2.5 s through a spray of the ground's block,
+    and the game's own zombies and skeletons that spawn that night rise the same way; never saved half-buried), monsters out that night get Strength and Speed, no one can sleep, barbarian camps raid
     twice as readily.
   - Super Blood Moon (8% of full moons): a huge deep red moon; up to 36 monsters near, two tries a draw, Strength II.
   - Harvest Moon (30% of full moons): a big golden moon; crops, stems, berries, cocoa and saplings round each player

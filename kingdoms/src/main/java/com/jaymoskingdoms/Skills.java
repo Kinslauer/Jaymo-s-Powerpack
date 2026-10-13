@@ -57,8 +57,13 @@ import org.jspecify.annotations.Nullable;
  * word of it gets round the villages ({@link Renown}).
  */
 public final class Skills {
-	/** A level's experience: from level {@code l} to the next takes {@code XP_BASE + XP_STEP * l}; the highest level. */
+	/**
+	 * A level's experience: from level {@code l} to the next takes {@code XP_BASE + XP_STEP * l}; the highest level (Strength
+	 * goes further, {@link #STRENGTH_MAX_LEVEL}, for its Combat Arts).
+	 */
 	public static final int XP_BASE = 30, XP_STEP = 15, MAX_LEVEL = 15;
+	/** (0.6.5) Strength's highest level: the levels past {@link #MAX_LEVEL} pay for the Combat Arts ({@link CombatArts}). */
+	public static final int STRENGTH_MAX_LEVEL = 25;
 	/** Stealth experience: a pocket picked clean with something in it, an empty one, a theft nobody saw. */
 	static final int XP_LIFT = 10, XP_EMPTY = 2, XP_THEFT = 4;
 	/** A guard's pocket counts this many times over; a sleeper's this share. */
@@ -86,12 +91,15 @@ public final class Skills {
 
 	/** The three pillars of the tree. Only the open ones have perks yet. */
 	public enum Pillar {
-		SURVIVAL(true), STEALTH(true), STRENGTH(true);
+		SURVIVAL(true, MAX_LEVEL), STEALTH(true, MAX_LEVEL), STRENGTH(true, STRENGTH_MAX_LEVEL);
 
 		public final boolean open;
+		/** The pillar's highest level. */
+		public final int maxLevel;
 
-		Pillar(boolean open) {
+		Pillar(boolean open, int maxLevel) {
 			this.open = open;
+			this.maxLevel = maxLevel;
 		}
 
 		public String key() {
@@ -121,7 +129,19 @@ public final class Skills {
 		BULLDOZER(Pillar.STRENGTH, 3, 1, 0, 1, 2, HEAVY_BLOWS),
 		QUARRYMAN(Pillar.STRENGTH, 1, 1, 5, 2, 0, BRACE),
 		PACKHORSE(Pillar.STRENGTH, 1, 1, 5, 2, 2, BULLDOZER),
-		TITANS_GRIP(Pillar.STRENGTH, 1, 2, 10, 3, 1, QUARRYMAN, PACKHORSE);
+		TITANS_GRIP(Pillar.STRENGTH, 1, 2, 10, 3, 1, QUARRYMAN, PACKHORSE),
+		// (0.6.5) the Combat Arts, Strength's second page (CombatArts): chains of blows, finishers and active skills
+		MOMENTUM(Pillar.STRENGTH, 3, 1, 15, 4, 0, TITANS_GRIP),
+		CLEAVE(Pillar.STRENGTH, 3, 1, 15, 4, 2, TITANS_GRIP),
+		EARTHSPLITTER(Pillar.STRENGTH, 1, 2, 18, 5, 0, MOMENTUM),
+		EXECUTIONER(Pillar.STRENGTH, 1, 2, 18, 5, 1, MOMENTUM, CLEAVE),
+		REND(Pillar.STRENGTH, 1, 2, 18, 5, 2, CLEAVE),
+		CHARGE(Pillar.STRENGTH, 1, 2, 21, 6, 0, EARTHSPLITTER, EXECUTIONER),
+		WAR_CRY(Pillar.STRENGTH, 1, 2, 21, 6, 2, EXECUTIONER, REND),
+		BLADESTORM(Pillar.STRENGTH, 1, 3, 24, 7, 1, CHARGE, WAR_CRY);
+
+		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
+		public static final int PAGE_TIERS = 4;
 
 		public final Pillar pillar;
 		public final int maxRank, cost, minLevel, tier, column;
@@ -163,7 +183,7 @@ public final class Skills {
 		}
 
 		public int level(Pillar pillar) {
-			return Skills.level(xp(pillar));
+			return Skills.level(xp(pillar), pillar.maxLevel);
 		}
 
 		/** How many ranks are learned, in all pillars. */
@@ -275,6 +295,7 @@ public final class Skills {
 		});
 		SurvivalSkill.register();
 		StrengthSkill.register();
+		CombatArts.register();
 		Renown.register();
 		KitchenCompat.skills();
 	}
@@ -370,10 +391,10 @@ public final class Skills {
 		return sum;
 	}
 
-	/** The level {@code xp} experience reaches. */
-	public static int level(int xp) {
+	/** The level {@code xp} experience reaches, at most {@code max}. */
+	public static int level(int xp, int max) {
 		int level = 0;
-		while (level < MAX_LEVEL && xp >= total(level + 1)) {
+		while (level < max && xp >= total(level + 1)) {
 			level++;
 		}
 		return level;
@@ -394,14 +415,14 @@ public final class Skills {
 		}
 		Progress p = of(player);
 		int before = p.xp(pillar);
-		int after = Math.min(total(MAX_LEVEL), before + amount);
+		int after = Math.min(total(pillar.maxLevel), before + amount);
 		if (after == before) {
 			return;
 		}
 		Map<String, Integer> xp = new HashMap<>(p.xp());
 		xp.put(pillar.key(), after);
 		player.setAttached(PROGRESS, new Progress(Map.copyOf(xp), p.ranks()));
-		int was = level(before), now = level(after);
+		int was = level(before, pillar.maxLevel), now = level(after, pillar.maxLevel);
 		if (now > was) {
 			refresh(player);
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.skills.level", Component.translatable("skill.jaymoskingdoms." + pillar.key()), now)
@@ -439,7 +460,7 @@ public final class Skills {
 			xp *= XP_ASLEEP;
 		}
 		int amount = Math.max(1, Math.round(xp));
-		if (of(player).xp(Pillar.STEALTH) >= total(MAX_LEVEL)) {
+		if (of(player).xp(Pillar.STEALTH) >= total(Pillar.STEALTH.maxLevel)) {
 			return 0;
 		}
 		grant(player, Pillar.STEALTH, amount);

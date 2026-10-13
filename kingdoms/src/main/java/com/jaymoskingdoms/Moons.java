@@ -68,7 +68,8 @@ import org.joml.Vector3fc;
  * {@code MoonSkyMixin}).
  *
  * <ul>
- * <li>{@link Moon#BLOOD Blood Moon} (any night): monsters gather round every player and come out stronger; no one can
+ * <li>{@link Moon#BLOOD Blood Moon} (any night): zombies and skeletons claw up out of the ground round every player
+ * ({@link #rise}), monsters come out stronger; no one can
  * sleep it off; barbarian camps raid twice as readily.</li>
  * <li>{@link Moon#SUPER_BLOOD Super Blood Moon} (full moons only, rare): a huge, deep red moon; the same, twice over.</li>
  * <li>{@link Moon#HARVEST Harvest Moon} (full moons only): a big golden moon; crops, berries and saplings round every
@@ -183,6 +184,11 @@ public final class Moons {
 	static void register() {
 		PayloadTypeRegistry.clientboundPlay().register(Sync.TYPE, Sync.CODEC);
 		ServerTickEvents.END_SERVER_TICK.register(Moons::tick);
+		ServerTickEvents.END_SERVER_TICK.register(Moons::riseTick);
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+			RISING.values().forEach(Moons::free);
+			RISING.clear();
+		});
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> ServerPlayNetworking.send(handler.player, new Sync(shown.ordinal())));
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> shown = Moon.NONE);
 		ServerEntityEvents.ENTITY_LOAD.register(Moons::loaded);
@@ -321,8 +327,8 @@ public final class Moons {
 
 	// ---- blood moons ----------------------------------------------------------------------------------------------------
 
-	private static final List<EntityType<? extends Mob>> BLOOD_MOBS = List.of(EntityTypes.ZOMBIE, EntityTypes.ZOMBIE, EntityTypes.SKELETON,
-		EntityTypes.SKELETON, EntityTypes.SPIDER, EntityTypes.CREEPER);
+	/** (0.6.6) Under a blood moon the dead come up out of the ground: zombies and skeletons only. */
+	private static final List<EntityType<? extends Mob>> BLOOD_MOBS = List.of(EntityTypes.ZOMBIE, EntityTypes.SKELETON);
 
 	/** A monster drawn out of the dark round {@code player}, if there's room and a dark place for it. */
 	private static void bloodSpawn(ServerLevel level, ServerPlayer player, Moon moon) {
@@ -355,7 +361,14 @@ public final class Moons {
 				mob.discard();
 				continue;
 			}
+			if (!sturdyGround(level, at)) {
+				mob.discard();
+				continue;
+			}
 			mob.finalizeSpawn(level, level.getCurrentDifficultyAt(at), EntitySpawnReason.NATURAL, null);
+			if (!mob.isPassenger()) {
+				rise(level, mob);
+			}
 			level.addFreshEntityWithPassengers(mob);
 		}
 	}
@@ -369,6 +382,92 @@ public final class Moons {
 		int ticks = (int)Math.min(BLOOD_BUFF_TICKS, Math.max(200, NIGHT_END - t + 600));
 		monster.addEffect(new MobEffectInstance(MobEffects.STRENGTH, ticks, shown == Moon.SUPER_BLOOD ? SUPER_STRENGTH : BLOOD_STRENGTH, true, false));
 		monster.addEffect(new MobEffectInstance(MobEffects.SPEED, ticks, BLOOD_SPEED, true, false));
+		// the game's own zombies and skeletons climb out of the ground as well
+		if ((entity.getType() == EntityTypes.ZOMBIE || entity.getType() == EntityTypes.SKELETON) && !RISING.containsKey(entity.getUUID())
+			&& !entity.isPassenger() && !entity.isVehicle() && sturdyGround(level, entity.blockPosition())) {
+			rise(level, (Mob)entity);
+		}
+	}
+
+	// ---- (0.6.6) the dead rising ----------------------------------------------------------------------------------------
+
+	/** How deep they start (blocks) and how long they take to climb out (ticks). */
+	static final double RISE_DEPTH = 2.0;
+	static final int RISE_TICKS = 50;
+
+	/** One climbing out: where it ends up standing, the ground it breaks through, how far along it is. */
+	private static final class Rising {
+		final Mob mob;
+		final double x, top, z;
+		final BlockState ground;
+		int ticks;
+
+		Rising(Mob mob, BlockState ground) {
+			this.mob = mob;
+			this.x = mob.getX();
+			this.top = mob.getY();
+			this.z = mob.getZ();
+			this.ground = ground;
+		}
+	}
+
+	private static final java.util.Map<java.util.UUID, Rising> RISING = new java.util.LinkedHashMap<>();
+
+	private static boolean sturdyGround(ServerLevel level, BlockPos feet) {
+		BlockPos below = feet.below();
+		return level.getBlockState(below).isFaceSturdy(level, below, net.minecraft.core.Direction.UP);
+	}
+
+	/** {@code mob} starts below the ground under it, frozen, and climbs up through it ({@link #riseTick}). */
+	private static void rise(ServerLevel level, Mob mob) {
+		Rising r = new Rising(mob, level.getBlockState(mob.blockPosition().below()));
+		RISING.put(mob.getUUID(), r);
+		mob.setNoAi(true);
+		mob.setNoGravity(true);
+		mob.noPhysics = true;
+		mob.setPos(r.x, r.top - RISE_DEPTH, r.z);
+		level.playSound(null, r.x, r.top, r.z, SoundEvents.ROOTED_DIRT_BREAK, SoundSource.HOSTILE, 1.0F, 0.6F);
+	}
+
+	private static void riseTick(MinecraftServer server) {
+		if (RISING.isEmpty()) {
+			return;
+		}
+		for (var it = RISING.values().iterator(); it.hasNext();) {
+			Rising r = it.next();
+			if (r.mob.isRemoved() || !(r.mob.level() instanceof ServerLevel level)) {
+				it.remove();
+				continue;
+			}
+			r.ticks++;
+			float t = Math.min(1.0F, r.ticks / (float)RISE_TICKS);
+			// quick at first, slow as the shoulders come free
+			double eased = 1.0 - (1.0 - t) * (1.0 - t);
+			r.mob.setPos(r.x, r.top - RISE_DEPTH * (1.0 - eased), r.z);
+			r.mob.setDeltaMovement(Vec3.ZERO);
+			if (r.ticks % 2 == 0) {
+				level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK, r.ground),
+					r.x, r.top + 0.1, r.z, 6, 0.3, 0.05, 0.3, 0.1);
+			}
+			if (r.ticks % 12 == 0) {
+				level.playSound(null, r.x, r.top, r.z, r.ticks < RISE_TICKS / 2 ? SoundEvents.GRAVEL_BREAK : SoundEvents.ROOTED_DIRT_BREAK,
+					SoundSource.HOSTILE, 0.8F, 0.7F + level.getRandom().nextFloat() * 0.2F);
+			}
+			if (r.ticks >= RISE_TICKS) {
+				it.remove();
+				free(r);
+				level.playSound(null, r.x, r.top, r.z, r.mob.getType() == EntityTypes.SKELETON ? SoundEvents.SKELETON_AMBIENT : SoundEvents.ZOMBIE_AMBIENT,
+					SoundSource.HOSTILE, 1.0F, 0.8F);
+			}
+		}
+	}
+
+	/** Out of the ground (or the server's stopping: never saved half-buried and frozen). */
+	private static void free(Rising r) {
+		r.mob.setPos(r.x, r.top, r.z);
+		r.mob.setNoAi(false);
+		r.mob.setNoGravity(false);
+		r.mob.noPhysics = false;
 	}
 
 	// ---- harvest moons --------------------------------------------------------------------------------------------------

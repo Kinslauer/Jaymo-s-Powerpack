@@ -27,7 +27,7 @@ import net.minecraft.world.entity.monster.Enemy;
  *
  * <p>Perks: Heavy Blows (more melee damage), Brace (less knockback taken), Bulldozer (more knockback dealt), Quarryman
  * (break blocks faster), Packhorse (sprinting, mining and fighting tire you less) and Titan's Grip (a full-strength blow
- * may stagger what it hits).
+ * may stagger what it hits). (0.6.5) Past Titan's Grip, the Combat Arts: {@link CombatArts}.
  */
 public final class StrengthSkill {
 	/** Strength experience: a melee blow landed (at most this often, ticks), a monster felled, stone or wood broken (this chance). */
