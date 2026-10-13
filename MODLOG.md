@@ -597,3 +597,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (the same file Build Modpack uses, checked by SHA-1, never shipped by us) and switches it on. Its marker is now
   `config/jaymospowers-medieval-villagers-v2`, so installs where it was missing or got dropped get it once more. It
   retextures MCA's clothes by path, so villagers already in the world change too; nothing of ours overrides it.
+- **0.8.107, Alex's Mobs out:** Alex's Mobs and its library Citadel leave the pack (manifest, server, profile). With
+  Iris shaders on, their models threw black slabs and streaky lines across the screen that changed as you looked up
+  and down; without them the artifacts stop. Build Modpack moves both jars out of your CurseForge profile into
+  `removed-mods` (matched by mod id, `removedIdsFromProfile`), and the server's mods folder drops them on its next sync.
+  Kitchen's Alex's Mobs fish stay in its `fish_corpses` tag as optional entries, so nothing breaks without the mod.
+  Worlds that had Alex's Mobs creatures lose them (and their items) on load.
