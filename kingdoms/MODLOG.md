@@ -2361,4 +2361,20 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   "Never mind". A question you walked off on is asked again after a pardon (walking off a second time costs no more
   reputation); a quest giver opens their quests. The answer screen has "Could you tell me more?" too, which adds the
   follow-up to the question shown. A grey hint ("Missed that? Right-click ...") follows news, gifts and greetings.
+- Guards halt a stranger once in three days per settlement (was daily, `HALT_TICKS`), and any guard comes over to a
+  player at most once in 8 minutes (`GUARD_GAP`, except to accuse). Four new guard encounters, weighted and worded by
+  the king's temper (a fief takes its liege's; a village with no ruler has its own plain lines), each with three answers:
+  - search your pack: allow (stolen goods you're suspected of turn up: a fine; clean: good name, though a tyrant's man
+    takes an emerald for his trouble), refuse (tyrant and paranoid guards arrest you), or bribe 2 emeralds (tyrant,
+    reveler and village guards take it and forget what they suspected; noble and warlord guards are insulted; a
+    paranoid one arrests you).
+  - a toll (tyrant 3, warlord and paranoid 2, others 1 emerald, to the treasury): pay (the reveler's feast toll gives
+    sweets back), haggle (to half, odds by temper; a tyrant's man takes it all and slaps you), or refuse (a tyrant's
+    men arrest you).
+  - a bout for 2 emeralds: odds from armour and attack damage (15-85%); a warlord's men think less of a refusal, and
+    insulting a tyrant's, warlord's or paranoid king's guard makes him draw on you.
+  - a loyalty test: praise (a paranoid king's guard may take it for flattery), keep quiet, or speak ill (tyrant: slap
+    and arrest; paranoid: arrest; warlord: a lot of good name lost).
+  Arrest (`Theft.arrest`) makes you wanted for a minute and the guards nearby come for you. Walking off on a search or
+  a toll counts as refusing it.
 - Not playtested in game.

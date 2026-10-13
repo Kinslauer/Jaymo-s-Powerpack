@@ -714,3 +714,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.9.2, beg their pardon (Kingdoms 0.6.2):** when someone runs up and you miss what they said, right-click them
   within 45 seconds to beg their pardon (they say it again, and a question you walked off on is put to you again) or ask
   them to tell you more. The answer screen has "Could you tell me more?" too.
+  Guards halt strangers far less often, and have four new encounters shaped by their king's temper: a pack search, a
+  toll, a bout for a wager and a loyalty test, where a wrong answer can cost emeralds, good name, or get you arrested.
