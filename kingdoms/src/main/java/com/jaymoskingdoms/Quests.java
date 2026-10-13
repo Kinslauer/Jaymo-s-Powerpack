@@ -169,7 +169,7 @@ public final class Quests {
 		return null;
 	}
 
-	private static void put(ServerPlayer player, Quest quest) {
+	static void put(ServerPlayer player, Quest quest) {
 		List<Quest> list = new ArrayList<>(log(player));
 		list.replaceAll(q -> q.id().equals(quest.id()) ? quest : q);
 		player.setAttached(LOG, List.copyOf(list));
@@ -186,6 +186,7 @@ public final class Quests {
 		return switch (q.kind()) {
 			case Quest.GATHER -> count(player, item(q.objective().target())) >= q.objective().count();
 			case Quest.FETCH -> find(player, q.id()) >= 0;
+			case Quest.BREAK_IN, Quest.STUD -> Stables.questHorse(player, q) != null;
 			default -> q.counted();
 		};
 	}
@@ -392,6 +393,9 @@ public final class Quests {
 			if (slot >= 0) {
 				player.getInventory().getItem(slot).shrink(1);
 			}
+		} else if (q.kind() == Quest.BREAK_IN || q.kind() == Quest.STUD) {
+			// (0.5.47) the horse goes to the giver's stable
+			Stables.questTurnIn(level, player, giver, f, q);
 		}
 		remove(player, q.id());
 		for (ItemStack stack : rewards(level, q)) {
@@ -445,7 +449,7 @@ public final class Quests {
 	static int finishAll(ServerPlayer player) {
 		int n = 0;
 		for (Quest q : log(player)) {
-			if (q.kind() != Quest.GATHER && q.kind() != Quest.FETCH && !q.counted()) {
+			if (q.kind() != Quest.GATHER && q.kind() != Quest.FETCH && q.kind() != Quest.BREAK_IN && q.kind() != Quest.STUD && !q.counted()) {
 				put(player, q.withProgress(q.objective().count()));
 				n++;
 			}
@@ -896,7 +900,8 @@ public final class Quests {
 		return switch (q.kind()) {
 			// (who a letter's for and where; whose chief, or whose king)
 			case Quest.DELIVER -> Component.translatable(key, addressee(q), q.objective().place());
-			case Quest.CHIEF, Quest.WARBAND -> Component.translatable(key, q.objective().place());
+			case Quest.CHIEF, Quest.WARBAND, Quest.RACE -> Component.translatable(key, q.objective().place());
+			case Quest.STUD -> Component.translatable(key, breedName(q));
 			// (the reasons differ by the king's temper, the title only by how it's done)
 			case Quest.REGICIDE -> Component.translatable("quest.jaymoskingdoms.king.regicide." + q.objective().otherName() + ".title", q.objective().place());
 			default -> Component.translatable(key);
@@ -916,6 +921,11 @@ public final class Quests {
 	private static Component foes(String target) {
 		String path = target.startsWith("*") ? target.substring(1) : target.substring(target.indexOf(':') + 1);
 		return Component.translatable("quest.jaymoskingdoms.foes." + path);
+	}
+
+	/** (0.5.47) A stud quest's breed. */
+	private static Component breedName(Quest q) {
+		return Component.translatable(com.jaymoskingdoms.equestrian.Breed.byId(q.objective().target()).key());
 	}
 
 	private static Component itemName(String id) {
@@ -952,6 +962,9 @@ public final class Quests {
 			case Quest.CHAMPION -> Component.translatable(key, Component.translatable("foe.jaymoskingdoms." + o.otherName()), ruin(o.target()), x(q), z(q));
 			case Quest.CHIEF -> Component.translatable(key, o.place(), x(q), z(q));
 			case Quest.REGICIDE, Quest.WARBAND -> Component.translatable(key, o.place(), x(q), z(q));
+			case Quest.BREAK_IN -> Component.translatable(key, o.place());
+			case Quest.STUD -> Component.translatable(key, breedName(q), o.count());
+			case Quest.RACE -> Component.translatable(key, o.place(), Stables.raceSeconds(q), x(q), z(q));
 			default -> Component.empty();
 		};
 	}
@@ -974,6 +987,9 @@ public final class Quests {
 			case Quest.CHIEF -> Component.translatable("quest.jaymoskingdoms.objective.chief", o.place(), x(q), z(q));
 			case Quest.REGICIDE -> Component.translatable("quest.jaymoskingdoms.objective.regicide", o.place(), x(q), z(q));
 			case Quest.WARBAND -> Component.translatable("quest.jaymoskingdoms.objective.warband", realmName(level, q.giver().faction()), o.place());
+			case Quest.BREAK_IN -> Component.translatable("quest.jaymoskingdoms.objective.break_in", q.giver().name());
+			case Quest.STUD -> Component.translatable("quest.jaymoskingdoms.objective.stud", breedName(q), o.count(), q.giver().name());
+			case Quest.RACE -> Component.translatable("quest.jaymoskingdoms.objective.race", o.place(), Stables.raceLeft(level, q), x(q), z(q));
 			default -> Component.empty();
 		};
 	}

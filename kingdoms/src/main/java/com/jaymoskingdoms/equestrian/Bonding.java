@@ -446,7 +446,7 @@ public final class Bonding {
 		}
 	}
 
-	static Component name(AbstractHorse horse) {
+	public static Component name(AbstractHorse horse) {
 		if (horse.hasCustomName()) {
 			return horse.getCustomName();
 		}
@@ -598,7 +598,9 @@ public final class Bonding {
 		boolean shy = false;
 		double bestDist = Double.MAX_VALUE;
 		for (AbstractHorse horse : level.getEntitiesOfClass(AbstractHorse.class, player.getBoundingBox().inflate(WHISTLE_RANGE),
-			h -> Equestrian.covered(h) && h.isAlive() && h.isTamed() && owner(h, player) && !h.isVehicle())) {
+			h -> Equestrian.covered(h) && h.isAlive() && h.isTamed() && owner(h, player) && !h.isVehicle()
+				// (0.5.47) a boarded horse stays in its stall till it's paid for
+				&& !com.jaymoskingdoms.Stables.boarded(h))) {
 			if (trust(horse, player) < WHISTLE_TRUST || horse.isLeashed()) {
 				shy = true;
 				continue;

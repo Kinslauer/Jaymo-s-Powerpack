@@ -5,6 +5,24 @@ of each arc, and get a boost if you let go on the upswing. You keep that speed i
 fire again mid-air to chain swings. Three utility webs round out the kit. Accent colour `0xE0303A`; the icon is a
 cobweb.
 
+## Slower momentum (0.8.93)
+Speed has to be built. A swing chain starts capped at 0.55 b/t (was 0.8) and the cap only climbs, 0.003 a tick (was
+0.011 regardless), while you're on a web moving at 85% of it or more: about half a minute of unbroken, well-driven
+swinging to the 2.6 top speed. A clean release (quality over 0.6) adds up to 0.08 to the cap. Jump thrust on the web
+is halved (0.035) and the forward pump too (0.015). Landing still starts the chain over. Tuning: top of `WebSwing`.
+- **Jump on a web:** holding it (still reels in) braces you: no fall damage while you hold it on a web (server reads
+  the client's input). Letting it go (after 3+ ticks) lets go of the webs and springs you up by 0.2 + 0.45 × your
+  speed, at most 1.4 b/t: the faster the swing, the higher the jump. Web keys must be pressed again after.
+- **Airbrake and freedive (S while gliding):** holding **S** (Sneak still works) flares the wings: the glide stops
+  carrying you, forward speed bleeds off at `BRAKE_DRAG` 0.94 a tick (about 3 s from top speed) and the fall eases to
+  `BRAKE_SINK` 0.2. Once you're nearly stopped (`DIVE_AT` 0.06 b/t) you tip head-first into a Wind-style freedive with
+  the wings still out but swept back, falling up to `DIVE_MAX_SPEED` 2.5. Let go of S and the glide takes over again,
+  so pitching up turns the dive's speed forward. Landing from a fast dive hurts. Others see it from the brake flag and
+  your fall speed (`WebArms` `DIVE_*`).
+- **Zip while gliding** is a boost: the wings stay out and the web tows you toward where you aimed for
+  `GLIDE_ZIP_TICKS` 30 (1.5 s), then lets go with the usual kick up (or sooner, near the target) and the line falls
+  limp. You carry on gliding with the speed and height.
+
 ## Controls
 
 | Key (default) | Ability | Cooldown |

@@ -83,7 +83,7 @@ final class Raids {
 	static final String TASK = "raid";
 	/** An illager war party: pillagers to each vindicator. */
 	static final int PILLAGERS_PER_VINDICATOR = 2;
-	/** (0.5.45) An orc war band: every this many, one is a ranger. */
+	/** (0.5.47) An orc war band: every this many, one is a ranger. */
 	static final int ORCS_PER_RANGER = 3;
 
 	enum Phase {
@@ -246,13 +246,15 @@ final class Raids {
 				continue;
 			}
 			raider.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
-			// (0.5.45) an orc war band: grunts, every third one a ranger
+			// (0.5.47) an orc war band: grunts, every third one a ranger
 			int role = !orcs ? Folk.BARBARIAN : i % ORCS_PER_RANGER == ORCS_PER_RANGER - 1 ? Orcs.RANGER : Orcs.GRUNT;
 			raider.setup(role, camp, target.seat(), RAID_HOME_RADIUS);
 			level.addFreshEntity(raider);
 			// (after it's added: its load mustn't take it for a stray)
 			raider.setTask(TASK);
 			raid.party.add(raider.getUUID());
+			// (0.5.47) some ride steppe ponies
+			Stables.pony(level, raider, camp, i);
 		}
 		tell(level, target.seat(), Component.translatable(illagers ? "message.jaymoskingdoms.raid.announce.illager"
 				: orcs ? "message.jaymoskingdoms.raid.announce.orc" : "message.jaymoskingdoms.raid.announce",
