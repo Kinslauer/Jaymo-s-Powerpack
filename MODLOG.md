@@ -537,7 +537,13 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.8.90, Your own blocks are no crime:** ships Jaymo's Kingdoms 0.5.46: breaking a block you placed yourself in a
   settlement (a chest, bed, crafting table, crops you planted), or opening a chest you placed there, no longer makes
   its people take you for a criminal. Blocks the settlement built still count.
-- **0.8.92, Iron golems burn corpses:** ships Jaymo's Kingdoms 0.5.48 and Jaymo's Kitchen 0.4.31: every iron golem
+- **0.8.92, Jaymo's Equestrian, stage 3 (the stables at work):** ships Jaymo's Kingdoms 0.5.47 (see `kingdoms/MODLOG.md`):
+  stables get a stablehand (boards your horse for 4 emeralds a week, sells horses by land and wealth, buys them back)
+  and a farrier (shoes horses, sells tack, the best only in wealthy kingdoms); realms with stables field better
+  cavalry; a fallen knight's destrier or a raider's steppe pony goes wild for you to break in; rifling a caravan
+  horse's saddlebags is theft; and stablehands and kings give horse quests (break one in, bring a stud, ride to
+  another town against the clock). Stablehands and farriers have their own screen: right-click them.
+- **0.8.93, Iron golems burn corpses:** ships Jaymo's Kingdoms 0.5.48 and Jaymo's Kitchen 0.4.31: every iron golem
   (village, kingdom or home-built) picks up corpses lying near it and carries them in its arms to the nearest fire pit,
   lit campfire or lava, then drops them in. Monsters at once, other corpses after 5 minutes untouched; never players'
   or golems' corpses. Golems never light fires, and fire pits on netherrack are no longer beaten out.
