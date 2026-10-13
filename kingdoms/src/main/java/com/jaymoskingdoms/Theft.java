@@ -122,7 +122,9 @@ public final class Theft {
 		JOB_BLOCK(Weight.MEDIUM, "vandal"), CHEST(Weight.MEDIUM, "theft"), STOREHOUSE(Weight.HEAVY, "theft"), BELL(Weight.HEAVY, "vandal"),
 		ARSON(Weight.MEDIUM, "arson"), PICKPOCKET(Weight.MEDIUM, "pickpocket"), SORCERY(Weight.MEDIUM, "sorcery"), LIVESTOCK(Weight.LIGHT, "livestock"), FOLK(Weight.MEDIUM, "murder"), VILLAGER(Weight.HEAVY, "murder"), GOLEM(Weight.HEAVY, "murder"),
 		/** (0.5.47) a caravan horse's saddlebags rifled. */
-		SADDLEBAG(Weight.MEDIUM, "theft");
+		SADDLEBAG(Weight.MEDIUM, "theft"),
+		/** (0.6.9) lingering in someone's house ({@link Trespass}). */
+		TRESPASS(Weight.LIGHT, "trespass");
 
 		final Weight weight;
 		final String cry;
@@ -259,7 +261,7 @@ public final class Theft {
 	}
 
 	/** {@code player} answers to no one here: creative, or of rank enough in the faction to take from its stores. */
-	private static boolean exempt(ServerPlayer player, Faction f) {
+	static boolean exempt(ServerPlayer player, Faction f) {
 		return player.isSpectator() || Storage.mayTake(player, f);
 	}
 

@@ -150,6 +150,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		Journal.register();
 		// 0.5.39: the townsfolk come over to you: questions, quests, requests, bargains, news
 		Approaches.register();
+		// (0.6.9) tag, little ones, daily routines, suspicion in their homes
+		Tag.register();
+		Families.register();
+		Routines.register();
+		Trespass.register();
 		// 0.5.37: sorcery: camps' shamans and necromancers, courts' wizards, the risen dead, spell scrolls (and the thralls' attachment)
 		Arcana.register();
 		LOGGER.debug("thrall attachment: {}", Thralls.TAG);

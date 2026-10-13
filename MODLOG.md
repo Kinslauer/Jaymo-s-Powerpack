@@ -777,13 +777,18 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (Kingdoms' and Naturalist's predators too) tear into bodies with a brutal worrying bite, the meat spills on the ground
   and they eat it from there. Players' kills are left for the player. See Kitchen's MODLOG.
 
-- **0.9.20, Darktide and Wind fixes (Kitchen 0.4.37):** a Darktide shade that dies (burned by the sun or killed again)
+- **0.9.21, Darktide and Wind fixes (Kitchen 0.4.37):** a Darktide shade that dies (burned by the sun or killed again)
   leaves no body; risen shadows never target their master or each other (`DarktideRisenTargetMixin`, brain targets
   cleared each tick), though their arrows and explosions still hurt you; up to 15 shadows stored. Riptide Dash has no
   cooldown when it lands, 5 s when it misses, and a flurry 1 minute. Every
   Wind ability blows out fire it sweeps (`WindDouse`: fire blocks and burning things, the caster too; a Stormbound
   bolt still lights what it strikes). A player carried in Wind flight can slip from the wind's arms, each second at a
   chance set by mastery (3% with one ability, never once all are mastered, `WindFumble.CARRY_DROP_CHANCE_PER_SECOND`).
+
+- **0.9.20, villagers' days (Kingdoms 0.6.9):** tag with a child is a real game (they run, you catch them, they
+  chase you back); settlements have toddlers again; villagers keep daily routines (water, gardens, market, chats,
+  campfires, housework, reading, sweeping, lunch, shopping, animals, eyeing strangers, dancing; kids play chase, hide
+  and seek, skip stones and tag along); and they grow suspicious of you in their homes, up to calling it trespass.
 
 - **0.9.19, Andy's power fixes (Kitchen 0.4.36):** falling corpses are caught by an empty hand from up to 2 blocks
   off, and no longer get stuck in blocks tumbling forever. Every web that sticks gives one tug: press Jump in midair and
