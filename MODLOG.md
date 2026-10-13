@@ -655,7 +655,13 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   covers vanilla armour, Kingdoms' armoury sets (their layer reads the same render state), carved pumpkins and mob
   heads; an elytra still spreads when the chest is hidden. Hidden pieces come off the render state last
   (`HiddenArmorAvatarRendererMixin`, after the symbiote's engulfing), in `core/HiddenArmor` + `client/HiddenArmorClient`.
-- **0.8.118, hermit wizards on floating islands (Kingdoms 0.5.60):** the villager living on Moog's floating island is
+- **0.8.118, Chunky out of the pack:** on the Deck a new world hung for good at "Selecting global world spawn" (no
+  error; every generation thread idle, the server thread waiting on the spawn chunk). Bisected on a fresh test server
+  (E:\fresh-test, the pack's mods, a new world each time): Distant Horizons alone, and the whole pack without Distant
+  Horizons, both start; Distant Horizons with Chunky alone hangs every time (both hook the server's chunk loading).
+  The whole pack without Chunky started a new world (Done in 40 s). Chunky had no task queued, so nothing is lost;
+  Build Modpack moves it out of the CurseForge profile. Existing worlds were never affected (their spawn is generated).
+- **0.8.119, hermit wizards on floating islands (Kingdoms 0.5.60):** the villager living on Moog's floating island is
   now a hermit wizard with a reason to be there: a stranded scholar, a mage hiding from the courts, the warden whose
   spell keeps the island up, or an exiled court wizard. They tell you when you first come near each day, give you a
   spell scroll for the climb, talk more about it when you chat with them, and can reset your skill tree like a court
