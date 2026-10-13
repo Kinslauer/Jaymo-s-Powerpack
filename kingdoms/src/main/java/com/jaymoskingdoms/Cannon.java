@@ -29,7 +29,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.63) A field cannon of one of the richest kingdoms', set on a wall, a tower or beside the gate ({@link Cannons}):
+ * (0.5.64) A field cannon of one of the richest kingdoms', set on a wall, a tower or beside the gate ({@link Cannons}):
  * a wooden carriage on two wheels and an iron barrel. One of the kingdom's archers sits on its trail as its gunner; the
  * cannon swings round to his foe, raises its barrel for the distance and fires a {@link Cannonball} every so often,
  * from {@link #NEAREST} to {@link #FURTHEST} blocks (a foe closer than that gets his arrows). It doesn't move, nor block

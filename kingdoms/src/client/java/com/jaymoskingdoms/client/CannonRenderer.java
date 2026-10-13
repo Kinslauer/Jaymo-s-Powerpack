@@ -22,7 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
 /**
- * (0.5.63) A field cannon drawn from blocks, scaled down and put together like the wagons: a dark oak carriage (two
+ * (0.5.64) A field cannon drawn from blocks, scaled down and put together like the wagons: a dark oak carriage (two
  * cheeks, an axle, a trail on the ground behind with a cushion in the kingdom's colour for its gunner), two spoked
  * wheels with iron hubs, and a cast-iron barrel (two squares crossed, so it reads as round) with copper bands, raised
  * to its mark and kicking back when it fires. Original, no other mod's model.

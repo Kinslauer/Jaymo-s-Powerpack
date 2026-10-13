@@ -31,7 +31,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.63) A {@link Cannon}'s shot: a heavy iron ball that arcs to its mark and bursts on whatever it meets, hurting
+ * (0.5.64) A {@link Cannon}'s shot: a heavy iron ball that arcs to its mark and bursts on whatever it meets, hurting
  * everything within {@link #BURST_RADIUS} and throwing it back, but never its gunner's own side (nor, from a defender,
  * the villagers and golems about them: {@link Javelins#harms}). Blocks are left whole, so a kingdom doesn't knock down
  * its own walls. Drawn as Balkon's WeaponMod cannonball when that's loaded, a fire charge otherwise. Never saved.
