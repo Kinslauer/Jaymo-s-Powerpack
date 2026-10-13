@@ -1,6 +1,10 @@
 package com.jaymospowers.power.arsenal.entity;
 
+import com.jaymospowers.core.Debris;
+import com.jaymospowers.power.arsenal.ArsenalDamocles;
 import com.jaymospowers.power.arsenal.ArsenalVoid;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.minecraft.core.BlockPos;
 import java.util.Optional;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -23,6 +27,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -32,7 +37,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * A Cannon Battery's shot: a heavy ball that flies fast and drops a little, and bursts on whatever it meets, hurting
- * everything close (not its owner) and throwing it back. Blocks are left alone. Drawn as Balkon's WeaponMod cannonball
+ * everything close (not its owner) and throwing it back. Blocks are left alone, except by the Void Arsenal's: each of
+ * those breaks up to {@link #VOID_BLOCKS} blocks where it lands. Drawn as Balkon's WeaponMod cannonball
  * when that's in the pack, a fire charge otherwise. Server-driven; never saved.
  */
 public class RiftCannonball extends Projectile implements ItemSupplier {
@@ -41,6 +47,10 @@ public class RiftCannonball extends Projectile implements ItemSupplier {
 	/** The burst: full damage on a direct hit, falling off to nothing at this radius; and how hard it shoves. */
 	public static final double BURST_RADIUS = 2.5;
 	public static final double KNOCKBACK = 0.8;
+	/** A void ball breaks up to this many blocks (nearest the impact first), within this reach, up to this hard. */
+	public static final int VOID_BLOCKS = 3;
+	public static final double VOID_BREAK_REACH = 1.6;
+	public static final float VOID_MAX_HARDNESS = 5.0F;
 
 	private static final EntityDataAccessor<Boolean> VOID = SynchedEntityData.defineId(RiftCannonball.class, EntityDataSerializers.BOOLEAN);
 	private static @Nullable Item look;
@@ -139,6 +149,9 @@ public class RiftCannonball extends Projectile implements ItemSupplier {
 				victim.syncVelocity = true;
 			}
 		}
+		if (this.isVoid()) {
+			this.breakBlocks(level, player, at);
+		}
 		level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y, at.z, 10, 0.4, 0.4, 0.4, 0.04);
 		if (this.isVoid()) {
@@ -146,6 +159,36 @@ public class RiftCannonball extends Projectile implements ItemSupplier {
 		}
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.0F, 1.2F);
 		this.discard();
+	}
+
+	/** The void ball's bite: the nearest few blocks to {@code at} it can break, where its owner may build. */
+	private void breakBlocks(ServerLevel level, ServerPlayer player, Vec3 at) {
+		BlockPos center = BlockPos.containing(at);
+		java.util.List<BlockPos> near = new java.util.ArrayList<>();
+		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-2, -2, -2), center.offset(2, 2, 2))) {
+			if (pos.distToCenterSqr(at) <= VOID_BREAK_REACH * VOID_BREAK_REACH) {
+				near.add(pos.immutable());
+			}
+		}
+		near.sort(java.util.Comparator.comparingDouble(pos -> pos.distToCenterSqr(at)));
+		int broken = 0;
+		for (BlockPos pos : near) {
+			if (broken >= VOID_BLOCKS) {
+				return;
+			}
+			BlockState state = level.getBlockState(pos);
+			if (state.isAir() || !state.getFluidState().isEmpty() || state.hasBlockEntity()) {
+				continue;
+			}
+			float hardness = state.getDestroySpeed(level, pos);
+			if (hardness < 0.0F || hardness > VOID_MAX_HARDNESS || !ArsenalDamocles.mayBreak(player, level, pos, state)) {
+				continue;
+			}
+			level.destroyBlock(pos, true, player);
+			PlayerBlockBreakEvents.AFTER.invoker().afterBlockBreak(level, player, pos, state, null);
+			Debris.puff(level, pos, state, 1.0F);
+			broken++;
+		}
 	}
 
 	@Override
