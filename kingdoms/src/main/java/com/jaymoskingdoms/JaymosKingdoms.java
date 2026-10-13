@@ -63,6 +63,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Armory.register();
 		Buildings.register();
 		Construction.register();
+		// 0.5.58: a builder of every crew levels the settlement's ground (pits, ledges, gaps) before anything else
+		Groundwork.register();
 		// 0.5.11: lost buildings put up again; the settlement's people answer fires
 		Rebuilds.register();
 		Firefighting.register();
