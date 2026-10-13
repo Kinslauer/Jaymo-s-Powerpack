@@ -132,7 +132,7 @@ public final class WebSwing {
 	static final double ZIP_STEER = 0.55;
 	/**
 	 * A block zip lets go this far short of the anchor and keeps its speed, with a kick upward, so it flings you up and
-	 * over (gaining height) instead of stopping dead. Hold Sneak to ride it all the way in and perch as before (a zip while gliding always does).
+	 * over (gaining height) instead of stopping dead. Hold Sneak to ride it all the way in and perch as before.
 	 */
 	static final double ZIP_RELEASE_DISTANCE = 4.0;
 	static final double ZIP_RELEASE_LIFT = 0.55;
@@ -971,12 +971,13 @@ public final class WebSwing {
 			stuckTicks = 0;
 		}
 		lastPos = player.position();
-		if (distance < arrive || pullTicks > pull.maxTicks() || stuckTicks >= 3 || player.isInWater()) {
+		// gliding, a block zip that runs out of time still lets go with the kick up, wings out, instead of stopping dead
+		boolean flingOut = pull.entityId() < 0 && wingsTicks > 0 && pullTicks > pull.maxTicks() && !player.isInWater();
+		if (!flingOut && (distance < arrive || pullTicks > pull.maxTicks() || stuckTicks >= 3 || player.isInWater())) {
 			finishPull(player, pull);
 			return;
 		}
-		// (gliding, it never lets go early: the web tows you all the way in)
-		if (pull.entityId() < 0 && distance < ZIP_RELEASE_DISTANCE && pullTicks > 2 && !player.isShiftKeyDown() && wingsTicks == 0) {
+		if (flingOut || pull.entityId() < 0 && distance < ZIP_RELEASE_DISTANCE && pullTicks > 2 && !player.isShiftKeyDown()) {
 			// let go early: momentum carries on, with a kick up
 			this.pull = null;
 			Vec3 v = player.getDeltaMovement();

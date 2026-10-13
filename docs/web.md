@@ -19,8 +19,9 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   the wings still out but swept back, falling up to `DIVE_MAX_SPEED` 2.5. Let go of S and the glide takes over again,
   so pitching up turns the dive's speed forward. Landing from a fast dive hurts. Others see it from the brake flag and
   your fall speed (`WebArms` `DIVE_*`).
-- **Zip while gliding** tows you all the way to the target with the wings out: no early fling at 4 blocks, and the
-  server times its line at `GLIDE_ZIP_PACE` 1.3 b/t (+20 ticks) so the web doesn't vanish mid-pull.
+- **Zip while gliding** keeps the wings out and pulls you the whole way: the server times its line at
+  `GLIDE_ZIP_PACE` 1.3 b/t (+20 ticks) so the web doesn't drop off mid-pull, and it lets go early with the kick up as
+  usual (or, if it ever runs out of time, lets go with that same kick rather than stopping dead).
 
 ## Controls
 
