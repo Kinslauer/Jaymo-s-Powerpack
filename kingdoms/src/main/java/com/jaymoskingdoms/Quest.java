@@ -24,6 +24,12 @@ public record Quest(String id, int kind, String template, Giver giver, Objective
 	 * pos its seat, otherName the seconds allowed).
 	 */
 	public static final int BREAK_IN = 8, STUD = 9, RACE = 10;
+	/**
+	 * (0.5.56) Beast quests ({@link Sightings}): slay the monster of legend seen near pos (target: its entity id, other: it
+	 * once it's come for you, otherName: its name); last a night out near pos where it was seen (spawned: the night's
+	 * begun).
+	 */
+	public static final int HUNT = 11, SURVIVE = 12;
 
 	/** Who asked: their UUID and name, their settlement, whether it's its king, and their trade (a profession's path). */
 	public record Giver(UUID uuid, String name, int faction, boolean king, String job) {

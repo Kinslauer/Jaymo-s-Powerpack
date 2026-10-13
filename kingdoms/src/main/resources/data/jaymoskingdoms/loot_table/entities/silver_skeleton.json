@@ -1,0 +1,61 @@
+{
+	"type": "minecraft:entity",
+	"pools": [
+		{
+			"rolls": 1,
+			"entries": [
+				{
+					"type": "minecraft:item",
+					"name": "minecraft:bone",
+					"modifier": [
+						{
+							"type": "minecraft:set_count",
+							"count": {
+								"type": "minecraft:uniform",
+								"min": 1,
+								"max": 3
+							}
+						},
+						{
+							"type": "minecraft:enchanted_count_increase",
+							"count": {
+								"type": "minecraft:uniform",
+								"min": 0.0,
+								"max": 1.0
+							},
+							"enchantment": "minecraft:looting"
+						}
+					]
+				}
+			]
+		},
+		{
+			"rolls": 1,
+			"entries": [
+				{
+					"type": "minecraft:item",
+					"name": "jaymoskingdoms:silver_sword"
+				}
+			],
+			"condition": {
+				"type": "minecraft:all_of",
+				"terms": [
+					{
+						"type": "minecraft:killed_by_player"
+					},
+					{
+						"enchantment": "minecraft:looting",
+						"unenchanted_chance": 0.08,
+						"enchanted_chance": {
+							"type": "minecraft:linear",
+							"base": 0.1,
+							"per_level_above_first": 0.02
+						},
+						"type": "minecraft:random_chance_with_enchanted_bonus"
+					}
+				]
+			}
+		}
+	],
+	"random_sequence": "jaymoskingdoms:entities/silver_skeleton"
+}

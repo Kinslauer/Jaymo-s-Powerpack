@@ -670,6 +670,11 @@ public final class Approaches {
 					// (0.5.52) word of what you are (Renown)
 					yield Component.translatable(key(a) + ".you." + a.enemy + "." + a.variant, name);
 				}
+				// (0.5.56) a monster of legend seen out there
+				Component beast = level.getRandom().nextFloat() < Sightings.GOSSIP_CHANCE ? Sightings.gossip(level, a.mob) : null;
+				if (beast != null) {
+					yield beast;
+				}
 				Component butcher = level.getRandom().nextFloat() < BUTCHER_GOSSIP_CHANCE ? KitchenCompat.butcherGossip(player, a.mob) : null;
 				yield butcher != null ? butcher : Component.translatable(key(a) + "." + a.variant);
 			}

@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.monsters.Monsters;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
@@ -714,6 +715,28 @@ public final class Quests {
 		if (entity instanceof Folk king && king.role() == Folk.KING) {
 			regicide(level, king, source);
 		}
+		// (0.5.56) a beast quest's beast, whoever struck it down; a survive quest's player fell before dawn
+		if (Monsters.legend(entity.getType())) {
+			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+				for (Quest q : log(p)) {
+					if (q.kind() == Quest.HUNT && !q.counted() && q.objective().other().map(entity.getUUID()::equals).orElse(false)) {
+						put(p, q.withProgress(1));
+						p.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.champion_slain", entity.getDisplayName(), q.giver().name())
+							.withStyle(ChatFormatting.GOLD));
+						sync(p, true);
+					}
+				}
+			}
+		}
+		if (entity instanceof ServerPlayer fallen) {
+			for (Quest q : log(fallen)) {
+				if (q.kind() == Quest.SURVIVE && !q.counted() && q.objective().spawned()) {
+					Quest.Objective o = q.objective();
+					put(fallen, q.withObjective(new Quest.Objective(o.target(), o.count(), o.progress(), o.pos(), o.other(), o.otherName(), o.place(), false)));
+					fallen.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.survive_failed").withStyle(ChatFormatting.YELLOW));
+				}
+			}
+		}
 		// so many slain
 		if (source.getEntity() instanceof ServerPlayer killer) {
 			for (Quest q : log(killer)) {
@@ -911,6 +934,10 @@ public final class Quests {
 			return;
 		}
 		for (Quest q : log(player)) {
+			if ((q.kind() == Quest.HUNT || q.kind() == Quest.SURVIVE) && q.objective().pos().isPresent()) {
+				beast(level, player, q);
+				continue;
+			}
 			if ((q.kind() != Quest.FETCH && q.kind() != Quest.CHAMPION) || q.objective().pos().isEmpty()) {
 				continue;
 			}
@@ -944,6 +971,50 @@ public final class Quests {
 		}
 	}
 
+	/**
+	 * (0.5.56) A beast quest's player near where the beast was seen: it comes for them (slay); at night its kind comes for
+	 * them, and dawn finds them alive (survive). A slay quest's beast that's gone (lost, despawned) comes again.
+	 */
+	private static void beast(ServerLevel level, ServerPlayer player, Quest q) {
+		Quest.Objective o = q.objective();
+		BlockPos at = o.pos().get();
+		double dx = at.getX() - player.getX(), dz = at.getZ() - player.getZ();
+		double d2 = dx * dx + dz * dz;
+		EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getOptional(Identifier.tryParse(o.target())).orElse(null);
+		if (type == null || q.counted() || player.isCreative() || player.isSpectator()) {
+			return;
+		}
+		if (q.kind() == Quest.HUNT) {
+			boolean gone = o.spawned() && o.other().map(id -> level.getEntity(id) == null).orElse(true);
+			if ((!o.spawned() || gone) && d2 < Sightings.HUNT_RANGE * Sightings.HUNT_RANGE) {
+				List<Mob> came = Encounters.send(level, player, type, 1, Sightings.QUEST_HUNT_TICKS);
+				if (!came.isEmpty()) {
+					put(player, q.withSpawned(Optional.of(came.getFirst().getUUID())));
+					player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.beast_near", came.getFirst().getDisplayName()).withStyle(ChatFormatting.RED));
+					sync(player, true);
+				}
+			}
+			return;
+		}
+		if (!o.spawned()) {
+			if (level.isDarkOutside() && d2 < Sightings.SURVIVE_RANGE * Sightings.SURVIVE_RANGE) {
+				// till dawn
+				long time = level.getOverworldClockTime() % 24000L;
+				int dawn = (int) Math.max(1200L, (time < 23000L ? 23000L : 47000L) - time);
+				List<Mob> came = Encounters.send(level, player, type, 2 + level.getRandom().nextInt(2), dawn);
+				if (!came.isEmpty()) {
+					put(player, q.withSpawned(Optional.empty()));
+					player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.survive_begun", came.getFirst().getDisplayName()).withStyle(ChatFormatting.RED));
+					sync(player, true);
+				}
+			}
+		} else if (!level.isDarkOutside()) {
+			put(player, q.withProgress(1));
+			player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.survived", q.giver().name()).withStyle(ChatFormatting.GOLD));
+			sync(player, true);
+		}
+	}
+
 	// ---- words -------------------------------------------------------------------------------------------------------
 
 	static Component title(Quest q) {
@@ -972,6 +1043,11 @@ public final class Quests {
 	private static Component foes(String target) {
 		String path = target.startsWith("*") ? target.substring(1) : target.substring(target.indexOf(':') + 1);
 		return Component.translatable("quest.jaymoskingdoms.foes." + path);
+	}
+
+	/** (0.5.56) A beast quest's beast, by its entity id. */
+	private static Component beastName(String id) {
+		return BuiltInRegistries.ENTITY_TYPE.getOptional(Identifier.tryParse(id)).map(EntityType::getDescription).orElse(Component.literal(id));
 	}
 
 	/** (0.5.47) A stud quest's breed. */
@@ -1016,6 +1092,7 @@ public final class Quests {
 			case Quest.BREAK_IN -> Component.translatable(key, o.place());
 			case Quest.STUD -> Component.translatable(key, breedName(q), o.count());
 			case Quest.RACE -> Component.translatable(key, o.place(), Stables.raceSeconds(q), x(q), z(q));
+			case Quest.HUNT, Quest.SURVIVE -> Component.translatable(key, x(q), z(q));
 			default -> Component.empty();
 		};
 	}
@@ -1041,6 +1118,9 @@ public final class Quests {
 			case Quest.BREAK_IN -> Component.translatable("quest.jaymoskingdoms.objective.break_in", q.giver().name());
 			case Quest.STUD -> Component.translatable("quest.jaymoskingdoms.objective.stud", breedName(q), o.count(), q.giver().name());
 			case Quest.RACE -> Component.translatable("quest.jaymoskingdoms.objective.race", o.place(), Stables.raceLeft(level, q), x(q), z(q));
+			case Quest.HUNT -> Component.translatable("quest.jaymoskingdoms.objective.hunt", beastName(o.target()), x(q), z(q));
+			case Quest.SURVIVE -> Component.translatable(o.spawned() ? "quest.jaymoskingdoms.objective.surviving" : "quest.jaymoskingdoms.objective.survive",
+				beastName(o.target()), x(q), z(q));
 			default -> Component.empty();
 		};
 	}

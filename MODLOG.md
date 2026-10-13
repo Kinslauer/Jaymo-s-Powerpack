@@ -610,3 +610,17 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   4Eotm6ov) joins the pack and the server. Run `/chunky radius 5000` then `/chunky start` once in the server console
   (it works through the world in the background and resumes after a restart); afterwards, gliding or flying fast
   loads saved chunks instead of generating them on the spot. Distant Horizons stays for the view past 32 chunks.
+- **0.8.110, Naturalist, wilderness encounters and monsters of legend:** adds Naturalist 2.0.6 (Starfish Studios' own 26.3 Fabric build;
+  code MIT, art all rights reserved, shipped unchanged by id) and ships Jaymo's Kingdoms 0.5.56 and Jaymo's Kitchen
+  0.4.34. Naturalist's wildlife roams as it means to, but its predators (bears, lions, tigers, alligators, komodo
+  dragons, rhinos, scorpions) never spawn on their own: now and then one finds a player out in the wild, well away from
+  any settlement, as a random encounter fitting the biome (see `kingdoms/MODLOG.md`). Its elephants and mammoths stay
+  out too, since Kingdoms has its own. Kingdoms also adds its own feral wolf packs, night-time coyotes, tarantulas
+  and moose, rebuilt from Better Animals Plus's models and textures (CC BY-NC-SA 4.0, credited), which only come as
+  encounters too. Kitchen corpses cover the new animals.
+  Kingdoms also brings monsters of legend in the spirit of Fangs 'n Claws (its own code; models and textures from
+  Mo' Creatures, GPL-3, credited): werewolves that turn at night and only really feel gold or silver, green, cave and
+  fire ogres (some two-headed) that smash the ground, wraiths and flame wraiths, silver skeletons, mud golems, and
+  mimics hiding as loot chests out in the wild. Villagers gossip about where one was seen, and now and then give a
+  quest to hunt it down or to survive a night out where it prowls. A silver sword (+4 against undead) drops rarely.
+  Two rideable horse breeds join them: the bat horse, which flies (hold jump to climb), and the fiery nightmare.

@@ -32,6 +32,8 @@ import org.jspecify.annotations.Nullable;
  * they're in the pack), found as {@code /locate} finds them.
  */
 final class QuestBoard {
+	/** (0.5.56) What a beast quest pays at least (emeralds; up to 6 more). */
+	static final int BEAST_EMERALDS = 10;
 	/** How far a villager's (and a king's) fetch or champion quest looks for its ruin (chunks). */
 	static final int VILLAGER_SEARCH_CHUNKS = 32, KING_SEARCH_CHUNKS = 56;
 	/** A ruin nearer any settlement's seat than this is lived in. */
@@ -257,6 +259,13 @@ final class QuestBoard {
 		if (job.equals("stablehand") && random.nextFloat() < Stables.STABLEHAND_HORSE_QUEST) {
 			// (0.5.47) a stablehand's horse quests
 			return Stables.stablehandQuest(level, f, who, random);
+		}
+		if (random.nextFloat() < Sightings.QUEST_CHANCE) {
+			// (0.5.56) after a monster of legend seen near here
+			Quest q = Sightings.quest(giver, who, reward(level, job, Quest.SLAY, BEAST_EMERALDS + random.nextInt(7), HEARTS + 6, trade, random), random);
+			if (q != null) {
+				return q;
+			}
 		}
 		if (random.nextFloat() < mail) {
 			Quest q = mail(level, giver, f, who, random, trade);

@@ -34,7 +34,14 @@ public enum Breed {
 		"indian", "african", "royal"),
 	/** Snowy kingdoms' woolly mammoth (a {@link WarElephant} too): bigger and tougher still, tireless in the cold, wilts in the heat. */
 	WOOLLY_MAMMOTH(0.17, 0.21, 0.42, 0.46, 110, 130, 1.5, 0.9, 0.95, 1.25F, 1.0F, 1.0F, 1.0F, Gait.GALLOP,
-		"woolly", "russet", "frost");
+		"woolly", "russet", "frost"),
+	/**
+	 * (0.5.56) The nightmare (Mo' Creatures' horse and coat): a black horse that burns and is never burned; fearless and
+	 * fast. Found wild in the Nether, or over the badlands at night ({@link MythicMounts}).
+	 */
+	NIGHTMARE(0.30, 0.36, 0.70, 0.95, 28, 34, 1.3, 0.8, 1.0, 1.05F, 1.0F, 1.0F, 1.02F, Gait.GALLOP, "nightmare"),
+	/** (0.5.56) The bat horse (Mo' Creatures'): a leathery-winged horse of the dark woods that flies under its rider ({@link MythicMounts}). */
+	BAT_HORSE(0.26, 0.31, 0.60, 0.80, 22, 28, 1.0, 1.0, 0.7, 1.0F, 0.95F, 1.0F, 1.0F, Gait.GALLOP, "bat");
 
 	/** The horse breeds (every breed but the elephant and the mammoth). */
 	public static final Breed[] HORSES = {DESTRIER, COURSER, PALFREY, DRAFT, STEPPE_PONY, DESERT_HORSE};

@@ -89,6 +89,10 @@ def packMods = [
 	// the terrain shape, the biome map and every structure's biome tags stay as they were. Server-side worldgen.
 	[dep: "maven.modrinth:wwoo:23VeM3qz", cf: [921022, 8894114]],
 	[dep: "maven.modrinth:cristel-lib:rWxmPrGC", cf: [856996, 8921504]],
+	// Naturalist (code MIT, art all rights reserved; Starfish Studios' own 26.3 Fabric build, needs only Fabric API):
+	// wildlife. Kingdoms keeps its predators out of natural spawning and sends them as rare wilderness encounters
+	// (Encounters), and keeps its elephants and mammoths out too since Kingdoms has its own
+	[dep: "maven.modrinth:naturalist:35ZJ5hlX", cf: [627986, 9004241]],
 	// Distant Horizons (LGPL-3.0): far-off terrain drawn as simplified chunks, for a much longer view than the render
 	// distance. Back in 0.8.56 from its Modrinth maven (it was a libs/ jar until 0.4.5). The server builds the far chunks
 	// and sends them to players. dev: false keeps it out of the dev game (too heavy for quick tests).

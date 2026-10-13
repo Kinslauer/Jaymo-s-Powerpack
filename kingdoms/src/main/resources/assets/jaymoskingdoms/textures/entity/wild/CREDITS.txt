@@ -1,0 +1,5 @@
+Feral wolf, coyote, tarantula and moose: models and textures from Better Animals Plus 11.0.10 (Minecraft 1.19.2),
+by cybercat5555, itsmeowdev and Wolverbyte (https://github.com/itsmeow/betteranimalsplus), licensed CC BY-NC-SA 4.0
+(https://creativecommons.org/licenses/by-nc-sa/4.0/). The models were carried over to Minecraft 26.3 names in
+kingdoms/src/client/java/com/jaymoskingdoms/client/wild/*Model.java; those adapted models and these textures are shared
+under the same licence (non-commercial, share alike, with this credit). The textures are unchanged.
