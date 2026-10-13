@@ -170,7 +170,7 @@ public final class Sorcery {
 	}
 
 	public static boolean isCaster(int role) {
-		return role == NECROMANCER || role == SHAMAN || role == WIZARD;
+		return role == NECROMANCER || role == SHAMAN || role == WIZARD || role == Orcs.SHAMAN;
 	}
 
 	/** A camp's caster (they hunt as its raiders do). */
@@ -199,10 +199,17 @@ public final class Sorcery {
 	static int wanted(MinecraftServer server, Faction f, int role, long now) {
 		if (f.type() == FactionType.BARBARIAN) {
 			Camps.CampData data = Camps.data(server, f.id());
-			if (data == null || !Camps.BARBARIAN.equals(data.kind())) {
+			if (data == null) {
 				return 0;
 			}
 			long days = (now - data.founded()) / Camps.DAY_TICKS;
+			if (data.orc()) {
+				// (0.5.45) an orc camp keeps a shaman of its own, a second once it's grown
+				return role == Orcs.SHAMAN ? days >= SECOND_SHAMAN_DAYS ? 2 : 1 : 0;
+			}
+			if (!Camps.BARBARIAN.equals(data.kind())) {
+				return 0;
+			}
 			Holds.Hold hold = Holds.get(server, f.id());
 			return switch (role) {
 				case SHAMAN -> days >= SECOND_SHAMAN_DAYS ? 2 : 1;
@@ -231,7 +238,7 @@ public final class Sorcery {
 
 	/** Places for the casters it lacks (hired as any other hand is, {@link Economy#hire}). */
 	private static void staff(MinecraftServer server, Faction f, long now) {
-		for (int role : new int[] {SHAMAN, NECROMANCER, WIZARD}) {
+		for (int role : new int[] {SHAMAN, NECROMANCER, WIZARD, Orcs.SHAMAN}) {
 			int want = wanted(server, f, role, now);
 			int have = f.holdings().count(role) + f.holdings().vacancies().getOrDefault(Folk.roleName(role), 0);
 			if (have < want) {
@@ -293,7 +300,7 @@ public final class Sorcery {
 			folk.getNavigation().moveTo(target, 1.0);
 		}
 		switch (folk.role()) {
-			case SHAMAN -> {
+			case SHAMAN, Orcs.SHAMAN -> {
 				if (timers[T_CHANT] <= 0 && fightingAllies(level, folk).size() >= CHANT_ALLIES) {
 					chant(level, folk);
 				} else if (timers[T_MEND] <= 0) {
@@ -332,7 +339,7 @@ public final class Sorcery {
 					drain(level, folk, target, DRAIN_DAMAGE, DRAIN_HEAL);
 				}
 			}
-			case SHAMAN -> {
+			case SHAMAN, Orcs.SHAMAN -> {
 				if (d <= CLOSE && timers[T_RING] <= 0) {
 					ring(level, folk);
 				} else if (target instanceof ServerPlayer && timers[T_HEX] <= 0) {
@@ -633,7 +640,7 @@ public final class Sorcery {
 			if (folk.role() == NECROMANCER) {
 				Thralls.release(level, folk.getUUID());
 			}
-			if (source.getEntity() instanceof ServerPlayer && (folk.role() != SHAMAN || level.getRandom().nextFloat() < SHAMAN_SCROLL_CHANCE)) {
+			if (source.getEntity() instanceof ServerPlayer && (folk.role() != SHAMAN && folk.role() != Orcs.SHAMAN || level.getRandom().nextFloat() < SHAMAN_SCROLL_CHANCE)) {
 				folk.spawnAtLocation(level, Arcana.scrollFor(folk.role(), level.getRandom()));
 			}
 			return;

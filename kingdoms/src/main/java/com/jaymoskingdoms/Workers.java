@@ -51,7 +51,7 @@ public final class Workers {
 		} else if (w.role() == Folk.PULLER) {
 			Rickshaws.tick(level, w);
 		} else if (Stables.isStableWorker(w.role())) {
-			// (0.5.45)
+			// (0.5.47)
 			Stables.tick(level, w);
 		}
 	}

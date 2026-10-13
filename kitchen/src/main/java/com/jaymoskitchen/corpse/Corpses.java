@@ -48,6 +48,11 @@ public final class Corpses {
 	 * take one ({@link CorpseEntity#takeBy}: Jaymo's Powers lets only Gravity do it).
 	 */
 	public static final TagKey<EntityType<?>> HEAVY_CORPSES = tag("heavy_corpses");
+	/**
+	 * Fish, vanilla and modded (Alex's Mobs' flying fish, catfish...), on top of anything built on vanilla's fish class:
+	 * looted in one click and gone (see {@link CorpseKind#FISH}).
+	 */
+	public static final TagKey<EntityType<?>> FISH_CORPSES = tag("fish_corpses");
 
 	/** A corpse's look is the mob's saved data as text; anything longer than this is cut down to the basics. */
 	public static final int MAX_LOOK_LENGTH = 30000;

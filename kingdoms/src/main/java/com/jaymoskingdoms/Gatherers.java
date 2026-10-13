@@ -312,7 +312,7 @@ public final class Gatherers {
 				com.jaymoskingdoms.equestrian.Equestrian.spawn(level, climate == Climate.SNOWY ? com.jaymoskingdoms.equestrian.Breed.WOOLLY_MAMMOTH
 					: com.jaymoskingdoms.equestrian.Breed.WAR_ELEPHANT, Construction.standable(level, mid, 3));
 			}
-			// (0.5.45) and its stablehand
+			// (0.5.47) and its stablehand
 			Stables.built(level, f);
 		}
 		if ((entry.equals("pen") || entry.equals("farm")) && Farmers.wanted(server, f)) {

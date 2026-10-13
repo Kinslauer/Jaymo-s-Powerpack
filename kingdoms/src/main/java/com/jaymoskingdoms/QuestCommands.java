@@ -33,7 +33,7 @@ final class QuestCommands {
 				.then(Commands.literal("regicide").executes(c -> offer(c, 1)))
 				.then(Commands.literal("warband").executes(c -> offer(c, 2)))
 				.then(Commands.literal("dig").executes(c -> offer(c, 4)))
-				// (0.5.45) a stablehand's or a king's horse quest
+				// (0.5.47) a stablehand's or a king's horse quest
 				.then(Commands.literal("horse").executes(c -> offer(c, 5)))
 				.then(Commands.literal("champion").then(Commands.argument("lair", StringArgumentType.word()).executes(c -> offer(c, 3)))))
 			.then(Commands.literal("finish").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(QuestCommands::finish));

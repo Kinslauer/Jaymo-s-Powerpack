@@ -888,6 +888,10 @@ public class CorpseEntity extends Entity {
 		}
 		ItemStack held = player.getItemInHand(hand);
 
+		// a fish is looted in one go, whatever's in your hand: out comes its loot and the body's gone
+		if (isFish()) {
+			return lootFish(level);
+		}
 		// anything that burns can be set alight
 		if (burns() && (held.is(Items.FLINT_AND_STEEL) || held.is(Items.FIRE_CHARGE))) {
 			igniteForSeconds(8.0F);
@@ -1129,6 +1133,27 @@ public class CorpseEntity extends Entity {
 		jolt(false);
 		play(level, SoundEvents.BUNDLE_DROP_CONTENTS, 1.0F);
 		return InteractionResult.SUCCESS_SERVER;
+	}
+
+	/** (0.4.29) A fish corpse: its loot drops and it's gone, in one click. */
+	private InteractionResult lootFish(ServerLevel level) {
+		dropLoot(level);
+		level.sendParticles(ParticleTypes.SPLASH, getX(), getY() + 0.2, getZ(), 12, 0.25, 0.1, 0.25, 0.05);
+		play(level, SoundEvents.BUNDLE_DROP_CONTENTS, 1.0F);
+		discard();
+		return InteractionResult.SUCCESS_SERVER;
+	}
+
+	/**
+	 * A fish (see {@link CorpseKind#FISH}). Fish corpses left from before 0.4.29 were saved as {@link CorpseKind#OTHER},
+	 * so those count by their type too.
+	 */
+	public boolean isFish() {
+		if (kind == CorpseKind.FISH) {
+			return true;
+		}
+		EntityType<?> type = kind == CorpseKind.OTHER ? sourceType() : null;
+		return type != null && type.builtInRegistryHolder().is(Corpses.FISH_CORPSES);
 	}
 
 	private void dropLoot(ServerLevel level) {

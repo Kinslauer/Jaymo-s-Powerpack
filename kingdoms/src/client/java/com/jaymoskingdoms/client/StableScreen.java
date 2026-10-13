@@ -26,7 +26,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * (0.5.45) A stablehand's or farrier's screen: your horses (board, sell, shoe), the ones you keep here (take out for
+ * (0.5.47) A stablehand's or farrier's screen: your horses (board, sell, shoe), the ones you keep here (take out for
  * the fee), today's horses for sale, the tack shop. A long list scrolls. The server decides everything; a button is
  * sent back and the screen comes again with what happened written under the list.
  */

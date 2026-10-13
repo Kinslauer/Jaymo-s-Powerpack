@@ -49,7 +49,7 @@ final class KingdomCommands {
 			.then(Commands.literal("ride").then(Commands.argument("rickshaw", IntegerArgumentType.integer()).then(Commands.argument("to", IntegerArgumentType.integer(0))
 				.executes(c -> Rickshaws.hire(c.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(c, "rickshaw"),
 					IntegerArgumentType.getInteger(c, "to"))))))
-			// (0.5.45) a stable's stablehand and farrier: what their offers run when clicked
+			// (0.5.47) a stable's stablehand and farrier: what their offers run when clicked
 			.then(Stables.stableCommand()).then(Stables.farrierCommand())
 			// (builders: plots and projects)
 			.then(BuildCommands.plot()).then(BuildCommands.project())

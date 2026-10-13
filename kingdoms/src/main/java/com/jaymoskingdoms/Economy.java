@@ -194,7 +194,7 @@ public final class Economy {
 			// (0.5.26) a rickshaw puller
 			hired = Rickshaws.spawn(level, ready, from);
 		} else if (Stables.isStableWorker(role)) {
-			// (0.5.45) a stable's stablehand or farrier
+			// (0.5.47) a stable's stablehand or farrier
 			hired = Stables.spawn(level, ready, role, from);
 		} else if (role == Folk.ARCHER) {
 			hired = KingdomEvents.spawnArcher(level, ready);

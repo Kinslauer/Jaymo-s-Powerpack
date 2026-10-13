@@ -202,7 +202,7 @@ final class QuestBoard {
 				T.slay("guard.pillagers", "#minecraft:illager", 5, 8),
 				T.fetch("guard.blade", "minecraft:iron_sword|comrades_blade", WAR)),
 			List.of("minecraft:iron_sword*1-1", "minecraft:shield*1-1", "minecraft:arrow*16-32", "minecraft:iron_chestplate*1-1", "minecraft:cooked_beef*6-12"))),
-		// (0.5.45) a stable's people (a stablehand's horse quests are its own, Stables)
+		// (0.5.47) a stable's people (a stablehand's horse quests are its own, Stables)
 		Map.entry("stablehand", new Trade(List.of(
 				T.gather("stablehand.wheat", "minecraft:wheat", 16, 32),
 				T.gather("stablehand.carrots", "minecraft:carrot", 12, 24),
@@ -255,7 +255,7 @@ final class QuestBoard {
 		float mail = job.equals("none") || job.equals("cartographer") ? 0.45F : 0.25F;
 		List<T> options = new ArrayList<>(trade.quests());
 		if (job.equals("stablehand") && random.nextFloat() < Stables.STABLEHAND_HORSE_QUEST) {
-			// (0.5.45) a stablehand's horse quests
+			// (0.5.47) a stablehand's horse quests
 			return Stables.stablehandQuest(level, f, who, random);
 		}
 		if (random.nextFloat() < mail) {
@@ -392,7 +392,7 @@ final class QuestBoard {
 		Quest.Giver who = new Quest.Giver(king.getUUID(), king.getName().getString(), f.id(), true, "king");
 		Tempers.Temper temper = Tempers.of(f);
 		if (random.nextFloat() < Stables.KING_HORSE_QUEST) {
-			// (0.5.45) a horse broken in for him, or a race to another town
+			// (0.5.47) a horse broken in for him, or a race to another town
 			Quest q = Stables.kingQuest(level, f, who, royalReward(random), random);
 			if (q != null) {
 				return q;

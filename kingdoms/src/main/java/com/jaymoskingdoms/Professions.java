@@ -35,7 +35,7 @@ public final class Professions {
 		WOODCUTTER = register("woodcutter", SoundEvents.VILLAGER_WORK_FLETCHER);
 		// (0.5.26)
 		PULLER = register("puller", SoundEvents.VILLAGER_WORK_LEATHERWORKER);
-		// (0.5.45)
+		// (0.5.47)
 		STABLEHAND = register("stablehand", SoundEvents.VILLAGER_WORK_SHEPHERD);
 		FARRIER = register("farrier", SoundEvents.VILLAGER_WORK_ARMORER);
 	}

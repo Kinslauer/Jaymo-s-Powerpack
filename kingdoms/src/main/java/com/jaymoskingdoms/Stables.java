@@ -67,7 +67,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.45) Equestrian stage 3: a settlement's stable at work. Its {@link Folk#STABLEHAND} boards players' horses (fed,
+ * (0.5.47) Equestrian stage 3: a settlement's stable at work. Its {@link Folk#STABLEHAND} boards players' horses (fed,
  * watered and brushed while they're away, {@link #WEEKLY_FEE} emeralds for each week begun, paid when the horse is
  * taken back out), sells horses (the breed by the land and the realm's wealth, the quality by its wealth) and buys
  * them back; its {@link Folk#FARRIER} shoes horses and sells tack, better tack in wealthier kingdoms. Walk up to either
@@ -585,7 +585,7 @@ public final class Stables {
 			races(level, player);
 		}
 		if (level.getGameTime() % STAFF_TICKS == 0) {
-			// (a stable built before 0.5.45, or a worker lost: its people come whether or not the settlement's short-handed)
+			// (a stable built before 0.5.47, or a worker lost: its people come whether or not the settlement's short-handed)
 			for (Faction f : Factions.all(server)) {
 				for (int role : new int[] {Folk.STABLEHAND, Folk.FARRIER}) {
 					if (level.isPositionEntityTicking(f.seat()) && wanted(server, f, role) && !Economy.underAttack(server, f)) {

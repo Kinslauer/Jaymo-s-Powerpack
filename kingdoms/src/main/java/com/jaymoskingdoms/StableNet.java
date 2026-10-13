@@ -13,7 +13,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * (0.5.45) The stable screen's packets: a stablehand's or farrier's screen as sections of rows, each row a horse or a
+ * (0.5.47) The stable screen's packets: a stablehand's or farrier's screen as sections of rows, each row a horse or a
  * ware with its buttons ({@link Open}), and the button the player pressed ({@link Act}). The server decides everything
  * and sends the screen again with the result.
  */

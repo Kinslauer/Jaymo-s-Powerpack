@@ -58,7 +58,7 @@ public final class JaymosKingdoms implements ModInitializer {
 			McaCompat.forget(handler.player);
 		});
 		// 0.3, builders and theft: the building catalogue, real-time construction, plots and the plot stake, crime
-		LOGGER.debug("builder and theft attachments: {} {}", Works.WORKS, Theft.WANTED);
+		LOGGER.debug("builder and theft attachments: {} {} {}", Works.WORKS, Theft.WANTED, Placed.MARKS);
 		Plots.register();
 		Armory.register();
 		Buildings.register();
@@ -117,7 +117,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.equestrian.Equestrian.register();
 		// 0.5.44: Jaymo's Equestrian, stage 2 (bond and tack: trust, disciplines, tricks, needs, tack) and its attachments
 		com.jaymoskingdoms.equestrian.Bonding.register();
-		// (0.5.45) stables at work: boarding, the horse market, the farrier
+		// (0.5.47) stables at work: boarding, the horse market, the farrier
 		Stables.register();
 		Carriages.register();
 		Rickshaws.register();

@@ -34,6 +34,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.Wagon.TYPE, WagonRenderer::new);
 		CampSkins.register();
 		GoblinSkins.register();
+		// 0.5.45: orcs
+		OrcSkins.register();
 		// 0.5.37: the casters
 		SorcerySkins.register();
 		com.jaymoskingdoms.client.lootgoblins.LootGoblinRenderer.register();
@@ -46,7 +48,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		ArmoryLayer.register();
 		// 0.5.34: Jaymo's Equestrian (gaits, the stamina HUD, coats, war elephants)
 		com.jaymoskingdoms.client.equestrian.EquestrianClient.register();
-		// 0.5.45: stablehands' and farriers' screens (the scroll kept when one comes again after a button)
+		// 0.5.47: stablehands' and farriers' screens (the scroll kept when one comes again after a button)
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(com.jaymoskingdoms.StableNet.Open.TYPE, (payload, context) -> {
 			int scroll = context.client().gui.screen() instanceof StableScreen was && was.workerId() == payload.workerId() ? was.scroll() : 0;
 			context.client().gui.setScreen(new StableScreen(payload, scroll));
@@ -102,8 +104,17 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 				context.getEquipmentRenderer()));
 			// (0.5.27) goblins' long ears and hooked noses
 			this.addLayer(new GoblinSkins.Features(this));
+			// (0.5.45) orcs' tusks, brows and ears
+			this.addLayer(new OrcSkins.Features(this));
 			// (0.5.37) a court wizard's pointed hat
 			this.addLayer(new SorcerySkins.Hat(this));
+		}
+
+		@Override
+		protected void scale(FolkState state, com.mojang.blaze3d.vertex.PoseStack poseStack) {
+			super.scale(state, poseStack);
+			// (0.5.45) orcs are broader than men
+			OrcSkins.broaden(state, poseStack);
 		}
 
 		@Override

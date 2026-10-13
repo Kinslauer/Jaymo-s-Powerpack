@@ -394,7 +394,7 @@ public final class Quests {
 				player.getInventory().getItem(slot).shrink(1);
 			}
 		} else if (q.kind() == Quest.BREAK_IN || q.kind() == Quest.STUD) {
-			// (0.5.45) the horse goes to the giver's stable
+			// (0.5.47) the horse goes to the giver's stable
 			Stables.questTurnIn(level, player, giver, f, q);
 		}
 		remove(player, q.id());
@@ -782,7 +782,7 @@ public final class Quests {
 
 	/** The camp {@code entity} is chief or warlord of, or -1. */
 	private static int campOf(Entity entity) {
-		if (entity instanceof Folk folk && folk.role() == Folk.CHIEF) {
+		if (entity instanceof Folk folk && (folk.role() == Folk.CHIEF || folk.role() == Orcs.WARCHIEF)) {
 			return folk.factionId();
 		}
 		Illagers.Tag tag = Illagers.tag(entity);
@@ -923,7 +923,7 @@ public final class Quests {
 		return Component.translatable("quest.jaymoskingdoms.foes." + path);
 	}
 
-	/** (0.5.45) A stud quest's breed. */
+	/** (0.5.47) A stud quest's breed. */
 	private static Component breedName(Quest q) {
 		return Component.translatable(com.jaymoskingdoms.equestrian.Breed.byId(q.objective().target()).key());
 	}

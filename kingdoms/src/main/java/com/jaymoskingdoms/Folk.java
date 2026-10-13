@@ -61,7 +61,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	public static final int CARTER = 11;
 	/** (0.5.26) A settlement's rickshaw puller: hauls its gatherers' loads, runs errands, carries its people and paying players ({@link Rickshaws}). */
 	public static final int PULLER = 12;
-	/** (0.5.45) A stable's stablehand (boards and sells horses) and farrier (shoes them, sells tack) ({@link Stables}). */
+	/** (0.5.47) A stable's stablehand (boards and sells horses) and farrier (shoes them, sells tack) ({@link Stables}). */
 	public static final int STABLEHAND = 13, FARRIER = 14;
 
 	/**
@@ -282,7 +282,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 
 	/** An archer (or a goblin slinger, or a caster): it keeps its post and shoots. */
 	public boolean ranged() {
-		return this.role() == ARCHER || Goblins.ranged(this.role()) || Sorcery.isCaster(this.role());
+		return this.role() == ARCHER || Goblins.ranged(this.role()) || Orcs.ranged(this.role()) || Sorcery.isCaster(this.role());
 	}
 
 	/** (0.5.37) A caster's spells' cooldowns (ticks left, by {@link Sorcery}'s slots). */
@@ -458,6 +458,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		Barbarians.addGoals(this, this.goalSelector, this.targetSelector);
 		// (0.5.27) goblins hunt everyone but those passing for one of them
 		Goblins.addGoals(this, this.goalSelector, this.targetSelector);
+		// (0.5.47) orcs hunt everyone but the other camps
+		Orcs.addGoals(this, this.goalSelector, this.targetSelector);
 		// realms at war: each other's folk (and sworn players) on sight
 		Wars.addGoals(this, this.targetSelector);
 	}
@@ -507,6 +509,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		if (Sorcery.isCaster(this.role())) {
 			Sorcery.tick(level, this);
 		}
+		// (0.5.47) an orc's blood rage and war cries, a warchief's slam
+		Orcs.tick(level, this);
 		// (0.5.12) javelins at a foe out of reach; attackers fight harder, break through and burn
 		Javelins.tick(level, this);
 		Assault.tick(level, this);
@@ -546,7 +550,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		ItemStack hand = this.getMainHandItem().copy();
 		Outfits.dress(this, faction, climate);
 		KnightsCompat.dress(this, faction, climate);
-		if (!this.combatant() || this.role() == BARBARIAN || this.role() == CHIEF) {
+		if (!this.combatant() || this.role() == BARBARIAN || this.role() == CHIEF || Orcs.isOrc(this)) {
 			this.setItemSlot(EquipmentSlot.MAINHAND, hand);
 		}
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
@@ -593,7 +597,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	@Override
 	public void die(DamageSource source) {
 		if (this.level() instanceof ServerLevel level) {
-			// (0.5.45) a knight's (or a raider's) horse goes wild when a player cuts him down
+			// (0.5.47) a knight's (or a raider's) horse goes wild when a player cuts him down
 			Stables.riderFell(level, this, source);
 		}
 		if (this.level() instanceof ServerLevel level && this.isCarrying()) {

@@ -19,7 +19,7 @@ public record Quest(String id, int kind, String template, Giver giver, Objective
 	/** Kinds: carry a letter, slay so many, bring back something from a ruin, bring so many of an item, slay a royal foe, slay a camp's chief. */
 	public static final int DELIVER = 0, SLAY = 1, FETCH = 2, GATHER = 3, CHAMPION = 4, CHIEF = 5, REGICIDE = 6, WARBAND = 7;
 	/**
-	 * (0.5.45) Horse quests ({@link Stables}): bring a horse you broke in yourself; bring a horse of a breed at least so
+	 * (0.5.47) Horse quests ({@link Stables}): bring a horse you broke in yourself; bring a horse of a breed at least so
 	 * good (target: the breed, count: the quality in percent); ride to another town in time (target {@code faction:<id>},
 	 * pos its seat, otherName the seconds allowed).
 	 */
