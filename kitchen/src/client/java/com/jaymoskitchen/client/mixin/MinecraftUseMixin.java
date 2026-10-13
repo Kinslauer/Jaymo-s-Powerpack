@@ -40,7 +40,7 @@ abstract class MinecraftUseMixin {
 			&& Corpses.isButcherBlock(player.level().getBlockState(block.getBlockPos()))) {
 			return;
 		}
-		// (0.4.30) a plain right-click on a butcher villager offers them the body
+		// (0.4.32) a plain right-click on a butcher villager offers them the body
 		if (!toss && hitResult instanceof EntityHitResult entity && Butchers.isButcher(entity.getEntity())) {
 			return;
 		}

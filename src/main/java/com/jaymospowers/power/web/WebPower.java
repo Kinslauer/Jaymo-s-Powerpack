@@ -69,6 +69,8 @@ public final class WebPower implements Power {
 	/** Zip reach, and how fast the client reels you in (blocks/tick; used here to time the zip). */
 	public static final double ZIP_RANGE = 48.0;
 	public static final double ZIP_SPEED = 1.8;
+	/** A zip taken while gliding tows you for this long (ticks, 1.5 s), then lets go and the line falls limp. */
+	static final int GLIDE_ZIP_TICKS = 30;
 	/** Yank reach, and the bounding-box volume above which a target is "heavy" (you fly to it instead). Player = 0.65. */
 	public static final double YANK_RANGE = 24.0;
 	public static final double YANK_HEAVY_VOLUME = 2.6;
@@ -513,8 +515,12 @@ public final class WebPower implements Power {
 				ServerPlayNetworking.send(player, new WebNet.SwingReject(hand));
 			}
 		}
+		if (swinging(state) && player.getLastClientInput().jump()) {
+			// holding Jump on a web braces you: no fall damage while you do
+			player.resetFallDistance();
+		}
 		if (state.grace || swinging(state) || state.pullTicks > 0) {
-			// fall damage always applies; only a wing glide (slower than 0.5 b/t down) isn't a fall, as with an elytra
+			// fall damage always applies (bar Jump held on a web, above); only a wing glide (slower than 0.5 b/t down) isn't a fall, as with an elytra
 			if (player.getAttached(WINGS) != null && player.getY() - player.yo > -0.5) {
 				player.fallDistance = Math.min(player.fallDistance, 1.0);
 			}
@@ -865,6 +871,10 @@ public final class WebPower implements Power {
 			target = anchor.add(face.getUnitVec3().scale(player.getBbWidth() * 0.5 + 0.2)).add(0.0, -1.3, 0.0);
 		}
 		int maxTicks = Mth.ceil(target.distanceTo(player.position()) / ZIP_SPEED) + 12;
+		if (player.getAttached(WINGS) != null) {
+			// gliding, the zip is a boost: it tows you toward the web this long, then lets go with a kick up (wings still out)
+			maxTicks = Math.min(maxTicks, GLIDE_ZIP_TICKS);
+		}
 		startPull(player, new WebNet.Pull(anchor, target, -1, maxTicks, (byte)face.ordinal()), new WebLine(WebLine.ZIP, anchor, -1));
 		player.setAttached(COOLDOWNS, new WebCooldowns(now + WebSymbiote.zipCooldown(player), cooldowns.shot(), cooldowns.yank()));
 		thwip(player);

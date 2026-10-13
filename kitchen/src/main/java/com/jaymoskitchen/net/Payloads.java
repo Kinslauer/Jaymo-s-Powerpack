@@ -317,7 +317,7 @@ public final class Payloads {
 	}
 
 	/**
-	 * (0.4.30) Server → client: a butcher villager looks over the body you brought ({@code what}) and names his price.
+	 * (0.4.32) Server → client: a butcher villager looks over the body you brought ({@code what}) and names his price.
 	 * {@code skill}: how many times what you'd get yourself (1 to 3); {@code tier} 0 (clumsy) to 4 (master).
 	 */
 	public record OpenButcher(int villager, Component name, Component what, float skill, int tier, int price) implements CustomPacketPayload {
@@ -337,7 +337,7 @@ public final class Payloads {
 		}
 	}
 
-	/** (0.4.30) Client → server: hand the body to the butcher and pay. */
+	/** (0.4.32) Client → server: hand the body to the butcher and pay. */
 	public record ButcherDeal(int villager) implements CustomPacketPayload {
 		public static final Type<ButcherDeal> TYPE = new Type<>(JaymosKitchen.id("butcher_deal"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, ButcherDeal> CODEC = CustomPacketPayload.codec(

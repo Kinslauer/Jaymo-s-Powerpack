@@ -666,7 +666,11 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
   corpse: its fish dropped and the body stayed behind.
 - Fish corpses saved before 0.4.29 (as `OTHER`) count by their type too (`CorpseEntity.isFish`).
 
-## 0.4.30: butcher villagers
+## 0.4.31: iron golems carry corpses in their arms
+- For Jaymo's Kingdoms 0.5.48, where iron golems take corpses to the fire: a carrier bigger than a villager holds a
+  carried corpse out past its own bulk and up at its arms (`carryPosition` scales with the carrier's size). Before, a
+  golem's corpse sat at its knees, half inside it. Players and villagers carry exactly as before.
+## 0.4.32: butcher villagers
 - **Butcher villagers butcher for you** (`corpse/Butchers`; vanilla's butchers and MCA's, by profession). Right-click
   one with a passive animal's corpse in your arms or a bagged one in your hand: a screen (`ButcherScreen`) shows the
   price, and their skill (Clumsy, Fair, Able, Skilled, Master) and yield only if you know them. Monsters and heavy

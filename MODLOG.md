@@ -537,8 +537,32 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.8.90, Your own blocks are no crime:** ships Jaymo's Kingdoms 0.5.46: breaking a block you placed yourself in a
   settlement (a chest, bed, crafting table, crops you planted), or opening a chest you placed there, no longer makes
   its people take you for a criminal. Blocks the settlement built still count.
-- **0.8.91, Butcher villagers:** ships Jaymo's Kitchen 0.4.30 and Jaymo's Kingdoms 0.5.47: right-click a butcher
+- **0.8.92, Jaymo's Equestrian, stage 3 (the stables at work):** ships Jaymo's Kingdoms 0.5.47 (see `kingdoms/MODLOG.md`):
+  stables get a stablehand (boards your horse for 4 emeralds a week, sells horses by land and wealth, buys them back)
+  and a farrier (shoes horses, sells tack, the best only in wealthy kingdoms); realms with stables field better
+  cavalry; a fallen knight's destrier or a raider's steppe pony goes wild for you to break in; rifling a caravan
+  horse's saddlebags is theft; and stablehands and kings give horse quests (break one in, bring a stud, ride to
+  another town against the clock). Stablehands and farriers have their own screen: right-click them.
+- **0.8.94, Iron golems burn corpses:** ships Jaymo's Kingdoms 0.5.48 and Jaymo's Kitchen 0.4.31: every iron golem
+  (village, kingdom or home-built) picks up corpses lying near it and carries them in its arms to the nearest fire pit,
+  lit campfire or lava, then drops them in. Monsters at once, other corpses after 5 minutes untouched; never players'
+  or golems' corpses. Golems never light fires, and fire pits on netherrack are no longer beaten out.
+- **0.8.95, crawl anywhere:** any player can press Jump and Sneak together twice quickly to drop flat (the swimming
+  pose) and stays flat while Jump is held, so one-block gaps are passable. Letting go stands you up once there's room;
+  under a low ceiling vanilla keeps you crawling. Holding Jump doesn't hop while crawling; not in water, flying,
+  gliding or riding. Combat Roll's double-tap Sneak ignores Sneak presses made with Jump down (`core/Crawl`,
+  `CrawlPlayerMixin`, `CrawlJumpMixin`, `client/CrawlTaps`).
+- **0.8.96, Quests are rare:** ships Jaymo's Kingdoms 0.5.49 (see `kingdoms/MODLOG.md`): only about one villager in
+  twenty ever gives quests (on about half their days), kings have work only now and then, and a good name with a
+  settlement raises both a little. Giving up a quest costs reputation with the giver's settlement. New: the
+  Traveller's Journal (craft a book with a map): with one in your inventory, M opens your quests, a map with your
+  quests and the settlements on it, and every settlement's opinion of you.
+- **0.8.97, Pickpocketing:** ships Jaymo's Kingdoms 0.5.50 (see `kingdoms/MODLOG.md`): sneak up behind a villager (MCA's
+  too) or a settlement's folk with an empty hand and hold right-click: your hand reaches into their pocket for 1-3 s,
+  longer in bright light, on armoured or cheerful marks, shorter in the dark or on sad ones. Stay behind them till it's
+  done to lift something; if they turn round on you they cry thief, which counts as a theft seen.
+- **0.8.98, Butcher villagers:** ships Jaymo's Kitchen 0.4.32 and Jaymo's Kingdoms 0.5.51: right-click a butcher
   villager with a passive animal's corpse (carried or bagged) for a screen with their price; pay in emeralds and they
   carry it out back, chop it up and walk back with the cuts, 1x to 3x what you'd get yourself. How good a butcher is
-  stays hidden until townsfolk gossip about them (their own village's, or far-off masters and botchers) or you've
-  seen their work.
+  stays hidden until townsfolk gossip about them (their own village's, or far-off masters and botchers), or, if
+  you're experienced with butchering (a Survival perk), you judge it from the cuts they hand you.

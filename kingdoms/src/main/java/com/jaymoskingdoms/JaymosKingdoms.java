@@ -90,6 +90,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.21: monsters hunt the settlements' folk as they do villagers
 		Prey.register();
 		Theft.register();
+		// 0.5.50: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
+		Pickpocket.register();
 		// 0.5.19: a boss's bar shows only to the players who've hit it
 		BossBars.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
@@ -117,6 +119,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.equestrian.Equestrian.register();
 		// 0.5.44: Jaymo's Equestrian, stage 2 (bond and tack: trust, disciplines, tricks, needs, tack) and its attachments
 		com.jaymoskingdoms.equestrian.Bonding.register();
+		// (0.5.47) stables at work: boarding, the horse market, the farrier
+		Stables.register();
 		Carriages.register();
 		Rickshaws.register();
 		Cabs.register();
@@ -125,6 +129,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.38: where newcomers and immigrants are from (skin tone by climate)
 		LOGGER.debug("origin attachment: {}", SkinTones.ORIGIN);
 		Quests.register();
+		// 0.5.50: the traveller's journal (book + map): quests, a map, reputations, on M
+		Journal.register();
 		// 0.5.39: the townsfolk come over to you: questions, quests, requests, bargains, news
 		Approaches.register();
 		// 0.5.37: sorcery: camps' shamans and necromancers, courts' wizards, the risen dead, spell scrolls (and the thralls' attachment)

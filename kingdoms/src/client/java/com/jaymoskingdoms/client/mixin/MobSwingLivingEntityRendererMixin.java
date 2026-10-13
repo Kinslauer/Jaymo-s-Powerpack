@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client.mixin;
 
 import com.jaymoskingdoms.client.MobAnimations;
+import com.jaymoskingdoms.client.PickpocketPose;
 import com.jaymoskingdoms.client.PullerPose;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -25,6 +26,7 @@ abstract class MobSwingLivingEntityRendererMixin {
 	private void jaymoskingdoms$swingState(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
 		MobAnimations.extract(entity, state, partialTicks);
 		PullerPose.extract(entity, state, partialTicks);
+		PickpocketPose.extract(entity, state, partialTicks);
 	}
 
 	@Inject(
@@ -33,6 +35,7 @@ abstract class MobSwingLivingEntityRendererMixin {
 	private void jaymoskingdoms$swingLayers(LivingEntityRenderState state, PoseStack poseStack, SubmitNodeCollector collector,
 		CameraRenderState camera, CallbackInfo ci) {
 		PullerPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
+		PickpocketPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		MobAnimations.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 	}
 }

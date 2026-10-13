@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 /**
- * (0.4.30) A butcher villager sizes up the body you brought: what he charges, how good he is (up to three times what
+ * (0.4.32) A butcher villager sizes up the body you brought: what he charges, how good he is (up to three times what
  * you'd get yourself) if you've heard tell of him, and whether you hand it over.
  */
 public class ButcherScreen extends Screen {

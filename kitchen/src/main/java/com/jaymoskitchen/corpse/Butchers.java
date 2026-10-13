@@ -53,7 +53,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.4.30) Butcher villagers (vanilla's and MCA's) butcher passive animals for you, for emeralds. Bring one a body (in
+ * (0.4.32) Butcher villagers (vanilla's and MCA's) butcher passive animals for you, for emeralds. Bring one a body (in
  * your arms or your pocket) and right-click them: a screen shows what it costs. Pay, and they take the body, walk out
  * back (to a butcher block nearby, or somewhere out of the way behind their smoker), chop it up, and walk back to hand
  * you the cuts. Each butcher has a skill of their own, from about what you'd get on a butcher block up to three times
@@ -209,7 +209,7 @@ public final class Butchers {
 	}
 
 	/**
-	 * (0.4.30) For Jaymo's Kingdoms' skill tree (by reflection): who counts as experienced with butchering (the first
+	 * (0.4.32) For Jaymo's Kingdoms' skill tree (by reflection): who counts as experienced with butchering (the first
 	 * Survival perk). They tell a butcher's skill from the cuts handed back after a job, and know that butcher from then on.
 	 */
 	public static void setExperienced(java.util.function.Predicate<Player> experienced) {

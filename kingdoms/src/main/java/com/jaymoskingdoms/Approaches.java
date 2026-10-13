@@ -74,7 +74,7 @@ public final class Approaches {
 	static final double SEEK_RANGE = 16.0;
 	/** Chance a scan that could start an approach does (so it doesn't come the moment the wait's over). */
 	static final float APPROACH_CHANCE = 0.3F;
-	/** (0.5.47) How often gossip is about a butcher (good, bad, ours or far off), when Jaymo's Kitchen is there. */
+	/** (0.5.51) How often gossip is about a butcher (good, bad, ours or far off), when Jaymo's Kitchen is there. */
 	static final float BUTCHER_GOSSIP_CHANCE = 0.5F;
 	/** Between approaches to one player (ticks): at least this, plus up to this; the first after joining. */
 	static final int PLAYER_GAP = 20 * 90, PLAYER_GAP_SPREAD = 20 * 150, FIRST_GAP = 20 * 45;

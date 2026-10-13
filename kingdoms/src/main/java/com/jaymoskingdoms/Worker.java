@@ -74,6 +74,12 @@ public interface Worker {
 			// (both hands on the shafts)
 			return ItemStack.EMPTY;
 		}
+		if (role == Folk.STABLEHAND) {
+			return new ItemStack(Items.BRUSH);
+		}
+		if (role == Folk.FARRIER) {
+			return new ItemStack(com.jaymoskingdoms.equestrian.Tackroom.HORSESHOES);
+		}
 		if (role == Folk.FOREMAN) {
 			return new ItemStack(wild ? Items.STONE_AXE : Items.WOODEN_AXE);
 		}
@@ -82,7 +88,8 @@ public interface Worker {
 
 	/** Whether {@code role} is one a worker does (and goes home to bed after). */
 	static boolean isWork(int role) {
-		return Folk.isBuilder(role) || role == Folk.FARMER || role == Folk.MINER || role == Folk.WOODCUTTER || role == Folk.PULLER;
+		return Folk.isBuilder(role) || role == Folk.FARMER || role == Folk.MINER || role == Folk.WOODCUTTER || role == Folk.PULLER
+			|| Stables.isStableWorker(role);
 	}
 
 	// ---- the mob's own ----------------------------------------------------------------------------------------------
