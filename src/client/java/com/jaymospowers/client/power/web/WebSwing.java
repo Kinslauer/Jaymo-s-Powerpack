@@ -39,22 +39,26 @@ public final class WebSwing {
 	/** Velocity kept per tick while on the web (replaces vanilla's 0.91 horizontal / 0.98 vertical air drag). */
 	static final double SWING_DRAG = 0.993;
 	/** Holding forward on the downswing pumps this much extra speed along the swing, per tick. */
-	static final double PUMP = 0.03;
+	static final double PUMP = 0.015;
 	/** Holding Jump on a web also thrusts you along the swing this much per tick (on top of reeling in): it rockets
 	 * you round the arc, and a release flings you out of it with the extra speed. */
-	static final double JUMP_THRUST = 0.07;
+	static final double JUMP_THRUST = 0.035;
 	/** Jump reels in, sneak lets out (blocks per tick), every web that's out. */
 	static final double REEL_IN = 0.45;
 	static final double LET_OUT = 0.35;
 	/** Speed cap while swinging or flying from a swing (blocks/tick; sprinting is ~0.28). */
 	static final double MAX_SPEED = 2.6;
 	/**
-	 * Momentum: a swing chain starts capped at {@code SWING_START_SPEED} and the cap climbs {@code SWING_RAMP} a tick
-	 * while you're on a web, up to {@code MAX_SPEED} (about 8 s of swinging). It holds through releases and new webs in
-	 * the air, and starts over once you're on the ground off the web.
+	 * Momentum has to be built: a swing chain starts capped at {@code SWING_START_SPEED}, and the cap only climbs
+	 * ({@code SWING_RAMP} a tick) while you're on a web actually moving at {@code RAMP_AT} of it or more, so it takes
+	 * about half a minute of good, unbroken swinging to reach {@code MAX_SPEED}. A clean release (quality over
+	 * {@code RELEASE_GAIN_QUALITY}) adds up to {@code RELEASE_GAIN}. It holds through releases and new webs in the air,
+	 * and starts over once you're on the ground off the web.
 	 */
-	static final double SWING_START_SPEED = 0.8;
-	static final double SWING_RAMP = 0.011;
+	static final double SWING_START_SPEED = 0.55;
+	static final double SWING_RAMP = 0.003;
+	static final double RAMP_AT = 0.85;
+	static final double RELEASE_GAIN = 0.08, RELEASE_GAIN_QUALITY = 0.6;
 	/** Release timing: letting go while travelling this many degrees above level is perfect; the window either side. */
 	static final double RELEASE_SWEET_ANGLE = 35.0;
 	static final double RELEASE_WINDOW = 35.0;
@@ -300,6 +304,11 @@ public final class WebSwing {
 		}
 		Vec3 forward = v.horizontal().normalize();
 		player.setDeltaMovement(v.add(forward.scale(RELEASE_FORWARD * quality)).add(0.0, RELEASE_UP * quality, 0.0));
+		if (quality > RELEASE_GAIN_QUALITY) {
+			// a well-timed release is how you build speed fastest
+			momentum = Math.min(MAX_SPEED, momentum + RELEASE_GAIN * quality);
+			flightCap = momentum;
+		}
 		if (quality > 0.7) {
 			play(player, SoundEvents.PLAYER_ATTACK_SWEEP, 0.7F, 1.6F);
 			Vec3 at = player.position().add(0.0, 1.0, 0.0);
@@ -361,7 +370,9 @@ public final class WebSwing {
 		tricks.tick(player, attached(), flying, wingsTicks > 0, apexY);
 		// the swing's momentum builds while on a web, and is lost on the ground
 		if (attached()) {
-			momentum = Math.min(MAX_SPEED, momentum + SWING_RAMP);
+			if (player.getDeltaMovement().length() >= momentum * RAMP_AT) {
+				momentum = Math.min(MAX_SPEED, momentum + SWING_RAMP);
+			}
 		} else if (player.onGround() || player.isInWater() || player.isInLava()) {
 			momentum = SWING_START_SPEED;
 		}

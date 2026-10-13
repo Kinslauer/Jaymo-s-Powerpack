@@ -5,6 +5,12 @@ of each arc, and get a boost if you let go on the upswing. You keep that speed i
 fire again mid-air to chain swings. Three utility webs round out the kit. Accent colour `0xE0303A`; the icon is a
 cobweb.
 
+## Slower momentum (0.8.91)
+Speed has to be built. A swing chain starts capped at 0.55 b/t (was 0.8) and the cap only climbs, 0.003 a tick (was
+0.011 regardless), while you're on a web moving at 85% of it or more: about half a minute of unbroken, well-driven
+swinging to the 2.6 top speed. A clean release (quality over 0.6) adds up to 0.08 to the cap. Jump thrust on the web
+is halved (0.035) and the forward pump too (0.015). Landing still starts the chain over. Tuning: top of `WebSwing`.
+
 ## Controls
 
 | Key (default) | Ability | Cooldown |
