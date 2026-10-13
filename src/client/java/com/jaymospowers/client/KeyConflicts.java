@@ -15,7 +15,7 @@ import net.minecraft.client.Minecraft;
  */
 final class KeyConflicts {
 	/**
-	 * Bump to run the move again (for a new clash in a later pack version). v2 (0.9.21): Camera Utils' zoom, on Z (the
+	 * Bump to run the move again (for a new clash in a later pack version). v2 (0.9.23): Camera Utils' zoom, on Z (the
 	 * pack zooms with OK Zoomer).
 	 */
 	private static final String MARKER = "jaymospowers-keys-v2";

@@ -157,7 +157,7 @@ power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts
 | 155 | Bulwark | V | Grab and Throw | Lift the creature you look at overhead; V again hurls it at 1.5 blocks/tick. Looking at the ground rips a 4-block chunk out and throws it. 1 s. | |
 | 156 | Bulwark | B | Leap Slam | A great leap; the landing hits 8 within 4 blocks. No fall damage. 6 s. | |
 | 157 | Pyre | R | Fire Bolt | A small fireball where you look. 1 s. | |
-| 158 | Pyre | G (hold) | Flame Jet | Levitation IV while held (costs hunger, needs food above 3); slow falling on release. | |
+| 158 | Pyre | G (hold) | Flame Jet | Fly where you look on jets of fire from your hands and feet, free; slow falling on release. | |
 | 159 | Pyre | V | Fire Nova | 6 damage and 5 s of fire to all within 5 blocks. 10 s. | |
 | 160 | Pyre | B | Magma Trail | Fire under your feet for 6 s. 15 s. | |
 | 161 | Pyre | passive | Living magma | Fire and lava can't hurt it; water and rain do 1 hp/s. | |
@@ -173,7 +173,7 @@ power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts
 | 171 | Wisp | R | Phase | Through a wall up to 2 blocks thick. 3 s. | |
 | 172 | Wisp | G | Shroud | Invisible until you strike; mobs forget you. | |
 | 173 | Wisp | V | Dread Wail | Mobs within 10 blocks flee for 3 s; players get 5 s of darkness. 15 s. | |
-| 174 | Wisp | B (hold) | Glide | Fall slowly and drift forward. No fall damage ever. | |
+| 174 | Wisp | B (hold) | Glide | Fall slowly and drift forward, tipped forward like a ghost, arms reaching, tatters streaming. No fall damage ever. | |
 | 175 | Gremlin | R | Spring | A huge jump, soft landing. 1.5 s. | |
 | 176 | Gremlin | G | Sabotage | Up to 16 blocks away: levers, buttons, doors, trapdoors, gates toggled; redstone wire, repeaters, comparators, torches popped off. 5 s. | |
 | 177 | Gremlin | V | Bite | 3 damage; players lose 4 food, mobs get Hunger and Weakness; heals you 2. 3 s. | |
@@ -183,22 +183,22 @@ power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts
 | 181 | Knell | V | Shriek | 4 damage, 6 s darkness and Slowness II to all within 12 blocks. 15 s. | |
 | 182 | Knell | B | Burrow | Sink into the ground (immune for a second) and come up where you look, up to 16 blocks. 12 s. | |
 | 183 | Wyrm | R | Dragon's Breath | A 3-block cloud of purple fire 5 blocks ahead for 5 s. 10 s. | |
-| 184 | Wyrm | G (hold) | Wings | Fly where you look (costs hunger); slow falling when you let go. | |
+| 184 | Wyrm | G (hold) | Wings | Fly where you look, free; the wings beat, then fold back at speed. Slow falling when you let go. | |
 | 185 | Wyrm | V | Wing Gust | 3 damage and a 1.6 shove to all within 6 blocks; you recoil. 6 s. | |
 | 186 | Wyrm | B | Rift | Teleport up to 12 blocks where you look. 4 s. | |
 | 187 | Wyrm | passive | Of the End | Water and rain do 1 hp/s. | |
 | 188 | Any | passive | Ascension | The power ascends once all 8 aliens are scanned and the power is fully mastered. C then works as an alien. | |
 | 189 | Any | C (ascended) | Ultimate | As an alien: become its Ultimate form for the rest of the timer. C again is the Ultimate's own move where it has one. | |
 | 190 | Bulwark | C | Titan | 2x size, +12 armour, +20 health; the Ground Clap smashes walls up to 3 blocks thick ahead of you. | |
-| 191 | Pyre | C | Sunheart | The Flame Jet is true flight toward your look; R is a held 12-block beam of fire (2 damage per 4 ticks, lights blocks). | |
+| 191 | Pyre | C | Sunheart | The Flame Jet flies half again as fast; R is a held 12-block beam of fire (2 damage per 4 ticks, lights blocks). | |
 | 192 | Blur | C | Afterimage | A glowing ghost of you bolts away for 10 s and everything hunting you hunts it. C again: another, every 10 s. | |
 | 193 | Prism | C | Geode | Everything within 6 blocks is cased in crystal for 4 s (held, can't strike); projectiles shatter; you get Resistance III. Every 20 s. | |
 | 194 | Wisp | C | Revenant | Possess the mob you look at (8 blocks) for 10 s: it goes where you look; nothing hunts you. C again lets go. | |
 | 195 | Gremlin | C | Swarm | 3 glowing gremlins follow and bite with you. C again swaps you with the farthest (nearest while sneaking). | |
 | 196 | Knell | C | The Tolling | Rooted for 10 s: 5 tolls, each 6 sonic damage, a shove and darkness to all within 8. Again after 30 s. | |
-| 197 | Wyrm | C | Elder Wyrm | 2x size, +8 armour, wings cost no hunger, breath every 2 s, gust half again as wide. | |
+| 197 | Wyrm | C | Elder Wyrm | 2x size, +8 armour, breath every 2 s, gust half again as wide. | |
 | 198 | Any | corrupted | Twists | Each alien's moves carry a flaw while the band is corrupted (4 knockouts): see docs/xenoform.md. The line is shown when you change. | |
 | 199 | Nadir | (getting it) | The two voices | Ascended and corrupted, Hush and Clamour speak from the band, in rounds that never end: two pairs of conflicting yes/no questions (each wants a yes; 6 pairs, changing by round), then a deed each (odd rounds: 3 changes without a blow, 12 lives as an alien; even rounds: 3 changes ended by hand, 2 knockouts taken). Then Nadir may be slammed once; when that change ends, the next round begins. | |
-| 200 | Nadir | body | The void given shape | 1.15x, 60 hp, fists of 6, +10% speed, immovable; no fall, fire or drowning damage. A dark silhouette with a void face and the xeno insignia on the chest. | |
+| 200 | Nadir | body | The void given shape | 1.15x, 60 hp, fists of 6, +20% speed, immovable; no fall, fire or drowning damage. Flies like creative (double-tap Jump), over three times creative's speed, free. A dark silhouette with a void face and the xeno insignia on the chest. | |
 | 201 | Nadir | R | Beacon | Tap: pick a player anywhere on the server (tap again for the next); they glow through the world for 3 s. Hold 1.5 s: phase to just behind them, across dimensions. 5 s. | |
 | 202 | Nadir | G V B | (later) | Not decided yet. | |
