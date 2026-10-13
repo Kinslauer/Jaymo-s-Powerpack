@@ -4,6 +4,9 @@ import com.jaymoskitchen.JaymosKitchen;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
@@ -313,7 +316,42 @@ public final class Payloads {
 		}
 	}
 
+	/**
+	 * (0.4.30) Server → client: a butcher villager looks over the body you brought ({@code what}) and names his price.
+	 * {@code skill}: how many times what you'd get yourself (1 to 3); {@code tier} 0 (clumsy) to 4 (master).
+	 */
+	public record OpenButcher(int villager, Component name, Component what, float skill, int tier, int price) implements CustomPacketPayload {
+		public static final Type<OpenButcher> TYPE = new Type<>(JaymosKitchen.id("open_butcher"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, OpenButcher> CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_INT, OpenButcher::villager,
+			ComponentSerialization.TRUSTED_STREAM_CODEC, OpenButcher::name,
+			ComponentSerialization.TRUSTED_STREAM_CODEC, OpenButcher::what,
+			ByteBufCodecs.FLOAT, OpenButcher::skill,
+			ByteBufCodecs.VAR_INT, OpenButcher::tier,
+			ByteBufCodecs.VAR_INT, OpenButcher::price,
+			OpenButcher::new);
+
+		@Override
+		public Type<OpenButcher> type() {
+			return TYPE;
+		}
+	}
+
+	/** (0.4.30) Client → server: hand the body to the butcher and pay. */
+	public record ButcherDeal(int villager) implements CustomPacketPayload {
+		public static final Type<ButcherDeal> TYPE = new Type<>(JaymosKitchen.id("butcher_deal"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, ButcherDeal> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeVarInt(p.villager), buf -> new ButcherDeal(buf.readVarInt()));
+
+		@Override
+		public Type<ButcherDeal> type() {
+			return TYPE;
+		}
+	}
+
 	public static void register() {
+		PayloadTypeRegistry.clientboundPlay().register(OpenButcher.TYPE, OpenButcher.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(ButcherDeal.TYPE, ButcherDeal.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(SearFinish.TYPE, SearFinish.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(DropCarried.TYPE, DropCarried.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(FinishRoll.TYPE, FinishRoll.CODEC);

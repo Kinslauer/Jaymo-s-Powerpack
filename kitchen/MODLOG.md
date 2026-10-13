@@ -665,3 +665,19 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
   splash (`CorpseEntity.lootFish`). Before, a fish too big to pocket (a beached flying fish) was searched like any other
   corpse: its fish dropped and the body stayed behind.
 - Fish corpses saved before 0.4.29 (as `OTHER`) count by their type too (`CorpseEntity.isFish`).
+
+## 0.4.30: butcher villagers
+- **Butcher villagers butcher for you** (`corpse/Butchers`; vanilla's butchers and MCA's, by profession). Right-click
+  one with a passive animal's corpse in your arms or a bagged one in your hand: a screen (`ButcherScreen`) shows their
+  skill (Clumsy, Fair, Able, Skilled, Master), the yield, and the price. Monsters and heavy (iron) corpses are refused.
+- **Skill** = 1 + 0.5 per trade level above novice, plus a knack of their own (+/-0.3, fixed per villager), clamped to
+  1x-3x of what a proper job on a butcher block gets (`CorpseEntity.butcheredDrops`: the loot, extra meat and the
+  block-only extras). Every count is multiplied, the fraction a chance at one more.
+- **Price** = skill x 1 emerald for a small body, x 2 for a big carcass, rounded (so 1 to 6). Creative pays nothing.
+- **The errand:** paid, they take the body in their arms and walk out back: to the nearest butcher block within 14
+  blocks they can reach, else a reachable spot 5-12 blocks past their smoker (job site) on the side away from you.
+  They chop for 5 s (swings, cleaver sounds, the body jolting), the body is gone, and they walk back to you and put
+  the cuts in your pockets (overflow at your feet). If you've wandered off they wait with the cuts and come over when
+  you're within 20 blocks, or right-click them to collect. The job (cuts worked out at the deal) is saved on the
+  villager (`jaymoskitchen:butcher_job`); if they die mid-job the cuts drop where they fall.
+- Tuning: the constants at the top of `Butchers`.

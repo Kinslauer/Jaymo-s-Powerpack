@@ -1,5 +1,6 @@
 package com.jaymoskitchen.client.mixin;
 
+import com.jaymoskitchen.corpse.Butchers;
 import com.jaymoskitchen.corpse.CorpseEntity;
 import com.jaymoskitchen.corpse.Corpses;
 import com.jaymoskitchen.net.Payloads;
@@ -7,6 +8,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * Carrying a corpse, right-clicking anywhere (at the air too, which normally sends nothing with an empty hand) lets go
  * of it: it drops from the arms, or with sneak held it's thrown a little way ahead. Only a plain right-click on a
- * butcher block goes through as usual, to lay it on top.
+ * butcher block goes through as usual, to lay it on top, and one on a butcher villager, to offer it to them.
  */
 @Mixin(Minecraft.class)
 abstract class MinecraftUseMixin {
@@ -36,6 +38,10 @@ abstract class MinecraftUseMixin {
 		boolean toss = player.isShiftKeyDown();
 		if (!toss && hitResult instanceof BlockHitResult block && block.getType() == HitResult.Type.BLOCK
 			&& Corpses.isButcherBlock(player.level().getBlockState(block.getBlockPos()))) {
+			return;
+		}
+		// (0.4.30) a plain right-click on a butcher villager offers them the body
+		if (!toss && hitResult instanceof EntityHitResult entity && Butchers.isButcher(entity.getEntity())) {
 			return;
 		}
 		// sneaking throws it a little way ahead (onto the ground, or into a cart); otherwise it just drops

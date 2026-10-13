@@ -537,3 +537,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.8.90, Your own blocks are no crime:** ships Jaymo's Kingdoms 0.5.46: breaking a block you placed yourself in a
   settlement (a chest, bed, crafting table, crops you planted), or opening a chest you placed there, no longer makes
   its people take you for a criminal. Blocks the settlement built still count.
+- **0.8.91, Butcher villagers:** ships Jaymo's Kitchen 0.4.30 (see `kitchen/MODLOG.md`): right-click a butcher villager
+  with a passive animal's corpse (carried or bagged) for a screen with their skill and price; pay in emeralds and they
+  carry it out back, chop it up and walk back with the cuts, up to 3x what you'd get yourself.
