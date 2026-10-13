@@ -638,9 +638,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.8.113, crawl roll:** while crawling, double-tap Left or Right (A / D) to roll one block that way, turning over once
   along your length. A roll puts out the fire on you and any fire you roll through (`Crawl.Roll`, `Crawl.ROLLING`,
   `client/CrawlRollPose`, `CrawlAvatarRendererMixin`).
-- **0.8.114, no punching trees, no vanilla metal tools (Kingdoms 0.5.59):** Andy's call. The vanilla crafting recipes
-  for iron, golden and copper pickaxes, axes, shovels, hoes and swords are off (Fabric `fabric:false` load conditions
-  over vanilla's files, with their recipe-book advancements; written by `tools/tinkering_assets.py`), so metal tools
-  come from the smeltery and Tool Station. Spears, armour and smelting are untouched. Wood needs an axe (Kingdoms
+- **0.8.114, no punching trees, no vanilla tools Tinkering makes (Kingdoms 0.5.59):** Andy's call: if Jaymo's
+  Tinkering can make it, the vanilla recipe goes. Its materials cover wood, stone, copper and iron, and its tools the
+  pickaxe, axe (hand axe), shovel and hoe (the mattock digs and tills) and sword, so the vanilla wooden, stone, copper
+  and iron pickaxe, axe, shovel, hoe and sword recipes are off (Fabric `fabric:false` load conditions over vanilla's
+  files, with their recipe-book advancements; written by `tools/tinkering_assets.py`). Golden and diamond tools (no
+  tinker gold or diamond heads), spears, armour, smelting and ingot/block crafting stay. Wood needs an axe (Kingdoms
   `Trees.needsAxe`): by hand a log is slow, drops nothing and won't chop, and a hint says to knap a hand axe (3 flint
   and a stick). Leaves broken by hand drop a stick 12% of the time, so the first stick doesn't depend on luck alone.

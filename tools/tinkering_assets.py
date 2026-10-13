@@ -553,20 +553,23 @@ def trades_data():
         write(os.path.join(MC_DATA, "tags", "villager_trade", prof, "level_%d.json" % level), {"values": values})
 
 
-# Andy (2026-10-13): the old metal tool recipes are off, so metal tools come from the smeltery and Tool Station.
-# Fabric's false load condition drops vanilla's file of the same id; their recipe-book advancements go with them.
-OFF_TOOLS = ("pickaxe", "axe", "shovel", "hoe")
+# Andy (2026-10-13): if Tinkering can make it, the vanilla recipe goes. Its materials cover wood, stone, copper and
+# iron (not gold or diamond), and its tools cover the pickaxe, axe (hand axe), shovel and hoe (mattock: digs and tills)
+# and sword. Fabric's false load condition drops vanilla's file of the same id; their recipe-book advancements go too.
+OFF_TIERS = ("wooden", "stone", "copper", "iron")
+OFF_TOOLS = ("pickaxe", "axe", "shovel", "hoe", "sword")
 
 
 def vanilla_off():
     off = {"fabric:load_conditions": [{"condition": "fabric:false"}]}
-    for metal in ("iron", "golden", "copper"):
-        for tool in OFF_TOOLS + ("sword",):
-            item = metal + "_" + tool
+    for folder in ("recipe", os.path.join("advancement", "recipes", "tools"), os.path.join("advancement", "recipes", "combat")):
+        shutil.rmtree(os.path.join(MC_DATA, folder), ignore_errors=True)
+    for tier in OFF_TIERS:
+        for tool in OFF_TOOLS:
+            item = tier + "_" + tool
             write(os.path.join(MC_DATA, "recipe", item + ".json"), off)
             folder = "combat" if tool == "sword" else "tools"
             write(os.path.join(MC_DATA, "advancement", "recipes", folder, item + ".json"), off)
-
 
 def data():
     write(os.path.join(DATA, "recipe", "tinkering", "pattern.json"), {
