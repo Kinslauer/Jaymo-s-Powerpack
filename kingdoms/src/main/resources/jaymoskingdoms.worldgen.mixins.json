@@ -2,6 +2,6 @@
 	"required": true,
 	"package": "com.jaymoskingdoms.mixin",
 	"compatibilityLevel": "JAVA_25",
-	"mixins": ["ChunkGeneratorStructureStateMixin", "StructureStartMixin"],
+	"mixins": ["ChunkGeneratorStructureStateMixin", "StructurePaletteMixin", "StructureStartMixin"],
 	"injectors": { "defaultRequire": 1 }
 }
