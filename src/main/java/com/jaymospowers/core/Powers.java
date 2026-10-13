@@ -271,7 +271,8 @@ public final class Powers {
 			return;
 		}
 		Power power = get(Identifier.tryParse(id));
-		if (power != null) {
+		// the screen doesn't offer a power fate can't give (the band only, for Xenoform); /power set still does
+		if (power != null && power.fated()) {
 			set(player, power);
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.chosen", power.name()));
 		}

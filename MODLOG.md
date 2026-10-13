@@ -786,8 +786,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   The band shows on a wearer's left wrist (dial glowing); holding Z lifts that wrist across the chest and the other
   fist drops onto the band as the change fires, in first and third person, and everyone sees a player slap the band as
   they change. Through a form's last ten seconds the alien pulses red for everyone (first-person arm too). The
-  alien's first-person arm now actually draws (the renderer skipped the hidden body's arm). Xenoform has no affinity
-  and never awakens by fate: the band is the only way to it (`Power.fated`).
+  alien's first-person arm now actually draws (the renderer skipped the hidden body's arm). Xenoform has no affinity,
+  never awakens by fate and isn't on creative's powers screen: the band is the only way to it (`Power.fated`; ops can
+  still `/power set` it).
 
 - **0.9.17, imbued blades proc (Kingdoms 0.6.8):** a Sorcerer's imbued blade bursts with its element on one blow in
   twenty rather than every one (the rest spark), and a lightning burst blinds for a moment; air lifts on every second

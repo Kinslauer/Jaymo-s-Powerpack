@@ -8,8 +8,8 @@ The plan with the user's answers: the "Omnitrix Power Plan" doc (Claude Docs); s
 ## Getting it [FallingStars, FallenStarBlock, XenoBandItem]
 
 - The band is the only way in: `XenoformPower.fated()` is false, so a random awakening never lands on Xenoform and it
-  can't be chosen as an affinity (`/power affinity` doesn't offer it either). Creative's H screen and `/power set`
-  still give it by hand.
+  can't be chosen as an affinity (`/power affinity` doesn't offer it either), and creative's H screen doesn't list it
+  (unless it's already yours). Only `/power set` gives it by hand.
 - **Falling stars** are a world event. Every 10 s each player under the open night sky (overworld, not raining) has a
   0.2% chance of one; at most one per world per day. A glowing rock (a scripted `BlockCluster`, like a Gravity meteor)
   comes down at a slant from 110 blocks up, 40–100 blocks from the player, in 4 s, whistling, with "A star is
