@@ -43,7 +43,7 @@ import org.jspecify.annotations.Nullable;
  * Ascends after {@link #ASCEND_PARRIES} katana parries with every ability unlocked. Darktide starts corrupted (the
  * Drowned Dark, {@link #corrupted}): {@link #CURE_TICKS} of Conduit Power in a row cure it until the next nightfall, when
  * it comes back. That's Darktide's own state, never written into Fate. Darktide users never drown, and dying at night
- * brings them back as their shadow until dawn ({@link DarktideShade}).
+ * brings them back as their shadow until the next nightfall ({@link DarktideShade}).
  */
 public final class DarktidePower implements Power {
 	public static final DarktidePower INSTANCE = new DarktidePower();
@@ -68,6 +68,7 @@ public final class DarktidePower implements Power {
 
 	public static void init() {
 		Powers.register(INSTANCE);
+		DarktideShade.registerItems();
 		DarktideNet.register();
 		ServerPlayNetworking.registerGlobalReceiver(DarktideNet.Guard.TYPE, (payload, ctx) -> DarktideGuard.setGuard(ctx.player(), payload.up()));
 		ServerPlayNetworking.registerGlobalReceiver(DarktideNet.Skill.TYPE, (payload, ctx) -> {
@@ -422,7 +423,7 @@ public final class DarktidePower implements Power {
 		tickCure(player, live);
 		DarktideShade.tick(player, live);
 		if (!player.isAlive()) {
-			// burned away at dawn
+			// the sun burned the shade away
 			return;
 		}
 		if (live.veil) {

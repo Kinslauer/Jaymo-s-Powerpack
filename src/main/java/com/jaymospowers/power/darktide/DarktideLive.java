@@ -47,6 +47,8 @@ final class DarktideLive {
 	boolean cureSeen;
 	/** The shade has been warned that dawn is near. */
 	boolean dawnWarned;
+	/** Ticks the shade has stood in sunlight. */
+	int sunTicks;
 
 	// Combat Roll
 	long rollStart = -1L;

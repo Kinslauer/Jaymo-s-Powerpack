@@ -94,7 +94,7 @@ final class DarktideDebugCommand {
 							return 0;
 						}
 						DarktideShade.rise(player);
-						c.getSource().sendSuccess(() -> Component.literal("You walk as your shade until dawn."), false);
+						c.getSource().sendSuccess(() -> Component.literal("You walk as your shade until nightfall. Keep out of the sun."), false);
 						return 1;
 					}))));
 	}

@@ -60,13 +60,16 @@ Fate): `corrupted = Fate.isCorrupted || !cured || (night && !nightReturnPrevente
 
 A Darktide user who dies **at night** (a dimension with a day, so never the Nether or the End) rises as their own
 **shade** instead: back on 10 health (`REBIRTH_HEALTH`) with full Flow, effects and fire cleared, 3 s of Darkness on the
-screen, drawn dark like a risen shadow and shedding black dust and ash (`DUST`; `SHADE` attachment, synced; `Save.shade` persisted so logging out dodges
-nothing). Once a night: a shade that dies again before dawn dies for real. `/kill`, the void and anything else
-through invulnerability are always final, and a held Totem of Undying goes first.
-- The shade lasts until dawn on the overworld clock (`DarktideFlow.NIGHT_END`, 23500), with a whisper 30 s before.
-- At dawn: under open sky (in a world with a sun, eyes able to see the sky, not under water) the shade **burns away**
-  and the user dies (`jaymospowers:darktide_dawn`, through armour, invulnerability, Resistance and totems). Sheltered
-  (a roof, a cave, deep water, the Nether or the End) the user is flesh again.
+screen, drawn dark like a risen shadow and shedding black dust and ash (`DUST`; `SHADE` attachment, synced;
+`Save.shadeUntil` persisted so logging out dodges nothing). Once a night: a shade that dies again dies for real.
+`/kill`, the void and anything else through invulnerability are always final, and a held Totem of Undying goes first.
+- The shade lasts until the **next nightfall** on the overworld clock (a whole day to hide through), then the user is
+  flesh again. A whisper 30 s before dawn tells them to find a roof.
+- **Sunlight** kills it: a world with a sun, `isBrightOutside` (so not at night or in the rain), eyes under open sky,
+  not under water. After 1 s in it (`SUN_GRACE_TICKS`, smoke and a warning) the shade **burns away**: every item it
+  carries is destroyed (inventory, armour, off hand, the crafting grid, the cursor, Tide Arms' stored blade), 3 Shadow
+  Ash (`jaymospowers:shadow_ash`) drop where it stood, and the user dies (`jaymospowers:darktide_dawn`, through armour,
+  invulnerability, Resistance and totems).
 - `/powerdebug darktide shade` rises as your shade now.
 
 ## Crippled [DarktideStatus]
@@ -107,5 +110,6 @@ cripple when it lands low). Pounce's 3 stabs need humanoid AND crippled.
 9. Combat Roll charges show 3.
 10. R charge: overhead blade / drawn-back fist seen by another player; release damage scales with the hold.
 11. Underwater: no air bubbles drop, no drowning.
-12. Die at night: you stand back up dark on 10 health. Stay outside till dawn and you burn away; get under a roof and you are
-    yourself again in the morning. Die twice in one night and you stay dead.
+12. Die at night: you stand back up dark on 10 health, shedding black dust. Step into the sun the next day and you burn
+    away, leaving only Shadow Ash and none of your items; hide until nightfall and you are yourself again. Die twice in one
+    night and you stay dead.

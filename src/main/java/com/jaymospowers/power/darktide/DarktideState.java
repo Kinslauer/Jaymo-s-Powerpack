@@ -27,7 +27,7 @@ import net.minecraft.world.item.component.ItemContainerContents;
  * <li>{@link #VEIL}: the veil is up and hides the name tag (synced to everyone);</li>
  * <li>{@link #CURED}: the corruption is cured for now (synced to everyone, for the name and the HUD);</li>
  * <li>{@link #RISEN}: a risen shadow (Necromancy), synced to everyone so it's drawn dark;</li>
- * <li>{@link #SHADE}: a user walking as their own shadow after dying at night, synced to everyone so they're drawn dark.</li>
+ * <li>{@link #SHADE}: a user walking as their own shadow after dying at night (until the next nightfall), synced to everyone so they're drawn dark.</li>
  * </ul>
  */
 public final class DarktideState {
@@ -40,37 +40,37 @@ public final class DarktideState {
 
 	/**
 	 * Saved: katana parries counted toward ascension, stored shadows (entity type ids), Tide Arms' stored items and slot,
-	 * the overworld clock time the cure lasts until (the next nightfall; 0: corrupted), and whether you're a shade (died
-	 * at night and came back as your shadow, {@link DarktideShade}) until dawn.
+	 * the overworld clock time the cure lasts until (the next nightfall; 0: corrupted), and the overworld clock time a shade
+	 * (died at night and came back as their shadow, {@link DarktideShade}) is flesh again (0: not a shade).
 	 */
-	public record Save(int parries, List<String> shadows, ItemContainerContents stored, int storedSlot, long curedUntil, boolean shade) {
-		public static final Save NONE = new Save(0, List.of(), ItemContainerContents.EMPTY, -1, 0L, false);
+	public record Save(int parries, List<String> shadows, ItemContainerContents stored, int storedSlot, long curedUntil, long shadeUntil) {
+		public static final Save NONE = new Save(0, List.of(), ItemContainerContents.EMPTY, -1, 0L, 0L);
 		public static final Codec<Save> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.INT.optionalFieldOf("parries", 0).forGetter(Save::parries),
 				Codec.STRING.listOf().optionalFieldOf("shadows", List.of()).forGetter(Save::shadows),
 				ItemContainerContents.CODEC.optionalFieldOf("stored", ItemContainerContents.EMPTY).forGetter(Save::stored),
 				Codec.INT.optionalFieldOf("stored_slot", -1).forGetter(Save::storedSlot),
 				Codec.LONG.optionalFieldOf("cured_until", 0L).forGetter(Save::curedUntil),
-				Codec.BOOL.optionalFieldOf("shade", false).forGetter(Save::shade))
+				Codec.LONG.optionalFieldOf("shade_until", 0L).forGetter(Save::shadeUntil))
 			.apply(i, Save::new));
 
 		Save withParries(int value) {
-			return new Save(value, shadows, stored, storedSlot, curedUntil, shade);
+			return new Save(value, shadows, stored, storedSlot, curedUntil, shadeUntil);
 		}
 
 		Save withShadows(List<String> value) {
-			return new Save(parries, List.copyOf(value), stored, storedSlot, curedUntil, shade);
+			return new Save(parries, List.copyOf(value), stored, storedSlot, curedUntil, shadeUntil);
 		}
 
 		Save withStored(ItemContainerContents value, int slot) {
-			return new Save(parries, shadows, value, slot, curedUntil, shade);
+			return new Save(parries, shadows, value, slot, curedUntil, shadeUntil);
 		}
 
 		Save withCuredUntil(long value) {
-			return new Save(parries, shadows, stored, storedSlot, value, shade);
+			return new Save(parries, shadows, stored, storedSlot, value, shadeUntil);
 		}
 
-		Save withShade(boolean value) {
+		Save withShadeUntil(long value) {
 			return new Save(parries, shadows, stored, storedSlot, curedUntil, value);
 		}
 	}
