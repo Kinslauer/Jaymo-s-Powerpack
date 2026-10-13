@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.6.10) Storm cells' local weather ({@link Storms}): rain falls on the ground under a cell, on both sides, whatever
+ * (0.6.12) Storm cells' local weather ({@link Storms}): rain falls on the ground under a cell, on both sides, whatever
  * vanilla's weather is; and on the client, the sky darkens, rain falls and thunder rolls when you're under or near one.
  */
 @Mixin(Level.class)

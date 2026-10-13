@@ -3,7 +3,7 @@ package com.jaymoskingdoms.disasters;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 
 /**
- * (0.6.10) A storm cell: a patch of dark sky {@link #radius} blocks across that drifts with the wind. Rain and thunder
+ * (0.6.12) A storm cell: a patch of dark sky {@link #radius} blocks across that drifts with the wind. Rain and thunder
  * fall only under it ({@link Storms#cover}). A supercell can put down a {@link Tornado}. Held by the server
  * ({@link Storms}) and mirrored to every client in the Overworld ({@link StormNet}), which moves it on by its velocity
  * between updates.

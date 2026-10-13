@@ -93,6 +93,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.6.4: Jaymo's Powers' aliens (the Xeno-Band) are monsters to folk who haven't seen you change (and its attachment)
 		LOGGER.debug("alien attachment: {}", Aliens.KNOWN);
 		Aliens.register();
+		Oddities.register();
 		// 0.5.21: monsters hunt the settlements' folk as they do villagers
 		Prey.register();
 		Theft.register();
@@ -175,7 +176,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("moon and grudge attachments: {} {}", Moons.ROLL, Omens.GRUDGES);
 		Moons.register();
 		Omens.register();
-		// 0.6.10: natural disasters, stage 1: storm fronts, tornadoes, the storm bell, weathervane and barometer
+		// 0.6.12: natural disasters, stage 1: storm fronts, tornadoes, the storm bell, weathervane and barometer
 		com.jaymoskingdoms.disasters.Disasters.register();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();

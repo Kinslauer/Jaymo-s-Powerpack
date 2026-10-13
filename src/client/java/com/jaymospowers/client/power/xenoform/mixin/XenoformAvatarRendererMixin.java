@@ -1,6 +1,7 @@
 package com.jaymospowers.client.power.xenoform.mixin;
 
 import com.jaymospowers.client.power.xenoform.XenoformClient;
+import com.jaymospowers.client.power.xenoform.XenoformFlightPose;
 import com.jaymospowers.client.power.xenoform.XenoformHand;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.geom.ModelPart;
@@ -21,7 +22,14 @@ abstract class XenoformAvatarRendererMixin {
 		method = "extractRenderState(Lnet/minecraft/world/entity/Avatar;Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;F)V",
 		at = @At("TAIL"))
 	private void jaymospowers$xenoform(Avatar entity, AvatarRenderState state, float partialTicks, CallbackInfo ci) {
-		XenoformClient.extract(entity, state);
+		XenoformClient.extract(entity, state, partialTicks);
+	}
+
+	@Inject(
+		method = "setupRotations(Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;FF)V",
+		at = @At("TAIL"))
+	private void jaymospowers$xenoformGlide(AvatarRenderState state, PoseStack poseStack, float bodyRot, float entityScale, CallbackInfo ci) {
+		XenoformFlightPose.rotate(state, poseStack, entityScale);
 	}
 
 	@Inject(method = "renderHand", at = @At("HEAD"), cancellable = true)

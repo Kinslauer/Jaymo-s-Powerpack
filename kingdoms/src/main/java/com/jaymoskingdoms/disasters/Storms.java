@@ -21,7 +21,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.6.10) Storm fronts. Now and then a storm cell forms a long way off, upwind of someone, and drifts across the land
+ * (0.6.12) Storm fronts. Now and then a storm cell forms a long way off, upwind of someone, and drifts across the land
  * with the wind: rain and thunder fall only under it (a mixin on {@link Level}'s weather asks {@link #cover}), and its
  * lightning strikes only there. Every few days ({@link Disasters#DISASTER_DAYS}) the cell is a supercell, and as it
  * nears people it can put down a {@link Tornado}. In a dry land it's a dust devil instead. Vanilla's own weather is

@@ -7,6 +7,9 @@ The plan with the user's answers: the "Omnitrix Power Plan" doc (Claude Docs); s
 
 ## Getting it [FallingStars, FallenStarBlock, XenoBandItem]
 
+- The band is the only way in: `XenoformPower.fated()` is false, so a random awakening never lands on Xenoform and it
+  can't be chosen as an affinity (`/power affinity` doesn't offer it either), and creative's H screen doesn't list it
+  (unless it's already yours). Only `/power set` gives it by hand.
 - **Falling stars** are a world event. Every 10 s each player under the open night sky (overworld, not raining) has a
   0.2% chance of one; at most one per world per day. A glowing rock (a scripted `BlockCluster`, like a Gravity meteor)
   comes down at a slant from 110 blocks up, 40–100 blocks from the player, in 4 s, whistling, with "A star is
@@ -53,12 +56,12 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 | Alien | DNA | Body | R | G | V | B |
 |---|---|---|---|---|---|---|
 | **Bulwark** | iron golem | 1.5x, 40 hp, fists 7, slower, 60% knockback resist, steps up a block | Fist Combo: 3 blows at 4 ticks, 5 each, the last shoves (2 s) | Ground Clap: 6 to all within 5, debris ring (8 s) | Grab: lift the creature you look at overhead (it rides you); V again hurls it. Looking at the ground rips a 4-block chunk out and throws it (1 s) | Leap Slam: a leap; the landing hits 8 within 4 blocks, no fall damage (6 s) |
-| **Pyre** | blaze | 1x, 24 hp, fists 4, fire and lava can't hurt it, water and rain do (1 hp/s) | Fire Bolt: a small fireball (1 s) | Flame Jet (hold): levitation IV while held, costs hunger (needs food > 3), slow falling on release | Fire Nova: 6 to all within 5 and 5 s of fire (10 s) | Magma Trail: fire under your feet for 6 s (15 s) |
+| **Pyre** | blaze | 1x, 24 hp, fists 4, fire and lava can't hurt it, water and rain do (1 hp/s) | Fire Bolt: a small fireball (1 s) | Flame Jet (hold): fly toward your look at 0.55/tick, free, arms swept back as jets, flames pour from hands and feet; slow falling on release | Fire Nova: 6 to all within 5 and 5 s of fire (10 s) | Magma Trail: fire under your feet for 6 s (15 s) |
 | **Prism** | shulker | 1.1x, 30 hp, fists 5, 40% knockback resist | Crystal Shards: 3 instant rays in a 12° fan, 4 each, 16 blocks (1.5 s) | Crystal Wall: 5x3 amethyst 3 blocks ahead for 10 s, only in air (12 s) | Reflect (hold): rooted; arrows that hit you are replaced by one shot back at the shooter, other projectiles vanish | Spike Field: 5 + Slowness II to all within 4.5 (10 s) |
 | **Wisp** | phantom | 1x, 16 hp, fists 3, no fall damage, no legs | Phase: through a wall up to 2 thick to the first spot you fit (3 s) | Shroud: Invisibility until you hurt something (`onDealtDamage`); mobs targeting you forget you | Dread Wail: mobs within 10 drop their target and path 10 blocks away for 3 s; players get Darkness (15 s) | Glide (hold): fall at -0.12, drift forward up to 0.7 |
 | **Gremlin** | silverfish | 0.3x, 10 hp, fists 2, 20% faster, no fall damage; fits 1x1 gaps | Spring: 1.1 up, 0.6 out (1.5 s) | Sabotage: within 16 blocks, levers and buttons are pulled, doors/trapdoors/gates toggled, wire/repeaters/comparators/torches popped off (5 s) | Bite: 3 damage within 2.5; players lose 4 food, mobs get Hunger II + Weakness; you heal 2 and eat 2 (3 s) | Climb (hold): up any wall at 0.18/tick |
 | **Knell** | Warden | 1.3x, 50 hp, fists 8, slower, 90% knockback resist, steps up a block | Sonic Boom: 15-block line through walls, 10 sonic damage + 2.5 knockback (8 s) | Tremor Sense (hold): Glowing on everything within 24 | Shriek: 4 damage, Darkness 6 s, Slowness II to all within 12 (15 s) | Burrow: 1 s digging (immune, Slowness X), teleport to the surface where you look up to 16 blocks, 1 s emerging (12 s) |
-| **Wyrm** | Ender Dragon (any part) | 1.2x, 36 hp, fists 5, 40% knockback resist; water and rain 1 hp/s; its own breath can't hurt it | Dragon's Breath: an `AreaEffectCloud` 5 blocks ahead on the ground, radius 3, 5 s, Instant Damage II (10 s) | Wings (hold): fly toward where you look at 0.9/tick, costs hunger (needs food > 3); slow falling on release | Wing Gust: 3 damage, shove 1.6 out to all within 6, you recoil (6 s) | Rift: teleport up to 12 blocks where you look (4 s) |
+| **Wyrm** | Ender Dragon (any part) | 1.2x, 36 hp, fists 5, 40% knockback resist; water and rain 1 hp/s; its own breath can't hurt it | Dragon's Breath: an `AreaEffectCloud` 5 blocks ahead on the ground, radius 3, 5 s, Instant Damage II (10 s) | Wings (hold): fly toward where you look at 0.9/tick, free; slow falling on release | Wing Gust: 3 damage, shove 1.6 out to all within 6, you recoil (6 s) | Rift: teleport up to 12 blocks where you look (4 s) |
 | **Blur** | horse (any) | 0.9x, 20 hp, fists 4, 60% faster, 4 blocks of extra safe fall | Dash: 1.5 blocks/tick for 8 ticks (2 s) | Wall Run (hold): against a wall, climb at 0.32/tick for up to 2 s | Whirlwind: pulls everything within 5 in, 4 damage (8 s) | Chain Strike: up to 5 foes within 8, every 3 ticks teleport behind one and hit for 5 (12 s) |
 
 ## Rendering [client/power/xenoform]
@@ -70,9 +73,32 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 - `XenoFormModels`: each alien is a `HumanoidModel` built from `HumanoidModel.createMesh` with a different inflation and
   extra parts hung on the head and body (Bulwark's brow, plates and lower arms; Pyre's crest, plumes and core; Blur's
   fin, snout and tail; Prism's crown and back crystals; Wisp's hood and tatters, no legs; Gremlin's big skull and ears;
-  Knell's horns, ribs and shoulders; Wyrm's horns, wings and tail), so it takes the player's own pose, swing, crouch and swim. Skins are 64x64 in the vanilla
-  layout, extras in the rows below; `tools/gen_xenoform.py` draws them.
-- First person: `renderHand` (head, cancellable) draws the alien's arm instead of the skin's.
+  Knell's horns, ribs, shoulders and jaw tendrils; Wyrm's horns, wings and finned tail; Bulwark's pauldrons, Blur's
+  ears, Prism's shoulder shards, Gremlin's tail), so it takes the player's own pose, swing, crouch and swim. Skins are
+  64x128: the vanilla layout in the top 64 rows, every extra in the rows below (nothing shares texels with a limb);
+  `tools/gen_xenoform.py` draws them face by face (lit from above, dark underneath) with each alien's own motifs, and
+  every alien wears the xeno insignia (the band's green hourglass): on the chest, or on Pyre's core and Knell's sternum.
+  `python tools/gen_xenoform.py preview.png` also writes a front-view contact sheet of all nine.
+- First person: `renderHand` (head, cancellable) draws the alien's arm instead of the skin's; `XenoformFirstPersonMixin`
+  lifts the render state's invisible flag for the hands (the body was hidden for the alien, and the renderer skips an
+  invisible body's bare arm).
+- The band itself (`XenoBand`): a 5x3x5 box on the left wrist of anyone whose power is Xenoform while they're
+  themselves, its dial emissive; a layer in third person, and drawn on the first-person arm during the slam.
+- The slam (`XenoformSlap`, client only): holding Z brings the left wrist up across the chest and the right fist up
+  behind it; the fist drops onto the band as the hold reaches `HOLD_TICKS` (when the server changes you), rests, and
+  both arms fall back. A tap just lifts the wrist for a look. Everyone else sees the slap when a player changes shape
+  (the alien appears mid-slap). The pose is read onto the render state in `extract`, laid over any humanoid model
+  after it animates (`XenoformModelFeatureRendererMixin`), and mirrored in first person by replacing the usual hands.
+- Flight (`XenoformFlightPose`, client): the server syncs how an alien is flying (`XenoformState.FLIGHT`, from
+  `XenoForm.flight`). Pyre's jet, Wyrm's wings and Nadir's flight make `WindPose` treat the alien as cruising once it
+  moves at 0.25/tick, so it takes Wind's lean, banking and stretched-out limbs (Pyre keeps its arms swept back as jets). Wyrm's wings beat deep while flying and
+  fold back along the body from 0.45 to 0.8/tick (`XenoFormModels.Wyrm`); Wisp's glide tips the body 38° forward with a
+  slow roll and bob, arms reaching out limp, the tatters streaming; Pyre pours client-side flames from both hands and feet,
+  out behind along the flight. All flight is free (no hunger). Nadir flies like creative (`Abilities.mayfly`, flying
+  speed 0.16), put back on the way out (creative and spectator keep theirs).
+- The ending glow: the server sets the synced `XenoformState.ENDING` through a form's last `BEEP_TICKS`; everyone's
+  client then draws the alien a second time with the emissive `eyes` render type in pulsing red (`XenoformLayer.glow`),
+  the first-person arm too.
 - HUD right of the hotbar: as a human the dial chip (Z, the dialled alien's icon, shaded through the recharge, name and
   "n/N" above) and the scan chip (X, fills while scanning); as an alien four chips with cooldowns and a timer bar in the
   alien's colour, red through the beeps. A flash of the form's colour round the screen on each change.
@@ -89,7 +115,7 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 | Alien | Ultimate | What it does |
 |---|---|---|
 | Bulwark | Titan | 2x size, +12 armour, +20 health; the clap smashes walls 3 deep, 3 wide, 3 tall (hardness ≤ 6, no block entities). |
-| Pyre | Sunheart | The jet is free flight toward your look; R is a held beam (12 blocks, 2 fire damage every 4 ticks, lights what it ends on). |
+| Pyre | Sunheart | The jet flies at 0.8/tick; R is a held beam (12 blocks, 2 fire damage every 4 ticks, lights what it ends on). |
 | Blur | Afterimage | An invisible, glowing horse of your DNA bolts away for 10 s; mobs hunting you within 20 blocks retarget to it. C again every 10 s. |
 | Prism | Geode | All within 6 blocks: slowness/weakness/mining fatigue for 4 s, held still, amethyst grown round them (removed after); projectiles shatter; you get Resistance III. Every 20 s. |
 | Wisp | Revenant | Ride inside the mob you look at (8 blocks) for 10 s with its AI off: it walks where you look and jumps at walls; you're invisible and mobs drop you. It wakes dazed, glowing and weak. |

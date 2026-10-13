@@ -564,7 +564,7 @@ public final class Trees {
 	}
 
 	/**
-	 * (0.6.10) A tornado tears the tree standing on {@code foot} out of the ground whole and flings it off at
+	 * (0.6.12) A tornado tears the tree standing on {@code foot} out of the ground whole and flings it off at
 	 * {@code velocity} ({@link FallingTree#fling}). Null (and nothing happens) if it isn't a living tree rooted in the
 	 * ground, or it has more than {@code mostLogs} logs.
 	 */

@@ -81,7 +81,7 @@ public final class WindWeather {
 	}
 
 	/**
-	 * (0.9.21) Jaymo's Kingdoms' storm cells bring thunder to one patch of sky; under one, it's a storm. Looked up by
+	 * (0.9.25) Jaymo's Kingdoms' storm cells bring thunder to one patch of sky; under one, it's a storm. Looked up by
 	 * name, so it's simply never true without Kingdoms.
 	 */
 	private static final MethodHandle KINGDOMS_THUNDER = findKingdomsThunder();

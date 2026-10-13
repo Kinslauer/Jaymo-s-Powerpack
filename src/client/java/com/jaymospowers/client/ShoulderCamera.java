@@ -28,6 +28,7 @@ public final class ShoulderCamera {
 
 	/** In the shoulder view right now (third person, from behind, with the power). */
 	public static boolean inView() {
-		return Minecraft.getInstance().options.getCameraType() == CameraType.THIRD_PERSON_BACK && active();
+		// Camera Utils' own views (F6/F7, detached) win while they're on
+		return Minecraft.getInstance().options.getCameraType() == CameraType.THIRD_PERSON_BACK && active() && !CameraPreset.viewActive();
 	}
 }

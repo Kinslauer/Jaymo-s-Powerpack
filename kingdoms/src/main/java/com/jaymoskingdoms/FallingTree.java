@@ -65,7 +65,7 @@ public final class FallingTree extends Entity {
 	static final float CRUSH_MOST = 10.0F, CRUSH_PER_LOG = 0.6F;
 	/** Of its blocks, every this-many'th log and leaf breaks with a puff and a sound (the rest only a puff of chips). */
 	static final int LOG_SOUNDS = 3, LEAF_SOUNDS = 9;
-	/** (0.6.10) A torn-up tree in flight: its fall (blocks/tick²), the air's drag, how long before it can strike the ground
+	/** (0.6.12) A torn-up tree in flight: its fall (blocks/tick²), the air's drag, how long before it can strike the ground
 	 * (ticks, to leave its own hole) and the longest it flies. */
 	static final double FLY_GRAVITY = 0.05, FLY_DRAG = 0.985;
 	static final int FLY_CLEAR = 6, FLY_LONGEST = 600;
@@ -100,7 +100,7 @@ public final class FallingTree extends Entity {
 	private @Nullable Entity cutter;
 	private ItemStack tool = ItemStack.EMPTY;
 	private @Nullable Consumer<ItemStack> sink;
-	/** (0.6.10) Torn up by a tornado: it flies (ticks flown), tumbling this many degrees a tick. */
+	/** (0.6.12) Torn up by a tornado: it flies (ticks flown), tumbling this many degrees a tick. */
 	private boolean flying;
 	private int flown;
 	private float tumble;
@@ -143,7 +143,7 @@ public final class FallingTree extends Entity {
 	}
 
 	/**
-	 * (0.6.10) The tree whose {@code logs} and {@code leaves} stood on {@code foot} is torn out of the ground whole (by a
+	 * (0.6.12) The tree whose {@code logs} and {@code leaves} stood on {@code foot} is torn out of the ground whole (by a
 	 * tornado) and flies off at {@code velocity}, tumbling end over end toward {@code heading} by {@code tumble} degrees a
 	 * tick (null if nothing was there). It falls as anything does once the winds let it go, and breaks apart where it strikes the ground.
 	 */
@@ -277,7 +277,7 @@ public final class FallingTree extends Entity {
 		this.downAt = this.tickCount;
 	}
 
-	/** (0.6.10) In flight: it falls and tumbles, and once clear of its hole breaks apart where its wood strikes the ground. */
+	/** (0.6.12) In flight: it falls and tumbles, and once clear of its hole breaks apart where its wood strikes the ground. */
 	private void fly(ServerLevel level, List<Piece> pieces) {
 		Vec3 v = this.getDeltaMovement().add(0.0, -FLY_GRAVITY, 0.0).scale(FLY_DRAG);
 		this.setDeltaMovement(v);

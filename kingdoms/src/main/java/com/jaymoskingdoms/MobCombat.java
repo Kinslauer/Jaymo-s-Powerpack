@@ -390,7 +390,7 @@ public final class MobCombat {
 					&& (wild || Reputation.get(player, folk.factionId()) <= Reputation.HOSTILE || Theft.wanted(player, folk.factionId())
 						|| Aliens.feared(player, folk.factionId()));
 			}
-			return !wild && other instanceof Enemy && !(other instanceof Creeper);
+			return !wild && (other instanceof Enemy && !(other instanceof Creeper) || Oddities.hunted(other));
 		}
 		// a monster's sweep catches players, never its own kind
 		return other instanceof Player player && !player.isCreative() && !player.isSpectator() && !(other instanceof Enemy);

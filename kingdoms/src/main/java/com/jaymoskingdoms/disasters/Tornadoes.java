@@ -30,7 +30,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.6.10) Tornadoes on the ground. Each one wanders under its storm, pulls in and spins everything near it, lifts
+ * (0.6.12) Tornadoes on the ground. Each one wanders under its storm, pulls in and spins everything near it, lifts
  * what's in its core and flings it out, and (unless the {@link Disasters#DISASTER_DAMAGE} rule is off) tears up the
  * land in its path: plants and leaves, glass, wood, wool, roofs; a monster tears up stone too. What it tears loose
  * is thrown as falling blocks (the rest smashed). Settlements put back their ruined buildings in time ({@code Rebuilds}).
@@ -53,9 +53,9 @@ public final class Tornadoes {
 	static final float[] SOFT_HARDNESS = {0.0F, 2.5F, 3.0F}, STONE_HARDNESS = {-1.0F, -1.0F, 2.0F};
 	/** At most this many torn-up blocks in the air at once per tornado (the rest are smashed). */
 	static final int THROWN_MOST = 40;
-	/** (0.6.10) Torn-up blocks and trees ride its winds this long (ticks), then fall like anything else. */
+	/** (0.6.12) Torn-up blocks and trees ride its winds this long (ticks), then fall like anything else. */
 	static final int THROWN_RIDE = 50;
-	/** (0.6.10) By size: the chance a tree it strikes is torn out whole (at full strength), its most logs, and the most
+	/** (0.6.12) By size: the chance a tree it strikes is torn out whole (at full strength), its most logs, and the most
 	 * torn-up trees in the air at once. */
 	static final float[] UPROOT = {0.0F, 0.12F, 0.45F};
 	static final int[] TREE_LOGS = {0, 12, 64}, TREES_MOST = {0, 3, 8};
@@ -247,7 +247,7 @@ public final class Tornadoes {
 		}
 	}
 
-	/** (0.6.10) A torn-up block or tree it has carried long enough (or a tree only toppling): it falls on its own now. */
+	/** (0.6.12) A torn-up block or tree it has carried long enough (or a tree only toppling): it falls on its own now. */
 	private static boolean letGo(Entity e) {
 		if (e instanceof FallingBlockEntity block) {
 			return block.time > THROWN_RIDE;
@@ -311,7 +311,7 @@ public final class Tornadoes {
 	}
 
 	/**
-	 * (0.6.10) The tree {@code hit} (a leaf or log at the top of its column) belongs to is torn out whole and flung round
+	 * (0.6.12) The tree {@code hit} (a leaf or log at the top of its column) belongs to is torn out whole and flung round
 	 * its winds ({@code nx, nz}: out from its middle), if it's small enough for this tornado. Null if it isn't.
 	 */
 	private static @Nullable FallingTree uproot(ServerLevel level, Tornado t, BlockPos hit, double nx, double nz, RandomSource random) {
