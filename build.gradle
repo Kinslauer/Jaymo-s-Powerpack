@@ -151,7 +151,7 @@ def packResourcePacks = [
 // (Towns and Towers left in 0.8.4: its villages fought Epic Structures: Villages, where kingdoms are founded; its
 // library Cristel Lib came back in 0.8.69 for Overhauled Overworld. Traveler's Backpack and Forge Config API Port left
 // in 0.8.14)
-// (Chunky left in 0.8.113: with Distant Horizons on the server, a new world hung for good at "Selecting global world spawn")
+// (Chunky left in 0.8.117: with Distant Horizons on the server, a new world hung for good at "Selecting global world spawn")
 def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-", "forge-config-api-port-", "alexs-mobs-", "citadel-", "chunky-"]
 // the same, by Fabric mod id, for mods whose CurseForge file names we don't know: Alex's Mobs and Citadel (0.8.107,
 // their models drew black slabs and streaks across the screen with Iris shaders)
