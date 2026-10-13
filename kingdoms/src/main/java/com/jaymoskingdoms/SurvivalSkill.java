@@ -31,7 +31,7 @@ import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.NetherWartBlock;
 
 /**
- * (0.5.51) The Survival pillar of the skill tree ({@link Skills}). It grows as you live off the land: harvesting ripe
+ * (0.5.52) The Survival pillar of the skill tree ({@link Skills}). It grows as you live off the land: harvesting ripe
  * crops, eating, living through the night, and taking a beating and living. Practice makes hunger drain slower.
  *
  * <p>Perks: Forager (an extra harvest), Second Wind (healing when you're low), Weathered (fire and frost bite less),

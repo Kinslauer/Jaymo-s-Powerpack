@@ -18,7 +18,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.51) Another player's alignment ({@link Renown}) over their name tag: Survivor, Rogue or Warrior, in its pillar's
+ * (0.5.52) Another player's alignment ({@link Renown}) over their name tag: Survivor, Rogue or Warrior, in its pillar's
  * colour. Hidden while they sneak, like a name tag behind a wall.
  */
 public final class SkillTitles {

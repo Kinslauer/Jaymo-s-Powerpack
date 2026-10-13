@@ -74,6 +74,8 @@ public final class Approaches {
 	static final double SEEK_RANGE = 16.0;
 	/** Chance a scan that could start an approach does (so it doesn't come the moment the wait's over). */
 	static final float APPROACH_CHANCE = 0.3F;
+	/** (0.5.51) How often gossip is about a butcher (good, bad, ours or far off), when Jaymo's Kitchen is there. */
+	static final float BUTCHER_GOSSIP_CHANCE = 0.5F;
 	/** Between approaches to one player (ticks): at least this, plus up to this; the first after joining. */
 	static final int PLAYER_GAP = 20 * 90, PLAYER_GAP_SPREAD = 20 * 150, FIRST_GAP = 20 * 45;
 	/** The same villager comes to the same player at most once in this long (ticks: a day); a guard halts a stranger once a day per settlement. */
@@ -122,7 +124,7 @@ public final class Approaches {
 		"greet", "child", "warn"};
 	/** How many ways each topic has of opening (lang keys {@code talk.jaymoskingdoms.<topic>.<n>}). */
 	static final int[] OPENINGS = {3, 3, 3, 3, 0, 3, 3, 3, 2, 10, 3, 3, 3};
-	/** (0.5.51) Lines a gossip has about a player whose alignment they've heard of, per pillar. */
+	/** (0.5.52) Lines a gossip has about a player whose alignment they've heard of, per pillar. */
 	static final int GOSSIP_ABOUT_YOU = 3;
 	/** Stranger's questions (each with a warm, a plain and a rude answer, and a reply to each). */
 	static final int QUESTIONS = 8;
@@ -632,7 +634,7 @@ public final class Approaches {
 				a.variant = random.nextInt(OPENINGS[WAR]);
 			}
 			case GOSSIP -> {
-				// (0.5.51) word of what you are has reached them: they talk about you (Renown)
+				// (0.5.52) word of what you are has reached them: they talk about you (Renown)
 				Skills.Pillar heard = Renown.heard(player, f.id());
 				if (heard != null && random.nextFloat() < Renown.GOSSIP_CHANCE) {
 					a.enemy = heard.key();
@@ -663,8 +665,14 @@ public final class Approaches {
 			case WAR -> Component.translatable(key(a) + "." + a.variant, a.enemy);
 			case HALT -> Component.translatable(key(a) + "." + a.variant, realm);
 			case GREET -> Component.translatable(key(a) + "." + a.variant, name);
-			case GOSSIP -> a.enemy.isEmpty() ? Component.translatable(key(a) + "." + a.variant)
-				: Component.translatable(key(a) + ".you." + a.enemy + "." + a.variant, name);
+			case GOSSIP -> {
+				if (!a.enemy.isEmpty()) {
+					// (0.5.52) word of what you are (Renown)
+					yield Component.translatable(key(a) + ".you." + a.enemy + "." + a.variant, name);
+				}
+				Component butcher = level.getRandom().nextFloat() < BUTCHER_GOSSIP_CHANCE ? KitchenCompat.butcherGossip(player, a.mob) : null;
+				yield butcher != null ? butcher : Component.translatable(key(a) + "." + a.variant);
+			}
 			default -> Component.translatable(key(a) + "." + a.variant);
 		};
 		int color = a.topic == ACCUSE ? Speech.RED : a.topic == HALT || a.topic == WARN ? Speech.YELLOW
@@ -715,7 +723,7 @@ public final class Approaches {
 
 	private static void answer(ServerPlayer player, TalkNet.Answer answer) {
 		if (Skills.answer(player, answer)) {
-			// (0.5.51) a court wizard's offer to unmake your skills
+			// (0.5.52) a court wizard's offer to unmake your skills
 			return;
 		}
 		Approach a = ACTIVE.get(player.getUUID());

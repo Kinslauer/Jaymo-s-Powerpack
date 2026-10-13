@@ -2068,7 +2068,13 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
 - The reach is seen by everyone nearby: `Pickpocket.Reach` tells them, and the client's `PickpocketPose` puts the
   player's main arm forward and down into the pocket, fingers working, the other hand drawn in.
 
-## 0.5.51: the skill tree (Survival, Stealth, Strength)
+## 0.5.51: gossip about butchers
+- With Jaymo's Kitchen 0.4.32, half the gossip townsfolk walk up with is about a butcher (`BUTCHER_GOSSIP_CHANCE`):
+  trash talk or praise for their own village's butcher, or word of a master far off, or one to avoid, with how far
+  and which way. Hearing it tells you that butcher's skill on Kitchen's butcher screen from then on. Reached through
+  `KitchenCompat.butcherGossip` (reflection on Kitchen's `Butchers.gossip`); without Kitchen, gossip is as before.
+
+## 0.5.52: the skill tree (Survival, Stealth, Strength)
 - Andy asked for stealth that improves the more you steal successfully, as a skill tree with three pillars:
   Survival, Stealth and Strength; then for all three pillars ("we can fix later"), a respec at a court wizard or by
   drinking a bottle o' enchanting, and an alignment other players can see that villagers gossip about.
@@ -2109,4 +2115,7 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   `Theft.witnesses`) learns it (`jaymoskingdoms:renown`, saved); each day word may travel from each settlement that
   knows you to one more (50%). Their gossips talk about you half the time (`talk.jaymoskingdoms.gossip.you.*`), and
   where you're known for a Rogue pockets take 20% longer to pick.
+- Butchering: any rank of Forager, the first Survival perk, makes you experienced with butchering (Kitchen 0.4.32's
+  `Butchers.setExperienced`, set by reflection in `KitchenCompat.skills`): you judge a butcher's skill from their cuts.
+- A gossip who's heard of you talks about you first; otherwise half of gossip is about butchers, as before.
 - Tuning constants are at the top of `Skills`, `SurvivalSkill`, `StrengthSkill` and `Renown`. Not playtested in game.

@@ -18,7 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.51) Your alignment: the pillar of the skill tree ({@link Skills}) you've made your own, once it's at least level
+ * (0.5.52) Your alignment: the pillar of the skill tree ({@link Skills}) you've made your own, once it's at least level
  * {@value #ALIGN_LEVEL} and ahead of the others. It shows over your head to other players (Survivor, Rogue, Warrior;
  * "Master" at the top level), and word of it gets round: a settlement whose people see you comes to know what you are,
  * and each day word may travel on to another. Its people gossip about you, and where you're known for a Rogue they

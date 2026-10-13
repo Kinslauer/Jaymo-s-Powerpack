@@ -19,7 +19,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.FormattedCharSequence;
 
 /**
- * (0.5.51) The skill tree ({@link Skills}), on the {@code K} key: a tab per pillar, its level and experience, and its
+ * (0.5.52) The skill tree ({@link Skills}), on the {@code K} key: a tab per pillar, its level and experience, and its
  * perks as a tree; press a perk to spend points on it. Under it, your alignment ({@link Renown}). The server checks every spend and syncs the result back.
  */
 final class SkillScreen extends Screen {

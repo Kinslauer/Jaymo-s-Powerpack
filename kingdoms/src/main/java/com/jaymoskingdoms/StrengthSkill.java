@@ -22,7 +22,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Enemy;
 
 /**
- * (0.5.51) The Strength pillar of the skill tree ({@link Skills}). It grows as you fight and labour: landing blows,
+ * (0.5.52) The Strength pillar of the skill tree ({@link Skills}). It grows as you fight and labour: landing blows,
  * felling monsters, mining stone and chopping wood. Practice makes your blows a little heavier.
  *
  * <p>Perks: Heavy Blows (more melee damage), Brace (less knockback taken), Bulldozer (more knockback dealt), Quarryman

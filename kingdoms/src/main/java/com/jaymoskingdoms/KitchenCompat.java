@@ -17,6 +17,8 @@ final class KitchenCompat {
 	private static final @Nullable Method HOSTILE, CARRIER, CARRY_BY, THROW_AT;
 	/** (0.5.37) For necromancers: what a corpse was, and whether it's a player's. */
 	private static final @Nullable Method SOURCE_TYPE, PLAYER_CORPSE;
+	/** (0.5.51) For gossip: Kitchen's {@code Butchers.gossip(ServerPlayer, Entity)}, word of a good or bad butcher. */
+	private static final @Nullable Method BUTCHER_GOSSIP;
 	/** (0.5.48) For golems: whether fire takes a corpse (a heavy iron one it doesn't, and can't be lifted). */
 	private static final @Nullable Method BURNS;
 
@@ -51,6 +53,16 @@ final class KitchenCompat {
 		}
 		SOURCE_TYPE = sourceType;
 		PLAYER_CORPSE = playerCorpse;
+		Method butcherGossip = null;
+		if (corpse != null) {
+			try {
+				butcherGossip = Class.forName("com.jaymoskitchen.corpse.Butchers")
+					.getMethod("gossip", net.minecraft.server.level.ServerPlayer.class, Entity.class);
+			} catch (ReflectiveOperationException e) {
+				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for gossip about butchers: {}", e.toString());
+			}
+		}
+		BUTCHER_GOSSIP = butcherGossip;
 		Method burns = null;
 		if (corpse != null) {
 			try {
@@ -63,6 +75,19 @@ final class KitchenCompat {
 	}
 
 	private KitchenCompat() {
+	}
+
+	/** (0.5.52) Tells Kitchen who's experienced with butchering: anyone with a rank of Forager, the first Survival perk. */
+	static void skills() {
+		if (CORPSE == null) {
+			return;
+		}
+		try {
+			Class.forName("com.jaymoskitchen.corpse.Butchers").getMethod("setExperienced", java.util.function.Predicate.class)
+				.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) player -> Skills.rank(player, Skills.Perk.FORAGER) > 0);
+		} catch (ReflectiveOperationException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old to know who's experienced with butchering (needs 0.4.32): {}", e.toString());
+		}
 	}
 
 	/** Kitchen is here, and new enough. */
@@ -115,6 +140,22 @@ final class KitchenCompat {
 	/** Whoever is carrying the corpse throws it at {@code at}. */
 	static void throwAt(Entity corpse, Vec3 at) {
 		call(THROW_AT, corpse, at);
+	}
+
+	/**
+	 * (0.5.51) Something {@code speaker} has heard about a butcher (their own village's, or a far-off master or botcher), for
+	 * {@code listener}, who knows that butcher's skill from then on. Null without Kitchen 0.4.32, or with nothing to tell.
+	 */
+	static net.minecraft.network.chat.@Nullable Component butcherGossip(net.minecraft.server.level.ServerPlayer listener, Entity speaker) {
+		if (BUTCHER_GOSSIP == null) {
+			return null;
+		}
+		try {
+			return BUTCHER_GOSSIP.invoke(null, listener, speaker) instanceof net.minecraft.network.chat.Component line ? line : null;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Kitchen butcher gossip failed: {}", e.toString());
+			return null;
+		}
 	}
 
 	private static @Nullable Object call(@Nullable Method method, Entity corpse, Object... args) {

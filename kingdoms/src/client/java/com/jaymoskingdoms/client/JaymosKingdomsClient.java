@@ -48,7 +48,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		QuestClient.register();
 		// 0.5.50: the traveller's journal on M
 		JournalClient.register();
-		// 0.5.51: the skill tree (K)
+		// 0.5.52: the skill tree (K)
 		SkillScreen.register();
 		TalkScreen.register();
 		ArmoryLayer.register();

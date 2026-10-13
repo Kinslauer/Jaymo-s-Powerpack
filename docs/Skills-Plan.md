@@ -17,7 +17,7 @@ every player whatever their power: it never touches a power's abilities or maste
   pillar has all of it. Perks have ranks, prerequisites above them, and a few need a pillar level.
 - Progress is saved and kept through death.
 
-## Stealth (built, Kingdoms 0.5.51)
+## Stealth (built, Kingdoms 0.5.52)
 XP: a pocket picked clean (+10; +2 empty; a guard's ×2, a sleeper's ×½), a theft nobody saw (+4, at most every 30 s).
 
 ```
@@ -36,10 +36,11 @@ XP: a pocket picked clean (+10; +2 empty; a guard's ×2, a sleeper's ×½), a th
 - Slip Away: half the time a mark turns on you, they can't tell who: no crime.
 - Ghost: guards take no longer to rob than anyone; unseen thefts never noticed later.
 
-## Survival (built, Kingdoms 0.5.51)
+## Survival (built, Kingdoms 0.5.52)
 XP: a ripe crop harvested (+1), every 2 hunger points eaten back (+1), a night lived through (+15), taking damage and
 living (+1 per 4, every 5 s at most). Practice: hunger drains 2% slower per level.
-- Forager (5): 8% chance each of an extra harvest.
+- Forager (5): 8% chance each of an extra harvest; any rank also makes you experienced with butchering (judge a
+  butcher's skill from their cuts, Kitchen 0.4.32).
 - Second Wind (3): under 30% health you start to heal.
 - Weathered (3): burn shorter, freeze slower.
 - Iron Stomach (lvl 5): food never gives you Hunger.
@@ -47,7 +48,7 @@ living (+1 per 4, every 5 s at most). Practice: hunger drains 2% slower per leve
   cancel fall damage (Gravity's Weightless and descents, Wind, Web) work exactly as before.
 - Last Stand (lvl 10, 2 pts): once a day, a killing blow leaves you on half a heart.
 
-## Strength (built, Kingdoms 0.5.51)
+## Strength (built, Kingdoms 0.5.52)
 XP: melee blows landed, monsters killed (+4), stone, ore and wood broken. Practice: +1% melee damage per level.
 - Heavy Blows (5): +4% melee damage each.
 - Brace (3): knocked back less.

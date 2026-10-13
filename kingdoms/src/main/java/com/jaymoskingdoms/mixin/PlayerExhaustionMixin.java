@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-/** (0.5.51) Survival practice and Packhorse ({@link Skills}): hunger drains slower. */
+/** (0.5.52) Survival practice and Packhorse ({@link Skills}): hunger drains slower. */
 @Mixin(Player.class)
 abstract class PlayerExhaustionMixin {
 	@ModifyVariable(method = "causeFoodExhaustion", at = @At("HEAD"), argsOnly = true)

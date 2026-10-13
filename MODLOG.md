@@ -561,9 +561,19 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   too) or a settlement's folk with an empty hand and hold right-click: your hand reaches into their pocket for 1-3 s,
   longer in bright light, on armoured or cheerful marks, shorter in the dark or on sad ones. Stay behind them till it's
   done to lift something; if they turn round on you they cry thief, which counts as a theft seen.
-- **0.8.98, Skill tree:** ships Jaymo's Kingdoms 0.5.51 (see `kingdoms/MODLOG.md`): press **K** for a skill tree with
+- **0.8.98, Darktide's shade:** a Darktide user who dies at night rises as their own shadow (drawn dark, shedding black
+  dust, 10 health, full Flow), once a night. The shade can hide through the day and is flesh again at the next
+  nightfall, but sunlight burns it away: the user dies for real, every item they carried is destroyed and only Shadow
+  Ash drops. A shade's second death, `/kill` and the void are final; a held totem goes first (`DarktideShade`,
+  `/powerdebug darktide shade`).
+- **0.8.99, Butcher villagers:** ships Jaymo's Kitchen 0.4.32 and Jaymo's Kingdoms 0.5.51: right-click a butcher
+  villager with a passive animal's corpse (carried or bagged) for a screen with their price; pay in emeralds and they
+  carry it out back, chop it up and walk back with the cuts, 1x to 3x what you'd get yourself. How good a butcher is
+  stays hidden until townsfolk gossip about them (their own village's, or far-off masters and botchers), or, if
+  you're experienced with butchering (a Survival perk), you judge it from the cuts they hand you.
+- **0.8.100, Skill tree:** ships Jaymo's Kingdoms 0.5.52 (see `kingdoms/MODLOG.md`): press **K** for a skill tree with
   three pillars. Stealth grows as you pick pockets and steal unseen (shorter holds, more loot, slipping away), Survival
   as you harvest, eat and live through the night (slower hunger, healing, Last Stand), Strength as you fight, mine and
   chop (heavier blows, knockback, faster mining). Each level is a perk point. A court wizard or a bottle o' enchanting
   (sneak and drink it) gives your points back. Your best pillar shows over your head (Survivor, Rogue, Warrior) and
-  villagers gossip about it.
+  villagers gossip about it. Forager, the first Survival perk, also lets you judge a butcher's skill from their cuts.

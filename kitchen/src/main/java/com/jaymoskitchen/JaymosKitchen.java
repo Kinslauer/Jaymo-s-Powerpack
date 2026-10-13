@@ -44,6 +44,7 @@ public class JaymosKitchen implements ModInitializer {
 		Quivers.register();
 		com.jaymoskitchen.archery.LegShots.register();
 		Corpses.register();
+		com.jaymoskitchen.corpse.Butchers.register();
 		PlayerCorpses.register();
 		Saddlebags.register();
 		Mill.register();

@@ -670,3 +670,29 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
 - For Jaymo's Kingdoms 0.5.48, where iron golems take corpses to the fire: a carrier bigger than a villager holds a
   carried corpse out past its own bulk and up at its arms (`carryPosition` scales with the carrier's size). Before, a
   golem's corpse sat at its knees, half inside it. Players and villagers carry exactly as before.
+## 0.4.32: butcher villagers
+- **Butcher villagers butcher for you** (`corpse/Butchers`; vanilla's butchers and MCA's, by profession). Right-click
+  one with a passive animal's corpse in your arms or a bagged one in your hand: a screen (`ButcherScreen`) shows the
+  price, and their skill (Clumsy, Fair, Able, Skilled, Master) and yield only if you know them. Monsters and heavy
+  (iron) corpses are refused.
+- **Skill** is born with each butcher (from their UUID), spread evenly from 1x to 3x what a proper job on a butcher
+  block gets (`CorpseEntity.butcheredDrops`: the loot, extra meat and the block-only extras); a fifth of butchers in
+  each tier. Every count is multiplied, the fraction a chance at one more. It has nothing to do with their trade level.
+- **Price** is their own asking (1x to 3x, also from their UUID, unrelated to skill) times 1 emerald for a small body,
+  2 for a big carcass: 1-3 or 2-6. A pricey butcher can be a hack. Creative pays nothing.
+- **Knowing a butcher** (`jaymoskitchen:known_butchers` on the player, kept on death): you learn how good one is from
+  gossip, or, if you're experienced with butchering, from the cuts they hand you (the hand-over says the x). Who's
+  experienced is set by `Butchers.setExperienced(Predicate<Player>)` (Jaymo's Kingdoms' first Survival perk, by
+  reflection); nobody without it.
+  `Butchers.gossip(ServerPlayer, Entity)` (public; Jaymo's Kingdoms 0.5.47's townsfolk call it) returns a line: trash
+  talk or praise for one of the speaker's own village's butchers (within 64 blocks), or word of a far-off master or a
+  botcher to avoid (only the top two and bottom two tiers travel; up to 3000 blocks, with distance and direction), ones
+  you haven't heard of first. Far-off butchers come from a per-dimension ledger (`jaymoskitchen:butcher_ledger`) of
+  every butcher that has been loaded.
+- **The errand:** paid, they take the body in their arms and walk out back: to the nearest butcher block within 14
+  blocks they can reach, else a reachable spot 5-12 blocks past their smoker (job site) on the side away from you.
+  They chop for 5 s (swings, cleaver sounds, the body jolting), the body is gone, and they walk back to you and put
+  the cuts in your pockets (overflow at your feet). If you've wandered off they wait with the cuts and come over when
+  you're within 20 blocks, or right-click them to collect. The job (cuts worked out at the deal) is saved on the
+  villager (`jaymoskitchen:butcher_job`); if they die mid-job the cuts drop where they fall.
+- Tuning: the constants at the top of `Butchers`.
