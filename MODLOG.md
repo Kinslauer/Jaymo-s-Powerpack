@@ -777,7 +777,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (Kingdoms' and Naturalist's predators too) tear into bodies with a brutal worrying bite, the meat spills on the ground
   and they eat it from there. Players' kills are left for the player. See Kitchen's MODLOG.
 
-- **0.9.18, the aliens' detail pass, the band on the wrist, the slam, the ending glow:** every alien's skin redrawn
+- **0.9.22, the aliens' detail pass, the band on the wrist, the slam, the ending glow:** every alien's skin redrawn
   with more in it (plate seams and rivets, magma cracks and obsidian, stripes and hooves, facets and fractures, folds
   and fraying cloth, warts and a toothy grin, sculk veins and bone claws, scales and belly plates, nebula dust) and
   each wears the xeno insignia, the band's green hourglass, on its chest (Pyre's on its core, Knell's on its sternum);
@@ -794,6 +794,22 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   never awakens by fate and isn't on creative's powers screen: the band is the only way to it (`Power.fated`; ops can
   still `/power set` it).
 
+- **0.9.20, villagers' days (Kingdoms 0.6.9):** tag with a child is a real game (they run, you catch them, they
+  chase you back); settlements have toddlers again; villagers keep daily routines (water, gardens, market, chats,
+  campfires, housework, reading, sweeping, lunch, shopping, animals, eyeing strangers, dancing; kids play chase, hide
+  and seek, skip stones and tag along); and they grow suspicious of you in their homes, up to calling it trespass.
+
+- **0.9.19, Andy's power fixes (Kitchen 0.4.36):** falling corpses are caught by an empty hand from up to 2 blocks
+  off, and no longer get stuck in blocks tumbling forever. Every web that sticks gives one tug: press Jump in midair and
+  you haul up and in on it (`WebSwing.TUG_LIFT`/`TUG_PULL`). A Web Whip with both webs on its catch is one web gripped
+  in both hands. Dropping a summoned flintlock drops its pair from the other hand. The Sword of Damocles is hauled back
+  up into its rift instead of fading. The Cannon Battery's cannons come out half as fast (`GROW_TICKS` 16) at random
+  spots behind you. JEI's cheat mode (click to take items) also switches on while you're opped, in any game mode.
+  Then: R/G webs stick to creatures, players and corpses within 2 blocks of the crosshair (out to 32), which lights
+  up gold when one's in reach; you swing from them and drag light ones after you (`WebAnchors.entityTarget`,
+  `WebPower.tickEntityWeb`). Hanging still in midair with no movement keys, Jump and Sneak raise and lower you slowly
+  (`WebSwing.HANG_REEL`). The limbs not on a web hang limp and trail the sway like the Wind hover's (`WebArms.LIMB_*`).
+
 - **0.9.17, imbued blades proc (Kingdoms 0.6.8):** a Sorcerer's imbued blade bursts with its element on one blow in
   twenty rather than every one (the rest spark), and a lightning burst blinds for a moment; air lifts on every second
   blow instead, for air combos. Thrown bolts always burst.
@@ -805,3 +821,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (zombies and skeletons climb out of the ground around you, no sleeping), a Super Blood Moon (twice over, a huge red moon), a Harvest Moon
   (crops grow all night) or a Blue Moon (luck, extra experience and gems). Bringing Bad Omen into a settlement wrecks
   your name there, and if it survives the raid it almost never forgets (`kingdoms/MODLOG.md`).
+- **0.9.18, crawl looks and held rolls:** a gesture crawler no longer swims on dry land: they drag themselves along
+  elbow over elbow with the legs trailing, and a roll stretches the arms past the head with the legs together while the
+  body turns over. Rolls are quick (a block every quarter second, about walking pace) for safe, quiet movement, and holding A or D after a roll keeps you rolling that way, a block at a time (`client/CrawlPose`,
+  `CrawlModelFeatureRendererMixin`).

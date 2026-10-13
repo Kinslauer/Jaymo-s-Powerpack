@@ -18,13 +18,19 @@ public final class WebNet {
 	public static final int OFF = 1;
 
 	/** Client → server: the {@code hand}'s swing web stuck to {@code anchor} ({@code attach}), or was let go. */
-	public record Swing(int hand, boolean attach, Vec3 anchor) implements CustomPacketPayload {
+	public record Swing(int hand, boolean attach, Vec3 anchor, int entityId) implements CustomPacketPayload {
 		public static final Type<Swing> TYPE = new Type<>(JaymosPowers.id("web_swing"));
 		public static final StreamCodec<ByteBuf, Swing> CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_INT, Swing::hand,
 			ByteBufCodecs.BOOL, Swing::attach,
 			Vec3.STREAM_CODEC, Swing::anchor,
+			ByteBufCodecs.VAR_INT, Swing::entityId,
 			Swing::new);
+
+		/** A web on a block (or let go). {@code entityId} is the creature, player or corpse it's stuck to, else -1. */
+		public Swing(int hand, boolean attach, Vec3 anchor) {
+			this(hand, attach, anchor, -1);
+		}
 
 		@Override
 		public Type<Swing> type() {

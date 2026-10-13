@@ -30,7 +30,8 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * <b>Cannon Battery</b> (X, the Power Skill key; once B is unlocked): hold it and rifts open in a fan behind you, a
- * cannon barrel pushing out of each, one more every {@link #GROW_TICKS} the longer you hold (up to {@link #MAX}). They
+ * cannon barrel pushing out of each at a random spot behind you, one more every {@link #GROW_TICKS} the longer you hold
+ * (up to {@link #MAX}). They
  * all swing to follow your crosshair. Let go and they fire in a rolling battery, one after another, then sink back
  * into their rifts.
  *
@@ -42,7 +43,7 @@ public final class ArsenalCannons {
 	public static final int COOLDOWN = 300;
 	public static final int MAX = 10;
 	/** A new cannon every this many ticks of holding (the first comes at once). */
-	public static final int GROW_TICKS = 8;
+	public static final int GROW_TICKS = 16;
 	/** Held this long, the battery fires on its own. */
 	public static final int MAX_HOLD = 200;
 	/** How far the crosshair aim reaches. */
@@ -174,7 +175,7 @@ public final class ArsenalCannons {
 		if (battery.held()) {
 			long held = now - battery.start();
 			if (held % GROW_TICKS == 0 && held / GROW_TICKS < MAX) {
-				Vec3 at = slot(player, (int) (held / GROW_TICKS), 1.0F);
+				Vec3 at = slot(player, battery, (int) (held / GROW_TICKS), 1.0F);
 				level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y, at.z, 10, 0.2, 0.2, 0.2, 0.03);
 				level.playSound(null, at.x, at.y, at.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.3F, 0.5F + held / (float) GROW_TICKS * 0.05F);
 				level.playSound(null, at.x, at.y, at.z, SoundEvents.CHAIN_PLACE, SoundSource.PLAYERS, 0.6F, 0.6F);
@@ -187,14 +188,14 @@ public final class ArsenalCannons {
 		int count = battery.count(battery.released());
 		long since = now - battery.released();
 		if (since % FIRE_GAP == 0 && since / FIRE_GAP < count) {
-			fire(player, (int) (since / FIRE_GAP));
+			fire(player, battery, (int) (since / FIRE_GAP));
 		}
 	}
 
 	/** Cannon {@code i} goes off at the crosshair. */
-	private static void fire(ServerPlayer player, int i) {
+	private static void fire(ServerPlayer player, Battery battery, int i) {
 		ServerLevel level = player.level();
-		Vec3 at = slot(player, i, 1.0F);
+		Vec3 at = slot(player, battery, i, 1.0F);
 		Vec3 aim = aimPoint(player, 1.0F);
 		Vec3 dir = aim.subtract(at).normalize();
 		Vec3 muzzle = at.add(dir.scale(BARREL_LENGTH));
@@ -209,22 +210,55 @@ public final class ArsenalCannons {
 	}
 
 	/**
-	 * Where cannon {@code i}'s rift sits: a fan behind and above you that turns with your view, the first in the middle
-	 * above your shoulders, the rest alternating out to either side and up into a second row.
+	 * Where cannon {@code i}'s rift sits: a random spot behind and above you that turns with your view. The spots are
+	 * cells of a grid behind you ({@link #COLUMNS} across, {@link #ROWS} up) shuffled by the battery's start time, so
+	 * every client picks the same ones and no two cannons share a cell, each nudged a little off its cell's centre.
 	 */
-	public static Vec3 slot(Player player, int i, float partialTick) {
+	public static Vec3 slot(Player player, Battery battery, int i, float partialTick) {
 		float yaw = player.getViewYRot(partialTick) * ((float) Math.PI / 180.0F);
 		Vec3 forward = new Vec3(-Math.sin(yaw), 0.0, Math.cos(yaw));
 		Vec3 right = new Vec3(-forward.z, 0.0, forward.x);
-		int row = i < 6 ? 0 : 1;
-		int k = row == 0 ? i : i - 6;
-		// 0, 1, -1, 2, -2, 3 ... across the row
-		int side = (k + 1) / 2 * (k % 2 == 1 ? 1 : -1);
-		double across = side * (row == 0 ? 1.15 : 1.3) + (row == 1 ? 0.65 : 0.0);
-		double up = (row == 0 ? 2.2 : 3.4) - Math.abs(side) * 0.25;
-		double back = 0.8 + Math.abs(side) * 0.15 + row * 0.5;
+		int[] cells = shuffledCells(battery.start());
+		int cell = cells[i % cells.length];
+		int column = cell % COLUMNS;
+		int row = cell / COLUMNS;
+		long hash = mix(battery.start() * 31 + i);
+		double jitterAcross = ((hash & 0xFF) / 255.0 - 0.5) * 0.5;
+		double jitterUp = ((hash >>> 8 & 0xFF) / 255.0 - 0.5) * 0.4;
+		double jitterBack = (hash >>> 16 & 0xFF) / 255.0 * 0.9;
+		double across = (column - (COLUMNS - 1) / 2.0) * 1.15 + jitterAcross;
+		double up = 1.6 + row * 1.05 + jitterUp;
+		double back = 1.0 + Math.abs(across) * 0.15 + jitterBack;
 		Vec3 base = player.getPosition(partialTick);
 		return base.add(right.scale(across)).add(forward.scale(-back)).add(0.0, up, 0.0);
+	}
+
+	/** The grid behind you the cannons are spread over (more cells than {@link #MAX}, so some stay empty). */
+	private static final int COLUMNS = 5;
+	private static final int ROWS = 3;
+
+	/** The grid cells in a random order fixed by {@code seed} (a Fisher-Yates shuffle). */
+	private static int[] shuffledCells(long seed) {
+		int[] cells = new int[COLUMNS * ROWS];
+		for (int c = 0; c < cells.length; c++) {
+			cells[c] = c;
+		}
+		long state = seed;
+		for (int c = cells.length - 1; c > 0; c--) {
+			state = mix(state + c);
+			int j = (int) Long.remainderUnsigned(state, c + 1);
+			int swap = cells[c];
+			cells[c] = cells[j];
+			cells[j] = swap;
+		}
+		return cells;
+	}
+
+	/** SplitMix64's finaliser: the same number in, the same well-scrambled number out, on every side. */
+	private static long mix(long z) {
+		z = (z ^ (z >>> 30)) * 0xBF58476D1CE4E5B9L;
+		z = (z ^ (z >>> 27)) * 0x94D049BB133111EBL;
+		return z ^ (z >>> 31);
 	}
 
 	/** What the crosshair is on: the first block along the look, or the end of {@link #RANGE}. */

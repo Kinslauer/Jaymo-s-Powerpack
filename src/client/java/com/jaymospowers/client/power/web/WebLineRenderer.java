@@ -255,12 +255,15 @@ final class WebLineRenderer {
 		for (Player player : level.players()) {
 			// a symbiote's webs are black, with a faint sheen running along them
 			boolean dark = com.jaymospowers.power.web.WebSymbiote.suitShown(player);
-			for (int handIndex = WebNet.MAIN; handIndex <= WebNet.OFF; handIndex++) {
+			// both webs on one catch (a Web Whip): one web, held in both hands
+			boolean twoHanded = WebArms.twoHanded(player);
+			for (int handIndex = WebNet.MAIN; handIndex <= (twoHanded ? WebNet.MAIN : WebNet.OFF); handIndex++) {
 				Vec3 end = WebArms.lineEnd(minecraft, level, player, handIndex, partialTick);
 				if (end == null) {
 					continue;
 				}
-				Vec3 hand = handPos(minecraft, player, handIndex, partialTick);
+				Vec3 hand = twoHanded ? handPos(minecraft, player, WebNet.MAIN, partialTick).lerp(handPos(minecraft, player, WebNet.OFF, partialTick), 0.5)
+					: handPos(minecraft, player, handIndex, partialTick);
 				if (hand.distanceToSqr(end) > 96.0 * 96.0) {
 					continue;
 				}

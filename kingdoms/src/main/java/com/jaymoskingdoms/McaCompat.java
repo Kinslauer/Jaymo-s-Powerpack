@@ -151,6 +151,24 @@ public final class McaCompat {
 		}
 	}
 
+	/** (0.6.9) {@link McaBridge#families}; 0 without MCA. */
+	static int families(ServerLevel level, AABB box, int grownPerYoung, int leastGrown, float chance, int soonUnits, boolean takeIn) {
+		return LOADED ? McaBridge.families(level, box, grownPerYoung, leastGrown, chance, soonUnits, takeIn) : 0;
+	}
+
+	/** (0.6.9) Where {@code villager} lives (their bed): MCA's home, else the vanilla villager's. */
+	static java.util.Optional<net.minecraft.core.GlobalPos> home(Villager villager) {
+		if (LOADED) {
+			java.util.Optional<net.minecraft.core.GlobalPos> home = McaBridge.home(villager);
+			if (home.isPresent()) {
+				return home;
+			}
+		}
+		net.minecraft.world.entity.ai.Brain<?> brain = villager.getBrain();
+		return brain.checkMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME, net.minecraft.world.entity.ai.memory.MemoryStatus.VALUE_PRESENT)
+			? brain.getMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME) : java.util.Optional.empty();
+	}
+
 	/** (0.5.39) {@code player}'s hearts with {@code villager} (0 without MCA, or for a plain villager). */
 	static int heartsOf(Villager villager, ServerPlayer player) {
 		return LOADED ? McaBridge.heartsOf(villager, player) : 0;
