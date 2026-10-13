@@ -28,7 +28,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.6.9) Townsfolk notice the abnormal. Jaymo's Powers tags whatever is strange ({@code jaymospowers_odd:<kind>}),
+ * (0.6.10) Townsfolk notice the abnormal. Jaymo's Powers tags whatever is strange ({@code jaymospowers_odd:<kind>}),
  * and the people of the world (vanilla and MCA villagers, a realm's folk) react to it:
  * <ul>
  * <li>a meteor or a falling star in the sky: those out of doors stop and stare up at it, and some cry out; where it

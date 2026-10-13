@@ -777,13 +777,18 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (Kingdoms' and Naturalist's predators too) tear into bodies with a brutal worrying bite, the meat spills on the ground
   and they eat it from there. Players' kills are left for the player. See Kitchen's MODLOG.
 
-- **0.9.20, townsfolk react to the strange (Kingdoms 0.6.9):** villagers and a realm's folk stare up at a meteor or a
+- **0.9.21, townsfolk react to the strange (Kingdoms 0.6.10):** villagers and a realm's folk stare up at a meteor or a
   falling star and cry out, and run from where it lands; they stare at a power used in front of them and say what they
   saw (each power has its own lines; children want it again); they run from the symbiote's blob and anything it's got
   into, and guards hunt it (not a villager it's inhabiting, whom they only shout about); a player in the symbiote's suit
   or walking as a shade is treated like an unknown alien until the kingdom sees the change; strange moons get remarked
   on; and all of it turns up in gossip for three days. Powers marks these with entity tags (`core/Oddities`:
   `jaymospowers_odd:meteor|star|symbiote|shade|power/<id>`), which Kingdoms reads (`Oddities`).
+
+- **0.9.20, villagers' days (Kingdoms 0.6.9):** tag with a child is a real game (they run, you catch them, they
+  chase you back); settlements have toddlers again; villagers keep daily routines (water, gardens, market, chats,
+  campfires, housework, reading, sweeping, lunch, shopping, animals, eyeing strangers, dancing; kids play chase, hide
+  and seek, skip stones and tag along); and they grow suspicious of you in their homes, up to calling it trespass.
 
 - **0.9.19, Andy's power fixes (Kitchen 0.4.36):** falling corpses are caught by an empty hand from up to 2 blocks
   off, and no longer get stuck in blocks tumbling forever. Every web that sticks gives one tug: press Jump in midair and

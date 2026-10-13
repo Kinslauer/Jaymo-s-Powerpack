@@ -31,7 +31,7 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>Read by entity tag ({@link #TAG}, set by Powers while a player is changed), so Kingdoms needs no Powers classes.
  *
- * <p>(0.6.9) The same goes for the other shapes a player can take ({@link #KINDS}): the symbiote's black suit or its
+ * <p>(0.6.10) The same goes for the other shapes a player can take ({@link #KINDS}): the symbiote's black suit or its
  * big body, and a Darktide shade. Each is learned on its own: a kingdom that saw you change into the alien still
  * runs from the suit until it sees you put that on.
  */

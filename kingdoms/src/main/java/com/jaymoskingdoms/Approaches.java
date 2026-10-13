@@ -526,7 +526,7 @@ public final class Approaches {
 			|| Theft.rioting(mob) || Quests.listening(mob) || talking(mob) || Rickshaws.onDuty(mob)) {
 			return false;
 		}
-		if (mob instanceof PathfinderMob pm && McaCompat.busy(pm) || Hermits.is(mob)) {
+		if (mob instanceof PathfinderMob pm && McaCompat.busy(pm) || Hermits.is(mob) || Tag.playing(mob) || Trespass.watching(mob)) {
 			// (0.5.62: a floating island's hermit greets visitors their own way)
 			return false;
 		}
@@ -797,7 +797,7 @@ public final class Approaches {
 				more = key(a) + ".you." + a.enemy + ".more";
 				args = new Object[] {name};
 			} else {
-				// (0.6.9) something strange seen lately; (0.5.56) a monster of legend seen out there; (0.5.51) a butcher
+				// (0.6.10) something strange seen lately; (0.5.56) a monster of legend seen out there; (0.5.51) a butcher
 				said = Oddities.gossip(level, a.mob);
 				if (said == null && level.getRandom().nextFloat() < Sightings.GOSSIP_CHANCE) {
 					said = Sightings.gossip(level, a.mob);
@@ -1093,8 +1093,9 @@ public final class Approaches {
 				if (option == 0) {
 					McaCompat.hearts(a.mob, player, PLAY_HEARTS);
 					reply(level, a, "talk.jaymoskingdoms.child." + a.variant + ".reply", Speech.WHITE);
-					if (a.variant == CHILD_TAG) {
-						flee(a.mob, player);
+					if (a.variant == CHILD_TAG && a.mob instanceof PathfinderMob child) {
+						// (0.6.9) a real game: you chase, they run, then they chase you
+						Tag.start(level, child, player);
 					}
 				} else {
 					reply(level, a, "talk.jaymoskingdoms.child.reply.no", Speech.WHITE);
@@ -1311,7 +1312,7 @@ public final class Approaches {
 		}
 	}
 
-	/** {@code mob} runs off away from {@code player} (a scared accuser; a child playing tag). */
+	/** {@code mob} runs off away from {@code player} (a scared accuser). */
 	private static void flee(Mob mob, ServerPlayer player) {
 		Vec3 away = mob.position().subtract(player.position()).normalize().scale(10.0).add(mob.position());
 		BlockPos to = BlockPos.containing(away);
