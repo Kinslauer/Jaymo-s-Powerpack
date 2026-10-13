@@ -552,3 +552,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   under a low ceiling vanilla keeps you crawling. Holding Jump doesn't hop while crawling; not in water, flying,
   gliding or riding. Combat Roll's double-tap Sneak ignores Sneak presses made with Jump down (`core/Crawl`,
   `CrawlPlayerMixin`, `CrawlJumpMixin`, `client/CrawlTaps`).
+- **0.8.96, Quests are rare:** ships Jaymo's Kingdoms 0.5.49 (see `kingdoms/MODLOG.md`): only about one villager in
+  twenty ever gives quests (on about half their days), kings have work only now and then, and a good name with a
+  settlement raises both a little. Giving up a quest costs reputation with the giver's settlement. New: the
+  Traveller's Journal (craft a book with a map): with one in your inventory, M opens your quests, a map with your
+  quests and the settlements on it, and every settlement's opinion of you.

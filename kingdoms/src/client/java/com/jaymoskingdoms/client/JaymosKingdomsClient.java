@@ -44,6 +44,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		SpeechBubbles.register();
 		// 0.5.29: quest givers' screens, marks and the tracker
 		QuestClient.register();
+		// 0.5.49: the traveller's journal on M
+		JournalClient.register();
 		TalkScreen.register();
 		ArmoryLayer.register();
 		// 0.5.34: Jaymo's Equestrian (gaits, the stamina HUD, coats, war elephants)
