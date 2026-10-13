@@ -71,6 +71,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 
 		CarryClient.init();
 		CombatRollTaps.init();
+		JeiCheats.init();
 		CrawlTaps.init();
 		WindPowerClient.init();
 		ArsenalPowerClient.init();
