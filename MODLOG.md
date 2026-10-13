@@ -635,7 +635,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   mended with silver ingots, and a Tinkering tool with a silver head counts as silver against werewolves. The bat
   horse and nightmare are now exceedingly rare: about once in 50 hours a player spends where one can turn up, and
   never while another wild one is about.
-- **0.8.113, no punching trees, no vanilla metal tools (Kingdoms 0.5.59):** Andy's call. The vanilla crafting recipes
+- **0.8.113, crawl roll:** while crawling, double-tap Left or Right (A / D) to roll one block that way, turning over once
+  along your length. A roll puts out the fire on you and any fire you roll through (`Crawl.Roll`, `Crawl.ROLLING`,
+  `client/CrawlRollPose`, `CrawlAvatarRendererMixin`).
+- **0.8.114, no punching trees, no vanilla metal tools (Kingdoms 0.5.59):** Andy's call. The vanilla crafting recipes
   for iron, golden and copper pickaxes, axes, shovels, hoes and swords are off (Fabric `fabric:false` load conditions
   over vanilla's files, with their recipe-book advancements; written by `tools/tinkering_assets.py`), so metal tools
   come from the smeltery and Tool Station. Spears, armour and smelting are untouched. Wood needs an axe (Kingdoms
