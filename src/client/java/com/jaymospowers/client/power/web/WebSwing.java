@@ -120,6 +120,8 @@ public final class WebSwing {
 	static final double BRAKE_DRAG = 0.94;
 	static final double BRAKE_SINK = 0.2;
 	static final double BRAKE_CATCH = 0.3;
+	/** Braking while still climbing: the share of the climb kept each tick (so it stalls, never lifts). */
+	static final double BRAKE_RISE_KEEP = 0.5;
 	/**
 	 * Braked to a stop (forward speed under {@code DIVE_AT}), still holding S: the wings stay out but stop flying, and you
 	 * drop head-first into a freedive, like Wind's, gaining speed down to {@code DIVE_MAX_SPEED}. Let go of S to pull out
@@ -882,7 +884,8 @@ public final class WebSwing {
 				// stopped dead: tip over and drop, head-first
 				m = new Vec3(m.x * 0.5, Math.max(-DIVE_MAX_SPEED, (m.y - WINGS_GRAVITY) * 0.98), m.z * 0.5);
 			} else {
-				m = m.add(0.0, -WINGS_GRAVITY, 0.0);
+				// a flare never carries you up: any climb you came in with dies off fast
+				m = new Vec3(m.x, (m.y > 0.0 ? m.y * BRAKE_RISE_KEEP : m.y) - WINGS_GRAVITY, m.z);
 				if (m.y < -BRAKE_SINK) {
 					m = new Vec3(m.x, Mth.lerp(BRAKE_CATCH, m.y, -BRAKE_SINK), m.z);
 				}
