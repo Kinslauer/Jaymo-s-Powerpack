@@ -28,7 +28,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.48) Pickpocketing: sneak up behind a villager (MCA's too) or one of a settlement's civilians or guards, empty
+ * (0.5.49) Pickpocketing: sneak up behind a villager (MCA's too) or one of a settlement's civilians or guards, empty
  * handed, and use them. You lift something from their pockets: some of what they carry (a farmer's wheat and bread), or
  * else a few emeralds, nuggets or a snack. A sleeping mark can be robbed from any side, and is easier.
  *

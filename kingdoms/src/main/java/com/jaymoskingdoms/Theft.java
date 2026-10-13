@@ -65,7 +65,7 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>(0.5.46) Blocks a player placed themselves ({@link Placed}) are theirs: breaking them or opening them is no crime.
  *
- * <p>(0.5.48) Picking a villager's or civilian's pocket ({@link Pickpocket}) is a theft like taking from its stores.
+ * <p>(0.5.49) Picking a villager's or civilian's pocket ({@link Pickpocket}) is a theft like taking from its stores.
  */
 public final class Theft {
 	/** How far a witness sees a crime (sneaking: this share of it); closer than {@link #HEAR_RANGE} they notice whichever way they face. */
@@ -117,7 +117,9 @@ public final class Theft {
 	enum Crime {
 		RUMMAGE(Weight.LIGHT, "rummage"), TAKE(Weight.MEDIUM, "theft"), CROP(Weight.LIGHT, "vandal"), BED(Weight.MEDIUM, "vandal"),
 		JOB_BLOCK(Weight.MEDIUM, "vandal"), CHEST(Weight.MEDIUM, "theft"), STOREHOUSE(Weight.HEAVY, "theft"), BELL(Weight.HEAVY, "vandal"),
-		ARSON(Weight.MEDIUM, "arson"), PICKPOCKET(Weight.MEDIUM, "pickpocket"), SORCERY(Weight.MEDIUM, "sorcery"), LIVESTOCK(Weight.LIGHT, "livestock"), FOLK(Weight.MEDIUM, "murder"), VILLAGER(Weight.HEAVY, "murder"), GOLEM(Weight.HEAVY, "murder");
+		ARSON(Weight.MEDIUM, "arson"), PICKPOCKET(Weight.MEDIUM, "pickpocket"), SORCERY(Weight.MEDIUM, "sorcery"), LIVESTOCK(Weight.LIGHT, "livestock"), FOLK(Weight.MEDIUM, "murder"), VILLAGER(Weight.HEAVY, "murder"), GOLEM(Weight.HEAVY, "murder"),
+		/** (0.5.47) a caravan horse's saddlebags rifled. */
+		SADDLEBAG(Weight.MEDIUM, "theft");
 
 		final Weight weight;
 		final String cry;

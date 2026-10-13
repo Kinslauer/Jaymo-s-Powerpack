@@ -90,7 +90,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.21: monsters hunt the settlements' folk as they do villagers
 		Prey.register();
 		Theft.register();
-		// 0.5.48: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
+		// 0.5.49: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
 		Pickpocket.register();
 		// 0.5.19: a boss's bar shows only to the players who've hit it
 		BossBars.register();
@@ -119,6 +119,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.equestrian.Equestrian.register();
 		// 0.5.44: Jaymo's Equestrian, stage 2 (bond and tack: trust, disciplines, tricks, needs, tack) and its attachments
 		com.jaymoskingdoms.equestrian.Bonding.register();
+		// (0.5.47) stables at work: boarding, the horse market, the farrier
+		Stables.register();
 		Carriages.register();
 		Rickshaws.register();
 		Cabs.register();
