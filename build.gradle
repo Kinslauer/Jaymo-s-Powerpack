@@ -96,6 +96,10 @@ def packMods = [
 	// Iris Shaders (LGPL-3.0): shader packs (Options > Video Settings > Shader Packs); built on the pack's Sodium.
 	// Client-only: the server ignores it.
 	[dep: "maven.modrinth:iris:vTN4NRGW", cf: [455508, 9015108], dev: false],
+	// Camera Utils (all rights reserved, by Max Henkel; downloaded by id, never copied): zoom, detached camera and two
+	// custom third-person views on F6 and F7 (Right Alt + the key edits one). Client-only. Jaymo's Powers sets its F7
+	// view to Andy's preset once per install (client/CameraPreset) and takes its zoom off Z (client/KeyConflicts).
+	[dep: "maven.modrinth:camera-utils:5XAah6bJ", cf: [510234, 8887090]],
 ]
 // First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
 // Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge
