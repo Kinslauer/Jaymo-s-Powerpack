@@ -75,6 +75,10 @@ final class Frights {
 				LivingEntity monster = monster(level, v, f);
 				Fright fright = FRIGHTS.get(v.getUUID());
 				if (monster != null) {
+					if (fright == null) {
+						// (0.6.9) a symbiote, a shade, an alien: they cry out what it is
+						Oddities.cry(level, v, monster, f);
+					}
 					if (fright == null || fright.until() - now < HIDE_TICKS / 2) {
 						fright = frighten(level, v, monster, now);
 					}
@@ -88,13 +92,15 @@ final class Frights {
 
 	/**
 	 * The nearest monster it can see, close enough to frighten it; null if none. (0.6.4) A player changed into one of
-	 * the Xeno-Band's aliens counts, unless {@code f}'s people saw them change ({@link Aliens}).
+	 * the Xeno-Band's aliens counts, unless {@code f}'s people saw them change ({@link Aliens}); (0.6.9) so does one in
+	 * the symbiote's suit or walking as a shade, and a mob the symbiote has taken ({@link Oddities#monstrous}).
 	 */
 	private static @Nullable LivingEntity monster(ServerLevel level, Villager v, Faction f) {
 		LivingEntity best = null;
 		double bestD = FRIGHT * FRIGHT;
 		for (LivingEntity m : level.getEntitiesOfClass(LivingEntity.class, v.getBoundingBox().inflate(FRIGHT),
-			m -> m.isAlive() && (m instanceof Mob mob && frightful(mob) || m instanceof ServerPlayer p && Aliens.feared(p, f.id())))) {
+			m -> m != v && m.isAlive() && (m instanceof Mob mob && (frightful(mob) || Oddities.monstrous(mob))
+				|| m instanceof ServerPlayer p && Aliens.feared(p, f.id())))) {
 			double d = m.distanceToSqr(v);
 			if (d < bestD && v.hasLineOfSight(m)) {
 				bestD = d;
@@ -111,9 +117,20 @@ final class Frights {
 		return m instanceof Enemy;
 	}
 
+	/** (0.6.9) Something came down at {@code at} (a meteor, a star): it runs from the spot and hides a while. */
+	static void scare(ServerLevel level, Villager v, Vec3 at) {
+		long now = level.getGameTime();
+		if (!FRIGHTS.containsKey(v.getUUID())) {
+			level.playSound(null, v.blockPosition(), SoundEvents.VILLAGER_HURT, SoundSource.NEUTRAL, 0.6F, 1.3F);
+		}
+		Fright fright = new Fright(away(level, v, at), null, now + HIDE_TICKS);
+		FRIGHTS.put(v.getUUID(), fright);
+		flee(level, v, fright);
+	}
+
 	/** It takes fright: where it'll run (home if that's near and not toward the monster, else away), and with which child. */
 	private static Fright frighten(ServerLevel level, Villager v, LivingEntity monster, long now) {
-		BlockPos to = away(level, v, monster);
+		BlockPos to = away(level, v, monster.position());
 		Optional<GlobalPos> home = v.getBrain().getMemoryInternal(MemoryModuleType.HOME);
 		if (home == null) {
 			home = Optional.empty();
@@ -148,8 +165,8 @@ final class Frights {
 	}
 
 	/** A spot on the ground {@link #RUN} blocks from {@code monster}, the way {@code v} already is from it. */
-	private static BlockPos away(ServerLevel level, Villager v, LivingEntity monster) {
-		Vec3 off = v.position().subtract(monster.position()).multiply(1.0, 0.0, 1.0);
+	private static BlockPos away(ServerLevel level, Villager v, Vec3 monster) {
+		Vec3 off = v.position().subtract(monster).multiply(1.0, 0.0, 1.0);
 		if (off.lengthSqr() < 1.0E-3) {
 			off = new Vec3(1.0, 0.0, 0.0);
 		}

@@ -777,6 +777,14 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (Kingdoms' and Naturalist's predators too) tear into bodies with a brutal worrying bite, the meat spills on the ground
   and they eat it from there. Players' kills are left for the player. See Kitchen's MODLOG.
 
+- **0.9.18, townsfolk react to the strange (Kingdoms 0.6.9):** villagers and a realm's folk stare up at a meteor or a
+  falling star and cry out, and run from where it lands; they stare at a power used in front of them and say what they
+  saw (each power has its own lines; children want it again); they run from the symbiote's blob and anything it's got
+  into, and guards hunt it (not a villager it's inhabiting, whom they only shout about); a player in the symbiote's suit
+  or walking as a shade is treated like an unknown alien until the kingdom sees the change; strange moons get remarked
+  on; and all of it turns up in gossip for three days. Powers marks these with entity tags (`core/Oddities`:
+  `jaymospowers_odd:meteor|star|symbiote|shade|power/<id>`), which Kingdoms reads (`Oddities`).
+
 - **0.9.17, imbued blades proc (Kingdoms 0.6.8):** a Sorcerer's imbued blade bursts with its element on one blow in
   twenty rather than every one (the rest spark), and a lightning burst blinds for a moment; air lifts on every second
   blow instead, for air combos. Thrown bolts always burst.

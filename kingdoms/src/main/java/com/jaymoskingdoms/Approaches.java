@@ -797,8 +797,11 @@ public final class Approaches {
 				more = key(a) + ".you." + a.enemy + ".more";
 				args = new Object[] {name};
 			} else {
-				// (0.5.56) a monster of legend seen out there; (0.5.51) a butcher
-				said = level.getRandom().nextFloat() < Sightings.GOSSIP_CHANCE ? Sightings.gossip(level, a.mob) : null;
+				// (0.6.9) something strange seen lately; (0.5.56) a monster of legend seen out there; (0.5.51) a butcher
+				said = Oddities.gossip(level, a.mob);
+				if (said == null && level.getRandom().nextFloat() < Sightings.GOSSIP_CHANCE) {
+					said = Sightings.gossip(level, a.mob);
+				}
 				if (said == null && level.getRandom().nextFloat() < BUTCHER_GOSSIP_CHANCE) {
 					said = KitchenCompat.butcherGossip(player, a.mob);
 				}

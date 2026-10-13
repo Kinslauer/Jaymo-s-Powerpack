@@ -178,6 +178,7 @@ final class GravityMeteor {
 		from = new Vec3(from.x, Math.min(from.y, level.getMaxY() - 2), from.z);
 		BlockCluster rock = BlockCluster.made(level, ROCK, from);
 		rock.script(true, false);
+		com.jaymospowers.core.Oddities.mark(rock, com.jaymospowers.core.Oddities.METEOR);
 		if (size > 1.0F) {
 			rock.setAttached(BlockCluster.SCALE, size);
 		}

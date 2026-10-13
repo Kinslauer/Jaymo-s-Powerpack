@@ -227,6 +227,7 @@ public final class Powers {
 			power.onKey(player, key, down);
 			if (down) {
 				Mastery.used(player);
+				Oddities.hold(player, Oddities.POWER + power.id().getPath(), Oddities.POWER_SEEN_TICKS);
 			}
 		}
 	}
@@ -239,6 +240,9 @@ public final class Powers {
 		}
 		if (power != null && player.isAlive() && !player.isSpectator()) {
 			power.onMode(player, down);
+			if (down) {
+				Oddities.hold(player, Oddities.POWER + power.id().getPath(), Oddities.POWER_SEEN_TICKS);
+			}
 		}
 	}
 
@@ -251,6 +255,9 @@ public final class Powers {
 		if (power != null && (Fate.isAscended(player) || power.ultimateWhenCorrupted() && Fate.isCorrupted(player)) && player.isAlive()
 			&& !player.isSpectator()) {
 			power.onUltimate(player, down);
+			if (down) {
+				Oddities.hold(player, Oddities.POWER + power.id().getPath(), Oddities.POWER_SEEN_TICKS);
+			}
 		}
 	}
 
