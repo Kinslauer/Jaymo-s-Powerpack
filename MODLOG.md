@@ -603,3 +603,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   `removed-mods` (matched by mod id, `removedIdsFromProfile`), and the server's mods folder drops them on its next sync.
   Kitchen's Alex's Mobs fish stay in its `fish_corpses` tag as optional entries, so nothing breaks without the mod.
   Worlds that had Alex's Mobs creatures lose them (and their items) on load.
+- **0.8.108, startup crash fix (Kitchen 0.4.33):** the game crashed while loading with "no payload type has been
+  registered with name jaymoskitchen:butcher_deal". Kitchen registered the butchers' deal receiver before its payload
+  types; `Payloads.register()` now runs first in `JaymosKitchen.onInitialize`.

@@ -40,6 +40,9 @@ public class JaymosKitchen implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		// payload types first: Fabric refuses a receiver for a payload it doesn't know yet (Butchers' butcher_deal
+		// crashed the game at startup in 0.4.32)
+		Payloads.register();
 		ModItems.register();
 		Quivers.register();
 		com.jaymoskitchen.archery.LegShots.register();
@@ -54,7 +57,6 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.kitchen.CookingTableBridge.register();
 		Tables.register();
 		Sowing.register();
-		Payloads.register();
 
 		// sneak + right-click with an empty hand: a lit campfire, furnace, smoker or blast furnace opens the kitchen;
 		// the top of a wood, stone or slab block opens the prep board (also with Pmeh in hand, to roll a joint)
