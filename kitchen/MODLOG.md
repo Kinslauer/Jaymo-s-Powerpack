@@ -720,3 +720,10 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
 - Tamed wolves eat meat dropped on the ground near them (anything they'd eat from your hand), unless sitting or
   fighting; while hurt they're never too full to.
 - Tuning: the constants at the top of `Scavengers`.
+
+## 0.4.36: catching falling bodies
+- A body in the air (dropped, thrown, falling off something) can be caught: an empty hand's right-click takes it into
+  your arms, and the crosshair takes it from up to 2 blocks off it (`CATCH_RADIUS`), so a near miss still catches it.
+  Powers' tendril grabs and whips find it the same way. Iron golems are still too heavy.
+- A falling body wedged in a block is eased out the nearest open way (as a dropped item is), and one that stops getting
+  anywhere for 2 seconds (`STUCK_TICKS`) lies where it is instead of tumbling forever.

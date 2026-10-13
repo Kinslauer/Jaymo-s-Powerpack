@@ -67,7 +67,7 @@ final class ArsenalCannonRenderer {
 					out *= 1.0F - ease((fired - ArsenalCannons.RECOIL_TICKS) / ArsenalCannons.SINK_TICKS);
 					open *= 1.0F - ease((fired - ArsenalCannons.RECOIL_TICKS - ArsenalCannons.SINK_TICKS) / ArsenalCannons.OPEN_TICKS);
 				}
-				Vec3 at = ArsenalCannons.slot(player, i, partialTick);
+				Vec3 at = ArsenalCannons.slot(player, battery, i, partialTick);
 				Vec3 dir = aim.subtract(at);
 				dir = dir.lengthSqr() < 1.0E-4 ? player.getViewVector(partialTick) : dir.normalize();
 				Vec3 right = dir.cross(new Vec3(0.0, 1.0, 0.0));
