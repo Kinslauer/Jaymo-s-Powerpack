@@ -89,6 +89,8 @@ public final class Quests {
 	static final int HOLD_TICKS = 20 * 60 * 2;
 	/** A chief's death counts for those with the quest this near it. */
 	static final double CHIEF_CREDIT_RANGE = 160.0;
+	/** (0.5.49) Giving up a quest costs this much reputation with the giver's settlement (a king's, this much). */
+	static final int ABANDON_REPUTATION = 10, ABANDON_ROYAL_REPUTATION = 40;
 	/** A delivered letter: hearts with whoever gets it. */
 	static final int LETTER_HEARTS = 5;
 	/** (0.5.29) A king slain cunningly (under a false oath, or out on his round): emeralds this much more (percent), and this much more good name with the giver's realm. */
@@ -466,7 +468,19 @@ public final class Quests {
 			}
 		}
 		player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.abandoned", title(q)).withStyle(ChatFormatting.GRAY));
+		disappoint(player, q);
 		sync(player, true);
+	}
+
+	/** (0.5.49) The giver's settlement thinks less of one who gave up their quest. */
+	private static void disappoint(ServerPlayer player, Quest q) {
+		Faction f = Factions.get(player.level().getServer(), q.giver().faction());
+		if (f == null) {
+			return;
+		}
+		int cost = q.giver().king() ? ABANDON_ROYAL_REPUTATION : ABANDON_REPUTATION;
+		Reputation.change(player, f, -cost);
+		player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.abandoned.reputation", cost, f.name()).withStyle(ChatFormatting.RED));
 	}
 
 	/** Gives up quest {@code id} from anywhere ({@code /kingdom quests abandon}). */
@@ -476,6 +490,7 @@ public final class Quests {
 			return false;
 		}
 		remove(player, id);
+		disappoint(player, q);
 		sync(player, true);
 		return true;
 	}

@@ -2035,3 +2035,13 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
 - **A good name helps a little:** reputation with the settlement raises both, up to one villager in ten and a king's
   work on one day in five at the best reputation (`GIVER_SHARE_REPUTED`, `KING_CHANCE_REPUTED`). The day's roll is made
   for whoever is near when it's first made. Operators can still `/kingdom quests offer` anyone.
+- **Giving up costs you:** giving up a quest (the giver's Give up button, or `/kingdom quests abandon`) costs 10
+  reputation with the giver's settlement, 40 for a king's decree (`Quests.ABANDON_REPUTATION`, `ABANDON_ROYAL_REPUTATION`).
+- **Traveller's Journal** (`Journal`, `JournalClient`, `JournalScreen`): craft a book with a map (empty or filled).
+  With it anywhere in your inventory, M (rebindable, "Open Traveller's Journal") or using it opens three pages:
+  **Quests** (each quest, who gave it, its story, what's left and which way it lies), **Map** (the land about you
+  drawn like a map from the chunks you have loaded, blank parchment beyond, zoom 1-32 blocks a cell with +/- or the
+  mouse wheel; you as an arrow, your quests numbered (gold, red for decrees, green when ready to turn in, then
+  pointing home), settlements in their colours; hover for names and reputation) and **Reputation** (each settlement
+  within 3000 blocks or that knows you: its word and a bar from -1000 to 1000). Without a journal, M only says how to
+  make one.
