@@ -263,6 +263,7 @@ public final class WebPower implements Power {
 		WebSymbiote.register();
 		WebSymbioteBlob.init();
 		WebBehemoth.register();
+		WebInhabit.register();
 		WebAscension.register();
 		WebDebugCommand.register();
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Swing.TYPE, (payload, ctx) -> INSTANCE.onSwing(ctx.player(), payload));

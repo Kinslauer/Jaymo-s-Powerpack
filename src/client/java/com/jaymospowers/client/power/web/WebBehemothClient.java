@@ -53,13 +53,20 @@ public final class WebBehemothClient {
 	/** On a behemoth's render state: it wears the big body. */
 	public static final RenderStateDataKey<Boolean> HOST = RenderStateDataKey.create(() -> "jaymospowers:web_behemoth");
 
-	/** Behemoths seen lately (entity ids), for their tendrils. */
+	/** On a mob's render state: a roaming symbiote is in it (see WebInhabit), so it wears the suit over its own body. */
+	public static final RenderStateDataKey<Boolean> INHABITED = RenderStateDataKey.create(() -> "jaymospowers:web_inhabited");
+	/** The suit over any mob's own model: black goo with veins, a texture that reads the same on any UV layout. */
+	private static final Identifier GOO = JaymosPowers.id("textures/entity/web_symbiote_goo.png");
+
+	/** Behemoths (and hostile mobs a symbiote is in) seen lately (entity ids), for their tendrils. */
 	private static final Set<Integer> SEEN = new HashSet<>();
 
 	private WebBehemothClient() {
 	}
 
 	static void init() {
+		// any mob can be inhabited: every living renderer gets the suit layer
+		LivingEntityRenderLayerRegistrationCallback.EVENT.register((type, renderer, helper, context) -> helper.register(inhabited(renderer)));
 		if (FabricLoader.getInstance().isModLoaded("jaymoskitchen")) {
 			Kitchen.init();
 		}
@@ -73,6 +80,14 @@ public final class WebBehemothClient {
 		} else if (state.getData(HOST) != null) {
 			state.setData(HOST, null);
 		}
+		if (com.jaymospowers.power.web.WebInhabit.isHost(entity)) {
+			state.setData(INHABITED, Boolean.TRUE);
+			if (com.jaymospowers.power.web.WebInhabit.lashing(entity)) {
+				SEEN.add(entity.getId());
+			}
+		} else if (state.getData(INHABITED) != null) {
+			state.setData(INHABITED, null);
+		}
 	}
 
 	/** Every behemoth's back tendrils (from WebLineRenderer, in the level pass). */
@@ -80,7 +95,8 @@ public final class WebBehemothClient {
 		if (SEEN.isEmpty()) {
 			return;
 		}
-		SEEN.removeIf(id -> !(level.getEntity(id) instanceof LivingEntity host) || !host.hasAttached(WebBehemoth.HOST) || !host.isAlive());
+		SEEN.removeIf(id -> !(level.getEntity(id) instanceof LivingEntity host)
+			|| !host.hasAttached(WebBehemoth.HOST) && !com.jaymospowers.power.web.WebInhabit.lashing(host) || !host.isAlive());
 		for (int id : SEEN) {
 			LivingEntity host = (LivingEntity)level.getEntity(id);
 			if (host == null || host.getPosition(partialTick).distanceToSqr(camera) > 64.0 * 64.0) {
@@ -151,6 +167,27 @@ public final class WebBehemothClient {
 				}
 			}
 		});
+	}
+
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private static RenderLayer inhabited(net.minecraft.client.renderer.entity.LivingEntityRenderer renderer) {
+		return new Inhabited(renderer);
+	}
+
+	/** The black suit over an inhabited mob: its own model, drawn again in the goo (the way glowing eyes are). */
+	private static final class Inhabited<S extends net.minecraft.client.renderer.entity.state.LivingEntityRenderState,
+		M extends net.minecraft.client.model.EntityModel<? super S>> extends RenderLayer<S, M> {
+		Inhabited(net.minecraft.client.renderer.entity.RenderLayerParent<S, M> renderer) {
+			super(renderer);
+		}
+
+		@Override
+		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, float yRot, float xRot) {
+			if (state.getData(INHABITED) == null || state.isInvisible) {
+				return;
+			}
+			renderColoredCutoutModel(this.getParentModel(), GOO, poseStack, collector, lightCoords, state, -1, 1);
+		}
 	}
 
 	private static float smooth(float x) {

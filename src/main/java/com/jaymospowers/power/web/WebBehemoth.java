@@ -167,7 +167,7 @@ public final class WebBehemoth {
 	 * Its tendrils, every tick: each lash lands halfway and ends; every free tendril whose rest is up lashes at a random
 	 * living thing in reach (it doesn't pick: anything will do).
 	 */
-	private static void lash(ServerLevel level, Mob host, long now) {
+	static void lash(ServerLevel level, Mob host, long now) {
 		java.util.List<Strike> old = host.getAttachedOrElse(STRIKE, java.util.List.of());
 		java.util.List<Strike> lashes = new ArrayList<>();
 		long[] next = NEXT_STRIKE.computeIfAbsent(host, h -> new long[TENDRILS]);

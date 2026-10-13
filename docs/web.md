@@ -59,6 +59,13 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   respawned player in the suit until their new age caught up with the old one.
 - **The blob** walks on rigid two-section tendrils (`WebBlobRenderer.LEG_LENGTH`), and reads its movement from its
   position change (clients don't keep a mob's velocity, so it used to slide with its legs idle).
+- **Blob inhabits mobs (`WebInhabit`):** with no web slinger or risen body in reach, a loose blob takes the nearest mob
+  (any but bosses, other blobs, behemoths). It wears the suit over its own model (`web_symbiote_goo.png`, drawn like
+  glowing eyes). A peaceful host is spat out after `CALM_MIN`-`CALM_MAX` 20-40 s (reels with Nausea, Slowness,
+  Weakness; lives). A hostile one (`Enemy`) keeps it `HOSTILE_MIN`-`HOSTILE_MAX` 60-90 s: +20 health, +4 damage, +25%
+  speed, lashing with behemoth tendrils at everything near, losing `DECAY` 1.2% of max health a second (up to x3 near
+  the end), and killed when its time is up. Whenever a host dies or is rejected the blob drops out there, rests
+  `MOB_REST_TICKS` 100, and never takes that mob again.
 
 ## Controls
 

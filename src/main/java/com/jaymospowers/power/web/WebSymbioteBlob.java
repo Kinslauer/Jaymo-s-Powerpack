@@ -37,7 +37,8 @@ import org.jspecify.annotations.Nullable;
  * The symbiote without a host: a black blob hauling itself over the ground on its tendrils. It leaves its host when
  * they die and stays near where they fell (their body, if Jaymo's Kitchen left one), looking for a new host: any web
  * slinger without a symbiote who comes near, or the dead host's body once it gets back up as a zombie (that one becomes
- * {@link WebBehemoth a behemoth}). Only fire, lava and explosions can hurt it; anything else it shrugs off.
+ * {@link WebBehemoth a behemoth}). With neither about it makes do with any mob nearby ({@link WebInhabit}), until that
+ * one proves unfit; it won't take one it has just left again. Only fire, lava and explosions can hurt it; anything else it shrugs off.
  */
 public class WebSymbioteBlob extends PathfinderMob {
 	// ---- tuning ----
@@ -70,6 +71,12 @@ public class WebSymbioteBlob extends PathfinderMob {
 
 	/** Ticks left that fire can't hurt it (it came down in a meteor). */
 	private int fireGrace;
+
+	/** Fresh out of a mob, it rests this long (ticks) before looking for another mob. */
+	static final int MOB_REST_TICKS = 100;
+	/** The mobs it has been in already: it won't take them again. */
+	private final java.util.Set<java.util.UUID> spurned = new java.util.HashSet<>();
+	private int mobRest;
 
 	/** Who (or what) it's after right now; worked out again every {@link #SCAN_EVERY}. */
 	private @Nullable Entity quarry;
@@ -109,6 +116,13 @@ public class WebSymbioteBlob extends PathfinderMob {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_DEATH, SoundSource.HOSTILE, 1.4F, 0.4F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.HOSTILE, 1.0F, 0.5F);
 		return blob;
+	}
+
+	/** It has just left {@code host} (rejected, or dead): it won't go back, and rests a moment first. */
+	WebSymbioteBlob spurn(Entity host) {
+		this.spurned.add(host.getUUID());
+		this.mobRest = MOB_REST_TICKS;
+		return this;
 	}
 
 	/** A meteor has struck at {@code at}: maybe a symbiote crawls out of the rock. Returns whether one did. */
@@ -165,6 +179,9 @@ public class WebSymbioteBlob extends PathfinderMob {
 		if (!(this.level() instanceof ServerLevel level)) {
 			return;
 		}
+		if (this.mobRest > 0) {
+			this.mobRest--;
+		}
 		if (this.fireGrace > 0) {
 			this.fireGrace--;
 			this.clearFire();
@@ -192,7 +209,7 @@ public class WebSymbioteBlob extends PathfinderMob {
 		}
 	}
 
-	/** A risen body first (its old host's or anyone's), then the nearest web slinger without a symbiote. */
+	/** A risen body first (its old host's or anyone's), then the nearest web slinger without a symbiote, then any mob. */
 	private @Nullable Entity findHost(ServerLevel level) {
 		Vec3 home = Vec3.atCenterOf(this.getHomePosition());
 		Entity zombie = level.getEntities(this, this.getBoundingBox().inflate(SEEK_RANGE),
@@ -201,8 +218,14 @@ public class WebSymbioteBlob extends PathfinderMob {
 		if (zombie != null) {
 			return zombie;
 		}
-		return level.getEntitiesOfClass(Player.class, this.getBoundingBox().inflate(SEEK_RANGE), p -> wants(p, home)).stream()
+		Entity player = level.getEntitiesOfClass(Player.class, this.getBoundingBox().inflate(SEEK_RANGE), p -> wants(p, home)).stream()
 			.min(Comparator.comparingDouble(p -> p.distanceToSqr(this))).orElse(null);
+		if (player != null || this.mobRest > 0) {
+			return player;
+		}
+		return level.getEntities(this, this.getBoundingBox().inflate(SEEK_RANGE), e -> WebInhabit.takeable(e) && !this.spurned.contains(e.getUUID())
+				&& e.position().distanceTo(home) <= LEASH).stream()
+			.min(Comparator.comparingDouble(e -> e.distanceToSqr(this))).orElse(null);
 	}
 
 	private static boolean wants(Player player, Vec3 home) {
@@ -217,8 +240,10 @@ public class WebSymbioteBlob extends PathfinderMob {
 				return;
 			}
 			WebSymbiote.bond(player, this.position());
-		} else if (host instanceof Mob mob) {
+		} else if (host instanceof Mob mob && KitchenCompat.isZombiePlayer(mob)) {
 			WebBehemoth.possess(level, mob);
+		} else if (host instanceof Mob mob && WebInhabit.takeable(mob) && !this.spurned.contains(mob.getUUID())) {
+			WebInhabit.inhabit(level, mob);
 		} else {
 			return;
 		}
