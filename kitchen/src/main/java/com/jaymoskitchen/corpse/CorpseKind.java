@@ -2,6 +2,7 @@ package com.jaymoskitchen.corpse;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.fish.AbstractFish;
 
 /** What a corpse is, which decides how it has to be dealt with. */
 public enum CorpseKind {
@@ -14,9 +15,14 @@ public enum CorpseKind {
 	/** Search it, then burn it or leave it to rot. */
 	OTHER,
 	/** A dead player: right-click for their hotbar back; burn it, or it gets up as a zombie wearing their face. */
-	PLAYER;
+	PLAYER,
+	/** (0.4.29) A fish: one click and its loot spills out and the body's gone, nothing to carry or butcher. */
+	FISH;
 
 	public static CorpseKind of(LivingEntity mob) {
+		if (mob instanceof AbstractFish || mob.is(Corpses.FISH_CORPSES)) {
+			return FISH;
+		}
 		if (mob.is(Corpses.ZOMBIE_CORPSES)) {
 			return ZOMBIE;
 		}
