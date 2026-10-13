@@ -36,7 +36,8 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * A risen body the symbiote has taken (Kitchen's zombie player): a feral undead behemoth in the big body. It hunts
- * every living thing it can see, lashing out with its tendrils, until something kills it; then the symbiote crawls
+ * every living thing it can see, and its tendrils never stop: each one thrashes on its own and lashes at whatever
+ * living thing is in reach, anything at all, several at once, the symbiote fighting for its life. Until something kills it; then the symbiote crawls
  * out again (as {@link WebSymbioteBlob}) and goes on looking for a host. The sun doesn't burn it and water doesn't
  * drown it (see {@code mixin.WebHostZombieMixin}).
  */
@@ -47,28 +48,35 @@ public final class WebBehemoth {
 	/** It sees prey this far off (in line of sight), and picks new prey this often (ticks). */
 	static final double SIGHT = 24.0;
 	static final int RETARGET_EVERY = 10;
-	/** A tendril lash: {@code STRIKE_TICKS} long, landing at {@code STRIKE_HIT}, one every {@code STRIKE_EVERY}, up to {@code STRIKE_REACH} away. */
-	public static final int STRIKE_TICKS = 16, STRIKE_HIT = 8;
-	static final int STRIKE_EVERY = 12;
-	public static final double STRIKE_REACH = 6.5;
-	static final float STRIKE_DAMAGE = 12.0F;
+	/**
+	 * Its back tendrils, each lashing on its own: {@code STRIKE_TICKS} long, landing at {@code STRIKE_HIT}, then
+	 * {@code STRIKE_GAP_MIN} to {@code STRIKE_GAP_MAX} ticks before that tendril goes again, at a random living thing up
+	 * to {@code STRIKE_REACH} away.
+	 */
+	public static final int TENDRILS = 6;
+	public static final int STRIKE_TICKS = 10, STRIKE_HIT = 5;
+	static final int STRIKE_GAP_MIN = 1, STRIKE_GAP_MAX = 5;
+	public static final double STRIKE_REACH = 7.5;
+	static final float STRIKE_DAMAGE = 10.0F;
 	static final double STRIKE_KNOCK = 1.1;
 
 	/** When the symbiote took this body (saved, synced: clients draw the big body and its tendrils). */
 	public static final AttachmentType<Long> HOST = AttachmentRegistry.create(JaymosPowers.id("web_behemoth"),
 		builder -> builder.persistent(Codec.LONG).syncWith(ByteBufCodecs.VAR_LONG.cast(), AttachmentSyncPredicate.all()));
 
-	/** A lash under way: at whom, and since when (synced, for the tendrils' swing). */
-	public record Strike(int target, long start) {
+	/** A lash under way: which tendril, at whom, and since when (synced, for the tendrils' swing). */
+	public record Strike(int tendril, int target, long start) {
 		public static final StreamCodec<ByteBuf, Strike> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.VAR_INT, Strike::target, ByteBufCodecs.VAR_LONG, Strike::start, Strike::new);
+			ByteBufCodecs.VAR_INT, Strike::tendril, ByteBufCodecs.VAR_INT, Strike::target, ByteBufCodecs.VAR_LONG, Strike::start, Strike::new);
 	}
 
-	public static final AttachmentType<Strike> STRIKE = AttachmentRegistry.create(JaymosPowers.id("web_behemoth_strike"),
-		builder -> builder.syncWith(Strike.STREAM_CODEC, AttachmentSyncPredicate.all()));
+	/** Every lash under way (one per tendril at most). */
+	public static final AttachmentType<java.util.List<Strike>> STRIKE = AttachmentRegistry.create(JaymosPowers.id("web_behemoth_strike"),
+		builder -> builder.syncWith(Strike.STREAM_CODEC.apply(ByteBufCodecs.list()), AttachmentSyncPredicate.all()));
 
 	private static final java.util.Set<Mob> HOSTS = java.util.Collections.newSetFromMap(new WeakHashMap<>());
-	private static final Map<Mob, Long> NEXT_STRIKE = new WeakHashMap<>();
+	/** When each tendril may lash again. */
+	private static final Map<Mob, long[]> NEXT_STRIKE = new WeakHashMap<>();
 
 	private WebBehemoth() {
 	}
@@ -145,27 +153,64 @@ public final class WebBehemoth {
 				host.setTarget(target);
 			}
 		}
-		Strike strike = host.getAttached(STRIKE);
-		if (strike != null) {
-			long t = now - strike.start();
-			if (t == STRIKE_HIT) {
-				land(level, host, level.getEntity(strike.target()));
-			}
-			if (t >= STRIKE_TICKS) {
-				host.removeAttached(STRIKE);
-				NEXT_STRIKE.put(host, now + STRIKE_EVERY - STRIKE_TICKS);
-			}
-		} else if (target != null && now >= NEXT_STRIKE.getOrDefault(host, 0L) && prey(host, target)
-			&& target.distanceTo(host) <= STRIKE_REACH && host.hasLineOfSight(target)) {
-			host.setAttached(STRIKE, new Strike(target.getId(), now));
-			level.playSound(null, host.getX(), host.getY(), host.getZ(), SoundEvents.PHANTOM_FLAP, SoundSource.HOSTILE, 1.0F, 0.5F);
-		}
+		lash(level, host, now);
 		if (host.tickCount % 80 == 0) {
 			level.playSound(null, host.getX(), host.getY(), host.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.HOSTILE, 0.7F, 0.6F);
 		}
 		if (host.getRandom().nextInt(4) == 0) {
 			level.sendParticles(WebSymbiote.dust(1.0F), host.getX(), host.getY() + host.getBbHeight() * 0.6, host.getZ(), 1,
 				host.getBbWidth() * 0.4, host.getBbHeight() * 0.3, host.getBbWidth() * 0.4, 0.0);
+		}
+	}
+
+	/**
+	 * Its tendrils, every tick: each lash lands halfway and ends; every free tendril whose rest is up lashes at a random
+	 * living thing in reach (it doesn't pick: anything will do).
+	 */
+	private static void lash(ServerLevel level, Mob host, long now) {
+		java.util.List<Strike> old = host.getAttachedOrElse(STRIKE, java.util.List.of());
+		java.util.List<Strike> lashes = new ArrayList<>();
+		long[] next = NEXT_STRIKE.computeIfAbsent(host, h -> new long[TENDRILS]);
+		boolean[] busy = new boolean[TENDRILS];
+		for (Strike strike : old) {
+			long t = now - strike.start();
+			if (t == STRIKE_HIT) {
+				land(level, host, level.getEntity(strike.target()));
+			}
+			if (t >= STRIKE_TICKS || strike.tendril() < 0 || strike.tendril() >= TENDRILS) {
+				if (strike.tendril() >= 0 && strike.tendril() < TENDRILS) {
+					next[strike.tendril()] = now + STRIKE_GAP_MIN + host.getRandom().nextInt(STRIKE_GAP_MAX - STRIKE_GAP_MIN + 1);
+				}
+				continue;
+			}
+			busy[strike.tendril()] = true;
+			lashes.add(strike);
+		}
+		java.util.List<LivingEntity> near = null;
+		for (int t = 0; t < TENDRILS; t++) {
+			if (busy[t] || now < next[t]) {
+				continue;
+			}
+			if (near == null) {
+				near = level.getEntitiesOfClass(LivingEntity.class, host.getBoundingBox().inflate(STRIKE_REACH),
+					e -> prey(host, e) && e.distanceTo(host) <= STRIKE_REACH && host.hasLineOfSight(e));
+			}
+			if (near.isEmpty()) {
+				break;
+			}
+			LivingEntity victim = near.get(host.getRandom().nextInt(near.size()));
+			lashes.add(new Strike(t, victim.getId(), now));
+			if (host.getRandom().nextInt(3) == 0) {
+				level.playSound(null, host.getX(), host.getY(), host.getZ(), SoundEvents.PHANTOM_FLAP, SoundSource.HOSTILE, 1.0F,
+					0.4F + host.getRandom().nextFloat() * 0.3F);
+			}
+		}
+		if (!lashes.equals(old)) {
+			if (lashes.isEmpty()) {
+				host.removeAttached(STRIKE);
+			} else {
+				host.setAttached(STRIKE, java.util.List.copyOf(lashes));
+			}
 		}
 	}
 

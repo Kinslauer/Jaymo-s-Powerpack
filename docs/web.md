@@ -41,6 +41,20 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   every slam throws block dust, smoke and a heavy mace thud, and shakes you, the one slammed and anyone within 12.
   Bosses can't be whipped; Living Armor's tendrils keep their own Sneak grab. `COOLDOWN` 20 ticks after one ends.
 
+## Andy's symbiote and whip changes (0.9.4)
+- **Rigid tendrils:** Wall Crawl's walking tendrils are jointed limbs (two straight sections, a knee out from the
+  surface, fixed length `WebTendrilWalk.LIMB` 32 px), Doc Ock style. Walking, running or climbing, every other tendril
+  stops swaying and holds its curl in two joints (`WebTendrilLayer.JOINTS`, fully stiff at walk speed `RIGID_SPEED`).
+- **Whip needs both webs:** the first Sneak + R/G only catches (a creature dragged nearly still, a chunk hanging where
+  it tore); Sneak + the other key within `WebWhip.CATCH_TICKS` 60 puts the second web on it and starts the whip. In
+  midair it's always the lasso and you hang in place for it (no gravity, held still); the seesaw only on a living
+  creature; anything else is the overhead.
+- **Barrage combo:** one creature held by a tendril, the other empty, hold left click: it's pinned in front and every
+  other tendril stabs it in turn, a stab every `BARRAGE_EVERY` 3 ticks (i-frames ignored), 3 damage rising to 9 over
+  `BARRAGE_RAMP_TICKS` 60; letting go of the button (or `BARRAGE_MAX_TICKS` 160) ends it.
+- **Behemoth (symbiote in a zombie player):** all 6 back tendrils thrash wildly and each lashes on its own at a random
+  living thing within `STRIKE_REACH` 7.5 (10 damage, 1-5 ticks between a tendril's lashes; normal i-frames).
+
 ## Controls
 
 | Key (default) | Ability | Cooldown |

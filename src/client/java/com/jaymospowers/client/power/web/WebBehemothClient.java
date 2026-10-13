@@ -27,7 +27,8 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * The feral undead behemoth (a risen body the symbiote took, see WebBehemoth): the big body's black skin and veins
- * over Kitchen's zombie player, and a crown of tendrils on its back that writhe and lash at its prey.
+ * over Kitchen's zombie player, and a crown of tendrils on its back that thrash wildly and never stop, each one
+ * lashing at whatever it's after on its own.
  */
 public final class WebBehemothClient {
 	// ---- tuning ----
@@ -35,7 +36,9 @@ public final class WebBehemothClient {
 	private static final float BULK = 0.7F, VEIN_GAP = 0.04F;
 	private static final int VEIN_TICKS = 4;
 	/** Back tendrils: how many, how long (times its scale), how thick at the root and tip. */
-	private static final int TENDRILS = 6;
+	private static final int TENDRILS = WebBehemoth.TENDRILS;
+	/** The thrashing: how fast and how wide (share of the length), and the sudden jerks on top. */
+	private static final double THRASH_SPEED = 0.45, THRASH_WIDE = 0.9, JERK = 0.8;
 	private static final double LENGTH = 1.7, ROOT_RADIUS = 0.11, TIP_RADIUS = 0.03;
 	private static final int PIECES = 10;
 	/** A lash: reared until this share of it, lands at {@code WebBehemoth.STRIKE_HIT}, how high it rears. */
@@ -95,24 +98,35 @@ public final class WebBehemothClient {
 		Vec3 right = new Vec3(-forward.z, 0.0, forward.x);
 		Vec3 up = new Vec3(0.0, 1.0, 0.0);
 		Vec3 back = host.getPosition(partialTick).add(0.0, host.getBbHeight() * 0.74, 0.0).subtract(forward.scale(0.2 * scale));
-		// a lash: which target, and how far through
-		WebBehemoth.Strike strike = host.getAttached(WebBehemoth.STRIKE);
-		Entity target = strike == null ? null : level.getEntity(strike.target());
-		float swing = strike == null ? -1.0F : Mth.clamp((level.getGameTime() - strike.start() + partialTick) / WebBehemoth.STRIKE_TICKS, 0.0F, 1.0F);
+		// each tendril's lash: which target, and how far through
+		Entity[] targets = new Entity[TENDRILS];
+		float[] swings = new float[TENDRILS];
+		java.util.Arrays.fill(swings, -1.0F);
+		for (WebBehemoth.Strike strike : host.getAttachedOrElse(WebBehemoth.STRIKE, java.util.List.<WebBehemoth.Strike>of())) {
+			if (strike.tendril() >= 0 && strike.tendril() < TENDRILS) {
+				targets[strike.tendril()] = level.getEntity(strike.target());
+				swings[strike.tendril()] = Mth.clamp((level.getGameTime() - strike.start() + partialTick) / WebBehemoth.STRIKE_TICKS, 0.0F, 1.0F);
+			}
+		}
 		int light = net.minecraft.util.LightCoordsUtil.getLightCoords(level, BlockPos.containing(back));
 		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.entityCutout(WebLineRenderer.TENDRIL_TEXTURE), (pose, buffer) -> {
 			for (int t = 0; t < TENDRILS; t++) {
 				double side = (t % 2 == 0 ? 1.0 : -1.0) * (0.6 + 0.4 * (t / 2));
 				Vec3 root = back.add(right.scale(side * 0.12 * scale)).add(0.0, (0.15 - 0.12 * (t / 2)) * scale, 0.0);
 				double length = LENGTH * scale * (1.0 - 0.12 * (t / 2));
-				// at rest: up, back and out over the shoulders, never still
-				double sway = Math.sin(time * 0.11 + t * 1.7) * 0.35 + Math.sin(time * 0.37 + t * 2.9) * 0.12;
-				Vec3 bend = right.scale(side * 0.55 + sway).add(up.scale(0.7 + 0.2 * Math.cos(time * 0.09 + t)))
-					.add(forward.scale(-0.55 + 0.15 * Math.sin(time * 0.13 + t * 0.7)));
-				Vec3 tip = root.add(bend.normalize().scale(length));
-				Vec3 mid = root.add(up.scale(length * 0.45)).add(right.scale(side * length * 0.2));
-				if (target != null && t < 2 && swing >= 0.0F) {
-					// the front two rear up and whip down onto the prey, then draw back
+				// thrashing wildly, never still: fast, wide, and jerking out at nothing now and then
+				double a = time * THRASH_SPEED;
+				double jerk = Math.pow(Math.max(0.0, Math.sin(a * 0.7 + t * 2.3) * Math.sin(a * 0.31 + t * 1.3)), 6.0) * JERK;
+				double sway = (Math.sin(a + t * 1.7) * 0.6 + Math.sin(a * 2.3 + t * 2.9) * 0.3) * THRASH_WIDE;
+				Vec3 bend = right.scale(side * (0.55 + jerk) + sway).add(up.scale(0.5 + 0.5 * Math.cos(a * 1.3 + t)))
+					.add(forward.scale(-0.3 + 0.7 * Math.sin(a * 0.9 + t * 0.7) + jerk));
+				Vec3 tip = root.add(bend.normalize().scale(length * (1.0 + 0.3 * jerk)));
+				Vec3 mid = root.add(up.scale(length * 0.45)).add(right.scale(side * length * 0.2))
+					.add(right.scale(Math.sin(a * 1.7 + t) * length * 0.25)).add(forward.scale(Math.cos(a * 1.5 + t * 2.0) * length * 0.2));
+				Entity target = targets[t];
+				float swing = swings[t];
+				if (target != null && swing >= 0.0F) {
+					// it rears up and whips down onto whatever it's after, then draws back
 					Vec3 aim = target.getPosition(partialTick).add(0.0, target.getBbHeight() * 0.5, 0.0);
 					Vec3 reared = root.add(up.scale(REAR_UP * scale)).add(right.scale(side * 0.4 * scale)).subtract(forward.scale(0.3 * scale));
 					float hit = WebBehemoth.STRIKE_HIT / (float)WebBehemoth.STRIKE_TICKS;

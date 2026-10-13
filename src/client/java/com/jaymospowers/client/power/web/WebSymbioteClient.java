@@ -49,7 +49,7 @@ public final class WebSymbioteClient {
 	/** {@code armor}: Living Armor's (it hunches, swells); otherwise only the tendrils, out on their own for a moment. */
 	/** {@code heavy}: the strike swings held debris (slower, further); {@code variant}: a slam or a swipe (see WebSymbiote.STRIKE_SLAM). */
 	/** {@code firstPerson}: your own, drawn in first person (by First-person Model, or next to the hands): they reach further forward. */
-	/** {@code combo}: a tendril combo (WebTendrilCombos.CLAP, CRUSH, SHATTER, THRASH; -1 none): {@code strike} is then how far through it. */
+	/** {@code combo}: a tendril combo (WebTendrilCombos.CLAP, CRUSH, SHATTER, THRASH, BARRAGE; -1 none): {@code strike} is then how far through it. */
 	/** {@code rear}, {@code hit}: the shares of {@code strike} where it stops rearing and where it lands. */
 	/** {@code feral}: how wild it still is (1 a fresh bond, 0 a full one): twitchier, restless tendrils. */
 	public record Tendrils(float growth, float time, float strike, float aimYaw, float aimPitch, float side, float run, int held, boolean armor,
@@ -460,7 +460,8 @@ public final class WebSymbioteClient {
 					rear = com.jaymospowers.power.web.WebTendrilCombos.THRASH_RAISE / (float)cycle;
 					hit = (com.jaymospowers.power.web.WebTendrilCombos.THRASH_RAISE + com.jaymospowers.power.web.WebTendrilCombos.THRASH_DOWN) / (float)cycle;
 				}
-				Entity victim = combo == com.jaymospowers.power.web.WebTendrilCombos.CRUSH ? player.level().getEntity(c.second()) : null;
+				Entity victim = combo == com.jaymospowers.power.web.WebTendrilCombos.CRUSH ? player.level().getEntity(c.second())
+					: combo == com.jaymospowers.power.web.WebTendrilCombos.BARRAGE ? player.level().getEntity(c.first()) : null;
 				net.minecraft.world.phys.Vec3 at = victim != null ? victim.getBoundingBox().getCenter()
 					: combo == com.jaymospowers.power.web.WebTendrilCombos.THRASH
 						? player.position().add(player.getLookAngle().horizontal().normalize().scale(com.jaymospowers.power.web.WebTendrilCombos.THRASH_FORWARD))

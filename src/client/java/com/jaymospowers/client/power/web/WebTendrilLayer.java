@@ -86,6 +86,11 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 	 */
 	private static final int[] JOINTS = {2, 4};
 	private static final float RIGID_SPEED = 0.35F;
+	/**
+	 * Barrage: every free tendril stabs the pinned creature in turn, each on its own beat. Drawn back (this much shorter,
+	 * cocked this far up and out) until {@code STAB_COCK} of its cycle, thrust in (this much longer) by {@code STAB_HIT}.
+	 */
+	private static final float STAB_COCK = 0.45F, STAB_HIT = 0.6F, STAB_SHORT = 0.6F, STAB_LONG = 1.25F, STAB_UP = 0.5F, STAB_OUT = 0.45F;
 	/** The bulge (thickness pulse) every tendril has, wild or not. */
 	private static final float PULSE = 0.04F;
 	/** Combos: a clap's tendrils hauled out this wide each side (yaw) and this much up; a shatter's reared this far apart. */
@@ -358,6 +363,39 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 				ModelPart base = this.parts[t][0];
 				// the top two (right, left) are the ones that reach out and hold: while holding, they're drawn reaching
 				base.visible = !(t == 0 && (tendrils.held() & 1) != 0 || t == 1 && (tendrils.held() & 2) != 0);
+				if (combo == WebTendrilCombos.BARRAGE && base.visible && tendrils.legs() == null && tendrils.tethers() == null) {
+					// stabbing, over and over: cocked back, then driven straight into it, each on its own beat
+					float beat = state.ageInTicks / WebTendrilCombos.BARRAGE_CYCLE + t * 0.618F;
+					float p = beat - Mth.floor(beat);
+					float reach;
+					float cock;
+					if (p < STAB_COCK) {
+						cock = smooth(p / STAB_COCK);
+						reach = Mth.lerp(cock, 1.0F, STAB_SHORT);
+					} else if (p < STAB_HIT) {
+						float k = (p - STAB_COCK) / (STAB_HIT - STAB_COCK);
+						cock = 1.0F - k;
+						reach = Mth.lerp(k * k, STAB_SHORT, STAB_LONG);
+					} else {
+						float k = smooth((p - STAB_HIT) / (1.0F - STAB_HIT));
+						cock = 0.0F;
+						reach = Mth.lerp(k, STAB_LONG, 1.0F);
+					}
+					base.yRot = aimYaw(tendrils.aimYaw() - side * STAB_OUT * cock, r[3]);
+					base.xRot = tendrils.aimPitch() + STAB_UP * cock;
+					base.xScale = thick;
+					base.yScale = thick;
+					base.zScale = length * reach * (fp ? 1.0F + STRETCH_FIRST_PERSON : 1.0F);
+					// rigid as a spear
+					for (int k = 1; k < SEGMENTS; k++) {
+						ModelPart segment = this.parts[t][k];
+						segment.xRot = 0.0F;
+						segment.yRot = 0.0F;
+						segment.xScale = 1.0F;
+						segment.yScale = 1.0F;
+					}
+					continue;
+				}
 				// a wild one never settles: quicker sway, and now and then a tendril jerks out on its own
 				float sway = Mth.sin(time * (0.07F + FERAL_SWAY * feral) + t * 1.3F) * 0.2F;
 				float jerk = (float)Math.pow(Math.max(0.0F, Mth.sin(time * 0.31F + t * 2.7F) * Mth.sin(time * 0.13F + t * 1.1F)), 8.0)
