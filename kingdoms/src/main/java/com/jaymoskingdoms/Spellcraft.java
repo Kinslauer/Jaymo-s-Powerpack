@@ -66,6 +66,8 @@ public final class Spellcraft {
 	static final int WATER_SLOW = 60, EARTH_STAGGER = 40, ICE_FREEZE = 160, LIGHTNING_CHAIN = 2;
 	/** (0.6.7) One blow in this many bursts with the element; the rest only spark. A thrown bolt always does. */
 	static final int PROC_ONE_IN = 20;
+	/** (0.6.7) Air instead lifts on every this-many-th blow, so the next one lands in the air: an air combo. */
+	static final int AIR_EVERY = 2;
 	/** (0.6.7) How long a lightning burst blinds, in ticks (0.3 s). */
 	static final int LIGHTNING_BLIND = 6;
 	static final double AIR_LIFT = 0.9, LIGHTNING_RANGE = 4.0;
@@ -84,6 +86,8 @@ public final class Spellcraft {
 
 	/** Sorcerer → game time their blade's element wears off. */
 	private static final Map<UUID, Long> IMBUED = new HashMap<>();
+	/** Blows landed since an air blade's last lift, by player. */
+	private static final Map<UUID, Integer> AIR_BLOWS = new HashMap<>();
 
 	private Spellcraft() {
 	}
@@ -110,7 +114,14 @@ public final class Spellcraft {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (source.getEntity() instanceof ServerPlayer sp && source.getDirectEntity() == sp && entity != sp && damageTaken > 0.0F && !blocked
 				&& imbued(sp) && entity.level() instanceof ServerLevel level) {
-				if (sp.getRandom().nextInt(PROC_ONE_IN) == 0) {
+				boolean burst;
+				if (element(sp).equals("air")) {
+					int blows = AIR_BLOWS.merge(sp.getUUID(), 1, Integer::sum);
+					burst = blows % AIR_EVERY == 0;
+				} else {
+					burst = sp.getRandom().nextInt(PROC_ONE_IN) == 0;
+				}
+				if (burst) {
 					strike(level, sp, entity, false);
 				} else {
 					level.sendParticles(particle(element(sp)), entity.getX(), entity.getY(0.6), entity.getZ(), 2, 0.2, 0.2, 0.2, 0.02);
@@ -121,6 +132,7 @@ public final class Spellcraft {
 
 	static void clear() {
 		IMBUED.clear();
+		AIR_BLOWS.clear();
 	}
 
 	// ---- the Mage -----------------------------------------------------------------------------------------------

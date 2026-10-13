@@ -2404,8 +2404,9 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
 
 ## 0.6.7: imbued blades proc (pack 0.9.16)
 - A Sorcerer's imbued blade no longer bursts on every blow: one blow in twenty does (`Spellcraft.PROC_ONE_IN`), the
-  rest only spark with the element's colour. A lightning burst also blinds for 0.3 s (`LIGHTNING_BLIND`). Thrown
-  bolts (sneak + J) always burst.
+  rest only spark with the element's colour. A lightning burst also blinds for 0.3 s (`LIGHTNING_BLIND`). Air
+  instead lifts on every second blow (`AIR_EVERY`), so the next lands in the air: air combos. Thrown bolts (sneak + J)
+  always burst.
 
 ## 0.6.6: lunar events and Bad Omen grudges (pack 0.9.15)
 - Our own lunar events (`Moons`; ideas from Lunar and Enhanced Celestials, nothing of theirs used). At dusk the
