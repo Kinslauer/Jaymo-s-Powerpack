@@ -60,7 +60,9 @@ public final class WebSuitGrowth {
 	static void extract(Player player, AvatarRenderState state, float partialTicks) {
 		int now = level(player);
 		long[] change = CHANGES.get(player.getId());
-		long tick = player.tickCount;
+		// game time, not the player's own age: a respawned player's age starts over, which would hold a change
+		// (the suit falling away at death) part-done until it caught up
+		long tick = player.level().getGameTime();
 		if (change == null) {
 			// first seen: as it is, no growing
 			CHANGES.put(player.getId(), new long[] {now, now, tick - 1000});

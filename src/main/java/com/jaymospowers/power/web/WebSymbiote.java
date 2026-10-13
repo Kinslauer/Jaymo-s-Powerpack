@@ -103,7 +103,7 @@ public final class WebSymbiote {
 	public static final float ROAR_DAMAGE = 8.0F, ROAR_SHAKE = 1.4F;
 	public static final int ROAR_RESISTANCE = 2;
 	/** Shroud: invisible until you attack, or for this long at most. */
-	public static final int SHROUD_TICKS = 400;
+	public static final int SHROUD_TICKS = 100;
 	/**
 	 * Living Armor: put on, it can be put away again after {@code ARMOR_TOGGLE_GAP}; without the suit it withdraws
 	 * after {@code ARMOR_IDLE_TICKS} of no use (nothing held, struck, swung or torn), and it never stays out longer
@@ -116,7 +116,7 @@ public final class WebSymbiote {
 	 * won't come at your call until it has given you {@code SUIT_ABILITIES} of its abilities. Whenever it takes over,
 	 * it engulfs you in the suit and the big body.
 	 */
-	public static final int SUIT_DEBUT_TICKS = 100, SUIT_ABILITIES = 4;
+	public static final int SUIT_DEBUT_TICKS = 30, SUIT_ABILITIES = 4;
 	/** Lines it has for its panic (last-ditch) and its alarm at noise and fire; never the same panic line twice running. */
 	public static final int PANIC_LINES = 8, ALARM_LINES = 4;
 	/**
