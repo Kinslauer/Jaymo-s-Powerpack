@@ -2,9 +2,11 @@ package com.jaymoskingdoms;
 
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -28,6 +30,10 @@ import org.jspecify.annotations.Nullable;
  * blocks, in line of sight) know you for who you are from then on, and that kingdom treats the alien as it treats you.
  *
  * <p>Read by entity tag ({@link #TAG}, set by Powers while a player is changed), so Kingdoms needs no Powers classes.
+ *
+ * <p>(0.6.11) The same goes for the other shapes a player can take ({@link #KINDS}): the symbiote's black suit or its
+ * big body, and a Darktide shade. Each is learned on its own: a kingdom that saw you change into the alien still
+ * runs from the suit until it sees you put that on.
  */
 final class Aliens {
 	/** The tag Powers puts on a changed player; who has seen a player change (faction ids), kept across deaths. */
@@ -38,7 +44,11 @@ final class Aliens {
 	static final double WITNESS = 16.0;
 	static final int EVERY = 10;
 
-	private static final Set<UUID> WAS = new HashSet<>();
+	/** What a player can be seen to become: the alien, the symbiote, the shade ({@link Oddities}' tags). */
+	static final String ALIEN = "alien";
+	static final List<String> KINDS = List.of(ALIEN, Oddities.SYMBIOTE, Oddities.SHADE);
+
+	private static final Map<UUID, Set<String>> WAS = new HashMap<>();
 
 	private Aliens() {
 	}
@@ -53,15 +63,42 @@ final class Aliens {
 		return e.entityTags().contains(TAG);
 	}
 
-	/** Whether {@code faction}'s people have seen {@code player} change, and so know the alien is them. */
-	static boolean known(ServerPlayer player, int faction) {
-		List<String> known = player.getAttached(KNOWN);
-		return known != null && known.contains(Integer.toString(faction));
+	/** Whether {@code e} shows {@code kind} right now. */
+	static boolean is(Entity e, String kind) {
+		return ALIEN.equals(kind) ? alien(e) : Oddities.has(e, kind);
 	}
 
-	/** Whether {@code faction}'s people take {@code player} for a monster: an alien they haven't seen change. */
+	/** What a {@code faction} that saw the change remembers (the alien's entry is the bare id, as before 0.6.9). */
+	private static String entry(int faction, String kind) {
+		return ALIEN.equals(kind) ? Integer.toString(faction) : faction + ":" + kind;
+	}
+
+	/** Whether {@code faction}'s people have seen {@code player} change, and so know the alien is them. */
+	static boolean known(ServerPlayer player, int faction) {
+		return known(player, faction, ALIEN);
+	}
+
+	static boolean known(ServerPlayer player, int faction, String kind) {
+		List<String> known = player.getAttached(KNOWN);
+		return known != null && known.contains(entry(faction, kind));
+	}
+
+	/** What {@code faction}'s people take {@code player} for a monster as, if anything: a shape they haven't seen them take. */
+	static @Nullable String fearedAs(ServerPlayer player, int faction) {
+		if (player.isCreative() || player.isSpectator()) {
+			return null;
+		}
+		for (String kind : KINDS) {
+			if (is(player, kind) && !known(player, faction, kind)) {
+				return kind;
+			}
+		}
+		return null;
+	}
+
+	/** Whether {@code faction}'s people take {@code player} for a monster: a shape they haven't seen them take. */
 	static boolean feared(ServerPlayer player, int faction) {
-		return !player.isCreative() && !player.isSpectator() && alien(player) && !known(player, faction);
+		return fearedAs(player, faction) != null;
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -69,19 +106,20 @@ final class Aliens {
 			return;
 		}
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-			boolean now = alien(player);
-			boolean was = WAS.contains(player.getUUID());
-			if (now && !was) {
-				witness(server, player);
-				WAS.add(player.getUUID());
-			} else if (!now && was) {
-				WAS.remove(player.getUUID());
+			Set<String> was = WAS.computeIfAbsent(player.getUUID(), id -> new HashSet<>());
+			for (String kind : KINDS) {
+				boolean now = is(player, kind);
+				if (now && was.add(kind)) {
+					witness(server, player, kind);
+				} else if (!now) {
+					was.remove(kind);
+				}
 			}
 		}
 	}
 
 	/** They changed just now: every kingdom with someone near enough, and looking, learns the alien is them. */
-	private static void witness(MinecraftServer server, ServerPlayer player) {
+	private static void witness(MinecraftServer server, ServerPlayer player, String kind) {
 		ServerLevel level = player.level();
 		Set<Integer> factions = new LinkedHashSet<>();
 		List<LivingEntity> witnesses = new ArrayList<>();
@@ -100,24 +138,24 @@ final class Aliens {
 		List<String> known = new ArrayList<>(player.getAttachedOrElse(KNOWN, List.of()));
 		boolean news = false;
 		for (int id : factions) {
-			if (!known.contains(Integer.toString(id))) {
-				known.add(Integer.toString(id));
+			if (!known.contains(entry(id, kind))) {
+				known.add(entry(id, kind));
 				news = true;
 				Faction f = Factions.get(server, id);
 				if (f != null) {
-					player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.alien.seen", f.name()).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+					player.sendSystemMessage(Component.translatable("message.jaymoskingdoms." + kind + ".seen", f.name()).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
 				}
 			}
 		}
 		if (news) {
 			player.setAttached(KNOWN, known);
 			LivingEntity speaker = witnesses.get(0);
-			Speech.say(level, speaker, Component.translatable("talk.jaymoskingdoms.alien.seen"), Speech.YELLOW, 24.0);
+			Speech.say(level, speaker, Component.translatable("talk.jaymoskingdoms." + kind + ".seen"), Speech.YELLOW, 24.0);
 		}
 	}
 
 	/** The kingdom {@code e} belongs to: a folk's own, a villager's by the land they stand on. */
-	private static @Nullable Faction factionOf(MinecraftServer server, LivingEntity e) {
+	static @Nullable Faction factionOf(MinecraftServer server, LivingEntity e) {
 		if (e instanceof Folk folk) {
 			return Factions.get(server, folk.factionId());
 		}

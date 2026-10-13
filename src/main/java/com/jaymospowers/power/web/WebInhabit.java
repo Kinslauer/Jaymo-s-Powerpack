@@ -107,6 +107,7 @@ public final class WebInhabit {
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (isHost(entity) && entity.level() instanceof ServerLevel level) {
 				entity.removeAttached(HOST);
+				com.jaymospowers.core.Oddities.unmark(entity, com.jaymospowers.core.Oddities.SYMBIOTE);
 				WebSymbioteBlob.release(level, entity.position()).spurn(entity);
 			}
 		});
@@ -120,6 +121,7 @@ public final class WebInhabit {
 		int stay = hostile ? HOSTILE_MIN + mob.getRandom().nextInt(HOSTILE_MAX - HOSTILE_MIN + 1)
 			: CALM_MIN + mob.getRandom().nextInt(CALM_MAX - CALM_MIN + 1);
 		mob.setAttached(HOST, now + stay);
+		com.jaymospowers.core.Oddities.mark(mob, com.jaymospowers.core.Oddities.SYMBIOTE);
 		if (hostile) {
 			boost(mob, Attributes.MAX_HEALTH, "inhabit_health", HEALTH_BONUS, AttributeModifier.Operation.ADD_VALUE);
 			boost(mob, Attributes.ATTACK_DAMAGE, "inhabit_damage", DAMAGE_BONUS, AttributeModifier.Operation.ADD_VALUE);
@@ -179,6 +181,7 @@ public final class WebInhabit {
 	/** Not good enough: it spits the mob out (reeling, but alive) and drops off to look again. */
 	private static void reject(ServerLevel level, Mob host) {
 		host.removeAttached(HOST);
+		com.jaymospowers.core.Oddities.unmark(host, com.jaymospowers.core.Oddities.SYMBIOTE);
 		host.removeAttached(WebBehemoth.STRIKE);
 		HOSTS.remove(host);
 		host.addEffect(new MobEffectInstance(MobEffects.NAUSEA, REJECT_REEL, 0));

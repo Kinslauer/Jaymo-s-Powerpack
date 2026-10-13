@@ -70,7 +70,7 @@ public final class PowerCommand {
 				.then(Commands.argument("targets", EntityArgument.players())
 					.then(Commands.argument("affinity", StringArgumentType.word())
 						.suggests((c, b) -> SharedSuggestionProvider.suggest(java.util.stream.Stream.concat(
-							Powers.all().stream().map(p -> p.id().getPath()), java.util.stream.Stream.of("fate", "none")), b))
+							Powers.fated().stream().map(p -> p.id().getPath()), java.util.stream.Stream.of("fate", "none")), b))
 						.executes(c -> {
 							String name = StringArgumentType.getString(c, "affinity");
 							net.minecraft.resources.Identifier id;

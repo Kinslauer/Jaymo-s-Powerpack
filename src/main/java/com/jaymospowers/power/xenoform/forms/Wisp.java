@@ -3,6 +3,7 @@ package com.jaymospowers.power.xenoform.forms;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
+import com.jaymospowers.power.xenoform.XenoformState;
 import java.util.Set;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -172,6 +173,12 @@ public final class Wisp extends XenoForm {
 	@Override
 	public boolean allowsFloating(ServerPlayer player, XenoformPower.Live live) {
 		return live.glide || live.possessed >= 0;
+	}
+
+	@Override
+	public int flight(ServerPlayer player, XenoformPower.Live live) {
+		return live.glide && !player.onGround() && !player.isInWater() && player.getVehicle() == null
+			? XenoformState.FLY_GLIDE : XenoformState.FLY_NONE;
 	}
 
 	// ---- Revenant ----

@@ -27,6 +27,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.Crawl.init();
 		com.jaymospowers.core.HiddenArmor.init();
 		com.jaymospowers.core.Dismember.init();
+		com.jaymospowers.core.Oddities.init();
 		// each power registers itself (and its items, entities, packets) from its own package
 		WindPower.init();
 		ArsenalPower.init();

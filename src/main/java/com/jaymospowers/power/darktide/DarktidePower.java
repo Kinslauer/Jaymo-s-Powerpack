@@ -417,6 +417,9 @@ public final class DarktidePower implements Power {
 	@Override
 	public void tick(ServerPlayer player) {
 		DarktideLive live = live(player);
+		if (DarktideShade.shade(player) && player.isAlive()) {
+			com.jaymospowers.core.Oddities.hold(player, com.jaymospowers.core.Oddities.SHADE);
+		}
 		if (!player.isAlive()) {
 			if (live.guarding) {
 				DarktideGuard.drop(player);

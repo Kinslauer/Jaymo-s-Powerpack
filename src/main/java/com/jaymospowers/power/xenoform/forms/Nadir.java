@@ -3,6 +3,7 @@ package com.jaymospowers.power.xenoform.forms;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
+import com.jaymospowers.power.xenoform.XenoformState;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -37,8 +38,35 @@ public final class Nadir extends XenoForm {
 	/** The beacon's glow (ticks), refreshed while R is held. */
 	public static final int GLOW_TICKS = 60;
 
+	/** Flight like creative's (double-tap jump), this fast (creative's is 0.05). Free and endless. */
+	public static final float FLY_SPEED = 0.16F;
+	/** Creative's flying speed, put back when Nadir goes. */
+	private static final float NORMAL_FLY_SPEED = 0.05F;
+
 	public Nadir() {
-		super("nadir", 1.15F, 60.0F, 6.0, 0.1, 1.0, 0.6, Items.ENDER_EYE, 0x7A4FD0);
+		super("nadir", 1.15F, 60.0F, 6.0, 0.2, 1.0, 0.6, Items.ENDER_EYE, 0x7A4FD0);
+	}
+
+	@Override
+	public void onEnter(ServerPlayer player, XenoformPower.Live live) {
+		player.getAbilities().mayfly = true;
+		player.getAbilities().setFlyingSpeed(FLY_SPEED);
+		player.onUpdateAbilities();
+	}
+
+	@Override
+	public int flight(ServerPlayer player, XenoformPower.Live live) {
+		return player.getAbilities().flying ? XenoformState.FLY_VOID : XenoformState.FLY_NONE;
+	}
+
+	@Override
+	public boolean allowsFloating(ServerPlayer player, XenoformPower.Live live) {
+		return true;
+	}
+
+	@Override
+	public boolean skipsMovementCheck(ServerPlayer player, XenoformPower.Live live) {
+		return player.getAbilities().flying;
 	}
 
 	@Override
@@ -55,6 +83,13 @@ public final class Nadir extends XenoForm {
 	public void onExit(ServerPlayer player, XenoformPower.Live live) {
 		live.beaconHeld = 0;
 		live.beaconTarget = null;
+		// back to the player's own flight: creative and spectator keep theirs
+		player.getAbilities().setFlyingSpeed(NORMAL_FLY_SPEED);
+		if (!player.isCreative() && !player.isSpectator()) {
+			player.getAbilities().mayfly = false;
+			player.getAbilities().flying = false;
+		}
+		player.onUpdateAbilities();
 	}
 
 	@Override

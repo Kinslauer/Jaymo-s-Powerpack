@@ -4,6 +4,7 @@ import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Flames;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
+import com.jaymospowers.power.xenoform.XenoformState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -30,10 +31,10 @@ import net.minecraft.world.phys.Vec3;
  * and rain do.
  * <ul>
  * <li>R, Fire Bolt: a small fireball where you look.</li>
- * <li>G (hold), Flame Jet: jets of fire from your hands lift you; let go and you drift down.</li>
+ * <li>G (hold), Flame Jet: jets of fire from your feet carry you where you look, for free; let go and you drift down.</li>
  * <li>V, Fire Nova: everything within {@link #NOVA_RADIUS} is burnt and set alight.</li>
  * <li>B, Magma Trail: for {@link #TRAIL_TICKS} the ground burns where you step.</li>
- * <li>C (ascended), Sunheart: the jet becomes true flight (hold G, go where you look), and R becomes a held beam of fire
+ * <li>C (ascended), Sunheart: the jet goes faster ({@link #FLIGHT_SPEED}), and R becomes a held beam of fire
  * {@link #BEAM_RANGE} blocks long that burns whatever it touches.</li>
  * </ul>
  * Corrupted: your fire spreads. The nova and the trail light the ground around you, and nothing of yours puts it out.
@@ -43,10 +44,8 @@ public final class Pyre extends XenoForm {
 	// ---- tuning ----
 	public static final int BOLT_COOLDOWN = 20;
 	public static final double BOLT_SPEED = 1.6;
-	/** The jet: levitation this strong (amplifier), costing this much hunger a tick, needing this much food. */
-	public static final int JET_LIFT = 3;
-	public static final float JET_EXHAUSTION = 0.06F;
-	public static final int JET_MIN_FOOD = 3;
+	/** The jet: this fast (blocks/tick), easing toward where you look; slow fall for this long after letting go. Free. */
+	public static final double JET_SPEED = 0.55, JET_EASE = 0.2;
 	public static final int JET_SLOW_FALL_TICKS = 50;
 	public static final int NOVA_COOLDOWN = 200;
 	public static final double NOVA_RADIUS = 5.0;
@@ -142,31 +141,17 @@ public final class Pyre extends XenoForm {
 		ServerLevel level = player.level();
 		// the jet
 		if (live.jet) {
-			if (player.getFoodData().getFoodLevel() <= JET_MIN_FOOD && !player.isCreative()) {
-				live.jet = false;
-				player.removeEffect(MobEffects.LEVITATION);
-			} else if (live.ultimate) {
-				// Sunheart: real flight
-				Vec3 want = player.getLookAngle().scale(FLIGHT_SPEED);
-				player.setDeltaMovement(player.getDeltaMovement().lerp(want, FLIGHT_EASE));
-				player.syncVelocity = true;
-				player.causeFoodExhaustion(JET_EXHAUSTION);
-				player.resetFallDistance();
-				Vec3 at = player.position();
-				level.sendParticles(ParticleTypes.FLAME, at.x, at.y + 0.2, at.z, 8, 0.3, 0.1, 0.3, 0.06);
-				if (player.tickCount % 8 == 0) {
-					sound(player, SoundEvents.FIRE_AMBIENT, 0.8F, 1.0F);
-				}
-			} else {
-				player.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 6, JET_LIFT, false, false));
-				player.causeFoodExhaustion(JET_EXHAUSTION);
-				player.resetFallDistance();
-				Vec3 at = player.position();
-				level.sendParticles(ParticleTypes.FLAME, at.x, at.y + 0.2, at.z, 6, 0.3, 0.1, 0.3, 0.04);
-				level.sendParticles(ParticleTypes.SMALL_FLAME, at.x, at.y + 0.1, at.z, 4, 0.2, 0.1, 0.2, 0.08);
-				if (player.tickCount % 8 == 0) {
-					sound(player, SoundEvents.FIRE_AMBIENT, 0.8F, 1.3F);
-				}
+			// flight where you look, free; Sunheart's is faster
+			boolean sun = live.ultimate;
+			Vec3 want = player.getLookAngle().scale(sun ? FLIGHT_SPEED : JET_SPEED);
+			player.setDeltaMovement(player.getDeltaMovement().lerp(want, sun ? FLIGHT_EASE : JET_EASE));
+			player.syncVelocity = true;
+			player.resetFallDistance();
+			Vec3 at = player.position();
+			level.sendParticles(ParticleTypes.FLAME, at.x, at.y + 0.2, at.z, sun ? 8 : 6, 0.3, 0.1, 0.3, sun ? 0.06 : 0.04);
+			level.sendParticles(ParticleTypes.SMALL_FLAME, at.x, at.y + 0.1, at.z, 4, 0.2, 0.1, 0.2, 0.08);
+			if (player.tickCount % 8 == 0) {
+				sound(player, SoundEvents.FIRE_AMBIENT, 0.8F, sun ? 1.0F : 1.3F);
 			}
 		}
 		// the trail
@@ -215,7 +200,12 @@ public final class Pyre extends XenoForm {
 
 	@Override
 	public boolean skipsMovementCheck(ServerPlayer player, XenoformPower.Live live) {
-		return live.ultimate && live.jet;
+		return live.jet;
+	}
+
+	@Override
+	public int flight(ServerPlayer player, XenoformPower.Live live) {
+		return live.jet && !player.onGround() ? XenoformState.FLY_JET : XenoformState.FLY_NONE;
 	}
 
 	// ---- Sunheart ----

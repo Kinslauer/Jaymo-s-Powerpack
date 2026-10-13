@@ -994,6 +994,9 @@ public final class WebSymbiote {
 		if (!player.isAlive() || player.isSpectator()) {
 			return;
 		}
+		if (suitShown(player) || bulked(player)) {
+			com.jaymospowers.core.Oddities.hold(player, com.jaymospowers.core.Oddities.SYMBIOTE);
+		}
 		if (live == null) {
 			live = live(player);
 		}
