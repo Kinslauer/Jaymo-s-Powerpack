@@ -471,7 +471,9 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 				&& (Reputation.get(player, this.factionId()) <= Reputation.HOSTILE || Aliens.feared(player, this.factionId()))));
 		// and monsters on their land
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.Mob.class, true,
-			(target, level) -> this.combatant() && target instanceof Enemy && !(target instanceof net.minecraft.world.entity.monster.Creeper)));
+			(target, level) -> this.combatant() && (target instanceof Enemy && !(target instanceof net.minecraft.world.entity.monster.Creeper)
+				// (0.6.11) and whatever the symbiote has got into (Oddities)
+				|| Oddities.hunted(target))));
 		// barbarians hunt everyone else's people, and realms' folk hunt barbarians
 		Barbarians.addGoals(this, this.goalSelector, this.targetSelector);
 		// (0.5.27) goblins hunt everyone but those passing for one of them

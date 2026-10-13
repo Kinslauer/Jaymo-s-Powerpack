@@ -2402,6 +2402,27 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
 - Alignment counts experience only up to level 15, so Strength's longer road doesn't decide it.
 - Not playtested in game.
 
+## 0.6.11: townsfolk react to the strange (pack 0.9.24)
+- `Oddities` reads the tags Jaymo's Powers puts on strange things (`jaymospowers_odd:<kind>`; Powers' `core/Oddities`)
+  and the world's people (vanilla and MCA villagers, a realm's folk who aren't attacking) react:
+  - A Gravity meteor or a falling star in the sky: everyone out of doors within 112 blocks (across the ground) stares
+    up at it and two cry out (`SKY_SEEN`, `SKY_CRIERS`). Where it lands, villagers within 36 run from the spot
+    (`Frights.scare`) and someone within 72 says so.
+  - A power used in sight within 24 blocks (any ability, mode or ultimate key, for 3 s after): they stare, and one
+    says a line for that power (8 powers, 3 lines each; a child cheers instead), at most every 20 s per player.
+  - The symbiote's blob, a mob it inhabits, a behemoth: monsters (`monstrous`): villagers run and cry out, and guards
+    hunt them (`hunted`; not an inhabited villager, whom they only shout about by name).
+  - A player in the symbiote's suit or big body, or walking as a Darktide shade, is treated like an unknown alien
+    (`Aliens.KINDS`): villagers run, guards hunt, unless the kingdom saw that change (each kind learned on its own;
+    the alien's saved entries are unchanged).
+  - Under a blood, super blood, harvest or blue moon those out at night now and then remark on it.
+  - Folk who know a changed player (they saw the change) now and then remark on it, unafraid (`KNOWN_TALK`).
+  - Twelve lines for every sight, fright, moon and bit of gossip, dealt like a shuffled deck (`Oddities.line`): each
+    is said once before any comes round again.
+  - It's all talked about: a gossip's line is often of the nearest strange thing within 1000 blocks in the last three
+    days (a star fell 300 blocks north; Andy called the wind down on the square). No one says something strange more
+    than once in 30 s (`TALK_GAP`). Tuning at the top of `Oddities`.
+
 ## 0.6.9: villagers' days (pack 0.9.20)
 - **More routines** (`Routines`, 11 more). Grown: **chores** (a barrel, chest, oven, crafting table, cauldron or loom within 6 of
   their bed: hands busy, the block's sound), **read** (lectern or bookshelf: page turns), **sweep** (their door's

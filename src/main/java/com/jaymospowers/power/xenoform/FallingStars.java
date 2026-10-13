@@ -117,6 +117,7 @@ public final class FallingStars {
 		from = new Vec3(from.x, Math.min(from.y, level.getMaxY() - 2), from.z);
 		BlockCluster rock = BlockCluster.made(level, ROCK, from);
 		rock.script(true, false);
+		com.jaymospowers.core.Oddities.mark(rock, com.jaymospowers.core.Oddities.STAR);
 		rock.setAttached(BlockCluster.SCALE, 1.4F);
 		STARS.add(new Star(level.dimension(), rock.getId(), from, to, level.getGameTime()));
 		LAST.put(level.dimension(), level.getGameTime());
