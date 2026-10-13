@@ -57,6 +57,12 @@ public final class WebSwing {
 	 * for height. Stringing web after web, that's a jump each time. Holding Jump on afterwards reels in as before.
 	 */
 	static final double TUG_LIFT = 0.6, TUG_PULL = 0.3;
+	/**
+	 * Precise hanging: in midair, slow (under {@code STILL_SPEED}), with no movement keys held, Jump and Sneak raise and
+	 * lower you gently ({@code HANG_REEL} blocks a tick) instead of reeling, and the sway settles ({@code HANG_DAMP}
+	 * of the sideways speed kept a tick), so you can hang exactly where you want.
+	 */
+	static final double STILL_SPEED = 0.3, HANG_REEL = 0.07, HANG_DAMP = 0.8;
 	/** Jump reels in, sneak lets out (blocks per tick), every web that's out. */
 	static final double REEL_IN = 0.45;
 	static final double LET_OUT = 0.35;
@@ -170,6 +176,8 @@ public final class WebSwing {
 		int retryIn;
 		/** Ticks until the web reaches its anchor (it shoots out at WebGrowth's speeds); no pull till then. */
 		int travel;
+		/** The creature, player or corpse the web is stuck to (its anchor follows it), or -1 for a block. */
+		int entityId = -1;
 
 		Strand(int hand) {
 			this.hand = hand;
@@ -288,7 +296,9 @@ public final class WebSwing {
 		if (strand.hand == WebNet.OFF && !WebPower.offHandFree(player)) {
 			return false;
 		}
-		WebAnchors.Anchor found = WebAnchors.find(player);
+		// near a creature, a player or a corpse (the crosshair's magnet): the web sticks to that instead
+		Entity stuckTo = WebAnchors.entityTarget(player);
+		WebAnchors.Anchor found = stuckTo != null ? new WebAnchors.Anchor(stuckTo.getBoundingBox().getCenter(), false) : WebAnchors.find(player);
 		if (found == null) {
 			return false;
 		}
@@ -300,11 +310,12 @@ public final class WebSwing {
 		swingEnergy = Double.NaN;
 		foldWings();
 		strand.anchor = found.pos();
+		strand.entityId = stuckTo == null ? -1 : stuckTo.getId();
 		strand.swingTicks = 0;
 		double distance = strand.anchor.distanceTo(player.position().add(0.0, ROPE_HEIGHT, 0.0));
 		strand.rope = Math.max(ROPE_MIN, distance * ATTACH_SLACK);
 		strand.travel = (int)(distance / (com.jaymospowers.power.web.WebSymbiote.suitShown(player) ? WebGrowth.ROPE_SPEED : WebGrowth.WEB_SPEED));
-		ClientPlayNetworking.send(new WebNet.Swing(strand.hand, true, strand.anchor));
+		ClientPlayNetworking.send(new WebNet.Swing(strand.hand, true, strand.anchor, strand.entityId));
 		play(player, SoundEvents.FISHING_BOBBER_THROW, 0.9F, 1.7F + player.getRandom().nextFloat() * 0.2F);
 		puff(player, strand.anchor, 5);
 		if (midAir) {
@@ -471,6 +482,18 @@ public final class WebSwing {
 			if (strand.attached && strand.travel > 0) {
 				strand.travel--;
 			}
+			if (strand.attached && strand.entityId >= 0) {
+				// stuck to something: the anchor goes where it goes, and the web lets go if it's gone
+				Entity entity = player.level().getEntity(strand.entityId);
+				if (entity == null || !entity.isAlive()) {
+					strand.attached = false;
+					ClientPlayNetworking.send(new WebNet.Swing(strand.hand, false, Vec3.ZERO));
+					play(player, SoundEvents.LEAD_BREAK, 0.6F, 1.6F);
+				} else {
+					strand.anchor = entity.getBoundingBox().getCenter();
+				}
+				continue;
+			}
 			if (strand.attached && ++strand.swingTicks % 5 == 0 && !WebAnchors.nearSolid(player.level(), strand.anchor)) {
 				strand.attached = false;
 				ClientPlayNetworking.send(new WebNet.Swing(strand.hand, false, Vec3.ZERO));
@@ -482,12 +505,19 @@ public final class WebSwing {
 			return;
 		}
 		Input input = player.input.keyPresses;
-		if (bothAttached() && input.shift()) {
+		// hanging still in midair with no movement keys: Jump and Sneak raise and lower you gently
+		boolean hang = !player.onGround() && (input.jump() || input.shift())
+			&& !input.forward() && !input.backward() && !input.left() && !input.right()
+			&& player.getDeltaMovement().length() < STILL_SPEED;
+		if (bothAttached() && input.shift() && !hang) {
 			swingJumpTicks = 0;
 			tickSling(player, input);
 			return;
 		}
-		if (input.jump()) {
+		if (hang) {
+			// no jump off, tug or thrust when you let go of Jump here
+			swingJumpTicks = 0;
+		} else if (input.jump()) {
 			swingJumpTicks++;
 		} else if (swingJumpTicks > 0) {
 			boolean jumpOff = swingJumpTicks >= JUMP_OFF_MIN_HOLD && !player.onGround();
@@ -507,6 +537,11 @@ public final class WebSwing {
 		// a symbiote's webs pull harder
 		double boost = com.jaymospowers.power.web.WebSymbiote.pullScale(player);
 		Vec3 v = player.getDeltaMovement();
+		if (hang) {
+			// settle the sway, and measure the swing again from here (the rope's length is changing under you)
+			v = new Vec3(v.x * HANG_DAMP, v.y, v.z * HANG_DAMP);
+			swingEnergy = Double.NaN;
+		}
 		if (air && !player.isFallFlying()) {
 			v = new Vec3(v.x / VANILLA_AIR_DRAG, v.y / VANILLA_AIR_DRAG_Y, v.z / VANILLA_AIR_DRAG).scale(SWING_DRAG).add(0.0, -SWING_GRAVITY, 0.0);
 		}
@@ -521,7 +556,13 @@ public final class WebSwing {
 			if (!strand.attached || strand.travel > 0) {
 				continue;
 			}
-			if (input.jump()) {
+			if (hang) {
+				if (input.jump() && !input.shift()) {
+					strand.rope = Math.max(ROPE_MIN, strand.rope - HANG_REEL);
+				} else if (input.shift() && !input.jump()) {
+					strand.rope = Math.min(WebAnchors.SWING_RANGE * com.jaymospowers.power.web.WebSymbiote.swingScale(player), strand.rope + HANG_REEL);
+				}
+			} else if (input.jump()) {
 				strand.rope = Math.max(ROPE_MIN, strand.rope - REEL_IN * boost);
 			} else if (input.shift()) {
 				strand.rope = Math.min(WebAnchors.SWING_RANGE * com.jaymospowers.power.web.WebSymbiote.swingScale(player), strand.rope + LET_OUT);
@@ -532,7 +573,7 @@ public final class WebSwing {
 			}
 		}
 		// Jump: rocket along the arc (the swing's own direction, square to the webs)
-		if (air && input.jump() && pullDir.lengthSqr() > 1.0E-6 && v.lengthSqr() > 0.04) {
+		if (air && !hang && input.jump() && pullDir.lengthSqr() > 1.0E-6 && v.lengthSqr() > 0.04) {
 			Vec3 dir = pullDir.normalize();
 			Vec3 tangent = v.subtract(dir.scale(v.dot(dir)));
 			if (tangent.lengthSqr() > 1.0E-4) {
@@ -578,6 +619,10 @@ public final class WebSwing {
 			}
 		}
 		v = pendulum(v, body, gravity, air);
+		if (hang) {
+			// gently: never faster up or down than the rope is being drawn in or let out
+			v = new Vec3(v.x, Mth.clamp(v.y, -HANG_REEL * 1.5, HANG_REEL * 1.5), v.z);
+		}
 		player.setDeltaMovement(cap(v));
 		int ticks = Math.max(strands[0].swingTicks, strands[1].swingTicks);
 		if (air && v.lengthSqr() > 1.2 * 1.2 && ticks % 12 == 0) {
@@ -1123,7 +1168,16 @@ public final class WebSwing {
 	/** Where the local player's own web from {@code hand} currently ends, or null. Zips and yanks come from the main hand. */
 	@Nullable Vec3 lineEnd(int hand, float partialTick) {
 		if (strands[hand].attached) {
-			return strands[hand].anchor;
+			Strand strand = strands[hand];
+			if (strand.entityId >= 0) {
+				// stuck to something moving: drawn to where it is this frame
+				Minecraft minecraft = Minecraft.getInstance();
+				Entity entity = minecraft.level == null ? null : minecraft.level.getEntity(strand.entityId);
+				if (entity != null) {
+					return entity.getPosition(partialTick).add(0.0, entity.getBbHeight() * 0.5, 0.0);
+				}
+			}
+			return strand.anchor;
 		}
 		WebNet.Pull pull = this.pull;
 		if (pull != null && hand == WebNet.MAIN) {

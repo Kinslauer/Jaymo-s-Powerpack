@@ -56,7 +56,7 @@ public final class WebArms {
 
 	/** This frame's pose: an arm's aim is null when that hand has no web out. Angles are model-part radians. */
 	public record Pose(float amount, float @Nullable [] mainArm, float @Nullable [] offArm, float legTrail, float legSide, float wings, float lean,
-		float brake, float dive, float swayPitch, float swayRoll) {
+		float brake, float dive, float swayPitch, float swayRoll, float armSway, float legSway, float limbRoll, boolean airborne) {
 	}
 
 	/**
@@ -103,6 +103,14 @@ public final class WebArms {
 	private static final float SWAY_DAMPING = 0.86F;
 	/** The swing pivots at about the shoulders (fraction of the body's height); the glide lean about its middle. */
 	private static final float SWAY_PIVOT = 0.85F;
+	/**
+	 * The limbs not on a web hang limp, as in the Wind hover: they chase the body's sway on softer springs of their own
+	 * ({@code LIMB_SPRING}, {@code LIMB_DAMPING}), so they trail a swing that's starting and run on as it stops, and drift
+	 * a little ({@code LIMB_DRIFT}, radians) so they never hang dead still.
+	 */
+	private static final float LIMB_SPRING = 0.1F;
+	private static final float LIMB_DAMPING = 0.82F;
+	private static final float LIMB_DRIFT = 0.07F;
 	private static final float LEAN_PIVOT = 0.5F;
 
 	/** A player's springy state. Directions are world-space unit vectors (from the shoulder toward the web). */
@@ -120,6 +128,9 @@ public final class WebArms {
 		float lean, prevLean;
 		float swayPitch, swayPitchVel, prevSwayPitch;
 		float swayRoll, swayRollVel, prevSwayRoll;
+		float armSway, armSwayVel, prevArmSway;
+		float legSway, legSwayVel, prevLegSway;
+		float limbRoll, limbRollVel, prevLimbRoll;
 		/** Ticks into the current Web Zip (0 = not zipping). */
 		int zipAge;
 	}
@@ -377,6 +388,16 @@ public final class WebArms {
 		body.prevSwayRoll = body.swayRoll;
 		body.swayRollVel = (body.swayRollVel + (rollWant - body.swayRoll) * SWAY_SPRING) * SWAY_DAMPING;
 		body.swayRoll += body.swayRollVel;
+		// the free limbs chase the sway, not its target, so they settle a beat after the body does
+		body.prevArmSway = body.armSway;
+		body.armSwayVel = (body.armSwayVel + (body.swayPitch - body.armSway) * LIMB_SPRING) * LIMB_DAMPING;
+		body.armSway += body.armSwayVel;
+		body.prevLegSway = body.legSway;
+		body.legSwayVel = (body.legSwayVel + (body.swayPitch - body.legSway) * LIMB_SPRING * 0.8F) * LIMB_DAMPING;
+		body.legSway += body.legSwayVel;
+		body.prevLimbRoll = body.limbRoll;
+		body.limbRollVel = (body.limbRollVel + (body.swayRoll - body.limbRoll) * LIMB_SPRING) * LIMB_DAMPING;
+		body.limbRoll += body.limbRollVel;
 		float trailWant = airborne ? Mth.clamp((float)(forwardSpeed - v.y * 0.35) * LEG_TRAIL_PER_SPEED, -LEG_TRAIL_MAX, LEG_TRAIL_MAX) : 0.0F;
 		float sideWant = airborne ? Mth.clamp((float)sideSpeed * 0.8F, -0.6F, 0.6F) : 0.0F;
 		body.prevTrail = body.trail;
@@ -508,7 +529,9 @@ public final class WebArms {
 			Mth.lerp(partialTicks, body.prevTrail, body.trail), Mth.lerp(partialTicks, body.prevSide, body.side), wings,
 			Mth.lerp(partialTicks, body.prevLean, body.lean), Mth.lerp(partialTicks, body.prevBrake, body.brake),
 			Mth.lerp(partialTicks, body.prevDive, body.dive), swayPitch(body, partialTicks),
-			swayRoll(body, partialTicks)));
+			swayRoll(body, partialTicks), Mth.lerp(partialTicks, body.prevArmSway, body.armSway) * amount,
+			Mth.lerp(partialTicks, body.prevLegSway, body.legSway) * amount, Mth.lerp(partialTicks, body.prevLimbRoll, body.limbRoll) * amount,
+			!player.onGround() && !player.isInWater()));
 	}
 
 	/** An arm's {xRot, yRot} pointing it along its web, relative to the body (as the bow-aiming pose does it). */
@@ -602,10 +625,34 @@ public final class WebArms {
 		if (pose.offArm() != null) {
 			set(offArm, pose.offArm()[0], pose.offArm()[1], 0.0F, amount);
 		}
+		// the limbs not on a web hang limp like a ragdoll's: trailing the sway, a little out from the body, drifting
+		float age = avatar.ageInTicks;
+		float armLag = pose.armSway() - pose.swayPitch();
+		float legLag = pose.legSway() - pose.swayPitch();
+		float spread = Math.abs(pose.limbRoll()) * 0.25F;
+		if (pose.wings() <= 0.001F && pose.airborne()) {
+			if (pose.mainArm() == null) {
+				float sign = mainRight ? 1.0F : -1.0F;
+				set(mainArm, pose.armSway() * 0.5F + armLag * 0.8F + drift(age, 0.0F), 0.0F,
+					sign * (0.12F + spread) + pose.limbRoll() * 0.3F + drift(age, 1.7F) * 0.4F, amount);
+			}
+			if (pose.offArm() == null) {
+				float sign = mainRight ? -1.0F : 1.0F;
+				set(offArm, pose.armSway() * 0.5F + armLag * 0.8F + drift(age, 3.1F), 0.0F,
+					sign * (0.12F + spread) + pose.limbRoll() * 0.3F + drift(age, 4.4F) * 0.4F, amount);
+			}
+		}
 		// limp legs, each a little out of step so they don't move as one
 		float flop = Mth.sin(avatar.ageInTicks * 0.35F) * 0.04F * Math.abs(pose.legTrail());
-		set(humanoid.rightLeg, pose.legTrail() + 0.12F + flop, 0.0F, 0.08F + pose.legSide() * 0.9F, amount);
-		set(humanoid.leftLeg, pose.legTrail() * 0.8F - 0.05F - flop, 0.0F, -0.08F + pose.legSide() * 0.7F, amount);
+		set(humanoid.rightLeg, pose.legTrail() + 0.12F + flop + legLag * 0.9F + drift(age, 2.3F), 0.0F,
+			0.08F + pose.legSide() * 0.9F + pose.limbRoll() * 0.15F, amount);
+		set(humanoid.leftLeg, pose.legTrail() * 0.8F - 0.05F - flop + legLag * 0.9F + drift(age, 5.9F), 0.0F,
+			-0.08F + pose.legSide() * 0.7F + pose.limbRoll() * 0.15F, amount);
+	}
+
+	/** A limb's slow wander (radians), out of step with the others by {@code phase}. */
+	private static float drift(float age, float phase) {
+		return LIMB_DRIFT * (Mth.sin(age * 0.07F + phase) * 0.6F + Mth.sin(age * 0.13F + phase * 1.9F) * 0.4F);
 	}
 
 	private static void set(ModelPart part, float xRot, float yRot, float zRot, float amount) {

@@ -270,12 +270,16 @@ public final class WebPowerClient implements PowerClient {
 	private static final double GRAB_AIM_INFLATE = 0.7;
 	/** What the tendrils would grab right now (worked out each tick, for the red crosshair). */
 	private net.minecraft.world.entity.@org.jspecify.annotations.Nullable Entity grabAim;
+	/** What an R/G web would stick to right now (a creature, player or corpse near the crosshair), for the lit crosshair. */
+	private net.minecraft.world.entity.@org.jspecify.annotations.Nullable Entity webAim;
 
 	@Override
 	public void tick(Minecraft minecraft, LocalPlayer player) {
 		swing.tick(minecraft, player);
 		wallRun.tick(player, swing);
 		grabAim = com.jaymospowers.power.web.WebSymbiote.tendrilKeys(player) ? grabTarget(player) : null;
+		webAim = grabAim != null || com.jaymospowers.power.web.WebSymbiote.tendrilKeys(player) || player.isSpectator()
+			|| !JaymosPowersClient.isUnlocked(PowerKey.ABILITY_1) || swing.pull != null ? null : WebAnchors.entityTarget(player);
 		WebSymbioteClient.tick(minecraft, player, swing);
 		if (swing.attached() || swing.pull != null || player.isSpectator()) {
 			preview = null;
@@ -290,6 +294,8 @@ public final class WebPowerClient implements PowerClient {
 	private static final int RETICLE_ASSIST = 0xFFF06A72;
 	private static final int RETICLE_NONE = 0x50FFFFFF;
 	private static final int RETICLE_ATTACHED = 0xFFE0303A;
+	/** A creature, player or corpse an R/G web would stick to. */
+	private static final int RETICLE_TARGET = 0xFFFFD040;
 
 	@Override
 	public void renderHud(GuiGraphicsExtractor graphics, DeltaTracker delta, LocalPlayer player) {
@@ -315,6 +321,18 @@ public final class WebPowerClient implements PowerClient {
 		corner(graphics, cx + r, cy - r, -1, 1, color);
 		corner(graphics, cx - r, cy + r, 1, -1, color);
 		corner(graphics, cx + r, cy + r, -1, -1, color);
+		if (webAim != null) {
+			// a creature, player or corpse in reach of a web: the crosshair lights up, a diamond round it
+			int lit = RETICLE_TARGET;
+			graphics.fill(cx - 4, cy, cx + 5, cy + 1, lit);
+			graphics.fill(cx, cy - 4, cx + 1, cy + 5, lit);
+			for (int i = 0; i <= 7; i++) {
+				graphics.fill(cx - 7 + i, cy - i, cx - 6 + i, cy - i + 1, lit);
+				graphics.fill(cx - 7 + i, cy + i, cx - 6 + i, cy + i + 1, lit);
+				graphics.fill(cx + 7 - i, cy - i, cx + 8 - i, cy - i + 1, lit);
+				graphics.fill(cx + 7 - i, cy + i, cx + 8 - i, cy + i + 1, lit);
+			}
+		}
 		if (grabAim != null) {
 			// something the tendrils can take: the crosshair goes red
 			graphics.fill(cx - 5, cy, cx + 6, cy + 1, 0xFFE02020);
