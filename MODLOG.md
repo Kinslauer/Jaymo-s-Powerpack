@@ -635,7 +635,27 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   mended with silver ingots, and a Tinkering tool with a silver head counts as silver against werewolves. The bat
   horse and nightmare are now exceedingly rare: about once in 50 hours a player spends where one can turn up, and
   never while another wild one is about.
-- **0.8.114, hermit wizards on floating islands (Kingdoms 0.5.60):** the villager living on Moog's floating island is
+- **0.8.113, crawl roll:** while crawling, double-tap Left or Right (A / D) to roll one block that way, turning over once
+  along your length. A roll puts out the fire on you and any fire you roll through (`Crawl.Roll`, `Crawl.ROLLING`,
+  `client/CrawlRollPose`, `CrawlAvatarRendererMixin`).
+- **0.8.114, Wind hover sway, aimable Tempest Kick, R-only take-off:** the hover pose is all damped springs: a smaller
+  sway that settles after one soft overshoot, hips that twist after camera turns and lean into them, a slight tip with
+  the look, sag on climbs, slow random gusts, and limbs that trail the body; first person rides it by about a degree
+  with a small bob (`WindHoverSway`, `CameraMixin`). The Tempest Kick flies where you look as the leg snaps (in the
+  air up or down; on the ground level or up). Flight toggles on R only: Sneak + double Jump no longer takes off.
+- **0.8.116, combat animations:** the quarterstaff is held by the middle and its Better Combat combo twirls it: a
+  propeller twirl in front, a sweep, a full-circle whirlwind with the staff twirling at your side, a jab, and a
+  helicopter twirl overhead into a strike. Fourteen other Armory weapon types get their own combos (longsword
+  half-sword thrust, glaive and war scythe whirls, dagger flip-and-stab, saber lunge, machete chops and more).
+  `tools/combat_animations.py` writes the animations (`assets/jaymospowers/player_animations`) and the `combo_*`
+  presets each weapon's attributes file names as its parent.
+- **0.8.117, hide armour pieces:** every player gets a small eye button beside each armour slot in the inventory (right
+  of the slot in survival, under it on the creative inventory tab). Click it to hide that piece: it stays worn and still
+  protects, it just isn't drawn, for anyone (the choice is synced to every client, saved, and kept through death). It
+  covers vanilla armour, Kingdoms' armoury sets (their layer reads the same render state), carved pumpkins and mob
+  heads; an elytra still spreads when the chest is hidden. Hidden pieces come off the render state last
+  (`HiddenArmorAvatarRendererMixin`, after the symbiote's engulfing), in `core/HiddenArmor` + `client/HiddenArmorClient`.
+- **0.8.118, hermit wizards on floating islands (Kingdoms 0.5.60):** the villager living on Moog's floating island is
   now a hermit wizard with a reason to be there: a stranded scholar, a mage hiding from the courts, the warden whose
   spell keeps the island up, or an exiled court wizard. They tell you when you first come near each day, give you a
   spell scroll for the climb, talk more about it when you chat with them, and can reset your skill tree like a court

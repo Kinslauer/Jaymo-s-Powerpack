@@ -5,11 +5,14 @@
 	"client": [
 		"CarryArmInvoker",
 		"CarryAvatarRendererMixin",
+		"CrawlAvatarRendererMixin",
 		"CarryCameraMixin",
 		"CarryFirstPersonMixin",
 		"CarryLivingEntityRendererMixin",
 		"CarryModelFeatureRendererMixin",
 		"CarryUseMixin",
+		"ContainerScreenAccessor",
+		"HiddenArmorAvatarRendererMixin",
 		"ShoulderCameraMixin",
 		"ShoulderCameraTypeMixin",
 		"ShoulderCrosshairMixin"
