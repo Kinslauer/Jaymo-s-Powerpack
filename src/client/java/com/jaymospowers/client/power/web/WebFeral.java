@@ -11,13 +11,19 @@ import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Living Armor moves like a beast. Standing, it hunches: bent forward at the hip, head thrust forward, the arms
- * hanging heavy and wide, legs apart (a mutant zombie's stance). Sprinting, it drops onto all fours and gallops, the
- * arms its front legs. Everything is set outright from the render state, so applying it twice changes nothing.
+ * Living Armor moves like a beast. Standing, it hunches deep: bent far forward at the hip, head thrust forward, the
+ * arms hanging heavy and wide to the knees, legs apart and bent, twitching now and then (a mutant zombie's stance).
+ * Sprinting, it drops onto all fours and gallops, the arms its front legs. Swelling into the big body it doubles
+ * over in pain first, clutching itself and shuddering, then straightens into the hunch. Rearing for a slam in the
+ * air (see WebSlam) both fists come up over its head. Everything is set outright from the render state, so applying it twice changes nothing.
  */
 public final class WebFeral {
 	/** How far the body bends forward at the hip (radians): hunched, and running on all fours. */
-	static final float IDLE_BEND = 0.45F, RUN_BEND = 1.35F;
+	static final float IDLE_BEND = 0.75F, RUN_BEND = 1.35F;
+	/** Doubled over in pain while it grows; the knees bent in the hunch (radians), and how far that sinks it (pixels). */
+	private static final float PAIN_BEND = 1.3F, KNEE_BEND = 0.3F;
+	/** Its share of the growth: doubling over until {@code PAIN_IN}, writhing until {@code PAIN_OUT}, then rising. */
+	private static final float PAIN_IN = 0.15F, PAIN_OUT = 0.7F;
 	/** The hip, in model pixels below the neck. */
 	private static final float HIP = 12.0F;
 
@@ -37,6 +43,11 @@ public final class WebFeral {
 			// only the tendrils are out: no beast in the body
 			tendrils = null;
 		}
+		Float slam = avatar.getData(WebSymbioteClient.SLAM);
+		if (slam != null && tendrils != null) {
+			overhead(humanoid, avatar, slam, slim);
+			return;
+		}
 		boolean galloping = tendrils != null && tendrils.run() > 0.3F && avatar.walkAnimationSpeed > 0.3F;
 		if (charge != null && !galloping) {
 			coil(humanoid, avatar, charge, slim);
@@ -49,6 +60,79 @@ public final class WebFeral {
 		// eased between standing, walking and the gallop (see WebSymbioteClient.smoothRun)
 		float run = tendrils.run() * Mth.clamp(0.4F + avatar.walkAnimationSpeed, 0.0F, 1.0F);
 		pose(humanoid, avatar, run, slim);
+		WebSuitGrowth.Growth growth = avatar.getData(WebSuitGrowth.KEY);
+		if (growth != null && growth.to() == 2 && growth.from() < 2) {
+			float t = growth.t();
+			float pain = t < PAIN_IN ? smooth(t / PAIN_IN) : t < PAIN_OUT ? 1.0F : 1.0F - smooth((t - PAIN_OUT) / (1.0F - PAIN_OUT));
+			agony(humanoid, avatar, pain, slim);
+		}
+	}
+
+	private static float smooth(float x) {
+		x = Mth.clamp(x, 0.0F, 1.0F);
+		return x * x * (3.0F - 2.0F * x);
+	}
+
+	/**
+	 * Swelling into the big body, in pain: doubled over at the hip, head hanging, arms clutched in to the belly, knees
+	 * buckling, the whole of it shuddering in spasms. {@code w}: how far into it (0 is the plain hunch).
+	 */
+	private static void agony(HumanoidModel<?> h, AvatarRenderState state, float w, boolean slim) {
+		float age = state.ageInTicks;
+		float spasm = (Mth.sin(age * 1.9F) * 0.6F + Mth.sin(age * 3.1F) * 0.4F) * 0.07F * w;
+		float bend = Mth.lerp(w, IDLE_BEND, PAIN_BEND) + spasm;
+		float armY = slim ? 2.5F : 2.0F;
+		place(h.body, 0.0F, 0.0F, bend);
+		place(h.head, 0.0F, 0.0F, bend);
+		place(h.rightArm, -5.0F, armY, bend);
+		place(h.leftArm, 5.0F, armY, bend);
+		h.body.xRot = bend;
+		// the head hangs, then jerks up now and then
+		float jerk = (float)Math.pow(Math.max(0.0F, Mth.sin(age * 0.37F)), 12.0) * 0.6F;
+		h.head.xRot = Mth.lerp(w, h.head.xRot, -bend * 0.2F - jerk);
+		h.head.zRot = Mth.sin(age * 0.9F) * 0.12F * w;
+		for (ModelPart arm : new ModelPart[] {h.rightArm, h.leftArm}) {
+			float side = arm == h.rightArm ? 1.0F : -1.0F;
+			// clutched in to the belly
+			arm.xRot = Mth.lerp(w, arm.xRot, -0.9F - bend * 0.3F + spasm * 2.0F);
+			arm.yRot = Mth.lerp(w, arm.yRot, -side * 0.55F);
+			arm.zRot = Mth.lerp(w, arm.zRot, -side * 0.25F);
+		}
+		for (ModelPart leg : new ModelPart[] {h.rightLeg, h.leftLeg}) {
+			float side = leg == h.rightLeg ? 1.0F : -1.0F;
+			leg.xRot = Mth.lerp(w, leg.xRot, -0.55F);
+			leg.zRot = side * Mth.lerp(w, 0.14F, 0.22F);
+		}
+		h.root().y = Math.max(h.root().y, 12.0F * (1.0F - Mth.cos(0.55F * w)));
+	}
+
+	/**
+	 * Rearing for a slam in the air: arched back a little, both arms raised high over the head with the fists together,
+	 * knees drawn up. {@code c}: how far up (0-1).
+	 */
+	private static void overhead(HumanoidModel<?> h, AvatarRenderState state, float c, boolean slim) {
+		float e = smooth(c);
+		float arch = -0.25F * e;
+		float armY = slim ? 2.5F : 2.0F;
+		place(h.body, 0.0F, 0.0F, arch);
+		place(h.head, 0.0F, 0.0F, arch);
+		place(h.rightArm, -5.0F, armY, arch);
+		place(h.leftArm, 5.0F, armY, arch);
+		h.body.xRot = arch;
+		h.head.xRot = state.xRot * Mth.DEG_TO_RAD * 0.5F + 0.2F * e;
+		float shake = Mth.sin(state.ageInTicks * 2.1F) * 0.03F * e;
+		for (ModelPart arm : new ModelPart[] {h.rightArm, h.leftArm}) {
+			float side = arm == h.rightArm ? 1.0F : -1.0F;
+			arm.xRot = Mth.lerp(e, 0.0F, -2.9F) + shake;
+			arm.yRot = 0.0F;
+			// the fists meet over the head
+			arm.zRot = side * Mth.lerp(e, 0.4F, -0.3F);
+		}
+		for (ModelPart leg : new ModelPart[] {h.rightLeg, h.leftLeg}) {
+			float side = leg == h.rightLeg ? 1.0F : -1.0F;
+			leg.xRot = Mth.lerp(e, 0.0F, side > 0.0F ? -0.7F : -0.35F);
+			leg.zRot = side * 0.1F * e;
+		}
 	}
 
 	/**
@@ -98,13 +182,16 @@ public final class WebFeral {
 		place(h.leftArm, 5.0F, armY, bend);
 		h.body.xRot = bend + breathe * 0.03F;
 		h.body.yRot = 0.0F;
-		// the head stays up, looking ahead (and where the player looks, a little)
-		h.head.xRot = state.xRot * Mth.DEG_TO_RAD * 0.5F - bend * 0.85F;
+		// the head stays up, looking ahead (and where the player looks, a little); now and then it twitches
+		float twitch = (float)Math.pow(Math.max(0.0F, Mth.sin(state.ageInTicks * 0.23F) * Mth.sin(state.ageInTicks * 0.071F)), 10.0);
+		h.head.xRot = state.xRot * Mth.DEG_TO_RAD * 0.5F - bend * 0.85F + twitch * 0.25F;
+		h.head.yRot += Mth.sin(state.ageInTicks * 1.7F) * 0.15F * twitch;
+		h.head.zRot = (1.0F - run) * 0.12F + twitch * 0.2F;
 
 		// hunched: arms hang heavy, forward and out, swinging as it walks
 		float walkSwing = Mth.cos(pos * 0.6662F) * speed * 0.6F;
-		float idleRight = 0.35F + walkSwing + breathe * 0.04F;
-		float idleLeft = 0.35F - walkSwing + breathe * 0.04F;
+		float idleRight = 0.5F + walkSwing + breathe * 0.04F;
+		float idleLeft = 0.5F - walkSwing + breathe * 0.04F;
 		// galloping: both arms reach and pull together, the legs a beat behind
 		float gallop = pos * 0.45F;
 		float runArms = Mth.sin(gallop) * 0.95F * speed;
@@ -121,7 +208,7 @@ public final class WebFeral {
 			float world = Mth.lerp(run, arm == h.rightArm ? idleRight : idleLeft, runArms);
 			arm.xRot = world - bend;
 			arm.yRot = 0.0F;
-			arm.zRot = side * Mth.lerp(run, 0.45F + breathe * 0.03F, 0.12F);
+			arm.zRot = side * Mth.lerp(run, 0.55F + breathe * 0.03F, 0.12F);
 		}
 		// legs: planted wide, bent a little; running, they drive together
 		for (ModelPart leg : new ModelPart[] {h.rightLeg, h.leftLeg}) {
@@ -129,8 +216,14 @@ public final class WebFeral {
 			if (run > 0.0F) {
 				leg.xRot = Mth.lerp(run, leg.xRot, runLegs + 0.2F);
 			}
-			leg.zRot = side * Mth.lerp(run, 0.14F, 0.05F);
+			leg.zRot = side * Mth.lerp(run, 0.2F, 0.05F);
+			if (run < 1.0F) {
+				// knees bent in the hunch
+				leg.xRot -= KNEE_BEND * (1.0F - run);
+			}
 		}
+		// sunk a little on the bent legs, so the feet stay down
+		h.root().y = 12.0F * (1.0F - Mth.cos(KNEE_BEND * (1.0F - run)));
 	}
 
 	/** Puts a part's pivot where it ends up when everything above the hip bends forward by {@code bend}. */

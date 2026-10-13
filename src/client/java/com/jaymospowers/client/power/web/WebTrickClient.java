@@ -18,7 +18,7 @@ final class WebTrickClient {
 	static final double ARC_SPEED = 0.75, ARC_CHANCE = 0.3;
 	/** The next web catching mid-air turns you round it this often. */
 	static final double CATCH_CHANCE = 0.4;
-	/** Touching down: a fall this far (blocks) lands three-point; this fast across the ground (blocks/tick) rolls. */
+	/** Touching down: this fast across the ground (blocks/tick) rolls; slower, a fall this far (blocks) lands three-point. */
 	static final double HERO_DROP = 2.5, ROLL_SPEED = 0.55;
 	/** The wings fold into a roll instead of their flare only above this speed. */
 	static final double WINGS_ROLL_SPEED = 1.2;
@@ -108,10 +108,12 @@ final class WebTrickClient {
 		int kind;
 		if (wings) {
 			kind = across > WINGS_ROLL_SPEED ? WebPose.LAND_ROLL : WebPose.WINGS_LAND;
-		} else if (drop >= HERO_DROP * 2.0 || drop >= HERO_DROP && across < ROLL_SPEED) {
-			kind = WebPose.HERO_LAND;
 		} else if (across > ROLL_SPEED) {
+			// coming in fast: carried on into a roll, however far the drop
 			kind = WebPose.LAND_ROLL;
+		} else if (drop >= HERO_DROP) {
+			// slow across the ground: eased down into the three-point landing
+			kind = WebPose.HERO_LAND;
 		} else {
 			return;
 		}

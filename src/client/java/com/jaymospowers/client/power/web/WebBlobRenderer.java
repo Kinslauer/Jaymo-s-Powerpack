@@ -20,9 +20,10 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * A symbiote with no host: a lumpy black blob, heaving, that drags itself along on tendrils. Each tendril plants on the
- * ground ahead and stays put while the blob is hauled past it, then lets go and reaches forward again, a couple at a
- * time; standing still, one probes the air. The tendrils use the same texture as Living Armor's.
+ * A symbiote with no host: a lumpy black blob, heaving, that walks itself along on rigid tendrils, like Doc Ock's
+ * arms: each is two straight sections jointed at a knee raised over the body. Each plants on the ground ahead and
+ * stays put while the blob is hauled past it, then lets go and reaches forward again, a couple at a time; standing
+ * still, one probes the air. The tendrils use the same texture as Living Armor's.
  */
 public class WebBlobRenderer extends EntityRenderer<WebSymbioteBlob, WebBlobRenderer.State> {
 	// ---- tuning ----
@@ -37,7 +38,8 @@ public class WebBlobRenderer extends EntityRenderer<WebSymbioteBlob, WebBlobRend
 	private static final float STEP_TICKS = 5.0F;
 	private static final double STEP_ARC = 0.45;
 	private static final double LEG_ROOT_RADIUS = 0.085, LEG_TIP_RADIUS = 0.025;
-	private static final int LEG_PIECES = 8;
+	/** A tendril's fixed length (blocks): planted closer, its knee rises higher; further, it stretches straight. */
+	private static final double LEG_LENGTH = 1.5, LEG_STRAIGHTEST = 0.96;
 
 	public static class State extends EntityRenderState {
 		/** Each tendril's tip, relative to the body. */
@@ -70,8 +72,9 @@ public class WebBlobRenderer extends EntityRenderer<WebSymbioteBlob, WebBlobRend
 	public void extractRenderState(WebSymbioteBlob blob, State state, float partialTicks) {
 		super.extractRenderState(blob, state, partialTicks);
 		Vec3 body = blob.getPosition(partialTicks);
-		Vec3 motion = blob.getDeltaMovement().horizontal();
-		state.moving = motion.lengthSqr() > 1.0E-4;
+		// how far it actually moved this tick (a mob's velocity isn't kept on clients)
+		Vec3 motion = new Vec3(blob.getX() - blob.xo, 0.0, blob.getZ() - blob.zo);
+		state.moving = motion.lengthSqr() > 1.0E-5;
 		float yaw = Mth.lerp(partialTicks, blob.yBodyRotO, blob.yBodyRot) * Mth.DEG_TO_RAD;
 		Vec3 heading = state.moving ? motion.normalize() : new Vec3(-Mth.sin(yaw), 0.0, Mth.cos(yaw));
 		state.heading = heading;
@@ -151,20 +154,31 @@ public class WebBlobRenderer extends EntityRenderer<WebSymbioteBlob, WebBlobRend
 				Vec3 flat = new Vec3(tip.x, 0.0, tip.z);
 				Vec3 out = flat.lengthSqr() < 1.0E-4 ? state.heading : flat.normalize();
 				Vec3 root = center.add(out.scale(BODY_WIDTH * 0.8)).add(0.0, -BODY_HEIGHT * 0.2, 0.0);
-				// up and over, then down onto its grip
-				Vec3 mid = root.lerp(tip, 0.5).add(0.0, 0.25 + 0.15 * Math.max(0.0, root.distanceTo(tip) - 0.6), 0.0);
-				Vec3 prev = root;
-				for (int k = 1; k <= LEG_PIECES; k++) {
-					double t = k / (double)LEG_PIECES;
-					Vec3 p = root.lerp(mid, t).lerp(mid.lerp(tip, t), t);
-					double r0 = Mth.lerp((k - 1) / (double)LEG_PIECES, LEG_ROOT_RADIUS, LEG_TIP_RADIUS);
-					double r1 = Mth.lerp(t, LEG_ROOT_RADIUS, LEG_TIP_RADIUS);
-					WebLineRenderer.tube(buffer, pose, prev, p, r0, r1, k + i, light);
-					prev = p;
-				}
+				// rigid: straight up to a knee raised over its grip, then straight down onto it
+				Vec3 knee = knee(root, tip, out);
+				double kneeRadius = Mth.lerp(0.5, LEG_ROOT_RADIUS, LEG_TIP_RADIUS);
+				WebLineRenderer.tube(buffer, pose, root, knee, LEG_ROOT_RADIUS, kneeRadius, i, light);
+				WebLineRenderer.tube(buffer, pose, knee, tip, kneeRadius, LEG_TIP_RADIUS, i + 1, light);
 			}
 		});
 		super.submit(state, poseStack, collector, camera);
+	}
+
+	/** A tendril's knee: where its two halves (half its length each) meet, raised up and a little out from the body. */
+	private static Vec3 knee(Vec3 root, Vec3 tip, Vec3 out) {
+		Vec3 chord = tip.subtract(root);
+		double d = chord.length();
+		if (d < 1.0E-4) {
+			return root.add(0.0, LEG_LENGTH * 0.5, 0.0);
+		}
+		double half = Math.max(LEG_LENGTH, d / LEG_STRAIGHTEST) * 0.5;
+		double rise = Math.sqrt(Math.max(0.0, half * half - d * d * 0.25));
+		// square to the chord, mostly up
+		Vec3 bend = new Vec3(0.0, 1.0, 0.0).add(out.scale(0.35));
+		Vec3 along = chord.scale(1.0 / d);
+		bend = bend.subtract(along.scale(bend.dot(along)));
+		bend = bend.lengthSqr() < 1.0E-6 ? out : bend.normalize();
+		return root.add(chord.scale(0.5)).add(bend.scale(rise));
 	}
 
 	/** The lumpy, heaving body: a squashed ball whose surface swells and sinks in slow waves. */

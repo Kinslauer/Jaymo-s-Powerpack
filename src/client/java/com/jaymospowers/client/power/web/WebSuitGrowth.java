@@ -23,6 +23,8 @@ import net.minecraft.world.entity.player.Player;
 public final class WebSuitGrowth {
 	/** How long a change takes (ticks); during a roar it pieces itself together slower, a part at a time. */
 	static final float TICKS = 16.0F, ROAR_TICKS = 22.0F;
+	/** Swelling into the big body takes longer: it doubles over in pain as it grows (see WebFeral). */
+	static final float BULK_TICKS = 60.0F;
 	/** Body, arms, head, legs: when each starts growing (0-1 of the change), and how long each takes to. */
 	private static final float BODY = 0.0F, ARMS = 0.2F, HEAD = 0.3F, LEGS = 0.4F, SPAN = 0.6F;
 	/** How far past its size a part swells before settling, and how small the bulk is before Living Armor fills it out. */
@@ -60,7 +62,9 @@ public final class WebSuitGrowth {
 	static void extract(Player player, AvatarRenderState state, float partialTicks) {
 		int now = level(player);
 		long[] change = CHANGES.get(player.getId());
-		long tick = player.tickCount;
+		// game time, not the player's own age: a respawned player's age starts over, which would hold a change
+		// (the suit falling away at death) part-done until it caught up
+		long tick = player.level().getGameTime();
 		if (change == null) {
 			// first seen: as it is, no growing
 			CHANGES.put(player.getId(), new long[] {now, now, tick - 1000});
@@ -72,7 +76,8 @@ public final class WebSuitGrowth {
 			change[0] = now;
 			change[2] = tick;
 		}
-		float t = (tick - change[2] + partialTicks) / (WebSymbiote.roaring(player) ? ROAR_TICKS : TICKS);
+		float span = change[0] == 2 && change[1] < 2 ? BULK_TICKS : WebSymbiote.roaring(player) ? ROAR_TICKS : TICKS;
+		float t = (tick - change[2] + partialTicks) / span;
 		state.setData(KEY, t < 1.0F && change[1] != change[0] ? new Growth((int)change[1], (int)change[0], Math.max(0.0F, t)) : null);
 		if (CHANGES.size() > 256) {
 			CHANGES.keySet().removeIf(id -> Minecraft.getInstance().level == null || Minecraft.getInstance().level.getEntity(id) == null);

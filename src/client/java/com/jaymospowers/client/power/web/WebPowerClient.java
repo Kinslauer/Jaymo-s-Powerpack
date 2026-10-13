@@ -34,6 +34,9 @@ public final class WebPowerClient implements PowerClient {
 	/** What the swing key would stick to right now, for the reticle (refreshed every other tick). */
 	private WebAnchors.@Nullable Anchor preview;
 
+	/** The barrage (by its start) we've already told the server we let go of. */
+	private static long barrageReleased = Long.MIN_VALUE;
+
 	private WebPowerClient() {
 	}
 
@@ -72,6 +75,19 @@ public final class WebPowerClient implements PowerClient {
 				return true;
 			}
 			return false;
+		});
+		// a barrage lasts while the attack key is held: let go, and it stops
+		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
+			LocalPlayer player = minecraft.player;
+			com.jaymospowers.power.web.WebTendrils.Combo combo = player == null ? null : player.getAttached(com.jaymospowers.power.web.WebTendrils.COMBO);
+			if (combo == null || combo.kind() != com.jaymospowers.power.web.WebTendrilCombos.BARRAGE) {
+				barrageReleased = Long.MIN_VALUE;
+				return;
+			}
+			if (!minecraft.options.keyAttack.isDown() && barrageReleased != combo.start()) {
+				barrageReleased = combo.start();
+				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebTendrilCombos.Release());
+			}
 		});
 		ClientTickEvents.START_CLIENT_TICK.register(minecraft -> {
 			LocalPlayer player = minecraft.player;
@@ -167,10 +183,11 @@ public final class WebPowerClient implements PowerClient {
 				return;
 			}
 		}
-		// Sneak with no web out, aimed at something in reach: the web whips it about and slams it down (see WebWhip)
+		// Sneak with no web out, aimed at something in reach: the web catches it; Sneak with the other key puts the
+		// second web on it, and with both attached it's whipped about and slammed down (see WebWhip)
 		if (down && !tendrils && player.isShiftKeyDown() && !swing.attached() && swing.pull == null
-			&& com.jaymospowers.power.web.WebWhip.aim(player, com.jaymospowers.power.web.WebWhip.RANGE
-				* com.jaymospowers.power.web.WebSymbiote.reachScale(player)) != null) {
+			&& (whipCatch(player, 1 - hand) || com.jaymospowers.power.web.WebWhip.aim(player, com.jaymospowers.power.web.WebWhip.RANGE
+				* com.jaymospowers.power.web.WebSymbiote.reachScale(player)) != null)) {
 			whipping[hand] = true;
 			net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Start(hand));
 			return;
@@ -196,6 +213,12 @@ public final class WebPowerClient implements PowerClient {
 	private final boolean[] grabbing = new boolean[2];
 	/** Which key started a whip (so its release doesn't let go of a swing web). */
 	private final boolean[] whipping = new boolean[2];
+
+	/** That hand's web is on a whip's catch (waiting for the other web). */
+	private static boolean whipCatch(LocalPlayer player, int hand) {
+		com.jaymospowers.power.web.WebLine line = player.getAttached(WebPower.line(hand));
+		return line != null && line.kind() == com.jaymospowers.power.web.WebLine.YANK && line.entityId() >= 0;
+	}
 
 	/** What a tendril would grab: the creature, player, item or corpse under the crosshair, close by. */
 	private static net.minecraft.world.entity.@org.jspecify.annotations.Nullable Entity grabTarget(LocalPlayer player) {

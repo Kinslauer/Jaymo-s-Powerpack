@@ -749,3 +749,14 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   blow or ended by hand; lives as an alien or knockouts taken); satisfy both and Nadir may be slammed once, and when
   that change ends the next round begins. Its Beacon (R) picks any player on the server, lights them through the world, and a hold
   phases you to them across dimensions; its other moves wait on Andy.
+
+- **0.9.8, rigid symbiote tendrils, two-web whip, tendril barrage, inhabited mobs:** Wall Crawl's walking tendrils are
+  stiff jointed limbs (Doc Ock style) and the rest hold stiff while you move. The Web Whip needs both webs on its
+  catch; in midair it's always the lasso and you hover for it; the seesaw only on living creatures. One creature held
+  and left click held: every other tendril stabs it, harder the longer you hold. The behemoth's tendrils all thrash
+  and lash at anything near. Shroud 5 s; the suit no longer lingers after death; the loose blob walks on rigid legs
+  and inhabits nearby mobs and villagers (peaceful ones spat out, hostile ones grow strong, lash and waste away),
+  settling into goo after 5 minutes alone. The big body grows in agony into a more feral stance and has a held-Jump
+  overhead slam. Shift+Space dives at once on the wings. Web block catch pries 1.5 s; tendril pull 0.5 s and breaks
+  spawners; takeover rips tear small craters. Fast landings roll, slow ones ease into the superhero landing. The symbiote talks more, remarks on your
+  surroundings, and now and then walks you somewhere it wants to see. `docs/web.md`.

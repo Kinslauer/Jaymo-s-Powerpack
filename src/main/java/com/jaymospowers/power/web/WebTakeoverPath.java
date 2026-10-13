@@ -111,7 +111,14 @@ final class WebTakeoverPath {
 	static final int RIP_LOOKAHEAD = 3;
 	static final double RIP_REACH = 4.5;
 	/** At most this many blocks torn out per takeover. */
-	static final int RIP_MAX_BLOCKS = 32;
+	static final int RIP_MAX_BLOCKS = 96;
+	/**
+	 * Each pull tears out a small crater, not just the blocks in the way (0.9.8): the slot plus the breakable blocks
+	 * round it (within {@code RIP_CRATER_RADIUS} of its middle, ragged, never below the slot's floor), up to
+	 * {@code RIP_CRATER} blocks.
+	 */
+	static final int RIP_CRATER = 9;
+	static final double RIP_CRATER_RADIUS = 1.8, RIP_CRATER_RAGGED = 0.6;
 	/** When ripping can't help (nothing breakable), it waits this long before trying again (ticks). */
 	static final int RIP_RETRY_TICKS = 40;
 	/** The dread on your screen is refreshed this often while it rips (ticks), for this long. */
@@ -595,6 +602,7 @@ final class WebTakeoverPath {
 			route.ripRetryAt = now + RIP_RETRY_TICKS;
 			return false;
 		}
+		blocks = crater(player, blocks);
 		if (blocks.size() > RIP_MAX_BLOCKS - route.ripped) {
 			blocks = blocks.subList(0, RIP_MAX_BLOCKS - route.ripped);
 		}
@@ -633,6 +641,40 @@ final class WebTakeoverPath {
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.SLIME_JUMP, SoundSource.PLAYERS, 0.8F, 0.5F);
 		return true;
+	}
+
+	/** The blocks in the way and a ragged crater round them (see {@link #RIP_CRATER}); the blocks in the way first. */
+	private static List<BlockPos> crater(ServerPlayer player, List<BlockPos> slot) {
+		ServerLevel level = player.level();
+		Vec3 middle = Vec3.ZERO;
+		int floor = Integer.MAX_VALUE;
+		for (BlockPos pos : slot) {
+			middle = middle.add(Vec3.atCenterOf(pos));
+			floor = Math.min(floor, pos.getY());
+		}
+		middle = middle.scale(1.0 / slot.size());
+		BlockPos feet = player.blockPosition().below();
+		BlockPos center = BlockPos.containing(middle);
+		Map<BlockPos, Double> rank = new HashMap<>();
+		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-2, -2, -2), center.offset(2, 2, 2))) {
+			BlockPos at = pos.immutable();
+			double d = Vec3.atCenterOf(at).distanceTo(middle);
+			if (slot.contains(at) || at.getY() < floor || at.equals(feet) || d > RIP_CRATER_RADIUS
+				|| Vec3.atCenterOf(at).distanceTo(player.getEyePosition()) > RIP_REACH + 1.0 || !breakable(player, level, at)) {
+				continue;
+			}
+			rank.put(at, d + player.getRandom().nextDouble() * RIP_CRATER_RAGGED);
+		}
+		List<BlockPos> around = new ArrayList<>(rank.keySet());
+		around.sort(java.util.Comparator.comparingDouble(rank::get));
+		List<BlockPos> out = new ArrayList<>(slot);
+		for (BlockPos pos : around) {
+			if (out.size() >= Math.max(RIP_CRATER, slot.size())) {
+				break;
+			}
+			out.add(pos);
+		}
+		return out;
 	}
 
 	/** The blocking blocks in the first cell along the line to {@code toward} (main axis first, then the other). */

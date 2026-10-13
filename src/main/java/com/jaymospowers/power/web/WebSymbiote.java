@@ -103,7 +103,7 @@ public final class WebSymbiote {
 	public static final float ROAR_DAMAGE = 8.0F, ROAR_SHAKE = 1.4F;
 	public static final int ROAR_RESISTANCE = 2;
 	/** Shroud: invisible until you attack, or for this long at most. */
-	public static final int SHROUD_TICKS = 400;
+	public static final int SHROUD_TICKS = 100;
 	/**
 	 * Living Armor: put on, it can be put away again after {@code ARMOR_TOGGLE_GAP}; without the suit it withdraws
 	 * after {@code ARMOR_IDLE_TICKS} of no use (nothing held, struck, swung or torn), and it never stays out longer
@@ -116,7 +116,7 @@ public final class WebSymbiote {
 	 * won't come at your call until it has given you {@code SUIT_ABILITIES} of its abilities. Whenever it takes over,
 	 * it engulfs you in the suit and the big body.
 	 */
-	public static final int SUIT_DEBUT_TICKS = 100, SUIT_ABILITIES = 4;
+	public static final int SUIT_DEBUT_TICKS = 30, SUIT_ABILITIES = 4;
 	/** Lines it has for its panic (last-ditch) and its alarm at noise and fire; never the same panic line twice running. */
 	public static final int PANIC_LINES = 8, ALARM_LINES = 4;
 	/**
@@ -171,8 +171,8 @@ public final class WebSymbiote {
 	 * (full) chance to be spoken, at most once every {@code NARRATE_GAP_MAX} to {@code NARRATE_GAP_MIN} ticks. Each act has
 	 * {@code SAY_LINES} lines (message.jaymospowers.web_symbiote.say.ACT.N).
 	 */
-	public static final float NARRATE_MIN = 0.1F, NARRATE_MAX = 0.9F;
-	public static final int NARRATE_GAP_MAX = 600, NARRATE_GAP_MIN = 100, SAY_LINES = 3;
+	public static final float NARRATE_MIN = 0.25F, NARRATE_MAX = 0.95F;
+	public static final int NARRATE_GAP_MAX = 400, NARRATE_GAP_MIN = 80, SAY_LINES = 3;
 
 	// ===== the bond ================================================================================================
 	public static final int SATIETY_MAX = 100;
@@ -261,6 +261,23 @@ public final class WebSymbiote {
 	public static final int CURIOUS_STRESS = 20;
 	public static final float CURIOUS_CHANCE = 0.03F, CURIOUS_ATTACK = 0.5F;
 	public static final int STARE_MIN = 40, STARE_MAX = 160;
+	/**
+	 * Remarks (0.9.8): unprompted, it comments on what's around you (the weather, the dark, the deep, height, heat and
+	 * cold, villagers, monsters, beasts, other players, water, lava, corpses), every {@code REMARK_GAP_MAX} ticks with a
+	 * weak bond down to {@code REMARK_GAP_MIN} with a full one (+ up to {@code REMARK_JITTER}); {@code REMARK_LINES} each.
+	 */
+	public static final int REMARK_GAP_MAX = 1400, REMARK_GAP_MIN = 500, REMARK_JITTER = 300, REMARK_LINES = 3;
+	public static final double REMARK_RANGE = 16.0;
+	/**
+	 * Sightseeing: a calm, fed bond (as for {@link #CURIOUS_CHANCE}) has {@code TOUR_CHANCE} each takeover check to take
+	 * the wheel and walk you {@code TOUR_MIN}-{@code TOUR_MAX} blocks to something it wants to see (a high point, water,
+	 * flowers, a villager), giving up after {@code TOUR_TICKS}; there ({@code TOUR_REACH}), it turns your head to take it
+	 * in, says so, and lets go. Never toward lava. A hidden marker ({@code TOUR_TAG}) is what it walks to.
+	 */
+	public static final float TOUR_CHANCE = 0.04F;
+	public static final int TOUR_MIN = 10, TOUR_MAX = 28, TOUR_TICKS = 600, TOUR_SAMPLES = 28, TOUR_LINES = 3;
+	public static final double TOUR_REACH = 2.5, TOUR_VIEW_RISE = 6.0;
+	public static final String TOUR_TAG = "jaymospowers_symbiote_sight";
 	/**
 	 * Tendril Grab at a block: every tendril reaches for the wall and hauls you in; there, you're turned with your back
 	 * to it and they fan out and slam into it, cracking it where each one hits, holding for {@code WALL_HOLD} ticks.
@@ -620,6 +637,12 @@ public final class WebSymbiote {
 		/** This takeover is only curiosity (a good bond): it looks, and maybe sets them down. Until when it stares. */
 		boolean curious;
 		long stareUntil;
+		/** This takeover is sightseeing: what it wants to see, and where it set out from. */
+		boolean touring;
+		String tourSight = "";
+		Vec3 tourFrom = Vec3.ZERO;
+		/** When it next remarks on what's around (0: not yet set). */
+		long remarkAt;
 		/** When it can swell to save itself again; whether this takeover is it running for its life. */
 		long defendReadyAt;
 		boolean fleeing;
@@ -704,6 +727,13 @@ public final class WebSymbiote {
 	}
 
 	static void register() {
+		// a sightseeing marker left behind by a save or a crash is cleared away
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
+			if (entity.entityTags().contains(TOUR_TAG) && level.getGameTime() > SIGHTS.getOrDefault(entity.getUUID(), 0L)) {
+				SIGHTS.remove(entity.getUUID());
+				entity.discard();
+			}
+		});
 		UseBlockCallback.EVENT.register(WebSymbiote::onUseBlock);
 		// a flint struck (or a fire charge) in its hands: it panics
 		UseBlockCallback.EVENT.register((player, world, hand, hit) -> flint(player, hand));
@@ -1174,12 +1204,22 @@ public final class WebSymbiote {
 				startTakeover(player, live, now);
 				live.feral = live.takeoverTicks > 0;
 			} else if (!starving && !live.gorging && next.stress() < CURIOUS_STRESS && next.satiety() >= SELF_FEED_BELOW && !sulking(player)
+				&& player.getRandom().nextFloat() < TOUR_CHANCE) {
+				// a good bond: somewhere it wants to see
+				live.rampage = false;
+				live.curious = false;
+				startTour(player, live, now);
+			} else if (!starving && !live.gorging && next.stress() < CURIOUS_STRESS && next.satiety() >= SELF_FEED_BELOW && !sulking(player)
 				&& player.getRandom().nextFloat() < CURIOUS_CHANCE) {
 				// a good bond: it only wants a look
 				live.rampage = false;
 				live.curious = true;
 				startTakeover(player, live, now);
 			}
+		}
+		// it talks: what it makes of where you are
+		if (live.takeoverTicks <= 0 && live.feedStage == FEED_NONE && live.roarAt <= 0L) {
+			remark(player, live, now);
 		}
 		// near death it will stop at nothing: everything it has, and under three hearts, the Shroud and a run for it
 		LivingEntity threat = sulking(player) ? null : threat(player);
@@ -1372,6 +1412,7 @@ public final class WebSymbiote {
 		abortFeeding(player, live);
 		if (live.takeoverTicks > 0) {
 			live.takeoverTicks = 0;
+			dropSight(player, live);
 			WebTakeoverPath.stop(player, live.route);
 			live.route = null;
 			ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0, false));
@@ -1408,6 +1449,7 @@ public final class WebSymbiote {
 		abortFeeding(player, live);
 		if (live.takeoverTicks > 0) {
 			live.takeoverTicks = 0;
+			dropSight(player, live);
 			WebTakeoverPath.stop(player, live.route);
 			live.route = null;
 			ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0, false));
@@ -1454,6 +1496,7 @@ public final class WebSymbiote {
 			if (live.takeoverTicks > 0) {
 				// mid-takeover: it lets go of the body (and the client stops steering)
 				live.takeoverTicks = 0;
+				dropSight(player, live);
 				WebTakeoverPath.stop(player, live.route);
 				live.route = null;
 				ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0, false));
@@ -1662,6 +1705,7 @@ public final class WebSymbiote {
 		if (live.curious) {
 			WebTendrils.release(player, WebNet.MAIN, false);
 		}
+		dropSight(player, live);
 		live.rampage = false;
 		live.curious = false;
 		live.fleeing = false;
@@ -1737,6 +1781,221 @@ public final class WebSymbiote {
 		whisper(player, "break_free");
 	}
 
+	/** The sightseeing markers in use (anything else carrying {@link #TOUR_TAG} is a leftover). */
+	private static final java.util.Map<java.util.UUID, Long> SIGHTS = new java.util.HashMap<>();
+
+	/** The tour's over: its marker goes. */
+	private static void dropSight(ServerPlayer player, Live live) {
+		if (live.touring && player.level().getEntity(live.takeoverTarget) instanceof net.minecraft.world.entity.Interaction sight) {
+			SIGHTS.remove(sight.getUUID());
+			sight.discard();
+		}
+		live.touring = false;
+	}
+
+	/** Every so often it says what it makes of where you are (see {@link #REMARK_GAP_MAX}). */
+	private static void remark(ServerPlayer player, Live live, long now) {
+		float bond = Mth.clamp(state(player).bond() / (float)BOND_MAX, 0.0F, 1.0F);
+		long gap = Math.round(Mth.lerp(bond, REMARK_GAP_MAX, REMARK_GAP_MIN)) + player.getRandom().nextInt(REMARK_JITTER + 1);
+		if (live.remarkAt == 0L) {
+			live.remarkAt = now + gap;
+			return;
+		}
+		if (now < live.remarkAt || now < live.narrateAt) {
+			return;
+		}
+		live.remarkAt = now + gap;
+		List<String> topics = surroundings(player);
+		if (!topics.isEmpty()) {
+			whisper(player, "see." + topics.get(player.getRandom().nextInt(topics.size())) + "." + (1 + player.getRandom().nextInt(REMARK_LINES)));
+		}
+	}
+
+	/** What there is to remark on around you right now. */
+	private static List<String> surroundings(ServerPlayer player) {
+		ServerLevel level = player.level();
+		BlockPos at = BlockPos.containing(player.getEyePosition());
+		List<String> topics = new java.util.ArrayList<>();
+		boolean sky = level.canSeeSky(at);
+		if (sky && level.isThundering()) {
+			topics.add("storm");
+		} else if (sky && level.isRainingAt(at)) {
+			topics.add("rain");
+		}
+		if (!level.dimensionType().hasFixedTime() && level.isDarkOutside() && sky) {
+			topics.add("night");
+		}
+		if (!sky && player.getY() < level.getSeaLevel() - 12) {
+			topics.add("deep");
+		}
+		if (sky && player.getY() > level.getSeaLevel() + 50) {
+			topics.add("high");
+		}
+		float heat = level.getBiome(at).value().getBaseTemperature();
+		if (heat >= 1.5F) {
+			topics.add("hot");
+		} else if (heat <= 0.15F) {
+			topics.add("cold");
+		}
+		if (player.isInWater()) {
+			topics.add("water");
+		}
+		AABB around = player.getBoundingBox().inflate(REMARK_RANGE);
+		if (!level.getEntitiesOfClass(net.minecraft.world.entity.npc.villager.AbstractVillager.class, around, Entity::isAlive).isEmpty()) {
+			topics.add("village");
+		}
+		if (!level.getEntitiesOfClass(Mob.class, around, m -> m.isAlive() && m instanceof net.minecraft.world.entity.monster.Enemy).isEmpty()) {
+			topics.add("monsters");
+		}
+		if (!level.getEntitiesOfClass(net.minecraft.world.entity.animal.Animal.class, around, Entity::isAlive).isEmpty()) {
+			topics.add("beasts");
+		}
+		if (!level.getEntitiesOfClass(Player.class, player.getBoundingBox().inflate(REMARK_RANGE * 1.5),
+			p -> p != player && p.isAlive() && !p.isSpectator()).isEmpty()) {
+			topics.add("player");
+		}
+		if (!level.getEntities(player, around, com.jaymospowers.power.gravity.GravityPower::isCorpse).isEmpty()) {
+			topics.add("corpse");
+		}
+		if (BlockPos.betweenClosedStream(player.blockPosition().offset(-5, -3, -5), player.blockPosition().offset(5, 3, 5))
+			.anyMatch(pos -> level.getFluidState(pos).is(net.minecraft.tags.FluidTags.LAVA))) {
+			topics.add("lava");
+		}
+		if (topics.isEmpty()) {
+			topics.add("quiet");
+		}
+		return topics;
+	}
+
+	/** It wants to see something: it finds it (see {@link #TOUR_CHANCE}) and takes the wheel to walk you there. */
+	private static void startTour(ServerPlayer player, Live live, long now) {
+		live.takeoverReadyAt = now + TAKEOVER_COOLDOWN;
+		ServerLevel level = player.level();
+		if (!level.canSeeSky(BlockPos.containing(player.getEyePosition()))) {
+			return;
+		}
+		Vec3 best = null;
+		String sight = null;
+		double bestScore = 0.0;
+		// someone to look at
+		for (net.minecraft.world.entity.npc.villager.AbstractVillager villager : level.getEntitiesOfClass(
+			net.minecraft.world.entity.npc.villager.AbstractVillager.class, player.getBoundingBox().inflate(TOUR_MAX), Entity::isAlive)) {
+			double d = villager.distanceTo(player);
+			if (d >= TOUR_MIN && 1.3 + player.getRandom().nextDouble() * 0.5 > bestScore) {
+				bestScore = 1.3 + player.getRandom().nextDouble() * 0.5;
+				best = villager.position();
+				sight = "village";
+			}
+		}
+		for (int i = 0; i < TOUR_SAMPLES; i++) {
+			double angle = player.getRandom().nextDouble() * Math.PI * 2.0;
+			double d = TOUR_MIN + player.getRandom().nextDouble() * (TOUR_MAX - TOUR_MIN);
+			BlockPos column = BlockPos.containing(player.getX() + Math.cos(angle) * d, 0.0, player.getZ() + Math.sin(angle) * d);
+			if (!level.hasChunkAt(column)) {
+				continue;
+			}
+			BlockPos top = level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
+			net.minecraft.world.level.material.FluidState fluid = level.getFluidState(top.below());
+			if (fluid.is(net.minecraft.tags.FluidTags.LAVA) || level.getFluidState(top).is(net.minecraft.tags.FluidTags.LAVA)) {
+				continue;
+			}
+			String kind;
+			double score;
+			Vec3 spot = Vec3.atBottomCenterOf(top);
+			if (fluid.is(net.minecraft.tags.FluidTags.WATER)) {
+				// the shore nearest you, looking out over it
+				Vec3 back = player.position().subtract(spot).horizontal().normalize();
+				Vec3 shore = null;
+				for (int step = 1; step <= 6 && shore == null; step++) {
+					BlockPos dry = level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+						BlockPos.containing(spot.add(back.scale(step))));
+					if (level.getFluidState(dry.below()).isEmpty()) {
+						shore = Vec3.atBottomCenterOf(dry);
+					}
+				}
+				if (shore == null) {
+					continue;
+				}
+				spot = shore;
+				kind = "water";
+				score = 1.0;
+			} else if (top.getY() >= player.getY() + TOUR_VIEW_RISE) {
+				kind = "view";
+				score = 1.0 + (top.getY() - player.getY()) * 0.08;
+			} else if (level.getBlockState(top).is(net.minecraft.tags.BlockTags.FLOWERS)) {
+				kind = "flowers";
+				score = 1.1;
+			} else {
+				continue;
+			}
+			score += player.getRandom().nextDouble() * 0.5;
+			if (score > bestScore) {
+				bestScore = score;
+				best = spot;
+				sight = kind;
+			}
+		}
+		if (best == null) {
+			return;
+		}
+		net.minecraft.world.entity.Interaction marker = net.minecraft.world.entity.EntityTypes.INTERACTION.create(level, net.minecraft.world.entity.EntitySpawnReason.TRIGGERED);
+		if (marker == null) {
+			return;
+		}
+		marker.setPos(best);
+		marker.addTag(TOUR_TAG);
+		SIGHTS.put(marker.getUUID(), now + TOUR_TICKS + 100L);
+		if (!level.addFreshEntity(marker)) {
+			SIGHTS.remove(marker.getUUID());
+			return;
+		}
+		live.touring = true;
+		live.tourSight = sight;
+		live.tourFrom = player.position();
+		live.stareUntil = 0L;
+		live.struggle = 0.0F;
+		live.resisted = false;
+		live.takeoverTicks = TOUR_TICKS;
+		live.takeoverTarget = marker.getId();
+		WebTakeoverPath.stop(player, live.route);
+		live.route = new WebTakeoverPath.Route();
+		ServerPlayNetworking.send(player, new WebNet.Takeover(marker.getId(), live.takeoverTicks, false));
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 1.6F, 1.3F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SNIFF, SoundSource.PLAYERS, 1.0F, 0.8F);
+		level.sendParticles(dust(1.4F), player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.8, 0.4, 0.0);
+		whisper(player, "tour." + sight + ".go." + (1 + player.getRandom().nextInt(TOUR_LINES)));
+	}
+
+	/** On its way to the sight; there, it turns your head to it, says so, and lets go. */
+	private static void tickTour(ServerPlayer player, Live live, long now, @org.jspecify.annotations.Nullable Entity target) {
+		if (target == null || !target.isAlive() || --live.takeoverTicks <= 0) {
+			endTakeover(player, live);
+			return;
+		}
+		drive(player, live, target, false, now);
+		Vec3 to = target.position().subtract(player.position());
+		if (to.horizontalDistance() > TOUR_REACH || Math.abs(to.y) > 2.0) {
+			if (live.takeoverTicks % 5 == 0) {
+				player.level().sendParticles(dust(1.0F), player.getX(), player.getY() + 1.0, player.getZ(), 3, 0.3, 0.6, 0.3, 0.0);
+			}
+			return;
+		}
+		// there: on along the way it came, and a little down (out over the view, the water, the flowers)
+		Vec3 out = player.position().subtract(live.tourFrom).horizontal();
+		if (live.tourSight.equals("village")) {
+			out = to.horizontal();
+		}
+		if (out.lengthSqr() > 1.0E-4) {
+			float yaw = (float)(Mth.atan2(out.z, out.x) * Mth.RAD_TO_DEG) - 90.0F;
+			float pitch = live.tourSight.equals("view") ? 15.0F : live.tourSight.equals("village") ? 0.0F : 30.0F;
+			player.connection.send(new net.minecraft.network.protocol.game.ClientboundPlayerRotationPacket(yaw, false, pitch, false));
+		}
+		String sight = live.tourSight;
+		endTakeover(player, live);
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SNIFF, SoundSource.PLAYERS, 0.8F, 1.0F);
+		whisper(player, "tour." + sight + ".there." + (1 + player.getRandom().nextInt(TOUR_LINES)));
+	}
+
 	/** Curiosity: up close it grabs them, holds them up to its face and stares; then sets them down, or doesn't. */
 	private static void tickCurious(ServerPlayer player, Live live, long now, Entity target) {
 		ServerLevel level = player.level();
@@ -1808,6 +2067,10 @@ public final class WebSymbiote {
 					emergency(player, live);
 				}
 			}
+			return;
+		}
+		if (live.touring) {
+			tickTour(player, live, now, target);
 			return;
 		}
 		// it lets go once its prey is dead, or has got away
@@ -2846,7 +3109,7 @@ public final class WebSymbiote {
 			return;
 		}
 		// a takeover's fight (not a look, not a run): the tendrils tear into what it took you for
-		boolean fighting = live.takeoverTicks > 0 && !live.curious && !live.fleeing;
+		boolean fighting = live.takeoverTicks > 0 && !live.curious && !live.touring && !live.fleeing;
 		if (now < live.nextStrikeAt || live.takeoverTicks > 0 && !fighting || live.fleeing
 			|| WebTendrilCombos.active(player)) {
 			return;

@@ -119,11 +119,12 @@ public final class WebTendrils {
 	/**
 	 * Tearing a chunk loose isn't instant: the tendril reaches the wall, digs in and struggles with it, the blocks
 	 * cracking and your view jarring, for {@code TUG_MIN} + {@code TUG_PER_HARDNESS} x the hardest block's hardness + up
-	 * to {@code TUG_RANDOM} more ticks (never more than {@code TUG_MAX}, 3 s), then it tears loose and is hauled in, held.
-	 * Let go of the key before then and nothing comes (as Gravity's Lift struggles).
+	 * to {@code TUG_RANDOM} more ticks (never more than {@code TUG_MAX}; 0.9.8: a flat half second), then it tears loose
+	 * and is hauled in, held. Let go of the key before then and nothing comes (as Gravity's Lift struggles). A spawner it
+	 * digs into (aimed at, or in the crater) is wrecked when the chunk tears out: broken, as if mined.
 	 */
-	static final int TUG_MIN = 20, TUG_MAX = 60, TUG_RANDOM = 16;
-	static final float TUG_PER_HARDNESS = 8.0F;
+	static final int TUG_MIN = 10, TUG_MAX = 10, TUG_RANDOM = 0;
+	static final float TUG_PER_HARDNESS = 0.0F;
 	/**
 	 * A chunk swung with a click is a heavy cross, not a jab: hauled back behind that shoulder over {@code CROSS_WINDUP}
 	 * ticks (slowly, at {@code CROSS_DRAW_SPEED}), whipped across in {@code CROSS_SWING} onto whatever's in front within
@@ -292,7 +293,10 @@ public final class WebTendrils {
 			return;
 		}
 		ServerLevel level = player.level();
-		List<net.minecraft.core.BlockPos> blocks = com.jaymospowers.core.BlockCluster.crater(level, hit.getBlockPos(), RIP_PIECES, RIP_HARDEST, player);
+		List<net.minecraft.core.BlockPos> blocks = new ArrayList<>(com.jaymospowers.core.BlockCluster.crater(level, hit.getBlockPos(), RIP_PIECES, RIP_HARDEST, player));
+		if (spawner(level, hit.getBlockPos()) && level.mayInteract(player, hit.getBlockPos())) {
+			blocks.add(0, hit.getBlockPos());
+		}
 		if (blocks.isEmpty()) {
 			return;
 		}
@@ -300,7 +304,9 @@ public final class WebTendrils {
 		cancelTug(player, hand);
 		float hardest = 0.0F;
 		for (net.minecraft.core.BlockPos pos : blocks) {
-			hardest = Math.max(hardest, level.getBlockState(pos).getDestroySpeed(level, pos));
+			if (!spawner(level, pos)) {
+				hardest = Math.max(hardest, level.getBlockState(pos).getDestroySpeed(level, pos));
+			}
 		}
 		long now = level.getGameTime();
 		long reach = (long)Math.ceil(hit.getLocation().distanceTo(eye) / TENDRIL_SPEED);
@@ -308,6 +314,12 @@ public final class WebTendrils {
 		TUGS.computeIfAbsent(player.getUUID(), k -> new Tug[2])[hand] = new Tug(hit, blocks, now + reach, now + reach + struggle);
 		player.setAttached(TUG, player.getAttachedOrElse(TUG, Latch.NONE).with(hand, hit.getLocation()));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 0.9F, 0.6F);
+	}
+
+	/** A monster spawner (or a trial spawner): the tendrils can tear those apart. */
+	private static boolean spawner(ServerLevel level, net.minecraft.core.BlockPos pos) {
+		net.minecraft.world.level.block.state.BlockState state = level.getBlockState(pos);
+		return state.is(net.minecraft.world.level.block.Blocks.SPAWNER) || state.is(net.minecraft.world.level.block.Blocks.TRIAL_SPAWNER);
 	}
 
 	/** That tendril is struggling with a chunk of wall. */
@@ -390,7 +402,11 @@ public final class WebTendrils {
 			// it gives: torn out, and hauled in
 			List<net.minecraft.core.BlockPos> loose = new ArrayList<>();
 			for (net.minecraft.core.BlockPos pos : tug.blocks()) {
-				if (com.jaymospowers.core.BlockCluster.takeable(level, pos, RIP_HARDEST, player)) {
+				if (spawner(level, pos)) {
+					// a spawner's cage is torn apart, not carried off
+					level.destroyBlock(pos, true, player);
+					ServerPlayNetworking.send(player, new WebNet.Shake(0.7F));
+				} else if (com.jaymospowers.core.BlockCluster.takeable(level, pos, RIP_HARDEST, player)) {
 					loose.add(pos);
 				}
 			}
