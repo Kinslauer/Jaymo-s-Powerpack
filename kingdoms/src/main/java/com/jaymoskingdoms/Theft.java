@@ -62,6 +62,8 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>(0.5.37) A kingdom that doesn't believe in magic ({@link Sorcery#believesInMagic}) prosecutes it: reading a spell
  * scroll inside its walls is a crime like arson, for its own people too (only its ruler may).
+ *
+ * <p>(0.5.46) Blocks a player placed themselves ({@link Placed}) are theirs: breaking them or opening them is no crime.
  */
 public final class Theft {
 	/** How far a witness sees a crime (sneaking: this share of it); closer than {@link #HEAR_RANGE} they notice whichever way they face. */
@@ -256,7 +258,9 @@ public final class Theft {
 
 	private static void opened(ServerPlayer player, ServerLevel level, BlockPos pos) {
 		Faction f = Factions.storageOwner(level.getServer(), pos);
-		if (f == null || f.fallen() || level != Factions.level(level.getServer()) || !(level.getBlockEntity(pos) instanceof Container c)) {
+		if (f == null || f.fallen() || level != Factions.level(level.getServer()) || !(level.getBlockEntity(pos) instanceof Container c)
+			|| Placed.byPlayer(player, level, pos, level.getBlockState(pos))) {
+			// (0.5.46) a chest you placed yourself is yours to open
 			return;
 		}
 		OPEN.put(player.getUUID(), new Opened(f.id(), pos.immutable(), counts(c), counts(player.getInventory()), level.getGameTime()));
@@ -333,6 +337,12 @@ public final class Theft {
 	}
 
 	private static void broke(ServerPlayer player, ServerLevel level, BlockPos pos, BlockState state, @Nullable BlockEntity entity) {
+		boolean own = Placed.byPlayer(player, level, pos, state);
+		Placed.forget(level, pos);
+		if (own) {
+			// (0.5.46) breaking a block you placed yourself is no crime
+			return;
+		}
 		Faction owner = Factions.storageOwner(level.getServer(), pos);
 		Faction f = owner != null ? owner : lawAt(level, pos);
 		if (f == null || f.fallen() || f.type() == FactionType.BARBARIAN || exempt(player, f)) {

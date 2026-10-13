@@ -58,7 +58,7 @@ public final class JaymosKingdoms implements ModInitializer {
 			McaCompat.forget(handler.player);
 		});
 		// 0.3, builders and theft: the building catalogue, real-time construction, plots and the plot stake, crime
-		LOGGER.debug("builder and theft attachments: {} {}", Works.WORKS, Theft.WANTED);
+		LOGGER.debug("builder and theft attachments: {} {} {}", Works.WORKS, Theft.WANTED, Placed.MARKS);
 		Plots.register();
 		Armory.register();
 		Buildings.register();

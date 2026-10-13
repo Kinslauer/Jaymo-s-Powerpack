@@ -532,3 +532,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   26.3 build, all rights reserved): orc camps rise in rough country near kingdoms, a dark oak stockade round the
   warchief's longhouse, tents, a forge, a fighting pit and a watchtower; grunts, rangers, a shaman and a warchief boss
   with a ground slam. Their war bands raid kingdoms; killing the warchief clears the camp.
+- **0.8.90, Your own blocks are no crime:** ships Jaymo's Kingdoms 0.5.46: breaking a block you placed yourself in a
+  settlement (a chest, bed, crafting table, crops you planted), or opening a chest you placed there, no longer makes
+  its people take you for a criminal. Blocks the settlement built still count.
