@@ -55,4 +55,5 @@ Hearts: Mage 8, Marksman 9, vanilla 10, Survivalist 11, Brute 12. These stack wi
 2. Heavy armour slows everyone a little: yes.
 3. Respec: keep both the Writ of Rebirth in loot and the court wizard's sale.
 4. The pick screen looks like a character-creation screen (Andy's Elden Ring reference): a card per class with a
-   portrait, a stat table and the starting gear; every class starts with its kit (`Classes.kit`), once per player.
+   portrait, a stat table and the gear it's good with.
+5. (07:45Z) No starting gear for anyone. The Mage gets the staff's recipe from a court wizard, or finds a staff.

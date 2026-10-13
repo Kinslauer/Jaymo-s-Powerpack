@@ -284,6 +284,10 @@ public final class CourtWizards {
 	static void died(ServerLevel level, Worker w, DamageSource source) {
 		if (w.role() == Sorcery.WIZARD && source.getEntity() instanceof ServerPlayer) {
 			w.mob().spawnAtLocation(level, Arcana.scrollFor(Sorcery.WIZARD, level.getRandom()));
+			// (0.6.0) and, as often as not, his staff: a Mage's "find one"
+			if (level.getRandom().nextFloat() < Classes.STAFF_DROP_CHANCE) {
+				w.mob().spawnAtLocation(level, new ItemStack(Arcana.WIZARD_STAFF));
+			}
 		}
 		FOES.remove(w.mob());
 	}

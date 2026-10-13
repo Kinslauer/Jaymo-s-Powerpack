@@ -19,7 +19,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.6.0) The class screen ({@link Classes}), laid out like a character-creation screen: a row of cards, each a class's
  * name over a gold rule, its portrait (its signature gear, drawn large), a table of what it's good with
- * ({@link ClassPerks#card}) and the gear it starts with ({@link Classes#kit}). Three cards show at once; the arrows
+ * ({@link ClassPerks#card}) and the gear it's good with ({@link Classes#gear}). Three cards show at once; the arrows
  * turn to the next three. Pressing a card picks it; a Mage or a Sorcerer then picks their first spell or element from
  * a row under the cards; Choose seals it. Opened by the server the first time a player comes into a world (then it
  * can't be shut without picking) and when a Writ of Rebirth is read.
@@ -182,7 +182,7 @@ final class ClassScreen extends Screen {
 		graphics.centeredText(this.font, name, x + w / 2, y + 5, picked ? COLOR_GOLD : COLOR_TEXT);
 		graphics.fill(x + 6, y + 16, x + w - 6, y + 17, COLOR_EDGE);
 		// the portrait: its signature gear, drawn large
-		List<ItemStack> kit = Classes.kit(cls, cls.options.isEmpty() ? "" : cls.options.getFirst());
+		List<ItemStack> kit = Classes.gear(cls, cls.options.isEmpty() ? "" : cls.options.getFirst());
 		if (!kit.isEmpty() && !kit.getFirst().isEmpty()) {
 			int px = x + w / 2 - 8 * PORTRAIT_SCALE, py = y + 20 + (PORTRAIT_H - 16 * PORTRAIT_SCALE) / 2;
 			graphics.pose().pushMatrix();
@@ -202,7 +202,7 @@ final class ClassScreen extends Screen {
 			graphics.text(this.font, lines.get(i), x + 7, ty, COLOR_TEXT);
 			ty += 11;
 		}
-		// the starting gear, as a row of icons
+		// the gear it's good with, as a row of icons
 		graphics.fill(x + 4, ty + 1, x + w - 4, ty + 2, COLOR_EDGE);
 		int n = 0;
 		for (ItemStack stack : kit) {

@@ -46,6 +46,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import org.jspecify.annotations.Nullable;
@@ -73,8 +74,8 @@ public final class Classes {
 	static final int WRIT_EMERALDS = 30;
 	/** The chance a rare chest (stronghold library, ancient city, woodland mansion) holds a writ. */
 	static final float WRIT_LOOT_CHANCE = 0.08F;
-	/** Whether a class comes with its starting gear ({@link #kit}) the first time it's picked (a writ's second pick gets none). */
-	static final boolean START_WITH_GEAR = true;
+	/** The chance a rare chest holds a wizard's staff (a Mage's "find one"); a slain court wizard drops his this often. */
+	static final float STAFF_LOOT_CHANCE = 0.1F, STAFF_DROP_CHANCE = 0.5F;
 
 	/** The eight classes. {@code options}: what the class picks besides (a Mage's first spell, a Sorcerer's element). */
 	public enum PlayerClass {
@@ -145,8 +146,6 @@ public final class Classes {
 	/** Each player's class. Saved, kept through death, synced to its own player (the screens). */
 	public static final AttachmentType<Chosen> CLASS = AttachmentRegistry.create(JaymosKingdoms.id("class"),
 		builder -> builder.persistent(Chosen.CODEC).copyOnDeath().syncWith(Chosen.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
-	/** Whether a player has had a class's starting gear (once per player, so a writ isn't a free kit). Saved, kept through death. */
-	static final AttachmentType<Boolean> KITTED = AttachmentRegistry.create(JaymosKingdoms.id("kitted"), builder -> builder.persistent(Codec.BOOL).copyOnDeath());
 	/** When a player last bought a writ from a court wizard (game time). Saved, kept through death. */
 	static final AttachmentType<Long> WRIT_BOUGHT = AttachmentRegistry.create(JaymosKingdoms.id("writ_bought"),
 		builder -> builder.persistent(Codec.LONG).copyOnDeath());
@@ -215,11 +214,16 @@ public final class Classes {
 			ClassPerks.clear();
 			Spellcraft.clear();
 		});
-		// a writ in the rarest chests
+		// a writ, or a wizard's staff, in the rarest chests
 		LootTableEvents.MODIFY_DROPS.register((table, context, drops) -> {
 			if (table.unwrapKey().filter(k -> k.equals(BuiltInLootTables.STRONGHOLD_LIBRARY) || k.equals(BuiltInLootTables.ANCIENT_CITY)
-				|| k.equals(BuiltInLootTables.WOODLAND_MANSION)).isPresent() && context.getRandom().nextFloat() < WRIT_LOOT_CHANCE) {
-				drops.add(new ItemStack(WRIT));
+				|| k.equals(BuiltInLootTables.WOODLAND_MANSION)).isPresent()) {
+				if (context.getRandom().nextFloat() < WRIT_LOOT_CHANCE) {
+					drops.add(new ItemStack(WRIT));
+				}
+				if (context.getRandom().nextFloat() < STAFF_LOOT_CHANCE) {
+					drops.add(new ItemStack(Arcana.WIZARD_STAFF));
+				}
 			}
 		});
 	}
@@ -274,14 +278,9 @@ public final class Classes {
 	static void set(ServerPlayer player, PlayerClass cls, String option) {
 		player.setAttached(CLASS, new Chosen(cls.key(), option, cls == PlayerClass.MAGE ? List.of(option) : List.of(), 0));
 		refresh(player);
-		if (cls == PlayerClass.MAGE && !player.getInventory().contains(new ItemStack(Arcana.WIZARD_STAFF))) {
-			player.getInventory().placeItemBackInInventory(new ItemStack(Arcana.WIZARD_STAFF), Prediction.SERVER_ONLY);
-		}
-		if (START_WITH_GEAR && !player.getAttachedOrElse(KITTED, false)) {
-			player.setAttached(KITTED, true);
-			for (ItemStack stack : kit(cls, option)) {
-				player.getInventory().placeItemBackInInventory(stack, Prediction.SERVER_ONLY);
-			}
+		// (no class starts with gear, Andy's word: a Mage gets the staff's recipe from a court wizard, or finds one)
+		if (cls == PlayerClass.MAGE) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.class.mage_staff").withStyle(ChatFormatting.GRAY));
 		}
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6F, 0.9F);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.class.chosen", Component.translatable("class.jaymoskingdoms." + cls.key()))
@@ -294,13 +293,14 @@ public final class Classes {
 		refresh(player);
 	}
 
-	// ---- the starting gear ---------------------------------------------------------------------------------------
+	// ---- the signature gear --------------------------------------------------------------------------------------
 
 	/**
-	 * What a class starts with (the first of them is its portrait on the screen). Items of other mods (Armory's dagger,
-	 * Balkon's musket) are looked up by id, with a vanilla stand-in when they're not there.
+	 * The gear a class is good with, for its card on the screen (the first of them is its portrait); nobody starts with
+	 * any of it. Items of other mods (Armory's dagger, Balkon's musket) are looked up by id, with a vanilla stand-in
+	 * when they're not there.
 	 */
-	public static List<ItemStack> kit(PlayerClass cls, String option) {
+	public static List<ItemStack> gear(PlayerClass cls, String option) {
 		return switch (cls) {
 			case THIEF -> List.of(any(1, "jaymospowers:iron_dagger", "minecraft:iron_sword"), new ItemStack(Items.LEATHER_CHESTPLATE),
 				new ItemStack(Items.LEATHER_LEGGINGS), new ItemStack(Items.LEATHER_BOOTS));
@@ -357,22 +357,43 @@ public final class Classes {
 		}
 	}
 
-	/** A player spoke to a court wizard with no perks to unmake: he offers a writ, if he hasn't sold them one this week. */
+	/** The wizard's staff's recipe, which a court wizard teaches a Mage. */
+	static final ResourceKey<Recipe<?>> STAFF_RECIPE = ResourceKey.create(Registries.RECIPE, JaymosKingdoms.id("wizard_staff"));
+
+	/** Whether {@code player} is a Mage who hasn't been taught the staff yet. */
+	static boolean wantsStaff(ServerPlayer player) {
+		return is(player, PlayerClass.MAGE) && !player.getRecipeBook().contains(STAFF_RECIPE);
+	}
+
+	/**
+	 * A player spoke to a court wizard with no perks to unmake: he teaches a Mage how a staff is made, and offers a writ,
+	 * if he hasn't sold them one this week.
+	 */
 	static void writOffer(ServerPlayer player, LivingEntity wizard) {
 		if (!ServerPlayNetworking.canSend(player, TalkNet.Ask.TYPE)) {
 			return;
 		}
 		long now = player.level().getGameTime();
 		Long last = player.getAttached(WRIT_BOUGHT);
-		if (last != null && now - last < WRIT_EVERY && now >= last) {
+		boolean writ = last == null || now - last >= WRIT_EVERY || now < last;
+		boolean staff = wantsStaff(player);
+		if (!writ && !staff) {
 			player.sendSystemMessage(Component.translatable("talk.jaymoskingdoms.wizard.writ.sold", wizard.getDisplayName()).withStyle(ChatFormatting.GRAY));
 			return;
 		}
 		WRIT_OFFERS.put(player.getUUID(), wizard.getId());
+		List<Component> options = new java.util.ArrayList<>();
+		List<Boolean> enabled = new java.util.ArrayList<>();
+		if (staff) {
+			options.add(Component.translatable("talk.jaymoskingdoms.wizard.staff.yes"));
+			enabled.add(true);
+		}
+		options.add(Component.translatable("talk.jaymoskingdoms.wizard.writ.yes", WRIT_EMERALDS));
+		enabled.add(writ && Approaches.emeralds(player) >= WRIT_EMERALDS);
+		options.add(Component.translatable("talk.jaymoskingdoms.wizard.respec.no"));
+		enabled.add(true);
 		ServerPlayNetworking.send(player, new TalkNet.Ask(wizard.getId(), wizard.getDisplayName(),
-			Component.translatable("talk.jaymoskingdoms.wizard.writ", WRIT_EMERALDS),
-			List.of(Component.translatable("talk.jaymoskingdoms.wizard.writ.yes", WRIT_EMERALDS), Component.translatable("talk.jaymoskingdoms.wizard.respec.no")),
-			List.of(Approaches.emeralds(player) >= WRIT_EMERALDS, true)));
+			Component.translatable(staff ? "talk.jaymoskingdoms.wizard.staff" : "talk.jaymoskingdoms.wizard.writ", WRIT_EMERALDS), options, enabled));
 	}
 
 	/** An answer to the wizard's writ offer; false when it wasn't one. */
@@ -382,14 +403,31 @@ public final class Classes {
 			return false;
 		}
 		WRIT_OFFERS.remove(player.getUUID());
-		if (answer.option() != 0 || !(player.level().getEntity(answer.entityId()) instanceof LivingEntity wizard) || !CourtWizards.is(wizard)
-			|| wizard.distanceTo(player) > 8.0 || Approaches.emeralds(player) < WRIT_EMERALDS) {
+		if (answer.option() < 0 || !(player.level().getEntity(answer.entityId()) instanceof LivingEntity wizard) || !CourtWizards.is(wizard)
+			|| wizard.distanceTo(player) > 8.0) {
+			return true;
+		}
+		ServerLevel level = (ServerLevel) player.level();
+		boolean staff = wantsStaff(player);
+		if (staff && answer.option() == 0) {
+			// the staff's recipe: into the recipe book, and said out loud
+			player.awardRecipesByKey(List.of(STAFF_RECIPE));
+			Speech.say(level, wizard, Component.translatable("talk.jaymoskingdoms.wizard.staff.done"), Speech.GOLD, 16.0);
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.class.staff_recipe").withStyle(ChatFormatting.LIGHT_PURPLE));
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
+			return true;
+		}
+		if (answer.option() != (staff ? 1 : 0) || Approaches.emeralds(player) < WRIT_EMERALDS) {
+			return true;
+		}
+		Long last = player.getAttached(WRIT_BOUGHT);
+		long now = level.getGameTime();
+		if (last != null && now - last < WRIT_EVERY && now >= last) {
 			return true;
 		}
 		Approaches.take(player, Items.EMERALD, WRIT_EMERALDS);
 		player.setAttached(WRIT_BOUGHT, player.level().getGameTime());
 		player.getInventory().placeItemBackInInventory(new ItemStack(WRIT), Prediction.SERVER_ONLY);
-		ServerLevel level = (ServerLevel) player.level();
 		Speech.say(level, wizard, Component.translatable("talk.jaymoskingdoms.wizard.writ.done"), Speech.GOLD, 16.0);
 		return true;
 	}

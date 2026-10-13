@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "A": "minecraft:amethyst_shard",
+    "B": "minecraft:blaze_rod",
+    "G": "minecraft:gold_ingot"
+  },
+  "pattern": [
+    " GA",
+    " B ",
+    "B  "
+  ],
+  "result": {
+    "id": "jaymoskingdoms:wizard_staff"
+  }
+}

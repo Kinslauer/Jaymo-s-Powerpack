@@ -2327,9 +2327,11 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   `ADD_MULTIPLIED_TOTAL`, so a power that takes it to nothing keeps it there.
 - The ninth class, the **Rider** (Andy asked for one more): in the saddle the horse runs 15% faster (a transient
   modifier on the mount's speed) and tires 25% slower (`Equestrian.drain`), horses trust them 50% sooner
-  (`Bonding.addTrust`), blows from horseback +20%; on foot 5% slower. Every class starts with a kit once per player
-  (`Classes.kit`, attachment `kitted`): the Thief a dagger and leather, the Archer a bow and arrows, the Rider a lance,
-  a saddle and wheat, and so on; other mods' items by id with vanilla stand-ins.
+  (`Bonding.addTrust`), blows from horseback +20%; on foot 5% slower. Nobody starts with gear (Andy's word): the
+  cards show what each class is good with (`Classes.gear`, other mods' items by id with vanilla stand-ins). A Mage
+  gets a wizard's staff by having a court wizard teach the recipe (sneak and speak to him: gold and amethyst on two
+  blaze rods, `recipe/wizard_staff.json`, put in the recipe book) or by finding one (rare chests, a slain court wizard
+  half the time).
 - Stage 2, the casters (`Spellcraft`): a Mage's wizard's staff casts the spell on it (right-click; sneak and
   right-click turns to the next), at 1.5x a scroll's power with its own cooldown per spell (`MAGE_COOLDOWN`); a Mage
   reading a scroll of a spell they don't know learns it (`Chosen.spells`). `Arcana.cast(spell, level, player, power)`

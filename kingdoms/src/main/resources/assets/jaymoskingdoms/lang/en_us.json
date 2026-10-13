@@ -1475,7 +1475,7 @@
 	"class.jaymoskingdoms.warlord": "Warlord",
 	"class.jaymoskingdoms.warlord.desc": "Two-handed weapons (claymores, war axes, glaives, halberds) hit 25% harder. Heavy armour weighs half as much on you.",
 	"class.jaymoskingdoms.mage": "Mage",
-	"class.jaymoskingdoms.mage.desc": "A wizard's staff of your own, and the spells to go with it. Two hearts fewer. Pick your first spell.",
+	"class.jaymoskingdoms.mage.desc": "A wizard's staff casts in your hands, and you learn every scroll you read. Two hearts fewer. A court wizard will teach you how a staff is made, or find one. Pick your first spell.",
 	"class.jaymoskingdoms.archer": "Archer",
 	"class.jaymoskingdoms.archer.desc": "Arrows and bolts hit 25% harder, and you're quicker on your feet. With a bow drawn you jump two blocks and land soft.",
 	"class.jaymoskingdoms.survivalist": "Survivalist",
@@ -1503,7 +1503,7 @@
 	"class.jaymoskingdoms.option.ice": "Ice",
 	"class.jaymoskingdoms.option.ice.desc": "Freezes what it hits for a moment.",
 	"gui.jaymoskingdoms.class.title": "Choose your class",
-	"gui.jaymoskingdoms.class.lead": "What are you good with? Your pick is for keeps, unless you come by a Writ of Rebirth.",
+	"gui.jaymoskingdoms.class.lead": "What are you good with? Your pick is for keeps, unless you come by a Writ of Rebirth. Nobody starts with gear: the cards show what each class is good with.",
 	"gui.jaymoskingdoms.class.pick": "Pick your %s",
 	"gui.jaymoskingdoms.class.pick.mage": "first spell",
 	"gui.jaymoskingdoms.class.pick.sorcerer": "element",
@@ -1555,5 +1555,10 @@
 	"message.jaymoskingdoms.imbue.no_blade": "Hold a blade to imbue it.",
 	"message.jaymoskingdoms.imbue.done": "Your blade burns with %s.",
 	"message.jaymoskingdoms.imbue.faded": "The element fades from your blade.",
-	"message.jaymoskingdoms.scroll_beyond": "This scroll is beyond a Sorcerer's quick magic."
+	"message.jaymoskingdoms.scroll_beyond": "This scroll is beyond a Sorcerer's quick magic.",
+	"message.jaymoskingdoms.class.mage_staff": "A wizard's staff casts in a Mage's hands. Sneak and speak to a court wizard to learn how one is made, or find one.",
+	"message.jaymoskingdoms.class.staff_recipe": "You learn how a wizard's staff is made: gold and amethyst on two blaze rods. It's in your recipe book.",
+	"talk.jaymoskingdoms.wizard.staff": "A Mage without a staff? I can tell you how one is made. And I have a Writ of Rebirth, if you'd be someone else entirely: %s emeralds.",
+	"talk.jaymoskingdoms.wizard.staff.yes": "Teach me the staff",
+	"talk.jaymoskingdoms.wizard.staff.done": "Gold and amethyst, bound to two rods of blaze. Mind your fingers."
 }
