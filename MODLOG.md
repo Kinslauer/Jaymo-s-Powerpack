@@ -716,3 +716,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   them to tell you more. The answer screen has "Could you tell me more?" too.
   Guards halt strangers far less often, and have four new encounters shaped by their king's temper: a pack search, a
   toll, a bout for a wager and a loyalty test, where a wrong answer can cost emeralds, good name, or get you arrested.
+
+- **0.9.3, no floating buildings (Kingdoms 0.6.3):** structures from any mod no longer hover over the ground: a gap of
+  up to 6 blocks under a building is filled with the ground below when the world generates (newly explored land only).
