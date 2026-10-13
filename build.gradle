@@ -96,10 +96,6 @@ def packMods = [
 	// Iris Shaders (LGPL-3.0): shader packs (Options > Video Settings > Shader Packs); built on the pack's Sodium, and
 	// Distant Horizons draws its far terrain through shaders that support it. Client-only: the server ignores it.
 	[dep: "maven.modrinth:iris:vTN4NRGW", cf: [455508, 9015108], dev: false],
-	// Alex's Mobs (Fabric) and its library Citadel (both LGPL-3.0, Astryxion's Fabric port of Alexthe666's mods; only on
-	// CurseForge, so they come from its maven by id): about 90 new animals and monsters across every biome and dimension
-	[dep: "curse.maven:citadel-fabric-1472150:8907805", cf: [1472150, 8907805]],
-	[dep: "curse.maven:alexs-mobs-fabric-1472153:8907935", cf: [1472153, 8907935]],
 ]
 // First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
 // Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge
@@ -152,6 +148,9 @@ def packResourcePacks = [
 // library Cristel Lib came back in 0.8.69 for Overhauled Overworld. Traveler's Backpack and Forge Config API Port left
 // in 0.8.14)
 def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-", "forge-config-api-port-"]
+// the same, by Fabric mod id, for mods whose CurseForge file names we don't know: Alex's Mobs and Citadel (0.8.106,
+// their models drew black slabs and streaks across the screen with Iris shaders)
+def removedIdsFromProfile = ["alexsmobs", "citadel"]
 // a jar's Fabric mod id (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's
 def modId = { File jar ->
 	try {
@@ -282,7 +281,7 @@ tasks.register("profileMods") {
 		old.each { new File(it.path + ".old").delete() }
 		// mods that have left the pack leave the profile too
 		def removedDir = new File(profileMods.parentFile, "removed-mods")
-		profileMods.listFiles().findAll { f -> f.name.endsWith(".jar") && removedFromProfile.any { f.name.startsWith(it) } }.each { f ->
+		profileMods.listFiles().findAll { f -> f.name.endsWith(".jar") && (removedFromProfile.any { f.name.startsWith(it) } || modId(f) in removedIdsFromProfile) }.each { f ->
 			removedDir.mkdirs()
 			if (f.renameTo(new File(removedDir, f.name))) {
 				logger.lifecycle("Moved ${f.name} out of your CurseForge profile (into removed-mods)")

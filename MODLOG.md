@@ -591,3 +591,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   the end it goes white. After 24-36 days grown they die peacefully in their sleep, leaving a corpse; with MCA their
   family mourns at the grave. A king or lord who dies of old age is succeeded by an heir the next day, a court wizard
   by the next eldest, and MCA's couples have children to fill the empty beds.
+- **0.8.106, Alex's Mobs out:** Alex's Mobs and its library Citadel leave the pack (manifest, server, profile). With
+  Iris shaders on, their models threw black slabs and streaky lines across the screen that changed as you looked up
+  and down; without them the artifacts stop. Build Modpack moves both jars out of your CurseForge profile into
+  `removed-mods` (matched by mod id, `removedIdsFromProfile`), and the server's mods folder drops them on its next sync.
+  Kitchen's Alex's Mobs fish stay in its `fish_corpses` tag as optional entries, so nothing breaks without the mod.
+  Worlds that had Alex's Mobs creatures lose them (and their items) on load.
