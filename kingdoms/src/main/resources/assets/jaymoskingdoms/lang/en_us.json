@@ -478,6 +478,8 @@
 	"entity.jaymoskingdoms.carter_of": "Carter of %s",
 	"entity.jaymoskingdoms.coachman_of": "Coachman of %s",
 	"entity.jaymoskingdoms.wagon": "Wagon",
+	"entity.jaymoskingdoms.cannon": "Cannon",
+	"entity.jaymoskingdoms.cannonball": "Cannonball",
 	"focus.jaymoskingdoms.mining": "mining: it sends stone and ore to its overlord",
 	"focus.jaymoskingdoms.farming": "farming: it sends food to its overlord",
 	"wealth.jaymoskingdoms.poor": "of modest means",

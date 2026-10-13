@@ -78,7 +78,12 @@ final class Javelins {
 	/** Its role throws: guards, barbarians (with their chiefs), and orc grunts. */
 	static boolean thrower(Folk folk) {
 		int role = folk.role();
-		return role == Folk.GUARD || role == Folk.BARBARIAN || role == Folk.CHIEF || role == Orcs.GRUNT;
+		return (role == Folk.GUARD || role == Folk.BARBARIAN || role == Folk.CHIEF || role == Orcs.GRUNT) && !Muskets.armed(folk);
+	}
+
+	/** (0.5.64) A shot of one of the folk's (a musket ball, a cannonball): its damage is known as theirs, and spares their side. */
+	static void mark(Projectile shot) {
+		THROWN.add(shot);
 	}
 
 	/** From {@link Folk#customServerAiStep}: a throw at its foe, when it can't close with it and the javelin's ready. */
@@ -152,6 +157,17 @@ final class Javelins {
 			|| e.getOffhandItem().getItem() instanceof BowItem || e.getOffhandItem().getItem() instanceof CrossbowItem;
 	}
 
+	/** Whether a shot of {@code thrower}'s may hurt {@code victim}: never its own side, nor (from a defender) the villagers and golems he guards. */
+	static boolean harms(Folk thrower, LivingEntity victim) {
+		if (victim instanceof Folk other) {
+			return !thrower.sameSide(other);
+		}
+		if (victim instanceof Villager || victim instanceof IronGolem) {
+			return Assault.attacker(thrower);
+		}
+		return !(victim instanceof Player p && p.isCreative());
+	}
+
 	/** While a rock's blow is being dealt again (so it isn't again and again). */
 	private static boolean redealing;
 
@@ -160,14 +176,7 @@ final class Javelins {
 		if (!(source.getDirectEntity() instanceof Projectile javelin) || !THROWN.contains(javelin) || !(source.getEntity() instanceof Folk thrower)) {
 			return true;
 		}
-		boolean allowed;
-		if (victim instanceof Folk other) {
-			allowed = !thrower.sameSide(other);
-		} else if (victim instanceof Villager || victim instanceof IronGolem) {
-			allowed = Assault.attacker(thrower);
-		} else {
-			allowed = !(victim instanceof Player p && p.isCreative());
-		}
+		boolean allowed = harms(thrower, victim);
 		if (allowed && !redealing && javelin instanceof Snowball && amount < ROCK_DAMAGE && victim.level() instanceof ServerLevel level) {
 			// a snowball does no harm: the rock's blow, dealt again with its weight (once: some mobs, like MCA's
 			// villagers, soften a blow before it gets here)

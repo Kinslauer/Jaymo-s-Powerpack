@@ -543,6 +543,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		// (0.5.47) an orc's blood rage and war cries, a warchief's slam
 		Orcs.tick(level, this);
 		// (0.5.12) javelins at a foe out of reach; attackers fight harder, break through and burn
+		// (0.5.64) the richest kingdoms' musketeers
+		Muskets.tick(level, this);
 		Javelins.tick(level, this);
 		Assault.tick(level, this);
 		if (this.leader() && this.tickCount % 5 == 0) {
@@ -567,6 +569,11 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.king_rallies", this.getDisplayName()).withStyle(ChatFormatting.GOLD));
 			}
 		}
+	}
+
+	/** (0.5.64) Its gear put on again from its faction's arms (a musketeer's musket sold back). */
+	void rearm(ServerLevel level) {
+		this.restyle(level);
 	}
 
 	/** Dressed before its faction's looks (an older save): its land read and its gear put on again; a builder's or raider's hands kept. */
@@ -690,6 +697,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			if (Sorcery.isCaster(this.archer.role())) {
 				// (0.5.37) a caster casts from where it stands while it can see its foe in reach; else it closes in (Sorcery.tick)
 				return target != null && target.isAlive() && this.archer.distanceTo(target) <= Sorcery.RANGE && this.archer.getSensing().hasLineOfSight(target);
+			}
+			if (this.archer.getVehicle() instanceof Cannon && target != null && this.archer.distanceTo(target) >= Cannon.NEAREST) {
+				// (0.5.64) a gunner fires his cannon (Cannon.tick); only a foe too close for it gets his arrows
+				return false;
 			}
 			return this.archer.ranged() && target != null && target.isAlive() && this.archer.distanceTo(target) <= ARCHER_RANGE;
 		}
