@@ -42,7 +42,8 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * Ascends after {@link #ASCEND_PARRIES} katana parries with every ability unlocked. Darktide starts corrupted (the
  * Drowned Dark, {@link #corrupted}): {@link #CURE_TICKS} of Conduit Power in a row cure it until the next nightfall, when
- * it comes back. That's Darktide's own state, never written into Fate. Darktide users never drown.
+ * it comes back. That's Darktide's own state, never written into Fate. Darktide users never drown, and dying at night
+ * brings them back as their shadow until dawn ({@link DarktideShade}).
  */
 public final class DarktidePower implements Power {
 	public static final DarktidePower INSTANCE = new DarktidePower();
@@ -87,6 +88,8 @@ public final class DarktidePower implements Power {
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register(DarktideGuard::allowDamage);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register(DarktideGuard::afterDamage);
 		ServerLivingEntityEvents.ALLOW_DEATH.register(DarktideTide::allowDeath);
+		ServerLivingEntityEvents.ALLOW_DEATH.register(DarktideShade::allowDeath);
+		ServerLivingEntityEvents.AFTER_DEATH.register(DarktideShade::afterDeath);
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			DarktideStatus.tick(server);
 			DarktideGuard.tickReflections();
@@ -373,6 +376,7 @@ public final class DarktidePower implements Power {
 		player.removeAttached(DarktideState.HUD);
 		player.removeAttached(DarktideState.SAVE);
 		player.removeAttached(DarktideState.CURED);
+		player.removeAttached(DarktideState.SHADE);
 	}
 
 	/** Ends everything running and hands the real items back (logging out, losing the power, the server stopping). */
@@ -416,6 +420,11 @@ public final class DarktidePower implements Power {
 			player.setAirSupply(player.getMaxAirSupply());
 		}
 		tickCure(player, live);
+		DarktideShade.tick(player, live);
+		if (!player.isAlive()) {
+			// burned away at dawn
+			return;
+		}
 		if (live.veil) {
 			// the Veil is the cured form's: the corruption (nightfall) or losing ascension takes it down
 			live.flow -= VEIL_DRAIN_PER_SECOND / 20.0F;

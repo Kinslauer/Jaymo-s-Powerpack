@@ -45,6 +45,8 @@ final class DarktideLive {
 	boolean wasCured;
 	/** Whether the cure's state has been looked at since joining (no whisper for the state you log in with). */
 	boolean cureSeen;
+	/** The shade has been warned that dawn is near. */
+	boolean dawnWarned;
 
 	// Combat Roll
 	long rollStart = -1L;

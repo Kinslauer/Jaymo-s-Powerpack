@@ -532,3 +532,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   26.3 build, all rights reserved): orc camps rise in rough country near kingdoms, a dark oak stockade round the
   warchief's longhouse, tents, a forge, a fighting pit and a watchtower; grunts, rangers, a shaman and a warchief boss
   with a ground slam. Their war bands raid kingdoms; killing the warchief clears the camp.
+- **0.8.90, Darktide's shade:** a Darktide user who dies at night rises as their own shadow (drawn dark, 10 health, full
+  Flow), once a night. At dawn the shade burns away and the user dies for real if it's under open sky; under a roof, in
+  a cave, deep water, the Nether or the End they're flesh again. A shade's second death, `/kill` and the void are final;
+  a held totem goes first (`DarktideShade`, `/powerdebug darktide shade`).

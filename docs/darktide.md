@@ -56,6 +56,19 @@ Fate): `corrupted = Fate.isCorrupted || !cured || (night && !nightReturnPrevente
   Cured gates: the Veil (ascended).
 - `/powerdebug darktide cure | corrupt` for testing.
 
+## The shade [DarktideShade]
+
+A Darktide user who dies **at night** (a dimension with a day, so never the Nether or the End) rises as their own
+**shade** instead: back on 10 health (`REBIRTH_HEALTH`) with full Flow, effects and fire cleared, 3 s of Darkness on the
+screen, drawn dark like a risen shadow (`SHADE` attachment, synced; `Save.shade` persisted so logging out dodges
+nothing). Once a night: a shade that dies again before dawn dies for real. `/kill`, the void and anything else
+through invulnerability are always final, and a held Totem of Undying goes first.
+- The shade lasts until dawn on the overworld clock (`DarktideFlow.NIGHT_END`, 23500), with a whisper 30 s before.
+- At dawn: under open sky (in a world with a sun, eyes able to see the sky, not under water) the shade **burns away**
+  and the user dies (`jaymospowers:darktide_dawn`, through armour, invulnerability, Resistance and totems). Sheltered
+  (a roof, a cave, deep water, the Nether or the End) the user is flesh again.
+- `/powerdebug darktide shade` rises as your shade now.
+
 ## Crippled [DarktideStatus]
 
 A humanoid (tag `jaymospowers:humanoid`, players always) hit by a Darktide user's melee or ability hit whose aim
@@ -71,7 +84,7 @@ cripple when it lands low). Pounce's 3 stabs need humanoid AND crippled.
   (attachments), `DarktideLive` (server state), `DarktideFlow`, `DarktideGuard` (guard, parry, riposte, reflect),
   `DarktideMoves` (R/G/V/B moves), `DarktideGedan` (X), `DarktideTide` (C: Tide Arms, Drown, raising; Z: shadow harvest),
   `DarktideStatus` (stun, cripple, reel), `DarktideMove` (pose kinds), `DarktideWeapons`, `DarktideNet`,
-  `CombatRollCompat`, `DarktideDebugCommand` (`/powerdebug darktide flow <n> | parries <n> | ready | cure | corrupt`), `mixin/`.
+  `CombatRollCompat`, `DarktideShade` (dying at night), `DarktideDebugCommand` (`/powerdebug darktide flow <n> | parries <n> | ready | cure | corrupt | shade`), `mixin/`.
 - `src/client/java/com/jaymospowers/client/power/darktide/`: `DarktidePowerClient` (guard/X keys, C while corrupted and not routed by the core),
   `DarktideHud`, `DarktidePose`, `DarktideFx`, `mixin/`.
 - `jaymospowers.darktide.mixins.json`, `jaymospowers.darktide.client.mixins.json`, `lang/parts/darktide.json`,
@@ -94,3 +107,5 @@ cripple when it lands low). Pounce's 3 stabs need humanoid AND crippled.
 9. Combat Roll charges show 3.
 10. R charge: overhead blade / drawn-back fist seen by another player; release damage scales with the hold.
 11. Underwater: no air bubbles drop, no drowning.
+12. Die at night: you stand back up dark on 10 health. Stay outside till dawn and you burn away; get under a roof and you are
+    yourself again in the morning. Die twice in one night and you stay dead.

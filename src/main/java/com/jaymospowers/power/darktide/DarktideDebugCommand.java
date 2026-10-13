@@ -14,7 +14,8 @@ import net.minecraft.server.level.ServerPlayer;
  * <li>{@code /powerdebug darktide flow <n>}: sets your Flow;</li>
  * <li>{@code /powerdebug darktide parries <n>}: sets your katana parries toward ascension (ascends at the threshold if it can);</li>
  * <li>{@code /powerdebug darktide ready}: clears every cooldown;</li>
- * <li>{@code /powerdebug darktide cure | corrupt}: cures the corruption until nightfall, or ends the cure.</li>
+ * <li>{@code /powerdebug darktide cure | corrupt}: cures the corruption until nightfall, or ends the cure;</li>
+ * <li>{@code /powerdebug darktide shade}: rises as your shade now, as if you'd died at night.</li>
  * </ul>
  */
 final class DarktideDebugCommand {
@@ -84,6 +85,16 @@ final class DarktideDebugCommand {
 						}
 						player.setAttached(DarktideState.SAVE, DarktideState.save(player).withCuredUntil(0L));
 						c.getSource().sendSuccess(() -> Component.literal("Darktide corrupted again."), false);
+						return 1;
+					}))
+				.then(Commands.literal("shade")
+					.executes(c -> {
+						ServerPlayer player = darktide(c);
+						if (player == null) {
+							return 0;
+						}
+						DarktideShade.rise(player);
+						c.getSource().sendSuccess(() -> Component.literal("You walk as your shade until dawn."), false);
 						return 1;
 					}))));
 	}
