@@ -20,6 +20,7 @@ abstract class SpeechEntityRenderDispatcherMixin {
 	private void jaymoskingdoms$speechState(Entity entity, float partialTicks, CallbackInfoReturnable<EntityRenderState> cir) {
 		SpeechBubbles.extract(entity, cir.getReturnValue(), partialTicks);
 		com.jaymoskingdoms.client.QuestClient.extract(entity, cir.getReturnValue(), partialTicks);
+		com.jaymoskingdoms.client.SkillTitles.extract(entity, cir.getReturnValue(), partialTicks);
 	}
 
 	@Inject(method = "submit", at = @At(value = "INVOKE",
@@ -29,5 +30,6 @@ abstract class SpeechEntityRenderDispatcherMixin {
 		SubmitNodeCollector collector, CallbackInfo ci) {
 		SpeechBubbles.submit(state, poseStack, collector, camera);
 		com.jaymoskingdoms.client.QuestClient.submit(state, poseStack, collector, camera);
+		com.jaymoskingdoms.client.SkillTitles.submit(state, poseStack, collector, camera);
 	}
 }

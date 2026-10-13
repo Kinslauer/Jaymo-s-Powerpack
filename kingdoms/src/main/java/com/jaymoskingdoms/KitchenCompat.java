@@ -77,6 +77,19 @@ final class KitchenCompat {
 	private KitchenCompat() {
 	}
 
+	/** (0.5.52) Tells Kitchen who's experienced with butchering: anyone with a rank of Forager, the first Survival perk. */
+	static void skills() {
+		if (CORPSE == null) {
+			return;
+		}
+		try {
+			Class.forName("com.jaymoskitchen.corpse.Butchers").getMethod("setExperienced", java.util.function.Predicate.class)
+				.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) player -> Skills.rank(player, Skills.Perk.FORAGER) > 0);
+		} catch (ReflectiveOperationException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old to know who's experienced with butchering (needs 0.4.32): {}", e.toString());
+		}
+	}
+
 	/** Kitchen is here, and new enough. */
 	static boolean loaded() {
 		return CORPSE != null;

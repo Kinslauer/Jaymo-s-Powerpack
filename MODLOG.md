@@ -576,3 +576,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   showed recipes. Now it switches on whenever you enter creative (or join in creative) and off when you leave
   (`client/JeiCheats`). The server still decides who may cheat: JEI allows creative players and ops by default
   (its `jei-server.properties`).
+- **0.8.103, Skill tree:** ships Jaymo's Kingdoms 0.5.52 (see `kingdoms/MODLOG.md`): press **K** for a skill tree with
+  three pillars. Stealth grows as you pick pockets and steal unseen (shorter holds, more loot, slipping away), Survival
+  as you harvest, eat and live through the night (slower hunger, healing, Last Stand), Strength as you fight, mine and
+  chop (heavier blows, knockback, faster mining). Each level is a perk point. A court wizard or a bottle o' enchanting
+  (sneak and drink it) gives your points back. Your best pillar shows over your head (Survivor, Rogue, Warrior) and
+  villagers gossip about it. Forager, the first Survival perk, also lets you judge a butcher's skill from their cuts.
