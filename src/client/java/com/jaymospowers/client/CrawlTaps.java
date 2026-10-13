@@ -11,7 +11,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * Crawl gesture: press Jump and Sneak together twice in quick succession and you go flat; you stay flat while Jump is
  * held (Sneak can be let go). Releasing Jump stands you up when there's headroom; under a one-block ceiling vanilla keeps
- * you crawling until you're out. While crawling, double-tap Left or Right to roll one block that way (puts fire out).
+ * you crawling until you're out. While crawling, double-tap Left or Right to roll one block that way (puts fire out);
+ * keep holding it to keep rolling.
  */
 final class CrawlTaps {
 	/** The most ticks between two Jump + Sneak presses that count as a double tap. */
@@ -97,15 +98,16 @@ final class CrawlTaps {
 			double step = (rollRight ? Crawl.ROLL_DISTANCE : -Crawl.ROLL_DISTANCE) / Crawl.ROLL_TICKS;
 			Vec3 motion = player.getDeltaMovement();
 			player.setDeltaMovement(-Math.cos(yaw) * step, motion.y, -Math.sin(yaw) * step);
+			// holding the key keeps you rolling that way, one block after another
+			if (rollLeft == 0 && crawling && minecraft.gui.screen() == null && (rollRight ? right : left)) {
+				startRoll(player, rollRight);
+			}
 		} else if (crawling && minecraft.gui.screen() == null) {
 			boolean pressedLeft = left && !leftWasDown;
 			boolean pressedRight = right && !rightWasDown;
 			if (pressedLeft != pressedRight) {
 				if (sinceSideTap <= ROLL_TAP_TICKS && lastTapRight == pressedRight) {
-					rollLeft = Crawl.ROLL_TICKS;
-					rollRight = pressedRight;
-					rollStart = player.level().getGameTime();
-					ClientPlayNetworking.send(new Crawl.Roll(pressedRight));
+					startRoll(player, pressedRight);
 					sinceSideTap = Integer.MAX_VALUE;
 				} else {
 					sinceSideTap = 0;
@@ -117,6 +119,13 @@ final class CrawlTaps {
 		}
 		leftWasDown = left;
 		rightWasDown = right;
+	}
+
+	private static void startRoll(LocalPlayer player, boolean right) {
+		rollLeft = Crawl.ROLL_TICKS;
+		rollRight = right;
+		rollStart = player.level().getGameTime();
+		ClientPlayNetworking.send(new Crawl.Roll(right));
 	}
 
 	private static void stop() {

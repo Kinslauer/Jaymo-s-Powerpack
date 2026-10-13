@@ -28,12 +28,12 @@ import org.jspecify.annotations.Nullable;
  * synced to everyone so every client draws the same pose and hitbox.
  *
  * <p>While crawling, double-tapping Left or Right (A / D) rolls you one block that way: stop, drop and roll. A roll puts
- * out the fire on you and any fire you roll through. The client moves the player (movement is the client's); the
+ * out the fire on you and any fire you roll through; holding the key keeps you rolling. The client moves the player (movement is the client's); the
  * server puts the fire out and syncs the roll so everyone sees the body turn over.
  */
 public final class Crawl {
-	/** How long a roll takes, in ticks (the client spreads the one-block slide over these). */
-	public static final int ROLL_TICKS = 8;
+	/** How long a roll takes, in ticks (the client spreads the one-block slide over these): quick, about walking pace. */
+	public static final int ROLL_TICKS = 5;
 	/** How far a roll carries you sideways, in blocks. */
 	public static final double ROLL_DISTANCE = 1.0;
 
@@ -102,7 +102,9 @@ public final class Crawl {
 	private static void roll(ServerPlayer player, boolean right) {
 		Level level = player.level();
 		long now = level.getGameTime();
-		if (!player.hasAttached(CRAWLING) || !canCrawl(player) || rollProgress(player, now, 0.0F) != null) {
+		Rolling last = player.getAttached(ROLLING);
+		// a held key chains rolls back to back, so allow a couple of ticks of network jitter
+		if (!player.hasAttached(CRAWLING) || !canCrawl(player) || last != null && now - last.start() < ROLL_TICKS - 2) {
 			return;
 		}
 		player.setAttached(ROLLING, new Rolling(now, right));
