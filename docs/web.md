@@ -13,6 +13,14 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
 - **Jump on a web:** holding it (still reels in) braces you: no fall damage while you hold it on a web (server reads
   the client's input). Letting it go (after 3+ ticks) lets go of the webs and springs you up by 0.2 + 0.45 × your
   speed, at most 1.4 b/t: the faster the swing, the higher the jump. Web keys must be pressed again after.
+- **Airbrake and freedive (S while gliding):** holding **S** (Sneak still works) flares the wings: the glide stops
+  carrying you, forward speed bleeds off at `BRAKE_DRAG` 0.94 a tick (about 3 s from top speed) and the fall eases to
+  `BRAKE_SINK` 0.2. Once you're nearly stopped (`DIVE_AT` 0.06 b/t) you tip head-first into a Wind-style freedive with
+  the wings still out but swept back, falling up to `DIVE_MAX_SPEED` 2.5. Let go of S and the glide takes over again,
+  so pitching up turns the dive's speed forward. Landing from a fast dive hurts. Others see it from the brake flag and
+  your fall speed (`WebArms` `DIVE_*`).
+- **Zip while gliding** tows you all the way to the target with the wings out: no early fling at 4 blocks, and the
+  server times its line at `GLIDE_ZIP_PACE` 1.3 b/t (+20 ticks) so the web doesn't vanish mid-pull.
 
 ## Controls
 
