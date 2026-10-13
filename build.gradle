@@ -96,6 +96,10 @@ def packMods = [
 	// Iris Shaders (LGPL-3.0): shader packs (Options > Video Settings > Shader Packs); built on the pack's Sodium, and
 	// Distant Horizons draws its far terrain through shaders that support it. Client-only: the server ignores it.
 	[dep: "maven.modrinth:iris:vTN4NRGW", cf: [455508, 9015108], dev: false],
+	// Chunky (GPL-3.0, Fabric 1.5.3): pre-generates the world ahead of time from the server console (/chunky radius 5000,
+	// /chunky start), so flying or gliding fast loads saved chunks instead of generating them on the spot. Server-side;
+	// harmless on clients. dev: false keeps it out of the dev game.
+	[dep: "maven.modrinth:chunky:4Eotm6ov", cf: [433175, 8036332], dev: false],
 ]
 // First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
 // Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge
