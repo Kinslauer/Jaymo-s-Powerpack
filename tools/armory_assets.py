@@ -235,7 +235,9 @@ def main(aow):
                 write(os.path.join(DATA, "weapon_attributes", item + ".json"), {"parent": parent_of(preset)})
             if tag:
                 tags[tag].append(f"{NS}:{item}")
-            if material:
+            if tier == "diamond":
+                pass  # (0.8.124) Andy: no craftable diamond weapons; the netherite ones still smith from loot
+            elif material:
                 shaped(item, pattern, dict(KEYS, X=material))
             else:
                 write(os.path.join(DATA, "recipe", "armory", item + "_smithing.json"), {
