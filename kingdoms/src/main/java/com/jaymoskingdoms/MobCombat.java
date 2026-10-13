@@ -387,7 +387,8 @@ public final class MobCombat {
 			boolean wild = folk.style() == FactionType.BARBARIAN;
 			if (other instanceof ServerPlayer player) {
 				return !player.isCreative() && !player.isSpectator()
-					&& (wild || Reputation.get(player, folk.factionId()) <= Reputation.HOSTILE || Theft.wanted(player, folk.factionId()));
+					&& (wild || Reputation.get(player, folk.factionId()) <= Reputation.HOSTILE || Theft.wanted(player, folk.factionId())
+						|| Aliens.feared(player, folk.factionId()));
 			}
 			return !wild && other instanceof Enemy && !(other instanceof Creeper);
 		}

@@ -2377,6 +2377,13 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
     and arrest; paranoid: arrest; warlord: a lot of good name lost).
   Arrest (`Theft.arrest`) makes you wanted for a minute and the guards nearby come for you. Walking off on a search or
   a toll counts as refusing it.
+## 0.6.4: townsfolk and the Xeno-Band's aliens (pack 0.9.7)
+- Jaymo's Powers' Xenoform (the Xeno-Band) turns a player into an alien. To a kingdom's people that is a monster:
+  villagers run from one as from a zombie (`Frights`), and guards hunt it (`Folk`'s target goal, `MobCombat.foe`),
+  unless they know better. A realm's folk or villagers who see you change (within 16 blocks, line of sight) know the
+  alien is you from then on (`Aliens.KNOWN`, kept across deaths): that kingdom then treats the alien as it treats you,
+  and one of them says so. Read by entity tag (`jaymospowers_xenoform`, set by Powers while you're changed), so
+  Kingdoms still needs no Powers classes.
 - Not playtested in game.
 
 ## 0.6.3: no floating buildings (pack 0.9.3)
