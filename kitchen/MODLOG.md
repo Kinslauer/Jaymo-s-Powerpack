@@ -715,5 +715,8 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
   the torn-off meat off the ground a piece at a time (healing 3 each) until full (3 pieces, then 4 minutes).
 - Corpses remember their killer (`Killer`, `KilledByPlayer`). Players' kills (and their tame pets' kills) are left
   alone unless the scavenger made the kill itself; tame animals never scavenge. Monster bodies, the risen dead, iron,
-  players' bodies and anything burning, carried or carted are never eaten. A player's own dropped meat is never eaten.
+  players' bodies and anything burning, carried or carted are never eaten. Wild scavengers eat only meat torn from a
+  body, never what a player drops.
+- Tamed wolves eat meat dropped on the ground near them (anything they'd eat from your hand), unless sitting or
+  fighting; while hurt they're never too full to.
 - Tuning: the constants at the top of `Scavengers`.

@@ -70,6 +70,17 @@ public final class Scavengers {
 			|| mob instanceof TamableAnimal tame && tame.isTame();
 	}
 
+	/** A pet (a tamed wolf): it doesn't scavenge, but it eats meat dropped on the ground for it. */
+	private static boolean tame(Mob mob) {
+		return mob instanceof TamableAnimal pet && pet.isTame();
+	}
+
+	/** Whether a pet will eat this off the ground: its own food (a wolf's is meat), or any meat if it has no say. */
+	private static boolean petFood(Mob mob, ItemEntity item) {
+		return mob instanceof net.minecraft.world.entity.animal.Animal animal ? animal.isFood(item.getItem())
+			: item.getItem().has(net.minecraft.core.component.DataComponents.FOOD);
+	}
+
 	/** One scavenger's appetite: full for a while after eating. */
 	private static final class Hunger {
 		long fullUntil;
@@ -210,7 +221,10 @@ public final class Scavengers {
 		}
 	}
 
-	/** Eats torn-off meat off the ground, a piece at a time. */
+	/**
+	 * Eats torn-off meat off the ground, a piece at a time. A pet eats any meat lying near it (so its owner can drop
+	 * meat for it), and while it's hurt it's never too full to.
+	 */
 	private static final class EatMeatGoal extends Goal {
 		private static final double REACH_SQ = 1.8 * 1.8;
 		private final Mob mob;
@@ -224,14 +238,26 @@ public final class Scavengers {
 			setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
 		}
 
+		private boolean unable() {
+			if (tame(mob)) {
+				TamableAnimal pet = (TamableAnimal) mob;
+				return pet.isOrderedToSit() || pet.getTarget() != null || mob.isPassenger() || mob.isVehicle()
+					|| hunger.full(mob) && mob.getHealth() >= mob.getMaxHealth();
+			}
+			return busy(mob) || hunger.full(mob);
+		}
+
 		@Override
 		public boolean canUse() {
-			if (busy(mob) || hunger.full(mob) || CARRION.isEmpty()) {
+			if (unable()) {
 				return false;
 			}
 			meat = null;
 			double best = MEAT_SIGHT * MEAT_SIGHT;
-			for (ItemEntity item : CARRION) {
+			Iterable<ItemEntity> near = tame(mob)
+				? mob.level().getEntitiesOfClass(ItemEntity.class, mob.getBoundingBox().inflate(MEAT_SIGHT), item -> petFood(mob, item))
+				: CARRION;
+			for (ItemEntity item : near) {
 				if (item.isAlive() && item.level() == mob.level()) {
 					double distance = item.distanceToSqr(mob);
 					if (distance < best) {
@@ -254,7 +280,7 @@ public final class Scavengers {
 
 		@Override
 		public boolean canContinueToUse() {
-			return meat != null && meat.isAlive() && giveUp > 0 && !busy(mob) && !hunger.full(mob);
+			return meat != null && meat.isAlive() && giveUp > 0 && !unable();
 		}
 
 		@Override
