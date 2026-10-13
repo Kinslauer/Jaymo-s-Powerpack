@@ -163,6 +163,9 @@ public final class XenoformState {
 		builder -> builder.syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all()));
 	public static final AttachmentType<Hud> HUD = AttachmentRegistry.create(JaymosPowers.id("xenoform_hud"),
 		builder -> builder.syncWith(Hud.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
+	/** Set (true) while a form is in its last {@link XenoformPower#BEEP_TICKS}: everyone's client glows the alien red. */
+	public static final AttachmentType<Boolean> ENDING = AttachmentRegistry.create(JaymosPowers.id("xenoform_ending"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 
 	private XenoformState() {
 	}
@@ -185,6 +188,11 @@ public final class XenoformState {
 	/** The alien this player is right now, or null (both sides). */
 	public static @Nullable XenoForm form(Player player) {
 		return XenoForms.get(player.getAttached(FORM));
+	}
+
+	/** Whether the player's form is in its last seconds (synced to everyone). */
+	public static boolean ending(Player player) {
+		return player.getAttached(ENDING) != null;
 	}
 
 	public static boolean transformed(Player player) {

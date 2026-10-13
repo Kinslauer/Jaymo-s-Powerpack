@@ -70,9 +70,25 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 - `XenoFormModels`: each alien is a `HumanoidModel` built from `HumanoidModel.createMesh` with a different inflation and
   extra parts hung on the head and body (Bulwark's brow, plates and lower arms; Pyre's crest, plumes and core; Blur's
   fin, snout and tail; Prism's crown and back crystals; Wisp's hood and tatters, no legs; Gremlin's big skull and ears;
-  Knell's horns, ribs and shoulders; Wyrm's horns, wings and tail), so it takes the player's own pose, swing, crouch and swim. Skins are 64x64 in the vanilla
-  layout, extras in the rows below; `tools/gen_xenoform.py` draws them.
-- First person: `renderHand` (head, cancellable) draws the alien's arm instead of the skin's.
+  Knell's horns, ribs, shoulders and jaw tendrils; Wyrm's horns, wings and finned tail; Bulwark's pauldrons, Blur's
+  ears, Prism's shoulder shards, Gremlin's tail), so it takes the player's own pose, swing, crouch and swim. Skins are
+  64x128: the vanilla layout in the top 64 rows, every extra in the rows below (nothing shares texels with a limb);
+  `tools/gen_xenoform.py` draws them face by face (lit from above, dark underneath) with each alien's own motifs, and
+  every alien wears the xeno insignia (the band's green hourglass): on the chest, or on Pyre's core and Knell's sternum.
+  `python tools/gen_xenoform.py preview.png` also writes a front-view contact sheet of all nine.
+- First person: `renderHand` (head, cancellable) draws the alien's arm instead of the skin's; `XenoformFirstPersonMixin`
+  lifts the render state's invisible flag for the hands (the body was hidden for the alien, and the renderer skips an
+  invisible body's bare arm).
+- The band itself (`XenoBand`): a 5x3x5 box on the left wrist of anyone whose power is Xenoform while they're
+  themselves, its dial emissive; a layer in third person, and drawn on the first-person arm during the slam.
+- The slam (`XenoformSlap`, client only): holding Z brings the left wrist up across the chest and the right fist up
+  behind it; the fist drops onto the band as the hold reaches `HOLD_TICKS` (when the server changes you), rests, and
+  both arms fall back. A tap just lifts the wrist for a look. Everyone else sees the slap when a player changes shape
+  (the alien appears mid-slap). The pose is read onto the render state in `extract`, laid over any humanoid model
+  after it animates (`XenoformModelFeatureRendererMixin`), and mirrored in first person by replacing the usual hands.
+- The ending glow: the server sets the synced `XenoformState.ENDING` through a form's last `BEEP_TICKS`; everyone's
+  client then draws the alien a second time with the emissive `eyes` render type in pulsing red (`XenoformLayer.glow`),
+  the first-person arm too.
 - HUD right of the hotbar: as a human the dial chip (Z, the dialled alien's icon, shaded through the recharge, name and
   "n/N" above) and the scan chip (X, fills while scanning); as an alien four chips with cooldowns and a timer bar in the
   alien's colour, red through the beeps. A flash of the form's colour round the screen on each change.

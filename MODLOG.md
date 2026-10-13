@@ -777,6 +777,17 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (Kingdoms' and Naturalist's predators too) tear into bodies with a brutal worrying bite, the meat spills on the ground
   and they eat it from there. Players' kills are left for the player. See Kitchen's MODLOG.
 
+- **0.9.18, the aliens' detail pass, the band on the wrist, the slam, the ending glow:** every alien's skin redrawn
+  with more in it (plate seams and rivets, magma cracks and obsidian, stripes and hooves, facets and fractures, folds
+  and fraying cloth, warts and a toothy grin, sculk veins and bone claws, scales and belly plates, nebula dust) and
+  each wears the xeno insignia, the band's green hourglass, on its chest (Pyre's on its core, Knell's on its sternum);
+  Gremlin is grey now. Skins are 64x128 so the extras no longer share texels with the left arm and leg; new parts:
+  Bulwark's pauldrons, Blur's ears, Prism's shoulder shards, Gremlin's tail, Knell's jaw tendrils, Wyrm's tail fin.
+  The band shows on a wearer's left wrist (dial glowing); holding Z lifts that wrist across the chest and the other
+  fist drops onto the band as the change fires, in first and third person, and everyone sees a player slap the band as
+  they change. Through a form's last ten seconds the alien pulses red for everyone (first-person arm too). The
+  alien's first-person arm now actually draws (the renderer skipped the hidden body's arm).
+
 - **0.9.17, imbued blades proc (Kingdoms 0.6.8):** a Sorcerer's imbued blade bursts with its element on one blow in
   twenty rather than every one (the rest spark), and a lightning burst blinds for a moment; air lifts on every second
   blow instead, for air combos. Thrown bolts always burst.

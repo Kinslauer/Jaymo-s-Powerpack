@@ -322,6 +322,7 @@ public final class XenoformPower implements Power {
 		LIVES.remove(player.getUUID());
 		player.removeAttached(XenoformState.HUD);
 		player.removeAttached(XenoformState.FORM);
+		player.removeAttached(XenoformState.ENDING);
 	}
 
 	@Override
@@ -361,6 +362,9 @@ public final class XenoformPower implements Power {
 		if (live.form != null) {
 			// in a form: the clock runs
 			live.ticksLeft--;
+			if (live.ticksLeft == BEEP_TICKS) {
+				player.setAttached(XenoformState.ENDING, true);
+			}
 			if (live.ticksLeft <= BEEP_TICKS && live.ticksLeft > 0 && live.ticksLeft % 20 == 0) {
 				float pitch = live.ticksLeft <= 60 ? 1.8F : 1.4F;
 				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARROW_HIT_PLAYER, SoundSource.PLAYERS, 0.6F, pitch);
@@ -681,6 +685,7 @@ public final class XenoformPower implements Power {
 		live.total = mastered ? FORM_MAX : FORM_MIN + player.getRandom().nextInt(FORM_MAX - FORM_MIN + 1);
 		live.ticksLeft = live.total;
 		player.setAttached(XenoformState.FORM, form.id);
+		player.removeAttached(XenoformState.ENDING);
 		player.addTag(XenoformState.TAG);
 		player.addTag(XenoformState.TAG + ":" + form.id);
 		live.corrupted = com.jaymospowers.core.Fate.isCorrupted(player);
@@ -728,6 +733,7 @@ public final class XenoformPower implements Power {
 		player.removeEffect(MobEffects.LEVITATION);
 		unapply(player);
 		player.removeAttached(XenoformState.FORM);
+		player.removeAttached(XenoformState.ENDING);
 		player.setHealth(Mth.clamp(live.humanHealth, 1.0F, player.getMaxHealth()));
 		player.resetFallDistance();
 		live.clearForm();

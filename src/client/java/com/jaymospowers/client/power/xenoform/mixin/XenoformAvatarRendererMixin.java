@@ -21,7 +21,7 @@ abstract class XenoformAvatarRendererMixin {
 		method = "extractRenderState(Lnet/minecraft/world/entity/Avatar;Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;F)V",
 		at = @At("TAIL"))
 	private void jaymospowers$xenoform(Avatar entity, AvatarRenderState state, float partialTicks, CallbackInfo ci) {
-		XenoformClient.extract(entity, state);
+		XenoformClient.extract(entity, state, partialTicks);
 	}
 
 	@Inject(method = "renderHand", at = @At("HEAD"), cancellable = true)

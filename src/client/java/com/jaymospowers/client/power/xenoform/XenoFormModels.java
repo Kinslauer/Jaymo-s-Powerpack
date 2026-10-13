@@ -19,8 +19,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * The aliens' bodies: each a humanoid model (so it takes the player's own pose, swing, crouch and swim) with the
  * player's proportions pushed about and extra parts hung on, and its own 64x64 skin
- * ({@code textures/entity/xenoform_<id>.png}, drawn by {@code tools/gen_xenoform.py}). The base limbs use the vanilla
- * skin layout; the extras use the free rows below it. {@link #of} finds a form's model by its id.
+ * ({@code textures/entity/xenoform_<id>.png}, 64x128, drawn by {@code tools/gen_xenoform.py}). The base limbs use the
+ * vanilla skin layout in the top 64 rows; the extras use the rows below it, so nothing shares texels with a limb. {@link #of} finds a form's model by its id.
  */
 public final class XenoFormModels {
 	/** One alien's model: the texture to draw it with, and the model itself. */
@@ -57,10 +57,10 @@ public final class XenoFormModels {
 	}
 
 	private static ModelPart bake(MeshDefinition mesh) {
-		return LayerDefinition.create(mesh, 64, 64).bakeRoot();
+		return LayerDefinition.create(mesh, 64, 128).bakeRoot();
 	}
 
-	/** Bulwark: thick-set, a heavy brow, and a second pair of arms under the first. */
+	/** Bulwark: thick-set, a heavy brow, pauldrons, and a second pair of arms under the first. */
 	static final class Bulwark extends FormModel {
 		private final ModelPart rightLowerArm, leftLowerArm;
 
@@ -74,14 +74,19 @@ public final class XenoFormModels {
 			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.9F), 0.0F);
 			PartDefinition root = mesh.getRoot();
 			PartDefinition head = root.getChild("head");
-			head.addOrReplaceChild("brow", CubeListBuilder.create().texOffs(0, 32).addBox(-5.0F, -10.0F, -6.0F, 10.0F, 3.0F, 3.0F), PartPose.ZERO);
+			head.addOrReplaceChild("brow", CubeListBuilder.create().texOffs(0, 64).addBox(-5.0F, -10.0F, -6.0F, 10.0F, 3.0F, 3.0F), PartPose.ZERO);
 			PartDefinition body = root.getChild("body");
-			body.addOrReplaceChild("plates", CubeListBuilder.create().texOffs(0, 38).addBox(-6.0F, -1.0F, -3.0F, 12.0F, 4.0F, 7.0F, new CubeDeformation(0.9F)),
+			body.addOrReplaceChild("plates", CubeListBuilder.create().texOffs(0, 72).addBox(-6.0F, -1.0F, -3.0F, 12.0F, 4.0F, 7.0F, new CubeDeformation(0.9F)),
 				PartPose.ZERO);
 			body.addOrReplaceChild("right_lower_arm", CubeListBuilder.create().texOffs(40, 16).addBox(-3.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.6F)),
 				PartPose.offset(-5.5F, 8.0F, 0.0F));
 			body.addOrReplaceChild("left_lower_arm", CubeListBuilder.create().texOffs(40, 16).mirror().addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.6F)),
 				PartPose.offset(5.5F, 8.0F, 0.0F));
+			// pauldrons on the upper arms
+			root.getChild("right_arm").addOrReplaceChild("pauldron", CubeListBuilder.create().texOffs(40, 64).addBox(-4.0F, -3.5F, -2.5F, 5.0F, 3.0F, 5.0F, new CubeDeformation(0.9F)),
+				PartPose.ZERO);
+			root.getChild("left_arm").addOrReplaceChild("pauldron", CubeListBuilder.create().texOffs(40, 64).mirror().addBox(-1.0F, -3.5F, -2.5F, 5.0F, 3.0F, 5.0F, new CubeDeformation(0.9F)),
+				PartPose.ZERO);
 			return mesh;
 		}
 
@@ -111,14 +116,14 @@ public final class XenoFormModels {
 			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.3F), 0.0F);
 			PartDefinition root = mesh.getRoot();
 			PartDefinition head = root.getChild("head");
-			head.addOrReplaceChild("crest", CubeListBuilder.create().texOffs(0, 32).addBox(-1.5F, -15.0F, -2.0F, 3.0F, 7.0F, 4.0F)
-				.texOffs(14, 32).addBox(-4.0F, -11.0F, 0.0F, 8.0F, 3.0F, 2.0F), PartPose.ZERO);
+			head.addOrReplaceChild("crest", CubeListBuilder.create().texOffs(0, 64).addBox(-1.5F, -15.0F, -2.0F, 3.0F, 7.0F, 4.0F)
+				.texOffs(14, 64).addBox(-4.0F, -11.0F, 0.0F, 8.0F, 3.0F, 2.0F), PartPose.ZERO);
 			PartDefinition body = root.getChild("body");
-			body.addOrReplaceChild("right_plume", CubeListBuilder.create().texOffs(0, 44).addBox(-2.0F, -5.0F, -1.5F, 3.0F, 6.0F, 3.0F),
+			body.addOrReplaceChild("right_plume", CubeListBuilder.create().texOffs(0, 76).addBox(-2.0F, -5.0F, -1.5F, 3.0F, 6.0F, 3.0F),
 				PartPose.offset(-6.0F, 0.0F, 0.0F));
-			body.addOrReplaceChild("left_plume", CubeListBuilder.create().texOffs(0, 44).mirror().addBox(-1.0F, -5.0F, -1.5F, 3.0F, 6.0F, 3.0F),
+			body.addOrReplaceChild("left_plume", CubeListBuilder.create().texOffs(0, 76).mirror().addBox(-1.0F, -5.0F, -1.5F, 3.0F, 6.0F, 3.0F),
 				PartPose.offset(6.0F, 0.0F, 0.0F));
-			body.addOrReplaceChild("core", CubeListBuilder.create().texOffs(12, 44).addBox(-2.5F, 2.0F, -3.0F, 5.0F, 5.0F, 1.0F), PartPose.ZERO);
+			body.addOrReplaceChild("core", CubeListBuilder.create().texOffs(12, 76).addBox(-2.5F, 2.0F, -3.0F, 5.0F, 5.0F, 1.0F), PartPose.ZERO);
 			return mesh;
 		}
 
@@ -133,7 +138,7 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** Blur: slight, a fin along the skull, and a long tail that swings as it runs. */
+	/** Blur: slight, a fin along the skull, pricked ears, and a long tail that swings as it runs. */
 	static final class Blur extends FormModel {
 		private final ModelPart tail, tailTip;
 
@@ -147,12 +152,16 @@ public final class XenoFormModels {
 			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(-0.15F), 0.0F);
 			PartDefinition root = mesh.getRoot();
 			PartDefinition head = root.getChild("head");
-			head.addOrReplaceChild("fin", CubeListBuilder.create().texOffs(0, 32).addBox(-1.0F, -12.0F, -4.0F, 2.0F, 4.0F, 9.0F), PartPose.ZERO);
-			head.addOrReplaceChild("snout", CubeListBuilder.create().texOffs(22, 32).addBox(-2.0F, -4.0F, -7.0F, 4.0F, 3.0F, 3.0F), PartPose.ZERO);
+			head.addOrReplaceChild("fin", CubeListBuilder.create().texOffs(0, 64).addBox(-1.0F, -12.0F, -4.0F, 2.0F, 4.0F, 9.0F), PartPose.ZERO);
+			head.addOrReplaceChild("snout", CubeListBuilder.create().texOffs(22, 64).addBox(-2.0F, -4.0F, -7.0F, 4.0F, 3.0F, 3.0F), PartPose.ZERO);
+			head.addOrReplaceChild("right_ear", CubeListBuilder.create().texOffs(36, 64).addBox(-0.5F, -3.0F, -1.0F, 1.0F, 3.0F, 2.0F),
+				PartPose.offsetAndRotation(-3.0F, -8.0F, 1.0F, 0.0F, 0.0F, -0.35F));
+			head.addOrReplaceChild("left_ear", CubeListBuilder.create().texOffs(36, 64).mirror().addBox(-0.5F, -3.0F, -1.0F, 1.0F, 3.0F, 2.0F),
+				PartPose.offsetAndRotation(3.0F, -8.0F, 1.0F, 0.0F, 0.0F, 0.35F));
 			PartDefinition body = root.getChild("body");
-			PartDefinition tail = body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(0, 45).addBox(-1.5F, -1.5F, 0.0F, 3.0F, 3.0F, 8.0F),
+			PartDefinition tail = body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(0, 78).addBox(-1.5F, -1.5F, 0.0F, 3.0F, 3.0F, 8.0F),
 				PartPose.offsetAndRotation(0.0F, 10.5F, 1.5F, 0.5F, 0.0F, 0.0F));
-			tail.addOrReplaceChild("tip", CubeListBuilder.create().texOffs(22, 45).addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 8.0F),
+			tail.addOrReplaceChild("tip", CubeListBuilder.create().texOffs(22, 78).addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 8.0F),
 				PartPose.offsetAndRotation(0.0F, 0.0F, 7.5F, 0.3F, 0.0F, 0.0F));
 			return mesh;
 		}
@@ -169,7 +178,7 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** Prism: angular, a crown of crystal and crystals jutting from its back. */
+	/** Prism: angular, a crown of crystal and crystals jutting from its back and shoulders. */
 	static final class Prism extends FormModel {
 		Prism() {
 			super(bake(mesh()), "prism");
@@ -179,15 +188,20 @@ public final class XenoFormModels {
 			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.4F), 0.0F);
 			PartDefinition root = mesh.getRoot();
 			PartDefinition head = root.getChild("head");
-			head.addOrReplaceChild("crown", CubeListBuilder.create().texOffs(0, 32).addBox(-1.0F, -14.0F, -1.0F, 2.0F, 6.0F, 2.0F), PartPose.ZERO);
-			head.addOrReplaceChild("right_crystal", CubeListBuilder.create().texOffs(8, 32).addBox(-1.0F, -5.0F, -1.0F, 2.0F, 5.0F, 2.0F),
+			head.addOrReplaceChild("crown", CubeListBuilder.create().texOffs(0, 64).addBox(-1.0F, -14.0F, -1.0F, 2.0F, 6.0F, 2.0F), PartPose.ZERO);
+			head.addOrReplaceChild("right_crystal", CubeListBuilder.create().texOffs(8, 64).addBox(-1.0F, -5.0F, -1.0F, 2.0F, 5.0F, 2.0F),
 				PartPose.offsetAndRotation(-3.5F, -8.0F, 0.0F, 0.0F, 0.0F, -0.5F));
-			head.addOrReplaceChild("left_crystal", CubeListBuilder.create().texOffs(8, 32).addBox(-1.0F, -5.0F, -1.0F, 2.0F, 5.0F, 2.0F),
+			head.addOrReplaceChild("left_crystal", CubeListBuilder.create().texOffs(8, 64).addBox(-1.0F, -5.0F, -1.0F, 2.0F, 5.0F, 2.0F),
 				PartPose.offsetAndRotation(3.5F, -8.0F, 0.0F, 0.0F, 0.0F, 0.5F));
 			PartDefinition body = root.getChild("body");
-			body.addOrReplaceChild("back", CubeListBuilder.create().texOffs(16, 32).addBox(-3.0F, 1.0F, 2.0F, 6.0F, 6.0F, 3.0F), PartPose.ZERO);
-			body.addOrReplaceChild("spine", CubeListBuilder.create().texOffs(34, 32).addBox(-1.0F, -2.0F, 3.0F, 2.0F, 5.0F, 2.0F),
+			body.addOrReplaceChild("back", CubeListBuilder.create().texOffs(16, 64).addBox(-3.0F, 1.0F, 2.0F, 6.0F, 6.0F, 3.0F), PartPose.ZERO);
+			body.addOrReplaceChild("spine", CubeListBuilder.create().texOffs(34, 64).addBox(-1.0F, -2.0F, 3.0F, 2.0F, 5.0F, 2.0F),
 				PartPose.offsetAndRotation(0.0F, 2.0F, 2.0F, -0.4F, 0.0F, 0.0F));
+			// crystals jutting from the shoulders
+			root.getChild("right_arm").addOrReplaceChild("shard", CubeListBuilder.create().texOffs(42, 64).addBox(-1.0F, -4.0F, -1.0F, 2.0F, 4.0F, 2.0F),
+				PartPose.offsetAndRotation(-2.0F, -1.0F, 0.0F, 0.0F, 0.0F, -0.5F));
+			root.getChild("left_arm").addOrReplaceChild("shard", CubeListBuilder.create().texOffs(42, 64).addBox(-1.0F, -4.0F, -1.0F, 2.0F, 4.0F, 2.0F),
+				PartPose.offsetAndRotation(2.0F, -1.0F, 0.0F, 0.0F, 0.0F, 0.5F));
 			return mesh;
 		}
 	}
@@ -204,8 +218,8 @@ public final class XenoFormModels {
 		private static MeshDefinition mesh() {
 			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.0F), 0.0F);
 			PartDefinition root = mesh.getRoot();
-			root.getChild("head").addOrReplaceChild("hood", CubeListBuilder.create().texOffs(24, 32).addBox(-5.0F, -9.0F, -5.0F, 10.0F, 10.0F, 10.0F), PartPose.ZERO);
-			root.getChild("body").addOrReplaceChild("tatters", CubeListBuilder.create().texOffs(0, 32).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 7.0F, 4.0F),
+			root.getChild("head").addOrReplaceChild("hood", CubeListBuilder.create().texOffs(0, 64).addBox(-5.0F, -9.0F, -5.0F, 10.0F, 10.0F, 10.0F), PartPose.ZERO);
+			root.getChild("body").addOrReplaceChild("tatters", CubeListBuilder.create().texOffs(0, 86).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 7.0F, 4.0F),
 				PartPose.offset(0.0F, 12.0F, 0.0F));
 			return mesh;
 		}
@@ -236,10 +250,10 @@ public final class XenoFormModels {
 			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.3F), 0.0F);
 			PartDefinition root = mesh.getRoot();
 			// heavy shoulders
-			root.getChild("body").addOrReplaceChild("shoulders", CubeListBuilder.create().texOffs(0, 32).addBox(-6.0F, -1.0F, -3.0F, 12.0F, 4.0F, 6.0F),
+			root.getChild("body").addOrReplaceChild("shoulders", CubeListBuilder.create().texOffs(0, 64).addBox(-6.0F, -1.0F, -3.0F, 12.0F, 4.0F, 6.0F),
 				PartPose.ZERO);
 			// the mantle: a flat sheet hanging from the back
-			root.getChild("body").addOrReplaceChild("mantle", CubeListBuilder.create().texOffs(36, 32).addBox(-5.0F, 0.0F, 0.0F, 10.0F, 14.0F, 1.0F),
+			root.getChild("body").addOrReplaceChild("mantle", CubeListBuilder.create().texOffs(36, 64).addBox(-5.0F, 0.0F, 0.0F, 10.0F, 14.0F, 1.0F),
 				PartPose.offset(0.0F, 1.0F, 3.0F));
 			return mesh;
 		}
@@ -251,24 +265,27 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** Gremlin: a big-headed imp with long ears that twitch. */
+	/** Gremlin: a big-headed imp with long ears that twitch and a thin tail that flicks. */
 	static final class Gremlin extends FormModel {
-		private final ModelPart rightEar, leftEar;
+		private final ModelPart rightEar, leftEar, tail;
 
 		Gremlin() {
 			super(bake(mesh()), "gremlin");
 			this.rightEar = this.head.getChild("right_ear");
 			this.leftEar = this.head.getChild("left_ear");
+			this.tail = this.body.getChild("tail");
 		}
 
 		private static MeshDefinition mesh() {
 			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.0F), 0.0F);
 			PartDefinition head = mesh.getRoot().getChild("head");
-			head.addOrReplaceChild("skull", CubeListBuilder.create().texOffs(0, 32).addBox(-5.0F, -10.0F, -5.0F, 10.0F, 10.0F, 10.0F), PartPose.ZERO);
-			head.addOrReplaceChild("right_ear", CubeListBuilder.create().texOffs(40, 32).addBox(-4.0F, -5.0F, -0.5F, 4.0F, 5.0F, 1.0F),
+			head.addOrReplaceChild("skull", CubeListBuilder.create().texOffs(0, 64).addBox(-5.0F, -10.0F, -5.0F, 10.0F, 10.0F, 10.0F), PartPose.ZERO);
+			head.addOrReplaceChild("right_ear", CubeListBuilder.create().texOffs(40, 64).addBox(-4.0F, -5.0F, -0.5F, 4.0F, 5.0F, 1.0F),
 				PartPose.offsetAndRotation(-5.0F, -4.0F, 0.0F, 0.0F, 0.0F, 0.6F));
-			head.addOrReplaceChild("left_ear", CubeListBuilder.create().texOffs(40, 32).mirror().addBox(0.0F, -5.0F, -0.5F, 4.0F, 5.0F, 1.0F),
+			head.addOrReplaceChild("left_ear", CubeListBuilder.create().texOffs(40, 64).mirror().addBox(0.0F, -5.0F, -0.5F, 4.0F, 5.0F, 1.0F),
 				PartPose.offsetAndRotation(5.0F, -4.0F, 0.0F, 0.0F, 0.0F, -0.6F));
+			mesh.getRoot().getChild("body").addOrReplaceChild("tail", CubeListBuilder.create().texOffs(40, 72).addBox(-0.5F, -0.5F, 0.0F, 1.0F, 1.0F, 6.0F),
+				PartPose.offsetAndRotation(0.0F, 11.0F, 2.0F, 0.6F, 0.0F, 0.0F));
 			return mesh;
 		}
 
@@ -278,10 +295,11 @@ public final class XenoFormModels {
 			float twitch = Mth.sin(state.ageInTicks * 0.3F) * 0.1F + state.walkAnimationSpeed * 0.2F;
 			this.rightEar.zRot = 0.6F + twitch;
 			this.leftEar.zRot = -0.6F - twitch;
+			this.tail.yRot = Mth.sin(state.ageInTicks * 0.2F) * 0.5F + Mth.cos(state.walkAnimationPos * 0.6662F) * 0.6F * state.walkAnimationSpeed;
 		}
 	}
 
-	/** Knell: hulking, horned, with a glowing ribcage and heavy shoulders. */
+	/** Knell: hulking, horned, with a glowing ribcage, heavy shoulders and sculk tendrils at the jaw. */
 	static final class Knell extends FormModel {
 		Knell() {
 			super(bake(mesh()), "knell");
@@ -291,19 +309,24 @@ public final class XenoFormModels {
 			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(1.0F), 0.0F);
 			PartDefinition root = mesh.getRoot();
 			PartDefinition head = root.getChild("head");
-			head.addOrReplaceChild("right_horn", CubeListBuilder.create().texOffs(0, 32).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 7.0F, 2.0F),
+			head.addOrReplaceChild("right_horn", CubeListBuilder.create().texOffs(0, 64).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 7.0F, 2.0F),
 				PartPose.offsetAndRotation(-4.0F, -8.0F, 0.0F, 0.0F, 0.0F, -0.45F));
-			head.addOrReplaceChild("left_horn", CubeListBuilder.create().texOffs(0, 32).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 7.0F, 2.0F),
+			head.addOrReplaceChild("left_horn", CubeListBuilder.create().texOffs(0, 64).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 7.0F, 2.0F),
 				PartPose.offsetAndRotation(4.0F, -8.0F, 0.0F, 0.0F, 0.0F, 0.45F));
 			PartDefinition body = root.getChild("body");
-			body.addOrReplaceChild("ribs", CubeListBuilder.create().texOffs(8, 32).addBox(-5.0F, 1.0F, -4.0F, 10.0F, 8.0F, 2.0F), PartPose.ZERO);
-			body.addOrReplaceChild("shoulders", CubeListBuilder.create().texOffs(0, 42).addBox(-6.0F, -3.0F, -2.5F, 12.0F, 3.0F, 5.0F, new CubeDeformation(1.0F)),
+			body.addOrReplaceChild("ribs", CubeListBuilder.create().texOffs(8, 64).addBox(-5.0F, 1.0F, -4.0F, 10.0F, 8.0F, 2.0F), PartPose.ZERO);
+			body.addOrReplaceChild("shoulders", CubeListBuilder.create().texOffs(0, 76).addBox(-6.0F, -3.0F, -2.5F, 12.0F, 3.0F, 5.0F, new CubeDeformation(1.0F)),
 				PartPose.ZERO);
+			// sculk tendrils hanging from the jaw
+			for (int i = 0; i < 3; i++) {
+				head.addOrReplaceChild("tendril_" + i, CubeListBuilder.create().texOffs(34, 64).addBox(-0.5F, 0.0F, -0.5F, 1.0F, 4.0F, 1.0F),
+					PartPose.offsetAndRotation(-2.5F + 2.5F * i, 0.0F, -4.5F, 0.15F, 0.0F, 0.2F - 0.2F * i));
+			}
 			return mesh;
 		}
 	}
 
-	/** Wyrm: horned, winged and tailed; the wings beat as it moves. */
+	/** Wyrm: horned, winged and finned-tailed; the wings beat as it moves. */
 	static final class Wyrm extends FormModel {
 		private final ModelPart rightWing, leftWing, tail, tailTip;
 
@@ -319,18 +342,19 @@ public final class XenoFormModels {
 			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.5F), 0.0F);
 			PartDefinition root = mesh.getRoot();
 			PartDefinition head = root.getChild("head");
-			head.addOrReplaceChild("right_horn", CubeListBuilder.create().texOffs(0, 32).addBox(-1.0F, -1.0F, -1.0F, 2.0F, 2.0F, 7.0F),
+			head.addOrReplaceChild("right_horn", CubeListBuilder.create().texOffs(0, 64).addBox(-1.0F, -1.0F, -1.0F, 2.0F, 2.0F, 7.0F),
 				PartPose.offsetAndRotation(-3.0F, -7.5F, 2.0F, -0.6F, 0.0F, 0.0F));
-			head.addOrReplaceChild("left_horn", CubeListBuilder.create().texOffs(0, 32).addBox(-1.0F, -1.0F, -1.0F, 2.0F, 2.0F, 7.0F),
+			head.addOrReplaceChild("left_horn", CubeListBuilder.create().texOffs(0, 64).addBox(-1.0F, -1.0F, -1.0F, 2.0F, 2.0F, 7.0F),
 				PartPose.offsetAndRotation(3.0F, -7.5F, 2.0F, -0.6F, 0.0F, 0.0F));
 			PartDefinition body = root.getChild("body");
-			PartDefinition tail = body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(18, 32).addBox(-1.5F, -1.5F, 0.0F, 3.0F, 3.0F, 10.0F),
+			PartDefinition tail = body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(18, 64).addBox(-1.5F, -1.5F, 0.0F, 3.0F, 3.0F, 10.0F),
 				PartPose.offsetAndRotation(0.0F, 11.0F, 2.0F, 0.5F, 0.0F, 0.0F));
-			tail.addOrReplaceChild("tip", CubeListBuilder.create().texOffs(18, 45).addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 8.0F),
+			PartDefinition tip = tail.addOrReplaceChild("tip", CubeListBuilder.create().texOffs(0, 78).addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 8.0F),
 				PartPose.offsetAndRotation(0.0F, 0.0F, 9.5F, 0.3F, 0.0F, 0.0F));
-			body.addOrReplaceChild("right_wing", CubeListBuilder.create().texOffs(0, 50).addBox(-14.0F, -0.5F, 0.0F, 14.0F, 1.0F, 8.0F),
+			tip.addOrReplaceChild("fin", CubeListBuilder.create().texOffs(44, 64).addBox(-0.5F, -4.0F, 0.0F, 1.0F, 4.0F, 3.0F), PartPose.offset(0.0F, -0.5F, 5.0F));
+			body.addOrReplaceChild("right_wing", CubeListBuilder.create().texOffs(20, 80).addBox(-14.0F, -0.5F, 0.0F, 14.0F, 1.0F, 8.0F),
 				PartPose.offsetAndRotation(-2.0F, 2.0F, 2.5F, 0.0F, 0.6F, 0.0F));
-			body.addOrReplaceChild("left_wing", CubeListBuilder.create().texOffs(0, 50).mirror().addBox(0.0F, -0.5F, 0.0F, 14.0F, 1.0F, 8.0F),
+			body.addOrReplaceChild("left_wing", CubeListBuilder.create().texOffs(20, 80).mirror().addBox(0.0F, -0.5F, 0.0F, 14.0F, 1.0F, 8.0F),
 				PartPose.offsetAndRotation(2.0F, 2.0F, 2.5F, 0.0F, -0.6F, 0.0F));
 			return mesh;
 		}

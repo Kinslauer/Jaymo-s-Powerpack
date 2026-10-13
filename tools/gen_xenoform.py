@@ -1,16 +1,40 @@
-"""Generates the Xenoform assets: the Xeno-Band item, the Fallen Star block, and the aliens' 64x64 skins
-(the vanilla skin layout for the limbs, the free rows under it for each form's extra parts; see
-client/power/xenoform/XenoFormModels). Everything is drawn from code (noise and simple shapes); nothing is copied.
-Run from the project root:  python tools/gen_xenoform.py
+"""Generates the Xenoform assets: the Xeno-Band item, the Fallen Star block, and the aliens' 64x128 skins.
+Rows 0-64 are the vanilla skin layout for the head, body, arms and legs (the hat layer is left clear); rows 64-128
+hold each form's extra parts (see client/power/xenoform/XenoFormModels for the exact offsets). Every box is painted
+face by face (lit from above, dark underneath, a darker back) and then decorated, and every alien wears the xeno
+insignia, the band's green hourglass, somewhere on it. Everything is drawn from code (noise and simple shapes);
+nothing is copied. Run from the project root:  python tools/gen_xenoform.py [preview]
 """
 import json
 import random
+import sys
 from pathlib import Path
 
 from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parent.parent / "src" / "main" / "resources" / "assets" / "jaymospowers"
 rng = random.Random(2603)
+
+W, H = 64, 128
+CLEAR = (0, 0, 0, 0)
+GREEN = (92, 240, 122, 255)        # the band's green
+PALE_GREEN = (190, 255, 205, 255)
+DEEP_GREEN = (12, 48, 24, 255)
+
+# the vanilla humanoid parts: (u, v, width, height, depth)
+HEAD = (0, 0, 8, 8, 8)
+BODY = (16, 16, 8, 12, 4)
+RARM = (40, 16, 4, 12, 4)
+LARM = (32, 48, 4, 12, 4)
+RLEG = (0, 16, 4, 12, 4)
+LLEG = (16, 48, 4, 12, 4)
+LIMBS = (RARM, LARM, RLEG, LLEG)
+ARMS = (RARM, LARM)
+LEGS = (RLEG, LLEG)
+BASE_PARTS = (HEAD, BODY) + LIMBS
+
+# how each face of a box is lit
+LIGHT = {"top": 1.18, "bottom": 0.6, "right": 0.86, "left": 0.86, "front": 1.0, "back": 0.78}
 
 
 def write_json(path, data):
@@ -29,7 +53,142 @@ def shade(color, amount):
 
 
 def lerp(a, b, t):
+    t = max(0.0, min(1.0, t))
     return tuple(int(a[i] + (b[i] - a[i]) * t) for i in range(3)) + (255,)
+
+
+def faces(u, v, w, h, d):
+    """The six faces of a box in the vanilla UV layout, as (x0, y0, x1, y1) boxes (x1, y1 exclusive)."""
+    return {
+        "top": (u + d, v, u + d + w, v + d),
+        "bottom": (u + d + w, v, u + d + 2 * w, v + d),
+        "right": (u, v + d, u + d, v + d + h),
+        "front": (u + d, v + d, u + d + w, v + d + h),
+        "left": (u + d + w, v + d, u + 2 * d + w, v + d + h),
+        "back": (u + 2 * d + w, v + d, u + 2 * d + 2 * w, v + d + h),
+    }
+
+
+def front(part):
+    return faces(*part)["front"]
+
+
+def noise_fill(img, color, spread=0.22, box=None):
+    x0, y0, x1, y1 = box or (0, 0, W, H)
+    for y in range(y0, y1):
+        for x in range(x0, x1):
+            img.putpixel((x, y), shade(color, 1.0 - spread / 2 + rng.random() * spread))
+
+
+def rect(img, box, color):
+    if box[2] > box[0] and box[3] > box[1]:
+        ImageDraw.Draw(img).rectangle([box[0], box[1], box[2] - 1, box[3] - 1], fill=color)
+
+
+def outline(img, box, color):
+    x0, y0, x1, y1 = box
+    rect(img, (x0, y0, x1, y0 + 1), color)
+    rect(img, (x0, y1 - 1, x1, y1), color)
+    rect(img, (x0, y0, x0 + 1, y1), color)
+    rect(img, (x1 - 1, y0, x1, y1), color)
+
+
+def vgrad(img, box, top, bottom, spread=0.12):
+    """A vertical gradient with a little grain."""
+    x0, y0, x1, y1 = box
+    for y in range(y0, y1):
+        t = (y - y0) / max(1, y1 - y0 - 1)
+        c = lerp(top, bottom, t)
+        for x in range(x0, x1):
+            img.putpixel((x, y), shade(c, 1.0 - spread / 2 + rng.random() * spread))
+
+
+def speckle(img, box, color, n):
+    x0, y0, x1, y1 = box
+    for _ in range(n):
+        img.putpixel((rng.randrange(x0, x1), rng.randrange(y0, y1)), color)
+
+
+def veins(img, box, cold, hot, n, length=(3, 8)):
+    """Wandering one-pixel veins kept inside the box."""
+    x0, y0, x1, y1 = box
+    for _ in range(n):
+        x, y = rng.randrange(x0, x1), rng.randrange(y0, y1)
+        heat = rng.random()
+        for _ in range(rng.randrange(*length)):
+            img.putpixel((x, y), lerp(cold, hot, heat * (0.6 + rng.random() * 0.4)))
+            x = min(x1 - 1, max(x0, x + rng.choice((-1, 0, 1))))
+            y = min(y1 - 1, max(y0, y + rng.choice((-1, 0, 1))))
+
+
+def box(img, part, base, spread=0.2, edge=None, light=LIGHT):
+    """Paints all six faces of a part, lit per face; `edge` darkens a one-pixel rim on each face (plated look)."""
+    for name, b in faces(*part).items():
+        c = shade(base, light[name])
+        noise_fill(img, c, spread, b)
+        if edge:
+            outline(img, b, shade(c, edge))
+
+
+def parts(img, base, spread=0.2, which=BASE_PARTS, **kw):
+    for part in which:
+        box(img, part, base, spread, **kw)
+
+
+def clear_hat(img):
+    rect(img, (32, 0, 64, 16), CLEAR)
+
+
+def eyes(img, color, y=11, wide=False, pupil=None):
+    """On the head's front face (8,8)-(16,16)."""
+    if wide:
+        rect(img, (9, y, 11, y + 2), color)
+        rect(img, (13, y, 15, y + 2), color)
+        if pupil:
+            img.putpixel((10, y + 1), pupil)
+            img.putpixel((13, y + 1), pupil)
+    else:
+        rect(img, (10, y, 11, y + 1), color)
+        rect(img, (13, y, 14, y + 1), color)
+
+
+def insignia(img, cx, top, small=False, fill=GREEN, rim=DEEP_GREEN, heart=PALE_GREEN):
+    """The xeno insignia: an hourglass of band green with a pale heart and a dark rim, 5x7 (or 3x5 when small),
+    its top-left pixel column centred on cx."""
+    widths = (3, 1, 1, 1, 3) if small else (5, 3, 1, 1, 1, 3, 5)
+    for i, w in enumerate(widths):
+        y = top + i
+        rect(img, (cx - w // 2 - 1, y, cx - w // 2 + w + 1, y + 1), rim)
+    rect(img, (cx - widths[0] // 2, top - 1, cx + widths[0] // 2 + 1, top), rim)
+    rect(img, (cx - widths[0] // 2, top + len(widths), cx + widths[0] // 2 + 1, top + len(widths) + 1), rim)
+    for i, w in enumerate(widths):
+        y = top + i
+        rect(img, (cx - w // 2, y, cx - w // 2 + w, y + 1), fill)
+    mid = top + len(widths) // 2
+    img.putpixel((cx, mid), heart)
+    if not small:
+        img.putpixel((cx - 1, top), heart)
+        img.putpixel((cx + 1, top + len(widths) - 1), heart)
+
+
+def chest_insignia(img, **kw):
+    """On the body's front face (20,20)-(28,32), low on the chest."""
+    insignia(img, 24, 24, **kw)
+
+
+def claws(img, color, which=LIMBS, rows=1):
+    """Dark tips at the bottom of each limb's faces (hands and feet)."""
+    for part in which:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back", "left", "right"):
+                for x in range(x0, x1, 2):
+                    rect(img, (x, y1 - rows, x + 1, y1), color)
+            elif name == "bottom":
+                noise_fill(img, color, 0.2, (x0, y0, x1, y1))
+
+
+def new_skin():
+    return Image.new("RGBA", (W, H))
 
 
 # ---- the band (item, 16x16) ----
@@ -72,6 +231,24 @@ def band():
     write_json(ROOT / "items" / "xeno_band.json", {"model": {"type": "minecraft:model", "model": "jaymospowers:item/xeno_band"}})
 
 
+# ---- the band on the wrist (entity, 32x32): a 5x3x5 box; the dial on its outer face, glowing in a second texture ----
+def band_worn():
+    img = Image.new("RGBA", (32, 32))
+    glow = Image.new("RGBA", (32, 32))
+    metal = (120, 132, 148)
+    for name, b in faces(0, 0, 5, 3, 5).items():
+        noise_fill(img, shade(metal, LIGHT[name]), 0.15, b)
+        outline(img, b, (34, 40, 48, 255))
+    # the outer face of a left wrist is the box's +x ("left") face: a 3x3 dial of green in a dark surround
+    x0, y0, x1, y1 = faces(0, 0, 5, 3, 5)["left"]
+    rect(img, (x0 + 1, y0, x0 + 4, y1), (28, 80, 44, 255))
+    rect(img, (x0 + 2, y0 + 1, x0 + 3, y0 + 2), GREEN)
+    rect(glow, (x0 + 1, y0, x0 + 4, y1), (60, 200, 90, 255))
+    rect(glow, (x0 + 2, y0 + 1, x0 + 3, y0 + 2), GREEN)
+    save(img, "entity/xeno_band.png")
+    save(glow, "entity/xeno_band_glow.png")
+
+
 # ---- the fallen star (block, 16x16) ----
 def fallen_star():
     img = Image.new("RGBA", (16, 16))
@@ -94,210 +271,569 @@ def fallen_star():
     write_json(ROOT / "items" / "fallen_star.json", {"model": {"type": "minecraft:model", "model": "jaymospowers:item/fallen_star"}})
 
 
-# ---- the aliens (entity skins, 64x64) ----
-def noise_fill(img, color, spread=0.25, box=None):
-    x0, y0, x1, y1 = box or (0, 0, 64, 64)
-    for y in range(y0, y1):
-        for x in range(x0, x1):
-            img.putpixel((x, y), shade(color, 1.0 - spread / 2 + rng.random() * spread))
-
-
-def rect(img, box, color):
-    ImageDraw.Draw(img).rectangle([box[0], box[1], box[2] - 1, box[3] - 1], fill=color)
-
-
-def eyes(img, color, y=11, wide=False):
-    # the head's front face is at (8,8)-(16,16)
-    if wide:
-        rect(img, (9, y, 11, y + 2), color)
-        rect(img, (13, y, 15, y + 2), color)
-    else:
-        rect(img, (10, y, 11, y + 1), color)
-        rect(img, (13, y, 14, y + 1), color)
-
-
-def clear_hat(img):
-    rect(img, (32, 0, 64, 16), (0, 0, 0, 0))
-
-
+# ---- the aliens (entity skins, 64x128) ----
 def bulwark():
-    img = Image.new("RGBA", (64, 64))
-    steel = (120, 130, 142)
-    noise_fill(img, steel, 0.3)
-    # plates: darker seams every few pixels over the body and arms
-    for y in range(16, 32, 4):
-        rect(img, (16, y, 56, y + 1), shade(steel, 0.6))
-    for x in range(16, 56, 6):
-        rect(img, (x, 16, x + 1, 32), shade(steel, 0.65))
-    # the brow and chest plates (rows 32+): heavier, darker metal
-    noise_fill(img, shade(steel, 0.75), 0.2, (0, 32, 26, 38))
-    noise_fill(img, shade(steel, 0.7), 0.2, (0, 38, 38, 49))
-    # rivets
-    for _ in range(40):
-        x, y = rng.randrange(0, 64), rng.randrange(16, 49)
-        img.putpixel((x, y), shade(steel, 1.35))
-    eyes(img, (255, 200, 60, 255), 12, wide=True)
+    """Riveted steel plate, amber visor, the insignia stamped on the breastplate."""
+    img = new_skin()
+    steel = (112, 122, 136)
+    dark = shade(steel, 0.55)
+    rivet = shade(steel, 1.45)
+    parts(img, steel, edge=0.8)
+    # plate seams on every face, bricked, with a rivet where they cross
+    for part in BASE_PARTS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("top", "bottom"):
+                continue
+            for y in range(y0 + 3, y1 - 1, 4):
+                rect(img, (x0, y, x1, y + 1), dark)
+                off = ((y - y0) // 4) % 2 * 2
+                for x in range(x0 + 1 + off, x1 - 1, 4):
+                    img.putpixel((x, y), rivet)
+                    if y + 1 < y1 - 1 and rng.random() < 0.5:
+                        img.putpixel((x, y - 1), rivet)
+    # heavier iron on the forearms and shins, black at the knuckles and toes
+    for part in LIMBS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back", "left", "right"):
+                noise_fill(img, shade(steel, 0.78), 0.15, (x0, y1 - 5, x1, y1 - 2))
+                rect(img, (x0, y1 - 5, x1, y1 - 4), rivet)
+    claws(img, (36, 38, 44, 255))
+    # head: a jaw guard, a vertical seam down the brow, and a wide amber visor
+    hx0, hy0, hx1, hy1 = front(HEAD)
+    noise_fill(img, shade(steel, 0.7), 0.15, (hx0, hy1 - 2, hx1, hy1))
+    rect(img, (11, 8, 13, 10), dark)
+    rect(img, (9, 11, 15, 13), (40, 32, 20, 255))
+    eyes(img, (255, 200, 60, 255), 11, wide=True)
+    img.putpixel((10, 11), (255, 240, 170, 255))
+    img.putpixel((14, 11), (255, 240, 170, 255))
+    # neck bolts on the head's sides
+    for (x0, y0, x1, y1) in (faces(*HEAD)["right"], faces(*HEAD)["left"]):
+        rect(img, (x0 + 3, y1 - 3, x0 + 5, y1 - 1), dark)
+        img.putpixel((x0 + 3, y1 - 3), rivet)
+    # the breastplate (the model's plates cover the top of the body): a central ridge and the insignia under it
+    bx0, by0, bx1, by1 = front(BODY)
+    rect(img, (23, by0, 25, by1), shade(steel, 0.9))
+    chest_insignia(img)
+    # extras: brow 10x3x3 at (0,64); plates 12x4x7 at (0,72); pauldrons 5x3x5 at (40,64)
+    heavy = shade(steel, 0.72)
+    box(img, (0, 64, 10, 3, 3), heavy, 0.15, edge=0.8)
+    box(img, (0, 72, 12, 4, 7), heavy, 0.15, edge=0.8)
+    box(img, (40, 64, 5, 3, 5), heavy, 0.15, edge=0.8)
+    for part in ((0, 64, 10, 3, 3), (0, 72, 12, 4, 7), (40, 64, 5, 3, 5)):
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name != "bottom":
+                for x in range(x0 + 1, x1 - 1, 3):
+                    img.putpixel((x, y0 + 1), rivet)
+    # a bright rim along the top of the plates
+    rect(img, (7, 72, 19, 73), shade(steel, 1.2))
     clear_hat(img)
     save(img, "entity/xenoform_bulwark.png")
 
 
 def pyre():
-    img = Image.new("RGBA", (64, 64))
-    rock = (52, 30, 24)
-    noise_fill(img, rock, 0.35)
-    # glowing cracks of magma over everything
-    for _ in range(60):
-        x, y = rng.randrange(64), rng.randrange(64)
-        heat = rng.random()
-        for _ in range(rng.randrange(3, 10)):
-            img.putpixel((x % 64, y % 64), lerp((255, 90, 20), (255, 230, 120), heat))
-            x += rng.choice((-1, 0, 1))
-            y += rng.choice((-1, 0, 1))
-    # the plumes and crest (rows 32+) are flame: yellow hearts, orange edges
-    for box in ((0, 32, 14, 43), (14, 32, 34, 37), (0, 44, 12, 53)):
-        noise_fill(img, (255, 120, 30), 0.4, box)
-        inner = (box[0] + 2, box[1] + 2, box[2] - 2, box[3] - 2)
-        if inner[2] > inner[0] and inner[3] > inner[1]:
-            noise_fill(img, (255, 220, 110), 0.3, inner)
-    # the core: a white-hot square on the chest
-    noise_fill(img, (255, 240, 180), 0.15, (12, 44, 24, 50))
-    eyes(img, (255, 250, 200, 255), 11)
+    """Scorched rock, magma cracks, flames for a crest, and the insignia burning on the core."""
+    img = new_skin()
+    rock = (50, 28, 22)
+    char = (24, 14, 12, 255)
+    ember = (255, 90, 20)
+    white = (255, 230, 120)
+    parts(img, rock, 0.3)
+    # magma cracks: dense on the chest and forearms, sparse elsewhere; a char rim around them
+    for part in BASE_PARTS:
+        for name, b in faces(*part).items():
+            n = 2 if name in ("top", "bottom") else 4
+            if part is BODY or part in ARMS:
+                n += 3
+            veins(img, b, ember, white, n, (2, 6))
+    # obsidian plates on the shoulders and thighs (the top rows of the limbs), glassy highlights
+    for part in LIMBS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back", "left", "right"):
+                noise_fill(img, (28, 18, 32), 0.2, (x0, y0, x1, y0 + 3))
+                img.putpixel((x0, y0), (110, 80, 120, 255))
+    # hands and feet glow from inside
+    for part in LIMBS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name == "bottom":
+                noise_fill(img, ember, 0.3, (x0, y0, x1, y1))
+            elif name != "top":
+                veins(img, (x0, y1 - 3, x1, y1), ember, white, 2, (2, 4))
+    # head: a cracked mask, the cracks running to pale wide eyes and a glowing mouth
+    hx0, hy0, hx1, hy1 = front(HEAD)
+    rect(img, (hx0 + 3, hy0, hx0 + 5, hy0 + 3), char)
+    veins(img, (hx0, hy0, hx1, hy1), ember, white, 3, (2, 4))
+    rect(img, (9, 11, 15, 13), char)
+    eyes(img, (255, 250, 200, 255), 11, wide=True)
+    rect(img, (10, 14, 14, 15), (255, 150, 40, 255))
+    img.putpixel((12, 14), (255, 240, 170, 255))
+    for (x0, y0, x1, y1) in (faces(*HEAD)["right"], faces(*HEAD)["left"]):
+        veins(img, (x0, y0, x1, y1), ember, white, 3, (3, 6))
+    # the core sits in front of the chest: the chest around it is burnt black with cracks radiating out
+    bx0, by0, bx1, by1 = front(BODY)
+    noise_fill(img, (30, 16, 14), 0.2, (bx0 + 1, by0 + 2, bx1 - 1, by0 + 9))
+    veins(img, (bx0, by0 + 1, bx1, by0 + 10), ember, white, 5, (2, 5))
+    # extras: crest 3x7x4 at (0,64) + bar 8x3x2 at (14,64); plumes 3x6x3 at (0,76); core 5x5x1 at (12,76)
+    for part in ((0, 64, 3, 7, 4), (14, 64, 8, 3, 2), (0, 76, 3, 6, 3)):
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            # flame: a yellow heart low down, orange, red tips at the top, ragged
+            vgrad(img, (x0, y0, x1, y1), (230, 60, 20), (255, 220, 110), 0.25)
+            if name in ("front", "back", "left", "right"):
+                for x in range(x0, x1):
+                    if rng.random() < 0.4:
+                        rect(img, (x, y0, x + 1, y0 + 1 + rng.randrange(0, 2)), CLEAR)
+                    if rng.random() < 0.3:
+                        img.putpixel((x, y1 - 1 - rng.randrange(0, 2)), (255, 250, 200, 255))
+    core = (12, 76, 5, 5, 1)
+    box(img, core, (255, 236, 170), 0.1)
+    cx0, cy0, cx1, cy1 = front(core)
+    insignia(img, cx0 + 2, cy0, small=True, fill=GREEN, rim=(255, 140, 40, 255), heart=(240, 255, 240, 255))
     clear_hat(img)
     save(img, "entity/xenoform_pyre.png")
 
 
 def blur():
-    img = Image.new("RGBA", (64, 64))
-    hide = (70, 130, 170)
-    noise_fill(img, hide, 0.25)
-    # a paler belly and throat
-    noise_fill(img, (150, 200, 220), 0.2, (20, 20, 28, 32))   # body front
-    noise_fill(img, (150, 200, 220), 0.2, (8, 13, 16, 16))    # chin
-    # stripes down the back and the tail
-    for y in range(20, 32, 3):
-        rect(img, (32, y, 40, y + 1), shade(hide, 0.6))
-    for box in ((0, 32, 22, 45), (22, 32, 36, 38), (0, 45, 22, 56), (22, 45, 42, 55)):
-        noise_fill(img, shade(hide, 0.85), 0.25, box)
-    for x in range(2, 42, 4):
-        rect(img, (x, 45, x + 1, 56), shade(hide, 0.55))
-    # fin and crest tips bright
-    noise_fill(img, (160, 230, 255), 0.2, (0, 32, 22, 34))
-    eyes(img, (255, 240, 120, 255), 11, wide=True)
+    """Sleek blue hide, a pale throat and belly, dark stripes, hooves, and the insignia on the breast."""
+    img = new_skin()
+    hide = (66, 128, 172)
+    belly = (160, 206, 226)
+    stripe = shade(hide, 0.55)
+    parts(img, hide, 0.18)
+    # a darker spine down the back, pale belly and inner limbs
+    for name, (x0, y0, x1, y1) in faces(*BODY).items():
+        if name == "back":
+            rect(img, (x0 + 3, y0, x0 + 5, y1), shade(hide, 0.75))
+        if name == "front":
+            vgrad(img, (x0 + 1, y0 + 1, x1 - 1, y1), belly, shade(belly, 0.92), 0.1)
+    for part in ARMS:
+        f = faces(*part)
+        inner = f["left"] if part is RARM else f["right"]
+        noise_fill(img, shade(belly, 0.9), 0.1, (inner[0] + 1, inner[1] + 1, inner[2] - 1, inner[3] - 2))
+    # stripes: slanted dark bands over the shoulders, back, flanks and thighs
+    for part in BASE_PARTS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("top", "bottom") or (part is BODY and name == "front"):
+                continue
+            step = 4 if part is BODY or part is HEAD else 3
+            for y in range(y0 + 1, y1 - 3, step):
+                for x in range(x0, x1):
+                    yy = y + (x - x0) // 2
+                    if y0 <= yy < y1 - 3:
+                        img.putpixel((x, yy), stripe)
+    # hooves and dark hands
+    claws(img, (30, 36, 50, 255), rows=2)
+    for part in LEGS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name != "top":
+                rect(img, (x0, y1 - 2, x1, y1 - 1), (60, 70, 90, 255))
+    # head: pale muzzle and chin, a dark blaze between the eyes, amber eyes with slit pupils
+    hx0, hy0, hx1, hy1 = front(HEAD)
+    noise_fill(img, belly, 0.1, (hx0 + 2, hy1 - 3, hx1 - 2, hy1))
+    rect(img, (11, 8, 13, 11), shade(hide, 0.7))
+    eyes(img, (255, 236, 110, 255), 11, wide=True, pupil=(30, 20, 20, 255))
+    rect(img, (9, 10, 11, 11), stripe)
+    rect(img, (13, 10, 15, 11), stripe)
+    chest_insignia(img, rim=(24, 60, 90, 255))
+    # extras: fin 2x4x9 at (0,64); snout 4x3x3 at (22,64); tail 3x3x8 at (0,78); tip 2x2x8 at (22,78); ears 1x3x2 at (36,64)
+    fin = (0, 64, 2, 4, 9)
+    for name, (x0, y0, x1, y1) in faces(*fin).items():
+        vgrad(img, (x0, y0, x1, y1), (170, 236, 255), shade(hide, 0.85), 0.15)
+        if name in ("left", "right"):
+            for x in range(x0, x1, 2):
+                rect(img, (x, y0, x + 1, y0 + 1), CLEAR)
+    snout = (22, 64, 4, 3, 3)
+    box(img, snout, shade(hide, 0.9), 0.15)
+    sx0, sy0, sx1, sy1 = front(snout)
+    noise_fill(img, belly, 0.1, (sx0, sy1 - 1, sx1, sy1))
+    img.putpixel((sx0, sy0), (30, 36, 50, 255))
+    img.putpixel((sx1 - 1, sy0), (30, 36, 50, 255))
+    for part in ((0, 78, 3, 3, 8), (22, 78, 2, 2, 8)):
+        box(img, part, hide, 0.18)
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("top", "bottom"):
+                continue
+            for x in range(x0 + 1, x1, 3):
+                rect(img, (x, y0, x + 1, y1), stripe)
+            if name == "bottom":
+                pass
+    # the tail's underside pale, its tip bright
+    rect(img, (14, 78, 22, 81), shade(belly, 0.9))
+    rect(img, (40, 78, 42, 88), (170, 236, 255, 255))
+    box(img, (36, 64, 1, 3, 2), hide, 0.15)
+    rect(img, (38, 66, 39, 69), (220, 170, 170, 255))
     clear_hat(img)
     save(img, "entity/xenoform_blur.png")
 
 
 def prism():
-    img = Image.new("RGBA", (64, 64))
-    crystal = (150, 100, 210)
-    noise_fill(img, crystal, 0.3)
-    # facets: diagonal bands of light and shade over everything
-    for y in range(64):
-        for x in range(64):
-            band = ((x + y) // 5) % 3
-            if band == 0:
-                img.putpixel((x, y), shade(crystal, 1.25))
-            elif band == 2:
-                img.putpixel((x, y), shade(crystal, 0.7))
-    # the crown, side crystals and back (rows 32+) are brighter, almost white at the tips
-    for box in ((0, 32, 8, 40), (8, 32, 16, 39), (16, 32, 34, 41), (34, 32, 42, 39)):
-        noise_fill(img, (205, 170, 250), 0.25, box)
-        rect(img, (box[0], box[1], box[2], box[1] + 2), (240, 225, 255, 255))
+    """Faceted violet crystal, white-hot tips, fracture lines, and the insignia set in the chest like an inclusion."""
+    img = new_skin()
+    crystal = (146, 98, 208)
+    bright = (236, 220, 255, 255)
+    fracture = shade(crystal, 0.5)
+    parts(img, crystal, 0.12)
+    # facets: diagonal bands of light and shade over every face, each face lit its own way
+    for part in BASE_PARTS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            base = shade(crystal, LIGHT[name])
+            for y in range(y0, y1):
+                for x in range(x0, x1):
+                    b = ((x - x0) + (y - y0)) // 4 % 3
+                    img.putpixel((x, y), shade(base, (1.25, 1.0, 0.72)[b] * (0.95 + rng.random() * 0.1)))
+            # a fracture line and a glint on each big face
+            if name in ("front", "back", "left", "right") and (y1 - y0) >= 8:
+                x = rng.randrange(x0, x1)
+                for y in range(y0 + 1, y1 - 1):
+                    img.putpixel((x, y), fracture)
+                    x = min(x1 - 1, max(x0, x + rng.choice((-1, 0, 0, 1))))
+                img.putpixel((rng.randrange(x0, x1), rng.randrange(y0, y1)), bright)
+    # gauntlets and greaves of paler crystal, pointed tips at the fingers and toes
+    for part in LIMBS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back", "left", "right"):
+                noise_fill(img, shade(crystal, 1.3), 0.1, (x0, y1 - 4, x1, y1 - 1))
+                for x in range(x0, x1, 2):
+                    img.putpixel((x, y1 - 1), bright)
+                    img.putpixel((x, y1 - 4), fracture)
+    # head: a geometric face, diamond white eyes, a dark fracture down one cheek
+    rect(img, (9, 10, 15, 13), shade(crystal, 0.75))
     eyes(img, (255, 255, 255, 255), 11, wide=True)
+    img.putpixel((10, 10), bright)
+    img.putpixel((13, 10), bright)
+    for y in range(13, 16):
+        img.putpixel((14 - (y - 13) // 2, y), fracture)
+    rect(img, (11, 14, 13, 15), shade(crystal, 0.6))
+    chest_insignia(img, rim=(50, 24, 90, 255))
+    # extras: crown 2x6x2 at (0,64); crystals 2x5x2 at (8,64); back 6x6x3 at (16,64); spine 2x5x2 at (34,64);
+    # shoulder crystals 2x4x2 at (42,64)
+    for part in ((0, 64, 2, 6, 2), (8, 64, 2, 5, 2), (16, 64, 6, 6, 3), (34, 64, 2, 5, 2), (42, 64, 2, 4, 2)):
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            vgrad(img, (x0, y0, x1, y1), (246, 236, 255), shade(crystal, LIGHT[name]), 0.1)
+            if name == "top":
+                noise_fill(img, (250, 245, 255), 0.05, (x0, y0, x1, y1))
     clear_hat(img)
     save(img, "entity/xenoform_prism.png")
 
 
 def wisp():
-    img = Image.new("RGBA", (64, 64))
-    mist = (170, 215, 230)
-    noise_fill(img, mist, 0.3)
-    # the hood (24,32)-(64,52) darker, the tatters (0,32)-(24,42) ragged: holes along the bottom
-    noise_fill(img, (90, 130, 150), 0.3, (24, 32, 64, 52))
-    noise_fill(img, (150, 195, 215), 0.3, (0, 32, 24, 42))
-    for x in range(0, 24):
-        if rng.random() < 0.5:
-            rect(img, (x, 40 + rng.randrange(0, 2), x + 1, 42), (0, 0, 0, 0))
-    # hollow black eyes in the hood's front (the hood's front face is at (34,42)-(44,52))
-    rect(img, (36, 45, 38, 48), (10, 10, 20, 255))
-    rect(img, (40, 45, 42, 48), (10, 10, 20, 255))
-    eyes(img, (20, 30, 40, 255), 11, wide=True)
+    """A shroud of pale mist with folds, a deep hood with hollow eyes, sleeves and hem fraying away, and the insignia
+    showing faintly through the chest."""
+    img = new_skin()
+    mist = (176, 216, 232)
+    deep = (84, 124, 146)
+    fold = shade(mist, 0.8)
+    parts(img, mist, 0.2)
+    # folds: wavering vertical streaks of shadow down the body and limbs
+    for part in BASE_PARTS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("top", "bottom"):
+                continue
+            for x in range(x0 + 1, x1, 3):
+                xx = x
+                for y in range(y0, y1):
+                    img.putpixel((xx, y), fold if rng.random() < 0.8 else shade(mist, 0.9))
+                    if rng.random() < 0.25:
+                        xx = min(x1 - 1, max(x0, xx + rng.choice((-1, 1))))
+    # the sleeves and the hem fray into nothing
+    for part in LIMBS + (BODY,):
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name == "bottom":
+                rect(img, (x0, y0, x1, y1), CLEAR)
+            elif name != "top":
+                for x in range(x0, x1):
+                    if rng.random() < 0.6:
+                        rect(img, (x, y1 - 1 - rng.randrange(0, 3), x + 1, y1), CLEAR)
+    # a pale glow in the breast where the insignia shows through the cloth
+    bx0, by0, bx1, by1 = front(BODY)
+    for y in range(by0 + 3, by0 + 11):
+        for x in range(bx0 + 1, bx1 - 1):
+            if rng.random() < 0.5:
+                img.putpixel((x, y), lerp(mist, (170, 240, 200), 0.4))
+    chest_insignia(img, fill=(120, 230, 160, 255), rim=(90, 140, 150, 255), heart=(220, 255, 230, 255))
+    # the head under the hood: a dim, featureless face, two dark pits
+    noise_fill(img, deep, 0.2, front(HEAD))
+    eyes(img, (16, 24, 36, 255), 11, wide=True)
+    # extras: hood 10x10x10 at (0,64); tatters 8x7x4 at (0,86)
+    hood = (0, 64, 10, 10, 10)
+    for name, (x0, y0, x1, y1) in faces(*hood).items():
+        vgrad(img, (x0, y0, x1, y1), shade(deep, LIGHT[name] * 1.1), shade(deep, LIGHT[name] * 0.8), 0.15)
+        if name in ("front", "back", "left", "right"):
+            for x in range(x0 + 1, x1, 3):
+                rect(img, (x, y0 + 2, x + 1, y1), shade(deep, LIGHT[name] * 0.7))
+            for x in range(x0, x1):
+                if rng.random() < 0.4:
+                    rect(img, (x, y1 - 1 - rng.randrange(0, 2), x + 1, y1), CLEAR)
+    # the hood's front (10,74)-(20,84): a cavern with hollow eyes, a cold light deep in each
+    hx0, hy0, hx1, hy1 = front(hood)
+    noise_fill(img, (26, 40, 54), 0.25, (hx0 + 2, hy0 + 3, hx1 - 2, hy1))
+    rect(img, (hx0 + 2, hy0 + 4, hx0 + 4, hy0 + 7), (8, 10, 18, 255))
+    rect(img, (hx1 - 4, hy0 + 4, hx1 - 2, hy0 + 7), (8, 10, 18, 255))
+    img.putpixel((hx0 + 3, hy0 + 6), (150, 230, 240, 255))
+    img.putpixel((hx1 - 3, hy0 + 6), (150, 230, 240, 255))
+    tatters = (0, 86, 8, 7, 4)
+    for name, (x0, y0, x1, y1) in faces(*tatters).items():
+        vgrad(img, (x0, y0, x1, y1), shade(mist, LIGHT[name]), shade(mist, LIGHT[name] * 0.85), 0.2)
+        if name == "bottom":
+            rect(img, (x0, y0, x1, y1), CLEAR)
+        elif name != "top":
+            for x in range(x0, x1):
+                if rng.random() < 0.65:
+                    rect(img, (x, y1 - 1 - rng.randrange(0, 4), x + 1, y1), CLEAR)
     clear_hat(img)
     save(img, "entity/xenoform_wisp.png")
 
 
 def gremlin():
-    img = Image.new("RGBA", (64, 64))
-    skin = (120, 180, 70)
-    noise_fill(img, skin, 0.3)
-    # the big skull (0,32)-(40,52): same green, with huge yellow eyes on its front face (10,42)-(20,52)
-    noise_fill(img, shade(skin, 1.05), 0.25, (0, 32, 40, 52))
-    rect(img, (11, 44, 14, 48), (250, 230, 80, 255))
-    rect(img, (16, 44, 19, 48), (250, 230, 80, 255))
-    rect(img, (12, 45, 13, 47), (20, 20, 20, 255))
-    rect(img, (17, 45, 18, 47), (20, 20, 20, 255))
-    rect(img, (13, 50, 17, 51), (60, 30, 30, 255))  # a grin
-    # ears (40,32)-(50,38) pink inside
-    noise_fill(img, shade(skin, 0.9), 0.2, (40, 32, 50, 38))
-    rect(img, (41, 33, 44, 37), (220, 150, 150, 255))
+    """A grey, warty imp: mottled hide, a pale belly, a spiny back, black claws, a huge skull with yellow eyes and
+    a jagged grin, notched ears, and the insignia on its chest."""
+    img = new_skin()
+    grey = (118, 120, 126)
+    belly = (168, 166, 164)
+    wart = shade(grey, 0.72)
+    spine = (60, 58, 62, 255)
+    parts(img, grey, 0.26)
+    # warts and mottling everywhere; a pale belly; a row of spines down the back
+    for part in BASE_PARTS:
+        for name, b in faces(*part).items():
+            speckle(img, b, wart, (b[2] - b[0]) * (b[3] - b[1]) // 6)
+            speckle(img, b, shade(grey, 1.2), (b[2] - b[0]) * (b[3] - b[1]) // 10)
+    bx0, by0, bx1, by1 = front(BODY)
+    vgrad(img, (bx0 + 1, by0 + 1, bx1 - 1, by1 - 1), belly, shade(belly, 0.85), 0.12)
+    kx0, ky0, kx1, ky1 = faces(*BODY)["back"]
+    for y in range(ky0, ky1, 2):
+        rect(img, (kx0 + 3, y, kx0 + 5, y + 1), spine)
+    # knobbly joints at the elbows and knees, black claws
+    for part in LIMBS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back", "left", "right"):
+                rect(img, (x0, y0 + 5, x1, y0 + 6), wart)
+    claws(img, (28, 26, 30, 255))
+    # the head under the skull barely shows: keep it grey with a dark throat
+    rect(img, (10, 14, 14, 16), wart)
+    chest_insignia(img, rim=(40, 40, 44, 255))
+    # extras: skull 10x10x10 at (0,64); ears 4x5x1 at (40,64); tail 1x1x6 at (40,72)
+    skull = (0, 64, 10, 10, 10)
+    box(img, skull, shade(grey, 1.04), 0.22)
+    for name, b in faces(*skull).items():
+        speckle(img, b, wart, 12)
+        speckle(img, b, shade(grey, 1.25), 6)
+    sx0, sy0, sx1, sy1 = front(skull)
+    # brow ridge, huge yellow eyes with slit pupils, nostrils, a wide grin of white teeth
+    rect(img, (sx0 + 1, sy0 + 1, sx1 - 1, sy0 + 2), wart)
+    rect(img, (sx0 + 1, sy0 + 2, sx0 + 4, sy0 + 6), (250, 230, 80, 255))
+    rect(img, (sx1 - 4, sy0 + 2, sx1 - 1, sy0 + 6), (250, 230, 80, 255))
+    rect(img, (sx0 + 2, sy0 + 3, sx0 + 3, sy0 + 6), (20, 20, 20, 255))
+    rect(img, (sx1 - 3, sy0 + 3, sx1 - 2, sy0 + 6), (20, 20, 20, 255))
+    img.putpixel((sx0 + 1, sy0 + 2), (255, 250, 200, 255))
+    img.putpixel((sx1 - 2, sy0 + 2), (255, 250, 200, 255))
+    img.putpixel((sx0 + 4, sy0 + 7), (40, 36, 40, 255))
+    img.putpixel((sx1 - 5, sy0 + 7), (40, 36, 40, 255))
+    rect(img, (sx0 + 1, sy0 + 8, sx1 - 1, sy0 + 10), (50, 22, 26, 255))
+    for x in range(sx0 + 1, sx1 - 1):
+        if x % 2 == 0:
+            img.putpixel((x, sy0 + 8), (240, 236, 220, 255))
+        else:
+            img.putpixel((x, sy0 + 9), (240, 236, 220, 255))
+    # warty crown on the skull's top
+    speckle(img, faces(*skull)["top"], wart, 14)
+    ears = (40, 64, 4, 5, 1)
+    box(img, ears, shade(grey, 0.95), 0.2)
+    ex0, ey0, ex1, ey1 = front(ears)
+    rect(img, (ex0 + 1, ey0 + 1, ex1 - 1, ey1 - 1), (214, 150, 150, 255))
+    rect(img, (ex0, ey0, ex0 + 1, ey0 + 1), CLEAR)
+    rect(img, (ex0 + 2, ey1 - 2, ex0 + 3, ey1 - 1), CLEAR)
+    tail = (40, 72, 1, 1, 6)
+    box(img, tail, grey, 0.2)
+    for name, (x0, y0, x1, y1) in faces(*tail).items():
+        if name in ("left", "right", "top", "bottom"):
+            for x in range(x0, x1, 2):
+                img.putpixel((x, y0), wart)
     clear_hat(img)
     save(img, "entity/xenoform_gremlin.png")
 
 
 def knell():
-    img = Image.new("RGBA", (64, 64))
+    """Sculk-dark hide threaded with cyan light, bone horns, a glowing ribcage with the insignia at the sternum,
+    a blind face, and claws of bone."""
+    img = new_skin()
     sculk = (20, 44, 52)
-    noise_fill(img, sculk, 0.35)
-    # veins of cyan light threading the whole hide
-    for _ in range(50):
-        x, y = rng.randrange(64), rng.randrange(64)
-        for _ in range(rng.randrange(3, 8)):
-            img.putpixel((x % 64, y % 64), lerp((31, 184, 200), (120, 240, 250), rng.random() * 0.6))
-            x += rng.choice((-1, 0, 1))
-            y += rng.choice((-1, 0, 1))
-    # horns (0,32)-(8,40) bone; ribs (8,32)-(32,42) glow; shoulders (0,42)-(34,50) dark
-    noise_fill(img, (200, 190, 170), 0.2, (0, 32, 8, 40))
-    noise_fill(img, (40, 200, 215), 0.35, (8, 32, 32, 42))
-    for y in range(33, 42, 2):
-        rect(img, (10, y, 30, y + 1), (10, 30, 36, 255))
-    noise_fill(img, shade(sculk, 0.8), 0.25, (0, 42, 34, 50))
-    # no eyes: a smooth, blind face with a faint glow where they'd be
+    cold = (31, 184, 200)
+    hot = (120, 240, 250)
+    bone = (206, 196, 176)
+    parts(img, sculk, 0.3)
+    # veins of light everywhere, thickest down the limbs; sculk growths (darker, with a bright centre) on the back
+    for part in BASE_PARTS:
+        for name, b in faces(*part).items():
+            n = 1 if name in ("top", "bottom") else 3
+            veins(img, b, cold, hot, n + (2 if part in LIMBS else 0), (2, 6))
+    kx0, ky0, kx1, ky1 = faces(*BODY)["back"]
+    for _ in range(4):
+        x, y = rng.randrange(kx0 + 1, kx1 - 1), rng.randrange(ky0 + 1, ky1 - 1)
+        rect(img, (x - 1, y - 1, x + 2, y + 2), shade(sculk, 0.6))
+        img.putpixel((x, y), hot + (255,) if len(hot) == 3 else hot)
+    # bone plates at the knuckles and shins, claw tips
+    for part in LIMBS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back", "left", "right"):
+                for x in range(x0, x1, 2):
+                    rect(img, (x, y1 - 3, x + 1, y1), bone)
+            elif name == "bottom":
+                noise_fill(img, bone, 0.15, (x0, y0, x1, y1))
+    # the face: blind and smooth, a faint glow where the eyes would be, sculk tendrils at the jaw
+    hx0, hy0, hx1, hy1 = front(HEAD)
+    noise_fill(img, shade(sculk, 0.9), 0.2, (hx0, hy0, hx1, hy1))
     rect(img, (9, 10, 15, 12), (18, 90, 100, 255))
+    rect(img, (10, 11, 14, 12), (30, 140, 150, 255))
+    for x in (9, 11, 13, 15):
+        rect(img, (x, 14, x + 1, 16), shade(sculk, 0.6))
+        img.putpixel((x, 15), cold + (255,))
+    # the ribs cover the chest; the chest behind is dark, a glow at its heart
+    bx0, by0, bx1, by1 = front(BODY)
+    noise_fill(img, shade(sculk, 0.7), 0.2, (bx0, by0, bx1, by1))
+    veins(img, (bx0, by0, bx1, by1), cold, hot, 3, (2, 5))
+    # extras: horns 2x7x2 at (0,64); ribs 10x8x2 at (8,64); shoulders 12x3x5 at (0,76); tendrils 1x4x1 at (34,64)
+    horns = (0, 64, 2, 7, 2)
+    for name, (x0, y0, x1, y1) in faces(*horns).items():
+        vgrad(img, (x0, y0, x1, y1), (236, 230, 214), shade(bone, 0.7), 0.1)
+        for y in range(y0 + 2, y1, 2):
+            rect(img, (x0, y, x1, y + 1), shade(bone, 0.6))
+    ribs = (8, 64, 10, 8, 2)
+    box(img, ribs, shade(sculk, 0.8), 0.2)
+    for name, (x0, y0, x1, y1) in faces(*ribs).items():
+        if name in ("front", "left", "right", "back"):
+            for y in range(y0 + 1, y1, 2):
+                rect(img, (x0, y, x1, y + 1), lerp(cold, hot, 0.3))
+                rect(img, (x0, y, x1, y + 1), lerp(cold, hot, 0.3))
+    rx0, ry0, rx1, ry1 = front(ribs)
+    rect(img, (rx0 + 4, ry0, rx0 + 6, ry1), shade(sculk, 0.6))
+    insignia(img, rx0 + 5, ry0 + 1, rim=(8, 24, 30, 255))
+    shoulders = (0, 76, 12, 3, 5)
+    box(img, shoulders, shade(sculk, 0.75), 0.25)
+    for name, b in faces(*shoulders).items():
+        veins(img, b, cold, hot, 2, (2, 5))
+        if name == "top":
+            speckle(img, b, shade(sculk, 0.5), 8)
+    tendril = (34, 64, 1, 4, 1)
+    box(img, tendril, shade(sculk, 0.7), 0.2)
+    rect(img, (34, 68, 38, 69), cold + (255,))
     clear_hat(img)
     save(img, "entity/xenoform_knell.png")
 
 
 def wyrm():
-    img = Image.new("RGBA", (64, 64))
-    scale = (30, 22, 40)
-    noise_fill(img, scale, 0.35)
-    # scales: a brick pattern of slightly lighter rows
-    for y in range(0, 64, 3):
-        for x in range((y // 3) % 2 * 2, 64, 4):
-            rect(img, (x, y, x + 2, y + 1), shade(scale, 1.3))
-    # horns (0,32)-(18,41) pale; tail (18,32)-(44,45) and tip (18,45)-(38,55) like the body; wings (0,50)-(44,59)
-    # membrane purple with dark bones
-    noise_fill(img, (190, 180, 170), 0.2, (0, 32, 18, 41))
-    noise_fill(img, (110, 50, 150), 0.3, (0, 50, 44, 59))
-    for x in range(0, 44, 7):
-        rect(img, (x, 50, x + 1, 59), (25, 15, 35, 255))
-    eyes(img, (200, 90, 240, 255), 11, wide=True)
+    """Dark violet scales, pale belly plates, bone horns, bat wings with bones and torn edges, a finned tail, and the
+    insignia on the breast plates."""
+    img = new_skin()
+    scale = (32, 24, 44)
+    plate = (120, 100, 130)
+    membrane = (112, 50, 152)
+    bone = (190, 180, 170)
+    parts(img, scale, 0.25)
+    # scales: a brick pattern of lighter crescents on every face, belly plates on the front of the body and legs
+    for part in BASE_PARTS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name == "front" and part in (BODY,) + LEGS:
+                for y in range(y0 + 1, y1 - 1, 3):
+                    rect(img, (x0 + 1, y, x1 - 1, y + 2), shade(plate, 0.9 + ((y - y0) // 3) % 2 * 0.12))
+                    rect(img, (x0 + 1, y + 2, x1 - 1, y + 3), shade(scale, 0.8))
+                continue
+            for y in range(y0, y1, 3):
+                for x in range(x0 + (y // 3) % 2 * 2, x1, 4):
+                    rect(img, (x, y, min(x + 2, x1), y + 1), shade(scale, 1.35 * LIGHT[name]))
+                    if x + 1 < x1 and y + 1 < y1:
+                        img.putpixel((x + 1, y + 1), shade(scale, 0.7))
+    # spines down the back of the body and the head
+    for face_box in (faces(*BODY)["back"], faces(*HEAD)["back"]):
+        x0, y0, x1, y1 = face_box
+        for y in range(y0, y1, 2):
+            rect(img, (x0 + 3, y, x0 + 5, y + 1), bone)
+    # talons
+    claws(img, bone)
+    # head: a horned brow, violet slit eyes, nostrils and a jaw line of teeth
+    hx0, hy0, hx1, hy1 = front(HEAD)
+    rect(img, (9, 9, 15, 10), shade(scale, 0.7))
+    rect(img, (9, 10, 15, 13), shade(scale, 0.85))
+    eyes(img, (210, 90, 240, 255), 11, wide=True, pupil=(20, 8, 24, 255))
+    img.putpixel((11, 13), shade(scale, 0.5))
+    img.putpixel((12, 13), shade(scale, 0.5))
+    rect(img, (9, 14, 15, 15), shade(scale, 0.6))
+    for x in range(9, 15, 2):
+        img.putpixel((x, 14), bone)
+    chest_insignia(img, rim=(30, 14, 40, 255))
+    # extras: horns 2x2x7 at (0,64); tail 3x3x10 at (18,64); tip 2x2x8 at (0,78); wings 14x1x8 at (20,80);
+    # tail fin 1x4x3 at (44,64)
+    horns = (0, 64, 2, 2, 7)
+    box(img, horns, bone, 0.15)
+    for name, (x0, y0, x1, y1) in faces(*horns).items():
+        if name in ("top", "bottom"):
+            for x in range(x0 + 1, x1, 2):
+                rect(img, (x, y0, x + 1, y1), shade(bone, 0.75))
+        else:
+            for y in range(y0, y1):
+                for x in range(x0 + 1, x1, 2):
+                    img.putpixel((x, y), shade(bone, 0.75))
+        if name in ("front",):
+            noise_fill(img, shade(bone, 0.6), 0.1, (x0, y0, x1, y1))
+    for part in ((18, 64, 3, 3, 10), (0, 78, 2, 2, 8)):
+        box(img, part, scale, 0.25)
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name == "bottom":
+                for x in range(x0 + 1, x1, 3):
+                    rect(img, (x, y0, x + 2, y1), plate)
+            elif name == "top":
+                for x in range(x0, x1, 2):
+                    rect(img, (x, y0, x + 1, y1), bone)
+            else:
+                for x in range(x0, x1, 3):
+                    rect(img, (x, y0, x + 1, y1), shade(scale, 1.3))
+    wing = (20, 80, 14, 1, 8)
+    for name, (x0, y0, x1, y1) in faces(*wing).items():
+        vgrad(img, (x0, y0, x1, y1), shade(membrane, 1.15), shade(membrane, 0.75), 0.2)
+        if name in ("top", "bottom"):
+            # bones fanning from the shoulder (the inner edge), a torn trailing edge, veins between
+            for x in range(x0, x1, 4):
+                rect(img, (x, y0, x + 1, y1), (26, 14, 36, 255))
+            rect(img, (x0, y0, x1, y0 + 1), (26, 14, 36, 255))
+            veins(img, (x0, y0 + 1, x1, y1), shade(membrane, 0.7), shade(membrane, 0.55), 6, (3, 7))
+            for x in range(x0 + 1, x1, 4):
+                if rng.random() < 0.7:
+                    rect(img, (x, y1 - 1 - rng.randrange(0, 2), x + 2, y1), CLEAR)
+    fin = (44, 64, 1, 4, 3)
+    for name, (x0, y0, x1, y1) in faces(*fin).items():
+        vgrad(img, (x0, y0, x1, y1), shade(membrane, 1.1), shade(membrane, 0.7), 0.15)
+        if name in ("left", "right"):
+            rect(img, (x0, y0, x0 + 1, y1), (26, 14, 36, 255))
     clear_hat(img)
     save(img, "entity/xenoform_wyrm.png")
 
 
 def nadir():
-    """The void given shape: near-black with faint stars, a face of deep nothing, and the green xeno insignia on the chest."""
-    img = Image.new("RGBA", (64, 64))
+    """The void given shape: near-black with faint stars and nebula dust, a face of deep nothing, and the green xeno
+    insignia burning on the chest; the shoulders and mantle are starfields too."""
+    img = new_skin()
     void = (9, 7, 16)
-    noise_fill(img, void, 0.2)
-    # faint stars all over, a few brighter
-    for _ in range(140):
-        x, y = rng.randrange(64), rng.randrange(64)
-        img.putpixel((x, y), lerp((40, 30, 70), (120, 100, 170), rng.random()))
-    for _ in range(18):
-        x, y = rng.randrange(64), rng.randrange(64)
-        img.putpixel((x, y), (200, 190, 240, 255))
+    parts(img, void, 0.25, light={"top": 1.4, "bottom": 0.8, "right": 1.0, "left": 1.0, "front": 1.0, "back": 0.9})
+    # nebula dust: faint patches of violet and blue, then stars, a few bright
+    for part in BASE_PARTS:
+        for name, b in faces(*part).items():
+            x0, y0, x1, y1 = b
+            for _ in range(2):
+                cx, cy = rng.randrange(x0, x1), rng.randrange(y0, y1)
+                tint = rng.choice(((50, 30, 90), (24, 40, 90), (70, 24, 70)))
+                for y in range(y0, y1):
+                    for x in range(x0, x1):
+                        d = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
+                        if d < 3.5 and rng.random() < 0.7:
+                            img.putpixel((x, y), lerp(img.getpixel((x, y)), tint, 0.5 * (1 - d / 3.5)))
+            speckle(img, b, (90, 70, 140, 255), (x1 - x0) * (y1 - y0) // 10)
+            speckle(img, b, (160, 140, 220, 255), (x1 - x0) * (y1 - y0) // 24)
+            speckle(img, b, (230, 225, 255, 255), 1)
+    # a faint rim of violet light along the top edge of every face: the shape reads against the dark
+    for part in BASE_PARTS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name in ("front", "back", "left", "right"):
+                for x in range(x0, x1):
+                    if rng.random() < 0.6:
+                        img.putpixel((x, y0), (60, 40, 110, 255))
     # the face (8,8)-(16,16): a deeper void, violet at the edges, a single pale point low in it
     for y in range(8, 16):
         for x in range(8, 16):
@@ -305,23 +841,70 @@ def nadir():
             img.putpixel((x, y), lerp((2, 1, 6), (60, 30, 110), d * d))
     img.putpixel((11, 13), (210, 200, 250, 255))
     img.putpixel((12, 13), (160, 140, 220, 255))
-    # the insignia on the chest (front face (20,20)-(28,32)): an hourglass of band green, 5 wide, 7 tall
-    green = (92, 240, 122, 255)
-    for i, w in enumerate((5, 3, 1, 1, 1, 3, 5)):
-        y = 22 + i
-        rect(img, (24 - w // 2, y, 24 - w // 2 + w, y + 1), green)
-    rect(img, (23, 25, 25, 26), (170, 255, 190, 255))
-    # the shoulders (0,32)-(36,42) and the mantle (36,32)-(58,47): the same void, the mantle ragged at its foot
-    noise_fill(img, (6, 4, 12), 0.2, (0, 32, 36, 42))
-    noise_fill(img, (14, 10, 26), 0.3, (36, 32, 58, 47))
-    for x in range(36, 58):
-        if rng.random() < 0.45:
-            rect(img, (x, 45 + rng.randrange(0, 2), x + 1, 47), (0, 0, 0, 0))
-    for _ in range(30):
-        x, y = rng.randrange(36, 58), rng.randrange(32, 45)
-        img.putpixel((x, y), lerp((40, 30, 70), (140, 120, 200), rng.random()))
+    # the insignia: a green glow bleeding into the chest around it, then the hourglass itself
+    bx0, by0, bx1, by1 = front(BODY)
+    for y in range(by0 + 1, by1):
+        for x in range(bx0, bx1):
+            d = max(abs(x - 24), abs(y - 27) * 0.8)
+            if d < 4 and rng.random() < 0.8:
+                img.putpixel((x, y), lerp(img.getpixel((x, y)), (30, 90, 50), 0.6 * (1 - d / 4)))
+    chest_insignia(img, rim=(8, 40, 24, 255))
+    # extras: shoulders 12x4x6 at (0,64); mantle 10x14x1 at (36,64); the mantle ragged at its foot
+    shoulders = (0, 64, 12, 4, 6)
+    box(img, shoulders, (6, 4, 12), 0.2)
+    for name, b in faces(*shoulders).items():
+        speckle(img, b, (90, 70, 140, 255), 8)
+        speckle(img, b, (200, 190, 240, 255), 2)
+        if name == "top":
+            x0, y0, x1, y1 = b
+            rect(img, (x0, y0, x1, y0 + 1), (70, 50, 120, 255))
+    mantle = (36, 64, 10, 14, 1)
+    box(img, mantle, (14, 10, 26), 0.3)
+    for name, b in faces(*mantle).items():
+        if name in ("front", "back"):
+            x0, y0, x1, y1 = b
+            speckle(img, b, (60, 44, 100, 255), 30)
+            speckle(img, b, (140, 120, 200, 255), 12)
+            speckle(img, b, (230, 225, 255, 255), 3)
+            for x in range(x0, x1):
+                if rng.random() < 0.5:
+                    rect(img, (x, y1 - 1 - rng.randrange(0, 3), x + 1, y1), CLEAR)
     clear_hat(img)
     save(img, "entity/xenoform_nadir.png")
+
+
+FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm", "nadir")
+# for the preview: extra parts drawn over the front view, (part, where on the 24x36 card)
+EXTRAS_IN_FRONT = {
+    "bulwark": (((0, 64, 10, 3, 3), (7, 1)), ((0, 72, 12, 4, 7), (6, 7))),
+    "pyre": (((12, 76, 5, 5, 1), (10, 10)),),
+    "blur": (((22, 64, 4, 3, 3), (10, 4)),),
+    "wisp": (((0, 64, 10, 10, 10), (7, 0)), ((0, 86, 8, 7, 4), (8, 20))),
+    "gremlin": (((0, 64, 10, 10, 10), (7, 0)), ((40, 64, 4, 5, 1), (3, 2)), ((40, 64, 4, 5, 1), (17, 2))),
+    "knell": (((8, 64, 10, 8, 2), (7, 9)), ((0, 76, 12, 3, 5), (6, 6))),
+    "nadir": (((0, 64, 12, 4, 6), (6, 7)),),
+}
+
+
+def preview(out):
+    """A contact sheet: each alien's front view assembled from its skin's front faces (no extras), 8x scale."""
+    k = 8
+    sheet = Image.new("RGBA", (len(FORMS) * 24 * k, 36 * k), (40, 40, 48, 255))
+    for i, form in enumerate(FORMS):
+        skin = Image.open(ROOT / "textures" / "entity" / f"xenoform_{form}.png")
+        card = Image.new("RGBA", (24, 36))
+        card.paste(skin.crop(front(HEAD)), (8, 0))
+        card.paste(skin.crop(front(BODY)), (8, 8))
+        card.paste(skin.crop(front(RARM)), (4, 8))
+        card.paste(skin.crop(front(LARM)), (16, 8))
+        card.paste(skin.crop(front(RLEG)), (8, 20))
+        card.paste(skin.crop(front(LLEG)), (12, 20))
+        # the extras that sit in front of the body or head
+        for part, at in EXTRAS_IN_FRONT.get(form, ()):
+            face = skin.crop(front(part))
+            card.paste(face, at, face)
+        sheet.paste(card.resize((24 * k, 36 * k), Image.NEAREST), (i * 24 * k, 0))
+    sheet.save(out)
 
 
 if __name__ == "__main__":
@@ -336,4 +919,8 @@ if __name__ == "__main__":
     knell()
     wyrm()
     nadir()
+    band_worn()
     print("Xenoform assets written under", ROOT)
+    if len(sys.argv) > 1:
+        preview(sys.argv[1])
+        print("preview sheet:", sys.argv[1])
