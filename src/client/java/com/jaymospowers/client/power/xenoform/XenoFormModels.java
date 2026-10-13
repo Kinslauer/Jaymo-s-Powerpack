@@ -51,6 +51,7 @@ public final class XenoFormModels {
 			MODELS.put("gremlin", new Gremlin());
 			MODELS.put("knell", new Knell());
 			MODELS.put("wyrm", new Wyrm());
+			MODELS.put("nadir", new Nadir());
 		}
 		return MODELS.get(form);
 	}
@@ -216,6 +217,37 @@ public final class XenoFormModels {
 			this.leftLeg.visible = false;
 			this.tatters.xRot = Mth.sin(state.ageInTicks * 0.12F) * 0.15F + state.walkAnimationSpeed * 0.3F;
 			this.tatters.zRot = Mth.cos(state.ageInTicks * 0.09F) * 0.1F;
+		}
+	}
+
+	/**
+	 * Nadir: a tall dark silhouette, broad at the shoulder, a face of nothing; a thin mantle of void drifts behind it.
+	 * The insignia is the skin's alone.
+	 */
+	static final class Nadir extends FormModel {
+		private final ModelPart mantle;
+
+		Nadir() {
+			super(bake(mesh()), "nadir");
+			this.mantle = this.body.getChild("mantle");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.3F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			// heavy shoulders
+			root.getChild("body").addOrReplaceChild("shoulders", CubeListBuilder.create().texOffs(0, 32).addBox(-6.0F, -1.0F, -3.0F, 12.0F, 4.0F, 6.0F),
+				PartPose.ZERO);
+			// the mantle: a flat sheet hanging from the back
+			root.getChild("body").addOrReplaceChild("mantle", CubeListBuilder.create().texOffs(36, 32).addBox(-5.0F, 0.0F, 0.0F, 10.0F, 14.0F, 1.0F),
+				PartPose.offset(0.0F, 1.0F, 3.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			this.mantle.xRot = 0.1F + Mth.sin(state.ageInTicks * 0.07F) * 0.06F + state.walkAnimationSpeed * 0.5F;
 		}
 	}
 

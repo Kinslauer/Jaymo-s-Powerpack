@@ -728,4 +728,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Ultimate for the rest of the timer: Titan (Bulwark), Sunheart (Pyre), Afterimage (Blur), Geode (Prism), Revenant
   (Wisp, possess a mob), Swarm (Gremlin), the Tolling (Knell), Elder Wyrm. Each alien carries its own flaw while the
   band is corrupted (Blur's dash won't stop, Prism's stance leaks arrows, Knell's shriek wakes shriekers...). Jaymo's
-  Kingdoms 0.6.1: townsfolk flee an alien and guards hunt it, unless that realm saw you change (`docs/xenoform.md`).
+  Kingdoms 0.6.1: townsfolk flee an alien and guards hunt it, unless that realm saw you change (`docs/xenoform.md`). A ninth alien, Nadir, the void given shape (a dark silhouette, a face of nothing, the xeno insignia
+  on its chest): no creature carries it. Ascended and corrupted, two voices speak from the band, Hush and Clamour,
+  with conflicting questions and then a deed each (3 changes without a blow; 12 lives as an alien); satisfy both
+  and Nadir is on the dial. Its Beacon (R) picks any player on the server, lights them through the world, and a hold
+  phases you to them across dimensions; its other moves wait on Andy.

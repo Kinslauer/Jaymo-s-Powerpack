@@ -111,6 +111,31 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
   you change (16 blocks, line of sight): then they know, for good (`Aliens.KNOWN`, copied on death), say so once, and
   treat the alien as they treat you. Minions carry `jaymospowers_xenoform_minion`.
 
+## Nadir, the void alien, and the two voices
+
+The ninth alien is one no creature carries. Once the power has ascended *and* the band is corrupted, two voices speak
+from it (`XenoVoices`, every 2 s as a human): **Hush**, the still one (aqua, italic), and **Clamour**, the loud one
+(dark red, bold). They never agree. Each asks a yes-or-no question in chat with clickable answers (or
+`/xenovoice hush yes`); the questions conflict (Hush: "when you could strike, will you stay your hand?"; Clamour: "when
+you could stay your hand, will you strike?") and each voice wants a yes, so satisfying both means telling each what it
+wants to hear, which the other remarks on. An answer that displeases a voice is thrown back and asked again a minute
+later. Two pairs of questions, then a deed each: Hush wants `PEACE_FORMS` (3) changes to run their whole course
+(timer out, no knockout) without a blow struck (`live.hurt`, set by the after-damage hook); Clamour wants `KILLS` (12)
+lives ended as an alien (after-death hook, minions excepted). With every requirement met the voices agree for once and
+Nadir is unlocked on the band. The trial (`XenoformState.TRIAL`: stage 0-4, answers, counts) is kept across deaths
+and goes on whatever Fate does after it began. Debug: `/powerdebug xenoform trial show | reset | deeds`.
+
+**Nadir** (`forms/Nadir`, id `nadir`, `hidden()` so it doesn't count toward a complete band): 1.15x, 60 health, fists
+of 6, a little faster, immovable; no fall, fire or drowning damage. Its look is a tall near-black silhouette with faint
+stars in it, heavy shoulders, a drifting mantle of void, a face of nothing with one pale point, and the green xeno
+insignia on its chest (`XenoFormModels.Nadir`, `gen_xenoform.nadir`). Moves:
+
+- R, **Beacon**: tap to pick a player anywhere on the server (next player on each tap; they get Glowing for 3 s, so
+  they show through the world to everyone); hold R for 1.5 s to phase to just behind them, across dimensions
+  (`teleportTo(ServerLevel...)`). 5 s cooldown. Overlay shows who and a progress bar.
+- G V B: not decided yet (Andy: "we can work on the other abilities later"); they say so.
+- No Ultimate; corruption doesn't trouble it.
+
 ## Later
 
 - Nothing planned from the Omnitrix Power Plan: all three stages are in. Ideas Andy might want: Kingdoms quests that

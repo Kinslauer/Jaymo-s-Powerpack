@@ -286,6 +286,44 @@ def wyrm():
     save(img, "entity/xenoform_wyrm.png")
 
 
+def nadir():
+    """The void given shape: near-black with faint stars, a face of deep nothing, and the green xeno insignia on the chest."""
+    img = Image.new("RGBA", (64, 64))
+    void = (9, 7, 16)
+    noise_fill(img, void, 0.2)
+    # faint stars all over, a few brighter
+    for _ in range(140):
+        x, y = rng.randrange(64), rng.randrange(64)
+        img.putpixel((x, y), lerp((40, 30, 70), (120, 100, 170), rng.random()))
+    for _ in range(18):
+        x, y = rng.randrange(64), rng.randrange(64)
+        img.putpixel((x, y), (200, 190, 240, 255))
+    # the face (8,8)-(16,16): a deeper void, violet at the edges, a single pale point low in it
+    for y in range(8, 16):
+        for x in range(8, 16):
+            d = max(abs(x - 11.5), abs(y - 11.5)) / 3.5
+            img.putpixel((x, y), lerp((2, 1, 6), (60, 30, 110), d * d))
+    img.putpixel((11, 13), (210, 200, 250, 255))
+    img.putpixel((12, 13), (160, 140, 220, 255))
+    # the insignia on the chest (front face (20,20)-(28,32)): an hourglass of band green, 5 wide, 7 tall
+    green = (92, 240, 122, 255)
+    for i, w in enumerate((5, 3, 1, 1, 1, 3, 5)):
+        y = 22 + i
+        rect(img, (24 - w // 2, y, 24 - w // 2 + w, y + 1), green)
+    rect(img, (23, 25, 25, 26), (170, 255, 190, 255))
+    # the shoulders (0,32)-(36,42) and the mantle (36,32)-(58,47): the same void, the mantle ragged at its foot
+    noise_fill(img, (6, 4, 12), 0.2, (0, 32, 36, 42))
+    noise_fill(img, (14, 10, 26), 0.3, (36, 32, 58, 47))
+    for x in range(36, 58):
+        if rng.random() < 0.45:
+            rect(img, (x, 45 + rng.randrange(0, 2), x + 1, 47), (0, 0, 0, 0))
+    for _ in range(30):
+        x, y = rng.randrange(36, 58), rng.randrange(32, 45)
+        img.putpixel((x, y), lerp((40, 30, 70), (140, 120, 200), rng.random()))
+    clear_hat(img)
+    save(img, "entity/xenoform_nadir.png")
+
+
 if __name__ == "__main__":
     band()
     fallen_star()
@@ -297,4 +335,5 @@ if __name__ == "__main__":
     gremlin()
     knell()
     wyrm()
+    nadir()
     print("Xenoform assets written under", ROOT)

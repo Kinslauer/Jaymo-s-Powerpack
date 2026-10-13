@@ -69,6 +69,50 @@ public final class XenoformState {
 	}
 
 	/**
+	 * The two voices' trial for the void alien ({@link XenoVoices}): how far the asking has gone ({@code stage}: 0 not
+	 * begun, 1 the first questions, 2 the second, 3 the deeds, 4 done), each voice's answers so far ("hush1=yes"...),
+	 * and the deeds' counts: changes that ran their course without a blow, and lives ended as an alien.
+	 */
+	public record Trial(int stage, List<String> answers, int peaceForms, int kills) {
+		public static final Trial NONE = new Trial(0, List.of(), 0, 0);
+		public static final Codec<Trial> CODEC = RecordCodecBuilder.create(i -> i.group(
+				Codec.INT.optionalFieldOf("stage", 0).forGetter(Trial::stage),
+				Codec.STRING.listOf().optionalFieldOf("answers", List.of()).forGetter(Trial::answers),
+				Codec.INT.optionalFieldOf("peace_forms", 0).forGetter(Trial::peaceForms),
+				Codec.INT.optionalFieldOf("kills", 0).forGetter(Trial::kills))
+			.apply(i, Trial::new));
+
+		public boolean answered(String key) {
+			return answers.stream().anyMatch(a -> a.startsWith(key + "="));
+		}
+
+		public @Nullable String answer(String key) {
+			return answers.stream().filter(a -> a.startsWith(key + "=")).map(a -> a.substring(key.length() + 1)).findFirst().orElse(null);
+		}
+
+		Trial with(String key, String value) {
+			List<String> list = new ArrayList<>(answers);
+			list.removeIf(a -> a.startsWith(key + "="));
+			list.add(key + "=" + value);
+			return new Trial(stage, List.copyOf(list), peaceForms, kills);
+		}
+
+		Trial without(String key) {
+			List<String> list = new ArrayList<>(answers);
+			list.removeIf(a -> a.startsWith(key + "="));
+			return new Trial(stage, List.copyOf(list), peaceForms, kills);
+		}
+
+		Trial stage(int value) {
+			return new Trial(value, answers, peaceForms, kills);
+		}
+
+		Trial counts(int peace, int killed) {
+			return new Trial(stage, answers, peace, killed);
+		}
+	}
+
+	/**
 	 * What the owner's HUD shows. {@code formTicks}/{@code formTotal}: the time left in the form; {@code recharge}/
 	 * {@code rechargeTotal}: the band's recharge; {@code until}/{@code length}: each move's cooldown end (game time) and
 	 * length; {@code scan}/{@code scanTotal}: the scan's progress; {@code scanForm}: the alien being scanned ("" for none).
@@ -116,6 +160,8 @@ public final class XenoformState {
 
 	public static final AttachmentType<Band> BAND = AttachmentRegistry.create(JaymosPowers.id("xenoform_band"),
 		builder -> builder.persistent(Band.CODEC).copyOnDeath().syncWith(Band.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
+	public static final AttachmentType<Trial> TRIAL = AttachmentRegistry.create(JaymosPowers.id("xenoform_trial"),
+		builder -> builder.persistent(Trial.CODEC).copyOnDeath());
 	public static final AttachmentType<String> FORM = AttachmentRegistry.create(JaymosPowers.id("xenoform_form"),
 		builder -> builder.syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all()));
 	public static final AttachmentType<Hud> HUD = AttachmentRegistry.create(JaymosPowers.id("xenoform_hud"),
@@ -127,6 +173,11 @@ public final class XenoformState {
 	public static Band band(Player player) {
 		Band band = player.getAttached(BAND);
 		return band == null ? Band.NONE : band;
+	}
+
+	public static Trial trial(Player player) {
+		Trial trial = player.getAttached(TRIAL);
+		return trial == null ? Trial.NONE : trial;
 	}
 
 	public static Hud hud(Player player) {

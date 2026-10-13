@@ -4,6 +4,7 @@ import com.jaymospowers.power.xenoform.forms.Blur;
 import com.jaymospowers.power.xenoform.forms.Bulwark;
 import com.jaymospowers.power.xenoform.forms.Gremlin;
 import com.jaymospowers.power.xenoform.forms.Knell;
+import com.jaymospowers.power.xenoform.forms.Nadir;
 import com.jaymospowers.power.xenoform.forms.Prism;
 import com.jaymospowers.power.xenoform.forms.Wisp;
 import com.jaymospowers.power.xenoform.forms.Wyrm;
@@ -17,7 +18,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * Every alien the band knows, in dial order. The first {@link #STARTERS} are the ones a fresh band comes with one of;
  * the rest are scanned from the creatures that carry their DNA. Stage 1 shipped Bulwark, Pyre and Blur; stage 2 added Prism, Wisp,
- * Gremlin, Knell (scanned from a Warden) and Wyrm (from the Ender Dragon).
+ * Gremlin, Knell (scanned from a Warden) and Wyrm (from the Ender Dragon); stage 3 Nadir, the void alien the voices give.
  */
 public final class XenoForms {
 	private static final Map<String, XenoForm> ALL = new LinkedHashMap<>();
@@ -32,6 +33,8 @@ public final class XenoForms {
 	public static final XenoForm GREMLIN = register(new Gremlin());
 	public static final XenoForm KNELL = register(new Knell());
 	public static final XenoForm WYRM = register(new Wyrm());
+	/** The void alien: no creature carries it; the two voices give it ({@link XenoVoices}). */
+	public static final XenoForm NADIR = register(new Nadir());
 
 	private XenoForms() {
 	}
@@ -47,6 +50,11 @@ public final class XenoForms {
 
 	public static List<XenoForm> all() {
 		return List.copyOf(ALL.values());
+	}
+
+	/** How many aliens can be scanned from creatures: a band with that many is complete. */
+	public static int scannable() {
+		return (int)ALL.values().stream().filter(f -> !f.hidden()).count();
 	}
 
 	/** The alien whose DNA {@code creature} carries, or null. */

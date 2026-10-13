@@ -105,6 +105,30 @@ final class XenoformDebugCommand {
 						XenoformPower.ready(player);
 						c.getSource().sendSuccess(() -> Component.literal("Xenoform recharge and cooldowns cleared."), false);
 						return 1;
-					}))));
+					}))
+				.then(Commands.literal("trial")
+					.then(Commands.literal("show")
+						.executes(c -> {
+							ServerPlayer player = c.getSource().getPlayerOrException();
+							XenoformState.Trial trial = XenoformState.trial(player);
+							c.getSource().sendSuccess(() -> Component.literal("The voices' trial: stage " + trial.stage() + " of 4, answers " + trial.answers()
+								+ ", peaceful changes " + trial.peaceForms() + "/" + XenoVoices.PEACE_FORMS + ", lives " + trial.kills() + "/" + XenoVoices.KILLS
+								+ (XenoVoices.eligible(player) ? "" : " (not ascended and corrupted: the voices sleep)")), false);
+							return 1;
+						}))
+					.then(Commands.literal("reset")
+						.executes(c -> {
+							ServerPlayer player = c.getSource().getPlayerOrException();
+							player.removeAttached(XenoformState.TRIAL);
+							c.getSource().sendSuccess(() -> Component.literal("The voices' trial starts over."), false);
+							return 1;
+						}))
+					.then(Commands.literal("deeds")
+						.executes(c -> {
+							ServerPlayer player = c.getSource().getPlayerOrException();
+							player.setAttached(XenoformState.TRIAL, new XenoformState.Trial(3, java.util.List.of("hush1=yes", "clamour1=yes", "hush2=yes", "clamour2=yes"), 0, 0));
+							c.getSource().sendSuccess(() -> Component.literal("The voices' questions are answered: on to the deeds."), false);
+							return 1;
+						})))));
 	}
 }

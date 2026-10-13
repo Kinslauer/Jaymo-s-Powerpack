@@ -43,7 +43,8 @@ final class XenoformHud {
 		"wisp", new Item[] {Items.PHANTOM_MEMBRANE, Items.GLASS, Items.SCULK_SHRIEKER, Items.ELYTRA},
 		"gremlin", new Item[] {Items.SLIME_BALL, Items.LEVER, Items.ROTTEN_FLESH, Items.VINE},
 		"knell", new Item[] {Items.ECHO_SHARD, Items.SCULK_SENSOR, Items.SCULK_SHRIEKER, Items.DIRT},
-		"wyrm", new Item[] {Items.DRAGON_BREATH, Items.ELYTRA, Items.WIND_CHARGE, Items.ENDER_EYE});
+		"wyrm", new Item[] {Items.DRAGON_BREATH, Items.ELYTRA, Items.WIND_CHARGE, Items.ENDER_EYE},
+		"nadir", new Item[] {Items.ENDER_EYE, Items.BARRIER, Items.BARRIER, Items.BARRIER});
 	private static final Item[] NO_ICONS = {Items.STONE_BUTTON, Items.STONE_BUTTON, Items.STONE_BUTTON, Items.STONE_BUTTON};
 
 	private XenoformHud() {

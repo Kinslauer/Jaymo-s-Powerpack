@@ -66,6 +66,11 @@ public abstract class XenoForm {
 	/** Whether {@code creature} carries this alien's DNA: scanning it (hold X at it) unlocks the form. */
 	public abstract boolean scans(Entity creature);
 
+	/** A form no creature carries (the void alien, {@link XenoVoices}): not counted toward a complete band. */
+	public boolean hidden() {
+		return false;
+	}
+
 	public Component name() {
 		return Component.translatable("xenoform.jaymospowers." + id);
 	}

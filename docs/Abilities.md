@@ -198,3 +198,7 @@ power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts
 | 196 | Knell | C | The Tolling | Rooted for 10 s: 5 tolls, each 6 sonic damage, a shove and darkness to all within 8. Again after 30 s. | |
 | 197 | Wyrm | C | Elder Wyrm | 2x size, +8 armour, wings cost no hunger, breath every 2 s, gust half again as wide. | |
 | 198 | Any | corrupted | Twists | Each alien's moves carry a flaw while the band is corrupted (4 knockouts): see docs/xenoform.md. The line is shown when you change. | |
+| 199 | Nadir | (getting it) | The two voices | Ascended and corrupted, Hush and Clamour speak from the band: two pairs of conflicting yes/no questions (each wants a yes), then deeds: 3 changes run their course without a blow, and 12 lives ended as an alien. Then Nadir is on the dial. | |
+| 200 | Nadir | body | The void given shape | 1.15x, 60 hp, fists of 6, +10% speed, immovable; no fall, fire or drowning damage. A dark silhouette with a void face and the xeno insignia on the chest. | |
+| 201 | Nadir | R | Beacon | Tap: pick a player anywhere on the server (tap again for the next); they glow through the world for 3 s. Hold 1.5 s: phase to just behind them, across dimensions. 5 s. | |
+| 202 | Nadir | G V B | (later) | Not decided yet. | |

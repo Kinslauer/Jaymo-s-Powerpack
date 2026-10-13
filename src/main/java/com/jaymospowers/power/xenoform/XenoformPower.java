@@ -159,6 +159,12 @@ public final class XenoformPower implements Power {
 		public int tolls;
 		/** Corrupted Wyrm: ticks the wings are out; corrupted Blur: ticks of a dash that won't stop. */
 		public int wingStall, runaway;
+		/** This change has hurt a living thing (the voices' trial counts the ones that don't). */
+		public boolean hurt;
+		/** Nadir: the Beacon's chosen player, R held for this many ticks (0: not held), and when the last tap was. */
+		public @Nullable UUID beaconTarget;
+		public int beaconHeld;
+		public long beaconTapAt;
 
 		void clearForm() {
 			form = null;
@@ -195,6 +201,9 @@ public final class XenoformPower implements Power {
 			geodeUntil = 0L;
 			tolls = 0;
 			wingStall = runaway = 0;
+			hurt = false;
+			beaconTarget = null;
+			beaconHeld = 0;
 			hudDirty = true;
 		}
 	}
@@ -235,6 +244,7 @@ public final class XenoformPower implements Power {
 			if (source.getEntity() instanceof ServerPlayer player && player != entity && has(player)) {
 				Live live = live(player);
 				if (live.form != null) {
+					live.hurt = true;
 					live.form.onDealtDamage(player, live, entity);
 				}
 			}
@@ -252,6 +262,7 @@ public final class XenoformPower implements Power {
 			FallingStars.clear();
 		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> XenoformDebugCommand.register(dispatcher));
+		XenoVoices.register();
 	}
 
 	public static boolean has(Player player) {
@@ -380,6 +391,7 @@ public final class XenoformPower implements Power {
 			}
 			tickScan(player, live);
 			tickAscension(player);
+			XenoVoices.tick(player);
 			// corrupted: now and then the band changes you without being asked
 			if (live.recharge <= 0 && !player.isCreative() && com.jaymospowers.core.Fate.isCorrupted(player)
 				&& player.getRandom().nextInt(GLITCH_SELF_TICKS) == 0) {
@@ -590,7 +602,8 @@ public final class XenoformPower implements Power {
 		if (player.tickCount % ASCEND_CHECK_EVERY != 0 || com.jaymospowers.core.Fate.isAscended(player)) {
 			return;
 		}
-		if (XenoformState.band(player).unlocked().size() >= XenoForms.all().size() && com.jaymospowers.core.Fate.canAscend(player)) {
+		if (XenoformState.band(player).unlocked().stream().filter(id -> XenoForms.get(id) != null && !XenoForms.get(id).hidden()).count() >= XenoForms.scannable()
+			&& com.jaymospowers.core.Fate.canAscend(player)) {
 			com.jaymospowers.core.Fate.ascend(player);
 		}
 	}
@@ -697,6 +710,9 @@ public final class XenoformPower implements Power {
 		}
 		if (live.ultimate) {
 			form.onUltimateEnd(player, live);
+		}
+		if (fx && !knockout && live.ticksLeft <= 0 && !live.hurt) {
+			XenoVoices.peacefulForm(player);
 		}
 		form.onExit(player, live);
 		player.removeTag(XenoformState.TAG);
