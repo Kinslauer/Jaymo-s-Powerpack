@@ -2479,10 +2479,15 @@ earthquakes, relief quests, forecasts).
   then fall: fall damage applies), and the living in a tornado's core take a little damage. Unless
   `jaymoskingdoms:disaster_damage` is off they tear up the land in their path (5/12 blocks a tick): plants, leaves,
   glass, wool, axe/hoe blocks up to hardness 2.5, and for a monster stone up to hardness 2. Up to 40 blocks per
-  tornado fly as falling blocks; the rest are smashed (a quarter drop). Block entities are never touched. Settlement
+  tornado fly as falling blocks, riding the winds for 2.5 seconds and then falling where they're flung (they no longer
+  hang in the air); the rest are smashed (a quarter drop). Block entities are never touched. Settlement
   buildings it ruins are rebuilt by `Rebuilds` as usual. Touchdowns are announced within 320 blocks; the roar carries.
+- Whole trees (`Trees.uproot`, `FallingTree.fling`): a tornado that strikes a living tree rooted in dirt may tear it
+  out whole (12% a strike for a tornado, trees up to 12 logs, 3 in the air at once; 45% for a monster, up to 64 logs,
+  8 at once). The tree flies off round the winds, tumbling end over end, falls, and breaks apart where its wood hits
+  the ground (logs and saplings drop; anything under it is struck).
 - Villagers (MCA's too) within 110/150 blocks of a tornado run home to bed, or away from it.
-- Jaymo's Powers' Wind (0.9.18): Wind users (tag `jaymospowers_wind`) ride a tornado's winds up to near its top
+- Jaymo's Powers' Wind (0.9.21): Wind users (tag `jaymospowers_wind`) ride a tornado's winds up to near its top
   without damage or fall build-up, and leave it gently; a Cyclone Lance fired at one within 48 blocks shoves it the
   way you aimed (tag `jaymospowers_wind_lance:<time>`). Under a storm cell's thunder Wind counts as in a storm.
 - The client draws the storms as particles: dark cloud decks over each cell within 640 blocks (lower and greener under

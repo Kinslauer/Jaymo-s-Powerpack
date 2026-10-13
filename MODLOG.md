@@ -810,5 +810,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   `CrawlModelFeatureRendererMixin`).
 - **0.9.21, natural disasters, stage 1 (Kingdoms 0.6.10):** storm cells drift across the land (rain and lightning
   only under them), and every few days a supercell puts down a tornado (or a monster) that lifts and flings everything
-  near it and tears up the land; dust devils in deserts. Storm bell, weathervane and barometer. Wind users ride a
+  near it and tears up the land, whole trees included; dust devils in deserts. Storm bell, weathervane and barometer. Wind users ride a
   tornado's winds and shove one off course with the Cyclone Lance (`kingdoms/MODLOG.md`).

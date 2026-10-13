@@ -553,7 +553,34 @@ public final class Trees {
 		if (logs.isEmpty() || logs.stream().noneMatch(p -> natural(level, p))) {
 			return 0;
 		}
-		// the leaves no other wood holds
+		List<BlockPos> leaves = leavesOf(level, logs);
+		logs.sort(Comparator.comparingInt(BlockPos::getY));
+		if (wear && cutter instanceof Player p && !tool.isEmpty() && tool.isDamageableItem()) {
+			tool.hurtAndBreak(Math.max(0, logs.size() - (level.getBlockState(cut).isAir() ? 1 : 0)), p, EquipmentSlot.MAINHAND);
+		}
+		FallingTree.topple(level, cut, logs, leaves, FallingTree.away(cutter, cut, level), cutter, tool, sink);
+		// (the growing-tree record, if it was one, is forgotten when its foot is gone)
+		return logs.size();
+	}
+
+	/**
+	 * (0.6.10) A tornado tears the tree standing on {@code foot} out of the ground whole and flings it off at
+	 * {@code velocity} ({@link FallingTree#fling}). Null (and nothing happens) if it isn't a living tree rooted in the
+	 * ground, or it has more than {@code mostLogs} logs.
+	 */
+	public static @Nullable FallingTree uproot(ServerLevel level, BlockPos foot, int mostLogs, net.minecraft.world.phys.Vec3 velocity, float heading, float tumble) {
+		if (!level.getBlockState(foot.below()).is(BlockTags.DIRT)) {
+			return null;
+		}
+		List<BlockPos> logs = trunk(level, foot);
+		if (logs.isEmpty() || logs.size() > mostLogs || logs.size() >= FELL_MOST || logs.stream().noneMatch(p -> natural(level, p))) {
+			return null;
+		}
+		return FallingTree.fling(level, foot, logs, leavesOf(level, logs), velocity, heading, tumble);
+	}
+
+	/** The leaves these logs hold that no other wood does. */
+	private static List<BlockPos> leavesOf(ServerLevel level, List<BlockPos> logs) {
 		Set<BlockPos> wood = new HashSet<>(logs);
 		List<BlockPos> leaves = new ArrayList<>();
 		Set<BlockPos> looked = new HashSet<>();
@@ -572,13 +599,7 @@ public final class Trees {
 				}
 			}
 		}
-		logs.sort(Comparator.comparingInt(BlockPos::getY));
-		if (wear && cutter instanceof Player p && !tool.isEmpty() && tool.isDamageableItem()) {
-			tool.hurtAndBreak(Math.max(0, logs.size() - (level.getBlockState(cut).isAir() ? 1 : 0)), p, EquipmentSlot.MAINHAND);
-		}
-		FallingTree.topple(level, cut, logs, leaves, FallingTree.away(cutter, cut, level), cutter, tool, sink);
-		// (the growing-tree record, if it was one, is forgotten when its foot is gone)
-		return logs.size();
+		return leaves;
 	}
 
 	/** The logs that come down when {@code cut} is cut: it and those joined to it above (not far off), lowest-found first. */

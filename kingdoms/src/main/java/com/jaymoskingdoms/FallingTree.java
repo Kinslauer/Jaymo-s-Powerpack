@@ -65,6 +65,10 @@ public final class FallingTree extends Entity {
 	static final float CRUSH_MOST = 10.0F, CRUSH_PER_LOG = 0.6F;
 	/** Of its blocks, every this-many'th log and leaf breaks with a puff and a sound (the rest only a puff of chips). */
 	static final int LOG_SOUNDS = 3, LEAF_SOUNDS = 9;
+	/** (0.6.10) A torn-up tree in flight: its fall (blocks/tick²), the air's drag, how long before it can strike the ground
+	 * (ticks, to leave its own hole) and the longest it flies. */
+	static final double FLY_GRAVITY = 0.05, FLY_DRAG = 0.985;
+	static final int FLY_CLEAR = 6, FLY_LONGEST = 600;
 
 	/** One block of the tree: its state, and where it stood relative to the cut. */
 	public record Piece(int state, int x, int y, int z) {
@@ -96,6 +100,10 @@ public final class FallingTree extends Entity {
 	private @Nullable Entity cutter;
 	private ItemStack tool = ItemStack.EMPTY;
 	private @Nullable Consumer<ItemStack> sink;
+	/** (0.6.10) Torn up by a tornado: it flies (ticks flown), tumbling this many degrees a tick. */
+	private boolean flying;
+	private int flown;
+	private float tumble;
 
 	public FallingTree(EntityType<? extends FallingTree> type, Level level) {
 		super(type, level);
@@ -120,6 +128,53 @@ public final class FallingTree extends Entity {
 		ItemStack tool, @Nullable Consumer<ItemStack> sink) {
 		FallingTree tree = new FallingTree(TYPE, level);
 		tree.setPos(cut.getX() + 0.5, cut.getY(), cut.getZ() + 0.5);
+		int top = take(level, tree, cut, logs, leaves);
+		if (top <= 0) {
+			return;
+		}
+		tree.setAttached(HEADING, heading);
+		tree.reach = Math.max(2.0F, top * 0.55F);
+		tree.logs = logs.size();
+		tree.cutter = cutter;
+		tree.tool = tool.copy();
+		tree.sink = sink;
+		level.addFreshEntity(tree);
+		level.playSound(null, cut, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.4F, 0.5F);
+	}
+
+	/**
+	 * (0.6.10) The tree whose {@code logs} and {@code leaves} stood on {@code foot} is torn out of the ground whole (by a
+	 * tornado) and flies off at {@code velocity}, tumbling end over end toward {@code heading} by {@code tumble} degrees a
+	 * tick (null if nothing was there). It falls as anything does once the winds let it go, and breaks apart where it strikes the ground.
+	 */
+	public static @Nullable FallingTree fling(ServerLevel level, BlockPos foot, List<BlockPos> logs, List<BlockPos> leaves, Vec3 velocity, float heading, float tumble) {
+		int height = 1;
+		for (BlockPos p : logs) {
+			height = Math.max(height, p.getY() - foot.getY() + 1);
+		}
+		// it turns about its middle, not its foot
+		BlockPos middle = foot.above(height / 2);
+		FallingTree tree = new FallingTree(TYPE, level);
+		tree.setPos(middle.getX() + 0.5, middle.getY(), middle.getZ() + 0.5);
+		if (take(level, tree, middle, logs, leaves) <= 0) {
+			return null;
+		}
+		tree.setAttached(HEADING, heading);
+		tree.logs = logs.size();
+		tree.flying = true;
+		tree.tumble = tumble;
+		tree.setDeltaMovement(velocity);
+		level.addFreshEntity(tree);
+		level.playSound(null, foot, SoundEvents.ROOTED_DIRT_BREAK, SoundSource.BLOCKS, 1.6F, 0.6F);
+		level.playSound(null, foot, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.4F, 0.5F);
+		return tree;
+	}
+
+	/**
+	 * Its {@code logs} and {@code leaves} leave the world and become {@code tree}'s pieces, placed from {@code origin}.
+	 * Returns how tall it stands above {@code origin} (0: nothing was there).
+	 */
+	private static int take(ServerLevel level, FallingTree tree, BlockPos origin, List<BlockPos> logs, List<BlockPos> leaves) {
 		List<Piece> pieces = new ArrayList<>();
 		int top = 1;
 		for (List<BlockPos> part : List.of(logs, leaves)) {
@@ -129,31 +184,24 @@ public final class FallingTree extends Entity {
 				if (state.isAir()) {
 					continue;
 				}
-				pieces.add(new Piece(Block.getId(state), p.getX() - cut.getX(), p.getY() - cut.getY(), p.getZ() - cut.getZ()));
-				top = Math.max(top, p.getY() - cut.getY() + 1);
+				pieces.add(new Piece(Block.getId(state), p.getX() - origin.getX(), p.getY() - origin.getY(), p.getZ() - origin.getZ()));
+				top = Math.max(top, p.getY() - origin.getY() + 1);
 			}
 		}
 		if (pieces.isEmpty()) {
-			return;
+			return 0;
 		}
 		// they leave the world all at once (the leaves first, so none decay as the wood goes)
 		for (int i = pieces.size() - 1; i >= 0; i--) {
 			Piece p = pieces.get(i);
-			level.setBlock(cut.offset(p.x(), p.y(), p.z()), Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+			level.setBlock(origin.offset(p.x(), p.y(), p.z()), Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
 		}
 		for (Piece p : pieces) {
-			BlockPos at = cut.offset(p.x(), p.y(), p.z());
+			BlockPos at = origin.offset(p.x(), p.y(), p.z());
 			level.updateNeighborsAt(at, Blocks.AIR);
 		}
 		tree.setAttached(PIECES, List.copyOf(pieces));
-		tree.setAttached(HEADING, heading);
-		tree.reach = Math.max(2.0F, top * 0.55F);
-		tree.logs = logs.size();
-		tree.cutter = cutter;
-		tree.tool = tool.copy();
-		tree.sink = sink;
-		level.addFreshEntity(tree);
-		level.playSound(null, cut, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.4F, 0.5F);
+		return top;
 	}
 
 	/** The way from {@code from} to {@code cut} (radians, as {@link #HEADING}), or any way if there's no one. */
@@ -209,10 +257,14 @@ public final class FallingTree extends Entity {
 			}
 			return;
 		}
+		if (this.flying) {
+			this.fly(level, pieces);
+			return;
+		}
 		float lean = this.lean();
 		this.speed += NUDGE + WEIGHT * Mth.sin(lean * Mth.DEG_TO_RAD) / this.reach;
 		float next = Math.min(FLAT, lean + this.speed);
-		boolean landed = next >= FLAT || this.tickCount >= LONGEST || this.strikes(level, pieces, next);
+		boolean landed = next >= FLAT || this.tickCount >= LONGEST || this.strikes(level, pieces, next, 2);
 		if (!landed) {
 			this.entityData.set(LEAN, next);
 			// the rush of air and creaking as it goes over
@@ -221,15 +273,43 @@ public final class FallingTree extends Entity {
 			}
 			return;
 		}
-		this.land(level, pieces, this.strikes(level, pieces, next) ? lean : next);
+		this.land(level, pieces, this.strikes(level, pieces, next, 2) ? lean : next);
 		this.downAt = this.tickCount;
 	}
 
-	/** Whether its wood, leaning {@code lean}, runs into anything solid (beyond its own foot). */
-	private boolean strikes(ServerLevel level, List<Piece> pieces, float lean) {
+	/** (0.6.10) In flight: it falls and tumbles, and once clear of its hole breaks apart where its wood strikes the ground. */
+	private void fly(ServerLevel level, List<Piece> pieces) {
+		Vec3 v = this.getDeltaMovement().add(0.0, -FLY_GRAVITY, 0.0).scale(FLY_DRAG);
+		this.setDeltaMovement(v);
+		this.setPos(this.getX() + v.x, this.getY() + v.y, this.getZ() + v.z);
+		this.flown++;
+		if (this.getY() < level.getMinY()) {
+			this.discard();
+			return;
+		}
+		float lean = this.lean(), next = lean + this.tumble;
+		if (this.flown > FLY_CLEAR && (this.flown > FLY_LONGEST || this.strikes(level, pieces, next, Integer.MIN_VALUE))) {
+			this.flying = false;
+			this.land(level, pieces, lean);
+			this.downAt = this.tickCount;
+			return;
+		}
+		this.entityData.set(LEAN, next);
+		if (this.flown % 8 == 0) {
+			level.playSound(null, this.blockPosition(), SoundEvents.AZALEA_LEAVES_STEP, SoundSource.BLOCKS, 1.2F, 0.6F);
+		}
+	}
+
+	/** Whether this tree has been torn up by a tornado and is still flying, and for how long (ticks). */
+	public int flown() {
+		return this.flying ? this.flown : -1;
+	}
+
+	/** Whether its wood (from {@code fromY} above its origin up), leaning {@code lean}, runs into anything solid. */
+	private boolean strikes(ServerLevel level, List<Piece> pieces, float lean, int fromY) {
 		Quaternionf turn = turn(lean, this.heading());
 		for (Piece p : pieces) {
-			if (p.y() < 2 || !p.blockState().is(BlockTags.LOGS)) {
+			if (p.y() < fromY || !p.blockState().is(BlockTags.LOGS)) {
 				continue;
 			}
 			BlockPos at = BlockPos.containing(this.where(p, turn));

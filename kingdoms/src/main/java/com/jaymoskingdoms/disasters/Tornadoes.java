@@ -1,5 +1,7 @@
 package com.jaymoskingdoms.disasters;
 
+import com.jaymoskingdoms.FallingTree;
+import com.jaymoskingdoms.Trees;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -51,6 +53,12 @@ public final class Tornadoes {
 	static final float[] SOFT_HARDNESS = {0.0F, 2.5F, 3.0F}, STONE_HARDNESS = {-1.0F, -1.0F, 2.0F};
 	/** At most this many torn-up blocks in the air at once per tornado (the rest are smashed). */
 	static final int THROWN_MOST = 40;
+	/** (0.6.10) Torn-up blocks and trees ride its winds this long (ticks), then fall like anything else. */
+	static final int THROWN_RIDE = 50;
+	/** (0.6.10) By size: the chance a tree it strikes is torn out whole (at full strength), its most logs, and the most
+	 * torn-up trees in the air at once. */
+	static final float[] UPROOT = {0.0F, 0.12F, 0.45F};
+	static final int[] TREE_LOGS = {0, 12, 64}, TREES_MOST = {0, 3, 8};
 	/** The share of smashed blocks that drop as items. */
 	static final float SMASHED_DROP = 0.25F;
 	/** The fastest anything moves in its winds (blocks/tick). */
@@ -74,6 +82,8 @@ public final class Tornadoes {
 	static final List<Tornado> SERVER = new ArrayList<>();
 	/** Each tornado's thrown blocks (by tornado id), to cap them. */
 	private static final java.util.Map<Integer, List<FallingBlockEntity>> THROWN = new java.util.HashMap<>();
+	/** Each tornado's torn-up trees in the air (by tornado id), to cap them. */
+	private static final java.util.Map<Integer, List<FallingTree>> TREES = new java.util.HashMap<>();
 
 	private Tornadoes() {
 	}
@@ -84,6 +94,7 @@ public final class Tornadoes {
 	static void clear() {
 		SERVER.clear();
 		THROWN.clear();
+		TREES.clear();
 		LANCED.clear();
 	}
 
@@ -142,6 +153,7 @@ public final class Tornadoes {
 			boolean gone = t.age >= t.life || t.storm >= 0 && storm(t) == null && t.age < t.life - FORM_TICKS && cut(t);
 			if (gone) {
 				THROWN.remove(t.id);
+				TREES.remove(t.id);
 			}
 			return gone;
 		});
@@ -196,7 +208,7 @@ public final class Tornadoes {
 		double pull = t.pull(), height = t.height(), f = t.formed();
 		AABB box = new AABB(t.x - pull, t.y - 4.0, t.z - pull, t.x + pull, t.y + height, t.z + pull);
 		for (Entity e : level.getEntities((Entity)null, box, e -> e.isAlive() && !e.isSpectator()
-			&& !(e instanceof Player p && (p.isCreative() || p.getAbilities().flying)) && !e.isPassenger())) {
+			&& !(e instanceof Player p && (p.isCreative() || p.getAbilities().flying)) && !e.isPassenger() && !letGo(e))) {
 			double dx = e.getX() - t.x, dz = e.getZ() - t.z, d = Math.sqrt(dx * dx + dz * dz);
 			if (d > pull || d < 1.0E-3) {
 				continue;
@@ -235,6 +247,18 @@ public final class Tornadoes {
 		}
 	}
 
+	/** (0.6.10) A torn-up block or tree it has carried long enough (or a tree only toppling): it falls on its own now. */
+	private static boolean letGo(Entity e) {
+		if (e instanceof FallingBlockEntity block) {
+			return block.time > THROWN_RIDE;
+		}
+		if (e instanceof FallingTree tree) {
+			int flown = tree.flown();
+			return flown < 0 || flown > THROWN_RIDE;
+		}
+		return false;
+	}
+
 	/** It tears up a few blocks in its path. */
 	private static void tear(ServerLevel level, Tornado t, RandomSource random) {
 		int tries = Math.round(BLOCKS_PER_TICK[t.size] * t.formed());
@@ -243,6 +267,8 @@ public final class Tornadoes {
 		}
 		List<FallingBlockEntity> thrown = THROWN.computeIfAbsent(t.id, k -> new ArrayList<>());
 		thrown.removeIf(e -> !e.isAlive());
+		List<FallingTree> trees = TREES.computeIfAbsent(t.id, k -> new ArrayList<>());
+		trees.removeIf(e -> !e.isAlive());
 		double swath = t.core() * 1.4;
 		for (int i = 0; i < tries; i++) {
 			double a = random.nextDouble() * Math.PI * 2.0, r = Math.sqrt(random.nextDouble()) * swath;
@@ -259,13 +285,21 @@ public final class Tornadoes {
 			if (!breakable(level, pos, state, t.size)) {
 				continue;
 			}
+			double nx = (x - t.x) / Math.max(0.5, r), nz = (z - t.z) / Math.max(0.5, r);
+			if ((state.is(BlockTags.LOGS) || state.is(BlockTags.LEAVES)) && trees.size() < TREES_MOST[t.size]
+				&& random.nextFloat() < UPROOT[t.size] * t.formed()) {
+				FallingTree tree = uproot(level, t, pos, nx, nz, random);
+				if (tree != null) {
+					trees.add(tree);
+					continue;
+				}
+			}
 			if (state.canBeReplaced() || state.getCollisionShape(level, pos).isEmpty()) {
 				level.destroyBlock(pos, false);
 			} else if (state.getSoundType() == SoundType.GLASS) {
 				level.destroyBlock(pos, false);
 			} else if (thrown.size() < THROWN_MOST && !state.getFluidState().isSource()) {
 				FallingBlockEntity block = FallingBlockEntity.fall(level, pos, state);
-				double nx = (x - t.x) / Math.max(0.5, r), nz = (z - t.z) / Math.max(0.5, r);
 				block.setDeltaMovement(-nz * 0.6 + nx * 0.1, 0.7 + random.nextDouble() * 0.5, nx * 0.6 + nz * 0.1);
 				block.setHurtsEntities(THROWN_DAMAGE, 6);
 				block.syncVelocity = true;
@@ -274,6 +308,33 @@ public final class Tornadoes {
 				level.destroyBlock(pos, random.nextFloat() < SMASHED_DROP);
 			}
 		}
+	}
+
+	/**
+	 * (0.6.10) The tree {@code hit} (a leaf or log at the top of its column) belongs to is torn out whole and flung round
+	 * its winds ({@code nx, nz}: out from its middle), if it's small enough for this tornado. Null if it isn't.
+	 */
+	private static @Nullable FallingTree uproot(ServerLevel level, Tornado t, BlockPos hit, double nx, double nz, RandomSource random) {
+		BlockPos log = null;
+		double best = Double.MAX_VALUE;
+		for (BlockPos q : BlockPos.betweenClosed(hit.offset(-2, -8, -2), hit.offset(2, 0, 2))) {
+			double d = q.distSqr(hit);
+			if (d < best && level.getBlockState(q).is(BlockTags.LOGS)) {
+				best = d;
+				log = q.immutable();
+			}
+		}
+		if (log == null) {
+			return null;
+		}
+		BlockPos foot = log;
+		while (foot.getY() > level.getMinY() && level.getBlockState(foot.below()).is(BlockTags.LOGS)) {
+			foot = foot.below();
+		}
+		double power = 1.0 + (t.size - Tornado.TORNADO) * 0.35;
+		Vec3 v = new Vec3(-nz * 0.55 + nx * 0.1, 0.55 + random.nextDouble() * 0.35, nx * 0.55 + nz * 0.1).scale(power);
+		float heading = (float)Math.atan2(v.z, v.x), tumble = 4.0F + random.nextFloat() * 6.0F;
+		return Trees.uproot(level, foot, TREE_LOGS[t.size], v, heading, tumble);
 	}
 
 	/** Whether a tornado of {@code size} tears up this block. */
