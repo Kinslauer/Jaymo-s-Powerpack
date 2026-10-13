@@ -89,6 +89,13 @@
         }
       },
       {
+        "when": "silver",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/part/tough_handle_silver"
+        }
+      },
+      {
         "when": "rose_gold",
         "model": {
           "type": "minecraft:model",

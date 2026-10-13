@@ -92,6 +92,13 @@
             }
           },
           {
+            "when": "silver",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/mattock/handle_silver"
+            }
+          },
+          {
             "when": "rose_gold",
             "model": {
               "type": "minecraft:model",
@@ -219,6 +226,13 @@
               }
             },
             {
+              "when": "silver",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_broken_silver"
+              }
+            },
+            {
               "when": "rose_gold",
               "model": {
                 "type": "minecraft:model",
@@ -339,6 +353,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/mattock/axe_iron"
+              }
+            },
+            {
+              "when": "silver",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/axe_silver"
               }
             },
             {
@@ -470,6 +491,13 @@
               }
             },
             {
+              "when": "silver",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_broken_silver"
+              }
+            },
+            {
               "when": "rose_gold",
               "model": {
                 "type": "minecraft:model",
@@ -590,6 +618,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/mattock/pick_iron"
+              }
+            },
+            {
+              "when": "silver",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/mattock/pick_silver"
               }
             },
             {

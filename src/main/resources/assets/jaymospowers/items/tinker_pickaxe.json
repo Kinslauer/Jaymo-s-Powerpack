@@ -92,6 +92,13 @@
             }
           },
           {
+            "when": "silver",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickaxe/handle_silver"
+            }
+          },
+          {
             "when": "rose_gold",
             "model": {
               "type": "minecraft:model",
@@ -219,6 +226,13 @@
               }
             },
             {
+              "when": "silver",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickaxe/head_broken_silver"
+              }
+            },
+            {
               "when": "rose_gold",
               "model": {
                 "type": "minecraft:model",
@@ -339,6 +353,13 @@
               "model": {
                 "type": "minecraft:model",
                 "model": "jaymospowers:item/tinkering/pickaxe/head_iron"
+              }
+            },
+            {
+              "when": "silver",
+              "model": {
+                "type": "minecraft:model",
+                "model": "jaymospowers:item/tinkering/pickaxe/head_silver"
               }
             },
             {
@@ -463,6 +484,13 @@
             "model": {
               "type": "minecraft:model",
               "model": "jaymospowers:item/tinkering/pickaxe/binding_iron"
+            }
+          },
+          {
+            "when": "silver",
+            "model": {
+              "type": "minecraft:model",
+              "model": "jaymospowers:item/tinkering/pickaxe/binding_silver"
             }
           },
           {

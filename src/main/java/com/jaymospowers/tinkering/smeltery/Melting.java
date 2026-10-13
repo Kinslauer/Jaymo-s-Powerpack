@@ -74,6 +74,12 @@ public final class Melting {
 	private Melting() {
 	}
 
+	/** (0.8.111) Silver, our own ore: its ingot, nugget, block, raw ore (doubled) and ore blocks. */
+	public static void silver(Item ingot, Item nugget, Item block, Item raw, Item rawBlock, Item... ores) {
+		metal(Molten.SILVER, ingot, nugget, block, raw, rawBlock);
+		add(Molten.SILVER, Molten.INGOT * ORE_INGOTS, ores);
+	}
+
 	/** An ingot, nugget, block and raw ore (doubled) of a metal. */
 	private static void metal(Molten molten, Item ingot, Item nugget, @Nullable Item block, Item raw, Item rawBlock) {
 		add(molten, Molten.INGOT, ingot);
@@ -195,6 +201,7 @@ public final class Melting {
 			case IRON -> new ItemStack(Items.IRON_NUGGET);
 			case GOLD -> new ItemStack(Items.GOLD_NUGGET);
 			case COPPER -> new ItemStack(Items.COPPER_NUGGET);
+			case SILVER -> new ItemStack(Tinkering.SILVER_NUGGET);
 			default -> null;
 		};
 	}
@@ -208,6 +215,7 @@ public final class Melting {
 			case IRON -> new BasinResult(new ItemStack(Items.IRON_BLOCK), Molten.BLOCK);
 			case GOLD -> new BasinResult(new ItemStack(Items.GOLD_BLOCK), Molten.BLOCK);
 			case COPPER -> new BasinResult(new ItemStack(Items.COPPER_BLOCK.weathering().unaffected()), Molten.BLOCK);
+			case SILVER -> new BasinResult(new ItemStack(Tinkering.SILVER_BLOCK), Molten.BLOCK);
 			case AMETHYST -> new BasinResult(new ItemStack(Items.AMETHYST_BLOCK), 400);
 			case SLIME -> new BasinResult(new ItemStack(Items.SLIME_BLOCK), 2250);
 			case HONEY -> new BasinResult(new ItemStack(Items.HONEY_BLOCK), 1000);

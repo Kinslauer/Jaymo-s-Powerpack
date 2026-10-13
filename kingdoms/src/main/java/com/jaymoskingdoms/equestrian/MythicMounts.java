@@ -35,9 +35,13 @@ import org.jspecify.annotations.Nullable;
  * rider shrug off fire and lava. Untamed ones fade with the dawn (or after a while in the Nether) if no one is near.
  */
 public final class MythicMounts {
-	/** How often each player's surroundings are weighed (ticks), and the chance one turns up then. */
+	/**
+	 * How often each player's surroundings are weighed (ticks), and the chance one turns up then: (0.5.57) exceedingly
+	 * rare, about once in 50 hours a player spends where they can turn up (only nights in the wild, or the Nether), and
+	 * never while another wild one is out anywhere.
+	 */
 	static final int CHECK_TICKS = 600;
-	static final float CHANCE = 1.0F / 80.0F;
+	static final float CHANCE = 1.0F / 6000.0F;
 	/** How long the fire-proofing lasts on each refresh (ticks). */
 	static final int FIRE_TICKS = 60;
 	/** An untamed one in the Nether is gone after this (ticks), if no one is near. */
@@ -96,7 +100,7 @@ public final class MythicMounts {
 		}
 		if (tick % CHECK_TICKS == 0) {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-				if (player.level() instanceof ServerLevel level && level.getRandom().nextFloat() < CHANCE) {
+				if (WILD.isEmpty() && player.level() instanceof ServerLevel level && level.getRandom().nextFloat() < CHANCE) {
 					find(server, level, player);
 				}
 			}

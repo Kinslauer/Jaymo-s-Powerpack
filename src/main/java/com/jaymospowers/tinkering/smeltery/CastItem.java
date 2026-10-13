@@ -51,7 +51,7 @@ public class CastItem extends Item {
 				|| stack.is(Items.BRICK) || stack.is(Items.NETHER_BRICK) || Tinkering.ALLOY_INGOTS.containsValue(stack.getItem())) {
 				return INGOT;
 			}
-			if (stack.is(Items.IRON_NUGGET) || stack.is(Items.GOLD_NUGGET) || stack.is(Items.COPPER_NUGGET)) {
+			if (stack.is(Items.IRON_NUGGET) || stack.is(Items.GOLD_NUGGET) || stack.is(Items.COPPER_NUGGET) || stack.is(Tinkering.SILVER_NUGGET)) {
 				return NUGGET;
 			}
 			return null;

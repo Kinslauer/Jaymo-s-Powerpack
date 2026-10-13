@@ -2223,3 +2223,11 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   fiery coat and gives its rider fire resistance. Tame and saddle them like any of our horses; untamed ones leave at
   dawn.
 - Not playtested in game.
+
+## 0.5.57: silver for the silver sword, rarer mythic mounts
+- The silver sword is crafted from two silver ingots and a stick (the `c:ingots/silver` tag; Jaymo's Powers 0.8.111
+  adds silver ore and ingots) and mended with silver ingots instead of iron.
+- Werewolves: a Jaymo's Tinkering tool counts as what its head is made of (read from the `jaymospowers:tool_materials`
+  component by id), so a silver-bladed tinker sword hits for double, and a rose gold one for full.
+- `MythicMounts`: bat horses and nightmares are exceedingly rare: `CHANCE` 1 in 6000 per 30 s check (was 1 in 80),
+  about once in 50 hours a player spends at night in the wild or in the Nether, and none while another wild one is out.

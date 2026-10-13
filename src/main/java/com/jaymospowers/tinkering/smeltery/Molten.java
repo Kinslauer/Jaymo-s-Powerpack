@@ -12,6 +12,7 @@ public enum Molten {
 	IRON("iron", 0xFFA81212, TinkerMaterial.IRON),
 	GOLD("gold", 0xFFF6D609, null),
 	COPPER("copper", 0xFFE77C56, TinkerMaterial.COPPER),
+	SILVER("silver", 0xFFD7E3EC, TinkerMaterial.SILVER),
 	AMETHYST("amethyst", 0xFFA67DE6, null),
 	ROSE_GOLD("rose_gold", 0xFFF7B2A0, TinkerMaterial.ROSE_GOLD),
 	AMETHYST_BRONZE("amethyst_bronze", 0xFFD49BD9, TinkerMaterial.AMETHYST_BRONZE),

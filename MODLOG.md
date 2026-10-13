@@ -624,3 +624,14 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   mimics hiding as loot chests out in the wild. Villagers gossip about where one was seen, and now and then give a
   quest to hunt it down or to survive a night out where it prowls. A silver sword (+4 against undead) drops rarely.
   Two rideable horse breeds join them: the bat horse, which flies (hold jump to climb), and the fiery nightmare.
+- **0.8.111, silver (Kingdoms 0.5.57):** silver ore (stone and deepslate) now generates in the Overworld, in veins of
+  up to 9 from the bottom of the world to y 48, most common around y -8; it needs an iron pickaxe. It drops raw silver
+  (Fortune works). Smelt or blast it into silver ingots, which craft into nuggets and blocks. Silver is a Jaymo's
+  Tinkering metal: the smeltery melts ore and raw silver into two ingots' worth (molten silver), and the casting table
+  and basin cast it into parts, ingots, nuggets and blocks. Silver parts have Tinkers' stats (300 durability, 5.5
+  speed, 2.25 attack, mines like iron) and the Smite trait (extra damage to the undead). Textures are vanilla's iron
+  ones recoloured by `tools/gen_silver.py`; the part and molten textures come from Tinkers' Construct (MIT) through
+  `tools/tinkering_assets.py`. In Kingdoms, the silver sword is now crafted from two silver ingots and a stick and
+  mended with silver ingots, and a Tinkering tool with a silver head counts as silver against werewolves. The bat
+  horse and nightmare are now exceedingly rare: about once in 50 hours a player spends where one can turn up, and
+  never while another wild one is about.
