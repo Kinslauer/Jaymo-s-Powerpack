@@ -765,3 +765,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   twice, then flip the axe end over end overhead and chop down. Sora's Daggers use the Armory dagger combo (cut, flip
   and stab, backhand). New animations `sword_twirl_slash`, `sword_whirl`, `axe_flip_chop`; the vanilla files live in
   `data/minecraft/weapon_attributes`, all written by `tools/combat_animations.py`.
+- **0.9.12, predators eat their kills (Kitchen 0.4.35):** wolves, foxes, bears, zombies and the other scavengers
+  (Kingdoms' and Naturalist's predators too) tear into bodies with a brutal worrying bite, the meat spills on the ground
+  and they eat it from there. Players' kills are left for the player. See Kitchen's MODLOG.

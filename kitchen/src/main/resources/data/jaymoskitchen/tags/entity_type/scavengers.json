@@ -1,0 +1,27 @@
+{
+	"values": [
+		"minecraft:wolf",
+		"minecraft:fox",
+		"minecraft:polar_bear",
+		"minecraft:ocelot",
+		"minecraft:zombie",
+		"minecraft:husk",
+		"minecraft:drowned",
+		"minecraft:zombie_villager",
+		"minecraft:zoglin",
+		{ "id": "jaymoskingdoms:feral_wolf", "required": false },
+		{ "id": "jaymoskingdoms:coyote", "required": false },
+		{ "id": "jaymoskingdoms:werewolf", "required": false },
+		{ "id": "jaymoskingdoms:ogre", "required": false },
+		{ "id": "jaymoskingdoms:cave_ogre", "required": false },
+		{ "id": "jaymoskingdoms:fire_ogre", "required": false },
+		{ "id": "naturalist:bear", "required": false },
+		{ "id": "naturalist:lion", "required": false },
+		{ "id": "naturalist:alligator", "required": false },
+		{ "id": "naturalist:hyena", "required": false },
+		{ "id": "naturalist:vulture", "required": false },
+		{ "id": "naturalist:black_bear", "required": false },
+		{ "id": "naturalist:tiger", "required": false },
+		{ "id": "naturalist:komodo_dragon", "required": false }
+	]
+}

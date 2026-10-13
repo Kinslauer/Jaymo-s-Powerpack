@@ -138,6 +138,11 @@ public class CorpseEntity extends Entity {
 	/** How far behind the limbs trail per block a tick of speed (a sprint is about 0.28), and each step's jolt. */
 	private static final float SWING_TRAIL = 3.2F, SWING_STEP = 0.09F;
 	private int selected;
+	/** (0.4.35) Who killed it (a UUID, or empty), and whether a player had a hand in it: scavengers leave players' kills alone. */
+	private String killer = "";
+	private boolean killedByPlayer;
+	/** (0.4.35) Bites a scavenger has taken out of it so far (see {@link Scavengers}). */
+	private int bites;
 
 	/** Client side: the mob rebuilt from {@link #LOOK}, for drawing. */
 	private @Nullable Entity body;
@@ -1112,6 +1117,62 @@ public class CorpseEntity extends Entity {
 		return kind == CorpseKind.ANIMAL && !isHostile() && !isHeavy();
 	}
 
+	/** (0.4.35) Records who killed it, for {@link Scavengers}. */
+	void setKiller(@Nullable Entity killer, boolean byPlayer) {
+		this.killer = killer == null ? "" : killer.getStringUUID();
+		this.killedByPlayer = byPlayer;
+	}
+
+	/** (0.4.35) Whether {@code mob} made this kill itself. */
+	public boolean killedBy(Entity mob) {
+		return !killer.isEmpty() && killer.equals(mob.getStringUUID());
+	}
+
+	/**
+	 * (0.4.35) Whether a scavenger may eat this body: an animal, a fish, or a person, lying still on the ground. Monsters'
+	 * bodies, the risen dead, iron, players' bodies and anything burning, carried, or carted are left alone, and so are
+	 * players' kills unless the scavenger killed it first itself.
+	 */
+	public boolean isCarrionFor(Entity mob) {
+		if (isRemoved() || kind == CorpseKind.ZOMBIE || kind == CorpseKind.SKELETON || kind == CorpseKind.PLAYER
+			|| isPlayerCorpse() || isHostile() || isHeavy() || isOnFire() || carrier() != null || isPassenger()
+			|| isTumbling() || isNoGravity() || this.entityData.get(CRUMBLING)) {
+			return false;
+		}
+		return killedBy(mob) || !killedByPlayer;
+	}
+
+	/** (0.4.35) A scavenger's bite: the body jerks hard, torn at. Returns the bites taken so far. */
+	int bite() {
+		jolt(true);
+		return ++bites;
+	}
+
+	/**
+	 * (0.4.35) Torn open at last: what it carried spills on the ground (the meat for the scavengers, leather and the
+	 * like for whoever comes by), with a bone or two, and the body is gone. Returns the dropped meat.
+	 */
+	List<net.minecraft.world.entity.item.ItemEntity> tearApart(ServerLevel level) {
+		List<net.minecraft.world.entity.item.ItemEntity> meat = new ArrayList<>();
+		List<ItemStack> spill = new ArrayList<>(loot);
+		loot.clear();
+		if (spill.stream().noneMatch(stack -> stack.has(DataComponents.FOOD))) {
+			// nothing that was meat to a person: the flesh itself, then
+			spill.add(new ItemStack(Items.ROTTEN_FLESH, 1 + random.nextInt(2)));
+		}
+		if (kind != CorpseKind.FISH) {
+			spill.add(new ItemStack(Items.BONE, 1 + random.nextInt(2)));
+		}
+		for (ItemStack stack : spill) {
+			net.minecraft.world.entity.item.ItemEntity dropped = spawnAtLocation(level, stack.copy(), 0.3F);
+			if (dropped != null && stack.has(DataComponents.FOOD)) {
+				meat.add(dropped);
+			}
+		}
+		discard();
+		return meat;
+	}
+
 	/** (0.4.32) Passed straight from whoever holds it into {@code carrier}'s arms (a butcher villager taking it from a player). */
 	void handTo(Entity carrier) {
 		setCarrier(carrier);
@@ -1548,6 +1609,9 @@ public class CorpseEntity extends Entity {
 			this.hotbar.set(i, i < savedHotbar.size() ? savedHotbar.get(i) : ItemStack.EMPTY);
 		}
 		this.selected = input.getIntOr("Selected", 0);
+		this.killer = input.getStringOr("Killer", "");
+		this.killedByPlayer = input.getBooleanOr("KilledByPlayer", false);
+		this.bites = input.getIntOr("Bites", 0);
 		// whatever held it up (a gravity power) is gone after a reload
 		setNoGravity(false);
 		refreshDimensions();
@@ -1567,6 +1631,9 @@ public class CorpseEntity extends Entity {
 		output.putString("OwnerName", ownerName());
 		output.store("Hotbar", ItemStack.OPTIONAL_CODEC.listOf(), hotbar);
 		output.putInt("Selected", selected);
+		output.putString("Killer", killer);
+		output.putBoolean("KilledByPlayer", killedByPlayer);
+		output.putInt("Bites", bites);
 		output.putBoolean("Slim", slim);
 	}
 }

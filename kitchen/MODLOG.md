@@ -1,4 +1,4 @@
-﻿# Jaymo's Kitchen: MODLOG
+# Jaymo's Kitchen: MODLOG
 
 A cooking minigame for Minecraft Java 26.3 (Fabric).
 
@@ -704,3 +704,16 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
   vanilla fish underneath, so they loot in one click already. Kingdoms' moose is a big carcass too.
 - Kingdoms' monsters of legend (0.5.56, optional entries): ogres are `big_carcasses`, the silver skeleton is a
   `skeleton_corpses` mob, and wraiths, mud golems and mimics leave no corpse.
+
+## 0.4.35: predators eat their kills
+- Mobs in the new `scavengers` tag (wolves, foxes, polar bears, ocelots, zombies and their kin, zoglins; optional
+  entries for Kingdoms' feral wolves, coyotes, werewolves and ogres and Naturalist's bears, lions, tigers, hyenas,
+  alligators, komodo dragons and vultures) go to a body when they have nothing to fight and tear into it: they lunge in,
+  worry it with the head down shaking side to side, yank back and drag it, the body jerking hard, blood flying, wet
+  bites and growls. After 4 bites plus 4 per block of its width it's torn open: its loot spills (leather and the like
+  stay for whoever comes by) with a bone or two, plus rotten flesh if it carried no meat. Scavengers nearby then eat
+  the torn-off meat off the ground a piece at a time (healing 3 each) until full (3 pieces, then 4 minutes).
+- Corpses remember their killer (`Killer`, `KilledByPlayer`). Players' kills (and their tame pets' kills) are left
+  alone unless the scavenger made the kill itself; tame animals never scavenge. Monster bodies, the risen dead, iron,
+  players' bodies and anything burning, carried or carted are never eaten. A player's own dropped meat is never eaten.
+- Tuning: the constants at the top of `Scavengers`.
