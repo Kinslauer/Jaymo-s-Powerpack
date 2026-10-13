@@ -32,7 +32,7 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.6.9) Natural disasters, stage 1: storm fronts ({@link Storms}) and tornadoes ({@link Tornadoes}), the instruments
+ * (0.6.10) Natural disasters, stage 1: storm fronts ({@link Storms}) and tornadoes ({@link Tornadoes}), the instruments
  * that watch for them ({@link Instruments}), two game rules, and the op command {@code /kingdom disaster}.
  */
 public final class Disasters {

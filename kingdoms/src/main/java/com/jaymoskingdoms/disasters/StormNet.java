@@ -8,7 +8,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-/** (0.6.9) Server → client: every storm and tornado in the Overworld, and the wind, sent a few times a second. */
+/** (0.6.10) Server → client: every storm and tornado in the Overworld, and the wind, sent a few times a second. */
 public final class StormNet {
 	public record Sync(float windAngle, float windSpeed, List<Storm> storms, List<Tornado> tornadoes) implements CustomPacketPayload {
 		public static final Type<Sync> TYPE = new Type<>(JaymosKingdoms.id("storms"));

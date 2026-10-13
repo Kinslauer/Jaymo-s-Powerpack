@@ -20,7 +20,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.6.9) The client's side of the storms: keeps its copy of the cells and tornadoes ({@link StormNet.Sync}) moving
+ * (0.6.10) The client's side of the storms: keeps its copy of the cells and tornadoes ({@link StormNet.Sync}) moving
  * between updates, eases the rain and thunder where the camera is (which {@code LevelWeatherMixin} hands the sky and
  * the rain), and draws the storms as particles: dark clouds over each cell, seen from far off, and each tornado's
  * whirling funnel and the debris at its foot.

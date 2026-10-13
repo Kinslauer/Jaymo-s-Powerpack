@@ -4,7 +4,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.util.Mth;
 
 /**
- * (0.6.9) A tornado: a dust devil, a tornado or a monster. It wanders under its storm (a dust devil has none),
+ * (0.6.10) A tornado: a dust devil, a tornado or a monster. It wanders under its storm (a dust devil has none),
  * forms over {@link Tornadoes#FORM_TICKS} and ropes out over its last ones. Held by the server ({@link Tornadoes}),
  * mirrored to clients ({@link StormNet}), which draw its funnel.
  */

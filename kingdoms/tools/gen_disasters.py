@@ -1,4 +1,4 @@
-"""Draws and writes Jaymo's Kingdoms' natural disasters' assets (0.6.9), all original and procedural:
+"""Draws and writes Jaymo's Kingdoms' natural disasters' assets (0.6.10), all original and procedural:
 
 - textures/particle/storm_cloud_0..3.png: soft white puffs (tinted by the client) for storm clouds and funnels;
   particles/storm_cloud.json and funnel.json name them.

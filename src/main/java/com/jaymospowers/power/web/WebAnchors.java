@@ -1,9 +1,12 @@
 package com.jaymospowers.power.web;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -30,7 +33,58 @@ public final class WebAnchors {
 	private static final double ASSIST_BEST_ELEVATION = 52.0;
 	private static final double ASSIST_BEST_DISTANCE = 20.0;
 
+	/**
+	 * A swing web (R/G) aimed near a creature, a player or a corpse sticks to it instead of a block: anything whose
+	 * middle is within {@code ENTITY_MAGNET} blocks of the crosshair's line, out to {@code ENTITY_RANGE}, in sight.
+	 * The crosshair lights up while one is in reach.
+	 */
+	public static final double ENTITY_RANGE = 32.0;
+	public static final double ENTITY_MAGNET = 2.0;
+
 	private WebAnchors() {
+	}
+
+	/** Something a swing web can stick to: a living creature or player (not you, your mount or a spectator), or a corpse. */
+	public static boolean webbable(Player player, @Nullable Entity entity) {
+		if (entity == null || entity == player || !entity.isAlive() || entity.isSpectator() || entity == player.getVehicle()
+			|| player.hasPassenger(entity) || entity.isPassengerOfSameVehicle(player)) {
+			return false;
+		}
+		return entity instanceof LivingEntity || com.jaymospowers.power.gravity.GravityPower.isCorpse(entity);
+	}
+
+	/**
+	 * The creature, player or corpse a swing web would stick to: the one whose middle is nearest the crosshair's line
+	 * (within {@link #ENTITY_MAGNET}), not behind a wall, out to {@link #ENTITY_RANGE}. Null if none.
+	 */
+	public static @Nullable Entity entityTarget(Player player) {
+		Vec3 eye = player.getEyePosition();
+		Vec3 look = player.getViewVector(1.0F);
+		double range = ENTITY_RANGE * WebSymbiote.swingScale(player);
+		BlockHitResult wall = clip(player, eye, eye.add(look.scale(range)));
+		double reach = wall.getType() == HitResult.Type.MISS ? range : wall.getLocation().distanceTo(eye) + ENTITY_MAGNET;
+		Entity best = null;
+		double bestScore = Double.MAX_VALUE;
+		AABB search = player.getBoundingBox().expandTowards(look.scale(reach)).inflate(ENTITY_MAGNET + 1.0);
+		for (Entity e : player.level().getEntities(player, search, e -> webbable(player, e))) {
+			Vec3 middle = e.getBoundingBox().getCenter();
+			double along = middle.subtract(eye).dot(look);
+			if (along < 1.0 || along > reach) {
+				continue;
+			}
+			// how far its middle is off the line, less its own size: a big creature is easier to hit
+			double off = middle.distanceTo(eye.add(look.scale(along))) - Math.min(e.getBbWidth(), e.getBbHeight()) * 0.5;
+			if (off > ENTITY_MAGNET) {
+				continue;
+			}
+			// nearest the line first, then nearest you
+			double score = Math.max(0.0, off) + along * 0.02;
+			if (score < bestScore && clip(player, eye, middle).getType() == HitResult.Type.MISS) {
+				bestScore = score;
+				best = e;
+			}
+		}
+		return best;
 	}
 
 	/** Where a swing web would stick, and whether the crosshair found it ({@code assisted} = false). */

@@ -28,7 +28,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.6.9) Tornadoes on the ground. Each one wanders under its storm, pulls in and spins everything near it, lifts
+ * (0.6.10) Tornadoes on the ground. Each one wanders under its storm, pulls in and spins everything near it, lifts
  * what's in its core and flings it out, and (unless the {@link Disasters#DISASTER_DAMAGE} rule is off) tears up the
  * land in its path: plants and leaves, glass, wood, wool, roofs; a monster tears up stone too. What it tears loose
  * is thrown as falling blocks (the rest smashed). Settlements put back their ruined buildings in time ({@code Rebuilds}).

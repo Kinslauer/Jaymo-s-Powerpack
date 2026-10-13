@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.Mth;
 
 /**
- * (0.6.9) A puff of a storm: a storm cloud drifting with its cell, a wisp of a tornado's funnel whirling up round it,
+ * (0.6.10) A puff of a storm: a storm cloud drifting with its cell, a wisp of a tornado's funnel whirling up round it,
  * or the dust and debris churned up at its foot. Spawned by the client alone ({@link StormsClient}) from its copy of
  * the storms; it follows its storm or tornado as that moves, and fades away if it's gone.
  */

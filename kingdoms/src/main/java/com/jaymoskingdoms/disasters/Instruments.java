@@ -25,7 +25,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * (0.6.9) Instruments for the weather: the storm bell (rings and gives a redstone signal while a tornado is near), the
+ * (0.6.10) Instruments for the weather: the storm bell (rings and gives a redstone signal while a tornado is near), the
  * weathervane (right click: the wind, and the nearest storm), and the barometer (held: what the sky is doing).
  */
 public final class Instruments {

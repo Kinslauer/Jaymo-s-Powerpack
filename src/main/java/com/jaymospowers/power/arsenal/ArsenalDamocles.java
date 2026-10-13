@@ -33,8 +33,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * The Void Arsenal's B, <b>Sword of Damocles</b>: a great rift tears open in the sky over you, and three seconds later
  * a sword {@link #LENGTH} blocks long pushes out of it and falls, smashing through whatever stands in its way (trees,
- * roofs, the floor above you) and driving its point into the ground, where it stands for a while before the void takes
- * it back. Whatever it falls on is crushed; around the point, everything is thrown back.
+ * roofs, the floor above you) and driving its point into the ground, where it stands for a while. Then the rift opens
+ * again and the sword is hauled back up into it, hilt first, before the rift closes behind it. Whatever it falls on is crushed; around the point, everything is thrown back.
  *
  * <p>Only the timing and the place are synced ({@link #FALL}, to everyone); every client works out where the sword is
  * from the same formulas as the server ({@link #tipY}, {@link #emerged}). Drawn by {@code ArsenalDamoclesRenderer}.
@@ -80,9 +80,11 @@ public final class ArsenalDamocles {
 	/** Falling: starting speed and the pull (blocks/tick, blocks/tick²). */
 	public static final double FALL_SPEED = 0.4;
 	public static final double FALL_ACCEL = 0.14;
-	/** How long it stands in the ground, then how long it takes to fade. */
+	/** How long it stands in the ground before the rift opens again to take it back. */
 	public static final int STAND = 240;
-	public static final int FADE = 16;
+	/** Hauled back up: starting speed and the pull (blocks/tick, blocks/tick²), once the rift is open again. */
+	public static final double RISE_SPEED = 0.05;
+	public static final double RISE_ACCEL = 0.06;
 	/** The rift closes over this many ticks once the sword has landed. */
 	public static final int PORTAL_CLOSE = 12;
 
@@ -112,8 +114,25 @@ public final class ArsenalDamocles {
 			return (float) (DROP + EMERGE + f);
 		}
 
+		/** Ticks after the cast when the rift starts opening again to take the sword back. */
+		public float reopensAt() {
+			return landsAt() + STAND;
+		}
+
+		/** Ticks after the cast when the sword starts rising (the rift is open again by then). */
+		public float risesAt() {
+			return reopensAt() + PORTAL_CLOSE;
+		}
+
+		/** Ticks after the cast when the point has gone back through the rift. */
+		public float sunkAt() {
+			double d = hiltStart() - tipEnd;
+			return risesAt() + (float) ((-RISE_SPEED + Math.sqrt(RISE_SPEED * RISE_SPEED + 2.0 * RISE_ACCEL * d)) / RISE_ACCEL);
+		}
+
+		/** Ticks after the cast when the rift has closed behind it. */
 		public float gone() {
-			return landsAt() + STAND + FADE;
+			return sunkAt() + PORTAL_CLOSE;
 		}
 
 		/** Along the blade, horizontally: the way the cross-guard runs. */
@@ -153,6 +172,10 @@ public final class ArsenalDamocles {
 
 	/** The point's height at {@code t}. */
 	public static double tipY(Fall fall, float t) {
+		if (t >= fall.risesAt()) {
+			float f = t - fall.risesAt();
+			return Math.min(fall.hiltStart(), fall.tipEnd() + RISE_SPEED * f + 0.5 * RISE_ACCEL * f * f);
+		}
 		if (t < DROP + EMERGE) {
 			return fall.hiltStart() - LENGTH * emerged(t);
 		}
@@ -166,14 +189,25 @@ public final class ArsenalDamocles {
 			float x = t / OPEN_END;
 			return (float) Math.min(1.1, 1.0 - Math.pow(1.0 - x, 3.0) + Math.sin(x * Math.PI) * 0.12);
 		}
+		if (t >= fall.sunkAt()) {
+			return Math.max(0.0F, 1.0F - (t - fall.sunkAt()) / PORTAL_CLOSE);
+		}
+		if (t >= fall.reopensAt()) {
+			return Math.min(1.0F, (t - fall.reopensAt()) / PORTAL_CLOSE);
+		}
 		float closing = t - fall.landsAt();
 		return closing <= 0.0F ? 1.0F : Math.max(0.0F, 1.0F - closing / PORTAL_CLOSE);
 	}
 
-	/** How much of the sword is left (1 standing, down to 0 as the void takes it back). */
-	public static float fade(Fall fall, float t) {
-		float left = t - fall.landsAt() - STAND;
-		return left <= 0.0F ? 1.0F : Math.max(0.0F, 1.0F - left / FADE);
+	/**
+	 * How much of the sword is out of the rift (blocks, point to wherever the rift cuts it): growing as it pushes out,
+	 * all of it while it falls and stands, shrinking again as it's hauled back in.
+	 */
+	public static double shownLength(Fall fall, float t) {
+		if (t >= fall.risesAt()) {
+			return Mth.clamp(fall.hiltStart() - tipY(fall, t), 0.0, LENGTH);
+		}
+		return LENGTH * emerged(t);
 	}
 
 	/** B, while corrupted. */
@@ -252,11 +286,26 @@ public final class ArsenalDamocles {
 			level.sendParticles(ParticleTypes.REVERSE_PORTAL, portal.x, portal.y - 1.0, portal.z, 120, 1.5, 1.0, 1.5, 0.3);
 		}
 		if (live.landed) {
-			if (t == (long) Math.ceil(fall.landsAt()) + STAND) {
-				// the void takes it back
-				double mid = fall.tipEnd() + LENGTH * 0.5;
-				level.sendParticles(ParticleTypes.REVERSE_PORTAL, fall.x(), mid, fall.z(), 160, 0.6, LENGTH * 0.3, 0.6, 0.05);
-				level.playSound(null, fall.x(), mid, fall.z(), SoundEvents.ENDER_EYE_DEATH, SoundSource.PLAYERS, 2.0F, 0.4F);
+			if (t == (long) Math.ceil(fall.reopensAt())) {
+				// the rift opens again to take it back
+				level.playSound(null, portal.x, portal.y, portal.z, SoundEvents.END_PORTAL_SPAWN, SoundSource.PLAYERS, 2.0F, 0.8F);
+				level.sendParticles(ParticleTypes.REVERSE_PORTAL, portal.x, portal.y - 0.3, portal.z, 60, PORTAL_RADIUS * 0.5, 0.2, PORTAL_RADIUS * 0.5, 0.05);
+			}
+			if (t == (long) Math.ceil(fall.risesAt())) {
+				// it tears out of the ground and is hauled up
+				double surface = fall.tipEnd() + EMBED_DEPTH;
+				level.sendParticles(ParticleTypes.REVERSE_PORTAL, fall.x(), surface + 1.0, fall.z(), 120, 1.0, 0.5, 1.0, 0.15);
+				level.playSound(null, fall.x(), surface, fall.z(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 1.5F, 0.5F);
+				level.playSound(null, portal.x, portal.y, portal.z, SoundEvents.PORTAL_TRAVEL, SoundSource.PLAYERS, 0.6F, 0.7F);
+			}
+			if (t > fall.risesAt() && t < fall.sunkAt() && t % 2 == 0) {
+				double tip = tipY(fall, t);
+				double shown = shownLength(fall, t);
+				level.sendParticles(ParticleTypes.REVERSE_PORTAL, fall.x(), tip + shown * 0.5, fall.z(), 8, 0.4, shown * 0.25, 0.4, 0.02);
+			}
+			if (t == (long) Math.ceil(fall.sunkAt())) {
+				level.playSound(null, portal.x, portal.y, portal.z, SoundEvents.ENDER_EYE_DEATH, SoundSource.PLAYERS, 2.0F, 0.4F);
+				level.sendParticles(ParticleTypes.REVERSE_PORTAL, portal.x, portal.y - 0.5, portal.z, 120, 1.5, 0.5, 1.5, 0.2);
 			}
 			return;
 		}
