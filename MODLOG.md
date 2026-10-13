@@ -638,7 +638,12 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.8.113, crawl roll:** while crawling, double-tap Left or Right (A / D) to roll one block that way, turning over once
   along your length. A roll puts out the fire on you and any fire you roll through (`Crawl.Roll`, `Crawl.ROLLING`,
   `client/CrawlRollPose`, `CrawlAvatarRendererMixin`).
-- **0.8.114, no punching trees, no vanilla tools Tinkering makes (Kingdoms 0.5.59):** Andy's call: if Jaymo's
+- **0.8.114, Wind hover sway, aimable Tempest Kick, R-only take-off:** the hover pose is all damped springs: a smaller
+  sway that settles after one soft overshoot, hips that twist after camera turns and lean into them, a slight tip with
+  the look, sag on climbs, slow random gusts, and limbs that trail the body; first person rides it by about a degree
+  with a small bob (`WindHoverSway`, `CameraMixin`). The Tempest Kick flies where you look as the leg snaps (in the
+  air up or down; on the ground level or up). Flight toggles on R only: Sneak + double Jump no longer takes off.
+- **0.8.115, no punching trees, no vanilla tools Tinkering makes (Kingdoms 0.5.59):** Andy's call: if Jaymo's
   Tinkering can make it, the vanilla recipe goes. Its materials cover wood, stone, copper and iron, and its tools the
   pickaxe, axe (hand axe), shovel and hoe (the mattock digs and tills) and sword, so the vanilla wooden, stone, copper
   and iron pickaxe, axe, shovel, hoe and sword recipes are off (Fabric `fabric:false` load conditions over vanilla's

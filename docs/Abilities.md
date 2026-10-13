@@ -58,7 +58,7 @@ power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts
 | Line | Form | Key | Ability | What it does now | Change to |
 |---|---|---|---|---|---|
 | 60 | Starter | passive | Wind cloak | A little quicker on foot; hold Jump in mid-air to drift down slowly, with a cloud under you and breeze wisps curling round you (everyone sees them), fading shortly after you land. Kept for good. | |
-| 61 | Base | R / Sneak + double Jump | Flight | Hover (WASD, Jump up, Sneak down). Sprint: cruise, up to sonic speed. Sneak at speed locks speed. S at speed is the air brake. Diving gains speed; pulling up is limited at speed; turning too hard throws you into a 2 s tumble. You lean into turns. Costs hunger. | |
+| 61 | Base | R | Flight | Hover (WASD, Jump up, Sneak down). Sprint: cruise, up to sonic speed. Sneak at speed locks speed. S at speed is the air brake. Diving gains speed; pulling up is limited at speed; turning too hard throws you into a 2 s tumble. You lean into turns. Costs hunger. | |
 | 62 | Base | flight | Crashes and rams | Hitting walls or the ground at speed hurts (wall damage grows with speed²) and smashes blocks. Flying through mobs at speed rams them (up to 18 hearts) and throws them. | |
 | 63 | Base | G (hold ≤5 s) | Tailwind / Gust | In the air: a dash, Speed and Jump Boost. On the ground: a gust blast (a full charge is TNT-strength). The two have **separate cooldowns** (the gust's up to 3 min). | |
 | 64 | Base | V (hold) | Gale Barrier | Resistance and knockback resistance, and a gust shoves mobs away. 30 s cooldown. | |
