@@ -155,6 +155,17 @@ final class McaBridge {
 			return false;
 		}
 		Enlisted e = worker(villager);
+		if (Hermits.is(e)) {
+			// (0.5.62) a floating island's hermit keeps their robe and their island, whatever MCA's menu says
+			if (villager.getProfession() != Professions.WIZARD) {
+				villager.setProfession(Professions.WIZARD);
+			}
+			return true;
+		}
+		if (e.role() < 0 && Hermits.due(villager) && Hermits.onSkyIsland(level, villager.blockPosition())) {
+			hermit(level, villager, e);
+			return true;
+		}
 		int job = villager.isGuard() ? Folk.GUARD : Professions.role(villager.getVillagerData().profession());
 		MinecraftServer server = level.getServer();
 		if (e.role() >= 0) {
@@ -278,6 +289,18 @@ final class McaBridge {
 		level.playSound(null, villager.blockPosition(), SoundEvents.ILLUSIONER_PREPARE_MIRROR, SoundSource.NEUTRAL, 0.8F, 1.2F);
 		JaymosKingdoms.LOGGER.debug("{} made {} its court wizard", f.name(), villager.getName().getString());
 		return w;
+	}
+
+	/** (0.5.62) {@code villager}, found on a floating island, made its hermit wizard ({@link Hermits}): no kingdom's. */
+	private static void hermit(ServerLevel level, VillagerEntityMCA villager, Enlisted e) {
+		if (villager.getProfession() != Professions.WIZARD) {
+			villager.setProfession(Professions.WIZARD);
+		}
+		e.enlist(Sorcery.WIZARD, Hermits.FACTION);
+		villager.setItemSlot(EquipmentSlot.MAINHAND, new net.minecraft.world.item.ItemStack(Arcana.WIZARD_STAFF));
+		villager.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
+		villager.setHomeTo(villager.blockPosition(), Hermits.HOME_RADIUS);
+		Hermits.settled(level, villager);
 	}
 
 	/** The eldest of {@code f}'s villagers who is an elder, isn't its ruler, nor at work, nor a guard or anything MCA keeps; or null. */

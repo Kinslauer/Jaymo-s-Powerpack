@@ -88,6 +88,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.12: javelins for guards; rulers' tempers
 		Javelins.register();
 		Tempers.register();
+		Retinue.register();
 		Frights.register();
 		// 0.5.21: monsters hunt the settlements' folk as they do villagers
 		Prey.register();
@@ -117,6 +118,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.14: horses and wagons: mounted guards and archers for prosperous realms, a wealthy king's carriage, and the
 		// fiefdoms' caravans to their kingdoms (and their attachment)
 		Wagon.register();
+		// 0.5.64: the richest kingdoms' cannons (their musketeers are Muskets, ticked by each guard)
+		Cannon.register();
+		Cannonball.register();
+		Cannons.register();
 		LOGGER.debug("caravan attachments: {} {}", Caravans.CARAVANS, Carriages.BOUGHT);
 		Caravans.register();
 		Cavalry.register();
@@ -144,12 +149,17 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("thrall attachment: {}", Thralls.TAG);
 		Thralls.register();
 		Sorcery.register();
+		// 0.5.62: the villager on a floating island is a hermit wizard with a story
+		Hermits.register();
 		// Naturalist's predators as rare wilderness encounters (0.5.55)
 		com.jaymoskingdoms.wild.Wild.register();
 		// monsters of legend after Fangs 'n Claws' list (0.5.56)
 		com.jaymoskingdoms.monsters.Monsters.register();
 		Encounters.register();
 		Sightings.register();
+		// 0.5.59: assassins: contracts on rulers and marked players, whispers, the attempt (and the contracts' attachment)
+		LOGGER.debug("contract attachment: {}", Assassins.CONTRACTS);
+		Assassins.register();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();
 			Gatherers.clear();
