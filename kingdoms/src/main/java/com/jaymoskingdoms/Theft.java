@@ -113,7 +113,9 @@ public final class Theft {
 	enum Crime {
 		RUMMAGE(Weight.LIGHT, "rummage"), TAKE(Weight.MEDIUM, "theft"), CROP(Weight.LIGHT, "vandal"), BED(Weight.MEDIUM, "vandal"),
 		JOB_BLOCK(Weight.MEDIUM, "vandal"), CHEST(Weight.MEDIUM, "theft"), STOREHOUSE(Weight.HEAVY, "theft"), BELL(Weight.HEAVY, "vandal"),
-		ARSON(Weight.MEDIUM, "arson"), SORCERY(Weight.MEDIUM, "sorcery"), LIVESTOCK(Weight.LIGHT, "livestock"), FOLK(Weight.MEDIUM, "murder"), VILLAGER(Weight.HEAVY, "murder"), GOLEM(Weight.HEAVY, "murder");
+		ARSON(Weight.MEDIUM, "arson"), SORCERY(Weight.MEDIUM, "sorcery"), LIVESTOCK(Weight.LIGHT, "livestock"), FOLK(Weight.MEDIUM, "murder"), VILLAGER(Weight.HEAVY, "murder"), GOLEM(Weight.HEAVY, "murder"),
+		/** (0.5.45) a caravan horse's saddlebags rifled. */
+		SADDLEBAG(Weight.MEDIUM, "theft");
 
 		final Weight weight;
 		final String cry;

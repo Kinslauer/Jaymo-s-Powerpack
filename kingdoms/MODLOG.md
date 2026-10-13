@@ -1936,3 +1936,38 @@ the top; `Bond`, `Tack`, `Discipline`, `Tackroom`, `TackMenu`), client `TackScre
   - Horse armour: its metal (iron), gold and diamond armour as an overlay over any coat; copper, netherite, leather
     (in its dye), chain and plate barding recoloured from the metal one. Other mods' horse armour shows as iron.
   - The old vanilla-layout coats (`textures/entity/equine/`) are gone.
+
+## 0.5.45: Jaymo's Equestrian, stage 3 (the stables at work)
+- **Stablehand and farrier** (`Stables`, `Folk.STABLEHAND`/`FARRIER`, MCA professions `jaymoskingdoms:stablehand` and
+  `jaymoskingdoms:farrier`): any settlement with a standing stable takes on a stablehand (the day the stable's finished),
+  and a farrier once it has 8 people. They work about the stable going from horse to horse, brushing them or picking
+  their hooves, and go home at night. Walk up to one and they say what they offer, each line a click; or use
+  `/kingdom stable` and `/kingdom farrier` beside them. Someone the settlement hates gets nothing.
+- **Boarding:** the stablehand stalls your horse by one of the stable's hay blocks (the one you ride, lead, or your
+  nearest). It's fed, watered and brushed while it's there, kept in its stall, and can't be ridden or whistled off.
+  The fee is 4 emeralds for each week begun, into the treasury when you take it back out ("Take ... back out", which
+  sets it down beside you). A boarded horse whose stable is ruined walks free.
+- **Horse market:** the stablehand sells 2, 3 or 4 horses a day (poor, prosperous, wealthy), the same for everyone till
+  tomorrow. A poor stable (every village and fief) sells palfreys, steppe ponies and drafts with middling stats at best;
+  richer kingdoms sell their land's horses (desert horses in the desert, ponies on the savanna, drafts in the snow) and
+  coursers, a wealthy one destriers too, each stat the better of two rolls. Price: the breed's (destrier 24, courser 22,
+  desert 18, palfrey and draft 12, pony 10) from half to one and a half times by quality. Bought horses come tamed to
+  you. The stable buys yours back for half its price (a foal 60% of that) if the treasury has it; its tack comes back
+  to you and it becomes one of the realm's horses (a spare for its cavalry).
+- **Farrier:** shoes your horse for 3 emeralds (fresh shoes, hooves trimmed), boarded or not. Tack shop: horseshoes, hoof pick, oats,
+  lead, saddle and bridle anywhere; a brush, a blanket in the realm's colour, the racing saddle and chain barding in
+  prosperous kingdoms; the war saddle and plate barding only in wealthy ones.
+- **Cavalry:** a realm with stables mounts its guards and archers on war saddles with a blanket in its colour; for each
+  standing stable (up to 3) the horse is better (each stat the better of two rolls), a little faster, and more trained
+  in war (level 2, 3, 4); with two or more stables they wear a bridle and chain barding (plate in a wealthy realm).
+- **Knights' destriers:** a mounted guard, archer or ruler cut down by a player leaves his horse wild where it stands,
+  tack and war training kept, for whoever breaks it in. Caravans' horses still go home with the caravan.
+- **Raiders:** every other barbarian raider rides a steppe pony (saddled, no barding); kill him and the pony bolts free.
+- **Saddlebags:** sneak-use a caravan horse with an empty hand to rifle its saddlebags (a few emeralds and goods, once a
+  horse). It's theft (`Theft.Crime.SADDLEBAG`): seen, the caravan's realm cries thief.
+- **Horse quests** (`Quest.BREAK_IN`, `STUD`, `RACE`): a stablehand mostly asks for a wild horse you broke in yourself
+  (not one bought at a stable) or a stud, a horse of a given breed at 45-65% quality or better; either is handed over
+  to the stable when you turn it in. A king with a stable sometimes wants a horse broken in for him, or sends you on a
+  race to another settlement 150-900 blocks off (allowed: distance at 6.5 blocks a second plus 40 seconds): ride in
+  mounted before time's up, then go back to him. Stablehands and farriers also ask for feed, iron, coal and leather.
+  Operators: `/kingdom quests offer horse` beside a stablehand or king.

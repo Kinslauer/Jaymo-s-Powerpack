@@ -528,3 +528,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   jump during the meal or just after it and leaps you clear: 60% of the time, and always in a village or with 3 or
   more creatures or people within 12 blocks. It leaps the way they're fewest, over open ground (straight up if boxed
   in); the movement keys don't answer while it coils (`WebSymbiote.escape`, `WebNet.Escape`, `WebSymbioteClient.tickEscape`).
+- **0.8.88, Jaymo's Equestrian, stage 3 (the stables at work):** ships Jaymo's Kingdoms 0.5.45 (see `kingdoms/MODLOG.md`):
+  stables get a stablehand (boards your horse for 4 emeralds a week, sells horses by land and wealth, buys them back)
+  and a farrier (shoes horses, sells tack, the best only in wealthy kingdoms); realms with stables field better
+  cavalry; a fallen knight's destrier or a raider's steppe pony goes wild for you to break in; rifling a caravan
+  horse's saddlebags is theft; and stablehands and kings give horse quests (break one in, bring a stud, ride to
+  another town against the clock).

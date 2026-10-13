@@ -249,6 +249,8 @@ final class Raids {
 			// (after it's added: its load mustn't take it for a stray)
 			raider.setTask(TASK);
 			raid.party.add(raider.getUUID());
+			// (0.5.45) some ride steppe ponies
+			Stables.pony(level, raider, camp, i);
 		}
 		tell(level, target.seat(), Component.translatable(illagers ? "message.jaymoskingdoms.raid.announce.illager" : "message.jaymoskingdoms.raid.announce",
 			camp.name(), target.name()).withStyle(ChatFormatting.RED));

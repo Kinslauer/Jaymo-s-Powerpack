@@ -61,6 +61,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	public static final int CARTER = 11;
 	/** (0.5.26) A settlement's rickshaw puller: hauls its gatherers' loads, runs errands, carries its people and paying players ({@link Rickshaws}). */
 	public static final int PULLER = 12;
+	/** (0.5.45) A stable's stablehand (boards and sells horses) and farrier (shoes them, sells tack) ({@link Stables}). */
+	public static final int STABLEHAND = 13, FARRIER = 14;
 
 	/**
 	 * A role: its saved name, whether it fights ({@code combatant}: melee unless it's an archer; non-combatants flee
@@ -174,6 +176,16 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			folk.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 			folk.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
 			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.puller_of", faction.name()));
+		}));
+		defineRole(new Role(STABLEHAND, "stablehand", false, false, null, (folk, faction) -> {
+			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BRUSH));
+			folk.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
+			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.stablehand_of", faction.name()));
+		}));
+		defineRole(new Role(FARRIER, "farrier", false, false, null, (folk, faction) -> {
+			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(com.jaymoskingdoms.equestrian.Tackroom.HORSESHOES));
+			folk.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.LEATHER_CHESTPLATE));
+			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.farrier_of", faction.name()));
 		}));
 		defineRole(new Role(FOREMAN, "foreman", false, false, null, (folk, faction) -> {
 			folk.getAttribute(Attributes.MAX_HEALTH).setBaseValue(BUILDER_HEALTH);
@@ -580,6 +592,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 
 	@Override
 	public void die(DamageSource source) {
+		if (this.level() instanceof ServerLevel level) {
+			// (0.5.45) a knight's (or a raider's) horse goes wild when a player cuts him down
+			Stables.riderFell(level, this, source);
+		}
 		if (this.level() instanceof ServerLevel level && this.isCarrying()) {
 			// whatever he was hauling falls where he does
 			this.spawnAtLocation(level, this.takeCarried());

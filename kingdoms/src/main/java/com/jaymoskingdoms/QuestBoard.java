@@ -202,6 +202,17 @@ final class QuestBoard {
 				T.slay("guard.pillagers", "#minecraft:illager", 5, 8),
 				T.fetch("guard.blade", "minecraft:iron_sword|comrades_blade", WAR)),
 			List.of("minecraft:iron_sword*1-1", "minecraft:shield*1-1", "minecraft:arrow*16-32", "minecraft:iron_chestplate*1-1", "minecraft:cooked_beef*6-12"))),
+		// (0.5.45) a stable's people (a stablehand's horse quests are its own, Stables)
+		Map.entry("stablehand", new Trade(List.of(
+				T.gather("stablehand.wheat", "minecraft:wheat", 16, 32),
+				T.gather("stablehand.carrots", "minecraft:carrot", 12, 24),
+				T.slay("stablehand.wolves", "minecraft:wolf", 3, 5)),
+			List.of("minecraft:golden_carrot*3-6", "minecraft:hay_block*4-8", "minecraft:lead*1-2", "minecraft:saddle*1-1", "jaymoskingdoms:oats*8-16"))),
+		Map.entry("farrier", new Trade(List.of(
+				T.gather("farrier.iron", "minecraft:iron_ingot", 8, 16),
+				T.gather("farrier.coal", "minecraft:coal", 12, 24),
+				T.gather("farrier.leather", "minecraft:leather", 6, 12)),
+			List.of("jaymoskingdoms:horseshoes*1-2", "jaymoskingdoms:hoof_pick*1-1", "jaymoskingdoms:bridle*1-1", "minecraft:iron_ingot*3-6"))),
 		Map.entry("none", new Trade(List.of(
 				T.gather("none.berries", "minecraft:sweet_berries", 12, 24),
 				T.gather("none.flowers", "minecraft:poppy", 6, 12),
@@ -243,6 +254,10 @@ final class QuestBoard {
 		// a letter a third of the time (more for the jobless and cartographers), else one of the trade's own
 		float mail = job.equals("none") || job.equals("cartographer") ? 0.45F : 0.25F;
 		List<T> options = new ArrayList<>(trade.quests());
+		if (job.equals("stablehand") && random.nextFloat() < Stables.STABLEHAND_HORSE_QUEST) {
+			// (0.5.45) a stablehand's horse quests
+			return Stables.stablehandQuest(level, f, who, random);
+		}
 		if (random.nextFloat() < mail) {
 			Quest q = mail(level, giver, f, who, random, trade);
 			if (q != null) {
@@ -376,6 +391,13 @@ final class QuestBoard {
 	static @Nullable Quest king(ServerLevel level, LivingEntity king, Faction f, RandomSource random) {
 		Quest.Giver who = new Quest.Giver(king.getUUID(), king.getName().getString(), f.id(), true, "king");
 		Tempers.Temper temper = Tempers.of(f);
+		if (random.nextFloat() < Stables.KING_HORSE_QUEST) {
+			// (0.5.45) a horse broken in for him, or a race to another town
+			Quest q = Stables.kingQuest(level, f, who, royalReward(random), random);
+			if (q != null) {
+				return q;
+			}
+		}
 		if (temper == Tempers.Temper.WARLORD && random.nextFloat() < WARBAND_CHANCE) {
 			Quest q = warband(level, f, who);
 			if (q != null) {
@@ -507,7 +529,7 @@ final class QuestBoard {
 		return new Quest(UUID.randomUUID().toString(), Quest.WARBAND, "king.warband", who, o, royalReward(level.getRandom()), 0L);
 	}
 
-	private static Quest.Reward royalReward(RandomSource random) {
+	static Quest.Reward royalReward(RandomSource random) {
 		List<String> items = new ArrayList<>();
 		items.add(roll(ROYAL_PAYS.get(random.nextInt(ROYAL_PAYS.size())), random));
 		String book = ROYAL_BOOKS.get(random.nextInt(ROYAL_BOOKS.size()));

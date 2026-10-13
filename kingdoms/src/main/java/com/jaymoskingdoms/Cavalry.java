@@ -118,6 +118,8 @@ final class Cavalry {
 		}
 		horse.snapTo(rider.getX(), rider.getY(), rider.getZ(), rider.getYRot(), 0.0F);
 		dress(level.getServer(), horse, f);
+		// (0.5.45) better for the realm's stables
+		Stables.equip(level, horse, f, rider);
 		horse.addTag(TAG);
 		horse.addTag(OF + f.id());
 		if (lent) {
