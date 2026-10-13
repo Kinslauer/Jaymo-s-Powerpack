@@ -1,5 +1,6 @@
 package com.jaymospowers.tinkering.smeltery;
 
+import com.jaymospowers.power.wind.SorasDagger;
 import com.jaymospowers.tinkering.PartType;
 import com.jaymospowers.tinkering.Tinkering;
 import com.jaymospowers.tinkering.ToolPartItem;
@@ -17,6 +18,9 @@ import org.jspecify.annotations.Nullable;
  * ingots' worth (Tinkers' ore doubling); metal gear melts back into the ingots it took.
  */
 public final class Melting {
+	/** (0.8.115) Molten gold to gild Sora's Dagger: a block's worth, as the gold block it took before. */
+	static final int DAGGER_GILDING = Molten.BLOCK;
+
 	/** Ticks to melt: a base plus one per this many mB (an ingot about 2.5 s, a block about 15 s). */
 	static final int MELT_BASE_TICKS = 20, MELT_MB_PER_TICK = 3;
 	/** Ores and raw ore give this many ingots' worth. */
@@ -149,6 +153,10 @@ public final class Melting {
 
 	/** What the casting table makes from this liquid on this cast (or an item to make a cast from), or null. */
 	public static @Nullable ItemStack tableResult(ItemStack cast, Molten molten) {
+		if (gilds(cast)) {
+			// (0.8.115) Andy: Sora's Dagger is gilded in the smeltery, not with a gold block
+			return molten == Molten.GOLD ? cast.transmuteCopy(SorasDagger.STAGES[SorasDagger.GILDED], 1) : null;
+		}
 		if (cast.getItem() instanceof CastItem castItem) {
 			return switch (castItem.shape) {
 				case INGOT -> ingot(molten);
@@ -171,6 +179,9 @@ public final class Melting {
 		if (result == null || result.isEmpty()) {
 			return 0;
 		}
+		if (gilds(cast)) {
+			return DAGGER_GILDING;
+		}
 		if (!(cast.getItem() instanceof CastItem castItem)) {
 			return Molten.INGOT;
 		}
@@ -179,6 +190,11 @@ public final class Melting {
 			case NUGGET -> Molten.NUGGET;
 			default -> castItem.shape.part.cost * Molten.INGOT;
 		};
+	}
+
+	/** (0.8.115) An iron Sora's Dagger, which a block's worth of molten gold gilds. */
+	public static boolean gilds(ItemStack stack) {
+		return stack.getItem() instanceof SorasDagger dagger && dagger.stage == SorasDagger.IRON;
 	}
 
 	/** Whether pouring onto this item uses it up (making a cast does; casting on a cast doesn't). */

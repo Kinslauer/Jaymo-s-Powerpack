@@ -1,4 +1,5 @@
 {
+	"message.jaymoskingdoms.needs_axe": "Wood needs an axe. Knap a hand axe from 3 flint and a stick (leaves drop sticks).",
 	"block.jaymoskingdoms.chopped_log": "Chopped Log",
 	"entity.jaymoskingdoms.folk": "Kingdom Folk",
 	"entity.jaymoskingdoms.king_of": "King of %s",

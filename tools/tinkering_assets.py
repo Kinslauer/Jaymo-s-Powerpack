@@ -164,6 +164,7 @@ SMELTERY_LANG = {
     "gui.jaymospowers.tool_station.clash": "%s and %s don't go together",
     "gui.jaymospowers.tool_station.needs": "Needs %s first",
     "gui.jaymospowers.tool_station.weapon": "%s doesn't go on this weapon",
+    "gui.jaymospowers.tool_station.embed": "Setting diamonds along its edge",
     "tooltip.jaymospowers.tinkering.level": "Level %s (%s / %s xp)",
     "tooltip.jaymospowers.tinkering.level_max": "Level %s (top level)",
     "tooltip.jaymospowers.tinkering.slots": "Modifier slots: %s of %s free",
@@ -553,6 +554,39 @@ def trades_data():
         write(os.path.join(MC_DATA, "tags", "villager_trade", prof, "level_%d.json" % level), {"values": values})
 
 
+# Andy (2026-10-13): if Tinkering can make it, the vanilla recipe goes, and gold and diamond tools and armour too
+# (Tinkering's Diamond modifier gives the diamond tier). Its materials cover wood, stone, copper and iron, and its tools
+# the pickaxe, axe (hand axe), shovel and hoe (mattock: digs and tills) and sword. Fabric's false load condition drops
+# vanilla's file of the same id; their recipe-book advancements go too.
+OFF_TIERS = ("wooden", "stone", "copper", "iron", "golden", "diamond")
+OFF_TOOLS = ("pickaxe", "axe", "shovel", "hoe", "sword")
+# Andy: gold and diamond armour go too (diamond tools come from Tinkering's Diamond modifier)
+OFF_ARMOUR = ("golden", "diamond")
+ARMOUR = ("helmet", "chestplate", "leggings", "boots")
+# Andy: no craftable diamond weapons at all (Armory's skip their recipe in tools/armory_assets.py, WeaponMod's are
+# dropped by tinkering/Uncraftable)
+OFF_WEAPONS = ("diamond_spear",)
+
+
+def vanilla_off():
+    off = {"fabric:load_conditions": [{"condition": "fabric:false"}]}
+    for folder in ("recipe", os.path.join("advancement", "recipes", "tools"), os.path.join("advancement", "recipes", "combat")):
+        shutil.rmtree(os.path.join(MC_DATA, folder), ignore_errors=True)
+    for tier in OFF_TIERS:
+        for tool in OFF_TOOLS:
+            item = tier + "_" + tool
+            write(os.path.join(MC_DATA, "recipe", item + ".json"), off)
+            folder = "combat" if tool == "sword" else "tools"
+            write(os.path.join(MC_DATA, "advancement", "recipes", folder, item + ".json"), off)
+    for tier in OFF_ARMOUR:
+        for piece in ARMOUR:
+            item = tier + "_" + piece
+            write(os.path.join(MC_DATA, "recipe", item + ".json"), off)
+            write(os.path.join(MC_DATA, "advancement", "recipes", "combat", item + ".json"), off)
+    for item in OFF_WEAPONS:
+        write(os.path.join(MC_DATA, "recipe", item + ".json"), off)
+        write(os.path.join(MC_DATA, "advancement", "recipes", "combat", item + ".json"), off)
+
 def data():
     write(os.path.join(DATA, "recipe", "tinkering", "pattern.json"), {
         "type": "minecraft:crafting_shaped", "category": "misc",
@@ -625,6 +659,7 @@ def main():
     data()
     smeltery_data()
     trades_data()
+    vanilla_off()
     lang()
 
 
