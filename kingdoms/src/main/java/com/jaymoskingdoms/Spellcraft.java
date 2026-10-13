@@ -64,11 +64,11 @@ public final class Spellcraft {
 	 * earth's stagger (ticks); air's lift; lightning's damage, how far it chains and to how many; ice's freeze (ticks). */
 	static final float FIRE_SECONDS = 4.0F, FIRE_DAMAGE = 1.0F, WATER_DAMAGE = 6.0F, LIGHTNING_DAMAGE = 3.0F;
 	static final int WATER_SLOW = 60, EARTH_STAGGER = 40, ICE_FREEZE = 160, LIGHTNING_CHAIN = 2;
-	/** (0.6.7) One blow in this many bursts with the element; the rest only spark. A thrown bolt always does. */
+	/** (0.6.8) One blow in this many bursts with the element; the rest only spark. A thrown bolt always does. */
 	static final int PROC_ONE_IN = 20;
-	/** (0.6.7) Air instead lifts on every this-many-th blow, so the next one lands in the air: an air combo. */
+	/** (0.6.8) Air instead lifts on every this-many-th blow, so the next one lands in the air: an air combo. */
 	static final int AIR_EVERY = 2;
-	/** (0.6.7) How long a lightning burst blinds, in ticks (0.3 s). */
+	/** (0.6.8) How long a lightning burst blinds, in ticks (0.3 s). */
 	static final int LIGHTNING_BLIND = 6;
 	static final double AIR_LIFT = 0.9, LIGHTNING_RANGE = 4.0;
 
