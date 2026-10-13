@@ -760,3 +760,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   overhead slam. Shift+Space dives at once on the wings. Web block catch pries 1.5 s; tendril pull 0.5 s and breaks
   spawners; takeover rips tear small craters. Fast landings roll, slow ones ease into the superhero landing. The symbiote talks more, remarks on your
   surroundings, and now and then walks you somewhere it wants to see. `docs/web.md`.
+- **0.9.9, sword, axe and Sora's Dagger combos:** vanilla swords (wooden to netherite, copper too) now cut, twirl the
+  blade like a wheel at your side and cut back, thrust, then spin a full circle with the blade out; vanilla axes cut
+  twice, then flip the axe end over end overhead and chop down. Sora's Daggers use the Armory dagger combo (cut, flip
+  and stab, backhand). New animations `sword_twirl_slash`, `sword_whirl`, `axe_flip_chop`; the vanilla files live in
+  `data/minecraft/weapon_attributes`, all written by `tools/combat_animations.py`.

@@ -9,7 +9,8 @@ and arms follow the torso. On `rightItem` the roll spins the held item round the
 quarterstaff twirls (its model is held by the middle, see armory_assets.py), the pitch flips it end over end, and the
 yaw only turns it about its own length.
 
-Combos go to data/jaymospowers/weapon_attributes/combo_*.json; each weapon's own file names one as its parent. Better
+Combos go to data/jaymospowers/weapon_attributes/combo_*.json; each weapon's own file names one as its parent (the
+Armory's from armory_assets.py, the rest from OTHER_WEAPONS here). Better
 Combat lands the hit at `upswing` of the swing, and plays an animation so that its endTick is the end of the swing.
 A spin can't unwind on the way back to rest, so every spin ends on a whole turn and snaps back to 0 in the same
 instant (`snap`), which looks the same.
@@ -178,6 +179,71 @@ def dagger_flip():
     animation("dagger_flip", "Dagger: flip the knife in the hand, then stab", 3, 20, 28, frames)
 
 
+def sword_twirl_slash():
+    """Spin the sword like a wheel at your side, then a cut from left to right (Better Combat's own cut)."""
+    side = {"rightArm": {"pitch": -0.55, "yaw": 0, "roll": 0.35, "x": -5, "y": 2, "z": -0.5},
+            "leftArm": {"pitch": -0.2, "roll": -0.25}, "rightItem": {"roll": 0}, "torso": {"yaw": -0.2}}
+    frames = [(1, "EASEOUTQUAD", side)]
+    frames += spin(1, 7, TURN, 4, "rightItem", "roll")
+    frames[-1][2].update(hold("rightArm", "leftArm", "torso"))
+    frames.append(snap(7, {"rightItem": {"roll": 0}}))
+    wound = {"rightArm": {"pitch": -1.42, "yaw": -0.91, "roll": 0.21, "x": -4.9, "y": 2.17, "z": -2.4},
+             "rightItem": {"pitch": -0.71, "roll": 1.43, "x": 0.51, "y": -2.19, "z": -0.09},
+             "leftArm": {"pitch": 0.6, "yaw": -0.54, "roll": -0.28, "x": 5, "y": 2, "z": 0},
+             "torso": {"yaw": 0.99, "pitch": 0.1, "roll": 0.06}}
+    frames.append((9, "EASEINOUTQUAD", wound))
+    frames.append((11, "EASEINQUAD", {
+        "rightArm": {"pitch": -1.77, "yaw": -0.05, "roll": 0.06, "x": -3.8, "y": 1.91, "z": -3.69},
+        "rightItem": {"pitch": -1.22, "roll": 1.58, "x": 1.05, "y": -1.99, "z": -0.04},
+        "leftArm": {"pitch": 0.48, "yaw": -0.46, "roll": -0.4}, "torso": {"yaw": 0.03, "pitch": -0.2, "roll": 0}}))
+    frames.append((15, "EASEOUTQUAD", {
+        "rightArm": {"pitch": -2.38, "yaw": 1.2, "roll": -0.8, "x": -5, "y": 1.9, "z": -1.95},
+        "torso": {"yaw": -0.49, "pitch": -0.19}}))
+    animation("sword_twirl_slash", "Sword: twirl it at your side, then cut across", 9, 20, 28, frames)
+
+
+def sword_whirl():
+    """Sword arm straight out, blade along it, and a full turn on the spot."""
+    out = {"rightArm": {"pitch": -0.1, "yaw": 0, "roll": 1.45, "x": -5, "y": 2, "z": 0},
+           "leftArm": {"pitch": -0.2, "yaw": 0, "roll": -0.9, "x": 5, "y": 2, "z": 0},
+           "rightItem": {"pitch": -1.4},
+           "torso": {"yaw": 0.7, "pitch": -0.05},
+           "rightLeg": {"pitch": -0.2, "yaw": 0.3}, "leftLeg": {"pitch": 0.25, "yaw": 0.3}}
+    frames = [(5, "EASEOUTQUAD", out)]
+    for i, tick in enumerate((7, 9, 11, 13, 15), start=1):
+        frames.append((tick, "LINEAR", {"torso": {"yaw": 0.7 - TURN * i / 5},
+                                        "rightLeg": {"yaw": 0.3 - 0.6 * i / 5}, "leftLeg": {"yaw": 0.3 - 0.6 * i / 5}}))
+    frames[-1][2].update(hold("rightArm", "leftArm", "rightItem"))
+    frames.append(snap(15, {"torso": {"yaw": 0.7}}))
+    frames.append((20, "EASEINOUTQUAD", {"torso": {"yaw": 0, "pitch": 0}, "rightItem": {"pitch": 0},
+                                         "rightArm": {"pitch": -0.6, "roll": 0.3}, "leftArm": {"pitch": 0, "roll": -0.2},
+                                         "rightLeg": {"pitch": 0, "yaw": 0}, "leftLeg": {"pitch": 0, "yaw": 0}}))
+    animation("sword_whirl", "Sword: spin round a full circle with the blade out", 6, 20, 28, frames)
+
+
+def axe_flip_chop():
+    """Raise the axe, flip it end over end in the hand, and chop straight down (Better Combat's own slam)."""
+    up = {"rightArm": {"pitch": -2.9, "yaw": 0.1, "roll": 0.2, "x": -5, "y": 1.5, "z": 0.5},
+          "leftArm": {"pitch": -0.6, "roll": -0.3}, "rightItem": {"pitch": 0},
+          "torso": {"pitch": 0.3, "yaw": 0}}
+    frames = [(2, "EASEOUTQUAD", up)]
+    frames += spin(2, 7, -TURN, 4, "rightItem", "pitch")
+    frames[-1][2].update(hold("rightArm", "leftArm", "torso"))
+    frames.append(snap(7, {"rightItem": {"pitch": 0}}))
+    frames.append((9, "EASEINOUTQUAD", {
+        "rightArm": {"pitch": -3.81, "yaw": 0.41, "roll": 0.25, "x": -5, "y": 1.06, "z": 1.67},
+        "rightItem": {"pitch": 0.05, "roll": -0.14, "yaw": -0.41, "x": -0.55, "y": 0.09, "z": -0.27},
+        "leftArm": {"pitch": -1.31, "yaw": -0.06, "roll": -0.22, "x": 5, "y": 2, "z": 0},
+        "torso": {"pitch": 0.51, "y": 0, "z": 0}}))
+    frames.append((11, "EASEINQUAD", {
+        "rightArm": {"pitch": -1.53, "yaw": -0.47, "roll": 0.21, "x": -4.96, "y": 2.25, "z": -2.08},
+        "rightItem": {"pitch": -0.29, "roll": -0.24, "yaw": -0.4, "x": -0.23, "y": 0.2, "z": -1.92},
+        "leftArm": {"pitch": 0.26, "yaw": -1.05, "roll": -1.3, "x": 5.03},
+        "torso": {"pitch": -0.95, "y": -0.15, "z": -0.35}}))
+    frames.append((20, "EASEOUTQUAD", {"torso": {"pitch": -1.0, "y": -0.11, "z": -0.3}}))
+    animation("axe_flip_chop", "Axe: flip it in the raised hand, then chop down", 9, 20, 28, frames)
+
+
 # --- combos -------------------------------------------------------------------------------------------------------
 
 def attack(hitbox, damage, animation, sound, angle=None, upswing=0.5, **extra):
@@ -294,14 +360,42 @@ COMBOS = {
         attack(F, 1.0, "two_handed_stab_left", "spear_stab", 0),
         attack(H, 0.7, "two_handed_slash_horizontal_right", "staff_slash", 120),
     ]},
+    # vanilla swords: cut, twirl and cut back, thrust, spin
+    "sword": {"range_bonus": 0, "category": "sword", "attacks": [
+        attack(H, 1.0, "one_handed_slash_horizontal_right", "sword_slash", 120),
+        attack(H, 1.0, NS + ":sword_twirl_slash", "sword_slash", 120, 0.55),
+        attack(F, 1.0, "one_handed_stab", "sword_slash", 0),
+        attack(H, 1.1, NS + ":sword_whirl", "sword_slash", 360),
+    ]},
+    # vanilla axes: two cuts, then flip it overhead and chop
+    "axe": {"range_bonus": -0.25, "category": "axe", "attacks": [
+        attack(H, 1.0, "one_handed_slash_horizontal_right", "axe_slash", 90, 0.3),
+        attack(H, 1.0, "one_handed_slash_horizontal_left", "axe_slash", 90, 0.3),
+        attack(V, 1.3, NS + ":axe_flip_chop", "axe_slash", 90, 0.55),
+    ]},
+}
+
+
+# weapons outside the Armory (its own are written by armory_assets.py): Wind's Sora's Daggers, and vanilla swords and
+# axes (Better Combat would otherwise give them its plain presets)
+TIERS = ("wooden", "stone", "copper", "iron", "golden", "diamond", "netherite")
+OTHER_WEAPONS = {
+    **{NS + ":" + d: "dagger" for d in ("soras_dagger", "soras_dagger_gold", "soras_dagger_diamond",
+                                        "soras_dagger_tempest")},
+    **{f"minecraft:{t}_sword": "sword" for t in TIERS},
+    **{f"minecraft:{t}_axe": "axe" for t in TIERS},
 }
 
 
 def main():
-    for make in (staff_twirl_front, staff_whirlwind, staff_twirl_overhead, polearm_whirl, dagger_flip):
+    for make in (staff_twirl_front, staff_whirlwind, staff_twirl_overhead, polearm_whirl, dagger_flip,
+                 sword_twirl_slash, sword_whirl, axe_flip_chop):
         make()
     for name, attributes in COMBOS.items():
         write(os.path.join(ATTRS, "combo_" + name + ".json"), {"attributes": attributes})
+    for item, combo in OTHER_WEAPONS.items():
+        ns, path = item.split(":")
+        write(os.path.join(RES, "data", ns, "weapon_attributes", path + ".json"), {"parent": NS + ":combo_" + combo})
 
 
 if __name__ == "__main__":
