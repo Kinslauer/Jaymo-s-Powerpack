@@ -2,6 +2,8 @@ package com.jaymoskingdoms;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import com.jaymoskingdoms.equestrian.Equine;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -33,10 +35,12 @@ public final class StableNet {
 		}
 	}
 
-	/** A horse or a ware: its icon, name, a line about it, and what can be done with it. */
-	public record Row(ItemStack icon, Component label, Component detail, List<Button> buttons) {
+	/** A horse or a ware: its icon (a horse is drawn in its coat), name, a line about it, and what can be done with it. */
+	public record Row(ItemStack icon, Optional<Equine> horse, Component label, Component detail, List<Button> buttons) {
 		static void write(RegistryFriendlyByteBuf buf, Row r) {
 			ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, r.icon);
+			buf.writeBoolean(r.horse.isPresent());
+			r.horse.ifPresent(e -> Equine.STREAM_CODEC.encode(buf, e));
 			ComponentSerialization.STREAM_CODEC.encode(buf, r.label);
 			ComponentSerialization.STREAM_CODEC.encode(buf, r.detail);
 			buf.writeVarInt(r.buttons.size());
@@ -47,6 +51,7 @@ public final class StableNet {
 
 		static Row read(RegistryFriendlyByteBuf buf) {
 			ItemStack icon = ItemStack.OPTIONAL_STREAM_CODEC.decode(buf);
+			Optional<Equine> horse = buf.readBoolean() ? Optional.of(Equine.STREAM_CODEC.decode(buf)) : Optional.empty();
 			Component label = ComponentSerialization.STREAM_CODEC.decode(buf);
 			Component detail = ComponentSerialization.STREAM_CODEC.decode(buf);
 			int n = buf.readVarInt();
@@ -54,7 +59,7 @@ public final class StableNet {
 			for (int i = 0; i < n; i++) {
 				buttons.add(Button.read(buf));
 			}
-			return new Row(icon, label, detail, buttons);
+			return new Row(icon, horse, label, detail, buttons);
 		}
 	}
 

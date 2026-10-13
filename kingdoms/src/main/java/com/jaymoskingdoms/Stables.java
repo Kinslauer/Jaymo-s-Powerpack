@@ -1008,14 +1008,14 @@ public final class Stables {
 		List<StableNet.Row> yours = new ArrayList<>();
 		for (AbstractHorse horse : yours(player, false)) {
 			boolean sellable = !(horse instanceof WarElephant);
-			yours.add(new StableNet.Row(icon(Equestrian.equine(horse).breed()), label(horse), stats(Equestrian.equine(horse)), List.of(
+			yours.add(new StableNet.Row(icon(Equestrian.equine(horse).breed()), Optional.of(Equestrian.equine(horse)), label(horse), stats(Equestrian.equine(horse)), List.of(
 				new StableNet.Button(Component.translatable("gui.jaymoskingdoms.stable.board"), StableNet.BOARD, horse.getId(), true),
 				new StableNet.Button(Component.translatable("gui.jaymoskingdoms.stable.sell", sellPrice(horse)), StableNet.SELL, horse.getId(), sellable))));
 		}
 		List<StableNet.Row> kept = new ArrayList<>();
 		for (AbstractHorse horse : boardedHere(level, player, f)) {
 			int fee = fee(level, horse);
-			kept.add(new StableNet.Row(icon(Equestrian.equine(horse).breed()), label(horse), Component.translatable("gui.jaymoskingdoms.stable.owed", fee),
+			kept.add(new StableNet.Row(icon(Equestrian.equine(horse).breed()), Optional.of(Equestrian.equine(horse)), label(horse), Component.translatable("gui.jaymoskingdoms.stable.owed", fee),
 				List.of(new StableNet.Button(Component.translatable("gui.jaymoskingdoms.stable.collect", fee), StableNet.COLLECT, horse.getId(), true))));
 		}
 		List<StableNet.Row> market = new ArrayList<>();
@@ -1027,7 +1027,7 @@ public final class Stables {
 			Equine e = offers.get(i).equine();
 			Component name = Component.translatable("gui.jaymoskingdoms.stable.offer", Component.translatable(e.breed().key()),
 				Component.translatable("coat.jaymoskingdoms." + e.coatName()));
-			market.add(new StableNet.Row(icon(e.breed()), name, stats(e), List.of(
+			market.add(new StableNet.Row(icon(e.breed()), Optional.of(e), name, stats(e), List.of(
 				new StableNet.Button(Component.translatable("gui.jaymoskingdoms.stable.buy", offers.get(i).price()), StableNet.BUY, i, true))));
 		}
 		return List.of(
@@ -1047,7 +1047,7 @@ public final class Stables {
 			Bond b = Bonding.bond(horse);
 			Component feet = Component.translatable("gui.jaymoskingdoms.farrier.feet", Math.round(b.hooves() / Bond.FULL * 100.0F),
 				Math.round(b.shoes() / Bond.FULL * 100.0F));
-			horses.add(new StableNet.Row(icon(Equestrian.equine(horse).breed()), label(horse), feet, List.of(
+			horses.add(new StableNet.Row(icon(Equestrian.equine(horse).breed()), Optional.of(Equestrian.equine(horse)), label(horse), feet, List.of(
 				new StableNet.Button(Component.translatable("gui.jaymoskingdoms.farrier.shoe", SHOE_PRICE), StableNet.SHOE, horse.getId(), true))));
 		}
 		MinecraftServer server = player.level().getServer();
@@ -1059,7 +1059,7 @@ public final class Stables {
 			boolean stocked = Wealth.atLeast(server, f, ware.tier());
 			Component detail = stocked ? Component.translatable("gui.jaymoskingdoms.farrier.stocked")
 				: Component.translatable("gui.jaymoskingdoms.farrier.locked." + ware.tier().name().toLowerCase(java.util.Locale.ROOT));
-			shop.add(new StableNet.Row(stack, stack.getHoverName(), detail, List.of(
+			shop.add(new StableNet.Row(stack, Optional.empty(), stack.getHoverName(), detail, List.of(
 				new StableNet.Button(Component.translatable("gui.jaymoskingdoms.farrier.buy", ware.price()), StableNet.BUY_TACK, i, stocked))));
 		}
 		return List.of(

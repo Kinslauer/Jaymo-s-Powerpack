@@ -1,7 +1,21 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.StableNet;
+import com.jaymoskingdoms.equestrian.Equestrian;
+import com.jaymoskingdoms.equestrian.Equine;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+import org.jspecify.annotations.Nullable;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -17,15 +31,20 @@ import net.minecraft.world.item.ItemStack;
  * sent back and the screen comes again with what happened written under the list.
  */
 final class StableScreen extends Screen {
-	static final int PANEL_W = 360, PAD = 8, HEADER = 34, FOOTER = 26, HEADING_H = 14, ROW_H = 24, EMPTY_H = 12, SCROLL_STEP = 12, BUTTON_H = 16;
+	static final int PANEL_W = 360, PAD = 8, HEADER = 34, FOOTER = 26, HEADING_H = 14, ROW_H = 24, ICON_W = 28, EMPTY_H = 12, SCROLL_STEP = 12, BUTTON_H = 16;
 
 	/** One line of the list: a heading, a section's "none" line, or a row; {@code y} from the list's top. */
-	private record Line(int y, int h, Component heading, StableNet.@org.jspecify.annotations.Nullable Row row) {
+	private record Line(int y, int h, Component heading, StableNet.@Nullable Row row) {
 	}
 
 	/** A row's button and where it sits before scrolling. */
 	private record Placed(Button button, int y) {
 	}
+
+	/** How a drawn horse is turned (degrees): side on, head to the left. */
+	static final float HORSE_TURN = 270.0F;
+	/** The horses drawn so far, by coat (kept between screens; a few dozen at most). */
+	private static final Map<Equine, @Nullable AbstractHorse> MODELS = new HashMap<>();
 
 	private final StableNet.Open open;
 	private final List<Line> lines = new ArrayList<>();
@@ -173,12 +192,17 @@ final class StableScreen extends Screen {
 				continue;
 			}
 			graphics.fill(x + PAD - 2, ly + 1, x + PANEL_W - PAD + 2, ly + ROW_H - 1, QuestScreen.COLOR_CARD);
-			graphics.item(r.icon(), x + PAD + 2, ly + 4);
-			graphics.itemDecorations(this.font, r.icon(), x + PAD + 2, ly + 4);
-			if (mouseX >= x + PAD + 2 && mouseX < x + PAD + 18 && mouseY >= ly + 4 && mouseY < ly + 20 && mouseY >= top && mouseY < top + view) {
-				hovered = r.icon();
+			AbstractHorse model = r.horse().map(this::model).orElse(null);
+			if (model != null && drawHorse(graphics, model, x + PAD, ly + 1, x + PAD + ICON_W, ly + ROW_H - 1)) {
+				// drawn
+			} else {
+				graphics.item(r.icon(), x + PAD + 6, ly + 4);
+				graphics.itemDecorations(this.font, r.icon(), x + PAD + 6, ly + 4);
+				if (mouseX >= x + PAD + 6 && mouseX < x + PAD + 22 && mouseY >= ly + 4 && mouseY < ly + 20 && mouseY >= top && mouseY < top + view) {
+					hovered = r.icon();
+				}
 			}
-			int textX = x + PAD + 22;
+			int textX = x + PAD + ICON_W + 4;
 			int buttonsW = 0;
 			for (StableNet.Button b : r.buttons()) {
 				buttonsW += this.font.width(b.text()) + 15;
@@ -204,6 +228,49 @@ final class StableScreen extends Screen {
 		if (!hovered.isEmpty()) {
 			graphics.setTooltipForNextFrame(this.font, hovered, mouseX, mouseY);
 		}
+	}
+
+	/** A horse of {@code e} to draw in its coat (one per coat, made once; null if it can't be made). */
+	private @Nullable AbstractHorse model(Equine e) {
+		return MODELS.computeIfAbsent(e, k -> {
+			if (this.minecraft == null || this.minecraft.level == null) {
+				return null;
+			}
+			AbstractHorse horse = k.breed().elephant() ? Equestrian.WAR_ELEPHANT.create(this.minecraft.level, EntitySpawnReason.LOAD)
+				: EntityTypes.HORSE.create(this.minecraft.level, EntitySpawnReason.LOAD);
+			if (horse != null) {
+				// (never in the world: an id no real entity has, which rendering asks for)
+				horse.setId(-1000 - MODELS.size());
+				horse.setAttached(Equestrian.EQUINE, k);
+			}
+			return horse;
+		});
+	}
+
+	/** {@code horse} side on, standing in the box; false (the icon instead) if it couldn't be drawn. */
+	private static boolean drawHorse(GuiGraphicsExtractor graphics, AbstractHorse horse, int x0, int y0, int x1, int y1) {
+		EntityRenderState state;
+		try {
+			EntityRenderer<? super AbstractHorse, ?> renderer = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(horse);
+			state = renderer.createRenderState(horse, 1.0F);
+		} catch (RuntimeException e) {
+			return false;
+		}
+		state.shadowPieces.clear();
+		state.outlineColor = 0;
+		if (state instanceof LivingEntityRenderState living) {
+			living.bodyRot = HORSE_TURN;
+			living.yRot = 0.0F;
+			living.xRot = 0.0F;
+			living.boundingBoxWidth = living.boundingBoxWidth / living.scale;
+			living.boundingBoxHeight = living.boundingBoxHeight / living.scale;
+			living.scale = 1.0F;
+		}
+		// (side on it's longer than its box is wide, and its head stands above the box)
+		float size = Math.min((x1 - x0) / Math.max(1.0F, state.boundingBoxWidth * 1.9F), (y1 - y0) / Math.max(1.0F, state.boundingBoxHeight * 1.35F));
+		Quaternionf rotation = new Quaternionf().rotateZ((float)Math.PI);
+		graphics.entity(state, size, new Vector3f(0.0F, state.boundingBoxHeight * 0.62F, 0.0F), rotation, null, x0, y0, x1, y1);
+		return true;
 	}
 
 	/** {@code text}'s first line within {@code width}. */
