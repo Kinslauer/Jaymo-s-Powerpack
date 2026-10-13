@@ -32,8 +32,8 @@ import org.jspecify.annotations.Nullable;
  * server puts the fire out and syncs the roll so everyone sees the body turn over.
  */
 public final class Crawl {
-	/** How long a roll takes, in ticks (the client spreads the one-block slide over these). */
-	public static final int ROLL_TICKS = 8;
+	/** How long a roll takes, in ticks (the client spreads the one-block slide over these): quick, about walking pace. */
+	public static final int ROLL_TICKS = 5;
 	/** How far a roll carries you sideways, in blocks. */
 	public static final double ROLL_DISTANCE = 1.0;
 

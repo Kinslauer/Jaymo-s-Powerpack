@@ -790,5 +790,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   your name there, and if it survives the raid it almost never forgets (`kingdoms/MODLOG.md`).
 - **0.9.18, crawl looks and held rolls:** a gesture crawler no longer swims on dry land: they drag themselves along
   elbow over elbow with the legs trailing, and a roll stretches the arms past the head with the legs together while the
-  body turns over. Holding A or D after a roll keeps you rolling that way, a block at a time (`client/CrawlPose`,
+  body turns over. Rolls are quick (a block every quarter second, about walking pace) for safe, quiet movement, and holding A or D after a roll keeps you rolling that way, a block at a time (`client/CrawlPose`,
   `CrawlModelFeatureRendererMixin`).
