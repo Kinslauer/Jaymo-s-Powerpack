@@ -533,4 +533,4 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   and a farrier (shoes horses, sells tack, the best only in wealthy kingdoms); realms with stables field better
   cavalry; a fallen knight's destrier or a raider's steppe pony goes wild for you to break in; rifling a caravan
   horse's saddlebags is theft; and stablehands and kings give horse quests (break one in, bring a stud, ride to
-  another town against the clock).
+  another town against the clock). Stablehands and farriers have their own screen: right-click them.

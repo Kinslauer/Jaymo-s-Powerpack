@@ -46,6 +46,11 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		ArmoryLayer.register();
 		// 0.5.34: Jaymo's Equestrian (gaits, the stamina HUD, coats, war elephants)
 		com.jaymoskingdoms.client.equestrian.EquestrianClient.register();
+		// 0.5.45: stablehands' and farriers' screens (the scroll kept when one comes again after a button)
+		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(com.jaymoskingdoms.StableNet.Open.TYPE, (payload, context) -> {
+			int scroll = context.client().gui.screen() instanceof StableScreen was && was.workerId() == payload.workerId() ? was.scroll() : 0;
+			context.client().gui.setScreen(new StableScreen(payload, scroll));
+		});
 	}
 
 	/** Their render state: which of them it is, its faction's style (type ordinal), and the dye it wears (-1 for none). */

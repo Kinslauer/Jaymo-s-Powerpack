@@ -1941,8 +1941,13 @@ the top; `Bond`, `Tack`, `Discipline`, `Tackroom`, `TackMenu`), client `TackScre
 - **Stablehand and farrier** (`Stables`, `Folk.STABLEHAND`/`FARRIER`, MCA professions `jaymoskingdoms:stablehand` and
   `jaymoskingdoms:farrier`): any settlement with a standing stable takes on a stablehand (the day the stable's finished),
   and a farrier once it has 8 people. They work about the stable going from horse to horse, brushing them or picking
-  their hooves, and go home at night. Walk up to one and they say what they offer, each line a click; or use
-  `/kingdom stable` and `/kingdom farrier` beside them. Someone the settlement hates gets nothing.
+  their hooves, and go home at night. Someone the settlement hates gets nothing.
+- **Stable screen** (`StableNet`, client `StableScreen`): right-click a stablehand or farrier (sneak and right-click
+  an MCA one, whose plain click is MCA's own screen), or use `/kingdom stable` / `/kingdom farrier` beside them. The
+  stablehand's screen lists your horses nearby (Board, Sell), those boarded here (Take out, with the fee owed) and
+  today's horses for sale (breed, coat, stats, Buy); the farrier's lists your horses' hooves and shoes (Shoe) and the
+  whole tack shop, the wares your kingdom is too poor for greyed out. What a button did shows under the list; long
+  lists scroll; a Quests button opens their quests. Walking up to one, they greet you with a click that opens it.
 - **Boarding:** the stablehand stalls your horse by one of the stable's hay blocks (the one you ride, lead, or your
   nearest). It's fed, watered and brushed while it's there, kept in its stall, and can't be ridden or whistled off.
   The fee is 4 emeralds for each week begun, into the treasury when you take it back out ("Take ... back out", which

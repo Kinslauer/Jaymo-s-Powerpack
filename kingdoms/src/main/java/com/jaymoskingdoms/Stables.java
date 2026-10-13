@@ -26,6 +26,7 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -168,6 +169,8 @@ public final class Stables {
 			}
 		});
 		UseEntityCallback.EVENT.register(Stables::use);
+		StableNet.register();
+		ServerPlayNetworking.registerGlobalReceiver(StableNet.Act.TYPE, (payload, context) -> act(context.player(), payload));
 		// a boarded horse can't smother in its stall's walls (a tall breed, a low roof)
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof AbstractHorse && source.is(DamageTypes.IN_WALL)
 			&& boarded(entity)));
@@ -348,54 +351,44 @@ public final class Stables {
 				continue;
 			}
 			GREETED.put(key, now);
-			menu(level, player, w, f);
+			hint(player, w, f);
 		}
 	}
 
-	/** What {@code w} offers {@code player}, each a click. */
-	static void menu(ServerLevel level, ServerPlayer player, Worker w, Faction f) {
+	/** A word from {@code w} as {@code player} comes by: who they are, and how to open their screen (or a click on the line). */
+	private static void hint(ServerPlayer player, Worker w, Faction f) {
 		if (Reputation.get(player, f.id()) <= Reputation.HOSTILE) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.stable.refused", w.mob().getName()).withStyle(ChatFormatting.RED));
 			return;
 		}
-		if (w.role() == Folk.FARRIER) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.farrier.greet", w.mob().getName(), f.name()).withStyle(ChatFormatting.GOLD));
-			AbstractHorse horse = yourHorse(player, false);
-			if (horse == null) {
-				// (a boarded one's shod in its stall)
-				horse = yourHorse(player, true);
-			}
-			if (horse != null && hooved(horse)) {
-				option(player, Component.translatable("message.jaymoskingdoms.farrier.shoe", Bonding.name(horse), SHOE_PRICE), "/kingdom farrier shoe " + horse.getId());
-			}
-			option(player, Component.translatable("message.jaymoskingdoms.farrier.see_tack"), "/kingdom farrier tack");
-			return;
-		}
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.stable.greet", w.mob().getName(), f.name(), WEEKLY_FEE).withStyle(ChatFormatting.GOLD));
-		AbstractHorse horse = yourHorse(player, false);
-		if (horse != null) {
-			option(player, Component.translatable("message.jaymoskingdoms.stable.board", Bonding.name(horse)), "/kingdom stable board");
-		}
-		for (AbstractHorse kept : boardedHere(level, player, f)) {
-			option(player, Component.translatable("message.jaymoskingdoms.stable.collect", Bonding.name(kept), fee(level, kept)), "/kingdom stable collect " + kept.getId());
-		}
-		option(player, Component.translatable("message.jaymoskingdoms.stable.see_market"), "/kingdom stable market");
-		if (horse != null) {
-			option(player, Component.translatable("message.jaymoskingdoms.stable.sell", Bonding.name(horse), sellPrice(horse)), "/kingdom stable sell " + horse.getId());
+		String role = w.role() == Folk.FARRIER ? "farrier" : "stable";
+		Component how = Component.translatable(McaCompat.isMca(w.mob()) ? "message.jaymoskingdoms.stable.how_mca" : "message.jaymoskingdoms.stable.how");
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms." + role + ".greet", w.mob().getName(), f.name(), WEEKLY_FEE).withStyle(ChatFormatting.GOLD));
+		option(player, Component.translatable("message.jaymoskingdoms.stable.open", w.mob().getName(), how), "/kingdom " + role);
+	}
+
+	/** Tells {@code player} {@code text}: on the screen they pressed a button on, else in chat. */
+	private static void tell(ServerPlayer player, Component text) {
+		if (screen != null && screen.player == player) {
+			screen.said.add(text);
+		} else {
+			player.sendSystemMessage(text);
 		}
 	}
 
 	private static void option(ServerPlayer player, Component text, String command) {
-		player.sendSystemMessage(Component.literal("  ").append(text.copy().withStyle(style -> style.withColor(ChatFormatting.GREEN).withUnderlined(true)
+		tell(player, Component.literal("  ").append(text.copy().withStyle(style -> style.withColor(ChatFormatting.GREEN).withUnderlined(true)
 			.withClickEvent(new ClickEvent.RunCommand(command)).withHoverEvent(new HoverEvent.ShowText(Component.literal(command))))));
 	}
 
 	/** The stable worker of {@code role} nearest {@code player} (within {@link #MENU_RANGE}), or null (and they're told). */
 	private static @Nullable Worker near(ServerPlayer player, int role) {
+		if (screen != null && screen.player == player && screen.worker.role() == role) {
+			return screen.worker;
+		}
 		ServerLevel level = player.level();
 		List<Worker> found = Workers.near(level, player.getBoundingBox().inflate(MENU_RANGE), w -> w.role() == role && w.isAlive());
 		if (found.isEmpty()) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms." + (role == Folk.FARRIER ? "farrier" : "stable") + ".none_near")
+			tell(player, Component.translatable("message.jaymoskingdoms." + (role == Folk.FARRIER ? "farrier" : "stable") + ".none_near")
 				.withStyle(ChatFormatting.GRAY));
 			return null;
 		}
@@ -409,7 +402,7 @@ public final class Stables {
 			return null;
 		}
 		if (Reputation.get(player, f.id()) <= Reputation.HOSTILE) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.stable.refused", w.mob().getName()).withStyle(ChatFormatting.RED));
+			tell(player, Component.translatable("message.jaymoskingdoms.stable.refused", w.mob().getName()).withStyle(ChatFormatting.RED));
 			return null;
 		}
 		return f;
@@ -502,7 +495,8 @@ public final class Stables {
 		return true;
 	}
 
-	private static int board(ServerPlayer player) {
+	/** Boards horse {@code id} ({@code -1}: the one {@code player} rides or leads, else their nearest). */
+	private static int board(ServerPlayer player, int id) {
 		ServerLevel level = player.level();
 		Worker w = near(player, Folk.STABLEHAND);
 		Faction f = w == null ? null : served(player, w);
@@ -510,9 +504,9 @@ public final class Stables {
 		if (stable == null) {
 			return 0;
 		}
-		AbstractHorse horse = yourHorse(player, false);
-		if (horse == null) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.stable.no_horse").withStyle(ChatFormatting.GRAY));
+		AbstractHorse horse = id < 0 ? yourHorse(player, false) : horseById(player, id);
+		if (horse == null || boarded(horse)) {
+			tell(player, Component.translatable("message.jaymoskingdoms.stable.no_horse").withStyle(ChatFormatting.GRAY));
 			return 0;
 		}
 		BlockPos at = stall(level, stable, f);
@@ -525,7 +519,7 @@ public final class Stables {
 		horse.setAttached(STALL, new Stall(f.id(), Production.day(level.getServer()), at));
 		care(level, horse);
 		level.playSound(null, at, SoundEvents.HORSE_AMBIENT, SoundSource.NEUTRAL, 1.0F, 1.0F);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.stable.boarded", Bonding.name(horse), w.mob().getName(), WEEKLY_FEE)
+		tell(player, Component.translatable("message.jaymoskingdoms.stable.boarded", Bonding.name(horse), w.mob().getName(), WEEKLY_FEE)
 			.withStyle(ChatFormatting.YELLOW));
 		return 1;
 	}
@@ -540,7 +534,7 @@ public final class Stables {
 		AbstractHorse horse = player.level().getEntity(id) instanceof AbstractHorse h && h.isAlive() && Bonding.owner(h, player) ? h : null;
 		Stall s = horse == null ? null : horse.getAttached(STALL);
 		if (s == null || s.faction() != f.id()) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.stable.not_here").withStyle(ChatFormatting.GRAY));
+			tell(player, Component.translatable("message.jaymoskingdoms.stable.not_here").withStyle(ChatFormatting.GRAY));
 			return 0;
 		}
 		int fee = fee(level, horse);
@@ -551,7 +545,7 @@ public final class Stables {
 		BlockPos at = Construction.standable(level, player.blockPosition(), 3);
 		horse.teleportTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
 		level.playSound(null, at, SoundEvents.HORSE_AMBIENT, SoundSource.NEUTRAL, 1.0F, 1.1F);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.stable.collected", Bonding.name(horse), fee).withStyle(ChatFormatting.YELLOW));
+		tell(player, Component.translatable("message.jaymoskingdoms.stable.collected", Bonding.name(horse), fee).withStyle(ChatFormatting.YELLOW));
 		return 1;
 	}
 
@@ -612,7 +606,7 @@ public final class Stables {
 			return true;
 		}
 		if (player.getInventory().countItem(Items.EMERALD) < cost) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.stable.cant_pay", cost).withStyle(ChatFormatting.RED));
+			tell(player, Component.translatable("message.jaymoskingdoms.stable.cant_pay", cost).withStyle(ChatFormatting.RED));
 			return false;
 		}
 		int take = cost;
@@ -720,7 +714,7 @@ public final class Stables {
 			return 0;
 		}
 		List<Offer> offers = offers(level, f);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.stable.market", f.name()).withStyle(ChatFormatting.GOLD));
+		tell(player, Component.translatable("message.jaymoskingdoms.stable.market", f.name()).withStyle(ChatFormatting.GOLD));
 		int shown = 0;
 		for (int i = 0; i < offers.size(); i++) {
 			if (SOLD.containsKey(soldKey(level, f, i))) {
@@ -734,7 +728,7 @@ public final class Stables {
 			shown++;
 		}
 		if (shown == 0) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.stable.sold_out").withStyle(ChatFormatting.GRAY));
+			tell(player, Component.translatable("message.jaymoskingdoms.stable.sold_out").withStyle(ChatFormatting.GRAY));
 		}
 		return 1;
 	}
@@ -753,7 +747,7 @@ public final class Stables {
 		List<Offer> offers = offers(level, f);
 		String key = soldKey(level, f, index);
 		if (index < 0 || index >= offers.size() || SOLD.containsKey(key)) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.stable.gone").withStyle(ChatFormatting.GRAY));
+			tell(player, Component.translatable("message.jaymoskingdoms.stable.gone").withStyle(ChatFormatting.GRAY));
 			return 0;
 		}
 		Offer offer = offers.get(index);
@@ -773,7 +767,7 @@ public final class Stables {
 		Bonding.tamed(horse, player);
 		SOLD.put(key, true);
 		level.playSound(null, at, SoundEvents.HORSE_AMBIENT, SoundSource.NEUTRAL, 1.0F, 1.0F);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.stable.bought", Component.translatable(offer.equine().breed().key()),
+		tell(player, Component.translatable("message.jaymoskingdoms.stable.bought", Component.translatable(offer.equine().breed().key()),
 			offer.price()).withStyle(ChatFormatting.YELLOW));
 		return 1;
 	}
@@ -787,20 +781,20 @@ public final class Stables {
 		}
 		AbstractHorse horse = horseById(player, id);
 		if (horse == null || boarded(horse) || horse instanceof WarElephant) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.stable.no_horse").withStyle(ChatFormatting.GRAY));
+			tell(player, Component.translatable("message.jaymoskingdoms.stable.no_horse").withStyle(ChatFormatting.GRAY));
 			return 0;
 		}
 		int price = sellPrice(horse);
 		Faction now = Factions.get(level.getServer(), f.id());
 		if (now == null || now.treasury() < price) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.stable.too_poor", w.mob().getName(), price).withStyle(ChatFormatting.GRAY));
+			tell(player, Component.translatable("message.jaymoskingdoms.stable.too_poor", w.mob().getName(), price).withStyle(ChatFormatting.GRAY));
 			return 0;
 		}
 		Factions.update(level.getServer(), f.id(), x -> x.withTreasury(Math.max(0L, x.treasury() - price)));
 		giveEmeralds(player, price);
 		Component name = Bonding.name(horse);
 		handOver(level, player, horse, f, w.blockPosition());
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.stable.sold", name, price).withStyle(ChatFormatting.YELLOW));
+		tell(player, Component.translatable("message.jaymoskingdoms.stable.sold", name, price).withStyle(ChatFormatting.YELLOW));
 		return 1;
 	}
 
@@ -865,15 +859,19 @@ public final class Stables {
 		if (f == null) {
 			return 0;
 		}
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.farrier.tack", f.name()).withStyle(ChatFormatting.GOLD));
-		List<Ware> stock = stock(player.level().getServer(), f);
-		for (int i = 0; i < stock.size(); i++) {
-			Ware ware = stock.get(i);
+		tell(player, Component.translatable("message.jaymoskingdoms.farrier.tack", f.name()).withStyle(ChatFormatting.GOLD));
+		MinecraftServer server = player.level().getServer();
+		List<Ware> all = wares();
+		for (int i = 0; i < all.size(); i++) {
+			Ware ware = all.get(i);
+			if (!Wealth.atLeast(server, f, ware.tier())) {
+				continue;
+			}
 			option(player, Component.translatable("message.jaymoskingdoms.farrier.ware", ware.count(), new ItemStack(ware.item()).getHoverName(), ware.price()),
 				"/kingdom farrier buy " + i);
 		}
-		if (stock.size() < wares().size()) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.farrier.richer").withStyle(ChatFormatting.GRAY));
+		if (stock(server, f).size() < all.size()) {
+			tell(player, Component.translatable("message.jaymoskingdoms.farrier.richer").withStyle(ChatFormatting.GRAY));
 		}
 		return 1;
 	}
@@ -885,11 +883,11 @@ public final class Stables {
 			return 0;
 		}
 		MinecraftServer server = player.level().getServer();
-		List<Ware> stock = stock(server, f);
-		if (index < 0 || index >= stock.size()) {
+		List<Ware> all = wares();
+		if (index < 0 || index >= all.size() || !Wealth.atLeast(server, f, all.get(index).tier())) {
 			return 0;
 		}
-		Ware ware = stock.get(index);
+		Ware ware = all.get(index);
 		if (!pay(player, f, ware.price())) {
 			return 0;
 		}
@@ -898,7 +896,7 @@ public final class Stables {
 			// (in the realm's colour)
 			stack.set(DataComponents.DYED_COLOR, new DyedItemColor(f.styleColor(server).getTextureDiffuseColor() & 0xFFFFFF));
 		}
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.farrier.bought", stack.getHoverName(), ware.price()).withStyle(ChatFormatting.YELLOW));
+		tell(player, Component.translatable("message.jaymoskingdoms.farrier.bought", stack.getHoverName(), ware.price()).withStyle(ChatFormatting.YELLOW));
 		give(player, stack);
 		return 1;
 	}
@@ -912,7 +910,7 @@ public final class Stables {
 		}
 		AbstractHorse horse = horseById(player, id);
 		if (horse == null || !hooved(horse)) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.stable.no_horse").withStyle(ChatFormatting.GRAY));
+			tell(player, Component.translatable("message.jaymoskingdoms.stable.no_horse").withStyle(ChatFormatting.GRAY));
 			return 0;
 		}
 		if (!pay(player, f, SHOE_PRICE)) {
@@ -922,7 +920,7 @@ public final class Stables {
 		horse.setAttached(Bonding.BOND, b.withFeet(Bond.FULL, Bond.FULL));
 		level.playSound(null, horse.blockPosition(), SoundEvents.ANVIL_USE, SoundSource.NEUTRAL, 0.6F, 1.5F);
 		level.sendParticles(ParticleTypes.CRIT, horse.getX(), horse.getY() + 0.3, horse.getZ(), 12, 0.4, 0.1, 0.4, 0.05);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.farrier.shod", w.mob().getName(), Bonding.name(horse), SHOE_PRICE)
+		tell(player, Component.translatable("message.jaymoskingdoms.farrier.shod", w.mob().getName(), Bonding.name(horse), SHOE_PRICE)
 			.withStyle(ChatFormatting.YELLOW));
 		return 1;
 	}
@@ -933,7 +931,7 @@ public final class Stables {
 	static LiteralArgumentBuilder<CommandSourceStack> stableCommand() {
 		return Commands.literal("stable")
 			.executes(c -> open(c.getSource().getPlayerOrException(), Folk.STABLEHAND))
-			.then(Commands.literal("board").executes(c -> board(c.getSource().getPlayerOrException())))
+			.then(Commands.literal("board").executes(c -> board(c.getSource().getPlayerOrException(), -1)))
 			.then(Commands.literal("collect").then(Commands.argument("horse", IntegerArgumentType.integer())
 				.executes(c -> collect(c.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(c, "horse")))))
 			.then(Commands.literal("market").executes(c -> market(c.getSource().getPlayerOrException())))
@@ -956,12 +954,174 @@ public final class Stables {
 
 	private static int open(ServerPlayer player, int role) {
 		Worker w = near(player, role);
-		Faction f = w == null ? null : Factions.get(player.level().getServer(), w.factionId());
+		Faction f = w == null ? null : served(player, w);
 		if (f == null) {
 			return 0;
 		}
-		menu(player.level(), player, w, f);
+		show(player, w, f, List.of());
 		return 1;
+	}
+
+	// ---- the screen -------------------------------------------------------------------------------------------------
+
+	/** A button being pressed on {@code worker}'s screen: what's said goes on the screen, not in chat. */
+	private static final class Pressing {
+		final ServerPlayer player;
+		final Worker worker;
+		final List<Component> said = new ArrayList<>();
+
+		Pressing(ServerPlayer player, Worker worker) {
+			this.player = player;
+			this.worker = worker;
+		}
+	}
+
+	private static @Nullable Pressing screen;
+
+	/** A click on {@code w} opens its screen: a plain one on folk, a sneaking one on an MCA villager (a plain one is MCA's own). */
+	private static boolean opens(ServerPlayer player, Worker w) {
+		return McaCompat.isMca(w.mob()) == player.isSecondaryUseActive() && w.factionId() >= 0;
+	}
+
+	/** Sends {@code player} {@code w}'s screen, {@code said} (what the last button did) under it. */
+	private static void show(ServerPlayer player, Worker w, Faction f, List<Component> said) {
+		if (!ServerPlayNetworking.canSend(player, StableNet.Open.TYPE)) {
+			// (no mod on their side: the old way, a word and a click)
+			hint(player, w, f);
+			return;
+		}
+		ServerLevel level = player.level();
+		boolean farrier = w.role() == Folk.FARRIER;
+		Component title = Component.translatable("gui.jaymoskingdoms." + (farrier ? "farrier" : "stable") + ".title", w.mob().getName(), f.name());
+		int purse = player.getInventory().countItem(Items.EMERALD);
+		Component subtitle = farrier ? Component.translatable("gui.jaymoskingdoms.farrier.subtitle", SHOE_PRICE, purse)
+			: Component.translatable("gui.jaymoskingdoms.stable.subtitle", WEEKLY_FEE, purse);
+		MutableComponent note = Component.empty();
+		for (Component c : said) {
+			note.append(note.getSiblings().isEmpty() ? Component.empty() : Component.literal(" ")).append(c);
+		}
+		List<StableNet.Section> sections = farrier ? farrierScreen(player, f) : stableScreen(level, player, f);
+		ServerPlayNetworking.send(player, new StableNet.Open(w.mob().getId(), title, subtitle, note, sections));
+	}
+
+	private static List<StableNet.Section> stableScreen(ServerLevel level, ServerPlayer player, Faction f) {
+		List<StableNet.Row> yours = new ArrayList<>();
+		for (AbstractHorse horse : yours(player, false)) {
+			boolean sellable = !(horse instanceof WarElephant);
+			yours.add(new StableNet.Row(icon(Equestrian.equine(horse).breed()), label(horse), stats(Equestrian.equine(horse)), List.of(
+				new StableNet.Button(Component.translatable("gui.jaymoskingdoms.stable.board"), StableNet.BOARD, horse.getId(), true),
+				new StableNet.Button(Component.translatable("gui.jaymoskingdoms.stable.sell", sellPrice(horse)), StableNet.SELL, horse.getId(), sellable))));
+		}
+		List<StableNet.Row> kept = new ArrayList<>();
+		for (AbstractHorse horse : boardedHere(level, player, f)) {
+			int fee = fee(level, horse);
+			kept.add(new StableNet.Row(icon(Equestrian.equine(horse).breed()), label(horse), Component.translatable("gui.jaymoskingdoms.stable.owed", fee),
+				List.of(new StableNet.Button(Component.translatable("gui.jaymoskingdoms.stable.collect", fee), StableNet.COLLECT, horse.getId(), true))));
+		}
+		List<StableNet.Row> market = new ArrayList<>();
+		List<Offer> offers = offers(level, f);
+		for (int i = 0; i < offers.size(); i++) {
+			if (SOLD.containsKey(soldKey(level, f, i))) {
+				continue;
+			}
+			Equine e = offers.get(i).equine();
+			Component name = Component.translatable("gui.jaymoskingdoms.stable.offer", Component.translatable(e.breed().key()),
+				Component.translatable("coat.jaymoskingdoms." + e.coatName()));
+			market.add(new StableNet.Row(icon(e.breed()), name, stats(e), List.of(
+				new StableNet.Button(Component.translatable("gui.jaymoskingdoms.stable.buy", offers.get(i).price()), StableNet.BUY, i, true))));
+		}
+		return List.of(
+			new StableNet.Section(Component.translatable("gui.jaymoskingdoms.stable.yours"), Component.translatable("gui.jaymoskingdoms.stable.yours_none"), yours),
+			new StableNet.Section(Component.translatable("gui.jaymoskingdoms.stable.kept"), Component.translatable("gui.jaymoskingdoms.stable.kept_none"), kept),
+			new StableNet.Section(Component.translatable("gui.jaymoskingdoms.stable.market"), Component.translatable("message.jaymoskingdoms.stable.sold_out"), market));
+	}
+
+	private static List<StableNet.Section> farrierScreen(ServerPlayer player, Faction f) {
+		List<StableNet.Row> horses = new ArrayList<>();
+		List<AbstractHorse> all = new ArrayList<>(yours(player, false));
+		all.addAll(yours(player, true));
+		for (AbstractHorse horse : all) {
+			if (!hooved(horse)) {
+				continue;
+			}
+			Bond b = Bonding.bond(horse);
+			Component feet = Component.translatable("gui.jaymoskingdoms.farrier.feet", Math.round(b.hooves() / Bond.FULL * 100.0F),
+				Math.round(b.shoes() / Bond.FULL * 100.0F));
+			horses.add(new StableNet.Row(icon(Equestrian.equine(horse).breed()), label(horse), feet, List.of(
+				new StableNet.Button(Component.translatable("gui.jaymoskingdoms.farrier.shoe", SHOE_PRICE), StableNet.SHOE, horse.getId(), true))));
+		}
+		MinecraftServer server = player.level().getServer();
+		List<StableNet.Row> shop = new ArrayList<>();
+		List<Ware> wares = wares();
+		for (int i = 0; i < wares.size(); i++) {
+			Ware ware = wares.get(i);
+			ItemStack stack = new ItemStack(ware.item(), ware.count());
+			boolean stocked = Wealth.atLeast(server, f, ware.tier());
+			Component detail = stocked ? Component.translatable("gui.jaymoskingdoms.farrier.stocked")
+				: Component.translatable("gui.jaymoskingdoms.farrier.locked." + ware.tier().name().toLowerCase(java.util.Locale.ROOT));
+			shop.add(new StableNet.Row(stack, stack.getHoverName(), detail, List.of(
+				new StableNet.Button(Component.translatable("gui.jaymoskingdoms.farrier.buy", ware.price()), StableNet.BUY_TACK, i, stocked))));
+		}
+		return List.of(
+			new StableNet.Section(Component.translatable("gui.jaymoskingdoms.farrier.horses"), Component.translatable("gui.jaymoskingdoms.stable.yours_none"), horses),
+			new StableNet.Section(Component.translatable("gui.jaymoskingdoms.farrier.shop"), Component.empty(), shop));
+	}
+
+	/** {@code player}'s horses about (within {@link #HORSE_RANGE}), boarded or not, nearest first. */
+	private static List<AbstractHorse> yours(ServerPlayer player, boolean boarded) {
+		List<AbstractHorse> horses = new ArrayList<>(player.level().getEntitiesOfClass(AbstractHorse.class, player.getBoundingBox().inflate(HORSE_RANGE),
+			h -> h.isAlive() && mine(h, player) && boarded(h) == boarded));
+		horses.sort(Comparator.comparingDouble(h -> h.distanceToSqr(player)));
+		return horses;
+	}
+
+	private static ItemStack icon(Breed breed) {
+		return new ItemStack(breed.elephant() ? Equestrian.WAR_ELEPHANT_SPAWN_EGG : Items.HORSE_SPAWN_EGG);
+	}
+
+	private static Component stats(Equine e) {
+		return Component.translatable("gui.jaymoskingdoms.stable.stats", pct(e.speed()), pct(e.stamina()), pct(e.jump()), pct(e.courage()));
+	}
+
+	/** A horse's name, and its breed if it has a name of its own. */
+	private static Component label(AbstractHorse horse) {
+		Equine e = Equestrian.equine(horse);
+		return horse.hasCustomName() ? Component.translatable("gui.jaymoskingdoms.stable.named", Bonding.name(horse), Component.translatable(e.breed().key()))
+			: Bonding.name(horse);
+	}
+
+	/** {@code player} pressed a button on a stable worker's screen: it's done as the command would, and the screen comes again with what was said. */
+	private static void act(ServerPlayer player, StableNet.Act act) {
+		if (!(player.level().getEntity(act.workerId()) instanceof Worker w) || !isStableWorker(w.role()) || !w.isAlive()
+			|| w.distanceToSqr(player.position()) > (MENU_RANGE + 4.0) * (MENU_RANGE + 4.0)) {
+			return;
+		}
+		if (act.action() == StableNet.QUESTS) {
+			Quests.open(player, w.mob());
+			return;
+		}
+		Pressing pressing = new Pressing(player, w);
+		screen = pressing;
+		try {
+			switch (act.action()) {
+				case StableNet.BOARD -> board(player, act.arg());
+				case StableNet.COLLECT -> collect(player, act.arg());
+				case StableNet.BUY -> buy(player, act.arg());
+				case StableNet.SELL -> sell(player, act.arg());
+				case StableNet.SHOE -> shoe(player, act.arg());
+				case StableNet.BUY_TACK -> buyTack(player, act.arg());
+				default -> {
+				}
+			}
+		} finally {
+			screen = null;
+		}
+		Faction f = Factions.get(player.level().getServer(), w.factionId());
+		if (f == null || f.fallen() || Reputation.get(player, f.id()) <= Reputation.HOSTILE) {
+			pressing.said.forEach(player::sendSystemMessage);
+			return;
+		}
+		show(player, w, f, pressing.said);
 	}
 
 	// ---- riders -----------------------------------------------------------------------------------------------------
@@ -1045,8 +1205,18 @@ public final class Stables {
 	// ---- saddlebags -------------------------------------------------------------------------------------------------
 
 	private static InteractionResult use(Player player, Level level, InteractionHand hand, Entity entity, net.minecraft.world.phys.@Nullable EntityHitResult hit) {
-		if (!(level instanceof ServerLevel server) || !(player instanceof ServerPlayer sp) || !(entity instanceof AbstractHorse horse) || hand != InteractionHand.MAIN_HAND
-			|| player.isSpectator()) {
+		if (!(level instanceof ServerLevel server) || !(player instanceof ServerPlayer sp) || hand != InteractionHand.MAIN_HAND || player.isSpectator()) {
+			return InteractionResult.PASS;
+		}
+		if (entity instanceof Worker w && isStableWorker(w.role()) && w.isAlive() && opens(sp, w)) {
+			// (an MCA villager's own screen on a plain click; theirs on a sneaking one)
+			Faction f = served(sp, w);
+			if (f != null) {
+				show(sp, w, f, List.of());
+			}
+			return InteractionResult.SUCCESS;
+		}
+		if (!(entity instanceof AbstractHorse horse)) {
 			return InteractionResult.PASS;
 		}
 		if (boarded(horse) && player.getMainHandItem().isEmpty() && !player.isSecondaryUseActive()) {
