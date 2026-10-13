@@ -31,6 +31,7 @@ import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
@@ -74,6 +75,11 @@ public final class EquestrianClient {
 
 	public static void register() {
 		EntityRenderers.register(Equestrian.WAR_ELEPHANT, WarElephantRenderer::new);
+		// 0.5.40: Mo' Creatures' horse for every horse, skeleton horse and zombie horse
+		TackLayer.register();
+		EntityRenderers.register(EntityTypes.HORSE, MocHorseRenderer::new);
+		EntityRenderers.register(EntityTypes.SKELETON_HORSE, MocHorseRenderer::new);
+		EntityRenderers.register(EntityTypes.ZOMBIE_HORSE, MocHorseRenderer::new);
 		Equestrian.localRider = new Equestrian.LocalRider() {
 			@Override
 			public boolean controls(Player controller) {
@@ -107,7 +113,6 @@ public final class EquestrianClient {
 			}
 		});
 		MenuScreens.register(Bonding.TACK_MENU, TackScreen::new);
-		TackLayer.register();
 		HudElementRegistry.attachElementAfter(VanillaHudElements.CROSSHAIR, JaymosKingdoms.id("horse_tag"), EquestrianClient::tag);
 		ScreenEvents.AFTER_INIT.register((minecraft, screen, width, height) -> {
 			if (screen instanceof AbstractMountInventoryScreen<?> mount && screen instanceof MountScreen holder

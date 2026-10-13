@@ -1875,5 +1875,19 @@ the top; `Bond`, `Tack`, `Discipline`, `Tackroom`, `TackMenu`), client `TackScre
   - Chain barding (armour 4) and plate barding (9, toughness 1); leather is vanilla's horse armour. Saddlebags stay
     Jaymo's Kitchen's (body slot).
   - Drawn in 3D on horses, skeleton and zombie horses: the war saddle (deep seat, high cantle, red cloth, stirrups), the
-    racing saddle, the headstall and reins they come with, the black-and-brass bridle, the blanket in its dye, shoes.
+    racing saddle, the black-and-brass bridle, the blanket in its dye, shoes.
 - Death keeps the mane lock; the bridle and blanket drop.
+- **Mo' Creatures horses** (Andy: "these horse models are not gonna cut it"): every horse, skeleton horse and zombie
+  horse is now DrZhark's Mo' Creatures horse (GPL-3, credited in `licenses/mocreatures`), ported to 26.3 as
+  `MocHorseModel` and drawn by `MocHorseRenderer`: jointed legs (the cannon bends as the hoof comes forward), the head,
+  neck and mane moving together, the mouth opening to eat, the tail lifting with speed; vanilla's rear and graze blend
+  in. Foals are the same horse at 55% size.
+  - Coats: our 36 breed coats are painted onto Mo' Creatures' white horse and shaded with it, so every coat keeps its
+    eyes, nostrils, mouth and hooves (`tools/gen_moc_horses.py`, specs still in `tools/gen_equestrian.py`). Skeleton
+    horses wear its skeleton (bone, sooty, mossy), zombie horses its undead horse (rotten, pale, mottled).
+  - A vanilla saddle is its saddle, stirrups, headstall, bit rings and reins (reins while ridden); the war and racing
+    saddles, the bridle, blanket and shoes are ours on its bones. Its headstall shows with any saddle unless the horse
+    wears a bridle.
+  - Horse armour: its metal (iron), gold and diamond armour as an overlay over any coat; copper, netherite, leather
+    (in its dye), chain and plate barding recoloured from the metal one. Other mods' horse armour shows as iron.
+  - The old vanilla-layout coats (`textures/entity/equine/`) are gone.

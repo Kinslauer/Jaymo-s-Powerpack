@@ -1,11 +1,12 @@
 """Draws Jaymo's Equestrian's tack (stage 2, 0.5.40), all original and procedural:
 
-- the 3D tack's pieces (assets/jaymoskingdoms/tack/tack.json: boxes on the horse model's bones, read by the client's
-  TackLayer) and their textures: textures/entity/tack/tack.png (leather, iron, brass) and tack_blanket.png (greyscale,
-  tinted by the blanket's dye). Groups: war_saddle (deep seat, high cantle, long flaps, heavy stirrups), racing_saddle
-  (small and flat, short stirrups), headstall (the plain headstall and reins a war or racing saddle comes with), bridle
-  (black leather, brass, a browband), *_reins (shown while ridden), shoes (iron rings at the hooves), blanket.
-- chain and plate barding for the horse armour model (textures/entity/equipment/horse_body/*.png, the horse's 64x64
+- the 3D tack's pieces (assets/jaymoskingdoms/tack/tack.json: boxes on the bones of MocHorseModel, Mo' Creatures' horse,
+  read by the client's TackLayer) and their textures: textures/entity/tack/tack.png (leather, iron, brass) and
+  tack_blanket.png (greyscale, tinted by the blanket's dye). Groups: war_saddle (deep seat, high cantle, long flaps,
+  heavy stirrups), racing_saddle (small and flat, short stirrups), bridle (black leather, brass, a browband),
+  bridle_reins (shown while ridden), shoes (iron rings at the hooves), blanket. (The plain headstall and reins any
+  saddle comes with are Mo' Creatures'.)
+- chain and plate barding for vanilla's horse armour model (our horses wear tools/gen_moc_horses.py's overlays instead) (textures/entity/equipment/horse_body/*.png, the horse's 64x64
   box layout: body, neck, head, muzzle and the tops of the legs).
 - the items' 16x16 sprites.
 
@@ -40,54 +41,49 @@ def shade(c, f):
 
 
 # ---- the 3D tack -------------------------------------------------------------------------------------------------------
-# (group, bone, pos, size, material, grow, rot) -- positions in the bone's own space (the horse model's, 1/16 block)
-L_HIND, R_HIND, L_FRONT, R_FRONT = "left_hind_leg", "right_hind_leg", "left_front_leg", "right_front_leg"
+# (group, bone, pos, size, material, grow, rot) -- positions in the bone's own space (MocHorseModel's, 1/16 block): the
+# saddles sit on its saddle bone (they move back with it when the horse rears), their stirrups hang from its stirrup
+# bones (and swing with them), the bridle is on its head, the bridle's reins on its rein bones, the shoes on its hooves
+L_HOOF, R_HOOF, LF_HOOF, RF_HOOF = "leg1_c", "leg2_c", "leg3_c", "leg4_c"
 PIECES = [
     # the war saddle: a deep seat, a high cantle behind, a pommel in front, long flaps, a red saddle cloth edge, stirrups
-    ("war_saddle", "body", (-5.5, -9.0, -10.0), (11, 1, 10), LEATHER_DARK, 0.0, None),
-    ("war_saddle", "body", (-4.5, -14.0, -1.5), (9, 5, 2), LEATHER_DARK, 0.0, None),
-    ("war_saddle", "body", (-3.0, -12.0, -11.0), (6, 3, 2), LEATHER_DARK, 0.0, None),
-    ("war_saddle", "body", (5.0, -8.5, -9.0), (1, 8, 8), LEATHER, 0.0, None),
-    ("war_saddle", "body", (-6.0, -8.5, -9.0), (1, 8, 8), LEATHER, 0.0, None),
-    ("war_saddle", "body", (-6.0, -9.5, -12.0), (12, 1, 2), WAR_RED, 0.1, None),
-    ("war_saddle", "body", (-5.5, 1.6, -6.5), (11, 1, 2), LEATHER_DARK, 0.0, None),
-    ("war_saddle", "body", (6.0, -1.0, -5.0), (1, 6, 1), LEATHER_DARK, 0.0, None),
-    ("war_saddle", "body", (-7.0, -1.0, -5.0), (1, 6, 1), LEATHER_DARK, 0.0, None),
-    ("war_saddle", "body", (6.0, 5.0, -6.5), (1, 1, 4), IRON, 0.0, None),
-    ("war_saddle", "body", (-7.0, 5.0, -6.5), (1, 1, 4), IRON, 0.0, None),
+    ("war_saddle", "saddle", (-5.5, 0.0, -4.0), (11, 1, 10), LEATHER_DARK, 0.0, None),
+    ("war_saddle", "saddle", (-4.5, -5.0, 4.5), (9, 5, 2), LEATHER_DARK, 0.0, None),
+    ("war_saddle", "saddle", (-3.0, -3.0, -5.0), (6, 3, 2), LEATHER_DARK, 0.0, None),
+    ("war_saddle", "saddle", (5.0, 0.5, -3.0), (1, 8, 8), LEATHER, 0.0, None),
+    ("war_saddle", "saddle", (-6.0, 0.5, -3.0), (1, 8, 8), LEATHER, 0.0, None),
+    ("war_saddle", "saddle", (-6.0, -0.5, -6.0), (12, 1, 2), WAR_RED, 0.1, None),
+    ("war_saddle", "saddle", (-5.5, 10.6, -0.5), (11, 1, 2), LEATHER_DARK, 0.0, None),
+    ("war_saddle", "stirrup_left", (0.5, 0.0, -0.5), (1, 8, 1), LEATHER_DARK, 0.0, None),
+    ("war_saddle", "stirrup_right", (-1.5, 0.0, -0.5), (1, 8, 1), LEATHER_DARK, 0.0, None),
+    ("war_saddle", "stirrup_left", (0.5, 8.0, -2.0), (1, 1, 4), IRON, 0.0, None),
+    ("war_saddle", "stirrup_right", (-1.5, 8.0, -2.0), (1, 1, 4), IRON, 0.0, None),
     # the racing saddle: small and flat, a low cantle, short flaps, stirrups ridden short
-    ("racing_saddle", "body", (-4.5, -8.6, -8.0), (9, 1, 7), LEATHER_LIGHT, 0.0, None),
-    ("racing_saddle", "body", (-3.0, -9.6, -2.0), (6, 1, 1), LEATHER_LIGHT, 0.0, None),
-    ("racing_saddle", "body", (5.0, -8.2, -7.5), (1, 4, 5), LEATHER, 0.0, None),
-    ("racing_saddle", "body", (-6.0, -8.2, -7.5), (1, 4, 5), LEATHER, 0.0, None),
-    ("racing_saddle", "body", (-5.4, 1.6, -6.0), (11, 1, 1), LEATHER, 0.0, None),
-    ("racing_saddle", "body", (6.0, -5.0, -5.0), (1, 3, 1), LEATHER, 0.0, None),
-    ("racing_saddle", "body", (-7.0, -5.0, -5.0), (1, 3, 1), LEATHER, 0.0, None),
-    ("racing_saddle", "body", (6.0, -2.0, -6.0), (1, 1, 3), IRON, 0.0, None),
-    ("racing_saddle", "body", (-7.0, -2.0, -6.0), (1, 1, 3), IRON, 0.0, None),
-    # the plain headstall: a noseband, a band behind the eyes, the bit rings, the reins
-    ("headstall", "head_parts", (-2.0, -11.0, -5.0), (4, 5, 1), LEATHER_DARK, 0.25, None),
-    ("headstall", "head_parts", (-3.0, -11.0, 0.0), (6, 5, 1), LEATHER_DARK, 0.25, None),
-    ("headstall", "head_parts", (2.0, -9.0, -6.0), (1, 2, 2), IRON, 0.0, None),
-    ("headstall", "head_parts", (-3.0, -9.0, -6.0), (1, 2, 2), IRON, 0.0, None),
-    ("headstall_reins", "head_parts", (3.1, -6.0, -8.0), (0, 3, 16), LEATHER_DARK, 0.0, (-30.0, 0.0, 0.0)),
-    ("headstall_reins", "head_parts", (-3.1, -6.0, -8.0), (0, 3, 16), LEATHER_DARK, 0.0, (-30.0, 0.0, 0.0)),
-    # the bridle: black leather with brass, a browband under the ears
-    ("bridle", "head_parts", (-2.0, -11.0, -5.0), (4, 5, 1), BLACK_LEATHER, 0.35, None),
-    ("bridle", "head_parts", (-3.0, -11.0, 0.0), (6, 5, 1), BLACK_LEATHER, 0.35, None),
-    ("bridle", "head_parts", (-3.0, -11.6, 3.0), (6, 1, 1), BRASS, 0.2, None),
-    ("bridle", "head_parts", (2.2, -9.0, -6.0), (1, 2, 2), BRASS, 0.05, None),
-    ("bridle", "head_parts", (-3.2, -9.0, -6.0), (1, 2, 2), BRASS, 0.05, None),
-    ("bridle_reins", "head_parts", (3.3, -6.0, -8.0), (0, 3, 16), BLACK_LEATHER, 0.0, (-30.0, 0.0, 0.0)),
-    ("bridle_reins", "head_parts", (-3.3, -6.0, -8.0), (0, 3, 16), BLACK_LEATHER, 0.0, (-30.0, 0.0, 0.0)),
-    # horseshoes: an iron band round each hoof
-    ("shoes", L_HIND, (-3.0, 9.0, -1.0), (4, 1, 4), IRON, 0.2, None),
-    ("shoes", R_HIND, (-1.0, 9.0, -1.0), (4, 1, 4), IRON, 0.2, None),
-    ("shoes", L_FRONT, (-3.0, 9.0, -1.9), (4, 1, 4), IRON, 0.2, None),
-    ("shoes", R_FRONT, (-1.0, 9.0, -1.9), (4, 1, 4), IRON, 0.2, None),
+    ("racing_saddle", "saddle", (-4.5, 0.4, -2.0), (9, 1, 7), LEATHER_LIGHT, 0.0, None),
+    ("racing_saddle", "saddle", (-3.0, -0.6, 4.0), (6, 1, 1), LEATHER_LIGHT, 0.0, None),
+    ("racing_saddle", "saddle", (5.0, 0.8, -1.5), (1, 4, 5), LEATHER, 0.0, None),
+    ("racing_saddle", "saddle", (-6.0, 0.8, -1.5), (1, 4, 5), LEATHER, 0.0, None),
+    ("racing_saddle", "saddle", (-5.4, 10.6, 0.0), (11, 1, 1), LEATHER, 0.0, None),
+    ("racing_saddle", "stirrup_left", (0.5, 0.0, -0.5), (1, 4, 1), LEATHER, 0.0, None),
+    ("racing_saddle", "stirrup_right", (-1.5, 0.0, -0.5), (1, 4, 1), LEATHER, 0.0, None),
+    ("racing_saddle", "stirrup_left", (0.5, 4.0, -1.5), (1, 1, 3), IRON, 0.0, None),
+    ("racing_saddle", "stirrup_right", (-1.5, 4.0, -1.5), (1, 1, 3), IRON, 0.0, None),
+    # the bridle: black leather with brass, a noseband, a band behind the eyes, a browband under the ears, the bit rings
+    ("bridle", "head", (-2.0, -10.0, -4.0), (4, 5, 1), BLACK_LEATHER, 0.35, None),
+    ("bridle", "head", (-2.5, -10.0, 2.0), (5, 5, 1), BLACK_LEATHER, 0.35, None),
+    ("bridle", "head", (-3.0, -10.6, 3.0), (6, 1, 1), BRASS, 0.2, None),
+    ("bridle", "head", (2.1, -8.0, -4.0), (1, 2, 2), BRASS, 0.05, None),
+    ("bridle", "head", (-3.1, -8.0, -4.0), (1, 2, 2), BRASS, 0.05, None),
+    ("bridle_reins", "rein_left", (2.8, -6.0, -6.0), (0, 3, 16), BLACK_LEATHER, 0.0, None),
+    ("bridle_reins", "rein_right", (-2.8, -6.0, -6.0), (0, 3, 16), BLACK_LEATHER, 0.0, None),
+    # horseshoes: an iron band round the bottom of each hoof
+    ("shoes", L_HOOF, (-2.5, 7.1, -2.0), (4, 1, 4), IRON, 0.2, None),
+    ("shoes", R_HOOF, (-1.5, 7.1, -2.0), (4, 1, 4), IRON, 0.2, None),
+    ("shoes", LF_HOOF, (-2.4, 7.1, -2.1), (4, 1, 4), IRON, 0.2, None),
+    ("shoes", RF_HOOF, (-1.6, 7.1, -2.1), (4, 1, 4), IRON, 0.2, None),
 ]
 # the blanket: a pad under the saddle, down the flanks (greyscale, for the dye), with a darker border
-BLANKET = [("blanket", "body", (-5.0, -8.0, -11.0), (10, 7, 12), 0.3, None)]
+BLANKET = [("blanket", "body", (-5.0, -8.0, -12.0), (10, 7, 12), 0.3, None)]
 
 
 def pack(pieces, width):

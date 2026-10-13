@@ -494,4 +494,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   horse trusts each rider on their own account (it bucks strangers and comes to a whistle at 60), learns trail, racing,
   jumping and war to level 5 with tricks (rear, sliding stop, side-pass, war kick, kneeling), gets hungry and thirsty,
   wears down unshod hooves, and wears war and racing saddles, a bridle, a dyeable blanket and chain or plate barding,
-  drawn in 3D. Keys: N whistle, J trick.
+  drawn in 3D. Keys: N whistle, J trick. Every horse, skeleton horse and zombie horse is now Mo' Creatures' horse
+  model (GPL-3, credited), with our 36 coats painted onto its texture and its armour over them.

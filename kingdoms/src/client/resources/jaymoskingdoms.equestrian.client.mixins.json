@@ -2,7 +2,7 @@
 	"required": true,
 	"package": "com.jaymoskingdoms.client.mixin.equestrian",
 	"compatibilityLevel": "JAVA_25",
-	"client": ["AbstractHorseRendererMixin", "HorseRendererMixin", "UndeadHorseRendererMixin", "LivingEntityRendererMixin", "MouseHandlerMixin",
+	"client": ["AbstractHorseRendererMixin", "LivingEntityRendererMixin", "MouseHandlerMixin",
 		"AbstractMountInventoryScreenMixin", "AbstractContainerScreenAccessor"],
 	"injectors": { "defaultRequire": 1 }
 }

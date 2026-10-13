@@ -10,12 +10,12 @@
  "pieces": [
   {
    "group": "war_saddle",
-   "bone": "body",
+   "bone": "saddle",
    "layer": "main",
    "pos": [
     -5.5,
-    -9.0,
-    -10.0
+    0.0,
+    -4.0
    ],
    "size": [
     11,
@@ -29,12 +29,12 @@
   },
   {
    "group": "war_saddle",
-   "bone": "body",
+   "bone": "saddle",
    "layer": "main",
    "pos": [
     -4.5,
-    -14.0,
-    -1.5
+    -5.0,
+    4.5
    ],
    "size": [
     9,
@@ -48,12 +48,12 @@
   },
   {
    "group": "war_saddle",
-   "bone": "body",
+   "bone": "saddle",
    "layer": "main",
    "pos": [
     -3.0,
-    -12.0,
-    -11.0
+    -3.0,
+    -5.0
    ],
    "size": [
     6,
@@ -67,12 +67,12 @@
   },
   {
    "group": "war_saddle",
-   "bone": "body",
+   "bone": "saddle",
    "layer": "main",
    "pos": [
     5.0,
-    -8.5,
-    -9.0
+    0.5,
+    -3.0
    ],
    "size": [
     1,
@@ -86,12 +86,12 @@
   },
   {
    "group": "war_saddle",
-   "bone": "body",
+   "bone": "saddle",
    "layer": "main",
    "pos": [
     -6.0,
-    -8.5,
-    -9.0
+    0.5,
+    -3.0
    ],
    "size": [
     1,
@@ -105,12 +105,12 @@
   },
   {
    "group": "war_saddle",
-   "bone": "body",
+   "bone": "saddle",
    "layer": "main",
    "pos": [
     -6.0,
-    -9.5,
-    -12.0
+    -0.5,
+    -6.0
    ],
    "size": [
     12,
@@ -125,12 +125,12 @@
   },
   {
    "group": "war_saddle",
-   "bone": "body",
+   "bone": "saddle",
    "layer": "main",
    "pos": [
     -5.5,
-    1.6,
-    -6.5
+    10.6,
+    -0.5
    ],
    "size": [
     11,
@@ -144,16 +144,16 @@
   },
   {
    "group": "war_saddle",
-   "bone": "body",
+   "bone": "stirrup_left",
    "layer": "main",
    "pos": [
-    6.0,
-    -1.0,
-    -5.0
+    0.5,
+    0.0,
+    -0.5
    ],
    "size": [
     1,
-    6,
+    8,
     1
    ],
    "uv": [
@@ -163,16 +163,16 @@
   },
   {
    "group": "war_saddle",
-   "bone": "body",
+   "bone": "stirrup_right",
    "layer": "main",
    "pos": [
-    -7.0,
-    -1.0,
-    -5.0
+    -1.5,
+    0.0,
+    -0.5
    ],
    "size": [
     1,
-    6,
+    8,
     1
    ],
    "uv": [
@@ -182,12 +182,12 @@
   },
   {
    "group": "war_saddle",
-   "bone": "body",
+   "bone": "stirrup_left",
    "layer": "main",
    "pos": [
-    6.0,
-    5.0,
-    -6.5
+    0.5,
+    8.0,
+    -2.0
    ],
    "size": [
     1,
@@ -201,12 +201,12 @@
   },
   {
    "group": "war_saddle",
-   "bone": "body",
+   "bone": "stirrup_right",
    "layer": "main",
    "pos": [
-    -7.0,
-    5.0,
-    -6.5
+    -1.5,
+    8.0,
+    -2.0
    ],
    "size": [
     1,
@@ -220,12 +220,12 @@
   },
   {
    "group": "racing_saddle",
-   "bone": "body",
+   "bone": "saddle",
    "layer": "main",
    "pos": [
     -4.5,
-    -8.6,
-    -8.0
+    0.4,
+    -2.0
    ],
    "size": [
     9,
@@ -239,12 +239,12 @@
   },
   {
    "group": "racing_saddle",
-   "bone": "body",
+   "bone": "saddle",
    "layer": "main",
    "pos": [
     -3.0,
-    -9.6,
-    -2.0
+    -0.6,
+    4.0
    ],
    "size": [
     6,
@@ -258,12 +258,12 @@
   },
   {
    "group": "racing_saddle",
-   "bone": "body",
+   "bone": "saddle",
    "layer": "main",
    "pos": [
     5.0,
-    -8.2,
-    -7.5
+    0.8,
+    -1.5
    ],
    "size": [
     1,
@@ -272,17 +272,17 @@
    ],
    "uv": [
     0,
-    24
+    25
    ]
   },
   {
    "group": "racing_saddle",
-   "bone": "body",
+   "bone": "saddle",
    "layer": "main",
    "pos": [
     -6.0,
-    -8.2,
-    -7.5
+    0.8,
+    -1.5
    ],
    "size": [
     1,
@@ -291,17 +291,17 @@
    ],
    "uv": [
     12,
-    24
+    25
    ]
   },
   {
    "group": "racing_saddle",
-   "bone": "body",
+   "bone": "saddle",
    "layer": "main",
    "pos": [
     -5.4,
-    1.6,
-    -6.0
+    10.6,
+    0.0
    ],
    "size": [
     11,
@@ -310,55 +310,55 @@
    ],
    "uv": [
     24,
-    24
+    25
    ]
   },
   {
    "group": "racing_saddle",
-   "bone": "body",
+   "bone": "stirrup_left",
    "layer": "main",
    "pos": [
-    6.0,
-    -5.0,
-    -5.0
+    0.5,
+    0.0,
+    -0.5
    ],
    "size": [
     1,
-    3,
+    4,
     1
    ],
    "uv": [
     48,
-    24
+    25
    ]
   },
   {
    "group": "racing_saddle",
-   "bone": "body",
+   "bone": "stirrup_right",
    "layer": "main",
    "pos": [
-    -7.0,
-    -5.0,
-    -5.0
+    -1.5,
+    0.0,
+    -0.5
    ],
    "size": [
     1,
-    3,
+    4,
     1
    ],
    "uv": [
     52,
-    24
+    25
    ]
   },
   {
    "group": "racing_saddle",
-   "bone": "body",
+   "bone": "stirrup_left",
    "layer": "main",
    "pos": [
-    6.0,
-    -2.0,
-    -6.0
+    0.5,
+    4.0,
+    -1.5
    ],
    "size": [
     1,
@@ -367,17 +367,17 @@
    ],
    "uv": [
     56,
-    24
+    25
    ]
   },
   {
    "group": "racing_saddle",
-   "bone": "body",
+   "bone": "stirrup_right",
    "layer": "main",
    "pos": [
-    -7.0,
-    -2.0,
-    -6.0
+    -1.5,
+    4.0,
+    -1.5
    ],
    "size": [
     1,
@@ -386,17 +386,17 @@
    ],
    "uv": [
     64,
-    24
+    25
    ]
   },
   {
-   "group": "headstall",
-   "bone": "head_parts",
+   "group": "bridle",
+   "bone": "head",
    "layer": "main",
    "pos": [
     -2.0,
-    -11.0,
-    -5.0
+    -10.0,
+    -4.0
    ],
    "size": [
     4,
@@ -405,163 +405,37 @@
    ],
    "uv": [
     72,
-    24
+    25
    ],
-   "grow": 0.25
+   "grow": 0.35
   },
   {
-   "group": "headstall",
-   "bone": "head_parts",
+   "group": "bridle",
+   "bone": "head",
    "layer": "main",
    "pos": [
-    -3.0,
-    -11.0,
-    0.0
+    -2.5,
+    -10.0,
+    2.0
    ],
    "size": [
-    6,
+    5,
     5,
     1
    ],
    "uv": [
     82,
-    24
-   ],
-   "grow": 0.25
-  },
-  {
-   "group": "headstall",
-   "bone": "head_parts",
-   "layer": "main",
-   "pos": [
-    2.0,
-    -9.0,
-    -6.0
-   ],
-   "size": [
-    1,
-    2,
-    2
-   ],
-   "uv": [
-    96,
-    24
-   ]
-  },
-  {
-   "group": "headstall",
-   "bone": "head_parts",
-   "layer": "main",
-   "pos": [
-    -3.0,
-    -9.0,
-    -6.0
-   ],
-   "size": [
-    1,
-    2,
-    2
-   ],
-   "uv": [
-    102,
-    24
-   ]
-  },
-  {
-   "group": "headstall_reins",
-   "bone": "head_parts",
-   "layer": "main",
-   "pos": [
-    3.1,
-    -6.0,
-    -8.0
-   ],
-   "size": [
-    0,
-    3,
-    16
-   ],
-   "uv": [
-    0,
-    33
-   ],
-   "rot": [
-    -30.0,
-    0.0,
-    0.0
-   ]
-  },
-  {
-   "group": "headstall_reins",
-   "bone": "head_parts",
-   "layer": "main",
-   "pos": [
-    -3.1,
-    -6.0,
-    -8.0
-   ],
-   "size": [
-    0,
-    3,
-    16
-   ],
-   "uv": [
-    32,
-    33
-   ],
-   "rot": [
-    -30.0,
-    0.0,
-    0.0
-   ]
-  },
-  {
-   "group": "bridle",
-   "bone": "head_parts",
-   "layer": "main",
-   "pos": [
-    -2.0,
-    -11.0,
-    -5.0
-   ],
-   "size": [
-    4,
-    5,
-    1
-   ],
-   "uv": [
-    64,
-    33
+    25
    ],
    "grow": 0.35
   },
   {
    "group": "bridle",
-   "bone": "head_parts",
+   "bone": "head",
    "layer": "main",
    "pos": [
     -3.0,
-    -11.0,
-    0.0
-   ],
-   "size": [
-    6,
-    5,
-    1
-   ],
-   "uv": [
-    74,
-    33
-   ],
-   "grow": 0.35
-  },
-  {
-   "group": "bridle",
-   "bone": "head_parts",
-   "layer": "main",
-   "pos": [
-    -3.0,
-    -11.6,
+    -10.6,
     3.0
    ],
    "size": [
@@ -570,39 +444,19 @@
     1
    ],
    "uv": [
-    88,
-    33
+    94,
+    25
    ],
    "grow": 0.2
   },
   {
    "group": "bridle",
-   "bone": "head_parts",
+   "bone": "head",
    "layer": "main",
    "pos": [
-    2.2,
-    -9.0,
-    -6.0
-   ],
-   "size": [
-    1,
-    2,
-    2
-   ],
-   "uv": [
-    102,
-    33
-   ],
-   "grow": 0.05
-  },
-  {
-   "group": "bridle",
-   "bone": "head_parts",
-   "layer": "main",
-   "pos": [
-    -3.2,
-    -9.0,
-    -6.0
+    2.1,
+    -8.0,
+    -4.0
    ],
    "size": [
     1,
@@ -611,18 +465,38 @@
    ],
    "uv": [
     108,
-    33
+    25
+   ],
+   "grow": 0.05
+  },
+  {
+   "group": "bridle",
+   "bone": "head",
+   "layer": "main",
+   "pos": [
+    -3.1,
+    -8.0,
+    -4.0
+   ],
+   "size": [
+    1,
+    2,
+    2
+   ],
+   "uv": [
+    114,
+    25
    ],
    "grow": 0.05
   },
   {
    "group": "bridle_reins",
-   "bone": "head_parts",
+   "bone": "rein_left",
    "layer": "main",
    "pos": [
-    3.3,
+    2.8,
     -6.0,
-    -8.0
+    -6.0
    ],
    "size": [
     0,
@@ -631,22 +505,17 @@
    ],
    "uv": [
     0,
-    52
-   ],
-   "rot": [
-    -30.0,
-    0.0,
-    0.0
+    34
    ]
   },
   {
    "group": "bridle_reins",
-   "bone": "head_parts",
+   "bone": "rein_right",
    "layer": "main",
    "pos": [
-    -3.3,
+    -2.8,
     -6.0,
-    -8.0
+    -6.0
    ],
    "size": [
     0,
@@ -655,22 +524,17 @@
    ],
    "uv": [
     32,
-    52
-   ],
-   "rot": [
-    -30.0,
-    0.0,
-    0.0
+    34
    ]
   },
   {
    "group": "shoes",
-   "bone": "left_hind_leg",
+   "bone": "leg1_c",
    "layer": "main",
    "pos": [
-    -3.0,
-    9.0,
-    -1.0
+    -2.5,
+    7.1,
+    -2.0
    ],
    "size": [
     4,
@@ -679,18 +543,18 @@
    ],
    "uv": [
     64,
-    52
+    34
    ],
    "grow": 0.2
   },
   {
    "group": "shoes",
-   "bone": "right_hind_leg",
+   "bone": "leg2_c",
    "layer": "main",
    "pos": [
-    -1.0,
-    9.0,
-    -1.0
+    -1.5,
+    7.1,
+    -2.0
    ],
    "size": [
     4,
@@ -699,18 +563,18 @@
    ],
    "uv": [
     80,
-    52
+    34
    ],
    "grow": 0.2
   },
   {
    "group": "shoes",
-   "bone": "left_front_leg",
+   "bone": "leg3_c",
    "layer": "main",
    "pos": [
-    -3.0,
-    9.0,
-    -1.9
+    -2.4,
+    7.1,
+    -2.1
    ],
    "size": [
     4,
@@ -719,18 +583,18 @@
    ],
    "uv": [
     96,
-    52
+    34
    ],
    "grow": 0.2
   },
   {
    "group": "shoes",
-   "bone": "right_front_leg",
+   "bone": "leg4_c",
    "layer": "main",
    "pos": [
-    -1.0,
-    9.0,
-    -1.9
+    -1.6,
+    7.1,
+    -2.1
    ],
    "size": [
     4,
@@ -739,7 +603,7 @@
    ],
    "uv": [
     112,
-    52
+    34
    ],
    "grow": 0.2
   },
@@ -750,7 +614,7 @@
    "pos": [
     -5.0,
     -8.0,
-    -11.0
+    -12.0
    ],
    "size": [
     10,
