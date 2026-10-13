@@ -28,14 +28,12 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
-import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * A roaming symbiote (see {@link WebSymbioteBlob}) with no web slinger or risen body about makes do with whatever mob is
- * near: a villager, a cow, a skeleton. It pours over it, and the mob wears the black suit over its own body for a while.
+ * A roaming symbiote (see {@link WebSymbioteBlob}) with no web slinger or risen body about makes do with a mob near
+ * (only some will do: see {@link #takeable}): a cow, a sheep, a zombie, a skeleton. It pours over it, and the mob wears the black suit over its own body for a while.
  * Nothing living can keep it: a peaceful host is spat out as inadequate after {@code CALM_MIN}-{@code CALM_MAX} ticks
  * (the mob reels, but lives), and the symbiote drops off to look again. A hostile mob keeps it longer
  * ({@code HOSTILE_MIN}-{@code HOSTILE_MAX}): stronger, faster, lashing with tendrils at everything near (as a behemoth
@@ -71,11 +69,19 @@ public final class WebInhabit {
 		return entity instanceof Enemy && isHost(entity);
 	}
 
-	/** A mob it could take: not a boss, not a stand, not taken already, not a player's (those go by their own rules). */
+	/**
+	 * A mob it could take: a few farm animals (cow, chicken, sheep, pig) or a humanoid hostile (zombies of every kind,
+	 * skeletons, illagers, witches, piglins). Not one taken already, and not a risen player (that one is a behemoth's).
+	 */
 	static boolean takeable(Entity entity) {
-		return entity instanceof Mob mob && mob.isAlive() && !(mob instanceof WebSymbioteBlob)
-			&& !(mob instanceof EnderDragon) && !(mob instanceof WitherBoss) && !isHost(mob) && !WebBehemoth.isHost(mob)
-			&& !KitchenCompat.isZombiePlayer(mob);
+		if (!(entity instanceof Mob mob) || !mob.isAlive() || isHost(mob) || WebBehemoth.isHost(mob) || KitchenCompat.isZombiePlayer(mob)) {
+			return false;
+		}
+		return mob instanceof net.minecraft.world.entity.animal.cow.Cow || mob instanceof net.minecraft.world.entity.animal.chicken.Chicken
+			|| mob instanceof net.minecraft.world.entity.animal.sheep.Sheep || mob instanceof net.minecraft.world.entity.animal.pig.Pig
+			|| mob instanceof net.minecraft.world.entity.monster.zombie.Zombie || mob instanceof net.minecraft.world.entity.monster.skeleton.AbstractSkeleton
+			|| mob instanceof net.minecraft.world.entity.monster.illager.AbstractIllager || mob instanceof net.minecraft.world.entity.monster.Witch
+			|| mob instanceof net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 	}
 
 	static void register() {
