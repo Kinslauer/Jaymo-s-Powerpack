@@ -400,6 +400,8 @@ public final class Bonding {
 	// ---- changing ---------------------------------------------------------------------------------------------------------
 
 	static void addTrust(AbstractHorse horse, Player player, float delta) {
+		// (0.6.0) a Rider wins trust sooner
+		delta = com.jaymoskingdoms.ClassPerks.trust(player, delta);
 		Bond b = bond(horse);
 		float was = b.trustOf(player.getUUID());
 		float now = Math.max(0.0F, Math.min(Bond.FULL, was + delta));

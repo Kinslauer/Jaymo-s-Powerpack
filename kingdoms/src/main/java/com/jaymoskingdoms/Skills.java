@@ -266,7 +266,8 @@ public final class Skills {
 				return InteractionResult.PASS;
 			}
 			if (of(sp).spent() == 0) {
-				sp.sendSystemMessage(Component.translatable("message.jaymoskingdoms.skills.respec.nothing", wizard.getDisplayName()).withStyle(ChatFormatting.GRAY));
+				// (0.6.0) nothing to unmake: he offers a Writ of Rebirth instead
+				Classes.writOffer(sp, wizard);
 			} else {
 				wizard(sp, wizard);
 			}
@@ -334,7 +335,7 @@ public final class Skills {
 	static boolean answer(ServerPlayer player, TalkNet.Answer answer) {
 		Integer offer = RESPEC_OFFERS.get(player.getUUID());
 		if (offer == null || offer != answer.entityId()) {
-			return false;
+			return Classes.answer(player, answer);
 		}
 		RESPEC_OFFERS.remove(player.getUUID());
 		if (answer.option() != 0 || !(player.level().getEntity(answer.entityId()) instanceof LivingEntity wizard) || !CourtWizards.is(wizard) || wizard.distanceTo(player) > 8.0) {

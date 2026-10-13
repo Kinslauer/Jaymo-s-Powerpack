@@ -1,0 +1,85 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymospowers:wooden_dagger",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:stone_dagger",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_dagger",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:golden_dagger",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:diamond_dagger",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:netherite_dagger",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:wooden_ninjato",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:stone_ninjato",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:iron_ninjato",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:golden_ninjato",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:diamond_ninjato",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:netherite_ninjato",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:primitive_knife",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:bone_knife",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:kunai",
+      "required": false
+    },
+    {
+      "id": "weaponmod:knife.wood",
+      "required": false
+    },
+    {
+      "id": "weaponmod:knife.stone",
+      "required": false
+    },
+    {
+      "id": "weaponmod:knife.iron",
+      "required": false
+    },
+    {
+      "id": "weaponmod:knife.gold",
+      "required": false
+    },
+    {
+      "id": "weaponmod:knife.diamond",
+      "required": false
+    }
+  ]
+}

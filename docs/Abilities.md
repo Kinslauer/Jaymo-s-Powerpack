@@ -145,13 +145,13 @@ power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts
 | 143 | Ascension | | How | Spend 10 minutes in Stasis or rewound, sleep through a night: you wake holding the Stopped Clock. Use it with everything mastered. | |
 | 144 | Corruption | | How | Shatter one of your echoes in the Nether: it's destroyed for good, and the hole it leaves corrupts you. Needed for Time Flow. | |
 
-## Xenoform (0.8.125)
+## Xenoform (0.9.1)
 
 | Line | Form | Key | Ability | What it does now | Change to |
 |---|---|---|---|---|---|
 | 150 | Getting it | | Falling star | On a clear night a star may fall near you (40–100 blocks off, once a day per world at most). Mine the Fallen Star in its crater with an iron pickaxe: 15% a Xeno-Band, 7% the symbiote's goo, else raw iron, amethyst and XP. Right-click the band on (powerless survival players get the power at once). | |
 | 151 | Band | Z | Dial / Slam | Tap: next alien the band holds. Hold 0.5 s: become the dialled alien, or turn back. A form lasts a random 1–5 min until fully mastered, then 5; beeps through the last 10 s. At zero health you're knocked back into yourself; the band recharges 1 min (2 after a knockout). Fists only while changed. | |
-| 152 | Band | X (hold) | Scan | 3 s at a creature within 12 blocks: the band learns its alien. Iron golem = Bulwark, blaze = Pyre, horse = Blur. | |
+| 152 | Band | X (hold) | Scan | 3 s at a creature within 12 blocks: the band learns its alien. Iron golem = Bulwark, blaze = Pyre, horse = Blur, shulker = Prism, phantom = Wisp, silverfish = Gremlin, Warden = Knell, Ender Dragon = Wyrm. | |
 | 153 | Bulwark | R | Fist Combo | 3 blows at 4 ticks, 5 damage each, the last one shoves. 2 s. | |
 | 154 | Bulwark | G | Ground Clap | 6 damage and a shove to all within 5 blocks, debris ring. 8 s. | |
 | 155 | Bulwark | V | Grab and Throw | Lift the creature you look at overhead; V again hurls it at 1.5 blocks/tick. Looking at the ground rips a 4-block chunk out and throws it. 1 s. | |
@@ -165,3 +165,25 @@ power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts
 | 163 | Blur | G (hold) | Wall Run | Against a wall, run straight up it for up to 2 s. | |
 | 164 | Blur | V | Whirlwind | Pulls everything within 5 blocks in and hits it for 4. 8 s. | |
 | 165 | Blur | B | Chain Strike | Up to 5 foes within 8 blocks: every 3 ticks you flicker behind one and hit it for 5. 12 s. | |
+| 166 | Band | passive | Corruption | Each knockout adds 25 corruption (4 corrupt the band). Corrupted: 1 slam in 4 gives the wrong alien, and about every 6 minutes as a human the band changes you on its own. Always shown on screen. | |
+| 167 | Prism | R | Crystal Shards | Three shards fan out 16 blocks, 4 damage each. 1.5 s. | |
+| 168 | Prism | G | Crystal Wall | A 5x3 amethyst wall 3 blocks ahead for 10 s. 12 s. | |
+| 169 | Prism | V (hold) | Reflect | Rooted; arrows that hit you fly back at the shooter, other projectiles shatter. | |
+| 170 | Prism | B | Spike Field | 5 damage and Slowness II to all within 4.5 blocks. 10 s. | |
+| 171 | Wisp | R | Phase | Through a wall up to 2 blocks thick. 3 s. | |
+| 172 | Wisp | G | Shroud | Invisible until you strike; mobs forget you. | |
+| 173 | Wisp | V | Dread Wail | Mobs within 10 blocks flee for 3 s; players get 5 s of darkness. 15 s. | |
+| 174 | Wisp | B (hold) | Glide | Fall slowly and drift forward. No fall damage ever. | |
+| 175 | Gremlin | R | Spring | A huge jump, soft landing. 1.5 s. | |
+| 176 | Gremlin | G | Sabotage | Up to 16 blocks away: levers, buttons, doors, trapdoors, gates toggled; redstone wire, repeaters, comparators, torches popped off. 5 s. | |
+| 177 | Gremlin | V | Bite | 3 damage; players lose 4 food, mobs get Hunger and Weakness; heals you 2. 3 s. | |
+| 178 | Gremlin | B (hold) | Climb | Straight up any wall. Fits through 1x1 gaps. | |
+| 179 | Knell | R | Sonic Boom | A 15-block blast through walls: 10 damage and a big shove. 8 s. | |
+| 180 | Knell | G (hold) | Tremor Sense | Everything living within 24 blocks glows. | |
+| 181 | Knell | V | Shriek | 4 damage, 6 s darkness and Slowness II to all within 12 blocks. 15 s. | |
+| 182 | Knell | B | Burrow | Sink into the ground (immune for a second) and come up where you look, up to 16 blocks. 12 s. | |
+| 183 | Wyrm | R | Dragon's Breath | A 3-block cloud of purple fire 5 blocks ahead for 5 s. 10 s. | |
+| 184 | Wyrm | G (hold) | Wings | Fly where you look (costs hunger); slow falling when you let go. | |
+| 185 | Wyrm | V | Wing Gust | 3 damage and a 1.6 shove to all within 6 blocks; you recoil. 6 s. | |
+| 186 | Wyrm | B | Rift | Teleport up to 12 blocks where you look. 4 s. | |
+| 187 | Wyrm | passive | Of the End | Water and rain do 1 hp/s. | |

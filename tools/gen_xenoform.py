@@ -1,4 +1,4 @@
-"""Generates the Xenoform assets: the Xeno-Band item, the Fallen Star block, and the three aliens' 64x64 skins
+"""Generates the Xenoform assets: the Xeno-Band item, the Fallen Star block, and the aliens' 64x64 skins
 (the vanilla skin layout for the limbs, the free rows under it for each form's extra parts; see
 client/power/xenoform/XenoFormModels). Everything is drawn from code (noise and simple shapes); nothing is copied.
 Run from the project root:  python tools/gen_xenoform.py
@@ -187,10 +187,114 @@ def blur():
     save(img, "entity/xenoform_blur.png")
 
 
+def prism():
+    img = Image.new("RGBA", (64, 64))
+    crystal = (150, 100, 210)
+    noise_fill(img, crystal, 0.3)
+    # facets: diagonal bands of light and shade over everything
+    for y in range(64):
+        for x in range(64):
+            band = ((x + y) // 5) % 3
+            if band == 0:
+                img.putpixel((x, y), shade(crystal, 1.25))
+            elif band == 2:
+                img.putpixel((x, y), shade(crystal, 0.7))
+    # the crown, side crystals and back (rows 32+) are brighter, almost white at the tips
+    for box in ((0, 32, 8, 40), (8, 32, 16, 39), (16, 32, 34, 41), (34, 32, 42, 39)):
+        noise_fill(img, (205, 170, 250), 0.25, box)
+        rect(img, (box[0], box[1], box[2], box[1] + 2), (240, 225, 255, 255))
+    eyes(img, (255, 255, 255, 255), 11, wide=True)
+    clear_hat(img)
+    save(img, "entity/xenoform_prism.png")
+
+
+def wisp():
+    img = Image.new("RGBA", (64, 64))
+    mist = (170, 215, 230)
+    noise_fill(img, mist, 0.3)
+    # the hood (24,32)-(64,52) darker, the tatters (0,32)-(24,42) ragged: holes along the bottom
+    noise_fill(img, (90, 130, 150), 0.3, (24, 32, 64, 52))
+    noise_fill(img, (150, 195, 215), 0.3, (0, 32, 24, 42))
+    for x in range(0, 24):
+        if rng.random() < 0.5:
+            rect(img, (x, 40 + rng.randrange(0, 2), x + 1, 42), (0, 0, 0, 0))
+    # hollow black eyes in the hood's front (the hood's front face is at (34,42)-(44,52))
+    rect(img, (36, 45, 38, 48), (10, 10, 20, 255))
+    rect(img, (40, 45, 42, 48), (10, 10, 20, 255))
+    eyes(img, (20, 30, 40, 255), 11, wide=True)
+    clear_hat(img)
+    save(img, "entity/xenoform_wisp.png")
+
+
+def gremlin():
+    img = Image.new("RGBA", (64, 64))
+    skin = (120, 180, 70)
+    noise_fill(img, skin, 0.3)
+    # the big skull (0,32)-(40,52): same green, with huge yellow eyes on its front face (10,42)-(20,52)
+    noise_fill(img, shade(skin, 1.05), 0.25, (0, 32, 40, 52))
+    rect(img, (11, 44, 14, 48), (250, 230, 80, 255))
+    rect(img, (16, 44, 19, 48), (250, 230, 80, 255))
+    rect(img, (12, 45, 13, 47), (20, 20, 20, 255))
+    rect(img, (17, 45, 18, 47), (20, 20, 20, 255))
+    rect(img, (13, 50, 17, 51), (60, 30, 30, 255))  # a grin
+    # ears (40,32)-(50,38) pink inside
+    noise_fill(img, shade(skin, 0.9), 0.2, (40, 32, 50, 38))
+    rect(img, (41, 33, 44, 37), (220, 150, 150, 255))
+    clear_hat(img)
+    save(img, "entity/xenoform_gremlin.png")
+
+
+def knell():
+    img = Image.new("RGBA", (64, 64))
+    sculk = (20, 44, 52)
+    noise_fill(img, sculk, 0.35)
+    # veins of cyan light threading the whole hide
+    for _ in range(50):
+        x, y = rng.randrange(64), rng.randrange(64)
+        for _ in range(rng.randrange(3, 8)):
+            img.putpixel((x % 64, y % 64), lerp((31, 184, 200), (120, 240, 250), rng.random() * 0.6))
+            x += rng.choice((-1, 0, 1))
+            y += rng.choice((-1, 0, 1))
+    # horns (0,32)-(8,40) bone; ribs (8,32)-(32,42) glow; shoulders (0,42)-(34,50) dark
+    noise_fill(img, (200, 190, 170), 0.2, (0, 32, 8, 40))
+    noise_fill(img, (40, 200, 215), 0.35, (8, 32, 32, 42))
+    for y in range(33, 42, 2):
+        rect(img, (10, y, 30, y + 1), (10, 30, 36, 255))
+    noise_fill(img, shade(sculk, 0.8), 0.25, (0, 42, 34, 50))
+    # no eyes: a smooth, blind face with a faint glow where they'd be
+    rect(img, (9, 10, 15, 12), (18, 90, 100, 255))
+    clear_hat(img)
+    save(img, "entity/xenoform_knell.png")
+
+
+def wyrm():
+    img = Image.new("RGBA", (64, 64))
+    scale = (30, 22, 40)
+    noise_fill(img, scale, 0.35)
+    # scales: a brick pattern of slightly lighter rows
+    for y in range(0, 64, 3):
+        for x in range((y // 3) % 2 * 2, 64, 4):
+            rect(img, (x, y, x + 2, y + 1), shade(scale, 1.3))
+    # horns (0,32)-(18,41) pale; tail (18,32)-(44,45) and tip (18,45)-(38,55) like the body; wings (0,50)-(44,59)
+    # membrane purple with dark bones
+    noise_fill(img, (190, 180, 170), 0.2, (0, 32, 18, 41))
+    noise_fill(img, (110, 50, 150), 0.3, (0, 50, 44, 59))
+    for x in range(0, 44, 7):
+        rect(img, (x, 50, x + 1, 59), (25, 15, 35, 255))
+    eyes(img, (200, 90, 240, 255), 11, wide=True)
+    clear_hat(img)
+    save(img, "entity/xenoform_wyrm.png")
+
+
 if __name__ == "__main__":
     band()
     fallen_star()
     bulwark()
     pyre()
     blur()
+    prism()
+    wisp()
+    gremlin()
+    knell()
+    wyrm()
     print("Xenoform assets written under", ROOT)

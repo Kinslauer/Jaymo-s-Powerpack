@@ -700,7 +700,17 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   texture, a steel blade with a diamond edge (`tools/gen_soras_dagger_diamond.py`). Wood needs an axe (Kingdoms
   `Trees.needsAxe`): by hand a log is slow, drops nothing and won't chop, and a hint says to knap a hand axe (3 flint
   and a stick). Leaves broken by hand drop a stick 12% of the time, so the first stick doesn't depend on luck alone.
-- **0.8.125, Xenoform, the Xeno-Band (stage 1):** a new power from a falling star. On clear nights a glowing rock
+
+- **0.9.0, player classes (Kingdoms 0.6.0):** the first time you join you pick a class, for keeps: Thief, Warlord,
+  Mage, Archer, Survivalist, Brute, Marksman, Sorcerer or Rider, each good with its own gear (found by item tags, so
+  Armory, Balkon's and Tinkering weapons all count) and paying its own price in hearts or speed. No class starts with
+  gear: a Mage learns the wizard's staff recipe from a court wizard or finds one. A Writ of Rebirth (rare loot, or a
+  court wizard's once a week) lets you choose again. Heavy armour now weighs a little on everyone. The Mage casts
+  through the staff, the Sorcerer imbues a blade (J), the Marksman's guns bite harder and reload quicker. Plan:
+  `docs/Classes-Plan.md`. The Armory's cleavers are redrawn short and its quarterstaffs long, the stick running the
+  whole sprite (`tools/gen_cleaver_staff.py`, run after `armory_assets.py`); the Tinkering cleaver takes the same
+  short shape in every material (`tools/gen_tinker_cleaver.py`).
+- **0.9.1, Xenoform, the Xeno-Band (stages 1 and 2):** a new power from a falling star. On clear nights a glowing rock
   sometimes comes down near a player (like a Gravity meteor; at most one a day per world) and leaves a Fallen Star in
   its crater. Mine it (iron pickaxe): 15% a Xeno-Band, 7% the symbiote's goo, else raw iron, amethyst and XP. Put the
   band on and it never comes off: tap Z to turn its dial, hold Z to slam it and become the dialled alien for a random
@@ -709,3 +719,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   had, and the band recharges. Hold X at a creature for 3 s to scan it and teach the band its alien. Three to start
   (one at random): Bulwark (iron golem: fist combo, ground clap, grab and throw, leap slam), Pyre (blaze: fire bolt,
   flame jet, fire nova, magma trail), Blur (horse: dash, wall run, whirlwind, chain strike). `docs/xenoform.md`.
+  Five more to scan: Prism (shulker: shard fan, amethyst wall, reflect stance that sends arrows back, spike burst),
+  Wisp (phantom: phase through walls, shroud, wail that scatters mobs, glide), Gremlin (silverfish: spring, sabotage
+  levers/doors/redstone at range, bite that steals food, climb), Knell (warden: sonic boom, sense, shriek, burrow),
+  Wyrm (ender dragon: dragon's breath cloud, held wings, gust, rift blink). Every knockout corrupts the band (25 of
+  100): once corrupted, slams land on the wrong alien a quarter of the time and the band sometimes changes you on
+  its own.

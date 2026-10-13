@@ -516,7 +516,8 @@ public final class Equestrian {
 
 	/** How fast it spends stamina: its breed's rate, its land, and the dead don't tire much. */
 	static double drain(AbstractHorse horse, Equine e) {
-		double d = e.breed().drain;
+		// (0.6.0) a Rider's horse tires slower
+		double d = e.breed().drain * com.jaymoskingdoms.ClassPerks.stamina(horse.getControllingPassenger());
 		if (undead(horse)) {
 			return d * UNDEAD_DRAIN;
 		}

@@ -46,6 +46,11 @@ public final class XenoFormModels {
 			MODELS.put("bulwark", new Bulwark());
 			MODELS.put("pyre", new Pyre());
 			MODELS.put("blur", new Blur());
+			MODELS.put("prism", new Prism());
+			MODELS.put("wisp", new Wisp());
+			MODELS.put("gremlin", new Gremlin());
+			MODELS.put("knell", new Knell());
+			MODELS.put("wyrm", new Wyrm());
 		}
 		return MODELS.get(form);
 	}
@@ -160,6 +165,156 @@ public final class XenoFormModels {
 			this.tail.xRot = 0.5F + run * 0.5F;
 			this.tailTip.yRot = sway * 1.3F;
 			this.tailTip.xRot = 0.3F - run * 0.2F;
+		}
+	}
+
+	/** Prism: angular, a crown of crystal and crystals jutting from its back. */
+	static final class Prism extends FormModel {
+		Prism() {
+			super(bake(mesh()), "prism");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.4F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			PartDefinition head = root.getChild("head");
+			head.addOrReplaceChild("crown", CubeListBuilder.create().texOffs(0, 32).addBox(-1.0F, -14.0F, -1.0F, 2.0F, 6.0F, 2.0F), PartPose.ZERO);
+			head.addOrReplaceChild("right_crystal", CubeListBuilder.create().texOffs(8, 32).addBox(-1.0F, -5.0F, -1.0F, 2.0F, 5.0F, 2.0F),
+				PartPose.offsetAndRotation(-3.5F, -8.0F, 0.0F, 0.0F, 0.0F, -0.5F));
+			head.addOrReplaceChild("left_crystal", CubeListBuilder.create().texOffs(8, 32).addBox(-1.0F, -5.0F, -1.0F, 2.0F, 5.0F, 2.0F),
+				PartPose.offsetAndRotation(3.5F, -8.0F, 0.0F, 0.0F, 0.0F, 0.5F));
+			PartDefinition body = root.getChild("body");
+			body.addOrReplaceChild("back", CubeListBuilder.create().texOffs(16, 32).addBox(-3.0F, 1.0F, 2.0F, 6.0F, 6.0F, 3.0F), PartPose.ZERO);
+			body.addOrReplaceChild("spine", CubeListBuilder.create().texOffs(34, 32).addBox(-1.0F, -2.0F, 3.0F, 2.0F, 5.0F, 2.0F),
+				PartPose.offsetAndRotation(0.0F, 2.0F, 2.0F, -0.4F, 0.0F, 0.0F));
+			return mesh;
+		}
+	}
+
+	/** Wisp: a hooded thing with no legs, trailing off into tatters that sway. */
+	static final class Wisp extends FormModel {
+		private final ModelPart tatters;
+
+		Wisp() {
+			super(bake(mesh()), "wisp");
+			this.tatters = this.body.getChild("tatters");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.0F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			root.getChild("head").addOrReplaceChild("hood", CubeListBuilder.create().texOffs(24, 32).addBox(-5.0F, -9.0F, -5.0F, 10.0F, 10.0F, 10.0F), PartPose.ZERO);
+			root.getChild("body").addOrReplaceChild("tatters", CubeListBuilder.create().texOffs(0, 32).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 7.0F, 4.0F),
+				PartPose.offset(0.0F, 12.0F, 0.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			this.rightLeg.visible = false;
+			this.leftLeg.visible = false;
+			this.tatters.xRot = Mth.sin(state.ageInTicks * 0.12F) * 0.15F + state.walkAnimationSpeed * 0.3F;
+			this.tatters.zRot = Mth.cos(state.ageInTicks * 0.09F) * 0.1F;
+		}
+	}
+
+	/** Gremlin: a big-headed imp with long ears that twitch. */
+	static final class Gremlin extends FormModel {
+		private final ModelPart rightEar, leftEar;
+
+		Gremlin() {
+			super(bake(mesh()), "gremlin");
+			this.rightEar = this.head.getChild("right_ear");
+			this.leftEar = this.head.getChild("left_ear");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.0F), 0.0F);
+			PartDefinition head = mesh.getRoot().getChild("head");
+			head.addOrReplaceChild("skull", CubeListBuilder.create().texOffs(0, 32).addBox(-5.0F, -10.0F, -5.0F, 10.0F, 10.0F, 10.0F), PartPose.ZERO);
+			head.addOrReplaceChild("right_ear", CubeListBuilder.create().texOffs(40, 32).addBox(-4.0F, -5.0F, -0.5F, 4.0F, 5.0F, 1.0F),
+				PartPose.offsetAndRotation(-5.0F, -4.0F, 0.0F, 0.0F, 0.0F, 0.6F));
+			head.addOrReplaceChild("left_ear", CubeListBuilder.create().texOffs(40, 32).mirror().addBox(0.0F, -5.0F, -0.5F, 4.0F, 5.0F, 1.0F),
+				PartPose.offsetAndRotation(5.0F, -4.0F, 0.0F, 0.0F, 0.0F, -0.6F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			float twitch = Mth.sin(state.ageInTicks * 0.3F) * 0.1F + state.walkAnimationSpeed * 0.2F;
+			this.rightEar.zRot = 0.6F + twitch;
+			this.leftEar.zRot = -0.6F - twitch;
+		}
+	}
+
+	/** Knell: hulking, horned, with a glowing ribcage and heavy shoulders. */
+	static final class Knell extends FormModel {
+		Knell() {
+			super(bake(mesh()), "knell");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(1.0F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			PartDefinition head = root.getChild("head");
+			head.addOrReplaceChild("right_horn", CubeListBuilder.create().texOffs(0, 32).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 7.0F, 2.0F),
+				PartPose.offsetAndRotation(-4.0F, -8.0F, 0.0F, 0.0F, 0.0F, -0.45F));
+			head.addOrReplaceChild("left_horn", CubeListBuilder.create().texOffs(0, 32).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 7.0F, 2.0F),
+				PartPose.offsetAndRotation(4.0F, -8.0F, 0.0F, 0.0F, 0.0F, 0.45F));
+			PartDefinition body = root.getChild("body");
+			body.addOrReplaceChild("ribs", CubeListBuilder.create().texOffs(8, 32).addBox(-5.0F, 1.0F, -4.0F, 10.0F, 8.0F, 2.0F), PartPose.ZERO);
+			body.addOrReplaceChild("shoulders", CubeListBuilder.create().texOffs(0, 42).addBox(-6.0F, -3.0F, -2.5F, 12.0F, 3.0F, 5.0F, new CubeDeformation(1.0F)),
+				PartPose.ZERO);
+			return mesh;
+		}
+	}
+
+	/** Wyrm: horned, winged and tailed; the wings beat as it moves. */
+	static final class Wyrm extends FormModel {
+		private final ModelPart rightWing, leftWing, tail, tailTip;
+
+		Wyrm() {
+			super(bake(mesh()), "wyrm");
+			this.rightWing = this.body.getChild("right_wing");
+			this.leftWing = this.body.getChild("left_wing");
+			this.tail = this.body.getChild("tail");
+			this.tailTip = this.tail.getChild("tip");
+		}
+
+		private static MeshDefinition mesh() {
+			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.5F), 0.0F);
+			PartDefinition root = mesh.getRoot();
+			PartDefinition head = root.getChild("head");
+			head.addOrReplaceChild("right_horn", CubeListBuilder.create().texOffs(0, 32).addBox(-1.0F, -1.0F, -1.0F, 2.0F, 2.0F, 7.0F),
+				PartPose.offsetAndRotation(-3.0F, -7.5F, 2.0F, -0.6F, 0.0F, 0.0F));
+			head.addOrReplaceChild("left_horn", CubeListBuilder.create().texOffs(0, 32).addBox(-1.0F, -1.0F, -1.0F, 2.0F, 2.0F, 7.0F),
+				PartPose.offsetAndRotation(3.0F, -7.5F, 2.0F, -0.6F, 0.0F, 0.0F));
+			PartDefinition body = root.getChild("body");
+			PartDefinition tail = body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(18, 32).addBox(-1.5F, -1.5F, 0.0F, 3.0F, 3.0F, 10.0F),
+				PartPose.offsetAndRotation(0.0F, 11.0F, 2.0F, 0.5F, 0.0F, 0.0F));
+			tail.addOrReplaceChild("tip", CubeListBuilder.create().texOffs(18, 45).addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 8.0F),
+				PartPose.offsetAndRotation(0.0F, 0.0F, 9.5F, 0.3F, 0.0F, 0.0F));
+			body.addOrReplaceChild("right_wing", CubeListBuilder.create().texOffs(0, 50).addBox(-14.0F, -0.5F, 0.0F, 14.0F, 1.0F, 8.0F),
+				PartPose.offsetAndRotation(-2.0F, 2.0F, 2.5F, 0.0F, 0.6F, 0.0F));
+			body.addOrReplaceChild("left_wing", CubeListBuilder.create().texOffs(0, 50).mirror().addBox(0.0F, -0.5F, 0.0F, 14.0F, 1.0F, 8.0F),
+				PartPose.offsetAndRotation(2.0F, 2.0F, 2.5F, 0.0F, -0.6F, 0.0F));
+			return mesh;
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			float t = state.ageInTicks;
+			float beat = Mth.sin(t * 0.25F) * (0.15F + state.walkAnimationSpeed * 0.6F);
+			this.rightWing.zRot = -0.3F + beat;
+			this.leftWing.zRot = 0.3F - beat;
+			this.rightWing.yRot = 0.6F + Mth.cos(t * 0.25F) * 0.1F;
+			this.leftWing.yRot = -0.6F - Mth.cos(t * 0.25F) * 0.1F;
+			float sway = Mth.cos(state.walkAnimationPos * 0.6662F) * 0.3F * state.walkAnimationSpeed + Mth.sin(t * 0.08F) * 0.1F;
+			this.tail.yRot = sway;
+			this.tailTip.yRot = sway * 1.4F;
 		}
 	}
 }

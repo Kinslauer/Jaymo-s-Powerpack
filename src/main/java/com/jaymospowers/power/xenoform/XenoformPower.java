@@ -78,6 +78,11 @@ public final class XenoformPower implements Power {
 	private static final int HUD_EVERY = 5;
 	/** Hints about the band ("hold Z") repeat no sooner than this. */
 	private static final int HINT_SPACING = 60;
+	/** Each knockout corrupts the band this much (out of {@link com.jaymospowers.core.Fate#MAX_CORRUPTION}). */
+	public static final int KNOCKOUT_CORRUPTION = 25;
+	/** Corrupted: a slam gives the wrong alien this often, and the band changes you on its own about every this many ticks. */
+	public static final float GLITCH_WRONG_CHANCE = 0.25F;
+	public static final int GLITCH_SELF_TICKS = 7200;
 
 	private static final Identifier SCALE_ID = JaymosPowers.id("xenoform_scale");
 	private static final Identifier HEALTH_ID = JaymosPowers.id("xenoform_health");
@@ -119,6 +124,21 @@ public final class XenoformPower implements Power {
 		public int wallRun;
 		public final List<Integer> chain = new ArrayList<>();
 		public int chainTick;
+		/** Prism: in the reflect stance; the wall's blocks and when it falls. */
+		public boolean reflecting;
+		public final List<net.minecraft.core.BlockPos> wall = new ArrayList<>();
+		public long wallUntil;
+		/** Wisp: shrouded; gliding; ticks left of the wail. */
+		public boolean shroud, glide;
+		public int wail;
+		/** Gremlin: climbing; ticks since a spring (0: none). */
+		public boolean climb;
+		public int spring;
+		/** Knell: sensing; ticks left of a burrow and where it comes up. Wyrm: the wings are held. */
+		public boolean sense;
+		public int burrow;
+		public @Nullable Vec3 burrowTo;
+		public boolean wings;
 
 		void clearForm() {
 			form = null;
@@ -135,6 +155,16 @@ public final class XenoformPower implements Power {
 			wallRun = 0;
 			chain.clear();
 			chainTick = 0;
+			reflecting = false;
+			wall.clear();
+			shroud = glide = false;
+			wail = 0;
+			climb = false;
+			spring = 0;
+			sense = false;
+			burrow = 0;
+			burrowTo = null;
+			wings = false;
 			hudDirty = true;
 		}
 	}
@@ -170,6 +200,14 @@ public final class XenoformPower implements Power {
 			}
 			Live live = live(player);
 			return live.form == null || live.form.allowDamage(player, live, source, amount);
+		});
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
+			if (source.getEntity() instanceof ServerPlayer player && player != entity && has(player)) {
+				Live live = live(player);
+				if (live.form != null) {
+					live.form.onDealtDamage(player, live, entity);
+				}
+			}
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			ServerPlayer player = handler.player;
@@ -272,7 +310,10 @@ public final class XenoformPower implements Power {
 			} else {
 				XenoForm dialled = XenoForms.get(XenoformState.band(player).dialled());
 				if (dialled != null) {
-					transform(player, dialled, false);
+					XenoForm glitched = glitch(player, dialled);
+					if (transform(player, glitched, false) && glitched != dialled) {
+						glitchFx(player, "message.jaymospowers.xenoform.glitch_wrong");
+					}
 				}
 			}
 		}
@@ -304,6 +345,14 @@ public final class XenoformPower implements Power {
 				live.hudDirty = true;
 			}
 			tickScan(player, live);
+			// corrupted: now and then the band changes you without being asked
+			if (live.recharge <= 0 && !player.isCreative() && com.jaymospowers.core.Fate.isCorrupted(player)
+				&& player.getRandom().nextInt(GLITCH_SELF_TICKS) == 0) {
+				XenoForm any = glitch(player, null);
+				if (any != null && transform(player, any, false)) {
+					glitchFx(player, "message.jaymospowers.xenoform.glitch_self");
+				}
+			}
 		}
 		// the HUD: on change, and every so often while a clock runs
 		boolean ticking = live.form != null || live.recharge > 0 || live.scanTicks > 0;
@@ -330,7 +379,7 @@ public final class XenoformPower implements Power {
 			}
 			return;
 		}
-		LivingEntity target = XenoForm.aimed(player, SCAN_REACH, e -> true);
+		Entity target = scanTarget(player);
 		XenoForm form = target == null ? null : XenoForms.scanOf(target);
 		if (form == null || target == null) {
 			if (live.scanTicks > 0) {
@@ -370,6 +419,19 @@ public final class XenoformPower implements Power {
 		}
 	}
 
+	/** What the crosshair rests on within {@link #SCAN_REACH}: a creature, or a piece of the Ender Dragon (its body). */
+	private static @Nullable Entity scanTarget(ServerPlayer player) {
+		Vec3 eye = player.getEyePosition();
+		Vec3 end = eye.add(player.getLookAngle().scale(SCAN_REACH));
+		net.minecraft.world.phys.AABB box = player.getBoundingBox().expandTowards(player.getLookAngle().scale(SCAN_REACH)).inflate(1.0);
+		net.minecraft.world.phys.EntityHitResult hit = net.minecraft.world.entity.projectile.ProjectileUtil.getEntityHitResult(player.level(), player, eye, end, box,
+			e -> e != player && e.isAlive() && !e.isSpectator() && (e instanceof LivingEntity || e instanceof net.minecraft.world.entity.boss.enderdragon.EnderDragonPart), 0.3F);
+		if (hit == null) {
+			return null;
+		}
+		return hit.getEntity() instanceof net.minecraft.world.entity.boss.enderdragon.EnderDragonPart part ? part.parentMob : hit.getEntity();
+	}
+
 	/** The band takes in a new alien (a scan, or a command). */
 	public static void unlock(ServerPlayer player, XenoForm form) {
 		XenoformState.Band band = XenoformState.band(player);
@@ -385,6 +447,37 @@ public final class XenoformPower implements Power {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.6F, 1.8F);
 		level.sendParticles(ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.5, 0.4, 0.0);
 		live(player).hudDirty = true;
+	}
+
+	/**
+	 * The band's corruption: a slam gives a random other unlocked alien {@link #GLITCH_WRONG_CHANCE} of the time
+	 * ({@code wanted} null: any unlocked alien, for the band acting on its own). Clean bands always give what was dialled.
+	 */
+	private static @Nullable XenoForm glitch(ServerPlayer player, @Nullable XenoForm wanted) {
+		List<String> unlocked = XenoformState.band(player).unlocked();
+		if (wanted != null && (!com.jaymospowers.core.Fate.isCorrupted(player) || unlocked.size() < 2
+			|| player.getRandom().nextFloat() >= GLITCH_WRONG_CHANCE)) {
+			return wanted;
+		}
+		List<XenoForm> others = new ArrayList<>();
+		for (String id : unlocked) {
+			XenoForm form = XenoForms.get(id);
+			if (form != null && form != wanted) {
+				others.add(form);
+			}
+		}
+		return others.isEmpty() ? wanted : others.get(player.getRandom().nextInt(others.size()));
+	}
+
+	/** A glitch always shows: static on the screen, a sour note, and a line saying what the band did. */
+	private static void glitchFx(ServerPlayer player, String message) {
+		player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 80, 0, false, false));
+		player.sendOverlayMessage(Component.translatable(message).withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
+		player.sendSystemMessage(Component.translatable(message).withStyle(ChatFormatting.DARK_PURPLE));
+		ServerLevel level = player.level();
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.NOTE_BLOCK_BIT.value(), SoundSource.PLAYERS, 1.0F, 0.5F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SCULK_CATALYST_BLOOM, SoundSource.PLAYERS, 1.0F, 0.6F);
+		level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.6, 0.4, 0.05);
 	}
 
 	// ---------------------------------------------------------------- keys
@@ -541,6 +634,7 @@ public final class XenoformPower implements Power {
 			level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 25, 0.4, 0.6, 0.4, 0.08);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 1.0F, 1.4F);
 			if (knockout) {
+				com.jaymospowers.core.Fate.addCorruption(player, KNOCKOUT_CORRUPTION);
 				player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 100, 0, false, false));
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.knocked_out").withStyle(ChatFormatting.RED));
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.PLAYERS, 1.0F, 0.5F);

@@ -192,10 +192,15 @@ final class SkillScreen extends Screen {
 			: Component.translatable("gui.jaymoskingdoms.skills.alignment", Component.translatable("title.jaymoskingdoms." + aligned.key()
 				+ (shown.level(aligned) >= Skills.MAX_LEVEL ? ".master" : "")));
 		graphics.centeredText(this.font, alignment, this.width / 2, y + PANEL_H - 50, aligned == null ? COLOR_DIM : COLOR_GOLD);
+		// (0.6.0) your class, beside the tree
+		com.jaymoskingdoms.Classes.PlayerClass cls = Minecraft.getInstance().player == null ? null : com.jaymoskingdoms.Classes.classOf(Minecraft.getInstance().player);
+		Component clsLine = cls == null ? Component.translatable("gui.jaymoskingdoms.skills.class.none")
+			: Component.translatable("gui.jaymoskingdoms.skills.class", Component.translatable("class.jaymoskingdoms." + cls.key()));
+		graphics.centeredText(this.font, clsLine, this.width / 2, y + PANEL_H - 62, cls == null ? COLOR_DIM : COLOR_GOLD);
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
-	private static void edge(GuiGraphicsExtractor graphics, int x, int y, int w, int h, int color) {
+	static void edge(GuiGraphicsExtractor graphics, int x, int y, int w, int h, int color) {
 		graphics.fill(x, y, x + w, y + 1, color);
 		graphics.fill(x, y + h - 1, x + w, y + h, color);
 		graphics.fill(x, y, x + 1, y + h, color);

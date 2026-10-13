@@ -279,3 +279,6 @@ def main(aow):
 
 if __name__ == "__main__":
     main(sys.argv[1])
+    # (0.9.0) our own short cleavers and long quarterstaffs over the copied sprites
+    import gen_cleaver_staff
+    gen_cleaver_staff.main()

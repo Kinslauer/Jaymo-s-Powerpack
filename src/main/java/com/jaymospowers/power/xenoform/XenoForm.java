@@ -85,6 +85,10 @@ public abstract class XenoForm {
 	public void onKey(ServerPlayer player, XenoformPower.Live live, PowerKey key, boolean down) {
 	}
 
+	/** The player, as this alien, just hurt {@code target} (a punch or a move). */
+	public void onDealtDamage(ServerPlayer player, XenoformPower.Live live, LivingEntity target) {
+	}
+
 	/** True while the form may hang in the air without the server's floating kick. */
 	public boolean allowsFloating(ServerPlayer player, XenoformPower.Live live) {
 		return false;

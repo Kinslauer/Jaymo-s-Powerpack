@@ -2313,3 +2313,42 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   stone without a pickaxe and drops nothing; the chop (`Trees.breaking`) is refused, and starting to punch wood shows
   "Wood needs an axe. Knap a hand axe from 3 flint and a stick (leaves drop sticks)."
 - Natural leaves broken by an empty hand drop a stick `LEAF_STICK_CHANCE` (12%) of the time, for that first stick.
+
+## 0.6.0: player classes (pack 0.9.0)
+- The first time a player comes into a world the class screen opens (`Classes`, client `ClassScreen`): Thief, Warlord,
+  Mage, Archer, Survivalist, Brute, Marksman or Sorcerer, for keeps. A Mage picks a first spell (Fire Bolt, Arcane
+  Bolt, Warding) and a Sorcerer an element (water, fire, earth, air, lightning, ice) on a second page; a Mage gets a
+  wizard's staff. The **Writ of Rebirth** (rare in stronghold libraries, ancient cities and woodland mansions; a court
+  wizard sells one a week for 30 emeralds when you've no perks to unmake) unmakes the pick and asks again. Ops:
+  `/kingdom class set|clear|get`. The K screen shows your class.
+- What each class is good with is attribute modifiers from the class, the held weapon and the armour worn
+  (`ClassPerks`, every number at its top). Gear is found by item tags under `data/jaymoskingdoms/tags/item/`
+  (`light_blades`, `two_handed`, `bludgeons`, `guns`, `light_armor`, `heavy_armor`; optional entries for Armory,
+  Balkon's and Tinkering ids). Thief: light blades +25% damage, +20% swing speed, +1 armour per light piece. Warlord:
+  two-handed +25%, heavy armour weighs half. Mage: -2 hearts. Archer: arrows +25% (`ENTITY_LOAD`), +10% speed, and
+  with a bow drawn a two-block jump (`JUMP_STRENGTH` +0.12) and half fall damage. Survivalist: hunger -30%, air x2
+  (`OXYGEN_BONUS`), +1 heart, fall damage -30%, +5% speed. Brute: bludgeons +30%, +2 hearts, -8% speed, heavy armour
+  weighs double, a raised shield halves what gets past it (`PlayerBlockingMixin`) and comes back in 50 ticks when
+  knocked aside. Marksman: -1 heart, +1 armour per light piece (its guns are stage 3). Sorcerer: its blade and element
+  are stage 2. Heavy armour now weighs on everyone: -1.5% speed a piece. Fall-damage changes are
+  `ADD_MULTIPLIED_TOTAL`, so a power that takes it to nothing keeps it there.
+- The ninth class, the **Rider** (Andy asked for one more): in the saddle the horse runs 15% faster (a transient
+  modifier on the mount's speed) and tires 25% slower (`Equestrian.drain`), horses trust them 50% sooner
+  (`Bonding.addTrust`), blows from horseback +20%; on foot 5% slower. Nobody starts with gear (Andy's word): the
+  cards show what each class is good with (`Classes.gear`, other mods' items by id with vanilla stand-ins). A Mage
+  gets a wizard's staff by having a court wizard teach the recipe (sneak and speak to him: gold and amethyst on two
+  blaze rods, `recipe/wizard_staff.json`, put in the recipe book) or by finding one (rare chests, a slain court wizard
+  half the time).
+- Stage 2, the casters (`Spellcraft`): a Mage's wizard's staff casts the spell on it (right-click; sneak and
+  right-click turns to the next), at 1.5x a scroll's power with its own cooldown per spell (`MAGE_COOLDOWN`); a Mage
+  reading a scroll of a spell they don't know learns it (`Chosen.spells`). `Arcana.cast(spell, level, player, power)`
+  casts any of the five by name. A Sorcerer's `J` key imbues the blade in hand with their element for 2 minutes (every
+  blow carries it: fire burns, water douses and slows and hurts what fears water, earth staggers, air launches, lightning
+  chains to 2 neighbours with a visual-only bolt, ice freezes); sneak and `J` throws a bolt of it (5 damage plus the
+  element, 2 s cooldown). The great scrolls (Raising, Warding) are beyond a Sorcerer.
+- Stage 3, the Marksman's guns (`WeaponModGuns`, only with Balkon's WeaponMod): a shot from a gun in
+  `#jaymoskingdoms:guns` flies half again as fast and far, hits 30% harder (`extraDamage`) and bends up to 3 degrees
+  toward the nearest living thing within 48 blocks of its line (`ENTITY_LOAD`); the gun reloads and winds up 35%
+  faster (`RangedComponentMixin` on `onUsingTick`/`releaseUsing`, applied by `WeaponModMixinPlugin` only when
+  WeaponMod is there).
+- Not playtested in game. Plan: `docs/Classes-Plan.md`.

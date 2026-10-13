@@ -1,0 +1,37 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:leather_helmet",
+    "minecraft:leather_chestplate",
+    "minecraft:leather_leggings",
+    "minecraft:leather_boots",
+    "minecraft:chainmail_helmet",
+    "minecraft:chainmail_chestplate",
+    "minecraft:chainmail_leggings",
+    "minecraft:chainmail_boots",
+    {
+      "id": "jaymospowers:caveman_helmet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:caveman_chestplate",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:caveman_leggings",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:caveman_boots",
+      "required": false
+    },
+    "jaymoskingdoms:ronin_helmet",
+    "jaymoskingdoms:ronin_chestplate",
+    "jaymoskingdoms:ronin_leggings",
+    "jaymoskingdoms:ronin_boots",
+    "jaymoskingdoms:warlord_helmet",
+    "jaymoskingdoms:warlord_chestplate",
+    "jaymoskingdoms:warlord_leggings",
+    "jaymoskingdoms:warlord_boots"
+  ]
+}
