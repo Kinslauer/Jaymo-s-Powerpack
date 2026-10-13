@@ -5,6 +5,7 @@
 	"client": [
 		"CarryArmInvoker",
 		"CarryAvatarRendererMixin",
+		"CrawlAvatarRendererMixin",
 		"CarryCameraMixin",
 		"CarryFirstPersonMixin",
 		"CarryLivingEntityRendererMixin",

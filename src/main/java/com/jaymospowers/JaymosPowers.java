@@ -50,7 +50,7 @@ public class JaymosPowers implements ModInitializer {
 			"core.Affinity", "core.BlockCluster", "core.Carry", "core.CarryBlock", "core.Crawl", "core.Fate", "core.HiddenArmor", "core.Mastery", "core.Powers",
 			"power.arsenal.ArsenalArmory", "power.arsenal.ArsenalPower", "power.arsenal.ArsenalReach", "power.arsenal.ArsenalRelics",
 			"power.arsenal.ArsenalStash", "power.arsenal.HundredBlades", "power.arsenal.ArsenalGates", "power.arsenal.ArsenalVoid",
-			"power.arsenal.ArsenalFlintlock", "power.arsenal.ArsenalDamocles",
+			"power.arsenal.ArsenalFlintlock", "power.arsenal.ArsenalDamocles", "power.arsenal.ArsenalCannons",
 			"power.chrono.ChronoEchoes", "power.chrono.ChronoMemory", "power.chrono.ChronoFlow", "power.wind.WindKick",
 			"power.gravity.GravityPower",
 			"power.web.WebAscension", "power.web.WebBehemoth", "power.web.WebBridges", "power.web.WebPower", "power.web.WebSymbiote", "power.web.WebTendrils",

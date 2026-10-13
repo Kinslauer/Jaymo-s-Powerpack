@@ -12,6 +12,7 @@ import net.minecraft.world.entity.MobCategory;
 public final class ArsenalEntities {
 	public static EntityType<RiftBlade> RIFT_BLADE;
 	public static EntityType<FrostLance> FROST_LANCE;
+	public static EntityType<RiftCannonball> RIFT_CANNONBALL;
 
 	private ArsenalEntities() {
 	}
@@ -36,5 +37,14 @@ public final class ArsenalEntities {
 				.clientTrackingRange(8)
 				.updateInterval(1)
 				.build(lanceKey));
+		ResourceKey<EntityType<?>> ballKey = ResourceKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("arsenal_cannonball"));
+		RIFT_CANNONBALL = Registry.register(BuiltInRegistries.ENTITY_TYPE, ballKey,
+			EntityType.Builder.<RiftCannonball>of(RiftCannonball::new, MobCategory.MISC)
+				.noLootTable()
+				.noSummon()
+				.sized(0.4F, 0.4F)
+				.clientTrackingRange(8)
+				.updateInterval(1)
+				.build(ballKey));
 	}
 }

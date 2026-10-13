@@ -322,7 +322,7 @@ public final class ArsenalDamocles {
 	 * Whether {@code player} may break the block at {@code pos}: they can build, the spot isn't spawn-protected or
 	 * adventure-restricted, and no claim mod (through Fabric's break event) objects.
 	 */
-	private static boolean mayBreak(ServerPlayer player, ServerLevel level, BlockPos pos, BlockState state) {
+	public static boolean mayBreak(ServerPlayer player, ServerLevel level, BlockPos pos, BlockState state) {
 		return player.mayBuild() && player.mayInteract(level, pos) && !player.blockActionRestricted(level, pos, player.gameMode())
 			&& PlayerBlockBreakEvents.BEFORE.invoker().beforeBlockBreak(level, player, pos, state, level.getBlockEntity(pos));
 	}

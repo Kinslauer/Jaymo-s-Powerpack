@@ -635,7 +635,15 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   mended with silver ingots, and a Tinkering tool with a silver head counts as silver against werewolves. The bat
   horse and nightmare are now exceedingly rare: about once in 50 hours a player spends where one can turn up, and
   never while another wild one is about.
-- **0.8.114, hide armour pieces:** every player gets a small eye button beside each armour slot in the inventory (right
+- **0.8.113, crawl roll:** while crawling, double-tap Left or Right (A / D) to roll one block that way, turning over once
+  along your length. A roll puts out the fire on you and any fire you roll through (`Crawl.Roll`, `Crawl.ROLLING`,
+  `client/CrawlRollPose`, `CrawlAvatarRendererMixin`).
+- **0.8.114, Wind hover sway, aimable Tempest Kick, R-only take-off:** the hover pose is all damped springs: a smaller
+  sway that settles after one soft overshoot, hips that twist after camera turns and lean into them, a slight tip with
+  the look, sag on climbs, slow random gusts, and limbs that trail the body; first person rides it by about a degree
+  with a small bob (`WindHoverSway`, `CameraMixin`). The Tempest Kick flies where you look as the leg snaps (in the
+  air up or down; on the ground level or up). Flight toggles on R only: Sneak + double Jump no longer takes off.
+- **0.8.116, hide armour pieces:** every player gets a small eye button beside each armour slot in the inventory (right
   of the slot in survival, under it on the creative inventory tab). Click it to hide that piece: it stays worn and still
   protects, it just isn't drawn, for anyone (the choice is synced to every client, saved, and kept through death). It
   covers vanilla armour, Kingdoms' armoury sets (their layer reads the same render state), carved pumpkins and mob
