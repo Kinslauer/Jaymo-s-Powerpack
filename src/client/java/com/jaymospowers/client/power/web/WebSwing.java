@@ -971,7 +971,7 @@ public final class WebSwing {
 			stuckTicks = 0;
 		}
 		lastPos = player.position();
-		// gliding, a block zip that runs out of time still lets go with the kick up, wings out, instead of stopping dead
+		// gliding, a block zip is a boost: when its time is up (WebPower.GLIDE_ZIP_TICKS) it lets go with the kick up, wings out
 		boolean flingOut = pull.entityId() < 0 && wingsTicks > 0 && pullTicks > pull.maxTicks() && !player.isInWater();
 		if (!flingOut && (distance < arrive || pullTicks > pull.maxTicks() || stuckTicks >= 3 || player.isInWater())) {
 			finishPull(player, pull);

@@ -69,8 +69,8 @@ public final class WebPower implements Power {
 	/** Zip reach, and how fast the client reels you in (blocks/tick; used here to time the zip). */
 	public static final double ZIP_RANGE = 48.0;
 	public static final double ZIP_SPEED = 1.8;
-	/** The pace (blocks/tick) a zip taken while gliding is timed at: slower than {@code ZIP_SPEED}, as air drag holds it back. */
-	static final double GLIDE_ZIP_PACE = 1.3;
+	/** A zip taken while gliding tows you for this long (ticks, 1.5 s), then lets go and the line falls limp. */
+	static final int GLIDE_ZIP_TICKS = 30;
 	/** Yank reach, and the bounding-box volume above which a target is "heavy" (you fly to it instead). Player = 0.65. */
 	public static final double YANK_RANGE = 24.0;
 	public static final double YANK_HEAVY_VOLUME = 2.6;
@@ -870,9 +870,11 @@ public final class WebPower implements Power {
 			// hang on the wall with the hands at the hit point; the client hops up onto the ledge at the end
 			target = anchor.add(face.getUnitVec3().scale(player.getBbWidth() * 0.5 + 0.2)).add(0.0, -1.3, 0.0);
 		}
-		// gliding, the zip rides all the way in, so the line has to hold for the whole trip at the speed it really goes
-		int maxTicks = player.getAttached(WINGS) != null ? Mth.ceil(target.distanceTo(player.position()) / GLIDE_ZIP_PACE) + 20
-			: Mth.ceil(target.distanceTo(player.position()) / ZIP_SPEED) + 12;
+		int maxTicks = Mth.ceil(target.distanceTo(player.position()) / ZIP_SPEED) + 12;
+		if (player.getAttached(WINGS) != null) {
+			// gliding, the zip is a boost: it tows you toward the web this long, then lets go with a kick up (wings still out)
+			maxTicks = Math.min(maxTicks, GLIDE_ZIP_TICKS);
+		}
 		startPull(player, new WebNet.Pull(anchor, target, -1, maxTicks, (byte)face.ordinal()), new WebLine(WebLine.ZIP, anchor, -1));
 		player.setAttached(COOLDOWNS, new WebCooldowns(now + WebSymbiote.zipCooldown(player), cooldowns.shot(), cooldowns.yank()));
 		thwip(player);
