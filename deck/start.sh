@@ -17,7 +17,7 @@ fi
 PLAYIT_PID=
 if [ -s playit-secret.txt ]; then
 	pkill -x playit 2>/dev/null
-	./playit --secret "$(head -n1 playit-secret.txt | tr -d '\r\n ')" > playit.log 2>&1 &
+	./playit --secret-path playit-secret.txt --socket-path "${XDG_RUNTIME_DIR:-/tmp}/playit.sock" > playit.log 2>&1 &
 	PLAYIT_PID=$!
 	echo "playit tunnel started (its log: playit.log)."
 else
@@ -25,9 +25,13 @@ else
 fi
 
 # keep the Deck awake while the server runs
+# (only where it's allowed: started from outside the desktop session, e.g. over SSH, systemd-inhibit is refused and
+# the server would never start, so it then runs without it)
 INHIBIT=
-if command -v systemd-inhibit >/dev/null; then
+if command -v systemd-inhibit >/dev/null && systemd-inhibit --what=sleep:idle --who=jaymos-server --why=check true 2>/dev/null; then
 	INHIBIT="systemd-inhibit --what=sleep:idle --who=jaymos-server --why=Minecraft_server"
+else
+	echo "(Not keeping the Deck awake: started outside the desktop session. Keep it plugged in with sleep off.)"
 fi
 
 $INHIBIT jdk/bin/java -Xms2G -Xmx6G -jar fabric-server-launch.jar nogui
