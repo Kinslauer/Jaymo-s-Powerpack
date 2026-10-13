@@ -28,12 +28,13 @@ import net.minecraft.world.phys.Vec3;
  * <li>Wyrm's wings beat hard while it flies and fold back along its body as it picks up speed (read in its model).</li>
  * <li>Wisp's glide is a ghost's drift: tipped forward, arms reaching out limp and swaying, the tatters streaming back,
  * the whole body rolling and bobbing slowly.</li>
- * <li>Pyre flies on fire: open flames pour from its feet ({@link #tick}).</li>
+ * <li>Pyre flies on fire: its arms stay swept back as jets (no fist out ahead), and open flames pour from its hands
+ * and feet ({@link #tick}).</li>
  * </ul>
  */
 public final class XenoformFlightPose {
-	/** One player's flight this frame: the glide's amount, the wings' (flying, folded back), and the time. */
-	public record Flight(float glide, float wings, float fold, float time) {
+	/** One player's flight this frame: the glide's amount, the wings' (flying, folded back), Pyre's jet, and the time. */
+	public record Flight(float glide, float wings, float fold, float jet, float time) {
 	}
 
 	public static final RenderStateDataKey<Flight> KEY = RenderStateDataKey.create(() -> "jaymospowers:xenoform_flight");
@@ -50,7 +51,10 @@ public final class XenoformFlightPose {
 	static final int FOOT_FLAMES = 2;
 	static final double FOOT_PUSH = 0.12;
 
-	/** entity id → {glide, glide before, wings, wings before, fold, fold before}. */
+	/** Pyre's jet arms: swept back this far (radians) and out from the body this far. */
+	static final float JET_ARM_BACK = 0.35F, JET_ARM_OUT = 0.3F;
+
+	/** entity id → {glide, glide before, wings, wings before, fold, fold before, jet, jet before}. */
 	private static final Map<Integer, float[]> AMOUNTS = new HashMap<>();
 
 	private XenoformFlightPose() {
@@ -86,12 +90,14 @@ public final class XenoformFlightPose {
 				if (kind == XenoformState.FLY_NONE) {
 					continue;
 				}
-				a = new float[6];
+				a = new float[8];
 				AMOUNTS.put(player.getId(), a);
 			}
 			a[1] = a[0];
 			a[3] = a[2];
 			a[5] = a[4];
+			a[7] = a[6];
+			a[6] = ease(a[6], kind == XenoformState.FLY_JET);
 			a[0] = ease(a[0], kind == XenoformState.FLY_GLIDE);
 			a[2] = ease(a[2], kind == XenoformState.FLY_WINGS);
 			float foldTarget = kind == XenoformState.FLY_WINGS ? Mth.clamp(((float)speed(player) - FOLD_START) / (FOLD_FULL - FOLD_START), 0.0F, 1.0F) : 0.0F;
@@ -102,7 +108,8 @@ public final class XenoformFlightPose {
 		}
 		AMOUNTS.entrySet().removeIf(entry -> {
 			float[] a = entry.getValue();
-			return a[0] <= 0.0F && a[1] <= 0.0F && a[2] <= 0.0F && a[3] <= 0.0F && a[4] <= 0.001F || level.getEntity(entry.getKey()) == null;
+			return a[0] <= 0.0F && a[1] <= 0.0F && a[2] <= 0.0F && a[3] <= 0.0F && a[4] <= 0.001F && a[6] <= 0.0F && a[7] <= 0.0F
+				|| level.getEntity(entry.getKey()) == null;
 		});
 	}
 
@@ -110,7 +117,13 @@ public final class XenoformFlightPose {
 		return on ? Math.min(1.0F, value + EASE) : Math.max(0.0F, value - EASE);
 	}
 
-	/** Open flames pouring from both feet, out behind along the flight (or straight down while upright). */
+	/** Pyre's arms are jets: Wind's cruise pose leaves them alone. */
+	public static boolean handsAsJets(AvatarRenderState state) {
+		Flight flight = state.getData(KEY);
+		return flight != null && flight.jet() > 0.001F;
+	}
+
+	/** Open flames pouring from both feet and both hands, out behind along the flight (or straight down while upright). */
 	private static void footFlames(ClientLevel level, Player player) {
 		RandomSource random = player.getRandom();
 		float cruise = WindPose.amount(player, 1.0F);
@@ -123,8 +136,12 @@ public final class XenoformFlightPose {
 		double width = height / 1.8 * 0.12;
 		Vec3 side = new Vec3(-Mth.cos(yaw), 0.0, -Mth.sin(yaw)).scale(width);
 		Vec3 out = new Vec3(0.0, -FOOT_PUSH, 0.0).lerp(look.scale(-FOOT_PUSH), cruise);
-		for (int foot = -1; foot <= 1; foot += 2) {
-			Vec3 at = feet.add(side.scale(foot));
+		// the hands, swept back at the sides: at the hips upright, alongside the waist stretched out
+		Vec3 hands = player.position().add(0.0, height * 0.42, 0.0)
+			.lerp(player.position().add(0.0, height * 0.5, 0.0).subtract(look.scale(height * 0.15)), cruise);
+		for (int jet = 0; jet < 4; jet++) {
+			int foot = jet % 2 == 0 ? -1 : 1;
+			Vec3 at = jet < 2 ? feet.add(side.scale(foot)) : hands.add(side.scale(foot * 3.0));
 			for (int i = 0; i < FOOT_FLAMES; i++) {
 				level.addParticle(ParticleTypes.FLAME, at.x, at.y, at.z,
 					out.x + random.nextGaussian() * 0.02, out.y + random.nextGaussian() * 0.02, out.z + random.nextGaussian() * 0.02);
@@ -143,7 +160,7 @@ public final class XenoformFlightPose {
 			return;
 		}
 		state.setData(KEY, new Flight(Mth.lerp(partialTicks, a[1], a[0]), Mth.lerp(partialTicks, a[3], a[2]), Mth.lerp(partialTicks, a[5], a[4]),
-			entity.tickCount + partialTicks));
+			Mth.lerp(partialTicks, a[7], a[6]), entity.tickCount + partialTicks));
 	}
 
 	/** After the body's turned to face its way: the glide tips it forward, rolling and bobbing slowly. */
@@ -167,7 +184,16 @@ public final class XenoformFlightPose {
 			return;
 		}
 		Flight flight = avatar.getData(KEY);
-		if (flight == null || flight.glide() <= 0.001F) {
+		if (flight == null) {
+			return;
+		}
+		if (flight.jet() > 0.001F) {
+			// Pyre: both arms swept back and a little out, palms behind, the flames pushing
+			float j = smooth(flight.jet()), t = flight.time(), shake = Mth.sin(t * 1.7F) * 0.04F;
+			pose(h.rightArm, JET_ARM_BACK + shake, 0.0F, JET_ARM_OUT, j);
+			pose(h.leftArm, JET_ARM_BACK - shake, 0.0F, -JET_ARM_OUT, j);
+		}
+		if (flight.glide() <= 0.001F) {
 			return;
 		}
 		float g = smooth(flight.glide()), t = flight.time();

@@ -507,7 +507,9 @@ public final class WindPose {
 		}
 		float flutter = Mth.sin(avatar.ageInTicks * 0.9F) * 0.05F;
 		// carrying someone, the arms are busy with the hold (see CarryPose)
-		boolean armsFree = avatar.getData(com.jaymospowers.client.CarryPose.CARRIER_KEY) == null;
+		boolean armsFree = avatar.getData(com.jaymospowers.client.CarryPose.CARRIER_KEY) == null
+			// Pyre flies on its hands too: they stay back as jets (XenoformFlightPose)
+			&& !com.jaymospowers.client.power.xenoform.XenoformFlightPose.handsAsJets(avatar);
 		// head up to look along the flight
 		pose(humanoid.head, -1.15F, 0.0F, 0.0F, amount);
 		ModelPart lead = avatar.mainArm == HumanoidArm.LEFT ? humanoid.leftArm : humanoid.rightArm;

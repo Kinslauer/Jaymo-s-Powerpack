@@ -157,7 +157,7 @@ power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts
 | 155 | Bulwark | V | Grab and Throw | Lift the creature you look at overhead; V again hurls it at 1.5 blocks/tick. Looking at the ground rips a 4-block chunk out and throws it. 1 s. | |
 | 156 | Bulwark | B | Leap Slam | A great leap; the landing hits 8 within 4 blocks. No fall damage. 6 s. | |
 | 157 | Pyre | R | Fire Bolt | A small fireball where you look. 1 s. | |
-| 158 | Pyre | G (hold) | Flame Jet | Fly where you look on jets of fire from your feet, free; slow falling on release. | |
+| 158 | Pyre | G (hold) | Flame Jet | Fly where you look on jets of fire from your hands and feet, free; slow falling on release. | |
 | 159 | Pyre | V | Fire Nova | 6 damage and 5 s of fire to all within 5 blocks. 10 s. | |
 | 160 | Pyre | B | Magma Trail | Fire under your feet for 6 s. 15 s. | |
 | 161 | Pyre | passive | Living magma | Fire and lava can't hurt it; water and rain do 1 hp/s. | |
@@ -199,6 +199,6 @@ power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts
 | 197 | Wyrm | C | Elder Wyrm | 2x size, +8 armour, breath every 2 s, gust half again as wide. | |
 | 198 | Any | corrupted | Twists | Each alien's moves carry a flaw while the band is corrupted (4 knockouts): see docs/xenoform.md. The line is shown when you change. | |
 | 199 | Nadir | (getting it) | The two voices | Ascended and corrupted, Hush and Clamour speak from the band, in rounds that never end: two pairs of conflicting yes/no questions (each wants a yes; 6 pairs, changing by round), then a deed each (odd rounds: 3 changes without a blow, 12 lives as an alien; even rounds: 3 changes ended by hand, 2 knockouts taken). Then Nadir may be slammed once; when that change ends, the next round begins. | |
-| 200 | Nadir | body | The void given shape | 1.15x, 60 hp, fists of 6, +60% speed, immovable; no fall, fire or drowning damage. Flies like creative (double-tap Jump), over three times creative's speed, free. A dark silhouette with a void face and the xeno insignia on the chest. | |
+| 200 | Nadir | body | The void given shape | 1.15x, 60 hp, fists of 6, +20% speed, immovable; no fall, fire or drowning damage. Flies like creative (double-tap Jump), over three times creative's speed, free. A dark silhouette with a void face and the xeno insignia on the chest. | |
 | 201 | Nadir | R | Beacon | Tap: pick a player anywhere on the server (tap again for the next); they glow through the world for 3 s. Hold 1.5 s: phase to just behind them, across dimensions. 5 s. | |
 | 202 | Nadir | G V B | (later) | Not decided yet. | |

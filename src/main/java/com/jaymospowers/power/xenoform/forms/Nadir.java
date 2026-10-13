@@ -44,7 +44,7 @@ public final class Nadir extends XenoForm {
 	private static final float NORMAL_FLY_SPEED = 0.05F;
 
 	public Nadir() {
-		super("nadir", 1.15F, 60.0F, 6.0, 0.6, 1.0, 0.6, Items.ENDER_EYE, 0x7A4FD0);
+		super("nadir", 1.15F, 60.0F, 6.0, 0.2, 1.0, 0.6, Items.ENDER_EYE, 0x7A4FD0);
 	}
 
 	@Override
