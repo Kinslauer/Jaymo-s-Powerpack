@@ -2306,3 +2306,23 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   dark oak carriage, spoked wheels, cast-iron barrel with copper bands, the realm's colour on the gunner's cushion; the
   barrel kicks back when it fires. Tuning numbers at the top of each class.
 - Not playtested in game.
+
+## 0.6.0: player classes (pack 0.9.0)
+- The first time a player comes into a world the class screen opens (`Classes`, client `ClassScreen`): Thief, Warlord,
+  Mage, Archer, Survivalist, Brute, Marksman or Sorcerer, for keeps. A Mage picks a first spell (Fire Bolt, Arcane
+  Bolt, Warding) and a Sorcerer an element (water, fire, earth, air, lightning, ice) on a second page; a Mage gets a
+  wizard's staff. The **Writ of Rebirth** (rare in stronghold libraries, ancient cities and woodland mansions; a court
+  wizard sells one a week for 30 emeralds when you've no perks to unmake) unmakes the pick and asks again. Ops:
+  `/kingdom class set|clear|get`. The K screen shows your class.
+- What each class is good with is attribute modifiers from the class, the held weapon and the armour worn
+  (`ClassPerks`, every number at its top). Gear is found by item tags under `data/jaymoskingdoms/tags/item/`
+  (`light_blades`, `two_handed`, `bludgeons`, `guns`, `light_armor`, `heavy_armor`; optional entries for Armory,
+  Balkon's and Tinkering ids). Thief: light blades +25% damage, +20% swing speed, +1 armour per light piece. Warlord:
+  two-handed +25%, heavy armour weighs half. Mage: -2 hearts. Archer: arrows +25% (`ENTITY_LOAD`), +10% speed, and
+  with a bow drawn a two-block jump (`JUMP_STRENGTH` +0.12) and half fall damage. Survivalist: hunger -30%, air x2
+  (`OXYGEN_BONUS`), +1 heart, fall damage -30%, +5% speed. Brute: bludgeons +30%, +2 hearts, -8% speed, heavy armour
+  weighs double, a raised shield halves what gets past it (`PlayerBlockingMixin`) and comes back in 50 ticks when
+  knocked aside. Marksman: -1 heart, +1 armour per light piece (its guns are stage 3). Sorcerer: its blade and element
+  are stage 2. Heavy armour now weighs on everyone: -1.5% speed a piece. Fall-damage changes are
+  `ADD_MULTIPLIED_TOTAL`, so a power that takes it to nothing keeps it there.
+- Not playtested in game. Plan: `docs/Classes-Plan.md`.

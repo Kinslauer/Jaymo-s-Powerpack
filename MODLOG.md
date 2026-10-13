@@ -683,3 +683,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   the night holding a clock (a day off); Web, survive a cave spider bite (a day off, once a day); Arsenal, kill with 5
   kinds of weapon (at once); Resonance, ring a village bell near midnight (a day off) or survive a Warden's sonic
   boom (at once); Darktide, stay at sea from dusk to dawn (at dawn).
+
+- **0.9.0, player classes (Kingdoms 0.6.0):** the first time you join you pick a class, for keeps: Thief, Warlord,
+  Mage, Archer, Survivalist, Brute, Marksman or Sorcerer, each good with its own gear (found by item tags, so Armory,
+  Balkon's and Tinkering weapons all count) and paying its own price in hearts or speed. A Writ of Rebirth (rare loot,
+  or a court wizard's once a week) lets you choose again. Heavy armour now weighs a little on everyone. Stage 1 of
+  three: the Mage's casting staff and the Sorcerer's elemental blade come next, then the Marksman's guns. Plan:
+  `docs/Classes-Plan.md`.
