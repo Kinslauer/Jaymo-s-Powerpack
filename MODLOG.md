@@ -768,3 +768,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.9.10, Combat Arts (Kingdoms 0.6.5):** the Strength skill tree gets a second page: combo chains with Momentum and
   Cleave, weapon finishers (Earthsplitter, Rend, Executioner), Charge and War Cry on Y, and Bladestorm. Strength now
   levels to 25. See `docs/Skills-Plan.md`.
+- **0.9.11, Tool Station part outlines:** Andy: the empty slots show faint outlines of which part goes where, in
+  Tinkers' layout (head top right, handle bottom left, binding or second head in the middle, extra top left). An
+  empty station shows each tool's parts in turn (`GHOST_CYCLE_MS` 1.5 s); with some parts in, it cycles the tools
+  those parts could make and outlines only what's missing. The tool shown is underlined in the recipe list. Nothing
+  shows while a tool or a modifier is in. `ToolStationScreen.ghosts`.
