@@ -89,7 +89,6 @@ public final class DarktidePower implements Power {
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
 			!(entity instanceof Player player && source.is(DamageTypes.DROWN) && has(player)));
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register(DarktideGuard::allowDamage);
-		ServerLivingEntityEvents.ALLOW_DAMAGE.register(DarktideTide::allowDamage);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register(DarktideGuard::afterDamage);
 		ServerLivingEntityEvents.ALLOW_DEATH.register(DarktideTide::allowDeath);
 		ServerLivingEntityEvents.ALLOW_DEATH.register(DarktideShade::allowDeath);

@@ -58,7 +58,7 @@ final class DarktideTide {
 	// ---- Necromancy ----
 	static final double HARVEST_REACH = 5.0;
 	static final int HARVEST_TICKS = 30;
-	static final int MAX_SHADOWS = 5, MAX_RISEN = 3;
+	static final int MAX_SHADOWS = 15, MAX_RISEN = 3;
 	static final double RISE_REACH = 10.0;
 	static final double RISEN_FOLLOW = 5.0, RISEN_TELEPORT = 20.0, RISEN_LEASH = 48.0;
 	static final double RISEN_SPEED = 1.25;
@@ -490,12 +490,6 @@ final class DarktideTide {
 	static boolean spares(Entity mob, @Nullable Entity target) {
 		UUID owner = target == null ? null : RISEN_OWNER.get(mob.getUUID());
 		return owner != null && (owner.equals(target.getUUID()) || owner.equals(RISEN_OWNER.get(target.getUUID())));
-	}
-
-	/** A risen shadow never hurts its master or its master's other shadows (arrows, explosions and all). */
-	static boolean allowDamage(LivingEntity entity, DamageSource source, float amount) {
-		Entity by = source.getEntity();
-		return by == null || !spares(by, entity);
 	}
 
 	/** What the risen go for: what hurt you, or what you hit. */

@@ -96,7 +96,8 @@ final class DarktideMoves {
 	static final double BARRAGE_REACH = 2.2, BARRAGE_HOLD_AT = 1.5;
 	// ---- B: Riptide Dash (knives, ascended) ----
 	static final double DASH_LENGTH = 5.0, DASH_SPEED = 1.0;
-	static final int DASH_TICKS = 5, DASH_COOLDOWN = 240;
+	/** A dash that lands is ready again at once; one that misses waits DASH_MISS_COOLDOWN, a flurry FLURRY_COOLDOWN (ticks). */
+	static final int DASH_TICKS = 5, DASH_MISS_COOLDOWN = 100, FLURRY_COOLDOWN = 1200;
 	static final float DASH_DAMAGE = 6.0F, DASH_FLOW = 30.0F;
 	static final int FLURRY_HITS = 8, FLURRY_EVERY = 2;
 	static final float FLURRY_HIT_DAMAGE = 2.5F;
@@ -625,6 +626,7 @@ final class DarktideMoves {
 				Vec3 front = first.position().subtract(dir.scale(first.getBbWidth() / 2.0 + 0.8));
 				player.teleportTo(level, front.x, first.getY(), front.z, Set.of(), player.getYRot(), player.getXRot(), false);
 				DarktideMove.play(player, DarktideMove.FLURRY, FLURRY_HITS * FLURRY_EVERY + 2, 0);
+				DarktidePower.cooldown(player, DarktideState.DASH, FLURRY_COOLDOWN);
 			}
 		}
 		if (dash.target < 0) {
@@ -632,7 +634,6 @@ final class DarktideMoves {
 		}
 		live.dash = dash;
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_RIPTIDE_1.value(), SoundSource.PLAYERS, 0.9F, 1.1F);
-		DarktidePower.cooldown(player, DarktideState.DASH, DASH_COOLDOWN);
 	}
 
 	private static void tickDash(ServerPlayer player, DarktideLive live) {
@@ -660,8 +661,6 @@ final class DarktideMoves {
 				player.teleportTo(level, behind.x, target.getY(), behind.z, Set.of(), player.getYRot() + 180.0F, player.getXRot(), false);
 				hit(player, target, FLURRY_HIT_DAMAGE * FLURRY_HITS);
 				live.dash = null;
-				// a dash that lands is ready again
-				DarktidePower.cooldown(player, DarktideState.DASH, 0);
 			}
 			return;
 		}
@@ -669,6 +668,10 @@ final class DarktideMoves {
 			player.setDeltaMovement(player.getDeltaMovement().multiply(0.3, 1.0, 0.3));
 			player.syncVelocity = true;
 			live.dash = null;
+			if (dash.hit.isEmpty()) {
+				// a miss: the dash waits; one that lands is ready again at once
+				DarktidePower.cooldown(player, DarktideState.DASH, DASH_MISS_COOLDOWN);
+			}
 			return;
 		}
 		player.setDeltaMovement(dash.dir.scale(DASH_SPEED).add(0.0, Math.max(0.0, player.getDeltaMovement().y), 0.0));
@@ -678,8 +681,6 @@ final class DarktideMoves {
 		for (LivingEntity target : around(player, player.getBoundingBox().inflate(0.9, 0.3, 0.9))) {
 			if (dash.hit.add(target.getId())) {
 				hit(player, target, DASH_DAMAGE);
-				// a dash that lands is ready again
-				DarktidePower.cooldown(player, DarktideState.DASH, 0);
 			}
 		}
 	}
