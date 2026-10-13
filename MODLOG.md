@@ -683,3 +683,12 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   the night holding a clock (a day off); Web, survive a cave spider bite (a day off, once a day); Arsenal, kill with 5
   kinds of weapon (at once); Resonance, ring a village bell near midnight (a day off) or survive a Warden's sonic
   boom (at once); Darktide, stay at sea from dusk to dawn (at dawn).
+- **0.8.125, Xenoform, the Xeno-Band (stage 1):** a new power from a falling star. On clear nights a glowing rock
+  sometimes comes down near a player (like a Gravity meteor; at most one a day per world) and leaves a Fallen Star in
+  its crater. Mine it (iron pickaxe): 15% a Xeno-Band, 7% the symbiote's goo, else raw iron, amethyst and XP. Put the
+  band on and it never comes off: tap Z to turn its dial, hold Z to slam it and become the dialled alien for a random
+  1–5 minutes (always 5 once mastered), with its body (size, health, fists, speed) and four moves on R G V B; fists only
+  while changed. The alien's health is a second life bar: at zero you're knocked back into yourself at the health you
+  had, and the band recharges. Hold X at a creature for 3 s to scan it and teach the band its alien. Three to start
+  (one at random): Bulwark (iron golem: fist combo, ground clap, grab and throw, leap slam), Pyre (blaze: fire bolt,
+  flame jet, fire nova, magma trail), Blur (horse: dash, wall run, whirlwind, chain strike). `docs/xenoform.md`.
