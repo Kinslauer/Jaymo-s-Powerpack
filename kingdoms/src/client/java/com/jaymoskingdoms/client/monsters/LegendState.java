@@ -11,4 +11,7 @@ public final class LegendState extends HumanoidRenderState {
 	/** An ogre with two heads; a werewolf hunched for the hunt or mid-change; a mimic shut. */
 	boolean twoHeads, hunched, changing, shut;
 	boolean sprinting, aggressive;
+	/** (0.7.0) A cursed werewolf: how much of the beast shows (0-1, mid-change), and its build (0 lean, 1, 2 heavy). */
+	float beast = 1.0F;
+	int build = 1;
 }

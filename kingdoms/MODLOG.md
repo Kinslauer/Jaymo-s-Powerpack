@@ -2542,3 +2542,24 @@ Plan and open questions: `docs/Vampires-Plan.md`. All in `Vampires` (tuning at t
   flies 32 blocks away from whoever hurt him. In flight he can't be hurt; a blow to the bat lands him and he takes
   twice it. 30 s between changes, 20 s at most a flight, and he lands at dawn. A flight cut by a restart ends on load.
 - Ops: `/kingdom vampire elder | turn <feeder|abstainer|hunter> | cure | where`.
+
+### Stage 2: lycanthropy (still Kingdoms 0.7.0)
+All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures port), now able to be someone.
+- **The curse** (`lycanthropy` attachment: coat, size 0.8-1.4, build lean/middling/heavy, last night changed) lies in
+  villagers (MCA's too) and realms' folk. Each dusk from day 4, 15% that it turns up in someone 20-64 blocks from a
+  player. A cursed beast's bite that someone survives passes it on 40% of the time. Vampires can't carry it; the cursed
+  can't be turned by a vampire's bite. Coat by where they live: timber in the cold, brown in the heat, any elsewhere;
+  1 in 20 fiery.
+- **The change**, every full moon (`EnvironmentAttributes.MOON_PHASE`; an op's `/kingdom werewolf moon` calls one
+  tonight), each within 10 s of moonrise: they stop, freeze and convulse for 2.5 s (jerking head and body, bones
+  cracking, cries, bits of fur), then the beast tears out (smoke, blood, a crack) and goes on changing for 3.5 s,
+  frozen: `Werewolf.beastness` drives the model's muzzle, ears, sideburns, claws and tail growing out of nothing, the
+  head and arms thrashing and the body convulsing hardest at first, and the body swelling from 65% to full size; a
+  growl halfway, a howl-whine at the end. Its size is the SCALE attribute, its build widens or narrows it, its health
+  grows with both.
+- The person rides hidden inside (invisible, no AI, no gravity, no physics, carried each tick, can't be hurt). The
+  beast hunts players and villagers (not hidden ones) and any vampire showing itself. Kill it and the person dies
+  with it, where it fell. At dawn it shrinks back over 3 s (the same animation backwards) and the person is left on
+  the ground: Slowness II and Weakness II for a minute, Nausea. Nobody near (not entity-ticking): they're simply
+  back. A restart mid-night puts them back at once; the leftover beast is discarded when it loads.
+- Ops: `/kingdom werewolf curse | change | cure | moon` (nearest within 16 blocks).

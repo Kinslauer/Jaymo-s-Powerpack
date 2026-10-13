@@ -863,4 +863,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   tornado's winds and shove one off course with the Cyclone Lance (`kingdoms/MODLOG.md`).
 - **0.10.0, vampires and werewolves, stage 1: vampires (Kingdoms 0.7.0):** one Elder Vampire per world, an ordinary
   villager by day who hunts anyone (kings too) at night; the bitten who survive turn at the next nightfall as feeders,
-  abstainers or hunters of their own kind. Plan: `docs/Vampires-Plan.md` (`kingdoms/MODLOG.md`).
+  abstainers or hunters of their own kind; the Elder flies as a bat. Stage 2: the wolf's curse in villagers and folk,
+  who change under the full moon (a grotesque change, each beast its own size, build and coat). Plan: `docs/Vampires-Plan.md` (`kingdoms/MODLOG.md`).

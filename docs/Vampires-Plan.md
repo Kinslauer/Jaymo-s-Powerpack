@@ -27,7 +27,7 @@ each stage lands on the same draft PR, and Andy can merge after any stage.
 - Ops: `/kingdom vampire elder` (the nearest grown villager becomes the Elder), `/kingdom vampire turn <feeder|abstainer|hunter>`
   (the nearest person turns), `/kingdom vampire cure` (the nearest is human again), `/kingdom vampire where` (the Elder's last place).
 
-## Stage 2: lycanthropy and the full moon
+## Stage 2: lycanthropy and the full moon (built; see the Kingdoms MODLOG for what landed)
 - Werewolves among villagers and folk: each its own beast built from the person (big or small, lean or heavy, fur
   from their hair and the climate they're from), a new model and textures of our own.
 - They change under every full moon (hooking into Moons: the moon phase, and the Super Blood Moon changes every one

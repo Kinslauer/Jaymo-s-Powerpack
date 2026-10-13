@@ -288,7 +288,7 @@ public final class Vampires {
 
 	/** One of the world's people a vampire may feed on: a grown villager (MCA's too), or a realm's folk; not another vampire. */
 	static boolean person(LivingEntity e) {
-		return e.isAlive() && !e.isBaby() && !isVampire(e) && (e instanceof Villager || e instanceof Folk);
+		return e.isAlive() && !e.isBaby() && !isVampire(e) && (e instanceof Villager || e instanceof Folk) && !Lycans.changed(e);
 	}
 
 	static boolean night(long clock) {
@@ -496,7 +496,8 @@ public final class Vampires {
 			player.addEffect(new MobEffectInstance(MobEffects.HUNGER, PLAYER_BITE_TICKS, 1));
 			return;
 		}
-		if (!prey.hasAttached(BITTEN) && prey instanceof PathfinderMob p) {
+		// (the wolf's curse in the blood: it won't take)
+		if (!prey.hasAttached(BITTEN) && !Lycans.cursed(prey) && prey instanceof PathfinderMob p) {
 			prey.setAttached(BITTEN, level.getOverworldClockTime());
 			LOADED.put(p.getUUID(), p);
 		}
