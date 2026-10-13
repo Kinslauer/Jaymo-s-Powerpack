@@ -606,3 +606,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.8.108, startup crash fix (Kitchen 0.4.33):** the game crashed while loading with "no payload type has been
   registered with name jaymoskitchen:butcher_deal". Kitchen registered the butchers' deal receiver before its payload
   types; `Payloads.register()` now runs first in `JaymosKitchen.onInitialize`.
+- **0.8.109, Chunky for fast gliding:** Chunky 1.5.3 (Fabric, GPL-3.0; CurseForge 433175 / 8036332, Modrinth
+  4Eotm6ov) joins the pack and the server. Run `/chunky radius 5000` then `/chunky start` once in the server console
+  (it works through the world in the background and resumes after a restart); afterwards, gliding or flying fast
+  loads saved chunks instead of generating them on the spot. Distant Horizons stays for the view past 32 chunks.
