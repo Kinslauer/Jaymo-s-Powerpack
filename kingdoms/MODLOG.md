@@ -1971,3 +1971,19 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   mark is dropped when the block breaks, and only matches while the same block stands there, so a block the
   settlement later puts in that spot is the settlement's again. Other players' blocks and settlement-built ones still
   count as before.
+
+## 0.5.48: iron golems drop corpses into the fire
+- Andy: "iron golems should pick up and drop the corpses into flame". Since 0.5.23 only a registered village's golems
+  did it, only for monsters, and only with a fire pit, lit campfire or lava within 16 blocks of the corpse, so in
+  practice it hardly ever happened. Now every iron golem does it, wherever it is (a village's, a kingdom's, one a
+  player built at home): a golem that isn't fighting picks up a corpse within 24 blocks of it, carries it in its arms
+  to the nearest fire pit, lit campfire or lava within 24 blocks of the corpse, walks right up to it and drops it in
+  (`Undertakers.golems`). Monsters' corpses at once; any other (an animal, a villager) once it has lain untouched 5
+  minutes (`SETTLE_TICKS`), so a kill you mean to butcher is yours first. Never a player's corpse, nor a heavy golem
+  corpse. Golems still never light a fire: with none near, the corpse is left (tried again a minute later).
+- Folk guards keep clearing monster corpses as before (they may still light one where it lies).
+- Firefighting no longer beats out a fire kept on netherrack (anything that burns forever), so a fire pit stays lit
+  for the golems; and anyone sent to a fire puts down the corpse they were carrying first and is left to the fire for
+  10 seconds (`Undertakers.calledAway`).
+- Needs Jaymo's Kitchen 0.4.31 (golems hold the corpse up at their arms, not at their knees; older Kitchen works but
+  looks wrong, and before 0.4.27 golems leave corpses alone).
