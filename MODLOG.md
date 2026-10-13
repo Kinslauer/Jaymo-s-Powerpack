@@ -548,5 +548,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   lit campfire or lava, then drops them in. Monsters at once, other corpses after 5 minutes untouched; never players'
   or golems' corpses. Golems never light fires, and fire pits on netherrack are no longer beaten out.
 - **0.8.95, Pickpocketing:** ships Jaymo's Kingdoms 0.5.49 (see `kingdoms/MODLOG.md`): sneak up behind a villager (MCA's
-  too) or a settlement's folk with an empty hand and use them to lift something from their pockets. They may feel it
-  and cry thief, which counts as a theft seen: reputation, and the guards come after you.
+  too) or a settlement's folk with an empty hand and hold right-click: your hand reaches into their pocket for 1-3 s,
+  longer in bright light, on armoured or cheerful marks, shorter in the dark or on sad ones. Stay behind them till it's
+  done to lift something; if they turn round on you they cry thief, which counts as a theft seen.
