@@ -1971,3 +1971,16 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   mark is dropped when the block breaks, and only matches while the same block stands there, so a block the
   settlement later puts in that spot is the settlement's again. Other players' blocks and settlement-built ones still
   count as before.
+
+## 0.5.48: pickpocketing
+- Andy asked for pickpocketing. `Pickpocket`: sneak behind a grown villager (MCA's included) or any of a settlement's
+  folk short of its ruler, empty handed, and use them (from behind: their gaze and the line to you over ~100° apart;
+  a sleeping mark from any side). It runs before `Quests`, so sneak-using a plain villager from the front still opens
+  its quests.
+- Loot: half a stack of something a villager carries (a farmer's wheat, bread, seeds), else a pocket's worth
+  (emeralds 1-3, gold or iron nuggets, bread, an apple, string, paper, flint) or nothing. A picked pocket is empty for
+  a day.
+- Caught: 25% awake, 10% asleep (they wake), 50% for a guard. The mark turns and cries thief; where a faction's law
+  holds that's `Theft.Crime.PICKPOCKET` (medium) seen: reputation -35 and its guards after you. Done clean, anyone
+  else who sees you is still a witness (the mark doesn't count); unseen, the theft may be noticed later like any other.
+  Outside any faction's law the mark only shouts.

@@ -90,6 +90,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.21: monsters hunt the settlements' folk as they do villagers
 		Prey.register();
 		Theft.register();
+		// 0.5.48: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
+		Pickpocket.register();
 		// 0.5.19: a boss's bar shows only to the players who've hit it
 		BossBars.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)

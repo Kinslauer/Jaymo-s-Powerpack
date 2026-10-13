@@ -537,3 +537,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.8.90, Your own blocks are no crime:** ships Jaymo's Kingdoms 0.5.46: breaking a block you placed yourself in a
   settlement (a chest, bed, crafting table, crops you planted), or opening a chest you placed there, no longer makes
   its people take you for a criminal. Blocks the settlement built still count.
+- **0.8.93, Pickpocketing:** ships Jaymo's Kingdoms 0.5.48 (see `kingdoms/MODLOG.md`): sneak up behind a villager (MCA's
+  too) or a settlement's folk with an empty hand and use them to lift something from their pockets. They may feel it
+  and cry thief, which counts as a theft seen: reputation, and the guards come after you.
