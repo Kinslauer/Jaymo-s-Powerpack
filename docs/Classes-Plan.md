@@ -48,7 +48,7 @@ Hearts: Mage 8, Marksman 9, vanilla 10, Survivalist 11, Brute 12. These stack wi
    Writ of Rebirth, the op commands, the class shown on the K screen.
 2. **Mage and Sorcerer magic** (done, same PR): the castable staff, learning scrolls, the beginner spell; the Imbue
    key (J; sneak+J the bolt) and the six elements.
-3. **Marksman's guns**: reload, windup, range, aim assist through WeaponMod mixins.
+3. **Marksman's guns** (done, same PR): reload, windup, range, aim assist through WeaponMod mixins.
 
 ## Andy's answers (2026-10-13)
 1. The "1." meant a ninth class: make one up. It's the **Rider**, built on the Equestrian horses.

@@ -207,6 +207,9 @@ public final class Classes {
 		});
 		ServerTickEvents.END_SERVER_TICK.register(Classes::tick);
 		Spellcraft.register();
+		if (Javelins.WEAPONMOD_LOADED) {
+			WeaponModGuns.register();
+		}
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			WRIT_OFFERS.clear();
 			ClassPerks.clear();

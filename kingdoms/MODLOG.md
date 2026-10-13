@@ -2337,4 +2337,9 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   blow carries it: fire burns, water douses and slows and hurts what fears water, earth staggers, air launches, lightning
   chains to 2 neighbours with a visual-only bolt, ice freezes); sneak and `J` throws a bolt of it (5 damage plus the
   element, 2 s cooldown). The great scrolls (Raising, Warding) are beyond a Sorcerer.
+- Stage 3, the Marksman's guns (`WeaponModGuns`, only with Balkon's WeaponMod): a shot from a gun in
+  `#jaymoskingdoms:guns` flies half again as fast and far, hits 30% harder (`extraDamage`) and bends up to 3 degrees
+  toward the nearest living thing within 48 blocks of its line (`ENTITY_LOAD`); the gun reloads and winds up 35%
+  faster (`RangedComponentMixin` on `onUsingTick`/`releaseUsing`, applied by `WeaponModMixinPlugin` only when
+  WeaponMod is there).
 - Not playtested in game. Plan: `docs/Classes-Plan.md`.

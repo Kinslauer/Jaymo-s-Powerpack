@@ -1,0 +1,8 @@
+{
+	"required": false,
+	"package": "com.jaymoskingdoms.mixin.weaponmod",
+	"plugin": "com.jaymoskingdoms.mixin.weaponmod.WeaponModMixinPlugin",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": ["RangedComponentMixin"],
+	"injectors": { "defaultRequire": 1 }
+}

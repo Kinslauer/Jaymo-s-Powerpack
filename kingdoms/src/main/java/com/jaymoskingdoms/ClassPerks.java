@@ -59,8 +59,10 @@ public final class ClassPerks {
 	/** Brute: the share of damage a raised shield still stops when it would otherwise get past; how long a knocked-aside shield stays down (ticks, vanilla 100). */
 	static final float BRUTE_BLOCK_LEFTOVER = 0.5F;
 	static final int BRUTE_SHIELD_DOWN = 50;
-	// Marksman
-	static final double MARKSMAN_HEALTH = -2.0, MARKSMAN_ARMOR_PER_PIECE = 1.0;
+	// Marksman: a heart fewer, light armour; guns (WeaponMod's) this share harder, this share faster to reload and wind up, this
+	// share further, and a shot bends up to this many degrees toward a target within this reach
+	public static final double MARKSMAN_HEALTH = -2.0, MARKSMAN_ARMOR_PER_PIECE = 1.0, MARKSMAN_DAMAGE = 0.3, MARKSMAN_RELOAD = 0.35, MARKSMAN_RANGE = 0.5,
+		MARKSMAN_AIM_DEGREES = 3.0, MARKSMAN_AIM_REACH = 48.0;
 	// Rider
 	static final double RIDER_MOUNT_SPEED = 0.15, RIDER_STAMINA = 0.75, RIDER_MOUNTED_DAMAGE = 0.2, RIDER_FOOT_MOVE = -0.05;
 	static final float RIDER_TRUST = 1.5F;
@@ -133,7 +135,7 @@ public final class ClassPerks {
 				lines.add(line("weight", "x" + (int) BRUTE_WEIGHT));
 			}
 			case MARKSMAN -> {
-				lines.add(line("guns", "+"));
+				lines.add(line("guns", pct(MARKSMAN_DAMAGE)));
 				lines.add(line("light_armor", "+" + (int) MARKSMAN_ARMOR_PER_PIECE));
 			}
 			case SORCERER -> {
