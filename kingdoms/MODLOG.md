@@ -2148,3 +2148,24 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   living entity): right-click a folk wizard as before, or sneak and right-click an MCA wizard (plain right-click still
   opens MCA's menu; from behind with an empty hand it's still a pickpocket).
 - Not playtested in game.
+
+## 0.5.54: people grow old and die
+- Andy: "npcs grow old and die". Built on 0.5.53's age count (`CourtWizards.grownDays`, now on an `Aging` interface
+  both MCA villagers and `Folk` implement). Everyone ages: every MCA villager (kingdom or not, spouses and friends
+  too), and the folk of realms (kings, lords, guards, archers, standalone casters; saved as `grown_since`, first seen
+  backdated 0-16 days like villagers). Camps' barbarians, orcs and goblins don't.
+- `OldAge` (tuning at its top): grown 8 days (`CourtWizards.ELDER_DAYS`) is an elder: MCA hair dyed grey (left alone
+  if someone dyed it themselves) and 10% slower. Each has their own lifespan, 24-36 days grown (`OLD_AGE_DAYS` +
+  up to `LIFESPAN_SPREAD`, from their UUID); their last 6 days their hair is white and they're 20% slower.
+- When their time comes they die asleep in bed; one who never lies down dies at night (wherever they are) once 2 days
+  past it. Never while fighting, riding, just hurt, or talking to a player. The death is quiet (no scream, a few
+  rising sparks and a soft chime) through the damage type `jaymoskingdoms:old_age` ("X died peacefully of old age",
+  in MCA's village records too). Jaymo's Kitchen leaves their corpse; MCA does the rest as for any death (grave,
+  family and neighbours mourn, a widow or widower).
+- A king or lord who dies so is succeeded: no fate roll, no war, no wardens' blame; "The King of X has died peacefully
+  in his sleep, at a great age" and the heir is crowned a day later (`KingdomEvents.folkDied`). A court wizard's office
+  goes to the next eldest (0.5.53's vacancy). Other folk leave a vacancy that is hired as usual.
+- Population: MCA's own village procreation (couples have a baby while a village is under its bed count) refills
+  the beds the dead leave; children grow up and are stamped as come-of-age then. One raised from their grave with
+  MCA's staff comes back an elder with a full stretch ahead.
+- Not playtested in game.

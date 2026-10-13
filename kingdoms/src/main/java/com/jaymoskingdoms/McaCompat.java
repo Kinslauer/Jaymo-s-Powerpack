@@ -193,6 +193,13 @@ public final class McaCompat {
 		return LOADED && McaBridge.busy(mob);
 	}
 
+	/** (0.5.54) An elder's hair goes grey ({@code frail}: white), unless someone has dyed it. */
+	static void greyHair(PathfinderMob mob, boolean frail) {
+		if (LOADED) {
+			McaBridge.greyHair(mob, frail);
+		}
+	}
+
 	/** A worker {@link Folk} of a realm, with MCA loaded: a villager takes its place (same job, same work); true if so. */
 	static boolean becomeVillager(ServerLevel level, Folk folk) {
 		return LOADED && folk.style() != FactionType.BARBARIAN && McaBridge.convert(level, folk);

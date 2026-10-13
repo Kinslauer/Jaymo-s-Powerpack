@@ -80,7 +80,7 @@ public final class CourtWizards {
 	// ---- age --------------------------------------------------------------------------------------------------------
 
 	/** Notes when {@code v} came of age (from {@link Workers#step}, now and then). */
-	static void age(ServerLevel level, Enlisted v) {
+	static void age(ServerLevel level, Aging v) {
 		long since = v.grownSince();
 		if (v.mob().isBaby()) {
 			if (since != CHILD) {
@@ -94,12 +94,12 @@ public final class CourtWizards {
 	}
 
 	/** Whole days {@code v} has been grown, or -1 if they're young or not seen yet. */
-	static long grownDays(ServerLevel level, Enlisted v) {
+	static long grownDays(ServerLevel level, Aging v) {
 		long since = v.grownSince();
 		return since == UNKNOWN || since == CHILD ? -1 : Math.max(0, (level.getGameTime() - since) / DAY_TICKS);
 	}
 
-	static boolean isElder(ServerLevel level, Enlisted v) {
+	static boolean isElder(ServerLevel level, Aging v) {
 		return grownDays(level, v) >= ELDER_DAYS;
 	}
 

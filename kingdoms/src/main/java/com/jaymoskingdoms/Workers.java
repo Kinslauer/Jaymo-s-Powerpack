@@ -97,6 +97,10 @@ public final class Workers {
 			if (w instanceof Enlisted e) {
 				// (0.5.53) how long they've been grown (elders become court wizards)
 				CourtWizards.age(level, e);
+				if (OldAge.step(level, e)) {
+					// (0.5.54) they died of old age
+					return false;
+				}
 			}
 			if (!McaCompat.reconcile(level, w)) {
 				return false;

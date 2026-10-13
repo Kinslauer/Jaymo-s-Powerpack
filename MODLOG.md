@@ -586,3 +586,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   court wizard is now one of its own elders, an MCA villager who has been grown for 8 days or more, who keeps their
   name, family and hearts and puts on the cleric's robe, the wizard's hat and staff. They live as villagers until a foe
   comes near, then fight and ward as the court wizard always has, and mend hurt townsfolk when idle.
+- **0.8.105, Villagers grow old and die:** ships Jaymo's Kingdoms 0.5.54 (see `kingdoms/MODLOG.md`): every MCA villager
+  and every realm's folk (kings, lords, guards, archers) grows old. Elders' hair goes grey and they walk slower; near
+  the end it goes white. After 24-36 days grown they die peacefully in their sleep, leaving a corpse; with MCA their
+  family mourns at the grave. A king or lord who dies of old age is succeeded by an heir the next day, a court wizard
+  by the next eldest, and MCA's couples have children to fill the empty beds.
