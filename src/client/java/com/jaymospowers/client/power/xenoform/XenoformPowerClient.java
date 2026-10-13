@@ -41,6 +41,8 @@ public final class XenoformPowerClient implements PowerClient {
 	public static void init() {
 		PowerClients.register(XenoformPower.ID, new XenoformPowerClient());
 		ClientTickEvents.START_CLIENT_TICK.register(XenoformPowerClient::skillInput);
+		// everyone's flight poses and Pyre's foot flames (other players may be aliens whatever the local power)
+		ClientTickEvents.END_CLIENT_TICK.register(XenoformFlightPose::tick);
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
 			if (renderer instanceof AvatarRenderer<?> avatar) {
 				helper.register(new XenoformLayer(avatar));

@@ -231,6 +231,13 @@ public final class XenoFormModels {
 			this.leftLeg.visible = false;
 			this.tatters.xRot = Mth.sin(state.ageInTicks * 0.12F) * 0.15F + state.walkAnimationSpeed * 0.3F;
 			this.tatters.zRot = Mth.cos(state.ageInTicks * 0.09F) * 0.1F;
+			XenoformFlightPose.Flight flight = state.getData(XenoformFlightPose.KEY);
+			if (flight != null && flight.glide() > 0.001F) {
+				// gliding, the tatters stream out behind and ripple
+				float g = XenoformFlightPose.smooth(flight.glide());
+				this.tatters.xRot = Mth.lerp(g, this.tatters.xRot, 1.15F + Mth.sin(state.ageInTicks * 0.35F) * 0.22F);
+				this.tatters.zRot = Mth.lerp(g, this.tatters.zRot, Mth.sin(state.ageInTicks * 0.23F) * 0.2F);
+			}
 		}
 	}
 
@@ -359,15 +366,26 @@ public final class XenoFormModels {
 			return mesh;
 		}
 
+		/** In flight: the beat's speed and depth; folded, the wings sweep back to this yaw and lift this little. */
+		static final float FLAP_RATE = 0.55F, FLAP_DEPTH = 0.95F, FOLDED_YAW = 1.35F, FOLDED_LIFT = 0.15F;
+
 		@Override
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
 			float t = state.ageInTicks;
-			float beat = Mth.sin(t * 0.25F) * (0.15F + state.walkAnimationSpeed * 0.6F);
-			this.rightWing.zRot = -0.3F + beat;
-			this.leftWing.zRot = 0.3F - beat;
-			this.rightWing.yRot = 0.6F + Mth.cos(t * 0.25F) * 0.1F;
-			this.leftWing.yRot = -0.6F - Mth.cos(t * 0.25F) * 0.1F;
+			XenoformFlightPose.Flight flight = state.getData(XenoformFlightPose.KEY);
+			float fly = flight == null ? 0.0F : XenoformFlightPose.smooth(flight.wings());
+			float fold = flight == null ? 0.0F : XenoformFlightPose.smooth(flight.fold());
+			// at rest a slow stir; flying, deep strokes that die away as the wings fold back at speed
+			float idle = Mth.sin(t * 0.25F) * (0.15F + state.walkAnimationSpeed * 0.6F);
+			float flap = Mth.sin(t * FLAP_RATE) * FLAP_DEPTH * (1.0F - fold);
+			float beat = Mth.lerp(fly, idle, flap);
+			float lift = fold * FOLDED_LIFT * fly;
+			this.rightWing.zRot = -0.3F + beat + lift;
+			this.leftWing.zRot = 0.3F - beat - lift;
+			float sweep = Mth.lerp(fold * fly, 0.6F + Mth.cos(t * 0.25F) * 0.1F, FOLDED_YAW);
+			this.rightWing.yRot = sweep;
+			this.leftWing.yRot = -sweep;
 			float sway = Mth.cos(state.walkAnimationPos * 0.6662F) * 0.3F * state.walkAnimationSpeed + Mth.sin(t * 0.08F) * 0.1F;
 			this.tail.yRot = sway;
 			this.tailTip.yRot = sway * 1.4F;

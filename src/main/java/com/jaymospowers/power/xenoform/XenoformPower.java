@@ -329,6 +329,7 @@ public final class XenoformPower implements Power {
 		player.removeAttached(XenoformState.HUD);
 		player.removeAttached(XenoformState.FORM);
 		player.removeAttached(XenoformState.ENDING);
+		player.removeAttached(XenoformState.FLIGHT);
 	}
 
 	@Override
@@ -382,6 +383,16 @@ public final class XenoformPower implements Power {
 			} else {
 				live.corrupted = com.jaymospowers.core.Fate.isCorrupted(player);
 				live.form.tick(player, live);
+				if (live.form != null) {
+					int flight = live.form.flight(player, live);
+					if (flight != XenoformState.flight(player)) {
+						if (flight == XenoformState.FLY_NONE) {
+							player.removeAttached(XenoformState.FLIGHT);
+						} else {
+							player.setAttached(XenoformState.FLIGHT, flight);
+						}
+					}
+				}
 				if (live.ultimate && live.form != null) {
 					live.form.tickUltimate(player, live);
 				}
@@ -740,6 +751,7 @@ public final class XenoformPower implements Power {
 		unapply(player);
 		player.removeAttached(XenoformState.FORM);
 		player.removeAttached(XenoformState.ENDING);
+		player.removeAttached(XenoformState.FLIGHT);
 		player.setHealth(Mth.clamp(live.humanHealth, 1.0F, player.getMaxHealth()));
 		player.resetFallDistance();
 		live.clearForm();

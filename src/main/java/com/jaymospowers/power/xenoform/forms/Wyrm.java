@@ -3,6 +3,7 @@ package com.jaymospowers.power.xenoform.forms;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
+import com.jaymospowers.power.xenoform.XenoformState;
 import java.util.Set;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.PowerParticleOption;
@@ -31,7 +32,7 @@ import net.minecraft.world.phys.Vec3;
  * it, as they do anything of the End.
  * <ul>
  * <li>R, Dragon's Breath: a cloud of purple fire ahead of you that burns whatever stands in it.</li>
- * <li>G (hold), Wings: fly where you look (it costs hunger); let go and you drift down.</li>
+ * <li>G (hold), Wings: fly where you look, for free; let go and you drift down.</li>
  * <li>V, Wing Gust: one great beat throws everything within {@link #GUST_RADIUS} away from you.</li>
  * <li>B, Rift: step through the void to where you look, up to {@link #RIFT_RANGE} blocks.</li>
  * <li>C (ascended), Elder Wyrm: twice your size with scales of {@link #ELDER_ARMOR} armour, wings that cost nothing, a
@@ -45,10 +46,9 @@ public final class Wyrm extends XenoForm {
 	public static final int BREATH_COOLDOWN = 200, BREATH_TICKS = 100;
 	public static final double BREATH_AHEAD = 5.0;
 	public static final float BREATH_RADIUS = 3.0F;
-	/** The wings: this fast (blocks/tick), easing toward where you look; this much hunger a tick; this much food needed. */
+	/** The wings: this fast (blocks/tick), easing toward where you look; slow fall for this long after letting go. Free. */
 	public static final double WING_SPEED = 0.9, WING_EASE = 0.25;
-	public static final float WING_EXHAUSTION = 0.04F;
-	public static final int WING_MIN_FOOD = 3, WING_SLOW_FALL_TICKS = 60;
+	public static final int WING_SLOW_FALL_TICKS = 60;
 	public static final int GUST_COOLDOWN = 120;
 	public static final double GUST_RADIUS = 6.0, GUST_OUT = 1.6, GUST_UP = 0.5, GUST_RECOIL = 0.5;
 	public static final float GUST_DAMAGE = 3.0F;
@@ -138,22 +138,14 @@ public final class Wyrm extends XenoForm {
 			level.sendParticles(ParticleTypes.PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.6, 0.3, 0.6, 0.3);
 		}
 		if (live.wings) {
-			if (player.getFoodData().getFoodLevel() <= WING_MIN_FOOD && !player.isCreative() && !live.ultimate) {
-				live.wings = false;
-				player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, WING_SLOW_FALL_TICKS, 0, false, false));
-			} else {
-				Vec3 want = player.getLookAngle().scale(WING_SPEED);
-				Vec3 motion = player.getDeltaMovement().lerp(want, WING_EASE);
-				player.setDeltaMovement(motion);
-				player.syncVelocity = true;
-				player.resetFallDistance();
-				if (!live.ultimate) {
-					player.causeFoodExhaustion(WING_EXHAUSTION);
-				}
-				if (player.tickCount % 12 == 0) {
-					sound(player, SoundEvents.ENDER_DRAGON_FLAP, 0.8F, 1.3F);
-					level.sendParticles(ParticleTypes.PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 6, 0.6, 0.3, 0.6, 0.1);
-				}
+			Vec3 want = player.getLookAngle().scale(WING_SPEED);
+			Vec3 motion = player.getDeltaMovement().lerp(want, WING_EASE);
+			player.setDeltaMovement(motion);
+			player.syncVelocity = true;
+			player.resetFallDistance();
+			if (player.tickCount % 12 == 0) {
+				sound(player, SoundEvents.ENDER_DRAGON_FLAP, 0.8F, 1.3F);
+				level.sendParticles(ParticleTypes.PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 6, 0.6, 0.3, 0.6, 0.1);
 			}
 		}
 		if (player.tickCount % 4 == 0) {
@@ -184,6 +176,11 @@ public final class Wyrm extends XenoForm {
 	@Override
 	public boolean skipsMovementCheck(ServerPlayer player, XenoformPower.Live live) {
 		return live.wings;
+	}
+
+	@Override
+	public int flight(ServerPlayer player, XenoformPower.Live live) {
+		return live.wings && !player.onGround() ? XenoformState.FLY_WINGS : XenoformState.FLY_NONE;
 	}
 
 	// ---- Elder Wyrm ----

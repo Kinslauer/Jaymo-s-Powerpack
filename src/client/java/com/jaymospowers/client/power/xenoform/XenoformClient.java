@@ -26,6 +26,7 @@ public final class XenoformClient {
 		state.setData(XenoformSlap.KEY, XenoformSlap.extract(entity, form, partialTicks));
 		state.setData(XenoBand.KEY, form == null && player != null && XenoformPower.has(player));
 		state.setData(ENDING, form != null && XenoformState.ending(player));
+		XenoformFlightPose.extract(entity, state, partialTicks);
 		if (form == null) {
 			return;
 		}
