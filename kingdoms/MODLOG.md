@@ -2402,7 +2402,7 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
 - Alignment counts experience only up to level 15, so Strength's longer road doesn't decide it.
 - Not playtested in game.
 
-## 0.6.9: townsfolk react to the strange (pack 0.9.18)
+## 0.6.9: townsfolk react to the strange (pack 0.9.19)
 - `Oddities` reads the tags Jaymo's Powers puts on strange things (`jaymospowers_odd:<kind>`; Powers' `core/Oddities`)
   and the world's people (vanilla and MCA villagers, a realm's folk who aren't attacking) react:
   - A Gravity meteor or a falling star in the sky: everyone out of doors within 112 blocks (across the ground) stares
@@ -2416,6 +2416,8 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
     (`Aliens.KINDS`): villagers run, guards hunt, unless the kingdom saw that change (each kind learned on its own;
     the alien's saved entries are unchanged).
   - Under a blood, super blood, harvest or blue moon those out at night now and then remark on it.
+  - Folk who know a changed player (they saw the change) now and then remark on it, unafraid (`KNOWN_TALK`).
+  - Six lines for every sight, fright, moon and bit of gossip.
   - It's all talked about: a gossip's line is often of the nearest strange thing within 1000 blocks in the last three
     days (a star fell 300 blocks north; Andy called the wind down on the square). No one says something strange more
     than once in 30 s (`TALK_GAP`). Tuning at the top of `Oddities`.

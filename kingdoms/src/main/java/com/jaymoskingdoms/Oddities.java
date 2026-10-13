@@ -38,7 +38,8 @@ import org.jspecify.annotations.Nullable;
  * hunt it ({@link #hunted}; not a villager it's got into, whom they only shout about);</li>
  * <li>a player in the symbiote's suit, walking as a shade, or changed into an alien: a monster, unless they saw the
  * change ({@link Aliens});</li>
- * <li>a strange moon: those out at night remark on it ({@link Moons}).</li>
+ * <li>a strange moon: those out at night remark on it ({@link Moons});</li>
+ * <li>a changed player they know (they saw the change): now and then someone remarks on it, unafraid.</li>
  * </ul>
  * And it gets talked about: for days after, a villager's gossip may be of the star that fell to the north, or of the
  * traveller who called the wind down on the square ({@link #gossip}).
@@ -65,10 +66,35 @@ final class Oddities {
 	static final int POWER_TALK_GAP = 400;
 	/** No one person says something strange more often than this (ticks). */
 	static final int TALK_GAP = 600;
+	/** A player changed in front of people who know it's them: now and then one says so, unafraid. */
+	private static void knownSeen(MinecraftServer server, ServerLevel level, ServerPlayer player, long now) {
+		if (REMARKED.containsKey(player.getUUID())) {
+			return;
+		}
+		for (String kind : Aliens.KINDS) {
+			if (!Aliens.is(player, kind)) {
+				continue;
+			}
+			for (LivingEntity p : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(POWER_SEEN),
+				e -> person(server, e) && e.hasLineOfSight(player))) {
+				Faction f = Aliens.factionOf(server, p);
+				if (f == null || !Aliens.known(player, f.id(), kind) || !free(p, now) || level.getRandom().nextFloat() >= KNOWN_TALK) {
+					continue;
+				}
+				REMARKED.put(player.getUUID(), now + KNOWN_TALK_GAP);
+				say(level, p, p.isBaby() ? "child" : "known." + kind, Speech.WHITE, now);
+				return;
+			}
+		}
+	}
+
 	/** Under a strange moon, each person out at night remarks on it with this chance per look. */
 	static final float MOON_TALK = 0.002F;
+	/** Those who know a changed player (they saw the change) remark on it with this chance per look, at most this often. */
+	static final float KNOWN_TALK = 0.05F;
+	static final int KNOWN_TALK_GAP = 1200;
 	/** How many lines there are for each sight. */
-	static final int LINES = 3;
+	static final int LINES = 6;
 	/** How long the strange is talked about (ticks; three days), how many are remembered, and from how far. */
 	static final long NEWS_TICKS = 72000L;
 	static final int MAX_NEWS = 24;
@@ -168,6 +194,9 @@ final class Oddities {
 			String power = power(player);
 			if (power != null && !player.isSpectator()) {
 				powerSeen(server, level, player, power, now);
+			}
+			if (!player.isSpectator()) {
+				knownSeen(server, level, player, now);
 			}
 		}
 		moon(server, level);

@@ -777,7 +777,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (Kingdoms' and Naturalist's predators too) tear into bodies with a brutal worrying bite, the meat spills on the ground
   and they eat it from there. Players' kills are left for the player. See Kitchen's MODLOG.
 
-- **0.9.18, townsfolk react to the strange (Kingdoms 0.6.9):** villagers and a realm's folk stare up at a meteor or a
+- **0.9.19, townsfolk react to the strange (Kingdoms 0.6.9):** villagers and a realm's folk stare up at a meteor or a
   falling star and cry out, and run from where it lands; they stare at a power used in front of them and say what they
   saw (each power has its own lines; children want it again); they run from the symbiote's blob and anything it's got
   into, and guards hunt it (not a villager it's inhabiting, whom they only shout about); a player in the symbiote's suit
