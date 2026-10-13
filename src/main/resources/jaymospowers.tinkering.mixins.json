@@ -2,6 +2,6 @@
 	"required": true,
 	"package": "com.jaymospowers.tinkering.mixin",
 	"compatibilityLevel": "JAVA_25",
-	"mixins": ["TinkerMiningSpeedMixin", "TinkerToolWearMixin"],
+	"mixins": ["TinkerMiningSpeedMixin", "TinkerToolWearMixin", "UncraftableRecipeMixin"],
 	"injectors": { "defaultRequire": 1 }
 }

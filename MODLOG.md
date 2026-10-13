@@ -689,7 +689,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   and iron pickaxe, axe, shovel, hoe and sword recipes are off (Fabric `fabric:false` load conditions over vanilla's
   files, with their recipe-book advancements; written by `tools/tinkering_assets.py`). Then Andy: golden and diamond
   tools and armour go too (pickaxe, axe, shovel, hoe, sword, helmet, chestplate, leggings, boots), so netherite gear is
-  loot-only (its smithing needs diamond gear). Spears, iron/copper/leather armour, smelting and ingot/block crafting
+  loot-only (its smithing needs diamond gear). And no diamond weapon is craftable: vanilla's diamond spear, Armory's 15
+  diamond weapons and round shield (`tools/armory_assets.py` skips them), and Balkon's WeaponMod's diamond knife,
+  spear, halberd, battleaxe, warhammer, katana, flail, boomerang and musket bayonet (its data pack can load after ours,
+  so `tinkering/Uncraftable` drops those recipe ids as the recipe map is built, `UncraftableRecipeMixin`). Their
+  netherite versions are loot-only the same way. Tinkering's Diamond modifier stays. Other spears, iron/copper/leather armour, smelting and ingot/block crafting
   stay. Sora's Dagger no longer comes from a gold block and a diamond block: the iron dagger is gilded on a casting
   table under a block's worth (810 mB) of molten gold, and the gilded dagger gets diamonds set along its edge at a Tool
   Station with a breeze rod and 2 diamonds (`ToolStationMenu.embed`, checked before the weapon recipes). New diamond

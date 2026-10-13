@@ -563,6 +563,9 @@ OFF_TOOLS = ("pickaxe", "axe", "shovel", "hoe", "sword")
 # Andy: gold and diamond armour go too (diamond tools come from Tinkering's Diamond modifier)
 OFF_ARMOUR = ("golden", "diamond")
 ARMOUR = ("helmet", "chestplate", "leggings", "boots")
+# Andy: no craftable diamond weapons at all (Armory's skip their recipe in tools/armory_assets.py, WeaponMod's are
+# dropped by tinkering/Uncraftable)
+OFF_WEAPONS = ("diamond_spear",)
 
 
 def vanilla_off():
@@ -580,6 +583,9 @@ def vanilla_off():
             item = tier + "_" + piece
             write(os.path.join(MC_DATA, "recipe", item + ".json"), off)
             write(os.path.join(MC_DATA, "advancement", "recipes", "combat", item + ".json"), off)
+    for item in OFF_WEAPONS:
+        write(os.path.join(MC_DATA, "recipe", item + ".json"), off)
+        write(os.path.join(MC_DATA, "advancement", "recipes", "combat", item + ".json"), off)
 
 def data():
     write(os.path.join(DATA, "recipe", "tinkering", "pattern.json"), {
