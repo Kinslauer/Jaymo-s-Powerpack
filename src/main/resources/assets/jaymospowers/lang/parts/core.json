@@ -10,6 +10,7 @@
 	"message.jaymospowers.open_menu": "(Press H to see what it does.)",
 	"message.jaymospowers.stirring": "Something stirs inside you...",
 	"message.jaymospowers.stirring_soon": "The feeling is overwhelming. It's almost here.",
+	"message.jaymospowers.calling": "Something answers. %s draws nearer.",
 	"message.jaymospowers.creative_only": "Powers can only be chosen in Creative. In Survival, yours will awaken on its own.",
 	"message.jaymospowers.chosen": "Power chosen: %s",
 	"commands.jaymospowers.unknown": "Unknown power",

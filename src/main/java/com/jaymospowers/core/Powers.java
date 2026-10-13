@@ -127,6 +127,8 @@ public final class Powers {
 			player.setAttached(POWER, power.id());
 			player.removeAttached(AWAKEN_IN);
 			player.removeAttached(AWAKEN_SLOW);
+			player.removeAttached(Callings.CALLING);
+			player.removeAttached(Callings.WEAPON_KILLS);
 			power.onGained(player);
 		}
 	}
@@ -141,9 +143,11 @@ public final class Powers {
 		if (choices.isEmpty()) {
 			return;
 		}
-		// the power their affinity leans to, almost always, if they have one (and don't already have it); otherwise fate decides
+		// a power that called them (Callings) always wins; then their affinity's, almost always; otherwise fate decides
+		Power called = Callings.power(player);
 		Power leaning = Affinity.power(player);
-		Power power = leaning != null && leaning != current && player.getRandom().nextFloat() < Affinity.CHANCE
+		Power power = called != null && called != current ? called
+			: leaning != null && leaning != current && player.getRandom().nextFloat() < Affinity.CHANCE
 			? leaning : choices.get(player.getRandom().nextInt(choices.size()));
 		set(player, power);
 		// a natural awakening starts small: the rest of the abilities come with mastery
@@ -176,6 +180,10 @@ public final class Powers {
 				continue;
 			}
 			Affinity.tick(player);
+			Callings.tick(player);
+			if (of(player) != null) {
+				continue;
+			}
 			Integer left = player.getAttached(AWAKEN_IN);
 			if (left == null) {
 				RandomSource random = player.getRandom();
