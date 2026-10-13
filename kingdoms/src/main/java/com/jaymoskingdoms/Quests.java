@@ -778,7 +778,7 @@ public final class Quests {
 
 	/** The camp {@code entity} is chief or warlord of, or -1. */
 	private static int campOf(Entity entity) {
-		if (entity instanceof Folk folk && folk.role() == Folk.CHIEF) {
+		if (entity instanceof Folk folk && (folk.role() == Folk.CHIEF || folk.role() == Orcs.WARCHIEF)) {
 			return folk.factionId();
 		}
 		Illagers.Tag tag = Illagers.tag(entity);

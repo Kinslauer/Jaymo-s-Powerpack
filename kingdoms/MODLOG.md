@@ -1936,3 +1936,29 @@ the top; `Bond`, `Tack`, `Discipline`, `Tackroom`, `TackMenu`), client `TackScre
   - Horse armour: its metal (iron), gold and diamond armour as an overlay over any coat; copper, netherite, leather
     (in its dye), chain and plate barding recoloured from the metal one. Other mods' horse armour shows as iron.
   - The old vanilla-layout coats (`textures/entity/equine/`) are gone.
+
+## 0.5.45: orc war camps
+Andy linked The Orcs! (CurseForge 976768). It stops at 1.20.4 and is all rights reserved with no source, so this is our
+own take, built on the camps' machinery like the goblin villages: nothing of it is used (looks, names, camps original).
+- **Orc camps** (`OrcCamps`, camp kind `orc`): one may rise near a kingdom in rough country (savanna, badlands, taiga,
+  dark forest, hills, plains, meadow, snowy plains), not on peaceful. A dark oak stockade on blackstone, sharpened stakes,
+  bone posts crowned with skulls, gate towers with red war banners; inside (`OrcBuildings`) the warchief's longhouse
+  (black hide roof, a red aisle to his blackstone throne between bone pillars, his hoard behind it), hide tents, a forge
+  (blast furnaces, anvil, a lava trough behind bars), a watchtower, the plunder pile (its storage), a fighting pit,
+  trophy racks, spike totems, a roasting spit and war drums by the fire. It grows daily: more orcs (every fourth a
+  ranger, up to 15) and the next of 7 tents, racks and totems.
+- **Orcs** (`Orcs`, roles 50-53), a man's height but drawn 16% broader, grey-green with tusks, a heavy brow and swept
+  ears (`OrcSkins`, skins by `tools/gen_orcs.py`):
+  - Grunts (34 health, axes and cleavers, hide or mail; they throw javelins): below 35% health a blood rage (strength
+    and speed); war cries in a fight.
+  - Rangers (bows) on the watchtower and the gate towers.
+  - A shaman (a second once the camp is 5 days old): `Sorcery`'s shaman spells (war chant, mending, fire bolts, a ring
+    of fire, hexes), and a fire scroll now and then when slain.
+  - The warchief (220 health, 1.35x size, netherite axe, a red boss bar, the usual rally): a ground slam every 8 s at
+    anyone within 3.5 blocks (8 damage, thrown back).
+- They hunt players, villagers, golems and every settlement's folk (other camps' folk only if they start it); realms'
+  fighting folk hunt them back, and villagers flee them.
+- **Raids**: orc war bands (grunts, every third a ranger) raid the nearest kingdom like a barbarian camp's, to drums
+  ("Drums in the hills! The orcs of X march on Y!"). Raiders' deaths are now undone on the roster by their own role.
+- Killing the warchief clears the camp (every settlement thanks you); its hides, fences, bones and skulls rot, the
+  stockade stays as a ruin. A lost warchief is replaced after 2 minutes. `/faction camp found orc` for ops.

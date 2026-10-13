@@ -528,3 +528,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   jump during the meal or just after it and leaps you clear: 60% of the time, and always in a village or with 3 or
   more creatures or people within 12 blocks. It leaps the way they're fewest, over open ground (straight up if boxed
   in); the movement keys don't answer while it coils (`WebSymbiote.escape`, `WebNet.Escape`, `WebSymbioteClient.tickEscape`).
+- **0.8.88, orc war camps:** ships Jaymo's Kingdoms 0.5.45 (see `kingdoms/MODLOG.md`): our own take on The Orcs! (no
+  26.3 build, all rights reserved): orc camps rise in rough country near kingdoms, a dark oak stockade round the
+  warchief's longhouse, tents, a forge, a fighting pit and a watchtower; grunts, rangers, a shaman and a warchief boss
+  with a ground slam. Their war bands raid kingdoms; killing the warchief clears the camp.
