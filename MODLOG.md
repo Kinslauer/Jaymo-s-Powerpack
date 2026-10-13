@@ -708,4 +708,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   court wizard's once a week) lets you choose again. Heavy armour now weighs a little on everyone. The Mage casts
   through the staff, the Sorcerer imbues a blade (J), the Marksman's guns bite harder and reload quicker. Plan:
   `docs/Classes-Plan.md`. The Armory's cleavers are redrawn short and its quarterstaffs long, the stick running the
-  whole sprite (`tools/gen_cleaver_staff.py`, run after `armory_assets.py`).
+  whole sprite (`tools/gen_cleaver_staff.py`, run after `armory_assets.py`); the Tinkering cleaver takes the same
+  short shape in every material (`tools/gen_tinker_cleaver.py`).
