@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.entity.player.PlayerModelType;
 
-/** The alien in first person: its arm in place of yours. */
+/** The alien in first person: its arm in place of yours, pulsing red through the form's last seconds. */
 public final class XenoformHand {
 	private XenoformHand() {
 	}
@@ -37,6 +37,10 @@ public final class XenoformHand {
 			poseStack.translate(right ? -0.03F : 0.03F, 0.0F, 0.0F);
 		}
 		collector.submitModelPart(limb, poseStack, RenderTypes.entityCutout(model.texture), light, OverlayTexture.NO_OVERLAY, null);
+		if (XenoformState.ending(player)) {
+			float time = player.tickCount + Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true);
+			collector.submitModelPart(limb, poseStack, RenderTypes.eyes(model.texture), light, OverlayTexture.NO_OVERLAY, null, XenoformLayer.glow(time));
+		}
 		poseStack.popPose();
 		return true;
 	}

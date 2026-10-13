@@ -131,6 +131,11 @@ public abstract class XenoForm {
 	}
 
 	/** True while the form may hang in the air without the server's floating kick. */
+	/** How it's flying this tick (a {@code XenoformState.FLY_*}), synced so everyone's client poses it; none by default. */
+	public int flight(ServerPlayer player, XenoformPower.Live live) {
+		return XenoformState.FLY_NONE;
+	}
+
 	public boolean allowsFloating(ServerPlayer player, XenoformPower.Live live) {
 		return false;
 	}

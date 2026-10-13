@@ -163,6 +163,17 @@ public final class XenoformState {
 		builder -> builder.syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all()));
 	public static final AttachmentType<Hud> HUD = AttachmentRegistry.create(JaymosPowers.id("xenoform_hud"),
 		builder -> builder.syncWith(Hud.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
+	/**
+	 * How the alien is flying right now, for everyone's client to pose it ({@link XenoForm#flight}): {@link #FLY_JET}
+	 * (Pyre), {@link #FLY_WINGS} (Wyrm), {@link #FLY_GLIDE} (Wisp), {@link #FLY_VOID} (Nadir). Absent: not flying.
+	 */
+	public static final AttachmentType<Integer> FLIGHT = AttachmentRegistry.create(JaymosPowers.id("xenoform_flight"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+	public static final int FLY_NONE = 0, FLY_JET = 1, FLY_WINGS = 2, FLY_GLIDE = 3, FLY_VOID = 4;
+
+	/** Set (true) while a form is in its last {@link XenoformPower#BEEP_TICKS}: everyone's client glows the alien red. */
+	public static final AttachmentType<Boolean> ENDING = AttachmentRegistry.create(JaymosPowers.id("xenoform_ending"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 
 	private XenoformState() {
 	}
@@ -185,6 +196,17 @@ public final class XenoformState {
 	/** The alien this player is right now, or null (both sides). */
 	public static @Nullable XenoForm form(Player player) {
 		return XenoForms.get(player.getAttached(FORM));
+	}
+
+	/** How the player's alien is flying ({@link #FLY_NONE} when it isn't). */
+	public static int flight(Player player) {
+		Integer kind = player.getAttached(FLIGHT);
+		return kind == null ? FLY_NONE : kind;
+	}
+
+	/** Whether the player's form is in its last seconds (synced to everyone). */
+	public static boolean ending(Player player) {
+		return player.getAttached(ENDING) != null;
 	}
 
 	public static boolean transformed(Player player) {

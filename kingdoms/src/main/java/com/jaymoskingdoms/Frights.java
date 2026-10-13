@@ -76,7 +76,7 @@ final class Frights {
 				Fright fright = FRIGHTS.get(v.getUUID());
 				if (monster != null) {
 					if (fright == null) {
-						// (0.6.10) a symbiote, a shade, an alien: they cry out what it is
+						// (0.6.11) a symbiote, a shade, an alien: they cry out what it is
 						Oddities.cry(level, v, monster, f);
 					}
 					if (fright == null || fright.until() - now < HIDE_TICKS / 2) {
@@ -92,7 +92,7 @@ final class Frights {
 
 	/**
 	 * The nearest monster it can see, close enough to frighten it; null if none. (0.6.4) A player changed into one of
-	 * the Xeno-Band's aliens counts, unless {@code f}'s people saw them change ({@link Aliens}); (0.6.10) so does one in
+	 * the Xeno-Band's aliens counts, unless {@code f}'s people saw them change ({@link Aliens}); (0.6.11) so does one in
 	 * the symbiote's suit or walking as a shade, and a mob the symbiote has taken ({@link Oddities#monstrous}).
 	 */
 	private static @Nullable LivingEntity monster(ServerLevel level, Villager v, Faction f) {
@@ -117,7 +117,7 @@ final class Frights {
 		return m instanceof Enemy;
 	}
 
-	/** (0.6.10) Something came down at {@code at} (a meteor, a star): it runs from the spot and hides a while. */
+	/** (0.6.11) Something came down at {@code at} (a meteor, a star): it runs from the spot and hides a while. */
 	static void scare(ServerLevel level, Villager v, Vec3 at) {
 		long now = level.getGameTime();
 		if (!FRIGHTS.containsKey(v.getUUID())) {

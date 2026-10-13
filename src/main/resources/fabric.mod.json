@@ -9,7 +9,8 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": ["com.jaymospowers.JaymosPowers"],
-		"client": ["com.jaymospowers.client.JaymosPowersClient"]
+		"client": ["com.jaymospowers.client.JaymosPowersClient"],
+		"preLaunch": ["com.jaymospowers.client.CameraPreset"]
 	},
 	"mixins": [
 		"jaymospowers.mixins.json",

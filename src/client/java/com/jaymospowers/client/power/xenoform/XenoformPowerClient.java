@@ -18,8 +18,9 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Xenoform's client half: the Power Skill key X (taken before the symbiote's menu sees it, the way Darktide does) sent to
- * the server as the scan, the HUD ({@link XenoformHud}), the flash when you change shape, and the alien's body on
- * everyone's screen ({@link XenoformLayer}, {@link XenoformHand}).
+ * the server as the scan, the HUD ({@link XenoformHud}), the flash when you change shape, the slam of the band
+ * ({@link XenoformSlap}), the band on the wrist ({@link XenoBand}), and the alien's body on everyone's screen
+ * ({@link XenoformLayer}, {@link XenoformHand}).
  */
 public final class XenoformPowerClient implements PowerClient {
 	/** The power skill key's mapping (registered in {@code WebSymbioteClient}). */
@@ -40,9 +41,12 @@ public final class XenoformPowerClient implements PowerClient {
 	public static void init() {
 		PowerClients.register(XenoformPower.ID, new XenoformPowerClient());
 		ClientTickEvents.START_CLIENT_TICK.register(XenoformPowerClient::skillInput);
+		// everyone's flight poses and Pyre's foot flames (other players may be aliens whatever the local power)
+		ClientTickEvents.END_CLIENT_TICK.register(XenoformFlightPose::tick);
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
 			if (renderer instanceof AvatarRenderer<?> avatar) {
 				helper.register(new XenoformLayer(avatar));
+				helper.register(new XenoBand.Layer(avatar));
 			}
 		});
 	}
@@ -87,6 +91,7 @@ public final class XenoformPowerClient implements PowerClient {
 		String form = player.getAttached(XenoformState.FORM);
 		if (!java.util.Objects.equals(form, formWas)) {
 			formWas = form;
+			XenoformSlap.changed(player.tickCount);
 			var shape = XenoformState.form(player);
 			flash = FLASH_TICKS;
 			flashColor = shape != null ? shape.color : XenoformPower.COLOR;
@@ -101,10 +106,21 @@ public final class XenoformPowerClient implements PowerClient {
 		XenoformHud.render(graphics, delta, player);
 	}
 
+	/** Z: the wrist comes up while it's held, the hand lands as the band slams. */
+	@Override
+	public void onMode(LocalPlayer player, boolean down) {
+		if (down) {
+			XenoformSlap.holdStart(player.tickCount);
+		} else {
+			XenoformSlap.release(player.tickCount);
+		}
+	}
+
 	@Override
 	public void onActiveChanged(LocalPlayer player, boolean active) {
 		skillWasDown = false;
 		formWas = active ? player.getAttached(XenoformState.FORM) : null;
 		flash = 0;
+		XenoformSlap.clear();
 	}
 }

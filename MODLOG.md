@@ -777,13 +777,30 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (Kingdoms' and Naturalist's predators too) tear into bodies with a brutal worrying bite, the meat spills on the ground
   and they eat it from there. Players' kills are left for the player. See Kitchen's MODLOG.
 
-- **0.9.21, townsfolk react to the strange (Kingdoms 0.6.10):** villagers and a realm's folk stare up at a meteor or a
+- **0.9.24, townsfolk react to the strange (Kingdoms 0.6.11):** villagers and a realm's folk stare up at a meteor or a
   falling star and cry out, and run from where it lands; they stare at a power used in front of them and say what they
   saw (each power has its own lines; children want it again); they run from the symbiote's blob and anything it's got
   into, and guards hunt it (not a villager it's inhabiting, whom they only shout about); a player in the symbiote's suit
   or walking as a shade is treated like an unknown alien until the kingdom sees the change; strange moons get remarked
   on; and all of it turns up in gossip for three days. Powers marks these with entity tags (`core/Oddities`:
   `jaymospowers_odd:meteor|star|symbiote|shade|power/<id>`), which Kingdoms reads (`Oddities`).
+
+- **0.9.22, the aliens' detail pass, the band on the wrist, the slam, the ending glow:** every alien's skin redrawn
+  with more in it (plate seams and rivets, magma cracks and obsidian, stripes and hooves, facets and fractures, folds
+  and fraying cloth, warts and a toothy grin, sculk veins and bone claws, scales and belly plates, nebula dust) and
+  each wears the xeno insignia, the band's green hourglass, on its chest (Pyre's on its core, Knell's on its sternum);
+  Gremlin is grey now. Skins are 64x128 so the extras no longer share texels with the left arm and leg; new parts:
+  Bulwark's pauldrons, Blur's ears, Prism's shoulder shards, Gremlin's tail, Knell's jaw tendrils, Wyrm's tail fin.
+  The band shows on a wearer's left wrist (dial glowing); holding Z lifts that wrist across the chest and the other
+  fist drops onto the band as the change fires, in first and third person, and everyone sees a player slap the band as
+  they change. Through a form's last ten seconds the alien pulses red for everyone (first-person arm too). The
+  alien's first-person arm now actually draws (the renderer skipped the hidden body's arm). The flying aliens fly like
+  Wind, leaning, banking and stretched out, and none of their flight costs hunger: Pyre's Flame Jet now goes where you
+  look (Sunheart half again as fast), its arms swept back as jets, with open flames pouring from its hands and feet; Wyrm's wings beat hard and fold back
+  along its body at speed; Wisp's glide is a ghost's drift (tipped forward, arms reaching limp, tatters streaming);
+  Nadir flies like creative (double-tap Jump), over three times as fast, and is 20% quicker on foot. Xenoform has no affinity,
+  never awakens by fate and isn't on creative's powers screen: the band is the only way to it (`Power.fated`; ops can
+  still `/power set` it).
 
 - **0.9.20, villagers' days (Kingdoms 0.6.9):** tag with a child is a real game (they run, you catch them, they
   chase you back); settlements have toddlers again; villagers keep daily routines (water, gardens, market, chats,
@@ -816,3 +833,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   elbow over elbow with the legs trailing, and a roll stretches the arms past the head with the legs together while the
   body turns over. Rolls are quick (a block every quarter second, about walking pace) for safe, quiet movement, and holding A or D after a roll keeps you rolling that way, a block at a time (`client/CrawlPose`,
   `CrawlModelFeatureRendererMixin`).
+- **0.9.23, Camera Utils with the F7 preset:** Camera Utils joins the pack (client-only, downloaded by id). F7 flips to
+  Andy's third-person view (3.4 blocks back, 0.1 up, 0.9 to the side, tipped 3 degrees, GUI shown), set once per
+  install before Camera Utils reads its config (`client/CameraPreset`, a preLaunch entrypoint); F6 is its other custom
+  view and Right Alt + F6/F7 edits them. Its zoom is taken off Z, the Mode key (`KeyConflicts` v2; OK Zoomer still
+  zooms). While one of its views is on, the Web/Gravity shoulder view stands aside.

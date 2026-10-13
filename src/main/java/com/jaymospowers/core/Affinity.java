@@ -52,10 +52,11 @@ public final class Affinity {
 		return of(player) != null;
 	}
 
-	/** The power the player's affinity leans to, or null (none chosen, fate, or an unknown id). */
+	/** The power the player's affinity leans to, or null (none chosen, fate, an unknown id, or a power fate can't give). */
 	public static @Nullable Power power(Player player) {
 		Identifier id = of(player);
-		return id == null || id.equals(FATE) ? null : Powers.get(id);
+		Power power = id == null || id.equals(FATE) ? null : Powers.get(id);
+		return power != null && power.fated() ? power : null;
 	}
 
 	/** Every so often: a powerless survival player who hasn't chosen yet is shown the choice (once per session). */
@@ -82,7 +83,7 @@ public final class Affinity {
 			return;
 		}
 		Power power = Powers.get(parsed);
-		if (power == null && !parsed.equals(FATE)) {
+		if (power == null ? !parsed.equals(FATE) : !power.fated()) {
 			return;
 		}
 		player.setAttached(AFFINITY, parsed);

@@ -2402,7 +2402,7 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
 - Alignment counts experience only up to level 15, so Strength's longer road doesn't decide it.
 - Not playtested in game.
 
-## 0.6.10: townsfolk react to the strange (pack 0.9.21)
+## 0.6.11: townsfolk react to the strange (pack 0.9.24)
 - `Oddities` reads the tags Jaymo's Powers puts on strange things (`jaymospowers_odd:<kind>`; Powers' `core/Oddities`)
   and the world's people (vanilla and MCA villagers, a realm's folk who aren't attacking) react:
   - A Gravity meteor or a falling star in the sky: everyone out of doors within 112 blocks (across the ground) stares
