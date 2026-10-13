@@ -215,6 +215,11 @@ public final class WebSymbioteClient {
 	private static net.minecraft.core.BlockPos ripFocus = net.minecraft.core.BlockPos.ZERO;
 	/** A takeover's leap: ticks coiled (-1 none), ticks it coils for, the charge it leaps with; and whether this tick touched it. */
 	private static int leapCoil = -1;
+	/** An escape leap after a meal: ticks coiled (-1 none), and the way it leaps (flat; zero: straight up). */
+	private static int escapeCoil = -1;
+	private static Vec3 escapeDir = Vec3.ZERO;
+	/** How long past a full coil it waits for footing before it gives the leap up. */
+	private static final int ESCAPE_GROUND_WAIT = 40;
 	private static int leapTicks;
 	private static float leapCharge;
 	private static boolean leapTouched;
@@ -257,6 +262,14 @@ public final class WebSymbioteClient {
 			}
 			minecraft.options.keyUse.setDown(false);
 			minecraft.options.keyAttack.setDown(false);
+		});
+		ClientPlayNetworking.registerGlobalReceiver(WebNet.Escape.TYPE, (payload, context) -> {
+			Vec3 dir = new Vec3(payload.x(), 0.0, payload.z());
+			escapeDir = dir.lengthSqr() < 1.0E-4 ? Vec3.ZERO : dir.normalize();
+			escapeCoil = 0;
+			if (ClientPlayNetworking.canSend(WebNet.ChargeHold.TYPE)) {
+				ClientPlayNetworking.send(new WebNet.ChargeHold(true));
+			}
 		});
 		ClientPlayNetworking.registerGlobalReceiver(WebNet.Takeover.TYPE, (payload, context) -> {
 			takeoverTarget = payload.entityId();
@@ -332,6 +345,7 @@ public final class WebSymbioteClient {
 		struggleMeter = 0.0F;
 		takeoverTicks = 0;
 		takeoverTarget = -1;
+		escapeCoil = -1;
 		clearPath();
 		THREATS.clear();
 	}
@@ -555,7 +569,9 @@ public final class WebSymbioteClient {
 			Vec3 v = player.getDeltaMovement();
 			player.setDeltaMovement(0.0, Math.min(v.y, 0.0), 0.0);
 		}
-		if (takeoverTicks > 0) {
+		if (escapeCoil >= 0 && takeoverTicks <= 0) {
+			tickEscape(player);
+		} else if (takeoverTicks > 0) {
 			tickTakeover(player);
 			struggleMeter = Math.max(0.0F, struggleMeter - WebSymbiote.STRUGGLE_FADE);
 		} else {
@@ -681,7 +697,51 @@ public final class WebSymbioteClient {
 
 	/** A takeover has the legs right now: the suit's own charged jump stands aside (its steps are plain hops). */
 	public static boolean driving() {
-		return takeoverTicks > 0;
+		return takeoverTicks > 0 || escapeCoil >= 0;
+	}
+
+	/** It's coiling (or just leapt) to get you clear after a meal: the movement keys don't answer. */
+	public static boolean escaping() {
+		return escapeCoil >= 0;
+	}
+
+	/** Fed on a kill, it coils where you stand and leaps clear (see {@link WebSymbiote#ESCAPE_CHANCE}). */
+	private static void tickEscape(LocalPlayer player) {
+		escapeCoil++;
+		if (player.isInWater() || player.isPassenger() || escapeCoil > com.jaymospowers.power.web.WebLeap.CHARGE_FULL + ESCAPE_GROUND_WAIT) {
+			// (it never found its footing)
+			endEscape();
+			return;
+		}
+		if (!escapeDir.equals(Vec3.ZERO)) {
+			turnToward(player, escapeDir, FLEE_TURN, false);
+		}
+		sprint(player, false);
+		Vec3 v = player.getDeltaMovement();
+		if (escapeCoil < com.jaymospowers.power.web.WebLeap.CHARGE_FULL || !player.onGround()) {
+			// coiling: down low, still but for a little give
+			if (escapeCoil % LEAP_SOUND_EVERY == 0 && escapeCoil < com.jaymospowers.power.web.WebLeap.CHARGE_FULL) {
+				WebSwing.play(player, net.minecraft.sounds.SoundEvents.SLIME_SQUISH_SMALL, 0.5F,
+					0.6F + escapeCoil / (float)com.jaymospowers.power.web.WebLeap.CHARGE_FULL);
+			}
+			if (player.onGround()) {
+				player.setDeltaMovement(v.x * LEAP_HOLD, v.y, v.z * LEAP_HOLD);
+			}
+			return;
+		}
+		// the full charge, up and away
+		Vec3 out = escapeDir.scale(com.jaymospowers.power.web.WebLeap.CHARGE_FORWARD_MAX);
+		player.setDeltaMovement(out.x, com.jaymospowers.power.web.WebLeap.speed(1.0F), out.z);
+		WebSwing.play(player, net.minecraft.sounds.SoundEvents.SLIME_JUMP, 1.0F, 0.5F);
+		WebSwing.play(player, net.minecraft.sounds.SoundEvents.WIND_CHARGE_BURST.value(), 0.8F, 0.6F);
+		endEscape();
+	}
+
+	private static void endEscape() {
+		if (escapeCoil >= 0 && ClientPlayNetworking.canSend(WebNet.ChargeHold.TYPE)) {
+			ClientPlayNetworking.send(new WebNet.ChargeHold(false));
+		}
+		escapeCoil = -1;
 	}
 
 	/** The takeover wants you sprinting. */

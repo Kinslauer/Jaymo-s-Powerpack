@@ -134,6 +134,23 @@ public final class WebNet {
 		}
 	}
 
+	/**
+	 * Server → client: fed on a takeover's kill, the symbiote coils a full charge where you stand and leaps clear, along
+	 * ({@code x}, {@code z}) (zero: straight up). See {@link WebSymbiote#ESCAPE_CHANCE}.
+	 */
+	public record Escape(float x, float z) implements CustomPacketPayload {
+		public static final Type<Escape> TYPE = new Type<>(JaymosPowers.id("web_symbiote_escape"));
+		public static final StreamCodec<ByteBuf, Escape> CODEC = StreamCodec.composite(
+			ByteBufCodecs.FLOAT, Escape::x,
+			ByteBufCodecs.FLOAT, Escape::z,
+			Escape::new);
+
+		@Override
+		public Type<Escape> type() {
+			return TYPE;
+		}
+	}
+
 	/** Server → client: the symbiote takes over for {@code ticks}, lurching at entity {@code entityId} (-1: it lets go). */
 	public record Takeover(int entityId, int ticks, boolean flee) implements CustomPacketPayload {
 		public static final Type<Takeover> TYPE = new Type<>(JaymosPowers.id("web_takeover"));
@@ -227,6 +244,7 @@ public final class WebNet {
 		PayloadTypeRegistry.serverboundPlay().register(Struggle.TYPE, Struggle.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ClimbLatch.TYPE, ClimbLatch.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Takeover.TYPE, Takeover.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(Escape.TYPE, Escape.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(TakeoverPath.TYPE, TakeoverPath.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Nudge.TYPE, Nudge.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Sense.TYPE, Sense.CODEC);

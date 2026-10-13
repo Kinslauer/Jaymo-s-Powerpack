@@ -224,6 +224,16 @@ public final class WebSymbiote {
 	/** Hungry, it goes looking for a corpse this far off (else for something to kill), and a tendril carries it in. */
 	public static final double SELF_FEED_RANGE = 14.0;
 	/**
+	 * Fed on a kill of its own (a takeover's hunt), it often gets you out of there: during the meal or just after it
+	 * ({@code ESCAPE_LAG_MIN}-{@code ESCAPE_LAG_MAX} ticks after it starts) it coils a full charge and leaps clear,
+	 * {@code ESCAPE_CHANCE} of the time, and every time it's in a bad spot: in a village, or with {@code ESCAPE_CROWD}
+	 * or more creatures or people within {@code ESCAPE_RANGE}. It leaps the way they're fewest, where the ground ahead
+	 * is open ({@code ESCAPE_DIRECTIONS} tried); boxed in, straight up.
+	 */
+	public static final float ESCAPE_CHANCE = 0.6F;
+	public static final int ESCAPE_CROWD = 3, ESCAPE_LAG_MIN = 10, ESCAPE_LAG_MAX = 70, ESCAPE_DIRECTIONS = 16;
+	public static final double ESCAPE_RANGE = 12.0;
+	/**
 	 * Feeding: it never eats anything living. SEEK a corpse (else the nearest creature), KILL it (at most
 	 * {@code KILL_TICKS}; then its corpse must turn up within {@code CORPSE_WAIT_TICKS}, within {@code CORPSE_FIND_RADIUS}
 	 * of where it fell), GRAB it with a tendril (the reach, then {@code GRAB_HAUL_TICKS} hauling it in, at most
@@ -678,6 +688,9 @@ public final class WebSymbiote {
 		int feedHand;
 		boolean hunting;
 		long feedFxAt;
+		/** The feeding is on a takeover's kill; when it leaps clear after it (0: it won't). */
+		boolean takeoverMeal;
+		long escapeAt;
 		/** A weak bond's takeover on a whim; when it may next speak; the struggle against its hold (presses, fading), the last press, and whether it answered it. */
 		boolean feral;
 		long narrateAt;
@@ -1082,6 +1095,10 @@ public final class WebSymbiote {
 		}
 		if (live.feedStage != FEED_NONE) {
 			tickFeeding(player, live, now);
+		}
+		if (live.escapeAt > 0L && now >= live.escapeAt) {
+			live.escapeAt = 0L;
+			escape(player, live);
 		}
 		if (player.getAttached(EATING) != null) {
 			tickEating(player, live, now);
@@ -2530,6 +2547,7 @@ public final class WebSymbiote {
 	 * hunts it). A prey already dead (a kill of its own) only waits for the corpse.
 	 */
 	private static void startKill(ServerPlayer player, Live live, long now, LivingEntity prey, boolean manual) {
+		live.takeoverMeal = !manual;
 		live.feedStage = FEED_KILL;
 		live.feedTarget = prey.getId();
 		live.feedStageAt = now;
@@ -2582,10 +2600,61 @@ public final class WebSymbiote {
 		float size = Mth.clamp(corpse.getBbWidth() * corpse.getBbWidth() * corpse.getBbHeight() / 2.0F, 0.0F, 1.0F);
 		startEating(player, corpse, Mth.lerp(size, CORPSE_HEAL_MIN, CORPSE_HEAL_MAX), Math.round(Mth.lerp(size, CONSUME_FEED, CORPSE_FEED_MAX)));
 		narrate(player, "feed");
+		if (live.takeoverMeal) {
+			// fed on its own kill: maybe it gets you out of here, during the meal or just after
+			live.escapeAt = now + ESCAPE_LAG_MIN + player.getRandom().nextInt(ESCAPE_LAG_MAX - ESCAPE_LAG_MIN + 1);
+			live.takeoverMeal = false;
+		}
 		live.feedStage = FEED_FEED;
 		live.feedTarget = corpse.getId();
 		live.feedStageAt = now;
 		live.feedFxAt = Math.min(live.feedFxAt, now);
+	}
+
+	/**
+	 * After a takeover's meal: in a bad spot (or {@link #ESCAPE_CHANCE} of the time anyway) it coils and leaps clear,
+	 * the way with the fewest about and open ground ahead (the client does the coil and the leap).
+	 */
+	private static void escape(ServerPlayer player, Live live) {
+		ServerLevel level = player.level();
+		if (!player.isAlive() || sulking(player) || live.fleeing || live.takeoverTicks > 0 || player.isInWater() || player.isPassenger()
+			|| player.getAbilities().flying || player.getAttached(WALL) != null) {
+			return;
+		}
+		Entity carried = KitchenCompat.carriedCorpse(player);
+		List<LivingEntity> about = level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(ESCAPE_RANGE),
+			e -> e != player && e != carried && e.isAlive() && !e.isSpectator());
+		boolean village = level.isVillage(player.blockPosition());
+		boolean cornered = village || about.size() >= ESCAPE_CROWD;
+		if (!cornered && player.getRandom().nextFloat() >= ESCAPE_CHANCE) {
+			return;
+		}
+		// the way out: away from them (the near ones count most), along open ground
+		Vec3 best = Vec3.ZERO;
+		double bestScore = Double.NEGATIVE_INFINITY;
+		float spin = player.getRandom().nextFloat() * Mth.TWO_PI;
+		for (int i = 0; i < ESCAPE_DIRECTIONS; i++) {
+			float a = spin + i * Mth.TWO_PI / ESCAPE_DIRECTIONS;
+			Vec3 dir = new Vec3(Mth.cos(a), 0.0, Mth.sin(a));
+			if (!level.noCollision(player, player.getBoundingBox().move(dir.scale(2.0)).move(0.0, 1.0, 0.0))
+				|| !level.noCollision(player, player.getBoundingBox().move(dir.scale(4.0)).move(0.0, 2.0, 0.0))) {
+				continue;
+			}
+			double score = 0.0;
+			for (LivingEntity e : about) {
+				Vec3 to = e.position().subtract(player.position());
+				double d = Math.max(1.0, to.horizontalDistance());
+				score -= dir.dot(new Vec3(to.x, 0.0, to.z).scale(1.0 / d)) / d;
+			}
+			if (score > bestScore) {
+				bestScore = score;
+				best = dir;
+			}
+		}
+		narrate(player, "escape");
+		dread(player, WebLeap.CHARGE_FULL + 30, true, true);
+		ServerPlayNetworking.send(player, new WebNet.Escape((float)best.x, (float)best.z));
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.PLAYERS, 1.0F, 0.6F);
 	}
 
 	/** The feeding, a tick at a time: kill, grab, carry, feed. The dread stays on your screen throughout. */
@@ -2692,6 +2761,7 @@ public final class WebSymbiote {
 
 	/** The feeding stops where it is (the hunt ends, a grabbed corpse is let go). */
 	private static void abortFeeding(ServerPlayer player, Live live) {
+		live.takeoverMeal = false;
 		if (live.feedStage == FEED_NONE) {
 			return;
 		}
