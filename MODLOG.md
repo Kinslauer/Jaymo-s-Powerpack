@@ -649,7 +649,13 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   half-sword thrust, glaive and war scythe whirls, dagger flip-and-stab, saber lunge, machete chops and more).
   `tools/combat_animations.py` writes the animations (`assets/jaymospowers/player_animations`) and the `combo_*`
   presets each weapon's attributes file names as its parent.
-- **0.8.117, Chunky out of the pack:** on the Deck a new world hung for good at "Selecting global world spawn" (no
+- **0.8.117, hide armour pieces:** every player gets a small eye button beside each armour slot in the inventory (right
+  of the slot in survival, under it on the creative inventory tab). Click it to hide that piece: it stays worn and still
+  protects, it just isn't drawn, for anyone (the choice is synced to every client, saved, and kept through death). It
+  covers vanilla armour, Kingdoms' armoury sets (their layer reads the same render state), carved pumpkins and mob
+  heads; an elytra still spreads when the chest is hidden. Hidden pieces come off the render state last
+  (`HiddenArmorAvatarRendererMixin`, after the symbiote's engulfing), in `core/HiddenArmor` + `client/HiddenArmorClient`.
+- **0.8.118, Chunky out of the pack:** on the Deck a new world hung for good at "Selecting global world spawn" (no
   error; every generation thread idle, the server thread waiting on the spawn chunk). Bisected on a fresh test server
   (E:\fresh-test, the pack's mods, a new world each time): Distant Horizons alone, and the whole pack without Distant
   Horizons, both start; Distant Horizons with Chunky alone hangs every time (both hook the server's chunk loading).
