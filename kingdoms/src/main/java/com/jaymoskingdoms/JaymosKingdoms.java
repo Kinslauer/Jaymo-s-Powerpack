@@ -120,6 +120,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Cavalry.register();
 		// 0.5.34: Jaymo's Equestrian, stage 1 (breeds, stats, gaits, stamina, courage, coats, war elephants) and its attachments
 		com.jaymoskingdoms.equestrian.Equestrian.register();
+		com.jaymoskingdoms.equestrian.MythicMounts.register();
 		// 0.5.44: Jaymo's Equestrian, stage 2 (bond and tack: trust, disciplines, tricks, needs, tack) and its attachments
 		com.jaymoskingdoms.equestrian.Bonding.register();
 		// (0.5.47) stables at work: boarding, the horse market, the farrier
@@ -143,7 +144,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		Sorcery.register();
 		// Naturalist's predators as rare wilderness encounters (0.5.55)
 		com.jaymoskingdoms.wild.Wild.register();
+		// monsters of legend after Fangs 'n Claws' list (0.5.56)
+		com.jaymoskingdoms.monsters.Monsters.register();
 		Encounters.register();
+		Sightings.register();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();
 			Gatherers.clear();

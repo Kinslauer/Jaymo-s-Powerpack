@@ -1,6 +1,9 @@
 package com.jaymoskingdoms.client.equestrian;
 
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.equestrian.Breed;
+import com.jaymoskingdoms.equestrian.Equestrian;
+import com.jaymoskingdoms.equestrian.Equine;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +45,13 @@ public final class MocHorseRenderer extends AbstractHorseRenderer<AbstractHorse,
 		int armorColor = -1;
 		/** The original's saddle (for a vanilla saddle), and its headstall and reins (any saddle, unless it wears a bridle). */
 		boolean mocSaddle, mocHeadstall;
+		/** (0.5.56) A bat horse: its wings, off the ground, climbing. */
+		boolean wings, airborne, flapping;
 	}
+
+	/** (0.5.56) The nightmare's coat flickers between its two skins, this many ticks each. */
+	private static final int NIGHTMARE_FLICKER_TICKS = 3;
+	private static final Identifier NIGHTMARE_FLICKER = HorseLooks.texture("textures/entity/moc_horse/nightmare/nightmare_1.png");
 
 	public MocHorseRenderer(EntityRendererProvider.Context context) {
 		super(context, new MocHorseModel(MocHorseModel.createBodyLayer().bakeRoot()), new MocHorseModel(MocHorseModel.createBodyLayer().bakeRoot()));
@@ -71,6 +80,13 @@ public final class MocHorseRenderer extends AbstractHorseRenderer<AbstractHorse,
 		boolean saddled = !state.saddle.isEmpty();
 		state.mocSaddle = saddled && (look == null || look.saddle() == 0);
 		state.mocHeadstall = saddled && (look == null || !look.bridle());
+		Equine e = Equestrian.peek(horse);
+		state.wings = e != null && e.breed() == Breed.BAT_HORSE;
+		state.airborne = !horse.onGround() && !horse.isInWater();
+		state.flapping = state.airborne && horse.getDeltaMovement().y > 0.0;
+		if (e != null && e.breed() == Breed.NIGHTMARE && (int) (state.ageInTicks / NIGHTMARE_FLICKER_TICKS) % 2 == 1) {
+			state.coat = NIGHTMARE_FLICKER;
+		}
 	}
 
 	private static Identifier armorTexture(Identifier asset) {

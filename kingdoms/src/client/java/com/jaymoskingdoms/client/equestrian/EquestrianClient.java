@@ -97,6 +97,7 @@ public final class EquestrianClient {
 			}
 		};
 		ClientTickEvents.END_CLIENT_TICK.register(EquestrianClient::tick);
+		MythicMountsClient.register();
 		ClientPlayNetworking.registerGlobalReceiver(Equestrian.Shied.TYPE, (payload, context) -> {
 			if (payload.horse() == riding) {
 				gait = Gait.WALK;

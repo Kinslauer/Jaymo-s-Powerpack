@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.monsters.Monsters;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -45,7 +46,8 @@ import org.jspecify.annotations.Nullable;
  * {@link #MIN_DISTANCE}-{@link #MAX_DISTANCE} blocks off, after that player, for {@link #HUNT_TICKS}; then they're
  * ordinary animals, gone if no one is near. Boars and snakes keep spawning as Naturalist has them and can be encounters
  * too. Kingdoms' own wild beasts (feral wolves, coyotes at night, tarantulas, moose; {@code wild/Wild}) come the same
- * way. Naturalist's are by id, so without it only Kingdoms' own come.
+ * way, and (0.5.56) the monsters of legend ({@code monsters/Monsters}), each a sighting folk talk about ({@link Sightings}).
+ * Naturalist's are by id, so without it only Kingdoms' own come.
  */
 public final class Encounters {
 	static final String MOD = "naturalist";
@@ -107,7 +109,16 @@ public final class Encounters {
 		new Encounter("jaymoskingdoms:feral_wolf", "jaymoskingdoms:has_feral_wolf", 10, 3, 5),
 		new Encounter("jaymoskingdoms:coyote", "jaymoskingdoms:has_coyote", 10, 2, 3, true),
 		new Encounter("jaymoskingdoms:tarantula", "jaymoskingdoms:has_tarantula", 8, 1, 2),
-		new Encounter("jaymoskingdoms:moose", "jaymoskingdoms:has_moose", 6, 1, 1));
+		new Encounter("jaymoskingdoms:moose", "jaymoskingdoms:has_moose", 6, 1, 1),
+		// (0.5.56) the monsters of legend (monsters/Monsters)
+		new Encounter("jaymoskingdoms:werewolf", "jaymoskingdoms:has_werewolf", 5, 1, 1, true),
+		new Encounter("jaymoskingdoms:ogre", "jaymoskingdoms:has_ogre", 4, 1, 1),
+		new Encounter("jaymoskingdoms:cave_ogre", "jaymoskingdoms:has_cave_ogre", 4, 1, 1, true),
+		new Encounter("jaymoskingdoms:fire_ogre", "jaymoskingdoms:has_fire_ogre", 3, 1, 1, true),
+		new Encounter("jaymoskingdoms:wraith", "jaymoskingdoms:has_wraith", 5, 1, 2, true),
+		new Encounter("jaymoskingdoms:flame_wraith", "jaymoskingdoms:has_flame_wraith", 3, 1, 1, true),
+		new Encounter("jaymoskingdoms:silver_skeleton", "jaymoskingdoms:has_silver_skeleton", 5, 2, 3, true),
+		new Encounter("jaymoskingdoms:mud_golem", "jaymoskingdoms:has_mud_golem", 6, 1, 2));
 
 	/** A beast after a player, until {@code until} (game time). */
 	private record Hunt(Mob mob, UUID player, long until) {
@@ -165,7 +176,7 @@ public final class Encounters {
 	}
 
 	/** Out on the surface, playing, and well away from every settlement. */
-	static boolean inTheWild(MinecraftServer server, ServerLevel level, ServerPlayer player) {
+	public static boolean inTheWild(MinecraftServer server, ServerLevel level, ServerPlayer player) {
 		if (!player.isAlive() || player.isCreative() || player.isSpectator()) {
 			return false;
 		}
@@ -192,12 +203,13 @@ public final class Encounters {
 			int count = Mth.nextInt(random, e.min(), e.max()), came = 0;
 			for (int n = 0; n < count; n++) {
 				BlockPos at = n == 0 ? spot : near(level, spot, random);
-				if (at != null && spawn(level, type, at, player)) {
+				if (at != null && spawn(level, type, at, player, HUNT_TICKS) != null) {
 					came++;
 				}
 			}
 			if (came > 0) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.encounter." + e.name()).withStyle(ChatFormatting.GOLD));
+				Sightings.seen(level, type, spot);
 				JaymosKingdoms.LOGGER.debug("{} {} came after {} at {}", came, e.mob(), player.getName().getString(), spot);
 				return true;
 			}
@@ -205,8 +217,32 @@ public final class Encounters {
 		return false;
 	}
 
+	/**
+	 * (0.5.56) Sends {@code count} of {@code type} after {@code player} from a spot near them (a quest's beast), after
+	 * them for {@code huntTicks} and kept from despawning; none if no spot could be found.
+	 */
+	static List<Mob> send(ServerLevel level, ServerPlayer player, EntityType<?> type, int count, int huntTicks) {
+		RandomSource random = level.getRandom();
+		List<Mob> came = new ArrayList<>();
+		for (int i = 0; i < SPOT_TRIES && came.isEmpty(); i++) {
+			BlockPos spot = spot(level, player, random);
+			if (spot == null) {
+				continue;
+			}
+			for (int n = 0; n < count; n++) {
+				BlockPos at = n == 0 ? spot : near(level, spot, random);
+				Mob mob = at == null ? null : spawn(level, type, at, player, huntTicks);
+				if (mob != null) {
+					mob.setPersistenceRequired();
+					came.add(mob);
+				}
+			}
+		}
+		return came;
+	}
+
 	/** A dry spot on the surface {@link #MIN_DISTANCE}-{@link #MAX_DISTANCE} blocks from the player, if one's loaded. */
-	private static @Nullable BlockPos spot(ServerLevel level, ServerPlayer player, RandomSource random) {
+	public static @Nullable BlockPos spot(ServerLevel level, ServerPlayer player, RandomSource random) {
 		double angle = random.nextDouble() * Math.PI * 2.0;
 		int distance = Mth.nextInt(random, MIN_DISTANCE, MAX_DISTANCE);
 		BlockPos column = BlockPos.containing(player.getX() + Math.cos(angle) * distance, player.getY(), player.getZ() + Math.sin(angle) * distance);
@@ -231,10 +267,17 @@ public final class Encounters {
 
 	/** One of the beasts that hunt {@code biome}, by weight; null if none does. */
 	static @Nullable Encounter pick(Holder<Biome> biome, boolean night, RandomSource random) {
+		return pick(biome, night, random, false);
+	}
+
+	/** {@link #pick}, among the monsters of legend only if {@code legends}. */
+	static @Nullable Encounter pick(Holder<Biome> biome, boolean night, RandomSource random, boolean legends) {
 		List<Encounter> fits = new ArrayList<>();
 		int total = 0;
 		for (Encounter e : TABLE) {
-			if ((night || !e.night()) && type(e.mob()) != null && biome.is(TagKey.create(Registries.BIOME, Identifier.parse(e.biomes())))) {
+			EntityType<?> type = type(e.mob());
+			if ((night || !e.night()) && type != null && (!legends || Monsters.legend(type))
+				&& biome.is(TagKey.create(Registries.BIOME, Identifier.parse(e.biomes())))) {
 				fits.add(e);
 				total += e.weight();
 			}
@@ -252,9 +295,9 @@ public final class Encounters {
 		return null;
 	}
 
-	private static boolean spawn(ServerLevel level, EntityType<?> type, BlockPos at, ServerPlayer player) {
+	private static @Nullable Mob spawn(ServerLevel level, EntityType<?> type, BlockPos at, ServerPlayer player, int huntTicks) {
 		if (!(type.create(level, EntitySpawnReason.EVENT) instanceof Mob mob)) {
-			return false;
+			return null;
 		}
 		mob.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360.0F, 0.0F);
 		mob.finalizeSpawn(level, level.getCurrentDifficultyAt(at), EntitySpawnReason.EVENT, null);
@@ -262,12 +305,12 @@ public final class Encounters {
 			ageable.setAge(0);
 		}
 		if (!level.noCollision(mob)) {
-			return false;
+			return null;
 		}
 		level.addFreshEntity(mob);
 		after(mob, player);
-		HUNTS.add(new Hunt(mob, player.getUUID(), level.getGameTime() + HUNT_TICKS));
-		return true;
+		HUNTS.add(new Hunt(mob, player.getUUID(), level.getGameTime() + huntTicks));
+		return mob;
 	}
 
 	private static void after(Mob mob, ServerPlayer player) {

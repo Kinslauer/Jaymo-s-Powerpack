@@ -20,5 +20,20 @@ Taken from it, under that licence:
   off the armoured horses as overlays (iron, gold, diamond) and recoloured from the metal one (copper, netherite,
   leather, chain and plate barding) (kingdoms/tools/gen_moc_horses.py)
 
+- (0.5.56) the horse's wings (MoCModelNewHorse's pegasus wings and their animation), added to MocHorseModel for the
+  bat horse; the horse textures horsebat, horsenightmare and horsenightmare1, as they are, as the bat horse's and the
+  nightmare's coats in assets/jaymoskingdoms/textures/entity/moc_horse/bat_horse/ and nightmare/
+
+- (0.5.56) the monsters of legend: the werewolf (MoCModelWere, and MoCEntityWerewolf's change by night, its hide that
+  only gold or silver cuts, its four faces and four coats), the ogre (MoCModelOgre: one head or two and a club), the
+  wraith (MoCModelWraith) and the silver skeleton (MoCModelSilverSkeleton), each with its animation, ported to 26.3 as
+  WerewolfModel, OgreModel, WraithModel and SilverSkeletonModel; the textures wolfblack, wolfbrown, wolftimber,
+  wolffire1-3, weredude, werehuman, wereoldie, werewoman, ogregreen, ogrered, wraith, flamewraith and silverskeleton
+  (the originals are in kingdoms/tools/mocreatures/), as they are, under our names in
+  assets/jaymoskingdoms/textures/entity/legend/, and ogre_cave there: ogregreen's skin turned slate grey
+  (kingdoms/tools/gen_legends.py)
+
 WarElephantModel, MocHorseModel and MocHorseRenderer are likewise licensed under the GNU GPL v3. Their source is in
-the Jaymo's Powerpack repository (kingdoms/src/client/java/com/jaymoskingdoms/client/equestrian/).
+the Jaymo's Powerpack repository (kingdoms/src/client/java/com/jaymoskingdoms/client/equestrian/). So are the monsters
+of legend (kingdoms/src/main/java/com/jaymoskingdoms/monsters/ and kingdoms/src/client/java/com/jaymoskingdoms/client/
+monsters/).

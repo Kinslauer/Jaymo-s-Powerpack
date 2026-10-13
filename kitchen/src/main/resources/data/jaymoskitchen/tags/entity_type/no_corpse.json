@@ -18,6 +18,10 @@
     { "id": "naturalist:firefly", "required": false },
     { "id": "naturalist:dragonfly", "required": false },
     { "id": "naturalist:ant", "required": false },
-    { "id": "naturalist:lizard_tail", "required": false }
+    { "id": "naturalist:lizard_tail", "required": false },
+    { "id": "jaymoskingdoms:wraith", "required": false },
+    { "id": "jaymoskingdoms:flame_wraith", "required": false },
+    { "id": "jaymoskingdoms:mud_golem", "required": false },
+    { "id": "jaymoskingdoms:mimic", "required": false }
   ]
 }

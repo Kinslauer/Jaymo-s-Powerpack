@@ -9,6 +9,7 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.5.44) Horses, skeleton horses and zombie horses: DrZhark's Mo' Creatures horse (MoCModelNewHorse, GPL-3, see
@@ -18,6 +19,7 @@ import net.minecraft.util.Mth;
  * to eat, the tail lifting with speed and swishing. Vanilla's rear and graze come in as blends (the original's are
  * on or off). A vanilla saddle shows as the original's saddle, stirrups, headstall and reins; our war and racing
  * saddles and the bridle are drawn by {@link TackLayer} on these same bones. Texture 128x128 (coats drawn at twice that).
+ * (0.5.56) The bat horse wears the original's wings too.
  */
 class MocHorseModel extends EntityModel<MocHorseRenderer.State> {
 	private static final float DEG = Mth.DEG_TO_RAD;
@@ -35,6 +37,8 @@ class MocHorseModel extends EntityModel<MocHorseRenderer.State> {
 	private final ModelPart leg1A, leg1B, leg1C, leg2A, leg2B, leg2C, leg3A, leg3B, leg3C, leg4A, leg4B, leg4C;
 	private final ModelPart headSaddle, saddle, saddleB, saddleC, stirrupLeft, stirrupLeftIron, stirrupRight, stirrupRightIron;
 	private final ModelPart bitLeft, bitRight, reinLeft, reinRight;
+	/** (0.5.56) The bat horse's wings (not on the armour's copy). */
+	private final @Nullable ModelPart innerWing, midWing, outerWing, innerWingR, midWingR, outerWingR;
 
 	MocHorseModel(ModelPart root) {
 		super(root);
@@ -75,24 +79,31 @@ class MocHorseModel extends EntityModel<MocHorseRenderer.State> {
 		this.bitRight = root.getChild("bit_right");
 		this.reinLeft = root.getChild("rein_left");
 		this.reinRight = root.getChild("rein_right");
+		boolean wings = root.hasChild("inner_wing");
+		this.innerWing = wings ? root.getChild("inner_wing") : null;
+		this.midWing = wings ? root.getChild("mid_wing") : null;
+		this.outerWing = wings ? root.getChild("outer_wing") : null;
+		this.innerWingR = wings ? root.getChild("inner_wing_r") : null;
+		this.midWingR = wings ? root.getChild("mid_wing_r") : null;
+		this.outerWingR = wings ? root.getChild("outer_wing_r") : null;
 	}
 
 	/** The horse itself. */
 	static LayerDefinition createBodyLayer() {
-		return LayerDefinition.create(mesh(true, CubeDeformation.NONE), 128, 128);
+		return LayerDefinition.create(mesh(true, CubeDeformation.NONE, true), 128, 128);
 	}
 
 	/** Its armour: the same boxes, a little larger, for an overlay texture drawn over the coat. */
 	static LayerDefinition createArmorLayer() {
-		return LayerDefinition.create(mesh(true, new CubeDeformation(0.1F)), 128, 128);
+		return LayerDefinition.create(mesh(true, new CubeDeformation(0.1F), false), 128, 128);
 	}
 
 	/** The bones alone (no boxes), for {@link TackLayer} to hang its pieces on. */
 	static MeshDefinition bones() {
-		return mesh(false, CubeDeformation.NONE);
+		return mesh(false, CubeDeformation.NONE, true);
 	}
 
-	private static MeshDefinition mesh(boolean boxes, CubeDeformation grow) {
+	private static MeshDefinition mesh(boolean boxes, CubeDeformation grow, boolean wings) {
 		MeshDefinition mesh = new MeshDefinition();
 		PartDefinition r = mesh.getRoot();
 		Parts p = new Parts(r, boxes);
@@ -136,6 +147,15 @@ class MocHorseModel extends EntityModel<MocHorseRenderer.State> {
 		p.add("bit_right", 74, 13, -2.5F, -8, -4, 1, 2, 2, grow, headPose);
 		p.add("rein_left", 44, 10, 2.6F, -6, -6, 0, 3, 16, grow, PartPose.offset(0, 4, -10));
 		p.add("rein_right", 44, 5, -2.6F, -6, -6, 0, 3, 16, grow, PartPose.offset(0, 4, -10));
+		if (wings) {
+			// (0.5.56) the bat horse's wings: the original's pegasus wings, which its bat coat paints leathery
+			p.add("mid_wing", 82, 68, 1, 0.1F, 1, 12, 2, 11, grow, PartPose.offsetAndRotation(5, 3, -6, 0, 0.0872665F, 0));
+			p.add("inner_wing", 0, 96, 0, 0, 0, 7, 2, 11, grow, PartPose.offsetAndRotation(5, 3, -6, 0, -0.3490659F, 0));
+			p.add("outer_wing", 0, 68, 0, 0, 0, 22, 2, 11, grow, PartPose.offsetAndRotation(17, 3, -6, 0, -0.3228859F, 0));
+			p.add("inner_wing_r", 0, 110, -7, 0, 0, 7, 2, 11, grow, PartPose.offsetAndRotation(-5, 3, -6, 0, 0.3490659F, 0));
+			p.add("mid_wing_r", 82, 82, -13, 0.1F, 1, 12, 2, 11, grow, PartPose.offsetAndRotation(-5, 3, -6, 0, -0.0872665F, 0));
+			p.add("outer_wing_r", 0, 82, -22, 0, 0, 22, 2, 11, grow, PartPose.offsetAndRotation(-17, 3, -6, 0, 0.3228859F, 0));
+		}
 		return mesh;
 	}
 
@@ -244,6 +264,46 @@ class MocHorseModel extends EntityModel<MocHorseRenderer.State> {
 		}
 		this.headSaddle.visible = this.bitLeft.visible = this.bitRight.visible = state.mocHeadstall;
 		this.reinLeft.visible = this.reinRight.visible = state.mocHeadstall && ridden;
+		this.wings(state, walked, ticks, stand);
+	}
+
+	/**
+	 * (0.5.56) The bat horse's wings, as the original's pegasus: folded along its sides on the ground, spread in the air,
+	 * beating while it climbs.
+	 */
+	private void wings(MocHorseRenderer.State state, float walked, float ticks, float stand) {
+		if (this.innerWing == null) {
+			return;
+		}
+		ModelPart[] all = {this.innerWing, this.midWing, this.outerWing, this.innerWingR, this.midWingR, this.outerWingR};
+		for (ModelPart part : all) {
+			part.visible = state.wings;
+			part.xRot = this.body.xRot;
+		}
+		if (!state.wings) {
+			return;
+		}
+		this.innerWing.y = stand > 0.5F ? -5.0F : 3.0F;
+		this.innerWing.z = stand > 0.5F ? 4.0F : -6.0F;
+		float wingRot = state.flapping ? Mth.cos(ticks * 0.3F + Mth.PI) * 1.2F : Mth.cos(walked * 0.5F) * 0.1F;
+		if (state.airborne) {
+			this.outerWing.yRot = -0.3228859F + wingRot / 2.0F;
+			this.outerWingR.yRot = 0.3228859F - wingRot / 2.0F;
+		} else {
+			wingRot = 60.0F * DEG;
+			this.outerWing.yRot = -90.0F * DEG;
+			this.outerWingR.yRot = 90.0F * DEG;
+		}
+		this.innerWingR.y = this.innerWing.y;
+		this.innerWingR.z = this.innerWing.z;
+		this.outerWing.x = this.innerWing.x + Mth.cos(wingRot) * 12.0F;
+		this.outerWingR.x = this.innerWingR.x - Mth.cos(wingRot) * 12.0F;
+		this.midWing.y = this.midWingR.y = this.innerWing.y;
+		this.outerWing.y = this.innerWing.y + Mth.sin(wingRot) * 12.0F;
+		this.outerWingR.y = this.innerWingR.y + Mth.sin(wingRot) * 12.0F;
+		this.midWing.z = this.midWingR.z = this.outerWing.z = this.outerWingR.z = this.innerWing.z;
+		this.midWing.zRot = this.innerWing.zRot = this.outerWing.zRot = wingRot;
+		this.innerWingR.zRot = this.midWingR.zRot = this.outerWingR.zRot = -wingRot;
 	}
 
 	private static void pose(ModelPart part, float y, float z, float xRot, float yRot) {
