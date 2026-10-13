@@ -50,6 +50,10 @@ public final class ArsenalPowerClient implements PowerClient {
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalSkyRenderer::render);
 		// the Void Arsenal's Sword of Damocles: its rift and the sword
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalDamoclesRenderer::render);
+		// Cannon Battery: the rifts and their cannons, and X held and let go
+		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalCannonRenderer::render);
+		EntityRendererRegistry.register(ArsenalEntities.RIFT_CANNONBALL, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));
+		ClientTickEvents.START_CLIENT_TICK.register(ArsenalPowerClient::cannonInput);
 		// the Void Arsenal's aura, on every corrupted arsenal user in view
 		ClientTickEvents.END_CLIENT_TICK.register(ArsenalAura::tick);
 		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
@@ -69,6 +73,37 @@ public final class ArsenalPowerClient implements PowerClient {
 				.withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.ITALIC);
 			lines.add(Math.min(1, lines.size()), line);
 		});
+	}
+
+	/** The power skill key's mapping (registered in {@code WebSymbioteClient}). */
+	private static final String SKILL_KEY = "key.jaymospowers.web_symbiote";
+	private static net.minecraft.client.KeyMapping skillKey;
+	private static boolean skillWasDown;
+
+	/** X for an Arsenal user: Cannon Battery's hold and release. Its presses are taken here so the symbiote's menu never opens. */
+	private static void cannonInput(Minecraft minecraft) {
+		LocalPlayer player = minecraft.player;
+		if (skillKey == null) {
+			for (net.minecraft.client.KeyMapping mapping : minecraft.options.keyMappings) {
+				if (SKILL_KEY.equals(mapping.getName())) {
+					skillKey = mapping;
+				}
+			}
+		}
+		if (skillKey == null || player == null || !com.jaymospowers.core.Powers.has(player, ArsenalPower.INSTANCE)) {
+			skillWasDown = false;
+			return;
+		}
+		while (skillKey.consumeClick()) {
+			// taken
+		}
+		boolean down = skillKey.isDown() && minecraft.gui.screen() == null && !player.isSpectator();
+		if (down != skillWasDown) {
+			skillWasDown = down;
+			if (net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.canSend(com.jaymospowers.power.arsenal.ArsenalCannons.Hold.TYPE)) {
+				net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new com.jaymospowers.power.arsenal.ArsenalCannons.Hold(down));
+			}
+		}
 	}
 
 	private static String seconds(long ticks) {

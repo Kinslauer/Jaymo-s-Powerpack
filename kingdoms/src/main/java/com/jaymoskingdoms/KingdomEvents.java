@@ -516,6 +516,12 @@ public final class KingdomEvents {
 			}
 			return;
 		}
+		if (wasLeader && Assassins.murdered(level, faction, folk, source)) {
+			// (0.5.59) murdered by an assassin's blade or poison: mourned, and his heir crowned
+			Wardens.rulerFell(level, faction);
+			Factions.update(server, faction.id(), f -> f.withSuccessionAt(level.getGameTime() + SUCCESSION_TICKS));
+			return;
+		}
 		if (killer != null) {
 			Reputation.change(killer, faction, lord ? REP_KILL_LORD : REP_KILL_KING);
 			// the realm's rivals are glad of it (every other standing realm that isn't its vassal or overlord)

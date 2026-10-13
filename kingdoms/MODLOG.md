@@ -2231,3 +2231,63 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   component by id), so a silver-bladed tinker sword hits for double, and a rose gold one for full.
 - `MythicMounts`: bat horses and nightmares are exceedingly rare: `CHANCE` 1 in 6000 per 30 s check (was 1 in 80),
   about once in 50 hours a player spends at night in the wild or in the Nether, and none while another wild one is out.
+
+## 0.5.61: assassins
+- **Contracts** (`Assassins`, tuning at the top): each day a realm's ruler (king or lord) has a 1.5% chance of a price
+  on his head, times his temper (tyrant 2.5, noble 0.5, warlord 1.5, paranoid 0.75, reveler 1) and doubled if a realm
+  is his rival or at war with him. Who paid: that rival (70% when there is one), his own people (a tyrant), an
+  impatient heir, or the guild. Players get marked too: a realm that hates them (2%/day), a Rogue (2%), one known in 4+
+  settlements (1%). At most 3 contracts at once; the blade comes 1-2 days later; a contract lapses after 6 days.
+- **Whispers**: while a contract waits, villagers near a player in that realm's land whisper of it (or warn a marked
+  player). Heard it? Right-click the ruler to warn him (+15 good name): the first blow is parried. A paranoid ruler
+  parries half the time anyway.
+- **The attempt** only happens with a player within 40 blocks of the ruler (a marked player: at night). A "Stranger" in
+  plain clothes walks in and makes for his mark; at reach he throws off the cloak (black leathers, iron sword) and
+  stabs: a quarter of the ruler's health (half if asleep) and a poison that takes 3.5% a second for 30 s; his guards
+  come running. Milk, honey or a golden apple (right-click the ruler) cures it (+40 good name, 16 emeralds from the
+  treasury); his physician may (4% a second). The assassin fights 12 s or until half dead, then smoke, invisibility,
+  and he runs. A marked player feels eyes on them at 9 blocks (Stealth 3+: 22 blocks, "one of your own trade"), then a
+  6-damage stab and Poison II.
+- **After**: killed, he drops his purse (8-20 emeralds) and a Sealed Contract (paper, its lore names the mark and who
+  paid). For a ruler: +50 good name to his killer, news to everyone, and a rival realm's seal makes the two rivals. A
+  murdered ruler is mourned and his heir crowned a day later (no ruin or conquest fate); word may get out of who paid.
+- Right-clicking a stranger: an evasive line (Stealth 3+: you recognise an assassin). `/kingdom assassin [realm]` (op):
+  a blade sent now for that realm's ruler, or for you.
+
+## 0.5.62: hermit wizards on floating islands
+- The villager Moog's Voyager Structures puts on its large floating island is no longer a stray: `Hermits` makes them
+  a hermit wizard (an MCA villager found standing in a structure tagged `jaymoskingdoms:sky_hermitage` is checked once
+  a minute; `Hermits.FACTION` -2 marks them, role `Sorcery.WIZARD`). They wear the court wizard's robe, hat and staff,
+  keep within 10 blocks of where they were found, and cast as a court wizard when something comes for them (monsters,
+  barbarians, whoever strikes them; never a player otherwise).
+- Each has a story (from their UUID): a scholar stranded by their own spell, a mage who left the courts for quiet, the
+  warden whose spell holds the island up, or an exiled court wizard. The first time a player comes near each day they
+  greet them aloud with it and hand over a court wizard's spell scroll (warding or arcane bolt) for the climb. MCA's
+  chat brings the story up 70% of the time (`dialogue.chat.jaymoskingdoms.hermit_<story>`). Sneak-use them to unmake
+  skills, as with any court wizard.
+- No kingdom claims them: they're never promoted, drafted, made court wizard, or sent over by `Approaches`.
+- Falling more than 2.5 blocks, they cast slow falling on themselves.
+- MCA's profession label for `jaymoskingdoms:wizard` is now "Wizard" (was "Court Wizard").
+- Not playtested in game.
+
+## 0.5.63: every king's guards have his temper
+- `Retinue` (was the paranoid-only `Paranoia`): how a ruler's guards take players about him, by his temper. Each
+  stranger builds heat a second close (within 5 blocks) or lingering (within 12), more for right-clicking him, and
+  it cools 1 a second once they give him room. Tuning is the `RULES` table at the top of `Retinue`.
+  - **Paranoid** (3/s close, 1/s lingering, +10 a click): too close, shoved back. At 25, up to 2 town guards dog
+    you, shoving you away from him and threatening you. At 60 they walk you out of the city (80 blocks from the
+    seat) and keep you out for 5 minutes.
+  - **Tyrant**: kneel (sneak) near him or it's insolence (2/s close, +15 a click). Too close standing, a guard
+    demands you kneel. At 20 a guard slaps you (1 damage, only above 5 hearts) and fines you an emerald for his
+    treasury every 5 s; at 50 you're thrown out (5 minutes). Kneeling cools it twice as fast, and once a day wins a
+    nod (+1 good name).
+  - **Warlord**: a weapon in hand near him (sword, axe, bow, crossbow, trident, mace) is a challenge (3/s close, 1/s
+    lingering, +8 a click). Too close armed, shoved and told to put it away; at 15 guards dog you; at 50 you're
+    marched out. Unarmed with 15+ armour, a salute once a day (+1 good name).
+  - **Noble**: greets you once a day, with 2 bread if you have 20+ good name with his realm. Standing right by him
+    (1/s) or pestering him (+6 a click) gets a polite word and a gentle push at 20. Never throws you out.
+  - **Reveler**: a cheer and 3 cookies or a honey bottle once a day. Pester him (+8 a click) and at 20 his guards
+    toss you up and away, laughing, and it's forgotten. Never throws you out.
+  - Guards never draw on you; only hitting the king or a guard makes them hostile. Realm members, sworn wardens and
+    creative players are left alone. Heat and bans live in memory (a restart clears them).
+- Not playtested in game.

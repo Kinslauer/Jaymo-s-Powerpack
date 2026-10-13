@@ -4,8 +4,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 
 ## Design
 - **Getting a power:**
-  - **Survival:** each player's power awakens on its own after a random 1–3 Minecraft days of survival play
-    (24000–72000 ticks; the timer is saved and kept through death). Hints appear 5 minutes and 1 minute out.
+  - **Survival:** each player's power awakens on its own after a random 3–5 Minecraft days of survival play
+    (72000–120000 ticks; the timer is saved and kept through death), sooner through the power's calling (`core/Callings`). Hints appear 5 minutes and 1 minute out.
     The awakening shows a title, a totem sound and particles.
   - **Creative:** press **H** for the powers screen and pick any power, or remove yours.
   - **Commands** (gamemasters): `/power set <players> <wind|arsenal|web|chrono>`, `/power clear <players>`,
@@ -635,3 +635,51 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   mended with silver ingots, and a Tinkering tool with a silver head counts as silver against werewolves. The bat
   horse and nightmare are now exceedingly rare: about once in 50 hours a player spends where one can turn up, and
   never while another wild one is about.
+- **0.8.113, crawl roll:** while crawling, double-tap Left or Right (A / D) to roll one block that way, turning over once
+  along your length. A roll puts out the fire on you and any fire you roll through (`Crawl.Roll`, `Crawl.ROLLING`,
+  `client/CrawlRollPose`, `CrawlAvatarRendererMixin`).
+- **0.8.114, Wind hover sway, aimable Tempest Kick, R-only take-off:** the hover pose is all damped springs: a smaller
+  sway that settles after one soft overshoot, hips that twist after camera turns and lean into them, a slight tip with
+  the look, sag on climbs, slow random gusts, and limbs that trail the body; first person rides it by about a degree
+  with a small bob (`WindHoverSway`, `CameraMixin`). The Tempest Kick flies where you look as the leg snaps (in the
+  air up or down; on the ground level or up). Flight toggles on R only: Sneak + double Jump no longer takes off.
+- **0.8.116, combat animations:** the quarterstaff is held by the middle and its Better Combat combo twirls it: a
+  propeller twirl in front, a sweep, a full-circle whirlwind with the staff twirling at your side, a jab, and a
+  helicopter twirl overhead into a strike. Fourteen other Armory weapon types get their own combos (longsword
+  half-sword thrust, glaive and war scythe whirls, dagger flip-and-stab, saber lunge, machete chops and more).
+  `tools/combat_animations.py` writes the animations (`assets/jaymospowers/player_animations`) and the `combo_*`
+  presets each weapon's attributes file names as its parent.
+- **0.8.117, hide armour pieces:** every player gets a small eye button beside each armour slot in the inventory (right
+  of the slot in survival, under it on the creative inventory tab). Click it to hide that piece: it stays worn and still
+  protects, it just isn't drawn, for anyone (the choice is synced to every client, saved, and kept through death). It
+  covers vanilla armour, Kingdoms' armoury sets (their layer reads the same render state), carved pumpkins and mob
+  heads; an elytra still spreads when the chest is hidden. Hidden pieces come off the render state last
+  (`HiddenArmorAvatarRendererMixin`, after the symbiote's engulfing), in `core/HiddenArmor` + `client/HiddenArmorClient`.
+- **0.8.118, Chunky out of the pack:** on the Deck a new world hung for good at "Selecting global world spawn" (no
+  error; every generation thread idle, the server thread waiting on the spawn chunk). Bisected on a fresh test server
+  (E:\fresh-test, the pack's mods, a new world each time): Distant Horizons alone, and the whole pack without Distant
+  Horizons, both start; Distant Horizons with Chunky alone hangs every time (both hook the server's chunk loading).
+  The whole pack without Chunky started a new world (Done in 40 s). Chunky had no task queued, so nothing is lost;
+  Build Modpack moves it out of the CurseForge profile. Existing worlds were never affected (their spawn is generated).
+- **0.8.119, assassins (Kingdoms 0.5.61):** now and then someone pays for a ruler's death, or a player's. Villagers
+  whisper of it for a day or two first (warn the ruler and he parries the blow). Then a stranger walks into town, throws
+  off his cloak and stabs the king with a poisoned blade: cure him with milk, honey or a golden apple, or cut the
+  assassin down for his purse and the sealed contract naming who paid. Rogues, players a realm hates and famous ones
+  can be marked too, at night. `/kingdom assassin [realm]` sends one at once (ops).
+- **0.8.120, hermit wizards on floating islands (Kingdoms 0.5.62):** the villager living on Moog's floating island is
+  now a hermit wizard with a reason to be there: a stranded scholar, a mage hiding from the courts, the warden whose
+  spell keeps the island up, or an exiled court wizard. They tell you when you first come near each day, give you a
+  spell scroll for the climb, talk more about it when you chat with them, and can reset your skill tree like a court
+  wizard. Kingdoms leave them alone.
+- **0.8.121, kings' guards with their king's temper (Kingdoms 0.5.63):** a king's guards now treat players by his
+  temper. A paranoid king's guards shove away anyone who hangs about him, then dog them, then walk them out of the
+  city for 5 minutes. A tyrant wants you to kneel (sneak): stand tall and his guards slap and fine you, then throw you
+  out. A warlord's guards won't have a drawn weapon near him, but salute the well armoured. A noble king greets you
+  with bread if you're in his good books, and his guards only ask politely for room. A reveler hands out treats, and
+  his guards toss pests away with a laugh. Nobody fights you unless you actually attack.
+- **0.8.123, slower awakenings and callings:** a power now awakens after 3–5 Minecraft days of survival play
+  (72000–120000 ticks; old saved countdowns get 2 days added once). Each power has a calling that picks it and cuts
+  the wait (`core/Callings`): Wind, kill a Breeze (at once); Gravity, land a 40+ block fall (a day off); Chrono, sleep
+  the night holding a clock (a day off); Web, survive a cave spider bite (a day off, once a day); Arsenal, kill with 5
+  kinds of weapon (at once); Resonance, ring a village bell near midnight (a day off) or survive a Warden's sonic
+  boom (at once); Darktide, stay at sea from dusk to dawn (at dawn).

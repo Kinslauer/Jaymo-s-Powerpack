@@ -60,5 +60,11 @@
 	"message.jaymospowers.carry.cant_struggle": "You can't move!",
 	"message.jaymospowers.carry.lifting": "It weighs nothing. Right-click to set it down, sneak + right-click to heave it",
 	"message.jaymospowers.carry.block": "Right-click to set it down, sneak + right-click to throw it",
-	"message.jaymospowers.carry.container": "Right-click to set it down"
+	"message.jaymospowers.carry.container": "Right-click to set it down",
+	"button.jaymospowers.armor.hide": "Hide %s (it still protects you)",
+	"button.jaymospowers.armor.show": "Show %s",
+	"button.jaymospowers.armor.head": "helmet",
+	"button.jaymospowers.armor.chest": "chestplate",
+	"button.jaymospowers.armor.legs": "leggings",
+	"button.jaymospowers.armor.feet": "boots"
 }
