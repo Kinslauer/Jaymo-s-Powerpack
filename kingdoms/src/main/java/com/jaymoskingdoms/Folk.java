@@ -46,7 +46,7 @@ import net.minecraft.world.level.storage.ValueOutput;
  * their faction's style ({@link #style()}: its type) and colour ({@link #colorId()}: a fiefdom's overlord's). Never
  * despawn.
  */
-public class Folk extends PathfinderMob implements net.minecraft.world.entity.monster.RangedAttackMob, Worker {
+public class Folk extends PathfinderMob implements net.minecraft.world.entity.monster.RangedAttackMob, Worker, Aging {
 	/**
 	 * Guards fight hand to hand; archers keep their posts on walls and towers and shoot; the king (and a fiefdom's lord)
 	 * is the boss; the foreman and workers build. {@link #BARBARIAN} and {@link #CHIEF} are reserved for camps (their
@@ -219,6 +219,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	private final int[] spellTimers = new int[Sorcery.TIMERS];
 	/** Which {@link Outfits#VERSION} dressed it (0: before faction looks, so it's dressed again on its next tick). Saved. */
 	private int outfit;
+	/** (0.5.54) When they came of age ({@link OldAge}). */
+	private long grownSince = CourtWizards.UNKNOWN;
 
 	public Folk(EntityType<? extends Folk> type, Level level) {
 		super(type, level);
@@ -324,6 +326,16 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			this.setHomeTo(this.post, this.postRadius);
 		}
 		this.post = null;
+	}
+
+	@Override
+	public long grownSince() {
+		return this.grownSince;
+	}
+
+	@Override
+	public void setGrownSince(long time) {
+		this.grownSince = time;
 	}
 
 	@Override
@@ -502,6 +514,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		}
 		if (this.tickCount % 20 == 0 && this.role() == Sorcery.WIZARD && CourtWizards.retire(level, this)) {
 			// (0.5.53) with MCA, a kingdom's court wizard is one of its elders: this one steps down
+			return;
+		}
+		if (this.tickCount % 20 == 0 && OldAge.folk(level, this)) {
+			// (0.5.54) they grow old, and at last die of it
 			return;
 		}
 		if (!Rickshaws.onDuty(this) && Homes.tick(level, this)) {
@@ -711,6 +727,9 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		output.putString("task", this.task);
 		output.putInt("climate", this.entityData.get(CLIMATE));
 		output.putInt("outfit", this.outfit);
+		if (this.grownSince != CourtWizards.UNKNOWN) {
+			output.putLong("grown_since", this.grownSince);
+		}
 		if (this.escort != null) {
 			output.store("escort", net.minecraft.core.UUIDUtil.CODEC, this.escort);
 			output.putInt("escort_slot", this.escortSlot);
@@ -734,6 +753,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		this.task = input.getStringOr("task", "");
 		this.entityData.set(CLIMATE, input.getIntOr("climate", Climate.PLAINS.ordinal()));
 		this.outfit = input.getIntOr("outfit", 0);
+		this.grownSince = input.getLongOr("grown_since", CourtWizards.UNKNOWN);
 		this.escort = input.read("escort", net.minecraft.core.UUIDUtil.CODEC).orElse(null);
 		this.escortSlot = input.getIntOr("escort_slot", 0);
 		this.post = input.getLong("post").map(BlockPos::of).orElse(null);

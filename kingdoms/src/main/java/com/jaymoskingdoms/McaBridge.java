@@ -327,6 +327,19 @@ final class McaBridge {
 		return mob instanceof VillagerEntityMCA v && v.getInteractions().getInteractingPlayer().isPresent();
 	}
 
+	/** MCA's hair dye: none (their own colour), or the grey and white of {@link OldAge}. */
+	private static final int UNDYED = 0xFF000000, GREY = 0xFF9C9A98, WHITE = 0xFFE2E0DC;
+
+	static void greyHair(PathfinderMob mob, boolean frail) {
+		if (mob instanceof VillagerEntityMCA v) {
+			int dye = v.getHairDye();
+			int want = frail ? WHITE : GREY;
+			if (dye != want && (dye == UNDYED || dye == GREY)) {
+				v.setHairDye(want);
+			}
+		}
+	}
+
 	/** A villager takes {@code folk}'s place: the same job for the same faction, at the same work, with its load. */
 	static boolean convert(ServerLevel level, Folk folk) {
 		Faction f = Factions.get(level.getServer(), folk.factionId());
