@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "P": "minecraft:dark_oak_planks",
+    "B": "minecraft:bell",
+    "R": "minecraft:redstone",
+    "S": "minecraft:smooth_stone_slab"
+  },
+  "pattern": [
+    "PPP",
+    "PBP",
+    "SRS"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:storm_bell"
+  }
+}

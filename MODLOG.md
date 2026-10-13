@@ -788,3 +788,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (zombies and skeletons climb out of the ground around you, no sleeping), a Super Blood Moon (twice over, a huge red moon), a Harvest Moon
   (crops grow all night) or a Blue Moon (luck, extra experience and gems). Bringing Bad Omen into a settlement wrecks
   your name there, and if it survives the raid it almost never forgets (`kingdoms/MODLOG.md`).
+
+- **0.9.18, natural disasters, stage 1 (Kingdoms 0.6.9):** storm cells drift across the land (rain and lightning
+  only under them), and every few days a supercell puts down a tornado (or a monster) that lifts and flings everything
+  near it and tears up the land; dust devils in deserts. Storm bell, weathervane and barometer. Wind users ride a
+  tornado's winds and shove one off course with the Cyclone Lance (`kingdoms/MODLOG.md`).
