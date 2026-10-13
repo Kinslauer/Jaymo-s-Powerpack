@@ -777,6 +777,13 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (Kingdoms' and Naturalist's predators too) tear into bodies with a brutal worrying bite, the meat spills on the ground
   and they eat it from there. Players' kills are left for the player. See Kitchen's MODLOG.
 
+- **0.9.18, Darktide and Wind fixes (Kitchen 0.4.36):** a Darktide shade that dies (burned by the sun or killed again)
+  leaves no body; risen shadows never target their master or each other (`DarktideRisenTargetMixin`, brain targets
+  cleared each tick) and can't hurt them; Riptide Dash (and its flurry) is ready again the moment it lands a hit. Every
+  Wind ability blows out fire it sweeps (`WindDouse`: fire blocks and burning things, the caster too; a Stormbound
+  bolt still lights what it strikes). A player carried in Wind flight can slip from the wind's arms, each second at a
+  chance set by mastery (3% with one ability down to 0.2% with all, `WindFumble.CARRY_DROP_CHANCE_PER_SECOND`).
+
 - **0.9.17, imbued blades proc (Kingdoms 0.6.8):** a Sorcerer's imbued blade bursts with its element on one blow in
   twenty rather than every one (the rest spark), and a lightning burst blinds for a moment; air lifts on every second
   blow instead, for air combos. Thrown bolts always burst.

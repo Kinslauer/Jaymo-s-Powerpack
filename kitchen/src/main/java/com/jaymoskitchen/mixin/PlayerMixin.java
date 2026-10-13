@@ -48,7 +48,9 @@ abstract class PlayerMixin implements PlayerCorpses.Holder {
 	@Inject(method = "dropEquipment", at = @At("HEAD"))
 	private void jaymoskitchen$keepHotbarOnBody(ServerLevel level, CallbackInfo ci) {
 		Player self = (Player) (Object) this;
-		if (level.getGameRules().get(GameRules.KEEP_INVENTORY) || self.isSpectator()) {
+		if (level.getGameRules().get(GameRules.KEEP_INVENTORY) || self.isSpectator()
+			|| self.entityTags().contains(com.jaymoskitchen.corpse.Corpses.NO_CORPSE_TAG)) {
+			// (no body to keep it: a tagged player's hotbar drops with everything else)
 			return;
 		}
 		Inventory inventory = self.getInventory();

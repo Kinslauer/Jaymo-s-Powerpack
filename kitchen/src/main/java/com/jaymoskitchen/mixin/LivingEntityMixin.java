@@ -108,6 +108,10 @@ abstract class LivingEntityMixin implements CorpseCapture {
 		cancellable = true)
 	private void jaymoskitchen$leaveCorpse(CallbackInfo ci) {
 		LivingEntity self = (LivingEntity) (Object) this;
+		if (self.entityTags().contains(Corpses.NO_CORPSE_TAG)) {
+			// (marked by another mod: a body that leaves nothing behind, like a Darktide shade)
+			return;
+		}
 		if (self instanceof ServerPlayer player && !player.isSpectator()) {
 			// a player's body stays where they fell, with their hotbar (they go on to respawn as usual)
 			PlayerCorpses.spawn(player);

@@ -132,9 +132,15 @@ public final class Corpses {
 		return state.is(BUTCHER_BLOCKS);
 	}
 
-	/** Whether this entity leaves a corpse when it dies (players and listed mobs don't). */
+	/**
+	 * An entity carrying this (scoreboard) tag leaves no corpse, player or mob: how other mods mark bodies that should
+	 * vanish (Jaymo's Powers' Darktide shades and risen shadows).
+	 */
+	public static final String NO_CORPSE_TAG = "jaymoskitchen.no_corpse";
+
+	/** Whether this entity leaves a corpse when it dies (players, listed mobs and tagged ones don't). */
 	public static boolean leavesCorpse(LivingEntity entity) {
-		return entity instanceof Mob && !(entity instanceof Player) && !entity.is(NO_CORPSE)
+		return entity instanceof Mob && !(entity instanceof Player) && !entity.is(NO_CORPSE) && !entity.entityTags().contains(NO_CORPSE_TAG)
 			&& entity.level() instanceof ServerLevel;
 	}
 

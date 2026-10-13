@@ -55,6 +55,8 @@
 	"hud.jaymospowers.wind.cold": "COLD",
 	"message.jaymospowers.wind.cold": "The cold stiffens the wind: slower to gather, slower to return.",
 	"message.jaymospowers.wind.fumble": "The wind tugs %s from your grip!",
+	"message.jaymospowers.wind.fumble_carried": "The wind tears %s from your arms!",
+	"message.jaymospowers.wind.slipped_from": "You slip from %s's arms!",
 	"power.jaymospowers.wind.key.ability_2.corrupted": "Hold up to 5s: Tailwind / on ground: gust blast; lightning strikes where it lands",
 	"power.jaymospowers.wind.key.ability_3.corrupted": "Hold: Gale Barrier (shield); a bolt strikes the nearest foe",
 	"power.jaymospowers.wind.key.mode.ascended": "Tempest mode on/off: wind turns arrows aside, abilities 1.25x stronger (costs hunger)",

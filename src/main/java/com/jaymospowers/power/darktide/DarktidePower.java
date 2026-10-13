@@ -25,6 +25,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -87,6 +89,7 @@ public final class DarktidePower implements Power {
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
 			!(entity instanceof Player player && source.is(DamageTypes.DROWN) && has(player)));
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register(DarktideGuard::allowDamage);
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register(DarktideTide::allowDamage);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register(DarktideGuard::afterDamage);
 		ServerLivingEntityEvents.ALLOW_DEATH.register(DarktideTide::allowDeath);
 		ServerLivingEntityEvents.ALLOW_DEATH.register(DarktideShade::allowDeath);
@@ -234,6 +237,11 @@ public final class DarktidePower implements Power {
 	}
 
 	// ---- cooldowns ----------------------------------------------------------------------------------------------------
+
+	/** Whether {@code mob} is a risen shadow that must never target {@code target} (its master or a fellow shadow). */
+	public static boolean risenSpares(Mob mob, @Nullable LivingEntity target) {
+		return DarktideTide.spares(mob, target);
+	}
 
 	static boolean ready(ServerPlayer player, int slot) {
 		return player.level().getGameTime() >= live(player).until[slot];

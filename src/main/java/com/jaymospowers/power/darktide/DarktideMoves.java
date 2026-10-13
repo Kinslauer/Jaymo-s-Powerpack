@@ -660,6 +660,8 @@ final class DarktideMoves {
 				player.teleportTo(level, behind.x, target.getY(), behind.z, Set.of(), player.getYRot() + 180.0F, player.getXRot(), false);
 				hit(player, target, FLURRY_HIT_DAMAGE * FLURRY_HITS);
 				live.dash = null;
+				// a dash that lands is ready again
+				DarktidePower.cooldown(player, DarktideState.DASH, 0);
 			}
 			return;
 		}
@@ -676,6 +678,8 @@ final class DarktideMoves {
 		for (LivingEntity target : around(player, player.getBoundingBox().inflate(0.9, 0.3, 0.9))) {
 			if (dash.hit.add(target.getId())) {
 				hit(player, target, DASH_DAMAGE);
+				// a dash that lands is ready again
+				DarktidePower.cooldown(player, DarktideState.DASH, 0);
 			}
 		}
 	}

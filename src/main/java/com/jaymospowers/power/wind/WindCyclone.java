@@ -92,6 +92,8 @@ public final class WindCyclone {
 	static final double TURN_RATE = 0.55;
 	/** The roar layered over the client's loop (ticks between). */
 	static final int ROAR_INTERVAL = 16;
+	/** How often the funnel blows out the fire it sweeps (ticks). */
+	static final int DOUSE_EVERY = 5;
 	private static final DustParticleOptions STORM_DUST = new DustParticleOptions(0xB070FF, 1.2F);
 	private static final Identifier ROOT = JaymosPowers.id("wind_cyclone_root");
 
@@ -279,6 +281,10 @@ public final class WindCyclone {
 			player.causeFoodExhaustion(EXHAUSTION_PER_TICK);
 		}
 		funnel(player, level, age, radius, height, corrupted);
+		if (age % DOUSE_EVERY == 0) {
+			// the funnel blows out the fire it sweeps (a Stormbound one's shocks still set what it batters alight)
+			WindDouse.douse(level, player.position().add(0.0, Math.min(height * 0.5, radius), 0.0), radius, player, !corrupted);
+		}
 		if (age % ROAR_INTERVAL == 0) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_WHIRL, SoundSource.PLAYERS, 1.2F, 0.5F + player.getRandom().nextFloat() * 0.2F);
 		}

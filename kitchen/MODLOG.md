@@ -720,3 +720,7 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
 - Tamed wolves eat meat dropped on the ground near them (anything they'd eat from your hand), unless sitting or
   fighting; while hurt they're never too full to.
 - Tuning: the constants at the top of `Scavengers`.
+
+## 0.4.36: tagged bodies leave no corpse
+- An entity with the `jaymoskitchen.no_corpse` scoreboard tag leaves no corpse, player or mob
+  (`Corpses.NO_CORPSE_TAG`); a tagged player's hotbar drops with the rest of their things. Jaymo's Powers tags Darktide shades as they die and risen shadows as they rise.
