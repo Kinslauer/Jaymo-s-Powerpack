@@ -1,0 +1,14 @@
+{
+	"values": [
+		"minecraft:cod",
+		"minecraft:salmon",
+		"minecraft:tropical_fish",
+		"minecraft:pufferfish",
+		{ "id": "alexsmobs:flying_fish", "required": false },
+		{ "id": "alexsmobs:blobfish", "required": false },
+		{ "id": "alexsmobs:catfish", "required": false },
+		{ "id": "alexsmobs:cosmic_cod", "required": false },
+		{ "id": "alexsmobs:devils_hole_pupfish", "required": false },
+		{ "id": "alexsmobs:mudskipper", "required": false }
+	]
+}
