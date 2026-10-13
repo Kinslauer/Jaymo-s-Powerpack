@@ -100,10 +100,6 @@ def packMods = [
 	// Iris Shaders (LGPL-3.0): shader packs (Options > Video Settings > Shader Packs); built on the pack's Sodium, and
 	// Distant Horizons draws its far terrain through shaders that support it. Client-only: the server ignores it.
 	[dep: "maven.modrinth:iris:vTN4NRGW", cf: [455508, 9015108], dev: false],
-	// Chunky (GPL-3.0, Fabric 1.5.3): pre-generates the world ahead of time from the server console (/chunky radius 5000,
-	// /chunky start), so flying or gliding fast loads saved chunks instead of generating them on the spot. Server-side;
-	// harmless on clients. dev: false keeps it out of the dev game.
-	[dep: "maven.modrinth:chunky:4Eotm6ov", cf: [433175, 8036332], dev: false],
 ]
 // First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
 // Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge
@@ -155,7 +151,8 @@ def packResourcePacks = [
 // (Towns and Towers left in 0.8.4: its villages fought Epic Structures: Villages, where kingdoms are founded; its
 // library Cristel Lib came back in 0.8.69 for Overhauled Overworld. Traveler's Backpack and Forge Config API Port left
 // in 0.8.14)
-def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-", "forge-config-api-port-", "alexs-mobs-", "citadel-"]
+// (Chunky left in 0.8.113: with Distant Horizons on the server, a new world hung for good at "Selecting global world spawn")
+def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-", "forge-config-api-port-", "alexs-mobs-", "citadel-", "chunky-"]
 // the same, by Fabric mod id, for mods whose CurseForge file names we don't know: Alex's Mobs and Citadel (0.8.107,
 // their models drew black slabs and streaks across the screen with Iris shaders)
 def removedIdsFromProfile = ["alexsmobs", "citadel"]

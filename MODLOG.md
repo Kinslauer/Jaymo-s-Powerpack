@@ -635,3 +635,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   mended with silver ingots, and a Tinkering tool with a silver head counts as silver against werewolves. The bat
   horse and nightmare are now exceedingly rare: about once in 50 hours a player spends where one can turn up, and
   never while another wild one is about.
+- **0.8.113, Chunky out of the pack:** on the Deck a new world hung for good at "Selecting global world spawn" (no
+  error; every generation thread idle, the server thread waiting on the spawn chunk). Bisected on a fresh test server
+  (E:\fresh-test, the pack's mods, a new world each time): Distant Horizons alone, and the whole pack without Distant
+  Horizons, both start; Distant Horizons with Chunky alone hangs every time (both hook the server's chunk loading).
+  The whole pack without Chunky started a new world (Done in 40 s). Chunky had no task queued, so nothing is lost;
+  Build Modpack moves it out of the CurseForge profile. Existing worlds were never affected (their spawn is generated).
