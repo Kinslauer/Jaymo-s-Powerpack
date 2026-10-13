@@ -12,7 +12,7 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.38) Andy: villagers in hot, dry lands should tend darker-skinned, those in the snow lighter. MCA already leaned its
+ * (0.5.44) Andy: villagers in hot, dry lands should tend darker-skinned, those in the snow lighter. MCA already leaned its
  * villagers' melanin on the biome's temperature, with one in five an "immigrant" whose skin ignored the land.
  * {@code mixin/mca/McaGeneticsMixin} re-rolls the melanin of every newly spawned MCA villager here, from where their
  * family comes from:
