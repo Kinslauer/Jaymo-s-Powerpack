@@ -167,6 +167,19 @@ public final class WebPowerClient implements PowerClient {
 				return;
 			}
 		}
+		// Sneak with no web out, aimed at something in reach: the web whips it about and slams it down (see WebWhip)
+		if (down && !tendrils && player.isShiftKeyDown() && !swing.attached() && swing.pull == null
+			&& com.jaymospowers.power.web.WebWhip.aim(player, com.jaymospowers.power.web.WebWhip.RANGE
+				* com.jaymospowers.power.web.WebSymbiote.reachScale(player)) != null) {
+			whipping[hand] = true;
+			net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Start(hand));
+			return;
+		}
+		if (!down && whipping[hand]) {
+			// (the whip plays out on its own)
+			whipping[hand] = false;
+			return;
+		}
 		if (!down && grabbing[hand]) {
 			grabbing[hand] = false;
 			net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new com.jaymospowers.power.web.WebTendrils.Grab(hand, -1));
@@ -181,6 +194,8 @@ public final class WebPowerClient implements PowerClient {
 
 	/** Which tendril is holding something (so its key's release throws instead of ending a swing). */
 	private final boolean[] grabbing = new boolean[2];
+	/** Which key started a whip (so its release doesn't let go of a swing web). */
+	private final boolean[] whipping = new boolean[2];
 
 	/** What a tendril would grab: the creature, player, item or corpse under the crosshair, close by. */
 	private static net.minecraft.world.entity.@org.jspecify.annotations.Nullable Entity grabTarget(LocalPlayer player) {

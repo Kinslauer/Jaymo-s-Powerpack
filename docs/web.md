@@ -17,11 +17,29 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   carrying you, forward speed bleeds off at `BRAKE_DRAG` 0.94 a tick (about 3 s from top speed) and the fall eases to
   `BRAKE_SINK` 0.2. Once you're nearly stopped (`DIVE_AT` 0.06 b/t) you tip head-first into a Wind-style freedive with
   the wings still out but swept back, falling up to `DIVE_MAX_SPEED` 2.5. Let go of S and the glide takes over again,
-  so pitching up turns the dive's speed forward. Landing from a fast dive hurts. Others see it from the brake flag and
+  so pitching up turns the dive's speed forward. Flaring at speed throws you up (0.8.101): the flare eases in over
+  `BRAKE_EASE_IN` 12 ticks, and `BRAKE_LIFT` 1.4 × the speed it takes off each tick comes back as lift (climb held
+  under `BRAKE_MAX_RISE` 0.9), so the climb builds gently, swells and fades as the speed runs out. The wings are a faint
+  cobweb skin that ripples in the wind (faster, more), and billows out and inflates by a third when you brake
+  (`WebLineRenderer` `WING_*`, `FLUTTER*`, `BILLOW`, `INFLATE`). Landing from a fast dive hurts. Others see it from the brake flag and
   your fall speed (`WebArms` `DIVE_*`).
 - **Zip while gliding** is a boost: the wings stay out and the web tows you toward where you aimed for
   `GLIDE_ZIP_TICKS` 30 (1.5 s), then lets go with the usual kick up (or sooner, near the target) and the line falls
   limp. You carry on gliding with the speed and height.
+
+## Web Whip, and webs that fall limp (0.8.100)
+- **Let-go webs fall limp:** every web line that lets go (swing webs on R/G, zips, whips, the Yank's lead) is left
+  behind like a spent zip: stuck where it hit, sagging, falling, then fading (`WebSpentLines`). A line on something that
+  moves falls free at once. Recasting to a new spot counts as letting go of the old one.
+- **Web Whip (Sneak + R or G, no web out):** aimed within `WebWhip.RANGE` 16 (× symbiote reach) at a creature, a corpse
+  (not a heavy one) or a block. A block tears out a small chunk (`PIECES` 4, nothing harder than `HARDEST` 3). The web
+  catches it and you whip it about, one of three ways at random: **overhead** (up over your head, down in front),
+  **seesaw** (down in front, then back over into the ground behind) or **lasso** (round you once, then overhead and
+  down). Each slam hits for `DAMAGE` 9 (5 to anything else where it lands) and breaks a crater under it, bigger for
+  bigger creatures (`CRATER_*`, from about 1.5 blocks for a chicken to over 3 for a golem). A chunk of ground bursts on
+  its last slam into a creeper-sized crater (`CHUNK_CRATER`). Every swing whooshes, trails dust and jolts your screen;
+  every slam throws block dust, smoke and a heavy mace thud, and shakes you, the one slammed and anyone within 12.
+  Bosses can't be whipped; Living Armor's tendrils keep their own Sneak grab. `COOLDOWN` 20 ticks after one ends.
 
 ## Controls
 

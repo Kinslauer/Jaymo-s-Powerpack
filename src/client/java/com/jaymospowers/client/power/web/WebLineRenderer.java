@@ -295,9 +295,9 @@ final class WebLineRenderer {
 			float spread = WebArms.wings(player, partialTick);
 			if (spread > 0.02F && !(player == minecraft.player && minecraft.options.getCameraType().isFirstPerson())) {
 				for (int side = -1; side <= 1; side += 2) {
-					drawWing(context, WebArms.wingShoulder(player, side, partialTick).subtract(camera),
+					drawWing(context, player, side, WebArms.wingShoulder(player, side, partialTick).subtract(camera),
 						WebArms.wingTip(player, side, spread, partialTick).subtract(camera), WebArms.wingHip(player, side, partialTick).subtract(camera),
-						width * 0.8F, dark);
+						width * 0.8F, dark, partialTick);
 				}
 			}
 		}
@@ -415,32 +415,96 @@ final class WebLineRenderer {
 	}
 
 	/**
-	 * One web wing: a membrane of strands between the arm (shoulder to hand) and the side (hand to hip), with a few
-	 * spokes from the armpit and a couple of cross threads, like a spider's web.
+	 * The wings are faint (a cobweb skin, mostly see-through): this alpha over the web's colour. A cobweb of
+	 * {@code WING_SPOKES} spokes from the armpit to the wing's edge, tied by {@code WING_RINGS} rings of sagging thread.
 	 */
-	private static void drawWing(LevelRenderContext context, Vec3 shoulder, Vec3 tip, Vec3 hip, float width, boolean dark) {
+	private static final int WING_ALPHA = 0x66, WING_EDGE_ALPHA = 0x99;
+	private static final int WING_SPOKES = 7, WING_RINGS = 4, WING_STEPS = 6;
+	/**
+	 * It flows in the wind: the free edge (hand to hip) and the threads ripple along the wing normal, {@code FLUTTER}
+	 * blocks plus {@code FLUTTER_PER_SPEED} per block/tick of speed, at {@code FLUTTER_SPEED} radians a tick. Braking, it
+	 * billows out {@code BILLOW} blocks at its middle and inflates: the hand and the hip end reach {@code INFLATE} further.
+	 */
+	private static final double FLUTTER = 0.05, FLUTTER_PER_SPEED = 0.05, FLUTTER_SPEED = 0.55, BILLOW = 0.55, INFLATE = 0.35;
+	/** How far a ring of thread sags back toward the armpit between two spokes (share of its length). */
+	private static final double RING_SAG = 0.08;
+
+	/**
+	 * One web wing: a cobweb membrane between the arm (shoulder to hand) and the side (hand to hip), spokes from the
+	 * armpit and rings of thread across them, rippling in the wind and billowing out when the wings flare to brake.
+	 */
+	private static void drawWing(LevelRenderContext context, Player player, int side, Vec3 shoulder, Vec3 tipIn, Vec3 hipIn, float width,
+		boolean dark, float partialTick) {
+		float brake = WebArms.brake(player, partialTick);
+		// inflated: the free corners reach further out from the shoulder as the wing fills
+		Vec3 hand = shoulder.add(tipIn.subtract(shoulder).scale(1.0 + INFLATE * brake));
+		Vec3 hip = shoulder.add(hipIn.subtract(shoulder).scale(1.0 + INFLATE * 0.6 * brake));
+		Vec3 tip = hand;
+		Vec3 normal = tip.subtract(shoulder).cross(hip.subtract(shoulder));
+		normal = normal.lengthSqr() < 1.0E-8 ? new Vec3(0.0, 1.0, 0.0) : normal.normalize();
+		if (normal.y < 0.0) {
+			// the air catches it from below: it bulges up and back
+			normal = normal.scale(-1.0);
+		}
+		double time = player.tickCount + partialTick;
+		double speed = player.getDeltaMovement().length();
+		double flutter = FLUTTER + FLUTTER_PER_SPEED * Math.min(speed, 2.5);
+		double billow = BILLOW * brake;
+		Vec3 armpit = shoulder.lerp(hip, 0.15);
+		Vec3 n = normal;
+		int color = dark ? (WING_ALPHA << 24) | (DARK & 0xFFFFFF) : (WING_ALPHA << 24) | (COLOR & 0xFFFFFF);
+		int edgeColor = dark ? (WING_EDGE_ALPHA << 24) | (DARK & 0xFFFFFF) : (WING_EDGE_ALPHA << 24) | (COLOR & 0xFFFFFF);
+		// a point of the membrane: s along its spoke (0 armpit, 1 edge), e along the edge (0 shoulder, 1 hand, 2 hip)
+		java.util.function.BiFunction<Double, Double, Vec3> at = (s, e) -> {
+			Vec3 edge = e <= 1.0 ? shoulder.lerp(tip, e) : tip.lerp(hip, e - 1.0);
+			Vec3 p = armpit.lerp(edge, s);
+			// the arm holds its edge still; the free edge (hand to hip) flies loosest
+			double free = e <= 1.0 ? 0.25 * e : 0.25 * (2.0 - e) + Math.sin(Math.PI * (e - 1.0));
+			double ripple = flutter * s * free * Math.sin(time * FLUTTER_SPEED + e * 2.6 + s * 1.7 + side);
+			double bulge = billow * Math.sin(Math.PI * s * 0.85) * Math.sin(Math.PI * Math.min(1.0, e * 0.5 + 0.05));
+			return p.add(n.scale(ripple + bulge));
+		};
 		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.lines(), (pose, buffer) -> {
-			line(buffer, pose, shoulder, tip, width, dark);
-			line(buffer, pose, tip, hip, width, dark);
-			Vec3 armpit = shoulder.lerp(hip, 0.15);
-			Vec3 prevA = null;
-			Vec3 prevB = null;
-			for (int k = 1; k <= 4; k++) {
-				double t = k / 5.0;
-				// spokes from the armpit out to the wing's edge (arm, then hand-to-hip edge)
-				Vec3 edge = k <= 2 ? shoulder.lerp(tip, t * 2.0) : tip.lerp(hip, (t - 0.4) * 1.6);
-				line(buffer, pose, armpit, edge, width * 0.7F, dark);
-				// cross threads between neighbouring spokes, at two distances out
-				Vec3 a = armpit.lerp(edge, 0.45);
-				Vec3 b = armpit.lerp(edge, 0.8);
-				if (prevA != null) {
-					line(buffer, pose, prevA, a, width * 0.6F, dark);
-					line(buffer, pose, prevB, b, width * 0.6F, dark);
+			// the edges: the arm, then the free edge from hand to hip
+			Vec3 prev = at.apply(1.0, 0.0);
+			for (int k = 1; k <= WING_STEPS * 2; k++) {
+				Vec3 next = at.apply(1.0, k / (double)WING_STEPS);
+				coloured(buffer, pose, prev, next, width, edgeColor);
+				prev = next;
+			}
+			// spokes, each a gentle curve with the membrane
+			for (int k = 1; k <= WING_SPOKES; k++) {
+				double e = 2.0 * k / (WING_SPOKES + 1);
+				prev = at.apply(0.0, e);
+				for (int step = 1; step <= WING_STEPS; step++) {
+					Vec3 next = at.apply(step / (double)WING_STEPS, e);
+					coloured(buffer, pose, prev, next, width * 0.6F, color);
+					prev = next;
 				}
-				prevA = a;
-				prevB = b;
+			}
+			// rings of thread from spoke to spoke, each sagging in toward the armpit between them
+			for (int ring = 1; ring <= WING_RINGS; ring++) {
+				double s = ring / (WING_RINGS + 0.6);
+				for (int k = 0; k <= WING_SPOKES; k++) {
+					double e0 = 2.0 * k / (WING_SPOKES + 1);
+					double e1 = 2.0 * (k + 1) / (WING_SPOKES + 1);
+					Vec3 a = at.apply(s, e0);
+					Vec3 mid = at.apply(s * (1.0 - RING_SAG), (e0 + e1) * 0.5);
+					Vec3 b = at.apply(s, e1);
+					coloured(buffer, pose, a, mid, width * 0.5F, color);
+					coloured(buffer, pose, mid, b, width * 0.5F, color);
+				}
 			}
 		});
+	}
+
+	private static void coloured(VertexConsumer buffer, PoseStack.Pose pose, Vec3 a, Vec3 b, float width, int color) {
+		Vec3 d = b.subtract(a);
+		double length = d.length();
+		if (length < 1.0E-4) {
+			return;
+		}
+		segment(buffer, pose, a, b, d.scale(1.0 / length), color, width);
 	}
 
 	private static void line(VertexConsumer buffer, PoseStack.Pose pose, Vec3 a, Vec3 b, float width, boolean dark) {
