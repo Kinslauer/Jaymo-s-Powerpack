@@ -19,8 +19,9 @@ import org.jspecify.annotations.Nullable;
  * Wall Crawl's walking tendrils, the way Doctor Octopus walks on his arms: while you climb (a wall or a ceiling), four
  * of the tendrils come alive on their own and walk you along it. Each plants its tip on the surface around you, a
  * little ahead the way you're going; when you've moved on far enough that it trails, it lifts, arcs out from the
- * surface and plants again ahead, in diagonal pairs (one pair steps while the other holds). They arch out from the
- * back to their tips, bowed away from the surface. The rest keep idling as usual, and the shoulder pair stays free for
+ * surface and plants again ahead, in diagonal pairs (one pair steps while the other holds). Each is a rigid limb: two
+ * straight sections from the back to its tip, jointed at a knee that juts out from the surface, so the body is
+ * carried on stiff legs rather than hung on soft cords. The rest keep idling as usual, and the shoulder pair stays free for
  * R and G. Worked out on every client from where the climber is (the server only says that they're climbing), so
  * everyone sees the same walk.
  */
@@ -34,11 +35,14 @@ final class WebTendrilWalk {
 	/** Its tip trails its spot this far (blocks) before it steps; it steps toward where you'll be this many ticks on. */
 	private static final double STEP_FAR = 0.6, LEAD_TICKS = 5.0;
 	/** A step: how long (ticks), how high the tip arcs off the surface (blocks), and how soon the other pair may go after. */
-	private static final float STEP_TICKS = 5.0F, STEP_LIFT = 0.45F, PAIR_GAP = 1.5F;
+	private static final float STEP_TICKS = 5.0F, STEP_LIFT = 0.6F, PAIR_GAP = 1.5F;
 	/** How far it looks for the surface: out in front of the spot, and in behind it. */
 	private static final double SURFACE_OUT = 0.6, SURFACE_IN = 1.6;
-	/** How far each bows out from the surface, as a share of its length. */
-	static final float ARCH = 0.28F;
+	/** A walking limb's length (model pixels, fully grown): with its tip planted closer than this, the knee bends out. */
+	static final float LIMB = 32.0F;
+	/** Segments from the root to the knee (the rest run from the knee to the tip), and how straight a limb may get before it stretches. */
+	static final int KNEE = 3;
+	static final float STRAIGHTEST = 0.96F;
 	/** A tip planting: its soft thud (volume, pitch). */
 	private static final float PLANT_VOLUME = 0.25F, PLANT_PITCH = 0.75F;
 
