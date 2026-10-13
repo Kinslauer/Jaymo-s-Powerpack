@@ -719,3 +719,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 
 - **0.9.3, no floating buildings (Kingdoms 0.6.3):** structures from any mod no longer hover over the ground: a gap of
   up to 6 blocks under a building is filled with the ground below when the world generates (newly explored land only).
+
+- **0.9.6, Distant Horizons out:** Distant Horizons left the pack (manifest, server, Deck mods and dev game). Build
+  Modpack moves its jar out of the CurseForge profile into removed-mods. Its leftovers are harmless and can be deleted
+  by hand: `config/DistantHorizons.toml`, the `Distant_Horizons_server_data` folder in the game folder, and
+  `DistantHorizons.sqlite` in each world's `data/` folder on the server.
