@@ -2402,6 +2402,11 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
 - Alignment counts experience only up to level 15, so Strength's longer road doesn't decide it.
 - Not playtested in game.
 
+## 0.6.7: imbued blades proc (pack 0.9.16)
+- A Sorcerer's imbued blade no longer bursts on every blow: one blow in twenty does (`Spellcraft.PROC_ONE_IN`), the
+  rest only spark with the element's colour. A lightning burst also blinds for 0.3 s (`LIGHTNING_BLIND`). Thrown
+  bolts (sneak + J) always burst.
+
 ## 0.6.6: lunar events and Bad Omen grudges (pack 0.9.15)
 - Our own lunar events (`Moons`; ideas from Lunar and Enhanced Celestials, nothing of theirs used). At dusk the
   Overworld rolls for the night (none in a world's first 4 nights); the roll is saved. Sky, fog and night light take

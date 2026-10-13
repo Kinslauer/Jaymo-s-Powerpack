@@ -64,6 +64,10 @@ public final class Spellcraft {
 	 * earth's stagger (ticks); air's lift; lightning's damage, how far it chains and to how many; ice's freeze (ticks). */
 	static final float FIRE_SECONDS = 4.0F, FIRE_DAMAGE = 1.0F, WATER_DAMAGE = 6.0F, LIGHTNING_DAMAGE = 3.0F;
 	static final int WATER_SLOW = 60, EARTH_STAGGER = 40, ICE_FREEZE = 160, LIGHTNING_CHAIN = 2;
+	/** (0.6.7) One blow in this many bursts with the element; the rest only spark. A thrown bolt always does. */
+	static final int PROC_ONE_IN = 20;
+	/** (0.6.7) How long a lightning burst blinds, in ticks (0.3 s). */
+	static final int LIGHTNING_BLIND = 6;
 	static final double AIR_LIFT = 0.9, LIGHTNING_RANGE = 4.0;
 
 	/** Player → server: the Imbue key ({@code bolt}: with sneak, the bolt). */
@@ -106,7 +110,11 @@ public final class Spellcraft {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (source.getEntity() instanceof ServerPlayer sp && source.getDirectEntity() == sp && entity != sp && damageTaken > 0.0F && !blocked
 				&& imbued(sp) && entity.level() instanceof ServerLevel level) {
-				strike(level, sp, entity, false);
+				if (sp.getRandom().nextInt(PROC_ONE_IN) == 0) {
+					strike(level, sp, entity, false);
+				} else {
+					level.sendParticles(particle(element(sp)), entity.getX(), entity.getY(0.6), entity.getZ(), 2, 0.2, 0.2, 0.2, 0.02);
+				}
 			}
 		});
 	}
@@ -239,7 +247,7 @@ public final class Spellcraft {
 		Theft.sorcery(player, level, player.blockPosition());
 	}
 
-	/** The element on a blow {@code player} landed on {@code target} ({@code bolt}: thrown, not struck). */
+	/** The element bursting on a blow {@code player} landed on {@code target} ({@code bolt}: thrown, not struck). */
 	static void strike(ServerLevel level, ServerPlayer player, LivingEntity target, boolean bolt) {
 		String element = element(player);
 		Vec3 away = target.position().subtract(player.position()).normalize();
@@ -267,6 +275,7 @@ public final class Spellcraft {
 			}
 			case "lightning" -> {
 				target.hurtServer(level, level.damageSources().indirectMagic(player, player), LIGHTNING_DAMAGE);
+				target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, LIGHTNING_BLIND, 0), player);
 				LightningBolt flash = EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
 				if (flash != null) {
 					flash.setVisualOnly(true);
