@@ -721,6 +721,13 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
   fighting; while hurt they're never too full to.
 - Tuning: the constants at the top of `Scavengers`.
 
-## 0.4.36: tagged bodies leave no corpse
+## 0.4.36: catching falling bodies
+- A body in the air (dropped, thrown, falling off something) can be caught: an empty hand's right-click takes it into
+  your arms, and the crosshair takes it from up to 2 blocks off it (`CATCH_RADIUS`), so a near miss still catches it.
+  Powers' tendril grabs and whips find it the same way. Iron golems are still too heavy.
+- A falling body wedged in a block is eased out the nearest open way (as a dropped item is), and one that stops getting
+  anywhere for 2 seconds (`STUCK_TICKS`) lies where it is instead of tumbling forever.
+
+## 0.4.37: tagged bodies leave no corpse
 - An entity with the `jaymoskitchen.no_corpse` scoreboard tag leaves no corpse, player or mob
   (`Corpses.NO_CORPSE_TAG`); a tagged player's hotbar drops with the rest of their things. Jaymo's Powers tags Darktide shades as they die and risen shadows as they rise.

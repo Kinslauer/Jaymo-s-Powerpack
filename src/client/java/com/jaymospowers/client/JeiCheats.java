@@ -4,19 +4,21 @@ import java.lang.reflect.Method;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
+import net.minecraft.server.permissions.Permissions;
 import org.jspecify.annotations.Nullable;
 
 /**
  * JEI (optional): its cheat mode (click an item to take it instead of seeing its recipes) starts off every session, and
  * its only default switch is Ctrl + left-click on JEI's wrench button. So cheat mode turns on by itself whenever you
- * enter creative (joining in creative counts) and off again when you leave it. In between, your own toggle is left
- * alone. The server still decides who may cheat (JEI allows creative players and ops by default).
+ * may cheat: in creative, or opped (in any game mode; joining that way counts), and off again when you no longer may.
+ * In between, your own toggle is left alone. The server still decides who may cheat (JEI allows creative players and
+ * ops by default).
  */
 final class JeiCheats {
 	private static @Nullable Object toggleState;
 	private static @Nullable Method setCheats;
-	/** Whether the player was in creative last tick (null: not in a world). */
-	private static @Nullable Boolean wasCreative;
+	/** Whether the player could cheat last tick (null: not in a world). */
+	private static @Nullable Boolean couldCheat;
 
 	private JeiCheats() {
 	}
@@ -37,17 +39,17 @@ final class JeiCheats {
 
 	private static void tick(Minecraft minecraft) {
 		if (minecraft.player == null || minecraft.gameMode == null) {
-			wasCreative = null;
+			couldCheat = null;
 			return;
 		}
-		boolean creative = minecraft.player.isCreative();
-		Boolean was = wasCreative;
-		wasCreative = creative;
-		if (was == null ? !creative : was == creative) {
+		boolean may = minecraft.player.isCreative() || minecraft.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
+		Boolean could = couldCheat;
+		couldCheat = may;
+		if (could == null ? !may : could == may) {
 			return;
 		}
 		try {
-			setCheats.invoke(toggleState, creative);
+			setCheats.invoke(toggleState, may);
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't switch JEI cheat mode", e);
 		}
