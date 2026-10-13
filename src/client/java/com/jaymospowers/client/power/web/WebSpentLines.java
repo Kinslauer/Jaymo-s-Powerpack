@@ -19,9 +19,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Spent Web Zip lines. When a zip lets go, its line doesn't vanish: it stays stuck where it hit, goes slack and falls,
- * draping down from the anchor and swaying, then comes loose, fades and breaks up into wisps. Purely visual, on each
- * client: every player's zips (from the synced line, or the local player's own pull) leave one behind.
+ * Spent web lines. When a swing web, a zip or a whip lets go, its line doesn't vanish: it stays stuck where it hit,
+ * goes slack and falls, draping down from the anchor and swaying, then comes loose, fades and breaks up into wisps.
+ * Purely visual, on each client: every player's lines (from the synced lines, or the local player's own webs and pull)
+ * leave one behind. A line stuck to something that moves (a yank, a whip) falls free at once.
  */
 final class WebSpentLines {
 	/** Points along a spent line (the first is the stuck end). */
@@ -58,12 +59,15 @@ final class WebSpentLines {
 		}
 	}
 
-	/** A player's zip line as last seen: where it was stuck and where it left the hand(s). */
-	private record Seen(Vec3 anchor, Vec3 main, Vec3 off, boolean dark) {
+	/** A hand's line as last seen: where it was stuck (on something that moves: {@code loose}), and where it left the hand. */
+	private record Seen(Vec3 anchor, Vec3 hand, boolean dark, boolean loose) {
 	}
 
 	private static final List<Spent> LINES = new ArrayList<>();
+	/** Keyed by player id × 2 + hand. */
 	private static final Map<Integer, Seen> SEEN = new HashMap<>();
+	/** A line whose stuck end jumps further than this in a tick was let go and another cast (blocks). */
+	private static final double RECAST_JUMP = 1.5;
 
 	private WebSpentLines() {
 	}
@@ -75,27 +79,27 @@ final class WebSpentLines {
 			SEEN.clear();
 			return;
 		}
-		// zips that just let go leave their lines behind
+		// lines that just let go (swing webs, zips, whips) leave themselves behind
 		Map<Integer, Seen> now = new HashMap<>();
 		for (Player player : level.players()) {
-			if (!zipLine(minecraft, player)) {
-				continue;
+			boolean dark = com.jaymospowers.power.web.WebSymbiote.suitShown(player);
+			for (int hand = WebNet.MAIN; hand <= WebNet.OFF; hand++) {
+				Vec3 end = WebArms.lineEnd(minecraft, level, player, hand, 1.0F);
+				if (end == null) {
+					continue;
+				}
+				int key = player.getId() * 2 + hand;
+				Seen seen = new Seen(end, WebLineRenderer.handPos(minecraft, player, hand, 1.0F), dark, onEntity(minecraft, player, hand));
+				Seen before = SEEN.get(key);
+				if (before != null && !before.loose() && !seen.loose() && before.anchor().distanceToSqr(end) > RECAST_JUMP * RECAST_JUMP) {
+					spend(before);
+				}
+				now.put(key, seen);
 			}
-			Vec3 end = WebArms.lineEnd(minecraft, level, player, WebNet.MAIN, 1.0F);
-			if (end == null) {
-				continue;
-			}
-			boolean both = WebArms.zipping(minecraft, player);
-			now.put(player.getId(), new Seen(end, WebLineRenderer.handPos(minecraft, player, WebNet.MAIN, 1.0F),
-				both ? WebLineRenderer.handPos(minecraft, player, WebNet.OFF, 1.0F) : null, com.jaymospowers.power.web.WebSymbiote.suitShown(player)));
 		}
 		for (Map.Entry<Integer, Seen> entry : SEEN.entrySet()) {
 			if (!now.containsKey(entry.getKey())) {
-				Seen seen = entry.getValue();
-				add(new Spent(seen.anchor(), seen.main(), seen.dark()));
-				if (seen.off() != null) {
-					add(new Spent(seen.anchor(), seen.off(), seen.dark()));
-				}
+				spend(entry.getValue());
 			}
 		}
 		SEEN.clear();
@@ -113,13 +117,24 @@ final class WebSpentLines {
 		}
 	}
 
-	/** A Web Zip's line is out for this player right now. */
-	private static boolean zipLine(Minecraft minecraft, Player player) {
-		if (player == minecraft.player && WebPowerClient.isActive(minecraft.player) && WebPowerClient.INSTANCE.swing.pull != null) {
-			return true;
+	/** That hand's line is stuck to an entity (a yank, a whip), not to a fixed point. */
+	private static boolean onEntity(Minecraft minecraft, Player player, int hand) {
+		WebLine line = player.getAttached(WebPower.line(hand));
+		if (line != null) {
+			return line.entityId() >= 0;
 		}
-		WebLine line = player.getAttached(WebPower.LINE);
-		return line != null && line.kind() == WebLine.ZIP;
+		// the local player's own swing webs and zip pull are fixed points; else the Yank tether
+		return hand == WebNet.MAIN && player.getAttached(WebPower.TETHER) != null
+			&& !(player == minecraft.player && WebPowerClient.INSTANCE.swing.lineEnd(hand, 1.0F) != null);
+	}
+
+	private static void spend(Seen seen) {
+		Spent line = new Spent(seen.anchor(), seen.hand(), seen.dark());
+		if (seen.loose()) {
+			// it was stuck to something moving: it falls free at once
+			line.age = HANG_TICKS;
+		}
+		add(line);
 	}
 
 	private static void add(Spent line) {
