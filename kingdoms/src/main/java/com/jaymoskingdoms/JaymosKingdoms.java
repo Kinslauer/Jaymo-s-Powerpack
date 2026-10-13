@@ -150,6 +150,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.monsters.Monsters.register();
 		Encounters.register();
 		Sightings.register();
+		// 0.5.59: assassins: contracts on rulers and marked players, whispers, the attempt (and the contracts' attachment)
+		LOGGER.debug("contract attachment: {}", Assassins.CONTRACTS);
+		Assassins.register();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();
 			Gatherers.clear();
