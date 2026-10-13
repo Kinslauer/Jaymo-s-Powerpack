@@ -60,6 +60,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		ClassKeys.register();
 		CombatArtKey.register();
 		TalkScreen.register();
+		// 0.6.6: lunar events' colours
+		MoonClient.register();
 		ArmoryLayer.register();
 		// 0.5.34: Jaymo's Equestrian (gaits, the stamina HUD, coats, war elephants)
 		com.jaymoskingdoms.client.equestrian.EquestrianClient.register();

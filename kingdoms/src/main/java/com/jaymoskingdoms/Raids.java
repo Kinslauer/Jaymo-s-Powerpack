@@ -173,7 +173,7 @@ final class Raids {
 				continue;
 			}
 			Faction target = target(server, level, camp);
-			if (target != null && random.nextFloat() < RAID_CHANCE) {
+			if (target != null && random.nextFloat() < Moons.raidChance(server, RAID_CHANCE)) {
 				start(level, camp, target);
 			}
 		}

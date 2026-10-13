@@ -1,0 +1,7 @@
+{
+	"required": true,
+	"package": "com.jaymoskingdoms.client.mixin.moons",
+	"compatibilityLevel": "JAVA_25",
+	"client": ["MoonSkyMixin"],
+	"injectors": { "defaultRequire": 1 }
+}

@@ -2401,3 +2401,24 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   Rend, Executioner); Charge and War Cry on the new Y key; Bladestorm every 8th link. Area blows only hit foes.
 - Alignment counts experience only up to level 15, so Strength's longer road doesn't decide it.
 - Not playtested in game.
+
+## 0.6.6: lunar events and Bad Omen grudges (pack 0.9.15)
+- Our own lunar events (`Moons`; ideas from Lunar and Enhanced Celestials, nothing of theirs used). At dusk the
+  Overworld rolls for the night (none in a world's first 4 nights); the roll is saved. Sky, fog and night light take
+  the moon's colour through a layer added to the game's environment attributes (`EnvironmentAttributeSystemBuilderMixin`),
+  and the moon itself is tinted and resized on the client (`MoonSkyMixin`), fading in and out over 10 seconds.
+  - Blood Moon (5% of nights): extra zombies and skeletons claw up out of the ground round each player (up to 22
+    monsters near; they start 2 blocks down, frozen, and climb out over 2.5 s through a spray of the ground's block,
+    and the game's own zombies and skeletons that spawn that night rise the same way; never saved half-buried), monsters out that night get Strength and Speed, no one can sleep, barbarian camps raid
+    twice as readily.
+  - Super Blood Moon (8% of full moons): a huge deep red moon; up to 36 monsters near, two tries a draw, Strength II.
+  - Harvest Moon (30% of full moons): a big golden moon; crops, stems, berries, cocoa and saplings round each player
+    grow all night; at dawn every loaded settlement's fields grow a stage.
+  - Blue Moon (22% of full moons): Luck for everyone under the open sky; monsters slain by a player give 6 extra
+    experience and a 15% chance of an emerald, diamond, amethyst shard or lapis.
+  - Ops: `/kingdom moon <blood|super_blood|harvest|blue|clear>` sets tonight's moon.
+- Bad Omen (`Omens`): walk into a kingdom, fiefdom or village (its land, or 96 blocks of its seat) carrying Bad Omen or
+  Raid Omen and every good word you had there is gone, then 400 more (once a day per settlement). If the raid you
+  brought comes and the settlement wins it, it holds a grudge (saved): reputation gains there count a tenth and never
+  climb over -50 (no pledging again), with a 1% chance a day it's finally forgiven. A raid that wipes it out leaves
+  no one to remember.
