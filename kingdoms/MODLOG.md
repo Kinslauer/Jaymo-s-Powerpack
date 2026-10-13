@@ -1962,3 +1962,12 @@ own take, built on the camps' machinery like the goblin villages: nothing of it 
   ("Drums in the hills! The orcs of X march on Y!"). Raiders' deaths are now undone on the roster by their own role.
 - Killing the warchief clears the camp (every settlement thanks you); its hides, fences, bones and skulls rot, the
   stockade stays as a ruin. A lost warchief is replaced after 2 minutes. `/faction camp found orc` for ops.
+
+## 0.5.46: your own blocks are no crime
+- Andy: breaking your own items in a village made the villagers take you for a criminal. Now every block a player
+  places from an item is remembered as theirs (`Placed`, a per-chunk attachment keyed by position, with the block it
+  was, written by `BlockItemMixin` on `BlockItem.place`'s `setPlacedBy`). `Theft.broke` lets that player break it
+  (a bed's head counts as its foot's), and `Theft.opened` lets them open a chest they placed, without a crime. The
+  mark is dropped when the block breaks, and only matches while the same block stands there, so a block the
+  settlement later puts in that spot is the settlement's again. Other players' blocks and settlement-built ones still
+  count as before.
