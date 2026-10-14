@@ -2885,6 +2885,10 @@ Andy: "vampirism should give you the sirben visual modifier" (Sirben is an MCA t
 - `Vampires.VAMPIRE` on players now syncs to every client (villagers' never does).
 - Built; not yet seen in game.
 
+## 0.7.25: no shader message (pack 0.10.87)
+Andy: "no shader disable message". Dark nights still switch Iris shaders off past a third of the night on a waning
+moon and back on at dawn (`DarkNights`), but without the "A dark night: shaders are off until dawn" overlay line.
+
 ## 0.7.26: creative kits build the whole ship (pack 0.10.88)
 - Andy: "is there a way to autocomplete a boat in creative?" A kit used in creative now fills every frame at once
   (`ShipKits.complete`: oak planks and fence rails, spruce fence masts, sails, helm, oars, unloaded guns, chests), joins
