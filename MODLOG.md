@@ -963,6 +963,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   and are stone for three days). The Tower (500-800 out; Hermit sells beans, seeds, the radar) climbs to the Lookout in
   the sky, whose Keeper blesses once a day. Its doors lead to the Time Chamber (`jaymospowers:time_chamber`, flat white,
   2x training, fast hunger) and the Verdant World (`jaymospowers:verdant_world`, green-sky plains with villages).
-- **0.10.20, Z Fighter flight poses back (`ZFighterFlightPose`):** the arms hold the pose picked with Z + scroll
-  whenever a Z Fighter is flying off the ground, hovering included (hover legs too), not only while sprint-flying.
-  Standing on the ground he still looks like himself; sprint-flying still lays him out along the flight.
+- **0.10.20, Z Fighter flight poses back (`ZFighterFlightPose`):** the laid-out flight body and the arm pose picked with
+  Z + scroll come on whenever a Z Fighter is actually flying fast (0.7 blocks a tick across or diving, off again under
+  0.35), for his own screen as well as everyone else's, not only while the client's sprint-cruise flag is set. Hovering,
+  taking off and standing he still looks like himself, arms included.
