@@ -100,7 +100,10 @@ final class DarktideMoves {
 	static final double BARRAGE_REACH = 2.2, BARRAGE_HOLD_AT = 1.5;
 	// ---- B: Riptide Dash (knives, ascended) ----
 	static final double DASH_LENGTH = 5.0, DASH_SPEED = 1.0;
-	/** A dash that lands is ready again at once; one that misses waits DASH_MISS_COOLDOWN, a flurry FLURRY_COOLDOWN (ticks). */
+	/**
+	 * Each dash spends a Combat Roll charge (a landed flurry refunds it, see CombatRollCompat). A dash that lands is
+	 * ready again at once; one that misses waits DASH_MISS_COOLDOWN, a flurry FLURRY_COOLDOWN (ticks).
+	 */
 	static final int DASH_TICKS = 5, DASH_MISS_COOLDOWN = 100, FLURRY_COOLDOWN = 1200;
 	static final float DASH_DAMAGE = 6.0F, DASH_FLOW = 30.0F;
 	static final int FLURRY_HITS = 8, FLURRY_EVERY = 2;
@@ -654,9 +657,12 @@ final class DarktideMoves {
 
 	static void dash(ServerPlayer player) {
 		DarktideLive live = DarktidePower.live(player);
-		if (live.dash != null || !readyOrSilent(player, DarktideState.DASH) || !DarktidePower.spend(player, DASH_FLOW)) {
+		if (live.dash != null || !readyOrSilent(player, DarktideState.DASH) || !CombatRollCompat.hasRoll(player)
+			|| !DarktidePower.spend(player, DASH_FLOW)) {
 			return;
 		}
+		// every dash (and flurry) spends a Combat Roll charge; a flurry that lands gives it back
+		CombatRollCompat.spendRoll(player);
 		ServerLevel level = player.level();
 		Vec3 dir = Vec3.directionFromRotation(0.0F, player.getYRot());
 		DarktideLive.Dash dash = new DarktideLive.Dash(level.getGameTime(), player.position(), dir);
@@ -702,6 +708,7 @@ final class DarktideMoves {
 				Vec3 behind = target.position().add(dash.dir.scale(target.getBbWidth() / 2.0 + 1.0));
 				player.teleportTo(level, behind.x, target.getY(), behind.z, Set.of(), player.getYRot() + 180.0F, player.getXRot(), false);
 				hit(player, target, FLURRY_HIT_DAMAGE * FLURRY_HITS);
+				CombatRollCompat.refundRoll(player);
 				live.dash = null;
 			}
 			return;

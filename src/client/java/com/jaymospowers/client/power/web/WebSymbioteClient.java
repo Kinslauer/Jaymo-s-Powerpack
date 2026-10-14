@@ -111,6 +111,8 @@ public final class WebSymbioteClient {
 	/** How far through a roar (0-1), for the maw thrown open. */
 	public static final RenderStateDataKey<Float> ROAR = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_roar");
 	/** Ticks into a curious stare (the head swollen, staring), for the maw. */
+	/** Ticks into a maw counter (WebCounter: Jaw Snap, Maul, Maw Roar, Drag to the Jaws), with its kind. */
+	public static final RenderStateDataKey<float[]> COUNTER_MAW = RenderStateDataKey.create(() -> "jaymospowers:web_counter_maw");
 	public static final RenderStateDataKey<Float> STARE = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_stare");
 	/** How long the meal's carry in takes (ticks), for the maw. */
 	public static final RenderStateDataKey<Integer> MEAL_REACH = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_meal_reach");
@@ -406,6 +408,11 @@ public final class WebSymbioteClient {
 		float roarAt = roarPose == null || roarPose.kind() != com.jaymospowers.power.web.WebPose.ROAR ? -1.0F
 			: roarPose.progress(entity.level().getGameTime() + net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false));
 		state.setData(ROAR, roarAt >= 0.0F && roarAt < 1.0F && entity instanceof Player p && WebSymbiote.isBonded(p) ? roarAt : null);
+		com.jaymospowers.power.web.WebCounter.Active counter = entity.getAttached(com.jaymospowers.power.web.WebCounter.ACTIVE);
+		float counterAt = counter == null || !com.jaymospowers.power.web.WebCounter.mawKind(counter.kind()) ? -1.0F
+			: entity.level().getGameTime() - counter.start() + net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
+		state.setData(COUNTER_MAW, counterAt >= 0.0F && counterAt < com.jaymospowers.power.web.WebCounter.ticks(counter.kind())
+			&& entity instanceof Player p && WebSymbiote.isBonded(p) ? new float[] {counterAt, counter.kind()} : null);
 		state.setData(STARE, staring == null ? null : Math.max(0.0F, entity.level().getGameTime() - staring
 			+ net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false)));
 		long out = entity instanceof Player p && WebSymbiote.isBonded(p) ? WebSymbiote.tendrilsOut(p) : -1L;

@@ -2520,7 +2520,7 @@ earthquakes, relief quests, forecasts).
 - Ops: `/kingdom disaster <storm|thunder|supercell|dust_devil|tornado|monster|clear>` (a cell overhead, or a
   tornado 60 blocks ahead coming your way).
 
-## 0.7.0: vampires, stage 1 of the 0.10.0 drop (pack 0.10.0)
+## 0.7.0: vampires, stage 1 of the 0.10.0 drop (pack 0.10.3)
 Plan and open questions: `docs/Vampires-Plan.md`. All in `Vampires` (tuning at the top).
 - **The Elder.** One per world (`elder_vampire` on the Overworld). From day 6, by day, a grown villager 20-64 blocks
   from a player becomes him (+20 max health). By day he's himself; at night (12800-23200) he hunts the nearest grown

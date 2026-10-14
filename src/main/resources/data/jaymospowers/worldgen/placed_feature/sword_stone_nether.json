@@ -2,10 +2,6 @@
   "feature": "jaymospowers:sword_stone_nether",
   "placement": [
     {
-      "type": "minecraft:rarity_filter",
-      "chance": 260
-    },
-    {
       "type": "minecraft:in_square"
     },
     {
@@ -19,9 +15,6 @@
           "absolute": 100
         }
       }
-    },
-    {
-      "type": "minecraft:biome"
     }
   ]
 }

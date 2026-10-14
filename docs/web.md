@@ -755,9 +755,19 @@ roams, bonds a nearby web user, or with Kitchen waits for the body to rise and t
   - Every `SENSE_TICKS` 10, the server sends the client the ids of mobs within 16 that are targeting you (`web_sense`).
   - The client (`WebEntityRendererMixin`, at the TAIL of `EntityRenderer.extractRenderState`) gives those a red
     outline, plus swelling creepers and skeletons drawing a bow within 16. The outline shows through walls.
-- **Dodge:** the first hit from an entity (melee or projectile; nothing that bypasses invulnerability) every
-  `DODGE_COOLDOWN` 400 ticks is cancelled (`ALLOW_DAMAGE`). You get a sidestep nudge square to the attack
-  (`web_nudge`), an amethyst tingle, and sparkles.
+- **Dodge (from 0.10.2, before ascending too):** hits from an entity (melee or projectile; nothing that bypasses
+  invulnerability) are cancelled (`ALLOW_DAMAGE`) while a sense charge is ready; each charge comes back after
+  `DODGE_COOLDOWN` 400 ticks. Charges grow with the power (`senseCharges`): `CHARGES_BY_UNLOCKED` {1, 1, 2, 3, 4} by
+  abilities unlocked, `DODGE_CHARGES` 5 once ascended. You get a sidestep nudge square to the attack (`web_nudge`),
+  an amethyst tingle, and sparkles. The red outlines stay ascended-only.
+- **Counters (`WebCounter`):** for `WINDOW` 30 ticks after a dodge (`web_counter_ready`, owner-synced), right click
+  (consumed client-side) counters the dodged attacker within 7, else whatever's under the crosshair within 10. A
+  random move, never the same twice running. Web: Spinning Heel Kick, Yank and Uppercut, Web Slam, Blinding Jabs,
+  Flip Kick, Cocoon Throw, Zip Kick, Trip Sweep, Pinned Haymaker. With the symbiote suit showing: Impale, Whiplash,
+  Hurl, Constrict, Spear Flurry (tendrils, drawn with the symbiote's own `STRIKE` plus `TENDRILS_OUT`; `WebSymbiote`
+  skips its own damage for these via `WebCounter.ownsStrike`), Jaw Snap, Maul, Maw Roar, Drag to the Jaws (the maw,
+  drawn by `WebMouthLayer` from `web_counter` / `WebCounter.maw`). The maw only bites; nothing living is fed on.
+  Damage and timings are constants at the top of `WebCounter`.
 - **Web Strike (C, `onUltimate`):**
   - It zips you to the living entity under the crosshair within `STRIKE_RANGE` 32, as a Yank-to pull.
   - When you're within 2.2 of the target's edge, the kick deals `max(STRIKE_MIN_DAMAGE 10, best speed of the last 3

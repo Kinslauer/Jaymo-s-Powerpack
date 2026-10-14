@@ -373,6 +373,13 @@ None of this has been run in game.
   `ArsenalLivingEntityRendererMixin` puts the aim on right after that `setupAnim`, and the existing
   `ArsenalModelFeatureRendererMixin` puts it on again for the body draw.
 
+### Swords in the Stone spacing (0.10.2)
+No two stones generate within `SwordStone.SPACING` 3000 blocks in the same dimension. Each 3000-block cell gets one
+seed-picked candidate chunk; it stands down if a neighbouring cell's candidate is closer than 3000 and outranks it.
+`SwordStone.owner` gives a standing candidate to one blade (Nether: Laevateinn; End outer islands: Caladbolg; Deep Dark
+below: Gram; frozen biomes: Hrunting; else Durandal), which tries 24 spots in that chunk. The placed features no
+longer have rarity or biome filters.
+
 ### Swords in the Stone get their gifts (`StoneSwords`, `entity/FrostLance`)
 `SwordStone` keeps the stones and worldgen; `StoneSwords` holds the five blades' passives and actives. All five are
 still netherite 4 / -2.6. Lore: flavour, passive (blue), active (purple), then the relic line. Each is drawn from its

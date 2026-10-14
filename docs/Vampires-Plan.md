@@ -1,6 +1,6 @@
 # 0.10.0: Vampires and Werewolves (plan)
 
-All of it is our own work inside Jaymo's Kingdoms (no other mod's code or art). It ships as pack 0.10.0 / Kingdoms 0.7.0;
+All of it is our own work inside Jaymo's Kingdoms (no other mod's code or art). It ships as pack 0.10.3 / Kingdoms 0.7.0;
 each stage lands on the same draft PR, and Andy can merge after any stage.
 
 ## Stage 1: the Elder and the spread of vampirism (building now)

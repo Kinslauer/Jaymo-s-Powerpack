@@ -29,6 +29,9 @@ import org.jspecify.annotations.Nullable;
  * Darktide is your power; everyone else keeps the pack's default. Missing attribute: nothing happens.</li>
  * <li>Rolls: Combat Roll's server event {@code ServerSideRollEvents.PLAYER_START_ROLLING}, hooked by reflection with a
  * proxy (no compile dependency). Missing: no Flow from rolling.</li>
+ * <li>Dashes: every Riptide Dash (and flurry) spends a roll charge, and a flurry that lands gives it back. Charges
+ * live on the client (Combat Roll's {@code RollManager}): it reports its count ({@link DarktideNet.Rolls}) and the
+ * server spends and refunds through {@link DarktideNet.RollCharge}. Until a count arrives, dashes cost nothing.</li>
  * <li>Evasion: within {@link #WINDOW} ticks of the roll's start, an enemy projectile passing within
  * {@link #NEAR_PROJECTILE} or a mob that has you as its target within {@link #NEAR_MOB}, while nothing hits you, counts
  * once per roll.</li>
@@ -111,6 +114,35 @@ final class CombatRollCompat {
 		double extra = CHARGES - instance.getBaseValue();
 		if (extra > 0.0 && !instance.hasModifier(MODIFIER_ID)) {
 			instance.addOrUpdateTransientModifier(new AttributeModifier(MODIFIER_ID, extra, AttributeModifier.Operation.ADD_VALUE));
+		}
+	}
+
+	/** Whether {@code player} has a roll charge for a dash (always, without Combat Roll). */
+	static boolean hasRoll(ServerPlayer player) {
+		return DarktidePower.live(player).rolls != 0;
+	}
+
+	/** A dash spends a roll charge. */
+	static void spendRoll(ServerPlayer player) {
+		DarktideLive live = DarktidePower.live(player);
+		if (live.rolls > 0) {
+			live.rolls--;
+			send(player, -1);
+		}
+	}
+
+	/** A landed flurry gives its roll charge back. */
+	static void refundRoll(ServerPlayer player) {
+		DarktideLive live = DarktidePower.live(player);
+		if (live.rolls >= 0) {
+			live.rolls++;
+			send(player, 1);
+		}
+	}
+
+	private static void send(ServerPlayer player, int change) {
+		if (net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.canSend(player, DarktideNet.RollCharge.TYPE)) {
+			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new DarktideNet.RollCharge(change));
 		}
 	}
 
