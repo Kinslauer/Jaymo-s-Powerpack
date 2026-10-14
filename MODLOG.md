@@ -931,3 +931,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Andy's follow-up: the guard and parry (`ZFighterGuard`: right click held bare-handed, half off frontal blows for ki,
   a parry in the first 6 ticks staggers the attacker and makes the next punch a counter; crossed arms drawn by
   `ZFighterGuardPose`), and Web and Gravity's F5 shoulder view (`ShoulderCamera.active`).
+- **0.10.14, server start fix:** the Hermit Beans block loot table was in the old format
+  (`minecraft:block_state_property`), which 26.3 no longer knows and can't upgrade, so a server wouldn't load its data.
+  It now uses 26.3's `match_block` condition and `modifier` (like vanilla wheat).
