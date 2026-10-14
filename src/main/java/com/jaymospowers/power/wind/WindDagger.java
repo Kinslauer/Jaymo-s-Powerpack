@@ -25,7 +25,7 @@ import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.10.25) Daggers in a wind sorcerer's hand, the way {@link WindStaff} does the quarterstaff (Andy: "the same way it
+ * (0.10.27) Daggers in a wind sorcerer's hand, the way {@link WindStaff} does the quarterstaff (Andy: "the same way it
  * does quarterstaves"; the same gate, a Kingdoms Sorcerer of the air). The four Better Combat dagger swings (slash right,
  * flip and stab, backhand, double stab) each carry a gale, counted by our own chain of landed swings:
  * <ol>

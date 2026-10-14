@@ -581,7 +581,7 @@ Every staff hit also leaves a small puff. **Staff Vault** (right click): ride a 
 goes straight up. 50-tick cooldown (cold-stretched), and no fall damage for 80 ticks or until you land. The Tempest mode
 and the ascension make every gale 1.3x. Tuning at the top of `WindStaff`. Not playtested.
 
-## 0.10.25: daggers ride the gale too (`WindDagger`)
+## 0.10.27: daggers ride the gale too (`WindDagger`)
 
 Andy: "wind should get increased proficiency with daggers the same way it does quarterstaves". Same gate as the staff
 (a **wind sorcerer**), same shape. Any item whose id contains `dagger`, `knife` or `kunai` (the Armory's daggers,
