@@ -2645,3 +2645,7 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   sail or mast; `up`/`down`); 36 shapes of sheet from `tools/gen_sailing.py`. Hung facing aft, a sail is turned to
   face forward as the ship casts off. While the ship's sails are furled (W/S) they're drawn rolled up on their yards
   (`furled`, the ship's sail setting synced to clients).
+- **0.7.10, tail fear (pack 0.10.45):** townsfolk who see a Z Fighter's tail out (`jaymospowers_tail` tag) take them for
+  a werewolf and run (`Tails`, `Frights`, 12 cries), until told: at 25 MCA hearts the chat menu gains "Explain your tail"
+  (`data/jaymoskingdoms/dialogues/main.json`, `McaAnswersMixin`), and that villager fears it no more.
+  `ClassPerks.trainedWith` tells Powers which weapons a class is trained with.

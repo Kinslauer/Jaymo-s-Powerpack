@@ -92,6 +92,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Frights.register();
 		// 0.6.4: Jaymo's Powers' aliens (the Xeno-Band) are monsters to folk who haven't seen you change (and its attachment)
 		LOGGER.debug("alien attachment: {}", Aliens.KNOWN);
+		LOGGER.debug("tail attachment: {}", Tails.EXPLAINED);
 		Aliens.register();
 		Oddities.register();
 		// 0.5.21: monsters hunt the settlements' folk as they do villagers

@@ -1037,3 +1037,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Pirates have no build past 1.20.1; Haubna's ocean physics are Physics Mod Pro (paid Patreon), so neither ships.
   With them, Kingdoms 0.7.7 brings sailing stage 1, our own ships built from blocks: put a helm on any hull you build
   on water and cast off (bellied sails on yards, buoyancy by weight, walkable decks and holds, chests usable afloat, drop anchor).
+- **0.10.45, Z Fighter fists first and tail fear (Kingdoms 0.7.10):** Z Fighters can swing weapons again, but a weapon
+  (or a bow's arrow) hits for 35% unless their Kingdoms class is trained with it (`ClassPerks.trainedWith`, read by
+  reflection: Thief light blades, Warlord two-handers, Brute bludgeons, Archer bows, Marksman guns and crossbows, Sorcerer
+  swords, Mage staffs, Rider anything from the saddle). A Warrior-born with the tail out frightens townsfolk (`Tails`,
+  by the `jaymospowers_tail` tag): they cry werewolf and run, until the player reaches 25 MCA hearts with them (tail
+  wrapped) and picks "Explain your tail" in their chat menu; each villager has to be told.
