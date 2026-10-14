@@ -67,6 +67,22 @@ def packMods = [
 	// Sound Physics Remastered (echoes, muffling); Lootr (every loot chest has its own loot for each player)
 	[dep: "maven.modrinth:sound-physics-remastered:9loJgQlO", cf: [535489, 8909383]],
 	[dep: "maven.modrinth:lootr:gVwn7m2v", cf: [615106, 8987242]],
+	// AmbientSounds 6 (LGPL-3.0, by CreativeMD; needs CreativeCore, LGPL-3.0): biome, cave, water and weather ambience,
+	// the part of Dynamic Surroundings that has a 26.3 build (Dynamic Surroundings stops at 1.21.1). Client-only.
+	[dep: "maven.modrinth:ambientsounds:T9Nl4OKj", cf: [254284, 9099194]],
+	[dep: "maven.modrinth:creativecore:GO707F1h", cf: [257814, 9027378]],
+	// Subtle Effects (all rights reserved, by MincraftEinstein; "use this mod in modpacks with credit and a link",
+	// modrinth.com/mod/subtle-effects): sparks on fires, snoring, dust clouds, burning entities, heartbeat at low health
+	// and more, all toggled in its config. Server-side too (some effects need it), so every client needs it to join.
+	// Needs Fzzy Config (TDL-M, modpacks allowed), which needs Fabric Language Kotlin (Apache-2.0).
+	[dep: "maven.modrinth:subtle-effects:kxxX36ei", cf: [1023913, 9151765]],
+	[dep: "maven.modrinth:fzzy-config:YkOumqzV", cf: [1005914, 9049861]],
+	[dep: "maven.modrinth:fabric-language-kotlin:SKW1BTL3", cf: [308769, 9106173]],
+	// A Good Place (MIT, by enjarai): blocks grow into place when you put them down. No dependencies.
+	[dep: "maven.modrinth:a-good-place:pdT3PrDD", cf: [1020455, 9082216]],
+	// MRU (all rights reserved) and YetAnotherConfigLib (LGPL-3.0): libraries for Sounds below
+	[dep: "maven.modrinth:mru:wpEZ3KrZ", cf: [669659, 9063992]],
+	[dep: "maven.modrinth:yacl:s9SjoFu1", cf: [667299, 8935498]],
 	// ATi Structures, Vanilla Edition (all rights reserved; "feel free to add to any modpack"): big medieval castles,
 	// forts and ruins from vanilla blocks, with vanilla mobs and loot
 	[dep: "maven.modrinth:ati-structures-vanilla-edition:3NkwZrUy", cf: [1158208, 8984306]],
@@ -122,6 +138,10 @@ def packMods = [
 def packModsNoCf = [
 	[dep: "maven.modrinth:first-person-model:Z05WZTy2", cf: null],
 	[dep: "maven.modrinth:not-enough-animations:EhSk2OTD", cf: null],
+	// Sounds (all rights reserved, by imb11; modpacks on Modrinth and CurseForge allowed under legal.imb11.dev/mods/eula):
+	// 170+ new sound effects for screens, items and blocks. Client-only; needs MRU and YACL (packMods).
+	// TODO(home PC): its CurseForge [project id, file id], as above (the cloud couldn't find its CurseForge page).
+	[dep: "maven.modrinth:sound:QCFPBvDa", cf: null],
 	// Grim Kingdoms, Vanilla Edition (all rights reserved; "feel free to add to any modpack"): castles, citadels and
 	// ruins from vanilla blocks. Server-side worldgen, so the server having it is what counts.
 	// TODO(home PC): its CurseForge [project id, file id], as above.
