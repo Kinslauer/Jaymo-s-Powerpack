@@ -6,6 +6,7 @@
   "animation": "jaymospowers:void_flintlock",
   "use_default_animation": "pistol",
   "third_person_animation": "default",
+  "player_animator_3rd": "tacz:pistol_default.player_animation",
   "transform": {
     "scale": {
       "thirdperson": [

@@ -693,6 +693,8 @@ def display(name, g, long):
         "model": f"{NS}:gun/{name}_geo", "texture": f"{NS}:gun/uv/{g.get('atlas', 'flintlocks')}",
         "hud": f"{NS}:gun/hud/{name}", "slot": f"{NS}:gun/slot/{name}",
         "animation": f"{NS}:{name}", "use_default_animation": g["defaults"], "third_person_animation": "default",
+        # third person through Player Animation Library (TaCZ's own default poses, by name; rifle unless we say)
+        "player_animator_3rd": f"tacz:{g['defaults']}_default.player_animation",
         "transform": {"scale": {"thirdperson": [0.6, 0.6, 0.6], "ground": [0.6, 0.6, 0.6],
                                 "fixed": [1.2, 1.2, 1.2] if long else [1.6, 1.6, 1.6]}},
         "muzzle_flash": {"texture": "tacz:flash/common_muzzle_flash", "scale": 1.4 if long else 1.0},

@@ -6,6 +6,7 @@
   "animation": "jaymospowers:blunderbuss",
   "use_default_animation": "rifle",
   "third_person_animation": "default",
+  "player_animator_3rd": "tacz:rifle_default.player_animation",
   "transform": {
     "scale": {
       "thirdperson": [
