@@ -467,6 +467,7 @@ public final class GravityPower implements Power {
 			}
 		});
 		GravityWalk.register();
+		GravityTrainingField.init();
 		ServerTickEvents.END_SERVER_TICK.register(GravityPower::serverTick);
 		ServerLivingEntityEvents.AFTER_DEATH.register(GravityPower::afterDeath);
 		// surviving a hard fall is a step toward ascension, like a kill by weight
@@ -673,6 +674,14 @@ public final class GravityPower implements Power {
 					releaseCrush(player, state, held, charge);
 				}
 			}
+		}
+	}
+
+	/** Z: the Training Field (a dome of heavy gravity to train in), or take yours down. */
+	@Override
+	public void onMode(ServerPlayer player, boolean down) {
+		if (down) {
+			GravityTrainingField.toggle(player);
 		}
 	}
 

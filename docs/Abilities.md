@@ -235,3 +235,4 @@ power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts
 | 235 | Any | item | Hermit Bean | A rare slow crop (seeds in jungle temple chests, 35%; a bean 12%). Eat one: full health, full stomach, a Z Fighter's ki full, bad effects and fire gone. 5 s between beans. Anyone can eat one. | |
 | 236 | Any | worn (feet) | Training Weights | Leather and iron. Slower (12%) and lower jumps (10%); a Z Fighter trains 1.5x faster (TP and mastery). Heavy (weights + 2 iron blocks): 25% slower, 20% lower jumps, 2x. | |
 | 237 | Base | passive | Training together | Z Fighters within 32 blocks get a quarter of the TP you earn. | |
+| 238 | Base | passive | Gravity training | In a Gravity user's Training Field (their Z), or under Gravity's weight (a Gravity Well's pull, Crush's pin), you train twice as fast (3x with Training Weights, 4x heavy), and every blow counts as a heavy one for form mastery. | |

@@ -268,9 +268,18 @@ public final class ZFighterTraining {
 		}
 	}
 
-	/** How fast he trains right now: Training Weights worn (and, later, heavy gravity). */
+	/** In a Gravity user's Training Field, or under Gravity's weight (a Well's pull, Crush's pin), he trains this much faster. */
+	public static final float HEAVY_GRAVITY_RATE = 2.0F;
+
+	/** How fast he trains right now: Training Weights worn, times heavy gravity. */
 	static float rate(ServerPlayer player) {
-		return ZFighterItems.weightRate(player);
+		return ZFighterItems.weightRate(player) * (heavyGravity(player) ? HEAVY_GRAVITY_RATE : 1.0F);
+	}
+
+	/** Under heavy gravity: someone's Training Field, or Gravity's weight on him. */
+	static boolean heavyGravity(ServerPlayer player) {
+		return com.jaymospowers.power.gravity.GravityTrainingField.inField(player)
+			|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.KNEEL) != null;
 	}
 
 	/** Mastery for the form he's in. */
@@ -336,7 +345,9 @@ public final class ZFighterTraining {
 		}
 		earn(player, TP_PER_HIT);
 		if (live.form > 0) {
-			master(player, live.form, damage >= targetMaxHealth * 0.2F ? MASTERY_PER_HIT * 4 : MASTERY_PER_HIT);
+			// a blow under heavy gravity counts as a heavy one
+			boolean heavy = damage >= targetMaxHealth * 0.2F || heavyGravity(player);
+			master(player, live.form, heavy ? MASTERY_PER_HIT * 4 : MASTERY_PER_HIT);
 		}
 	}
 
