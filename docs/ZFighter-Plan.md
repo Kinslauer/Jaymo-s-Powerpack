@@ -13,7 +13,7 @@ Everything below is our own code, art and names, built from DragonMineZ's ideas 
 - **Training together.** Friends who are Z Fighters within 32 blocks get 25% of the TP you earn.
 
 ## Stage 2: gravity training with Gravity users (after Gravity PR #135 merges, so the two don't clash)
-- A Gravity user can place a **Training Field**: a dome of heavy gravity, 10 blocks across, for 60 s, at the block they aim at. The key combo is picked once #135's keys are settled.
+- A Gravity user can place a **Immense Field**: a dome of heavy gravity, 10 blocks across, for 60 s, at the block they aim at. The key combo is picked once #135's keys are settled.
 - Inside, everyone is heavy (slower, low jumps, faster falls). A Z Fighter inside trains at 2x TP and 2x form mastery (3x with weights on), and his hits count as heavy for mastery.
 - The Gravity user earns mastery for every minute a Z Fighter trains in their field.
 - Any Z Fighter pinned by Crush or a Gravity Well also gets the 2x while it lasts.

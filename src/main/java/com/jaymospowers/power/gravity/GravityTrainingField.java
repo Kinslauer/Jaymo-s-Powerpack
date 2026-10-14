@@ -34,7 +34,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Z (Power Mode), the Training Field: a dome of heavy gravity set down where you aim (or around you), for a while.
+ * Z (Power Mode), the Immense Field: a dome of heavy gravity set down where you aim (or around you), for a while.
  * Everyone inside but you is heavy: slowed, low-jumping, falling fast. It's for training: a Z Fighter inside trains at
  * double the rate (the Z Fighter power asks {@link #inField}), and you earn mastery for every minute one spends in it.
  * Z again takes it down. Once the Gravity Well (G) is yours.
@@ -104,7 +104,7 @@ public final class GravityTrainingField {
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.gravity.field").withStyle(ChatFormatting.LIGHT_PURPLE));
 	}
 
-	/** Whether {@code entity} stands in someone else's Training Field. */
+	/** Whether {@code entity} stands in someone else's Immense Field. */
 	public static boolean inField(Entity entity) {
 		return owner(entity) != null;
 	}
