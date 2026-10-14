@@ -80,6 +80,10 @@ def packMods = [
 	[dep: "maven.modrinth:fabric-language-kotlin:SKW1BTL3", cf: [308769, 9106173]],
 	// A Good Place (MIT, by enjarai): blocks grow into place when you put them down. No dependencies.
 	[dep: "maven.modrinth:a-good-place:pdT3PrDD", cf: [1020455, 9082216]],
+	// Soft Imprints (MIT, by Nine; modrinth.com/mod/snow-imprints): players, mobs, horses and carts press tracks into
+	// snow, snow layers, sand and red sand, filling back in after a minute or so. Client-only; the tracks are baked into
+	// the block model through Fabric's renderer API, so they light and shade normally under Iris. Needs Fabric API only.
+	[dep: "maven.modrinth:snow-imprints:vVPbnY0q", cf: [1474300, 8893476]],
 	// MRU (all rights reserved) and YetAnotherConfigLib (LGPL-3.0): libraries for Sounds below
 	[dep: "maven.modrinth:mru:wpEZ3KrZ", cf: [669659, 9063992]],
 	[dep: "maven.modrinth:yacl:s9SjoFu1", cf: [667299, 8935498]],
