@@ -148,5 +148,11 @@
   "message.jaymospowers.zfighter_tail_wrapped": "Tail wrapped round your waist.",
   "message.jaymospowers.zfighter_tail_out": "Tail out.",
   "message.jaymospowers.zfighter_ape": "The full moon! You become the Great Ape!",
-  "message.jaymospowers.zfighter_ape_end": "You shrink back to yourself."
+  "message.jaymospowers.zfighter_ape_end": "You shrink back to yourself.",
+  "technique.jaymospowers.zfighter.ki_wave.warrior": "Crimson Cannon",
+  "technique.jaymospowers.zfighter.ki_wave.warrior.desc": "The Warrior-born's V: a violet beam, wider and harder than a Ki Wave, with a bigger blast. Slower to gather, a little more ki.",
+  "technique.jaymospowers.zfighter.ki_wave.verdant": "Spiral Lance",
+  "technique.jaymospowers.zfighter.ki_wave.verdant.desc": "The Verdant's V: a thin beam wound with a spiral that bores through walls and everything in its line. Longer reach, no blast.",
+  "technique.jaymospowers.zfighter.ki_wave.frost": "Frost Needle",
+  "technique.jaymospowers.zfighter.ki_wave.frost.desc": "The Frost-born's V: a needle of ki from one fingertip. Gathers in a second, costs little, reaches far and chills what it pierces. No blast."
 }

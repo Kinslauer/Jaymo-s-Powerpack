@@ -60,11 +60,14 @@ public final class ZFighterPowerClient implements PowerClient {
 	public static void init() {
 		PowerClients.register(ZFighterPower.ID, INSTANCE);
 		ZFighterInputClient.init();
+		ZFighterBeams.init();
 		ClientTickEvents.END_CLIENT_TICK.register(ZFighterFlightPose::tick);
+		ClientTickEvents.END_CLIENT_TICK.register(ZFighterChargePose::tick);
 		// the Training Post: a Z Fighter's right click opens the drills
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
 			if (renderer instanceof AvatarRenderer<?> avatar) {
 				helper.register(new ZFighterTail.Layer(avatar));
+				helper.register(new ZFighterHair.Layer(avatar));
 			}
 		});
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
@@ -101,12 +104,15 @@ public final class ZFighterPowerClient implements PowerClient {
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
 		ZFighterFlightPose.extract(entity, state, partialTicks);
 		ZFighterTail.extract(entity, state);
+		ZFighterHair.extract(entity, state);
+		ZFighterChargePose.extract(entity, state, partialTicks);
 		ZFighterGuardPose.extract(entity, state);
 	}
 
 	/** Right after a humanoid model animates. */
 	public static void applyModel(Model<?> model, Object state) {
 		ZFighterFlightPose.applyModel(model, state);
+		ZFighterChargePose.applyModel(model, state);
 		ZFighterGuardPose.applyModel(model, state);
 	}
 

@@ -258,7 +258,7 @@ public class ZFighterTrainingScreen extends Screen {
 			boolean spirit = i == ZFighterTraining.SPIRIT_BOMB;
 			boolean equipped = !spirit && (ZFighterTraining.charged(i) ? data.charged() == i : data.quick() == i);
 			String slot = spirit ? "C" : ZFighterTraining.charged(i) ? "V" : "G";
-			graphics.text(this.font, Component.translatable("technique.jaymospowers.zfighter." + key), x + 8, ry, known ? COLOR_GOLD : COLOR_TEXT);
+			graphics.text(this.font, Component.translatable(ZFighterLineage.techniqueKey(player, i)), x + 8, ry, known ? COLOR_GOLD : COLOR_TEXT);
 			graphics.text(this.font, "[" + slot + "]", x + 130, ry, COLOR_DIM);
 			Component status;
 			if (equipped) {
@@ -269,7 +269,7 @@ public class ZFighterTrainingScreen extends Screen {
 				status = Component.translatable("screen.jaymospowers.zfighter.tp_cost", ZFighterTraining.TECHNIQUE_TP[i]);
 			}
 			graphics.text(this.font, status, x + 160, ry, COLOR_DIM);
-			var lines = this.font.split(Component.translatable("technique.jaymospowers.zfighter." + key + ".desc"), W - 70);
+			var lines = this.font.split(Component.translatable(ZFighterLineage.techniqueKey(player, i) + ".desc"), W - 70);
 			if (!lines.isEmpty()) {
 				graphics.text(this.font, lines.get(0), x + 8, ry + 10, COLOR_DIM);
 			}
