@@ -180,8 +180,8 @@ final class Routines {
 	}
 
 	/** Free for a routine at {@code t}: awake, unafraid, not working, guarding, fighting or talking. */
-	private static boolean free(Villager v, long t) {
-		if (v.isSleeping() || v.isPassenger() || v.isNoAi() || v.getTarget() != null || v.hurtTime > 0 || Frights.afraid(v.getUUID())
+	static boolean free(Villager v, long t) {
+		if (Neighbours.meeting(v) || v.isSleeping() || v.isPassenger() || v.isNoAi() || v.getTarget() != null || v.hurtTime > 0 || Frights.afraid(v.getUUID())
 			|| Theft.rioting(v) || Approaches.talking(v) || Quests.listening(v) || Tag.playing(v) || Trespass.watching(v) || McaCompat.busy(v)
 			|| McaCompat.panicking(v) || Hermits.is(v) || Rickshaws.onDuty(v)) {
 			return false;
@@ -245,7 +245,8 @@ final class Routines {
 			}
 			case CHAT -> {
 				Villager friend = nearest(v, folk, false);
-				if (friend == null || DOING.containsKey(friend.getUUID()) || !free(friend, t)) {
+				// (0.7.19) nobody calls on someone they can't stand
+				if (friend == null || DOING.containsKey(friend.getUUID()) || !free(friend, t) || Neighbours.regard(v, friend) <= Neighbours.DISLIKE) {
 					yield null;
 				}
 				Doing c = new Doing(kind, friend.blockPosition(), now, linger);
@@ -349,7 +350,8 @@ final class Routines {
 			v.getNavigation().stop();
 			v.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
 			if (d.with != null && !DOING.containsKey(d.with.getUUID())) {
-				// (the one called on stops for the chat)
+				// (the one called on stops for the chat; a chat warms them a little to each other)
+				Neighbours.shift(v, d.with, 1);
 				Doing back = new Doing(Kind.CHAT, v.blockPosition(), now, d.linger);
 				back.with = v;
 				back.arrived = now;

@@ -1124,3 +1124,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **Kingdoms 0.7.18, cannons break blocks** (Andy: "cannons should break blocks. no mercy"): ship round shot that hits
   land smashes every block within 1.6 of where it strikes, except unbreakable ones and obsidian-tough ones (blast
   resistance 1200+); 30% drop as items (`ShipShot.breach`). Keep cannons (`Cannon`) are unchanged.
+- **0.10.68 / Kingdoms 0.7.19, neighbours** (Andy: "make villagers have more interactions with each other dependent on
+  their relationship with each other ... negative interactions at lower reputation, positive interactions, higher
+  reputation"): every pair of grown villagers has a regard for each other (-100..100; starts from the pair's own draw,
+  MCA personalities, partners and kin) that drives frequent meetings: fights, arguments, shoves and snubs when low;
+  greetings, chat and jokes in the middle; gifts, meals, hugs, courting and (with MCA) marriage when high. Each meeting
+  moves the regard, so friendships and feuds grow. See `kingdoms/MODLOG.md` 0.7.19.

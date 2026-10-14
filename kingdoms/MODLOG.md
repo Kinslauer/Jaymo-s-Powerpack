@@ -2812,3 +2812,29 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
 - Tested in a cloud dev client: all three kits laid, filled and bailed dry; sailing on a beam reach and in irons;
   rowing; loading a gun by hand; a broadside holing a target ship that then sank and lay as a wreck; a gale moving a
   furled sloop 6 blocks in 8 s; a world gun holing a brick wall.
+
+## 0.7.19: neighbours: villagers' regard for one another (pack 0.10.68)
+Andy: "make villagers have more interactions with each other dependent on their relationship with each other ...
+negative interactions at lower reputation, positive interactions, higher reputation".
+- **Regard** (`Neighbours`, attachment `neighbour_regard` on each villager, both sides kept): every pair of grown
+  villagers has a regard of -100..100. Where it starts is the pair's own draw (-40..60, always the same for the two),
+  plus 10 per step of each one's MCA personality (friendly, upbeat, peaceful, extroverted, relaxed +1; greedy, gloomy,
+  anxious -1; crabby -2); MCA partners start at 70 or more, kin at 35 or more. Each remembers their 48 strongest.
+- **Meetings:** each second a realm's free grown villagers (not at work, on guard, in a routine, afraid, talking to a
+  player; daytime) have a 12% chance that one walks over to another within 14 blocks; at most 3 at once per realm,
+  then each rests 45-120 s. What they do hangs on the regard (an MCA villager's low or high mood counts as 15 less or
+  more): below -50 fights, arguments, shoves, snubs and the odd apology; to -15 arguments, snubs, shoves, spats;
+  middling greetings, small talk, jokes, spats; from 15 gifts, shared meals (likelier at lunch), hugs; from 50 hugs
+  and, for unattached MCA man-and-woman pairs who aren't kin, courting; partners are affectionate. At 88+ a courting
+  pair may propose (35%) and, with MCA, marry (both sides of the family tree).
+- Every meeting moves the regard (fight -8, argument -4, shove -3, snub/spat -2; greeting +1, chat/joke +2, meal/hug
+  +3, gift/courting +4, apology/proposal +10) and an MCA villager's mood (fight -3, sour -1, warm +1/+2). Below -50 an
+  argument becomes a shove and a shove a fight 40% of the time. A routine chat (`Routines`) adds +1, and nobody
+  calls on someone they're below -15 with.
+- **Fights** are scuffles: blows trade with knockback, sounds and crits but no damage; onlookers stop to watch and call
+  out (children too); a realm guard within 16 who can see it breaks it up; the one who took more blows has the sore
+  last word.
+- Lines: `neighbours.jaymoskingdoms.<kind>.<open|answer>.0-7` (8 each, dealt as a shuffled deck), plus `watch`,
+  `watch.child`, `guard`, `fight.lost`, `wed`; lines may use `%1$s`, the other's name. Talk floats over their heads.
+- Ops: `/kingdom neighbours [kind]` makes the two grown villagers nearest you meet now and tells you their regard.
+- Built; not yet seen in game.

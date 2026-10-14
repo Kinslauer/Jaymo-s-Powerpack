@@ -169,6 +169,36 @@ public final class McaCompat {
 			? brain.getMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME) : java.util.Optional.empty();
 	}
 
+	/** (0.7.19) {@link #kin}: no kin, kin (family), partners (married, engaged or promised). */
+	static final int STRANGERS = 0, KIN = 1, PARTNER = 2;
+
+	/** (0.7.19) How {@code a} and {@code b} are related (MCA's family tree); {@link #STRANGERS} without MCA. */
+	static int kin(Villager a, Villager b) {
+		return LOADED ? McaBridge.kin(a, b) : STRANGERS;
+	}
+
+	/** (0.7.19) An MCA villager's temper, by their personality: 1 warm (friendly, upbeat, peaceful), -1 sour (greedy, gloomy), -2 crabby; else 0. */
+	static int temper(Villager v) {
+		return LOADED ? McaBridge.temper(v) : 0;
+	}
+
+	/** (0.7.19) {@code a} and {@code b} might court: grown, unattached, not kin, a man and a woman (MCA only). */
+	static boolean courtable(Villager a, Villager b) {
+		return LOADED && McaBridge.courtable(a, b);
+	}
+
+	/** (0.7.19) An MCA villager's mood goes up (or down) by {@code by}. */
+	static void cheer(Villager v, int by) {
+		if (LOADED) {
+			McaBridge.cheer(v, by);
+		}
+	}
+
+	/** (0.7.19) {@code a} and {@code b} marry (MCA); true if they did. */
+	static boolean marry(Villager a, Villager b) {
+		return LOADED && courtable(a, b) && McaBridge.marry(a, b);
+	}
+
 	/** (0.5.39) {@code player}'s hearts with {@code villager} (0 without MCA, or for a plain villager). */
 	static int heartsOf(Villager villager, ServerPlayer player) {
 		return LOADED ? McaBridge.heartsOf(villager, player) : 0;
