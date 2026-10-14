@@ -124,6 +124,7 @@ public final class Dismember {
 
 	public static void init() {
 		SeveredPart.register();
+		Fractures.init();
 		ServerLivingEntityEvents.AFTER_DAMAGE.register(Dismember::afterDamage);
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof Projectile projectile) {
@@ -296,17 +297,38 @@ public final class Dismember {
 
 	/** Takes {@code part} off {@code target} (if it still has it), with everything that follows. True if it came off. */
 	public static boolean sever(LivingEntity target, int part, @Nullable LivingEntity by) {
+		return lose(target, part, by, false);
+	}
+
+	/**
+	 * A skeleton's part smashed to pieces by a blunt blow ({@link Fractures}): gone like a severed one, but nothing flies
+	 * off and nothing bleeds, just a shower of bone and a bone or two on the ground. True if it went.
+	 */
+	public static boolean shatter(LivingEntity target, int part, @Nullable LivingEntity by) {
+		return lose(target, part, by, true);
+	}
+
+	private static boolean lose(LivingEntity target, int part, @Nullable LivingEntity by, boolean shattered) {
 		if (!(target.level() instanceof ServerLevel level) || (missing(target) & part) != 0) {
 			return false;
 		}
 		int mask = missing(target) | part;
 		target.setAttached(MISSING, mask);
 		target.addTag(tag(part));
-		Vec3 from = by != null ? by.position() : target.position().add(target.getLookAngle().scale(-1.0));
-		SeveredPart.spawn(level, target, part, from);
-		gore(level, target, part);
+		if (shattered) {
+			Fractures.crack(level, target, part);
+			Vec3 at = stump(target, part);
+			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), at.x, at.y, at.z, 30,
+				0.2, 0.2, 0.2, 0.3);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.SKELETON_HURT, SoundSource.HOSTILE, 1.0F, 0.6F);
+			drop(level, target, new ItemStack(net.minecraft.world.item.Items.BONE, 1 + target.getRandom().nextInt(2)));
+		} else {
+			Vec3 from = by != null ? by.position() : target.position().add(target.getLookAngle().scale(-1.0));
+			SeveredPart.spawn(level, target, part, from);
+			gore(level, target, part);
+			BLEEDING.put(target, level.getGameTime() + BLEED_TICKS);
+		}
 		track(target);
-		BLEEDING.put(target, level.getGameTime() + BLEED_TICKS);
 		switch (part) {
 			case HEAD -> {
 				ItemStack helmet = target.getItemBySlot(EquipmentSlot.HEAD);
@@ -354,7 +376,7 @@ public final class Dismember {
 	}
 
 	/** Whatever the lost arm's hand held falls. */
-	private static void emptyHand(ServerLevel level, LivingEntity target, int part) {
+	static void emptyHand(ServerLevel level, LivingEntity target, int part) {
 		InteractionHand hand = hand(target, part);
 		ItemStack held = target.getItemInHand(hand);
 		if (!held.isEmpty()) {
@@ -364,7 +386,7 @@ public final class Dismember {
 	}
 
 	/** The hand on the side of {@code part} (an arm). */
-	private static InteractionHand hand(LivingEntity target, int part) {
+	static InteractionHand hand(LivingEntity target, int part) {
 		HumanoidArm side = part == RIGHT_ARM ? HumanoidArm.RIGHT : HumanoidArm.LEFT;
 		return target.getMainArm() == side ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
 	}

@@ -1,6 +1,7 @@
 package com.jaymospowers.client;
 
 import com.jaymospowers.core.Dismember;
+import com.jaymospowers.core.Fractures;
 import com.jaymospowers.core.SeveredPart;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,10 @@ public final class Dismembered {
 	/** On a living body's render state: the parts it's lost. */
 	public static final RenderStateDataKey<Integer> MISSING = RenderStateDataKey.create(() -> "jaymospowers:missing_parts");
 	/** On a severed part's body: the one part to draw (everything else hidden, the part straightened out). */
+	/** On a living body's render state: the bones it has broken (drawn hanging limp). */
+	public static final RenderStateDataKey<Integer> BROKEN = RenderStateDataKey.create(() -> "jaymospowers:broken_bones");
+	/** A broken limb's droop: an arm a little forward and out from the side, a leg trailing slightly behind and in. */
+	private static final float LIMP_ARM_PITCH = -0.1F, LIMP_ARM_ROLL = 0.12F, LIMP_LEG_PITCH = 0.18F, LIMP_LEG_ROLL = -0.05F;
 	public static final RenderStateDataKey<Integer> ONLY = RenderStateDataKey.create(() -> "jaymospowers:only_part");
 
 	private static final Map<ModelPart, Function<String, ModelPart>> LOOKUPS = new WeakHashMap<>();
@@ -64,6 +69,8 @@ public final class Dismembered {
 	public static void extract(LivingEntity entity, EntityRenderState state) {
 		int mask = Dismember.missing(entity);
 		state.setData(MISSING, mask == 0 ? null : mask);
+		int broken = Fractures.broken(entity);
+		state.setData(BROKEN, broken == 0 ? null : broken);
 	}
 
 	/** Right after a model animates: the lost parts hidden (or all but the severed one). */
@@ -95,6 +102,10 @@ public final class Dismembered {
 			}
 			return;
 		}
+		Integer broken = renderState.getData(BROKEN);
+		if (broken != null) {
+			limp(root, broken);
+		}
 		Integer missing = renderState.getData(MISSING);
 		if (missing == null) {
 			return;
@@ -105,6 +116,24 @@ public final class Dismembered {
 					hidePart(find(root, name));
 				}
 			}
+		}
+	}
+
+	/** Broken limbs ({@link Fractures}) hang limp: an arm dangles at the side, a leg drags straight, neither swings. */
+	private static void limp(ModelPart root, int broken) {
+		for (int part : new int[] {Dismember.RIGHT_ARM, Dismember.LEFT_ARM, Dismember.RIGHT_LEG, Dismember.LEFT_LEG}) {
+			if ((broken & part) == 0) {
+				continue;
+			}
+			ModelPart limb = find(root, names(part)[0]);
+			if (limb == null) {
+				continue;
+			}
+			boolean right = part == Dismember.RIGHT_ARM || part == Dismember.RIGHT_LEG;
+			boolean arm = part == Dismember.RIGHT_ARM || part == Dismember.LEFT_ARM;
+			limb.xRot = arm ? LIMP_ARM_PITCH : LIMP_LEG_PITCH;
+			limb.yRot = 0.0F;
+			limb.zRot = (right ? 1.0F : -1.0F) * (arm ? LIMP_ARM_ROLL : LIMP_LEG_ROLL);
 		}
 	}
 
