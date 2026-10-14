@@ -61,6 +61,7 @@ final class WebLineRenderer {
 		}
 		if (!minecraft.isPaused()) {
 			drip(minecraft);
+			WebRopeSim.tick(minecraft.level);
 		}
 		for (net.minecraft.world.entity.Entity entity : minecraft.level.entitiesForRendering()) {
 			if (entity.getAttached(com.jaymospowers.power.web.WebPower.HITCH) != null) {
@@ -285,10 +286,12 @@ final class WebLineRenderer {
 				// how it hangs: slack sags, a fresh or just-caught line twangs, a stretched one hums and thins
 				double slack = slack(minecraft, player, handIndex, hand, end);
 				double time = level.getGameTime() + partialTick;
-				double twang = out < 1.0F ? 0.0 : Math.max(WebLineShape.stuckTwang(WebGrowth.ticks(key) - length / speed),
-					WebLineShape.caughtTwang(key, slack, time));
+				double twang = out < 1.0F ? 0.0 : WebLineShape.stuckTwang(WebGrowth.ticks(key) - length / speed);
 				Vec3 from = hand.subtract(camera), to = end.subtract(camera);
-				WebLineShape.Shape shape = WebLineShape.of(from, to, out < 1.0F ? 0.0 : Math.max(0.0, slack), Math.max(0.0, -slack),
+				// once it's stuck, the line is a simulated rope: it hangs, drapes over edges and lies on the ground
+				WebLineShape.Shape rope = out < 1.0F ? null
+					: WebRopeSim.shape(key, hand, end, hand.distanceTo(end) + Math.max(0.0, slack), partialTick, camera);
+				WebLineShape.Shape shape = WebLineShape.of(rope, from, to, 0.0, Math.max(0.0, -slack),
 					1.0 - out, twang, time, player.getId() * 31 + handIndex);
 				float lineWidth = width * WebLineShape.thin(-slack);
 				// a symbiote's lines are thick, living cords: most of that side's tendrils at once

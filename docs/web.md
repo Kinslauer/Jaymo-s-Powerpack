@@ -879,10 +879,13 @@ None of them run during a web, zip, the wings, a wall run, a takeover or the sym
 ## 0.10.53: lines with weight (`WebLineShape`, `WebHeft`)
 Andy linked Advanced Hook Launchers and asked to adapt its line and behaviours. That mod is CC BY-ND 4.0 (no
 derivatives) and has no public source, so nothing was ported: these are our own takes on its ideas.
-- **Living lines (client, `WebLineShape`):** a slack swing web sags under its own weight (dip ≈ √(3/8 × span × slack),
-  `SAG_MAX` 6); a web snakes out through the air as it shoots (`WAVE_*`); it twangs when it sticks, and again when a
-  slack line catches you taut (`TWANG_*`, `SNAP_SLACK` 0.6); a line stretched past its length hums and thins
-  (`HUM_*`, `STRETCH_THIN`). The symbiote's corded ropes follow the same shape. Your own swing webs know their slack;
+- **Living lines (client, `WebLineShape`, `WebRopeSim`):** once stuck, every web line is a simulated verlet rope
+  (a point every `POINT_SPACING` 0.8 blocks, 10-48 points, `GRAVITY` 0.05, `ITERATIONS` 14) pinned at the hand and
+  the anchor: slack line hangs, swings and bounces when it's caught taut, drapes over edges and lies on the ground
+  instead of passing through blocks (collision shapes, `FRICTION` 0.5). Looks only: the swing still pulls straight
+  at the anchor. Andy also linked Enchanted Fishing Line (ARR, client-only); this is our own rope after its idea. A
+  web snakes out through the air as it shoots (`WAVE_*`); it twangs when it sticks (`TWANG_*`); a line stretched
+  past its length hums and thins (`HUM_*`, `STRETCH_THIN`). The symbiote's corded ropes follow the same shape. Your own swing webs know their slack;
   the Yank lead (3 blocks) sags for everyone; other players' swing webs are drawn taut (their rope isn't synced).
 - **Weight (`WebHeft`):** a catch's weight is its bounding-box volume against how much you can haul
   (`YANK_HEAVY_VOLUME` 4, ×1.5 in the suit, ×2 in Living Armor). Over it, you're hauled to it as before. Several

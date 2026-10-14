@@ -1,14 +1,11 @@
 package com.jaymospowers.client.power.web;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import net.minecraft.world.phys.Vec3;
 
 /**
  * How a web line hangs, end to end, so it reads as a real elastic line rather than a rod: slack line sags under its
- * own weight, a web snakes through the air as it shoots out, a line that sticks (or is caught taut after hanging
- * slack) twangs and settles, and an over-stretched line hums and thins. Our own take on grappling-rope feel.
+ * own weight (once stuck, {@link WebRopeSim} hangs it for real), a web snakes through the air as it shoots out, a
+ * line that sticks twangs and settles, and an over-stretched line hums and thins. Our own take on grappling-rope feel.
  */
 final class WebLineShape {
 	// ===== the knobs ================================================================================================
@@ -20,12 +17,10 @@ final class WebLineShape {
 	 */
 	static final double WAVE_AMP = 0.35, WAVE_WAVES = 2.0, WAVE_SPEED = 1.6;
 	/**
-	 * Sticking, or caught taut after hanging slack, the line twangs: {@code TWANG_AMP} blocks (more on a long line, up
+	 * Sticking, the line twangs: {@code TWANG_AMP} blocks (more on a long line, up
 	 * to {@code TWANG_LENGTH_MAX} times), dying away over about {@code TWANG_DECAY} ticks, at {@code TWANG_FREQ} radians a tick.
 	 */
 	static final double TWANG_AMP = 0.18, TWANG_DECAY = 5.0, TWANG_FREQ = 2.4, TWANG_LENGTH_MAX = 1.6;
-	/** A line that hung at least this slack (blocks) and then went taut twangs as it catches you. */
-	static final double SNAP_SLACK = 0.6;
 	/** An over-stretched line hums (blocks across, radians a tick) and thins (share per block stretched, up to the max). */
 	static final double HUM_AMP = 0.035, HUM_FREQ = 9.0;
 	static final double STRETCH_THIN = 0.25, STRETCH_THIN_MAX = 0.4;
@@ -49,10 +44,22 @@ final class WebLineShape {
 	 * {@code time} (game ticks); {@code seed} keeps two lines from moving in step.
 	 */
 	static Shape of(Vec3 from, Vec3 to, double slack, double stretch, double wave, double twang, double time, int seed) {
+		return of(null, from, to, slack, stretch, wave, twang, time, seed);
+	}
+
+	/**
+	 * {@link #of}, laid over {@code base} (the simulated rope, see {@link WebRopeSim}) instead of a straight line with
+	 * a sag: the rope already hangs, so {@code slack} is ignored.
+	 */
+	static Shape of(@org.jspecify.annotations.Nullable Shape base, Vec3 from, Vec3 to, double slack, double stretch, double wave,
+		double twang, double time, int seed) {
 		Vec3 delta = to.subtract(from);
 		double length = delta.length();
+		if (base != null) {
+			slack = 0.0;
+		}
 		if (length < 1.0E-3 || slack <= 0.0 && stretch <= 0.0 && wave <= 0.0 && twang <= 0.0) {
-			return straight(from, to);
+			return base != null ? base : straight(from, to);
 		}
 		Vec3 dir = delta.scale(1.0 / length);
 		Vec3 across = Math.abs(dir.y) < 0.95 ? dir.cross(new Vec3(0.0, 1.0, 0.0)).normalize() : dir.cross(new Vec3(1.0, 0.0, 0.0)).normalize();
@@ -72,7 +79,7 @@ final class WebLineShape {
 		Vec3 sagDir = down, side = across, side2 = across2;
 		return t -> {
 			double belly = Math.sin(Math.PI * t);
-			Vec3 p = from.add(delta.scale(t));
+			Vec3 p = base != null ? base.at(t) : from.add(delta.scale(t));
 			if (sag > 0.0) {
 				p = p.add(sagDir.scale(4.0 * sag * t * (1.0 - t)));
 			}
@@ -98,47 +105,5 @@ final class WebLineShape {
 	/** The twang a line has {@code age} ticks after it stuck (0-1). */
 	static double stuckTwang(double age) {
 		return age < 0.0 ? 0.0 : Math.exp(-age / TWANG_DECAY);
-	}
-
-	private static final class Taut {
-		double slack;
-		double snappedAt = -1.0E9;
-		double strength;
-		long seen;
-	}
-
-	private static final Map<Long, Taut> TAUT = new HashMap<>();
-	private static long lastSweep;
-
-	/**
-	 * The twang (0-1) line {@code key} has from being caught taut after hanging slack: it's {@code slack} blocks slack
-	 * now, at {@code time}. Call once a frame per line.
-	 */
-	static double caughtTwang(long key, double slack, double time) {
-		long now = System.nanoTime();
-		Taut taut = TAUT.computeIfAbsent(key, k -> new Taut());
-		if (now - taut.seen > 250_000_000L) {
-			// a new line: it hasn't been slack yet
-			taut.slack = 0.0;
-		}
-		taut.seen = now;
-		if (slack > 0.05) {
-			taut.slack = Math.max(taut.slack, slack);
-		} else if (taut.slack > SNAP_SLACK) {
-			taut.snappedAt = time;
-			taut.strength = Math.min(1.0, taut.slack / 3.0);
-			taut.slack = 0.0;
-		} else {
-			taut.slack = 0.0;
-		}
-		if (now - lastSweep > 2_000_000_000L) {
-			lastSweep = now;
-			for (Iterator<Taut> it = TAUT.values().iterator(); it.hasNext(); ) {
-				if (now - it.next().seen > 2_000_000_000L) {
-					it.remove();
-				}
-			}
-		}
-		return taut.strength * stuckTwang(time - taut.snappedAt);
 	}
 }
