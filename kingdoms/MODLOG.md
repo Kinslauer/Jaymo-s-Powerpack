@@ -2620,3 +2620,10 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   any time, lays you down awake: the screen dims a little, you don't count as a sleeper, and poison and withering
   can't hurt you while you rest (anything else gets you up). At night a **Sleep** button over Leave Bed puts you to
   sleep. Resting needs what sleeping does (reach, room, no monsters near) and sets your spawn.
+
+## 0.7.6: musketeers carry Jaymo's flintlocks (pack 0.10.41)
+- **`TaczGuns`:** with TaCZ installed, our TaCZ guns (musket, blunderbuss, flintlock pistol; the gunpack ships in
+  Jaymo's Powers) are made by item id with their gun id in custom data. Musketeers are handed the TaCZ musket
+  (`Muskets.musketStack`) and their shots stay our own; the Marksman's class card shows it with musket balls.
+  Without TaCZ nothing changes (WeaponMod's musket, or a crossbow). The Marksman perks still apply to WeaponMod's guns
+  only.

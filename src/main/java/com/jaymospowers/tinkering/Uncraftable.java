@@ -1,5 +1,6 @@
 package com.jaymospowers.tinkering;
 
+import java.util.List;
 import java.util.Set;
 import net.minecraft.core.Holder;
 import net.minecraft.world.item.crafting.Recipe;
@@ -21,7 +22,15 @@ public final class Uncraftable {
 	private Uncraftable() {
 	}
 
+	/**
+	 * (0.10.41) TaCZ's own modern guns, their ammo and attachments (its default gunpack's recipes) and the attachment
+	 * bench: the pack only uses TaCZ for our flintlocks (armory/TaczGuns), whose recipes are jaymospowers:gun/... .
+	 */
+	static final List<String> PREFIXES = List.of("tacz:gun/", "tacz:ammo/", "tacz:attachments/");
+	static final Set<String> TACZ = Set.of("tacz:attachment_workbench");
+
 	public static boolean keeps(Holder.Reference<Recipe<?>> recipe) {
-		return !RECIPES.contains(recipe.key().identifier().toString());
+		String id = recipe.key().identifier().toString();
+		return !RECIPES.contains(id) && !TACZ.contains(id) && PREFIXES.stream().noneMatch(id::startsWith);
 	}
 }

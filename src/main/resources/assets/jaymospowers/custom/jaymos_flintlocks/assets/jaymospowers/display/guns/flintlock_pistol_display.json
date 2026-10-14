@@ -1,0 +1,40 @@
+{
+  "model": "jaymospowers:gun/flintlock_pistol_geo",
+  "texture": "jaymospowers:gun/uv/flintlocks",
+  "hud": "jaymospowers:gun/hud/flintlock_pistol",
+  "slot": "jaymospowers:gun/slot/flintlock_pistol",
+  "animation": "jaymospowers:flintlock_pistol",
+  "use_default_animation": "pistol",
+  "third_person_animation": "default",
+  "transform": {
+    "scale": {
+      "thirdperson": [
+        0.6,
+        0.6,
+        0.6
+      ],
+      "ground": [
+        0.6,
+        0.6,
+        0.6
+      ],
+      "fixed": [
+        1.6,
+        1.6,
+        1.6
+      ]
+    }
+  },
+  "muzzle_flash": {
+    "texture": "tacz:flash/common_muzzle_flash",
+    "scale": 1.0
+  },
+  "iron_zoom": 1.2,
+  "zoom_model_fov": 30,
+  "sounds": {
+    "draw": "jaymospowers:flintlock/draw",
+    "put_away": "jaymospowers:flintlock/put_away",
+    "shoot": "jaymospowers:flintlock/pistol_shoot",
+    "shoot_3p": "jaymospowers:flintlock/pistol_shoot_3p"
+  }
+}

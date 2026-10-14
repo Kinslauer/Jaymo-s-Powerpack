@@ -1032,6 +1032,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.10.37 / Kingdoms 0.7.5, timelapse night and bed rest:** our own take on Sleeping Overhaul 2 (Forge only): the
   night runs by as a timelapse (the whole world sped up, villagers at work; drag to look around in bed) instead of skipping, leave bed any time, and rest in bed awake by day or sneaking (immune
   to poison and withering), with a Sleep button at night. See kingdoms/MODLOG.md.
-- **0.10.41, guns (pack mods):** TaCZ: Refabricated (the unofficial Fabric 26.3 port of Timeless and Classics Zero,
-  beta) joins the pack with Forge Config API Port: modern guns, attachments, scopes, a Gun Smith Table and ammo. It's
-  on Modrinth only, so the CurseForge import zip carries its jar (untouched, credited; art CC BY-NC-ND 4.0).
+- **0.10.41 / Kingdoms 0.7.6, flintlocks in TaCZ:** TaCZ: Refabricated (the unofficial Fabric 26.3 port of Timeless
+  and Classics Zero, beta) joins the pack with Forge Config API Port, used only for our own guns: a musket, a
+  blunderbuss and a flintlock pistol, a gunpack of ours (`assets/jaymospowers/custom/jaymos_flintlocks`, from
+  tools/gen_tacz_guns.py: models, texture, sounds and muzzle-loading animations, nothing of TaCZ's art) that
+  `armory/TaczGuns` hands to TaCZ. They and their musket balls and shot are made at TaCZ's Gun Smith Table; TaCZ's
+  modern guns, ammo, attachments and attachment bench are uncraftable (`tinkering/Uncraftable`). Kingdoms'
+  musketeers carry the TaCZ musket. TaCZ is on Modrinth only, so the CurseForge import zip carries its jar
+  (untouched, credited; its art is CC BY-NC-ND 4.0).
