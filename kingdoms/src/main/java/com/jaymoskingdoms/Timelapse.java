@@ -21,24 +21,32 @@ import net.minecraft.world.level.gamerules.GameRules;
 
 /**
  * (0.7.4) The night as a timelapse, our own take on Sleeping Overhaul 2 (Forge only): once enough players are fast asleep,
- * instead of the clock jumping to morning, the Overworld's clock runs {@link #SPEED} times as fast (eased in over
- * {@link #RAMP_TICKS}), so the sleepers watch the stars wheel and the sun come up. The clock's rate is sent to every
- * player, so their skies move smoothly. Anyone can leave bed at any time (the Leave Bed button or Escape), and the moment
- * too few are asleep the clock goes back to its own pace wherever it got to. On reaching the morning it stops exactly at
- * vanilla's wake-up time and vanilla wakes everyone and clears the rain as ever.
+ * instead of the clock jumping to morning, the whole world runs faster: the server ticks at {@link #TICK_RATE} (vanilla's
+ * {@code /tick rate}, so villagers walk, build and farm at speed and the sleepers can watch them), and on top of that the
+ * Overworld's clock runs {@link #SPEED} times as fast, both eased in over {@link #RAMP_TICKS}. The world only goes as fast
+ * as the server keeps up. Both rates are sent to every player, so what they see moves smoothly. Anyone can leave bed at
+ * any time (the Leave Bed button or Escape), and the moment too few are asleep everything goes back to its own pace
+ * wherever the night got to. On reaching the morning it stops exactly at vanilla's wake-up time and vanilla wakes
+ * everyone and clears the rain as ever.
  * <p>
- * The hours run by aren't ticked through, so the settlements make them up at once afterwards ({@link Nights#pass}),
- * exactly as they do for a skipped night ({@link Nights} only sees jumps, and a timelapse moves the clock a little each tick).
+ * The hours the clock runs on ahead of the ticks aren't ticked through, so the settlements make them up at once
+ * afterwards ({@link Nights#pass}), as they do for a skipped night ({@link Nights} only sees jumps, and a timelapse moves
+ * the clock a little each tick).
  */
 public final class Timelapse {
-	/** How many times as fast the clock runs once everyone's asleep (a night takes about 12 s). */
-	static final float SPEED = 50.0F;
-	/** Ticks the clock takes to speed up from its own pace. */
+	/**
+	 * The server's ticks a second while everyone's asleep (vanilla's is 20, so 5 times as fast), and how many times as fast
+	 * as that the clock runs: 30 times in all, a night in about 20 s if the server keeps up.
+	 */
+	static final float TICK_RATE = 100.0F, SPEED = 6.0F;
+	/** Ticks the world takes to speed up from its own pace. */
 	static final int RAMP_TICKS = 40;
 
 	private static boolean active;
 	private static long startClock, startTick, target;
 	private static int ran;
+	/** The server's tick rate before the night ran by, put back after. */
+	private static float tickRate = 20.0F;
 
 	private Timelapse() {
 	}
@@ -91,6 +99,7 @@ public final class Timelapse {
 			startTick = level.getGameTime();
 			target = wake;
 			ran = 0;
+			tickRate = server.tickRateManager().tickrate();
 		}
 		if (now >= target) {
 			// back to exactly the wake-up time (the last step may overshoot it), so vanilla's move to it stays put
@@ -100,7 +109,11 @@ public final class Timelapse {
 		}
 		if (ran < RAMP_TICKS) {
 			ran++;
-			clocks.setRate(clock.get(), 1.0F + (SPEED - 1.0F) * ran / RAMP_TICKS);
+			float eased = (float) ran / RAMP_TICKS;
+			clocks.setRate(clock.get(), 1.0F + (SPEED - 1.0F) * eased);
+			if (tickRate < TICK_RATE) {
+				server.tickRateManager().setTickRate(tickRate + (TICK_RATE - tickRate) * eased);
+			}
 		}
 		return false;
 	}
@@ -128,6 +141,9 @@ public final class Timelapse {
 	private static void stop(ServerLevel level) {
 		active = false;
 		level.dimensionType().defaultClock().ifPresent(clock -> level.getServer().clockManager().setRate(clock, 1.0F));
+		if (tickRate < TICK_RATE) {
+			level.getServer().tickRateManager().setTickRate(tickRate);
+		}
 		long skipped = (level.getOverworldClockTime() - startClock) - (level.getGameTime() - startTick);
 		if (skipped >= Nights.MIN_JUMP) {
 			Nights.pass(level, Math.min(Nights.MOST, skipped));

@@ -4,13 +4,14 @@ import com.jaymoskingdoms.client.RestClient;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.InBedChatScreen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.7.4) A Sleep button above Leave Bed, shown while you rest at night ({@link RestClient}). */
+/** (0.7.4) A Sleep button above Leave Bed, shown while you rest at night, and dragging to look around ({@link RestClient}). */
 @Mixin(InBedChatScreen.class)
 abstract class InBedChatScreenMixin extends ChatScreen {
 	private InBedChatScreenMixin() {
@@ -24,5 +25,14 @@ abstract class InBedChatScreenMixin extends ChatScreen {
 			.build();
 		this.addRenderableWidget(sleep);
 		RestClient.sleepButton(sleep);
+	}
+
+	@Override
+	public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
+		if (super.mouseDragged(event, dx, dy)) {
+			return true;
+		}
+		RestClient.look(dx, dy);
+		return true;
 	}
 }

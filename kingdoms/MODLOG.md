@@ -2607,13 +2607,15 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
 ## 0.7.4: the timelapse night and bed rest (pack 0.10.33)
 - Andy asked for Sleeping Overhaul 2, which is Forge/NeoForge only (up to 1.21.1), so this is our own take on its ideas
   (its code is LGPL-3.0 but nothing is taken from it).
-- **Timelapse night (`Timelapse`):** once enough players are fast asleep, the clock doesn't jump to morning: the
-  Overworld's clock runs 50 times as fast (`SPEED`, eased in over 2 s), about 12 s for a night. Its rate is sent to every
-  player, so skies move smoothly. The screen fades to black on falling asleep as ever, then clears while the night runs
-  so you watch it. Dawn doesn't turn sleepers out; at vanilla's wake-up time it stops exactly there and vanilla wakes
-  everyone and clears the rain. Leave Bed (or Escape) works at any time; once too few are asleep the clock goes back to
-  its own pace wherever it got to. The hours run by are made up by the settlements at once (`Nights.pass`), as for a
-  skipped night. A server stopped mid-night saves the clock at its own pace.
+- **Timelapse night (`Timelapse`):** once enough players are fast asleep, the clock doesn't jump to morning: the whole
+  world runs faster. The server ticks at 100 a second (`TICK_RATE`, vanilla's `/tick rate`; 5 times as fast), so
+  villagers walk, build and farm at speed, and the clock runs 6 times as fast again (`SPEED`): 30 times in all, about
+  20 s for a night if the server keeps up (slower if it can't). Both eased in over 2 s and sent to every player, so it
+  all moves smoothly. Andy asked to be able to watch the villagers work. The screen fades to black on falling asleep as
+  ever, then clears while the night runs, and dragging the mouse on the bed screen looks around from the pillow. Dawn doesn't turn sleepers out; at vanilla's wake-up time it stops exactly there and vanilla wakes
+  everyone and clears the rain. Leave Bed (or Escape) works at any time; once too few are asleep the world goes back to
+  its own pace wherever it got to. The hours the clock ran on ahead of the ticks are made up by the settlements at once (`Nights.pass`), as for a
+  skipped night. A server stopped mid-night saves the clock at its own pace and its tick rate is put back.
 - **Bed rest (`BedRest`):** using a bed by day (or wherever sleep isn't possible, a blood moon too), or sneaking at
   any time, lays you down awake: the screen dims a little, you don't count as a sleeper, and poison and withering
   can't hurt you while you rest (anything else gets you up). At night a **Sleep** button over Leave Bed puts you to
