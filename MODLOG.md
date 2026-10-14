@@ -1081,3 +1081,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   ravager) and merchant caravans (a wandering trader, trader llamas, pack mules, a nearby realm's guards as escort) now
   pass by players out in the wild, along King's Roads where they run. Pack animals carry chests of the land's goods.
   Pillager Caravans' ideas in our own code (it stops at 26.1 and has its own licence). See kingdoms/MODLOG.md.
+- **0.10.59, layered storm clouds (Kingdoms 0.7.16):** storm cells are drawn in layers from the same number of puffs: a
+  flat dark base, a tower over the middle that builds up as the cell gathers (thunderstorms and supercells), and a
+  pale anvil spread over a supercell's top, leaning downwind. Each tornado hangs from a turning wall cloud
+  (`kingdoms/MODLOG.md`).
