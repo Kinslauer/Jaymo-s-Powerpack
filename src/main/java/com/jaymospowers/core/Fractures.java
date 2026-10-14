@@ -58,9 +58,10 @@ import net.minecraft.world.phys.Vec3;
  * <li><b>Skeletons</b> have nothing but bone: the part shatters and is gone for good ({@link Dismember#shatter}).</li>
  * </ul>
  * A break knits by itself after {@link #HEAL_TICKS} of mending, faster the healthier the body ({@link #HEALTHY_RATE}
- * at full health); at once with a respawn, a Hermit Bean, a Verdant's healing (or a Verdant's own body), Chrono's Bloom,
- * Wind's Zephyr's Breath, or a priest ({@link #PRIEST_FEE} emeralds: right-click a cleric with them). The body is drawn
- * with the broken limb hanging limp (client {@code Dismembered}).
+ * at full health); at once with a respawn, a Hermit Bean, a Verdant's healing (or a Verdant's own body), or a priest
+ * ({@link #PRIEST_FEE} emeralds: right-click a cleric with them). Chrono's Bloom and Wind's Zephyr's Breath start the
+ * healing ({@link #startMend}): whole again {@link #BLOOM_MEND} and {@link #ZEPHYR_MEND} ticks later, if not sooner. The
+ * body is drawn with the broken limb hanging limp (client {@code Dismembered}).
  */
 public final class Fractures {
 	/** A humanoid mob's chance per blunt blow of at least {@link #MIN_DAMAGE}, plus {@link #PER_DAMAGE} per point over. */
@@ -76,6 +77,8 @@ public final class Fractures {
 	public static final float HEALTHY_RATE = 3.0F;
 	/** How often mending is counted (and saved). */
 	private static final int MEND_EVERY = 20;
+	/** Started healing: whole again this long after Chrono's Bloom (2 min) and Wind's Zephyr's Breath (5 min). */
+	public static final int BLOOM_MEND = 2400, ZEPHYR_MEND = 6000;
 	/** What a priest asks to set your bones, in emeralds. */
 	public static final int PRIEST_FEE = 2;
 	/** A limp: speed and jump lost to one broken leg, and to both. */
@@ -88,6 +91,10 @@ public final class Fractures {
 	/** The mending its breaks still need (ticks at the slowest rate). */
 	public static final AttachmentType<Integer> MENDING = AttachmentRegistry.create(JaymosPowers.id("bones_mending"),
 		builder -> builder.persistent(Codec.INT));
+
+	/** The game time its breaks will have mended by, whatever its health (a started healing). */
+	public static final AttachmentType<Long> MENDED_BY = AttachmentRegistry.create(JaymosPowers.id("bones_mended_by"),
+		builder -> builder.persistent(Codec.LONG));
 
 	/** Any weapon that breaks bones, whatever its name. */
 	public static final TagKey<net.minecraft.world.item.Item> CRUSHING = TagKey.create(Registries.ITEM, JaymosPowers.id("crushing"));
@@ -208,6 +215,8 @@ public final class Fractures {
 		mask |= part;
 		target.setAttached(BROKEN, mask);
 		target.setAttached(MENDING, HEAL_TICKS);
+		// a fresh break isn't covered by healing started before it
+		target.removeAttached(MENDED_BY);
 		HEALING.add(target);
 		if (part == Dismember.RIGHT_ARM || part == Dismember.LEFT_ARM) {
 			Dismember.emptyHand(level, target, part);
@@ -225,9 +234,23 @@ public final class Fractures {
 		boolean had = broken(target) != 0;
 		target.removeAttached(BROKEN);
 		target.removeAttached(MENDING);
+		target.removeAttached(MENDED_BY);
 		limp(target, 0);
 		HEALING.remove(target);
 		return had;
+	}
+
+	/** Starts its breaks healing: whole again within {@code ticks} (sooner if they'd mend sooner). True if it had any. */
+	public static boolean startMend(LivingEntity target, int ticks) {
+		if (broken(target) == 0 || !(target.level() instanceof ServerLevel level)) {
+			return false;
+		}
+		long by = level.getGameTime() + ticks;
+		Long before = target.getAttached(MENDED_BY);
+		if (before == null || by < before) {
+			target.setAttached(MENDED_BY, by);
+		}
+		return before == null || by < before;
 	}
 
 	private static void limp(LivingEntity target, int mask) {
@@ -283,10 +306,12 @@ public final class Fractures {
 				float health = body.getHealth() / Math.max(1.0F, body.getMaxHealth());
 				Integer left = body.getAttached(MENDING);
 				int now = (left == null ? HEAL_TICKS : left) - Math.round(MEND_EVERY * (1.0F + (HEALTHY_RATE - 1.0F) * health));
-				if (now <= 0 || broken(body) == 0) {
+				Long by = body.getAttached(MENDED_BY);
+				if (now <= 0 || broken(body) == 0 || by != null && level.getGameTime() >= by) {
 					it.remove();
 					body.removeAttached(BROKEN);
 					body.removeAttached(MENDING);
+					body.removeAttached(MENDED_BY);
 					limp(body, 0);
 					continue;
 				}
