@@ -2663,4 +2663,15 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
 - **Followed** (`Roads.ahead`): `Construction.leg` keeps long walks to the road that leads to the goal, so cabs,
   rickshaws and rulers on their rounds take it; caravans make for points along it, seen and unseen.
 - Ops: `/kingdom roads` (the roads, their length, chunks paved), `/kingdom roads plan` (plan the next missing one now).
+- **Milestone travel** (`Milestones`; Andy chose "both" a coach and a teleport): right-click a linked sign (sneak to
+  edit your own) for where its roads go, each with **[Coach]** (1 emerald + 1 per 160 blocks, at most 12, to the
+  realm: a coachman, a horse and a carriage, `Wagon.COACH`, appear and gallop you along the road itself, helped on
+  when stuck; gone in a puff after) and **[Teleport]** (4 + 1 per 48 blocks, at most 40, lost to the road; a blackout,
+  hunger as if you'd walked it, a 30 s rest; a ridden horse comes too). A King's Road's milestone is linked to the
+  town at its other end from the start.
+- **Road Charter** (map + feather + ink sac; art by `tools/gen_roads.py`), Via Romana's idea in our own way: mark a
+  sign, follow your own road (sampled every half second; 80% of it on road blocks: paths, gravel, cobble, bricks,
+  tiles, planks, slabs, stairs, smooth/cut stone), mark another sign at least 48 blocks along: they're linked (saved
+  on the Overworld, `jaymoskingdoms:charted_roads`). Jumping (a pearl, a fall) loses the chart; a link whose far sign is
+  broken goes when someone tries it. Coaches on charted roads come from the nearest realm.
 - Not yet seen in game.

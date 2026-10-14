@@ -1040,4 +1040,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.10.44 / Kingdoms 0.7.9, King's Roads:** our own settlement roads (Via Romana and Countered's Settlement Roads
   don't run on 26.3, and Via Romana's licence bars a port): roads planned between nearby realms and villages, paved
   in the land's style as chunks load, with bridges, lanterns and milestones; cabs, rickshaws, rulers and caravans keep
-  to them. See kingdoms/MODLOG.md.
+  to them. Milestones offer a coach ride along the road or a dearer teleport, and a Road Charter links signs on roads
+  you build yourself (Via Romana's idea, our own way). See kingdoms/MODLOG.md.

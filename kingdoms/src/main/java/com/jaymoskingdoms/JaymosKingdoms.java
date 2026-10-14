@@ -137,6 +137,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.9) King's Roads between settlements, kept to by cabs, rickshaws, rulers and caravans
 		LOGGER.debug("road attachment: {}", Roads.ROADS);
 		Roads.register();
+		LOGGER.debug("charted road attachment: {}", Milestones.CHARTED);
+		Milestones.register();
 		Cavalry.register();
 		// 0.5.34: Jaymo's Equestrian, stage 1 (breeds, stats, gaits, stamina, courage, coats, war elephants) and its attachments
 		com.jaymoskingdoms.equestrian.Equestrian.register();

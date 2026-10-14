@@ -99,13 +99,21 @@ public final class Roads {
 	/** A road is only followed if what's left of it is at most this times the straight distance (plus a little). */
 	static final double DETOUR = 2.0;
 
-	/** One road: between factions {@code a} and {@code b}, its route (packed block positions), the chunks it's paved in. */
-	public record Road(int a, int b, List<Long> points, List<Long> laid) {
+	/** No milestone (yet). */
+	static final long NONE = Long.MIN_VALUE;
+
+	/**
+	 * One road: between factions {@code a} and {@code b}, its route (packed block positions), the chunks it's paved in, and
+	 * where its milestones' signs stand ({@link #NONE} till they're set up).
+	 */
+	public record Road(int a, int b, List<Long> points, List<Long> laid, long stoneA, long stoneB) {
 		static final Codec<Road> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.INT.fieldOf("a").forGetter(Road::a),
 				Codec.INT.fieldOf("b").forGetter(Road::b),
 				Codec.LONG.listOf().fieldOf("points").forGetter(Road::points),
-				Codec.LONG.listOf().optionalFieldOf("laid", List.of()).forGetter(Road::laid))
+				Codec.LONG.listOf().optionalFieldOf("laid", List.of()).forGetter(Road::laid),
+				Codec.LONG.optionalFieldOf("stone_a", NONE).forGetter(Road::stoneA),
+				Codec.LONG.optionalFieldOf("stone_b", NONE).forGetter(Road::stoneB))
 			.apply(i, Road::new));
 
 		String key() {
@@ -124,7 +132,7 @@ public final class Roads {
 		builder -> builder.persistent(Network.CODEC));
 
 	/** A road as a line to follow: its points, and how far along it each one is. */
-	private static final class Line {
+	static final class Line {
 		final double[] x, y, z, along;
 		final double minX, maxX, minZ, maxZ;
 
@@ -250,7 +258,7 @@ public final class Roads {
 		Factions.level(server).setAttached(ROADS, network);
 	}
 
-	private static Line line(Road road) {
+	static Line line(Road road) {
 		return LINES.computeIfAbsent(road, r -> new Line(r.points()));
 	}
 
@@ -353,7 +361,7 @@ public final class Roads {
 		RandomState random = level.getChunkSource().randomState();
 		int ida = a.id(), idb = b.id();
 		LevelHeightAccessor heights = LevelHeightAccessor.create(level.getMinY(), level.getHeight());
-		planning = CompletableFuture.supplyAsync(() -> new Road(ida, idb, route(gen, random, heights, from, to), List.of()), PLANNER);
+		planning = CompletableFuture.supplyAsync(() -> new Road(ida, idb, route(gen, random, heights, from, to), List.of(), NONE, NONE), PLANNER);
 		JaymosKingdoms.LOGGER.debug("planning a road between {} and {}", a.name(), b.name());
 	}
 
@@ -569,18 +577,17 @@ public final class Roads {
 				if (r >= roads.size()) {
 					continue;
 				}
-				Road road = roads.get(r);
-				pave(level, road, cx, cz, seats);
+				Road road = pave(level, roads.get(r), cx, cz, seats);
 				List<Long> laid = new ArrayList<>(road.laid());
 				laid.add(chunk);
-				roads.set(r, new Road(road.a(), road.b(), road.points(), laid));
+				roads.set(r, new Road(road.a(), road.b(), road.points(), laid, road.stoneA(), road.stoneB()));
 			}
 			save(server, new Network(roads));
 		}
 	}
 
-	/** What one road lays in one chunk. */
-	private static void pave(ServerLevel level, Road road, int cx, int cz, List<BlockPos> seats) {
+	/** What one road lays in one chunk; the road back, with any milestone set up here. */
+	private static Road pave(ServerLevel level, Road road, int cx, int cz, List<BlockPos> seats) {
 		int x0 = cx << 4, z0 = cz << 4, x1 = x0 + 15, z1 = z0 + 15;
 		List<Long> pts = road.points();
 		RandomSource random = RandomSource.create(ChunkPos.pack(cx, cz) * 31L + road.key().hashCode());
@@ -650,14 +657,19 @@ public final class Roads {
 			Faction a = Factions.get(server, road.a()), b = Factions.get(server, road.b());
 			BlockPos atA = beside(pts, first, HALF + 2), atB = beside(pts, last, -(HALF + 2));
 			if (a != null && b != null) {
+				long stoneA = road.stoneA(), stoneB = road.stoneB();
 				if (inside(atA, x0, z0)) {
-					milestone(level, atA, pts, first, first + 1, b, a, (int)(line.length() - line.along[first]));
+					BlockPos sign = milestone(level, atA, pts, first, first + 1, b, a, (int)(line.length() - line.along[first]));
+					stoneA = sign == null ? stoneA : sign.asLong();
 				}
 				if (inside(atB, x0, z0)) {
-					milestone(level, atB, pts, last, last - 1, a, b, (int)line.along[last]);
+					BlockPos sign = milestone(level, atB, pts, last, last - 1, a, b, (int)line.along[last]);
+					stoneB = sign == null ? stoneB : sign.asLong();
 				}
+				return new Road(road.a(), road.b(), road.points(), road.laid(), stoneA, stoneB);
 			}
 		}
+		return road;
 	}
 
 	private static boolean inside(BlockPos at, int x0, int z0) {
@@ -821,14 +833,14 @@ public final class Roads {
 	 * A milestone at a road's end: a post and a sign that reads, to those setting out, where the road goes and how far;
 	 * on its back, to those arriving, where they've come to.
 	 */
-	private static void milestone(ServerLevel level, BlockPos near, List<Long> pts, int i, int toward, Faction there, Faction here, int blocks) {
+	private static @Nullable BlockPos milestone(ServerLevel level, BlockPos near, List<Long> pts, int i, int toward, Faction there, Faction here, int blocks) {
 		BlockPos top = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, near).below();
 		if (!natural(level.getBlockState(top)) || !level.getFluidState(top).isEmpty()) {
-			return;
+			return null;
 		}
 		for (int up = 1; up <= 2; up++) {
 			if (!clearable(level, top.above(up), level.getBlockState(top.above(up)))) {
-				return;
+				return null;
 			}
 		}
 		long p = pts.get(i), q = pts.get(Math.max(0, Math.min(pts.size() - 1, toward)));
@@ -856,6 +868,7 @@ public final class Roads {
 			BlockState state = level.getBlockState(at);
 			level.sendBlockUpdated(at, state, state, Block.UPDATE_ALL);
 		}
+		return at;
 	}
 
 	// ---- following -----------------------------------------------------------------------------------------------------
