@@ -7,6 +7,8 @@ Written 2026-10-10 at the end of a long local session, so a cloud session can ca
   Web Slinger (with the symbiote), Pocket Arsenal, Chronokinesis, Resonance, Darktide, Xenoform (the Xeno-Band
   from falling stars; `docs/xenoform.md`). Each power owns `power/<name>` (+ client),
   `lang/parts/<name>.json` and its mixin configs. Core shared code is in `core/`, `api/`.
+  - Screen shake: every power goes through `core/Shakes` (server: `send`, `around`, `heavy`, each with the spot it
+    came from) and `client/ScreenShake` (directional kick + rattle, stacking, explosions shake too). Don't add another.
   - `docs/Abilities.md`: the table of every ability (the user edits the "Change to" column; "Line" = the row's own line
     number in the file). `docs/Plan-0.7.md`: the 0.7 plan and the user's answers (all built).
   - `docs/<power>.md`: per-power design notes. `MODLOG.md`: the design log.
