@@ -26,8 +26,8 @@ Stop the server, put the parts in `~/jaymos-server`, open a terminal there and r
 then start it again.
 
 **Pre-generating the world (once, makes fast flight smooth):** with the server running, type in its window
-`chunky radius 5000` then `chunky start`. It generates every chunk within 5000 blocks of spawn in the background;
+`chunky radius 2500` then `chunky start`. It generates every chunk within 2500 blocks of spawn in the background;
 players can stay on, and it pauses when the server stops and carries on with `chunky continue`. `chunky progress`
-shows how far along it is. It takes many hours on the Deck and the world folder grows by a few GB, so start it before
+shows how far along it is. It takes a few hours on the Deck and the world folder grows by about a GB, so start it before
 bed. In `server.properties`, `view-distance=12` and `simulation-distance=8` are a good balance on the Deck: more chunks
 are sent ahead of flyers, fewer are ticked.

@@ -105,7 +105,7 @@ def packMods = [
 	// the terrain shape, the biome map and every structure's biome tags stay as they were. Server-side worldgen.
 	[dep: "maven.modrinth:wwoo:23VeM3qz", cf: [921022, 8894114]],
 	[dep: "maven.modrinth:cristel-lib:rWxmPrGC", cf: [856996, 8921504]],
-	// Chunky (GPL-3.0, by pop4959): pre-generates the world ahead of time from the server console (`chunky radius 5000`,
+	// Chunky (GPL-3.0, by pop4959): pre-generates the world ahead of time from the server console (`chunky radius 2500`,
 	// then `chunky start`; it pauses with the server and picks up again). Fast flight outran the Deck's worldgen; land
 	// that's already generated loads from disk many times faster. Back since 0.10.51 (it left in 0.8.118 for a hang that
 	// was Distant Horizons'). Server-side; harmless on clients.
