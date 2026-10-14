@@ -2741,7 +2741,7 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
 - `ChestedHorseInvoker` (villagers mixins) remakes a pack animal's inventory after it's given a chest.
 - Tuning is in the constants at the top of `RoamingCaravans`. Not yet seen in game.
 
-## 0.7.16: layered storm clouds (pack 0.10.62)
+## 0.7.16: layered storm clouds (pack 0.10.63)
 - Andy liked Simple Clouds' look (Forge/NeoForge only, PolyForm Perimeter, so ideas only) as long as it costs little.
   `StormsClient.clouds` splits each cell's puffs (no more of them than before) into layers: 55% a flat dark base,
   30% a tower over the middle 45% of the cell that climbs 45 (thunderstorm) or 85 (supercell) blocks as the cell
