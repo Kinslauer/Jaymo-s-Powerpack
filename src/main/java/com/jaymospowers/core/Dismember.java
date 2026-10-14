@@ -29,6 +29,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Prediction;
@@ -73,6 +74,8 @@ public final class Dismember {
 	public static final int[] PARTS = {HEAD, RIGHT_ARM, LEFT_ARM, RIGHT_LEG, LEFT_LEG};
 	/** Chances per blow: any blade against a humanoid mob, the katana slash, any blow against a player. */
 	public static final float BLADE_CHANCE = 0.05F, KATANA_CHANCE = 0.20F, PLAYER_CHANCE = 0.05F;
+	/** Skeletons (dry bones, brittle joints) lose parts this many times as often: 15% to any blade, 60% to the katana. */
+	public static final float SKELETON_CHANCE_SCALE = 3.0F;
 	/** A blow has to land at least this hard (after armour) to sever anything: no taking heads with a tap. */
 	public static final float MIN_DAMAGE = 3.0F;
 	/** Share of the body from the top that's the head, and from the feet up that's the legs. */
@@ -255,7 +258,7 @@ public final class Dismember {
 		if (!canLoseParts(target) || target instanceof Player p && (p.isCreative() || p.isSpectator())) {
 			return false;
 		}
-		float chance = target instanceof Player ? PLAYER_CHANCE : mobChance;
+		float chance = target instanceof Player ? PLAYER_CHANCE : mobChance(target, mobChance);
 		if (target.getRandom().nextFloat() >= chance) {
 			return false;
 		}
@@ -274,10 +277,15 @@ public final class Dismember {
 		if (target instanceof Player p && (p.isCreative() || p.isSpectator())) {
 			return;
 		}
-		float chance = target instanceof Player ? PLAYER_CHANCE : BLADE_CHANCE;
+		float chance = target instanceof Player ? PLAYER_CHANCE : mobChance(target, BLADE_CHANCE);
 		if (target.getRandom().nextFloat() < chance) {
 			sever(target, aimedPart(attacker, target), attacker);
 		}
+	}
+
+	/** A humanoid mob's chance to lose a part to a blow ({@code base}), raised for skeletons. */
+	static float mobChance(LivingEntity target, float base) {
+		return target.getType().builtInRegistryHolder().is(EntityTypeTags.SKELETONS) ? Math.min(1.0F, base * SKELETON_CHANCE_SCALE) : base;
 	}
 
 	// ---- severing --------------------------------------------------------------------------------------------------------
