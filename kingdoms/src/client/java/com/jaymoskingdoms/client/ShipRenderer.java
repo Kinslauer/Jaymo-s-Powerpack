@@ -36,7 +36,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.5) A ship under sail, block for block, turned to its heading, heeling in its turns and rocking on the swell
+ * (0.7.6) A ship under sail, block for block, turned to its heading, heeling in its turns and rocking on the swell
  * (harder in a storm). Chests are drawn as barrels while it sails (a chest is drawn by its block entity, which stays
  * in the hold until the ship anchors).
  */

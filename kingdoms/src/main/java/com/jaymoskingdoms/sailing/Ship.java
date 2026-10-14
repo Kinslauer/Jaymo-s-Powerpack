@@ -58,7 +58,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.5) A ship built from blocks, under sail. Every block joined to a {@link HelmBlock} leaves the world and sails
+ * (0.7.6) A ship built from blocks, under sail. Every block joined to a {@link HelmBlock} leaves the world and sails
  * as one piece: drawn block for block, floating as deep as its weight against the water its hull keeps out ({@link Hull}),
  * driven by its sails and steered from the helm (W/S set the sails, A/D the rudder). You can walk its decks while it
  * sails ({@link Ships#collisions}), open the chests in its hold, and sneak at the helm to drop anchor: it swings to the

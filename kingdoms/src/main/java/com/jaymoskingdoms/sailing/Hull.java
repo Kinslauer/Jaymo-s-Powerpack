@@ -15,7 +15,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * (0.7.5) What a ship's blocks add up to, worked out once from its {@link Ship.Piece}s: where each piece is, how solid it
+ * (0.7.6) What a ship's blocks add up to, worked out once from its {@link Ship.Piece}s: where each piece is, how solid it
  * is, how heavy the whole ship is, how much water its hull keeps out at each height (its walls and the dry space they
  * close in), and from those how deep it sits, how long it is at the waterline, and how much sail it carries.
  */

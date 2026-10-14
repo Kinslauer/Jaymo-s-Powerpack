@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.7.5) Whoever is at a ship's wheel stands to it rather than sitting. */
+/** (0.7.6) Whoever is at a ship's wheel stands to it rather than sitting. */
 @Mixin(HumanoidMobRenderer.class)
 abstract class HumanoidHelmStanceMixin {
 	@Inject(method = "extractHumanoidRenderState", at = @At("TAIL"))

@@ -30,7 +30,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		EntityRenderers.register(JaymosKingdoms.FOLK, FolkRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.FallingTree.TYPE, FallingTreeRenderer::new);
-		// 0.7.5: ships under sail, and the client's part in sailing
+		// 0.7.6: ships under sail, and the client's part in sailing
 		EntityRenderers.register(com.jaymoskingdoms.sailing.Ship.TYPE, ShipRenderer::new);
 		ShipClient.init();
 		net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(com.jaymoskingdoms.ChoppedLog.ENTITY, ChoppedLogRenderer::new);
@@ -66,6 +66,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		TalkScreen.register();
 		// 0.6.6: lunar events' colours
 		MoonClient.register();
+		// 0.7.5: bed rest and the timelapse night (the bed's darkness, the Sleep button)
+		RestClient.register();
 		ArmoryLayer.register();
 		// 0.5.34: Jaymo's Equestrian (gaits, the stamina HUD, coats, war elephants)
 		com.jaymoskingdoms.client.equestrian.EquestrianClient.register();

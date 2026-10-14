@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 
 /**
- * (0.7.5) Sailing, stage 1: ships built from blocks. The {@link HelmBlock} and {@link SailBlock}, the {@link Ship} they
+ * (0.7.6) Sailing, stage 1: ships built from blocks. The {@link HelmBlock} and {@link SailBlock}, the {@link Ship} they
  * make, and its packet. Our own take on the idea (block ships that sail), no one's code.
  */
 public final class Sailing {

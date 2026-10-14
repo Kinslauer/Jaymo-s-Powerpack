@@ -1029,8 +1029,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   fringe), and fists and ki power are 15% stronger. Sneak+C in base form toggles Corrupted mode: Super 1's fists,
   speed and ki power with no ki drain, bleeding half a heart a second (ends at one heart), 35% life steal on every hit,
   and 3 Combat Roll charges whose rolls blink (up to 8 blocks towards the target, behind it within 5, ahead with none).
-- **0.10.36, sailing (pack mods):** Shippy Ships (sailboat, cog, caravel, galleon) and Old Cannons join the pack with
+- **0.10.37 / Kingdoms 0.7.5, timelapse night and bed rest:** our own take on Sleeping Overhaul 2 (Forge only): the
+  night runs by as a timelapse (the whole world sped up, villagers at work; drag to look around in bed) instead of skipping, leave bed any time, and rest in bed awake by day or sneaking (immune
+  to poison and withering), with a Sleep button at night. See kingdoms/MODLOG.md.
+- **0.10.39, sailing (pack mods):** Shippy Ships (sailboat, cog, caravel, galleon) and Old Cannons join the pack with
   Ingenium API, all by Caesius_Leo, whose licence allows modpacks with credit. Valkyrien Skies, Eureka and Valkyrien
   Pirates have no build past 1.20.1; Haubna's ocean physics are Physics Mod Pro (paid Patreon), so neither ships.
-  With them, Kingdoms 0.7.5 brings sailing stage 1, our own ships built from blocks: put a helm on any hull you build
+  With them, Kingdoms 0.7.6 brings sailing stage 1, our own ships built from blocks: put a helm on any hull you build
   on water and cast off (sails, buoyancy by weight, walkable decks and holds, chests usable afloat, drop anchor).

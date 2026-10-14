@@ -12,7 +12,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * (0.7.5) The ships under sail on each side, and what their blocks mean to everything else: each block a box to stand
+ * (0.7.6) The ships under sail on each side, and what their blocks mean to everything else: each block a box to stand
  * on or walk into, wherever the ship has carried it ({@link #collisions}), and who is aboard one ({@link #aboard}).
  */
 public final class Ships {

@@ -18,7 +18,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.5) The client's part in sailing: the deck carries you (your own game moves you, so it carries you here), the wheel
+ * (0.7.6) The client's part in sailing: the deck carries you (your own game moves you, so it carries you here), the wheel
  * turns you with the ship, the ship heels in its turns, and right-clicking its helm or a chest aboard uses it.
  */
 public final class ShipClient {

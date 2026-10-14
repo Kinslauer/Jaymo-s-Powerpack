@@ -7,7 +7,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-/** (0.7.5) Client → server: use the block at (x, y, z) of a ship (in its own frame): take the helm, open a chest. */
+/** (0.7.6) Client → server: use the block at (x, y, z) of a ship (in its own frame): take the helm, open a chest. */
 public final class ShipNet {
 	public record Use(int ship, int x, int y, int z) implements CustomPacketPayload {
 		public static final Type<Use> TYPE = new Type<>(JaymosKingdoms.id("ship_use"));
