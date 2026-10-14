@@ -946,3 +946,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   The V beams are drawn like beacon beams (`ZFighterBeams`, sent by `ZFighterNet.BeamFx`) instead of only particles.
 - **0.10.16, brittle skeletons:** skeletons (strays, wither skeletons, bogged and parched too) lose heads and limbs three
   times as often: 15% a blade hit, 60% to the katana's aimed slash.
+- **0.10.17, the quarterstaff rides the gale (`WindStaff`):** in a wind sorcerer's hand (a Kingdoms Sorcerer of the air
+  element; read by name through `Classes.of`), the staff's five Better Combat swings each carry a gale: Gust, Wind
+  Blade, Vortex, Piercing Gale, Downdraft (a slam from the air bounces you up). Right click is the Staff Vault (sneak:
+  straight up), landing soft. See docs/wind.md.
