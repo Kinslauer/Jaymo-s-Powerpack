@@ -33,7 +33,7 @@ public final class TaczGuns {
 		if (!LOADED) {
 			return;
 		}
-		// (0.10.65) TaCZ's gun smith table, statue, target and workbench loot tables use 1.21's block_state_property,
+		// (0.10.66) TaCZ's gun smith table, statue, target and workbench loot tables use 1.21's block_state_property,
 		// which 26.3 can't read or upgrade, so a server wouldn't load its data at all: 26.3-format copies in an
 		// always-on pack
 		ResourceLoader.registerBuiltinPack(JaymosPowers.id("tacz_fixes"),

@@ -66,6 +66,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		TalkScreen.register();
 		// 0.6.6: lunar events' colours
 		MoonClient.register();
+		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(DarkNights::tick);
 		// 0.7.5: bed rest and the timelapse night (the bed's darkness, the Sleep button)
 		RestClient.register();
 		ArmoryLayer.register();
