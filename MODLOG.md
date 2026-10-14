@@ -1053,3 +1053,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   in the land's style as chunks load, with bridges, lanterns and milestones; cabs, rickshaws, rulers and caravans keep
   to them. Milestones offer a coach ride along the road or a dearer teleport, and a Road Charter links signs on roads
   you build yourself (Via Romana's idea, our own way). See kingdoms/MODLOG.md.
+- **0.10.47 / Kitchen 0.4.39, ragdoll physics:** our own Physics Mod-style ragdolls for corpses (Physics Mod itself is
+  closed, ARR and client-only with no API; see kitchen/MODLOG.md). Severed parts roll along the ground as they move,
+  rock to rest on a spring (a limb lies along the ground, never on end), and are kicked along by anyone walking into them.
