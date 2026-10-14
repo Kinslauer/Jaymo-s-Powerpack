@@ -17,8 +17,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
 
 /**
- * Pocket Stash: a personal 27-slot pocket dimension. The contents live in a player attachment (saved, kept through
- * death) and open in a vanilla chest screen. Summoned weapons can't be put in (see {@code SlotMixin}).
+ * The Rift Hoard (once the Pocket Stash): 27 slots in a player attachment (saved, kept through death), opened from
+ * the ender chest in the player's pocket room ({@link ArsenalPocket}) in a vanilla chest screen. Summoned weapons can't be put in (see {@code SlotMixin}).
  */
 public final class ArsenalStash {
 	public static final int SIZE = 27;
