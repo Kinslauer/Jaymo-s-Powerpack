@@ -1139,3 +1139,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (edge blur, red tint) all the time. At night their screen edges also beat blood red and warm-blooded creatures
   within 24 blocks glow red through walls (40 when starving). Everyone sees a vampire player's ashen face and hands,
   and at night their fangs and red eyes glowing where their own skin's eyes are. See `kingdoms/MODLOG.md` 0.7.24.
+- **0.10.87 / Kingdoms 0.7.25, no shader message** (Andy: "no shader disable message"): dark nights still turn
+  shaders off until dawn, but no longer say so on screen. See `kingdoms/MODLOG.md` 0.7.25.

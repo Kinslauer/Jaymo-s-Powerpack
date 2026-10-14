@@ -2884,3 +2884,7 @@ Andy: "vampirism should give you the sirben visual modifier" (Sirben is an MCA t
   stock spots (row 12). Checked against all nine default skins: each lands on its eyes.
 - `Vampires.VAMPIRE` on players now syncs to every client (villagers' never does).
 - Built; not yet seen in game.
+
+## 0.7.25: no shader message (pack 0.10.87)
+Andy: "no shader disable message". Dark nights still switch Iris shaders off past a third of the night on a waning
+moon and back on at dawn (`DarkNights`), but without the "A dark night: shaders are off until dawn" overlay line.
