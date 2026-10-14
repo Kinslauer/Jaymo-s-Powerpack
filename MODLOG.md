@@ -1155,3 +1155,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     your body's arm.
   - Wyrm's wings are the ender dragon's own boxes at a fifth of the size, drawn from the game's dragon texture
     (`WyrmWings`); they beat, fold, flare and wrap round the body as before.
+- **0.10.87 / Kingdoms 0.7.25, no shader message** (Andy: "no shader disable message"): dark nights still turn
+  shaders off until dawn, but no longer say so on screen. See `kingdoms/MODLOG.md` 0.7.25.

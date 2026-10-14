@@ -50,9 +50,9 @@ public final class DarkNights {
 		}
 		boolean dark = minecraft.level.dimensionType().hasSkyLight() && lastNight > SHADERS_OFF_AT && lastMoon < 1.0F;
 		if (dark && !shadersOff && Iris.inUse()) {
+			// (0.7.25) quietly, no message (Andy: "no shader disable message")
 			if (Iris.set(false)) {
 				shadersOff = true;
-				minecraft.player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymoskingdoms.dark_night_shaders"));
 			}
 		} else if (!dark && shadersOff) {
 			Iris.set(true);
