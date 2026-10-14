@@ -2,14 +2,19 @@ package com.jaymoskingdoms;
 
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Consumer;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -25,18 +30,24 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.animal.bee.Bee;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
@@ -52,6 +63,13 @@ import org.jspecify.annotations.Nullable;
  * slower than a short one), until its wood strikes the ground or it lies flat. Where it lands it breaks apart with a
  * crash: every log and leaf gives what it would have, where it came to rest (or into a woodcutter's bag), and anything
  * standing where it comes down is struck.
+ * <p>
+ * (0.7.11) Physical Falling Trees, our own take (the datapack is CC BY-NC-ND, none of it used): it falls to its heavier
+ * side ({@link #heavier}), straight along a compass line, and only away from its cutter when it's even; it strikes
+ * anything in its path (its cutter too) as hard as the wood there is moving; bees in a nest on it come out angry
+ * ({@link #hives}); and down, it lies a moment and becomes real blocks where it came to rest, its logs on their side and
+ * its leaves withering away ({@link #settle}). Felled in under half a second, it settles at once. A woodcutter's tree
+ * still breaks up into his bag, and a tornado's still smashes apart.
  */
 public final class FallingTree extends Entity {
 	/** Its first push (degrees a tick), a steady nudge, and the pull of its own weight (scaled by how far it leans). */
@@ -59,10 +77,16 @@ public final class FallingTree extends Entity {
 	/** It lies flat at this lean; it never takes longer than this to come down (ticks). */
 	static final float FLAT = 90.0F;
 	static final int LONGEST = 200;
-	/** Down, it lies a moment (ticks) before it breaks apart. */
-	static final int LIES = 14;
-	/** What it strikes where it lands: the most damage, and a share of it per log. */
-	static final float CRUSH_MOST = 10.0F, CRUSH_PER_LOG = 0.6F;
+	/** Down, it lies a moment (ticks) before it settles; down sooner than this after the cut, it settles at once. */
+	static final int LIES = 10, QUICK = 10;
+	/** (0.7.11) What it strikes: damage per block a tick the wood is moving there, the most, and the slowest that hurts. */
+	static final float HIT_PER_SPEED = 7.0F, CRUSH_MOST = 14.0F, HIT_SLOWEST = 0.12F;
+	/** (0.7.11) How it picks its side: a log weighs this, a leaf 1; its weight this far (blocks) off the trunk tips it. */
+	static final float LOG_WEIGHT = 3.0F, TIPS = 0.35F;
+	/** (0.7.11) Settling, a piece with no room where it lies may sink this far onto what's below. */
+	static final int SINKS = 3;
+	/** (0.7.11) Bees round a nest in it (this far) go for a woodcutter who fells it. */
+	static final double BEES_RANGE = 24.0;
 	/** Of its blocks, every this-many'th log and leaf breaks with a puff and a sound (the rest only a puff of chips). */
 	static final int LOG_SOUNDS = 3, LEAF_SOUNDS = 9;
 	/** (0.6.12) A torn-up tree in flight: its fall (blocks/tick²), the air's drag, how long before it can strike the ground
@@ -96,14 +120,15 @@ public final class FallingTree extends Entity {
 	/** When it came down (-1: still falling). */
 	private int downAt = -1;
 	private float reach = 2.0F;
-	private int logs;
 	private @Nullable Entity cutter;
 	private ItemStack tool = ItemStack.EMPTY;
 	private @Nullable Consumer<ItemStack> sink;
 	/** (0.6.12) Torn up by a tornado: it flies (ticks flown), tumbling this many degrees a tick. */
-	private boolean flying;
+	private boolean flying, torn;
 	private int flown;
 	private float tumble;
+	/** (0.7.11) What it has struck already (once each). */
+	private final Set<UUID> struck = new HashSet<>();
 
 	public FallingTree(EntityType<? extends FallingTree> type, Level level) {
 		super(type, level);
@@ -134,7 +159,6 @@ public final class FallingTree extends Entity {
 		}
 		tree.setAttached(HEADING, heading);
 		tree.reach = Math.max(2.0F, top * 0.55F);
-		tree.logs = logs.size();
 		tree.cutter = cutter;
 		tree.tool = tool.copy();
 		tree.sink = sink;
@@ -160,8 +184,8 @@ public final class FallingTree extends Entity {
 			return null;
 		}
 		tree.setAttached(HEADING, heading);
-		tree.logs = logs.size();
 		tree.flying = true;
+		tree.torn = true;
 		tree.tumble = tumble;
 		tree.setDeltaMovement(velocity);
 		level.addFreshEntity(tree);
@@ -202,6 +226,61 @@ public final class FallingTree extends Entity {
 		}
 		tree.setAttached(PIECES, List.copyOf(pieces));
 		return top;
+	}
+
+	/**
+	 * (0.7.11) Which way the tree of {@code logs} and {@code leaves} on {@code cut} falls (radians, as {@link #HEADING}, along
+	 * a compass line): to its heavier side, a log weighing {@link #LOG_WEIGHT} and a leaf 1; if it's even (its weight
+	 * less than {@link #TIPS} off the trunk), away from {@code cutter}.
+	 */
+	static float heavier(ServerLevel level, BlockPos cut, List<BlockPos> logs, List<BlockPos> leaves, @Nullable Entity cutter) {
+		double x = 0.0, z = 0.0, total = 0.0;
+		for (List<BlockPos> part : List.of(logs, leaves)) {
+			for (BlockPos p : part) {
+				BlockState state = level.getBlockState(p);
+				double w = state.is(BlockTags.LOGS) || state.is(ChoppedLog.BLOCK) ? LOG_WEIGHT : 1.0;
+				x += w * (p.getX() - cut.getX());
+				z += w * (p.getZ() - cut.getZ());
+				total += w;
+			}
+		}
+		if (total > 0.0 && Math.max(Math.abs(x), Math.abs(z)) / total >= TIPS) {
+			return Math.abs(x) >= Math.abs(z) ? (x > 0 ? 0.0F : Mth.PI) : (z > 0 ? Mth.HALF_PI : -Mth.HALF_PI);
+		}
+		float away = away(cutter, cut, level);
+		return Math.round(away / Mth.HALF_PI) * Mth.HALF_PI;
+	}
+
+	/**
+	 * (0.7.11) The bee nests and hives on these logs: their bees come out now, angry at {@code cutter} (if near), and
+	 * the nests come down with the tree.
+	 */
+	static List<BlockPos> hives(ServerLevel level, List<BlockPos> logs, @Nullable Entity cutter) {
+		Set<BlockPos> found = new HashSet<>();
+		for (BlockPos log : logs) {
+			for (Direction d : Direction.values()) {
+				BlockPos p = log.relative(d);
+				if (level.getBlockState(p).is(BlockTags.BEEHIVES)) {
+					found.add(p.immutable());
+				}
+			}
+		}
+		Player player = cutter instanceof Player p && !p.isCreative() ? p : null;
+		for (BlockPos p : found) {
+			if (level.getBlockEntity(p) instanceof BeehiveBlockEntity hive) {
+				// (the game's own: out, and at a player near unless they're smoked)
+				hive.emptyAllLivingFromHive(player, level.getBlockState(p), BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
+			}
+			if (cutter instanceof LivingEntity target && !(cutter instanceof Player)) {
+				for (Bee bee : level.getEntitiesOfClass(Bee.class, new AABB(p).inflate(BEES_RANGE / 3.0))) {
+					if (bee.getTarget() == null) {
+						bee.setPersistentAngerTarget(EntityReference.of(target));
+						bee.setTarget(target);
+					}
+				}
+			}
+		}
+		return new ArrayList<>(found);
 	}
 
 	/** The way from {@code from} to {@code cut} (radians, as {@link #HEADING}), or any way if there's no one. */
@@ -253,7 +332,11 @@ public final class FallingTree extends Entity {
 		}
 		if (this.downAt >= 0) {
 			if (this.tickCount - this.downAt >= LIES) {
-				this.breakApart(level, pieces);
+				if (this.torn || this.sink != null) {
+					this.breakApart(level, pieces);
+				} else {
+					this.settle(level, pieces);
+				}
 			}
 			return;
 		}
@@ -264,7 +347,10 @@ public final class FallingTree extends Entity {
 		float lean = this.lean();
 		this.speed += NUDGE + WEIGHT * Mth.sin(lean * Mth.DEG_TO_RAD) / this.reach;
 		float next = Math.min(FLAT, lean + this.speed);
-		boolean landed = next >= FLAT || this.tickCount >= LONGEST || this.strikes(level, pieces, next, 2);
+		boolean blocked = this.strikes(level, pieces, next, 2);
+		boolean landed = next >= FLAT || this.tickCount >= LONGEST || blocked;
+		float at = blocked ? lean : next;
+		this.hit(level, pieces, at, 2, 0.0F, this.speed * Mth.DEG_TO_RAD);
 		if (!landed) {
 			this.entityData.set(LEAN, next);
 			// the rush of air and creaking as it goes over
@@ -273,8 +359,9 @@ public final class FallingTree extends Entity {
 			}
 			return;
 		}
-		this.land(level, pieces, this.strikes(level, pieces, next, 2) ? lean : next);
-		this.downAt = this.tickCount;
+		this.land(level, pieces, at);
+		// (down in under half a second: it settles at once)
+		this.downAt = this.tickCount < QUICK ? this.tickCount - LIES : this.tickCount;
 	}
 
 	/** (0.6.12) In flight: it falls and tumbles, and once clear of its hole breaks apart where its wood strikes the ground. */
@@ -290,6 +377,7 @@ public final class FallingTree extends Entity {
 		float lean = this.lean(), next = lean + this.tumble;
 		if (this.flown > FLY_CLEAR && (this.flown > FLY_LONGEST || this.strikes(level, pieces, next, Integer.MIN_VALUE))) {
 			this.flying = false;
+			this.hit(level, pieces, lean, Integer.MIN_VALUE, (float)v.length(), this.tumble * Mth.DEG_TO_RAD);
 			this.land(level, pieces, lean);
 			this.downAt = this.tickCount;
 			return;
@@ -312,7 +400,7 @@ public final class FallingTree extends Entity {
 			if (p.y() < fromY || !p.blockState().is(BlockTags.LOGS)) {
 				continue;
 			}
-			BlockPos at = BlockPos.containing(this.where(p, turn));
+			BlockPos at = this.cell(this.where(p, turn));
 			BlockState there = level.getBlockState(at);
 			if (!there.isAir() && !there.canBeReplaced() && !(there.getBlock() instanceof LeavesBlock) && there.isCollisionShapeFullBlock(level, at)) {
 				return true;
@@ -321,27 +409,53 @@ public final class FallingTree extends Entity {
 		return false;
 	}
 
-	/** It comes down: a thud and a cloud of leaves, and anything under it is struck. */
+	/**
+	 * (0.7.11) Its wood (from {@code fromY} above its origin up), leaning {@code lean}, strikes whatever it passes through
+	 * (once each) as hard as it's moving there: {@code flat} blocks a tick, plus {@code turning} for every block from
+	 * where it turns. Its cutter is struck too, unless he's a woodcutter filling his bag.
+	 */
+	private void hit(ServerLevel level, List<Piece> pieces, float lean, int fromY, float flat, float turning) {
+		Quaternionf turn = turn(lean, this.heading());
+		Map<LivingEntity, Float> worst = new HashMap<>();
+		for (Piece p : pieces) {
+			if (p.y() < fromY || !p.blockState().is(BlockTags.LOGS)) {
+				continue;
+			}
+			float speed = flat + turning * Math.abs(p.y() + 0.5F);
+			if (speed < HIT_SLOWEST) {
+				continue;
+			}
+			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(BlockPos.containing(this.where(p, turn))).inflate(0.3),
+				e -> e.isAlive() && !e.isSpectator() && !this.struck.contains(e.getUUID()) && (this.sink == null || e != this.cutter))) {
+				worst.merge(e, speed, Math::max);
+			}
+		}
+		DamageSource source = level.damageSources().fallingBlock(this);
+		float dx = Mth.cos(this.heading()), dz = Mth.sin(this.heading());
+		for (Map.Entry<LivingEntity, Float> hit : worst.entrySet()) {
+			LivingEntity e = hit.getKey();
+			float speed = hit.getValue();
+			this.struck.add(e.getUUID());
+			if (e.hurtServer(level, source, Math.min(CRUSH_MOST, speed * HIT_PER_SPEED))) {
+				// (knocked the way it falls)
+				e.push(dx * speed * 0.6F, 0.15, dz * speed * 0.6F);
+				e.needsSync = true;
+			}
+		}
+	}
+
+	/** It comes down: a thud and a cloud of leaves. */
 	private void land(ServerLevel level, List<Piece> pieces, float lean) {
 		this.entityData.set(LEAN, lean);
 		Quaternionf turn = turn(lean, this.heading());
-		Set<LivingEntity> struck = new HashSet<>();
 		Vec3 middle = Vec3.ZERO;
 		int count = 0;
 		for (Piece p : pieces) {
 			if (!p.blockState().is(BlockTags.LOGS)) {
 				continue;
 			}
-			Vec3 at = this.where(p, turn);
-			middle = middle.add(at);
+			middle = middle.add(this.where(p, turn));
 			count++;
-			struck.addAll(level.getEntitiesOfClass(LivingEntity.class, new AABB(BlockPos.containing(at)).inflate(0.3),
-				e -> e.isAlive() && e != this.cutter && !e.isSpectator()));
-		}
-		float crush = Math.min(CRUSH_MOST, 2.0F + CRUSH_PER_LOG * this.logs);
-		DamageSource source = level.damageSources().fallingBlock(this);
-		for (LivingEntity e : struck) {
-			e.hurtServer(level, source, crush);
 		}
 		if (count > 0) {
 			middle = middle.scale(1.0 / count);
@@ -374,6 +488,79 @@ public final class FallingTree extends Entity {
 			}
 		}
 		this.discard();
+	}
+
+	/**
+	 * (0.7.11) Lain a moment, it becomes real blocks where it lies: its logs (and nests) turned on their side, its leaves
+	 * left to wither (no wood holds them now). A piece with no room there (or two in one place) gives what it would have.
+	 */
+	private void settle(ServerLevel level, List<Piece> pieces) {
+		float lean = this.lean();
+		Quaternionf turn = turn(lean, this.heading());
+		boolean lying = lean >= 45.0F;
+		// (lying, it settles flat along the ground, held up only by what it really came to rest on)
+		Quaternionf flat = lying ? turn(FLAT, this.heading()) : turn;
+		Direction.Axis along = Math.abs(Mth.cos(this.heading())) >= Math.abs(Mth.sin(this.heading())) ? Direction.Axis.X : Direction.Axis.Z;
+		Set<BlockPos> taken = new HashSet<>();
+		List<Piece> ordered = new ArrayList<>(pieces);
+		// (wood first, lowest first: it takes its place before the leaves do)
+		ordered.sort(Comparator.<Piece>comparingInt(p -> p.blockState().is(BlockTags.LOGS) ? 0 : 1).thenComparingInt(Piece::y));
+		int logCount = 0;
+		for (Piece p : ordered) {
+			BlockState state = p.blockState();
+			boolean log = state.is(BlockTags.LOGS);
+			if (lying && state.hasProperty(BlockStateProperties.AXIS)) {
+				Direction.Axis axis = state.getValue(BlockStateProperties.AXIS);
+				state = state.setValue(BlockStateProperties.AXIS, axis == Direction.Axis.Y ? along : axis == along ? Direction.Axis.Y : axis);
+			}
+			if (state.getBlock() instanceof LeavesBlock) {
+				state = state.setValue(LeavesBlock.PERSISTENT, false).setValue(LeavesBlock.DISTANCE, LeavesBlock.DECAY_DISTANCE);
+			}
+			if (state.hasProperty(BlockStateProperties.WATERLOGGED)) {
+				state = state.setValue(BlockStateProperties.WATERLOGGED, false);
+			}
+			Vec3 at = this.where(p, turn);
+			BlockPos pos = this.cell(this.where(p, flat));
+			if (lying) {
+				// up onto what it struck (no higher than it really lay), then down onto the ground a little way
+				int rested = this.cell(at).getY();
+				while (!room(level, pos, taken) && pos.getY() < rested) {
+					pos = pos.above();
+				}
+				for (int i = 0; i < SINKS && room(level, pos, taken) && room(level, pos.below(), taken); i++) {
+					pos = pos.below();
+				}
+			}
+			if (room(level, pos, taken)) {
+				taken.add(pos);
+				// (known shape: its leaves keep their withering, not taking the lying wood for a tree's)
+				level.setBlock(pos, state, Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
+				if (log && logCount++ % LOG_SOUNDS == 0) {
+					level.playSound(null, pos, state.getSoundType().getPlaceSound(), SoundSource.BLOCKS, 1.0F, 0.6F);
+				}
+				continue;
+			}
+			for (ItemStack drop : Block.getDrops(p.blockState(), level, pos, null, this.cutter, this.tool)) {
+				Block.popResource(level, pos, drop);
+			}
+			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, p.blockState()), at.x, at.y, at.z, 3, 0.3, 0.3, 0.3, 0.05);
+		}
+		this.discard();
+	}
+
+	/** Whether a settling piece fits at {@code pos}: nothing solid there (water will do) and no other piece. */
+	private static boolean room(ServerLevel level, BlockPos pos, Set<BlockPos> taken) {
+		BlockState there = level.getBlockState(pos);
+		return !taken.contains(pos) && there.canBeReplaced() && (there.getFluidState().isEmpty() || there.getFluidState().is(FluidTags.WATER));
+	}
+
+	/**
+	 * The block a piece's middle is in. Lying, a tree's pieces sit on block edges (it turns about the foot of its cut),
+	 * so they're nudged up and back toward the cut: its wood lies on the ground, from where it stood.
+	 */
+	private BlockPos cell(Vec3 at) {
+		float heading = this.heading();
+		return BlockPos.containing(at.x - 0.01 * Mth.cos(heading), at.y + 0.01, at.z - 0.01 * Mth.sin(heading));
 	}
 
 	@Override

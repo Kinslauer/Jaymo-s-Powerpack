@@ -42,6 +42,7 @@ import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.jspecify.annotations.Nullable;
 
@@ -59,7 +60,10 @@ import org.jspecify.annotations.Nullable;
  * cutter, breaking apart where it lands and giving its wood there ({@link FallingTree}). (0.5.25) As in HT's TreeChop,
  * it takes chops, not one break: each stroke at a log narrows it ({@link ChoppedLog}), and the tree comes down on the
  * chop that makes up what its size needs ({@link #needed}); the axe takes a point of wear per chop. Sneak to break one
- * log only. Woodcutters chop and fell the same way ({@link Gatherers}).</li>
+ * log only. Woodcutters chop and fell the same way ({@link Gatherers}). (0.7.11) As in Physical Falling Trees, it falls
+ * to its heavier side (or away from the cutter if it's even), strikes what's in its way as hard as it's moving, angers
+ * the bees of any nest in it, and comes to rest as real blocks lying on the ground: its logs on their side, its leaves
+ * withering away ({@link FallingTree}).</li>
  * <li><b>Seeding</b>: now and then, round each player, a grown tree drops a sapling of its kind on open grass a few
  * blocks off, where the wood isn't already thick, so forests slowly spread (and grow up as above). Never in a
  * settlement's buildings or plots.</li>
@@ -504,7 +508,7 @@ public final class Trees {
 	 */
 	static int chop(ServerLevel level, BlockPos cut, @Nullable Entity cutter, ItemStack tool, @Nullable Consumer<ItemStack> sink) {
 		BlockState state = level.getBlockState(cut);
-		if (!state.is(BlockTags.LOGS)) {
+		if (!state.is(BlockTags.LOGS) || fallen(level, cut, state)) {
 			return -1;
 		}
 		List<BlockPos> logs = trunk(level, cut);
@@ -558,7 +562,9 @@ public final class Trees {
 		if (wear && cutter instanceof Player p && !tool.isEmpty() && tool.isDamageableItem()) {
 			tool.hurtAndBreak(Math.max(0, logs.size() - (level.getBlockState(cut).isAir() ? 1 : 0)), p, EquipmentSlot.MAINHAND);
 		}
-		FallingTree.topple(level, cut, logs, leaves, FallingTree.away(cutter, cut, level), cutter, tool, sink);
+		// (0.7.11) a nest in it comes down too, its bees out and angry at whoever cut it
+		leaves.addAll(FallingTree.hives(level, logs, cutter));
+		FallingTree.topple(level, cut, logs, leaves, FallingTree.heavier(level, cut, logs, leaves, cutter), cutter, tool, sink);
 		// (the growing-tree record, if it was one, is forgotten when its foot is gone)
 		return logs.size();
 	}
@@ -577,6 +583,22 @@ public final class Trees {
 			return null;
 		}
 		return FallingTree.fling(level, foot, logs, leavesOf(level, logs), velocity, heading, tumble);
+	}
+
+	/**
+	 * (0.7.11) A log lying on its side on the ground (a felled tree come to rest, {@link FallingTree}) is a fallen trunk,
+	 * not a tree: it's broken log by log, not chopped.
+	 */
+	static boolean fallen(ServerLevel level, BlockPos pos, BlockState state) {
+		if (!state.hasProperty(BlockStateProperties.AXIS) || state.getValue(BlockStateProperties.AXIS) == Direction.Axis.Y) {
+			return false;
+		}
+		BlockState below = level.getBlockState(pos.below());
+		if (below.is(BlockTags.LOGS)) {
+			// (one fallen trunk across another)
+			return below.hasProperty(BlockStateProperties.AXIS) && below.getValue(BlockStateProperties.AXIS) != Direction.Axis.Y;
+		}
+		return below.isFaceSturdy(level, pos.below(), Direction.UP);
 	}
 
 	/** The leaves these logs hold that no other wood does. */

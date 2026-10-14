@@ -1056,3 +1056,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.10.47 / Kitchen 0.4.39, ragdoll physics:** our own Physics Mod-style ragdolls for corpses (Physics Mod itself is
   closed, ARR and client-only with no API; see kitchen/MODLOG.md). Severed parts roll along the ground as they move,
   rock to rest on a spring (a limb lies along the ground, never on end), and are kicked along by anyone walking into them.
+- **0.10.50 / Kingdoms 0.7.11, physical falling trees:** felled trees fall to their heavier side, hurt what they hit by
+  how fast they're moving, anger the bees of any nest on them, and land as real blocks (logs on their side, leaves
+  withering). Physical Falling Trees' ideas in our own code (the datapack is CC BY-NC-ND and stops at 26.2). See
+  kingdoms/MODLOG.md.
