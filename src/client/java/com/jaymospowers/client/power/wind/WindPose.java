@@ -222,6 +222,10 @@ public final class WindPose {
 		if (com.jaymospowers.client.power.zfighter.ZFighterFlightPose.cruising(player)) {
 			return true;
 		}
+		// and a Smoke user flying fast in Vapour Form (the legs are smoke: SmokeFlightPose)
+		if (com.jaymospowers.client.power.smoke.SmokeFlightPose.cruising(player)) {
+			return true;
+		}
 		if (player == minecraft.player) {
 			return WindPowerClient.INSTANCE.flight().state().fast() && WindPowerClient.isActive(minecraft.player);
 		}
@@ -248,8 +252,11 @@ public final class WindPose {
 			state.setData(WindTumble.KEY, null);
 			state.setData(WindCyclonePose.KEY, null);
 			state.setData(WindFlightSwing.KEY, null);
+			state.setData(com.jaymospowers.client.FlightRolls.KEY, null);
 			return;
 		}
+		// a barrel roll (Wind, Xenoform, Z Fighter and Smoke flights alike): drawn in rotate
+		com.jaymospowers.client.FlightRolls.extract(entity, state, partialTicks);
 		WindCyclonePose.Stance stance = WindCyclonePose.extract(entity, partialTicks);
 		state.setData(WindCyclonePose.KEY, stance);
 		if (stance != null) {
@@ -301,14 +308,17 @@ public final class WindPose {
 		kickLean(state, poseStack);
 		WindCyclonePose.rotate(state, poseStack);
 		Float amount = state.getData(KEY);
-		if (amount == null || !(state instanceof AvatarRenderState) || state.deathTime > 0.0F) {
+		boolean laidOut = amount != null && state instanceof AvatarRenderState && state.deathTime <= 0.0F;
+		// a barrel roll: upright, about the way the body faces; laid out, about its length (in the tilt)
+		com.jaymospowers.client.FlightRolls.rollUpright(state, poseStack, entityScale, laidOut ? 1.0F - amount : 1.0F);
+		if (!laidOut) {
 			return;
 		}
 		float middle = state.boundingBoxHeight / Math.max(entityScale, 0.01F) * 0.5F;
 		Float brake = state.getData(BRAKE_KEY);
 		WindFlightSwing.Swing swing = state.getData(WindFlightSwing.KEY);
 		tilt(poseStack, amount, brake == null ? 0.0F : brake, state.getData(BANK_KEY), state.yRot, state.xRot, state.bodyRot, middle,
-			WindFlightSwing.roll(swing), WindFlightSwing.lunge(swing));
+			WindFlightSwing.roll(swing) + com.jaymospowers.client.FlightRolls.angle(state), WindFlightSwing.lunge(swing));
 	}
 
 	/**
@@ -343,7 +353,7 @@ public final class WindPose {
 			// rolled into the turn, about the body's own length
 			poseStack.rotateDegrees(Axis.YP, bank[1] * amount * (1.0F - b));
 		}
-		// a swing rolls the body into the cut (a spin all the way round) and a thrust lunges it ahead
+		// a swing rolls the body into the cut (a spin all the way round), as does a barrel roll, and a thrust lunges it ahead
 		poseStack.rotateDegrees(Axis.YP, swingRoll * amount);
 		poseStack.translate(0.0F, lunge * amount, 0.0F);
 		poseStack.translate(0.0F, -middle, 0.0F);

@@ -208,5 +208,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 		if (client != null && !minecraft.isPaused()) {
 			client.tick(minecraft, player);
 		}
+		if (!minecraft.isPaused()) {
+			// after the flight has set this tick's velocity: a barrel roll slides on top of it
+			FlightRolls.tick(minecraft, player);
+		}
 	}
 }

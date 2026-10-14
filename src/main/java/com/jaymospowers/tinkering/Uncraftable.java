@@ -25,7 +25,7 @@ public final class Uncraftable {
 	/**
 	 * (0.10.43) TaCZ's own modern guns, their ammo and attachments (its default gunpack's recipes) and the attachment
 	 * bench: the pack only uses TaCZ for our flintlocks (armory/TaczGuns), whose recipes are jaymospowers:gun/... .
-	 * (0.10.80) Andy: nothing modern at all, so every other TaCZ block and item too (ammo boxes, the ammo bench,
+	 * (0.10.83) Andy: nothing modern at all, so every other TaCZ block and item too (ammo boxes, the ammo bench,
 	 * targets, the statue, the poster); only the gun smith table (our Gunsmith's Bench) and its gunpowder recipe stay.
 	 */
 	static final List<String> PREFIXES = List.of("tacz:gun/", "tacz:ammo/", "tacz:attachments/", "tacz:misc/");

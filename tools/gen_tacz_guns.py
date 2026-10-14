@@ -17,7 +17,7 @@ gunpack.meta.json). Jaymo's Powers hands it to TaCZ when TaCZ is installed (armo
 - void_flintlock: Arsenal's Void Armory pistol in the void palette, no recipe, one per hand; it never reloads: Q drops
   the pair and Jaymo's Powers puts a fresh pair in your hands, which come up out of the rift (its draw animation).
 
-- (0.10.80) TaCZ's default gunpack (all modern guns) is never loaded (armory/TaczGuns), so this pack also brings what
+- (0.10.83) TaCZ's default gunpack (all modern guns) is never loaded (armory/TaczGuns), so this pack also brings what
   every gun used to borrow from it, all our own: the Lua animation state machine (scripts/flintlock_state_machine.lua),
   third-person poses for Player Animation Library (player_animator/), a muzzle flash, hit/kill/dry-fire sounds and the
   Gunsmith's Bench (TaCZ's gun smith table block, given our model, tabs and recipe filter by data/tacz/index/blocks).

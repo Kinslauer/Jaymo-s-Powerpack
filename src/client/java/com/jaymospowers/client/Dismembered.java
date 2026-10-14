@@ -137,7 +137,8 @@ public final class Dismembered {
 		}
 	}
 
-	private static void hidePart(@Nullable ModelPart part) {
+	/** Hides {@code part} until the model's drawn ({@link #restore}). */
+	public static void hidePart(@Nullable ModelPart part) {
 		if (part != null && part.visible) {
 			part.visible = false;
 			HIDDEN.add(part);

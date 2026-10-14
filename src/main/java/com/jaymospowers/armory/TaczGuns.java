@@ -17,7 +17,7 @@ import net.minecraft.world.item.component.CustomData;
 /**
  * (0.10.43) Our flintlocks in TaCZ: the musket, blunderbuss and flintlock pistol are a gunpack of our own
  * ({@code assets/jaymospowers/custom/jaymos_flintlocks}, made by tools/gen_tacz_guns.py), handed to TaCZ through its
- * API so it copies it into {@code .minecraft/tacz}; since 0.10.80 it's the only gunpack (TaCZ's modern one is kept
+ * API so it copies it into {@code .minecraft/tacz}; since 0.10.83 it's the only gunpack (TaCZ's modern one is kept
  * out, {@link #dropDefaultPack}). Through reflection, so Jaymo's Powers
  * still runs without TaCZ. TaCZ's own modern guns, ammo and attachments are taken off its benches
  * ({@code tinkering/Uncraftable}). As TaCZ items the guns are {@code tacz:modern_kinetic_gun} with
@@ -52,7 +52,7 @@ public final class TaczGuns {
 	}
 
 	/**
-	 * (0.10.80) Andy: nothing modern in the pack. TaCZ's default gunpack (its AK-47s, ammo, attachments, benches and
+	 * (0.10.83) Andy: nothing modern in the pack. TaCZ's default gunpack (its AK-47s, ammo, attachments, benches and
 	 * the scripts and poses it shares with every gun) is kept from loading: its entry comes off TaCZ's export list
 	 * before TaCZ copies it into {@code .minecraft/tacz}, and a copy an earlier launch left there is deleted (TaCZ
 	 * loads every folder in it). Our gunpack brings its own state machine, Gunsmith's Bench, muzzle flash, hit sounds
