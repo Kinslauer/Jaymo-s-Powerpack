@@ -110,6 +110,12 @@ def packMods = [
 	// that's already generated loads from disk many times faster. Back since 0.10.51 (it left in 0.8.118 for a hang that
 	// was Distant Horizons'). Server-side; harmless on clients.
 	[dep: "maven.modrinth:chunky:4Eotm6ov", cf: [433175, 8036332]],
+	// Advanced Chimneys (CC BY-ND 4.0, by EnderLanky; shipped unchanged, downloaded by id) and its library ForgeEndertech
+	// (needs Forge Config API Port, above): chimneys, ducts and vents that carry smoke from furnaces and fires outdoors,
+	// with wind-blown, colliding smoke. The Smoke power's gas is our own after its rules, and rides its chimneys
+	// (power/smoke/ChimneyCompat reads only its block ids). Kept out of the dev game.
+	[dep: "maven.modrinth:advanced-chimneys:ASEt7Igg", cf: [244830, 9119091], dev: false],
+	[dep: "maven.modrinth:forgeendertech:G2PeFNvS", cf: [244844, 9119047], dev: false],
 	// Naturalist (code MIT, art all rights reserved; Starfish Studios' own 26.3 Fabric build, needs only Fabric API):
 	// wildlife. Kingdoms keeps its predators out of natural spawning and sends them as rare wilderness encounters
 	// (Encounters), and keeps its elephants and mammoths out too since Kingdoms has its own

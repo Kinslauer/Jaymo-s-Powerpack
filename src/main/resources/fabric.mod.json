@@ -34,7 +34,8 @@
 		"jaymospowers.xenoform.mixins.json",
 		{ "config": "jaymospowers.xenoform.client.mixins.json", "environment": "client" },
 		"jaymospowers.zfighter.mixins.json",
-		{ "config": "jaymospowers.zfighter.client.mixins.json", "environment": "client" }
+		{ "config": "jaymospowers.zfighter.client.mixins.json", "environment": "client" },
+		"jaymospowers.smoke.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.19.5",

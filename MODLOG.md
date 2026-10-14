@@ -1077,3 +1077,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   than they're ready, with a "terrain loading" note, and picks up again as they load (`client/TerrainAhead`). Before,
   players flew into land the game hadn't shown and stuck on invisible blocks. Chunky is back to pre-generate the world
   from the server console, so most of the map loads from disk instead of being generated under a flyer.
+- **0.10.55 / Kingdoms 0.7.13, roaming caravans:** pillager caravans (minor, and major under the ominous banner with a
+  ravager) and merchant caravans (a wandering trader, trader llamas, pack mules, a nearby realm's guards as escort) now
+  pass by players out in the wild, along King's Roads where they run. Pack animals carry chests of the land's goods.
+  Pillager Caravans' ideas in our own code (it stops at 26.1 and has its own licence). See kingdoms/MODLOG.md.

@@ -89,6 +89,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.darktide.DarktidePowerClient.init();
 		com.jaymospowers.client.power.xenoform.XenoformPowerClient.init();
 		com.jaymospowers.client.power.zfighter.ZFighterPowerClient.init();
+		com.jaymospowers.client.power.smoke.SmokePowerClient.init();
 	}
 
 	/** The key mapping for an ability key (to show its bound key in a HUD, say). */

@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
@@ -24,6 +25,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BiomeTags;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionResult;
@@ -40,6 +42,8 @@ import net.minecraft.world.entity.vehicle.boat.AbstractBoat;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -55,6 +59,8 @@ import org.jspecify.annotations.Nullable;
  * (awakens at once).</li>
  * <li>Darktide: stay out at sea, swimming or in a boat, from dusk to dawn. Awakens at dawn.</li>
  * <li>Z Fighter: kill {@link #FIST_KILLS_NEEDED} monsters with your bare fists. Awakens at once.</li>
+ * <li>Smoke: breathe a fire's smoke ({@link #SMOKE_FIRES}+ burning blocks or lit campfires round you) for
+ * {@link #SMOKE_SECONDS} s in a row and live. A day off, once a day.</li>
  * <li>Xenoform: put on a Xeno-Band from a broken fallen star ({@code power/xenoform}). Awakens at once, and it is the
  * only way: fate never hands Xenoform out and it can't be an affinity ({@code Power.fated}).</li>
  * </ul>
@@ -83,6 +89,10 @@ public final class Callings {
 	public static final int MIDNIGHT_WINDOW = 1000;
 	/** Darktide: night ticks in a row at sea before dawn counts (a night is ~10000). */
 	public static final int NIGHT_AT_SEA = 9000;
+	/** Smoke: how many fires (burning blocks, lit campfires) within {@link #SMOKE_REACH} blocks, for how many seconds. */
+	public static final int SMOKE_FIRES = 3;
+	public static final int SMOKE_REACH = 4;
+	public static final int SMOKE_SECONDS = 60;
 
 	/** Highest fall distance this flight, per player (reset on landing). */
 	private static final Map<UUID, Double> FALLS = new HashMap<>();
@@ -93,6 +103,9 @@ public final class Callings {
 	/** Web and Resonance: the day number each was last counted, so they count once a day (or night). */
 	private static final Map<UUID, Long> BITTEN_DAY = new HashMap<>();
 	private static final Map<UUID, Long> BELL_DAY = new HashMap<>();
+	/** Smoke: seconds in a row spent in a fire's smoke, and the day it last counted. */
+	private static final Map<UUID, Integer> IN_SMOKE = new HashMap<>();
+	private static final Map<UUID, Long> SMOKE_DAY = new HashMap<>();
 
 	private Callings() {
 	}
@@ -153,6 +166,8 @@ public final class Callings {
 			AT_SEA.clear();
 			BITTEN_DAY.clear();
 			BELL_DAY.clear();
+			IN_SMOKE.clear();
+			SMOKE_DAY.clear();
 		});
 	}
 
@@ -167,6 +182,7 @@ public final class Callings {
 		FALLS.remove(id);
 		SLEPT_WITH_CLOCK.remove(id);
 		AT_SEA.remove(id);
+		IN_SMOKE.remove(id);
 	}
 
 	/** Wind (a Breeze), Z Fighter (bare fists) and Arsenal (weapon kinds): kills by a powerless player. */
@@ -222,7 +238,7 @@ public final class Callings {
 		return BuiltInRegistries.ITEM.getKey(weapon.getItem()).toString();
 	}
 
-	/** Every tick, for a powerless survival player: Gravity's falls, Chrono's sleep, Darktide's night at sea. */
+	/** Every tick, for a powerless survival player: Gravity's falls, Chrono's sleep, Darktide's night at sea, Smoke's fires. */
 	static void tick(ServerPlayer player) {
 		UUID id = player.getUUID();
 		// Gravity: the highest point of a fall, judged when they land (on ground, not in water)
@@ -260,5 +276,33 @@ public final class Callings {
 				call(player, "darktide", Integer.MAX_VALUE);
 			}
 		}
+		// Smoke: a minute in a burning building's smoke (or round a ring of campfires), once a day
+		if (player.tickCount % 20 == 0) {
+			if (fires(level, player.blockPosition()) >= SMOKE_FIRES) {
+				int seconds = IN_SMOKE.merge(id, 1, Integer::sum);
+				if (seconds >= SMOKE_SECONDS) {
+					IN_SMOKE.remove(id);
+					if (once(SMOKE_DAY, player)) {
+						call(player, "smoke", DAY);
+					}
+				}
+			} else {
+				IN_SMOKE.remove(id);
+			}
+		}
+	}
+
+	/** Burning blocks and lit campfires within {@link #SMOKE_REACH} blocks of {@code center} (stops counting at enough). */
+	private static int fires(ServerLevel level, BlockPos center) {
+		int found = 0;
+		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-SMOKE_REACH, -2, -SMOKE_REACH), center.offset(SMOKE_REACH, SMOKE_REACH, SMOKE_REACH))) {
+			BlockState state = level.getBlockState(pos);
+			if (state.is(BlockTags.FIRE) || state.is(BlockTags.CAMPFIRES) && state.getValueOrElse(CampfireBlock.LIT, false)) {
+				if (++found >= SMOKE_FIRES) {
+					return found;
+				}
+			}
+		}
+		return found;
 	}
 }
