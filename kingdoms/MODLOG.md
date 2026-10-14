@@ -2718,5 +2718,12 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   moon's phase. Full moon is a normal night; a new moon gives no sky light at all, so anything without a torch near it
   is pitch black. Lunar events always shine full. Overworld-type dimensions only. Shader packs that light the world
   themselves may ignore it.
+- **Spider kinds** (`wild/SpiderKinds`, tint in `client/mixin/SpiderTintMixin`; Spider Overhaul's ideas, all rights
+  reserved, remade on the game's own spiders, no new mobs): a spider takes its kind from its biome the first time it
+  loads. Birch: lies still in wait and pounces. Desert: tougher, bursts its spines (4 damage, 3.5 blocks) as it dies.
+  Swamp: floats still like a lily pad, never drowns, swims at prey; its bite bogs you (pulled under in water, 6 s).
+  Cavern (below y 0): drops amethyst, emerald or (rarely) diamond; spits web that holds its prey in a cobweb for 5 s.
+  Jungle: 30% faster, pounces, poison bite, a poison pollen cloud as it dies. Ice (snowy biomes): bite freezes and
+  slows. Cave spiders and spiders elsewhere are unchanged. Spider Overhaul's "Icy" slipping is freezing here instead.
 - Not yet seen in game.
 

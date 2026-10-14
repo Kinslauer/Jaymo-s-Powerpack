@@ -128,6 +128,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		BedRest.register();
 		// (0.7.12) placed torches burn down and go out (our own take on Realistic Torches)
 		Torches.register();
+		// (0.7.12) spiders take after their biome (our own take on Spider Overhaul)
+		com.jaymoskingdoms.wild.SpiderKinds.register();
 		// 0.5.14: horses and wagons: mounted guards and archers for prosperous realms, a wealthy king's carriage, and the
 		// fiefdoms' caravans to their kingdoms (and their attachment)
 		Wagon.register();

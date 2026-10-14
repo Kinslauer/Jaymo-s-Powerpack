@@ -1087,4 +1087,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   the belt off R to Caps Lock, Shoulder Surfing's free look off Left Alt (OK Zoomer) and swap shoulder off U (werewolf
   shift). Kingdoms 0.7.12 remakes Realistic Torches and Total Darkness (see kingdoms/MODLOG.md). Turned down: Mo'
   Bends (fights Fresh Animations/EMF and our poses), Immersive Portals (1.21.1 at newest), Better Third Person (1.21.8,
-  and Shoulder Surfing refuses to load beside it). Not yet seen in game.
+  and Shoulder Surfing refuses to load beside it). Also added: Fancy World Animations (MIT; doors, chests, levers and
+  more animate, lanterns sway) and Ji AFK Cinematic (idle cinematic camera; in packModsNoCf until CurseForge has its
+  26.3 file). Kingdoms 0.7.12 also gives spiders biome kinds (Spider Overhaul's ideas). Not yet seen in game.
