@@ -69,6 +69,9 @@ public final class ArsenalDamocles {
 	/** Soft ground (dirt, sand, grass) around the point cracks open out to this far. */
 	static final double CRATER_RADIUS = 3.0;
 	static final float CRATER_HARDNESS = 1.0F;
+	/** Calling it back early (G) shakes everyone this far off this hard (degrees), as long as a shake can last. */
+	static final double RECALL_SHAKE_RANGE = 160.0;
+	static final float RECALL_SHAKE = 9.0F;
 
 	// timeline (ticks since the cast)
 	public static final int OPEN_END = 14;
@@ -452,6 +455,10 @@ public final class ArsenalDamocles {
 		}
 		// the next tick lands on the reopening, so its sound and motes still play
 		player.setAttached(FALL, new Fall(now - reopen + 1, fall.x(), fall.z(), fall.portalY(), fall.tipEnd(), fall.angle()));
+		// wrenched back early: the whole land shudders
+		Vec3 at = new Vec3(fall.x(), fall.tipEnd() + EMBED_DEPTH, fall.z());
+		com.jaymospowers.core.Shakes.around(player.level(), at, RECALL_SHAKE_RANGE, RECALL_SHAKE, com.jaymospowers.core.Shakes.MAX_TICKS, null);
+		player.level().playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 4.0F, 0.5F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal.damocles_recalled").withStyle(ChatFormatting.LIGHT_PURPLE));
 		return true;
 	}
