@@ -2708,16 +2708,17 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
 - Not yet seen in game.
 
 ## 0.7.12: torches burn down, moonless nights go dark
-- **Torches burn down** (`Torches`; Realistic Torches' idea, none of its code or art): a torch a player places burns two
-  days (`BURN_TICKS`), then goes out with a hiss and is left a smouldering **Burnt-out Torch** (no light, drops a
-  stick). Rain on a torch open to the sky puts it out in about two minutes. Flint and steel, a fire charge or a lit
-  torch in hand lights it again for another full burn. Torches the world or a settlement put there aren't counted, so
-  villages and miners' tunnels stay lit. Checked every 5 s in the chunks round players (`CHUNK_RADIUS` 6); torches
-  further off go out when someone comes near.
+- **Torches burn down** (`Torches`, `mixin/TorchBlockMixin`; Realistic Torches' idea, none of its code or art): every
+  torch, floor or wall, whoever put it there, burns about two days on average (a chance on each random tick), then
+  goes out with a hiss and is left a smouldering **Burnt-out Torch** (no light, drops a stick). Rain on a torch open to
+  the sky puts it out within a couple of minutes. Flint and steel, a fire charge or a lit torch in hand lights it
+  again. **Villagers relight them** (Andy): every 2 s the nearest awake grown villager within 24 blocks of a burnt
+  torch walks over and lights it, so a village stays lit while its folk are up.
 - **Dark nights** (`client/DarkNights`; Total Darkness / True Darkness's idea, LGPL, remade): moonlight follows the
   moon's phase. Full moon is a normal night; a new moon gives no sky light at all, so anything without a torch near it
-  is pitch black. Lunar events always shine full. Overworld-type dimensions only. Shader packs that light the world
-  themselves may ignore it.
+  is pitch black. Lunar events always shine full. Overworld-type dimensions only. Shader packs light the world
+  themselves and would undo it, so on any night darker than full moon an Iris shader pack switches off at dusk (with a
+  note on screen) and back on at dawn (Andy).
 - **Spider kinds** (`wild/SpiderKinds`, tint in `client/mixin/SpiderTintMixin`; Spider Overhaul's ideas, all rights
   reserved, remade on the game's own spiders, no new mobs): a spider takes its kind from its biome the first time it
   loads. Birch: lies still in wait and pounces. Desert: tougher, bursts its spines (4 damage, 3.5 blocks) as it dies.

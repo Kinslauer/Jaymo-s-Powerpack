@@ -2445,6 +2445,7 @@
 	"block.jaymoskingdoms.ship_helm": "Ship's Helm",
 	"block.jaymoskingdoms.sail": "Sail",
 	"block.jaymoskingdoms.burnt_torch": "Burnt-out Torch",
+	"message.jaymoskingdoms.dark_night_shaders": "A dark night: shaders are off until dawn",
 	"entity.jaymoskingdoms.ship": "Ship",
 	"ship.jaymoskingdoms.too_big": "Too many blocks for one ship (the most is %s): is the hull still tied to the land?",
 	"ship.jaymoskingdoms.too_long": "Too long for one ship (the most is %s blocks): is the hull still tied to the land?",
