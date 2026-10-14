@@ -50,6 +50,14 @@ through `Dismembered.hidePart`, so a shared model is restored once drawn) and th
 for everyone, and makes WindPose lay a fast flier out flat. The old 4 s invisibility, Speed II, Slow Falling and "mobs
 lose you" are gone (the trail hides you instead).
 
+## No armour in Vapour Form (0.10.102)
+Andy: "smoke cannot wear any armor when immaterial. it stays equipped until you do." Read as: in Vapour Form you
+can't put armour on; what you already wear stays on until you take it off yourself. `SmokeArmourMixin` makes
+`LivingEntity.isEquippableInSlot` refuse armour slots (inventory clicks, shift-clicks, hotbar keys) and
+`canEquipWithDispenser` refuse armour; `SmokeEquipMixin` refuses right-click equipping (`Equippable.swapWithEquipmentSlot`).
+As a catch-all (creative inventory, other mods) `SmokeVapour.tick` hands back anything that lands in an armour slot
+that was empty the tick before. Each refusal shows "Armour won't go on smoke." Vapour Form is the only immaterial state.
+
 ## Smoke Jet (0.10.67)
 Hold X (`power/smoke/SmokeJet`): a jet of smoke along your look, 14 blocks, widening 0.14 a block. Each tick it lays
 0.6 of gas along the way (more toward the end) and blows the smoke in its way on; it gives what it catches a gentle
