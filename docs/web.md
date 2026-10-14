@@ -33,6 +33,7 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   ahead on the upswing (the lead leg a little further). Swinging from one hand, the free arm flares out for balance. The
   body banks into turns. It fades in with speed (`WebArms.DRIVE_SPEED` 0.45 b/t) and only going forward; backwards or
   slow, the old limp hang. Tuning: the "active swing" block at the top of `WebArms`.
+- Wall cling needs webbed fists or the suit, climbs on W, and has new perch / tendril poses (see Parkour below).
 
 ## Web Whip, and webs that fall limp (0.8.100)
 - **Let-go webs fall limp:** every web line that lets go (swing webs on R/G, zips, whips, the Yank's lead) is left
@@ -883,6 +884,10 @@ code). No keys of their own:
 - **Wall cling:** in the air, facing a wall, hold Sneak: you hang on it. A/D shimmies along (`CLING_SHIMMY`), let go of
   Sneak to drop. You hold for `CLING_HOLD_TICKS` by tier (2 s to 10 s ascended), then slip (`CLING_SLIP`). The server
   lets a cling float (`WebPower.allowsFloating`) and it never counts as a fall.
+  Since 0.10.100 a cling only starts with webbed fists on (X; synced as `WebStrength.FISTS`) or in the symbiote's suit
+  (`WebParkour.canCling`). Holding W climbs (`CLING_CLIMB`) and pulls you over the top (`MANTLE_UP`, `MANTLE_IN`). With
+  fists it's a spider perch, crawling hand over hand as you move; in the suit the walking tendrils hold the wall
+  (`WebTendrilWalk.climbing`) and it never slips.
 - **Wall jump:** in the air against a wall (front or side), or from a cling, Jump kicks you up and away
   (`WALL_JUMP_UP` by tier, `WALL_JUMP_OUT`). From a cling with W held you climb instead (more up, `CLIMB_OUT` out), so
   cling, jump, cling again scales a wall. Each wall face once until you land; two facing walls chain like a chimney.

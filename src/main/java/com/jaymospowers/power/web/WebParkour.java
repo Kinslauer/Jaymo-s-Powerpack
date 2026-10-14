@@ -34,8 +34,9 @@ import org.jspecify.annotations.Nullable;
  * Parkour for web slingers (our own take on ParCool's moves, which is Forge-only):
  * <ul>
  * <li><b>Vault:</b> sprint at a one-block obstacle and you plant a hand on it and swing your legs over.</li>
- * <li><b>Wall cling:</b> in the air against a wall in front of you, hold Sneak to hang on it; A/D shimmy along, let go
- * of Sneak to drop. You hold on longer with mastery, then start to slip.</li>
+ * <li><b>Wall cling:</b> in the air against a wall in front of you, hold Sneak to hang on it; A/D shimmy along, W climbs
+ * (and pulls you over the top), let go of Sneak to drop. You hold on longer with mastery, then start to slip. It takes
+ * webbed fists to start one (X; Sneak + X when bonded); in the symbiote's suit its tendrils hold you instead, and never slip.</li>
  * <li><b>Wall jump:</b> in the air against a wall (or clinging), Jump kicks you off it, up and away; holding forward
  * from a cling climbs instead, kicking up more than out. Each wall face once until you land, so two facing walls can be
  * climbed like a chimney.</li>
@@ -54,6 +55,8 @@ public final class WebParkour {
 	public static final int CLING_MAX_TICKS = 400;
 	/** Shimmying along the wall while clinging (blocks/tick). */
 	public static final double CLING_SHIMMY = 0.08;
+	/** Climbing up the wall while clinging (W, blocks/tick), and the pull up and over when the wall runs out above. */
+	public static final double CLING_CLIMB = 0.09, MANTLE_UP = 0.45, MANTLE_IN = 0.22;
 	/** A wall jump: up (by tier) and out from the wall; climbing (forward held from a cling) goes up this much more and out this much. */
 	public static final double[] WALL_JUMP_UP = {0.5, 0.54, 0.58, 0.62, 0.66, 0.8};
 	public static final double WALL_JUMP_OUT = 0.45, CLIMB_UP_BONUS = 0.1, CLIMB_OUT = 0.12;
@@ -104,6 +107,11 @@ public final class WebParkour {
 		return move % 8 - 1;
 	}
 
+	/** A cling may start: webbed fists on, or the symbiote's suit (its tendrils hold the wall). */
+	public static boolean canCling(net.minecraft.world.entity.player.Player player) {
+		return player.getAttached(WebStrength.FISTS) != null || WebSymbiote.suitShown(player);
+	}
+
 	/** Clinging to a wall: the server lets them hang in the air. */
 	public static boolean clinging(ServerPlayer player) {
 		Doing doing = DOING.get(player.getUUID());
@@ -120,6 +128,10 @@ public final class WebParkour {
 		int kind = move.kind();
 		Direction side = move.face() >= 0 && move.face() < Direction.values().length ? Direction.from3DDataValue(move.face()) : null;
 		boolean wallMove = kind == CLING || kind == WALL_JUMP;
+		if (kind == CLING && !canCling(player)) {
+			stop(player);
+			return;
+		}
 		if (kind <= NONE || kind > SLIDE || !player.isAlive() || player.isSpectator() || player.isPassenger() || !Powers.has(player, WebPower.INSTANCE)
 			|| wallMove && (side == null || !side.getAxis().isHorizontal() || !WebWallRun.wallAt(player.level(), player, side, 0.8))) {
 			stop(player);
