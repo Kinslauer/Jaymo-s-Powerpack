@@ -30,7 +30,7 @@ import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.10.15) The quarterstaff in a wind sorcerer's hand (a Kingdoms Sorcerer of the air). Its five Better Combat swings (front twirl, sweep, whirlwind, thrust,
+ * (0.10.16) The quarterstaff in a wind sorcerer's hand (a Kingdoms Sorcerer of the air). Its five Better Combat swings (front twirl, sweep, whirlwind, thrust,
  * overhead slam) each carry a gale of their own, counted by our own chain of landed swings (Better Combat's combo index
  * never reaches the server):
  * <ol>

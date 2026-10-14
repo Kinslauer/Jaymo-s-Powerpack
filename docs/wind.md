@@ -563,10 +563,10 @@ whisper in the action bar.
   (`COLD_SWIRL_*`, thickening as it builds) with snowflakes, and plays a blowing wind (breeze air and whirl) every
   `COLD_SOUND_EVERY` ticks (`WindKick.coldSwirl`). The cooldown's cold extra is unchanged.
 
-## 0.10.15: the quarterstaff rides the gale (`WindStaff`)
+## 0.10.16: the quarterstaff rides the gale (`WindStaff`)
 
 Any item whose id ends in `quarterstaff` (the Armory's wooden and iron ones), held by a **wind sorcerer**: a Jaymo's
-Kingdoms Sorcerer who picked the air element (0.10.15, Andy: "only wind sorcerers"; the Wind power alone doesn't count).
+Kingdoms Sorcerer who picked the air element (0.10.16, Andy: "only wind sorcerers"; the Wind power alone doesn't count).
 Kingdoms is read by name (`Classes.of`), so without it nobody qualifies. Server only; Better Combat's
 five staff swings play as before, and our own chain of landed swings (one count per swing, broken after
 `CHAIN_TIMEOUT` 40 ticks without a hit) picks the gale for each:
