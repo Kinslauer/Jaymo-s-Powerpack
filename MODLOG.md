@@ -1017,3 +1017,15 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   obstacles, wall cling (Sneak in the air facing a wall; A/D shimmy; slips after a hold that grows with mastery), wall
   jump (Jump against a wall or from a cling; W from a cling climbs), and a sprint slide (Sneak while sprinting).
   Everyone sees the poses (`WebParkourPose`, attachment `web_parkour`); Fresh Animations steps aside for them.
+- **0.10.31, Z Fighter stage 6 (`ZFighterFusion`, `ZFighterMasters`, `ZFighterRaids`, `ZFighterTournaments`, `ZFighterRogue`,
+  `ZFighterKingdoms`):** the fusion dance (Z then C facing a partner: one body for 60 s, the partner spectating from
+  inside, control swapping at 30 s, stats added plus 10%, 10 min cooldown). With Jaymo's Kingdoms (read by reflection only): masters (each
+  kingdom's eldest villager; a dark master in each barbarian camp) teach a technique or form step once a day, by
+  reputation and the Rogue's path; tyrants (a new `rogue_fighter` entity) raid kingdoms by night every 5-7 days and
+  share 6000 TP by damage; tournaments every 3-4 days in a ring beside a kingdom's seat, players and champions in a
+  bracket, never to the death. Rogue skins from `tools/gen_rogue_fighters.py`. `/powerdebug zfighter raid|tournament`.
+  Corruption (`ZFighterCorruption`, `ZFighterMark`): each dark master's lesson fills a third of Fate's corruption
+  meter, so the third corrupts. Corrupted, a crimson mark glows on the forehead in every form (over Super hair's
+  fringe), and fists and ki power are 15% stronger. Sneak+C in base form toggles Corrupted mode: Super 1's fists,
+  speed and ki power with no ki drain, bleeding half a heart a second (ends at one heart), 35% life steal on every hit,
+  and 3 Combat Roll charges whose rolls blink (up to 8 blocks towards the target, behind it within 5, ahead with none).
