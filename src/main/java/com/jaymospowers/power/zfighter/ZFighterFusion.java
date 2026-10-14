@@ -227,6 +227,7 @@ public final class ZFighterFusion {
 		level.sendParticles(ParticleTypes.END_ROD, true, false, leader.getX(), leader.getY() + 1.0, leader.getZ(), 80, 1.5, 1.5, 1.5, 0.2);
 		level.playSound(null, leader.getX(), leader.getY(), leader.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 2.0F, 0.7F);
 		level.playSound(null, leader.getX(), leader.getY(), leader.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 1.5F, 1.6F);
+		com.jaymospowers.core.Shakes.around(level, leader.position(), 20.0, 1.5F);
 		Component message = Component.translatable("message.jaymospowers.zfighter_fused", leader.getDisplayName(), partner.getDisplayName())
 			.withStyle(ChatFormatting.GOLD);
 		for (ServerPlayer near : level.players()) {

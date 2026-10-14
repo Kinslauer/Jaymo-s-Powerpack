@@ -308,6 +308,7 @@ public final class WindDagger {
 		Vec3 center = player.position().add(0.0, 1.0, 0.0);
 		level.sendParticles(ParticleTypes.GUST_EMITTER_LARGE, center.x, center.y, center.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.BREEZE_WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 1.4F, 0.8F);
+		com.jaymospowers.core.Shakes.heavy(player, center, BURST_RADIUS * 2.0, 0.8F);
 		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(BURST_RADIUS), e -> WindStaff.foe(player, e))) {
 			Vec3 away = target.position().subtract(player.position()).horizontal();
 			double distance = away.length();

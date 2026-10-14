@@ -142,6 +142,7 @@ public final class Knell extends XenoForm {
 				player.resetFallDistance();
 				sound(player, SoundEvents.WARDEN_EMERGE, 1.5F, 1.0F);
 				level.sendParticles(dust, to.x, to.y + 0.5, to.z, 40, 0.8, 0.5, 0.8, 0.1);
+				com.jaymospowers.core.Shakes.heavy(player, to, 12.0, 1.0F);
 			}
 		}
 	}
@@ -195,6 +196,7 @@ public final class Knell extends XenoForm {
 			ring(level, ParticleTypes.SCULK_CHARGE_POP, at, TOLL_RADIUS, 24);
 			sound(player, SoundEvents.WARDEN_SONIC_BOOM, 3.0F, 0.6F);
 			sound(player, SoundEvents.BELL_BLOCK, 3.0F, 0.5F);
+			com.jaymospowers.core.Shakes.heavy(player, at, TOLL_RADIUS * 2.0, 1.8F);
 			if (live.tolls == 0) {
 				ultimateCooldown(player, live, TOLL_COOLDOWN);
 			}
@@ -257,6 +259,7 @@ public final class Knell extends XenoForm {
 			}
 		}
 		sound(player, SoundEvents.WARDEN_SONIC_BOOM, 3.0F, 1.0F);
+		com.jaymospowers.core.Shakes.heavy(player, from.add(dir.scale(2.0)), BOOM_RANGE, 1.4F);
 	}
 
 	private static void shriek(ServerPlayer player) {
@@ -272,6 +275,7 @@ public final class Knell extends XenoForm {
 		level.sendParticles(new net.minecraft.core.particles.ShriekParticleOption(0), at.x, at.y + 0.5, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		sound(player, SoundEvents.WARDEN_ROAR, 3.0F, 1.0F);
 		sound(player, SoundEvents.SCULK_SHRIEKER_SHRIEK, 2.0F, 0.8F);
+		com.jaymospowers.core.Shakes.heavy(player, at, SHRIEK_RADIUS * 1.5, 1.6F);
 	}
 
 	/** Picks where you come up: the surface of the block you look at, or the ground {@link #BURROW_RANGE} ahead. */
