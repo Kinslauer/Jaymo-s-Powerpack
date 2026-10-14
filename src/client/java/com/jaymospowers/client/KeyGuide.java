@@ -20,7 +20,8 @@ import org.jspecify.annotations.Nullable;
  * then {@code .ascended_corrupted}, {@code .corrupted}, {@code .ascended}. An empty line means the key does nothing in
  * that state. Slots: {@code ability_1}-{@code ability_4} (R G V B), {@code mode} (Z), {@code ultimate} (C, only once
  * it answers), {@code special} (X). Every line gets the bound keys as arguments, so it can name them: %1$s-%4$s are
- * R G V B, %5$s Z, %6$s C and %7$s X.
+ * R G V B, %5$s Z, %6$s C and %7$s X. Each line's {@code .name} (e.g. {@code .key.ability_1.corrupted.name}) is its
+ * short name, for the screen's rows and the unlock title; a line without one shows its text cut short.
  */
 final class KeyGuide {
 	static final int COLOR_TEXT = 0xFFFFFFFF;
@@ -31,11 +32,15 @@ final class KeyGuide {
 	/** The X key is shared: Web's symbiote menu, Wind's Tempest Kick and Cyclone. */
 	private static final String SPECIAL_KEY = "key.jaymospowers.web_symbiote";
 
-	/** One key's line: the key's name, what it does, and its colour. */
-	record Line(Component key, Component text, int color) {
+	/** One key's line: the key's name, the ability's short name (null if it has none), what it does, its colour. */
+	record Line(Component key, @Nullable Component name, Component text, int color, boolean locked) {
 		Component full() {
 			return Component.literal("[").append(key).append("] ").append(text);
 		}
+	}
+
+	/** A resolved line: its text and short name. */
+	private record Resolved(Component text, @Nullable Component name) {
 	}
 
 	private KeyGuide() {
@@ -56,17 +61,17 @@ final class KeyGuide {
 			// a fresh awakening: only the starter, on its key (or always on, if it's passive)
 			PowerKey key = power.starterKey();
 			lines.add(new Line(key == null ? Component.translatable("screen.jaymospowers.passive") : name(JaymosPowersClient.keyMapping(key)),
-				Component.translatable(base + "starter", args), COLOR_STARTER));
+				shortName(base + "starter"), Component.translatable(base + "starter", args), COLOR_STARTER, false));
 		}
 		for (PowerKey key : PowerKey.values()) {
-			Component text = resolve(base + key.id(), suffixes, args);
-			if (text == null) {
+			Resolved line = resolve(base + key.id(), suffixes, args);
+			if (line == null) {
 				continue;
 			}
 			// your own power's locked abilities show greyed out
 			boolean locked = mastering && !Mastery.isUnlocked(player, key);
-			lines.add(new Line(name(JaymosPowersClient.keyMapping(key)),
-				locked ? Component.translatable("screen.jaymospowers.locked") : text, locked ? COLOR_DIM : COLOR_TEXT));
+			lines.add(locked ? locked(name(JaymosPowersClient.keyMapping(key)))
+				: new Line(name(JaymosPowersClient.keyMapping(key)), line.name(), line.text(), COLOR_TEXT, false));
 		}
 		add(lines, power, player, "mode", base, suffixes, args, JaymosPowersClient.modeKey(), COLOR_TEXT, mastering);
 		// the C key shows up only once it answers (ascended; some powers' corruption too)
@@ -82,12 +87,12 @@ final class KeyGuide {
 
 	private static void add(List<Line> lines, Power power, @Nullable Player player, String slot, String base, List<String> suffixes,
 			Object[] args, @Nullable KeyMapping mapping, int color, boolean mastering) {
-		Component text = resolve(base + slot, suffixes, args);
-		if (text == null || mapping == null) {
+		Resolved line = resolve(base + slot, suffixes, args);
+		if (line == null || mapping == null) {
 			return;
 		}
 		boolean locked = mastering && !power.slotUnlocked(player, slot);
-		lines.add(new Line(name(mapping), locked ? Component.translatable("screen.jaymospowers.locked") : text, locked ? COLOR_DIM : color));
+		lines.add(locked ? locked(name(mapping)) : new Line(name(mapping), line.name(), line.text(), color, false));
 	}
 
 	/** The lang suffixes to try for {@code player}'s state, most specific first, ending with the plain line. */
@@ -118,12 +123,22 @@ final class KeyGuide {
 		return suffixes;
 	}
 
+	private static Line locked(Component key) {
+		return new Line(key, Component.translatable("screen.jaymospowers.locked_name"), Component.translatable("message.jaymospowers.locked"), COLOR_DIM, true);
+	}
+
+	/** The short name for the line {@code key}, or null if it has none. */
+	private static @Nullable Component shortName(String key) {
+		return Language.getInstance().has(key + ".name") ? Component.translatable(key + ".name") : null;
+	}
+
 	/** The most specific line for {@code key}, or null if there's none or it's empty (nothing in this state). */
-	private static @Nullable Component resolve(String key, List<String> suffixes, Object[] args) {
+	private static @Nullable Resolved resolve(String key, List<String> suffixes, Object[] args) {
 		Language language = Language.getInstance();
 		for (String suffix : suffixes) {
 			if (language.has(key + suffix)) {
-				return language.getOrDefault(key + suffix).isEmpty() ? null : Component.translatable(key + suffix, args);
+				return language.getOrDefault(key + suffix).isEmpty() ? null
+					: new Resolved(Component.translatable(key + suffix, args), shortName(key + suffix));
 			}
 		}
 		return null;

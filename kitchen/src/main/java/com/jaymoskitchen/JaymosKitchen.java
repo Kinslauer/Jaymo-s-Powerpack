@@ -86,7 +86,8 @@ public class JaymosKitchen implements ModInitializer {
 				}
 				return InteractionResult.SUCCESS;
 			}
-			if (player instanceof ServerPlayer reheater && Station.of(level, hit.getBlockPos()) != null
+			Station heat = Station.of(level, hit.getBlockPos());
+			if (player instanceof ServerPlayer reheater && heat != null && heat.heats()
 				&& Kitchen.reheat(reheater, hit.getBlockPos(), player.getMainHandItem())) {
 				return InteractionResult.SUCCESS;
 			}
@@ -106,7 +107,8 @@ public class JaymosKitchen implements ModInitializer {
 				}
 				return InteractionResult.PASS;
 			}
-			if (station != null && sneakingEmptyHanded) {
+			// a cutting board opens the prep screen below, which has the chopping on it
+			if (station != null && station != Station.BOARD && sneakingEmptyHanded) {
 				if (player instanceof ServerPlayer serverPlayer) {
 					ServerPlayNetworking.send(serverPlayer, new Payloads.OpenKitchen(pos, station.ordinal(), Kitchen.stocked(serverPlayer, pos, station)));
 				}
@@ -156,6 +158,8 @@ public class JaymosKitchen implements ModInitializer {
 			(payload, ctx) -> Smoke.finish(ctx.player(), payload.scorchTicks(), payload.coldTicks(), payload.cured()));
 		ServerPlayNetworking.registerGlobalReceiver(Payloads.SearFinish.TYPE,
 			(payload, ctx) -> Sear.finish(ctx.player(), payload.perfects(), payload.goods(), payload.misses()));
+		ServerPlayNetworking.registerGlobalReceiver(Payloads.MinigameFinish.TYPE,
+			(payload, ctx) -> com.jaymoskitchen.cooking.Minigames.finish(ctx.player(), payload.a(), payload.b(), payload.c(), payload.d()));
 		ServerTickEvents.END_SERVER_TICK.register(Kitchen::tick);
 		ServerTickEvents.END_SERVER_TICK.register(Quivers::tick);
 		ServerTickEvents.END_SERVER_TICK.register(Grill::tick);
