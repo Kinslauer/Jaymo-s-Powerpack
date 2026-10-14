@@ -622,6 +622,19 @@ public final class ZFighterPower implements Power {
 		sync(player, live, maxKi(player));
 	}
 
+	/** Puts him in the air already flying, hovering in pose {@code pose} with no take-off burst (a fusion swap mid-flight). */
+	static void hoverNow(ServerPlayer player, int pose) {
+		Live live = live(player);
+		if (pose <= 0 || ZFighterLineage.ape(player) || !com.jaymospowers.power.wind.WindFlight.canFly(player)) {
+			return;
+		}
+		live.flying = true;
+		live.lastFlyPos = player.position();
+		player.resetFallDistance();
+		player.setAttached(FLIGHT, Mth.clamp(pose, 1, FLIGHT_POSES));
+		sync(player, live, maxKi(player));
+	}
+
 	/** Take-off: a burst of ki from where he stood (the client throws him up), a ring of dust and a flash of his aura. */
 	private static void takeOffBurst(ServerPlayer player, Live live) {
 		ServerLevel level = player.level();

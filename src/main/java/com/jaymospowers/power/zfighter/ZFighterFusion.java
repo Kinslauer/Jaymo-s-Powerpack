@@ -245,6 +245,7 @@ public final class ZFighterFusion {
 		ZFighterPower.Live live = ZFighterPower.live(leader);
 		float healthShare = leader.getHealth() / leader.getMaxHealth();
 		boolean airborne = !leader.onGround();
+		int flightPose = live.flying ? ZFighterPower.flightPose(leader) : 0;
 		if (live.flying) {
 			ZFighterPower.endFlight(leader, live);
 		}
@@ -266,7 +267,7 @@ public final class ZFighterFusion {
 		partner.setDeltaMovement(motion);
 		partner.resetFallDistance();
 		if (airborne) {
-			// a moment to take off again before the fall is a real one
+			// just in case the hover doesn't take: a moment to take off again before the fall is a real one
 			partner.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOW_FALLING, 60, 0, false, false));
 		}
 		FUSED.put(partner.getUUID(), swapped);
@@ -277,6 +278,11 @@ public final class ZFighterFusion {
 		ZFighterPower.refresh(partner, partnerLive);
 		partnerLive.ki = Math.min(ZFighterPower.maxKi(partner), ki);
 		partner.setHealth(Math.max(1.0F, healthShare * partner.getMaxHealth()));
+		if (flightPose > 0) {
+			// mid-flight: he takes over hovering where the body was
+			partner.setDeltaMovement(Vec3.ZERO);
+			ZFighterPower.hoverNow(partner, flightPose);
+		}
 		ServerLevel level = partner.level();
 		level.sendParticles(ParticleTypes.END_ROD, true, false, partner.getX(), partner.getY() + 1.0, partner.getZ(), 40, 0.8, 1.0, 0.8, 0.1);
 		level.playSound(null, partner.getX(), partner.getY(), partner.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1.5F, 0.8F);
