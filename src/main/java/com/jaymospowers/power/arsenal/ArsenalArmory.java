@@ -60,7 +60,9 @@ public final class ArsenalArmory {
 		ServerLevel level = player.level();
 		ItemStack held = player.getMainHandItem();
 		if (Summoned.is(held)) {
-			player.setAttached(PIN, BuiltInRegistries.ITEM.getKey(held.getItem()));
+			// a TaCZ flintlock pins as the flintlock (TaCZ guns all share one item)
+			Item pin = ArsenalFlintlock.isFlintlock(held) ? ArsenalFlintlock.FLINTLOCK : held.getItem();
+			player.setAttached(PIN, BuiltInRegistries.ITEM.getKey(pin));
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal.pinned", held.getHoverName())
 				.withStyle(ChatFormatting.GOLD));
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARMOR_EQUIP_NETHERITE.value(), SoundSource.PLAYERS, 0.9F, 0.7F);

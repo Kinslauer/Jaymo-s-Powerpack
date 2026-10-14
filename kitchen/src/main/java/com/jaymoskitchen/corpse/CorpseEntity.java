@@ -82,6 +82,9 @@ public class CorpseEntity extends Entity {
 	/** (0.4.37) Parts the body lost before it died (see {@link Corpses#missingParts}): not drawn. */
 	private static final EntityDataAccessor<Integer> MISSING = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.INT);
+	/** (0.4.39) The game time it died (0 once reloaded): clients let a fresh body fall into place (see Flop). */
+	private static final EntityDataAccessor<Long> BORN = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.LONG);
 
 	/** Animals at most this big (wide and tall, after baby scaling) go in a pocket; bigger ones are carried. */
 	private static final float POCKET_WIDTH = 0.5F, POCKET_HEIGHT = 0.8F;
@@ -435,6 +438,18 @@ public class CorpseEntity extends Entity {
 		builder.define(OWNER_NAME, "");
 		builder.define(CRUMBLING, false);
 		builder.define(MISSING, 0);
+		builder.define(BORN, 0L);
+	}
+
+	/** (0.4.39) Server: it has just died, this tick (see {@link #sinceDeath}). */
+	public void markJustDied() {
+		this.entityData.set(BORN, level().getGameTime());
+	}
+
+	/** (0.4.39) Ticks since it died, or a very large number for a body that has been lying a while (or was reloaded). */
+	public long sinceDeath() {
+		long born = this.entityData.get(BORN);
+		return born == 0L ? Long.MAX_VALUE : level().getGameTime() - born;
 	}
 
 	@Override

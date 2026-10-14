@@ -116,6 +116,8 @@ def packMods = [
 	// custom third-person views on F6 and F7 (Right Alt + the key edits one). Client-only. Jaymo's Powers sets its F7
 	// view to Andy's preset once per install (client/CameraPreset) and takes its zoom off Z (client/KeyConflicts).
 	[dep: "maven.modrinth:camera-utils:5XAah6bJ", cf: [510234, 8887090]],
+	// Forge Config API Port (MPL-2.0, Fuzs): config library that TaCZ: Refabricated needs (packModsOverride).
+	[dep: "maven.modrinth:forge-config-api-port:JpKvrr9J", cf: [547434, 8938808]],
 	// Entity Model Features and Entity Texture Features (both LGPL-3.0, by Traben): custom entity models and animations
 	// from resource packs, here for Fresh Animations: Player Extension (packResourcePacks). Client-only. Our own poses
 	// pause its animations while they play (client/EmfCompat).
@@ -146,6 +148,15 @@ def packModsNoCf = [
 	// ruins from vanilla blocks. Server-side worldgen, so the server having it is what counts.
 	// TODO(home PC): its CurseForge [project id, file id], as above.
 	[dep: "maven.modrinth:grim-kingdoms-lost-structures-ruins-vanilla-edition:Hn8zuckE", cf: null],
+]
+// on Modrinth only and needed by every client, so the CurseForge import zip carries the jar itself (overrides/mods), and
+// the server, modpack/mods and your profile get it like any pack mod. Not loaded in the dev game (too heavy).
+def packModsOverride = [
+	// TaCZ: Refabricated, unofficial 26.3 port (Modrinth "tacz-refabricated-unofficial-port"; GPL-3.0 code, art
+	// CC BY-NC-ND 4.0, so shipped as the untouched jar with credit, never edited or taken apart): Timeless and Classics
+	// Zero's modern guns with attachments, scopes, a Gun Smith Table and ammo. The official TaCZ is Forge 1.20.1 and its
+	// Fabric port stops at 1.21.1. Beta. Needs Forge Config API Port (packMods) and Player Animation Library 1.2.7+.
+	[dep: "maven.modrinth:tacz-refabricated-unofficial-port:3BP2Kc1r"],
 ]
 // not on CurseForge: shipped inside the pack as overrides
 def kitchenJar = fileTree("libs") { include "jaymos-kitchen-*.jar" }
@@ -184,10 +195,10 @@ def packResourcePacks = [
 ]
 // mods taken out of the pack: moved out of your CurseForge profile's mods folder (into removed-mods) on the next build
 // (Towns and Towers left in 0.8.4: its villages fought Epic Structures: Villages, where kingdoms are founded; its
-// library Cristel Lib came back in 0.8.69 for Overhauled Overworld. Traveler's Backpack and Forge Config API Port left
-// in 0.8.14)
+// library Cristel Lib came back in 0.8.69 for Overhauled Overworld. Traveler's Backpack left in 0.8.14, and Forge
+// Config API Port with it until TaCZ brought it back in 0.10.43)
 // (Chunky left in 0.8.118: with Distant Horizons on the server, a new world hung for good at "Selecting global world spawn")
-def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-", "forge-config-api-port-", "alexs-mobs-", "citadel-", "chunky-"]
+def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-", "alexs-mobs-", "citadel-", "chunky-"]
 // the same, by Fabric mod id, for mods whose CurseForge file names we don't know: Alex's Mobs and Citadel (0.8.107,
 // their models drew black slabs and streaks across the screen with Iris shaders), Distant Horizons (0.9.6, taken out
 // at Andy's request; a new world on the Deck's server had hung at startup with it)
@@ -212,6 +223,11 @@ configurations {
 		canBeResolved = true
 		transitive = false
 	}
+	packOverrideJars {
+		canBeConsumed = false
+		canBeResolved = true
+		transitive = false
+	}
 }
 
 dependencies {
@@ -232,6 +248,7 @@ dependencies {
 	packMods.drop(1).findAll { it.dev != false }.each { localRuntime it.dep }
 	packMods.each { packJars it.dep }
 	packModsNoCf.each { localRuntime it.dep; packJars it.dep }
+	packModsOverride.each { packJars it.dep; packOverrideJars it.dep }
 }
 
 // gradlew packageModpack:
@@ -270,6 +287,7 @@ tasks.register("curseforgePack", Zip) {
 	destinationDirectory = packDir
 	from(layout.buildDirectory.file("modpack/manifest.json"))
 	into("overrides/mods") {
+		from configurations.packOverrideJars
 		from tasks.named("jar")
 		from kitchenJar
 		from mcaJar

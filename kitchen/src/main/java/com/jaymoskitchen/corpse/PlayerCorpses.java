@@ -69,6 +69,7 @@ public final class PlayerCorpses {
 		corpse.setSlim(slim(player));
 		corpse.setMissing(Corpses.missingParts(player));
 		holder.jaymoskitchen$setHotbar(List.of(), 0);
+		corpse.markJustDied();
 		level.addFreshEntity(corpse);
 	}
 

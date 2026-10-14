@@ -1,0 +1,15 @@
+{
+  "jaymospowers.ammo.musket_ball.name": "Musket Balls",
+  "jaymospowers.ammo.shot.name": "Shot",
+  "jaymospowers.ammo.void_shot.name": "Void Shot",
+  "jaymospowers.gun.blunderbuss.desc": "A brass flintlock with a flared mouth: a fistful of shot, deadly up close.",
+  "jaymospowers.gun.blunderbuss.name": "Blunderbuss",
+  "jaymospowers.gun.flintlock_pistol.desc": "A single-shot horse pistol, quicker to load than a musket.",
+  "jaymospowers.gun.flintlock_pistol.name": "Flintlock Pistol",
+  "jaymospowers.gun.musket.desc": "A long smoothbore flintlock. One ball, a long reload, and a hard hit out to 24 blocks.",
+  "jaymospowers.gun.musket.name": "Musket",
+  "jaymospowers.gun.void_flintlock.desc": "Out of the rift, one shot at a time: a spent one is dropped and a loaded one pulled from the void.",
+  "jaymospowers.gun.void_flintlock.name": "Void Flintlock",
+  "pack.jaymospowers.jaymos_flintlocks.desc": "Muskets, blunderbusses and pistols for Jaymo's Powers.",
+  "pack.jaymospowers.jaymos_flintlocks.name": "Jaymo's Flintlocks"
+}

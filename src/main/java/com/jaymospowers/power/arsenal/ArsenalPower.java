@@ -277,6 +277,7 @@ public final class ArsenalPower implements Power {
 		HundredBlades.tick(player);
 		ArsenalDamocles.tick(player);
 		ArsenalCannons.tick(player);
+		ArsenalFlintlock.tickTacz(player);
 		Pending pending = PENDING.get(player.getUUID());
 		if (pending == null) {
 			return;
