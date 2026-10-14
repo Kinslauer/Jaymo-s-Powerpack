@@ -11,7 +11,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
 
 /**
- * (0.7.6) Jaymo's flintlocks (musket, blunderbuss, flintlock pistol), a TaCZ gunpack that Jaymo's Powers ships
+ * (0.7.8) Jaymo's flintlocks (musket, blunderbuss, flintlock pistol), a TaCZ gunpack that Jaymo's Powers ships
  * (its armory/TaczGuns). TaCZ guns and ammo are one item each, told apart by an id in their custom data, so they're
  * made here by item id: nothing of TaCZ is compiled against. Empty stacks when TaCZ isn't installed.
  */

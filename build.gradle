@@ -107,6 +107,13 @@ def packMods = [
 	// pause its animations while they play (client/EmfCompat).
 	[dep: "maven.modrinth:entity-model-features:N7d5LddE", cf: [844662, 9064964]],
 	[dep: "maven.modrinth:entitytexturefeatures:O8J3sxxp", cf: [568563, 9055242]],
+	// Sailing. Shippy Ships and Old Cannons (by Caesius_Leo; custom licence: "Include this mod in public or private
+	// Minecraft modpacks, provided proper credit is given"; downloaded by id, never copied or taken apart): sailboat,
+	// cog, caravel and galleon you craft and sail (crew, storms, sinking, wrecks you can loot), and cannons that mount on
+	// them for naval battles. Both need Ingenium API (MIT, same author). Client and server.
+	[dep: "maven.modrinth:ingeniumapi:VYmEo1o8", cf: [1609990, 8956937]],
+	[dep: "maven.modrinth:shippy-ships:q3Hz6ClL", cf: [1551850, 9106490]],
+	[dep: "maven.modrinth:oldcannons:Lpxyj63b", cf: [1610113, 8974890]],
 ]
 // First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
 // Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge
@@ -169,7 +176,7 @@ def packResourcePacks = [
 // mods taken out of the pack: moved out of your CurseForge profile's mods folder (into removed-mods) on the next build
 // (Towns and Towers left in 0.8.4: its villages fought Epic Structures: Villages, where kingdoms are founded; its
 // library Cristel Lib came back in 0.8.69 for Overhauled Overworld. Traveler's Backpack left in 0.8.14, and Forge
-// Config API Port with it until TaCZ brought it back in 0.10.41)
+// Config API Port with it until TaCZ brought it back in 0.10.43)
 // (Chunky left in 0.8.118: with Distant Horizons on the server, a new world hung for good at "Selecting global world spawn")
 def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-", "alexs-mobs-", "citadel-", "chunky-"]
 // the same, by Fabric mod id, for mods whose CurseForge file names we don't know: Alex's Mobs and Citadel (0.8.107,

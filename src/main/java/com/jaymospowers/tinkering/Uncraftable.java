@@ -23,7 +23,7 @@ public final class Uncraftable {
 	}
 
 	/**
-	 * (0.10.41) TaCZ's own modern guns, their ammo and attachments (its default gunpack's recipes) and the attachment
+	 * (0.10.43) TaCZ's own modern guns, their ammo and attachments (its default gunpack's recipes) and the attachment
 	 * bench: the pack only uses TaCZ for our flintlocks (armory/TaczGuns), whose recipes are jaymospowers:gun/... .
 	 */
 	static final List<String> PREFIXES = List.of("tacz:gun/", "tacz:ammo/", "tacz:attachments/");

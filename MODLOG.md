@@ -1032,7 +1032,12 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.10.37 / Kingdoms 0.7.5, timelapse night and bed rest:** our own take on Sleeping Overhaul 2 (Forge only): the
   night runs by as a timelapse (the whole world sped up, villagers at work; drag to look around in bed) instead of skipping, leave bed any time, and rest in bed awake by day or sneaking (immune
   to poison and withering), with a Sleep button at night. See kingdoms/MODLOG.md.
-- **0.10.41 / Kingdoms 0.7.6, flintlocks in TaCZ:** TaCZ: Refabricated (the unofficial Fabric 26.3 port of Timeless
+- **0.10.42, sailing (pack mods):** Shippy Ships (sailboat, cog, caravel, galleon) and Old Cannons join the pack with
+  Ingenium API, all by Caesius_Leo, whose licence allows modpacks with credit. Valkyrien Skies, Eureka and Valkyrien
+  Pirates have no build past 1.20.1; Haubna's ocean physics are Physics Mod Pro (paid Patreon), so neither ships.
+  With them, Kingdoms 0.7.7 brings sailing stage 1, our own ships built from blocks: put a helm on any hull you build
+  on water and cast off (bellied sails on yards, buoyancy by weight, walkable decks and holds, chests usable afloat, drop anchor).
+- **0.10.43 / Kingdoms 0.7.8, flintlocks in TaCZ:** TaCZ: Refabricated (the unofficial Fabric 26.3 port of Timeless
   and Classics Zero, beta) joins the pack with Forge Config API Port, used only for our own guns: a musket, a
   blunderbuss and a flintlock pistol, a gunpack of ours (`assets/jaymospowers/custom/jaymos_flintlocks`, from
   tools/gen_tacz_guns.py: models, texture, sounds and muzzle-loading animations, nothing of TaCZ's art) that

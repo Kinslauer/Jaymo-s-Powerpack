@@ -2621,7 +2621,32 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   can't hurt you while you rest (anything else gets you up). At night a **Sleep** button over Leave Bed puts you to
   sleep. Resting needs what sleeping does (reach, room, no monsters near) and sets your spawn.
 
-## 0.7.6: musketeers carry Jaymo's flintlocks (pack 0.10.41)
+## 0.7.7: sailing, stage 1: ships built from blocks (pack 0.10.42)
+- Andy: "i want sailing" (Valkyrien Skies, Eureka and Valkyrien Pirates stop at 1.20.1; Haubna's are ARR), so our own.
+  Plan: `/mnt/project-files/sailing/Sailing-Plan.md` (stage 2 naval combat, stage 3 pirates and navies, later).
+- **Helm** (`HelmBlock`; planks, a compass and iron) and **sail** (`SailBlock`; wool and a stick, makes 4). Build a hull
+  of any blocks on water, put a helm on it and right-click: everything joined to the helm (not the sea, not the land)
+  casts off as one `Ship` entity, up to 3000 blocks and 64 long. Joined to the land, or aground, it won't go.
+- **Buoyancy** (`Hull`): every block weighs by its material (cloth, wood, glass, stone, metal, gold) and the shape it
+  fills; dry rooms enclosed by the hull, layer by layer, float it too. It settles to the depth where it displaces its
+  own weight, and too heavy a hull won't cast off at all. The sea inside the hold is masked out (no water drawn there,
+  no swimming in it).
+- **Sailing**: W/S set and furl the sails, A/D the rudder; S with sails furled backs water. Top speed grows with sails
+  and length (8 blocks/s at most); long ships turn slower, and slower at low speed. It stops against land and blocks,
+  heels in turns and rolls on the swell (more in storms). Everyone and everything on deck rides along and can walk it.
+- **Anchoring**: sneak at the helm of a ship lying still and it swings to the nearest straight heading and goes back
+  into the world as blocks, a block or two off if it must, chests and their contents with it; under way, sneaking leaves
+  the helm and it drifts with its sails furling. With no one aboard it anchors itself after 5 s.
+- Chests (any 1-6 row container) open aboard while sailing; other block entities wait for the anchor.
+- **Sails** (Andy: "the sails kind of float"): sails side by side and above one another join into one sheet of our own
+  canvas (seamed panels), hanging from a yard across its top just in front of the mast (a fence, wall or upright log
+  beside it is crossed by the sheet and the yard, lashed to it), bellied out toward the bow, most in the middle and less
+  at its free edges, with sheets (ropes) from its lower corners. `SailBlock` knows its neighbours (`left`/`right`: none,
+  sail or mast; `up`/`down`); 36 shapes of sheet from `tools/gen_sailing.py`. Hung facing aft, a sail is turned to
+  face forward as the ship casts off. While the ship's sails are furled (W/S) they're drawn rolled up on their yards
+  (`furled`, the ship's sail setting synced to clients).
+
+## 0.7.8: musketeers carry Jaymo's flintlocks (pack 0.10.43)
 - **`TaczGuns`:** with TaCZ installed, our TaCZ guns (musket, blunderbuss, flintlock pistol; the gunpack ships in
   Jaymo's Powers) are made by item id with their gun id in custom data. Musketeers are handed the TaCZ musket
   (`Muskets.musketStack`) and their shots stay our own; the Marksman's class card shows it with musket balls.
