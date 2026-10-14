@@ -63,7 +63,7 @@ public final class Ships {
 	public static boolean dry(Level level, net.minecraft.core.BlockPos pos) {
 		Vec3 mid = Vec3.atCenterOf(pos);
 		for (Ship s : in(level)) {
-			if (!s.getBoundingBox().contains(mid)) {
+			if (!s.getBoundingBox().contains(mid) || s.foundering()) {
 				continue;
 			}
 			Hull h = s.hull();

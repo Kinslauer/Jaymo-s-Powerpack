@@ -1,0 +1,49 @@
+{
+  "variants": {
+    "facing=north,load=empty": {
+      "model": "jaymoskingdoms:block/ship_cannon"
+    },
+    "facing=north,load=powder": {
+      "model": "jaymoskingdoms:block/ship_cannon"
+    },
+    "facing=north,load=shot": {
+      "model": "jaymoskingdoms:block/ship_cannon"
+    },
+    "facing=east,load=empty": {
+      "model": "jaymoskingdoms:block/ship_cannon",
+      "y": 90
+    },
+    "facing=east,load=powder": {
+      "model": "jaymoskingdoms:block/ship_cannon",
+      "y": 90
+    },
+    "facing=east,load=shot": {
+      "model": "jaymoskingdoms:block/ship_cannon",
+      "y": 90
+    },
+    "facing=south,load=empty": {
+      "model": "jaymoskingdoms:block/ship_cannon",
+      "y": 180
+    },
+    "facing=south,load=powder": {
+      "model": "jaymoskingdoms:block/ship_cannon",
+      "y": 180
+    },
+    "facing=south,load=shot": {
+      "model": "jaymoskingdoms:block/ship_cannon",
+      "y": 180
+    },
+    "facing=west,load=empty": {
+      "model": "jaymoskingdoms:block/ship_cannon",
+      "y": 270
+    },
+    "facing=west,load=powder": {
+      "model": "jaymoskingdoms:block/ship_cannon",
+      "y": 270
+    },
+    "facing=west,load=shot": {
+      "model": "jaymoskingdoms:block/ship_cannon",
+      "y": 270
+    }
+  }
+}

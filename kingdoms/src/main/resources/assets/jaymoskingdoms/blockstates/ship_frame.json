@@ -1,0 +1,244 @@
+{
+  "variants": {
+    "facing=north,want=hull,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/hull"
+    },
+    "facing=north,want=hull,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/hull"
+    },
+    "facing=east,want=hull,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/hull",
+      "y": 90
+    },
+    "facing=east,want=hull,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/hull",
+      "y": 90
+    },
+    "facing=south,want=hull,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/hull",
+      "y": 180
+    },
+    "facing=south,want=hull,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/hull",
+      "y": 180
+    },
+    "facing=west,want=hull,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/hull",
+      "y": 270
+    },
+    "facing=west,want=hull,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/hull",
+      "y": 270
+    },
+    "facing=north,want=rail,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/rail"
+    },
+    "facing=north,want=rail,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/rail"
+    },
+    "facing=east,want=rail,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/rail",
+      "y": 90
+    },
+    "facing=east,want=rail,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/rail",
+      "y": 90
+    },
+    "facing=south,want=rail,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/rail",
+      "y": 180
+    },
+    "facing=south,want=rail,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/rail",
+      "y": 180
+    },
+    "facing=west,want=rail,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/rail",
+      "y": 270
+    },
+    "facing=west,want=rail,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/rail",
+      "y": 270
+    },
+    "facing=north,want=mast,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/mast"
+    },
+    "facing=north,want=mast,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/mast"
+    },
+    "facing=east,want=mast,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/mast",
+      "y": 90
+    },
+    "facing=east,want=mast,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/mast",
+      "y": 90
+    },
+    "facing=south,want=mast,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/mast",
+      "y": 180
+    },
+    "facing=south,want=mast,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/mast",
+      "y": 180
+    },
+    "facing=west,want=mast,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/mast",
+      "y": 270
+    },
+    "facing=west,want=mast,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/mast",
+      "y": 270
+    },
+    "facing=north,want=sail,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/sail"
+    },
+    "facing=north,want=sail,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/sail"
+    },
+    "facing=east,want=sail,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/sail",
+      "y": 90
+    },
+    "facing=east,want=sail,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/sail",
+      "y": 90
+    },
+    "facing=south,want=sail,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/sail",
+      "y": 180
+    },
+    "facing=south,want=sail,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/sail",
+      "y": 180
+    },
+    "facing=west,want=sail,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/sail",
+      "y": 270
+    },
+    "facing=west,want=sail,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/sail",
+      "y": 270
+    },
+    "facing=north,want=helm,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/helm"
+    },
+    "facing=north,want=helm,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/helm"
+    },
+    "facing=east,want=helm,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/helm",
+      "y": 90
+    },
+    "facing=east,want=helm,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/helm",
+      "y": 90
+    },
+    "facing=south,want=helm,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/helm",
+      "y": 180
+    },
+    "facing=south,want=helm,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/helm",
+      "y": 180
+    },
+    "facing=west,want=helm,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/helm",
+      "y": 270
+    },
+    "facing=west,want=helm,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/helm",
+      "y": 270
+    },
+    "facing=north,want=oar,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/oar"
+    },
+    "facing=north,want=oar,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/oar"
+    },
+    "facing=east,want=oar,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/oar",
+      "y": 90
+    },
+    "facing=east,want=oar,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/oar",
+      "y": 90
+    },
+    "facing=south,want=oar,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/oar",
+      "y": 180
+    },
+    "facing=south,want=oar,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/oar",
+      "y": 180
+    },
+    "facing=west,want=oar,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/oar",
+      "y": 270
+    },
+    "facing=west,want=oar,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/oar",
+      "y": 270
+    },
+    "facing=north,want=cannon,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/cannon"
+    },
+    "facing=north,want=cannon,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/cannon"
+    },
+    "facing=east,want=cannon,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/cannon",
+      "y": 90
+    },
+    "facing=east,want=cannon,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/cannon",
+      "y": 90
+    },
+    "facing=south,want=cannon,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/cannon",
+      "y": 180
+    },
+    "facing=south,want=cannon,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/cannon",
+      "y": 180
+    },
+    "facing=west,want=cannon,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/cannon",
+      "y": 270
+    },
+    "facing=west,want=cannon,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/cannon",
+      "y": 270
+    },
+    "facing=north,want=chest,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/chest"
+    },
+    "facing=north,want=chest,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/chest"
+    },
+    "facing=east,want=chest,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/chest",
+      "y": 90
+    },
+    "facing=east,want=chest,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/chest",
+      "y": 90
+    },
+    "facing=south,want=chest,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/chest",
+      "y": 180
+    },
+    "facing=south,want=chest,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/chest",
+      "y": 180
+    },
+    "facing=west,want=chest,waterlogged=false": {
+      "model": "jaymoskingdoms:block/ship_frame/chest",
+      "y": 270
+    },
+    "facing=west,want=chest,waterlogged=true": {
+      "model": "jaymoskingdoms:block/ship_frame/chest",
+      "y": 270
+    }
+  }
+}

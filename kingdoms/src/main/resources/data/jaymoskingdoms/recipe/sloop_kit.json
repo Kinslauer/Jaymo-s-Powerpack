@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:paper",
+    "minecraft:paper",
+    "minecraft:string",
+    "minecraft:stick",
+    "#minecraft:wool"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:sloop_kit"
+  }
+}

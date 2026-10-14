@@ -44,8 +44,10 @@ public final class Hull {
 	/** How deep it sits (blocks below the waterline, from its bottom), and whether it floats at all. */
 	public final float draft;
 	public final boolean floats;
-	/** Its length at the waterline (blocks, along local z), and its sails. */
-	public final int waterline, sails;
+	/** Its length at the waterline (blocks, along local z), its sails, and (0.7.12) its oars. */
+	public final int waterline, sails, oars;
+	/** (0.7.12) Its guns' pieces, and its oars'. */
+	public final int[] cannons, oarPieces;
 	/** The pieces on its outside (walls, bottom and ends), which run into land first. */
 	public final int[] skin;
 	/** The helm's piece (-1: none). */
@@ -61,6 +63,7 @@ public final class Hull {
 		this.hi = new float[n];
 		int x0 = Integer.MAX_VALUE, y0 = Integer.MAX_VALUE, z0 = Integer.MAX_VALUE, x1 = Integer.MIN_VALUE, y1 = Integer.MIN_VALUE, z1 = Integer.MIN_VALUE;
 		int h = -1, sailCount = 0;
+		IntArrayList guns = new IntArrayList(), oarList = new IntArrayList();
 		double r = 1.0;
 		float[] fill = new float[n];
 		float m = 0.0F;
@@ -96,7 +99,16 @@ public final class Hull {
 			if (state.getBlock() instanceof SailBlock) {
 				sailCount++;
 			}
+			if (state.getBlock() instanceof ShipCannonBlock) {
+				guns.add(i);
+			}
+			if (state.getBlock() instanceof OarBlock) {
+				oarList.add(i);
+			}
 		}
+		this.cannons = guns.toIntArray();
+		this.oarPieces = oarList.toIntArray();
+		this.oars = this.oarPieces.length;
 		this.minX = x0;
 		this.minY = y0;
 		this.minZ = z0;
