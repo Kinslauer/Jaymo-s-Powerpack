@@ -1037,3 +1037,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Pirates have no build past 1.20.1; Haubna's ocean physics are Physics Mod Pro (paid Patreon), so neither ships.
   With them, Kingdoms 0.7.7 brings sailing stage 1, our own ships built from blocks: put a helm on any hull you build
   on water and cast off (bellied sails on yards, buoyancy by weight, walkable decks and holds, chests usable afloat, drop anchor).
+- **0.10.47 / Kitchen 0.4.39, ragdoll physics:** our own Physics Mod-style ragdolls for corpses (Physics Mod itself is
+  closed, ARR and client-only with no API; see kitchen/MODLOG.md). Severed parts roll along the ground as they move,
+  rock to rest on a spring (a limb lies along the ground, never on end), and are kicked along by anyone walking into them.

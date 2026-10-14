@@ -753,3 +753,16 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
   Cooking Pot on a lit oven).
 - The dish list is restyled like the Powers H screen: striped rows with the dish, its method and ingredient icons, and
   a hover box with how it's cooked, what Perfect gives and what you're missing. Click a row to cook it.
+
+### 0.4.39: ragdoll physics
+- Andy asked to work Physics Mod into our ragdolls. It can't be: it's closed source, All Rights Reserved, client-only
+  and has no API, so it can't drive our server-side corpses. `client/corpse/Flop` is our own take instead, run on each
+  client per corpse:
+  - Every limb and the head sit on a damped spring around the rest pose (Ragdoll sprawl, Limp hang, or the keeled-over
+    pose), so blows, rummaging, landing from a drop or throw, being shoved (explosions, carts) and people walking over
+    the body fling them about. Limbs of a sprawled body slap down onto the ground and bounce. Replaces `Jolt`.
+  - The whole body swings from where it was drawn into each new pose (dying, picked up, dropped, landing) instead of
+    snapping: lying down it falls under gravity and bounces, held up it's a quick spring. A fresh body (synced
+    `BORN`, `CorpseEntity.markJustDied`) falls from the dying mob's keeled-over pose, limbs swinging out from straight.
+  - Lying still it tips to the ground under it (slopes, steps, slabs; up to 35 degrees; walls aren't climbed) and
+    bounces a little when it lands hard.
