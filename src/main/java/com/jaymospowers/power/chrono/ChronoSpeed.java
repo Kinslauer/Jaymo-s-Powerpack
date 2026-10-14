@@ -63,7 +63,12 @@ public final class ChronoSpeed {
 
 	/** Water holds up an overclocked player who's sprinting (lava doesn't: they'd still burn). */
 	public static boolean runsOn(Player player, FluidState fluid) {
-		return fluid.is(FluidTags.WATER) && player.isSprinting() && !player.isShiftKeyDown() && overclocked(player);
+		return fluid.is(FluidTags.WATER) && runsOnFluids(player);
+	}
+
+	/** Overclocked and sprinting (not sneaking): the water run is on (which fluids hold you is {@link #runsOn}'s). */
+	public static boolean runsOnFluids(Player player) {
+		return player.isSprinting() && !player.isShiftKeyDown() && overclocked(player);
 	}
 
 	/** Each tick (server): the sprint and step modifiers follow Overclock and sprinting; the streak behind you. */
@@ -82,7 +87,7 @@ public final class ChronoSpeed {
 				}
 				ChronoFx.particles(level, player, ParticleTypes.WAX_ON, was.x, was.y + 0.9, was.z, 1, 0.2, 0.4, 0.2, 0.0);
 			}
-			if (player.isInWater() || player.onGround() && !level.getFluidState(player.blockPosition()).isEmpty()) {
+			if (player.isInWater() || player.onGround() && !level.getFluidState(player.blockPosition().below()).isEmpty()) {
 				ChronoFx.particles(level, player, ParticleTypes.SPLASH, player.getX(), player.getY() + 0.1, player.getZ(), 6, 0.3, 0.0, 0.3, 0.1);
 			}
 		}

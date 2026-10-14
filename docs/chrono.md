@@ -8,7 +8,7 @@ Particles and sounds are sent from the server, so every nearby player sees and h
 | Key (default) | Ability | What it does | Cooldown |
 |---|---|---|---|
 | R | **Rewind** | Snaps you back to where you were 3 s ago, with the same facing. Restores your health to what it was then, if that was higher. Puts out fire and clears fall distance. A golden streak replays your path backwards, with a rising chime. | 15 s |
-| G | **Stasis Field** | Stops time for 4 s in a 6-block sphere where you cast it. Mobs (not players) freeze in place with their AI paused. Projectiles in flight stop mid-air and then carry on with their original velocity. You can still hit frozen mobs; the knockback is stored and released (capped) when time resumes. | 30 s |
+| G | **Stasis Field** | Stops time for 4 s in a 6-block sphere where you cast it. Mobs (not players) freeze in place with their AI paused. Projectiles in flight stop mid-air and then carry on with their original velocity. You can still hit frozen mobs; the knockback is stored and released (capped) when time resumes. Casting it also resets every other cooldown you have running (Rewind, Overclock, Bloom, Chrono Punch, item cooldowns like ender pearls), never its own. | 30 s |
 | V | **Overclock** | 6 s of Speed III, Haste II and ×1.6 attack speed (a transient attribute modifier). | 25 s |
 | B | **Time Bloom** | 5 s of fast-forward in a 5-block sphere where you cast it. Gives extra random ticks (crops, saplings, cane, berries, amethyst...) and runs every ticking block entity at 4× speed (furnaces, smokers, blast furnaces, campfires, brewing stands, Cooking for Blockheads ovens). | 40 s |
 
