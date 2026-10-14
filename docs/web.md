@@ -547,7 +547,7 @@ it no longer lurches in a straight line into walls.
      `SELF_FEED_RANGE` 14 (edible, nobody carrying it, no tendril holding it); else the nearest creature there that
      leaves a corpse (no pets, no named ones; players only in a rampage).
   2. **Kill:** it takes the wheel (a "hunt" takeover: no big body) and attacks; the tendril strikes go for the prey
-     first. No time limit (0.10.5): it only gives up if the prey gets `TAKEOVER_ESCAPE` 64 away or is gone, or you
+     first. No time limit (0.10.7): it only gives up if the prey gets `TAKEOVER_ESCAPE` 64 away or is gone, or you
      break free. A hungry or rampage takeover that kills its own prey also goes on into feeding. Either way it keeps
      the wheel through grab, carry and meal (`holdForMeal`: the takeover's target becomes you, and your client holds
      still), letting go when the meal ends (or when the post-meal escape leap fires). Takeovers no longer end on a
@@ -771,10 +771,10 @@ roams, bonds a nearby web user, or with Kitchen waits for the body to rise and t
   skips its own damage for these via `WebCounter.ownsStrike`), Jaw Snap, Maul, Maw Roar, Drag to the Jaws (the maw,
   drawn by `WebMouthLayer` from `web_counter` / `WebCounter.maw`). The maw only bites; nothing living is fed on.
   Damage and timings are constants at the top of `WebCounter`.
-- **Sense bolts (0.10.5, `WebSenseBolts`):** no text on a dodge or counter. While the counter window is open
+- **Sense bolts (0.10.7, `WebSenseBolts`):** no text on a dodge or counter. While the counter window is open
   (`web_counter_ready`, now synced to everyone), three faint pale-gold lightning bolts flash over the slinger's head
   every 6 ticks, fading through the window; in first person your own flash at the top of the screen.
-- **Tendril-held corpse (0.10.5):** while a tendril grips a Kitchen corpse, a plain right click (no Sneak, any target)
+- **Tendril-held corpse (0.10.7):** while a tendril grips a Kitchen corpse, a plain right click (no Sneak, any target)
   releases it into your arms (`WebTendrils.CarryHeld` → `carryHeld` → `KitchenCompat.carry`).
 - **Web Strike (C, `onUltimate`):**
   - It zips you to the living entity under the crosshair within `STRIKE_RANGE` 32, as a Yank-to pull.
