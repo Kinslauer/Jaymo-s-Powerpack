@@ -75,8 +75,8 @@ final class ZFighterTechniques {
 	/** The sphere's radius at full: 15, so 30 blocks across. */
 	static final double SPIRIT_MAX_SIZE = 15.0;
 	/** Where it lands: hurt reach and blast power, per block of its radius. */
-	static final double SPIRIT_REACH_PER_SIZE = 1.2;
-	static final float SPIRIT_BURST_PER_SIZE = 0.4F;
+	static final double SPIRIT_REACH_PER_SIZE = 2.0;
+	static final float SPIRIT_BURST_PER_SIZE = 1.0F;
 	/** How far off players still see the sphere drawn. */
 	static final double SPIRIT_SEEN = 256.0;
 	/** Someone who hurt him this recently counts as a foe (ticks). */
@@ -264,7 +264,7 @@ final class ZFighterTechniques {
 		spiritFx(level, player.getId(), sphere, size(live.spiritEnergy));
 	}
 
-	/** Tells players near where the sphere is and how big, so they draw it (a great blue crystal). */
+	/** Tells players near where the sphere is and how big, so they draw it. */
 	static void spiritFx(ServerLevel level, int id, Vec3 at, double size) {
 		ZFighterNet.SpiritFx fx = new ZFighterNet.SpiritFx(id, at.x, at.y, at.z, (float)size);
 		for (ServerPlayer viewer : level.players()) {

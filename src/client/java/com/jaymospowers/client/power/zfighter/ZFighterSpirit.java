@@ -9,29 +9,28 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.model.object.crystal.EndCrystalModel;
-import net.minecraft.client.renderer.entity.EndCrystalRenderer;
-import net.minecraft.client.renderer.entity.state.EndCrystalRenderState;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.blockentity.BeaconRenderer;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * The Spirit Bomb drawn as a great blue End Crystal: the crystal's spinning glass cubes, tinted blue and lit from within,
- * as big as the sphere (up to 30 blocks across), with a fainter, larger halo round it. The server sends where it is
- * every tick ({@link ZFighterNet.SpiritFx}); it's drawn between the last two places, and goes when they stop coming.
+ * The Spirit Bomb drawn as what it is: a great ball of pale blue light, see-through at its rim, with energy streaming
+ * round it (the beacon beam's texture, scrolling) and a white-hot heart. The server sends where it is every tick
+ * ({@link ZFighterNet.SpiritFx}); it's drawn between the last two places, and goes when they stop coming.
  */
 public final class ZFighterSpirit {
-	private static final Identifier CRYSTAL = Identifier.withDefaultNamespace("textures/entity/end_crystal/end_crystal.png");
-	/** The crystal's outer cube is half a block across at scale 1; this many times the sphere's radius across. */
-	static final float CUBE_PER_SIZE = 1.6F;
-	static final float HALO = 1.18F;
-	static final int TINT = 0xFF70C8FF;
-	static final int HALO_TINT = 0x5590D8FF;
-	static final int FULL_BRIGHT = 0xF000F0;
+	/** The heart's share of the radius, and the colours: the shell's rim, its glow, the heart. */
+	static final float CORE = 0.62F;
+	static final int SHELL = 0x9070C8FF;
+	static final int INNER = 0x60B8E8FF;
+	static final int HEART = 0xFFF0FAFF;
+	static final int LON = 20;
+	static final int LAT = 14;
+	static final float SPIN = 0.02F;
+	static final float FLOW = 0.04F;
 	/** Ticks without word before it's dropped. */
 	static final int STALE = 3;
 
@@ -45,7 +44,6 @@ public final class ZFighterSpirit {
 	}
 
 	private static final Map<Integer, Live> SPHERES = new HashMap<>();
-	private static EndCrystalModel model;
 
 	private ZFighterSpirit() {
 	}
@@ -88,35 +86,59 @@ public final class ZFighterSpirit {
 			return;
 		}
 		Minecraft minecraft = Minecraft.getInstance();
-		if (model == null) {
-			model = new EndCrystalModel(minecraft.getEntityModels().bakeLayer(ModelLayers.END_CRYSTAL));
-		}
 		float partial = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		Vec3 camera = context.levelState().cameraRenderState.pos;
-		PoseStack poseStack = context.poseStack();
 		for (Live live : SPHERES.values()) {
 			Vec3 at = live.prev.lerp(live.at, partial).subtract(camera);
 			float size = Mth.lerp(partial, live.prevSize, live.size);
-			float age = live.age + partial;
-			EndCrystalRenderState state = new EndCrystalRenderState();
-			state.ageInTicks = age;
-			state.showsBottom = false;
-			state.lightCoords = FULL_BRIGHT;
-			// the model hangs its glass 1.5 blocks up and bobs it; take both away so it sits on the sphere's middle
-			float lift = 1.5F + EndCrystalRenderer.getY(age) * 0.5F;
-			submit(context, poseStack, state, at, size * CUBE_PER_SIZE * 2.0F, lift, TINT);
-			submit(context, poseStack, state, at, size * CUBE_PER_SIZE * 2.0F * HALO, lift, HALO_TINT);
+			float time = live.age + partial;
+			// it breathes a little
+			float pulse = 1.0F + 0.03F * Mth.sin(time * 0.25F);
+			float r = size * pulse;
+			context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.beaconBeam(BeaconRenderer.BEAM_LOCATION, false),
+				(pose, buffer) -> sphere(buffer, pose, at, r * CORE, HEART, time * SPIN * 1.7F, time * FLOW * 1.5F));
+			context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.beaconBeam(BeaconRenderer.BEAM_LOCATION, true),
+				(pose, buffer) -> sphere(buffer, pose, at, r * 0.85F, INNER, -time * SPIN, time * FLOW));
+			context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.beaconBeam(BeaconRenderer.BEAM_LOCATION, true),
+				(pose, buffer) -> sphere(buffer, pose, at, r, SHELL, time * SPIN, -time * FLOW * 0.7F));
 		}
 	}
 
-	private static void submit(LevelRenderContext context, PoseStack poseStack, EndCrystalRenderState state, Vec3 at, float scale, float lift,
-		int tint) {
-		poseStack.pushPose();
-		poseStack.translate(at.x, at.y, at.z);
-		poseStack.scale(scale, scale, scale);
-		poseStack.translate(0.0F, -lift, 0.0F);
-		context.submitNodeCollector().submitModel(model, state, poseStack, RenderTypes.entityTranslucentEmissive(CRYSTAL), FULL_BRIGHT,
-			OverlayTexture.NO_OVERLAY, tint, null, 0);
-		poseStack.popPose();
+	/** A ball of {@link #LON} by {@link #LAT} faces, the texture wrapped round it and turning; both sides drawn. */
+	private static void sphere(VertexConsumer buffer, PoseStack.Pose pose, Vec3 c, float radius, int color, float uShift, float vShift) {
+		for (int i = 0; i < LAT; i++) {
+			float t0 = Mth.PI * i / LAT;
+			float t1 = Mth.PI * (i + 1) / LAT;
+			for (int j = 0; j < LON; j++) {
+				float p0 = Mth.TWO_PI * j / LON;
+				float p1 = Mth.TWO_PI * (j + 1) / LON;
+				float u0 = j / (float)LON * 2.0F + uShift;
+				float u1 = (j + 1) / (float)LON * 2.0F + uShift;
+				float v0 = i / (float)LAT + vShift;
+				float v1 = (i + 1) / (float)LAT + vShift;
+				Vec3 a = point(c, radius, t0, p0);
+				Vec3 b = point(c, radius, t1, p0);
+				Vec3 d = point(c, radius, t1, p1);
+				Vec3 e = point(c, radius, t0, p1);
+				vertex(buffer, pose, a, color, u0, v0);
+				vertex(buffer, pose, b, color, u0, v1);
+				vertex(buffer, pose, d, color, u1, v1);
+				vertex(buffer, pose, e, color, u1, v0);
+				vertex(buffer, pose, e, color, u1, v0);
+				vertex(buffer, pose, d, color, u1, v1);
+				vertex(buffer, pose, b, color, u0, v1);
+				vertex(buffer, pose, a, color, u0, v0);
+			}
+		}
+	}
+
+	private static Vec3 point(Vec3 c, float radius, float theta, float phi) {
+		float s = Mth.sin(theta);
+		return c.add(radius * s * Mth.cos(phi), radius * Mth.cos(theta), radius * s * Mth.sin(phi));
+	}
+
+	private static void vertex(VertexConsumer buffer, PoseStack.Pose pose, Vec3 p, int color, float u, float v) {
+		buffer.addVertex(pose, (float)p.x, (float)p.y, (float)p.z).setColor(color).setUv(u, v).setOverlay(OverlayTexture.NO_OVERLAY)
+			.setLight(15728880).setNormal(pose, 0.0F, 1.0F, 0.0F);
 	}
 }

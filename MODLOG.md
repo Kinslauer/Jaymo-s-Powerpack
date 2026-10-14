@@ -954,6 +954,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   taller than 236): three tabs (Stats, Forms, Techniques) instead of two crowded pages, striped rows, and long text cut
   with "..." instead of running off. Descriptions, form requirements and how Limit Break works show in full in a box
   at the bottom when you point at a row. The lineage picker wraps its question and descriptions.
-  The Spirit Bomb grows up to 30 blocks across (radius 15, was 6) and is drawn as a great blue End Crystal
-  (`ZFighterSpirit`, sent by `ZFighterNet.SpiritFx`): the crystal's spinning glass, tinted blue and lit, with a faint
-  halo. It lands when its leading edge meets the ground; its hurt reach grows 1.2 per block of radius, its blast 0.4.
+  The Spirit Bomb grows up to 30 blocks across (radius 15, was 6) and is drawn as a ball of light (`ZFighterSpirit`,
+  sent by `ZFighterNet.SpiritFx`): a see-through pale blue shell with energy streaming round it and a white-hot heart.
+  When it meets the ground it grinds down into it for 2 seconds, the earth spraying up round it, then bursts: a blast
+  of power 3 + its radius (18 at full) with a ring of 8 more round it, hurting foes out to 3 + 2 per block of radius.
