@@ -7,21 +7,25 @@ import com.jaymospowers.client.PowerClients;
 import com.jaymospowers.power.smoke.SmokePower;
 import com.jaymospowers.power.smoke.SmokeState;
 import java.util.Locale;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 /**
  * Smoke's client half: right of the hotbar, in Wind's chip style, R G V B with their cooldowns; over the crosshair, how
- * long Smokescreen has left to pour, Smother to choke, or Vapour Form to last. The smoke itself (seen by everyone) is
- * {@link SmokeFieldClient}.
+ * long Smokescreen has left to pour or Smother to choke, or Vapour Form's speed while cruising. The smoke itself (seen by
+ * everyone) is {@link SmokeFieldClient}; Vapour Form's flight is {@link SmokeFlightClient} and its smoke legs
+ * {@link SmokeFlightPose}.
  */
 public final class SmokePowerClient implements PowerClient {
 	public static final SmokePowerClient INSTANCE = new SmokePowerClient();
@@ -32,7 +36,6 @@ public final class SmokePowerClient implements PowerClient {
 	/** How long each runs at most (ticks), for the bar over the crosshair; mirrors the server's tuning. */
 	private static final int POUR_TICKS = 200;
 	private static final int SMOTHER_TICKS = 120;
-	private static final int VAPOUR_TICKS = 120;
 
 	private SmokePowerClient() {
 	}
@@ -41,6 +44,22 @@ public final class SmokePowerClient implements PowerClient {
 		PowerClients.register(SmokePower.ID, INSTANCE);
 		SmokeFieldClient.init();
 		SmokeJetClient.init();
+		ClientTickEvents.END_CLIENT_TICK.register(SmokeFlightPose::tick);
+	}
+
+	/** From the avatar renderer's extractRenderState (everyone): Vapour Form's smoke legs. */
+	public static void extract(Avatar entity, AvatarRenderState state) {
+		SmokeFlightPose.extract(entity, state);
+	}
+
+	@Override
+	public void tick(Minecraft minecraft, LocalPlayer player) {
+		SmokeFlightClient.tick(minecraft, player);
+	}
+
+	@Override
+	public void onActiveChanged(LocalPlayer player, boolean active) {
+		SmokeFlightClient.reset();
 	}
 
 	@Override
@@ -48,11 +67,11 @@ public final class SmokePowerClient implements PowerClient {
 		Font font = Minecraft.getInstance().font;
 		long now = player.level().getGameTime();
 		SmokeState state = SmokePower.state(player);
-		bar(graphics, font, state, now, graphics.guiWidth() / 2, graphics.guiHeight() / 2);
+		bar(graphics, font, player, state, now, graphics.guiWidth() / 2, graphics.guiHeight() / 2);
 		chips(graphics, font, state, now);
 	}
 
-	private static void bar(GuiGraphicsExtractor graphics, Font font, SmokeState state, long now, int cx, int cy) {
+	private static void bar(GuiGraphicsExtractor graphics, Font font, LocalPlayer player, SmokeState state, long now, int cx, int cy) {
 		float fill;
 		Component label;
 		if (state.pourFrom() >= 0) {
@@ -61,8 +80,8 @@ public final class SmokePowerClient implements PowerClient {
 		} else if (state.smotherFrom() >= 0) {
 			fill = 1.0F - Mth.clamp((now - state.smotherFrom()) / (float)SMOTHER_TICKS, 0.0F, 1.0F);
 			label = Component.translatable("hud.jaymospowers.smoke.smother");
-		} else if (state.vapourUntil() > now) {
-			fill = Mth.clamp((state.vapourUntil() - now) / (float)VAPOUR_TICKS, 0.0F, 1.0F);
+		} else if (SmokeFlightClient.cruising()) {
+			fill = (float)SmokeFlightClient.speedFraction(player);
 			label = Component.translatable("hud.jaymospowers.smoke.vapour");
 		} else {
 			return;
@@ -86,8 +105,8 @@ public final class SmokePowerClient implements PowerClient {
 			y = height - 22 - 30 - CHIP;
 		}
 		int step = CHIP + CHIP_GAP;
-		chip(graphics, font, x, y, PowerKey.ABILITY_1, Items.CAMPFIRE, state, SmokeState.SCREEN, now);
-		chip(graphics, font, x + step, y, PowerKey.ABILITY_2, Items.PHANTOM_MEMBRANE, state, SmokeState.VAPOUR, now);
+		chip(graphics, font, x, y, PowerKey.ABILITY_1, Items.PHANTOM_MEMBRANE, state, SmokeState.VAPOUR, now);
+		chip(graphics, font, x + step, y, PowerKey.ABILITY_2, Items.CAMPFIRE, state, SmokeState.SCREEN, now);
 		chip(graphics, font, x + step * 2, y, PowerKey.ABILITY_3, Items.FIREWORK_STAR, state, SmokeState.BOMB, now);
 		chip(graphics, font, x + step * 3, y, PowerKey.ABILITY_4, Items.CHARCOAL, state, SmokeState.SMOTHER, now);
 	}

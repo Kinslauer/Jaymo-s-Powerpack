@@ -13,7 +13,7 @@ heat sources, changes with what it passes through, and rides its chimneys (`Chim
   - **spread**: 10% of the difference flows to each thinner side neighbour, 3.5% downward;
   - **leak**: full blocks stop it, fluids kill it, part blocks (doors, slabs, fences, bars) pass 25%, leaves 50%;
   - **drift**: under the open sky a wandering wind (0.3 clear, 0.7 rain, 1.0 storm) carries up to 12% downwind;
-  - **fade**: 0.4% + a flat 0.004 a step, +0.01 under the sky, +0.035 in the rain; past 24000 cells it fades 3x.
+  - **fade**: 0.3% + a flat 0.004 a step, +0.007 under the sky, +0.035 in the rain; past 24000 cells it fades 3x.
 - **path**: through fire it comes out 15% thicker and sootier, through leaves cleaner; each block keeps a soot
   value (0 pale grey to 1 black) the client colours by. Inside Advanced Chimneys' chimneys, ducts, pipes and pumps
   60% is drawn up each step and it only moves along them or out of a vent.
@@ -30,9 +30,25 @@ heat sources, changes with what it passes through, and rides its chimneys (`Chim
 ## The client (`client/power/smoke`)
 - `SmokeFieldClient` eases each block between the last two updates and draws 1-2 camera-facing puffs per block
   from `textures/entity/smoke/puff.png` (made by `tools/gen_smoke.py`), slowly turning and bobbing, lit by the
-  world's light, sorted (`entityTranslucent`). Your own smoke is drawn at 30%. Your head in someone else's smoke
-  greys the screen (full at 1.6).
-- `SmokePowerClient`: R G V B chips right of the hotbar; a bar over the crosshair for pour / smother / vapour.
+  world's light, sorted (`entityTranslucent`). Since 0.10.81 it's drawn much thicker (Andy: "way thicker so it is
+  visible more easily"): 1-3 puffs a block (2 from 0.6, 3 from 1.8), alpha 0.22 + 0.35 a unit (up to 0.85), bigger
+  puffs, and your own smoke at 50%. Your head in someone else's smoke greys the screen (full at 1.6).
+- `SmokePowerClient`: R G V B chips right of the hotbar; a bar over the crosshair for pour / smother / cruise speed.
+
+## Thicker smoke (0.10.81)
+Every ability pours more: Smokescreen 2.0 a tick (was 0.9), Smoke Bomb 130 / 190 mastered (was 60 / 90), Smother
+1.1 a tick on the target (was 0.5), Smoke Jet 1.5 a tick (was 0.6), and the gas fades a little slower.
+
+## Vapour Form flight (0.10.81)
+Andy: "smoke's G vapour form should turn everything below your waist into smoke, giving you a powerful flight mode
+similar to wind's", and it moved from G to R so it's the first ability (Smokescreen moved to G). R toggles
+(`SmokeVapour`); the synced `smoke_vapour` attachment is the form. The client flies it (`SmokeFlightClient`, built like
+Z Fighter's: hover, Sprint cruise to 2.2 b/t (1.3 starter), dive speed-up to 1.25x, S brake, speed-limited turns)
+and takes off when the form starts. The server ends it on R, Sneak on the ground, 30 ticks grounded, 6 food or
+`WindFlight.canFly` failing; shots pass through, falls don't hurt. `SmokeFlightPose` hides the legs (and pants,
+through `Dismembered.hidePart`, so a shared model is restored once drawn) and the leggings/boots, pours the smoke tail
+for everyone, and makes WindPose lay a fast flier out flat. The old 4 s invisibility, Speed II, Slow Falling and "mobs
+lose you" are gone (the trail hides you instead).
 
 ## Smoke Jet (0.10.67)
 Hold X (`power/smoke/SmokeJet`): a jet of smoke along your look, 14 blocks, widening 0.14 a block. Each tick it lays

@@ -14,6 +14,8 @@ abstract class DismemberModelFeatureRendererMixin {
 		shift = At.Shift.AFTER))
 	private void jaymospowers$hideLost(ModelFeatureRenderer.Submit<?> submit, CallbackInfo ci) {
 		Dismembered.hide(submit.model(), submit.state());
+		// Vapour Form's legs are smoke: hidden the same way
+		com.jaymospowers.client.power.smoke.SmokeFlightPose.hide(submit.model(), submit.state());
 	}
 
 	@Inject(method = "prepareModel", at = @At("RETURN"))
