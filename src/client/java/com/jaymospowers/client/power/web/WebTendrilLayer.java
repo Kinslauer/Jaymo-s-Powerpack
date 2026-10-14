@@ -39,6 +39,8 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 	/** Segments per tendril, and each one's length (model pixels). */
 	private static final int SEGMENTS = 7;
 	private static final float SEGMENT_LENGTH = 4.5F;
+	/** The last segments' thickness (model pixels; the rest are 3): each tendril tapers to a point. */
+	private static final float[] TIP = {2.5F, 1.9F, 1.2F};
 	/** Where each tendril roots (model space: +Y down, +Z back), its outward lean and its upward tilt (radians). */
 	private static final float[][] ROOTS = {
 		{-3.0F, 1.5F, 2.0F, -0.6F, -1.0F},
@@ -125,8 +127,10 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 			PartDefinition parent = root.addOrReplaceChild("tendril" + t, CubeListBuilder.create().texOffs(0, 0)
 				.addBox(-1.5F, -1.5F, 0.0F, 3.0F, 3.0F, SEGMENT_LENGTH), PartPose.offset(r[0], r[1], r[2]));
 			for (int k = 1; k < SEGMENTS; k++) {
+				// the last few narrow to a point, like the Spike Burst's spikes
+				float thick = k < SEGMENTS - TIP.length ? 3.0F : TIP[k - (SEGMENTS - TIP.length)];
 				parent = parent.addOrReplaceChild("s" + k, CubeListBuilder.create().texOffs(0, (k % 2) * 8)
-					.addBox(-1.5F, -1.5F, 0.0F, 3.0F, 3.0F, SEGMENT_LENGTH), PartPose.offset(0.0F, 0.0F, SEGMENT_LENGTH - 0.4F));
+					.addBox(-thick / 2.0F, -thick / 2.0F, 0.0F, thick, thick, SEGMENT_LENGTH), PartPose.offset(0.0F, 0.0F, SEGMENT_LENGTH - 0.4F));
 			}
 		}
 		return LayerDefinition.create(mesh, 32, 32);

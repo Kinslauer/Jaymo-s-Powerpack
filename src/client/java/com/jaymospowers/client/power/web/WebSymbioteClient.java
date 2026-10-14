@@ -108,6 +108,8 @@ public final class WebSymbioteClient {
 		return run.value;
 	}
 
+	/** How wild the bond still is (1 a fresh bond, 0 a full one), for the veins on a feral suit. */
+	public static final RenderStateDataKey<Float> FERAL = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_feral");
 	/** Ticks into a Spike Burst (or the roar's own, from just before it lands), for the spikes out of the whole body. */
 	public static final RenderStateDataKey<Float> SPIKES = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_spikes");
 	/** How far through a roar (0-1), for the maw thrown open. */
@@ -386,6 +388,8 @@ public final class WebSymbioteClient {
 	/** From the avatar renderer's extractRenderState: does this player wear the suit. */
 	public static void extract(Entity entity, AvatarRenderState state) {
 		state.setData(SUIT, entity instanceof Player player && WebSymbiote.suitShown(player) ? Boolean.TRUE : null);
+		state.setData(FERAL, entity instanceof Player player && WebSymbiote.isBonded(player)
+			? 1.0F - WebSymbiote.state(player).bond() / (float)WebSymbiote.BOND_MAX : null);
 		if (entity instanceof Player player) {
 			WebSuitGrowth.extract(player, state, net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false));
 		}

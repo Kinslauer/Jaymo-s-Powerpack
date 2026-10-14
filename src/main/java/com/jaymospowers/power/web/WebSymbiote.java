@@ -92,6 +92,14 @@ public final class WebSymbiote {
 	 */
 	public static final double SPIKE_RADIUS = 5.0;
 	public static final int SPIKE_TICKS = 16;
+	/** A spiked creature's blood, and what doesn't bleed (it only flashes). */
+	static final int SPIKE_BLOOD = 0x8A0303;
+	static final java.util.Set<net.minecraft.world.entity.EntityType<?>> SPIKE_NO_BLOOD = java.util.Set.of(
+		net.minecraft.world.entity.EntityTypes.SKELETON, net.minecraft.world.entity.EntityTypes.STRAY, net.minecraft.world.entity.EntityTypes.WITHER_SKELETON,
+		net.minecraft.world.entity.EntityTypes.BOGGED, net.minecraft.world.entity.EntityTypes.IRON_GOLEM, net.minecraft.world.entity.EntityTypes.SNOW_GOLEM,
+		net.minecraft.world.entity.EntityTypes.BLAZE, net.minecraft.world.entity.EntityTypes.BREEZE, net.minecraft.world.entity.EntityTypes.SLIME,
+		net.minecraft.world.entity.EntityTypes.MAGMA_CUBE, net.minecraft.world.entity.EntityTypes.ARMOR_STAND, net.minecraft.world.entity.EntityTypes.VEX,
+		net.minecraft.world.entity.EntityTypes.ALLAY, net.minecraft.world.entity.EntityTypes.SHULKER, net.minecraft.world.entity.EntityTypes.COPPER_GOLEM);
 	public static final float SPIKE_DAMAGE = 8.0F;
 	public static final double SPIKE_KNOCKBACK = 1.3;
 	/**
@@ -3568,6 +3576,7 @@ public final class WebSymbiote {
 				continue;
 			}
 			living.hurtServer(level, level.damageSources().playerAttack(player), ROAR_DAMAGE);
+			spikeHit(level, center, living);
 			Vec3 flat = new Vec3(to.x, 0.0, to.z);
 			flat = flat.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : flat.normalize();
 			// the nearer, the harder it throws them
@@ -3646,6 +3655,7 @@ public final class WebSymbiote {
 				continue;
 			}
 			living.hurtServer(level, level.damageSources().playerAttack(player), SPIKE_DAMAGE);
+			spikeHit(level, center, living);
 			Vec3 flat = new Vec3(to.x, 0.0, to.z);
 			flat = flat.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : flat.normalize();
 			Vec3 push = flat.scale(SPIKE_KNOCKBACK).add(0.0, 0.45, 0.0);
@@ -3663,6 +3673,26 @@ public final class WebSymbiote {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.POINTED_DRIPSTONE_LAND, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_DEATH, SoundSource.PLAYERS, 0.8F, 0.5F);
 		return true;
+	}
+
+	/**
+	 * A spike runs a creature through: a white flash where it strikes (the side facing you), and blood sprayed out the
+	 * far side and onto the ground under it. Things that don't bleed ({@link #SPIKE_NO_BLOOD}) only flash.
+	 */
+	private static void spikeHit(ServerLevel level, Vec3 center, LivingEntity living) {
+		Vec3 mid = living.getBoundingBox().getCenter();
+		Vec3 dir = mid.subtract(center);
+		dir = dir.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : dir.normalize();
+		Vec3 hit = mid.subtract(dir.scale(living.getBbWidth() * 0.5));
+		level.sendParticles(ParticleTypes.EXPLOSION, hit.x, hit.y, hit.z, 1, 0.0, 0.0, 0.0, 0.0);
+		level.sendParticles(ParticleTypes.CRIT, hit.x, hit.y, hit.z, 10, 0.15, 0.15, 0.15, 0.4);
+		if (SPIKE_NO_BLOOD.contains(living.getType())) {
+			return;
+		}
+		DustParticleOptions blood = new DustParticleOptions(SPIKE_BLOOD, 1.8F);
+		Vec3 out = mid.add(dir.scale(living.getBbWidth() * 0.5));
+		level.sendParticles(blood, out.x, out.y, out.z, 16, 0.15 + dir.x * 0.3, 0.2, 0.15 + dir.z * 0.3, 0.0);
+		level.sendParticles(blood, mid.x + dir.x * 0.8, living.getY() + 0.05, mid.z + dir.z * 0.8, 18, 0.6, 0.02, 0.6, 0.0);
 	}
 
 	/** Shroud: the suit swallows the light; you vanish until you strike, or until it tires. */
