@@ -30,6 +30,11 @@ public record Quest(String id, int kind, String template, Giver giver, Objective
 	 * begun).
 	 */
 	public static final int HUNT = 11, SURVIVE = 12;
+	/**
+	 * (0.7.21) A villager's grudge ({@link Grudges}): give their enemy a beating (count: blows), or lure them to where the
+	 * giver lies in wait (pos). other: the enemy, otherName: their name.
+	 */
+	public static final int GRUDGE = 13;
 
 	/** Who asked: their UUID and name, their settlement, whether it's its king, and their trade (a profession's path). */
 	public record Giver(UUID uuid, String name, int faction, boolean king, String job) {

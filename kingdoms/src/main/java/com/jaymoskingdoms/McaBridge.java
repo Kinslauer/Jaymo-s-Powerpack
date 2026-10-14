@@ -132,6 +132,21 @@ final class McaBridge {
 		return true;
 	}
 
+	/** (0.7.21) {@link McaCompat#following}. */
+	static java.util.@Nullable UUID following(Villager v) {
+		if (!(v instanceof VillagerEntityMCA m) || m.getVillagerBrain().getMoveState() != net.conczin.mca.entity.ai.MoveState.FOLLOW) {
+			return null;
+		}
+		return m.getBrain().getMemory(net.conczin.mca.entity.ai.MemoryModuleTypeMCA.PLAYER_FOLLOWING).map(net.minecraft.world.entity.Entity::getUUID).orElse(null);
+	}
+
+	/** (0.7.21) {@link McaCompat#stopFollowing}. */
+	static void stopFollowing(Villager v) {
+		if (v instanceof VillagerEntityMCA m && m.getVillagerBrain().getMoveState() == net.conczin.mca.entity.ai.MoveState.FOLLOW) {
+			m.getVillagerBrain().setMoveState(net.conczin.mca.entity.ai.MoveState.MOVE, null);
+		}
+	}
+
 	/** (0.5.50) An MCA villager is panicking. */
 	static boolean panicking(Villager villager) {
 		return villager instanceof VillagerEntityMCA v && v.getVillagerBrain().isPanicking();

@@ -204,6 +204,18 @@ public final class McaCompat {
 		return LOADED && courtable(a, b) && McaBridge.marry(a, b);
 	}
 
+	/** (0.7.21) The player an MCA villager was asked to follow (their menu's Follow), while they're following; else null. */
+	static java.util.@Nullable UUID following(Villager v) {
+		return LOADED ? McaBridge.following(v) : null;
+	}
+
+	/** (0.7.21) An MCA villager following someone goes back to going about their day. */
+	static void stopFollowing(Villager v) {
+		if (LOADED) {
+			McaBridge.stopFollowing(v);
+		}
+	}
+
 	/** (0.5.39) {@code player}'s hearts with {@code villager} (0 without MCA, or for a plain villager). */
 	static int heartsOf(Villager villager, ServerPlayer player) {
 		return LOADED ? McaBridge.heartsOf(villager, player) : 0;

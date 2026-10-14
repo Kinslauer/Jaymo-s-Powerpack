@@ -181,7 +181,7 @@ final class Routines {
 
 	/** Free for a routine at {@code t}: awake, unafraid, not working, guarding, fighting or talking. */
 	static boolean free(Villager v, long t) {
-		if (Neighbours.meeting(v) || v.isSleeping() || v.isPassenger() || v.isNoAi() || v.getTarget() != null || v.hurtTime > 0 || Frights.afraid(v.getUUID())
+		if (Neighbours.meeting(v) || Grudges.busy(v) || v.isSleeping() || v.isPassenger() || v.isNoAi() || v.getTarget() != null || v.hurtTime > 0 || Frights.afraid(v.getUUID())
 			|| Theft.rioting(v) || Approaches.talking(v) || Quests.listening(v) || Tag.playing(v) || Trespass.watching(v) || McaCompat.busy(v)
 			|| McaCompat.panicking(v) || Hermits.is(v) || Rickshaws.onDuty(v)) {
 			return false;

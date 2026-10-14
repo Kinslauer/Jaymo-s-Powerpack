@@ -177,6 +177,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.19: villagers' regard for one another, and the meetings it makes (fights to hugs) (and its attachment)
 		LOGGER.debug("regard attachment: {}", Neighbours.REGARD);
 		Neighbours.register();
+		// 0.7.21: grudges: villagers who hate another set you on them (a beating, or a lure into an ambush)
+		Grudges.register();
 		Trespass.register();
 		// 0.5.37: sorcery: camps' shamans and necromancers, courts' wizards, the risen dead, spell scrolls (and the thralls' attachment)
 		Arcana.register();
