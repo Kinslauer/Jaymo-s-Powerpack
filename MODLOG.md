@@ -1081,3 +1081,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   ravager) and merchant caravans (a wandering trader, trader llamas, pack mules, a nearby realm's guards as escort) now
   pass by players out in the wild, along King's Roads where they run. Pack animals carry chests of the land's goods.
   Pillager Caravans' ideas in our own code (it stops at 26.1 and has its own licence). See kingdoms/MODLOG.md.
+- **0.10.60, tracks in the snow:** Soft Imprints (MIT) joins the pack: everything that walks or rolls over snow, snow
+  layers, sand and red sand leaves footprints and trails shaped to its body (players, mobs, horses, carts and
+  caravans), which slowly fill back in. Client-only and works with Iris shaders.
