@@ -57,7 +57,7 @@ public final class WindDagger {
 	static final double CYCLONE_RADIUS = 3.0, CYCLONE_PUSH = 0.8, CYCLONE_LIFT = 0.7;
 	static final float CYCLONE_DAMAGE = 0.35F;
 	/** The Flurry: slashes, ticks between them, reach (blocks), how wide (cosine of the half-angle), damage per slash (x your attack damage), cooldown. */
-	static final int FLURRY_SLASHES = 10, FLURRY_EVERY = 3, FLURRY_COOLDOWN = 140;
+	static final int FLURRY_SLASHES = 10, FLURRY_EVERY = 3, FLURRY_COOLDOWN = 400;
 	static final double FLURRY_REACH = 5.5, FLURRY_CONE = 0.35;
 	static final float FLURRY_DAMAGE = 0.65F;
 	/** How far each slash carries you forward (blocks/tick), and how its gust throws what it hits. */

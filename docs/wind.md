@@ -597,6 +597,6 @@ knives and kunai, Balkon's knives). Better Combat's four dagger swings play as b
 Every dagger hit leaves a small puff. **Flurry** (right click, not with the throwable kunai; Andy: "the dagger and
 knife instead do the flurry sora's dagger used to do"): Sora's Dagger's winds' Flurry, 10 slashes 3 ticks apart, each
 cutting a 5.5-block cone ahead (0.65x attack damage, no hurt cooldown between slashes), carrying you forward 0.38 a
-slash and throwing what it hits, then a burst throws everything within 5 blocks out and up. 140-tick cooldown
+slash and throwing what it hits, then a burst throws everything within 5 blocks out and up. 400-tick (20 s) cooldown
 (cold-stretched); it stops if you put the dagger away. The Tempest mode and the ascension make every gale and the
 Flurry 1.3x. Tuning at the top of `WindDagger`. Not playtested.
