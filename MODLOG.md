@@ -777,6 +777,12 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (Kingdoms' and Naturalist's predators too) tear into bodies with a brutal worrying bite, the meat spills on the ground
   and they eat it from there. Players' kills are left for the player. See Kitchen's MODLOG.
 
+- **0.10.1, Riptide Dash spends roll charges:** every Riptide Dash, and every flurry, spends one Combat Roll charge
+  (none left: no dash), and a flurry that lands gives its charge back. The miss and flurry cooldowns stay as they were.
+  Charges live in Combat Roll's client `RollManager`: `DarktideRolls` reports the count (`DarktideNet.Rolls`) and the
+  server spends and refunds through `DarktideNet.RollCharge` (`CombatRollCompat.hasRoll/spendRoll/refundRoll`).
+  Without Combat Roll, dashes cost no charge.
+
 - **0.9.27, Darktide and Wind fixes, dismemberment (Kitchen 0.4.37):** a Darktide shade that dies (burned by the sun or killed again)
   leaves no body; risen shadows never target their master or each other (`DarktideRisenTargetMixin`, brain targets
   cleared each tick), though their arrows and explosions still hurt you; up to 15 shadows stored. Riptide Dash has no

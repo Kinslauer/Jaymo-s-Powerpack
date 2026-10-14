@@ -78,6 +78,7 @@ public final class DarktidePower implements Power {
 				DarktideGedan.key(ctx.player(), payload.down());
 			}
 		});
+		ServerPlayNetworking.registerGlobalReceiver(DarktideNet.Rolls.TYPE, (payload, ctx) -> live(ctx.player()).rolls = Math.max(0, payload.available()));
 		ServerPlayNetworking.registerGlobalReceiver(DarktideNet.NightKey.TYPE, (payload, ctx) -> {
 			ServerPlayer player = ctx.player();
 			// only when the core doesn't forward C itself (so it never arrives twice)
