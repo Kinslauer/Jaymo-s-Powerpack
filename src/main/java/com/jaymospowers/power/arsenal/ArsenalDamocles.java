@@ -69,6 +69,12 @@ public final class ArsenalDamocles {
 	/** Soft ground (dirt, sand, grass) around the point cracks open out to this far. */
 	static final double CRATER_RADIUS = 3.0;
 	static final float CRATER_HARDNESS = 1.0F;
+	/** The point striking the ground shakes everyone this far off this hard (degrees), as long as a shake can last. */
+	static final double IMPACT_SHAKE_RANGE = 160.0;
+	static final float IMPACT_SHAKE = 9.0F;
+	/** Calling it back early (G): a smaller shake. */
+	static final double RECALL_SHAKE_RANGE = 64.0;
+	static final float RECALL_SHAKE = 3.0F;
 
 	// timeline (ticks since the cast)
 	public static final int OPEN_END = 14;
@@ -429,8 +435,35 @@ public final class ArsenalDamocles {
 				victim.syncVelocity = true;
 			}
 		}
-		// the ground shakes for everyone near
-		com.jaymospowers.core.Shakes.around(level, at, IMPACT_RADIUS * 5.0, 2.5F);
+		// the whole land shudders
+		com.jaymospowers.core.Shakes.around(level, at, IMPACT_SHAKE_RANGE, IMPACT_SHAKE, com.jaymospowers.core.Shakes.MAX_TICKS, null);
+	}
+
+	/**
+	 * G, while the sword stands in the ground: the rift opens again now instead of waiting out {@link #STAND}, and it's
+	 * hauled back up as usual. Shifts the fall's start so every client's timeline jumps along with it. False (G does
+	 * what it otherwise does) when no sword is standing.
+	 */
+	static boolean recall(ServerPlayer player) {
+		Fall fall = player.getAttached(FALL);
+		Live live = LIVE.get(player.getUUID());
+		if (fall == null || live == null || !live.landed) {
+			return false;
+		}
+		long now = player.level().getGameTime();
+		long reopen = (long) Math.ceil(fall.reopensAt());
+		if (now - fall.start() >= reopen) {
+			// already on its way back
+			return false;
+		}
+		// the next tick lands on the reopening, so its sound and motes still play
+		player.setAttached(FALL, new Fall(now - reopen + 1, fall.x(), fall.z(), fall.portalY(), fall.tipEnd(), fall.angle()));
+		// wrenched back early: the ground around it shudders
+		Vec3 at = new Vec3(fall.x(), fall.tipEnd() + EMBED_DEPTH, fall.z());
+		com.jaymospowers.core.Shakes.around(player.level(), at, RECALL_SHAKE_RANGE, RECALL_SHAKE);
+		player.level().playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 4.0F, 0.5F);
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal.damocles_recalled").withStyle(ChatFormatting.LIGHT_PURPLE));
+		return true;
 	}
 
 	/** The power went away: the rift and the sword go with it. */
