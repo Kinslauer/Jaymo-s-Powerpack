@@ -21,8 +21,8 @@ import net.minecraft.world.entity.animal.golem.AbstractGolem;
 import net.minecraft.world.entity.decoration.ArmorStand;
 
 /**
- * (0.7.22) A vampire player's sight at night (Andy: "vampirism should give you the sirben visual modifier"). The
- * screen's edges darken to blood red and beat like a heart; every warm-blooded creature near them glows red through
+ * (0.7.22) A vampire player's sight (Andy: "vampirism should give you the sirben visual modifier", MCA's Sirben trait
+ * screen, {@link #SIRBEN}, worn always). At night, too, the screen's edges darken to blood red and beat like a heart; every warm-blooded creature near them glows red through
  * walls, beating in time. Starving, the beat quickens, the red deepens, and they smell blood from further off. Only
  * the vampire sees any of it. Undead, golems and armour stands have no blood to see.
  */
@@ -39,10 +39,16 @@ public final class BloodVision {
 	static final float FADE = 0.02F;
 
 	private static final Identifier VIGNETTE = Identifier.withDefaultNamespace("textures/misc/vignette.png");
+	/**
+	 * MCA's Sirben trait screen (a blur that grows toward the edges, tinted red), worn by every vampire player day and
+	 * night. MCA (GPL-3.0) ships it in the pack; we only ask for it by name, so without MCA there's none.
+	 */
+	public static final Identifier SIRBEN = Identifier.fromNamespaceAndPath("mca", "sirben");
+	private static final boolean MCA = net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("mca");
 
 	/** 0 by day, 1 at night; eased. */
 	private static float strength, lastStrength;
-	private static boolean on, starving;
+	private static boolean vampire, on, starving;
 
 	private BloodVision() {
 	}
@@ -57,13 +63,18 @@ public final class BloodVision {
 		lastStrength = strength;
 		if (player == null || minecraft.level == null) {
 			strength = lastStrength = 0.0F;
-			on = false;
+			vampire = on = false;
 			return;
 		}
-		boolean vampire = Vampires.isVampire(player) && !player.isSpectator();
+		vampire = Vampires.isVampire(player) && !player.isSpectator();
 		on = vampire && Vampires.night(minecraft.level.getOverworldClockTime());
 		starving = vampire && VampirePlayers.starving(player);
 		strength = Mth.clamp(strength + (on ? FADE : -FADE), 0.0F, 1.0F);
+	}
+
+	/** The Sirben screen to ask for this frame, or null. */
+	public static Identifier sirben() {
+		return MCA && vampire ? SIRBEN : null;
 	}
 
 	/** The beat now: 0 at rest, 1 at the top of the first thump, a smaller second thump after it. */

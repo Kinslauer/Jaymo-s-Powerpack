@@ -2861,16 +2861,21 @@ beating". (0.7.20 / 0.10.69 are the Kingdom languages PR's.)
   offers you the quest.
 - Built; not yet seen in game.
 
-## 0.7.22: blood vision (pack 0.10.71)
-Andy: "vampirism should give you the sirben visual modifier". Nothing called "sirben" turned up (no mod, shader or
-file in the pack), so this is the likeliest reading of a vampire's "visual modifier", pending Andy's word.
-- `client/BloodVision` (tuning at the top): only for a vampire player, only at night (fades in at dusk, out at dawn
-  over 2.5 s). The screen's edges darken blood red (vanilla's vignette texture and pipeline, darkening green and
-  blue only) and beat like a heart (double thump every 24 ticks).
-- Every living creature within 24 blocks, except undead, golems and armour stands, glows through walls with a red
-  outline that beats in time (`mixin/vampires/BloodGlowMixin`, `BloodGlowColorMixin`); only the vampire sees it, and
-  a creature glowing for another reason keeps its own colour.
-- Starving (`VampirePlayers.starving`, two nights without blood): the beat comes every 14 ticks, the edges go darker
-  and blood shows from 40 blocks.
-- `Vampires.VAMPIRE` now syncs to the vampire player themself (target only), so the client knows.
+## 0.7.22: vampire looks and sight (pack 0.10.71)
+Andy: "vampirism should give you the sirben visual modifier" (Sirben is an MCA trait that changes the screen), then
+"do both of those": blood vision and the vampire looks as well.
+- **Sirben:** a vampire player's screen always wears MCA's own `mca:sirben` post effect (blur growing toward the
+  edges, tinted red), asked for by name each frame (`mixin/vampires/SirbenMixin`, `BloodVision.SIRBEN`); MCA is
+  GPL-3.0, so nothing of it is copied, and without MCA there's no Sirben.
+- **Blood vision** (`client/BloodVision`, tuning at the top): only at night (fades in at dusk, out at dawn over 2.5 s).
+  The screen's edges darken blood red (vanilla's vignette texture and pipeline, darkening green and blue only) and
+  beat like a heart (double thump every 24 ticks). Every living creature within 24 blocks, except undead, golems and
+  armour stands, glows through walls with a red outline that beats in time (`BloodGlowMixin`, `BloodGlowColorMixin`);
+  only the vampire sees it, and a creature glowing for another reason keeps its own colour. Starving
+  (`VampirePlayers.starving`, two nights without blood): the beat comes every 14 ticks, the edges go darker and blood
+  shows from 40 blocks.
+- **Looks** (`client/VampireLooks`, a layer on the player renderer; textures `tools/gen_vampire_looks.py`): everyone
+  sees a vampire player's face and hands washed ashen; at night, two fangs under the mouth and red eyes that glow in
+  the dark (eye pixels where the default skin has them, row 12).
+- `Vampires.VAMPIRE` on players now syncs to every client (villagers' never does).
 - Built; not yet seen in game.

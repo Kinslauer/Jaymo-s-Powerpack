@@ -9,13 +9,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Blood vision's outline beats red (a creature glowing for any other reason keeps its own colour). */
+/** Blood vision's outline beats red (a creature glowing for any other reason keeps its own colour); a vampire player's looks go on the state. */
 @Mixin(LivingEntityRenderer.class)
 abstract class BloodGlowColorMixin {
 	@Inject(
 		method = "extractRenderState(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;F)V",
 		at = @At("TAIL"))
 	private void jaymoskingdoms$bloodColor(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
+		state.setData(com.jaymoskingdoms.client.VampireLooks.LOOK, com.jaymoskingdoms.client.VampireLooks.look(entity));
 		if (state.outlineColor != 0 && !entity.isCurrentlyGlowing() && BloodVision.sensed(entity)) {
 			state.outlineColor = BloodVision.color(partialTicks);
 		}
