@@ -82,6 +82,17 @@ public final class WebNet {
 		}
 	}
 
+	/** The Power Skill key (X) for a web slinger with no symbiote (or Sneak + X with one): Webbed Fists. */
+	public record Fists() implements CustomPacketPayload {
+		public static final Type<Fists> TYPE = new Type<>(JaymosPowers.id("web_fists"));
+		public static final StreamCodec<ByteBuf, Fists> CODEC = StreamCodec.unit(new Fists());
+
+		@Override
+		public Type<Fists> type() {
+			return TYPE;
+		}
+	}
+
 	public record Wings(boolean open) implements CustomPacketPayload {
 		public static final Type<Wings> TYPE = new Type<>(JaymosPowers.id("web_wings"));
 		public static final StreamCodec<ByteBuf, Wings> CODEC = ByteBufCodecs.BOOL.map(Wings::new, Wings::open);
@@ -259,6 +270,7 @@ public final class WebNet {
 		PayloadTypeRegistry.serverboundPlay().register(Wings.TYPE, Wings.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(WingsBrake.TYPE, WingsBrake.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ChargeHold.TYPE, ChargeHold.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(Fists.TYPE, Fists.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Swing.TYPE, Swing.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(SwingReject.TYPE, SwingReject.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Pull.TYPE, Pull.CODEC);

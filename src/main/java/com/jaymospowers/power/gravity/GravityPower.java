@@ -677,7 +677,7 @@ public final class GravityPower implements Power {
 		}
 	}
 
-	/** Z: the Training Field (a dome of heavy gravity to train in), or take yours down. */
+	/** Z: the Immense Field (a dome of heavy gravity to train in), or take yours down. */
 	@Override
 	public void onMode(ServerPlayer player, boolean down) {
 		if (down) {

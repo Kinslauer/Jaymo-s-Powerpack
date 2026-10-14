@@ -53,11 +53,11 @@ public final class WebPower implements Power {
 	public static final Identifier ID = JaymosPowers.id("web");
 
 	/** Cooldowns, in ticks. */
-	public static final int ZIP_COOLDOWN = 60;
-	public static final int SHOT_COOLDOWN = 40;
+	public static final int ZIP_COOLDOWN = 40;
+	public static final int SHOT_COOLDOWN = 30;
 	/** Web Shot charges for up to this long (hold V); the cooldown grows from SHOT_COOLDOWN to this at a full charge. */
 	public static final int SHOT_CHARGE_TICKS = 60;
-	public static final int SHOT_COOLDOWN_MAX = 160;
+	public static final int SHOT_COOLDOWN_MAX = 100;
 	/**
 	 * Let go of V before {@code SHOT_TAP_TICKS} (a second) and it's a webshooter pellet instead: {@code PELLET_SPEED},
 	 * {@code PELLET_COOLDOWN} (0.2 s) between them, so they can be tapped out fast. Held longer, it's the charged blast,
@@ -65,7 +65,7 @@ public final class WebPower implements Power {
 	 */
 	public static final int SHOT_TAP_TICKS = 20, PELLET_COOLDOWN = 4;
 	public static final float PELLET_SPEED = 3.6F;
-	public static final int YANK_COOLDOWN = 120;
+	public static final int YANK_COOLDOWN = 80;
 	/** Zip reach, and how fast the client reels you in (blocks/tick; used here to time the zip). */
 	public static final double ZIP_RANGE = 48.0;
 	public static final double ZIP_SPEED = 1.8;
@@ -73,7 +73,7 @@ public final class WebPower implements Power {
 	static final int GLIDE_ZIP_TICKS = 30;
 	/** Yank reach, and the bounding-box volume above which a target is "heavy" (you fly to it instead). Player = 0.65. */
 	public static final double YANK_RANGE = 24.0;
-	public static final double YANK_HEAVY_VOLUME = 2.6;
+	public static final double YANK_HEAVY_VOLUME = 4.0;
 	/**
 	 * Holding Yank keeps the web stuck to its target like a lead: past {@code TETHER_LENGTH} it's pulled back toward
 	 * you (springy, at most {@code TETHER_MAX_PULL} b/t a tick), so you can drag it along or let it hang under you. The
@@ -81,14 +81,14 @@ public final class WebPower implements Power {
 	 */
 	public static final double TETHER_LENGTH = 3.0;
 	public static final double TETHER_SPRING = 0.25;
-	public static final double TETHER_MAX_PULL = 0.9;
+	public static final double TETHER_MAX_PULL = 1.1;
 	public static final double TETHER_BREAK = 4.5;
 	/**
 	 * A swing web stuck to a creature (see {@link WebAnchors#entityTarget}) lets go past this many times its reach, and
 	 * only drags creatures up to this big (width × height, blocks²: a horse is about 2.2, an iron golem 3.8).
 	 */
 	static final double ENTITY_WEB_BREAK = 1.5;
-	static final double ENTITY_WEB_MAX_SIZE = 3.0;
+	static final double ENTITY_WEB_MAX_SIZE = 4.5;
 	/**
 	 * A <i>player</i> on the Yank line can fight it: they're pulled more gently than a mob ({@code PLAYER_TETHER_*}),
 	 * so they can lean away against it, and holding it stretched past {@code TETHER_LENGTH + PLAYER_STRAIN_OVER} for
@@ -265,6 +265,7 @@ public final class WebPower implements Power {
 		WebHitches.register();
 		WebBridges.register();
 		WebTendrils.register();
+		WebStrength.register();
 		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			WebTendrils.releaseAll(handler.player, false);
 			WebTendrils.forget(handler.player);
@@ -278,6 +279,11 @@ public final class WebPower implements Power {
 		WebAscension.register();
 		WebDebugCommand.register();
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Swing.TYPE, (payload, ctx) -> INSTANCE.onSwing(ctx.player(), payload));
+		ServerPlayNetworking.registerGlobalReceiver(WebNet.Fists.TYPE, (payload, ctx) -> {
+			if (Powers.has(ctx.player(), INSTANCE) && ctx.player().isAlive() && !ctx.player().isSpectator() && !Powers.silenced(ctx.player())) {
+				WebStrength.fists(ctx.player());
+			}
+		});
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Wings.TYPE, (payload, ctx) -> INSTANCE.onWings(ctx.player(), payload.open()));
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.WingsBrake.TYPE, (payload, ctx) -> INSTANCE.onWingsBrake(ctx.player(), payload.on()));
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.ChargeHold.TYPE, (payload, ctx) -> {
@@ -327,6 +333,7 @@ public final class WebPower implements Power {
 	@Override
 	public void onGained(ServerPlayer player) {
 		ensurePassive(player);
+		WebStrength.physique(player);
 	}
 
 	@Override
@@ -340,6 +347,7 @@ public final class WebPower implements Power {
 			safeFall.removeModifier(SAFE_FALL_ID);
 		}
 		feather(player, false);
+		WebStrength.onLost(player);
 		player.removeAttached(STATE);
 		player.removeAttached(LINE);
 		player.removeAttached(LINE_OFF);
@@ -452,6 +460,7 @@ public final class WebPower implements Power {
 	public void tick(ServerPlayer player) {
 		if (player.tickCount % 20 == 0) {
 			ensurePassive(player);
+			WebStrength.physique(player);
 		}
 		State state = player.getAttached(STATE);
 		WebSymbiote.tick(player);
@@ -731,6 +740,15 @@ public final class WebPower implements Power {
 		if (key == PowerKey.ABILITY_3) {
 			// V charges on the way down and fires on the way up
 			if (down) {
+				State held = player.getAttached(STATE);
+				if (held != null && held.tetherId >= 0) {
+					// the Yank web holds something: V sends a shock down it instead
+					Entity target = player.level().getEntity(held.tetherId);
+					if (target != null) {
+						WebStrength.shock(player, target);
+					}
+					return;
+				}
 				startShot(player);
 			} else {
 				shoot(player);
@@ -1015,6 +1033,14 @@ public final class WebPower implements Power {
 		}
 		// wearing the suit, it's a black mass of the symbiote instead
 		boolean dark = WebSymbiote.suitShown(player) || WebSymbiote.isToggled(player, WebSymbioteState.ARMOR);
+		if (held < SHOT_TAP_TICKS && player.isShiftKeyDown()) {
+			// Sneak + tap: a web bomb, lobbed
+			Projectile.spawnProjectileFromRotation((lvl, owner, stack) -> new WebBall(lvl, owner, stack).bomb(), level,
+				new ItemStack(dark ? SYMBIOTE_MASS_ITEM : WEB_BALL_ITEM), player, -8.0F, WebStrength.BOMB_SPEED, 0.5F);
+			player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), now + WebStrength.BOMB_COOLDOWN, cooldowns.yank()));
+			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.SNOWBALL_THROW, SoundSource.PLAYERS, 0.9F, 0.6F);
+			return;
+		}
 		if (held < SHOT_TAP_TICKS && !dark) {
 			// a tap: a quick webshooter pellet
 			Projectile.spawnProjectileFromRotation((lvl, owner, stack) -> new WebBall(lvl, owner, stack).pellet(), level,

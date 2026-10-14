@@ -70,6 +70,7 @@ public final class ZFighterPowerClient implements PowerClient {
 			if (renderer instanceof AvatarRenderer<?> avatar) {
 				helper.register(new ZFighterTail.Layer(avatar));
 				helper.register(new ZFighterHair.Layer(avatar));
+				helper.register(new ZFighterApe.Layer(avatar));
 			}
 		});
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
@@ -109,6 +110,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterHair.extract(entity, state);
 		ZFighterChargePose.extract(entity, state, partialTicks);
 		ZFighterGuardPose.extract(entity, state);
+		ZFighterApe.extract(entity, state);
 	}
 
 	/** Right after a humanoid model animates. */
