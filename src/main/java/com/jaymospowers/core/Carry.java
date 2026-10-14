@@ -73,6 +73,9 @@ import org.jspecify.annotations.Nullable;
  * {@link #OVERHEAD}. A carried mob's AI is on hold ({@code GravityCarriedMobMixin}).
  * <p>
  * Single blocks can be carried too, held in front in both arms ({@link #BLOCK}, see {@link CarryBlock}).
+ * <p>
+ * So can a severed head or limb ({@link SeveredPart}), dangling from one hand ({@link #PART}): right-click it with an
+ * empty hand (or sneak + right-click), the same controls to drop or throw it.
  */
 public final class Carry {
 	/** The holds: over one shoulder, across both arms, held up by the shoulder at your side, slung over your back. */
@@ -81,6 +84,8 @@ public final class Carry {
 	public static final int OVERHEAD = 4;
 	/** A block ({@link CarryBlock}) held in both arms in front. Never rolled, and kept through take-off and landing. */
 	public static final int BLOCK = 5;
+	/** A severed head or limb ({@link SeveredPart}) dangling from the right hand. Never rolled, kept in flight. */
+	public static final int PART = 6;
 	/** On foot only the first two are rolled; in flight any of the four. */
 	public static final int FOOT_HOLDS = 2, FLIGHT_HOLDS = 4;
 	/** Weight: the carrier walks this much slower (share of their speed) with a person, or with a small animal. */
@@ -117,6 +122,7 @@ public final class Carry {
 		{0.0, 0.3, -0.6},
 		{0.0, 1.4, 0.7},
 		{0.0, 0.6, 1.25},
+		{0.36, 0.5, 0.3},
 	};
 	/** Overhead, it's let go this much further ahead per block of its width, so it clears you. */
 	static final double OVERHEAD_RELEASE_PER_WIDTH = 0.5;
@@ -276,7 +282,7 @@ public final class Carry {
 		if (!entity.isAlive() || entity.isSpectator()) {
 			return false;
 		}
-		if (entity instanceof Player) {
+		if (entity instanceof Player || entity instanceof SeveredPart) {
 			return true;
 		}
 		return entity instanceof LivingEntity && (entity.getType().builtInRegistryHolder().is(CARRYABLE)
@@ -344,7 +350,9 @@ public final class Carry {
 			// (the same click seen twice)
 			return InteractionResult.SUCCESS;
 		}
-		if (hand != InteractionHand.MAIN_HAND || !player.isShiftKeyDown() || player.isSpectator() || !canBeCarriedBy(player, target)) {
+		// a severed part is taken with a plain right-click too, as long as the hand is empty
+		boolean grab = player.isShiftKeyDown() || target instanceof SeveredPart && player.getMainHandItem().isEmpty();
+		if (hand != InteractionHand.MAIN_HAND || !grab || player.isSpectator() || !canBeCarriedBy(player, target)) {
 			return InteractionResult.PASS;
 		}
 		if (isCarrying(player) || KitchenCompat.isCarryingCorpse(player) || player.isPassenger() || player.isSleeping()) {
@@ -367,8 +375,9 @@ public final class Carry {
 		boolean flying = flying(carrier);
 		boolean light = GravityWeight.lightens(carrier);
 		boolean block = CarryBlock.is(target);
-		boolean overhead = light && !block && GravityWeight.overhead(target);
-		int hold = block ? BLOCK : overhead ? OVERHEAD : carrier.getRandom().nextInt(flying ? FLIGHT_HOLDS : FOOT_HOLDS);
+		boolean part = target instanceof SeveredPart;
+		boolean overhead = light && !block && !part && GravityWeight.overhead(target);
+		int hold = part ? PART : block ? BLOCK : overhead ? OVERHEAD : carrier.getRandom().nextInt(flying ? FLIGHT_HOLDS : FOOT_HOLDS);
 		Entry entry = new Entry(carrier.getUUID(), target, hold, flying, carrier.position(), !block && !canBeCarried(target));
 		CARRIES.put(carrier.getUUID(), entry);
 		carrier.setAttached(CARRYING, new Carrying(target.getId(), hold));
@@ -384,12 +393,12 @@ public final class Carry {
 			mob.getNavigation().stop();
 			mob.setTarget(null);
 		}
-		carrier.sendOverlayMessage(Component.translatable(block ? (CarryBlock.holdsContents(target) ? "message.jaymospowers.carry.container" : "message.jaymospowers.carry.block")
+		carrier.sendOverlayMessage(Component.translatable(part ? "message.jaymospowers.carry.part" : block ? (CarryBlock.holdsContents(target) ? "message.jaymospowers.carry.container" : "message.jaymospowers.carry.block")
 			: overhead ? "message.jaymospowers.carry.lifting" : "message.jaymospowers.carry.carrying")
 			.withStyle(ChatFormatting.GRAY));
 		AttributeInstance speed = carrier.getAttribute(Attributes.MOVEMENT_SPEED);
-		// a Gravity user feels no weight at all
-		if (speed != null && !light) {
+		// a Gravity user feels no weight at all, and a head or a limb weighs nothing much
+		if (speed != null && !light && !part) {
 			speed.addOrUpdateTransientModifier(new AttributeModifier(WEIGHT_ID, -(target instanceof Player ? PLAYER_WEIGHT : block ? BLOCK_WEIGHT : ANIMAL_WEIGHT),
 				AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 		}
@@ -571,8 +580,8 @@ public final class Carry {
 		}
 		entry.lastCarrierPos = here;
 		carried.resetFallDistance();
-		if (!(carried instanceof Player)) {
-			// the server holds animals at the carrier's feet (each client draws them in the hold)
+		if (!(carried instanceof Player) && !(carried instanceof SeveredPart)) {
+			// (a severed part holds itself in the hand, see SeveredPart#tick) the server holds animals at the carrier's feet (each client draws them in the hold)
 			carried.setPos(here.x, here.y, here.z);
 			carried.setDeltaMovement(Vec3.ZERO);
 			carried.setYRot(carrier.getYRot());
@@ -585,7 +594,7 @@ public final class Carry {
 		}
 		// take off and every hold is open (a new roll); land with a flight-only hold and it shifts to one for walking
 		boolean flying = flying(carrier);
-		if (flying != entry.flying && entry.hold != OVERHEAD && entry.hold != BLOCK) {
+		if (flying != entry.flying && entry.hold != OVERHEAD && entry.hold != BLOCK && entry.hold != PART) {
 			entry.flying = flying;
 			if (flying) {
 				entry.hold = carrier.getRandom().nextInt(FLIGHT_HOLDS);
