@@ -544,8 +544,9 @@ final class WebLineRenderer {
 
 	/**
 	 * The slack (blocks) on {@code player}'s line from {@code handIndex}, negative when it's stretched: the local
-	 * player's own swing webs know their rope; a Yank web holding something is {@link WebPower#TETHER_LENGTH} long, for
-	 * anyone. Other lines are drawn taut.
+	 * player's own swing webs know their rope; other players' swing webs go by the rope length their game sends (see
+	 * {@link com.jaymospowers.power.web.WebPower#ROPE}); a Yank web holding something is
+	 * {@link com.jaymospowers.power.web.WebPower#TETHER_LENGTH} long. Other lines are drawn taut.
 	 */
 	private static double slack(Minecraft minecraft, Player player, int handIndex, Vec3 hand, Vec3 end) {
 		if (player == minecraft.player && WebPowerClient.isActive(minecraft.player)) {
@@ -554,7 +555,13 @@ final class WebLineRenderer {
 				return swing.slack(handIndex);
 			}
 		}
-		if (handIndex == WebNet.MAIN && player.getAttached(com.jaymospowers.power.web.WebPower.line(WebNet.MAIN)) == null
+		com.jaymospowers.power.web.WebLine line = player.getAttached(com.jaymospowers.power.web.WebPower.line(handIndex));
+		Float rope = player.getAttached(com.jaymospowers.power.web.WebPower.rope(handIndex));
+		if (line != null && line.kind() == com.jaymospowers.power.web.WebLine.SWING && rope != null) {
+			// measured as the swinger's game does, from about hand height
+			return rope - end.distanceTo(player.getPosition(minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false)).add(0.0, 1.2, 0.0));
+		}
+		if (handIndex == WebNet.MAIN && line == null
 			&& player.getAttached(com.jaymospowers.power.web.WebPower.TETHER) != null) {
 			return com.jaymospowers.power.web.WebPower.TETHER_LENGTH - hand.distanceTo(end);
 		}

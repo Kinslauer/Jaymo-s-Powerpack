@@ -885,8 +885,9 @@ derivatives) and has no public source, so nothing was ported: these are our own 
   instead of passing through blocks (collision shapes, `FRICTION` 0.5). Looks only: the swing still pulls straight
   at the anchor. Andy also linked Enchanted Fishing Line (ARR, client-only); this is our own rope after its idea. A
   web snakes out through the air as it shoots (`WAVE_*`); it twangs when it sticks (`TWANG_*`); a line stretched
-  past its length hums and thins (`HUM_*`, `STRETCH_THIN`). The symbiote's corded ropes follow the same shape. Your own swing webs know their slack;
-  the Yank lead (3 blocks) sags for everyone; other players' swing webs are drawn taut (their rope isn't synced).
+  past its length hums and thins (`HUM_*`, `STRETCH_THIN`). The symbiote's corded ropes follow the same shape. Everyone sees the same rope: each
+  swinger's game sends its rope length when it changes by 0.3 blocks (`WebNet.Rope` into the synced `WebPower.ROPE` /
+  `ROPE_OFF`), and the Yank lead is always 3 blocks.
 - **Weight (`WebHeft`):** a catch's weight is its bounding-box volume against how much you can haul
   (`YANK_HEAVY_VOLUME` 4, ×1.5 in the suit, ×2 in Living Armor). Over it, you're hauled to it as before. Several
   slingers holding the same catch on their Yank lines add up, so friends can drag in what one can't. A catch over

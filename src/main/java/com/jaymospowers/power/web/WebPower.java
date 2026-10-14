@@ -141,6 +141,11 @@ public final class WebPower implements Power {
 	/** The off-hand swing web, if one's out. */
 	public static final AttachmentType<WebLine> LINE_OFF = AttachmentRegistry.create(JaymosPowers.id("web_line_off"),
 		builder -> builder.syncWith(WebLine.STREAM_CODEC, AttachmentSyncPredicate.all()));
+	/** How much line each hand's swing web has out (blocks), for everyone to draw it hanging (see WebRopeSim). */
+	public static final AttachmentType<Float> ROPE = AttachmentRegistry.create(JaymosPowers.id("web_rope"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.FLOAT, AttachmentSyncPredicate.all()));
+	public static final AttachmentType<Float> ROPE_OFF = AttachmentRegistry.create(JaymosPowers.id("web_rope_off"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.FLOAT, AttachmentSyncPredicate.all()));
 	/** A whole-body move under way (a Spider-Sense dodge, a ragdoll), for everyone to draw. */
 	public static final AttachmentType<WebPose> POSE = AttachmentRegistry.create(JaymosPowers.id("web_pose"),
 		builder -> builder.syncWith(WebPose.STREAM_CODEC, AttachmentSyncPredicate.all()));
@@ -282,6 +287,13 @@ public final class WebPower implements Power {
 		WebAscension.register();
 		WebDebugCommand.register();
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Swing.TYPE, (payload, ctx) -> INSTANCE.onSwing(ctx.player(), payload));
+		ServerPlayNetworking.registerGlobalReceiver(WebNet.Rope.TYPE, (payload, ctx) -> {
+			State state = ctx.player().getAttached(STATE);
+			int hand = payload.hand();
+			if (state != null && (hand == WebNet.MAIN || hand == WebNet.OFF) && state.swinging[hand] && Float.isFinite(payload.length())) {
+				ctx.player().setAttached(rope(hand), Mth.clamp(payload.length(), 0.0F, 128.0F));
+			}
+		});
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Fists.TYPE, (payload, ctx) -> {
 			if (Powers.has(ctx.player(), INSTANCE) && ctx.player().isAlive() && !ctx.player().isSpectator() && !Powers.silenced(ctx.player())) {
 				WebStrength.fists(ctx.player());
@@ -354,6 +366,8 @@ public final class WebPower implements Power {
 		player.removeAttached(STATE);
 		player.removeAttached(LINE);
 		player.removeAttached(LINE_OFF);
+		player.removeAttached(ROPE);
+		player.removeAttached(ROPE_OFF);
 		player.removeAttached(WINGS);
 		player.removeAttached(TETHER);
 		player.removeAttached(COOLDOWNS);
@@ -404,6 +418,10 @@ public final class WebPower implements Power {
 	/** The synced line for a hand's web. */
 	public static AttachmentType<WebLine> line(int hand) {
 		return hand == WebNet.OFF ? LINE_OFF : LINE;
+	}
+
+	public static AttachmentType<Float> rope(int hand) {
+		return hand == WebNet.OFF ? ROPE_OFF : ROPE;
 	}
 
 	/** The off-hand web needs a free hand to shoot from. */
@@ -486,6 +504,8 @@ public final class WebPower implements Power {
 			player.removeAttached(STATE);
 			player.removeAttached(LINE);
 			player.removeAttached(LINE_OFF);
+			player.removeAttached(ROPE);
+			player.removeAttached(ROPE_OFF);
 			player.removeAttached(WINGS);
 			player.removeAttached(WINGS_BRAKE);
 			player.removeAttached(TETHER);
@@ -617,6 +637,7 @@ public final class WebPower implements Power {
 			state.lineTicks = 0;
 		}
 		player.setAttached(line(hand), new WebLine(WebLine.SWING, anchor, stuckTo == null ? -1 : stuckTo.getId()));
+		player.setAttached(rope(hand), (float)anchor.distanceTo(player.position().add(0.0, 1.2, 0.0)));
 		ServerLevel level = player.level();
 		if (stuckTo != null) {
 			level.playSound(null, stuckTo.getX(), stuckTo.getY(), stuckTo.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.PLAYERS, 0.8F, 1.2F);
@@ -751,6 +772,7 @@ public final class WebPower implements Power {
 	}
 
 	private static void dropSwing(ServerPlayer player, State state, int hand) {
+		player.removeAttached(rope(hand));
 		state.swingEntity[hand] = -1;
 		state.swinging[hand] = false;
 		state.graceTicks = 0;
@@ -1036,6 +1058,8 @@ public final class WebPower implements Power {
 		state.swinging[WebNet.MAIN] = false;
 		state.swinging[WebNet.OFF] = false;
 		player.removeAttached(LINE_OFF);
+		player.removeAttached(ROPE);
+		player.removeAttached(ROPE_OFF);
 		state.pullTicks = pull.maxTicks() + 5;
 		state.lineTicks = pull.maxTicks() + 2;
 		state.grace = true;
