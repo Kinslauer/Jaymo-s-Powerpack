@@ -2726,5 +2726,9 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   Cavern (below y 0): drops amethyst, emerald or (rarely) diamond; spits web that holds its prey in a cobweb for 5 s.
   Jungle: 30% faster, pounces, poison bite, a poison pollen cloud as it dies. Ice (snowy biomes): bite freezes and
   slows. Cave spiders and spiders elsewhere are unchanged. Spider Overhaul's "Icy" slipping is freezing here instead.
-- Not yet seen in game.
+- **Spider legs** (`client/mixin/SpiderLegsMixin`, Mo' Bends' idea; Mo' Bends itself fights Fresh Animations/EMF): every
+  spider and cave spider leg is a thigh and a shin with a knee. Knees rise above the body, shins bend down to the ground
+  and fold further on the step; legs twitch at rest, the abdomen breathes and sways as it walks. Tuning in KNEE_LIFT,
+  SHIN_BEND, STEP_BEND.
+- Spider kinds and legs seen in a cloud playtest (screenshots in spider-kinds/); torches and dark nights not yet.
 
