@@ -890,7 +890,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   and eaten, unless you break free, which is far harder now (80 presses, 6 fewer per ability earned, fading faster).
   Hunts no longer give up after 20 s. A corpse in a tendril's grip goes into your arms on a plain right click (no Sneak).
   See docs/web.md.
-- **0.10.12, Z Fighter (Andy's idea, our own take; no Dragon Ball mod code or art):** a martial artist who fights
+- **0.10.12, jump cuts a zip, dive slam:** pressing Jump at any point of a Web Zip (or Yank-to) lets go of the line,
+  keeping the speed it gave you. Coming down straight out of the wings' freedive lands in a superhero landing that
+  breaks the ground and hurls everything near. See docs/web.md.
+- **0.10.13, Z Fighter (Andy's idea, our own take; no Dragon Ball mod code or art):** a martial artist who fights
   with fists and ki (`power/zfighter`, `docs/Abilities.md`). Ki meter (100, +5 per foe that ever beat him) charged on
   R (hold), spent on Ki Blast (G), Ki Wave (V hold), Flash Step (B) and ki flight (Z, creative-style, drains ki).
   Fists only: a weapon won't strike in his hand (`ZFighterPlayerMixin` on `Player.attack`); strong fists, 5-hit

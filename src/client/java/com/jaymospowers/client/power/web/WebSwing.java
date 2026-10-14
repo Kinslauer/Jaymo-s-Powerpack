@@ -226,6 +226,8 @@ public final class WebSwing {
 	WebNet.@Nullable Pull pull;
 	private int pullTicks;
 	private int stuckTicks;
+	/** Jump was down last tick of the zip (a press, not a held Jump from before it began, cuts it). */
+	private boolean pullJumpHeld;
 	private Vec3 lastPos = Vec3.ZERO;
 	/** Flips and twirls off the webs, on them, and on landing. */
 	private final WebTrickClient tricks = new WebTrickClient();
@@ -402,6 +404,7 @@ public final class WebSwing {
 		this.pull = pull;
 		pullTicks = 0;
 		stuckTicks = 0;
+		pullJumpHeld = player.input.keyPresses.jump();
 		lastPos = player.position();
 	}
 
@@ -417,7 +420,7 @@ public final class WebSwing {
 		if (swingLockout > 0) {
 			swingLockout--;
 		}
-		tricks.tick(player, attached(), flying, wingsTicks > 0, apexY);
+		tricks.tick(player, attached(), flying, wingsTicks > 0, diving, apexY);
 		// the swing's momentum builds while on a web, and is lost on the ground
 		if (attached()) {
 			if (player.getDeltaMovement().length() >= momentum * RAMP_AT) {
@@ -1077,6 +1080,15 @@ public final class WebSwing {
 
 	private void tickPull(LocalPlayer player) {
 		WebNet.Pull pull = this.pull;
+		// Jump at any point cuts the line: you carry on with whatever speed the zip had given you
+		boolean jump = player.input.keyPresses.jump();
+		if (jump && !pullJumpHeld) {
+			this.pull = null;
+			ClientPlayNetworking.send(new WebNet.Swing(WebNet.MAIN, false, Vec3.ZERO));
+			play(player, SoundEvents.LEAD_BREAK, 0.6F, 1.6F);
+			return;
+		}
+		pullJumpHeld = jump;
 		pullTicks++;
 		Vec3 dest = pull.target();
 		double arrive = 0.9;

@@ -568,6 +568,10 @@ public final class WebPower implements Power {
 		if (!payload.attach()) {
 			if (state.swinging[hand]) {
 				dropSwing(player, state, hand);
+			} else if (hand == WebNet.MAIN && state.pullTicks > 0) {
+				// a Zip cut short by a jump: the line goes now, not when the pull would have run out
+				state.pullTicks = 0;
+				state.lineTicks = 1;
 			}
 			return;
 		}
