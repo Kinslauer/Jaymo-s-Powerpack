@@ -202,3 +202,22 @@ power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts
 | 200 | Nadir | body | The void given shape | 1.15x, 60 hp, fists of 6, +20% speed, immovable; no fall, fire or drowning damage. Flies like creative (double-tap Jump), over three times creative's speed, free. A dark silhouette with a void face and the xeno insignia on the chest. | |
 | 201 | Nadir | R | Beacon | Tap: pick a player anywhere on the server (tap again for the next); they glow through the world for 3 s. Hold 1.5 s: phase to just behind them, across dimensions. 5 s. | |
 | 202 | Nadir | G V B | (later) | Not decided yet. | |
+
+## Z Fighter (0.10.5)
+
+| Line | Form | Key | Ability | What it does now | Change to |
+|---|---|---|---|---|---|
+| 210 | Starter | R (hold) | Charge Ki (weak) | Ki gathers at 8 a second while you stand your ground (slowed 60%). | |
+| 211 | Starter | passive | Fists | Bare fists hit for 4 (+0.75 per ability unlocked, +0.25 per foe that ever beat you, +1 ascended). Weapons (anything with its own attack damage) won't strike in your hand; bows still shoot. | |
+| 212 | Base | R (hold) | Charge Ki | Ki pours in, 20 a second; the aura flares (white-orange, gold when Super) and you slow 60%. Costs a lot of food. Not while starving. | |
+| 213 | Base | G | Ki Blast | A fast bolt from the palm: 8 ki, ~5 damage (grows with mastery, x1.5 Super), knocks back, 40-tick flight. 0.3 s between shots. | |
+| 214 | Base | V (hold) | Ki Wave | Gather for up to 3 s, let go: a beam through everything in a 40-block line, 8-24 damage, 0.8-1.8 blocks wide, a blast where it ends (no block damage; a full wave while Super breaks blocks if mob griefing is on). 25-60 ki. 5 s. | |
+| 215 | Base | B | Flash Step | Up to 10 blocks the way you look in a blink, leaving an afterimage; aimed at a creature within 16, you land behind it facing its back. 15 ki. 1.5 s. | |
+| 216 | Base | Z | Flight | From 2 abilities: rise on your ki and fly like creative (double-tap Jump works too). 2 ki a second while airborne; out of ki, you fall. Z again lands you. | |
+| 217 | Base | passive | Ki | 100 ki (+5 per foe that ever beat you, up to +100). Back by itself at 0.5 a second when not hungry; +2 per punch that lands; +3 per hunger point eaten. | |
+| 218 | Base | passive | Combos | Punches within 1.25 s of each other chain; every 5th is a finisher: +4 damage, the foe flies. | |
+| 219 | Base | passive | Appetite | Burns food all the time (about a hunger point every 20 s), and far more charging, blasting and in Super. At 6 food or less: no ki regen, fists 30% weaker. | |
+| 220 | Base | passive | No foe fells him twice | Whatever kills you (each kind of creature; each player by name) is remembered: it does 50% less damage to you and takes 50% more from you, for good. Each new victor makes you stronger (above). | |
+| 221 | Ascension |  | How | Hardship 40, then near death (30% health) in a fight with everything mastered: you break through, heal 5 hearts and go Super on the spot. Hardship: back up after falling to 25% health mid-fight (+3, once a minute), a new defeat (+4), killing a foe that once killed you (+2), a Wither, Ender Dragon, Warden or Elder Guardian (+10). | |
+| 222 | Ascended | C | Super | Needs 30 ki: a gold blast throws back everything within 5. Fists +60%, ki techniques x1.5, 25% faster, faster flight. Burns 1.5 ki a second and 2.5x the food. C again (or no ki) ends it; 10 s before it comes again. | |
+| 223 | Getting it |  | Calling | Kill 20 monsters with your bare fists while powerless: it awakens at once. Fate can also hand it out. | |

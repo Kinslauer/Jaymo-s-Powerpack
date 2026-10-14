@@ -879,3 +879,14 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     (it breaks or falls off); the cure for both is a rare priest's quest. Plan: `docs/Vampires-Plan.md` (`kingdoms/MODLOG.md`).
 - **0.10.4, cursed werewolves' coats (Kingdoms 0.7.1):** cursed villagers' beasts are mangy, scarred or patchy, with
   the torn remains of their clothes on, dyed by their trade (`kingdoms/MODLOG.md`).
+- **0.10.5, Z Fighter (Andy's idea, our own take; no Dragon Ball mod code or art):** a martial artist who fights
+  with fists and ki (`power/zfighter`, `docs/Abilities.md`). Ki meter (100, +5 per foe that ever beat him) charged on
+  R (hold), spent on Ki Blast (G), Ki Wave (V hold), Flash Step (B) and ki flight (Z, creative-style, drains ki).
+  Fists only: a weapon won't strike in his hand (`ZFighterPlayerMixin` on `Player.attack`); strong fists, 5-hit
+  combos with a finisher, ki from punches and from eating. Eats a lot (constant exhaustion, more for everything).
+  No foe fells him twice: whatever kills him (kind of creature, or player) is saved in `zfighter_defeats` and does
+  50% less to him and takes 50% more from him (`ZFighterLivingEntityMixin`), and each new victor raises his ki and
+  fists. Super is the ascension, through hardship (`zfighter_hardship`: clutch recoveries, defeats, rematches, great
+  beasts; 40, everything mastered, near death mid-fight): he breaks through and goes Super; then C toggles it (gold
+  aura, fists +60%, ki x1.5, faster; burns ki and food). Calling: 20 monsters killed with bare fists while powerless.
+  No corruption yet. `/powerdebug zfighter ready|hardship <n>|foes [clear]`.
