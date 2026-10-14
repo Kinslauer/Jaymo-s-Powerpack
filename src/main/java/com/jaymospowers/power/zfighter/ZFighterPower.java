@@ -227,6 +227,8 @@ public final class ZFighterPower implements Power {
 		/** His lineage ({@link ZFighterLineage}), refreshed every tick, and how long the Great Ape has been out of the moonlight. */
 		int lineage;
 		int moonless;
+		/** How far grown into the Great Ape (0-1): eases up over {@link ZFighterLineage#APE_GROW_TICKS} and back down. */
+		float apeSize;
 		/** The guard (right click held): up, since when, when he may parry again, until when his punch counters. */
 		boolean guarding;
 		long guardStart;
@@ -849,7 +851,8 @@ public final class ZFighterPower implements Power {
 		boolean ape = ZFighterLineage.ape(player);
 		set(player, Attributes.ENTITY_INTERACTION_RANGE, REACH_ID, lineage == ZFighterLineage.VERDANT ? ZFighterLineage.REACH : 0.0,
 			AttributeModifier.Operation.ADD_VALUE);
-		double scale = ape ? ZFighterLineage.APE_SCALE : lineage == ZFighterLineage.VERDANT ? ZFighterLineage.GIANT_SCALE[live.form] : 0.0;
+		double scale = live.apeSize > 0.0F ? ZFighterLineage.apeScale(live.apeSize)
+			: lineage == ZFighterLineage.VERDANT ? ZFighterLineage.GIANT_SCALE[live.form] : 0.0;
 		set(player, Attributes.SCALE, SCALE_ID, scale, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 		set(player, Attributes.ATTACK_DAMAGE, APE_FIST_ID, ape ? ZFighterLineage.APE_FISTS : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.MAX_HEALTH, APE_HEALTH_ID, ape ? ZFighterLineage.APE_HEALTH : 0.0, AttributeModifier.Operation.ADD_VALUE);

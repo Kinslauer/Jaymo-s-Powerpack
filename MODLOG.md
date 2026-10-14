@@ -967,3 +967,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Z + scroll come on whenever a Z Fighter is actually flying fast (0.7 blocks a tick across or diving, off again under
   0.35), for his own screen as well as everyone else's, not only while the client's sprint-cruise flag is set. Hovering,
   taking off and standing he still looks like himself, arms included.
+  The Great Ape stands about 30 blocks tall (scale 17, was 3; `ZFighterScaleMixin` lifts the scale attribute's cap from
+  16 to 20) and grows into it over 4 seconds, swelling smoothly with dust, smoke and a heartbeat, then roars at full
+  size; ending, he shrinks back over 2 seconds.

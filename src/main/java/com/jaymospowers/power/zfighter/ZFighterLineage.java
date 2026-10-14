@@ -19,6 +19,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.entity.LivingEntity;
@@ -60,7 +61,13 @@ public final class ZFighterLineage {
 	public static final float EARTHLING_LIMIT = 0.5F;
 	// ---- Warrior-born ----
 	public static final int WARRIOR_ZENKAI = 2;
-	static final double APE_SCALE = 2.0;
+	/** The Great Ape's scale added to a player's 1 (17 times: about 30 blocks tall). */
+	static final double APE_SCALE = 16.0;
+	/** Growing into the ape takes this long; shrinking back, this long. */
+	static final int APE_GROW_TICKS = 80;
+	static final int APE_SHRINK_TICKS = 40;
+	/** How big the scale attribute may go (vanilla stops at 16; see {@code ZFighterScaleMixin}). */
+	public static final double MAX_SCALE = 20.0;
 	static final double APE_FISTS = 1.0;
 	static final double APE_HEALTH = 40.0;
 	static final double APE_SPEED = 0.15;
@@ -215,6 +222,46 @@ public final class ZFighterLineage {
 			ape(player, live, level, now);
 		} else if (ape(player)) {
 			endApe(player, live);
+		}
+		grow(player, live, level);
+	}
+
+	/** The scale (added to 1) at this far grown: eased in and out, so he swells up and slows into his full size. */
+	static double apeScale(float size) {
+		float t = Mth.clamp(size, 0.0F, 1.0F);
+		return APE_SCALE * t * t * (3.0F - 2.0F * t);
+	}
+
+	/** Grows him into the Great Ape (or shrinks him back) a little every tick, the ground shaking while he does. */
+	private static void grow(ServerPlayer player, ZFighterPower.Live live, ServerLevel level) {
+		boolean ape = ape(player);
+		float target = ape ? 1.0F : 0.0F;
+		if (live.apeSize == target) {
+			return;
+		}
+		live.apeSize = ape ? Math.min(1.0F, live.apeSize + 1.0F / APE_GROW_TICKS) : Math.max(0.0F, live.apeSize - 1.0F / APE_SHRINK_TICKS);
+		ZFighterPower.refresh(player, live);
+		if (ape) {
+			double width = player.getBbWidth();
+			level.sendParticles(new DustParticleOptions(0x6B3A1E, 3.0F), true, false, player.getX(), player.getY() + player.getBbHeight() * 0.5,
+				player.getZ(), 6, width * 0.4, player.getBbHeight() * 0.35, width * 0.4, 0.0);
+			level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, true, false, player.getX(), player.getY() + 0.2, player.getZ(), 3, width * 0.6, 0.1,
+				width * 0.6, 0.02);
+			if (level.getGameTime() % 10 == 0) {
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 3.0F,
+					0.5F + 0.3F * (1.0F - live.apeSize));
+			}
+			if (live.apeSize >= 1.0F) {
+				// full size: the roar
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 6.0F, 0.4F);
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 5.0F, 0.5F);
+				level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, true, false, player.getX(), player.getY() + 2.0, player.getZ(), 3, width * 0.4, 1.0,
+					width * 0.4, 0.0);
+				player.setHealth(player.getMaxHealth());
+			}
+		}
+		if (player.getHealth() > player.getMaxHealth()) {
+			player.setHealth(player.getMaxHealth());
 		}
 	}
 
