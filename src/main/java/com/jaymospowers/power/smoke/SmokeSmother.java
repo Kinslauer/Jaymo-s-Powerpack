@@ -34,7 +34,7 @@ final class SmokeSmother {
 	static final double KEEP_RANGE = 32.0;
 	static final int MAX_TICKS = 120;
 	/** Smoke a tick round its head. */
-	static final float WRAP = 0.5F;
+	static final float WRAP = 1.1F;
 	/** Air taken a tick (vanilla gives back 4 a tick out of water; a full breath is 300). */
 	static final int AIR_DRAIN = 19;
 	static final float CHOKE = 2.0F;
