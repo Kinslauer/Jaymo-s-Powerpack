@@ -877,14 +877,16 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   who change under the full moon (a grotesque change, each beast its own size, build and coat). Stage 3: players turn
   by a vampire's bite or take the wolf's curse by ritual (bone, campfires, full moon); the change tears 30% of your armour's durability
     (it breaks or falls off); the cure for both is a rare priest's quest. Plan: `docs/Vampires-Plan.md` (`kingdoms/MODLOG.md`).
-- **0.10.7, sense bolts, takeovers see it through:** the counter's text is gone; a dodge flashes three faint lightning
-  bolts over your head (top of the screen in first person) while you can counter. Symbiote takeovers no longer end on
-  a timer: it keeps the wheel until its prey is dead (or gets 64 blocks away), its look is had, or its kill is carried
-  and eaten, unless you break free, which is far harder now (80 presses, 6 fewer per ability earned, fading faster).
-  Hunts no longer give up after 20 s. A corpse in a tendril's grip goes into your arms on a plain right click (no Sneak).
-  See docs/web.md.
 - **0.10.4, cursed werewolves' coats (Kingdoms 0.7.1):** cursed villagers' beasts are mangy, scarred or patchy, with
   the torn remains of their clothes on, dyed by their trade (`kingdoms/MODLOG.md`).
 - **0.10.5, grabbable severed parts:** a severed head or limb can be picked up (right-click it with an empty hand, or
   sneak + right-click) and dangles from your right hand as you walk; right-click drops it, sneak + right-click throws
   it, the same as carrying a body. A beheaded player's view goes along with their carried head.
+- **0.10.9, rarer tornadoes (Kingdoms 0.7.2):** only one supercell in ten can put down a tornado now, so one comes
+  about every 60 in-game days instead of every 6. The other supercells still bring their storm (`kingdoms/MODLOG.md`).
+- **0.10.10, sense bolts, takeovers see it through:** the counter's text is gone; a dodge flashes three faint lightning
+  bolts over your head (top of the screen in first person) while you can counter. Symbiote takeovers no longer end on
+  a timer: it keeps the wheel until its prey is dead (or gets 64 blocks away), its look is had, or its kill is carried
+  and eaten, unless you break free, which is far harder now (80 presses, 6 fewer per ability earned, fading faster).
+  Hunts no longer give up after 20 s. A corpse in a tendril's grip goes into your arms on a plain right click (no Sneak).
+  See docs/web.md.
