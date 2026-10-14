@@ -3,6 +3,7 @@ package com.jaymoskingdoms.client.mixin;
 import com.jaymoskingdoms.client.MobAnimations;
 import com.jaymoskingdoms.client.PickpocketPose;
 import com.jaymoskingdoms.client.PullerPose;
+import com.jaymoskingdoms.client.VerdantLook;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
@@ -27,6 +28,7 @@ abstract class MobSwingLivingEntityRendererMixin {
 		MobAnimations.extract(entity, state, partialTicks);
 		PullerPose.extract(entity, state, partialTicks);
 		PickpocketPose.extract(entity, state, partialTicks);
+		VerdantLook.extract(entity, state);
 	}
 
 	@Inject(
