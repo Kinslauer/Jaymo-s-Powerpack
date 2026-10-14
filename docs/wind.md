@@ -580,3 +580,20 @@ five staff swings play as before, and our own chain of landed swings (one count 
 Every staff hit also leaves a small puff. **Staff Vault** (right click): ride a gust forward and up; sneak + right click
 goes straight up. 50-tick cooldown (cold-stretched), and no fall damage for 80 ticks or until you land. The Tempest mode
 and the ascension make every gale 1.3x. Tuning at the top of `WindStaff`. Not playtested.
+
+## 0.10.25: daggers ride the gale too (`WindDagger`)
+
+Andy: "wind should get increased proficiency with daggers the same way it does quarterstaves". Same gate as the staff
+(a **wind sorcerer**), same shape. Any item whose id contains `dagger`, `knife` or `kunai` (the Armory's daggers,
+knives and kunai, Balkon's knives). Better Combat's four dagger swings play as before; our own chain of landed swings
+(broken after `CHAIN_TIMEOUT` 30 ticks) picks the gale:
+
+1. **Gale Cut** (slash): a blade of air 4.5 blocks ahead cuts everything in a narrow cone (0.5x attack damage).
+2. **Wind Stab** (flip and stab): the foe is driven back and you ride the wind in after it.
+3. **Crosswind** (backhand): everyone within 3.5 blocks is swept across your front.
+4. **Cyclone Thrust** (double stab): a burst round the foe throws it and anyone within 3 blocks of it up and away
+   (0.35x attack damage to those beside it).
+
+Every dagger hit leaves a small puff. **Wind Step** (right click, not with the throwable kunai): a quick dash where you
+look; sneak + right click hops back. 30-tick cooldown (cold-stretched), no fall damage for 40 ticks or until you land.
+The Tempest mode and the ascension make every gale 1.3x. Tuning at the top of `WindDagger`. Not playtested.

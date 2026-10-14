@@ -980,3 +980,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.10.25, Sora's Dagger removed:** per Andy, Wind's dagger is gone: the item (all four stages), its recipe, Flurry,
   textures, Better Combat dagger preset, the casting-table gilding and the Tool Station diamond setting. Wind keeps
   every ability; daggers already in a world disappear when it loads.
+- **0.10.25, daggers ride the gale (`WindDagger`):** wind sorcerers now fight with daggers the way they do with the
+  quarterstaff: the four dagger swings carry Gale Cut, Wind Stab, Crosswind and Cyclone Thrust, every hit leaves a
+  puff, and right click is the Wind Step dash (sneak: hop back). See docs/wind.md.
