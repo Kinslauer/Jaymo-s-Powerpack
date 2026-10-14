@@ -269,6 +269,18 @@ public final class Quests {
 		return lot < GIVER_SHARE + GIVER_SHARE_REPUTED * reputed;
 	}
 
+	/** (0.7.21) {@code giver} has {@code q} to offer until tomorrow (a grudge come to a head), whatever their day's lot. */
+	static void offerNow(ServerLevel level, LivingEntity giver, Quest q) {
+		giver.setAttached(OFFER, new Offer(day(level) + 1, true, Optional.of(q)));
+		mark(giver, true);
+	}
+
+	/** (0.7.21) {@code giver} has a quest on offer just now. */
+	static boolean offering(LivingEntity giver) {
+		Offer offer = giver.getAttached(OFFER);
+		return offer != null && offer.has() && offer.quest().isPresent();
+	}
+
 	private static void mark(LivingEntity giver, boolean has) {
 		if (giver.getAttachedOrElse(MARK, false) != has) {
 			if (has) {
@@ -1038,6 +1050,7 @@ public final class Quests {
 			case Quest.DELIVER -> Component.translatable(key, addressee(q), q.objective().place());
 			case Quest.CHIEF, Quest.WARBAND, Quest.RACE -> Component.translatable(key, q.objective().place());
 			case Quest.STUD -> Component.translatable(key, breedName(q));
+			case Quest.GRUDGE -> Component.translatable(key, q.objective().otherName());
 			// (the reasons differ by the king's temper, the title only by how it's done)
 			case Quest.REGICIDE -> Component.translatable("quest.jaymoskingdoms.king.regicide." + q.objective().otherName() + ".title", q.objective().place());
 			default -> Component.translatable(key);
@@ -1107,6 +1120,7 @@ public final class Quests {
 			case Quest.STUD -> Component.translatable(key, breedName(q), o.count());
 			case Quest.RACE -> Component.translatable(key, o.place(), Stables.raceSeconds(q), x(q), z(q));
 			case Quest.HUNT, Quest.SURVIVE -> Component.translatable(key, x(q), z(q));
+			case Quest.GRUDGE -> Component.translatable(key, o.otherName(), o.count(), x(q), z(q));
 			default -> Component.empty();
 		};
 	}
@@ -1135,6 +1149,10 @@ public final class Quests {
 			case Quest.HUNT -> Component.translatable("quest.jaymoskingdoms.objective.hunt", beastName(o.target()), x(q), z(q));
 			case Quest.SURVIVE -> Component.translatable(o.spawned() ? "quest.jaymoskingdoms.objective.surviving" : "quest.jaymoskingdoms.objective.survive",
 				beastName(o.target()), x(q), z(q));
+			case Quest.GRUDGE -> o.pos().isPresent()
+				? Component.translatable(o.spawned() ? "quest.jaymoskingdoms.objective.grudge_luring" : "quest.jaymoskingdoms.objective.grudge_lure",
+					o.otherName(), q.giver().name(), x(q), z(q))
+				: Component.translatable("quest.jaymoskingdoms.objective.grudge_beat", o.otherName(), o.progress(), o.count());
 			default -> Component.empty();
 		};
 	}

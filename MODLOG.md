@@ -1130,3 +1130,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   MCA personalities, partners and kin) that drives frequent meetings: fights, arguments, shoves and snubs when low;
   greetings, chat and jokes in the middle; gifts, meals, hugs, courting and (with MCA) marriage when high. Each meeting
   moves the regard, so friendships and feuds grow. See `kingdoms/MODLOG.md` 0.7.19.
+- **0.10.70 / Kingdoms 0.7.21, grudges** (Andy: "Villagers will set each other up at low rep, maybe giving you a quest
+  to beat them up or lure them into a beating"): villagers who come to hate another (regard -50 or less after a
+  quarrel) may offer you a grudge quest: give their enemy a 3-blow beating, or walk up to them so they follow you and
+  lead them to the giver's hiding spot on the outskirts, where the giver ambushes them. See `kingdoms/MODLOG.md` 0.7.21.

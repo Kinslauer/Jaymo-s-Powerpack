@@ -2838,3 +2838,24 @@ negative interactions at lower reputation, positive interactions, higher reputat
   `watch.child`, `guard`, `fight.lost`, `wed`; lines may use `%1$s`, the other's name. Talk floats over their heads.
 - Ops: `/kingdom neighbours [kind]` makes the two grown villagers nearest you meet now and tells you their regard.
 - Built; not yet seen in game.
+
+## 0.7.21: grudges: villagers set each other up (pack 0.10.70)
+Andy: "Villagers will set each other up at low rep, maybe giving you a quest to beat them up or lure them into a
+beating". (0.7.20 / 0.10.69 are the Kingdom languages PR's.)
+- **A grudge comes to a head** (`Grudges`): after any sour meeting (`Neighbours`) that leaves the pair at or below
+  -50, there's a 30% chance one of them mutters about it and gets a `Quest.GRUDGE` on offer until tomorrow (gold
+  mark; at most one a day each, and not over a quest they already offer). They walk up to players like any giver
+  (`Approaches` QUEST_OFFER). Pays 6-12 emeralds and 6 MCA hearts with the giver; no reputation.
+- **A beating:** land 3 blows on their enemy (or kill them, which counts, and is murder if seen). On the third they
+  beg off and run (`Frights.scare`). MCA, the guards and golems react to a villager being hit as they always do.
+- **A lure:** come within 3 blocks of the enemy and they follow you ("You've something to show me?"); lead them to the
+  giver's hiding spot on the outskirts (26-36 blocks from the seat, shown on the tracker). The giver goes there and
+  waits; when both are there the giver springs out and lays into them (`Neighbours.ambush`: a fight where only the
+  giver lands blows), and the quest is done. Get more than 18 blocks ahead or take over 4 minutes and they give up
+  (you can draw them again).
+- Each grudge settled drops the two's regard by 10 more.
+- Stories: `quest.jaymoskingdoms.grudge.<beat|lure>.0-3.title|text`; lines `neighbours.jaymoskingdoms.grudge|lure|
+  lure.lost|ambush|mercy.0-7`.
+- Ops: `/kingdom neighbours grudge_beat|grudge_lure`: the nearest grown villager comes to hate the next nearest and
+  offers you the quest.
+- Built; not yet seen in game.

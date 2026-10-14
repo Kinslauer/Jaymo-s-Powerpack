@@ -137,6 +137,8 @@ final class Neighbours {
 		int beat;
 		/** Blows landed in a fight, by the opener and by the other. */
 		int aHits, bHits;
+		/** (0.7.21) An ambush: the opener lands every blow. */
+		boolean ambush;
 
 		Meeting(Villager a, Villager b, int faction, Kind kind, long now) {
 			this.a = a;
@@ -318,6 +320,24 @@ final class Neighbours {
 		}
 	}
 
+	/**
+	 * (0.7.21) {@code a} falls on {@code b}, lured to where they lay in wait: a fight where only {@code a} lands blows. Whatever
+	 * either was about is dropped.
+	 */
+	static void ambush(ServerLevel level, int faction, Villager a, Villager b, long now) {
+		for (Villager v : List.of(a, b)) {
+			Meeting old = MEETING.get(v.getUUID());
+			if (old != null) {
+				end(level, old, now);
+			}
+		}
+		begin(level, faction, a, b, Kind.FIGHT, now);
+		Meeting m = MEETING.get(a.getUUID());
+		m.ambush = true;
+		m.arrived = now;
+		m.next = now;
+	}
+
 	/** {@code a} goes over to {@code b} to {@code kind}. */
 	private static void begin(ServerLevel level, int faction, Villager a, Villager b, Kind kind, long now) {
 		Meeting m = new Meeting(a, b, faction, kind, now);
@@ -388,7 +408,7 @@ final class Neighbours {
 					onlookers(level, m);
 				}
 				// (blows trade back and forth, the angrier one, the opener, swinging more)
-				boolean aSwings = random.nextFloat() < 0.6F;
+				boolean aSwings = m.ambush || random.nextFloat() < 0.6F;
 				Villager hitter = aSwings ? m.a : m.b, hit = aSwings ? m.b : m.a;
 				blow(level, hitter, hit, BLOW_KNOCK);
 				if (aSwings) {
@@ -512,6 +532,10 @@ final class Neighbours {
 	private static boolean finish(ServerLevel level, Meeting m, long now) {
 		RandomSource random = level.getRandom();
 		shift(m.a, m.b, m.kind.regard);
+		if (m.kind.sour() && !m.ambush) {
+			// (0.7.21) a bitter enough grudge looks for someone to settle it
+			Grudges.brew(level, m.a, m.b, m.faction);
+		}
 		int moodBy = m.kind == Kind.FIGHT ? -3 : m.kind.sour() ? -1 : m.kind.regard >= 4 ? 2 : 1;
 		McaCompat.cheer(m.a, moodBy);
 		McaCompat.cheer(m.b, moodBy);
@@ -556,7 +580,7 @@ final class Neighbours {
 	}
 
 	/** {@code speaker} says one of family {@code family}'s lines (to {@code to}, whose name a line may use). */
-	private static void say(ServerLevel level, LivingEntity speaker, String family, int color, LivingEntity to) {
+	static void say(ServerLevel level, LivingEntity speaker, String family, int color, LivingEntity to) {
 		Speech.say(level, speaker, Component.translatable("neighbours.jaymoskingdoms." + family + "." + deal(family, level.getRandom()),
 			to.getDisplayName()), color, SPEECH_RANGE);
 	}
@@ -595,9 +619,14 @@ final class Neighbours {
 				for (Kind k : Kind.values()) {
 					b.suggest(k.key());
 				}
+				b.suggest("grudge_beat");
+				b.suggest("grudge_lure");
 				return b.buildFuture();
 			}).executes(c -> {
 				String name = com.mojang.brigadier.arguments.StringArgumentType.getString(c, "kind").toUpperCase(Locale.ROOT);
+				if (name.startsWith("GRUDGE_")) {
+					return grudge(c.getSource(), name.equals("GRUDGE_BEAT"));
+				}
 				for (Kind k : Kind.values()) {
 					if (k.name().equals(name)) {
 						return force(c.getSource(), k);
@@ -606,6 +635,23 @@ final class Neighbours {
 				c.getSource().sendFailure(Component.translatable("neighbours.jaymoskingdoms.command.unknown", name.toLowerCase(Locale.ROOT)));
 				return 0;
 			}));
+	}
+
+	/** (0.7.21) The nearest grown villager comes to hate the next nearest, and has a grudge quest for you. */
+	private static int grudge(CommandSourceStack source, boolean beating) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+		ServerPlayer player = source.getPlayerOrException();
+		if (!(player.level() instanceof ServerLevel level)) {
+			return 0;
+		}
+		List<Villager> near = level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(MEET_RANGE), v -> v.isAlive() && !v.isBaby());
+		near.sort((x, y) -> Double.compare(x.distanceToSqr(player), y.distanceToSqr(player)));
+		if (near.size() < 2 || !Grudges.force(level, near.get(0), near.get(1), beating)) {
+			source.sendFailure(Component.translatable("neighbours.jaymoskingdoms.command.nobody"));
+			return 0;
+		}
+		source.sendSuccess(() -> Component.translatable("neighbours.jaymoskingdoms.command.grudge", near.get(0).getDisplayName(), near.get(1).getDisplayName())
+			.withStyle(ChatFormatting.GRAY), false);
+		return 1;
 	}
 
 	private static int force(CommandSourceStack source, @Nullable Kind kind) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
