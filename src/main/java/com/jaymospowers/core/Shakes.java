@@ -24,6 +24,8 @@ public final class Shakes {
 	public static final double FALLOFF_POWER = 1.5;
 	/** Bystanders feel a mover's own shake ({@link #heavy}) at this share. */
 	public static final float BYSTANDER_SHARE = 0.5F;
+	/** A heavy mover's shake grows with the square root of its heft (see {@code Impacts.heft}), up to this many times. */
+	public static final float HEFT_BOOST_MAX = 1.6F;
 
 	private Shakes() {
 	}
@@ -96,13 +98,20 @@ public final class Shakes {
 
 	/**
 	 * A heavy body's own impact (a landing, a slam, a stomp): the mover feels {@code strength} from under/behind it,
-	 * everyone else within {@code range} feels a share of it from where it hit.
+	 * everyone else within {@code range} feels a share of it from where it hit. The bigger the body (Bulwark, Knell, the
+	 * symbiote), the harder it lands.
 	 */
 	public static void heavy(ServerPlayer player, Vec3 at, double range, float strength) {
 		heavy(player, at, range, strength, ticksFor(strength));
 	}
 
 	public static void heavy(ServerPlayer player, Vec3 at, double range, float strength, int ticks) {
+		strength *= Math.clamp((float)Math.sqrt(Impacts.heft(player)), 1.0F, HEFT_BOOST_MAX);
+		felt(player, at, range, strength, ticks);
+	}
+
+	/** As {@link #heavy}, with the strength exactly as given (already scaled by heft). */
+	public static void felt(ServerPlayer player, Vec3 at, double range, float strength, int ticks) {
 		send(player, strength, ticks, at);
 		around(player.level(), at, range, strength * BYSTANDER_SHARE, ticks, player);
 	}

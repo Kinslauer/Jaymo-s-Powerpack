@@ -314,5 +314,6 @@ public final class WebAscension {
 		level.sendParticles(ParticleTypes.ITEM_COBWEB, at.x, at.y, at.z, 10, 0.3, 0.3, 0.3, 0.1);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1.2F, 0.8F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.0F, 0.9F);
+		com.jaymospowers.core.Shakes.send(player, 0.9F, at);
 	}
 }

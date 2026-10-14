@@ -381,6 +381,7 @@ public final class Wisp extends XenoForm {
 		sound(player, SoundEvents.PHANTOM_SWOOP, 2.0F, 0.5F);
 		sound(player, SoundEvents.WARDEN_ROAR, 0.6F, 1.8F);
 		sound(player, SoundEvents.PHANTOM_AMBIENT, 2.0F, 0.6F);
+		com.jaymospowers.core.Shakes.heavy(player, player.position(), WAIL_RADIUS, 1.0F);
 	}
 
 	/** Every mob within reach drops what it was doing and runs. */

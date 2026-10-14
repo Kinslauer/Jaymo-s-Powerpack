@@ -295,6 +295,7 @@ public final class ZFighterWishes {
 		}
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ENDER_DRAGON_GROWL, SoundSource.PLAYERS, 4.0F, 0.6F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 4.0F, 0.8F);
+		com.jaymospowers.core.Shakes.around(level, at, 96.0, 2.5F);
 		ServerPlayNetworking.send(player, new ZFighterNet.OpenWish());
 	}
 

@@ -295,6 +295,7 @@ public final class ZFighterLineage {
 				level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, true, false, player.getX(), player.getY() + 2.0, player.getZ(), 3, width * 0.4, 1.0,
 					width * 0.4, 0.0);
 				player.setHealth(player.getMaxHealth());
+				com.jaymospowers.core.Shakes.heavy(player, player.position(), 48.0, 2.8F);
 			}
 		}
 		if (player.getHealth() > player.getMaxHealth()) {

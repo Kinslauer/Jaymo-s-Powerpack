@@ -302,6 +302,7 @@ public final class ArsenalDamocles {
 				level.sendParticles(ParticleTypes.REVERSE_PORTAL, fall.x(), surface + 1.0, fall.z(), 120, 1.0, 0.5, 1.0, 0.15);
 				level.playSound(null, fall.x(), surface, fall.z(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 1.5F, 0.5F);
 				level.playSound(null, portal.x, portal.y, portal.z, SoundEvents.PORTAL_TRAVEL, SoundSource.PLAYERS, 0.6F, 0.7F);
+				com.jaymospowers.core.Shakes.around(level, new net.minecraft.world.phys.Vec3(fall.x(), surface, fall.z()), 24.0, 1.0F);
 			}
 			if (t > fall.risesAt() && t < fall.sunkAt() && t % 2 == 0) {
 				double tip = tipY(fall, t);

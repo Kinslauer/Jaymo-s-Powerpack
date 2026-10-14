@@ -211,5 +211,6 @@ public final class WindTempest {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_RIPTIDE_3, SoundSource.PLAYERS, 1.2F, 1.4F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_WIND_CHARGE_BURST, SoundSource.PLAYERS, 1.4F, 0.6F);
 		level.playSound(null, tip.x, tip.y, tip.z, SoundEvents.WIND_CHARGE_BURST, SoundSource.PLAYERS, 1.2F, 0.7F);
+		com.jaymospowers.core.Shakes.around(level, tip, 14.0, 1.2F, com.jaymospowers.core.Shakes.ticksFor(1.2F), player);
 	}
 }
