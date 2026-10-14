@@ -91,6 +91,11 @@ public final class PoseTakeover {
 			|| s.getData(WebBodyPose.KEY) != null || s.getData(WebArms.KEY) != null
 			|| s.getData(WebRagdoll.KEY) != null || s.getData(WebSymbioteClient.SLAM) != null || s.getData(WebSymbioteClient.CHARGE) != null
 			|| s.getData(WebSymbioteClient.ROAR) != null || s.getData(WebSymbioteClient.EATING) != null
+			// the symbiote's suit and Living Armor are models of their own over the body, posed the vanilla way (and Living
+			// Armor hunches like a beast, WebFeral): Fresh Animations would move the body out from under them
+			|| s.getData(WebSymbioteClient.SUIT) != null
+			|| s.getData(WebSymbioteClient.TENDRILS) != null && s.getData(WebSymbioteClient.TENDRILS).armor()
+			|| s.getData(com.jaymospowers.client.power.web.WebSuitGrowth.KEY) != null
 			|| s.getData(ChronoFlowPose.KEY) != null || s.getData(ChronoReelPose.KEY) != null
 			|| s.getData(XenoformFlightPose.KEY) != null || s.getData(XenoformSlap.KEY) != null
 			|| s.getData(ZFighterFlightPose.KEY) != null || s.getData(com.jaymospowers.client.power.smoke.SmokeFlightPose.KEY) != null || s.getData(ZFighterChargePose.KEY) != null

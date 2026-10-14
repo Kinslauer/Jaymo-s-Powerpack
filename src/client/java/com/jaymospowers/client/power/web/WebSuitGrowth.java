@@ -31,10 +31,10 @@ public final class WebSuitGrowth {
 	private static final float OVERSHOOT = 0.12F, BULK_FROM = 0.8F;
 
 	/** On a player's render state while their suit is changing. {@code from}, {@code to}: 0 bare, 1 suit, 2 Living Armor. */
-	record Growth(int from, int to, float t) {
+	public record Growth(int from, int to, float t) {
 	}
 
-	static final RenderStateDataKey<Growth> KEY = RenderStateDataKey.create(() -> "jaymospowers:web_suit_growth");
+	public static final RenderStateDataKey<Growth> KEY = RenderStateDataKey.create(() -> "jaymospowers:web_suit_growth");
 
 	/** The suit layer's own models (only these are grown), and which of them are Living Armor's bulk. */
 	private static final Set<Model<?>> MODELS = Collections.newSetFromMap(new WeakHashMap<>());
@@ -86,7 +86,27 @@ public final class WebSuitGrowth {
 
 	/** After the suit model is posed: each part scaled by how far it has grown (and no head on your own, in first person). */
 	public static void applyModel(Model<?> model, Object state) {
-		if (!(state instanceof AvatarRenderState avatar) || !(model instanceof PlayerModel player) || !MODELS.contains(model)) {
+		if (!(state instanceof AvatarRenderState avatar)) {
+			return;
+		}
+		if (model.getClass().getName().startsWith(MCA_MODELS)) {
+			mcaUnder(model, covered(avatar));
+			return;
+		}
+		if (!(model instanceof PlayerModel player)) {
+			return;
+		}
+		if (!MODELS.contains(model)) {
+			// the wearer's own body: the skin's outer layer (hat, jacket, sleeves, trousers) sits further out than the
+			// suit, and would poke through it in patches, so it goes under the suit while the suit covers it all
+			if (covered(avatar)) {
+				player.hat.visible = false;
+				player.jacket.visible = false;
+				player.leftSleeve.visible = false;
+				player.rightSleeve.visible = false;
+				player.leftPants.visible = false;
+				player.rightPants.visible = false;
+			}
 			return;
 		}
 		grow(player, avatar);
@@ -94,6 +114,57 @@ public final class WebSuitGrowth {
 			player.head.visible = false;
 		}
 	}
+
+	/** The suit (or Living Armor's bulk) is all over them, not growing or drawing back. */
+	private static boolean covered(AvatarRenderState avatar) {
+		if (avatar.isInvisible) {
+			return false;
+		}
+		Growth growth = avatar.getData(KEY);
+		if (growth != null) {
+			// most of the way there (or only just starting to draw back)
+			if (Math.min(growth.from(), growth.to()) >= 1) {
+				return true;
+			}
+			return growth.to() > growth.from() ? growth.t() >= COVERED_AT : growth.t() <= 1.0F - COVERED_AT;
+		}
+		WebSymbioteClient.Tendrils tendrils = avatar.getData(WebSymbioteClient.TENDRILS);
+		return tendrils != null && tendrils.armor() || avatar.getData(WebSymbioteClient.SUIT) != null;
+	}
+
+	/**
+	 * Players drawn by MCA (its "Player" look) wear MCA's own body, clothes and hair, sized by its sliders, some of it
+	 * further out than the suit: all of it goes under the suit while the suit covers them, and comes back after (only
+	 * the parts that were showing).
+	 */
+	private static final String MCA_MODELS = "net.conczin.mca.client.model.";
+	private static final Map<Model<?>, java.util.List<ModelPart>> MCA_HIDDEN = new WeakHashMap<>();
+
+	private static void mcaUnder(Model<?> model, boolean covered) {
+		java.util.List<ModelPart> hidden = MCA_HIDDEN.get(model);
+		if (covered) {
+			if (hidden == null) {
+				hidden = new java.util.ArrayList<>();
+				MCA_HIDDEN.put(model, hidden);
+			}
+			for (ModelPart part : model.allParts()) {
+				if (part.visible) {
+					part.visible = false;
+					hidden.add(part);
+				}
+			}
+		} else if (hidden != null) {
+			for (ModelPart part : hidden) {
+				part.visible = true;
+			}
+			MCA_HIDDEN.remove(model);
+		}
+	}
+
+	/** How far through putting the suit on (0-1) the skin's outer layer goes under it. */
+	private static final float COVERED_AT = 0.85F;
+	/** Living Armor's bulk: its head is kept this much smaller than the rest of it is swollen (a monstrous body, not a balloon head). */
+	static final float BULK_HEAD = 0.88F;
 
 	private static void grow(PlayerModel player, AvatarRenderState avatar) {
 		Growth growth = avatar.getData(KEY);
@@ -106,12 +177,18 @@ public final class WebSuitGrowth {
 				part.zScale = 1.0F;
 				part.visible = true;
 			}
+			if (bulk) {
+				headSize(player.head);
+			}
 			return;
 		}
 		scale(player.body, growth, BODY, bulk);
 		scale(player.rightArm, growth, ARMS, bulk);
 		scale(player.leftArm, growth, ARMS, bulk);
 		scale(player.head, growth, HEAD, bulk);
+		if (bulk) {
+			headSize(player.head);
+		}
 		scale(player.rightLeg, growth, LEGS, bulk);
 		scale(player.leftLeg, growth, LEGS, bulk);
 	}
@@ -136,6 +213,12 @@ public final class WebSuitGrowth {
 		part.yScale = size;
 		part.zScale = size + ripple;
 		part.visible = size > 0.02F;
+	}
+
+	private static void headSize(ModelPart head) {
+		head.xScale *= BULK_HEAD;
+		head.yScale *= BULK_HEAD;
+		head.zScale *= BULK_HEAD;
 	}
 
 	/** 0 → 1, overshooting a little first. */

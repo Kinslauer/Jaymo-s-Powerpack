@@ -55,18 +55,21 @@ final class WebLineRenderer {
 	/** End of every client tick: remember which creatures are hitched. */
 	static void tick(Minecraft minecraft) {
 		HITCHED.clear();
-		WebSpentLines.tick(minecraft);
+		if (minecraft.level != null) {
+			for (net.minecraft.world.entity.Entity entity : minecraft.level.entitiesForRendering()) {
+				if (entity.getAttached(com.jaymospowers.power.web.WebPower.HITCH) != null) {
+					HITCHED.add(entity);
+				}
+			}
+		}
+		// (spent lines go by which creatures are hitched, to leave a broken hitch's line behind)
+		WebSpentLines.tick(minecraft, HITCHED);
 		if (minecraft.level == null) {
 			return;
 		}
 		if (!minecraft.isPaused()) {
 			drip(minecraft);
 			WebRopeSim.tick(minecraft.level);
-		}
-		for (net.minecraft.world.entity.Entity entity : minecraft.level.entitiesForRendering()) {
-			if (entity.getAttached(com.jaymospowers.power.web.WebPower.HITCH) != null) {
-				HITCHED.add(entity);
-			}
 		}
 	}
 
@@ -281,7 +284,9 @@ final class WebLineRenderer {
 				long key = player.getId() * 4L + handIndex;
 				double length = hand.distanceTo(end);
 				double speed = dark ? WebGrowth.ROPE_SPEED : WebGrowth.WEB_SPEED;
-				float out = WebGrowth.fraction(key, end, length, speed, false);
+				// (one stuck to something that moves, a whip's catch or a yank, keeps growing however fast that flies: it
+				// isn't a fresh web each time its end jumps between frames)
+				float out = WebGrowth.fraction(key, end, length, speed, WebSpentLines.onEntity(minecraft, player, handIndex));
 				end = hand.lerp(end, out);
 				// how it hangs: slack sags, a fresh or just-caught line twangs, a stretched one hums and thins
 				double slack = slack(minecraft, player, handIndex, hand, end);
