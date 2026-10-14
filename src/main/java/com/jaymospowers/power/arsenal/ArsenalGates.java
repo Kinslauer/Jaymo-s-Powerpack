@@ -33,7 +33,8 @@ import org.jspecify.annotations.Nullable;
  * Void Gates, the Void Arsenal's V (corrupted, in place of Barrage): the rift learns to open anywhere.
  * <ul>
  * <li><b>V</b>: a gate is fixed where you aim (up to {@link #PLACE_RANGE} blocks), up to {@link #MAX_GATES}; another
- * replaces the oldest. V aimed at one of your gates (within {@link #CLOSE_RADIUS} blocks) closes it instead.</li>
+ * replaces the oldest. Hold V ({@link #CLOSE_HOLD} ticks) aimed at one of your gates (within {@link #CLOSE_RADIUS}
+ * blocks) and it closes.</li>
  * <li><b>Sneak + V</b>: you step through to the gate you're aiming toward, from any distance and through anything in
  * between (the gate nearest your aim, in this dimension).</li>
  * <li><b>Hold Sneak + V with no gates</b>: a gate is cast out ahead of you, drifting forward (a body-sized outline shows
@@ -46,8 +47,9 @@ public final class ArsenalGates {
 	static final double PLACE_RANGE = 64.0;
 	/** How close to your aim a gate must be to be picked (cosine of the angle off your look). */
 	static final double AIM_CONE = 0.8;
-	/** V this close to one of your gates closes it. */
+	/** Holding V this long, aimed this close to one of your gates, closes it. */
 	static final double CLOSE_RADIUS = 1.5;
+	static final int CLOSE_HOLD = 12;
 	/** The cast-out gate: blocks a tick, and the farthest it goes. */
 	static final double PROJECT_SPEED = 0.8, PROJECT_MAX = 32.0;
 	/** Between two steps through. */
@@ -82,6 +84,8 @@ public final class ArsenalGates {
 
 	private static final Map<UUID, Projection> PROJECTING = new HashMap<>();
 	private static final Map<UUID, Long> READY_AT = new HashMap<>();
+	/** When plain V went down (a tap places a gate on release; held on a gate, it closes it). */
+	private static final Map<UUID, Long> PRESSED = new HashMap<>();
 
 	private ArsenalGates() {
 	}
@@ -94,6 +98,10 @@ public final class ArsenalGates {
 	/** V, down or up (the Void Arsenal only). */
 	static void key(ServerPlayer player, boolean down) {
 		if (!down) {
+			if (PRESSED.remove(player.getUUID()) != null) {
+				place(player);
+				return;
+			}
 			Projection projection = PROJECTING.remove(player.getUUID());
 			if (projection != null) {
 				step(player, player.level(), projection.pos);
@@ -101,7 +109,7 @@ public final class ArsenalGates {
 			return;
 		}
 		if (!player.isShiftKeyDown()) {
-			place(player);
+			PRESSED.put(player.getUUID(), player.level().getGameTime());
 			return;
 		}
 		ServerLevel level = player.level();
@@ -121,30 +129,50 @@ public final class ArsenalGates {
 		}
 	}
 
+	/** Where a gate would sit, where you aim (null if nothing's there to hold it). */
+	private static @Nullable Vec3 aimSpot(ServerPlayer player) {
+		Vec3 eye = player.getEyePosition();
+		BlockHitResult hit = player.level().clip(new ClipContext(eye, eye.add(player.getLookAngle().scale(PLACE_RANGE)), ClipContext.Block.COLLIDER,
+			ClipContext.Fluid.NONE, player));
+		return hit.getType() == HitResult.Type.MISS ? null : hit.getLocation().add(hit.getDirection().getUnitVec3().scale(0.4));
+	}
+
+	/** Your gate where you aim (within {@link #CLOSE_RADIUS}), if there is one. */
+	private static @Nullable Gate gateAt(ServerPlayer player) {
+		Vec3 at = aimSpot(player);
+		if (at == null) {
+			return null;
+		}
+		for (Gate gate : gates(player)) {
+			if (gate.dimension() == player.level().dimension() && gate.pos().distanceToSqr(at) < CLOSE_RADIUS * CLOSE_RADIUS) {
+				return gate;
+			}
+		}
+		return null;
+	}
+
+	/** V held on one of your gates: it closes. */
+	private static void closeGate(ServerPlayer player, Gate gate) {
+		ServerLevel level = player.level();
+		List<Gate> gates = new ArrayList<>(gates(player));
+		gates.remove(gate);
+		player.setAttached(GATES, gates);
+		Vec3 p = gate.pos();
+		level.sendParticles(ParticleTypes.PORTAL, p.x, p.y + 0.5, p.z, 30, 0.2, 0.5, 0.2, 0.6);
+		level.playSound(null, p.x, p.y, p.z, SoundEvents.ENDER_CHEST_CLOSE, SoundSource.PLAYERS, 0.8F, 0.6F);
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal_gate_closed", gates.size(), MAX_GATES)
+			.withStyle(ChatFormatting.DARK_PURPLE));
+	}
+
 	/** A gate where you aim. */
 	private static void place(ServerPlayer player) {
 		ServerLevel level = player.level();
-		Vec3 eye = player.getEyePosition();
-		BlockHitResult hit = level.clip(new ClipContext(eye, eye.add(player.getLookAngle().scale(PLACE_RANGE)), ClipContext.Block.COLLIDER,
-			ClipContext.Fluid.NONE, player));
-		if (hit.getType() == HitResult.Type.MISS) {
+		Vec3 at = aimSpot(player);
+		if (at == null) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal_gate_too_far").withStyle(ChatFormatting.DARK_PURPLE));
 			return;
 		}
-		Vec3 at = hit.getLocation().add(hit.getDirection().getUnitVec3().scale(0.4));
 		List<Gate> gates = new ArrayList<>(gates(player));
-		for (Gate gate : gates) {
-			if (gate.dimension() == level.dimension() && gate.pos().distanceToSqr(at) < CLOSE_RADIUS * CLOSE_RADIUS) {
-				gates.remove(gate);
-				player.setAttached(GATES, gates);
-				Vec3 p = gate.pos();
-				level.sendParticles(ParticleTypes.PORTAL, p.x, p.y + 0.5, p.z, 30, 0.2, 0.5, 0.2, 0.6);
-				level.playSound(null, p.x, p.y, p.z, SoundEvents.ENDER_CHEST_CLOSE, SoundSource.PLAYERS, 0.8F, 0.6F);
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal_gate_closed", gates.size(), MAX_GATES)
-					.withStyle(ChatFormatting.DARK_PURPLE));
-				return;
-			}
-		}
 		while (gates.size() >= MAX_GATES) {
 			gates.remove(0);
 		}
@@ -214,6 +242,18 @@ public final class ArsenalGates {
 	/** Per tick: the gates shimmer for their owner, and a cast-out gate drifts on. */
 	static void tick(ServerPlayer player) {
 		ServerLevel level = player.level();
+		Long pressed = PRESSED.get(player.getUUID());
+		if (pressed != null && level.getGameTime() - pressed >= 2) {
+			Gate held = gateAt(player);
+			if (held != null) {
+				Vec3 p = held.pos();
+				show(player, level, ParticleTypes.REVERSE_PORTAL, p.x, p.y + 0.9, p.z, 4, 0.3, 0.6, 0.3, 0.02);
+				if (level.getGameTime() - pressed >= CLOSE_HOLD) {
+					PRESSED.remove(player.getUUID());
+					closeGate(player, held);
+				}
+			}
+		}
 		Projection projection = PROJECTING.get(player.getUUID());
 		if (projection != null) {
 			if (!player.isAlive() || !com.jaymospowers.core.Fate.isCorrupted(player)) {
@@ -236,7 +276,7 @@ public final class ArsenalGates {
 			for (Gate gate : gates(player)) {
 				if (gate.dimension() == level.dimension() && gate.pos().distanceToSqr(player.position()) < 96.0 * 96.0) {
 					Vec3 p = gate.pos();
-					show(player, level, ParticleTypes.PORTAL, p.x, p.y + 0.9, p.z, 6, 0.25, 0.6, 0.25, 0.3);
+					show(player, level, ParticleTypes.PORTAL, p.x, p.y + 0.9, p.z, 3, 0.25, 0.6, 0.25, 0.3);
 					show(player, level, VOID, p.x, p.y + 0.9, p.z, 2, 0.2, 0.5, 0.2, 0.0);
 				}
 			}
@@ -268,6 +308,7 @@ public final class ArsenalGates {
 
 	static void forget(ServerPlayer player) {
 		PROJECTING.remove(player.getUUID());
+		PRESSED.remove(player.getUUID());
 		READY_AT.remove(player.getUUID());
 	}
 

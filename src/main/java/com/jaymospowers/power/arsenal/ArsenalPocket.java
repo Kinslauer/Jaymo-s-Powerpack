@@ -4,6 +4,7 @@ import com.jaymospowers.JaymosPowers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -15,6 +16,11 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -93,27 +99,78 @@ public final class ArsenalPocket {
 		final UUID owner;
 		final int room;
 		final boolean out;
+		final boolean voidRift;
+		final long opened;
 		long until;
 
-		Rift(ResourceKey<Level> dimension, Vec3 pos, float yaw, UUID owner, int room, boolean out, long until) {
+		Rift(ResourceKey<Level> dimension, Vec3 pos, float yaw, UUID owner, int room, boolean out, boolean voidRift, long opened, long until) {
 			this.dimension = dimension;
 			this.pos = pos;
 			this.yaw = yaw;
 			this.owner = owner;
 			this.room = room;
 			this.out = out;
+			this.voidRift = voidRift;
+			this.opened = opened;
 			this.until = until;
 		}
 	}
 
+	/** How far away a rift (or your own void gate) is drawn, and how often the list is re-sent. */
+	static final double VIEW_DISTANCE = 96.0;
+	static final int SYNC_EVERY = 5;
+
+	/**
+	 * Server → client, every {@link #SYNC_EVERY} ticks: the doorways to draw near you. A pocket rift (nether portal swirl,
+	 * or the End's starfield when its opener is corrupted) facing {@code yaw}, opening from {@code opened}; or one of
+	 * your own void gates ({@code gate}), always the void, turned toward you.
+	 */
+	public record Portal(double x, double y, double z, float yaw, long opened, boolean voidRift, boolean gate) {
+	}
+
+	public record Portals(List<Portal> portals) implements CustomPacketPayload {
+		public static final Type<Portals> TYPE = new Type<>(JaymosPowers.id("arsenal_portals"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Portals> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> {
+				buf.writeVarInt(p.portals.size());
+				for (Portal portal : p.portals) {
+					buf.writeDouble(portal.x);
+					buf.writeDouble(portal.y);
+					buf.writeDouble(portal.z);
+					buf.writeFloat(portal.yaw);
+					buf.writeVarLong(portal.opened);
+					buf.writeBoolean(portal.voidRift);
+					buf.writeBoolean(portal.gate);
+				}
+			},
+			buf -> {
+				int n = Math.min(buf.readVarInt(), 256);
+				List<Portal> list = new ArrayList<>(n);
+				for (int i = 0; i < n; i++) {
+					list.add(new Portal(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readFloat(), buf.readVarLong(), buf.readBoolean(),
+						buf.readBoolean()));
+				}
+				return new Portals(list);
+			});
+
+		@Override
+		public Type<Portals> type() {
+			return TYPE;
+		}
+	}
+
 	private static final List<Rift> RIFTS = new ArrayList<>();
+	/** Who was last sent a list with something in it (so they get one empty list when it all closes). */
+	private static final Set<UUID> SHOWING = new HashSet<>();
 	private static final Map<UUID, Long> LAST_PASS = new HashMap<>();
 
 	private ArsenalPocket() {
 	}
 
 	public static void init() {
+		PayloadTypeRegistry.clientboundPlay().register(Portals.TYPE, Portals.CODEC);
 		ServerTickEvents.END_SERVER_TICK.register(ArsenalPocket::serverTick);
+		ServerTickEvents.END_SERVER_TICK.register(ArsenalPocket::sync);
 		PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) ->
 			level.dimension() != POCKET || player.isCreative() || !protectedBlock(pos));
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
@@ -151,7 +208,8 @@ public final class ArsenalPocket {
 		boolean out = level.dimension() == POCKET;
 		int room = out ? roomAt(player.blockPosition()) : room(player);
 		Vec3 at = riftSpot(player);
-		RIFTS.add(new Rift(level.dimension(), at, player.getYRot(), player.getUUID(), room, out, level.getGameTime() + RIFT_TICKS));
+		RIFTS.add(new Rift(level.dimension(), at, player.getYRot(), player.getUUID(), room, out, ArsenalVoid.isVoid(player), level.getGameTime(),
+			level.getGameTime() + RIFT_TICKS));
 		level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y + 1.0, at.z, 30, 0.3, 0.8, 0.3, 0.06);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.4F, 1.6F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ENDER_CHEST_OPEN, SoundSource.PLAYERS, 0.7F, 0.6F);
@@ -278,19 +336,43 @@ public final class ArsenalPocket {
 		}
 	}
 
-	/** A standing oval doorway of void motes, facing the way it was opened. */
+	/** The doorway itself is drawn on the client; here, only a few motes drift off it. */
 	private static void outline(ServerLevel level, Rift rift) {
-		double rad = Math.toRadians(rift.yaw);
-		double sideX = Math.cos(rad), sideZ = Math.sin(rad);
 		Vec3 c = rift.pos.add(0.0, RIFT_HEIGHT / 2.0, 0.0);
-		int points = 14;
-		for (int i = 0; i < points; i++) {
-			double a = level.getRandom().nextDouble() * Math.PI * 2.0;
-			double side = Math.cos(a) * RIFT_HALF_WIDTH;
-			double up = Math.sin(a) * RIFT_HEIGHT / 2.0;
-			level.sendParticles(ParticleTypes.REVERSE_PORTAL, c.x + sideX * side, c.y + up, c.z + sideZ * side, 1, 0.0, 0.0, 0.0, 0.0);
+		level.sendParticles(rift.voidRift ? ParticleTypes.REVERSE_PORTAL : ParticleTypes.PORTAL, c.x, c.y, c.z, 3, 0.3, 0.7, 0.3, 0.2);
+	}
+
+	/** Every few ticks, each player is told the doorways near them (and their own void gates). */
+	private static void sync(MinecraftServer server) {
+		if (server.getTickCount() % SYNC_EVERY != 0) {
+			return;
 		}
-		level.sendParticles(ParticleTypes.PORTAL, c.x, c.y, c.z, 6, sideX * 0.25, 0.6, sideZ * 0.25, 0.4);
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			List<Portal> list = new ArrayList<>();
+			ResourceKey<Level> here = player.level().dimension();
+			Vec3 me = player.position();
+			for (Rift rift : RIFTS) {
+				if (rift.dimension == here && rift.pos.distanceToSqr(me) < VIEW_DISTANCE * VIEW_DISTANCE) {
+					list.add(new Portal(rift.pos.x, rift.pos.y, rift.pos.z, rift.yaw, rift.opened, rift.voidRift, false));
+				}
+			}
+			if (com.jaymospowers.core.Fate.isCorrupted(player)) {
+				for (ArsenalGates.Gate gate : ArsenalGates.gates(player)) {
+					if (gate.dimension() == here && gate.pos().distanceToSqr(me) < VIEW_DISTANCE * VIEW_DISTANCE) {
+						list.add(new Portal(gate.pos().x, gate.pos().y, gate.pos().z, 0.0F, 0L, true, true));
+					}
+				}
+			}
+			if (list.isEmpty() && !SHOWING.remove(player.getUUID())) {
+				continue;
+			}
+			if (!list.isEmpty()) {
+				SHOWING.add(player.getUUID());
+			}
+			if (ServerPlayNetworking.canSend(player, Portals.TYPE)) {
+				ServerPlayNetworking.send(player, new Portals(list));
+			}
+		}
 	}
 
 	// ---------------------------------------------------------------- the room

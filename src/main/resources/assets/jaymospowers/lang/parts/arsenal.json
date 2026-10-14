@@ -56,7 +56,7 @@
 	"power.jaymospowers.arsenal.key.starter.name": "Rummage",
 	"item.jaymospowers.arsenal_relic.lore": "It hums, as if it remembers being somewhere else.",
 	"message.jaymospowers.arsenal.relic_kept": "%s slips into the Rift Hoard in your pocket. It's yours now.",
-	"power.jaymospowers.arsenal.key.ability_3.corrupted": "Void Gates: %3$s fixes a gate where you aim (up to 5); Sneak + %3$s steps through to the one you aim at; %3$s aimed at one of your gates closes it; hold Sneak + %3$s with none to cast one ahead",
+	"power.jaymospowers.arsenal.key.ability_3.corrupted": "Void Gates: %3$s fixes a gate where you aim (up to 5); Sneak + %3$s steps through to the one you aim at; hold %3$s on one of your gates to close it; hold Sneak + %3$s with none to cast one ahead",
 	"power.jaymospowers.arsenal.key.ability_3.corrupted.name": "Void Gates",
 	"message.jaymospowers.arsenal_gate_placed": "Gate fixed (%s/%s).",
 	"message.jaymospowers.arsenal_gate_closed": "Gate closed (%s/%s).",
