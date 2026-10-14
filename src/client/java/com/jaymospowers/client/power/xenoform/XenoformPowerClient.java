@@ -51,6 +51,21 @@ public final class XenoformPowerClient implements PowerClient {
 		});
 	}
 
+	/**
+	 * From the scroll mixin: while a band wearer holds Z as themselves, the wheel turns the dial (down: the next alien,
+	 * like the hotbar) and the hotbar stays put. True if the scroll was taken.
+	 */
+	public static boolean scroll(double amount) {
+		Minecraft minecraft = Minecraft.getInstance();
+		LocalPlayer player = minecraft.player;
+		if (amount == 0.0 || player == null || minecraft.gui.screen() != null || player.isSpectator() || !XenoformPower.has(player)
+			|| !com.jaymospowers.client.JaymosPowersClient.modeKey().isDown() || player.getAttached(XenoformState.FORM) != null) {
+			return false;
+		}
+		ClientPlayNetworking.send(new XenoNet.Dial(amount < 0.0 ? 1 : -1));
+		return true;
+	}
+
 	static @Nullable KeyMapping skillKey(Minecraft minecraft) {
 		if (skillKey == null) {
 			for (KeyMapping mapping : minecraft.options.keyMappings) {
@@ -106,11 +121,11 @@ public final class XenoformPowerClient implements PowerClient {
 		XenoformHud.render(graphics, delta, player);
 	}
 
-	/** Z: the wrist comes up while it's held, the hand lands as the band slams. */
+	/** Z: the wrist comes up while it's held (the wheel turns the dial), the hand lands as the band slams on letting go. */
 	@Override
 	public void onMode(LocalPlayer player, boolean down) {
 		if (down) {
-			XenoformSlap.holdStart(player.tickCount);
+			XenoformSlap.holdStart(player.tickCount, player.getAttached(XenoformState.FORM) == null);
 		} else {
 			XenoformSlap.release(player.tickCount);
 		}

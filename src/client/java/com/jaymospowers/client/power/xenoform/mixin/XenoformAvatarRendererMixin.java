@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.xenoform.mixin;
 
+import com.jaymospowers.client.power.xenoform.XenoBand;
 import com.jaymospowers.client.power.xenoform.XenoformClient;
 import com.jaymospowers.client.power.xenoform.XenoformFlightPose;
 import com.jaymospowers.client.power.xenoform.XenoformHand;
@@ -38,5 +39,11 @@ abstract class XenoformAvatarRendererMixin {
 		if (XenoformHand.render(poseStack, collector, lightCoords, arm, ((AvatarRenderer<?>)(Object)this).getModel())) {
 			ci.cancel();
 		}
+	}
+
+	@Inject(method = "renderHand", at = @At("TAIL"))
+	private void jaymospowers$xenoBandOnHand(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, Identifier skinTexture, ModelPart arm,
+		boolean hasSleeve, CallbackInfo ci) {
+		XenoBand.submitFirstPerson(poseStack, collector, lightCoords, arm, ((AvatarRenderer<?>)(Object)this).getModel());
 	}
 }

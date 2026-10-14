@@ -151,7 +151,7 @@ power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts
 | Line | Form | Key | Ability | What it does now | Change to |
 |---|---|---|---|---|---|
 | 152 | Getting it | | Falling star | On a clear night a star may fall near you (40–100 blocks off, once a day per world at most). Mine the Fallen Star in its crater with an iron pickaxe: 15% a Xeno-Band, 7% the symbiote's goo, else raw iron, amethyst and XP. Right-click the band on (powerless survival players get the power at once). | |
-| 153 | Band | Z | Dial / Slam | Tap: next alien the band holds. Hold 0.5 s: become the dialled alien, or turn back. A form lasts a random 1–5 min until fully mastered, then 5; beeps through the last 10 s. At zero health you're knocked back into yourself; the band recharges 1 min (2 after a knockout). Fists only while changed. | |
+| 153 | Band | Z | Dial / Slam | Hold: the wrist comes up; scroll to turn the dial through the aliens the band holds. Let go: the band slams and you become the dialled alien. As an alien, hold 0.5 s to turn back. A form lasts a random 1–5 min until fully mastered, then 5; beeps through the last 10 s. At zero health you're knocked back into yourself; the band recharges 1 min (2 after a knockout). Fists only while changed. | |
 | 154 | Band | X (hold) | Scan | 3 s at a creature within 12 blocks: the band learns its alien. Iron golem = Bulwark, blaze = Pyre, horse = Blur, shulker = Prism, phantom = Wisp, silverfish = Gremlin, Warden = Knell, Ender Dragon = Wyrm. | |
 | 155 | Bulwark | R | Fist Combo | 3 blows at 4 ticks, 5 damage each, the last one shoves. 2 s. | |
 | 156 | Bulwark | G | Ground Clap | 6 damage and a shove to all within 5 blocks, debris ring. 8 s. | |

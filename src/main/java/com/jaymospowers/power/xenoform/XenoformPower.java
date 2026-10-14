@@ -44,8 +44,8 @@ import org.jspecify.annotations.Nullable;
  * Xenoform: the Xeno-Band, a wrist band out of a fallen star ({@link FallingStars}) that turns you into one of the aliens
  * it holds ({@link XenoForms}), each with its own body and four moves. Everything is decided here, on the server.
  * <ul>
- * <li>Z tap: turn the dial to the next alien. Z held {@link #HOLD_TICKS}: slam the band and become the dialled alien, or
- * turn back early.</li>
+ * <li>Z held: the wrist comes up; scrolling while it's held turns the dial ({@link #dial}). Letting Z go slams the band
+ * and you become the dialled alien. As an alien, Z held {@link #HOLD_TICKS} turns you back early.</li>
  * <li>R G V B: the alien's moves ({@link XenoForm#onKey}). As a human they do nothing.</li>
  * <li>X held {@link #SCAN_TICKS} at a creature: scan it; if it carries an alien's DNA, the band unlocks that alien.</li>
  * <li>A form lasts a random {@link #FORM_MIN}-{@link #FORM_MAX} until the power is fully mastered, then always
@@ -351,20 +351,10 @@ public final class XenoformPower implements Power {
 			return;
 		}
 		long now = player.level().getGameTime();
-		// the slam: Z held long enough
-		if (live.modeDownAt >= 0L && !live.slammed && now - live.modeDownAt >= HOLD_TICKS) {
+		// as an alien, Z held long enough turns you back (as yourself the slam comes when Z is let go: onMode)
+		if (live.modeDownAt >= 0L && !live.slammed && live.form != null && now - live.modeDownAt >= HOLD_TICKS) {
 			live.slammed = true;
-			if (live.form != null) {
-				revert(player, false, true);
-			} else {
-				XenoForm dialled = XenoForms.get(XenoformState.band(player).dialled());
-				if (dialled != null) {
-					XenoForm glitched = glitch(player, dialled);
-					if (transform(player, glitched, false) && glitched != dialled) {
-						glitchFx(player, "message.jaymospowers.xenoform.glitch_wrong");
-					}
-				}
-			}
+			revert(player, false, true);
 		}
 		if (live.form != null) {
 			// in a form: the clock runs
@@ -563,7 +553,10 @@ public final class XenoformPower implements Power {
 		}
 	}
 
-	/** Z: a tap turns the dial, a hold slams the band (see {@link #tick}). */
+	/**
+	 * Z: held, the wrist comes up and the scroll wheel turns the dial ({@link XenoNet.Dial}); let go, the band slams and you
+	 * become the dialled alien. As an alien, holding it turns you back (see {@link #tick}).
+	 */
 	@Override
 	public void onMode(ServerPlayer player, boolean down) {
 		Live live = live(player);
@@ -572,11 +565,27 @@ public final class XenoformPower implements Power {
 			live.slammed = false;
 			return;
 		}
-		boolean tap = live.modeDownAt >= 0L && !live.slammed;
+		boolean slam = live.modeDownAt >= 0L && !live.slammed;
 		live.modeDownAt = -1L;
-		if (tap && live.form == null) {
-			dial(player, 1);
+		if (slam && live.form == null) {
+			live.slammed = true;
+			XenoForm dialled = XenoForms.get(XenoformState.band(player).dialled());
+			if (dialled != null) {
+				XenoForm glitched = glitch(player, dialled);
+				if (transform(player, glitched, false) && glitched != dialled) {
+					glitchFx(player, "message.jaymospowers.xenoform.glitch_wrong");
+				}
+			}
 		}
+	}
+
+	/** The scroll wheel while Z is held (from the client): turns the dial, as yourself only. */
+	static void scrollDial(ServerPlayer player, int by) {
+		Live live = live(player);
+		if (!has(player) || live.form != null || live.modeDownAt < 0L || by == 0) {
+			return;
+		}
+		dial(player, Integer.signum(by));
 	}
 
 	/**

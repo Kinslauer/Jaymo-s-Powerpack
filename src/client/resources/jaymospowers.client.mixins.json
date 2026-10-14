@@ -17,6 +17,7 @@
 		"ContainerScreenAccessor",
 		"HiddenArmorAvatarRendererMixin",
 		"LimbPickMixin",
+		"PoseLayersLivingEntityRendererMixin",
 		"PoseTakeoverLivingEntityRendererMixin",
 		"ScreenShakeMixin",
 		"ScreenShakeExplosionMixin",

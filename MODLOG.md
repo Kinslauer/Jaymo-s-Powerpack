@@ -1139,5 +1139,21 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (edge blur, red tint) all the time. At night their screen edges also beat blood red and warm-blooded creatures
   within 24 blocks glow red through walls (40 when starving). Everyone sees a vampire player's ashen face and hands,
   and at night their fangs and red eyes glowing where their own skin's eyes are. See `kingdoms/MODLOG.md` 0.7.24.
+- **0.10.86, poses fixed, the band's dial on the scroll wheel, dragon wings for Wyrm** (Andy: "holding z and scroll
+  should navigate the watch. letting go should slam"; flight poses, web wing gliding and the Xeno-Band in first person
+  broken; holstered items still walking in mid-air; "can they use smaller versions of the ender dragon wings?"):
+  - Fresh Animations (through Entity Model Features) ran its player animations again as each model was finally drawn,
+    after our poses, and its pause check only knew which player was posed while the renderer was still on them. It's
+    now answered by entity (`PoseTakeover.posedEntity`), so every pose of ours (Z Fighter flight, Web's wings and
+    swings, Wind, the rest) stays ours.
+  - The renderer animates the model once more for its layers, and layers that hang things off the body (YDM's Weapon
+    Master's holstered weapons, the Xeno-Band) read that plain walking model: our poses now go on there too
+    (`ModelPoses`, `PoseLayersLivingEntityRendererMixin`), and the walk stops in any flight or glide.
+  - Xenoform: hold Z and scroll to turn the dial (the hotbar stays put), let go to slam; as an alien, hold Z to turn
+    back. The hand stays poised while you scroll and comes down as you let go. The band now shows on your first-person
+    left arm whenever it's in view (slim arms get a narrower band), and no longer floats where First-person Model hides
+    your body's arm.
+  - Wyrm's wings are the ender dragon's own boxes at a fifth of the size, drawn from the game's dragon texture
+    (`WyrmWings`); they beat, fold, flare and wrap round the body as before.
 - **0.10.87 / Kingdoms 0.7.25, no shader message** (Andy: "no shader disable message"): dark nights still turn
   shaders off until dawn, but no longer say so on screen. See `kingdoms/MODLOG.md` 0.7.25.
