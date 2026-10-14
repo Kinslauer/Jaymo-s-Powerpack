@@ -302,7 +302,7 @@ public final class Quests {
 			return;
 		}
 		if (!Languages.understands(player, giver)) {
-			// (0.7.19) work's explained in words, and you don't have theirs
+			// (0.7.20) work's explained in words, and you don't have theirs
 			Languages.shrug(player, giver);
 			return;
 		}

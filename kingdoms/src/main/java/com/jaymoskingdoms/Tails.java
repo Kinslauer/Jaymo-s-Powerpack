@@ -18,7 +18,7 @@ import net.minecraft.world.entity.npc.villager.Villager;
  * the player has made a friend of them: at {@link #EXPLAIN_HEARTS} hearts with an MCA villager the chat menu gains
  * "Explain your tail", and once told, that villager knows them and is never frightened by the tail again. Each
  * villager has to be told on their own. A wrapped tail (sneak+Z) shows nothing, which is how a bond is built at all.
- * (0.7.19) Explaining takes a tongue you share ({@link Languages}).
+ * (0.7.20) Explaining takes a tongue you share ({@link Languages}).
  *
  * <p>Read by entity tag ({@link #TAILED}, {@link #TAIL}, set by Powers), so Kingdoms needs no Powers classes.
  */

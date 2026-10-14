@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * (0.7.10) "Explain your tail" ({@link Tails#ANSWER}, added to MCA's {@code main} menu by our dialogue data) shows only
  * to a Warrior-born Z Fighter who hasn't yet told this villager, once they're close enough friends.
- * (0.7.19) To a foreigner ({@link Languages}) a menu offers only what needs no words ({@link Languages#simpleDialogue}).
+ * (0.7.20) To a foreigner ({@link Languages}) a menu offers only what needs no words ({@link Languages#simpleDialogue}).
  */
 @Mixin(Question.class)
 abstract class McaAnswersMixin {
@@ -25,7 +25,7 @@ abstract class McaAnswersMixin {
 			cir.getReturnValue().remove(Tails.ANSWER);
 		}
 		if (!Languages.understands(player, villager)) {
-			// (0.7.19) without their tongue, only what hands can say
+			// (0.7.20) without their tongue, only what hands can say
 			cir.getReturnValue().removeIf(answer -> !Languages.simpleDialogue(name, answer));
 		}
 	}

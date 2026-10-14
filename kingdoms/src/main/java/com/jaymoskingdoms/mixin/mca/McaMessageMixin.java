@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.19) What an MCA villager says to a player who doesn't speak their tongue ({@link Languages}) reaches them as
+ * (0.7.20) What an MCA villager says to a player who doesn't speak their tongue ({@link Languages}) reaches them as
  * words they don't know (the same gibberish our own speech bubbles show).
  */
 @Mixin(Network.class)

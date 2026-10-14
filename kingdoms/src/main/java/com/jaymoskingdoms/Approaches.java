@@ -192,7 +192,7 @@ public final class Approaches {
 		ItemStack goods = ItemStack.EMPTY;
 		int price;
 		String enemy = "";
-		/** (0.7.19) They speak a tongue you don't ({@link Languages}): what they mean, as you make it out from their hands. */
+		/** (0.7.20) They speak a tongue you don't ({@link Languages}): what they mean, as you make it out from their hands. */
 		boolean foreign;
 		Component gesture = Component.empty();
 
@@ -662,7 +662,7 @@ public final class Approaches {
 			w[GOSSIP] = 2;
 		}
 		if (!Languages.understands(player, mob)) {
-			// (0.7.19) you don't speak their tongue: only what hands and faces can say
+			// (0.7.20) you don't speak their tongue: only what hands and faces can say
 			for (int t = 0; t < w.length; t++) {
 				if (!simple(t)) {
 					w[t] = 0;
@@ -693,7 +693,7 @@ public final class Approaches {
 	}
 
 	/**
-	 * (0.7.19) What can be got across without a shared tongue: a gift, a greeting, food begged or a bargain shown, a
+	 * (0.7.20) What can be got across without a shared tongue: a gift, a greeting, food begged or a bargain shown, a
 	 * child's game of tag, a guard waving you indoors, holding out a hand for a toll, or squaring up for a bout.
 	 */
 	static boolean simple(int topic) {
@@ -745,7 +745,7 @@ public final class Approaches {
 			case QUESTION -> a.variant = random.nextInt(QUESTIONS);
 			case CHILD -> {
 				List<Integer> games = new ArrayList<>(List.of(CHILD_TAG));
-				// (0.7.19 a child who can't make you understand just plays tag)
+				// (0.7.20 a child who can't make you understand just plays tag)
 				if (!a.foreign && !player.getItemBySlot(EquipmentSlot.CHEST).isEmpty()) {
 					games.add(CHILD_KNIGHT);
 				}
@@ -843,7 +843,7 @@ public final class Approaches {
 		level.playSound(null, a.mob.getX(), a.mob.getY(), a.mob.getZ(), a.mob instanceof Villager ? SoundEvents.VILLAGER_AMBIENT : SoundEvents.VILLAGER_TRADE,
 			SoundSource.NEUTRAL, 0.8F, a.mob.isBaby() ? 1.5F : 1.0F);
 		if (a.foreign) {
-			// (0.7.19) the words are lost on you, but not what they mean by them
+			// (0.7.20) the words are lost on you, but not what they mean by them
 			a.gesture = Component.translatable("language.jaymoskingdoms.gesture." + TOPICS[a.topic], switch (a.topic) {
 				case BARGAIN -> new Object[] {a.goods.getCount(), a.goods.getHoverName(), a.price};
 				case TOLL, BOUT -> new Object[] {a.price};
@@ -880,7 +880,7 @@ public final class Approaches {
 		}
 	}
 
-	/** What they've told you: the line, and what more they said if you asked; (0.7.19) in a foreign tongue, gibberish and what they meant. */
+	/** What they've told you: the line, and what more they said if you asked; (0.7.20) in a foreign tongue, gibberish and what they meant. */
 	private static Component heard(ServerPlayer player, Approach a) {
 		if (a.foreign) {
 			return Component.translatable("language.jaymoskingdoms.gist", Languages.heard(player, a.mob, a.line), a.gesture);

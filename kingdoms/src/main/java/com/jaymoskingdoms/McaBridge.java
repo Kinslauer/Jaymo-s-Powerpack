@@ -62,7 +62,7 @@ final class McaBridge {
 		return villager instanceof VillagerEntityMCA v ? v.getVillagerBrain().getMemoriesForPlayer(player).getHearts() : 0;
 	}
 
-	/** (0.7.19) {@code player} is family to an MCA villager. */
+	/** (0.7.20) {@code player} is family to an MCA villager. */
 	static boolean family(Villager villager, ServerPlayer player) {
 		return villager instanceof VillagerEntityMCA v && net.conczin.mca.entity.ai.Relationship.IS_FAMILY.test(v, (net.minecraft.world.entity.Entity)player);
 	}

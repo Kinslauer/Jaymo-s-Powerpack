@@ -15,7 +15,7 @@ import net.minecraft.world.entity.animal.golem.IronGolem;
 /**
  * Words spoken aloud in the world (a ruler's temper, a witness crying thief): they float above the speaker's head for
  * the players nearby and fade, instead of going to chat. The client half draws them ({@code SpeechBubbles}), and MCA
- * villagers' own talk goes the same way there. (0.7.19) Townsfolk speaking a tongue a player doesn't know
+ * villagers' own talk goes the same way there. (0.7.20) Townsfolk speaking a tongue a player doesn't know
  * ({@link Languages}) come out as gibberish for that player.
  */
 public final class Speech {
@@ -53,7 +53,7 @@ public final class Speech {
 			return;
 		}
 		for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, speaker.getBoundingBox().inflate(range))) {
-			// (0.7.19) in a tongue they don't speak, it's words they don't know
+			// (0.7.20) in a tongue they don't speak, it's words they don't know
 			Component heard = Languages.heard(p, speaker, words);
 			if (ServerPlayNetworking.canSend(p, Said.TYPE)) {
 				ServerPlayNetworking.send(p, new Said(speaker.getId(), heard, color));

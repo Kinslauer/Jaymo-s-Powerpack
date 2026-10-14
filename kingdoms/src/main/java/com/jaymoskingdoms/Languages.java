@@ -36,7 +36,7 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.19) Tongues. The land is split into language regions by its climate ({@link Climate}): every settlement speaks
+ * (0.7.20) Tongues. The land is split into language regions by its climate ({@link Climate}): every settlement speaks
  * the tongue of the land its seat stands in, and you grew up speaking the tongue of the land where the world's spawn is.
  * With folk whose tongue you don't speak you can only do simple things: trade, give gifts, hug, play with children,
  * beckon them to follow or stay, pay a toll, hand in a finished errand. Anything that needs words (chatting, jokes,

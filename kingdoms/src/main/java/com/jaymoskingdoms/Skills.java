@@ -288,7 +288,7 @@ public final class Skills {
 				return InteractionResult.PASS;
 			}
 			if (!Languages.understands(sp, wizard)) {
-				// (0.7.19) unmaking a man's skills takes explaining, in a tongue you share
+				// (0.7.20) unmaking a man's skills takes explaining, in a tongue you share
 				Languages.shrug(sp, wizard);
 				return InteractionResult.SUCCESS;
 			}

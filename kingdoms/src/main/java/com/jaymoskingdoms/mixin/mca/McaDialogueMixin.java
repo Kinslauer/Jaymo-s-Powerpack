@@ -17,14 +17,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * ({@link SkinTones#ORIGIN}) instead of MCA's own small talk. Said the way MCA says a line with no follow-up question.
  * (0.5.62) A floating island's hermit ({@link Hermits}) mostly talks of why they live up there.
  * (0.7.10) "Explain your tail" ({@link Tails}): the villager understands the Z Fighter is no monster.
- * (0.7.19) A foreigner ({@link Languages}) gets a shrug for anything that takes words ({@link Languages#simpleDialogue}).
+ * (0.7.20) A foreigner ({@link Languages}) gets a shrug for anything that takes words ({@link Languages#simpleDialogue}).
  */
 @Mixin(Dialogues.class)
 abstract class McaDialogueMixin {
 	@Inject(method = "selectAnswer", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$homeTalk(VillagerEntityMCA villager, ServerPlayer player, String question, String answer, CallbackInfo ci) {
 		if (!Languages.simpleDialogue(question, answer) && !Languages.understands(player, villager)) {
-			// (0.7.19) that takes words you don't share
+			// (0.7.20) that takes words you don't share
 			Languages.shrug(player, villager);
 			villager.getInteractions().stopInteracting();
 			ci.cancel();
