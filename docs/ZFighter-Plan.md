@@ -40,6 +40,6 @@ Each lineage has its own skin tint and aura colour.
 - **Masters.** Rare MCA elders (like court wizards) teach a technique or a form step, if your alignment from the K skill tree suits them (good masters: 61+; dark masters: 40 or less).
 - **Tournaments.** Capitals hold a tournament now and then: a ring, bracket fights between strong fighters (players and champions), prizes in TP and emeralds.
 - **Raids and world bosses.** A rogue Z Fighter or a tyrant lands and attacks a kingdom; whoever helps beat it shares a large TP prize.
-- **Fusion.** Two Z Fighters do the fusion dance together (both press Z then C within 2 s, facing each other). One body for 60 s, the leader steers, stats added together and a little more. The other watches from inside.
+- **Fusion.** Two Z Fighters do the fusion dance together (both press Z then C within 2 s, facing each other). One body for 60 s, the leader steers (they swap at 30 s), stats added together and a little more. The other watches from inside.
 
 Andy's earlier rulings stay: "no foe fells him twice" lasts only for the rematch, fists only, eats a lot.

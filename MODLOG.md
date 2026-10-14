@@ -979,7 +979,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - Gravity's Z dome is now called the **Immense Field** (was the Training Field): key guide, messages and docs.
 - **0.10.25, Z Fighter stage 6 (`ZFighterFusion`, `ZFighterMasters`, `ZFighterRaids`, `ZFighterTournaments`, `ZFighterRogue`,
   `ZFighterKingdoms`):** the fusion dance (Z then C facing a partner: one body for 60 s, the partner spectating from
-  inside, stats added plus 10%, 10 min cooldown). With Jaymo's Kingdoms (read by reflection only): masters (each
+  inside, control swapping at 30 s, stats added plus 10%, 10 min cooldown). With Jaymo's Kingdoms (read by reflection only): masters (each
   kingdom's eldest villager; a dark master in each barbarian camp) teach a technique or form step once a day, by
   reputation and the Rogue's path; tyrants (a new `rogue_fighter` entity) raid kingdoms by night every 5-7 days and
   share 6000 TP by damage; tournaments every 3-4 days in a ring beside a kingdom's seat, players and champions in a

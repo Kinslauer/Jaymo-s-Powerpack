@@ -33,7 +33,7 @@ import net.minecraft.world.phys.Vec3;
  * The fusion dance. Two Z Fighters face each other a few blocks apart; each taps Z, then presses C within two seconds,
  * and dances (arms swept out to one side, over, then fingertips pointed at each other). When the second one's dance
  * ends, they become one for {@link #FUSION_TICKS}: the first to dance leads and steers; the other watches from inside
- * (a spectator riding his camera). The fused fighter has both their fists, health, ki and ki power added together, and
+ * (a spectator riding his camera); after {@link #SWAP_AT} they change places. The fused fighter has both their fists, health, ki and ki power added together, and
  * {@link #FUSION_BONUS} more. Either may then not fuse again for {@link #COOLDOWN}.
  */
 public final class ZFighterFusion {
@@ -46,6 +46,8 @@ public final class ZFighterFusion {
 	static final int FUSION_TICKS = 1200;
 	static final float FUSION_BONUS = 0.1F;
 	static final long COOLDOWN = 12000L;
+	/** Halfway through, the one watching from inside takes over and the leader goes inside. */
+	static final int SWAP_AT = FUSION_TICKS / 2;
 
 	/** Which way the dancer sweeps (1 right, -1 left), while dancing; everyone's client poses it. */
 	public static final AttachmentType<Integer> DANCE = AttachmentRegistry.create(JaymosPowers.id("zfighter_dance"),
@@ -64,7 +66,7 @@ public final class ZFighterFusion {
 	}
 
 	/** What the partner adds to the leader, taken when they fuse. */
-	record Fused(UUID partner, long until, double fists, double health, int ki, float power, float toughness) {
+	record Fused(UUID partner, long until, double fists, double health, int ki, float power, float toughness, boolean swapped) {
 	}
 
 	private static final Map<UUID, Long> Z_TAPS = new HashMap<>();
@@ -181,6 +183,10 @@ public final class ZFighterFusion {
 				defuse(server, id);
 				continue;
 			}
+			if (!fused.swapped() && fused.until() - now <= FUSION_TICKS - SWAP_AT) {
+				swap(leader, partner, fused);
+				continue;
+			}
 			// the partner rides along inside, seeing what the leader sees
 			if (partner.level() != leader.level() || partner.distanceToSqr(leader) > 4.0) {
 				partner.teleportTo(leader.level(), leader.getX(), leader.getY(), leader.getZ(), Set.of(), leader.getYRot(), leader.getXRot(), false);
@@ -203,7 +209,7 @@ public final class ZFighterFusion {
 		long now = leader.level().getGameTime();
 		ZFighterPower.Live partnerLive = ZFighterPower.live(partner);
 		Fused fused = new Fused(partner.getUUID(), now + FUSION_TICKS, ZFighterPower.fistBonus(partner), partner.getMaxHealth(),
-			ZFighterPower.maxKi(partner), ZFighterPower.kiPower(partner, partnerLive), ZFighterTraining.toughness(partner));
+			ZFighterPower.maxKi(partner), ZFighterPower.kiPower(partner, partnerLive), ZFighterTraining.toughness(partner), false);
 		FUSED.put(leader.getUUID(), fused);
 		leader.setAttached(LAST, now);
 		partner.setAttached(LAST, now);
@@ -228,6 +234,55 @@ public final class ZFighterFusion {
 				near.sendSystemMessage(message);
 			}
 		}
+	}
+
+	/**
+	 * Halfway: the partner steps into the body where it stands and steers, and the leader goes inside to watch. The fused
+	 * strength stays the same; only who adds to whom changes.
+	 */
+	private static void swap(ServerPlayer leader, ServerPlayer partner, Fused fused) {
+		FUSED.remove(leader.getUUID());
+		ZFighterPower.Live live = ZFighterPower.live(leader);
+		float healthShare = leader.getHealth() / leader.getMaxHealth();
+		boolean airborne = !leader.onGround();
+		if (live.flying) {
+			ZFighterPower.endFlight(leader, live);
+		}
+		live.charging = false;
+		// what the old leader brings, on his own
+		ZFighterPower.refresh(leader, live);
+		ZFighterPower.Live partnerLive = ZFighterPower.live(partner);
+		Fused swapped = new Fused(leader.getUUID(), fused.until(), ZFighterPower.fistBonus(leader), leader.getMaxHealth(), ZFighterPower.maxKi(leader),
+			ZFighterPower.kiPower(leader, live), ZFighterTraining.toughness(leader), true);
+		float ki = live.ki;
+		live.ki = 0.0F;
+		// the partner out, in the body's place
+		Vec3 motion = leader.getDeltaMovement();
+		Integer mode = partner.getAttached(RESTORE);
+		partner.removeAttached(RESTORE);
+		partner.setCamera(partner);
+		partner.teleportTo(leader.level(), leader.getX(), leader.getY(), leader.getZ(), Set.of(), leader.getYRot(), leader.getXRot(), false);
+		partner.setGameMode(GameType.byId(mode == null ? GameType.SURVIVAL.getId() : mode));
+		partner.setDeltaMovement(motion);
+		partner.resetFallDistance();
+		if (airborne) {
+			// a moment to take off again before the fall is a real one
+			partner.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOW_FALLING, 60, 0, false, false));
+		}
+		FUSED.put(partner.getUUID(), swapped);
+		// the old leader in
+		leader.setAttached(RESTORE, leader.gameMode().getId());
+		leader.setGameMode(GameType.SPECTATOR);
+		leader.setCamera(partner);
+		ZFighterPower.refresh(partner, partnerLive);
+		partnerLive.ki = Math.min(ZFighterPower.maxKi(partner), ki);
+		partner.setHealth(Math.max(1.0F, healthShare * partner.getMaxHealth()));
+		ServerLevel level = partner.level();
+		level.sendParticles(ParticleTypes.END_ROD, true, false, partner.getX(), partner.getY() + 1.0, partner.getZ(), 40, 0.8, 1.0, 0.8, 0.1);
+		level.playSound(null, partner.getX(), partner.getY(), partner.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1.5F, 0.8F);
+		Component message = Component.translatable("message.jaymospowers.zfighter_fusion_swap", partner.getDisplayName()).withStyle(ChatFormatting.GOLD);
+		partner.sendOverlayMessage(message);
+		leader.sendOverlayMessage(message);
 	}
 
 	/** The fusion ends: the leader loses what the partner gave, and the partner steps out beside him. */
