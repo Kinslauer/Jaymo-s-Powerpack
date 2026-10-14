@@ -2603,3 +2603,149 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   down a tornado only one time in ten (`Storms.TORNADO_SUPERCELLS`): about one tornado every 60 days, down from every
   6. The others still storm, with lightning. Dust devils, and the op commands (`/kingdom disaster supercell|tornado`),
   are unchanged.
+
+## 0.7.5: the timelapse night and bed rest (pack 0.10.37)
+- Andy asked for Sleeping Overhaul 2, which is Forge/NeoForge only (up to 1.21.1), so this is our own take on its ideas
+  (its code is LGPL-3.0 but nothing is taken from it).
+- **Timelapse night (`Timelapse`):** once enough players are fast asleep, the clock doesn't jump to morning: the whole
+  world runs faster. The server ticks at 100 a second (`TICK_RATE`, vanilla's `/tick rate`; 5 times as fast), so
+  villagers walk, build and farm at speed, and the clock runs 6 times as fast again (`SPEED`): 30 times in all, about
+  20 s for a night if the server keeps up (slower if it can't). Both eased in over 2 s and sent to every player, so it
+  all moves smoothly. Andy asked to be able to watch the villagers work. The screen fades to black on falling asleep as
+  ever, then clears while the night runs, and dragging the mouse on the bed screen looks around from the pillow. Dawn doesn't turn sleepers out; at vanilla's wake-up time it stops exactly there and vanilla wakes
+  everyone and clears the rain. Leave Bed (or Escape) works at any time; once too few are asleep the world goes back to
+  its own pace wherever it got to. The hours the clock ran on ahead of the ticks are made up by the settlements at once (`Nights.pass`), as for a
+  skipped night. A server stopped mid-night saves the clock at its own pace and its tick rate is put back.
+- **Bed rest (`BedRest`):** using a bed by day (or wherever sleep isn't possible, a blood moon too), or sneaking at
+  any time, lays you down awake: the screen dims a little, you don't count as a sleeper, and poison and withering
+  can't hurt you while you rest (anything else gets you up). At night a **Sleep** button over Leave Bed puts you to
+  sleep. Resting needs what sleeping does (reach, room, no monsters near) and sets your spawn.
+
+## 0.7.7: sailing, stage 1: ships built from blocks (pack 0.10.42)
+- Andy: "i want sailing" (Valkyrien Skies, Eureka and Valkyrien Pirates stop at 1.20.1; Haubna's are ARR), so our own.
+  Plan: `/mnt/project-files/sailing/Sailing-Plan.md` (stage 2 naval combat, stage 3 pirates and navies, later).
+- **Helm** (`HelmBlock`; planks, a compass and iron) and **sail** (`SailBlock`; wool and a stick, makes 4). Build a hull
+  of any blocks on water, put a helm on it and right-click: everything joined to the helm (not the sea, not the land)
+  casts off as one `Ship` entity, up to 3000 blocks and 64 long. Joined to the land, or aground, it won't go.
+- **Buoyancy** (`Hull`): every block weighs by its material (cloth, wood, glass, stone, metal, gold) and the shape it
+  fills; dry rooms enclosed by the hull, layer by layer, float it too. It settles to the depth where it displaces its
+  own weight, and too heavy a hull won't cast off at all. The sea inside the hold is masked out (no water drawn there,
+  no swimming in it).
+- **Sailing**: W/S set and furl the sails, A/D the rudder; S with sails furled backs water. Top speed grows with sails
+  and length (8 blocks/s at most); long ships turn slower, and slower at low speed. It stops against land and blocks,
+  heels in turns and rolls on the swell (more in storms). Everyone and everything on deck rides along and can walk it.
+- **Anchoring**: sneak at the helm of a ship lying still and it swings to the nearest straight heading and goes back
+  into the world as blocks, a block or two off if it must, chests and their contents with it; under way, sneaking leaves
+  the helm and it drifts with its sails furling. With no one aboard it anchors itself after 5 s.
+- Chests (any 1-6 row container) open aboard while sailing; other block entities wait for the anchor.
+- **Sails** (Andy: "the sails kind of float"): sails side by side and above one another join into one sheet of our own
+  canvas (seamed panels), hanging from a yard across its top just in front of the mast (a fence, wall or upright log
+  beside it is crossed by the sheet and the yard, lashed to it), bellied out toward the bow, most in the middle and less
+  at its free edges, with sheets (ropes) from its lower corners. `SailBlock` knows its neighbours (`left`/`right`: none,
+  sail or mast; `up`/`down`); 36 shapes of sheet from `tools/gen_sailing.py`. Hung facing aft, a sail is turned to
+  face forward as the ship casts off. While the ship's sails are furled (W/S) they're drawn rolled up on their yards
+  (`furled`, the ship's sail setting synced to clients).
+
+## 0.7.8: musketeers carry Jaymo's flintlocks (pack 0.10.43)
+- **`TaczGuns`:** with TaCZ installed, our TaCZ guns (musket, blunderbuss, flintlock pistol; the gunpack ships in
+  Jaymo's Powers) are made by item id with their gun id in custom data. Musketeers are handed the TaCZ musket
+  (`Muskets.musketStack`) and their shots stay our own; the Marksman's class card shows it with musket balls.
+  Without TaCZ nothing changes (WeaponMod's musket, or a crossbow). The Marksman perks still apply to WeaponMod's guns
+  only.
+
+## 0.7.9: King's Roads (pack 0.10.44)
+- Andy asked whether Via Romana and Countered's Settlement Roads could work with our carriages. Neither runs on 26.3
+  (Via Romana stops at 1.21.1 and its Responsive Source License bars hosting a port; Settlement Roads is MIT but stops
+  at 1.21.10 and only joins vanilla villages at worldgen), so this is our own take, nothing copied.
+- **Planned** (`Roads`): every kingdom, fiefdom and village is linked to its 2 nearest within 700 blocks (a fiefdom to
+  its overlord too). The route is an A* search on 8-block cells over the world generator's own terrain heights (so it
+  plans through unexplored land), off the server thread, disliking climbs, cliffs and water; then rounded off, walked
+  out in 4-block points and graded. Saved on the Overworld (`jaymoskingdoms:roads`).
+- **Laid** a chunk at a time as chunks load: 3 wide in the ground's style (dirt path, coarse dirt and gravel in the
+  green, sandstone on sand, cobble and andesite on rock, packed mud in swamps, cobble/mossy/stone bricks within 120 of a
+  town), graded up to 3 blocks, trees in the way felled whole, 5-wide spruce bridges with rails over water, a lantern
+  post every ~48 blocks, and a milestone (post and waxed sign) at each end: "King's Road / To <town> / <n> blocks",
+  "Welcome to <town>" on the back. Only natural ground is touched, never builds; towns' own streets (within 56 of a
+  seat) are left alone. Each chunk is paved once.
+- **Followed** (`Roads.ahead`): `Construction.leg` keeps long walks to the road that leads to the goal, so cabs,
+  rickshaws and rulers on their rounds take it; caravans make for points along it, seen and unseen.
+- Ops: `/kingdom roads` (the roads, their length, chunks paved), `/kingdom roads plan` (plan the next missing one now).
+- **Milestone travel** (`Milestones`; Andy chose "both" a coach and a teleport): right-click a linked sign (sneak to
+  edit your own) for where its roads go, each with **[Coach]** (1 emerald + 1 per 160 blocks, at most 12, to the
+  realm: a coachman, a horse and a carriage, `Wagon.COACH`, appear and gallop you along the road itself, helped on
+  when stuck; gone in a puff after) and **[Teleport]** (4 + 1 per 48 blocks, at most 40, lost to the road; a blackout,
+  hunger as if you'd walked it, a 30 s rest; a ridden horse comes too). A King's Road's milestone is linked to the
+  town at its other end from the start.
+- **Road Charter** (map + feather + ink sac; art by `tools/gen_roads.py`), Via Romana's idea in our own way: mark a
+  sign, follow your own road (sampled every half second; 80% of it on road blocks: paths, gravel, cobble, bricks,
+  tiles, planks, slabs, stairs, smooth/cut stone), mark another sign at least 48 blocks along: they're linked (saved
+  on the Overworld, `jaymoskingdoms:charted_roads`). Jumping (a pearl, a fall) loses the chart; a link whose far sign is
+  broken goes when someone tries it. Coaches on charted roads come from the nearest realm.
+- Not yet seen in game.
+- **0.7.10, tail fear (pack 0.10.48):** townsfolk who see a Z Fighter's tail out (`jaymospowers_tail` tag) take them for
+  a werewolf and run (`Tails`, `Frights`, 12 cries), until told: at 25 MCA hearts the chat menu gains "Explain your tail"
+  (`data/jaymoskingdoms/dialogues/main.json`, `McaAnswersMixin`), and that villager fears it no more.
+  `ClassPerks.trainedWith` tells Powers which weapons a class is trained with.
+
+## 0.7.11: physical falling trees (pack 0.10.50)
+- Andy asked to combine the Physical Falling Trees datapack with our felling. It's CC BY-NC-ND 4.0 (no derivatives)
+  and stops at 26.2, so it's remade in our own code in `FallingTree` (none of its files used):
+  - A chopped-down tree falls to its **heavier side** (a log weighs 3, a leaf 1; `heavier`, `LOG_WEIGHT`, `TIPS`),
+    straight along a compass line; only an even tree falls away from its cutter, as before.
+  - It **strikes what's in its path** as it goes over, the cutter too (not a woodcutter), as hard as the wood there
+    is moving (`hit`: 7 per block a tick, at most 14), knocking them the way it falls; once each.
+  - A **bee nest or hive** on its logs comes down with it, and its bees come out angry at the cutter (the game's own
+    release; smoked hives stay calm; `hives`).
+  - Down, it lies half a second and becomes **real blocks** where it rests (`settle`): logs on their side along the
+    fall, nests too, leaves left to wither (non-persistent, distance 7, so they decay and drop saplings as usual).
+    It settles flat along the ground, resting up on what it hit and sinking up to 3 blocks onto the ground below; a
+    piece with no room gives its drops. Felled in under half a second, it settles at once.
+  - A **fallen log** (on its side, resting on the ground or another fallen log) isn't a tree: it's broken log by log,
+    not chopped (`Trees.fallen`).
+  - Woodcutters' trees still break up into their bags. Trees a tornado throws (Andy) strike by their speed and land
+    the same way: on their side along the compass line nearest their flight, wherever they come down (rising up to 4
+    blocks out of what they hit, sinking up to 8 onto the ground).
+- Not yet seen in game.
+
+## 0.7.13: roaming caravans, pillager and merchant (pack 0.10.55)
+- Andy asked to work Pillager Caravans into our caravan system so there are hostile and neutral caravans to meet. Its
+  latest build is for 26.1 and it carries the Obscuria Ecosystem licence, so its ideas are remade in our own code
+  (`RoamingCaravans`, reusing `Caravans`' ground, steering and `Drive` goal); none of its files are used.
+- **When:** each minute (`SPAWN_CHECK`), a 3% chance (Andy: rarer; about half an hour on average once one is due) that a due caravan comes near a random player: 64-96 blocks off
+  on dry land outside every realm's claims, crossing past him to a point 420 blocks beyond. Cooldowns per kind:
+  minor pillager 3 days, major pillager 7 days (a major also resets the minor's), merchant 2 days (Andy: rarer). Never on peaceful
+  for pillagers.
+- **Where it goes:** a pillager caravan with an illager camp ahead of it (within 700 blocks, within about 50 degrees of
+  its way) is bound there; a merchant caravan with a realm ahead (900) is bound for its storehouse door. It keeps to a
+  King's Road when one runs that way (`Roads.ahead`). Stuck for 20 s with nobody within 32 blocks, it hops 8 blocks on.
+- **Pillager caravans (hostile):** a caravan master (pillager, patrol leader) with 2 pillagers and a vindicator and 1-2
+  pack animals; a major one has a captain under the ominous banner (it drops), 3 pillagers, 2 vindicators, a ravager
+  with a rider and 4 animals, the first carrying a strongbox (emeralds, gold, a saddle, golden apples; 1 in 4 a
+  diamond or two, 1 in 10 a totem). They walk as a vanilla patrol and fight whoever comes near, merchants included.
+  Animals are donkeys and mules, llamas in snowy and taiga land; each is leashed to one of the raiders and brought
+  back if it strays (the leash snaps at 12). Kill its leader and it is free (tame it to open the chest, or kill it
+  for its load). Kill every raider and the animals go free, and every realm and village within 320 blocks gives each
+  player who fought it +15 reputation.
+- **Merchant caravans (neutral):** a Caravan Merchant (wandering trader: his usual trades plus 3 of the land's goods
+  for 1-3 emeralds), 2 trader llamas and 2 pack mules on his leads, and, when a realm stands within 640 blocks, 2 of
+  its guards as escort (mounted when it's prosperous), steered with the caravan folk's `Drive` goal. Strike the
+  merchant or one of his animals and the escort turns on you, and that realm takes -40 reputation (once per caravan).
+  If the merchant dies, his animals go free and the escort goes home once it has no one left to fight.
+- **Cargo** by the land (`Climate`): jungle cocoa, bamboo, melons; desert and badlands sugar cane, cactus, gold,
+  golden carrots; snowy and taiga fish, berries, mutton, spruce; savanna, swamp, cherry and plains goods of their own;
+  pillagers add village plunder, merchants paper, books, dyes, candles, lanterns.
+- **Gone** when no player is within 144 blocks, after a day on the road, or on reaching its goal; nothing of it is
+  saved but the cooldowns (`roaming_caravans` attachment), and its leftovers in unloaded chunks are cleared when they
+  load. Animals set free are ordinary animals from then on.
+- Ops: `/kingdom roaming` lists them; `/kingdom roaming pillager | pillager_major | merchant` brings one past you.
+- `ChestedHorseInvoker` (villagers mixins) remakes a pack animal's inventory after it's given a chest.
+- Tuning is in the constants at the top of `RoamingCaravans`. Not yet seen in game.
+
+## 0.7.16: layered storm clouds (pack 0.10.63)
+- Andy liked Simple Clouds' look (Forge/NeoForge only, PolyForm Perimeter, so ideas only) as long as it costs little.
+  `StormsClient.clouds` splits each cell's puffs (no more of them than before) into layers: 55% a flat dark base,
+  30% a tower over the middle 45% of the cell that climbs 45 (thunderstorm) or 85 (supercell) blocks as the cell
+  gathers, paler toward its top, and for a supercell the rest an anvil: a pale sheet over the top, 1.15 times the
+  cell's width and leaning downwind. A rain cell stays all base.
+- A tornado's wall cloud: a lowered, turning ring of dark puffs round the top of its funnel (3 a tick for a tornado,
+  5 for a monster), so the funnel hangs out of the cloud.

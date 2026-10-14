@@ -141,11 +141,11 @@ public final class WindStaff {
 		CLASS_OPTION = option;
 	}
 
-	private static double bonus(ServerPlayer player) {
+	static double bonus(ServerPlayer player) {
 		return WindModes.tempest(player) || Fate.isAscended(player) ? TEMPEST_BONUS : 1.0;
 	}
 
-	private static boolean foe(ServerPlayer player, LivingEntity e) {
+	static boolean foe(ServerPlayer player, LivingEntity e) {
 		return e != player && e.isAlive() && !e.isSpectator() && !player.isAlliedTo(e) && !(e instanceof TamableAnimal pet && pet.isOwnedBy(player));
 	}
 
@@ -278,7 +278,7 @@ public final class WindStaff {
 		}
 	}
 
-	private static void push(LivingEntity e, Vec3 horizontal, double lift) {
+	static void push(LivingEntity e, Vec3 horizontal, double lift) {
 		Vec3 v = e.getDeltaMovement().add(horizontal);
 		e.setDeltaMovement(v.x, Math.max(v.y, 0.0) + lift, v.z);
 		e.syncVelocity = true;

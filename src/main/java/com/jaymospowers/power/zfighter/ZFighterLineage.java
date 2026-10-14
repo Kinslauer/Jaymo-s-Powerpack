@@ -79,9 +79,14 @@ public final class ZFighterLineage {
 	static final float APE_STOMP = 14.0F;
 	static final int APE_STOMP_EVERY = 5;
 	static final double APE_STOMP_DEPTH = 3.0;
+	/** Screen shake: each footfall (every this many blocks walked, felt this far), a stomp that lands, the change itself. */
+	static final double APE_STRIDE = 3.0, APE_STEP_RANGE = 32.0;
+	static final float APE_STEP_SHAKE = 0.7F, APE_STOMP_SHAKE = 1.4F, APE_CHANGE_SHAKE = 2.5F;
 	// ---- Verdant ----
 	static final int REGEN_EVERY = 40;
 	static final float REGEN = 1.0F;
+	/** How often a Verdant grows back one lost limb (30 s; a multiple of REGEN_EVERY). */
+	static final int REGROW_EVERY = 600;
 	static final double REACH = 1.5;
 	/** Giant forms grow him by this much (scale added, by form). */
 	static final double[] GIANT_SCALE = {0.0, 0.4, 0.8, 1.3};
@@ -215,13 +220,40 @@ public final class ZFighterLineage {
 
 	// ---------------------------------------------------------------- every tick
 
+	/**
+	 * Entity tags Jaymo's Kingdoms reads (it needs no Powers classes): a Warrior-born, and one whose tail is out for
+	 * villagers to see (they take him for a monster until he's explained it to them).
+	 */
+	public static final String TAILED_TAG = "jaymospowers_tailed", TAIL_TAG = "jaymospowers_tail";
+
+	static void tailTags(ServerPlayer player, boolean tailed, boolean out) {
+		tag(player, TAILED_TAG, tailed);
+		tag(player, TAIL_TAG, out);
+	}
+
+	private static void tag(ServerPlayer player, String tag, boolean on) {
+		if (on) {
+			player.addTag(tag);
+		} else {
+			player.removeTag(tag);
+		}
+	}
+
 	static void tick(ServerPlayer player, ZFighterPower.Live live) {
 		live.lineage = of(player);
+		tailTags(player, live.lineage == WARRIOR, tailOut(player));
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		if (live.lineage == VERDANT && now % REGEN_EVERY == 0 && player.getHealth() < player.getMaxHealth()
 			&& player.getFoodData().getFoodLevel() > ZFighterPower.HUNGRY_FOOD) {
 			player.heal(REGEN);
+		}
+		if (live.lineage == VERDANT && now % REGEN_EVERY == 0) {
+			// a Verdant's body mends itself: breaks knit at once, lost limbs grow back one at a time
+			com.jaymospowers.core.Fractures.heal(player);
+			if (now % REGROW_EVERY == 0) {
+				com.jaymospowers.core.Dismember.regrow(player, false);
+			}
 		}
 		if (live.lineage == WARRIOR) {
 			ape(player, live, level, now);
@@ -291,6 +323,13 @@ public final class ZFighterLineage {
 		if (now % 200 == 0) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 2.0F, 0.5F);
 		}
+		// every stride of his shakes the ground
+		if (player.moveDist - live.apeStepAt >= APE_STRIDE * Math.max(0.5F, live.apeSize)) {
+			live.apeStepAt = player.moveDist;
+			if (player.onGround() && live.apeSize >= 0.5F) {
+				com.jaymospowers.core.Shakes.heavy(player, player.position(), APE_STEP_RANGE, APE_STEP_SHAKE * live.apeSize);
+			}
+		}
 		if (now % APE_STOMP_EVERY == 0 && live.apeSize >= 0.5F) {
 			stomp(player, level);
 		}
@@ -312,6 +351,7 @@ public final class ZFighterLineage {
 		}
 		if (hit) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 2.0F, 0.5F);
+			com.jaymospowers.core.Shakes.heavy(player, player.position(), APE_STEP_RANGE, APE_STOMP_SHAKE);
 		}
 	}
 
@@ -332,6 +372,7 @@ public final class ZFighterLineage {
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 3.0F, 0.4F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 2.0F, 0.6F);
+		com.jaymospowers.core.Shakes.heavy(player, player.position(), APE_STEP_RANGE * 1.5, APE_CHANGE_SHAKE);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_ape").withStyle(ChatFormatting.RED));
 		ZFighterPower.refresh(player, live);
 		player.setHealth(player.getMaxHealth());
@@ -361,10 +402,13 @@ public final class ZFighterLineage {
 			e -> e instanceof LivingEntity living && living.isAlive() && !(e instanceof Enemy) && !(e instanceof ArmorStand) && e != player,
 			HEAL_RANGE * HEAL_RANGE);
 		LivingEntity target = aimed != null && aimed.getEntity() instanceof LivingEntity living ? living : player;
-		if (target.getHealth() >= target.getMaxHealth() || !ZFighterPower.spend(player, live, HEAL_KI)) {
+		if (target.getHealth() >= target.getMaxHealth() && com.jaymospowers.core.Fractures.broken(target) == 0
+			|| !ZFighterPower.spend(player, live, HEAL_KI)) {
 			return false;
 		}
 		target.heal(HEAL);
+		// sets broken bones too (only a Verdant's own body regrows what's lost)
+		com.jaymospowers.core.Fractures.heal(target);
 		ServerLevel level = player.level();
 		level.sendParticles(ParticleTypes.HAPPY_VILLAGER, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 12, 0.4, 0.5,
 			0.4, 0.05);

@@ -977,3 +977,114 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Super hair covers his own: the skin's hat layer is hidden while it shows, and the cap reaches past where that layer
   sat (0.7 out), with a fringe above the eyes, the whole back of the head and over the ears.
 - Gravity's Z dome is now called the **Immense Field** (was the Training Field): key guide, messages and docs.
+- **0.10.27, Sora's Dagger removed:** per Andy, Wind's dagger is gone: the item (all four stages), its recipe, Flurry,
+  textures, Better Combat dagger preset, the casting-table gilding and the Tool Station diamond setting. Wind keeps
+  every ability; daggers already in a world disappear when it loads.
+- **0.10.27, daggers ride the gale (`WindDagger`):** wind sorcerers now fight with daggers the way they do with the
+  quarterstaff: the four dagger swings carry Gale Cut, Wind Stab, Crosswind and Cyclone Thrust, every hit leaves a
+  puff, and right click is Sora's Dagger's old Flurry (10 slashes on the wind, then a burst). See docs/wind.md.
+- **0.10.28, the Flash's speed on Chrono's Overclock (`ChronoSpeed`):** while Overclock runs, sprinting is far faster
+  and steps up whole blocks, holding forward into a wall runs you up it, sprinting crosses still water, and V again at
+  a wall phases you through it (up to 4 blocks). See docs/chrono.md.
+- **0.10.28 / Kingdoms 0.7.3, Shield Throw:** a Strength Combat Arts perk (3 ranks): Y with a shield hurls it; it
+  ricochets between foes and comes back. Relic shields always come home; a plain one drops where a wall stops it.
+- **0.10.29, Fresh Animations: Player Extension (`client/PackResourcePacks`, `client/EmfCompat`, `client/PoseTakeover`):**
+  the pack gets FreshLX's player animations (CurseForge 1281029, file 8245230, `FA+Player-v1.1.zip`; modpacks may
+  include it, never redistribute it, so it downloads by id like the medieval villager pack) and the two mods that run
+  it, Entity Model Features and Entity Texture Features (LGPL-3.0, client-only). It's switched on once per install
+  (marker `config/jaymospowers-fa-player-v1`), downloaded from CurseForge's CDN first if missing. `MedievalVillagers`
+  became `PackResourcePacks`, a list of packs (the medieval marker stays v2). FA moves the limbs' pivots as well as
+  turning them, so while any of our own body poses is on a player (Wind flight/kick/cyclone/sway/tumble/swing, crawl
+  and roll, freefall, carry, Gravity walk/board/kneel, Darktide moves and crawl, Web wall run/body/arms/ragdoll and
+  the symbiote's slam/charge/roar/feeding, Chrono flow/reel, Xenoform flight/slap, Z Fighter flight/charge/guard,
+  Arsenal's reach and flintlock aim) EMF's pause hook stops FA for that player; Better Combat swings already pause it
+  (EMF's own Player Animation Library check).
+  The Xenoform aliens move in Fresh Animations' manner (`XenoMotion`): with FA on, EMF copies the player's FA pose
+  onto each form's body and limbs like armour, and the forms' own extras now follow the body instead of running on a
+  bare sine. A per-entity follower tracks turn rate (springy, the trail a beat behind), fall speed, air time, a
+  landing jolt and breathing. The Wyrm's wings breathe and bounce with steps, flare open when dropping without flying,
+  slam down on landing and bank out of turns; its tail swings behind turns (tip later), lifts as it falls, whips down
+  on landing and droops crouched. Blur's and the Gremlin's tails do the same; Pyre's flames stream back with speed;
+  Wisp's tatters and Nadir's mantle billow as they drop; the Gremlin's ears bounce and flop; Bulwark's lower arms
+  breathe and swing out of turns; Knell's jaw tendrils hang straight down whichever way it looks.
+  The Wyrm's wings are bigger, each in two halves (10 + 10 long, 14 deep; was one 14x8 sheet): flying they spread
+  about 40 across and the outer halves flex behind each stroke; on the ground they hang from the shoulders and wrap
+  round the body like a cloak, the outer halves folded across the chest, breathing and swaying with the steps, and
+  open again as it leaves the ground (`Wyrm.WRAP_*`). Its tail is longer, three joints (13 + 10 + 8) running down from
+  the back and levelling out near the ground, each joint swinging a beat after the last (`Wyrm.TAIL_REST`). New
+  texture regions from `tools/gen_xenoform.py` (wings at 0,90; tail at 0,106 and 32,106).
+  Web parkour (`WebParkour`, our own take on ParCool's moves; see docs/web.md): sprint-vault over one-block
+  obstacles, wall cling (Sneak in the air facing a wall; A/D shimmy; slips after a hold that grows with mastery), wall
+  jump (Jump against a wall or from a cling; W from a cling climbs), and a sprint slide (Sneak while sprinting).
+  Everyone sees the poses (`WebParkourPose`, attachment `web_parkour`); Fresh Animations steps aside for them.
+- **0.10.31, Z Fighter stage 6 (`ZFighterFusion`, `ZFighterMasters`, `ZFighterRaids`, `ZFighterTournaments`, `ZFighterRogue`,
+  `ZFighterKingdoms`):** the fusion dance (Z then C facing a partner: one body for 60 s, the partner spectating from
+  inside, control swapping at 30 s, stats added plus 10%, 10 min cooldown). With Jaymo's Kingdoms (read by reflection only): masters (each
+  kingdom's eldest villager; a dark master in each barbarian camp) teach a technique or form step once a day, by
+  reputation and the Rogue's path; tyrants (a new `rogue_fighter` entity) raid kingdoms by night every 5-7 days and
+  share 6000 TP by damage; tournaments every 3-4 days in a ring beside a kingdom's seat, players and champions in a
+  bracket, never to the death. Rogue skins from `tools/gen_rogue_fighters.py`. `/powerdebug zfighter raid|tournament`.
+  Corruption (`ZFighterCorruption`, `ZFighterMark`): each dark master's lesson fills a third of Fate's corruption
+  meter, so the third corrupts. Corrupted, a crimson mark glows on the forehead in every form (over Super hair's
+  fringe), and fists and ki power are 15% stronger. Sneak+C in base form toggles Corrupted mode: Super 1's fists,
+  speed and ki power with no ki drain, bleeding half a heart a second (ends at one heart), 35% life steal on every hit,
+  and 3 Combat Roll charges whose rolls blink (up to 8 blocks towards the target, behind it within 5, ahead with none).
+- **0.10.37 / Kingdoms 0.7.5, timelapse night and bed rest:** our own take on Sleeping Overhaul 2 (Forge only): the
+  night runs by as a timelapse (the whole world sped up, villagers at work; drag to look around in bed) instead of skipping, leave bed any time, and rest in bed awake by day or sneaking (immune
+  to poison and withering), with a Sleep button at night. See kingdoms/MODLOG.md.
+- **0.10.42, sailing (pack mods):** Shippy Ships (sailboat, cog, caravel, galleon) and Old Cannons join the pack with
+  Ingenium API, all by Caesius_Leo, whose licence allows modpacks with credit. Valkyrien Skies, Eureka and Valkyrien
+  Pirates have no build past 1.20.1; Haubna's ocean physics are Physics Mod Pro (paid Patreon), so neither ships.
+  With them, Kingdoms 0.7.7 brings sailing stage 1, our own ships built from blocks: put a helm on any hull you build
+  on water and cast off (bellied sails on yards, buoyancy by weight, walkable decks and holds, chests usable afloat, drop anchor).
+- **0.10.43 / Kingdoms 0.7.8, flintlocks in TaCZ:** TaCZ: Refabricated (the unofficial Fabric 26.3 port of Timeless
+  and Classics Zero, beta) joins the pack with Forge Config API Port, used only for our own guns: a musket, a
+  blunderbuss and a flintlock pistol, a gunpack of ours (`assets/jaymospowers/custom/jaymos_flintlocks`, from
+  tools/gen_tacz_guns.py: models, texture, sounds and muzzle-loading animations, nothing of TaCZ's art) that
+  `armory/TaczGuns` hands to TaCZ. They and their musket balls and shot are made at TaCZ's Gun Smith Table; TaCZ's
+  modern guns, ammo, attachments and attachment bench are uncraftable (`tinkering/Uncraftable`). Kingdoms'
+  musketeers carry the TaCZ musket. Arsenal's Void Armory flintlocks become a TaCZ gun too (void palette, no
+  recipe), one in each hand: a click fires the main hand's, the next the off hand's (brought round into the main hand
+  once the first is spent, `ArsenalFlintlock.tickTacz`), and Q is the reload: it drops the pair and a fresh pair
+  comes up out of the rift. TaCZ is on Modrinth only, so the CurseForge import zip carries its jar
+  (untouched, credited; its art is CC BY-NC-ND 4.0).
+- **0.10.44 / Kingdoms 0.7.9, King's Roads:** our own settlement roads (Via Romana and Countered's Settlement Roads
+  don't run on 26.3, and Via Romana's licence bars a port): roads planned between nearby realms and villages, paved
+  in the land's style as chunks load, with bridges, lanterns and milestones; cabs, rickshaws, rulers and caravans keep
+  to them. Milestones offer a coach ride along the road or a dearer teleport, and a Road Charter links signs on roads
+  you build yourself (Via Romana's idea, our own way). See kingdoms/MODLOG.md.
+- **0.10.47 / Kitchen 0.4.39, ragdoll physics:** our own Physics Mod-style ragdolls for corpses (Physics Mod itself is
+  closed, ARR and client-only with no API; see kitchen/MODLOG.md). Severed parts roll along the ground as they move,
+  rock to rest on a spring (a limb lies along the ground, never on end), and are kicked along by anyone walking into them.
+- **0.10.48, Z Fighter fists first and tail fear (Kingdoms 0.7.10):** Z Fighters can swing weapons again, but a weapon
+  (or a bow's arrow) hits for 35% unless their Kingdoms class is trained with it (`ClassPerks.trainedWith`, read by
+  reflection: Thief light blades, Warlord two-handers, Brute bludgeons, Archer bows, Marksman guns and crossbows, Sorcerer
+  swords, Mage staffs, Rider anything from the saddle). A Warrior-born with the tail out frightens townsfolk (`Tails`,
+  by the `jaymospowers_tail` tag): they cry werewolf and run, until the player reaches 25 MCA hearts with them (tail
+  wrapped) and picks "Explain your tail" in their chat menu; each villager has to be told.
+- **0.10.49, sounds, ambience and detail:** Sounds (imb11; new screen, item and block sounds), AmbientSounds 6 (biome,
+  cave, water and weather ambience, in place of Dynamic Surroundings, which stops at 1.21.1), Subtle Effects (sparks,
+  snoring, dust clouds and more) and A Good Place (blocks animate into place) join the pack with their libraries. Sounds
+  awaits its CurseForge id (`packModsNoCf`). Particular stops at 1.21.4, so `client/Ambience` remakes its ideas from
+  vanilla particles and sounds: spray, mist and a rumble where waterfalls land, fireflies over flowers and grass in warm
+  biomes at night, dust deep in dark caves, splashes sized to what fell in, and a quiet clink of armour as people walk.
+- **0.10.50 / Kingdoms 0.7.11, physical falling trees:** felled trees fall to their heavier side, hurt what they hit by
+  how fast they're moving, anger the bees of any nest on them, and land as real blocks (logs on their side, leaves
+  withering). Physical Falling Trees' ideas in our own code (the datapack is CC BY-NC-ND and stops at 26.2). See
+  kingdoms/MODLOG.md.
+- **0.10.51, flight never outruns the terrain:** fast flight (any power, elytra, a ridden mount) looks a second ahead
+  each move; where the chunks haven't arrived or haven't been drawn yet it slows to a speed that reaches them no sooner
+  than they're ready, with a "terrain loading" note, and picks up again as they load (`client/TerrainAhead`). Before,
+  players flew into land the game hadn't shown and stuck on invisible blocks. Chunky is back to pre-generate the world
+  from the server console, so most of the map loads from disk instead of being generated under a flyer.
+- **0.10.55 / Kingdoms 0.7.13, roaming caravans:** pillager caravans (minor, and major under the ominous banner with a
+  ravager) and merchant caravans (a wandering trader, trader llamas, pack mules, a nearby realm's guards as escort) now
+  pass by players out in the wild, along King's Roads where they run. Pack animals carry chests of the land's goods.
+  Pillager Caravans' ideas in our own code (it stops at 26.1 and has its own licence). See kingdoms/MODLOG.md.
+- **0.10.60, tracks in the snow:** Soft Imprints (MIT) joins the pack: everything that walks or rolls over snow, snow
+  layers, sand and red sand leaves footprints and trails shaped to its body (players, mobs, horses, carts and
+  caravans), which slowly fill back in. Client-only and works with Iris shaders.
+- **0.10.63, layered storm clouds (Kingdoms 0.7.16):** storm cells are drawn in layers from the same number of puffs: a
+  flat dark base, a tower over the middle that builds up as the cell gathers (thunderstorms and supercells), and a
+  pale anvil spread over a supercell's top, leaning downwind. Each tornado hangs from a turning wall cloud
+  (`kingdoms/MODLOG.md`).

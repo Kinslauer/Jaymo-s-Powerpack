@@ -337,6 +337,24 @@ public final class Payloads {
 		}
 	}
 
+	/** (0.4.38) Client → server: a chop, roast or stir is over; what the four numbers mean is in Minigames#finish. */
+	public record MinigameFinish(int a, int b, int c, int d) implements CustomPacketPayload {
+		public static final Type<MinigameFinish> TYPE = new Type<>(JaymosKitchen.id("minigame_finish"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, MinigameFinish> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> {
+				buf.writeVarInt(p.a);
+				buf.writeVarInt(p.b);
+				buf.writeVarInt(p.c);
+				buf.writeVarInt(p.d);
+			},
+			buf -> new MinigameFinish(buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt()));
+
+		@Override
+		public Type<MinigameFinish> type() {
+			return TYPE;
+		}
+	}
+
 	/** (0.4.32) Client → server: hand the body to the butcher and pay. */
 	public record ButcherDeal(int villager) implements CustomPacketPayload {
 		public static final Type<ButcherDeal> TYPE = new Type<>(JaymosKitchen.id("butcher_deal"));
@@ -353,6 +371,7 @@ public final class Payloads {
 		PayloadTypeRegistry.clientboundPlay().register(OpenButcher.TYPE, OpenButcher.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ButcherDeal.TYPE, ButcherDeal.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(SearFinish.TYPE, SearFinish.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(MinigameFinish.TYPE, MinigameFinish.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(DropCarried.TYPE, DropCarried.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(FinishRoll.TYPE, FinishRoll.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(SimUpdate.TYPE, SimUpdate.CODEC);

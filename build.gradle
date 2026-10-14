@@ -67,6 +67,26 @@ def packMods = [
 	// Sound Physics Remastered (echoes, muffling); Lootr (every loot chest has its own loot for each player)
 	[dep: "maven.modrinth:sound-physics-remastered:9loJgQlO", cf: [535489, 8909383]],
 	[dep: "maven.modrinth:lootr:gVwn7m2v", cf: [615106, 8987242]],
+	// AmbientSounds 6 (LGPL-3.0, by CreativeMD; needs CreativeCore, LGPL-3.0): biome, cave, water and weather ambience,
+	// the part of Dynamic Surroundings that has a 26.3 build (Dynamic Surroundings stops at 1.21.1). Client-only.
+	[dep: "maven.modrinth:ambientsounds:T9Nl4OKj", cf: [254284, 9099194]],
+	[dep: "maven.modrinth:creativecore:GO707F1h", cf: [257814, 9027378]],
+	// Subtle Effects (all rights reserved, by MincraftEinstein; "use this mod in modpacks with credit and a link",
+	// modrinth.com/mod/subtle-effects): sparks on fires, snoring, dust clouds, burning entities, heartbeat at low health
+	// and more, all toggled in its config. Server-side too (some effects need it), so every client needs it to join.
+	// Needs Fzzy Config (TDL-M, modpacks allowed), which needs Fabric Language Kotlin (Apache-2.0).
+	[dep: "maven.modrinth:subtle-effects:kxxX36ei", cf: [1023913, 9151765]],
+	[dep: "maven.modrinth:fzzy-config:YkOumqzV", cf: [1005914, 9049861]],
+	[dep: "maven.modrinth:fabric-language-kotlin:SKW1BTL3", cf: [308769, 9106173]],
+	// A Good Place (MIT, by enjarai): blocks grow into place when you put them down. No dependencies.
+	[dep: "maven.modrinth:a-good-place:pdT3PrDD", cf: [1020455, 9082216]],
+	// Soft Imprints (MIT, by Nine; modrinth.com/mod/snow-imprints): players, mobs, horses and carts press tracks into
+	// snow, snow layers, sand and red sand, filling back in after a minute or so. Client-only; the tracks are baked into
+	// the block model through Fabric's renderer API, so they light and shade normally under Iris. Needs Fabric API only.
+	[dep: "maven.modrinth:snow-imprints:vVPbnY0q", cf: [1474300, 8893476]],
+	// MRU (all rights reserved) and YetAnotherConfigLib (LGPL-3.0): libraries for Sounds below
+	[dep: "maven.modrinth:mru:wpEZ3KrZ", cf: [669659, 9063992]],
+	[dep: "maven.modrinth:yacl:s9SjoFu1", cf: [667299, 8935498]],
 	// ATi Structures, Vanilla Edition (all rights reserved; "feel free to add to any modpack"): big medieval castles,
 	// forts and ruins from vanilla blocks, with vanilla mobs and loot
 	[dep: "maven.modrinth:ati-structures-vanilla-edition:3NkwZrUy", cf: [1158208, 8984306]],
@@ -89,6 +109,17 @@ def packMods = [
 	// the terrain shape, the biome map and every structure's biome tags stay as they were. Server-side worldgen.
 	[dep: "maven.modrinth:wwoo:23VeM3qz", cf: [921022, 8894114]],
 	[dep: "maven.modrinth:cristel-lib:rWxmPrGC", cf: [856996, 8921504]],
+	// Chunky (GPL-3.0, by pop4959): pre-generates the world ahead of time from the server console (`chunky radius 2500`,
+	// then `chunky start`; it pauses with the server and picks up again). Fast flight outran the Deck's worldgen; land
+	// that's already generated loads from disk many times faster. Back since 0.10.51 (it left in 0.8.118 for a hang that
+	// was Distant Horizons'). Server-side; harmless on clients.
+	[dep: "maven.modrinth:chunky:4Eotm6ov", cf: [433175, 8036332]],
+	// Advanced Chimneys (CC BY-ND 4.0, by EnderLanky; shipped unchanged, downloaded by id) and its library ForgeEndertech
+	// (needs Forge Config API Port, above): chimneys, ducts and vents that carry smoke from furnaces and fires outdoors,
+	// with wind-blown, colliding smoke. The Smoke power's gas is our own after its rules, and rides its chimneys
+	// (power/smoke/ChimneyCompat reads only its block ids). Kept out of the dev game.
+	[dep: "maven.modrinth:advanced-chimneys:ASEt7Igg", cf: [244830, 9119091], dev: false],
+	[dep: "maven.modrinth:forgeendertech:G2PeFNvS", cf: [244844, 9119047], dev: false],
 	// Naturalist (code MIT, art all rights reserved; Starfish Studios' own 26.3 Fabric build, needs only Fabric API):
 	// wildlife. Kingdoms keeps its predators out of natural spawning and sends them as rare wilderness encounters
 	// (Encounters), and keeps its elephants and mammoths out too since Kingdoms has its own
@@ -100,6 +131,20 @@ def packMods = [
 	// custom third-person views on F6 and F7 (Right Alt + the key edits one). Client-only. Jaymo's Powers sets its F7
 	// view to Andy's preset once per install (client/CameraPreset) and takes its zoom off Z (client/KeyConflicts).
 	[dep: "maven.modrinth:camera-utils:5XAah6bJ", cf: [510234, 8887090]],
+	// Forge Config API Port (MPL-2.0, Fuzs): config library that TaCZ: Refabricated needs (packModsOverride).
+	[dep: "maven.modrinth:forge-config-api-port:JpKvrr9J", cf: [547434, 8938808]],
+	// Entity Model Features and Entity Texture Features (both LGPL-3.0, by Traben): custom entity models and animations
+	// from resource packs, here for Fresh Animations: Player Extension (packResourcePacks). Client-only. Our own poses
+	// pause its animations while they play (client/EmfCompat).
+	[dep: "maven.modrinth:entity-model-features:N7d5LddE", cf: [844662, 9064964]],
+	[dep: "maven.modrinth:entitytexturefeatures:O8J3sxxp", cf: [568563, 9055242]],
+	// Sailing. Shippy Ships and Old Cannons (by Caesius_Leo; custom licence: "Include this mod in public or private
+	// Minecraft modpacks, provided proper credit is given"; downloaded by id, never copied or taken apart): sailboat,
+	// cog, caravel and galleon you craft and sail (crew, storms, sinking, wrecks you can loot), and cannons that mount on
+	// them for naval battles. Both need Ingenium API (MIT, same author). Client and server.
+	[dep: "maven.modrinth:ingeniumapi:VYmEo1o8", cf: [1609990, 8956937]],
+	[dep: "maven.modrinth:shippy-ships:q3Hz6ClL", cf: [1551850, 9106490]],
+	[dep: "maven.modrinth:oldcannons:Lpxyj63b", cf: [1610113, 8974890]],
 ]
 // First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
 // Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge
@@ -110,10 +155,23 @@ def packMods = [
 def packModsNoCf = [
 	[dep: "maven.modrinth:first-person-model:Z05WZTy2", cf: null],
 	[dep: "maven.modrinth:not-enough-animations:EhSk2OTD", cf: null],
+	// Sounds (all rights reserved, by imb11; modpacks on Modrinth and CurseForge allowed under legal.imb11.dev/mods/eula):
+	// 170+ new sound effects for screens, items and blocks. Client-only; needs MRU and YACL (packMods).
+	// TODO(home PC): its CurseForge [project id, file id], as above (the cloud couldn't find its CurseForge page).
+	[dep: "maven.modrinth:sound:QCFPBvDa", cf: null],
 	// Grim Kingdoms, Vanilla Edition (all rights reserved; "feel free to add to any modpack"): castles, citadels and
 	// ruins from vanilla blocks. Server-side worldgen, so the server having it is what counts.
 	// TODO(home PC): its CurseForge [project id, file id], as above.
 	[dep: "maven.modrinth:grim-kingdoms-lost-structures-ruins-vanilla-edition:Hn8zuckE", cf: null],
+]
+// on Modrinth only and needed by every client, so the CurseForge import zip carries the jar itself (overrides/mods), and
+// the server, modpack/mods and your profile get it like any pack mod. Not loaded in the dev game (too heavy).
+def packModsOverride = [
+	// TaCZ: Refabricated, unofficial 26.3 port (Modrinth "tacz-refabricated-unofficial-port"; GPL-3.0 code, art
+	// CC BY-NC-ND 4.0, so shipped as the untouched jar with credit, never edited or taken apart): Timeless and Classics
+	// Zero's modern guns with attachments, scopes, a Gun Smith Table and ammo. The official TaCZ is Forge 1.20.1 and its
+	// Fabric port stops at 1.21.1. Beta. Needs Forge Config API Port (packMods) and Player Animation Library 1.2.7+.
+	[dep: "maven.modrinth:tacz-refabricated-unofficial-port:3BP2Kc1r"],
 ]
 // not on CurseForge: shipped inside the pack as overrides
 def kitchenJar = fileTree("libs") { include "jaymos-kitchen-*.jar" }
@@ -139,20 +197,24 @@ def localPackMods = [
 	// (none right now; Distant Horizons was here until 0.4.5)
 ]
 // resource packs, client-only: the CurseForge import downloads them into resourcepacks/ by id, and Jaymo's Powers
-// switches each on once per install (client/MedievalVillagers). The CurseForge files are all rights reserved, so they
+// switches each on once per install (client/PackResourcePacks). The CurseForge files are all rights reserved, so they
 // are never copied into the pack; Build Modpack downloads them into your own profile from CurseForge's CDN.
 def packResourcePacks = [
 	// MCA - Default Medieval (by DE4THR4SH): vanilla-style medieval clothes, faces and hair for MCA's villagers. Its
 	// newest file says 1.21.1, but it only retextures MCA's skins, and 1144 of our 26.3 MCA jar's 1145 skin files are
 	// at the same paths (the last one is MCA's own folder icon).
 	[cf: [667175, 8868890], file: "MCAR_VanillaMedieval_Universal_7.7.36-beta.3+1.21.1.zip"],
+	// Fresh Animations: Player Extension (by FreshLX; modpacks may include it, never redistribute it): livelier player
+	// animations through Entity Model Features. Stands alone, no base Fresh Animations needed; supports up to 26.3.
+	[cf: [1281029, 8245230], file: "FA+Player-v1.1.zip"],
 ]
 // mods taken out of the pack: moved out of your CurseForge profile's mods folder (into removed-mods) on the next build
 // (Towns and Towers left in 0.8.4: its villages fought Epic Structures: Villages, where kingdoms are founded; its
-// library Cristel Lib came back in 0.8.69 for Overhauled Overworld. Traveler's Backpack and Forge Config API Port left
-// in 0.8.14)
-// (Chunky left in 0.8.118: with Distant Horizons on the server, a new world hung for good at "Selecting global world spawn")
-def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-", "forge-config-api-port-", "alexs-mobs-", "citadel-", "chunky-"]
+// library Cristel Lib came back in 0.8.69 for Overhauled Overworld. Traveler's Backpack left in 0.8.14, and Forge
+// Config API Port with it until TaCZ brought it back in 0.10.43)
+// (Chunky left in 0.8.118, wrongly blamed for a new world hanging at "Selecting global world spawn" with Distant
+// Horizons on the server; back in 0.10.51)
+def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-", "alexs-mobs-", "citadel-"]
 // the same, by Fabric mod id, for mods whose CurseForge file names we don't know: Alex's Mobs and Citadel (0.8.107,
 // their models drew black slabs and streaks across the screen with Iris shaders), Distant Horizons (0.9.6, taken out
 // at Andy's request; a new world on the Deck's server had hung at startup with it)
@@ -177,6 +239,11 @@ configurations {
 		canBeResolved = true
 		transitive = false
 	}
+	packOverrideJars {
+		canBeConsumed = false
+		canBeResolved = true
+		transitive = false
+	}
 }
 
 dependencies {
@@ -191,9 +258,15 @@ dependencies {
 	compileOnly kitchenJar
 	// compiled against to read Better Combat's attack swings while flying; touched only via client/power/wind/PalAccess
 	compileOnly "maven.modrinth:player-animation-library:xJ30QmpE"
+	// compiled against to make its swings hit bodies, not boxes; touched only via client/compat/mixin/LimbSwingMixin
+	compileOnly "maven.modrinth:better-combat:8Vyq1h9a"
+	// compiled against to pause Fresh Animations' player animations under our poses; touched only via client/EmfAccess
+	compileOnly "maven.modrinth:entity-model-features:N7d5LddE"
+	compileOnly "maven.modrinth:entitytexturefeatures:O8J3sxxp"
 	packMods.drop(1).findAll { it.dev != false }.each { localRuntime it.dep }
 	packMods.each { packJars it.dep }
 	packModsNoCf.each { localRuntime it.dep; packJars it.dep }
+	packModsOverride.each { packJars it.dep; packOverrideJars it.dep }
 }
 
 // gradlew packageModpack:
@@ -232,6 +305,7 @@ tasks.register("curseforgePack", Zip) {
 	destinationDirectory = packDir
 	from(layout.buildDirectory.file("modpack/manifest.json"))
 	into("overrides/mods") {
+		from configurations.packOverrideJars
 		from tasks.named("jar")
 		from kitchenJar
 		from mcaJar

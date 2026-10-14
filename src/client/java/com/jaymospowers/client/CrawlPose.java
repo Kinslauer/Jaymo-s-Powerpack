@@ -21,10 +21,10 @@ import org.jspecify.annotations.Nullable;
  */
 public final class CrawlPose {
 	/** {@code roll}: progress through a roll (signed by direction), or null; {@code stride}/{@code speed}: the crawl's walk cycle. */
-	record State(@Nullable Float roll, float stride, float speed) {
+	public record State(@Nullable Float roll, float stride, float speed) {
 	}
 
-	static final RenderStateDataKey<State> KEY = RenderStateDataKey.create(() -> "jaymospowers:crawl");
+	public static final RenderStateDataKey<State> KEY = RenderStateDataKey.create(() -> "jaymospowers:crawl");
 
 	private CrawlPose() {
 	}

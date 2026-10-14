@@ -19,10 +19,10 @@ import org.joml.Matrix4f;
  */
 public final class GravityWalkPose {
 	/** {@code up}: where the head points; {@code front}: where the chest faces; {@code feet}: where the feet go, from the entity's position. */
-	record Turn(Vec3 up, Vec3 front, Vec3 feet) {
+	public record Turn(Vec3 up, Vec3 front, Vec3 feet) {
 	}
 
-	static final RenderStateDataKey<Turn> KEY = RenderStateDataKey.create(() -> "jaymospowers:gravity_walk");
+	public static final RenderStateDataKey<Turn> KEY = RenderStateDataKey.create(() -> "jaymospowers:gravity_walk");
 
 	private GravityWalkPose() {
 	}

@@ -28,9 +28,13 @@
 	"screen.jaymospowers.keys": "Abilities",
 	"commands.jaymospowers.level": "Unlocked %s abilities for %s player(s)",
 	"message.jaymospowers.unlocked": "New ability",
-	"message.jaymospowers.unlocked_chat": "Your power grows: [%s] %s",
+	"message.jaymospowers.unlocked_chat": "Your power grows: [%s] %s (hover, or see it on %s)",
 	"message.jaymospowers.locked": "That ability is still locked. Keep using your power to unlock it.",
 	"screen.jaymospowers.locked": "locked",
+	"screen.jaymospowers.locked_name": "Locked",
+	"screen.jaymospowers.mastery_bar": "Mastery %s%%",
+	"screen.jaymospowers.mastered": "Fully mastered",
+	"screen.jaymospowers.hover_hint": "Hover an ability to read it in full.",
 	"screen.jaymospowers.mastery": "Mastery: next ability %s%%",
 	"key.jaymospowers.ultimate": "Power Ability 5",
 	"message.jaymospowers.ascended": "Your power ascends",
@@ -70,5 +74,12 @@
 	"button.jaymospowers.armor.feet": "boots",
 	"death.attack.jaymospowers.decapitation": "%1$s lost their head",
 	"death.attack.jaymospowers.decapitation.player": "%1$s was beheaded by %2$s",
-	"entity.jaymospowers.severed_part": "Severed Part"
+	"entity.jaymospowers.severed_part": "Severed Part",
+	"message.jaymospowers.fracture.dazed": "Your head rings from the blow",
+	"message.jaymospowers.fracture.right_arm": "Your right arm is broken: it can't hold anything until it knits",
+	"message.jaymospowers.fracture.left_arm": "Your left arm is broken: it can't hold anything until it knits",
+	"message.jaymospowers.fracture.right_leg": "Your right leg is broken: you're limping",
+	"message.jaymospowers.fracture.left_leg": "Your left leg is broken: you're limping",
+	"message.jaymospowers.fracture.priest": "%s sets your broken bones",
+	"jaymospowers.terrain_loading": "Terrain ahead still loading: slowing down"
 }

@@ -734,3 +734,35 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
 - Bodies keep their lost parts: a mob or player tagged `jaymoskitchen.missing.<head|right_arm|left_arm|right_leg|left_leg>`
   (Jaymo's Powers dismemberment) leaves a corpse drawn without those parts (`CorpseEntity#missing`, saved as `Missing`;
   `client/corpse/Severed` hides them by model part name after the pose and shows them again once drawn).
+
+## 0.4.38: plain larder dishes and three new minigames
+- Nine dishes from basic ingredients: Borscht, Beetroot Hash, Carrot Soup, Glazed Carrots, Carrot Cake, Roast Chicken,
+  Chicken Soup, Roast Mutton and Shepherd's Pie (`Dish`, sprites in `tools/gen_assets.py`, cooking table recipes in
+  `recipe/minigame/`).
+- Three new minigames (`cooking/Minigames` for the shared rules and judging, `client/LarderGames` for play):
+  - **Chop** (hashes, glazed carrots): the veg slides under the knife, faster after each cut; press Space or click
+    when a mark is under the blade. 8 cuts; a missed mark is ragged.
+  - **Roast** (roast chicken and mutton): a spit over the fire with four sides; only the side facing down cooks, and
+    the fire surges and dies back. Turn it a quarter at a time and take it off when every side is golden.
+  - **Stir** (soups): circle the mouse round the pot. Too slow and it sticks, too fast and it slops over; when it
+    boils up it wants stirring faster.
+  - Like the sear, the client plays and reports (`MinigameFinish`); the server judges with the same code and checks
+    enough time passed. Walking away chars a pot or spit, and leaves half-chopped veg a mess.
+- Each game has its own station: Chop on a Cutting Board (a "Chop vegetables" button on the board's prep screen; new
+  `Station.BOARD`, which never reheats), Roast on a spit over a Campfire only, Stir in a pot (Furnace, Smoker, or a
+  Cooking Pot on a lit oven).
+- The dish list is restyled like the Powers H screen: striped rows with the dish, its method and ingredient icons, and
+  a hover box with how it's cooked, what Perfect gives and what you're missing. Click a row to cook it.
+
+### 0.4.39: ragdoll physics
+- Andy asked to work Physics Mod into our ragdolls. It can't be: it's closed source, All Rights Reserved, client-only
+  and has no API, so it can't drive our server-side corpses. `client/corpse/Flop` is our own take instead, run on each
+  client per corpse:
+  - Every limb and the head sit on a damped spring around the rest pose (Ragdoll sprawl, Limp hang, or the keeled-over
+    pose), so blows, rummaging, landing from a drop or throw, being shoved (explosions, carts) and people walking over
+    the body fling them about. Limbs of a sprawled body slap down onto the ground and bounce. Replaces `Jolt`.
+  - The whole body swings from where it was drawn into each new pose (dying, picked up, dropped, landing) instead of
+    snapping: lying down it falls under gravity and bounces, held up it's a quick spring. A fresh body (synced
+    `BORN`, `CorpseEntity.markJustDied`) falls from the dying mob's keeled-over pose, limbs swinging out from straight.
+  - Lying still it tips to the ground under it (slopes, steps, slabs; up to 35 degrees; walls aren't climbed) and
+    bounces a little when it lands hard.

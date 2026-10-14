@@ -156,6 +156,16 @@ public final class ZFighterFlightClient {
 			land(player, true);
 		}
 		zHeld = z;
+		if (pose == 0 && sinceSent > SERVER_GRACE && !player.onGround() && ZFighterPower.flightPose(player) > 0) {
+			// the server put him in the air already flying (a fusion swap mid-flight): hover where he is
+			owner = player;
+			pose = ZFighterPower.flightPose(player);
+			burst = 0;
+			cruising = false;
+			speed = 0.0;
+			sinkArmed = false;
+			velocity = Vec3.ZERO;
+		}
 		if (pose == 0) {
 			return;
 		}

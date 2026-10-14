@@ -58,8 +58,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 			com.jaymospowers.client.armory.ThrownWeaponRenderer::new);
 		// once per install: move other mods' (and vanilla's) defaults off the power keys
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(KeyConflicts::resolveOnce);
-		// once per install: switch on the medieval MCA villagers resource pack the CurseForge import downloaded
-		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(MedievalVillagers::enableOnce);
+		// once per install: switch on the pack's resource packs (medieval MCA villagers, Fresh Animations' player) the
+		// CurseForge import downloaded
+		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(PackResourcePacks::enableOnce);
 
 		// Balkon's guns get solid 3D models in hand (an always-on built-in pack, above WeaponMod's own assets)
 		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("held_guns"),
@@ -71,9 +72,12 @@ public class JaymosPowersClient implements ClientModInitializer {
 		ClientPlayNetworking.registerGlobalReceiver(PowerPayloads.OpenAffinity.TYPE, (payload, context) -> affinityPending = true);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("power_hud"), PowerHud::render);
 
+		ScreenShake.init();
+		Ambience.init();
 		CarryClient.init();
 		CombatRollTaps.init();
 		JeiCheats.init();
+		EmfCompat.init();
 		CrawlTaps.init();
 		HiddenArmorClient.init();
 		WindPowerClient.init();
@@ -85,6 +89,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.darktide.DarktidePowerClient.init();
 		com.jaymospowers.client.power.xenoform.XenoformPowerClient.init();
 		com.jaymospowers.client.power.zfighter.ZFighterPowerClient.init();
+		com.jaymospowers.client.power.smoke.SmokePowerClient.init();
 	}
 
 	/** The key mapping for an ability key (to show its bound key in a HUD, say). */

@@ -138,7 +138,9 @@ public final class Skills {
 		REND(Pillar.STRENGTH, 1, 2, 18, 5, 2, CLEAVE),
 		CHARGE(Pillar.STRENGTH, 1, 2, 21, 6, 0, EARTHSPLITTER, EXECUTIONER),
 		WAR_CRY(Pillar.STRENGTH, 1, 2, 21, 6, 2, EXECUTIONER, REND),
-		BLADESTORM(Pillar.STRENGTH, 1, 3, 24, 7, 1, CHARGE, WAR_CRY);
+		BLADESTORM(Pillar.STRENGTH, 1, 3, 24, 7, 1, CHARGE, WAR_CRY),
+		// (0.7.3) a thrown shield that ricochets between foes and comes home (ShieldThrow); last, so no ordinal moves
+		SHIELD_THROW(Pillar.STRENGTH, 3, 1, 21, 6, 1, EXECUTIONER);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;
@@ -296,6 +298,7 @@ public final class Skills {
 		SurvivalSkill.register();
 		StrengthSkill.register();
 		CombatArts.register();
+		ShieldThrow.register();
 		Renown.register();
 		KitchenCompat.skills();
 	}

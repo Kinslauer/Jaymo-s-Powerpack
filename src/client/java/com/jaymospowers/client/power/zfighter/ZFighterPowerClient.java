@@ -62,14 +62,18 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterInputClient.init();
 		ZFighterBeams.init();
 		ZFighterSpirit.init();
+		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.zfighter.ZFighterRaids.ROGUE,
+			ZFighterRogueRenderer::new);
 		ZFighterWishScreen.register();
 		ClientTickEvents.END_CLIENT_TICK.register(ZFighterFlightPose::tick);
 		ClientTickEvents.END_CLIENT_TICK.register(ZFighterChargePose::tick);
+		ClientTickEvents.END_CLIENT_TICK.register(ZFighterDancePose::tick);
 		// the Training Post: a Z Fighter's right click opens the drills
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
 			if (renderer instanceof AvatarRenderer<?> avatar) {
 				helper.register(new ZFighterTail.Layer(avatar));
 				helper.register(new ZFighterHair.Layer(avatar));
+				helper.register(new ZFighterMark.Layer(avatar));
 				helper.register(new ZFighterApe.Layer(avatar));
 			}
 		});
@@ -110,6 +114,8 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterHair.extract(entity, state);
 		ZFighterChargePose.extract(entity, state, partialTicks);
 		ZFighterGuardPose.extract(entity, state);
+		ZFighterDancePose.extract(entity, state, partialTicks);
+		ZFighterMark.extract(entity, state);
 		ZFighterApe.extract(entity, state);
 	}
 
@@ -118,6 +124,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterFlightPose.applyModel(model, state);
 		ZFighterChargePose.applyModel(model, state);
 		ZFighterGuardPose.applyModel(model, state);
+		ZFighterDancePose.applyModel(model, state);
 	}
 
 	@Override

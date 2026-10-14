@@ -53,6 +53,9 @@ public final class Bulwark extends XenoForm {
 	public static final float SLAM_DAMAGE = 8.0F;
 	/** Titan: the extra size (added to the form's 1.5x), armour and health; how deep, wide and tall the clap breaks walls. */
 	public static final double TITAN_EXTRA_SCALE = 0.5, TITAN_ARMOR = 12.0, TITAN_HEALTH = 20.0;
+	/** Screen shake (degrees, and how far it's felt): the clap, the leap's landing, growing into the Titan. */
+	public static final float CLAP_SHAKE = 1.0F, SLAM_SHAKE = 1.5F, TITAN_SHAKE = 1.6F;
+	public static final double CLAP_SHAKE_RANGE = 14.0, SLAM_SHAKE_RANGE = 16.0, TITAN_SHAKE_RANGE = 24.0;
 	public static final int TITAN_BREAK_DEPTH = 3, TITAN_BREAK_HALF_WIDTH = 1, TITAN_BREAK_HEIGHT = 3;
 	public static final float TITAN_BREAK_MAX_HARDNESS = 6.0F;
 	/** Corrupted: harder fists, and the slam's bite on yourself. */
@@ -176,6 +179,7 @@ public final class Bulwark extends XenoForm {
 		ring(level, ParticleTypes.POOF, player.position(), 3.0, 24);
 		sound(player, SoundEvents.IRON_GOLEM_REPAIR, 1.5F, 0.5F);
 		sound(player, SoundEvents.ANVIL_LAND, 1.0F, 0.4F);
+		com.jaymospowers.core.Shakes.heavy(player, player.position(), TITAN_SHAKE_RANGE, TITAN_SHAKE);
 		return true;
 	}
 
@@ -265,6 +269,7 @@ public final class Bulwark extends XenoForm {
 		Debris.ring(level, player.blockPosition(), (int)CLAP_RADIUS, 1.0F);
 		sound(player, SoundEvents.ANVIL_LAND, 1.2F, 0.5F);
 		sound(player, SoundEvents.GENERIC_EXPLODE.value(), 0.6F, 1.3F);
+		com.jaymospowers.core.Shakes.heavy(player, feet, CLAP_SHAKE_RANGE, CLAP_SHAKE);
 	}
 
 	/** V: throw what's held; else grab what's looked at; else rip a chunk out of the ground and throw it. */
@@ -326,6 +331,7 @@ public final class Bulwark extends XenoForm {
 		ring(level, ParticleTypes.POOF, feet, SLAM_RADIUS, 20);
 		sound(player, SoundEvents.GENERIC_EXPLODE.value(), 1.0F, 1.1F);
 		sound(player, SoundEvents.IRON_GOLEM_HURT, 1.0F, 0.6F);
+		com.jaymospowers.core.Shakes.heavy(player, feet, SLAM_SHAKE_RANGE, SLAM_SHAKE);
 		player.resetFallDistance();
 	}
 }

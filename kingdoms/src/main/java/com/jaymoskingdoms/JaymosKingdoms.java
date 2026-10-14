@@ -92,6 +92,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Frights.register();
 		// 0.6.4: Jaymo's Powers' aliens (the Xeno-Band) are monsters to folk who haven't seen you change (and its attachment)
 		LOGGER.debug("alien attachment: {}", Aliens.KNOWN);
+		LOGGER.debug("tail attachment: {}", Tails.EXPLAINED);
 		Aliens.register();
 		Oddities.register();
 		// 0.5.21: monsters hunt the settlements' folk as they do villagers
@@ -122,6 +123,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.1: a night slept through made up at once (building, fields), farmers, rulers' days out
 		LOGGER.debug("warden attachment: {}", Wardens.WARDENS);
 		Nights.register();
+		// (0.7.5) the night as a timelapse, and resting in bed awake (our own take on Sleeping Overhaul 2)
+		Timelapse.register();
+		BedRest.register();
 		// 0.5.14: horses and wagons: mounted guards and archers for prosperous realms, a wealthy king's carriage, and the
 		// fiefdoms' caravans to their kingdoms (and their attachment)
 		Wagon.register();
@@ -131,6 +135,14 @@ public final class JaymosKingdoms implements ModInitializer {
 		Cannons.register();
 		LOGGER.debug("caravan attachments: {} {}", Caravans.CARAVANS, Carriages.BOUGHT);
 		Caravans.register();
+		// (0.7.13) roaming pillager and merchant caravans (our own take on Pillager Caravans) and their attachment
+		LOGGER.debug("roaming caravan attachment: {}", RoamingCaravans.LEDGER);
+		RoamingCaravans.register();
+		// (0.7.9) King's Roads between settlements, kept to by cabs, rickshaws, rulers and caravans
+		LOGGER.debug("road attachment: {}", Roads.ROADS);
+		Roads.register();
+		LOGGER.debug("charted road attachment: {}", Milestones.CHARTED);
+		Milestones.register();
 		Cavalry.register();
 		// 0.5.34: Jaymo's Equestrian, stage 1 (breeds, stats, gaits, stamina, courage, coats, war elephants) and its attachments
 		com.jaymoskingdoms.equestrian.Equestrian.register();
@@ -187,6 +199,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.0: players as vampires (by a bite) and werewolves (by ritual)
 		VampirePlayers.register();
 		WerewolfPlayers.register();
+		// 0.7.7: sailing, stage 1: ships built from blocks (the helm, sails, the ship and its attachment)
+		com.jaymoskingdoms.sailing.Sailing.register();
+		LOGGER.debug("ship attachment: {}", com.jaymoskingdoms.sailing.Ship.PIECES);
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();
 			Gatherers.clear();

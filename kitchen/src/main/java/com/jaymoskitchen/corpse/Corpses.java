@@ -183,6 +183,7 @@ public final class Corpses {
 			// died burning (a zombie in the sun): keeps burning on the ground
 			corpse.setRemainingFireTicks(mob.getRemainingFireTicks());
 		}
+		corpse.markJustDied();
 		level.addFreshEntity(corpse);
 	}
 

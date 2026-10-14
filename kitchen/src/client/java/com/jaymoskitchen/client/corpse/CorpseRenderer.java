@@ -23,7 +23,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -54,6 +56,16 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		float crumble;
 		float age;
 		final AvatarRenderState avatar = new AvatarRenderState();
+		/** (0.4.39) Ragdoll physics (see Flop): drawn tipped to the ground, bounced up, and still swinging into place. */
+		float anchorX, anchorY, anchorZ;
+		final Quaternionf tilt = new Quaternionf();
+		final Quaternionf turn = new Quaternionf();
+		final Vector3f move = new Vector3f();
+		final float[] lift = new float[1];
+		/** A body sprawled flat (see Ragdoll), whose limbs lie on the ground. */
+		boolean ragdolled;
+		/** How far the body's own renderer turns it over as it dies (spiders roll right onto their backs). */
+		float flip;
 	}
 
 	private final PlayerModel wide;
@@ -79,6 +91,10 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 	@Override
 	public void extractRenderState(CorpseEntity corpse, State state, float partialTicks) {
 		super.extractRenderState(corpse, state, partialTicks);
+		// the corpse's own spot: the body is drawn placed from here (see place), and swings about it (see Flop)
+		double baseX = state.x, baseY = state.y, baseZ = state.z;
+		state.ragdolled = false;
+		state.flip = 90.0F;
 		// it burns from the inside (see CorpseEntity#smoulder), not in a sheet of fire
 		state.displayFireAnimation = false;
 		state.body = null;
@@ -86,9 +102,6 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		state.player = false;
 		state.crumble = corpse.crumble(partialTicks);
 		state.age = corpse.tickCount + partialTicks;
-		float strength = corpse.jolt(partialTicks);
-		// a blow or rummaging: its limbs flop (see Jolt), the body stays put
-		Jolt jolt = strength > 0.0F ? new Jolt(strength, corpse.joltTime(partialTicks), corpse.joltSide()) : null;
 		float yaw = corpse.getYRot();
 		Entity carrier = corpse.carrier();
 		// dropped and still falling: drawn limp as if carried, turning over as it goes, until it lands
@@ -116,14 +129,15 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		}
 		if (corpse.isPlayerCorpse()) {
 			extractPlayer(corpse, state, carrier, yaw, partialTicks);
-			state.avatar.setData(Jolt.KEY, jolt);
 			state.avatar.setData(Severed.KEY, Severed.of(corpse.missing()));
+			physics(corpse, state, state.avatar, baseX, baseY, baseZ, partialTicks);
 			return;
 		}
 		Entity body = corpse.clientBody(yaw);
 		if (body == null) {
 			return;
 		}
+		state.bodyHeight = body.getBbHeight();
 		EntityRenderer<? super Entity, ?> renderer = this.entityRenderDispatcher.getRenderer(body);
 		Object kindOfRenderer = renderer;
 		if (state.carried) {
@@ -142,6 +156,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 			|| kindOfRenderer instanceof EndermiteRenderer)) {
 			// these die flipping onto their backs, pivoting at the feet, which buries the body: lift it out
 			state.y += body.getBbHeight();
+			state.flip = 180.0F;
 		} else if (!state.carried) {
 			// the rest keel over sideways from the feet (toward yaw's (cos, sin)): shift back so the body's middle,
 			// not its feet, sits over the corpse (the middle of the butcher block)
@@ -161,6 +176,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 				// humanoids (zombies, piglins, skeletons...) sprawl flat like a player's body, not keeled over
 				Ragdoll ragdoll = Ragdoll.of(corpse.poseSeed());
 				living.setData(Ragdoll.KEY, ragdoll);
+				state.ragdolled = true;
 				living.deathTime = 0.0F;
 				living.walkAnimationPos = 0.0F;
 				living.walkAnimationSpeed = 0.0F;
@@ -203,10 +219,49 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		bodyState.displayFireAnimation = false;
 		// no name over a body (a zombie player's, say)
 		bodyState.nameTag = null;
-		bodyState.setData(Jolt.KEY, jolt);
 		bodyState.setData(Severed.KEY, Severed.of(corpse.missing()));
 		state.body = bodyState;
 		state.bodyRenderer = renderer;
+		physics(corpse, state, bodyState, baseX, baseY, baseZ, partialTicks);
+	}
+
+	/**
+	 * (0.4.39) Runs the body's ragdoll physics (see Flop) and hands this frame's result to the drawing: where the body
+	 * is placed now (relative to the corpse's spot) is what it swings from the next time it changes pose.
+	 */
+	private void physics(CorpseEntity corpse, State state, EntityRenderState bodyState, double baseX, double baseY, double baseZ,
+		float partialTicks) {
+		Flop flop = Flop.of(corpse);
+		Flop.Layout layout = state.tumbling ? Flop.Layout.TUMBLING : state.carried ? Flop.Layout.CARRIED : Flop.Layout.LYING;
+		boolean onGround = !state.carried && (state.player || state.ragdolled);
+		flop.update(corpse, layout, onGround, state.faceUp, state.bodyHeight);
+		state.anchorX = (float) (baseX - state.x);
+		state.anchorY = (float) (baseY - state.y);
+		state.anchorZ = (float) (baseZ - state.z);
+		Matrix4f placement = placement(state);
+		if (layout == Flop.Layout.LYING) {
+			// just died: it falls from where the dying mob was last drawn, keeled over on its side at the corpse's spot
+			flop.fallFrom(new Matrix4f().rotateY((180.0F - corpse.getYRot()) * Mth.DEG_TO_RAD).rotateZ(state.flip * Mth.DEG_TO_RAD));
+		}
+		flop.placed(placement, baseX, baseY, baseZ, partialTicks, state.tilt, state.move, state.turn, state.lift);
+		bodyState.setData(Flop.KEY, new Flop.Frame(flop, partialTicks));
+	}
+
+	/** Where the body is placed (its feet, facing as drawn), relative to the corpse's own spot. */
+	private static Matrix4f placement(State state) {
+		PoseStack poseStack = new PoseStack();
+		poseStack.translate(-state.anchorX, -state.anchorY, -state.anchorZ);
+		place(state, poseStack);
+		Matrix4f placement = new Matrix4f(poseStack.last().pose());
+		if (!state.player && state.body instanceof LivingEntityRenderState living) {
+			// the body's own renderer then turns it to face its way, and over as it dies
+			placement.rotateY((180.0F - living.bodyRot) * Mth.DEG_TO_RAD);
+			if (living.deathTime > 0.0F) {
+				float fall = Math.min(1.0F, Mth.sqrt((living.deathTime - 1.0F) / 20.0F * 1.6F));
+				placement.rotateZ(fall * state.flip * Mth.DEG_TO_RAD);
+			}
+		}
+		return placement;
 	}
 
 	/** Undoes the keel-over offset: the body lies centred on the corpse. */
@@ -247,76 +302,73 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 	@Override
 	public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
 		super.submit(state, poseStack, collector, camera);
-		if (state.tumbling) {
-			// falling: it turns over about its middle, end over end and side to side, as fast as it's spinning
-			poseStack.pushPose();
-			float yaw = state.carryYaw * Mth.DEG_TO_RAD;
-			poseStack.translate(0.0F, 0.3F, 0.0F);
-			// end over end about the body's own crosswise axis, then rolling about its length
-			poseStack.rotate(new org.joml.Quaternionf().rotationAxis(state.tumblePitch * Mth.DEG_TO_RAD, Mth.cos(yaw), 0.0F, Mth.sin(yaw)));
-			poseStack.rotate(new org.joml.Quaternionf().rotationAxis(state.tumbleRoll * Mth.DEG_TO_RAD, -Mth.sin(yaw), 0.0F, Mth.cos(yaw)));
-			poseStack.translate(0.0F, -0.3F, 0.0F);
-			submitWhole(state, poseStack, collector, camera);
-			poseStack.popPose();
+		if (state.body == null && !state.player) {
 			return;
 		}
-		submitWhole(state, poseStack, collector, camera);
-	}
-
-	private void submitWhole(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
+		poseStack.pushPose();
+		// ragdoll physics (see Flop), about the corpse's own spot: bounced up, tipped to lie along the ground under it,
+		// and swinging from where it was drawn before into where it's placed now
+		poseStack.translate(state.anchorX, state.anchorY + state.lift[0], state.anchorZ);
+		poseStack.rotate(state.tilt);
+		poseStack.translate(state.move.x(), state.move.y(), state.move.z());
+		poseStack.rotate(state.turn);
+		poseStack.translate(-state.anchorX, -state.anchorY, -state.anchorZ);
 		if (state.crumble > 0.0F && !state.player) {
 			// falling apart: shuddering harder as it goes, slumping flatter and sinking into the ground
 			float c = state.crumble;
 			float shake = 0.04F * c;
-			poseStack.pushPose();
 			poseStack.translate(Mth.sin(state.age * 2.7F) * shake, -0.35F * c * c, Mth.cos(state.age * 3.1F) * shake);
 			poseStack.scale(1.0F + 0.15F * c, 1.0F - 0.6F * c * c, 1.0F + 0.15F * c);
-			state.crumble = 0.0F;
-			submitWhole(state, poseStack, collector, camera);
-			state.crumble = c;
-			poseStack.popPose();
-			return;
 		}
+		place(state, poseStack);
 		if (state.player) {
-			submitPlayer(state, poseStack, collector);
-			return;
-		}
-		if (state.body != null && state.bodyRenderer != null) {
-			poseStack.pushPose();
-			if (state.carried) {
-				layAcrossArms(state, poseStack);
-			} else if (state.sprawled) {
-				// tipped flat about its side-to-side axis, face up or down, its middle over the corpse
-				float radians = state.yaw * Mth.DEG_TO_RAD;
-				poseStack.translate(0.0F, 2.0F / 16.0F, 0.0F);
-				poseStack.rotate(new Quaternionf().rotationAxis(state.faceUp ? -Mth.HALF_PI : Mth.HALF_PI, Mth.cos(radians), 0.0F,
-					Mth.sin(radians)));
-				poseStack.translate(0.0F, -state.bodyHeight / 2.0F, 0.0F);
-			}
+			// as players are drawn
+			poseStack.scale(-1.0F, -1.0F, 1.0F);
+			poseStack.translate(0.0F, -1.501F, 0.0F);
+			PlayerModel model = state.avatar.skin.model() == PlayerModelType.SLIM ? slim : wide;
+			collector.submitModel(model, state.avatar, poseStack, state.avatar.skin.body().texturePath(), state.lightCoords,
+				OverlayTexture.NO_OVERLAY, state.outlineColor);
+		} else if (state.bodyRenderer != null) {
 			submitBody(state.bodyRenderer, state.body, poseStack, collector, camera);
-			poseStack.popPose();
 		}
+		poseStack.popPose();
 	}
 
-	private void submitPlayer(State state, PoseStack poseStack, SubmitNodeCollector collector) {
-		poseStack.pushPose();
-		if (state.carried) {
-			layAcrossArms(state, poseStack);
-			poseStack.rotate(Axis.YP.rotationDegrees(180.0F - state.yaw));
-		} else {
-			// flat on the ground, face up or down, its middle over the corpse
-			poseStack.translate(0.0F, 2.0F / 16.0F, 0.0F);
-			poseStack.rotate(Axis.YP.rotationDegrees(180.0F - state.yaw));
-			poseStack.rotate(Axis.XP.rotationDegrees(state.faceUp ? 90.0F : -90.0F));
-			poseStack.translate(0.0F, -0.9F, 0.0F);
+	/**
+	 * Places the body (drawn from its feet, as its renderer draws it) as it lies: fallen over, sprawled flat, across
+	 * someone's arms, or turning over as it falls from them.
+	 */
+	private static void place(State state, PoseStack poseStack) {
+		if (state.tumbling) {
+			// falling: it turns over about its middle, end over end and side to side, as fast as it's spinning
+			float yaw = state.carryYaw * Mth.DEG_TO_RAD;
+			poseStack.translate(0.0F, 0.3F, 0.0F);
+			// end over end about the body's own crosswise axis, then rolling about its length
+			poseStack.rotate(new Quaternionf().rotationAxis(state.tumblePitch * Mth.DEG_TO_RAD, Mth.cos(yaw), 0.0F, Mth.sin(yaw)));
+			poseStack.rotate(new Quaternionf().rotationAxis(state.tumbleRoll * Mth.DEG_TO_RAD, -Mth.sin(yaw), 0.0F, Mth.cos(yaw)));
+			poseStack.translate(0.0F, -0.3F, 0.0F);
 		}
-		// as players are drawn
-		poseStack.scale(-1.0F, -1.0F, 1.0F);
-		poseStack.translate(0.0F, -1.501F, 0.0F);
-		PlayerModel model = state.avatar.skin.model() == PlayerModelType.SLIM ? slim : wide;
-		collector.submitModel(model, state.avatar, poseStack, state.avatar.skin.body().texturePath(), state.lightCoords,
-			OverlayTexture.NO_OVERLAY, state.outlineColor);
-		poseStack.popPose();
+		if (state.player) {
+			if (state.carried) {
+				layAcrossArms(state, poseStack);
+				poseStack.rotate(Axis.YP.rotationDegrees(180.0F - state.yaw));
+			} else {
+				// flat on the ground, face up or down, its middle over the corpse
+				poseStack.translate(0.0F, 2.0F / 16.0F, 0.0F);
+				poseStack.rotate(Axis.YP.rotationDegrees(180.0F - state.yaw));
+				poseStack.rotate(Axis.XP.rotationDegrees(state.faceUp ? 90.0F : -90.0F));
+				poseStack.translate(0.0F, -0.9F, 0.0F);
+			}
+		} else if (state.carried) {
+			layAcrossArms(state, poseStack);
+		} else if (state.sprawled) {
+			// tipped flat about its side-to-side axis, face up or down, its middle over the corpse
+			float radians = state.yaw * Mth.DEG_TO_RAD;
+			poseStack.translate(0.0F, 2.0F / 16.0F, 0.0F);
+			poseStack.rotate(new Quaternionf().rotationAxis(state.faceUp ? -Mth.HALF_PI : Mth.HALF_PI, Mth.cos(radians), 0.0F,
+				Mth.sin(radians)));
+			poseStack.translate(0.0F, -state.bodyHeight / 2.0F, 0.0F);
+		}
 	}
 
 	/**

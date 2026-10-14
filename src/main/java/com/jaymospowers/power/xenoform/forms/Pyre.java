@@ -49,6 +49,9 @@ public final class Pyre extends XenoForm {
 	public static final int JET_SLOW_FALL_TICKS = 50;
 	public static final int NOVA_COOLDOWN = 200;
 	public static final double NOVA_RADIUS = 5.0;
+	/** Screen shake from the Fire Nova (degrees), and how far it's felt. */
+	public static final float NOVA_SHAKE = 0.9F;
+	public static final double NOVA_SHAKE_RANGE = 14.0;
 	public static final float NOVA_DAMAGE = 6.0F;
 	public static final int NOVA_BURN_SECONDS = 5;
 	public static final int TRAIL_COOLDOWN = 300, TRAIL_TICKS = 120;
@@ -318,5 +321,6 @@ public final class Pyre extends XenoForm {
 		level.sendParticles(ParticleTypes.LAVA, at.x, at.y + 0.5, at.z, 20, 1.0, 0.5, 1.0, 0.0);
 		sound(player, SoundEvents.GENERIC_EXPLODE.value(), 0.8F, 1.4F);
 		sound(player, SoundEvents.BLAZE_SHOOT, 1.0F, 0.6F);
+		com.jaymospowers.core.Shakes.heavy(player, at, NOVA_SHAKE_RANGE, NOVA_SHAKE);
 	}
 }

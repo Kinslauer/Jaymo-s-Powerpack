@@ -116,7 +116,7 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
 | **R** (hold) | **Web Swing.** Sticks a web where you aim. If you aim at the sky or far below you, it auto-picks an anchor above and ahead of you. Hold to swing; release to let go. While swinging: **W** on the downswing pumps speed, **Jump** reels in, **Sneak** lets out rope. | none |
 | **G** | **Web Zip.** Fires a web at the crosshair block (48 blocks) and reels you to it. Hitting a wall hops you up onto the ledge if there's one within 3 blocks. | 3 s |
 | **V** | **Web Shot.** A fast, nearly flat web ball. A hit does 1 damage and gives Slowness IV and no jumping for 4 s. It also puts a temporary cobweb at the target's feet for 5 s (only in air). | 2 s |
-| **B** | **Yank.** Webs the entity under the crosshair (24 blocks). Small things are flung to land about 2 blocks in front of you. Big things (bounding box over 2.6 m³, e.g. iron golems and horses) pull **you** to **them**. | 6 s |
+| **B** | **Yank.** Webs the entity under the crosshair (24 blocks). Small things are flung to land about 2 blocks in front of you. Things heavier than you can haul (bounding box over 4 m³, more in the suit or with friends holding it on their lines too, e.g. iron golems) pull **you** to **them**; at a torch, lantern or bell it tears it off. | 6 s |
 
 **Passives:**
 - You take no fall damage from the moment a swing web sticks, or a zip/yank-to starts, until you land. Landing means
@@ -859,3 +859,42 @@ Andy asked for a stronger Web (ideas remade from Powerborne Heroes' Spider-Man, 
   cocoons for 3 s; 30 s cooldown.
 - Numbers: web shot 2-14 damage (symbiote 3-22), pellets 3 (4), shot cooldown 30-100, zip 40, Yank 80;
   Yank and entity webs drag bigger things (horses now); Spider-Sense charges 2/2/3/4/5, 7 ascended, 15 s recharge.
+
+## 0.10.29: parkour (`WebParkour`, `WebParkourClient`, `WebParkourPose`)
+Andy asked for ParCool's moves on Web (ParCool is Forge/NeoForge only and stops at 1.21.8; LGPL, but this is our own
+code). No keys of their own:
+- **Vault:** sprint into a one-block obstacle with room above it: a hand planted on it, legs swung over
+  (`VAULT_UP` 0.5, `VAULT_FORWARD` 0.42). Fences (1.5 high) and two-high walls don't count.
+- **Wall cling:** in the air, facing a wall, hold Sneak: you hang on it. A/D shimmies along (`CLING_SHIMMY`), let go of
+  Sneak to drop. You hold for `CLING_HOLD_TICKS` by tier (2 s to 10 s ascended), then slip (`CLING_SLIP`). The server
+  lets a cling float (`WebPower.allowsFloating`) and it never counts as a fall.
+- **Wall jump:** in the air against a wall (front or side), or from a cling, Jump kicks you up and away
+  (`WALL_JUMP_UP` by tier, `WALL_JUMP_OUT`). From a cling with W held you climb instead (more up, `CLIMB_OUT` out), so
+  cling, jump, cling again scales a wall. Each wall face once until you land; two facing walls chain like a chimney.
+- **Slide:** sprinting, press Sneak: a fast low slide (`SLIDE_BOOST`, decays by `SLIDE_KEEP`, at most `SLIDE_TICKS`).
+  Let go of Sneak to stand; Jump out of it keeps the speed. The hitbox stays crouch-height (no sliding under one-block
+  gaps; the double-tap crawl does that).
+None of them run during a web, zip, the wings, a wall run, a takeover or the symbiote's wall crawl.
+
+## 0.10.53: lines with weight (`WebLineShape`, `WebHeft`)
+Andy linked Advanced Hook Launchers and asked to adapt its line and behaviours. That mod is CC BY-ND 4.0 (no
+derivatives) and has no public source, so nothing was ported: these are our own takes on its ideas.
+- **Living lines (client, `WebLineShape`, `WebRopeSim`):** once stuck, every web line is a simulated verlet rope
+  (a point every `POINT_SPACING` 0.8 blocks, 10-48 points, `GRAVITY` 0.05, `ITERATIONS` 14) pinned at the hand and
+  the anchor: slack line hangs, swings and bounces when it's caught taut, drapes over edges and lies on the ground
+  instead of passing through blocks (collision shapes, `FRICTION` 0.5). Looks only: the swing still pulls straight
+  at the anchor. Andy also linked Enchanted Fishing Line (ARR, client-only); this is our own rope after its idea. A
+  web snakes out through the air as it shoots (`WAVE_*`); it twangs when it sticks (`TWANG_*`); a line stretched
+  past its length hums and thins (`HUM_*`, `STRETCH_THIN`). The symbiote's corded ropes follow the same shape. Everyone sees the same rope: each
+  swinger's game sends its rope length when it changes by 0.3 blocks (`WebNet.Rope` into the synced `WebPower.ROPE` /
+  `ROPE_OFF`), and the Yank lead is always 3 blocks.
+- **Weight (`WebHeft`):** a catch's weight is its bounding-box volume against how much you can haul
+  (`YANK_HEAVY_VOLUME` 4, ×1.5 in the suit, ×2 in Living Armor). Over it, you're hauled to it as before. Several
+  slingers holding the same catch on their Yank lines add up, so friends can drag in what one can't. A catch over
+  `RECOIL_FROM` (35%) of your strength jerks you toward it as it comes in, and held on the lead it fights back (the
+  line pulls it more weakly and drags you along when it pulls away).
+- **Plucks riders:** Yank on a rider pulls them off their mount; aimed at a ridden mount, the web takes the rider.
+- **Rips out torches, lanterns and bells:** B aimed at one tears it off and it flies back to you (as a block break, so
+  protection and Kingdoms' crime rules apply; `RIP_COOLDOWN` 1 s).
+- **Burns:** a swing web or Yank lead running through fire, lava or a lit campfire, or stuck to a burning creature,
+  burns through and lets go (checked every `BURN_EVERY` 5 ticks).

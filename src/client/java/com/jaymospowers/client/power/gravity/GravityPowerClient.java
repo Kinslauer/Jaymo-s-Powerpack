@@ -58,7 +58,7 @@ public final class GravityPowerClient implements PowerClient {
 			}
 			// straining to tear a block loose: the view shudders
 			if (player.getAttached(GravityPower.RIPPING) != null && player.tickCount % 3 == 0) {
-				com.jaymospowers.client.power.web.WebShake.start(0.35F);
+				com.jaymospowers.client.ScreenShake.add(0.35F);
 			}
 			GravityRockFlightClient.tick(minecraft, player);
 			GravityForwardClient.tick(player);
