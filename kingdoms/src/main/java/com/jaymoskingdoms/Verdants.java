@@ -22,7 +22,7 @@ import net.minecraft.world.entity.npc.villager.Villager;
  */
 public final class Verdants {
 	/** Jaymo's Powers' Verdant World. */
-	static final Identifier WORLD = Identifier.fromNamespaceAndPath("jaymospowers", "verdant_world");
+	public static final Identifier WORLD = Identifier.fromNamespaceAndPath("jaymospowers", "verdant_world");
 	/** Greens from the palest (shade 0) to the deepest (shade 1), and how far a shade leans yellow or blue. */
 	static final int PALE = 0xA6DE86, DEEP = 0x2F6E2A;
 	static final int LEAN = 26;

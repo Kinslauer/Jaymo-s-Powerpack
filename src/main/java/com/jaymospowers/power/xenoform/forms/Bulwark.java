@@ -110,6 +110,7 @@ public final class Bulwark extends XenoForm {
 					live.leaping = true;
 					live.leapTicks = 0;
 					sound(player, SoundEvents.IRON_GOLEM_ATTACK, 1.0F, 0.6F);
+					com.jaymospowers.core.Shakes.send(player, 0.5F, player.position());
 					cooldown(player, live, B, SLAM_COOLDOWN);
 				}
 			}
@@ -247,6 +248,7 @@ public final class Bulwark extends XenoForm {
 			shove(target, player.position(), 1.2, 0.5);
 			sound(player, SoundEvents.PLAYER_ATTACK_KNOCKBACK, 1.0F, 0.6F);
 			burst(level, ParticleTypes.CRIT, target.getBoundingBox().getCenter(), 12, 0.4, 0.3);
+			com.jaymospowers.core.Shakes.heavy(player, target.getBoundingBox().getCenter(), 10.0, 1.0F);
 		} else {
 			shove(target, player.position(), 0.25, 0.1);
 			sound(player, SoundEvents.IRON_GOLEM_ATTACK, 0.8F, 1.0F);

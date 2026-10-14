@@ -99,6 +99,7 @@ final class ResonancePulse {
 		float pitch = ResonancePower.pitch(tune);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 1.0F, pitch);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.2F, pitch);
+		com.jaymospowers.core.Shakes.heavy(player, eye.add(look.scale(2.0)), range, 0.7F);
 
 		if (Fate.isCorrupted(player)) {
 			BlockHitResult hit = level.clip(new ClipContext(eye, eye.add(look.scale(range)), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));

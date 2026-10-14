@@ -257,6 +257,7 @@ public final class WindKick {
 				}
 				if (--c.delay == 0) {
 					snap(level, c);
+					com.jaymospowers.core.Shakes.around(level, c.pos, 10.0, 0.7F);
 				}
 				continue;
 			}

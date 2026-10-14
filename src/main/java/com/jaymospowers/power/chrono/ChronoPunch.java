@@ -127,6 +127,7 @@ final class ChronoPunch {
 			SoundSource.PLAYERS, last ? 1.2F : 0.7F, pitch);
 		if (last) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.2F, 0.6F);
+			com.jaymospowers.core.Shakes.send(player, 0.9F);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 0.8F, 1.5F);
 		}
 	}

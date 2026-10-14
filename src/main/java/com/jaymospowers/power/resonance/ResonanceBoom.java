@@ -88,6 +88,7 @@ final class ResonanceBoom {
 			Vec3 at = eye.add(look.scale(i));
 			level.sendParticles(ParticleTypes.SONIC_BOOM, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		}
+		com.jaymospowers.core.Shakes.heavy(player, eye.add(look.scale(2.0)), RANGE, 1.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 3.0F, 1.0F);
 		List<LivingEntity> hits = level.getEntitiesOfClass(LivingEntity.class, new AABB(eye, end).inflate(BEAM_WIDTH + 1.0),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand));
@@ -119,6 +120,7 @@ final class ResonanceBoom {
 		}
 		ResonanceEcho.send(player, heard, SHRIEK_TICKS, ResonanceNet.Sense.HEARTBEAT);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SCULK_SHRIEKER_SHRIEK, SoundSource.PLAYERS, 2.0F, 0.9F);
+		com.jaymospowers.core.Shakes.heavy(player, player.position(), SHRIEK_RADIUS, 0.9F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 1.5F, 0.8F);
 		for (int i = 0; i < 10; i++) {
 			level.sendParticles(new ShriekParticleOption(i * 5), player.getX(), player.getEyeY() + 0.2, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);

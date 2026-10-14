@@ -319,6 +319,7 @@ public final class RelicWeapons {
 				level.sendParticles(ParticleTypes.SONIC_BOOM, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 			}
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 2.0F, 1.0F);
+			com.jaymospowers.core.Shakes.heavy(player, player.getEyePosition().add(dir.scale(2.0)), BOOM_RANGE, 1.3F);
 			return BOOM_COOLDOWN;
 		}
 

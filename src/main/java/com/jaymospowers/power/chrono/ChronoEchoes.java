@@ -401,6 +401,7 @@ public final class ChronoEchoes {
 		ChronoFx.particles(level, player, ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 1.0, player.getZ(), 120, 0.6, 1.2, 0.6, 0.6);
 		level.playSound(null, x, y, z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.HOSTILE, 2.0F, 0.5F);
 		level.playSound(null, x, y, z, SoundEvents.END_PORTAL_SPAWN, SoundSource.HOSTILE, 1.5F, 0.6F);
+		com.jaymospowers.core.Shakes.around(level, new net.minecraft.world.phys.Vec3(x, y, z), 24.0, 1.8F);
 		player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.BLINDNESS, 30, 0), player);
 		player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.DARKNESS, 140, 0), player);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.chrono_echo_unravelled").withStyle(ChatFormatting.DARK_PURPLE));
