@@ -24,6 +24,7 @@ import org.jspecify.annotations.Nullable;
  * <li>G, Vapour Form ({@link SmokeVapour}): you turn to smoke for a few seconds; blows pass through you.</li>
  * <li>V, Smoke Bomb ({@link SmokeBomb}): a thrown ball that bursts into a cloud.</li>
  * <li>B (hold), Smother ({@link SmokeSmother}): smoke wraps whoever you aim at; they're blinded, slowed and choke.</li>
+ * <li>X (hold), Smoke Jet ({@link SmokeJet}): a jet of smoke where you look; it fills a ship's sails.</li>
  * </ul>
  * You see through your own smoke (the client draws it faint and doesn't grey your view in it). The way in is a calling
  * ({@code core/Callings}): breathe the smoke of a fire (3 burning blocks or lit campfires round you) for a minute.
@@ -56,17 +57,20 @@ public final class SmokePower implements Power {
 		SmokeField.init();
 		SmokeVapour.init();
 		SmokeBomb.init();
+		SmokeJet.init();
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			SmokeScreen.clear();
 			SmokeSmother.clear();
 			SmokeBomb.clear();
+			SmokeJet.clear();
 		});
 	}
 
 	private static void forget(ServerPlayer player) {
 		SmokeScreen.stop(player, false);
 		SmokeSmother.stop(player, false);
+		SmokeJet.stop(player);
 		SmokeField.forget(player);
 		SmokeHeat.forget(player);
 	}
@@ -98,10 +102,10 @@ public final class SmokePower implements Power {
 		return PowerKey.ABILITY_1;
 	}
 
-	/** Nothing on Z or X yet. */
+	/** Nothing on Z yet; X (held) is the Smoke Jet ({@link SmokeJet}). */
 	@Override
 	public boolean slotUnlocked(Player player, String slot) {
-		return false;
+		return "special".equals(slot);
 	}
 
 	@Override
@@ -121,6 +125,7 @@ public final class SmokePower implements Power {
 		SmokeScreen.tick(player);
 		SmokeVapour.tick(player);
 		SmokeSmother.tick(player);
+		SmokeJet.tick(player);
 	}
 
 	@Override

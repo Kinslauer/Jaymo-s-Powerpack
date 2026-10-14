@@ -40,6 +40,7 @@ public final class SmokePowerClient implements PowerClient {
 	public static void init() {
 		PowerClients.register(SmokePower.ID, INSTANCE);
 		SmokeFieldClient.init();
+		SmokeJetClient.init();
 	}
 
 	@Override

@@ -446,6 +446,11 @@ public final class Ship extends Entity {
 					0.8F + this.random.nextFloat() * 0.2F);
 			}
 		}
+		// (0.7.18) a Wind user's gale or a Smoke user's jet in her sails
+		double blown = Jets.blown(level, this, h, this.sail);
+		if (blown != 0.0) {
+			wanted = Mth.clamp(wanted + blown, -FASTEST, FASTEST);
+		}
 		this.fireVolley(level, h);
 		this.speed += (wanted - this.speed) * GATHER;
 		if (Math.abs(this.speed) < 1.0E-4) {

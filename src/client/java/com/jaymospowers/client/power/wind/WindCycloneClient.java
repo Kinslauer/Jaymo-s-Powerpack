@@ -2,6 +2,7 @@ package com.jaymospowers.client.power.wind;
 
 import com.jaymospowers.power.web.WebSymbiote;
 import com.jaymospowers.power.wind.WindCyclone;
+import com.jaymospowers.power.wind.WindJet;
 import com.jaymospowers.power.wind.WindKick;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +19,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The X key for a wind user: a tap is the Tempest Kick, a hold of {@link WindCyclone#HOLD_TICKS} the Cyclone, kept
- * for as long as it's held. X is registered by the symbiote's menu (the same key); for a wind user its presses are
+ * for as long as it's held; pressed while sneaking, the Gale Stream ({@link WindJet}) for as long as it's held. X is
+ * registered by the symbiote's menu (the same key); for a wind user its presses are
  * taken here, at the start of the tick, before the symbiote's handler would see them. Also the roar of every
  * Cyclone in view.
  */
@@ -36,7 +38,9 @@ final class WindCycloneClient {
 		/** Held into a Cyclone (asked the server for one). */
 		HOLDING,
 		/** Held past the threshold with no Cyclone to give; the release does nothing. */
-		SPENT
+		SPENT,
+		/** Pressed while sneaking: the Gale Stream, for as long as it's held. */
+		STREAM
 	}
 
 	private static @Nullable KeyMapping key;
@@ -116,7 +120,12 @@ final class WindCycloneClient {
 		boolean down = mapping.isDown() && minecraft.gui.screen() == null && !player.isSpectator();
 		switch (phase) {
 			case IDLE -> {
-				if (down) {
+				if (down && player.isShiftKeyDown()) {
+					ClientPlayNetworking.send(new WindJet.Hold(true));
+					phase = Phase.STREAM;
+				} else if (pressed && player.isShiftKeyDown()) {
+					// a sneaking tap: no stream, and no kick either
+				} else if (down) {
 					phase = Phase.PRESSING;
 					heldTicks = 0;
 				} else if (pressed && minecraft.gui.screen() == null && !player.isSpectator()) {
@@ -150,6 +159,12 @@ final class WindCycloneClient {
 			}
 			case SPENT -> {
 				if (!down) {
+					phase = Phase.IDLE;
+				}
+			}
+			case STREAM -> {
+				if (!down) {
+					ClientPlayNetworking.send(new WindJet.Hold(false));
 					phase = Phase.IDLE;
 				}
 			}

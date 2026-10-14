@@ -23,7 +23,10 @@ import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -32,8 +35,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.7.18) A ship's gun's round shot: an iron ball that arcs out over the water and holes whatever ship it meets (the
  * planks round where it strikes are smashed out, sails it passes through are torn: {@link Ship#struck}), and hurts
- * everyone near where it lands. It splashes into the sea and thuds into land: blocks in the world are left whole. Never
- * saved.
+ * everyone near where it lands. It splashes into the sea, and smashes a hole in whatever it hits on land ({@link #breach}).
+ * Never saved.
  */
 public final class ShipShot extends Projectile implements ItemSupplier {
 	/** How fast it leaves the barrel and how fast it falls (blocks per tick, per tick), and how long it flies at most. */
@@ -42,6 +45,9 @@ public final class ShipShot extends Projectile implements ItemSupplier {
 	/** Its blow on whoever it hits, falling off to {@link #BURST_SHARE} at {@link #BURST_RADIUS}. */
 	static final float DAMAGE = 16.0F, BURST_SHARE = 0.3F;
 	static final double BURST_RADIUS = 2.0, KNOCKBACK = 0.8;
+	/** (0.7.18) How far round where it strikes land it smashes blocks out, what holds against it, and the share left as items. */
+	static final double BREACH_RADIUS = 1.6;
+	static final float TOUGHEST = 1200.0F, RUBBLE = 0.3F;
 	/** How finely its flight is tested against ships (blocks). */
 	static final double STEP = 0.25;
 
@@ -121,7 +127,9 @@ public final class ShipShot extends Projectile implements ItemSupplier {
 			this.burst(level, gunner, entityHit.getLocation(), entityHit.getEntity());
 			return;
 		}
-		if (hit.getType() != HitResult.Type.MISS) {
+		if (hit instanceof BlockHitResult blockHit && hit.getType() == HitResult.Type.BLOCK) {
+			// it smashes into what it hits: no mercy
+			this.breach(level, gunner, blockHit.getBlockPos(), hit.getLocation());
 			this.burst(level, gunner, hit.getLocation(), null);
 			return;
 		}
@@ -135,6 +143,25 @@ public final class ShipShot extends Projectile implements ItemSupplier {
 		this.setPos(next);
 		this.setDeltaMovement(move.add(0.0, -GRAVITY, 0.0));
 		level.sendParticles(ParticleTypes.SMOKE, this.getX(), this.getY(), this.getZ(), 1, 0.03, 0.03, 0.03, 0.0);
+	}
+
+	/**
+	 * (0.7.18) Smashes the blocks round where it struck land: everything within {@link #BREACH_RADIUS} that can be broken
+	 * at all and is softer than {@link #TOUGHEST} (obsidian and its like hold), some of it left as rubble to pick up.
+	 */
+	private void breach(ServerLevel level, @Nullable Entity gunner, BlockPos struck, Vec3 at) {
+		double r2 = BREACH_RADIUS * BREACH_RADIUS;
+		int r = (int)Math.ceil(BREACH_RADIUS);
+		for (BlockPos pos : BlockPos.betweenClosed(struck.offset(-r, -r, -r), struck.offset(r, r, r))) {
+			if (!pos.equals(struck) && Vec3.atCenterOf(pos).distanceToSqr(at) > r2) {
+				continue;
+			}
+			BlockState state = level.getBlockState(pos);
+			if (state.isAir() || state.getBlock() instanceof LiquidBlock || state.getDestroySpeed(level, pos) < 0.0F || state.getBlock().getExplosionResistance() >= TOUGHEST) {
+				continue;
+			}
+			level.destroyBlock(pos, this.random.nextFloat() < RUBBLE, gunner != null ? gunner : this);
+		}
 	}
 
 	private void burst(ServerLevel level, @Nullable Entity gunner, Vec3 at, @Nullable Entity direct) {

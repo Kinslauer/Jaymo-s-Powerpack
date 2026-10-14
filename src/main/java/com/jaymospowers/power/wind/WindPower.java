@@ -117,6 +117,7 @@ public final class WindPower implements Power {
 		WindDagger.register();
 		WindKick.init();
 		WindCyclone.init();
+		WindJet.init();
 		WindDebug.register();
 		ServerPlayNetworking.registerGlobalReceiver(WindNet.Flight.TYPE, (payload, ctx) -> INSTANCE.onFlightPacket(ctx.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(WindNet.Impact.TYPE, (payload, ctx) -> INSTANCE.onImpact(ctx.player(), payload));
@@ -212,6 +213,7 @@ public final class WindPower implements Power {
 	@Override
 	public void onLost(ServerPlayer player) {
 		WindCyclone.stop(player);
+		WindJet.stop(player);
 		player.removeTag(KINGDOMS_TAG);
 		forgetLance(player);
 		State s = this.states.remove(player.getUUID());
@@ -436,6 +438,7 @@ public final class WindPower implements Power {
 		player.addTag(KINGDOMS_TAG);
 		ServerLevel level = player.level();
 		blowShieldAway(player, level);
+		WindJet.tick(player);
 		boolean statusDirty = !s.synced;
 		s.synced = true;
 		for (int i = 0; i < s.cooldowns.length; i++) {

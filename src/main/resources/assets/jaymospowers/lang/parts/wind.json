@@ -42,8 +42,8 @@
 	"message.jaymospowers.wind.no_eating": "The storm won't sit still long enough to eat.",
 	"message.jaymospowers.wind.cured_days": "Three days on, the storm in you has blown itself out.",
 	"message.jaymospowers.wind.cured_snow": "The snow smothers the storm in you. The static is gone.",
-	"power.jaymospowers.wind.key.special": "Tap: Tempest Kick (everything mastered), a crescent of wind, 5 blocks. Hold on the ground: Cyclone, whirls everything up and flings it away",
-	"power.jaymospowers.wind.key.special.name": "Tempest Kick / Cyclone",
+	"power.jaymospowers.wind.key.special": "Tap: Tempest Kick (everything mastered), a crescent of wind, 5 blocks. Hold on the ground: Cyclone, whirls everything up and flings it away. Sneak + hold: Gale Stream, a stream of wind where you look (18 blocks) that blows out fire, clears smoke and fills a ship's sails",
+	"power.jaymospowers.wind.key.special.name": "Tempest Kick / Cyclone / Gale Stream",
 	"hud.jaymospowers.wind.cyclone": "Cyclone",
 	"hud.jaymospowers.wind.cyclone.fire": "Fire Tornado",
 	"hud.jaymospowers.wind.cyclone.water": "Waterspout",
@@ -66,10 +66,10 @@
 	"power.jaymospowers.wind.key.mode.corrupted.name": "Stormbound Mode",
 	"power.jaymospowers.wind.key.mode.ascended_corrupted": "Thunderhead mode on/off: Tempest and Stormbound at once (costs hunger)",
 	"power.jaymospowers.wind.key.mode.ascended_corrupted.name": "Thunderhead Mode",
-	"power.jaymospowers.wind.key.special.ascended": "Tap: Tempest Kick (everything mastered), a crescent of wind, 20 blocks. Hold on the ground: a faster, harder Cyclone",
-	"power.jaymospowers.wind.key.special.ascended.name": "Tempest Kick / Cyclone",
-	"power.jaymospowers.wind.key.special.corrupted": "Tap: Tempest Kick (everything mastered), 5 blocks. Hold on the ground: a sparking Cyclone that shocks and burns",
-	"power.jaymospowers.wind.key.special.corrupted.name": "Tempest Kick / Cyclone",
-	"power.jaymospowers.wind.key.special.ascended_corrupted": "Tap: Tempest Kick (everything mastered), 20 blocks. Hold on the ground: a sparking Cyclone that shocks and burns",
-	"power.jaymospowers.wind.key.special.ascended_corrupted.name": "Tempest Kick / Cyclone"
+	"power.jaymospowers.wind.key.special.ascended": "Tap: Tempest Kick (everything mastered), a crescent of wind, 20 blocks. Hold on the ground: a faster, harder Cyclone. Sneak + hold: Gale Stream, a stream of wind where you look (18 blocks) that blows out fire, clears smoke and fills a ship's sails",
+	"power.jaymospowers.wind.key.special.ascended.name": "Tempest Kick / Cyclone / Gale Stream",
+	"power.jaymospowers.wind.key.special.corrupted": "Tap: Tempest Kick (everything mastered), 5 blocks. Hold on the ground: a sparking Cyclone that shocks and burns. Sneak + hold: Gale Stream, a stream of wind where you look (18 blocks) that blows out fire, clears smoke and fills a ship's sails",
+	"power.jaymospowers.wind.key.special.corrupted.name": "Tempest Kick / Cyclone / Gale Stream",
+	"power.jaymospowers.wind.key.special.ascended_corrupted": "Tap: Tempest Kick (everything mastered), 20 blocks. Hold on the ground: a sparking Cyclone that shocks and burns. Sneak + hold: Gale Stream, a stream of wind where you look (18 blocks) that blows out fire, clears smoke and fills a ship's sails",
+	"power.jaymospowers.wind.key.special.ascended_corrupted.name": "Tempest Kick / Cyclone / Gale Stream"
 }
