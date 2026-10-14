@@ -1068,3 +1068,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   awaits its CurseForge id (`packModsNoCf`). Particular stops at 1.21.4, so `client/Ambience` remakes its ideas from
   vanilla particles and sounds: spray, mist and a rumble where waterfalls land, fireflies over flowers and grass in warm
   biomes at night, dust deep in dark caves, splashes sized to what fell in, and a quiet clink of armour as people walk.
+- **0.10.51, flight never outruns the terrain:** fast flight (any power, elytra, a ridden mount) looks a second ahead
+  each move; where the chunks haven't arrived or haven't been drawn yet it slows to a speed that reaches them no sooner
+  than they're ready, with a "terrain loading" note, and picks up again as they load (`client/TerrainAhead`). Before,
+  players flew into land the game hadn't shown and stuck on invisible blocks. Chunky is back to pre-generate the world
+  from the server console, so most of the map loads from disk instead of being generated under a flyer.
