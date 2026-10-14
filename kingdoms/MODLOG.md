@@ -2603,3 +2603,21 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   down a tornado only one time in ten (`Storms.TORNADO_SUPERCELLS`): about one tornado every 60 days, down from every
   6. The others still storm, with lightning. Dust devils, and the op commands (`/kingdom disaster supercell|tornado`),
   are unchanged.
+
+## 0.7.4: sailing, stage 1: ships built from blocks (pack 0.10.32)
+- Andy: "i want sailing" (Valkyrien Skies, Eureka and Valkyrien Pirates stop at 1.20.1; Haubna's are ARR), so our own.
+  Plan: `/mnt/project-files/sailing/Sailing-Plan.md` (stage 2 naval combat, stage 3 pirates and navies, later).
+- **Helm** (`HelmBlock`; planks, a compass and iron) and **sail** (`SailBlock`; wool and a stick, makes 4). Build a hull
+  of any blocks on water, put a helm on it and right-click: everything joined to the helm (not the sea, not the land)
+  casts off as one `Ship` entity, up to 3000 blocks and 64 long. Joined to the land, or aground, it won't go.
+- **Buoyancy** (`Hull`): every block weighs by its material (cloth, wood, glass, stone, metal, gold) and the shape it
+  fills; dry rooms enclosed by the hull, layer by layer, float it too. It settles to the depth where it displaces its
+  own weight, and too heavy a hull won't cast off at all. The sea inside the hold is masked out (no water drawn there,
+  no swimming in it).
+- **Sailing**: W/S set and furl the sails, A/D the rudder; S with sails furled backs water. Top speed grows with sails
+  and length (8 blocks/s at most); long ships turn slower, and slower at low speed. It stops against land and blocks,
+  heels in turns and rolls on the swell (more in storms). Everyone and everything on deck rides along and can walk it.
+- **Anchoring**: sneak at the helm of a ship lying still and it swings to the nearest straight heading and goes back
+  into the world as blocks, a block or two off if it must, chests and their contents with it; under way, sneaking leaves
+  the helm and it drifts with its sails furling. With no one aboard it anchors itself after 5 s.
+- Chests (any 1-6 row container) open aboard while sailing; other block entities wait for the anchor.

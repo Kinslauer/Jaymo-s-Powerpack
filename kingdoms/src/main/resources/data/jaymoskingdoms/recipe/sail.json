@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "S": "minecraft:stick",
+    "W": "#minecraft:wool"
+  },
+  "pattern": [
+    " S ",
+    "WWW",
+    "WWW"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:sail",
+    "count": 4
+  }
+}

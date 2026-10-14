@@ -1,0 +1,18 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jaymoskingdoms:block/sail"
+    },
+    "facing=east": {
+      "model": "jaymoskingdoms:block/sail",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jaymoskingdoms:block/sail"
+    },
+    "facing=west": {
+      "model": "jaymoskingdoms:block/sail",
+      "y": 90
+    }
+  }
+}
