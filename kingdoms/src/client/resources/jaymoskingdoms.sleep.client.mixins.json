@@ -1,0 +1,7 @@
+{
+	"required": true,
+	"package": "com.jaymoskingdoms.client.mixin.sleep",
+	"compatibilityLevel": "JAVA_25",
+	"client": ["HudSleepMixin", "InBedChatScreenMixin"],
+	"injectors": { "defaultRequire": 1 }
+}

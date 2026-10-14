@@ -2422,5 +2422,7 @@
 	"quest.jaymoskingdoms.cure.wolf.title": "The Old Rite: The Wolf's Price",
 	"quest.jaymoskingdoms.cure.wolf.text": "The moon has its claws in you. I know the rite that can break its hold, but the curse wants a life in return. Slay %s of the %s, one of the cursed in its beast shape, and come back to me. Then the moon will lose its grip on you.",
 	"quest.jaymoskingdoms.foes.vampire": "Vampires",
-	"quest.jaymoskingdoms.foes.werewolf": "Cursed Beasts"
+	"quest.jaymoskingdoms.foes.werewolf": "Cursed Beasts",
+	"message.jaymoskingdoms.bed_rest": "You lie down to rest. Poison and withering can't hurt you here.",
+	"gui.jaymoskingdoms.bed_rest_sleep": "Sleep"
 }

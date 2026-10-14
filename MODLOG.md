@@ -988,3 +988,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   a wall phases you through it (up to 4 blocks). See docs/chrono.md.
 - **0.10.28 / Kingdoms 0.7.3, Shield Throw:** a Strength Combat Arts perk (3 ranks): Y with a shield hurls it; it
   ricochets between foes and comes back. Relic shields always come home; a plain one drops where a wall stops it.
+- **0.10.33 / Kingdoms 0.7.4, timelapse night and bed rest:** our own take on Sleeping Overhaul 2 (Forge only): the
+  night runs by as a timelapse instead of skipping, leave bed any time, and rest in bed awake by day or sneaking (immune
+  to poison and withering), with a Sleep button at night. See kingdoms/MODLOG.md.

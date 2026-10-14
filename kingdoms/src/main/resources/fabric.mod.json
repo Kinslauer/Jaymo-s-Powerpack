@@ -23,10 +23,12 @@
 		"jaymoskingdoms.weaponmod.mixins.json",
 		"jaymoskingdoms.moons.mixins.json",
 		"jaymoskingdoms.disasters.mixins.json",
+		"jaymoskingdoms.sleep.mixins.json",
 		{ "config": "jaymoskingdoms.combat.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.mca.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.equestrian.client.mixins.json", "environment": "client" },
-		{ "config": "jaymoskingdoms.moons.client.mixins.json", "environment": "client" }
+		{ "config": "jaymoskingdoms.moons.client.mixins.json", "environment": "client" },
+		{ "config": "jaymoskingdoms.sleep.client.mixins.json", "environment": "client" }
 	],
 	"depends": {
 		"fabricloader": ">=0.19.5",
