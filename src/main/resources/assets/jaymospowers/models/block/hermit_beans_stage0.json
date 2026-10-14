@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/crop",
+  "textures": {
+    "crop": "jaymospowers:block/hermit_beans_stage0"
+  }
+}

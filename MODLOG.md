@@ -893,3 +893,41 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.10.12, jump cuts a zip, dive slam:** pressing Jump at any point of a Web Zip (or Yank-to) lets go of the line,
   keeping the speed it gave you. Coming down straight out of the wings' freedive lands in a superhero landing that
   breaks the ground and hurls everything near. See docs/web.md.
+- **0.10.13, Z Fighter (Andy's idea, our own take; no Dragon Ball mod code or art):** a martial artist who fights
+  with fists and ki (`power/zfighter`, `docs/Abilities.md`). Ki meter (100, +5 per foe that ever beat him) charged on
+  R (hold), spent on Ki Blast (G), Ki Wave (V hold), Flash Step (B) and ki flight (Z, creative-style, drains ki).
+  Fists only: a weapon won't strike in his hand (`ZFighterPlayerMixin` on `Player.attack`); strong fists, 5-hit
+  combos with a finisher, ki from punches and from eating. Eats a lot (constant exhaustion, more for everything).
+  No foe fells him twice: whatever kills him (kind of creature, or player) is saved in `zfighter_defeats` and does
+  50% less to him and takes 50% more from him (`ZFighterLivingEntityMixin`), and each new victor raises his ki and
+  fists. Super is the ascension, through hardship (`zfighter_hardship`: clutch recoveries, defeats, rematches, great
+  beasts; 40, everything mastered, near death mid-fight): he breaks through and goes Super; then C toggles it (gold
+  aura, fists +60%, ki x1.5, faster; burns ki and food). Calling: 20 monsters killed with bare fists while powerless.
+  No corruption yet. `/powerdebug zfighter ready|hardship <n>|foes [clear]|tp <n>|mastery <form> <percent>`.
+  Andy's follow-ups (same release): the 50% edge lasts only for the rematch (`zfighter_grudges`; killing that foe settles
+  it, the growth stays). Training after DragonMineZ's idea, our own build (`ZFighterTraining`, X opens the screen):
+  Training Points from blows, kills, time, walking and meditation buy 5 stats; forms Super 2 and Super 3 bought with TP,
+  25% mastery of the form below and hardship; per-form mastery (25% next form, 50% free entry, up to +15% power and
+  -25% drain); C up a form, sneak+C down one; Limit Break (3 tiers, sneak+X) stacks on a form and burns health.
+  Andy's "add all of it" (stage 1, same release): Rage before the first Super (`ZFighterBattle.rage`); techniques bought
+  with TP and set on G/V from the training screen's Techniques page (Ki Disc, Homing Volley, Solar Flash, Ki Barrier,
+  Ki Bomb; `ZFighterKi`, `ZFighterTechniques`); the Spirit Bomb past Super 3 (hold C in Super 3; gathers from living
+  things within 48, hurts only foes, 3 min); Hermit Beans (crop, jungle temples) and Training Weights (`ZFighterItems`);
+  Z Fighters within 32 share a quarter of each other's TP. Flight rebuilt Wind-style (Andy): hold Z and scroll to take
+  off and step through 5 arm poses (`ZFighterFlightClient`, `ZFighterFlightPose`, synced `zfighter_flight`), ki only,
+  charging works in the air; `WindPose` lays him out at cruise speed but leaves his arms to his pose.
+  Stage 2, gravity training: Gravity's Z is now the Training Field (`GravityTrainingField`), a minute-long dome of heavy
+  gravity where they aim; a Z Fighter in it, or under a Well's pull or Crush's pin (`GravityPower.KNEEL`), trains 2x
+  and his blows count as heavy for mastery; the Gravity user earns a mastery use per minute a Z Fighter trains there.
+  Stage 3, training activities: the Sparring Dummy (`ZFighterSparring`: a vanilla mannequin wearing your skin, driven
+  from the server; it never kills you, yields for a TP prize) and the Training Post block with four client-side drills
+  (`ZFighterDrillScreen`, paid by `ZFighterDrills` with a per-drill rest).
+  Stage 4, lineages (`ZFighterLineage`, picked once on the training screen; a Writ of Rebirth read while sneaking unmakes
+  it): Earthling (TP 1.25x, Limit Break half price and half burn), Warrior-born (tail drawn by `ZFighterTail`, sneak+Z
+  wraps it; defeats count double; out under a full moon with the tail out he's the Great Ape: 3x size, +100% fists,
+  +40 health, a mouth beam on V, no techniques, forms or flight until the moon goes), Verdant (regenerates, +1.5 reach,
+  Giant/Great Giant/Titan forms that grow him instead of Super, sneak+B heals the one you look at) and Frost-born (Second
+  and Final forms free to hold, then Golden). Each lineage has its own aura colours.
+  Andy's follow-up: the guard and parry (`ZFighterGuard`: right click held bare-handed, half off frontal blows for ki,
+  a parry in the first 6 ticks staggers the attacker and makes the next punch a counter; crossed arms drawn by
+  `ZFighterGuardPose`), and Web and Gravity's F5 shoulder view (`ShoulderCamera.active`).

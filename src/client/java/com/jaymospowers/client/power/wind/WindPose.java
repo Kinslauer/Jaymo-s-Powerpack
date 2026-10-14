@@ -218,6 +218,10 @@ public final class WindPose {
 		if (com.jaymospowers.client.power.xenoform.XenoformFlightPose.cruising(player)) {
 			return true;
 		}
+		// and a Z Fighter at speed (his arms keep the pose he chose: ZFighterFlightPose)
+		if (com.jaymospowers.client.power.zfighter.ZFighterFlightPose.cruising(player)) {
+			return true;
+		}
 		if (player == minecraft.player) {
 			return WindPowerClient.INSTANCE.flight().state().fast() && WindPowerClient.isActive(minecraft.player);
 		}
@@ -525,7 +529,8 @@ public final class WindPose {
 		// carrying someone, the arms are busy with the hold (see CarryPose)
 		boolean armsFree = avatar.getData(com.jaymospowers.client.CarryPose.CARRIER_KEY) == null
 			// Pyre flies on its hands too: they stay back as jets (XenoformFlightPose)
-			&& !com.jaymospowers.client.power.xenoform.XenoformFlightPose.handsAsJets(avatar);
+			&& !com.jaymospowers.client.power.xenoform.XenoformFlightPose.handsAsJets(avatar)
+			&& !com.jaymospowers.client.power.zfighter.ZFighterFlightPose.ownsArms(avatar);
 		// head up to look along the flight
 		pose(humanoid.head, -1.15F, 0.0F, 0.0F, amount);
 		ModelPart lead = avatar.mainArm == HumanoidArm.LEFT ? humanoid.leftArm : humanoid.rightArm;

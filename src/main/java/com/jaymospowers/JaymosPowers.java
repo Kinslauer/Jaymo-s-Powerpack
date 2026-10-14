@@ -37,6 +37,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.power.resonance.ResonancePower.init();
 		com.jaymospowers.power.darktide.DarktidePower.init();
 		com.jaymospowers.power.xenoform.XenoformPower.init();
+		com.jaymospowers.power.zfighter.ZFighterPower.init();
 		// weapons from the Stone Age to the pirates (after Age of Weapons), not a power
 		com.jaymospowers.armory.Armory.init();
 		com.jaymospowers.tinkering.Tinkering.init();
@@ -63,6 +64,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.resonance.ResonancePower", "power.resonance.ResonanceHush",
 			"power.darktide.DarktideState",
 			"power.xenoform.XenoformState",
+			"power.zfighter.ZFighterPower", "power.zfighter.ZFighterTraining", "power.zfighter.ZFighterLineage", "power.zfighter.ZFighterGuard",
 		};
 		for (String holder : holders) {
 			try {

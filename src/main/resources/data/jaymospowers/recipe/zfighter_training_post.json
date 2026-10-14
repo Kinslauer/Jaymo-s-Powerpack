@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "L": "minecraft:stripped_oak_log",
+    "H": "minecraft:hay_block",
+    "S": "minecraft:stick"
+  },
+  "pattern": [
+    "SLS",
+    " H ",
+    " L "
+  ],
+  "result": {
+    "id": "jaymospowers:training_post"
+  }
+}
