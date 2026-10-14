@@ -168,6 +168,9 @@ public final class ZFighterPower implements Power {
 	/** How he's flying, for everyone's client: 0 (or absent) not, 1-{@link #FLIGHT_POSES} the pose his arms hold. */
 	public static final AttachmentType<Integer> FLIGHT = AttachmentRegistry.create(JaymosPowers.id("zfighter_flight"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+	/** Charging ki right now, for everyone's client (the stance): the form he's in plus one; absent when he isn't. */
+	public static final AttachmentType<Integer> CHARGE = AttachmentRegistry.create(JaymosPowers.id("zfighter_charge"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 	/** Hardship lived through (the road to Super). Saved, kept through death. */
 	public static final AttachmentType<Integer> HARDSHIP = AttachmentRegistry.create(JaymosPowers.id("zfighter_hardship"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath());
@@ -322,6 +325,7 @@ public final class ZFighterPower implements Power {
 		player.removeAttached(ZFighterLineage.GREAT_APE);
 		player.removeAttached(STATE);
 		player.removeAttached(FLIGHT);
+		player.removeAttached(CHARGE);
 		player.removeAttached(DEFEATS);
 		player.removeAttached(GRUDGES);
 		player.removeAttached(ZFighterTraining.DATA);
@@ -572,12 +576,28 @@ public final class ZFighterPower implements Power {
 				live.flying = true;
 				live.lastFlyPos = player.position();
 				player.resetFallDistance();
-				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 0.8F, 0.8F);
-				player.level().sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY(), player.getZ(), 12, 0.4, 0.05, 0.4, 0.05);
+				takeOffBurst(player, live);
 			}
 			player.setAttached(FLIGHT, pose);
 		}
 		sync(player, live, maxKi(player));
+	}
+
+	/** Take-off: a burst of ki from where he stood (the client throws him up), a ring of dust and a flash of his aura. */
+	private static void takeOffBurst(ServerPlayer player, Live live) {
+		ServerLevel level = player.level();
+		double x = player.getX(), y = player.getY(), z = player.getZ();
+		DustParticleOptions dust = dust(live);
+		for (int i = 0; i < 24; i++) {
+			double a = i * Math.PI * 2.0 / 24.0;
+			level.sendParticles(ParticleTypes.CLOUD, true, false, x + Math.cos(a) * 0.6, y + 0.1, z + Math.sin(a) * 0.6, 0, Math.cos(a), 0.02,
+				Math.sin(a), 0.45);
+		}
+		level.sendParticles(dust, true, false, x, y + 0.8, z, 40, 0.35, 0.9, 0.35, 0.25);
+		level.sendParticles(ParticleTypes.EXPLOSION, true, false, x, y + 0.2, z, 1, 0.0, 0.0, 0.0, 0.0);
+		level.playSound(null, x, y, z, SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 1.0F, 0.6F);
+		level.playSound(null, x, y, z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.5F, 1.6F);
+		level.playSound(null, x, y, z, SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.8F, 1.8F);
 	}
 
 	/** The pose his arms hold in flight (0: not flying). Both sides. */
@@ -854,6 +874,15 @@ public final class ZFighterPower implements Power {
 		int bomb = live.spiritFrom < 0 ? -1 : Math.round(100.0F * live.spiritEnergy / ZFighterTechniques.SPIRIT_MAX);
 		int rage = live.raging() ? 100 : Math.round(100.0F * live.rage);
 		int combo = player.level().getGameTime() - live.lastHit <= ZFighterBattle.COMBO_WINDOW ? live.combo : 0;
+		Integer stance = player.getAttached(CHARGE);
+		int wanted = live.charging ? live.form + 1 : 0;
+		if ((stance == null ? 0 : stance) != wanted) {
+			if (wanted == 0) {
+				player.removeAttached(CHARGE);
+			} else {
+				player.setAttached(CHARGE, wanted);
+			}
+		}
 		ZFighterState state = state(player);
 		int ki = Mth.floor(live.ki);
 		if (!state.sameAs(ki, max, live.waveFrom, flags, combo, live.form, live.limit, bomb, rage)) {

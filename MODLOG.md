@@ -934,3 +934,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.10.14, server start fix:** the Hermit Beans block loot table was in the old format
   (`minecraft:block_state_property`), which 26.3 no longer knows and can't upgrade, so a server wouldn't load its data.
   It now uses 26.3's `match_block` condition and `modifier` (like vanilla wheat).
+- **0.10.15, Z Fighter flight and stances (Andy's test notes):** the flight arm poses only show while sprint-flying
+  (`ZFighterFlightPose.cruising`: the local player's own cruise, others by speed); hovering or standing, a Z Fighter
+  looks like himself. Taking off is a burst of ki that throws him about 8 blocks up (`ZFighterFlightClient.TAKEOFF_BURST`)
+  with a ring of dust and a flash of aura. Charging ki now has a stance per lineage and form (`ZFighterChargePose`,
+  synced by `ZFighterPower.CHARGE`).

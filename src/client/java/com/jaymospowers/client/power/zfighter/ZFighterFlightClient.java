@@ -35,7 +35,10 @@ public final class ZFighterFlightClient {
 	static final double HOVER_VERTICAL = 0.4;
 	static final double HOVER_RESPONSE = 0.16;
 	static final double HOVER_BOB = 0.012;
-	static final double TAKEOFF_LIFT = 0.45;
+	/** Take-off: a burst of ki throws him up this fast, then eases off over this many ticks into a hover. */
+	static final double TAKEOFF_BURST = 1.6;
+	static final int BURST_TICKS = 10;
+	static final double BURST_DRAG = 0.82;
 	static final double CRUISE_ENTER_SPEED = 0.7;
 	static final double CRUISE_ACCEL = 0.05;
 	static final double CRUISE_ACCEL_TAPER = 0.6;
@@ -52,6 +55,7 @@ public final class ZFighterFlightClient {
 	static final int SERVER_GRACE = 20;
 
 	private static int pose;
+	private static int burst;
 	private static boolean cruising;
 	private static Vec3 velocity = Vec3.ZERO;
 	private static double speed;
@@ -67,6 +71,11 @@ public final class ZFighterFlightClient {
 
 	static boolean ours(@Nullable LocalPlayer player) {
 		return player != null && Powers.has(player, ZFighterPower.INSTANCE);
+	}
+
+	/** Whether the local player is sprint-flying (the arms' pose and Wind's laid-out body follow it). */
+	public static boolean cruising() {
+		return pose > 0 && cruising;
 	}
 
 	/** The local player's flight pose (0: on foot), for the HUD. */
@@ -112,8 +121,8 @@ public final class ZFighterFlightClient {
 		cruising = false;
 		speed = 0.0;
 		sinkArmed = false;
-		velocity = new Vec3(player.getDeltaMovement().x, Math.max(player.getDeltaMovement().y, TAKEOFF_LIFT), player.getDeltaMovement().z);
-		player.level().playLocalSound(player, SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 0.6F, 0.9F);
+		burst = BURST_TICKS;
+		velocity = new Vec3(player.getDeltaMovement().x * 0.3, Math.max(player.getDeltaMovement().y, TAKEOFF_BURST), player.getDeltaMovement().z * 0.3);
 	}
 
 	private static void land(LocalPlayer player, boolean tell) {
@@ -121,6 +130,7 @@ public final class ZFighterFlightClient {
 			return;
 		}
 		pose = 0;
+		burst = 0;
 		cruising = false;
 		if (tell) {
 			send(0);
@@ -169,7 +179,11 @@ public final class ZFighterFlightClient {
 			cruising = false;
 			velocity = new Vec3(0.0, velocity.y * 0.3, 0.0);
 		}
-		if (cruising) {
+		if (burst > 0) {
+			// the take-off burst: shot up, slowing into a hover
+			burst--;
+			velocity = velocity.scale(BURST_DRAG);
+		} else if (cruising) {
 			cruise(player, input, charging);
 		} else {
 			hover(player, input, charging);
