@@ -22,6 +22,8 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -106,6 +108,8 @@ final class ZFighterKi {
 	static final float WAVE_EXHAUSTION = 2.0F;
 	/** How long the beam stays in the air (ticks, just to be seen). */
 	static final int BEAM_TICKS = 12;
+	/** Players this near a beam's middle see it drawn. */
+	static final double BEAM_SEEN = 160.0;
 
 	// ---- Flash Step ----
 	static final float STEP_KI = 15.0F;
@@ -116,6 +120,33 @@ final class ZFighterKi {
 
 	private static final int BLAST_COLOR = 0xFFC85A;
 	private static final int WAVE_COLOR = 0x8FD3FF;
+
+	// ---- the signature V of each lineage (the Ki Wave's shape; the Ki Bomb is the same for all) ----
+	/** How a beam is drawn: a broad wave, a thin lance wound with a spiral, a fine needle. */
+	static final int WAVE = 0;
+	static final int SPIRAL = 1;
+	static final int NEEDLE = 2;
+
+	/**
+	 * One lineage's V: ticks to full, times the wave's damage, width, blast and ki; its reach; whether it passes through
+	 * blocks; how long it slows what it hits (ticks); its colour (outside Super) and how it's drawn.
+	 */
+	record Signature(int full, float damage, double width, float blast, float ki, double range, boolean pierces, int chill, int color,
+		int style) {
+	}
+
+	/** By lineage: none and Earthling the Ki Wave; Warrior-born the Crimson Cannon; Verdant the Spiral Lance; Frost-born the Frost Needle. */
+	static final Signature[] SIGNATURES = {
+		new Signature(WAVE_FULL, 1.0F, 1.0, 1.0F, 1.0F, WAVE_RANGE, false, 0, WAVE_COLOR, WAVE),
+		new Signature(WAVE_FULL, 1.0F, 1.0, 1.0F, 1.0F, WAVE_RANGE, false, 0, WAVE_COLOR, WAVE),
+		new Signature(70, 1.3F, 1.25, 1.6F, 1.15F, WAVE_RANGE, false, 0, 0xB050FF, WAVE),
+		new Signature(70, 1.25F, 0.35, 0.0F, 1.0F, 56.0, true, 0, 0xE8FF70, SPIRAL),
+		new Signature(20, 0.8F, 0.25, 0.0F, 0.6F, 56.0, false, 40, 0xFF70D8, NEEDLE),
+	};
+
+	static Signature signature(ZFighterPower.Live live) {
+		return SIGNATURES[Mth.clamp(live.lineage, 0, SIGNATURES.length - 1)];
+	}
 
 	// ---- the Great Ape's mouth beam (V) ----
 	static final double APE_BEAM_RANGE = 28.0;
@@ -175,7 +206,7 @@ final class ZFighterKi {
 		}
 	};
 
-	private record Beam(ServerLevel level, Vec3 from, Vec3 to, double radius, int color, int[] age) {
+	private record Beam(ServerLevel level, Vec3 from, Vec3 to, double radius, int color, int style, int[] age) {
 	}
 
 	private static final List<Bolt> BOLTS = new ArrayList<>();
@@ -460,7 +491,7 @@ final class ZFighterKi {
 	// ---------------------------------------------------------------- Ki Wave
 
 	static void startWave(ServerPlayer player, ZFighterPower.Live live) {
-		float min = ZFighterTraining.of(player).charged() == ZFighterTraining.KI_BOMB ? BOMB_MIN_KI : WAVE_MIN_KI;
+		float min = ZFighterTraining.of(player).charged() == ZFighterTraining.KI_BOMB ? BOMB_MIN_KI : WAVE_MIN_KI * signature(live).ki();
 		if (live.ki < min && !player.isCreative() && !live.raging()) {
 			ZFighterPower.spend(player, live, min);
 			return;
@@ -471,11 +502,12 @@ final class ZFighterKi {
 
 	/** The charge (0-1) of a wave gathered since {@code from}, held back to what his ki can pay for. */
 	private static float charge(ServerPlayer player, ZFighterPower.Live live, long now) {
-		float charge = Mth.clamp((now - live.waveFrom) / (float)WAVE_FULL, 0.0F, 1.0F);
+		boolean bomb = ZFighterTraining.of(player).charged() == ZFighterTraining.KI_BOMB;
+		Signature sig = signature(live);
+		float charge = Mth.clamp((now - live.waveFrom) / (float)(bomb ? WAVE_FULL : sig.full()), 0.0F, 1.0F);
 		if (!player.isCreative() && !live.raging()) {
-			boolean bomb = ZFighterTraining.of(player).charged() == ZFighterTraining.KI_BOMB;
-			float min = bomb ? BOMB_MIN_KI : WAVE_MIN_KI;
-			float affordable = (live.ki - min) / ((bomb ? BOMB_MAX_KI : WAVE_MAX_KI) - min);
+			float min = bomb ? BOMB_MIN_KI : WAVE_MIN_KI * sig.ki();
+			float affordable = (live.ki - min) / ((bomb ? BOMB_MAX_KI : WAVE_MAX_KI * sig.ki()) - min);
 			charge = Math.min(charge, Mth.clamp(affordable, 0.0F, 1.0F));
 		}
 		return charge;
@@ -492,7 +524,13 @@ final class ZFighterKi {
 		Vec3 look = player.getViewVector(1.0F);
 		Vec3 hands = player.getEyePosition().add(look.scale(0.7)).add(0.0, -0.45, 0.0);
 		RandomSource random = level.getRandom();
-		DustParticleOptions dust = new DustParticleOptions(live.superOn() ? formColor(live) : WAVE_COLOR, 0.8F + charge * 1.2F);
+		Signature sig = signature(live);
+		if (sig.style() == NEEDLE && ZFighterTraining.of(player).charged() != ZFighterTraining.KI_BOMB) {
+			// one finger, pointed: the ki gathers at its tip
+			hands = player.getEyePosition().add(look.scale(0.9)).add(0.0, -0.25, 0.0);
+		}
+		DustParticleOptions dust = new DustParticleOptions(live.superOn() ? formColor(live) : sig.color(),
+			(0.8F + charge * 1.2F) * (sig.style() == NEEDLE ? 0.5F : 1.0F));
 		for (int i = 0; i < 3; i++) {
 			double ox = (random.nextDouble() - 0.5) * 1.6;
 			double oy = (random.nextDouble() - 0.5) * 1.6;
@@ -519,7 +557,7 @@ final class ZFighterKi {
 		float charge = charge(player, live, level.getGameTime());
 		live.waveFrom = -1L;
 		boolean bomb = ZFighterTraining.of(player).charged() == ZFighterTraining.KI_BOMB;
-		float cost = bomb ? Mth.lerp(charge, BOMB_MIN_KI, BOMB_MAX_KI) : Mth.lerp(charge, WAVE_MIN_KI, WAVE_MAX_KI);
+		float cost = bomb ? Mth.lerp(charge, BOMB_MIN_KI, BOMB_MAX_KI) : Mth.lerp(charge, WAVE_MIN_KI, WAVE_MAX_KI) * signature(live).ki();
 		if (!ZFighterPower.spend(player, live, cost)) {
 			return false;
 		}
@@ -552,12 +590,14 @@ final class ZFighterKi {
 	private static void fireWave(ServerPlayer player, ZFighterPower.Live live, float charge) {
 		ServerLevel level = player.level();
 		Vec3 look = player.getViewVector(1.0F);
+		Signature sig = signature(live);
 		Vec3 from = player.getEyePosition().add(look.scale(0.7)).add(0.0, -0.3, 0.0);
-		BlockHitResult block = level.clip(new ClipContext(from, from.add(look.scale(WAVE_RANGE)), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE,
-			player));
-		Vec3 to = block.getLocation();
-		double radius = Mth.lerp(charge, WAVE_RADIUS_MIN, WAVE_RADIUS_MAX);
-		float damage = Mth.lerp(charge, WAVE_DAMAGE_MIN, WAVE_DAMAGE_MAX) * ZFighterPower.kiPower(player, live);
+		Vec3 end = from.add(look.scale(sig.range()));
+		// the Spiral Lance bores through whatever stands in its way
+		Vec3 to = sig.pierces() ? end : level.clip(new ClipContext(from, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player))
+			.getLocation();
+		double radius = Mth.lerp(charge, WAVE_RADIUS_MIN, WAVE_RADIUS_MAX) * sig.width();
+		float damage = Mth.lerp(charge, WAVE_DAMAGE_MIN, WAVE_DAMAGE_MAX) * sig.damage() * ZFighterPower.kiPower(player, live);
 		DamageSource source = source(player);
 		Set<Entity> struck = new HashSet<>();
 		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, new AABB(from, to).inflate(radius + 1.0),
@@ -567,16 +607,35 @@ final class ZFighterKi {
 			}
 			target.setInvulnerableTime(0);
 			target.hurtServer(level, source, damage);
-			push(target, look, 0.8 + charge * 1.2, 0.3);
+			push(target, look, (0.8 + charge * 1.2) * (sig.style() == NEEDLE ? 0.3 : 1.0), 0.3);
+			if (sig.chill() > 0) {
+				target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, sig.chill(), 2), player);
+				target.setTicksFrozen(Math.max(target.getTicksFrozen(), target.getTicksRequiredToFreeze() + sig.chill()));
+			}
 		}
 		boolean super_ = live.superOn();
-		BEAMS.add(new Beam(level, from, to, radius, super_ ? formColor(live) : WAVE_COLOR, new int[1]));
-		float power = Mth.lerp(charge, WAVE_BLAST_MIN, WAVE_BLAST_MAX) * (super_ ? 1.3F : 1.0F);
-		// a full wave from a Super tears the ground (as a mob would: mob griefing decides); anything less only hurts
-		Level.ExplosionInteraction interaction = super_ && charge >= 1.0F ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE;
-		level.explode(player, source, null, to.x, to.y, to.z, power, false, interaction);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.2F, 1.4F);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 1.6F);
+		addBeam(new Beam(level, from, to, radius, super_ ? formColor(live) : sig.color(), sig.style(), new int[1]));
+		if (sig.blast() > 0.0F) {
+			float power = Mth.lerp(charge, WAVE_BLAST_MIN, WAVE_BLAST_MAX) * sig.blast() * (super_ ? 1.3F : 1.0F);
+			// a full wave from a Super tears the ground (as a mob would: mob griefing decides); anything less only hurts
+			Level.ExplosionInteraction interaction = super_ && charge >= 1.0F ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE;
+			level.explode(player, source, null, to.x, to.y, to.z, power, false, interaction);
+		}
+		switch (sig.style()) {
+			case NEEDLE -> {
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.PLAYERS, 1.2F, 1.8F);
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GLASS_BREAK, SoundSource.PLAYERS, 0.6F, 2.0F);
+			}
+			case SPIRAL -> {
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_RIPTIDE_3.value(), SoundSource.PLAYERS, 1.2F, 1.3F);
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 1.8F);
+			}
+			default -> {
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.2F,
+					sig.blast() > 1.0F ? 1.0F : 1.4F);
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 1.6F);
+			}
+		}
 		if (!player.onGround()) {
 			// the recoil pushes a fighter in the air back
 			player.push(look.scale(-0.4 * charge));
@@ -611,11 +670,24 @@ final class ZFighterKi {
 			target.hurtServer(level, source, damage);
 			push(target, look, 1.2, 0.3);
 		}
-		BEAMS.add(new Beam(level, from, to, APE_BEAM_RADIUS, APE_BEAM_COLOR, new int[1]));
+		addBeam(new Beam(level, from, to, APE_BEAM_RADIUS, APE_BEAM_COLOR, WAVE, new int[1]));
 		level.explode(player, source, GROUND_ONLY, to.x, to.y, to.z, APE_BEAM_BLAST, false, Level.ExplosionInteraction.MOB);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 2.0F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.5F, 0.7F);
 		return true;
+	}
+
+	/** A beam: the server keeps it for its sparks, and everyone near draws it (beacon-style, {@code ZFighterBeams}). */
+	private static void addBeam(Beam beam) {
+		BEAMS.add(beam);
+		ZFighterNet.BeamFx fx = new ZFighterNet.BeamFx(beam.from().x, beam.from().y, beam.from().z, beam.to().x, beam.to().y, beam.to().z,
+			(float)beam.radius(), beam.color(), beam.style(), BEAM_TICKS);
+		Vec3 middle = beam.from().lerp(beam.to(), 0.5);
+		for (ServerPlayer viewer : beam.level().players()) {
+			if (viewer.position().distanceToSqr(middle) <= BEAM_SEEN * BEAM_SEEN) {
+				net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(viewer, fx);
+			}
+		}
 	}
 
 	private static void drawBeam(Beam beam) {
@@ -628,12 +700,31 @@ final class ZFighterKi {
 		Vec3 dir = path.scale(1.0 / length);
 		float fade = 1.0F - beam.age()[0] / (float)BEAM_TICKS;
 		double radius = beam.radius() * (0.4 + 0.6 * fade);
-		DustParticleOptions core = new DustParticleOptions(0xFFFFFF, 2.5F);
-		DustParticleOptions glow = new DustParticleOptions(beam.color(), 3.0F);
-		for (double d = 0.0; d <= length; d += 0.6) {
+		boolean fine = beam.style() != WAVE;
+		DustParticleOptions core = new DustParticleOptions(0xFFFFFF, fine ? 1.0F : 2.5F);
+		DustParticleOptions glow = new DustParticleOptions(beam.color(), fine ? 1.2F : 3.0F);
+		// two axes square to the beam, for the Spiral Lance's coil
+		Vec3 side = dir.cross(Math.abs(dir.y) < 0.95 ? new Vec3(0.0, 1.0, 0.0) : new Vec3(1.0, 0.0, 0.0)).normalize();
+		Vec3 up = side.cross(dir).normalize();
+		double step = fine ? 0.35 : 0.6;
+		for (double d = 0.0; d <= length; d += step) {
 			Vec3 at = beam.from().add(dir.scale(d));
-			level.sendParticles(core, true, false, at.x, at.y, at.z, 1, radius * 0.15, radius * 0.15, radius * 0.15, 0.0);
-			level.sendParticles(glow, true, false, at.x, at.y, at.z, 2, radius * 0.4, radius * 0.4, radius * 0.4, 0.0);
+			if (beam.style() != WAVE && beam.age()[0] < 2) {
+				level.sendParticles(core, true, false, at.x, at.y, at.z, 1, radius * 0.15, radius * 0.15, radius * 0.15, 0.0);
+			}
+			if (beam.style() == SPIRAL) {
+				double t = d * 1.6 + beam.age()[0] * 0.8;
+				Vec3 coil = at.add(side.scale(Math.cos(t) * 0.5)).add(up.scale(Math.sin(t) * 0.5));
+				level.sendParticles(glow, true, false, coil.x, coil.y, coil.z, 1, 0.0, 0.0, 0.0, 0.0);
+			} else if (beam.style() == WAVE) {
+				// the beam itself is drawn by the clients; here only a crackle of ki round it
+				if (level.getRandom().nextInt(6) == 0) {
+					level.sendParticles(glow, true, false, at.x, at.y, at.z, 1, radius * 0.6, radius * 0.6, radius * 0.6, 0.0);
+				}
+			} else if (beam.age()[0] < 3) {
+				// the needle is there and gone
+				level.sendParticles(glow, true, false, at.x, at.y, at.z, 1, 0.02, 0.02, 0.02, 0.0);
+			}
 		}
 	}
 

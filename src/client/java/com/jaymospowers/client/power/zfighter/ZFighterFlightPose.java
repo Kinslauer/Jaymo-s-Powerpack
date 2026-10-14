@@ -35,8 +35,12 @@ public final class ZFighterFlightPose {
 
 	public static final RenderStateDataKey<Pose> KEY = RenderStateDataKey.create(() -> "jaymospowers:zfighter_flight");
 
-	/** Moving at least this fast (blocks a tick), he takes Wind's laid-out cruise pose. */
-	static final double CRUISE_SPEED = 0.6;
+	/**
+	 * Someone else flying this fast across (blocks a tick, flat) is taken to be cruising, until he slows below the second
+	 * (the local player's own cruise is known exactly).
+	 */
+	static final double CRUISE_SPEED = 0.7;
+	static final double CRUISE_EXIT_SPEED = 0.35;
 	/** How fast flight and the arms ease from one pose to the next, per tick. */
 	static final float EASE = 0.2F;
 	static final float ARM_EASE = 0.25F;
@@ -60,13 +64,31 @@ public final class ZFighterFlightPose {
 	private ZFighterFlightPose() {
 	}
 
-	/** A flying Z Fighter at speed: Wind's cruise pose lays him out. */
+	/** Remote players seen cruising (entity ids). */
+	private static final java.util.Set<Integer> CRUISING = new java.util.HashSet<>();
+
+	/**
+	 * A Z Fighter sprint-flying: Wind's cruise lays him out and his arms take their pose. Hovering, taking off and standing
+	 * he looks like himself.
+	 */
 	public static boolean cruising(Player player) {
 		if (ZFighterPower.flightPose(player) <= 0) {
 			return false;
 		}
-		double dx = player.getX() - player.xo, dy = player.getY() - player.yo, dz = player.getZ() - player.zo;
-		return dx * dx + dy * dy + dz * dz >= CRUISE_SPEED * CRUISE_SPEED;
+		if (player == Minecraft.getInstance().player) {
+			return ZFighterFlightClient.cruising();
+		}
+		return CRUISING.contains(player.getId());
+	}
+
+	private static void watchCruise(Player player) {
+		double dx = player.getX() - player.xo, dz = player.getZ() - player.zo;
+		double flat = dx * dx + dz * dz;
+		if (ZFighterPower.flightPose(player) <= 0 || flat < CRUISE_EXIT_SPEED * CRUISE_EXIT_SPEED) {
+			CRUISING.remove(player.getId());
+		} else if (flat >= CRUISE_SPEED * CRUISE_SPEED) {
+			CRUISING.add(player.getId());
+		}
 	}
 
 	/** While he flies, his arms are his own: Wind's cruise leaves them alone. */
@@ -80,13 +102,16 @@ public final class ZFighterFlightPose {
 		ClientLevel level = minecraft.level;
 		if (level == null) {
 			STATE.clear();
+			CRUISING.clear();
 			return;
 		}
 		if (minecraft.isPaused()) {
 			return;
 		}
 		for (AbstractClientPlayer player : level.players()) {
-			int pose = ZFighterPower.flightPose(player);
+			watchCruise(player);
+			// the arms only take their pose once he's sprint-flying
+			int pose = cruising(player) ? ZFighterPower.flightPose(player) : 0;
 			float[] s = STATE.get(player.getId());
 			if (s == null) {
 				if (pose <= 0) {
@@ -106,6 +131,7 @@ public final class ZFighterFlightPose {
 				}
 			}
 		}
+		CRUISING.removeIf(id -> level.getEntity(id) == null);
 		STATE.entrySet().removeIf(entry -> entry.getValue()[0] <= 0.0F && entry.getValue()[1] <= 0.0F || level.getEntity(entry.getKey()) == null);
 	}
 
