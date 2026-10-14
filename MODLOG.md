@@ -977,3 +977,14 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Super hair covers his own: the skin's hat layer is hidden while it shows, and the cap reaches past where that layer
   sat (0.7 out), with a fringe above the eyes, the whole back of the head and over the ears.
 - Gravity's Z dome is now called the **Immense Field** (was the Training Field): key guide, messages and docs.
+- **0.10.29, Fresh Animations: Player Extension (`client/PackResourcePacks`, `client/EmfCompat`, `client/PoseTakeover`):**
+  the pack gets FreshLX's player animations (CurseForge 1281029, file 8245230, `FA+Player-v1.1.zip`; modpacks may
+  include it, never redistribute it, so it downloads by id like the medieval villager pack) and the two mods that run
+  it, Entity Model Features and Entity Texture Features (LGPL-3.0, client-only). It's switched on once per install
+  (marker `config/jaymospowers-fa-player-v1`), downloaded from CurseForge's CDN first if missing. `MedievalVillagers`
+  became `PackResourcePacks`, a list of packs (the medieval marker stays v2). FA moves the limbs' pivots as well as
+  turning them, so while any of our own body poses is on a player (Wind flight/kick/cyclone/sway/tumble/swing, crawl
+  and roll, freefall, carry, Gravity walk/board/kneel, Darktide moves and crawl, Web wall run/body/arms/ragdoll and
+  the symbiote's slam/charge/roar/feeding, Chrono flow/reel, Xenoform flight/slap, Z Fighter flight/charge/guard,
+  Arsenal's reach and flintlock aim) EMF's pause hook stops FA for that player; Better Combat swings already pause it
+  (EMF's own Player Animation Library check).

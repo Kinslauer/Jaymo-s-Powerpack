@@ -16,6 +16,7 @@
 		"CarryUseMixin",
 		"ContainerScreenAccessor",
 		"HiddenArmorAvatarRendererMixin",
+		"PoseTakeoverLivingEntityRendererMixin",
 		"ShoulderCameraMixin",
 		"ShoulderCameraTypeMixin",
 		"ShoulderCrosshairMixin"

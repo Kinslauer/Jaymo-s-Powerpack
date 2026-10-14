@@ -100,6 +100,11 @@ def packMods = [
 	// custom third-person views on F6 and F7 (Right Alt + the key edits one). Client-only. Jaymo's Powers sets its F7
 	// view to Andy's preset once per install (client/CameraPreset) and takes its zoom off Z (client/KeyConflicts).
 	[dep: "maven.modrinth:camera-utils:5XAah6bJ", cf: [510234, 8887090]],
+	// Entity Model Features and Entity Texture Features (both LGPL-3.0, by Traben): custom entity models and animations
+	// from resource packs, here for Fresh Animations: Player Extension (packResourcePacks). Client-only. Our own poses
+	// pause its animations while they play (client/EmfCompat).
+	[dep: "maven.modrinth:entity-model-features:N7d5LddE", cf: [844662, 9064964]],
+	[dep: "maven.modrinth:entitytexturefeatures:O8J3sxxp", cf: [568563, 9055242]],
 ]
 // First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
 // Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge
@@ -139,13 +144,16 @@ def localPackMods = [
 	// (none right now; Distant Horizons was here until 0.4.5)
 ]
 // resource packs, client-only: the CurseForge import downloads them into resourcepacks/ by id, and Jaymo's Powers
-// switches each on once per install (client/MedievalVillagers). The CurseForge files are all rights reserved, so they
+// switches each on once per install (client/PackResourcePacks). The CurseForge files are all rights reserved, so they
 // are never copied into the pack; Build Modpack downloads them into your own profile from CurseForge's CDN.
 def packResourcePacks = [
 	// MCA - Default Medieval (by DE4THR4SH): vanilla-style medieval clothes, faces and hair for MCA's villagers. Its
 	// newest file says 1.21.1, but it only retextures MCA's skins, and 1144 of our 26.3 MCA jar's 1145 skin files are
 	// at the same paths (the last one is MCA's own folder icon).
 	[cf: [667175, 8868890], file: "MCAR_VanillaMedieval_Universal_7.7.36-beta.3+1.21.1.zip"],
+	// Fresh Animations: Player Extension (by FreshLX; modpacks may include it, never redistribute it): livelier player
+	// animations through Entity Model Features. Stands alone, no base Fresh Animations needed; supports up to 26.3.
+	[cf: [1281029, 8245230], file: "FA+Player-v1.1.zip"],
 ]
 // mods taken out of the pack: moved out of your CurseForge profile's mods folder (into removed-mods) on the next build
 // (Towns and Towers left in 0.8.4: its villages fought Epic Structures: Villages, where kingdoms are founded; its
@@ -191,6 +199,9 @@ dependencies {
 	compileOnly kitchenJar
 	// compiled against to read Better Combat's attack swings while flying; touched only via client/power/wind/PalAccess
 	compileOnly "maven.modrinth:player-animation-library:xJ30QmpE"
+	// compiled against to pause Fresh Animations' player animations under our poses; touched only via client/EmfAccess
+	compileOnly "maven.modrinth:entity-model-features:N7d5LddE"
+	compileOnly "maven.modrinth:entitytexturefeatures:O8J3sxxp"
 	packMods.drop(1).findAll { it.dev != false }.each { localRuntime it.dep }
 	packMods.each { packJars it.dep }
 	packModsNoCf.each { localRuntime it.dep; packJars it.dep }
