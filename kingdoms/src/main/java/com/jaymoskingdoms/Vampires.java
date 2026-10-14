@@ -159,7 +159,7 @@ public final class Vampires {
 			Codec.STRING.fieldOf("kind").forGetter(Vampire::kind),
 			Codec.LONG.fieldOf("fed_night").forGetter(Vampire::fedNight),
 			Codec.LONG.fieldOf("fed_at").forGetter(Vampire::fedAt)).apply(i, Vampire::new));
-		/** (0.7.22) A vampire player is sent to every client (blood vision for them, the looks for everyone); villagers never are. */
+		/** (0.7.24) A vampire player is sent to every client (blood vision for them, the looks for everyone); villagers never are. */
 		static final StreamCodec<ByteBuf, Vampire> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.STRING_UTF8, Vampire::kind, ByteBufCodecs.VAR_LONG, Vampire::fedNight, ByteBufCodecs.VAR_LONG, Vampire::fedAt, Vampire::new);
 

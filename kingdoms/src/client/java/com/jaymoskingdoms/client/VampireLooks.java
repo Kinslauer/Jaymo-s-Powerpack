@@ -29,7 +29,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.7.22) What everyone sees of a vampire player: ashen skin on the face and hands always; at night, fangs and red
+ * (0.7.24) What everyone sees of a vampire player: ashen skin on the face and hands always; at night, fangs and red
  * eyes that glow in the dark. Textures from {@code tools/gen_vampire_looks.py}, laid over the player's own skin. The
  * red eyes go where that skin's own eyes are ({@link #findEyes}), worked out once per skin; the stock texture's
  * spots (the default skins' eyes) are the fallback while a skin downloads or when no eyes can be told apart.

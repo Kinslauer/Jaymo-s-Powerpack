@@ -1,4 +1,4 @@
-"""Vampire player looks (Kingdoms 0.7.22): overlays on the 64x64 player skin layout.
+"""Vampire player looks (Kingdoms 0.7.24): overlays on the 64x64 player skin layout.
 
 pale.png  - translucent ashen wash over the head and hands (always on a vampire).
 fangs.png - two white fangs under the mouth (night).

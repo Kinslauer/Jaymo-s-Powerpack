@@ -21,7 +21,7 @@ import net.minecraft.world.entity.animal.golem.AbstractGolem;
 import net.minecraft.world.entity.decoration.ArmorStand;
 
 /**
- * (0.7.22) A vampire player's sight (Andy: "vampirism should give you the sirben visual modifier", MCA's Sirben trait
+ * (0.7.24) A vampire player's sight (Andy: "vampirism should give you the sirben visual modifier", MCA's Sirben trait
  * screen, {@link #SIRBEN}, worn always). At night, too, the screen's edges darken to blood red and beat like a heart; every warm-blooded creature near them glows red through
  * walls, beating in time. Starving, the beat quickens, the red deepens, and they smell blood from further off. Only
  * the vampire sees any of it. Undead, golems and armour stands have no blood to see.
