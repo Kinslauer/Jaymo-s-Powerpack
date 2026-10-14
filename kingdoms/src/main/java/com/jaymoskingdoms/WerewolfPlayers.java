@@ -49,9 +49,10 @@ import org.jspecify.annotations.Nullable;
  * change at will ({@code U}), and back, except under a full moon. The change: they double over (bones cracking, the
  * world swimming), then the beast tears out of them, their own {@link Werewolf} (size, build and coat theirs) that every
  * other player sees in their place, step for step; their own body is hidden. As the beast: strong, quick, high-jumping,
- * tougher, seeing in the dark, always hungry; their armour falls off and their hands are claws (nothing can be held).
+ * tougher, seeing in the dark, always hungry; their armour is torn (30% of its durability) and breaks or falls at their
+ * feet, and their hands are claws (nothing can be held).
  * Blows to the beast are theirs. Guards hunt it and villagers run. At dawn it shrinks back into them, sick and shaking.
- * A cleric's rite cures it ({@link VampirePlayers}).
+ * A priest's rare quest cures it ({@link Cures}).
  */
 public final class WerewolfPlayers {
 	/** Lit campfires the ritual wants within {@link #RITUAL_RANGE} blocks. */
@@ -63,6 +64,8 @@ public final class WerewolfPlayers {
 	/** As the beast: Strength, Speed, Jump Boost, Resistance levels (amplifiers), and extra health. */
 	static final int BEAST_STRENGTH = 1, BEAST_SPEED = 0, BEAST_JUMP = 1, BEAST_RESISTANCE = 0;
 	static final double BEAST_HEALTH = 10.0;
+	/** The share of each armour piece's durability the change tears off. */
+	static final float ARMOUR_TEAR = 0.3F;
 	/** What a kill feeds the beast (food, saturation). */
 	static final int KILL_FOOD = 6;
 	static final float KILL_SATURATION = 0.8F;
@@ -294,7 +297,7 @@ public final class WerewolfPlayers {
 			if ((now + player.getId()) % 20 == 0) {
 				buffs(player);
 			}
-			strip(player);
+			strip(player, false);
 		}
 	}
 
@@ -318,7 +321,7 @@ public final class WerewolfPlayers {
 			health.addTransientModifier(new AttributeModifier(HEALTH, BEAST_HEALTH, AttributeModifier.Operation.ADD_VALUE));
 		}
 		buffs(player);
-		strip(player);
+		strip(player, true);
 	}
 
 	/** The beast stands where they stand, looks where they look, hunches as they run. */
@@ -343,15 +346,34 @@ public final class WerewolfPlayers {
 		player.addEffect(new MobEffectInstance(MobEffects.HUNGER, 60, 0, true, false, true));
 	}
 
-	/** Claws hold nothing, and the armour's torn off. */
-	private static void strip(ServerPlayer player) {
-		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND, EquipmentSlot.HEAD, EquipmentSlot.CHEST,
-			EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
+	/**
+	 * Claws hold nothing (what's in the hands goes to the inventory), and the armour's torn off: as the beast bursts out
+	 * ({@code tearing}) each piece takes {@link #ARMOUR_TEAR} of its durability, and breaks if that's the end of it, or
+	 * falls at their feet. Armour put on as the beast just falls off.
+	 */
+	private static void strip(ServerPlayer player, boolean tearing) {
+		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND}) {
 			ItemStack stack = player.getItemBySlot(slot);
 			if (!stack.isEmpty()) {
 				player.setItemSlot(slot, ItemStack.EMPTY);
 				player.getInventory().placeItemBackInInventory(stack, Prediction.SERVER_ONLY);
 			}
+		}
+		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
+			ItemStack stack = player.getItemBySlot(slot);
+			if (stack.isEmpty()) {
+				continue;
+			}
+			player.setItemSlot(slot, ItemStack.EMPTY);
+			if (tearing && stack.isDamageableItem()) {
+				int damage = stack.getDamageValue() + Math.max(1, Math.round(stack.getMaxDamage() * ARMOUR_TEAR));
+				if (damage >= stack.getMaxDamage()) {
+					player.level().playSound(null, player.blockPosition(), SoundEvents.ITEM_BREAK.value(), SoundSource.PLAYERS, 1.0F, 0.8F);
+					continue;
+				}
+				stack.setDamageValue(damage);
+			}
+			player.drop(stack, true, Prediction.SERVER_ONLY);
 		}
 	}
 

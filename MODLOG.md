@@ -865,4 +865,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   villager by day who hunts anyone (kings too) at night; the bitten who survive turn at the next nightfall as feeders,
   abstainers or hunters of their own kind; the Elder flies as a bat. Stage 2: the wolf's curse in villagers and folk,
   who change under the full moon (a grotesque change, each beast its own size, build and coat). Stage 3: players turn
-  by a vampire's bite or take the wolf's curse by ritual (bone, campfires, full moon); a cleric's rite cures both. Plan: `docs/Vampires-Plan.md` (`kingdoms/MODLOG.md`).
+  by a vampire's bite or take the wolf's curse by ritual (bone, campfires, full moon); the change tears 30% of your armour's durability
+    (it breaks or falls off); the cure for both is a rare priest's quest. Plan: `docs/Vampires-Plan.md` (`kingdoms/MODLOG.md`).

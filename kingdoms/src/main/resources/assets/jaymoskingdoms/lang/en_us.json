@@ -2409,11 +2409,16 @@
 	"key.jaymoskingdoms.werewolf_shift": "Werewolf: Change",
 	"key.category.jaymoskingdoms.werewolf": "Jaymo's Werewolves",
 	"message.jaymoskingdoms.vampire.turned": "You wake with a thirst no water will touch. The light stings your eyes.",
-	"message.jaymoskingdoms.cure.night": "\"Not by night. Come back when the sun is up.\"",
-	"message.jaymoskingdoms.cure.done": "The cleric's prayer burns through you, and then it's gone. You're yourself again.",
+	"message.jaymoskingdoms.cure.done": "The priest's prayer burns through you, and then it's gone. You're yourself again.",
 	"message.jaymoskingdoms.werewolf.ritual": "The fires gutter. Something in the moonlight looks back at you.",
 	"message.jaymoskingdoms.werewolf.moon": "The moon holds you. There's no changing back tonight.",
 	"message.jaymoskingdoms.werewolf.unmastered": "The wolf won't come at your call. Not yet.",
 	"message.jaymoskingdoms.theft.cry.bloodletting.0": "They're drinking blood! VAMPIRE!",
-	"message.jaymoskingdoms.theft.cry.bloodletting.1": "Get your teeth off them, you monster! Guards!"
+	"message.jaymoskingdoms.theft.cry.bloodletting.1": "Get your teeth off them, you monster! Guards!",
+	"quest.jaymoskingdoms.cure.vampire.title": "The Old Rite: Blood for Blood",
+	"quest.jaymoskingdoms.cure.vampire.text": "I see the hunger in you, child; you can't hide it from me. There is an old rite that can still draw it out, but the night must pay for it first. Hunt down %s of the %s that walk among us, and come back to me. Then we'll pray, and you'll be yourself again.",
+	"quest.jaymoskingdoms.cure.wolf.title": "The Old Rite: The Wolf's Price",
+	"quest.jaymoskingdoms.cure.wolf.text": "The moon has its claws in you. I know the rite that can break its hold, but the curse wants a life in return. Slay %s of the %s, one of the cursed in its beast shape, and come back to me. Then the moon will lose its grip on you.",
+	"quest.jaymoskingdoms.foes.vampire": "Vampires",
+	"quest.jaymoskingdoms.foes.werewolf": "Cursed Beasts"
 }

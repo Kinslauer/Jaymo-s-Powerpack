@@ -2579,8 +2579,11 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   moon. The change: 2 s doubled over (Nausea, held still, bones cracking), then the beast tears out: a no-AI
   `Werewolf` puppet (their own size, build, coat; updated every tick, `updateInterval(1)`) stands in for them for
   everyone else, while they're invisible; the puppet's change animation plays as for villagers. As the beast:
-  Strength II, Speed I, Jump Boost II, Resistance I, Night Vision, Hunger, +10 max health; armour and held items go
-  to the inventory every tick (claws); a kill (not a monster) feeds them 6 + 0.8. Blows to the puppet land on them;
+  Strength II, Speed I, Jump Boost II, Resistance I, Night Vision, Hunger, +10 max health; the change tears 30% of
+  each armour piece's max durability (Andy): if that finishes it, it breaks, else it falls at their feet; armour put on
+  as the beast just drops; held items go to the inventory (claws); a kill (not a monster) feeds them 6 + 0.8. Blows to the puppet land on them;
   guards hunt it, villagers flee it. At dawn it shrinks back (Slowness, Weakness, Nausea after). Their own puppet
   isn't drawn for them in first person.
-- **The cure** for both: by day, right-click a cleric villager holding a golden apple (the rite takes it).
+- **The cure** for both (Andy): a rare quest from a priest (`Cures`). A quarter of clerics know the old rite (fixed by
+  who they are); ask one for work while bitten, turned or cursed and they set the hunt instead: slay 2 vampires among
+  the living, or 1 cursed werewolf in its beast shape (players don't count). Turn it in and the rite lifts the curse.

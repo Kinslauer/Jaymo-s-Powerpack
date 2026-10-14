@@ -51,6 +51,7 @@ each stage lands on the same draft PR, and Andy can merge after any stage.
 1. Do NPC vampires burn in sunlight? [No: weak by day, so they can hide among the living]
 2. Do people a vampire kills rise as vampires? [No: only the bitten who live turn]
 3. Does a werewolf's bite spread lycanthropy? [Yes, to survivors, less often than vampirism]
-4. Cures? [Vampirism: a golden apple and a night in a church/priest's care before you've fed; lycanthropy: killing
-   the werewolf that bit you, or none for ritual werewolves]
+4. ~~Cures?~~ Andy: a rare quest from a priest for both (built: a quarter of clerics know the rite; slay 2 vampires
+   or 1 cursed werewolf, then the rite). Andy also: the change tears 30% of each armour piece's durability, then it
+   breaks or falls off (built).
 5. ~~Can the Elder turn into a bat?~~ Andy: yes (built in stage 1).

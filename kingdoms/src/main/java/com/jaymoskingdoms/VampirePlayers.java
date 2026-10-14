@@ -9,7 +9,6 @@ import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -23,10 +22,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.npc.villager.Villager;
-import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Items;
 
 /**
  * (0.7.0) Stage 3 of the 0.10.0 drop: a player as a vampire. Bitten by one (and living through it), they turn at the
@@ -40,8 +36,8 @@ import net.minecraft.world.item.Items;
  * second): it feeds them, heals them, and the bitten turn too, if they live. Two nights without it and they're
  * starving (Hunger, Weakness) until they drink. Anyone of that realm who sees it cries out (a heavy crime); at night
  * they show themselves too, and the guards hunt them till dawn.</li>
- * <li>The cure, for the bitten or the turned (or a werewolf, {@link WerewolfPlayers}): by day, a golden apple given to a
- * cleric (right-click them holding it). The rite takes the apple.</li>
+ * <li>The cure, for the bitten or the turned (or a werewolf, {@link WerewolfPlayers}): a rare quest from a priest
+ * ({@link Cures}).</li>
  * </ul>
  */
 public final class VampirePlayers {
@@ -67,10 +63,6 @@ public final class VampirePlayers {
 			if (!(level instanceof ServerLevel server) || !(player instanceof ServerPlayer sp) || hand != InteractionHand.MAIN_HAND
 				|| !(entity instanceof LivingEntity target)) {
 				return InteractionResult.PASS;
-			}
-			if (target instanceof Villager v && sp.getMainHandItem().is(Items.GOLDEN_APPLE) && !sp.isShiftKeyDown()
-				&& v.getVillagerData().profession().is(VillagerProfession.CLERIC)) {
-				return cure(server, sp, v) ? InteractionResult.SUCCESS : InteractionResult.PASS;
 			}
 			if (Vampires.isVampire(sp) && sp.isShiftKeyDown() && sp.getMainHandItem().isEmpty() && Vampires.person(target)) {
 				drink(server, sp, target);
@@ -177,31 +169,5 @@ public final class VampirePlayers {
 		if (f != null) {
 			Theft.commit(player, level, f, Theft.Crime.BLOODLETTING, target.blockPosition(), null, false);
 		}
-	}
-
-	/** A cleric's rite: by day, a golden apple; the bitten, the turned and the wolf-cursed are whole again. */
-	private static boolean cure(ServerLevel level, ServerPlayer player, Villager cleric) {
-		boolean vampire = Vampires.isVampire(player) || player.hasAttached(Vampires.BITTEN);
-		boolean wolf = Lycans.cursed(player);
-		if (!vampire && !wolf) {
-			return false;
-		}
-		if (Vampires.night(level.getOverworldClockTime())) {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.cure.night").withStyle(ChatFormatting.GRAY));
-			return true;
-		}
-		if (!player.isCreative()) {
-			player.getMainHandItem().shrink(1);
-		}
-		player.removeAttached(Vampires.VAMPIRE);
-		player.removeAttached(Vampires.BITTEN);
-		if (wolf) {
-			WerewolfPlayers.cure(player);
-		}
-		level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY(1.0), player.getZ(), 30, 0.4, 0.6, 0.4, 0.05);
-		level.playSound(null, player.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 1.2F);
-		cleric.getLookControl().setLookAt(player);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.cure.done").withStyle(ChatFormatting.GOLD));
-		return true;
 	}
 }
