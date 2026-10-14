@@ -54,6 +54,7 @@ import net.minecraft.world.phys.Vec3;
  * <li>Active skills on the {@code Y} key: Charge (shoulder into the first foe ahead) and War Cry (sneak and {@code Y}, or
  * {@code Y} alone if it's the only one you know: foes round you are cowed, you and your friends emboldened).
  * <li>Bladestorm: every {@link #BLADESTORM_LINK}th link, you whirl and strike every foe round you.
+ * <li>(0.7.3) Shield Throw on {@code Y} with a shield in hand ({@link ShieldThrow}).
  * </ul>
  *
  * <p>Area blows (Cleave, Earthsplitter, Bladestorm, War Cry, Charge) only ever touch foes: monsters, and whatever is
@@ -321,7 +322,7 @@ public final class CombatArts {
 	}
 
 	/** One of our own blows: counted as {@code player}'s, but not as a link in their chain, and through the hurt cooldown. */
-	private static void strike(ServerLevel level, ServerPlayer player, LivingEntity target, float amount) {
+	static void strike(ServerLevel level, ServerPlayer player, LivingEntity target, float amount) {
 		if (amount <= 0.0F || !target.isAlive()) {
 			return;
 		}
@@ -342,6 +343,11 @@ public final class CombatArts {
 			return;
 		}
 		boolean charge = Skills.rank(sp, Skills.Perk.CHARGE) > 0, cry = Skills.rank(sp, Skills.Perk.WAR_CRY) > 0;
+		// with a shield in hand, Y throws it (sneak still roars)
+		if (ShieldThrow.wanted(sp) && !(sneaking && cry)) {
+			ShieldThrow.use(level, sp);
+			return;
+		}
 		if (!charge && !cry) {
 			sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.combat_art.none").withStyle(ChatFormatting.GRAY));
 			return;

@@ -141,6 +141,7 @@ public final class ChronoPowerClient implements PowerClient {
 			cooldownLeft[i] = cooldownTotal[i] = activeLeft[i] = activeTotal[i] = deniedFlash[i] = readyFlash[i] = 0;
 		}
 		ultimateLeft = ultimateTotal = ultimateDenied = ultimateReady = 0;
+		ChronoSpeedClient.reset();
 	}
 
 	@Override
@@ -150,6 +151,7 @@ public final class ChronoPowerClient implements PowerClient {
 
 	@Override
 	public void tick(Minecraft minecraft, LocalPlayer player) {
+		ChronoSpeedClient.tick(player, activeLeft[OVERCLOCK] > 0);
 		for (int i = 0; i < ChronoSync.ABILITIES; i++) {
 			if (cooldownLeft[i] > 0 && --cooldownLeft[i] == 0) {
 				readyFlash[i] = 8;
@@ -188,7 +190,7 @@ public final class ChronoPowerClient implements PowerClient {
 	@Override
 	public void onKey(LocalPlayer player, PowerKey key, boolean down) {
 		int i = key.ordinal();
-		if (down && cooldownLeft[i] > 0) {
+		if (down && cooldownLeft[i] > 0 && !(i == OVERCLOCK && activeLeft[OVERCLOCK] > 0)) {
 			deniedFlash[i] = 6;
 			Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.COMPARATOR_CLICK, 0.6F, 0.5F));
 		}
