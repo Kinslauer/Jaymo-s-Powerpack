@@ -159,6 +159,8 @@ public final class WebSwing {
 	static final double PERCH_FORWARD = 0.22;
 	// ===============================================================================================================
 
+	/** The rope length is sent to the server (for everyone else to draw) when it's changed by this much (blocks). */
+	private static final double ROPE_SYNC_CHANGE = 0.3;
 	/** Vanilla's air drag, which the swing and flight undo before applying their own. */
 	private static final double VANILLA_AIR_DRAG = 0.91;
 	private static final double VANILLA_AIR_DRAG_Y = 0.98;
@@ -178,6 +180,8 @@ public final class WebSwing {
 		int travel;
 		/** The creature, player or corpse the web is stuck to (its anchor follows it), or -1 for a block. */
 		int entityId = -1;
+		/** The rope length the server last heard (for everyone else's drawing of it). */
+		double sentRope;
 
 		Strand(int hand) {
 			this.hand = hand;
@@ -316,6 +320,7 @@ public final class WebSwing {
 		strand.swingTicks = 0;
 		double distance = strand.anchor.distanceTo(player.position().add(0.0, ROPE_HEIGHT, 0.0));
 		strand.rope = Math.max(ROPE_MIN, distance * ATTACH_SLACK);
+		strand.sentRope = distance;
 		strand.travel = (int)(distance / (com.jaymospowers.power.web.WebSymbiote.suitShown(player) ? WebGrowth.ROPE_SPEED : WebGrowth.WEB_SPEED));
 		ClientPlayNetworking.send(new WebNet.Swing(strand.hand, true, strand.anchor, strand.entityId));
 		play(player, SoundEvents.FISHING_BOBBER_THROW, 0.9F, 1.7F + player.getRandom().nextFloat() * 0.2F);
@@ -573,6 +578,11 @@ public final class WebSwing {
 			Vec3 to = strand.anchor.subtract(body);
 			if (to.lengthSqr() > 1.0E-8) {
 				pullDir = pullDir.add(to.normalize());
+			}
+			// everyone else draws the rope hanging by how much line is out: tell the server when it's changed
+			if (Math.abs(strand.rope - strand.sentRope) > ROPE_SYNC_CHANGE && player.tickCount % 2 == 0) {
+				strand.sentRope = strand.rope;
+				ClientPlayNetworking.send(new WebNet.Rope(strand.hand, (float)strand.rope));
 			}
 		}
 		// Jump: rocket along the arc (the swing's own direction, square to the webs)
@@ -1175,6 +1185,19 @@ public final class WebSwing {
 		for (int i = 0; i < count; i++) {
 			player.level().addParticle(ParticleTypes.ITEM_COBWEB, at.x, at.y, at.z, rnd(player) * 0.05, rnd(player) * 0.05, rnd(player) * 0.05);
 		}
+	}
+
+	/**
+	 * How much slack (blocks: rope out, less the distance it spans) the local player's swing web from {@code hand} has;
+	 * negative when it's stretched past its length. 0 when there's none out.
+	 */
+	double slack(int hand) {
+		Strand strand = strands[hand];
+		LocalPlayer player = Minecraft.getInstance().player;
+		if (!strand.attached || strand.travel > 0 || player == null) {
+			return 0.0;
+		}
+		return strand.rope - strand.anchor.distanceTo(player.position().add(0.0, ROPE_HEIGHT, 0.0));
 	}
 
 	/** Where the local player's own web from {@code hand} currently ends, or null. Zips and yanks come from the main hand. */

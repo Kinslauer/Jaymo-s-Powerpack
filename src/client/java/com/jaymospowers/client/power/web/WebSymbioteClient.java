@@ -331,6 +331,12 @@ public final class WebSymbioteClient {
 				player.setDeltaMovement(payload.velocity());
 			}
 		});
+		ClientPlayNetworking.registerGlobalReceiver(WebNet.Shove.TYPE, (payload, context) -> {
+			LocalPlayer player = context.player();
+			if (player != null) {
+				player.setDeltaMovement(player.getDeltaMovement().add(payload.add()));
+			}
+		});
 		ClientPlayNetworking.registerGlobalReceiver(WebNet.Sense.TYPE, (payload, context) -> {
 			THREATS.clear();
 			THREATS.addAll(payload.ids());
