@@ -119,13 +119,25 @@ final class ZFighterKi {
 	static final double BEAM_SEEN = 160.0;
 	/** How far ahead of its middle (in its sizes) the Spirit Bomb's leading edge meets the ground. */
 	static final double SPIRIT_LEAD = 0.6;
-	/** Once it meets the ground it grinds down this slowly, this long, before it bursts. */
+	/**
+	 * Whatever block it meets (ground, wall, roof), it embeds itself: it grinds in, glowing brighter all the while, this
+	 * long (ticks), sinking this share of its size into the blocks (never slower than {@link #SPIRIT_SINK_SPEED}), then bursts.
+	 */
 	static final double SPIRIT_SINK_SPEED = 0.15;
-	static final int SPIRIT_SINK_TICKS = 40;
+	static final int SPIRIT_SINK_TICKS = 60;
+	static final double SPIRIT_EMBED = 0.7;
+	/** Flown this long (ticks) without meeting anything, it drops straight down; this much longer, it bursts where it is. */
+	static final int SPIRIT_FALL_AFTER = 200;
+	static final int SPIRIT_FALL_LIMIT = 400;
+	static final double SPIRIT_FALL_SPEED = 1.2;
 	/** The ring of blasts round the main one: how many, how far out (in its sizes) and how strong (of the main one). */
 	static final int SPIRIT_RING = 8;
 	static final double SPIRIT_RING_AT = 0.7;
 	static final float SPIRIT_RING_POWER = 0.55F;
+	/** And an outer ring, so the blast tears up a wide area. */
+	static final int SPIRIT_OUTER_RING = 12;
+	static final double SPIRIT_OUTER_AT = 1.4;
+	static final float SPIRIT_OUTER_POWER = 0.4F;
 
 	// ---- Flash Step ----
 	static final float STEP_KI = 15.0F;
@@ -409,11 +421,11 @@ final class ZFighterKi {
 		DustParticleOptions dust = new DustParticleOptions(bolt.color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : bolt.color,
 			bolt.kind == BOMB || bolt.kind == SPIRIT ? 3.0F : 1.8F);
 		double reach = 1.0 + bolt.size;
-		EntityHitResult hit = ProjectileUtil.getEntityHitResult(owner, from, end, new AABB(from, end).inflate(reach),
+		EntityHitResult hit = bolt.kind == SPIRIT ? null : ProjectileUtil.getEntityHitResult(owner, from, end, new AABB(from, end).inflate(reach),
 			e -> e instanceof LivingEntity living && living.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && e != owner
 				&& !bolt.struck.contains(e.getId()) && (bolt.kind != SPIRIT || ZFighterTechniques.foe(owner, living)),
 			from.distanceToSqr(end));
-		if (hit == null && bolt.size > 0.0) {
+		if (hit == null && bolt.size > 0.0 && bolt.kind != SPIRIT) {
 			// a big ball catches what it brushes past, not just what's dead ahead
 			for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, new AABB(from, end).inflate(bolt.size),
 				e -> e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && e != owner && (bolt.kind != SPIRIT || ZFighterTechniques.foe(owner, e)))) {
@@ -439,11 +451,11 @@ final class ZFighterKi {
 		}
 		if (block.getType() != HitResult.Type.MISS) {
 			if (bolt.kind == SPIRIT) {
-				// it doesn't burst on touching the ground: it grinds down into it first
+				// it never bursts on touching: it embeds itself in whatever it met first, grinding in
 				bolt.sinking = 1;
 				bolt.pos = end;
-				bolt.velocity = bolt.velocity.normalize().scale(SPIRIT_SINK_SPEED);
-				ZFighterTechniques.spiritFx(level, bolt.fxId, end, bolt.size);
+				bolt.velocity = bolt.velocity.normalize().scale(Math.max(SPIRIT_SINK_SPEED, bolt.size * SPIRIT_EMBED / SPIRIT_SINK_TICKS));
+				ZFighterTechniques.spiritFx(level, bolt.fxId, end, bolt.size, 0.0F);
 				return true;
 			}
 			if (bolt.kind == BOMB) {
@@ -455,10 +467,17 @@ final class ZFighterKi {
 		}
 		draw(level, bolt, from, dust);
 		if (bolt.kind == SPIRIT) {
-			ZFighterTechniques.spiritFx(level, bolt.fxId, to, bolt.size);
+			ZFighterTechniques.spiritFx(level, bolt.fxId, to, bolt.size, 0.0F);
 		}
 		bolt.pos = to;
-		if (++bolt.age >= bolt.life) {
+		if (bolt.kind == SPIRIT && ++bolt.age < SPIRIT_FALL_LIMIT) {
+			if (bolt.age == SPIRIT_FALL_AFTER) {
+				// thrown at the sky: it comes down to earth instead of bursting in the air
+				bolt.velocity = new Vec3(0.0, -SPIRIT_FALL_SPEED, 0.0);
+			}
+			return true;
+		}
+		if (bolt.kind == SPIRIT || ++bolt.age >= bolt.life) {
 			if (bolt.kind == BOMB || bolt.kind == SPIRIT) {
 				burst(owner, bolt, to);
 			}
@@ -558,6 +577,12 @@ final class ZFighterKi {
 				level.explode(owner, source, GROUND_ONLY, at.x + Math.cos(a) * r, at.y, at.z + Math.sin(a) * r, bolt.burst * SPIRIT_RING_POWER, false,
 					bolt.griefing ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
 			}
+			for (int i = 0; i < SPIRIT_OUTER_RING; i++) {
+				double a = (i + 0.5) * Math.PI * 2.0 / SPIRIT_OUTER_RING;
+				double r = bolt.size * SPIRIT_OUTER_AT;
+				level.explode(owner, source, GROUND_ONLY, at.x + Math.cos(a) * r, at.y + bolt.size * 0.3, at.z + Math.sin(a) * r,
+					bolt.burst * SPIRIT_OUTER_POWER, false, bolt.griefing ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
+			}
 		}
 		DustParticleOptions dust = new DustParticleOptions(bolt.color, 3.0F);
 		level.sendParticles(dust, true, false, at.x, at.y, at.z, (int)(30 + bolt.radius * 10), bolt.radius * 0.4, bolt.radius * 0.4,
@@ -575,8 +600,17 @@ final class ZFighterKi {
 		ServerLevel level = bolt.level;
 		bolt.pos = bolt.pos.add(bolt.velocity);
 		Vec3 at = bolt.pos;
-		ZFighterTechniques.spiritFx(level, bolt.fxId, at, bolt.size);
+		// brighter and brighter till it goes
+		float glow = Mth.clamp(bolt.sinking / (float)SPIRIT_SINK_TICKS, 0.0F, 1.0F);
+		ZFighterTechniques.spiritFx(level, bolt.fxId, at, bolt.size, glow);
 		RandomSource random = level.getRandom();
+		int flashes = (int)(2 + glow * glow * 16);
+		level.sendParticles(ParticleTypes.END_ROD, true, false, at.x, at.y, at.z, flashes, bolt.size * 0.5, bolt.size * 0.5, bolt.size * 0.5,
+			0.1 + glow * 0.4);
+		if (glow > 0.6F) {
+			level.sendParticles(new DustParticleOptions(0xFFFFFF, 4.0F), true, false, at.x, at.y + bolt.size * 0.5, at.z, 1, bolt.size * 0.3, 0.2, bolt.size * 0.3,
+				0.0);
+		}
 		for (int i = 0; i < 12; i++) {
 			double a = random.nextDouble() * Math.PI * 2.0;
 			double r = bolt.size * (0.5 + random.nextDouble() * 0.6);
@@ -588,8 +622,8 @@ final class ZFighterKi {
 					ground.getZ() + 0.5, 6, 0.4, 0.6, 0.4, 0.4);
 			}
 		}
-		if (bolt.sinking % 5 == 1) {
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 4.0F, 0.5F);
+		if (bolt.sinking % Math.max(2, 6 - (int)(glow * 4)) == 1) {
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 4.0F, 0.5F + glow * 0.6F);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 2.0F, 0.4F);
 		}
 		if (++bolt.sinking >= SPIRIT_SINK_TICKS) {
