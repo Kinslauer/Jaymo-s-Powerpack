@@ -1,6 +1,7 @@
 package com.jaymospowers.power.arsenal;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.armory.TaczGuns;
 import com.jaymospowers.core.Fate;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
@@ -41,6 +42,9 @@ import net.minecraft.world.phys.Vec3;
  * brings the pair ({@link #PAIR_CHANCE}; always the first time). Pinned (Sneak + Reach holding one), they're the only
  * thing the rift gives you, a pair every Reach. Fire one (right click), drop it spent, and a fresh loaded one is
  * already in your hand: no Reach, no wait.
+ * <p>(0.10.43) With TaCZ installed the pair are TaCZ guns instead ({@code jaymospowers:void_flintlock}, our own model
+ * in the void palette, from tools/gen_tacz_guns.py): never reloaded, each shot is followed by the drop and a fresh one
+ * pulled from the rift (its bolt animation), and its one shot is topped up here while it's summoned ({@link #tickTacz}).
  */
 public final class ArsenalFlintlock {
 	/** The shot: reach, damage (the void adds its share), how far it throws. */
@@ -49,6 +53,8 @@ public final class ArsenalFlintlock {
 	static final double KNOCKBACK = 0.5;
 	/** Chance a Reach in the Void Armory brings the pair (unpinned). */
 	static final float PAIR_CHANCE = 0.35F;
+	/** The TaCZ gun id (jaymospowers:...) of the flintlock when TaCZ is installed. */
+	static final String TACZ_GUN = "void_flintlock";
 
 	public static Item FLINTLOCK;
 	/** {@code jaymospowers:spent}: this flintlock has been fired. */
@@ -90,9 +96,33 @@ public final class ArsenalFlintlock {
 		}
 		player.setAttached(FOUND, true);
 		List<ItemStack> pair = new ArrayList<>();
-		pair.add(new ItemStack(FLINTLOCK));
-		pair.add(new ItemStack(FLINTLOCK));
+		pair.add(fresh());
+		pair.add(fresh());
 		return pair;
+	}
+
+	/** A loaded flintlock: the TaCZ one when TaCZ is in, else ours. */
+	static ItemStack fresh() {
+		ItemStack gun = TaczGuns.gun(TACZ_GUN);
+		return gun.isEmpty() ? new ItemStack(FLINTLOCK) : gun;
+	}
+
+	/** Whether {@code stack} is the Void Armory's flintlock, either kind. */
+	public static boolean isFlintlock(ItemStack stack) {
+		return stack.is(FLINTLOCK) || TaczGuns.is(stack, TACZ_GUN);
+	}
+
+	/** Summoned TaCZ flintlocks in hand never run dry: the shot is back by the time the fresh one is pulled. */
+	static void tickTacz(ServerPlayer player) {
+		if (!TaczGuns.LOADED) {
+			return;
+		}
+		for (InteractionHand hand : InteractionHand.values()) {
+			ItemStack stack = player.getItemInHand(hand);
+			if (Summoned.is(stack) && TaczGuns.is(stack, TACZ_GUN)) {
+				TaczGuns.topUp(stack, 1);
+			}
+		}
 	}
 
 	/**

@@ -2,6 +2,14 @@ package com.jaymospowers.armory;
 
 import com.jaymospowers.JaymosPowers;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
 
 /**
  * (0.10.43) Our flintlocks in TaCZ: the musket, blunderbuss and flintlock pistol are a gunpack of our own
@@ -28,6 +36,44 @@ public final class TaczGuns {
 				.invoke(null, JaymosPowers.class, PACK);
 		} catch (ReflectiveOperationException | LinkageError e) {
 			JaymosPowers.LOGGER.warn("Couldn't hand our flintlocks to TaCZ", e);
+		}
+	}
+
+	/** One of our guns by name ({@code musket}, {@code void_flintlock}, ...), loaded; empty without TaCZ. */
+	public static ItemStack gun(String name) {
+		Item item = LOADED ? BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath("tacz", "modern_kinetic_gun")) : Items.AIR;
+		if (item == Items.AIR) {
+			return ItemStack.EMPTY;
+		}
+		CompoundTag tag = new CompoundTag();
+		tag.putString("GunId", JaymosPowers.MOD_ID + ":" + name);
+		tag.putString("GunFireMode", "SEMI");
+		tag.putInt("GunCurrentAmmoCount", 1);
+		tag.putBoolean("HasBulletInBarrel", true);
+		ItemStack stack = new ItemStack(item);
+		stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+		return stack;
+	}
+
+	/** Whether {@code stack} is our TaCZ gun {@code name}. */
+	public static boolean is(ItemStack stack, String name) {
+		if (!LOADED || stack.isEmpty()) {
+			return false;
+		}
+		CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+		return data != null && (JaymosPowers.MOD_ID + ":" + name).equals(data.copyTag().getStringOr("GunId", ""));
+	}
+
+	/** Puts {@code n} rounds back in a TaCZ gun's magazine, if it has fewer. */
+	public static void topUp(ItemStack stack, int n) {
+		CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+		if (data == null) {
+			return;
+		}
+		CompoundTag tag = data.copyTag();
+		if (tag.getIntOr("GunCurrentAmmoCount", 0) < n) {
+			tag.putInt("GunCurrentAmmoCount", n);
+			stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
 		}
 	}
 }

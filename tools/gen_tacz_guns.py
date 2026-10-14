@@ -14,6 +14,8 @@ gunpack.meta.json). Jaymo's Powers hands it to TaCZ when TaCZ is installed (armo
   (muzzle up, powder down the barrel, ramrod drawn, rammed twice, returned, hammer cocked) and an inspect.
 - tacz_sounds/flintlock/*.ogg: synthesised (pan flash + boom, ramrod scrape, clicks); needs ffmpeg.
 - data: gun stats, two ammo types (musket balls, shot) and Gun Smith Table / Ammo Workbench recipes.
+- void_flintlock: Arsenal's Void Armory pistol in the void palette, no recipe; it never reloads: after each shot it's
+  dropped and a fresh one pulled up (a bolt-action "bolt" animation), and Jaymo's Powers refills its one shot.
 
 Hand poses are first guesses (arms are placed by the animations); tune the HANDS_* numbers after looking in game.
 
@@ -47,11 +49,18 @@ BASE = {
 }
 
 
-def atlas():
+# the Void Armory's flintlock (Arsenal): ebony, violet gunmetal, amethyst fittings, a flint lit with void fire
+VOID = {
+    "wood": (42, 22, 52), "wood_dark": (82, 44, 98), "steel": (58, 50, 82), "steel_dark": (34, 30, 44),
+    "brass": (176, 120, 230), "flint": (236, 110, 255), "black": (20, 10, 26), "skin": (200, 160, 130),
+}
+
+
+def atlas(base=BASE):
     rnd = random.Random(7)
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
     for mat, (ox, oy) in SWATCH.items():
-        r, g, b = BASE[mat]
+        r, g, b = base[mat]
         for y in range(16):
             for x in range(16):
                 n = rnd.randint(-6, 6)
@@ -224,8 +233,8 @@ def long_gun(ident, barrel_end, bell, brass_barrel):
     return m, {"muzzle": muzzle, "rod_len": -6 - (barrel_end + 0.5), "bore": bore, "rod_y": 7.9}
 
 
-def pistol():
-    m = Model("flintlock_pistol")
+def pistol(ident="flintlock_pistol"):
+    m = Model(ident)
     bore = 9.1
     end = -15.0
     frame(m, False, end - 0.5, bore)
@@ -253,7 +262,7 @@ def pistol():
 # ---- pictures drawn from the boxes ----------------------------------------------------------------------------------
 
 
-def side_view(m, size, pad, colour=None):
+def side_view(m, size, pad, colour=None, base=BASE):
     """Project every box onto the z/y plane (muzzle left), painted by material or in one colour, fitted to size."""
     boxes = []
     for name in m.order:
@@ -279,7 +288,7 @@ def side_view(m, size, pad, colour=None):
     for c, mat in order:
         poly = [(ox + (z - min(zs)) * sc, h - oy - (y - min(ys)) * sc) for z, y in corners(c)]
         hull = convex(poly)
-        fill = colour or BASE[mat] + (255,)
+        fill = colour or base[mat] + (255,)
         dr.polygon(hull, fill=fill)
     if colour is None:
         img = outlined(img)
@@ -338,7 +347,10 @@ def outlined(img):
 def ammo_icon(kind):
     img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
     dr = ImageDraw.Draw(img)
-    if kind == "musket_ball":
+    if kind == "void_shot":
+        dr.ellipse((9, 9, 23, 23), fill=(112, 64, 160, 255), outline=(20, 10, 26, 255))
+        dr.ellipse((12, 12, 16, 16), fill=(236, 110, 255, 255))
+    elif kind == "musket_ball":
         for cx, cy in ((11, 19), (20, 20), (16, 12)):
             dr.ellipse((cx - 5, cy - 5, cx + 5, cy + 5), fill=(92, 94, 100, 255), outline=(30, 30, 34, 255))
             dr.ellipse((cx - 3, cy - 3, cx - 1, cy - 1), fill=(170, 172, 178, 255))
@@ -447,11 +459,46 @@ def inspect(hands, empty):
                          "2.0": {"effect": f"{NS}:flintlock/draw"}}}
 
 
+def repull(hands, length):
+    """The Void Armory's flintlock after a shot: dropped spent out of sight, a fresh one pulled up from the rift."""
+    s = length / 0.85
+    T = lambda t: round(t * s, 4)  # noqa: E731
+    gone_rot, gone_pos = [35, -10, 25], [2, -16, 5]
+    rise_rot, rise_pos = [-15, 15, -30], [-2, -14, 3]
+    lrot, lpos = hands["lefthand"]
+    return {"animation_length": round(length, 4), "loop": "hold_on_last_frame", "bones": {
+        "root": {"rotation": keys([(0, [0, 0, 0]), (T(0.25), gone_rot), (T(0.35), rise_rot), (T(0.75), [2, 0, 3]),
+                                   (T(0.85), [0, 0, 0])]),
+                 "position": keys([(0, [0, 0, 0]), (T(0.25), gone_pos), (T(0.35), rise_pos), (T(0.75), [0, 0.4, 0]),
+                                   (T(0.85), [0, 0, 0])])},
+        "camera": {"rotation": keys([(0, [0, 0, 0]), (T(0.2), [0.6, -0.4, -1]), (T(0.6), [-0.4, 0.3, 0.8]),
+                                     (T(0.85), [0, 0, 0])])},
+        # the left hand lets go and comes back to the fresh gun
+        "lefthand": {"rotation": keys([(0, lrot), (T(0.2), add(lrot, [20, 0, -15])), (T(0.65), add(lrot, [20, 0, -15])),
+                                       (T(0.85), lrot)]),
+                     "position": keys([(0, lpos), (T(0.2), add(lpos, [3, -4, 4])), (T(0.65), add(lpos, [3, -4, 4])),
+                                       (T(0.85), lpos)]),
+                     "scale": SCALE},
+        # the one that comes back is loaded: cocked, pan shut
+        "hammer": {"rotation": keys([(0, HAMMER_DOWN), (T(0.3), HAMMER_DOWN), (T(0.31), HAMMER_COCKED)])},
+        "frizzen": {"rotation": keys([(0, FRIZZEN_OPEN), (T(0.3), FRIZZEN_OPEN), (T(0.31), FRIZZEN_SHUT)])},
+    }, "sound_effects": {"0": {"effect": f"{NS}:flintlock/put_away"},
+                        f"{T(0.32):.4g}": {"effect": f"{NS}:flintlock/void_pull"}}}
+
+
 def animations(hands, g, long, reload_len, kick):
-    return {"format_version": "1.8.0", "animations": {
-        "static_idle": idle(hands, False), "static_bolt_caught": idle(hands, True), "shoot": shoot(kick),
-        "reload_empty": reload(hands, g, long, reload_len), "inspect": inspect(hands, False),
-        "inspect_empty": inspect(hands, True)}}
+    anims = {"static_idle": idle(hands, False), "static_bolt_caught": idle(hands, True), "shoot": shoot(kick),
+             "reload_empty": reload(hands, g, long, reload_len), "inspect": inspect(hands, False),
+             "inspect_empty": inspect(hands, True)}
+    return {"format_version": "1.8.0", "animations": anims}
+
+
+def void_animations(hands, kick, length):
+    """No reloading: every shot is followed by the drop and the pull (TaCZ's bolt), which is also its reload."""
+    anims = {"static_idle": idle(hands, False), "static_bolt_caught": idle(hands, True), "shoot": shoot(kick),
+             "bolt": repull(hands, length), "reload_empty": repull(hands, length), "inspect": inspect(hands, False),
+             "inspect_empty": inspect(hands, True)}
+    return {"format_version": "1.8.0", "animations": anims}
 
 
 # ---- sounds ---------------------------------------------------------------------------------------------------------
@@ -537,12 +584,28 @@ def rustle(seed, secs):
     return [a * g * e * 0.6 for a, g, e in zip(x, grains, env(n, 800, secs * RATE / 2.5))]
 
 
+def void_pull():
+    """A rising rush out of the rift with a glassy chime on top."""
+    n = int(0.55 * RATE)
+    sweep, y = [], 0.0
+    src = noise(n, 18)
+    for i, x in enumerate(src):
+        a = 0.02 + 0.25 * (i / n) ** 2
+        y += a * (x - y)
+        sweep.append(y)
+    rush = [v * min(1.0, i / (0.3 * RATE)) * math.exp(-max(0, i - 0.4 * RATE) / (0.03 * RATE)) * 2.5
+            for i, v in enumerate(sweep)]
+    chime = [sum(math.sin(2 * math.pi * f * i / RATE) for f in (1320, 1980, 2640)) * 0.08
+             * math.exp(-max(0, i - 0.38 * RATE) / (0.12 * RATE)) * (1 if i > 0.38 * RATE else 0) for i in range(n + 6000)]
+    return mix(rush, chime)
+
+
 SOUNDS = {
     "musket_shoot": lambda: shot(False), "musket_shoot_3p": lambda: shot(True),
     "pistol_shoot": lambda: scale(shot(False), 0.8), "pistol_shoot_3p": lambda: scale(shot(True), 0.8),
     "powder": lambda: rustle(11, 0.5), "rod_draw": lambda: scrape(12), "ram": lambda: thud(13),
     "frizzen": lambda: click(14), "cock": lambda: click(15, 0.05), "draw": lambda: rustle(16, 0.35),
-    "put_away": lambda: rustle(17, 0.3),
+    "put_away": lambda: rustle(17, 0.3), "void_pull": lambda: void_pull(),
 }
 
 
@@ -592,6 +655,16 @@ GUNS = {
         "aim_time": 0.18, "zoom": 1.2, "sound": "pistol",
         "recipe": [("tag", "c:ingots/iron", 2), ("tag", "minecraft:planks", 3), ("item", "minecraft:flint", 1)],
     },
+    # Arsenal's Void Armory flintlock: summoned only (no recipe), never reloaded (Jaymo's Powers keeps its one
+    # shot topped up while it's summoned); damage is the old 9, and the void adds its share to summoned weapons'
+    # hits (ArsenalVoid.modifyDamage).
+    "void_flintlock": {
+        "type": "pistol", "defaults": "pistol", "ammo": "void_shot", "pellets": 1, "damage": 9,
+        "falloff": [(24, 9), (48, 7), ("infinite", 4)], "speed": 160, "gravity": 0.05,
+        "reload": (0.75, 0.85), "inacc": (2.5, 3.5, 2, 1.5, 0.8), "recoil": (5.0, 1.2), "weight": 1.2, "kick": 1.0,
+        "aim_time": 0.15, "zoom": 1.2, "sound": "pistol", "bolt": "manual_action", "atlas": "flintlocks_void",
+        "recipe": None,
+    },
 }
 AMMO = {
     "musket_ball": {"stack": 32, "tracer": "#FFE2B0", "group": "lc_specialized", "count": 16,
@@ -600,16 +673,20 @@ AMMO = {
     "shot": {"stack": 24, "tracer": "#FFE2B0", "group": "shotgun_shells", "count": 8,
              "recipe": [("item", "minecraft:iron_nugget", 9), ("item", "minecraft:gunpowder", 2),
                         ("item", "minecraft:leather", 1)]},
+    "void_shot": {"stack": 64, "tracer": "#E070FF", "group": "alternative_proj", "count": 1, "recipe": None},
 }
 NAMES = {"musket": ("Musket", "A long smoothbore flintlock. One ball, a long reload, and a hard hit out to 24 blocks."),
          "blunderbuss": ("Blunderbuss", "A brass flintlock with a flared mouth: a fistful of shot, deadly up close."),
-         "flintlock_pistol": ("Flintlock Pistol", "A single-shot horse pistol, quicker to load than a musket.")}
+         "flintlock_pistol": ("Flintlock Pistol", "A single-shot horse pistol, quicker to load than a musket."),
+         "void_flintlock": ("Void Flintlock", "Out of the rift, one shot at a time: a spent one is dropped and a "
+                                              "loaded one pulled from the void.")}
 
 
 def gun_data(g):
     inacc = dict(zip(("stand", "move", "sneak", "lie", "aim"), g["inacc"]))
     return {
-        "ammo": f"{NS}:{g['ammo']}", "ammo_amount": 1, "extended_mag_ammo_amount": [1, 1, 1], "bolt": "open_bolt",
+        "ammo": f"{NS}:{g['ammo']}", "ammo_amount": 1, "extended_mag_ammo_amount": [1, 1, 1],
+        "bolt": g.get("bolt", "open_bolt"),
         "rpm": 60, "fire_mode": ["semi"],
         "bullet": {"life": 1.0, "bullet_amount": g["pellets"], "damage": g["damage"], "tracer_count_interval": 0,
                    "extra_damage": {"armor_ignore": 0.2, "head_shot_multiplier": 1.6, "damage_adjust": [
@@ -624,13 +701,13 @@ def gun_data(g):
                                                                 "range_angle": 30, "damage": 4, "knockback": 0.8,
                                                                 "prep": 0.1}},
         "allow_attachment_types": [],
-    }
+    } | ({"bolt_action_time": g["reload"][1]} if g.get("bolt") == "manual_action" else {})
 
 
 def display(name, g, long):
     snd = g["sound"]
     return {
-        "model": f"{NS}:gun/{name}_geo", "texture": f"{NS}:gun/uv/flintlocks",
+        "model": f"{NS}:gun/{name}_geo", "texture": f"{NS}:gun/uv/{g.get('atlas', 'flintlocks')}",
         "hud": f"{NS}:gun/hud/{name}", "slot": f"{NS}:gun/slot/{name}",
         "animation": f"{NS}:{name}", "use_default_animation": g["defaults"], "third_person_animation": "default",
         "transform": {"scale": {"thirdperson": [0.6, 0.6, 0.6], "ground": [0.6, 0.6, 0.6],
@@ -664,39 +741,45 @@ def main():
                                     "desc": f"pack.{NS}.jaymos_flintlocks.desc", "license": "Jaymo's Powers",
                                     "authors": ["Jaymo's Powers"], "date": "2026-10-14"})
     save(f"{A}/textures/gun/uv/flintlocks.png", atlas())
+    save(f"{A}/textures/gun/uv/flintlocks_void.png", atlas(VOID))
     models = {"musket": (*long_gun("musket", -44.0, False, False), True),
               "blunderbuss": (*long_gun("blunderbuss", -30.0, True, True), True),
-              "flintlock_pistol": (*pistol(), False)}
+              "flintlock_pistol": (*pistol(), False), "void_flintlock": (*pistol("void_flintlock"), False)}
     lang = {f"pack.{NS}.jaymos_flintlocks.name": "Jaymo's Flintlocks",
             f"pack.{NS}.jaymos_flintlocks.desc": "Muskets, blunderbusses and pistols for Jaymo's Powers."}
     for name, (m, geo, long) in models.items():
         g = GUNS[name]
         dump(f"{A}/geo_models/gun/{name}_geo.json", m.json())
-        save(f"{A}/textures/gun/slot/{name}.png", side_view(m, (64, 64), 2))
+        base = VOID if g.get("atlas") == "flintlocks_void" else BASE
+        save(f"{A}/textures/gun/slot/{name}.png", side_view(m, (64, 64), 2, base=base))
         save(f"{A}/textures/gun/hud/{name}.png", side_view(m, (384, 128), 6, (235, 235, 235, 230)))
         hands = HANDS_LONG if long else HANDS_PISTOL
-        dump(f"{A}/animations/{name}.animation.json",
-             animations(hands, geo, long, g["reload"][1] - 0.1, g["kick"]))
+        anims = void_animations(hands, g["kick"], g["reload"][1]) if g.get("bolt") == "manual_action" \
+            else animations(hands, geo, long, g["reload"][1] - 0.1, g["kick"])
+        dump(f"{A}/animations/{name}.animation.json", anims)
         dump(f"{A}/display/guns/{name}_display.json", display(name, g, long))
         dump(f"{D}/index/guns/{name}.json", {"name": f"{NS}.gun.{name}.name", "display": f"{NS}:{name}_display",
                                              "data": f"{NS}:{name}_data", "tooltip": f"{NS}.gun.{name}.desc",
                                              "type": g["type"], "sort": 1})
         dump(f"{D}/data/guns/{name}_data.json", gun_data(g))
-        dump(f"{D}/recipe/gun/{name}.json", {"materials": [ingredient(*i) for i in g["recipe"]],
-                                             "result": {"type": "gun", "id": f"{NS}:{name}"},
-                                             "type": "tacz:gun_smith_table_crafting"})
+        if g["recipe"]:
+            dump(f"{D}/recipe/gun/{name}.json", {"materials": [ingredient(*i) for i in g["recipe"]],
+                                                 "result": {"type": "gun", "id": f"{NS}:{name}"},
+                                                 "type": "tacz:gun_smith_table_crafting"})
         lang[f"{NS}.gun.{name}.name"], lang[f"{NS}.gun.{name}.desc"] = NAMES[name]
     for name, a in AMMO.items():
         save(f"{A}/textures/ammo/slot/{name}.png", ammo_icon(name))
         dump(f"{A}/display/ammo/{name}_display.json", {"slot": f"{NS}:ammo/slot/{name}", "tracer_color": a["tracer"]})
         dump(f"{D}/index/ammo/{name}.json", {"name": f"{NS}.ammo.{name}.name", "display": f"{NS}:{name}_display",
                                              "stack_size": a["stack"], "sort": 1})
-        dump(f"{D}/recipe/ammo/{name}.json", {"materials": [ingredient(*i) for i in a["recipe"]],
-                                              "result": {"type": "ammo", "group": a["group"], "id": f"{NS}:{name}",
-                                                         "count": a["count"]},
-                                              "type": "tacz:gun_smith_table_crafting"})
+        if a["recipe"]:
+            dump(f"{D}/recipe/ammo/{name}.json", {"materials": [ingredient(*i) for i in a["recipe"]],
+                                                  "result": {"type": "ammo", "group": a["group"],
+                                                             "id": f"{NS}:{name}", "count": a["count"]},
+                                                  "type": "tacz:gun_smith_table_crafting"})
     lang[f"{NS}.ammo.musket_ball.name"] = "Musket Balls"
     lang[f"{NS}.ammo.shot.name"] = "Shot"
+    lang[f"{NS}.ammo.void_shot.name"] = "Void Shot"
     dump(f"{A}/lang/en_us.json", dict(sorted(lang.items())))
     for name, make in SOUNDS.items():
         path = f"{A}/tacz_sounds/flintlock/{name}.ogg"
