@@ -2645,3 +2645,10 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   sail or mast; `up`/`down`); 36 shapes of sheet from `tools/gen_sailing.py`. Hung facing aft, a sail is turned to
   face forward as the ship casts off. While the ship's sails are furled (W/S) they're drawn rolled up on their yards
   (`furled`, the ship's sail setting synced to clients).
+
+## 0.7.8: musketeers carry Jaymo's flintlocks (pack 0.10.43)
+- **`TaczGuns`:** with TaCZ installed, our TaCZ guns (musket, blunderbuss, flintlock pistol; the gunpack ships in
+  Jaymo's Powers) are made by item id with their gun id in custom data. Musketeers are handed the TaCZ musket
+  (`Muskets.musketStack`) and their shots stay our own; the Marksman's class card shows it with musket balls.
+  Without TaCZ nothing changes (WeaponMod's musket, or a crossbow). The Marksman perks still apply to WeaponMod's guns
+  only.

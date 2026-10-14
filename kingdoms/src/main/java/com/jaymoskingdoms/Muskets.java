@@ -66,9 +66,16 @@ final class Muskets {
 		return musket;
 	}
 
+	/** The musket a guard is handed: our TaCZ musket when TaCZ is in, else WeaponMod's (or a crossbow). */
+	static ItemStack musketStack() {
+		ItemStack gun = TaczGuns.gun("musket");
+		return gun.isEmpty() ? new ItemStack(musket()) : gun;
+	}
+
 	/** A guard with his musket in hand. */
 	static boolean armed(Folk folk) {
-		return folk.role() == Folk.GUARD && folk.getMainHandItem().is(musket());
+		ItemStack held = folk.getMainHandItem();
+		return folk.role() == Folk.GUARD && (held.is(musket()) || TaczGuns.isGun(held));
 	}
 
 	/** One of the guards who'd carry a musket in a rich enough kingdom. */
@@ -91,7 +98,7 @@ final class Muskets {
 			Faction f = Factions.get(level.getServer(), folk.factionId());
 			boolean should = picked(folk) && afford(f, armed ? KEEP_TREASURY : ARM_TREASURY);
 			if (should && !armed) {
-				folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(musket()));
+				folk.setItemSlot(EquipmentSlot.MAINHAND, musketStack());
 				folk.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
 				folk.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
 				NEXT.put(folk, level.getGameTime() + level.getRandom().nextInt(JITTER));

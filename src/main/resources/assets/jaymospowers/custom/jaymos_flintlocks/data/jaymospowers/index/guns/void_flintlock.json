@@ -1,0 +1,8 @@
+{
+  "name": "jaymospowers.gun.void_flintlock.name",
+  "display": "jaymospowers:void_flintlock_display",
+  "data": "jaymospowers:void_flintlock_data",
+  "tooltip": "jaymospowers.gun.void_flintlock.desc",
+  "type": "pistol",
+  "sort": 1
+}
