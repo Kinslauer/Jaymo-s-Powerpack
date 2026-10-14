@@ -49,6 +49,9 @@ public final class Storms {
 	/** A supercell puts down its tornado once it's this close to someone (and gathered); the chance each roll. */
 	static final double TOUCHDOWN_NEAR = 170.0;
 	static final float TOUCHDOWN_CHANCE = 0.3F;
+	/** (0.7.2) Only this share of the supercells that come on their own can put down a tornado at all (the rest just
+	 * storm): about one tornado every 60 days at the default {@link Disasters#DISASTER_DAYS}. */
+	static final float TORNADO_SUPERCELLS = 0.1F;
 	/** The odds a supercell's tornado is a monster. */
 	static final float MONSTER_CHANCE = 0.2F;
 	/** The wind's drift speed (blocks/tick) range, and how far its heading wanders per tick (radians). */
@@ -161,7 +164,9 @@ public final class Storms {
 				if (dry(level, target.blockPosition())) {
 					dustDevil(level, target.position(), random);
 				} else {
-					form(level, target.position(), Storm.SUPERCELL, random, true);
+					Storm cell = form(level, target.position(), Storm.SUPERCELL, random, true);
+					// (0.7.2) most never put one down
+					cell.spawned = random.nextFloat() >= TORNADO_SUPERCELLS;
 				}
 			}
 			return;
