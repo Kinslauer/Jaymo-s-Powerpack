@@ -22,7 +22,7 @@ import net.minecraft.world.phys.Vec3;
 final class WebLineRenderer {
 	private static final int COLOR = 0xFFEDEDED;
 	private static final int SPLAT_COLOR = 0xFFD8D8D8;
-	private static final int SEGMENTS = 12;
+	private static final int SEGMENTS = 20;
 	/** A symbiote's webs: black-purple, with a faint sheen that runs along them. */
 	private static final int DARK = 0xFF0B0710;
 	private static final int SHEEN = 0xFF1F1530;
@@ -76,9 +76,13 @@ final class WebLineRenderer {
 
 	/** Three thick black cords, from around the shoulder and arm, gathering on the same point. */
 	private static void bundle(LevelRenderContext context, Vec3 from, Vec3 to, float width) {
-		rope(context, from, to, ROPE_STRANDS, ROPE_STRAND_RADIUS, ROPE_TWIST_RADIUS);
+		bundle(context, WebLineShape.straight(from, to), from, to, width);
+	}
+
+	private static void bundle(LevelRenderContext context, WebLineShape.Shape shape, Vec3 from, Vec3 to, float width) {
+		rope(context, shape, from, to, ROPE_STRANDS, ROPE_STRAND_RADIUS, ROPE_TWIST_RADIUS);
 		// where it holds on, the black web spreads
-		splat(context, to, to.subtract(from).normalize(), width * DARK_WIDTH, true);
+		splat(context, to, to.subtract(shape.at(0.95)).normalize(), width * DARK_WIDTH, true);
 	}
 
 	/** A symbiote's cord: strands this thick (blocks), twisted this far about the middle, a turn per this many blocks. */
@@ -96,6 +100,11 @@ final class WebLineRenderer {
 	 * faces, with a faint purple-black sheen along the top, so it reads as round without any lighting.
 	 */
 	static void rope(LevelRenderContext context, Vec3 from, Vec3 to, int strands, double radius, double twist) {
+		rope(context, WebLineShape.straight(from, to), from, to, strands, radius, twist);
+	}
+
+	/** {@link #rope}, following {@code shape} (sagging, twanging) instead of straight. */
+	static void rope(LevelRenderContext context, WebLineShape.Shape shape, Vec3 from, Vec3 to, int strands, double radius, double twist) {
 		Vec3 delta = to.subtract(from);
 		double length = delta.length();
 		if (length < 1.0E-3) {
@@ -114,7 +123,7 @@ final class WebLineRenderer {
 					double angle = phase + t * length / ROPE_TURN_LENGTH * Math.PI * 2.0;
 					// tapering a little toward the far end, like a tentacle
 					double r = radius * (1.0 - 0.35 * t);
-					Vec3 center = from.add(delta.scale(t)).add(u.scale(Math.cos(angle) * twist)).add(v.scale(Math.sin(angle) * twist));
+					Vec3 center = shape.at(t).add(u.scale(Math.cos(angle) * twist)).add(v.scale(Math.sin(angle) * twist));
 					Vec3[] ring = new Vec3[ROPE_SIDES];
 					for (int j = 0; j < ROPE_SIDES; j++) {
 						double a = j * Math.PI * 2.0 / ROPE_SIDES;
@@ -268,14 +277,25 @@ final class WebLineRenderer {
 					continue;
 				}
 				// shooting out to where it sticks (the symbiote's ropes slower than a web)
-				float out = WebGrowth.fraction(player.getId() * 4L + handIndex, end, hand.distanceTo(end),
-					dark ? WebGrowth.ROPE_SPEED : WebGrowth.WEB_SPEED, false);
+				long key = player.getId() * 4L + handIndex;
+				double length = hand.distanceTo(end);
+				double speed = dark ? WebGrowth.ROPE_SPEED : WebGrowth.WEB_SPEED;
+				float out = WebGrowth.fraction(key, end, length, speed, false);
 				end = hand.lerp(end, out);
+				// how it hangs: slack sags, a fresh or just-caught line twangs, a stretched one hums and thins
+				double slack = slack(minecraft, player, handIndex, hand, end);
+				double time = level.getGameTime() + partialTick;
+				double twang = out < 1.0F ? 0.0 : Math.max(WebLineShape.stuckTwang(WebGrowth.ticks(key) - length / speed),
+					WebLineShape.caughtTwang(key, slack, time));
+				Vec3 from = hand.subtract(camera), to = end.subtract(camera);
+				WebLineShape.Shape shape = WebLineShape.of(from, to, out < 1.0F ? 0.0 : Math.max(0.0, slack), Math.max(0.0, -slack),
+					1.0 - out, twang, time, player.getId() * 31 + handIndex);
+				float lineWidth = width * WebLineShape.thin(-slack);
 				// a symbiote's lines are thick, living cords: most of that side's tendrils at once
 				if (dark) {
-					bundle(context, hand.subtract(camera), end.subtract(camera), width);
+					bundle(context, shape, from, to, lineWidth);
 				} else {
-					draw(context.poseStack(), context, hand.subtract(camera), end.subtract(camera), width, false);
+					draw(context.poseStack(), context, shape, from, to, lineWidth, false, out >= 1.0F);
 				}
 			}
 			// whatever the tendrils hold, held up on its cords
@@ -520,6 +540,25 @@ final class WebLineRenderer {
 	}
 
 	/**
+	 * The slack (blocks) on {@code player}'s line from {@code handIndex}, negative when it's stretched: the local
+	 * player's own swing webs know their rope; a Yank web holding something is {@link WebPower#TETHER_LENGTH} long, for
+	 * anyone. Other lines are drawn taut.
+	 */
+	private static double slack(Minecraft minecraft, Player player, int handIndex, Vec3 hand, Vec3 end) {
+		if (player == minecraft.player && WebPowerClient.isActive(minecraft.player)) {
+			WebSwing swing = WebPowerClient.INSTANCE.swing;
+			if (swing.strands[handIndex].attached) {
+				return swing.slack(handIndex);
+			}
+		}
+		if (handIndex == WebNet.MAIN && player.getAttached(com.jaymospowers.power.web.WebPower.line(WebNet.MAIN)) == null
+			&& player.getAttached(com.jaymospowers.power.web.WebPower.TETHER) != null) {
+			return com.jaymospowers.power.web.WebPower.TETHER_LENGTH - hand.distanceTo(end);
+		}
+		return 0.0;
+	}
+
+	/**
 	 * Where the web leaves the hand: in first person, the screen corner the hand is in (as the fishing line does it);
 	 * otherwise the posed hand at the end of the arm (see WebArms), or roughly where the hand would be.
 	 */
@@ -546,24 +585,33 @@ final class WebLineRenderer {
 	}
 
 	private static void draw(PoseStack poseStack, LevelRenderContext context, Vec3 from, Vec3 to, float width, boolean dark) {
-		Vec3 delta = to.subtract(from);
-		double length = delta.length();
-		if (length < 1.0E-3) {
+		draw(poseStack, context, WebLineShape.straight(from, to), from, to, width, dark, true);
+	}
+
+	/** A line along {@code shape} (sagging, snaking, twanging); {@code stuck}: it has reached its end, so splat there. */
+	private static void draw(PoseStack poseStack, LevelRenderContext context, WebLineShape.Shape shape, Vec3 from, Vec3 to, float width,
+		boolean dark, boolean stuck) {
+		if (to.distanceToSqr(from) < 1.0E-6) {
 			return;
 		}
-		Vec3 dir = delta.scale(1.0 / length);
-		// two directions across the line, for the splat at the anchor
-		Vec3 across = Math.abs(dir.y) < 0.95 ? dir.cross(new Vec3(0.0, 1.0, 0.0)).normalize() : dir.cross(new Vec3(1.0, 0.0, 0.0)).normalize();
-		Vec3 across2 = dir.cross(across).normalize();
+		Vec3[] points = new Vec3[SEGMENTS + 1];
+		for (int i = 0; i <= SEGMENTS; i++) {
+			points[i] = shape.at((double)i / SEGMENTS);
+		}
 		context.submitNodeCollector().submitCustomGeometry(poseStack, RenderTypes.lines(), (pose, buffer) -> {
 			for (int i = 0; i < SEGMENTS; i++) {
-				Vec3 a = from.add(delta.scale((double)i / SEGMENTS));
-				Vec3 b = from.add(delta.scale((double)(i + 1) / SEGMENTS));
-				segment(buffer, pose, a, b, dir, dark ? sheen((i + 0.5F) / SEGMENTS) : COLOR, width);
+				Vec3 d = points[i + 1].subtract(points[i]);
+				if (d.lengthSqr() < 1.0E-8) {
+					continue;
+				}
+				segment(buffer, pose, points[i], points[i + 1], d.normalize(), dark ? sheen((i + 0.5F) / SEGMENTS) : COLOR, width);
 			}
 		});
-		// a little cobweb where it sticks
-		splat(context, to, dir, width, dark);
+		if (stuck) {
+			// a little cobweb where it sticks, facing the way the line comes in
+			Vec3 in = points[SEGMENTS].subtract(points[SEGMENTS - 1]);
+			splat(context, to, in.lengthSqr() < 1.0E-8 ? to.subtract(from).normalize() : in.normalize(), width, dark);
+		}
 	}
 
 	private static void segment(VertexConsumer buffer, PoseStack.Pose pose, Vec3 a, Vec3 b, Vec3 normal, int color, float width) {

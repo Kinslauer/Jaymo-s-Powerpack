@@ -116,7 +116,7 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
 | **R** (hold) | **Web Swing.** Sticks a web where you aim. If you aim at the sky or far below you, it auto-picks an anchor above and ahead of you. Hold to swing; release to let go. While swinging: **W** on the downswing pumps speed, **Jump** reels in, **Sneak** lets out rope. | none |
 | **G** | **Web Zip.** Fires a web at the crosshair block (48 blocks) and reels you to it. Hitting a wall hops you up onto the ledge if there's one within 3 blocks. | 3 s |
 | **V** | **Web Shot.** A fast, nearly flat web ball. A hit does 1 damage and gives Slowness IV and no jumping for 4 s. It also puts a temporary cobweb at the target's feet for 5 s (only in air). | 2 s |
-| **B** | **Yank.** Webs the entity under the crosshair (24 blocks). Small things are flung to land about 2 blocks in front of you. Big things (bounding box over 2.6 m³, e.g. iron golems and horses) pull **you** to **them**. | 6 s |
+| **B** | **Yank.** Webs the entity under the crosshair (24 blocks). Small things are flung to land about 2 blocks in front of you. Things heavier than you can haul (bounding box over 4 m³, more in the suit or with friends holding it on their lines too, e.g. iron golems) pull **you** to **them**; at a torch, lantern or bell it tears it off. | 6 s |
 
 **Passives:**
 - You take no fall damage from the moment a swing web sticks, or a zip/yank-to starts, until you land. Landing means
@@ -875,3 +875,22 @@ code). No keys of their own:
   Let go of Sneak to stand; Jump out of it keeps the speed. The hitbox stays crouch-height (no sliding under one-block
   gaps; the double-tap crawl does that).
 None of them run during a web, zip, the wings, a wall run, a takeover or the symbiote's wall crawl.
+
+## 0.10.53: lines with weight (`WebLineShape`, `WebHeft`)
+Andy linked Advanced Hook Launchers and asked to adapt its line and behaviours. That mod is CC BY-ND 4.0 (no
+derivatives) and has no public source, so nothing was ported: these are our own takes on its ideas.
+- **Living lines (client, `WebLineShape`):** a slack swing web sags under its own weight (dip ≈ √(3/8 × span × slack),
+  `SAG_MAX` 6); a web snakes out through the air as it shoots (`WAVE_*`); it twangs when it sticks, and again when a
+  slack line catches you taut (`TWANG_*`, `SNAP_SLACK` 0.6); a line stretched past its length hums and thins
+  (`HUM_*`, `STRETCH_THIN`). The symbiote's corded ropes follow the same shape. Your own swing webs know their slack;
+  the Yank lead (3 blocks) sags for everyone; other players' swing webs are drawn taut (their rope isn't synced).
+- **Weight (`WebHeft`):** a catch's weight is its bounding-box volume against how much you can haul
+  (`YANK_HEAVY_VOLUME` 4, ×1.5 in the suit, ×2 in Living Armor). Over it, you're hauled to it as before. Several
+  slingers holding the same catch on their Yank lines add up, so friends can drag in what one can't. A catch over
+  `RECOIL_FROM` (35%) of your strength jerks you toward it as it comes in, and held on the lead it fights back (the
+  line pulls it more weakly and drags you along when it pulls away).
+- **Plucks riders:** Yank on a rider pulls them off their mount; aimed at a ridden mount, the web takes the rider.
+- **Rips out torches, lanterns and bells:** B aimed at one tears it off and it flies back to you (as a block break, so
+  protection and Kingdoms' crime rules apply; `RIP_COOLDOWN` 1 s).
+- **Burns:** a swing web or Yank lead running through fire, lava or a lit campfire, or stuck to a burning creature,
+  burns through and lets go (checked every `BURN_EVERY` 5 ticks).

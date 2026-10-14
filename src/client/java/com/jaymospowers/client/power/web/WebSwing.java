@@ -1177,6 +1177,19 @@ public final class WebSwing {
 		}
 	}
 
+	/**
+	 * How much slack (blocks: rope out, less the distance it spans) the local player's swing web from {@code hand} has;
+	 * negative when it's stretched past its length. 0 when there's none out.
+	 */
+	double slack(int hand) {
+		Strand strand = strands[hand];
+		LocalPlayer player = Minecraft.getInstance().player;
+		if (!strand.attached || strand.travel > 0 || player == null) {
+			return 0.0;
+		}
+		return strand.rope - strand.anchor.distanceTo(player.position().add(0.0, ROPE_HEIGHT, 0.0));
+	}
+
 	/** Where the local player's own web from {@code hand} currently ends, or null. Zips and yanks come from the main hand. */
 	@Nullable Vec3 lineEnd(int hand, float partialTick) {
 		if (strands[hand].attached) {

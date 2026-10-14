@@ -214,6 +214,17 @@ public final class WebNet {
 		}
 	}
 
+	/** Server → client: add to your own velocity (a web line hauling you toward a heavy catch), keeping your momentum. */
+	public record Shove(Vec3 add) implements CustomPacketPayload {
+		public static final Type<Shove> TYPE = new Type<>(JaymosPowers.id("web_shove"));
+		public static final StreamCodec<ByteBuf, Shove> CODEC = Vec3.STREAM_CODEC.map(Shove::new, Shove::add);
+
+		@Override
+		public Type<Shove> type() {
+			return TYPE;
+		}
+	}
+
 	/**
 	 * Server → client: the symbiote presses in on you for {@code ticks}: the screen darkens under a pulsing
 	 * blackish-purple vignette, and (if {@code growl}) a low growl plays for you alone. Sent with every whisper, and
@@ -253,6 +264,7 @@ public final class WebNet {
 		PayloadTypeRegistry.clientboundPlay().register(Escape.TYPE, Escape.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(TakeoverPath.TYPE, TakeoverPath.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Nudge.TYPE, Nudge.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(Shove.TYPE, Shove.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Sense.TYPE, Sense.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Dread.TYPE, Dread.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Wings.TYPE, Wings.CODEC);

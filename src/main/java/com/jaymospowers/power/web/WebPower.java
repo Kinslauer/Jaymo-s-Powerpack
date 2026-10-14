@@ -71,7 +71,7 @@ public final class WebPower implements Power {
 	public static final double ZIP_SPEED = 1.8;
 	/** A zip taken while gliding tows you for this long (ticks, 1.5 s), then lets go and the line falls limp. */
 	static final int GLIDE_ZIP_TICKS = 30;
-	/** Yank reach, and the bounding-box volume above which a target is "heavy" (you fly to it instead). Player = 0.65. */
+	/** Yank reach, and how much a slinger can haul (bounding-box volume; see {@link WebHeft}): heavier, you fly to it. Player = 0.65. */
 	public static final double YANK_RANGE = 24.0;
 	public static final double YANK_HEAVY_VOLUME = 4.0;
 	/**
@@ -195,6 +195,8 @@ public final class WebPower implements Power {
 		boolean tetherWasSwinging;
 		/** Game time the Yank web caught what it holds (a release soon after is a tap: a pull). */
 		long tetherSince;
+		/** What the Yank web holds weighs this share of what you (and anyone helping) can haul (see {@link WebHeft}). */
+		double tetherLoad;
 	}
 
 	/** Starts a whole-body move ({@link WebPose}) everyone sees. */
@@ -531,7 +533,9 @@ public final class WebPower implements Power {
 				continue;
 			}
 			boolean broken = false;
-			if (state.swingEntity[hand] >= 0) {
+			if (player.tickCount % WebHeft.BURN_EVERY == 0 && burnsThrough(player, hand)) {
+				broken = true;
+			} else if (state.swingEntity[hand] >= 0) {
 				broken = !tickEntityWeb(player, state, hand);
 			} else if (player.tickCount % 10 == 0) {
 				// the block it was stuck to is gone
@@ -697,6 +701,27 @@ public final class WebPower implements Power {
 		if (state != null) {
 			state.lineTicks = 0;
 		}
+	}
+
+	/** A swing line from {@code hand} runs through fire (or is stuck to something burning): it burns through. */
+	private static boolean burnsThrough(ServerPlayer player, int hand) {
+		WebLine line = player.getAttached(line(hand));
+		if (line == null) {
+			return false;
+		}
+		Entity stuckTo = line.entityId() >= 0 ? player.level().getEntity(line.entityId()) : null;
+		Vec3 to = stuckTo != null ? stuckTo.getBoundingBox().getCenter() : line.anchor();
+		Vec3 at = WebHeft.burning(player.level(), player.position().add(0.0, player.getBbHeight() * 0.7, 0.0), to, stuckTo);
+		if (at == null) {
+			return false;
+		}
+		WebHeft.burnFx(player.level(), at);
+		return true;
+	}
+
+	/** Adds to {@code player}'s velocity (their motion is theirs to simulate, so it goes to their client). */
+	static void shove(ServerPlayer player, Vec3 add) {
+		ServerPlayNetworking.send(player, new WebNet.Shove(add));
 	}
 
 	/**
@@ -872,6 +897,15 @@ public final class WebPower implements Power {
 		Vec3 hand = player.position().add(0.0, player.getBbHeight() * 0.7, 0.0);
 		Vec3 to = hand.subtract(target.position().add(0.0, target.getBbHeight() * 0.5, 0.0));
 		double distance = to.length();
+		if (player.tickCount % WebHeft.BURN_EVERY == 0) {
+			Vec3 burn = WebHeft.burning(player.level(), hand, target.getBoundingBox().getCenter(), target);
+			if (burn != null) {
+				// it burns through
+				WebHeft.burnFx(player.level(), burn);
+				releaseTether(player, state);
+				return;
+			}
+		}
 		boolean swinging = target instanceof LivingEntity living && living.isSwinging();
 		boolean settling = player.level().getGameTime() - state.tetherSince < TETHER_SETTLE_TICKS;
 		if (distance > TETHER_BREAK && !settling || swinging && !state.tetherWasSwinging) {
@@ -894,9 +928,11 @@ public final class WebPower implements Power {
 			Vec3 dir = to.scale(1.0 / distance);
 			Vec3 v = target.getDeltaMovement();
 			double inward = v.dot(dir);
-			double want = player2
+			// a heavy catch fights the line, and drags you along when it pulls away
+			double keep = WebHeft.drag(player, target, state.tetherLoad, distance - TETHER_LENGTH, swinging(state));
+			double want = keep * (player2
 				? Math.min((distance - TETHER_LENGTH) * PLAYER_TETHER_SPRING, PLAYER_TETHER_MAX_PULL)
-				: Math.min((distance - TETHER_LENGTH) * TETHER_SPRING, TETHER_MAX_PULL);
+				: Math.min((distance - TETHER_LENGTH) * TETHER_SPRING, TETHER_MAX_PULL));
 			if (inward < want) {
 				target.setDeltaMovement(v.add(dir.scale(want - inward)));
 				target.needsSync = true;
@@ -914,6 +950,7 @@ public final class WebPower implements Power {
 
 	private static void releaseTether(ServerPlayer player, State state) {
 		state.tetherStrain = 0;
+		state.tetherLoad = 0.0;
 		Entity target = player.level().getEntity(state.tetherId);
 		if (target != null) {
 			target.removeAttached(HELD);
@@ -1087,13 +1124,28 @@ public final class WebPower implements Power {
 		}
 		Entity target = entityInSight(player, YANK_RANGE * WebSymbiote.reachScale(player));
 		if (target == null) {
-			// nothing to yank: B aimed at a block starts a webline instead
-			startWebline(player);
+			// aimed at a torch, lantern or bell, the web tears it off; at any other block, B starts a webline
+			if (WebHeft.ripOut(player)) {
+				player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), cooldowns.shot(), now + Math.min(yankCooldown(player), WebHeft.RIP_COOLDOWN)));
+				thwip(player);
+			} else {
+				startWebline(player);
+			}
 			return;
 		}
+		// a rider is plucked off their mount
+		target = WebHeft.pluck(player, target);
 		Vec3 center = target.getBoundingBox().getCenter();
-		double volume = target.getBbWidth() * target.getBbWidth() * target.getBbHeight();
-		if (volume > YANK_HEAVY_VOLUME) {
+		// how heavy it is against how much can haul on it: you, and anyone else already holding it on their line
+		double strength = WebHeft.strength(player);
+		for (ServerPlayer other : level.players()) {
+			State theirs = other == player ? null : other.getAttached(STATE);
+			if (theirs != null && theirs.tetherId == target.getId()) {
+				strength += WebHeft.strength(other);
+			}
+		}
+		double load = WebHeft.weight(target) / strength;
+		if (load > 1.0) {
 			// too big to budge: reel yourself in instead
 			int maxTicks = Mth.ceil(center.distanceTo(player.position()) / ZIP_SPEED) + 12;
 			startPull(player, new WebNet.Pull(center, target.position(), target.getId(), maxTicks, (byte)-1),
@@ -1104,7 +1156,10 @@ public final class WebPower implements Power {
 			}
 			// the web catches it and pulls it in; let go at once (a tap) and that's all, keep holding and it's on a lead
 			pullIn(target, player);
+			// the heavier it is, the harder it hauls back on you
+			WebHeft.recoil(player, target, load);
 			State state = state(player);
+			state.tetherLoad = load;
 			state.tetherSince = now;
 			state.tetherId = target.getId();
 			state.tetherWasSwinging = target instanceof LivingEntity living && living.isSwinging();
