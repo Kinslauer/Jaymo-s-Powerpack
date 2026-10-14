@@ -10,6 +10,7 @@
 		"CrawlJumpMixin",
 		"CrawlPlayerMixin",
 		"DismemberMobMixin",
+		"ImpactShakeMixin",
 		"ServerGamePacketListenerImplMixin"
 	],
 	"injectors": {

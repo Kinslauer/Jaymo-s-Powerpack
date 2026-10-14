@@ -255,6 +255,7 @@ public final class WindStaff {
 		level.sendParticles(ParticleTypes.GUST_EMITTER_LARGE, center.x, center.y + 0.3, center.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.sendParticles(ParticleTypes.CLOUD, center.x, center.y + 0.1, center.z, 30, DOWNDRAFT_RADIUS * 0.4, 0.1, DOWNDRAFT_RADIUS * 0.4, 0.15);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.BREEZE_WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 1.3F, 0.7F);
+		com.jaymospowers.core.Shakes.heavy(player, center, DOWNDRAFT_RADIUS * 2.0, 1.0F);
 		float damage = (float)(player.getAttributeValue(Attributes.ATTACK_DAMAGE) * DOWNDRAFT_DAMAGE * bonus);
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(DOWNDRAFT_RADIUS), e -> foe(player, e))) {
 			Vec3 away = e.position().subtract(center).horizontal();

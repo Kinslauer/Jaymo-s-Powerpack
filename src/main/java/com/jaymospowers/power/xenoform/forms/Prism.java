@@ -264,6 +264,7 @@ public final class Prism extends XenoForm {
 		ring(level, CRYSTAL_DUST, at, GEODE_RADIUS, 32);
 		sound(player, SoundEvents.AMETHYST_CLUSTER_PLACE, 1.5F, 0.5F);
 		sound(player, SoundEvents.AMETHYST_BLOCK_CHIME, 1.5F, 0.6F);
+		com.jaymospowers.core.Shakes.heavy(player, at, GEODE_RADIUS * 2.0, 1.1F);
 		return true;
 	}
 
@@ -367,5 +368,6 @@ public final class Prism extends XenoForm {
 		}
 		sound(player, SoundEvents.AMETHYST_CLUSTER_PLACE, 1.2F, 0.6F);
 		sound(player, SoundEvents.GLASS_BREAK, 0.8F, 0.7F);
+		com.jaymospowers.core.Shakes.heavy(player, feet, SPIKE_RADIUS * 2.0, 0.8F);
 	}
 }

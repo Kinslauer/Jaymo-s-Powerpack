@@ -327,6 +327,7 @@ final class ZFighterTechniques {
 		ZFighterPower.cooldown(player, ZFighterState.SPIRIT, SPIRIT_COOLDOWN);
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 2.0F, 0.6F);
+		com.jaymospowers.core.Shakes.send(player, 1.2F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_spirit_thrown").withStyle(ChatFormatting.AQUA));
 	}
 

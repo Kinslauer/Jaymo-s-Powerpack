@@ -289,6 +289,7 @@ final class ChronoEchoFight {
 				target.setDeltaMovement(away.scale(PUNCH_THROW).add(0.0, 0.45, 0.0));
 				ChronoFlow.reel(target, ChronoFlow.FLUNG, 0);
 				ChronoFx.particles(level, fx, ParticleTypes.EXPLOSION, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+				com.jaymospowers.core.Shakes.around(level, at, 10.0, 0.8F);
 			} else {
 				target.setDeltaMovement(before.scale(0.2));
 				ChronoFlow.reel(target, ChronoFlow.FLINCH, n % 2 == 0 ? 1 : -1);

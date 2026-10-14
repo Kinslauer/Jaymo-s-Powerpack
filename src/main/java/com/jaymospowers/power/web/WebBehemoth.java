@@ -152,6 +152,7 @@ public final class WebBehemoth {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_EMERGE, SoundSource.HOSTILE, 1.2F, 0.7F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ZOMBIE_INFECT, SoundSource.HOSTILE, 1.4F, 0.5F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_ROAR, SoundSource.HOSTILE, 1.5F, 0.6F);
+		com.jaymospowers.core.Shakes.around(level, at, 32.0, 1.4F);
 	}
 
 	private static void boost(Mob host, Holder<Attribute> attribute, String id, double amount, AttributeModifier.Operation operation) {
@@ -247,6 +248,7 @@ public final class WebBehemoth {
 		level.sendParticles(ParticleTypes.SQUID_INK, center.x, center.y + 0.4, center.z, 40, 0.5, 0.5, 0.5, 0.3);
 		level.playSound(null, host.getX(), host.getY(), host.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.HOSTILE, 2.0F, 0.7F);
 		level.playSound(null, host.getX(), host.getY(), host.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 1.6F, 0.5F);
+		com.jaymospowers.core.Shakes.around(level, host.position(), 24.0, 1.4F);
 	}
 
 	/** Nearly dead: it vanishes into the Shroud and leaps clear, away from what hurt it, healing as it goes. */

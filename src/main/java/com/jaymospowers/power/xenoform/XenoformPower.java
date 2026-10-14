@@ -720,6 +720,7 @@ public final class XenoformPower implements Power {
 		player.removeEffect(MobEffects.LEVITATION);
 		ServerLevel level = player.level();
 		Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
+		com.jaymospowers.core.Shakes.heavy(player, at, 10.0, 0.5F);
 		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFF000000 | COLOR), at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.sendParticles(ParticleTypes.END_ROD, at.x, at.y, at.z, 40, 0.5, 0.8, 0.5, 0.12);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 1.6F);

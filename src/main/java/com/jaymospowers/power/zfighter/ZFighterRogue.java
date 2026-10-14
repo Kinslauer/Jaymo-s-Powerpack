@@ -162,6 +162,7 @@ public class ZFighterRogue extends Monster {
 				this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(TYRANT_DAMAGE * 1.4);
 				level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, this.getX(), this.getY() + 1.0, this.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 				level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 3.0F, 0.6F);
+				com.jaymospowers.core.Shakes.around(level, this.position(), 32.0, 1.6F);
 			}
 			// he flies up to foes above him, and won't fall to his death
 			boolean above = target != null && target.getY() > this.getY() + 2.5;

@@ -60,6 +60,7 @@ public final class Debris {
 		}
 		level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y + 0.5, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, (float)Math.min(1.0, 0.3 + speed * 0.25), 1.3F);
+		Shakes.around(level, at, 8.0 + speed * 4.0, (float)Math.min(1.4, 0.3 + speed * 0.35));
 	}
 
 

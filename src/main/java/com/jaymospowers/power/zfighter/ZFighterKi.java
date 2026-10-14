@@ -624,6 +624,7 @@ final class ZFighterKi {
 		}
 		if (bolt.sinking % Math.max(2, 6 - (int)(glow * 4)) == 1) {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 4.0F, 0.5F + glow * 0.6F);
+			com.jaymospowers.core.Shakes.around(level, at, 32.0 + bolt.size * 4.0, 0.6F + 1.8F * glow);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 2.0F, 0.4F);
 		}
 		if (++bolt.sinking >= SPIRIT_SINK_TICKS) {
@@ -853,6 +854,7 @@ final class ZFighterKi {
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 1.6F);
 			}
 		}
+		com.jaymospowers.core.Shakes.send(player, 0.5F + 0.9F * charge, from);
 		if (!player.onGround()) {
 			// the recoil pushes a fighter in the air back
 			player.push(look.scale(-0.4 * charge));
@@ -891,6 +893,7 @@ final class ZFighterKi {
 		level.explode(player, source, GROUND_ONLY, to.x, to.y, to.z, APE_BEAM_BLAST, false, Level.ExplosionInteraction.MOB);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 2.0F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.5F, 0.7F);
+		com.jaymospowers.core.Shakes.heavy(player, player.position(), 24.0, 1.8F);
 		return true;
 	}
 

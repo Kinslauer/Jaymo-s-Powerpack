@@ -1442,6 +1442,7 @@ public final class WebSymbiote {
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, player.getX(), player.getY() + 0.5, player.getZ(), 20, 0.5, 0.4, 0.5, 0.03);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_DEATH, SoundSource.PLAYERS, 1.5F, 0.4F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ELDER_GUARDIAN_CURSE, SoundSource.PLAYERS, 0.7F, 1.4F);
+		com.jaymospowers.core.Shakes.send(player, 1.0F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 1.0F, 1.2F);
 		player.hurtServer(level, level.damageSources().magic(), EXPOSURE_DAMAGE);
 		player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 160, 0, false, false));
