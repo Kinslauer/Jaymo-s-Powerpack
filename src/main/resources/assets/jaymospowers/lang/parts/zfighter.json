@@ -261,5 +261,10 @@
   "entity.jaymospowers.rogue_fighter.champion.yarro": "Yarro",
   "entity.jaymospowers.rogue_fighter.champion.pashi": "Pashi",
   "entity.jaymospowers.rogue_fighter.champion.namu": "Namu",
-  "entity.jaymospowers.rogue_fighter.champion.gula": "Gula"
+  "entity.jaymospowers.rogue_fighter.champion.gula": "Gula",
+  "power.jaymospowers.zfighter.key.ultimate.corrupted": "Transform (%6$s): up a form, as far as you've learned (Super, Super 2, Super 3); sneak+%6$s: down one. In Super 3, once learned, hold %6$s to raise a Spirit Bomb and let go to throw it. Corrupted: sneak+%6$s in base form enters Corrupted mode (Super's strength, no ki drain; bleeds half a heart a second, heals you for a third of every hit, 3 rolls that blink to your target or behind it); again to leave",
+  "message.jaymospowers.zfighter_corrupted": "The dark lessons have taken root. A mark burns on your brow, and the power in you has turned.",
+  "message.jaymospowers.zfighter_corrupted_on": "Corrupted mode: your blood feeds the power.",
+  "message.jaymospowers.zfighter_corrupted_weak": "Too little blood left to feed it.",
+  "message.jaymospowers.zfighter_corrupted_spent": "Your blood runs low; the corruption lets you go."
 }

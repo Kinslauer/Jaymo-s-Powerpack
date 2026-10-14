@@ -984,3 +984,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   reputation and the Rogue's path; tyrants (a new `rogue_fighter` entity) raid kingdoms by night every 5-7 days and
   share 6000 TP by damage; tournaments every 3-4 days in a ring beside a kingdom's seat, players and champions in a
   bracket, never to the death. Rogue skins from `tools/gen_rogue_fighters.py`. `/powerdebug zfighter raid|tournament`.
+  Corruption (`ZFighterCorruption`, `ZFighterMark`): each dark master's lesson fills a third of Fate's corruption
+  meter, so the third corrupts. Corrupted, a crimson mark glows on the forehead in every form (over Super hair's
+  fringe), and fists and ki power are 15% stronger. Sneak+C in base form toggles Corrupted mode: Super 1's fists,
+  speed and ki power with no ki drain, bleeding half a heart a second (ends at one heart), 35% life steal on every hit,
+  and 3 Combat Roll charges whose rolls blink (up to 8 blocks towards the target, behind it within 5, ahead with none).
