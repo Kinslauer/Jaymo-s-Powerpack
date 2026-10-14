@@ -988,3 +988,32 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   a wall phases you through it (up to 4 blocks). See docs/chrono.md.
 - **0.10.28 / Kingdoms 0.7.3, Shield Throw:** a Strength Combat Arts perk (3 ranks): Y with a shield hurls it; it
   ricochets between foes and comes back. Relic shields always come home; a plain one drops where a wall stops it.
+- **0.10.29, Fresh Animations: Player Extension (`client/PackResourcePacks`, `client/EmfCompat`, `client/PoseTakeover`):**
+  the pack gets FreshLX's player animations (CurseForge 1281029, file 8245230, `FA+Player-v1.1.zip`; modpacks may
+  include it, never redistribute it, so it downloads by id like the medieval villager pack) and the two mods that run
+  it, Entity Model Features and Entity Texture Features (LGPL-3.0, client-only). It's switched on once per install
+  (marker `config/jaymospowers-fa-player-v1`), downloaded from CurseForge's CDN first if missing. `MedievalVillagers`
+  became `PackResourcePacks`, a list of packs (the medieval marker stays v2). FA moves the limbs' pivots as well as
+  turning them, so while any of our own body poses is on a player (Wind flight/kick/cyclone/sway/tumble/swing, crawl
+  and roll, freefall, carry, Gravity walk/board/kneel, Darktide moves and crawl, Web wall run/body/arms/ragdoll and
+  the symbiote's slam/charge/roar/feeding, Chrono flow/reel, Xenoform flight/slap, Z Fighter flight/charge/guard,
+  Arsenal's reach and flintlock aim) EMF's pause hook stops FA for that player; Better Combat swings already pause it
+  (EMF's own Player Animation Library check).
+  The Xenoform aliens move in Fresh Animations' manner (`XenoMotion`): with FA on, EMF copies the player's FA pose
+  onto each form's body and limbs like armour, and the forms' own extras now follow the body instead of running on a
+  bare sine. A per-entity follower tracks turn rate (springy, the trail a beat behind), fall speed, air time, a
+  landing jolt and breathing. The Wyrm's wings breathe and bounce with steps, flare open when dropping without flying,
+  slam down on landing and bank out of turns; its tail swings behind turns (tip later), lifts as it falls, whips down
+  on landing and droops crouched. Blur's and the Gremlin's tails do the same; Pyre's flames stream back with speed;
+  Wisp's tatters and Nadir's mantle billow as they drop; the Gremlin's ears bounce and flop; Bulwark's lower arms
+  breathe and swing out of turns; Knell's jaw tendrils hang straight down whichever way it looks.
+  The Wyrm's wings are bigger, each in two halves (10 + 10 long, 14 deep; was one 14x8 sheet): flying they spread
+  about 40 across and the outer halves flex behind each stroke; on the ground they hang from the shoulders and wrap
+  round the body like a cloak, the outer halves folded across the chest, breathing and swaying with the steps, and
+  open again as it leaves the ground (`Wyrm.WRAP_*`). Its tail is longer, three joints (13 + 10 + 8) running down from
+  the back and levelling out near the ground, each joint swinging a beat after the last (`Wyrm.TAIL_REST`). New
+  texture regions from `tools/gen_xenoform.py` (wings at 0,90; tail at 0,106 and 32,106).
+  Web parkour (`WebParkour`, our own take on ParCool's moves; see docs/web.md): sprint-vault over one-block
+  obstacles, wall cling (Sneak in the air facing a wall; A/D shimmy; slips after a hold that grows with mastery), wall
+  jump (Jump against a wall or from a cling; W from a cling climbs), and a sprint slide (Sneak while sprinting).
+  Everyone sees the poses (`WebParkourPose`, attachment `web_parkour`); Fresh Animations steps aside for them.

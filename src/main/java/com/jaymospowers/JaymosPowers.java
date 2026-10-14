@@ -58,7 +58,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.chrono.ChronoEchoes", "power.chrono.ChronoMemory", "power.chrono.ChronoFlow", "power.wind.WindKick",
 			"power.gravity.GravityPower", "power.gravity.GravityForward", "power.gravity.GravityWalk",
 			"power.web.WebAscension", "power.web.WebCounter", "power.web.WebBehemoth", "power.web.WebInhabit", "power.web.WebSlam", "power.web.WebBridges", "power.web.WebPower", "power.web.WebSymbiote", "power.web.WebTendrils",
-			"power.web.WebWallRun",
+			"power.web.WebWallRun", "power.web.WebParkour",
 			"power.wind.WindModes", "power.wind.WindPower", "power.wind.WindStorm", "power.wind.WindTempest",
 			"power.wind.WindCyclone",
 			"power.resonance.ResonancePower", "power.resonance.ResonanceHush",
