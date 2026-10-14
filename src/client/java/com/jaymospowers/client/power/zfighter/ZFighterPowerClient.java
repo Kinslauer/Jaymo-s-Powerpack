@@ -74,6 +74,7 @@ public final class ZFighterPowerClient implements PowerClient {
 				helper.register(new ZFighterTail.Layer(avatar));
 				helper.register(new ZFighterHair.Layer(avatar));
 				helper.register(new ZFighterMark.Layer(avatar));
+				helper.register(new ZFighterVerdantLook.Layer(avatar));
 				helper.register(new ZFighterApe.Layer(avatar));
 			}
 		});
@@ -116,6 +117,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterGuardPose.extract(entity, state);
 		ZFighterDancePose.extract(entity, state, partialTicks);
 		ZFighterMark.extract(entity, state);
+		ZFighterVerdantLook.extract(entity, state);
 		ZFighterApe.extract(entity, state);
 	}
 
