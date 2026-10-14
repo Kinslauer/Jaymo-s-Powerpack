@@ -65,6 +65,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.darktide.DarktideState",
 			"power.xenoform.XenoformState",
 			"power.zfighter.ZFighterPower", "power.zfighter.ZFighterTraining", "power.zfighter.ZFighterLineage", "power.zfighter.ZFighterGuard",
+			"power.zfighter.ZFighterSites",
 		};
 		for (String holder : holders) {
 			try {

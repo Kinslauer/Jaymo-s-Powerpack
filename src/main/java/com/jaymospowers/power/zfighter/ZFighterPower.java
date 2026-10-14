@@ -251,6 +251,8 @@ public final class ZFighterPower implements Power {
 		ZFighterSparring.init();
 		ZFighterDrills.init();
 		ZFighterLineage.init();
+		ZFighterWishes.init();
+		ZFighterSites.init();
 		ZFighterNet.register();
 		ZFighterBattle.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ZFighterDebugCommand.register(dispatcher));
