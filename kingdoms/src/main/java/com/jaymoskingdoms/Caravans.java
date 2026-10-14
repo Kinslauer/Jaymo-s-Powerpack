@@ -789,7 +789,7 @@ final class Caravans {
 		}
 	}
 
-	private static BlockPos ground(ServerLevel level, Vec3 at) {
+	static BlockPos ground(ServerLevel level, Vec3 at) {
 		return level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, BlockPos.containing(at));
 	}
 

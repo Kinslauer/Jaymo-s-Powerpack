@@ -51,7 +51,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * Relic weapons: one-of-a-kind arms the pocket dimension let slip, each with its own gift, each turning up where it
  * belongs ({@link #THEMES}). They're relics like any other ({@link ArsenalRelics#RELIC}): an Arsenal user who picks one
- * up claims it into the Pocket Stash, and Reach brings it out first. Anyone can swing one.
+ * up claims it into the Rift Hoard (the old Pocket Stash), and Reach brings it out first. Anyone can swing one.
  * <ul>
  * <li><b>Soul Saber</b> (the Nether): drinks {@link #LIFE_STEAL} of the harm it does; right click looses a slash of
  * soul fire down your sight line.</li>

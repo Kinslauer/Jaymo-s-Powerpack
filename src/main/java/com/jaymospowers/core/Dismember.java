@@ -67,7 +67,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Arm</b>: whatever that hand held falls, and it holds nothing more.</li>
  * <li><b>Leg</b>: slowed hard, and with both gone barely moving and never jumping.</li>
  * </ul>
- * A player's lost limbs come back when they respawn.
+ * A player's lost limbs never grow back by themselves: only when they respawn, eat a Hermit Bean, or are Verdant
+ * ({@link #regrow}). A blunt blow breaks a limb instead ({@link Fractures}).
  */
 public final class Dismember {
 	public static final int HEAD = 1, RIGHT_ARM = 2, LEFT_ARM = 4, RIGHT_LEG = 8, LEFT_LEG = 16;
@@ -124,6 +125,7 @@ public final class Dismember {
 
 	public static void init() {
 		SeveredPart.register();
+		Fractures.init();
 		ServerLivingEntityEvents.AFTER_DAMAGE.register(Dismember::afterDamage);
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof Projectile projectile) {
@@ -203,9 +205,9 @@ public final class Dismember {
 	// ---- where a blow lands ----------------------------------------------------------------------------------------------
 
 	/**
-	 * The part a blow from {@code attacker} lands on: for a player, where their crosshair crosses the target (top
-	 * {@link #HEAD_SHARE} the head, bottom {@link #LEG_SHARE} a leg, between an arm; the side it's on picks which); for
-	 * anything else, at random.
+	 * The part a blow from {@code attacker} lands on: for a player, the part their crosshair crosses
+	 * ({@link LimbBoxes#aimedPart}; for a body without parts, by height: top {@link #HEAD_SHARE} the head, bottom
+	 * {@link #LEG_SHARE} a leg, between an arm, the side it's on picking which); for anything else, at random.
 	 */
 	public static int aimedPart(LivingEntity attacker, LivingEntity target) {
 		if (!(attacker instanceof Player)) {
@@ -220,9 +222,13 @@ public final class Dismember {
 				default -> LEFT_LEG;
 			};
 		}
-		AABB box = target.getBoundingBox();
 		Vec3 eye = attacker.getEyePosition();
 		Vec3 look = attacker.getLookAngle();
+		Integer limb = LimbBoxes.aimedPart(target, eye, look);
+		if (limb != null) {
+			return limb;
+		}
+		AABB box = target.getBoundingBox();
 		Vec3 at = box.inflate(0.1).clip(eye, eye.add(look.scale(16.0))).orElse(null);
 		if (at == null) {
 			// (a sweep that didn't cross it): where the look passes at its distance
@@ -292,17 +298,38 @@ public final class Dismember {
 
 	/** Takes {@code part} off {@code target} (if it still has it), with everything that follows. True if it came off. */
 	public static boolean sever(LivingEntity target, int part, @Nullable LivingEntity by) {
+		return lose(target, part, by, false);
+	}
+
+	/**
+	 * A skeleton's part smashed to pieces by a blunt blow ({@link Fractures}): gone like a severed one, but nothing flies
+	 * off and nothing bleeds, just a shower of bone and a bone or two on the ground. True if it went.
+	 */
+	public static boolean shatter(LivingEntity target, int part, @Nullable LivingEntity by) {
+		return lose(target, part, by, true);
+	}
+
+	private static boolean lose(LivingEntity target, int part, @Nullable LivingEntity by, boolean shattered) {
 		if (!(target.level() instanceof ServerLevel level) || (missing(target) & part) != 0) {
 			return false;
 		}
 		int mask = missing(target) | part;
 		target.setAttached(MISSING, mask);
 		target.addTag(tag(part));
-		Vec3 from = by != null ? by.position() : target.position().add(target.getLookAngle().scale(-1.0));
-		SeveredPart.spawn(level, target, part, from);
-		gore(level, target, part);
+		if (shattered) {
+			Fractures.crack(level, target, part);
+			Vec3 at = stump(target, part);
+			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), at.x, at.y, at.z, 30,
+				0.2, 0.2, 0.2, 0.3);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.SKELETON_HURT, SoundSource.HOSTILE, 1.0F, 0.6F);
+			drop(level, target, new ItemStack(net.minecraft.world.item.Items.BONE, 1 + target.getRandom().nextInt(2)));
+		} else {
+			Vec3 from = by != null ? by.position() : target.position().add(target.getLookAngle().scale(-1.0));
+			SeveredPart.spawn(level, target, part, from);
+			gore(level, target, part);
+			BLEEDING.put(target, level.getGameTime() + BLEED_TICKS);
+		}
 		track(target);
-		BLEEDING.put(target, level.getGameTime() + BLEED_TICKS);
 		switch (part) {
 			case HEAD -> {
 				ItemStack helmet = target.getItemBySlot(EquipmentSlot.HEAD);
@@ -314,6 +341,38 @@ public final class Dismember {
 			}
 			case RIGHT_ARM, LEFT_ARM -> emptyHand(level, target, part);
 			default -> legs(target, mask);
+		}
+		return true;
+	}
+
+	/**
+	 * Lost parts grown back (Andy: a living player only ever regrows them as a Verdant, with a Hermit Bean, or by
+	 * respawning): every one, or just the first still missing. True if anything grew back.
+	 */
+	public static boolean regrow(LivingEntity target, boolean all) {
+		int mask = missing(target);
+		if (mask == 0) {
+			return false;
+		}
+		for (int part : PARTS) {
+			if ((mask & part) != 0) {
+				mask &= ~part;
+				target.removeTag(tag(part));
+				if (!all) {
+					break;
+				}
+			}
+		}
+		if (mask == 0) {
+			target.removeAttached(MISSING);
+		} else {
+			target.setAttached(MISSING, mask);
+		}
+		legs(target, mask);
+		if (target.level() instanceof ServerLevel level) {
+			level.sendParticles(ParticleTypes.HAPPY_VILLAGER, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), 14,
+				0.35, 0.5, 0.35, 0.0);
+			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.CHORUS_FLOWER_GROW, SoundSource.PLAYERS, 1.0F, 1.2F);
 		}
 		return true;
 	}
@@ -350,7 +409,7 @@ public final class Dismember {
 	}
 
 	/** Whatever the lost arm's hand held falls. */
-	private static void emptyHand(ServerLevel level, LivingEntity target, int part) {
+	static void emptyHand(ServerLevel level, LivingEntity target, int part) {
 		InteractionHand hand = hand(target, part);
 		ItemStack held = target.getItemInHand(hand);
 		if (!held.isEmpty()) {
@@ -360,7 +419,7 @@ public final class Dismember {
 	}
 
 	/** The hand on the side of {@code part} (an arm). */
-	private static InteractionHand hand(LivingEntity target, int part) {
+	static InteractionHand hand(LivingEntity target, int part) {
 		HumanoidArm side = part == RIGHT_ARM ? HumanoidArm.RIGHT : HumanoidArm.LEFT;
 		return target.getMainArm() == side ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
 	}

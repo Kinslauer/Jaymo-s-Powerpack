@@ -16,12 +16,10 @@
 		"CarryUseMixin",
 		"ContainerScreenAccessor",
 		"HiddenArmorAvatarRendererMixin",
+		"LimbPickMixin",
 		"PoseTakeoverLivingEntityRendererMixin",
 		"ScreenShakeMixin",
 		"ScreenShakeExplosionMixin",
-		"ShoulderCameraMixin",
-		"ShoulderCameraTypeMixin",
-		"ShoulderCrosshairMixin",
 		"TerrainAheadMixin"
 	],
 	"injectors": { "defaultRequire": 1 }

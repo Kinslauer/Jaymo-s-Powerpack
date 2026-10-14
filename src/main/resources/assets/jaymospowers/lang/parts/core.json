@@ -75,5 +75,11 @@
 	"death.attack.jaymospowers.decapitation": "%1$s lost their head",
 	"death.attack.jaymospowers.decapitation.player": "%1$s was beheaded by %2$s",
 	"entity.jaymospowers.severed_part": "Severed Part",
+	"message.jaymospowers.fracture.dazed": "Your head rings from the blow",
+	"message.jaymospowers.fracture.right_arm": "Your right arm is broken: it can't hold anything until it knits",
+	"message.jaymospowers.fracture.left_arm": "Your left arm is broken: it can't hold anything until it knits",
+	"message.jaymospowers.fracture.right_leg": "Your right leg is broken: you're limping",
+	"message.jaymospowers.fracture.left_leg": "Your left leg is broken: you're limping",
+	"message.jaymospowers.fracture.priest": "%s sets your broken bones",
 	"jaymospowers.terrain_loading": "Terrain ahead still loading: slowing down"
 }
