@@ -21,7 +21,7 @@ public final class FreefallPose {
 	static final float START = 0.8F, FULL = 1.3F;
 
 	/** {@code tip}: how far over a wind's dive has gone (0-1), growing slowly with the speed of the fall. */
-	record Fall(float strength, float time, boolean dive, float tip) {
+	public record Fall(float strength, float time, boolean dive, float tip) {
 	}
 
 	/**
@@ -30,7 +30,7 @@ public final class FreefallPose {
 	 */
 	static final float DIVE_START = 20.0F, DIVE_PITCH = 150.0F, DIVE_FULL = 2.6F;
 
-	static final RenderStateDataKey<Fall> KEY = RenderStateDataKey.create(() -> "jaymospowers:freefall");
+	public static final RenderStateDataKey<Fall> KEY = RenderStateDataKey.create(() -> "jaymospowers:freefall");
 
 	private FreefallPose() {
 	}

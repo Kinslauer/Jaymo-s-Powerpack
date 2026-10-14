@@ -802,6 +802,39 @@ def wyrm():
         vgrad(img, (x0, y0, x1, y1), shade(membrane, 1.1), shade(membrane, 0.7), 0.15)
         if name in ("left", "right"):
             rect(img, (x0, y0, x0 + 1, y1), (26, 14, 36, 255))
+    # (0.10.29) bigger two-part wings that wrap round it on the ground: each half 10x1x14 at (0,90), the inner and
+    # outer halves sharing it; a longer tail: base 3x3x13 at (0,106), middle 2x2x10 at (32,106), then the old tip.
+    # Its own random stream, so the forms drawn after it come out as before.
+    saved = rng.getstate()
+    rng.seed(2629)
+    wrng = rng
+    big_wing = (0, 90, 10, 1, 14)
+    for name, (x0, y0, x1, y1) in faces(*big_wing).items():
+        vgrad(img, (x0, y0, x1, y1), shade(membrane, 1.15), shade(membrane, 0.72), 0.2)
+        if name in ("top", "bottom"):
+            # a bone along the leading edge, finger bones fanning back, veins between, a torn trailing edge
+            rect(img, (x0, y0, x1, y0 + 1), (26, 14, 36, 255))
+            for x in range(x0, x1, 3):
+                for y in range(y0, y1 - 2):
+                    if (y - y0) < (y1 - y0) * (0.55 + 0.4 * ((x - x0) % 6 == 0)):
+                        img.putpixel((x, y), (40, 20, 52, 255))
+            veins(img, (x0, y0 + 1, x1, y1), shade(membrane, 0.7), shade(membrane, 0.55), 8, (3, 8))
+            for x in range(x0 + 1, x1, 3):
+                if wrng.random() < 0.7:
+                    rect(img, (x, y1 - 1 - wrng.randrange(0, 3), x + 2, y1), CLEAR)
+    for part in ((0, 106, 3, 3, 13), (32, 106, 2, 2, 10)):
+        box(img, part, scale, 0.25)
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name == "bottom":
+                for x in range(x0 + 1, x1, 3):
+                    rect(img, (x, y0, x + 2, y1), plate)
+            elif name == "top":
+                for x in range(x0, x1, 2):
+                    rect(img, (x, y0, x + 1, y1), bone)
+            else:
+                for x in range(x0, x1, 3):
+                    rect(img, (x, y0, x + 1, y1), shade(scale, 1.3))
+    rng.setstate(saved)
     clear_hat(img)
     save(img, "entity/xenoform_wyrm.png")
 

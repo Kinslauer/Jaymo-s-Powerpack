@@ -20,10 +20,10 @@ import net.minecraft.world.entity.LivingEntity;
  */
 public final class WebBodyPose {
 	/** The move, which way it goes, and how far through it (0-1). */
-	record Pose(int kind, int side, float p, float time) {
+	public record Pose(int kind, int side, float p, float time) {
 	}
 
-	static final RenderStateDataKey<Pose> KEY = RenderStateDataKey.create(() -> "jaymospowers:web_body_pose");
+	public static final RenderStateDataKey<Pose> KEY = RenderStateDataKey.create(() -> "jaymospowers:web_body_pose");
 
 	private WebBodyPose() {
 	}

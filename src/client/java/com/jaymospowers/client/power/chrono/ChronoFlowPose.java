@@ -19,10 +19,10 @@ import net.minecraft.world.entity.Entity;
  */
 public final class ChronoFlowPose {
 	/** The blow on this player and how far through it they are (0-1). */
-	record Pose(ChronoFlow.Move move, float p) {
+	public record Pose(ChronoFlow.Move move, float p) {
 	}
 
-	static final RenderStateDataKey<Pose> KEY = RenderStateDataKey.create(() -> "jaymospowers:chrono_flow_pose");
+	public static final RenderStateDataKey<Pose> KEY = RenderStateDataKey.create(() -> "jaymospowers:chrono_flow_pose");
 
 	private ChronoFlowPose() {
 	}

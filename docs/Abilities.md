@@ -73,7 +73,6 @@ power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts
 | 73 | Any | passive | **No shields** (new) | A Wind user can't hold a shield: the wind tears it out of the hand into the inventory. | |
 | 74 | Both (Thunderhead) | Z | Thunderhead mode | Both modes at once. Turning it on in rain or a storm brings bolts down around you and darkens everyone's screen within 48 blocks; while it lasts, lightning flashes everyone's screens black and white every few seconds, with thunder. | |
 | 75 | Any | Z | Mode hunger | Modes cost hunger (the Thunderhead the most) and switch off at 3 shanks. You can't eat while a mode is on. | |
-| 76 | Item | | Sora's Dagger | Iron → Gilded (810 mB molten gold poured over it on a casting table) → Diamond (breeze rod + 2 diamonds set in at a Tool Station, right click Flurry) → Tempest (ascended Wind, Nether Star + Dragon's Breath + Heavy Core). Its gifts only work for Wind users. | |
 | 77 | Ascension | | How | Any breeze a wind kills (not yet ascended) drops the Gale Heart 66% of the time; use it with everything mastered. | |
 | 78 | Corruption | | How | Using the wind during real thunderstorms fills the meter (about 3 min of use); it drains outside storms. | |
 | 79 | Cure | | Eye of the Storm | Hover at Y 192+ in a thunderstorm for 60 s without casting; or stand in a snowstorm for 10 s; or wait: it blows itself out 3 Minecraft days after it took you. | |

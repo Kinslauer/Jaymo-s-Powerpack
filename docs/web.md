@@ -859,3 +859,19 @@ Andy asked for a stronger Web (ideas remade from Powerborne Heroes' Spider-Man, 
   cocoons for 3 s; 30 s cooldown.
 - Numbers: web shot 2-14 damage (symbiote 3-22), pellets 3 (4), shot cooldown 30-100, zip 40, Yank 80;
   Yank and entity webs drag bigger things (horses now); Spider-Sense charges 2/2/3/4/5, 7 ascended, 15 s recharge.
+
+## 0.10.29: parkour (`WebParkour`, `WebParkourClient`, `WebParkourPose`)
+Andy asked for ParCool's moves on Web (ParCool is Forge/NeoForge only and stops at 1.21.8; LGPL, but this is our own
+code). No keys of their own:
+- **Vault:** sprint into a one-block obstacle with room above it: a hand planted on it, legs swung over
+  (`VAULT_UP` 0.5, `VAULT_FORWARD` 0.42). Fences (1.5 high) and two-high walls don't count.
+- **Wall cling:** in the air, facing a wall, hold Sneak: you hang on it. A/D shimmies along (`CLING_SHIMMY`), let go of
+  Sneak to drop. You hold for `CLING_HOLD_TICKS` by tier (2 s to 10 s ascended), then slip (`CLING_SLIP`). The server
+  lets a cling float (`WebPower.allowsFloating`) and it never counts as a fall.
+- **Wall jump:** in the air against a wall (front or side), or from a cling, Jump kicks you up and away
+  (`WALL_JUMP_UP` by tier, `WALL_JUMP_OUT`). From a cling with W held you climb instead (more up, `CLIMB_OUT` out), so
+  cling, jump, cling again scales a wall. Each wall face once until you land; two facing walls chain like a chimney.
+- **Slide:** sprinting, press Sneak: a fast low slide (`SLIDE_BOOST`, decays by `SLIDE_KEEP`, at most `SLIDE_TICKS`).
+  Let go of Sneak to stand; Jump out of it keeps the speed. The hitbox stays crouch-height (no sliding under one-block
+  gaps; the double-tap crawl does that).
+None of them run during a web, zip, the wings, a wall run, a takeover or the symbiote's wall crawl.
