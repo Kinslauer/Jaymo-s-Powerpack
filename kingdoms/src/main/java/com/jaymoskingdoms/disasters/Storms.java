@@ -72,6 +72,16 @@ public final class Storms {
 	public static final float RAINS = 0.3F;
 
 	static float windAngle = 0.0F, windSpeed = 0.06F;
+
+	/** (0.7.18) The server's wind: the way it blows toward (radians, toward (cos, sin) in x, z), and how hard, from none
+	 * (its least) to 1 (its most). Ships' sails ask this. */
+	public static float windAngle() {
+		return windAngle;
+	}
+
+	public static float windStrength() {
+		return (windSpeed - WIND_MIN) / (WIND_MAX - WIND_MIN);
+	}
 	private static int nextId = 1;
 
 	private Storms() {
@@ -270,7 +280,7 @@ public final class Storms {
 	}
 
 	/** Which way (x, z) lies from (fromX, fromZ), as a compass word for messages. */
-	static Component direction(double fromX, double fromZ, double x, double z) {
+	public static Component direction(double fromX, double fromZ, double x, double z) {
 		double angle = Math.toDegrees(Math.atan2(z - fromZ, x - fromX));
 		// east is 0°, south 90° (z grows southward)
 		String[] names = {"east", "south_east", "south", "south_west", "west", "north_west", "north", "north_east"};

@@ -1,0 +1,49 @@
+{
+  "variants": {
+    "facing=north,oar=shipped": {
+      "model": "jaymoskingdoms:block/oar/shipped"
+    },
+    "facing=north,oar=lock": {
+      "model": "jaymoskingdoms:block/oar/lock"
+    },
+    "facing=north,oar=loom": {
+      "model": "jaymoskingdoms:block/oar/loom"
+    },
+    "facing=east,oar=shipped": {
+      "model": "jaymoskingdoms:block/oar/shipped",
+      "y": 90
+    },
+    "facing=east,oar=lock": {
+      "model": "jaymoskingdoms:block/oar/lock",
+      "y": 90
+    },
+    "facing=east,oar=loom": {
+      "model": "jaymoskingdoms:block/oar/loom",
+      "y": 90
+    },
+    "facing=south,oar=shipped": {
+      "model": "jaymoskingdoms:block/oar/shipped",
+      "y": 180
+    },
+    "facing=south,oar=lock": {
+      "model": "jaymoskingdoms:block/oar/lock",
+      "y": 180
+    },
+    "facing=south,oar=loom": {
+      "model": "jaymoskingdoms:block/oar/loom",
+      "y": 180
+    },
+    "facing=west,oar=shipped": {
+      "model": "jaymoskingdoms:block/oar/shipped",
+      "y": 270
+    },
+    "facing=west,oar=lock": {
+      "model": "jaymoskingdoms:block/oar/lock",
+      "y": 270
+    },
+    "facing=west,oar=loom": {
+      "model": "jaymoskingdoms:block/oar/loom",
+      "y": 270
+    }
+  }
+}

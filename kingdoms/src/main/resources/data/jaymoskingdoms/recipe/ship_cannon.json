@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "B": "minecraft:iron_block",
+    "P": "#minecraft:planks"
+  },
+  "pattern": [
+    "IBI",
+    "P P"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:ship_cannon"
+  }
+}

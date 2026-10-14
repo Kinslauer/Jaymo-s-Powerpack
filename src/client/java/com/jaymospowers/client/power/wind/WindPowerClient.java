@@ -62,6 +62,7 @@ public final class WindPowerClient implements PowerClient {
 				WindCycloneClient.tickSounds(minecraft);
 				WindAura.tick(minecraft);
 				WindWisps.tick(minecraft);
+				WindJetClient.tick(minecraft);
 				WindScreenFx.tick();
 			}
 		});

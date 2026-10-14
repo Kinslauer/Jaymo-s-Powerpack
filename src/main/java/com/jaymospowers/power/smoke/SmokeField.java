@@ -276,6 +276,28 @@ public final class SmokeField {
 		}
 	}
 
+	/** Takes {@code share} of the smoke within {@code radius} of {@code at} away (a wind scattering it). */
+	public static void thin(ServerLevel level, Vec3 at, double radius, float share) {
+		Field field = FIELDS.get(level.dimension());
+		if (field == null || field.density.isEmpty()) {
+			return;
+		}
+		int r = Mth.ceil(radius);
+		BlockPos center = BlockPos.containing(at);
+		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-r, -r, -r), center.offset(r, r, r))) {
+			long key = pos.asLong();
+			float d = field.density.get(key);
+			if (d <= 0.0F || Vec3.atCenterOf(pos).distanceToSqr(at) > radius * radius) {
+				continue;
+			}
+			if (d * (1.0F - share) < 0.02F) {
+				field.density.remove(key);
+			} else {
+				field.density.put(key, d * (1.0F - share));
+			}
+		}
+	}
+
 	/** Clears every block of smoke within {@code radius} of {@code at}. */
 	static void clear(ServerLevel level, Vec3 at, double radius) {
 		Field field = FIELDS.get(level.dimension());
@@ -383,9 +405,10 @@ public final class SmokeField {
 		Long2FloatOpenHashMap cells = new Long2FloatOpenHashMap(from.size() * 3);
 		cells.defaultReturnValue(-1.0F);
 		BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
-		long[] to = new long[7];
-		float[] flow = new float[7];
-		int[] kinds = new int[7];
+		// up, the five other sides and two downwind: eight at most
+		long[] to = new long[8];
+		float[] flow = new float[8];
+		int[] kinds = new int[8];
 		for (Long2FloatMap.Entry entry : from.long2FloatEntrySet()) {
 			long key = entry.getLongKey();
 			float d = entry.getFloatValue();

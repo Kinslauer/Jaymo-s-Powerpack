@@ -26,6 +26,18 @@ public final class ShipNet {
 		}
 	}
 
+	/** (0.7.18) Client → server: the one at the helm fires a broadside to the side they look. */
+	public record Broadside(int ship) implements CustomPacketPayload {
+		public static final Type<Broadside> TYPE = new Type<>(JaymosKingdoms.id("ship_broadside"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Broadside> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeVarInt(p.ship), buf -> new Broadside(buf.readVarInt()));
+
+		@Override
+		public Type<Broadside> type() {
+			return TYPE;
+		}
+	}
+
 	private ShipNet() {
 	}
 
@@ -34,6 +46,12 @@ public final class ShipNet {
 		ServerPlayNetworking.registerGlobalReceiver(Use.TYPE, (payload, context) -> {
 			if (context.player().level().getEntity(payload.ship()) instanceof Ship ship) {
 				ship.use(context.player(), payload.x(), payload.y(), payload.z());
+			}
+		});
+		PayloadTypeRegistry.serverboundPlay().register(Broadside.TYPE, Broadside.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Broadside.TYPE, (payload, context) -> {
+			if (context.player().level().getEntity(payload.ship()) instanceof Ship ship) {
+				ship.broadside(context.player());
 			}
 		});
 	}

@@ -1105,3 +1105,22 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   `block_state_property`, which 26.3 can't read (and Moog's on-the-fly upgrader doesn't convert), so a server stopped
   loading its data. Powers ships 26.3-format copies in an always-on built-in pack (`resourcepacks/tacz_fixes`, only
   with TaCZ loaded; `armory/TaczGuns`). TaCZ's jar itself is untouched.
+- **0.10.67 / Kingdoms 0.7.18, sailing stage 2 (Andy: "wind, oars, cannons, and the in world build kits"):** ships sail
+  by the world's wind (in irons head to wind, best on a reach), row with oars, fight with ship's cannons (broadsides
+  from the helm, round shot holes hulls, a ship holed at the waterline founders and lies on the bottom as a wreck), and
+  come as Rowboat, Sloop and Brig build kits laid out as frames on the water. After AlekiShips' ideas (MIT, Forge
+  1.20.1 only); none of its code or art (`kingdoms/MODLOG.md`).
+- **0.10.67, Gale Stream and Smoke Jet** (Andy: "give wind and smoke a held button constant aimed particle projection in
+  their respective styles that push sails. wind can also use it to clear smoke and put out fires"): Wind's **Gale Stream**
+  is sneak + hold X (`wind/WindJet`): pale wisps and breeze whorls along where you look, 18 blocks, widening; it blows
+  smoke on and thins it, snuffs fire blocks and burning things, shoves creatures along, costs hunger and stops at 6
+  food. Smoke's **Smoke Jet** is hold X (`smoke/SmokeJet`; X was free): dark smoke driven along your look, 14 blocks,
+  laying the real gas thickest at its end and driving smoke on, a gentler shove. Both put a tag on the player
+  (`jaymospowers_jet:wind` / `:smoke`) that Kingdoms' ships read (`sailing/Jets`): every sail in the stream adds way
+  along it, a gale like a strong wind, smoke half that (tested: a gale moved a furled sloop 6 blocks in 8 s).
+- **0.10.67, smoke sim crash fixed:** `SmokeField.step` could send smoke 8 ways (up, five sides, two downwind) into
+  arrays of 7, which crashed the server (ArrayIndexOutOfBounds) when smoke sat in open air with room all round. Found
+  testing the Smoke Jet; the arrays hold 8 now.
+- **Kingdoms 0.7.18, cannons break blocks** (Andy: "cannons should break blocks. no mercy"): ship round shot that hits
+  land smashes every block within 1.6 of where it strikes, except unbreakable ones and obsidian-tough ones (blast
+  resistance 1200+); 30% drop as items (`ShipShot.breach`). Keep cannons (`Cannon`) are unchanged.

@@ -32,6 +32,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -90,6 +91,25 @@ public final class Ship extends Entity {
 	static final int ADRIFT = 100;
 	/** How near a player must be to use a block of it. */
 	static final double REACH = 7.0;
+	/**
+	 * (0.7.18) Rowing: her speed per (square root of) oar, held back by her weight per this much, the fastest oars take
+	 * her, backing water's share of that, how long a stroke takes (ticks), and what it takes out of the one rowing (food
+	 * exhaustion a tick).
+	 */
+	static final double ROW_PER_OAR = 0.12, ROW_MASS = 20.0, ROW_FASTEST = 0.22, ROW_BACK = 0.5;
+	public static final int STROKE = 30;
+	static final float ROW_TIRE = 0.008F;
+	/**
+	 * (0.7.18) Holed by round shot: how far round where it strikes her blocks are smashed out, the share of those that
+	 * wash up as items, how fast she goes down once she can't float (blocks a tick), and the longest she takes to reach
+	 * the bottom (ticks) before she's laid there as a wreck.
+	 */
+	static final double HOLE = 1.3, SINK = 0.03;
+	static final float SALVAGE = 0.25F;
+	static final int SINKING_MOST = 600;
+	/** (0.7.18) A broadside fires the guns pointing within this of where you look (a cosine), this many ticks apart. */
+	static final double BROADSIDE_ARC = 0.5;
+	static final int BROADSIDE_GAP = 3;
 
 	/** One block of the ship, in its own frame. */
 	public record Piece(int state, int x, int y, int z) {
@@ -114,6 +134,13 @@ public final class Ship extends Entity {
 	/** Server: how far its sails are set (0 furled to 1 full), its way (blocks/tick) and its turn (degrees/tick). */
 	private double sail, speed;
 	private static final EntityDataAccessor<Float> SET = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.FLOAT);
+	/** (0.7.18) Whether she's rowing: 1 ahead, -1 astern, 0 not. */
+	private static final EntityDataAccessor<Byte> ROWING = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.BYTE);
+	/** (0.7.18) Whether she's going down (her hold's flooded). */
+	private static final EntityDataAccessor<Boolean> FOUNDERING = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.BOOLEAN);
+	/** (0.7.18) Server: ticks since she began to go down (0: afloat), and the guns of a broadside still to fire (piece, tick). */
+	private int sinking;
+	private final List<int[]> volley = new ArrayList<>();
 	private float turn;
 	private int adrift;
 	/** Server: the block entities aboard (chests and the like), by piece. */
@@ -233,6 +260,10 @@ public final class Ship extends Entity {
 			for (Direction d : Direction.values()) {
 				BlockPos q = p.relative(d);
 				if (seen.add(q.asLong()) && part(level.getBlockState(q))) {
+					if (level.getBlockState(q).getBlock() instanceof ShipFrameBlock) {
+						player.sendOverlayMessage(Component.translatable("ship.jaymoskingdoms.finish_frame"));
+						return;
+					}
 					if (level.getBlockState(q).getDestroySpeed(level, q) < 0.0F) {
 						player.sendOverlayMessage(Component.translatable("ship.jaymoskingdoms.land"));
 						return;
@@ -366,23 +397,61 @@ public final class Ship extends Entity {
 			this.discard();
 			return;
 		}
+		if (this.sinking > 0) {
+			this.goDown(level, h);
+			return;
+		}
 		Vec3 from = this.position();
 		float yawFrom = this.getYRot();
 		ServerPlayer pilot = this.getFirstPassenger() instanceof ServerPlayer p ? p : null;
 		Input input = pilot != null ? pilot.getLastClientInput() : Input.EMPTY;
-		// the sails and the rudder
-		if (input.forward()) {
-			this.sail = Math.min(1.0, this.sail + SAIL_RATE);
-		} else if (input.backward()) {
-			this.sail = Math.max(0.0, this.sail - SAIL_RATE);
+		boolean sails = h.sails > 0, oars = h.oars > 0;
+		// the sails (W/S), the oars (W/S with no sails; Space with them, S astern once they're furled) and the rudder
+		int row = 0;
+		if (sails || !oars) {
+			if (input.forward()) {
+				this.sail = Math.min(1.0, this.sail + SAIL_RATE);
+			} else if (input.backward()) {
+				this.sail = Math.max(0.0, this.sail - SAIL_RATE);
+			}
+			if (oars && input.jump()) {
+				row = 1;
+			} else if (oars && input.backward() && this.sail <= 0.0) {
+				row = -1;
+			}
+		} else {
+			this.sail = 0.0;
+			row = input.forward() ? 1 : input.backward() ? -1 : 0;
 		}
 		if (pilot == null) {
 			this.sail = Math.max(0.0, this.sail - SAIL_RATE);
+			row = 0;
 		}
 		this.entityData.set(SET, (float)this.sail);
-		double top = this.topSpeed(h);
-		// with the sails furled, backing water (S) takes it slowly astern
-		double wanted = this.sail <= 0.0 && input.backward() ? -PADDLE : this.sail * top;
+		this.entityData.set(ROWING, (byte)row);
+		double top = this.topSpeed(h), rowTop = this.rowSpeed(h);
+		double wanted = this.sail * top;
+		if (row > 0) {
+			wanted = Math.max(wanted, rowTop);
+		} else if (row < 0) {
+			wanted = -rowTop * ROW_BACK;
+		} else if (!oars && this.sail <= 0.0 && input.backward()) {
+			// with the sails furled and no oars, backing water (S) takes it slowly astern
+			wanted = -PADDLE;
+		}
+		if (row != 0 && pilot != null) {
+			pilot.causeFoodExhaustion(ROW_TIRE);
+			if (this.tickCount % STROKE == 0) {
+				level.playSound(null, this.getX(), this.getY() + h.draft, this.getZ(), SoundEvents.BOAT_PADDLE_WATER, SoundSource.NEUTRAL, 1.0F,
+					0.8F + this.random.nextFloat() * 0.2F);
+			}
+		}
+		// (0.7.18) a Wind user's gale or a Smoke user's jet in her sails
+		double blown = Jets.blown(level, this, h, this.sail);
+		if (blown != 0.0) {
+			wanted = Mth.clamp(wanted + blown, -FASTEST, FASTEST);
+		}
+		this.fireVolley(level, h);
 		this.speed += (wanted - this.speed) * GATHER;
 		if (Math.abs(this.speed) < 1.0E-4) {
 			this.speed = 0.0;
@@ -425,8 +494,7 @@ public final class Ship extends Entity {
 			level.playSound(null, this.getX(), this.getY() + h.draft, this.getZ(), SoundEvents.WOOD_STEP, SoundSource.BLOCKS, 0.6F, 0.5F);
 		}
 		if (pilot != null && this.tickCount % 10 == 0) {
-			pilot.sendOverlayMessage(Component.translatable("ship.jaymoskingdoms.under_way", Mth.floor(this.sail * 100.0),
-				String.format("%.1f", this.speed * 20.0), String.format("%.1f", top * 20.0)));
+			pilot.sendOverlayMessage(this.readout(level, h, row, sails ? top : oars ? rowTop : PADDLE));
 		}
 		// with no one aboard a while, it anchors itself
 		boolean manned = pilot != null;
@@ -439,12 +507,53 @@ public final class Ship extends Entity {
 		}
 	}
 
-	/** Its top speed (blocks/tick): its sails' push or its length, whichever is less (or paddling, with no sails). */
+	/**
+	 * Its top speed under sail (blocks/tick): its sails' push, as much as they catch of the wind on her heading and as
+	 * hard as it blows ({@link Winds}), or its length, whichever is less (or paddling, with no sails).
+	 */
 	double topSpeed(Hull h) {
 		if (h.sails == 0) {
 			return PADDLE;
 		}
-		return Math.min(FASTEST, Math.min(PER_LENGTH * h.waterline, PER_SAIL * Math.sqrt(h.sails)));
+		double push = PER_SAIL * Math.sqrt(h.sails) * Winds.catches(this.getYRot()) * Winds.strength(this.level(), this.getX(), this.getZ());
+		return Math.min(FASTEST, Math.min(PER_LENGTH * h.waterline, push));
+	}
+
+	/** (0.7.18) Its top speed under oars (blocks/tick): more oars row faster, a heavier ship slower (none: no oars). */
+	double rowSpeed(Hull h) {
+		if (h.oars == 0) {
+			return 0.0;
+		}
+		double row = ROW_PER_OAR * Math.sqrt(h.oars) / Math.sqrt(Math.max(1.0, h.mass / ROW_MASS));
+		return Math.min(ROW_FASTEST, Math.min(PER_LENGTH * Math.max(4, h.waterline), row));
+	}
+
+	/** (0.7.18) What the one at the helm sees: sails, oars, speed and the wind, or (lying still, every few seconds) the keys. */
+	private Component readout(ServerLevel level, Hull h, int row, double top) {
+		net.minecraft.network.chat.MutableComponent line = Component.empty();
+		String dot = "  ·  ";
+		// lying still, the keys take turns with the rest
+		if (Math.abs(this.speed) < STILL && this.tickCount / 60 % 2 == 1) {
+			String keys = h.sails > 0 ? h.oars > 0 ? "sails_oars" : "sails" : h.oars > 0 ? "oars" : "paddle";
+			line.append(Component.translatable("ship.jaymoskingdoms.keys." + keys));
+			if (h.cannons.length > 0) {
+				line.append(dot).append(Component.translatable("ship.jaymoskingdoms.keys.broadside"));
+			}
+			return line;
+		}
+		if (h.sails > 0) {
+			line.append(Component.translatable("ship.jaymoskingdoms.hud.sails", Mth.floor(this.sail * 100.0))).append(dot);
+		}
+		if (row != 0) {
+			line.append(Component.translatable(row > 0 ? "ship.jaymoskingdoms.hud.rowing" : "ship.jaymoskingdoms.hud.backing")).append(dot);
+		}
+		line.append(Component.translatable("ship.jaymoskingdoms.hud.speed", String.format("%.1f", this.speed * 20.0), String.format("%.1f", top * 20.0)));
+		if (h.sails > 0) {
+			float strength = Winds.strength(level, this.getX(), this.getZ());
+			line.append(dot).append(Component.translatable("ship.jaymoskingdoms.hud.wind", Winds.word(strength), Winds.from(),
+				Winds.point(this.getYRot()).label()));
+		}
+		return line;
 	}
 
 	/** Its keel's height next tick: easing toward its waterline on the water under it (where it is, if there's none). */
@@ -715,6 +824,20 @@ public final class Ship extends Entity {
 			}
 			return;
 		}
+		if (state.getBlock() instanceof ShipCannonBlock && this.level() instanceof ServerLevel level) {
+			InteractionHand hand = player.getMainHandItem().isEmpty() ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
+			ShipCannonBlock.Handled done = ShipCannonBlock.handle(state, player.getItemInHand(hand), player, hand);
+			if (done != null) {
+				this.setPiece(i, done.next());
+				if (done.fires()) {
+					this.fireGun(level, i, done.next(), player);
+				} else {
+					Vec3 at = this.toWorld(x, y + 0.5, z);
+					level.playSound(null, at.x, at.y, at.z, SoundEvents.SAND_PLACE, SoundSource.BLOCKS, 0.8F, 0.7F);
+				}
+			}
+			return;
+		}
 		BlockEntity be = this.cargo.get(i);
 		if (be instanceof Container chest && chest.getContainerSize() % 9 == 0 && chest.getContainerSize() <= 54) {
 			if (be.getLevel() == null) {
@@ -782,6 +905,273 @@ public final class Ship extends Entity {
 		}
 	}
 
+	// ---- her guns ----
+
+	/** One of her blocks becomes {@code state} (a gun loaded or fired). */
+	private void setPiece(int i, BlockState state) {
+		Hull h = this.hull();
+		if (h == null || i < 0 || i >= h.pieces.size()) {
+			return;
+		}
+		List<Piece> pieces = new ArrayList<>(h.pieces);
+		Piece p = pieces.get(i);
+		pieces.set(i, new Piece(Block.getId(state), p.x(), p.y(), p.z()));
+		this.setAttached(PIECES, List.copyOf(pieces));
+	}
+
+	/** The way a gun aboard points, in the world (x, z), its muzzle facing {@code facing} in her frame. */
+	private double[] worldWay(Direction facing) {
+		float c = Mth.cos(this.getYRot() * Mth.DEG_TO_RAD), s = Mth.sin(this.getYRot() * Mth.DEG_TO_RAD);
+		return new double[] {facing.getStepX() * c - facing.getStepZ() * s, facing.getStepX() * s + facing.getStepZ() * c};
+	}
+
+	/** Gun {@code i} (now {@code state}, emptied) fires. */
+	private void fireGun(ServerLevel level, int i, BlockState state, @Nullable Player gunner) {
+		Hull h = this.hull();
+		if (h == null) {
+			return;
+		}
+		Piece p = h.pieces.get(i);
+		double[] way = this.worldWay(state.getValue(ShipCannonBlock.FACING));
+		ShipCannonBlock.fire(level, this.toWorld(p.x(), p.y() + 0.5, p.z()), way[0], way[1], gunner, this);
+	}
+
+	/**
+	 * {@code by}, at her helm, fires a broadside: every loaded gun on the side they look to, one after another. Tells them
+	 * if none are.
+	 */
+	void broadside(ServerPlayer by) {
+		Hull h = this.hull();
+		if (h == null || this.getFirstPassenger() != by || !(this.level() instanceof ServerLevel)) {
+			return;
+		}
+		double lx = -Mth.sin(by.getYRot() * Mth.DEG_TO_RAD), lz = Mth.cos(by.getYRot() * Mth.DEG_TO_RAD);
+		int when = this.tickCount + 1;
+		boolean any = false;
+		for (int i : h.cannons) {
+			BlockState state = h.pieces.get(i).blockState();
+			if (state.getValue(ShipCannonBlock.LOAD) != ShipCannonBlock.Load.SHOT) {
+				continue;
+			}
+			double[] way = this.worldWay(state.getValue(ShipCannonBlock.FACING));
+			if (way[0] * lx + way[1] * lz < BROADSIDE_ARC) {
+				continue;
+			}
+			boolean queued = false;
+			for (int[] v : this.volley) {
+				queued |= v[0] == i;
+			}
+			if (!queued) {
+				this.volley.add(new int[] {i, when});
+				when += BROADSIDE_GAP;
+				any = true;
+			}
+		}
+		if (!any) {
+			by.sendOverlayMessage(Component.translatable("ship.jaymoskingdoms.no_guns_that_way"));
+		}
+	}
+
+	/** The guns of a broadside whose turn it is fire (if they're still there and loaded). */
+	private void fireVolley(ServerLevel level, Hull h) {
+		if (this.volley.isEmpty()) {
+			return;
+		}
+		for (java.util.Iterator<int[]> it = this.volley.iterator(); it.hasNext(); ) {
+			int[] v = it.next();
+			if (v[1] > this.tickCount) {
+				continue;
+			}
+			it.remove();
+			Hull now = this.hull();
+			if (now == null || v[0] >= now.pieces.size()) {
+				continue;
+			}
+			BlockState state = now.pieces.get(v[0]).blockState();
+			if (state.getBlock() instanceof ShipCannonBlock && state.getValue(ShipCannonBlock.LOAD) == ShipCannonBlock.Load.SHOT) {
+				BlockState empty = state.setValue(ShipCannonBlock.LOAD, ShipCannonBlock.Load.EMPTY);
+				this.setPiece(v[0], empty);
+				this.fireGun(level, v[0], empty, this.getFirstPassenger() instanceof Player p ? p : null);
+			}
+		}
+	}
+
+	// ---- holed and sinking ----
+
+	/**
+	 * Round shot at {@code world}: if it's in one of her blocks, the blocks round it are smashed out (sailcloth is only
+	 * torn, and the ball flies on) and true. She goes down if she's holed at the waterline (half her hold there flooded)
+	 * or can no longer float. Her helm is too stout to smash.
+	 */
+	public boolean struck(Vec3 world, @Nullable Entity by) {
+		Hull h = this.hull();
+		if (h == null || this.isRemoved() || !(this.level() instanceof ServerLevel level)) {
+			return false;
+		}
+		Vec3 l = this.toLocal(world);
+		int x = Mth.floor(l.x + 0.5), y = Mth.floor(l.y), z = Mth.floor(l.z + 0.5);
+		int i = h.at(x, y, z);
+		if (i < 0) {
+			return false;
+		}
+		BlockState state = h.pieces.get(i).blockState();
+		boolean in = false;
+		for (AABB box : state.getShape(net.minecraft.world.level.EmptyBlockGetter.INSTANCE, BlockPos.ZERO).toAabbs()) {
+			in |= box.inflate(0.05).contains(l.x - x + 0.5, l.y - y, l.z - z + 0.5);
+		}
+		if (!in) {
+			return false;
+		}
+		java.util.Set<Integer> gone = new java.util.HashSet<>();
+		if (state.getBlock() instanceof SailBlock) {
+			gone.add(i);
+			this.smash(level, h, gone);
+			return false;
+		}
+		for (int j = 0; j < h.pieces.size(); j++) {
+			Piece p = h.pieces.get(j);
+			if (j != h.helm && l.distanceTo(new Vec3(p.x(), p.y() + 0.5, p.z())) <= HOLE) {
+				gone.add(j);
+			}
+		}
+		this.smash(level, h, gone);
+		return true;
+	}
+
+	/** Her pieces {@code gone} are smashed out: splinters, some wash up, her chests spill. */
+	private void smash(ServerLevel level, Hull h, java.util.Set<Integer> gone) {
+		if (gone.isEmpty()) {
+			return;
+		}
+		List<Piece> left = new ArrayList<>(h.pieces.size() - gone.size());
+		Map<Integer, BlockEntity> cargo = new HashMap<>();
+		Map<Integer, CompoundTag> tags = new HashMap<>();
+		for (int i = 0; i < h.pieces.size(); i++) {
+			Piece p = h.pieces.get(i);
+			if (!gone.contains(i)) {
+				int k = left.size();
+				left.add(p);
+				if (this.cargo.containsKey(i)) {
+					cargo.put(k, this.cargo.get(i));
+				}
+				if (this.cargoTags.containsKey(i)) {
+					tags.put(k, this.cargoTags.get(i));
+				}
+				continue;
+			}
+			BlockState state = p.blockState();
+			Vec3 at = this.toWorld(p.x(), p.y() + 0.5, p.z());
+			level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK, state),
+				at.x, at.y, at.z, 12, 0.3, 0.3, 0.3, 0.1);
+			BlockEntity be = this.cargo.get(i);
+			if (be instanceof Container chest) {
+				for (int slot = 0; slot < chest.getContainerSize(); slot++) {
+					net.minecraft.world.Containers.dropItemStack(level, at.x, at.y, at.z, chest.removeItemNoUpdate(slot));
+				}
+			}
+			if (be != null || this.random.nextFloat() < SALVAGE) {
+				net.minecraft.world.Containers.dropItemStack(level, at.x, at.y, at.z, new ItemStack(state.getBlock().asItem()));
+			}
+		}
+		this.cargo.clear();
+		this.cargo.putAll(cargo);
+		this.cargoTags.clear();
+		this.cargoTags.putAll(tags);
+		this.volley.clear();
+		if (left.isEmpty()) {
+			this.ejectPassengers();
+			this.discard();
+			return;
+		}
+		int dryBefore = dryBelowWaterline(h);
+		this.setAttached(PIECES, List.copyOf(left));
+		Hull now = this.hull();
+		// holed at the waterline, her hold floods and she founders (and so does one too heavy to float at all)
+		if (now != null && (!now.floats || dryBefore > 0 && dryBelowWaterline(now) * 2 < dryBefore) && this.sinking == 0) {
+			this.sinking = 1;
+			this.entityData.set(FOUNDERING, true);
+			for (Player p : level.players()) {
+				if (p.getVehicle() == this || this.aboard(this.toLocal(p.position()), 1.0)) {
+					p.sendOverlayMessage(Component.translatable("ship.jaymoskingdoms.sinking"));
+				}
+			}
+			this.ejectPassengers();
+			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 2.0F, 0.4F);
+		}
+	}
+
+	/** The dry cells of her hold at or below her waterline (what keeps a laden ship up). */
+	private static int dryBelowWaterline(Hull h) {
+		int n = 0;
+		for (long cell : h.enclosed) {
+			if (BlockPos.getY(cell) - h.minY < h.draft + 1.0F) {
+				n++;
+			}
+		}
+		return n;
+	}
+
+	/** Going down: she slows, settles under, and once she reaches the bottom (or has sunk a while) lies there as a wreck. */
+	private void goDown(ServerLevel level, Hull h) {
+		this.sinking++;
+		this.speed *= 0.95;
+		Vec3 from = this.position();
+		float yaw = this.getYRot();
+		Vec3 ahead = new Vec3(-Mth.sin(yaw * Mth.DEG_TO_RAD), 0.0, Mth.cos(yaw * Mth.DEG_TO_RAD)).scale(this.speed);
+		Vec3 to = from.add(ahead.x, -SINK, ahead.z);
+		if (this.sinking > SINKING_MOST || this.strikes(level, h, to, yaw)) {
+			this.wreck(level, h);
+			return;
+		}
+		this.setPos(to);
+		this.carry(level, h, from, yaw);
+		if (this.sinking % 3 == 0) {
+			Vec3 at = this.toWorld((this.random.nextFloat() - 0.5) * (h.maxX - h.minX), h.draft, (this.random.nextFloat() - 0.5) * (h.maxZ - h.minZ));
+			level.sendParticles(net.minecraft.core.particles.ParticleTypes.BUBBLE_COLUMN_UP, at.x, at.y, at.z, 6, 0.4, 0.2, 0.4, 0.05);
+		}
+		if (this.sinking % 40 == 0) {
+			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WOOD_STEP, SoundSource.BLOCKS, 1.0F, 0.4F);
+		}
+	}
+
+	/** She's laid on the bottom where she sank, block for block where there's room, her holds full of what they held. */
+	private void wreck(ServerLevel level, Hull h) {
+		int quarter = Math.floorMod(Math.round(this.getYRot() / 90.0F), 4);
+		Rotation turn = QUARTERS[quarter];
+		BlockPos origin = BlockPos.containing(this.getX(), Math.round(this.getY()), this.getZ());
+		this.saveCargo(level);
+		Map<Integer, BlockPos> laid = new HashMap<>();
+		for (int i = 0; i < h.pieces.size(); i++) {
+			Piece p = h.pieces.get(i);
+			BlockPos at = origin.offset(new BlockPos(p.x(), p.y(), p.z()).rotate(turn));
+			BlockState there = level.getBlockState(at);
+			if (!level.hasChunkAt(at) || !(there.isAir() || there.canBeReplaced() || !there.getFluidState().isEmpty() && !part(there))) {
+				continue;
+			}
+			BlockState state = p.blockState().rotate(turn);
+			if (state.hasProperty(BlockStateProperties.WATERLOGGED)) {
+				state = state.setValue(BlockStateProperties.WATERLOGGED, level.getFluidState(at).is(FluidTags.WATER));
+			}
+			level.setBlock(at, state, Block.UPDATE_ALL);
+			laid.put(i, at);
+		}
+		for (Map.Entry<Integer, CompoundTag> e : this.cargoTags.entrySet()) {
+			BlockPos at = laid.get(e.getKey());
+			if (at == null) {
+				continue;
+			}
+			BlockEntity be = BlockEntity.loadStatic(at, level.getBlockState(at), e.getValue(), level.registryAccess());
+			if (be != null) {
+				level.setBlockEntity(be);
+			}
+		}
+		this.cargo.clear();
+		this.cargoTags.clear();
+		level.playSound(null, origin, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 2.0F, 0.5F);
+		this.ejectPassengers();
+		this.discard();
+	}
+
 	// ---- the rest ----
 
 	@Override
@@ -824,11 +1214,23 @@ public final class Ship extends Entity {
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder entityData) {
 		entityData.define(SET, 0.0F);
+		entityData.define(ROWING, (byte)0);
+		entityData.define(FOUNDERING, false);
 	}
 
 	/** Client: how far its sails are set (0 furled to 1 full). */
 	public float sailSet() {
 		return this.entityData.get(SET);
+	}
+
+	/** Whether she's going down, her hold flooded. */
+	public boolean foundering() {
+		return this.entityData.get(FOUNDERING);
+	}
+
+	/** Client: whether she's rowing (1 ahead, -1 astern, 0 not). */
+	public int rowing() {
+		return this.entityData.get(ROWING);
 	}
 
 	@Override
@@ -856,6 +1258,8 @@ public final class Ship extends Entity {
 			}
 		}
 		this.sail = input.getDoubleOr("Sail", 0.0);
+		this.sinking = input.getIntOr("Sinking", 0);
+		this.entityData.set(FOUNDERING, this.sinking > 0);
 		this.entityData.set(SET, (float)this.sail);
 		if (this.level() instanceof ServerLevel level) {
 			this.loadCargo(level);
@@ -892,5 +1296,6 @@ public final class Ship extends Entity {
 		}
 		output.store("Hold", CompoundTag.CODEC.listOf(), hold);
 		output.putDouble("Sail", this.sail);
+		output.putInt("Sinking", this.sinking);
 	}
 }

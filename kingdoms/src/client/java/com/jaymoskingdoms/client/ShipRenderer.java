@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.sailing.Hull;
+import com.jaymoskingdoms.sailing.OarBlock;
 import com.jaymoskingdoms.sailing.SailBlock;
 import com.jaymoskingdoms.sailing.Ship;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -46,12 +47,23 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 	static final float ROLL_FAIR = 1.2F, ROLL_STORM = 4.5F, PITCH_FAIR = 0.6F, PITCH_STORM = 2.5F, SWELL_SPEED = 0.06F;
 	/** Below this much sail set (0 to 1), the sails are drawn furled on their yards. */
 	static final float FURLED_BELOW = 0.1F;
+	/**
+	 * (0.7.18) Oars run out: how far each stroke sweeps fore and aft and how steeply it dips (degrees), how much deeper the
+	 * blade bites on the pull, and how much longer the oar is drawn than its model (stretched along its length).
+	 */
+	static final float OAR_SWEEP = 28.0F, OAR_DIP = 36.0F, OAR_BITE = 12.0F, OAR_LENGTH = 2.5F;
+	/** Where an oar turns in its lock, in its (north-facing) model's pixels. */
+	static final float PIVOT_X = 8.0F, PIVOT_Y = 5.5F, PIVOT_Z = 1.0F;
 
 	public static final class State extends EntityRenderState {
 		final List<MovingBlockRenderState> blocks = new ArrayList<>();
 		final List<Ship.Piece> pieces = new ArrayList<>();
 		float yaw, heel, pitch;
 		Model.Simple dryMask;
+		/** (0.7.18) Oars run out, drawn on their own: each one's piece, its facing's turn, its sweep and dip, and its look. */
+		final List<Ship.Piece> oars = new ArrayList<>();
+		final List<float[]> oarAngles = new ArrayList<>();
+		final List<MovingBlockRenderState> oarBlocks = new ArrayList<>();
 	}
 
 	/** Each hull's dry hold, as a mask that keeps the sea it floats in from showing inside it (as a boat's does). */
@@ -77,14 +89,38 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 		super.extractRenderState(ship, state, partialTicks);
 		state.blocks.clear();
 		state.pieces.clear();
+		state.oars.clear();
+		state.oarAngles.clear();
+		state.oarBlocks.clear();
 		Hull h = ship.hull();
 		if (h == null || !(ship.level() instanceof ClientLevel level)) {
 			return;
 		}
 		// sails all but furled are drawn rolled up on their yards
 		boolean furled = ship.sailSet() < FURLED_BELOW;
+		int rowing = ship.rowing();
+		// the stroke: the blade sweeps aft through the water on the pull and comes forward lifted on the return
+		float phase = (ship.tickCount + partialTicks) % Ship.STROKE / Ship.STROKE * Mth.TWO_PI;
+		float sweep = Mth.cos(phase) * OAR_SWEEP * rowing, dip = OAR_DIP + OAR_BITE * Mth.sin(phase);
 		for (Ship.Piece piece : h.pieces) {
 			BlockState shown = piece.blockState();
+			if (rowing != 0 && shown.getBlock() instanceof OarBlock) {
+				Direction facing = shown.getValue(OarBlock.FACING);
+				shown = shown.setValue(OarBlock.OAR, OarBlock.Oar.LOCK);
+				MovingBlockRenderState loom = new MovingBlockRenderState();
+				loom.blockState = shown.setValue(OarBlock.OAR, OarBlock.Oar.LOOM).setValue(OarBlock.FACING, Direction.NORTH);
+				Vec3 at = ship.toWorld(piece.x(), piece.y() + 0.5, piece.z());
+				loom.blockPos = BlockPos.containing(at);
+				loom.randomSeedPos = new BlockPos(piece.x(), piece.y(), piece.z());
+				loom.biome = level.getBiome(loom.blockPos);
+				loom.cardinalLighting = level.cardinalLighting();
+				loom.lightEngine = level.getLightEngine();
+				state.oars.add(piece);
+				// the oars on her left sweep the other way round to those on her right, so all pull her ahead
+				float side = facing == Direction.WEST || facing == Direction.SOUTH ? -1.0F : 1.0F;
+				state.oarAngles.add(new float[] {facing.toYRot() + 180.0F, sweep * side, dip});
+				state.oarBlocks.add(loom);
+			}
 			if (shown.getBlock() instanceof ChestBlock) {
 				shown = Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, Direction.UP);
 			}
@@ -105,7 +141,7 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 			state.blocks.add(block);
 			state.pieces.add(piece);
 		}
-		state.dryMask = h.enclosed.length == 0 ? null : MASKS.computeIfAbsent(h, ShipRenderer::mask);
+		state.dryMask = h.enclosed.length == 0 || ship.foundering() ? null : MASKS.computeIfAbsent(h, ShipRenderer::mask);
 		state.yaw = Mth.rotLerp(partialTicks, ship.yRotO, ship.getYRot());
 		float storm = level.getThunderLevel(partialTicks), t = (ship.tickCount + partialTicks) * SWELL_SPEED;
 		// a bigger ship rocks less
@@ -146,6 +182,22 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 			// a piece's place is its column's middle; a block is drawn from its corner
 			poseStack.translate(p.x() - 0.5F, p.y(), p.z() - 0.5F);
 			collector.submitMovingBlock(poseStack, state.blocks.get(i), state.outlineColor);
+			poseStack.popPose();
+		}
+		for (int i = 0; i < state.oars.size(); i++) {
+			Ship.Piece p = state.oars.get(i);
+			float[] a = state.oarAngles.get(i);
+			poseStack.pushPose();
+			poseStack.translate(p.x(), p.y(), p.z());
+			// turned to face outboard as its block does, then swung in its lock
+			poseStack.rotateDegrees(Axis.YP, -a[0]);
+			poseStack.translate(-0.5F, 0.0F, -0.5F);
+			poseStack.translate(PIVOT_X / 16.0F, PIVOT_Y / 16.0F, PIVOT_Z / 16.0F);
+			poseStack.rotateDegrees(Axis.YP, a[1]);
+			poseStack.rotateDegrees(Axis.XP, -a[2]);
+			poseStack.scale(1.0F, 1.0F, OAR_LENGTH);
+			poseStack.translate(-PIVOT_X / 16.0F, -PIVOT_Y / 16.0F, -PIVOT_Z / 16.0F);
+			collector.submitMovingBlock(poseStack, state.oarBlocks.get(i), state.outlineColor);
 			poseStack.popPose();
 		}
 		if (state.dryMask != null) {

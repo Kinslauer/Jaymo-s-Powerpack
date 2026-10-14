@@ -24,6 +24,8 @@ import net.minecraft.world.phys.Vec3;
 public final class ShipClient {
 	/** Heel per degree of turn a tick, and how quickly it eases in. */
 	static final float HEEL_PER_TURN = 2.2F, HEEL_EASE = 0.08F, MOST_HEEL = 9.0F;
+	/** (0.7.18) Ticks between broadsides you can call for. */
+	static final int BROADSIDE_COOLDOWN = 20;
 	private static int useCooldown;
 
 	private ShipClient() {
@@ -65,6 +67,19 @@ public final class ShipClient {
 		you.setYHeadRot(you.getYHeadRot() + turned);
 	}
 
+	/** (0.7.18) At the helm, a left click fires a broadside to the side you look. True if it did (the click's used). */
+	public static boolean broadside(Minecraft mc) {
+		LocalPlayer you = mc.player;
+		if (you == null || !(you.getVehicle() instanceof Ship ship)) {
+			return false;
+		}
+		if (useCooldown <= 0) {
+			ClientPlayNetworking.send(new ShipNet.Broadside(ship.getId()));
+			useCooldown = BROADSIDE_COOLDOWN;
+		}
+		return true;
+	}
+
 	/** Uses the ship's helm or chest in your sights, if it's nearer than whatever block you're looking at. */
 	public static boolean use(Minecraft mc) {
 		LocalPlayer you = mc.player;
@@ -103,7 +118,8 @@ public final class ShipClient {
 				if (!in) {
 					continue;
 				}
-						if (!(state.getBlock() instanceof HelmBlock) && !(state.getBlock() instanceof EntityBlock)) {
+				if (!(state.getBlock() instanceof HelmBlock) && !(state.getBlock() instanceof EntityBlock)
+					&& !(state.getBlock() instanceof com.jaymoskingdoms.sailing.ShipCannonBlock)) {
 					return false;
 				}
 				ClientPlayNetworking.send(new ShipNet.Use(ship.getId(), x, y, z));
