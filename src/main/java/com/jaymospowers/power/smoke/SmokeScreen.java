@@ -1,6 +1,5 @@
 package com.jaymospowers.power.smoke;
 
-import com.jaymospowers.core.Mastery;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -12,16 +11,14 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * R (hold), Smokescreen: smoke pours out of you for as long as you hold it (up to {@link #MAX_TICKS}), and the
+ * G (hold), Smokescreen: smoke pours out of you for as long as you hold it (up to {@link #MAX_TICKS}), and the
  * {@link SmokeField} does the rest: it billows round you, climbs, fills the room. The cooldown grows with how long you
- * poured. A fresh awakening (only the starter) pours half as much for half as long.
+ * poured.
  */
 final class SmokeScreen {
-	/** Smoke a tick (a block's worth is 1), and how long one pour lasts; the starter's. */
-	static final float POUR = 0.9F;
+	/** Smoke a tick (a block's worth is 1; a thick, hiding cloud is 3 a block), and how long one pour lasts. */
+	static final float POUR = 2.0F;
 	static final int MAX_TICKS = 200;
-	static final float STARTER_POUR = 0.45F;
-	static final int STARTER_MAX_TICKS = 100;
 	/** Hunger a tick while pouring. */
 	static final float EXHAUSTION = 0.02F;
 
@@ -68,10 +65,9 @@ final class SmokeScreen {
 			stop(player, true);
 			return;
 		}
-		boolean starter = Mastery.starterOnly(player);
 		// it pours from the chest, and a little ahead when you move, so it trails behind you
 		Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.55, 0.0);
-		SmokeField.puff(level, at, starter ? STARTER_POUR : POUR, player);
+		SmokeField.puff(level, at, POUR, player);
 		player.causeFoodExhaustion(EXHAUSTION);
 		if (held % 12 == 0) {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.CAMPFIRE_CRACKLE, SoundSource.PLAYERS, 0.7F, 0.6F + level.getRandom().nextFloat() * 0.2F);
@@ -79,7 +75,7 @@ final class SmokeScreen {
 	}
 
 	private static int max(ServerPlayer player) {
-		return Mastery.starterOnly(player) ? STARTER_MAX_TICKS : MAX_TICKS;
+		return MAX_TICKS;
 	}
 
 	static void clear() {

@@ -38,7 +38,7 @@ public final class SmokeJet {
 	/** How far the jet reaches (blocks), how wide it is at your hands and how much wider a block further. */
 	public static final double RANGE = 14.0, MOUTH = 0.3, SPREAD = 0.14;
 	/** Smoke laid along it a tick (a block's worth is 1), and every how many blocks. */
-	static final float POUR = 0.6F;
+	static final float POUR = 1.5F;
 	static final double STEP = 2.0;
 	/** Its push on what it catches (blocks/tick a tick, near you; nothing at its far end), and the most it gives. */
 	static final double PUSH = 0.035, MOST = 0.5;

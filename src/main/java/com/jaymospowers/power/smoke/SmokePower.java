@@ -20,8 +20,9 @@ import org.jspecify.annotations.Nullable;
  * Smoke: you make smoke, and the smoke is a real gas ({@link SmokeField}) that rises, fills rooms, leaks through gaps,
  * drifts on the wind and hides whatever is inside it. Everything is decided here, on the server.
  * <ul>
- * <li>R (hold), Smokescreen ({@link SmokeScreen}): smoke pours out of you. The starter, weaker until mastered.</li>
- * <li>G, Vapour Form ({@link SmokeVapour}): you turn to smoke for a few seconds; blows pass through you.</li>
+ * <li>R, Vapour Form ({@link SmokeVapour}): everything below your waist turns to smoke and you fly on it, Wind-style;
+ * R again lands. The starter (a thinner trail until more is unlocked).</li>
+ * <li>G (hold), Smokescreen ({@link SmokeScreen}): smoke pours out of you.</li>
  * <li>V, Smoke Bomb ({@link SmokeBomb}): a thrown ball that bursts into a cloud.</li>
  * <li>B (hold), Smother ({@link SmokeSmother}): smoke wraps whoever you aim at; they're blinded, slowed and choke.</li>
  * <li>X (hold), Smoke Jet ({@link SmokeJet}): a jet of smoke where you look; it fills a ship's sails.</li>
@@ -37,7 +38,8 @@ public final class SmokePower implements Power {
 	// ---- tuning (ticks) ----
 	public static final int SCREEN_COOLDOWN_MIN = 40;
 	public static final int SCREEN_COOLDOWN_MAX = 160;
-	public static final int VAPOUR_COOLDOWN = 320;
+	/** After Vapour Form ends, before it can be used again. */
+	public static final int VAPOUR_COOLDOWN = 40;
 	public static final int BOMB_COOLDOWN = 160;
 	public static final int BOMB_COOLDOWN_MASTERED = 100;
 	public static final int SMOTHER_COOLDOWN_MIN = 80;
@@ -64,6 +66,7 @@ public final class SmokePower implements Power {
 			SmokeSmother.clear();
 			SmokeBomb.clear();
 			SmokeJet.clear();
+			SmokeVapour.clear();
 		});
 	}
 
@@ -71,6 +74,7 @@ public final class SmokePower implements Power {
 		SmokeScreen.stop(player, false);
 		SmokeSmother.stop(player, false);
 		SmokeJet.stop(player);
+		SmokeVapour.end(player);
 		SmokeField.forget(player);
 		SmokeHeat.forget(player);
 	}
@@ -90,13 +94,13 @@ public final class SmokePower implements Power {
 		return new ItemStack(Items.CAMPFIRE);
 	}
 
-	/** R (Smokescreen) first, then V (Smoke Bomb), G (Vapour Form), B (Smother). */
+	/** R (Vapour Form) first, then G (Smokescreen), V (Smoke Bomb), B (Smother). */
 	@Override
 	public PowerKey[] unlockOrder() {
-		return new PowerKey[] {PowerKey.ABILITY_1, PowerKey.ABILITY_3, PowerKey.ABILITY_2, PowerKey.ABILITY_4};
+		return new PowerKey[] {PowerKey.ABILITY_1, PowerKey.ABILITY_2, PowerKey.ABILITY_3, PowerKey.ABILITY_4};
 	}
 
-	/** A fresh awakening pours a thin Smokescreen on R. */
+	/** A fresh awakening flies on smoke legs (Vapour Form) on R. */
 	@Override
 	public @Nullable PowerKey starterKey() {
 		return PowerKey.ABILITY_1;
@@ -116,7 +120,6 @@ public final class SmokePower implements Power {
 	@Override
 	public void onLost(ServerPlayer player) {
 		forget(player);
-		SmokeVapour.end(player);
 		player.removeAttached(STATE);
 	}
 
@@ -132,15 +135,15 @@ public final class SmokePower implements Power {
 	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
 		switch (key) {
 			case ABILITY_1 -> {
+				if (down) {
+					SmokeVapour.toggle(player);
+				}
+			}
+			case ABILITY_2 -> {
 				if (down && ready(player, SmokeState.SCREEN)) {
 					SmokeScreen.start(player);
 				} else if (!down) {
 					SmokeScreen.stop(player, true);
-				}
-			}
-			case ABILITY_2 -> {
-				if (down && ready(player, SmokeState.VAPOUR)) {
-					SmokeVapour.start(player);
 				}
 			}
 			case ABILITY_3 -> {
@@ -160,6 +163,12 @@ public final class SmokePower implements Power {
 
 	@Override
 	public boolean allowsFloating(ServerPlayer player) {
+		return SmokeVapour.active(player);
+	}
+
+	/** Vapour Form flies faster than the server's "moved too quickly" check allows. */
+	@Override
+	public boolean skipsMovementCheck(ServerPlayer player) {
 		return SmokeVapour.active(player);
 	}
 

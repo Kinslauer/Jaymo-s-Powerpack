@@ -28,8 +28,8 @@ import net.minecraft.world.phys.Vec3;
  * by the burst is blinded for a moment.
  */
 final class SmokeBomb {
-	static final float AMOUNT = 60.0F;
-	static final float AMOUNT_MASTERED = 90.0F;
+	static final float AMOUNT = 130.0F;
+	static final float AMOUNT_MASTERED = 190.0F;
 	static final float SPEED = 1.3F;
 	/** Blinded within this many blocks of the burst, for this many ticks. */
 	static final double BLIND_RADIUS = 2.5;

@@ -65,9 +65,9 @@ public final class SmokeField {
 	static final float SPREAD = 0.1F;
 	static final float SINK = 0.035F;
 	/** Lost each step: a share, plus a little more indoors, more under the sky, a lot in the rain. */
-	static final float FADE = 0.004F;
+	static final float FADE = 0.003F;
 	static final float DECAY = 0.004F;
-	static final float OPEN_DECAY = 0.01F;
+	static final float OPEN_DECAY = 0.007F;
 	static final float RAIN_DECAY = 0.035F;
 	/** Share carried downwind each step under the sky, at full wind. */
 	static final float DRIFT = 0.12F;
@@ -182,11 +182,8 @@ public final class SmokeField {
 		return false;
 	}
 
-	/** Whether {@code looker} can't make {@code target} out through smoke (or a Smoke user's Vapour Form). */
+	/** Whether {@code looker} can't make {@code target} out through smoke. */
 	public static boolean hidden(LivingEntity looker, LivingEntity target) {
-		if (target instanceof ServerPlayer player && SmokeVapour.active(player) && looker.distanceToSqr(target) > SEE_THROUGH * SEE_THROUGH) {
-			return true;
-		}
 		return blocksSight(looker.level(), looker.getEyePosition(), target.getEyePosition());
 	}
 
