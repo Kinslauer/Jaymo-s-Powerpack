@@ -61,6 +61,8 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCon
  * stomach and a Z Fighter's ki, and clears what ails you. Anyone can eat one.</li>
  * <li><b>Training Weights</b>, worn on the feet (ankle weights and wristbands): slower, lower jumps; a Z Fighter
  * wearing them trains faster ({@link #LIGHT_RATE}, heavy {@link #HEAVY_RATE}).</li>
+ * <li>The <b>Sparring Dummy</b> ({@link ZFighterSparring}) and the <b>Training Post</b>, whose drills are played on the
+ * client and paid for by {@link ZFighterDrills}.</li>
  * </ul>
  */
 public final class ZFighterItems {
@@ -84,6 +86,9 @@ public final class ZFighterItems {
 	public static Item HERMIT_BEAN;
 	public static Item TRAINING_WEIGHTS;
 	public static Item HEAVY_TRAINING_WEIGHTS;
+	public static Item SPARRING_DUMMY;
+	public static Block TRAINING_POST;
+	public static Item TRAINING_POST_ITEM;
 
 	private ZFighterItems() {
 	}
@@ -102,13 +107,24 @@ public final class ZFighterItems {
 			.useCooldown(BEAN_COOLDOWN_SECONDS)));
 		TRAINING_WEIGHTS = weights("training_weights", LIGHT_SLOW, LIGHT_JUMP, Rarity.COMMON);
 		HEAVY_TRAINING_WEIGHTS = weights("heavy_training_weights", HEAVY_SLOW, HEAVY_JUMP, Rarity.UNCOMMON);
+		ResourceKey<Item> dummyKey = item("sparring_dummy");
+		SPARRING_DUMMY = Registry.register(BuiltInRegistries.ITEM, dummyKey, new ZFighterSparring.DummyItem(new Item.Properties().setId(dummyKey)
+			.stacksTo(1).rarity(Rarity.UNCOMMON)));
+		ResourceKey<Block> postKey = ResourceKey.create(Registries.BLOCK, JaymosPowers.id("training_post"));
+		TRAINING_POST = Registry.register(BuiltInRegistries.BLOCK, postKey, new Block(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+			.strength(2.0F).sound(SoundType.WOOD).noOcclusion().setId(postKey)));
+		ResourceKey<Item> postItemKey = item("training_post");
+		TRAINING_POST_ITEM = Registry.register(BuiltInRegistries.ITEM, postItemKey, new BlockItem(TRAINING_POST, new Item.Properties().setId(postItemKey)
+			.useBlockDescriptionPrefix()));
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> output.accept(HERMIT_BEAN));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> output.accept(HERMIT_BEAN_SEEDS));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 			output.accept(TRAINING_WEIGHTS);
 			output.accept(HEAVY_TRAINING_WEIGHTS);
+			output.accept(SPARRING_DUMMY);
 		});
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(TRAINING_POST_ITEM));
 		LootTableEvents.MODIFY.register((table, builder, source, registries) -> {
 			if (!source.isBuiltin() || !table.equals(BuiltInLootTables.JUNGLE_TEMPLE)) {
 				return;

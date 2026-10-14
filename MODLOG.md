@@ -916,3 +916,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Stage 2, gravity training: Gravity's Z is now the Training Field (`GravityTrainingField`), a minute-long dome of heavy
   gravity where they aim; a Z Fighter in it, or under a Well's pull or Crush's pin (`GravityPower.KNEEL`), trains 2x
   and his blows count as heavy for mastery; the Gravity user earns a mastery use per minute a Z Fighter trains there.
+  Stage 3, training activities: the Sparring Dummy (`ZFighterSparring`: a vanilla mannequin wearing your skin, driven
+  from the server; it never kills you, yields for a TP prize) and the Training Post block with four client-side drills
+  (`ZFighterDrillScreen`, paid by `ZFighterDrills` with a per-drill rest).

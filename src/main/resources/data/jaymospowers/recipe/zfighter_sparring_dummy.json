@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": "minecraft:armor_stand",
+    "H": "minecraft:hay_block",
+    "L": "minecraft:leather"
+  },
+  "pattern": [
+    "H",
+    "A",
+    "L"
+  ],
+  "result": {
+    "id": "jaymospowers:sparring_dummy"
+  }
+}

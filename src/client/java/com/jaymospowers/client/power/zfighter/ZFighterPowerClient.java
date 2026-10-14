@@ -9,6 +9,11 @@ import com.jaymospowers.power.zfighter.ZFighterPower;
 import com.jaymospowers.power.zfighter.ZFighterState;
 import com.jaymospowers.power.zfighter.ZFighterTraining;
 import java.util.Locale;
+import com.jaymospowers.core.Powers;
+import com.jaymospowers.power.zfighter.ZFighterItems;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
@@ -50,6 +55,15 @@ public final class ZFighterPowerClient implements PowerClient {
 		PowerClients.register(ZFighterPower.ID, INSTANCE);
 		ZFighterInputClient.init();
 		ClientTickEvents.END_CLIENT_TICK.register(ZFighterFlightPose::tick);
+		// the Training Post: a Z Fighter's right click opens the drills
+		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
+			if (!level.isClientSide() || hand != InteractionHand.MAIN_HAND || !level.getBlockState(hit.getBlockPos()).is(ZFighterItems.TRAINING_POST)
+				|| !Powers.has(player, ZFighterPower.INSTANCE)) {
+				return InteractionResult.PASS;
+			}
+			Minecraft.getInstance().gui.setScreen(new ZFighterDrillScreen());
+			return InteractionResult.SUCCESS;
+		});
 	}
 
 	@Override
