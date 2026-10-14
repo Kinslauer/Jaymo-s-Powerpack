@@ -264,3 +264,15 @@ power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts
 | 265 | Any | /powerdebug zfighter raid, tournament [start] | Stage 6 debug | Ops: a tyrant lands near you; a tournament opens near you (start ends its sign-up). | |
 | 266 | Any | passive | Corruption | Each dark master's lesson fills a third of your corruption; the third corrupts you. A crimson mark glows on your forehead in every form, and your fists and ki power are 15% stronger. | |
 | 267 | Base | sneak + C (base form, corrupted) | Corrupted mode | Super's fists, speed and ki power with no ki drain; instead it bleeds half a heart a second and ends at one heart. Every hit heals you a third of the damage dealt. 3 Combat Roll charges, and every roll blinks you up to 8 blocks towards your target (what you aim at, last hit, or what's hunting you), behind it if it's within 5, or 6 blocks ahead with none. Sneak+C again leaves; C goes Super instead. | |
+
+## Smoke
+
+| Line | Form | Key | Ability | What it does now | Change to |
+|---|---|---|---|---|---|
+| 272 | Starter | R (hold) | Thin Smokescreen | A thin smoke pours out of you for up to 5 s (half of Smokescreen). | |
+| 273 | Base | R (hold) | Smokescreen | Smoke pours out of you for up to 10 s (cooldown 2-8 s, longer the longer you poured; costs a little hunger). The smoke is a real gas: it climbs, pools under ceilings and fills rooms from the top down, flows toward thinner air, leaks a quarter through doors, slabs, fences and bars (half through leaves), is stopped by full blocks and killed by water, drifts on a wandering wind under the open sky (harder in rain and storms) and fades, quickly in the rain. Mobs can't take or keep a target when the line between their eyes runs through thick smoke (closer than 3 blocks they still see you). Your own smoke is drawn faint and doesn't grey your view; anyone else's head in thick smoke greys their screen out. Wind users flying fast scatter it. | |
+| 274 | Base | G | Vapour Form | 4 s (6 s mastered): unseen, Speed II, Slow Falling, a trail of smoke; blows, arrows and bites pass through you (fire, blasts and falls still hurt). Mobs lose you. Hitting something brings you back. 16 s cooldown. | |
+| 275 | Base | V | Smoke Bomb | Throw a grey ball; where it lands it bursts into a cloud (60 blocks' worth, 90 mastered) and blinds whatever is within 2.5 blocks for 3 s. 8 s cooldown (5 s mastered). | |
+| 276 | Base | B (hold) | Smother | Smoke wraps whoever you aim at (24 blocks) for up to 6 s: Blindness, Slowness II, their air runs out as if under water, then they choke a heart a second through armour. The undead and fish don't breathe: only blinded and slowed. Cooldown 4-12 s. | |
+| 277 | Calling |  | How | Breathe a fire's smoke (3+ burning blocks or lit campfires within 4 blocks) for 60 s in a row and live: a day off the wait, once a day. | |
+| 278 | Next | Z, X, C | Not built yet | Proposed: Z Smoke Sight (creatures in any smoke outlined), X Smoke Step (step out of any of your clouds within 32 blocks), C Pyroclasm (ascended: a rolling burning cloud); corrupted Smog (your smoke turns toxic); cure: 60 s of clean air at Y 200+. | |
