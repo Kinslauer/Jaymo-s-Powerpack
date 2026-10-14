@@ -147,6 +147,11 @@ public final class ZFighterPower implements Power {
 	private static final Identifier LIMIT_SPEED_ID = JaymosPowers.id("zfighter_limit_speed");
 	private static final Identifier VITALITY_ID = JaymosPowers.id("zfighter_vitality");
 	private static final Identifier RAGE_FIST_ID = JaymosPowers.id("zfighter_rage_fists");
+	private static final Identifier REACH_ID = JaymosPowers.id("zfighter_reach");
+	private static final Identifier SCALE_ID = JaymosPowers.id("zfighter_scale");
+	private static final Identifier APE_FIST_ID = JaymosPowers.id("zfighter_ape_fists");
+	private static final Identifier APE_HEALTH_ID = JaymosPowers.id("zfighter_ape_health");
+	private static final Identifier APE_SPEED_ID = JaymosPowers.id("zfighter_ape_speed");
 
 	/** The owner's HUD state (ki, cooldowns, what he's doing). Not saved: a relog clears it. */
 	public static final AttachmentType<ZFighterState> STATE = AttachmentRegistry.create(JaymosPowers.id("zfighter_state"),
@@ -207,6 +212,9 @@ public final class ZFighterPower implements Power {
 		float rage;
 		int rageTicks;
 		int rageCooldown;
+		/** His lineage ({@link ZFighterLineage}), refreshed every tick, and how long the Great Ape has been out of the moonlight. */
+		int lineage;
+		int moonless;
 
 		boolean raging() {
 			return rageTicks > 0;
@@ -225,6 +233,7 @@ public final class ZFighterPower implements Power {
 		ZFighterItems.init();
 		ZFighterSparring.init();
 		ZFighterDrills.init();
+		ZFighterLineage.init();
 		ZFighterNet.register();
 		ZFighterBattle.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ZFighterDebugCommand.register(dispatcher));
@@ -279,6 +288,9 @@ public final class ZFighterPower implements Power {
 	@Override
 	public void onGained(ServerPlayer player) {
 		player.setAttached(STATE, ZFighterState.NONE);
+		if (ZFighterLineage.of(player) == ZFighterLineage.NONE) {
+			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_pick_lineage").withStyle(ChatFormatting.GOLD));
+		}
 	}
 
 	@Override
@@ -288,13 +300,20 @@ public final class ZFighterPower implements Power {
 			live.flying = false;
 		}
 		landFlight(player);
-		for (Identifier id : new Identifier[] {FIST_ID, SUPER_FIST_ID, HUNGRY_ID, LIMIT_FIST_ID, RAGE_FIST_ID}) {
+		for (Identifier id : new Identifier[] {FIST_ID, SUPER_FIST_ID, HUNGRY_ID, LIMIT_FIST_ID, RAGE_FIST_ID, APE_FIST_ID}) {
 			remove(player, Attributes.ATTACK_DAMAGE, id);
 		}
 		remove(player, Attributes.MOVEMENT_SPEED, SLOW_ID);
 		remove(player, Attributes.MOVEMENT_SPEED, SUPER_SPEED_ID);
 		remove(player, Attributes.MOVEMENT_SPEED, LIMIT_SPEED_ID);
 		remove(player, Attributes.MAX_HEALTH, VITALITY_ID);
+		remove(player, Attributes.MAX_HEALTH, APE_HEALTH_ID);
+		remove(player, Attributes.MOVEMENT_SPEED, APE_SPEED_ID);
+		remove(player, Attributes.ENTITY_INTERACTION_RANGE, REACH_ID);
+		remove(player, Attributes.SCALE, SCALE_ID);
+		player.removeAttached(ZFighterLineage.LINEAGE);
+		player.removeAttached(ZFighterLineage.TAIL_WRAPPED);
+		player.removeAttached(ZFighterLineage.GREAT_APE);
 		player.removeAttached(STATE);
 		player.removeAttached(FLIGHT);
 		player.removeAttached(DEFEATS);
@@ -327,6 +346,7 @@ public final class ZFighterPower implements Power {
 		int food = player.getFoodData().getFoodLevel();
 		boolean hungry = food <= HUNGRY_FOOD && !creative;
 		boolean starving = food <= 0 && !creative;
+		ZFighterLineage.tick(player, live);
 
 		// a Z Fighter eats like three men, and every bite comes back as ki
 		if (live.lastFood >= 0 && food > live.lastFood) {
@@ -391,7 +411,7 @@ public final class ZFighterPower implements Power {
 
 		if (live.superOn()) {
 			float ease = 1.0F - MASTERY_EASE * ZFighterTraining.mastery(player, live.form);
-			live.ki -= FORM_DRAIN[live.form] * ease * (live.limit > 0 ? LIMIT_STACK_DRAIN : 1.0F);
+			live.ki -= FORM_DRAIN[live.form] * ease * (live.limit > 0 ? LIMIT_STACK_DRAIN : 1.0F) * ZFighterLineage.drainFactor(live.lineage, live.form);
 			if (now % 2 == 0) {
 				aura(player, live, 1 + live.form);
 			}
@@ -405,11 +425,12 @@ public final class ZFighterPower implements Power {
 			}
 		}
 		if (live.limit > 0) {
-			if (player.getHealth() - LIMIT_HEALTH[live.limit] <= 2.0F) {
+			float burn = LIMIT_HEALTH[live.limit] * ZFighterLineage.limitFactor(player);
+			if (player.getHealth() - burn <= 2.0F) {
 				endLimit(player, live);
 			} else {
 				if (!creative) {
-					player.setHealth(player.getHealth() - LIMIT_HEALTH[live.limit]);
+					player.setHealth(player.getHealth() - burn);
 				}
 				if (now % 3 == 0) {
 					level.sendParticles(new DustParticleOptions(LIMIT_COLOR, 1.4F), true, false, player.getX(), player.getY() + 1.0, player.getZ(),
@@ -430,6 +451,14 @@ public final class ZFighterPower implements Power {
 	@Override
 	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
 		Live live = live(player);
+		if (ZFighterLineage.ape(player) && key != PowerKey.ABILITY_1) {
+			// the Great Ape has no techniques: only his fists, and the beam from his mouth on V
+			if (key == PowerKey.ABILITY_3 && down && ready(player, ZFighterState.WAVE) && ZFighterKi.apeBeam(player, live)) {
+				cooldown(player, ZFighterState.WAVE, ZFighterLineage.APE_BEAM_COOLDOWN);
+			}
+			sync(player, live, maxKi(player));
+			return;
+		}
 		switch (key) {
 			case ABILITY_1 -> {
 				if (down && player.getFoodData().getFoodLevel() <= 0 && !player.isCreative()) {
@@ -459,7 +488,11 @@ public final class ZFighterPower implements Power {
 				refresh(player, live);
 			}
 			case ABILITY_4 -> {
-				if (down && ready(player, ZFighterState.STEP) && ZFighterKi.step(player, live)) {
+				if (down && live.lineage == ZFighterLineage.VERDANT && player.isShiftKeyDown()) {
+					if (ready(player, ZFighterState.STEP) && ZFighterLineage.heal(player, live)) {
+						cooldown(player, ZFighterState.STEP, ZFighterLineage.HEAL_COOLDOWN);
+					}
+				} else if (down && ready(player, ZFighterState.STEP) && ZFighterKi.step(player, live)) {
 					cooldown(player, ZFighterState.STEP, ZFighterKi.STEP_COOLDOWN);
 				}
 			}
@@ -498,9 +531,15 @@ public final class ZFighterPower implements Power {
 		}
 	}
 
-	/** Z alone does nothing on the server: flight is hold Z and scroll ({@link #fly}), sent by the client. */
+	/**
+	 * Z alone does nothing on the server: flight is hold Z and scroll ({@link #fly}), sent by the client. Sneak+Z on the
+	 * ground: a Warrior-born wraps his tail away or lets it out.
+	 */
 	@Override
 	public void onMode(ServerPlayer player, boolean down) {
+		if (down && player.isShiftKeyDown() && !live(player).flying) {
+			ZFighterLineage.toggleTail(player);
+		}
 	}
 
 	/**
@@ -514,7 +553,8 @@ public final class ZFighterPower implements Power {
 			if (live.flying) {
 				endFlight(player, live);
 			}
-		} else if (!INSTANCE.slotUnlocked(player, "mode") || Powers.silenced(player) || !com.jaymospowers.power.wind.WindFlight.canFly(player)) {
+		} else if (!INSTANCE.slotUnlocked(player, "mode") || Powers.silenced(player) || ZFighterLineage.ape(player)
+			|| !com.jaymospowers.power.wind.WindFlight.canFly(player)) {
 			if (live.flying) {
 				endFlight(player, live);
 			}
@@ -544,6 +584,9 @@ public final class ZFighterPower implements Power {
 	@Override
 	public void onUltimate(ServerPlayer player, boolean down) {
 		Live live = live(player);
+		if (down && ZFighterLineage.ape(player)) {
+			return;
+		}
 		if (!down) {
 			ZFighterTechniques.release(player, live);
 			sync(player, live, maxKi(player));
@@ -601,7 +644,7 @@ public final class ZFighterPower implements Power {
 		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFE08A), true, true, center.x, center.y + 1.0, center.z, 1, 0.0,
 			0.0, 0.0, 0.0);
 		level.sendParticles(ParticleTypes.EXPLOSION, true, false, center.x, center.y + 0.5, center.z, 6, 1.2, 0.4, 1.2, 0.0);
-		level.sendParticles(new DustParticleOptions(FORM_COLOR[form], 2.0F), true, false, center.x, center.y + 1.0, center.z, 40 + 20 * form, 1.2,
+		level.sendParticles(new DustParticleOptions(ZFighterLineage.color(live.lineage, form), 2.0F), true, false, center.x, center.y + 1.0, center.z, 40 + 20 * form, 1.2,
 			1.2, 1.2, 0.2);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 0.8F, 1.8F - 0.25F * form);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.7F, 1.4F);
@@ -708,7 +751,7 @@ public final class ZFighterPower implements Power {
 		if (live.raging()) {
 			return new DustParticleOptions(ZFighterBattle.RAGE_COLOR, 1.5F);
 		}
-		return new DustParticleOptions(FORM_COLOR[live.form], live.superOn() ? 1.4F + 0.2F * live.form : 1.2F);
+		return new DustParticleOptions(ZFighterLineage.color(live.lineage, live.form), live.superOn() ? 1.4F + 0.2F * live.form : 1.2F);
 	}
 
 	// ---------------------------------------------------------------- attributes
@@ -728,11 +771,21 @@ public final class ZFighterPower implements Power {
 		set(player, Attributes.MOVEMENT_SPEED, SLOW_ID, live.charging || live.waveFrom >= 0 || live.spiritFrom >= 0 ? -CHARGE_SLOW : 0.0,
 			AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.MOVEMENT_SPEED, SUPER_SPEED_ID, FORM_SPEED[live.form], AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		// lineages: a Verdant's long arms and Giant forms; the Great Ape
+		int lineage = ZFighterLineage.of(player);
+		boolean ape = ZFighterLineage.ape(player);
+		set(player, Attributes.ENTITY_INTERACTION_RANGE, REACH_ID, lineage == ZFighterLineage.VERDANT ? ZFighterLineage.REACH : 0.0,
+			AttributeModifier.Operation.ADD_VALUE);
+		double scale = ape ? ZFighterLineage.APE_SCALE : lineage == ZFighterLineage.VERDANT ? ZFighterLineage.GIANT_SCALE[live.form] : 0.0;
+		set(player, Attributes.SCALE, SCALE_ID, scale, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+		set(player, Attributes.ATTACK_DAMAGE, APE_FIST_ID, ape ? ZFighterLineage.APE_FISTS : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		set(player, Attributes.MAX_HEALTH, APE_HEALTH_ID, ape ? ZFighterLineage.APE_HEALTH : 0.0, AttributeModifier.Operation.ADD_VALUE);
+		set(player, Attributes.MOVEMENT_SPEED, APE_SPEED_ID, ape ? ZFighterLineage.APE_SPEED : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 	}
 
 	/** What his bare fists add to a punch: mastery, every foe that ever beat him, ascension and trained Strength. */
 	static double fistBonus(Player player) {
-		return FIST_DAMAGE + FIST_PER_ABILITY * Mastery.unlocked(player) + FIST_PER_DEFEAT * zenkai(player)
+		return FIST_DAMAGE + FIST_PER_ABILITY * Mastery.unlocked(player) + FIST_PER_DEFEAT * zenkai(player) * ZFighterLineage.zenkaiFactor(player)
 			+ (Fate.isAscended(player) ? ASCENDED_FIST : 0.0)
 			+ ZFighterTraining.STRENGTH_PER_LEVEL * ZFighterTraining.of(player).stat(ZFighterTraining.STRENGTH);
 	}
@@ -821,7 +874,7 @@ public final class ZFighterPower implements Power {
 	}
 
 	public static int maxKi(Player player) {
-		return BASE_MAX_KI + KI_PER_DEFEAT * zenkai(player)
+		return BASE_MAX_KI + KI_PER_DEFEAT * zenkai(player) * ZFighterLineage.zenkaiFactor(player)
 			+ ZFighterTraining.ENERGY_PER_LEVEL * ZFighterTraining.of(player).stat(ZFighterTraining.ENERGY);
 	}
 

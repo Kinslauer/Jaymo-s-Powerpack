@@ -117,6 +117,13 @@ final class ZFighterKi {
 	private static final int BLAST_COLOR = 0xFFC85A;
 	private static final int WAVE_COLOR = 0x8FD3FF;
 
+	// ---- the Great Ape's mouth beam (V) ----
+	static final double APE_BEAM_RANGE = 28.0;
+	static final double APE_BEAM_RADIUS = 1.5;
+	static final float APE_BEAM_DAMAGE = 16.0F;
+	static final float APE_BEAM_BLAST = 2.5F;
+	static final int APE_BEAM_COLOR = 0xFF6A3A;
+
 	/** What a bolt is: drawn and spent differently. */
 	static final int BOLT = 0;
 	static final int DISC = 1;
@@ -203,7 +210,7 @@ final class ZFighterKi {
 		right = right.lengthSqr() < 1.0E-6 ? Vec3.ZERO : right.normalize();
 		Vec3 from = player.getEyePosition().add(look.scale(0.8)).add(right.scale(0.3)).add(0.0, -0.25, 0.0);
 		float damage = BLAST_DAMAGE * ZFighterPower.kiPower(player, live);
-		BOLTS.add(new Bolt(level, player.getUUID(), from, look.scale(BLAST_SPEED), damage, ZFighterPower.FORM_COLOR[live.form], BOLT, BLAST_LIFE));
+		BOLTS.add(new Bolt(level, player.getUUID(), from, look.scale(BLAST_SPEED), damage, formColor(live), BOLT, BLAST_LIFE));
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		if (!player.isCreative()) {
 			player.causeFoodExhaustion(BLAST_EXHAUSTION);
@@ -407,7 +414,7 @@ final class ZFighterKi {
 		ServerLevel level = player.level();
 		Vec3 look = player.getViewVector(1.0F);
 		BOLTS.add(new Bolt(level, player.getUUID(), palm(player, look), look.scale(DISC_SPEED), DISC_DAMAGE * ZFighterPower.kiPower(player, live),
-			ZFighterPower.FORM_COLOR[live.form], DISC, DISC_LIFE));
+			formColor(live), DISC, DISC_LIFE));
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		exhaust(player, BLAST_EXHAUSTION);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8F, 1.6F);
@@ -425,7 +432,7 @@ final class ZFighterKi {
 		float damage = VOLLEY_DAMAGE * ZFighterPower.kiPower(player, live);
 		for (int i = 0; i < VOLLEY_BOLTS; i++) {
 			Vec3 spread = look.add((random.nextDouble() - 0.5) * 0.7, random.nextDouble() * 0.4, (random.nextDouble() - 0.5) * 0.7).normalize();
-			BOLTS.add(new Bolt(level, player.getUUID(), palm(player, look), spread.scale(VOLLEY_SPEED), damage, ZFighterPower.FORM_COLOR[live.form],
+			BOLTS.add(new Bolt(level, player.getUUID(), palm(player, look), spread.scale(VOLLEY_SPEED), damage, formColor(live),
 				HOMING, VOLLEY_LIFE));
 		}
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
@@ -485,7 +492,7 @@ final class ZFighterKi {
 		Vec3 look = player.getViewVector(1.0F);
 		Vec3 hands = player.getEyePosition().add(look.scale(0.7)).add(0.0, -0.45, 0.0);
 		RandomSource random = level.getRandom();
-		DustParticleOptions dust = new DustParticleOptions(live.superOn() ? ZFighterPower.FORM_COLOR[live.form] : WAVE_COLOR, 0.8F + charge * 1.2F);
+		DustParticleOptions dust = new DustParticleOptions(live.superOn() ? formColor(live) : WAVE_COLOR, 0.8F + charge * 1.2F);
 		for (int i = 0; i < 3; i++) {
 			double ox = (random.nextDouble() - 0.5) * 1.6;
 			double oy = (random.nextDouble() - 0.5) * 1.6;
@@ -531,7 +538,7 @@ final class ZFighterKi {
 		Vec3 from = player.getEyePosition().add(look.scale(1.0 + size)).add(0.0, -0.2, 0.0);
 		Bolt bolt = new Bolt(level, player.getUUID(), from, look.scale(BOMB_SPEED),
 			Mth.lerp(charge, BOMB_DAMAGE_MIN, BOMB_DAMAGE_MAX) * ZFighterPower.kiPower(player, live),
-			live.superOn() ? ZFighterPower.FORM_COLOR[live.form] : WAVE_COLOR, BOMB, BOMB_LIFE);
+			live.superOn() ? formColor(live) : WAVE_COLOR, BOMB, BOMB_LIFE);
 		bolt.size = size;
 		bolt.radius = 2.0 + size * 1.5;
 		bolt.burst = Mth.lerp(charge, BOMB_BLAST_MIN, BOMB_BLAST_MAX) * (live.superOn() ? 1.3F : 1.0F);
@@ -563,7 +570,7 @@ final class ZFighterKi {
 			push(target, look, 0.8 + charge * 1.2, 0.3);
 		}
 		boolean super_ = live.superOn();
-		BEAMS.add(new Beam(level, from, to, radius, super_ ? ZFighterPower.FORM_COLOR[live.form] : WAVE_COLOR, new int[1]));
+		BEAMS.add(new Beam(level, from, to, radius, super_ ? formColor(live) : WAVE_COLOR, new int[1]));
 		float power = Mth.lerp(charge, WAVE_BLAST_MIN, WAVE_BLAST_MAX) * (super_ ? 1.3F : 1.0F);
 		// a full wave from a Super tears the ground (as a mob would: mob griefing decides); anything less only hurts
 		Level.ExplosionInteraction interaction = super_ && charge >= 1.0F ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE;
@@ -578,6 +585,37 @@ final class ZFighterKi {
 		if (!player.isCreative()) {
 			player.causeFoodExhaustion(WAVE_EXHAUSTION * (1.0F + charge));
 		}
+	}
+
+	/** A bolt's or beam's colour: the base blast's, or the form's in his lineage's hue. */
+	private static int formColor(ZFighterPower.Live live) {
+		return live.form == 0 ? ZFighterPower.FORM_COLOR[0] : ZFighterLineage.color(live.lineage, live.form);
+	}
+
+	/** V as the Great Ape: a beam from the mouth. No ki, no charge: it's the moon's strength. */
+	static boolean apeBeam(ServerPlayer player, ZFighterPower.Live live) {
+		ServerLevel level = player.level();
+		Vec3 look = player.getViewVector(1.0F);
+		Vec3 from = player.getEyePosition().add(look.scale(player.getBbWidth())).add(0.0, -0.3 * player.getScale(), 0.0);
+		BlockHitResult block = level.clip(new ClipContext(from, from.add(look.scale(APE_BEAM_RANGE)), ClipContext.Block.COLLIDER,
+			ClipContext.Fluid.NONE, player));
+		Vec3 to = block.getLocation();
+		DamageSource source = source(player);
+		float damage = APE_BEAM_DAMAGE * ZFighterPower.kiPower(player, live);
+		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, new AABB(from, to).inflate(APE_BEAM_RADIUS + 1.0),
+			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand))) {
+			if (distanceToSegment(target.getBoundingBox().getCenter(), from, to) > APE_BEAM_RADIUS + target.getBbWidth() * 0.5) {
+				continue;
+			}
+			target.setInvulnerableTime(0);
+			target.hurtServer(level, source, damage);
+			push(target, look, 1.2, 0.3);
+		}
+		BEAMS.add(new Beam(level, from, to, APE_BEAM_RADIUS, APE_BEAM_COLOR, new int[1]));
+		level.explode(player, source, GROUND_ONLY, to.x, to.y, to.z, APE_BEAM_BLAST, false, Level.ExplosionInteraction.MOB);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 2.0F, 0.6F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.5F, 0.7F);
+		return true;
 	}
 
 	private static void drawBeam(Beam beam) {

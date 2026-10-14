@@ -922,3 +922,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Stage 3, training activities: the Sparring Dummy (`ZFighterSparring`: a vanilla mannequin wearing your skin, driven
   from the server; it never kills you, yields for a TP prize) and the Training Post block with four client-side drills
   (`ZFighterDrillScreen`, paid by `ZFighterDrills` with a per-drill rest).
+  Stage 4, lineages (`ZFighterLineage`, picked once on the training screen; a Writ of Rebirth read while sneaking unmakes
+  it): Earthling (TP 1.25x, Limit Break half price and half burn), Warrior-born (tail drawn by `ZFighterTail`, sneak+Z
+  wraps it; defeats count double; out under a full moon with the tail out he's the Great Ape: 3x size, +100% fists,
+  +40 health, a mouth beam on V, no techniques, forms or flight until the moon goes), Verdant (regenerates, +1.5 reach,
+  Giant/Great Giant/Titan forms that grow him instead of Super, sneak+B heals the one you look at) and Frost-born (Second
+  and Final forms free to hold, then Golden). Each lineage has its own aura colours.

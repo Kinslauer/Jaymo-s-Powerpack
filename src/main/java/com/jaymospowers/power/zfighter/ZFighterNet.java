@@ -17,6 +17,7 @@ public final class ZFighterNet {
 	public static final int CYCLE_LIMIT = 3;
 	public static final int BUY_TECHNIQUE = 4;
 	public static final int EQUIP_TECHNIQUE = 5;
+	public static final int PICK_LINEAGE = 6;
 
 	private ZFighterNet() {
 	}
@@ -72,6 +73,7 @@ public final class ZFighterNet {
 			case CYCLE_LIMIT -> ZFighterPower.cycleLimit(player);
 			case BUY_TECHNIQUE -> ZFighterTraining.buyTechnique(player, train.index());
 			case EQUIP_TECHNIQUE -> ZFighterTraining.equipTechnique(player, train.index());
+			case PICK_LINEAGE -> ZFighterLineage.pick(player, train.index());
 			default -> {
 			}
 		}

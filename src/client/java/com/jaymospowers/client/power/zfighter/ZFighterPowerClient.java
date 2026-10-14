@@ -5,6 +5,7 @@ import com.jaymospowers.client.JaymosPowersClient;
 import com.jaymospowers.client.PowerClient;
 import com.jaymospowers.client.PowerClients;
 import com.jaymospowers.core.Fate;
+import com.jaymospowers.power.zfighter.ZFighterLineage;
 import com.jaymospowers.power.zfighter.ZFighterPower;
 import com.jaymospowers.power.zfighter.ZFighterState;
 import com.jaymospowers.power.zfighter.ZFighterTraining;
@@ -20,6 +21,8 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.world.entity.Avatar;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
@@ -56,6 +59,11 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterInputClient.init();
 		ClientTickEvents.END_CLIENT_TICK.register(ZFighterFlightPose::tick);
 		// the Training Post: a Z Fighter's right click opens the drills
+		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
+			if (renderer instanceof AvatarRenderer<?> avatar) {
+				helper.register(new ZFighterTail.Layer(avatar));
+			}
+		});
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			if (!level.isClientSide() || hand != InteractionHand.MAIN_HAND || !level.getBlockState(hit.getBlockPos()).is(ZFighterItems.TRAINING_POST)
 				|| !Powers.has(player, ZFighterPower.INSTANCE)) {
@@ -74,6 +82,7 @@ public final class ZFighterPowerClient implements PowerClient {
 	/** From the avatar renderer's extractRenderState (everyone, not only Z Fighters: the pose eases out). */
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
 		ZFighterFlightPose.extract(entity, state, partialTicks);
+		ZFighterTail.extract(entity, state);
 	}
 
 	/** Right after a humanoid model animates. */
@@ -196,7 +205,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		graphics.text(font, ki, x + width - font.width(ki), y - 9, 0xFF000000 | color);
 		Component label = Component.translatable("hud.jaymospowers.zfighter.ki");
 		if (state.form() > 0) {
-			label = Component.translatable("form.jaymospowers.zfighter." + state.form()).copy().withColor(color);
+			label = Component.translatable(ZFighterLineage.formKey(net.minecraft.client.Minecraft.getInstance().player, state.form())).copy().withColor(color);
 		}
 		if (state.limit() > 0) {
 			label = label.copy().append(Component.translatable("hud.jaymospowers.zfighter.limit", state.limit()).copy().withColor(0xFF5A40));

@@ -273,7 +273,7 @@ public final class ZFighterTraining {
 
 	/** How fast he trains right now: Training Weights worn, times heavy gravity. */
 	static float rate(ServerPlayer player) {
-		return ZFighterItems.weightRate(player) * (heavyGravity(player) ? HEAVY_GRAVITY_RATE : 1.0F);
+		return ZFighterItems.weightRate(player) * (heavyGravity(player) ? HEAVY_GRAVITY_RATE : 1.0F) * ZFighterLineage.trainingFactor(player);
 	}
 
 	/** Under heavy gravity: someone's Training Field, or Gravity's weight on him. */
@@ -297,7 +297,7 @@ public final class ZFighterTraining {
 		for (int threshold : new int[] {NEXT_FORM_MASTERY, FREE_ENTRY_MASTERY, MASTERY_MAX}) {
 			if (before < threshold && after >= threshold) {
 				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_mastery_" + threshold / 100,
-					Component.translatable("form.jaymospowers.zfighter." + form)).withStyle(ChatFormatting.GOLD));
+					Component.translatable(ZFighterLineage.formKey(player, form))).withStyle(ChatFormatting.GOLD));
 				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.7F, 1.4F);
 			}
 		}
@@ -378,7 +378,7 @@ public final class ZFighterTraining {
 		Data data = of(player);
 		player.setAttached(DATA, data.withForm(form).withTp(player.isCreative() ? data.tp() : data.tp() - FORM_TP[form]));
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_form_learned",
-			Component.translatable("form.jaymospowers.zfighter." + form)).withStyle(ChatFormatting.GOLD));
+			Component.translatable(ZFighterLineage.formKey(player, form))).withStyle(ChatFormatting.GOLD));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 0.8F,
 			1.2F);
 	}
@@ -386,11 +386,20 @@ public final class ZFighterTraining {
 	static void buyLimit(ServerPlayer player) {
 		Data data = of(player);
 		int tier = data.limit() + 1;
-		if (tier >= LIMIT_TP.length || data.tp() < LIMIT_TP[tier] && !player.isCreative()) {
+		if (tier >= LIMIT_TP.length) {
 			return;
 		}
-		player.setAttached(DATA, data.withLimit(tier).withTp(player.isCreative() ? data.tp() : data.tp() - LIMIT_TP[tier]));
+		int cost = limitCost(player, tier);
+		if (data.tp() < cost && !player.isCreative()) {
+			return;
+		}
+		player.setAttached(DATA, data.withLimit(tier).withTp(player.isCreative() ? data.tp() : data.tp() - cost));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6F, 0.8F);
+	}
+
+	/** What Limit Break tier {@code tier} costs him (Earthlings pay half). */
+	public static int limitCost(Player player, int tier) {
+		return Math.round(LIMIT_TP[tier] * ZFighterLineage.limitFactor(player));
 	}
 
 	/** Whether technique {@code index} can be learned now; if not, why (a lang key), or null when it can. */
