@@ -124,7 +124,7 @@ A Gravity user lightens whatever they hold, at every mastery level (`GravityWeig
 - **Meteor (C)** tears through every breakable block it passes on the way down (`GravityMeteor.carve`: 0.8 of its
   width, at most 7 blocks from its middle, 600 blocks a tick, 10% drop as items), so a roof it falls through is
   gone before the impact blast.
-- **Shoulder view**: since 0.10.57 Shoulder Surfing Reloaded gives everyone the over-the-shoulder F5 view (our own
+- **Shoulder view**: since 0.10.65 Shoulder Surfing Reloaded gives everyone the over-the-shoulder F5 view (our own
   Web/Gravity/Z Fighter one is gone; `client/CameraPreset` sets its offsets and keeps the camera coupled so abilities
   fire where the crosshair points).
 

@@ -1,0 +1,13 @@
+{
+  "type": "jaymospowers:arsenal_pocket",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "jaymospowers:arsenal_pocket",
+      "features": false,
+      "lakes": false,
+      "layers": [{"block": "minecraft:air", "height": 1}],
+      "structure_overrides": []
+    }
+  }
+}

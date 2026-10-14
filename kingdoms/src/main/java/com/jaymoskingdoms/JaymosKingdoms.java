@@ -126,9 +126,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.5) the night as a timelapse, and resting in bed awake (our own take on Sleeping Overhaul 2)
 		Timelapse.register();
 		BedRest.register();
-		// (0.7.12) placed torches burn down and go out (our own take on Realistic Torches)
+		// (0.7.17) placed torches burn down and go out (our own take on Realistic Torches)
 		Torches.register();
-		// (0.7.12) spiders take after their biome (our own take on Spider Overhaul)
+		// (0.7.17) spiders take after their biome (our own take on Spider Overhaul)
 		com.jaymoskingdoms.wild.SpiderKinds.register();
 		// 0.5.14: horses and wagons: mounted guards and archers for prosperous realms, a wealthy king's carriage, and the
 		// fiefdoms' caravans to their kingdoms (and their attachment)
@@ -139,6 +139,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Cannons.register();
 		LOGGER.debug("caravan attachments: {} {}", Caravans.CARAVANS, Carriages.BOUGHT);
 		Caravans.register();
+		// (0.7.13) roaming pillager and merchant caravans (our own take on Pillager Caravans) and their attachment
+		LOGGER.debug("roaming caravan attachment: {}", RoamingCaravans.LEDGER);
+		RoamingCaravans.register();
 		// (0.7.9) King's Roads between settlements, kept to by cabs, rickshaws, rulers and caravans
 		LOGGER.debug("road attachment: {}", Roads.ROADS);
 		Roads.register();

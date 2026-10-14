@@ -62,6 +62,7 @@ final class KingdomCommands {
 				.then(Commands.literal("village").executes(KingdomCommands::foundVillage)))
 			.then(Camps.command())
 			.then(Roads.command())
+			.then(RoamingCaravans.command())
 			.then(Milestones.command())
 			.then(QuestCommands.command())
 			.then(Assassins.command())

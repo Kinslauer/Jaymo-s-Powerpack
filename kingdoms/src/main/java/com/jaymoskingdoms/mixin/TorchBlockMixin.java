@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.TorchBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 
-/** (0.7.12) Torches (floor and wall) take random ticks, on which they burn down ({@link Torches}). */
+/** (0.7.17) Torches (floor and wall) take random ticks, on which they burn down ({@link Torches}). */
 @Mixin(TorchBlock.class)
 abstract class TorchBlockMixin extends BaseTorchBlock {
 	protected TorchBlockMixin(Properties properties) {

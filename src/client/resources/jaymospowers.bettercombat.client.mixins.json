@@ -1,0 +1,9 @@
+{
+	"required": false,
+	"package": "com.jaymospowers.client.compat.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"LimbSwingMixin"
+	],
+	"injectors": { "defaultRequire": 0 }
+}

@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.7.12) Spiders move like spiders, Mo' Bends' idea (MIT; remade here): each leg gets a knee (two 8-long halves, the
+ * (0.7.17) Spiders move like spiders, Mo' Bends' idea (MIT; remade here): each leg gets a knee (two 8-long halves, the
  * lower one a child "shin"), held high with the foot planted, and lifting the foot higher as it steps; the abdomen
  * breathes and sways as it walks, and idle legs twitch now and then. Same part names as the game's, so cave spiders
  * and anything that looks parts up by name still work.

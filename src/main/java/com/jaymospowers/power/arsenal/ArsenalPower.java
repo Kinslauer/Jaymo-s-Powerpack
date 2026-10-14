@@ -149,6 +149,7 @@ public final class ArsenalPower implements Power {
 			DataComponentType.<Summoned>builder().persistent(Summoned.CODEC).networkSynchronized(Summoned.STREAM_CODEC).build());
 		ArsenalEntities.init();
 		ArsenalStash.init();
+		ArsenalPocket.init();
 		ArsenalArmory.init();
 		HundredBlades.init();
 		ArsenalDamocles.init();
@@ -207,22 +208,22 @@ public final class ArsenalPower implements Power {
 			case ABILITY_1 -> reach(player);
 			case ABILITY_2 -> sendBack(player);
 			case ABILITY_3 -> barrage(player);
-			// the Void Arsenal's B drops the Sword of Damocles; the stash lives on Z (B still opens it uncorrupted)
+			// the Void Arsenal's B drops the Sword of Damocles; the pocket lives on Z (B still opens it uncorrupted)
 			case ABILITY_4 -> {
 				if (voided) {
 					ArsenalDamocles.cast(player);
 				} else {
-					ArsenalStash.open(player);
+					ArsenalPocket.toggle(player);
 				}
 			}
 		}
 	}
 
-	/** Z: the Pocket Stash, once B (the ability it used to be) is unlocked. */
+	/** Z: the Pocket Dimension, once B (the ability it used to be) is unlocked. */
 	@Override
 	public void onMode(ServerPlayer player, boolean down) {
 		if (down && slotUnlocked(player, "mode")) {
-			ArsenalStash.open(player);
+			ArsenalPocket.toggle(player);
 		}
 	}
 

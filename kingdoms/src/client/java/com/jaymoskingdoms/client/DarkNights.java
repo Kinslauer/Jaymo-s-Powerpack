@@ -8,7 +8,7 @@ import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.level.MoonPhase;
 
 /**
- * (0.7.12) Total Darkness / True Darkness's idea (LGPL-3.0, grondag; remade here, none of its code): moonlight follows
+ * (0.7.17) Total Darkness / True Darkness's idea (LGPL-3.0, grondag; remade here, none of its code): moonlight follows
  * the moon. Under a full moon a night looks as it always has; under a new moon the sky gives no light at all, and
  * whatever has no torch or fire near it is pitch black. Unlit caves already are in 26.3. Only where there's a sky
  * (the Overworld), and a lunar event's moon (Blood, Harvest, Blue...) always shines full. Applied to the lightmap

@@ -41,7 +41,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.12) Spiders take after where they live: Spider Overhaul's ideas (all rights reserved, by Chybx; remade here, none
+ * (0.7.17) Spiders take after where they live: Spider Overhaul's ideas (all rights reserved, by Chybx; remade here, none
  * of its code or art) put onto the game's own spiders, which Stormie's Spiders already sends up walls. A spider gets
  * its kind the first time it loads, from its biome (or depth), and keeps it; the client dresses it in its kind's
  * skin (client/mixin/SpiderSkinMixin, art from tools/gen_spider_kinds.py). Plain spiders elsewhere, and cave spiders, are left as they are.

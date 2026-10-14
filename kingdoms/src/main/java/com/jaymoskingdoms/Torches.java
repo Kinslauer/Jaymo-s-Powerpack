@@ -46,7 +46,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.PushReaction;
 
 /**
- * (0.7.12) Torches burn down, the idea of Realistic Torches (remade here; none of its code or art). Every torch, floor
+ * (0.7.17) Torches burn down, the idea of Realistic Torches (remade here; none of its code or art). Every torch, floor
  * or wall, placed by a player, a settlement or world generation, burns about {@link #BURN_TICKS} on average (a chance
  * on each random tick, mixin.TorchBlockMixin), then goes out and is left a {@link #BURNT_TORCH}; rain on a torch open
  * to the sky puts it out much sooner. A burnt torch gives no light and drops a stick. Flint and steel, a fire charge or

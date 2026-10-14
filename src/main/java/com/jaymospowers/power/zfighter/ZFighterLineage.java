@@ -85,6 +85,8 @@ public final class ZFighterLineage {
 	// ---- Verdant ----
 	static final int REGEN_EVERY = 40;
 	static final float REGEN = 1.0F;
+	/** How often a Verdant grows back one lost limb (30 s; a multiple of REGEN_EVERY). */
+	static final int REGROW_EVERY = 600;
 	static final double REACH = 1.5;
 	/** Giant forms grow him by this much (scale added, by form). */
 	static final double[] GIANT_SCALE = {0.0, 0.4, 0.8, 1.3};
@@ -246,6 +248,13 @@ public final class ZFighterLineage {
 			&& player.getFoodData().getFoodLevel() > ZFighterPower.HUNGRY_FOOD) {
 			player.heal(REGEN);
 		}
+		if (live.lineage == VERDANT && now % REGEN_EVERY == 0) {
+			// a Verdant's body mends itself: breaks knit at once, lost limbs grow back one at a time
+			com.jaymospowers.core.Fractures.heal(player);
+			if (now % REGROW_EVERY == 0) {
+				com.jaymospowers.core.Dismember.regrow(player, false);
+			}
+		}
 		if (live.lineage == WARRIOR) {
 			ape(player, live, level, now);
 		} else if (ape(player)) {
@@ -393,10 +402,13 @@ public final class ZFighterLineage {
 			e -> e instanceof LivingEntity living && living.isAlive() && !(e instanceof Enemy) && !(e instanceof ArmorStand) && e != player,
 			HEAL_RANGE * HEAL_RANGE);
 		LivingEntity target = aimed != null && aimed.getEntity() instanceof LivingEntity living ? living : player;
-		if (target.getHealth() >= target.getMaxHealth() || !ZFighterPower.spend(player, live, HEAL_KI)) {
+		if (target.getHealth() >= target.getMaxHealth() && com.jaymospowers.core.Fractures.broken(target) == 0
+			|| !ZFighterPower.spend(player, live, HEAL_KI)) {
 			return false;
 		}
 		target.heal(HEAL);
+		// sets broken bones too (only a Verdant's own body regrows what's lost)
+		com.jaymospowers.core.Fractures.heal(target);
 		ServerLevel level = player.level();
 		level.sendParticles(ParticleTypes.HAPPY_VILLAGER, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 12, 0.4, 0.5,
 			0.4, 0.05);
