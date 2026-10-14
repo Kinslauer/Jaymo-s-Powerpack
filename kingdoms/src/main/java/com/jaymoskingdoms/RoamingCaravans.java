@@ -83,7 +83,7 @@ final class RoamingCaravans {
 	/** The chance, each spawn check that one is due, that a caravan comes. */
 	static final float SPAWN_CHANCE = 0.2F;
 	/** After a minor pillager caravan, a major one, a merchant caravan: none of that kind for this long (ticks). */
-	static final long MINOR_COOLDOWN = 24000L, MAJOR_COOLDOWN = 72000L, MERCHANT_COOLDOWN = 18000L;
+	static final long MINOR_COOLDOWN = 72000L, MAJOR_COOLDOWN = 168000L, MERCHANT_COOLDOWN = 48000L;
 	/** The share of pillager caravans that are major (when one is due). */
 	static final float MAJOR_SHARE = 0.35F;
 	/** It comes into the world this far from the player (blocks), and makes for a point this far beyond him. */

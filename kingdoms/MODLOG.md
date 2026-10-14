@@ -2713,7 +2713,7 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   (`RoamingCaravans`, reusing `Caravans`' ground, steering and `Drive` goal); none of its files are used.
 - **When:** each minute (`SPAWN_CHECK`), a 20% chance that a due caravan comes near a random player: 64-96 blocks off
   on dry land outside every realm's claims, crossing past him to a point 420 blocks beyond. Cooldowns per kind:
-  minor pillager 1 day, major pillager 3 days (a major also resets the minor's), merchant 15 minutes. Never on peaceful
+  minor pillager 3 days, major pillager 7 days (a major also resets the minor's), merchant 2 days (Andy: rarer). Never on peaceful
   for pillagers.
 - **Where it goes:** a pillager caravan with an illager camp ahead of it (within 700 blocks, within about 50 degrees of
   its way) is bound there; a merchant caravan with a realm ahead (900) is bound for its storehouse door. It keeps to a
