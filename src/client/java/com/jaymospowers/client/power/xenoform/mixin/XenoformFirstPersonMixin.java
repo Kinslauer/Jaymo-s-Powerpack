@@ -1,6 +1,5 @@
 package com.jaymospowers.client.power.xenoform.mixin;
 
-import com.jaymospowers.client.power.xenoform.XenoBand;
 import com.jaymospowers.client.power.xenoform.XenoformClient;
 import com.jaymospowers.client.power.xenoform.XenoformSlap;
 import com.jaymospowers.core.Carry;
@@ -68,11 +67,8 @@ abstract class XenoformFirstPersonMixin {
 		poseStack.pushPose();
 		poseStack.translate(0.1F * raise, 0.3F * raise, 0.05F * raise);
 		poseStack.rotateDegrees(Axis.ZP, -25.0F * raise);
+		// (the band goes on with the arm: XenoformAvatarRendererMixin, after renderHand)
 		arms.jaymospowers$renderPlayerArm(poseStack, collector, light, 0.0F, 0.0F, HumanoidArm.LEFT, player);
-		if (avatar.getData(XenoformClient.FORM) == null) {
-			// the pose stack now carries the arm's own placement: the band sits on that wrist
-			XenoBand.submit(XenoBand.firstPerson(), poseStack, collector, light);
-		}
 		poseStack.popPose();
 		// the striking hand: up and back, then down and across onto the wrist
 		poseStack.pushPose();

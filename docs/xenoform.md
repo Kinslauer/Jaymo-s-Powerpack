@@ -25,8 +25,9 @@ The plan with the user's answers: the "Omnitrix Power Plan" doc (Claude Docs); s
 
 ## The band [XenoformPower, XenoformState]
 
-- **Z tap**: turn the dial to the next alien the band holds (overlay with its name). **Z held 0.5 s**: slam the band and
-  become the dialled alien; held again while changed, turn back early.
+- **Z held**: the wrist comes up; **scroll** while holding it to turn the dial through the aliens the band holds
+  (overlay with its name; the hotbar stays put). **Let go of Z**: slam the band and become the dialled alien. Held
+  0.5 s while changed, turn back early.
 - A fresh band holds one of the three starters at random (`XenoForms.STARTERS`). **Scanning (X held)** at a creature for
   3 s from up to 12 blocks: if it carries an alien's DNA (`XenoForm.scans`), the band learns that alien (chime, green
   beam, level-up sound). Only as a human.
@@ -83,7 +84,8 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
   lifts the render state's invisible flag for the hands (the body was hidden for the alien, and the renderer skips an
   invisible body's bare arm).
 - The band itself (`XenoBand`): a 5x3x5 box on the left wrist of anyone whose power is Xenoform while they're
-  themselves, its dial emissive; a layer in third person, and drawn on the first-person arm during the slam.
+  themselves, its dial emissive; a layer in third person (not on an arm First-person Model hides), and on your
+  first-person left arm whenever it's drawn (AvatarRenderer.renderHand).
 - The slam (`XenoformSlap`, client only): holding Z brings the left wrist up across the chest and the right fist up
   behind it; the fist drops onto the band as the hold reaches `HOLD_TICKS` (when the server changes you), rests, and
   both arms fall back. A tap just lifts the wrist for a look. Everyone else sees the slap when a player changes shape
@@ -92,7 +94,8 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
 - Flight (`XenoformFlightPose`, client): the server syncs how an alien is flying (`XenoformState.FLIGHT`, from
   `XenoForm.flight`). Pyre's jet, Wyrm's wings and Nadir's flight make `WindPose` treat the alien as cruising once it
   moves at 0.25/tick, so it takes Wind's lean, banking and stretched-out limbs (Pyre keeps its arms swept back as jets). Wyrm's wings beat deep while flying and
-  fold back along the body from 0.45 to 0.8/tick (`XenoFormModels.Wyrm`); Wisp's glide tips the body 38° forward with a
+  fold back along the body from 0.45 to 0.8/tick (`WyrmWings`: since 0.10.86 they're the ender dragon's own wings, its
+  boxes at a fifth of the size, drawn from the game's own dragon texture, never copied); Wisp's glide tips the body 38° forward with a
   slow roll and bob, arms reaching out limp, the tatters streaming; Pyre pours client-side flames from both hands and feet,
   out behind along the flight. All flight is free (no hunger). Nadir flies like creative (`Abilities.mayfly`, flying
   speed 0.16), put back on the way out (creative and spectator keep theirs).

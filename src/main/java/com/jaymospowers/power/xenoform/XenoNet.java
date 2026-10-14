@@ -21,11 +21,24 @@ public final class XenoNet {
 		}
 	}
 
+	/** Client → server: the scroll wheel turned while Z was held: turn the dial one alien on (1) or back (-1). */
+	public record Dial(int by) implements CustomPacketPayload {
+		public static final Type<Dial> TYPE = new Type<>(JaymosPowers.id("xenoform_dial"));
+		public static final StreamCodec<ByteBuf, Dial> CODEC = ByteBufCodecs.VAR_INT.map(Dial::new, Dial::by);
+
+		@Override
+		public Type<Dial> type() {
+			return TYPE;
+		}
+	}
+
 	private XenoNet() {
 	}
 
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(Skill.TYPE, Skill.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Skill.TYPE, (payload, ctx) -> XenoformPower.skill(ctx.player(), payload.down()));
+		PayloadTypeRegistry.serverboundPlay().register(Dial.TYPE, Dial.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Dial.TYPE, (payload, ctx) -> XenoformPower.scrollDial(ctx.player(), payload.by()));
 	}
 }

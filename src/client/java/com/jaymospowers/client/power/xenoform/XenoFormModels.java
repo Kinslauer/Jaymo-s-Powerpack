@@ -385,14 +385,10 @@ public final class XenoFormModels {
 	 * chest. The tail runs in three joints to a finned tip.
 	 */
 	static final class Wyrm extends FormModel {
-		private final ModelPart rightWing, leftWing, rightOuter, leftOuter, tail, tailMid, tailTip;
+		private final ModelPart tail, tailMid, tailTip;
 
 		Wyrm() {
 			super(bake(mesh()), "wyrm");
-			this.rightWing = this.body.getChild("right_wing");
-			this.leftWing = this.body.getChild("left_wing");
-			this.rightOuter = this.rightWing.getChild("outer");
-			this.leftOuter = this.leftWing.getChild("outer");
 			this.tail = this.body.getChild("tail");
 			this.tailMid = this.tail.getChild("mid");
 			this.tailTip = this.tailMid.getChild("tip");
@@ -414,30 +410,10 @@ public final class XenoFormModels {
 			PartDefinition tip = mid.addOrReplaceChild("tip", CubeListBuilder.create().texOffs(0, 78).addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 8.0F),
 				PartPose.offsetAndRotation(0.0F, 0.0F, 9.5F, TAIL_REST[2], 0.0F, 0.0F));
 			tip.addOrReplaceChild("fin", CubeListBuilder.create().texOffs(44, 64).addBox(-0.5F, -4.0F, 0.0F, 1.0F, 4.0F, 3.0F), PartPose.offset(0.0F, -0.5F, 5.0F));
-			PartDefinition right = body.addOrReplaceChild("right_wing",
-				CubeListBuilder.create().texOffs(0, 90).addBox(-WING_HALF, -0.5F, 0.0F, WING_HALF, 1.0F, WING_DEPTH), PartPose.offset(-2.0F, 2.0F, 2.5F));
-			right.addOrReplaceChild("outer", CubeListBuilder.create().texOffs(0, 90).addBox(-WING_HALF, -0.5F, 0.0F, WING_HALF, 1.0F, WING_DEPTH),
-				PartPose.offset(-WING_HALF + 0.5F, 0.0F, 0.0F));
-			PartDefinition left = body.addOrReplaceChild("left_wing",
-				CubeListBuilder.create().texOffs(0, 90).mirror().addBox(0.0F, -0.5F, 0.0F, WING_HALF, 1.0F, WING_DEPTH), PartPose.offset(2.0F, 2.0F, 2.5F));
-			left.addOrReplaceChild("outer", CubeListBuilder.create().texOffs(0, 90).mirror().addBox(0.0F, -0.5F, 0.0F, WING_HALF, 1.0F, WING_DEPTH),
-				PartPose.offset(WING_HALF - 0.5F, 0.0F, 0.0F));
+			// the wings are the ender dragon's own, drawn small by XenoformLayer (WyrmWings)
 			return mesh;
 		}
 
-		/** Each wing half's length and depth (was one 14x8 sheet a side). */
-		static final float WING_HALF = 10.0F, WING_DEPTH = 14.0F;
-		/** In flight: the beat's speed and depth; folded, the wings sweep back to this yaw and lift this little. */
-		static final float FLAP_RATE = 0.55F, FLAP_DEPTH = 0.95F, FOLDED_YAW = 1.35F, FOLDED_LIFT = 0.15F;
-		/** In flight, how far the outer halves bend behind the beat. */
-		static final float OUTER_FLEX = 0.45F;
-		/** Falling without flying, how far the wings flare open; how hard a landing slams them down. */
-		static final float FALL_FLARE = 0.8F, LAND_SLAM = 0.6F;
-		/**
-		 * Wrapped on the ground: the inner halves hang down (pitch) and swing forward round the sides past the arms
-		 * (yaw), the outer halves fold in across the chest; how fast the wrap closes and opens (per tick of air).
-		 */
-		static final float WRAP_PITCH = -Mth.HALF_PI, WRAP_YAW = -0.42F, WRAP_FOLD = -2.25F;
 		/** The tail's resting pitch at each joint (+ is up): down from the back, levelling out near the ground. */
 		static final float[] TAIL_REST = {-0.35F, -0.12F, 0.32F};
 
@@ -445,44 +421,8 @@ public final class XenoFormModels {
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
 			float t = state.ageInTicks;
-			XenoformFlightPose.Flight flight = state.getData(XenoformFlightPose.KEY);
-			float fly = flight == null ? 0.0F : XenoformFlightPose.smooth(flight.wings());
-			float fold = flight == null ? 0.0F : XenoformFlightPose.smooth(flight.fold());
 			XenoMotion.Read m = XenoMotion.read(state);
 			float walk = state.walkAnimationSpeed;
-			// on the ground and not flying, the wings wrap round it; in the air they open
-			float wrap = XenoformFlightPose.smooth(Mth.clamp((1.0F - m.air()) * (1.0F - fly), 0.0F, 1.0F));
-
-			// open (in the air): a slow stir at rest, deep strokes flying that die away as the wings fold back at speed
-			float idle = m.breath() * 0.08F + Mth.sin(t * 0.25F) * 0.05F;
-			float flap = Mth.sin(t * FLAP_RATE) * FLAP_DEPTH * (1.0F - fold);
-			float beat = Mth.lerp(fly, idle, flap);
-			float lift = fold * FOLDED_LIFT * fly;
-			// dropping without flying, they flare open to catch the air; landing slams them down
-			float flare = Math.max(0.0F, m.fall()) * m.air() * (1.0F - fly) * FALL_FLARE;
-			float slam = m.land() * LAND_SLAM;
-			// both tip together out of a turn, the outer wing up
-			float bank = m.turn() * 0.3F;
-			float openZ = -0.3F + beat + lift - flare + slam + bank;
-			float openY = Mth.lerp(fold * fly, 0.6F + Mth.cos(t * 0.25F) * 0.1F - flare * 0.5F, FOLDED_YAW);
-			float openOuter = -Mth.sin(t * FLAP_RATE - 0.9F) * OUTER_FLEX * fly * (1.0F - fold) + flare * 0.3F;
-
-			// wrapped (on the ground): the cloak breathes, sways with each step and swings out behind a turn
-			float step = Mth.sin(state.walkAnimationPos * 0.6662F) * walk;
-			float wrapX = WRAP_PITCH + m.breath() * 0.03F + walk * 0.15F + m.land() * 0.25F;
-			float wrapY = WRAP_YAW + m.breath() * 0.03F + Mth.abs(step) * 0.06F;
-			float wrapFold = WRAP_FOLD + walk * 0.25F - m.breath() * 0.04F;
-
-			this.rightWing.xRot = Mth.lerp(wrap, 0.0F, wrapX);
-			this.leftWing.xRot = Mth.lerp(wrap, 0.0F, wrapX);
-			this.rightWing.yRot = Mth.lerp(wrap, openY, wrapY + step * 0.08F - m.trail() * 0.2F);
-			this.leftWing.yRot = Mth.lerp(wrap, -openY, -wrapY + step * 0.08F - m.trail() * 0.2F);
-			this.rightWing.zRot = Mth.lerp(wrap, openZ, 0.0F);
-			this.leftWing.zRot = Mth.lerp(wrap, -openZ + 2.0F * bank, 0.0F);
-			// the outer halves: open, they flex behind the stroke (about the wing's length axis it's zRot); wrapped,
-			// the same axis now stands upright, so zRot folds them forward across the chest
-			this.rightOuter.zRot = Mth.lerp(wrap, openOuter, wrapFold);
-			this.leftOuter.zRot = Mth.lerp(wrap, -openOuter, -wrapFold);
 
 			// the tail swings behind each turn, each joint a beat after the last; it lifts as it drops, whips down on
 			// landing and droops when crouched
