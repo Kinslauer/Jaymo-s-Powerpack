@@ -35,7 +35,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.10.72) Andy: every Verdant has antennae and some shade of green skin. A Verdant-born Z Fighter (never the Great Ape)
+ * (0.10.77) Andy: every Verdant has antennae and some shade of green skin. A Verdant-born Z Fighter (never the Great Ape)
  * gets both: two stalks from the top of the forehead in one of seven shapes ({@link #SHAPES}, theirs from their UUID)
  * ({@code textures/entity/zfighter_antennae.png}, greyscale, tinted), and their own skin repainted green. Only the skin
  * tones in the skin are repainted (warm, not too grey, not too dark), so clothes keep their colours; the paint keeps
