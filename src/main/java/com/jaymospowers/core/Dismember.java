@@ -203,9 +203,9 @@ public final class Dismember {
 	// ---- where a blow lands ----------------------------------------------------------------------------------------------
 
 	/**
-	 * The part a blow from {@code attacker} lands on: for a player, where their crosshair crosses the target (top
-	 * {@link #HEAD_SHARE} the head, bottom {@link #LEG_SHARE} a leg, between an arm; the side it's on picks which); for
-	 * anything else, at random.
+	 * The part a blow from {@code attacker} lands on: for a player, the part their crosshair crosses
+	 * ({@link LimbBoxes#aimedPart}; for a body without parts, by height: top {@link #HEAD_SHARE} the head, bottom
+	 * {@link #LEG_SHARE} a leg, between an arm, the side it's on picking which); for anything else, at random.
 	 */
 	public static int aimedPart(LivingEntity attacker, LivingEntity target) {
 		if (!(attacker instanceof Player)) {
@@ -220,9 +220,13 @@ public final class Dismember {
 				default -> LEFT_LEG;
 			};
 		}
-		AABB box = target.getBoundingBox();
 		Vec3 eye = attacker.getEyePosition();
 		Vec3 look = attacker.getLookAngle();
+		Integer limb = LimbBoxes.aimedPart(target, eye, look);
+		if (limb != null) {
+			return limb;
+		}
+		AABB box = target.getBoundingBox();
 		Vec3 at = box.inflate(0.1).clip(eye, eye.add(look.scale(16.0))).orElse(null);
 		if (at == null) {
 			// (a sweep that didn't cross it): where the look passes at its distance
