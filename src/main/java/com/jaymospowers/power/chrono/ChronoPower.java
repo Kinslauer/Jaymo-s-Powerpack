@@ -43,7 +43,7 @@ import net.minecraft.world.phys.Vec3;
  * Chronokinesis: golden clockwork time magic. Everything is decided here, on the server.
  * <ul>
  * <li>R, Rewind: snap back to where you were 3 s ago (health restored if it was higher, fire put out).</li>
- * <li>G, Stasis Field: stop time for mobs and projectiles in a 6-block bubble for 4 s. Since 0.10.94 it also resets every
+ * <li>G, Stasis Field: stop time for mobs and projectiles in a 6-block bubble for 4 s. Since 0.10.95 it also resets every
  * other cooldown you have running (never its own).</li>
  * <li>V, Overclock: 6 s as a speedster: Speed V, Haste II and faster attacks, everyone near you slowed hard. Since
  * 0.10.28 the Flash's speed too ({@link ChronoSpeed}): a far faster sprint, running up walls and across water, and V
@@ -426,7 +426,7 @@ public final class ChronoPower implements Power {
 	}
 
 	/**
-	 * (0.10.94) Stasis Field also winds back every cooldown you have running: Rewind, Overclock, Time Bloom, Chrono
+	 * (0.10.95) Stasis Field also winds back every cooldown you have running: Rewind, Overclock, Time Bloom, Chrono
 	 * Punch, Overclock's phase, and the items in your inventory (ender pearls, shields, wind charges...). Stasis's own
 	 * cooldown starts fresh right after, so G can't be chained into itself.
 	 */
