@@ -162,7 +162,7 @@ Ideas from Gravity Control (MIT; a NeoForge 1.21.1 fork of Gravity API), remade 
   Armor weight: `/give @s iron_chestplate[attribute_modifiers=[{type:"movement_speed",amount:-0.5,operation:"add_multiplied_total",id:"test",slot:"chest"}]]`,
   wear it: no slower after a second; `/power clear @s` and it slows you.
 
-## 0.10.21: The earthboard's ride, refined
+## 0.10.23: The earthboard's ride, refined
 - The board is drawn right under its rider's feet every frame (it used to trail by the server's lag, so it slid out
   from under them at speed), and turns with the rider's heading since boarding.
 - It banks with the rider's carve and tips with the flight: nose up climbing (10 degrees flat out), down sinking, and
