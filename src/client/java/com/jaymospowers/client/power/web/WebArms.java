@@ -31,6 +31,9 @@ import org.jspecify.annotations.Nullable;
  * and trail behind you while you fly forward.</li>
  * <li>While hanging from a web the legs go limp: they trail behind the swing and flop sideways with it, settling as
  * the swing slows.</li>
+ * <li>Swinging along on a web, the slinger drives the swing instead: legs back on the drop, knees tucked through the
+ * bottom of the arc, kicked out ahead on the upswing; the free arm flares out for balance, and the body banks into
+ * turns.</li>
  * </ul>
  * The web line is drawn from the posed hand ({@link #handPos}), so it really comes out of the arm.
  */
@@ -56,7 +59,8 @@ public final class WebArms {
 
 	/** This frame's pose: an arm's aim is null when that hand has no web out. Angles are model-part radians. */
 	public record Pose(float amount, float @Nullable [] mainArm, float @Nullable [] offArm, float legTrail, float legSide, float wings, float lean,
-		float brake, float dive, float swayPitch, float swayRoll, float armSway, float legSway, float limbRoll, boolean airborne) {
+		float brake, float dive, float swayPitch, float swayRoll, float armSway, float legSway, float limbRoll, boolean airborne,
+		float drive, float pump, float tuck) {
 	}
 
 	/**
@@ -113,6 +117,30 @@ public final class WebArms {
 	private static final float LIMB_DRIFT = 0.07F;
 	private static final float LEAN_PIVOT = 0.5F;
 
+	// ===== active swing: the knobs to tweak after playtesting =========================================================
+	/**
+	 * Swinging along on a swing web (not a zip, yank or whip), the body drives the swing, fully once it moves this fast
+	 * (blocks/tick) and mostly the way it faces; slower, or going backwards, it hangs limp as before.
+	 */
+	private static final float DRIVE_SPEED = 0.45F;
+	/**
+	 * The legs through the arc (thigh angle, radians; negative = forward): back and straight on the drop ({@code LEGS_DROP}),
+	 * tucked up through the bottom ({@code LEGS_TUCK}), kicked out ahead on the upswing ({@code LEGS_KICK}). The bottom is
+	 * where the climb or fall is under {@code BOTTOM_BAND} blocks/tick; the drop and the upswing are full at
+	 * {@code DROP_FULL} / {@code RISE_FULL}.
+	 */
+	private static final float LEGS_DROP = 0.3F, LEGS_TUCK = -1.2F, LEGS_KICK = -1.65F;
+	private static final float BOTTOM_BAND = 0.18F, DROP_FULL = 0.35F, RISE_FULL = 0.3F;
+	/** The legs follow on a quick spring, so the kick whips. Tucked, the knees part this far (radians each). */
+	private static final float PUMP_SPRING = 0.32F, PUMP_DAMPING = 0.68F;
+	private static final float TUCK_SPLAY = 0.22F;
+	/** Kicking, the legs scissor: the lead leg this much further ahead than the other (radians). */
+	private static final float KICK_SCISSOR = 0.3F;
+	/** Swinging from one hand, the free arm flares out to the side ({@code FLARE_OUT}) and a little back ({@code FLARE_BACK}). */
+	private static final float FLARE_OUT = 1.25F, FLARE_BACK = 0.35F;
+	/** Banking into a turn: roll per (radians turned per tick x blocks/tick), and the most it banks (radians). */
+	private static final float BANK_PER_TURN = 9.0F, BANK_MAX = 0.55F;
+
 	/** A player's springy state. Directions are world-space unit vectors (from the shoulder toward the web). */
 	private static final class Body {
 		final Vec3[] dir = new Vec3[2];
@@ -131,6 +159,12 @@ public final class WebArms {
 		float armSway, armSwayVel, prevArmSway;
 		float legSway, legSwayVel, prevLegSway;
 		float limbRoll, limbRollVel, prevLimbRoll;
+		/** Active swing: how much the body drives it (0-1), the legs' angle through the arc, and how tucked they are. */
+		float drive, prevDrive;
+		float pump, pumpVel, prevPump;
+		float tuck, prevTuck;
+		/** Last tick's motion, for the turn. */
+		Vec3 lastMotion = Vec3.ZERO;
 		/** Ticks into the current Web Zip (0 = not zipping). */
 		int zipAge;
 	}
@@ -177,10 +211,21 @@ public final class WebArms {
 			float t = Math.min(1.0F, body.wingsAge / LEAN_TICKS);
 			body.lean = winged ? t * t * (3.0F - 2.0F * t) : Math.max(0.0F, body.lean - 0.15F);
 			body.zipAge = zipping ? body.zipAge + 1 : 0;
-			tickBody(player, body, main, off);
+			boolean swinging = !zipping && !winged && (swingLine(minecraft, player, WebNet.MAIN) || swingLine(minecraft, player, WebNet.OFF))
+				&& !twoHanded(player);
+			tickBody(player, body, main, off, swinging);
 		}
 		BODIES.entrySet().removeIf(entry -> entry.getValue().amount <= 0.0F && entry.getValue().prevAmount <= 0.0F
 			&& entry.getValue().wings <= 0.0F && entry.getValue().prevWings <= 0.0F || level.getEntity(entry.getKey()) == null);
+	}
+
+	/** This hand's web is a swing line (stuck to the world or a thing, swung from), for any player. */
+	private static boolean swingLine(Minecraft minecraft, Player player, int hand) {
+		if (player == minecraft.player && WebPowerClient.isActive(minecraft.player)) {
+			return WebPowerClient.INSTANCE.swing.strands[hand].attached;
+		}
+		WebLine line = player.getAttached(WebPower.line(hand));
+		return line != null && line.kind() == WebLine.SWING;
 	}
 
 	/**
@@ -332,7 +377,7 @@ public final class WebArms {
 			.add(0.0, SHOULDER_HEIGHT * player.getScale(), 0.0), partialTick);
 	}
 
-	private static void tickBody(Player player, Body body, @Nullable Vec3 main, @Nullable Vec3 off) {
+	private static void tickBody(Player player, Body body, @Nullable Vec3 main, @Nullable Vec3 off, boolean swinging) {
 		boolean hanging = main != null || off != null;
 		body.prevAmount = body.amount;
 		body.amount = hanging ? Math.min(1.0F, body.amount + EASE) : Math.max(0.0F, body.amount - EASE);
@@ -382,6 +427,10 @@ public final class WebArms {
 		double rightSpeed = -sideSpeed;
 		float pitchWant = airborne ? Mth.clamp((float)(forwardSpeed * SWAY_PER_SPEED - v.y * SWAY_PER_RISE), -SWAY_MAX, SWAY_MAX) : 0.0F;
 		float rollWant = airborne ? Mth.clamp((float)(rightSpeed * SWAY_PER_SPEED), -SWAY_MAX, SWAY_MAX) : 0.0F;
+		tickDrive(body, v, forwardSpeed, airborne && swinging);
+		// driving the swing, the body banks into a turn (toward its inside, as the rope pulls it round)
+		rollWant += bank(body.lastMotion, v) * body.drive;
+		body.lastMotion = v;
 		body.prevSwayPitch = body.swayPitch;
 		body.swayPitchVel = (body.swayPitchVel + (pitchWant - body.swayPitch) * SWAY_SPRING) * SWAY_DAMPING;
 		body.swayPitch += body.swayPitchVel;
@@ -406,6 +455,39 @@ public final class WebArms {
 		body.prevSide = body.side;
 		body.sideVel = (body.sideVel + (sideWant - body.side) * LEG_SPRING) * LEG_DAMPING;
 		body.side += body.sideVel;
+	}
+
+	/**
+	 * The active swing's legs: where in the arc the body is, from its climb or fall, sets how far back, tucked or kicked
+	 * out they want to be, and they chase that on a quick spring.
+	 */
+	private static void tickDrive(Body body, Vec3 v, double forwardSpeed, boolean swinging) {
+		double horizontal = Math.sqrt(v.x * v.x + v.z * v.z);
+		float ahead = horizontal < 1.0E-3 ? 0.0F : (float)(forwardSpeed / horizontal);
+		float driveWant = swinging ? Mth.clamp((float)horizontal / DRIVE_SPEED, 0.0F, 1.0F) * Mth.clamp((ahead + 0.2F) / 0.8F, 0.0F, 1.0F) : 0.0F;
+		body.prevDrive = body.drive;
+		body.drive += (driveWant - body.drive) * 0.2F;
+		float drop = Mth.clamp((float)-v.y / DROP_FULL, 0.0F, 1.0F);
+		float rise = Mth.clamp((float)v.y / RISE_FULL, 0.0F, 1.0F);
+		float bottom = Mth.clamp(1.0F - (float)Math.abs(v.y) / BOTTOM_BAND, 0.0F, 1.0F);
+		float total = drop + rise + bottom;
+		float want = total < 1.0E-3 ? 0.0F : (drop * LEGS_DROP + bottom * LEGS_TUCK + rise * LEGS_KICK) / total;
+		body.prevPump = body.pump;
+		body.pumpVel = (body.pumpVel + (want - body.pump) * PUMP_SPRING) * PUMP_DAMPING;
+		body.pump += body.pumpVel;
+		body.prevTuck = body.tuck;
+		body.tuck += ((total < 1.0E-3 ? 0.0F : bottom / total) - body.tuck) * 0.3F;
+	}
+
+	/** How far to bank (radians, + = toward the right) for turning from {@code before} to {@code now}. */
+	private static float bank(Vec3 before, Vec3 now) {
+		double was = Math.sqrt(before.x * before.x + before.z * before.z), is = Math.sqrt(now.x * now.x + now.z * now.z);
+		if (was < 0.05 || is < 0.05) {
+			return 0.0F;
+		}
+		// the sine of the turn, + to the right of the way it was going (the right of heading (x, z) is (-z, x))
+		double turn = (now.x * -before.z + now.z * before.x) / (was * is);
+		return Mth.clamp((float)(turn * is) * BANK_PER_TURN, -BANK_MAX, BANK_MAX);
 	}
 
 	/** Straight back from the way the body is flying, and a little down: where a zipping slinger's hands trail. */
@@ -532,7 +614,8 @@ public final class WebArms {
 			Mth.lerp(partialTicks, body.prevDive, body.dive), swayPitch(body, partialTicks),
 			swayRoll(body, partialTicks), Mth.lerp(partialTicks, body.prevArmSway, body.armSway) * amount,
 			Mth.lerp(partialTicks, body.prevLegSway, body.legSway) * amount, Mth.lerp(partialTicks, body.prevLimbRoll, body.limbRoll) * amount,
-			!player.onGround() && !player.isInWater()));
+			!player.onGround() && !player.isInWater(), Mth.lerp(partialTicks, body.prevDrive, body.drive) * amount,
+			Mth.lerp(partialTicks, body.prevPump, body.pump), Mth.lerp(partialTicks, body.prevTuck, body.tuck)));
 	}
 
 	/** An arm's {xRot, yRot} pointing it along its web, relative to the body (as the bow-aiming pose does it). */
@@ -631,24 +714,31 @@ public final class WebArms {
 		float armLag = pose.armSway() - pose.swayPitch();
 		float legLag = pose.legSway() - pose.swayPitch();
 		float spread = Math.abs(pose.limbRoll()) * 0.25F;
+		float drive = pose.drive();
 		if (pose.wings() <= 0.001F && pose.airborne()) {
+			// driving a swing, the free arm flares out for balance; hanging, it dangles
 			if (pose.mainArm() == null) {
 				float sign = mainRight ? 1.0F : -1.0F;
-				set(mainArm, pose.armSway() * 0.5F + armLag * 0.8F + drift(age, 0.0F), 0.0F,
-					sign * (0.12F + spread) + pose.limbRoll() * 0.3F + drift(age, 1.7F) * 0.4F, amount);
+				set(mainArm, Mth.lerp(drive, pose.armSway() * 0.5F + armLag * 0.8F, FLARE_BACK + armLag * 0.4F) + drift(age, 0.0F), 0.0F,
+					sign * Mth.lerp(drive, 0.12F + spread, FLARE_OUT) + pose.limbRoll() * 0.3F + drift(age, 1.7F) * 0.4F, amount);
 			}
 			if (pose.offArm() == null) {
 				float sign = mainRight ? -1.0F : 1.0F;
-				set(offArm, pose.armSway() * 0.5F + armLag * 0.8F + drift(age, 3.1F), 0.0F,
-					sign * (0.12F + spread) + pose.limbRoll() * 0.3F + drift(age, 4.4F) * 0.4F, amount);
+				set(offArm, Mth.lerp(drive, pose.armSway() * 0.5F + armLag * 0.8F, FLARE_BACK + armLag * 0.4F) + drift(age, 3.1F), 0.0F,
+					sign * Mth.lerp(drive, 0.12F + spread, FLARE_OUT) + pose.limbRoll() * 0.3F + drift(age, 4.4F) * 0.4F, amount);
 			}
 		}
 		// limp legs, each a little out of step so they don't move as one
 		float flop = Mth.sin(avatar.ageInTicks * 0.35F) * 0.04F * Math.abs(pose.legTrail());
-		set(humanoid.rightLeg, pose.legTrail() + 0.12F + flop + legLag * 0.9F + drift(age, 2.3F), 0.0F,
-			0.08F + pose.legSide() * 0.9F + pose.limbRoll() * 0.15F, amount);
-		set(humanoid.leftLeg, pose.legTrail() * 0.8F - 0.05F - flop + legLag * 0.9F + drift(age, 5.9F), 0.0F,
-			-0.08F + pose.legSide() * 0.7F + pose.limbRoll() * 0.15F, amount);
+		// driving the swing they pump instead: back on the drop, knees tucked and apart at the bottom, kicked out ahead
+		// on the upswing with the lead (main-side) leg a little further
+		float kick = Mth.clamp((pose.pump() - LEGS_TUCK) / (LEGS_KICK - LEGS_TUCK), 0.0F, 1.0F) * KICK_SCISSOR;
+		float splay = pose.tuck() * TUCK_SPLAY;
+		float rightLead = mainRight ? -kick * 0.5F : kick * 0.5F;
+		set(humanoid.rightLeg, Mth.lerp(drive, pose.legTrail() + 0.12F + flop + legLag * 0.9F, pose.pump() + rightLead + legLag * 0.3F)
+			+ drift(age, 2.3F), 0.0F, Mth.lerp(drive, 0.08F + pose.legSide() * 0.9F, 0.06F + splay) + pose.limbRoll() * 0.15F, amount);
+		set(humanoid.leftLeg, Mth.lerp(drive, pose.legTrail() * 0.8F - 0.05F - flop + legLag * 0.9F, pose.pump() - rightLead + legLag * 0.3F)
+			+ drift(age, 5.9F), 0.0F, Mth.lerp(drive, -0.08F + pose.legSide() * 0.7F, -0.06F - splay) + pose.limbRoll() * 0.15F, amount);
 	}
 
 	/** A limb's slow wander (radians), out of step with the others by {@code phase}. */
