@@ -87,10 +87,10 @@ public final class CookingTableBridge {
 	/** A short "what you need" line for a dish with nowhere to cook it: the oven and the cookware to put on it. */
 	private static String noStationKey(Dish dish) {
 		return "message.jaymoskitchen.no_station." + switch (dish.method()) {
-			case SEQUENCE -> "pot";
-			case GRILL -> "grill";
+			case SEQUENCE, STIR -> "pot";
+			case GRILL, CHOP -> "grill";
 			case SEAR -> "sear";
-			case OVEN -> "oven";
+			case OVEN, ROAST -> "oven";
 			case SMOKE -> "smoker";
 		};
 	}

@@ -156,6 +156,8 @@ public class JaymosKitchen implements ModInitializer {
 			(payload, ctx) -> Smoke.finish(ctx.player(), payload.scorchTicks(), payload.coldTicks(), payload.cured()));
 		ServerPlayNetworking.registerGlobalReceiver(Payloads.SearFinish.TYPE,
 			(payload, ctx) -> Sear.finish(ctx.player(), payload.perfects(), payload.goods(), payload.misses()));
+		ServerPlayNetworking.registerGlobalReceiver(Payloads.MinigameFinish.TYPE,
+			(payload, ctx) -> com.jaymoskitchen.cooking.Minigames.finish(ctx.player(), payload.a(), payload.b(), payload.c(), payload.d()));
 		ServerTickEvents.END_SERVER_TICK.register(Kitchen::tick);
 		ServerTickEvents.END_SERVER_TICK.register(Quivers::tick);
 		ServerTickEvents.END_SERVER_TICK.register(Grill::tick);

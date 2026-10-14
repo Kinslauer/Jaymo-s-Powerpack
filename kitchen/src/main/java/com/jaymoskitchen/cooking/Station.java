@@ -43,9 +43,10 @@ public enum Station {
 
 	public boolean allows(Dish dish) {
 		return switch (this) {
-			case STOVE, STOVE_POT, STOVE_PAN, STOVE_FULL -> dish.method() == Dish.Method.OVEN
-				|| (hasPot() && dish.method() == Dish.Method.SEQUENCE)
-				|| (hasPan() && (dish.method() == Dish.Method.GRILL || dish.method() == Dish.Method.SEAR));
+			// the oven bakes and roasts; a pot on the hob adds the stews and soups, a pan the grilled, seared and chopped
+			case STOVE, STOVE_POT, STOVE_PAN, STOVE_FULL -> dish.method() == Dish.Method.OVEN || dish.method() == Dish.Method.ROAST
+				|| (hasPot() && (dish.method() == Dish.Method.SEQUENCE || dish.method() == Dish.Method.STIR))
+				|| (hasPan() && (dish.method() == Dish.Method.GRILL || dish.method() == Dish.Method.SEAR || dish.method() == Dish.Method.CHOP));
 			default -> dish.stations().contains(this);
 		};
 	}

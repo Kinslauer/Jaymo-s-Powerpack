@@ -55,7 +55,26 @@ public enum Dish {
 		List.of(new Buff(MobEffects.FIRE_RESISTANCE, 120 * 20, 0), new Buff(MobEffects.RESISTANCE, 30 * 20, 0))),
 	NETHER_WART_STEW(Method.SEQUENCE, EnumSet.of(Station.FURNACE, Station.SMOKER),
 		List.of(BOWL, NETHER_WART, CRIMSON_FUNGUS, STIR, WARPED_FUNGUS, SIMMER, STIR), 10, 0.7F, true,
-		List.of(new Buff(MobEffects.FIRE_RESISTANCE, 180 * 20, 0), new Buff(MobEffects.HASTE, 60 * 20, 0)));
+		List.of(new Buff(MobEffects.FIRE_RESISTANCE, 180 * 20, 0), new Buff(MobEffects.HASTE, 60 * 20, 0))),
+	// --- content drop 4: the plain larder (beetroot, carrots, chicken, mutton) and three new minigames ---
+	BORSCHT(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, BEETROOT, BEETROOT, POTATO), 9, 0.7F, true,
+		List.of(new Buff(MobEffects.RESISTANCE, 90 * 20, 0))),
+	BEETROOT_HASH(Method.CHOP, EnumSet.of(Station.CAMPFIRE, Station.FURNACE), List.of(BEETROOT, BEETROOT, POTATO), 8, 0.7F, false,
+		List.of(new Buff(MobEffects.HASTE, 90 * 20, 0))),
+	CARROT_SOUP(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, CARROT, CARROT, SUGAR), 8, 0.6F, true,
+		List.of(new Buff(MobEffects.NIGHT_VISION, 240 * 20, 0))),
+	GLAZED_CARROTS(Method.CHOP, EnumSet.of(Station.CAMPFIRE, Station.FURNACE), List.of(CARROT, CARROT, HONEY_BOTTLE), 7, 0.7F, false,
+		List.of(new Buff(MobEffects.SPEED, 120 * 20, 0))),
+	CARROT_CAKE(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(DOUGH, CARROT, SUGAR, EGG), 10, 0.6F, false,
+		List.of(new Buff(MobEffects.ABSORPTION, 60 * 20, 0), new Buff(MobEffects.LUCK, 300 * 20, 0))),
+	ROAST_CHICKEN(Method.ROAST, EnumSet.of(Station.CAMPFIRE), List.of(CHICKEN, POTATO), 11, 0.9F, false,
+		List.of(new Buff(MobEffects.STRENGTH, 90 * 20, 0), new Buff(MobEffects.REGENERATION, 10 * 20, 0))),
+	CHICKEN_SOUP(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, CHICKEN, CARROT, POTATO), 10, 0.8F, true,
+		List.of(new Buff(MobEffects.REGENERATION, 20 * 20, 0), new Buff(MobEffects.HEALTH_BOOST, 120 * 20, 0))),
+	ROAST_MUTTON(Method.ROAST, EnumSet.of(Station.CAMPFIRE), List.of(MUTTON, SWEET_BERRIES), 11, 0.9F, false,
+		List.of(new Buff(MobEffects.RESISTANCE, 90 * 20, 0), new Buff(MobEffects.STRENGTH, 30 * 20, 0))),
+	SHEPHERDS_PIE(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(MUTTON, POTATO, CARROT), 12, 0.8F, false,
+		List.of(new Buff(MobEffects.HEALTH_BOOST, 180 * 20, 0), new Buff(MobEffects.ABSORPTION, 60 * 20, 0)));
 
 	/** Which minigame cooks the dish. */
 	public enum Method {
@@ -68,7 +87,13 @@ public enum Dish {
 		/** Keep the smoker's heat in the band by fanning the coals until the meat is cured. */
 		SMOKE,
 		/** Hit the sweeping marker inside the target, round after round (blast furnace). */
-		SEAR
+		SEAR,
+		/** Chop on the marks as the vegetables slide under the knife (see {@link Minigames}). */
+		CHOP,
+		/** Turn the spit over the fire so every side browns evenly (see {@link Minigames}). */
+		ROAST,
+		/** Stir the pot round and round with the mouse, faster when it boils up (see {@link Minigames}). */
+		STIR
 	}
 
 	public record Buff(Holder<MobEffect> effect, int ticks, int amplifier) {
@@ -150,6 +175,11 @@ public enum Dish {
 			case MUTTON_KEBAB -> 120;
 			case GLAZED_PORK_CHOP -> 130;
 			case CRIMSON_SKEWER -> 120;
+			case CARROT_CAKE -> 180;
+			case SHEPHERDS_PIE -> 190;
+			// a roast's side
+			case ROAST_CHICKEN -> 90;
+			case ROAST_MUTTON -> 80;
 			default -> 100;
 		};
 	}
@@ -169,7 +199,7 @@ public enum Dish {
 
 	/** Pot stews and soups, baking and curing take their time; grilling and searing in a pan is quick. */
 	public boolean slowCook() {
-		return method != Method.GRILL && method != Method.SEAR;
+		return method != Method.GRILL && method != Method.SEAR && method != Method.CHOP;
 	}
 
 	/** How rewarding the dish is: its hunger, its saturation, and what a Perfect cook adds. */
