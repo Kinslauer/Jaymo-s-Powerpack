@@ -17,6 +17,11 @@ gunpack.meta.json). Jaymo's Powers hands it to TaCZ when TaCZ is installed (armo
 - void_flintlock: Arsenal's Void Armory pistol in the void palette, no recipe, one per hand; it never reloads: Q drops
   the pair and Jaymo's Powers puts a fresh pair in your hands, which come up out of the rift (its draw animation).
 
+- (0.10.79) TaCZ's default gunpack (all modern guns) is never loaded (armory/TaczGuns), so this pack also brings what
+  every gun used to borrow from it, all our own: the Lua animation state machine (scripts/flintlock_state_machine.lua),
+  third-person poses for Player Animation Library (player_animator/), a muzzle flash, hit/kill/dry-fire sounds and the
+  Gunsmith's Bench (TaCZ's gun smith table block, given our model, tabs and recipe filter by data/tacz/index/blocks).
+
 Hand poses are first guesses (arms are placed by the animations); tune the HANDS_* numbers after looking in game.
 
 Run from the project root:  python -I tools/gen_tacz_guns.py
@@ -362,6 +367,81 @@ def ammo_icon(kind):
     return img
 
 
+def muzzle_flash():
+    """A flintlock's flash: a ragged orange tongue of flame with a white-hot heart, fading out into grey smoke."""
+    size = 64
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    px = img.load()
+    rnd = random.Random(31)
+    spikes = [rnd.uniform(0.55, 1.0) for _ in range(11)]
+    c = (size - 1) / 2
+    for y in range(size):
+        for x in range(size):
+            dx, dy = (x - c) / c, (y - c) / c
+            d = math.hypot(dx, dy)
+            a = (math.atan2(dy, dx) / (2 * math.pi)) % 1.0
+            i = a * len(spikes)
+            k = int(i)
+            reach = spikes[k] + (spikes[(k + 1) % len(spikes)] - spikes[k]) * (i - k)
+            t = d / reach
+            if t >= 1.0:
+                continue
+            heat = 1.0 - t
+            if heat > 0.7:
+                col = (255, 250, 220)
+            elif heat > 0.4:
+                col = (255, int(150 + 230 * (heat - 0.4)), 60)
+            elif heat > 0.15:
+                col = (235, int(90 + 200 * (heat - 0.15)), 30)
+            else:
+                col = (120, 110, 104)
+            alpha = int(255 * min(1.0, heat * 2.2) * (0.55 if heat <= 0.15 else 1.0))
+            px[x, y] = (*col, alpha)
+    return img
+
+
+def bench():
+    """The Gunsmith's Bench (TaCZ's two-block gun smith table): a plank bench with a vice, a musket being stocked,
+    a powder keg and tools on the shelf, and a rack of ramrods and a mallet behind."""
+    m = Model("gunsmith_bench")
+    m.bone("bench")
+    for x in (-7.5, 21.5):
+        for z in (-7.5, 5.5):
+            m.box("bench", x, 0, z, x + 2, 14, z + 2, "wood_dark")
+    m.box("bench", -7, 3, -7, 23, 4.5, -6, "wood_dark")
+    m.box("bench", -7, 3, 6, 23, 4.5, 7, "wood_dark")
+    m.box("bench", -7, 4.5, -7, 23, 5.5, 7, "wood")
+    m.box("bench", -8, 14, -8, 24, 16, 8, "wood")
+    # the vice on the right-hand end, jaws open on a stock blank
+    m.box("bench", 17, 16, -8.5, 23, 17.5, -4, "steel_dark")
+    m.box("bench", 17.5, 17.5, -8.5, 18.5, 20.5, -5, "steel")
+    m.box("bench", 21.5, 17.5, -8.5, 22.5, 20.5, -5, "steel")
+    m.box("bench", 18.5, 17.5, -8, 21.5, 19.5, -5.5, "wood")
+    m.box("bench", 22.5, 18.5, -7.5, 25.5, 19.2, -6.8, "steel_dark")
+    # a musket laid on the top, lock towards you
+    m.box("bench", -6, 16.2, -1.6, 14, 17.2, -0.6, "steel")
+    m.box("bench", 3, 15.9, -2.1, 16, 17.4, 0.4, "wood")
+    m.box("bench", 13, 15.6, -2.1, 18, 17.8, 0.1, "wood")
+    m.box("bench", 4.5, 17.2, -2.3, 6.5, 17.8, -1.6, "steel_dark")
+    m.box("bench", 9, 16.1, -2.2, 9.8, 17.5, 0.5, "brass")
+    # powder horn and a pouch of balls on the top, a keg on the shelf
+    m.box("bench", -5.5, 16, 3, -1.5, 17.5, 4.5, "brass")
+    m.box("bench", 0, 16, 2.5, 2.5, 17.8, 5, "wood_dark")
+    m.box("bench", -5, 5.5, -4, 1, 12.5, 2, "wood_dark")
+    for y in (6.5, 11):
+        m.box("bench", -5.3, y, -4.3, 1.3, y + 0.8, 2.3, "brass")
+    m.box("bench", 8, 5.5, -3, 14, 7, 3, "wood")
+    # the rack behind: two uprights, a rail, ramrods and a mallet hanging on it
+    m.box("bench", -8, 16, 6, -6, 30, 8, "wood_dark")
+    m.box("bench", 22, 16, 6, 24, 30, 8, "wood_dark")
+    m.box("bench", -6, 27, 6.5, 22, 28.5, 7.5, "wood")
+    for x in (0, 2, 4):
+        m.box("bench", x, 17, 6.6, x + 0.5, 27, 7.1, "steel_dark")
+    m.box("bench", 12, 20, 6.4, 13, 27, 7.4, "wood")
+    m.box("bench", 10.5, 18.5, 6, 14.5, 21, 8, "wood_dark")
+    return m
+
+
 # ---- animations -----------------------------------------------------------------------------------------------------
 # Hand poses (absolute, like every TaCZ gun): rotation, position. Long guns: right hand on the wrist, left under the
 # forestock. Pistol: right hand on the grip, left cupping it.
@@ -484,6 +564,251 @@ def void_animations(hands, kick, length):
     return {"format_version": "1.8.0", "animations": anims}
 
 
+# Third person (Player Animation Library): our own poses. Degrees and pixels on the player's limbs; x below 0 lifts an
+# arm forward. Long guns are held across the body, the stock under the right arm and the left hand forward on the
+# stock; the pistol is held out in the right hand alone.
+def pa_keys(pairs):
+    return {f"{t:.4g}": {"post": [r(v) for v in val], "lerp_mode": "INOUTSINE"} for t, val in pairs}
+
+
+def pa_pose(arms, length=2.0, sway=1.5, loop=True):
+    """A held pose that breathes: each limb's rotation rises and falls by sway degrees over length seconds."""
+    bones = {}
+    for limb, (rot, pos) in arms.items():
+        bones[limb] = {"rotation": pa_keys([(0, rot), (length / 2, add(rot, [-sway, 0, 0])), (length, rot)]),
+                       "position": pa_keys([(0, pos), (length, pos)])}
+    return {"loop": loop, "animation_length": length, "bones": bones}
+
+
+def pa_once(arms, frames, length):
+    """A one-shot: each limb steps through (time, rotation offset) on top of its pose."""
+    bones = {}
+    for limb, (rot, pos) in arms.items():
+        bones[limb] = {"rotation": pa_keys([(t, add(rot, d)) for t, d in frames.get(limb, [(0, [0, 0, 0])])]),
+                       "position": pa_keys([(0, pos), (length, pos)])}
+    return {"animation_length": length, "bones": bones}
+
+
+def player_animations(long, reload_len):
+    if long:
+        hold = {"right_arm": ([-62, -18, 6], [0, 0, 0]), "left_arm": ([-78, 34, 0], [0, 0, -1])}
+        aim = {"right_arm": ([-88, -14, 0], [0, -0.5, 1]), "left_arm": ([-95, 38, 0], [0.5, -0.5, -2.5]),
+               "head": ([0, 0, 0], [0, 0, 0])}
+        run = {"right_arm": ([-34, -30, 24], [0, 0, 0]), "left_arm": ([-58, 46, 0], [0, 0, 0])}
+        ram = [(0, [0, 0, 0]), (reload_len * 0.1, [70, 0, -10]), (reload_len * 0.85, [70, 0, -10]), (reload_len, [0, 0, 0])]
+        stroke = [(0, [0, 0, 0]), (reload_len * 0.1, [-50, -20, 0])]
+        for i in range(2):
+            t = reload_len * (0.45 + i * 0.15)
+            stroke += [(t, [-75, -20, 0]), (t + reload_len * 0.07, [-40, -20, 0])]
+        stroke += [(reload_len * 0.85, [-50, -20, 0]), (reload_len, [0, 0, 0])]
+        reload_frames = {"right_arm": ram, "left_arm": stroke}
+    else:
+        hold = {"right_arm": ([-55, -6, 0], [0, 0, 0])}
+        aim = {"right_arm": ([-90, -4, 0], [0, -0.5, 0.5]), "head": ([0, 0, 0], [0, 0, 0])}
+        run = {"right_arm": ([-25, -8, 6], [0, 0, 0])}
+        hold_l = {"left_arm": ([-30, 20, 0], [0, 0, 0])}
+        reload_frames = {"right_arm": [(0, [0, 0, 0]), (reload_len * 0.1, [35, 0, 0]),
+                                       (reload_len * 0.85, [35, 0, 0]), (reload_len, [0, 0, 0])],
+                         "left_arm": [(0, [0, 0, 0]), (reload_len * 0.1, [-25, 0, 0]),
+                                      (reload_len * 0.5, [-55, 0, 0]), (reload_len * 0.6, [-30, 0, 0]),
+                                      (reload_len * 0.7, [-55, 0, 0]), (reload_len, [0, 0, 0])]}
+        hold, run = {**hold, **hold_l}, {**run, **hold_l}
+    kick = [(0, [0, 0, 0]), (0.05, [-14, 0, 0]), (0.35, [0, 0, 0])]
+    anims = {
+        "hold_upper": pa_pose(hold), "walk_upper": pa_pose(hold, 0.7, 3.0), "crouch_walk_upper": pa_pose(hold, 1.0, 2.0),
+        "aim_upper": pa_pose(aim, 3.0, 0.6), "run_upper": pa_pose(run, 0.6, 5.0),
+        "normal_fire_upper": pa_once(hold, {"right_arm": kick, "left_arm": kick}, 0.35),
+        "aim_fire_upper": pa_once(aim, {"right_arm": kick, "left_arm": kick}, 0.35),
+        "reload_upper": pa_once(hold, reload_frames, round(reload_len, 4)),
+        "melee_upper": pa_once(hold, {"right_arm": [(0, [0, 0, 0]), (0.15, [-30, 10, 0]), (0.55, [0, 0, 0])],
+                                      "left_arm": [(0, [0, 0, 0]), (0.15, [-30, 0, 0]), (0.55, [0, 0, 0])]}, 0.55),
+        "empty": {"loop": True, "bones": {"body": {"rotation": [0, 0, 0]}}},
+    }
+    return {"format_version": "1.8.0", "animations": anims}
+
+
+STATE_MACHINE = """-- Jaymo's flintlocks: our own animation state machine for TaCZ (tools/gen_tacz_guns.py writes this file).
+-- A muzzle-loader has little to track: a held pose (and the empty lock once it's fired), one-shot actions (draw,
+-- put away, reload, inspect, stock blow), the kick of each shot, and how you're moving.
+
+local POSE_LINE, KICK_LINE, MOVE_LINE = 0, 1, 2
+local POSE, LOCK, ACTION = 0, 1, 2
+local MOVE = 0
+
+local function action(context)
+    return context:getTrack(POSE_LINE, ACTION)
+end
+
+local function spent(context)
+    return (not context:hasBulletInBarrel()) and context:getAmmoCount() <= 0
+end
+
+local function play(context, name)
+    context:runAnimation(name, action(context), false, PLAY_ONCE_STOP, 0.15)
+end
+
+-- the held pose, always under everything else
+local pose = {}
+function pose.entry(this, context)
+    context:runAnimation("static_idle", context:getTrack(POSE_LINE, POSE), false, LOOP, 0)
+end
+
+-- loaded: hammer cocked, pan shut; spent: hammer down, frizzen thrown open, until it's loaded again
+local lock = { loaded = {}, spent = {} }
+function lock.loaded.update(this, context)
+    if spent(context) then
+        context:trigger("spent")
+    end
+end
+function lock.loaded.transition(this, context, input)
+    if input == "spent" then
+        context:runAnimation("static_bolt_caught", context:getTrack(POSE_LINE, LOCK), false, LOOP, 0)
+        return this.lock.spent
+    end
+end
+function lock.spent.update(this, context)
+    if not spent(context) then
+        context:trigger("primed")
+    end
+end
+function lock.spent.transition(this, context, input)
+    if input == "primed" then
+        context:stopAnimation(context:getTrack(POSE_LINE, LOCK))
+        return this.lock.loaded
+    end
+end
+
+-- the hands' one-shot actions
+local hands = { holstered = {}, ready = {}, away = {} }
+function hands.holstered.transition(this, context, input)
+    if input == INPUT_DRAW then
+        play(context, "draw")
+        return this.hands.ready
+    end
+end
+function hands.ready.transition(this, context, input)
+    if input == INPUT_PUT_AWAY then
+        context:runAnimation("put_away", action(context), false, PLAY_ONCE_HOLD, 0.15)
+        return this.hands.away
+    elseif input == INPUT_RELOAD then
+        play(context, "reload_empty")
+    elseif input == INPUT_INSPECT and context:getAimingProgress() < 1 then
+        play(context, spent(context) and "inspect_empty" or "inspect")
+    elseif input == INPUT_BAYONET_STOCK or input == INPUT_BAYONET_PUSH or input == INPUT_BAYONET_MUZZLE then
+        play(context, "melee_stock")
+    elseif input == INPUT_SHOOT and context:getAimingProgress() > 0 then
+        context:stopAnimation(action(context))
+    end
+end
+
+-- each shot kicks on a track of its own, so quick shots overlap
+local kick = {}
+function kick.transition(this, context, input)
+    if input == INPUT_SHOOT then
+        context:runAnimation("shoot", context:findIdleTrack(KICK_LINE, false), true, PLAY_ONCE_STOP, 0)
+    end
+end
+
+-- moving: standing breath, walking (its pace follows your steps), running
+local stride = { still = {}, walking = { name = "" }, running = { started = false } }
+local function stepping(context, name, fade)
+    local state = stride.walking
+    local track = context:getTrack(MOVE_LINE, MOVE)
+    if state.name ~= name then
+        state.name = name
+        context:runAnimation(name, track, true, LOOP, fade)
+        context:anchorWalkDist()
+    end
+    if name ~= "idle" then
+        context:setAnimationProgress(track, (context:getWalkDist() % 2.0) / 2.0, true)
+    end
+end
+function stride.still.update(this, context)
+    local track = context:getTrack(MOVE_LINE, MOVE)
+    if context:isStopped(track) or context:isHolding(track) then
+        context:runAnimation("idle", track, true, LOOP, 0)
+    end
+end
+function stride.still.transition(this, context, input)
+    if input == INPUT_RUN and context:isStopped(action(context)) then
+        return this.stride.running
+    elseif input == INPUT_RUN or input == INPUT_WALK then
+        return this.stride.walking
+    end
+end
+function stride.walking.entry(this, context)
+    stride.walking.name = ""
+end
+function stride.walking.update(this, context)
+    if context:getShootCoolDown() > 0 or not context:isOnGround() then
+        stepping(context, "idle", 0.4)
+    elseif context:getAimingProgress() > 0.5 then
+        stepping(context, "walk_aiming", 0.3)
+    elseif context:isInputUp() then
+        stepping(context, "walk_forward", 0.4)
+    elseif context:isInputDown() then
+        stepping(context, "walk_backward", 0.4)
+    elseif context:isInputLeft() or context:isInputRight() then
+        stepping(context, "walk_sideway", 0.4)
+    end
+end
+function stride.walking.exit(this, context)
+    context:runAnimation("idle", context:getTrack(MOVE_LINE, MOVE), true, PLAY_ONCE_HOLD, 0.4)
+end
+function stride.walking.transition(this, context, input)
+    if input == INPUT_IDLE then
+        return this.stride.still
+    elseif input == INPUT_RUN and context:isStopped(action(context)) then
+        return this.stride.running
+    end
+end
+function stride.running.entry(this, context)
+    stride.running.started = false
+    context:runAnimation("run_start", context:getTrack(MOVE_LINE, MOVE), true, PLAY_ONCE_HOLD, 0.2)
+end
+function stride.running.update(this, context)
+    local track = context:getTrack(MOVE_LINE, MOVE)
+    if context:isHolding(track) and not stride.running.started then
+        stride.running.started = true
+        context:runAnimation("run", track, true, LOOP, 0.2)
+        context:anchorWalkDist()
+    end
+    if stride.running.started then
+        context:setAnimationProgress(track, (context:getWalkDist() % 2.0) / 2.0, true)
+    end
+end
+function stride.running.exit(this, context)
+    context:runAnimation("run_end", context:getTrack(MOVE_LINE, MOVE), true, PLAY_ONCE_HOLD, 0.3)
+end
+function stride.running.transition(this, context, input)
+    if input == INPUT_IDLE then
+        return this.stride.still
+    elseif input == INPUT_WALK or not context:isStopped(action(context)) then
+        return this.stride.walking
+    end
+end
+
+local M = { pose = pose, lock = lock, hands = hands, kick = kick, stride = stride }
+
+function M:initialize(context)
+    context:ensureTrackLineSize(3)
+    context:ensureTracksAmount(POSE_LINE, 3)
+    context:ensureTracksAmount(MOVE_LINE, 1)
+    stride.walking.name = ""
+    stride.running.started = false
+end
+
+function M:exit(context)
+end
+
+function M:states()
+    return { self.pose, self.lock.loaded, self.hands.holstered, self.kick, self.stride.still }
+end
+
+return M
+"""
+
+
 # ---- sounds ---------------------------------------------------------------------------------------------------------
 RATE = 44100
 
@@ -567,6 +892,23 @@ def rustle(seed, secs):
     return [a * g * e * 0.6 for a, g, e in zip(x, grains, env(n, 800, secs * RATE / 2.5))]
 
 
+def hit(seed, head):
+    """A ball striking: a dull smack, with a hard knock on top for the head."""
+    n = int(0.2 * RATE)
+    smack = [x * e * 2 for x, e in zip(lowpass(noise(n, seed), 0.12), env(n, 10, 0.03 * RATE))]
+    if not head:
+        return smack
+    knock = [math.sin(2 * math.pi * 620 * i / RATE) * math.exp(-i / (0.025 * RATE)) * 0.7 for i in range(n)]
+    return mix(smack, knock)
+
+
+def kill_knell():
+    """A low, short toll when the shot kills."""
+    n = int(0.7 * RATE)
+    return [sum(math.sin(2 * math.pi * f * i / RATE) * w for f, w in ((196, 0.6), (392, 0.25), (587, 0.12)))
+            * min(1.0, i / 200) * math.exp(-i / (0.22 * RATE)) for i in range(n)]
+
+
 def void_pull():
     """A rising rush out of the rift with a glassy chime on top."""
     n = int(0.55 * RATE)
@@ -589,6 +931,9 @@ SOUNDS = {
     "powder": lambda: rustle(11, 0.5), "rod_draw": lambda: scrape(12), "ram": lambda: thud(13),
     "frizzen": lambda: click(14), "cock": lambda: click(15, 0.05), "draw": lambda: rustle(16, 0.35),
     "put_away": lambda: rustle(17, 0.3), "void_pull": lambda: void_pull(),
+    # TaCZ's shared sounds (its default pack had them): a snap on an empty pan, the ball striking home
+    "dry_fire": lambda: click(21), "flesh_hit": lambda: hit(22, False), "head_hit": lambda: hit(23, True),
+    "kill": lambda: kill_knell(),
 }
 
 
@@ -650,13 +995,13 @@ GUNS = {
     },
 }
 AMMO = {
-    "musket_ball": {"stack": 32, "tracer": "#FFE2B0", "group": "lc_specialized", "count": 16,
+    "musket_ball": {"stack": 32, "tracer": "#FFE2B0", "count": 16,
                     "recipe": [("item", "minecraft:iron_nugget", 8), ("item", "minecraft:gunpowder", 2),
                                ("item", "minecraft:paper", 1)]},
-    "shot": {"stack": 24, "tracer": "#FFE2B0", "group": "shotgun_shells", "count": 8,
+    "shot": {"stack": 24, "tracer": "#FFE2B0", "count": 8,
              "recipe": [("item", "minecraft:iron_nugget", 9), ("item", "minecraft:gunpowder", 2),
                         ("item", "minecraft:leather", 1)]},
-    "void_shot": {"stack": 64, "tracer": "#E070FF", "group": "alternative_proj", "count": 1, "recipe": None},
+    "void_shot": {"stack": 64, "tracer": "#E070FF", "count": 1, "recipe": None},
 }
 NAMES = {"musket": ("Musket", "A long smoothbore flintlock. One ball, a long reload, and a hard hit out to 24 blocks."),
          "blunderbuss": ("Blunderbuss", "A brass flintlock with a flared mouth: a fistful of shot, deadly up close."),
@@ -693,14 +1038,18 @@ def display(name, g, long):
         "model": f"{NS}:gun/{name}_geo", "texture": f"{NS}:gun/uv/{g.get('atlas', 'flintlocks')}",
         "hud": f"{NS}:gun/hud/{name}", "slot": f"{NS}:gun/slot/{name}",
         "animation": f"{NS}:{name}", "use_default_animation": g["defaults"], "third_person_animation": "default",
-        # third person through Player Animation Library (TaCZ's own default poses, by name; rifle unless we say)
-        "player_animator_3rd": f"tacz:{g['defaults']}_default.player_animation",
+        # third person through Player Animation Library: our own poses
+        "player_animator_3rd": f"{NS}:flintlock_{'long' if long else 'pistol'}.player_animation",
+        "state_machine": f"{NS}:flintlock_state_machine",
         "transform": {"scale": {"thirdperson": [0.6, 0.6, 0.6], "ground": [0.6, 0.6, 0.6],
                                 "fixed": [1.2, 1.2, 1.2] if long else [1.6, 1.6, 1.6]}},
-        "muzzle_flash": {"texture": "tacz:flash/common_muzzle_flash", "scale": 1.4 if long else 1.0},
+        "muzzle_flash": {"texture": f"{NS}:flash/flintlock_flash", "scale": 1.4 if long else 1.0},
         "iron_zoom": g["zoom"], "zoom_model_fov": 30,
         "sounds": {"draw": f"{NS}:flintlock/draw", "put_away": f"{NS}:flintlock/put_away",
-                   "shoot": f"{NS}:flintlock/{snd}_shoot", "shoot_3p": f"{NS}:flintlock/{snd}_shoot_3p"},
+                   "shoot": f"{NS}:flintlock/{snd}_shoot", "shoot_3p": f"{NS}:flintlock/{snd}_shoot_3p",
+                   "dry_fire": f"{NS}:flintlock/dry_fire", "fire_select": f"{NS}:flintlock/cock",
+                   "head_hit": f"{NS}:flintlock/head_hit", "flesh_hit": f"{NS}:flintlock/flesh_hit",
+                   "kill": f"{NS}:flintlock/kill", "melee_stock": f"{NS}:flintlock/ram"},
     }
 
 
@@ -749,7 +1098,8 @@ def main():
         dump(f"{D}/data/guns/{name}_data.json", gun_data(g))
         if g["recipe"]:
             dump(f"{D}/recipe/gun/{name}.json", {"materials": [ingredient(*i) for i in g["recipe"]],
-                                                 "result": {"type": "gun", "id": f"{NS}:{name}"},
+                                                 "result": {"type": "gun", "id": f"{NS}:{name}",
+                                                            "group": f"{NS}:firearms"},
                                                  "type": "tacz:gun_smith_table_crafting"})
         lang[f"{NS}.gun.{name}.name"], lang[f"{NS}.gun.{name}.desc"] = NAMES[name]
     for name, a in AMMO.items():
@@ -759,9 +1109,45 @@ def main():
                                              "stack_size": a["stack"], "sort": 1})
         if a["recipe"]:
             dump(f"{D}/recipe/ammo/{name}.json", {"materials": [ingredient(*i) for i in a["recipe"]],
-                                                  "result": {"type": "ammo", "group": a["group"],
+                                                  "result": {"type": "ammo", "group": f"{NS}:shot_and_ball",
                                                              "id": f"{NS}:{name}", "count": a["count"]},
                                                   "type": "tacz:gun_smith_table_crafting"})
+    # what every gun used to borrow from TaCZ's default pack, now our own
+    os.makedirs(f"{A}/scripts", exist_ok=True)
+    with open(f"{A}/scripts/flintlock_state_machine.lua", "w", encoding="utf-8", newline="\n") as f:
+        f.write(STATE_MACHINE)
+    reload_long = GUNS["musket"]["reload"][1] - 0.1
+    reload_pistol = GUNS["flintlock_pistol"]["reload"][1] - 0.1
+    dump(f"{A}/player_animator/flintlock_long.player_animation.json", player_animations(True, reload_long))
+    dump(f"{A}/player_animator/flintlock_pistol.player_animation.json", player_animations(False, reload_pistol))
+    save(f"{A}/textures/flash/flintlock_flash.png", muzzle_flash())
+    bench_model = bench()
+    dump(f"{A}/geo_models/block/gunsmith_bench.json", bench_model.json())
+    dump(f"{A}/display/blocks/gunsmith_bench.json", {
+        "model": f"{NS}:block/gunsmith_bench", "texture": f"{NS}:gun/uv/flintlocks",
+        "transforms": {
+            "thirdperson_righthand": {"rotation": [0, 90, 0], "translation": [0, 0.5, -2], "scale": [0.22, 0.22, 0.22]},
+            "thirdperson_lefthand": {"rotation": [0, 90, 0], "translation": [0, 0.5, 2], "scale": [0.22, 0.22, 0.22]},
+            "firstperson_righthand": {"rotation": [0, 90, 0], "scale": [0.24, 0.24, 0.24]},
+            "firstperson_lefthand": {"rotation": [0, 90, 0], "translation": [0, 0, 4], "scale": [0.24, 0.24, 0.24]},
+            "ground": {"translation": [2, 2, 0], "scale": [0.24, 0.24, 0.24]},
+            "gui": {"rotation": [20, -140, 0], "translation": [-2.5, -2.5, 0], "scale": [0.42, 0.42, 0.42]},
+            "fixed": {"translation": [4, -3, -3], "scale": [0.48, 0.48, 0.48]}}})
+    # TaCZ's own gun smith table block and item look for the index tacz:gun_smith_table, which only its default pack
+    # had: ours points it at the bench, our tabs and a filter showing only our recipes
+    dump(f"{PACK}/data/tacz/index/blocks/gun_smith_table.json", {
+        "name": f"{NS}.block.gunsmith_bench.name", "display": f"{NS}:gunsmith_bench", "data": f"{NS}:gunsmith_bench",
+        "tooltip": f"{NS}.block.gunsmith_bench.desc", "id": "tacz:gun_smith_table", "sort": 1})
+    gun_icon = {"id": "tacz:modern_kinetic_gun", "components": {"minecraft:custom_data": f'{{GunId: "{NS}:musket"}}'}}
+    ammo_icon_stack = {"id": "tacz:ammo", "components": {"minecraft:custom_data": f'{{AmmoId: "{NS}:musket_ball"}}'}}
+    dump(f"{D}/data/blocks/gunsmith_bench.json", {"filter": f"{NS}:flintlocks", "tabs": [
+        {"id": f"{NS}:firearms", "name": f"{NS}.tab.firearms", "icon": gun_icon},
+        {"id": f"{NS}:shot_and_ball", "name": f"{NS}.tab.shot_and_ball", "icon": ammo_icon_stack}]})
+    dump(f"{D}/recipe_filters/flintlocks.json", {"whitelist": [f"^{NS}:.*$"], "blacklist": []})
+    lang[f"{NS}.block.gunsmith_bench.name"] = "Gunsmith's Bench"
+    lang[f"{NS}.block.gunsmith_bench.desc"] = "Where muskets, blunderbusses and pistols are made, and their shot cast."
+    lang[f"{NS}.tab.firearms"] = "Firearms"
+    lang[f"{NS}.tab.shot_and_ball"] = "Shot and Ball"
     lang[f"{NS}.ammo.musket_ball.name"] = "Musket Balls"
     lang[f"{NS}.ammo.shot.name"] = "Shot"
     lang[f"{NS}.ammo.void_shot.name"] = "Void Shot"

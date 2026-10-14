@@ -1,0 +1,6 @@
+{
+  "whitelist": [
+    "^jaymospowers:.*$"
+  ],
+  "blacklist": []
+}

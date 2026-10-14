@@ -1,0 +1,25 @@
+{
+  "filter": "jaymospowers:flintlocks",
+  "tabs": [
+    {
+      "id": "jaymospowers:firearms",
+      "name": "jaymospowers.tab.firearms",
+      "icon": {
+        "id": "tacz:modern_kinetic_gun",
+        "components": {
+          "minecraft:custom_data": "{GunId: \"jaymospowers:musket\"}"
+        }
+      }
+    },
+    {
+      "id": "jaymospowers:shot_and_ball",
+      "name": "jaymospowers.tab.shot_and_ball",
+      "icon": {
+        "id": "tacz:ammo",
+        "components": {
+          "minecraft:custom_data": "{AmmoId: \"jaymospowers:musket_ball\"}"
+        }
+      }
+    }
+  ]
+}

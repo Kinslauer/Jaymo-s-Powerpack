@@ -17,7 +17,8 @@ import net.minecraft.world.item.component.CustomData;
 /**
  * (0.10.43) Our flintlocks in TaCZ: the musket, blunderbuss and flintlock pistol are a gunpack of our own
  * ({@code assets/jaymospowers/custom/jaymos_flintlocks}, made by tools/gen_tacz_guns.py), handed to TaCZ through its
- * API so it copies it into {@code .minecraft/tacz} beside its default pack. Through reflection, so Jaymo's Powers
+ * API so it copies it into {@code .minecraft/tacz}; since 0.10.79 it's the only gunpack (TaCZ's modern one is kept
+ * out, {@link #dropDefaultPack}). Through reflection, so Jaymo's Powers
  * still runs without TaCZ. TaCZ's own modern guns, ammo and attachments are taken off its benches
  * ({@code tinkering/Uncraftable}). As TaCZ items the guns are {@code tacz:modern_kinetic_gun} with
  * {@code GunId: "jaymospowers:musket"} in their custom data (Kingdoms hands them out that way).
@@ -25,6 +26,8 @@ import net.minecraft.world.item.component.CustomData;
 public final class TaczGuns {
 	public static final boolean LOADED = FabricLoader.getInstance().isModLoaded("tacz");
 	static final String PACK = "/assets/" + JaymosPowers.MOD_ID + "/custom/jaymos_flintlocks";
+	/** TaCZ's own gunpack, all modern: never loaded (see dropDefaultPack). */
+	static final String DEFAULT_PACK = "tacz_default_gun";
 
 	private TaczGuns() {
 	}
@@ -45,6 +48,45 @@ public final class TaczGuns {
 				.invoke(null, JaymosPowers.class, PACK);
 		} catch (ReflectiveOperationException | LinkageError e) {
 			JaymosPowers.LOGGER.warn("Couldn't hand our flintlocks to TaCZ", e);
+		}
+	}
+
+	/**
+	 * (0.10.79) Andy: nothing modern in the pack. TaCZ's default gunpack (its AK-47s, ammo, attachments, benches and
+	 * the scripts and poses it shares with every gun) is kept from loading: its entry comes off TaCZ's export list
+	 * before TaCZ copies it into {@code .minecraft/tacz}, and a copy an earlier launch left there is deleted (TaCZ
+	 * loads every folder in it). Our gunpack brings its own state machine, Gunsmith's Bench, muzzle flash, hit sounds
+	 * and third-person poses instead (tools/gen_tacz_guns.py). TaCZ's art is CC BY-NC-ND, so nothing of it is copied.
+	 * Called from the client and dedicated-server entrypoints, which run after every mod's main one (where TaCZ adds
+	 * its pack) and before resources load (where it copies and reads them).
+	 */
+	@SuppressWarnings("unchecked")
+	public static void dropDefaultPack() {
+		if (!LOADED) {
+			return;
+		}
+		try {
+			Class<?> manager = Class.forName("com.tacz.guns.api.resource.ResourceManager");
+			java.util.List<Object> entries = (java.util.List<Object>)manager.getField("EXTRA_ENTRIES").get(null);
+			for (java.util.Iterator<Object> it = entries.iterator(); it.hasNext(); ) {
+				Object entry = it.next();
+				if (DEFAULT_PACK.equals(entry.getClass().getMethod("extraDirName").invoke(entry))) {
+					it.remove();
+				}
+			}
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			JaymosPowers.LOGGER.warn("Couldn't keep TaCZ's default (modern) gunpack from loading", e);
+		}
+		java.nio.file.Path copy = FabricLoader.getInstance().getGameDir().resolve("tacz").resolve(DEFAULT_PACK);
+		if (java.nio.file.Files.isDirectory(copy)) {
+			try (java.util.stream.Stream<java.nio.file.Path> walk = java.nio.file.Files.walk(copy)) {
+				for (java.nio.file.Path path : walk.sorted(java.util.Comparator.reverseOrder()).toList()) {
+					java.nio.file.Files.delete(path);
+				}
+				JaymosPowers.LOGGER.info("Removed TaCZ's default (modern) gunpack from {}", copy);
+			} catch (java.io.IOException | RuntimeException e) {
+				JaymosPowers.LOGGER.warn("Couldn't remove TaCZ's default gunpack from {}", copy, e);
+			}
 		}
 	}
 

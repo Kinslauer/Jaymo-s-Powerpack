@@ -21,7 +21,8 @@
   ],
   "result": {
     "type": "gun",
-    "id": "jaymospowers:flintlock_pistol"
+    "id": "jaymospowers:flintlock_pistol",
+    "group": "jaymospowers:firearms"
   },
   "type": "tacz:gun_smith_table_crafting"
 }
