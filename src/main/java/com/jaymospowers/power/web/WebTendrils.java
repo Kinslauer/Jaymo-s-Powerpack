@@ -184,6 +184,17 @@ public final class WebTendrils {
 		}
 	}
 
+	/** Client → server: plain right click while a tendril holds a corpse: take it into your arms. */
+	public record CarryHeld(int hand) implements CustomPacketPayload {
+		public static final Type<CarryHeld> TYPE = new Type<>(JaymosPowers.id("web_tendril_carry_held"));
+		public static final StreamCodec<ByteBuf, CarryHeld> CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, CarryHeld::hand, CarryHeld::new);
+
+		@Override
+		public Type<CarryHeld> type() {
+			return TYPE;
+		}
+	}
+
 	/** Client → server: a tendril key on something (grab it), or let go (entity -1: throw; -2: tear a chunk out of the block aimed at). */
 	public record Grab(int hand, int entityId) implements CustomPacketPayload {
 		public static final Type<Grab> TYPE = new Type<>(JaymosPowers.id("web_tendril_grab"));
@@ -259,6 +270,12 @@ public final class WebTendrils {
 		ServerPlayNetworking.registerGlobalReceiver(Smash.TYPE, (payload, ctx) -> {
 			if (!WebSymbiote.driving(ctx.player())) {
 				smash(ctx.player(), payload.hand() == WebNet.OFF ? WebNet.OFF : WebNet.MAIN);
+			}
+		});
+		PayloadTypeRegistry.serverboundPlay().register(CarryHeld.TYPE, CarryHeld.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(CarryHeld.TYPE, (payload, ctx) -> {
+			if (!WebSymbiote.driving(ctx.player())) {
+				carryHeld(ctx.player(), payload.hand() == WebNet.OFF ? WebNet.OFF : WebNet.MAIN);
 			}
 		});
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.ClimbLatch.TYPE, (payload, ctx) -> climbLatch(ctx.player(), payload));
@@ -644,6 +661,20 @@ public final class WebTendrils {
 	}
 
 	/** Lets go of what a tendril holds: thrown where you look ({@code hurl}), or just dropped. */
+	/** A corpse in a tendril's grip, handed to your arms (no Sneak needed, as it would be off the ground). */
+	private static void carryHeld(ServerPlayer player, int hand) {
+		Grips grips = player.getAttachedOrElse(GRIPS, Grips.NONE);
+		Entity held = grips.get(hand) < 0 ? null : player.level().getEntity(grips.get(hand));
+		if (held == null || !com.jaymospowers.power.gravity.GravityPower.isCorpse(held) || KitchenCompat.isCarryingCorpse(player)) {
+			return;
+		}
+		release(player, hand, false);
+		if (KitchenCompat.carry(player, held)) {
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), net.minecraft.sounds.SoundEvents.SLIME_SQUISH,
+				net.minecraft.sounds.SoundSource.PLAYERS, 0.7F, 0.8F);
+		}
+	}
+
 	static void release(ServerPlayer player, int hand, boolean hurl) {
 		letGo(player, hand, hurl ? player.getLookAngle().scale(THROW_SPEED).add(0.0, THROW_LIFT, 0.0) : null);
 	}

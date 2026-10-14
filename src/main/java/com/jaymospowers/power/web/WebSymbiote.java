@@ -161,11 +161,11 @@ public final class WebSymbiote {
 	/**
 	 * Once it takes over it keeps you until it's done with you: no key answers. With {@code BREAK_FREE_ABILITIES} of its
 	 * abilities earned, fighting it (any key, spammed) breaks its hold: {@code BREAK_FREE_BASE} presses,
-	 * {@code BREAK_FREE_PER_ABILITY} fewer for each ability earned (12 with all six), the count fading {@code STRUGGLE_FADE}
+	 * {@code BREAK_FREE_PER_ABILITY} fewer for each ability earned (44 with all six), the count fading {@code STRUGGLE_FADE}
 	 * a tick. Breaking free stresses it ({@code BREAK_FREE_STRESS}) and costs a little bond.
 	 */
-	public static final int BREAK_FREE_ABILITIES = 3, BREAK_FREE_BASE = 36, BREAK_FREE_PER_ABILITY = 4, BREAK_FREE_STRESS = 10;
-	public static final float STRUGGLE_FADE = 0.12F;
+	public static final int BREAK_FREE_ABILITIES = 3, BREAK_FREE_BASE = 80, BREAK_FREE_PER_ABILITY = 6, BREAK_FREE_STRESS = 10;
+	public static final float STRUGGLE_FADE = 0.25F;
 	/**
 	 * It narrates what it does, more as the bond grows: each act has a {@code NARRATE_MIN} (bond 0) to {@code NARRATE_MAX}
 	 * (full) chance to be spoken, at most once every {@code NARRATE_GAP_MAX} to {@code NARRATE_GAP_MIN} ticks. Each act has
@@ -199,12 +199,16 @@ public final class WebSymbiote {
 	public static final int TAKEOVER_ATTACK_TICKS = 20;
 	public static final int TAKEOVER_COOLDOWN = 900;
 	/**
-	 * Once it has the wheel it keeps it until its prey is dead or gets {@code TAKEOVER_ESCAPE} blocks away (and, so it
-	 * can never hold you for good, {@code TAKEOVER_LIMIT} at most).
+	 * Once it has the wheel it keeps it until it has done what it set out to (its prey dead, a look had, a kill carried
+	 * off and eaten) or you wrestle it back: there's no time limit. Only prey that gets clean away
+	 * ({@code TAKEOVER_ESCAPE} blocks) or is gone ends it early. {@code TAKEOVER_LIMIT} is how long each hold is
+	 * told to your client; it's renewed while the takeover lasts.
 	 */
-	public static final double TAKEOVER_ESCAPE = 30.0;
+	public static final double TAKEOVER_ESCAPE = 64.0;
 	public static final int TAKEOVER_LIMIT = 1200;
 	public static final int TAKEOVER_RELIEF = 20;
+	/** The hold is told to the client again this many ticks before it would run out. */
+	static final int HOLD_RENEW = 40;
 	/**
 	 * Near death (at or under {@code DEFEND_HEALTH}), it swells into the big body and takes over to save itself,
 	 * going for whatever hurt you; it costs the bond {@code DEFEND_STRESS}, and can't happen again for {@code DEFEND_COOLDOWN}.
@@ -234,13 +238,13 @@ public final class WebSymbiote {
 	public static final int ESCAPE_CROWD = 3, ESCAPE_LAG_MIN = 10, ESCAPE_LAG_MAX = 70, ESCAPE_DIRECTIONS = 16;
 	public static final double ESCAPE_RANGE = 12.0;
 	/**
-	 * Feeding: it never eats anything living. SEEK a corpse (else the nearest creature), KILL it (at most
-	 * {@code KILL_TICKS}; then its corpse must turn up within {@code CORPSE_WAIT_TICKS}, within {@code CORPSE_FIND_RADIUS}
+	 * Feeding: it never eats anything living. SEEK a corpse (else the nearest creature), KILL it (for as long as the hunt
+	 * takes; then its corpse must turn up within {@code CORPSE_WAIT_TICKS}, within {@code CORPSE_FIND_RADIUS}
 	 * of where it fell), GRAB it with a tendril (the reach, then {@code GRAB_HAUL_TICKS} hauling it in, at most
 	 * {@code GRAB_TIMEOUT}), CARRY it in your arms (Jaymo's Kitchen; {@code CARRY_TIMEOUT}), and only then FEED.
 	 */
 	public static final int FEED_NONE = 0, FEED_KILL = 1, FEED_GRAB = 2, FEED_CARRY = 3, FEED_FEED = 4;
-	public static final int KILL_TICKS = 400, CORPSE_WAIT_TICKS = 60, GRAB_HAUL_TICKS = 8, GRAB_TIMEOUT = 80, CARRY_TIMEOUT = 20;
+	public static final int CORPSE_WAIT_TICKS = 60, GRAB_HAUL_TICKS = 8, GRAB_TIMEOUT = 80, CARRY_TIMEOUT = 20;
 	public static final double CORPSE_FIND_RADIUS = 3.0;
 	/** Consume: a corpse a tendril can take from this far; something weak enough is finished off by a lash landing {@code CONSUME_FINISH_LAG} later. */
 	public static final double CONSUME_CORPSE_RANGE = 6.0;
@@ -1132,6 +1136,10 @@ public final class WebSymbiote {
 		}
 		if (live.escapeAt > 0L && now >= live.escapeAt) {
 			live.escapeAt = 0L;
+			if (live.takeoverTicks > 0 && live.takeoverTarget == player.getId()) {
+				// done with the meal's hold: it leaps clear on its own
+				endTakeover(player, live);
+			}
 			escape(player, live);
 		}
 		if (player.getAttached(EATING) != null) {
@@ -1726,6 +1734,24 @@ public final class WebSymbiote {
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.8F, 1.4F);
 	}
 
+	/** The takeover's hold, told to the client again before it runs out (a takeover has no time limit). */
+	private static void renewHold(ServerPlayer player, Live live) {
+		if (--live.takeoverTicks <= HOLD_RENEW) {
+			live.takeoverTicks = TAKEOVER_LIMIT;
+			ServerPlayNetworking.send(player, new WebNet.Takeover(live.takeoverTarget, live.takeoverTicks, false));
+		}
+	}
+
+	/** Its prey is dead: it keeps the wheel, holding you still, while it gets the corpse in and eats (you as the "target"). */
+	private static void holdForMeal(ServerPlayer player, Live live) {
+		live.takeoverTarget = player.getId();
+		live.stareUntil = 0L;
+		WebTakeoverPath.stop(player, live.route);
+		live.route = null;
+		live.takeoverTicks = TAKEOVER_LIMIT;
+		ServerPlayNetworking.send(player, new WebNet.Takeover(player.getId(), live.takeoverTicks, false));
+	}
+
 	/** Moves you along the takeover's way (see {@link WebTakeoverPath}). */
 	private static void drive(ServerPlayer player, Live live, Entity target, boolean flee, long now) {
 		if (live.route == null) {
@@ -2077,21 +2103,42 @@ public final class WebSymbiote {
 			tickTour(player, live, now, target);
 			return;
 		}
-		// it lets go once its prey is dead, or has got away
-		if (target == null || !target.isAlive() || target.distanceTo(player) > TAKEOVER_ESCAPE || --live.takeoverTicks <= 0) {
-			boolean killed = target != null && !target.isAlive() && !live.curious && !live.hunting;
-			endTakeover(player, live);
+		if (target == player) {
+			// its kill carried off: it holds you still through the grab, the carry and the meal, and lets go after
+			if (live.feedStage == FEED_NONE) {
+				endTakeover(player, live);
+			} else {
+				renewHold(player, live);
+			}
+			return;
+		}
+		// it lets go once its prey is dead (and, if it's hungry, eaten), or has got clean away; never on a timer
+		if (target == null || !target.isAlive() || target.distanceTo(player) > TAKEOVER_ESCAPE) {
+			boolean dead = target != null && !target.isAlive();
+			if (dead && live.hunting && live.feedStage == FEED_KILL) {
+				// the hunt's kill: on to the corpse, still at the wheel
+				holdForMeal(player, live);
+				return;
+			}
+			boolean killed = dead && !live.curious && !live.hunting;
 			if (killed) {
 				narrate(player, "kill");
 			}
 			if (killed && live.feedStage == FEED_NONE && player.getAttached(EATING) == null
 				&& (state(player).satiety() < SELF_FEED_BELOW || live.craving || live.gorging)
 				&& target instanceof LivingEntity prey && edible(prey) && !sulking(player)) {
-				// a kill of its own: now it feeds, on the corpse
+				// a kill of its own: now it feeds, on the corpse, still at the wheel
 				startKill(player, live, now, prey, false);
+				live.rampage = false;
+				live.feral = false;
+				live.hunting = true;
+				holdForMeal(player, live);
+				return;
 			}
+			endTakeover(player, live);
 			return;
 		}
+		renewHold(player, live);
 		if (!live.curious || live.stareUntil == 0L) {
 			// on its way: round walls, or through them
 			drive(player, live, target, false, now);
@@ -2956,8 +3003,8 @@ public final class WebSymbiote {
 							level.playSound(null, prey.getX(), prey.getY(), prey.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.0F, 0.5F);
 							level.sendParticles(dust(1.4F), prey.getX(), prey.getY() + prey.getBbHeight() * 0.6, prey.getZ(), 14, 0.3, 0.3, 0.3, 0.0);
 						}
-					} else if (live.takeoverTicks <= 0 || t > KILL_TICKS) {
-						// it got away (or took too long)
+					} else if (live.takeoverTicks <= 0) {
+						// it got away (the hunt's over)
 						abortFeeding(player, live);
 					}
 					return;
@@ -2978,9 +3025,7 @@ public final class WebSymbiote {
 					}
 				}
 				if (corpse != null) {
-					if (live.hunting && live.takeoverTicks > 0) {
-						endTakeover(player, live);
-					}
+					// (a hunt keeps the wheel through the grab, the carry and the meal: see holdForMeal)
 					startGrab(player, live, now, corpse);
 				} else if (since > CORPSE_WAIT_TICKS) {
 					abortFeeding(player, live);
@@ -3113,7 +3158,7 @@ public final class WebSymbiote {
 			return;
 		}
 		// a takeover's fight (not a look, not a run): the tendrils tear into what it took you for
-		boolean fighting = live.takeoverTicks > 0 && !live.curious && !live.touring && !live.fleeing;
+		boolean fighting = live.takeoverTicks > 0 && live.takeoverTarget != player.getId() && !live.curious && !live.touring && !live.fleeing;
 		if (now < live.nextStrikeAt || live.takeoverTicks > 0 && !fighting || live.fleeing
 			|| WebTendrilCombos.active(player)) {
 			return;

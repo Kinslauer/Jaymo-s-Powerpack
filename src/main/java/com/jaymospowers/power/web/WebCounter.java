@@ -7,10 +7,8 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -112,9 +110,12 @@ public final class WebCounter {
 
 	public static final AttachmentType<Active> ACTIVE = AttachmentRegistry.create(JaymosPowers.id("web_counter"),
 		builder -> builder.syncWith(Active.STREAM_CODEC, AttachmentSyncPredicate.all()));
-	/** Until when (game time) right click counters: set by a dodge (synced to the owner, whose client listens for the click). */
+	/**
+	 * Until when (game time) right click counters: set by a dodge. Synced to everyone: the owner's client listens for
+	 * the click, and every client flashes the Spider-Sense bolts over their head meanwhile.
+	 */
 	public static final AttachmentType<Long> READY = AttachmentRegistry.create(JaymosPowers.id("web_counter_ready"),
-		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.targetOnly()));
+		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
 	private static final AttachmentType<Live> LIVE = AttachmentRegistry.create(JaymosPowers.id("web_counter_live"));
 
 	private static final class Live {
@@ -210,12 +211,10 @@ public final class WebCounter {
 	}
 
 	/** A sense dodge just happened: right click counters for a moment. */
-	static void opened(ServerPlayer player, Entity attacker, int left, int charges) {
+	static void opened(ServerPlayer player, Entity attacker) {
 		Live live = live(player);
 		live.attacker = attacker.getId();
 		player.setAttached(READY, player.level().getGameTime() + WINDOW);
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_counter.ready", left, charges)
-			.withStyle(ChatFormatting.RED, ChatFormatting.BOLD));
 	}
 
 	private static Live live(ServerPlayer player) {
@@ -254,8 +253,6 @@ public final class WebCounter {
 		live.lastKind = kind;
 		player.removeAttached(READY);
 		player.setAttached(ACTIVE, new Active(kind, target.getId(), now));
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_counter." + kind).withStyle(suit ? ChatFormatting.DARK_RED : ChatFormatting.GOLD,
-			ChatFormatting.ITALIC));
 		begin(player, level, kind, target);
 	}
 
@@ -625,6 +622,16 @@ public final class WebCounter {
 
 	private static void sound(ServerLevel level, Entity at, SoundEvent sound, float volume, float pitch) {
 		level.playSound(null, at.getX(), at.getY(), at.getZ(), sound, SoundSource.PLAYERS, volume, pitch);
+	}
+
+	/** The Spider-Sense is tingling (a dodge's counter window): how many ticks into it, or -1. */
+	public static float sensing(Player player, float partialTick) {
+		Long until = player.getAttached(READY);
+		if (until == null) {
+			return -1.0F;
+		}
+		float t = player.level().getGameTime() + partialTick - (until - WINDOW);
+		return t >= 0.0F && t <= WINDOW ? t : -1.0F;
 	}
 
 	/** Whether the local counter window is open (the client's check before it sends {@link Strike}). */
