@@ -22,6 +22,11 @@ final class WebTrickClient {
 	static final double HERO_DROP = 2.5, ROLL_SPEED = 0.55;
 	/** The wings fold into a roll instead of their flare only above this speed. */
 	static final double WINGS_ROLL_SPEED = 1.2;
+	/**
+	 * The wings' freedive coming down onto the ground at this speed (blocks/tick), its sideways drift under this much
+	 * of the fall: a superhero landing that breaks the ground ({@link com.jaymospowers.power.web.WebSlam}).
+	 */
+	static final double DIVE_SLAM_SPEED = 1.0, DIVE_STRAIGHT = 0.5;
 	/** Only a real trip through the air ends in a landing trick (ticks off the ground). */
 	static final int MIN_AIR_TICKS = 8;
 
@@ -31,17 +36,20 @@ final class WebTrickClient {
 	/** Off the ground on a web, a release or the wings: the next touchdown may get a landing. */
 	private boolean armed;
 	private boolean wings;
+	/** In the wings' freedive on the last tick in the air. */
+	private boolean dove;
 	private double previousVy;
 	private Vec3 airVelocity = Vec3.ZERO;
 
 	void reset() {
 		armed = false;
 		wings = false;
+		dove = false;
 		airTicks = 0;
 	}
 
 	/** Every tick, before the swing moves you. {@code apexY}: the top of the current fall. */
-	void tick(LocalPlayer player, boolean onWeb, boolean flying, boolean wingsOpen, double apexY) {
+	void tick(LocalPlayer player, boolean onWeb, boolean flying, boolean wingsOpen, boolean diving, double apexY) {
 		if (player.isInWater() || player.isInLava() || player.onClimbable() || player.isPassenger() || player.isFallFlying()) {
 			reset();
 			return;
@@ -55,6 +63,7 @@ final class WebTrickClient {
 			if (wingsOpen) {
 				wings = true;
 			}
+			dove = wingsOpen && diving;
 			if (onWeb) {
 				arc(player);
 			}
@@ -106,6 +115,12 @@ final class WebTrickClient {
 		}
 		double across = airVelocity.horizontalDistance();
 		int kind;
+		if (dove && -airVelocity.y >= DIVE_SLAM_SPEED && across < -airVelocity.y * DIVE_STRAIGHT) {
+			// straight down out of the dive: a superhero landing that breaks the ground under it
+			send(player, WebPose.HERO_LAND);
+			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebSlam.Dive());
+			return;
+		}
 		if (wings) {
 			kind = across > WINGS_ROLL_SPEED ? WebPose.LAND_ROLL : WebPose.WINGS_LAND;
 		} else if (across > ROLL_SPEED) {

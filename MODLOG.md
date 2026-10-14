@@ -890,3 +890,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   and eaten, unless you break free, which is far harder now (80 presses, 6 fewer per ability earned, fading faster).
   Hunts no longer give up after 20 s. A corpse in a tendril's grip goes into your arms on a plain right click (no Sneak).
   See docs/web.md.
+- **0.10.12, jump cuts a zip, dive slam:** pressing Jump at any point of a Web Zip (or Yank-to) lets go of the line,
+  keeping the speed it gave you. Coming down straight out of the wings' freedive lands in a superhero landing that
+  breaks the ground and hurls everything near. See docs/web.md.
