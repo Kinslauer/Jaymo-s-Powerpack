@@ -15,8 +15,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Slamming the band: the left arm (the band's wrist) comes up across the chest and the right hand drops onto it. For
- * yourself the arm rises as you hold Z and the hand lands as the change fires (the server's {@link XenoformPower#HOLD_TICKS});
- * a tap only lifts the wrist for a look. Everyone else sees the slap when a player changes shape. The pose is worked
+ * yourself the arm rises as you hold Z (while you scroll the dial) and the hand comes down as you let go; as an alien the
+ * hand lands as the hold turns you back (the server's {@link XenoformPower#HOLD_TICKS}). Everyone else sees the slap when a player changes shape. The pose is worked
  * out here from the time ({@link #extract}, onto the render state), laid over the model after it animates
  * ({@link #applyModel}, through the model-feature mixin: the human body and the alien alike), and mirrored in first
  * person by {@code XenoformFirstPersonMixin}.
@@ -43,6 +43,10 @@ public final class XenoformSlap {
 
 	// yourself
 	private static float holdAt = -1.0F, releaseAt = -1.0F, slamAt = -1.0F;
+	/** The hold began as yourself: letting go is the slam (the hand comes down then), not a hold timer. */
+	private static boolean slamOnRelease;
+	/** The running slam started from your own release: play the strike, like everyone else's slap. */
+	private static boolean selfStrike;
 	// everyone else: the form each was last seen in, and when their slap started
 	private static final Map<UUID, @Nullable String> FORMS = new HashMap<>();
 	private static final Map<UUID, Float> SLAMS = new HashMap<>();
@@ -51,22 +55,32 @@ public final class XenoformSlap {
 	}
 
 	/** Z went down (as a band wearer). */
-	public static void holdStart(float now) {
+	public static void holdStart(float now, boolean human) {
 		holdAt = now;
 		releaseAt = -1.0F;
+		slamOnRelease = human;
 	}
 
-	/** Z came up. */
+	/** Z came up: as yourself, the band slams now. */
 	public static void release(float now) {
 		if (holdAt >= 0.0F && releaseAt < 0.0F) {
+			if (slamOnRelease) {
+				// the wrist is already up: start the strike straight away
+				slamAt = now - OTHERS_RAISE_TICKS;
+				selfStrike = true;
+				holdAt = -1.0F;
+				return;
+			}
 			releaseAt = now;
 		}
 	}
 
-	/** Your shape changed: if Z was the cause, the hand lands. */
+	/** Your shape changed: if Z was the cause, the hand lands (unless the release already brought it down). */
 	public static void changed(float now) {
-		if (holdAt >= 0.0F && now - holdAt <= HOLD_STALE_TICKS) {
+		boolean striking = selfStrike && slamAt >= 0.0F && now - slamAt <= HOLD_STALE_TICKS;
+		if (!striking && holdAt >= 0.0F && now - holdAt <= HOLD_STALE_TICKS) {
 			slamAt = now;
+			selfStrike = false;
 		}
 		holdAt = -1.0F;
 		releaseAt = -1.0F;
@@ -74,6 +88,7 @@ public final class XenoformSlap {
 
 	public static void clear() {
 		holdAt = releaseAt = slamAt = -1.0F;
+		selfStrike = slamOnRelease = false;
 		FORMS.clear();
 		SLAMS.clear();
 	}
@@ -82,9 +97,10 @@ public final class XenoformSlap {
 	public static @Nullable Pose extract(Avatar entity, @Nullable String form, float partialTicks) {
 		float now = entity.tickCount + partialTicks;
 		if (entity == Minecraft.getInstance().player) {
-			Pose pose = pose(now, holdAt, releaseAt, slamAt, true);
+			Pose pose = pose(now, holdAt, releaseAt, slamAt, !selfStrike, slamOnRelease);
 			if (pose == null) {
 				slamAt = -1.0F;
+				selfStrike = false;
 			}
 			return pose;
 		}
@@ -98,14 +114,14 @@ public final class XenoformSlap {
 		if (slam == null) {
 			return null;
 		}
-		Pose pose = pose(now, -1.0F, -1.0F, slam, false);
+		Pose pose = pose(now, -1.0F, -1.0F, slam, false, false);
 		if (pose == null) {
 			SLAMS.remove(id);
 		}
 		return pose;
 	}
 
-	static @Nullable Pose pose(float now, float hold, float release, float slam, boolean fromHold) {
+	static @Nullable Pose pose(float now, float hold, float release, float slam, boolean fromHold, boolean poisedWhileHeld) {
 		if (slam >= 0.0F) {
 			float dt = now - slam;
 			if (!fromHold) {
@@ -129,7 +145,8 @@ public final class XenoformSlap {
 		if (hold >= 0.0F) {
 			float dt = now - hold;
 			float raise = ease(Math.min(1.0F, dt / RAISE_TICKS));
-			float strike = ease(Mth.clamp((dt - (XenoformPower.HOLD_TICKS - STRIKE_TICKS)) / STRIKE_TICKS, 0.0F, 1.0F));
+			// as yourself the hand waits, poised, for as long as you hold (and scroll); as an alien it lands as the hold turns you back
+			float strike = poisedWhileHeld ? 0.0F : ease(Mth.clamp((dt - (XenoformPower.HOLD_TICKS - STRIKE_TICKS)) / STRIKE_TICKS, 0.0F, 1.0F));
 			if (release >= 0.0F) {
 				float f = 1.0F - (now - release) / DROP_TICKS;
 				if (f <= 0.0F) {

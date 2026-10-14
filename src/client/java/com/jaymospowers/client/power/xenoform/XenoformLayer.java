@@ -29,9 +29,19 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		}
 		// renderColoredCutoutModel, not the "copy layer" one: that skips invisible states, and the body was made invisible
 		renderColoredCutoutModel(model, model.texture, poseStack, collector, lightCoords, state, -1, 1);
-		if (Boolean.TRUE.equals(state.getData(XenoformClient.ENDING))) {
+		boolean ending = Boolean.TRUE.equals(state.getData(XenoformClient.ENDING));
+		if (ending) {
 			collector.order(1).submitModel(model, state, poseStack, RenderTypes.eyes(model.texture), lightCoords, OverlayTexture.NO_OVERLAY,
 				glow(state.ageInTicks), null, 0);
+		}
+		if (model instanceof XenoFormModels.Wyrm) {
+			// Wyrm's wings: the ender dragon's, small, from the game's own dragon texture
+			WyrmWings wings = WyrmWings.get();
+			renderColoredCutoutModel(wings, WyrmWings.TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
+			if (ending) {
+				collector.order(1).submitModel(wings, state, poseStack, RenderTypes.eyes(WyrmWings.TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY,
+					glow(state.ageInTicks), null, 0);
+			}
 		}
 		// the body is drawn by now; let the shadow fall (EntityRenderer skips it for invisible states, after the layers)
 		state.isInvisible = false;
