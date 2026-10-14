@@ -900,3 +900,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Training Points from blows, kills, time, walking and meditation buy 5 stats; forms Super 2 and Super 3 bought with TP,
   25% mastery of the form below and hardship; per-form mastery (25% next form, 50% free entry, up to +15% power and
   -25% drain); C up a form, sneak+C down one; Limit Break (3 tiers, sneak+X) stacks on a form and burns health.
+  Andy's "add all of it" (stage 1, same release): Rage before the first Super (`ZFighterBattle.rage`); techniques bought
+  with TP and set on G/V from the training screen's Techniques page (Ki Disc, Homing Volley, Solar Flash, Ki Barrier,
+  Ki Bomb; `ZFighterKi`, `ZFighterTechniques`); the Spirit Bomb past Super 3 (hold C in Super 3; gathers from living
+  things within 48, hurts only foes, 3 min); Hermit Beans (crop, jungle temples) and Training Weights (`ZFighterItems`);
+  Z Fighters within 32 share a quarter of each other's TP. Flight rebuilt Wind-style (Andy): hold Z and scroll to take
+  off and step through 5 arm poses (`ZFighterFlightClient`, `ZFighterFlightPose`, synced `zfighter_flight`), ki only,
+  charging works in the air; `WindPose` lays him out at cruise speed but leaves his arms to his pose.

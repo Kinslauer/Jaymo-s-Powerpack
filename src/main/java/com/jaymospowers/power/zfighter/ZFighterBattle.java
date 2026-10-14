@@ -8,6 +8,7 @@ import java.util.List;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -17,6 +18,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
@@ -75,12 +77,31 @@ final class ZFighterBattle {
 	static final float BREAKTHROUGH_HEALTH = 0.3F;
 	static final float BREAKTHROUGH_HEAL = 10.0F;
 
+	// ---- Rage: before he has ever gone Super, a beating can send him into a fury ----
+	/** At or below this share of his health in a fight, the meter fills... */
+	static final float RAGE_HEALTH = 0.25F;
+	/** ...over this many ticks (it drains, slower, out of danger). */
+	static final int RAGE_FILL = 80;
+	static final int RAGE_DRAIN = 400;
+	static final int RAGE_TICKS = 300;
+	/** After Rage, this long before it can fill again. */
+	static final int RAGE_COOLDOWN = 1200;
+	/** In Rage: fists this much harder (on top), this much less damage taken, and techniques cost no ki. */
+	static final double RAGE_FIST = 0.4;
+	static final float RAGE_TOUGHNESS = 0.25F;
+	static final int RAGE_HARDSHIP = 2;
+	static final int RAGE_COLOR = 0xFF2A1A;
+
 	private ZFighterBattle() {
 	}
 
 	static void init() {
 		ServerLivingEntityEvents.AFTER_DEATH.register(ZFighterBattle::afterDeath);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
+			if (entity instanceof ServerPlayer hurt && source.getEntity() instanceof LivingEntity attacker && attacker != hurt
+				&& Powers.has(hurt, ZFighterPower.INSTANCE)) {
+				ZFighterTechniques.hurtBy(hurt, attacker);
+			}
 			if (damageTaken <= 0.0F || !(source.getEntity() instanceof ServerPlayer player) || entity == player
 				|| !Powers.has(player, ZFighterPower.INSTANCE)) {
 				return;
@@ -149,6 +170,18 @@ final class ZFighterBattle {
 		Entity attacker = source.getEntity();
 		if (victim instanceof ServerPlayer player && Powers.has(player, ZFighterPower.INSTANCE)) {
 			damage *= 1.0F - ZFighterTraining.toughness(player);
+			ZFighterPower.Live live = ZFighterPower.live(player);
+			if (live.raging()) {
+				damage *= 1.0F - RAGE_TOUGHNESS;
+			}
+			if (live.barrierTicks > 0) {
+				if (source.is(DamageTypeTags.IS_PROJECTILE)) {
+					return 0.0F;
+				}
+				if (source.is(DamageTypeTags.IS_EXPLOSION)) {
+					damage *= 1.0F - ZFighterTechniques.BARRIER_BLAST_CUT;
+				}
+			}
 			if (attacker != null && attacker != victim && grudge(player, attacker)) {
 				damage *= 1.0F - FOE_RESIST;
 			}
@@ -268,9 +301,50 @@ final class ZFighterBattle {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_clutch").withStyle(ChatFormatting.GOLD));
 			}
 		}
+		rage(player, live, inFight && share <= RAGE_HEALTH);
 		if (inFight && share <= BREAKTHROUGH_HEALTH && ZFighterPower.hardship(player) >= SUPER_HARDSHIP && Fate.canAscend(player)) {
 			breakthrough(player, live);
 		}
+	}
+
+	/** Rage fills while he's taking a beating (only before he has ever gone Super), and bursts when full. */
+	private static void rage(ServerPlayer player, ZFighterPower.Live live, boolean beaten) {
+		if (live.raging()) {
+			if (--live.rageTicks == 0) {
+				live.rageCooldown = RAGE_COOLDOWN;
+				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.8F, 0.7F);
+				ZFighterPower.refresh(player, live);
+			} else if (live.rageTicks % 2 == 0) {
+				ZFighterPower.aura(player, live, 3);
+			}
+			return;
+		}
+		if (live.rageCooldown > 0) {
+			live.rageCooldown--;
+			return;
+		}
+		if (Fate.isAscended(player) || player.isCreative()) {
+			live.rage = 0.0F;
+			return;
+		}
+		live.rage = beaten ? live.rage + 1.0F / RAGE_FILL : Math.max(0.0F, live.rage - 1.0F / RAGE_DRAIN);
+		if (live.rage < 1.0F) {
+			return;
+		}
+		live.rage = 0.0F;
+		live.rageTicks = RAGE_TICKS;
+		ZFighterPower.addHardship(player, RAGE_HARDSHIP);
+		ServerLevel level = player.level();
+		Vec3 centre = player.position();
+		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(ZFighterPower.SUPER_BURST_RADIUS),
+			e -> e != player && e.isAlive() && !e.isSpectator())) {
+			ZFighterKi.push(near, near.position().subtract(centre), 1.2, 0.3);
+		}
+		level.sendParticles(new DustParticleOptions(RAGE_COLOR, 2.0F), true, false, centre.x, centre.y + 1.0, centre.z, 50, 1.0, 1.0, 1.0, 0.2);
+		level.sendParticles(ParticleTypes.EXPLOSION, true, false, centre.x, centre.y + 0.5, centre.z, 3, 0.8, 0.3, 0.8, 0.0);
+		level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 1.2F, 1.3F);
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_rage").withStyle(ChatFormatting.RED));
+		ZFighterPower.refresh(player, live);
 	}
 
 	/** Near death, with hardship enough behind him: the power ascends and he goes Super, healed and blazing. */

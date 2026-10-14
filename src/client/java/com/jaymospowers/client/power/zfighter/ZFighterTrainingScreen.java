@@ -29,7 +29,11 @@ public class ZFighterTrainingScreen extends Screen {
 
 	private final List<Button> statButtons = new ArrayList<>();
 	private final List<Button> formButtons = new ArrayList<>();
+	private final List<Button> techniqueButtons = new ArrayList<>();
 	private Button limitButton;
+	private Button tabButton;
+	/** Which page: the stats, forms and Limit Break, or the techniques. */
+	private static boolean techniquesPage;
 
 	public ZFighterTrainingScreen() {
 		super(Component.translatable("screen.jaymospowers.zfighter.title"));
@@ -63,6 +67,14 @@ public class ZFighterTrainingScreen extends Screen {
 	protected void init() {
 		statButtons.clear();
 		formButtons.clear();
+		techniqueButtons.clear();
+		tabButton = addRenderableWidget(Button.builder(Component.empty(), b -> techniquesPage = !techniquesPage)
+			.bounds(left() + W - 86, top() + 4, 80, 12).build());
+		for (int i = 0; i < ZFighterTraining.TECHNIQUES; i++) {
+			int technique = i;
+			techniqueButtons.add(addRenderableWidget(Button.builder(Component.empty(), b -> techniqueAction(technique))
+				.bounds(left() + W - 56, techniquesY() + i * TECH_ROW - 2, 50, 12).build()));
+		}
 		for (int i = 0; i < ZFighterTraining.STATS; i++) {
 			int stat = i;
 			statButtons.add(addRenderableWidget(Button.builder(Component.literal("+"), b -> send(ZFighterNet.BUY_STAT, stat))
@@ -75,6 +87,17 @@ public class ZFighterTrainingScreen extends Screen {
 		}
 		limitButton = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter.learn"), b -> send(ZFighterNet.BUY_LIMIT, 0))
 			.bounds(left() + W - 56, limitY() - 2, 50, 12).build());
+	}
+
+	private int techniquesY() {
+		return top() + 42;
+	}
+
+	private static final int TECH_ROW = 24;
+
+	private void techniqueAction(int technique) {
+		ZFighterTraining.Data data = ZFighterTraining.of(this.minecraft.player);
+		send(data.knows(technique) ? ZFighterNet.EQUIP_TECHNIQUE : ZFighterNet.BUY_TECHNIQUE, technique);
 	}
 
 	private static void send(int action, int index) {
@@ -100,6 +123,22 @@ public class ZFighterTrainingScreen extends Screen {
 		graphics.fill(x, y, x + W, y + 2, COLOR_ACCENT);
 		graphics.centeredText(this.font, this.title, this.width / 2, y + 6, COLOR_ACCENT);
 		graphics.centeredText(this.font, Component.translatable("screen.jaymospowers.zfighter.tp", data.tp()), this.width / 2, y + 18, COLOR_TEXT);
+		tabButton.setMessage(Component.translatable(techniquesPage ? "screen.jaymospowers.zfighter.tab_training" : "screen.jaymospowers.zfighter.tab_techniques"));
+		for (Button button : statButtons) {
+			button.visible = !techniquesPage;
+		}
+		limitButton.visible = !techniquesPage;
+		for (Button button : techniqueButtons) {
+			button.visible = techniquesPage;
+		}
+		if (techniquesPage) {
+			for (Button button : formButtons) {
+				button.visible = false;
+			}
+			techniques(graphics, player, data, creative, x);
+			super.extractRenderState(graphics, mouseX, mouseY, a);
+			return;
+		}
 
 		// stats
 		int cost = ZFighterTraining.statCost(data);
@@ -166,6 +205,46 @@ public class ZFighterTrainingScreen extends Screen {
 			fy += 9;
 		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
+	}
+
+	/** The techniques page: each one, what it does, its price or the key it's on. */
+	private void techniques(GuiGraphicsExtractor graphics, LocalPlayer player, ZFighterTraining.Data data, boolean creative, int x) {
+		for (int i = 0; i < ZFighterTraining.TECHNIQUES; i++) {
+			int ry = techniquesY() + i * TECH_ROW;
+			String key = ZFighterTraining.TECHNIQUE_KEYS[i];
+			boolean known = data.knows(i);
+			boolean spirit = i == ZFighterTraining.SPIRIT_BOMB;
+			boolean equipped = !spirit && (ZFighterTraining.charged(i) ? data.charged() == i : data.quick() == i);
+			String slot = spirit ? "C" : ZFighterTraining.charged(i) ? "V" : "G";
+			graphics.text(this.font, Component.translatable("technique.jaymospowers.zfighter." + key), x + 8, ry, known ? COLOR_GOLD : COLOR_TEXT);
+			graphics.text(this.font, "[" + slot + "]", x + 130, ry, COLOR_DIM);
+			Component status;
+			if (equipped) {
+				status = Component.translatable("screen.jaymospowers.zfighter.on_key", slot);
+			} else if (known) {
+				status = Component.translatable(spirit ? "screen.jaymospowers.zfighter.spirit_known" : "screen.jaymospowers.zfighter.known");
+			} else {
+				status = Component.translatable("screen.jaymospowers.zfighter.tp_cost", ZFighterTraining.TECHNIQUE_TP[i]);
+			}
+			graphics.text(this.font, status, x + 160, ry, COLOR_DIM);
+			var lines = this.font.split(Component.translatable("technique.jaymospowers.zfighter." + key + ".desc"), W - 70);
+			if (!lines.isEmpty()) {
+				graphics.text(this.font, lines.get(0), x + 8, ry + 10, COLOR_DIM);
+			}
+			Button button = techniqueButtons.get(i);
+			if (!known) {
+				String blocker = ZFighterTraining.techniqueBlocker(player, i);
+				button.setMessage(Component.translatable("screen.jaymospowers.zfighter.learn"));
+				button.active = blocker == null || creative && "screen.jaymospowers.zfighter.need_tp".equals(blocker);
+				if (blocker != null && !button.active && button.isHovered()) {
+					graphics.setTooltipForNextFrame(Component.translatable(blocker), button.getX(), button.getY());
+				}
+			} else {
+				button.setMessage(Component.translatable("screen.jaymospowers.zfighter.equip"));
+				button.visible = !spirit && !equipped;
+				button.active = true;
+			}
+		}
 	}
 
 	/** What {@code level} levels of stat {@code index} give, as shown. */

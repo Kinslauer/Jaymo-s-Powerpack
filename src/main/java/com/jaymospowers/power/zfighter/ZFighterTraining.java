@@ -2,6 +2,7 @@ package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
+import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
@@ -68,6 +69,25 @@ public final class ZFighterTraining {
 	/** Mastery for every 5 s spent in a form (0.04%). */
 	public static final int MASTERY_PER_TIME = 4;
 
+	// ---- techniques: G (quick) and V (charged) each hold one; the Spirit Bomb is C in Super 3 ----
+	public static final int KI_BLAST = 0;
+	public static final int KI_DISC = 1;
+	public static final int HOMING_VOLLEY = 2;
+	public static final int SOLAR_FLASH = 3;
+	public static final int KI_BARRIER = 4;
+	public static final int KI_WAVE = 5;
+	public static final int KI_BOMB = 6;
+	public static final int SPIRIT_BOMB = 7;
+	public static final int TECHNIQUES = 8;
+	public static final String[] TECHNIQUE_KEYS = {"ki_blast", "ki_disc", "homing_volley", "solar_flash", "ki_barrier", "ki_wave", "ki_bomb",
+		"spirit_bomb"};
+	/** Known from the start: Ki Blast and Ki Wave. */
+	public static final int STARTER_TECHNIQUES = 1 << KI_BLAST | 1 << KI_WAVE;
+	/** TP to learn each (index by technique). */
+	public static final int[] TECHNIQUE_TP = {0, 800, 1200, 600, 1500, 0, 2000, 20000};
+	/** The Spirit Bomb also needs Super 3 a quarter mastered. */
+	public static final int SPIRIT_BOMB_MASTERY = 2500;
+
 	/** Limit Break's tiers: TP each (index by tier, 1-3). */
 	public static final int[] LIMIT_TP = {0, 1000, 3000, 8000};
 
@@ -83,15 +103,21 @@ public final class ZFighterTraining {
 	public static final float MEDITATE_KI = 2.0F;
 	/** Hungry, a fighter trains at half the rate. */
 	public static final float HUNGRY_TP = 0.5F;
+	/** Z Fighters within this many blocks get {@link #SHARE_TP} of the TP he earns (training together). */
+	public static final double SHARE_RANGE = 32.0;
+	public static final float SHARE_TP = 0.25F;
 
-	public record Data(int tp, List<Integer> stats, int form, List<Integer> mastery, int limit) {
-		public static final Data NONE = new Data(0, List.of(0, 0, 0, 0, 0), 0, List.of(0, 0, 0), 0);
+	public record Data(int tp, List<Integer> stats, int form, List<Integer> mastery, int limit, int techniques, int quick, int charged) {
+		public static final Data NONE = new Data(0, List.of(0, 0, 0, 0, 0), 0, List.of(0, 0, 0), 0, STARTER_TECHNIQUES, KI_BLAST, KI_WAVE);
 		public static final Codec<Data> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.INT.optionalFieldOf("tp", 0).forGetter(Data::tp),
 				Codec.INT.listOf().optionalFieldOf("stats", NONE.stats).forGetter(Data::stats),
 				Codec.INT.optionalFieldOf("form", 0).forGetter(Data::form),
 				Codec.INT.listOf().optionalFieldOf("mastery", NONE.mastery).forGetter(Data::mastery),
-				Codec.INT.optionalFieldOf("limit", 0).forGetter(Data::limit))
+				Codec.INT.optionalFieldOf("limit", 0).forGetter(Data::limit),
+				Codec.INT.optionalFieldOf("techniques", STARTER_TECHNIQUES).forGetter(Data::techniques),
+				Codec.INT.optionalFieldOf("quick", KI_BLAST).forGetter(Data::quick),
+				Codec.INT.optionalFieldOf("charged", KI_WAVE).forGetter(Data::charged))
 			.apply(i, Data::new));
 		public static final StreamCodec<ByteBuf, Data> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_INT, Data::tp,
@@ -99,6 +125,9 @@ public final class ZFighterTraining {
 			ByteBufCodecs.VAR_INT, Data::form,
 			ByteBufCodecs.VAR_INT.apply(ByteBufCodecs.list()), Data::mastery,
 			ByteBufCodecs.VAR_INT, Data::limit,
+			ByteBufCodecs.VAR_INT, Data::techniques,
+			ByteBufCodecs.VAR_INT, Data::quick,
+			ByteBufCodecs.VAR_INT, Data::charged,
 			Data::new);
 
 		public int stat(int index) {
@@ -119,7 +148,7 @@ public final class ZFighterTraining {
 		}
 
 		Data withTp(int value) {
-			return new Data(value, stats, form, mastery, limit);
+			return new Data(value, stats, form, mastery, limit, techniques, quick, charged);
 		}
 
 		Data withStat(int index, int level) {
@@ -128,11 +157,11 @@ public final class ZFighterTraining {
 				next.add(0);
 			}
 			next.set(index, level);
-			return new Data(tp, List.copyOf(next), form, mastery, limit);
+			return new Data(tp, List.copyOf(next), form, mastery, limit, techniques, quick, charged);
 		}
 
 		Data withForm(int value) {
-			return new Data(tp, stats, value, mastery, limit);
+			return new Data(tp, stats, value, mastery, limit, techniques, quick, charged);
 		}
 
 		Data withMastery(int form, int value) {
@@ -141,11 +170,28 @@ public final class ZFighterTraining {
 				next.add(0);
 			}
 			next.set(form - 1, value);
-			return new Data(tp, stats, this.form, List.copyOf(next), limit);
+			return new Data(tp, stats, this.form, List.copyOf(next), limit, techniques, quick, charged);
 		}
 
 		Data withLimit(int value) {
-			return new Data(tp, stats, form, mastery, value);
+			return new Data(tp, stats, form, mastery, value, techniques, quick, charged);
+		}
+
+		/** Whether technique {@code index} ({@link #KI_BLAST} etc.) has been learned. */
+		public boolean knows(int index) {
+			return (techniques & 1 << index) != 0;
+		}
+
+		Data withTechnique(int index) {
+			return new Data(tp, stats, form, mastery, limit, techniques | 1 << index, quick, charged);
+		}
+
+		Data withQuick(int index) {
+			return new Data(tp, stats, form, mastery, limit, techniques, index, charged);
+		}
+
+		Data withCharged(int index) {
+			return new Data(tp, stats, form, mastery, limit, techniques, quick, index);
 		}
 	}
 
@@ -197,10 +243,22 @@ public final class ZFighterTraining {
 		if (amount <= 0.0F || player.isCreative()) {
 			return;
 		}
-		ZFighterPower.Live live = ZFighterPower.live(player);
 		if (player.getFoodData().getFoodLevel() <= ZFighterPower.HUNGRY_FOOD) {
 			amount *= HUNGRY_TP;
 		}
+		amount *= rate(player);
+		add(player, amount);
+		// training together: friends who are Z Fighters nearby learn from watching
+		for (ServerPlayer friend : player.level().players()) {
+			if (friend != player && friend.isAlive() && !friend.isCreative() && friend.distanceToSqr(player) <= SHARE_RANGE * SHARE_RANGE
+				&& Powers.has(friend, ZFighterPower.INSTANCE)) {
+				add(friend, amount * SHARE_TP);
+			}
+		}
+	}
+
+	private static void add(ServerPlayer player, float amount) {
+		ZFighterPower.Live live = ZFighterPower.live(player);
 		live.tpFraction += amount;
 		int whole = (int)live.tpFraction;
 		if (whole > 0) {
@@ -210,6 +268,11 @@ public final class ZFighterTraining {
 		}
 	}
 
+	/** How fast he trains right now: Training Weights worn (and, later, heavy gravity). */
+	static float rate(ServerPlayer player) {
+		return ZFighterItems.weightRate(player);
+	}
+
 	/** Mastery for the form he's in. */
 	static void master(ServerPlayer player, int form, int amount) {
 		if (form < 1 || form > FORMS || amount <= 0) {
@@ -217,7 +280,7 @@ public final class ZFighterTraining {
 		}
 		Data data = of(player);
 		int before = data.mastery(form);
-		int after = Math.min(MASTERY_MAX, before + amount);
+		int after = Math.min(MASTERY_MAX, before + Math.round(amount * rate(player)));
 		if (after == before) {
 			return;
 		}
@@ -317,6 +380,49 @@ public final class ZFighterTraining {
 		}
 		player.setAttached(DATA, data.withLimit(tier).withTp(player.isCreative() ? data.tp() : data.tp() - LIMIT_TP[tier]));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6F, 0.8F);
+	}
+
+	/** Whether technique {@code index} can be learned now; if not, why (a lang key), or null when it can. */
+	public static String techniqueBlocker(Player player, int index) {
+		Data data = of(player);
+		if (index < 0 || index >= TECHNIQUES || data.knows(index)) {
+			return "screen.jaymospowers.zfighter.owned";
+		}
+		if (index == SPIRIT_BOMB && (formsOpen(player) < FORMS || data.mastery(FORMS) < SPIRIT_BOMB_MASTERY)) {
+			return "screen.jaymospowers.zfighter.need_super3";
+		}
+		if (data.tp() < TECHNIQUE_TP[index]) {
+			return "screen.jaymospowers.zfighter.need_tp";
+		}
+		return null;
+	}
+
+	static void buyTechnique(ServerPlayer player, int index) {
+		String blocker = techniqueBlocker(player, index);
+		if (blocker != null && !(player.isCreative() && "screen.jaymospowers.zfighter.need_tp".equals(blocker))) {
+			return;
+		}
+		Data data = of(player);
+		player.setAttached(DATA, data.withTechnique(index).withTp(player.isCreative() ? data.tp() : data.tp() - TECHNIQUE_TP[index]));
+		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_technique_learned",
+			Component.translatable("technique.jaymospowers.zfighter." + TECHNIQUE_KEYS[index])).withStyle(ChatFormatting.GOLD));
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 0.8F,
+			1.4F);
+	}
+
+	/** Puts a learned technique on its key: G for the quick ones, V for the charged ones. */
+	static void equipTechnique(ServerPlayer player, int index) {
+		Data data = of(player);
+		if (index < 0 || index >= SPIRIT_BOMB || !data.knows(index)) {
+			return;
+		}
+		player.setAttached(DATA, charged(index) ? data.withCharged(index) : data.withQuick(index));
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS, 0.5F, 1.2F);
+	}
+
+	/** Whether technique {@code index} goes on V (held and let go) rather than G. */
+	public static boolean charged(int index) {
+		return index == KI_WAVE || index == KI_BOMB;
 	}
 
 	// ---------------------------------------------------------------- what the stats and mastery give

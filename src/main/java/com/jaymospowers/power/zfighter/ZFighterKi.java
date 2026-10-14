@@ -29,6 +29,8 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -59,6 +61,36 @@ final class ZFighterKi {
 	static final int BLAST_LIFE = 40;
 	static final float BLAST_EXHAUSTION = 0.5F;
 
+	// ---- Ki Disc: a spinning blade of ki that cuts through everything in its path ----
+	static final float DISC_KI = 12.0F;
+	static final int DISC_COOLDOWN = 20;
+	static final float DISC_DAMAGE = 7.0F;
+	static final double DISC_SPEED = 1.3;
+	static final int DISC_LIFE = 30;
+
+	// ---- Homing Volley: small bolts that seek out foes ----
+	static final float VOLLEY_KI = 20.0F;
+	static final int VOLLEY_COOLDOWN = 40;
+	static final int VOLLEY_BOLTS = 5;
+	static final float VOLLEY_DAMAGE = 3.0F;
+	static final double VOLLEY_SPEED = 0.9;
+	static final int VOLLEY_LIFE = 60;
+	static final double VOLLEY_SEEK = 16.0;
+	/** How hard a seeking bolt turns each tick (0-1). */
+	static final double VOLLEY_TURN = 0.25;
+
+	// ---- Ki Bomb (V, held like the wave): a big slow ball that bursts ----
+	static final float BOMB_MIN_KI = 30.0F;
+	static final float BOMB_MAX_KI = 70.0F;
+	static final float BOMB_DAMAGE_MIN = 10.0F;
+	static final float BOMB_DAMAGE_MAX = 28.0F;
+	static final double BOMB_SIZE_MIN = 0.6;
+	static final double BOMB_SIZE_MAX = 1.6;
+	static final float BOMB_BLAST_MIN = 1.5F;
+	static final float BOMB_BLAST_MAX = 3.5F;
+	static final double BOMB_SPEED = 0.6;
+	static final int BOMB_LIFE = 80;
+
 	// ---- Ki Wave ----
 	static final float WAVE_MIN_KI = 25.0F;
 	static final float WAVE_MAX_KI = 60.0F;
@@ -85,24 +117,56 @@ final class ZFighterKi {
 	private static final int BLAST_COLOR = 0xFFC85A;
 	private static final int WAVE_COLOR = 0x8FD3FF;
 
+	/** What a bolt is: drawn and spent differently. */
+	static final int BOLT = 0;
+	static final int DISC = 1;
+	static final int HOMING = 2;
+	static final int BOMB = 3;
+	static final int SPIRIT = 4;
+
 	private static final class Bolt {
 		final ServerLevel level;
 		final UUID owner;
 		Vec3 pos;
-		final Vec3 velocity;
+		Vec3 velocity;
 		final float damage;
 		final int color;
+		final int kind;
+		final int life;
+		/** How big it is (blocks): its reach for a hit and how it's drawn. */
+		double size;
+		/** BOMB and SPIRIT: the blast's power and reach where it lands, and whether it may tear the ground. */
+		float burst;
+		double radius;
+		boolean griefing;
+		/** DISC: who it has already cut (it passes through). */
+		final Set<Integer> struck = new HashSet<>();
 		int age;
 
-		Bolt(ServerLevel level, UUID owner, Vec3 pos, Vec3 velocity, float damage, int color) {
+		Bolt(ServerLevel level, UUID owner, Vec3 pos, Vec3 velocity, float damage, int color, int kind, int life) {
 			this.level = level;
 			this.owner = owner;
 			this.pos = pos;
 			this.velocity = velocity;
 			this.damage = damage;
 			this.color = color;
+			this.kind = kind;
+			this.life = life;
 		}
 	}
+
+	/** Explosions of ours only shake the ground: the hurting is done by hand, so the fighter and bystanders are spared. */
+	private static final ExplosionDamageCalculator GROUND_ONLY = new ExplosionDamageCalculator() {
+		@Override
+		public boolean shouldDamageEntity(Explosion explosion, Entity entity) {
+			return false;
+		}
+
+		@Override
+		public float getKnockbackMultiplier(Entity entity) {
+			return 0.0F;
+		}
+	};
 
 	private record Beam(ServerLevel level, Vec3 from, Vec3 to, double radius, int color, int[] age) {
 	}
@@ -139,7 +203,7 @@ final class ZFighterKi {
 		right = right.lengthSqr() < 1.0E-6 ? Vec3.ZERO : right.normalize();
 		Vec3 from = player.getEyePosition().add(look.scale(0.8)).add(right.scale(0.3)).add(0.0, -0.25, 0.0);
 		float damage = BLAST_DAMAGE * ZFighterPower.kiPower(player, live);
-		BOLTS.add(new Bolt(level, player.getUUID(), from, look.scale(BLAST_SPEED), damage, ZFighterPower.FORM_COLOR[live.form]));
+		BOLTS.add(new Bolt(level, player.getUUID(), from, look.scale(BLAST_SPEED), damage, ZFighterPower.FORM_COLOR[live.form], BOLT, BLAST_LIFE));
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		if (!player.isCreative()) {
 			player.causeFoodExhaustion(BLAST_EXHAUSTION);
@@ -169,32 +233,155 @@ final class ZFighterKi {
 	/** One tick of a bolt's flight. False when it's spent. */
 	private static boolean flyBolt(ServerPlayer owner, Bolt bolt) {
 		ServerLevel level = bolt.level;
+		if (bolt.kind == HOMING) {
+			seek(owner, bolt);
+		}
 		Vec3 from = bolt.pos;
 		Vec3 to = from.add(bolt.velocity);
 		BlockHitResult block = level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, owner));
 		Vec3 end = block.getType() == HitResult.Type.MISS ? to : block.getLocation();
-		EntityHitResult hit = ProjectileUtil.getEntityHitResult(owner, from, end, new AABB(from, end).inflate(1.0),
-			e -> e instanceof LivingEntity living && living.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && e != owner,
+		DustParticleOptions dust = new DustParticleOptions(bolt.color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : bolt.color,
+			bolt.kind == BOMB || bolt.kind == SPIRIT ? 3.0F : 1.8F);
+		double reach = 1.0 + bolt.size;
+		EntityHitResult hit = ProjectileUtil.getEntityHitResult(owner, from, end, new AABB(from, end).inflate(reach),
+			e -> e instanceof LivingEntity living && living.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && e != owner
+				&& !bolt.struck.contains(e.getId()) && (bolt.kind != SPIRIT || ZFighterTechniques.foe(owner, living)),
 			from.distanceToSqr(end));
-		DustParticleOptions dust = new DustParticleOptions(bolt.color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : bolt.color, 1.8F);
+		if (hit == null && bolt.size > 0.0) {
+			// a big ball catches what it brushes past, not just what's dead ahead
+			for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, new AABB(from, end).inflate(bolt.size),
+				e -> e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && e != owner && (bolt.kind != SPIRIT || ZFighterTechniques.foe(owner, e)))) {
+				if (distanceToSegment(near.getBoundingBox().getCenter(), from, end) <= bolt.size + near.getBbWidth() * 0.5) {
+					hit = new EntityHitResult(near, near.getBoundingBox().getCenter());
+					break;
+				}
+			}
+		}
 		if (hit != null && hit.getEntity() instanceof LivingEntity target) {
+			if (bolt.kind == BOMB || bolt.kind == SPIRIT) {
+				burst(owner, bolt, hit.getLocation());
+				return false;
+			}
 			target.setInvulnerableTime(0);
 			target.hurtServer(level, source(owner), bolt.damage);
 			push(target, bolt.velocity, 0.6, 0.2);
 			pop(level, hit.getLocation(), dust);
-			return false;
+			if (bolt.kind != DISC) {
+				return false;
+			}
+			bolt.struck.add(target.getId());
 		}
 		if (block.getType() != HitResult.Type.MISS) {
-			pop(level, block.getLocation(), dust);
+			if (bolt.kind == BOMB || bolt.kind == SPIRIT) {
+				burst(owner, bolt, block.getLocation());
+			} else {
+				pop(level, block.getLocation(), dust);
+			}
 			return false;
 		}
-		for (int i = 0; i < 3; i++) {
-			Vec3 at = from.add(bolt.velocity.scale(i / 3.0));
-			level.sendParticles(dust, true, false, at.x, at.y, at.z, 1, 0.03, 0.03, 0.03, 0.0);
-		}
-		level.sendParticles(ParticleTypes.END_ROD, true, false, to.x, to.y, to.z, 1, 0.0, 0.0, 0.0, 0.0);
+		draw(level, bolt, from, dust);
 		bolt.pos = to;
-		return ++bolt.age < BLAST_LIFE;
+		if (++bolt.age >= bolt.life) {
+			if (bolt.kind == BOMB || bolt.kind == SPIRIT) {
+				burst(owner, bolt, to);
+			}
+			return false;
+		}
+		return true;
+	}
+
+	private static void draw(ServerLevel level, Bolt bolt, Vec3 from, DustParticleOptions dust) {
+		Vec3 to = from.add(bolt.velocity);
+		switch (bolt.kind) {
+			case DISC -> {
+				// a flat spinning ring, edge-on to the way it flies
+				double spin = bolt.age * 0.9;
+				for (int i = 0; i < 8; i++) {
+					double a = spin + i * Math.PI / 4.0;
+					level.sendParticles(dust, true, false, to.x + Math.cos(a) * 0.55, to.y, to.z + Math.sin(a) * 0.55, 1, 0.0, 0.0, 0.0, 0.0);
+				}
+				level.sendParticles(ParticleTypes.END_ROD, true, false, to.x, to.y, to.z, 1, 0.0, 0.0, 0.0, 0.0);
+			}
+			case BOMB, SPIRIT -> {
+				RandomSource random = level.getRandom();
+				int count = (int)Math.min(60, 6 + bolt.size * bolt.size * 6);
+				for (int i = 0; i < count; i++) {
+					Vec3 dir = new Vec3(random.nextGaussian(), random.nextGaussian(), random.nextGaussian()).normalize();
+					Vec3 at = to.add(dir.scale(bolt.size * (0.6 + random.nextDouble() * 0.4)));
+					level.sendParticles(dust, true, false, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+				}
+				level.sendParticles(new DustParticleOptions(0xFFFFFF, 3.0F), true, false, to.x, to.y, to.z, 2, bolt.size * 0.2, bolt.size * 0.2,
+					bolt.size * 0.2, 0.0);
+				if (bolt.age % 6 == 0) {
+					level.playSound(null, to.x, to.y, to.z, SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 1.0F + (float)bolt.size * 0.3F, 0.6F);
+				}
+			}
+			default -> {
+				for (int i = 0; i < 3; i++) {
+					Vec3 at = from.add(bolt.velocity.scale(i / 3.0));
+					level.sendParticles(dust, true, false, at.x, at.y, at.z, 1, 0.03, 0.03, 0.03, 0.0);
+				}
+				level.sendParticles(ParticleTypes.END_ROD, true, false, to.x, to.y, to.z, 1, 0.0, 0.0, 0.0, 0.0);
+			}
+		}
+	}
+
+	/** A seeking bolt turns towards the nearest foe ahead of it. */
+	private static void seek(ServerPlayer owner, Bolt bolt) {
+		double speed = bolt.velocity.length();
+		if (speed < 1.0E-4) {
+			return;
+		}
+		Vec3 heading = bolt.velocity.scale(1.0 / speed);
+		LivingEntity best = null;
+		double bestDistance = Double.MAX_VALUE;
+		for (LivingEntity near : bolt.level.getEntitiesOfClass(LivingEntity.class, new AABB(bolt.pos, bolt.pos).inflate(VOLLEY_SEEK),
+			e -> e.isAlive() && !e.isSpectator() && e != owner && !(e instanceof ArmorStand) && ZFighterTechniques.foe(owner, e))) {
+			Vec3 toward = near.getBoundingBox().getCenter().subtract(bolt.pos);
+			double distance = toward.lengthSqr();
+			if (distance < bestDistance && toward.normalize().dot(heading) > 0.2) {
+				best = near;
+				bestDistance = distance;
+			}
+		}
+		if (best != null) {
+			Vec3 toward = best.getBoundingBox().getCenter().subtract(bolt.pos).normalize();
+			bolt.velocity = heading.lerp(toward, VOLLEY_TURN).normalize().scale(speed);
+		}
+	}
+
+	/** A Ki Bomb or the Spirit Bomb lands: everything near is hurt (the Spirit Bomb hurts only foes and shoves the rest aside). */
+	private static void burst(ServerPlayer owner, Bolt bolt, Vec3 at) {
+		ServerLevel level = bolt.level;
+		DamageSource source = source(owner);
+		boolean spirit = bolt.kind == SPIRIT;
+		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(bolt.radius),
+			e -> e != owner && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand))) {
+			Vec3 away = near.getBoundingBox().getCenter().subtract(at);
+			double distance = away.length();
+			if (distance > bolt.radius) {
+				continue;
+			}
+			double falloff = 1.0 - 0.5 * distance / bolt.radius;
+			if (spirit && !ZFighterTechniques.foe(owner, near)) {
+				push(near, away, 0.8 * falloff, 0.3);
+				continue;
+			}
+			near.setInvulnerableTime(0);
+			near.hurtServer(level, source, (float)(bolt.damage * falloff));
+			push(near, away, (spirit ? 2.0 : 1.2) * falloff, 0.5);
+		}
+		level.explode(owner, source, GROUND_ONLY, at.x, at.y, at.z, bolt.burst, false,
+			bolt.griefing ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
+		DustParticleOptions dust = new DustParticleOptions(bolt.color, 3.0F);
+		level.sendParticles(dust, true, false, at.x, at.y, at.z, (int)(30 + bolt.radius * 10), bolt.radius * 0.4, bolt.radius * 0.4,
+			bolt.radius * 0.4, 0.3);
+		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, true, false, at.x, at.y, at.z, spirit ? 3 : 1, bolt.radius * 0.2, 0.2,
+			bolt.radius * 0.2, 0.0);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, spirit ? 4.0F : 1.5F, spirit ? 0.5F : 0.9F);
+		if (spirit) {
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 3.0F, 0.6F);
+		}
 	}
 
 	private static void pop(ServerLevel level, Vec3 at, DustParticleOptions dust) {
@@ -204,11 +391,71 @@ final class ZFighterKi {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.35F, 1.9F);
 	}
 
+	// ---------------------------------------------------------------- Ki Disc, Homing Volley
+
+	/** Where his palm is: the eye, a little ahead, right and down. */
+	private static Vec3 palm(ServerPlayer player, Vec3 look) {
+		Vec3 right = look.cross(new Vec3(0.0, 1.0, 0.0));
+		right = right.lengthSqr() < 1.0E-6 ? Vec3.ZERO : right.normalize();
+		return player.getEyePosition().add(look.scale(0.8)).add(right.scale(0.3)).add(0.0, -0.25, 0.0);
+	}
+
+	static boolean disc(ServerPlayer player, ZFighterPower.Live live) {
+		if (!ZFighterPower.spend(player, live, DISC_KI)) {
+			return false;
+		}
+		ServerLevel level = player.level();
+		Vec3 look = player.getViewVector(1.0F);
+		BOLTS.add(new Bolt(level, player.getUUID(), palm(player, look), look.scale(DISC_SPEED), DISC_DAMAGE * ZFighterPower.kiPower(player, live),
+			ZFighterPower.FORM_COLOR[live.form], DISC, DISC_LIFE));
+		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+		exhaust(player, BLAST_EXHAUSTION);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8F, 1.6F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.6F, 1.2F);
+		return true;
+	}
+
+	static boolean volley(ServerPlayer player, ZFighterPower.Live live) {
+		if (!ZFighterPower.spend(player, live, VOLLEY_KI)) {
+			return false;
+		}
+		ServerLevel level = player.level();
+		Vec3 look = player.getViewVector(1.0F);
+		RandomSource random = level.getRandom();
+		float damage = VOLLEY_DAMAGE * ZFighterPower.kiPower(player, live);
+		for (int i = 0; i < VOLLEY_BOLTS; i++) {
+			Vec3 spread = look.add((random.nextDouble() - 0.5) * 0.7, random.nextDouble() * 0.4, (random.nextDouble() - 0.5) * 0.7).normalize();
+			BOLTS.add(new Bolt(level, player.getUUID(), palm(player, look), spread.scale(VOLLEY_SPEED), damage, ZFighterPower.FORM_COLOR[live.form],
+				HOMING, VOLLEY_LIFE));
+		}
+		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+		exhaust(player, BLAST_EXHAUSTION * 2.0F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.7F, 1.4F);
+		return true;
+	}
+
+	/** The Spirit Bomb, thrown from where it gathered. */
+	static void throwSpirit(ServerPlayer player, Vec3 from, Vec3 velocity, float damage, double size, double radius, float burst) {
+		Bolt bolt = new Bolt(player.level(), player.getUUID(), from, velocity, damage, ZFighterTechniques.SPIRIT_COLOR, SPIRIT, 200);
+		bolt.size = size;
+		bolt.radius = radius;
+		bolt.burst = burst;
+		bolt.griefing = true;
+		BOLTS.add(bolt);
+	}
+
+	private static void exhaust(ServerPlayer player, float amount) {
+		if (!player.isCreative()) {
+			player.causeFoodExhaustion(amount);
+		}
+	}
+
 	// ---------------------------------------------------------------- Ki Wave
 
 	static void startWave(ServerPlayer player, ZFighterPower.Live live) {
-		if (live.ki < WAVE_MIN_KI && !player.isCreative()) {
-			ZFighterPower.spend(player, live, WAVE_MIN_KI);
+		float min = ZFighterTraining.of(player).charged() == ZFighterTraining.KI_BOMB ? BOMB_MIN_KI : WAVE_MIN_KI;
+		if (live.ki < min && !player.isCreative() && !live.raging()) {
+			ZFighterPower.spend(player, live, min);
 			return;
 		}
 		live.waveFrom = player.level().getGameTime();
@@ -218,8 +465,10 @@ final class ZFighterKi {
 	/** The charge (0-1) of a wave gathered since {@code from}, held back to what his ki can pay for. */
 	private static float charge(ServerPlayer player, ZFighterPower.Live live, long now) {
 		float charge = Mth.clamp((now - live.waveFrom) / (float)WAVE_FULL, 0.0F, 1.0F);
-		if (!player.isCreative()) {
-			float affordable = (live.ki - WAVE_MIN_KI) / (WAVE_MAX_KI - WAVE_MIN_KI);
+		if (!player.isCreative() && !live.raging()) {
+			boolean bomb = ZFighterTraining.of(player).charged() == ZFighterTraining.KI_BOMB;
+			float min = bomb ? BOMB_MIN_KI : WAVE_MIN_KI;
+			float affordable = (live.ki - min) / ((bomb ? BOMB_MAX_KI : WAVE_MAX_KI) - min);
 			charge = Math.min(charge, Mth.clamp(affordable, 0.0F, 1.0F));
 		}
 		return charge;
@@ -262,12 +511,35 @@ final class ZFighterKi {
 		ServerLevel level = player.level();
 		float charge = charge(player, live, level.getGameTime());
 		live.waveFrom = -1L;
-		float cost = Mth.lerp(charge, WAVE_MIN_KI, WAVE_MAX_KI);
+		boolean bomb = ZFighterTraining.of(player).charged() == ZFighterTraining.KI_BOMB;
+		float cost = bomb ? Mth.lerp(charge, BOMB_MIN_KI, BOMB_MAX_KI) : Mth.lerp(charge, WAVE_MIN_KI, WAVE_MAX_KI);
 		if (!ZFighterPower.spend(player, live, cost)) {
 			return false;
 		}
-		fireWave(player, live, charge);
+		if (bomb) {
+			fireBomb(player, live, charge);
+		} else {
+			fireWave(player, live, charge);
+		}
 		return true;
+	}
+
+	private static void fireBomb(ServerPlayer player, ZFighterPower.Live live, float charge) {
+		ServerLevel level = player.level();
+		Vec3 look = player.getViewVector(1.0F);
+		double size = Mth.lerp(charge, BOMB_SIZE_MIN, BOMB_SIZE_MAX);
+		Vec3 from = player.getEyePosition().add(look.scale(1.0 + size)).add(0.0, -0.2, 0.0);
+		Bolt bolt = new Bolt(level, player.getUUID(), from, look.scale(BOMB_SPEED),
+			Mth.lerp(charge, BOMB_DAMAGE_MIN, BOMB_DAMAGE_MAX) * ZFighterPower.kiPower(player, live),
+			live.superOn() ? ZFighterPower.FORM_COLOR[live.form] : WAVE_COLOR, BOMB, BOMB_LIFE);
+		bolt.size = size;
+		bolt.radius = 2.0 + size * 1.5;
+		bolt.burst = Mth.lerp(charge, BOMB_BLAST_MIN, BOMB_BLAST_MAX) * (live.superOn() ? 1.3F : 1.0F);
+		bolt.griefing = live.superOn() && charge >= 1.0F;
+		BOLTS.add(bolt);
+		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1.0F, 0.5F);
+		exhaust(player, WAVE_EXHAUSTION * (1.0F + charge));
 	}
 
 	private static void fireWave(ServerPlayer player, ZFighterPower.Live live, float charge) {

@@ -23,6 +23,7 @@ import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -48,7 +49,8 @@ import net.minecraft.world.phys.Vec3;
  * comes in fast while charging, from landing punches, and from eating. The techniques spend it.</li>
  * <li>R (hold), Charge Ki: stand your ground, the aura flares, ki pours in (hungry work).</li>
  * <li>G, Ki Blast; V (hold), Ki Wave; B, Flash Step ({@link ZFighterKi}).</li>
- * <li>Z, Flight: ki-borne, creative-style flight that drains ki.</li>
+ * <li>Hold Z and scroll, Flight: Wind-style flight (hover, Sprint to cruise) borne on ki alone; scrolling up takes off and
+ * steps through five poses of the arms, down steps back and lands. Charging works in the air.</li>
  * <li>C (ascended): up a form; sneak+C: down one. Super is reached through hardship ({@link ZFighterBattle}); Super 2
  * and 3 are bought with training ({@link ZFighterTraining}). Each hits harder and burns more ki and food; mastery
  * lifts its power and eases its drain.</li>
@@ -83,7 +85,6 @@ public final class ZFighterPower implements Power {
 	// ---- the appetite (exhaustion per tick; 4 exhaustion is one hunger point) ----
 	static final float BASE_EXHAUSTION = 0.01F;
 	static final float CHARGE_EXHAUSTION = 0.05F;
-	static final float FLIGHT_EXHAUSTION = 0.01F;
 	/** Super burns this many times the base appetite. */
 	static final float SUPER_HUNGER = 2.5F;
 	/** At or below this food level he's hungry: no ki comes back by itself and his fists weaken. */
@@ -99,18 +100,22 @@ public final class ZFighterPower implements Power {
 	// ---- movement ----
 	/** Charging (R) or gathering a Ki Wave (V) slows you this much. */
 	static final double CHARGE_SLOW = 0.6;
-	/** Ki per tick while flying (2 a second); the flying speed is per form ({@link #FORM_FLY}, creative's is 0.05). */
-	static final float FLY_KI = 0.1F;
+	/** Ki per tick to stay up (1 a second), plus this much per block a tick he's moving (a fast cruise costs more). */
+	static final float FLY_KI = 0.05F;
+	static final float FLY_KI_PER_SPEED = 0.12F;
+	/** The flight poses (hold Z and scroll): 1 rising, arms at the sides ... 5 diving, hands together overhead. */
+	public static final int FLIGHT_POSES = 5;
 	private static final float NORMAL_FLY_SPEED = 0.05F;
 	/** Mastery needed for Z (Flight): abilities unlocked. */
 	static final int FLIGHT_UNLOCK = 2;
 
 	// ---- forms (index: 0 base, 1 Super, 2 Super 2, 3 Super 3) ----
-	/** Fists (added to the damage multiplier), ki techniques (times), speed (added), flying speed. */
+	/** Fists (added to the damage multiplier), ki techniques (times), speed (added). */
 	static final double[] FORM_FIST = {0.0, 0.6, 1.0, 1.6};
 	static final float[] FORM_KI = {1.0F, 1.5F, 1.8F, 2.2F};
 	static final double[] FORM_SPEED = {0.0, 0.25, 0.35, 0.45};
-	static final float[] FORM_FLY = {0.08F, 0.12F, 0.14F, 0.16F};
+	/** Top cruise speed in flight (blocks a tick; Wind's is 2.5 in a plain rainy sky). */
+	public static final double[] FORM_CRUISE = {1.2, 1.6, 1.9, 2.2};
 	/** Ki per tick to hold the form (1.5, 3, 6 a second), and times the base appetite. */
 	static final float[] FORM_DRAIN = {0.0F, 0.075F, 0.15F, 0.3F};
 	static final float[] FORM_HUNGER = {1.0F, 2.5F, 3.5F, 5.0F};
@@ -141,6 +146,7 @@ public final class ZFighterPower implements Power {
 	private static final Identifier LIMIT_FIST_ID = JaymosPowers.id("zfighter_limit_fists");
 	private static final Identifier LIMIT_SPEED_ID = JaymosPowers.id("zfighter_limit_speed");
 	private static final Identifier VITALITY_ID = JaymosPowers.id("zfighter_vitality");
+	private static final Identifier RAGE_FIST_ID = JaymosPowers.id("zfighter_rage_fists");
 
 	/** The owner's HUD state (ki, cooldowns, what he's doing). Not saved: a relog clears it. */
 	public static final AttachmentType<ZFighterState> STATE = AttachmentRegistry.create(JaymosPowers.id("zfighter_state"),
@@ -154,6 +160,9 @@ public final class ZFighterPower implements Power {
 	 */
 	public static final AttachmentType<List<String>> GRUDGES = AttachmentRegistry.create(JaymosPowers.id("zfighter_grudges"),
 		builder -> builder.persistent(Codec.STRING.listOf()).copyOnDeath());
+	/** How he's flying, for everyone's client: 0 (or absent) not, 1-{@link #FLIGHT_POSES} the pose his arms hold. */
+	public static final AttachmentType<Integer> FLIGHT = AttachmentRegistry.create(JaymosPowers.id("zfighter_flight"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 	/** Hardship lived through (the road to Super). Saved, kept through death. */
 	public static final AttachmentType<Integer> HARDSHIP = AttachmentRegistry.create(JaymosPowers.id("zfighter_hardship"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath());
@@ -164,6 +173,7 @@ public final class ZFighterPower implements Power {
 		boolean charging;
 		long waveFrom = -1L;
 		boolean flying;
+		Vec3 lastFlyPos;
 		/** The form he's in (0 base, 1-3) and the Limit Break tier on top (0 off). */
 		int form;
 		int limit;
@@ -186,6 +196,21 @@ public final class ZFighterPower implements Power {
 		long stepUntil;
 		long lastGrowl = -100000L;
 		long lastRefusal = -100L;
+		/** Who hurt him lately (for the Spirit Bomb and Homing Volley: they're foes). */
+		final Map<UUID, Long> attackers = new HashMap<>();
+		/** Ticks left on the Ki Barrier. */
+		int barrierTicks;
+		/** Since when the Spirit Bomb has been gathering (-1: it isn't), and what it holds. */
+		long spiritFrom = -1L;
+		float spiritEnergy;
+		/** Rage (before he has ever gone Super): the meter (0-1), ticks left in it, ticks before it can fill again. */
+		float rage;
+		int rageTicks;
+		int rageCooldown;
+
+		boolean raging() {
+			return rageTicks > 0;
+		}
 	}
 
 	private static final Map<UUID, Live> LIVE = new HashMap<>();
@@ -197,6 +222,7 @@ public final class ZFighterPower implements Power {
 	public static void init() {
 		Powers.register(INSTANCE);
 		ZFighterKi.init();
+		ZFighterItems.init();
 		ZFighterNet.register();
 		ZFighterBattle.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ZFighterDebugCommand.register(dispatcher));
@@ -260,7 +286,7 @@ public final class ZFighterPower implements Power {
 			live.flying = false;
 		}
 		landFlight(player);
-		for (Identifier id : new Identifier[] {FIST_ID, SUPER_FIST_ID, HUNGRY_ID, LIMIT_FIST_ID}) {
+		for (Identifier id : new Identifier[] {FIST_ID, SUPER_FIST_ID, HUNGRY_ID, LIMIT_FIST_ID, RAGE_FIST_ID}) {
 			remove(player, Attributes.ATTACK_DAMAGE, id);
 		}
 		remove(player, Attributes.MOVEMENT_SPEED, SLOW_ID);
@@ -268,6 +294,7 @@ public final class ZFighterPower implements Power {
 		remove(player, Attributes.MOVEMENT_SPEED, LIMIT_SPEED_ID);
 		remove(player, Attributes.MAX_HEALTH, VITALITY_ID);
 		player.removeAttached(STATE);
+		player.removeAttached(FLIGHT);
 		player.removeAttached(DEFEATS);
 		player.removeAttached(GRUDGES);
 		player.removeAttached(ZFighterTraining.DATA);
@@ -282,7 +309,7 @@ public final class ZFighterPower implements Power {
 	@Override
 	public boolean skipsMovementCheck(ServerPlayer player) {
 		Live live = live(player);
-		return live.flying && player.getAbilities().flying || live.stepUntil > player.level().getGameTime();
+		return live.flying || live.stepUntil > player.level().getGameTime();
 	}
 
 	@Override
@@ -329,29 +356,34 @@ public final class ZFighterPower implements Power {
 						0.7F + fill * 0.9F);
 				}
 			}
-		} else if (!live.superOn() && !hungry && live.waveFrom < 0) {
+		} else if (!live.superOn() && !hungry && live.waveFrom < 0 && live.spiritFrom < 0) {
 			live.ki += KI_REGEN;
 		}
 
 		ZFighterKi.tickWave(player, live);
+		ZFighterTechniques.tickBarrier(player, live);
+		ZFighterTechniques.tickSpirit(player, live);
 
-		// flight: ki-borne, and it burns ki only while actually in the air
+		// flight: Wind-style (the client steers it), borne on ki alone
 		if (live.flying) {
-			if (player.getAbilities().flying) {
-				live.ki -= FLY_KI;
-				if (!creative) {
-					player.causeFoodExhaustion(FLIGHT_EXHAUSTION);
-				}
-				if (now % 4 == 0) {
-					level.sendParticles(dust(live), true, false, player.getX(), player.getY() + 0.2, player.getZ(), 2, 0.2, 0.1, 0.2, 0.0);
-				}
+			Vec3 at = player.position();
+			double moved = live.lastFlyPos == null ? 0.0 : Math.min(3.0, at.distanceTo(live.lastFlyPos));
+			live.lastFlyPos = at;
+			if (!creative) {
+				live.ki -= FLY_KI + FLY_KI_PER_SPEED * (float)moved;
+			}
+			player.resetFallDistance();
+			if (now % 4 == 0) {
+				level.sendParticles(dust(live), true, false, player.getX(), player.getY() + 0.2, player.getZ(), 2, 0.2, 0.1, 0.2, 0.0);
+			}
+			if (live.ki <= 0.0F || !com.jaymospowers.power.wind.WindFlight.canFly(player)) {
+				endFlight(player, live);
 				if (live.ki <= 0.0F) {
-					endFlight(player, live);
 					player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_no_ki").withStyle(ChatFormatting.GRAY));
 				}
 			}
 		} else if (player.getAbilities().mayfly && !creative && !player.isSpectator()) {
-			// left over from a flight cut short (a death, a relog): nobody else gives a Z Fighter wings
+			// left over from the old creative-style flight: nobody else gives a Z Fighter wings
 			landFlight(player);
 		}
 
@@ -410,8 +442,8 @@ public final class ZFighterPower implements Power {
 				refresh(player, live);
 			}
 			case ABILITY_2 -> {
-				if (down && ready(player, ZFighterState.BLAST) && ZFighterKi.blast(player, live)) {
-					cooldown(player, ZFighterState.BLAST, ZFighterKi.BLAST_COOLDOWN);
+				if (down && ready(player, ZFighterState.BLAST)) {
+					quick(player, live);
 				}
 			}
 			case ABILITY_3 -> {
@@ -433,40 +465,96 @@ public final class ZFighterPower implements Power {
 		sync(player, live, maxKi(player));
 	}
 
-	/** Z: take off on your ki, or come down. */
+	/** G: whichever quick technique is on it. */
+	private static void quick(ServerPlayer player, Live live) {
+		switch (ZFighterTraining.of(player).quick()) {
+			case ZFighterTraining.KI_DISC -> {
+				if (ZFighterKi.disc(player, live)) {
+					cooldown(player, ZFighterState.BLAST, ZFighterKi.DISC_COOLDOWN);
+				}
+			}
+			case ZFighterTraining.HOMING_VOLLEY -> {
+				if (ZFighterKi.volley(player, live)) {
+					cooldown(player, ZFighterState.BLAST, ZFighterKi.VOLLEY_COOLDOWN);
+				}
+			}
+			case ZFighterTraining.SOLAR_FLASH -> {
+				if (ZFighterTechniques.flash(player, live)) {
+					cooldown(player, ZFighterState.BLAST, ZFighterTechniques.FLASH_COOLDOWN);
+				}
+			}
+			case ZFighterTraining.KI_BARRIER -> {
+				if (ZFighterTechniques.barrier(player, live)) {
+					cooldown(player, ZFighterState.BLAST, ZFighterTechniques.BARRIER_COOLDOWN);
+				}
+			}
+			default -> {
+				if (ZFighterKi.blast(player, live)) {
+					cooldown(player, ZFighterState.BLAST, ZFighterKi.BLAST_COOLDOWN);
+				}
+			}
+		}
+	}
+
+	/** Z alone does nothing on the server: flight is hold Z and scroll ({@link #fly}), sent by the client. */
 	@Override
 	public void onMode(ServerPlayer player, boolean down) {
-		if (!down || !slotUnlocked(player, "mode")) {
-			return;
-		}
+	}
+
+	/**
+	 * From the client (hold Z and scroll): take off into pose {@code pose} (1-{@link #FLIGHT_POSES}), change pose, or come
+	 * down (0). The client flies him; the server pays the ki and tells everyone how he holds his arms.
+	 */
+	static void fly(ServerPlayer player, int pose) {
 		Live live = live(player);
-		if (live.flying) {
-			endFlight(player, live);
-		} else if (live.ki < 5.0F) {
+		pose = Mth.clamp(pose, 0, FLIGHT_POSES);
+		if (pose == 0) {
+			if (live.flying) {
+				endFlight(player, live);
+			}
+		} else if (!INSTANCE.slotUnlocked(player, "mode") || Powers.silenced(player) || !com.jaymospowers.power.wind.WindFlight.canFly(player)) {
+			if (live.flying) {
+				endFlight(player, live);
+			}
+		} else if (!live.flying && live.ki < 5.0F && !player.isCreative()) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_no_ki").withStyle(ChatFormatting.GRAY));
+			player.removeAttached(FLIGHT);
 		} else {
-			live.flying = true;
-			player.getAbilities().mayfly = true;
-			player.getAbilities().flying = true;
-			player.getAbilities().setFlyingSpeed(FORM_FLY[live.form]);
-			player.onUpdateAbilities();
-			player.resetFallDistance();
-			player.push(0.0, 0.5, 0.0);
-			player.syncVelocity = true;
-			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 0.8F, 0.8F);
-			player.level().sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY(), player.getZ(), 12, 0.4, 0.05, 0.4, 0.05);
+			if (!live.flying) {
+				live.flying = true;
+				live.lastFlyPos = player.position();
+				player.resetFallDistance();
+				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 0.8F, 0.8F);
+				player.level().sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY(), player.getZ(), 12, 0.4, 0.05, 0.4, 0.05);
+			}
+			player.setAttached(FLIGHT, pose);
 		}
 		sync(player, live, maxKi(player));
 	}
 
-	/** C: up a form; sneak+C: down one. */
+	/** The pose his arms hold in flight (0: not flying). Both sides. */
+	public static int flightPose(Player player) {
+		Integer pose = player.getAttached(FLIGHT);
+		return pose == null ? 0 : pose;
+	}
+
+	/** C: up a form; sneak+C: down one. In Super 3 with the Spirit Bomb learned, C (held) raises it instead. */
 	@Override
 	public void onUltimate(ServerPlayer player, boolean down) {
+		Live live = live(player);
 		if (!down) {
+			ZFighterTechniques.release(player, live);
+			sync(player, live, maxKi(player));
 			return;
 		}
-		Live live = live(player);
-		if (player.isShiftKeyDown()) {
+		if (!player.isShiftKeyDown() && live.form == ZFighterTraining.FORMS && ZFighterTraining.of(player).knows(ZFighterTraining.SPIRIT_BOMB)) {
+			if (ZFighterTechniques.canRaise(player, live)) {
+				ZFighterTechniques.raise(player, live);
+				refresh(player, live);
+			} else {
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_spirit_wait").withStyle(ChatFormatting.GRAY));
+			}
+		} else if (player.isShiftKeyDown()) {
 			if (live.superOn()) {
 				descend(player, live);
 			}
@@ -515,7 +603,6 @@ public final class ZFighterPower implements Power {
 			1.2, 1.2, 0.2);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 0.8F, 1.8F - 0.25F * form);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.7F, 1.4F);
-		flySpeed(player, live);
 		refresh(player, live);
 	}
 
@@ -527,7 +614,6 @@ public final class ZFighterPower implements Power {
 		}
 		live.form--;
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.6F, 1.5F);
-		flySpeed(player, live);
 		refresh(player, live);
 	}
 
@@ -539,7 +625,6 @@ public final class ZFighterPower implements Power {
 		live.form = 0;
 		cooldown(player, ZFighterState.SUPER_SLOT, SUPER_COOLDOWN);
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.8F, 1.3F);
-		flySpeed(player, live);
 		refresh(player, live);
 	}
 
@@ -586,15 +671,10 @@ public final class ZFighterPower implements Power {
 		refresh(player, live);
 	}
 
-	private static void flySpeed(ServerPlayer player, Live live) {
-		if (live.flying) {
-			player.getAbilities().setFlyingSpeed(FORM_FLY[live.form]);
-			player.onUpdateAbilities();
-		}
-	}
-
 	static void endFlight(ServerPlayer player, Live live) {
 		live.flying = false;
+		live.lastFlyPos = null;
+		player.removeAttached(FLIGHT);
 		landFlight(player);
 	}
 
@@ -623,6 +703,9 @@ public final class ZFighterPower implements Power {
 	}
 
 	static DustParticleOptions dust(Live live) {
+		if (live.raging()) {
+			return new DustParticleOptions(ZFighterBattle.RAGE_COLOR, 1.5F);
+		}
 		return new DustParticleOptions(FORM_COLOR[live.form], live.superOn() ? 1.4F + 0.2F * live.form : 1.2F);
 	}
 
@@ -635,11 +718,12 @@ public final class ZFighterPower implements Power {
 		float power = 1.0F + MASTERY_POWER * ZFighterTraining.mastery(player, live.form);
 		set(player, Attributes.ATTACK_DAMAGE, SUPER_FIST_ID, FORM_FIST[live.form] * power, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.ATTACK_DAMAGE, LIMIT_FIST_ID, LIMIT_FIST[live.limit], AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		set(player, Attributes.ATTACK_DAMAGE, RAGE_FIST_ID, live.raging() ? ZFighterBattle.RAGE_FIST : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.MOVEMENT_SPEED, LIMIT_SPEED_ID, LIMIT_SPEED[live.limit], AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.MAX_HEALTH, VITALITY_ID, ZFighterTraining.of(player).stat(ZFighterTraining.VITALITY) * ZFighterTraining.VITALITY_PER_LEVEL,
 			AttributeModifier.Operation.ADD_VALUE);
 		set(player, Attributes.ATTACK_DAMAGE, HUNGRY_ID, hungry ? -HUNGRY_WEAKNESS : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-		set(player, Attributes.MOVEMENT_SPEED, SLOW_ID, live.charging || live.waveFrom >= 0 ? -CHARGE_SLOW : 0.0,
+		set(player, Attributes.MOVEMENT_SPEED, SLOW_ID, live.charging || live.waveFrom >= 0 || live.spiritFrom >= 0 ? -CHARGE_SLOW : 0.0,
 			AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.MOVEMENT_SPEED, SUPER_SPEED_ID, FORM_SPEED[live.form], AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 	}
@@ -705,18 +789,20 @@ public final class ZFighterPower implements Power {
 
 	private static void sync(ServerPlayer player, Live live, int max) {
 		int flags = (live.charging ? ZFighterState.CHARGING : 0) | (live.flying ? ZFighterState.FLYING : 0)
-			| (live.superOn() ? ZFighterState.SUPER : 0);
+			| (live.superOn() ? ZFighterState.SUPER : 0) | (live.raging() ? ZFighterState.RAGE : 0) | (live.barrierTicks > 0 ? ZFighterState.BARRIER : 0);
+		int bomb = live.spiritFrom < 0 ? -1 : Math.round(100.0F * live.spiritEnergy / ZFighterTechniques.SPIRIT_MAX);
+		int rage = live.raging() ? 100 : Math.round(100.0F * live.rage);
 		int combo = player.level().getGameTime() - live.lastHit <= ZFighterBattle.COMBO_WINDOW ? live.combo : 0;
 		ZFighterState state = state(player);
 		int ki = Mth.floor(live.ki);
-		if (!state.sameAs(ki, max, live.waveFrom, flags, combo, live.form, live.limit)) {
-			set(player, state.with(ki, max, live.waveFrom, flags, combo, live.form, live.limit));
+		if (!state.sameAs(ki, max, live.waveFrom, flags, combo, live.form, live.limit, bomb, rage)) {
+			set(player, state.with(ki, max, live.waveFrom, flags, combo, live.form, live.limit, bomb, rage));
 		}
 	}
 
-	/** Spends {@code cost} ki if he has it; otherwise says so and spends nothing. */
+	/** Spends {@code cost} ki if he has it (Rage pays for everything); otherwise says so and spends nothing. */
 	static boolean spend(ServerPlayer player, Live live, float cost) {
-		if (player.isCreative()) {
+		if (player.isCreative() || live.raging()) {
 			return true;
 		}
 		if (live.ki < cost) {
