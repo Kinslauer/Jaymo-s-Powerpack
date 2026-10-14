@@ -34,6 +34,12 @@ heat sources, changes with what it passes through, and rides its chimneys (`Chim
   greys the screen (full at 1.6).
 - `SmokePowerClient`: R G V B chips right of the hotbar; a bar over the crosshair for pour / smother / vapour.
 
+## Smoke Jet (0.10.67)
+Hold X (`power/smoke/SmokeJet`): a jet of smoke along your look, 14 blocks, widening 0.14 a block. Each tick it lays
+0.6 of gas along the way (more toward the end) and blows the smoke in its way on; it gives what it catches a gentle
+shove; 0.025 hunger a tick, stops at 6 food. While it runs the player carries the tag `jaymospowers_jet:smoke`, which
+Kingdoms' ships read to fill their sails (half a Wind user's Gale Stream). Drawn by `client/power/smoke/SmokeJetClient`.
+
 ## Stage 2 (proposed, not built)
 Z Smoke Sight, X Smoke Step, C Pyroclasm (ascended), corrupted Smog (toxic smoke), cure at Y 200+ in clean air,
 Vapour Form through 1-block gaps.

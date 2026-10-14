@@ -1,0 +1,36 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "condition": {
+            "type": "minecraft:match_block",
+            "blocks": "tacz:workbench_b",
+            "state": {
+              "part": "foot"
+            }
+          },
+          "modifier": {
+            "type": "minecraft:copy_custom_data",
+            "source": "block_entity",
+            "ops": [
+              {
+                "source": "BlockId",
+                "target": "BlockId",
+                "op": "replace"
+              }
+            ]
+          },
+          "name": "tacz:workbench_b"
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "tacz:blocks/workbench_b"
+}

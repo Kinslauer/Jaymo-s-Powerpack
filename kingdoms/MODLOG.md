@@ -2775,7 +2775,7 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   SHIN_BEND, STEP_BEND.
 - Spider kinds and legs seen in a cloud playtest (screenshots in spider-kinds/); torches and dark nights not yet.
 
-## 0.7.18: sailing, stage 2: wind, oars, cannons and build kits (pack 0.10.66)
+## 0.7.18: sailing, stage 2: wind, oars, cannons and build kits (pack 0.10.67)
 - Andy: "I want wind, oars, cannons, and the in world build kits" (after linking AlekiShips: MIT, but Forge/NeoForge
   1.20.1 only, so its ideas remade; none of its code or art).
 - **Wind** (`sailing/Winds`): sails take the world's own wind (`Storms.windAngle()/windStrength()`, the one that drives
@@ -2793,7 +2793,9 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   charge: it fires as high as you look (-6 to 15 degrees). Works ashore and aboard. At the helm a left click fires a
   **broadside**: every loaded gun on the side you look to, 3 ticks apart. `ShipShot` (speed 1.6, gravity 0.015) holes a
   ship it hits (blocks within 1.3 smashed out, a quarter wash up, chests spill, her helm never), tears sails it passes
-  through, hurts everyone within 2 (16 at the heart), splashes into the sea and leaves world blocks whole. A ship holed
+  through, hurts everyone within 2 (16 at the heart) and splashes into the sea. Andy: "cannons should break blocks. no
+  mercy": shot that hits land smashes every block within 1.6 of where it strikes (`ShipShot.breach`; unbreakable and
+  obsidian-tough blocks, blast resistance 1200+, hold; 30% drop as items). Keep cannons (`Cannon`) don't. A ship holed
   at the waterline (half her hold there flooded) or too heavy to float founders: she goes down slowly with bubbles and
   is laid on the bottom as a wreck, chests and all.
 - **Build kits** (`ShipKits`; paper, string and a stick, the sloop adds a second paper and wool, the brig a third and
@@ -2803,5 +2805,10 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   frame is filled her timbers are dried, her hold bailed, and she can cast off like any ship of blocks (casting off
   refuses while frames remain). Rowboat: 7 long, two oars. Sloop: 13 long, a mast and sail, 4 oars, 2 guns, a chest.
   Brig: 19 long, two masts, 4 oars, 6 guns, 2 chests in a two-high hold.
+- **Streams in the sails** (`Jets`): a Wind user's Gale Stream or a Smoke user's Smoke Jet (Powers 0.10.67, read by the
+  `jaymospowers_jet:wind/smoke` tag) adds way to a ship along the stream for each sail in it: 0.1 b/t per square root
+  of sails filled from dead astern for a gale, 0.05 for smoke, less across her, backing her from ahead; furled sails
+  catch 30%. Works with no one at the helm.
 - Tested in a cloud dev client: all three kits laid, filled and bailed dry; sailing on a beam reach and in irons;
-  rowing; loading a gun by hand; a broadside holing a target ship that then sank and lay as a wreck.
+  rowing; loading a gun by hand; a broadside holing a target ship that then sank and lay as a wreck; a gale moving a
+  furled sloop 6 blocks in 8 s; a world gun holing a brick wall.

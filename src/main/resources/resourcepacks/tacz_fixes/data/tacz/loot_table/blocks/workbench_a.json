@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "modifier": {
+            "type": "minecraft:copy_custom_data",
+            "source": "block_entity",
+            "ops": [
+              {
+                "source": "BlockId",
+                "target": "BlockId",
+                "op": "replace"
+              }
+            ]
+          },
+          "name": "tacz:workbench_a"
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "tacz:blocks/workbench_a"
+}
