@@ -9,6 +9,7 @@ import com.jaymospowers.client.power.gravity.GravityKneelPose;
 import com.jaymospowers.client.power.gravity.GravityWalkPose;
 import com.jaymospowers.client.power.web.WebArms;
 import com.jaymospowers.client.power.web.WebBodyPose;
+import com.jaymospowers.client.power.web.WebParkourPose;
 import com.jaymospowers.client.power.web.WebRagdoll;
 import com.jaymospowers.client.power.web.WebSymbioteClient;
 import com.jaymospowers.client.power.web.WebWallRunPose;
@@ -53,7 +54,8 @@ public final class PoseTakeover {
 			|| WindPose.posed(s)
 			|| s.getData(GravityWalkPose.KEY) != null || s.getData(GravityBoardPose.KEY) != null || s.getData(GravityKneelPose.KEY) != null
 			|| s.getData(DarktidePose.KEY) != null || s.getData(DarktidePose.CRAWL) != null
-			|| s.getData(WebWallRunPose.KEY) != null || s.getData(WebBodyPose.KEY) != null || s.getData(WebArms.KEY) != null
+			|| s.getData(WebWallRunPose.KEY) != null || s.getData(WebParkourPose.KEY) != null
+			|| s.getData(WebBodyPose.KEY) != null || s.getData(WebArms.KEY) != null
 			|| s.getData(WebRagdoll.KEY) != null || s.getData(WebSymbioteClient.SLAM) != null || s.getData(WebSymbioteClient.CHARGE) != null
 			|| s.getData(WebSymbioteClient.ROAR) != null || s.getData(WebSymbioteClient.EATING) != null
 			|| s.getData(ChronoFlowPose.KEY) != null || s.getData(ChronoReelPose.KEY) != null
