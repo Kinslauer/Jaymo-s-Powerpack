@@ -36,7 +36,7 @@ Each lineage has its own skin tint and aura colour.
 - **The Tower:** a tall spire to climb; at the top, a hermit master who sells Hermit Beans.
 - **The Verdant World:** a green-sky dimension with Verdant villages and traders, reached through the Lookout.
 
-## Stage 6: Kingdoms tie-ins
+## Stage 6: Kingdoms tie-ins (built: Abilities rows 261-265)
 - **Masters.** Rare MCA elders (like court wizards) teach a technique or a form step, if your alignment from the K skill tree suits them (good masters: 61+; dark masters: 40 or less).
 - **Tournaments.** Capitals hold a tournament now and then: a ring, bracket fights between strong fighters (players and champions), prizes in TP and emeralds.
 - **Raids and world bosses.** A rogue Z Fighter or a tyrant lands and attacks a kingdom; whoever helps beat it shares a large TP prize.

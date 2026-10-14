@@ -255,6 +255,10 @@ public final class ZFighterPower implements Power {
 		ZFighterLineage.init();
 		ZFighterWishes.init();
 		ZFighterSites.init();
+		ZFighterFusion.init();
+		ZFighterMasters.init();
+		ZFighterRaids.init();
+		ZFighterTournaments.init();
 		ZFighterNet.register();
 		ZFighterBattle.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ZFighterDebugCommand.register(dispatcher));
@@ -563,6 +567,9 @@ public final class ZFighterPower implements Power {
 	 */
 	@Override
 	public void onMode(ServerPlayer player, boolean down) {
+		if (down && !player.isShiftKeyDown()) {
+			ZFighterFusion.tappedZ(player);
+		}
 		if (down && player.isShiftKeyDown() && !live(player).flying) {
 			ZFighterLineage.toggleTail(player);
 		}
@@ -627,6 +634,11 @@ public final class ZFighterPower implements Power {
 	public void onUltimate(ServerPlayer player, boolean down) {
 		Live live = live(player);
 		if (down && ZFighterLineage.ape(player)) {
+			return;
+		}
+		if (down && !player.isShiftKeyDown() && ZFighterFusion.tryDance(player, live)) {
+			// Z, then C: the fusion dance, not a transformation
+			sync(player, live, maxKi(player));
 			return;
 		}
 		if (!down) {
@@ -857,6 +869,10 @@ public final class ZFighterPower implements Power {
 		set(player, Attributes.ATTACK_DAMAGE, APE_FIST_ID, ape ? ZFighterLineage.APE_FISTS : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.MAX_HEALTH, APE_HEALTH_ID, ape ? ZFighterLineage.APE_HEALTH : 0.0, AttributeModifier.Operation.ADD_VALUE);
 		set(player, Attributes.MOVEMENT_SPEED, APE_SPEED_ID, ape ? ZFighterLineage.APE_SPEED : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		// fused: the partner's fists and health added, and a little more
+		set(player, Attributes.ATTACK_DAMAGE, ZFighterFusion.FIST_ID, ZFighterFusion.fists(player), AttributeModifier.Operation.ADD_VALUE);
+		set(player, Attributes.ATTACK_DAMAGE, ZFighterFusion.BONUS_ID, ZFighterFusion.bonus(player), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		set(player, Attributes.MAX_HEALTH, ZFighterFusion.HEALTH_ID, ZFighterFusion.health(player), AttributeModifier.Operation.ADD_VALUE);
 	}
 
 	/** What his bare fists add to a punch: mastery, every foe that ever beat him, ascension and trained Strength. */
@@ -968,7 +984,8 @@ public final class ZFighterPower implements Power {
 
 	public static int maxKi(Player player) {
 		return BASE_MAX_KI + KI_PER_DEFEAT * zenkai(player) * ZFighterLineage.zenkaiFactor(player)
-			+ ZFighterTraining.ENERGY_PER_LEVEL * ZFighterTraining.of(player).stat(ZFighterTraining.ENERGY);
+			+ ZFighterTraining.ENERGY_PER_LEVEL * ZFighterTraining.of(player).stat(ZFighterTraining.ENERGY)
+			+ (player instanceof ServerPlayer server ? ZFighterFusion.ki(server) : 0);
 	}
 
 	public static int hardship(Player player) {
@@ -985,6 +1002,6 @@ public final class ZFighterPower implements Power {
 	static float kiPower(ServerPlayer player, Live live) {
 		float form = 1.0F + (FORM_KI[live.form] - 1.0F) * (1.0F + MASTERY_POWER * ZFighterTraining.mastery(player, live.form));
 		float trained = 1.0F + ZFighterTraining.KI_POWER_PER_LEVEL * ZFighterTraining.of(player).stat(ZFighterTraining.KI_POWER);
-		return ((0.75F + 0.0625F * Mastery.unlocked(player)) * form + (Fate.isAscended(player) ? 0.1F : 0.0F)) * trained;
+		return ZFighterFusion.power(player, ((0.75F + 0.0625F * Mastery.unlocked(player)) * form + (Fate.isAscended(player) ? 0.1F : 0.0F)) * trained);
 	}
 }

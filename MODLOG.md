@@ -977,3 +977,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Super hair covers his own: the skin's hat layer is hidden while it shows, and the cap reaches past where that layer
   sat (0.7 out), with a fringe above the eyes, the whole back of the head and over the ears.
 - Gravity's Z dome is now called the **Immense Field** (was the Training Field): key guide, messages and docs.
+- **0.10.25, Z Fighter stage 6 (`ZFighterFusion`, `ZFighterMasters`, `ZFighterRaids`, `ZFighterTournaments`, `ZFighterRogue`,
+  `ZFighterKingdoms`):** the fusion dance (Z then C facing a partner: one body for 60 s, the partner spectating from
+  inside, stats added plus 10%, 10 min cooldown). With Jaymo's Kingdoms (read by reflection only): masters (each
+  kingdom's eldest villager; a dark master in each barbarian camp) teach a technique or form step once a day, by
+  reputation and the Rogue's path; tyrants (a new `rogue_fighter` entity) raid kingdoms by night every 5-7 days and
+  share 6000 TP by damage; tournaments every 3-4 days in a ring beside a kingdom's seat, players and champions in a
+  bracket, never to the death. Rogue skins from `tools/gen_rogue_fighters.py`. `/powerdebug zfighter raid|tournament`.
