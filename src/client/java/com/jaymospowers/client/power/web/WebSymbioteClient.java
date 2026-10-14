@@ -790,7 +790,12 @@ public final class WebSymbioteClient {
 			return;
 		}
 		leapTouched = false;
-		if (pathMode == WebNet.TakeoverPath.RIP) {
+		if (target == player) {
+			// its kill carried off and eaten: it holds you still till it's done
+			sprint(player, false);
+			Vec3 v = player.getDeltaMovement();
+			player.setDeltaMovement(v.x * RIP_HOLD, v.y, v.z * RIP_HOLD);
+		} else if (pathMode == WebNet.TakeoverPath.RIP) {
 			holdForRip(player);
 		} else if (pathMode == WebNet.TakeoverPath.PATH && followPath(player, target)) {
 			// on its way
