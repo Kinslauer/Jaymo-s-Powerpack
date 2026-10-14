@@ -12,7 +12,10 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
 
 /**
  * The werewolf (after Mo' Creatures'): by day a plain biped in one of four faces, by night the beast ({@link WerewolfModel})
@@ -25,6 +28,22 @@ final class WerewolfRenderer extends LegendRenderer<Werewolf> {
 		LegendRenderer.texture("werewolf_timber")};
 	private static final Identifier[] FIRE = {LegendRenderer.texture("werewolf_fire_1"), LegendRenderer.texture("werewolf_fire_2"),
 		LegendRenderer.texture("werewolf_fire_3")};
+	/** (0.7.1) The cursed ones' coats (coat, then wear: mangy, scarred, patchy) and their rags ({@code tools/gen_cursed_werewolf.py}). */
+	private static final Identifier[][] CURSED = new Identifier[COATS.length][Werewolf.WEARS];
+	private static final Identifier[] RAGS = new Identifier[Werewolf.RAG_SETS];
+
+	static {
+		String[] coats = {"black", "brown", "timber"}, wears = {"mangy", "scarred", "patchy"};
+		for (int c = 0; c < COATS.length; c++) {
+			for (int w = 0; w < Werewolf.WEARS; w++) {
+				CURSED[c][w] = LegendRenderer.texture("werewolf_cursed_" + coats[c] + "_" + wears[w]);
+			}
+		}
+		for (int r = 0; r < RAGS.length; r++) {
+			RAGS[r] = LegendRenderer.texture("werewolf_rags_" + r);
+		}
+	}
+
 	/** How long each of the fiery coat's skins shows (ticks). */
 	private static final int FLICKER_TICKS = 4;
 
@@ -35,6 +54,7 @@ final class WerewolfRenderer extends LegendRenderer<Werewolf> {
 		super(context, new WerewolfModel(WerewolfModel.createBodyLayer().bakeRoot()), 0.5F, 1.0F, state -> FACES[0], false);
 		this.beast = this.model;
 		this.human = new HumanoidModel<>(LayerDefinition.create(HumanoidModel.createMesh(CubeDeformation.NONE, 0.0F), 64, 32).bakeRoot());
+		this.addLayer(new RagsLayer(this));
 	}
 
 	@Override
@@ -47,6 +67,8 @@ final class WerewolfRenderer extends LegendRenderer<Werewolf> {
 		state.hunched = !werewolf.isHuman() && werewolf.isAggressive() || werewolf.change() != 0;
 		state.beast = werewolf.beastness(partialTicks);
 		state.build = werewolf.build();
+		state.look = werewolf.look();
+		state.rags = werewolf.rags();
 	}
 
 	@Override
@@ -83,7 +105,26 @@ final class WerewolfRenderer extends LegendRenderer<Werewolf> {
 			return FACES[Math.floorMod(state.variant / Werewolf.COATS, FACES.length)];
 		}
 		int coat = Math.floorMod(state.variant, Werewolf.COATS);
-		return coat == Werewolf.FIRE_COAT ? FIRE[(int) (state.ageInTicks / FLICKER_TICKS) % FIRE.length] : COATS[coat];
+		if (coat == Werewolf.FIRE_COAT) {
+			return FIRE[(int) (state.ageInTicks / FLICKER_TICKS) % FIRE.length];
+		}
+		return state.look > 0 ? CURSED[coat][(state.look - 1) / Werewolf.RAG_SETS % Werewolf.WEARS] : COATS[coat];
+	}
+
+	/** (0.7.1) What's left of a cursed one's clothes, dyed the colour they were, torn on over its coat. */
+	private static final class RagsLayer extends RenderLayer<LegendState, EntityModel<LegendState>> {
+		RagsLayer(RenderLayerParent<LegendState, EntityModel<LegendState>> parent) {
+			super(parent);
+		}
+
+		@Override
+		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, LegendState state, float yRot, float xRot) {
+			if (state.look <= 0 || state.shut || state.isInvisible) {
+				return;
+			}
+			Identifier rags = RAGS[(state.look - 1) % Werewolf.RAG_SETS];
+			renderColoredCutoutModel(this.getParentModel(), rags, poseStack, collector, lightCoords, state, ARGB.opaque(state.rags), 1);
+		}
 	}
 
 	static void install() {

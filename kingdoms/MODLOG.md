@@ -2587,3 +2587,13 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
 - **The cure** for both (Andy): a rare quest from a priest (`Cures`). A quarter of clerics know the old rite (fixed by
   who they are); ask one for work while bitten, turned or cursed and they set the hunt instead: slay 2 vampires among
   the living, or 1 cursed werewolf in its beast shape (players don't count). Turn it in and the rite lifts the curse.
+
+## 0.7.1: the cursed ones' coats (pack 0.10.4)
+- Andy: the cursed werewolves get coats of their own. Each of the three ordinary coats (black, brown, timber) comes worn
+  three ways: **mangy** (bald, sore patches, thinning fur), **scarred** (old pale wounds, fur never grown back round
+  them) or **patchy** (piebald, uneven, bald spots). Over it, what's left of their clothes: a split shirt and trousers,
+  trousers and a waist strip, or shirt shreds with a sleeve and one leg, torn, frayed and bloodied, dyed the colour of
+  their trade (librarian red, cleric purple, farmer straw, fisherman blue and so on; folk and players a plain cloth).
+  Wear and rags are fixed by who they are, so the same villager is the same beast every moon. The fiery coat keeps its
+  flames (rags still on). `Werewolf` syncs `look`/`rags`; `WerewolfRenderer` picks the coat and draws a `RagsLayer`.
+  Textures painted from our own coats by `tools/gen_cursed_werewolf.py`.
