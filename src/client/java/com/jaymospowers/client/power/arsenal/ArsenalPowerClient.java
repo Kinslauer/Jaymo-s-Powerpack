@@ -52,6 +52,8 @@ public final class ArsenalPowerClient implements PowerClient {
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalDamoclesRenderer::render);
 		// Cannon Battery: the rifts and their cannons, and X held and let go
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalCannonRenderer::render);
+		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalPortalRenderer::render);
+		ArsenalPortalRenderer.init();
 		EntityRendererRegistry.register(ArsenalEntities.RIFT_CANNONBALL, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));
 		ClientTickEvents.START_CLIENT_TICK.register(ArsenalPowerClient::cannonInput);
 		// the Void Arsenal's aura, on every corrupted arsenal user in view
