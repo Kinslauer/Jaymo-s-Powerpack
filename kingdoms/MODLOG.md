@@ -2740,3 +2740,12 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
 - Ops: `/kingdom roaming` lists them; `/kingdom roaming pillager | pillager_major | merchant` brings one past you.
 - `ChestedHorseInvoker` (villagers mixins) remakes a pack animal's inventory after it's given a chest.
 - Tuning is in the constants at the top of `RoamingCaravans`. Not yet seen in game.
+
+## 0.7.16: layered storm clouds (pack 0.10.63)
+- Andy liked Simple Clouds' look (Forge/NeoForge only, PolyForm Perimeter, so ideas only) as long as it costs little.
+  `StormsClient.clouds` splits each cell's puffs (no more of them than before) into layers: 55% a flat dark base,
+  30% a tower over the middle 45% of the cell that climbs 45 (thunderstorm) or 85 (supercell) blocks as the cell
+  gathers, paler toward its top, and for a supercell the rest an anvil: a pale sheet over the top, 1.15 times the
+  cell's width and leaning downwind. A rain cell stays all base.
+- A tornado's wall cloud: a lowered, turning ring of dark puffs round the top of its funnel (3 a tick for a tornado,
+  5 for a monster), so the funnel hangs out of the cloud.

@@ -1084,3 +1084,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.10.60, tracks in the snow:** Soft Imprints (MIT) joins the pack: everything that walks or rolls over snow, snow
   layers, sand and red sand leaves footprints and trails shaped to its body (players, mobs, horses, carts and
   caravans), which slowly fill back in. Client-only and works with Iris shaders.
+- **0.10.63, layered storm clouds (Kingdoms 0.7.16):** storm cells are drawn in layers from the same number of puffs: a
+  flat dark base, a tower over the middle that builds up as the cell gathers (thunderstorms and supercells), and a
+  pale anvil spread over a supercell's top, leaning downwind. Each tornado hangs from a turning wall cloud
+  (`kingdoms/MODLOG.md`).
