@@ -884,3 +884,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   See docs/web.md.
 - **0.10.4, cursed werewolves' coats (Kingdoms 0.7.1):** cursed villagers' beasts are mangy, scarred or patchy, with
   the torn remains of their clothes on, dyed by their trade (`kingdoms/MODLOG.md`).
+- **0.10.5, grabbable severed parts:** a severed head or limb can be picked up (right-click it with an empty hand, or
+  sneak + right-click) and dangles from your right hand as you walk; right-click drops it, sneak + right-click throws
+  it, the same as carrying a body. A beheaded player's view goes along with their carried head.
