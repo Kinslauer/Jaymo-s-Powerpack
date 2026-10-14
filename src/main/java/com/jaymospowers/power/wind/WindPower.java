@@ -58,6 +58,8 @@ public final class WindPower implements Power {
 	/** (0.9.26) Tags Jaymo's Kingdoms' tornadoes read: a Wind user, and their last Cyclone Lance (+ the game time). */
 	public static final String KINGDOMS_TAG = "jaymospowers_wind", LANCE_TAG = "jaymospowers_wind_lance:";
 
+	/** The air brake as others see it: clouds ahead of the palms each tick, and a puff of wind every few ticks. */
+	private static final int BRAKE_CLOUDS = 5, BRAKE_GUST_EVERY = 4;
 	private static final Identifier BARRIER_MODIFIER = JaymosPowers.id("wind_gale_barrier");
 
 	// ---- ability tuning ---------------------------------------------------------------------------------------
@@ -481,10 +483,10 @@ public final class WindPower implements Power {
 		if (player.getAttached(BRAKING) != null) {
 			if (!s.flight.flying()) {
 				player.removeAttached(BRAKING);
-			} else if (player.tickCount % 2 == 0) {
+			} else {
 				Vec3 ahead = player.getEyePosition().add(player.getLookAngle().scale(1.4));
-				this.particlesForOthers(player, level, ParticleTypes.CLOUD, ahead.x, ahead.y - 0.3, ahead.z, 3, 0.25, 0.25, 0.25, 0.08);
-				if (player.tickCount % 8 == 0) {
+				this.particlesForOthers(player, level, ParticleTypes.CLOUD, ahead.x, ahead.y - 0.3, ahead.z, BRAKE_CLOUDS, 0.3, 0.3, 0.3, 0.08);
+				if (player.tickCount % BRAKE_GUST_EVERY == 0) {
 					this.particlesForOthers(player, level, ParticleTypes.SMALL_GUST, ahead.x, ahead.y - 0.3, ahead.z, 1, 0.1, 0.1, 0.1, 0.0);
 				}
 			}
