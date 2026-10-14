@@ -1,0 +1,19 @@
+{
+  "type": "jaymospowers:future",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "jaymospowers:future_ruins",
+      "features": false,
+      "lakes": false,
+      "layers": [
+        {"block": "minecraft:bedrock", "height": 1},
+        {"block": "minecraft:deepslate", "height": 63},
+        {"block": "minecraft:stone", "height": 38},
+        {"block": "minecraft:dirt", "height": 5},
+        {"block": "minecraft:water", "height": 20}
+      ],
+      "structure_overrides": []
+    }
+  }
+}

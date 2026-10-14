@@ -1169,3 +1169,20 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   `WindPose`, so `PoseTakeover.posed` keeps EMF/Fresh Animations off it).
   Ship's Plans (Andy: "can we make our own ship kits?"): sneak-use them on the helm of a ship you built to draw her,
   then use them on open water to lay her again (frames in survival, built exactly in creative); kept after use.
+- **0.10.102, the future** (Andy: "what if we made a new dimension, that was just this map, with feral zombies like the
+  ones we made for corpses? I want to simulate going to the future in an apocalypse."): Chronokinesis sneak+B, **Fast
+  Forward**, leaps you and every player within 4 blocks to `jaymospowers:future`, a lifetime from now: **Los Perrito
+  City by Uospag** (https://www.curseforge.com/minecraft/worlds/los-perrito, CC BY 4.0; credited in chat on each
+  player's first arrival), ruined. Sneak+B there (1 min recharge) brings you back to where you left, and a golden Time
+  Rift beside the arrival point takes anyone home, so friends without Chrono are never stranded. The map is 764 MB, so
+  it isn't in the jar: the first leap on a server fetches it from CurseForge (or uses `LosPerrito2.0.1.zip` dropped in
+  the server or world folder), unpacks its region/entity/POI files into the dimension's folder and moves its 5,800 map
+  arts above every map id the world has used (the city's item frames are pointed at them as they load); the leap shows
+  progress until it's ready. Its chunks are 1.19.2 saves the game upgrades as they first load. Each city chunk decays
+  the first time it loads (`FutureRuins`): windows smashed out, lights dead, lawns gone to dirt, dead bushes, moss on
+  the roads, vines down the walls, cobwebs under roofs, and an ashen biome (`future_ruins`: grey sky, dead grass, murky
+  water) around an empty sea like the map's own. Feral hordes (`FutureFerals`): packs of zombies, husks and zombie
+  villagers, 10 per player by day and 20 by night, 35% faster, tracking from 48 blocks, drawn to anyone running within
+  40 or walking within 16 (sneak to slip by); nothing burns in the future's sun (`FutureSunMixin`). They're vanilla
+  zombies, so Kitchen's scavenging and rising corpses work on them as on any other. `/future go|back|fetch|status` for
+  gamemasters. `docs/chrono.md`.

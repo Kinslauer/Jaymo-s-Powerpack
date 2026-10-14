@@ -50,6 +50,8 @@ import net.minecraft.world.phys.Vec3;
  * again to phase through a wall.</li>
  * <li>B, Time Bloom: 5 s of fast-forward for crops, saplings, furnaces, smokers and ovens within 5 blocks, and for
  * your own wounds (they mend {@code BLOOM_HEAL} every {@code BLOOM_HEAL_EVERY} ticks meanwhile).</li>
+ * <li>Sneak+B, Fast Forward (0.10.102): you and everyone close by leap to the ruined future and back
+ * ({@link com.jaymospowers.power.chrono.future.Future}).</li>
  * </ul>
  * The HUD is fed by {@link ChronoSync}.
  *
@@ -124,6 +126,7 @@ public final class ChronoPower implements Power {
 		JaymosPowers.LOGGER.debug("chrono attachments: {} {}", ChronoMemory.MEMORY, ChronoEchoes.ORPHANS);
 		ServerTickEvents.END_SERVER_TICK.register(ChronoPunch::tick);
 		ChronoFlow.init();
+		com.jaymospowers.power.chrono.future.Future.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ChronoDebugCommand.register(dispatcher));
 		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, blockEntity) -> {
 			if (player instanceof ServerPlayer serverPlayer && Powers.has(serverPlayer, INSTANCE)) {
@@ -342,6 +345,11 @@ public final class ChronoPower implements Power {
 		ChronoState state = state(player);
 		int ability = key.ordinal();
 		int now = now(player);
+		if (ability == BLOOM && player.isShiftKeyDown() && !com.jaymospowers.core.Mastery.starterOnly(player)) {
+			// sneak+B, Fast Forward: a leap into the ruined future (or back), with its own recharge
+			com.jaymospowers.power.chrono.future.Future.leap(player);
+			return;
+		}
 		if (ability == OVERCLOCK && state.overclockLeft > 0) {
 			// V again mid-Overclock: phase through the wall ahead
 			if (now >= state.phaseReadyAt && ChronoSpeed.phase(player)) {

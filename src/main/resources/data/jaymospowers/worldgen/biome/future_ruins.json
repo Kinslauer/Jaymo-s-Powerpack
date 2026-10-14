@@ -1,0 +1,67 @@
+{
+  "attributes": {
+    "minecraft:gameplay/natural_mob_spawns": {
+      "argument": {
+        "spawn_costs": {},
+        "spawns_by_category": {
+          "ambient": [
+            {
+              "type": "minecraft:bat",
+              "count": 8,
+              "weight": 10
+            }
+          ],
+          "axolotls": [],
+          "creature": [],
+          "misc": [],
+          "monster": [
+            {
+              "type": "minecraft:zombie",
+              "count": 4,
+              "weight": 100
+            },
+            {
+              "type": "minecraft:husk",
+              "count": 4,
+              "weight": 20
+            },
+            {
+              "type": "minecraft:zombie_villager",
+              "count": 1,
+              "weight": 15
+            }
+          ],
+          "underground_water_creature": [],
+          "water_ambient": [],
+          "water_creature": []
+        }
+      },
+      "modifier": "overlay"
+    },
+    "minecraft:visual/sky_color": "#9c968a",
+    "minecraft:visual/fog_color": "#8f8a7e"
+  },
+  "carvers": [],
+  "downfall": 0.3,
+  "effects": {
+    "water_color": "#4f5a3c",
+    "grass_color": "#8f8a52",
+    "foliage_color": "#7d7442",
+    "dry_foliage_color": "#7b5334"
+  },
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    []
+  ],
+  "has_precipitation": true,
+  "temperature": 0.8
+}

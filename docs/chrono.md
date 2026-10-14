@@ -488,3 +488,25 @@ long-range barrage with a close grab. Not yet compiled or seen in game.
 - **Players flinch and ragdoll too** in PvP, the same as mobs.
 - **Only loaded echoes count** toward the one-echo limit. An echo sitting in unloaded chunks far away isn't seen, so in
   that rare case a second one could be owed.
+
+## The future (0.10.102)
+
+Andy: "what if we made a new dimension, that was just this map, with feral zombies like the ones we made for corpses?
+I want to simulate going to the future in an apocalypse." The map is Los Perrito City by Uospag
+(https://www.curseforge.com/minecraft/worlds/los-perrito), CC BY 4.0; its `licensing.txt` allows modpacks and changes
+as long as it's credited by name and link (we do, in chat on a player's first arrival, in MODLOG and in the marker
+file), never as if Uospag endorsed us.
+
+| Piece | What it does | Numbers | Class |
+|---|---|---|---|
+| Sneak+B, Fast Forward | You and every player within 4 blocks leap to `jaymospowers:future`, arriving at the map's own spawn facing the Time Rift. Sneak+B there brings you and those near you back to where each left (or world spawn). Not for a starter Chrono; B must be unlocked. Own recharge, Bloom's untouched. | radius 4, recharge 60 s | `future/Future` |
+| Time Rift | A golden whirl 5 blocks north of the arrival point; walk into it to go home. | radius 0.8 | `future/Future` |
+| Fetching the city | First leap on a server starts a background download from CurseForge (file 9033035, 801,180,636 bytes) or uses `LosPerrito2.0.1.zip` in the server or world folder; then unpacks `region/`, `entities/`, `poi/` into `dimensions/jaymospowers/future/` and moves `data/map_N.dat` to `data/minecraft/maps/<N+offset>.dat`, claiming those ids. Marker: `los_perrito.txt` (holds `mapOffset`). Delete the dimension folder to start over. | 764 MB zipped, 1.07 GB unpacked | `future/LosPerrito` |
+| Map art | Item frames in the future are pointed at the shifted map ids the first time each loads (an attachment marks it). | | `future/Future` |
+| Ruins | Each island chunk decays once, on first load, 2 chunks a tick, seeded by position, then turns to the `future_ruins` biome (biomes re-sent). | panes 65% / glass 45% smashed, lawns 35% dead (12% podzol), flowers 60% dead, road moss 3.5%, wall vines 1.2% (up to 6 down), cobwebs 1.2% | `future/FutureRuins` |
+| Ferals | Packs of 3-6 (70% zombie, 15% husk, 15% zombie villager) 24-44 blocks from each survival player, up to the cap. 35% faster, follow range 48. Running within 40 or walking within 16 draws them; in sight within 24, they attack. Tagged `jaymospowers.feral`. | cap 10 day / 20 night within 64 | `future/FutureFerals` |
+| No sun burn | Mobs never burn by day in the future. | | `mixin/FutureSunMixin` |
+
+Outside the island (x -3584..5631, z -3584..3583) is the map's own flat sea (same layers as its superflat). The map's
+chunks are DataVersion 3120 (1.19.2) though CurseForge tags it 26.3; vanilla upgrades each on first load, so a chunk's
+first visit is slower. Not playtested in-game yet.
