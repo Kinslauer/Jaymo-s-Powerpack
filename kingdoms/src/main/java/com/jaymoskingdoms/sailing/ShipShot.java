@@ -30,7 +30,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.12) A ship's gun's round shot: an iron ball that arcs out over the water and holes whatever ship it meets (the
+ * (0.7.18) A ship's gun's round shot: an iron ball that arcs out over the water and holes whatever ship it meets (the
  * planks round where it strikes are smashed out, sails it passes through are torn: {@link Ship#struck}), and hurts
  * everyone near where it lands. It splashes into the sea and thuds into land: blocks in the world are left whole. Never
  * saved.

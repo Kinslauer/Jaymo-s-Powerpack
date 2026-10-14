@@ -19,7 +19,7 @@ import net.minecraft.world.level.material.MapColor;
 
 /**
  * (0.7.7) Sailing, stage 1: ships built from blocks. The {@link HelmBlock} and {@link SailBlock}, the {@link Ship} they
- * make, and its packet. Our own take on the idea (block ships that sail), no one's code. (0.7.12) Stage 2: the wind in
+ * make, and its packet. Our own take on the idea (block ships that sail), no one's code. (0.7.18) Stage 2: the wind in
  * her sails ({@link Winds}), {@link OarBlock oars}, {@link ShipCannonBlock guns} and their {@link ShipShot shot}, and
  * {@link ShipKits build kits}, after AlekiShips' ideas (MIT; no code or art of it is used).
  */
@@ -36,7 +36,7 @@ public final class Sailing {
 			.strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
 		SAIL = block("sail", SailBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.GUITAR)
 			.strength(0.8F).sound(SoundType.WOOL).noOcclusion().ignitedByLava());
-		// (0.7.12) oars, guns and the frames of build kits
+		// (0.7.18) oars, guns and the frames of build kits
 		OAR = block("oar", OarBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).instrument(NoteBlockInstrument.BASS)
 			.strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava());
 		CANNON = block("ship_cannon", ShipCannonBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).instrument(NoteBlockInstrument.IRON_XYLOPHONE)

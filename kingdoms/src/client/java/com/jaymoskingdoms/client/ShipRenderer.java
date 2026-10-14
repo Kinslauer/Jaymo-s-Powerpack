@@ -48,7 +48,7 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 	/** Below this much sail set (0 to 1), the sails are drawn furled on their yards. */
 	static final float FURLED_BELOW = 0.1F;
 	/**
-	 * (0.7.12) Oars run out: how far each stroke sweeps fore and aft and how steeply it dips (degrees), how much deeper the
+	 * (0.7.18) Oars run out: how far each stroke sweeps fore and aft and how steeply it dips (degrees), how much deeper the
 	 * blade bites on the pull, and how much longer the oar is drawn than its model (stretched along its length).
 	 */
 	static final float OAR_SWEEP = 28.0F, OAR_DIP = 36.0F, OAR_BITE = 12.0F, OAR_LENGTH = 2.5F;
@@ -60,7 +60,7 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 		final List<Ship.Piece> pieces = new ArrayList<>();
 		float yaw, heel, pitch;
 		Model.Simple dryMask;
-		/** (0.7.12) Oars run out, drawn on their own: each one's piece, its facing's turn, its sweep and dip, and its look. */
+		/** (0.7.18) Oars run out, drawn on their own: each one's piece, its facing's turn, its sweep and dip, and its look. */
 		final List<Ship.Piece> oars = new ArrayList<>();
 		final List<float[]> oarAngles = new ArrayList<>();
 		final List<MovingBlockRenderState> oarBlocks = new ArrayList<>();

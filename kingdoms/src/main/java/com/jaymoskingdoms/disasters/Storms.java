@@ -73,7 +73,7 @@ public final class Storms {
 
 	static float windAngle = 0.0F, windSpeed = 0.06F;
 
-	/** (0.7.12) The server's wind: the way it blows toward (radians, toward (cos, sin) in x, z), and how hard, from none
+	/** (0.7.18) The server's wind: the way it blows toward (radians, toward (cos, sin) in x, z), and how hard, from none
 	 * (its least) to 1 (its most). Ships' sails ask this. */
 	public static float windAngle() {
 		return windAngle;

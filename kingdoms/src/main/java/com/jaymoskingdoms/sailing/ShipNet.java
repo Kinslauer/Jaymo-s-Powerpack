@@ -26,7 +26,7 @@ public final class ShipNet {
 		}
 	}
 
-	/** (0.7.12) Client → server: the one at the helm fires a broadside to the side they look. */
+	/** (0.7.18) Client → server: the one at the helm fires a broadside to the side they look. */
 	public record Broadside(int ship) implements CustomPacketPayload {
 		public static final Type<Broadside> TYPE = new Type<>(JaymosKingdoms.id("ship_broadside"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Broadside> CODEC = CustomPacketPayload.codec(

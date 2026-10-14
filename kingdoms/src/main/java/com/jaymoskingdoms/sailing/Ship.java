@@ -92,7 +92,7 @@ public final class Ship extends Entity {
 	/** How near a player must be to use a block of it. */
 	static final double REACH = 7.0;
 	/**
-	 * (0.7.12) Rowing: her speed per (square root of) oar, held back by her weight per this much, the fastest oars take
+	 * (0.7.18) Rowing: her speed per (square root of) oar, held back by her weight per this much, the fastest oars take
 	 * her, backing water's share of that, how long a stroke takes (ticks), and what it takes out of the one rowing (food
 	 * exhaustion a tick).
 	 */
@@ -100,14 +100,14 @@ public final class Ship extends Entity {
 	public static final int STROKE = 30;
 	static final float ROW_TIRE = 0.008F;
 	/**
-	 * (0.7.12) Holed by round shot: how far round where it strikes her blocks are smashed out, the share of those that
+	 * (0.7.18) Holed by round shot: how far round where it strikes her blocks are smashed out, the share of those that
 	 * wash up as items, how fast she goes down once she can't float (blocks a tick), and the longest she takes to reach
 	 * the bottom (ticks) before she's laid there as a wreck.
 	 */
 	static final double HOLE = 1.3, SINK = 0.03;
 	static final float SALVAGE = 0.25F;
 	static final int SINKING_MOST = 600;
-	/** (0.7.12) A broadside fires the guns pointing within this of where you look (a cosine), this many ticks apart. */
+	/** (0.7.18) A broadside fires the guns pointing within this of where you look (a cosine), this many ticks apart. */
 	static final double BROADSIDE_ARC = 0.5;
 	static final int BROADSIDE_GAP = 3;
 
@@ -134,11 +134,11 @@ public final class Ship extends Entity {
 	/** Server: how far its sails are set (0 furled to 1 full), its way (blocks/tick) and its turn (degrees/tick). */
 	private double sail, speed;
 	private static final EntityDataAccessor<Float> SET = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.FLOAT);
-	/** (0.7.12) Whether she's rowing: 1 ahead, -1 astern, 0 not. */
+	/** (0.7.18) Whether she's rowing: 1 ahead, -1 astern, 0 not. */
 	private static final EntityDataAccessor<Byte> ROWING = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.BYTE);
-	/** (0.7.12) Whether she's going down (her hold's flooded). */
+	/** (0.7.18) Whether she's going down (her hold's flooded). */
 	private static final EntityDataAccessor<Boolean> FOUNDERING = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.BOOLEAN);
-	/** (0.7.12) Server: ticks since she began to go down (0: afloat), and the guns of a broadside still to fire (piece, tick). */
+	/** (0.7.18) Server: ticks since she began to go down (0: afloat), and the guns of a broadside still to fire (piece, tick). */
 	private int sinking;
 	private final List<int[]> volley = new ArrayList<>();
 	private float turn;
@@ -514,7 +514,7 @@ public final class Ship extends Entity {
 		return Math.min(FASTEST, Math.min(PER_LENGTH * h.waterline, push));
 	}
 
-	/** (0.7.12) Its top speed under oars (blocks/tick): more oars row faster, a heavier ship slower (none: no oars). */
+	/** (0.7.18) Its top speed under oars (blocks/tick): more oars row faster, a heavier ship slower (none: no oars). */
 	double rowSpeed(Hull h) {
 		if (h.oars == 0) {
 			return 0.0;
@@ -523,7 +523,7 @@ public final class Ship extends Entity {
 		return Math.min(ROW_FASTEST, Math.min(PER_LENGTH * Math.max(4, h.waterline), row));
 	}
 
-	/** (0.7.12) What the one at the helm sees: sails, oars, speed and the wind, or (lying still, every few seconds) the keys. */
+	/** (0.7.18) What the one at the helm sees: sails, oars, speed and the wind, or (lying still, every few seconds) the keys. */
 	private Component readout(ServerLevel level, Hull h, int row, double top) {
 		net.minecraft.network.chat.MutableComponent line = Component.empty();
 		String dot = "  ·  ";

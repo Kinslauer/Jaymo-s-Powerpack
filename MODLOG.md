@@ -1101,3 +1101,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   and Shoulder Surfing refuses to load beside it). Also added: Fancy World Animations (MIT; doors, chests, levers and
   more animate, lanterns sway) and Ji AFK Cinematic (idle cinematic camera; in packModsNoCf until CurseForge has its
   26.3 file). Kingdoms 0.7.17 also gives spiders biome kinds (Spider Overhaul's ideas). Not yet seen in game.
+- **0.10.66 / Kingdoms 0.7.18, sailing stage 2 (Andy: "wind, oars, cannons, and the in world build kits"):** ships sail
+  by the world's wind (in irons head to wind, best on a reach), row with oars, fight with ship's cannons (broadsides
+  from the helm, round shot holes hulls, a ship holed at the waterline founders and lies on the bottom as a wreck), and
+  come as Rowboat, Sloop and Brig build kits laid out as frames on the water. After AlekiShips' ideas (MIT, Forge
+  1.20.1 only); none of its code or art (`kingdoms/MODLOG.md`).

@@ -1,7 +1,7 @@
 """Writes Jaymo's Kingdoms' sailing assets (0.7.4): the ship's helm (a spruce wheel on a post, from vanilla's own block
 textures) and the sail (0.7.6: bellied sailcloth on a yard, one model for each way its neighbours join it, set and
 furled, and our own sailcloth and rope textures), their blockstates, item models, loot tables and recipes.
-(0.7.12) Also oars (shipped, their lock, and the oar alone, which the ship sweeps), the ship's gun, the frames build
+(0.7.18) Also oars (shipped, their lock, and the oar alone, which the ship sweeps), the ship's gun, the frames build
 kits lay down, round shot and the kits themselves (our own textures, drawn here).
 Run from kingdoms/: python3 -I tools/gen_sailing.py"""
 import json
@@ -201,7 +201,7 @@ def block_model(textures, elements, ao=True):
     return m
 
 
-# ---- oars (0.7.12) ----
+# ---- oars (0.7.18) ----
 # Facing north is outboard (-z). The lock is an iron fork on the outboard edge of a low board on the gunwale; the oar
 # turns in it at (8, 5.5, 1). Shipped, the oar lies along the gunwale; run out, the ship draws the loom alone, swung
 # and stretched along its length (ShipRenderer).
@@ -228,7 +228,7 @@ def oars():
     write_json(os.path.join(ASSETS, "blockstates", "oar.json"), {"variants": variants})
 
 
-# ---- the ship's gun (0.7.12): an iron barrel on a wooden carriage, its muzzle north ----
+# ---- the ship's gun (0.7.18): an iron barrel on a wooden carriage, its muzzle north ----
 def cannon():
     tex = {"particle": "minecraft:block/anvil", "iron": "minecraft:block/anvil", "wood": "minecraft:block/dark_oak_planks",
            "bore": "minecraft:block/black_concrete", "rope": "jaymoskingdoms:block/sail_rope"}
@@ -256,7 +256,7 @@ def cannon():
     write_json(os.path.join(ASSETS, "blockstates", "ship_cannon.json"), {"variants": variants})
 
 
-# ---- frames (0.7.12): bare ribs round the cell, and a small token of what it wants in the middle ----
+# ---- frames (0.7.18): bare ribs round the cell, and a small token of what it wants in the middle ----
 def frames():
     tex = {"particle": "minecraft:block/scaffolding_side", "rib": "minecraft:block/stripped_oak_log",
            "planks": "minecraft:block/oak_planks", "mast": "minecraft:block/stripped_spruce_log",
@@ -289,7 +289,7 @@ def frames():
     write_json(os.path.join(ASSETS, "blockstates", "ship_frame.json"), {"variants": variants})
 
 
-# ---- item sprites (0.7.12): round shot, and the three kits (a rolled plan of each ship) ----
+# ---- item sprites (0.7.18): round shot, and the three kits (a rolled plan of each ship) ----
 def sprites():
     out = os.path.join(ASSETS, "textures", "item")
     os.makedirs(out, exist_ok=True)

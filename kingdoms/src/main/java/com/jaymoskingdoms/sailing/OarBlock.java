@@ -19,7 +19,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * (0.7.12) An oar in its oarlock, set on a ship's gunwale and facing outboard. Each one aboard lets her row (W/S on a ship
+ * (0.7.18) An oar in its oarlock, set on a ship's gunwale and facing outboard. Each one aboard lets her row (W/S on a ship
  * with no sails, Space on one with them), the faster the more oars she has and the lighter she is ({@link Ship}); while
  * she rows her oars are run out and drawn sweeping through the water, and shipped (laid along the gunwale) when she
  * doesn't. (AlekiShips, MIT, rows its boats with oars in oarlocks; this is our own take on it.)

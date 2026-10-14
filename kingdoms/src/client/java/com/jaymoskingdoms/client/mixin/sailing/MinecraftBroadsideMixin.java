@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.7.12) At a ship's helm, a left click fires a broadside instead of swinging. */
+/** (0.7.18) At a ship's helm, a left click fires a broadside instead of swinging. */
 @Mixin(Minecraft.class)
 abstract class MinecraftBroadsideMixin {
 	@Inject(method = "startAttack", at = @At("HEAD"), cancellable = true)

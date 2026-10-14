@@ -2774,3 +2774,34 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   and fold further on the step; legs twitch at rest, the abdomen breathes and sways as it walks. Tuning in KNEE_LIFT,
   SHIN_BEND, STEP_BEND.
 - Spider kinds and legs seen in a cloud playtest (screenshots in spider-kinds/); torches and dark nights not yet.
+
+## 0.7.18: sailing, stage 2: wind, oars, cannons and build kits (pack 0.10.66)
+- Andy: "I want wind, oars, cannons, and the in world build kits" (after linking AlekiShips: MIT, but Forge/NeoForge
+  1.20.1 only, so its ideas remade; none of its code or art).
+- **Wind** (`sailing/Winds`): sails take the world's own wind (`Storms.windAngle()/windStrength()`, the one that drives
+  storm cells), harder in rain and hardest under thunder. How much they catch goes by the angle off the wind: running
+  0.85, broad and close reach 1.0, beam 0.8, close-hauled down to 0.3, in irons (within 40 degrees of head to wind)
+  nothing. The helm readout shows sails, speed, wind strength, where it blows from and the point of sail; lying still
+  it takes turns with the keys. Tuning in `Winds.ANGLES/CATCH`, `LEAST/MOST/RAIN/THUNDER`.
+- **Oars** (`OarBlock`; planks, a stick and an iron nugget): set on the gunwale facing outboard. A ship with no sails
+  rows on W/S; one with sails rows ahead on Space and backs oars on S once her sails are furled. Speed 0.12 x the
+  square root of her oars, slowed by her weight (`Ship.ROW_*`), at most 4.4 blocks/s; rowing tires the one at the helm a
+  little. Shipped, an oar lies along the gunwale; rowing, the ship draws them run out and sweeping through the water
+  (`ShipRenderer.OAR_*`).
+- **Ship's cannon** (`ShipCannonBlock`; iron, an iron block and planks) and **round shot** (iron nuggets round an ingot,
+  makes 4; WeaponMod's cannonball works too). Right-click with gunpowder, then shot, then flint and steel or a fire
+  charge: it fires as high as you look (-6 to 15 degrees). Works ashore and aboard. At the helm a left click fires a
+  **broadside**: every loaded gun on the side you look to, 3 ticks apart. `ShipShot` (speed 1.6, gravity 0.015) holes a
+  ship it hits (blocks within 1.3 smashed out, a quarter wash up, chests spill, her helm never), tears sails it passes
+  through, hurts everyone within 2 (16 at the heart), splashes into the sea and leaves world blocks whole. A ship holed
+  at the waterline (half her hold there flooded) or too heavy to float founders: she goes down slowly with bubbles and
+  is laid on the bottom as a wreck, chests and all.
+- **Build kits** (`ShipKits`; paper, string and a stick, the sloop adds a second paper and wool, the brig a third and
+  an iron ingot): used looking at open water, a kit lays her whole frame (`ShipFrameBlock`) on the water, stern just
+  beyond where you look, bow the way you face. Each frame shows what it wants (planks, fence rail, fence or log mast,
+  sail, helm, oar, cannon, chest); right-click it with that. The kit's tooltip counts what she takes. When the last
+  frame is filled her timbers are dried, her hold bailed, and she can cast off like any ship of blocks (casting off
+  refuses while frames remain). Rowboat: 7 long, two oars. Sloop: 13 long, a mast and sail, 4 oars, 2 guns, a chest.
+  Brig: 19 long, two masts, 4 oars, 6 guns, 2 chests in a two-high hold.
+- Tested in a cloud dev client: all three kits laid, filled and bailed dry; sailing on a beam reach and in irons;
+  rowing; loading a gun by hand; a broadside holing a target ship that then sank and lay as a wreck.

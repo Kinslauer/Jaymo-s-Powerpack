@@ -24,7 +24,7 @@ import net.minecraft.world.phys.Vec3;
 public final class ShipClient {
 	/** Heel per degree of turn a tick, and how quickly it eases in. */
 	static final float HEEL_PER_TURN = 2.2F, HEEL_EASE = 0.08F, MOST_HEEL = 9.0F;
-	/** (0.7.12) Ticks between broadsides you can call for. */
+	/** (0.7.18) Ticks between broadsides you can call for. */
 	static final int BROADSIDE_COOLDOWN = 20;
 	private static int useCooldown;
 
@@ -67,7 +67,7 @@ public final class ShipClient {
 		you.setYHeadRot(you.getYHeadRot() + turned);
 	}
 
-	/** (0.7.12) At the helm, a left click fires a broadside to the side you look. True if it did (the click's used). */
+	/** (0.7.18) At the helm, a left click fires a broadside to the side you look. True if it did (the click's used). */
 	public static boolean broadside(Minecraft mc) {
 		LocalPlayer you = mc.player;
 		if (you == null || !(you.getVehicle() instanceof Ship ship)) {

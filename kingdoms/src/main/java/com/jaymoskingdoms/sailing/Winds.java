@@ -6,7 +6,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 
 /**
- * (0.7.12) The wind in a ship's sails: the world's own wind ({@link Storms}, the one that drives its storm cells), harder
+ * (0.7.18) The wind in a ship's sails: the world's own wind ({@link Storms}, the one that drives its storm cells), harder
  * in rain and hardest under a thunderstorm, and how much of it the sails catch on the ship's heading. With the wind
  * behind her she runs well; across it (a reach) she sails best; she can point up to about 45 degrees off it
  * (close-hauled), and head to wind she lies in irons, her sails flogging, and has to row or come about. (AlekiShips, MIT,

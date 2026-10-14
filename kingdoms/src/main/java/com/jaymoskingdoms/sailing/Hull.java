@@ -44,9 +44,9 @@ public final class Hull {
 	/** How deep it sits (blocks below the waterline, from its bottom), and whether it floats at all. */
 	public final float draft;
 	public final boolean floats;
-	/** Its length at the waterline (blocks, along local z), its sails, and (0.7.12) its oars. */
+	/** Its length at the waterline (blocks, along local z), its sails, and (0.7.18) its oars. */
 	public final int waterline, sails, oars;
-	/** (0.7.12) Its guns' pieces, and its oars'. */
+	/** (0.7.18) Its guns' pieces, and its oars'. */
 	public final int[] cannons, oarPieces;
 	/** The pieces on its outside (walls, bottom and ends), which run into land first. */
 	public final int[] skin;

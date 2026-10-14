@@ -35,7 +35,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.12) A ship's gun on its carriage, its muzzle the way it faces. Ram in gunpowder, then round shot (or WeaponMod's
+ * (0.7.18) A ship's gun on its carriage, its muzzle the way it faces. Ram in gunpowder, then round shot (or WeaponMod's
  * cannonball), and touch it off with flint and steel or a fire charge: it fires a {@link ShipShot} that holes ships.
  * Works ashore and aboard, laid as high as its gunner looks; at the helm, a left click fires every loaded gun on the
  * side you look to, a broadside.

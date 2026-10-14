@@ -43,7 +43,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.12) A ship's frame, laid on the water by a {@link ShipKits build kit}: one block of the ship still to build, its
+ * (0.7.18) A ship's frame, laid on the water by a {@link ShipKits build kit}: one block of the ship still to build, its
  * bare ribs showing what it wants (planks for the hull and deck, a fence for the rail, a fence or log for a mast, a
  * sail, the helm, an oar, a gun, a chest). Right-click it with that to put it in. When the last one's in, the water in
  * her hold is bailed out and she's ready to cast off. (AlekiShips, MIT, builds its ships in the world from frames; ours

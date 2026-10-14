@@ -36,7 +36,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.12) Build kits: a rowboat, a sloop and a brig, each a set of plans that, used on open water, lays out the whole
+ * (0.7.18) Build kits: a rowboat, a sloop and a brig, each a set of plans that, used on open water, lays out the whole
  * ship in {@link ShipFrameBlock frames} ahead of you, her bow the way you face. Fill every frame with what it wants and
  * she's built (her hold bailed dry), ready to cast off from her helm like any ship of blocks. (AlekiShips, MIT, builds its
  * ships from in-world frames; these designs and how they go together are our own.)
