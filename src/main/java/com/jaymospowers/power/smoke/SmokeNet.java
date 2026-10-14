@@ -16,7 +16,7 @@ public final class SmokeNet {
 	/**
 	 * Server → one client: all the smoke near them, replacing what they had. {@code origin} is a packed block position;
 	 * {@code cells} is {@link #STRIDE} bytes a block: x, y, z off the origin, density (0-255 of {@link SmokeField#CAP})
-	 * and flags ({@link #YOURS}: you made it). Empty: no smoke near you any more.
+	 * and flags ({@link #YOURS}: you made it; the upper seven bits are its soot, 0-127). Empty: no smoke near you any more.
 	 */
 	public record Field(long origin, byte[] cells) implements CustomPacketPayload {
 		public static final int STRIDE = 5;

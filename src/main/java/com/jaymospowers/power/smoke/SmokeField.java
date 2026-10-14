@@ -41,7 +41,10 @@ import net.minecraft.world.phys.Vec3;
  * (leaves half);</li>
  * <li>drifts: under the open sky the wind carries it (the wind wanders, stronger in rain and storms), and Wind users
  * flying through it scatter it;</li>
- * <li>fades: a little goes every step, faster under the sky and much faster in the rain.</li>
+ * <li>fades: a little goes every step, faster under the sky and much faster in the rain;</li>
+ * <li>follows its path (after Advanced Chimneys' smoke): it gets sootier and thicker passing through fire, cleaner
+ * through leaves, and rides Advanced Chimneys' chimneys, ducts and pipes up and out of their vents
+ * ({@link ChimneyCompat}). Smoke made by a fire is thicker and darker ({@link SmokeHeat}).</li>
  * </ul>
  * Thick smoke hides: a mob can't take (or keep) a target when the line between their eyes runs through enough of it
  * ({@link #blocksSight}). Each player is sent the smoke near them ({@link SmokeNet.Field}); the client draws it as soft
@@ -71,6 +74,18 @@ public final class SmokeField {
 	/** How much gets through a part block (doors, slabs, fences, bars), and through leaves. */
 	static final float LEAK = 0.25F;
 	static final float LEAVES = 0.5F;
+	/** Inside an Advanced Chimneys chimney, duct, pipe or pump, this share is drawn up (or along) each step. */
+	static final float DRAFT = 0.6F;
+	/** Smoke passing through fire comes out this much thicker and sootier; through leaves it comes out cleaner. */
+	static final float FIRE_FEED = 1.15F;
+	static final float FIRE_SOOT = 0.3F;
+	static final float LEAF_CLEAN = 0.8F;
+	/** Kinds of block, for the path smoke takes (kept with each block's leak in the step's cache). */
+	static final int PLAIN = 0;
+	static final int CONDUIT = 1;
+	static final int VENT = 2;
+	static final int HOT = 3;
+	static final int FILTER = 4;
 	/** Cells kept per dimension; past this it fades three times as fast until it's back under. */
 	static final int MAX_CELLS = 24000;
 	/** Smoke this thick at your head hides you; the line between two pairs of eyes is blocked by this much in all. */
@@ -92,6 +107,8 @@ public final class SmokeField {
 	static final class Field {
 		Long2FloatOpenHashMap density = new Long2FloatOpenHashMap();
 		Long2IntOpenHashMap owner = new Long2IntOpenHashMap();
+		/** How sooty each block's smoke is, 0 (pale grey) to 1 (black), from what made it and what it passed through. */
+		Long2FloatOpenHashMap soot = new Long2FloatOpenHashMap();
 		double windAngle = Math.random() * Math.PI * 2.0;
 		double wind = 0.3;
 		boolean crowded;
@@ -180,6 +197,12 @@ public final class SmokeField {
 	 * outward into open blocks nearby, so a big puff makes a cloud at once.
 	 */
 	public static void puff(ServerLevel level, Vec3 at, float amount, @org.jspecify.annotations.Nullable Entity owner) {
+		// a Smoke user by a fire makes more smoke, and darker ({@link SmokeHeat})
+		float soot = SmokeHeat.BASE_SOOT;
+		if (owner instanceof ServerPlayer player) {
+			amount *= SmokeHeat.boost(player);
+			soot = SmokeHeat.soot(player);
+		}
 		if (amount <= 0.0F) {
 			return;
 		}
@@ -206,6 +229,7 @@ public final class SmokeField {
 			if (room > 0.0F) {
 				float put = Math.min(room, left);
 				field.density.put(key, now + put);
+				field.soot.put(key, (field.soot.get(key) * now + soot * put) / (now + put));
 				if (ownerId != 0 || now < put) {
 					field.owner.put(key, ownerId);
 				}
@@ -248,6 +272,7 @@ public final class SmokeField {
 			field.density.addTo(move[0], -d);
 			field.density.put(move[1], Math.min(CAP, field.density.get(move[1]) + d));
 			field.owner.put(move[1], field.owner.get(move[0]));
+			field.soot.put(move[1], field.soot.get(move[0]));
 		}
 	}
 
@@ -268,6 +293,16 @@ public final class SmokeField {
 	 * blocks, water or lava, and unloaded or out-of-world blocks; leaves and part blocks let some through.
 	 */
 	static float leak(Level level, BlockPos pos) {
+		float cell = cell(level, pos);
+		return cell - kindOf(cell) * 10.0F;
+	}
+
+	/**
+	 * The block at {@code pos} for the step: its leak (0-1) plus ten times its kind ({@link #PLAIN}, {@link #CONDUIT},
+	 * {@link #VENT}, {@link #HOT}, {@link #FILTER}). Advanced Chimneys' chimneys, ducts, pipes and pumps are hollow to
+	 * smoke ({@link ChimneyCompat}).
+	 */
+	static float cell(Level level, BlockPos pos) {
 		if (level.isOutsideBuildHeight(pos) || !level.isLoaded(pos)) {
 			return 0.0F;
 		}
@@ -278,13 +313,24 @@ public final class SmokeField {
 		if (!state.getFluidState().isEmpty()) {
 			return 0.0F;
 		}
+		if (ChimneyCompat.conduit(state)) {
+			return 1.0F + CONDUIT * 10.0F;
+		}
+		if (ChimneyCompat.vent(state)) {
+			return 1.0F + VENT * 10.0F;
+		}
 		if (state.is(BlockTags.LEAVES)) {
-			return LEAVES;
+			return LEAVES + FILTER * 10.0F;
 		}
+		int kind = SmokeHeat.hot(state) ? HOT : PLAIN;
 		if (state.getCollisionShape(level, pos).isEmpty()) {
-			return 1.0F;
+			return 1.0F + kind * 10.0F;
 		}
-		return state.isCollisionShapeFullBlock(level, pos) ? 0.0F : LEAK;
+		return state.isCollisionShapeFullBlock(level, pos) ? 0.0F : LEAK + kind * 10.0F;
+	}
+
+	static int kindOf(float cell) {
+		return (int)(cell / 10.0F);
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -333,60 +379,71 @@ public final class SmokeField {
 		Long2FloatOpenHashMap from = field.density;
 		Long2FloatOpenHashMap next = new Long2FloatOpenHashMap(from.size() * 2);
 		Long2IntOpenHashMap owners = new Long2IntOpenHashMap(from.size() * 2);
-		Long2FloatOpenHashMap leaks = new Long2FloatOpenHashMap(from.size() * 3);
-		leaks.defaultReturnValue(-1.0F);
+		Long2FloatOpenHashMap sootMass = new Long2FloatOpenHashMap(from.size() * 2);
+		Long2FloatOpenHashMap cells = new Long2FloatOpenHashMap(from.size() * 3);
+		cells.defaultReturnValue(-1.0F);
 		BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
 		long[] to = new long[7];
 		float[] flow = new float[7];
+		int[] kinds = new int[7];
 		for (Long2FloatMap.Entry entry : from.long2FloatEntrySet()) {
 			long key = entry.getLongKey();
 			float d = entry.getFloatValue();
-			if (leakAt(level, leaks, key, cursor) <= 0.0F) {
+			float here = cellAt(level, cells, key, cursor);
+			if (here <= 0.0F) {
 				continue; // filled in, or flooded: the smoke there is gone
 			}
+			boolean duct = kindOf(here) == CONDUIT;
 			cursor.set(key);
-			boolean open = level.canSeeSky(cursor);
+			boolean open = !duct && level.canSeeSky(cursor);
 			float decay = DECAY + (open ? OPEN_DECAY + (level.isRainingAt(cursor) ? RAIN_DECAY : 0.0F) : 0.0F);
 			float keep = d * (1.0F - FADE * decayScale) - decay * decayScale;
 			if (keep <= 0.0F) {
 				continue;
 			}
 			int owner = field.owner.get(key);
+			float soot = field.soot.get(key);
 			int n = 0;
-			// up
+			// up: inside a chimney it's drawn up hard
 			long up = BlockPos.offset(key, Direction.UP);
-			float leakUp = leakAt(level, leaks, up, cursor);
-			if (leakUp > 0.0F) {
+			float cellUp = cellAt(level, cells, up, cursor);
+			if (cellUp > 0.0F) {
 				to[n] = up;
-				flow[n++] = keep * RISE * leakUp;
+				kinds[n] = kindOf(cellUp);
+				flow[n++] = keep * (duct ? DRAFT : RISE) * open(cellUp);
 			}
-			// sideways and down, toward thinner smoke
+			// sideways and down, toward thinner smoke (inside a chimney, only along it or out of a vent)
 			for (Direction direction : Direction.values()) {
 				if (direction == Direction.UP) {
 					continue;
 				}
 				long side = BlockPos.offset(key, direction);
-				float leak = leakAt(level, leaks, side, cursor);
+				float cell = cellAt(level, cells, side, cursor);
+				int kind = kindOf(cell);
 				float diff = keep - from.get(side);
-				if (leak <= 0.0F || diff <= 0.0F) {
+				if (cell <= 0.0F || diff <= 0.0F || duct && kind != CONDUIT && kind != VENT) {
 					continue;
 				}
 				to[n] = side;
-				flow[n++] = diff * (direction == Direction.DOWN ? SINK : SPREAD) * leak;
+				kinds[n] = kind;
+				float share = duct && kind == CONDUIT ? DRAFT * 0.5F : direction == Direction.DOWN ? SINK : SPREAD;
+				flow[n++] = diff * share * open(cell);
 			}
 			// downwind, under the sky
 			if (open) {
 				long x = BlockPos.offset(key, downwindX);
-				float leakX = leakAt(level, leaks, x, cursor);
-				if (leakX > 0.0F) {
+				float cellX = cellAt(level, cells, x, cursor);
+				if (cellX > 0.0F) {
 					to[n] = x;
-					flow[n++] = keep * DRIFT * Math.abs(windX) * leakX;
+					kinds[n] = kindOf(cellX);
+					flow[n++] = keep * DRIFT * Math.abs(windX) * open(cellX);
 				}
 				long z = BlockPos.offset(key, downwindZ);
-				float leakZ = leakAt(level, leaks, z, cursor);
-				if (leakZ > 0.0F) {
+				float cellZ = cellAt(level, cells, z, cursor);
+				if (cellZ > 0.0F) {
 					to[n] = z;
-					flow[n++] = keep * DRIFT * Math.abs(windZ) * leakZ;
+					kinds[n] = kindOf(cellZ);
+					flow[n++] = keep * DRIFT * Math.abs(windZ) * open(cellZ);
 				}
 			}
 			float total = 0.0F;
@@ -394,13 +451,24 @@ public final class SmokeField {
 				total += flow[i];
 			}
 			float scale = total > keep * 0.8F ? keep * 0.8F / total : 1.0F;
-			add(next, owners, key, keep - total * scale, owner);
+			add(next, owners, sootMass, key, keep - total * scale, owner, soot);
 			for (int i = 0; i < n; i++) {
-				add(next, owners, to[i], flow[i] * scale, owner);
+				// what it passes through changes it: fire feeds it and blackens it, leaves clean it
+				float amount = flow[i] * scale;
+				float carried = soot;
+				if (kinds[i] == HOT) {
+					amount *= FIRE_FEED;
+					carried = Math.min(1.0F, soot + FIRE_SOOT);
+				} else if (kinds[i] == FILTER) {
+					carried = soot * LEAF_CLEAN;
+				}
+				add(next, owners, sootMass, to[i], amount, owner, carried);
 			}
 		}
 		next.long2FloatEntrySet().removeIf(e -> e.getFloatValue() < MIN);
+		Long2FloatOpenHashMap soots = new Long2FloatOpenHashMap(next.size() * 2);
 		for (Long2FloatMap.Entry entry : next.long2FloatEntrySet()) {
+			soots.put(entry.getLongKey(), Mth.clamp(sootMass.get(entry.getLongKey()) / entry.getFloatValue(), 0.0F, 1.0F));
 			if (entry.getFloatValue() > CAP) {
 				entry.setValue(CAP);
 			}
@@ -408,24 +476,32 @@ public final class SmokeField {
 		owners.keySet().retainAll(next.keySet());
 		field.density = next;
 		field.owner = owners;
+		field.soot = soots;
 		field.crowded = next.size() > MAX_CELLS;
 	}
 
-	private static float leakAt(Level level, Long2FloatOpenHashMap cache, long key, BlockPos.MutableBlockPos cursor) {
-		float leak = cache.get(key);
-		if (leak < 0.0F) {
-			leak = leak(level, cursor.set(key));
-			cache.put(key, leak);
-		}
-		return leak;
+	/** The leak (0-1) part of a {@link #cell} value. */
+	private static float open(float cell) {
+		return cell - kindOf(cell) * 10.0F;
 	}
 
-	/** Adds smoke to a cell of the next step; the owner of the bigger share wins it. */
-	private static void add(Long2FloatOpenHashMap next, Long2IntOpenHashMap owners, long key, float amount, int owner) {
+	private static float cellAt(Level level, Long2FloatOpenHashMap cache, long key, BlockPos.MutableBlockPos cursor) {
+		float cell = cache.get(key);
+		if (cell < 0.0F) {
+			cell = cell(level, cursor.set(key));
+			cache.put(key, cell);
+		}
+		return cell;
+	}
+
+	/** Adds smoke to a cell of the next step; the owner of the bigger share wins it, and the soot mixes by amount. */
+	private static void add(Long2FloatOpenHashMap next, Long2IntOpenHashMap owners, Long2FloatOpenHashMap sootMass, long key, float amount,
+			int owner, float soot) {
 		if (amount <= 0.0F) {
 			return;
 		}
 		float before = next.addTo(key, amount);
+		sootMass.addTo(key, amount * soot);
 		if (amount >= before) {
 			owners.put(key, owner);
 		}
@@ -495,7 +571,8 @@ public final class SmokeField {
 			data[i++] = (byte)(BlockPos.getY(key) - origin.getY());
 			data[i++] = (byte)(BlockPos.getZ(key) - origin.getZ());
 			data[i++] = (byte)Mth.clamp(Math.round(field.density.get(key) / CAP * 255.0F), 1, 255);
-			data[i++] = (byte)(field.owner.get(key) == self ? SmokeNet.Field.YOURS : 0);
+			int soot = Math.round(Mth.clamp(field.soot.get(key), 0.0F, 1.0F) * 127.0F);
+			data[i++] = (byte)(soot << 1 | (field.owner.get(key) == self ? SmokeNet.Field.YOURS : 0));
 		}
 		SmokeNet.send(player, new SmokeNet.Field(origin.asLong(), data));
 	}

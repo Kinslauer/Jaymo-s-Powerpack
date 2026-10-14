@@ -30,7 +30,7 @@ import org.joml.Vector3f;
  * Draws the smoke the server sends ({@link SmokeNet.Field}, every few ticks) as soft volume: each block of smoke is
  * one or two big camera-facing puffs (a 2x2 sheet of ragged puffs, {@code textures/entity/smoke/puff.png}), slowly
  * turning and bobbing, overlapping their neighbours so a cloud reads as one mass, lit by the world's light (dark at
- * night, glowing by a torch). Between updates each block's thickness eases from the last value to the new one.
+ * night, glowing by a torch), pale grey or sooty black by what made it and what it passed through. Between updates each block's thickness eases from the last value to the new one.
  * Your own smoke is drawn faint (you see through it). With your head in someone else's smoke the screen greys out.
  */
 public final class SmokeFieldClient {
@@ -51,6 +51,8 @@ public final class SmokeFieldClient {
 	private static Long2FloatOpenHashMap before = new Long2FloatOpenHashMap();
 	private static Long2FloatOpenHashMap now = new Long2FloatOpenHashMap();
 	private static LongOpenHashSet yours = new LongOpenHashSet();
+	/** Each block's soot (0 pale grey to 1 black), from the latest update. */
+	private static Long2FloatOpenHashMap soot = new Long2FloatOpenHashMap();
 	private static int sinceUpdate;
 	private static int age;
 
@@ -77,12 +79,14 @@ public final class SmokeFieldClient {
 		before = new Long2FloatOpenHashMap();
 		now = new Long2FloatOpenHashMap();
 		yours = new LongOpenHashSet();
+		soot = new Long2FloatOpenHashMap();
 	}
 
 	private static void receive(SmokeNet.Field field) {
 		byte[] cells = field.cells();
 		Long2FloatOpenHashMap next = new Long2FloatOpenHashMap(cells.length / SmokeNet.Field.STRIDE * 2);
 		LongOpenHashSet mine = new LongOpenHashSet();
+		Long2FloatOpenHashMap soots = new Long2FloatOpenHashMap();
 		int ox = BlockPos.getX(field.origin());
 		int oy = BlockPos.getY(field.origin());
 		int oz = BlockPos.getZ(field.origin());
@@ -92,10 +96,12 @@ public final class SmokeFieldClient {
 			if ((cells[i + 4] & SmokeNet.Field.YOURS) != 0) {
 				mine.add(key);
 			}
+			soots.put(key, ((cells[i + 4] & 0xFF) >> 1) / 127.0F);
 		}
 		before = now;
 		now = next;
 		yours = mine;
+		soot = soots;
 		sinceUpdate = 0;
 	}
 
@@ -189,7 +195,7 @@ public final class SmokeFieldClient {
 					puffs[o + 4] = phase + time * 0.004F * ((h & 0x10000) == 0 ? 1.0F : -1.0F);
 					puffs[o + 5] = alpha;
 					puffs[o + 6] = h >>> 40 & 3;
-					puffs[o + 7] = (h >>> 42 & 0x1F) / 31.0F;
+					puffs[o + 7] = (h >>> 42 & 0x1F) / 31.0F * 0.15F + 0.85F * (1.0F - soot.get(key));
 					lights[count - 1] = light;
 				}
 			}
@@ -219,7 +225,7 @@ public final class SmokeFieldClient {
 			float alpha, int light, int cell, float shade) {
 		float u0 = (cell & 1) * 0.5F;
 		float v0 = (cell >> 1) * 0.5F;
-		int grey = (int)(196 + 40 * shade);
+		int grey = (int)(40 + 196 * shade);
 		int color = (int)(alpha * 255.0F) << 24 | grey << 16 | grey << 8 | Math.min(255, grey + 6);
 		vertex(buffer, pose, turn, corner, x, y, z, -half, -half, color, u0, v0 + 0.5F, light);
 		vertex(buffer, pose, turn, corner, x, y, z, half, -half, color, u0 + 0.5F, v0 + 0.5F, light);

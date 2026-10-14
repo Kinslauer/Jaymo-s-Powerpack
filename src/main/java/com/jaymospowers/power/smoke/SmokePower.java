@@ -68,6 +68,7 @@ public final class SmokePower implements Power {
 		SmokeScreen.stop(player, false);
 		SmokeSmother.stop(player, false);
 		SmokeField.forget(player);
+		SmokeHeat.forget(player);
 	}
 
 	@Override
