@@ -46,4 +46,10 @@ final class WebGrowth {
 		double ticks = (now - entry.start()) / 50_000_000.0;
 		return length < 1.0E-3 ? 1.0F : (float)Math.min(1.0, ticks * speed / length);
 	}
+
+	/** Ticks since line {@code key} started shooting out (call after {@link #fraction} this frame), or 0 if unknown. */
+	static double ticks(long key) {
+		Entry entry = LINES.get(key);
+		return entry == null ? 0.0 : (System.nanoTime() - entry.start()) / 50_000_000.0;
+	}
 }
