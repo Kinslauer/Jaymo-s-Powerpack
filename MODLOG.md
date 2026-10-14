@@ -1056,6 +1056,12 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.10.47 / Kitchen 0.4.39, ragdoll physics:** our own Physics Mod-style ragdolls for corpses (Physics Mod itself is
   closed, ARR and client-only with no API; see kitchen/MODLOG.md). Severed parts roll along the ground as they move,
   rock to rest on a spring (a limb lies along the ground, never on end), and are kicked along by anyone walking into them.
+- **0.10.48, Z Fighter fists first and tail fear (Kingdoms 0.7.10):** Z Fighters can swing weapons again, but a weapon
+  (or a bow's arrow) hits for 35% unless their Kingdoms class is trained with it (`ClassPerks.trainedWith`, read by
+  reflection: Thief light blades, Warlord two-handers, Brute bludgeons, Archer bows, Marksman guns and crossbows, Sorcerer
+  swords, Mage staffs, Rider anything from the saddle). A Warrior-born with the tail out frightens townsfolk (`Tails`,
+  by the `jaymospowers_tail` tag): they cry werewolf and run, until the player reaches 25 MCA hearts with them (tail
+  wrapped) and picks "Explain your tail" in their chat menu; each villager has to be told.
 - **0.10.49, sounds, ambience and detail:** Sounds (imb11; new screen, item and block sounds), AmbientSounds 6 (biome,
   cave, water and weather ambience, in place of Dynamic Surroundings, which stops at 1.21.1), Subtle Effects (sparks,
   snoring, dust clouds and more) and A Good Place (blocks animate into place) join the pack with their libraries. Sounds

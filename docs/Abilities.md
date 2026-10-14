@@ -207,7 +207,7 @@ power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts
 | Line | Form | Key | Ability | What it does now | Change to |
 |---|---|---|---|---|---|
 | 210 | Starter | R (hold) | Charge Ki (weak) | Ki gathers at 8 a second while you stand your ground (slowed 60%). | |
-| 211 | Starter | passive | Fists | Bare fists hit for 4 (+0.75 per ability unlocked, +0.25 per foe that ever beat you, +1 ascended, +0.2 per Strength). Weapons (anything with its own attack damage) won't strike in your hand; bows still shoot. | |
+| 211 | Starter | passive | Fists | Bare fists hit for 4 (+0.75 per ability unlocked, +0.25 per foe that ever beat you, +1 ascended, +0.2 per Strength). Weapons (anything with its own attack damage, and arrows) hit for 35% unless your Kingdoms class is trained with them (Thief light blades, Warlord two-handers, Brute bludgeons, Archer bows, Marksman guns/crossbows, Sorcerer swords, Mage staffs, Rider anything from the saddle). | |
 | 212 | Base | R (hold) | Charge Ki | Ki pours in, 20 a second; the aura flares and you slow 60%. Costs a lot of food. Not while starving. | |
 | 213 | Base | G | Quick technique | Whichever is set on the training screen: Ki Blast by default, a fast bolt from the palm (8 ki, ~5 damage, grows with mastery, Ki Power and the form, 0.3 s). Others: lines 229-232. | |
 | 214 | Base | V (hold) | Charged technique | Ki Wave by default: gather for up to 3 s, let go: a beam through everything in a 40-block line, 8-24 damage, a blast where it ends (a full wave in a Super form breaks blocks if mob griefing is on). 25-60 ki. 5 s. Or Ki Bomb (line 233). | |

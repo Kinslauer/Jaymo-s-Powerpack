@@ -59,7 +59,7 @@ import net.minecraft.world.phys.Vec3;
  * lifts its power and eases its drain.</li>
  * <li>X: the training screen; sneak+X: Limit Break up a tier (wraps to off), a form that stacks on top and burns
  * health.</li>
- * <li>Passive: fists only (weapons won't strike, {@code ZFighterPlayerMixin}), strong fists that grow with mastery,
+ * <li>Passive: fists first (a weapon his Kingdoms class isn't trained with hits weakly, {@code ZFighterBattle#WEAPON_DAMAGE}), strong fists that grow with mastery,
  * five-hit combos, an enormous appetite, and no foe fells him twice ({@link ZFighterBattle}).</li>
  * </ul>
  */
@@ -363,6 +363,7 @@ public final class ZFighterPower implements Power {
 		player.removeAttached(FLIGHT);
 		player.removeAttached(CHARGE);
 		ZFighterCorruption.clear(player);
+		ZFighterLineage.tailTags(player, false, false);
 		player.removeAttached(FORM);
 		player.removeAttached(DEFEATS);
 		player.removeAttached(GRUDGES);
