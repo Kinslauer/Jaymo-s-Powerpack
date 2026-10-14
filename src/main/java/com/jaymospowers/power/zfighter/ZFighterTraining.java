@@ -1,0 +1,332 @@
+package com.jaymospowers.power.zfighter;
+
+import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.Fate;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.netty.buffer.ByteBuf;
+import java.util.ArrayList;
+import java.util.List;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
+
+/**
+ * Training, our own take on a ki-fighter's growth: <b>Training Points</b> (TP) come from fighting (every hit, every
+ * kill, more for bigger foes), from time spent with the power, from the road (walking) and from meditation (sneak and
+ * stand still, unhurt). They buy:
+ * <ul>
+ * <li>five <b>stats</b> ({@link #STRENGTH} fists, {@link #TOUGHNESS} less damage taken, {@link #VITALITY} health,
+ * {@link #KI_POWER} ki techniques, {@link #ENERGY} more ki), each up to {@link #STAT_CAP}; every level bought makes the
+ * next one dearer;</li>
+ * <li>the <b>forms</b> past Super: Super 2 and Super 3, each needing TP, a quarter of the form below mastered, and
+ * hardship lived through;</li>
+ * <li>the tiers of <b>Limit Break</b>, the form that stacks on top of the others and burns your health.</li>
+ * </ul>
+ * <b>Mastery</b> is per form (0-100%), earned only while in it: every blow landed (four times as much for a heavy one)
+ * and time spent in it. A quarter opens the next form; half lets you go into it for free; and it lifts the form's
+ * power while easing its drain. Saved, kept through death, synced to the owner (the training screen, the HUD).
+ */
+public final class ZFighterTraining {
+	public static final int STRENGTH = 0;
+	public static final int TOUGHNESS = 1;
+	public static final int VITALITY = 2;
+	public static final int KI_POWER = 3;
+	public static final int ENERGY = 4;
+	public static final int STATS = 5;
+	public static final int STAT_CAP = 50;
+	/** A stat level costs this, plus {@link #STAT_COST_STEP} for every level already bought (any stat). */
+	public static final int STAT_BASE_COST = 20;
+	public static final int STAT_COST_STEP = 10;
+	/** What one level gives: fist damage, share of damage taken away, max health, ki technique power, max ki. */
+	public static final double STRENGTH_PER_LEVEL = 0.2;
+	public static final float TOUGHNESS_PER_LEVEL = 0.006F;
+	public static final double VITALITY_PER_LEVEL = 0.4;
+	public static final float KI_POWER_PER_LEVEL = 0.015F;
+	public static final int ENERGY_PER_LEVEL = 3;
+
+	/** Forms: 1 Super (the breakthrough), 2 Super 2, 3 Super 3. Index 0 is base. */
+	public static final int FORMS = 3;
+	/** TP and hardship to buy Super 2 and Super 3 (index by form); each also needs {@link #NEXT_FORM_MASTERY} of the one below. */
+	public static final int[] FORM_TP = {0, 0, 4000, 12000};
+	public static final int[] FORM_HARDSHIP = {0, 0, 80, 150};
+	/** Mastery, in hundredths of a percent (10000 = 100%). */
+	public static final int MASTERY_MAX = 10000;
+	public static final int NEXT_FORM_MASTERY = 2500;
+	public static final int FREE_ENTRY_MASTERY = 5000;
+	/** Mastery per blow landed in a form (0.25%); a heavy blow (a fifth of the target's health or more) counts four times. */
+	public static final int MASTERY_PER_HIT = 25;
+	/** Mastery for every 5 s spent in a form (0.04%). */
+	public static final int MASTERY_PER_TIME = 4;
+
+	/** Limit Break's tiers: TP each (index by tier, 1-3). */
+	public static final int[] LIMIT_TP = {0, 1000, 3000, 8000};
+
+	// ---- earning TP ----
+	public static final int TP_PER_HIT = 2;
+	/** A kill: this, plus a quarter of the victim's max health. */
+	public static final int TP_PER_KILL = 2;
+	public static final int TP_PASSIVE_TICKS = 100;
+	public static final double TP_TRAVEL_BLOCKS = 20.0;
+	/** Meditating: still, sneaking, unhurt for this long, then a TP and 2 ki every second. */
+	public static final int MEDITATE_AFTER = 60;
+	public static final int MEDITATE_TP = 1;
+	public static final float MEDITATE_KI = 2.0F;
+	/** Hungry, a fighter trains at half the rate. */
+	public static final float HUNGRY_TP = 0.5F;
+
+	public record Data(int tp, List<Integer> stats, int form, List<Integer> mastery, int limit) {
+		public static final Data NONE = new Data(0, List.of(0, 0, 0, 0, 0), 0, List.of(0, 0, 0), 0);
+		public static final Codec<Data> CODEC = RecordCodecBuilder.create(i -> i.group(
+				Codec.INT.optionalFieldOf("tp", 0).forGetter(Data::tp),
+				Codec.INT.listOf().optionalFieldOf("stats", NONE.stats).forGetter(Data::stats),
+				Codec.INT.optionalFieldOf("form", 0).forGetter(Data::form),
+				Codec.INT.listOf().optionalFieldOf("mastery", NONE.mastery).forGetter(Data::mastery),
+				Codec.INT.optionalFieldOf("limit", 0).forGetter(Data::limit))
+			.apply(i, Data::new));
+		public static final StreamCodec<ByteBuf, Data> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_INT, Data::tp,
+			ByteBufCodecs.VAR_INT.apply(ByteBufCodecs.list()), Data::stats,
+			ByteBufCodecs.VAR_INT, Data::form,
+			ByteBufCodecs.VAR_INT.apply(ByteBufCodecs.list()), Data::mastery,
+			ByteBufCodecs.VAR_INT, Data::limit,
+			Data::new);
+
+		public int stat(int index) {
+			return index >= 0 && index < stats.size() ? stats.get(index) : 0;
+		}
+
+		/** Mastery of {@code form} (1-3), 0-{@link #MASTERY_MAX}. */
+		public int mastery(int form) {
+			return form >= 1 && form <= mastery.size() ? mastery.get(form - 1) : 0;
+		}
+
+		public int totalLevels() {
+			int total = 0;
+			for (int level : stats) {
+				total += level;
+			}
+			return total;
+		}
+
+		Data withTp(int value) {
+			return new Data(value, stats, form, mastery, limit);
+		}
+
+		Data withStat(int index, int level) {
+			List<Integer> next = new ArrayList<>(stats);
+			while (next.size() < STATS) {
+				next.add(0);
+			}
+			next.set(index, level);
+			return new Data(tp, List.copyOf(next), form, mastery, limit);
+		}
+
+		Data withForm(int value) {
+			return new Data(tp, stats, value, mastery, limit);
+		}
+
+		Data withMastery(int form, int value) {
+			List<Integer> next = new ArrayList<>(mastery);
+			while (next.size() < FORMS) {
+				next.add(0);
+			}
+			next.set(form - 1, value);
+			return new Data(tp, stats, this.form, List.copyOf(next), limit);
+		}
+
+		Data withLimit(int value) {
+			return new Data(tp, stats, form, mastery, value);
+		}
+	}
+
+	public static final AttachmentType<Data> DATA = AttachmentRegistry.create(JaymosPowers.id("zfighter_training"),
+		builder -> builder.persistent(Data.CODEC).copyOnDeath().syncWith(Data.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
+
+	private ZFighterTraining() {
+	}
+
+	public static Data of(Player player) {
+		Data data = player.getAttached(DATA);
+		return data == null ? Data.NONE : data;
+	}
+
+	/** The cost of the next level of any stat. */
+	public static int statCost(Data data) {
+		return STAT_BASE_COST + STAT_COST_STEP * data.totalLevels();
+	}
+
+	/**
+	 * The highest form he can take: 0 before the breakthrough, then the highest bought (Super comes with the breakthrough,
+	 * which ascends the power).
+	 */
+	public static int formsOpen(Player player) {
+		return Fate.isAscended(player) ? Mth.clamp(Math.max(1, of(player).form()), 1, FORMS) : 0;
+	}
+
+	/** Whether {@code form} (2-3) can be bought now; if not, why (a lang key), or null when it can. */
+	public static String formBlocker(Player player, int form) {
+		Data data = of(player);
+		if (form < 2 || form > FORMS || form != formsOpen(player) + 1) {
+			return form <= formsOpen(player) ? "screen.jaymospowers.zfighter.owned" : "screen.jaymospowers.zfighter.locked";
+		}
+		if (data.mastery(form - 1) < NEXT_FORM_MASTERY) {
+			return "screen.jaymospowers.zfighter.need_mastery";
+		}
+		if (ZFighterPower.hardship(player) < FORM_HARDSHIP[form]) {
+			return "screen.jaymospowers.zfighter.need_hardship";
+		}
+		if (data.tp() < FORM_TP[form]) {
+			return "screen.jaymospowers.zfighter.need_tp";
+		}
+		return null;
+	}
+
+	// ---------------------------------------------------------------- server: earning
+
+	static void earn(ServerPlayer player, float amount) {
+		if (amount <= 0.0F || player.isCreative()) {
+			return;
+		}
+		ZFighterPower.Live live = ZFighterPower.live(player);
+		if (player.getFoodData().getFoodLevel() <= ZFighterPower.HUNGRY_FOOD) {
+			amount *= HUNGRY_TP;
+		}
+		live.tpFraction += amount;
+		int whole = (int)live.tpFraction;
+		if (whole > 0) {
+			live.tpFraction -= whole;
+			Data data = of(player);
+			player.setAttached(DATA, data.withTp(data.tp() + whole));
+		}
+	}
+
+	/** Mastery for the form he's in. */
+	static void master(ServerPlayer player, int form, int amount) {
+		if (form < 1 || form > FORMS || amount <= 0) {
+			return;
+		}
+		Data data = of(player);
+		int before = data.mastery(form);
+		int after = Math.min(MASTERY_MAX, before + amount);
+		if (after == before) {
+			return;
+		}
+		player.setAttached(DATA, data.withMastery(form, after));
+		for (int threshold : new int[] {NEXT_FORM_MASTERY, FREE_ENTRY_MASTERY, MASTERY_MAX}) {
+			if (before < threshold && after >= threshold) {
+				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_mastery_" + threshold / 100,
+					Component.translatable("form.jaymospowers.zfighter." + form)).withStyle(ChatFormatting.GOLD));
+				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.7F, 1.4F);
+			}
+		}
+	}
+
+	/** Every tick: time with the power, the road walked, meditation, time spent in a form. */
+	static void tick(ServerPlayer player, ZFighterPower.Live live) {
+		long now = player.level().getGameTime();
+		if (now % TP_PASSIVE_TICKS == 0) {
+			earn(player, 1.0F);
+			if (live.form > 0) {
+				master(player, live.form, MASTERY_PER_TIME);
+			}
+		}
+		if (live.lastX != null && player.onGround() && player.getVehicle() == null && !live.flying) {
+			double dx = player.getX() - live.lastX;
+			double dz = player.getZ() - live.lastZ;
+			double step = Math.sqrt(dx * dx + dz * dz);
+			if (step < 1.0) {
+				live.walked += step;
+			}
+			if (live.walked >= TP_TRAVEL_BLOCKS) {
+				live.walked -= TP_TRAVEL_BLOCKS;
+				earn(player, 1.0F);
+			}
+		}
+		live.lastX = player.getX();
+		live.lastZ = player.getZ();
+		// meditation: sneaking, still, on the ground, unhurt
+		boolean still = player.isShiftKeyDown() && player.onGround() && player.getDeltaMovement().horizontalDistanceSqr() < 1.0E-4
+			&& player.hurtTime == 0 && !live.charging && live.waveFrom < 0;
+		live.meditating = still ? live.meditating + 1 : 0;
+		if (live.meditating >= MEDITATE_AFTER && live.meditating % 20 == 0) {
+			earn(player, MEDITATE_TP);
+			live.ki += MEDITATE_KI;
+			player.level().sendParticles(net.minecraft.core.particles.ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.2, player.getZ(), 4,
+				0.5, 0.4, 0.5, 0.2);
+		}
+	}
+
+	/** A blow he landed (fist, ki): TP, and mastery of the form he's in. */
+	static void landed(ServerPlayer player, ZFighterPower.Live live, float damage, float targetMaxHealth) {
+		if (damage < 1.0F) {
+			return;
+		}
+		earn(player, TP_PER_HIT);
+		if (live.form > 0) {
+			master(player, live.form, damage >= targetMaxHealth * 0.2F ? MASTERY_PER_HIT * 4 : MASTERY_PER_HIT);
+		}
+	}
+
+	static void killed(ServerPlayer player, float victimMaxHealth) {
+		earn(player, TP_PER_KILL + victimMaxHealth * 0.25F);
+	}
+
+	// ---------------------------------------------------------------- server: spending (from the training screen)
+
+	static void buyStat(ServerPlayer player, int index) {
+		Data data = of(player);
+		if (index < 0 || index >= STATS || data.stat(index) >= STAT_CAP) {
+			return;
+		}
+		int cost = statCost(data);
+		if (data.tp() < cost && !player.isCreative()) {
+			return;
+		}
+		player.setAttached(DATA, data.withStat(index, data.stat(index) + 1).withTp(player.isCreative() ? data.tp() : data.tp() - cost));
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.5F, 1.6F);
+		ZFighterPower.refresh(player, ZFighterPower.live(player));
+	}
+
+	static void buyForm(ServerPlayer player, int form) {
+		if (formBlocker(player, form) != null && !(player.isCreative() && form == formsOpen(player) + 1 && form <= FORMS && Fate.isAscended(player))) {
+			return;
+		}
+		Data data = of(player);
+		player.setAttached(DATA, data.withForm(form).withTp(player.isCreative() ? data.tp() : data.tp() - FORM_TP[form]));
+		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_form_learned",
+			Component.translatable("form.jaymospowers.zfighter." + form)).withStyle(ChatFormatting.GOLD));
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 0.8F,
+			1.2F);
+	}
+
+	static void buyLimit(ServerPlayer player) {
+		Data data = of(player);
+		int tier = data.limit() + 1;
+		if (tier >= LIMIT_TP.length || data.tp() < LIMIT_TP[tier] && !player.isCreative()) {
+			return;
+		}
+		player.setAttached(DATA, data.withLimit(tier).withTp(player.isCreative() ? data.tp() : data.tp() - LIMIT_TP[tier]));
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6F, 0.8F);
+	}
+
+	// ---------------------------------------------------------------- what the stats and mastery give
+
+	/** 0-1 mastery of the form he's in (0 in base). */
+	static float mastery(Player player, int form) {
+		return form <= 0 ? 0.0F : of(player).mastery(form) / (float)MASTERY_MAX;
+	}
+
+	static float toughness(Player player) {
+		return of(player).stat(TOUGHNESS) * TOUGHNESS_PER_LEVEL;
+	}
+}

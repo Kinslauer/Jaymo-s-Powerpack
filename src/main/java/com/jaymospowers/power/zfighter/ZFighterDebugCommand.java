@@ -15,7 +15,10 @@ import net.minecraft.server.level.ServerPlayer;
  * <li>{@code /powerdebug zfighter ready}: clears every cooldown and fills the ki;</li>
  * <li>{@code /powerdebug zfighter hardship <n>}: sets the hardship ({@value ZFighterBattle#SUPER_HARDSHIP} opens the way
  * to Super);</li>
- * <li>{@code /powerdebug zfighter foes}: lists every foe that has beaten you; {@code foes clear} forgets them.</li>
+ * <li>{@code /powerdebug zfighter foes}: lists every foe that has beaten you and the rematches still owed;
+ * {@code foes clear} forgets them;</li>
+ * <li>{@code /powerdebug zfighter tp <n>}: sets your Training Points;</li>
+ * <li>{@code /powerdebug zfighter mastery <form> <percent>}: sets a form's mastery (1-3).</li>
  * </ul>
  */
 final class ZFighterDebugCommand {
@@ -43,11 +46,33 @@ final class ZFighterDebugCommand {
 								+ ZFighterBattle.SUPER_HARDSHIP), false);
 							return 1;
 						})))
+				.then(Commands.literal("tp")
+					.then(Commands.argument("n", IntegerArgumentType.integer(0, 10000000))
+						.executes(c -> {
+							ServerPlayer player = c.getSource().getPlayerOrException();
+							player.setAttached(ZFighterTraining.DATA, ZFighterTraining.of(player).withTp(IntegerArgumentType.getInteger(c, "n")));
+							c.getSource().sendSuccess(() -> Component.literal("TP: " + ZFighterTraining.of(player).tp()), false);
+							return 1;
+						})))
+				.then(Commands.literal("mastery")
+					.then(Commands.argument("form", IntegerArgumentType.integer(1, ZFighterTraining.FORMS))
+						.then(Commands.argument("percent", IntegerArgumentType.integer(0, 100))
+							.executes(c -> {
+								ServerPlayer player = c.getSource().getPlayerOrException();
+								int form = IntegerArgumentType.getInteger(c, "form");
+								player.setAttached(ZFighterTraining.DATA, ZFighterTraining.of(player).withMastery(form,
+									IntegerArgumentType.getInteger(c, "percent") * 100));
+								c.getSource().sendSuccess(() -> Component.literal("Form " + form + " mastery: "
+									+ ZFighterTraining.of(player).mastery(form) / 100 + "%"), false);
+								return 1;
+							}))))
 				.then(Commands.literal("foes")
 					.executes(c -> {
 						ServerPlayer player = c.getSource().getPlayerOrException();
 						List<String> foes = player.getAttachedOrElse(ZFighterPower.DEFEATS, List.of());
+						List<String> grudges = player.getAttachedOrElse(ZFighterPower.GRUDGES, List.of());
 						c.getSource().sendSuccess(() -> Component.literal("Beaten by (" + foes.size() + "): " + String.join(", ", foes)
+							+ "; rematches owed: " + String.join(", ", grudges)
 							+ (Powers.has(player, ZFighterPower.INSTANCE) ? "" : " (not a Z Fighter)")), false);
 						return 1;
 					})
@@ -55,6 +80,7 @@ final class ZFighterDebugCommand {
 						.executes(c -> {
 							ServerPlayer player = c.getSource().getPlayerOrException();
 							player.removeAttached(ZFighterPower.DEFEATS);
+							player.removeAttached(ZFighterPower.GRUDGES);
 							c.getSource().sendSuccess(() -> Component.literal("Foes forgotten."), false);
 							return 1;
 						})))));

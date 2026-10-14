@@ -40,6 +40,7 @@ public final class ZFighterPowerClient implements PowerClient {
 
 	public static void init() {
 		PowerClients.register(ZFighterPower.ID, INSTANCE);
+		ZFighterInputClient.init();
 	}
 
 	@Override
@@ -73,7 +74,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		boolean flight = ZFighterPower.INSTANCE.slotUnlocked(player, "mode");
 		boolean ultimate = Fate.isAscended(player);
 		boolean super_ = state.has(ZFighterState.SUPER);
-		int count = 4 + (flight ? 1 : 0) + (ultimate ? 1 : 0);
+		int count = 5 + (flight ? 1 : 0) + (ultimate ? 1 : 0);
 		int total = CHIP * count + CHIP_GAP * (count - 1);
 		int width = graphics.guiWidth();
 		int height = graphics.guiHeight();
@@ -97,6 +98,9 @@ public final class ZFighterPowerClient implements PowerClient {
 			special(graphics, font, x + step * next++, y, new ItemStack(Items.PHANTOM_MEMBRANE), 0, 1,
 				JaymosPowersClient.modeKey().getTranslatedKeyMessage().getString(), flying ? pulse(0xFFFFFF, CHIP_COLOR, time * 0.4F) : CHIP_COLOR);
 		}
+		boolean limit = state.limit() > 0;
+		special(graphics, font, x + step * next++, y, new ItemStack(limit ? Items.BLAZE_POWDER : Items.WRITABLE_BOOK), 0, 1,
+			ZFighterInputClient.keyLabel(Minecraft.getInstance()), limit ? pulse(0xFF3A2A, 0xFFB0A0, time * 0.6F) : CHIP_COLOR);
 		if (ultimate) {
 			special(graphics, font, x + step * next, y, new ItemStack(Items.NETHER_STAR), state.left(ZFighterState.SUPER_SLOT, now),
 				state.length()[ZFighterState.SUPER_SLOT], JaymosPowersClient.ultimateKey().getTranslatedKeyMessage().getString(),
@@ -112,8 +116,15 @@ public final class ZFighterPowerClient implements PowerClient {
 		graphics.fill(x + 1, y + 1, x + 1 + Math.round((width - 2) * fill), y + 3, 0xFF000000 | color);
 		String ki = state.ki() + "/" + state.maxKi();
 		graphics.text(font, ki, x + width - font.width(ki), y - 9, 0xFF000000 | color);
-		graphics.text(font, Component.translatable("hud.jaymospowers.zfighter.ki"), x, y - 9, 0xFFFFFFFF);
-		if (state.combo() >= 2) {
+		Component label = Component.translatable("hud.jaymospowers.zfighter.ki");
+		if (state.form() > 0) {
+			label = Component.translatable("form.jaymospowers.zfighter." + state.form()).copy().withColor(color);
+		}
+		if (state.limit() > 0) {
+			label = label.copy().append(Component.translatable("hud.jaymospowers.zfighter.limit", state.limit()).copy().withColor(0xFF5A40));
+		}
+		graphics.text(font, label, x, y - 9, 0xFFFFFFFF);
+		if (state.combo() >= 2 && state.form() == 0 && state.limit() == 0) {
 			Component combo = Component.translatable("hud.jaymospowers.zfighter.combo", state.combo());
 			graphics.text(font, combo, x + width / 2 - font.width(combo) / 2, y - 9, 0xFFFFE08A);
 		}

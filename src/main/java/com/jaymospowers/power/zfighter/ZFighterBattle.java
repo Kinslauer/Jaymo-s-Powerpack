@@ -31,9 +31,10 @@ import org.jspecify.annotations.Nullable;
 /**
  * The fighter's way:
  * <ul>
- * <li><b>No foe fells him twice.</b> Whatever kills him (each kind of creature; each player by name) is remembered for
- * good: from then on it does {@link #FOE_RESIST} less damage to him and takes {@link #FOE_BONUS} more from him. Every new
- * victor also makes him stronger for good (more ki, harder fists; see {@link ZFighterPower#zenkai}).</li>
+ * <li><b>No foe fells him twice.</b> Whatever kills him (each kind of creature; each player by name) owes him a rematch:
+ * until he beats it (kills one of that kind, or that player), it does {@link #FOE_RESIST} less damage to him and takes
+ * {@link #FOE_BONUS} more from him; beating it settles the score and the edge is gone. Every new victor also makes him
+ * stronger for good (more ki, harder fists; see {@link ZFighterPower#zenkai}).</li>
  * <li><b>Fists only.</b> A weapon (anything with attack damage of its own) won't strike in his hand
  * ({@code ZFighterPlayerMixin}). Every punch that lands builds ki and a combo; every {@link #COMBO_FINISHER}th hit in
  * a row is a finisher that sends the foe flying.</li>
@@ -64,7 +65,7 @@ final class ZFighterBattle {
 	static final int CLUTCH_HARDSHIP = 3;
 	/** At most one clutch counts in this many ticks. */
 	static final int CLUTCH_SPACING = 1200;
-	/** Killed a foe that once killed him. */
+	/** Settled a score: killed a foe that had killed him. */
 	static final int REMATCH_HARDSHIP = 2;
 	/** Felled a Wither, an Ender Dragon, a Warden or an Elder Guardian. */
 	static final int BOSS_HARDSHIP = 10;
@@ -80,8 +81,12 @@ final class ZFighterBattle {
 	static void init() {
 		ServerLivingEntityEvents.AFTER_DEATH.register(ZFighterBattle::afterDeath);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
-			if (damageTaken > 0.0F && source.getEntity() instanceof ServerPlayer player && source.getDirectEntity() == player
-				&& source.is(DamageTypes.PLAYER_ATTACK) && entity != player && Powers.has(player, ZFighterPower.INSTANCE)) {
+			if (damageTaken <= 0.0F || !(source.getEntity() instanceof ServerPlayer player) || entity == player
+				|| !Powers.has(player, ZFighterPower.INSTANCE)) {
+				return;
+			}
+			ZFighterTraining.landed(player, ZFighterPower.live(player), damageTaken, entity.getMaxHealth());
+			if (source.getDirectEntity() == player && source.is(DamageTypes.PLAYER_ATTACK)) {
 				punched(player, entity);
 			}
 		});
@@ -92,8 +97,9 @@ final class ZFighterBattle {
 		return entity instanceof Player player ? "player:" + player.getUUID() : BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString();
 	}
 
-	static boolean beatenBy(Player player, Entity foe) {
-		return player.getAttachedOrElse(ZFighterPower.DEFEATS, List.of()).contains(foeKey(foe));
+	/** Whether {@code foe} beat him and the rematch is still on. */
+	static boolean grudge(Player player, Entity foe) {
+		return player.getAttachedOrElse(ZFighterPower.GRUDGES, List.of()).contains(foeKey(foe));
 	}
 
 	// ---------------------------------------------------------------- fists only
@@ -132,16 +138,23 @@ final class ZFighterBattle {
 
 	// ---------------------------------------------------------------- damage
 
-	/** A foe that beat him once hits him for less, and takes more from him (every hit, any kind). */
+	/**
+	 * In a rematch, the foe that beat him hits him for less and takes more from him (every hit, any kind). Trained
+	 * Toughness takes its share off everything that hurts him.
+	 */
 	static float modifyDamage(LivingEntity victim, DamageSource source, float damage) {
-		Entity attacker = source.getEntity();
-		if (attacker == null || attacker == victim || damage <= 0.0F) {
+		if (damage <= 0.0F) {
 			return damage;
 		}
-		if (victim instanceof ServerPlayer player && Powers.has(player, ZFighterPower.INSTANCE) && beatenBy(player, attacker)) {
-			return damage * (1.0F - FOE_RESIST);
+		Entity attacker = source.getEntity();
+		if (victim instanceof ServerPlayer player && Powers.has(player, ZFighterPower.INSTANCE)) {
+			damage *= 1.0F - ZFighterTraining.toughness(player);
+			if (attacker != null && attacker != victim && grudge(player, attacker)) {
+				damage *= 1.0F - FOE_RESIST;
+			}
+			return damage;
 		}
-		if (attacker instanceof ServerPlayer player && Powers.has(player, ZFighterPower.INSTANCE) && beatenBy(player, victim)) {
+		if (attacker instanceof ServerPlayer player && attacker != victim && Powers.has(player, ZFighterPower.INSTANCE) && grudge(player, victim)) {
 			return damage * (1.0F + FOE_BONUS);
 		}
 		return damage;
@@ -162,7 +175,7 @@ final class ZFighterBattle {
 		// the finisher: one heavy blow that sends it flying
 		Vec3 look = player.getViewVector(1.0F);
 		target.setInvulnerableTime(0);
-		target.hurtServer(level, ZFighterKi.source(player), FINISHER_DAMAGE * (live.superOn ? ZFighterPower.SUPER_KI_POWER : 1.0F));
+		target.hurtServer(level, ZFighterKi.source(player), FINISHER_DAMAGE * ZFighterPower.FORM_KI[live.form]);
 		ZFighterKi.push(target, look, 1.8, 0.45);
 		Vec3 at = target.getBoundingBox().getCenter();
 		level.sendParticles(ParticleTypes.EXPLOSION, true, false, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
@@ -179,7 +192,12 @@ final class ZFighterBattle {
 			return;
 		}
 		if (source.getEntity() instanceof ServerPlayer player && player != entity && Powers.has(player, ZFighterPower.INSTANCE)) {
-			if (beatenBy(player, entity)) {
+			ZFighterTraining.killed(player, entity.getMaxHealth());
+			if (grudge(player, entity)) {
+				// the score is settled: the edge over this foe is spent
+				List<String> grudges = new ArrayList<>(player.getAttachedOrElse(ZFighterPower.GRUDGES, List.of()));
+				grudges.remove(foeKey(entity));
+				player.setAttached(ZFighterPower.GRUDGES, grudges);
 				ZFighterPower.addHardship(player, REMATCH_HARDSHIP);
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_rematch", entity.getDisplayName())
 					.withStyle(ChatFormatting.GOLD));
@@ -203,10 +221,18 @@ final class ZFighterBattle {
 			return;
 		}
 		String key = foeKey(victor);
+		List<String> grudges = new ArrayList<>(player.getAttachedOrElse(ZFighterPower.GRUDGES, List.of()));
+		if (!grudges.contains(key)) {
+			grudges.add(key);
+			player.setAttached(ZFighterPower.GRUDGES, grudges);
+		}
 		List<String> defeats = new ArrayList<>(player.getAttachedOrElse(ZFighterPower.DEFEATS, List.of()));
 		if (defeats.contains(key)) {
+			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_again", victor.getDisplayName())
+				.withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
 			return;
 		}
+		// a new victor: the growth stays for good
 		defeats.add(key);
 		player.setAttached(ZFighterPower.DEFEATS, defeats);
 		ZFighterPower.addHardship(player, DEFEAT_HARDSHIP);
@@ -255,7 +281,7 @@ final class ZFighterBattle {
 		player.heal(BREAKTHROUGH_HEAL);
 		live.ki = ZFighterPower.maxKi(player);
 		live.clutchFrom = -1L;
-		ZFighterPower.enterSuper(player, live);
+		ZFighterPower.transform(player, live, 1);
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 1.5F, 0.8F);
 	}
 }

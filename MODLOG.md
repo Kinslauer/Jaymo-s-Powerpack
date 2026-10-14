@@ -892,4 +892,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   fists. Super is the ascension, through hardship (`zfighter_hardship`: clutch recoveries, defeats, rematches, great
   beasts; 40, everything mastered, near death mid-fight): he breaks through and goes Super; then C toggles it (gold
   aura, fists +60%, ki x1.5, faster; burns ki and food). Calling: 20 monsters killed with bare fists while powerless.
-  No corruption yet. `/powerdebug zfighter ready|hardship <n>|foes [clear]`.
+  No corruption yet. `/powerdebug zfighter ready|hardship <n>|foes [clear]|tp <n>|mastery <form> <percent>`.
+  Andy's follow-ups (same release): the 50% edge lasts only for the rematch (`zfighter_grudges`; killing that foe settles
+  it, the growth stays). Training after DragonMineZ's idea, our own build (`ZFighterTraining`, X opens the screen):
+  Training Points from blows, kills, time, walking and meditation buy 5 stats; forms Super 2 and Super 3 bought with TP,
+  25% mastery of the form below and hardship; per-form mastery (25% next form, 50% free entry, up to +15% power and
+  -25% drain); C up a form, sneak+C down one; Limit Break (3 tiers, sneak+X) stacks on a form and burns health.

@@ -91,20 +91,20 @@ final class ZFighterKi {
 		Vec3 pos;
 		final Vec3 velocity;
 		final float damage;
-		final boolean gold;
+		final int color;
 		int age;
 
-		Bolt(ServerLevel level, UUID owner, Vec3 pos, Vec3 velocity, float damage, boolean gold) {
+		Bolt(ServerLevel level, UUID owner, Vec3 pos, Vec3 velocity, float damage, int color) {
 			this.level = level;
 			this.owner = owner;
 			this.pos = pos;
 			this.velocity = velocity;
 			this.damage = damage;
-			this.gold = gold;
+			this.color = color;
 		}
 	}
 
-	private record Beam(ServerLevel level, Vec3 from, Vec3 to, double radius, boolean gold, int[] age) {
+	private record Beam(ServerLevel level, Vec3 from, Vec3 to, double radius, int color, int[] age) {
 	}
 
 	private static final List<Bolt> BOLTS = new ArrayList<>();
@@ -139,7 +139,7 @@ final class ZFighterKi {
 		right = right.lengthSqr() < 1.0E-6 ? Vec3.ZERO : right.normalize();
 		Vec3 from = player.getEyePosition().add(look.scale(0.8)).add(right.scale(0.3)).add(0.0, -0.25, 0.0);
 		float damage = BLAST_DAMAGE * ZFighterPower.kiPower(player, live);
-		BOLTS.add(new Bolt(level, player.getUUID(), from, look.scale(BLAST_SPEED), damage, live.superOn));
+		BOLTS.add(new Bolt(level, player.getUUID(), from, look.scale(BLAST_SPEED), damage, ZFighterPower.FORM_COLOR[live.form]));
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		if (!player.isCreative()) {
 			player.causeFoodExhaustion(BLAST_EXHAUSTION);
@@ -176,7 +176,7 @@ final class ZFighterKi {
 		EntityHitResult hit = ProjectileUtil.getEntityHitResult(owner, from, end, new AABB(from, end).inflate(1.0),
 			e -> e instanceof LivingEntity living && living.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && e != owner,
 			from.distanceToSqr(end));
-		DustParticleOptions dust = new DustParticleOptions(bolt.gold ? ZFighterPower.SUPER_COLOR : BLAST_COLOR, 1.8F);
+		DustParticleOptions dust = new DustParticleOptions(bolt.color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : bolt.color, 1.8F);
 		if (hit != null && hit.getEntity() instanceof LivingEntity target) {
 			target.setInvulnerableTime(0);
 			target.hurtServer(level, source(owner), bolt.damage);
@@ -236,7 +236,7 @@ final class ZFighterKi {
 		Vec3 look = player.getViewVector(1.0F);
 		Vec3 hands = player.getEyePosition().add(look.scale(0.7)).add(0.0, -0.45, 0.0);
 		RandomSource random = level.getRandom();
-		DustParticleOptions dust = new DustParticleOptions(live.superOn ? ZFighterPower.SUPER_COLOR : WAVE_COLOR, 0.8F + charge * 1.2F);
+		DustParticleOptions dust = new DustParticleOptions(live.superOn() ? ZFighterPower.FORM_COLOR[live.form] : WAVE_COLOR, 0.8F + charge * 1.2F);
 		for (int i = 0; i < 3; i++) {
 			double ox = (random.nextDouble() - 0.5) * 1.6;
 			double oy = (random.nextDouble() - 0.5) * 1.6;
@@ -290,8 +290,8 @@ final class ZFighterKi {
 			target.hurtServer(level, source, damage);
 			push(target, look, 0.8 + charge * 1.2, 0.3);
 		}
-		boolean super_ = live.superOn;
-		BEAMS.add(new Beam(level, from, to, radius, super_, new int[1]));
+		boolean super_ = live.superOn();
+		BEAMS.add(new Beam(level, from, to, radius, super_ ? ZFighterPower.FORM_COLOR[live.form] : WAVE_COLOR, new int[1]));
 		float power = Mth.lerp(charge, WAVE_BLAST_MIN, WAVE_BLAST_MAX) * (super_ ? 1.3F : 1.0F);
 		// a full wave from a Super tears the ground (as a mob would: mob griefing decides); anything less only hurts
 		Level.ExplosionInteraction interaction = super_ && charge >= 1.0F ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE;
@@ -319,7 +319,7 @@ final class ZFighterKi {
 		float fade = 1.0F - beam.age()[0] / (float)BEAM_TICKS;
 		double radius = beam.radius() * (0.4 + 0.6 * fade);
 		DustParticleOptions core = new DustParticleOptions(0xFFFFFF, 2.5F);
-		DustParticleOptions glow = new DustParticleOptions(beam.gold() ? ZFighterPower.SUPER_COLOR : WAVE_COLOR, 3.0F);
+		DustParticleOptions glow = new DustParticleOptions(beam.color(), 3.0F);
 		for (double d = 0.0; d <= length; d += 0.6) {
 			Vec3 at = beam.from().add(dir.scale(d));
 			level.sendParticles(core, true, false, at.x, at.y, at.z, 1, radius * 0.15, radius * 0.15, radius * 0.15, 0.0);
