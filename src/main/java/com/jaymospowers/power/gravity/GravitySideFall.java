@@ -163,7 +163,7 @@ final class GravitySideFall {
 		level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), fall.speed > 1.2 ? SoundEvents.MACE_SMASH_GROUND_HEAVY : SoundEvents.MACE_SMASH_GROUND,
 			SoundSource.PLAYERS, 1.0F, 0.8F);
 		if (entity instanceof ServerPlayer player) {
-			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new com.jaymospowers.power.web.WebNet.Shake((float)Mth.clamp(fall.speed * 0.4, 0.2, 1.0)));
+			com.jaymospowers.core.Shakes.heavy(player, front, 10.0, (float)Mth.clamp(fall.speed * 0.4, 0.2, 1.0));
 		}
 	}
 

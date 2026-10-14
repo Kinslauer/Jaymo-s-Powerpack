@@ -724,13 +724,13 @@ public final class WebSwing {
 				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebStrain.Strain(1.0F, back));
 				strainTicks = 0;
 				sentStrain = 0.0F;
-				WebShake.start(0.9F);
+				com.jaymospowers.client.ScreenShake.add(0.9F);
 				slingJumpHeld = false;
 				fireSling(player, forward);
 				return;
 			}
 			if (strainTicks % 10 == 0) {
-				WebShake.start(0.15F + 0.35F * progress);
+				com.jaymospowers.client.ScreenShake.add(0.15F + 0.35F * progress);
 			}
 			if (progress - sentStrain >= 0.1F) {
 				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebStrain.Strain(progress, back));

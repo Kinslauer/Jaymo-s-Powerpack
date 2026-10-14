@@ -131,6 +131,9 @@ public final class ZFighterPower implements Power {
 	/** After dropping back to base, this long before going up again. */
 	static final int SUPER_COOLDOWN = 200;
 	static final double SUPER_BURST_RADIUS = 5.0;
+	/** The transformation's screen shake: degrees, more for each form up, and how far it's felt. */
+	static final float SUPER_SHAKE = 0.6F, SUPER_SHAKE_PER_FORM = 0.3F;
+	static final double SUPER_SHAKE_RANGE = 24.0;
 
 	// ---- Limit Break (index: tier 1-3) ----
 	static final double[] LIMIT_FIST = {0.0, 0.3, 0.6, 1.0};
@@ -229,6 +232,8 @@ public final class ZFighterPower implements Power {
 		int moonless;
 		/** How far grown into the Great Ape (0-1): eases up over {@link ZFighterLineage#APE_GROW_TICKS} and back down. */
 		float apeSize;
+		/** How far he'd walked at the Great Ape's last footfall (the ground shakes every stride). */
+		float apeStepAt;
 		/** The guard (right click held): up, since when, when he may parry again, until when his punch counters. */
 		boolean guarding;
 		long guardStart;
@@ -734,6 +739,7 @@ public final class ZFighterPower implements Power {
 			1.2, 1.2, 0.2);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 0.8F, 1.8F - 0.25F * form);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.7F, 1.4F);
+		com.jaymospowers.core.Shakes.heavy(player, center, SUPER_SHAKE_RANGE, SUPER_SHAKE + SUPER_SHAKE_PER_FORM * form);
 		refresh(player, live);
 	}
 

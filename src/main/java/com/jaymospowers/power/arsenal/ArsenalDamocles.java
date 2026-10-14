@@ -12,7 +12,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -431,12 +430,7 @@ public final class ArsenalDamocles {
 			}
 		}
 		// the ground shakes for everyone near
-		for (ServerPlayer near : level.players()) {
-			double d = near.position().distanceTo(at);
-			if (d <= IMPACT_RADIUS * 5.0) {
-				ServerPlayNetworking.send(near, new com.jaymospowers.power.web.WebNet.Shake(2.5F * (float) (1.0 - d / (IMPACT_RADIUS * 5.0))));
-			}
-		}
+		com.jaymospowers.core.Shakes.around(level, at, IMPACT_RADIUS * 5.0, 2.5F);
 	}
 
 	/** The power went away: the rift and the sword go with it. */

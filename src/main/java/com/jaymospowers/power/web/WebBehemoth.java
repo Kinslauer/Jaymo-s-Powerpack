@@ -232,7 +232,7 @@ public final class WebBehemoth {
 			double force = WebSymbiote.ROAR_KNOCKBACK * (1.2 - 0.5 * Math.min(1.0, to.length() / radius));
 			fling(living, flat.scale(force).add(0.0, 0.5, 0.0));
 			if (living instanceof ServerPlayer player) {
-				net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new WebNet.Shake(WebSymbiote.ROAR_SHAKE));
+				com.jaymospowers.core.Shakes.send(player, WebSymbiote.ROAR_SHAKE, host.position());
 			}
 		}
 		level.sendParticles(ParticleTypes.SONIC_BOOM, center.x, center.y + 0.4, center.z, 1, 0.0, 0.0, 0.0, 0.0);
