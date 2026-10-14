@@ -1044,6 +1044,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   `armory/TaczGuns` hands to TaCZ. They and their musket balls and shot are made at TaCZ's Gun Smith Table; TaCZ's
   modern guns, ammo, attachments and attachment bench are uncraftable (`tinkering/Uncraftable`). Kingdoms'
   musketeers carry the TaCZ musket. Arsenal's Void Armory flintlocks become a TaCZ gun too (void palette, no
-  recipe): no reloading, each shot is followed by the spent one dropping out of sight and a fresh one pulled from the
-  rift, and its shot is topped up while summoned (`ArsenalFlintlock.tickTacz`). TaCZ is on Modrinth only, so the CurseForge import zip carries its jar
+  recipe), one in each hand: a click fires the main hand's, the next the off hand's (brought round into the main hand
+  once the first is spent, `ArsenalFlintlock.tickTacz`), and Q is the reload: it drops the pair and a fresh pair
+  comes up out of the rift. TaCZ is on Modrinth only, so the CurseForge import zip carries its jar
   (untouched, credited; its art is CC BY-NC-ND 4.0).

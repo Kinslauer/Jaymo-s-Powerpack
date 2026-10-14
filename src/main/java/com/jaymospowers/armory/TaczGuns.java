@@ -49,7 +49,6 @@ public final class TaczGuns {
 		tag.putString("GunId", JaymosPowers.MOD_ID + ":" + name);
 		tag.putString("GunFireMode", "SEMI");
 		tag.putInt("GunCurrentAmmoCount", 1);
-		tag.putBoolean("HasBulletInBarrel", true);
 		ItemStack stack = new ItemStack(item);
 		stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
 		return stack;
@@ -64,16 +63,13 @@ public final class TaczGuns {
 		return data != null && (JaymosPowers.MOD_ID + ":" + name).equals(data.copyTag().getStringOr("GunId", ""));
 	}
 
-	/** Puts {@code n} rounds back in a TaCZ gun's magazine, if it has fewer. */
-	public static void topUp(ItemStack stack, int n) {
+	/** Rounds in a TaCZ gun: its magazine plus the one in the barrel. */
+	public static int ammo(ItemStack stack) {
 		CustomData data = stack.get(DataComponents.CUSTOM_DATA);
 		if (data == null) {
-			return;
+			return 0;
 		}
 		CompoundTag tag = data.copyTag();
-		if (tag.getIntOr("GunCurrentAmmoCount", 0) < n) {
-			tag.putInt("GunCurrentAmmoCount", n);
-			stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
-		}
+		return tag.getIntOr("GunCurrentAmmoCount", 0) + (tag.getBooleanOr("HasBulletInBarrel", false) ? 1 : 0);
 	}
 }

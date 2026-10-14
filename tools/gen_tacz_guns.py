@@ -14,8 +14,8 @@ gunpack.meta.json). Jaymo's Powers hands it to TaCZ when TaCZ is installed (armo
   (muzzle up, powder down the barrel, ramrod drawn, rammed twice, returned, hammer cocked) and an inspect.
 - tacz_sounds/flintlock/*.ogg: synthesised (pan flash + boom, ramrod scrape, clicks); needs ffmpeg.
 - data: gun stats, two ammo types (musket balls, shot) and Gun Smith Table / Ammo Workbench recipes.
-- void_flintlock: Arsenal's Void Armory pistol in the void palette, no recipe; it never reloads: after each shot it's
-  dropped and a fresh one pulled up (a bolt-action "bolt" animation), and Jaymo's Powers refills its one shot.
+- void_flintlock: Arsenal's Void Armory pistol in the void palette, no recipe, one per hand; it never reloads: Q drops
+  the pair and Jaymo's Powers puts a fresh pair in your hands, which come up out of the rift (its draw animation).
 
 Hand poses are first guesses (arms are placed by the animations); tune the HANDS_* numbers after looking in game.
 
@@ -459,31 +459,15 @@ def inspect(hands, empty):
                          "2.0": {"effect": f"{NS}:flintlock/draw"}}}
 
 
-def repull(hands, length):
-    """The Void Armory's flintlock after a shot: dropped spent out of sight, a fresh one pulled up from the rift."""
-    s = length / 0.85
-    T = lambda t: round(t * s, 4)  # noqa: E731
-    gone_rot, gone_pos = [35, -10, 25], [2, -16, 5]
-    rise_rot, rise_pos = [-15, 15, -30], [-2, -14, 3]
-    lrot, lpos = hands["lefthand"]
+def rift_draw(hands, length):
+    """The Void Armory's flintlock coming into your hand: pulled up out of the rift below, rolling level."""
+    rrot, rpos = hands["righthand"]
     return {"animation_length": round(length, 4), "loop": "hold_on_last_frame", "bones": {
-        "root": {"rotation": keys([(0, [0, 0, 0]), (T(0.25), gone_rot), (T(0.35), rise_rot), (T(0.75), [2, 0, 3]),
-                                   (T(0.85), [0, 0, 0])]),
-                 "position": keys([(0, [0, 0, 0]), (T(0.25), gone_pos), (T(0.35), rise_pos), (T(0.75), [0, 0.4, 0]),
-                                   (T(0.85), [0, 0, 0])])},
-        "camera": {"rotation": keys([(0, [0, 0, 0]), (T(0.2), [0.6, -0.4, -1]), (T(0.6), [-0.4, 0.3, 0.8]),
-                                     (T(0.85), [0, 0, 0])])},
-        # the left hand lets go and comes back to the fresh gun
-        "lefthand": {"rotation": keys([(0, lrot), (T(0.2), add(lrot, [20, 0, -15])), (T(0.65), add(lrot, [20, 0, -15])),
-                                       (T(0.85), lrot)]),
-                     "position": keys([(0, lpos), (T(0.2), add(lpos, [3, -4, 4])), (T(0.65), add(lpos, [3, -4, 4])),
-                                       (T(0.85), lpos)]),
-                     "scale": SCALE},
-        # the one that comes back is loaded: cocked, pan shut
-        "hammer": {"rotation": keys([(0, HAMMER_DOWN), (T(0.3), HAMMER_DOWN), (T(0.31), HAMMER_COCKED)])},
-        "frizzen": {"rotation": keys([(0, FRIZZEN_OPEN), (T(0.3), FRIZZEN_OPEN), (T(0.31), FRIZZEN_SHUT)])},
-    }, "sound_effects": {"0": {"effect": f"{NS}:flintlock/put_away"},
-                        f"{T(0.32):.4g}": {"effect": f"{NS}:flintlock/void_pull"}}}
+        "root": {"rotation": keys([(0, [-15, 15, -30]), (length * 0.8, [2, 0, 3]), (length, [0, 0, 0])]),
+                 "position": keys([(0, [-2, -14, 3]), (length * 0.8, [0, 0.4, 0]), (length, [0, 0, 0])])},
+        "camera": {"rotation": keys([(0, [-0.4, 0.3, 0.8]), (length, [0, 0, 0])])},
+        "righthand": {"rotation": {"0": rrot}, "position": {"0": rpos}, "scale": SCALE},
+    }, "sound_effects": {"0": {"effect": f"{NS}:flintlock/void_pull"}}}
 
 
 def animations(hands, g, long, reload_len, kick):
@@ -494,10 +478,9 @@ def animations(hands, g, long, reload_len, kick):
 
 
 def void_animations(hands, kick, length):
-    """No reloading: every shot is followed by the drop and the pull (TaCZ's bolt), which is also its reload."""
+    """No reloading (Q drops the pair for a fresh one): the shot, and the draw is the pull out of the rift."""
     anims = {"static_idle": idle(hands, False), "static_bolt_caught": idle(hands, True), "shoot": shoot(kick),
-             "bolt": repull(hands, length), "reload_empty": repull(hands, length), "inspect": inspect(hands, False),
-             "inspect_empty": inspect(hands, True)}
+             "draw": rift_draw(hands, length), "inspect": inspect(hands, False), "inspect_empty": inspect(hands, True)}
     return {"format_version": "1.8.0", "animations": anims}
 
 
@@ -655,14 +638,14 @@ GUNS = {
         "aim_time": 0.18, "zoom": 1.2, "sound": "pistol",
         "recipe": [("tag", "c:ingots/iron", 2), ("tag", "minecraft:planks", 3), ("item", "minecraft:flint", 1)],
     },
-    # Arsenal's Void Armory flintlock: summoned only (no recipe), never reloaded (Jaymo's Powers keeps its one
-    # shot topped up while it's summoned); damage is the old 9, and the void adds its share to summoned weapons'
-    # hits (ArsenalVoid.modifyDamage).
+    # Arsenal's Void Armory flintlock: summoned only (no recipe), one shot, never reloaded (Q drops the pair for a
+    # fresh one, ArsenalFlintlock); damage is the old 9, and the void adds its share to summoned weapons' hits
+    # (ArsenalVoid.modifyDamage). "reload" here is only its draw time.
     "void_flintlock": {
         "type": "pistol", "defaults": "pistol", "ammo": "void_shot", "pellets": 1, "damage": 9,
         "falloff": [(24, 9), (48, 7), ("infinite", 4)], "speed": 160, "gravity": 0.05,
-        "reload": (0.75, 0.85), "inacc": (2.5, 3.5, 2, 1.5, 0.8), "recoil": (5.0, 1.2), "weight": 1.2, "kick": 1.0,
-        "aim_time": 0.15, "zoom": 1.2, "sound": "pistol", "bolt": "manual_action", "atlas": "flintlocks_void",
+        "reload": (0.45, 0.5), "inacc": (2.5, 3.5, 2, 1.5, 0.8), "recoil": (5.0, 1.2), "weight": 1.2, "kick": 1.0,
+        "aim_time": 0.15, "zoom": 1.2, "sound": "pistol", "void": True, "atlas": "flintlocks_void",
         "recipe": None,
     },
 }
@@ -686,7 +669,7 @@ def gun_data(g):
     inacc = dict(zip(("stand", "move", "sneak", "lie", "aim"), g["inacc"]))
     return {
         "ammo": f"{NS}:{g['ammo']}", "ammo_amount": 1, "extended_mag_ammo_amount": [1, 1, 1],
-        "bolt": g.get("bolt", "open_bolt"),
+        "bolt": "open_bolt",
         "rpm": 60, "fire_mode": ["semi"],
         "bullet": {"life": 1.0, "bullet_amount": g["pellets"], "damage": g["damage"], "tracer_count_interval": 0,
                    "extra_damage": {"armor_ignore": 0.2, "head_shot_multiplier": 1.6, "damage_adjust": [
@@ -701,7 +684,7 @@ def gun_data(g):
                                                                 "range_angle": 30, "damage": 4, "knockback": 0.8,
                                                                 "prep": 0.1}},
         "allow_attachment_types": [],
-    } | ({"bolt_action_time": g["reload"][1]} if g.get("bolt") == "manual_action" else {})
+    } | ({"draw_time": g["reload"][0]} if g.get("void") else {})
 
 
 def display(name, g, long):
@@ -754,7 +737,7 @@ def main():
         save(f"{A}/textures/gun/slot/{name}.png", side_view(m, (64, 64), 2, base=base))
         save(f"{A}/textures/gun/hud/{name}.png", side_view(m, (384, 128), 6, (235, 235, 235, 230)))
         hands = HANDS_LONG if long else HANDS_PISTOL
-        anims = void_animations(hands, g["kick"], g["reload"][1]) if g.get("bolt") == "manual_action" \
+        anims = void_animations(hands, g["kick"], g["reload"][0]) if g.get("void") \
             else animations(hands, geo, long, g["reload"][1] - 0.1, g["kick"])
         dump(f"{A}/animations/{name}.animation.json", anims)
         dump(f"{A}/display/guns/{name}_display.json", display(name, g, long))
