@@ -974,3 +974,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   ape stands in his place in his pose (furred head with muzzle, brow and red eyes, barrel chest, long arms, short legs,
   swinging tail). Grown at least halfway, he stomps: monsters and anything hunting him under his feet take 14 every
   quarter second and are pressed into the ground.
+  Super hair covers his own: the skin's hat layer is hidden while it shows, and the cap reaches past where that layer
+  sat (0.7 out), with a fringe above the eyes, the whole back of the head and over the ears.

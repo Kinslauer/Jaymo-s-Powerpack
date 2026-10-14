@@ -38,6 +38,8 @@ public final class ZFighterHair {
 	static final int FULL_BRIGHT = 0xF000F0;
 
 	private static final ModelPart[] HAIR = new ModelPart[4];
+	/** The cap sits this far out from the head: past the skin's hat layer (0.5). */
+	private static final CubeDeformation CAP = new CubeDeformation(0.7F);
 
 	private ZFighterHair() {
 	}
@@ -56,9 +58,12 @@ public final class ZFighterHair {
 		if (HAIR[form] == null) {
 			MeshDefinition mesh = new MeshDefinition();
 			PartDefinition root = mesh.getRoot();
-			// the cap: over the top and back of the head, a little proud of it
-			root.addOrReplaceChild("cap", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 3.0F, 8.0F, new CubeDeformation(0.4F))
-				.texOffs(0, 11).addBox(-4.0F, -5.0F, 2.0F, 8.0F, 4.0F, 2.0F, new CubeDeformation(0.4F)), PartPose.ZERO);
+			// the cap: over the top, a fringe above the eyes, down the back and over the ears, proud of the skin's own hat
+			// layer (0.5) so none of his own hair shows through
+			root.addOrReplaceChild("cap", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 4.0F, 8.0F, CAP)
+				.texOffs(0, 11).addBox(-4.0F, -4.0F, 1.0F, 8.0F, 4.0F, 3.0F, CAP)
+				.texOffs(24, 0).addBox(-4.0F, -4.0F, -2.0F, 1.0F, 2.0F, 3.0F, CAP)
+				.texOffs(24, 0).mirror().addBox(3.0F, -4.0F, -2.0F, 1.0F, 2.0F, 3.0F, CAP), PartPose.ZERO);
 			float[][] spikes = form >= 2 ? SPIKES_2 : SPIKES_1;
 			for (int i = 0; i < spikes.length; i++) {
 				float[] s = spikes[i];
@@ -90,6 +95,10 @@ public final class ZFighterHair {
 			}
 		}
 		state.setData(KEY, hair);
+		if (hair != null) {
+			// his own hair (the skin's hat layer) goes under the Super hair, or it pokes through
+			state.showHat = false;
+		}
 	}
 
 	static final class Layer extends RenderLayer<AvatarRenderState, PlayerModel> {
