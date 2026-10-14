@@ -4,6 +4,7 @@ import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.wind.WindFlight;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -11,14 +12,18 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.Vec3;
 
@@ -28,6 +33,10 @@ import net.minecraft.world.phys.Vec3;
  * It costs hunger, more the faster you go, and ends when you're too hungry. Your smoke half pours a thick trail into
  * the {@link SmokeField}; arrows and other shots pass through it (blows, fire and blasts still land). Everyone sees the
  * smoke legs ({@link #FORM}).
+ * <p>
+ * Smoke can't put armour on in Vapour Form; what you already wear stays on until you take it off (the inventory,
+ * right-click and dispenser routes are refused in {@code SmokeArmourMixin}/{@code SmokeEquipMixin}, and anything that
+ * still lands in an empty armour slot, like the creative inventory, is handed straight back).
  */
 public final class SmokeVapour {
 	/** Smoke a tick your legs pour out (a block's worth is 1); a fresh awakening's (only this ability) is thinner. */
@@ -48,6 +57,9 @@ public final class SmokeVapour {
 	/** Each flier's last position and ticks on the ground. */
 	private static final Map<UUID, Vec3> LAST = new HashMap<>();
 	private static final Map<UUID, Integer> GROUNDED = new HashMap<>();
+	/** Which armour slots each flier had filled last tick: a slot that fills up while in vapour is handed back. */
+	private static final Map<UUID, EnumSet<EquipmentSlot>> WORN = new HashMap<>();
+	private static final EquipmentSlot[] ARMOUR = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 
 	private SmokeVapour() {
 	}
@@ -96,6 +108,7 @@ public final class SmokeVapour {
 		player.resetFallDistance();
 		LAST.put(player.getUUID(), player.position());
 		GROUNDED.remove(player.getUUID());
+		WORN.put(player.getUUID(), worn(player));
 		// the legs go up in a gout of smoke
 		Vec3 at = player.position().add(0.0, 0.4, 0.0);
 		SmokeField.puff(level, at, 6.0F, player);
@@ -121,6 +134,7 @@ public final class SmokeVapour {
 			return;
 		}
 		player.resetFallDistance();
+		handBackArmour(player);
 		Vec3 now = player.position();
 		Vec3 last = LAST.put(id, now);
 		double moved = last == null ? 0.0 : Math.min(4.0, now.distanceTo(last));
@@ -133,6 +147,43 @@ public final class SmokeVapour {
 		}
 	}
 
+	private static EnumSet<EquipmentSlot> worn(Player player) {
+		EnumSet<EquipmentSlot> worn = EnumSet.noneOf(EquipmentSlot.class);
+		for (EquipmentSlot slot : ARMOUR) {
+			if (!player.getItemBySlot(slot).isEmpty()) {
+				worn.add(slot);
+			}
+		}
+		return worn;
+	}
+
+	/** Armour that got into a slot that was empty last tick comes back off, into the inventory (or dropped). */
+	private static void handBackArmour(ServerPlayer player) {
+		EnumSet<EquipmentSlot> before = WORN.getOrDefault(player.getUUID(), EnumSet.noneOf(EquipmentSlot.class));
+		boolean refused = false;
+		for (EquipmentSlot slot : ARMOUR) {
+			ItemStack stack = player.getItemBySlot(slot);
+			if (!stack.isEmpty() && !before.contains(slot)) {
+				player.setItemSlot(slot, ItemStack.EMPTY);
+				if (!player.getInventory().add(stack)) {
+					player.drop(stack, false, net.minecraft.util.Prediction.SERVER_ONLY);
+				}
+				refused = true;
+			}
+		}
+		if (refused) {
+			refuseArmour(player);
+		}
+		WORN.put(player.getUUID(), worn(player));
+	}
+
+	/** Tells the player (server side) why the armour won't go on. */
+	public static void refuseArmour(Player player) {
+		if (player instanceof ServerPlayer server) {
+			server.sendOverlayMessage(Component.translatable("message.jaymospowers.smoke_vapour_armour").withStyle(ChatFormatting.GRAY));
+		}
+	}
+
 	private static boolean spent(ServerPlayer player) {
 		return !player.getAbilities().instabuild && player.getFoodData().getFoodLevel() <= MIN_FOOD;
 	}
@@ -141,6 +192,7 @@ public final class SmokeVapour {
 	static void end(ServerPlayer player) {
 		LAST.remove(player.getUUID());
 		GROUNDED.remove(player.getUUID());
+		WORN.remove(player.getUUID());
 		if (player.getAttached(FORM) == null) {
 			return;
 		}
@@ -155,5 +207,6 @@ public final class SmokeVapour {
 	static void clear() {
 		LAST.clear();
 		GROUNDED.clear();
+		WORN.clear();
 	}
 }
