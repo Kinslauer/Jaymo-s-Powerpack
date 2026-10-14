@@ -89,6 +89,21 @@ public final class WebPowerClient implements PowerClient {
 				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebTendrilCombos.Release());
 			}
 		});
+		// just after a Spider-Sense dodge, right click is a counter (and nothing else)
+		ClientTickEvents.START_CLIENT_TICK.register(minecraft -> {
+			LocalPlayer player = minecraft.player;
+			if (!isActive(player) || minecraft.gui.screen() != null || WebSymbioteClient.inputLocked()
+				|| !com.jaymospowers.power.web.WebCounter.ready(player)) {
+				return;
+			}
+			boolean pressed = false;
+			while (minecraft.options.keyUse.consumeClick()) {
+				pressed = true;
+			}
+			if (pressed) {
+				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebCounter.Strike());
+			}
+		});
 		ClientTickEvents.START_CLIENT_TICK.register(minecraft -> {
 			LocalPlayer player = minecraft.player;
 			if (player == null || minecraft.gui.screen() != null || WebSymbioteClient.inputLocked() || !holdsChunk(player, WebNet.OFF)) {

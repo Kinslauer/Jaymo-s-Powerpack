@@ -65,7 +65,7 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	@Override
 	public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
 		if (state.getData(WebSymbioteClient.EATING) == null && state.getData(WebSymbioteClient.STARE) == null && state.getData(WebSymbioteClient.ROAR) == null
-			|| state.isInvisible || WebSymbioteClient.ownFirstPerson(state)) {
+			&& state.getData(WebSymbioteClient.COUNTER_MAW) == null || state.isInvisible || WebSymbioteClient.ownFirstPerson(state)) {
 			return;
 		}
 		poseStack.pushPose();
@@ -109,6 +109,23 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 				this.root.yScale = scale;
 				this.root.zScale = scale;
 				this.root.z = -LUNGE * gape;
+				return;
+			}
+			float[] counter = state.getData(WebSymbioteClient.COUNTER_MAW);
+			if (ticks == null && counter != null) {
+				// a counter: it bursts out of the head, gapes and snaps on each bite (or roars), and sinks back
+				float t = counter[0];
+				int kind = (int)counter[1];
+				float end = com.jaymospowers.power.web.WebCounter.ticks(kind);
+				float morph = Mth.clamp(Math.min(t / 3.0F, (end - t) / 4.0F), 0.0F, 1.0F);
+				float open = com.jaymospowers.power.web.WebCounter.maw(kind, t);
+				this.skull.xRot = -open * SKULL_GAPE;
+				this.jaw.xRot = open * JAW_GAPE;
+				float scale = Mth.lerp(morph, 0.8F, 1.15F) * (1.0F + SWELL * Math.min(open, 1.0F));
+				this.root.xScale = scale;
+				this.root.yScale = scale;
+				this.root.zScale = scale;
+				this.root.z = -LUNGE * Math.min(open, 1.0F);
 				return;
 			}
 			if (ticks == null && stare != null) {
