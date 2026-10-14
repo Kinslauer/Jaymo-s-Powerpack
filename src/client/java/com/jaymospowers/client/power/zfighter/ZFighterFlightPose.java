@@ -68,8 +68,8 @@ public final class ZFighterFlightPose {
 	private static final java.util.Set<Integer> CRUISING = new java.util.HashSet<>();
 
 	/**
-	 * A Z Fighter sprint-flying: Wind's cruise lays him out and his arms take their pose. Hovering, taking off and standing
-	 * he looks like himself.
+	 * A Z Fighter sprint-flying: Wind's cruise lays him out. Hovering his arms still hold their pose; only standing on the
+	 * ground does he look like himself.
 	 */
 	public static boolean cruising(Player player) {
 		if (ZFighterPower.flightPose(player) <= 0) {
@@ -110,8 +110,8 @@ public final class ZFighterFlightPose {
 		}
 		for (AbstractClientPlayer player : level.players()) {
 			watchCruise(player);
-			// the arms only take their pose once he's sprint-flying
-			int pose = cruising(player) ? ZFighterPower.flightPose(player) : 0;
+			// in the air (hovering or cruising) the arms hold the pose he scrolled to; on the ground he stands as himself
+			int pose = cruising(player) || !player.onGround() ? ZFighterPower.flightPose(player) : 0;
 			float[] s = STATE.get(player.getId());
 			if (s == null) {
 				if (pose <= 0) {
