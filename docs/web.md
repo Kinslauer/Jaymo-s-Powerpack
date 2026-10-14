@@ -33,6 +33,8 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   ahead on the upswing (the lead leg a little further). Swinging from one hand, the free arm flares out for balance. The
   body banks into turns. It fades in with speed (`WebArms.DRIVE_SPEED` 0.45 b/t) and only going forward; backwards or
   slow, the old limp hang. Tuning: the "active swing" block at the top of `WebArms`.
+- Tendrils stay supple on the move: they stream back behind you, ripple out to the tips and slither with your stride
+  (`WebTendrilLayer.DRAG_*`); only the walkers planted on a wall are rigid.
 - Wall cling needs webbed fists or the suit, climbs on W, and has new perch / tendril poses (see Parkour below).
 
 ## Web Whip, and webs that fall limp (0.8.100)
@@ -57,7 +59,8 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
 ## Andy's symbiote and whip changes (0.9.8)
 - **Rigid tendrils:** Wall Crawl's walking tendrils are jointed limbs (two straight sections, a knee out from the
   surface, fixed length `WebTendrilWalk.LIMB` 32 px), Doc Ock style. Walking, running or climbing, every other tendril
-  stops swaying and holds its curl in two joints (`WebTendrilLayer.JOINTS`, fully stiff at walk speed `RIGID_SPEED`).
+  stops swaying and holds its curl in two joints. Since 0.10.100 (Andy: too stiff) only the planted walkers stay rigid;
+  the rest stream back and ripple on the move (`WebTendrilLayer.DRAG_*`).
 - **Whip needs both webs:** the first Sneak + R/G only catches (a creature dragged nearly still, a chunk hanging where
   it tore); Sneak + the other key within `WebWhip.CATCH_TICKS` 60 puts the second web on it and starts the whip. In
   midair it's always the lasso and you hang in place for it (no gravity, held still); the seesaw only on a living

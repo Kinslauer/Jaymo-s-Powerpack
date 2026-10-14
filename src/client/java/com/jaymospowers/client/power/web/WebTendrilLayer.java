@@ -30,6 +30,7 @@ import net.minecraft.util.Mth;
  * wide to one side, then swept across through the target), as the server picked it (see {@link WebSymbiote.Strike});
  * swinging held debris it's slower and reaches much further. In first person (your own body drawn by First-person
  * Model, or {@link #submitFirstPerson} next to the hands without it) they reach forward over the shoulders into view.
+ * On the move they stay supple, streaming back and rippling; only the walkers planted on a wall are rigid limbs.
  */
 final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	private static final Identifier TEXTURE = JaymosPowers.id("textures/entity/web_symbiote_tendril.png");
@@ -81,11 +82,13 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 	/** Feral (a young bond): extra sway speed, how hard a sudden jerk throws a tendril, and how much the bulge swells. */
 	private static final float FERAL_SWAY = 0.08F, FERAL_JERK = 0.9F, FERAL_PULSE = 0.06F;
 	/**
-	 * Rigid while you move (or climb): the sway and ripple die away and each tendril locks into a jointed limb, its curl
-	 * gathered into two joints (these segments) with straight sections between. Fully rigid at this walk speed.
+	 * Supple while you move: they stream back behind you (lower by {@code DRAG_LOWER} of their tilt, drawn in toward the
+	 * middle by {@code DRAG_NARROW} of their lean, uncurling to {@code DRAG_CURL}), the ripple rolls out along them faster
+	 * and harder ({@code DRAG_WAVE_SPEED}, {@code DRAG_WAVE}) and they slither side to side with your stride
+	 * ({@code DRAG_SLITHER}). All of it at this walk speed. Only a tendril planted on a wall (climbing) goes rigid.
 	 */
-	private static final int[] JOINTS = {2, 4};
-	private static final float RIGID_SPEED = 0.35F;
+	private static final float DRAG_SPEED = 0.4F, DRAG_LOWER = 0.55F, DRAG_NARROW = 0.35F, DRAG_CURL = 0.1F;
+	private static final float DRAG_WAVE_SPEED = 0.3F, DRAG_WAVE = 0.6F, DRAG_SLITHER = 0.16F;
 	/**
 	 * Barrage: every free tendril stabs the pinned creature in turn, each on its own beat. Drawn back (this much shorter,
 	 * cocked this far up and out) until {@code STAB_COCK} of its cycle, thrust in (this much longer) by {@code STAB_HIT}.
@@ -355,8 +358,8 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 			// a slam strikes with the tendrils on the target's side; a swipe with those on the side it sweeps from
 			float strikers = variant == WebSymbiote.STRIKE_SLAM ? tendrils.side() : sweepSide;
 			float stretch = 1.0F + (heavy ? STRETCH_HEAVY : STRETCH) * weight * Math.min(1.0F, swing) + (fp ? STRETCH_FIRST_PERSON * weight : 0.0F);
-			// moving or climbing, they hold stiff (a wild one less so)
-			float rigid = (tendrils.legs() != null ? 1.0F : smooth(state.walkAnimationSpeed / RIGID_SPEED)) * (1.0F - 0.5F * feral);
+			// moving, they stream back behind you, rippling (climbing, the walkers are planted limbs; see bend)
+			float drag = fp ? 0.0F : smooth(Mth.clamp(state.walkAnimationSpeed / DRAG_SPEED, 0.0F, 1.0F));
 
 			for (int t = 0; t < ROOTS.length; t++) {
 				float[] r = ROOTS[t];
@@ -407,10 +410,10 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 				float sway = Mth.sin(time * (0.07F + FERAL_SWAY * feral) + t * 1.3F) * 0.2F;
 				float jerk = (float)Math.pow(Math.max(0.0F, Mth.sin(time * 0.31F + t * 2.7F) * Mth.sin(time * 0.13F + t * 1.1F)), 8.0)
 					* FERAL_JERK * feral;
-				sway = (sway + jerk) * (1.0F - rigid);
-				float restYaw = r[3] + sway * 0.5F;
-				float restPitch = r[4] + sway;
-				float restCurlX = 0.28F;
+				sway = sway + jerk;
+				float restYaw = r[3] * (1.0F - DRAG_NARROW * drag) + sway * 0.5F;
+				float restPitch = r[4] * (1.0F - DRAG_LOWER * drag) + sway;
+				float restCurlX = Mth.lerp(drag, 0.28F, DRAG_CURL);
 				float restCurlY = 0.0F;
 				float restLength = length;
 				if (fp && upper) {
@@ -514,21 +517,19 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 					}
 					continue;
 				}
-				// held stiff only at rest: a strike or a reach for the wall moves them as usual
-				float stiff = rigid * calm;
+				// on the move the ripple rolls out toward the tips, quicker and bigger, and the stride sets them slithering
+				float slither = Mth.sin(state.walkAnimationPos * 0.6662F + t * 1.3F) * DRAG_SLITHER * drag;
 				for (int k = 1; k < SEGMENTS; k++) {
 					ModelPart segment = this.parts[t][k];
-					float wave = Mth.sin(time * 0.12F + t * 0.9F + k * 0.7F) * (0.18F + 0.07F * k);
+					float wave = Mth.lerp(drag, Mth.sin(time * 0.12F + t * 0.9F + k * 0.7F),
+						Mth.sin(time * (0.12F + DRAG_WAVE_SPEED) + t * 0.9F - k * 0.9F) * (1.0F + DRAG_WAVE)) * (0.18F + 0.07F * k);
 					// each segment curls further over, rippling; striking straightens them into a whip
 					float flexX = segCurlX + wave * 0.5F * calm + wave * 0.1F * (1.0F - calm);
-					float flexY = segCurlY + wave * 0.55F * calm;
-					// held stiff: the same overall curl, all of it in the joints
-					boolean joint = k == JOINTS[0] || k == JOINTS[1];
-					float share = joint ? (SEGMENTS - 1) / (float)JOINTS.length : 0.0F;
-					segment.xRot = Mth.lerp(stiff, flexX, segCurlX * share);
-					segment.yRot = Mth.lerp(stiff, flexY, segCurlY * share);
+					float flexY = segCurlY + wave * 0.55F * calm + slither * calm * (k / (float)SEGMENTS);
+					segment.xRot = flexX;
+					segment.yRot = flexY;
 					// a slow swallow-like bulge travels out along each one, faster and harder the wilder it is
-					float pulse = 0.9F + (PULSE + FERAL_PULSE * feral) * (1.0F - stiff) * Mth.sin(time * (0.2F + 0.15F * feral) - k * 0.8F + t * 1.9F);
+					float pulse = 0.9F + (PULSE + FERAL_PULSE * feral) * Mth.sin(time * (0.2F + 0.15F * feral) - k * 0.8F + t * 1.9F);
 					segment.xScale = pulse;
 					segment.yScale = pulse;
 				}
