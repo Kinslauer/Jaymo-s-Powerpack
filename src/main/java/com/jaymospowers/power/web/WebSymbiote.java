@@ -1108,7 +1108,8 @@ public final class WebSymbiote {
 			}
 		} else {
 			live.armorTicks = 0;
-			if (player.getAttached(STRIKE) != null) {
+			// (a counter's tendril strike is out without the armour: WebCounter ends it)
+			if (player.getAttached(STRIKE) != null && !WebCounter.ownsStrike(player)) {
 				player.removeAttached(STRIKE);
 			}
 		}
@@ -3101,7 +3102,7 @@ public final class WebSymbiote {
 			long t = now - strike.start();
 			Entity target = level.getEntity(strike.target());
 			double range = strike.heavy() ? HEAVY_STRIKE_RANGE : STRIKE_RANGE;
-			if (t == strike.hitAt() && target instanceof LivingEntity living && living.isAlive()
+			if (t == strike.hitAt() && !WebCounter.ownsStrike(player) && target instanceof LivingEntity living && living.isAlive()
 				&& living.distanceTo(player) <= range + 1.5 + living.getBbWidth() * 0.5) {
 				land(player, strike, living);
 			}

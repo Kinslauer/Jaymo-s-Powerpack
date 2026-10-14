@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -24,6 +25,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -35,6 +37,7 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -45,12 +48,14 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.GenerationStep;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Swords in stones: pedestals out in the world, each with a legendary blade driven into it. Only a Pocket Arsenal user
@@ -59,34 +64,53 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * ({@link Variant}): Durandal on the Overworld's surface, Laevateinn in the Nether, Caladbolg on the End's outer
  * islands, Gram in the Deep Dark, Hrunting in the frozen mountains. Placed by {@code worldgen/placed_feature/<id>.json};
  * art from {@code tools/gen_sword_stone.py}. Each blade's gifts are in {@link StoneSwords}.
+ *
+ * <p>No two stones lie within {@link #SPACING} blocks of each other (in the same dimension). The world is cut into
+ * {@code SPACING}-wide cells, each with one candidate chunk picked from the world seed; a candidate stands down when a
+ * neighbouring cell's candidate is too close and outranks it. Only a candidate that stands gets a stone, and only one
+ * blade claims it ({@link #owner}). It's all worked out from the seed, so it doesn't matter which chunks generate first.
  */
 public final class SwordStone {
+	/** Blocks between any two stones in a dimension, at the least. */
+	public static final int SPACING = 3000;
+	/** Spots tried in a candidate chunk before giving up on it. */
+	private static final int ATTEMPTS = 24;
+
 	/** Each sword, its stone, where it lies and what it's set in. */
 	public enum Variant {
-		DURANDAL("sword_in_stone", "durandal", "sword_stone", false, GenerationStep.Decoration.SURFACE_STRUCTURES,
+		DURANDAL("sword_in_stone", "durandal", "sword_stone", false, 0, 0, GenerationStep.Decoration.SURFACE_STRUCTURES,
 			List.of(Blocks.MOSSY_STONE_BRICKS, Blocks.CRACKED_STONE_BRICKS, Blocks.STONE_BRICKS)),
-		LAEVATEINN("nether_sword_stone", "laevateinn", "sword_stone_nether", true, GenerationStep.Decoration.SURFACE_STRUCTURES,
+		LAEVATEINN("nether_sword_stone", "laevateinn", "sword_stone_nether", true, 32, 100, GenerationStep.Decoration.SURFACE_STRUCTURES,
 			List.of(Blocks.POLISHED_BLACKSTONE_BRICKS, Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS, Blocks.GILDED_BLACKSTONE)),
-		CALADBOLG("end_sword_stone", "caladbolg", "sword_stone_end", false, GenerationStep.Decoration.SURFACE_STRUCTURES,
+		CALADBOLG("end_sword_stone", "caladbolg", "sword_stone_end", false, 0, 0, GenerationStep.Decoration.SURFACE_STRUCTURES,
 			List.of(Blocks.END_STONE_BRICKS, Blocks.PURPUR_BLOCK, Blocks.END_STONE_BRICKS)),
-		GRAM("deep_sword_stone", "gram", "sword_stone_deep", true, GenerationStep.Decoration.UNDERGROUND_DECORATION,
+		GRAM("deep_sword_stone", "gram", "sword_stone_deep", true, -52, -10, GenerationStep.Decoration.UNDERGROUND_DECORATION,
 			List.of(Blocks.DEEPSLATE_TILES, Blocks.CRACKED_DEEPSLATE_TILES, Blocks.SCULK)),
-		HRUNTING("frost_sword_stone", "hrunting", "sword_stone_frost", false, GenerationStep.Decoration.SURFACE_STRUCTURES,
+		HRUNTING("frost_sword_stone", "hrunting", "sword_stone_frost", false, 0, 0, GenerationStep.Decoration.SURFACE_STRUCTURES,
 			List.of(Blocks.PACKED_ICE, Blocks.BLUE_ICE, Blocks.SNOW_BLOCK));
+
+		/** Hrunting's frozen country (it claims a candidate there before Durandal can). */
+		private static final List<ResourceKey<Biome>> FROST = List.of(Biomes.SNOWY_SLOPES, Biomes.FROZEN_PEAKS, Biomes.JAGGED_PEAKS,
+			Biomes.GROVE, Biomes.SNOWY_PLAINS, Biomes.ICE_SPIKES);
 
 		final String block, sword, feature;
 		/** Placed underground (scanning down for a floor) rather than on the surface. */
 		final boolean underground;
+		/** Underground: the heights a search for a floor starts from. */
+		final int minY, maxY;
 		final GenerationStep.Decoration step;
 		final List<Block> footing;
 		Block stone;
 		Item item;
 
-		Variant(String block, String sword, String feature, boolean underground, GenerationStep.Decoration step, List<Block> footing) {
+		Variant(String block, String sword, String feature, boolean underground, int minY, int maxY, GenerationStep.Decoration step,
+			List<Block> footing) {
 			this.block = block;
 			this.sword = sword;
 			this.feature = feature;
 			this.underground = underground;
+			this.minY = minY;
+			this.maxY = maxY;
 			this.step = step;
 			this.footing = footing;
 		}
@@ -101,9 +125,29 @@ public final class SwordStone {
 				case LAEVATEINN -> BiomeSelectors.foundInTheNether();
 				case CALADBOLG -> BiomeSelectors.foundInTheEnd().and(BiomeSelectors.includeByKey(Biomes.THE_END).negate());
 				case GRAM -> BiomeSelectors.includeByKey(Biomes.DEEP_DARK);
-				case HRUNTING -> BiomeSelectors.includeByKey(Biomes.SNOWY_SLOPES, Biomes.FROZEN_PEAKS, Biomes.JAGGED_PEAKS, Biomes.GROVE,
-					Biomes.SNOWY_PLAINS, Biomes.ICE_SPIKES);
+				case HRUNTING -> BiomeSelectors.includeByKey(FROST);
 			};
+		}
+
+		/** The same, for a spot in a generating world: the stone may stand in this biome. */
+		boolean biome(Holder<Biome> biome) {
+			return switch (this) {
+				case DURANDAL -> !biome.is(BiomeTags.IS_OCEAN) && !biome.is(BiomeTags.IS_DEEP_OCEAN) && !biome.is(BiomeTags.IS_RIVER)
+					&& !biome.is(Biomes.DEEP_DARK) && !frost(biome);
+				case LAEVATEINN -> true;
+				case CALADBOLG -> !biome.is(Biomes.THE_END);
+				case GRAM -> biome.is(Biomes.DEEP_DARK);
+				case HRUNTING -> frost(biome);
+			};
+		}
+
+		static boolean frost(Holder<Biome> biome) {
+			for (ResourceKey<Biome> key : FROST) {
+				if (biome.is(key)) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		/** Ground the stone may stand on. */
@@ -235,6 +279,28 @@ public final class SwordStone {
 
 		@Override
 		public boolean place(WorldGenLevel level, ChunkGenerator chunkGenerator, RandomSource random, BlockPos origin) {
+			int chunkX = origin.getX() >> 4, chunkZ = origin.getZ() >> 4;
+			long seed = level.getSeed() ^ level.getLevel().dimension().identifier().hashCode() * 0x9E3779B97F4A7C15L;
+			int cellX = Math.floorDiv(origin.getX(), SPACING), cellZ = Math.floorDiv(origin.getZ(), SPACING);
+			long[] mine = candidate(seed, cellX, cellZ);
+			if ((int)mine[0] >> 4 != chunkX || (int)mine[1] >> 4 != chunkZ || !stands(seed, cellX, cellZ, mine)
+				|| owner(level, (int)mine[0], (int)mine[1]) != this.variant) {
+				return false;
+			}
+			for (int i = 0; i < ATTEMPTS; i++) {
+				int x = i == 0 ? origin.getX() : (chunkX << 4) + random.nextInt(16);
+				int z = i == 0 ? origin.getZ() : (chunkZ << 4) + random.nextInt(16);
+				int y = i == 0 ? origin.getY() : this.variant.underground ? Mth.randomBetweenInclusive(random, this.variant.minY, this.variant.maxY)
+					: level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
+				if (this.tryPlace(level, random, new BlockPos(x, y, z))) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		/** One spot: the stone on its footing there, if the ground (and the biome) will have it. */
+		private boolean tryPlace(WorldGenLevel level, RandomSource random, BlockPos origin) {
 			BlockPos at = origin;
 			if (this.variant.underground) {
 				// down to the first floor: air over solid ground
@@ -251,7 +317,8 @@ public final class SwordStone {
 				}
 			}
 			BlockPos ground = at.below();
-			if (!level.getBlockState(at).isAir() || !level.getFluidState(ground).isEmpty() || !this.variant.ground(level.getBlockState(ground))) {
+			if (!level.getBlockState(at).isAir() || !level.getFluidState(ground).isEmpty() || !this.variant.ground(level.getBlockState(ground))
+				|| !this.variant.biome(level.getBiome(at))) {
 				return false;
 			}
 			// the footing: a worn 3x3 set into the ground
@@ -270,5 +337,63 @@ public final class SwordStone {
 			level.setBlock(at, this.variant.stone.defaultBlockState(), Block.UPDATE_CLIENTS);
 			return true;
 		}
+	}
+
+	/**
+	 * A cell's candidate spot: {x, z, rank}, all from the seed. It may lie anywhere in the cell; {@link #stands}
+	 * settles clashes with the neighbours.
+	 */
+	static long[] candidate(long seed, int cellX, int cellZ) {
+		long h = mix(seed + cellX * 0x632BE59BD9B4E019L + cellZ * 0x85157AF5L);
+		long x = (long)cellX * SPACING + Math.floorMod(h, SPACING);
+		long h2 = mix(h);
+		long z = (long)cellZ * SPACING + Math.floorMod(h2, SPACING);
+		return new long[] {x, z, mix(h2)};
+	}
+
+	/** A candidate stands unless a neighbouring cell's lies within {@link #SPACING} of it and outranks it. */
+	static boolean stands(long seed, int cellX, int cellZ, long[] mine) {
+		for (int dx = -1; dx <= 1; dx++) {
+			for (int dz = -1; dz <= 1; dz++) {
+				if (dx == 0 && dz == 0) {
+					continue;
+				}
+				long[] other = candidate(seed, cellX + dx, cellZ + dz);
+				long ox = other[0] - mine[0], oz = other[1] - mine[1];
+				if (ox * ox + oz * oz < (long)SPACING * SPACING && other[2] > mine[2]) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Which blade a standing candidate belongs to (null: none). The Nether's is Laevateinn and the End's Caladbolg (off
+	 * the main island); elsewhere Gram if the Deep Dark lies under it, Hrunting in frozen country, else Durandal.
+	 */
+	static @Nullable Variant owner(WorldGenLevel level, int x, int z) {
+		ResourceKey<Level> dimension = level.getLevel().dimension();
+		if (dimension == Level.NETHER) {
+			return Variant.LAEVATEINN;
+		}
+		int top = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
+		Holder<Biome> surface = level.getBiome(new BlockPos(x, top, z));
+		if (dimension == Level.END) {
+			return Variant.CALADBOLG.biome(surface) ? Variant.CALADBOLG : null;
+		}
+		for (int y = Variant.GRAM.minY; y <= Variant.GRAM.maxY; y += 6) {
+			if (level.getBiome(new BlockPos(x, y, z)).is(Biomes.DEEP_DARK)) {
+				return Variant.GRAM;
+			}
+		}
+		return Variant.frost(surface) ? Variant.HRUNTING : Variant.DURANDAL;
+	}
+
+	/** SplitMix64's finaliser: scrambles a seed into an even spread. */
+	private static long mix(long z) {
+		z = (z ^ (z >>> 30)) * 0xBF58476D1CE4E5B9L;
+		z = (z ^ (z >>> 27)) * 0x94D049BB133111EBL;
+		return z ^ (z >>> 31);
 	}
 }

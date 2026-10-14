@@ -2,6 +2,7 @@ package com.jaymospowers.power.web;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
+import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.phys.Vec3;
 
@@ -34,10 +36,12 @@ import net.minecraft.world.phys.Vec3;
  * airborne on a swing web (from your position each tick: movement is client-authoritative), and once you've swung
  * {@link #ASCEND_DISTANCE} blocks with every ability mastered, the power ascends.
  *
- * <p>The ascended form is <b>Spider-Sense</b>: creatures about to hurt you are outlined red on your screen (the server
- * tells your client which ones; the client adds swelling creepers and drawn bows), and the first hit every
- * {@link #DODGE_COOLDOWN} ticks misses you entirely, with a quick sidestep. The ascended ability is <b>Web Strike</b>
- * (the ultimate key): zip to whatever's under the crosshair and kick it.
+ * <p>Spider-Sense grows with the power: hits miss you entirely, with a quick sidestep, as many as you have sense
+ * charges ({@link #senseCharges}: one at the start, more as abilities unlock, {@link #DODGE_CHARGES} once ascended),
+ * each charge back after {@link #DODGE_COOLDOWN} ticks. Right after a dodge, right click counters ({@link WebCounter}).
+ * Ascended, creatures about to hurt you are outlined red on your screen too (the server tells your client which ones;
+ * the client adds swelling creepers and drawn bows). The ascended ability is <b>Web Strike</b> (the ultimate key): zip
+ * to whatever's under the crosshair and kick it.
  */
 public final class WebAscension {
 	/** Blocks swung (airborne, with a swing web out) to ascend. */
@@ -53,8 +57,10 @@ public final class WebAscension {
 	public static final double SENSE_RANGE = 16.0;
 	public static final int SENSE_TICKS = 10;
 	public static final int DODGE_COOLDOWN = 400;
-	/** Spider-Sense holds this many dodges, each recharging on its own ({@link #DODGE_COOLDOWN}). */
+	/** Ascended, Spider-Sense holds this many dodges, each recharging on its own ({@link #DODGE_COOLDOWN}). */
 	public static final int DODGE_CHARGES = 5;
+	/** Before that, by abilities unlocked (0, a fresh awakening, to all 4). */
+	public static final int[] CHARGES_BY_UNLOCKED = {1, 1, 2, 3, 4};
 	/** The dodge's sidestep (blocks/tick sideways, and up). */
 	private static final double DODGE_SIDESTEP = 0.85;
 	private static final double DODGE_HOP = 0.22;
@@ -94,6 +100,12 @@ public final class WebAscension {
 
 	static void register() {
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register(WebAscension::allowDamage);
+		WebCounter.register();
+	}
+
+	/** Sense charges (dodges held at once): they grow with the power, to the most once it's ascended. */
+	public static int senseCharges(Player player) {
+		return Fate.isAscended(player) ? DODGE_CHARGES : CHARGES_BY_UNLOCKED[Mastery.unlocked(player)];
 	}
 
 	private static Live live(ServerPlayer player) {
@@ -114,6 +126,7 @@ public final class WebAscension {
 		player.removeAttached(SWUNG);
 		player.removeAttached(STRIKE_READY);
 		player.removeAttached(LIVE);
+		WebCounter.clear(player);
 	}
 
 	/** Every tick, for a web slinger. {@code swinging}: a swing web is stuck right now. */
@@ -137,6 +150,7 @@ public final class WebAscension {
 		if (live.strikeTarget >= 0) {
 			tickStrike(player, live);
 		}
+		WebCounter.tick(player);
 		if (player.tickCount % SENSE_TICKS == 0) {
 			sense(player, live);
 		}
@@ -185,7 +199,7 @@ public final class WebAscension {
 
 	/** The first hit every so often never lands: a tingle, and you're already a step to the side. */
 	private static boolean allowDamage(LivingEntity entity, DamageSource source, float amount) {
-		if (!(entity instanceof ServerPlayer player) || !Powers.has(player, WebPower.INSTANCE) || !Fate.isAscended(player)) {
+		if (!(entity instanceof ServerPlayer player) || !Powers.has(player, WebPower.INSTANCE)) {
 			return true;
 		}
 		Entity attacker = source.getEntity() != null ? source.getEntity() : source.getDirectEntity();
@@ -195,17 +209,21 @@ public final class WebAscension {
 		Live live = live(player);
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
-		int charge = -1;
-		for (int i = 0; i < DODGE_CHARGES; i++) {
+		int charges = senseCharges(player);
+		int charge = -1, left = 0;
+		for (int i = 0; i < charges; i++) {
 			if (now >= live.dodgeReadyAt[i]) {
-				charge = i;
-				break;
+				left++;
+				if (charge < 0) {
+					charge = i;
+				}
 			}
 		}
 		if (charge < 0) {
 			return true;
 		}
 		live.dodgeReadyAt[charge] = now + DODGE_COOLDOWN;
+		WebCounter.opened(player, attacker, left - 1, charges);
 		// out of the way, square to where it came from, with one of four moves
 		Entity from = source.getDirectEntity() != null ? source.getDirectEntity() : attacker;
 		Vec3 away = player.position().subtract(from.position());
