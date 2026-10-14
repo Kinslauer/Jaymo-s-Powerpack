@@ -39,8 +39,9 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * Pocket Dimension (the idea of MavLeague's Pocket Dimension datapack, remade for Arsenal): every Arsenal user owns one
- * room in {@code jaymospowers:arsenal_pocket}. Z (or B uncorrupted) steps through a rift into it, and from inside, back
- * out to where you left. The rift you leave by stays open a few seconds and any player who walks into it follows you.
+ * room in {@code jaymospowers:arsenal_pocket}. Z (or B uncorrupted) tears a rift open a couple of blocks in front of you;
+ * walk into it to go in (and from inside, Z opens one that leads back out to where you left). Z again closes it. Any
+ * player who walks into your rift follows you, and it stays open a few seconds after you pass through.
  * The room is yours to build in; its shell can't be broken. The Rift Hoard (the ender chest at the back) is the old
  * Pocket Stash, so everything already stored, and every relic you claim, is still there. The crying obsidian pad by
  * the door takes anyone home.
@@ -52,9 +53,13 @@ public final class ArsenalPocket {
 	static final int HEIGHT = 7;
 	static final int FLOOR = 64;
 	static final int SPACING = 512;
-	/** How long the rift you entered by stays open for others, and how close they must walk to it. */
+	/** How long a rift stays open (and stays open again after its owner passes), and how close you must walk to it. */
 	static final int RIFT_TICKS = 200;
-	static final double RIFT_RADIUS = 1.2;
+	static final double RIFT_RADIUS = 0.7;
+	/** How far in front of you the rift opens (it comes closer if something's in the way). */
+	static final double RIFT_DISTANCE = 2.5;
+	/** The rift's outline: half its width, and its height. */
+	static final double RIFT_HALF_WIDTH = 0.6, RIFT_HEIGHT = 2.2;
 	/** No one passes through twice within this many ticks (so arriving never bounces you straight back). */
 	static final int PASS_COOLDOWN = 20;
 	/** Ceiling lights every this many blocks. */
@@ -80,7 +85,25 @@ public final class ArsenalPocket {
 	public static final AttachmentType<Integer> NEXT_ROOM = AttachmentRegistry.create(JaymosPowers.id("arsenal_pocket_next"),
 		builder -> builder.persistent(Codec.INT));
 
-	private record Rift(ResourceKey<Level> dimension, Vec3 pos, UUID owner, int room, long until) {
+	/** A rift standing open: into {@code room}, or, when {@code out}, back out of the pocket. Faces along {@code yaw}. */
+	private static final class Rift {
+		final ResourceKey<Level> dimension;
+		final Vec3 pos;
+		final float yaw;
+		final UUID owner;
+		final int room;
+		final boolean out;
+		long until;
+
+		Rift(ResourceKey<Level> dimension, Vec3 pos, float yaw, UUID owner, int room, boolean out, long until) {
+			this.dimension = dimension;
+			this.pos = pos;
+			this.yaw = yaw;
+			this.owner = owner;
+			this.room = room;
+			this.out = out;
+			this.until = until;
+		}
 	}
 
 	private static final List<Rift> RIFTS = new ArrayList<>();
@@ -118,13 +141,34 @@ public final class ArsenalPocket {
 
 	// ---------------------------------------------------------------- the key
 
-	/** Z (or B): into your room, or, from inside any pocket, back out. */
+	/** Z (or B): a rift opens in front of you (into your room, or, from inside any pocket, back out); again, it closes. */
 	public static void toggle(ServerPlayer player) {
-		if (player.level().dimension() == POCKET) {
-			leave(player);
-		} else {
-			enter(player, room(player), true);
+		ServerLevel level = player.level();
+		if (RIFTS.removeIf(r -> r.owner.equals(player.getUUID()) && r.dimension == level.dimension())) {
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDER_CHEST_CLOSE, SoundSource.PLAYERS, 0.7F, 0.6F);
+			return;
 		}
+		boolean out = level.dimension() == POCKET;
+		int room = out ? roomAt(player.blockPosition()) : room(player);
+		Vec3 at = riftSpot(player);
+		RIFTS.add(new Rift(level.dimension(), at, player.getYRot(), player.getUUID(), room, out, level.getGameTime() + RIFT_TICKS));
+		level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y + 1.0, at.z, 30, 0.3, 0.8, 0.3, 0.06);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.4F, 1.6F);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.ENDER_CHEST_OPEN, SoundSource.PLAYERS, 0.7F, 0.6F);
+	}
+
+	/** In front of you at your feet, as far as {@link #RIFT_DISTANCE}, but never inside a wall. */
+	private static Vec3 riftSpot(ServerPlayer player) {
+		double rad = Math.toRadians(player.getYRot());
+		Vec3 ahead = new Vec3(-Math.sin(rad), 0.0, Math.cos(rad));
+		Vec3 feet = player.position();
+		for (double d = RIFT_DISTANCE; d > 1.0; d -= 0.5) {
+			Vec3 at = feet.add(ahead.scale(d));
+			if (player.level().noCollision(new AABB(at.x - 0.3, at.y + 0.05, at.z - 0.3, at.x + 0.3, at.y + 1.8, at.z + 0.3))) {
+				return at;
+			}
+		}
+		return feet.add(ahead);
 	}
 
 	private static int room(ServerPlayer player) {
@@ -138,7 +182,7 @@ public final class ArsenalPocket {
 		return room;
 	}
 
-	private static void enter(ServerPlayer player, int room, boolean openRift) {
+	private static void enter(ServerPlayer player, int room) {
 		MinecraftServer server = player.level().getServer();
 		ServerLevel pocket = server.getLevel(POCKET);
 		if (pocket == null) {
@@ -150,9 +194,6 @@ public final class ArsenalPocket {
 		}
 		if (from.dimension() != POCKET) {
 			player.setAttached(RETURN, new Return(from.dimension(), player.position(), player.getYRot(), player.getXRot()));
-		}
-		if (openRift) {
-			RIFTS.add(new Rift(from.dimension(), player.position(), player.getUUID(), room, from.getGameTime() + RIFT_TICKS));
 		}
 		burst(from, player.position());
 		build(pocket, room);
@@ -190,6 +231,8 @@ public final class ArsenalPocket {
 		LAST_PASS.put(player.getUUID(), server.getTickCount() + (long) RIFT_TICKS);
 		player.teleportTo(to, at.x, at.y, at.z, Set.of(), yaw, pitch, true);
 		player.removeAttached(RETURN);
+		// you're back: the rift you went in by closes behind you
+		RIFTS.removeIf(r -> !r.out && r.owner.equals(player.getUUID()));
 		burst(to, at);
 	}
 
@@ -208,24 +251,46 @@ public final class ArsenalPocket {
 		long tick = server.getTickCount();
 		for (Iterator<Rift> it = RIFTS.iterator(); it.hasNext(); ) {
 			Rift rift = it.next();
-			ServerLevel level = server.getLevel(rift.dimension());
-			if (level == null || level.getGameTime() > rift.until()) {
+			ServerLevel level = server.getLevel(rift.dimension);
+			if (level == null || level.getGameTime() > rift.until) {
 				it.remove();
 				continue;
 			}
-			Vec3 p = rift.pos();
+			Vec3 p = rift.pos;
 			if (tick % 2 == 0) {
-				level.sendParticles(ParticleTypes.REVERSE_PORTAL, p.x, p.y + 1.0, p.z, 6, 0.15, 0.7, 0.15, 0.01);
-				level.sendParticles(ParticleTypes.PORTAL, p.x, p.y + 1.0, p.z, 4, 0.2, 0.8, 0.2, 0.3);
+				outline(level, rift);
 			}
 			AABB box = new AABB(p.x - RIFT_RADIUS, p.y - 0.5, p.z - RIFT_RADIUS, p.x + RIFT_RADIUS, p.y + 2.0, p.z + RIFT_RADIUS);
 			for (ServerPlayer other : level.getEntitiesOfClass(ServerPlayer.class, box)) {
-				if (!other.getUUID().equals(rift.owner()) && !other.isSpectator() && other.isAlive()
-					&& tick - LAST_PASS.getOrDefault(other.getUUID(), -1000L) > PASS_COOLDOWN) {
-					enter(other, rift.room(), false);
+				if (other.isSpectator() || !other.isAlive() || tick - LAST_PASS.getOrDefault(other.getUUID(), -1000L) <= PASS_COOLDOWN) {
+					continue;
+				}
+				if (rift.out) {
+					leave(other);
+				} else {
+					enter(other, rift.room);
+				}
+				if (other.getUUID().equals(rift.owner)) {
+					// the owner's gone through: the rift holds a while longer for anyone following
+					rift.until = level.getGameTime() + RIFT_TICKS;
 				}
 			}
 		}
+	}
+
+	/** A standing oval doorway of void motes, facing the way it was opened. */
+	private static void outline(ServerLevel level, Rift rift) {
+		double rad = Math.toRadians(rift.yaw);
+		double sideX = Math.cos(rad), sideZ = Math.sin(rad);
+		Vec3 c = rift.pos.add(0.0, RIFT_HEIGHT / 2.0, 0.0);
+		int points = 14;
+		for (int i = 0; i < points; i++) {
+			double a = level.getRandom().nextDouble() * Math.PI * 2.0;
+			double side = Math.cos(a) * RIFT_HALF_WIDTH;
+			double up = Math.sin(a) * RIFT_HEIGHT / 2.0;
+			level.sendParticles(ParticleTypes.REVERSE_PORTAL, c.x + sideX * side, c.y + up, c.z + sideZ * side, 1, 0.0, 0.0, 0.0, 0.0);
+		}
+		level.sendParticles(ParticleTypes.PORTAL, c.x, c.y, c.z, 6, sideX * 0.25, 0.6, sideZ * 0.25, 0.4);
 	}
 
 	// ---------------------------------------------------------------- the room
