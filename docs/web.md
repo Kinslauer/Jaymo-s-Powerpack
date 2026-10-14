@@ -83,6 +83,12 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   block where it is.
 - **Quick dive:** Shift + Space while gliding on the wings tips you straight into the dive; slowing to `DIVE_AT` still
   does it too.
+- **Dive slam (0.10.12):** coming down straight out of the freedive (at least `WebTrickClient.DIVE_SLAM_SPEED` 1 b/t,
+  sideways drift under half the fall) lands in the superhero landing and breaks the ground: a `Debris.smash` at the
+  dive's speed, a debris ring, and everything within `WebSlam.DIVE_RADIUS` 4 hurt (6 + 4 per b/t, half at the edge)
+  and thrown out. The server checks its own record of the fall (6+ blocks, 1+ b/t, landed within 8 ticks).
+- **Jump cuts a zip (0.10.12):** pressing Jump at any point of a Web Zip or Yank-to lets go of the line; you keep the
+  speed it gave you. A Jump already held when the zip starts doesn't count until it's pressed again.
 - **Web block catch:** the whip's first web on a block now pries for 1.5 s (`WebWhip.PRY_TICKS` 30), the blocks
   cracking, before the chunk tears out and hangs there for the second web.
 - **Tendril debris pull** takes a flat 0.5 s (`TUG_MIN`/`TUG_MAX` 10) and can wreck spawners (monster and trial): aimed
@@ -152,7 +158,8 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   - The server raycasts, then sends `jaymospowers:web_pull` (line anchor, foot target or entity id, max ticks, block
     face).
   - The client steers your velocity onto the line at up to 1.8 blocks/tick. It stops when you arrive, the time runs
-    out, or you're stuck for 3 ticks.
+    out, you're stuck for 3 ticks, or you press Jump (it tells the server with a main-hand `web_swing` let-go, which
+    drops the line).
   - At the end it hops: onto the ledge for a wall hit, a small settle for a top face, or a soft stop otherwise.
 - **Yank-in (server).** Sets the target's velocity on a rough ballistic arc toward you and flags `syncVelocity`, so
   players get the push as well. It also stops the mob's pathing.
