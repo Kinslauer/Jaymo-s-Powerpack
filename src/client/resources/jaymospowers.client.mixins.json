@@ -21,7 +21,8 @@
 		"ScreenShakeExplosionMixin",
 		"ShoulderCameraMixin",
 		"ShoulderCameraTypeMixin",
-		"ShoulderCrosshairMixin"
+		"ShoulderCrosshairMixin",
+		"TerrainAheadMixin"
 	],
 	"injectors": { "defaultRequire": 1 }
 }

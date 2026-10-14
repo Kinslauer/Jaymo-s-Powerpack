@@ -1072,3 +1072,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   how fast they're moving, anger the bees of any nest on them, and land as real blocks (logs on their side, leaves
   withering). Physical Falling Trees' ideas in our own code (the datapack is CC BY-NC-ND and stops at 26.2). See
   kingdoms/MODLOG.md.
+- **0.10.51, flight never outruns the terrain:** fast flight (any power, elytra, a ridden mount) looks a second ahead
+  each move; where the chunks haven't arrived or haven't been drawn yet it slows to a speed that reaches them no sooner
+  than they're ready, with a "terrain loading" note, and picks up again as they load (`client/TerrainAhead`). Before,
+  players flew into land the game hadn't shown and stuck on invisible blocks. Chunky is back to pre-generate the world
+  from the server console, so most of the map loads from disk instead of being generated under a flyer.

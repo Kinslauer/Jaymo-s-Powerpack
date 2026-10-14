@@ -74,5 +74,6 @@
 	"button.jaymospowers.armor.feet": "boots",
 	"death.attack.jaymospowers.decapitation": "%1$s lost their head",
 	"death.attack.jaymospowers.decapitation.player": "%1$s was beheaded by %2$s",
-	"entity.jaymospowers.severed_part": "Severed Part"
+	"entity.jaymospowers.severed_part": "Severed Part",
+	"jaymospowers.terrain_loading": "Terrain ahead still loading: slowing down"
 }
