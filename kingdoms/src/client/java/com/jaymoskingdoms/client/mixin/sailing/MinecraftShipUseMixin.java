@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.7.4) Right-clicking a ship's helm or chest (nearer than any world block) uses it. */
+/** (0.7.5) Right-clicking a ship's helm or chest (nearer than any world block) uses it. */
 @Mixin(Minecraft.class)
 abstract class MinecraftShipUseMixin {
 	@Inject(method = "startUseItem", at = @At("HEAD"), cancellable = true)

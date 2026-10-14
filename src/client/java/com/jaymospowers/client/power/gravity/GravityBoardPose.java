@@ -56,7 +56,7 @@ public final class GravityBoardPose {
 	public record Ride(float lean, float pitch, float time, float tilt, float climb, float bob) {
 	}
 
-	static final RenderStateDataKey<Ride> KEY = RenderStateDataKey.create(() -> "jaymospowers:gravity_board");
+	public static final RenderStateDataKey<Ride> KEY = RenderStateDataKey.create(() -> "jaymospowers:gravity_board");
 
 	/** Each rider's springs: lean, its speed, tilt, its speed, climb, its speed, forward pitch, and when last worked out. */
 	private static final Int2ObjectOpenHashMap<float[]> SPRINGS = new Int2ObjectOpenHashMap<>();

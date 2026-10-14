@@ -500,6 +500,12 @@ public final class WindPose {
 		h.head.zRot -= bend * KICK_HIP_HEAD_LEVEL;
 	}
 
+	/** Any of Wind's body poses on this avatar (cruise, brake, kick, cyclone, hover sway, tumble, flight swing). */
+	public static boolean posed(AvatarRenderState avatar) {
+		return avatar.getData(KEY) != null || avatar.getData(KICK_KEY) != null || avatar.getData(WindCyclonePose.KEY) != null
+			|| avatar.getData(WindHoverSway.KEY) != null || avatar.getData(WindTumble.KEY) != null || avatar.getData(WindFlightSwing.KEY) != null;
+	}
+
 	/** After the model animates: the limbs. */
 	public static void applyModel(Model<?> model, Object state) {
 		if (CombatAnimCompat.firstPersonPass(state)) {

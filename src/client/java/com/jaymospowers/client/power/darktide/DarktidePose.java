@@ -27,11 +27,11 @@ import org.jspecify.annotations.Nullable;
  * outright from the move's progress, after the model's own animation.
  */
 public final class DarktidePose {
-	record Pose(int kind, float p, float ticks, int variant, int guardKit, boolean guarding, float stanceBlend, int fromStance) {
+	public record Pose(int kind, float p, float ticks, int variant, int guardKit, boolean guarding, float stanceBlend, int fromStance) {
 	}
 
-	static final RenderStateDataKey<Pose> KEY = RenderStateDataKey.create(() -> "jaymospowers:darktide_pose");
-	static final RenderStateDataKey<Boolean> RISEN = RenderStateDataKey.create(() -> "jaymospowers:darktide_risen");
+	public static final RenderStateDataKey<Pose> KEY = RenderStateDataKey.create(() -> "jaymospowers:darktide_pose");
+	public static final RenderStateDataKey<Boolean> RISEN = RenderStateDataKey.create(() -> "jaymospowers:darktide_risen");
 	/** How long the arms take from one kamae to the next. */
 	static final float STANCE_BLEND_TICKS = 4.0F;
 	/** A risen shadow's tint (ARGB). */
@@ -41,10 +41,10 @@ public final class DarktidePose {
 	private static final Map<Integer, long[]> STANCES = new HashMap<>();
 
 	/** A crippled humanoid mob face down on the ground: how far down (0 standing, 1 flat) and its crawl's stride. */
-	record Crawl(float down, float stride, float speed) {
+	public record Crawl(float down, float stride, float speed) {
 	}
 
-	static final RenderStateDataKey<Crawl> CRAWL = RenderStateDataKey.create(() -> "jaymospowers:darktide_crawl");
+	public static final RenderStateDataKey<Crawl> CRAWL = RenderStateDataKey.create(() -> "jaymospowers:darktide_crawl");
 	/** Ticks to drop to the ground, and to get back up once the cripple wears off. */
 	static final float CRAWL_DROP = 5.0F, CRAWL_GET_UP = 10.0F;
 	/** How high the chest rides off the ground when flat (model units, blocks), so it doesn't sink in. */

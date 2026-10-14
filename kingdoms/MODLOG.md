@@ -2604,7 +2604,7 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   6. The others still storm, with lightning. Dust devils, and the op commands (`/kingdom disaster supercell|tornado`),
   are unchanged.
 
-## 0.7.4: sailing, stage 1: ships built from blocks (pack 0.10.32)
+## 0.7.5: sailing, stage 1: ships built from blocks (pack 0.10.36)
 - Andy: "i want sailing" (Valkyrien Skies, Eureka and Valkyrien Pirates stop at 1.20.1; Haubna's are ARR), so our own.
   Plan: `/mnt/project-files/sailing/Sailing-Plan.md` (stage 2 naval combat, stage 3 pirates and navies, later).
 - **Helm** (`HelmBlock`; planks, a compass and iron) and **sail** (`SailBlock`; wool and a stick, makes 4). Build a hull

@@ -9,7 +9,6 @@
 		"WebJumpMixin",
 		"WebLivingEntityRendererMixin",
 		"WebModelFeatureRendererMixin",
-		"WebShakeMixin",
 		"WebSprintMixin",
 		"WebTakeoverInputMixin",
 		"WebWallLookMixin"

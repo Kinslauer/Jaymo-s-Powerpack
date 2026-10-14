@@ -16,7 +16,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * (0.7.4) A square of sailcloth hung across the ship (facing the way it sails). Each one aboard drives the ship a little
+ * (0.7.5) A square of sailcloth hung across the ship (facing the way it sails). Each one aboard drives the ship a little
  * faster ({@link Hull#sails}).
  */
 public final class SailBlock extends Block {

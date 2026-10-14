@@ -448,6 +448,9 @@ public final class WebSymbiote {
 	public static final float HEAVY_SIZE_BASE = 0.6F, HEAVY_SIZE_PER_PIECE = 0.1F, HEAVY_SIZE_MIN = 0.7F, HEAVY_SIZE_MAX = 1.5F;
 	public static final double HEAVY_KNOCK = 1.0, HEAVY_LIFT = 0.45, HEAVY_SLAM_KNOCK = 0.75, HEAVY_SLAM_LIFT = 0.2;
 	public static final float HEAVY_SHAKE = 1.6F, HEAVY_TARGET_SHAKE = 2.5F;
+	/** Screen shake as Living Armor swells over you, and as the big body bursts out (felt {@code BULK_SHAKE_RANGE} off). */
+	public static final float ARMOR_ON_SHAKE = 0.6F, BULK_SHAKE = 1.3F;
+	public static final double BULK_SHAKE_RANGE = 16.0;
 	/** The held debris is swung along with the tendril: how fast it may move (blocks/tick), how high it's reared for a slam, how far out for a swipe. */
 	public static final double HEAVY_DEBRIS_SPEED = 2.6, HEAVY_REAR_UP = 2.2, HEAVY_REAR_SIDE = 2.0;
 	/**
@@ -1299,6 +1302,7 @@ public final class WebSymbiote {
 				applyArmor(player);
 				player.setAbsorptionAmount((float)Math.max(player.getAbsorptionAmount(), ARMOR_ABSORPTION * 0.5));
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_PLACE, SoundSource.PLAYERS, 1.2F, 0.5F);
+				com.jaymospowers.core.Shakes.heavy(player, player.position(), BULK_SHAKE_RANGE, BULK_SHAKE);
 			} else {
 				removeArmor(player);
 				if (!next.has(WebSymbioteState.ARMOR) || next.bond() < BOND_MAX) {
@@ -1807,7 +1811,7 @@ public final class WebSymbiote {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ANGRY, SoundSource.PLAYERS, 0.9F, 1.4F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.7, 0.4, 0.05);
-		ServerPlayNetworking.send(player, new WebNet.Shake(1.2F));
+		com.jaymospowers.core.Shakes.send(player, 1.2F, null);
 		whisper(player, "break_free");
 	}
 
@@ -2262,6 +2266,7 @@ public final class WebSymbiote {
 				cooldown = ARMOR_TOGGLE_GAP;
 				live.armorOnAt = now;
 				live.armorUsedAt = now;
+				com.jaymospowers.core.Shakes.send(player, ARMOR_ON_SHAKE);
 			}
 		}
 		player.setAttached(COOLDOWNS, cooldowns.with(ability, now + cooldown, ABILITIES));
@@ -3263,9 +3268,9 @@ public final class WebSymbiote {
 			if (chunkState != null) {
 				com.jaymospowers.core.Debris.puff(level, living.blockPosition().above(), chunkState, 1.6F);
 			}
-			ServerPlayNetworking.send(player, new WebNet.Shake(HEAVY_SHAKE));
+			com.jaymospowers.core.Shakes.send(player, HEAVY_SHAKE, living.getBoundingBox().getCenter());
 			if (living instanceof ServerPlayer other) {
-				ServerPlayNetworking.send(other, new WebNet.Shake(HEAVY_TARGET_SHAKE));
+				com.jaymospowers.core.Shakes.send(other, HEAVY_TARGET_SHAKE, player.position());
 			}
 		}
 	}
@@ -3587,10 +3592,10 @@ public final class WebSymbiote {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 1.6F, 0.55F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 0.6F, 0.7F);
 		// every screen near it shakes, yours most
-		ServerPlayNetworking.send(player, new WebNet.Shake(ROAR_SHAKE));
+		com.jaymospowers.core.Shakes.send(player, ROAR_SHAKE, null);
 		for (ServerPlayer other : level.players()) {
 			if (other != player && other.distanceTo(player) < ROAR_RADIUS * 2.5) {
-				ServerPlayNetworking.send(other, new WebNet.Shake(ROAR_SHAKE * 0.5F));
+				com.jaymospowers.core.Shakes.send(other, ROAR_SHAKE * 0.5F, player.position());
 			}
 		}
 	}

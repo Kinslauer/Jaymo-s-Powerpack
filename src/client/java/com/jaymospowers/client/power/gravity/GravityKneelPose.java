@@ -51,10 +51,10 @@ public final class GravityKneelPose {
 	};
 
 	/** {@code down}: 0 standing to 1 fully down; {@code resist}: how much they're still fighting it (0-1). */
-	record Kneel(int style, float down, float resist, float time) {
+	public record Kneel(int style, float down, float resist, float time) {
 	}
 
-	static final RenderStateDataKey<Kneel> KEY = RenderStateDataKey.create(() -> "jaymospowers:gravity_kneel");
+	public static final RenderStateDataKey<Kneel> KEY = RenderStateDataKey.create(() -> "jaymospowers:gravity_kneel");
 
 	/** Each kneeler's style, how far down they were last drawn, and when the weight lifted (game time, or -1). */
 	private static final class Track {

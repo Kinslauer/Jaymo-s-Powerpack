@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Wind camera shake: nudges the first-person view (not the player's aim) by a few decaying degrees, and lets it ride
+ * Wind camera tremble: nudges the first-person view (not the player's aim) at sonic speed, and lets it ride
  * the hovering body's sway.
  */
 @Mixin(Camera.class)

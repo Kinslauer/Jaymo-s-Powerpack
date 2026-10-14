@@ -23,7 +23,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * (0.7.4) The ship's helm: set on a hull floating free on the water, facing the way the ship should sail (you stand
+ * (0.7.5) The ship's helm: set on a hull floating free on the water, facing the way the ship should sail (you stand
  * behind it), and right-clicked, every block joined to it casts off as one {@link Ship} with you at the wheel.
  */
 public final class HelmBlock extends Block {

@@ -3,7 +3,6 @@ package com.jaymospowers.power.web;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -102,7 +101,7 @@ public final class WebImpacts {
 			goo(level, player.position(), (int)(30 * speed));
 		}
 		float shake = (float)Math.min(SHAKE_MAX, speed * SHAKE_PER_SPEED) * (armor ? 1.0F : SUIT_SHAKE);
-		ServerPlayNetworking.send(player, new WebNet.Shake(shake));
+		com.jaymospowers.core.Shakes.heavy(player, player.position(), 12.0, shake);
 		if (speed >= SMASH_SPEED) {
 			smash(level, player.position().add(0.0, -0.5, 0.0), speed, player);
 		}

@@ -30,7 +30,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		EntityRenderers.register(JaymosKingdoms.FOLK, FolkRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.FallingTree.TYPE, FallingTreeRenderer::new);
-		// 0.7.4: ships under sail, and the client's part in sailing
+		// 0.7.5: ships under sail, and the client's part in sailing
 		EntityRenderers.register(com.jaymoskingdoms.sailing.Ship.TYPE, ShipRenderer::new);
 		ShipClient.init();
 		net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(com.jaymoskingdoms.ChoppedLog.ENTITY, ChoppedLogRenderer::new);
