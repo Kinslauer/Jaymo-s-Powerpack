@@ -112,7 +112,34 @@ public final class ZFighterNet {
 		}
 	}
 
+	/** Server → client: the Eternal Dragon waits; open the wish screen. */
+	public record OpenWish() implements CustomPacketPayload {
+		public static final Type<OpenWish> TYPE = new Type<>(JaymosPowers.id("zfighter_open_wish"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, OpenWish> CODEC = StreamCodec.unit(new OpenWish());
+
+		@Override
+		public Type<OpenWish> type() {
+			return TYPE;
+		}
+	}
+
+	/** Client → server: the wish picked on the wish screen ({@code ZFighterWishes.POWER} etc.). */
+	public record Wish(int wish) implements CustomPacketPayload {
+		public static final Type<Wish> TYPE = new Type<>(JaymosPowers.id("zfighter_wish"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Wish> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeVarInt(p.wish),
+			buf -> new Wish(buf.readVarInt()));
+
+		@Override
+		public Type<Wish> type() {
+			return TYPE;
+		}
+	}
+
 	static void register() {
+		PayloadTypeRegistry.clientboundPlay().register(OpenWish.TYPE, OpenWish.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(Wish.TYPE, Wish.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Wish.TYPE, (payload, ctx) -> ZFighterWishes.wish(ctx.player(), payload.wish()));
 		PayloadTypeRegistry.clientboundPlay().register(BeamFx.TYPE, BeamFx.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(SpiritFx.TYPE, SpiritFx.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Guard.TYPE, Guard.CODEC);

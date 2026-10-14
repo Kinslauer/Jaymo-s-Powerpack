@@ -958,3 +958,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   sent by `ZFighterNet.SpiritFx`): a see-through pale blue shell with energy streaming round it and a white-hot heart.
   When it meets the ground it grinds down into it for 2 seconds, the earth spraying up round it, then bursts: a blast
   of power 3 + its radius (18 at full) with a ring of 8 more round it, hurting foes out to 3 + 2 per block of radius.
+- **0.10.19, Z Fighter stage 5 (`ZFighterWishes`, `ZFighterSites`, `ZFighterWishScreen`):** seven wish orbs in shrines
+  300-2000 blocks out, a Wish Radar, and the Eternal Dragon (all seven, at night: one wish of six, then the orbs scatter
+  and are stone for three days). The Tower (500-800 out; Hermit sells beans, seeds, the radar) climbs to the Lookout in
+  the sky, whose Keeper blesses once a day. Its doors lead to the Time Chamber (`jaymospowers:time_chamber`, flat white,
+  2x training, fast hunger) and the Verdant World (`jaymospowers:verdant_world`, green-sky plains with villages).

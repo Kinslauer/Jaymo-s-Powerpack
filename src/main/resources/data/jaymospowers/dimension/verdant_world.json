@@ -1,0 +1,11 @@
+{
+  "type": "jaymospowers:verdant_world",
+  "generator": {
+    "type": "minecraft:noise",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "jaymospowers:verdant_plains"
+    },
+    "settings": "minecraft:overworld"
+  }
+}

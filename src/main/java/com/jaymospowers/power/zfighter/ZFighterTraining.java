@@ -257,6 +257,12 @@ public final class ZFighterTraining {
 		}
 	}
 
+	/** A gift of TP (the Keeper, a wish): straight in, no rate. */
+	static void grant(ServerPlayer player, int amount) {
+		Data data = of(player);
+		player.setAttached(DATA, data.withTp(data.tp() + amount));
+	}
+
 	private static void add(ServerPlayer player, float amount) {
 		ZFighterPower.Live live = ZFighterPower.live(player);
 		live.tpFraction += amount;
@@ -273,7 +279,8 @@ public final class ZFighterTraining {
 
 	/** How fast he trains right now: Training Weights worn, times heavy gravity. */
 	static float rate(ServerPlayer player) {
-		return ZFighterItems.weightRate(player) * (heavyGravity(player) ? HEAVY_GRAVITY_RATE : 1.0F) * ZFighterLineage.trainingFactor(player);
+		return ZFighterItems.weightRate(player) * (heavyGravity(player) ? HEAVY_GRAVITY_RATE : 1.0F) * ZFighterLineage.trainingFactor(player)
+			* (player.level().dimension() == ZFighterSites.TIME_CHAMBER ? ZFighterSites.CHAMBER_TRAINING : 1.0F);
 	}
 
 	/** Under heavy gravity: someone's Training Field, or Gravity's weight on him. */
