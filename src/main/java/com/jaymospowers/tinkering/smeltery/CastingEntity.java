@@ -143,7 +143,7 @@ public class CastingEntity extends BlockEntity {
 
 	/** Sets a cast (or an item to make one from) on an empty table. */
 	public boolean putCast(ItemStack stack) {
-		if (basin() || !cast.isEmpty() || busy() || !(stack.getItem() instanceof CastItem) && CastItem.Shape.of(stack) == null && !Melting.gilds(stack)) {
+		if (basin() || !cast.isEmpty() || busy() || !(stack.getItem() instanceof CastItem) && CastItem.Shape.of(stack) == null) {
 			return false;
 		}
 		cast = stack.split(1);

@@ -977,6 +977,17 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Super hair covers his own: the skin's hat layer is hidden while it shows, and the cap reaches past where that layer
   sat (0.7 out), with a fringe above the eyes, the whole back of the head and over the ears.
 - Gravity's Z dome is now called the **Immense Field** (was the Training Field): key guide, messages and docs.
+- **0.10.27, Sora's Dagger removed:** per Andy, Wind's dagger is gone: the item (all four stages), its recipe, Flurry,
+  textures, Better Combat dagger preset, the casting-table gilding and the Tool Station diamond setting. Wind keeps
+  every ability; daggers already in a world disappear when it loads.
+- **0.10.27, daggers ride the gale (`WindDagger`):** wind sorcerers now fight with daggers the way they do with the
+  quarterstaff: the four dagger swings carry Gale Cut, Wind Stab, Crosswind and Cyclone Thrust, every hit leaves a
+  puff, and right click is Sora's Dagger's old Flurry (10 slashes on the wind, then a burst). See docs/wind.md.
+- **0.10.28, the Flash's speed on Chrono's Overclock (`ChronoSpeed`):** while Overclock runs, sprinting is far faster
+  and steps up whole blocks, holding forward into a wall runs you up it, sprinting crosses still water, and V again at
+  a wall phases you through it (up to 4 blocks). See docs/chrono.md.
+- **0.10.28 / Kingdoms 0.7.3, Shield Throw:** a Strength Combat Arts perk (3 ranks): Y with a shield hurls it; it
+  ricochets between foes and comes back. Relic shields always come home; a plain one drops where a wall stops it.
 - **0.10.29, Fresh Animations: Player Extension (`client/PackResourcePacks`, `client/EmfCompat`, `client/PoseTakeover`):**
   the pack gets FreshLX's player animations (CurseForge 1281029, file 8245230, `FA+Player-v1.1.zip`; modpacks may
   include it, never redistribute it, so it downloads by id like the medieval villager pack) and the two mods that run

@@ -44,7 +44,9 @@ import net.minecraft.world.phys.Vec3;
  * <ul>
  * <li>R, Rewind: snap back to where you were 3 s ago (health restored if it was higher, fire put out).</li>
  * <li>G, Stasis Field: stop time for mobs and projectiles in a 6-block bubble for 4 s.</li>
- * <li>V, Overclock: 6 s as a speedster: Speed V, Haste II and faster attacks, everyone near you slowed hard.</li>
+ * <li>V, Overclock: 6 s as a speedster: Speed V, Haste II and faster attacks, everyone near you slowed hard. Since
+ * 0.10.28 the Flash's speed too ({@link ChronoSpeed}): a far faster sprint, running up walls and across water, and V
+ * again to phase through a wall.</li>
  * <li>B, Time Bloom: 5 s of fast-forward for crops, saplings, furnaces, smokers and ovens within 5 blocks, and for
  * your own wounds (they mend {@code BLOOM_HEAL} every {@code BLOOM_HEAL_EVERY} ticks meanwhile).</li>
  * </ul>
@@ -250,6 +252,7 @@ public final class ChronoPower implements Power {
 		state.trail = null;
 		state.overclockLeft = 0;
 		setOverclockModifier(player, false);
+		ChronoSpeed.clear(player);
 		state.synced = false;
 	}
 
@@ -316,7 +319,14 @@ public final class ChronoPower implements Power {
 			}
 		}
 		setOverclockModifier(player, state.overclockLeft > 0);
+		ChronoSpeed.tick(player, level, state.overclockLeft > 0);
 		sync(player, state, now);
+	}
+
+	/** Whether Overclock is running for {@code player} (server side). */
+	static boolean overclocked(ServerPlayer player) {
+		ChronoState state = STATES.get(player.getUUID());
+		return state != null && state.overclockLeft > 0;
 	}
 
 	@Override
@@ -327,6 +337,13 @@ public final class ChronoPower implements Power {
 		ChronoState state = state(player);
 		int ability = key.ordinal();
 		int now = now(player);
+		if (ability == OVERCLOCK && state.overclockLeft > 0) {
+			// V again mid-Overclock: phase through the wall ahead
+			if (now >= state.phaseReadyAt && ChronoSpeed.phase(player)) {
+				state.phaseReadyAt = now + ChronoSpeed.PHASE_GAP;
+			}
+			return;
+		}
 		if (state.cooldownLeft(ability, now) > 0) {
 			return; // the client plays the "not ready" feedback itself
 		}
