@@ -190,7 +190,7 @@ final class WebSpentLines {
 	}
 
 	/** That hand's line is stuck to an entity (a yank, a whip), not to a fixed point. */
-	private static boolean onEntity(Minecraft minecraft, Player player, int hand) {
+	static boolean onEntity(Minecraft minecraft, Player player, int hand) {
 		WebLine line = player.getAttached(WebPower.line(hand));
 		if (line != null) {
 			return line.entityId() >= 0;

@@ -34,6 +34,12 @@ final class WebDebugCommand {
 								c.getSource().sendSuccess(() -> Component.literal(WebSymbiote.describe(player)), false);
 								return 1;
 							})))
+						// one of the symbiote's radial abilities, as if picked from the wheel (by its number, see WebSymbiote)
+						.then(Commands.literal("use")
+							.then(Commands.argument("ability", IntegerArgumentType.integer(0, WebSymbiote.SUIT_TOGGLE)).executes(c -> {
+								WebSymbiote.use(c.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(c, "ability"));
+								return 1;
+							})))
 						.then(Commands.literal("reject").executes(c -> {
 							WebSymbiote.reject(c.getSource().getPlayerOrException());
 							return 1;

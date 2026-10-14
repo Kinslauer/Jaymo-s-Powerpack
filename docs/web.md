@@ -31,6 +31,11 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
 - **Let-go webs fall limp:** every web line that lets go (swing webs on R/G, zips, whips, the Yank's lead) is left
   behind like a spent zip: stuck where it hit, sagging, falling, then fading (`WebSpentLines`). A line on something that
   moves falls free at once. Recasting to a new spot counts as letting go of the old one.
+  The Yank's lead waits: let go of it and only when it breaks or the creature is lost does a spent line fall (one line,
+  not two); tied off to a block (`WebSpentLines.LEAD_WAIT` 4 ticks to tell) nothing falls until the hitch itself goes.
+- **Taut lines:** a line with no more than `WebRopeSim.TAUT_SLACK` 0.3 blocks of slack is drawn dead straight, easing
+  into a free hang by `LOOSE_SLACK` 2.0; a line stuck to something moving (a whip's catch) keeps its growth, so whips
+  and the midair lasso draw to both hands through the spin.
 - **Web Whip (Sneak + R or G, no web out):** aimed within `WebWhip.RANGE` 16 (× symbiote reach) at a creature, a corpse
   (not a heavy one) or a block. A block tears out a small chunk (`PIECES` 4, nothing harder than `HARDEST` 3). The web
   catches it and you whip it about, one of three ways at random: **overhead** (up over your head, down in front),
@@ -50,7 +55,7 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   midair it's always the lasso and you hang in place for it (no gravity, held still); the seesaw only on a living
   creature; anything else is the overhead.
 - **Barrage combo:** one creature held by a tendril, the other empty, hold left click: it's pinned in front and every
-  other tendril stabs it in turn, a stab every `BARRAGE_EVERY` 3 ticks (i-frames ignored), 3 damage rising to 9 over
+  other tendril stabs it in turn (the rest held poised), a stab every `BARRAGE_EVERY` 10 ticks (half a second) (i-frames ignored), 3 damage rising to 9 over
   `BARRAGE_RAMP_TICKS` 60; letting go of the button (or `BARRAGE_MAX_TICKS` 160) ends it.
 - **Behemoth (symbiote in a zombie player):** all 6 back tendrils thrash wildly and each lashes on its own at a random
   living thing within `STRIKE_REACH` 7.5 (10 damage, 1-5 ticks between a tendril's lashes; normal i-frames).
@@ -70,6 +75,9 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   a roar every `ROAR_EVERY` 300 ticks with prey near and at half and quarter health (10 damage, hurled, Resistance III
   while it roars), a frenzy under half health (lashes twice as often, x1.4, 18% snatch and hurl), and under a quarter
   the Shroud (5 s unseen, Regeneration III, Speed, a leap away) once a minute.
+- **Suits under Fresh Animations:** while the plain suit, the big body or its growth shows, `PoseTakeover.posed` pauses
+  EMF/FA so the suit models line up with the body. The big body is `WebSymbioteLayer.BULK` 1.3 thick (head
+  `WebSuitGrowth.BULK_HEAD` 0.88 of that); MCA player models hide their own skin, clothes and hair layers under it.
 - **Into the big body:** the bulk takes 3 s (`WebSuitGrowth.BULK_TICKS` 60): doubled over in pain, clutching the
   middle, spasming, knees buckling, head hanging and jerking (`WebFeral.agony`), then up into a deeper feral idle
   (`IDLE_BEND` 0.75, arms low and wide, knees bent, head twitching).

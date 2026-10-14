@@ -284,7 +284,9 @@ final class WebLineRenderer {
 				long key = player.getId() * 4L + handIndex;
 				double length = hand.distanceTo(end);
 				double speed = dark ? WebGrowth.ROPE_SPEED : WebGrowth.WEB_SPEED;
-				float out = WebGrowth.fraction(key, end, length, speed, false);
+				// (one stuck to something that moves, a whip's catch or a yank, keeps growing however fast that flies: it
+				// isn't a fresh web each time its end jumps between frames)
+				float out = WebGrowth.fraction(key, end, length, speed, WebSpentLines.onEntity(minecraft, player, handIndex));
 				end = hand.lerp(end, out);
 				// how it hangs: slack sags, a fresh or just-caught line twangs, a stretched one hums and thins
 				double slack = slack(minecraft, player, handIndex, hand, end);

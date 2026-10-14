@@ -27,7 +27,7 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 	private final PlayerModel veinsSlim;
 
 	/** The suit swollen by Living Armor: the player model inflated, thick and muscular (wide and slim arms). */
-	private static final float BULK = 0.7F;
+	private static final float BULK = 1.3F;
 	private final PlayerModel bulkWide;
 	private final PlayerModel bulkSlim;
 	/** The plain suit sits just over the skin (not on it, where it would flicker against it). */

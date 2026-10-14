@@ -426,8 +426,9 @@ public final class WebArms {
 		Vec3 end;
 		if (player == minecraft.player && WebPowerClient.isActive(minecraft.player)) {
 			end = WebPowerClient.INSTANCE.swing.lineEnd(hand, partialTick);
-			if (end == null && hand == WebNet.MAIN) {
-				// a line the server put out from the main hand (a webline being strung, a yank) draws like any other
+			if (end == null && (hand == WebNet.MAIN || twoHanded(player))) {
+				// a line the server put out from the main hand (a webline being strung, a yank) draws like any other, and
+				// so do both of a Web Whip's (the off hand's too, or only one arm would follow the whirl)
 				end = syncedEnd(level, player, hand, partialTick);
 			}
 		} else {
