@@ -280,6 +280,7 @@ public final class WindStorm {
 		}
 		// the bolt sets alight everything flammable it reaches, not just the creatures
 		com.jaymospowers.core.Flames.area(level, area, Math.max(1, LIGHTNING_BURN_TICKS / 20), caster, e -> true);
+		com.jaymospowers.core.Shakes.around(level, at, 20.0, 1.2F);
 	}
 
 	private static void applySlow(ServerPlayer player) {

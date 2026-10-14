@@ -667,6 +667,7 @@ public final class ZFighterPower implements Power {
 		level.playSound(null, x, y, z, SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.playSound(null, x, y, z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.5F, 1.6F);
 		level.playSound(null, x, y, z, SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.8F, 1.8F);
+		com.jaymospowers.core.Shakes.heavy(player, new net.minecraft.world.phys.Vec3(x, y, z), 12.0, 0.7F);
 	}
 
 	/** The pose his arms hold in flight (0: not flying). Both sides. */

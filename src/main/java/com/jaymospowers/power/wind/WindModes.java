@@ -404,6 +404,7 @@ public final class WindModes {
 		}
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 6.0F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.2F, 0.5F);
+		com.jaymospowers.core.Shakes.heavy(player, player.position(), 48.0, 2.0F);
 		for (ServerPlayer near : level.players()) {
 			if (near.distanceToSqr(player) <= THUNDERHEAD_DARK_RANGE * THUNDERHEAD_DARK_RANGE) {
 				near.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.DARKNESS, THUNDERHEAD_DARK_TICKS, 0,
@@ -599,6 +600,7 @@ public final class WindModes {
 		}
 		// the bolt sets alight everything flammable it reaches, not just the creatures
 		com.jaymospowers.core.Flames.area(level, area, CALL_BURN_SECONDS, player, e -> true);
+		com.jaymospowers.core.Shakes.around(level, at, 24.0, Mth.lerp(f, 1.2F, 1.8F));
 		player.causeFoodExhaustion(Mth.lerp(f, CALL_EXHAUSTION_MIN, CALL_EXHAUSTION_MAX));
 		// the air was thick with static: some of it finds you
 		if (!player.isCreative()) {

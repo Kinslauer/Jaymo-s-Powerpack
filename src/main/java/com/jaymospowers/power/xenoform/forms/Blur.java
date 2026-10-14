@@ -142,6 +142,7 @@ public final class Blur extends XenoForm {
 				player.setDeltaMovement(Vec3.ZERO);
 				player.syncVelocity = true;
 				sound(player, SoundEvents.HORSE_ANGRY, 0.8F, 1.4F);
+				com.jaymospowers.core.Shakes.heavy(player, player.position(), 10.0, 0.9F);
 			} else {
 				Vec3 look = player.getLookAngle().horizontal();
 				look = look.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : look.normalize();

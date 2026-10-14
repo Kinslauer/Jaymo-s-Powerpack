@@ -97,6 +97,7 @@ final class SmokeBomb {
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y, at.z, 30, 0.6, 0.6, 0.6, 0.08);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 1.0F, 0.5F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 1.2F, 0.6F);
+		com.jaymospowers.core.Shakes.around(level, at, 10.0, 0.4F);
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(BLIND_RADIUS),
 			e -> e.isAlive() && e != owner)) {
 			living.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, BLIND_TICKS, 0), owner);

@@ -459,6 +459,7 @@ final class DarktideMoves {
 		swing(player);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_SPLASH, SoundSource.PLAYERS, 1.2F, 0.5F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ELDER_GUARDIAN_CURSE, SoundSource.PLAYERS, 0.4F, 1.6F);
+		com.jaymospowers.core.Shakes.heavy(player, player.position(), 14.0, 0.8F);
 		DarktidePower.cooldown(player, DarktideState.BLACK_TIDE, TIDE_COOLDOWN);
 	}
 
@@ -708,6 +709,7 @@ final class DarktideMoves {
 				Vec3 behind = target.position().add(dash.dir.scale(target.getBbWidth() / 2.0 + 1.0));
 				player.teleportTo(level, behind.x, target.getY(), behind.z, Set.of(), player.getYRot() + 180.0F, player.getXRot(), false);
 				hit(player, target, FLURRY_HIT_DAMAGE * FLURRY_HITS);
+				com.jaymospowers.core.Shakes.send(player, 1.0F, target.getBoundingBox().getCenter());
 				CombatRollCompat.refundRoll(player);
 				live.dash = null;
 			}

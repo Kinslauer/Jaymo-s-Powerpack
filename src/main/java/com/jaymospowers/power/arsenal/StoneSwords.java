@@ -430,6 +430,7 @@ public final class StoneSwords {
 		level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.4F, 0.7F);
 		level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.6F, 0.5F);
 		level.sendParticles(ParticleTypes.EXPLOSION, centre.x, centre.y + 0.2, centre.z, 1, 0.0, 0.0, 0.0, 0.0);
+		com.jaymospowers.core.Shakes.heavy(player, centre, PLANT_RADIUS * 2.5, 1.4F);
 	}
 
 	/** One ring of the shockwave: dust of whatever ground it runs over. */

@@ -243,6 +243,9 @@ public final class ArsenalFlintlock {
 			level.sendParticles(ParticleTypes.LARGE_SMOKE, muzzle.x, muzzle.y, muzzle.z, 8, 0.1, 0.1, 0.1, 0.03);
 			level.sendParticles(ParticleTypes.REVERSE_PORTAL, muzzle.x, muzzle.y, muzzle.z, 10, 0.1, 0.1, 0.1, 0.05);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.7F, 1.9F);
+			if (player instanceof net.minecraft.server.level.ServerPlayer shooter) {
+				com.jaymospowers.core.Shakes.send(shooter, 0.5F, muzzle);
+			}
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.CROSSBOW_SHOOT, SoundSource.PLAYERS, 1.0F, 0.6F);
 		}
 	}

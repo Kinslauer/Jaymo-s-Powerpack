@@ -231,6 +231,7 @@ public final class DarktideGuard {
 		DarktideMove.play(player, DarktideMove.STAGGER, DarktideMove.STAGGER_TICKS, 0);
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SHIELD_BREAK.value(), SoundSource.PLAYERS, 1.0F, 0.8F);
 		player.level().sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.2, player.getZ(), 16, 0.3, 0.4, 0.3, 0.08);
+		com.jaymospowers.core.Shakes.send(player, 0.8F);
 	}
 
 	/** A parry: nothing taken or spent, Flow gained, the next R empowered; a katana answers. */
