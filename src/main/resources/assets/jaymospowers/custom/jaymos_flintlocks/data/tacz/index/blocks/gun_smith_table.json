@@ -1,0 +1,8 @@
+{
+  "name": "jaymospowers.block.gunsmith_bench.name",
+  "display": "jaymospowers:gunsmith_bench",
+  "data": "jaymospowers:gunsmith_bench",
+  "tooltip": "jaymospowers.block.gunsmith_bench.desc",
+  "id": "tacz:gun_smith_table",
+  "sort": 1
+}

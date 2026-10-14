@@ -10,6 +10,7 @@
 	"entrypoints": {
 		"main": ["com.jaymospowers.JaymosPowers"],
 		"client": ["com.jaymospowers.client.JaymosPowersClient"],
+		"server": ["com.jaymospowers.JaymosPowersServer"],
 		"preLaunch": ["com.jaymospowers.client.CameraPreset"]
 	},
 	"mixins": [

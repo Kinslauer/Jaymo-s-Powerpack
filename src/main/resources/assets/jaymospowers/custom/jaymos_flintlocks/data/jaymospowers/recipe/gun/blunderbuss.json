@@ -27,7 +27,8 @@
   ],
   "result": {
     "type": "gun",
-    "id": "jaymospowers:blunderbuss"
+    "id": "jaymospowers:blunderbuss",
+    "group": "jaymospowers:firearms"
   },
   "type": "tacz:gun_smith_table_crafting"
 }

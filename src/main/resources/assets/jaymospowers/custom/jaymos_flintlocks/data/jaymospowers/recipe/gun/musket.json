@@ -21,7 +21,8 @@
   ],
   "result": {
     "type": "gun",
-    "id": "jaymospowers:musket"
+    "id": "jaymospowers:musket",
+    "group": "jaymospowers:firearms"
   },
   "type": "tacz:gun_smith_table_crafting"
 }

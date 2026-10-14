@@ -6,6 +6,8 @@
   "animation": "jaymospowers:musket",
   "use_default_animation": "rifle",
   "third_person_animation": "default",
+  "player_animator_3rd": "jaymospowers:flintlock_long.player_animation",
+  "state_machine": "jaymospowers:flintlock_state_machine",
   "transform": {
     "scale": {
       "thirdperson": [
@@ -26,7 +28,7 @@
     }
   },
   "muzzle_flash": {
-    "texture": "tacz:flash/common_muzzle_flash",
+    "texture": "jaymospowers:flash/flintlock_flash",
     "scale": 1.4
   },
   "iron_zoom": 1.5,
@@ -35,6 +37,12 @@
     "draw": "jaymospowers:flintlock/draw",
     "put_away": "jaymospowers:flintlock/put_away",
     "shoot": "jaymospowers:flintlock/musket_shoot",
-    "shoot_3p": "jaymospowers:flintlock/musket_shoot_3p"
+    "shoot_3p": "jaymospowers:flintlock/musket_shoot_3p",
+    "dry_fire": "jaymospowers:flintlock/dry_fire",
+    "fire_select": "jaymospowers:flintlock/cock",
+    "head_hit": "jaymospowers:flintlock/head_hit",
+    "flesh_hit": "jaymospowers:flintlock/flesh_hit",
+    "kill": "jaymospowers:flintlock/kill",
+    "melee_stock": "jaymospowers:flintlock/ram"
   }
 }

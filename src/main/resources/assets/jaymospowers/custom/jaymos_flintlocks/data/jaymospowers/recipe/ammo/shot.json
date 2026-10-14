@@ -21,7 +21,7 @@
   ],
   "result": {
     "type": "ammo",
-    "group": "shotgun_shells",
+    "group": "jaymospowers:shot_and_ball",
     "id": "jaymospowers:shot",
     "count": 8
   },
