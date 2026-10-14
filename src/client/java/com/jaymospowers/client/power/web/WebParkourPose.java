@@ -16,7 +16,9 @@ import net.minecraft.world.entity.LivingEntity;
  * The parkour moves as everyone sees them ({@link WebParkour#MOVE}):
  * <ul>
  * <li><b>Vault:</b> the body tips sideways over the planted hand while the legs swing over together.</li>
- * <li><b>Cling:</b> leaning into the wall, both hands high on it, one knee up against it, the other leg hanging.</li>
+ * <li><b>Cling</b> (webbed fists): a crouched spider perch, feet splayed wide on the wall, one hand high and the other
+ * flat beside you; shimmying or climbing, it crawls hand over hand, the legs stepping in turn. In the suit the
+ * tendrils hold the wall instead ({@code WebTendrilWalk}): the body hangs off them, arms and legs loose and ready.</li>
  * <li><b>Wall jump:</b> arched back off the wall, arms flung up and out, legs driving off it, then tucking.</li>
  * <li><b>Slide:</b> laid back on one hip, the lead leg straight out ahead, the other folded under, a hand trailing on
  * the ground and the other arm up for balance.</li>
@@ -29,12 +31,16 @@ public final class WebParkourPose {
 	static final float VAULT_TILT = 38.0F, SLIDE_LEAN = 62.0F;
 	/** How far the body leans into the wall while clinging (degrees). */
 	static final float CLING_LEAN = 10.0F;
+	/** In the suit, the tendrils hold the body this far out from the wall (degrees, tipping the top back off it). */
+	static final float TENDRIL_HANG = 8.0F;
+	/** Crawling on the wall: how fast the limbs cycle (radians a tick), and the speed (blocks/tick) that's a full crawl. */
+	static final float CRAWL_RATE = 0.55F, CRAWL_FULL = 0.06F;
 	/** Ticks a held move (cling, slide) takes to settle in. */
 	static final float EASE_IN = 3.0F;
 	// ================================================================================================================
 
 	/** {@code kind}: a {@link WebParkour} move; {@code p}: how far through it (0-1, timed moves); {@code in}: settled into it (0-1). */
-	public record Pose(int kind, float p, float in, float time) {
+	public record Pose(int kind, float p, float in, float time, boolean tendrils, float crawl) {
 	}
 
 	public static final RenderStateDataKey<Pose> KEY = RenderStateDataKey.create(() -> "jaymospowers:web_parkour");
@@ -60,14 +66,20 @@ public final class WebParkourPose {
 		float time = entity.level().getGameTime() + partialTicks;
 		float[] started = STARTED.get(entity.getId());
 		if (started == null || started[0] != move) {
-			started = new float[] {move, time};
+			started = new float[] {move, time, 0.0F};
 			STARTED.put(entity.getId(), started);
 		}
 		float age = time - started[1];
 		float length = kind == WebParkour.VAULT ? WebParkour.VAULT_TICKS : kind == WebParkour.WALL_JUMP ? WebParkour.WALL_JUMP_TICKS : 0.0F;
 		float p = length > 0.0F ? Mth.clamp(age / length, 0.0F, 1.0F) : 0.0F;
 		float in = length > 0.0F ? Mth.sin(Mth.PI * p) : smooth(Mth.clamp(age / EASE_IN, 0.0F, 1.0F));
-		state.setData(KEY, new Pose(kind, p, Math.min(1.0F, in * (length > 0.0F ? 1.6F : 1.0F)), time));
+		boolean tendrils = kind == WebParkour.CLING && entity instanceof net.minecraft.world.entity.player.Player player
+			&& com.jaymospowers.power.web.WebSymbiote.suitShown(player);
+		// moving on the wall (shimmy or climb): how much it's crawling, eased so the limbs settle when it stops
+		float speed = (float)Math.sqrt(Mth.square(entity.getX() - entity.xo) + Mth.square(entity.getY() - entity.yo) + Mth.square(entity.getZ() - entity.zo));
+		float crawlWant = kind == WebParkour.CLING ? Mth.clamp(speed / CRAWL_FULL, 0.0F, 1.0F) : 0.0F;
+		started[2] = Mth.lerp(0.15F, started[2], crawlWant);
+		state.setData(KEY, new Pose(kind, p, Math.min(1.0F, in * (length > 0.0F ? 1.6F : 1.0F)), time, tendrils, started[2]));
 	}
 
 	/** After the body faces its way: tip over in a vault, lie back in a slide, lean into the wall in a cling. */
@@ -84,7 +96,7 @@ public final class WebParkourPose {
 				poseStack.rotateDegrees(Axis.ZP, -VAULT_TILT * pose.in());
 			}
 			case WebParkour.SLIDE -> poseStack.rotateDegrees(Axis.XP, SLIDE_LEAN * pose.in());
-			case WebParkour.CLING -> poseStack.rotateDegrees(Axis.XP, -CLING_LEAN * pose.in());
+			case WebParkour.CLING -> poseStack.rotateDegrees(Axis.XP, (pose.tendrils() ? TENDRIL_HANG : -CLING_LEAN) * pose.in());
 			case WebParkour.WALL_JUMP -> poseStack.rotateDegrees(Axis.XP, 18.0F * pose.in());
 			default -> {
 			}
@@ -112,12 +124,24 @@ public final class WebParkourPose {
 				h.head.zRot = Mth.lerp(e, h.head.zRot, VAULT_TILT * 0.5F * Mth.DEG_TO_RAD);
 			}
 			case WebParkour.CLING -> {
-				// hands high on the wall, swaying a little as it hangs; a knee up on it, the other leg dangling
 				float sway = Mth.sin(pose.time() * 0.12F) * 0.05F;
-				set(h.rightArm, -2.75F + sway, -0.12F, 0.18F, e);
-				set(h.leftArm, -2.75F - sway, 0.12F, -0.18F, e);
-				set(h.rightLeg, -0.9F, 0.0F, 0.08F, e);
-				set(h.leftLeg, -0.15F + sway, 0.0F, -0.06F, e);
+				if (pose.tendrils()) {
+					// held off the wall by the tendrils: arms loose and a little out, ready; legs drawn up a touch, swaying
+					set(h.rightArm, -0.35F + sway, 0.0F, 0.35F, e);
+					set(h.leftArm, -0.35F - sway, 0.0F, -0.35F, e);
+					set(h.rightLeg, -0.45F - sway, 0.0F, 0.12F, e);
+					set(h.leftLeg, -0.2F + sway, 0.0F, -0.12F, e);
+					break;
+				}
+				// the perch: one hand high, the other flat on the wall beside you, feet splayed wide on it. Crawling, the
+				// hands go over each other and the legs step in turn (opposite arm and leg together)
+				float c = pose.crawl();
+				float step = Mth.sin(pose.time() * CRAWL_RATE);
+				float reachR = Mth.lerp(c, 1.0F, 0.5F + 0.5F * step), reachL = Mth.lerp(c, 0.0F, 0.5F - 0.5F * step);
+				set(h.rightArm, Mth.lerp(reachR, -1.7F, -2.8F) + sway, -0.1F, Mth.lerp(reachR, 0.65F, 0.2F), e);
+				set(h.leftArm, Mth.lerp(reachL, -1.7F, -2.8F) - sway, 0.1F, Mth.lerp(reachL, -0.65F, -0.2F), e);
+				set(h.rightLeg, -0.85F - 0.35F * c * step, 0.0F, 0.55F, e);
+				set(h.leftLeg, -0.85F + 0.35F * c * step + sway, 0.0F, -0.55F, e);
 				h.head.xRot = Mth.lerp(e, h.head.xRot, Math.min(h.head.xRot, -0.25F));
 			}
 			case WebParkour.WALL_JUMP -> {

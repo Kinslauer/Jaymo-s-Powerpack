@@ -72,9 +72,14 @@ final class WebTendrilWalk {
 	private WebTendrilWalk() {
 	}
 
-	/** Climbing by the tendrils right now (Wall Crawl's latch is on). */
+	/** Climbing by the tendrils right now: Wall Crawl's latch is on, or a wall cling in the suit (the tendrils hold the wall). */
 	static boolean climbing(Player player) {
-		return player.getAttached(WebTendrils.CLIMB) != null;
+		if (player.getAttached(WebTendrils.CLIMB) != null) {
+			return true;
+		}
+		Integer move = player.getAttached(com.jaymospowers.power.web.WebParkour.MOVE);
+		return move != null && com.jaymospowers.power.web.WebParkour.kind(move) == com.jaymospowers.power.web.WebParkour.CLING
+			&& com.jaymospowers.power.web.WebSymbiote.suitShown(player);
 	}
 
 	/**
