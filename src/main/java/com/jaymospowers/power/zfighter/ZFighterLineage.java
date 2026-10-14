@@ -218,8 +218,28 @@ public final class ZFighterLineage {
 
 	// ---------------------------------------------------------------- every tick
 
+	/**
+	 * Entity tags Jaymo's Kingdoms reads (it needs no Powers classes): a Warrior-born, and one whose tail is out for
+	 * villagers to see (they take him for a monster until he's explained it to them).
+	 */
+	public static final String TAILED_TAG = "jaymospowers_tailed", TAIL_TAG = "jaymospowers_tail";
+
+	static void tailTags(ServerPlayer player, boolean tailed, boolean out) {
+		tag(player, TAILED_TAG, tailed);
+		tag(player, TAIL_TAG, out);
+	}
+
+	private static void tag(ServerPlayer player, String tag, boolean on) {
+		if (on) {
+			player.addTag(tag);
+		} else {
+			player.removeTag(tag);
+		}
+	}
+
 	static void tick(ServerPlayer player, ZFighterPower.Live live) {
 		live.lineage = of(player);
+		tailTags(player, live.lineage == WARRIOR, tailOut(player));
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		if (live.lineage == VERDANT && now % REGEN_EVERY == 0 && player.getHealth() < player.getMaxHealth()

@@ -2,6 +2,7 @@ package com.jaymoskingdoms.mixin.mca;
 
 import com.jaymoskingdoms.Hermits;
 import com.jaymoskingdoms.SkinTones;
+import com.jaymoskingdoms.Tails;
 import net.conczin.mca.entity.VillagerEntityMCA;
 import net.conczin.mca.resources.Dialogues;
 import net.minecraft.server.level.ServerPlayer;
@@ -14,11 +15,22 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.5.44) Chatting with a newcomer or an immigrant: now and then they talk about where their family is from
  * ({@link SkinTones#ORIGIN}) instead of MCA's own small talk. Said the way MCA says a line with no follow-up question.
  * (0.5.62) A floating island's hermit ({@link Hermits}) mostly talks of why they live up there.
+ * (0.7.10) "Explain your tail" ({@link Tails}): the villager understands the Z Fighter is no monster.
  */
 @Mixin(Dialogues.class)
 abstract class McaDialogueMixin {
 	@Inject(method = "selectAnswer", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$homeTalk(VillagerEntityMCA villager, ServerPlayer player, String question, String answer, CallbackInfo ci) {
+		if ("main".equals(question) && Tails.ANSWER.equals(answer)) {
+			// (0.7.10) a Z Fighter tells them about the tail: they understand, and fear it no more
+			if (Tails.canExplain(player, villager)) {
+				villager.sendChatMessage(player, "dialogue.chat.jaymoskingdoms.tail_explained");
+				Tails.explain(player, villager);
+			}
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
 		if (!"chat.topic".equals(question)) {
 			return;
 		}

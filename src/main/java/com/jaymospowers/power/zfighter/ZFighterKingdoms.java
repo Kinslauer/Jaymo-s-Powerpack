@@ -31,6 +31,7 @@ final class ZFighterKingdoms {
 	private static Method ALL, PEOPLE, REPUTATION, SKILLS_OF, ALIGNMENT, GROWN, WORKER_FACTION;
 	private static Method F_ID, F_TYPE, F_NAME, F_SEAT, F_FALLEN, F_TREASURY;
 	private static Class<?> AGING, WORKER;
+	private static Method TRAINED;
 	private static final long UNKNOWN = Long.MIN_VALUE, CHILD = Long.MIN_VALUE + 1;
 
 	static {
@@ -57,6 +58,23 @@ final class ZFighterKingdoms {
 			} catch (ReflectiveOperationException | LinkageError e) {
 				ALL = null;
 			}
+			try {
+				TRAINED = Class.forName("com.jaymoskingdoms.ClassPerks").getMethod("trainedWith", ServerPlayer.class, net.minecraft.world.item.ItemStack.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				TRAINED = null;
+			}
+		}
+	}
+
+	/** Whether his Kingdoms class is trained with {@code weapon} (never without Kingdoms, or without a class). */
+	static boolean trainedWith(ServerPlayer player, net.minecraft.world.item.ItemStack weapon) {
+		if (TRAINED == null) {
+			return false;
+		}
+		try {
+			return (boolean)TRAINED.invoke(null, player, weapon);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
 		}
 	}
 

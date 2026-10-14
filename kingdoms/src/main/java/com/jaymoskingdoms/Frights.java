@@ -93,14 +93,15 @@ final class Frights {
 	/**
 	 * The nearest monster it can see, close enough to frighten it; null if none. (0.6.4) A player changed into one of
 	 * the Xeno-Band's aliens counts, unless {@code f}'s people saw them change ({@link Aliens}); (0.6.11) so does one in
-	 * the symbiote's suit or walking as a shade, and a mob the symbiote has taken ({@link Oddities#monstrous}).
+	 * the symbiote's suit or walking as a shade, and a mob the symbiote has taken ({@link Oddities#monstrous}); (0.7.10) and a Z Fighter
+	 * with a tail out, unless they have explained it to {@code v} ({@link Tails}).
 	 */
 	private static @Nullable LivingEntity monster(ServerLevel level, Villager v, Faction f) {
 		LivingEntity best = null;
 		double bestD = FRIGHT * FRIGHT;
 		for (LivingEntity m : level.getEntitiesOfClass(LivingEntity.class, v.getBoundingBox().inflate(FRIGHT),
 			m -> m != v && m.isAlive() && (m instanceof Mob mob && (frightful(mob) || Oddities.monstrous(mob))
-				|| m instanceof ServerPlayer p && Aliens.feared(p, f.id())))) {
+				|| m instanceof ServerPlayer p && (Aliens.feared(p, f.id()) || Tails.feared(p, v))))) {
 			double d = m.distanceToSqr(v);
 			if (d < bestD && v.hasLineOfSight(m)) {
 				bestD = d;
