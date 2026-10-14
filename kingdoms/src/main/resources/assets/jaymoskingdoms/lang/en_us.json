@@ -222,6 +222,8 @@
 	"skill.jaymoskingdoms.perk.hardy_landing.desc": "Falls hurt 30% less (but they always hurt). Powers that cancel fall damage work as before.",
 	"skill.jaymoskingdoms.perk.last_stand": "Last Stand",
 	"skill.jaymoskingdoms.perk.last_stand.desc": "Once a day, a blow that would kill you leaves you on half a heart instead.",
+	"skill.jaymoskingdoms.perk.meditation": "Meditation",
+	"skill.jaymoskingdoms.perk.meditation.desc": "Hold the Meditate key (I) standing still to sit and meditate: it earns mastery toward your power's next move. Each rank after the first makes it quicker. Z Fighters shadowbox instead, and that's how they train in a Gravity user's Immense Field.",
 	"skill.jaymoskingdoms.perk.heavy_blows": "Heavy Blows",
 	"skill.jaymoskingdoms.perk.heavy_blows.desc": "Each rank adds 4% to your melee damage.",
 	"skill.jaymoskingdoms.perk.brace": "Brace",

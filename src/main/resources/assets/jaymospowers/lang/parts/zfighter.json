@@ -58,7 +58,7 @@
   "screen.jaymospowers.zfighter.limit": "Limit Break: tier %s of 3",
   "screen.jaymospowers.zfighter.limit_next": "Tier %s: %s TP",
   "screen.jaymospowers.zfighter.limit_how": "Sneak+%s steps it up. Burns health; on a form, only one mastered 25%%, and twice the ki.",
-  "screen.jaymospowers.zfighter.earn": "TP: blows landed, kills (more for bigger foes), time, walking, meditating (sneak, stand still). Weights: 1.5x (heavy 2x). Z Fighters near you get a quarter of yours.",
+  "screen.jaymospowers.zfighter.earn": "TP: blows landed, kills (more for bigger foes), time, walking, shadowboxing (hold Meditate, I, standing still; 3x more in a Gravity user's Immense Field). Weights: 1.5x (heavy 2x). Z Fighters near you get a quarter of yours.",
   "screen.jaymospowers.zfighter.owned": "Learned.",
   "screen.jaymospowers.zfighter.locked": "Learn the form below first.",
   "screen.jaymospowers.zfighter.need_mastery": "Master the form below more.",

@@ -23,8 +23,8 @@ import net.minecraft.world.entity.player.Player;
 
 /**
  * Training, our own take on a ki-fighter's growth: <b>Training Points</b> (TP) come from fighting (every hit, every
- * kill, more for bigger foes), from time spent with the power, from the road (walking) and from meditation (sneak and
- * stand still, unhurt). They buy:
+ * kill, more for bigger foes), from time spent with the power, from the road (walking) and from shadowboxing (the
+ * Meditate key; under heavy gravity, many times over). They buy:
  * <ul>
  * <li>five <b>stats</b> ({@link #STRENGTH} fists, {@link #TOUGHNESS} less damage taken, {@link #VITALITY} health,
  * {@link #KI_POWER} ki techniques, {@link #ENERGY} more ki), each up to {@link #STAT_CAP}; every level bought makes the
@@ -97,10 +97,17 @@ public final class ZFighterTraining {
 	public static final int TP_PER_KILL = 2;
 	public static final int TP_PASSIVE_TICKS = 100;
 	public static final double TP_TRAVEL_BLOCKS = 20.0;
-	/** Meditating: still, sneaking, unhurt for this long, then a TP and 2 ki every second. */
-	public static final int MEDITATE_AFTER = 60;
-	public static final int MEDITATE_TP = 1;
-	public static final float MEDITATE_KI = 2.0F;
+	/**
+	 * Shadowboxing (his meditation, the Meditate key; see {@link com.jaymospowers.core.Meditate}): once settled, every
+	 * second this much TP, this much ki, form mastery while in a form, and a little hunger. Under heavy gravity (an
+	 * Immense Field, Gravity's weight) it's how he trains: the TP and mastery count {@link #SHADOWBOX_HEAVY} times over
+	 * (on top of heavy gravity's own {@link #HEAVY_GRAVITY_RATE}).
+	 */
+	public static final float SHADOWBOX_TP = 1.0F;
+	public static final float SHADOWBOX_KI = 2.0F;
+	public static final int SHADOWBOX_MASTERY = 4;
+	public static final float SHADOWBOX_HEAVY = 3.0F;
+	public static final float SHADOWBOX_EXHAUSTION = 0.2F;
 	/** Hungry, a fighter trains at half the rate. */
 	public static final float HUNGRY_TP = 0.5F;
 	/** Z Fighters within this many blocks get {@link #SHARE_TP} of the TP he earns (training together). */
@@ -284,7 +291,7 @@ public final class ZFighterTraining {
 	}
 
 	/** Under heavy gravity: someone's Immense Field, or Gravity's weight on him. */
-	static boolean heavyGravity(ServerPlayer player) {
+	public static boolean heavyGravity(ServerPlayer player) {
 		return com.jaymospowers.power.gravity.GravityTrainingField.inField(player)
 			|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.KNEEL) != null;
 	}
@@ -333,15 +340,17 @@ public final class ZFighterTraining {
 		}
 		live.lastX = player.getX();
 		live.lastZ = player.getZ();
-		// meditation: sneaking, still, on the ground, unhurt
-		boolean still = player.isShiftKeyDown() && player.onGround() && player.getDeltaMovement().horizontalDistanceSqr() < 1.0E-4
-			&& player.hurtTime == 0 && !live.charging && live.waveFrom < 0 && live.barrageFrom < 0;
-		live.meditating = still ? live.meditating + 1 : 0;
-		if (live.meditating >= MEDITATE_AFTER && live.meditating % 20 == 0) {
-			earn(player, MEDITATE_TP);
-			live.ki += MEDITATE_KI;
-			player.level().sendParticles(net.minecraft.core.particles.ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.2, player.getZ(), 4,
-				0.5, 0.4, 0.5, 0.2);
+		// shadowboxing: his meditation (the Meditate key, standing still), and how he trains under heavy gravity
+		boolean boxing = com.jaymospowers.core.Meditate.shadowboxing(player) && !live.charging && live.waveFrom < 0 && live.barrageFrom < 0;
+		live.meditating = boxing ? live.meditating + 1 : 0;
+		if (live.meditating > 0 && live.meditating % 20 == 0) {
+			float heavy = heavyGravity(player) ? SHADOWBOX_HEAVY : 1.0F;
+			earn(player, SHADOWBOX_TP * heavy);
+			live.ki += SHADOWBOX_KI;
+			if (live.form > 0) {
+				master(player, live.form, Math.round(SHADOWBOX_MASTERY * heavy));
+			}
+			player.causeFoodExhaustion(SHADOWBOX_EXHAUSTION * heavy);
 		}
 	}
 
