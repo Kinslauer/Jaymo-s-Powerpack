@@ -182,6 +182,31 @@ public final class Lycans {
 		LOADED.put(mob.getUUID(), mob);
 	}
 
+	/** (0.7.1) The colours of the clothes a beast's rags were (by the villager's trade; folk and players get a plain cloth). */
+	private static final Map<String, Integer> TRADE_CLOTHES = Map.ofEntries(Map.entry("farmer", 0x9C7A3C), Map.entry("fisherman", 0x4E6A7A),
+		Map.entry("shepherd", 0xC8C0B0), Map.entry("fletcher", 0x6E7F4A), Map.entry("librarian", 0x8A2E2E), Map.entry("cartographer", 0x3E5A8A),
+		Map.entry("cleric", 0x6A3A7A), Map.entry("armorer", 0x5A5A5A), Map.entry("weaponsmith", 0x3A3A3A), Map.entry("toolsmith", 0x5A4A3A),
+		Map.entry("butcher", 0xB8B0A0), Map.entry("leatherworker", 0x7A4A2A), Map.entry("mason", 0x8A8A80), Map.entry("nitwit", 0x6A8A4A));
+	private static final int[] PLAIN_CLOTHES = {0xB8A27A, 0x7A6A55, 0x5A6A7A, 0x8A5A4A, 0x9A9A8A, 0x4A5A3A};
+
+	/** (0.7.1) How {@code who}'s beast wears its coat and what's left of their clothes: fixed by who they are. */
+	static int look(Entity who) {
+		long bits = who.getUUID().getLeastSignificantBits() ^ who.getUUID().getMostSignificantBits() >>> 7;
+		return 1 + (int) Math.floorMod(bits, (long) Werewolf.WEARS * Werewolf.RAG_SETS);
+	}
+
+	/** (0.7.1) The colour of the clothes {@code who} wore when they changed. */
+	static int clothes(Entity who) {
+		if (who instanceof Villager v) {
+			String trade = net.minecraft.core.registries.BuiltInRegistries.VILLAGER_PROFESSION.getKey(v.getVillagerData().profession().value()).getPath();
+			Integer colour = TRADE_CLOTHES.get(trade);
+			if (colour != null) {
+				return colour;
+			}
+		}
+		return PLAIN_CLOTHES[Math.floorMod(who.getUUID().hashCode(), PLAIN_CLOTHES.length)];
+	}
+
 	/** A beast of their own for {@code e}. */
 	static Curse roll(ServerLevel level, LivingEntity mob) {
 		RandomSource random = level.getRandom();
@@ -393,7 +418,7 @@ public final class Lycans {
 		w.snapTo(who.getX(), who.getY(), who.getZ(), who.getYRot(), 0.0F);
 		// (any face: the cursed are never seen as the legend's wanderer)
 		w.setVariant(curse.coat());
-		w.curse(who.getUUID(), curse.build());
+		w.curse(who.getUUID(), curse.build(), look(who), clothes(who));
 		AttributeInstance scale = w.getAttribute(Attributes.SCALE);
 		if (scale != null) {
 			scale.setBaseValue(curse.scale());

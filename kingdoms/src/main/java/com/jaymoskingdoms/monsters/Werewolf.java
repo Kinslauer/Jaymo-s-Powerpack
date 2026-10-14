@@ -63,6 +63,12 @@ public class Werewolf extends LegendMonster {
 	private static final EntityDataAccessor<Integer> CHANGE = SynchedEntityData.defineId(Werewolf.class, EntityDataSerializers.INT);
 	/** (0.7.0) Its build: 0 lean, 1 middling, 2 heavy. */
 	private static final EntityDataAccessor<Integer> BUILD = SynchedEntityData.defineId(Werewolf.class, EntityDataSerializers.INT);
+	/** (0.7.1) A cursed one's look: 0 for a wild one, else 1 + its coat's wear (mangy, scarred, patchy) * 3 + its rags. */
+	private static final EntityDataAccessor<Integer> LOOK = SynchedEntityData.defineId(Werewolf.class, EntityDataSerializers.INT);
+	/** (0.7.1) The colour of the clothes it wore (its rags are dyed so). */
+	private static final EntityDataAccessor<Integer> RAGS = SynchedEntityData.defineId(Werewolf.class, EntityDataSerializers.INT);
+	/** (0.7.1) Its coat's wears, and its rags. */
+	public static final int WEARS = 3, RAG_SETS = 3;
 	/** (0.7.0) How long a cursed one's change takes, each way (ticks). */
 	public static final int CURSE_IN_TICKS = 70, CURSE_OUT_TICKS = 60;
 
@@ -135,6 +141,8 @@ public class Werewolf extends LegendMonster {
 		entityData.define(HUMAN, true);
 		entityData.define(CHANGE, 0);
 		entityData.define(BUILD, 1);
+		entityData.define(LOOK, 0);
+		entityData.define(RAGS, 0);
 	}
 
 	public boolean isHuman() {
@@ -157,10 +165,12 @@ public class Werewolf extends LegendMonster {
 	}
 
 	/** (0.7.0) It's {@code host} (a cursed villager or folk), changing into the beast now. */
-	public void curse(java.util.UUID host, int build) {
+	public void curse(java.util.UUID host, int build, int look, int rags) {
 		this.host = host;
 		this.setHuman(false);
 		this.entityData.set(BUILD, build);
+		this.entityData.set(LOOK, look);
+		this.entityData.set(RAGS, rags);
 		this.entityData.set(CHANGE, CURSE_IN_TICKS);
 		this.setPersistenceRequired();
 	}
@@ -171,6 +181,16 @@ public class Werewolf extends LegendMonster {
 
 	public int build() {
 		return this.entityData.get(BUILD);
+	}
+
+	/** (0.7.1) 0 for a wild one; else 1 + wear * 3 + rags. */
+	public int look() {
+		return this.entityData.get(LOOK);
+	}
+
+	/** (0.7.1) Its rags' colour (RGB). */
+	public int rags() {
+		return this.entityData.get(RAGS);
 	}
 
 	/** (0.7.0) A swipe of its claws (a werewolf player's beast, as they strike). */
@@ -324,6 +344,8 @@ public class Werewolf extends LegendMonster {
 		if (this.host != null) {
 			output.putString("host", this.host.toString());
 			output.putInt("build", this.build());
+			output.putInt("look", this.look());
+			output.putInt("rags", this.rags());
 		}
 	}
 
@@ -335,6 +357,8 @@ public class Werewolf extends LegendMonster {
 		if (!host.isEmpty()) {
 			this.host = java.util.UUID.fromString(host);
 			this.entityData.set(BUILD, input.getIntOr("build", 1));
+			this.entityData.set(LOOK, input.getIntOr("look", 0));
+			this.entityData.set(RAGS, input.getIntOr("rags", 0));
 		}
 	}
 }

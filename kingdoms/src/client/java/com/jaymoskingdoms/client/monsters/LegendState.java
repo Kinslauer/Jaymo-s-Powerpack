@@ -14,4 +14,6 @@ public final class LegendState extends HumanoidRenderState {
 	/** (0.7.0) A cursed werewolf: how much of the beast shows (0-1, mid-change), and its build (0 lean, 1, 2 heavy). */
 	float beast = 1.0F;
 	int build = 1;
+	/** (0.7.1) A cursed werewolf's look (0 wild; else 1 + wear * 3 + rags) and its rags' colour. */
+	int look, rags;
 }
