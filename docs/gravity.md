@@ -162,6 +162,15 @@ Ideas from Gravity Control (MIT; a NeoForge 1.21.1 fork of Gravity API), remade 
   Armor weight: `/give @s iron_chestplate[attribute_modifiers=[{type:"movement_speed",amount:-0.5,operation:"add_multiplied_total",id:"test",slot:"chest"}]]`,
   wear it: no slower after a second; `/power clear @s` and it slows you.
 
+## 0.10.23: The earthboard's ride, refined
+- The board is drawn right under its rider's feet every frame (it used to trail by the server's lag, so it slid out
+  from under them at speed), and turns with the rider's heading since boarding.
+- It banks with the rider's carve and tips with the flight: nose up climbing (10 degrees flat out), down sinking, and
+  down a touch at top speed. The rider tips with it, crouches deeper climbing and rises a little sinking.
+- Every lean and tilt is a damped spring (`GravityBoardPose.SPRING`, `DAMPING`), like Wind's hover sway: a sharp turn
+  swings past and settles instead of snapping, and the forward pitch at speed eases in instead of jittering.
+- Board and rider bob together slowly (`BOB`), less at speed. Stepping off, the board drops square again.
+
 ## Notes and risks
 - Lifting a *player* sends them velocity updates every tick, so it may look jittery on their screen.
 - The anti-kick mixin lets any player whose gravity is below 0.02 float, so a lifted player isn't kicked.
