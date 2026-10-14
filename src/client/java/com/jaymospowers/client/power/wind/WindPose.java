@@ -151,6 +151,7 @@ public final class WindPose {
 			AMOUNTS.clear();
 			return;
 		}
+		WindFlightSwing.tick(level);
 		for (AbstractClientPlayer player : level.players()) {
 			boolean fast = isFast(minecraft, player);
 			float[] amount = AMOUNTS.get(player.getId());
@@ -242,6 +243,7 @@ public final class WindPose {
 			state.setData(WindHoverSway.KEY, null);
 			state.setData(WindTumble.KEY, null);
 			state.setData(WindCyclonePose.KEY, null);
+			state.setData(WindFlightSwing.KEY, null);
 			return;
 		}
 		WindCyclonePose.Stance stance = WindCyclonePose.extract(entity, partialTicks);
@@ -255,12 +257,14 @@ public final class WindPose {
 			state.setData(BANK_KEY, null);
 			state.setData(WindHoverSway.KEY, null);
 			state.setData(WindTumble.KEY, null);
+			state.setData(WindFlightSwing.KEY, null);
 			return;
 		}
 		com.jaymospowers.power.wind.WindKick.Kicking kicked = entity.getAttached(com.jaymospowers.power.wind.WindKick.KICKING);
 		float kick = kicked == null ? -1.0F : entity.level().getGameTime() - kicked.start() + partialTicks;
 		state.setData(KICK_KEY, kick >= 0.0F && kick < kicked.length()
 			? new KickPose(kick, kicked.left(), kicked.seed(), kicked.windup()) : null);
+		state.setData(WindFlightSwing.KEY, WindFlightSwing.extract(entity, state, partialTicks));
 		WindHoverSway.extract(entity, state, partialTicks);
 		WindTumble.extract(entity, state, partialTicks);
 		float[] amount = AMOUNTS.get(entity.getId());
@@ -284,6 +288,10 @@ public final class WindPose {
 
 	/** After the body has been turned to face its way: tip it into the flight, pivoting about its middle. */
 	public static void rotate(LivingEntityRenderState state, PoseStack poseStack, float entityScale) {
+		if (CombatAnimCompat.firstPersonPass(state)) {
+			// Better Combat's first-person swing: the body stays as it is round the camera
+			return;
+		}
 		WindHoverSway.rotate(state, poseStack, entityScale);
 		WindTumble.rotate(state, poseStack, entityScale);
 		kickLean(state, poseStack);
@@ -294,7 +302,9 @@ public final class WindPose {
 		}
 		float middle = state.boundingBoxHeight / Math.max(entityScale, 0.01F) * 0.5F;
 		Float brake = state.getData(BRAKE_KEY);
-		tilt(poseStack, amount, brake == null ? 0.0F : brake, state.getData(BANK_KEY), state.yRot, state.xRot, state.bodyRot, middle);
+		WindFlightSwing.Swing swing = state.getData(WindFlightSwing.KEY);
+		tilt(poseStack, amount, brake == null ? 0.0F : brake, state.getData(BANK_KEY), state.yRot, state.xRot, state.bodyRot, middle,
+			WindFlightSwing.roll(swing), WindFlightSwing.lunge(swing));
 	}
 
 	/**
@@ -314,11 +324,11 @@ public final class WindPose {
 			: new float[] {(float)Mth.rotLerp(partialTicks, path[0], path[1]), (float)Mth.lerp(partialTicks, path[2], path[3])};
 		float bodyRot = Mth.rotLerp(partialTicks, living.yBodyRotO, living.yBodyRot);
 		float headYaw = Mth.wrapDegrees(entity.getYRot(partialTicks) - bodyRot);
-		tilt(poseStack, value, b, bank, headYaw, entity.getXRot(partialTicks), bodyRot, entity.getBbHeight() * 0.5F);
+		tilt(poseStack, value, b, bank, headYaw, entity.getXRot(partialTicks), bodyRot, entity.getBbHeight() * 0.5F, 0.0F, 0.0F);
 	}
 
 	private static void tilt(PoseStack poseStack, float amount, float b, float @org.jspecify.annotations.Nullable [] bank, float yRot, float xRot,
-		float bodyRot, float middle) {
+		float bodyRot, float middle, float swingRoll, float lunge) {
 		// the air brake pulls the body up out of the dive, leaning back into the gust
 		// face along the path it's actually taking (a quick look aside doesn't swing the body round), else where the head faces
 		float facing = bank == null ? yRot : Mth.wrapDegrees(bank[0] - bodyRot);
@@ -329,6 +339,9 @@ public final class WindPose {
 			// rolled into the turn, about the body's own length
 			poseStack.rotateDegrees(Axis.YP, bank[1] * amount * (1.0F - b));
 		}
+		// a swing rolls the body into the cut (a spin all the way round) and a thrust lunges it ahead
+		poseStack.rotateDegrees(Axis.YP, swingRoll * amount);
+		poseStack.translate(0.0F, lunge * amount, 0.0F);
 		poseStack.translate(0.0F, -middle, 0.0F);
 	}
 
@@ -485,6 +498,9 @@ public final class WindPose {
 
 	/** After the model animates: the limbs. */
 	public static void applyModel(Model<?> model, Object state) {
+		if (CombatAnimCompat.firstPersonPass(state)) {
+			return;
+		}
 		// the hover ragdoll first; the cruise pose, easing in over it, wins as speed picks up
 		WindHoverSway.applyModel(model, state);
 		WindTumble.applyModel(model, state);
@@ -533,6 +549,11 @@ public final class WindPose {
 			pose(humanoid.rightLeg, -0.45F, 0.0F, 0.08F, brake);
 			pose(humanoid.leftLeg, -0.25F, 0.0F, -0.08F, brake);
 			pose(humanoid.head, -0.2F, 0.0F, 0.0F, brake);
+		}
+		WindFlightSwing.Swing swing = avatar.getData(WindFlightSwing.KEY);
+		if (swing != null && armsFree) {
+			// a weapon swung in flight: the flight's own swing, over the cruise and the brake
+			WindFlightSwing.applyModel(humanoid, swing, amount);
 		}
 	}
 
