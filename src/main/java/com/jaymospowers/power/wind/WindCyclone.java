@@ -251,6 +251,7 @@ public final class WindCyclone {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_BIG_FALL, SoundSource.PLAYERS, 0.8F, 0.8F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_INHALE, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.sendParticles(ParticleTypes.GUST_EMITTER_SMALL, player.getX(), player.getY() + 0.1, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+		com.jaymospowers.core.Shakes.heavy(player, player.position(), 10.0, 0.9F);
 		for (int i = 0; i < 16; i++) {
 			double a = i * Math.PI * 2.0 / 16.0;
 			level.sendParticles(ParticleTypes.POOF, player.getX() + Math.cos(a) * 0.5, player.getY() + 0.1, player.getZ() + Math.sin(a) * 0.5,
@@ -279,6 +280,7 @@ public final class WindCyclone {
 		}
 		level.sendParticles(ParticleTypes.GUST_EMITTER_LARGE, player.getX(), player.getY() + 0.5, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_WIND_CHARGE_BURST, SoundSource.PLAYERS, 1.2F, 0.7F);
+		com.jaymospowers.core.Shakes.heavy(player, player.position(), 12.0, 1.1F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_DEATH, SoundSource.PLAYERS, 0.5F, 0.6F);
 	}
 

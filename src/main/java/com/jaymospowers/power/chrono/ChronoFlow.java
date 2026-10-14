@@ -496,6 +496,7 @@ public final class ChronoFlow {
 			SoundSource.PLAYERS, 1.0F, 0.8F + Math.min(0.6F, fighter.combo * 0.04F));
 		if (finisher && style != COUNTER) {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.0F, 0.7F);
+			com.jaymospowers.core.Shakes.send(player, 0.8F, at);
 			ChronoFx.particles(level, player, ParticleTypes.SWEEP_ATTACK, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 		if (fighter.combo % 5 == 0) {

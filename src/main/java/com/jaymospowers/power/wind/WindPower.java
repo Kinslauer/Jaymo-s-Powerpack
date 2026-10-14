@@ -625,6 +625,7 @@ public final class WindPower implements Power {
 			this.particlesForOthers(player, level, ColorParticleOption.create(ParticleTypes.FLASH, 0xFFFFFFFF), x, y, z, 1, 0.0, 0.0, 0.0, 0.0);
 			level.playSound(player, x, y, z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.6F, 0.7F);
 			level.playSound(player, x, y, z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 0.7F, 0.55F);
+			com.jaymospowers.core.Shakes.around(level, new net.minecraft.world.phys.Vec3(x, y, z), 40.0, 1.4F, com.jaymospowers.core.Shakes.ticksFor(1.4F), player);
 		}
 	}
 
@@ -775,6 +776,7 @@ public final class WindPower implements Power {
 				this.pushMobs(player, level, f, w * WindStorm.galeMultiplier(player));
 				level.sendParticles(ParticleTypes.GUST_EMITTER_LARGE, player.getX(), player.getY() + 0.5, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_WIND_CHARGE_BURST, SoundSource.PLAYERS, 1.2F, 0.8F);
+				com.jaymospowers.core.Shakes.heavy(player, player.position(), 10.0, 0.7F);
 			}
 			case ZEPHYR -> {
 				if (stormbound && WindModes.thunderPower(level) > 0.0F) {
@@ -867,6 +869,7 @@ public final class WindPower implements Power {
 			level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 			level.sendParticles(ParticleTypes.GUST_EMITTER_LARGE, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 4.0F, 0.8F);
+			com.jaymospowers.core.Shakes.heavy(player, at, 24.0, 1.8F);
 		}
 	}
 

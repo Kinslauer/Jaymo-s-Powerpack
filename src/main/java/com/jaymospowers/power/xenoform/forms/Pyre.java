@@ -221,6 +221,7 @@ public final class Pyre extends XenoForm {
 		level.sendParticles(ParticleTypes.LAVA, at.x, at.y, at.z, 30, 0.6, 0.6, 0.6, 0.0);
 		sound(player, SoundEvents.BLAZE_AMBIENT, 2.0F, 0.6F);
 		sound(player, SoundEvents.FIRECHARGE_USE, 1.0F, 0.8F);
+		com.jaymospowers.core.Shakes.heavy(player, at, 16.0, 1.0F);
 		return true;
 	}
 

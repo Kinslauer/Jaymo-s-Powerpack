@@ -374,6 +374,7 @@ final class ZFighterBattle {
 		level.sendParticles(ParticleTypes.EXPLOSION, true, false, centre.x, centre.y + 0.5, centre.z, 3, 0.8, 0.3, 0.8, 0.0);
 		level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 1.2F, 1.3F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_rage").withStyle(ChatFormatting.RED));
+		com.jaymospowers.core.Shakes.heavy(player, centre, 16.0, 1.6F);
 		ZFighterPower.refresh(player, live);
 	}
 

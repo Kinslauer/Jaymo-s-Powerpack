@@ -916,6 +916,7 @@ public final class GravityPower implements Power {
 				BlockPos under = living.blockPosition().below();
 				com.jaymospowers.core.Debris.puff(level, under, level.getBlockState(under), 1.8F);
 				level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.2F, 0.7F);
+				com.jaymospowers.core.Shakes.around(level, living.position(), 14.0, (float)Mth.clamp(fell * 0.12, 0.4, 1.4));
 			}
 		}
 	}
@@ -1359,6 +1360,7 @@ public final class GravityPower implements Power {
 			com.jaymospowers.core.Debris.puff(level, under, shown, IMPACT_DEBRIS * 1.6F * debris);
 			level.sendParticles(ParticleTypes.EXPLOSION, target.getX(), target.getY(), target.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.3F, 0.7F);
+			com.jaymospowers.core.Shakes.around(level, target.position(), 20.0, slam.aerial() ? 2.2F : 1.3F);
 		}
 	}
 
@@ -1603,6 +1605,7 @@ public final class GravityPower implements Power {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 1.2F, 0.6F);
 		level.sendParticles(ParticleTypes.REVERSE_PORTAL, player.getX(), player.getY() + 0.1, player.getZ(), 40, 0.6, 0.1, 0.6, 0.3);
 		com.jaymospowers.core.Debris.puff(level, player.blockPosition().below(), level.getBlockState(player.blockPosition().below()), 2.0F);
+		com.jaymospowers.core.Shakes.heavy(player, player.position(), 10.0, 0.8F);
 		return true;
 	}
 
@@ -1655,6 +1658,7 @@ public final class GravityPower implements Power {
 		}
 		level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y + 0.5, at.z, 30, radius * 0.4, 0.3, radius * 0.4, 0.05);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.2F, 0.6F);
+		com.jaymospowers.core.Shakes.heavy(player, at, radius * 2.5, 1.0F + 1.2F * charge);
 		int cooldown = Math.round(Mth.lerp(charge, CRUSH_COOLDOWN_MIN, CRUSH_COOLDOWN_MAX));
 		player.setAttached(COOLDOWNS, cooldowns(player).withCrush(level.getGameTime() + cooldown, cooldown));
 	}
@@ -2139,6 +2143,7 @@ public final class GravityPower implements Power {
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y, at.z, 80, 1.5, 1.5, 1.5, 0.6);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.2F, 0.6F);
+		com.jaymospowers.core.Shakes.around(level, at, 28.0, 1.8F);
 	}
 
 	// ---------------------------------------------------------------- deaths by weight

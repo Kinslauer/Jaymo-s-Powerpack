@@ -72,6 +72,7 @@ final class GravityRockFlight {
 		ServerPlayNetworking.send(player, new com.jaymospowers.power.web.WebNet.Nudge(new Vec3(0.0, 0.55, 0.0)));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.2F, 0.7F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_EMERGE, SoundSource.PLAYERS, 0.8F, 1.4F);
+		com.jaymospowers.core.Shakes.heavy(player, player.position(), 10.0, 0.9F);
 		BlockPos under = player.blockPosition().below();
 		com.jaymospowers.core.Debris.puff(level, under, slab.pieces().isEmpty() ? level.getBlockState(under) : slab.pieces().get(0).blockState(), 2.0F);
 		return true;

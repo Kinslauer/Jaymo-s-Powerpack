@@ -108,6 +108,7 @@ final class DarktideShade {
 		level.sendParticles(DUST, player.getX(), player.getY() + 1.0, player.getZ(), 80, 0.5, 0.9, 0.5, 0.0);
 		level.sendParticles(ParticleTypes.SCULK_SOUL, player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.3, 0.6, 0.3, 0.02);
 		whisper(player, "shade_rises", SoundEvents.WARDEN_EMERGE, ChatFormatting.DARK_AQUA);
+		com.jaymospowers.core.Shakes.send(player, 1.5F);
 	}
 
 	/** Makes {@code player} a shade until the overworld clock reaches {@code until}, or ends it ({@code 0}). */
