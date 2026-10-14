@@ -2,9 +2,9 @@ package com.jaymospowers.core;
 
 import com.jaymospowers.JaymosPowers;
 import com.mojang.serialization.Codec;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.Set;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -31,7 +32,12 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.npc.villager.VillagerDataHolder;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -51,8 +57,10 @@ import net.minecraft.world.phys.Vec3;
  * <li><b>Head</b>: no break, a daze: slowed and reeling (a player's view swims), a mob forgets who it was fighting.</li>
  * <li><b>Skeletons</b> have nothing but bone: the part shatters and is gone for good ({@link Dismember#shatter}).</li>
  * </ul>
- * A break knits after {@link #HEAL_TICKS}, or when a player respawns. The body is drawn with the broken limb hanging
- * limp (client {@code Dismembered}).
+ * A break knits by itself after {@link #HEAL_TICKS} of mending, faster the healthier the body ({@link #HEALTHY_RATE}
+ * at full health); at once with a respawn, a Hermit Bean, a Verdant's healing (or a Verdant's own body), Chrono's Bloom,
+ * Wind's Zephyr's Breath, or a priest ({@link #PRIEST_FEE} emeralds: right-click a cleric with them). The body is drawn
+ * with the broken limb hanging limp (client {@code Dismembered}).
  */
 public final class Fractures {
 	/** A humanoid mob's chance per blunt blow of at least {@link #MIN_DAMAGE}, plus {@link #PER_DAMAGE} per point over. */
@@ -62,8 +70,14 @@ public final class Fractures {
 	public static final float MIN_DAMAGE = 4.0F;
 	/** Skeletons shatter at this many times the break chance. */
 	public static final float SKELETON_SCALE = 2.0F;
-	/** How long a break takes to knit (two in-game minutes). */
-	public static final int HEAL_TICKS = 2400;
+	/** How much mending a break takes: five minutes when near death, a third of that at full health. */
+	public static final int HEAL_TICKS = 6000;
+	/** Mending per tick at full health (1 at none, in between by health). */
+	public static final float HEALTHY_RATE = 3.0F;
+	/** How often mending is counted (and saved). */
+	private static final int MEND_EVERY = 20;
+	/** What a priest asks to set your bones, in emeralds. */
+	public static final int PRIEST_FEE = 2;
 	/** A limp: speed and jump lost to one broken leg, and to both. */
 	public static final double LIMP_SPEED = -0.3, LIMPS_SPEED = -0.6, LIMP_JUMP = -0.4, LIMPS_JUMP = -0.7;
 	public static final int DAZE_TICKS = 80;
@@ -71,9 +85,9 @@ public final class Fractures {
 	/** The bones this creature has broken (a {@link Dismember#RIGHT_ARM}... bitmask). Saved, synced to everyone. */
 	public static final AttachmentType<Integer> BROKEN = AttachmentRegistry.create(JaymosPowers.id("broken_bones"),
 		builder -> builder.persistent(Codec.INT).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
-	/** The game time its breaks knit. */
-	public static final AttachmentType<Long> KNITS = AttachmentRegistry.create(JaymosPowers.id("bones_knit"),
-		builder -> builder.persistent(Codec.LONG));
+	/** The mending its breaks still need (ticks at the slowest rate). */
+	public static final AttachmentType<Integer> MENDING = AttachmentRegistry.create(JaymosPowers.id("bones_mending"),
+		builder -> builder.persistent(Codec.INT));
 
 	/** Any weapon that breaks bones, whatever its name. */
 	public static final TagKey<net.minecraft.world.item.Item> CRUSHING = TagKey.create(Registries.ITEM, JaymosPowers.id("crushing"));
@@ -83,7 +97,7 @@ public final class Fractures {
 	private static final Identifier LIMP_SPEED_ID = JaymosPowers.id("broken_leg_speed");
 	private static final Identifier LIMP_JUMP_ID = JaymosPowers.id("broken_leg_jump");
 	/** Everyone with a break, until it knits. */
-	private static final Map<LivingEntity, Long> HEALING = new HashMap<>();
+	private static final Set<LivingEntity> HEALING = new HashSet<>();
 
 	private Fractures() {
 	}
@@ -92,13 +106,33 @@ public final class Fractures {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register(Fractures::afterDamage);
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof LivingEntity living && broken(living) != 0) {
-				Long knits = living.getAttached(KNITS);
-				HEALING.put(living, knits == null ? level.getGameTime() + HEAL_TICKS : knits);
+				HEALING.add(living);
 			}
+		});
+		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
+			if (hand != InteractionHand.MAIN_HAND || broken(player) == 0 || !player.getMainHandItem().is(Items.EMERALD)
+				|| player.getMainHandItem().getCount() < PRIEST_FEE || !priest(entity)) {
+				return InteractionResult.PASS;
+			}
+			if (!level.isClientSide() && level instanceof ServerLevel server) {
+				player.getMainHandItem().consume(PRIEST_FEE, player);
+				heal(player);
+				server.sendParticles(ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.4, 0.5, 0.4, 0.0);
+				server.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.VILLAGER_WORK_CLERIC, SoundSource.NEUTRAL, 1.0F, 1.0F);
+				player.sendOverlayMessage(Component.translatable("message.jaymospowers.fracture.priest", entity.getDisplayName())
+					.withStyle(ChatFormatting.GREEN));
+			}
+			return InteractionResult.SUCCESS;
 		});
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> heal(newPlayer));
 		ServerTickEvents.END_SERVER_TICK.register(Fractures::tick);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> HEALING.clear());
+	}
+
+	/** A cleric (a village's or a kingdom's priest, MCA's included) who can set bones. */
+	public static boolean priest(Entity entity) {
+		return entity instanceof VillagerDataHolder holder && entity instanceof LivingEntity living && living.isAlive() && !living.isBaby()
+			&& holder.getVillagerData().profession().is(VillagerProfession.CLERIC);
 	}
 
 	public static int broken(LivingEntity entity) {
@@ -172,10 +206,9 @@ public final class Fractures {
 			return false;
 		}
 		mask |= part;
-		long knits = level.getGameTime() + HEAL_TICKS;
 		target.setAttached(BROKEN, mask);
-		target.setAttached(KNITS, knits);
-		HEALING.put(target, knits);
+		target.setAttached(MENDING, HEAL_TICKS);
+		HEALING.add(target);
 		if (part == Dismember.RIGHT_ARM || part == Dismember.LEFT_ARM) {
 			Dismember.emptyHand(level, target, part);
 		} else {
@@ -187,12 +220,14 @@ public final class Fractures {
 		return true;
 	}
 
-	/** All its breaks knit. */
-	public static void heal(LivingEntity target) {
+	/** All its breaks knit at once. True if it had any. */
+	public static boolean heal(LivingEntity target) {
+		boolean had = broken(target) != 0;
 		target.removeAttached(BROKEN);
-		target.removeAttached(KNITS);
+		target.removeAttached(MENDING);
 		limp(target, 0);
 		HEALING.remove(target);
+		return had;
 	}
 
 	private static void limp(LivingEntity target, int mask) {
@@ -233,22 +268,29 @@ public final class Fractures {
 		if (HEALING.isEmpty()) {
 			return;
 		}
-		for (Iterator<Map.Entry<LivingEntity, Long>> it = HEALING.entrySet().iterator(); it.hasNext(); ) {
-			Map.Entry<LivingEntity, Long> e = it.next();
-			LivingEntity body = e.getKey();
+		boolean count = server.getTickCount() % MEND_EVERY == 0;
+		for (Iterator<LivingEntity> it = HEALING.iterator(); it.hasNext(); ) {
+			LivingEntity body = it.next();
 			if (body.isRemoved() || !(body.level() instanceof ServerLevel level)) {
 				it.remove();
 				continue;
 			}
-			if (level.getGameTime() >= e.getValue() || broken(body) == 0) {
-				it.remove();
-				body.removeAttached(BROKEN);
-				body.removeAttached(KNITS);
-				limp(body, 0);
-				continue;
-			}
 			if (!body.isAlive()) {
 				continue;
+			}
+			if (count) {
+				// mends faster the healthier the body
+				float health = body.getHealth() / Math.max(1.0F, body.getMaxHealth());
+				Integer left = body.getAttached(MENDING);
+				int now = (left == null ? HEAL_TICKS : left) - Math.round(MEND_EVERY * (1.0F + (HEALTHY_RATE - 1.0F) * health));
+				if (now <= 0 || broken(body) == 0) {
+					it.remove();
+					body.removeAttached(BROKEN);
+					body.removeAttached(MENDING);
+					limp(body, 0);
+					continue;
+				}
+				body.setAttached(MENDING, now);
 			}
 			int mask = broken(body);
 			for (int arm : new int[] {Dismember.RIGHT_ARM, Dismember.LEFT_ARM}) {

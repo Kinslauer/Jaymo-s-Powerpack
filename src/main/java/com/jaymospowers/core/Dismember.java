@@ -67,7 +67,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Arm</b>: whatever that hand held falls, and it holds nothing more.</li>
  * <li><b>Leg</b>: slowed hard, and with both gone barely moving and never jumping.</li>
  * </ul>
- * A player's lost limbs come back when they respawn.
+ * A player's lost limbs never grow back by themselves: only when they respawn, eat a Hermit Bean, or are Verdant
+ * ({@link #regrow}). A blunt blow breaks a limb instead ({@link Fractures}).
  */
 public final class Dismember {
 	public static final int HEAD = 1, RIGHT_ARM = 2, LEFT_ARM = 4, RIGHT_LEG = 8, LEFT_LEG = 16;
@@ -340,6 +341,38 @@ public final class Dismember {
 			}
 			case RIGHT_ARM, LEFT_ARM -> emptyHand(level, target, part);
 			default -> legs(target, mask);
+		}
+		return true;
+	}
+
+	/**
+	 * Lost parts grown back (Andy: a living player only ever regrows them as a Verdant, with a Hermit Bean, or by
+	 * respawning): every one, or just the first still missing. True if anything grew back.
+	 */
+	public static boolean regrow(LivingEntity target, boolean all) {
+		int mask = missing(target);
+		if (mask == 0) {
+			return false;
+		}
+		for (int part : PARTS) {
+			if ((mask & part) != 0) {
+				mask &= ~part;
+				target.removeTag(tag(part));
+				if (!all) {
+					break;
+				}
+			}
+		}
+		if (mask == 0) {
+			target.removeAttached(MISSING);
+		} else {
+			target.setAttached(MISSING, mask);
+		}
+		legs(target, mask);
+		if (target.level() instanceof ServerLevel level) {
+			level.sendParticles(ParticleTypes.HAPPY_VILLAGER, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), 14,
+				0.35, 0.5, 0.35, 0.0);
+			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.CHORUS_FLOWER_GROW, SoundSource.PLAYERS, 1.0F, 1.2F);
 		}
 		return true;
 	}
