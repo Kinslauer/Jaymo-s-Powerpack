@@ -2711,7 +2711,7 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
 - Andy asked to work Pillager Caravans into our caravan system so there are hostile and neutral caravans to meet. Its
   latest build is for 26.1 and it carries the Obscuria Ecosystem licence, so its ideas are remade in our own code
   (`RoamingCaravans`, reusing `Caravans`' ground, steering and `Drive` goal); none of its files are used.
-- **When:** each minute (`SPAWN_CHECK`), a 20% chance that a due caravan comes near a random player: 64-96 blocks off
+- **When:** each minute (`SPAWN_CHECK`), a 3% chance (Andy: rarer; about half an hour on average once one is due) that a due caravan comes near a random player: 64-96 blocks off
   on dry land outside every realm's claims, crossing past him to a point 420 blocks beyond. Cooldowns per kind:
   minor pillager 3 days, major pillager 7 days (a major also resets the minor's), merchant 2 days (Andy: rarer). Never on peaceful
   for pillagers.

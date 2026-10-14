@@ -81,7 +81,7 @@ final class RoamingCaravans {
 	/** How often caravans are moved on (ticks), and how often a new one may come. */
 	static final int TICK = 20, SPAWN_CHECK = 1200;
 	/** The chance, each spawn check that one is due, that a caravan comes. */
-	static final float SPAWN_CHANCE = 0.2F;
+	static final float SPAWN_CHANCE = 0.03F;
 	/** After a minor pillager caravan, a major one, a merchant caravan: none of that kind for this long (ticks). */
 	static final long MINOR_COOLDOWN = 72000L, MAJOR_COOLDOWN = 168000L, MERCHANT_COOLDOWN = 48000L;
 	/** The share of pillager caravans that are major (when one is due). */
