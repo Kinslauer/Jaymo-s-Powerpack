@@ -14,8 +14,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * Balkon's WeaponMod (optional), the only place Darktide looks at its items: katanas ({@code weaponmod:katana.<tier>})
  * and knives ({@code weaponmod:knife.<tier>}), every tier, found by registry id at runtime (no compile dependency, the
- * same way {@link ArsenalPool} finds them). Sora's Daggers are Wind's and never count. Without WeaponMod everything
- * here says "unarmed".
+ * same way {@link ArsenalPool} finds them). Without WeaponMod everything here says "unarmed".
  */
 public final class DarktideWeapons {
 	/** What the hands hold, as far as Darktide cares. */

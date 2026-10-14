@@ -977,3 +977,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Super hair covers his own: the skin's hat layer is hidden while it shows, and the cap reaches past where that layer
   sat (0.7 out), with a fringe above the eyes, the whole back of the head and over the ears.
 - Gravity's Z dome is now called the **Immense Field** (was the Training Field): key guide, messages and docs.
+- **0.10.25, Sora's Dagger removed:** per Andy, Wind's dagger is gone: the item (all four stages), its recipe, Flurry,
+  textures, Better Combat dagger preset, the casting-table gilding and the Tool Station diamond setting. Wind keeps
+  every ability; daggers already in a world disappear when it loads.

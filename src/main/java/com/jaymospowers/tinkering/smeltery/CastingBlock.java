@@ -60,7 +60,7 @@ public class CastingBlock extends Block implements EntityBlock {
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
 		InteractionHand hand, BlockHitResult hit) {
 		if (level.getBlockEntity(pos) instanceof CastingEntity casting && !casting.busy() && casting.cast().isEmpty()
-			&& (stack.getItem() instanceof CastItem || CastItem.Shape.of(stack) != null || Melting.gilds(stack)) && !basin) {
+			&& (stack.getItem() instanceof CastItem || CastItem.Shape.of(stack) != null) && !basin) {
 			if (!level.isClientSide()) {
 				casting.putCast(stack);
 			}

@@ -508,8 +508,7 @@ whisper in the action bar.
   - **Wind-ups:** the channels (G / V / B: the full charge takes 60 ticks more; it's stored per channel and sent to
     the client in `WindNet.Status.channelMax`, so the HUD bar matches), the Cyclone's hold threshold on X (client),
     the Tempest Kick's wind-up.
-  - **Cooldowns:** G / V / B, the ground Gust, Call Lightning, Cyclone Lance, the Cyclone, the Tempest Kick, the
-    Flurry of Sora's Dagger.
+  - **Cooldowns:** G / V / B, the ground Gust, Call Lightning, Cyclone Lance, the Cyclone, the Tempest Kick.
 - **HUD:** a pale-blue frost mark (a snowflake) left of the weather glyph while it's cold, a "COLD" tag on the charge
   meter's label, and an action-bar line when the cold first takes hold (at most once a minute).
 
