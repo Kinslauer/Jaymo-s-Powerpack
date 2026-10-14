@@ -2861,7 +2861,7 @@ beating". (0.7.20 / 0.10.69 are the Kingdom languages PR's.)
   offers you the quest.
 - Built; not yet seen in game.
 
-## 0.7.24: vampire looks and sight (pack 0.10.79)
+## 0.7.24: vampire looks and sight (pack 0.10.83)
 Andy: "vampirism should give you the sirben visual modifier" (Sirben is an MCA trait that changes the screen), then
 "do both of those": blood vision and the vampire looks as well.
 - **Sirben:** a vampire player's screen always wears MCA's own `mca:sirben` post effect (blur growing toward the

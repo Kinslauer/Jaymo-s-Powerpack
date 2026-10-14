@@ -42,7 +42,7 @@ public final class SmokeFieldClient {
 	/** Blocks from the camera that are drawn. */
 	static final int RANGE = 56;
 	/** How see-through your own smoke is drawn. */
-	static final float OWN_ALPHA = 0.3F;
+	static final float OWN_ALPHA = 0.5F;
 	/** The grey your view goes in thick smoke, and the thickness that greys it out completely. */
 	static final int VIEW_GREY = 0x8E9094;
 	static final float VIEW_FULL = 1.6F;
@@ -145,7 +145,7 @@ public final class SmokeFieldClient {
 		Quaternionf facing = context.levelState().cameraRenderState.orientation;
 		float time = age + partial;
 		// gather the puffs first, then draw them in one go
-		int most = (now.size() + before.size()) * 2;
+		int most = (now.size() + before.size()) * 3;
 		float[] puffs = new float[most * PUFF];
 		int[] lights = new int[most];
 		int count = 0;
@@ -169,7 +169,7 @@ public final class SmokeFieldClient {
 				}
 				int light = LightCoordsUtil.getLightCoords(minecraft.level, cursor.set(x, y, z));
 				float own = yours.contains(key) ? OWN_ALPHA : 1.0F;
-				int n = d >= 1.0F ? 2 : 1;
+				int n = d >= 1.8F ? 3 : d >= 0.6F ? 2 : 1;
 				for (int i = 0; i < n; i++) {
 					long h = mix(key * 31L + i);
 					float phase = (h & 0xFFFF) / 65535.0F * Mth.TWO_PI;
@@ -183,7 +183,7 @@ public final class SmokeFieldClient {
 					// right by the camera a puff would be one flat sprite filling the view: let the grey view do that
 					float near = (float)Mth.clamp((distance - 0.4) / 1.2, 0.0, 1.0);
 					float thin = Math.min(1.0F, d / 0.3F);
-					float alpha = Math.min(0.55F, 0.12F + d * 0.2F) * thin * near * own / (n == 2 ? 1.4F : 1.0F);
+					float alpha = Math.min(0.85F, 0.22F + d * 0.35F) * thin * near * own / (1.0F + 0.35F * (n - 1));
 					if (alpha < 0.01F) {
 						continue;
 					}
@@ -191,7 +191,7 @@ public final class SmokeFieldClient {
 					puffs[o] = (float)dx;
 					puffs[o + 1] = (float)dy;
 					puffs[o + 2] = (float)dz;
-					puffs[o + 3] = 0.6F + 0.28F * Math.min(d, 2.0F) + 0.06F * Mth.sin(time * 0.03F + phase);
+					puffs[o + 3] = 0.7F + 0.32F * Math.min(d, 2.5F) + 0.06F * Mth.sin(time * 0.03F + phase);
 					puffs[o + 4] = phase + time * 0.004F * ((h & 0x10000) == 0 ? 1.0F : -1.0F);
 					puffs[o + 5] = alpha;
 					puffs[o + 6] = h >>> 40 & 3;

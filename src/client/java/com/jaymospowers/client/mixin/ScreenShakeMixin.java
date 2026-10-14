@@ -15,5 +15,6 @@ abstract class ScreenShakeMixin {
 	@Inject(method = "bobHurt", at = @At("TAIL"))
 	private void jaymospowers$shake(CameraRenderState cameraState, PoseStack poseStack, CallbackInfo ci) {
 		ScreenShake.apply(cameraState, poseStack);
+		com.jaymospowers.client.FlightRolls.applyCamera(poseStack, net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false));
 	}
 }
