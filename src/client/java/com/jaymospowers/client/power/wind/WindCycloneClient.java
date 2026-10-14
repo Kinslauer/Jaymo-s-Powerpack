@@ -56,6 +56,7 @@ final class WindCycloneClient {
 
 	static void init() {
 		ClientTickEvents.START_CLIENT_TICK.register(WindCycloneClient::input);
+		WindCycloneFunnel.register();
 	}
 
 	static @Nullable KeyMapping key(Minecraft minecraft) {
@@ -170,6 +171,7 @@ final class WindCycloneClient {
 			SOUNDS.clear();
 			return;
 		}
+		WindCycloneFunnel.tick(minecraft);
 		SOUNDS.values().removeIf(WindCycloneSound::isStopped);
 		for (AbstractClientPlayer player : level.players()) {
 			if (WindCyclone.isActive(player) && !SOUNDS.containsKey(player.getId())) {

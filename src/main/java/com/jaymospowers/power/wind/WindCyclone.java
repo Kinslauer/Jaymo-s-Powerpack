@@ -102,18 +102,41 @@ public final class WindCyclone {
 	 * A Cyclone under way: when it began (game time), which side kneels ({@code left}: the stance mirrored), and the
 	 * {@link WindCycloneElement} it has drawn up.
 	 */
-	public record Stance(long start, boolean left, int element) {
+	public record Stance(long start, boolean left, int element, float radius, float height) {
 		public static final Codec<Stance> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.LONG.fieldOf("start").forGetter(Stance::start),
 			Codec.BOOL.fieldOf("left").forGetter(Stance::left),
-			Codec.INT.optionalFieldOf("element", 0).forGetter(Stance::element)
+			Codec.INT.optionalFieldOf("element", 0).forGetter(Stance::element),
+			Codec.FLOAT.optionalFieldOf("radius", (float)RADIUS_MIN).forGetter(Stance::radius),
+			Codec.FLOAT.optionalFieldOf("height", (float)HEIGHT_MIN).forGetter(Stance::height)
 		).apply(i, Stance::new));
 		public static final StreamCodec<ByteBuf, Stance> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, Stance::start,
 			ByteBufCodecs.BOOL, Stance::left,
 			ByteBufCodecs.VAR_INT, Stance::element,
+			ByteBufCodecs.FLOAT, Stance::radius,
+			ByteBufCodecs.FLOAT, Stance::height,
 			Stance::new);
+
+		/** How far the funnel has risen out of the landing (0-1) at this game time. */
+		public float grown(float gameTime) {
+			float grow = Mth.clamp((gameTime - this.start + 1.0F) / FORM_TICKS, 0.0F, 1.0F);
+			return grow * grow * (3.0F - 2.0F * grow);
+		}
+
+		/** The funnel's radius {@code h} blocks up (full size), narrow at the foot and widening to the top. */
+		public float radiusAt(float h) {
+			return (float)Mth.lerp(Mth.clamp(h / this.height, 0.0F, 1.0F), this.radius * FOOT_SHARE, this.radius);
+		}
 	}
+
+	/**
+	 * The funnel's look, drawn by each client round the player (see the client's {@code WindCycloneFunnel}): wisps
+	 * like a Jaymo's Kingdoms tornado's, but white.
+	 */
+	public static final net.minecraft.core.particles.SimpleParticleType FUNNEL_WISP = net.minecraft.core.Registry.register(
+		net.minecraft.core.registries.BuiltInRegistries.PARTICLE_TYPE, JaymosPowers.id("cyclone_wisp"),
+		net.fabricmc.fabric.api.particle.v1.FabricParticleTypes.simple(true));
 
 	/** On a player holding a Cyclone: the stance. Synced to everyone, who see the landing pose and hear the roar. */
 	public static final AttachmentType<Stance> CYCLONE = AttachmentRegistry.create(JaymosPowers.id("wind_cyclone"),
@@ -217,7 +240,7 @@ public final class WindCyclone {
 		}
 		boolean fast = Fate.isAscended(player) || Fate.isCorrupted(player);
 		ACTIVE.put(player.getUUID(), new Active(level.dimension(), now, now + DAMAGE_INTERVAL, now + (fast ? SELF_INTERVAL_ASCENDED : SELF_INTERVAL)));
-		player.setAttached(CYCLONE, new Stance(now, player.getRandom().nextBoolean(), 0));
+		player.setAttached(CYCLONE, new Stance(now, player.getRandom().nextBoolean(), 0, (float)radius(player), (float)height(player)));
 		root(player);
 		Mastery.used(player);
 		WindFumble.onCast(player);
@@ -251,7 +274,7 @@ public final class WindCyclone {
 		double radius = radius(player);
 		for (LivingEntity target : caught(player, level, radius, height(player))) {
 			if (active.orbiting.containsKey(target.getUUID())) {
-				fling(player, level, target);
+				fling(player, level, target, active.element == WindCycloneElement.GALE ? WindCycloneElement.GALE_FLING : 1.0);
 			}
 		}
 		level.sendParticles(ParticleTypes.GUST_EMITTER_LARGE, player.getX(), player.getY() + 0.5, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
@@ -302,7 +325,7 @@ public final class WindCyclone {
 				active.element = element;
 				Stance stance = player.getAttached(CYCLONE);
 				if (stance != null) {
-					player.setAttached(CYCLONE, new Stance(stance.start(), stance.left(), element.ordinal()));
+					player.setAttached(CYCLONE, new Stance(stance.start(), stance.left(), element.ordinal(), stance.radius(), stance.height()));
 				}
 			}
 		}
@@ -335,7 +358,7 @@ public final class WindCyclone {
 			long since = active.orbiting.computeIfAbsent(id, k -> now);
 			if (now - since >= ORBIT_TICKS) {
 				// round and up, and off it goes
-				fling(player, level, target);
+				fling(player, level, target, element == WindCycloneElement.GALE ? WindCycloneElement.GALE_FLING : 1.0);
 				active.orbiting.remove(id);
 				active.thrown.put(id, now + RECATCH_TICKS);
 				continue;
@@ -404,8 +427,8 @@ public final class WindCyclone {
 	}
 
 	/** Thrown clear: outward, up, and a little along the spin, with a gust where it leaves. */
-	private static void fling(ServerPlayer player, ServerLevel level, LivingEntity target) {
-		double resist = 1.0 - target.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
+	private static void fling(ServerPlayer player, ServerLevel level, LivingEntity target, double strength) {
+		double resist = (1.0 - target.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE)) * strength;
 		if (resist <= 0.0) {
 			return;
 		}
@@ -457,7 +480,10 @@ public final class WindCyclone {
 		return landed;
 	}
 
-	/** The column: rings of cloud turning round you, wider toward the top, with gusts and (corrupted) sparks. */
+	/**
+	 * The column's extras: the white funnel itself is drawn by each client (see {@link #FUNNEL_WISP}); here, what it
+	 * has drawn up turning in rings round you, wider toward the top, with gusts and (corrupted) sparks.
+	 */
 	private static void funnel(ServerPlayer player, ServerLevel level, long age, double radius, double height, boolean corrupted,
 		WindCycloneElement element) {
 		ParticleOptions carried = element.particle(level);
@@ -474,7 +500,10 @@ public final class WindCyclone {
 				// count 0: (dx, dy, dz) is the velocity, along the circle and rising
 				double speed = 0.25 + 0.25 * up;
 				// (one point a ring is what it has drawn up)
-				ParticleOptions particle = carried != null && i == 0 ? carried : corrupted && i == 0 ? STORM_DUST : ParticleTypes.CLOUD;
+				ParticleOptions particle = carried != null && i == 0 ? carried : corrupted && i == 0 ? STORM_DUST : null;
+				if (particle == null) {
+					continue;
+				}
 				level.sendParticles(particle, x, y, z, 0, -Math.sin(a) * speed, 0.06, Math.cos(a) * speed, 1.0);
 			}
 		}

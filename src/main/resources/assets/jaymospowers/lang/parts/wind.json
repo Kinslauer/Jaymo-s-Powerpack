@@ -58,6 +58,7 @@
 	"hud.jaymospowers.wind.cyclone.snow": "Blizzard",
 	"hud.jaymospowers.wind.cyclone.sand": "Sandstorm",
 	"hud.jaymospowers.wind.cyclone.storm": "Storm Cyclone",
+	"hud.jaymospowers.wind.cyclone.gale": "Gale Cyclone",
 	"hud.jaymospowers.wind.cold": "COLD",
 	"message.jaymospowers.wind.cold": "The cold stiffens the wind: slower to gather, slower to return.",
 	"message.jaymospowers.wind.fumble": "The wind tugs %s from your grip!",

@@ -31,9 +31,15 @@ import net.minecraft.world.level.levelgen.Heightmap;
  * frozen, sandy or soaked creatures it catches feed their element in too. The strongest element around wins, and the
  * funnel changes over if another takes over (fire meeting water goes up in steam first). Nothing it carries harms you
  * in the eye of it.
+ * <p>
+ * A Jaymo's Kingdoms Sorcerer whose blade is Imbued brings their element in with them, over whatever is round about:
+ * fire, water, ice (a blizzard), lightning (the storm), earth (a sandstorm), and air (a {@link #GALE} that throws
+ * {@link #GALE_FLING} times as hard). Kingdoms is read by reflection ({@code Spellcraft.imbuedElement}).
  */
 public enum WindCycloneElement {
-	NONE, FIRE, WATER, SNOW, SAND, STORM;
+	NONE, FIRE, WATER, SNOW, SAND, STORM,
+	/** Only from an air Imbue: a fiercer wind that throws harder. */
+	GALE;
 
 	/** How often the funnel takes stock of what's around it (ticks), and how far down it reaches (blocks). */
 	static final int SAMPLE_EVERY = 10, SAMPLE_DEPTH = 2;
@@ -52,6 +58,44 @@ public enum WindCycloneElement {
 	/** The sandstorm: blindness per hit (ticks), and the grit's extra cut. */
 	static final int BLIND_TICKS = 50;
 	static final float GRIT_DAMAGE = 1.0F;
+	/** An Imbue's element outweighs anything round about; the gale's throw. */
+	static final int IMBUE_WEIGHT = 100;
+	static final double GALE_FLING = 1.5;
+
+	private static final java.lang.invoke.MethodHandle IMBUED;
+
+	static {
+		java.lang.invoke.MethodHandle imbued = null;
+		try {
+			Class<?> spellcraft = Class.forName("com.jaymoskingdoms.Spellcraft");
+			imbued = java.lang.invoke.MethodHandles.publicLookup().findStatic(spellcraft, "imbuedElement",
+				java.lang.invoke.MethodType.methodType(String.class, net.minecraft.world.entity.Entity.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			imbued = null;
+		}
+		IMBUED = imbued;
+	}
+
+	/** The element a Sorcerer's Imbued blade brings to their Cyclone, or NONE. */
+	static WindCycloneElement imbued(ServerPlayer player) {
+		if (IMBUED == null) {
+			return NONE;
+		}
+		try {
+			String element = (String)IMBUED.invoke((net.minecraft.world.entity.Entity)player);
+			return element == null ? NONE : switch (element) {
+				case "fire" -> FIRE;
+				case "water" -> WATER;
+				case "ice" -> SNOW;
+				case "earth" -> SAND;
+				case "lightning" -> STORM;
+				case "air" -> GALE;
+				default -> NONE;
+			};
+		} catch (Throwable t) {
+			return NONE;
+		}
+	}
 
 	public static WindCycloneElement byId(int id) {
 		WindCycloneElement[] all = values();
@@ -99,6 +143,7 @@ public enum WindCycloneElement {
 		for (LivingEntity creature : orbiting) {
 			weight[carried(creature).ordinal()] += CREATURE_WEIGHT;
 		}
+		weight[imbued(player).ordinal()] += IMBUE_WEIGHT;
 		weight[NONE.ordinal()] = 0;
 		WindCycloneElement best = NONE;
 		for (WindCycloneElement e : values()) {
@@ -161,6 +206,7 @@ public enum WindCycloneElement {
 			case SNOW -> level.playSound(null, x, y, z, SoundEvents.POWDER_SNOW_BREAK, SoundSource.PLAYERS, 1.2F, 0.5F);
 			case SAND -> level.playSound(null, x, y, z, SoundEvents.SAND_BREAK, SoundSource.PLAYERS, 1.2F, 0.5F);
 			case STORM -> level.playSound(null, x, y, z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 0.7F, 1.4F);
+			case GALE -> level.playSound(null, x, y, z, SoundEvents.BREEZE_WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 1.2F, 0.5F);
 			default -> {
 			}
 		}
@@ -174,6 +220,7 @@ public enum WindCycloneElement {
 			case SNOW -> ParticleTypes.SNOWFLAKE;
 			case SAND -> new BlockParticleOption(ParticleTypes.FALLING_DUST, Blocks.SAND.defaultBlockState());
 			case STORM -> ParticleTypes.ELECTRIC_SPARK;
+			case GALE -> ParticleTypes.SMALL_GUST;
 			case NONE -> null;
 		};
 	}
