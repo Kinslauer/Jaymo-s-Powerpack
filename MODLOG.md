@@ -988,3 +988,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   the symbiote's slam/charge/roar/feeding, Chrono flow/reel, Xenoform flight/slap, Z Fighter flight/charge/guard,
   Arsenal's reach and flintlock aim) EMF's pause hook stops FA for that player; Better Combat swings already pause it
   (EMF's own Player Animation Library check).
+  The Xenoform aliens move in Fresh Animations' manner (`XenoMotion`): with FA on, EMF copies the player's FA pose
+  onto each form's body and limbs like armour, and the forms' own extras now follow the body instead of running on a
+  bare sine. A per-entity follower tracks turn rate (springy, the trail a beat behind), fall speed, air time, a
+  landing jolt and breathing. The Wyrm's wings breathe and bounce with steps, flare open when dropping without flying,
+  slam down on landing and bank out of turns; its tail swings behind turns (tip later), lifts as it falls, whips down
+  on landing and droops crouched. Blur's and the Gremlin's tails do the same; Pyre's flames stream back with speed;
+  Wisp's tatters and Nadir's mantle billow as they drop; the Gremlin's ears bounce and flop; Bulwark's lower arms
+  breathe and swing out of turns; Knell's jaw tendrils hang straight down whichever way it looks.

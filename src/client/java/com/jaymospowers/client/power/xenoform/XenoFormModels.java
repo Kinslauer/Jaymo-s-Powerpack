@@ -56,6 +56,11 @@ public final class XenoFormModels {
 		return MODELS.get(form);
 	}
 
+	/** How far a tail rises: up as it falls, whipping down on landing, low when crouched (radians, + is up). */
+	static float tailLift(XenoMotion.Read m) {
+		return Math.max(0.0F, m.fall()) * 0.5F * m.air() - m.land() * 0.7F - (m.crouching() ? 0.35F : 0.0F);
+	}
+
 	private static ModelPart bake(MeshDefinition mesh) {
 		return LayerDefinition.create(mesh, 64, 128).bakeRoot();
 	}
@@ -93,11 +98,14 @@ public final class XenoFormModels {
 		@Override
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
-			// the lower arms swing the opposite way, half as far, and hang a little out
+			XenoMotion.Read m = XenoMotion.read(state);
+			// the lower arms swing the opposite way, half as far, and hang a little out; they rise and fall with its
+			// breath, swing out behind a turn, lift as it falls and jolt down on landing
+			float jolt = m.land() * 0.5F - Math.max(0.0F, m.fall()) * 0.35F * m.air();
 			this.rightLowerArm.xRot = -this.rightArm.xRot * 0.5F;
 			this.leftLowerArm.xRot = -this.leftArm.xRot * 0.5F;
-			this.rightLowerArm.zRot = 0.25F;
-			this.leftLowerArm.zRot = -0.25F;
+			this.rightLowerArm.zRot = 0.25F + m.breath() * 0.04F + m.trail() * 0.2F - jolt;
+			this.leftLowerArm.zRot = -0.25F - m.breath() * 0.04F + m.trail() * 0.2F + jolt;
 		}
 	}
 
@@ -131,10 +139,16 @@ public final class XenoFormModels {
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
 			float t = state.ageInTicks;
-			this.crest.zRot = Mth.sin(t * 0.35F) * 0.12F;
-			this.crest.xRot = Mth.cos(t * 0.27F) * 0.08F - 0.15F;
-			this.rightPlume.zRot = 0.3F + Mth.sin(t * 0.4F) * 0.15F;
-			this.leftPlume.zRot = -0.3F - Mth.sin(t * 0.4F + 1.0F) * 0.15F;
+			XenoMotion.Read m = XenoMotion.read(state);
+			// the flames flicker faster and stream back the faster it goes, lean out of a turn, and leap up as it falls
+			float flicker = t * (1.0F + m.speed() * 0.8F);
+			float stream = m.speed() * 0.45F + Math.max(0.0F, m.fall()) * 0.4F;
+			this.crest.zRot = Mth.sin(flicker * 0.35F) * 0.12F - m.trail() * 0.25F;
+			this.crest.xRot = Mth.cos(flicker * 0.27F) * 0.08F - 0.15F - stream;
+			this.rightPlume.zRot = 0.3F + Mth.sin(flicker * 0.4F) * 0.15F - m.trail() * 0.2F;
+			this.leftPlume.zRot = -0.3F - Mth.sin(flicker * 0.4F + 1.0F) * 0.15F - m.trail() * 0.2F;
+			this.rightPlume.xRot = -stream;
+			this.leftPlume.xRot = -stream;
 		}
 	}
 
@@ -170,11 +184,13 @@ public final class XenoFormModels {
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
 			float run = state.walkAnimationSpeed;
+			XenoMotion.Read m = XenoMotion.read(state);
 			float sway = Mth.cos(state.walkAnimationPos * 0.6662F) * 0.4F * run + Mth.sin(state.ageInTicks * 0.1F) * 0.08F;
-			this.tail.yRot = sway;
-			this.tail.xRot = 0.5F + run * 0.5F;
-			this.tailTip.yRot = sway * 1.3F;
-			this.tailTip.xRot = 0.3F - run * 0.2F;
+			float lift = tailLift(m);
+			this.tail.yRot = sway - m.trail() * 0.6F;
+			this.tail.xRot = 0.5F + run * 0.5F + lift;
+			this.tailTip.yRot = sway * 1.3F - (m.trail() - m.turn()) * 0.9F;
+			this.tailTip.xRot = 0.3F - run * 0.2F + lift * 0.6F;
 		}
 	}
 
@@ -229,8 +245,11 @@ public final class XenoFormModels {
 			super.setupAnim(state);
 			this.rightLeg.visible = false;
 			this.leftLeg.visible = false;
-			this.tatters.xRot = Mth.sin(state.ageInTicks * 0.12F) * 0.15F + state.walkAnimationSpeed * 0.3F;
-			this.tatters.zRot = Mth.cos(state.ageInTicks * 0.09F) * 0.1F;
+			XenoMotion.Read m = XenoMotion.read(state);
+			// the tatters drag behind it, billow up as it drops and swing out of a turn
+			this.tatters.xRot = Mth.sin(state.ageInTicks * 0.12F) * 0.15F + state.walkAnimationSpeed * 0.3F + Math.abs(m.fall()) * 0.6F * m.air()
+				+ m.land() * 0.3F;
+			this.tatters.zRot = Mth.cos(state.ageInTicks * 0.09F) * 0.1F - m.trail() * 0.35F;
 			XenoformFlightPose.Flight flight = state.getData(XenoformFlightPose.KEY);
 			if (flight != null && flight.glide() > 0.001F) {
 				// gliding, the tatters stream out behind and ripple
@@ -268,7 +287,11 @@ public final class XenoFormModels {
 		@Override
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
-			this.mantle.xRot = 0.1F + Mth.sin(state.ageInTicks * 0.07F) * 0.06F + state.walkAnimationSpeed * 0.5F;
+			XenoMotion.Read m = XenoMotion.read(state);
+			// the mantle drifts with its breath, streams out behind as it moves or drops, and swings out of a turn
+			this.mantle.xRot = 0.1F + Mth.sin(state.ageInTicks * 0.07F) * 0.06F + state.walkAnimationSpeed * 0.5F
+				+ Math.max(0.0F, m.fall()) * 0.9F * m.air() + m.land() * 0.25F;
+			this.mantle.zRot = -m.trail() * 0.3F;
 		}
 	}
 
@@ -299,17 +322,40 @@ public final class XenoFormModels {
 		@Override
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
-			float twitch = Mth.sin(state.ageInTicks * 0.3F) * 0.1F + state.walkAnimationSpeed * 0.2F;
-			this.rightEar.zRot = 0.6F + twitch;
-			this.leftEar.zRot = -0.6F - twitch;
-			this.tail.yRot = Mth.sin(state.ageInTicks * 0.2F) * 0.5F + Mth.cos(state.walkAnimationPos * 0.6662F) * 0.6F * state.walkAnimationSpeed;
+			XenoMotion.Read m = XenoMotion.read(state);
+			// the ears bounce with each step, flop on landing, blow back as it falls and lag a turn
+			float twitch = Mth.sin(state.ageInTicks * 0.3F) * 0.1F + state.walkAnimationSpeed * 0.2F
+				+ Mth.abs(Mth.sin(state.walkAnimationPos * 0.6662F)) * 0.15F * state.walkAnimationSpeed;
+			float flop = m.land() * 0.7F - Math.max(0.0F, m.fall()) * 0.4F * m.air();
+			this.rightEar.zRot = 0.6F + twitch + flop - m.trail() * 0.25F;
+			this.leftEar.zRot = -0.6F - twitch - flop - m.trail() * 0.25F;
+			this.tail.yRot = Mth.sin(state.ageInTicks * 0.2F) * 0.5F + Mth.cos(state.walkAnimationPos * 0.6662F) * 0.6F * state.walkAnimationSpeed
+				- m.trail() * 0.8F;
+			this.tail.xRot = 0.6F + tailLift(m);
 		}
 	}
 
 	/** Knell: hulking, horned, with a glowing ribcage, heavy shoulders and sculk tendrils at the jaw. */
 	static final class Knell extends FormModel {
+		private final ModelPart[] tendrils = new ModelPart[3];
+
 		Knell() {
 			super(bake(mesh()), "knell");
+			for (int i = 0; i < 3; i++) {
+				this.tendrils[i] = this.head.getChild("tendril_" + i);
+			}
+		}
+
+		@Override
+		public void setupAnim(AvatarRenderState state) {
+			super.setupAnim(state);
+			XenoMotion.Read m = XenoMotion.read(state);
+			// the tendrils hang straight down whichever way it looks, sway on their own and swing out of a turn
+			for (int i = 0; i < 3; i++) {
+				float own = Mth.sin(state.ageInTicks * 0.11F + i * 1.7F);
+				this.tendrils[i].xRot = 0.15F - this.head.xRot * 0.85F + own * 0.08F + m.speed() * 0.25F + m.land() * 0.4F;
+				this.tendrils[i].zRot = 0.2F - 0.2F * i + own * 0.06F - m.trail() * 0.4F;
+			}
 		}
 
 		private static MeshDefinition mesh() {
@@ -368,6 +414,8 @@ public final class XenoFormModels {
 
 		/** In flight: the beat's speed and depth; folded, the wings sweep back to this yaw and lift this little. */
 		static final float FLAP_RATE = 0.55F, FLAP_DEPTH = 0.95F, FOLDED_YAW = 1.35F, FOLDED_LIFT = 0.15F;
+		/** Falling without flying, how far the wings flare open; how hard a landing slams them down. */
+		static final float FALL_FLARE = 0.8F, LAND_SLAM = 0.6F;
 
 		@Override
 		public void setupAnim(AvatarRenderState state) {
@@ -376,19 +424,32 @@ public final class XenoFormModels {
 			XenoformFlightPose.Flight flight = state.getData(XenoformFlightPose.KEY);
 			float fly = flight == null ? 0.0F : XenoformFlightPose.smooth(flight.wings());
 			float fold = flight == null ? 0.0F : XenoformFlightPose.smooth(flight.fold());
-			// at rest a slow stir; flying, deep strokes that die away as the wings fold back at speed
-			float idle = Mth.sin(t * 0.25F) * (0.15F + state.walkAnimationSpeed * 0.6F);
+			XenoMotion.Read m = XenoMotion.read(state);
+			// at rest the wings rise and settle with each breath and bounce with each step; flying, deep strokes that
+			// die away as they fold back at speed
+			float step = Mth.abs(Mth.sin(state.walkAnimationPos * 0.6662F)) * 0.18F * state.walkAnimationSpeed;
+			float idle = m.breath() * 0.08F + Mth.sin(t * 0.25F) * 0.05F + step;
 			float flap = Mth.sin(t * FLAP_RATE) * FLAP_DEPTH * (1.0F - fold);
 			float beat = Mth.lerp(fly, idle, flap);
 			float lift = fold * FOLDED_LIFT * fly;
-			this.rightWing.zRot = -0.3F + beat + lift;
-			this.leftWing.zRot = 0.3F - beat - lift;
-			float sweep = Mth.lerp(fold * fly, 0.6F + Mth.cos(t * 0.25F) * 0.1F, FOLDED_YAW);
+			// dropping without flying, they flare open to catch the air; landing slams them down
+			float flare = Math.max(0.0F, m.fall()) * m.air() * (1.0F - fly) * FALL_FLARE;
+			float slam = m.land() * LAND_SLAM;
+			// both tip together out of a turn, the outer wing up
+			float bank = m.turn() * 0.3F;
+			this.rightWing.zRot = -0.3F + beat + lift - flare + slam + bank;
+			this.leftWing.zRot = 0.3F - beat - lift + flare - slam + bank;
+			float sweep = Mth.lerp(fold * fly, 0.6F + Mth.cos(t * 0.25F) * 0.1F - flare * 0.5F, FOLDED_YAW);
 			this.rightWing.yRot = sweep;
 			this.leftWing.yRot = -sweep;
+			// the tail swings behind each turn and its tip a beat after; it lifts as it drops, whips down on landing
+			// and droops when crouched
 			float sway = Mth.cos(state.walkAnimationPos * 0.6662F) * 0.3F * state.walkAnimationSpeed + Mth.sin(t * 0.08F) * 0.1F;
-			this.tail.yRot = sway;
-			this.tailTip.yRot = sway * 1.4F;
+			float tailUp = tailLift(m);
+			this.tail.yRot = sway - m.trail() * 0.7F;
+			this.tailTip.yRot = sway * 1.4F - (m.trail() - m.turn()) * 1.0F;
+			this.tail.xRot = 0.5F + state.walkAnimationSpeed * 0.2F + tailUp;
+			this.tailTip.xRot = 0.3F + tailUp * 0.7F;
 		}
 	}
 }
