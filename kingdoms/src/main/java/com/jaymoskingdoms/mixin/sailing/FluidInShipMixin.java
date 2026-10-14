@@ -13,7 +13,7 @@ import net.minecraft.world.level.material.Fluids;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-/** (0.7.6) In a ship's dry hold you stand in the dry, though the sea outside rides higher than its floor. */
+/** (0.7.7) In a ship's dry hold you stand in the dry, though the sea outside rides higher than its floor. */
 @Mixin(EntityFluidInteraction.class)
 abstract class FluidInShipMixin {
 	@WrapOperation(method = "update", at = @At(value = "INVOKE",

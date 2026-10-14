@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * (0.7.6) A player walking a ship's deck: their own game carries them with it, and the server's copy of the ship lies a
+ * (0.7.7) A player walking a ship's deck: their own game carries them with it, and the server's copy of the ship lies a
  * little apart from theirs, so the server takes their word for where they are aboard (no "moved wrongly"), and a deck in
  * open water isn't floating in the air (no flying kick).
  */

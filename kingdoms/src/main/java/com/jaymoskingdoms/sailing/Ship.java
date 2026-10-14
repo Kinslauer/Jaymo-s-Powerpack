@@ -21,6 +21,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -58,7 +60,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.6) A ship built from blocks, under sail. Every block joined to a {@link HelmBlock} leaves the world and sails
+ * (0.7.7) A ship built from blocks, under sail. Every block joined to a {@link HelmBlock} leaves the world and sails
  * as one piece: drawn block for block, floating as deep as its weight against the water its hull keeps out ({@link Hull}),
  * driven by its sails and steered from the helm (W/S set the sails, A/D the rudder). You can walk its decks while it
  * sails ({@link Ships#collisions}), open the chests in its hold, and sneak at the helm to drop anchor: it swings to the
@@ -111,6 +113,7 @@ public final class Ship extends Entity {
 	private @Nullable List<Piece> hullOf;
 	/** Server: how far its sails are set (0 furled to 1 full), its way (blocks/tick) and its turn (degrees/tick). */
 	private double sail, speed;
+	private static final EntityDataAccessor<Float> SET = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.FLOAT);
 	private float turn;
 	private int adrift;
 	/** Server: the block entities aboard (chests and the like), by piece. */
@@ -293,7 +296,12 @@ public final class Ship extends Entity {
 			if (be != null) {
 				tags.put(pieces.size(), be.saveWithFullMetadata(level.registryAccess()));
 			}
-			pieces.add(new Piece(Block.getId(state.rotate(turn)), local.getX(), local.getY() - keel, local.getZ()));
+			state = state.rotate(turn);
+			if (state.getBlock() instanceof SailBlock) {
+				// sails belly forward, with the wind
+				state = SailBlock.toward(state, Direction.SOUTH);
+			}
+			pieces.add(new Piece(Block.getId(state), local.getX(), local.getY() - keel, local.getZ()));
 		}
 		Hull hull = new Hull(List.copyOf(pieces));
 		if (!hull.floats) {
@@ -371,6 +379,7 @@ public final class Ship extends Entity {
 		if (pilot == null) {
 			this.sail = Math.max(0.0, this.sail - SAIL_RATE);
 		}
+		this.entityData.set(SET, (float)this.sail);
 		double top = this.topSpeed(h);
 		// with the sails furled, backing water (S) takes it slowly astern
 		double wanted = this.sail <= 0.0 && input.backward() ? -PADDLE : this.sail * top;
@@ -814,6 +823,12 @@ public final class Ship extends Entity {
 
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder entityData) {
+		entityData.define(SET, 0.0F);
+	}
+
+	/** Client: how far its sails are set (0 furled to 1 full). */
+	public float sailSet() {
+		return this.entityData.get(SET);
 	}
 
 	@Override
@@ -841,6 +856,7 @@ public final class Ship extends Entity {
 			}
 		}
 		this.sail = input.getDoubleOr("Sail", 0.0);
+		this.entityData.set(SET, (float)this.sail);
 		if (this.level() instanceof ServerLevel level) {
 			this.loadCargo(level);
 		}

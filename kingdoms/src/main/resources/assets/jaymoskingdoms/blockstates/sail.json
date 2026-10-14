@@ -1,18 +1,1084 @@
 {
   "variants": {
-    "facing=north": {
-      "model": "jaymoskingdoms:block/sail"
+    "down=false,facing=north,furled=false,left=none,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_xx"
     },
-    "facing=east": {
-      "model": "jaymoskingdoms:block/sail",
+    "down=false,facing=east,furled=false,left=none,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_xx",
       "y": 90
     },
-    "facing=south": {
-      "model": "jaymoskingdoms:block/sail"
+    "down=false,facing=south,furled=false,left=none,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_xx",
+      "y": 180
     },
-    "facing=west": {
-      "model": "jaymoskingdoms:block/sail",
+    "down=false,facing=west,furled=false,left=none,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_xx",
+      "y": 270
+    },
+    "down=false,facing=north,furled=true,left=none,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_xx_furled"
+    },
+    "down=false,facing=east,furled=true,left=none,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_xx_furled",
       "y": 90
+    },
+    "down=false,facing=south,furled=true,left=none,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_xx_furled",
+      "y": 180
+    },
+    "down=false,facing=west,furled=true,left=none,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_xx_furled",
+      "y": 270
+    },
+    "down=true,facing=north,furled=false,left=none,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_xd"
+    },
+    "down=true,facing=east,furled=false,left=none,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_xd",
+      "y": 90
+    },
+    "down=true,facing=south,furled=false,left=none,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_xd",
+      "y": 180
+    },
+    "down=true,facing=west,furled=false,left=none,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_xd",
+      "y": 270
+    },
+    "down=true,facing=north,furled=true,left=none,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_xd_furled"
+    },
+    "down=true,facing=east,furled=true,left=none,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_xd_furled",
+      "y": 90
+    },
+    "down=true,facing=south,furled=true,left=none,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_xd_furled",
+      "y": 180
+    },
+    "down=true,facing=west,furled=true,left=none,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_xd_furled",
+      "y": 270
+    },
+    "down=false,facing=north,furled=false,left=none,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_ux"
+    },
+    "down=false,facing=east,furled=false,left=none,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_ux",
+      "y": 90
+    },
+    "down=false,facing=south,furled=false,left=none,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_ux",
+      "y": 180
+    },
+    "down=false,facing=west,furled=false,left=none,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_ux",
+      "y": 270
+    },
+    "down=false,facing=north,furled=true,left=none,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_ux_furled"
+    },
+    "down=false,facing=east,furled=true,left=none,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_ux_furled",
+      "y": 90
+    },
+    "down=false,facing=south,furled=true,left=none,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_ux_furled",
+      "y": 180
+    },
+    "down=false,facing=west,furled=true,left=none,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_ux_furled",
+      "y": 270
+    },
+    "down=true,facing=north,furled=false,left=none,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_ud"
+    },
+    "down=true,facing=east,furled=false,left=none,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_ud",
+      "y": 90
+    },
+    "down=true,facing=south,furled=false,left=none,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_ud",
+      "y": 180
+    },
+    "down=true,facing=west,furled=false,left=none,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_ud",
+      "y": 270
+    },
+    "down=true,facing=north,furled=true,left=none,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_ud_furled"
+    },
+    "down=true,facing=east,furled=true,left=none,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_ud_furled",
+      "y": 90
+    },
+    "down=true,facing=south,furled=true,left=none,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_ud_furled",
+      "y": 180
+    },
+    "down=true,facing=west,furled=true,left=none,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_none_ud_furled",
+      "y": 270
+    },
+    "down=false,facing=north,furled=false,left=none,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_xx"
+    },
+    "down=false,facing=east,furled=false,left=none,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_xx",
+      "y": 90
+    },
+    "down=false,facing=south,furled=false,left=none,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_xx",
+      "y": 180
+    },
+    "down=false,facing=west,furled=false,left=none,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_xx",
+      "y": 270
+    },
+    "down=false,facing=north,furled=true,left=none,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_xx_furled"
+    },
+    "down=false,facing=east,furled=true,left=none,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_xx_furled",
+      "y": 90
+    },
+    "down=false,facing=south,furled=true,left=none,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_xx_furled",
+      "y": 180
+    },
+    "down=false,facing=west,furled=true,left=none,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_xx_furled",
+      "y": 270
+    },
+    "down=true,facing=north,furled=false,left=none,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_xd"
+    },
+    "down=true,facing=east,furled=false,left=none,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_xd",
+      "y": 90
+    },
+    "down=true,facing=south,furled=false,left=none,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_xd",
+      "y": 180
+    },
+    "down=true,facing=west,furled=false,left=none,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_xd",
+      "y": 270
+    },
+    "down=true,facing=north,furled=true,left=none,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_xd_furled"
+    },
+    "down=true,facing=east,furled=true,left=none,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_xd_furled",
+      "y": 90
+    },
+    "down=true,facing=south,furled=true,left=none,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_xd_furled",
+      "y": 180
+    },
+    "down=true,facing=west,furled=true,left=none,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_xd_furled",
+      "y": 270
+    },
+    "down=false,facing=north,furled=false,left=none,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_ux"
+    },
+    "down=false,facing=east,furled=false,left=none,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_ux",
+      "y": 90
+    },
+    "down=false,facing=south,furled=false,left=none,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_ux",
+      "y": 180
+    },
+    "down=false,facing=west,furled=false,left=none,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_ux",
+      "y": 270
+    },
+    "down=false,facing=north,furled=true,left=none,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_ux_furled"
+    },
+    "down=false,facing=east,furled=true,left=none,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_ux_furled",
+      "y": 90
+    },
+    "down=false,facing=south,furled=true,left=none,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_ux_furled",
+      "y": 180
+    },
+    "down=false,facing=west,furled=true,left=none,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_ux_furled",
+      "y": 270
+    },
+    "down=true,facing=north,furled=false,left=none,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_ud"
+    },
+    "down=true,facing=east,furled=false,left=none,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_ud",
+      "y": 90
+    },
+    "down=true,facing=south,furled=false,left=none,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_ud",
+      "y": 180
+    },
+    "down=true,facing=west,furled=false,left=none,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_ud",
+      "y": 270
+    },
+    "down=true,facing=north,furled=true,left=none,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_ud_furled"
+    },
+    "down=true,facing=east,furled=true,left=none,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_ud_furled",
+      "y": 90
+    },
+    "down=true,facing=south,furled=true,left=none,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_ud_furled",
+      "y": 180
+    },
+    "down=true,facing=west,furled=true,left=none,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_sail_ud_furled",
+      "y": 270
+    },
+    "down=false,facing=north,furled=false,left=none,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_xx"
+    },
+    "down=false,facing=east,furled=false,left=none,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_xx",
+      "y": 90
+    },
+    "down=false,facing=south,furled=false,left=none,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_xx",
+      "y": 180
+    },
+    "down=false,facing=west,furled=false,left=none,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_xx",
+      "y": 270
+    },
+    "down=false,facing=north,furled=true,left=none,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_xx_furled"
+    },
+    "down=false,facing=east,furled=true,left=none,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_xx_furled",
+      "y": 90
+    },
+    "down=false,facing=south,furled=true,left=none,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_xx_furled",
+      "y": 180
+    },
+    "down=false,facing=west,furled=true,left=none,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_xx_furled",
+      "y": 270
+    },
+    "down=true,facing=north,furled=false,left=none,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_xd"
+    },
+    "down=true,facing=east,furled=false,left=none,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_xd",
+      "y": 90
+    },
+    "down=true,facing=south,furled=false,left=none,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_xd",
+      "y": 180
+    },
+    "down=true,facing=west,furled=false,left=none,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_xd",
+      "y": 270
+    },
+    "down=true,facing=north,furled=true,left=none,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_xd_furled"
+    },
+    "down=true,facing=east,furled=true,left=none,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_xd_furled",
+      "y": 90
+    },
+    "down=true,facing=south,furled=true,left=none,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_xd_furled",
+      "y": 180
+    },
+    "down=true,facing=west,furled=true,left=none,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_xd_furled",
+      "y": 270
+    },
+    "down=false,facing=north,furled=false,left=none,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_ux"
+    },
+    "down=false,facing=east,furled=false,left=none,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_ux",
+      "y": 90
+    },
+    "down=false,facing=south,furled=false,left=none,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_ux",
+      "y": 180
+    },
+    "down=false,facing=west,furled=false,left=none,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_ux",
+      "y": 270
+    },
+    "down=false,facing=north,furled=true,left=none,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_ux_furled"
+    },
+    "down=false,facing=east,furled=true,left=none,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_ux_furled",
+      "y": 90
+    },
+    "down=false,facing=south,furled=true,left=none,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_ux_furled",
+      "y": 180
+    },
+    "down=false,facing=west,furled=true,left=none,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_ux_furled",
+      "y": 270
+    },
+    "down=true,facing=north,furled=false,left=none,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_ud"
+    },
+    "down=true,facing=east,furled=false,left=none,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_ud",
+      "y": 90
+    },
+    "down=true,facing=south,furled=false,left=none,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_ud",
+      "y": 180
+    },
+    "down=true,facing=west,furled=false,left=none,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_ud",
+      "y": 270
+    },
+    "down=true,facing=north,furled=true,left=none,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_ud_furled"
+    },
+    "down=true,facing=east,furled=true,left=none,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_ud_furled",
+      "y": 90
+    },
+    "down=true,facing=south,furled=true,left=none,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_ud_furled",
+      "y": 180
+    },
+    "down=true,facing=west,furled=true,left=none,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_none_mast_ud_furled",
+      "y": 270
+    },
+    "down=false,facing=north,furled=false,left=sail,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_xx"
+    },
+    "down=false,facing=east,furled=false,left=sail,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_xx",
+      "y": 90
+    },
+    "down=false,facing=south,furled=false,left=sail,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_xx",
+      "y": 180
+    },
+    "down=false,facing=west,furled=false,left=sail,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_xx",
+      "y": 270
+    },
+    "down=false,facing=north,furled=true,left=sail,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_xx_furled"
+    },
+    "down=false,facing=east,furled=true,left=sail,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_xx_furled",
+      "y": 90
+    },
+    "down=false,facing=south,furled=true,left=sail,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_xx_furled",
+      "y": 180
+    },
+    "down=false,facing=west,furled=true,left=sail,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_xx_furled",
+      "y": 270
+    },
+    "down=true,facing=north,furled=false,left=sail,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_xd"
+    },
+    "down=true,facing=east,furled=false,left=sail,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_xd",
+      "y": 90
+    },
+    "down=true,facing=south,furled=false,left=sail,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_xd",
+      "y": 180
+    },
+    "down=true,facing=west,furled=false,left=sail,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_xd",
+      "y": 270
+    },
+    "down=true,facing=north,furled=true,left=sail,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_xd_furled"
+    },
+    "down=true,facing=east,furled=true,left=sail,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_xd_furled",
+      "y": 90
+    },
+    "down=true,facing=south,furled=true,left=sail,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_xd_furled",
+      "y": 180
+    },
+    "down=true,facing=west,furled=true,left=sail,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_xd_furled",
+      "y": 270
+    },
+    "down=false,facing=north,furled=false,left=sail,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_ux"
+    },
+    "down=false,facing=east,furled=false,left=sail,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_ux",
+      "y": 90
+    },
+    "down=false,facing=south,furled=false,left=sail,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_ux",
+      "y": 180
+    },
+    "down=false,facing=west,furled=false,left=sail,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_ux",
+      "y": 270
+    },
+    "down=false,facing=north,furled=true,left=sail,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_ux_furled"
+    },
+    "down=false,facing=east,furled=true,left=sail,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_ux_furled",
+      "y": 90
+    },
+    "down=false,facing=south,furled=true,left=sail,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_ux_furled",
+      "y": 180
+    },
+    "down=false,facing=west,furled=true,left=sail,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_ux_furled",
+      "y": 270
+    },
+    "down=true,facing=north,furled=false,left=sail,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_ud"
+    },
+    "down=true,facing=east,furled=false,left=sail,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_ud",
+      "y": 90
+    },
+    "down=true,facing=south,furled=false,left=sail,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_ud",
+      "y": 180
+    },
+    "down=true,facing=west,furled=false,left=sail,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_ud",
+      "y": 270
+    },
+    "down=true,facing=north,furled=true,left=sail,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_ud_furled"
+    },
+    "down=true,facing=east,furled=true,left=sail,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_ud_furled",
+      "y": 90
+    },
+    "down=true,facing=south,furled=true,left=sail,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_ud_furled",
+      "y": 180
+    },
+    "down=true,facing=west,furled=true,left=sail,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_none_ud_furled",
+      "y": 270
+    },
+    "down=false,facing=north,furled=false,left=sail,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_xx"
+    },
+    "down=false,facing=east,furled=false,left=sail,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_xx",
+      "y": 90
+    },
+    "down=false,facing=south,furled=false,left=sail,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_xx",
+      "y": 180
+    },
+    "down=false,facing=west,furled=false,left=sail,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_xx",
+      "y": 270
+    },
+    "down=false,facing=north,furled=true,left=sail,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_xx_furled"
+    },
+    "down=false,facing=east,furled=true,left=sail,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_xx_furled",
+      "y": 90
+    },
+    "down=false,facing=south,furled=true,left=sail,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_xx_furled",
+      "y": 180
+    },
+    "down=false,facing=west,furled=true,left=sail,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_xx_furled",
+      "y": 270
+    },
+    "down=true,facing=north,furled=false,left=sail,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_xd"
+    },
+    "down=true,facing=east,furled=false,left=sail,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_xd",
+      "y": 90
+    },
+    "down=true,facing=south,furled=false,left=sail,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_xd",
+      "y": 180
+    },
+    "down=true,facing=west,furled=false,left=sail,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_xd",
+      "y": 270
+    },
+    "down=true,facing=north,furled=true,left=sail,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_xd_furled"
+    },
+    "down=true,facing=east,furled=true,left=sail,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_xd_furled",
+      "y": 90
+    },
+    "down=true,facing=south,furled=true,left=sail,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_xd_furled",
+      "y": 180
+    },
+    "down=true,facing=west,furled=true,left=sail,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_xd_furled",
+      "y": 270
+    },
+    "down=false,facing=north,furled=false,left=sail,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_ux"
+    },
+    "down=false,facing=east,furled=false,left=sail,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_ux",
+      "y": 90
+    },
+    "down=false,facing=south,furled=false,left=sail,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_ux",
+      "y": 180
+    },
+    "down=false,facing=west,furled=false,left=sail,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_ux",
+      "y": 270
+    },
+    "down=false,facing=north,furled=true,left=sail,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_ux_furled"
+    },
+    "down=false,facing=east,furled=true,left=sail,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_ux_furled",
+      "y": 90
+    },
+    "down=false,facing=south,furled=true,left=sail,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_ux_furled",
+      "y": 180
+    },
+    "down=false,facing=west,furled=true,left=sail,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_ux_furled",
+      "y": 270
+    },
+    "down=true,facing=north,furled=false,left=sail,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_ud"
+    },
+    "down=true,facing=east,furled=false,left=sail,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_ud",
+      "y": 90
+    },
+    "down=true,facing=south,furled=false,left=sail,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_ud",
+      "y": 180
+    },
+    "down=true,facing=west,furled=false,left=sail,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_ud",
+      "y": 270
+    },
+    "down=true,facing=north,furled=true,left=sail,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_ud_furled"
+    },
+    "down=true,facing=east,furled=true,left=sail,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_ud_furled",
+      "y": 90
+    },
+    "down=true,facing=south,furled=true,left=sail,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_ud_furled",
+      "y": 180
+    },
+    "down=true,facing=west,furled=true,left=sail,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_sail_ud_furled",
+      "y": 270
+    },
+    "down=false,facing=north,furled=false,left=sail,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_xx"
+    },
+    "down=false,facing=east,furled=false,left=sail,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_xx",
+      "y": 90
+    },
+    "down=false,facing=south,furled=false,left=sail,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_xx",
+      "y": 180
+    },
+    "down=false,facing=west,furled=false,left=sail,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_xx",
+      "y": 270
+    },
+    "down=false,facing=north,furled=true,left=sail,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_xx_furled"
+    },
+    "down=false,facing=east,furled=true,left=sail,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_xx_furled",
+      "y": 90
+    },
+    "down=false,facing=south,furled=true,left=sail,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_xx_furled",
+      "y": 180
+    },
+    "down=false,facing=west,furled=true,left=sail,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_xx_furled",
+      "y": 270
+    },
+    "down=true,facing=north,furled=false,left=sail,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_xd"
+    },
+    "down=true,facing=east,furled=false,left=sail,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_xd",
+      "y": 90
+    },
+    "down=true,facing=south,furled=false,left=sail,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_xd",
+      "y": 180
+    },
+    "down=true,facing=west,furled=false,left=sail,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_xd",
+      "y": 270
+    },
+    "down=true,facing=north,furled=true,left=sail,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_xd_furled"
+    },
+    "down=true,facing=east,furled=true,left=sail,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_xd_furled",
+      "y": 90
+    },
+    "down=true,facing=south,furled=true,left=sail,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_xd_furled",
+      "y": 180
+    },
+    "down=true,facing=west,furled=true,left=sail,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_xd_furled",
+      "y": 270
+    },
+    "down=false,facing=north,furled=false,left=sail,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_ux"
+    },
+    "down=false,facing=east,furled=false,left=sail,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_ux",
+      "y": 90
+    },
+    "down=false,facing=south,furled=false,left=sail,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_ux",
+      "y": 180
+    },
+    "down=false,facing=west,furled=false,left=sail,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_ux",
+      "y": 270
+    },
+    "down=false,facing=north,furled=true,left=sail,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_ux_furled"
+    },
+    "down=false,facing=east,furled=true,left=sail,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_ux_furled",
+      "y": 90
+    },
+    "down=false,facing=south,furled=true,left=sail,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_ux_furled",
+      "y": 180
+    },
+    "down=false,facing=west,furled=true,left=sail,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_ux_furled",
+      "y": 270
+    },
+    "down=true,facing=north,furled=false,left=sail,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_ud"
+    },
+    "down=true,facing=east,furled=false,left=sail,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_ud",
+      "y": 90
+    },
+    "down=true,facing=south,furled=false,left=sail,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_ud",
+      "y": 180
+    },
+    "down=true,facing=west,furled=false,left=sail,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_ud",
+      "y": 270
+    },
+    "down=true,facing=north,furled=true,left=sail,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_ud_furled"
+    },
+    "down=true,facing=east,furled=true,left=sail,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_ud_furled",
+      "y": 90
+    },
+    "down=true,facing=south,furled=true,left=sail,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_ud_furled",
+      "y": 180
+    },
+    "down=true,facing=west,furled=true,left=sail,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_sail_mast_ud_furled",
+      "y": 270
+    },
+    "down=false,facing=north,furled=false,left=mast,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_xx"
+    },
+    "down=false,facing=east,furled=false,left=mast,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_xx",
+      "y": 90
+    },
+    "down=false,facing=south,furled=false,left=mast,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_xx",
+      "y": 180
+    },
+    "down=false,facing=west,furled=false,left=mast,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_xx",
+      "y": 270
+    },
+    "down=false,facing=north,furled=true,left=mast,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_xx_furled"
+    },
+    "down=false,facing=east,furled=true,left=mast,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_xx_furled",
+      "y": 90
+    },
+    "down=false,facing=south,furled=true,left=mast,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_xx_furled",
+      "y": 180
+    },
+    "down=false,facing=west,furled=true,left=mast,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_xx_furled",
+      "y": 270
+    },
+    "down=true,facing=north,furled=false,left=mast,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_xd"
+    },
+    "down=true,facing=east,furled=false,left=mast,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_xd",
+      "y": 90
+    },
+    "down=true,facing=south,furled=false,left=mast,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_xd",
+      "y": 180
+    },
+    "down=true,facing=west,furled=false,left=mast,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_xd",
+      "y": 270
+    },
+    "down=true,facing=north,furled=true,left=mast,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_xd_furled"
+    },
+    "down=true,facing=east,furled=true,left=mast,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_xd_furled",
+      "y": 90
+    },
+    "down=true,facing=south,furled=true,left=mast,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_xd_furled",
+      "y": 180
+    },
+    "down=true,facing=west,furled=true,left=mast,right=none,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_xd_furled",
+      "y": 270
+    },
+    "down=false,facing=north,furled=false,left=mast,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_ux"
+    },
+    "down=false,facing=east,furled=false,left=mast,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_ux",
+      "y": 90
+    },
+    "down=false,facing=south,furled=false,left=mast,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_ux",
+      "y": 180
+    },
+    "down=false,facing=west,furled=false,left=mast,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_ux",
+      "y": 270
+    },
+    "down=false,facing=north,furled=true,left=mast,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_ux_furled"
+    },
+    "down=false,facing=east,furled=true,left=mast,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_ux_furled",
+      "y": 90
+    },
+    "down=false,facing=south,furled=true,left=mast,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_ux_furled",
+      "y": 180
+    },
+    "down=false,facing=west,furled=true,left=mast,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_ux_furled",
+      "y": 270
+    },
+    "down=true,facing=north,furled=false,left=mast,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_ud"
+    },
+    "down=true,facing=east,furled=false,left=mast,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_ud",
+      "y": 90
+    },
+    "down=true,facing=south,furled=false,left=mast,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_ud",
+      "y": 180
+    },
+    "down=true,facing=west,furled=false,left=mast,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_ud",
+      "y": 270
+    },
+    "down=true,facing=north,furled=true,left=mast,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_ud_furled"
+    },
+    "down=true,facing=east,furled=true,left=mast,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_ud_furled",
+      "y": 90
+    },
+    "down=true,facing=south,furled=true,left=mast,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_ud_furled",
+      "y": 180
+    },
+    "down=true,facing=west,furled=true,left=mast,right=none,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_none_ud_furled",
+      "y": 270
+    },
+    "down=false,facing=north,furled=false,left=mast,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_xx"
+    },
+    "down=false,facing=east,furled=false,left=mast,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_xx",
+      "y": 90
+    },
+    "down=false,facing=south,furled=false,left=mast,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_xx",
+      "y": 180
+    },
+    "down=false,facing=west,furled=false,left=mast,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_xx",
+      "y": 270
+    },
+    "down=false,facing=north,furled=true,left=mast,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_xx_furled"
+    },
+    "down=false,facing=east,furled=true,left=mast,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_xx_furled",
+      "y": 90
+    },
+    "down=false,facing=south,furled=true,left=mast,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_xx_furled",
+      "y": 180
+    },
+    "down=false,facing=west,furled=true,left=mast,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_xx_furled",
+      "y": 270
+    },
+    "down=true,facing=north,furled=false,left=mast,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_xd"
+    },
+    "down=true,facing=east,furled=false,left=mast,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_xd",
+      "y": 90
+    },
+    "down=true,facing=south,furled=false,left=mast,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_xd",
+      "y": 180
+    },
+    "down=true,facing=west,furled=false,left=mast,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_xd",
+      "y": 270
+    },
+    "down=true,facing=north,furled=true,left=mast,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_xd_furled"
+    },
+    "down=true,facing=east,furled=true,left=mast,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_xd_furled",
+      "y": 90
+    },
+    "down=true,facing=south,furled=true,left=mast,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_xd_furled",
+      "y": 180
+    },
+    "down=true,facing=west,furled=true,left=mast,right=sail,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_xd_furled",
+      "y": 270
+    },
+    "down=false,facing=north,furled=false,left=mast,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_ux"
+    },
+    "down=false,facing=east,furled=false,left=mast,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_ux",
+      "y": 90
+    },
+    "down=false,facing=south,furled=false,left=mast,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_ux",
+      "y": 180
+    },
+    "down=false,facing=west,furled=false,left=mast,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_ux",
+      "y": 270
+    },
+    "down=false,facing=north,furled=true,left=mast,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_ux_furled"
+    },
+    "down=false,facing=east,furled=true,left=mast,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_ux_furled",
+      "y": 90
+    },
+    "down=false,facing=south,furled=true,left=mast,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_ux_furled",
+      "y": 180
+    },
+    "down=false,facing=west,furled=true,left=mast,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_ux_furled",
+      "y": 270
+    },
+    "down=true,facing=north,furled=false,left=mast,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_ud"
+    },
+    "down=true,facing=east,furled=false,left=mast,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_ud",
+      "y": 90
+    },
+    "down=true,facing=south,furled=false,left=mast,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_ud",
+      "y": 180
+    },
+    "down=true,facing=west,furled=false,left=mast,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_ud",
+      "y": 270
+    },
+    "down=true,facing=north,furled=true,left=mast,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_ud_furled"
+    },
+    "down=true,facing=east,furled=true,left=mast,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_ud_furled",
+      "y": 90
+    },
+    "down=true,facing=south,furled=true,left=mast,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_ud_furled",
+      "y": 180
+    },
+    "down=true,facing=west,furled=true,left=mast,right=sail,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_sail_ud_furled",
+      "y": 270
+    },
+    "down=false,facing=north,furled=false,left=mast,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_xx"
+    },
+    "down=false,facing=east,furled=false,left=mast,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_xx",
+      "y": 90
+    },
+    "down=false,facing=south,furled=false,left=mast,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_xx",
+      "y": 180
+    },
+    "down=false,facing=west,furled=false,left=mast,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_xx",
+      "y": 270
+    },
+    "down=false,facing=north,furled=true,left=mast,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_xx_furled"
+    },
+    "down=false,facing=east,furled=true,left=mast,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_xx_furled",
+      "y": 90
+    },
+    "down=false,facing=south,furled=true,left=mast,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_xx_furled",
+      "y": 180
+    },
+    "down=false,facing=west,furled=true,left=mast,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_xx_furled",
+      "y": 270
+    },
+    "down=true,facing=north,furled=false,left=mast,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_xd"
+    },
+    "down=true,facing=east,furled=false,left=mast,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_xd",
+      "y": 90
+    },
+    "down=true,facing=south,furled=false,left=mast,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_xd",
+      "y": 180
+    },
+    "down=true,facing=west,furled=false,left=mast,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_xd",
+      "y": 270
+    },
+    "down=true,facing=north,furled=true,left=mast,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_xd_furled"
+    },
+    "down=true,facing=east,furled=true,left=mast,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_xd_furled",
+      "y": 90
+    },
+    "down=true,facing=south,furled=true,left=mast,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_xd_furled",
+      "y": 180
+    },
+    "down=true,facing=west,furled=true,left=mast,right=mast,up=false": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_xd_furled",
+      "y": 270
+    },
+    "down=false,facing=north,furled=false,left=mast,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_ux"
+    },
+    "down=false,facing=east,furled=false,left=mast,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_ux",
+      "y": 90
+    },
+    "down=false,facing=south,furled=false,left=mast,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_ux",
+      "y": 180
+    },
+    "down=false,facing=west,furled=false,left=mast,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_ux",
+      "y": 270
+    },
+    "down=false,facing=north,furled=true,left=mast,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_ux_furled"
+    },
+    "down=false,facing=east,furled=true,left=mast,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_ux_furled",
+      "y": 90
+    },
+    "down=false,facing=south,furled=true,left=mast,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_ux_furled",
+      "y": 180
+    },
+    "down=false,facing=west,furled=true,left=mast,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_ux_furled",
+      "y": 270
+    },
+    "down=true,facing=north,furled=false,left=mast,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_ud"
+    },
+    "down=true,facing=east,furled=false,left=mast,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_ud",
+      "y": 90
+    },
+    "down=true,facing=south,furled=false,left=mast,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_ud",
+      "y": 180
+    },
+    "down=true,facing=west,furled=false,left=mast,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_ud",
+      "y": 270
+    },
+    "down=true,facing=north,furled=true,left=mast,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_ud_furled"
+    },
+    "down=true,facing=east,furled=true,left=mast,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_ud_furled",
+      "y": 90
+    },
+    "down=true,facing=south,furled=true,left=mast,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_ud_furled",
+      "y": 180
+    },
+    "down=true,facing=west,furled=true,left=mast,right=mast,up=true": {
+      "model": "jaymoskingdoms:block/sail/sail_mast_mast_ud_furled",
+      "y": 270
     }
   }
 }

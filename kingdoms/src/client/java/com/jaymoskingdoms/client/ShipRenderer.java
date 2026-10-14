@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.sailing.Hull;
+import com.jaymoskingdoms.sailing.SailBlock;
 import com.jaymoskingdoms.sailing.Ship;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -36,13 +37,15 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.6) A ship under sail, block for block, turned to its heading, heeling in its turns and rocking on the swell
+ * (0.7.7) A ship under sail, block for block, turned to its heading, heeling in its turns and rocking on the swell
  * (harder in a storm). Chests are drawn as barrels while it sails (a chest is drawn by its block entity, which stays
  * in the hold until the ship anchors).
  */
 public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State> {
 	/** The swell: its roll and pitch (degrees) in fair weather and in a storm, and how fast it rolls. */
 	static final float ROLL_FAIR = 1.2F, ROLL_STORM = 4.5F, PITCH_FAIR = 0.6F, PITCH_STORM = 2.5F, SWELL_SPEED = 0.06F;
+	/** Below this much sail set (0 to 1), the sails are drawn furled on their yards. */
+	static final float FURLED_BELOW = 0.1F;
 
 	public static final class State extends EntityRenderState {
 		final List<MovingBlockRenderState> blocks = new ArrayList<>();
@@ -78,10 +81,15 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 		if (h == null || !(ship.level() instanceof ClientLevel level)) {
 			return;
 		}
+		// sails all but furled are drawn rolled up on their yards
+		boolean furled = ship.sailSet() < FURLED_BELOW;
 		for (Ship.Piece piece : h.pieces) {
 			BlockState shown = piece.blockState();
 			if (shown.getBlock() instanceof ChestBlock) {
 				shown = Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, Direction.UP);
+			}
+			if (furled && shown.getBlock() instanceof SailBlock) {
+				shown = shown.setValue(SailBlock.FURLED, true);
 			}
 			if (shown.getRenderShape() != RenderShape.MODEL) {
 				continue;

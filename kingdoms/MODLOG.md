@@ -2621,7 +2621,7 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   can't hurt you while you rest (anything else gets you up). At night a **Sleep** button over Leave Bed puts you to
   sleep. Resting needs what sleeping does (reach, room, no monsters near) and sets your spawn.
 
-## 0.7.6: sailing, stage 1: ships built from blocks (pack 0.10.42)
+## 0.7.7: sailing, stage 1: ships built from blocks (pack 0.10.42)
 - Andy: "i want sailing" (Valkyrien Skies, Eureka and Valkyrien Pirates stop at 1.20.1; Haubna's are ARR), so our own.
   Plan: `/mnt/project-files/sailing/Sailing-Plan.md` (stage 2 naval combat, stage 3 pirates and navies, later).
 - **Helm** (`HelmBlock`; planks, a compass and iron) and **sail** (`SailBlock`; wool and a stick, makes 4). Build a hull
@@ -2638,3 +2638,10 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   into the world as blocks, a block or two off if it must, chests and their contents with it; under way, sneaking leaves
   the helm and it drifts with its sails furling. With no one aboard it anchors itself after 5 s.
 - Chests (any 1-6 row container) open aboard while sailing; other block entities wait for the anchor.
+- **Sails** (Andy: "the sails kind of float"): sails side by side and above one another join into one sheet of our own
+  canvas (seamed panels), hanging from a yard across its top just in front of the mast (a fence, wall or upright log
+  beside it is crossed by the sheet and the yard, lashed to it), bellied out toward the bow, most in the middle and less
+  at its free edges, with sheets (ropes) from its lower corners. `SailBlock` knows its neighbours (`left`/`right`: none,
+  sail or mast; `up`/`down`); 36 shapes of sheet from `tools/gen_sailing.py`. Hung facing aft, a sail is turned to
+  face forward as the ship casts off. While the ship's sails are furled (W/S) they're drawn rolled up on their yards
+  (`furled`, the ship's sail setting synced to clients).
