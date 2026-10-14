@@ -54,7 +54,7 @@ import org.jspecify.annotations.Nullable;
  *
  * <ul>
  * <li>R - Reach Through: open a rift, pull a random weapon (+ ammo) into your hand.</li>
- * <li>G - Return: send the held summoned weapon back; refunds part of Reach's cooldown.</li>
+ * <li>G - Return: send the held summoned weapon back; refunds part of Reach's cooldown. A standing Sword of Damocles is called back first.</li>
  * <li>V - Barrage: 3-5 rifts open around you and fire weapons at what you're looking at.</li>
  * <li>B - Pocket Stash (also on Z). Corrupted: Sword of Damocles ({@link ArsenalDamocles}).</li>
  * <li>Z - Pocket Stash: your personal 27-slot pocket dimension.</li>
@@ -206,7 +206,12 @@ public final class ArsenalPower implements Power {
 		}
 		switch (key) {
 			case ABILITY_1 -> reach(player);
-			case ABILITY_2 -> sendBack(player);
+			case ABILITY_2 -> {
+				// a standing Sword of Damocles is called back first
+				if (!ArsenalDamocles.recall(player)) {
+					sendBack(player);
+				}
+			}
 			case ABILITY_3 -> barrage(player);
 			// the Void Arsenal's B drops the Sword of Damocles; the pocket lives on Z (B still opens it uncorrupted)
 			case ABILITY_4 -> {

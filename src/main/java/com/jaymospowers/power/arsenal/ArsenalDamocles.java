@@ -433,6 +433,29 @@ public final class ArsenalDamocles {
 		com.jaymospowers.core.Shakes.around(level, at, IMPACT_RADIUS * 5.0, 2.5F);
 	}
 
+	/**
+	 * G, while the sword stands in the ground: the rift opens again now instead of waiting out {@link #STAND}, and it's
+	 * hauled back up as usual. Shifts the fall's start so every client's timeline jumps along with it. False (G does
+	 * what it otherwise does) when no sword is standing.
+	 */
+	static boolean recall(ServerPlayer player) {
+		Fall fall = player.getAttached(FALL);
+		Live live = LIVE.get(player.getUUID());
+		if (fall == null || live == null || !live.landed) {
+			return false;
+		}
+		long now = player.level().getGameTime();
+		long reopen = (long) Math.ceil(fall.reopensAt());
+		if (now - fall.start() >= reopen) {
+			// already on its way back
+			return false;
+		}
+		// the next tick lands on the reopening, so its sound and motes still play
+		player.setAttached(FALL, new Fall(now - reopen + 1, fall.x(), fall.z(), fall.portalY(), fall.tipEnd(), fall.angle()));
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.arsenal.damocles_recalled").withStyle(ChatFormatting.LIGHT_PURPLE));
+		return true;
+	}
+
 	/** The power went away: the rift and the sword go with it. */
 	static void onLost(ServerPlayer player) {
 		player.removeAttached(FALL);
