@@ -2645,3 +2645,22 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   sail or mast; `up`/`down`); 36 shapes of sheet from `tools/gen_sailing.py`. Hung facing aft, a sail is turned to
   face forward as the ship casts off. While the ship's sails are furled (W/S) they're drawn rolled up on their yards
   (`furled`, the ship's sail setting synced to clients).
+
+## 0.7.9: King's Roads (pack 0.10.44)
+- Andy asked whether Via Romana and Countered's Settlement Roads could work with our carriages. Neither runs on 26.3
+  (Via Romana stops at 1.21.1 and its Responsive Source License bars hosting a port; Settlement Roads is MIT but stops
+  at 1.21.10 and only joins vanilla villages at worldgen), so this is our own take, nothing copied.
+- **Planned** (`Roads`): every kingdom, fiefdom and village is linked to its 2 nearest within 700 blocks (a fiefdom to
+  its overlord too). The route is an A* search on 8-block cells over the world generator's own terrain heights (so it
+  plans through unexplored land), off the server thread, disliking climbs, cliffs and water; then rounded off, walked
+  out in 4-block points and graded. Saved on the Overworld (`jaymoskingdoms:roads`).
+- **Laid** a chunk at a time as chunks load: 3 wide in the ground's style (dirt path, coarse dirt and gravel in the
+  green, sandstone on sand, cobble and andesite on rock, packed mud in swamps, cobble/mossy/stone bricks within 120 of a
+  town), graded up to 3 blocks, trees in the way felled whole, 5-wide spruce bridges with rails over water, a lantern
+  post every ~48 blocks, and a milestone (post and waxed sign) at each end: "King's Road / To <town> / <n> blocks",
+  "Welcome to <town>" on the back. Only natural ground is touched, never builds; towns' own streets (within 56 of a
+  seat) are left alone. Each chunk is paved once.
+- **Followed** (`Roads.ahead`): `Construction.leg` keeps long walks to the road that leads to the goal, so cabs,
+  rickshaws and rulers on their rounds take it; caravans make for points along it, seen and unseen.
+- Ops: `/kingdom roads` (the roads, their length, chunks paved), `/kingdom roads plan` (plan the next missing one now).
+- Not yet seen in game.
