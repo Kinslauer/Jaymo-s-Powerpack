@@ -77,6 +77,12 @@ public final class VampirePlayers {
 		return Vampires.isVampire(player);
 	}
 
+	/** Gone {@link #STARVE_NIGHTS} nights without blood (also read on the client, for blood vision). */
+	public static boolean starving(Player player) {
+		Vampires.Vampire v = player.getAttached(Vampires.VAMPIRE);
+		return v != null && Vampires.nightIndex(player.level().getOverworldClockTime()) - v.fedNight() >= STARVE_NIGHTS;
+	}
+
 	/** A vampire's bite on {@code player}: they'll turn at the next nightfall (unless they die first, or carry the wolf's curse). */
 	static void bitten(ServerPlayer player) {
 		if (!Vampires.isVampire(player) && !Lycans.cursed(player) && !player.hasAttached(Vampires.BITTEN)) {
