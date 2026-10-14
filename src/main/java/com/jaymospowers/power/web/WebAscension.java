@@ -56,11 +56,11 @@ public final class WebAscension {
 	/** Spider-Sense: how far it reaches, how often the server refreshes it, and how often a hit can be dodged. */
 	public static final double SENSE_RANGE = 16.0;
 	public static final int SENSE_TICKS = 10;
-	public static final int DODGE_COOLDOWN = 400;
+	public static final int DODGE_COOLDOWN = 300;
 	/** Ascended, Spider-Sense holds this many dodges, each recharging on its own ({@link #DODGE_COOLDOWN}). */
-	public static final int DODGE_CHARGES = 5;
+	public static final int DODGE_CHARGES = 7;
 	/** Before that, by abilities unlocked (0, a fresh awakening, to all 4). */
-	public static final int[] CHARGES_BY_UNLOCKED = {1, 1, 2, 3, 4};
+	public static final int[] CHARGES_BY_UNLOCKED = {2, 2, 3, 4, 5};
 	/** The dodge's sidestep (blocks/tick sideways, and up). */
 	private static final double DODGE_SIDESTEP = 0.85;
 	private static final double DODGE_HOP = 0.22;

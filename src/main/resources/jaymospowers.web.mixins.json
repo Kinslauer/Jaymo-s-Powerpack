@@ -5,6 +5,7 @@
 	"mixins": [
 		"WebFoodPropertiesMixin",
 		"WebHostZombieMixin",
+		"WebLivingEntityMixin",
 		"WebServerLevelMixin"
 	],
 	"injectors": { "defaultRequire": 1 }
