@@ -135,7 +135,7 @@ def packMods = [
 	[dep: "maven.modrinth:iris:vTN4NRGW", cf: [455508, 9015108], dev: false],
 	// Shoulder Surfing Reloaded (MIT, by Exopandora): the third-person camera for everyone, over the shoulder with a
 	// crosshair, free look (Right Alt), swap shoulder (O) and adaptive see-through when the view is blocked. Replaced Camera
-	// Utils (it refuses to load beside it) and our own power-only shoulder view in 0.10.52. Jaymo's Powers sets Andy's
+	// Utils (it refuses to load beside it) and our own power-only shoulder view in 0.10.57. Jaymo's Powers sets Andy's
 	// old F7 numbers as its view once per install (client/CameraPreset) and moves its keys off ours (client/KeyConflicts).
 	// Client-only; needs Forge Config API Port (below).
 	[dep: "maven.modrinth:shoulder-surfing-reloaded:sEg9bfXx", cf: [243190, 9013849]],
@@ -229,7 +229,7 @@ def packResourcePacks = [
 def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-", "alexs-mobs-", "citadel-"]
 // the same, by Fabric mod id, for mods whose CurseForge file names we don't know: Alex's Mobs and Citadel (0.8.107,
 // their models drew black slabs and streaks across the screen with Iris shaders), Distant Horizons (0.9.6, taken out
-// at Andy's request; a new world on the Deck's server had hung at startup with it), Camera Utils (0.10.52, Shoulder
+// at Andy's request; a new world on the Deck's server had hung at startup with it), Camera Utils (0.10.57, Shoulder
 // Surfing Reloaded won't load beside it)
 def removedIdsFromProfile = ["alexsmobs", "citadel", "distanthorizons", "camerautils"]
 // a jar's Fabric mod id (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's

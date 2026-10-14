@@ -214,6 +214,29 @@ public final class WebNet {
 		}
 	}
 
+	/** Client → server: how much line {@code hand}'s swing web has out now (reeled in or let out), for everyone to draw. */
+	public record Rope(int hand, float length) implements CustomPacketPayload {
+		public static final Type<Rope> TYPE = new Type<>(JaymosPowers.id("web_rope"));
+		public static final StreamCodec<ByteBuf, Rope> CODEC = StreamCodec.composite(
+			net.minecraft.network.codec.ByteBufCodecs.VAR_INT, Rope::hand, net.minecraft.network.codec.ByteBufCodecs.FLOAT, Rope::length, Rope::new);
+
+		@Override
+		public Type<Rope> type() {
+			return TYPE;
+		}
+	}
+
+	/** Server → client: add to your own velocity (a web line hauling you toward a heavy catch), keeping your momentum. */
+	public record Shove(Vec3 add) implements CustomPacketPayload {
+		public static final Type<Shove> TYPE = new Type<>(JaymosPowers.id("web_shove"));
+		public static final StreamCodec<ByteBuf, Shove> CODEC = Vec3.STREAM_CODEC.map(Shove::new, Shove::add);
+
+		@Override
+		public Type<Shove> type() {
+			return TYPE;
+		}
+	}
+
 	/**
 	 * Server → client: the symbiote presses in on you for {@code ticks}: the screen darkens under a pulsing
 	 * blackish-purple vignette, and (if {@code growl}) a low growl plays for you alone. Sent with every whisper, and
@@ -253,6 +276,7 @@ public final class WebNet {
 		PayloadTypeRegistry.clientboundPlay().register(Escape.TYPE, Escape.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(TakeoverPath.TYPE, TakeoverPath.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Nudge.TYPE, Nudge.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(Shove.TYPE, Shove.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Sense.TYPE, Sense.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Dread.TYPE, Dread.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Wings.TYPE, Wings.CODEC);
@@ -260,6 +284,7 @@ public final class WebNet {
 		PayloadTypeRegistry.serverboundPlay().register(ChargeHold.TYPE, ChargeHold.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Fists.TYPE, Fists.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Swing.TYPE, Swing.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(Rope.TYPE, Rope.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(SwingReject.TYPE, SwingReject.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Pull.TYPE, Pull.CODEC);
 	}

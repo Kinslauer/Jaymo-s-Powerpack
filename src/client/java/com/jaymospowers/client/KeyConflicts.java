@@ -16,7 +16,7 @@ import net.minecraft.client.Minecraft;
 final class KeyConflicts {
 	/**
 	 * Bump to run the move again (for a new clash in a later pack version). v2 (0.9.23): Camera Utils' zoom, on Z (the
-	 * pack zooms with OK Zoomer). v3 (0.10.52): Traveler Tool Belt on R; Shoulder Surfing's free look on Left Alt (OK
+	 * pack zooms with OK Zoomer). v3 (0.10.57): Traveler Tool Belt on R; Shoulder Surfing's free look on Left Alt (OK
 	 * Zoomer's zoom) and swap shoulder on U (Kingdoms' werewolf shift).
 	 */
 	private static final String MARKER = "jaymospowers-keys-v3";

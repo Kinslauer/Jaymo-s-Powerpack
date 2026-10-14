@@ -12,7 +12,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 
 /**
- * Shoulder Surfing Reloaded, if it's installed (0.10.52; it replaced Camera Utils and our own power-only shoulder view):
+ * Shoulder Surfing Reloaded, if it's installed (0.10.57; it replaced Camera Utils and our own power-only shoulder view):
  * once per install, its view is set to Andy's old Camera Utils F7 preset ({@link #PRESET}: 3.4 blocks back, 0.1 up, 0.9
  * to the right), F5 goes straight to it instead of vanilla's view from behind, and the camera stays coupled to the
  * player, so powers that fire along your look (Web, Gravity, Z Fighter) still go where the crosshair points. Its

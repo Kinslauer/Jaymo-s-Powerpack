@@ -1077,7 +1077,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   than they're ready, with a "terrain loading" note, and picks up again as they load (`client/TerrainAhead`). Before,
   players flew into land the game hadn't shown and stuck on invisible blocks. Chunky is back to pre-generate the world
   from the server console, so most of the map loads from disk instead of being generated under a flyer.
-- **0.10.52, Andy's immersion mods:** Shoulder Surfing Reloaded (MIT) is the third-person camera for everyone: F5 goes
+- **0.10.57, Andy's immersion mods:** Shoulder Surfing Reloaded (MIT) is the third-person camera for everyone: F5 goes
   to an over-the-shoulder view with the crosshair (Right Alt free look, O swaps shoulder, arrows and Page Up/Down move
   the camera), set to Andy's old Camera Utils F7 numbers (3.4 back, 0.9 right, 0.1 up) and kept coupled to the body so
   powers fire where the crosshair points (`client/CameraPreset`). It refuses to load beside Camera Utils, so Camera
