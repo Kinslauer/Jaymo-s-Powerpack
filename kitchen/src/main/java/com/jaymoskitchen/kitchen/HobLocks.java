@@ -60,8 +60,8 @@ public final class HobLocks {
 
 	public static Kind uses(Dish dish) {
 		return switch (dish.method()) {
-			case SEQUENCE -> Kind.POT;
-			case GRILL, SEAR -> Kind.PAN;
+			case SEQUENCE, STIR -> Kind.POT;
+			case GRILL, SEAR, CHOP -> Kind.PAN;
 			default -> Kind.NONE;
 		};
 	}

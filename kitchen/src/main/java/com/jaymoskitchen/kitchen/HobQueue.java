@@ -141,9 +141,9 @@ public final class HobQueue {
 			return Look.BAKE;
 		}
 		return switch (dish.method()) {
-			case SEQUENCE -> Look.POT;
-			case GRILL, SEAR -> Look.PAN;
-			case OVEN, SMOKE -> Look.BAKE;
+			case SEQUENCE, STIR -> Look.POT;
+			case GRILL, SEAR, CHOP -> Look.PAN;
+			case OVEN, SMOKE, ROAST -> Look.BAKE;
 		};
 	}
 

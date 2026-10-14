@@ -38,20 +38,30 @@ import net.minecraft.world.level.block.Blocks;
  * press, so you have to find the next one each time. The server judges every press.
  */
 public class CookingScreen extends Screen {
-	private enum Phase { SELECT, WAITING, COOKING, GRILLING, SMOKING, SEARING, RESULT }
+	private enum Phase { SELECT, WAITING, COOKING, GRILLING, SMOKING, SEARING, PLAYING, RESULT }
 
 	private static final int PANEL_W = 340;
 	private static final int PANEL_H = 240;
 	/** Vertical spacing of the dish list. */
-	private static final int ROW_PITCH = 23;
+	private static final int ROW_PITCH = 20;
+	/** Where the method column starts in a dish row; names longer than the gap end in "...". */
+	private static final int METHOD_X = 142;
+	/** Where the dish list starts, under the title. */
+	private static final int LIST_TOP = 24;
+	/** The box under the dish list that tells about the hovered dish. */
+	private static final int DETAIL_H = 46;
 	/** Dish rows shown at once; longer lists (a furnace, an oven with pot and pan on the hob) scroll. */
-	private static final int LIST_ROWS = 8;
+	private static final int LIST_ROWS = (PANEL_H - LIST_TOP - DETAIL_H - 4) / ROW_PITCH;
+	private static final int COLOR_ROW = 0x30FFFFFF;
+	private static final int COLOR_ROW_ALT = 0x18FFFFFF;
+	private static final int COLOR_ROW_HOVER = 0x50FFFFFF;
 	private static final int BUTTON_W = 100;
 	private static final int BUTTON_H = 20;
 	private static final int DECOYS = 3;
 
 	/** See-through, so the stove and what's cooking on it show behind the panel. */
 	private static final int COLOR_PANEL = 0x80201812;
+	private static final int COLOR_PANEL_LIST = 0xE0201812;
 	private static final int COLOR_BORDER = 0xFF8B5A2B;
 	private static final int COLOR_TEXT = 0xFFFFFFFF;
 	private static final int COLOR_DIM = 0xFFA0A0A0;
@@ -108,6 +118,11 @@ public class CookingScreen extends Screen {
 	private int cureTicks;
 	private int scorchTicks;
 	private int coldTicks;
+	/** The chopping, roasting or stirring game being played (the plain larder's dishes). */
+	private LarderGames game;
+	/** Where the mouse was last drawn (stirring follows it). */
+	private double mouseX;
+	private double mouseY;
 	/** The buttons on offer for the current dish (its steps plus decoys), reshuffled after each press. */
 	private List<Step> board = List.of();
 
@@ -136,6 +151,7 @@ public class CookingScreen extends Screen {
 			case COOKING -> initCooking();
 			case GRILLING -> initGrilling();
 			case RESULT -> initResult();
+			case PLAYING -> initPlaying();
 			case SMOKING, SEARING -> {
 			}
 			case WAITING -> {
@@ -144,27 +160,35 @@ public class CookingScreen extends Screen {
 	}
 
 	private void initSelect() {
-		List<Dish> dishes = station.dishes();
-		listScroll = Math.max(0, Math.min(listScroll, dishes.size() - LIST_ROWS));
-		int end = Math.min(dishes.size(), listScroll + LIST_ROWS);
-		for (int i = listScroll; i < end; i++) {
-			Dish d = dishes.get(i);
-			Button button = Button.builder(dishName(d), b -> chooseDish(d))
-				.bounds(left() + 10, top() + 30 + (i - listScroll) * ROW_PITCH, 130, BUTTON_H)
-				.build();
-			button.active = this.minecraft.player != null && (this.minecraft.player.hasInfiniteMaterials()
-				|| (stocked & (1 << i)) != 0 || Kitchen.hasIngredients(this.minecraft.player.getInventory(), d.ingredients()));
-			addRenderableWidget(button);
+		listScroll = Math.max(0, Math.min(listScroll, station.dishes().size() - LIST_ROWS));
+	}
+
+	/** Whether the i-th dish of the station can be made (from the pockets or the kitchen nearby; creative always). */
+	private boolean canMake(int i, Dish d) {
+		return this.minecraft.player != null && (this.minecraft.player.hasInfiniteMaterials() || (stocked & (1 << i)) != 0
+			|| Kitchen.hasIngredients(this.minecraft.player.getInventory(), d.ingredients()));
+	}
+
+	/** The index of the dish row under the mouse, or -1. */
+	private int rowAt(double mx, double my) {
+		int x = left();
+		int y = top() + LIST_TOP;
+		if (mx < x + 6 || mx >= x + PANEL_W - 6 || my < y) {
+			return -1;
 		}
-		if (dishes.size() > LIST_ROWS) {
-			Button up = Button.builder(Component.literal("▲"), b -> scrollList(-1))
-				.bounds(left() + PANEL_W - 30, top() + 30, 20, BUTTON_H).build();
-			up.active = listScroll > 0;
-			addRenderableWidget(up);
-			Button down = Button.builder(Component.literal("▼"), b -> scrollList(1))
-				.bounds(left() + PANEL_W - 30, top() + 30 + (LIST_ROWS - 1) * ROW_PITCH, 20, BUTTON_H).build();
-			down.active = end < dishes.size();
-			addRenderableWidget(down);
+		int row = (int)((my - y) / ROW_PITCH);
+		int index = listScroll + row;
+		return row < LIST_ROWS && index < station.dishes().size() ? index : -1;
+	}
+
+	private void initPlaying() {
+		if (game instanceof LarderGames.Roast) {
+			int cx = this.width / 2;
+			int by = top() + PANEL_H - 24;
+			addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskitchen.turn"), b -> game.press())
+				.bounds(cx - 105, by, 100, BUTTON_H).build());
+			addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskitchen.take_off"), b -> game.serve())
+				.bounds(cx + 5, by, 100, BUTTON_H).build());
 		}
 	}
 
@@ -346,6 +370,10 @@ public class CookingScreen extends Screen {
 			sear();
 			return true;
 		}
+		if (phase == Phase.PLAYING && event.key() == InputConstants.KEY_SPACE) {
+			game.press();
+			return true;
+		}
 		return super.keyPressed(event);
 	}
 
@@ -366,6 +394,25 @@ public class CookingScreen extends Screen {
 		if (phase == Phase.SEARING) {
 			sear();
 			return true;
+		}
+		if (phase == Phase.PLAYING) {
+			// the roast's buttons first; a click anywhere else chops (stirring is all in the mouse's moves)
+			if (super.mouseClicked(event, doubleClick)) {
+				return true;
+			}
+			if (game instanceof LarderGames.Chop) {
+				game.press();
+			}
+			return true;
+		}
+		if (phase == Phase.SELECT) {
+			int index = rowAt(event.x(), event.y());
+			if (index >= 0 && canMake(index, station.dishes().get(index))) {
+				this.minecraft.getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
+					net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK, 1.0F));
+				chooseDish(station.dishes().get(index));
+				return true;
+			}
 		}
 		return super.mouseClicked(event, doubleClick);
 	}
@@ -392,6 +439,9 @@ public class CookingScreen extends Screen {
 			closeAtOven();
 		} else if (updated.method() == Dish.Method.SEAR) {
 			startSear();
+		} else if (com.jaymoskitchen.cooking.Minigames.handles(updated)) {
+			game = LarderGames.of(updated);
+			phase = Phase.PLAYING;
 		} else {
 			heat = 0.25F;
 			fanning = false;
@@ -587,6 +637,13 @@ public class CookingScreen extends Screen {
 		if (phase == Phase.SEARING) {
 			tickSear();
 		}
+		if (phase == Phase.PLAYING && game != null) {
+			game.tick(mouseX, mouseY);
+			if (game.over) {
+				phase = Phase.WAITING;
+				rebuildWidgets();
+			}
+		}
 		if (flipAnim >= 0 && ++flipAnim > Grill.FLIP_TICKS) {
 			flipAnim = -1;
 		}
@@ -597,6 +654,8 @@ public class CookingScreen extends Screen {
 
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+		this.mouseX = mouseX;
+		this.mouseY = mouseY;
 		int x = left();
 		int y = top();
 		int border = flashTicks > 0 ? COLOR_BAD : COLOR_BORDER;
@@ -605,42 +664,105 @@ public class CookingScreen extends Screen {
 		graphics.fill(x - 2, y + PANEL_H, x + PANEL_W + 2, y + PANEL_H + 2, border);
 		graphics.fill(x - 2, y, x, y + PANEL_H, border);
 		graphics.fill(x + PANEL_W, y, x + PANEL_W + 2, y + PANEL_H, border);
-		graphics.fill(x, y, x + PANEL_W, y + PANEL_H, COLOR_PANEL);
+		// the dish list and the larder games read better on a darker panel; the other cooking views keep the fire showing
+		graphics.fill(x, y, x + PANEL_W, y + PANEL_H, phase == Phase.SELECT || phase == Phase.PLAYING ? COLOR_PANEL_LIST : COLOR_PANEL);
 		Component stationName = Component.translatable(station.translationKey());
 		graphics.centeredText(this.font, this.title.copy().append(" - ").append(stationName), this.width / 2, y + 8, COLOR_CURRENT);
 
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		switch (phase) {
-			case SELECT -> drawSelect(graphics, x, y);
+			case SELECT -> drawSelect(graphics, x, y, mouseX, mouseY);
 			case WAITING -> graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.waiting"),
 				this.width / 2, y + PANEL_H / 2, COLOR_DIM);
 			case COOKING -> drawCooking(graphics, x, y);
 			case GRILLING -> drawGrilling(graphics, x, y, a);
 			case SMOKING -> drawSmoking(graphics, x, y, a);
 			case SEARING -> drawSearing(graphics, x, y, a);
+			case PLAYING -> drawPlaying(graphics, x, y, a);
 			case RESULT -> drawResult(graphics, x, y);
 		}
 	}
 
-	private void drawSelect(GuiGraphicsExtractor graphics, int x, int y) {
-		graphics.text(this.font, Component.translatable("screen.jaymoskitchen.pick"), x + 10, y + 20, COLOR_DIM);
+	/**
+	 * The dish list, in the powers screen's style: a striped row per dish (its picture, its name, how it's cooked and
+	 * what goes in), the hovered one lit; the box underneath tells about the hovered dish.
+	 */
+	private void drawSelect(GuiGraphicsExtractor graphics, int x, int y, int mouseX, int mouseY) {
 		List<Dish> dishes = station.dishes();
 		int end = Math.min(dishes.size(), listScroll + LIST_ROWS);
+		int hovered = rowAt(mouseX, mouseY);
 		for (int i = listScroll; i < end; i++) {
-			int iconX = x + 146;
-			int iconY = y + 32 + (i - listScroll) * ROW_PITCH;
-			for (Map.Entry<Step, Integer> need : dishes.get(i).ingredients().entrySet()) {
+			Dish d = dishes.get(i);
+			boolean can = canMake(i, d);
+			int ry = y + LIST_TOP + (i - listScroll) * ROW_PITCH;
+			graphics.fill(x + 6, ry, x + PANEL_W - 6, ry + ROW_PITCH - 1, i == hovered && can ? COLOR_ROW_HOVER : i % 2 == 0 ? COLOR_ROW : COLOR_ROW_ALT);
+			graphics.item(new ItemStack(ModItems.dish(d)), x + 9, ry + 1);
+			graphics.text(this.font, fit(dishName(d), METHOD_X - 33), x + 29, ry + 6, can ? COLOR_TEXT : COLOR_DIM);
+			// what goes in, right-aligned, each icon with its count
+			int iconX = x + PANEL_W - 10 - 17 * d.ingredients().size();
+			graphics.text(this.font, Component.translatable("screen.jaymoskitchen.method." + d.method().name().toLowerCase()),
+				x + METHOD_X, ry + 6, can ? 0xFFC8A070 : 0xFF706050);
+			for (Map.Entry<Step, Integer> need : d.ingredients().entrySet()) {
 				ItemStack stack = need.getKey().icon(need.getValue());
-				graphics.item(stack, iconX, iconY);
-				graphics.itemDecorations(this.font, stack, iconX, iconY, null);
-				iconX += 18;
+				graphics.item(stack, iconX, ry + 1);
+				graphics.itemDecorations(this.font, stack, iconX, ry + 1, null);
+				iconX += 17;
 			}
 		}
-		String hint = "screen.jaymoskitchen.hint." + station.name().toLowerCase();
-		if (net.minecraft.locale.Language.getInstance().has(hint)) {
-			graphics.centeredText(this.font, Component.translatable(hint), this.width / 2, y + PANEL_H - 16, COLOR_DIM);
+		if (dishes.size() > LIST_ROWS) {
+			// a thin scrollbar down the right
+			int track = LIST_ROWS * ROW_PITCH;
+			int thumb = Math.max(10, track * LIST_ROWS / dishes.size());
+			int at = y + LIST_TOP + (track - thumb) * listScroll / Math.max(1, dishes.size() - LIST_ROWS);
+			graphics.fill(x + PANEL_W - 4, y + LIST_TOP, x + PANEL_W - 2, y + LIST_TOP + track, 0x40FFFFFF);
+			graphics.fill(x + PANEL_W - 4, at, x + PANEL_W - 2, at + thumb, 0xC0FFFFFF);
 		}
+
+		// the box underneath: the hovered dish, or the station's hint
+		int dy = y + PANEL_H - DETAIL_H;
+		graphics.fill(x + 6, dy, x + PANEL_W - 6, dy + 1, COLOR_ROW);
+		if (hovered >= 0) {
+			Dish d = dishes.get(hovered);
+			graphics.text(this.font, dishName(d), x + 9, dy + 5, COLOR_CURRENT);
+			Component how = Component.translatable("screen.jaymoskitchen.how." + d.method().name().toLowerCase());
+			graphics.text(this.font, fit(how, PANEL_W - 18), x + 9, dy + 16, COLOR_DIM);
+			Component perfect = Component.translatable("screen.jaymoskitchen.perfect_gives");
+			for (int b = 0; b < d.perfectBuffs().size(); b++) {
+				Dish.Buff buff = d.perfectBuffs().get(b);
+				perfect = perfect.copy().append(b == 0 ? " " : ", ").append(Component.translatable(buff.effect().value().getDescriptionId()))
+					.append(buff.amplifier() > 0 ? " " + (buff.amplifier() + 1) : "").append(" (" + buff.ticks() / 20 + "s)");
+			}
+			graphics.text(this.font, fit(perfect, PANEL_W - 18), x + 9, dy + 27, 0xFFFFD54A);
+			if (!canMake(hovered, d)) {
+				graphics.text(this.font, Component.translatable("screen.jaymoskitchen.missing"), x + 9, dy + 37, COLOR_BAD);
+			}
+		} else {
+			graphics.text(this.font, Component.translatable("screen.jaymoskitchen.pick"), x + 9, dy + 5, COLOR_DIM);
+			String hint = "screen.jaymoskitchen.hint." + station.name().toLowerCase();
+			if (net.minecraft.locale.Language.getInstance().has(hint)) {
+				var lines = this.font.split(Component.translatable(hint), PANEL_W - 18);
+				for (int l = 0; l < Math.min(3, lines.size()); l++) {
+					graphics.text(this.font, lines.get(l), x + 9, dy + 16 + l * 10, 0xFF808080);
+				}
+			}
+		}
+	}
+
+	/** The text cut to a width, ending in "..." when it doesn't fit. */
+	private net.minecraft.util.FormattedCharSequence fit(Component text, int width) {
+		if (this.font.width(text) <= width) {
+			return text.getVisualOrderText();
+		}
+		String plain = this.font.plainSubstrByWidth(text.getString(), width - this.font.width("...")) + "...";
+		return Component.literal(plain).withStyle(text.getStyle()).getVisualOrderText();
+	}
+
+	private void drawPlaying(GuiGraphicsExtractor graphics, int x, int y, float a) {
+		graphics.centeredText(this.font, dishName(dish), this.width / 2, y + 22, COLOR_TEXT);
+		graphics.centeredText(this.font, Component.translatable(game.hintKey()), this.width / 2, y + 34, COLOR_DIM);
+		int bottom = y + PANEL_H - (game instanceof LarderGames.Roast ? 30 : 8);
+		game.draw(graphics, this.font, x + 20, x + PANEL_W - 20, y + 48, bottom, a);
 	}
 
 	private void drawCooking(GuiGraphicsExtractor graphics, int x, int y) {
@@ -691,6 +813,9 @@ public class CookingScreen extends Screen {
 			case OVEN -> "result.jaymoskitchen.oven.";
 			case SMOKE -> "result.jaymoskitchen.smoke.";
 			case SEAR -> "result.jaymoskitchen.sear.";
+			case CHOP -> "result.jaymoskitchen.chop.";
+			case ROAST -> "result.jaymoskitchen.roast.";
+			case STIR -> "result.jaymoskitchen.stir.";
 		};
 		String resultKey = prefix + result.name().toLowerCase();
 		graphics.centeredText(this.font, Component.translatable(resultKey), cx, y + 84, COLOR_TEXT);
@@ -707,7 +832,7 @@ public class CookingScreen extends Screen {
 	@Override
 	public void removed() {
 		if (phase == Phase.COOKING || phase == Phase.GRILLING || phase == Phase.SMOKING || phase == Phase.SEARING
-			|| phase == Phase.WAITING) {
+			|| phase == Phase.PLAYING || phase == Phase.WAITING) {
 			ClientPlayNetworking.send(new Payloads.Abandon());
 		}
 		super.removed();

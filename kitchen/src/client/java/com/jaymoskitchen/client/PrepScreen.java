@@ -3,6 +3,7 @@ package com.jaymoskitchen.client;
 import com.jaymoskitchen.ModItems;
 import com.jaymoskitchen.cooking.Kitchen;
 import com.jaymoskitchen.cooking.Prep;
+import com.jaymoskitchen.cooking.Station;
 import com.jaymoskitchen.cooking.Step;
 import com.jaymoskitchen.net.Payloads;
 import com.jaymoskitchen.net.Payloads.PrepUpdate;
@@ -94,15 +95,24 @@ public class PrepScreen extends Screen {
 		int by = top() + PANEL_H - 28;
 		switch (phase) {
 			case INTRO -> {
+				// on a cutting board there's a third choice: chopping (the chopped dishes)
+				boolean board = isBoard();
+				int w = board ? 100 : 120;
+				int x0 = board ? cx - 155 : cx - 125;
 				Button start = Button.builder(Component.translatable("screen.jaymoskitchen.prep.start"), b -> start())
-					.bounds(cx - 125, by, 120, BUTTON_H).build();
+					.bounds(x0, by, w, BUTTON_H).build();
 				start.active = canMake(Prep.Recipe.DOUGH);
 				addRenderableWidget(start);
 				Button roll = Button.builder(Component.translatable("screen.jaymoskitchen.roll.start"),
 						b -> this.minecraft.gui.setScreen(new RollingScreen(pos)))
-					.bounds(cx + 5, by, 120, BUTTON_H).build();
+					.bounds(x0 + w + 5, by, w, BUTTON_H).build();
 				roll.active = canMake(Prep.Recipe.JOINT);
 				addRenderableWidget(roll);
+				if (board) {
+					addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskitchen.prep.chop"),
+							b -> this.minecraft.gui.setScreen(new CookingScreen(pos, Station.BOARD, 0)))
+						.bounds(x0 + 2 * (w + 5), by, w, BUTTON_H).build());
+				}
 			}
 			case KNEAD -> {
 				addRenderableWidget(Button.builder(Component.translatable("screen.jaymoskitchen.prep.knead_left"), b -> knead(-1))
@@ -119,6 +129,11 @@ public class PrepScreen extends Screen {
 			default -> {
 			}
 		}
+	}
+
+	/** Whether this prep board is a cutting board (the only place to chop). */
+	private boolean isBoard() {
+		return this.minecraft.level != null && Station.of(this.minecraft.level.getBlockState(pos)) == Station.BOARD;
 	}
 
 	private boolean canMake(Prep.Recipe recipe) {

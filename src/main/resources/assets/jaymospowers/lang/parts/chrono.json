@@ -2,11 +2,16 @@
 	"power.jaymospowers.chrono": "Chronokinesis",
 	"power.jaymospowers.chrono.desc": "Bend the flow of time. Rewind your last moments, freeze foes, and fast-forward yourself or the world.",
 	"power.jaymospowers.chrono.key.ability_1": "Rewind 3 seconds",
+	"power.jaymospowers.chrono.key.ability_1.name": "Rewind",
 	"power.jaymospowers.chrono.key.ability_2": "Stasis Field: stop time around you for 3s (players too)",
+	"power.jaymospowers.chrono.key.ability_2.name": "Stasis Field",
 	"power.jaymospowers.chrono.key.ability_3": "Overclock: a speedster for 6 s (Speed V, faster blows), everyone near you slowed hard. Sprint to go far faster, run up walls and across water; V again at a wall to phase through it",
+	"power.jaymospowers.chrono.key.ability_3.name": "Overclock",
 	"power.jaymospowers.chrono.key.ability_4": "Time Bloom (grow and cook fast, and mend your wounds)",
+	"power.jaymospowers.chrono.key.ability_4.name": "Time Bloom",
 	"power.jaymospowers.chrono.ascended": "Timeless",
 	"power.jaymospowers.chrono.key.ultimate": "Chrono Punch: ten punches in half a second into everything in front of you",
+	"power.jaymospowers.chrono.key.ultimate.name": "Chrono Punch",
 	"message.jaymospowers.chrono_rewind_short": "Not enough time has passed to rewind.",
 	"message.jaymospowers.chrono_rewind_tangled": "The timeline is tangled across dimensions.",
 	"message.jaymospowers.chrono_rewind_blocked": "Your past is blocked. Something stands where you were.",
@@ -18,6 +23,7 @@
 	"item.jaymospowers.chrono_stopped_clock.lore1": "Both hands rest on the same moment.",
 	"item.jaymospowers.chrono_stopped_clock.lore2": "It waits for one who has stood outside time.",
 	"power.jaymospowers.chrono.key.starter": "Nudge time: slow what you look at (sneak: speed yourself)",
+	"power.jaymospowers.chrono.key.starter.name": "Nudge Time",
 	"message.jaymospowers.chrono_flow_unavailable": "Time won't flow for you like that. Not yet.",
 	"message.jaymospowers.chrono_flow_lent": "The echo's blow lands out of time, and time begins to flow through you.",
 	"message.jaymospowers.chrono_flow_drained": "The flow drains out of you.",
@@ -26,5 +32,7 @@
 	"hud.jaymospowers.chrono_flow_combo": "%s HIT COMBO",
 	"message.jaymospowers.chrono_echo_unravelled": "Your echo is gone for good, and the hole it leaves runs straight through you. Time comes loose.",
 	"power.jaymospowers.chrono.key.mode.ascended_corrupted": "Time Flow on/off (over-the-shoulder view): attack toward a foe to fly at it; right click to counter held blows, even mid-move",
-	"power.jaymospowers.chrono.key.ultimate.ascended_corrupted": "Chrono Punch (in Time Flow: lock onto a foe for a barrage, only a counter breaks it; the last punch throws everything in front away)"
+	"power.jaymospowers.chrono.key.mode.ascended_corrupted.name": "Time Flow",
+	"power.jaymospowers.chrono.key.ultimate.ascended_corrupted": "Chrono Punch (in Time Flow: lock onto a foe for a barrage, only a counter breaks it; the last punch throws everything in front away)",
+	"power.jaymospowers.chrono.key.ultimate.ascended_corrupted.name": "Chrono Punch"
 }

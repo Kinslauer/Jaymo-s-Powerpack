@@ -1032,6 +1032,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.10.37 / Kingdoms 0.7.5, timelapse night and bed rest:** our own take on Sleeping Overhaul 2 (Forge only): the
   night runs by as a timelapse (the whole world sped up, villagers at work; drag to look around in bed) instead of skipping, leave bed any time, and rest in bed awake by day or sneaking (immune
   to poison and withering), with a Sleep button at night. See kingdoms/MODLOG.md.
-- **0.10.38, guns (pack mods):** TaCZ: Refabricated (the unofficial Fabric 26.3 port of Timeless and Classics Zero,
+- **0.10.41, guns (pack mods):** TaCZ: Refabricated (the unofficial Fabric 26.3 port of Timeless and Classics Zero,
   beta) joins the pack with Forge Config API Port: modern guns, attachments, scopes, a Gun Smith Table and ammo. It's
   on Modrinth only, so the CurseForge import zip carries its jar (untouched, credited; art CC BY-NC-ND 4.0).
