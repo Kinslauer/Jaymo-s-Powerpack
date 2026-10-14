@@ -2598,7 +2598,7 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   flames (rags still on). `Werewolf` syncs `look`/`rags`; `WerewolfRenderer` picks the coat and draws a `RagsLayer`.
   Textures painted from our own coats by `tools/gen_cursed_werewolf.py`.
 
-## 0.7.2: rarer tornadoes (pack 0.10.6)
+## 0.7.2: rarer tornadoes (pack 0.10.9)
 - Andy: tornadoes should be far rarer. A supercell that comes on its own (every `disaster_days`, 6 by default) can put
   down a tornado only one time in ten (`Storms.TORNADO_SUPERCELLS`): about one tornado every 60 days, down from every
   6. The others still storm, with lightning. Dust devils, and the op commands (`/kingdom disaster supercell|tornado`),
