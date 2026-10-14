@@ -46,8 +46,8 @@ public final class Hull {
 	public final boolean floats;
 	/** Its length at the waterline (blocks, along local z), its sails, and (0.7.18) its oars. */
 	public final int waterline, sails, oars;
-	/** (0.7.18) Its guns' pieces, and its oars'. */
-	public final int[] cannons, oarPieces;
+	/** (0.7.18) Its guns' pieces, and its oars'; (0.7.28) the pieces that give light (torches, lanterns, glowstone...). */
+	public final int[] cannons, oarPieces, lights;
 	/** The pieces on its outside (walls, bottom and ends), which run into land first. */
 	public final int[] skin;
 	/** The helm's piece (-1: none). */
@@ -63,7 +63,7 @@ public final class Hull {
 		this.hi = new float[n];
 		int x0 = Integer.MAX_VALUE, y0 = Integer.MAX_VALUE, z0 = Integer.MAX_VALUE, x1 = Integer.MIN_VALUE, y1 = Integer.MIN_VALUE, z1 = Integer.MIN_VALUE;
 		int h = -1, sailCount = 0;
-		IntArrayList guns = new IntArrayList(), oarList = new IntArrayList();
+		IntArrayList guns = new IntArrayList(), oarList = new IntArrayList(), lightList = new IntArrayList();
 		double r = 1.0;
 		float[] fill = new float[n];
 		float m = 0.0F;
@@ -105,9 +105,13 @@ public final class Hull {
 			if (state.getBlock() instanceof OarBlock) {
 				oarList.add(i);
 			}
+			if (state.getLightEmission() > 0) {
+				lightList.add(i);
+			}
 		}
 		this.cannons = guns.toIntArray();
 		this.oarPieces = oarList.toIntArray();
+		this.lights = lightList.toIntArray();
 		this.oars = this.oarPieces.length;
 		this.minX = x0;
 		this.minY = y0;

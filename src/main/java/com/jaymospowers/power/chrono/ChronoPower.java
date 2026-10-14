@@ -43,7 +43,8 @@ import net.minecraft.world.phys.Vec3;
  * Chronokinesis: golden clockwork time magic. Everything is decided here, on the server.
  * <ul>
  * <li>R, Rewind: snap back to where you were 3 s ago (health restored if it was higher, fire put out).</li>
- * <li>G, Stasis Field: stop time for mobs and projectiles in a 6-block bubble for 4 s.</li>
+ * <li>G, Stasis Field: stop time for mobs and projectiles in a 6-block bubble for 4 s. Since 0.10.96 it also resets every
+ * other cooldown you have running (never its own).</li>
  * <li>V, Overclock: 6 s as a speedster: Speed V, Haste II and faster attacks, everyone near you slowed hard. Since
  * 0.10.28 the Flash's speed too ({@link ChronoSpeed}): a far faster sprint, running up walls and across water, and V
  * again to phase through a wall.</li>
@@ -369,6 +370,9 @@ public final class ChronoPower implements Power {
 			default -> false;
 		};
 		if (used) {
+			if (ability == STASIS) {
+				resetCooldowns(player, state);
+			}
 			int cooldown = cooldown(player, ability);
 			state.readyAt[ability] = now + cooldown;
 			state.cooldownTotal[ability] = cooldown;
@@ -419,6 +423,25 @@ public final class ChronoPower implements Power {
 
 	private static ServerLevel level(ServerPlayer player) {
 		return player.level();
+	}
+
+	/**
+	 * (0.10.96) Stasis Field also winds back every cooldown you have running: Rewind, Overclock, Time Bloom, Chrono
+	 * Punch, Overclock's phase, and the items in your inventory (ender pearls, shields, wind charges...). Stasis's own
+	 * cooldown starts fresh right after, so G can't be chained into itself.
+	 */
+	private static void resetCooldowns(ServerPlayer player, ChronoState state) {
+		java.util.Arrays.fill(state.readyAt, 0);
+		state.ultimateReadyAt = 0;
+		state.phaseReadyAt = 0;
+		net.minecraft.world.item.ItemCooldowns items = player.getCooldowns();
+		java.util.Set<Identifier> groups = new java.util.HashSet<>();
+		for (net.minecraft.world.item.ItemStack stack : player.getInventory()) {
+			if (!stack.isEmpty() && items.isOnCooldown(stack)) {
+				groups.add(items.getCooldownGroup(stack));
+			}
+		}
+		groups.forEach(items::removeCooldown);
 	}
 
 	/** An ability's cooldown: shorter for the Timeless (ascended). */

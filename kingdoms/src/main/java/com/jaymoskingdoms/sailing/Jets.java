@@ -6,7 +6,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.18) A Wind user's Gale Stream or a Smoke user's Smoke Jet (Jaymo's Powers, read by the tag it puts on whoever is
+ * (0.7.18) A Wind user's Wind Whistle or a Smoke user's Smoke Jet (Jaymo's Powers, read by the tag it puts on whoever is
  * using it) filling a ship's sails: each sail in the stream adds to her way along the stream's push, as if the wind blew
  * there and that way. Blown from astern she runs before it; from ahead it backs her; across her, it does little.
  */
