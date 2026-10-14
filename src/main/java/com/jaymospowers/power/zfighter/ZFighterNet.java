@@ -94,7 +94,7 @@ public final class ZFighterNet {
 	}
 
 	/** Server → client: a Spirit Bomb (by its thrower's entity id) is here and this big; drawn while it keeps coming. */
-	public record SpiritFx(int id, double x, double y, double z, float size) implements CustomPacketPayload {
+	public record SpiritFx(int id, double x, double y, double z, float size, float glow) implements CustomPacketPayload {
 		public static final Type<SpiritFx> TYPE = new Type<>(JaymosPowers.id("zfighter_spirit"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, SpiritFx> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
@@ -103,8 +103,9 @@ public final class ZFighterNet {
 				buf.writeDouble(p.y);
 				buf.writeDouble(p.z);
 				buf.writeFloat(p.size);
+				buf.writeFloat(p.glow);
 			},
-			buf -> new SpiritFx(buf.readVarInt(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readFloat()));
+			buf -> new SpiritFx(buf.readVarInt(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readFloat(), buf.readFloat()));
 
 		@Override
 		public Type<SpiritFx> type() {

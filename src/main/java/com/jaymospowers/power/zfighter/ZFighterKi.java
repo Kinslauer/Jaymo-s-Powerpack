@@ -1,6 +1,7 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.Powers;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -24,6 +25,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -48,7 +50,8 @@ import net.minecraft.world.phys.Vec3;
  * The ki techniques:
  * <ul>
  * <li>G, Ki Blast: a fast bolt of ki from the palm. Cheap and quick; it hurts and knocks back, and fizzles on stone.</li>
- * <li>V (hold), Ki Wave: cup your hands and gather it ({@link #WAVE_FULL} ticks to full), let go and it fires as a beam
+ * <li>V tap, Ki Blast; V held {@link #BARRAGE_WINDUP} ticks, Ki Barrage: bolts from both palms in turn while it's held.</li>
+ * <li>Sneak+V (hold), Ki Wave: cup your hands and gather it ({@link #WAVE_FULL} ticks to full), let go and it fires as a beam
  * through everything in a line, ending in a blast. The fuller, the wider, the harder, the dearer. A full wave from a
  * Super breaks blocks (if mob griefing is on).</li>
  * <li>B, Flash Step: gone in a blink, up to {@link #STEP_RANGE} blocks the way you look; aimed at a creature, behind
@@ -116,13 +119,25 @@ final class ZFighterKi {
 	static final double BEAM_SEEN = 160.0;
 	/** How far ahead of its middle (in its sizes) the Spirit Bomb's leading edge meets the ground. */
 	static final double SPIRIT_LEAD = 0.6;
-	/** Once it meets the ground it grinds down this slowly, this long, before it bursts. */
+	/**
+	 * Whatever block it meets (ground, wall, roof), it embeds itself: it grinds in, glowing brighter all the while, this
+	 * long (ticks), sinking this share of its size into the blocks (never slower than {@link #SPIRIT_SINK_SPEED}), then bursts.
+	 */
 	static final double SPIRIT_SINK_SPEED = 0.15;
-	static final int SPIRIT_SINK_TICKS = 40;
+	static final int SPIRIT_SINK_TICKS = 60;
+	static final double SPIRIT_EMBED = 0.7;
+	/** Flown this long (ticks) without meeting anything, it drops straight down; this much longer, it bursts where it is. */
+	static final int SPIRIT_FALL_AFTER = 200;
+	static final int SPIRIT_FALL_LIMIT = 400;
+	static final double SPIRIT_FALL_SPEED = 1.2;
 	/** The ring of blasts round the main one: how many, how far out (in its sizes) and how strong (of the main one). */
 	static final int SPIRIT_RING = 8;
 	static final double SPIRIT_RING_AT = 0.7;
 	static final float SPIRIT_RING_POWER = 0.55F;
+	/** And an outer ring, so the blast tears up a wide area. */
+	static final int SPIRIT_OUTER_RING = 12;
+	static final double SPIRIT_OUTER_AT = 1.4;
+	static final float SPIRIT_OUTER_POWER = 0.4F;
 
 	// ---- Flash Step ----
 	static final float STEP_KI = 15.0F;
@@ -130,6 +145,21 @@ final class ZFighterKi {
 	static final double STEP_RANGE = 10.0;
 	static final double STEP_TARGET_RANGE = 16.0;
 	static final float STEP_EXHAUSTION = 0.8F;
+
+	// V: a tap is a Ki Blast; held, after a windup, bolts from both palms in turn until it's let go or the ki runs dry
+	/** V let go sooner than this (ticks) is a tap: one Ki Blast. Held this long, the barrage starts. */
+	static final int BARRAGE_WINDUP = 40;
+	/** a bolt every this many ticks, from the right palm, then the left */
+	static final int BARRAGE_EVERY = 2;
+	static final float BARRAGE_KI = 2.5F;
+	static final float BARRAGE_DAMAGE = 1.8F;
+	static final double BARRAGE_SPEED = 1.8;
+	/** how far each bolt may stray from the aim */
+	static final double BARRAGE_SPREAD = 0.08;
+	static final int BARRAGE_LIFE = 30;
+	static final float BARRAGE_EXHAUSTION = 0.1F;
+	/** ticks before V fires again after a barrage ends */
+	static final int BARRAGE_COOLDOWN = 20;
 
 	private static final int BLAST_COLOR = 0xFFC85A;
 	private static final int WAVE_COLOR = 0x8FD3FF;
@@ -285,6 +315,94 @@ final class ZFighterKi {
 		}
 	}
 
+	// ---------------------------------------------------------------- V: Ki Blast (tap) and Ki Barrage (hold)
+
+	/** V down: the hands start to gather. What it becomes is decided by how long it's held. */
+	static void pressBarrage(ServerPlayer player, ZFighterPower.Live live) {
+		long now = player.level().getGameTime();
+		if (now < live.barrageReady) {
+			return;
+		}
+		live.barrageFrom = now;
+	}
+
+	/** V up: let go during the windup, it was a tap and one Ki Blast flies; let go mid-barrage, it ends. */
+	static void releaseBarrage(ServerPlayer player, ZFighterPower.Live live) {
+		if (live.barrageFrom < 0) {
+			return;
+		}
+		long now = player.level().getGameTime();
+		long held = now - live.barrageFrom;
+		live.barrageFrom = -1L;
+		if (held < BARRAGE_WINDUP) {
+			if (blast(player, live)) {
+				live.barrageReady = now + BLAST_COOLDOWN;
+			}
+		} else {
+			live.barrageReady = now + BARRAGE_COOLDOWN;
+		}
+	}
+
+	/** While V is held: the windup (ki gathers in both palms), then the barrage. */
+	static void tickBarrage(ServerPlayer player, ZFighterPower.Live live) {
+		if (live.barrageFrom < 0) {
+			return;
+		}
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		if (Powers.silenced(player) || ZFighterLineage.ape(player) || !player.isAlive()) {
+			live.barrageFrom = -1L;
+			return;
+		}
+		long held = now - live.barrageFrom;
+		Vec3 look = player.getViewVector(1.0F);
+		int color = formColor(live);
+		DustParticleOptions dust = new DustParticleOptions(color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : color, 1.0F);
+		if (held < BARRAGE_WINDUP) {
+			if (held < 5) {
+				// too soon to tell a tap from a hold
+				return;
+			}
+			float wind = held / (float)BARRAGE_WINDUP;
+			RandomSource random = level.getRandom();
+			for (boolean left : new boolean[] {false, true}) {
+				Vec3 hand = palm(player, look, left);
+				double r = 0.6 * (1.0F - wind) + 0.15;
+				double ox = (random.nextDouble() - 0.5) * r * 2;
+				double oy = (random.nextDouble() - 0.5) * r * 2;
+				double oz = (random.nextDouble() - 0.5) * r * 2;
+				level.sendParticles(dust, true, false, hand.x + ox, hand.y + oy, hand.z + oz, 0, -ox, -oy, -oz, 0.1);
+				level.sendParticles(dust, true, false, hand.x, hand.y, hand.z, 1, 0.04, 0.04, 0.04, 0.0);
+			}
+			if (held % 10 == 0) {
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 0.8F,
+					1.0F + wind);
+			}
+			return;
+		}
+		long firing = held - BARRAGE_WINDUP;
+		if (firing % BARRAGE_EVERY != 0) {
+			return;
+		}
+		if (!ZFighterPower.spend(player, live, BARRAGE_KI)) {
+			// out of ki: the barrage is spent; letting go of V does nothing more
+			live.barrageFrom = -1L;
+			live.barrageReady = now + BARRAGE_COOLDOWN;
+			return;
+		}
+		boolean left = (firing / BARRAGE_EVERY) % 2 == 1;
+		RandomSource random = level.getRandom();
+		Vec3 aim = look.add((random.nextDouble() - 0.5) * BARRAGE_SPREAD * 2, (random.nextDouble() - 0.5) * BARRAGE_SPREAD * 2,
+			(random.nextDouble() - 0.5) * BARRAGE_SPREAD * 2).normalize();
+		BOLTS.add(new Bolt(level, player.getUUID(), palm(player, look, left), aim.scale(BARRAGE_SPEED),
+			BARRAGE_DAMAGE * ZFighterPower.kiPower(player, live), color, BOLT, BARRAGE_LIFE));
+		boolean mainRight = player.getMainArm() == HumanoidArm.RIGHT;
+		player.swing(left == mainRight ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+		exhaust(player, BARRAGE_EXHAUSTION);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.45F,
+			1.6F + random.nextFloat() * 0.3F);
+	}
+
 	/** One tick of a bolt's flight. False when it's spent. */
 	private static boolean flyBolt(ServerPlayer owner, Bolt bolt) {
 		ServerLevel level = bolt.level;
@@ -303,11 +421,11 @@ final class ZFighterKi {
 		DustParticleOptions dust = new DustParticleOptions(bolt.color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : bolt.color,
 			bolt.kind == BOMB || bolt.kind == SPIRIT ? 3.0F : 1.8F);
 		double reach = 1.0 + bolt.size;
-		EntityHitResult hit = ProjectileUtil.getEntityHitResult(owner, from, end, new AABB(from, end).inflate(reach),
+		EntityHitResult hit = bolt.kind == SPIRIT ? null : ProjectileUtil.getEntityHitResult(owner, from, end, new AABB(from, end).inflate(reach),
 			e -> e instanceof LivingEntity living && living.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && e != owner
 				&& !bolt.struck.contains(e.getId()) && (bolt.kind != SPIRIT || ZFighterTechniques.foe(owner, living)),
 			from.distanceToSqr(end));
-		if (hit == null && bolt.size > 0.0) {
+		if (hit == null && bolt.size > 0.0 && bolt.kind != SPIRIT) {
 			// a big ball catches what it brushes past, not just what's dead ahead
 			for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, new AABB(from, end).inflate(bolt.size),
 				e -> e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && e != owner && (bolt.kind != SPIRIT || ZFighterTechniques.foe(owner, e)))) {
@@ -333,11 +451,11 @@ final class ZFighterKi {
 		}
 		if (block.getType() != HitResult.Type.MISS) {
 			if (bolt.kind == SPIRIT) {
-				// it doesn't burst on touching the ground: it grinds down into it first
+				// it never bursts on touching: it embeds itself in whatever it met first, grinding in
 				bolt.sinking = 1;
 				bolt.pos = end;
-				bolt.velocity = bolt.velocity.normalize().scale(SPIRIT_SINK_SPEED);
-				ZFighterTechniques.spiritFx(level, bolt.fxId, end, bolt.size);
+				bolt.velocity = bolt.velocity.normalize().scale(Math.max(SPIRIT_SINK_SPEED, bolt.size * SPIRIT_EMBED / SPIRIT_SINK_TICKS));
+				ZFighterTechniques.spiritFx(level, bolt.fxId, end, bolt.size, 0.0F);
 				return true;
 			}
 			if (bolt.kind == BOMB) {
@@ -349,10 +467,17 @@ final class ZFighterKi {
 		}
 		draw(level, bolt, from, dust);
 		if (bolt.kind == SPIRIT) {
-			ZFighterTechniques.spiritFx(level, bolt.fxId, to, bolt.size);
+			ZFighterTechniques.spiritFx(level, bolt.fxId, to, bolt.size, 0.0F);
 		}
 		bolt.pos = to;
-		if (++bolt.age >= bolt.life) {
+		if (bolt.kind == SPIRIT && ++bolt.age < SPIRIT_FALL_LIMIT) {
+			if (bolt.age == SPIRIT_FALL_AFTER) {
+				// thrown at the sky: it comes down to earth instead of bursting in the air
+				bolt.velocity = new Vec3(0.0, -SPIRIT_FALL_SPEED, 0.0);
+			}
+			return true;
+		}
+		if (bolt.kind == SPIRIT || ++bolt.age >= bolt.life) {
 			if (bolt.kind == BOMB || bolt.kind == SPIRIT) {
 				burst(owner, bolt, to);
 			}
@@ -452,6 +577,12 @@ final class ZFighterKi {
 				level.explode(owner, source, GROUND_ONLY, at.x + Math.cos(a) * r, at.y, at.z + Math.sin(a) * r, bolt.burst * SPIRIT_RING_POWER, false,
 					bolt.griefing ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
 			}
+			for (int i = 0; i < SPIRIT_OUTER_RING; i++) {
+				double a = (i + 0.5) * Math.PI * 2.0 / SPIRIT_OUTER_RING;
+				double r = bolt.size * SPIRIT_OUTER_AT;
+				level.explode(owner, source, GROUND_ONLY, at.x + Math.cos(a) * r, at.y + bolt.size * 0.3, at.z + Math.sin(a) * r,
+					bolt.burst * SPIRIT_OUTER_POWER, false, bolt.griefing ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
+			}
 		}
 		DustParticleOptions dust = new DustParticleOptions(bolt.color, 3.0F);
 		level.sendParticles(dust, true, false, at.x, at.y, at.z, (int)(30 + bolt.radius * 10), bolt.radius * 0.4, bolt.radius * 0.4,
@@ -469,8 +600,17 @@ final class ZFighterKi {
 		ServerLevel level = bolt.level;
 		bolt.pos = bolt.pos.add(bolt.velocity);
 		Vec3 at = bolt.pos;
-		ZFighterTechniques.spiritFx(level, bolt.fxId, at, bolt.size);
+		// brighter and brighter till it goes
+		float glow = Mth.clamp(bolt.sinking / (float)SPIRIT_SINK_TICKS, 0.0F, 1.0F);
+		ZFighterTechniques.spiritFx(level, bolt.fxId, at, bolt.size, glow);
 		RandomSource random = level.getRandom();
+		int flashes = (int)(2 + glow * glow * 16);
+		level.sendParticles(ParticleTypes.END_ROD, true, false, at.x, at.y, at.z, flashes, bolt.size * 0.5, bolt.size * 0.5, bolt.size * 0.5,
+			0.1 + glow * 0.4);
+		if (glow > 0.6F) {
+			level.sendParticles(new DustParticleOptions(0xFFFFFF, 4.0F), true, false, at.x, at.y + bolt.size * 0.5, at.z, 1, bolt.size * 0.3, 0.2, bolt.size * 0.3,
+				0.0);
+		}
 		for (int i = 0; i < 12; i++) {
 			double a = random.nextDouble() * Math.PI * 2.0;
 			double r = bolt.size * (0.5 + random.nextDouble() * 0.6);
@@ -482,8 +622,8 @@ final class ZFighterKi {
 					ground.getZ() + 0.5, 6, 0.4, 0.6, 0.4, 0.4);
 			}
 		}
-		if (bolt.sinking % 5 == 1) {
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 4.0F, 0.5F);
+		if (bolt.sinking % Math.max(2, 6 - (int)(glow * 4)) == 1) {
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 4.0F, 0.5F + glow * 0.6F);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 2.0F, 0.4F);
 		}
 		if (++bolt.sinking >= SPIRIT_SINK_TICKS) {
@@ -504,9 +644,14 @@ final class ZFighterKi {
 
 	/** Where his palm is: the eye, a little ahead, right and down. */
 	private static Vec3 palm(ServerPlayer player, Vec3 look) {
+		return palm(player, look, false);
+	}
+
+	/** His right palm, or his left. */
+	private static Vec3 palm(ServerPlayer player, Vec3 look, boolean left) {
 		Vec3 right = look.cross(new Vec3(0.0, 1.0, 0.0));
 		right = right.lengthSqr() < 1.0E-6 ? Vec3.ZERO : right.normalize();
-		return player.getEyePosition().add(look.scale(0.8)).add(right.scale(0.3)).add(0.0, -0.25, 0.0);
+		return player.getEyePosition().add(look.scale(0.8)).add(right.scale(left ? -0.3 : 0.3)).add(0.0, -0.25, 0.0);
 	}
 
 	static boolean disc(ServerPlayer player, ZFighterPower.Live live) {

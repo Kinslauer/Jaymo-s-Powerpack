@@ -365,6 +365,7 @@ public final class ZFighterLineage {
 		ZFighterPower.endLimit(player, live);
 		ZFighterTechniques.cancel(player, live);
 		live.waveFrom = -1L;
+		live.barrageFrom = -1L;
 		live.charging = false;
 		live.moonless = 0;
 		player.setAttached(GREAT_APE, true);

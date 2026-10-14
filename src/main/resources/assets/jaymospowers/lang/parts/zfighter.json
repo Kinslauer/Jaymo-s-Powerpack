@@ -8,7 +8,7 @@
   "power.jaymospowers.zfighter.key.ability_1.name": "Charge Ki",
   "power.jaymospowers.zfighter.key.ability_2": "G, your quick technique (pick it on the training screen): Ki Blast (8 ki, a fast bolt), Ki Disc, Homing Volley, Solar Flash or Ki Barrier",
   "power.jaymospowers.zfighter.key.ability_2.name": "Quick Technique",
-  "power.jaymospowers.zfighter.key.ability_3": "V (hold, release), your charged technique: Ki Wave (a beam through everything in a 40-block line, 25-60 ki) or Ki Bomb (a big slow ball that bursts, 30-70 ki)",
+  "power.jaymospowers.zfighter.key.ability_3": "V: tap for a Ki Blast; hold for 2 s and both hands fire a barrage. Sneak+V (hold, release), your charged technique: Ki Wave (a beam through everything in a 40-block line, 25-60 ki) or Ki Bomb (a big slow ball that bursts, 30-70 ki)",
   "power.jaymospowers.zfighter.key.ability_3.name": "Charged Technique",
   "power.jaymospowers.zfighter.key.ability_4": "Flash Step: gone in a blink, up to 10 blocks the way you look; aimed at a creature, behind it (15 ki). Verdant: sneak+%4$s heals whoever you look at, or yourself (20 ki)",
   "power.jaymospowers.zfighter.key.ability_4.name": "Flash Step",
