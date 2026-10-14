@@ -287,6 +287,11 @@ public final class Skills {
 				|| entity instanceof Folk || !(entity instanceof LivingEntity wizard) || !CourtWizards.is(wizard)) {
 				return InteractionResult.PASS;
 			}
+			if (!Languages.understands(sp, wizard)) {
+				// (0.7.20) unmaking a man's skills takes explaining, in a tongue you share
+				Languages.shrug(sp, wizard);
+				return InteractionResult.SUCCESS;
+			}
 			if (of(sp).spent() == 0) {
 				// (0.6.0) nothing to unmake: he offers a Writ of Rebirth instead
 				Classes.writOffer(sp, wizard);

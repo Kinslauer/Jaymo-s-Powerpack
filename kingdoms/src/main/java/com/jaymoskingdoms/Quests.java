@@ -313,6 +313,11 @@ public final class Quests {
 		if (!(player.level() instanceof ServerLevel level)) {
 			return;
 		}
+		if (!Languages.understands(player, giver)) {
+			// (0.7.20) work's explained in words, and you don't have theirs
+			Languages.shrug(player, giver);
+			return;
+		}
 		Faction f = settlement(level, giver);
 		Component name = giver.getDisplayName();
 		if (f == null) {
