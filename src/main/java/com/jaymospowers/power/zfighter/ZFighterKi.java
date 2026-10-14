@@ -158,6 +158,8 @@ final class ZFighterKi {
 	static final double BARRAGE_SPREAD = 0.08;
 	static final int BARRAGE_LIFE = 30;
 	static final float BARRAGE_EXHAUSTION = 0.1F;
+	/** a barrage bolt's orb, blocks across */
+	static final double BARRAGE_ORB = 0.3;
 	/** ticks before V fires again after a barrage ends */
 	static final int BARRAGE_COOLDOWN = 20;
 
@@ -222,6 +224,9 @@ final class ZFighterKi {
 		boolean griefing;
 		/** SPIRIT: the thrower's entity id, so the client keeps drawing the same sphere it watched gather. */
 		int fxId;
+		/** Which end crystal orb is this one's on the clients, and how big across (0: by kind). */
+		final int orbId = nextOrb++;
+		double orbSize;
 		/** SPIRIT: ticks it has been grinding into the ground (0 while it flies). */
 		int sinking;
 		/** DISC: who it has already cut (it passes through). */
@@ -257,6 +262,11 @@ final class ZFighterKi {
 	}
 
 	private static final List<Bolt> BOLTS = new ArrayList<>();
+	/** This tick's end crystal orbs, by level: sent to everyone near at the end of the tick ({@code ZFighterOrbs} draws them). */
+	private static final java.util.Map<ServerLevel, List<ZFighterNet.Orb>> ORBS = new java.util.HashMap<>();
+	/** Players this near an orb see it. */
+	static final double ORB_SEEN = 128.0;
+	private static int nextOrb = 1;
 	private static final List<Beam> BEAMS = new ArrayList<>();
 
 	private ZFighterKi() {
@@ -268,6 +278,7 @@ final class ZFighterKi {
 
 	static void clear() {
 		BOLTS.clear();
+		ORBS.clear();
 		BEAMS.clear();
 	}
 
@@ -306,6 +317,7 @@ final class ZFighterKi {
 				it.remove();
 			}
 		}
+		sendOrbs();
 		for (Iterator<Beam> it = BEAMS.iterator(); it.hasNext(); ) {
 			Beam beam = it.next();
 			drawBeam(beam);
@@ -366,13 +378,16 @@ final class ZFighterKi {
 			float wind = held / (float)BARRAGE_WINDUP;
 			RandomSource random = level.getRandom();
 			for (boolean left : new boolean[] {false, true}) {
+				// an orb grows in each palm, a mote of ki drawn into one of them now and then
 				Vec3 hand = palm(player, look, left);
-				double r = 0.6 * (1.0F - wind) + 0.15;
-				double ox = (random.nextDouble() - 0.5) * r * 2;
-				double oy = (random.nextDouble() - 0.5) * r * 2;
-				double oz = (random.nextDouble() - 0.5) * r * 2;
-				level.sendParticles(dust, true, false, hand.x + ox, hand.y + oy, hand.z + oz, 0, -ox, -oy, -oz, 0.1);
-				level.sendParticles(dust, true, false, hand.x, hand.y, hand.z, 1, 0.04, 0.04, 0.04, 0.0);
+				orb(level, -(player.getId() * 4 + (left ? 2 : 1)), hand, 0.1 + 0.25 * wind, color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : color);
+				if (random.nextInt(3) == 0) {
+					double r = 0.6 * (1.0F - wind) + 0.15;
+					double ox = (random.nextDouble() - 0.5) * r * 2;
+					double oy = (random.nextDouble() - 0.5) * r * 2;
+					double oz = (random.nextDouble() - 0.5) * r * 2;
+					level.sendParticles(dust, true, false, hand.x + ox, hand.y + oy, hand.z + oz, 0, -ox, -oy, -oz, 0.1);
+				}
 			}
 			if (held % 10 == 0) {
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 0.8F,
@@ -394,13 +409,42 @@ final class ZFighterKi {
 		RandomSource random = level.getRandom();
 		Vec3 aim = look.add((random.nextDouble() - 0.5) * BARRAGE_SPREAD * 2, (random.nextDouble() - 0.5) * BARRAGE_SPREAD * 2,
 			(random.nextDouble() - 0.5) * BARRAGE_SPREAD * 2).normalize();
-		BOLTS.add(new Bolt(level, player.getUUID(), palm(player, look, left), aim.scale(BARRAGE_SPEED),
-			BARRAGE_DAMAGE * ZFighterPower.kiPower(player, live), color, BOLT, BARRAGE_LIFE));
+		Bolt bolt = new Bolt(level, player.getUUID(), palm(player, look, left), aim.scale(BARRAGE_SPEED),
+			BARRAGE_DAMAGE * ZFighterPower.kiPower(player, live), color, BOLT, BARRAGE_LIFE);
+		bolt.orbSize = BARRAGE_ORB;
+		BOLTS.add(bolt);
 		boolean mainRight = player.getMainArm() == HumanoidArm.RIGHT;
 		player.swing(left == mainRight ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		exhaust(player, BARRAGE_EXHAUSTION);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.45F,
 			1.6F + random.nextFloat() * 0.3F);
+	}
+
+	/** An end crystal orb {@code size} blocks across at {@code at} this tick, {@code id} the same tick to tick for the same orb. */
+	static void orb(ServerLevel level, int id, Vec3 at, double size, int color) {
+		ORBS.computeIfAbsent(level, l -> new ArrayList<>()).add(new ZFighterNet.Orb(id, at.x, at.y, at.z, (float)size, color & 0xFFFFFF));
+	}
+
+	/** This tick's orbs to everyone near them. */
+	private static void sendOrbs() {
+		for (java.util.Map.Entry<ServerLevel, List<ZFighterNet.Orb>> entry : ORBS.entrySet()) {
+			List<ZFighterNet.Orb> orbs = entry.getValue();
+			if (orbs.isEmpty()) {
+				continue;
+			}
+			for (ServerPlayer viewer : entry.getKey().players()) {
+				List<ZFighterNet.Orb> seen = new ArrayList<>();
+				for (ZFighterNet.Orb orb : orbs) {
+					if (viewer.distanceToSqr(orb.x(), orb.y(), orb.z()) <= ORB_SEEN * ORB_SEEN) {
+						seen.add(orb);
+					}
+				}
+				if (!seen.isEmpty()) {
+					net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(viewer, new ZFighterNet.KiOrbs(seen));
+				}
+			}
+			orbs.clear();
+		}
 	}
 
 	/** One tick of a bolt's flight. False when it's spent. */
@@ -488,19 +532,30 @@ final class ZFighterKi {
 
 	private static void draw(ServerLevel level, Bolt bolt, Vec3 from, DustParticleOptions dust) {
 		Vec3 to = from.add(bolt.velocity);
+		int orbColor = bolt.color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : bolt.color;
 		switch (bolt.kind) {
 			case DISC -> {
-				// a flat spinning ring, edge-on to the way it flies
+				// the orb with a spinning edge round it, flat to the way it flies
+				orb(level, bolt.orbId, to, bolt.orbSize > 0 ? bolt.orbSize : 0.55, orbColor);
 				double spin = bolt.age * 0.9;
-				for (int i = 0; i < 8; i++) {
-					double a = spin + i * Math.PI / 4.0;
+				for (int i = 0; i < 2; i++) {
+					double a = spin + i * Math.PI;
 					level.sendParticles(dust, true, false, to.x + Math.cos(a) * 0.55, to.y, to.z + Math.sin(a) * 0.55, 1, 0.0, 0.0, 0.0, 0.0);
 				}
-				level.sendParticles(ParticleTypes.END_ROD, true, false, to.x, to.y, to.z, 1, 0.0, 0.0, 0.0, 0.0);
 			}
-			case BOMB, SPIRIT -> {
+			case BOMB -> {
+				orb(level, bolt.orbId, to, bolt.orbSize > 0 ? bolt.orbSize : bolt.size * 2.0, orbColor);
+				if (bolt.age % 2 == 0) {
+					level.sendParticles(dust, true, false, from.x, from.y, from.z, 1, bolt.size * 0.3, bolt.size * 0.3, bolt.size * 0.3, 0.0);
+				}
+				if (bolt.age % 6 == 0) {
+					level.playSound(null, to.x, to.y, to.z, SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 1.0F + (float)bolt.size * 0.3F, 0.6F);
+				}
+			}
+			case SPIRIT -> {
+				// drawn by the clients as a ball of light (ZFighterSpirit); a few motes shed behind it
 				RandomSource random = level.getRandom();
-				int count = (int)Math.min(60, 6 + bolt.size * bolt.size * 6);
+				int count = (int)Math.min(8, 2 + bolt.size);
 				for (int i = 0; i < count; i++) {
 					Vec3 dir = new Vec3(random.nextGaussian(), random.nextGaussian(), random.nextGaussian()).normalize();
 					Vec3 at = to.add(dir.scale(bolt.size * (0.6 + random.nextDouble() * 0.4)));
@@ -513,11 +568,11 @@ final class ZFighterKi {
 				}
 			}
 			default -> {
-				for (int i = 0; i < 3; i++) {
-					Vec3 at = from.add(bolt.velocity.scale(i / 3.0));
-					level.sendParticles(dust, true, false, at.x, at.y, at.z, 1, 0.03, 0.03, 0.03, 0.0);
+				// an end crystal orb, and a thin trail of one mote every other tick
+				orb(level, bolt.orbId, to, bolt.orbSize > 0 ? bolt.orbSize : bolt.kind == HOMING ? 0.3 : 0.45, orbColor);
+				if (bolt.age % 2 == 0) {
+					level.sendParticles(dust, true, false, from.x, from.y, from.z, 1, 0.03, 0.03, 0.03, 0.0);
 				}
-				level.sendParticles(ParticleTypes.END_ROD, true, false, to.x, to.y, to.z, 1, 0.0, 0.0, 0.0, 0.0);
 			}
 		}
 	}
@@ -635,9 +690,9 @@ final class ZFighterKi {
 	}
 
 	private static void pop(ServerLevel level, Vec3 at, DustParticleOptions dust) {
-		level.sendParticles(dust, true, false, at.x, at.y, at.z, 12, 0.25, 0.25, 0.25, 0.1);
-		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 6, 0.2, 0.2, 0.2, 0.3);
-		level.sendParticles(ParticleTypes.SMOKE, at.x, at.y, at.z, 4, 0.15, 0.15, 0.15, 0.02);
+		level.sendParticles(dust, true, false, at.x, at.y, at.z, 5, 0.25, 0.25, 0.25, 0.1);
+		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 3, 0.2, 0.2, 0.2, 0.3);
+		level.sendParticles(ParticleTypes.SMOKE, at.x, at.y, at.z, 2, 0.15, 0.15, 0.15, 0.02);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.35F, 1.9F);
 	}
 
@@ -749,14 +804,16 @@ final class ZFighterKi {
 		}
 		DustParticleOptions dust = new DustParticleOptions(live.superOn() ? formColor(live) : sig.color(),
 			(0.8F + charge * 1.2F) * (sig.style() == NEEDLE ? 0.5F : 1.0F));
-		for (int i = 0; i < 3; i++) {
+		// the ki gathers as an end crystal orb between the hands, growing with the charge; now and then a mote drawn in
+		boolean needle = sig.style() == NEEDLE && ZFighterTraining.of(player).charged() != ZFighterTraining.KI_BOMB;
+		orb(level, -(player.getId() * 4 + 3), hands, needle ? 0.12 + 0.18 * charge : 0.25 + 0.75 * charge,
+			live.superOn() ? formColor(live) : sig.color());
+		if (random.nextInt(2) == 0) {
 			double ox = (random.nextDouble() - 0.5) * 1.6;
 			double oy = (random.nextDouble() - 0.5) * 1.6;
 			double oz = (random.nextDouble() - 0.5) * 1.6;
 			level.sendParticles(dust, true, false, hands.x + ox, hands.y + oy, hands.z + oz, 0, -ox, -oy, -oz, 0.12);
 		}
-		level.sendParticles(dust, true, false, hands.x, hands.y, hands.z, 1 + (int)(charge * 3), 0.05 + charge * 0.1, 0.05 + charge * 0.1,
-			0.05 + charge * 0.1, 0.0);
 		if (charge >= 1.0F && now % 3 == 0) {
 			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, hands.x, hands.y, hands.z, 2, 0.2, 0.2, 0.2, 0.2);
 		}
