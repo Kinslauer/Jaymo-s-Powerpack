@@ -64,7 +64,37 @@ public final class ZFighterNet {
 		}
 	}
 
+	/**
+	 * Server → client: a beam to draw (a Ki Wave and its kin, the Great Ape's): from, to, how thick, its colour, its
+	 * style ({@code ZFighterKi.WAVE} etc.) and how long it lasts in ticks.
+	 */
+	public record BeamFx(double fx, double fy, double fz, double tx, double ty, double tz, float radius, int color, int style, int ticks)
+		implements CustomPacketPayload {
+		public static final Type<BeamFx> TYPE = new Type<>(JaymosPowers.id("zfighter_beam"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, BeamFx> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> {
+				buf.writeDouble(p.fx);
+				buf.writeDouble(p.fy);
+				buf.writeDouble(p.fz);
+				buf.writeDouble(p.tx);
+				buf.writeDouble(p.ty);
+				buf.writeDouble(p.tz);
+				buf.writeFloat(p.radius);
+				buf.writeInt(p.color);
+				buf.writeVarInt(p.style);
+				buf.writeVarInt(p.ticks);
+			},
+			buf -> new BeamFx(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble(),
+				buf.readFloat(), buf.readInt(), buf.readVarInt(), buf.readVarInt()));
+
+		@Override
+		public Type<BeamFx> type() {
+			return TYPE;
+		}
+	}
+
 	static void register() {
+		PayloadTypeRegistry.clientboundPlay().register(BeamFx.TYPE, BeamFx.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Guard.TYPE, Guard.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Guard.TYPE, (payload, ctx) -> {
 			if (Powers.has(ctx.player(), ZFighterPower.INSTANCE)) {

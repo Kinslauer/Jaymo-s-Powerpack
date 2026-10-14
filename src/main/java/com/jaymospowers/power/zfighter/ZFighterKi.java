@@ -108,6 +108,8 @@ final class ZFighterKi {
 	static final float WAVE_EXHAUSTION = 2.0F;
 	/** How long the beam stays in the air (ticks, just to be seen). */
 	static final int BEAM_TICKS = 12;
+	/** Players this near a beam's middle see it drawn. */
+	static final double BEAM_SEEN = 160.0;
 
 	// ---- Flash Step ----
 	static final float STEP_KI = 15.0F;
@@ -612,7 +614,7 @@ final class ZFighterKi {
 			}
 		}
 		boolean super_ = live.superOn();
-		BEAMS.add(new Beam(level, from, to, radius, super_ ? formColor(live) : sig.color(), sig.style(), new int[1]));
+		addBeam(new Beam(level, from, to, radius, super_ ? formColor(live) : sig.color(), sig.style(), new int[1]));
 		if (sig.blast() > 0.0F) {
 			float power = Mth.lerp(charge, WAVE_BLAST_MIN, WAVE_BLAST_MAX) * sig.blast() * (super_ ? 1.3F : 1.0F);
 			// a full wave from a Super tears the ground (as a mob would: mob griefing decides); anything less only hurts
@@ -668,11 +670,24 @@ final class ZFighterKi {
 			target.hurtServer(level, source, damage);
 			push(target, look, 1.2, 0.3);
 		}
-		BEAMS.add(new Beam(level, from, to, APE_BEAM_RADIUS, APE_BEAM_COLOR, WAVE, new int[1]));
+		addBeam(new Beam(level, from, to, APE_BEAM_RADIUS, APE_BEAM_COLOR, WAVE, new int[1]));
 		level.explode(player, source, GROUND_ONLY, to.x, to.y, to.z, APE_BEAM_BLAST, false, Level.ExplosionInteraction.MOB);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 2.0F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.5F, 0.7F);
 		return true;
+	}
+
+	/** A beam: the server keeps it for its sparks, and everyone near draws it (beacon-style, {@code ZFighterBeams}). */
+	private static void addBeam(Beam beam) {
+		BEAMS.add(beam);
+		ZFighterNet.BeamFx fx = new ZFighterNet.BeamFx(beam.from().x, beam.from().y, beam.from().z, beam.to().x, beam.to().y, beam.to().z,
+			(float)beam.radius(), beam.color(), beam.style(), BEAM_TICKS);
+		Vec3 middle = beam.from().lerp(beam.to(), 0.5);
+		for (ServerPlayer viewer : beam.level().players()) {
+			if (viewer.position().distanceToSqr(middle) <= BEAM_SEEN * BEAM_SEEN) {
+				net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(viewer, fx);
+			}
+		}
 	}
 
 	private static void drawBeam(Beam beam) {
@@ -694,13 +709,18 @@ final class ZFighterKi {
 		double step = fine ? 0.35 : 0.6;
 		for (double d = 0.0; d <= length; d += step) {
 			Vec3 at = beam.from().add(dir.scale(d));
-			level.sendParticles(core, true, false, at.x, at.y, at.z, 1, radius * 0.15, radius * 0.15, radius * 0.15, 0.0);
+			if (beam.style() != WAVE && beam.age()[0] < 2) {
+				level.sendParticles(core, true, false, at.x, at.y, at.z, 1, radius * 0.15, radius * 0.15, radius * 0.15, 0.0);
+			}
 			if (beam.style() == SPIRAL) {
 				double t = d * 1.6 + beam.age()[0] * 0.8;
 				Vec3 coil = at.add(side.scale(Math.cos(t) * 0.5)).add(up.scale(Math.sin(t) * 0.5));
 				level.sendParticles(glow, true, false, coil.x, coil.y, coil.z, 1, 0.0, 0.0, 0.0, 0.0);
 			} else if (beam.style() == WAVE) {
-				level.sendParticles(glow, true, false, at.x, at.y, at.z, 2, radius * 0.4, radius * 0.4, radius * 0.4, 0.0);
+				// the beam itself is drawn by the clients; here only a crackle of ki round it
+				if (level.getRandom().nextInt(6) == 0) {
+					level.sendParticles(glow, true, false, at.x, at.y, at.z, 1, radius * 0.6, radius * 0.6, radius * 0.6, 0.0);
+				}
 			} else if (beam.age()[0] < 3) {
 				// the needle is there and gone
 				level.sendParticles(glow, true, false, at.x, at.y, at.z, 1, 0.02, 0.02, 0.02, 0.0);

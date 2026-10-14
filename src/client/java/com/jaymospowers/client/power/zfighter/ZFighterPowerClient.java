@@ -60,6 +60,7 @@ public final class ZFighterPowerClient implements PowerClient {
 	public static void init() {
 		PowerClients.register(ZFighterPower.ID, INSTANCE);
 		ZFighterInputClient.init();
+		ZFighterBeams.init();
 		ClientTickEvents.END_CLIENT_TICK.register(ZFighterFlightPose::tick);
 		ClientTickEvents.END_CLIENT_TICK.register(ZFighterChargePose::tick);
 		// the Training Post: a Z Fighter's right click opens the drills
