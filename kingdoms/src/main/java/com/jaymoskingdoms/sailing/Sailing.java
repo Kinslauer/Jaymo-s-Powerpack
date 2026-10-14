@@ -25,7 +25,7 @@ import net.minecraft.world.level.material.MapColor;
  */
 public final class Sailing {
 	public static Block HELM, SAIL, OAR, CANNON, FRAME;
-	public static Item HELM_ITEM, SAIL_ITEM, OAR_ITEM, CANNON_ITEM, ROUND_SHOT, ROWBOAT_KIT, SLOOP_KIT, BRIG_KIT;
+	public static Item HELM_ITEM, SAIL_ITEM, OAR_ITEM, CANNON_ITEM, ROUND_SHOT, ROWBOAT_KIT, SLOOP_KIT, BRIG_KIT, SHIP_PLANS;
 
 	private Sailing() {
 	}
@@ -51,6 +51,8 @@ public final class Sailing {
 		ROWBOAT_KIT = item(ShipKits.Kind.ROWBOAT.id(), p -> new ShipKits.KitItem(ShipKits.Kind.ROWBOAT, p), new Item.Properties().stacksTo(1));
 		SLOOP_KIT = item(ShipKits.Kind.SLOOP.id(), p -> new ShipKits.KitItem(ShipKits.Kind.SLOOP, p), new Item.Properties().stacksTo(1));
 		BRIG_KIT = item(ShipKits.Kind.BRIG.id(), p -> new ShipKits.KitItem(ShipKits.Kind.BRIG, p), new Item.Properties().stacksTo(1));
+		// (0.7.28) kits of your own: plans drawn from a ship you've built
+		SHIP_PLANS = item("ship_plans", ShipPlans.PlansItem::new, new Item.Properties().stacksTo(1));
 		ShipShot.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			output.insertAfter(Items.BAMBOO_CHEST_RAFT, HELM_ITEM);
@@ -61,6 +63,7 @@ public final class Sailing {
 			output.insertAfter(ROUND_SHOT, ROWBOAT_KIT);
 			output.insertAfter(ROWBOAT_KIT, SLOOP_KIT);
 			output.insertAfter(SLOOP_KIT, BRIG_KIT);
+			output.insertAfter(BRIG_KIT, SHIP_PLANS);
 		});
 		ShipNet.register();
 	}

@@ -5,6 +5,7 @@ import com.jaymospowers.power.gravity.GravityWalk;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.LivingEntity;
@@ -15,7 +16,7 @@ import org.joml.Matrix4f;
 /**
  * The body turned to its own "down", for everyone to see: walking on a wall it stands out from the wall, feet on it,
  * facing the way it looks along it; on a ceiling it hangs upside down, feet up; falling forward it dives head first
- * along the fall, belly to the ground. (The view stays upright: only the body turns.)
+ * along the fall, belly to the ground. (The view stays upright: only the body turns, and not in your own first person.)
  */
 public final class GravityWalkPose {
 	/** {@code up}: where the head points; {@code front}: where the chest faces; {@code feet}: where the feet go, from the entity's position. */
@@ -30,6 +31,12 @@ public final class GravityWalkPose {
 	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
 		state.setData(KEY, null);
 		if (!(entity instanceof Player player) || player.isPassenger()) {
+			return;
+		}
+		// your own first-person view stays upright, so does the body First-person Model draws under it (turned, it
+		// would lie across the camera)
+		Minecraft minecraft = Minecraft.getInstance();
+		if (entity == minecraft.player && minecraft.options.getCameraType().isFirstPerson()) {
 			return;
 		}
 		Integer surface = player.getAttached(GravityWalk.SURFACE);

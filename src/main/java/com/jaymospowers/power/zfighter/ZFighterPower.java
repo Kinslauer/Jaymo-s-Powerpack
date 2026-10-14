@@ -146,6 +146,14 @@ public final class ZFighterPower implements Power {
 	/** In a form, ground this far below him breaks up; this many bits rise every other tick per form. */
 	static final int DEBRIS_HEIGHT = 3;
 	static final int DEBRIS_PER_FORM = 3;
+	/** Charging: bits of ground that rise every {@link #CHARGE_DEBRIS_EVERY} ticks, per tier (base 1, Super 2, Super 2 3, Super 3 4). */
+	static final int CHARGE_DEBRIS = 2;
+	static final int CHARGE_DEBRIS_EVERY = 3;
+	/** Charging: the chance a tick (tier in this) of a small lightning crackle over him. */
+	static final int CHARGE_CRACKLE = 10;
+	/** Charging: puffs of smoky fog (a Verdant's, mist) rolling out at his feet every other tick, per tier. */
+	static final int CHARGE_FOG = 1;
+	private static final int CRACKLE_COLOR = 0xD8ECFF;
 
 	private static final Identifier FIST_ID = JaymosPowers.id("zfighter_fists");
 	private static final Identifier SUPER_FIST_ID = JaymosPowers.id("zfighter_super_fists");
@@ -425,6 +433,7 @@ public final class ZFighterPower implements Power {
 					player.causeFoodExhaustion(CHARGE_EXHAUSTION);
 				}
 				aura(player, live, live.ki >= max ? 6 : 3);
+				chargeFx(player, live, now);
 				if (now % 16 == 0) {
 					float fill = Mth.clamp(live.ki / max, 0.0F, 1.0F);
 					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 1.2F,
@@ -854,6 +863,64 @@ public final class ZFighterPower implements Power {
 
 	/** In a form near the ground: bits of the ground under him tear loose and rip upwards, more with each form. */
 	private static void debris(ServerPlayer player, Live live) {
+		debris(player, DEBRIS_PER_FORM * live.form, 1.2 + 0.8 * live.form, 0.4 + 0.25 * live.form, live.form >= 2);
+	}
+
+	/**
+	 * Charging ki: the ground breaks up and rises round him, small lightning crackles over him, and a smoky fog rolls out
+	 * at his feet (from a Verdant, a pale mist). All of it harder in each form.
+	 */
+	private static void chargeFx(ServerPlayer player, Live live, long now) {
+		ServerLevel level = player.level();
+		RandomSource random = level.getRandom();
+		int tier = live.form + 1;
+		if (now % CHARGE_DEBRIS_EVERY == 0) {
+			debris(player, CHARGE_DEBRIS * tier, 1.0 + 0.6 * tier, 0.25 + 0.15 * tier, false);
+		}
+		if (random.nextInt(CHARGE_CRACKLE) < tier) {
+			crackle(player, random, tier);
+		}
+		if (now % 2 == 0) {
+			boolean mist = live.lineage == ZFighterLineage.VERDANT;
+			for (int i = 0; i < CHARGE_FOG * tier; i++) {
+				double a = random.nextDouble() * Math.PI * 2.0;
+				double r = 0.3 + random.nextDouble() * 0.5;
+				double speed = 0.04 + 0.025 * tier + random.nextDouble() * 0.03;
+				level.sendParticles(mist ? ParticleTypes.CLOUD : ParticleTypes.LARGE_SMOKE, true, false, player.getX() + Math.cos(a) * r,
+					player.getY() + 0.1 + random.nextDouble() * 0.2, player.getZ() + Math.sin(a) * r, 0, Math.cos(a), 0.02, Math.sin(a), speed);
+			}
+		}
+	}
+
+	/** A small fork of lightning over him: a jagged line of white motes, a spark where it ends. */
+	private static void crackle(ServerPlayer player, RandomSource random, int tier) {
+		ServerLevel level = player.level();
+		DustParticleOptions bolt = new DustParticleOptions(CRACKLE_COLOR, 0.5F + 0.1F * tier);
+		double a = random.nextDouble() * Math.PI * 2.0;
+		double r = 0.5 + random.nextDouble() * (0.3 + 0.15 * tier);
+		Vec3 at = new Vec3(player.getX() + Math.cos(a) * r, player.getY() + random.nextDouble() * player.getBbHeight(), player.getZ() + Math.sin(a) * r);
+		Vec3 heading = new Vec3(random.nextGaussian(), random.nextGaussian(), random.nextGaussian()).normalize();
+		int segments = 3 + tier;
+		for (int i = 0; i < segments; i++) {
+			Vec3 next = at.add(heading.scale(0.25 + 0.05 * tier)).add((random.nextDouble() - 0.5) * 0.25, (random.nextDouble() - 0.5) * 0.25,
+				(random.nextDouble() - 0.5) * 0.25);
+			for (int k = 0; k < 2; k++) {
+				Vec3 p = at.lerp(next, k / 2.0);
+				level.sendParticles(bolt, true, false, p.x, p.y, p.z, 1, 0.0, 0.0, 0.0, 0.0);
+			}
+			at = next;
+		}
+		level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, at.x, at.y, at.z, 1, 0.05, 0.05, 0.05, 0.1);
+		if (random.nextInt(4) == 0) {
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.12F + 0.04F * tier, 1.8F);
+		}
+	}
+
+	/** Bits of the ground under him rising round him: {@code count} of them, {@code spread} blocks out, flung up at {@code lift}. */
+	private static void debris(ServerPlayer player, int count, double spread, double lift, boolean smoke) {
+		if (count <= 0) {
+			return;
+		}
 		ServerLevel level = player.level();
 		RandomSource random = level.getRandom();
 		BlockPos feet = player.blockPosition();
@@ -872,15 +939,14 @@ public final class ZFighterPower implements Power {
 			return;
 		}
 		BlockParticleOption bits = new BlockParticleOption(ParticleTypes.BLOCK, ground);
-		double spread = 1.2 + 0.8 * live.form;
 		double top = groundPos.getY() + 1.0;
-		for (int i = 0; i < DEBRIS_PER_FORM * live.form; i++) {
+		for (int i = 0; i < count; i++) {
 			double a = random.nextDouble() * Math.PI * 2.0;
 			double r = random.nextDouble() * spread;
 			level.sendParticles(bits, true, false, player.getX() + Math.cos(a) * r, top + 0.05, player.getZ() + Math.sin(a) * r, 0, 0.0, 1.0, 0.0,
-				0.4 + 0.25 * live.form + random.nextDouble() * 0.3);
+				lift + random.nextDouble() * 0.3);
 		}
-		if (live.form >= 2 && random.nextInt(4) == 0) {
+		if (smoke && random.nextInt(4) == 0) {
 			level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, true, false, player.getX(), top, player.getZ(), 0, 0.0, 1.0, 0.0, 0.05);
 		}
 	}

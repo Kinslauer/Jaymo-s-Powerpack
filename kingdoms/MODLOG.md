@@ -2888,3 +2888,23 @@ Andy: "vampirism should give you the sirben visual modifier" (Sirben is an MCA t
 ## 0.7.25: no shader message (pack 0.10.87)
 Andy: "no shader disable message". Dark nights still switch Iris shaders off past a third of the night on a waning
 moon and back on at dawn (`DarkNights`), but without the "A dark night: shaders are off until dawn" overlay line.
+
+## 0.7.28: creative kits build the whole ship (pack 0.10.97)
+- Andy: "is there a way to autocomplete a boat in creative?" A kit used in creative now fills every frame at once
+  (`ShipKits.complete`: oak planks and fence rails, spruce fence masts, sails, helm, oars, unloaded guns, chests), joins
+  the fences and sails up and bails her hold, as the last frame filled by hand would. Sneak-use still lays the bare
+  frames. Survival is unchanged.
+- Andy: "activating the ship breaks any attached light sources, cant we wimulate them with our lighting?" Torches,
+  wall torches, lanterns (hanging too) and any other glowing block stay aboard when she casts off, and now light the
+  water and deck around her as she sails: `Ship.shine` keeps an invisible `minecraft:light` block (waterlogged under the
+  sea line) in each world cell a light piece is in, at its brightness, every `LIGHT_EVERY` ticks, and takes them up as
+  she moves on, anchors, wrecks or is removed (`Lit` is saved so a reload takes up stale ones). A light someone else
+  takes up is put back. `Hull.lights` lists the glowing pieces.
+- Andy: "can we make our own ship kits?" **Ship's Plans** (`ShipPlans`, 3 paper + an ink sac): sneak + right-click the
+  helm of a ship you've built (before launch or at anchor) and the plans draw her, block for block, with how deep she
+  sat. Used on open water they lay her again, bow the way you face: in survival as frames (any full block, stair or slab
+  becomes a hull frame wanting planks; fences and logs stacked 3+ high are masts, other fences rails; sails, helm,
+  oars, guns and chests/barrels as themselves; lanterns, doors and other fittings are left for you, and the tooltip
+  counts them); in creative she's built exactly as drawn (sneak for the bare frames). The plans are kept, so one design
+  can be laid again and again; rename them on an anvil. `ShipKits.lay`/`room` now take any design.
+- A wrecked ship's blocks go down solid ones first, so the torches and lanterns hung on them don't pop off.

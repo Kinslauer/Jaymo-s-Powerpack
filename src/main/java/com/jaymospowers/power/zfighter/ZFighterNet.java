@@ -137,7 +137,42 @@ public final class ZFighterNet {
 		}
 	}
 
+	/** One ki orb this tick: who it is (to follow it between ticks), where, how big across (blocks) and its colour. */
+	public record Orb(int id, double x, double y, double z, float size, int color) {
+	}
+
+	/** Server → client, every tick: the ki orbs near you (blasts in flight, ki gathering in the hands), drawn as end crystals. */
+	public record KiOrbs(java.util.List<Orb> orbs) implements CustomPacketPayload {
+		public static final Type<KiOrbs> TYPE = new Type<>(JaymosPowers.id("zfighter_ki_orbs"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, KiOrbs> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> {
+				buf.writeVarInt(p.orbs.size());
+				for (Orb orb : p.orbs) {
+					buf.writeVarInt(orb.id());
+					buf.writeDouble(orb.x());
+					buf.writeDouble(orb.y());
+					buf.writeDouble(orb.z());
+					buf.writeFloat(orb.size());
+					buf.writeInt(orb.color());
+				}
+			},
+			buf -> {
+				int count = Math.min(buf.readVarInt(), 512);
+				java.util.List<Orb> orbs = new java.util.ArrayList<>(count);
+				for (int i = 0; i < count; i++) {
+					orbs.add(new Orb(buf.readVarInt(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readFloat(), buf.readInt()));
+				}
+				return new KiOrbs(orbs);
+			});
+
+		@Override
+		public Type<KiOrbs> type() {
+			return TYPE;
+		}
+	}
+
 	static void register() {
+		PayloadTypeRegistry.clientboundPlay().register(KiOrbs.TYPE, KiOrbs.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(OpenWish.TYPE, OpenWish.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Wish.TYPE, Wish.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Wish.TYPE, (payload, ctx) -> ZFighterWishes.wish(ctx.player(), payload.wish()));
