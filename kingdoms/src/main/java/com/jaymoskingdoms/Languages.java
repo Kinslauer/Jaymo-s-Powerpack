@@ -44,7 +44,8 @@ import org.jspecify.annotations.Nullable;
  * and whatever they say comes out as words you don't know ({@link #garble}, over their heads and on their screens).
  *
  * <p>You learn a tongue by living among it: time spent near its speakers ({@link #IMMERSION_TICKS}) and each trade with
- * one of them add to it, and at {@link #FLUENT} you speak it. Your own family (MCA spouse, children, parents) always
+ * one of them add to it, and at {@link #FLUENT} you speak it. You keep learning after that, and the locals comment on
+ * your accent as it improves, until at {@link #NATIVE} you sound born to it. Your own family (MCA spouse, children, parents) always
  * understands you, and you speak the tongue of any realm you're sworn to.
  */
 public final class Languages {
@@ -108,6 +109,18 @@ public final class Languages {
 
 	/** Learning: what speaking a tongue takes; what each stretch among its speakers and each trade with one adds. */
 	public static final int FLUENT = 100;
+	/**
+	 * (Accent) Learning goes on past fluent: at {@link #NATIVE} you sound born to it. The locals remark on your accent from
+	 * {@link #ACCENT_FROM} points (a stumbling try at their words) until then, by tier: halting, broken, thick, slight.
+	 */
+	public static final int NATIVE = 200, ACCENT_FROM = 50;
+	static final int[] ACCENT_TIERS = {50, 75, 100, 150};
+	static final String[] ACCENTS = {"halting", "broken", "thick", "slight"};
+	/** Lines per accent tier (lang {@code language.jaymoskingdoms.accent.<tier>.<n>}), and for sounding native. */
+	static final int ACCENT_LINES = 4, NATIVE_LINES = 3;
+	/** A remark on your accent: the chance each immersion minute, and the least time between two (ticks). */
+	static final float ACCENT_CHANCE = 0.3F;
+	static final int ACCENT_GAP = 20 * 60 * 5;
 	static final int IMMERSION_TICKS = 20 * 60, IMMERSION_POINTS = 1, TRADE_POINTS = 2;
 	/** How near a speaker must be for the time to count (blocks). */
 	static final double IMMERSION_RANGE = 24.0;
@@ -133,6 +146,8 @@ public final class Languages {
 	private static final Map<Entity, int[]> SPEAKERS = new WeakHashMap<>();
 	/** Player → when they were last reminded (server tick). */
 	private static final Map<UUID, Integer> REMINDED = new HashMap<>();
+	/** Player → when their accent was last remarked on (server tick). */
+	private static final Map<UUID, Integer> REMARKED = new HashMap<>();
 
 	private Languages() {
 	}
@@ -140,11 +155,15 @@ public final class Languages {
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(Languages::tick);
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> home(handler.player));
-		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> REMINDED.remove(handler.player.getUUID()));
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			REMINDED.remove(handler.player.getUUID());
+			REMARKED.remove(handler.player.getUUID());
+		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			FACTIONS.clear();
 			SPEAKERS.clear();
 			REMINDED.clear();
+			REMARKED.clear();
 		});
 	}
 
@@ -201,12 +220,18 @@ public final class Languages {
 		return level.dimension() == net.minecraft.world.level.Level.OVERWORLD ? Tongue.of(Climate.at(level, speaker.blockPosition())) : null;
 	}
 
-	/** Points {@code player} has in {@code t} ({@link #FLUENT} for one they speak outright). */
+	/** Points {@code player} has in {@code t}: {@link #NATIVE} in their own, at least {@link #FLUENT} in their sworn realm's. */
 	public static int points(ServerPlayer player, Tongue t) {
-		if (t == home(player) || sworn(player, t)) {
-			return FLUENT;
+		if (t == home(player)) {
+			return NATIVE;
 		}
-		return Math.min(FLUENT, player.getAttachedOrElse(LEARNED, Map.<String, Integer>of()).getOrDefault(t.id(), 0));
+		int learned = Math.min(NATIVE, player.getAttachedOrElse(LEARNED, Map.<String, Integer>of()).getOrDefault(t.id(), 0));
+		return sworn(player, t) ? Math.max(FLUENT, learned) : learned;
+	}
+
+	/** How much of {@code t} {@code player} knows, as a percentage of speaking it (never over 100). */
+	static int percent(ServerPlayer player, Tongue t) {
+		return Math.min(FLUENT, points(player, t)) * 100 / FLUENT;
 	}
 
 	/** Whether {@code player} speaks {@code t}. */
@@ -247,7 +272,7 @@ public final class Languages {
 			return;
 		}
 		REMINDED.put(player.getUUID(), now);
-		player.sendOverlayMessage(Component.translatable("language.jaymoskingdoms.foreign", t.title(), points(player, t))
+		player.sendOverlayMessage(Component.translatable("language.jaymoskingdoms.foreign", t.title(), percent(player, t))
 			.withStyle(ChatFormatting.GRAY));
 	}
 
@@ -308,7 +333,7 @@ public final class Languages {
 		Tongue t = of(speaker);
 		if (t != null) {
 			REMINDED.put(player.getUUID(), level.getServer().getTickCount());
-			player.sendOverlayMessage(Component.translatable("language.jaymoskingdoms.shrugged", speaker.getDisplayName(), t.title(), points(player, t))
+			player.sendOverlayMessage(Component.translatable("language.jaymoskingdoms.shrugged", speaker.getDisplayName(), t.title(), percent(player, t))
 				.withStyle(ChatFormatting.GRAY));
 		}
 		if (speaker instanceof LivingEntity) {
@@ -319,28 +344,31 @@ public final class Languages {
 	// ---- learning ------------------------------------------------------------------------------------------------------
 
 	/** {@code player} learns {@code points} of {@code t} (told at each step, and when they speak it). */
-	public static void learn(ServerPlayer player, Tongue t, int points) {
+	public static int learn(ServerPlayer player, Tongue t, int points) {
 		int before = points(player, t);
-		if (before >= FLUENT || points <= 0) {
-			return;
+		if (before >= NATIVE || points <= 0) {
+			return before;
 		}
-		int after = Math.min(FLUENT, before + points);
+		int after = Math.min(NATIVE, before + points);
 		Map<String, Integer> learned = new HashMap<>(player.getAttachedOrElse(LEARNED, Map.of()));
 		learned.put(t.id(), after);
 		player.setAttached(LEARNED, learned);
-		if (after >= FLUENT) {
+		if (after >= NATIVE) {
+			player.sendSystemMessage(Component.translatable("language.jaymoskingdoms.native", t.title()).withStyle(ChatFormatting.GOLD));
+		} else if (after >= FLUENT && before < FLUENT) {
 			player.sendSystemMessage(Component.translatable("language.jaymoskingdoms.fluent", t.title()).withStyle(ChatFormatting.GOLD));
 			player.level().playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6F, 1.2F);
-		} else if (after / PROGRESS_STEP > before / PROGRESS_STEP) {
+		} else if (after < FLUENT && after / PROGRESS_STEP > before / PROGRESS_STEP) {
 			player.sendOverlayMessage(Component.translatable("language.jaymoskingdoms.progress", t.title(), after).withStyle(ChatFormatting.AQUA));
 		}
+		return after;
 	}
 
 	/** (From the trade mixin) a trade with {@code villager}: a few more words of their tongue. */
 	public static void traded(Villager villager) {
-		if (villager.getTradingPlayer() instanceof ServerPlayer player && !understands(player, villager)) {
+		if (villager.getTradingPlayer() instanceof ServerPlayer player && !player.isCreative()) {
 			Tongue t = of(villager);
-			if (t != null) {
+			if (t != null && t != home(player)) {
 				learn(player, t, TRADE_POINTS);
 			}
 		}
@@ -357,18 +385,47 @@ public final class Languages {
 			}
 			List<Mob> near = level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(IMMERSION_RANGE),
 				e -> (e instanceof Villager || e instanceof Folk) && e.isAlive() && !e.isBaby());
-			Tongue foreign = null;
+			near.sort(java.util.Comparator.comparingDouble(e -> e.distanceToSqr(player)));
 			for (Mob m : near) {
 				Tongue t = of(m);
-				if (t != null && !speaks(player, t)) {
-					foreign = t;
+				if (t != null && points(player, t) < NATIVE) {
+					int before = points(player, t);
+					int after = learn(player, t, IMMERSION_POINTS);
+					remark(level, player, m, before, after);
 					break;
 				}
 			}
-			if (foreign != null) {
-				learn(player, foreign, IMMERSION_POINTS);
-			}
 		}
+	}
+
+	/**
+	 * Now and then, {@code speaker} (one of the folk whose tongue {@code player} is learning) remarks on their accent, in
+	 * words simple enough to follow; and once, when they first sound native, says so.
+	 */
+	private static void remark(ServerLevel level, ServerPlayer player, Mob speaker, int before, int after) {
+		if (speaker.distanceTo(player) > Approaches.SPEECH_RANGE || !speaker.hasLineOfSight(player) || speaker.isSleeping() || speaker.getTarget() != null) {
+			return;
+		}
+		int now = level.getServer().getTickCount();
+		Component line;
+		if (after >= NATIVE && before < NATIVE) {
+			line = Component.translatable("language.jaymoskingdoms.accent.native." + level.getRandom().nextInt(NATIVE_LINES), player.getName());
+		} else {
+			Integer last = REMARKED.get(player.getUUID());
+			if (after < ACCENT_FROM || after >= NATIVE || (last != null && now - last < ACCENT_GAP) || level.getRandom().nextFloat() > ACCENT_CHANCE) {
+				return;
+			}
+			int tier = 0;
+			while (tier + 1 < ACCENT_TIERS.length && after >= ACCENT_TIERS[tier + 1]) {
+				tier++;
+			}
+			line = Component.translatable("language.jaymoskingdoms.accent." + ACCENTS[tier] + "." + level.getRandom().nextInt(ACCENT_LINES), player.getName());
+		}
+		REMARKED.put(player.getUUID(), now);
+		// (said slowly and simply, to you: you follow it even before you speak the tongue)
+		Speech.sayTo(level, speaker, player, line, Speech.WHITE);
+		speaker.getLookControl().setLookAt(player, 30.0F, 30.0F);
+		level.playSound(null, speaker.getX(), speaker.getY(), speaker.getZ(), SoundEvents.VILLAGER_AMBIENT, SoundSource.NEUTRAL, 0.8F, 1.0F);
 	}
 
 	// ---- /kingdom language -------------------------------------------------------------------------------------------
@@ -383,7 +440,7 @@ public final class Languages {
 							b.suggest(t.id());
 						}
 						return b.buildFuture();
-					}).then(Commands.argument("points", IntegerArgumentType.integer(0, FLUENT)).executes(Languages::set)))));
+					}).then(Commands.argument("points", IntegerArgumentType.integer(0, NATIVE)).executes(Languages::set)))));
 	}
 
 	private static int show(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
@@ -393,8 +450,9 @@ public final class Languages {
 		for (Tongue t : Tongue.values()) {
 			if (t != home) {
 				int p = points(player, t);
-				c.getSource().sendSuccess(() -> Component.translatable(p >= FLUENT ? "language.jaymoskingdoms.command.fluent"
-					: "language.jaymoskingdoms.command.learning", t.title(), p).withStyle(p >= FLUENT ? ChatFormatting.GREEN : ChatFormatting.GRAY), false);
+				String key = p >= NATIVE ? "native" : p >= FLUENT ? "fluent" : "learning";
+				c.getSource().sendSuccess(() -> Component.translatable("language.jaymoskingdoms.command." + key, t.title(), p)
+					.withStyle(p >= FLUENT ? ChatFormatting.GREEN : ChatFormatting.GRAY), false);
 			}
 		}
 		return 1;

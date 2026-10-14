@@ -46,6 +46,18 @@ public final class Speech {
 		PayloadTypeRegistry.clientboundPlay().register(Said.TYPE, Said.CODEC);
 	}
 
+	/** (0.7.20) {@code speaker} says {@code words} to {@code player} alone, slowly enough to follow in any tongue. */
+	public static void sayTo(ServerLevel level, Entity speaker, ServerPlayer player, Component words, int color) {
+		if (speaker instanceof IronGolem) {
+			return;
+		}
+		if (ServerPlayNetworking.canSend(player, Said.TYPE)) {
+			ServerPlayNetworking.send(player, new Said(speaker.getId(), words, color));
+		} else {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.says", speaker.getDisplayName(), words).withColor(color));
+		}
+	}
+
 	/** {@code speaker} says {@code words} aloud: every player within {@code range} sees it over their head. */
 	public static void say(ServerLevel level, Entity speaker, Component words, int color, double range) {
 		if (speaker instanceof IronGolem) {
