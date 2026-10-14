@@ -51,7 +51,8 @@ import net.minecraft.world.phys.Vec3;
  * ({@link #DAMAGE} every {@link #DAMAGE_INTERVAL} ticks, {@link #DAMAGE_ASCENDED} ascended or corrupted; corrupted, as
  * shock), then hurled away ({@link #FLING}). A thrown creature can't be caught again for {@link #RECATCH_TICKS}. The vortex steals your breath too: {@link #SELF_DAMAGE} suffocation every
  * {@link #SELF_INTERVAL} ticks ({@link #SELF_INTERVAL_ASCENDED}), which is what limits how long you can hold it.
- * Available from the first unlocked ability; its radius and height grow with mastery.
+ * Available from the first unlocked ability; its radius and height grow with mastery. It draws up what's round it
+ * (fire, water, snow, sand, a thunderstorm) and carries it: see {@link WindCycloneElement}.
  */
 public final class WindCyclone {
 	/** How long X must be held before it's a Cyclone rather than a kick (ticks, ~0.4 s). The client decides it. */
@@ -97,15 +98,20 @@ public final class WindCyclone {
 	private static final DustParticleOptions STORM_DUST = new DustParticleOptions(0xB070FF, 1.2F);
 	private static final Identifier ROOT = JaymosPowers.id("wind_cyclone_root");
 
-	/** A Cyclone under way: when it began (game time) and which side kneels ({@code left}: the stance mirrored). */
-	public record Stance(long start, boolean left) {
+	/**
+	 * A Cyclone under way: when it began (game time), which side kneels ({@code left}: the stance mirrored), and the
+	 * {@link WindCycloneElement} it has drawn up.
+	 */
+	public record Stance(long start, boolean left, int element) {
 		public static final Codec<Stance> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.LONG.fieldOf("start").forGetter(Stance::start),
-			Codec.BOOL.fieldOf("left").forGetter(Stance::left)
+			Codec.BOOL.fieldOf("left").forGetter(Stance::left),
+			Codec.INT.optionalFieldOf("element", 0).forGetter(Stance::element)
 		).apply(i, Stance::new));
 		public static final StreamCodec<ByteBuf, Stance> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, Stance::start,
 			ByteBufCodecs.BOOL, Stance::left,
+			ByteBufCodecs.VAR_INT, Stance::element,
 			Stance::new);
 	}
 
@@ -133,6 +139,8 @@ public final class WindCyclone {
 		final Map<UUID, Long> orbiting = new HashMap<>();
 		/** Who was just thrown, and until when they can't be caught again. */
 		final Map<UUID, Long> thrown = new HashMap<>();
+		/** What the funnel has drawn up into itself. */
+		WindCycloneElement element = WindCycloneElement.NONE;
 
 		Active(ResourceKey<Level> dimension, long start, long nextHit, long nextSelf) {
 			this.dimension = dimension;
@@ -209,7 +217,7 @@ public final class WindCyclone {
 		}
 		boolean fast = Fate.isAscended(player) || Fate.isCorrupted(player);
 		ACTIVE.put(player.getUUID(), new Active(level.dimension(), now, now + DAMAGE_INTERVAL, now + (fast ? SELF_INTERVAL_ASCENDED : SELF_INTERVAL)));
-		player.setAttached(CYCLONE, new Stance(now, player.getRandom().nextBoolean()));
+		player.setAttached(CYCLONE, new Stance(now, player.getRandom().nextBoolean(), 0));
 		root(player);
 		Mastery.used(player);
 		WindFumble.onCast(player);
@@ -280,10 +288,33 @@ public final class WindCyclone {
 		if (!player.isCreative()) {
 			player.causeFoodExhaustion(EXHAUSTION_PER_TICK);
 		}
-		funnel(player, level, age, radius, height, corrupted);
+		if (age % WindCycloneElement.SAMPLE_EVERY == 0) {
+			// what it draws up from round about (before the douse below sweeps up the flames it would feed on)
+			java.util.List<LivingEntity> held = new java.util.ArrayList<>();
+			for (LivingEntity target : caught(player, level, radius, height)) {
+				if (active.orbiting.containsKey(target.getUUID())) {
+					held.add(target);
+				}
+			}
+			WindCycloneElement element = WindCycloneElement.sample(player, level, radius, held, active.element);
+			if (element != active.element) {
+				element.announce(player, level, active.element, height);
+				active.element = element;
+				Stance stance = player.getAttached(CYCLONE);
+				if (stance != null) {
+					player.setAttached(CYCLONE, new Stance(stance.start(), stance.left(), element.ordinal()));
+				}
+			}
+		}
+		WindCycloneElement element = active.element;
+		boolean shocking = corrupted || element == WindCycloneElement.STORM;
+		funnel(player, level, age, radius, height, shocking, element);
+		element.funnelExtras(player, level, age, radius, height);
 		if (age % DOUSE_EVERY == 0) {
-			// the funnel blows out the fire it sweeps (a Stormbound one's shocks still set what it batters alight)
-			WindDouse.douse(level, player.position().add(0.0, Math.min(height * 0.5, radius), 0.0), radius, player, !corrupted);
+			// the funnel blows out the fire it sweeps (a Stormbound one's shocks, or a fire tornado, still set what it
+			// batters alight; the fire tornado has drawn the flames up into itself)
+			WindDouse.douse(level, player.position().add(0.0, Math.min(height * 0.5, radius), 0.0), radius, player,
+				!shocking && element != WindCycloneElement.FIRE);
 		}
 		if (age % ROAR_INTERVAL == 0) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_WHIRL, SoundSource.PLAYERS, 1.2F, 0.5F + player.getRandom().nextFloat() * 0.2F);
@@ -311,7 +342,8 @@ public final class WindCyclone {
 			}
 			orbit(player, target, (now - since) / (double)ORBIT_TICKS, radius, height);
 			if (hit) {
-				batter(player, level, target, corrupted, fast ? DAMAGE_ASCENDED : DAMAGE);
+				batter(player, level, target, shocking, (fast ? DAMAGE_ASCENDED : DAMAGE) + element.bonus(target));
+				element.batter(player, level, target);
 			}
 		}
 		// (anything that slipped out of the funnel starts over if it's caught again)
@@ -426,7 +458,9 @@ public final class WindCyclone {
 	}
 
 	/** The column: rings of cloud turning round you, wider toward the top, with gusts and (corrupted) sparks. */
-	private static void funnel(ServerPlayer player, ServerLevel level, long age, double radius, double height, boolean corrupted) {
+	private static void funnel(ServerPlayer player, ServerLevel level, long age, double radius, double height, boolean corrupted,
+		WindCycloneElement element) {
+		ParticleOptions carried = element.particle(level);
 		double x0 = player.getX(), y0 = player.getY(), z0 = player.getZ();
 		for (int ring = 0; ring < RINGS; ring++) {
 			double up = (ring + 0.5) / RINGS;
@@ -439,7 +473,8 @@ public final class WindCyclone {
 				double y = y0 + up * height + (player.getRandom().nextDouble() - 0.5) * height / RINGS;
 				// count 0: (dx, dy, dz) is the velocity, along the circle and rising
 				double speed = 0.25 + 0.25 * up;
-				ParticleOptions particle = corrupted && i == 0 ? STORM_DUST : ParticleTypes.CLOUD;
+				// (one point a ring is what it has drawn up)
+				ParticleOptions particle = carried != null && i == 0 ? carried : corrupted && i == 0 ? STORM_DUST : ParticleTypes.CLOUD;
 				level.sendParticles(particle, x, y, z, 0, -Math.sin(a) * speed, 0.06, Math.cos(a) * speed, 1.0);
 			}
 		}

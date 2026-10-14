@@ -182,6 +182,9 @@ final class WindCycloneClient {
 
 	/** The Cyclone's line over the crosshair while it lasts. */
 	static Component label() {
-		return Component.translatable("hud.jaymospowers.wind.cyclone");
+		LocalPlayer player = Minecraft.getInstance().player;
+		WindCyclone.Stance stance = player == null ? null : player.getAttached(WindCyclone.CYCLONE);
+		// with what it has drawn up in it: Fire Tornado, Waterspout...
+		return Component.translatable(com.jaymospowers.power.wind.WindCycloneElement.byId(stance == null ? 0 : stance.element()).labelKey());
 	}
 }
