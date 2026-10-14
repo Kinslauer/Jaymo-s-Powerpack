@@ -62,6 +62,11 @@ final class McaBridge {
 		return villager instanceof VillagerEntityMCA v ? v.getVillagerBrain().getMemoriesForPlayer(player).getHearts() : 0;
 	}
 
+	/** (0.7.19) {@code player} is family to an MCA villager. */
+	static boolean family(Villager villager, ServerPlayer player) {
+		return villager instanceof VillagerEntityMCA v && net.conczin.mca.entity.ai.Relationship.IS_FAMILY.test(v, (net.minecraft.world.entity.Entity)player);
+	}
+
 	/** (0.5.50) An MCA villager's mood value (-15..15; 0 for a plain one). */
 	static int mood(Villager villager) {
 		return villager instanceof VillagerEntityMCA v ? v.getVillagerBrain().getMoodValue() : 0;

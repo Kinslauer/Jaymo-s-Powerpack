@@ -169,6 +169,11 @@ public final class McaCompat {
 			? brain.getMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME) : java.util.Optional.empty();
 	}
 
+	/** (0.7.19) {@code villager} is {@code player}'s family in MCA (spouse, child, parent): they always understand each other. */
+	static boolean family(Villager villager, ServerPlayer player) {
+		return LOADED && McaBridge.family(villager, player);
+	}
+
 	/** (0.5.39) {@code player}'s hearts with {@code villager} (0 without MCA, or for a plain villager). */
 	static int heartsOf(Villager villager, ServerPlayer player) {
 		return LOADED ? McaBridge.heartsOf(villager, player) : 0;

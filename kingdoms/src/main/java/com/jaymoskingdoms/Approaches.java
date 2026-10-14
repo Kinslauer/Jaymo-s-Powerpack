@@ -192,6 +192,9 @@ public final class Approaches {
 		ItemStack goods = ItemStack.EMPTY;
 		int price;
 		String enemy = "";
+		/** (0.7.19) They speak a tongue you don't ({@link Languages}): what they mean, as you make it out from their hands. */
+		boolean foreign;
+		Component gesture = Component.empty();
 
 		Approach(Mob mob, UUID player, int topic, int faction, long until) {
 			this.mob = mob;
@@ -501,6 +504,7 @@ public final class Approaches {
 			return false;
 		}
 		Approach a = new Approach(best, id, bestTopic, bestFaction.id(), now + WALK_TICKS);
+		a.foreign = !Languages.understands(player, best);
 		prepare(level, a, player, bestFaction, random);
 		ACTIVE.put(id, a);
 		MET.put(best.getUUID() + "/" + id, now);
@@ -657,6 +661,17 @@ public final class Approaches {
 			}
 			w[GOSSIP] = 2;
 		}
+		if (!Languages.understands(player, mob)) {
+			// (0.7.19) you don't speak their tongue: only what hands and faces can say
+			for (int t = 0; t < w.length; t++) {
+				if (!simple(t)) {
+					w[t] = 0;
+				}
+			}
+			if (only >= 0 && !simple(only)) {
+				return null;
+			}
+		}
 		if (only >= 0) {
 			return w[only] > 0 || testable(mob, only) ? new int[] {only, 1} : null;
 		}
@@ -675,6 +690,15 @@ public final class Approaches {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * (0.7.19) What can be got across without a shared tongue: a gift, a greeting, food begged or a bargain shown, a
+	 * child's game of tag, a guard waving you indoors, holding out a hand for a toll, or squaring up for a bout.
+	 */
+	static boolean simple(int topic) {
+		return topic == GIFT || topic == GREET || topic == HUNGRY || topic == BARGAIN || topic == CHILD || topic == WARN || topic == TOLL
+			|| topic == BOUT;
 	}
 
 	/** (The test command) {@code mob} can be made to come over about {@code topic} whatever they know: anything but quests and wars they haven't got. */
@@ -721,10 +745,11 @@ public final class Approaches {
 			case QUESTION -> a.variant = random.nextInt(QUESTIONS);
 			case CHILD -> {
 				List<Integer> games = new ArrayList<>(List.of(CHILD_TAG));
-				if (!player.getItemBySlot(EquipmentSlot.CHEST).isEmpty()) {
+				// (0.7.19 a child who can't make you understand just plays tag)
+				if (!a.foreign && !player.getItemBySlot(EquipmentSlot.CHEST).isEmpty()) {
 					games.add(CHILD_KNIGHT);
 				}
-				if (player.getMainHandItem().has(DataComponents.WEAPON)) {
+				if (!a.foreign && player.getMainHandItem().has(DataComponents.WEAPON)) {
 					games.add(CHILD_SWORD);
 				}
 				a.variant = games.get(random.nextInt(games.size()));
@@ -817,6 +842,14 @@ public final class Approaches {
 		Speech.say(level, a.mob, a.line, a.color, SPEECH_RANGE);
 		level.playSound(null, a.mob.getX(), a.mob.getY(), a.mob.getZ(), a.mob instanceof Villager ? SoundEvents.VILLAGER_AMBIENT : SoundEvents.VILLAGER_TRADE,
 			SoundSource.NEUTRAL, 0.8F, a.mob.isBaby() ? 1.5F : 1.0F);
+		if (a.foreign) {
+			// (0.7.19) the words are lost on you, but not what they mean by them
+			a.gesture = Component.translatable("language.jaymoskingdoms.gesture." + TOPICS[a.topic], switch (a.topic) {
+				case BARGAIN -> new Object[] {a.goods.getCount(), a.goods.getHoverName(), a.price};
+				case TOLL, BOUT -> new Object[] {a.price};
+				default -> new Object[0];
+			}).withStyle(ChatFormatting.ITALIC);
+		}
 		if (a.topic == GIFT) {
 			ItemStack gift = new ItemStack(GIFTS.get(level.getRandom().nextInt(GIFTS.size())));
 			if (!player.getInventory().add(gift)) {
@@ -824,7 +857,10 @@ public final class Approaches {
 			}
 			a.mob.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		}
-		if (asks(a.topic)) {
+		if (a.foreign) {
+			player.sendOverlayMessage((asks(a.topic) ? Component.translatable("language.jaymoskingdoms.gesture.hint", a.gesture, a.mob.getDisplayName())
+				: a.gesture.copy()).withStyle(ChatFormatting.GOLD));
+		} else if (asks(a.topic)) {
 			player.sendOverlayMessage(Component.translatable("talk.jaymoskingdoms.hint", a.mob.getDisplayName()).withStyle(ChatFormatting.GOLD));
 		} else {
 			player.sendOverlayMessage(Component.translatable("talk.jaymoskingdoms.hint.pardon", a.mob.getDisplayName()).withStyle(ChatFormatting.GRAY));
@@ -839,13 +875,16 @@ public final class Approaches {
 			options.add(new Option(Component.translatable("talk.jaymoskingdoms.pardon.more"), true));
 		}
 		if (ServerPlayNetworking.canSend(player, TalkNet.Ask.TYPE)) {
-			ServerPlayNetworking.send(player, new TalkNet.Ask(a.mob.getId(), a.mob.getDisplayName(), heard(a),
+			ServerPlayNetworking.send(player, new TalkNet.Ask(a.mob.getId(), a.mob.getDisplayName(), heard(player, a),
 				options.stream().map(Option::label).toList(), options.stream().map(Option::enabled).toList()));
 		}
 	}
 
-	/** What they've told you: the line, and what more they said if you asked. */
-	private static Component heard(Approach a) {
+	/** What they've told you: the line, and what more they said if you asked; (0.7.19) in a foreign tongue, gibberish and what they meant. */
+	private static Component heard(ServerPlayer player, Approach a) {
+		if (a.foreign) {
+			return Component.translatable("language.jaymoskingdoms.gist", Languages.heard(player, a.mob, a.line), a.gesture);
+		}
 		return a.elaborated ? Component.translatable("talk.jaymoskingdoms.pardon.both", a.line, a.more) : a.line;
 	}
 
@@ -868,7 +907,7 @@ public final class Approaches {
 			buttons.add(Button.MORE);
 		}
 		buttons.add(Button.BYE);
-		Component words = repeated || a.elaborated ? heard(a) : Component.translatable("talk.jaymoskingdoms.pardon.prompt", a.mob.getDisplayName());
+		Component words = repeated || a.elaborated ? heard(player, a) : Component.translatable("talk.jaymoskingdoms.pardon.prompt", a.mob.getDisplayName());
 		List<Component> labels = buttons.stream().map(b -> (Component) Component.translatable(switch (b) {
 			case PARDON -> "talk.jaymoskingdoms.pardon.again";
 			case MORE -> "talk.jaymoskingdoms.pardon.more";
