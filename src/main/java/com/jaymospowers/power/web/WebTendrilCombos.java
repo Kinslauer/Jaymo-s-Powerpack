@@ -467,7 +467,7 @@ public final class WebTendrilCombos {
 			out = out.lengthSqr() < 1.0E-4 ? ahead(player) : out.normalize();
 			knock(living, living.getDeltaMovement().add(out.scale(0.5)).add(0.0, 0.3, 0.0));
 		}
-		ServerPlayNetworking.send(player, new WebNet.Shake(THRASH_SHAKE));
+		com.jaymospowers.core.Shakes.send(player, THRASH_SHAKE, at);
 	}
 
 	/** Every tick, per web slinger (from {@link WebTendrils#tick}): the impact, and the end of the reset. */
@@ -524,9 +524,9 @@ public final class WebTendrilCombos {
 		if (t % (BARRAGE_EVERY * 2) == 0) {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.9F, 0.5F + ramp * 0.3F);
 		}
-		ServerPlayNetworking.send(player, new WebNet.Shake(BARRAGE_SHAKE * (1.0F + ramp)));
+		com.jaymospowers.core.Shakes.send(player, BARRAGE_SHAKE * (1.0F + ramp), at);
 		if (victim instanceof ServerPlayer struck) {
-			ServerPlayNetworking.send(struck, new WebNet.Shake(TARGET_SHAKE * 0.5F));
+			com.jaymospowers.core.Shakes.send(struck, TARGET_SHAKE * 0.5F, player.position());
 		}
 	}
 
@@ -549,7 +549,7 @@ public final class WebTendrilCombos {
 		entity.syncVelocity = true;
 		if (entity instanceof ServerPlayer other) {
 			ServerPlayNetworking.send(other, new WebNet.Nudge(v));
-			ServerPlayNetworking.send(other, new WebNet.Shake(TARGET_SHAKE));
+			com.jaymospowers.core.Shakes.send(other, TARGET_SHAKE, entity.position().subtract(v));
 		}
 	}
 
@@ -588,7 +588,7 @@ public final class WebTendrilCombos {
 		level.playSound(null, meet.x, meet.y, meet.z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.3F, 0.5F);
 		level.playSound(null, meet.x, meet.y, meet.z, SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 1.2F, 0.5F);
 		level.playSound(null, meet.x, meet.y, meet.z, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.0F, 0.7F);
-		ServerPlayNetworking.send(player, new WebNet.Shake(SHAKE));
+		com.jaymospowers.core.Shakes.heavy(player, meet, 12.0, SHAKE);
 	}
 
 	/** Debris brought down on a creature: it's hurt (and driven down), and the debris collapses. */
@@ -611,7 +611,7 @@ public final class WebTendrilCombos {
 			if (victim != null && handOf(player, victim) >= 0) {
 				letGo(player, victim);
 			}
-			ServerPlayNetworking.send(player, new WebNet.Shake(SHAKE * 0.5F));
+			com.jaymospowers.core.Shakes.send(player, SHAKE * 0.5F, null);
 			return;
 		}
 		LivingEntity living = (LivingEntity)victim;
@@ -635,7 +635,7 @@ public final class WebTendrilCombos {
 		level.playSound(null, top.x, top.y, top.z, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.5F, 0.5F);
 		level.playSound(null, top.x, top.y, top.z, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.6F, 0.5F);
 		level.playSound(null, top.x, top.y, top.z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.2F, 0.5F);
-		ServerPlayNetworking.send(player, new WebNet.Shake(SHAKE));
+		com.jaymospowers.core.Shakes.heavy(player, top, 12.0, SHAKE);
 	}
 
 	/** Two clumps smashed together: they burst into a cone of debris ahead, hurting everything in it. */
@@ -677,7 +677,7 @@ public final class WebTendrilCombos {
 		}
 		if (clumps.size() < 2 || pieces == 0) {
 			// only one left to smash: it just breaks
-			ServerPlayNetworking.send(player, new WebNet.Shake(SHAKE * 0.5F));
+			com.jaymospowers.core.Shakes.send(player, SHAKE * 0.5F, null);
 			return;
 		}
 		// soft blocks hit for no more than any soft block; a mix by its share of hard ones
@@ -726,7 +726,7 @@ public final class WebTendrilCombos {
 		level.playSound(null, meet.x, meet.y, meet.z, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.6F, 0.45F);
 		level.playSound(null, meet.x, meet.y, meet.z, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.7F, 0.45F);
 		level.playSound(null, meet.x, meet.y, meet.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.6F, 0.6F);
-		ServerPlayNetworking.send(player, new WebNet.Shake(SHATTER_SHAKE));
+		com.jaymospowers.core.Shakes.heavy(player, meet, 12.0, SHATTER_SHAKE);
 	}
 
 	private static boolean soft(Entity debris) {

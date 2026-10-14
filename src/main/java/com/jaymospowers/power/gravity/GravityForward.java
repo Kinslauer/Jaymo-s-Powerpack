@@ -122,8 +122,7 @@ public final class GravityForward {
 			com.jaymospowers.core.Debris.puff(level, at, level.getBlockState(at), 1.8F);
 			com.jaymospowers.core.Debris.puff(level, player.blockPosition().below(), level.getBlockState(player.blockPosition().below()), 1.0F);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.0F, 0.9F);
-			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player,
-				new com.jaymospowers.power.web.WebNet.Shake((float)Mth.clamp(speed * 0.35, 0.2, 0.9)));
+			com.jaymospowers.core.Shakes.heavy(player, net.minecraft.world.phys.Vec3.atCenterOf(at), 10.0, (float)Mth.clamp(speed * 0.35, 0.2, 0.9));
 			stop(player);
 		} else if (run.ticks >= TICKS || player.isInWater() || player.isPassenger()) {
 			stop(player);

@@ -408,7 +408,7 @@ public final class WebTendrils {
 					com.jaymospowers.core.Debris.puff(level, at, state, 0.4F);
 				}
 				if (t % 8 == 0) {
-					ServerPlayNetworking.send(player, new WebNet.Shake(0.35F + 0.4F * t / total));
+					com.jaymospowers.core.Shakes.send(player, 0.35F + 0.4F * t / total, null);
 					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.6F, 0.5F);
 				}
 				if (t == total / 2) {
@@ -422,7 +422,7 @@ public final class WebTendrils {
 				if (spawner(level, pos)) {
 					// a spawner's cage is torn apart, not carried off
 					level.destroyBlock(pos, true, player);
-					ServerPlayNetworking.send(player, new WebNet.Shake(0.7F));
+					com.jaymospowers.core.Shakes.send(player, 0.7F, net.minecraft.world.phys.Vec3.atCenterOf(pos));
 				} else if (com.jaymospowers.core.BlockCluster.takeable(level, pos, RIP_HARDEST, player)) {
 					loose.add(pos);
 				}
@@ -432,7 +432,7 @@ public final class WebTendrils {
 				tug.hit().getDirection().getUnitVec3().scale(0.9), player);
 			if (chunk != null) {
 				grab(player, hand, chunk, -1L, true);
-				ServerPlayNetworking.send(player, new WebNet.Shake(0.9F));
+				com.jaymospowers.core.Shakes.send(player, 0.9F, null);
 			}
 		}
 	}
@@ -550,13 +550,13 @@ public final class WebTendrils {
 		target.syncVelocity = true;
 		if (target instanceof ServerPlayer other) {
 			ServerPlayNetworking.send(other, new WebNet.Nudge(target.getDeltaMovement()));
-			ServerPlayNetworking.send(other, new WebNet.Shake(CROSS_SHAKE * 1.5F));
+			com.jaymospowers.core.Shakes.send(other, CROSS_SHAKE * 1.5F, player.position());
 		}
 		Vec3 at = target.getBoundingBox().getCenter();
 		level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 14, 0.3, 0.3, 0.3, 0.2);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.2F, 0.5F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.1F, 0.7F);
-		ServerPlayNetworking.send(player, new WebNet.Shake(CROSS_SHAKE));
+		com.jaymospowers.core.Shakes.send(player, CROSS_SHAKE, at);
 		WebSymbiote.narrate(player, "smash");
 		chunk.chip(level);
 		if (!chunk.isAlive()) {

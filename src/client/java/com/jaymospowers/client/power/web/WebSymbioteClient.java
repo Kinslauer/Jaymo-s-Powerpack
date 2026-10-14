@@ -314,7 +314,6 @@ public final class WebSymbioteClient {
 				}
 			}
 		});
-		ClientPlayNetworking.registerGlobalReceiver(WebNet.Shake.TYPE, (payload, context) -> WebShake.start(payload.strength()));
 		// its voice darkens your screen (whispers, and a whole feeding)
 		ClientPlayNetworking.registerGlobalReceiver(WebNet.Dread.TYPE, (payload, context) -> WebSymbioteDread.onPacket(payload));
 		net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry.attachElementAfter(

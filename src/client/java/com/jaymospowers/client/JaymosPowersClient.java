@@ -72,6 +72,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		ClientPlayNetworking.registerGlobalReceiver(PowerPayloads.OpenAffinity.TYPE, (payload, context) -> affinityPending = true);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("power_hud"), PowerHud::render);
 
+		ScreenShake.init();
 		CarryClient.init();
 		CombatRollTaps.init();
 		JeiCheats.init();
