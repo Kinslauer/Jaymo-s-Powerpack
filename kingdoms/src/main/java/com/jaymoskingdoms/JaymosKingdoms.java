@@ -174,6 +174,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Tag.register();
 		Families.register();
 		Routines.register();
+		// 0.7.19: villagers' regard for one another, and the meetings it makes (fights to hugs) (and its attachment)
+		LOGGER.debug("regard attachment: {}", Neighbours.REGARD);
+		Neighbours.register();
 		Trespass.register();
 		// 0.5.37: sorcery: camps' shamans and necromancers, courts' wizards, the risen dead, spell scrolls (and the thralls' attachment)
 		Arcana.register();

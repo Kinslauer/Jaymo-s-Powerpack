@@ -7,6 +7,8 @@ import net.conczin.mca.Config;
 import net.conczin.mca.entity.VillagerEntityMCA;
 import net.conczin.mca.entity.ai.Pregnancy;
 import net.conczin.mca.entity.ai.relationship.AgeState;
+import net.conczin.mca.entity.ai.relationship.EntityRelationship;
+import net.conczin.mca.entity.ai.relationship.Gender;
 import net.conczin.mca.entity.VillagerFactory;
 import net.conczin.mca.registry.ProfessionsMCA;
 import net.conczin.mca.server.world.data.VillageManager;
@@ -70,6 +72,64 @@ final class McaBridge {
 	/** (0.5.50) An MCA villager's mood value (-15..15; 0 for a plain one). */
 	static int mood(Villager villager) {
 		return villager instanceof VillagerEntityMCA v ? v.getVillagerBrain().getMoodValue() : 0;
+	}
+
+	/** (0.7.19) {@link McaCompat#kin}. */
+	static int kin(Villager a, Villager b) {
+		if (!(a instanceof VillagerEntityMCA x) || !(b instanceof VillagerEntityMCA y)) {
+			return McaCompat.STRANGERS;
+		}
+		EntityRelationship r = x.getRelationships();
+		if (r.isMarriedTo(y.getUUID()) || r.isEngagedWith(y.getUUID()) || r.isPromisedTo(y.getUUID())) {
+			return McaCompat.PARTNER;
+		}
+		return r.getFamilyEntry().isRelative(y.getUUID()) ? McaCompat.KIN : McaCompat.STRANGERS;
+	}
+
+	/** (0.7.19) {@link McaCompat#temper}. */
+	static int temper(Villager v) {
+		if (!(v instanceof VillagerEntityMCA m)) {
+			return 0;
+		}
+		return switch (m.getVillagerBrain().getPersonality().getId().getPath()) {
+			case "friendly", "upbeat", "peaceful", "extroverted", "relaxed" -> 1;
+			case "greedy", "gloomy", "anxious" -> -1;
+			case "crabby" -> -2;
+			default -> 0;
+		};
+	}
+
+	/** (0.7.19) {@link McaCompat#courtable}. */
+	static boolean courtable(Villager a, Villager b) {
+		if (!(a instanceof VillagerEntityMCA x) || !(b instanceof VillagerEntityMCA y) || x.getAgeState() != AgeState.ADULT
+			|| y.getAgeState() != AgeState.ADULT) {
+			return false;
+		}
+		EntityRelationship rx = x.getRelationships(), ry = y.getRelationships();
+		Gender gx = rx.getGender(), gy = ry.getGender();
+		boolean pair = gx == Gender.MALE && gy == Gender.FEMALE || gx == Gender.FEMALE && gy == Gender.MALE;
+		return pair && unattached(rx) && unattached(ry) && !rx.getFamilyEntry().isRelative(y.getUUID());
+	}
+
+	private static boolean unattached(EntityRelationship r) {
+		return !r.isMarried() && !r.isEngaged() && !r.isPromised();
+	}
+
+	/** (0.7.19) {@link McaCompat#cheer}. */
+	static void cheer(Villager v, int by) {
+		if (v instanceof VillagerEntityMCA m) {
+			m.getVillagerBrain().modifyMoodValue(by);
+		}
+	}
+
+	/** (0.7.19) {@link McaCompat#marry}: both sides of the family tree learn of it. */
+	static boolean marry(Villager a, Villager b) {
+		if (!(a instanceof VillagerEntityMCA x) || !(b instanceof VillagerEntityMCA y)) {
+			return false;
+		}
+		x.getRelationships().marry(y);
+		y.getRelationships().marry(x);
+		return true;
 	}
 
 	/** (0.5.50) An MCA villager is panicking. */
