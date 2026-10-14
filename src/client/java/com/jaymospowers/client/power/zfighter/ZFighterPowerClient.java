@@ -66,6 +66,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
 			if (renderer instanceof AvatarRenderer<?> avatar) {
 				helper.register(new ZFighterTail.Layer(avatar));
+				helper.register(new ZFighterHair.Layer(avatar));
 			}
 		});
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
@@ -102,6 +103,7 @@ public final class ZFighterPowerClient implements PowerClient {
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
 		ZFighterFlightPose.extract(entity, state, partialTicks);
 		ZFighterTail.extract(entity, state);
+		ZFighterHair.extract(entity, state);
 		ZFighterChargePose.extract(entity, state, partialTicks);
 		ZFighterGuardPose.extract(entity, state);
 	}

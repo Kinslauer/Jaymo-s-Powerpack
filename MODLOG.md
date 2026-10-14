@@ -940,3 +940,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   with a ring of dust and a flash of aura. Charging ki now has a stance per lineage and form (`ZFighterChargePose`,
   synced by `ZFighterPower.CHARGE`). Charging in the air keeps his speed; only at 30% health or less does it slow him
   (`ZFighterFlightClient.LOW_HEALTH`).
+  Each lineage's own V (`ZFighterKi.SIGNATURES`): Crimson Cannon (Warrior-born), Spiral Lance (Verdant, through walls),
+  Frost Needle (Frost-born). Super hair (`ZFighterHair`, Earthling and Warrior-born, synced by `ZFighterPower.FORM`),
+  ground debris rising under every form and an aura that grows with each form.

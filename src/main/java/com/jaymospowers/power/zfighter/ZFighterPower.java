@@ -19,6 +19,9 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -137,6 +140,9 @@ public final class ZFighterPower implements Power {
 	/** Stacked on a form, that form's ki drain is multiplied by this. */
 	static final float LIMIT_STACK_DRAIN = 2.0F;
 	static final int LIMIT_COLOR = 0xFF3A2A;
+	/** In a form, ground this far below him breaks up; this many bits rise every other tick per form. */
+	static final int DEBRIS_HEIGHT = 3;
+	static final int DEBRIS_PER_FORM = 3;
 
 	private static final Identifier FIST_ID = JaymosPowers.id("zfighter_fists");
 	private static final Identifier SUPER_FIST_ID = JaymosPowers.id("zfighter_super_fists");
@@ -170,6 +176,9 @@ public final class ZFighterPower implements Power {
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 	/** Charging ki right now, for everyone's client (the stance): the form he's in plus one; absent when he isn't. */
 	public static final AttachmentType<Integer> CHARGE = AttachmentRegistry.create(JaymosPowers.id("zfighter_charge"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+	/** The form he's in (1-3), for everyone's client (the hair); absent in base form. */
+	public static final AttachmentType<Integer> FORM = AttachmentRegistry.create(JaymosPowers.id("zfighter_form"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 	/** Hardship lived through (the road to Super). Saved, kept through death. */
 	public static final AttachmentType<Integer> HARDSHIP = AttachmentRegistry.create(JaymosPowers.id("zfighter_hardship"),
@@ -326,6 +335,7 @@ public final class ZFighterPower implements Power {
 		player.removeAttached(STATE);
 		player.removeAttached(FLIGHT);
 		player.removeAttached(CHARGE);
+		player.removeAttached(FORM);
 		player.removeAttached(DEFEATS);
 		player.removeAttached(GRUDGES);
 		player.removeAttached(ZFighterTraining.DATA);
@@ -422,8 +432,10 @@ public final class ZFighterPower implements Power {
 		if (live.superOn()) {
 			float ease = 1.0F - MASTERY_EASE * ZFighterTraining.mastery(player, live.form);
 			live.ki -= FORM_DRAIN[live.form] * ease * (live.limit > 0 ? LIMIT_STACK_DRAIN : 1.0F) * ZFighterLineage.drainFactor(live.lineage, live.form);
+			// the aura roars harder with each form, and the ground under him breaks up and rises
+			aura(player, live, 1 + 2 * live.form);
 			if (now % 2 == 0) {
-				aura(player, live, 1 + live.form);
+				debris(player, live);
 			}
 			if (now % (8 - live.form * 2) == 0) {
 				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 1 + live.form, 0.4,
@@ -766,10 +778,43 @@ public final class ZFighterPower implements Power {
 		DustParticleOptions dust = dust(live);
 		for (int i = 0; i < count; i++) {
 			double a = random.nextDouble() * Math.PI * 2.0;
-			double r = 0.45 + random.nextDouble() * 0.25;
+			double r = 0.45 + 0.12 * live.form + random.nextDouble() * (0.25 + 0.1 * live.form);
 			double h = random.nextDouble() * player.getBbHeight();
 			level.sendParticles(dust, true, false, player.getX() + Math.cos(a) * r, player.getY() + h, player.getZ() + Math.sin(a) * r, 0, 0.0, 1.0,
-				0.0, 0.15);
+				0.0, 0.15 + 0.07 * live.form);
+		}
+	}
+
+	/** In a form near the ground: bits of the ground under him tear loose and rip upwards, more with each form. */
+	private static void debris(ServerPlayer player, Live live) {
+		ServerLevel level = player.level();
+		RandomSource random = level.getRandom();
+		BlockPos feet = player.blockPosition();
+		BlockState ground = null;
+		BlockPos groundPos = null;
+		for (int down = 1; down <= DEBRIS_HEIGHT; down++) {
+			BlockPos at = feet.below(down);
+			BlockState state = level.getBlockState(at);
+			if (!state.isAir() && state.getFluidState().isEmpty() && state.isSolidRender()) {
+				ground = state;
+				groundPos = at;
+				break;
+			}
+		}
+		if (ground == null) {
+			return;
+		}
+		BlockParticleOption bits = new BlockParticleOption(ParticleTypes.BLOCK, ground);
+		double spread = 1.2 + 0.8 * live.form;
+		double top = groundPos.getY() + 1.0;
+		for (int i = 0; i < DEBRIS_PER_FORM * live.form; i++) {
+			double a = random.nextDouble() * Math.PI * 2.0;
+			double r = random.nextDouble() * spread;
+			level.sendParticles(bits, true, false, player.getX() + Math.cos(a) * r, top + 0.05, player.getZ() + Math.sin(a) * r, 0, 0.0, 1.0, 0.0,
+				0.4 + 0.25 * live.form + random.nextDouble() * 0.3);
+		}
+		if (live.form >= 2 && random.nextInt(4) == 0) {
+			level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, true, false, player.getX(), top, player.getZ(), 0, 0.0, 1.0, 0.0, 0.05);
 		}
 	}
 
@@ -881,6 +926,14 @@ public final class ZFighterPower implements Power {
 				player.removeAttached(CHARGE);
 			} else {
 				player.setAttached(CHARGE, wanted);
+			}
+		}
+		Integer shown = player.getAttached(FORM);
+		if ((shown == null ? 0 : shown) != live.form) {
+			if (live.form == 0) {
+				player.removeAttached(FORM);
+			} else {
+				player.setAttached(FORM, live.form);
 			}
 		}
 		ZFighterState state = state(player);
