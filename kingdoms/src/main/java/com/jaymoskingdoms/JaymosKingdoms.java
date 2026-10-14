@@ -190,6 +190,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.0: players as vampires (by a bite) and werewolves (by ritual)
 		VampirePlayers.register();
 		WerewolfPlayers.register();
+		// 0.7.7: sailing, stage 1: ships built from blocks (the helm, sails, the ship and its attachment)
+		com.jaymoskingdoms.sailing.Sailing.register();
+		LOGGER.debug("ship attachment: {}", com.jaymoskingdoms.sailing.Ship.PIECES);
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();
 			Gatherers.clear();

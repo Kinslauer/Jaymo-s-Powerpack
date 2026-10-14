@@ -2424,5 +2424,17 @@
 	"quest.jaymoskingdoms.foes.vampire": "Vampires",
 	"quest.jaymoskingdoms.foes.werewolf": "Cursed Beasts",
 	"message.jaymoskingdoms.bed_rest": "You lie down to rest. Poison and withering can't hurt you here.",
-	"gui.jaymoskingdoms.bed_rest_sleep": "Sleep"
+	"gui.jaymoskingdoms.bed_rest_sleep": "Sleep",
+	"block.jaymoskingdoms.ship_helm": "Ship's Helm",
+	"block.jaymoskingdoms.sail": "Sail",
+	"entity.jaymoskingdoms.ship": "Ship",
+	"ship.jaymoskingdoms.too_big": "Too many blocks for one ship (the most is %s): is the hull still tied to the land?",
+	"ship.jaymoskingdoms.too_long": "Too long for one ship (the most is %s blocks): is the hull still tied to the land?",
+	"ship.jaymoskingdoms.land": "The hull is joined to the land: cut it free first",
+	"ship.jaymoskingdoms.not_afloat": "The hull must float free on water to cast off",
+	"ship.jaymoskingdoms.too_heavy": "She's too heavy to float: lighter blocks, or more dry hull",
+	"ship.jaymoskingdoms.no_room": "No room to drop anchor here",
+	"ship.jaymoskingdoms.under_way": "Sails %s%%  ·  %s of %s blocks/s  ·  W/S sails, A/D rudder, sneak to anchor or leave",
+	"ship.jaymoskingdoms.anchor_to_use": "Drop anchor to use that",
+	"ship.jaymoskingdoms.left_helm": "You left the helm: she drifts, sails furling. Take the wheel and sneak once she lies still to drop anchor"
 }
