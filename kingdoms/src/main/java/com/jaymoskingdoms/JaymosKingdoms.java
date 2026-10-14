@@ -167,6 +167,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Journal.register();
 		// 0.5.39: the townsfolk come over to you: questions, quests, requests, bargains, news
 		Approaches.register();
+		// 0.7.20: tongues by region; only simple dealings with folk whose tongue you don't speak (and its attachments)
+		LOGGER.debug("tongue attachments: {} {}", Languages.HOME, Languages.LEARNED);
+		Languages.register();
 		// (0.6.9) tag, little ones, daily routines, suspicion in their homes
 		Tag.register();
 		Families.register();

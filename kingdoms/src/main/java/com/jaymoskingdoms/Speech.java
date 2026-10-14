@@ -15,7 +15,8 @@ import net.minecraft.world.entity.animal.golem.IronGolem;
 /**
  * Words spoken aloud in the world (a ruler's temper, a witness crying thief): they float above the speaker's head for
  * the players nearby and fade, instead of going to chat. The client half draws them ({@code SpeechBubbles}), and MCA
- * villagers' own talk goes the same way there.
+ * villagers' own talk goes the same way there. (0.7.20) Townsfolk speaking a tongue a player doesn't know
+ * ({@link Languages}) come out as gibberish for that player.
  */
 public final class Speech {
 	/** Bubble colours (RGB): plain talk, a warning, an angry shout. */
@@ -45,19 +46,32 @@ public final class Speech {
 		PayloadTypeRegistry.clientboundPlay().register(Said.TYPE, Said.CODEC);
 	}
 
+	/** (0.7.20) {@code speaker} says {@code words} to {@code player} alone, slowly enough to follow in any tongue. */
+	public static void sayTo(ServerLevel level, Entity speaker, ServerPlayer player, Component words, int color) {
+		if (speaker instanceof IronGolem) {
+			return;
+		}
+		if (ServerPlayNetworking.canSend(player, Said.TYPE)) {
+			ServerPlayNetworking.send(player, new Said(speaker.getId(), words, color));
+		} else {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.says", speaker.getDisplayName(), words).withColor(color));
+		}
+	}
+
 	/** {@code speaker} says {@code words} aloud: every player within {@code range} sees it over their head. */
 	public static void say(ServerLevel level, Entity speaker, Component words, int color, double range) {
 		if (speaker instanceof IronGolem) {
 			// (0.5.42) golems never speak
 			return;
 		}
-		Said said = new Said(speaker.getId(), words, color);
 		for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, speaker.getBoundingBox().inflate(range))) {
+			// (0.7.20) in a tongue they don't speak, it's words they don't know
+			Component heard = Languages.heard(p, speaker, words);
 			if (ServerPlayNetworking.canSend(p, Said.TYPE)) {
-				ServerPlayNetworking.send(p, said);
+				ServerPlayNetworking.send(p, new Said(speaker.getId(), heard, color));
 			} else {
 				// (a client without the mod: chat, as before)
-				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.says", speaker.getDisplayName(), words)
+				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.says", speaker.getDisplayName(), heard)
 					.withColor(color));
 			}
 		}

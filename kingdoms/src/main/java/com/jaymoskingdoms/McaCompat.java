@@ -169,6 +169,11 @@ public final class McaCompat {
 			? brain.getMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME) : java.util.Optional.empty();
 	}
 
+	/** (0.7.20) {@code villager} is {@code player}'s family in MCA (spouse, child, parent): they always understand each other. */
+	static boolean family(Villager villager, ServerPlayer player) {
+		return LOADED && McaBridge.family(villager, player);
+	}
+
 	/** (0.7.19) {@link #kin}: no kin, kin (family), partners (married, engaged or promised). */
 	static final int STRANGERS = 0, KIN = 1, PARTNER = 2;
 
