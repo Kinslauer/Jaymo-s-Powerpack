@@ -136,7 +136,7 @@ power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts
 |---|---|---|---|---|---|
 | 136 | Starter | R | Nudge | R speeds you up a little; Sneak + R slows what you look at a little. 15 s cooldown. | |
 | 137 | Base | R | Rewind | Snap back to where you were 3 s ago (health restored if it was higher, fire put out). 15 s cooldown. | |
-| 138 | Base | G | Stasis Field | Stop time for mobs, projectiles and players within 6 blocks: 3 s fresh, up to 6 s fully mastered. 30 s cooldown. | |
+| 138 | Base | G | Stasis Field | Stop time for mobs, projectiles and players within 6 blocks: 3 s fresh, up to 6 s fully mastered. 30 s cooldown. Also resets every other cooldown you have running: R, V, B, C and item cooldowns (not its own). | |
 | 139 | Base | V | Overclock | 6 s of Speed III, Haste II and faster attacks; everyone near you is slowed. 25 s cooldown. | |
 | 140 | Base | B | Time Bloom | 5 s of fast-forward for crops, saplings, furnaces and smokers within 5 blocks, and it heals you 5 hearts over those 5 s. 40 s cooldown. | |
 | 141 | Base | passive | Echoes | Every level-up leaves an echo of you somewhere nearby, 5-25 minutes later, walking your old paths. Only attacks shatter it, and a shattered one comes back. This is Chrono's curse in place of corruption. | |
