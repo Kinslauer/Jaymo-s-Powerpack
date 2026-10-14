@@ -425,7 +425,7 @@ public final class ZFighterTraining {
 		Data data = of(player);
 		player.setAttached(DATA, data.withTechnique(index).withTp(player.isCreative() ? data.tp() : data.tp() - TECHNIQUE_TP[index]));
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_technique_learned",
-			Component.translatable("technique.jaymospowers.zfighter." + TECHNIQUE_KEYS[index])).withStyle(ChatFormatting.GOLD));
+			Component.translatable(ZFighterLineage.techniqueKey(player, index))).withStyle(ChatFormatting.GOLD));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 0.8F,
 			1.4F);
 	}
