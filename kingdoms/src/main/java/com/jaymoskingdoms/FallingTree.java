@@ -69,7 +69,7 @@ import org.jspecify.annotations.Nullable;
  * anything in its path (its cutter too) as hard as the wood there is moving; bees in a nest on it come out angry
  * ({@link #hives}); and down, it lies a moment and becomes real blocks where it came to rest, its logs on their side and
  * its leaves withering away ({@link #settle}). Felled in under half a second, it settles at once. A woodcutter's tree
- * still breaks up into his bag, and a tornado's still smashes apart.
+ * still breaks up into his bag; a tree a tornado threw lands on its side the same way, wherever it comes down.
  */
 public final class FallingTree extends Entity {
 	/** Its first push (degrees a tick), a steady nudge, and the pull of its own weight (scaled by how far it leans). */
@@ -83,8 +83,9 @@ public final class FallingTree extends Entity {
 	static final float HIT_PER_SPEED = 7.0F, CRUSH_MOST = 14.0F, HIT_SLOWEST = 0.12F;
 	/** (0.7.11) How it picks its side: a log weighs this, a leaf 1; its weight this far (blocks) off the trunk tips it. */
 	static final float LOG_WEIGHT = 3.0F, TIPS = 0.35F;
-	/** (0.7.11) Settling, a piece with no room where it lies may sink this far onto what's below. */
-	static final int SINKS = 3;
+	/** (0.7.11) Settling, a piece with no room where it lies may sink this far onto what's below (a thrown tree further,
+	 * and rise this far out of what it struck). */
+	static final int SINKS = 3, THROWN_SINKS = 8, THROWN_RISES = 4;
 	/** (0.7.11) Bees round a nest in it (this far) go for a woodcutter who fells it. */
 	static final double BEES_RANGE = 24.0;
 	/** Of its blocks, every this-many'th log and leaf breaks with a puff and a sound (the rest only a puff of chips). */
@@ -332,7 +333,7 @@ public final class FallingTree extends Entity {
 		}
 		if (this.downAt >= 0) {
 			if (this.tickCount - this.downAt >= LIES) {
-				if (this.torn || this.sink != null) {
+				if (this.sink != null) {
 					this.breakApart(level, pieces);
 				} else {
 					this.settle(level, pieces);
@@ -497,10 +498,13 @@ public final class FallingTree extends Entity {
 	private void settle(ServerLevel level, List<Piece> pieces) {
 		float lean = this.lean();
 		Quaternionf turn = turn(lean, this.heading());
-		boolean lying = lean >= 45.0F;
+		// (a tree a tornado threw lands on its side whichever way it tumbled, along the compass line nearest its flight)
+		boolean lying = this.torn || lean >= 45.0F;
+		float lay = this.torn ? Math.round(this.heading() / Mth.HALF_PI) * Mth.HALF_PI : this.heading();
 		// (lying, it settles flat along the ground, held up only by what it really came to rest on)
-		Quaternionf flat = lying ? turn(FLAT, this.heading()) : turn;
-		Direction.Axis along = Math.abs(Mth.cos(this.heading())) >= Math.abs(Mth.sin(this.heading())) ? Direction.Axis.X : Direction.Axis.Z;
+		Quaternionf flat = lying ? turn(FLAT, lay) : turn;
+		Direction.Axis along = Math.abs(Mth.cos(lay)) >= Math.abs(Mth.sin(lay)) ? Direction.Axis.X : Direction.Axis.Z;
+		int sinks = this.torn ? THROWN_SINKS : SINKS;
 		Set<BlockPos> taken = new HashSet<>();
 		List<Piece> ordered = new ArrayList<>(pieces);
 		// (wood first, lowest first: it takes its place before the leaves do)
@@ -523,11 +527,11 @@ public final class FallingTree extends Entity {
 			BlockPos pos = this.cell(this.where(p, flat));
 			if (lying) {
 				// up onto what it struck (no higher than it really lay), then down onto the ground a little way
-				int rested = this.cell(at).getY();
+				int rested = this.torn ? pos.getY() + THROWN_RISES : this.cell(at).getY();
 				while (!room(level, pos, taken) && pos.getY() < rested) {
 					pos = pos.above();
 				}
-				for (int i = 0; i < SINKS && room(level, pos, taken) && room(level, pos.below(), taken); i++) {
+				for (int i = 0; i < sinks && room(level, pos, taken) && room(level, pos.below(), taken); i++) {
 					pos = pos.below();
 				}
 			}

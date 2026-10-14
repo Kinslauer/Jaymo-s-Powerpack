@@ -2698,6 +2698,7 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
     piece with no room gives its drops. Felled in under half a second, it settles at once.
   - A **fallen log** (on its side, resting on the ground or another fallen log) isn't a tree: it's broken log by log,
     not chopped (`Trees.fallen`).
-  - Woodcutters' trees still break up into their bags, and tornadoes' torn-up trees still smash apart (flung trees now
-    strike by their speed too).
+  - Woodcutters' trees still break up into their bags. Trees a tornado throws (Andy) strike by their speed and land
+    the same way: on their side along the compass line nearest their flight, wherever they come down (rising up to 4
+    blocks out of what they hit, sinking up to 8 onto the ground).
 - Not yet seen in game.
