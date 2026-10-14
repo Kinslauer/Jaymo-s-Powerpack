@@ -100,6 +100,13 @@ def packMods = [
 	// custom third-person views on F6 and F7 (Right Alt + the key edits one). Client-only. Jaymo's Powers sets its F7
 	// view to Andy's preset once per install (client/CameraPreset) and takes its zoom off Z (client/KeyConflicts).
 	[dep: "maven.modrinth:camera-utils:5XAah6bJ", cf: [510234, 8887090]],
+	// Sailing. Shippy Ships and Old Cannons (by Caesius_Leo; custom licence: "Include this mod in public or private
+	// Minecraft modpacks, provided proper credit is given"; downloaded by id, never copied or taken apart): sailboat,
+	// cog, caravel and galleon you craft and sail (crew, storms, sinking, wrecks you can loot), and cannons that mount on
+	// them for naval battles. Both need Ingenium API (MIT, same author). Client and server.
+	[dep: "maven.modrinth:ingeniumapi:VYmEo1o8", cf: [1609990, 8956937]],
+	[dep: "maven.modrinth:shippy-ships:q3Hz6ClL", cf: [1551850, 9106490]],
+	[dep: "maven.modrinth:oldcannons:Lpxyj63b", cf: [1610113, 8974890]],
 ]
 // First-person Model (MIT): your own body (and Living Armor's tendrils) drawn in first person; it needs Not Enough
 // Animations (tr7zw Protective License: fine to ship in a pack). Kept out of packMods for now because the CurseForge
