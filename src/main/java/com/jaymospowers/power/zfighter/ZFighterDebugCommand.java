@@ -18,7 +18,9 @@ import net.minecraft.server.level.ServerPlayer;
  * <li>{@code /powerdebug zfighter foes}: lists every foe that has beaten you and the rematches still owed;
  * {@code foes clear} forgets them;</li>
  * <li>{@code /powerdebug zfighter tp <n>}: sets your Training Points;</li>
- * <li>{@code /powerdebug zfighter mastery <form> <percent>}: sets a form's mastery (1-3).</li>
+ * <li>{@code /powerdebug zfighter mastery <form> <percent>}: sets a form's mastery (1-3);</li>
+ * <li>{@code /powerdebug zfighter raid}: a tyrant lands near you; {@code tournament}: a tournament opens near you,
+ * {@code tournament start} ends its sign-up.</li>
  * </ul>
  */
 final class ZFighterDebugCommand {
@@ -66,6 +68,26 @@ final class ZFighterDebugCommand {
 									+ ZFighterTraining.of(player).mastery(form) / 100 + "%"), false);
 								return 1;
 							}))))
+				.then(Commands.literal("raid")
+					.executes(c -> {
+						ServerPlayer player = c.getSource().getPlayerOrException();
+						boolean landed = ZFighterRaids.land(player.level(), player.blockPosition(), "Debug");
+						c.getSource().sendSuccess(() -> Component.literal(landed ? "A tyrant lands nearby." : "No tyrant."), false);
+						return 1;
+					}))
+				.then(Commands.literal("tournament")
+					.executes(c -> {
+						ServerPlayer player = c.getSource().getPlayerOrException();
+						boolean opened = ZFighterTournaments.open(player.level(), player.blockPosition(), "Debug");
+						c.getSource().sendSuccess(() -> Component.literal(opened ? "A tournament opens nearby." : "A tournament is already on."), false);
+						return 1;
+					})
+					.then(Commands.literal("start")
+						.executes(c -> {
+							boolean closed = ZFighterTournaments.closeSignUp();
+							c.getSource().sendSuccess(() -> Component.literal(closed ? "Sign-up closed." : "No tournament is signing up."), false);
+							return 1;
+						})))
 				.then(Commands.literal("foes")
 					.executes(c -> {
 						ServerPlayer player = c.getSource().getPlayerOrException();

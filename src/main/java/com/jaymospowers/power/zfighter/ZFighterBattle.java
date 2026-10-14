@@ -170,6 +170,7 @@ final class ZFighterBattle {
 		Entity attacker = source.getEntity();
 		if (victim instanceof ServerPlayer player && Powers.has(player, ZFighterPower.INSTANCE)) {
 			damage *= 1.0F - ZFighterTraining.toughness(player);
+			damage = ZFighterFusion.toughness(player, damage);
 			ZFighterPower.Live live = ZFighterPower.live(player);
 			damage = ZFighterGuard.guard(player, live, source, damage);
 			if (damage <= 0.0F) {

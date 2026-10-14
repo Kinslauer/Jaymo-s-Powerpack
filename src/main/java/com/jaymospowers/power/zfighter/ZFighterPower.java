@@ -255,6 +255,11 @@ public final class ZFighterPower implements Power {
 		ZFighterLineage.init();
 		ZFighterWishes.init();
 		ZFighterSites.init();
+		ZFighterFusion.init();
+		ZFighterMasters.init();
+		ZFighterRaids.init();
+		ZFighterTournaments.init();
+		ZFighterCorruption.init();
 		ZFighterNet.register();
 		ZFighterBattle.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ZFighterDebugCommand.register(dispatcher));
@@ -301,6 +306,19 @@ public final class ZFighterPower implements Power {
 	}
 
 	@Override
+	public void onCorrupted(ServerPlayer player) {
+		// the mark and the corrupted strength come at once
+		refresh(player, live(player));
+	}
+
+	@Override
+	public void onPurified(ServerPlayer player) {
+		Live live = live(player);
+		ZFighterCorruption.end(player, live);
+		refresh(player, live);
+	}
+
+	@Override
 	public String statusSuffix(Player player) {
 		int form = state(player).form();
 		return form > 0 ? ".super_" + form : null;
@@ -339,6 +357,7 @@ public final class ZFighterPower implements Power {
 		player.removeAttached(STATE);
 		player.removeAttached(FLIGHT);
 		player.removeAttached(CHARGE);
+		ZFighterCorruption.clear(player);
 		player.removeAttached(FORM);
 		player.removeAttached(DEFEATS);
 		player.removeAttached(GRUDGES);
@@ -371,6 +390,7 @@ public final class ZFighterPower implements Power {
 		boolean hungry = food <= HUNGRY_FOOD && !creative;
 		boolean starving = food <= 0 && !creative;
 		ZFighterLineage.tick(player, live);
+		ZFighterCorruption.tick(player, live);
 
 		// a Z Fighter eats like three men, and every bite comes back as ki
 		if (live.lastFood >= 0 && food > live.lastFood) {
@@ -563,6 +583,9 @@ public final class ZFighterPower implements Power {
 	 */
 	@Override
 	public void onMode(ServerPlayer player, boolean down) {
+		if (down && !player.isShiftKeyDown()) {
+			ZFighterFusion.tappedZ(player);
+		}
 		if (down && player.isShiftKeyDown() && !live(player).flying) {
 			ZFighterLineage.toggleTail(player);
 		}
@@ -599,6 +622,19 @@ public final class ZFighterPower implements Power {
 		sync(player, live, maxKi(player));
 	}
 
+	/** Puts him in the air already flying, hovering in pose {@code pose} with no take-off burst (a fusion swap mid-flight). */
+	static void hoverNow(ServerPlayer player, int pose) {
+		Live live = live(player);
+		if (pose <= 0 || ZFighterLineage.ape(player) || !com.jaymospowers.power.wind.WindFlight.canFly(player)) {
+			return;
+		}
+		live.flying = true;
+		live.lastFlyPos = player.position();
+		player.resetFallDistance();
+		player.setAttached(FLIGHT, Mth.clamp(pose, 1, FLIGHT_POSES));
+		sync(player, live, maxKi(player));
+	}
+
 	/** Take-off: a burst of ki from where he stood (the client throws him up), a ring of dust and a flash of his aura. */
 	private static void takeOffBurst(ServerPlayer player, Live live) {
 		ServerLevel level = player.level();
@@ -629,6 +665,11 @@ public final class ZFighterPower implements Power {
 		if (down && ZFighterLineage.ape(player)) {
 			return;
 		}
+		if (down && !player.isShiftKeyDown() && ZFighterFusion.tryDance(player, live)) {
+			// Z, then C: the fusion dance, not a transformation
+			sync(player, live, maxKi(player));
+			return;
+		}
 		if (!down) {
 			ZFighterTechniques.release(player, live);
 			sync(player, live, maxKi(player));
@@ -644,6 +685,9 @@ public final class ZFighterPower implements Power {
 		} else if (player.isShiftKeyDown()) {
 			if (live.superOn()) {
 				descend(player, live);
+			} else {
+				// in base form, a corrupted fighter's sneak+C is Corrupted mode
+				ZFighterCorruption.toggle(player, live);
 			}
 		} else if (live.form >= ZFighterTraining.formsOpen(player)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_no_higher").withStyle(ChatFormatting.GRAY));
@@ -857,6 +901,11 @@ public final class ZFighterPower implements Power {
 		set(player, Attributes.ATTACK_DAMAGE, APE_FIST_ID, ape ? ZFighterLineage.APE_FISTS : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.MAX_HEALTH, APE_HEALTH_ID, ape ? ZFighterLineage.APE_HEALTH : 0.0, AttributeModifier.Operation.ADD_VALUE);
 		set(player, Attributes.MOVEMENT_SPEED, APE_SPEED_ID, ape ? ZFighterLineage.APE_SPEED : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		ZFighterCorruption.attributes(player, live);
+		// fused: the partner's fists and health added, and a little more
+		set(player, Attributes.ATTACK_DAMAGE, ZFighterFusion.FIST_ID, ZFighterFusion.fists(player), AttributeModifier.Operation.ADD_VALUE);
+		set(player, Attributes.ATTACK_DAMAGE, ZFighterFusion.BONUS_ID, ZFighterFusion.bonus(player), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		set(player, Attributes.MAX_HEALTH, ZFighterFusion.HEALTH_ID, ZFighterFusion.health(player), AttributeModifier.Operation.ADD_VALUE);
 	}
 
 	/** What his bare fists add to a punch: mastery, every foe that ever beat him, ascension and trained Strength. */
@@ -866,7 +915,7 @@ public final class ZFighterPower implements Power {
 			+ ZFighterTraining.STRENGTH_PER_LEVEL * ZFighterTraining.of(player).stat(ZFighterTraining.STRENGTH);
 	}
 
-	private static void set(ServerPlayer player, Holder<Attribute> attribute, Identifier id, double amount, AttributeModifier.Operation operation) {
+	static void set(ServerPlayer player, Holder<Attribute> attribute, Identifier id, double amount, AttributeModifier.Operation operation) {
 		AttributeInstance instance = player.getAttribute(attribute);
 		if (instance == null) {
 			return;
@@ -968,7 +1017,8 @@ public final class ZFighterPower implements Power {
 
 	public static int maxKi(Player player) {
 		return BASE_MAX_KI + KI_PER_DEFEAT * zenkai(player) * ZFighterLineage.zenkaiFactor(player)
-			+ ZFighterTraining.ENERGY_PER_LEVEL * ZFighterTraining.of(player).stat(ZFighterTraining.ENERGY);
+			+ ZFighterTraining.ENERGY_PER_LEVEL * ZFighterTraining.of(player).stat(ZFighterTraining.ENERGY)
+			+ (player instanceof ServerPlayer server ? ZFighterFusion.ki(server) : 0);
 	}
 
 	public static int hardship(Player player) {
@@ -985,6 +1035,7 @@ public final class ZFighterPower implements Power {
 	static float kiPower(ServerPlayer player, Live live) {
 		float form = 1.0F + (FORM_KI[live.form] - 1.0F) * (1.0F + MASTERY_POWER * ZFighterTraining.mastery(player, live.form));
 		float trained = 1.0F + ZFighterTraining.KI_POWER_PER_LEVEL * ZFighterTraining.of(player).stat(ZFighterTraining.KI_POWER);
-		return ((0.75F + 0.0625F * Mastery.unlocked(player)) * form + (Fate.isAscended(player) ? 0.1F : 0.0F)) * trained;
+		return ZFighterFusion.power(player, ((0.75F + 0.0625F * Mastery.unlocked(player)) * form + (Fate.isAscended(player) ? 0.1F : 0.0F)) * trained
+			* ZFighterCorruption.kiFactor(player, live));
 	}
 }

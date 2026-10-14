@@ -749,6 +749,17 @@ final class ZFighterKi {
 		return true;
 	}
 
+	/** A beam drawn for everyone near and nothing else (the rogue fighters' blasts; they do their own hurting). */
+	static void showBeam(ServerLevel level, Vec3 from, Vec3 to, float radius, int color) {
+		ZFighterNet.BeamFx fx = new ZFighterNet.BeamFx(from.x, from.y, from.z, to.x, to.y, to.z, radius, color, WAVE, BEAM_TICKS);
+		Vec3 middle = from.lerp(to, 0.5);
+		for (ServerPlayer viewer : level.players()) {
+			if (viewer.position().distanceToSqr(middle) <= BEAM_SEEN * BEAM_SEEN) {
+				net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(viewer, fx);
+			}
+		}
+	}
+
 	/** A beam: the server keeps it for its sparks, and everyone near draws it (beacon-style, {@code ZFighterBeams}). */
 	private static void addBeam(Beam beam) {
 		BEAMS.add(beam);
