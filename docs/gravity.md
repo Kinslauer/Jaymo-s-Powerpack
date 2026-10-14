@@ -128,7 +128,27 @@ A Gravity user lightens whatever they hold, at every mastery level (`GravityWeig
   (`client/ShoulderCamera` and the `Shoulder*` mixins in `jaymospowers.client.mixins.json`). Other powers keep
   vanilla's views.
 
-## Testing
+## 0.10.11: Sideways falls, falling forward, wall walk
+Ideas from Gravity Control (MIT; a NeoForge 1.21.1 fork of Gravity API), remade here: that mod turns the actual
+"down" of an entity, camera and hitbox and all. We fake each effect with velocity and a turned body instead.
+- **Sideways fall** (`GravitySideFall`): sneak as you let go of R, and what Lift held falls the way you look; **Sneak+G**
+  (instead of the Well, same cooldown) drops everything within 8 outward, away from you. It falls flat along the
+  ground with no weight, gathering 0.1 blocks/tick² up to 2.4, for up to 3 s. When it hits something it takes the
+  fall at once (1.2 per block past the first 2.5, at most 24, as fall damage, so it counts as a death by weight),
+  and the wall throws up its dust. Collapse's let-go plummet gives way to it.
+- **Fall forward** (`GravityForward`, client `GravityForwardClient`): **Sneak+V while Weightless**. For 1.2 s "down"
+  is where you look: you gather 0.18 blocks/tick² that way (steer by looking; air drag bends the old speed away).
+  Creatures you hit take up to 7 hearts and are thrown along. Hitting a wall (or diving into the ground) at speed
+  throws up debris and shakes your view; Weightless keeps you from the damage. Each uses 5 s of Weightless's 30 s;
+  1.5 s between them. Everyone sees a head-first dive (`GravityWalkPose`).
+- **Wall walk** (`GravityWalk`, client `GravityWalkClient`): once Gravity is fully mastered (or ascended, or
+  corrupted). Sneak while facing a wall you're pressed against, or with your head against a ceiling: you stand on
+  it. W goes the way you look along the surface (look up a wall and W climbs it), A/D go the way they look on
+  screen, sprint is faster. Jump pushes off; Sneak again lets go and you fall. Walk off the top of a wall and you
+  step up onto it; off any other edge, you fall. It drains a little hunger; the fall doesn't count while you're on.
+  **The view stays upright**: only your body turns (feet on the wall, upside down on a ceiling) for everyone else.
+  No wrapping round corners: walk off an edge and you drop.
+
 - `/power set @s gravity`
 - `/powerdebug gravity ready` clears every cooldown.
 - 0.8.25: aim R at a player 50 blocks off (corners show); G on grass (lumps rise, take one with R); B a zombie
