@@ -36,15 +36,19 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.10.72) Andy: every Verdant has antennae and some shade of green skin. A Verdant-born Z Fighter (never the Great Ape)
- * gets both: two stalks from the top of the forehead curling forward, each with a knob
+ * gets both: two stalks from the top of the forehead in one of seven shapes ({@link #SHAPES}, theirs from their UUID)
  * ({@code textures/entity/zfighter_antennae.png}, greyscale, tinted), and their own skin repainted green. Only the skin
  * tones in the skin are repainted (warm, not too grey, not too dark), so clothes keep their colours; the paint keeps
  * the skin's own shading. Each player's shade is their own, from their UUID. Kingdoms gives the Verdant World's
  * villagers the same look.
  */
 public final class ZFighterVerdantLook {
-	/** The Verdant's green (opaque ARGB), or absent for anyone else. */
-	public static final RenderStateDataKey<Integer> KEY = RenderStateDataKey.create(() -> "jaymospowers:zfighter_verdant");
+	/** A Verdant's green (opaque ARGB) and antenna shape ({@link #SHAPES}). */
+	public record Look(int green, int variant) {
+	}
+
+	/** The Verdant's look, or absent for anyone else. */
+	public static final RenderStateDataKey<Look> KEY = RenderStateDataKey.create(() -> "jaymospowers:zfighter_verdant");
 	static final Identifier TEXTURE = JaymosPowers.id("textures/entity/zfighter_antennae.png");
 	/** Greens from the palest to the deepest, and how far a shade leans yellow or blue. */
 	static final int PALE = 0xA6DE86, DEEP = 0x2F6E2A;
@@ -53,10 +57,23 @@ public final class ZFighterVerdantLook {
 	static final float SKIN_HUE_MIN = 0.0F, SKIN_HUE_MAX = 40.0F, SKIN_SAT_MIN = 0.12F, SKIN_SAT_MAX = 0.78F, SKIN_VALUE_MIN = 0.22F;
 	/** A skin pixel this bright comes out the Verdant's own green; brighter and darker ones keep their shading around it. */
 	static final float SKIN_MIDTONE = 0.78F;
-	/** Where the stalks stand (pixels from the head's middle, out to each side and back from the brow), how far they lean. */
-	static final float APART = 1.5F, BACK = -2.0F, LEAN_OUT = 0.3F, LEAN_BACK = -0.2F, CURL = 0.75F;
+	/**
+	 * The antenna shapes, one per Verdant (picked from their UUID): where the stalks stand (pixels out from the head's
+	 * middle, back from the brow), how they lean (out, back), the base stalk's length, the upper stalk's curl forward
+	 * and out and its length, the knob's size (0: none), and a side prong (1) or not (0).
+	 */
+	static final float[][] SHAPES = {
+		// apart, back, leanOut, leanBack, base, curl, curlOut, tip, knob, prong
+		{1.5F, -2.0F, 0.30F, -0.20F, 4, 0.75F, 0.10F, 4, 2, 0}, // curled: up, then forward, a knob on the end
+		{1.5F, -1.5F, 0.12F, -0.05F, 6, 0.00F, 0.00F, 3, 1, 0}, // tall: straight up, a bead on top
+		{2.0F, -1.0F, 0.35F, -0.90F, 5, -0.40F, 0.15F, 5, 0, 0}, // swept: laid back over the head like feelers
+		{1.5F, -2.0F, 0.45F, 0.00F, 2, 0.30F, 0.00F, 1, 3, 0}, // stubby: short, with big bulbs
+		{2.0F, -2.5F, 0.60F, -0.10F, 4, 0.00F, 1.20F, 4, 2, 0}, // drooping: out to the sides and hanging down
+		{1.5F, -2.0F, 0.25F, -0.15F, 4, 0.50F, -0.40F, 3, 1, 1}, // forked: a prong off each, the tips bending in
+		{2.5F, -2.5F, 0.70F, -0.30F, 3, 0.90F, 0.30F, 5, 0, 0}, // moth: wide-set, long and arching forward
+	};
 
-	private static ModelPart antennae;
+	private static final ModelPart[] ANTENNAE = new ModelPart[SHAPES.length];
 	/** Repainted skins: "<skin>|<green>" → the green skin's texture. */
 	private static final Map<String, Identifier> SKINS = new HashMap<>();
 
@@ -83,7 +100,7 @@ public final class ZFighterVerdantLook {
 
 	static void extract(Avatar entity, AvatarRenderState state) {
 		boolean verdant = entity instanceof Player player && ZFighterLineage.of(player) == ZFighterLineage.VERDANT && !ZFighterLineage.ape(player);
-		state.setData(KEY, verdant ? green(entity.getUUID()) : null);
+		state.setData(KEY, verdant ? new Look(green(entity.getUUID()), variant(entity.getUUID())) : null);
 	}
 
 	/** The local player's green, for their own arms in first person; null when they're no Verdant. */
@@ -154,22 +171,35 @@ public final class ZFighterVerdantLook {
 		}
 	}
 
-	private static ModelPart antennae() {
-		if (antennae == null) {
+	/** Which shape {@code id}'s antennae are. */
+	static int variant(java.util.UUID id) {
+		return Math.floorMod(Long.hashCode(id.getLeastSignificantBits() * 31L + id.getMostSignificantBits()), SHAPES.length);
+	}
+
+	private static ModelPart antennae(int variant) {
+		if (ANTENNAE[variant] == null) {
+			float[] s = SHAPES[variant];
 			MeshDefinition mesh = new MeshDefinition();
 			PartDefinition root = mesh.getRoot();
 			for (int side = -1; side <= 1; side += 2) {
 				String name = side < 0 ? "right" : "left";
-				PartDefinition stalk = root.addOrReplaceChild(name, CubeListBuilder.create().texOffs(0, 0).addBox(-0.5F, -4.0F, -0.5F, 1.0F, 4.0F, 1.0F),
-					PartPose.offsetAndRotation(side * APART, -8.0F, BACK, LEAN_BACK, 0.0F, side * LEAN_OUT));
-				PartDefinition tip = stalk.addOrReplaceChild(name + "_tip", CubeListBuilder.create().texOffs(4, 0).addBox(-0.5F, -4.0F, -0.5F, 1.0F, 4.0F, 1.0F),
-					PartPose.offsetAndRotation(0.0F, -4.0F, 0.0F, CURL, 0.0F, side * 0.1F));
-				tip.addOrReplaceChild(name + "_knob", CubeListBuilder.create().texOffs(0, 6).addBox(-1.0F, -1.5F, -1.0F, 2.0F, 2.0F, 2.0F),
-					PartPose.offset(0.0F, -4.0F, 0.0F));
+				PartDefinition stalk = root.addOrReplaceChild(name, CubeListBuilder.create().texOffs(0, 0).addBox(-0.5F, -s[4], -0.5F, 1.0F, s[4], 1.0F),
+					PartPose.offsetAndRotation(side * s[0], -8.0F, s[1], s[3], 0.0F, side * s[2]));
+				if (s[9] > 0) {
+					stalk.addOrReplaceChild(name + "_prong", CubeListBuilder.create().texOffs(0, 8).addBox(-0.5F, -2.0F, -0.5F, 1.0F, 2.0F, 1.0F),
+						PartPose.offsetAndRotation(0.0F, -s[4] + 0.5F, 0.0F, 0.2F, 0.0F, side * 0.9F));
+				}
+				PartDefinition tip = stalk.addOrReplaceChild(name + "_tip", CubeListBuilder.create().texOffs(4, 0).addBox(-0.5F, -s[7], -0.5F, 1.0F, s[7], 1.0F),
+					PartPose.offsetAndRotation(0.0F, -s[4], 0.0F, s[5], 0.0F, side * s[6]));
+				float knob = s[8];
+				if (knob > 0) {
+					tip.addOrReplaceChild(name + "_knob", CubeListBuilder.create().texOffs(8, 0).addBox(-knob / 2, -knob, -knob / 2, knob, knob, knob),
+						PartPose.offset(0.0F, -s[7] + 0.5F, 0.0F));
+				}
 			}
-			antennae = LayerDefinition.create(mesh, 16, 16).bakeRoot();
+			ANTENNAE[variant] = LayerDefinition.create(mesh, 32, 16).bakeRoot();
 		}
-		return antennae;
+		return ANTENNAE[variant];
 	}
 
 	static final class Layer extends RenderLayer<AvatarRenderState, PlayerModel> {
@@ -179,13 +209,14 @@ public final class ZFighterVerdantLook {
 
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
-			Integer green = state.getData(KEY);
-			if (green == null || state.isInvisible || !this.getParentModel().head.visible) {
+			Look look = state.getData(KEY);
+			if (look == null || state.isInvisible || !this.getParentModel().head.visible) {
 				return;
 			}
 			poseStack.pushPose();
 			this.getParentModel().head.translateAndRotate(poseStack);
-			collector.submitModelPart(antennae(), poseStack, RenderTypes.entityCutout(TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY, null, green);
+			collector.submitModelPart(antennae(look.variant()), poseStack, RenderTypes.entityCutout(TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY, null,
+				look.green());
 			poseStack.popPose();
 		}
 	}

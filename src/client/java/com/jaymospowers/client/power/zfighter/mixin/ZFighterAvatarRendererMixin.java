@@ -27,9 +27,9 @@ abstract class ZFighterAvatarRendererMixin {
 		method = "getTextureLocation(Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;)Lnet/minecraft/resources/Identifier;",
 		at = @At("RETURN"), cancellable = true)
 	private void jaymospowers$verdantSkin(AvatarRenderState state, CallbackInfoReturnable<Identifier> cir) {
-		Integer green = state.getData(ZFighterVerdantLook.KEY);
-		if (green != null) {
-			cir.setReturnValue(ZFighterVerdantLook.skin(cir.getReturnValue(), green));
+		ZFighterVerdantLook.Look look = state.getData(ZFighterVerdantLook.KEY);
+		if (look != null) {
+			cir.setReturnValue(ZFighterVerdantLook.skin(cir.getReturnValue(), look.green()));
 		}
 	}
 
