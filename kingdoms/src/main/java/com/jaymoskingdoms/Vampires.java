@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -22,6 +23,8 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -38,6 +41,7 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ambient.Bat;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -155,6 +159,9 @@ public final class Vampires {
 			Codec.STRING.fieldOf("kind").forGetter(Vampire::kind),
 			Codec.LONG.fieldOf("fed_night").forGetter(Vampire::fedNight),
 			Codec.LONG.fieldOf("fed_at").forGetter(Vampire::fedAt)).apply(i, Vampire::new));
+		/** (0.7.24) A vampire player is sent to every client (blood vision for them, the looks for everyone); villagers never are. */
+		static final StreamCodec<ByteBuf, Vampire> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.STRING_UTF8, Vampire::kind, ByteBufCodecs.VAR_LONG, Vampire::fedNight, ByteBufCodecs.VAR_LONG, Vampire::fedAt, Vampire::new);
 
 		Kind type() {
 			Kind k = Kind.parse(this.kind);
@@ -170,7 +177,7 @@ public final class Vampires {
 	}
 
 	static final AttachmentType<Vampire> VAMPIRE = AttachmentRegistry.create(JaymosKingdoms.id("vampire"),
-		builder -> builder.persistent(Vampire.CODEC).copyOnDeath());
+		builder -> builder.persistent(Vampire.CODEC).copyOnDeath().syncWith(Vampire.STREAM_CODEC.cast(), (target, viewer) -> target instanceof Player));
 	/** On the bitten who aren't turned yet: the Overworld clock when they were bitten. */
 	static final AttachmentType<Long> BITTEN = AttachmentRegistry.create(JaymosKingdoms.id("vampire_bitten"),
 		builder -> builder.persistent(Codec.LONG));
@@ -298,13 +305,13 @@ public final class Vampires {
 		return e instanceof ServerPlayer p && p.isAlive() && !p.isCreative() && !p.isSpectator() && !isVampire(p) && !WerewolfPlayers.beast(p);
 	}
 
-	static boolean night(long clock) {
+	public static boolean night(long clock) {
 		long t = Math.floorMod(clock, DAY);
 		return t >= NIGHT_FROM && t < NIGHT_TO;
 	}
 
 	/** The night {@code clock} belongs to: a morning counts with the night before it. */
-	static long nightIndex(long clock) {
+	public static long nightIndex(long clock) {
 		return Math.floorDiv(clock - NIGHT_FROM, DAY);
 	}
 

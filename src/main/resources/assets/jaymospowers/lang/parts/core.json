@@ -80,6 +80,5 @@
 	"message.jaymospowers.fracture.left_arm": "Your left arm is broken: it can't hold anything until it knits",
 	"message.jaymospowers.fracture.right_leg": "Your right leg is broken: you're limping",
 	"message.jaymospowers.fracture.left_leg": "Your left leg is broken: you're limping",
-	"message.jaymospowers.fracture.priest": "%s sets your broken bones",
-	"jaymospowers.terrain_loading": "Terrain ahead still loading: slowing down"
+	"message.jaymospowers.fracture.priest": "%s sets your broken bones"
 }

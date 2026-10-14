@@ -69,13 +69,13 @@ final class ZFighterTechniques {
 	/** A lending player's own appetite pays a little (exhaustion a second). */
 	static final float SPIRIT_LEND_EXHAUSTION = 0.5F;
 	static final float SPIRIT_MIN_THROW = 10.0F;
-	static final float SPIRIT_BASE_DAMAGE = 20.0F;
-	static final float SPIRIT_DAMAGE_PER_ENERGY = 0.35F;
+	static final float SPIRIT_BASE_DAMAGE = 30.0F;
+	static final float SPIRIT_DAMAGE_PER_ENERGY = 0.5F;
 	static final double SPIRIT_SPEED = 0.7;
 	/** The sphere's radius at full: 15, so 30 blocks across. */
 	static final double SPIRIT_MAX_SIZE = 15.0;
 	/** Where it lands: hurt reach and blast power, per block of its radius. */
-	static final double SPIRIT_REACH_PER_SIZE = 2.0;
+	static final double SPIRIT_REACH_PER_SIZE = 2.5;
 	static final float SPIRIT_BURST_PER_SIZE = 1.0F;
 	/** How far off players still see the sphere drawn. */
 	static final double SPIRIT_SEEN = 256.0;
@@ -266,7 +266,12 @@ final class ZFighterTechniques {
 
 	/** Tells players near where the sphere is and how big, so they draw it. */
 	static void spiritFx(ServerLevel level, int id, Vec3 at, double size) {
-		ZFighterNet.SpiritFx fx = new ZFighterNet.SpiritFx(id, at.x, at.y, at.z, (float)size);
+		spiritFx(level, id, at, size, 0.0F);
+	}
+
+	/** ...and how bright (0-1): it glows brighter as it embeds itself, up to the burst. */
+	static void spiritFx(ServerLevel level, int id, Vec3 at, double size, float glow) {
+		ZFighterNet.SpiritFx fx = new ZFighterNet.SpiritFx(id, at.x, at.y, at.z, (float)size, glow);
 		for (ServerPlayer viewer : level.players()) {
 			if (viewer.position().distanceToSqr(at) <= SPIRIT_SEEN * SPIRIT_SEEN) {
 				ServerPlayNetworking.send(viewer, fx);

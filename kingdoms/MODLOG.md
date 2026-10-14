@@ -2860,3 +2860,27 @@ beating". (0.7.20 / 0.10.69 are the Kingdom languages PR's.)
 - Ops: `/kingdom neighbours grudge_beat|grudge_lure`: the nearest grown villager comes to hate the next nearest and
   offers you the quest.
 - Built; not yet seen in game.
+
+## 0.7.24: vampire looks and sight (pack 0.10.83)
+Andy: "vampirism should give you the sirben visual modifier" (Sirben is an MCA trait that changes the screen), then
+"do both of those": blood vision and the vampire looks as well.
+- **Sirben:** a vampire player's screen always wears MCA's own `mca:sirben` post effect (blur growing toward the
+  edges, tinted red), asked for by name each frame (`mixin/vampires/SirbenMixin`, `BloodVision.SIRBEN`); MCA is
+  GPL-3.0, so nothing of it is copied, and without MCA there's no Sirben.
+- **Blood vision** (`client/BloodVision`, tuning at the top): only at night (fades in at dusk, out at dawn over 2.5 s).
+  The screen's edges darken blood red (vanilla's vignette texture and pipeline, darkening green and blue only) and
+  beat like a heart (double thump every 24 ticks). Every living creature within 24 blocks, except undead, golems and
+  armour stands, glows through walls with a red outline that beats in time (`BloodGlowMixin`, `BloodGlowColorMixin`);
+  only the vampire sees it, and a creature glowing for another reason keeps its own colour. Starving
+  (`VampirePlayers.starving`, two nights without blood): the beat comes every 14 ticks, the edges go darker and blood
+  shows from 40 blocks.
+- **Looks** (`client/VampireLooks`, a layer on the player renderer; textures `tools/gen_vampire_looks.py`): everyone
+  sees a vampire player's face and hands washed ashen; at night, two fangs under the mouth and red eyes that glow in
+  the dark. The red eyes go where each skin's own eyes are (Andy: "try and match it on unusual skins"):
+  `VampireLooks.findEyes` reads the skin once (face plus hat layer), takes the most common colour as skin tone and
+  picks the row from 9 to 13 with the most mirrored pixel pairs that stand out from it (x 9-10 / 13-14 with plain
+  skin between; or x 11-12 alone for close-set eyes; ties go to row 12), plus a second row when the eyes are tall.
+  Eyes under a mask or glasses on the hat layer glow there too. A blank face, or a skin still downloading, uses the
+  stock spots (row 12). Checked against all nine default skins: each lands on its eyes.
+- `Vampires.VAMPIRE` on players now syncs to every client (villagers' never does).
+- Built; not yet seen in game.

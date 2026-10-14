@@ -18,7 +18,8 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * The Spirit Bomb drawn as what it is: a great ball of pale blue light, see-through at its rim, with energy streaming
- * round it (the beacon beam's texture, scrolling) and a white-hot heart. The server sends where it is every tick
+ * round it (the beacon beam's texture, scrolling) and a white-hot heart. Embedding itself before the burst, it glows
+ * brighter and brighter: the heart swells, everything whitens and a halo of light grows round it. The server sends where it is every tick
  * ({@link ZFighterNet.SpiritFx}); it's drawn between the last two places, and goes when they stop coming.
  */
 public final class ZFighterSpirit {
@@ -39,6 +40,8 @@ public final class ZFighterSpirit {
 		Vec3 at;
 		float prevSize;
 		float size;
+		float prevGlow;
+		float glow;
 		int quiet;
 		int age;
 	}
@@ -63,6 +66,8 @@ public final class ZFighterSpirit {
 			live.prevSize = live.size;
 			live.at = at;
 			live.size = fx.size();
+			live.prevGlow = live.glow;
+			live.glow = fx.glow();
 			live.quiet = 0;
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
@@ -92,16 +97,37 @@ public final class ZFighterSpirit {
 			Vec3 at = live.prev.lerp(live.at, partial).subtract(camera);
 			float size = Mth.lerp(partial, live.prevSize, live.size);
 			float time = live.age + partial;
-			// it breathes a little
-			float pulse = 1.0F + 0.03F * Mth.sin(time * 0.25F);
+			float glow = Mth.lerp(partial, live.prevGlow, live.glow);
+			// it breathes a little, quicker and harder as it glows towards the burst
+			float pulse = 1.0F + (0.03F + 0.05F * glow) * Mth.sin(time * (0.25F + glow * 0.9F));
 			float r = size * pulse;
+			int heart = HEART;
+			int inner = brighten(INNER, glow);
+			int shell = brighten(SHELL, glow);
+			float core = CORE + (0.92F - CORE) * glow;
 			context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.beaconBeam(BeaconRenderer.BEAM_LOCATION, false),
-				(pose, buffer) -> sphere(buffer, pose, at, r * CORE, HEART, time * SPIN * 1.7F, time * FLOW * 1.5F));
+				(pose, buffer) -> sphere(buffer, pose, at, r * core, heart, time * SPIN * 1.7F, time * FLOW * 1.5F));
 			context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.beaconBeam(BeaconRenderer.BEAM_LOCATION, true),
-				(pose, buffer) -> sphere(buffer, pose, at, r * 0.85F, INNER, -time * SPIN, time * FLOW));
+				(pose, buffer) -> sphere(buffer, pose, at, r * Math.max(0.85F, core + 0.03F), inner, -time * SPIN, time * FLOW));
 			context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.beaconBeam(BeaconRenderer.BEAM_LOCATION, true),
-				(pose, buffer) -> sphere(buffer, pose, at, r, SHELL, time * SPIN, -time * FLOW * 0.7F));
+				(pose, buffer) -> sphere(buffer, pose, at, r, shell, time * SPIN, -time * FLOW * 0.7F));
+			if (glow > 0.02F) {
+				// a halo of light round it, growing as it glows
+				int halo = ((int)(glow * 0x70) << 24) | 0xE8F6FF;
+				float hr = r * (1.0F + 0.35F * glow);
+				context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.beaconBeam(BeaconRenderer.BEAM_LOCATION, true),
+					(pose, buffer) -> sphere(buffer, pose, at, hr, halo, -time * SPIN * 0.5F, time * FLOW * 2.0F));
+			}
 		}
+	}
+
+	/** {@code argb} towards white and opaque, by {@code glow} (0-1). */
+	private static int brighten(int argb, float glow) {
+		int a = (int)Mth.lerp(glow, argb >>> 24, 255);
+		int r = (int)Mth.lerp(glow, argb >> 16 & 0xFF, 255);
+		int g = (int)Mth.lerp(glow, argb >> 8 & 0xFF, 255);
+		int b = (int)Mth.lerp(glow, argb & 0xFF, 255);
+		return a << 24 | r << 16 | g << 8 | b;
 	}
 
 	/** A ball of {@link #LON} by {@link #LAT} faces, the texture wrapped round it and turning; both sides drawn. */

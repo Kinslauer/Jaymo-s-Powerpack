@@ -3,7 +3,6 @@ package com.jaymospowers.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
@@ -26,11 +25,6 @@ public final class TerrainAhead {
 	static final double LEAD_TICKS = 20;
 	/** spacing of the look-ahead checks, in blocks */
 	static final double STEP = 8;
-	/** ticks between "terrain loading" notes on the action bar */
-	static final int NOTE_EVERY = 40;
-
-	private static long lastNote;
-
 	private TerrainAhead() {
 	}
 
@@ -67,11 +61,6 @@ public final class TerrainAhead {
 		double allowed = Math.max(MIN_SPEED, ready / LEAD_TICKS);
 		if (speed <= allowed) {
 			return delta;
-		}
-		long now = level.getGameTime();
-		if (entity == mc.player && now - lastNote >= NOTE_EVERY) {
-			lastNote = now;
-			mc.player.sendOverlayMessage(Component.translatable("jaymospowers.terrain_loading"));
 		}
 		double scale = allowed / speed;
 		return new Vec3(delta.x * scale, delta.y, delta.z * scale);

@@ -38,7 +38,8 @@ public class ZFighterRogueRenderer extends MobRenderer<ZFighterRogue, AvatarRend
 		state.id = entity.getId();
 		state.setData(ZFighterRogueRenderer.KIND, entity.kind());
 		int form = entity.form();
-		state.setData(ZFighterHair.KEY, form <= 0 ? null : new ZFighterHair.Hair(form, form >= 2 ? SUPER_2_HAIR : SUPER_HAIR));
+		state.setData(ZFighterHair.KEY, form <= 0 ? null : new ZFighterHair.Hair(form, form >= 2 ? SUPER_2_HAIR : SUPER_HAIR,
+			ZFighterHair.style(entity.getUUID())));
 	}
 
 	static final net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey<Integer> KIND =

@@ -335,7 +335,7 @@ public final class ZFighterTraining {
 		live.lastZ = player.getZ();
 		// meditation: sneaking, still, on the ground, unhurt
 		boolean still = player.isShiftKeyDown() && player.onGround() && player.getDeltaMovement().horizontalDistanceSqr() < 1.0E-4
-			&& player.hurtTime == 0 && !live.charging && live.waveFrom < 0;
+			&& player.hurtTime == 0 && !live.charging && live.waveFrom < 0 && live.barrageFrom < 0;
 		live.meditating = still ? live.meditating + 1 : 0;
 		if (live.meditating >= MEDITATE_AFTER && live.meditating % 20 == 0) {
 			earn(player, MEDITATE_TP);
