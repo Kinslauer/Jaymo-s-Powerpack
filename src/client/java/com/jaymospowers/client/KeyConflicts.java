@@ -16,23 +16,27 @@ import net.minecraft.client.Minecraft;
 final class KeyConflicts {
 	/**
 	 * Bump to run the move again (for a new clash in a later pack version). v2 (0.9.23): Camera Utils' zoom, on Z (the
-	 * pack zooms with OK Zoomer).
+	 * pack zooms with OK Zoomer). v3 (0.10.52): Traveler Tool Belt on R; Shoulder Surfing's free look on Left Alt (OK
+	 * Zoomer's zoom) and swap shoulder on U (Kingdoms' werewolf shift).
 	 */
-	private static final String MARKER = "jaymospowers-keys-v2";
+	private static final String MARKER = "jaymospowers-keys-v3";
 
 	/** Key mapping name → where it goes (unknown = unbound), applied only while it's still on {@code from}. */
 	private record Move(String from, String to) {
 	}
 
-	private static final Map<String, Move> MOVES = Map.of(
-		"gui.xaero_new_waypoint", new Move("key.keyboard.b", "key.keyboard.n"),
-		"gui.xaero_enlarge_map", new Move("key.keyboard.z", "key.keyboard.m"),
-		"key.pantryforblockheads.your_key", new Move("key.keyboard.b", "key.keyboard.k"),
-		"key.ok_zoomer.zoom", new Move("key.keyboard.c", "key.keyboard.left.alt"),
-		"key.quickActions", new Move("key.keyboard.g", "key.keyboard.j"),
-		"key.saveToolbarActivator", new Move("key.keyboard.c", "key.keyboard.unknown"),
-		"key.loadToolbarActivator", new Move("key.keyboard.x", "key.keyboard.unknown"),
-		"key.camerautils.zoom", new Move("key.keyboard.z", "key.keyboard.unknown"));
+	private static final Map<String, Move> MOVES = Map.ofEntries(
+		Map.entry("gui.xaero_new_waypoint", new Move("key.keyboard.b", "key.keyboard.n")),
+		Map.entry("gui.xaero_enlarge_map", new Move("key.keyboard.z", "key.keyboard.m")),
+		Map.entry("key.pantryforblockheads.your_key", new Move("key.keyboard.b", "key.keyboard.k")),
+		Map.entry("key.ok_zoomer.zoom", new Move("key.keyboard.c", "key.keyboard.left.alt")),
+		Map.entry("key.quickActions", new Move("key.keyboard.g", "key.keyboard.j")),
+		Map.entry("key.saveToolbarActivator", new Move("key.keyboard.c", "key.keyboard.unknown")),
+		Map.entry("key.loadToolbarActivator", new Move("key.keyboard.x", "key.keyboard.unknown")),
+		Map.entry("key.camerautils.zoom", new Move("key.keyboard.z", "key.keyboard.unknown")),
+		Map.entry("key.travelertoolbelt.open_toolbelt", new Move("key.keyboard.r", "key.keyboard.caps.lock")),
+		Map.entry("key.shouldersurfing.free_look", new Move("key.keyboard.left.alt", "key.keyboard.right.alt")),
+		Map.entry("key.shouldersurfing.swap_shoulder", new Move("key.keyboard.u", "key.keyboard.o")));
 
 	private KeyConflicts() {
 	}

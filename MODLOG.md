@@ -1077,3 +1077,14 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   than they're ready, with a "terrain loading" note, and picks up again as they load (`client/TerrainAhead`). Before,
   players flew into land the game hadn't shown and stuck on invisible blocks. Chunky is back to pre-generate the world
   from the server console, so most of the map loads from disk instead of being generated under a flyer.
+- **0.10.52, Andy's immersion mods:** Shoulder Surfing Reloaded (MIT) is the third-person camera for everyone: F5 goes
+  to an over-the-shoulder view with the crosshair (Right Alt free look, O swaps shoulder, arrows and Page Up/Down move
+  the camera), set to Andy's old Camera Utils F7 numbers (3.4 back, 0.9 right, 0.1 up) and kept coupled to the body so
+  powers fire where the crosshair points (`client/CameraPreset`). It refuses to load beside Camera Utils, so Camera
+  Utils left the pack, and our own Web/Gravity/Z Fighter shoulder view (`ShoulderCamera` and its mixins) went with it;
+  Chrono's Time Flow lets Shoulder Surfing hold the camera. Added: Stormie's Spiders (the maintained Spiders 2.0 fork),
+  Nether Portal Spread and Traveler Tool Belt (gigaherz's Tool Belt is NeoForge-only); `client/KeyConflicts` v3 moves
+  the belt off R to Caps Lock, Shoulder Surfing's free look off Left Alt (OK Zoomer) and swap shoulder off U (werewolf
+  shift). Kingdoms 0.7.12 remakes Realistic Torches and Total Darkness (see kingdoms/MODLOG.md). Turned down: Mo'
+  Bends (fights Fresh Animations/EMF and our poses), Immersive Portals (1.21.1 at newest), Better Third Person (1.21.8,
+  and Shoulder Surfing refuses to load beside it). Not yet seen in game.

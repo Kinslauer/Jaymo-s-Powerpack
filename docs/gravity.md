@@ -124,10 +124,9 @@ A Gravity user lightens whatever they hold, at every mastery level (`GravityWeig
 - **Meteor (C)** tears through every breakable block it passes on the way down (`GravityMeteor.carve`: 0.8 of its
   width, at most 7 blocks from its middle, 600 blocks a tick, 10% drop as items), so a roof it falls through is
   gone before the impact blast.
-- **Shoulder view (Web and Gravity)**: F5 flips between first person and an over-the-shoulder third person (2.6
-  blocks back, 0.7 right, 0.15 up, pulled in by walls) with the crosshair shown; the front-facing view is skipped
-  (`client/ShoulderCamera` and the `Shoulder*` mixins in `jaymospowers.client.mixins.json`). Other powers keep
-  vanilla's views.
+- **Shoulder view**: since 0.10.52 Shoulder Surfing Reloaded gives everyone the over-the-shoulder F5 view (our own
+  Web/Gravity/Z Fighter one is gone; `client/CameraPreset` sets its offsets and keeps the camera coupled so abilities
+  fire where the crosshair points).
 
 ## 0.10.11: Sideways falls, falling forward, wall walk
 Ideas from Gravity Control (MIT; a NeoForge 1.21.1 fork of Gravity API), remade here: that mod turns the actual

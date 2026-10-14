@@ -110,9 +110,14 @@ public final class ChronoFlowClient {
 		}
 	}
 
-	/** Whether the camera should sit over your shoulder now (Time Flow on, its third-person view in place). */
+	private static final boolean SHOULDER_SURFING = net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("shouldersurfing");
+
+	/**
+	 * Whether the camera should sit over your shoulder now (Time Flow on, its third-person view in place). Not with
+	 * Shoulder Surfing Reloaded, whose own shoulder view already takes F5's third person.
+	 */
 	public static boolean overShoulder(Minecraft minecraft) {
-		return viewBefore != null && minecraft.player != null && minecraft.getCameraEntity() == minecraft.player
+		return !SHOULDER_SURFING && viewBefore != null && minecraft.player != null && minecraft.getCameraEntity() == minecraft.player
 			&& ChronoFlow.on(minecraft.player) && minecraft.options.getCameraType() == CameraType.THIRD_PERSON_BACK;
 	}
 

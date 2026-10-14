@@ -1,8 +1,6 @@
 package com.jaymospowers.client;
 
 import java.io.IOException;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -14,90 +12,78 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 
 /**
- * Camera Utils (Max Henkel), if it's installed: its second custom third-person view, on F7, is set once per install to
- * Andy's preset ({@link #PRESET}: 3.4 blocks back, 0.1 up, 0.9 to the side, tipped 3 degrees, GUI kept). It reads its
- * config in its own client entrypoint, so the file is written here, before any mod starts. After that, players' own
- * changes (Right Alt + F7) are never touched.
- *
- * <p>While one of its views (or its detached camera) is on, the Web/Gravity shoulder view stands aside
- * ({@link #viewActive()}); its state is read by reflection, so it isn't a compile dependency.
+ * Shoulder Surfing Reloaded, if it's installed (0.10.52; it replaced Camera Utils and our own power-only shoulder view):
+ * once per install, its view is set to Andy's old Camera Utils F7 preset ({@link #PRESET}: 3.4 blocks back, 0.1 up, 0.9
+ * to the right), F5 goes straight to it instead of vanilla's view from behind, and the camera stays coupled to the
+ * player, so powers that fire along your look (Web, Gravity, Z Fighter) still go where the crosshair points. Its
+ * config is read by Forge Config API Port when it starts, so the file is written here, before any mod does; keys we
+ * don't write are filled in with its defaults. After that, players' own changes are never touched.
  */
 public final class CameraPreset implements PreLaunchEntrypoint {
 	/** Bump to set the preset again (for a new preset in a later pack version). */
-	private static final String MARKER = "jaymospowers-camera-preset-v1";
-	/** Camera Utils' config keys for its view 2 (F7) and the values to put there. */
-	private static final Map<String, String> PRESET = new LinkedHashMap<>();
+	private static final String MARKER = "jaymospowers-camera-preset-v2";
+	/** TOML table → key → value, in Shoulder Surfing's client config. */
+	private static final Map<String, Map<String, String>> PRESET = new LinkedHashMap<>();
 
 	static {
-		PRESET.put("third_person_cam_2_offset_x", "-3.4");
-		PRESET.put("third_person_cam_2_offset_y", "0.1");
-		PRESET.put("third_person_cam_2_offset_z", "0.9");
-		PRESET.put("third_person_cam_2_rotation_x", "-3.0");
-		PRESET.put("third_person_cam_2_inverted", "false");
-		PRESET.put("third_person_cam_2_hide_gui", "false");
+		PRESET.put("camera.offset", new LinkedHashMap<>(Map.of("offset_x", "-0.9", "offset_y", "0.1", "offset_z", "3.4")));
+		PRESET.put("camera", new LinkedHashMap<>(Map.of("decoupled_camera", "false")));
+		PRESET.put("perspective", new LinkedHashMap<>(Map.of("replace_default_perspective", "true")));
 	}
-
-	private static final boolean LOADED = FabricLoader.getInstance().isModLoaded("camerautils");
-	private static final String CONFIG_CLASS = "de.maxhenkel.camerautils.config.ClientConfig";
-	private static VarHandle thirdPersonCam, detached;
-	private static boolean looked;
 
 	@Override
 	public void onPreLaunch() {
 		FabricLoader loader = FabricLoader.getInstance();
-		if (!LOADED || loader.getEnvironmentType() != EnvType.CLIENT) {
+		if (!loader.isModLoaded("shouldersurfing") || loader.getEnvironmentType() != EnvType.CLIENT) {
 			return;
 		}
 		Path marker = loader.getConfigDir().resolve(MARKER);
 		if (Files.exists(marker)) {
 			return;
 		}
-		Path config = loader.getConfigDir().resolve("camerautils").resolve("camerautils.properties");
+		Path config = loader.getConfigDir().resolve("shouldersurfing-client.toml");
 		try {
 			List<String> lines = Files.exists(config) ? new ArrayList<>(Files.readAllLines(config)) : new ArrayList<>();
-			Map<String, String> left = new LinkedHashMap<>(PRESET);
+			Map<String, Map<String, String>> left = new LinkedHashMap<>();
+			PRESET.forEach((table, keys) -> left.put(table, new LinkedHashMap<>(keys)));
+			// set the keys already in the file where they are
+			String table = "";
 			for (int i = 0; i < lines.size(); i++) {
-				String line = lines.get(i);
+				String line = lines.get(i).trim();
+				if (line.startsWith("[") && line.endsWith("]")) {
+					table = line.substring(1, line.length() - 1).trim();
+					continue;
+				}
 				int eq = line.indexOf('=');
-				if (!line.startsWith("#") && eq > 0) {
-					String value = left.remove(line.substring(0, eq).trim());
+				Map<String, String> keys = left.get(table);
+				if (keys != null && !line.startsWith("#") && eq > 0) {
+					String value = keys.remove(line.substring(0, eq).trim());
 					if (value != null) {
-						lines.set(i, line.substring(0, eq).trim() + "=" + value);
+						lines.set(i, lines.get(i).substring(0, lines.get(i).indexOf('=')) + "= " + value);
 					}
 				}
 			}
-			left.forEach((key, value) -> lines.add(key + "=" + value));
+			// the rest go at the end, each under its own table header (TOML allows a table once, so only new ones)
+			for (Map.Entry<String, Map<String, String>> entry : left.entrySet()) {
+				if (entry.getValue().isEmpty()) {
+					continue;
+				}
+				if (lines.stream().anyMatch(l -> l.trim().equals("[" + entry.getKey() + "]"))) {
+					// the table is there but lacks the key: put it straight after the header
+					int at = lines.indexOf(lines.stream().filter(l -> l.trim().equals("[" + entry.getKey() + "]")).findFirst().orElseThrow()) + 1;
+					for (Map.Entry<String, String> key : entry.getValue().entrySet()) {
+						lines.add(at++, "\t" + key.getKey() + " = " + key.getValue());
+					}
+					continue;
+				}
+				lines.add("[" + entry.getKey() + "]");
+				entry.getValue().forEach((key, value) -> lines.add("\t" + key + " = " + value));
+			}
 			Files.createDirectories(config.getParent());
 			Files.write(config, lines);
-			Files.writeString(marker, "Jaymo's Powers set Camera Utils' F7 view to the pack's preset. Delete this file to do it again.\n");
+			Files.writeString(marker, "Jaymo's Powers set Shoulder Surfing's view to the pack's preset. Delete this file to do it again.\n");
 		} catch (IOException e) {
-			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't set Camera Utils' F7 preset in {}", config, e);
-		}
-	}
-
-	/** One of Camera Utils' custom views (F6/F7) or its detached camera is on right now. */
-	public static boolean viewActive() {
-		if (!LOADED) {
-			return false;
-		}
-		if (!looked) {
-			looked = true;
-			try {
-				MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(Class.forName(CONFIG_CLASS), MethodHandles.lookup());
-				thirdPersonCam = lookup.findStaticVarHandle(lookup.lookupClass(), "thirdPersonCam", int.class);
-				detached = lookup.findStaticVarHandle(lookup.lookupClass(), "detached", boolean.class);
-			} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
-				thirdPersonCam = null;
-				detached = null;
-			}
-		}
-		if (thirdPersonCam == null) {
-			return false;
-		}
-		try {
-			return (int)thirdPersonCam.get() >= 0 || (boolean)detached.get();
-		} catch (RuntimeException e) {
-			return false;
+			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't set Shoulder Surfing's preset in {}", config, e);
 		}
 	}
 }

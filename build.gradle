@@ -110,6 +110,18 @@ def packMods = [
 	// that's already generated loads from disk many times faster. Back since 0.10.51 (it left in 0.8.118 for a hang that
 	// was Distant Horizons'). Server-side; harmless on clients.
 	[dep: "maven.modrinth:chunky:4Eotm6ov", cf: [433175, 8036332]],
+	// Stormie's Spiders (LGPL-2.1+, by demistorm): the maintained fork of Spiders 2.0 for 26.3. Spiders and cave spiders
+	// walk up walls and across ceilings, and path round almost anything. Client and server.
+	[dep: "maven.modrinth:stormies-spiders:jTOAPFV5", cf: [1395945, 8916944]],
+	// Nether Portal Spread (all rights reserved, by Serilum; modpacks allowed while downloads stay on CurseForge/Modrinth;
+	// needs Collective, above): a lit nether portal slowly turns the overworld round it to netherrack, magma and soul
+	// sand. Server-side.
+	[dep: "maven.modrinth:nether-portal-spread:WcSmdj09", cf: [342097, 9033522]],
+	// Traveler Tool Belt (all rights reserved, by Tiviacz; downloaded by id, never copied): an upgradeable belt worn on
+	// the hip; hold its key for a radial menu that swaps the tool into your hand. gigaherz's Tool Belt is NeoForge-only.
+	// Its key starts on R (a power key): client/KeyConflicts moves it to Caps Lock. Needs Forge Config API Port.
+	// Client and server.
+	[dep: "maven.modrinth:traveler-tool-belt:r5bfVDn1", cf: [1457447, 9070319]],
 	// Naturalist (code MIT, art all rights reserved; Starfish Studios' own 26.3 Fabric build, needs only Fabric API):
 	// wildlife. Kingdoms keeps its predators out of natural spawning and sends them as rare wilderness encounters
 	// (Encounters), and keeps its elephants and mammoths out too since Kingdoms has its own
@@ -117,10 +129,12 @@ def packMods = [
 	// Iris Shaders (LGPL-3.0): shader packs (Options > Video Settings > Shader Packs); built on the pack's Sodium.
 	// Client-only: the server ignores it.
 	[dep: "maven.modrinth:iris:vTN4NRGW", cf: [455508, 9015108], dev: false],
-	// Camera Utils (all rights reserved, by Max Henkel; downloaded by id, never copied): zoom, detached camera and two
-	// custom third-person views on F6 and F7 (Right Alt + the key edits one). Client-only. Jaymo's Powers sets its F7
-	// view to Andy's preset once per install (client/CameraPreset) and takes its zoom off Z (client/KeyConflicts).
-	[dep: "maven.modrinth:camera-utils:5XAah6bJ", cf: [510234, 8887090]],
+	// Shoulder Surfing Reloaded (MIT, by Exopandora): the third-person camera for everyone, over the shoulder with a
+	// crosshair, free look (Right Alt), swap shoulder (O) and adaptive see-through when the view is blocked. Replaced Camera
+	// Utils (it refuses to load beside it) and our own power-only shoulder view in 0.10.52. Jaymo's Powers sets Andy's
+	// old F7 numbers as its view once per install (client/CameraPreset) and moves its keys off ours (client/KeyConflicts).
+	// Client-only; needs Forge Config API Port (below).
+	[dep: "maven.modrinth:shoulder-surfing-reloaded:sEg9bfXx", cf: [243190, 9013849]],
 	// Forge Config API Port (MPL-2.0, Fuzs): config library that TaCZ: Refabricated needs (packModsOverride).
 	[dep: "maven.modrinth:forge-config-api-port:JpKvrr9J", cf: [547434, 8938808]],
 	// Entity Model Features and Entity Texture Features (both LGPL-3.0, by Traben): custom entity models and animations
@@ -207,8 +221,9 @@ def packResourcePacks = [
 def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-", "alexs-mobs-", "citadel-"]
 // the same, by Fabric mod id, for mods whose CurseForge file names we don't know: Alex's Mobs and Citadel (0.8.107,
 // their models drew black slabs and streaks across the screen with Iris shaders), Distant Horizons (0.9.6, taken out
-// at Andy's request; a new world on the Deck's server had hung at startup with it)
-def removedIdsFromProfile = ["alexsmobs", "citadel", "distanthorizons"]
+// at Andy's request; a new world on the Deck's server had hung at startup with it), Camera Utils (0.10.52, Shoulder
+// Surfing Reloaded won't load beside it)
+def removedIdsFromProfile = ["alexsmobs", "citadel", "distanthorizons", "camerautils"]
 // a jar's Fabric mod id (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's
 def modId = { File jar ->
 	try {

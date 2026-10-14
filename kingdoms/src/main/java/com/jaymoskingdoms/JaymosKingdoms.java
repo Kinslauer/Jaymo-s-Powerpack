@@ -126,6 +126,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.5) the night as a timelapse, and resting in bed awake (our own take on Sleeping Overhaul 2)
 		Timelapse.register();
 		BedRest.register();
+		// (0.7.12) placed torches burn down and go out (our own take on Realistic Torches)
+		Torches.register();
 		// 0.5.14: horses and wagons: mounted guards and archers for prosperous realms, a wealthy king's carriage, and the
 		// fiefdoms' caravans to their kingdoms (and their attachment)
 		Wagon.register();

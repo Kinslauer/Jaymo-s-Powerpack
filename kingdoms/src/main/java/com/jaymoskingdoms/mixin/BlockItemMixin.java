@@ -15,7 +15,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-/** (0.5.46) Remembers which player placed a block ({@link Placed}), so breaking it later is no crime for them. */
+/**
+ * (0.5.46) Remembers which player placed a block ({@link Placed}), so breaking it later is no crime for them. (0.7.12) A
+ * placed torch starts to burn down ({@link com.jaymoskingdoms.Torches}).
+ */
 @Mixin(BlockItem.class)
 abstract class BlockItemMixin {
 	@WrapOperation(method = "place", at = @At(value = "INVOKE",
@@ -25,6 +28,7 @@ abstract class BlockItemMixin {
 		original.call(block, level, pos, state, by, stack);
 		if (by instanceof ServerPlayer player && level instanceof ServerLevel server) {
 			Placed.placed(player, server, pos, state);
+			com.jaymoskingdoms.Torches.placed(server, pos, state);
 		}
 	}
 }
