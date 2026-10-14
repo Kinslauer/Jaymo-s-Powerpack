@@ -950,3 +950,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   element; read by name through `Classes.of`), the staff's five Better Combat swings each carry a gale: Gust, Wind
   Blade, Vortex, Piercing Gale, Downdraft (a slam from the air bounces you up). Right click is the Staff Vault (sneak:
   straight up), landing soft. See docs/wind.md.
+- **0.10.18, tidier Z Fighter training screen, a 30-block Spirit Bomb:** the X screen fits small screens (it shrinks to the window and is no
+  taller than 236): three tabs (Stats, Forms, Techniques) instead of two crowded pages, striped rows, and long text cut
+  with "..." instead of running off. Descriptions, form requirements and how Limit Break works show in full in a box
+  at the bottom when you point at a row. The lineage picker wraps its question and descriptions.
+  The Spirit Bomb grows up to 30 blocks across (radius 15, was 6) and is drawn as a ball of light (`ZFighterSpirit`,
+  sent by `ZFighterNet.SpiritFx`): a see-through pale blue shell with energy streaming round it and a white-hot heart.
+  When it meets the ground it grinds down into it for 2 seconds, the earth spraying up round it, then bursts: a blast
+  of power 3 + its radius (18 at full) with a ring of 8 more round it, hurting foes out to 3 + 2 per block of radius.

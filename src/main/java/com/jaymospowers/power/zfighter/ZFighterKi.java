@@ -8,6 +8,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
@@ -110,6 +114,15 @@ final class ZFighterKi {
 	static final int BEAM_TICKS = 12;
 	/** Players this near a beam's middle see it drawn. */
 	static final double BEAM_SEEN = 160.0;
+	/** How far ahead of its middle (in its sizes) the Spirit Bomb's leading edge meets the ground. */
+	static final double SPIRIT_LEAD = 0.6;
+	/** Once it meets the ground it grinds down this slowly, this long, before it bursts. */
+	static final double SPIRIT_SINK_SPEED = 0.15;
+	static final int SPIRIT_SINK_TICKS = 40;
+	/** The ring of blasts round the main one: how many, how far out (in its sizes) and how strong (of the main one). */
+	static final int SPIRIT_RING = 8;
+	static final double SPIRIT_RING_AT = 0.7;
+	static final float SPIRIT_RING_POWER = 0.55F;
 
 	// ---- Flash Step ----
 	static final float STEP_KI = 15.0F;
@@ -177,6 +190,10 @@ final class ZFighterKi {
 		float burst;
 		double radius;
 		boolean griefing;
+		/** SPIRIT: the thrower's entity id, so the client keeps drawing the same sphere it watched gather. */
+		int fxId;
+		/** SPIRIT: ticks it has been grinding into the ground (0 while it flies). */
+		int sinking;
 		/** DISC: who it has already cut (it passes through). */
 		final Set<Integer> struck = new HashSet<>();
 		int age;
@@ -274,10 +291,15 @@ final class ZFighterKi {
 		if (bolt.kind == HOMING) {
 			seek(owner, bolt);
 		}
+		if (bolt.kind == SPIRIT && bolt.sinking > 0) {
+			return sink(owner, bolt);
+		}
 		Vec3 from = bolt.pos;
 		Vec3 to = from.add(bolt.velocity);
-		BlockHitResult block = level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, owner));
-		Vec3 end = block.getType() == HitResult.Type.MISS ? to : block.getLocation();
+		// the Spirit Bomb is huge: it lands when its leading edge meets the ground, not its middle
+		Vec3 lead = bolt.kind == SPIRIT ? bolt.velocity.normalize().scale(bolt.size * SPIRIT_LEAD) : Vec3.ZERO;
+		BlockHitResult block = level.clip(new ClipContext(from.add(lead), to.add(lead), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, owner));
+		Vec3 end = block.getType() == HitResult.Type.MISS ? to : block.getLocation().subtract(lead);
 		DustParticleOptions dust = new DustParticleOptions(bolt.color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : bolt.color,
 			bolt.kind == BOMB || bolt.kind == SPIRIT ? 3.0F : 1.8F);
 		double reach = 1.0 + bolt.size;
@@ -310,7 +332,15 @@ final class ZFighterKi {
 			bolt.struck.add(target.getId());
 		}
 		if (block.getType() != HitResult.Type.MISS) {
-			if (bolt.kind == BOMB || bolt.kind == SPIRIT) {
+			if (bolt.kind == SPIRIT) {
+				// it doesn't burst on touching the ground: it grinds down into it first
+				bolt.sinking = 1;
+				bolt.pos = end;
+				bolt.velocity = bolt.velocity.normalize().scale(SPIRIT_SINK_SPEED);
+				ZFighterTechniques.spiritFx(level, bolt.fxId, end, bolt.size);
+				return true;
+			}
+			if (bolt.kind == BOMB) {
 				burst(owner, bolt, block.getLocation());
 			} else {
 				pop(level, block.getLocation(), dust);
@@ -318,6 +348,9 @@ final class ZFighterKi {
 			return false;
 		}
 		draw(level, bolt, from, dust);
+		if (bolt.kind == SPIRIT) {
+			ZFighterTechniques.spiritFx(level, bolt.fxId, to, bolt.size);
+		}
 		bolt.pos = to;
 		if (++bolt.age >= bolt.life) {
 			if (bolt.kind == BOMB || bolt.kind == SPIRIT) {
@@ -411,6 +444,15 @@ final class ZFighterKi {
 		}
 		level.explode(owner, source, GROUND_ONLY, at.x, at.y, at.z, bolt.burst, false,
 			bolt.griefing ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
+		if (spirit) {
+			// and a ring of blasts round it, so the crater is as wide as the bomb was
+			for (int i = 0; i < SPIRIT_RING; i++) {
+				double a = i * Math.PI * 2.0 / SPIRIT_RING;
+				double r = bolt.size * SPIRIT_RING_AT;
+				level.explode(owner, source, GROUND_ONLY, at.x + Math.cos(a) * r, at.y, at.z + Math.sin(a) * r, bolt.burst * SPIRIT_RING_POWER, false,
+					bolt.griefing ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
+			}
+		}
 		DustParticleOptions dust = new DustParticleOptions(bolt.color, 3.0F);
 		level.sendParticles(dust, true, false, at.x, at.y, at.z, (int)(30 + bolt.radius * 10), bolt.radius * 0.4, bolt.radius * 0.4,
 			bolt.radius * 0.4, 0.3);
@@ -420,6 +462,35 @@ final class ZFighterKi {
 		if (spirit) {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 3.0F, 0.6F);
 		}
+	}
+
+	/** The Spirit Bomb grinding into the ground: slow, the earth shaking and spraying up round it, then the blast. */
+	private static boolean sink(ServerPlayer owner, Bolt bolt) {
+		ServerLevel level = bolt.level;
+		bolt.pos = bolt.pos.add(bolt.velocity);
+		Vec3 at = bolt.pos;
+		ZFighterTechniques.spiritFx(level, bolt.fxId, at, bolt.size);
+		RandomSource random = level.getRandom();
+		for (int i = 0; i < 12; i++) {
+			double a = random.nextDouble() * Math.PI * 2.0;
+			double r = bolt.size * (0.5 + random.nextDouble() * 0.6);
+			BlockPos ground = BlockPos.containing(at.x + Math.cos(a) * r, at.y, at.z + Math.sin(a) * r);
+			ground = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ground).below();
+			BlockState state = level.getBlockState(ground);
+			if (!state.isAir()) {
+				level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), true, false, ground.getX() + 0.5, ground.getY() + 1.2,
+					ground.getZ() + 0.5, 6, 0.4, 0.6, 0.4, 0.4);
+			}
+		}
+		if (bolt.sinking % 5 == 1) {
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 4.0F, 0.5F);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 2.0F, 0.4F);
+		}
+		if (++bolt.sinking >= SPIRIT_SINK_TICKS) {
+			burst(owner, bolt, at);
+			return false;
+		}
+		return true;
 	}
 
 	private static void pop(ServerLevel level, Vec3 at, DustParticleOptions dust) {
@@ -479,6 +550,7 @@ final class ZFighterKi {
 		bolt.radius = radius;
 		bolt.burst = burst;
 		bolt.griefing = true;
+		bolt.fxId = player.getId();
 		BOLTS.add(bolt);
 	}
 
