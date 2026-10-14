@@ -53,8 +53,10 @@ public final class WindFlightController {
 	 * The air brake: S at speed pushes a gust out ahead from the palms. Momentum is shed smoothly (this share kept each
 	 * tick, plus the plain brake) down to a hover; it's only an air brake from {@code AIR_BRAKE_MIN_SPEED} up.
 	 */
-	static final double AIR_BRAKE_KEEP = 0.86;
+	static final double AIR_BRAKE_KEEP = 0.93, AIR_BRAKE_PLAIN = 0.25;
 	static final double AIR_BRAKE_MIN_SPEED = 0.7;
+	/** The gust's clouds out of the palms each tick, and a puff of wind every {@code AIR_BRAKE_GUST_EVERY} ticks. */
+	static final int AIR_BRAKE_CLOUDS = 6, AIR_BRAKE_GUST_EVERY = 3;
 	/**
 	 * Turning is rate-limited by speed, with real inertia: the flight path swings toward where you look by at most this
 	 * many degrees per tick, from just-cruising to top speed (so at sonic a U-turn takes a long, wide arc).
@@ -310,7 +312,7 @@ public final class WindFlightController {
 					WindCamera.shake(0.4F, 5);
 				}
 				this.braking = true;
-				this.speed = this.speed * AIR_BRAKE_KEEP - CRUISE_BRAKE * 0.5;
+				this.speed = this.speed * AIR_BRAKE_KEEP - CRUISE_BRAKE * AIR_BRAKE_PLAIN;
 				this.brakeGust(player);
 			} else {
 				this.braking = false;
@@ -387,17 +389,15 @@ public final class WindFlightController {
 
 	/** The air brake's gust, pushed out ahead from the hands (our own view; others get it from the server). */
 	private void brakeGust(LocalPlayer player) {
-		if (this.ticks % 2 != 0) {
-			return;
-		}
 		RandomSource random = player.getRandom();
 		Vec3 look = player.getLookAngle();
 		Vec3 hands = player.getEyePosition().add(look.scale(0.9)).add(0.0, -0.35, 0.0);
-		for (int i = 0; i < 4; i++) {
-			player.level().addParticle(ParticleTypes.CLOUD, hands.x + random.nextGaussian() * 0.15, hands.y + random.nextGaussian() * 0.15,
-				hands.z + random.nextGaussian() * 0.15, look.x * 0.5 + random.nextGaussian() * 0.05, look.y * 0.5, look.z * 0.5 + random.nextGaussian() * 0.05);
+		for (int i = 0; i < AIR_BRAKE_CLOUDS; i++) {
+			player.level().addParticle(ParticleTypes.CLOUD, hands.x + random.nextGaussian() * 0.2, hands.y + random.nextGaussian() * 0.2,
+				hands.z + random.nextGaussian() * 0.2, look.x * 0.5 + random.nextGaussian() * 0.08, look.y * 0.5 + random.nextGaussian() * 0.04,
+				look.z * 0.5 + random.nextGaussian() * 0.08);
 		}
-		if (this.ticks % 6 == 0) {
+		if (this.ticks % AIR_BRAKE_GUST_EVERY == 0) {
 			player.level().addParticle(ParticleTypes.SMALL_GUST, hands.x + look.x, hands.y + look.y, hands.z + look.z, 0.0, 0.0, 0.0);
 		}
 	}

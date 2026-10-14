@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -28,7 +29,17 @@ public final class BlockClusterRenderer extends EntityRenderer<BlockCluster, Blo
 		float scale = 1.0F;
 		/** Resting debris: its fixed lean (degrees), and how far it has turned in flight; NaN if it isn't debris. */
 		float restYaw = Float.NaN, restTilt, spin;
+		/**
+		 * Ridden as an earthboard: drawn right under its rider's feet this frame (an offset from where the entity is,
+		 * which trails the rider by the server's lag), turned with the rider's heading since boarding ({@code turn}),
+		 * and banked and tipped with them (see GravityBoardPose); {@code pivot}: its top over its middle. Null if not ridden.
+		 */
+		@org.jspecify.annotations.Nullable Vec3 follow;
+		float heading, turn, lean, tilt, bob, pivot;
 	}
+
+	/** Each ridden board's rider heading when first seen ridden (its turn is drawn from there). */
+	private static final it.unimi.dsi.fastutil.ints.Int2FloatOpenHashMap BOARDED = new it.unimi.dsi.fastutil.ints.Int2FloatOpenHashMap();
 
 	public BlockClusterRenderer(EntityRendererProvider.Context context) {
 		super(context);
@@ -81,14 +92,60 @@ public final class BlockClusterRenderer extends EntityRenderer<BlockCluster, Blo
 		state.spin = net.minecraft.util.Mth.lerp(partialTicks, entity.spinO, entity.spin);
 		Float scale = entity.getAttached(BlockCluster.SCALE);
 		state.scale = scale == null ? 1.0F : scale;
+		ridden(entity, state, partialTicks, bounds);
+	}
+
+	/** An earthboard under its rider: where and how it's drawn this frame (see {@link State#follow}). */
+	private static void ridden(BlockCluster entity, State state, float partialTicks, AABB bounds) {
+		state.follow = null;
+		Player rider = null;
+		for (Player player : entity.level().players()) {
+			Integer board = player.getAttached(com.jaymospowers.power.gravity.GravityPower.ROCK_FLIGHT);
+			if (board != null && board == entity.getId()) {
+				rider = player;
+				break;
+			}
+		}
+		if (rider == null) {
+			BOARDED.remove(entity.getId());
+			return;
+		}
+		// (as GravityRockFlight.drop: its top level with the feet)
+		double drop = 0.7 + bounds.getYsize() * 0.5;
+		Vec3 under = rider.getPosition(partialTicks).subtract(0.0, drop, 0.0);
+		state.follow = under.subtract(entity.getPosition(partialTicks));
+		float heading = net.minecraft.util.Mth.rotLerp(partialTicks, rider.yBodyRotO, rider.yBodyRot);
+		if (!BOARDED.containsKey(entity.getId())) {
+			BOARDED.put(entity.getId(), heading);
+		}
+		state.heading = heading;
+		state.turn = net.minecraft.util.Mth.wrapDegrees(heading - BOARDED.get(entity.getId()));
+		com.jaymospowers.client.power.gravity.GravityBoardPose.Ride ride = com.jaymospowers.client.power.gravity.GravityBoardPose.ride(rider, partialTicks);
+		state.lean = ride.lean();
+		state.tilt = ride.tilt();
+		state.bob = ride.bob();
+		state.pivot = (float)(bounds.getYsize() * 0.5);
 	}
 
 	@Override
 	public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
 		poseStack.pushPose();
+		if (state.follow != null) {
+			poseStack.translate(state.follow.x, state.follow.y + state.bob, state.follow.z);
+		}
 		poseStack.translate(0.0F, 0.7F * state.scale, 0.0F);
 		poseStack.scale(state.scale, state.scale, state.scale);
-		if (!Float.isNaN(state.restYaw)) {
+		if (state.follow != null) {
+			// ridden: about the middle of its top (under the feet), into the rider's frame (+Z ahead, +X their left),
+			// banked with their lean and tipped nose-up with the tilt, then back, turned as they've turned since boarding
+			poseStack.translate(0.0F, state.pivot, 0.0F);
+			poseStack.rotateDegrees(Axis.YP, -state.heading);
+			poseStack.rotateDegrees(Axis.ZP, -state.lean);
+			poseStack.rotateDegrees(Axis.XP, -state.tilt);
+			poseStack.rotateDegrees(Axis.YP, state.heading);
+			poseStack.rotateDegrees(Axis.YP, -state.turn);
+			poseStack.translate(0.0F, -state.pivot, 0.0F);
+		} else if (!Float.isNaN(state.restYaw)) {
 			// debris: leaning where it lies, turning over only while it flies
 			poseStack.rotateDegrees(Axis.YP, state.restYaw);
 			poseStack.rotateDegrees(Axis.XP, state.restTilt + state.spin);
