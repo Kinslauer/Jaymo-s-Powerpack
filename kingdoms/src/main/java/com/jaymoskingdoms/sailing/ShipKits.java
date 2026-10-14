@@ -22,6 +22,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.ClipContext;
@@ -199,35 +200,21 @@ public final class ShipKits {
 
 	// ---- laying her down ----
 
-	/** Lays the frames of a {@code kind} on the water just beyond {@code water}, her bow toward {@code bow}. False if there's no room. */
-	static boolean lay(ServerLevel level, Kind kind, BlockPos water, Direction bow) {
-		// her keel: the sea's top layer there, less her depth
-		BlockPos.MutableBlockPos top = water.mutable();
-		while (level.getFluidState(top.above()).is(FluidTags.WATER) && top.getY() < level.getMaxY()) {
-			top.move(Direction.UP);
+	/**
+	 * Lays the frames of a {@code kind} on the water just beyond {@code water}, her bow toward {@code bow}: where they went,
+	 * or null if there's no room.
+	 */
+	static @org.jspecify.annotations.Nullable List<BlockPos> lay(ServerLevel level, Kind kind, BlockPos water, Direction bow) {
+		return lay(level, design(kind), KEEL.get(kind), water, bow);
+	}
+
+	/** (0.7.28) The same for any design (a kit's, or {@link ShipPlans plans} of a ship of your own), her keel this deep. */
+	static @org.jspecify.annotations.Nullable List<BlockPos> lay(ServerLevel level, List<Cell> design, int keel, BlockPos water, Direction bow) {
+		List<BlockPos> where = room(level, design.stream().map(c -> new BlockPos(c.x(), c.y(), c.z())).toList(), keel, water, bow);
+		if (where == null) {
+			return null;
 		}
-		List<Cell> design = design(kind);
-		// her stern a block beyond where you look, her bow away from you
-		int stern = 0;
-		for (Cell c : design) {
-			stern = Math.min(stern, c.z());
-		}
-		BlockPos origin = top.below(KEEL.get(kind)).relative(bow, 1 - stern).immutable();
-		Rotation turn = Rotation.NONE;
-		for (Rotation r : Rotation.values()) {
-			if (r.rotate(Direction.SOUTH) == bow) {
-				turn = r;
-			}
-		}
-		List<BlockPos> where = new ArrayList<>(design.size());
-		for (Cell c : design) {
-			BlockPos at = origin.offset(new BlockPos(c.x(), c.y(), c.z()).rotate(turn));
-			BlockState there = level.getBlockState(at);
-			if (!level.hasChunkAt(at) || !(there.isAir() || there.canBeReplaced() || there.is(Blocks.WATER))) {
-				return false;
-			}
-			where.add(at);
-		}
+		Rotation turn = turn(bow);
 		for (int i = 0; i < design.size(); i++) {
 			Cell c = design.get(i);
 			BlockPos at = where.get(i);
@@ -236,7 +223,89 @@ public final class ShipKits {
 				.setValue(ShipFrameBlock.WATERLOGGED, level.getFluidState(at).is(FluidTags.WATER));
 			level.setBlock(at, frame, Block.UPDATE_CLIENTS);
 		}
-		return true;
+		return where;
+	}
+
+	/** The turn that points a design's bow (+z, south) toward {@code bow}. */
+	static Rotation turn(Direction bow) {
+		for (Rotation r : Rotation.values()) {
+			if (r.rotate(Direction.SOUTH) == bow) {
+				return r;
+			}
+		}
+		return Rotation.NONE;
+	}
+
+	/**
+	 * Where each of a design's blocks ({@code cells}, keel at y 0, bow +z) goes on the water just beyond {@code water},
+	 * her keel {@code keel} below the sea's top layer and her bow toward {@code bow}; null if any of it has no room.
+	 */
+	static @org.jspecify.annotations.Nullable List<BlockPos> room(ServerLevel level, List<BlockPos> cells, int keel, BlockPos water, Direction bow) {
+		BlockPos.MutableBlockPos top = water.mutable();
+		while (level.getFluidState(top.above()).is(FluidTags.WATER) && top.getY() < level.getMaxY()) {
+			top.move(Direction.UP);
+		}
+		// her stern a block beyond where you look, her bow away from you
+		int stern = 0;
+		for (BlockPos c : cells) {
+			stern = Math.min(stern, c.getZ());
+		}
+		BlockPos origin = top.below(keel).relative(bow, 1 - stern).immutable();
+		Rotation turn = turn(bow);
+		List<BlockPos> where = new ArrayList<>(cells.size());
+		for (BlockPos c : cells) {
+			BlockPos at = origin.offset(c.rotate(turn));
+			if (!level.hasChunkAt(at)) {
+				return null;
+			}
+			BlockState there = level.getBlockState(at);
+			if (!(there.isAir() || there.canBeReplaced() || there.is(Blocks.WATER))) {
+				return null;
+			}
+			where.add(at);
+		}
+		return where;
+	}
+
+	/** What a creative kit fills each frame with: oak planks and rails, spruce masts. */
+	private static ItemStack stock(ShipFrameBlock.Want want) {
+		return new ItemStack(switch (want) {
+			case HULL -> Items.OAK_PLANKS;
+			case RAIL -> Items.OAK_FENCE;
+			case MAST -> Items.SPRUCE_FENCE;
+			case SAIL -> Sailing.SAIL.asItem();
+			case HELM -> Sailing.HELM.asItem();
+			case OAR -> Sailing.OAR.asItem();
+			case CANNON -> Sailing.CANNON.asItem();
+			case CHEST -> Items.CHEST;
+		});
+	}
+
+	/** (0.7.28) In creative: every frame just laid at {@code where} filled at once, and her hold bailed. */
+	static void complete(ServerLevel level, List<BlockPos> where, @org.jspecify.annotations.Nullable ServerPlayer player) {
+		for (BlockPos at : where) {
+			BlockState frame = level.getBlockState(at);
+			if (!(frame.getBlock() instanceof ShipFrameBlock)) {
+				continue;
+			}
+			ShipFrameBlock.Want want = frame.getValue(ShipFrameBlock.WANT);
+			BlockState next = ShipFrameBlock.fills(want, frame.getValue(ShipFrameBlock.FACING), stock(want));
+			if (next != null) {
+				level.setBlock(at, next, Block.UPDATE_CLIENTS);
+			}
+		}
+		// then joined up: fences to their neighbours, sails into one sheet
+		for (BlockPos at : where) {
+			BlockState state = level.getBlockState(at);
+			BlockState next = Block.updateFromNeighbourShapes(state, level, at);
+			if (next.getBlock() instanceof SailBlock) {
+				next = SailBlock.connect(next, level, at);
+			}
+			if (next != state) {
+				level.setBlock(at, next, Block.UPDATE_CLIENTS);
+			}
+		}
+		placed(level, where.get(0), player);
 	}
 
 	/** After a frame's filled at {@code pos}: how much is left, and once nothing is, her hold bailed dry. */
@@ -314,7 +383,8 @@ public final class ShipKits {
 			if (!(level instanceof ServerLevel server)) {
 				return InteractionResult.SUCCESS;
 			}
-			if (!lay(server, this.kind, hit.getBlockPos(), player.getDirection())) {
+			List<BlockPos> where = lay(server, this.kind, hit.getBlockPos(), player.getDirection());
+			if (where == null) {
 				if (player instanceof ServerPlayer p) {
 					p.sendOverlayMessage(Component.translatable("ship.jaymoskingdoms.kit_no_room"));
 				}
@@ -325,6 +395,10 @@ public final class ShipKits {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
 			if (player instanceof ServerPlayer p) {
 				p.sendOverlayMessage(Component.translatable("ship.jaymoskingdoms.kit_laid"));
+			}
+			// (0.7.28) in creative she's built whole at once (sneak for the bare frames)
+			if (player.getAbilities().instabuild && !player.isShiftKeyDown()) {
+				complete(server, where, player instanceof ServerPlayer p ? p : null);
 			}
 			player.getItemInHand(hand).consume(1, player);
 			return InteractionResult.SUCCESS;
