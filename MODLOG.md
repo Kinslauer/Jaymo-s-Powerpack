@@ -983,3 +983,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.10.27, daggers ride the gale (`WindDagger`):** wind sorcerers now fight with daggers the way they do with the
   quarterstaff: the four dagger swings carry Gale Cut, Wind Stab, Crosswind and Cyclone Thrust, every hit leaves a
   puff, and right click is Sora's Dagger's old Flurry (10 slashes on the wind, then a burst). See docs/wind.md.
+- **0.10.28, the Flash's speed on Chrono's Overclock (`ChronoSpeed`):** while Overclock runs, sprinting is far faster
+  and steps up whole blocks, holding forward into a wall runs you up it, sprinting crosses still water, and V again at
+  a wall phases you through it (up to 4 blocks). See docs/chrono.md.
+- **0.10.28 / Kingdoms 0.7.3, Shield Throw:** a Strength Combat Arts perk (3 ranks): Y with a shield hurls it; it
+  ricochets between foes and comes back. Relic shields always come home; a plain one drops where a wall stops it.
