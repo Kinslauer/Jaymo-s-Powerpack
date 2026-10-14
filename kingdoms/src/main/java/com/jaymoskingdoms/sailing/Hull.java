@@ -46,7 +46,7 @@ public final class Hull {
 	public final boolean floats;
 	/** Its length at the waterline (blocks, along local z), its sails, and (0.7.18) its oars. */
 	public final int waterline, sails, oars;
-	/** (0.7.18) Its guns' pieces, and its oars'; (0.7.26) the pieces that give light (torches, lanterns, glowstone...). */
+	/** (0.7.18) Its guns' pieces, and its oars'; (0.7.28) the pieces that give light (torches, lanterns, glowstone...). */
 	public final int[] cannons, oarPieces, lights;
 	/** The pieces on its outside (walls, bottom and ends), which run into land first. */
 	public final int[] skin;

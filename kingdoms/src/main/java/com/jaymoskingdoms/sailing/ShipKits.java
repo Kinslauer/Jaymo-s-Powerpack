@@ -205,33 +205,16 @@ public final class ShipKits {
 	 * or null if there's no room.
 	 */
 	static @org.jspecify.annotations.Nullable List<BlockPos> lay(ServerLevel level, Kind kind, BlockPos water, Direction bow) {
-		// her keel: the sea's top layer there, less her depth
-		BlockPos.MutableBlockPos top = water.mutable();
-		while (level.getFluidState(top.above()).is(FluidTags.WATER) && top.getY() < level.getMaxY()) {
-			top.move(Direction.UP);
+		return lay(level, design(kind), KEEL.get(kind), water, bow);
+	}
+
+	/** (0.7.28) The same for any design (a kit's, or {@link ShipPlans plans} of a ship of your own), her keel this deep. */
+	static @org.jspecify.annotations.Nullable List<BlockPos> lay(ServerLevel level, List<Cell> design, int keel, BlockPos water, Direction bow) {
+		List<BlockPos> where = room(level, design.stream().map(c -> new BlockPos(c.x(), c.y(), c.z())).toList(), keel, water, bow);
+		if (where == null) {
+			return null;
 		}
-		List<Cell> design = design(kind);
-		// her stern a block beyond where you look, her bow away from you
-		int stern = 0;
-		for (Cell c : design) {
-			stern = Math.min(stern, c.z());
-		}
-		BlockPos origin = top.below(KEEL.get(kind)).relative(bow, 1 - stern).immutable();
-		Rotation turn = Rotation.NONE;
-		for (Rotation r : Rotation.values()) {
-			if (r.rotate(Direction.SOUTH) == bow) {
-				turn = r;
-			}
-		}
-		List<BlockPos> where = new ArrayList<>(design.size());
-		for (Cell c : design) {
-			BlockPos at = origin.offset(new BlockPos(c.x(), c.y(), c.z()).rotate(turn));
-			BlockState there = level.getBlockState(at);
-			if (!level.hasChunkAt(at) || !(there.isAir() || there.canBeReplaced() || there.is(Blocks.WATER))) {
-				return null;
-			}
-			where.add(at);
-		}
+		Rotation turn = turn(bow);
 		for (int i = 0; i < design.size(); i++) {
 			Cell c = design.get(i);
 			BlockPos at = where.get(i);
@@ -239,6 +222,47 @@ public final class ShipKits {
 				.setValue(ShipFrameBlock.FACING, turn.rotate(c.facing()))
 				.setValue(ShipFrameBlock.WATERLOGGED, level.getFluidState(at).is(FluidTags.WATER));
 			level.setBlock(at, frame, Block.UPDATE_CLIENTS);
+		}
+		return where;
+	}
+
+	/** The turn that points a design's bow (+z, south) toward {@code bow}. */
+	static Rotation turn(Direction bow) {
+		for (Rotation r : Rotation.values()) {
+			if (r.rotate(Direction.SOUTH) == bow) {
+				return r;
+			}
+		}
+		return Rotation.NONE;
+	}
+
+	/**
+	 * Where each of a design's blocks ({@code cells}, keel at y 0, bow +z) goes on the water just beyond {@code water},
+	 * her keel {@code keel} below the sea's top layer and her bow toward {@code bow}; null if any of it has no room.
+	 */
+	static @org.jspecify.annotations.Nullable List<BlockPos> room(ServerLevel level, List<BlockPos> cells, int keel, BlockPos water, Direction bow) {
+		BlockPos.MutableBlockPos top = water.mutable();
+		while (level.getFluidState(top.above()).is(FluidTags.WATER) && top.getY() < level.getMaxY()) {
+			top.move(Direction.UP);
+		}
+		// her stern a block beyond where you look, her bow away from you
+		int stern = 0;
+		for (BlockPos c : cells) {
+			stern = Math.min(stern, c.getZ());
+		}
+		BlockPos origin = top.below(keel).relative(bow, 1 - stern).immutable();
+		Rotation turn = turn(bow);
+		List<BlockPos> where = new ArrayList<>(cells.size());
+		for (BlockPos c : cells) {
+			BlockPos at = origin.offset(c.rotate(turn));
+			if (!level.hasChunkAt(at)) {
+				return null;
+			}
+			BlockState there = level.getBlockState(at);
+			if (!(there.isAir() || there.canBeReplaced() || there.is(Blocks.WATER))) {
+				return null;
+			}
+			where.add(at);
 		}
 		return where;
 	}
@@ -257,7 +281,7 @@ public final class ShipKits {
 		});
 	}
 
-	/** (0.7.26) In creative: every frame just laid at {@code where} filled at once, and her hold bailed. */
+	/** (0.7.28) In creative: every frame just laid at {@code where} filled at once, and her hold bailed. */
 	static void complete(ServerLevel level, List<BlockPos> where, @org.jspecify.annotations.Nullable ServerPlayer player) {
 		for (BlockPos at : where) {
 			BlockState frame = level.getBlockState(at);
@@ -372,7 +396,7 @@ public final class ShipKits {
 			if (player instanceof ServerPlayer p) {
 				p.sendOverlayMessage(Component.translatable("ship.jaymoskingdoms.kit_laid"));
 			}
-			// (0.7.26) in creative she's built whole at once (sneak for the bare frames)
+			// (0.7.28) in creative she's built whole at once (sneak for the bare frames)
 			if (player.getAbilities().instabuild && !player.isShiftKeyDown()) {
 				complete(server, where, player instanceof ServerPlayer p ? p : null);
 			}

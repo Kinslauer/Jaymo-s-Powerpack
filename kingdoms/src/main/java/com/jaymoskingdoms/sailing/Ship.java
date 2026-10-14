@@ -110,7 +110,7 @@ public final class Ship extends Entity {
 	static final int SINKING_MOST = 600;
 	/** (0.7.18) A broadside fires the guns pointing within this of where you look (a cosine), this many ticks apart. */
 	static final double BROADSIDE_ARC = 0.5;
-	/** (0.7.26) How often (ticks) its torches and lanterns move their light along with it. */
+	/** (0.7.28) How often (ticks) its torches and lanterns move their light along with it. */
 	static final int LIGHT_EVERY = 2;
 	static final int BROADSIDE_GAP = 3;
 
@@ -147,7 +147,7 @@ public final class Ship extends Entity {
 	private float turn;
 	private int adrift;
 	/**
-	 * (0.7.26) Server: where its torches and lanterns light the world as it sails, and how brightly. The game doesn't light
+	 * (0.7.28) Server: where its torches and lanterns light the world as it sails, and how brightly. The game doesn't light
 	 * the world from an entity, so each one aboard leaves an invisible light block in the world cell it's passing
 	 * through, moved as the ship moves and taken up when it anchors, sinks or unloads.
 	 */
@@ -1154,7 +1154,14 @@ public final class Ship extends Entity {
 		BlockPos origin = BlockPos.containing(this.getX(), Math.round(this.getY()), this.getZ());
 		this.saveCargo(level);
 		Map<Integer, BlockPos> laid = new HashMap<>();
+		// (0.7.28) her solid timbers first, so the torches and lanterns hung on them don't pop off as they're put down
+		List<Integer> order = new ArrayList<>(h.pieces.size());
 		for (int i = 0; i < h.pieces.size(); i++) {
+			order.add(i);
+		}
+		order.sort((a, b) -> Boolean.compare(!h.pieces.get(a).blockState().isCollisionShapeFullBlock(level, BlockPos.ZERO),
+			!h.pieces.get(b).blockState().isCollisionShapeFullBlock(level, BlockPos.ZERO)));
+		for (int i : order) {
 			Piece p = h.pieces.get(i);
 			BlockPos at = origin.offset(new BlockPos(p.x(), p.y(), p.z()).rotate(turn));
 			BlockState there = level.getBlockState(at);
@@ -1196,7 +1203,7 @@ public final class Ship extends Entity {
 		Ships.remove(this);
 	}
 
-	/** (0.7.26) Its light sources light the world cells they're in now (see {@link #lit}). */
+	/** (0.7.28) Its light sources light the world cells they're in now (see {@link #lit}). */
 	private void shine(ServerLevel level, Hull h) {
 		if (h.lights.length == 0 && this.lit.isEmpty() || this.tickCount % LIGHT_EVERY != 0) {
 			return;
@@ -1235,7 +1242,7 @@ public final class Ship extends Entity {
 		}
 	}
 
-	/** (0.7.26) Every light it left in the world taken up again. */
+	/** (0.7.28) Every light it left in the world taken up again. */
 	private void unshine(ServerLevel level) {
 		for (long key : this.lit.keySet()) {
 			douse(level, BlockPos.of(key));
@@ -1376,7 +1383,7 @@ public final class Ship extends Entity {
 		output.store("Hold", CompoundTag.CODEC.listOf(), hold);
 		output.putDouble("Sail", this.sail);
 		output.putInt("Sinking", this.sinking);
-		// (0.7.26) where its lights are, so a reload takes up any the save caught in the world
+		// (0.7.28) where its lights are, so a reload takes up any the save caught in the world
 		output.store("Lit", com.mojang.serialization.Codec.LONG.listOf(), List.copyOf(this.lit.keySet()));
 	}
 }

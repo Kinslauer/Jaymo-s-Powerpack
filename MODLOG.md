@@ -1157,7 +1157,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     (`WyrmWings`); they beat, fold, flare and wrap round the body as before.
 - **0.10.87 / Kingdoms 0.7.25, no shader message** (Andy: "no shader disable message"): dark nights still turn
   shaders off until dawn, but no longer say so on screen. See `kingdoms/MODLOG.md` 0.7.25.
-- **0.10.88 / Kingdoms 0.7.26, creative ship kits build her whole** (Andy: "is there a way to autocomplete a boat in
+- **0.10.97 / Kingdoms 0.7.28, creative ship kits build her whole** (Andy: "is there a way to autocomplete a boat in
   creative?"): a Rowboat, Sloop or Brig kit used in creative lays the ship finished (oak planks and rails, spruce masts,
   sails, helm, oars, empty guns, chests), bailed dry and ready to cast off; sneak to lay the bare frames as before.
   Torches and lanterns aboard a ship now light the deck and water around her as she sails (invisible light blocks that
@@ -1167,3 +1167,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Wind user leans over from the hips with feet braced, blows the wind from the mouth (the wisps now start there), and
   both arms are flung out behind, fluttering in it (`client/power/wind/WindWhistlePose`, drawn for everyone through
   `WindPose`, so `PoseTakeover.posed` keeps EMF/Fresh Animations off it).
+  Ship's Plans (Andy: "can we make our own ship kits?"): sneak-use them on the helm of a ship you built to draw her,
+  then use them on open water to lay her again (frames in survival, built exactly in creative); kept after use.
