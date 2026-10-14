@@ -1,0 +1,29 @@
+{
+  "materials": [
+    {
+      "item": {
+        "item": "minecraft:iron_nugget"
+      },
+      "count": 9
+    },
+    {
+      "item": {
+        "item": "minecraft:gunpowder"
+      },
+      "count": 2
+    },
+    {
+      "item": {
+        "item": "minecraft:leather"
+      },
+      "count": 1
+    }
+  ],
+  "result": {
+    "type": "ammo",
+    "group": "shotgun_shells",
+    "id": "jaymospowers:shot",
+    "count": 8
+  },
+  "type": "tacz:gun_smith_table_crafting"
+}
