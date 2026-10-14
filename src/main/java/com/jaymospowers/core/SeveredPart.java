@@ -23,6 +23,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
@@ -33,12 +34,23 @@ import net.minecraft.world.phys.Vec3;
  * A severed head or limb (see {@link Dismember}): it flies off the body, tumbles, bounces and lies where it lands,
  * drawn as that part of whoever lost it (from {@link #look()}, a player's from their skin). A player's fallen head is
  * what they see through until they respawn. Gone after {@link #LIFETIME}.
+ * <p>
+ * Anyone can pick one up ({@link Carry}, hold {@link Carry#PART}): it dangles from their right hand (held by the hair, or
+ * by the end of the limb) until it's dropped or thrown. A player's head, carried, is carried with their view.
  */
 public class SeveredPart extends Entity {
 	public static final int LIFETIME = 6000;
 	/** How hard it flies off (blocks a tick), and up. */
 	static final double FLING = 0.32, FLING_UP = 0.3;
 	static final double GRAVITY = 0.05, BOUNCE = 0.35;
+	/**
+	 * Carried: where the hand is from the carrier's feet ({right, up, ahead}, blocks), how far below it the part's middle
+	 * hangs (a head, a limb; for a body 1.8 tall), and how far it swings (degrees) as it's carried along.
+	 */
+	static final double HAND_RIGHT = 0.36, HAND_UP = 0.78, HAND_AHEAD = 0.3, HEAD_HANG = 0.23, LIMB_HANG = 0.33;
+	static final float CARRY_SWAY = 9.0F;
+	/** The part's middle sits this high above the entity (as the renderer draws it). */
+	static final double MIDDLE = 0.17;
 	/** Saved data that has nothing to do with how the body looks (and gear, which the part doesn't carry). */
 	private static final Set<String> DROPPED_KEYS = Set.of("Brain", "brain", "Offers", "offers", "Gossips", "gossips", "attributes",
 		"Attributes", "active_effects", "ActiveEffects", "Passengers", "Leash", "leash", "equipment", "HandItems", "ArmorItems", "Inventory",
@@ -142,6 +154,11 @@ public class SeveredPart extends Entity {
 	@Override
 	public void tick() {
 		super.tick();
+		Player carrier = Carry.carrierOf(this);
+		if (carrier != null) {
+			carried(carrier);
+			return;
+		}
 		this.setDeltaMovement(this.getDeltaMovement().add(0.0, -GRAVITY, 0.0));
 		Vec3 before = this.getDeltaMovement();
 		this.move(MoverType.SELF, before);
@@ -174,8 +191,39 @@ public class SeveredPart extends Entity {
 		}
 	}
 
+	/** Carried: it hangs from the carrier's right hand, swinging a little as they go (both sides, so it stays put). */
+	private void carried(Player carrier) {
+		float yaw = carrier.yBodyRot * Mth.DEG_TO_RAD;
+		Vec3 ahead = new Vec3(-Mth.sin(yaw), 0.0, Mth.cos(yaw));
+		Vec3 right = new Vec3(-Mth.cos(yaw), 0.0, -Mth.sin(yaw));
+		double hang = (part() == Dismember.HEAD ? HEAD_HANG : LIMB_HANG) * bodyHeight() / 1.8 + MIDDLE;
+		Vec3 at = carrier.position().add(right.scale(HAND_RIGHT)).add(ahead.scale(HAND_AHEAD)).add(0.0, HAND_UP - hang, 0.0);
+		this.setPos(at.x, at.y, at.z);
+		this.setDeltaMovement(Vec3.ZERO);
+		this.setYRot(carrier.yBodyRot);
+		this.setOnGround(false);
+		this.resetFallDistance();
+		if (this.level().isClientSide()) {
+			// upright as it was on the body, swinging with the carrier's stride
+			float stride = carrier.walkAnimation.position();
+			this.spinO = this.spin;
+			this.spin = Mth.sin(stride * 0.6662F) * CARRY_SWAY * Math.min(1.0F, carrier.walkAnimation.speed() * 2.0F + 0.15F);
+		}
+	}
+
 	@Override
 	public boolean isPickable() {
+		// it can be clicked on (to pick it up), though nothing hurts it
+		return !this.isRemoved();
+	}
+
+	@Override
+	public boolean isAttackable() {
+		return false;
+	}
+
+	@Override
+	public boolean canBeHitByProjectile() {
 		return false;
 	}
 
