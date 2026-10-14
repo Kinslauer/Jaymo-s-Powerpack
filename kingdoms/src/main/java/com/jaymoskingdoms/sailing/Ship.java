@@ -48,6 +48,7 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LightBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -109,6 +110,8 @@ public final class Ship extends Entity {
 	static final int SINKING_MOST = 600;
 	/** (0.7.18) A broadside fires the guns pointing within this of where you look (a cosine), this many ticks apart. */
 	static final double BROADSIDE_ARC = 0.5;
+	/** (0.7.26) How often (ticks) its torches and lanterns move their light along with it. */
+	static final int LIGHT_EVERY = 2;
 	static final int BROADSIDE_GAP = 3;
 
 	/** One block of the ship, in its own frame. */
@@ -143,6 +146,12 @@ public final class Ship extends Entity {
 	private final List<int[]> volley = new ArrayList<>();
 	private float turn;
 	private int adrift;
+	/**
+	 * (0.7.26) Server: where its torches and lanterns light the world as it sails, and how brightly. The game doesn't light
+	 * the world from an entity, so each one aboard leaves an invisible light block in the world cell it's passing
+	 * through, moved as the ship moves and taken up when it anchors, sinks or unloads.
+	 */
+	private final it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap lit = new it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap();
 	/** Server: the block entities aboard (chests and the like), by piece. */
 	private final Map<Integer, BlockEntity> cargo = new HashMap<>();
 	private final Map<Integer, CompoundTag> cargoTags = new HashMap<>();
@@ -485,6 +494,7 @@ public final class Ship extends Entity {
 		this.setYRot(yaw);
 		this.setPos(to);
 		this.carry(level, h, from, yawFrom);
+		this.shine(level, h);
 		// the wake and the creak of her timbers
 		if (this.speed > 0.1 && this.tickCount % 4 == 0) {
 			Vec3 bow = this.toWorld(0.0, h.draft, h.maxZ + 0.5);
@@ -679,6 +689,7 @@ public final class Ship extends Entity {
 		if (!(this.level() instanceof ServerLevel level)) {
 			return false;
 		}
+		this.unshine(level);
 		Hull h = this.hull();
 		if (h == null) {
 			this.discard();
@@ -1125,6 +1136,7 @@ public final class Ship extends Entity {
 		}
 		this.setPos(to);
 		this.carry(level, h, from, yaw);
+		this.shine(level, h);
 		if (this.sinking % 3 == 0) {
 			Vec3 at = this.toWorld((this.random.nextFloat() - 0.5) * (h.maxX - h.minX), h.draft, (this.random.nextFloat() - 0.5) * (h.maxZ - h.minZ));
 			level.sendParticles(net.minecraft.core.particles.ParticleTypes.BUBBLE_COLUMN_UP, at.x, at.y, at.z, 6, 0.4, 0.2, 0.4, 0.05);
@@ -1136,6 +1148,7 @@ public final class Ship extends Entity {
 
 	/** She's laid on the bottom where she sank, block for block where there's room, her holds full of what they held. */
 	private void wreck(ServerLevel level, Hull h) {
+		this.unshine(level);
 		int quarter = Math.floorMod(Math.round(this.getYRot() / 90.0F), 4);
 		Rotation turn = QUARTERS[quarter];
 		BlockPos origin = BlockPos.containing(this.getX(), Math.round(this.getY()), this.getZ());
@@ -1177,7 +1190,68 @@ public final class Ship extends Entity {
 	@Override
 	public void onRemoval(Entity.RemovalReason reason) {
 		super.onRemoval(reason);
+		if (this.level() instanceof ServerLevel level) {
+			this.unshine(level);
+		}
 		Ships.remove(this);
+	}
+
+	/** (0.7.26) Its light sources light the world cells they're in now (see {@link #lit}). */
+	private void shine(ServerLevel level, Hull h) {
+		if (h.lights.length == 0 && this.lit.isEmpty() || this.tickCount % LIGHT_EVERY != 0) {
+			return;
+		}
+		it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap want = new it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap();
+		for (int i : h.lights) {
+			Piece p = h.pieces.get(i);
+			long at = BlockPos.containing(this.toWorld(p.x(), p.y() + 0.5, p.z())).asLong();
+			want.put(at, Math.max(want.get(at), p.blockState().getLightEmission()));
+		}
+		for (it.unimi.dsi.fastutil.longs.Long2IntMap.Entry e : this.lit.long2IntEntrySet()) {
+			if (want.get(e.getLongKey()) != e.getIntValue()) {
+				douse(level, BlockPos.of(e.getLongKey()));
+			}
+		}
+		// what no longer matches is taken up; what something else took up (a bucket, a fill) is put back below
+		this.lit.long2IntEntrySet().removeIf(e -> want.get(e.getLongKey()) != e.getIntValue()
+			|| level.hasChunkAt(BlockPos.of(e.getLongKey())) && !level.getBlockState(BlockPos.of(e.getLongKey())).is(Blocks.LIGHT));
+		for (it.unimi.dsi.fastutil.longs.Long2IntMap.Entry e : want.long2IntEntrySet()) {
+			long key = e.getLongKey();
+			if (this.lit.containsKey(key)) {
+				continue;
+			}
+			BlockPos at = BlockPos.of(key);
+			if (!level.hasChunkAt(at)) {
+				continue;
+			}
+			BlockState there = level.getBlockState(at);
+			boolean water = there.is(Blocks.WATER) && there.getFluidState().isSource();
+			if (!there.isAir() && !water) {
+				continue;
+			}
+			level.setBlock(at, Blocks.LIGHT.defaultBlockState().setValue(LightBlock.LEVEL, e.getIntValue())
+				.setValue(LightBlock.WATERLOGGED, water), Block.UPDATE_CLIENTS);
+			this.lit.put(key, e.getIntValue());
+		}
+	}
+
+	/** (0.7.26) Every light it left in the world taken up again. */
+	private void unshine(ServerLevel level) {
+		for (long key : this.lit.keySet()) {
+			douse(level, BlockPos.of(key));
+		}
+		this.lit.clear();
+	}
+
+	private static void douse(ServerLevel level, BlockPos at) {
+		if (!level.hasChunkAt(at)) {
+			return;
+		}
+		BlockState there = level.getBlockState(at);
+		if (there.is(Blocks.LIGHT)) {
+			level.setBlock(at, there.getValue(LightBlock.WATERLOGGED) ? Blocks.WATER.defaultBlockState() : Blocks.AIR.defaultBlockState(),
+				Block.UPDATE_CLIENTS);
+		}
 	}
 
 	@Override
@@ -1259,6 +1333,11 @@ public final class Ship extends Entity {
 		}
 		this.sail = input.getDoubleOr("Sail", 0.0);
 		this.sinking = input.getIntOr("Sinking", 0);
+		this.lit.clear();
+		for (long key : input.read("Lit", com.mojang.serialization.Codec.LONG.listOf()).orElse(List.of())) {
+			// level 0 matches no light it has: the first shine takes it up
+			this.lit.put(key, 0);
+		}
 		this.entityData.set(FOUNDERING, this.sinking > 0);
 		this.entityData.set(SET, (float)this.sail);
 		if (this.level() instanceof ServerLevel level) {
@@ -1297,5 +1376,7 @@ public final class Ship extends Entity {
 		output.store("Hold", CompoundTag.CODEC.listOf(), hold);
 		output.putDouble("Sail", this.sail);
 		output.putInt("Sinking", this.sinking);
+		// (0.7.26) where its lights are, so a reload takes up any the save caught in the world
+		output.store("Lit", com.mojang.serialization.Codec.LONG.listOf(), List.copyOf(this.lit.keySet()));
 	}
 }

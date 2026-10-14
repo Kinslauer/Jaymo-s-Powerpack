@@ -2894,3 +2894,9 @@ moon and back on at dawn (`DarkNights`), but without the "A dark night: shaders 
   (`ShipKits.complete`: oak planks and fence rails, spruce fence masts, sails, helm, oars, unloaded guns, chests), joins
   the fences and sails up and bails her hold, as the last frame filled by hand would. Sneak-use still lays the bare
   frames. Survival is unchanged.
+- Andy: "activating the ship breaks any attached light sources, cant we wimulate them with our lighting?" Torches,
+  wall torches, lanterns (hanging too) and any other glowing block stay aboard when she casts off, and now light the
+  water and deck around her as she sails: `Ship.shine` keeps an invisible `minecraft:light` block (waterlogged under the
+  sea line) in each world cell a light piece is in, at its brightness, every `LIGHT_EVERY` ticks, and takes them up as
+  she moves on, anchors, wrecks or is removed (`Lit` is saved so a reload takes up stale ones). A light someone else
+  takes up is put back. `Hull.lights` lists the glowing pieces.
