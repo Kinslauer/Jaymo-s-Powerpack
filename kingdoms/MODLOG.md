@@ -2848,7 +2848,8 @@ beating". (0.7.20 / 0.10.69 are the Kingdom languages PR's.)
   (`Approaches` QUEST_OFFER). Pays 6-12 emeralds and 6 MCA hearts with the giver; no reputation.
 - **A beating:** land 3 blows on their enemy (or kill them, which counts, and is murder if seen). On the third they
   beg off and run (`Frights.scare`). MCA, the guards and golems react to a villager being hit as they always do.
-- **A lure:** come within 3 blocks of the enemy and they follow you ("You've something to show me?"); lead them to the
+- **A lure:** ask the enemy to follow you (MCA's Follow in their talk menu; Andy: "you should have to use the follow
+  dialogue option instead of getting near") and they come along ("You've something to show me?"); lead them to the
   giver's hiding spot on the outskirts (26-36 blocks from the seat, shown on the tracker). The giver goes there and
   waits; when both are there the giver springs out and lays into them (`Neighbours.ambush`: a fight where only the
   giver lands blows), and the quest is done. Get more than 18 blocks ahead or take over 4 minutes and they give up

@@ -34,7 +34,8 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li><b>a beating:</b> land so many blows on their enemy (an MCA villager remembers who hit them; the guards and golems
  * may see; a kill counts too, and is murder if it's seen);</li>
- * <li><b>a lure:</b> walk up to their enemy and they'll follow you ("you wanted to show me something?"); lead them to the
+ * <li><b>a lure:</b> ask their enemy to follow you (MCA's Follow in their talk menu; without MCA, walk up to them) and
+ * they come along ("you wanted to show me something?"); lead them to the
  * spot on the outskirts where the giver lies in wait, and the giver falls on them. Go too far ahead and they give up.</li>
  * </ul>
  * Either way the enemy runs off afterwards, and the two think even less of each other.
@@ -48,7 +49,7 @@ final class Grudges {
 	/** What it pays: emeralds (and a few more), MCA hearts with the giver. */
 	static final int EMERALDS = 6, EMERALDS_MORE = 7, HEARTS = 6;
 	/** The lure: how near you have to come to the enemy to draw them along; how far behind they'll follow; how long; their pace. */
-	static final double DRAW = 3.0, FOLLOW = 18.0;
+	static final double DRAW = 3.0, FOLLOW = 18.0;  // (DRAW: without MCA only)
 	static final int LURE_TICKS = 20 * 60 * 4;
 	static final float LURE_WALK = 0.6F;
 	/** The hiding spot: this far from the seat, at a random bearing; how near the enemy must come to it, and the giver to it. */
@@ -189,7 +190,7 @@ final class Grudges {
 				if (q.kind() != Quest.GRUDGE || q.counted() || o.pos().isEmpty() || o.other().isEmpty() || LURED.containsKey(o.other().get())) {
 					continue;
 				}
-				if (level.getEntity(o.other().get()) instanceof Villager enemy && enemy.isAlive() && enemy.distanceTo(p) <= DRAW && !enemy.isSleeping()
+				if (level.getEntity(o.other().get()) instanceof Villager enemy && enemy.isAlive() && drawn(enemy, p) && !enemy.isSleeping()
 					&& !Neighbours.meeting(enemy) && !Frights.afraid(enemy.getUUID())) {
 					LURED.put(enemy.getUUID(), new Lure(p, q.id(), q.giver().uuid(), now + LURE_TICKS));
 					Neighbours.say(level, enemy, "lure", Speech.WHITE, p);
@@ -206,6 +207,14 @@ final class Grudges {
 		}
 	}
 
+	/**
+	 * {@code enemy} has been drawn along by {@code p}: asked to follow in their talk menu (MCA's Follow); without MCA, just
+	 * walked up to.
+	 */
+	private static boolean drawn(Villager enemy, ServerPlayer p) {
+		return McaCompat.LOADED ? p.getUUID().equals(McaCompat.following(enemy)) : enemy.distanceTo(p) <= DRAW;
+	}
+
 	/** One think of a lure: the enemy follows, the giver waits at the spot, and when both are there it's sprung. False once over. */
 	private static boolean lead(ServerLevel level, UUID enemyId, Lure lure, long now) {
 		ServerPlayer p = lure.player();
@@ -214,13 +223,17 @@ final class Grudges {
 			return false;
 		}
 		BlockPos spot = q.objective().pos().orElseThrow();
-		if (now > lure.until() || enemy.distanceTo(p) > FOLLOW || Frights.afraid(enemy.getUUID()) || enemy.isSleeping()) {
-			// (left behind, or they've had enough of the walk)
+		boolean told = McaCompat.LOADED && !p.getUUID().equals(McaCompat.following(enemy));
+		if (now > lure.until() || enemy.distanceTo(p) > FOLLOW || Frights.afraid(enemy.getUUID()) || enemy.isSleeping() || told) {
+			// (left behind, told to stay, or they've had enough of the walk)
 			Neighbours.say(level, enemy, "lure.lost", Speech.YELLOW, p);
+			McaCompat.stopFollowing(enemy);
 			unspawn(p, q);
 			return false;
 		}
-		BehaviorUtils.setWalkAndLookTargetMemories(enemy, p, LURE_WALK, 2);
+		if (!McaCompat.LOADED) {
+			BehaviorUtils.setWalkAndLookTargetMemories(enemy, p, LURE_WALK, 2);
+		}
 		LivingEntity giver = giver(level, q);
 		if (giver instanceof Villager g && !Neighbours.meeting(g)) {
 			// (the giver goes to the spot and keeps out of sight there)
@@ -242,6 +255,7 @@ final class Grudges {
 	/** The giver falls on the enemy: done, and they hate each other the more for it. */
 	private static void spring(ServerLevel level, ServerPlayer p, Quest q, Villager giver, Villager enemy, long now) {
 		WAITING_AT.remove(giver.getUUID());
+		McaCompat.stopFollowing(enemy);
 		Neighbours.say(level, giver, "ambush", Speech.RED, enemy);
 		Neighbours.ambush(level, q.giver().faction(), giver, enemy, now);
 		Neighbours.shift(giver, enemy, -10);
