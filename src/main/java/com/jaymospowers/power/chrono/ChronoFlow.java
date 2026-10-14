@@ -716,6 +716,7 @@ public final class ChronoFlow {
 					ChronoFx.particles(level, player, GOLD_FLASH, mid.x, mid.y, mid.z, 1, 0.0, 0.0, 0.0, 0.0);
 					ChronoFx.particles(level, player, ParticleTypes.EXPLOSION, mid.x, mid.y, mid.z, 1, 0.0, 0.0, 0.0, 0.0);
 					level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.8F, 1.3F);
+					com.jaymospowers.core.Shakes.around(level, mid, 12.0, 0.9F);
 				} else {
 					// held in the moment: no knockback, no lift, a jolt of pain
 					target.setDeltaMovement(0.0, Math.min(0.0, before.y), 0.0);

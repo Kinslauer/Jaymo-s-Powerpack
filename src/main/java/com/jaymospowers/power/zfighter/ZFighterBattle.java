@@ -221,6 +221,7 @@ final class ZFighterBattle {
 		level.sendParticles(ZFighterPower.dust(live), true, false, at.x, at.y, at.z, 16, 0.3, 0.3, 0.3, 0.2);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.4F, 1.6F);
+		com.jaymospowers.core.Shakes.around(level, at, 12.0, 1.0F);
 	}
 
 	// ---------------------------------------------------------------- defeat, rematches, great beasts

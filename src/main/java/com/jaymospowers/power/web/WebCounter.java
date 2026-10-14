@@ -379,7 +379,7 @@ public final class WebCounter {
 					push(target, new Vec3(0.0, -2.0, 0.0));
 				} else if (t == 12) {
 					hit(player, target, SLAM_DAMAGE, new Vec3(0.0, 0.25, 0.0), ParticleTypes.EXPLOSION, SoundEvents.MACE_SMASH_GROUND);
-					ServerPlayNetworking.send(player, new WebNet.Shake(0.8F));
+					com.jaymospowers.core.Shakes.heavy(player, target.position(), 10.0, 0.8F);
 				}
 			}
 			case BLIND_JABS -> {
@@ -428,7 +428,7 @@ public final class WebCounter {
 				if (t == 8) {
 					player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 					hit(player, target, HAYMAKER_DAMAGE, away.scale(1.6).add(0.0, 0.4, 0.0), ParticleTypes.CRIT, SoundEvents.PLAYER_ATTACK_CRIT);
-					ServerPlayNetworking.send(player, new WebNet.Shake(0.6F));
+					com.jaymospowers.core.Shakes.send(player, 0.6F, target.getBoundingBox().getCenter());
 				}
 			}
 			case IMPALE -> {
@@ -544,13 +544,13 @@ public final class WebCounter {
 		hit(player, target, damage, push, WebSymbiote.dust(1.5F), SoundEvents.EVOKER_FANGS_ATTACK);
 		sound(level, target, SoundEvents.PLAYER_ATTACK_CRIT, 1.0F, 0.6F);
 		sound(level, player, SoundEvents.WARDEN_ATTACK_IMPACT, 0.7F, 1.2F);
-		ServerPlayNetworking.send(player, new WebNet.Shake(0.7F));
+		com.jaymospowers.core.Shakes.send(player, 0.7F, target.getBoundingBox().getCenter());
 	}
 
 	/** Maw Roar: everything near reels back from it, weakened and slowed. */
 	private static void roar(ServerPlayer player, ServerLevel level, LivingEntity target) {
 		sound(level, player, SoundEvents.WARDEN_ROAR, 1.2F, 1.3F);
-		ServerPlayNetworking.send(player, new WebNet.Shake(1.2F));
+		com.jaymospowers.core.Shakes.send(player, 1.2F, null);
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(ROAR_RADIUS),
 			e -> e != player && e.isAlive() && !e.isSpectator() && e.distanceTo(player) <= ROAR_RADIUS && !(e instanceof Player p && p.isCreative()))) {
 			living.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 0), player);
