@@ -2749,3 +2749,28 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   cell's width and leaning downwind. A rain cell stays all base.
 - A tornado's wall cloud: a lowered, turning ring of dark puffs round the top of its funnel (3 a tick for a tornado,
   5 for a monster), so the funnel hangs out of the cloud.
+
+## 0.7.17: torches burn down, moonless nights go dark
+- **Torches burn down** (`Torches`, `mixin/TorchBlockMixin`; Realistic Torches' idea, none of its code or art): every
+  torch, floor or wall, whoever put it there, burns about two days on average (a chance on each random tick), then
+  goes out with a hiss and is left a smouldering **Burnt-out Torch** (no light, drops a stick). Rain on a torch open to
+  the sky puts it out within a couple of minutes. Flint and steel, a fire charge or a lit torch in hand lights it
+  again. **Villagers relight them** (Andy): every 2 s the nearest awake grown villager within 24 blocks of a burnt
+  torch walks over and lights it, so a village stays lit while its folk are up.
+- **Dark nights** (`client/DarkNights`; Total Darkness / True Darkness's idea, LGPL, remade): moonlight follows the
+  moon's phase. Full moon is a normal night; a new moon gives no sky light at all, so anything without a torch near it
+  is pitch black. Lunar events always shine full. Overworld-type dimensions only. Shader packs light the world
+  themselves and would undo it, so on any night darker than full moon an Iris shader pack switches off at dusk (with a
+  note on screen) and back on at dawn (Andy).
+- **Spider kinds** (`wild/SpiderKinds`, own skins from `tools/gen_spider_kinds.py` via `client/mixin/SpiderSkinMixin`; Spider Overhaul's ideas, all rights
+  reserved, remade on the game's own spiders with our own art, no new mobs): a spider takes its kind from its biome the first time it
+  loads. Birch: lies still in wait and pounces. Desert: tougher, bursts its spines (4 damage, 3.5 blocks) as it dies.
+  Swamp: floats still like a lily pad, never drowns, swims at prey; its bite bogs you (pulled under in water, 6 s).
+  Cavern (below y 0): drops amethyst, emerald or (rarely) diamond; spits web that holds its prey in a cobweb for 5 s.
+  Jungle: 30% faster, pounces, poison bite, a poison pollen cloud as it dies. Ice (snowy biomes): bite freezes and
+  slows. Cave spiders and spiders elsewhere are unchanged. Spider Overhaul's "Icy" slipping is freezing here instead.
+- **Spider legs** (`client/mixin/SpiderLegsMixin`, Mo' Bends' idea; Mo' Bends itself fights Fresh Animations/EMF): every
+  spider and cave spider leg is a thigh and a shin with a knee. Knees rise above the body, shins bend down to the ground
+  and fold further on the step; legs twitch at rest, the abdomen breathes and sways as it walks. Tuning in KNEE_LIFT,
+  SHIN_BEND, STEP_BEND.
+- Spider kinds and legs seen in a cloud playtest (screenshots in spider-kinds/); torches and dark nights not yet.

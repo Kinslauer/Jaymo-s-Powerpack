@@ -1088,3 +1088,16 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   flat dark base, a tower over the middle that builds up as the cell gathers (thunderstorms and supercells), and a
   pale anvil spread over a supercell's top, leaning downwind. Each tornado hangs from a turning wall cloud
   (`kingdoms/MODLOG.md`).
+- **0.10.65 / Kingdoms 0.7.17, Andy's immersion mods:** Shoulder Surfing Reloaded (MIT) is the third-person camera for everyone: F5 goes
+  to an over-the-shoulder view with the crosshair (Right Alt free look, O swaps shoulder, arrows and Page Up/Down move
+  the camera), set to Andy's old Camera Utils F7 numbers (3.4 back, 0.9 right, 0.1 up) and kept coupled to the body so
+  powers fire where the crosshair points (`client/CameraPreset`). It refuses to load beside Camera Utils, so Camera
+  Utils left the pack, and our own Web/Gravity/Z Fighter shoulder view (`ShoulderCamera` and its mixins) went with it;
+  Chrono's Time Flow lets Shoulder Surfing hold the camera. Added: Stormie's Spiders (the maintained Spiders 2.0 fork),
+  Nether Portal Spread and Traveler Tool Belt (gigaherz's Tool Belt is NeoForge-only); `client/KeyConflicts` v3 moves
+  the belt off R to Caps Lock, Shoulder Surfing's free look off Left Alt (OK Zoomer) and swap shoulder off U (werewolf
+  shift). Kingdoms 0.7.17 remakes Realistic Torches and Total Darkness (see kingdoms/MODLOG.md). Turned down: Mo'
+  Bends (fights Fresh Animations/EMF and our poses), Immersive Portals (1.21.1 at newest), Better Third Person (1.21.8,
+  and Shoulder Surfing refuses to load beside it). Also added: Fancy World Animations (MIT; doors, chests, levers and
+  more animate, lanterns sway) and Ji AFK Cinematic (idle cinematic camera; in packModsNoCf until CurseForge has its
+  26.3 file). Kingdoms 0.7.17 also gives spiders biome kinds (Spider Overhaul's ideas). Not yet seen in game.

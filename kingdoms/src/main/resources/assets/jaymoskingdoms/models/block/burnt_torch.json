@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/template_torch",
+  "textures": {
+    "torch": "jaymoskingdoms:block/burnt_torch"
+  }
+}
