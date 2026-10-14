@@ -1048,3 +1048,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   once the first is spent, `ArsenalFlintlock.tickTacz`), and Q is the reload: it drops the pair and a fresh pair
   comes up out of the rift. TaCZ is on Modrinth only, so the CurseForge import zip carries its jar
   (untouched, credited; its art is CC BY-NC-ND 4.0).
+- **0.10.44 / Kingdoms 0.7.9, King's Roads:** our own settlement roads (Via Romana and Countered's Settlement Roads
+  don't run on 26.3, and Via Romana's licence bars a port): roads planned between nearby realms and villages, paved
+  in the land's style as chunks load, with bridges, lanterns and milestones; cabs, rickshaws, rulers and caravans keep
+  to them. Milestones offer a coach ride along the road or a dearer teleport, and a Road Charter links signs on roads
+  you build yourself (Via Romana's idea, our own way). See kingdoms/MODLOG.md.

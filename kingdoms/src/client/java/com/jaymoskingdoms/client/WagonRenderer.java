@@ -100,7 +100,7 @@ public final class WagonRenderer extends EntityRenderer<Wagon, WagonRenderer.Sta
 		List<Box> boxes = new ArrayList<>();
 		List<Wheel> wheels = new ArrayList<>();
 		BlockState wheelWood;
-		if (state.kind == Wagon.CARRIAGE || state.kind == Wagon.CAB) {
+		if (state.kind == Wagon.CARRIAGE || state.kind == Wagon.CAB || state.kind == Wagon.COACH) {
 			carriage(boxes, wheels, state.color, state.kind == Wagon.CARRIAGE);
 			wheelWood = block("dark_oak_planks");
 		} else if (state.kind == Wagon.RICKSHAW) {

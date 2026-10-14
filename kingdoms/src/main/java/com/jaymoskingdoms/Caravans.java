@@ -47,7 +47,7 @@ import org.jspecify.annotations.Nullable;
  *
  * <p><b>On the road.</b> A caravan is a record (saved on the Overworld) with its carts' loads and where it is. Where a
  * player is about, it's there to see: each cart a {@link Wagon} hitched to a horse with its carter (a {@link #CARTER})
- * in the saddle, the carts in a column on the straight road between the two seats, its guards (the fiefdom's, mounted
+ * in the saddle, the carts in a column on the road between the two seats (a {@link Roads King's Road}, else straight across), its guards (the fiefdom's, mounted
  * when the kingdom is prosperous) riding alongside. Away from every player it travels on in the record alone, at the
  * same pace, and appears again where it has got to when someone comes near. Its entities are tagged with the caravan
  * and the time it last appeared, so ones left in a chunk that unloaded are cleared away when it loads again.
@@ -521,7 +521,8 @@ final class Caravans {
 				reached(level, c, now);
 				continue;
 			}
-			Vec3 next = at.add(to.subtract(at).scale(Math.min(1.0, ROAD_SPEED * TICK / d)));
+			Vec3 road = Roads.ahead(level, at, goal, ROAD_SPEED * TICK);
+			Vec3 next = road != null ? road : at.add(to.subtract(at).scale(Math.min(1.0, ROAD_SPEED * TICK / d)));
 			put(server, c.at(BlockPos.containing(next)));
 		}
 	}
@@ -637,7 +638,13 @@ final class Caravans {
 		Vec3 here = lead.position();
 		Vec3 flat = new Vec3(to.x - here.x, 0.0, to.z - here.z);
 		double len = flat.length();
-		Vec3 ahead = len > WAYPOINT ? here.add(flat.scale(WAYPOINT / len)) : to;
+		Vec3 road = Roads.ahead(level, here, goal, WAYPOINT);
+		Vec3 ahead = road != null ? road : len > WAYPOINT ? here.add(flat.scale(WAYPOINT / len)) : to;
+		if (road != null) {
+			// (on the road: the guards flank the way it runs)
+			flat = new Vec3(road.x - here.x, 0.0, road.z - here.z);
+			len = flat.length();
+		}
 		BlockPos column = BlockPos.containing(ahead);
 		if (level.isLoaded(column)) {
 			column = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
