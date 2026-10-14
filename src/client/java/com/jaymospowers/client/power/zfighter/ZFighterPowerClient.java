@@ -6,6 +6,8 @@ import com.jaymospowers.client.PowerClient;
 import com.jaymospowers.client.PowerClients;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
+import com.jaymospowers.power.zfighter.ZFighterNet;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import com.jaymospowers.power.zfighter.ZFighterPower;
 import com.jaymospowers.power.zfighter.ZFighterState;
 import com.jaymospowers.power.zfighter.ZFighterTraining;
@@ -40,6 +42,7 @@ import net.minecraft.world.item.Items;
  */
 public final class ZFighterPowerClient implements PowerClient {
 	public static final ZFighterPowerClient INSTANCE = new ZFighterPowerClient();
+	private static boolean guardWasUp;
 
 	private static final int CHIP = 20;
 	private static final int CHIP_GAP = 2;
@@ -77,17 +80,34 @@ public final class ZFighterPowerClient implements PowerClient {
 	@Override
 	public void tick(Minecraft minecraft, LocalPlayer player) {
 		ZFighterFlightClient.tick(minecraft, player);
+		// the guard: right click held, bare-handed
+		boolean guard = minecraft.options.keyUse.isDown() && minecraft.gui.screen() == null && !player.isSpectator()
+			&& player.getMainHandItem().isEmpty();
+		if (guard != guardWasUp) {
+			guardWasUp = guard;
+			ClientPlayNetworking.send(new ZFighterNet.Guard(guard));
+		}
+	}
+
+	@Override
+	public void onActiveChanged(LocalPlayer player, boolean active) {
+		if (guardWasUp) {
+			guardWasUp = false;
+			ClientPlayNetworking.send(new ZFighterNet.Guard(false));
+		}
 	}
 
 	/** From the avatar renderer's extractRenderState (everyone, not only Z Fighters: the pose eases out). */
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
 		ZFighterFlightPose.extract(entity, state, partialTicks);
 		ZFighterTail.extract(entity, state);
+		ZFighterGuardPose.extract(entity, state);
 	}
 
 	/** Right after a humanoid model animates. */
 	public static void applyModel(Model<?> model, Object state) {
 		ZFighterFlightPose.applyModel(model, state);
+		ZFighterGuardPose.applyModel(model, state);
 	}
 
 	@Override

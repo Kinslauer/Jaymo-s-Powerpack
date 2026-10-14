@@ -215,6 +215,11 @@ public final class ZFighterPower implements Power {
 		/** His lineage ({@link ZFighterLineage}), refreshed every tick, and how long the Great Ape has been out of the moonlight. */
 		int lineage;
 		int moonless;
+		/** The guard (right click held): up, since when, when he may parry again, until when his punch counters. */
+		boolean guarding;
+		long guardStart;
+		long parryReadyAt;
+		long counterUntil;
 
 		boolean raging() {
 			return rageTicks > 0;
@@ -311,6 +316,7 @@ public final class ZFighterPower implements Power {
 		remove(player, Attributes.MOVEMENT_SPEED, APE_SPEED_ID);
 		remove(player, Attributes.ENTITY_INTERACTION_RANGE, REACH_ID);
 		remove(player, Attributes.SCALE, SCALE_ID);
+		player.removeAttached(ZFighterGuard.GUARD);
 		player.removeAttached(ZFighterLineage.LINEAGE);
 		player.removeAttached(ZFighterLineage.TAIL_WRAPPED);
 		player.removeAttached(ZFighterLineage.GREAT_APE);
@@ -768,7 +774,7 @@ public final class ZFighterPower implements Power {
 		set(player, Attributes.MAX_HEALTH, VITALITY_ID, ZFighterTraining.of(player).stat(ZFighterTraining.VITALITY) * ZFighterTraining.VITALITY_PER_LEVEL,
 			AttributeModifier.Operation.ADD_VALUE);
 		set(player, Attributes.ATTACK_DAMAGE, HUNGRY_ID, hungry ? -HUNGRY_WEAKNESS : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-		set(player, Attributes.MOVEMENT_SPEED, SLOW_ID, live.charging || live.waveFrom >= 0 || live.spiritFrom >= 0 ? -CHARGE_SLOW : 0.0,
+		set(player, Attributes.MOVEMENT_SPEED, SLOW_ID, live.charging || live.guarding || live.waveFrom >= 0 || live.spiritFrom >= 0 ? -CHARGE_SLOW : 0.0,
 			AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.MOVEMENT_SPEED, SUPER_SPEED_ID, FORM_SPEED[live.form], AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		// lineages: a Verdant's long arms and Giant forms; the Great Ape

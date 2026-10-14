@@ -171,6 +171,10 @@ final class ZFighterBattle {
 		if (victim instanceof ServerPlayer player && Powers.has(player, ZFighterPower.INSTANCE)) {
 			damage *= 1.0F - ZFighterTraining.toughness(player);
 			ZFighterPower.Live live = ZFighterPower.live(player);
+			damage = ZFighterGuard.guard(player, live, source, damage);
+			if (damage <= 0.0F) {
+				return 0.0F;
+			}
 			if (live.raging()) {
 				damage *= 1.0F - RAGE_TOUGHNESS;
 			}
@@ -187,8 +191,9 @@ final class ZFighterBattle {
 			}
 			return damage;
 		}
-		if (attacker instanceof ServerPlayer player && attacker != victim && Powers.has(player, ZFighterPower.INSTANCE) && grudge(player, victim)) {
-			return damage * (1.0F + FOE_BONUS);
+		if (attacker instanceof ServerPlayer player && attacker != victim && Powers.has(player, ZFighterPower.INSTANCE)) {
+			damage = ZFighterGuard.counter(player, source, damage);
+			return grudge(player, victim) ? damage * (1.0F + FOE_BONUS) : damage;
 		}
 		return damage;
 	}

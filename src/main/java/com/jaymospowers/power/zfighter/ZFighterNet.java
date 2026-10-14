@@ -51,7 +51,26 @@ public final class ZFighterNet {
 		}
 	}
 
+	/** Client → server: right click held bare-handed (the guard) or let go. */
+	public record Guard(boolean up) implements CustomPacketPayload {
+		public static final Type<Guard> TYPE = new Type<>(JaymosPowers.id("zfighter_guard"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Guard> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeBoolean(p.up),
+			buf -> new Guard(buf.readBoolean()));
+
+		@Override
+		public Type<Guard> type() {
+			return TYPE;
+		}
+	}
+
 	static void register() {
+		PayloadTypeRegistry.serverboundPlay().register(Guard.TYPE, Guard.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Guard.TYPE, (payload, ctx) -> {
+			if (Powers.has(ctx.player(), ZFighterPower.INSTANCE)) {
+				ZFighterGuard.set(ctx.player(), payload.up());
+			}
+		});
 		PayloadTypeRegistry.serverboundPlay().register(Train.TYPE, Train.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Fly.TYPE, Fly.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Fly.TYPE, (payload, ctx) -> {
