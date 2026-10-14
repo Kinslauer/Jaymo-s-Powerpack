@@ -104,6 +104,25 @@ public final class WebPowerClient implements PowerClient {
 				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebCounter.Strike());
 			}
 		});
+		// a tendril holding a corpse: plain right click takes it into your arms
+		ClientTickEvents.START_CLIENT_TICK.register(minecraft -> {
+			LocalPlayer player = minecraft.player;
+			if (!isActive(player) || minecraft.gui.screen() != null || WebSymbioteClient.inputLocked()
+				|| com.jaymospowers.power.web.KitchenCompat.isCarryingCorpse(player)) {
+				return;
+			}
+			int hand = holdsCorpse(player, WebNet.MAIN) ? WebNet.MAIN : holdsCorpse(player, WebNet.OFF) ? WebNet.OFF : -1;
+			if (hand < 0) {
+				return;
+			}
+			boolean pressed = false;
+			while (minecraft.options.keyUse.consumeClick()) {
+				pressed = true;
+			}
+			if (pressed) {
+				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebTendrils.CarryHeld(hand));
+			}
+		});
 		ClientTickEvents.START_CLIENT_TICK.register(minecraft -> {
 			LocalPlayer player = minecraft.player;
 			if (player == null || minecraft.gui.screen() != null || WebSymbioteClient.inputLocked() || !holdsChunk(player, WebNet.OFF)) {
@@ -123,6 +142,7 @@ public final class WebPowerClient implements PowerClient {
 		EntityRenderers.register(com.jaymospowers.power.web.WebSymbioteBlob.TYPE, WebBlobRenderer::new);
 		EntityRenderers.register(WebPower.WEB_BALL, context -> new ThrownItemRenderer<>(context, 0.85F, false));
 		LevelRenderEvents.COLLECT_SUBMITS.register(WebLineRenderer::render);
+		LevelRenderEvents.COLLECT_SUBMITS.register(WebSenseBolts::render);
 		// every player's arms and legs (theirs and others'), whether or not we're a web slinger ourselves
 		ClientTickEvents.END_CLIENT_TICK.register(WebArms::tick);
 		ClientTickEvents.END_CLIENT_TICK.register(WebLineRenderer::tick);
@@ -276,6 +296,12 @@ public final class WebPowerClient implements PowerClient {
 			&& player.level().getEntity(grips.get(hand)) instanceof com.jaymospowers.core.BlockCluster;
 	}
 
+	static boolean holdsCorpse(LocalPlayer player, int hand) {
+		com.jaymospowers.power.web.WebTendrils.Grips grips = player.getAttached(com.jaymospowers.power.web.WebTendrils.GRIPS);
+		return grips != null && grips.get(hand) >= 0 && player.level().getEntity(grips.get(hand)) instanceof net.minecraft.world.entity.Entity held
+			&& com.jaymospowers.power.gravity.GravityPower.isCorpse(held);
+	}
+
 	private static boolean holding(LocalPlayer player, net.minecraft.world.entity.Entity e) {
 		com.jaymospowers.power.web.WebTendrils.Grips grips = player.getAttached(com.jaymospowers.power.web.WebTendrils.GRIPS);
 		return grips != null && (grips.right() == e.getId() || grips.left() == e.getId());
@@ -365,6 +391,7 @@ public final class WebPowerClient implements PowerClient {
 		int width = graphics.guiWidth();
 		int height = graphics.guiHeight();
 		WebSymbioteClient.renderHud(graphics, player);
+		WebSenseBolts.renderHud(graphics, player);
 		// the ascended ability (Web Strike) joins the end of the row once you have it
 		boolean ascended = com.jaymospowers.core.Fate.isAscended(player);
 		int chips = ascended ? 6 : 5;

@@ -547,8 +547,11 @@ it no longer lurches in a straight line into walls.
      `SELF_FEED_RANGE` 14 (edible, nobody carrying it, no tendril holding it); else the nearest creature there that
      leaves a corpse (no pets, no named ones; players only in a rampage).
   2. **Kill:** it takes the wheel (a "hunt" takeover: no big body) and attacks; the tendril strikes go for the prey
-     first. Gives up after `KILL_TICKS` 400 or if the prey escapes. A hungry or rampage takeover that kills its own prey
-     also goes on into feeding.
+     first. No time limit (0.10.10): it only gives up if the prey gets `TAKEOVER_ESCAPE` 64 away or is gone, or you
+     break free. A hungry or rampage takeover that kills its own prey also goes on into feeding. Either way it keeps
+     the wheel through grab, carry and meal (`holdForMeal`: the takeover's target becomes you, and your client holds
+     still), letting go when the meal ends (or when the post-meal escape leap fires). Takeovers no longer end on a
+     timer (`TAKEOVER_LIMIT` is only the hold the client is told, renewed by `renewHold`).
   3. Once the prey is dead, its Kitchen corpse must appear within `CORPSE_WAIT_TICKS` 60, within `CORPSE_FIND_RADIUS`
      3 of where it fell.
   4. **Grab:** a tendril (`WebTendrils.grab`) reaches for it and hauls it in (reach + `GRAB_HAUL_TICKS` 8, at most
@@ -663,8 +666,8 @@ whisper, so the vignette, dark screen and growl play each time.
 
 **Takeovers can't be interrupted.** `WebTakeoverInputMixin` zeroes movement while it drives, and clicks, power keys,
 mode, ultimate and the menu key are swallowed. Each fresh press is a struggle (`WebNet.Struggle`): once you've
-earned `BREAK_FREE_ABILITIES` 3 abilities, `BREAK_FREE_BASE` 36 - 4 per ability presses (12 with all six; the
-count fades by `STRUGGLE_FADE` per tick) break its hold, which adds `BREAK_FREE_STRESS` 10 stress. A meter shows on
+earned `BREAK_FREE_ABILITIES` 3 abilities, `BREAK_FREE_BASE` 80 - 6 per ability presses (44 with all six, since 0.10.10; the
+count fades by `STRUGGLE_FADE` 0.25 per tick) break its hold, which adds `BREAK_FREE_STRESS` 10 stress. A meter shows on
 the HUD.
 
 **Takeover combat:** the tendrils do the fighting: `FRENZY_TICKS` 18 strikes every `FRENZY_EVERY` 4 ticks for
@@ -768,6 +771,11 @@ roams, bonds a nearby web user, or with Kitchen waits for the body to rise and t
   skips its own damage for these via `WebCounter.ownsStrike`), Jaw Snap, Maul, Maw Roar, Drag to the Jaws (the maw,
   drawn by `WebMouthLayer` from `web_counter` / `WebCounter.maw`). The maw only bites; nothing living is fed on.
   Damage and timings are constants at the top of `WebCounter`.
+- **Sense bolts (0.10.10, `WebSenseBolts`):** no text on a dodge or counter. While the counter window is open
+  (`web_counter_ready`, now synced to everyone), three faint pale-gold lightning bolts flash over the slinger's head
+  every 6 ticks, fading through the window; in first person your own flash at the top of the screen.
+- **Tendril-held corpse (0.10.10):** while a tendril grips a Kitchen corpse, a plain right click (no Sneak, any target)
+  releases it into your arms (`WebTendrils.CarryHeld` → `carryHeld` → `KitchenCompat.carry`).
 - **Web Strike (C, `onUltimate`):**
   - It zips you to the living entity under the crosshair within `STRIKE_RANGE` 32, as a Yank-to pull.
   - When you're within 2.2 of the target's edge, the kick deals `max(STRIKE_MIN_DAMAGE 10, best speed of the last 3

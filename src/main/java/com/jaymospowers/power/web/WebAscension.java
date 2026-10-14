@@ -210,20 +210,17 @@ public final class WebAscension {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		int charges = senseCharges(player);
-		int charge = -1, left = 0;
-		for (int i = 0; i < charges; i++) {
+		int charge = -1;
+		for (int i = 0; i < charges && charge < 0; i++) {
 			if (now >= live.dodgeReadyAt[i]) {
-				left++;
-				if (charge < 0) {
-					charge = i;
-				}
+				charge = i;
 			}
 		}
 		if (charge < 0) {
 			return true;
 		}
 		live.dodgeReadyAt[charge] = now + DODGE_COOLDOWN;
-		WebCounter.opened(player, attacker, left - 1, charges);
+		WebCounter.opened(player, attacker);
 		// out of the way, square to where it came from, with one of four moves
 		Entity from = source.getDirectEntity() != null ? source.getDirectEntity() : attacker;
 		Vec3 away = player.position().subtract(from.position());

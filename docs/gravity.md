@@ -128,7 +128,7 @@ A Gravity user lightens whatever they hold, at every mastery level (`GravityWeig
   (`client/ShoulderCamera` and the `Shoulder*` mixins in `jaymospowers.client.mixins.json`). Other powers keep
   vanilla's views.
 
-## 0.10.6: Sideways falls, falling forward, wall walk
+## 0.10.11: Sideways falls, falling forward, wall walk
 Ideas from Gravity Control (MIT; a NeoForge 1.21.1 fork of Gravity API), remade here: that mod turns the actual
 "down" of an entity, camera and hitbox and all. We fake each effect with velocity and a turned body instead.
 - **Sideways fall** (`GravitySideFall`): sneak as you let go of R, and what Lift held falls the way you look; **Sneak+G**
