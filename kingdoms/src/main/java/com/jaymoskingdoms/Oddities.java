@@ -308,6 +308,11 @@ final class Oddities {
 		String kind = null;
 		if (monster instanceof ServerPlayer player) {
 			kind = Aliens.fearedAs(player, f.id());
+			if (kind == null && Tails.feared(player, v)) {
+				// (0.7.10) a tail: a werewolf, surely, or worse
+				say(level, v, "fear.tail", Speech.RED, now);
+				return;
+			}
 		} else if (monstrous(monster)) {
 			kind = monster instanceof Villager ? "host" : SYMBIOTE;
 		} else if (Vampires.exposed(monster)) {

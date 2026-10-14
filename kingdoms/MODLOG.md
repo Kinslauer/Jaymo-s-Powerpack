@@ -2682,3 +2682,7 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   on the Overworld, `jaymoskingdoms:charted_roads`). Jumping (a pearl, a fall) loses the chart; a link whose far sign is
   broken goes when someone tries it. Coaches on charted roads come from the nearest realm.
 - Not yet seen in game.
+- **0.7.10, tail fear (pack 0.10.48):** townsfolk who see a Z Fighter's tail out (`jaymospowers_tail` tag) take them for
+  a werewolf and run (`Tails`, `Frights`, 12 cries), until told: at 25 MCA hearts the chat menu gains "Explain your tail"
+  (`data/jaymoskingdoms/dialogues/main.json`, `McaAnswersMixin`), and that villager fears it no more.
+  `ClassPerks.trainedWith` tells Powers which weapons a class is trained with.

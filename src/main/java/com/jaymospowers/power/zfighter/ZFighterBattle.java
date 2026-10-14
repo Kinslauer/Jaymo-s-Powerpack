@@ -37,8 +37,8 @@ import org.jspecify.annotations.Nullable;
  * until he beats it (kills one of that kind, or that player), it does {@link #FOE_RESIST} less damage to him and takes
  * {@link #FOE_BONUS} more from him; beating it settles the score and the edge is gone. Every new victor also makes him
  * stronger for good (more ki, harder fists; see {@link ZFighterPower#zenkai}).</li>
- * <li><b>Fists only.</b> A weapon (anything with attack damage of its own) won't strike in his hand
- * ({@code ZFighterPlayerMixin}). Every punch that lands builds ki and a combo; every {@link #COMBO_FINISHER}th hit in
+ * <li><b>Fists first.</b> A weapon (anything with attack damage of its own, or a bow's arrow) hits for only
+ * {@link #WEAPON_DAMAGE} of its damage, unless his Jaymo's Kingdoms class is trained with it. Every punch that lands builds ki and a combo; every {@link #COMBO_FINISHER}th hit in
  * a row is a finisher that sends the foe flying.</li>
  * <li><b>Super, through hardship.</b> Hardship builds from coming back from the brink in a fight, from defeats, from
  * settling scores with old victors and from felling great beasts. With {@link #SUPER_HARDSHIP} of it and every ability
@@ -50,6 +50,8 @@ final class ZFighterBattle {
 	/** Damage a foe that once beat him does to him is cut by this much; his own damage to it grows by this much. */
 	static final float FOE_RESIST = 0.5F;
 	static final float FOE_BONUS = 0.5F;
+	/** A weapon his class isn't trained with hits for this share of what it would. */
+	static final float WEAPON_DAMAGE = 0.35F;
 
 	/** Hits within this many ticks of each other keep a combo going. */
 	static final int COMBO_WINDOW = 25;
@@ -123,7 +125,7 @@ final class ZFighterBattle {
 		return player.getAttachedOrElse(ZFighterPower.GRUDGES, List.of()).contains(foeKey(foe));
 	}
 
-	// ---------------------------------------------------------------- fists only
+	// ---------------------------------------------------------------- fists first
 
 	/** A weapon: anything that would hit harder than a fist (its own attack damage, or a weapon's component). */
 	static boolean isWeapon(ItemStack stack) {
@@ -141,20 +143,40 @@ final class ZFighterBattle {
 		return false;
 	}
 
-	/** Whether {@code player}'s swing is refused: a Z Fighter with a weapon in hand. Says so (now and then) on the server. */
-	static boolean refusesAttack(Player player) {
-		if (!Powers.has(player, ZFighterPower.INSTANCE) || !isWeapon(player.getMainHandItem())) {
-			return false;
+	/**
+	 * The weapon behind a blow of his, if it was one: a swing with a weapon in hand, or an arrow or bolt from a bow or
+	 * crossbow. Ki and fists are never weapons.
+	 */
+	static @Nullable ItemStack weaponUsed(ServerPlayer player, DamageSource source) {
+		ItemStack weapon = source.getWeaponItem();
+		if (weapon == null || weapon.isEmpty()) {
+			return null;
 		}
-		if (player instanceof ServerPlayer server) {
-			ZFighterPower.Live live = ZFighterPower.live(server);
-			long now = server.level().getGameTime();
-			if (now - live.lastRefusal > 40) {
-				live.lastRefusal = now;
-				server.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_fists_only").withStyle(ChatFormatting.GOLD));
-			}
+		if (source.getDirectEntity() == player && source.is(DamageTypes.PLAYER_ATTACK)) {
+			return isWeapon(weapon) ? weapon : null;
 		}
-		return true;
+		if (source.getDirectEntity() instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow) {
+			return weapon;
+		}
+		return null;
+	}
+
+	/**
+	 * A blow struck with a weapon: full only when his Kingdoms class is trained with it ({@link ZFighterKingdoms#trainedWith}),
+	 * else {@link #WEAPON_DAMAGE} of it. Says so (now and then).
+	 */
+	private static float weaponBlow(ServerPlayer player, DamageSource source, float damage) {
+		ItemStack weapon = weaponUsed(player, source);
+		if (weapon == null || ZFighterKingdoms.trainedWith(player, weapon)) {
+			return damage;
+		}
+		ZFighterPower.Live live = ZFighterPower.live(player);
+		long now = player.level().getGameTime();
+		if (now - live.lastRefusal > 200) {
+			live.lastRefusal = now;
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_fists_only").withStyle(ChatFormatting.GOLD));
+		}
+		return damage * WEAPON_DAMAGE;
 	}
 
 	// ---------------------------------------------------------------- damage
@@ -194,6 +216,7 @@ final class ZFighterBattle {
 		}
 		if (attacker instanceof ServerPlayer player && attacker != victim && Powers.has(player, ZFighterPower.INSTANCE)) {
 			damage = ZFighterGuard.counter(player, source, damage);
+			damage = weaponBlow(player, source, damage);
 			return grudge(player, victim) ? damage * (1.0F + FOE_BONUS) : damage;
 		}
 		return damage;

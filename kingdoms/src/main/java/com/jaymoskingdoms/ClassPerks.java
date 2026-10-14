@@ -170,6 +170,29 @@ public final class ClassPerks {
 		return Classes.is(player, PlayerClass.SURVIVALIST) ? SURVIVALIST_EXHAUSTION : 1.0F;
 	}
 
+	/**
+	 * (0.7.10) Whether {@code player}'s class is trained with {@code weapon}: a Thief's light blades, a Warlord's two-handers,
+	 * a Brute's bludgeons, an Archer's bows, a Marksman's guns and crossbows, a Sorcerer's swords, a Mage's staffs, and
+	 * anything a Rider swings from the saddle. Jaymo's Powers asks, by reflection: a Z Fighter hits at full only with these.
+	 */
+	public static boolean trainedWith(ServerPlayer player, ItemStack weapon) {
+		PlayerClass cls = Classes.classOf(player);
+		if (cls == null || weapon.isEmpty()) {
+			return false;
+		}
+		return switch (cls) {
+			case THIEF -> weapon.is(LIGHT_BLADES);
+			case WARLORD -> weapon.is(TWO_HANDED);
+			case BRUTE -> weapon.is(BLUDGEONS);
+			case ARCHER -> weapon.getItem() instanceof net.minecraft.world.item.ProjectileWeaponItem;
+			case MARKSMAN -> weapon.is(GUNS) || weapon.getItem() instanceof net.minecraft.world.item.CrossbowItem;
+			case SORCERER -> weapon.is(net.minecraft.tags.ItemTags.SWORDS) || weapon.is(LIGHT_BLADES);
+			case MAGE -> weapon.is(Arcana.BONE_STAFF) || weapon.is(Arcana.TOTEM_STAFF) || weapon.is(Arcana.WIZARD_STAFF);
+			case RIDER -> player.getVehicle() != null;
+			case SURVIVALIST -> false;
+		};
+	}
+
 	/** Everything a class does through attributes, from the class, the held weapon and the armour worn now. */
 	static void attributes(ServerPlayer player) {
 		PlayerClass cls = Classes.classOf(player);
