@@ -29,6 +29,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.MoonPhase;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -74,6 +75,10 @@ public final class ZFighterLineage {
 	static final int APE_BEAM_COOLDOWN = 80;
 	/** Out of the moonlight this long, the Great Ape shrinks back. */
 	static final int APE_MOONLESS = 200;
+	/** Enemies underfoot (in the lowest blocks of his bulk) take this much, every this many ticks, and are flattened. */
+	static final float APE_STOMP = 14.0F;
+	static final int APE_STOMP_EVERY = 5;
+	static final double APE_STOMP_DEPTH = 3.0;
 	// ---- Verdant ----
 	static final int REGEN_EVERY = 40;
 	static final float REGEN = 1.0F;
@@ -285,6 +290,28 @@ public final class ZFighterLineage {
 		}
 		if (now % 200 == 0) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 2.0F, 0.5F);
+		}
+		if (now % APE_STOMP_EVERY == 0 && live.apeSize >= 0.5F) {
+			stomp(player, level);
+		}
+	}
+
+	/** The Great Ape treads on his enemies: monsters, and anything that's after him, under his feet. */
+	private static void stomp(ServerPlayer player, ServerLevel level) {
+		AABB box = player.getBoundingBox();
+		AABB feet = new AABB(box.minX, box.minY - 0.5, box.minZ, box.maxX, box.minY + APE_STOMP_DEPTH, box.maxZ);
+		boolean hit = false;
+		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, feet, e -> e != player && e.isAlive()
+			&& (e instanceof Enemy || e instanceof net.minecraft.world.entity.Mob mob && mob.getTarget() == player))) {
+			if (victim.hurtServer(level, level.damageSources().playerAttack(player), APE_STOMP)) {
+				hit = true;
+				victim.setDeltaMovement(victim.getDeltaMovement().multiply(0.3, 0.0, 0.3).add(0.0, -0.4, 0.0));
+				level.sendParticles(ParticleTypes.EXPLOSION, victim.getX(), victim.getY() + 0.3, victim.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+				level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, victim.getX(), victim.getY() + 0.2, victim.getZ(), 6, 0.6, 0.1, 0.6, 0.02);
+			}
+		}
+		if (hit) {
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 2.0F, 0.5F);
 		}
 	}
 

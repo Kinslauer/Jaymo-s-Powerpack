@@ -970,3 +970,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   The Great Ape stands about 30 blocks tall (scale 17, was 3; `ZFighterScaleMixin` lifts the scale attribute's cap from
   16 to 20) and grows into it over 4 seconds, swelling smoothly with dust, smoke and a heartbeat, then roars at full
   size; ending, he shrinks back over 2 seconds.
+  The Great Ape has its own body (`ZFighterApe`, skin from `tools/gen_great_ape.py`): the player is hidden and a shaggy
+  ape stands in his place in his pose (furred head with muzzle, brow and red eyes, barrel chest, long arms, short legs,
+  swinging tail). Grown at least halfway, he stomps: monsters and anything hunting him under his feet take 14 every
+  quarter second and are pressed into the ground.
