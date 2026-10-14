@@ -1,10 +1,12 @@
 package com.jaymospowers.client.power.wind;
 
+import com.jaymospowers.client.ScreenShake;
 import net.minecraft.util.Mth;
 
 /**
- * Purely visual camera effects for the local flyer: a decaying shake (take-off, sonic boom, impacts) and a speed FOV
- * boost. Applied by {@code CameraMixin} and {@code AbstractClientPlayerMixin}; the player's real aim is never touched.
+ * Purely visual camera effects for the local flyer: shakes (take-off, sonic boom, impacts; through the shared
+ * {@link ScreenShake}), a steady tremble at sonic speed, and a speed FOV boost. Applied by {@code CameraMixin} and
+ * {@code AbstractClientPlayerMixin}; the player's real aim is never touched.
  */
 public final class WindCamera {
 	/** Shake ceiling, in degrees, whatever asks for it. */
@@ -12,9 +14,6 @@ public final class WindCamera {
 	/** Extra FOV at top cruise speed (0.15 = +15%), scaled by the FOV-effects slider. */
 	static final float MAX_FOV_BOOST = 0.15F;
 
-	private static float shakeStrength;
-	private static int shakeTicks;
-	private static int shakeDuration = 1;
 	/** A steady tremble on top (sonic flight), degrees. */
 	private static float tremble;
 	private static float fovBoost;
@@ -23,14 +22,9 @@ public final class WindCamera {
 	private WindCamera() {
 	}
 
-	/** Shake the camera by up to {@code degrees}, fading out over {@code duration} ticks. A weaker shake never cuts a stronger one short. */
+	/** Shake the screen by up to {@code degrees}, fading out over {@code duration} ticks (see ScreenShake). */
 	public static void shake(float degrees, int duration) {
-		float remaining = shakeTicks > 0 ? shakeStrength * shakeTicks / (float)shakeDuration : 0.0F;
-		if (degrees >= remaining) {
-			shakeStrength = Math.min(degrees, MAX_SHAKE);
-			shakeDuration = Math.max(1, duration);
-			shakeTicks = shakeDuration;
-		}
+		ScreenShake.add(Math.min(degrees, MAX_SHAKE), duration, null);
 	}
 
 	static void setTremble(float degrees) {
@@ -44,21 +38,16 @@ public final class WindCamera {
 
 	static void tick() {
 		ticks++;
-		if (shakeTicks > 0) {
-			shakeTicks--;
-		}
 	}
 
 	static void reset() {
-		shakeTicks = 0;
 		tremble = 0.0F;
 		fovBoost = 0.0F;
 	}
 
-	/** {yaw, pitch} offsets in degrees for this frame, or null when the camera is still. */
+	/** {yaw, pitch} offsets in degrees for this frame (the tremble), or null when the camera is still. */
 	public static float[] offsets(float partialTicks) {
-		float decay = shakeTicks > 0 ? Math.max(0.0F, (shakeTicks - partialTicks) / shakeDuration) : 0.0F;
-		float amplitude = shakeStrength * decay * decay + tremble;
+		float amplitude = tremble;
 		if (amplitude < 0.01F) {
 			return null;
 		}

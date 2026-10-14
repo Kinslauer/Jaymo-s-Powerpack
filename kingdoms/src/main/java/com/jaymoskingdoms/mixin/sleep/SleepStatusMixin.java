@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-/** (0.7.4) Players resting in bed ({@link BedRest}) are awake: they don't count among the sleepers. */
+/** (0.7.5) Players resting in bed ({@link BedRest}) are awake: they don't count among the sleepers. */
 @Mixin(SleepStatus.class)
 abstract class SleepStatusMixin {
 	@Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isSleeping()Z"))

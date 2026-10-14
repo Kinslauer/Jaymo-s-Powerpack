@@ -63,7 +63,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		TalkScreen.register();
 		// 0.6.6: lunar events' colours
 		MoonClient.register();
-		// 0.7.4: bed rest and the timelapse night (the bed's darkness, the Sleep button)
+		// 0.7.5: bed rest and the timelapse night (the bed's darkness, the Sleep button)
 		RestClient.register();
 		ArmoryLayer.register();
 		// 0.5.34: Jaymo's Equestrian (gaits, the stamina HUD, coats, war elephants)

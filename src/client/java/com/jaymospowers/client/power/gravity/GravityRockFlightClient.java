@@ -69,7 +69,7 @@ final class GravityRockFlightClient {
 			vy += (player.getRandom().nextDouble() - 0.5) * SHUDDER * strain - SAG * strain;
 			horizontal = horizontal.scale(1.0 - 0.25 * strain);
 			if (player.tickCount % 4 == 0) {
-				com.jaymospowers.client.power.web.WebShake.start(STRAIN_SHAKE * (float)strain);
+				com.jaymospowers.client.ScreenShake.add(STRAIN_SHAKE * (float)strain);
 			}
 		}
 		player.setDeltaMovement(horizontal.x, vy, horizontal.z);

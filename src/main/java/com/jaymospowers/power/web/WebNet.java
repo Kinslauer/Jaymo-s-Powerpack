@@ -214,17 +214,6 @@ public final class WebNet {
 		}
 	}
 
-	/** Server → client: shake the screen this hard (Living Armor landing heavily). */
-	public record Shake(float strength) implements CustomPacketPayload {
-		public static final Type<Shake> TYPE = new Type<>(JaymosPowers.id("web_shake"));
-		public static final StreamCodec<ByteBuf, Shake> CODEC = ByteBufCodecs.FLOAT.map(Shake::new, Shake::strength);
-
-		@Override
-		public Type<Shake> type() {
-			return TYPE;
-		}
-	}
-
 	/**
 	 * Server → client: the symbiote presses in on you for {@code ticks}: the screen darkens under a pulsing
 	 * blackish-purple vignette, and (if {@code growl}) a low growl plays for you alone. Sent with every whisper, and
@@ -265,7 +254,6 @@ public final class WebNet {
 		PayloadTypeRegistry.clientboundPlay().register(TakeoverPath.TYPE, TakeoverPath.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Nudge.TYPE, Nudge.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Sense.TYPE, Sense.CODEC);
-		PayloadTypeRegistry.clientboundPlay().register(Shake.TYPE, Shake.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Dread.TYPE, Dread.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Wings.TYPE, Wings.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(WingsBrake.TYPE, WingsBrake.CODEC);

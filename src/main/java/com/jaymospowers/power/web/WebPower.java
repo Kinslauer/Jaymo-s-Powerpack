@@ -260,6 +260,7 @@ public final class WebPower implements Power {
 		WebWhip.register();
 		WebSlam.register();
 		WebWallRun.register();
+		WebParkour.register();
 		WebStrain.register();
 		WebTraps.register();
 		WebHitches.register();
@@ -448,7 +449,7 @@ public final class WebPower implements Power {
 
 	@Override
 	public boolean allowsFloating(ServerPlayer player) {
-		return inGrace(player) || WebSymbiote.allowsFloating(player);
+		return inGrace(player) || WebSymbiote.allowsFloating(player) || WebParkour.clinging(player);
 	}
 
 	@Override

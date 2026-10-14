@@ -122,7 +122,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.1: a night slept through made up at once (building, fields), farmers, rulers' days out
 		LOGGER.debug("warden attachment: {}", Wardens.WARDENS);
 		Nights.register();
-		// (0.7.4) the night as a timelapse, and resting in bed awake (our own take on Sleeping Overhaul 2)
+		// (0.7.5) the night as a timelapse, and resting in bed awake (our own take on Sleeping Overhaul 2)
 		Timelapse.register();
 		BedRest.register();
 		// 0.5.14: horses and wagons: mounted guards and archers for prosperous realms, a wealthy king's carriage, and the

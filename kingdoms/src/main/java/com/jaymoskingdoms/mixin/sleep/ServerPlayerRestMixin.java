@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.7.4) Using a bed by day, where sleep isn't possible, or while sneaking lays you down to rest ({@link BedRest}). */
+/** (0.7.5) Using a bed by day, where sleep isn't possible, or while sneaking lays you down to rest ({@link BedRest}). */
 @Mixin(ServerPlayer.class)
 abstract class ServerPlayerRestMixin {
 	@Shadow

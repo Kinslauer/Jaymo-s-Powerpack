@@ -12,7 +12,7 @@ import net.minecraft.client.player.LocalPlayer;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.4) The client's side of bed rest ({@link BedRest}) and the timelapse night ({@link com.jaymoskingdoms.Timelapse}):
+ * (0.7.5) The client's side of bed rest ({@link BedRest}) and the timelapse night ({@link com.jaymoskingdoms.Timelapse}):
  * how dark the screen is in bed. Falling asleep fades to black as in vanilla, but once the night runs by as a timelapse
  * the screen clears to {@link #TIMELAPSE_DIM} so you can watch it, and resting only dims it to {@link #REST_DIM}. The
  * Sleep button over Leave Bed shows while you rest at night. Dragging the mouse across the bed screen looks around from

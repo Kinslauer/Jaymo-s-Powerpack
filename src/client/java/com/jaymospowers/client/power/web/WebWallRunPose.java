@@ -32,10 +32,10 @@ public final class WebWallRunPose {
 	// ================================================================================================================
 
 	/** {@code side}: +1 with the wall on your right, -1 on your left; {@code in}: how settled into the pose (0-1). */
-	record Run(int side, float time, float in) {
+	public record Run(int side, float time, float in) {
 	}
 
-	static final RenderStateDataKey<Run> KEY = RenderStateDataKey.create(() -> "jaymospowers:web_wall_run");
+	public static final RenderStateDataKey<Run> KEY = RenderStateDataKey.create(() -> "jaymospowers:web_wall_run");
 
 	/** Per entity id: the game time its current run began (for the ease in). */
 	private static final java.util.Map<Integer, Float> STARTED = new java.util.HashMap<>();

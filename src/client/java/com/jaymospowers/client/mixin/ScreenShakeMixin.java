@@ -1,6 +1,6 @@
-package com.jaymospowers.client.power.web.mixin;
+package com.jaymospowers.client.mixin;
 
-import com.jaymospowers.client.power.web.WebShake;
+import com.jaymospowers.client.ScreenShake;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
@@ -9,11 +9,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** The screen shakes with the hurt bob (see WebShake). */
+/** The screen shakes with the hurt bob (see ScreenShake). */
 @Mixin(GameRenderer.class)
-abstract class WebShakeMixin {
+abstract class ScreenShakeMixin {
 	@Inject(method = "bobHurt", at = @At("TAIL"))
 	private void jaymospowers$shake(CameraRenderState cameraState, PoseStack poseStack, CallbackInfo ci) {
-		WebShake.apply(poseStack);
+		ScreenShake.apply(cameraState, poseStack);
 	}
 }

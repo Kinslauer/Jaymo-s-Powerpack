@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.7.4) A Sleep button above Leave Bed, shown while you rest at night, and dragging to look around ({@link RestClient}). */
+/** (0.7.5) A Sleep button above Leave Bed, shown while you rest at night, and dragging to look around ({@link RestClient}). */
 @Mixin(InBedChatScreen.class)
 abstract class InBedChatScreenMixin extends ChatScreen {
 	private InBedChatScreenMixin() {

@@ -34,7 +34,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.4) Resting in bed without sleeping, our own take on Sleeping Overhaul 2's bed rest: by day (or wherever sleep isn't
+ * (0.7.5) Resting in bed without sleeping, our own take on Sleeping Overhaul 2's bed rest: by day (or wherever sleep isn't
  * possible, a blood moon included), or at any time while sneaking, using a bed lays you down awake. Your screen dims a
  * little, you don't count as asleep (so you never hold up or bring on the morning), and while you rest poison and withering
  * can't hurt you. Any other hurt gets you up, as in vanilla. At night a Sleep button above Leave Bed puts you to sleep

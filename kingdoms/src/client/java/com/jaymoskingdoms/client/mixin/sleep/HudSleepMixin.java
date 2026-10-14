@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.7.4) The bed's darkness as {@link RestClient} has it: dim while resting, clear while the night runs by. */
+/** (0.7.5) The bed's darkness as {@link RestClient} has it: dim while resting, clear while the night runs by. */
 @Mixin(Hud.class)
 abstract class HudSleepMixin {
 	@Shadow

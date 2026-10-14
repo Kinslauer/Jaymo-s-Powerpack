@@ -79,6 +79,9 @@ public final class ZFighterLineage {
 	static final float APE_STOMP = 14.0F;
 	static final int APE_STOMP_EVERY = 5;
 	static final double APE_STOMP_DEPTH = 3.0;
+	/** Screen shake: each footfall (every this many blocks walked, felt this far), a stomp that lands, the change itself. */
+	static final double APE_STRIDE = 3.0, APE_STEP_RANGE = 32.0;
+	static final float APE_STEP_SHAKE = 0.7F, APE_STOMP_SHAKE = 1.4F, APE_CHANGE_SHAKE = 2.5F;
 	// ---- Verdant ----
 	static final int REGEN_EVERY = 40;
 	static final float REGEN = 1.0F;
@@ -291,6 +294,13 @@ public final class ZFighterLineage {
 		if (now % 200 == 0) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 2.0F, 0.5F);
 		}
+		// every stride of his shakes the ground
+		if (player.moveDist - live.apeStepAt >= APE_STRIDE * Math.max(0.5F, live.apeSize)) {
+			live.apeStepAt = player.moveDist;
+			if (player.onGround() && live.apeSize >= 0.5F) {
+				com.jaymospowers.core.Shakes.heavy(player, player.position(), APE_STEP_RANGE, APE_STEP_SHAKE * live.apeSize);
+			}
+		}
 		if (now % APE_STOMP_EVERY == 0 && live.apeSize >= 0.5F) {
 			stomp(player, level);
 		}
@@ -312,6 +322,7 @@ public final class ZFighterLineage {
 		}
 		if (hit) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 2.0F, 0.5F);
+			com.jaymospowers.core.Shakes.heavy(player, player.position(), APE_STEP_RANGE, APE_STOMP_SHAKE);
 		}
 	}
 
@@ -332,6 +343,7 @@ public final class ZFighterLineage {
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 3.0F, 0.4F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 2.0F, 0.6F);
+		com.jaymospowers.core.Shakes.heavy(player, player.position(), APE_STEP_RANGE * 1.5, APE_CHANGE_SHAKE);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_ape").withStyle(ChatFormatting.RED));
 		ZFighterPower.refresh(player, live);
 		player.setHealth(player.getMaxHealth());

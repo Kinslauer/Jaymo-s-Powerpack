@@ -20,7 +20,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gamerules.GameRules;
 
 /**
- * (0.7.4) The night as a timelapse, our own take on Sleeping Overhaul 2 (Forge only): once enough players are fast asleep,
+ * (0.7.5) The night as a timelapse, our own take on Sleeping Overhaul 2 (Forge only): once enough players are fast asleep,
  * instead of the clock jumping to morning, the whole world runs faster: the server ticks at {@link #TICK_RATE} (vanilla's
  * {@code /tick rate}, so villagers walk, build and farm at speed and the sleepers can watch them), and on top of that the
  * Overworld's clock runs {@link #SPEED} times as fast, both eased in over {@link #RAMP_TICKS}. The world only goes as fast

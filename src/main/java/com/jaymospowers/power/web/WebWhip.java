@@ -492,7 +492,7 @@ public final class WebWhip {
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.TRIDENT_THROW.value(), SoundSource.PLAYERS, 0.7F, 0.8F);
 		level.sendParticles(ParticleTypes.POOF, at.x, at.y, at.z, 8, 0.4, 0.4, 0.4, 0.02);
 		level.sendParticles(ParticleTypes.CLOUD, at.x, at.y, at.z, 4, 0.3, 0.3, 0.3, 0.01);
-		ServerPlayNetworking.send(player, new WebNet.Shake(SWING_SHAKE));
+		com.jaymospowers.core.Shakes.send(player, SWING_SHAKE, at);
 	}
 
 	/** Brought down hard: damage, a crater, dust, and every screen near it shakes. */
@@ -510,7 +510,7 @@ public final class WebWhip {
 			living.hurtServer(level, level.damageSources().playerAttack(player), DAMAGE);
 		}
 		if (target instanceof ServerPlayer struck) {
-			ServerPlayNetworking.send(struck, new WebNet.Shake(TARGET_SHAKE));
+			com.jaymospowers.core.Shakes.send(struck, TARGET_SHAKE, struck.position());
 		}
 		// anything else where it lands is caught under it
 		for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, new AABB(ground, ground).inflate(SPLASH + force * 0.5),
@@ -527,10 +527,10 @@ public final class WebWhip {
 		Debris.ring(level, BlockPos.containing(ground).below(), radius, 1.2F);
 		level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, ground.x, ground.y + 0.3, ground.z, 6 + radius * 3, radius * 0.5, 0.2, radius * 0.5, 0.02);
 		level.playSound(null, ground.x, ground.y, ground.z, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.0F, chunk ? 0.7F : 0.9F);
-		ServerPlayNetworking.send(player, new WebNet.Shake(SLAM_SHAKE));
+		com.jaymospowers.core.Shakes.send(player, SLAM_SHAKE, ground);
 		for (ServerPlayer near : level.players()) {
 			if (near != player && near != target && near.distanceToSqr(ground) < NEAR_SHAKE_RANGE * NEAR_SHAKE_RANGE) {
-				ServerPlayNetworking.send(near, new WebNet.Shake(NEAR_SHAKE));
+				com.jaymospowers.core.Shakes.send(near, NEAR_SHAKE, ground);
 			}
 		}
 		if (chunk && last) {

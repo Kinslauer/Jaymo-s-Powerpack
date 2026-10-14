@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-/** (0.7.4) The night runs by as a timelapse ({@link Timelapse}) rather than skipping straight to morning. */
+/** (0.7.5) The night runs by as a timelapse ({@link Timelapse}) rather than skipping straight to morning. */
 @Mixin(ServerLevel.class)
 abstract class ServerLevelTimelapseMixin {
 	@Shadow

@@ -2604,7 +2604,7 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   6. The others still storm, with lightning. Dust devils, and the op commands (`/kingdom disaster supercell|tornado`),
   are unchanged.
 
-## 0.7.4: the timelapse night and bed rest (pack 0.10.33)
+## 0.7.5: the timelapse night and bed rest (pack 0.10.37)
 - Andy asked for Sleeping Overhaul 2, which is Forge/NeoForge only (up to 1.21.1), so this is our own take on its ideas
   (its code is LGPL-3.0 but nothing is taken from it).
 - **Timelapse night (`Timelapse`):** once enough players are fast asleep, the clock doesn't jump to morning: the whole

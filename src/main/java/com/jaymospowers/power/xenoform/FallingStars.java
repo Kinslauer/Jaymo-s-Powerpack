@@ -47,6 +47,9 @@ public final class FallingStars {
 	public static final int FALL_TICKS = 80;
 	/** The blast on landing (hurts and flings; breaks nothing itself: the crater is carved). */
 	public static final float BLAST = 2.0F;
+	/** The landing shakes every screen this far off, this hard (degrees) close by. */
+	public static final double LANDING_SHAKE_RANGE = 64.0;
+	public static final float LANDING_SHAKE = 2.5F;
 
 	/** What the star looks like coming down. */
 	private static final List<BlockState> ROCK = List.of(Blocks.CRYING_OBSIDIAN.defaultBlockState(), Blocks.BLACKSTONE.defaultBlockState(),
@@ -171,6 +174,7 @@ public final class FallingStars {
 	/** The crater, and the star in its heart. */
 	private static void land(ServerLevel level, Vec3 to) {
 		level.explode(null, to.x, to.y, to.z, BLAST, Level.ExplosionInteraction.NONE);
+		com.jaymospowers.core.Shakes.around(level, to, LANDING_SHAKE_RANGE, LANDING_SHAKE);
 		level.playSound(null, to.x, to.y, to.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.AMBIENT, 8.0F, 0.6F);
 		level.playSound(null, to.x, to.y, to.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.AMBIENT, 10.0F, 0.9F);
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, to.x, to.y + 1.0, to.z, 2, 1.0, 0.5, 1.0, 0.0);
