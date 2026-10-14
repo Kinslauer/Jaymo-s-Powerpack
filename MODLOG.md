@@ -934,3 +934,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.10.14, server start fix:** the Hermit Beans block loot table was in the old format
   (`minecraft:block_state_property`), which 26.3 no longer knows and can't upgrade, so a server wouldn't load its data.
   It now uses 26.3's `match_block` condition and `modifier` (like vanilla wheat).
+- **0.10.15, brittle skeletons:** skeletons (strays, wither skeletons, bogged and parched too) lose heads and limbs three
+  times as often: 15% a blade hit, 60% to the katana's aimed slash.
