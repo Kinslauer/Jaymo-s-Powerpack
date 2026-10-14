@@ -86,8 +86,12 @@ public final class WebSymbiote {
 	public static final float CONSUME_HEAL = 6.0F;
 	public static final int CONSUME_FEED = 30;
 	public static final int CONSUME_CALM = 10;
-	/** Spike Burst: radius, damage, how hard it throws things away. */
+	/**
+	 * Spike Burst: radius, damage, how hard it throws things away. Rigid black spikes shoot out of the whole body (head,
+	 * chest, back, arms and legs) for {@code SPIKE_TICKS}; the roar throws the same spikes out as it lands.
+	 */
 	public static final double SPIKE_RADIUS = 5.0;
+	public static final int SPIKE_TICKS = 16;
 	public static final float SPIKE_DAMAGE = 8.0F;
 	public static final double SPIKE_KNOCKBACK = 1.3;
 	/**
@@ -3652,16 +3656,8 @@ public final class WebSymbiote {
 				ServerPlayNetworking.send(other, new WebNet.Nudge(push));
 			}
 		}
-		// the spikes: rays of black out from the body, in a ring
-		for (int ray = 0; ray < 24; ray++) {
-			double angle = ray * Math.PI * 2.0 / 24.0;
-			double tilt = (ray % 3 - 1) * 0.35;
-			Vec3 dir = new Vec3(Math.cos(angle), tilt, Math.sin(angle));
-			for (int k = 1; k <= 5; k++) {
-				Vec3 at = center.add(dir.scale(k * SPIKE_RADIUS / 5.0));
-				level.sendParticles(k == 5 ? sheen(1.2F) : dust(1.6F - k * 0.2F), at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-			}
-		}
+		// the spikes themselves are drawn for everyone, out of every part of the body (WebSpikeLayer)
+		WebPower.pose(player, WebPose.SPIKES, player.getRandom().nextBoolean() ? 1 : -1);
 		level.sendParticles(ParticleTypes.SQUID_INK, center.x, center.y, center.z, 30, 0.5, 0.6, 0.5, 0.25);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.EVOKER_FANGS_ATTACK, SoundSource.PLAYERS, 1.2F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.POINTED_DRIPSTONE_LAND, SoundSource.PLAYERS, 1.0F, 0.6F);
