@@ -135,6 +135,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Cannons.register();
 		LOGGER.debug("caravan attachments: {} {}", Caravans.CARAVANS, Carriages.BOUGHT);
 		Caravans.register();
+		// (0.7.13) roaming pillager and merchant caravans (our own take on Pillager Caravans) and their attachment
+		LOGGER.debug("roaming caravan attachment: {}", RoamingCaravans.LEDGER);
+		RoamingCaravans.register();
 		// (0.7.9) King's Roads between settlements, kept to by cabs, rickshaws, rulers and caravans
 		LOGGER.debug("road attachment: {}", Roads.ROADS);
 		Roads.register();

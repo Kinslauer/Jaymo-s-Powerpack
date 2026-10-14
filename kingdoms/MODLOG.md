@@ -2706,3 +2706,37 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
     the same way: on their side along the compass line nearest their flight, wherever they come down (rising up to 4
     blocks out of what they hit, sinking up to 8 onto the ground).
 - Not yet seen in game.
+
+## 0.7.13: roaming caravans, pillager and merchant (pack 0.10.55)
+- Andy asked to work Pillager Caravans into our caravan system so there are hostile and neutral caravans to meet. Its
+  latest build is for 26.1 and it carries the Obscuria Ecosystem licence, so its ideas are remade in our own code
+  (`RoamingCaravans`, reusing `Caravans`' ground, steering and `Drive` goal); none of its files are used.
+- **When:** each minute (`SPAWN_CHECK`), a 3% chance (Andy: rarer; about half an hour on average once one is due) that a due caravan comes near a random player: 64-96 blocks off
+  on dry land outside every realm's claims, crossing past him to a point 420 blocks beyond. Cooldowns per kind:
+  minor pillager 3 days, major pillager 7 days (a major also resets the minor's), merchant 2 days (Andy: rarer). Never on peaceful
+  for pillagers.
+- **Where it goes:** a pillager caravan with an illager camp ahead of it (within 700 blocks, within about 50 degrees of
+  its way) is bound there; a merchant caravan with a realm ahead (900) is bound for its storehouse door. It keeps to a
+  King's Road when one runs that way (`Roads.ahead`). Stuck for 20 s with nobody within 32 blocks, it hops 8 blocks on.
+- **Pillager caravans (hostile):** a caravan master (pillager, patrol leader) with 2 pillagers and a vindicator and 1-2
+  pack animals; a major one has a captain under the ominous banner (it drops), 3 pillagers, 2 vindicators, a ravager
+  with a rider and 4 animals, the first carrying a strongbox (emeralds, gold, a saddle, golden apples; 1 in 4 a
+  diamond or two, 1 in 10 a totem). They walk as a vanilla patrol and fight whoever comes near, merchants included.
+  Animals are donkeys and mules, llamas in snowy and taiga land; each is leashed to one of the raiders and brought
+  back if it strays (the leash snaps at 12). Kill its leader and it is free (tame it to open the chest, or kill it
+  for its load). Kill every raider and the animals go free, and every realm and village within 320 blocks gives each
+  player who fought it +15 reputation.
+- **Merchant caravans (neutral):** a Caravan Merchant (wandering trader: his usual trades plus 3 of the land's goods
+  for 1-3 emeralds), 2 trader llamas and 2 pack mules on his leads, and, when a realm stands within 640 blocks, 2 of
+  its guards as escort (mounted when it's prosperous), steered with the caravan folk's `Drive` goal. Strike the
+  merchant or one of his animals and the escort turns on you, and that realm takes -40 reputation (once per caravan).
+  If the merchant dies, his animals go free and the escort goes home once it has no one left to fight.
+- **Cargo** by the land (`Climate`): jungle cocoa, bamboo, melons; desert and badlands sugar cane, cactus, gold,
+  golden carrots; snowy and taiga fish, berries, mutton, spruce; savanna, swamp, cherry and plains goods of their own;
+  pillagers add village plunder, merchants paper, books, dyes, candles, lanterns.
+- **Gone** when no player is within 144 blocks, after a day on the road, or on reaching its goal; nothing of it is
+  saved but the cooldowns (`roaming_caravans` attachment), and its leftovers in unloaded chunks are cleared when they
+  load. Animals set free are ordinary animals from then on.
+- Ops: `/kingdom roaming` lists them; `/kingdom roaming pillager | pillager_major | merchant` brings one past you.
+- `ChestedHorseInvoker` (villagers mixins) remakes a pack animal's inventory after it's given a chest.
+- Tuning is in the constants at the top of `RoamingCaravans`. Not yet seen in game.
