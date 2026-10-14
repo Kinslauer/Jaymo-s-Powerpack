@@ -594,6 +594,9 @@ knives and kunai, Balkon's knives). Better Combat's four dagger swings play as b
 4. **Cyclone Thrust** (double stab): a burst round the foe throws it and anyone within 3 blocks of it up and away
    (0.35x attack damage to those beside it).
 
-Every dagger hit leaves a small puff. **Wind Step** (right click, not with the throwable kunai): a quick dash where you
-look; sneak + right click hops back. 30-tick cooldown (cold-stretched), no fall damage for 40 ticks or until you land.
-The Tempest mode and the ascension make every gale 1.3x. Tuning at the top of `WindDagger`. Not playtested.
+Every dagger hit leaves a small puff. **Flurry** (right click, not with the throwable kunai; Andy: "the dagger and
+knife instead do the flurry sora's dagger used to do"): Sora's Dagger's winds' Flurry, 10 slashes 3 ticks apart, each
+cutting a 5.5-block cone ahead (0.65x attack damage, no hurt cooldown between slashes), carrying you forward 0.38 a
+slash and throwing what it hits, then a burst throws everything within 5 blocks out and up. 140-tick cooldown
+(cold-stretched); it stops if you put the dagger away. The Tempest mode and the ascension make every gale and the
+Flurry 1.3x. Tuning at the top of `WindDagger`. Not playtested.

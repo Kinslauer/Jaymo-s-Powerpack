@@ -982,4 +982,4 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   every ability; daggers already in a world disappear when it loads.
 - **0.10.27, daggers ride the gale (`WindDagger`):** wind sorcerers now fight with daggers the way they do with the
   quarterstaff: the four dagger swings carry Gale Cut, Wind Stab, Crosswind and Cyclone Thrust, every hit leaves a
-  puff, and right click is the Wind Step dash (sneak: hop back). See docs/wind.md.
+  puff, and right click is Sora's Dagger's old Flurry (10 slashes on the wind, then a burst). See docs/wind.md.

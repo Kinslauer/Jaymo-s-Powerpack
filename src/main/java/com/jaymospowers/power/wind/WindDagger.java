@@ -18,9 +18,11 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SwingAnimationType;
 import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.phys.Vec3;
 
@@ -34,8 +36,9 @@ import net.minecraft.world.phys.Vec3;
  * <li><b>Crosswind</b> (the backhand): everyone close is swept aside, across your front.</li>
  * <li><b>Cyclone Thrust</b> (the double stab): a burst round the foe throws it and those beside it up and away.</li>
  * </ol>
- * Right click (not with a throwing knife such as the kunai) is the <b>Wind Step</b>: a quick dash along the ground
- * where you look (sneak: a hop back), landing soft. Every hit leaves a puff of air. The Tempest mode (Z) and the
+ * Right click (not with a throwing knife such as the kunai) is the <b>Flurry</b> Sora's Dagger used to have in a wind's
+ * hand (Andy: "the dagger and knife instead do the flurry"): a run of quick slashes in front of you, each a gust that
+ * carries you forward on the wind and throws what it hits, ending in a burst. Every hit leaves a puff of air. The Tempest mode (Z) and the
  * ascension make every gale hit harder. Anyone else just holds a dagger.
  */
 public final class WindDagger {
@@ -53,16 +56,25 @@ public final class WindDagger {
 	/** Cyclone Thrust: radius round the foe, push, lift, damage to those beside it (x your attack damage). */
 	static final double CYCLONE_RADIUS = 3.0, CYCLONE_PUSH = 0.8, CYCLONE_LIFT = 0.7;
 	static final float CYCLONE_DAMAGE = 0.35F;
-	/** Wind Step: dash (blocks/tick), hop back, small lift, cooldown (ticks), soft landing window. */
-	static final double STEP_FORWARD = 1.4, STEP_BACK = 1.0, STEP_UP = 0.25;
-	static final int STEP_COOLDOWN = 30, STEP_SOFT_TICKS = 40;
+	/** The Flurry: slashes, ticks between them, reach (blocks), how wide (cosine of the half-angle), damage per slash (x your attack damage), cooldown. */
+	static final int FLURRY_SLASHES = 10, FLURRY_EVERY = 3, FLURRY_COOLDOWN = 140;
+	static final double FLURRY_REACH = 5.5, FLURRY_CONE = 0.35;
+	static final float FLURRY_DAMAGE = 0.65F;
+	/** How far each slash carries you forward (blocks/tick), and how its gust throws what it hits. */
+	static final double FLURRY_LUNGE = 0.38, SLASH_PUSH = 0.55, SLASH_LIFT = 0.22;
+	/** The burst at the end: radius and push. */
+	static final double BURST_RADIUS = 5.0, BURST_PUSH = 1.4;
 
 	private record Chain(int step, long lastTick) {
 	}
 
 	private static final Map<UUID, Chain> CHAINS = new HashMap<>();
-	/** Dashing players and the tick their soft landing runs out. */
-	private static final Map<UUID, Long> STEPS = new HashMap<>();
+	private record Flurry(ServerLevel level, int step) {
+	}
+
+	/** Players mid-Flurry. */
+	private static final Map<UUID, Flurry> FLURRIES = new HashMap<>();
+	private static final SwingAnimation SLASH = new SwingAnimation(SwingAnimationType.WHACK, FLURRY_EVERY);
 	/** Our own gale hits fire the damage event too: don't count those as swings. */
 	private static boolean inGale;
 
@@ -83,12 +95,10 @@ public final class WindDagger {
 				return InteractionResult.PASS;
 			}
 			if (player instanceof ServerPlayer serverPlayer) {
-				step(serverPlayer, stack);
+				return flurry(serverPlayer, stack);
 			}
 			return InteractionResult.SUCCESS;
 		});
-		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
-			!(source.is(DamageTypes.FALL) && entity instanceof ServerPlayer player && STEPS.containsKey(player.getUUID())));
 		ServerTickEvents.END_SERVER_TICK.register(WindDagger::tick);
 	}
 
@@ -212,42 +222,100 @@ public final class WindDagger {
 		}
 	}
 
-	// ---------------------------------------------------------------- the step
+	// ---------------------------------------------------------------- the Flurry
 
-	private static void step(ServerPlayer player, ItemStack stack) {
-		if (player.getCooldowns().isOnCooldown(stack) || player.isPassenger()) {
-			return;
+	private static InteractionResult flurry(ServerPlayer player, ItemStack stack) {
+		if (player.getCooldowns().isOnCooldown(stack) || FLURRIES.containsKey(player.getUUID())) {
+			return InteractionResult.FAIL;
 		}
 		ServerLevel level = player.level();
-		Vec3 flat = player.getLookAngle().horizontal();
-		flat = flat.lengthSqr() > 1.0E-4 ? flat.normalize() : Vec3.ZERO;
-		Vec3 v = player.isShiftKeyDown() ? flat.scale(-STEP_BACK).add(0.0, STEP_UP + 0.15, 0.0) : flat.scale(STEP_FORWARD).add(0.0, STEP_UP, 0.0);
-		player.setDeltaMovement(v);
-		player.syncVelocity = true;
-		player.fallDistance = 0.0;
-		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-		STEPS.put(player.getUUID(), level.getGameTime() + STEP_SOFT_TICKS);
-		player.getCooldowns().addCooldown(stack, WindCold.cooldown(player, STEP_COOLDOWN));
-		Vec3 at = player.position();
-		level.sendParticles(ParticleTypes.CLOUD, at.x, at.y + 0.1, at.z, 10, 0.3, 0.05, 0.3, 0.06);
-		level.sendParticles(ParticleTypes.SMALL_GUST, at.x, at.y + 0.5, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-		level.playSound(null, at.x, at.y, at.z, SoundEvents.BREEZE_JUMP, SoundSource.PLAYERS, 0.7F, 1.5F);
+		FLURRIES.put(player.getUUID(), new Flurry(level, 0));
+		player.getCooldowns().addCooldown(stack, WindCold.cooldown(player, FLURRY_COOLDOWN));
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_CHARGE, SoundSource.PLAYERS, 0.9F, 1.3F);
+		return InteractionResult.SUCCESS;
 	}
 
 	private static void tick(MinecraftServer server) {
-		for (Iterator<Map.Entry<UUID, Long>> it = STEPS.entrySet().iterator(); it.hasNext(); ) {
-			Map.Entry<UUID, Long> entry = it.next();
+		for (Iterator<Map.Entry<UUID, Flurry>> it = FLURRIES.entrySet().iterator(); it.hasNext(); ) {
+			Map.Entry<UUID, Flurry> entry = it.next();
+			Flurry flurry = entry.getValue();
 			ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
-			if (player == null || !player.isAlive()) {
+			// it ends if you die, leave, or put the dagger away
+			if (player == null || !player.isAlive() || player.level() != flurry.level() || !isDagger(player.getMainHandItem())) {
 				it.remove();
 				continue;
 			}
-			long now = player.level().getGameTime();
-			if (now > entry.getValue() || player.onGround() && entry.getValue() - now < STEP_SOFT_TICKS - 5) {
-				player.fallDistance = 0.0;
-				it.remove();
+			if (flurry.step() % FLURRY_EVERY == 0) {
+				int index = flurry.step() / FLURRY_EVERY;
+				slash(player, index);
+				if (index + 1 >= FLURRY_SLASHES) {
+					burst(player);
+					it.remove();
+					continue;
+				}
 			}
+			entry.setValue(new Flurry(flurry.level(), flurry.step() + 1));
 		}
 		CHAINS.keySet().removeIf(id -> server.getPlayerList().getPlayer(id) == null);
+	}
+
+	private static void slash(ServerPlayer player, int index) {
+		ServerLevel level = player.level();
+		ItemStack stack = player.getMainHandItem();
+		float damage = (float)(player.getAttributeValue(Attributes.ATTACK_DAMAGE) * FLURRY_DAMAGE * WindStaff.bonus(player));
+		Vec3 look = player.getLookAngle();
+		Vec3 flat = look.horizontal();
+		flat = flat.lengthSqr() > 1.0E-4 ? flat.normalize() : Vec3.ZERO;
+		// alternating swings, a lunge on the wind with each
+		player.swing(index % 2 == 0 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, SLASH, true);
+		player.setDeltaMovement(player.getDeltaMovement().add(flat.scale(FLURRY_LUNGE)));
+		player.syncVelocity = true;
+		Vec3 eye = player.getEyePosition();
+		Vec3 sweep = eye.add(look.scale(1.6)).add(0.0, -0.3, 0.0);
+		level.sendParticles(ParticleTypes.SWEEP_ATTACK, sweep.x, sweep.y, sweep.z, 1, 0.3, 0.15, 0.3, 0.0);
+		level.sendParticles(ParticleTypes.GUST, sweep.x + look.x, sweep.y + look.y, sweep.z + look.z, 1, 0.0, 0.0, 0.0, 0.0);
+		level.sendParticles(ParticleTypes.CLOUD, sweep.x, sweep.y, sweep.z, 6, 0.6, 0.3, 0.6, 0.08);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.7F,
+			1.1F + 0.1F * (index % 4));
+		boolean hit = false;
+		inGale = true;
+		try {
+			for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(FLURRY_REACH), e -> WindStaff.foe(player, e))) {
+				Vec3 to = target.getBoundingBox().getCenter().subtract(eye);
+				double distance = to.length();
+				if (distance > FLURRY_REACH + target.getBbWidth() * 0.5 || distance > 1.0E-3 && to.scale(1.0 / distance).dot(look) < FLURRY_CONE) {
+					continue;
+				}
+				// every slash lands, however close together (no hurt cooldown between them)
+				target.setInvulnerableTime(0);
+				if (target.hurtServer(level, player.damageSources().playerAttack(player), damage)) {
+					hit = true;
+					WindStaff.push(target, flat.scale(SLASH_PUSH), SLASH_LIFT);
+					level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 4, 0.2, 0.2, 0.2, 0.2);
+				}
+			}
+		} finally {
+			inGale = false;
+		}
+		if (hit && !player.isCreative()) {
+			stack.hurtAndBreak(1, player, EquipmentSlot.MAINHAND);
+		}
+	}
+
+	/** The last word: everything near is thrown out and up. */
+	private static void burst(ServerPlayer player) {
+		ServerLevel level = player.level();
+		Vec3 center = player.position().add(0.0, 1.0, 0.0);
+		level.sendParticles(ParticleTypes.GUST_EMITTER_LARGE, center.x, center.y, center.z, 1, 0.0, 0.0, 0.0, 0.0);
+		level.playSound(null, center.x, center.y, center.z, SoundEvents.BREEZE_WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 1.4F, 0.8F);
+		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(BURST_RADIUS), e -> WindStaff.foe(player, e))) {
+			Vec3 away = target.position().subtract(player.position()).horizontal();
+			double distance = away.length();
+			if (distance > BURST_RADIUS || distance < 1.0E-3) {
+				continue;
+			}
+			double strength = BURST_PUSH * WindStaff.bonus(player) * (1.0 - distance / (BURST_RADIUS + 1.0));
+			WindStaff.push(target, away.normalize().scale(strength), strength * 0.6);
+		}
 	}
 }
