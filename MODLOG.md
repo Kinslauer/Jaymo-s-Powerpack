@@ -1068,3 +1068,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   awaits its CurseForge id (`packModsNoCf`). Particular stops at 1.21.4, so `client/Ambience` remakes its ideas from
   vanilla particles and sounds: spray, mist and a rumble where waterfalls land, fireflies over flowers and grass in warm
   biomes at night, dust deep in dark caves, splashes sized to what fell in, and a quiet clink of armour as people walk.
+- **0.10.50 / Kingdoms 0.7.11, physical falling trees:** felled trees fall to their heavier side, hurt what they hit by
+  how fast they're moving, anger the bees of any nest on them, and land as real blocks (logs on their side, leaves
+  withering). Physical Falling Trees' ideas in our own code (the datapack is CC BY-NC-ND and stops at 26.2). See
+  kingdoms/MODLOG.md.

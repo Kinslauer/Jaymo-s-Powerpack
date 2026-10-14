@@ -2686,3 +2686,23 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   a werewolf and run (`Tails`, `Frights`, 12 cries), until told: at 25 MCA hearts the chat menu gains "Explain your tail"
   (`data/jaymoskingdoms/dialogues/main.json`, `McaAnswersMixin`), and that villager fears it no more.
   `ClassPerks.trainedWith` tells Powers which weapons a class is trained with.
+
+## 0.7.11: physical falling trees (pack 0.10.50)
+- Andy asked to combine the Physical Falling Trees datapack with our felling. It's CC BY-NC-ND 4.0 (no derivatives)
+  and stops at 26.2, so it's remade in our own code in `FallingTree` (none of its files used):
+  - A chopped-down tree falls to its **heavier side** (a log weighs 3, a leaf 1; `heavier`, `LOG_WEIGHT`, `TIPS`),
+    straight along a compass line; only an even tree falls away from its cutter, as before.
+  - It **strikes what's in its path** as it goes over, the cutter too (not a woodcutter), as hard as the wood there
+    is moving (`hit`: 7 per block a tick, at most 14), knocking them the way it falls; once each.
+  - A **bee nest or hive** on its logs comes down with it, and its bees come out angry at the cutter (the game's own
+    release; smoked hives stay calm; `hives`).
+  - Down, it lies half a second and becomes **real blocks** where it rests (`settle`): logs on their side along the
+    fall, nests too, leaves left to wither (non-persistent, distance 7, so they decay and drop saplings as usual).
+    It settles flat along the ground, resting up on what it hit and sinking up to 3 blocks onto the ground below; a
+    piece with no room gives its drops. Felled in under half a second, it settles at once.
+  - A **fallen log** (on its side, resting on the ground or another fallen log) isn't a tree: it's broken log by log,
+    not chopped (`Trees.fallen`).
+  - Woodcutters' trees still break up into their bags. Trees a tornado throws (Andy) strike by their speed and land
+    the same way: on their side along the compass line nearest their flight, wherever they come down (rising up to 4
+    blocks out of what they hit, sinking up to 8 onto the ground).
+- Not yet seen in game.
