@@ -218,6 +218,9 @@ public final class ZFighterItems {
 			ItemStack left = super.finishUsingItem(stack, level, entity);
 			if (level instanceof ServerLevel server) {
 				entity.setHealth(entity.getMaxHealth());
+				// bones set and lost limbs grown back
+				com.jaymospowers.core.Fractures.heal(entity);
+				com.jaymospowers.core.Dismember.regrow(entity, true);
 				List<MobEffectInstance> ailments = new ArrayList<>();
 				for (MobEffectInstance effect : entity.getActiveEffects()) {
 					if (effect.getEffect().value().getCategory() == MobEffectCategory.HARMFUL) {

@@ -301,6 +301,10 @@ public final class ChronoPower implements Power {
 			state.bloom = null;
 			state.synced = false;
 		}
+		if (state.bloom != null && com.jaymospowers.core.Fractures.startMend(player, com.jaymospowers.core.Fractures.BLOOM_MEND)) {
+			// broken bones start running forward to knitted
+			ChronoFx.particles(level, player, ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 1.0, player.getZ(), 6, 0.3, 0.5, 0.3, 0.0);
+		}
 		if (state.bloom != null && player.tickCount % BLOOM_HEAL_EVERY == 0 && player.getHealth() < player.getMaxHealth()) {
 			// your own wounds run forward too, to healed
 			player.heal(BLOOM_HEAL);

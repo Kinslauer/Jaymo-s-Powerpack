@@ -258,6 +258,8 @@ dependencies {
 	compileOnly kitchenJar
 	// compiled against to read Better Combat's attack swings while flying; touched only via client/power/wind/PalAccess
 	compileOnly "maven.modrinth:player-animation-library:xJ30QmpE"
+	// compiled against to make its swings hit bodies, not boxes; touched only via client/compat/mixin/LimbSwingMixin
+	compileOnly "maven.modrinth:better-combat:8Vyq1h9a"
 	// compiled against to pause Fresh Animations' player animations under our poses; touched only via client/EmfAccess
 	compileOnly "maven.modrinth:entity-model-features:N7d5LddE"
 	compileOnly "maven.modrinth:entitytexturefeatures:O8J3sxxp"
