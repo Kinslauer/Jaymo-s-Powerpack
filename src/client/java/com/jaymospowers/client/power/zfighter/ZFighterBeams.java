@@ -20,7 +20,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Ki beams drawn like a beacon's: the beacon beam texture scrolling down a bright core in the beam's colour, wrapped in
  * a wider see-through glow. They swell in, then thin away over their life. The Frost Needle is a hair-thin core; the
- * Spiral Lance's coil is the server's particles round its core.
+ * Spiral Lance's coil is the server's particles round its core. An end crystal orb burns at each end.
  */
 public final class ZFighterBeams {
 	/** The core's share of the beam's width, the glow's alpha, and how fast the texture runs along it. */
@@ -88,6 +88,11 @@ public final class ZFighterBeams {
 				context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.beaconBeam(BeaconRenderer.BEAM_LOCATION, true),
 					(pose, buffer) -> tube(buffer, pose, a, b, radius, glow, v0 * 0.7F, v1 * 0.7F));
 			}
+			// an end crystal orb where it leaves the hands and where it ends (see ZFighterOrbs)
+			float fade = 1.0F - life;
+			float orb = needle ? radius * 6.0F + 0.2F : radius * 2.6F;
+			ZFighterOrbs.orb(context.submitNodeCollector(), context.poseStack(), a, orb, beam.color(), time, fade);
+			ZFighterOrbs.orb(context.submitNodeCollector(), context.poseStack(), b, orb * 1.2F, beam.color(), time + 20.0F, fade);
 		}
 	}
 

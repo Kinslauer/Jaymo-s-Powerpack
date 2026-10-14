@@ -62,6 +62,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterInputClient.init();
 		ZFighterBeams.init();
 		ZFighterSpirit.init();
+		ZFighterOrbs.init();
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.power.zfighter.ZFighterRaids.ROGUE,
 			ZFighterRogueRenderer::new);
 		ZFighterWishScreen.register();
