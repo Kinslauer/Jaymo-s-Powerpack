@@ -1,6 +1,5 @@
 package com.jaymospowers.tinkering;
 
-import com.jaymospowers.power.wind.SorasDagger;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.HolderLookup;
@@ -17,7 +16,6 @@ import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -26,8 +24,6 @@ import org.jspecify.annotations.Nullable;
  * in, the old one is lost.
  */
 public class ToolStationMenu extends AbstractContainerMenu {
-	/** (0.8.115) Diamonds set into Sora's Dagger's gilded blade. */
-	static final int EMBED_DIAMONDS = 2;
 	public static final int INPUTS = 4, RESULT = 4;
 	/** Where the part slots sit, around the big result slot of Tinkers' screen. */
 	public static final int[][] SLOT_AT = {{53, 22}, {15, 60}, {33, 41}, {15, 22}};
@@ -61,7 +57,6 @@ public class ToolStationMenu extends AbstractContainerMenu {
 				@Override
 				public boolean mayPlace(ItemStack stack) {
 					return stack.getItem() instanceof ToolPartItem || Modifier.takes(stack) || TinkerMaterial.of(stack) != null
-						|| stack.getItem() instanceof SorasDagger || stack.is(Items.BREEZE_ROD)
 						|| Modifier.ingredient(stack);
 				}
 			});
@@ -115,13 +110,7 @@ public class ToolStationMenu extends AbstractContainerMenu {
 				}
 			}
 		}
-		// (the dagger counts as a weapon, so it's checked before the tool recipes)
-		ItemStack out = embed();
-		if (!out.isEmpty()) {
-			result.setItem(RESULT, out);
-			broadcastChanges();
-			return;
-		}
+		ItemStack out = ItemStack.EMPTY;
 		if (toolSlot >= 0 && filled > 1) {
 			out = repair(toolSlot);
 			if (out.isEmpty()) {
@@ -135,40 +124,6 @@ public class ToolStationMenu extends AbstractContainerMenu {
 		}
 		result.setItem(RESULT, out);
 		broadcastChanges();
-	}
-
-	/**
-	 * (0.8.115) Andy: Sora's Dagger's diamond stage sets diamonds into the gilded blade rather than making it of them. A
-	 * gilded dagger, a breeze rod to bind them and {@link #EMBED_DIAMONDS} diamonds (stacked or spread over slots).
-	 */
-	private ItemStack embed() {
-		int dagger = -1, rod = -1;
-		int[] taking = new int[INPUTS];
-		int diamonds = 0;
-		for (int i = 0; i < INPUTS; i++) {
-			ItemStack stack = inputs.getItem(i);
-			if (stack.isEmpty()) {
-				continue;
-			}
-			if (stack.getItem() instanceof SorasDagger d && d.stage == SorasDagger.GILDED && dagger == -1) {
-				dagger = i;
-			} else if (stack.is(Items.BREEZE_ROD) && rod == -1) {
-				rod = i;
-			} else if (stack.is(Items.DIAMOND)) {
-				taking[i] = Math.min(stack.getCount(), EMBED_DIAMONDS - diamonds);
-				diamonds += taking[i];
-			} else {
-				return ItemStack.EMPTY;
-			}
-		}
-		if (dagger == -1 || rod == -1 || diamonds < EMBED_DIAMONDS) {
-			return ItemStack.EMPTY;
-		}
-		uses = taking;
-		uses[dagger] = 1;
-		uses[rod] = 1;
-		status = Component.translatable("gui.jaymospowers.tool_station.embed");
-		return inputs.getItem(dagger).transmuteCopy(SorasDagger.STAGES[SorasDagger.DIAMOND], 1);
 	}
 
 	/** Parts only: the tool whose parts they are. */

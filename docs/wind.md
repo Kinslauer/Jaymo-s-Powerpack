@@ -508,8 +508,7 @@ whisper in the action bar.
   - **Wind-ups:** the channels (G / V / B: the full charge takes 60 ticks more; it's stored per channel and sent to
     the client in `WindNet.Status.channelMax`, so the HUD bar matches), the Cyclone's hold threshold on X (client),
     the Tempest Kick's wind-up.
-  - **Cooldowns:** G / V / B, the ground Gust, Call Lightning, Cyclone Lance, the Cyclone, the Tempest Kick, the
-    Flurry of Sora's Dagger.
+  - **Cooldowns:** G / V / B, the ground Gust, Call Lightning, Cyclone Lance, the Cyclone, the Tempest Kick.
 - **HUD:** a pale-blue frost mark (a snowflake) left of the weather glyph while it's cold, a "COLD" tag on the charge
   meter's label, and an action-bar line when the cold first takes hold (at most once a minute).
 
@@ -581,3 +580,23 @@ five staff swings play as before, and our own chain of landed swings (one count 
 Every staff hit also leaves a small puff. **Staff Vault** (right click): ride a gust forward and up; sneak + right click
 goes straight up. 50-tick cooldown (cold-stretched), and no fall damage for 80 ticks or until you land. The Tempest mode
 and the ascension make every gale 1.3x. Tuning at the top of `WindStaff`. Not playtested.
+
+## 0.10.27: daggers ride the gale too (`WindDagger`)
+
+Andy: "wind should get increased proficiency with daggers the same way it does quarterstaves". Same gate as the staff
+(a **wind sorcerer**), same shape. Any item whose id contains `dagger`, `knife` or `kunai` (the Armory's daggers,
+knives and kunai, Balkon's knives). Better Combat's four dagger swings play as before; our own chain of landed swings
+(broken after `CHAIN_TIMEOUT` 30 ticks) picks the gale:
+
+1. **Gale Cut** (slash): a blade of air 4.5 blocks ahead cuts everything in a narrow cone (0.5x attack damage).
+2. **Wind Stab** (flip and stab): the foe is driven back and you ride the wind in after it.
+3. **Crosswind** (backhand): everyone within 3.5 blocks is swept across your front.
+4. **Cyclone Thrust** (double stab): a burst round the foe throws it and anyone within 3 blocks of it up and away
+   (0.35x attack damage to those beside it).
+
+Every dagger hit leaves a small puff. **Flurry** (right click, not with the throwable kunai; Andy: "the dagger and
+knife instead do the flurry sora's dagger used to do"): Sora's Dagger's winds' Flurry, 10 slashes 3 ticks apart, each
+cutting a 5.5-block cone ahead (0.65x attack damage, no hurt cooldown between slashes), carrying you forward 0.38 a
+slash and throwing what it hits, then a burst throws everything within 5 blocks out and up. 400-tick (20 s) cooldown
+(cold-stretched); it stops if you put the dagger away. The Tempest mode and the ascension make every gale and the
+Flurry 1.3x. Tuning at the top of `WindDagger`. Not playtested.
