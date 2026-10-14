@@ -39,5 +39,6 @@
 	"power.jaymospowers.gravity.key.mode.name": "Immense Field",
 	"message.jaymospowers.gravity.field": "Immense Field: the air grows heavy.",
 	"message.jaymospowers.gravity.field_wait": "The Immense Field returns in %s s.",
-	"message.jaymospowers.gravity.field_trained": "%s trains under your weight."
+	"message.jaymospowers.gravity.field_trained": "%s trains under your weight.",
+	"message.jaymospowers.gravity.field_starved": "Too hungry to hold the Immense Field."
 }

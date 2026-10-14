@@ -49,6 +49,10 @@ public final class GravityTrainingField {
 	/** A Z Fighter's minutes in the field: each gives the field's owner one use towards mastery. */
 	static final int MASTERY_TICKS = 1200;
 	static final int COLOR = 0x8A6CFF;
+	/** Hunger the field costs its owner each tick it stands, fresh (4 exhaustion = half a shank): about 5 shanks a full field. */
+	static final float EXHAUSTION = 0.035F;
+	/** What's left of that cost once the power is fully mastered; it eases down as you level. */
+	static final float MASTERED_EXHAUSTION = 0.25F;
 
 	private record Field(ResourceKey<Level> dimension, Vec3 centre, UUID owner, long until) {
 	}
@@ -104,6 +108,22 @@ public final class GravityTrainingField {
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.gravity.field").withStyle(ChatFormatting.LIGHT_PURPLE));
 	}
 
+	/** Holding the field up is hard work: it eats the owner's hunger, less as they level. Starving, they drop it. */
+	private static boolean feed(ServerPlayer owner) {
+		if (owner.isCreative() || owner.isSpectator()) {
+			return true;
+		}
+		if (owner.getFoodData().getFoodLevel() <= 0) {
+			owner.sendOverlayMessage(Component.translatable("message.jaymospowers.gravity.field_starved").withStyle(ChatFormatting.GRAY));
+			owner.level().playSound(null, owner.getX(), owner.getY(), owner.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.8F, 0.6F);
+			return false;
+		}
+		float level = Mastery.unlocked(owner) >= Mastery.ALL ? 1.0F
+			: Math.min(1.0F, Mastery.points(owner) / (float)Mastery.UNLOCK_AT[Mastery.ALL]);
+		owner.causeFoodExhaustion(EXHAUSTION * (1.0F - level * (1.0F - MASTERED_EXHAUSTION)));
+		return true;
+	}
+
 	/** Whether {@code entity} stands in someone else's Immense Field. */
 	public static boolean inField(Entity entity) {
 		return owner(entity) != null;
@@ -131,7 +151,7 @@ public final class GravityTrainingField {
 				continue;
 			}
 			ServerPlayer owner = server.getPlayerList().getPlayer(field.owner());
-			if (owner == null || !Powers.has(owner, GravityPower.INSTANCE)) {
+			if (owner == null || !Powers.has(owner, GravityPower.INSTANCE) || !feed(owner)) {
 				it.remove();
 				continue;
 			}
