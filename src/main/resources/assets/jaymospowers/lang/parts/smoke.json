@@ -1,0 +1,20 @@
+{
+	"power.jaymospowers.smoke": "Smoke",
+	"power.jaymospowers.smoke.desc": "You make smoke, and it's real: it billows, climbs, fills rooms, leaks under doors and drifts on the wind. Nothing sees through it but you.",
+	"power.jaymospowers.smoke.key.starter": "Thin Smokescreen (hold): a thin smoke pours out of you for up to 5 s",
+	"power.jaymospowers.smoke.key.starter.name": "Thin Smokescreen",
+	"power.jaymospowers.smoke.key.ability_1": "Smokescreen (hold): smoke pours out of you for up to 10 s; it rises, fills the room and hides whoever is in it",
+	"power.jaymospowers.smoke.key.ability_1.name": "Smokescreen",
+	"power.jaymospowers.smoke.key.ability_2": "Vapour Form: you turn to smoke for 4 s (6 s mastered): unseen, quick, falling slowly; blows pass through you",
+	"power.jaymospowers.smoke.key.ability_2.name": "Vapour Form",
+	"power.jaymospowers.smoke.key.ability_3": "Smoke Bomb: throw a ball that bursts into a big cloud where it lands, blinding whoever is right by it",
+	"power.jaymospowers.smoke.key.ability_3.name": "Smoke Bomb",
+	"power.jaymospowers.smoke.key.ability_4": "Smother (hold): smoke wraps whoever you aim at (24 blocks), blinding and slowing them while their air runs out, then they choke",
+	"power.jaymospowers.smoke.key.ability_4.name": "Smother",
+	"message.jaymospowers.smoke_smother_nothing": "Nothing there to smother.",
+	"hud.jaymospowers.smoke.pour": "Smokescreen",
+	"hud.jaymospowers.smoke.smother": "Smother",
+	"hud.jaymospowers.smoke.vapour": "Vapour Form",
+	"death.attack.jaymospowers.smoke_choke": "%1$s choked on smoke",
+	"death.attack.jaymospowers.smoke_choke.player": "%1$s was smothered by %2$s"
+}
