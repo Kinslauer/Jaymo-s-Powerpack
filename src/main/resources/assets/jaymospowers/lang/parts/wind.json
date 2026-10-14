@@ -44,6 +44,7 @@
 	"message.jaymospowers.soras_dagger.missing": "The winds wait for: %s",
 	"message.jaymospowers.wind.mode_hungry": "Too hungry to hold the storm.",
 	"message.jaymospowers.soras_dagger.refuses": "The dagger tears free of your grip. It answers only the wind.",
+	"item.jaymospowers.quarterstaff.wind": "In a wind's hand every swing rides the gale; right click to vault.",
 	"message.jaymospowers.soras_dagger.forged": "The winds take the blade. Sora's Dagger is Tempest-forged.",
 	"message.jaymospowers.wind.no_storm": "No storm overhead to call down.",
 	"message.jaymospowers.wind.shield_blown": "Your wind tears the shield from your grip.",

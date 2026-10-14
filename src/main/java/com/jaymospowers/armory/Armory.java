@@ -127,6 +127,10 @@ public final class Armory {
 	static final Map<Tier, Item> LANCES = new EnumMap<>(Tier.class);
 	public static final ResourceKey<EquipmentAsset> CAVEMAN = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosPowers.id("caveman"));
 
+	/** (0.10.13) A quarterstaff in a wind's hand rides the gale (WindStaff). */
+	private static final ItemLore STAFF_LORE = new ItemLore(List.of(
+		Component.translatable("item.jaymospowers.quarterstaff.wind").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC)));
+
 	private Armory() {
 	}
 
@@ -148,8 +152,8 @@ public final class Armory {
 		item("wooden_cudgel", Item::new, p -> p.sword(ToolMaterial.WOOD, 3.0F, -2.8F));
 		item("stone_cudgel", Item::new, p -> p.sword(ToolMaterial.STONE, 3.0F, -2.8F));
 		throwing("throwing_stick", p -> p.sword(ToolMaterial.WOOD, 0.5F, -2.0F), 3.0F, true);
-		item("wooden_quarterstaff", Item::new, p -> p.sword(ToolMaterial.WOOD, 2.0F, -2.0F));
-		item("iron_quarterstaff", Item::new, p -> p.sword(ToolMaterial.IRON, 2.0F, -2.0F));
+		item("wooden_quarterstaff", Item::new, p -> p.sword(ToolMaterial.WOOD, 2.0F, -2.0F).component(DataComponents.LORE, STAFF_LORE));
+		item("iron_quarterstaff", Item::new, p -> p.sword(ToolMaterial.IRON, 2.0F, -2.0F).component(DataComponents.LORE, STAFF_LORE));
 		item("caveman_helmet", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.HELMET));
 		item("caveman_chestplate", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.CHESTPLATE));
 		item("caveman_leggings", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.LEGGINGS));

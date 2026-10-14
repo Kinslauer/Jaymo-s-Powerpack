@@ -562,3 +562,20 @@ whisper in the action bar.
   abilities take. While it's held, the server swirls white dust in a rising spiral round the kicker
   (`COLD_SWIRL_*`, thickening as it builds) with snowflakes, and plays a blowing wind (breeze air and whirl) every
   `COLD_SOUND_EVERY` ticks (`WindKick.coldSwirl`). The cooldown's cold extra is unchanged.
+
+## 0.10.13: the quarterstaff rides the gale (`WindStaff`)
+
+Any item whose id ends in `quarterstaff` (the Armory's wooden and iron ones), held by a wind. Server only; Better Combat's
+five staff swings play as before, and our own chain of landed swings (one count per swing, broken after
+`CHAIN_TIMEOUT` 40 ticks without a hit) picks the gale for each:
+
+1. **Gust** (front twirl): the foe is blown back and lifted.
+2. **Wind Blade** (sweep): a blade of air runs 6 blocks ahead and cuts everything in the cone (0.5x attack damage).
+3. **Vortex** (whirlwind): everyone within 6 blocks is dragged in toward you.
+4. **Piercing Gale** (thrust): the foe is hurled far back along your look.
+5. **Downdraft** (overhead slam): everything within 4.5 blocks is thrown up (0.4x attack damage); slammed from the
+   air, it bounces you back up too, landing soft.
+
+Every staff hit also leaves a small puff. **Staff Vault** (right click): ride a gust forward and up; sneak + right click
+goes straight up. 50-tick cooldown (cold-stretched), and no fall damage for 80 ticks or until you land. The Tempest mode
+and the ascension make every gale 1.3x. Tuning at the top of `WindStaff`. Not playtested.
