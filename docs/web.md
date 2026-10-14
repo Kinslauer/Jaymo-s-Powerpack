@@ -27,6 +27,13 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   `GLIDE_ZIP_TICKS` 30 (1.5 s), then lets go with the usual kick up (or sooner, near the target) and the line falls
   limp. You carry on gliding with the speed and height.
 
+## Active swing (0.10.100)
+- Swinging along on a swing web (not hanging still, not a zip, yank or whip), the body drives the swing instead of
+  hanging limp: legs back and straight on the drop, knees tucked up and apart through the bottom of the arc, kicked out
+  ahead on the upswing (the lead leg a little further). Swinging from one hand, the free arm flares out for balance. The
+  body banks into turns. It fades in with speed (`WebArms.DRIVE_SPEED` 0.45 b/t) and only going forward; backwards or
+  slow, the old limp hang. Tuning: the "active swing" block at the top of `WebArms`.
+
 ## Web Whip, and webs that fall limp (0.8.100)
 - **Let-go webs fall limp:** every web line that lets go (swing webs on R/G, zips, whips, the Yank's lead) is left
   behind like a spent zip: stuck where it hit, sagging, falling, then fading (`WebSpentLines`). A line on something that
