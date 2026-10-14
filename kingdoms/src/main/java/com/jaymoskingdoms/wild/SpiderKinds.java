@@ -43,8 +43,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * (0.7.12) Spiders take after where they live: Spider Overhaul's ideas (all rights reserved, by Chybx; remade here, none
  * of its code or art) put onto the game's own spiders, which Stormie's Spiders already sends up walls. A spider gets
- * its kind the first time it loads, from its biome (or depth), and keeps it; the client tints it to match
- * (client/SpiderTint). Plain spiders elsewhere, and cave spiders, are left as they are.
+ * its kind the first time it loads, from its biome (or depth), and keeps it; the client dresses it in its kind's
+ * skin (client/mixin/SpiderSkinMixin, art from tools/gen_spider_kinds.py). Plain spiders elsewhere, and cave spiders, are left as they are.
  * <ul>
  * <li><b>Birch</b>: lies in wait without moving, then pounces on whoever comes close.</li>
  * <li><b>Desert</b>: prickly and a little tougher; dying, it bursts its spines into everything round it.</li>
@@ -58,14 +58,7 @@ import net.minecraft.world.phys.Vec3;
  */
 public final class SpiderKinds {
 	public enum Kind {
-		PLAIN(-1), BIRCH(0xE3DCC8), DESERT(0xE0C27A), SWAMP(0x7E9E52), CAVERN(0x8E86B8), JUNGLE(0x9CCB4E), ICE(0xBCE4F4);
-
-		/** The tint the client multiplies the spider's skin by. */
-		public final int tint;
-
-		Kind(int tint) {
-			this.tint = tint;
-		}
+		PLAIN, BIRCH, DESERT, SWAMP, CAVERN, JUNGLE, ICE
 	}
 
 	/** Below this height a spider is a cavern spider, whatever the biome. */

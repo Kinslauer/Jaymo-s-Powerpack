@@ -2719,8 +2719,8 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   is pitch black. Lunar events always shine full. Overworld-type dimensions only. Shader packs light the world
   themselves and would undo it, so on any night darker than full moon an Iris shader pack switches off at dusk (with a
   note on screen) and back on at dawn (Andy).
-- **Spider kinds** (`wild/SpiderKinds`, tint in `client/mixin/SpiderTintMixin`; Spider Overhaul's ideas, all rights
-  reserved, remade on the game's own spiders, no new mobs): a spider takes its kind from its biome the first time it
+- **Spider kinds** (`wild/SpiderKinds`, own skins from `tools/gen_spider_kinds.py` via `client/mixin/SpiderSkinMixin`; Spider Overhaul's ideas, all rights
+  reserved, remade on the game's own spiders with our own art, no new mobs): a spider takes its kind from its biome the first time it
   loads. Birch: lies still in wait and pounces. Desert: tougher, bursts its spines (4 damage, 3.5 blocks) as it dies.
   Swamp: floats still like a lily pad, never drowns, swims at prey; its bite bogs you (pulled under in water, 6 s).
   Cavern (below y 0): drops amethyst, emerald or (rarely) diamond; spits web that holds its prey in a cobweb for 5 s.
