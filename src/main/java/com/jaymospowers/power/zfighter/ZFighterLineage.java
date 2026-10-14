@@ -145,6 +145,13 @@ public final class ZFighterLineage {
 		return "form.jaymospowers.zfighter." + kind + form;
 	}
 
+	/** The lang key of a technique: the V's Ki Wave is each lineage's own (Crimson Cannon, Spiral Lance, Frost Needle). */
+	public static String techniqueKey(Player player, int technique) {
+		String key = "technique.jaymospowers.zfighter." + ZFighterTraining.TECHNIQUE_KEYS[technique];
+		int lineage = of(player);
+		return technique == ZFighterTraining.KI_WAVE && lineage > EARTHLING ? key + "." + KEYS[lineage] : key;
+	}
+
 	public static String formKey(Player player, int form) {
 		return formKey(of(player), form);
 	}

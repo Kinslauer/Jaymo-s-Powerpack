@@ -934,5 +934,15 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.10.14, server start fix:** the Hermit Beans block loot table was in the old format
   (`minecraft:block_state_property`), which 26.3 no longer knows and can't upgrade, so a server wouldn't load its data.
   It now uses 26.3's `match_block` condition and `modifier` (like vanilla wheat).
-- **0.10.15, brittle skeletons:** skeletons (strays, wither skeletons, bogged and parched too) lose heads and limbs three
+- **0.10.15, Z Fighter flight and stances (Andy's test notes):** the flight arm poses only show while sprint-flying
+  (`ZFighterFlightPose.cruising`: the local player's own cruise, others by speed); hovering or standing, a Z Fighter
+  looks like himself. Taking off is a burst of ki that throws him about 8 blocks up (`ZFighterFlightClient.TAKEOFF_BURST`)
+  with a ring of dust and a flash of aura. Charging ki now has a stance per lineage and form (`ZFighterChargePose`,
+  synced by `ZFighterPower.CHARGE`). Charging in the air keeps his speed; only at 30% health or less does it slow him
+  (`ZFighterFlightClient.LOW_HEALTH`).
+  Each lineage's own V (`ZFighterKi.SIGNATURES`): Crimson Cannon (Warrior-born), Spiral Lance (Verdant, through walls),
+  Frost Needle (Frost-born). Super hair (`ZFighterHair`, Earthling and Warrior-born, synced by `ZFighterPower.FORM`),
+  ground debris rising under every form and an aura that grows with each form.
+  The V beams are drawn like beacon beams (`ZFighterBeams`, sent by `ZFighterNet.BeamFx`) instead of only particles.
+- **0.10.16, brittle skeletons:** skeletons (strays, wither skeletons, bogged and parched too) lose heads and limbs three
   times as often: 15% a blade hit, 60% to the katana's aimed slash.
