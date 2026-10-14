@@ -30,7 +30,11 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ShieldItem;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -44,9 +48,10 @@ import org.joml.Vector3f;
  * spinning flat, strikes the first creature in its way, ricochets on to the next foe (and off walls), and once it has
  * nothing left to hit it flies home to your hand. Each rank adds a ricochet.
  *
- * <p>The shield really leaves your hand while it flies (a spinning item display shows it). Anything that cuts the flight
- * short (you die, change dimension, log out, the server stops, it's out too long) puts it straight back in your
- * inventory, or at your feet if there's no room, so it can never be lost.
+ * <p>The shield really leaves your hand while it flies (a spinning item display shows it). It's caught when it reaches you.
+ * A plain shield that isn't caught (a wall in its way home, or you die, change dimension, log out, the server stops, it's
+ * out too long) drops where it is. A relic shield ({@link #relic}) always comes home: through walls on the way back, and
+ * whatever cuts the flight short puts it straight back in your inventory (or at your feet if there's no room).
  */
 public final class ShieldThrow {
 	/** Out: speed (blocks a tick) and how far it goes before turning home if it hits nothing. */
@@ -73,6 +78,7 @@ public final class ShieldThrow {
 		final UUID owner;
 		final InteractionHand hand;
 		final ItemStack shield;
+		final boolean relic;
 		final Display.ItemDisplay display;
 		Vec3 pos, motion;
 		double travelled;
@@ -85,12 +91,17 @@ public final class ShieldThrow {
 			this.owner = owner;
 			this.hand = hand;
 			this.shield = shield;
+			this.relic = relic(shield);
 			this.display = display;
 			this.pos = pos;
 			this.motion = motion;
 			this.ricochetsLeft = ricochets;
 		}
 	}
+
+	/** Jaymo's Powers' relic shield and relic mark. */
+	private static final Identifier GRAND_SHIELD = Identifier.fromNamespaceAndPath("jaymospowers", "grand_shield");
+	private static final Identifier ARSENAL_RELIC = Identifier.fromNamespaceAndPath("jaymospowers", "arsenal_relic");
 
 	private static final Map<UUID, Flight> FLIGHTS = new HashMap<>();
 	private static final Map<UUID, Long> READY = new HashMap<>();
@@ -104,29 +115,37 @@ public final class ShieldThrow {
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			Flight flight = FLIGHTS.remove(handler.player.getUUID());
 			if (flight != null) {
-				giveBack(handler.player, flight);
+				end(handler.player, flight);
 			}
 		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			for (Flight flight : new ArrayList<>(FLIGHTS.values())) {
 				ServerPlayer owner = server.getPlayerList().getPlayer(flight.owner);
-				if (owner != null) {
-					giveBack(owner, flight);
-				} else {
-					flight.display.discard();
-				}
+				end(owner, flight);
 			}
 			FLIGHTS.clear();
 			READY.clear();
 		});
 	}
 
-	/** The hand holding a shield (the off hand first), or null. */
+	/** The hand holding a shield (the off hand first), or null. Any shield: vanilla, Arsenal's Grand Shield, modded. */
 	static InteractionHand shieldHand(ServerPlayer player) {
-		if (player.getOffhandItem().is(Items.SHIELD)) {
+		if (player.getOffhandItem().getItem() instanceof ShieldItem) {
 			return InteractionHand.OFF_HAND;
 		}
-		return player.getMainHandItem().is(Items.SHIELD) ? InteractionHand.MAIN_HAND : null;
+		return player.getMainHandItem().getItem() instanceof ShieldItem ? InteractionHand.MAIN_HAND : null;
+	}
+
+	/**
+	 * A relic shield, which always comes home: a quest relic of ours ({@link Relics}), or one of Jaymo's Powers' Arsenal
+	 * relics (the Grand Shield, or anything carrying its relic mark; looked up by id, since Powers is optional).
+	 */
+	static boolean relic(ItemStack stack) {
+		if (Relics.passive(stack) != null || BuiltInRegistries.ITEM.getKey(stack.getItem()).equals(GRAND_SHIELD)) {
+			return true;
+		}
+		DataComponentType<?> mark = BuiltInRegistries.DATA_COMPONENT_TYPE.getValue(ARSENAL_RELIC);
+		return mark != null && stack.has(mark);
 	}
 
 	/** Whether {@code Y} should throw: the perk is known and a shield is in hand. */
@@ -187,13 +206,9 @@ public final class ShieldThrow {
 		for (Iterator<Map.Entry<UUID, Flight>> it = FLIGHTS.entrySet().iterator(); it.hasNext(); ) {
 			Flight flight = it.next().getValue();
 			ServerPlayer owner = server.getPlayerList().getPlayer(flight.owner);
-			if (owner == null) {
-				flight.display.discard();
-				it.remove();
-				continue;
-			}
-			if (!owner.isAlive() || owner.level() != flight.display.level() || flight.display.isRemoved() || ++flight.ticks > MAX_FLIGHT) {
-				giveBack(owner, flight);
+			if (owner == null || !owner.isAlive() || owner.level() != flight.display.level() || flight.display.isRemoved()
+				|| ++flight.ticks > MAX_FLIGHT) {
+				end(owner, flight);
 				it.remove();
 				continue;
 			}
@@ -203,15 +218,19 @@ public final class ShieldThrow {
 				it.remove();
 				continue;
 			}
-			if (fly((ServerLevel) owner.level(), owner, flight)) {
+			Boolean caught = fly((ServerLevel) owner.level(), owner, flight);
+			if (caught == Boolean.TRUE) {
 				catchIt(owner, flight);
+				it.remove();
+			} else if (caught == null) {
+				drop(flight);
 				it.remove();
 			}
 		}
 	}
 
-	/** One tick of flight. True once it's back in the hand. */
-	private static boolean fly(ServerLevel level, ServerPlayer owner, Flight flight) {
+	/** One tick of flight. True once it's caught, null if a plain shield hit a wall on the way home (it drops there). */
+	private static Boolean fly(ServerLevel level, ServerPlayer owner, Flight flight) {
 		Vec3 from = flight.pos;
 		if (flight.home) {
 			Vec3 chest = owner.position().add(0.0, owner.getBbHeight() * 0.6, 0.0);
@@ -219,9 +238,21 @@ public final class ShieldThrow {
 			if (to.length() <= Math.max(CATCH_REACH, HOME_SPEED)) {
 				return true;
 			}
-			// home through anything in the way, like it knows the road back
 			flight.motion = to.normalize().scale(HOME_SPEED);
-			move(level, flight, from.add(flight.motion));
+			Vec3 next = from.add(flight.motion);
+			if (!flight.relic) {
+				// a plain shield comes back the way a thrown thing does: a wall in the way stops it
+				BlockHitResult wall = level.clip(new ClipContext(from, next, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, flight.display));
+				if (wall.getType() != HitResult.Type.MISS) {
+					Vec3 at = wall.getLocation();
+					level.playSound(null, at.x, at.y, at.z, SoundEvents.SHIELD_BLOCK.value(), SoundSource.PLAYERS, 0.8F, 1.2F);
+					Direction face = wall.getDirection();
+					flight.pos = at.add(face.getStepX() * 0.3, face.getStepY() * 0.3, face.getStepZ() * 0.3);
+					return null;
+				}
+			}
+			// (a relic homes through anything in the way, like it knows the road back)
+			move(level, flight, next);
 			return false;
 		}
 		if (flight.next != null) {
@@ -352,6 +383,27 @@ public final class ShieldThrow {
 		if (!flight.shield.isEmpty()) {
 			owner.level().playSound(null, owner.getX(), owner.getY(), owner.getZ(), SoundEvents.ARMOR_EQUIP_IRON.value(), SoundSource.PLAYERS, 0.9F, 1.3F);
 		}
+	}
+
+	/** The flight is cut short: a relic goes back to its owner, a plain shield drops where it is. */
+	private static void end(ServerPlayer owner, Flight flight) {
+		if (flight.relic && owner != null) {
+			giveBack(owner, flight);
+		} else {
+			drop(flight);
+		}
+	}
+
+	/** Not caught: the shield falls where it is. */
+	private static void drop(Flight flight) {
+		flight.display.discard();
+		if (flight.shield.isEmpty() || !(flight.display.level() instanceof ServerLevel level)) {
+			return;
+		}
+		ItemEntity item = new ItemEntity(level, flight.pos.x, flight.pos.y, flight.pos.z, flight.shield);
+		item.setDeltaMovement(flight.motion.scale(0.1).add(0.0, 0.1, 0.0));
+		item.setDefaultPickUpDelay();
+		level.addFreshEntity(item);
 	}
 
 	private static void giveBack(ServerPlayer owner, Flight flight) {

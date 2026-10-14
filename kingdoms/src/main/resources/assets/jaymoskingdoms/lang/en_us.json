@@ -249,7 +249,7 @@
 	"skill.jaymoskingdoms.perk.war_cry": "War Cry",
 	"skill.jaymoskingdoms.perk.war_cry.desc": "Sneak and press Y (or just Y, if you don't know Charge) to roar. Foes within 10 blocks are weakened and slowed for 6 seconds; you and nearby players get Strength for 8. 45 second wait.",
 	"skill.jaymoskingdoms.perk.shield_throw": "Shield Throw",
-	"skill.jaymoskingdoms.perk.shield_throw.desc": "With a shield in hand, press Y to hurl it. It strikes the first thing in its way, ricochets on to the next foe (or off a wall) and flies back to your hand. Each rank: one more ricochet. Press Y again to call it back early. 5 second wait.",
+	"skill.jaymoskingdoms.perk.shield_throw.desc": "With a shield in hand, press Y to hurl it. It strikes the first thing in its way, ricochets on to the next foe (or off a wall) and flies back to you. If a wall stops it on the way back, it drops there; relic shields always find their way home. Each rank: one more ricochet. Press Y again to call it back early. 5 second wait.",
 	"skill.jaymoskingdoms.perk.bladestorm": "Bladestorm",
 	"skill.jaymoskingdoms.perk.bladestorm.desc": "Every 8th hit of a combo, if it's full strength, you whirl round and strike every foe around you for the full blow.",
 	"gui.jaymoskingdoms.skills.page.strength.0": "< Strength",
