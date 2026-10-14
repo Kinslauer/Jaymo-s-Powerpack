@@ -33,10 +33,8 @@ public record Limp(float back, float left) {
 		} else if (limp != null) {
 			limp.pose(model.root());
 		}
-		Jolt jolt = renderState.getData(Jolt.KEY);
-		if (jolt != null) {
-			jolt.apply(model.root());
-		}
+		// (0.4.39) then its ragdoll physics: limbs flung about and flopping back (see Flop)
+		Flop.apply(model, state);
 	}
 
 	private void pose(ModelPart root) {

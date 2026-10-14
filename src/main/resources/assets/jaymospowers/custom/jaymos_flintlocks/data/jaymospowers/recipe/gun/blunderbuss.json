@@ -1,0 +1,33 @@
+{
+  "materials": [
+    {
+      "item": {
+        "tag": "c:ingots/copper"
+      },
+      "count": 6
+    },
+    {
+      "item": {
+        "tag": "c:ingots/iron"
+      },
+      "count": 2
+    },
+    {
+      "item": {
+        "tag": "minecraft:planks"
+      },
+      "count": 5
+    },
+    {
+      "item": {
+        "item": "minecraft:flint"
+      },
+      "count": 1
+    }
+  ],
+  "result": {
+    "type": "gun",
+    "id": "jaymospowers:blunderbuss"
+  },
+  "type": "tacz:gun_smith_table_crafting"
+}

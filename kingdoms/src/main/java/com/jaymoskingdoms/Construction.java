@@ -975,6 +975,11 @@ public final class Construction {
 		if (across <= LEG) {
 			return goal;
 		}
+		// (0.7.9) a long way: along the road that goes there, if there is one
+		net.minecraft.world.phys.Vec3 road = across > Roads.LEAST ? Roads.ahead(level, walker.position(), goal, LEG) : null;
+		if (road != null) {
+			return level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, BlockPos.containing(road.x, walker.getY(), road.z));
+		}
 		return level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
 			BlockPos.containing(walker.getX() + dx / across * LEG, walker.getY(), walker.getZ() + dz / across * LEG));
 	}

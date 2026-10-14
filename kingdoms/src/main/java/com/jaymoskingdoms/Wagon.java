@@ -50,7 +50,7 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Wagon extends Entity {
 	/** (0.5.26) {@link #CAB}: a hired carriage of a rich realm's, for players ({@link Cabs}). */
-	public static final int CART = 0, CARRIAGE = 1, RICKSHAW = 2, CAB = 3;
+	public static final int CART = 0, CARRIAGE = 1, RICKSHAW = 2, CAB = 3, COACH = 4;
 	/** (0.5.28) Its caravan when it's no caravan's: none (a carriage), or a war party's spoils cart ({@link WarParties}). */
 	static final int NO_CARAVAN = -1, WAR_CART = -2;
 	/** What a cart's load looks like: nothing, stone and ore, food, a bit of everything. */
@@ -256,6 +256,13 @@ public final class Wagon extends Entity {
 			return;
 		}
 		Entity horse = this.horse();
+		if (this.kind() == COACH) {
+			// (0.7.9) a coach hired at a milestone
+			Milestones.tick(level, this, horse);
+			if (this.isRemoved() || horse == null || !horse.isAlive()) {
+				return;
+			}
+		}
 		if (this.kind() == CAB) {
 			this.horseLost = horse == null || !horse.isAlive() ? this.horseLost + 1 : 0;
 			Cabs.tick(level, this, horse);
@@ -326,7 +333,7 @@ public final class Wagon extends Entity {
 
 	@Override
 	protected boolean canAddPassenger(Entity passenger) {
-		return (this.kind() == CARRIAGE || this.kind() == RICKSHAW || this.kind() == CAB) && this.getPassengers().isEmpty();
+		return (this.kind() == CARRIAGE || this.kind() == RICKSHAW || this.kind() == CAB || this.kind() == COACH) && this.getPassengers().isEmpty();
 	}
 
 	@Override
@@ -372,6 +379,10 @@ public final class Wagon extends Entity {
 	public InteractionResult interact(Player player, InteractionHand hand, Vec3 location) {
 		if (hand != InteractionHand.MAIN_HAND) {
 			return InteractionResult.PASS;
+		}
+		if (player instanceof ServerPlayer sp && this.kind() == COACH) {
+			Milestones.hail(sp, this);
+			return InteractionResult.SUCCESS;
 		}
 		if (player instanceof ServerPlayer sp && this.level() instanceof ServerLevel level && (this.kind() == RICKSHAW || this.kind() == CAB)) {
 			if (!player.isPassenger()) {

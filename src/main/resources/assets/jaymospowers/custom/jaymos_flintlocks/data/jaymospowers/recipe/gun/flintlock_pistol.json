@@ -1,0 +1,27 @@
+{
+  "materials": [
+    {
+      "item": {
+        "tag": "c:ingots/iron"
+      },
+      "count": 2
+    },
+    {
+      "item": {
+        "tag": "minecraft:planks"
+      },
+      "count": 3
+    },
+    {
+      "item": {
+        "item": "minecraft:flint"
+      },
+      "count": 1
+    }
+  ],
+  "result": {
+    "type": "gun",
+    "id": "jaymospowers:flintlock_pistol"
+  },
+  "type": "tacz:gun_smith_table_crafting"
+}

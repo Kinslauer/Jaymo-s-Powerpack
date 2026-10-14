@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:map",
+    "minecraft:feather",
+    "minecraft:ink_sac"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:road_charter"
+  }
+}

@@ -49,6 +49,14 @@ public class SeveredPart extends Entity {
 	 */
 	static final double HAND_RIGHT = 0.36, HAND_UP = 0.78, HAND_AHEAD = 0.3, HEAD_HANG = 0.23, LIMB_HANG = 0.33;
 	static final float CARRY_SWAY = 9.0F;
+	/**
+	 * (0.10.47) Rolling and settling: rolling along the ground it turns this many degrees per block moved (about a
+	 * hand's width across), until it's slower than ROLL_MIN; then it rocks onto its side on a damped spring.
+	 */
+	static final float ROLL_RATE = 380.0F, ROLL_MIN = 0.02F, SETTLE_PULL = 0.25F, SETTLE_DAMPING = 0.6F;
+	/** (0.10.47) Walked into, it's kicked along this much faster than the walker goes, and up; at most this often. */
+	static final double KICK = 1.3, KICK_UP = 0.14, KICK_MIN = 0.05;
+	static final int KICK_EVERY = 8;
 	/** The part's middle sits this high above the entity (as the renderer draws it). */
 	static final double MIDDLE = 0.17;
 	/** Saved data that has nothing to do with how the body looks (and gear, which the part doesn't carry). */
@@ -67,6 +75,9 @@ public class SeveredPart extends Entity {
 	private int age;
 	/** Client side: how far it has turned over (degrees), this tick and last, and about which way it spins. */
 	public float spin, spinO, spinAxis;
+	/** Client side: how fast it's turning over (degrees a tick). */
+	private float spinVel;
+	private int kickCooldown;
 
 	public SeveredPart(EntityType<? extends SeveredPart> type, Level level) {
 		super(type, level);
@@ -175,18 +186,43 @@ public class SeveredPart extends Entity {
 				this.discard();
 				return;
 			}
+			if (this.onGround() && --this.kickCooldown <= 0) {
+				kickedBy(level);
+			}
 			if (this.age < 40 && this.age % 3 == 0) {
 				// a trail of blood off the cut
 				level.sendParticles(new DustParticleOptions(0x7A0000, 1.0F), this.getX(), this.getY() + 0.1, this.getZ(), 2, 0.05, 0.05, 0.05, 0.0);
 			}
 		} else {
 			this.spinO = this.spin;
+			Vec3 motion = this.getDeltaMovement();
+			float rolling = (float) motion.horizontalDistance();
 			if (!this.onGround()) {
-				this.spin += (float) Math.min(30.0, this.getDeltaMovement().length() * 45.0);
+				this.spinVel = (float) Math.min(30.0, motion.length() * 45.0);
+			} else if (rolling > ROLL_MIN) {
+				// rolling along the ground, as far round as it goes
+				this.spinVel = rolling * ROLL_RATE;
 			} else {
-				// settles on its side
-				float rest = Math.round(this.spin / 90.0F) * 90.0F + 90.0F * (this.part() == Dismember.HEAD ? 1 : 0);
-				this.spin = Mth.approachDegrees(this.spin, rest, 12.0F);
+				// rocks to a stop, a limb lying along the ground, a head on any face (not on end, for a limb)
+				float rest = this.part() == Dismember.HEAD ? Math.round(this.spin / 90.0F) * 90.0F
+					: Math.round((this.spin - 90.0F) / 180.0F) * 180.0F + 90.0F;
+				this.spinVel = (this.spinVel + Mth.wrapDegrees(rest - this.spin) * SETTLE_PULL) * SETTLE_DAMPING;
+			}
+			this.spin += this.spinVel;
+		}
+	}
+
+	/** (0.10.47) Someone walking into it on the ground kicks it along ahead of them, rolling and bouncing. */
+	private void kickedBy(ServerLevel level) {
+		for (Entity walker : level.getEntities(this, this.getBoundingBox().inflate(0.1),
+			e -> e instanceof LivingEntity && e.isAlive() && !e.isSpectator())) {
+			double mx = walker.getX() - walker.xo, mz = walker.getZ() - walker.zo;
+			double speed = Math.sqrt(mx * mx + mz * mz);
+			if (speed > KICK_MIN) {
+				this.setDeltaMovement(mx * KICK, KICK_UP + speed * 0.3, mz * KICK);
+				this.needsSync = true;
+				this.kickCooldown = KICK_EVERY;
+				return;
 			}
 		}
 	}

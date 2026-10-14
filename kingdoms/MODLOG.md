@@ -2645,7 +2645,44 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   sail or mast; `up`/`down`); 36 shapes of sheet from `tools/gen_sailing.py`. Hung facing aft, a sail is turned to
   face forward as the ship casts off. While the ship's sails are furled (W/S) they're drawn rolled up on their yards
   (`furled`, the ship's sail setting synced to clients).
-- **0.7.10, tail fear (pack 0.10.45):** townsfolk who see a Z Fighter's tail out (`jaymospowers_tail` tag) take them for
+
+## 0.7.8: musketeers carry Jaymo's flintlocks (pack 0.10.43)
+- **`TaczGuns`:** with TaCZ installed, our TaCZ guns (musket, blunderbuss, flintlock pistol; the gunpack ships in
+  Jaymo's Powers) are made by item id with their gun id in custom data. Musketeers are handed the TaCZ musket
+  (`Muskets.musketStack`) and their shots stay our own; the Marksman's class card shows it with musket balls.
+  Without TaCZ nothing changes (WeaponMod's musket, or a crossbow). The Marksman perks still apply to WeaponMod's guns
+  only.
+
+## 0.7.9: King's Roads (pack 0.10.44)
+- Andy asked whether Via Romana and Countered's Settlement Roads could work with our carriages. Neither runs on 26.3
+  (Via Romana stops at 1.21.1 and its Responsive Source License bars hosting a port; Settlement Roads is MIT but stops
+  at 1.21.10 and only joins vanilla villages at worldgen), so this is our own take, nothing copied.
+- **Planned** (`Roads`): every kingdom, fiefdom and village is linked to its 2 nearest within 700 blocks (a fiefdom to
+  its overlord too). The route is an A* search on 8-block cells over the world generator's own terrain heights (so it
+  plans through unexplored land), off the server thread, disliking climbs, cliffs and water; then rounded off, walked
+  out in 4-block points and graded. Saved on the Overworld (`jaymoskingdoms:roads`).
+- **Laid** a chunk at a time as chunks load: 3 wide in the ground's style (dirt path, coarse dirt and gravel in the
+  green, sandstone on sand, cobble and andesite on rock, packed mud in swamps, cobble/mossy/stone bricks within 120 of a
+  town), graded up to 3 blocks, trees in the way felled whole, 5-wide spruce bridges with rails over water, a lantern
+  post every ~48 blocks, and a milestone (post and waxed sign) at each end: "King's Road / To <town> / <n> blocks",
+  "Welcome to <town>" on the back. Only natural ground is touched, never builds; towns' own streets (within 56 of a
+  seat) are left alone. Each chunk is paved once.
+- **Followed** (`Roads.ahead`): `Construction.leg` keeps long walks to the road that leads to the goal, so cabs,
+  rickshaws and rulers on their rounds take it; caravans make for points along it, seen and unseen.
+- Ops: `/kingdom roads` (the roads, their length, chunks paved), `/kingdom roads plan` (plan the next missing one now).
+- **Milestone travel** (`Milestones`; Andy chose "both" a coach and a teleport): right-click a linked sign (sneak to
+  edit your own) for where its roads go, each with **[Coach]** (1 emerald + 1 per 160 blocks, at most 12, to the
+  realm: a coachman, a horse and a carriage, `Wagon.COACH`, appear and gallop you along the road itself, helped on
+  when stuck; gone in a puff after) and **[Teleport]** (4 + 1 per 48 blocks, at most 40, lost to the road; a blackout,
+  hunger as if you'd walked it, a 30 s rest; a ridden horse comes too). A King's Road's milestone is linked to the
+  town at its other end from the start.
+- **Road Charter** (map + feather + ink sac; art by `tools/gen_roads.py`), Via Romana's idea in our own way: mark a
+  sign, follow your own road (sampled every half second; 80% of it on road blocks: paths, gravel, cobble, bricks,
+  tiles, planks, slabs, stairs, smooth/cut stone), mark another sign at least 48 blocks along: they're linked (saved
+  on the Overworld, `jaymoskingdoms:charted_roads`). Jumping (a pearl, a fall) loses the chart; a link whose far sign is
+  broken goes when someone tries it. Coaches on charted roads come from the nearest realm.
+- Not yet seen in game.
+- **0.7.10, tail fear (pack 0.10.48):** townsfolk who see a Z Fighter's tail out (`jaymospowers_tail` tag) take them for
   a werewolf and run (`Tails`, `Frights`, 12 cries), until told: at 25 MCA hearts the chat menu gains "Explain your tail"
   (`data/jaymoskingdoms/dialogues/main.json`, `McaAnswersMixin`), and that villager fears it no more.
   `ClassPerks.trainedWith` tells Powers which weapons a class is trained with.
