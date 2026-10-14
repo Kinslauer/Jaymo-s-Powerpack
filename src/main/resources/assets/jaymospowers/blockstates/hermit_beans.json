@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "age=0": {
+      "model": "jaymospowers:block/hermit_beans_stage0"
+    },
+    "age=1": {
+      "model": "jaymospowers:block/hermit_beans_stage1"
+    },
+    "age=2": {
+      "model": "jaymospowers:block/hermit_beans_stage2"
+    },
+    "age=3": {
+      "model": "jaymospowers:block/hermit_beans_stage3"
+    }
+  }
+}

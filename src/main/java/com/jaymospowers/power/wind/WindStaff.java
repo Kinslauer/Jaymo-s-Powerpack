@@ -1,7 +1,9 @@
 package com.jaymospowers.power.wind;
 
 import com.jaymospowers.core.Fate;
-import com.jaymospowers.core.Powers;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -28,7 +30,7 @@ import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.10.13) The quarterstaff in a wind's hand. Its five Better Combat swings (front twirl, sweep, whirlwind, thrust,
+ * (0.10.15) The quarterstaff in a wind sorcerer's hand (a Kingdoms Sorcerer of the air). Its five Better Combat swings (front twirl, sweep, whirlwind, thrust,
  * overhead slam) each carry a gale of their own, counted by our own chain of landed swings (Better Combat's combo index
  * never reaches the server):
  * <ol>
@@ -41,7 +43,7 @@ import net.minecraft.world.phys.Vec3;
  * </ol>
  * Right click (or sneak + right click, standing) is the <b>Staff Vault</b>: plant the staff and ride a gust forward
  * and up (straight up when sneaking), landing soft. Every hit with a staff also leaves a puff of air. In anyone else's
- * hand it's just a staff. The Tempest mode (Z) and the ascension make every gale hit harder.
+ * hand (a Wind power user included) it's just a staff. The Tempest mode (Z) and the ascension make every gale hit harder.
  */
 public final class WindStaff {
 	/** A chain breaks if no swing lands for this long (ticks); a swing is counted once however many it hits. */
@@ -104,8 +106,39 @@ public final class WindStaff {
 		return !stack.isEmpty() && BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().endsWith("quarterstaff");
 	}
 
+	/**
+	 * (Andy: "only wind sorcerers") A Jaymo's Kingdoms Sorcerer who picked the air element. Read by name, so
+	 * without Kingdoms nobody is one.
+	 */
 	static boolean wind(Player player) {
-		return Powers.has(player, WindPower.INSTANCE);
+		if (CLASS_OF == null) {
+			return false;
+		}
+		try {
+			Object chosen = CLASS_OF.invoke(player);
+			return "sorcerer".equals(CLASS_KEY.invoke(chosen)) && "air".equals(CLASS_OPTION.invoke(chosen));
+		} catch (Throwable t) {
+			return false;
+		}
+	}
+
+	private static final MethodHandle CLASS_OF, CLASS_KEY, CLASS_OPTION;
+
+	static {
+		MethodHandle of = null, key = null, option = null;
+		try {
+			Class<?> classes = Class.forName("com.jaymoskingdoms.Classes");
+			Class<?> chosen = Class.forName("com.jaymoskingdoms.Classes$Chosen");
+			MethodHandles.Lookup lookup = MethodHandles.publicLookup();
+			of = lookup.findStatic(classes, "of", MethodType.methodType(chosen, Player.class));
+			key = lookup.findVirtual(chosen, "cls", MethodType.methodType(String.class));
+			option = lookup.findVirtual(chosen, "option", MethodType.methodType(String.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			of = null;
+		}
+		CLASS_OF = of;
+		CLASS_KEY = key;
+		CLASS_OPTION = option;
 	}
 
 	private static double bonus(ServerPlayer player) {

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "B": "minecraft:iron_block",
+    "W": "jaymospowers:training_weights"
+  },
+  "pattern": [
+    "BWB"
+  ],
+  "result": {
+    "id": "jaymospowers:heavy_training_weights"
+  }
+}

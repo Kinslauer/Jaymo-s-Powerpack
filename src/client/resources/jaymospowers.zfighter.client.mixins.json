@@ -1,0 +1,7 @@
+{
+	"required": true,
+	"package": "com.jaymospowers.client.power.zfighter.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": ["ZFighterAvatarRendererMixin", "ZFighterModelFeatureRendererMixin", "ZFighterScrollMixin"],
+	"injectors": { "defaultRequire": 1 }
+}

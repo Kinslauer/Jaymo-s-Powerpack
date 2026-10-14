@@ -20,5 +20,9 @@
 	"power.jaymospowers.gravity.key.ability_4.corrupted": "Tap: everything around you is forced to its knees (after %2$s, it launches you high too). Hold, then let go: Crush, wider and heavier",
 	"power.jaymospowers.gravity.key.ability_4.ascended_corrupted": "Tap: everything around you is forced to its knees (after %2$s, it launches you high too). Hold, then let go: your orbiting ring rains down on the target",
 	"power.jaymospowers.gravity.key.ultimate.corrupted": "Singularity: a black hole where you aim",
-	"power.jaymospowers.gravity.key.ultimate.ascended_corrupted": "Skyfall: everything around falls up, then slams down"
+	"power.jaymospowers.gravity.key.ultimate.ascended_corrupted": "Skyfall: everything around falls up, then slams down",
+	"power.jaymospowers.gravity.key.mode": "Training Field (once the Well is yours): a dome of heavy gravity where you aim, for a minute. Everyone in it but you is slowed and falls fast; a Z Fighter trains twice as fast in it, and each minute one trains there brings you mastery. %5$s again takes it down",
+	"message.jaymospowers.gravity.field": "Training Field: the air grows heavy.",
+	"message.jaymospowers.gravity.field_wait": "The Training Field returns in %s s.",
+	"message.jaymospowers.gravity.field_trained": "%s trains under your weight."
 }

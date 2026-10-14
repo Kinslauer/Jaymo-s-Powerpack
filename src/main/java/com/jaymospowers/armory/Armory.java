@@ -127,7 +127,7 @@ public final class Armory {
 	static final Map<Tier, Item> LANCES = new EnumMap<>(Tier.class);
 	public static final ResourceKey<EquipmentAsset> CAVEMAN = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosPowers.id("caveman"));
 
-	/** (0.10.13) A quarterstaff in a wind's hand rides the gale (WindStaff). */
+	/** (0.10.13) A quarterstaff in a wind sorcerer's hand rides the gale (WindStaff). */
 	private static final ItemLore STAFF_LORE = new ItemLore(List.of(
 		Component.translatable("item.jaymospowers.quarterstaff.wind").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC)));
 

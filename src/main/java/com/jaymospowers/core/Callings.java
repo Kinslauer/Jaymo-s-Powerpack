@@ -30,6 +30,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.breeze.Breeze;
 import net.minecraft.world.entity.monster.spider.CaveSpider;
 import net.minecraft.world.entity.player.Player;
@@ -53,6 +54,7 @@ import org.jspecify.annotations.Nullable;
  * <li>Resonance: ring a village bell around midnight (a day off, once a night), or live through a Warden's sonic boom
  * (awakens at once).</li>
  * <li>Darktide: stay out at sea, swimming or in a boat, from dusk to dawn. Awakens at dawn.</li>
+ * <li>Z Fighter: kill {@link #FIST_KILLS_NEEDED} monsters with your bare fists. Awakens at once.</li>
  * <li>Xenoform: put on a Xeno-Band from a broken fallen star ({@code power/xenoform}). Awakens at once, and it is the
  * only way: fate never hands Xenoform out and it can't be an affinity ({@code Power.fated}).</li>
  * </ul>
@@ -65,12 +67,18 @@ public final class Callings {
 	public static final AttachmentType<List<String>> WEAPON_KILLS = AttachmentRegistry.create(JaymosPowers.id("weapon_kills"),
 		builder -> builder.persistent(Codec.STRING.listOf()).copyOnDeath());
 
+	/** Monsters a powerless player has killed with bare fists (for Z Fighter). Saved, kept through death. */
+	public static final AttachmentType<Integer> FIST_KILLS = AttachmentRegistry.create(JaymosPowers.id("fist_kills"),
+		builder -> builder.persistent(Codec.INT).copyOnDeath());
+
 	/** One Minecraft day of the wait (20 minutes). */
 	public static final int DAY = 24000;
 	/** Gravity: the smallest fall (blocks) that counts. */
 	public static final double GRAVITY_FALL = 40.0;
 	/** Arsenal: how many different kinds of weapon must have killed something. */
 	public static final int ARSENAL_TYPES = 5;
+	/** Z Fighter: monsters to kill with bare fists. */
+	public static final int FIST_KILLS_NEEDED = 20;
 	/** Resonance: how near midnight (clock ticks either side of 18000) a bell has to be rung. */
 	public static final int MIDNIGHT_WINDOW = 1000;
 	/** Darktide: night ticks in a row at sea before dawn counts (a night is ~10000). */
@@ -161,7 +169,7 @@ public final class Callings {
 		AT_SEA.remove(id);
 	}
 
-	/** Wind (a Breeze) and Arsenal (weapon kinds): kills by a powerless player. */
+	/** Wind (a Breeze), Z Fighter (bare fists) and Arsenal (weapon kinds): kills by a powerless player. */
 	private static void afterDeath(LivingEntity entity, DamageSource source) {
 		if (!(source.getEntity() instanceof ServerPlayer player) || Powers.of(player) != null) {
 			return;
@@ -169,6 +177,15 @@ public final class Callings {
 		if (entity instanceof Breeze) {
 			call(player, "wind", Integer.MAX_VALUE);
 			return;
+		}
+		if (entity instanceof Enemy && player.getMainHandItem().isEmpty() && source.getDirectEntity() == player
+			&& source.is(DamageTypes.PLAYER_ATTACK)) {
+			int kills = player.getAttachedOrElse(FIST_KILLS, 0) + 1;
+			player.setAttached(FIST_KILLS, kills);
+			if (kills >= FIST_KILLS_NEEDED) {
+				call(player, "zfighter", Integer.MAX_VALUE);
+				return;
+			}
 		}
 		String kind = weaponKind(player, source);
 		if (kind == null) {
