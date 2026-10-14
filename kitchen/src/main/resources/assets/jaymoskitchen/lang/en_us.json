@@ -154,7 +154,7 @@
 	"screen.jaymoskitchen.campfire": "Campfire",
 	"screen.jaymoskitchen.furnace": "Furnace",
 	"screen.jaymoskitchen.smoker": "Smoker",
-	"screen.jaymoskitchen.hint.campfire": "Grilling only. Fancier dishes need a Furnace or Smoker.",
+	"screen.jaymoskitchen.hint.campfire": "Grilling and spit roasts. Fancier dishes need a Furnace or Smoker; chopping a Cutting Board.",
 	"screen.jaymoskitchen.hint.furnace": "Grilled dishes are cooked over a Campfire.",
 	"screen.jaymoskitchen.hint.smoker": "Smokers give 25% more time. Grill on a Campfire.",
 	"screen.jaymoskitchen.pick": "Pick a dish (greyed out = missing ingredients)",
@@ -419,5 +419,10 @@
 	"screen.jaymoskitchen.how.roast": "Turn the spit so every side browns, then take it off.",
 	"screen.jaymoskitchen.how.stir": "Circle the mouse round the pot; faster when it boils up.",
 	"screen.jaymoskitchen.perfect_gives": "Perfect:",
-	"screen.jaymoskitchen.missing": "You're missing ingredients."
+	"screen.jaymoskitchen.missing": "You're missing ingredients.",
+	"screen.jaymoskitchen.board": "Cutting Board",
+	"screen.jaymoskitchen.hint.board": "Chopping only. Cook the rest at a Campfire, Furnace or Smoker.",
+	"screen.jaymoskitchen.prep.chop": "Chop vegetables",
+	"message.jaymoskitchen.no_station.board": "%s: chop it on a Cutting Board.",
+	"message.jaymoskitchen.no_station.spit": "%s: roast it on a spit over a lit Campfire."
 }

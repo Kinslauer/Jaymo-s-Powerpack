@@ -6,6 +6,7 @@ import net.blay09.mods.cookingforblockheads.block.entity.OvenBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.blay09.mods.cookingforblockheads.block.CuttingBoardBlock;
 import net.blay09.mods.cookingforblockheads.block.OvenBlock;
 import java.util.Arrays;
 import java.util.List;
@@ -31,7 +32,9 @@ public enum Station {
 	STOVE(4, 4),
 	STOVE_POT(4, 4),
 	STOVE_PAN(4, 4),
-	STOVE_FULL(4, 4);
+	STOVE_FULL(4, 4),
+	/** A Cooking for Blockheads cutting board: the chopped dishes. Opened from the prep screen there (0.4.38). */
+	BOARD(4, 4);
 
 	private final int timeNumerator;
 	private final int timeDenominator;
@@ -43,12 +46,18 @@ public enum Station {
 
 	public boolean allows(Dish dish) {
 		return switch (this) {
-			// the oven bakes and roasts; a pot on the hob adds the stews and soups, a pan the grilled, seared and chopped
-			case STOVE, STOVE_POT, STOVE_PAN, STOVE_FULL -> dish.method() == Dish.Method.OVEN || dish.method() == Dish.Method.ROAST
+			// the oven bakes; a pot on the hob adds the stews and soups, a pan the grilled and seared (chopping wants a
+			// cutting board, spit roasts a campfire)
+			case STOVE, STOVE_POT, STOVE_PAN, STOVE_FULL -> dish.method() == Dish.Method.OVEN
 				|| (hasPot() && (dish.method() == Dish.Method.SEQUENCE || dish.method() == Dish.Method.STIR))
-				|| (hasPan() && (dish.method() == Dish.Method.GRILL || dish.method() == Dish.Method.SEAR || dish.method() == Dish.Method.CHOP));
+				|| (hasPan() && (dish.method() == Dish.Method.GRILL || dish.method() == Dish.Method.SEAR));
 			default -> dish.stations().contains(this);
 		};
+	}
+
+	/** Whether it cooks with heat (everything but the cutting board): what can reheat a dish. */
+	public boolean heats() {
+		return this != BOARD;
 	}
 
 	/** A lit Cooking for Blockheads oven, whatever is on its hob. */
@@ -84,6 +93,9 @@ public enum Station {
 	public static @Nullable Station of(BlockState state) {
 		if (state.getBlock() instanceof CampfireBlock) {
 			return state.getValue(CampfireBlock.LIT) ? CAMPFIRE : null;
+		}
+		if (state.getBlock() instanceof CuttingBoardBlock) {
+			return BOARD;
 		}
 		if (state.is(Blocks.FURNACE)) {
 			return FURNACE;

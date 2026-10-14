@@ -88,9 +88,11 @@ public final class CookingTableBridge {
 	private static String noStationKey(Dish dish) {
 		return "message.jaymoskitchen.no_station." + switch (dish.method()) {
 			case SEQUENCE, STIR -> "pot";
-			case GRILL, CHOP -> "grill";
+			case GRILL -> "grill";
+			case CHOP -> "board";
 			case SEAR -> "sear";
-			case OVEN, ROAST -> "oven";
+			case OVEN -> "oven";
+			case ROAST -> "spit";
 			case SMOKE -> "smoker";
 		};
 	}

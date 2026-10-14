@@ -59,11 +59,11 @@ public enum Dish {
 	// --- content drop 4: the plain larder (beetroot, carrots, chicken, mutton) and three new minigames ---
 	BORSCHT(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, BEETROOT, BEETROOT, POTATO), 9, 0.7F, true,
 		List.of(new Buff(MobEffects.RESISTANCE, 90 * 20, 0))),
-	BEETROOT_HASH(Method.CHOP, EnumSet.of(Station.CAMPFIRE, Station.FURNACE), List.of(BEETROOT, BEETROOT, POTATO), 8, 0.7F, false,
+	BEETROOT_HASH(Method.CHOP, EnumSet.of(Station.BOARD), List.of(BEETROOT, BEETROOT, POTATO), 8, 0.7F, false,
 		List.of(new Buff(MobEffects.HASTE, 90 * 20, 0))),
 	CARROT_SOUP(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, CARROT, CARROT, SUGAR), 8, 0.6F, true,
 		List.of(new Buff(MobEffects.NIGHT_VISION, 240 * 20, 0))),
-	GLAZED_CARROTS(Method.CHOP, EnumSet.of(Station.CAMPFIRE, Station.FURNACE), List.of(CARROT, CARROT, HONEY_BOTTLE), 7, 0.7F, false,
+	GLAZED_CARROTS(Method.CHOP, EnumSet.of(Station.BOARD), List.of(CARROT, CARROT, HONEY_BOTTLE), 7, 0.7F, false,
 		List.of(new Buff(MobEffects.SPEED, 120 * 20, 0))),
 	CARROT_CAKE(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(DOUGH, CARROT, SUGAR, EGG), 10, 0.6F, false,
 		List.of(new Buff(MobEffects.ABSORPTION, 60 * 20, 0), new Buff(MobEffects.LUCK, 300 * 20, 0))),

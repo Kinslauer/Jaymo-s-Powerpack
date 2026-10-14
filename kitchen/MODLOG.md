@@ -748,6 +748,8 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
     boils up it wants stirring faster.
   - Like the sear, the client plays and reports (`MinigameFinish`); the server judges with the same code and checks
     enough time passed. Walking away chars a pot or spit, and leaves half-chopped veg a mess.
-- Oven hob: Stir needs a pot, Chop a pan; the oven itself roasts.
+- Each game has its own station: Chop on a Cutting Board (a "Chop vegetables" button on the board's prep screen; new
+  `Station.BOARD`, which never reheats), Roast on a spit over a Campfire only, Stir in a pot (Furnace, Smoker, or a
+  Cooking Pot on a lit oven).
 - The dish list is restyled like the Powers H screen: striped rows with the dish, its method and ingredient icons, and
   a hover box with how it's cooked, what Perfect gives and what you're missing. Click a row to cook it.

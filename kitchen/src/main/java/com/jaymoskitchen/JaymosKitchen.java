@@ -86,7 +86,8 @@ public class JaymosKitchen implements ModInitializer {
 				}
 				return InteractionResult.SUCCESS;
 			}
-			if (player instanceof ServerPlayer reheater && Station.of(level, hit.getBlockPos()) != null
+			Station heat = Station.of(level, hit.getBlockPos());
+			if (player instanceof ServerPlayer reheater && heat != null && heat.heats()
 				&& Kitchen.reheat(reheater, hit.getBlockPos(), player.getMainHandItem())) {
 				return InteractionResult.SUCCESS;
 			}
@@ -106,7 +107,8 @@ public class JaymosKitchen implements ModInitializer {
 				}
 				return InteractionResult.PASS;
 			}
-			if (station != null && sneakingEmptyHanded) {
+			// a cutting board opens the prep screen below, which has the chopping on it
+			if (station != null && station != Station.BOARD && sneakingEmptyHanded) {
 				if (player instanceof ServerPlayer serverPlayer) {
 					ServerPlayNetworking.send(serverPlayer, new Payloads.OpenKitchen(pos, station.ordinal(), Kitchen.stocked(serverPlayer, pos, station)));
 				}
