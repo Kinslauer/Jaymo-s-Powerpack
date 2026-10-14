@@ -19,50 +19,63 @@ import net.minecraft.network.chat.Component;
  * what it still needs) and Limit Break's tiers. Everything is checked again on the server.
  */
 public class ZFighterTrainingScreen extends Screen {
-	private static final int W = 330;
-	private static final int ROW = 13;
+	private static final int MAX_W = 340;
+	private static final int H = 236;
+	private static final int ROW = 16;
+	private static final int FORM_ROW = 24;
+	private static final int LINEAGE_ROW = 46;
+	/** The box at the bottom that shows the hovered row's full description. */
+	private static final int DETAIL_H = 40;
+	private static final int BUTTON_W = 54;
 	private static final int COLOR_PANEL = 0xD0101018;
+	private static final int COLOR_ROW = 0x30FFFFFF;
 	private static final int COLOR_TEXT = 0xFFFFFFFF;
 	private static final int COLOR_DIM = 0xFFA8A8B8;
 	private static final int COLOR_ACCENT = 0xFF000000 | ZFighterPower.COLOR;
 	private static final int COLOR_GOLD = 0xFF000000 | ZFighterPower.SUPER_COLOR;
+	private static final int COLOR_LIMIT = 0xFFFF6A50;
 	private static final String[] STAT_KEYS = {"strength", "toughness", "vitality", "ki_power", "energy"};
+	private static final String[] TAB_KEYS = {"tab_stats", "tab_forms", "tab_techniques"};
+	private static final int STATS_PAGE = 0;
+	private static final int FORMS_PAGE = 1;
+	private static final int TECHNIQUES_PAGE = 2;
 
 	private final List<Button> statButtons = new ArrayList<>();
 	private final List<Button> formButtons = new ArrayList<>();
 	private final List<Button> techniqueButtons = new ArrayList<>();
 	private final List<Button> lineageButtons = new ArrayList<>();
+	private final List<Button> tabButtons = new ArrayList<>();
 	private Button limitButton;
-	private Button tabButton;
-	/** Which page: the stats, forms and Limit Break, or the techniques. */
-	private static boolean techniquesPage;
+	/** Which page is open (kept between openings). */
+	private static int page;
 
 	public ZFighterTrainingScreen() {
 		super(Component.translatable("screen.jaymospowers.zfighter.title"));
 	}
 
+	private int panelW() {
+		return Math.min(MAX_W, this.width - 12);
+	}
+
 	private int left() {
-		return (this.width - W) / 2;
+		return (this.width - panelW()) / 2;
 	}
 
 	private int top() {
-		return Math.max(4, (this.height - height()) / 2);
+		return Math.max(4, (this.height - H) / 2);
 	}
 
-	private static int height() {
-		return 30 + 12 + ZFighterTraining.STATS * ROW + 16 + 12 + ZFighterTraining.FORMS * (ROW * 2) + 16 + ROW * 2 + 30;
+	private int buttonX() {
+		return left() + panelW() - BUTTON_W - 6;
 	}
 
-	private int statsY() {
-		return top() + 42;
+	/** Where each page's rows start, under the title, TP and tabs. */
+	private int contentY() {
+		return top() + 52;
 	}
 
-	private int formsY() {
-		return statsY() + ZFighterTraining.STATS * ROW + 28;
-	}
-
-	private int limitY() {
-		return formsY() + ZFighterTraining.FORMS * ROW * 2 + 16;
+	private int detailY() {
+		return top() + H - DETAIL_H - 4;
 	}
 
 	@Override
@@ -71,43 +84,45 @@ public class ZFighterTrainingScreen extends Screen {
 		formButtons.clear();
 		techniqueButtons.clear();
 		lineageButtons.clear();
+		tabButtons.clear();
+		int w = panelW();
+		int tabW = (w - 16) / 3;
+		for (int i = 0; i < 3; i++) {
+			int tab = i;
+			tabButtons.add(addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter." + TAB_KEYS[i]), b -> page = tab)
+				.bounds(left() + 8 + i * (tabW + 0), top() + 30, tabW - 2, 16).build()));
+		}
 		for (int i = ZFighterLineage.EARTHLING; i < ZFighterLineage.LINEAGES; i++) {
 			int lineage = i;
 			lineageButtons.add(addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter.choose"),
-				b -> send(ZFighterNet.PICK_LINEAGE, lineage)).bounds(left() + W - 56, lineageY() + (i - 1) * LINEAGE_ROW - 2, 50, 12).build()));
-		}
-		tabButton = addRenderableWidget(Button.builder(Component.empty(), b -> techniquesPage = !techniquesPage)
-			.bounds(left() + W - 86, top() + 4, 80, 12).build());
-		for (int i = 0; i < ZFighterTraining.TECHNIQUES; i++) {
-			int technique = i;
-			techniqueButtons.add(addRenderableWidget(Button.builder(Component.empty(), b -> techniqueAction(technique))
-				.bounds(left() + W - 56, techniquesY() + i * TECH_ROW - 2, 50, 12).build()));
+				b -> send(ZFighterNet.PICK_LINEAGE, lineage)).bounds(buttonX(), lineageY() + (i - 1) * LINEAGE_ROW - 3, BUTTON_W, 14).build()));
 		}
 		for (int i = 0; i < ZFighterTraining.STATS; i++) {
 			int stat = i;
 			statButtons.add(addRenderableWidget(Button.builder(Component.literal("+"), b -> send(ZFighterNet.BUY_STAT, stat))
-				.bounds(left() + W - 26, statsY() + i * ROW - 2, 20, 12).build()));
+				.bounds(left() + w - 26, contentY() + 12 + i * ROW - 3, 20, 14).build()));
 		}
 		for (int form = 2; form <= ZFighterTraining.FORMS; form++) {
 			int f = form;
 			formButtons.add(addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter.learn"), b -> send(ZFighterNet.BUY_FORM, f))
-				.bounds(left() + W - 56, formsY() + (form - 1) * ROW * 2 - 2, 50, 12).build()));
+				.bounds(buttonX(), contentY() + (form - 1) * FORM_ROW - 3, BUTTON_W, 14).build()));
 		}
 		limitButton = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter.learn"), b -> send(ZFighterNet.BUY_LIMIT, 0))
-			.bounds(left() + W - 56, limitY() - 2, 50, 12).build());
+			.bounds(buttonX(), limitY() - 3, BUTTON_W, 14).build());
+		for (int i = 0; i < ZFighterTraining.TECHNIQUES; i++) {
+			int technique = i;
+			techniqueButtons.add(addRenderableWidget(Button.builder(Component.empty(), b -> techniqueAction(technique))
+				.bounds(buttonX(), contentY() + i * ROW - 3, BUTTON_W, 14).build()));
+		}
 	}
-
-	private static final int LINEAGE_ROW = 44;
 
 	private int lineageY() {
-		return top() + 52;
+		return top() + 50;
 	}
 
-	private int techniquesY() {
-		return top() + 42;
+	private int limitY() {
+		return contentY() + ZFighterTraining.FORMS * FORM_ROW + 8;
 	}
-
-	private static final int TECH_ROW = 24;
 
 	private void techniqueAction(int technique) {
 		ZFighterTraining.Data data = ZFighterTraining.of(this.minecraft.player);
@@ -123,6 +138,33 @@ public class ZFighterTrainingScreen extends Screen {
 		return false;
 	}
 
+	/** One line of text, cut with "..." if it would run past {@code width}. */
+	private void line(GuiGraphicsExtractor graphics, Component text, int x, int y, int width, int color) {
+		String s = text.getString();
+		if (this.font.width(s) > width) {
+			s = this.font.plainSubstrByWidth(s, width - this.font.width("...")) + "...";
+		}
+		graphics.text(this.font, s, x, y, color);
+	}
+
+	/** Wrapped text, at most {@code lines} lines. */
+	private void wrapped(GuiGraphicsExtractor graphics, Component text, int x, int y, int width, int lines, int color) {
+		var split = this.font.split(text, width);
+		for (int i = 0; i < Math.min(lines, split.size()); i++) {
+			graphics.text(this.font, split.get(i), x, y + i * 9, color);
+		}
+	}
+
+	private static boolean over(int mouseX, int mouseY, int x, int y, int w, int h) {
+		return mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + h;
+	}
+
+	private static void show(List<Button> buttons, boolean visible) {
+		for (Button button : buttons) {
+			button.visible = visible;
+		}
+	}
+
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		LocalPlayer player = this.minecraft.player;
@@ -133,91 +175,91 @@ public class ZFighterTrainingScreen extends Screen {
 		boolean creative = player.isCreative();
 		int x = left();
 		int y = top();
-		graphics.fill(x, y, x + W, y + height(), COLOR_PANEL);
-		graphics.fill(x, y, x + W, y + 2, COLOR_ACCENT);
+		int w = panelW();
+		graphics.fill(x, y, x + w, y + H, COLOR_PANEL);
+		graphics.fill(x, y, x + w, y + 2, COLOR_ACCENT);
 		graphics.centeredText(this.font, this.title, this.width / 2, y + 6, COLOR_ACCENT);
 		graphics.centeredText(this.font, Component.translatable("screen.jaymospowers.zfighter.tp", data.tp()), this.width / 2, y + 18, COLOR_TEXT);
 		boolean picking = ZFighterLineage.of(player) == ZFighterLineage.NONE;
-		for (Button button : lineageButtons) {
-			button.visible = picking;
-		}
+		show(lineageButtons, picking);
+		show(tabButtons, !picking);
+		show(statButtons, !picking && page == STATS_PAGE);
+		show(formButtons, !picking && page == FORMS_PAGE);
+		limitButton.visible = !picking && page == FORMS_PAGE;
+		show(techniqueButtons, !picking && page == TECHNIQUES_PAGE);
 		if (picking) {
-			// first, who he is: the lineage is picked once
-			tabButton.visible = false;
-			for (List<Button> buttons : List.of(statButtons, formButtons, techniqueButtons)) {
-				for (Button button : buttons) {
-					button.visible = false;
-				}
-			}
-			limitButton.visible = false;
-			graphics.text(this.font, Component.translatable("screen.jaymospowers.zfighter.lineage"), x + 8, lineageY() - 16, COLOR_GOLD);
-			for (int i = ZFighterLineage.EARTHLING; i < ZFighterLineage.LINEAGES; i++) {
-				int ry = lineageY() + (i - 1) * LINEAGE_ROW;
-				String key = "lineage.jaymospowers.zfighter." + ZFighterLineage.KEYS[i];
-				graphics.text(this.font, Component.translatable(key), x + 8, ry, 0xFF000000 | ZFighterLineage.color(i, 1));
-				int ly = ry + 11;
-				for (var line : this.font.split(Component.translatable(key + ".desc"), W - 76)) {
-					graphics.text(this.font, line, x + 14, ly, COLOR_DIM);
-					ly += 9;
-				}
-			}
+			lineages(graphics, x, w);
 			super.extractRenderState(graphics, mouseX, mouseY, a);
 			return;
 		}
-		tabButton.visible = true;
-		tabButton.setMessage(Component.translatable(techniquesPage ? "screen.jaymospowers.zfighter.tab_training" : "screen.jaymospowers.zfighter.tab_techniques"));
-		for (Button button : statButtons) {
-			button.visible = !techniquesPage;
+		for (int i = 0; i < tabButtons.size(); i++) {
+			tabButtons.get(i).active = page != i;
 		}
-		limitButton.visible = !techniquesPage;
-		for (Button button : techniqueButtons) {
-			button.visible = techniquesPage;
-		}
-		if (techniquesPage) {
-			for (Button button : formButtons) {
-				button.visible = false;
-			}
-			techniques(graphics, player, data, creative, x);
-			super.extractRenderState(graphics, mouseX, mouseY, a);
-			return;
-		}
+		Component detail = switch (page) {
+			case FORMS_PAGE -> forms(graphics, player, data, creative, x, w, mouseX, mouseY);
+			case TECHNIQUES_PAGE -> techniques(graphics, player, data, creative, x, w, mouseX, mouseY);
+			default -> stats(graphics, data, creative, x, w);
+		};
+		int dy = detailY();
+		graphics.fill(x + 6, dy - 3, x + w - 6, dy - 2, COLOR_ROW);
+		wrapped(graphics, detail, x + 8, dy, w - 16, 4, COLOR_DIM);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
+	}
 
-		// stats
+	/** First, who he is: the lineage is picked once. */
+	private void lineages(GuiGraphicsExtractor graphics, int x, int w) {
+		wrapped(graphics, Component.translatable("screen.jaymospowers.zfighter.lineage"), x + 8, top() + 30, w - 16, 2, COLOR_GOLD);
+		for (int i = ZFighterLineage.EARTHLING; i < ZFighterLineage.LINEAGES; i++) {
+			int ry = lineageY() + (i - 1) * LINEAGE_ROW;
+			String key = "lineage.jaymospowers.zfighter." + ZFighterLineage.KEYS[i];
+			graphics.text(this.font, Component.translatable(key), x + 8, ry, 0xFF000000 | ZFighterLineage.color(i, 1));
+			wrapped(graphics, Component.translatable(key + ".desc"), x + 14, ry + 11, w - BUTTON_W - 26, 4, COLOR_DIM);
+		}
+	}
+
+	private Component stats(GuiGraphicsExtractor graphics, ZFighterTraining.Data data, boolean creative, int x, int w) {
 		int cost = ZFighterTraining.statCost(data);
-		graphics.text(this.font, Component.translatable("screen.jaymospowers.zfighter.stats", cost), x + 8, statsY() - 12, COLOR_GOLD);
+		line(graphics, Component.translatable("screen.jaymospowers.zfighter.stats", cost), x + 8, contentY(), w - 16, COLOR_GOLD);
 		for (int i = 0; i < ZFighterTraining.STATS; i++) {
 			int level = data.stat(i);
-			int ry = statsY() + i * ROW;
-			graphics.text(this.font, Component.translatable("stat.jaymospowers.zfighter." + STAT_KEYS[i]), x + 8, ry, COLOR_TEXT);
-			graphics.text(this.font, level + "/" + ZFighterTraining.STAT_CAP, x + 82, ry, COLOR_DIM);
-			graphics.text(this.font, Component.translatable("stat.jaymospowers.zfighter." + STAT_KEYS[i] + ".effect", effect(i, level)), x + 122, ry,
+			int ry = contentY() + 12 + i * ROW;
+			graphics.fill(x + 6, ry - 4, x + w - 6, ry + 11, i % 2 == 0 ? COLOR_ROW : 0x18FFFFFF);
+			line(graphics, Component.translatable("stat.jaymospowers.zfighter." + STAT_KEYS[i]), x + 10, ry, 66, COLOR_TEXT);
+			graphics.text(this.font, level + "/" + ZFighterTraining.STAT_CAP, x + 80, ry, COLOR_DIM);
+			line(graphics, Component.translatable("stat.jaymospowers.zfighter." + STAT_KEYS[i] + ".effect", effect(i, level)), x + 118, ry, w - 118 - 32,
 				COLOR_DIM);
 			statButtons.get(i).active = level < ZFighterTraining.STAT_CAP && (creative || data.tp() >= cost);
 		}
+		return Component.translatable("screen.jaymospowers.zfighter.earn");
+	}
 
-		// forms
-		graphics.text(this.font, Component.translatable("screen.jaymospowers.zfighter.forms"), x + 8, formsY() - 12, COLOR_GOLD);
+	private Component forms(GuiGraphicsExtractor graphics, LocalPlayer player, ZFighterTraining.Data data, boolean creative, int x, int w, int mouseX,
+		int mouseY) {
+		Component detail = Component.translatable("screen.jaymospowers.zfighter.forms_hint");
 		int open = ZFighterTraining.formsOpen(player);
+		int textW = w - BUTTON_W - 24;
 		for (int form = 1; form <= ZFighterTraining.FORMS; form++) {
-			int ry = formsY() + (form - 1) * ROW * 2;
-			int mastery = data.mastery(form);
-			graphics.text(this.font, Component.translatable(ZFighterLineage.formKey(player, form)), x + 8, ry, form <= open ? COLOR_GOLD : COLOR_DIM);
+			int ry = contentY() + (form - 1) * FORM_ROW;
+			graphics.fill(x + 6, ry - 4, x + w - 6, ry + FORM_ROW - 6, form % 2 == 1 ? COLOR_ROW : 0x18FFFFFF);
+			Component name = Component.translatable(ZFighterLineage.formKey(player, form));
+			line(graphics, name, x + 10, ry, 90, form <= open ? COLOR_GOLD : COLOR_DIM);
+			Component need = form == 1 ? Component.translatable("screen.jaymospowers.zfighter.super_how")
+				: Component.translatable("screen.jaymospowers.zfighter.form_needs", ZFighterTraining.FORM_TP[form],
+					ZFighterTraining.NEXT_FORM_MASTERY / 100, Component.translatable(ZFighterLineage.formKey(player, form - 1)),
+					ZFighterTraining.FORM_HARDSHIP[form], ZFighterPower.hardship(player));
 			if (form <= open) {
-				graphics.text(this.font, Component.translatable("screen.jaymospowers.zfighter.mastery",
-					String.format(Locale.ROOT, "%.1f", mastery / 100.0)), x + 82, ry, COLOR_TEXT);
-				int bar = 120;
-				graphics.fill(x + 82, ry + 10, x + 82 + bar, ry + 12, 0xFF303030);
-				graphics.fill(x + 82, ry + 10, x + 82 + bar * mastery / ZFighterTraining.MASTERY_MAX, ry + 12, COLOR_GOLD);
+				int mastery = data.mastery(form);
+				line(graphics, Component.translatable("screen.jaymospowers.zfighter.mastery", String.format(Locale.ROOT, "%.1f", mastery / 100.0)),
+					x + 104, ry, textW - 98, COLOR_TEXT);
+				int bar = Math.min(120, textW - 98);
+				graphics.fill(x + 104, ry + 10, x + 104 + bar, ry + 12, 0xFF303030);
+				graphics.fill(x + 104, ry + 10, x + 104 + bar * mastery / ZFighterTraining.MASTERY_MAX, ry + 12, COLOR_GOLD);
+			} else {
+				line(graphics, Component.translatable(form == 1 ? "screen.jaymospowers.zfighter.locked_hardship" : "screen.jaymospowers.zfighter.locked_hover"),
+					x + 104, ry, textW - 98, COLOR_DIM);
 			}
-			if (form > open) {
-				Component need = form == 1 ? Component.translatable("screen.jaymospowers.zfighter.super_how")
-					: Component.translatable("screen.jaymospowers.zfighter.form_needs", ZFighterTraining.FORM_TP[form],
-						ZFighterTraining.NEXT_FORM_MASTERY / 100, Component.translatable(ZFighterLineage.formKey(player, form - 1)),
-						ZFighterTraining.FORM_HARDSHIP[form], ZFighterPower.hardship(player));
-				var lines = this.font.split(need, W - 82 - (form >= 2 ? 62 : 8));
-				for (int l = 0; l < Math.min(2, lines.size()); l++) {
-					graphics.text(this.font, lines.get(l), x + 82, ry + l * 10, COLOR_DIM);
-				}
+			if (over(mouseX, mouseY, x + 6, ry - 4, w - 12, FORM_ROW - 2)) {
+				detail = form <= open ? Component.translatable("screen.jaymospowers.zfighter.form_open", name) : need;
 			}
 			if (form >= 2) {
 				Button button = formButtons.get(form - 2);
@@ -229,37 +271,36 @@ public class ZFighterTrainingScreen extends Screen {
 		// Limit Break
 		int ly = limitY();
 		int limit = data.limit();
-		graphics.text(this.font, Component.translatable("screen.jaymospowers.zfighter.limit", limit), x + 8, ly, 0xFFFF6A50);
+		graphics.fill(x + 6, ly - 4, x + w - 6, ly + 20, 0x30FF6A50);
+		line(graphics, Component.translatable("screen.jaymospowers.zfighter.limit", limit), x + 10, ly, textW, COLOR_LIMIT);
 		boolean more = limit + 1 < ZFighterTraining.LIMIT_TP.length;
 		if (more) {
-			graphics.text(this.font, Component.translatable("screen.jaymospowers.zfighter.limit_next", limit + 1,
-				ZFighterTraining.limitCost(player, limit + 1)), x + 120, ly, COLOR_DIM);
+			line(graphics, Component.translatable("screen.jaymospowers.zfighter.limit_next", limit + 1, ZFighterTraining.limitCost(player, limit + 1)),
+				x + 10, ly + 10, textW, COLOR_DIM);
 		}
-		graphics.text(this.font, Component.translatable("screen.jaymospowers.zfighter.limit_how", ZFighterInputClient.keyLabel(this.minecraft)),
-			x + 8, ly + 12, COLOR_DIM);
 		limitButton.visible = more;
 		limitButton.active = more && (creative || data.tp() >= ZFighterTraining.limitCost(player, limit + 1));
-
-		// how TP comes
-		int fy = y + height() - 22;
-		for (var line : this.font.split(Component.translatable("screen.jaymospowers.zfighter.earn"), W - 16)) {
-			graphics.text(this.font, line, x + 8, fy, COLOR_DIM);
-			fy += 9;
+		if (over(mouseX, mouseY, x + 6, ly - 4, w - 12, 24)) {
+			detail = Component.translatable("screen.jaymospowers.zfighter.limit_how", ZFighterInputClient.keyLabel(this.minecraft));
 		}
-		super.extractRenderState(graphics, mouseX, mouseY, a);
+		return detail;
 	}
 
-	/** The techniques page: each one, what it does, its price or the key it's on. */
-	private void techniques(GuiGraphicsExtractor graphics, LocalPlayer player, ZFighterTraining.Data data, boolean creative, int x) {
+	/** The techniques page: each one, its key, its price or where it is; hover one for what it does. */
+	private Component techniques(GuiGraphicsExtractor graphics, LocalPlayer player, ZFighterTraining.Data data, boolean creative, int x, int w,
+		int mouseX, int mouseY) {
+		Component detail = Component.translatable("screen.jaymospowers.zfighter.techniques_hint");
+		int statusX = x + 136;
 		for (int i = 0; i < ZFighterTraining.TECHNIQUES; i++) {
-			int ry = techniquesY() + i * TECH_ROW;
-			String key = ZFighterTraining.TECHNIQUE_KEYS[i];
+			int ry = contentY() + i * ROW;
+			String key = ZFighterLineage.techniqueKey(player, i);
 			boolean known = data.knows(i);
 			boolean spirit = i == ZFighterTraining.SPIRIT_BOMB;
 			boolean equipped = !spirit && (ZFighterTraining.charged(i) ? data.charged() == i : data.quick() == i);
 			String slot = spirit ? "C" : ZFighterTraining.charged(i) ? "V" : "G";
-			graphics.text(this.font, Component.translatable(ZFighterLineage.techniqueKey(player, i)), x + 8, ry, known ? COLOR_GOLD : COLOR_TEXT);
-			graphics.text(this.font, "[" + slot + "]", x + 130, ry, COLOR_DIM);
+			graphics.fill(x + 6, ry - 4, x + w - 6, ry + 11, i % 2 == 0 ? COLOR_ROW : 0x18FFFFFF);
+			graphics.text(this.font, slot, x + 10, ry, COLOR_ACCENT);
+			line(graphics, Component.translatable(key), x + 22, ry, statusX - x - 26, known ? COLOR_GOLD : COLOR_TEXT);
 			Component status;
 			if (equipped) {
 				status = Component.translatable("screen.jaymospowers.zfighter.on_key", slot);
@@ -268,25 +309,24 @@ public class ZFighterTrainingScreen extends Screen {
 			} else {
 				status = Component.translatable("screen.jaymospowers.zfighter.tp_cost", ZFighterTraining.TECHNIQUE_TP[i]);
 			}
-			graphics.text(this.font, status, x + 160, ry, COLOR_DIM);
-			var lines = this.font.split(Component.translatable(ZFighterLineage.techniqueKey(player, i) + ".desc"), W - 70);
-			if (!lines.isEmpty()) {
-				graphics.text(this.font, lines.get(0), x + 8, ry + 10, COLOR_DIM);
-			}
+			line(graphics, status, statusX, ry, buttonX() - statusX - 4, COLOR_DIM);
 			Button button = techniqueButtons.get(i);
+			String blocker = null;
 			if (!known) {
-				String blocker = ZFighterTraining.techniqueBlocker(player, i);
+				blocker = ZFighterTraining.techniqueBlocker(player, i);
 				button.setMessage(Component.translatable("screen.jaymospowers.zfighter.learn"));
 				button.active = blocker == null || creative && "screen.jaymospowers.zfighter.need_tp".equals(blocker);
-				if (blocker != null && !button.active && button.isHovered()) {
-					graphics.setTooltipForNextFrame(Component.translatable(blocker), button.getX(), button.getY());
-				}
 			} else {
 				button.setMessage(Component.translatable("screen.jaymospowers.zfighter.equip"));
 				button.visible = !spirit && !equipped;
 				button.active = true;
 			}
+			if (over(mouseX, mouseY, x + 6, ry - 4, w - 12, ROW)) {
+				Component desc = Component.translatable(key + ".desc");
+				detail = blocker != null && !button.active ? desc.copy().append(" ").append(Component.translatable(blocker)) : desc;
+			}
 		}
+		return detail;
 	}
 
 	/** What {@code level} levels of stat {@code index} give, as shown. */

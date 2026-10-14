@@ -74,11 +74,10 @@
   "message.jaymospowers.zfighter_spirit_wait": "The Spirit Bomb isn't ready yet.",
   "message.jaymospowers.zfighter_technique_learned": "You've learned %s.",
   "screen.jaymospowers.zfighter.tab_techniques": "Techniques",
-  "screen.jaymospowers.zfighter.tab_training": "Stats & forms",
   "screen.jaymospowers.zfighter.equip": "Use",
   "screen.jaymospowers.zfighter.on_key": "On %s",
   "screen.jaymospowers.zfighter.known": "Learned",
-  "screen.jaymospowers.zfighter.spirit_known": "Learned: hold C in Super 3",
+  "screen.jaymospowers.zfighter.spirit_known": "Learned (C)",
   "screen.jaymospowers.zfighter.tp_cost": "%s TP",
   "screen.jaymospowers.zfighter.need_super3": "Needs Super 3, mastered 25%.",
   "technique.jaymospowers.zfighter.ki_blast": "Ki Blast",
@@ -154,5 +153,12 @@
   "technique.jaymospowers.zfighter.ki_wave.verdant": "Spiral Lance",
   "technique.jaymospowers.zfighter.ki_wave.verdant.desc": "The Verdant's V: a thin beam wound with a spiral that bores through walls and everything in its line. Longer reach, no blast.",
   "technique.jaymospowers.zfighter.ki_wave.frost": "Frost Needle",
-  "technique.jaymospowers.zfighter.ki_wave.frost.desc": "The Frost-born's V: a needle of ki from one fingertip. Gathers in a second, costs little, reaches far and chills what it pierces. No blast."
+  "technique.jaymospowers.zfighter.ki_wave.frost.desc": "The Frost-born's V: a needle of ki from one fingertip. Gathers in a second, costs little, reaches far and chills what it pierces. No blast.",
+  "screen.jaymospowers.zfighter.tab_stats": "Stats",
+  "screen.jaymospowers.zfighter.tab_forms": "Forms",
+  "screen.jaymospowers.zfighter.forms_hint": "Point at a form to see what it still needs. Point at Limit Break to see how it works.",
+  "screen.jaymospowers.zfighter.locked_hardship": "Locked: through hardship",
+  "screen.jaymospowers.zfighter.locked_hover": "Locked: point here",
+  "screen.jaymospowers.zfighter.form_open": "%s is yours. Its mastery grows while you hold it; the next form needs some of it.",
+  "screen.jaymospowers.zfighter.techniques_hint": "Point at a technique to see what it does. The letter is the key it goes on."
 }

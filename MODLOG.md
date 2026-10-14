@@ -946,3 +946,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   The V beams are drawn like beacon beams (`ZFighterBeams`, sent by `ZFighterNet.BeamFx`) instead of only particles.
 - **0.10.16, brittle skeletons:** skeletons (strays, wither skeletons, bogged and parched too) lose heads and limbs three
   times as often: 15% a blade hit, 60% to the katana's aimed slash.
+- **0.10.17, tidier Z Fighter training screen:** the X screen fits small screens (it shrinks to the window and is no
+  taller than 236): three tabs (Stats, Forms, Techniques) instead of two crowded pages, striped rows, and long text cut
+  with "..." instead of running off. Descriptions, form requirements and how Limit Break works show in full in a box
+  at the bottom when you point at a row. The lineage picker wraps its question and descriptions.
