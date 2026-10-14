@@ -56,6 +56,7 @@ final class WindCycloneClient {
 
 	static void init() {
 		ClientTickEvents.START_CLIENT_TICK.register(WindCycloneClient::input);
+		WindCycloneFunnel.register();
 	}
 
 	static @Nullable KeyMapping key(Minecraft minecraft) {
@@ -170,6 +171,7 @@ final class WindCycloneClient {
 			SOUNDS.clear();
 			return;
 		}
+		WindCycloneFunnel.tick(minecraft);
 		SOUNDS.values().removeIf(WindCycloneSound::isStopped);
 		for (AbstractClientPlayer player : level.players()) {
 			if (WindCyclone.isActive(player) && !SOUNDS.containsKey(player.getId())) {
@@ -182,6 +184,9 @@ final class WindCycloneClient {
 
 	/** The Cyclone's line over the crosshair while it lasts. */
 	static Component label() {
-		return Component.translatable("hud.jaymospowers.wind.cyclone");
+		LocalPlayer player = Minecraft.getInstance().player;
+		WindCyclone.Stance stance = player == null ? null : player.getAttached(WindCyclone.CYCLONE);
+		// with what it has drawn up in it: Fire Tornado, Waterspout...
+		return Component.translatable(com.jaymospowers.power.wind.WindCycloneElement.byId(stance == null ? 0 : stance.element()).labelKey());
 	}
 }
