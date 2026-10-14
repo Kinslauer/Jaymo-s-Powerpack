@@ -22,6 +22,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.ClipContext;
@@ -199,8 +200,11 @@ public final class ShipKits {
 
 	// ---- laying her down ----
 
-	/** Lays the frames of a {@code kind} on the water just beyond {@code water}, her bow toward {@code bow}. False if there's no room. */
-	static boolean lay(ServerLevel level, Kind kind, BlockPos water, Direction bow) {
+	/**
+	 * Lays the frames of a {@code kind} on the water just beyond {@code water}, her bow toward {@code bow}: where they went,
+	 * or null if there's no room.
+	 */
+	static @org.jspecify.annotations.Nullable List<BlockPos> lay(ServerLevel level, Kind kind, BlockPos water, Direction bow) {
 		// her keel: the sea's top layer there, less her depth
 		BlockPos.MutableBlockPos top = water.mutable();
 		while (level.getFluidState(top.above()).is(FluidTags.WATER) && top.getY() < level.getMaxY()) {
@@ -224,7 +228,7 @@ public final class ShipKits {
 			BlockPos at = origin.offset(new BlockPos(c.x(), c.y(), c.z()).rotate(turn));
 			BlockState there = level.getBlockState(at);
 			if (!level.hasChunkAt(at) || !(there.isAir() || there.canBeReplaced() || there.is(Blocks.WATER))) {
-				return false;
+				return null;
 			}
 			where.add(at);
 		}
@@ -236,7 +240,48 @@ public final class ShipKits {
 				.setValue(ShipFrameBlock.WATERLOGGED, level.getFluidState(at).is(FluidTags.WATER));
 			level.setBlock(at, frame, Block.UPDATE_CLIENTS);
 		}
-		return true;
+		return where;
+	}
+
+	/** What a creative kit fills each frame with: oak planks and rails, spruce masts. */
+	private static ItemStack stock(ShipFrameBlock.Want want) {
+		return new ItemStack(switch (want) {
+			case HULL -> Items.OAK_PLANKS;
+			case RAIL -> Items.OAK_FENCE;
+			case MAST -> Items.SPRUCE_FENCE;
+			case SAIL -> Sailing.SAIL.asItem();
+			case HELM -> Sailing.HELM.asItem();
+			case OAR -> Sailing.OAR.asItem();
+			case CANNON -> Sailing.CANNON.asItem();
+			case CHEST -> Items.CHEST;
+		});
+	}
+
+	/** (0.7.26) In creative: every frame just laid at {@code where} filled at once, and her hold bailed. */
+	static void complete(ServerLevel level, List<BlockPos> where, @org.jspecify.annotations.Nullable ServerPlayer player) {
+		for (BlockPos at : where) {
+			BlockState frame = level.getBlockState(at);
+			if (!(frame.getBlock() instanceof ShipFrameBlock)) {
+				continue;
+			}
+			ShipFrameBlock.Want want = frame.getValue(ShipFrameBlock.WANT);
+			BlockState next = ShipFrameBlock.fills(want, frame.getValue(ShipFrameBlock.FACING), stock(want));
+			if (next != null) {
+				level.setBlock(at, next, Block.UPDATE_CLIENTS);
+			}
+		}
+		// then joined up: fences to their neighbours, sails into one sheet
+		for (BlockPos at : where) {
+			BlockState state = level.getBlockState(at);
+			BlockState next = Block.updateFromNeighbourShapes(state, level, at);
+			if (next.getBlock() instanceof SailBlock) {
+				next = SailBlock.connect(next, level, at);
+			}
+			if (next != state) {
+				level.setBlock(at, next, Block.UPDATE_CLIENTS);
+			}
+		}
+		placed(level, where.get(0), player);
 	}
 
 	/** After a frame's filled at {@code pos}: how much is left, and once nothing is, her hold bailed dry. */
@@ -314,7 +359,8 @@ public final class ShipKits {
 			if (!(level instanceof ServerLevel server)) {
 				return InteractionResult.SUCCESS;
 			}
-			if (!lay(server, this.kind, hit.getBlockPos(), player.getDirection())) {
+			List<BlockPos> where = lay(server, this.kind, hit.getBlockPos(), player.getDirection());
+			if (where == null) {
 				if (player instanceof ServerPlayer p) {
 					p.sendOverlayMessage(Component.translatable("ship.jaymoskingdoms.kit_no_room"));
 				}
@@ -325,6 +371,10 @@ public final class ShipKits {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
 			if (player instanceof ServerPlayer p) {
 				p.sendOverlayMessage(Component.translatable("ship.jaymoskingdoms.kit_laid"));
+			}
+			// (0.7.26) in creative she's built whole at once (sneak for the bare frames)
+			if (player.getAbilities().instabuild && !player.isShiftKeyDown()) {
+				complete(server, where, player instanceof ServerPlayer p ? p : null);
 			}
 			player.getItemInHand(hand).consume(1, player);
 			return InteractionResult.SUCCESS;

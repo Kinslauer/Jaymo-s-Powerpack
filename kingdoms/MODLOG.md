@@ -2884,3 +2884,9 @@ Andy: "vampirism should give you the sirben visual modifier" (Sirben is an MCA t
   stock spots (row 12). Checked against all nine default skins: each lands on its eyes.
 - `Vampires.VAMPIRE` on players now syncs to every client (villagers' never does).
 - Built; not yet seen in game.
+
+## 0.7.26: creative kits build the whole ship (pack 0.10.88)
+- Andy: "is there a way to autocomplete a boat in creative?" A kit used in creative now fills every frame at once
+  (`ShipKits.complete`: oak planks and fence rails, spruce fence masts, sails, helm, oars, unloaded guns, chests), joins
+  the fences and sails up and bails her hold, as the last frame filled by hand would. Sneak-use still lays the bare
+  frames. Survival is unchanged.

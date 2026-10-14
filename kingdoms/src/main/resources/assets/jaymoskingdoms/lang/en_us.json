@@ -2852,7 +2852,7 @@
 	"ship.jaymoskingdoms.kit_on_water": "Use the kit looking at open water",
 	"ship.jaymoskingdoms.kit_no_room": "No room for her here: she needs open water ahead of you",
 	"ship.jaymoskingdoms.kit_laid": "Her frame's laid: fill each frame with what it wants (right-click one to see)",
-	"ship.jaymoskingdoms.kit_use": "Use on open water to lay her frame ahead of you",
+	"ship.jaymoskingdoms.kit_use": "Use on open water to lay her frame ahead of you (in creative she's built whole; sneak for the bare frame)",
 	"ship.jaymoskingdoms.kit_needs": "%s × %s",
 	"ship.jaymoskingdoms.want.hull": "planks",
 	"ship.jaymoskingdoms.want.rail": "a wooden fence",

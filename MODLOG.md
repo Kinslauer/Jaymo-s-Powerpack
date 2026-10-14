@@ -1155,3 +1155,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     your body's arm.
   - Wyrm's wings are the ender dragon's own boxes at a fifth of the size, drawn from the game's dragon texture
     (`WyrmWings`); they beat, fold, flare and wrap round the body as before.
+- **0.10.88 / Kingdoms 0.7.26, creative ship kits build her whole** (Andy: "is there a way to autocomplete a boat in
+  creative?"): a Rowboat, Sloop or Brig kit used in creative lays the ship finished (oak planks and rails, spruce masts,
+  sails, helm, oars, empty guns, chests), bailed dry and ready to cast off; sneak to lay the bare frames as before
+  (`kingdoms/MODLOG.md`).
