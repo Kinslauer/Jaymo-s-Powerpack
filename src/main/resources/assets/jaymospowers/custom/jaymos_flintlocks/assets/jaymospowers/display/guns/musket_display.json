@@ -1,0 +1,40 @@
+{
+  "model": "jaymospowers:gun/musket_geo",
+  "texture": "jaymospowers:gun/uv/flintlocks",
+  "hud": "jaymospowers:gun/hud/musket",
+  "slot": "jaymospowers:gun/slot/musket",
+  "animation": "jaymospowers:musket",
+  "use_default_animation": "rifle",
+  "third_person_animation": "default",
+  "transform": {
+    "scale": {
+      "thirdperson": [
+        0.6,
+        0.6,
+        0.6
+      ],
+      "ground": [
+        0.6,
+        0.6,
+        0.6
+      ],
+      "fixed": [
+        1.2,
+        1.2,
+        1.2
+      ]
+    }
+  },
+  "muzzle_flash": {
+    "texture": "tacz:flash/common_muzzle_flash",
+    "scale": 1.4
+  },
+  "iron_zoom": 1.5,
+  "zoom_model_fov": 30,
+  "sounds": {
+    "draw": "jaymospowers:flintlock/draw",
+    "put_away": "jaymospowers:flintlock/put_away",
+    "shoot": "jaymospowers:flintlock/musket_shoot",
+    "shoot_3p": "jaymospowers:flintlock/musket_shoot_3p"
+  }
+}
