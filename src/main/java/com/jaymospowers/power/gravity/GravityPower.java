@@ -2143,15 +2143,9 @@ public final class GravityPower implements Power {
 
 	// ---------------------------------------------------------------- deaths by weight
 
-	/** A camera shake for everyone within {@code range} of {@code at}, weaker with distance. */
+	/** A camera shake for everyone within {@code range} of {@code at}, weaker with distance, felt from where it hit. */
 	static void shake(ServerLevel level, Vec3 at, double range, float strength) {
-		for (ServerPlayer player : level.players()) {
-			double d = player.position().distanceTo(at);
-			if (d <= range) {
-				net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player,
-					new com.jaymospowers.power.web.WebNet.Shake(strength * (float)(1.0 - d / range)));
-			}
-		}
+		com.jaymospowers.core.Shakes.around(level, at, range, strength);
 	}
 
 	static void touch(LivingEntity target, ServerPlayer player) {

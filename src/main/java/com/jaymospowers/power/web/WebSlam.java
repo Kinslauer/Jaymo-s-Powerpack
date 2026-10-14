@@ -204,10 +204,10 @@ public final class WebSlam {
 		level.playSound(null, impact.x, impact.y, impact.z, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.5F, 0.6F);
 		level.playSound(null, impact.x, impact.y, impact.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.0F, 0.7F);
 		level.playSound(null, impact.x, impact.y, impact.z, SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 0.8F, 1.2F);
-		ServerPlayNetworking.send(player, new WebNet.Shake(SHAKE));
+		com.jaymospowers.core.Shakes.send(player, SHAKE, impact);
 		for (ServerPlayer near : level.players()) {
 			if (near != player && near.distanceToSqr(impact) < NEAR_SHAKE_RANGE * NEAR_SHAKE_RANGE) {
-				ServerPlayNetworking.send(near, new WebNet.Shake(NEAR_SHAKE));
+				com.jaymospowers.core.Shakes.send(near, NEAR_SHAKE, impact);
 			}
 		}
 	}
@@ -242,10 +242,10 @@ public final class WebSlam {
 		level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, at.x, at.y + 0.2, at.z, 14, DIVE_RADIUS * 0.4, 0.1, DIVE_RADIUS * 0.4, 0.02);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.3F, 0.8F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.7F, 0.9F);
-		ServerPlayNetworking.send(player, new WebNet.Shake(DIVE_SHAKE));
+		com.jaymospowers.core.Shakes.send(player, DIVE_SHAKE, at);
 		for (ServerPlayer near : level.players()) {
 			if (near != player && near.distanceToSqr(at) < NEAR_SHAKE_RANGE * NEAR_SHAKE_RANGE) {
-				ServerPlayNetworking.send(near, new WebNet.Shake(NEAR_SHAKE));
+				com.jaymospowers.core.Shakes.send(near, NEAR_SHAKE, at);
 			}
 		}
 	}

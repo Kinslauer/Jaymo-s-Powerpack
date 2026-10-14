@@ -44,6 +44,8 @@ final class ChronoState {
 	@Nullable StasisField stasis;
 	@Nullable TimeBloom bloom;
 	int overclockLeft;
+	/** (0.10.28) Server tick when V may phase through a wall again (mid-Overclock). */
+	int phaseReadyAt;
 	@Nullable RewindTrail trail;
 
 	/** False until the client has been sent the current state (new state, relog, or something changed). */

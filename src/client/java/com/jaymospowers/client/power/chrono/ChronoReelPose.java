@@ -17,10 +17,10 @@ import net.minecraft.world.entity.LivingEntity;
  */
 public final class ChronoReelPose {
 	/** The flinch's progress (0-1) and which way it's jolted. */
-	record Flinch(float p, int side) {
+	public record Flinch(float p, int side) {
 	}
 
-	static final RenderStateDataKey<Flinch> KEY = RenderStateDataKey.create(() -> "jaymospowers:chrono_reel");
+	public static final RenderStateDataKey<Flinch> KEY = RenderStateDataKey.create(() -> "jaymospowers:chrono_reel");
 
 	/** How far the body tips back and twists (degrees), and how far the head snaps back and the arms fly (radians). */
 	private static final float BODY_TIP = 14.0F, BODY_TWIST = 8.0F;

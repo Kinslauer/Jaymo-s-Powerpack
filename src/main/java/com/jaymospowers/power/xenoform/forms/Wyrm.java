@@ -52,6 +52,9 @@ public final class Wyrm extends XenoForm {
 	public static final int GUST_COOLDOWN = 120;
 	public static final double GUST_RADIUS = 6.0, GUST_OUT = 1.6, GUST_UP = 0.5, GUST_RECOIL = 0.5;
 	public static final float GUST_DAMAGE = 3.0F;
+	/** Screen shake (degrees, and how far it's felt): the wing gust, and growing into the Elder Wyrm. */
+	public static final float GUST_SHAKE = 0.8F, ELDER_SHAKE = 1.4F;
+	public static final double GUST_SHAKE_RANGE = 16.0, ELDER_SHAKE_RANGE = 28.0;
 	public static final int RIFT_COOLDOWN = 80;
 	public static final double RIFT_RANGE = 12.0;
 	/** In water or rain: this much damage every this many ticks. */
@@ -202,6 +205,7 @@ public final class Wyrm extends XenoForm {
 		level.sendParticles(ParticleTypes.PORTAL, at.x, at.y, at.z, 80, 1.0, 1.0, 1.0, 0.5);
 		ring(level, PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1.0F), player.position(), 3.0, 24);
 		sound(player, SoundEvents.ENDER_DRAGON_GROWL, 2.0F, 0.9F);
+		com.jaymospowers.core.Shakes.heavy(player, player.position(), ELDER_SHAKE_RANGE, ELDER_SHAKE);
 		return true;
 	}
 
@@ -269,6 +273,8 @@ public final class Wyrm extends XenoForm {
 		ring(level, ParticleTypes.GUST, player.position(), GUST_RADIUS * reach, 8);
 		sound(player, SoundEvents.ENDER_DRAGON_FLAP, 2.0F, 0.7F);
 		sound(player, SoundEvents.WIND_CHARGE_BURST.value(), 1.0F, 0.8F);
+		// the beat throws you back: felt from ahead
+		com.jaymospowers.core.Shakes.heavy(player, player.getEyePosition().add(player.getLookAngle().scale(2.0)), GUST_SHAKE_RANGE, GUST_SHAKE);
 	}
 
 	private static boolean rift(ServerPlayer player) {

@@ -28,6 +28,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.HiddenArmor.init();
 		com.jaymospowers.core.Dismember.init();
 		com.jaymospowers.core.Oddities.init();
+		com.jaymospowers.core.Shakes.register();
 		// each power registers itself (and its items, entities, packets) from its own package
 		WindPower.init();
 		ArsenalPower.init();
@@ -58,14 +59,14 @@ public class JaymosPowers implements ModInitializer {
 			"power.chrono.ChronoEchoes", "power.chrono.ChronoMemory", "power.chrono.ChronoFlow", "power.wind.WindKick",
 			"power.gravity.GravityPower", "power.gravity.GravityForward", "power.gravity.GravityWalk",
 			"power.web.WebAscension", "power.web.WebCounter", "power.web.WebBehemoth", "power.web.WebInhabit", "power.web.WebSlam", "power.web.WebBridges", "power.web.WebPower", "power.web.WebSymbiote", "power.web.WebTendrils",
-			"power.web.WebWallRun",
+			"power.web.WebWallRun", "power.web.WebParkour",
 			"power.wind.WindModes", "power.wind.WindPower", "power.wind.WindStorm", "power.wind.WindTempest",
 			"power.wind.WindCyclone",
 			"power.resonance.ResonancePower", "power.resonance.ResonanceHush",
 			"power.darktide.DarktideState",
 			"power.xenoform.XenoformState",
 			"power.zfighter.ZFighterPower", "power.zfighter.ZFighterTraining", "power.zfighter.ZFighterLineage", "power.zfighter.ZFighterGuard",
-			"power.zfighter.ZFighterSites",
+			"power.zfighter.ZFighterSites", "power.zfighter.ZFighterFusion", "power.zfighter.ZFighterMasters", "power.zfighter.ZFighterRaids", "power.zfighter.ZFighterTournaments", "power.zfighter.ZFighterCorruption",
 		};
 		for (String holder : holders) {
 			try {
