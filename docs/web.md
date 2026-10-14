@@ -847,7 +847,7 @@ roams, bonds a nearby web user, or with Kitchen waits for the body to rise and t
 ### Known gaps / upgrade ideas
 - Feeding when your own hunger bar is full isn't possible: vanilla won't start eating.
 
-## 0.10.20: stronger Web (`WebStrength`)
+## 0.10.21: stronger Web (`WebStrength`)
 Andy asked for a stronger Web (ideas remade from Powerborne Heroes' Spider-Man, which is 1.20.1 Palladium and ARR).
 - **Spider physique** (passive): +3 attack damage, +15% speed, +25% jump, +0.4 knockback resistance, 30% softer
   landings (fall damage still applies), each scaled by abilities unlocked (a fifth at a fresh awakening).

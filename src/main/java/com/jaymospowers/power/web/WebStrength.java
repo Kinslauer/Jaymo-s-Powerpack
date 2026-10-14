@@ -40,7 +40,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Web's raw strength (0.10.20): the spider's body, and the webs that hold things down.
+ * Web's raw strength (0.10.21): the spider's body, and the webs that hold things down.
  * <ul>
  * <li><b>Spider physique</b>: always on, harder punches, quicker feet, higher jumps, steadier footing and softer
  * landings, growing with every ability unlocked ({@link #physique}).</li>
