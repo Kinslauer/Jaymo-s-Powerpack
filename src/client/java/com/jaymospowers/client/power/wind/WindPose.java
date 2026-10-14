@@ -146,6 +146,7 @@ public final class WindPose {
 		WindHoverSway.tick(minecraft);
 		WindTumble.tick(minecraft);
 		WindCyclonePose.tick(minecraft);
+		WindWhistlePose.tick(minecraft);
 		ClientLevel level = minecraft.level;
 		if (level == null) {
 			AMOUNTS.clear();
@@ -251,6 +252,7 @@ public final class WindPose {
 			state.setData(WindHoverSway.KEY, null);
 			state.setData(WindTumble.KEY, null);
 			state.setData(WindCyclonePose.KEY, null);
+			state.setData(WindWhistlePose.KEY, null);
 			state.setData(WindFlightSwing.KEY, null);
 			state.setData(com.jaymospowers.client.FlightRolls.KEY, null);
 			return;
@@ -269,6 +271,7 @@ public final class WindPose {
 			state.setData(WindHoverSway.KEY, null);
 			state.setData(WindTumble.KEY, null);
 			state.setData(WindFlightSwing.KEY, null);
+			state.setData(WindWhistlePose.KEY, null);
 			return;
 		}
 		com.jaymospowers.power.wind.WindKick.Kicking kicked = entity.getAttached(com.jaymospowers.power.wind.WindKick.KICKING);
@@ -285,8 +288,15 @@ public final class WindPose {
 		state.setData(BRAKE_KEY, brakeValue > 0.001F ? brakeValue : null);
 		if (value <= 0.001F || state.isFallFlying || state.isVisuallySwimming) {
 			state.setData(KEY, null);
+			// the Wind Whistle on foot: leaned over into it (sneak + X, so no crouch)
+			Float whistle = state.isFallFlying || state.isVisuallySwimming ? null : WindWhistlePose.extract(entity, partialTicks);
+			state.setData(WindWhistlePose.KEY, whistle);
+			if (whistle != null) {
+				state.isCrouching = false;
+			}
 			return;
 		}
+		state.setData(WindWhistlePose.KEY, null);
 		state.setData(KEY, value);
 		double[] path = PATHS.get(entity.getId());
 		state.setData(BANK_KEY, path == null ? null
@@ -307,6 +317,7 @@ public final class WindPose {
 		WindTumble.rotate(state, poseStack, entityScale);
 		kickLean(state, poseStack);
 		WindCyclonePose.rotate(state, poseStack);
+		WindWhistlePose.rotate(state, poseStack);
 		Float amount = state.getData(KEY);
 		boolean laidOut = amount != null && state instanceof AvatarRenderState && state.deathTime <= 0.0F;
 		// a barrel roll: upright, about the way the body faces; laid out, about its length (in the tilt)
@@ -510,10 +521,10 @@ public final class WindPose {
 		h.head.zRot -= bend * KICK_HIP_HEAD_LEVEL;
 	}
 
-	/** Any of Wind's body poses on this avatar (cruise, brake, kick, cyclone, hover sway, tumble, flight swing). */
+	/** Any of Wind's body poses on this avatar (cruise, brake, kick, cyclone, Wind Whistle, hover sway, tumble, flight swing). */
 	public static boolean posed(AvatarRenderState avatar) {
 		return avatar.getData(KEY) != null || avatar.getData(KICK_KEY) != null || avatar.getData(WindCyclonePose.KEY) != null
-			|| avatar.getData(WindHoverSway.KEY) != null || avatar.getData(WindTumble.KEY) != null || avatar.getData(WindFlightSwing.KEY) != null;
+			|| avatar.getData(WindWhistlePose.KEY) != null || avatar.getData(WindHoverSway.KEY) != null || avatar.getData(WindTumble.KEY) != null || avatar.getData(WindFlightSwing.KEY) != null;
 	}
 
 	/** After the model animates: the limbs. */
@@ -535,6 +546,11 @@ public final class WindPose {
 		KickPose kick = avatar.getData(KICK_KEY);
 		if (kick != null) {
 			kickLimbs(humanoid, kick);
+			return;
+		}
+		Float whistle = avatar.getData(WindWhistlePose.KEY);
+		if (whistle != null) {
+			WindWhistlePose.applyModel(humanoid, avatar, whistle);
 			return;
 		}
 		Float amount = avatar.getData(KEY);

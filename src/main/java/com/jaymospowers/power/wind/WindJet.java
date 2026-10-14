@@ -31,7 +31,8 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Gale Stream (sneak + hold X): a steady stream of wind out of your hands along where you look, for as long as you
+ * Wind Whistle (sneak + hold X): a steady, whistling blast of wind blown from your mouth along where you look (leaned
+ * over into it, arms flung back by its force; the client draws the pose), for as long as you
  * hold it and have the breath (food) for it. It blows smoke out of its way and thins it, snuffs every fire it passes
  * through, shoves creatures and loose things along, and fills a ship's sails (Jaymo's Kingdoms reads the
  * {@link #KINGDOMS_TAG} and pushes the ship). Everyone in view sees the stream ({@link #JETTING}; the client draws it).
