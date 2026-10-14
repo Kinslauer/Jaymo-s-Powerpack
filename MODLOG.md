@@ -938,4 +938,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (`ZFighterFlightPose.cruising`: the local player's own cruise, others by speed); hovering or standing, a Z Fighter
   looks like himself. Taking off is a burst of ki that throws him about 8 blocks up (`ZFighterFlightClient.TAKEOFF_BURST`)
   with a ring of dust and a flash of aura. Charging ki now has a stance per lineage and form (`ZFighterChargePose`,
-  synced by `ZFighterPower.CHARGE`).
+  synced by `ZFighterPower.CHARGE`). Charging in the air keeps his speed; only at 30% health or less does it slow him
+  (`ZFighterFlightClient.LOW_HEALTH`).

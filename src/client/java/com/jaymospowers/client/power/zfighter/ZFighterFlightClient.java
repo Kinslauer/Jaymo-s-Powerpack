@@ -26,7 +26,8 @@ import org.jspecify.annotations.Nullable;
  * <li>Hover: WASD, Jump rises, Sneak sinks (and lands on the ground).</li>
  * <li>Sprint: cruise along your look, faster the higher the form ({@link ZFighterPower#FORM_CRUISE}); let go and you
  * coast back to a hover; S brakes.</li>
- * <li>Charging ki (R) works in the air: he slows to a near-standstill while he does.</li>
+ * <li>Charging ki (R) works in the air and keeps his speed (a cruise neither speeds up nor slows); badly hurt, he slows to
+ * a near-standstill while he does.</li>
  * </ul>
  */
 public final class ZFighterFlightClient {
@@ -49,7 +50,8 @@ public final class ZFighterFlightClient {
 	/** Turning rate (degrees a tick), from just-cruising to top speed. */
 	static final double TURN_RATE_SLOW = 8.0;
 	static final double TURN_RATE_FAST = 1.2;
-	/** Charging ki in the air: he barely moves. */
+	/** Charging ki in the air keeps his speed; only badly hurt (at or under this share of his health) does he slow to this. */
+	static final float LOW_HEALTH = 0.3F;
 	static final double CHARGING_SPEED = 0.08;
 	/** The server's word wins: once it says he's down this long after our last word, the flight ends here too. */
 	static final int SERVER_GRACE = 20;
@@ -173,7 +175,9 @@ public final class ZFighterFlightClient {
 			return;
 		}
 		Input input = player.input.keyPresses;
+		// charging ki keeps his speed, unless he's badly hurt: then he slows to a near-standstill
 		boolean charging = ZFighterPower.state(player).has(ZFighterState.CHARGING);
+		boolean slowed = charging && player.getHealth() <= player.getMaxHealth() * LOW_HEALTH;
 		if (player.horizontalCollision && cruising) {
 			// flew into something: the cruise is over
 			cruising = false;
@@ -184,38 +188,38 @@ public final class ZFighterFlightClient {
 			burst--;
 			velocity = velocity.scale(BURST_DRAG);
 		} else if (cruising) {
-			cruise(player, input, charging);
+			cruise(player, input, charging, slowed);
 		} else {
-			hover(player, input, charging);
+			hover(player, input, slowed);
 		}
 		if (pose > 0) {
 			player.setDeltaMovement(velocity);
 		}
 	}
 
-	private static void hover(LocalPlayer player, Input input, boolean charging) {
+	private static void hover(LocalPlayer player, Input input, boolean slowed) {
 		if (!input.shift()) {
 			sinkArmed = true;
 		}
 		Vec2 move = player.input.getMoveVector();
 		float sin = Mth.sin(player.getYRot() * Mth.DEG_TO_RAD);
 		float cos = Mth.cos(player.getYRot() * Mth.DEG_TO_RAD);
-		double horizontal = charging ? CHARGING_SPEED : HOVER_SPEED;
+		double horizontal = slowed ? CHARGING_SPEED : HOVER_SPEED;
 		double wishX = (move.x * cos - move.y * sin) * horizontal;
 		double wishZ = (move.y * cos + move.x * sin) * horizontal;
 		double wishY = 0.0;
 		if (input.jump()) {
-			wishY += charging ? CHARGING_SPEED : HOVER_VERTICAL;
+			wishY += slowed ? CHARGING_SPEED : HOVER_VERTICAL;
 		}
 		boolean sinking = input.shift() && sinkArmed;
 		if (sinking) {
-			wishY -= charging ? CHARGING_SPEED : HOVER_VERTICAL;
+			wishY -= slowed ? CHARGING_SPEED : HOVER_VERTICAL;
 		}
 		if (wishY == 0.0 && wishX * wishX + wishZ * wishZ < 1.0E-4) {
 			wishY = Math.cos(ticks * 0.1) * HOVER_BOB;
 		}
 		velocity = velocity.add(new Vec3(wishX, wishY, wishZ).subtract(velocity).scale(HOVER_RESPONSE));
-		if (input.sprint() && !charging) {
+		if (input.sprint() && !slowed) {
 			cruising = true;
 			speed = Math.max(CRUISE_ENTER_SPEED, velocity.length());
 			velocity = velocity.lerp(player.getLookAngle().scale(speed), 0.5);
@@ -225,10 +229,12 @@ public final class ZFighterFlightClient {
 		}
 	}
 
-	private static void cruise(LocalPlayer player, Input input, boolean charging) {
+	private static void cruise(LocalPlayer player, Input input, boolean charging, boolean slowed) {
 		double top = ZFighterPower.FORM_CRUISE[Mth.clamp(ZFighterPower.state(player).form(), 0, ZFighterPower.FORM_CRUISE.length - 1)];
-		if (charging) {
+		if (slowed) {
 			speed = Math.max(0.0, speed - CRUISE_BRAKE);
+		} else if (charging) {
+			// charging holds the speed he had
 		} else if (input.sprint() && speed < top) {
 			speed = Math.min(top, speed + CRUISE_ACCEL * (1.0 - CRUISE_ACCEL_TAPER * speed / top));
 		} else if (!input.sprint()) {
