@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
@@ -183,12 +184,15 @@ public final class Mastery {
 		if (power == null) {
 			return;
 		}
-		Component ability = Component.translatable("power." + power.id().getNamespace() + "." + power.id().getPath() + ".key." + key.id())
-			.withStyle(style -> style.withColor(TextColor.fromRgb(power.color())));
+		// the title shows the ability's short name; the whole line is in chat, on hover
+		String line = "power." + power.id().getNamespace() + "." + power.id().getPath() + ".key." + key.id();
+		Component ability = Component.translatable(line + ".name").withStyle(style -> style.withColor(TextColor.fromRgb(power.color())));
+		Component full = Component.translatable(line);
 		player.connection.send(new ClientboundSetTitlesAnimationPacket(8, 50, 15));
 		player.connection.send(new ClientboundSetTitleTextPacket(Component.translatable("message.jaymospowers.unlocked")));
 		player.connection.send(new ClientboundSetSubtitleTextPacket(ability));
-		player.sendSystemMessage(Component.translatable("message.jaymospowers.unlocked_chat", Component.keybind("key.jaymospowers." + key.id()), ability)
+		player.sendSystemMessage(Component.translatable("message.jaymospowers.unlocked_chat", Component.keybind("key.jaymospowers." + key.id()),
+				ability.copy().withStyle(style -> style.withHoverEvent(new HoverEvent.ShowText(full))), Component.keybind("key.jaymospowers.menu"))
 			.withStyle(ChatFormatting.GOLD));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.8F, 1.2F);
 	}

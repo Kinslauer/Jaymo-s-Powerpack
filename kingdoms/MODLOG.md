@@ -2621,7 +2621,7 @@ All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures por
   can't hurt you while you rest (anything else gets you up). At night a **Sleep** button over Leave Bed puts you to
   sleep. Resting needs what sleeping does (reach, room, no monsters near) and sets your spawn.
 
-## 0.7.6: sailing, stage 1: ships built from blocks (pack 0.10.39)
+## 0.7.6: sailing, stage 1: ships built from blocks (pack 0.10.42)
 - Andy: "i want sailing" (Valkyrien Skies, Eureka and Valkyrien Pirates stop at 1.20.1; Haubna's are ARR), so our own.
   Plan: `/mnt/project-files/sailing/Sailing-Plan.md` (stage 2 naval combat, stage 3 pirates and navies, later).
 - **Helm** (`HelmBlock`; planks, a compass and iron) and **sail** (`SailBlock`; wool and a stick, makes 4). Build a hull

@@ -60,6 +60,7 @@ public final class Kitchen {
 		Grill.dishesAt(level, pos, out);
 		Sear.dishesAt(level, pos, out);
 		Smoke.dishesAt(level, pos, out);
+		Minigames.dishesAt(level, pos, out);
 		return out;
 	}
 
@@ -103,7 +104,7 @@ public final class Kitchen {
 			station = null;
 		}
 		if (dish == null || station == null || !inReach(player, pos) || SESSIONS.containsKey(player.getUUID())
-			|| Grill.isGrilling(player) || Smoke.isSmoking(player) || Sear.isSearing(player)) {
+			|| Grill.isGrilling(player) || Smoke.isSmoking(player) || Sear.isSearing(player) || Minigames.isPlaying(player)) {
 			reject(player, dishIndex, "message.jaymoskitchen.station_gone");
 			return;
 		}
@@ -135,6 +136,10 @@ public final class Kitchen {
 			}
 			case SEAR -> {
 				Sear.start(player, dish, pos);
+				return;
+			}
+			case CHOP, ROAST, STIR -> {
+				Minigames.start(player, dish, pos);
 				return;
 			}
 			default -> {
@@ -179,6 +184,7 @@ public final class Kitchen {
 		Grill.serve(player);
 		Smoke.abandon(player);
 		Sear.abandon(player);
+		Minigames.abandon(player);
 		Prep.abandon(player);
 	}
 
