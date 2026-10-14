@@ -61,6 +61,8 @@ public final class GravityPowerClient implements PowerClient {
 				com.jaymospowers.client.power.web.WebShake.start(0.35F);
 			}
 			GravityRockFlightClient.tick(minecraft, player);
+			GravityForwardClient.tick(player);
+			GravityWalkClient.tick(player);
 			liftMark = liftMark(player);
 		});
 		// left click while Lift holds a chunk of the world (or anything else that can't be choked): it's thrown

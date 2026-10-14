@@ -466,6 +466,7 @@ public final class GravityPower implements Power {
 				grip(player, state(player), payload.left());
 			}
 		});
+		GravityWalk.register();
 		ServerTickEvents.END_SERVER_TICK.register(GravityPower::serverTick);
 		ServerLivingEntityEvents.AFTER_DEATH.register(GravityPower::afterDeath);
 		// surviving a hard fall is a step toward ascension, like a kill by weight
@@ -483,6 +484,8 @@ public final class GravityPower implements Power {
 			GravityOrbit.drop(handler.player);
 			GravityRockFlight.stop(handler.player);
 			GravitySkyfall.land(handler.player);
+			GravityForward.forget(handler.player);
+			GravityWalk.stop(handler.player);
 		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			STATES.clear();
@@ -498,6 +501,9 @@ public final class GravityPower implements Power {
 			GravityMeteor.clear();
 			GravitySkyfall.clear();
 			GravityOrbit.clear();
+			GravitySideFall.clear();
+			GravityForward.clear();
+			GravityWalk.clear();
 		});
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> GravityDebugCommand.register(dispatcher));
 	}
@@ -564,6 +570,8 @@ public final class GravityPower implements Power {
 			dropLift(player, state, false);
 		}
 		setWeightless(player, false);
+		GravityForward.forget(player);
+		GravityWalk.stop(player);
 		modifier(player, Attributes.GRAVITY, COLLAPSE_ID, 0.0, false);
 		modifier(player, Attributes.FALL_DAMAGE_MULTIPLIER, COLLAPSE_FALL_ID, 0.0, false);
 		modifier(player, Attributes.KNOCKBACK_RESISTANCE, HORIZON_ID, 0.0, false);
@@ -584,7 +592,8 @@ public final class GravityPower implements Power {
 
 	@Override
 	public boolean allowsFloating(ServerPlayer player) {
-		return player.getAttached(WEIGHTLESS_ON) != null || GravitySkyfall.riding(player);
+		return player.getAttached(WEIGHTLESS_ON) != null || GravitySkyfall.riding(player) || GravityForward.falling(player)
+			|| GravityWalk.walking(player);
 	}
 
 	// ---------------------------------------------------------------- keys
@@ -604,7 +613,14 @@ public final class GravityPower implements Power {
 				} else if (state.ripFrom >= 0) {
 					finishRip(player, state);
 				} else if (!state.chunkHold) {
+					// sneaking as you let go: what you held falls sideways, the way you look
+					Entity held = player.isShiftKeyDown() && state.liftTarget >= 0 ? player.level().getEntity(state.liftTarget) : null;
 					dropLift(player, state, true);
+					if (held instanceof LivingEntity living && living.isAlive()) {
+						GravitySideFall.start(player, living, player.getLookAngle());
+						// (Collapse's plummet gives way to it)
+						PLUMMETS.removeIf(p -> p.entity().equals(living.getUUID()));
+					}
 				}
 			}
 			case ABILITY_2 -> {
@@ -624,6 +640,12 @@ public final class GravityPower implements Power {
 					if (riding) {
 						// riding (the toggle, once mastered): V again steps off (the release that follows does nothing)
 						GravityRockFlight.stop(player);
+						state.vDownAt = -1;
+					} else if (player.isShiftKeyDown() && player.getAttached(WEIGHTLESS_ON) != null) {
+						// sneak+V while weightless: fall forward, the way you look (it uses up some of Weightless's time)
+						if (GravityForward.start(player)) {
+							state.weightlessTicks += GravityForward.WEIGHTLESS_COST;
+						}
 						state.vDownAt = -1;
 					} else {
 						state.vDownAt = player.level().getGameTime();
@@ -1502,6 +1524,12 @@ public final class GravityPower implements Power {
 		if (!ready(player, WELL)) {
 			return;
 		}
+		if (player.isShiftKeyDown()) {
+			// sneak+G: no well; down turns sideways around you, and everything falls outward into the walls
+			cool(player, WELL, WELL_COOLDOWN);
+			GravitySideFall.well(player);
+			return;
+		}
 		Vec3 at = player.position();
 		WELLS.add(new Well(player.level().dimension(), at, player.getUUID(), player.level().getGameTime() + WELL_TICKS, false));
 		cool(player, WELL, WELL_COOLDOWN);
@@ -1676,6 +1704,7 @@ public final class GravityPower implements Power {
 			if (player.getAttached(WEIGHTLESS_ON) != null) {
 				setWeightless(player, false);
 			}
+			GravityForward.stop(player);
 			if (player.getAttached(ROCK_FLIGHT) != null) {
 				GravityRockFlight.stop(player);
 			}
@@ -1733,6 +1762,7 @@ public final class GravityPower implements Power {
 		if (state.crushFrom >= 0 && player.tickCount % HEAVY_AURA_REFRESH == 0) {
 			crushZone(player, state);
 		}
+		GravityForward.tick(player);
 		if (player.getAttached(WEIGHTLESS_ON) != null) {
 			state.weightlessTicks++;
 			// no fall counts while weightless: only what you fall after it ends
@@ -1921,6 +1951,8 @@ public final class GravityPower implements Power {
 	}
 
 	private static void serverTick(MinecraftServer server) {
+		GravitySideFall.tick(server);
+		GravityWalk.tick(server);
 		if (!SLAMS.isEmpty()) {
 			tickSlams(server);
 		}

@@ -49,14 +49,16 @@ public final class FreefallPose {
 		state.setData(KEY, strength <= 0.0F ? null : new Fall(strength, player.tickCount + partialTicks, dive, tip * tip * (3.0F - 2.0F * tip)));
 	}
 
-	/** Falling on purpose: a wind's flight, web wings or lines, a rock slab, Weightless. */
+	/** Falling on purpose: a wind's flight, web wings or lines, a rock slab, Weightless, a forward fall, a wall walk. */
 	private static boolean controlled(Player player) {
 		return player.getAttached(com.jaymospowers.power.wind.WindPower.FLIGHT) != null
 			|| player.getAttached(com.jaymospowers.power.web.WebPower.WINGS) != null
 			|| player.getAttached(com.jaymospowers.power.web.WebPower.LINE) != null
 			|| player.getAttached(com.jaymospowers.power.web.WebPower.LINE_OFF) != null
 			|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.ROCK_FLIGHT) != null
-			|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.WEIGHTLESS_ON) != null;
+			|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.WEIGHTLESS_ON) != null
+			|| player.getAttached(com.jaymospowers.power.gravity.GravityForward.FALLING) != null
+			|| player.getAttached(com.jaymospowers.power.gravity.GravityWalk.SURFACE) != null;
 	}
 
 	/** After the body faces its way: a wind's dive tips the whole body over, head first, about its middle. */
