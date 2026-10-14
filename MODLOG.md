@@ -1029,6 +1029,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   fringe), and fists and ki power are 15% stronger. Sneak+C in base form toggles Corrupted mode: Super 1's fists,
   speed and ki power with no ki drain, bleeding half a heart a second (ends at one heart), 35% life steal on every hit,
   and 3 Combat Roll charges whose rolls blink (up to 8 blocks towards the target, behind it within 5, ahead with none).
-- **0.10.34, guns (pack mods):** TaCZ: Refabricated (the unofficial Fabric 26.3 port of Timeless and Classics Zero,
+- **0.10.35, guns (pack mods):** TaCZ: Refabricated (the unofficial Fabric 26.3 port of Timeless and Classics Zero,
   beta) joins the pack with Forge Config API Port: modern guns, attachments, scopes, a Gun Smith Table and ammo. It's
   on Modrinth only, so the CurseForge import zip carries its jar (untouched, credited; art CC BY-NC-ND 4.0).
