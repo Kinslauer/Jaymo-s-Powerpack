@@ -946,7 +946,14 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   The V beams are drawn like beacon beams (`ZFighterBeams`, sent by `ZFighterNet.BeamFx`) instead of only particles.
 - **0.10.16, brittle skeletons:** skeletons (strays, wither skeletons, bogged and parched too) lose heads and limbs three
   times as often: 15% a blade hit, 60% to the katana's aimed slash.
-- **0.10.17, tidier Z Fighter training screen:** the X screen fits small screens (it shrinks to the window and is no
+- **0.10.17, the quarterstaff rides the gale (`WindStaff`):** in a wind sorcerer's hand (a Kingdoms Sorcerer of the air
+  element; read by name through `Classes.of`), the staff's five Better Combat swings each carry a gale: Gust, Wind
+  Blade, Vortex, Piercing Gale, Downdraft (a slam from the air bounces you up). Right click is the Staff Vault (sneak:
+  straight up), landing soft. See docs/wind.md.
+- **0.10.18, tidier Z Fighter training screen, a 30-block Spirit Bomb:** the X screen fits small screens (it shrinks to the window and is no
   taller than 236): three tabs (Stats, Forms, Techniques) instead of two crowded pages, striped rows, and long text cut
   with "..." instead of running off. Descriptions, form requirements and how Limit Break works show in full in a box
   at the bottom when you point at a row. The lineage picker wraps its question and descriptions.
+  The Spirit Bomb grows up to 30 blocks across (radius 15, was 6) and is drawn as a great blue End Crystal
+  (`ZFighterSpirit`, sent by `ZFighterNet.SpiritFx`): the crystal's spinning glass, tinted blue and lit, with a faint
+  halo. It lands when its leading edge meets the ground; its hurt reach grows 1.2 per block of radius, its blast 0.4.

@@ -2,6 +2,7 @@ package com.jaymospowers.power.zfighter;
 
 import java.util.Map;
 import java.util.UUID;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -71,6 +72,13 @@ final class ZFighterTechniques {
 	static final float SPIRIT_BASE_DAMAGE = 20.0F;
 	static final float SPIRIT_DAMAGE_PER_ENERGY = 0.35F;
 	static final double SPIRIT_SPEED = 0.7;
+	/** The sphere's radius at full: 15, so 30 blocks across. */
+	static final double SPIRIT_MAX_SIZE = 15.0;
+	/** Where it lands: hurt reach and blast power, per block of its radius. */
+	static final double SPIRIT_REACH_PER_SIZE = 1.2;
+	static final float SPIRIT_BURST_PER_SIZE = 0.4F;
+	/** How far off players still see the sphere drawn. */
+	static final double SPIRIT_SEEN = 256.0;
 	/** Someone who hurt him this recently counts as a foe (ticks). */
 	static final int FOE_MEMORY = 1200;
 
@@ -205,7 +213,7 @@ final class ZFighterTechniques {
 	}
 
 	static double size(float energy) {
-		return 1.0 + 5.0 * Math.sqrt(Mth.clamp(energy / SPIRIT_MAX, 0.0F, 1.0F));
+		return 1.0 + (SPIRIT_MAX_SIZE - 1.0) * Math.sqrt(Mth.clamp(energy / SPIRIT_MAX, 0.0F, 1.0F));
 	}
 
 	static void tickSpirit(ServerPlayer player, ZFighterPower.Live live) {
@@ -253,6 +261,17 @@ final class ZFighterTechniques {
 			live.spiritEnergy = Math.min(SPIRIT_MAX, live.spiritEnergy);
 		}
 		drawSphere(level, sphere, size(live.spiritEnergy), now);
+		spiritFx(level, player.getId(), sphere, size(live.spiritEnergy));
+	}
+
+	/** Tells players near where the sphere is and how big, so they draw it (a great blue crystal). */
+	static void spiritFx(ServerLevel level, int id, Vec3 at, double size) {
+		ZFighterNet.SpiritFx fx = new ZFighterNet.SpiritFx(id, at.x, at.y, at.z, (float)size);
+		for (ServerPlayer viewer : level.players()) {
+			if (viewer.position().distanceToSqr(at) <= SPIRIT_SEEN * SPIRIT_SEEN) {
+				ServerPlayNetworking.send(viewer, fx);
+			}
+		}
 	}
 
 	/** What a living thing near gives each second: animals a little, folk more, players only if they sneak to lend it. */
@@ -298,7 +317,8 @@ final class ZFighterTechniques {
 		double size = size(energy);
 		float damage = (SPIRIT_BASE_DAMAGE + energy * SPIRIT_DAMAGE_PER_ENERGY) * ZFighterPower.kiPower(player, live);
 		Vec3 look = player.getViewVector(1.0F);
-		ZFighterKi.throwSpirit(player, from, look.scale(SPIRIT_SPEED), damage, size, 3.0 + size * 1.5, (float)(3.0 + size));
+		ZFighterKi.throwSpirit(player, from, look.scale(SPIRIT_SPEED), damage, size, 3.0 + size * SPIRIT_REACH_PER_SIZE,
+			3.0F + (float)size * SPIRIT_BURST_PER_SIZE);
 		ZFighterPower.cooldown(player, ZFighterState.SPIRIT, SPIRIT_COOLDOWN);
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 2.0F, 0.6F);

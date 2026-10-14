@@ -110,6 +110,8 @@ final class ZFighterKi {
 	static final int BEAM_TICKS = 12;
 	/** Players this near a beam's middle see it drawn. */
 	static final double BEAM_SEEN = 160.0;
+	/** How far ahead of its middle (in its sizes) the Spirit Bomb's leading edge meets the ground. */
+	static final double SPIRIT_LEAD = 0.6;
 
 	// ---- Flash Step ----
 	static final float STEP_KI = 15.0F;
@@ -177,6 +179,8 @@ final class ZFighterKi {
 		float burst;
 		double radius;
 		boolean griefing;
+		/** SPIRIT: the thrower's entity id, so the client keeps drawing the same sphere it watched gather. */
+		int fxId;
 		/** DISC: who it has already cut (it passes through). */
 		final Set<Integer> struck = new HashSet<>();
 		int age;
@@ -276,8 +280,10 @@ final class ZFighterKi {
 		}
 		Vec3 from = bolt.pos;
 		Vec3 to = from.add(bolt.velocity);
-		BlockHitResult block = level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, owner));
-		Vec3 end = block.getType() == HitResult.Type.MISS ? to : block.getLocation();
+		// the Spirit Bomb is huge: it lands when its leading edge meets the ground, not its middle
+		Vec3 lead = bolt.kind == SPIRIT ? bolt.velocity.normalize().scale(bolt.size * SPIRIT_LEAD) : Vec3.ZERO;
+		BlockHitResult block = level.clip(new ClipContext(from.add(lead), to.add(lead), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, owner));
+		Vec3 end = block.getType() == HitResult.Type.MISS ? to : block.getLocation().subtract(lead);
 		DustParticleOptions dust = new DustParticleOptions(bolt.color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : bolt.color,
 			bolt.kind == BOMB || bolt.kind == SPIRIT ? 3.0F : 1.8F);
 		double reach = 1.0 + bolt.size;
@@ -318,6 +324,9 @@ final class ZFighterKi {
 			return false;
 		}
 		draw(level, bolt, from, dust);
+		if (bolt.kind == SPIRIT) {
+			ZFighterTechniques.spiritFx(level, bolt.fxId, to, bolt.size);
+		}
 		bolt.pos = to;
 		if (++bolt.age >= bolt.life) {
 			if (bolt.kind == BOMB || bolt.kind == SPIRIT) {
@@ -479,6 +488,7 @@ final class ZFighterKi {
 		bolt.radius = radius;
 		bolt.burst = burst;
 		bolt.griefing = true;
+		bolt.fxId = player.getId();
 		BOLTS.add(bolt);
 	}
 
