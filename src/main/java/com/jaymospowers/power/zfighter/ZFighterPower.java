@@ -192,6 +192,9 @@ public final class ZFighterPower implements Power {
 		float ki;
 		boolean charging;
 		long waveFrom = -1L;
+		/** When V went down for a blast or barrage (-1: it isn't held), and when V may fire again. */
+		long barrageFrom = -1L;
+		long barrageReady;
 		boolean flying;
 		Vec3 lastFlyPos;
 		/** The form he's in (0 base, 1-3) and the Limit Break tier on top (0 off). */
@@ -428,11 +431,12 @@ public final class ZFighterPower implements Power {
 						0.7F + fill * 0.9F);
 				}
 			}
-		} else if (!live.superOn() && !hungry && live.waveFrom < 0 && live.spiritFrom < 0) {
+		} else if (!live.superOn() && !hungry && live.waveFrom < 0 && live.barrageFrom < 0 && live.spiritFrom < 0) {
 			live.ki += KI_REGEN;
 		}
 
 		ZFighterKi.tickWave(player, live);
+		ZFighterKi.tickBarrage(player, live);
 		ZFighterTechniques.tickBarrier(player, live);
 		ZFighterTechniques.tickSpirit(player, live);
 
@@ -530,12 +534,19 @@ public final class ZFighterPower implements Power {
 				}
 			}
 			case ABILITY_3 -> {
+				// V: tap for a Ki Blast, hold for the two-handed barrage; sneak+V (hold) gathers the charged technique
 				if (down) {
-					if (ready(player, ZFighterState.WAVE)) {
-						ZFighterKi.startWave(player, live);
+					if (player.isShiftKeyDown()) {
+						if (ready(player, ZFighterState.WAVE)) {
+							ZFighterKi.startWave(player, live);
+						}
+					} else {
+						ZFighterKi.pressBarrage(player, live);
 					}
 				} else if (ZFighterKi.releaseWave(player, live)) {
 					cooldown(player, ZFighterState.WAVE, ZFighterKi.WAVE_COOLDOWN);
+				} else {
+					ZFighterKi.releaseBarrage(player, live);
 				}
 				refresh(player, live);
 			}
@@ -894,7 +905,8 @@ public final class ZFighterPower implements Power {
 		set(player, Attributes.MAX_HEALTH, VITALITY_ID, ZFighterTraining.of(player).stat(ZFighterTraining.VITALITY) * ZFighterTraining.VITALITY_PER_LEVEL,
 			AttributeModifier.Operation.ADD_VALUE);
 		set(player, Attributes.ATTACK_DAMAGE, HUNGRY_ID, hungry ? -HUNGRY_WEAKNESS : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-		set(player, Attributes.MOVEMENT_SPEED, SLOW_ID, live.charging || live.guarding || live.waveFrom >= 0 || live.spiritFrom >= 0 ? -CHARGE_SLOW : 0.0,
+		set(player, Attributes.MOVEMENT_SPEED, SLOW_ID, live.charging || live.guarding || live.waveFrom >= 0 || live.barrageFrom >= 0 || live.spiritFrom >= 0
+			? -CHARGE_SLOW : 0.0,
 			AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.MOVEMENT_SPEED, SUPER_SPEED_ID, FORM_SPEED[live.form], AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		// lineages: a Verdant's long arms and Giant forms; the Great Ape

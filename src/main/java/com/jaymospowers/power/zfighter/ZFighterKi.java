@@ -1,6 +1,7 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.Powers;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -24,6 +25,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -48,7 +50,8 @@ import net.minecraft.world.phys.Vec3;
  * The ki techniques:
  * <ul>
  * <li>G, Ki Blast: a fast bolt of ki from the palm. Cheap and quick; it hurts and knocks back, and fizzles on stone.</li>
- * <li>V (hold), Ki Wave: cup your hands and gather it ({@link #WAVE_FULL} ticks to full), let go and it fires as a beam
+ * <li>V tap, Ki Blast; V held {@link #BARRAGE_WINDUP} ticks, Ki Barrage: bolts from both palms in turn while it's held.</li>
+ * <li>Sneak+V (hold), Ki Wave: cup your hands and gather it ({@link #WAVE_FULL} ticks to full), let go and it fires as a beam
  * through everything in a line, ending in a blast. The fuller, the wider, the harder, the dearer. A full wave from a
  * Super breaks blocks (if mob griefing is on).</li>
  * <li>B, Flash Step: gone in a blink, up to {@link #STEP_RANGE} blocks the way you look; aimed at a creature, behind
@@ -130,6 +133,21 @@ final class ZFighterKi {
 	static final double STEP_RANGE = 10.0;
 	static final double STEP_TARGET_RANGE = 16.0;
 	static final float STEP_EXHAUSTION = 0.8F;
+
+	// V: a tap is a Ki Blast; held, after a windup, bolts from both palms in turn until it's let go or the ki runs dry
+	/** V let go sooner than this (ticks) is a tap: one Ki Blast. Held this long, the barrage starts. */
+	static final int BARRAGE_WINDUP = 40;
+	/** a bolt every this many ticks, from the right palm, then the left */
+	static final int BARRAGE_EVERY = 2;
+	static final float BARRAGE_KI = 2.5F;
+	static final float BARRAGE_DAMAGE = 1.8F;
+	static final double BARRAGE_SPEED = 1.8;
+	/** how far each bolt may stray from the aim */
+	static final double BARRAGE_SPREAD = 0.08;
+	static final int BARRAGE_LIFE = 30;
+	static final float BARRAGE_EXHAUSTION = 0.1F;
+	/** ticks before V fires again after a barrage ends */
+	static final int BARRAGE_COOLDOWN = 20;
 
 	private static final int BLAST_COLOR = 0xFFC85A;
 	private static final int WAVE_COLOR = 0x8FD3FF;
@@ -283,6 +301,94 @@ final class ZFighterKi {
 				it.remove();
 			}
 		}
+	}
+
+	// ---------------------------------------------------------------- V: Ki Blast (tap) and Ki Barrage (hold)
+
+	/** V down: the hands start to gather. What it becomes is decided by how long it's held. */
+	static void pressBarrage(ServerPlayer player, ZFighterPower.Live live) {
+		long now = player.level().getGameTime();
+		if (now < live.barrageReady) {
+			return;
+		}
+		live.barrageFrom = now;
+	}
+
+	/** V up: let go during the windup, it was a tap and one Ki Blast flies; let go mid-barrage, it ends. */
+	static void releaseBarrage(ServerPlayer player, ZFighterPower.Live live) {
+		if (live.barrageFrom < 0) {
+			return;
+		}
+		long now = player.level().getGameTime();
+		long held = now - live.barrageFrom;
+		live.barrageFrom = -1L;
+		if (held < BARRAGE_WINDUP) {
+			if (blast(player, live)) {
+				live.barrageReady = now + BLAST_COOLDOWN;
+			}
+		} else {
+			live.barrageReady = now + BARRAGE_COOLDOWN;
+		}
+	}
+
+	/** While V is held: the windup (ki gathers in both palms), then the barrage. */
+	static void tickBarrage(ServerPlayer player, ZFighterPower.Live live) {
+		if (live.barrageFrom < 0) {
+			return;
+		}
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		if (Powers.silenced(player) || ZFighterLineage.ape(player) || !player.isAlive()) {
+			live.barrageFrom = -1L;
+			return;
+		}
+		long held = now - live.barrageFrom;
+		Vec3 look = player.getViewVector(1.0F);
+		int color = formColor(live);
+		DustParticleOptions dust = new DustParticleOptions(color == ZFighterPower.FORM_COLOR[0] ? BLAST_COLOR : color, 1.0F);
+		if (held < BARRAGE_WINDUP) {
+			if (held < 5) {
+				// too soon to tell a tap from a hold
+				return;
+			}
+			float wind = held / (float)BARRAGE_WINDUP;
+			RandomSource random = level.getRandom();
+			for (boolean left : new boolean[] {false, true}) {
+				Vec3 hand = palm(player, look, left);
+				double r = 0.6 * (1.0F - wind) + 0.15;
+				double ox = (random.nextDouble() - 0.5) * r * 2;
+				double oy = (random.nextDouble() - 0.5) * r * 2;
+				double oz = (random.nextDouble() - 0.5) * r * 2;
+				level.sendParticles(dust, true, false, hand.x + ox, hand.y + oy, hand.z + oz, 0, -ox, -oy, -oz, 0.1);
+				level.sendParticles(dust, true, false, hand.x, hand.y, hand.z, 1, 0.04, 0.04, 0.04, 0.0);
+			}
+			if (held % 10 == 0) {
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 0.8F,
+					1.0F + wind);
+			}
+			return;
+		}
+		long firing = held - BARRAGE_WINDUP;
+		if (firing % BARRAGE_EVERY != 0) {
+			return;
+		}
+		if (!ZFighterPower.spend(player, live, BARRAGE_KI)) {
+			// out of ki: the barrage is spent; letting go of V does nothing more
+			live.barrageFrom = -1L;
+			live.barrageReady = now + BARRAGE_COOLDOWN;
+			return;
+		}
+		boolean left = (firing / BARRAGE_EVERY) % 2 == 1;
+		RandomSource random = level.getRandom();
+		Vec3 aim = look.add((random.nextDouble() - 0.5) * BARRAGE_SPREAD * 2, (random.nextDouble() - 0.5) * BARRAGE_SPREAD * 2,
+			(random.nextDouble() - 0.5) * BARRAGE_SPREAD * 2).normalize();
+		BOLTS.add(new Bolt(level, player.getUUID(), palm(player, look, left), aim.scale(BARRAGE_SPEED),
+			BARRAGE_DAMAGE * ZFighterPower.kiPower(player, live), color, BOLT, BARRAGE_LIFE));
+		boolean mainRight = player.getMainArm() == HumanoidArm.RIGHT;
+		player.swing(left == mainRight ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+		exhaust(player, BARRAGE_EXHAUSTION);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.45F,
+			1.6F + random.nextFloat() * 0.3F);
 	}
 
 	/** One tick of a bolt's flight. False when it's spent. */
@@ -504,9 +610,14 @@ final class ZFighterKi {
 
 	/** Where his palm is: the eye, a little ahead, right and down. */
 	private static Vec3 palm(ServerPlayer player, Vec3 look) {
+		return palm(player, look, false);
+	}
+
+	/** His right palm, or his left. */
+	private static Vec3 palm(ServerPlayer player, Vec3 look, boolean left) {
 		Vec3 right = look.cross(new Vec3(0.0, 1.0, 0.0));
 		right = right.lengthSqr() < 1.0E-6 ? Vec3.ZERO : right.normalize();
-		return player.getEyePosition().add(look.scale(0.8)).add(right.scale(0.3)).add(0.0, -0.25, 0.0);
+		return player.getEyePosition().add(look.scale(0.8)).add(right.scale(left ? -0.3 : 0.3)).add(0.0, -0.25, 0.0);
 	}
 
 	static boolean disc(ServerPlayer player, ZFighterPower.Live live) {
