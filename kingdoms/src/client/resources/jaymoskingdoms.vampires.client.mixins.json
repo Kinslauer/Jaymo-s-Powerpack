@@ -1,0 +1,7 @@
+{
+	"required": true,
+	"package": "com.jaymoskingdoms.client.mixin.vampires",
+	"compatibilityLevel": "JAVA_25",
+	"client": ["BloodGlowMixin", "BloodGlowColorMixin"],
+	"injectors": { "defaultRequire": 1 }
+}

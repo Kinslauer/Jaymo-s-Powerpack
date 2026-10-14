@@ -2860,3 +2860,17 @@ beating". (0.7.20 / 0.10.69 are the Kingdom languages PR's.)
 - Ops: `/kingdom neighbours grudge_beat|grudge_lure`: the nearest grown villager comes to hate the next nearest and
   offers you the quest.
 - Built; not yet seen in game.
+
+## 0.7.22: blood vision (pack 0.10.71)
+Andy: "vampirism should give you the sirben visual modifier". Nothing called "sirben" turned up (no mod, shader or
+file in the pack), so this is the likeliest reading of a vampire's "visual modifier", pending Andy's word.
+- `client/BloodVision` (tuning at the top): only for a vampire player, only at night (fades in at dusk, out at dawn
+  over 2.5 s). The screen's edges darken blood red (vanilla's vignette texture and pipeline, darkening green and
+  blue only) and beat like a heart (double thump every 24 ticks).
+- Every living creature within 24 blocks, except undead, golems and armour stands, glows through walls with a red
+  outline that beats in time (`mixin/vampires/BloodGlowMixin`, `BloodGlowColorMixin`); only the vampire sees it, and
+  a creature glowing for another reason keeps its own colour.
+- Starving (`VampirePlayers.starving`, two nights without blood): the beat comes every 14 ticks, the edges go darker
+  and blood shows from 40 blocks.
+- `Vampires.VAMPIRE` now syncs to the vampire player themself (target only), so the client knows.
+- Built; not yet seen in game.

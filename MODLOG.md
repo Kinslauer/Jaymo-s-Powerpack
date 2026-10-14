@@ -1134,3 +1134,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   to beat them up or lure them into a beating"): villagers who come to hate another (regard -50 or less after a
   quarrel) may offer you a grudge quest: give their enemy a 3-blow beating, or walk up to them so they follow you and
   lead them to the giver's hiding spot on the outskirts, where the giver ambushes them. See `kingdoms/MODLOG.md` 0.7.21.
+- **0.10.71 / Kingdoms 0.7.22, blood vision** (Andy: "vampirism should give you the sirben visual modifier"; "sirben"
+  matched nothing, so this is the likeliest reading, pending Andy's word): at night a vampire player's screen edges
+  darken blood red and beat like a heart, and warm-blooded creatures within 24 blocks glow red through walls in time
+  with it. Starving, the beat quickens, the red deepens and the range is 40. See `kingdoms/MODLOG.md` 0.7.22.
