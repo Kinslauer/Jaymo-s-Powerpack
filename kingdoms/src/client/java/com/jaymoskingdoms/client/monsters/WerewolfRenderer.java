@@ -43,14 +43,38 @@ final class WerewolfRenderer extends LegendRenderer<Werewolf> {
 		HumanoidMobRenderer.extractHumanoidRenderState(werewolf, state, partialTicks, this.itemModelResolver);
 		state.variant = werewolf.variant();
 		state.shut = werewolf.isHuman();
-		state.changing = werewolf.changing();
-		state.hunched = !werewolf.isHuman() && werewolf.isAggressive();
+		state.changing = werewolf.changing() || werewolf.change() != 0;
+		state.hunched = !werewolf.isHuman() && werewolf.isAggressive() || werewolf.change() != 0;
+		state.beast = werewolf.beastness(partialTicks);
+		state.build = werewolf.build();
 	}
 
 	@Override
 	public void submit(LegendState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
 		this.model = state.shut ? this.human : this.beast;
 		super.submit(state, poseStack, collector, camera);
+	}
+
+	/** (0.7.0) A werewolf player doesn't see their own beast from inside it (the camera's in its chest). */
+	@Override
+	public boolean shouldRender(Werewolf werewolf, net.minecraft.client.renderer.culling.Frustum frustum, double x, double y, double z, float partialTicks) {
+		net.minecraft.client.Minecraft minecraft = net.minecraft.client.Minecraft.getInstance();
+		if (werewolf.isNoAi() && minecraft.player != null && minecraft.options.getCameraType().isFirstPerson()
+			&& werewolf.distanceToSqr(minecraft.player) < 2.0) {
+			return false;
+		}
+		return super.shouldRender(werewolf, frustum, x, y, z, partialTicks);
+	}
+
+	/** (0.7.0) A cursed one's build, and its body swelling as the beast comes out (or shrinking as it goes). */
+	@Override
+	protected void scale(LegendState state, PoseStack poseStack) {
+		super.scale(state, poseStack);
+		float grow = 0.65F + 0.35F * state.beast;
+		float wide = state.build == 0 ? 0.85F : state.build == 2 ? 1.2F : 1.0F;
+		if (grow != 1.0F || wide != 1.0F) {
+			poseStack.scale(grow * wide, grow, grow * wide);
+		}
 	}
 
 	@Override

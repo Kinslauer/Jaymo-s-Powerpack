@@ -322,6 +322,14 @@ public final class Quests {
 			}
 		}
 		if (views.isEmpty()) {
+			// (0.7.0) a priest who knows the old rite sees what you've become, and sets you the hunt that lifts it
+			Quest cure = Cures.offer(player, giver, f);
+			if (cure != null) {
+				giver.setAttached(OFFER, new Offer(day(level) + 1, true, Optional.of(cure)));
+			} else if (giver.getAttachedOrElse(OFFER, new Offer(-1L, false, Optional.empty())).quest().filter(o -> o.template().startsWith("cure.")).isPresent()) {
+				// (the hunt was for someone else: nothing for this one today)
+				giver.setAttached(OFFER, new Offer(day(level) + 1, false, Optional.empty()));
+			}
 			Quest q = offered(level, giver, f, rep);
 			if (q != null) {
 				views.add(view(level, player, q, QuestNet.OFFER));
@@ -436,6 +444,8 @@ public final class Quests {
 			Stables.questTurnIn(level, player, giver, f, q);
 		}
 		remove(player, q.id());
+		// (0.7.0) a priest's hunt: the rite, there and then
+		Cures.rite(level, player, giver, q);
 		for (ItemStack stack : rewards(level, q)) {
 			give(player, stack);
 		}
@@ -864,6 +874,10 @@ public final class Quests {
 
 	/** A slay target: an entity type id, {@code #tag}, or {@code *monster}. */
 	static boolean matches(String target, Entity entity) {
+		Boolean cure = Cures.matches(target, entity);
+		if (cure != null) {
+			return cure;
+		}
 		if (target.equals("*monster")) {
 			return entity instanceof Enemy;
 		}

@@ -82,7 +82,8 @@ public final class Monsters {
 	}
 
 	public static void register() {
-		WEREWOLF = type("werewolf", EntityType.Builder.of(Werewolf::new, MobCategory.MONSTER).sized(0.8F, 1.9F).clientTrackingRange(10));
+		// (0.7.0) updated every tick: a werewolf player's beast follows them step for step
+		WEREWOLF = type("werewolf", EntityType.Builder.of(Werewolf::new, MobCategory.MONSTER).sized(0.8F, 1.9F).clientTrackingRange(10).updateInterval(1));
 		OGRE = type("ogre", EntityType.Builder.<Ogre>of((t, l) -> new Ogre(t, l, Ogre.GREEN), MobCategory.MONSTER).sized(1.6F, 3.4F).clientTrackingRange(10));
 		CAVE_OGRE = type("cave_ogre", EntityType.Builder.<Ogre>of((t, l) -> new Ogre(t, l, Ogre.CAVE), MobCategory.MONSTER).sized(1.6F, 3.4F)
 			.clientTrackingRange(10));

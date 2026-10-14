@@ -317,5 +317,58 @@ final class WerewolfModel extends EntityModel<LegendState> {
 		this.lFinger3.zRot = this.lArmA.zRot;
 		this.lFinger4.zRot = this.lArmA.zRot;
 		this.lFinger5.zRot = this.lArmA.zRot;
+
+		if (state.beast < 1.0F) {
+			this.morph(state.beast, state.ageInTicks);
+		}
+	}
+
+	/**
+	 * (0.7.0) A cursed one changing ({@code p}: 0 the person, 1 the beast): the muzzle, ears, claws and tail pushing out
+	 * (or drawing back in), and the whole body convulsing, hardest early on, the head and arms thrashing.
+	 */
+	private void morph(float p, float t) {
+		float jaw = 0.2F + 0.8F * p;
+		for (ModelPart part : new ModelPart[] {this.nose, this.snout, this.teethU, this.teethL, this.mouth}) {
+			part.xScale = part.yScale = part.zScale = jaw;
+		}
+		float ear = 0.1F + 0.9F * p;
+		this.lEar.xScale = this.lEar.yScale = this.lEar.zScale = ear;
+		this.rEar.xScale = this.rEar.yScale = this.rEar.zScale = ear;
+		float fur = 0.3F + 0.7F * p;
+		this.sideburnL.xScale = this.sideburnL.yScale = this.sideburnL.zScale = fur;
+		this.sideburnR.xScale = this.sideburnR.yScale = this.sideburnR.zScale = fur;
+		for (ModelPart part : new ModelPart[] {this.tailA, this.tailB, this.tailC, this.tailD}) {
+			part.xScale = part.yScale = part.zScale = Math.max(0.05F, p);
+		}
+		float claw = 0.3F + 0.7F * p;
+		for (ModelPart part : new ModelPart[] {this.rFinger1, this.rFinger2, this.rFinger3, this.rFinger4, this.rFinger5,
+			this.lFinger1, this.lFinger2, this.lFinger3, this.lFinger4, this.lFinger5}) {
+			part.yScale = claw;
+		}
+		float amp = Mth.sin(p * Mth.PI) * 0.55F + (1.0F - p) * 0.25F;
+		float headX = Mth.sin(t * 2.7F) * amp, headY = Mth.cos(t * 1.9F) * amp * 0.8F, headZ = Mth.cos(t * 3.1F) * amp * 0.6F;
+		for (ModelPart part : new ModelPart[] {this.head, this.nose, this.snout, this.teethU, this.teethL, this.mouth, this.lEar, this.rEar,
+			this.sideburnL, this.sideburnR}) {
+			part.xRot += headX;
+			part.yRot += headY;
+			part.zRot += headZ;
+		}
+		float rArmX = Mth.sin(t * 2.2F + 1.0F) * amp * 1.4F, rArmZ = Mth.cos(t * 3.4F) * amp * 0.7F;
+		for (ModelPart part : new ModelPart[] {this.rArmA, this.rArmB, this.rArmC, this.rHand, this.rFinger1, this.rFinger2, this.rFinger3,
+			this.rFinger4, this.rFinger5}) {
+			part.xRot += rArmX;
+			part.zRot += rArmZ;
+		}
+		float lArmX = Mth.sin(t * 2.5F + 2.0F) * amp * 1.4F, lArmZ = -Mth.cos(t * 2.9F + 0.5F) * amp * 0.7F;
+		for (ModelPart part : new ModelPart[] {this.lArmA, this.lArmB, this.lArmC, this.lHand, this.lFinger1, this.lFinger2, this.lFinger3,
+			this.lFinger4, this.lFinger5}) {
+			part.xRot += lArmX;
+			part.zRot += lArmZ;
+		}
+		this.chest.xRot += Mth.sin(t * 2.3F) * amp * 0.5F;
+		this.abdomen.xRot += Mth.cos(t * 2.9F) * amp * 0.4F;
+		this.root().zRot = Mth.sin(t * 3.3F) * amp * 0.15F;
+		this.root().xRot = Mth.sin(t * 1.7F) * amp * 0.1F;
 	}
 }

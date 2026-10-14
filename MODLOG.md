@@ -871,3 +871,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   only under them), and every few days a supercell puts down a tornado (or a monster) that lifts and flings everything
   near it and tears up the land, whole trees included; dust devils in deserts. Storm bell, weathervane and barometer. Wind users ride a
   tornado's winds and shove one off course with the Cyclone Lance (`kingdoms/MODLOG.md`).
+- **0.10.3, vampires and werewolves, stage 1: vampires (Kingdoms 0.7.0):** one Elder Vampire per world, an ordinary
+  villager by day who hunts anyone (kings too) at night; the bitten who survive turn at the next nightfall as feeders,
+  abstainers or hunters of their own kind; the Elder flies as a bat. Stage 2: the wolf's curse in villagers and folk,
+  who change under the full moon (a grotesque change, each beast its own size, build and coat). Stage 3: players turn
+  by a vampire's bite or take the wolf's curse by ritual (bone, campfires, full moon); the change tears 30% of your armour's durability
+    (it breaks or falls off); the cure for both is a rare priest's quest. Plan: `docs/Vampires-Plan.md` (`kingdoms/MODLOG.md`).

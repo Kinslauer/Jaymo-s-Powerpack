@@ -178,6 +178,15 @@ public final class JaymosKingdoms implements ModInitializer {
 		Omens.register();
 		// 0.6.12: natural disasters, stage 1: storm fronts, tornadoes, the storm bell, weathervane and barometer
 		com.jaymoskingdoms.disasters.Disasters.register();
+		// 0.7.0: vampires: the Elder, the bite and the turned (their attachments)
+		LOGGER.debug("vampire attachments: {} {} {}", Vampires.VAMPIRE, Vampires.BITTEN, Vampires.ELDER);
+		Vampires.register();
+		// 0.7.0: lycanthropy: the cursed change under the full moon (their attachments)
+		LOGGER.debug("lycan attachments: {} {}", Lycans.CURSE, Lycans.FORCED);
+		Lycans.register();
+		// 0.7.0: players as vampires (by a bite) and werewolves (by ritual)
+		VampirePlayers.register();
+		WerewolfPlayers.register();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();
 			Gatherers.clear();

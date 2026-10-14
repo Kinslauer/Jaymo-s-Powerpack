@@ -2519,3 +2519,71 @@ earthquakes, relief quests, forecasts).
   tornado on the action bar. Art: `tools/gen_disasters.py` (models from vanilla's block textures).
 - Ops: `/kingdom disaster <storm|thunder|supercell|dust_devil|tornado|monster|clear>` (a cell overhead, or a
   tornado 60 blocks ahead coming your way).
+
+## 0.7.0: vampires, stage 1 of the 0.10.0 drop (pack 0.10.3)
+Plan and open questions: `docs/Vampires-Plan.md`. All in `Vampires` (tuning at the top).
+- **The Elder.** One per world (`elder_vampire` on the Overworld). From day 6, by day, a grown villager 20-64 blocks
+  from a player becomes him (+20 max health). By day he's himself; at night (12800-23200) he hunts the nearest grown
+  person within 24 blocks (villagers, MCA's, any realm's folk, rulers included; never children), holds them (Slowness
+  VI) and bites every second for 5 (healing 3/4 of it) until they die, rests 2 minutes, and hunts again. Slain (or
+  cured), another may come 30 days later.
+- **The bite** (`vampire_bitten`): a person bitten who lives turns at the next nightfall, rolled: feeder 50% (hunts
+  each night until it's killed once), abstainer 30% (sleeps; after 3 nights unfed it bites someone once and lets go),
+  hunter 20% (goes for any vampire that's shown itself, with claws). Turned vampires get +8 max health. Killed
+  outright, the victim stays dead. Players bitten only get Weakness and Hunger for now (they turn in stage 3).
+- **Shown.** A vampire hunting or fighting shows red eyes (dust particles) and drains with blood and a drinking sound;
+  till dawn guards go for it (`Folk` targets, `MobCombat.foe`), villagers run from it crying who it is
+  (`talk.jaymoskingdoms.vampire.cry.*`), and whoever it attacks fights back. Hurt by someone, it fights them with its
+  claws; under 30% health it runs. At night it heals 0.5 a second when left alone. Fire hurts it twice over. By day it
+  has Weakness and passes for the living. Villagers are driven by their brain's walk target, folk by their target.
+- **Bat form** (Andy): the Elder, his prey 12-48 blocks off, bursts into a bat (smoke, a no-AI vanilla bat tagged
+  `jaymoskingdoms_elder_bat`; he's hidden: invisible, no gravity, no physics, carried along under it), flies at 0.7
+  blocks a tick 5 blocks over the higher end, drops onto his prey and changes back beside them. Under 30% health he
+  flies 32 blocks away from whoever hurt him. In flight he can't be hurt; a blow to the bat lands him and he takes
+  twice it. 30 s between changes, 20 s at most a flight, and he lands at dawn. A flight cut by a restart ends on load.
+- Ops: `/kingdom vampire elder | turn <feeder|abstainer|hunter> | cure | where`.
+
+### Stage 2: lycanthropy (still Kingdoms 0.7.0)
+All in `Lycans` (tuning at the top) and the legend `Werewolf` (Mo' Creatures port), now able to be someone.
+- **The curse** (`lycanthropy` attachment: coat, size 0.8-1.4, build lean/middling/heavy, last night changed) lies in
+  villagers (MCA's too) and realms' folk. Each dusk from day 4, 15% that it turns up in someone 20-64 blocks from a
+  player. A cursed beast's bite that someone survives passes it on 40% of the time. Vampires can't carry it; the cursed
+  can't be turned by a vampire's bite. Coat by where they live: timber in the cold, brown in the heat, any elsewhere;
+  1 in 20 fiery.
+- **The change**, every full moon (`EnvironmentAttributes.MOON_PHASE`; an op's `/kingdom werewolf moon` calls one
+  tonight), each within 10 s of moonrise: they stop, freeze and convulse for 2.5 s (jerking head and body, bones
+  cracking, cries, bits of fur), then the beast tears out (smoke, blood, a crack) and goes on changing for 3.5 s,
+  frozen: `Werewolf.beastness` drives the model's muzzle, ears, sideburns, claws and tail growing out of nothing, the
+  head and arms thrashing and the body convulsing hardest at first, and the body swelling from 65% to full size; a
+  growl halfway, a howl-whine at the end. Its size is the SCALE attribute, its build widens or narrows it, its health
+  grows with both.
+- The person rides hidden inside (invisible, no AI, no gravity, no physics, carried each tick, can't be hurt). The
+  beast hunts players and villagers (not hidden ones) and any vampire showing itself. Kill it and the person dies
+  with it, where it fell. At dawn it shrinks back over 3 s (the same animation backwards) and the person is left on
+  the ground: Slowness II and Weakness II for a minute, Nausea. Nobody near (not entity-ticking): they're simply
+  back. A restart mid-night puts them back at once; the leftover beast is discarded when it loads.
+- Ops: `/kingdom werewolf curse | change | cure | moon` (nearest within 16 blocks).
+
+### Stage 3: players (still Kingdoms 0.7.0)
+- **Vampire by bite** (`VampirePlayers`): the Elder and feeders now hunt survival players too, and bite them (claws
+  only for vampires, and for a non-person who attacks them). A bitten player turns at the next nightfall (dying first
+  cures it; the wolf-cursed can't turn). At night: Strength I, Speed I, Night Vision. By day under open sky: Weakness;
+  3000-9000 with a bare head they catch fire. Sneak + right-click a grown villager or folk with an empty hand (from the
+  front: Pickpocket has the back) to drink every second: 4 damage, +4 food, +1.5 saturation, +3 health, and the
+  bitten turn if they live. Two nights without blood: Hunger and Weakness till they drink. Seen by that realm's
+  people it's a heavy crime (`Theft.Crime.BLOODLETTING`); at night they show themselves and guards hunt them till dawn
+  (`Folk` player targets, `MobCombat.foe`).
+- **Werewolf by ritual** (`WerewolfPlayers`): full moon, night, Overworld, under the sky, 4+ lit campfires within 5
+  blocks, sneak and use a bone: the curse (`lycanthropy`, kept through death) and the change at once. Every full
+  moon the change is forced and lasts till dawn; after 3 moons `U` changes at will (and back), never against the
+  moon. The change: 2 s doubled over (Nausea, held still, bones cracking), then the beast tears out: a no-AI
+  `Werewolf` puppet (their own size, build, coat; updated every tick, `updateInterval(1)`) stands in for them for
+  everyone else, while they're invisible; the puppet's change animation plays as for villagers. As the beast:
+  Strength II, Speed I, Jump Boost II, Resistance I, Night Vision, Hunger, +10 max health; the change tears 30% of
+  each armour piece's max durability (Andy): if that finishes it, it breaks, else it falls at their feet; armour put on
+  as the beast just drops; held items go to the inventory (claws); a kill (not a monster) feeds them 6 + 0.8. Blows to the puppet land on them;
+  guards hunt it, villagers flee it. At dawn it shrinks back (Slowness, Weakness, Nausea after). Their own puppet
+  isn't drawn for them in first person.
+- **The cure** for both (Andy): a rare quest from a priest (`Cures`). A quarter of clerics know the old rite (fixed by
+  who they are); ask one for work while bitten, turned or cursed and they set the hunt instead: slay 2 vampires among
+  the living, or 1 cursed werewolf in its beast shape (players don't count). Turn it in and the rite lifts the curse.

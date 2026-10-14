@@ -59,8 +59,16 @@ public class Werewolf extends LegendMonster {
 	static final float FIRE_SECONDS = 4.0F;
 
 	private static final EntityDataAccessor<Boolean> HUMAN = SynchedEntityData.defineId(Werewolf.class, EntityDataSerializers.BOOLEAN);
+	/** (0.7.0) A cursed one's change ({@link com.jaymoskingdoms.Lycans}): ticks left changing in (positive) or back (negative). */
+	private static final EntityDataAccessor<Integer> CHANGE = SynchedEntityData.defineId(Werewolf.class, EntityDataSerializers.INT);
+	/** (0.7.0) Its build: 0 lean, 1 middling, 2 heavy. */
+	private static final EntityDataAccessor<Integer> BUILD = SynchedEntityData.defineId(Werewolf.class, EntityDataSerializers.INT);
+	/** (0.7.0) How long a cursed one's change takes, each way (ticks). */
+	public static final int CURSE_IN_TICKS = 70, CURSE_OUT_TICKS = 60;
 
 	private int changing;
+	/** (0.7.0) The cursed villager or folk this is, hidden inside it till dawn ({@link com.jaymoskingdoms.Lycans}); null for a wild one. */
+	private java.util.@Nullable UUID host;
 
 	public Werewolf(EntityType<? extends Werewolf> type, Level level) {
 		super(type, level);
@@ -114,13 +122,19 @@ public class Werewolf extends LegendMonster {
 		});
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true,
 			(target, level) -> !this.isHuman() && level.getDifficulty() != Difficulty.PEACEFUL));
-		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true, (target, level) -> !this.isHuman()));
+		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true,
+			(target, level) -> !this.isHuman() && !target.isInvisible()));
+		// (0.7.0) the cursed hate vampires: one that's shown itself is torn into
+		this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.PathfinderMob.class, true,
+			(target, level) -> this.host != null && com.jaymoskingdoms.Vampires.exposed(target)));
 	}
 
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder entityData) {
 		super.defineSynchedData(entityData);
 		entityData.define(HUMAN, true);
+		entityData.define(CHANGE, 0);
+		entityData.define(BUILD, 1);
 	}
 
 	public boolean isHuman() {
@@ -142,9 +156,73 @@ public class Werewolf extends LegendMonster {
 		}
 	}
 
+	/** (0.7.0) It's {@code host} (a cursed villager or folk), changing into the beast now. */
+	public void curse(java.util.UUID host, int build) {
+		this.host = host;
+		this.setHuman(false);
+		this.entityData.set(BUILD, build);
+		this.entityData.set(CHANGE, CURSE_IN_TICKS);
+		this.setPersistenceRequired();
+	}
+
+	public java.util.@Nullable UUID host() {
+		return this.host;
+	}
+
+	public int build() {
+		return this.entityData.get(BUILD);
+	}
+
+	/** (0.7.0) A swipe of its claws (a werewolf player's beast, as they strike). */
+	public void claw() {
+		this.swingArm(this.nextArm());
+	}
+
+	/** (0.7.0) A tick of the change, for a beast that has no mind of its own (a werewolf player's). */
+	public void stepChange() {
+		int c = this.change();
+		if (c != 0) {
+			this.entityData.set(CHANGE, c > 0 ? c - 1 : c + 1);
+		}
+	}
+
+	/** (0.7.0) Begins changing back (at dawn). */
+	public void changeBack() {
+		if (this.entityData.get(CHANGE) >= 0) {
+			this.entityData.set(CHANGE, -CURSE_OUT_TICKS);
+		}
+	}
+
+	/** (0.7.0) Ticks left changing (in: positive; back: negative; 0 when it's the beast). */
+	public int change() {
+		return this.entityData.get(CHANGE);
+	}
+
+	/** (0.7.0) How much of the beast shows (0 the person, 1 the beast), for the model. */
+	public float beastness(float partialTicks) {
+		int c = this.change();
+		if (c > 0) {
+			return net.minecraft.util.Mth.clamp(1.0F - (c - partialTicks) / CURSE_IN_TICKS, 0.0F, 1.0F);
+		}
+		if (c < 0) {
+			return net.minecraft.util.Mth.clamp((-c - partialTicks) / CURSE_OUT_TICKS, 0.0F, 1.0F);
+		}
+		return 1.0F;
+	}
+
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
+		if (this.host != null) {
+			// (a cursed one keeps the beast all night; Lycans turns it back at dawn)
+			int c = this.change();
+			if (c != 0) {
+				this.getNavigation().stop();
+				this.setTarget(null);
+				this.entityData.set(CHANGE, c > 0 ? c - 1 : c + 1);
+			}
+			return;
+		}
 		boolean night = level.isDarkOutside();
 		if (this.changing > 0) {
 			this.getNavigation().stop();
@@ -184,7 +262,13 @@ public class Werewolf extends LegendMonster {
 
 	@Override
 	public boolean doHurtTarget(ServerLevel level, Entity target) {
+		if (this.host != null && this.change() != 0) {
+			return false;
+		}
 		boolean hit = super.doHurtTarget(level, target);
+		if (hit && this.host != null) {
+			com.jaymoskingdoms.Lycans.bite(level, this, target);
+		}
 		if (hit && this.coat() == FIRE_COAT) {
 			target.igniteForSeconds(FIRE_SECONDS);
 		}
@@ -198,7 +282,7 @@ public class Werewolf extends LegendMonster {
 
 	@Override
 	public boolean removeWhenFarAway(double distSqr) {
-		return !this.isHuman() && super.removeWhenFarAway(distSqr);
+		return this.host == null && !this.isHuman() && super.removeWhenFarAway(distSqr);
 	}
 
 	static WolfSoundVariant.WolfSoundSet sounds(SoundSet set) {
@@ -237,11 +321,20 @@ public class Werewolf extends LegendMonster {
 	protected void addAdditionalSaveData(ValueOutput output) {
 		super.addAdditionalSaveData(output);
 		output.putBoolean("human", this.isHuman());
+		if (this.host != null) {
+			output.putString("host", this.host.toString());
+			output.putInt("build", this.build());
+		}
 	}
 
 	@Override
 	protected void readAdditionalSaveData(ValueInput input) {
 		super.readAdditionalSaveData(input);
 		this.setHuman(input.getBooleanOr("human", true));
+		String host = input.getStringOr("host", "");
+		if (!host.isEmpty()) {
+			this.host = java.util.UUID.fromString(host);
+			this.entityData.set(BUILD, input.getIntOr("build", 1));
+		}
 	}
 }
