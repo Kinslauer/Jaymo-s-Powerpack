@@ -99,14 +99,15 @@ public final class WebTendrilCombos {
 	public static final double THRASH_FORWARD = 2.0, THRASH_SIDE = 0.7, THRASH_UP = 1.8, THRASH_SPLASH = 1.6;
 	static final float THRASH_SPLASH_DAMAGE = 5.0F, THRASH_SHAKE = 0.8F;
 	/**
-	 * Barrage: the held creature pinned this far ahead and below the eyes; a stab every {@code BARRAGE_EVERY} ticks
+	 * Barrage: the held creature pinned this far ahead and below the eyes; a stab every {@code BARRAGE_EVERY} ticks (one
+	 * tendril at a time, taking turns; Andy: one stab per half second)
 	 * (its own i-frames ignored), {@code BARRAGE_DAMAGE} at first, rising to {@code BARRAGE_DAMAGE_MAX} after
 	 * {@code BARRAGE_RAMP_TICKS} of holding. It lets go after {@code BARRAGE_MAX_TICKS} at most. A tendril's stab cycle on
 	 * screen is {@code BARRAGE_CYCLE} ticks.
 	 */
 	public static final double BARRAGE_PIN_FORWARD = 2.0, BARRAGE_PIN_DROP = 0.6;
-	public static final int BARRAGE_EVERY = 3, BARRAGE_RAMP_TICKS = 60, BARRAGE_MAX_TICKS = 160;
-	public static final float BARRAGE_CYCLE = 6.0F;
+	public static final int BARRAGE_EVERY = 10, BARRAGE_RAMP_TICKS = 60, BARRAGE_MAX_TICKS = 160;
+	public static final float BARRAGE_CYCLE = BARRAGE_EVERY;
 	static final float BARRAGE_DAMAGE = 3.0F, BARRAGE_DAMAGE_MAX = 9.0F, BARRAGE_SHAKE = 0.35F;
 	/** Blood (dust colour). */
 	static final int BLOOD = 0x7A0A0A;

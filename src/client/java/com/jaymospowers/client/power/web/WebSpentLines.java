@@ -22,7 +22,9 @@ import net.minecraft.world.phys.Vec3;
  * Spent web lines. When a swing web, a zip or a whip lets go, its line doesn't vanish: it stays stuck where it hit,
  * goes slack and falls, draping down from the anchor and swaying, then comes loose, fades and breaks up into wisps.
  * Purely visual, on each client: every player's lines (from the synced lines, or the local player's own webs and pull)
- * leave one behind. A line stuck to something that moves (a yank, a whip) falls free at once.
+ * leave one behind. A line stuck to something that moves (a yank, a whip) falls free at once. The Yank's lead, let go
+ * aimed at a block, is tied off there instead (a hitch): it leaves nothing behind then, only once the hitch breaks or
+ * the creature on it is gone.
  */
 final class WebSpentLines {
 	/** Points along a spent line (the first is the stuck end). */
@@ -59,9 +61,21 @@ final class WebSpentLines {
 		}
 	}
 
-	/** A hand's line as last seen: where it was stuck (on something that moves: {@code loose}), and where it left the hand. */
-	private record Seen(Vec3 anchor, Vec3 hand, boolean dark, boolean loose) {
+	/**
+	 * A hand's line as last seen: where it was stuck (on something that moves: {@code loose}), and where it left the hand;
+	 * on the Yank's lead, the creature it holds ({@code -1} otherwise) and how many hitches that creature had then.
+	 */
+	private record Seen(Vec3 anchor, Vec3 hand, boolean dark, boolean loose, int lead, int hitches) {
 	}
+
+	/** A lead just let go: if its creature turns up with one more hitch within {@code LEAD_WAIT} ticks, it was tied off. */
+	private record Let(Seen seen, int ticks) {
+	}
+
+	private static final int LEAD_WAIT = 4;
+	private static final List<Let> LET_GO = new ArrayList<>();
+	/** Every hitched creature's lines as last seen (creature id → where each is tied, and where the creature was). */
+	private static final Map<Integer, List<Seen>> HITCHES = new HashMap<>();
 
 	private static final List<Spent> LINES = new ArrayList<>();
 	/** Keyed by player id × 2 + hand. */
@@ -72,11 +86,13 @@ final class WebSpentLines {
 	private WebSpentLines() {
 	}
 
-	static void tick(Minecraft minecraft) {
+	static void tick(Minecraft minecraft, List<net.minecraft.world.entity.Entity> hitched) {
 		ClientLevel level = minecraft.level;
 		if (level == null) {
 			LINES.clear();
 			SEEN.clear();
+			LET_GO.clear();
+			HITCHES.clear();
 			return;
 		}
 		// lines that just let go (swing webs, zips, whips) leave themselves behind
@@ -89,7 +105,10 @@ final class WebSpentLines {
 					continue;
 				}
 				int key = player.getId() * 2 + hand;
-				Seen seen = new Seen(end, WebLineRenderer.handPos(minecraft, player, hand, 1.0F), dark, onEntity(minecraft, player, hand));
+				Integer lead = hand == WebNet.MAIN && player.getAttached(WebPower.line(hand)) == null ? player.getAttached(WebPower.TETHER) : null;
+				int leadId = lead == null ? -1 : lead;
+				Seen seen = new Seen(end, WebLineRenderer.handPos(minecraft, player, hand, 1.0F), dark, onEntity(minecraft, player, hand),
+					leadId, leadId < 0 ? 0 : hitchCount(level.getEntity(leadId)));
 				Seen before = SEEN.get(key);
 				if (before != null && !before.loose() && !seen.loose() && before.anchor().distanceToSqr(end) > RECAST_JUMP * RECAST_JUMP) {
 					spend(before);
@@ -99,11 +118,29 @@ final class WebSpentLines {
 		}
 		for (Map.Entry<Integer, Seen> entry : SEEN.entrySet()) {
 			if (!now.containsKey(entry.getKey())) {
-				spend(entry.getValue());
+				if (entry.getValue().lead() >= 0) {
+					// the lead let go: wait and see whether it was tied off to a block
+					LET_GO.add(new Let(entry.getValue(), 0));
+				} else {
+					spend(entry.getValue());
+				}
 			}
 		}
 		SEEN.clear();
 		SEEN.putAll(now);
+		for (int i = LET_GO.size() - 1; i >= 0; i--) {
+			Let let = LET_GO.get(i);
+			if (hitchCount(level.getEntity(let.seen().lead())) > let.seen().hitches()) {
+				// tied off: it lives on as the hitch, and falls only when that goes
+				LET_GO.remove(i);
+			} else if (let.ticks() + 1 >= LEAD_WAIT) {
+				LET_GO.remove(i);
+				spend(let.seen());
+			} else {
+				LET_GO.set(i, new Let(let.seen(), let.ticks() + 1));
+			}
+		}
+		hitches(level, hitched);
 		if (minecraft.isPaused()) {
 			return;
 		}
@@ -115,6 +152,41 @@ final class WebSpentLines {
 			}
 			step(level, line);
 		}
+	}
+
+	private static int hitchCount(net.minecraft.world.entity.@org.jspecify.annotations.Nullable Entity entity) {
+		List<com.jaymospowers.power.web.WebHitches.Line> lines = entity == null ? null : entity.getAttached(WebPower.HITCH);
+		return lines == null ? 0 : lines.size();
+	}
+
+	/**
+	 * Hitch lines that broke (snapped, cut, burnt, or the creature on it gone) since last tick: each is left hanging
+	 * from where it was tied, its free end where the creature was, then falls and fades like any other.
+	 */
+	private static void hitches(ClientLevel level, List<net.minecraft.world.entity.Entity> hitched) {
+		Map<Integer, List<Seen>> now = new HashMap<>();
+		for (net.minecraft.world.entity.Entity entity : hitched) {
+			List<com.jaymospowers.power.web.WebHitches.Line> lines = entity.getAttached(WebPower.HITCH);
+			if (lines == null || entity.isRemoved()) {
+				continue;
+			}
+			Vec3 center = entity.position().add(0.0, entity.getBbHeight() * 0.5, 0.0);
+			List<Seen> seen = new ArrayList<>();
+			for (com.jaymospowers.power.web.WebHitches.Line line : lines) {
+				seen.add(new Seen(line.anchor(), center, line.dark(), false, -1, 0));
+			}
+			now.put(entity.getId(), seen);
+		}
+		for (Map.Entry<Integer, List<Seen>> entry : HITCHES.entrySet()) {
+			List<Seen> still = now.getOrDefault(entry.getKey(), List.of());
+			for (Seen before : entry.getValue()) {
+				if (still.stream().noneMatch(s -> s.anchor().distanceToSqr(before.anchor()) < 1.0E-4)) {
+					spend(before);
+				}
+			}
+		}
+		HITCHES.clear();
+		HITCHES.putAll(now);
 	}
 
 	/** That hand's line is stuck to an entity (a yank, a whip), not to a fixed point. */

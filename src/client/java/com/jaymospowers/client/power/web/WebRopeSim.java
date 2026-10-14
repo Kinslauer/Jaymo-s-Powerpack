@@ -33,6 +33,13 @@ final class WebRopeSim {
 	static final double SKIN = 0.03;
 	/** An end that jumps further than this (blocks) in a tick is a new line: the rope starts over. */
 	static final double RESET_JUMP = 3.0;
+	/**
+	 * A line with no more than {@code TAUT_SLACK} blocks of slack is taut: drawn dead straight, the way it sticks. From
+	 * there to {@code LOOSE_SLACK} it eases into hanging free (a chain of points alone never pulls quite straight under
+	 * gravity: a long one sagged even with no slack at all). {@code TAUT_PULL}: share of the way a taut line's points are
+	 * drawn straight each tick.
+	 */
+	static final double TAUT_SLACK = 0.3, LOOSE_SLACK = 2.0, TAUT_PULL = 0.6;
 	// ================================================================================================================
 
 	private static final class Rope {
@@ -69,6 +76,7 @@ final class WebRopeSim {
 		rope.anchor = anchor;
 		rope.length = Math.max(span * 0.999, length);
 		Rope r = rope;
+		double taut = taut(r.length, span);
 		int last = r.now.length - 1;
 		// between the last two ticks, with the ends where they are this frame (any gap shared out along it)
 		Vec3[] points = new Vec3[r.now.length];
@@ -78,13 +86,18 @@ final class WebRopeSim {
 		Vec3 handGap = hand.subtract(points[0]), anchorGap = anchor.subtract(points[last]);
 		for (int i = 0; i <= last; i++) {
 			double t = i / (double)last;
-			points[i] = points[i].add(handGap.scale(1.0 - t)).add(anchorGap.scale(t)).subtract(camera);
+			points[i] = points[i].add(handGap.scale(1.0 - t)).add(anchorGap.scale(t)).lerp(hand.lerp(anchor, t), taut).subtract(camera);
 		}
 		return t -> {
 			double at = Mth.clamp(t, 0.0, 1.0) * last;
 			int i = Math.min(last - 1, (int)at);
 			return points[i].lerp(points[i + 1], at - i);
 		};
+	}
+
+	/** 1 for a taut line (drawn straight), easing to 0 for one with plenty of slack (hanging free). */
+	private static double taut(double length, double span) {
+		return 1.0 - Mth.clamp((length - span - TAUT_SLACK) / (LOOSE_SLACK - TAUT_SLACK), 0.0, 1.0);
 	}
 
 	private static Rope start(Vec3 hand, Vec3 anchor) {
@@ -168,6 +181,14 @@ final class WebRopeSim {
 					p[i] = out;
 					resting[i] = true;
 				}
+			}
+		}
+		double taut = taut(rope.length, rope.hand.distanceTo(rope.anchor));
+		if (taut > 0.0) {
+			// taut: pulled straight (and its swing stilled), so it's already straight when it's drawn
+			for (int i = 1; i < last; i++) {
+				p[i] = p[i].lerp(rope.hand.lerp(rope.anchor, i / (double)last), taut * TAUT_PULL);
+				old[i] = old[i].lerp(p[i], taut);
 			}
 		}
 		for (int i = 1; i < last; i++) {

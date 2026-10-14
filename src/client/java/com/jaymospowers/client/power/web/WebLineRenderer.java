@@ -55,18 +55,21 @@ final class WebLineRenderer {
 	/** End of every client tick: remember which creatures are hitched. */
 	static void tick(Minecraft minecraft) {
 		HITCHED.clear();
-		WebSpentLines.tick(minecraft);
+		if (minecraft.level != null) {
+			for (net.minecraft.world.entity.Entity entity : minecraft.level.entitiesForRendering()) {
+				if (entity.getAttached(com.jaymospowers.power.web.WebPower.HITCH) != null) {
+					HITCHED.add(entity);
+				}
+			}
+		}
+		// (spent lines go by which creatures are hitched, to leave a broken hitch's line behind)
+		WebSpentLines.tick(minecraft, HITCHED);
 		if (minecraft.level == null) {
 			return;
 		}
 		if (!minecraft.isPaused()) {
 			drip(minecraft);
 			WebRopeSim.tick(minecraft.level);
-		}
-		for (net.minecraft.world.entity.Entity entity : minecraft.level.entitiesForRendering()) {
-			if (entity.getAttached(com.jaymospowers.power.web.WebPower.HITCH) != null) {
-				HITCHED.add(entity);
-			}
 		}
 	}
 

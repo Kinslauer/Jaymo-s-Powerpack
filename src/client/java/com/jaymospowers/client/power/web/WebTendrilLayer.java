@@ -91,6 +91,8 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 	 * cocked this far up and out) until {@code STAB_COCK} of its cycle, thrust in (this much longer) by {@code STAB_HIT}.
 	 */
 	private static final float STAB_COCK = 0.45F, STAB_HIT = 0.6F, STAB_SHORT = 0.6F, STAB_LONG = 1.25F, STAB_UP = 0.5F, STAB_OUT = 0.45F;
+	/** Barrage: how far a tendril waiting its turn is drawn back (0-1 of a full cock). */
+	private static final float STAB_POISED = 0.4F;
 	/** The bulge (thickness pulse) every tendril has, wild or not. */
 	private static final float PULSE = 0.04F;
 	/** Combos: a clap's tendrils hauled out this wide each side (yaw) and this much up; a shatter's reared this far apart. */
@@ -364,12 +366,17 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 				// the top two (right, left) are the ones that reach out and hold: while holding, they're drawn reaching
 				base.visible = !(t == 0 && (tendrils.held() & 1) != 0 || t == 1 && (tendrils.held() & 2) != 0);
 				if (combo == WebTendrilCombos.BARRAGE && base.visible && tendrils.legs() == null && tendrils.tethers() == null) {
-					// stabbing, over and over: cocked back, then driven straight into it, each on its own beat
-					float beat = state.ageInTicks / WebTendrilCombos.BARRAGE_CYCLE + t * 0.618F;
+					// stabbing, over and over: the free tendrils take turns, one stab a beat, cocked back then driven
+					// straight into it; the rest wait poised, half drawn back
+					float beat = state.ageInTicks / WebTendrilCombos.BARRAGE_CYCLE;
+					boolean turn = t == FIRST_TETHER + Math.floorMod(Mth.floor(beat), ROOTS.length - FIRST_TETHER);
 					float p = beat - Mth.floor(beat);
 					float reach;
 					float cock;
-					if (p < STAB_COCK) {
+					if (!turn) {
+						cock = STAB_POISED;
+						reach = Mth.lerp(cock, 1.0F, STAB_SHORT);
+					} else if (p < STAB_COCK) {
 						cock = smooth(p / STAB_COCK);
 						reach = Mth.lerp(cock, 1.0F, STAB_SHORT);
 					} else if (p < STAB_HIT) {
