@@ -880,7 +880,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.10.7, sense bolts, takeovers see it through:** the counter's text is gone; a dodge flashes three faint lightning
   bolts over your head (top of the screen in first person) while you can counter. Symbiote takeovers no longer end on
   a timer: it keeps the wheel until its prey is dead (or gets 64 blocks away), its look is had, or its kill is carried
-  and eaten, unless you break free. Hunts no longer give up after 20 s. A corpse in a tendril's grip goes into your arms on a plain right click (no Sneak).
+  and eaten, unless you break free, which is far harder now (80 presses, 6 fewer per ability earned, fading faster).
+  Hunts no longer give up after 20 s. A corpse in a tendril's grip goes into your arms on a plain right click (no Sneak).
   See docs/web.md.
 - **0.10.4, cursed werewolves' coats (Kingdoms 0.7.1):** cursed villagers' beasts are mangy, scarred or patchy, with
   the torn remains of their clothes on, dyed by their trade (`kingdoms/MODLOG.md`).

@@ -161,11 +161,11 @@ public final class WebSymbiote {
 	/**
 	 * Once it takes over it keeps you until it's done with you: no key answers. With {@code BREAK_FREE_ABILITIES} of its
 	 * abilities earned, fighting it (any key, spammed) breaks its hold: {@code BREAK_FREE_BASE} presses,
-	 * {@code BREAK_FREE_PER_ABILITY} fewer for each ability earned (12 with all six), the count fading {@code STRUGGLE_FADE}
+	 * {@code BREAK_FREE_PER_ABILITY} fewer for each ability earned (44 with all six), the count fading {@code STRUGGLE_FADE}
 	 * a tick. Breaking free stresses it ({@code BREAK_FREE_STRESS}) and costs a little bond.
 	 */
-	public static final int BREAK_FREE_ABILITIES = 3, BREAK_FREE_BASE = 36, BREAK_FREE_PER_ABILITY = 4, BREAK_FREE_STRESS = 10;
-	public static final float STRUGGLE_FADE = 0.12F;
+	public static final int BREAK_FREE_ABILITIES = 3, BREAK_FREE_BASE = 80, BREAK_FREE_PER_ABILITY = 6, BREAK_FREE_STRESS = 10;
+	public static final float STRUGGLE_FADE = 0.25F;
 	/**
 	 * It narrates what it does, more as the bond grows: each act has a {@code NARRATE_MIN} (bond 0) to {@code NARRATE_MAX}
 	 * (full) chance to be spoken, at most once every {@code NARRATE_GAP_MAX} to {@code NARRATE_GAP_MIN} ticks. Each act has

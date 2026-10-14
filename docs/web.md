@@ -666,8 +666,8 @@ whisper, so the vignette, dark screen and growl play each time.
 
 **Takeovers can't be interrupted.** `WebTakeoverInputMixin` zeroes movement while it drives, and clicks, power keys,
 mode, ultimate and the menu key are swallowed. Each fresh press is a struggle (`WebNet.Struggle`): once you've
-earned `BREAK_FREE_ABILITIES` 3 abilities, `BREAK_FREE_BASE` 36 - 4 per ability presses (12 with all six; the
-count fades by `STRUGGLE_FADE` per tick) break its hold, which adds `BREAK_FREE_STRESS` 10 stress. A meter shows on
+earned `BREAK_FREE_ABILITIES` 3 abilities, `BREAK_FREE_BASE` 80 - 6 per ability presses (44 with all six, since 0.10.7; the
+count fades by `STRUGGLE_FADE` 0.25 per tick) break its hold, which adds `BREAK_FREE_STRESS` 10 stress. A meter shows on
 the HUD.
 
 **Takeover combat:** the tendrils do the fighting: `FRENZY_TICKS` 18 strikes every `FRENZY_EVERY` 4 ticks for
