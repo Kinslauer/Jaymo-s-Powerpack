@@ -235,10 +235,13 @@ public final class WindHoverSway {
 		float spread = Math.abs(sway.limbRoll()) * 0.25F;
 		// arms hang loose a little out from the sides (unless they're carrying someone)
 		if (avatar.getData(com.jaymospowers.client.CarryPose.CARRIER_KEY) == null) {
+			// swinging a weapon, they let go for the swing (upright enough here for Better Combat's own)
+			WindFlightSwing.Swing swing = avatar.getData(WindFlightSwing.KEY);
+			float arms = amount * (swing == null ? 1.0F : 1.0F - swing.weight());
 			set(humanoid.rightArm, sway.armPitch() * 0.5F + armLag * 0.8F + drift[0], 0.0F,
-				0.1F + spread + sway.limbRoll() * 0.3F + drift[1] * 0.4F, amount);
+				0.1F + spread + sway.limbRoll() * 0.3F + drift[1] * 0.4F, arms);
 			set(humanoid.leftArm, sway.armPitch() * 0.5F + armLag * 0.8F + drift[1], 0.0F,
-				-0.1F - spread + sway.limbRoll() * 0.3F - drift[0] * 0.4F, amount);
+				-0.1F - spread + sway.limbRoll() * 0.3F - drift[0] * 0.4F, arms);
 		}
 		// legs dangle together, toes down, the right a touch ahead
 		set(humanoid.rightLeg, sway.legPitch() * 0.35F + legLag * 0.9F + 0.06F + drift[2], 0.0F,

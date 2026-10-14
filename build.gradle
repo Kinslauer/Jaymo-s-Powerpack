@@ -189,6 +189,8 @@ dependencies {
 	localRuntime mcaJar
 	// compiled against (for its corpses); required at runtime since 0.8 (fabric.mod.json), touched only via power/web/KitchenCompat
 	compileOnly kitchenJar
+	// compiled against to read Better Combat's attack swings while flying; touched only via client/power/wind/PalAccess
+	compileOnly "maven.modrinth:player-animation-library:xJ30QmpE"
 	packMods.drop(1).findAll { it.dev != false }.each { localRuntime it.dep }
 	packMods.each { packJars it.dep }
 	packModsNoCf.each { localRuntime it.dep; packJars it.dep }

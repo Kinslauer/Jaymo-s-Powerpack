@@ -882,7 +882,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.10.5, grabbable severed parts:** a severed head or limb can be picked up (right-click it with an empty hand, or
   sneak + right-click) and dangles from your right hand as you walk; right-click drops it, sneak + right-click throws
   it, the same as carrying a body. A beheaded player's view goes along with their carried head.
-- **0.10.6, Z Fighter (Andy's idea, our own take; no Dragon Ball mod code or art):** a martial artist who fights
+- **0.10.9, rarer tornadoes (Kingdoms 0.7.2):** only one supercell in ten can put down a tornado now, so one comes
+  about every 60 in-game days instead of every 6. The other supercells still bring their storm (`kingdoms/MODLOG.md`).
+- **0.10.10, Z Fighter (Andy's idea, our own take; no Dragon Ball mod code or art):** a martial artist who fights
   with fists and ki (`power/zfighter`, `docs/Abilities.md`). Ki meter (100, +5 per foe that ever beat him) charged on
   R (hold), spent on Ki Blast (G), Ki Wave (V hold), Flash Step (B) and ki flight (Z, creative-style, drains ki).
   Fists only: a weapon won't strike in his hand (`ZFighterPlayerMixin` on `Player.attack`); strong fists, 5-hit

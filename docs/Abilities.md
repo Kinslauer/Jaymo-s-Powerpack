@@ -203,7 +203,7 @@ power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts
 | 201 | Nadir | R | Beacon | Tap: pick a player anywhere on the server (tap again for the next); they glow through the world for 3 s. Hold 1.5 s: phase to just behind them, across dimensions. 5 s. | |
 | 202 | Nadir | G V B | (later) | Not decided yet. | |
 
-## Z Fighter (0.10.6)
+## Z Fighter (0.10.10)
 
 | Line | Form | Key | Ability | What it does now | Change to |
 |---|---|---|---|---|---|
