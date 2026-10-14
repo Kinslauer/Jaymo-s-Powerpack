@@ -963,3 +963,17 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   and are stone for three days). The Tower (500-800 out; Hermit sells beans, seeds, the radar) climbs to the Lookout in
   the sky, whose Keeper blesses once a day. Its doors lead to the Time Chamber (`jaymospowers:time_chamber`, flat white,
   2x training, fast hunger) and the Verdant World (`jaymospowers:verdant_world`, green-sky plains with villages).
+- **0.10.20, Z Fighter flight poses back (`ZFighterFlightPose`):** the laid-out flight body and the arm pose picked with
+  Z + scroll come on whenever a Z Fighter is actually flying fast (0.7 blocks a tick across or diving, off again under
+  0.35), for his own screen as well as everyone else's, not only while the client's sprint-cruise flag is set. Hovering,
+  taking off and standing he still looks like himself, arms included.
+  The Great Ape stands about 30 blocks tall (scale 17, was 3; `ZFighterScaleMixin` lifts the scale attribute's cap from
+  16 to 20) and grows into it over 4 seconds, swelling smoothly with dust, smoke and a heartbeat, then roars at full
+  size; ending, he shrinks back over 2 seconds.
+  The Great Ape has its own body (`ZFighterApe`, skin from `tools/gen_great_ape.py`): the player is hidden and a shaggy
+  ape stands in his place in his pose (furred head with muzzle, brow and red eyes, barrel chest, long arms, short legs,
+  swinging tail). Grown at least halfway, he stomps: monsters and anything hunting him under his feet take 14 every
+  quarter second and are pressed into the ground.
+  Super hair covers his own: the skin's hat layer is hidden while it shows, and the cap reaches past where that layer
+  sat (0.7 out), with a fringe above the eyes, the whole back of the head and over the ears.
+- Gravity's Z dome is now called the **Immense Field** (was the Training Field): key guide, messages and docs.

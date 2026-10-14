@@ -36,8 +36,7 @@ public final class ZFighterFlightPose {
 	public static final RenderStateDataKey<Pose> KEY = RenderStateDataKey.create(() -> "jaymospowers:zfighter_flight");
 
 	/**
-	 * Someone else flying this fast across (blocks a tick, flat) is taken to be cruising, until he slows below the second
-	 * (the local player's own cruise is known exactly).
+	 * Anyone flying this fast (blocks a tick) is taken to be cruising, laid out flat, until he slows below the second.
 	 */
 	static final double CRUISE_SPEED = 0.7;
 	static final double CRUISE_EXIT_SPEED = 0.35;
@@ -68,25 +67,24 @@ public final class ZFighterFlightPose {
 	private static final java.util.Set<Integer> CRUISING = new java.util.HashSet<>();
 
 	/**
-	 * A Z Fighter sprint-flying: Wind's cruise lays him out and his arms take their pose. Hovering, taking off and standing
-	 * he looks like himself.
+	 * A Z Fighter flying fast: Wind's cruise lays him out flat and his arms take their pose. Hovering, taking off and
+	 * standing he looks like himself. Judged by how fast he's actually moving (for everyone, the local player too, so it
+	 * doesn't hang on how the sprint key is pressed), or by the local player's own sprint-cruise.
 	 */
 	public static boolean cruising(Player player) {
 		if (ZFighterPower.flightPose(player) <= 0) {
 			return false;
 		}
-		if (player == Minecraft.getInstance().player) {
-			return ZFighterFlightClient.cruising();
-		}
-		return CRUISING.contains(player.getId());
+		return CRUISING.contains(player.getId()) || player == Minecraft.getInstance().player && ZFighterFlightClient.cruising();
 	}
 
 	private static void watchCruise(Player player) {
-		double dx = player.getX() - player.xo, dz = player.getZ() - player.zo;
-		double flat = dx * dx + dz * dz;
-		if (ZFighterPower.flightPose(player) <= 0 || flat < CRUISE_EXIT_SPEED * CRUISE_EXIT_SPEED) {
+		double dx = player.getX() - player.xo, dy = player.getY() - player.yo, dz = player.getZ() - player.zo;
+		// across or diving (the take-off burst straight up doesn't count)
+		double speed = dx * dx + dz * dz + (dy < 0.0 ? dy * dy : 0.0);
+		if (ZFighterPower.flightPose(player) <= 0 || speed < CRUISE_EXIT_SPEED * CRUISE_EXIT_SPEED) {
 			CRUISING.remove(player.getId());
-		} else if (flat >= CRUISE_SPEED * CRUISE_SPEED) {
+		} else if (speed >= CRUISE_SPEED * CRUISE_SPEED) {
 			CRUISING.add(player.getId());
 		}
 	}
@@ -110,7 +108,7 @@ public final class ZFighterFlightPose {
 		}
 		for (AbstractClientPlayer player : level.players()) {
 			watchCruise(player);
-			// the arms only take their pose once he's sprint-flying
+			// the arms only take their pose while he's laid out flat (flying fast)
 			int pose = cruising(player) ? ZFighterPower.flightPose(player) : 0;
 			float[] s = STATE.get(player.getId());
 			if (s == null) {

@@ -25,9 +25,9 @@ import net.minecraft.world.phys.HitResult;
  */
 public class WebBall extends ThrowableItemProjectile {
 	/** Direct-hit damage at no charge and at a full charge; things in the splash take up to half that. */
-	public static final float DAMAGE_MIN = 0.5F, DAMAGE_MAX = 10.0F;
+	public static final float DAMAGE_MIN = 2.0F, DAMAGE_MAX = 14.0F;
 	/** The suit's symbiote mass: the same, but it hits much harder the longer it's charged. */
-	public static final float DARK_DAMAGE_MIN = 2.0F, DARK_DAMAGE_MAX = 18.0F;
+	public static final float DARK_DAMAGE_MIN = 3.0F, DARK_DAMAGE_MAX = 22.0F;
 	/**
 	 * Webs left around the splash besides the ones on whoever's caught: many from a quick shot (all splash, little
 	 * sting), few from a charged one.
@@ -43,14 +43,18 @@ public class WebBall extends ThrowableItemProjectile {
 	 * A tapped V: a webshooter pellet, fast and light, a sting and nothing more (no splash, no webs). Damage on a direct
 	 * hit: a web's, and the symbiote's.
 	 */
-	public static final float PELLET_DAMAGE = 1.5F, DARK_PELLET_DAMAGE = 2.5F;
+	public static final float PELLET_DAMAGE = 3.0F, DARK_PELLET_DAMAGE = 4.0F;
 
 	/** 0-1: how long it was charged. Server only. */
 	private float charge;
 	private boolean pellet;
+	/** A web bomb (Sneak + tap V): lobbed, and it cocoons everything around where it bursts (see {@link WebStrength#bomb}). */
+	private boolean bomb;
 	private boolean burst;
 	/** Gravity per tick (a snowball is 0.03): it flies nearly flat. */
 	private static final double GRAVITY = 0.012;
+	/** A web bomb is lobbed like a snowball. */
+	private static final double BOMB_GRAVITY = 0.03;
 	/** Despawns after this many ticks in flight. */
 	private static final int LIFETIME = 100;
 
@@ -73,6 +77,12 @@ public class WebBall extends ThrowableItemProjectile {
 		return this;
 	}
 
+	/** A web bomb (see {@link #bomb}). */
+	public WebBall bomb() {
+		this.bomb = true;
+		return this;
+	}
+
 	@Override
 	protected Item getDefaultItem() {
 		return WebPower.WEB_BALL_ITEM;
@@ -80,7 +90,7 @@ public class WebBall extends ThrowableItemProjectile {
 
 	@Override
 	protected double getDefaultGravity() {
-		return GRAVITY;
+		return this.bomb ? BOMB_GRAVITY : GRAVITY;
 	}
 
 	@Override
@@ -104,6 +114,10 @@ public class WebBall extends ThrowableItemProjectile {
 	private void burst(ServerLevel level, @org.jspecify.annotations.Nullable Entity direct) {
 		this.burst = true;
 		boolean dark = this.dark();
+		if (this.bomb) {
+			WebStrength.bomb(level, this.position(), this.getOwner(), dark);
+			return;
+		}
 		if (this.pellet) {
 			// a pellet stings what it hits, and that's all
 			if (direct != null && direct != this.getOwner()) {
@@ -129,7 +143,10 @@ public class WebBall extends ThrowableItemProjectile {
 				living.hurtServer(level, this.damageSources().thrown(this, owner), hurt);
 			}
 			int ticks = (int)(slowTicks * strength);
-			if (ticks > 20 && living.isAlive()) {
+			if (living == direct && this.charge >= WebStrength.PIN_CHARGE && living.isAlive()) {
+				// an impact web: pinned to the wall behind it, or the floor
+				WebStrength.pin(level, living, this.getDeltaMovement(), this.charge, dark);
+			} else if (ticks > 20 && living.isAlive()) {
 				WebTraps.ensnare(level, living, SLOWNESS_AMPLIFIER, ticks, dark);
 			}
 		}

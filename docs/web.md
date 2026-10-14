@@ -846,3 +846,16 @@ roams, bonds a nearby web user, or with Kitchen waits for the body to rise and t
 
 ### Known gaps / upgrade ideas
 - Feeding when your own hunger bar is full isn't possible: vanilla won't start eating.
+
+## 0.10.21: stronger Web (`WebStrength`)
+Andy asked for a stronger Web (ideas remade from Powerborne Heroes' Spider-Man, which is 1.20.1 Palladium and ARR).
+- **Spider physique** (passive): +3 attack damage, +15% speed, +25% jump, +0.4 knockback resistance, 30% softer
+  landings (fall damage still applies), each scaled by abilities unlocked (a fifth at a fresh awakening).
+- **Impact web**: a Web Shot charged past half pins what it hits against the wall behind it (within 3 blocks) or
+  where it stands, 3-6 s; pinned things take 1.5x damage (`WebLivingEntityMixin`).
+- **Taser web**: V while the Yank web holds something: 4 damage (lightning type), a stun, 1 s between shocks.
+- **Web bomb**: Sneak + tap V lobs a ball that cocoons everything within 4 blocks for 4 s (6 s V cooldown).
+- **Webbed fists**: X (Sneak + X with a symbiote): 10 s of sticky melee; each hit slows harder, the third
+  cocoons for 3 s; 30 s cooldown.
+- Numbers: web shot 2-14 damage (symbiote 3-22), pellets 3 (4), shot cooldown 30-100, zip 40, Yank 80;
+  Yank and entity webs drag bigger things (horses now); Spider-Sense charges 2/2/3/4/5, 7 ascended, 15 s recharge.

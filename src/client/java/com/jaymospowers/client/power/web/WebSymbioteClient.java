@@ -247,8 +247,13 @@ public final class WebSymbioteClient {
 					struggle();
 					continue;
 				}
-				if (player != null && minecraft.gui.screen() == null && !player.isSpectator() && WebSymbiote.isBonded(player) && takeoverTicks <= 0) {
+				if (player != null && minecraft.gui.screen() == null && !player.isSpectator() && WebSymbiote.isBonded(player) && takeoverTicks <= 0
+					&& !player.isShiftKeyDown()) {
 					minecraft.gui.setScreen(new WebSymbioteScreen());
+				} else if (player != null && minecraft.gui.screen() == null && !player.isSpectator() && WebPowerClient.isActive(player)
+					&& takeoverTicks <= 0) {
+					// a web slinger's own Power Skill (Sneak + X in the symbiote): webbed fists
+					ClientPlayNetworking.send(new com.jaymospowers.power.web.WebNet.Fists());
 				} else if (player != null && minecraft.gui.screen() == null && !player.isSpectator()
 					&& com.jaymospowers.client.power.wind.WindPowerClient.isActive(player)) {
 					// the same key is Wind's Tempest Kick

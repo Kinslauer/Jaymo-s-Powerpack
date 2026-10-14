@@ -13,7 +13,7 @@ mid-ability. The HUD is in `client/power/gravity/GravityPowerClient.java`: chips
 | V | Weightless | Toggle. Your gravity drops by 70% and you take 50% less fall damage. It drains hunger and lasts up to 30 s, then a 10 s cooldown (2 s if you switch it off early with V). While it's on, everything within 6 blocks of you is heavy and slowed. Water or an empty hunger bar ends it. |
 | G | Gravity Well | A point where you aim, up to 24 blocks, pulls everything within 7 blocks (mobs, players, items) for 4 s. 14 s cooldown. |
 | B (hold, release) | Crush | Charges over 3 s. While it charges, everything in the zone you aim at (at the charge's current size) is already heavy and slowed. On release, everything around the aim point is slammed down. Radius scales 2.5→5.5 and damage 4→16 with charge, plus Slowness II, and targets weigh 4× as much for 3 s. Cooldown is 6–20 s, depending on the charge. |
-| Z | Training Field | Once the Well (G) is yours. A dome of heavy gravity (5 blocks round) where you aim (24 blocks), for 60 s: everyone in it but you gets Slowness II and an extra pull down in the air. A Z Fighter trains twice as fast in it (TP and form mastery; his blows count as heavy), and every minute one spends in it gives you a use towards mastery. Z again takes it down. 90 s between fields. (`GravityTrainingField`) |
+| Z | Immense Field | Once the Well (G) is yours. A dome of heavy gravity (5 blocks round) where you aim (24 blocks), for 60 s: everyone in it but you gets Slowness II and an extra pull down in the air. A Z Fighter trains twice as fast in it (TP and form mastery; his blows count as heavy), and every minute one spends in it gives you a use towards mastery. Z again takes it down. 90 s between fields. (`GravityTrainingField`) |
 
 ## 0.3.0 fate
 - **Deaths by weight:** a creature you touched with a gravity ability in the last 10 s that then dies from a fall, from
@@ -161,6 +161,15 @@ Ideas from Gravity Control (MIT; a NeoForge 1.21.1 fork of Gravity API), remade 
   try the Ender Dragon (nothing). Fill a Kitchen supply cart and take it by the shafts: it comes, with no slowdown.
   Armor weight: `/give @s iron_chestplate[attribute_modifiers=[{type:"movement_speed",amount:-0.5,operation:"add_multiplied_total",id:"test",slot:"chest"}]]`,
   wear it: no slower after a second; `/power clear @s` and it slows you.
+
+## 0.10.23: The earthboard's ride, refined
+- The board is drawn right under its rider's feet every frame (it used to trail by the server's lag, so it slid out
+  from under them at speed), and turns with the rider's heading since boarding.
+- It banks with the rider's carve and tips with the flight: nose up climbing (10 degrees flat out), down sinking, and
+  down a touch at top speed. The rider tips with it, crouches deeper climbing and rises a little sinking.
+- Every lean and tilt is a damped spring (`GravityBoardPose.SPRING`, `DAMPING`), like Wind's hover sway: a sharp turn
+  swings past and settles instead of snapping, and the forward pitch at speed eases in instead of jittering.
+- Board and rider bob together slowly (`BOB`), less at speed. Stepping off, the board drops square again.
 
 ## Notes and risks
 - Lifting a *player* sends them velocity updates every tick, so it may look jittery on their screen.

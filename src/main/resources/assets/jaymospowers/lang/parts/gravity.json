@@ -35,9 +35,9 @@
 	"power.jaymospowers.gravity.key.ultimate.corrupted.name": "Singularity",
 	"power.jaymospowers.gravity.key.ultimate.ascended_corrupted": "Skyfall: everything around falls up, then slams down",
 	"power.jaymospowers.gravity.key.ultimate.ascended_corrupted.name": "Skyfall",
-	"power.jaymospowers.gravity.key.mode": "Training Field (once the Well is yours): a dome of heavy gravity where you aim, for a minute. Everyone in it but you is slowed and falls fast; a Z Fighter trains twice as fast in it, and each minute one trains there brings you mastery. %5$s again takes it down",
-	"power.jaymospowers.gravity.key.mode.name": "Training Field",
-	"message.jaymospowers.gravity.field": "Training Field: the air grows heavy.",
-	"message.jaymospowers.gravity.field_wait": "The Training Field returns in %s s.",
+	"power.jaymospowers.gravity.key.mode": "Immense Field (once the Well is yours): a dome of heavy gravity where you aim, for a minute. Everyone in it but you is slowed and falls fast; a Z Fighter trains twice as fast in it, and each minute one trains there brings you mastery. %5$s again takes it down",
+	"power.jaymospowers.gravity.key.mode.name": "Immense Field",
+	"message.jaymospowers.gravity.field": "Immense Field: the air grows heavy.",
+	"message.jaymospowers.gravity.field_wait": "The Immense Field returns in %s s.",
 	"message.jaymospowers.gravity.field_trained": "%s trains under your weight."
 }
