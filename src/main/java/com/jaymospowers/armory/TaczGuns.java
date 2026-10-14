@@ -1,8 +1,11 @@
 package com.jaymospowers.armory;
 
 import com.jaymospowers.JaymosPowers;
+import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
+import net.fabricmc.fabric.api.resource.v1.pack.PackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
@@ -30,6 +33,12 @@ public final class TaczGuns {
 		if (!LOADED) {
 			return;
 		}
+		// (0.10.65) TaCZ's gun smith table, statue, target and workbench loot tables use 1.21's block_state_property,
+		// which 26.3 can't read or upgrade, so a server wouldn't load its data at all: 26.3-format copies in an
+		// always-on pack
+		ResourceLoader.registerBuiltinPack(JaymosPowers.id("tacz_fixes"),
+			FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
+			Component.literal("Jaymo's Powers: TaCZ block drops"), PackActivationType.ALWAYS_ENABLED);
 		try {
 			Class.forName("com.tacz.guns.api.resource.ResourceManager")
 				.getMethod("registerExportResource", Class.class, String.class)

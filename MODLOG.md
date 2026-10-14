@@ -1088,3 +1088,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   flat dark base, a tower over the middle that builds up as the cell gathers (thunderstorms and supercells), and a
   pale anvil spread over a supercell's top, leaning downwind. Each tornado hangs from a turning wall cloud
   (`kingdoms/MODLOG.md`).
+- **0.10.65, servers start again with TaCZ:** TaCZ's gun smith table, statue, target and three workbench block loot tables use 1.21's
+  `block_state_property`, which 26.3 can't read (and Moog's on-the-fly upgrader doesn't convert), so a server stopped
+  loading its data. Powers ships 26.3-format copies in an always-on built-in pack (`resourcepacks/tacz_fixes`, only
+  with TaCZ loaded; `armory/TaczGuns`). TaCZ's jar itself is untouched.
