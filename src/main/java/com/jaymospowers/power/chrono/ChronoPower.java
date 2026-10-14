@@ -50,7 +50,7 @@ import net.minecraft.world.phys.Vec3;
  * again to phase through a wall.</li>
  * <li>B, Time Bloom: 5 s of fast-forward for crops, saplings, furnaces, smokers and ovens within 5 blocks, and for
  * your own wounds (they mend {@code BLOOM_HEAL} every {@code BLOOM_HEAL_EVERY} ticks meanwhile).</li>
- * <li>Sneak+B, Fast Forward (0.10.102): you and everyone close by leap to the ruined future and back
+ * <li>Sneak+B, Fast Forward (0.10.103): you and everyone close by leap to the ruined future and back
  * ({@link com.jaymospowers.power.chrono.future.Future}).</li>
  * </ul>
  * The HUD is fed by {@link ChronoSync}.
