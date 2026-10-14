@@ -996,3 +996,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   on landing and droops crouched. Blur's and the Gremlin's tails do the same; Pyre's flames stream back with speed;
   Wisp's tatters and Nadir's mantle billow as they drop; the Gremlin's ears bounce and flop; Bulwark's lower arms
   breathe and swing out of turns; Knell's jaw tendrils hang straight down whichever way it looks.
+  The Wyrm's wings are bigger, each in two halves (10 + 10 long, 14 deep; was one 14x8 sheet): flying they spread
+  about 40 across and the outer halves flex behind each stroke; on the ground they hang from the shoulders and wrap
+  round the body like a cloak, the outer halves folded across the chest, breathing and swaying with the steps, and
+  open again as it leaves the ground (`Wyrm.WRAP_*`). Its tail is longer, three joints (13 + 10 + 8) running down from
+  the back and levelling out near the ground, each joint swinging a beat after the last (`Wyrm.TAIL_REST`). New
+  texture regions from `tools/gen_xenoform.py` (wings at 0,90; tail at 0,106 and 32,106).
