@@ -1,8 +1,18 @@
 package com.jaymospowers.power.chrono;
 
 import com.jaymospowers.JaymosPowers;
+import io.netty.buffer.ByteBuf;
 import java.util.Set;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -21,7 +31,9 @@ import net.minecraft.world.phys.Vec3;
  * (0.10.28) The speedster half of Overclock (V), after the Flash. While Overclock runs:
  * <ul>
  * <li>Sprinting, you're far faster still ({@link #SPRINT_BOOST}) and stride up whole blocks without jumping.</li>
- * <li>Running into a wall holding forward, you run straight up it (the client drives it: {@code ChronoSpeedClient}).</li>
+ * <li>Running into a wall holding forward, you run straight up it (the client drives it: {@code ChronoSpeedClient}).
+ * Since 0.11.37 for as long as you hold forward, with no sideways drift, a hop onto the top, and the body turned onto
+ * the wall, legs running, the way Gravity's wall walk stands on it ({@link #WALL_RUN}, drawn by {@code GravityWalkPose}).</li>
  * <li>Sprinting, water holds you up: you run across it (see {@code ChronoWaterRunMixin}).</li>
  * <li>V again, facing a wall: you vibrate through it, up to {@link #PHASE_DEPTH} blocks thick, to the first space you
  * fit on the other side. Every {@link #PHASE_GAP} ticks at most.</li>
@@ -33,9 +45,13 @@ public final class ChronoSpeed {
 	static final double SPRINT_BOOST = 1.2;
 	/** Extra step height while overclocked (vanilla 0.6, so 1.25 in all: a full block without jumping). */
 	static final double STEP_BOOST = 0.65;
-	/** Wall running: how fast you climb (blocks a tick), and for how long at most before you have to touch ground again. */
+	/** Wall running: how fast you climb (blocks a tick), and how hard you're held against the wall (blocks a tick into it). */
 	public static final double WALL_CLIMB = 0.5;
-	public static final int WALL_TICKS = 60;
+	public static final double WALL_STICK = 0.08;
+	/** Running off the top of a wall: the hop up and over onto it. */
+	public static final double WALL_TOP_UP = 0.42, WALL_TOP_IN = 0.3;
+	/** How fast the legs pump on a wall run (walk animation per tick). */
+	public static final float WALL_STRIDE = 1.3F;
 	/** Phasing: how thick a wall you can pass through, how far ahead the wall may start, and the gap between phases. */
 	static final int PHASE_DEPTH = 4;
 	static final double PHASE_REACH = 1.5;
@@ -50,7 +66,37 @@ public final class ChronoSpeed {
 	 */
 	public static volatile long clientOverclockedAt = Long.MIN_VALUE;
 
+	/** On a player running up a wall: the wall's side (a horizontal direction's 3D index, into the wall), for everyone to draw it. */
+	public static final AttachmentType<Integer> WALL_RUN = AttachmentRegistry.create(JaymosPowers.id("chrono_wall_run"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+
+	/** Client → server: running up the wall on side {@code face} (into it), or -1 for off it. */
+	public record WallRun(int face) implements CustomPacketPayload {
+		public static final Type<WallRun> TYPE = new Type<>(JaymosPowers.id("chrono_wall_run"));
+		public static final StreamCodec<ByteBuf, WallRun> CODEC = ByteBufCodecs.VAR_INT.map(WallRun::new, WallRun::face);
+
+		@Override
+		public Type<WallRun> type() {
+			return TYPE;
+		}
+	}
+
 	private ChronoSpeed() {
+	}
+
+	static void register() {
+		PayloadTypeRegistry.serverboundPlay().register(WallRun.TYPE, WallRun.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(WallRun.TYPE, (payload, ctx) -> wallRun(ctx.player(), payload.face()));
+	}
+
+	private static void wallRun(ServerPlayer player, int face) {
+		Direction side = face >= 0 && face < Direction.values().length ? Direction.from3DDataValue(face) : null;
+		if (side != null && side.getAxis().isHorizontal() && ChronoPower.overclocked(player) && player.isAlive() && !player.isPassenger()) {
+			player.setAttached(WALL_RUN, side.get3DDataValue());
+			player.resetFallDistance();
+		} else if (player.getAttached(WALL_RUN) != null) {
+			player.removeAttached(WALL_RUN);
+		}
 	}
 
 	/** Whether {@code player} is overclocked right now, on either side. */
@@ -99,9 +145,12 @@ public final class ChronoSpeed {
 				ChronoFx.particles(level, player, ParticleTypes.SPLASH, player.getX(), player.getY() + 0.1, player.getZ(), 6, 0.3, 0.0, 0.3, 0.1);
 			}
 		}
-		if (overclocked && player.horizontalCollision) {
+		if (overclocked && (player.horizontalCollision || player.getAttached(WALL_RUN) != null)) {
 			// running up a wall is no fall
 			player.resetFallDistance();
+		}
+		if (!overclocked && player.getAttached(WALL_RUN) != null) {
+			player.removeAttached(WALL_RUN);
 		}
 	}
 
@@ -119,6 +168,9 @@ public final class ChronoSpeed {
 
 	/** Take both modifiers off (power lost, Overclock cut short). */
 	static void clear(ServerPlayer player) {
+		if (player.getAttached(WALL_RUN) != null) {
+			player.removeAttached(WALL_RUN);
+		}
 		modifier(player.getAttribute(Attributes.MOVEMENT_SPEED), SPRINT_MODIFIER, SPRINT_BOOST, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, false);
 		modifier(player.getAttribute(Attributes.STEP_HEIGHT), STEP_MODIFIER, STEP_BOOST, AttributeModifier.Operation.ADD_VALUE, false);
 	}

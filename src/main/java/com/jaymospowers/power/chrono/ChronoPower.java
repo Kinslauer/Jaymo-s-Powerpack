@@ -126,6 +126,7 @@ public final class ChronoPower implements Power {
 		Powers.register(INSTANCE);
 		PayloadTypeRegistry.clientboundPlay().register(ChronoSync.TYPE, ChronoSync.CODEC);
 		StasisField.registerLocks();
+		ChronoSpeed.register();
 		ChronoEchoes.init();
 		StoppedClockItem.init();
 		// touch the attachment types so they register at startup

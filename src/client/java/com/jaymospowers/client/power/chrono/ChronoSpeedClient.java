@@ -1,23 +1,32 @@
 package com.jaymospowers.client.power.chrono;
 
 import com.jaymospowers.power.chrono.ChronoSpeed;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.10.28) Overclock's wall run, on the local player (movement is the client's to decide, so it's smooth): overclocked,
- * running into a wall with forward held, you run straight up it at {@link ChronoSpeed#WALL_CLIMB}, for up to
- * {@link ChronoSpeed#WALL_TICKS} before you need ground again. Sneak to let go.
+ * running into a wall with forward held, you run straight up it at {@link ChronoSpeed#WALL_CLIMB}. Sneak to let go.
+ *
+ * <p>(0.11.37) Straight up: held against the wall you face, with no sideways drift and no time limit while you hold
+ * forward; run off the top and you hop onto it. The server is told which wall, so everyone sees the body turned onto it,
+ * legs running ({@link ChronoSpeed#WALL_RUN}).
  */
 final class ChronoSpeedClient {
-	private static int wallTicks;
+	/** The wall being run up (into it), or null. */
+	private static @Nullable Direction wall;
 
 	private ChronoSpeedClient() {
 	}
 
 	static void reset() {
-		wallTicks = 0;
+		if (wall != null && ClientPlayNetworking.canSend(ChronoSpeed.WallRun.TYPE)) {
+			ClientPlayNetworking.send(new ChronoSpeed.WallRun(-1));
+		}
+		wall = null;
 		ChronoSpeed.clientOverclockedAt = Long.MIN_VALUE;
 	}
 
@@ -25,19 +34,25 @@ final class ChronoSpeedClient {
 		if (overclocked) {
 			ChronoSpeed.clientOverclockedAt = player.level().getGameTime();
 		}
-		if (!overclocked || player.onGround() || player.isInWater()) {
-			wallTicks = 0;
+		boolean able = overclocked && player.input.keyPresses.forward() && !player.input.keyPresses.shift()
+			&& !player.getAbilities().flying && !player.isPassenger() && !player.isFallFlying() && !player.onClimbable()
+			&& !player.isSpectator() && player.isAlive();
+		Direction was = wall;
+		Direction now = null;
+		if (able && player.horizontalCollision) {
+			// the wall you face; held against it so you climb straight, not sliding along it
+			now = player.getDirection();
+			player.setDeltaMovement(now.getStepX() * ChronoSpeed.WALL_STICK, ChronoSpeed.WALL_CLIMB, now.getStepZ() * ChronoSpeed.WALL_STICK);
+			if (player.tickCount % 2 == 0) {
+				player.level().addParticle(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 0.1, player.getZ(), 0.0, -0.05, 0.0);
+			}
+		} else if (able && was != null && !player.onGround()) {
+			// ran off the top: hop up and over onto it
+			player.setDeltaMovement(was.getStepX() * ChronoSpeed.WALL_TOP_IN, ChronoSpeed.WALL_TOP_UP, was.getStepZ() * ChronoSpeed.WALL_TOP_IN);
 		}
-		if (!overclocked || !player.horizontalCollision || wallTicks >= ChronoSpeed.WALL_TICKS || !player.input.keyPresses.forward()
-			|| player.input.keyPresses.shift() || player.getAbilities().flying || player.isPassenger() || player.isFallFlying()
-			|| player.onClimbable() || player.isSpectator() || !player.isAlive()) {
-			return;
-		}
-		wallTicks++;
-		Vec3 v = player.getDeltaMovement();
-		player.setDeltaMovement(v.x, ChronoSpeed.WALL_CLIMB, v.z);
-		if (wallTicks % 2 == 0) {
-			player.level().addParticle(ParticleTypes.ELECTRIC_SPARK, player.getX(), player.getY() + 0.1, player.getZ(), 0.0, -0.05, 0.0);
+		wall = now;
+		if (now != was && ClientPlayNetworking.canSend(ChronoSpeed.WallRun.TYPE)) {
+			ClientPlayNetworking.send(new ChronoSpeed.WallRun(now == null ? -1 : now.get3DDataValue()));
 		}
 	}
 }
