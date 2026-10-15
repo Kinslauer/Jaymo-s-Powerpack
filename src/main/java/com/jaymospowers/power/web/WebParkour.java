@@ -67,6 +67,11 @@ public final class WebParkour {
 	/** A slide: the push at the start (times your speed, at least the minimum), how much speed is left each tick, how long at most, and the slowest it keeps going. */
 	public static final double SLIDE_BOOST = 1.5, SLIDE_MIN = 0.5, SLIDE_KEEP = 0.94, SLIDE_STOP = 0.14;
 	public static final int SLIDE_TICKS = 24;
+	/**
+	 * Jumping out of a slide: the upward kick (a vanilla jump is 0.42), and the speed along the ground it leaves with
+	 * (the slide's speed times this, plus that, at most the cap), so a slide is a run-up for a long, high leap.
+	 */
+	public static final double SLIDE_JUMP_UP = 0.62, SLIDE_JUMP_KEEP = 1.3, SLIDE_JUMP_ADD = 0.12, SLIDE_JUMP_MAX = 0.95;
 	/** Ticks before another vault or slide. */
 	public static final int VAULT_COOLDOWN = 8, SLIDE_COOLDOWN = 12;
 	/** How long the vault and wall jump poses last (ticks). */
@@ -74,6 +79,8 @@ public final class WebParkour {
 	// ================================================================================================================
 
 	public static final int NONE = 0, VAULT = 1, CLING = 2, WALL_JUMP = 3, SLIDE = 4;
+	/** Vaults and slides each come in this many looks, picked at random (never the same one twice running). */
+	public static final int VARIANTS = 4;
 
 	/** Client → server: started move {@code kind} against wall side {@code face} (a horizontal direction's 3D index, or -1), or {@link #NONE} for done. */
 	public record Move(int kind, int face) implements CustomPacketPayload {
@@ -87,7 +94,10 @@ public final class WebParkour {
 		}
 	}
 
-	/** The move a web slinger is in, for everyone to draw: {@code kind * 8 + face + 1} (face -1..5). See {@link #kind}, {@link #face}. */
+	/**
+	 * The move a web slinger is in, for everyone to draw: {@code (variant * 8 + kind) * 8 + face + 1} (face -1..5). See
+	 * {@link #kind}, {@link #face}, {@link #variant}.
+	 */
 	public static final AttachmentType<Integer> MOVE = AttachmentRegistry.create(JaymosPowers.id("web_parkour"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 
@@ -95,12 +105,19 @@ public final class WebParkour {
 	}
 
 	private static final Map<UUID, Doing> DOING = new HashMap<>();
+	/** Per player: the last vault look and the last slide look, so the next one differs. */
+	private static final Map<UUID, int[]> LAST_VARIANT = new HashMap<>();
 
 	private WebParkour() {
 	}
 
 	public static int kind(int move) {
-		return move / 8;
+		return move / 8 % 8;
+	}
+
+	/** Which look of a vault or slide (0 to {@link #VARIANTS} - 1). */
+	public static int variant(int move) {
+		return move / 64;
 	}
 
 	public static int face(int move) {
@@ -138,7 +155,17 @@ public final class WebParkour {
 			return;
 		}
 		DOING.put(player.getUUID(), new Doing(kind, side == null ? -1 : side.get3DDataValue(), 0));
-		player.setAttached(MOVE, kind * 8 + (side == null ? -1 : side.get3DDataValue()) + 1);
+		int variant = 0;
+		if (kind == VAULT || kind == SLIDE) {
+			int[] last = LAST_VARIANT.computeIfAbsent(player.getUUID(), id -> new int[] {-1, -1});
+			int slot = kind == VAULT ? 0 : 1;
+			variant = player.getRandom().nextInt(last[slot] < 0 ? VARIANTS : VARIANTS - 1);
+			if (last[slot] >= 0 && variant >= last[slot]) {
+				variant++;
+			}
+			last[slot] = variant;
+		}
+		player.setAttached(MOVE, (variant * 8 + kind) * 8 + (side == null ? -1 : side.get3DDataValue()) + 1);
 		if (kind != SLIDE) {
 			player.resetFallDistance();
 		}

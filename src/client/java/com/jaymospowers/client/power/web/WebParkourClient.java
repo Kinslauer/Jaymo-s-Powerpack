@@ -1,6 +1,7 @@
 package com.jaymospowers.client.power.web;
 
 import com.jaymospowers.power.web.WebParkour;
+import com.jaymospowers.power.web.WebPose;
 import com.jaymospowers.power.web.WebPower;
 import com.jaymospowers.power.web.WebSymbiote;
 import com.jaymospowers.power.web.WebSymbioteState;
@@ -27,6 +28,8 @@ final class WebParkourClient {
 	private static final double HUG = 0.02;
 	/** Moving at least this fast across the ground (blocks/tick) to vault or slide. */
 	private static final double MOVE_MIN = 0.15;
+	/** The flips a jump out of a slide turns into, one at random. */
+	private static final int[] SLIDE_FLIPS = {WebPose.FRONT_FLIP, WebPose.CORKSCREW, WebPose.CARTWHEEL};
 
 	private int kind = WebParkour.NONE;
 	/** The wall's side for a cling (null otherwise), and the slide's heading and speed. */
@@ -229,8 +232,23 @@ final class WebParkourClient {
 		Vec3 moved = new Vec3(player.getX() - player.xo, 0.0, player.getZ() - player.zo);
 		speed *= WebParkour.SLIDE_KEEP;
 		boolean blocked = ticks > 1 && moved.dot(heading) < speed * 0.3;
+		if (jumpPressed || !player.onGround() && input.jump() && player.getDeltaMovement().y > 0.0) {
+			// a jump out of it: a leap higher and further than a plain jump, the slide's speed and then some
+			double out = Math.min(WebParkour.SLIDE_JUMP_MAX, speed * WebParkour.SLIDE_JUMP_KEEP + WebParkour.SLIDE_JUMP_ADD);
+			player.setDeltaMovement(heading.scale(out).add(0.0, Math.max(player.getDeltaMovement().y, WebParkour.SLIDE_JUMP_UP), 0.0));
+			stop();
+			cooldown = WebParkour.SLIDE_COOLDOWN;
+			// and flips out of it (Andy: every slide)
+			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebTricks.Trick(
+				SLIDE_FLIPS[player.getRandom().nextInt(SLIDE_FLIPS.length)], player.getRandom().nextBoolean() ? 1 : -1));
+			WebSwing.play(player, SoundEvents.SLIME_JUMP, 0.7F, 1.2F);
+			for (int i = 0; i < 6; i++) {
+				player.level().addParticle(ParticleTypes.CLOUD, player.getX(), player.getY() + 0.1, player.getZ(), -heading.x * 0.12, 0.04, -heading.z * 0.12);
+			}
+			return;
+		}
 		if (!player.onGround() || jumpPressed || !input.shift() || ++ticks > WebParkour.SLIDE_TICKS || speed < WebParkour.SLIDE_STOP || blocked) {
-			// a jump out of it (or a drop off a ledge) keeps the speed: vanilla carries it from here
+			// a drop off a ledge keeps the speed: vanilla carries it from here
 			stop();
 			cooldown = WebParkour.SLIDE_COOLDOWN;
 			return;
