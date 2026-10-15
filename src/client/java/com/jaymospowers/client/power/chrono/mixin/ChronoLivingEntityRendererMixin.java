@@ -17,6 +17,7 @@ abstract class ChronoLivingEntityRendererMixin {
 	private void jaymospowers$chronoReelTip(LivingEntityRenderState state, PoseStack poseStack, float bodyRot, float entityScale, CallbackInfo ci) {
 		ChronoReelPose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.power.chrono.ChronoFlowPose.rotate(state, poseStack);
+		com.jaymospowers.client.power.chrono.ChronoRunPose.rotate(state, poseStack);
 	}
 
 	@Inject(
