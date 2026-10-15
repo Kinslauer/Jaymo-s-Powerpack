@@ -1257,3 +1257,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   `PoseTakeover`). R arms Vapour Form; a sprint takes off into a cruise that holds top speed until S brakes it to a
   hover. Shift (mastered) toggles whole-body smoke and no longer sinks. No fall damage for Smoke users (a second of
   smoke legs on landing). The Jet hurts and throws back; every move puts out double smoke (`SmokeField.MOVE_SMOKE`).
+- **0.11.24, YDM's Weapon Master key off** (Andy: "disable YDM weapons master keybind for all"): its only key, Open
+  Settings (`key.weaponmaster_ydm.opengui`, default Y, the Combat Arts key), is unbound once per install for every
+  player (`KeyConflicts`, marker `jaymospowers-weaponmaster-keys-v1`). Players can still bind it again in Controls.
+  The narrator's Ctrl+B hotkey is switched off once per install too (Andy: "disable narrator hotkey";
+  `jaymospowers-narrator-hotkey-v1`); Accessibility Settings can turn it back on.
