@@ -49,7 +49,8 @@ import net.minecraft.world.phys.Vec3;
  * 0.10.28 the Flash's speed too ({@link ChronoSpeed}): a far faster sprint, running up walls and across water, and V
  * again to phase through a wall.</li>
  * <li>B, Time Bloom: 5 s of fast-forward for crops, saplings, furnaces, smokers and ovens within 5 blocks, and for
- * your own wounds (they mend {@code BLOOM_HEAL} every {@code BLOOM_HEAL_EVERY} ticks meanwhile).</li>
+ * your own wounds and those of every creature within {@code BLOOM_HEAL_RADIUS} (they mend {@code BLOOM_HEAL} every
+ * {@code BLOOM_HEAL_EVERY} ticks meanwhile).</li>
  * <li>Sneak+B, Fast Forward (0.10.111): you and everyone close by leap to the ruined future and back
  * ({@link com.jaymospowers.power.chrono.future.Future}).</li>
  * </ul>
@@ -79,6 +80,8 @@ public final class ChronoPower implements Power {
 	/** Time Bloom mends you too: this much health every this many ticks while it runs (5 hearts over its 5 s). */
 	static final float BLOOM_HEAL = 1.0F;
 	static final int BLOOM_HEAL_EVERY = 10;
+	/** Since 0.11.25 the mending reaches every living thing this close to you as well (friend or foe alike). */
+	static final double BLOOM_HEAL_RADIUS = 5.0;
 	/** Overclock makes you a speedster: Speed amplifier (4 = Speed V). */
 	static final int OVERCLOCK_SPEED_AMPLIFIER = 4;
 	/** Overclock's drag on everyone around you: radius, Slowness amplifier (3 = Slowness IV), refreshed this often. */
@@ -309,10 +312,13 @@ public final class ChronoPower implements Power {
 			// broken bones start running forward to knitted
 			ChronoFx.particles(level, player, ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 1.0, player.getZ(), 6, 0.3, 0.5, 0.3, 0.0);
 		}
-		if (state.bloom != null && player.tickCount % BLOOM_HEAL_EVERY == 0 && player.getHealth() < player.getMaxHealth()) {
+		if (state.bloom != null && player.tickCount % BLOOM_HEAL_EVERY == 0) {
 			// your own wounds run forward too, to healed
-			player.heal(BLOOM_HEAL);
-			ChronoFx.particles(level, player, ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 1.0, player.getZ(), 3, 0.3, 0.5, 0.3, 0.0);
+			if (player.getHealth() < player.getMaxHealth()) {
+				player.heal(BLOOM_HEAL);
+				ChronoFx.particles(level, player, ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 1.0, player.getZ(), 3, 0.3, 0.5, 0.3, 0.0);
+			}
+			bloomHealNearby(player, level);
 		}
 		ChronoFlow.tickPlayer(player);
 		if (state.overclockLeft > 0) {
@@ -585,6 +591,18 @@ public final class ChronoPower implements Power {
 	 * While overclocked, time around you drags: every creature and player close by is slowed, so your own speed stands
 	 * out all the more. Refreshed as you move, so it follows you.
 	 */
+	/** Time Bloom's mending for everything living around you: players, villagers, animals and monsters alike. */
+	private static void bloomHealNearby(ServerPlayer player, ServerLevel level) {
+		AABB area = player.getBoundingBox().inflate(BLOOM_HEAL_RADIUS);
+		for (net.minecraft.world.entity.LivingEntity living : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, area,
+			e -> e != player && e.isAlive() && !e.isSpectator() && e.getHealth() < e.getMaxHealth()
+				&& e.distanceToSqr(player) <= BLOOM_HEAL_RADIUS * BLOOM_HEAL_RADIUS
+				&& !(e instanceof net.minecraft.world.entity.decoration.ArmorStand))) {
+			living.heal(BLOOM_HEAL);
+			ChronoFx.particles(level, player, ParticleTypes.HAPPY_VILLAGER, living.getX(), living.getY() + living.getBbHeight() * 0.6, living.getZ(), 3, 0.3, 0.4, 0.3, 0.0);
+		}
+	}
+
 	private static void overclockDrag(ServerPlayer player, ServerLevel level) {
 		AABB area = player.getBoundingBox().inflate(OVERCLOCK_DRAG_RADIUS);
 		for (net.minecraft.world.entity.LivingEntity living : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, area,
