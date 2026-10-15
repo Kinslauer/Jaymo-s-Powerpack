@@ -37,6 +37,9 @@ final class SmokeSmother {
 	static final float WRAP = 1.1F;
 	/** Air taken a tick (vanilla gives back 4 a tick out of water; a full breath is 300). */
 	static final int AIR_DRAIN = 19;
+	/** Corrupted (Black Lung): air goes this much faster, and the target breathes out this much smog every second. */
+	static final float BLACK_LUNG_DRAIN = 1.5F;
+	static final float BLACK_LUNG_BREATH = 4.0F;
 	static final float CHOKE = 2.0F;
 	/** Smother's choking: through armour, drowning's hurt sound. */
 	static final ResourceKey<DamageType> CHOKE_TYPE = ResourceKey.create(Registries.DAMAGE_TYPE, JaymosPowers.id("smoke_choke"));
@@ -97,8 +100,14 @@ final class SmokeSmother {
 			target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 40, 0), player);
 			target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 1), player);
 		}
+		boolean blackLung = com.jaymospowers.core.Fate.isCorrupted(player);
+		if (blackLung && held % 20 == 10) {
+			// Black Lung: smog fills them and they breathe it out round themselves
+			SmokeField.puff(level, target.getEyePosition(), BLACK_LUNG_BREATH, player);
+			level.playSound(null, target.getX(), target.getEyeY(), target.getZ(), SoundEvents.PLAYER_HURT_DROWN, SoundSource.PLAYERS, 0.5F, 0.6F);
+		}
 		if (!target.canBreatheUnderwater()) {
-			int air = Math.max(-20, target.getAirSupply() - AIR_DRAIN);
+			int air = Math.max(-20, target.getAirSupply() - Math.round(AIR_DRAIN * (blackLung ? BLACK_LUNG_DRAIN : 1.0F)));
 			target.setAirSupply(air);
 			if (air <= 0 && held % 20 == 0) {
 				target.hurtServer(level, player.damageSources().source(CHOKE_TYPE, player), CHOKE);
