@@ -1305,3 +1305,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   food tooltips show a meal's worth.
 - **0.11.46 / Kingdoms 0.7.54:** village fires get stone hearths and chimneys when villages generate, and golems only
   burn corpses at open, safe fires, so villages stop burning down (`kingdoms/MODLOG.md`).
+- **0.11.47, Bobby:** Bobby 5.2.16 (LGPL-3.0, client-only; CurseForge 409301 / 9077335, Modrinth J7YnfCss) keeps the
+  chunks you've seen and draws them past the server's view distance, so explored land stays visible further out. It
+  doesn't help with land nobody has visited (Chunky pre-gen does that). Works with Sodium and Iris; in cached areas the
+  fast-flight slowdown (`TerrainAhead`) doesn't kick in, since those chunks are already there. C2ME was looked at and
+  left out: its 26.3 build is an early alpha that rewrites worldgen.
