@@ -1,0 +1,8 @@
+{
+	"required": false,
+	"package": "com.jaymoskingdoms.mixin.bettercombat",
+	"plugin": "com.jaymoskingdoms.mixin.bettercombat.BetterCombatMixinPlugin",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": ["AttackSelectionMixin"],
+	"injectors": { "defaultRequire": 1 }
+}

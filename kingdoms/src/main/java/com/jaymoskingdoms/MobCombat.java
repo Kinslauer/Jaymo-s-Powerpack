@@ -49,7 +49,8 @@ import org.jspecify.annotations.Nullable;
  * and armed zombies, vindicators, wither skeletons and the like) fight with their weapon's Better Combat moves instead of
  * vanilla's poke. Each swing is that weapon's next attack in its combo: a wind-up (its upswing), then one blow that
  * strikes every foe in the attack's arc and reach, at the attack's damage multiplier, with its swing sound; the mob
- * slows as it swings, as a player does. Watchers' clients play the attack's animation on the mob
+ * slows as it swings, as a player does. (0.7.30) Only {@link WeaponForms#experienced} mobs know a weapon's whole combo;
+ * the rest have its one or two basic swings. Watchers' clients play the attack's animation on the mob
  * ({@code MobSwing}, client {@code MobAnimations}), when Player Animation Library is there to read it.
  * <p>
  * Fighting folk also <b>sidestep</b>: a player's blow that would land may be dodged (a hop to the side, no damage), now
@@ -232,6 +233,10 @@ public final class MobCombat {
 		}
 		if (usable.isEmpty()) {
 			usable = moves.attacks();
+		}
+		// (0.7.30) only the experienced know the whole combo; the rest swing one or two plain blows
+		if (!WeaponForms.experienced(mob)) {
+			usable = WeaponForms.basic(usable, Move::animation);
 		}
 		return usable.get(Math.floorMod(combo, usable.size()));
 	}
