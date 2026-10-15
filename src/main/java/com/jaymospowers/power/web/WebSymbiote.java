@@ -2654,6 +2654,10 @@ public final class WebSymbiote {
 	private static void clearCracks(ServerPlayer player, Live live) {
 		for (int i = 0; i < live.wallCracks.size(); i++) {
 			player.level().destroyBlockProgress(crackId(player, i), live.wallCracks.get(i), -1);
+			// the crack stays a while after the tendril has let go, then fades
+			if (live.wallStages[i] > 0) {
+				WebCracks.crack(player.level(), live.wallCracks.get(i), live.wallStages[i]);
+			}
 		}
 		live.wallCracks.clear();
 		java.util.Arrays.fill(live.wallStages, 0);
