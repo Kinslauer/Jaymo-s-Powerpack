@@ -102,7 +102,7 @@ public final class WindStaff {
 	}
 
 	/** Any quarterstaff (the Armory's, or one another mod names so). */
-	static boolean isStaff(ItemStack stack) {
+	public static boolean isStaff(ItemStack stack) {
 		return !stack.isEmpty() && BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().endsWith("quarterstaff");
 	}
 
