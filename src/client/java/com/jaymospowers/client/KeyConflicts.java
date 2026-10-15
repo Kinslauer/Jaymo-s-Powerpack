@@ -21,11 +21,12 @@ final class KeyConflicts {
 	/**
 	 * Bump to run the move again (for a new clash in a later pack version). v2 (0.9.23): Camera Utils' zoom, on Z (the
 	 * pack zooms with OK Zoomer). v3 (0.10.65): Traveler Tool Belt on R; Shoulder Surfing's free look on Left Alt (OK
-	 * Zoomer's zoom) and swap shoulder on U (Kingdoms' werewolf shift).
+	 * Zoomer's zoom) and swap shoulder on U (Kingdoms' werewolf shift). v4 (0.11.74): Kingdoms' night gifts take O and
+	 * P, so swap shoulder goes on to the full stop (from U or O) and the social interactions screen comes off P.
 	 */
-	private static final String MARKER = "jaymospowers-keys-v3";
+	private static final String MARKER = "jaymospowers-keys-v4";
 
-	/** Key mapping name → where it goes (unknown = unbound), applied only while it's still on {@code from}. */
+	/** Key mapping name → where it goes (unknown = unbound), applied only while it's still on {@code from} (or one of several, split by |). */
 	private record Move(String from, String to) {
 	}
 
@@ -40,7 +41,8 @@ final class KeyConflicts {
 		Map.entry("key.camerautils.zoom", new Move("key.keyboard.z", "key.keyboard.unknown")),
 		Map.entry("key.travelertoolbelt.open_toolbelt", new Move("key.keyboard.r", "key.keyboard.caps.lock")),
 		Map.entry("key.shouldersurfing.free_look", new Move("key.keyboard.left.alt", "key.keyboard.right.alt")),
-		Map.entry("key.shouldersurfing.swap_shoulder", new Move("key.keyboard.u", "key.keyboard.o")));
+		Map.entry("key.shouldersurfing.swap_shoulder", new Move("key.keyboard.u|key.keyboard.o", "key.keyboard.period")),
+		Map.entry("key.socialInteractions", new Move("key.keyboard.p", "key.keyboard.unknown")));
 
 	/**
 	 * Bump to set JEI's hover keys again. v1 (0.11.15): showRecipe had come unbound in Andy's profile. v2 (0.11.31):
@@ -79,7 +81,7 @@ final class KeyConflicts {
 		int moved = 0;
 		for (KeyMapping mapping : minecraft.options.keyMappings) {
 			Move move = MOVES.get(mapping.getName());
-			if (move != null && mapping.saveString().equals(move.from())) {
+			if (move != null && java.util.Arrays.asList(move.from().split("\\|")).contains(mapping.saveString())) {
 				mapping.setKey(InputConstants.getKey(move.to()));
 				moved++;
 			}
