@@ -92,7 +92,7 @@ public final class SeveredPartRenderer extends EntityRenderer<SeveredPart, Sever
 		int part = entity.part();
 		String first = Dismembered.names(part)[0];
 		state.player = entity.owner().isPresent() || entity.look().contains("\"minecraft:player\"");
-		// (0.11.78) a player's part comes off the villager MCA draws them as, when there is one (as their corpse does)
+		// (0.11.79) a player's part comes off the villager MCA draws them as, when there is one (as their corpse does)
 		Entity look = state.player ? com.jaymoskitchen.client.corpse.McaLooks.of(entity.owner()) : null;
 		if (state.player && look == null) {
 			AvatarRenderState avatar = state.avatar;

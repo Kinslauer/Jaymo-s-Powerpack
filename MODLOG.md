@@ -1365,7 +1365,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   halberd) take a Tough Handle, and swords (longsword, broadsword, claymore, saber, ninjato, katana) a new Tinkering
   part, the Crossguard, in place of the binding. Kunai take just a binding, throwing star blanks nothing.
   Wooden weapons, round shields and the musket bayonet stay craftable.
-- **0.11.78 / Kitchen 0.4.44, player corpses wear their villager look:** with MCA everyone is a villager, so a dead
+- **0.11.79 / Kitchen 0.4.44, player corpses wear their villager look:** with MCA everyone is a villager, so a dead
   player's corpse is drawn as the villager MCA draws them as (genes, skin, hair, clothes), by MCA's own renderer,
   lying and ragdolling like any villager's body (Kitchen `client/corpse/McaLooks`, which asks
   `MCAClient.getVillagerRendererData` and only touches MCA when it's loaded; `CorpseEntity.placeBody`). Their severed
