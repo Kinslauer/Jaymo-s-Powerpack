@@ -98,15 +98,20 @@ public final class ChronoFlowClient {
 		});
 	}
 
+	/** (0.11.40) Until then, Space follows the Space counter with the time stop. */
+	private static long followUntil = Long.MIN_VALUE;
+
 	/**
-	 * (0.11.40) Space while the cue is open (a blow passed through you): the Space counter, if you have a roll charge.
-	 * The jump is taken for it; with no charge left, Space jumps as usual and a dull click says so.
+	 * (0.11.40) Space while the cue is open (a blow passed through you): the Space counter, a spinning kick. Space again
+	 * while it plays or just after: the time stop, if a roll charge is left (with none, a dull click and an ordinary jump).
 	 */
 	private static void spaceCounter(Minecraft minecraft, LocalPlayer player) {
-		if (ChronoSpaceCue.open(player, 0.0F) < 0.0F) {
+		long now = player.level().getGameTime();
+		boolean cue = ChronoSpaceCue.open(player, 0.0F) >= 0.0F;
+		boolean follow = now < followUntil;
+		if (!cue && !follow) {
 			return;
 		}
-		Integer charges = player.getAttached(ChronoFlow.CHARGES);
 		boolean pressed = false;
 		while (minecraft.options.keyJump.consumeClick()) {
 			pressed = true;
@@ -114,15 +119,23 @@ public final class ChronoFlowClient {
 		if (!pressed) {
 			return;
 		}
-		if (charges == null || charges <= 0) {
-			minecraft.getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
-				net.minecraft.sounds.SoundEvents.COMPARATOR_CLICK, 0.6F, 0.5F));
-			return;
+		if (cue) {
+			minecraft.options.keyJump.setDown(false);
+			ClientPlayNetworking.send(new ChronoFlow.Spin());
+			local = new ChronoFlow.Move(ChronoFlow.SPIN, now, -1, 1);
+			followUntil = now + local.duration() + ChronoFlow.FOLLOW_TICKS;
+		} else {
+			Integer charges = player.getAttached(ChronoFlow.CHARGES);
+			if (charges == null || charges <= 0) {
+				minecraft.getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
+					net.minecraft.sounds.SoundEvents.COMPARATOR_CLICK, 0.6F, 0.5F));
+				return;
+			}
+			minecraft.options.keyJump.setDown(false);
+			ClientPlayNetworking.send(new ChronoFlow.TimeStop());
+			local = new ChronoFlow.Move(ChronoFlow.PUSH, now, -1, 1);
+			followUntil = Long.MIN_VALUE;
 		}
-		minecraft.options.keyJump.setDown(false);
-		ClientPlayNetworking.send(new ChronoFlow.Spin());
-		long now = player.level().getGameTime();
-		local = new ChronoFlow.Move(ChronoFlow.SPIN, now, -1, 1);
 		busyUntil = now + local.duration();
 		counter = null;
 		barrage = null;
@@ -173,7 +186,7 @@ public final class ChronoFlowClient {
 			return;
 		}
 		ChronoFlow.Move move = player.getAttached(ChronoFlow.MOVE);
-		boolean locks = move != null && (move.style() == ChronoFlow.BARRAGE || move.style() == ChronoFlow.SPIN
+		boolean locks = move != null && (move.style() == ChronoFlow.BARRAGE || move.style() == ChronoFlow.SPIN || move.style() == ChronoFlow.PUSH
 			|| move.style() == ChronoFlow.COUNTER && move.target() >= 0);
 		if (barrage != null && (move == null || move.start() != barrage.start())) {
 			barrage = null; // ended early, or broken off by a counter
@@ -188,8 +201,8 @@ public final class ChronoFlowClient {
 		if (local != null && local.style() == ChronoFlow.COUNTER) {
 			local = null; // the server's counter replaces the raised guard
 		}
-		if (move.style() == ChronoFlow.SPIN) {
-			counter = null; // the spinning kick stands its ground
+		if (move.style() == ChronoFlow.SPIN || move.style() == ChronoFlow.PUSH) {
+			counter = null; // the spinning kick and the time stop stand their ground
 		} else if (move.style() == ChronoFlow.BARRAGE) {
 			barrage = move;
 		} else if (move.variant() != ChronoFlow.CROWD) {

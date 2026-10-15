@@ -31,7 +31,7 @@
 	"message.jaymospowers.chrono_echo_stasis": "Your own stillness, turned on you.",
 	"hud.jaymospowers.chrono_flow_combo": "%s HIT COMBO",
 	"message.jaymospowers.chrono_echo_unravelled": "Your echo is gone for good, and the hole it leaves runs straight through you. Time comes loose.",
-	"power.jaymospowers.chrono.key.mode.ascended_corrupted": "Time Flow on/off (over-the-shoulder view): attack toward a foe to fly at it; right click to counter held blows, even mid-move. A counter leaves you intangible for a moment: a blow through you flashes red, and Space spends one of 3 roll charges on a spinning kick that throws everyone round you away",
+	"power.jaymospowers.chrono.key.mode.ascended_corrupted": "Time Flow on/off (over-the-shoulder view): attack toward a foe to fly at it; right click to counter held blows, even mid-move. A counter leaves you intangible for a moment: a blow through you flashes red, and Space answers with a spinning kick that throws everyone round you away. Space again spends one of 3 roll charges on stopping time all round you",
 	"power.jaymospowers.chrono.key.mode.ascended_corrupted.name": "Time Flow",
 	"power.jaymospowers.chrono.key.ultimate.ascended_corrupted": "Chrono Punch (in Time Flow: lock onto a foe for a barrage, only a counter breaks it; the last punch throws everything in front away)",
 	"power.jaymospowers.chrono.key.ultimate.ascended_corrupted.name": "Chrono Punch",

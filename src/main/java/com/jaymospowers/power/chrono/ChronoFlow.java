@@ -65,7 +65,9 @@ import net.minecraft.world.phys.Vec3;
  * <li><b>Intangible (0.11.40):</b> every right-click counter that lands leaves you intangible for {@link #INTANGIBLE_TICKS}:
  * blows pass straight through you. One that does flashes your screen red and puts a Space cue over your head for
  * {@link #DODGE_TICKS}: press Space and you answer it with {@link #SPIN}, a spinning kick that throws everything around
- * you away. It costs one of the {@link #ROLL_CHARGES} roll charges you get each time you enter Time Flow.</li>
+ * you away. Space again during or just after it ({@link #FOLLOW_TICKS}) spends one of the {@link #ROLL_CHARGES} roll
+ * charges you get each time you enter Time Flow on {@link #PUSH}: both arms pushed out, and time stops all round you
+ * (a Stasis Field where you stand).</li>
  * <li>Getting hit for real, or {@link #COMBO_TIMEOUT} without a blow, ends the combo.</li>
  * </ul>
  * The client finds the target and carries you there (movement is the client's); the server checks it and lands the
@@ -77,18 +79,20 @@ public final class ChronoFlow {
 	/** Distance bands: up close a plain blow; then a lunge; beyond that a flying kick. */
 	public static final double CLOSE = 2.4, MID = 5.0;
 	/** Styles (animations): close blows, the lunge, the flying kick, the counter, Chrono Punch's quick jabs, and its Time Flow barrage. */
-	public static final int JAB = 0, HOOK = 1, UPPERCUT = 2, LUNGE = 3, KICK = 4, COUNTER = 5, RAPID = 6, BARRAGE = 7, SPIN = 8;
+	public static final int JAB = 0, HOOK = 1, UPPERCUT = 2, LUNGE = 3, KICK = 4, COUNTER = 5, RAPID = 6, BARRAGE = 7, SPIN = 8, PUSH = 9;
 	/** The barrage (C in Time Flow): this many punches, one every so many ticks, at the target it locked onto (in reach of it). */
 	public static final int BARRAGE_PUNCHES = 10, BARRAGE_EVERY = 2;
 	/** How long each style's animation runs, and when its blow lands (ticks). */
-	public static final int[] DURATION = {6, 7, 8, 9, 12, 10, 3, BARRAGE_PUNCHES * BARRAGE_EVERY, 14};
-	public static final int[] HIT_AT = {2, 3, 4, 5, 8, 4, 1, 0, 6};
+	public static final int[] DURATION = {6, 7, 8, 9, 12, 10, 3, BARRAGE_PUNCHES * BARRAGE_EVERY, 14, 14};
+	public static final int[] HIT_AT = {2, 3, 4, 5, 8, 4, 1, 0, 6, 5};
 	/** Each style's damage (before the combo): low, so a zombie takes eight or nine blows from a fresh combo. */
-	static final float[] DAMAGE = {1.5F, 1.75F, 2.0F, 2.0F, 2.5F, 2.5F, 0.0F, 0.0F, 4.0F};
+	static final float[] DAMAGE = {1.5F, 1.75F, 2.0F, 2.0F, 2.5F, 2.5F, 0.0F, 0.0F, 4.0F, 0.0F};
 	/** (0.11.40) After a right-click counter you're intangible this long; a blow through you opens the Space cue this long. */
 	public static final int INTANGIBLE_TICKS = 40, DODGE_TICKS = 20;
-	/** Roll charges on entering Time Flow: each Space counter spends one. */
+	/** Roll charges on entering Time Flow: each time stop after a Space counter spends one. */
 	public static final int ROLL_CHARGES = 3;
+	/** The time stop follows the Space counter: Space again while it plays or this many ticks after. */
+	public static final int FOLLOW_TICKS = 12;
 	/** The Space counter's spinning kick: how far round you it reaches, and how hard it throws. */
 	static final double SPIN_RADIUS = 5.0, SPIN_PUSH = 1.2, SPIN_LIFT = 0.5;
 	/** Screen shake: the right-click counter, the Space counter (cast and landing), and the barrage (first punch, then more each). */
@@ -239,6 +243,17 @@ public final class ChronoFlow {
 		}
 	}
 
+	/** Client → server: Space again after the Space counter, the time stop (a roll charge). */
+	public record TimeStop() implements CustomPacketPayload {
+		public static final Type<TimeStop> TYPE = new Type<>(JaymosPowers.id("chrono_time_stop"));
+		public static final StreamCodec<ByteBuf, TimeStop> CODEC = StreamCodec.unit(new TimeStop());
+
+		@Override
+		public Type<TimeStop> type() {
+			return TYPE;
+		}
+	}
+
 	/** A blow held in time, waiting for the counter. */
 	private record Held(UUID victim, int attacker, DamageSource source, float amount, long due) {
 	}
@@ -252,7 +267,7 @@ public final class ChronoFlow {
 	}
 
 	/** The Space counter's kick, due to land. */
-	private record SpinKick(UUID player, long due) {
+	private record SpinKick(UUID player, long due, boolean stop) {
 	}
 
 	private static final class Fighter {
@@ -260,6 +275,8 @@ public final class ChronoFlow {
 		/** (0.11.40) Blows pass through until then; the Space cue is open until {@code dodgeUntil}. */
 		long intangibleUntil = -100;
 		long dodgeUntil = -100;
+		/** A time stop can follow the Space counter until then. */
+		long followUntil = -100;
 		int charges;
 		long lastBlow;
 		/** A guard raised against nothing yet (a blow coming within {@link #PARRY_EARLY} is countered at once). */
@@ -295,6 +312,8 @@ public final class ChronoFlow {
 		PayloadTypeRegistry.serverboundPlay().register(Parry.TYPE, Parry.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Spin.TYPE, Spin.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Spin.TYPE, (payload, ctx) -> spin(ctx.player()));
+		PayloadTypeRegistry.serverboundPlay().register(TimeStop.TYPE, TimeStop.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(TimeStop.TYPE, (payload, ctx) -> timeStop(ctx.player()));
 		ServerPlayNetworking.registerGlobalReceiver(Strike.TYPE, (payload, ctx) -> strike(ctx.player(), payload.target(), payload.style()));
 		ServerPlayNetworking.registerGlobalReceiver(Parry.TYPE, (payload, ctx) -> parry(ctx.player()));
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register(ChronoFlow::allowDamage);
@@ -618,8 +637,8 @@ public final class ChronoFlow {
 	}
 
 	/**
-	 * Space while the cue is open: a roll charge spent on a spinning kick that throws everything round you away. The
-	 * move cuts whatever was playing short, and you stay intangible until it's done.
+	 * Space while the cue is open: a spinning kick that throws everything round you away (free). The move cuts whatever
+	 * was playing short, and you stay intangible until it's done; a time stop can follow it.
 	 */
 	private static void spin(ServerPlayer player) {
 		if (!on(player) || !player.isAlive()) {
@@ -628,11 +647,9 @@ public final class ChronoFlow {
 		Fighter fighter = fighter(player);
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
-		if (now >= fighter.dodgeUntil || fighter.charges <= 0) {
+		if (now >= fighter.dodgeUntil) {
 			return;
 		}
-		fighter.charges--;
-		player.setAttached(CHARGES, fighter.charges);
 		fighter.dodgeUntil = -100;
 		player.removeAttached(DODGE);
 		UUID id = player.getUUID();
@@ -644,10 +661,46 @@ public final class ChronoFlow {
 		fighter.busyUntil = now + move.duration();
 		fighter.intangibleUntil = Math.max(fighter.intangibleUntil, now + move.duration());
 		player.setAttached(MOVE, move);
-		SPINS.add(new SpinKick(id, now + move.hitAt()));
+		SPINS.add(new SpinKick(id, now + move.hitAt(), false));
+		fighter.followUntil = now + move.duration() + FOLLOW_TICKS;
 		com.jaymospowers.core.Shakes.send(player, SPIN_SHAKE);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.2F, 0.5F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 0.9F, 0.8F);
+	}
+
+	/**
+	 * Space again after the Space counter: a roll charge spent on stopping time all round you. Both arms pushed out, and
+	 * when they're out a Stasis Field opens where you stand (a kick still on its way lands all the same).
+	 */
+	private static void timeStop(ServerPlayer player) {
+		if (!on(player) || !player.isAlive()) {
+			return;
+		}
+		Fighter fighter = fighter(player);
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		if (now >= fighter.followUntil || fighter.charges <= 0) {
+			return;
+		}
+		fighter.charges--;
+		player.setAttached(CHARGES, fighter.charges);
+		fighter.followUntil = -100;
+		UUID id = player.getUUID();
+		Move move = new Move(PUSH, now, -1, 1);
+		fighter.busyUntil = now + move.duration();
+		fighter.intangibleUntil = Math.max(fighter.intangibleUntil, now + move.duration());
+		player.setAttached(MOVE, move);
+		SPINS.add(new SpinKick(id, now + move.hitAt(), true));
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 1.0F, 0.6F);
+	}
+
+	/** The time stop lands: arms out, time stops round you. */
+	private static void stopTime(ServerPlayer player) {
+		ServerLevel level = player.level();
+		ChronoPower.flowTimeStop(player);
+		ChronoFx.particles(level, player, GOLD_FLASH, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 1.2F, 0.5F);
+		com.jaymospowers.core.Shakes.send(player, SPIN_LAND_SHAKE);
 	}
 
 	/** The spinning kick lands: everything hostile round you is struck and thrown away. */
@@ -1106,7 +1159,11 @@ public final class ChronoFlow {
 					it.remove();
 				} else if (player.level().getGameTime() >= kick.due()) {
 					it.remove();
-					spinKick(player);
+					if (kick.stop()) {
+						stopTime(player);
+					} else {
+						spinKick(player);
+					}
 				}
 			}
 		}

@@ -112,6 +112,20 @@ public final class ChronoFlowPose {
 				h.body.zRot = -0.3F * out;
 				h.head.zRot = 0.2F * out;
 			}
+			case ChronoFlow.PUSH -> {
+				// (0.11.40) the time stop: both palms drawn in to the chest, then driven straight out, braced
+				float hit = ChronoFlow.HIT_AT[ChronoFlow.PUSH] / (float)ChronoFlow.DURATION[ChronoFlow.PUSH];
+				float draw = seg(p, 0.0F, hit * 0.6F) * (1.0F - seg(p, hit * 0.6F, hit));
+				float push = seg(p, hit * 0.6F, hit) * (1.0F - seg(p, 0.8F, 1.0F));
+				set(h.rightArm, -0.9F, 0.5F, -0.3F, draw);
+				set(h.leftArm, -0.9F, -0.5F, 0.3F, draw);
+				h.body.xRot = -0.1F * draw;
+				set(h.rightArm, -Mth.HALF_PI - 0.05F, -0.12F, 0.0F, push);
+				set(h.leftArm, -Mth.HALF_PI - 0.05F, 0.12F, 0.0F, push);
+				set(h.leftLeg, -0.45F, 0.0F, 0.0F, push);
+				set(h.rightLeg, 0.4F, 0.0F, 0.0F, push);
+				h.body.xRot = Mth.lerp(push, h.body.xRot, 0.2F);
+			}
 			case ChronoFlow.KICK -> {
 				// the kicking leg straight out ahead, the body thrown back, arms flung out
 				set(h.rightLeg, -Mth.HALF_PI - 0.2F, 0.0F, 0.0F, e);
