@@ -16,19 +16,36 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * The suit doesn't just appear: it grows over you like flesh. Put on, it spreads out from the chest, the body first,
- * then the arms and head, then the legs, each part swelling out past its size and settling; taken off, it draws back
- * the other way. Living Armor swells up over the suit the same way (and shrinks back). Everyone sees it.
+ * The suit doesn't just appear: the symbiote builds it over you. First its tendrils leech out of the chest and wrap the
+ * body (the torso, then the arms and head, then the legs), coiling round each part ({@link WebSuitWrapLayer}); then it
+ * folds over the body in layers along them, each part covered from its joint outward: raw goo first, then the suit
+ * itself rolling over it, its edge a thick band of tendril. Taken off, it all goes back the other way. The big body is
+ * built the same way: thick tendrils wrap you, then its muscle is slapped on a slab at a time (core, back, lats, chest,
+ * shoulders and arms, the forearms and hands, the claws, at last the head and its jaws; {@link WebHulk}), while you're
+ * doubled over in pain (see WebFeral). Everyone sees it.
  */
 public final class WebSuitGrowth {
-	/** How long a change takes (ticks); during a roar it pieces itself together slower, a part at a time. */
-	static final float TICKS = 16.0F, ROAR_TICKS = 22.0F;
-	/** Swelling into the big body takes longer: it doubles over in pain as it grows (see WebFeral). */
+	/** How long putting the suit on (or off) takes (ticks); during a roar it pieces itself together quicker. */
+	static final float TICKS = 36.0F, ROAR_TICKS = 26.0F;
+	/** Building the big body takes longer: it doubles over in pain as it grows (see WebFeral). */
 	static final float BULK_TICKS = 60.0F;
-	/** Body, arms, head, legs: when each starts growing (0-1 of the change), and how long each takes to. */
-	private static final float BODY = 0.0F, ARMS = 0.2F, HEAD = 0.3F, LEGS = 0.4F, SPAN = 0.6F;
-	/** How far past its size a part swells before settling, and how small the bulk is before Living Armor fills it out. */
-	private static final float OVERSHOOT = 0.12F, BULK_FROM = 0.8F;
+	/**
+	 * Body, arms, head, legs: when each part's tendrils start out (share of the change). They take {@code WRAP_SPAN} to wrap
+	 * it, the goo layer starts {@code GOO_AFTER} after the tendrils do and takes {@code LAYER_SPAN}, the suit follows it
+	 * {@code SUIT_AFTER} later.
+	 */
+	static final float BODY = 0.0F, ARMS = 0.1F, HEAD = 0.16F, LEGS = 0.22F;
+	static final float WRAP_SPAN = 0.3F, GOO_AFTER = 0.28F, SUIT_AFTER = 0.14F, LAYER_SPAN = 0.26F;
+
+	/** What each of the suit layer's models is. */
+	enum Role {
+		/** The suit itself (and the veins over it). */
+		SUIT,
+		/** The raw goo under it, laid first. */
+		GOO,
+		/** The big body. */
+		HULK
+	}
 
 	/** On a player's render state while their suit is changing. {@code from}, {@code to}: 0 bare, 1 suit, 2 Living Armor. */
 	public record Growth(int from, int to, float t) {
@@ -36,9 +53,8 @@ public final class WebSuitGrowth {
 
 	public static final RenderStateDataKey<Growth> KEY = RenderStateDataKey.create(() -> "jaymospowers:web_suit_growth");
 
-	/** The suit layer's own models (only these are grown), and which of them are Living Armor's bulk. */
-	private static final Set<Model<?>> MODELS = Collections.newSetFromMap(new WeakHashMap<>());
-	private static final Set<Model<?>> BULK = Collections.newSetFromMap(new WeakHashMap<>());
+	/** The suit layer's own models (only these are grown), and what each one is. */
+	private static final Map<Model<?>, Role> MODELS = new WeakHashMap<>();
 
 	/** entity id → {shown level, level before the change, tick it changed}. */
 	private static final Map<Integer, long[]> CHANGES = new HashMap<>();
@@ -46,11 +62,8 @@ public final class WebSuitGrowth {
 	private WebSuitGrowth() {
 	}
 
-	static void register(Model<?> model, boolean bulk) {
-		MODELS.add(model);
-		if (bulk) {
-			BULK.add(model);
-		}
+	static void register(Model<?> model, Role role) {
+		MODELS.put(model, role);
 	}
 
 	/** 0 bare, 1 the suit, 2 the big body. */
@@ -84,7 +97,10 @@ public final class WebSuitGrowth {
 		}
 	}
 
-	/** After the suit model is posed: each part scaled by how far it has grown (and no head on your own, in first person). */
+	/**
+	 * After a model is posed: every model drawn for the big body moves out to its frame ({@link WebHulk#shift}); the suit
+	 * layer's own models are laid on as far as they've got (and no head on your own, in first person).
+	 */
 	public static void applyModel(Model<?> model, Object state) {
 		if (!(state instanceof AvatarRenderState avatar)) {
 			return;
@@ -93,10 +109,14 @@ public final class WebSuitGrowth {
 			mcaUnder(model, covered(avatar));
 			return;
 		}
+		if (model instanceof net.minecraft.client.model.HumanoidModel<?> humanoid) {
+			WebHulk.shift(humanoid, hulkness(avatar));
+		}
 		if (!(model instanceof PlayerModel player)) {
 			return;
 		}
-		if (!MODELS.contains(model)) {
+		Role role = MODELS.get(model);
+		if (role == null) {
 			// the wearer's own body: the skin's outer layer (hat, jacket, sleeves, trousers) sits further out than the
 			// suit, and would poke through it in patches, so it goes under the suit while the suit covers it all
 			if (covered(avatar)) {
@@ -109,9 +129,93 @@ public final class WebSuitGrowth {
 			}
 			return;
 		}
-		grow(player, avatar);
+		if (role == Role.HULK) {
+			WebHulk.Model hulk = (WebHulk.Model)model;
+			hulk.build(hulkBuilt(avatar));
+			hulk.breathe(avatar.ageInTicks);
+		} else {
+			lay(player, avatar, role);
+		}
 		if (WebSymbioteClient.ownFirstPerson(avatar)) {
 			player.head.visible = false;
+		}
+	}
+
+	/** Moves a model drawn outside the usual passes (a layer reading the body's parts) out to the big body's frame. */
+	static void shift(net.minecraft.client.model.HumanoidModel<?> model, AvatarRenderState state) {
+		WebHulk.shift(model, hulkness(state));
+	}
+
+	/** How far into the big body's frame the body is spread (0 not at all, 1 the whole way). */
+	static float hulkness(AvatarRenderState avatar) {
+		Growth growth = avatar.getData(KEY);
+		if (growth != null && Math.max(growth.from(), growth.to()) == 2) {
+			return ease((built(growth) - 0.25F) / 0.5F);
+		}
+		WebSymbioteClient.Tendrils tendrils = avatar.getData(WebSymbioteClient.TENDRILS);
+		return tendrils != null && tendrils.armor() ? 1.0F : 0.0F;
+	}
+
+	/** How far the big body is built (0-1). */
+	static float hulkBuilt(AvatarRenderState avatar) {
+		Growth growth = avatar.getData(KEY);
+		return growth != null && Math.max(growth.from(), growth.to()) == 2 ? built(growth) : 1.0F;
+	}
+
+	/** How far toward the higher of the change's two levels it is (putting on reads 0 → 1, taking off 1 → 0). */
+	static float built(Growth growth) {
+		return growth.to() > growth.from() ? growth.t() : 1.0F - growth.t();
+	}
+
+	/** Each part's start (share of the change): body, arms, head, legs. */
+	static float start(int part) {
+		return switch (part) {
+			case 1, 2 -> ARMS;
+			case 3 -> HEAD;
+			case 4, 5 -> LEGS;
+			default -> BODY;
+		};
+	}
+
+	/** How far a part's tendrils have wrapped it (0-1). Parts: 0 body, 1 right arm, 2 left arm, 3 head, 4 right leg, 5 left leg. */
+	static float wrapped(float built, int part) {
+		return ease((built - start(part)) / WRAP_SPAN);
+	}
+
+	/** How far a part's goo (or its suit, {@code suit}) has folded over it, from its joint outward (0-1). */
+	static float layered(float built, int part, boolean suit) {
+		return ease((built - start(part) - GOO_AFTER - (suit ? SUIT_AFTER : 0.0F)) / LAYER_SPAN);
+	}
+
+	private static float ease(float x) {
+		x = Mth.clamp(x, 0.0F, 1.0F);
+		return x * x * (3.0F - 2.0F * x);
+	}
+
+	/** The suit (or the goo under it) laid over each part from its joint out, as far as it's got. */
+	private static void lay(PlayerModel player, AvatarRenderState avatar, Role role) {
+		Growth growth = avatar.getData(KEY);
+		ModelPart[] parts = {player.body, player.rightArm, player.leftArm, player.head, player.rightLeg, player.leftLeg};
+		if (growth == null || Math.min(growth.from(), growth.to()) >= 1) {
+			// nothing changing (or the suit under the big body as it comes or goes): whole, as it is
+			for (ModelPart part : parts) {
+				part.xScale = 1.0F;
+				part.yScale = 1.0F;
+				part.zScale = 1.0F;
+				part.visible = true;
+			}
+			return;
+		}
+		float built = built(growth);
+		for (int i = 0; i < parts.length; i++) {
+			float cover = layered(built, i, role == Role.SUIT);
+			// it folds down the part from the joint (each part's pivot), thickening as it settles
+			ModelPart part = parts[i];
+			float ripple = cover > 0.0F && cover < 1.0F ? Mth.sin(cover * Mth.PI * 2.0F + avatar.ageInTicks * 0.6F) * 0.04F : 0.0F;
+			part.yScale = cover;
+			part.xScale = Mth.lerp(cover, 0.9F, 1.0F) + ripple;
+			part.zScale = Mth.lerp(cover, 0.9F, 1.0F) + ripple;
+			part.visible = cover > 0.02F;
 		}
 	}
 
@@ -162,68 +266,5 @@ public final class WebSuitGrowth {
 	}
 
 	/** How far through putting the suit on (0-1) the skin's outer layer goes under it. */
-	private static final float COVERED_AT = 0.85F;
-	/** Living Armor's bulk: its head is kept this much smaller than the rest of it is swollen (a monstrous body, not a balloon head). */
-	static final float BULK_HEAD = 0.88F;
-
-	private static void grow(PlayerModel player, AvatarRenderState avatar) {
-		Growth growth = avatar.getData(KEY);
-		boolean bulk = BULK.contains(player);
-		if (growth == null || !bulk && Math.max(growth.from(), growth.to()) == 2) {
-			// nothing changing (or the plain suit under armour that's coming or going): whole, as it is
-			for (ModelPart part : new ModelPart[] {player.body, player.rightArm, player.leftArm, player.head, player.rightLeg, player.leftLeg}) {
-				part.xScale = 1.0F;
-				part.yScale = 1.0F;
-				part.zScale = 1.0F;
-				part.visible = true;
-			}
-			if (bulk) {
-				headSize(player.head);
-			}
-			return;
-		}
-		scale(player.body, growth, BODY, bulk);
-		scale(player.rightArm, growth, ARMS, bulk);
-		scale(player.leftArm, growth, ARMS, bulk);
-		scale(player.head, growth, HEAD, bulk);
-		if (bulk) {
-			headSize(player.head);
-		}
-		scale(player.rightLeg, growth, LEGS, bulk);
-		scale(player.leftLeg, growth, LEGS, bulk);
-	}
-
-	private static void scale(ModelPart part, Growth growth, float delay, boolean bulk) {
-		boolean growing = growth.to() > growth.from();
-		// growing out from the chest, or drawing back the other way (legs first)
-		float start = growing ? delay : LEGS - delay;
-		float g = Mth.clamp((growth.t() - start) / SPAN, 0.0F, 1.0F);
-		// grown: swelling past its size, then settling (and a ripple of flesh as it creeps)
-		float grown = growing ? swell(g) : 1.0F - g * g;
-		float size;
-		if (bulk) {
-			// Living Armor: the bulk fills out from just over the suit (or from nothing, put on bare)
-			float low = Math.min(growth.from(), growth.to()) >= 1 ? BULK_FROM : 0.0F;
-			size = Mth.lerp(grown, low, 1.0F);
-		} else {
-			size = grown;
-		}
-		float ripple = growing && g > 0.0F && g < 1.0F ? Mth.sin(g * Mth.PI * 3.0F) * 0.05F : 0.0F;
-		part.xScale = size + ripple;
-		part.yScale = size;
-		part.zScale = size + ripple;
-		part.visible = size > 0.02F;
-	}
-
-	private static void headSize(ModelPart head) {
-		head.xScale *= BULK_HEAD;
-		head.yScale *= BULK_HEAD;
-		head.zScale *= BULK_HEAD;
-	}
-
-	/** 0 → 1, overshooting a little first. */
-	private static float swell(float g) {
-		float eased = 1.0F - (1.0F - g) * (1.0F - g);
-		return eased + Mth.sin(g * Mth.PI) * OVERSHOOT;
-	}
+	private static final float COVERED_AT = 0.55F;
 }

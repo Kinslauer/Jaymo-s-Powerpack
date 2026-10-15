@@ -17,8 +17,10 @@ import net.minecraft.world.phys.Vec3;
  */
 final class SmokeScreen {
 	/** Smoke a tick (a block's worth is 1; a thick, hiding cloud is 3 a block), and how long one pour lasts. */
-	static final float POUR = 2.0F;
+	static final float POUR = 3.0F;
 	static final int MAX_TICKS = 200;
+	/** The first gout when you start pouring, so the cloud is already round you before anyone can step out of it. */
+	static final float BURST = 40.0F;
 	/** Hunger a tick while pouring. */
 	static final float EXHAUSTION = 0.02F;
 	/** Mastered: how long after you stop pouring your smoke stays banked (no wind, slow to fade). */
@@ -40,6 +42,7 @@ final class SmokeScreen {
 		POURING.put(player.getUUID(), now);
 		SmokePower.set(player, SmokePower.state(player).withPour(now));
 		SmokeMoves.begin(player, SmokeMoves.POUR);
+		SmokeField.puff(player.level(), player.position().add(0.0, player.getBbHeight() * 0.55, 0.0), BURST, player);
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.6F, 0.6F);
 	}
 

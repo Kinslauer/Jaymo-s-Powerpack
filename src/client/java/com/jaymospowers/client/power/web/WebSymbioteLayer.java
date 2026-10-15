@@ -13,61 +13,56 @@ import net.minecraft.resources.Identifier;
  * The symbiote's black suit, drawn over a bonded web slinger's whole body (and their skin's outer layer) with the
  * player model's own pose. Everyone sees it; it hides when the wearer is invisible or has the suit turned off.
  * The texture ({@code textures/entity/web_symbiote_suit.png}) is drawn by {@code tools/gen_web.py}: the clean black
- * suit. Its veins show only while it's feral (a bond under {@code VEIN_BOND}), while it swells into the big body, and on
- * the big body itself.
+ * suit. Its veins show only while it's feral (a bond under {@code VEIN_BOND}). The big body is its own hulking model
+ * ({@link WebHulk}, veins in its texture) with a lolling tongue. While either is being put on (see WebSuitGrowth) a
+ * layer of raw goo goes on under the suit first.
  */
 final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	private static final Identifier TEXTURE = JaymosPowers.id("textures/entity/web_symbiote_suit.png");
-	/** Veins coursing over the big body ({@code tools/gen_web_veins.py}): frames cycled every {@code VEIN_TICKS}. */
+	/** The raw goo laid on first, under the suit, as it's put on. */
+	private static final Identifier GOO = JaymosPowers.id("textures/entity/web_symbiote_goo.png");
+	/** Veins coursing over the feral suit ({@code tools/gen_web_veins.py}): frames cycled every {@code VEIN_TICKS}. */
 	private static final Identifier[] VEINS = {
 		JaymosPowers.id("textures/entity/web_symbiote_veins_0.png"), JaymosPowers.id("textures/entity/web_symbiote_veins_1.png"),
 		JaymosPowers.id("textures/entity/web_symbiote_veins_2.png"), JaymosPowers.id("textures/entity/web_symbiote_veins_3.png")};
 	private static final int VEIN_TICKS = 4;
 	/** Under this bond the plain suit still shows its veins (it's feral). */
 	private static final int VEIN_BOND = 40;
-	/** The veins sit just over the bulk. */
+	/** The veins sit just over the suit. */
 	private static final float VEIN_GAP = 0.04F;
-	private final PlayerModel veinsWide;
-	private final PlayerModel veinsSlim;
 	/** The veins over the plain suit (feral). */
 	private final PlayerModel suitVeinsWide;
 	private final PlayerModel suitVeinsSlim;
 
-	/** The suit swollen by Living Armor: the player model inflated, thick and muscular (wide and slim arms). */
-	private static final float BULK = 1.3F;
-	private final PlayerModel bulkWide;
-	private final PlayerModel bulkSlim;
-	/** The plain suit sits just over the skin (not on it, where it would flicker against it). */
-	private static final float SKIN_GAP = 0.12F;
+	/** The big body. */
+	private final WebHulk.Model hulk;
+	/** The plain suit sits just over the skin (not on it, where it would flicker against it); the goo just under it. */
+	private static final float SKIN_GAP = 0.12F, GOO_GAP = 0.06F;
 	private final PlayerModel suitWide;
 	private final PlayerModel suitSlim;
+	private final PlayerModel gooWide;
+	private final PlayerModel gooSlim;
 
 	WebSymbioteLayer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
 		super(renderer);
-		this.bulkWide = new PlayerModel(net.minecraft.client.model.geom.builders.LayerDefinition.create(
-			PlayerModel.createMesh(new net.minecraft.client.model.geom.builders.CubeDeformation(BULK), false), 64, 64).bakeRoot(), false);
-		this.bulkSlim = new PlayerModel(net.minecraft.client.model.geom.builders.LayerDefinition.create(
-			PlayerModel.createMesh(new net.minecraft.client.model.geom.builders.CubeDeformation(BULK), true), 64, 64).bakeRoot(), true);
-		this.suitWide = new PlayerModel(net.minecraft.client.model.geom.builders.LayerDefinition.create(
-			PlayerModel.createMesh(new net.minecraft.client.model.geom.builders.CubeDeformation(SKIN_GAP), false), 64, 64).bakeRoot(), false);
-		this.suitSlim = new PlayerModel(net.minecraft.client.model.geom.builders.LayerDefinition.create(
-			PlayerModel.createMesh(new net.minecraft.client.model.geom.builders.CubeDeformation(SKIN_GAP), true), 64, 64).bakeRoot(), true);
-		this.veinsWide = new PlayerModel(net.minecraft.client.model.geom.builders.LayerDefinition.create(
-			PlayerModel.createMesh(new net.minecraft.client.model.geom.builders.CubeDeformation(BULK + VEIN_GAP), false), 64, 64).bakeRoot(), false);
-		this.veinsSlim = new PlayerModel(net.minecraft.client.model.geom.builders.LayerDefinition.create(
-			PlayerModel.createMesh(new net.minecraft.client.model.geom.builders.CubeDeformation(BULK + VEIN_GAP), true), 64, 64).bakeRoot(), true);
-		this.suitVeinsWide = new PlayerModel(net.minecraft.client.model.geom.builders.LayerDefinition.create(
-			PlayerModel.createMesh(new net.minecraft.client.model.geom.builders.CubeDeformation(SKIN_GAP + VEIN_GAP), false), 64, 64).bakeRoot(), false);
-		this.suitVeinsSlim = new PlayerModel(net.minecraft.client.model.geom.builders.LayerDefinition.create(
-			PlayerModel.createMesh(new net.minecraft.client.model.geom.builders.CubeDeformation(SKIN_GAP + VEIN_GAP), true), 64, 64).bakeRoot(), true);
-		WebSuitGrowth.register(this.suitVeinsWide, false);
-		WebSuitGrowth.register(this.suitVeinsSlim, false);
-		WebSuitGrowth.register(this.bulkWide, true);
-		WebSuitGrowth.register(this.bulkSlim, true);
-		WebSuitGrowth.register(this.suitWide, false);
-		WebSuitGrowth.register(this.suitSlim, false);
-		WebSuitGrowth.register(this.veinsWide, true);
-		WebSuitGrowth.register(this.veinsSlim, true);
+		this.hulk = new WebHulk.Model();
+		this.suitWide = suitModel(SKIN_GAP, false);
+		this.suitSlim = suitModel(SKIN_GAP, true);
+		this.gooWide = suitModel(GOO_GAP, false);
+		this.gooSlim = suitModel(GOO_GAP, true);
+		this.suitVeinsWide = suitModel(SKIN_GAP + VEIN_GAP, false);
+		this.suitVeinsSlim = suitModel(SKIN_GAP + VEIN_GAP, true);
+		WebSuitGrowth.register(this.hulk, WebSuitGrowth.Role.HULK);
+		for (PlayerModel model : new PlayerModel[] {this.suitWide, this.suitSlim, this.suitVeinsWide, this.suitVeinsSlim}) {
+			WebSuitGrowth.register(model, WebSuitGrowth.Role.SUIT);
+		}
+		WebSuitGrowth.register(this.gooWide, WebSuitGrowth.Role.GOO);
+		WebSuitGrowth.register(this.gooSlim, WebSuitGrowth.Role.GOO);
+	}
+
+	private static PlayerModel suitModel(float gap, boolean slim) {
+		return new PlayerModel(net.minecraft.client.model.geom.builders.LayerDefinition.create(
+			PlayerModel.createMesh(new net.minecraft.client.model.geom.builders.CubeDeformation(gap), slim), 64, 64).bakeRoot(), slim);
 	}
 
 	@Override
@@ -75,37 +70,48 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 		boolean slim = state.skin.model() == net.minecraft.world.entity.player.PlayerModelType.SLIM;
 		WebSuitGrowth.Growth growth = state.getData(WebSuitGrowth.KEY);
 		if (growth != null) {
-			// it's growing over them (or drawing back): see WebSuitGrowth
+			// it's being built over them (or taken apart): see WebSuitGrowth
 			int high = Math.max(growth.from(), growth.to()), low = Math.min(growth.from(), growth.to());
-			if (high == 2 && low == 1 || high == 1) {
-				coloredCutoutModelCopyLayerRender(slim ? this.suitSlim : this.suitWide, TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
+			if (low == 0) {
+				// bare skin: the goo goes on first, the suit over it
+				coloredCutoutModelCopyLayerRender(slim ? this.gooSlim : this.gooWide, GOO, poseStack, collector, lightCoords, state, -1, 1);
 			}
+			coloredCutoutModelCopyLayerRender(slim ? this.suitSlim : this.suitWide, TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
 			if (high == 2) {
-				coloredCutoutModelCopyLayerRender(slim ? this.bulkSlim : this.bulkWide, TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
-				// swelling into the big body: the veins come up
-				coloredCutoutModelCopyLayerRender(slim ? this.veinsSlim : this.veinsWide, veins(state), poseStack, collector, lightCoords, state, -1, 1);
+				coloredCutoutModelCopyLayerRender(this.hulk, WebHulk.TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
+				tongue(poseStack, collector, state, WebSuitGrowth.hulkBuilt(state));
 			}
 			return;
 		}
 		WebSymbioteClient.Tendrils tendrils = state.getData(WebSymbioteClient.TENDRILS);
 		if (tendrils != null && tendrils.armor()) {
-			// Living Armor: the suit swells over the whole body, whether or not it was showing
-			PlayerModel bulk = state.skin.model() == net.minecraft.world.entity.player.PlayerModelType.SLIM ? this.bulkSlim : this.bulkWide;
-			coloredCutoutModelCopyLayerRender(bulk, TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
-			// veins coursing over it, writhing as the frames cycle
-			coloredCutoutModelCopyLayerRender(slim ? this.veinsSlim : this.veinsWide, veins(state), poseStack, collector, lightCoords, state, -1, 1);
+			// the big body, whether or not the suit was showing
+			coloredCutoutModelCopyLayerRender(this.hulk, WebHulk.TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
+			tongue(poseStack, collector, state, 1.0F);
 			return;
 		}
 		if (state.getData(WebSymbioteClient.SUIT) == null) {
 			return;
 		}
-		PlayerModel suit = state.skin.model() == net.minecraft.world.entity.player.PlayerModelType.SLIM ? this.suitSlim : this.suitWide;
+		PlayerModel suit = slim ? this.suitSlim : this.suitWide;
 		coloredCutoutModelCopyLayerRender(suit, TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
 		Float feral = state.getData(WebSymbioteClient.FERAL);
 		if (feral != null && feral > 1.0F - VEIN_BOND / (float)com.jaymospowers.power.web.WebSymbiote.BOND_MAX) {
 			// still feral: its veins show through the suit
 			coloredCutoutModelCopyLayerRender(slim ? this.suitVeinsSlim : this.suitVeinsWide, veins(state), poseStack, collector, lightCoords, state, -1, 1);
 		}
+	}
+
+	/** The big body's tongue, lolling out of its jaws (it comes in with the head, the last thing built). */
+	private void tongue(PoseStack poseStack, SubmitNodeCollector collector, AvatarRenderState state, float built) {
+		if (state.isInvisible || WebSymbioteClient.ownFirstPerson(state) || state.getData(WebSymbioteClient.EATING) != null
+			|| state.getData(WebSymbioteClient.COUNTER_MAW) != null || state.getData(WebSymbioteClient.ROAR) != null) {
+			// (the maw has the head)
+			return;
+		}
+		PlayerModel parent = this.getParentModel();
+		WebSuitGrowth.shift(parent, state);
+		WebHulk.submitTongue(poseStack, collector, state, parent, net.minecraft.util.Mth.clamp((built - 0.85F) / 0.15F, 0.0F, 1.0F));
 	}
 
 	/** The veins' frame now: cycling, so they pulse and writhe. */

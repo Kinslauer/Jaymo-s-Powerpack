@@ -43,8 +43,11 @@ public final class ModelPoses {
 		WebSuitGrowth.applyModel(model, state);
 		WebRagdoll.applyModel(model, state);
 		WebBodyPose.applyModel(model, state);
+		com.jaymospowers.client.power.web.WebCounterPose.applyModel(model, state);
+		com.jaymospowers.client.power.web.WebMorphLayer.applyModel(model, state);
 		WebWallRunPose.applyModel(model, state);
 		WebParkourPose.applyModel(model, state);
+		com.jaymospowers.client.power.chrono.ChronoRunPose.applyModel(model, state);
 		ChronoFlowPose.applyModel(model, state);
 		ChronoReelPose.applyModel(model, state);
 		GravityBoardPose.applyModel(model, state);

@@ -56,6 +56,39 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   every slam throws block dust, smoke and a heavy mace thud, and shakes you, the one slammed and anyone within 12.
   Bosses can't be whipped; Living Armor's tendrils keep their own Sneak grab. `COOLDOWN` 20 ticks after one ends.
 
+## Weapon arm, counter animations, hulking big body (0.11.62)
+- **Weapon arm (`WebMorph`):** in the suit or big body, with an empty main hand, left click morphs the arm into a
+  random weapon (never the same twice running, arms alternate) and strikes what you aim at within `REACH` 6:
+  - Mace (blunt): `DAMAGE` 10, `hurtArmor` x`ARMOR_WEAR` 4, breaks a bone `MACE_BREAK` 35% (shatters skeletons), slams back.
+  - Scythe (slashing): 8, severs a limb `SCYTHE_SEVER` 45% (`Dismember.cut`), sweeps others within 2.5 for 60% at half the chance.
+  - Spear (piercing): 9, `SPEAR_PIERCE` 35% of it ignores armour, armour wear x4, drives straight back.
+  - Timing: `TICKS` 16, forms at `FORM` 4, lands at `HIT` 8, `COOLDOWN` 12 ticks; holding the button chains strikes.
+    A block under the crosshair is still mined. Drawn by `WebMorphLayer` (cord + weapon head, arm pose).
+- **Counter animations (`WebCounterPose`):** all 18 counters (9 web, 9 symbiote) have their own body animation,
+  driven by the synced `WebCounter.ACTIVE`; the side is picked from game time so server and client agree.
+- **Hulking big body (`WebHulk`, mesh from `tools/gen_web_hulk.py` → `WebHulkMesh` + `web_symbiote_hulk.png`):**
+  53 boxes: huge traps/shoulders/lats, Popeye forearms, long clawed hands, thick legs, a small head sunk low and forward
+  (`HEAD_DOWN` 2.5, `HEAD_FORWARD` 1.5), arms out `ARM_OUT` 3.5, legs `LEG_OUT` 1.2. A hinged fanged jaw breathes and
+  snarls (`JAW_REST` 0.22); a red tongue (12 pieces) lolls and lashes every `LASH_EVERY` 70 ticks. No emblem (earlier ruling).
+  The behemoth (zombie-player host) still uses the old inflated body.
+- **Equip animation (`WebSuitGrowth` + `WebSuitWrapLayer`):** tendrils leech out and coil round the body, arms, head,
+  then legs from each joint (`WRAP_SPAN` 0.3); raw goo folds over each part (`GOO_AFTER` 0.28, `LAYER_SPAN` 0.26), then
+  the suit rolls over it (`SUIT_AFTER` 0.14) with a band of tendril at its edge, as the strands sink in. Building the big
+  body, thicker tendrils wrap the new frame, then each muscle is slapped on in turn (`WebHulk.BUILD_*`). Off runs backward.
+
+- **Swinging in the suit:** the whole suit arm streams into the line: `WebLineRenderer.armSheath` peels
+  `SHEATH_STRANDS` 7 tendrils off the arm from the shoulder, flares them past the hand (`SHEATH_FLARE` 0.32) and braids
+  them into the cord `SHEATH_MERGE` 2.6 blocks out. Not in your own first person, nor on two-handed catches.
+- **Cracks linger (`WebCracks`):** Wall Crawl bites (`WebTendrils.CLIMB_CRACK` 5), walking tips (`WebTendrilWalk.PLANT_CRACK`
+  3) and the wall tethers crack the block they grab; the crack holds `HOLD_TICKS` 100 after the last bite, then fades a
+  stage at a time over `FADE_TICKS` 200. Server cracks reach everyone; walking-tip cracks are worked out on each client.
+- **Doc Ock Wall Crawl:** off the wall, with Wall Crawl on, four tendrils carry you (`WebSymbioteClient.stride`,
+  `WebTendrilWalk.striding`): hoisted `STRIDE_HEIGHT` 1.2 off the ground, walking at `STRIDE_SPEED` 0.2 (sprint 0.3),
+  each tip reaching `STRIDE_REACH` 4.5 for whatever is near (ground, walls, ceilings, trees) and stepping when it trails
+  `STRIDE_STEP_FAR` 1.1. Jump climbs (needs `STRIDE_RISE_ANCHORS` 4 ways to grab), Sneak lowers, Sneak on the ground
+  stands you on your feet; nothing to grab within reach and you fall. Walls and ceilings still climb as before. While the
+  four walk, four spare tendrils (`WebTendrilLayer.FIRST_SPARE`) grow, so strikes, grabs and the barrage keep theirs.
+
 ## Andy's symbiote and whip changes (0.9.8)
 - **Rigid tendrils:** Wall Crawl's walking tendrils are jointed limbs (two straight sections, a knee out from the
   surface, fixed length `WebTendrilWalk.LIMB` 32 px), Doc Ock style. Walking, running or climbing, every other tendril
@@ -87,8 +120,8 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   while it roars), a frenzy under half health (lashes twice as often, x1.4, 18% snatch and hurl), and under a quarter
   the Shroud (5 s unseen, Regeneration III, Speed, a leap away) once a minute.
 - **Suits under Fresh Animations:** while the plain suit, the big body or its growth shows, `PoseTakeover.posed` pauses
-  EMF/FA so the suit models line up with the body. The big body is `WebSymbioteLayer.BULK` 1.3 thick (head
-  `WebSuitGrowth.BULK_HEAD` 0.88 of that); MCA player models hide their own skin, clothes and hair layers under it.
+  EMF/FA so the suit models line up with the body. Since 0.11.62 the big body is its own hulking model
+  (`WebHulk`, see below); MCA player models hide their own skin, clothes and hair layers under it.
 - **Into the big body:** the bulk takes 3 s (`WebSuitGrowth.BULK_TICKS` 60): doubled over in pain, clutching the
   middle, spasming, knees buckling, head hanging and jerking (`WebFeral.agony`), then up into a deeper feral idle
   (`IDLE_BEND` 0.75, arms low and wide, knees bent, head twitching).

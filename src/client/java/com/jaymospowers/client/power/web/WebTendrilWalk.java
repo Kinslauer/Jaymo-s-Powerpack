@@ -24,6 +24,12 @@ import org.jspecify.annotations.Nullable;
  * carried on stiff legs rather than hung on soft cords. The rest keep idling as usual, and the shoulder pair stays free for
  * R and G. Worked out on every client from where the climber is (the server only says that they're climbing), so
  * everyone sees the same walk.
+ * <p>
+ * Off the wall, Wall Crawl carries you on them the same way, Doctor Octopus style ({@link #striding}): hoisted up off
+ * the ground on the four, each reaching out ({@code STRIDE_REACH}) to grab whatever is near (the ground, a wall, a
+ * ceiling, a tree), the body carried along between them. Each tip that plants cracks the block it grabs, and the crack
+ * lingers ({@code WebCracks}). The other tendrils stay free: while the four walk, four more grow to stand in for them, so
+ * every other ability still has its tendrils.
  */
 final class WebTendrilWalk {
 	/** The walking tendrils (see {@link WebTendrilLayer}'s roots): the middle pair, then the low pair. */
@@ -45,6 +51,19 @@ final class WebTendrilWalk {
 	static final float STRAIGHTEST = 0.96F;
 	/** A tip planting: its soft thud (volume, pitch). */
 	private static final float PLANT_VOLUME = 0.25F, PLANT_PITCH = 0.75F;
+	/** How deep a planted tip cracks the block it grabs (0-9). */
+	static final int PLANT_CRACK = 3;
+	/**
+	 * Carried on the tendrils (off a wall): how far each one reaches for something to grab (blocks), how far down it looks
+	 * for the ground under you, and, per leg, which way it reaches (to your right, down, ahead: out round you and down).
+	 */
+	static final double STRIDE_REACH = 4.5, STRIDE_GROUND = 4.0;
+	private static final double[][] STRIDE_DIRS = {{0.8, -1.0, 0.7}, {-0.8, -1.0, 0.7}, {0.8, -1.0, -0.6}, {-0.8, -1.0, -0.6}};
+	/** Striding, a tip trails its spot this far (blocks) before it steps, and steps this high. */
+	private static final double STRIDE_STEP_FAR = 1.1;
+	private static final float STRIDE_STEP_LIFT = 0.9F;
+	/** Ways to look for something to grab, out from your middle (anchors are counted along these). */
+	private static final Vec3[] PROBES = probes();
 
 	private static final class Leg {
 		@Nullable Vec3 foot;
@@ -77,9 +96,61 @@ final class WebTendrilWalk {
 		if (player.getAttached(WebTendrils.CLIMB) != null) {
 			return true;
 		}
+		return clinging(player) || striding(player);
+	}
+
+	/** A wall cling in the suit (the tendrils hold the wall). */
+	private static boolean clinging(Player player) {
 		Integer move = player.getAttached(com.jaymospowers.power.web.WebParkour.MOVE);
 		return move != null && com.jaymospowers.power.web.WebParkour.kind(move) == com.jaymospowers.power.web.WebParkour.CLING
 			&& com.jaymospowers.power.web.WebSymbiote.suitShown(player);
+	}
+
+	/**
+	 * Carried on the tendrils (Wall Crawl on, off the ground, something near to grab): worked out the same on every
+	 * client from what it can see, so everyone sees the same walk.
+	 */
+	static boolean striding(Player player) {
+		return com.jaymospowers.power.web.WebSymbiote.isBonded(player)
+			&& com.jaymospowers.power.web.WebSymbiote.isToggled(player, com.jaymospowers.power.web.WebSymbioteState.CRAWL)
+			&& !player.onGround() && !player.isPassenger() && !player.isFallFlying() && !player.getAbilities().flying && !player.isInWater()
+			&& !player.isSpectator() && anchors(player, STRIDE_REACH * player.getScale()) >= 2;
+	}
+
+	/** How many ways out from your middle there's something to grab within {@code reach}. */
+	static int anchors(Player player, double reach) {
+		Vec3 middle = player.getBoundingBox().getCenter();
+		int count = 0;
+		for (Vec3 probe : PROBES) {
+			BlockHitResult hit = player.level().clip(new ClipContext(middle, middle.add(probe.scale(reach)), ClipContext.Block.COLLIDER,
+				ClipContext.Fluid.NONE, player));
+			if (hit.getType() == HitResult.Type.BLOCK) {
+				count++;
+			}
+		}
+		return count;
+	}
+
+	/** How far below your feet the ground is (blocks), or -1 if there's none within {@code max}. */
+	static double groundBelow(Player player, double max) {
+		Vec3 feet = player.position();
+		BlockHitResult hit = player.level().clip(new ClipContext(feet.add(0.0, 0.05, 0.0), feet.subtract(0.0, max, 0.0), ClipContext.Block.COLLIDER,
+			ClipContext.Fluid.NONE, player));
+		return hit.getType() == HitResult.Type.BLOCK ? feet.y - hit.getLocation().y : -1.0;
+	}
+
+	private static Vec3[] probes() {
+		java.util.List<Vec3> out = new java.util.ArrayList<>();
+		for (int x = -1; x <= 1; x++) {
+			for (int y = -1; y <= 1; y++) {
+				for (int z = -1; z <= 1; z++) {
+					if (x != 0 || y != 0 || z != 0) {
+						out.add(new Vec3(x, y, z).normalize());
+					}
+				}
+			}
+		}
+		return out.toArray(new Vec3[0]);
 	}
 
 	/**
@@ -93,8 +164,14 @@ final class WebTendrilWalk {
 			return null;
 		}
 		Vec3 normal = surface(player);
-		if (normal == null) {
-			return null;
+		boolean stride = false;
+		if (normal == null || player.getAttached(WebTendrils.CLIMB) == null && !clinging(player) && striding(player)) {
+			if (!striding(player)) {
+				return null;
+			}
+			// carried between them: the knees jut up and out
+			stride = true;
+			normal = new Vec3(0.0, 1.0, 0.0);
 		}
 		Walk walk = WALKS.computeIfAbsent(player.getId(), id -> new Walk());
 		if (WALKS.size() > 64) {
@@ -126,7 +203,16 @@ final class WebTendrilWalk {
 		float[] out = new float[roots.length * 6];
 		for (int i = 0; i < WALKERS.length; i++) {
 			Leg leg = walk.legs[i];
-			Vec3 spot = plant(player, middle.add(right.scale(HOME[i][0] * scale)).add(up.scale(HOME[i][1] * scale)).add(lead), normal);
+			Vec3 legOut = Vec3.ZERO;
+			Vec3 spot;
+			if (stride) {
+				// reaching out round you and down for whatever there is to grab
+				double[] d = STRIDE_DIRS[i];
+				legOut = left.scale(-d[0]).add(0.0, d[1], 0.0).add(ahead.scale(d[2])).normalize();
+				spot = grab(player, middle.add(lead), legOut, STRIDE_REACH * scale);
+			} else {
+				spot = plant(player, middle.add(right.scale(HOME[i][0] * scale)).add(up.scale(HOME[i][1] * scale)).add(lead), normal);
+			}
 			if (leg.foot == null) {
 				leg.foot = spot;
 			}
@@ -138,7 +224,7 @@ final class WebTendrilWalk {
 					otherStepping = true;
 				}
 			}
-			if (leg.stepStart < 0.0F && leg.foot.distanceTo(spot) > STEP_FAR * scale && !otherStepping && time - walk.pairDone[other] >= PAIR_GAP) {
+			if (leg.stepStart < 0.0F && leg.foot.distanceTo(spot) > (stride ? STRIDE_STEP_FAR : STEP_FAR) * scale && !otherStepping && time - walk.pairDone[other] >= PAIR_GAP) {
 				// it trails: up it comes, and over to plant ahead (its partner goes with it)
 				for (int j = 0; j < WALKERS.length; j++) {
 					Leg partner = walk.legs[j];
@@ -157,6 +243,8 @@ final class WebTendrilWalk {
 					leg.stepStart = -1.0F;
 					walk.pairDone[pair] = time;
 					tip = spot;
+					// it bites in: the block cracks, and stays cracked a while
+					com.jaymospowers.power.web.WebCracks.crackAt(player.level(), spot, PLANT_CRACK);
 					if (i == 0 || i == 1) {
 						// a soft thud as the pair plants (once a pair)
 						player.level().playLocalSound(spot.x, spot.y, spot.z, SoundEvents.SLIME_SQUISH_SMALL, SoundSource.PLAYERS, PLANT_VOLUME,
@@ -164,7 +252,7 @@ final class WebTendrilWalk {
 					}
 				} else {
 					float e = t * t * (3.0F - 2.0F * t);
-					tip = leg.from.lerp(leg.to, e).add(normal.scale(STEP_LIFT * scale * Mth.sin(t * Mth.PI)));
+					tip = leg.from.lerp(leg.to, e).add(normal.scale((stride ? STRIDE_STEP_LIFT : STEP_LIFT) * scale * Mth.sin(t * Mth.PI)));
 				}
 			}
 			// from the tendril's root on the back, in the body's model space
@@ -176,9 +264,11 @@ final class WebTendrilWalk {
 			out[index * 6] = (float)chord.dot(left);
 			out[index * 6 + 1] = (float)-chord.y;
 			out[index * 6 + 2] = (float)-chord.dot(ahead);
-			out[index * 6 + 3] = (float)normal.dot(left);
-			out[index * 6 + 4] = (float)-normal.y;
-			out[index * 6 + 5] = (float)-normal.dot(ahead);
+			// the way it bows: off the surface (striding, up and out to its own side)
+			Vec3 bow = stride ? normal.add(legOut.multiply(1.0, 0.0, 1.0)).normalize() : normal;
+			out[index * 6 + 3] = (float)bow.dot(left);
+			out[index * 6 + 4] = (float)-bow.y;
+			out[index * 6 + 5] = (float)-bow.dot(ahead);
 		}
 		return out;
 	}
@@ -188,6 +278,27 @@ final class WebTendrilWalk {
 		BlockHitResult hit = player.level().clip(new ClipContext(at.add(normal.scale(SURFACE_OUT)), at.subtract(normal.scale(SURFACE_IN)),
 			ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
 		return hit.getType() == HitResult.Type.BLOCK ? hit.getLocation() : at.subtract(normal.scale(0.4));
+	}
+
+	/**
+	 * Where a striding tip grabs, reaching {@code dir} from {@code from}: whatever it meets; failing that straight down,
+	 * then straight out to that side, then up; with nothing at all, it hangs out that way.
+	 */
+	private static Vec3 grab(Player player, Vec3 from, Vec3 dir, double reach) {
+		Vec3 side = new Vec3(dir.x, 0.0, dir.z);
+		side = side.lengthSqr() < 1.0E-4 ? Vec3.ZERO : side.normalize();
+		Vec3[] tries = {dir, new Vec3(side.x * 0.4, -1.0, side.z * 0.4).normalize(), side, side.add(0.0, 1.0, 0.0).normalize()};
+		for (Vec3 way : tries) {
+			if (way.lengthSqr() < 1.0E-4) {
+				continue;
+			}
+			BlockHitResult hit = player.level().clip(new ClipContext(from, from.add(way.scale(reach)), ClipContext.Block.COLLIDER,
+				ClipContext.Fluid.NONE, player));
+			if (hit.getType() == HitResult.Type.BLOCK) {
+				return hit.getLocation();
+			}
+		}
+		return from.add(dir.scale(reach * 0.4));
 	}
 
 	/** Which way the surface they're climbing faces (out of it): a ceiling above, or the wall their box presses on. */

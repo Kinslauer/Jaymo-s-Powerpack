@@ -8,10 +8,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -44,12 +42,18 @@ public final class FallingStars {
 	/** It lands this far from the player (blocks), from this high, over this many ticks. */
 	public static final double RANGE_MIN = 40.0, RANGE_MAX = 100.0;
 	public static final double HEIGHT = 110.0;
-	public static final int FALL_TICKS = 80;
+	public static final int FALL_TICKS = 140;
 	/** The blast on landing (hurts and flings; breaks nothing itself: the crater is carved). */
 	public static final float BLAST = 2.0F;
 	/** The landing shakes every screen this far off, this hard (degrees) close by. */
 	public static final double LANDING_SHAKE_RANGE = 64.0;
 	public static final float LANDING_SHAKE = 2.5F;
+	/** Its trail is sent to everyone in the world this close (blocks), so a star is seen coming down from far off. */
+	public static final double SEEN_FROM = 400.0;
+	/** How big the rock is drawn while it falls (it glows through hills too). */
+	public static final float ROCK_SCALE = 2.5F;
+	/** After it lands, a tall smoke plume with sparks marks the crater for this long (ticks: 3 minutes). */
+	public static final int PLUME_TICKS = 3600;
 
 	/** What the star looks like coming down. */
 	private static final List<BlockState> ROCK = List.of(Blocks.CRYING_OBSIDIAN.defaultBlockState(), Blocks.BLACKSTONE.defaultBlockState(),
@@ -58,7 +62,11 @@ public final class FallingStars {
 	private record Star(ResourceKey<Level> dimension, int rock, Vec3 from, Vec3 to, long start) {
 	}
 
+	private record Plume(ResourceKey<Level> dimension, Vec3 at, long start) {
+	}
+
 	private static final List<Star> STARS = new ArrayList<>();
+	private static final List<Plume> PLUMES = new ArrayList<>();
 	private static final Map<ResourceKey<Level>, Long> LAST = new HashMap<>();
 
 	private FallingStars() {
@@ -69,11 +77,13 @@ public final class FallingStars {
 
 	static void clear() {
 		STARS.clear();
+		PLUMES.clear();
 		LAST.clear();
 	}
 
 	static void tick(MinecraftServer server) {
 		fly(server);
+		smoke(server);
 		if (server.getTickCount() % CHECK_EVERY != 0) {
 			return;
 		}
@@ -121,17 +131,13 @@ public final class FallingStars {
 		BlockCluster rock = BlockCluster.made(level, ROCK, from);
 		rock.script(true, false);
 		com.jaymospowers.core.Oddities.mark(rock, com.jaymospowers.core.Oddities.STAR);
-		rock.setAttached(BlockCluster.SCALE, 1.4F);
+		rock.setAttached(BlockCluster.SCALE, ROCK_SCALE);
+		rock.setGlowingTag(true);
 		STARS.add(new Star(level.dimension(), rock.getId(), from, to, level.getGameTime()));
 		LAST.put(level.dimension(), level.getGameTime());
-		// a long whistle, and a word to everyone near enough to look up
+		// a long whistle, and no word: whoever looks up has to spot it and find where it lands
 		level.playSound(null, to.x, to.y, to.z, SoundEvents.FIRECHARGE_USE, SoundSource.AMBIENT, 12.0F, 0.5F);
 		level.playSound(null, to.x, to.y, to.z, SoundEvents.ELYTRA_FLYING, SoundSource.AMBIENT, 12.0F, 0.6F);
-		for (ServerPlayer player : level.players()) {
-			if (player.distanceToSqr(to) < 160.0 * 160.0) {
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.star_falling").withStyle(ChatFormatting.AQUA, ChatFormatting.ITALIC));
-			}
-		}
 		return true;
 	}
 
@@ -153,10 +159,16 @@ public final class FallingStars {
 				rock.setDeltaMovement(at.subtract(was));
 				rock.syncVelocity = true;
 			}
-			// a bright tail, and smoke
-			level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 0.8, at.z, 6, 0.6, 0.6, 0.6, 0.02);
-			level.sendParticles(ParticleTypes.FLAME, at.x, at.y + 0.8, at.z, 4, 0.6, 0.6, 0.6, 0.04);
-			level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y + 0.8, at.z, 4, 0.6, 0.6, 0.6, 0.02);
+			// a bright tail, and smoke, seen from far off (forced past the usual 32-block particle range)
+			for (ServerPlayer player : level.players()) {
+				if (player.distanceToSqr(at) > SEEN_FROM * SEEN_FROM) {
+					continue;
+				}
+				level.sendParticles(player, ParticleTypes.END_ROD, true, true, at.x, at.y + 0.8, at.z, 14, 1.0, 1.0, 1.0, 0.03);
+				level.sendParticles(player, ParticleTypes.FLAME, true, true, at.x, at.y + 0.8, at.z, 8, 1.0, 1.0, 1.0, 0.05);
+				level.sendParticles(player, ParticleTypes.LARGE_SMOKE, true, true, at.x, at.y + 0.8, at.z, 6, 0.8, 0.8, 0.8, 0.02);
+				level.sendParticles(player, ParticleTypes.CAMPFIRE_COSY_SMOKE, true, true, at.x, at.y + 0.8, at.z, 3, 0.6, 0.6, 0.6, 0.01);
+			}
 			if (t % 10 == 0) {
 				level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRECHARGE_USE, SoundSource.AMBIENT, 4.0F, 0.5F + p * 0.4F);
 			}
@@ -168,6 +180,31 @@ public final class FallingStars {
 				rock.discard();
 			}
 			land(level, star.to());
+			PLUMES.add(new Plume(level.dimension(), star.to(), level.getGameTime()));
+		}
+	}
+
+	/** The plume over a fresh crater: signal smoke climbing high, and sparks, so whoever saw it fall can find it. */
+	private static void smoke(MinecraftServer server) {
+		for (Iterator<Plume> it = PLUMES.iterator(); it.hasNext(); ) {
+			Plume plume = it.next();
+			ServerLevel level = server.getLevel(plume.dimension());
+			long t = level == null ? PLUME_TICKS : level.getGameTime() - plume.start();
+			if (t >= PLUME_TICKS) {
+				it.remove();
+				continue;
+			}
+			if (t % 4 != 0) {
+				continue;
+			}
+			Vec3 at = plume.at();
+			for (ServerPlayer player : level.players()) {
+				if (player.distanceToSqr(at) > SEEN_FROM * SEEN_FROM) {
+					continue;
+				}
+				level.sendParticles(player, ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, true, true, at.x, at.y + 0.5, at.z, 2, 0.6, 0.3, 0.6, 0.01);
+				level.sendParticles(player, ParticleTypes.END_ROD, true, true, at.x, at.y + 1.0, at.z, 2, 0.5, 1.5, 0.5, 0.06);
+			}
 		}
 	}
 

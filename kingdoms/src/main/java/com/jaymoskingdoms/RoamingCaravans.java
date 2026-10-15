@@ -115,8 +115,6 @@ final class RoamingCaravans {
 	/** Reputation: breaking a pillager caravan (with every realm within {@link #REWARD_RANGE}); striking a merchant's caravan. */
 	static final int REP_BREAK = 15, REP_ROB = -40;
 	static final double REWARD_RANGE = 320.0;
-	/** Players this near hear of a caravan coming. */
-	static final double TELL_RANGE = 128.0;
 
 	static final String TAG = "jaymoskingdoms.roaming", TAG_OF = "jaymoskingdoms.roaming_of.";
 
@@ -298,14 +296,7 @@ final class RoamingCaravans {
 			next.merge(Kind.PILLAGER.name(), now + MINOR_COOLDOWN, Math::max);
 		}
 		level.setAttached(LEDGER, new Ledger(next));
-		String key = "message.jaymoskingdoms.roaming." + kind.name().toLowerCase(java.util.Locale.ROOT);
-		Component heard = realm != null
-			? Component.translatable(key + "_escorted", realm.name()) : Component.translatable(key);
-		for (ServerPlayer p : level.players()) {
-			if (p.blockPosition().closerThan(spot, TELL_RANGE)) {
-				p.sendSystemMessage(heard.copy().withStyle(kind.hostile() ? ChatFormatting.RED : ChatFormatting.GOLD));
-			}
-		}
+		// (no word to anyone nearby: players have to come across it)
 		JaymosKingdoms.LOGGER.info("A {} caravan comes near {} at {}, bound for {}", kind, player.getName().getString(), spot.toShortString(),
 			goal.toShortString());
 		return kind.name();
