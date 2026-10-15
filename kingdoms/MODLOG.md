@@ -3154,3 +3154,10 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
   strangers (Approaches topic `unmask`): lift the mask, be searched (stolen goods: fine and arrest), or refuse (the
   costume's name suffers; 30 s to leave the settlement or the guards come). Ops: `/kingdom identity [list|link
   <settlement>|unlink [<settlement>]|forget]`, `/kingdom talk unmask`.
+  With MCA a masked player is a stranger to its villagers: their memories (hearts) of you are kept under the
+  costume's own stand-in id (`McaMemoriesMixin` on `VillagerBrain.getMemoriesForPlayer`, by the synced `masked_as`),
+  so the costume starts at 0 hearts and your real hearts are untouched; your names in what they say to you become the
+  costume's (`McaMessageMixin`, `Identities.withoutName`). Tyrants and paranoid kings (their own or their liege's)
+  exile the vigilantes they know: when a settlement of theirs learns who wears a costume, and whenever that player is
+  on its land, its guards see them out of the city (`Retinue.exile`, 3 days, where the realm has a ruler of its own),
+  and after 60 s still there they're taken by force (`Theft.arrest`, 2 minutes).

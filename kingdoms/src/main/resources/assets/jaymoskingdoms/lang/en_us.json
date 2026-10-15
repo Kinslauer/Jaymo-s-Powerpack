@@ -3532,5 +3532,10 @@
 	"command.jaymoskingdoms.identity.no_realm": "No settlement by that name.",
 	"command.jaymoskingdoms.identity.unlinked": "%s no longer knows who wears your costume.",
 	"command.jaymoskingdoms.identity.unlinked_all": "Nobody knows who wears your costume any more.",
-	"command.jaymoskingdoms.identity.forgotten": "The world has forgotten your costume, and the powers it saw you use."
+	"command.jaymoskingdoms.identity.forgotten": "The world has forgotten your costume, and the powers it saw you use.",
+	"message.jaymoskingdoms.identity.exiled": "The ruler of %s has no love for masked vigilantes. You are exiled: its guards will see you out of its streets.",
+	"message.jaymoskingdoms.identity.exiled.inside": "You are an exile in %1$s: they know who wears your costume. Leave within %2$s seconds or the guards will take you by force.",
+	"talk.jaymoskingdoms.identity.exiled.0": "You! The masked meddler! The king wants your kind gone. Out!",
+	"talk.jaymoskingdoms.identity.exiled.1": "We know you, %s. No vigilantes here. Be on your way.",
+	"talk.jaymoskingdoms.identity.exiled.2": "Guards! The one who plays the hero in a mask is back!"
 }

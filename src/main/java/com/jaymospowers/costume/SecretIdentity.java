@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.Set;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -19,7 +20,10 @@ import org.jspecify.annotations.Nullable;
  * <li>{@link #MASKED}{@code <key>}: masked, as the identity {@link #key} (the same costume always gives the same key);</li>
  * <li>{@link #NAME}{@code <name>}: the costume's name, when it has one.</li>
  * </ul>
- * Kingdoms keeps the identity's own reputation and crimes, and works out who is under the mask. Which power was just
+ * Kingdoms keeps the identity's own reputation and crimes, and works out who is under the mask.
+ * <p>
+ * (0.11.75) While masked the costume's name stands in for the player's display name everywhere (chat, the tab list,
+ * death messages, the name tag: {@code mixin/CostumeNameMixin}, {@code CostumeTabListMixin}). Which power was just
  * used is already tagged by {@code core.Oddities} ({@code jaymospowers_odd:power/<power>}).
  */
 public final class SecretIdentity {
@@ -81,15 +85,23 @@ public final class SecretIdentity {
 				want.add(NAME + worn.name());
 			}
 		}
+		boolean changed = false;
 		for (String tag : new ArrayList<>(player.entityTags())) {
 			if ((tag.startsWith(MASKED) || tag.startsWith(NAME)) && !want.contains(tag)) {
 				player.removeTag(tag);
+				changed = true;
 			}
 		}
 		for (String tag : want) {
 			if (!player.entityTags().contains(tag)) {
 				player.addTag(tag);
+				changed = true;
 			}
+		}
+		if (changed) {
+			// (0.11.75) everyone's tab list shows the costume's name now (or the real one again)
+			player.level().getServer().getPlayerList().broadcastAll(
+				new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME, player));
 		}
 	}
 }

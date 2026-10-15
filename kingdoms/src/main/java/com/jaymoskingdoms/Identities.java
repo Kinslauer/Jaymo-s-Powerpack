@@ -12,8 +12,13 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -22,6 +27,11 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.PlainTextContents;
+import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,6 +39,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -51,6 +62,15 @@ import org.jspecify.annotations.Nullable;
  * searched, or refuse and be sent out of the settlement ({@link #LEAVE_TICKS} to go, then the guards come).</li>
  * </ul>
  * {@code /kingdom identity} (ops) shows and clears what the settlements know.
+ *
+ * <p>(0.7.67) With Minecraft Comes Alive a masked player is a stranger to its villagers too: their memories of them are
+ * kept under the costume's own stand-in id ({@link #standIn}; {@code mixin/mca/McaMemoriesMixin}), so the costume starts
+ * at 0 hearts and the real hearts wait untouched for the bare face; and the player's names are taken out of what MCA
+ * villagers say to them ({@link #withoutName}). (Chat, the tab list and every display name are Powers' business.)
+ *
+ * <p>(0.7.67) Tyrants and paranoid kings don't like vigilantes: a settlement under one ({@link #exiles}) that knows who
+ * wears a costume exiles them. Their guards see them out of the city ({@link Retinue#exile}, where the realm has its own
+ * ruler), and anyone still on its land after {@link #EXILE_GRACE} ticks is taken by force ({@link Theft#arrest}).
  */
 public final class Identities {
 	/** Powers' tags on a masked player: the identity's key; its name. Powers' tag for a power just used. */
@@ -81,6 +101,10 @@ public final class Identities {
 	static final int SEARCH_CLEAN_REP = 1;
 	/** Lines a witness has, per way of finding out. */
 	static final int LINES = 3;
+	/** (0.7.67) An exiled vigilante: how long the guards' ban runs from each time they're found inside; how long they may linger on the land; how long they're then hunted (ticks). */
+	static final long EXILE_BAN_TICKS = 24000L * 3, EXILE_GRACE = 20L * 60, EXILE_ARREST_TICKS = 2400L;
+	/** (0.7.67) What MCA villagers call a masked player whose costume has no name. */
+	static final String UNNAMED = "Masked Stranger";
 
 	/** One costume's own name in the world: its name, its reputation, wanted time and who each settlement knows wears it (faction id keys). */
 	record Identity(String name, Map<String, Integer> rep, Map<String, Long> wanted, Map<String, String> links) {
@@ -120,6 +144,10 @@ public final class Identities {
 	static final AttachmentType<Map<String, Map<String, Integer>>> SIGHTINGS = AttachmentRegistry.create(JaymosKingdoms.id("power_sightings"),
 		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Codec.unboundedMap(Codec.STRING, Codec.INT))).copyOnDeath());
 
+	/** (0.7.67) On a player, synced: the identity they're masked as (absent bare-faced), for MCA on both sides. */
+	static final AttachmentType<String> MASKED_AS = AttachmentRegistry.create(JaymosKingdoms.id("masked_as"),
+		builder -> builder.syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all()));
+
 	/** Player → the identity they were last seen in ("" bare-faced). */
 	private static final Map<UUID, String> WAS = new HashMap<>();
 	/** Player/power → when a use of it last counted. */
@@ -128,6 +156,8 @@ public final class Identities {
 	private static final Map<String, Long> CHALLENGED = new HashMap<>();
 	/** Player → {faction id, the tick they must be gone by}: refused to unmask. */
 	private static final Map<UUID, long[]> SENT_OFF = new HashMap<>();
+	/** (0.7.67) Player → {faction id, the tick they were found there}: an exiled vigilante on a settlement's land. */
+	private static final Map<UUID, long[]> EXILED_IN = new HashMap<>();
 	private static long lastDay = Long.MIN_VALUE;
 
 	private Identities() {
@@ -138,12 +168,14 @@ public final class Identities {
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			WAS.remove(handler.player.getUUID());
 			SENT_OFF.remove(handler.player.getUUID());
+			EXILED_IN.remove(handler.player.getUUID());
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			WAS.clear();
 			LAST_SIGHTING.clear();
 			CHALLENGED.clear();
 			SENT_OFF.clear();
+			EXILED_IN.clear();
 			lastDay = Long.MIN_VALUE;
 		});
 	}
@@ -210,10 +242,93 @@ public final class Identities {
 		return f == null || hidden(player, f.id());
 	}
 
+	/** (0.7.67) The identity {@code player} is masked as, on either side (the synced mirror of Powers' tag), or null. */
+	public static @Nullable String maskedAs(Player player) {
+		return player.getAttached(MASKED_AS);
+	}
+
+	/** (0.7.67) The id a costume goes by where a player's UUID would be (MCA's memories of it). */
+	public static UUID standIn(String key) {
+		return UUID.nameUUIDFromBytes(("jaymoskingdoms:identity/" + key).getBytes(StandardCharsets.UTF_8));
+	}
+
+	/**
+	 * (0.7.67) {@code text} said to a masked {@code player}, with their name ({@code getName}, and any of {@code names},
+	 * e.g. MCA's name for them) put back to the costume's. The same component if nothing changed, or they aren't masked.
+	 */
+	public static Component withoutName(ServerPlayer player, Component text, String... names) {
+		if (key(player) == null) {
+			return text;
+		}
+		String mask = tagName(player).isEmpty() ? UNNAMED : tagName(player);
+		Set<String> real = new HashSet<>();
+		real.add(player.getName().getString());
+		for (String n : names) {
+			if (n != null && !n.isBlank()) {
+				real.add(n);
+			}
+		}
+		real.remove(mask);
+		return real.isEmpty() ? text : scrub(text, real, mask);
+	}
+
+	private static Component scrub(Component c, Set<String> real, String mask) {
+		boolean changed = false;
+		ComponentContents contents = c.getContents();
+		if (contents instanceof TranslatableContents t) {
+			Object[] args = t.getArgs().clone();
+			for (int i = 0; i < args.length; i++) {
+				if (args[i] instanceof String s) {
+					String r = scrub(s, real, mask);
+					if (!r.equals(s)) {
+						args[i] = r;
+						changed = true;
+					}
+				} else if (args[i] instanceof Component a) {
+					Component b = scrub(a, real, mask);
+					if (b != a) {
+						args[i] = b;
+						changed = true;
+					}
+				}
+			}
+			if (changed) {
+				contents = new TranslatableContents(t.getKey(), t.getFallback(), args);
+			}
+		} else if (contents instanceof PlainTextContents p) {
+			String r = scrub(p.text(), real, mask);
+			if (!r.equals(p.text())) {
+				contents = PlainTextContents.create(r);
+				changed = true;
+			}
+		}
+		List<Component> siblings = new ArrayList<>();
+		for (Component s : c.getSiblings()) {
+			Component r = scrub(s, real, mask);
+			changed |= r != s;
+			siblings.add(r);
+		}
+		if (!changed) {
+			return c;
+		}
+		MutableComponent out = MutableComponent.create(contents).setStyle(c.getStyle());
+		siblings.forEach(out::append);
+		return out;
+	}
+
+	private static String scrub(String s, Set<String> real, String mask) {
+		for (String r : real) {
+			if (s.contains(r)) {
+				s = s.replaceAll("(?<![\\p{L}\\p{N}_])" + Pattern.quote(r) + "(?![\\p{L}\\p{N}_])", Matcher.quoteReplacement(mask));
+			}
+		}
+		return s;
+	}
+
 	/** (Approaches) Who a crime is held against: the player, or (a stable stand-in id for) the costume they hid behind. */
 	static UUID suspectId(ServerPlayer player, int faction) {
 		String persona = persona(player, faction);
-		return persona == null ? player.getUUID() : UUID.nameUUIDFromBytes(("jaymoskingdoms:identity/" + persona).getBytes(StandardCharsets.UTF_8));
+		return persona == null ? player.getUUID() : standIn(persona);
 	}
 
 	// ---- the store -----------------------------------------------------------------------------------------------------
@@ -327,6 +442,11 @@ public final class Identities {
 				name, player.getName()), Speech.YELLOW);
 		}
 		JaymosKingdoms.LOGGER.debug("{} knows {} is {} ({})", f.name(), player.getName().getString(), name.getString(), how);
+		if (exiles(server, f)) {
+			// (0.7.67) a tyrant or a paranoid king won't have a vigilante in his realm
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.identity.exiled", f.name()).withStyle(ChatFormatting.DARK_RED));
+			EXILED_IN.remove(player.getUUID());
+		}
 		return true;
 	}
 
@@ -338,13 +458,33 @@ public final class Identities {
 
 	// ---- (Approaches) a paranoid king's guards and masked strangers -----------------------------------------------
 
+	/** {@code f}'s ruler's temper (its liege's, where it has none of its own), or null. */
+	private static Tempers.@Nullable Temper temper(MinecraftServer server, Faction f) {
+		Tempers.Temper t = Tempers.of(f);
+		return t != null ? t : Tempers.of(Wars.top(server, f));
+	}
+
 	/** Whether {@code f}'s ruler (or its liege) is paranoid. */
 	static boolean paranoid(MinecraftServer server, Faction f) {
-		Tempers.Temper t = Tempers.of(f);
-		if (t == null) {
-			t = Tempers.of(Wars.top(server, f));
+		return temper(server, f) == Tempers.Temper.PARANOID;
+	}
+
+	/** (0.7.67) Whether {@code f} exiles the vigilantes it knows: under a tyrant or a paranoid king. */
+	static boolean exiles(MinecraftServer server, Faction f) {
+		Tempers.Temper t = temper(server, f);
+		return t == Tempers.Temper.TYRANT || t == Tempers.Temper.PARANOID;
+	}
+
+	/** (0.7.67) {@code f}'s people know {@code player} wears some costume. */
+	static boolean vigilante(MinecraftServer server, ServerPlayer player, Faction f) {
+		String fid = Integer.toString(f.id());
+		String me = player.getStringUUID();
+		for (Identity id : all(server).values()) {
+			if (me.equals(id.links().get(fid))) {
+				return true;
+			}
 		}
-		return t == Tempers.Temper.PARANOID;
+		return false;
 	}
 
 	/** A guard of {@code f} would stop {@code player}: masked, a stranger there, a paranoid king's realm, not stopped lately. */
@@ -396,6 +536,13 @@ public final class Identities {
 			if (cur != null) {
 				noteName(server, cur, tagName(player));
 			}
+			if (!java.util.Objects.equals(cur, player.getAttached(MASKED_AS))) {
+				if (cur == null) {
+					player.removeAttached(MASKED_AS);
+				} else {
+					player.setAttached(MASKED_AS, cur);
+				}
+			}
 			if (player.level() != level || !player.isAlive() || player.isSpectator()) {
 				continue;
 			}
@@ -408,6 +555,38 @@ public final class Identities {
 			}
 			powers(level, player, cur, now);
 			sentOff(level, player, now);
+			exiled(level, player, now);
+		}
+	}
+
+	/** (0.7.67) A known vigilante on the land of a tyrant's or a paranoid king's settlement: seen out, or taken. */
+	private static void exiled(ServerLevel level, ServerPlayer player, long now) {
+		MinecraftServer server = level.getServer();
+		Faction here = player.isCreative() ? null : Theft.lawAt(level, player.blockPosition());
+		if (here == null || !exiles(server, here) || !vigilante(server, player, here)) {
+			EXILED_IN.remove(player.getUUID());
+			return;
+		}
+		long[] in = EXILED_IN.get(player.getUUID());
+		if (in == null || in[0] != here.id()) {
+			EXILED_IN.put(player.getUUID(), new long[] {here.id(), now});
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.identity.exiled.inside", here.name(), EXILE_GRACE / 20)
+				.withStyle(ChatFormatting.DARK_RED));
+			Map<Faction, LivingEntity> seen = witnesses(level, player, REVEAL_RANGE, false);
+			for (Map.Entry<Faction, LivingEntity> e : seen.entrySet()) {
+				if (e.getKey().id() == here.id()) {
+					Speech.say(level, e.getValue(), Component.translatable("talk.jaymoskingdoms.identity.exiled." + level.getRandom().nextInt(LINES),
+						player.getName()), Speech.RED, 24.0);
+				}
+			}
+			if (Tempers.of(here) != null) {
+				Retinue.exile(level, here, player, EXILE_BAN_TICKS);
+			}
+			return;
+		}
+		if (now - in[1] >= EXILE_GRACE) {
+			in[1] = now;
+			Theft.arrest(player, level, here, EXILE_ARREST_TICKS);
 		}
 	}
 

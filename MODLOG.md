@@ -1349,4 +1349,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   its name over your head to other players (`CostumeClient.extract`), and Powers tags the wearer for Kingdoms
   (`costume/SecretIdentity`: `jaymospowers_masked:<key>`, `jaymospowers_mask_name:<name>`; the key is a stable hash
   of the design's name and look). Kingdoms keeps the costume's own reputation and crimes (`Identities`; see
-  `kingdoms/MODLOG.md`).
+  `kingdoms/MODLOG.md`). Masked, the costume's name ("Masked Stranger" if unnamed) is your display name everywhere:
+  chat, death and join messages, the tab list (resent when the mask goes on or off), the name tag
+  (`mixin/CostumeNameMixin` on `Player.getDisplayName`, `CostumeTabListMixin` on `ServerPlayer.getTabListDisplayName`).

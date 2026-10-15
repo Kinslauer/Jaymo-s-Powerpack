@@ -103,6 +103,8 @@ final class Retinue {
 		long touched;
 		long warned = Long.MIN_VALUE / 2;
 		long threatened = Long.MIN_VALUE / 2;
+		/** (0.7.67) An exiled vigilante's ban ({@link #exile}): it lapses without a word of forgiveness. */
+		boolean exiled;
 
 		boolean banned(long now) {
 			return this.bannedUntil > now;
@@ -239,7 +241,7 @@ final class Retinue {
 			if (w.bannedUntil >= 0 && !w.banned(now)) {
 				// the ban's run out: a clean slate
 				it.remove();
-				if (p != null) {
+				if (p != null && !w.exiled) {
 					p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.retinue.forgiven", f.name()).withStyle(ChatFormatting.GRAY));
 				}
 				continue;
@@ -435,6 +437,22 @@ final class Retinue {
 			.withStyle(ChatFormatting.DARK_RED));
 		Speech.say(level, king, Component.translatable(speech(t, "seize")), Speech.RED, SPEECH_RANGE);
 		level.playSound(null, king.blockPosition(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 1.0F, 0.8F);
+	}
+
+	/**
+	 * (0.7.67) {@code p} is banned from {@code f}'s city for at least {@code ticks}, and its guards see them out (an exiled
+	 * vigilante, {@link Identities}). Only a realm with a ruler of its own runs its guards this way ({@link Tempers}).
+	 */
+	static void exile(ServerLevel level, Faction f, ServerPlayer p, long ticks) {
+		long now = level.getGameTime();
+		Watch w = WATCHED.computeIfAbsent(key(f.id(), p.getUUID()), k -> new Watch());
+		w.bannedUntil = Math.max(w.bannedUntil, now + ticks);
+		w.threatened = now;
+		w.touched = now;
+		w.exiled = true;
+		if (!trusted(level, f, p) && inCity(f, p)) {
+			send(level, f, p);
+		}
 	}
 
 	/** Sends up to {@link #HARASSERS} of the realm's town guards after {@code p} (the nearest, not at his back). */

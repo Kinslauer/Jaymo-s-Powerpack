@@ -97,7 +97,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("tail attachment: {}", Tails.EXPLAINED);
 		Aliens.register();
 		// 0.7.62: Jaymo's Powers' costumes: a masked player is a stranger, the costume someone of its own (and its attachments)
-		LOGGER.debug("identity attachments: {} {}", Identities.ALL, Identities.SIGHTINGS);
+		LOGGER.debug("identity attachments: {} {} {}", Identities.ALL, Identities.SIGHTINGS, Identities.MASKED_AS);
 		Identities.register();
 		Oddities.register();
 		// 0.5.21: monsters hunt the settlements' folk as they do villagers
