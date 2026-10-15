@@ -86,3 +86,27 @@ harness clouds, stop tornadoes building and weaken them), Ash Storm (both: kill 
   Stopping the cruise brings the body back.
 - **Bank** (mastered Smokescreen): while pouring and 20 s after, the user's smoke (by owner) ignores the wind and fades
   3x slower (`SmokeField.bank`).
+
+## Stage 2: Smog, the corruption (0.10.112)
+Nothing explained in game (`SmokeSmog`).
+- **Meter:** while pouring (Smokescreen, jet, or Vapour Form's trail) black smoke, meaning 3+ heat sources round you
+  (`SmokeHeat`) or your eye block in your own smoke at soot 0.7+, a point every 48 ticks (100 = about 4 min). A raging
+  fire (8+ fire blocks within 6) doubles it. Grey pouring eases a point every 200 ticks. At 50 a hard cough and
+  "Your throat burns...".
+- **Smog:** each tick a corrupted user's entity id is marked in `SmokeField.SMOG` (40-tick lease). Their smoke is at
+  least soot 0.8, fades 2x slower and takes 30% of the rain's washing; a 6th byte per synced cell (`SmokeNet.Field.SMOG`)
+  makes the client draw it yellow-brown. Every second, anyone but the maker with their eye block holding 1.0+ of the
+  maker's smoke gets Poison I + Hunger (3 s), at 2.0+ Poison II + Nausea; golems only Blindness; the undead shrug
+  poison off (vanilla). Every 2 s, up to 6 of up to 64 cells of 1.0+ within 48 blocks wither the block there or below:
+  grass/podzol/mycelium to dirt, leaves destroyed (no drop), crops/flowers/saplings/grass/ferns broken.
+- **Costs:** at Y 100+, under the open sky, out of smoke: +0.012 exhaustion a tick and a cough every 5 s. (Planned
+  no-natural-regen and MCA villager mood are not built.)
+- **Kit:** G pours smog (Smog Bank). V Choke Bomb: those it blinds also get Poison (5 s) and cough out 6 of smog.
+  B Black Lung: air drains 1.5x, the target breathes out 4 of smog every second. X Soot Jet: what it catches is blinded
+  2 s. Lang `.corrupted` variants name them.
+- **C Pyroclasm** (`SmokePyroclasm`, `ultimateWhenCorrupted`): hold up to 3 s, let go: a cloud rolls along the ground
+  at 0.4 b/t for 12-24 blocks (by charge), widening from 2 to 5, climbing up to 2 blocks (a taller wall stops it). Every
+  5 ticks things inside burn 5 s, take 2 fire damage and are blinded; it pours 4 smog a tick; 35% a tick it lights a
+  spot at its front. 40 s cooldown (`SmokeState.PYRO`).
+- **Cure** (`Fate.purify`, for good): 60 s at Y 200+ in the Overworld not pouring (Vapour trail allowed; whisper the
+  first time), 3 min standing in rain not pouring, or 3 Minecraft days (`smoke_smog_since`, saved).

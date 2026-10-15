@@ -45,6 +45,8 @@ public final class SmokeJet {
 	/** Hunger a tick; at or below this food you can't keep it up. */
 	static final float EXHAUSTION = 0.025F;
 	static final int MIN_FOOD = 6;
+	/** Corrupted (Soot Jet): how long what it catches is blinded. */
+	static final int SOOT_BLIND_TICKS = 40;
 	/** Jaymo's Kingdoms reads this tag: a jet of smoke along the bearer's look fills sails. */
 	public static final String KINGDOMS_TAG = "jaymospowers_jet:smoke";
 
@@ -137,6 +139,7 @@ public final class SmokeJet {
 			SmokeField.blow(level, p, r, look.scale(1.5));
 			SmokeField.puff(level, p, POUR * i / weights, player);
 		}
+		boolean soot = com.jaymospowers.core.Fate.isCorrupted(player);
 		AABB box = new AABB(from, from.add(look.scale(reach))).inflate(MOUTH + reach * SPREAD);
 		for (Entity e : level.getEntities(player, box, e -> e.isAlive() && !e.isSpectator() && !e.noPhysics && e != player.getVehicle())) {
 			Vec3 c = e.getBoundingBox().getCenter().subtract(from);
@@ -155,6 +158,10 @@ public final class SmokeJet {
 			}
 			e.setDeltaMovement(v);
 			e.syncVelocity = true;
+			if (soot && e instanceof LivingEntity living && player.tickCount % 10 == 0) {
+				// Soot Jet (smog): it blinds what it catches
+				living.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.BLINDNESS, SOOT_BLIND_TICKS, 0), player);
+			}
 		}
 		player.causeFoodExhaustion(EXHAUSTION);
 		if (player.tickCount % 10 == 0) {
