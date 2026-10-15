@@ -108,6 +108,10 @@ public final class WebSymbioteClient {
 		return run.value;
 	}
 
+	/** How wild the bond still is (1 a fresh bond, 0 a full one), for the veins on a feral suit. */
+	public static final RenderStateDataKey<Float> FERAL = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_feral");
+	/** Ticks into a Spike Burst (or the roar's own, from just before it lands), for the spikes out of the whole body. */
+	public static final RenderStateDataKey<Float> SPIKES = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_spikes");
 	/** How far through a roar (0-1), for the maw thrown open. */
 	public static final RenderStateDataKey<Float> ROAR = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_roar");
 	/** Ticks into a curious stare (the head swollen, staring), for the maw. */
@@ -347,6 +351,7 @@ public final class WebSymbioteClient {
 				helper.register(new WebSymbioteLayer(avatar));
 				helper.register(new WebTendrilLayer(avatar));
 				helper.register(new WebMouthLayer(avatar));
+				helper.register(new WebSpikeLayer(avatar));
 			}
 		});
 	}
@@ -383,6 +388,8 @@ public final class WebSymbioteClient {
 	/** From the avatar renderer's extractRenderState: does this player wear the suit. */
 	public static void extract(Entity entity, AvatarRenderState state) {
 		state.setData(SUIT, entity instanceof Player player && WebSymbiote.suitShown(player) ? Boolean.TRUE : null);
+		state.setData(FERAL, entity instanceof Player player && WebSymbiote.isBonded(player)
+			? 1.0F - WebSymbiote.state(player).bond() / (float)WebSymbiote.BOND_MAX : null);
 		if (entity instanceof Player player) {
 			WebSuitGrowth.extract(player, state, net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false));
 		}
@@ -418,6 +425,8 @@ public final class WebSymbioteClient {
 		float roarAt = roarPose == null || roarPose.kind() != com.jaymospowers.power.web.WebPose.ROAR ? -1.0F
 			: roarPose.progress(entity.level().getGameTime() + net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false));
 		state.setData(ROAR, roarAt >= 0.0F && roarAt < 1.0F && entity instanceof Player p && WebSymbiote.isBonded(p) ? roarAt : null);
+		state.setData(SPIKES, entity instanceof Player p && WebSymbiote.isBonded(p) ? WebSpikeLayer.age(roarPose,
+			entity.level().getGameTime() + net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false)) : null);
 		com.jaymospowers.power.web.WebCounter.Active counter = entity.getAttached(com.jaymospowers.power.web.WebCounter.ACTIVE);
 		float counterAt = counter == null || !com.jaymospowers.power.web.WebCounter.mawKind(counter.kind()) ? -1.0F
 			: entity.level().getGameTime() - counter.start() + net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);

@@ -86,8 +86,12 @@ public final class WebSymbiote {
 	public static final float CONSUME_HEAL = 6.0F;
 	public static final int CONSUME_FEED = 30;
 	public static final int CONSUME_CALM = 10;
-	/** Spike Burst: radius, damage, how hard it throws things away. */
+	/**
+	 * Spike Burst: radius, damage, how hard it throws things away. Rigid black spikes shoot out of the whole body (head,
+	 * chest, back, arms and legs) for {@code SPIKE_TICKS}; the roar throws the same spikes out as it lands.
+	 */
 	public static final double SPIKE_RADIUS = 5.0;
+	public static final int SPIKE_TICKS = 16;
 	public static final float SPIKE_DAMAGE = 8.0F;
 	public static final double SPIKE_KNOCKBACK = 1.3;
 	/**
@@ -3564,6 +3568,7 @@ public final class WebSymbiote {
 				continue;
 			}
 			living.hurtServer(level, level.damageSources().playerAttack(player), ROAR_DAMAGE);
+			spikeHit(level, center, living);
 			Vec3 flat = new Vec3(to.x, 0.0, to.z);
 			flat = flat.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : flat.normalize();
 			// the nearer, the harder it throws them
@@ -3642,6 +3647,7 @@ public final class WebSymbiote {
 				continue;
 			}
 			living.hurtServer(level, level.damageSources().playerAttack(player), SPIKE_DAMAGE);
+			spikeHit(level, center, living);
 			Vec3 flat = new Vec3(to.x, 0.0, to.z);
 			flat = flat.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : flat.normalize();
 			Vec3 push = flat.scale(SPIKE_KNOCKBACK).add(0.0, 0.45, 0.0);
@@ -3652,21 +3658,25 @@ public final class WebSymbiote {
 				ServerPlayNetworking.send(other, new WebNet.Nudge(push));
 			}
 		}
-		// the spikes: rays of black out from the body, in a ring
-		for (int ray = 0; ray < 24; ray++) {
-			double angle = ray * Math.PI * 2.0 / 24.0;
-			double tilt = (ray % 3 - 1) * 0.35;
-			Vec3 dir = new Vec3(Math.cos(angle), tilt, Math.sin(angle));
-			for (int k = 1; k <= 5; k++) {
-				Vec3 at = center.add(dir.scale(k * SPIKE_RADIUS / 5.0));
-				level.sendParticles(k == 5 ? sheen(1.2F) : dust(1.6F - k * 0.2F), at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-			}
-		}
+		// the spikes themselves are drawn for everyone, out of every part of the body (WebSpikeLayer)
+		WebPower.pose(player, WebPose.SPIKES, player.getRandom().nextBoolean() ? 1 : -1);
 		level.sendParticles(ParticleTypes.SQUID_INK, center.x, center.y, center.z, 30, 0.5, 0.6, 0.5, 0.25);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.EVOKER_FANGS_ATTACK, SoundSource.PLAYERS, 1.2F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.POINTED_DRIPSTONE_LAND, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_DEATH, SoundSource.PLAYERS, 0.8F, 0.5F);
 		return true;
+	}
+
+	/**
+	 * A spike runs a creature through: a white flash where it strikes (the side facing you). No blood (Andy).
+	 */
+	private static void spikeHit(ServerLevel level, Vec3 center, LivingEntity living) {
+		Vec3 mid = living.getBoundingBox().getCenter();
+		Vec3 dir = mid.subtract(center);
+		dir = dir.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : dir.normalize();
+		Vec3 hit = mid.subtract(dir.scale(living.getBbWidth() * 0.5));
+		level.sendParticles(ParticleTypes.EXPLOSION, hit.x, hit.y, hit.z, 1, 0.0, 0.0, 0.0, 0.0);
+		level.sendParticles(ParticleTypes.CRIT, hit.x, hit.y, hit.z, 10, 0.15, 0.15, 0.15, 0.4);
 	}
 
 	/** Shroud: the suit swallows the light; you vanish until you strike, or until it tires. */

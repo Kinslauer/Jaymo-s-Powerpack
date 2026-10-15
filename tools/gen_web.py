@@ -148,27 +148,28 @@ def goo_block():
     blockstate.write_text(json.dumps({"variants": {"": {"model": "jaymospowers:block/web_symbiote_goo"}}}, indent=2) + "\n")
 
 
-SUIT_BLACK = (16, 14, 20)
-SUIT_DEEP = (8, 7, 11)
-SUIT_VEIN = (44, 28, 60)
-SUIT_VEIN_HI = (78, 50, 106)
-EYE_WHITE = (238, 238, 244)
-EYE_EDGE = (168, 166, 182)
+SUIT_BLACK = (22, 22, 27)
+SUIT_DEEP = (13, 13, 17)
+# a faint blue-grey sheen on the tops of shoulders, upper chest and back, thighs
+SUIT_SHEEN = (74, 82, 100)
+EYE_WHITE = (240, 240, 246)
+EYE_EDGE = (190, 192, 204)
+EYE_BORDER = (3, 3, 5)
 
-# the face (8x8, front of the head): two angular white eye-patches, mirrored. W = white, g = soft edge
+# the face (8x8, front of the head): two big angular white eyes with thick black borders, mirrored, nearly meeting
+# over the nose. W = white, g = soft edge, k = black border
 FACE_LEFT = [
     "....",
-    "g...",
-    "WWg.",
-    "WWW.",
-    "gWW.",
-    "..W.",
-    "....",
+    "k...",
+    "Wkk.",
+    "WWgk",
+    "WWWk",
+    "gWWk",
+    "kkk.",
     "....",
 ]
 # the right eye mirrors the left exactly
 FACE = [row + row[::-1] for row in FACE_LEFT]
-
 # regions of a 64x64 player skin: (x0, y0, x1, y1), base layer → its outer layer
 SKIN_PARTS = [
     ((0, 0, 32, 16), (32, 0, 64, 16)),     # head → hat
@@ -180,36 +181,43 @@ SKIN_PARTS = [
 ]
 
 
+# each region's box: width, height, depth (model pixels), so the sheen knows which way is up on every face
+SKIN_BOXES = [(8, 8, 8), (8, 12, 4), (4, 12, 4), (4, 12, 4), (4, 12, 4), (4, 12, 4)]
+
+
 def suit_texture():
-    """The black suit over the whole player skin: mottled black, a web of dark purple veins, white eye-patches."""
+    """The classic black suit over the whole player skin: flat matte black with clean seams, a faint blue-grey sheen
+    high on each limb and across the chest and back, and big angular white eyes with thick black borders. No veins
+    (they show only when it's feral or bulking, as a separate overlay) and no emblem (Andy, 0.10.101)."""
+    import math
     import random
 
     rnd = random.Random(31337)
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
-    inside = set()
-    for (x0, y0, x1, y1), _ in SKIN_PARTS:
+    for ((x0, y0, x1, y1), _), (w, h, d) in zip(SKIN_PARTS, SKIN_BOXES):
         for y in range(y0, y1):
             for x in range(x0, x1):
-                inside.add((x, y))
-                img.putpixel((x, y), lerp(SUIT_DEEP, SUIT_BLACK, 0.55 + rnd.random() * 0.45) + (255,))
-    # veins: wandering random walks that branch, kept inside the skin's used areas
-    for _ in range(26):
-        x, y = rnd.choice(sorted(inside))
-        dx, dy = rnd.choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
-        for step in range(rnd.randint(6, 16)):
-            if (x, y) not in inside:
-                break
-            img.putpixel((x, y), (SUIT_VEIN_HI if rnd.random() < 0.25 else SUIT_VEIN) + (255,))
-            if rnd.random() < 0.35:
-                dx, dy = rnd.choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
-            x, y = x + dx, y + dy
+                c = lerp(SUIT_DEEP, SUIT_BLACK, 0.8 + rnd.random() * 0.2)
+                if y < y0 + d:
+                    # top and bottom faces: the top (left half) catches the light
+                    if x < x0 + d + w:
+                        c = lerp(c, SUIT_SHEEN, 0.28)
+                else:
+                    # the sides: brightest just under the top edge, fading down the face
+                    v = (y - y0 - d + 0.5) / h
+                    glow = math.exp(-((v - 0.12) / 0.16) ** 2) * 0.32
+                    # a little more down the middle of the front and back faces (a rounded look)
+                    u = (x - x0) % (w + d) - d
+                    if 0 <= u < w and w > 4:
+                        glow += 0.08 * math.exp(-((u + 0.5 - w / 2) / (w * 0.3)) ** 2) * (1.0 - v)
+                    c = lerp(c, SUIT_SHEEN, min(0.45, glow))
+                img.putpixel((x, y), c + (255,))
     # the face: head front is (8, 8)-(16, 16)
+    colours = {"W": EYE_WHITE, "g": EYE_EDGE, "k": EYE_BORDER}
     for fy, row in enumerate(FACE):
         for fx, ch in enumerate(row):
-            if ch == "W":
-                img.putpixel((8 + fx, 8 + fy), EYE_WHITE + (255,))
-            elif ch == "g":
-                img.putpixel((8 + fx, 8 + fy), EYE_EDGE + (255,))
+            if ch in colours:
+                img.putpixel((8 + fx, 8 + fy), colours[ch] + (255,))
     # the outer layer matches the base, so a skin's own hat/jacket/sleeves are covered too
     for (bx0, by0, bx1, by1), (ox0, oy0, _, _) in SKIN_PARTS:
         for y in range(by0, by1):
