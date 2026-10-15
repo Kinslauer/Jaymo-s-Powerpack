@@ -278,6 +278,7 @@ public final class ZFighterPower implements Power {
 		ZFighterCorruption.init();
 		ZFighterNet.register();
 		ZFighterBattle.init();
+		ZFighterCombo.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ZFighterDebugCommand.register(dispatcher));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> LIVE.remove(handler.player.getUUID()));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
@@ -367,6 +368,7 @@ public final class ZFighterPower implements Power {
 		remove(player, Attributes.ENTITY_INTERACTION_RANGE, REACH_ID);
 		remove(player, Attributes.SCALE, SCALE_ID);
 		player.removeAttached(ZFighterGuard.GUARD);
+		ZFighterCombo.drop(player);
 		player.removeAttached(ZFighterLineage.LINEAGE);
 		player.removeAttached(ZFighterLineage.TAIL_WRAPPED);
 		player.removeAttached(ZFighterLineage.GREAT_APE);
@@ -505,6 +507,7 @@ public final class ZFighterPower implements Power {
 		}
 		ZFighterTraining.tick(player, live);
 
+		ZFighterCombo.tick(player, live);
 		live.ki = Mth.clamp(live.ki, 0.0F, max);
 		ZFighterBattle.tick(player, live);
 		if (now % 10 == 0) {
