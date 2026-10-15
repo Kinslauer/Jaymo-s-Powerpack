@@ -17,7 +17,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -34,6 +36,16 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.MoveTowardsRestrictionGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
+import net.minecraft.world.entity.item.PrimedTnt;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.projectile.hurtingprojectile.AbstractHurtingProjectile;
+import net.minecraft.world.entity.vehicle.minecart.MinecartTNT;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -50,6 +62,10 @@ import org.jspecify.annotations.Nullable;
  * them standing by) is marked. A web slinger without a symbiote is taken there and then: it leaps up its tendril and
  * bonds to them. Anyone else is lashed: a blow that leaves them badly hurt (a broken limb, reeling) or, often, dead; it
  * comes after them for a while to finish it. A web slinger who already wears a symbiote is kin and only gets shrugged off.
+ * <p>
+ * Fire and blasts are the one thing it fears ({@link #danger}): flames, lava, a lit campfire, anything burning, primed
+ * TNT, a hissing creeper, a fireball, someone holding flint and steel, a fire charge or lava, or being burnt or blasted
+ * itself send it fleeing at full speed until it's {@link #FLEE_DISTANCE} away, and it makes its new home there.
  */
 public class WebSymbioteBlob extends PathfinderMob {
 	// ---- tuning ----
@@ -89,6 +105,14 @@ public class WebSymbioteBlob extends PathfinderMob {
 	static final int GRUDGE_TICKS = 300;
 	/** Burnt or blasted with no one to blame, it blames the nearest player this close. */
 	static final double BLAME_RANGE = 8.0;
+	/** It looks for fire this far off (blocks), and for burning or exploding things / fire in hand this far. */
+	static final int FIRE_SCAN = 6;
+	static final double THREAT_SCAN = 12.0, HELD_FIRE_SCAN = 8.0;
+	/** It checks for fire this often (ticks). */
+	static final int DANGER_EVERY = 10;
+	/** It runs until this far from the fire (blocks), or for this long at most (ticks). */
+	static final double FLEE_DISTANCE = 40.0, FLEE_SPEED = 2.2;
+	static final int FLEE_TICKS = 400;
 
 	public static EntityType<WebSymbioteBlob> TYPE;
 
@@ -108,10 +132,16 @@ public class WebSymbioteBlob extends PathfinderMob {
 	/** Whoever went for it, and until when it hunts them. */
 	private @Nullable LivingEntity grudge;
 	private int grudgeTicks, lashCooldown;
+	/** The fire it's running from, and for how much longer. */
+	private @Nullable Vec3 fleeFrom;
+	private int fleeTicks;
 
 	public WebSymbioteBlob(EntityType<? extends WebSymbioteBlob> type, Level level) {
 		super(type, level);
 		this.setPersistenceRequired();
+		this.setPathfindingMalus(net.minecraft.world.level.pathfinder.PathType.FIRE, -1.0F);
+		this.setPathfindingMalus(net.minecraft.world.level.pathfinder.PathType.FIRE_IN_NEIGHBOR, -1.0F);
+		this.setPathfindingMalus(net.minecraft.world.level.pathfinder.PathType.LAVA, -1.0F);
 	}
 
 	static void init() {
@@ -216,7 +246,8 @@ public class WebSymbioteBlob extends PathfinderMob {
 	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
-		this.goalSelector.addGoal(1, new SeekHostGoal());
+		this.goalSelector.addGoal(1, new FleeFireGoal());
+		this.goalSelector.addGoal(2, new SeekHostGoal());
 		this.goalSelector.addGoal(3, new MoveTowardsRestrictionGoal(this, ROAM_SPEED));
 		this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, ROAM_SPEED));
 		this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
@@ -240,6 +271,17 @@ public class WebSymbioteBlob extends PathfinderMob {
 		if (this.isOnFire() && this.tickCount % SCAN_EVERY == 0 && this.grudge == null) {
 			this.blameNearest(level);
 		}
+		if (this.fleeTicks > 0) {
+			this.fleeTicks--;
+		}
+		if (this.isOnFire()) {
+			this.flee(this.fleeFrom != null ? this.fleeFrom : this.position());
+		} else if (this.tickCount % DANGER_EVERY == 0) {
+			Vec3 threat = this.danger(level);
+			if (threat != null) {
+				this.flee(threat);
+			}
+		}
 		if (this.grudge != null) {
 			// someone is trying to kill it: they come first
 			this.quarry = this.grudge;
@@ -250,7 +292,7 @@ public class WebSymbioteBlob extends PathfinderMob {
 				}
 			}
 		}
-		if (this.tickCount >= SETTLE_TICKS && this.quarry == null && this.onGround() && this.settle(level)) {
+		if (this.tickCount >= SETTLE_TICKS && this.quarry == null && this.fleeFrom == null && this.onGround() && this.settle(level)) {
 			return;
 		}
 		if (this.fireGrace > 0) {
@@ -422,8 +464,51 @@ public class WebSymbioteBlob extends PathfinderMob {
 		level.sendParticles(ParticleTypes.SQUID_INK, from.x, from.y, from.z, 12, 0.3, 0.15, 0.3, 0.08);
 	}
 
+	/** Runs from {@code threat} (again, if it was already running). */
+	private void flee(Vec3 threat) {
+		if (this.fleeFrom == null) {
+			this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WARDEN_HURT, SoundSource.HOSTILE, 0.7F, 1.8F);
+		}
+		this.fleeFrom = threat;
+		this.fleeTicks = FLEE_TICKS;
+	}
+
+	/** The nearest fire or blast-to-be it can see, or null if there's none. */
+	private @Nullable Vec3 danger(ServerLevel level) {
+		AABB near = this.getBoundingBox().inflate(THREAT_SCAN);
+		Entity threat = level.getEntities(this, near, e -> e.isAlive() && (e.isOnFire() || e instanceof PrimedTnt || e instanceof MinecartTNT
+				|| e instanceof AbstractHurtingProjectile || e instanceof Creeper c && (c.getSwellDir() > 0 || c.isIgnited())
+				|| e instanceof LivingEntity l && l.distanceTo(this) <= HELD_FIRE_SCAN && (holdsFire(l.getMainHandItem()) || holdsFire(l.getOffhandItem())))).stream()
+			.min(Comparator.comparingDouble(e -> e.distanceToSqr(this))).orElse(null);
+		if (threat != null) {
+			return threat.position();
+		}
+		BlockPos centre = this.blockPosition();
+		BlockPos best = null;
+		double bestDist = Double.MAX_VALUE;
+		for (BlockPos pos : BlockPos.betweenClosed(centre.offset(-FIRE_SCAN, -FIRE_SCAN / 2, -FIRE_SCAN), centre.offset(FIRE_SCAN, FIRE_SCAN / 2, FIRE_SCAN))) {
+			BlockState state = level.getBlockState(pos);
+			if (state.is(BlockTags.FIRE) || state.getFluidState().is(FluidTags.LAVA) || CampfireBlock.isLitCampfire(state)) {
+				double d = pos.distSqr(centre);
+				if (d < bestDist) {
+					bestDist = d;
+					best = pos.immutable();
+				}
+			}
+		}
+		return best == null ? null : Vec3.atCenterOf(best);
+	}
+
+	private static boolean holdsFire(ItemStack stack) {
+		return stack.is(Items.FLINT_AND_STEEL) || stack.is(Items.FIRE_CHARGE) || stack.is(Items.LAVA_BUCKET) || stack.is(Items.TNT);
+	}
+
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
+		if (source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypeTags.IS_EXPLOSION)) {
+			Vec3 at = source.getSourcePosition();
+			this.flee(at != null ? at : this.position());
+		}
 		this.provoked(level, source);
 		if (this.isRemoved()) {
 			return false;
@@ -460,6 +545,65 @@ public class WebSymbioteBlob extends PathfinderMob {
 	@Override
 	public boolean removeWhenFarAway(double distSqr) {
 		return false;
+	}
+
+	/** Runs flat out from {@link #fleeFrom} until it's far enough away, then settles there as its new home. */
+	private final class FleeFireGoal extends Goal {
+		private int repath;
+
+		FleeFireGoal() {
+			this.setFlags(java.util.EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
+		}
+
+		private boolean running() {
+			WebSymbioteBlob blob = WebSymbioteBlob.this;
+			return blob.fleeFrom != null && blob.fleeTicks > 0 && blob.position().distanceTo(blob.fleeFrom) < FLEE_DISTANCE;
+		}
+
+		@Override
+		public boolean canUse() {
+			return this.running();
+		}
+
+		@Override
+		public boolean canContinueToUse() {
+			return this.running();
+		}
+
+		@Override
+		public void start() {
+			this.repath = 0;
+		}
+
+		@Override
+		public void stop() {
+			WebSymbioteBlob blob = WebSymbioteBlob.this;
+			blob.getNavigation().stop();
+			if (blob.fleeFrom != null && blob.position().distanceTo(blob.fleeFrom) >= FLEE_DISTANCE * 0.5) {
+				// far from the fire: it stays out here now
+				blob.setHomeTo(blob.blockPosition(), ROAM_RADIUS);
+			}
+			blob.fleeFrom = null;
+			blob.fleeTicks = 0;
+		}
+
+		@Override
+		public void tick() {
+			WebSymbioteBlob blob = WebSymbioteBlob.this;
+			if (blob.fleeFrom == null) {
+				return;
+			}
+			if (--this.repath <= 0 || blob.getNavigation().isDone()) {
+				this.repath = 20;
+				Vec3 to = DefaultRandomPos.getPosAway(blob, 16, 7, blob.fleeFrom);
+				if (to == null) {
+					// nowhere mapped: straight away from it
+					Vec3 away = blob.position().subtract(blob.fleeFrom).horizontal();
+					to = blob.position().add(away.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : away.normalize().scale(10.0));
+				}
+				blob.getNavigation().moveTo(to.x, to.y, to.z, FLEE_SPEED);
+			}
+		}
 	}
 
 	/** Goes after whatever {@link #findHost} picked, and leaps on it once it's close. */
