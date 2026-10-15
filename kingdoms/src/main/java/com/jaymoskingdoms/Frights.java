@@ -129,6 +129,17 @@ final class Frights {
 		flee(level, v, fright);
 	}
 
+	/** (0.7.63) It hides at {@code to} (its home) until {@code until}, as from a monster: a war party is coming ({@link WarAlert}). */
+	static void shelter(ServerLevel level, Villager v, BlockPos to, long until) {
+		Fright had = FRIGHTS.get(v.getUUID());
+		if (had != null && had.until() >= until) {
+			return;
+		}
+		Fright fright = new Fright(had != null ? had.to() : to, had != null ? had.child() : null, until);
+		FRIGHTS.put(v.getUUID(), fright);
+		flee(level, v, fright);
+	}
+
 	/** It takes fright: where it'll run (home if that's near and not toward the monster, else away), and with which child. */
 	private static Fright frighten(ServerLevel level, Villager v, LivingEntity monster, long now) {
 		BlockPos to = away(level, v, monster.position());

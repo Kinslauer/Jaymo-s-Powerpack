@@ -154,6 +154,23 @@ final class WarParties {
 		return ACTIVE.values().stream().anyMatch(p -> p.war == war);
 	}
 
+	/**
+	 * (0.7.63) Where a party marching on (or besieging) {@code faction} is: its lead, or its target's seat before it's
+	 * been seen; null if none is coming ({@link WarAlert}).
+	 */
+	static @Nullable BlockPos incoming(MinecraftServer server, int faction) {
+		for (Party party : ACTIVE.values()) {
+			if (party.target == faction && party.phase != Phase.RETURN) {
+				if (party.lastAt != null) {
+					return party.lastAt;
+				}
+				Faction from = Factions.get(server, party.faction);
+				return from != null ? from.seat() : null;
+			}
+		}
+		return null;
+	}
+
 	// ---- sending -------------------------------------------------------------------------------------------------------
 
 	private static void consider(MinecraftServer server, ServerLevel level, long now) {
