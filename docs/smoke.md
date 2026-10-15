@@ -110,3 +110,25 @@ Nothing explained in game (`SmokeSmog`).
   spot at its front. 40 s cooldown (`SmokeState.PYRO`).
 - **Cure** (`Fate.purify`, for good): 60 s at Y 200+ in the Overworld not pouring (Vapour trail allowed; whisper the
   first time), 3 min standing in rain not pouring, or 3 Minecraft days (`smoke_smog_since`, saved).
+
+## Stage 3: Cloudshaper, the ascension (0.10.117 / Kingdoms 0.7.34)
+`SmokeCloudshaper`.
+- **How:** with everything mastered (`Fate.canAscend`), in Vapour Form at Y 150+ with `WindWeather.stormOverhead`
+  (a real thunderstorm with rain on you, vanilla or a Kingdoms cell) for 600 ticks in a row: `Fate.ascend`. Cloud
+  gathers into you with soft thunder every 2 s; nothing is explained. (The plan's Storm Seed item was dropped: you
+  ascend on the spot.)
+- **Passive:** ascended and not smog, your smoke is soot 0 (white) at Y 120+, in the rain or while sneaking
+  (`SmokeField.puff`); your smoke takes no rain washing (`SmokeField.CLOUD` lease). Falling through 1.5+ of your own
+  cloud gives Slow Falling (the plan's "stand on it" became sinking slowly through it). Vapour Form's top speed is
+  x1.15 in the rain (`SmokeFlightClient`).
+- **C, Harness the Sky** (corrupted wins C while both, until stage 4): a tap (under 10 ticks) calls a raincloud where
+  you aim (64 blocks): 30 s, radius 10, 9 blocks over the ground (lower under a roof); fires in it go out, burning
+  things stop burning, crops get extra random ticks; 30 s cooldown (`SmokeState.SKY`). Held, every second: a tornado
+  within 48 is unwound by a second (`SkyCalm.unwind`, no kill) and drags you toward it; otherwise the cell overhead is
+  calmed by a second (`SkyCalm.calm`). Without Kingdoms (or with no cell overhead) vanilla weather: 20 s turns thunder
+  to rain, 60 s in all clears the sky. 0.05 hunger a tick held; stops at 6 food.
+- **Kingdoms `disasters/SkyCalm`** (found by reflection): `calm` takes 60 ticks of life a second off the cell most over
+  you (30%+ cover; never below a quarter gathering from now); a supercell calmed 10 s is spent (never touches down) and
+  becomes a thunderstorm, 30 s in all a rain cell (`Storm.kind` no longer final, `calmed` server-only). `unwind` drops
+  the nearest tornado a rank every 5 s (`Tornado.size` no longer final) and cuts 25% off its remaining life; a dust
+  devil only dies with `kill` (stage 4's Ash Storm).
