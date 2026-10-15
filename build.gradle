@@ -147,6 +147,10 @@ def packMods = [
 	// Iris Shaders (LGPL-3.0): shader packs (Options > Video Settings > Shader Packs); built on the pack's Sodium.
 	// Client-only: the server ignores it.
 	[dep: "maven.modrinth:iris:vTN4NRGW", cf: [455508, 9015108], dev: false],
+	// Bobby (LGPL-3.0, by Johni0702): keeps the chunks you've seen on disk and draws them past the server's view distance
+	// (the Deck sends 12), so explored land stays in sight further out. Nothing for land nobody has visited yet; works
+	// with Sodium and Iris. Client-only: the server ignores it.
+	[dep: "maven.modrinth:bobby:J7YnfCss", cf: [409301, 9077335], dev: false],
 	// Shoulder Surfing Reloaded (MIT, by Exopandora): the third-person camera for everyone, over the shoulder with a
 	// crosshair, free look (Right Alt), swap shoulder (O) and adaptive see-through when the view is blocked. Replaced Camera
 	// Utils (it refuses to load beside it) and our own power-only shoulder view in 0.10.57. Jaymo's Powers sets Andy's
