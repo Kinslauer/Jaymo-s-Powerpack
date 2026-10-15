@@ -100,9 +100,15 @@ public final class FutureGuns {
 
 	/** Nobody fires at point blank (they'd rather swing). */
 	static final double NEAREST = 2.5;
-	/** The chance a gun drops from a dead gunner, and the chance it leaves rounds for it (this many, at most). */
-	static final float DROP_CHANCE = 0.1F, AMMO_CHANCE = 0.35F;
-	static final int AMMO_MIN = 4, AMMO_MAX = 24;
+	/**
+	 * The chance a gun drops from a dead gunner (holding at most {@link #MAG_SHARE} of a magazine), and the chance it
+	 * leaves rounds for it: mostly a handful, now and then up to a stack ({@link #AMMO_MAX}, rolled as r^{@link #AMMO_SKEW}).
+	 */
+	static final float DROP_CHANCE = 0.1F, AMMO_CHANCE = 0.2F, MAG_SHARE = 0.25F;
+	static final int AMMO_MAX = 64;
+	static final double AMMO_SKEW = 3.0;
+	/** Gunners don't rush in: they hang back about this far (a share of the gun's range, within these bounds), backing off if you close. */
+	static final double KEEP_SHARE = 0.45, KEEP_MIN = 6.0, KEEP_MAX = 18.0, BACK_OFF = 0.6;
 	/** How far TaCZ's report of a mob's shot carries. */
 	static final int SOUND_RANGE = 96;
 
@@ -133,7 +139,7 @@ public final class FutureGuns {
 	/** Hands a mob a random modern gun, loaded (nothing without TaCZ). Returns whether it's armed. */
 	public static boolean arm(Mob mob, RandomSource random) {
 		Gun pick = MODERN[random.nextInt(MODERN.length)];
-		ItemStack gun = TaczGuns.modernGun(pick.id.substring("tacz:".length()), pick.magazine);
+		ItemStack gun = TaczGuns.modernGun(pick.id.substring("tacz:".length()), random.nextInt(Math.max(1, Math.round(pick.magazine * MAG_SHARE)) + 1));
 		if (gun.isEmpty()) {
 			return false;
 		}
@@ -141,8 +147,20 @@ public final class FutureGuns {
 		mob.setDropChance(EquipmentSlot.MAINHAND, DROP_CHANCE);
 		mob.addTag(TAG);
 		ARMED.put(mob, pick);
-		NEXT.put(mob, mob.level().getGameTime() + 20 + random.nextInt(60));
+		NEXT.put(mob, mob.level().getGameTime() + 10 + random.nextInt(20));
+		holdBack(mob);
 		return true;
+	}
+
+	/** Mobs that have given up their melee rush (redone after a reload, which brings the goals back). */
+	private static final Map<Mob, Boolean> HELD_BACK = new WeakHashMap<>();
+
+	/** A gunner relies on its gun: no melee rush, it keeps its distance ({@link #tick}). */
+	static void holdBack(Mob mob) {
+		if (HELD_BACK.put(mob, true) == null) {
+			((com.jaymospowers.mixin.MobGoalsAccessor) mob).jaymospowers$goals()
+				.removeAllGoals(goal -> goal instanceof net.minecraft.world.entity.ai.goal.MeleeAttackGoal);
+		}
 	}
 
 	/** Some rounds for the gun it carried, now and then. */
@@ -152,7 +170,7 @@ public final class FutureGuns {
 		if (gun == null || gun.ammo.isEmpty() || random.nextFloat() >= AMMO_CHANCE) {
 			return;
 		}
-		ItemStack ammo = TaczGuns.modernAmmo(gun.ammo, AMMO_MIN + random.nextInt(AMMO_MAX - AMMO_MIN + 1));
+		ItemStack ammo = TaczGuns.modernAmmo(gun.ammo, 1 + (int) (Math.pow(random.nextDouble(), AMMO_SKEW) * AMMO_MAX));
 		if (!ammo.isEmpty()) {
 			mob.spawnAtLocation(level, ammo);
 		}
@@ -166,13 +184,26 @@ public final class FutureGuns {
 			BURST.remove(mob);
 			return;
 		}
+		holdBack(mob);
+		Kind kind = gun.kind;
+		double d = mob.distanceTo(foe);
+		boolean sight = mob.hasLineOfSight(foe);
+		keepDistance(mob, foe, kind, d, sight);
+		shoot(level, mob, foe, gun, d, sight);
+	}
+
+	/** A mob with a built-in gun (the mech's cannons): fire at its foe a burst at a time, if in range and in sight. */
+	static void tickWith(ServerLevel level, Mob mob, LivingEntity foe, Gun gun) {
+		shoot(level, mob, foe, gun, mob.distanceTo(foe), mob.hasLineOfSight(foe));
+	}
+
+	private static void shoot(ServerLevel level, Mob mob, LivingEntity foe, Gun gun, double d, boolean sight) {
+		Kind kind = gun.kind;
 		long now = level.getGameTime();
 		if (now < NEXT.getOrDefault(mob, 0L)) {
 			return;
 		}
-		Kind kind = gun.kind;
-		double d = mob.distanceTo(foe);
-		if (d < NEAREST || d > kind.range || !mob.hasLineOfSight(foe)) {
+		if (d < NEAREST || d > kind.range || !sight) {
 			BURST.remove(mob);
 			return;
 		}
@@ -187,7 +218,24 @@ public final class FutureGuns {
 		fire(level, mob, foe, gun);
 	}
 
-	private static void fire(ServerLevel level, Mob mob, LivingEntity foe, Gun gun) {
+	/** Close in until it has a shot, then hold there; back off from anyone who comes too near. */
+	private static void keepDistance(Mob mob, LivingEntity foe, Kind kind, double d, boolean sight) {
+		double keep = Math.clamp(kind.range * KEEP_SHARE, KEEP_MIN, KEEP_MAX);
+		mob.getLookControl().setLookAt(foe, 30.0F, 30.0F);
+		if (!sight || d > Math.min(kind.range, keep * 1.6)) {
+			if (mob.getNavigation().isDone() || mob.tickCount % 10 == 0) {
+				mob.getNavigation().moveTo(foe, 1.0);
+			}
+		} else if (d < keep * BACK_OFF) {
+			Vec3 away = mob.position().subtract(foe.position()).multiply(1.0, 0.0, 1.0).normalize().scale(6.0);
+			Vec3 to = mob.position().add(away);
+			mob.getNavigation().moveTo(to.x, to.y, to.z, 1.0);
+		} else {
+			mob.getNavigation().stop();
+		}
+	}
+
+	static void fire(ServerLevel level, Mob mob, LivingEntity foe, Gun gun) {
 		RandomSource random = level.getRandom();
 		Kind kind = gun.kind;
 		boolean flintlock = !gun.id.startsWith("tacz:");
