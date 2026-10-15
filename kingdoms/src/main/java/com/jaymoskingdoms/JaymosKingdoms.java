@@ -180,6 +180,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Tailors.register();
 		// 0.5.39: the townsfolk come over to you: questions, quests, requests, bargains, news
 		Approaches.register();
+		// 0.7.61: villagers react to your deeds (fires put out, lives saved, captives brought home)
+		Deeds.register();
+		Captives.register();
 		// 0.7.20: tongues by region; only simple dealings with folk whose tongue you don't speak (and its attachments)
 		LOGGER.debug("tongue attachments: {} {}", Languages.HOME, Languages.LEARNED);
 		Languages.register();

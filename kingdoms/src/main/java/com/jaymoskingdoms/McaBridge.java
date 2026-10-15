@@ -467,6 +467,11 @@ final class McaBridge {
 		return true;
 	}
 
+	/** (0.7.61) A new grown MCA villager at {@code at}, not yet added to the world ({@link Captives}). */
+	static Villager newVillager(ServerLevel level, net.minecraft.world.phys.Vec3 at) {
+		return VillagerFactory.newVillager(level).withPosition(at).withAge(0).build(EntitySpawnReason.EVENT);
+	}
+
 	// ---- families (0.6.9) -------------------------------------------------------------------------------------------
 
 	/**

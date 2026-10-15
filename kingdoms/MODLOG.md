@@ -3101,3 +3101,13 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
   4 blocks (players spared), each lit for 4 s and burnt for 1, like lightning's chain. Ice's burst freezes far longer
   (300 ticks, long enough for the cold's own damage), slows for 4 s, does 2 damage, and chills up to 4 creatures within
   3 blocks (frozen a while, slowed 3 s). (`Spellcraft.strike`)
+- **0.7.61, villagers react to your deeds:** (`Deeds`) put out a fire in a settlement (a watched fire that goes out
+  within 6 blocks of a player who just used their hands or an item), kill whatever struck (or was going for) a villager,
+  or bring a captive home, and they react: the one saved thanks you (30% hand you a gift), witnesses cheer, MCA hearts
+  and mood rise, reputation with the settlement (fires +1, saves +6, capped at 60 a day; freed +10, brought home +40).
+  For 7 days folk there call out to you about it as you pass and gossips talk of it; each day word may reach the
+  nearest settlement that hasn't heard ("they say in X you..."). 12 lines per family, dealt as a deck.
+  (`Captives`) villagers in chains in camps (80%, 1-2 when a player first comes within 64; a camp left without takes
+  another after 3 days, 50%) and in 35% of dungeons (spawner on cobblestone): taken from the nearest settlement within
+  1500, bound (NoAI, invulnerable, unseen by monsters), they cry for help. Right-click breaks the chains; they follow you
+  home (lost after 30 s more than 48 blocks behind, or 3 days), and give 3-8 emeralds there. Ops: `/kingdom captive`.

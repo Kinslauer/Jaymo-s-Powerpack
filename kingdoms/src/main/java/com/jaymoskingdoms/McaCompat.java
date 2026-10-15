@@ -151,6 +151,14 @@ public final class McaCompat {
 		}
 	}
 
+	/** (0.7.61) A new grown villager at {@code at} (MCA's, with MCA), not yet added to the world ({@link Captives}). */
+	static @Nullable Villager newVillager(ServerLevel level, net.minecraft.world.phys.Vec3 at) {
+		if (LOADED) {
+			return McaBridge.newVillager(level, at);
+		}
+		return net.minecraft.world.entity.EntityTypes.VILLAGER.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
+	}
+
 	/** (0.6.9) {@link McaBridge#families}; 0 without MCA. */
 	static int families(ServerLevel level, AABB box, int grownPerYoung, int leastGrown, float chance, int soonUnits, boolean takeIn) {
 		return LOADED ? McaBridge.families(level, box, grownPerYoung, leastGrown, chance, soonUnits, takeIn) : 0;
