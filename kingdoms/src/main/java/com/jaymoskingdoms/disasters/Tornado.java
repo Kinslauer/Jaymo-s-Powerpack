@@ -13,7 +13,8 @@ public final class Tornado {
 	public static final String[] NAMES = {"dust_devil", "tornado", "monster"};
 
 	public final int id;
-	public final int size;
+	/** (0.7.34) Not final: a Smoke cloudshaper can unwind it a rank at a time ({@link SkyCalm}). */
+	public int size;
 	/** Its storm's id (-1 for a dust devil, which has none). */
 	public final int storm;
 	public double x, z, vx, vz;
@@ -22,6 +23,8 @@ public final class Tornado {
 	public int age, life;
 	/** A Wind user's shove (blocks per tick), wearing off. Server only. */
 	double shoveX, shoveZ;
+	/** (0.7.34) Seconds a Smoke cloudshaper has spent unwinding it ({@link SkyCalm}). Server only. */
+	float unwound;
 	/** A seed for its wander, so each one weaves its own way. */
 	final float seed;
 

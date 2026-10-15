@@ -13,12 +13,15 @@ public final class Storm {
 	public static final int RAIN = 0, THUNDER = 1, SUPERCELL = 2;
 
 	public final int id;
-	public final int kind;
+	/** (0.7.34) Not final: a Smoke cloudshaper can calm a supercell to a thunderstorm and that to a rain cell ({@link SkyCalm}). */
+	public int kind;
 	public double x, z, vx, vz;
 	public float radius;
 	public int age, life;
 	/** Whether this supercell has already put down its tornado. Server only. */
 	boolean spawned;
+	/** (0.7.34) Seconds a Smoke cloudshaper has spent calming it ({@link SkyCalm}). Server only. */
+	float calmed;
 
 	public Storm(int id, int kind, double x, double z, double vx, double vz, float radius, int age, int life) {
 		this.id = id;
