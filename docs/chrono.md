@@ -515,3 +515,44 @@ file), never as if Uospag endorsed us.
 Outside the island (x -3584..5631, z -3584..3583) is the map's own flat sea (same layers as its superflat). The map's
 chunks are DataVersion 3120 (1.19.2) though CurseForge tags it 26.3; vanilla upgrades each on first load, so a chunk's
 first visit is slower. Not playtested in-game yet.
+
+## 0.11.62: Overclock's speed-force streak, run and glyphs
+
+Andy asked for the comic-book speedster look on V (the idea only: built from scratch, nothing taken from any other mod).
+While Overclock runs and you're moving fast, every client draws it, because the server now syncs a `chrono_flash`
+attachment (`ChronoSpeed.FLASH`) while Overclock is on. All of it scales with speed and fades out as you slow.
+
+- **Afterimages** (`ChronoStreak.ghosts`): translucent golden copies of the runner, each one the frame the world drew
+  them in a moment ago (stride and run pose included), left where they were and fading. Not on a wall run, gliding,
+  swimming or riding. Your own are skipped in first person if they're close to the camera.
+- **Lightning** (`ChronoStreak.lightning`): jagged yellow-orange bolts at three heights along the last 10 ticks of
+  path, plus short arcs off the body. Each bolt has a glow and a hot core, drawn with the lightning render type
+  (additive). Their shape jumps every 2 ticks and each one blinks in and out.
+- **Glyphs** (`ChronoStreak.glyphs`): enchanting-table glyphs (`ParticleTypes.ENCHANT`) peel off the stretch just run
+  and drift out, up and back. They're spawned client side.
+- **The run** (`ChronoRunPose`): the whole body leans hard forward from the feet, with the head held up. Arms pump and
+  legs cycle at about 2.6x a vanilla sprint. Off on wall runs (that is still `GravityWalkPose`), in a Time Flow blow,
+  sneaking, swimming, gliding, riding and in your own first person. Hooked in `ChronoAvatarRendererMixin` (extract),
+  `ChronoLivingEntityRendererMixin` (lean), `ChronoModelFeatureRendererMixin` and `ModelPoses` (limbs).
+
+| Constant | Value | What |
+|---|---|---|
+| `ChronoStreak.MIN_SPEED` / `FULL_SPEED` | 0.3 / 0.8 b/t | streak starts / is full (vanilla sprint ~0.28) |
+| `ChronoStreak.RISE` / `FALL` | 0.4 / 0.15 | how fast it comes up / dies away (share a tick) |
+| `ChronoStreak.RUN_MIN_SPEED` / `RUN_FULL_SPEED` | 0.25 / 0.6 b/t | run pose in / full (horizontal speed) |
+| `ChronoStreak.TRAIL_TICKS` | 10 | ticks of path kept |
+| `ChronoStreak.GHOST_EVERY` / `GHOSTS` | 2 / 4 | an afterimage every 2 ticks, at most 4 |
+| `ChronoStreak.GHOST_RGB` / `GHOST_ALPHA` | 0xFFC860 / 0.5 | afterimage tint, nearest one's opacity |
+| `ChronoStreak.BOLT_HEIGHTS` | 0.35, 0.95, 1.45 | bolt heights above the feet |
+| `ChronoStreak.JAG_SPLITS` / `JAG` | 3 / 0.2 | jags per path step, how far off the line |
+| `ChronoStreak.FLICKER_TICKS` / `BOLT_CHANCE` | 2 / 0.7 | new shape every 2 ticks, each bolt lit 70% |
+| `ChronoStreak.BODY_ARCS` / `ARC_LENGTH` | 2 / 0.7 | arcs off the body |
+| `ChronoStreak.CORE_*` / `GLOW_*` | 0.05 / 0.18 wide, 0xFFF4B0 / 0xFF8A1E | bolt core and glow |
+| `ChronoStreak.GLYPHS_PER_TICK` / `GLYPH_DRIFT` | 2.5 / 1.1 | glyphs a tick at full speed, drift in blocks |
+| `ChronoStreak.VIEW_DISTANCE` | 64 | how far others' streaks are drawn |
+| `ChronoRunPose.LEAN_DEGREES` | 32 | forward lean at full run |
+| `ChronoRunPose.CADENCE` | 2.1 rad/tick | limb cycle speed |
+| `ChronoRunPose.LEG_SWING` / `ARM_SWING` | 1.25 / 1.35 rad | stride and arm pump |
+
+Not seen in game yet. Check that the afterimages face the right way and sit on the runner's path, that the bolts
+show from both sides, and that the lean doesn't clip the feet into the ground.

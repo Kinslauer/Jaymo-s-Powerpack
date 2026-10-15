@@ -302,6 +302,11 @@ final class WebLineRenderer {
 				// a symbiote's lines are thick, living cords: most of that side's tendrils at once
 				if (dark) {
 					bundle(context, shape, from, to, lineWidth);
+					// and the whole arm streams into it: the suit's arm comes apart into tendrils from the shoulder down,
+					// which run out along the line and braid into it
+					if (!twoHanded && !(player == minecraft.player && minecraft.options.getCameraType().isFirstPerson())) {
+						armSheath(context, minecraft, player, handIndex, shape, from, to, time, partialTick, camera);
+					}
 				} else {
 					draw(context.poseStack(), context, shape, from, to, lineWidth, false, out >= 1.0F);
 				}
@@ -389,6 +394,75 @@ final class WebLineRenderer {
 				double r1 = radius * (1.0 - 0.45 * (i + 1) / pieces);
 				Vec3 tip = i + 1 <= reach ? points[i + 1] : points[i].lerp(points[i + 1], reach - i);
 				tube(buffer, pose, points[i], tip, r0, r1, i, light);
+			}
+		});
+	}
+
+	/**
+	 * Swinging in the suit, the arm itself becomes the line: {@code SHEATH_STRANDS} tendrils peel off the suit's arm from
+	 * the shoulder down (wrapped round it, {@code SHEATH_ARM} blocks out from its middle, {@code SHEATH_BIG_ARM} on the big
+	 * body), flare out past the hand ({@code SHEATH_FLARE}) and braid into the cord {@code SHEATH_MERGE} blocks along it,
+	 * writhing as they go. Each is {@code SHEATH_RADIUS} thick at the shoulder, thinning toward the cord.
+	 */
+	private static final int SHEATH_STRANDS = 7, SHEATH_ARM_PIECES = 4, SHEATH_LINE_PIECES = 8;
+	private static final double SHEATH_ARM = 0.11, SHEATH_BIG_ARM = 0.2, SHEATH_FLARE = 0.32, SHEATH_MERGE = 2.6;
+	private static final double SHEATH_RADIUS = 0.05, SHEATH_WRITHE = 0.04;
+
+	private static void armSheath(LevelRenderContext context, Minecraft minecraft, Player player, int handIndex, WebLineShape.Shape shape,
+		Vec3 from, Vec3 to, double time, float partialTick, Vec3 camera) {
+		double length = from.distanceTo(to);
+		if (length < 0.3) {
+			return;
+		}
+		boolean big = com.jaymospowers.power.web.WebSymbiote.bulked(player);
+		double scale = player.getScale();
+		Vec3 shoulder = WebArms.shoulder(player, handIndex, partialTick).subtract(camera);
+		Vec3 hand = from;
+		Vec3 armDir = hand.subtract(shoulder);
+		if (armDir.lengthSqr() < 1.0E-4) {
+			return;
+		}
+		armDir = armDir.normalize();
+		Vec3 au = Math.abs(armDir.y) < 0.95 ? armDir.cross(new Vec3(0.0, 1.0, 0.0)).normalize() : armDir.cross(new Vec3(1.0, 0.0, 0.0)).normalize();
+		Vec3 av = armDir.cross(au).normalize();
+		Vec3 lineDir = shape.at(0.05).subtract(from);
+		lineDir = lineDir.lengthSqr() < 1.0E-6 ? armDir : lineDir.normalize();
+		Vec3 lu = Math.abs(lineDir.y) < 0.95 ? lineDir.cross(new Vec3(0.0, 1.0, 0.0)).normalize() : lineDir.cross(new Vec3(1.0, 0.0, 0.0)).normalize();
+		Vec3 lv = lineDir.cross(lu).normalize();
+		double armR = (big ? SHEATH_BIG_ARM : SHEATH_ARM) * scale;
+		double merge = Math.min(SHEATH_MERGE, length * 0.8) / length;
+		int pieces = SHEATH_ARM_PIECES + SHEATH_LINE_PIECES;
+		int light = minecraft.getEntityRenderDispatcher().getPackedLightCoords(player, partialTick);
+		Vec3[][] strands = new Vec3[SHEATH_STRANDS][pieces + 1];
+		for (int k = 0; k < SHEATH_STRANDS; k++) {
+			double phase = k * Math.PI * 2.0 / SHEATH_STRANDS + player.getId();
+			for (int i = 0; i <= pieces; i++) {
+				double writhe = Math.sin(time * 0.45 + i * 0.9 + k * 1.7) * SHEATH_WRITHE * scale;
+				Vec3 p;
+				if (i <= SHEATH_ARM_PIECES) {
+					// wrapped round the arm, coiling a little as it runs down it
+					double f = i / (double)SHEATH_ARM_PIECES;
+					double a = phase + f * 1.2;
+					double r = armR + writhe;
+					p = shoulder.lerp(hand, f).add(au.scale(Math.cos(a) * r)).add(av.scale(Math.sin(a) * r));
+				} else {
+					// out along the line: flaring wide past the hand, then braiding back into the cord
+					double f = (i - SHEATH_ARM_PIECES) / (double)SHEATH_LINE_PIECES;
+					double a = phase + 1.2 + f * 2.4;
+					double flare = Math.sin(Math.min(1.0, f * 1.6) * Math.PI);
+					double r = Mth.lerp(f, armR, ROPE_TWIST_RADIUS) + flare * SHEATH_FLARE * scale + writhe * 2.0;
+					p = shape.at(f * merge).add(lu.scale(Math.cos(a) * r)).add(lv.scale(Math.sin(a) * r));
+				}
+				strands[k][i] = p;
+			}
+		}
+		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.entityCutout(TENDRIL_TEXTURE), (pose, buffer) -> {
+			for (Vec3[] strand : strands) {
+				for (int i = 0; i < pieces; i++) {
+					double r0 = SHEATH_RADIUS * scale * (1.0 - 0.6 * i / pieces) * (big ? 1.5 : 1.0);
+					double r1 = SHEATH_RADIUS * scale * (1.0 - 0.6 * (i + 1) / pieces) * (big ? 1.5 : 1.0);
+					tube(buffer, pose, strand[i], strand[i + 1], r0, r1, i, light);
+				}
 			}
 		});
 	}

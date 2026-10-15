@@ -51,7 +51,16 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		{3.5F, 4.5F, 2.0F, 1.0F, -0.55F},
 		{-2.0F, 8.0F, 2.0F, -1.25F, -0.15F},
 		{2.0F, 8.0F, 2.0F, 1.25F, -0.15F},
+		// the spares: grown only while four of the others walk you along, to stand in for them
+		{-2.5F, 3.0F, 2.5F, -0.8F, -0.8F},
+		{2.5F, 3.0F, 2.5F, 0.8F, -0.8F},
+		{-1.0F, 5.5F, 2.5F, -0.45F, -1.1F},
+		{1.0F, 5.5F, 2.5F, 0.45F, -1.1F},
 	};
+	/** The first of the spares (see {@link #ROOTS}): hidden unless the tendrils are walking you. */
+	static final int FIRST_SPARE = 8;
+	/** Which ones take turns stabbing in a barrage: those free to, walking or not. */
+	private static final int[] BARRAGE_FREE = {2, 3, 4, 5, 6, 7}, BARRAGE_FREE_WALKING = {0, 1, 2, 3, 8, 9, 10, 11};
 	/** Roots higher than this (model y) are the upper ones: the strikers, and the ones seen in first person. */
 	private static final float UPPER_ROOT_Y = 6.0F;
 	/** A whole tendril's length at its rest size (model pixels): the segments overlap a little. */
@@ -372,11 +381,23 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 				ModelPart base = this.parts[t][0];
 				// the top two (right, left) are the ones that reach out and hold: while holding, they're drawn reaching
 				base.visible = !(t == 0 && (tendrils.held() & 1) != 0 || t == 1 && (tendrils.held() & 2) != 0);
-				if (combo == WebTendrilCombos.BARRAGE && base.visible && tendrils.legs() == null && tendrils.tethers() == null) {
+				float[] legs = tendrils.legs();
+				if (t >= FIRST_SPARE && legs == null) {
+					// a spare: only out while the others walk
+					base.visible = false;
+					continue;
+				}
+				if (legs != null && (legs[t * 6] != 0.0F || legs[t * 6 + 1] != 0.0F || legs[t * 6 + 2] != 0.0F)) {
+					// walking you along: bowed out from the back, its tip planted (or stepping) on whatever it holds
+					bend(this.parts[t], legs[t * 6], legs[t * 6 + 1], legs[t * 6 + 2], legs[t * 6 + 3], legs[t * 6 + 4], legs[t * 6 + 5], eased);
+					continue;
+				}
+				if (combo == WebTendrilCombos.BARRAGE && base.visible && tendrils.tethers() == null) {
 					// stabbing, over and over: the free tendrils take turns, one stab a beat, cocked back then driven
 					// straight into it; the rest wait poised, half drawn back
 					float beat = state.ageInTicks / WebTendrilCombos.BARRAGE_CYCLE;
-					boolean turn = t == FIRST_TETHER + Math.floorMod(Mth.floor(beat), ROOTS.length - FIRST_TETHER);
+					int[] free = legs == null ? BARRAGE_FREE : BARRAGE_FREE_WALKING;
+					boolean turn = t == free[Math.floorMod(Mth.floor(beat), free.length)];
 					float p = beat - Mth.floor(beat);
 					float reach;
 					float cock;
@@ -467,12 +488,6 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 					base.yRot = r[3] * 0.85F;
 					base.xRot = (r[1] - 4.0F) * 0.13F;
 					base.zScale = length * 1.15F;
-				}
-				float[] legs = tendrils.legs();
-				if (legs != null && (legs[t * 6] != 0.0F || legs[t * 6 + 1] != 0.0F || legs[t * 6 + 2] != 0.0F)) {
-					// walking you up the wall: bowed out from the back, its tip planted (or stepping) on the surface
-					bend(this.parts[t], legs[t * 6], legs[t * 6 + 1], legs[t * 6 + 2], legs[t * 6 + 3], legs[t * 6 + 4], legs[t * 6 + 5], eased);
-					continue;
 				}
 				float[] tethers = tendrils.tethers();
 				if (tethers != null && t >= FIRST_TETHER && tethers[t * 3 + 2] > 0.0F) {

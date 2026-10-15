@@ -146,6 +146,16 @@ public final class WebSymbioteClient {
 	static final double CLIMB_SAG = -0.03, CLIMB_OFF_WALL = 0.4;
 	/** Pressed up into a ceiling this hard each tick to stay stuck. */
 	static final double CEILING_PRESS = 0.1;
+	/**
+	 * Off the wall, Wall Crawl carries you on four tendrils (Doctor Octopus style, see WebTendrilWalk): held up
+	 * {@code STRIDE_HEIGHT} blocks off the ground (eased there at {@code STRIDE_LIFT} of the gap a tick), walked along at
+	 * {@code STRIDE_SPEED} ({@code STRIDE_SPRINT} sprinting), the grip taking {@code STRIDE_GRIP} of the change a tick.
+	 * Jump climbs and Sneak lowers at {@code STRIDE_CLIMB}; climbing needs {@code STRIDE_RISE_ANCHORS} ways to grab, and
+	 * with nothing to grab within reach you fall. Sneak on the ground stands you on your own feet.
+	 */
+	static final double STRIDE_HEIGHT = 1.2, STRIDE_LIFT = 0.3, STRIDE_SPEED = 0.2, STRIDE_SPRINT = 0.3, STRIDE_GRIP = 0.35;
+	static final double STRIDE_CLIMB = 0.22;
+	static final int STRIDE_RISE_ANCHORS = 4;
 	/** Climbing off the top of a wall: a little hop forward onto the ledge. */
 	static final double LEDGE_HOP = 0.35;
 	static final double LEDGE_FORWARD = 0.18;
@@ -352,6 +362,8 @@ public final class WebSymbioteClient {
 				helper.register(new WebTendrilLayer(avatar));
 				helper.register(new WebMouthLayer(avatar));
 				helper.register(new WebSpikeLayer(avatar));
+				helper.register(new WebMorphLayer(avatar));
+				helper.register(new WebSuitWrapLayer(avatar));
 			}
 		});
 	}
@@ -390,6 +402,7 @@ public final class WebSymbioteClient {
 		state.setData(SUIT, entity instanceof Player player && WebSymbiote.suitShown(player) ? Boolean.TRUE : null);
 		state.setData(FERAL, entity instanceof Player player && WebSymbiote.isBonded(player)
 			? 1.0F - WebSymbiote.state(player).bond() / (float)WebSymbiote.BOND_MAX : null);
+		WebMorphLayer.extract(entity, state);
 		if (entity instanceof Player player) {
 			WebSuitGrowth.extract(player, state, net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false));
 		}
@@ -1143,6 +1156,7 @@ public final class WebSymbioteClient {
 				return;
 			}
 		}
+		boolean wasClinging = wallClinging;
 		if (wallClinging && !player.onGround() && player.getDeltaMovement().y > 0.0) {
 			// over the top: a hop onto the ledge
 			Vec3 forward = player.getLookAngle().horizontal();
@@ -1151,6 +1165,41 @@ public final class WebSymbioteClient {
 		}
 		wallClinging = false;
 		letGoOfWall();
+		if (!wasClinging) {
+			stride(player, input, move);
+		}
+	}
+
+	/** Carried on four tendrils, off the wall (see {@link #STRIDE_HEIGHT}). */
+	private static void stride(LocalPlayer player, Input input, Vec3 move) {
+		if (input.shift() && player.onGround() || player.isSpectator()) {
+			// on your own feet
+			return;
+		}
+		int anchors = WebTendrilWalk.anchors(player, WebTendrilWalk.STRIDE_REACH * player.getScale());
+		if (anchors < 2) {
+			// nothing to grab: you fall
+			return;
+		}
+		double scale = player.getScale();
+		double ground = WebTendrilWalk.groundBelow(player, WebTendrilWalk.STRIDE_GROUND * scale);
+		double vy;
+		if (input.jump()) {
+			vy = anchors >= STRIDE_RISE_ANCHORS ? STRIDE_CLIMB : 0.0;
+		} else if (input.shift()) {
+			vy = -STRIDE_CLIMB;
+		} else if (ground >= 0.0) {
+			// held up on them, rising and dipping a touch with each stride
+			double bob = move.lengthSqr() > 0.0 ? Mth.sin(player.tickCount * 0.45F) * 0.06 : 0.0;
+			vy = Mth.clamp((STRIDE_HEIGHT * scale + bob - ground) * STRIDE_LIFT, -STRIDE_CLIMB, STRIDE_CLIMB);
+		} else {
+			// hanging between whatever they hold
+			vy = 0.0;
+		}
+		Vec3 want = move.scale(player.isSprinting() ? STRIDE_SPRINT : STRIDE_SPEED);
+		Vec3 v = player.getDeltaMovement();
+		player.setDeltaMovement(Mth.lerp(STRIDE_GRIP, v.x, want.x), vy, Mth.lerp(STRIDE_GRIP, v.z, want.z));
+		player.resetFallDistance();
 	}
 
 	/** Which way the wall you're on faces (out of it, toward you): the side your box is pressed against. */

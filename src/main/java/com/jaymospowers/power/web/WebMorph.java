@@ -1,0 +1,330 @@
+package com.jaymospowers.power.web;
+
+import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.Dismember;
+import com.jaymospowers.core.Fractures;
+import io.netty.buffer.ByteBuf;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
+
+/**
+ * The weapon arm: in the suit, a left click with an empty hand (at a creature, or at the air) throws the arm out as a
+ * tendril, and its end morphs into a weapon, picked at random each time: a <b>mace</b> (blunt: smashes armour, breaks
+ * bones), a <b>scythe</b> (slashing: a wide sweep that severs limbs far more often than a blade, and catches what's
+ * beside the target too) or a <b>spear</b> (piercing: a straight thrust through armour). Arms alternate, right then
+ * left. Everyone sees it ({@link #MORPH}); the client draws the cord and the weapon ({@code WebMorphLayer}).
+ */
+public final class WebMorph {
+	/** The weapons. */
+	public static final int MACE = 0, SCYTHE = 1, SPEAR = 2, WEAPONS = 3;
+	/** How far the arm reaches (blocks from the eyes), and the slack the server allows on the client's pick. */
+	public static final double REACH = 6.0, REACH_SLACK = 1.5;
+	/** The whole move (ticks): the arm swells into the weapon until {@code FORM}, swings or thrusts, lands at {@code HIT}. */
+	public static final int TICKS = 16, FORM = 4, HIT = 8;
+	/** Ticks after a strike starts before the next one (a little past {@link #HIT}, so they chain arm over arm). */
+	public static final int COOLDOWN = 12;
+	/** Damage by weapon: mace, scythe, spear. */
+	static final float[] DAMAGE = {10.0F, 8.0F, 9.0F};
+	/** Mace and spear wear armour this many times harder than the blow alone would. */
+	static final float ARMOR_WEAR = 4.0F;
+	/** The spear goes through armour: this share of its damage is dealt again ignoring armour. */
+	static final float SPEAR_PIERCE = 0.35F;
+	/** The mace: chance (against a humanoid; players {@link Fractures#PLAYER_CHANCE} x2) to break the bone it lands on. */
+	static final float MACE_BREAK = 0.35F;
+	/** The scythe: chance to take off the limb it lands on (a sword's is {@link Dismember#BLADE_CHANCE}). */
+	static final float SCYTHE_SEVER = 0.45F;
+	/** The scythe sweeps through everything this close to its target, in front of you, for this share of its damage. */
+	static final double SCYTHE_SWEEP = 2.5;
+	static final float SCYTHE_SWEEP_SHARE = 0.6F;
+	/** Knockback: mace (and up), scythe (sideways along the sweep), spear (straight back). */
+	static final double MACE_KNOCK = 0.9, MACE_LIFT = 0.45, SCYTHE_KNOCK = 0.7, SPEAR_KNOCK = 1.3;
+
+	/** A strike under way: which weapon, at whom (-1 the air), when it began (game time), which arm (1 right, -1 left). */
+	public record Morph(int weapon, int target, long start, int side) {
+		public static final StreamCodec<ByteBuf, Morph> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_INT, Morph::weapon,
+			ByteBufCodecs.VAR_INT, Morph::target,
+			ByteBufCodecs.VAR_LONG, Morph::start,
+			ByteBufCodecs.VAR_INT, Morph::side,
+			Morph::new);
+
+		/** Ticks in, at {@code time} (game time + partial tick). */
+		public float age(float time) {
+			return time - start;
+		}
+	}
+
+	public static final AttachmentType<Morph> MORPH = AttachmentRegistry.create(JaymosPowers.id("web_morph"),
+		builder -> builder.syncWith(Morph.STREAM_CODEC, AttachmentSyncPredicate.all()));
+	private static final AttachmentType<Live> LIVE = AttachmentRegistry.create(JaymosPowers.id("web_morph_live"));
+
+	private static final class Live {
+		int lastWeapon = -1;
+		int side = -1;
+		long readyAt;
+	}
+
+	/** Client → server: the arm goes out (at a creature's id, or -1). */
+	public record Strike(int target) implements CustomPacketPayload {
+		public static final Type<Strike> TYPE = new Type<>(JaymosPowers.id("web_morph_strike"));
+		public static final StreamCodec<ByteBuf, Strike> CODEC = ByteBufCodecs.VAR_INT.map(Strike::new, Strike::target).cast();
+
+		@Override
+		public Type<Strike> type() {
+			return TYPE;
+		}
+	}
+
+	private WebMorph() {
+	}
+
+	static void register() {
+		PayloadTypeRegistry.serverboundPlay().register(Strike.TYPE, Strike.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Strike.TYPE, (payload, ctx) -> strike(ctx.player(), payload.target()));
+	}
+
+	/**
+	 * Whether a left click right now is the weapon arm: the suit showing (or the big body), an empty main hand, nothing
+	 * else of the symbiote's using the click. Both sides check it (the client before sending).
+	 */
+	public static boolean usable(@Nullable Player player) {
+		if (player == null || !player.isAlive() || player.isSpectator() || !WebSymbiote.isBonded(player)
+			|| !(WebSymbiote.suitShown(player) || WebSymbiote.bulked(player)) || !player.getMainHandItem().isEmpty()
+			|| WebPower.ragdolled(player) || player.getAttached(WebCounter.ACTIVE) != null || WebTendrilCombos.active(player)) {
+			return false;
+		}
+		Morph morph = player.getAttached(MORPH);
+		return morph == null || player.level().getGameTime() - morph.start() >= COOLDOWN;
+	}
+
+	/** The living thing the arm would go for: under the crosshair within {@link #REACH}. */
+	public static @Nullable LivingEntity aim(Player player) {
+		Vec3 eye = player.getEyePosition();
+		Vec3 look = player.getViewVector(1.0F);
+		Vec3 end = eye.add(look.scale(REACH));
+		LivingEntity best = null;
+		double bestDist = REACH * REACH;
+		for (Entity entity : player.level().getEntities(player, player.getBoundingBox().expandTowards(look.scale(REACH)).inflate(1.0),
+			e -> e instanceof LivingEntity living && living.isAlive() && !e.isSpectator() && e.isPickable())) {
+			AABB box = entity.getBoundingBox().inflate(Math.max(0.3, entity.getPickRadius()));
+			var hit = box.clip(eye, end);
+			if (box.contains(eye)) {
+				return (LivingEntity)entity;
+			}
+			if (hit.isPresent()) {
+				double d = eye.distanceToSqr(hit.get());
+				if (d < bestDist) {
+					bestDist = d;
+					best = (LivingEntity)entity;
+				}
+			}
+		}
+		if (best != null) {
+			// not through a wall
+			var block = player.level().clip(new net.minecraft.world.level.ClipContext(eye, best.getBoundingBox().getCenter(),
+				net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, player));
+			if (block.getType() != net.minecraft.world.phys.HitResult.Type.MISS
+				&& block.getLocation().distanceToSqr(eye) + 0.25 < best.getBoundingBox().getCenter().distanceToSqr(eye)) {
+				return null;
+			}
+		}
+		return best;
+	}
+
+	private static Live live(ServerPlayer player) {
+		Live live = player.getAttached(LIVE);
+		if (live == null) {
+			live = new Live();
+			player.setAttached(LIVE, live);
+		}
+		return live;
+	}
+
+	/** The arm goes out: a weapon picked (never the same twice running), on the other arm from last time. */
+	private static void strike(ServerPlayer player, int targetId) {
+		if (!usable(player) || WebSymbiote.driving(player)) {
+			return;
+		}
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		Live live = live(player);
+		if (now < live.readyAt) {
+			return;
+		}
+		LivingEntity target = null;
+		if (targetId >= 0 && level.getEntity(targetId) instanceof LivingEntity living && living.isAlive() && living != player
+			&& player.getEyePosition().distanceTo(living.getBoundingBox().getCenter()) <= REACH + REACH_SLACK + living.getBbWidth() * 0.5) {
+			Vec3 to = living.getBoundingBox().getCenter().subtract(player.getEyePosition()).normalize();
+			if (to.dot(player.getLookAngle()) > 0.3) {
+				target = living;
+			}
+		}
+		int weapon;
+		do {
+			weapon = player.getRandom().nextInt(WEAPONS);
+		} while (weapon == live.lastWeapon);
+		live.lastWeapon = weapon;
+		live.side = -live.side;
+		live.readyAt = now + COOLDOWN;
+		player.setAttached(MORPH, new Morph(weapon, target == null ? -1 : target.getId(), now, live.side));
+		player.resetAttackStrengthTicker();
+		// the arm swells and splits into its shape
+		sound(level, player, SoundEvents.WARDEN_TENDRIL_CLICKS, 1.0F, 0.7F + 0.15F * weapon);
+		sound(level, player, SoundEvents.HONEY_BLOCK_SLIDE, 0.8F, 0.6F);
+	}
+
+	/** Every tick, for a web slinger: the strike under way lands, then ends. */
+	static void tick(ServerPlayer player) {
+		Morph morph = player.getAttached(MORPH);
+		if (morph == null) {
+			return;
+		}
+		ServerLevel level = player.level();
+		long t = level.getGameTime() - morph.start();
+		if (t >= TICKS || !player.isAlive() || !(WebSymbiote.suitShown(player) || WebSymbiote.bulked(player))) {
+			player.removeAttached(MORPH);
+			return;
+		}
+		if (t == FORM) {
+			// the swing (or thrust) whooshes out
+			sound(level, player, morph.weapon() == SPEAR ? SoundEvents.TRIDENT_THROW.value() : SoundEvents.PLAYER_ATTACK_SWEEP, 1.0F,
+				morph.weapon() == MACE ? 0.6F : 1.0F);
+		}
+		if (t != HIT) {
+			return;
+		}
+		Entity found = morph.target() < 0 ? null : level.getEntity(morph.target());
+		if (found instanceof LivingEntity target && target.isAlive()
+			&& player.getEyePosition().distanceTo(target.getBoundingBox().getCenter()) <= REACH + REACH_SLACK + 1.0 + target.getBbWidth() * 0.5) {
+			land(player, level, morph, target);
+		} else {
+			// the air: a crack of the whip, nothing more
+			sound(level, player, SoundEvents.PLAYER_ATTACK_NODAMAGE, 0.8F, 0.7F);
+		}
+	}
+
+	/** It lands: each weapon its own way. */
+	private static void land(ServerPlayer player, ServerLevel level, Morph morph, LivingEntity target) {
+		int weapon = morph.weapon();
+		float damage = DAMAGE[weapon];
+		Vec3 away = away(player, target);
+		Vec3 at = target.getBoundingBox().getCenter();
+		DamageSource source = level.damageSources().playerAttack(player);
+		int part = Dismember.aimedPart(player, target);
+		switch (weapon) {
+			case MACE -> {
+				blow(target, level, source, damage);
+				target.hurtArmor(source, damage * ARMOR_WEAR);
+				breakBone(player, target, part);
+				push(target, away.scale(MACE_KNOCK).add(0.0, target.onGround() ? MACE_LIFT : -0.6, 0.0));
+				level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+				level.sendParticles(WebSymbiote.dust(1.6F), at.x, at.y, at.z, 16, 0.3, 0.3, 0.3, 0.1);
+				sound(level, target, SoundEvents.MACE_SMASH_GROUND_HEAVY, 1.0F, 0.9F);
+				sound(level, target, SoundEvents.ANVIL_LAND, 0.4F, 0.7F);
+				com.jaymospowers.core.Shakes.send(player, 0.9F, at);
+			}
+			case SCYTHE -> {
+				Vec3 right = new Vec3(-away.z, 0.0, away.x).scale(morph.side());
+				Dismember.cut(player, target, part, SCYTHE_SEVER, () -> blow(target, level, source, damage));
+				push(target, right.scale(-SCYTHE_KNOCK).add(away.scale(0.3)).add(0.0, 0.25, 0.0));
+				// the sweep carries on through what's beside it
+				for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(SCYTHE_SWEEP),
+					e -> e != player && e != target && e.isAlive() && !e.isSpectator() && !(e instanceof Player p && p.isCreative())
+						&& e.position().subtract(player.position()).horizontal().dot(player.getLookAngle().horizontal()) > 0.0)) {
+					Dismember.cut(player, other, Dismember.aimedPart(player, other), SCYTHE_SEVER * 0.5F,
+						() -> blow(other, level, source, damage * SCYTHE_SWEEP_SHARE));
+					push(other, right.scale(-SCYTHE_KNOCK * 0.6).add(0.0, 0.2, 0.0));
+				}
+				level.sendParticles(ParticleTypes.SWEEP_ATTACK, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+				level.sendParticles(WebSymbiote.dust(1.2F), at.x, at.y, at.z, 12, 0.5, 0.2, 0.5, 0.05);
+				sound(level, target, SoundEvents.PLAYER_ATTACK_SWEEP, 1.1F, 0.7F);
+				sound(level, target, SoundEvents.TRIDENT_HIT, 0.6F, 1.4F);
+			}
+			default -> {
+				blow(target, level, source, damage * (1.0F - SPEAR_PIERCE));
+				if (target.isAlive()) {
+					// straight through: this much ignores armour
+					target.setInvulnerableTime(0);
+					target.hurtServer(level, pierce(level, player), damage * SPEAR_PIERCE);
+				}
+				target.hurtArmor(source, damage * ARMOR_WEAR);
+				push(target, away.scale(SPEAR_KNOCK).add(0.0, 0.2, 0.0));
+				level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 14, 0.2, 0.2, 0.2, 0.4);
+				level.sendParticles(WebSymbiote.dust(1.2F), at.x, at.y, at.z, 10, 0.15, 0.15, 0.15, 0.1);
+				sound(level, target, SoundEvents.TRIDENT_HIT, 1.1F, 0.8F);
+				com.jaymospowers.core.Shakes.send(player, 0.5F, at);
+			}
+		}
+		sound(level, target, SoundEvents.SLIME_ATTACK, 0.9F, 0.5F);
+	}
+
+	/** Armour-piercing damage from you (the spear's thrust through). */
+	private static DamageSource pierce(ServerLevel level, ServerPlayer player) {
+		return new DamageSource(level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.DAMAGE_TYPE)
+			.getOrThrow(net.minecraft.world.damagesource.DamageTypes.MAGIC), player, player);
+	}
+
+	private static void blow(LivingEntity target, ServerLevel level, DamageSource source, float damage) {
+		target.hurtServer(level, source, damage);
+	}
+
+	/** The mace: the bone it lands on breaks (a skeleton's shatters), at {@link #MACE_BREAK}. */
+	private static void breakBone(ServerPlayer player, LivingEntity target, int part) {
+		if (!target.isAlive() || !Dismember.canLoseParts(target) || target instanceof Player p && (p.isCreative() || p.isSpectator())) {
+			return;
+		}
+		boolean bones = target.getType().builtInRegistryHolder().is(EntityTypeTags.SKELETONS);
+		float chance = target instanceof Player ? Fractures.PLAYER_CHANCE * 2.0F : bones ? Math.min(1.0F, MACE_BREAK * 2.0F) : MACE_BREAK;
+		if (target.getRandom().nextFloat() >= chance) {
+			return;
+		}
+		if (bones) {
+			Dismember.shatter(target, part, player);
+		} else {
+			Fractures.breakBone(target, part, player);
+		}
+	}
+
+	private static Vec3 away(Entity from, Entity to) {
+		Vec3 d = to.position().subtract(from.position());
+		Vec3 flat = new Vec3(d.x, 0.0, d.z);
+		if (flat.lengthSqr() < 1.0E-4) {
+			flat = from.getLookAngle().horizontal();
+		}
+		return flat.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : flat.normalize();
+	}
+
+	private static void push(Entity target, Vec3 velocity) {
+		target.setDeltaMovement(target.getDeltaMovement().scale(0.3).add(velocity));
+		target.needsSync = true;
+		target.syncVelocity = true;
+		if (target instanceof ServerPlayer other) {
+			ServerPlayNetworking.send(other, new WebNet.Nudge(other.getDeltaMovement()));
+		}
+	}
+
+	private static void sound(ServerLevel level, Entity at, SoundEvent sound, float volume, float pitch) {
+		level.playSound(null, at.getX(), at.getY(), at.getZ(), sound, SoundSource.PLAYERS, volume, pitch * Mth.nextFloat(level.getRandom(), 0.92F, 1.08F));
+	}
+}
