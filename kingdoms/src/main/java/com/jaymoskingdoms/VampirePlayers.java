@@ -38,7 +38,7 @@ import net.minecraft.world.entity.player.Player;
  * they show themselves too, and the guards hunt them till dawn.</li>
  * <li>The cure, for the bitten or the turned (or a werewolf, {@link WerewolfPlayers}): a rare quest from a priest
  * ({@link Cures}).</li>
- * <li>(0.7.58) A golden apple eaten between the bite and the nightfall only half saves them: they wake a
+ * <li>(0.7.61) A golden apple eaten between the bite and the nightfall only half saves them: they wake a
  * {@link Vampires.Kind#DHAMPIR dhampir}, with none of a vampire's weaknesses (no sun, no starving, fire burns them no
  * worse) and none of its night strength, but its gifts ({@link NightGifts}). Whoever turns wakes in a crypt dug beneath
  * where they stood ({@link Lairs#crypt}), their bed a coffin.</li>
@@ -58,7 +58,7 @@ public final class VampirePlayers {
 
 	private static final Map<UUID, Long> LAST_DRINK = new HashMap<>();
 
-	/** (0.7.58) On the bitten who ate a golden apple before they turned: they'll wake a dhampir. */
+	/** (0.7.61) On the bitten who ate a golden apple before they turned: they'll wake a dhampir. */
 	static final net.fabricmc.fabric.api.attachment.v1.AttachmentType<Boolean> HALF_TURN = net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry.create(
 		JaymosKingdoms.id("vampire_half_turn"), builder -> builder.persistent(com.mojang.serialization.Codec.BOOL));
 
@@ -162,7 +162,7 @@ public final class VampirePlayers {
 		}
 	}
 
-	/** (0.7.58) A golden apple, eaten by the bitten before they turn: they'll only half turn. */
+	/** (0.7.61) A golden apple, eaten by the bitten before they turn: they'll only half turn. */
 	public static void ateGold(ServerPlayer player) {
 		if (player.hasAttached(Vampires.BITTEN) && !player.hasAttached(HALF_TURN)) {
 			player.setAttached(HALF_TURN, true);

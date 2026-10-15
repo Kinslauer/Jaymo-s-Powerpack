@@ -39,7 +39,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * (0.7.58) The client half of {@link NightGifts}: the two keys ({@code O}: Blood Dash or Leap; {@code P}: Groundpound or
+ * (0.7.61) The client half of {@link NightGifts}: the two keys ({@code O}: Blood Dash or Leap; {@code P}: Groundpound or
  * Howl), the kin-sense compass at the top of the screen, people a groundpound or howl showed glowing through walls,
  * and a vampire's bat wings, spread when it glides without an elytra.
  */

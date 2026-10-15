@@ -1335,3 +1335,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.11.63 / Kingdoms 0.7.59:** `/kingdom skills` commands for ops (`kingdoms/MODLOG.md`).
 - **0.11.64 / Kingdoms 0.7.60:** Sorcerer fire bursts spread to nearby creatures; ice bursts freeze, hurt and chill
   (`kingdoms/MODLOG.md`).
+- **0.11.68 / Kingdoms 0.7.61:** night gifts for vampires and werewolves: dash, groundpound, leap, howl, kin-sense,
+  bat wings, lifeleech, frenzy, wall run, dhampirs, wolfbloods, crypts and dens (`kingdoms/MODLOG.md`).

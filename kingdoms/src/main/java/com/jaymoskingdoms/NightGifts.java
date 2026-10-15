@@ -65,7 +65,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.58) The night's gifts: the moves and senses vampire and werewolf players get on top of {@link VampirePlayers} and
+ * (0.7.61) The night's gifts: the moves and senses vampire and werewolf players get on top of {@link VampirePlayers} and
  * {@link WerewolfPlayers}. Ideas from the Vampires Strike Back modpack's own origins (All Rights Reserved: nothing of
  * theirs is used, only the ideas, remade here).
  *

@@ -177,7 +177,7 @@ public final class WerewolfPlayers {
 
 	private static boolean ritual(ServerLevel level, ServerPlayer player) {
 		long clock = level.getOverworldClockTime();
-		// (0.7.58) under any other moon the ritual only half takes: a wolfblood ({@link NightGifts}), who can come back
+		// (0.7.61) under any other moon the ritual only half takes: a wolfblood ({@link NightGifts}), who can come back
 		// under a full moon to finish it
 		boolean full = Lycans.fullMoon(level, clock);
 		Lycans.Curse had = player.getAttached(Lycans.CURSE);
@@ -405,7 +405,7 @@ public final class WerewolfPlayers {
 		}
 		player.removeEffect(MobEffects.INVISIBILITY);
 		if (sick && player.level() instanceof ServerLevel level) {
-			// (0.7.58) after the first moon they come to in a den of their own, dug beneath where the night left them
+			// (0.7.61) after the first moon they come to in a den of their own, dug beneath where the night left them
 			Lycans.Curse curse = player.getAttached(Lycans.CURSE);
 			if (f.forced && curse != null && curse.moons() == 1 && Lairs.den(level, player)) {
 				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.werewolf.den").withStyle(ChatFormatting.DARK_RED));

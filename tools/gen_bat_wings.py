@@ -1,4 +1,4 @@
-"""Draws Kingdoms' vampire bat wings (0.7.58): an elytra-layout texture (64x32), leathery membrane with finger bones
+"""Draws Kingdoms' vampire bat wings (0.7.61): an elytra-layout texture (64x32), leathery membrane with finger bones
 and a scalloped trailing edge. Run from the repo root: python3 tools/gen_bat_wings.py"""
 import math
 import random

@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.7.58) A golden apple eaten by the bitten before they turn: they'll wake a dhampir ({@link VampirePlayers#ateGold}). */
+/** (0.7.61) A golden apple eaten by the bitten before they turn: they'll wake a dhampir ({@link VampirePlayers#ateGold}). */
 @Mixin(ItemStack.class)
 abstract class GoldenAppleMixin {
 	@Inject(method = "finishUsingItem", at = @At("HEAD"))

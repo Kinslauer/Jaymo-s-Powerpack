@@ -3101,3 +3101,18 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
   4 blocks (players spared), each lit for 4 s and burnt for 1, like lightning's chain. Ice's burst freezes far longer
   (300 ticks, long enough for the cold's own damage), slows for 4 s, does 2 damage, and chills up to 4 creatures within
   3 blocks (frozen a while, slowed 3 s). (`Spellcraft.strike`)
+- **0.7.61, the night's gifts** (ideas from the Vampires Strike Back modpack's origins, remade; nothing of theirs used):
+  vampire and werewolf players get two keys and a sense (`NightGifts`). Vampires: `O` Blood Dash (look up for a great
+  leap, one more dash in the air, no fall damage till they land); `P` in the air Groundpound (down like a stone, throws
+  back and hurts everyone within 5 blocks, no fall damage, every person within 32 shows through walls for 10 s); bat
+  wings (Space in the air glides with no elytra; 2 minutes of gliding, mended by experience; spread on the back while
+  gliding); Lifeleech (kills heal and lend Absorption that builds with quick kills); quick below y 60 out of the sky;
+  the sun drains their hunger. Werewolves: `O` Leap (look up to jump straight up; stronger as the beast); `P` Howl
+  (shows people through walls; as the beast it throws everyone back and sends villagers running; other werewolves hear
+  where it came from); Frenzy after a kill; the beast climbs any wall it runs into and falls far better; quick at
+  night in forests. Both: a kin-sense compass top left (arrows and distances to the 3 nearest of their kind).
+  Dhampirs: a golden apple eaten between the bite and nightfall half-saves you (no sun, starving or double fire, no
+  night strength, all the gifts). Wolfbloods: the bone ritual on any night but a full moon half-curses you (never
+  change, human-form gifts; finish the rite under a full moon). Newly turned vampires wake in a crypt dug beneath them
+  (coffin bed = respawn, candles, ladder up); werewolves wake from their first moon in a den. Natural ground only.
+  `/kingdom nightgift <vampire|dhampir|werewolf|wolfblood|crypt|den|none>` for ops.
