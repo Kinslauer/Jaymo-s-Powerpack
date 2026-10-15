@@ -1335,7 +1335,15 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.11.63 / Kingdoms 0.7.59:** `/kingdom skills` commands for ops (`kingdoms/MODLOG.md`).
 - **0.11.64 / Kingdoms 0.7.60:** Sorcerer fire bursts spread to nearby creatures; ice bursts freeze, hurt and chill
   (`kingdoms/MODLOG.md`).
-- **0.11.71:** Andy: "remove the metal knife recipes, all weapons should be forged", the Tinkers way. Stone and metal
+- **0.11.71, tournament arenas:** the ring was any spot 14 blocks from the seat at whatever height the ground had
+  there (a hillside, a cliff's edge, a roof, the river), so fighters were set down inside the hill or over a drop and
+  fell out of it. Now the land 18-44 blocks round the seat is searched (16 ways at 5 distances) for the flattest plain
+  ground (no water, lava, houses or roads; at most 4 blocks from lowest to highest), and a floor is laid there: smooth
+  stone edged in stone bricks at the ring's line, dips filled, grass, trees and snow cleared to 5 above (trees to 10).
+  Fighters stand on it. The old spot is used only if nowhere will do (`ZFighterArena`).
+- **0.11.73 / Kingdoms 0.7.65:** the whole realm on alert in a war: bells, sandbags round the seat, civilians hiding
+  and guards at the sandbags when a war party comes (`kingdoms/MODLOG.md`).
+- **0.11.74:** Andy: "remove the metal knife recipes, all weapons should be forged", the Tinkers way. Stone and metal
   weapons (Armory's, Balkon's WeaponMod's knives/spears/halberds/battleaxes/warhammers/katanas/flails/boomerangs,
   vanilla spears, kunai, throwing stars, harpoon, iron quarterstaff) lose their crafting recipes. Each has its own head
   or blade (Claymore Blade, Knife Blade...): shape it from stone at the Part Builder (arrows page to the weapon heads),
