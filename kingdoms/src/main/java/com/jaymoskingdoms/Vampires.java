@@ -137,7 +137,9 @@ public final class Vampires {
 	public enum Kind {
 		ELDER, FEEDER, ABSTAINER, HUNTER,
 		/** (stage 3) a player ({@link VampirePlayers}). */
-		PLAYER;
+		PLAYER,
+		/** (0.7.58) a player half turned ({@link VampirePlayers#ateGold}): none of the weaknesses. */
+		DHAMPIR;
 
 		String id() {
 			return this.name().toLowerCase(Locale.ROOT);
@@ -250,7 +252,7 @@ public final class Vampires {
 		ServerTickEvents.END_SERVER_TICK.register(Vampires::tick);
 		ServerLivingEntityEvents.AFTER_DEATH.register(Vampires::died);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, dealt, taken, blocked) -> {
-			if (taken > 0.0F && source.is(DamageTypeTags.IS_FIRE) && isVampire(entity) && entity.isAlive()) {
+			if (taken > 0.0F && source.is(DamageTypeTags.IS_FIRE) && isVampire(entity) && kind(entity) != Kind.DHAMPIR && entity.isAlive()) {
 				entity.setHealth(Math.max(0.5F, entity.getHealth() - taken * (FIRE_FACTOR - 1.0F)));
 			}
 		});
@@ -267,7 +269,7 @@ public final class Vampires {
 				.then(Commands.literal("turn").then(Commands.argument("kind", StringArgumentType.word())
 					.suggests((c, b) -> {
 						for (Kind k : Kind.values()) {
-							if (k != Kind.ELDER && k != Kind.PLAYER) {
+							if (k != Kind.ELDER && k != Kind.PLAYER && k != Kind.DHAMPIR) {
 								b.suggest(k.id());
 							}
 						}
@@ -450,7 +452,7 @@ public final class Vampires {
 			case ELDER -> now - v.fedAt() >= ELDER_REST || now < v.fedAt();
 			case FEEDER, HUNTER -> v.fedNight() < nightNo;
 			case ABSTAINER -> nightNo - v.fedNight() >= THIRST_NIGHTS;
-			case PLAYER -> false;
+			case PLAYER, DHAMPIR -> false;
 		};
 	}
 
@@ -840,7 +842,7 @@ public final class Vampires {
 
 	private static int turnNearest(CommandSourceStack source, String id) {
 		Kind kind = Kind.parse(id);
-		if (kind == null || kind == Kind.ELDER || kind == Kind.PLAYER) {
+		if (kind == null || kind == Kind.ELDER || kind == Kind.PLAYER || kind == Kind.DHAMPIR) {
 			source.sendFailure(Component.literal("feeder, abstainer or hunter"));
 			return 0;
 		}

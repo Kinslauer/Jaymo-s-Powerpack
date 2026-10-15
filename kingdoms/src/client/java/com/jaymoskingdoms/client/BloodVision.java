@@ -95,6 +95,9 @@ public final class BloodVision {
 
 	/** Whether {@code entity} glows for this client's blood vision. */
 	public static boolean sensed(Entity entity) {
+		if (NightGiftsClient.revealed(entity) && entity.isAlive()) {
+			return true; // (0.7.58) shown by a groundpound or howl, for anyone with the gift
+		}
 		if (strength <= 0.0F || !(entity instanceof LivingEntity living) || !living.isAlive() || living instanceof ArmorStand
 			|| living instanceof AbstractGolem || living.is(EntityTypeTags.UNDEAD) || living.isSpectator()) {
 			return false;

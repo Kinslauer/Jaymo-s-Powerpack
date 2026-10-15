@@ -38,6 +38,10 @@ import net.minecraft.world.entity.player.Player;
  * they show themselves too, and the guards hunt them till dawn.</li>
  * <li>The cure, for the bitten or the turned (or a werewolf, {@link WerewolfPlayers}): a rare quest from a priest
  * ({@link Cures}).</li>
+ * <li>(0.7.58) A golden apple eaten between the bite and the nightfall only half saves them: they wake a
+ * {@link Vampires.Kind#DHAMPIR dhampir}, with none of a vampire's weaknesses (no sun, no starving, fire burns them no
+ * worse) and none of its night strength, but its gifts ({@link NightGifts}). Whoever turns wakes in a crypt dug beneath
+ * where they stood ({@link Lairs#crypt}), their bed a coffin.</li>
  * </ul>
  */
 public final class VampirePlayers {
@@ -53,6 +57,10 @@ public final class VampirePlayers {
 	static final int STARVE_NIGHTS = 2;
 
 	private static final Map<UUID, Long> LAST_DRINK = new HashMap<>();
+
+	/** (0.7.58) On the bitten who ate a golden apple before they turned: they'll wake a dhampir. */
+	static final net.fabricmc.fabric.api.attachment.v1.AttachmentType<Boolean> HALF_TURN = net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry.create(
+		JaymosKingdoms.id("vampire_half_turn"), builder -> builder.persistent(com.mojang.serialization.Codec.BOOL));
 
 	private VampirePlayers() {
 	}
@@ -80,7 +88,7 @@ public final class VampirePlayers {
 	/** Gone {@link #STARVE_NIGHTS} nights without blood (also read on the client, for blood vision). */
 	public static boolean starving(Player player) {
 		Vampires.Vampire v = player.getAttached(Vampires.VAMPIRE);
-		return v != null && Vampires.nightIndex(player.level().getOverworldClockTime()) - v.fedNight() >= STARVE_NIGHTS;
+		return v != null && v.type() != Vampires.Kind.DHAMPIR && Vampires.nightIndex(player.level().getOverworldClockTime()) - v.fedNight() >= STARVE_NIGHTS;
 	}
 
 	/** A vampire's bite on {@code player}: they'll turn at the next nightfall (unless they die first, or carry the wolf's curse). */
@@ -105,6 +113,12 @@ public final class VampirePlayers {
 			}
 			Vampires.Vampire v = player.getAttached(Vampires.VAMPIRE);
 			if (v == null || player.isCreative()) {
+				continue;
+			}
+			if (v.type() == Vampires.Kind.DHAMPIR) {
+				if (night) {
+					player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 400, 0, true, false, true));
+				}
 				continue;
 			}
 			if (night) {
@@ -134,12 +148,26 @@ public final class VampirePlayers {
 		return !level.isRainingAt(player.blockPosition()) && level.canSeeSky(BlockPos.containing(player.getEyePosition()));
 	}
 
-	/** They wake changed (vaguely told: they find out the rest). */
+	/** They wake changed (vaguely told: they find out the rest), in a crypt where there's room for one. */
 	private static void turn(ServerPlayer player, long nightNo) {
 		player.removeAttached(Vampires.BITTEN);
-		player.setAttached(Vampires.VAMPIRE, new Vampires.Vampire(Vampires.Kind.PLAYER.name().toLowerCase(java.util.Locale.ROOT), nightNo - 1, 0L));
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.vampire.turned").withStyle(ChatFormatting.DARK_RED));
+		boolean half = Boolean.TRUE.equals(player.removeAttached(HALF_TURN));
+		Vampires.Kind kind = half ? Vampires.Kind.DHAMPIR : Vampires.Kind.PLAYER;
+		player.setAttached(Vampires.VAMPIRE, new Vampires.Vampire(kind.name().toLowerCase(java.util.Locale.ROOT), nightNo - 1, 0L));
+		player.sendSystemMessage(Component.translatable(half ? "message.jaymoskingdoms.vampire.turned_half" : "message.jaymoskingdoms.vampire.turned")
+			.withStyle(ChatFormatting.DARK_RED));
 		player.level().playSound(null, player.blockPosition(), SoundEvents.EVOKER_PREPARE_SUMMON, SoundSource.PLAYERS, 0.6F, 0.5F);
+		if (!player.isPassenger() && Lairs.crypt(player.level(), player)) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.vampire.crypt").withStyle(ChatFormatting.DARK_RED));
+		}
+	}
+
+	/** (0.7.58) A golden apple, eaten by the bitten before they turn: they'll only half turn. */
+	public static void ateGold(ServerPlayer player) {
+		if (player.hasAttached(Vampires.BITTEN) && !player.hasAttached(HALF_TURN)) {
+			player.setAttached(HALF_TURN, true);
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.vampire.gold").withStyle(ChatFormatting.GOLD));
+		}
 	}
 
 	/** A bite from a player who's one of them. */

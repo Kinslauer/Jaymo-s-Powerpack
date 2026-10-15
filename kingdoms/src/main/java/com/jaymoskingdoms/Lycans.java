@@ -82,16 +82,26 @@ public final class Lycans {
 	// ---- what's kept ---------------------------------------------------------------------------------------------------
 
 	/** The curse in someone: their beast's coat, size and build, the last night they changed, and (a player) how many moons they've changed under. */
-	record Curse(int coat, float scale, int build, long night, int moons) {
+	record Curse(int coat, float scale, int build, long night, int moons, boolean half) {
 		static final Codec<Curse> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.INT.fieldOf("coat").forGetter(Curse::coat),
 			Codec.FLOAT.fieldOf("scale").forGetter(Curse::scale),
 			Codec.INT.fieldOf("build").forGetter(Curse::build),
 			Codec.LONG.fieldOf("night").forGetter(Curse::night),
-			Codec.INT.optionalFieldOf("moons", 0).forGetter(Curse::moons)).apply(i, Curse::new));
+			Codec.INT.optionalFieldOf("moons", 0).forGetter(Curse::moons),
+			// (0.7.58) a wolfblood: half-cursed by a ritual done under any moon but the full one; never changes ({@link NightGifts})
+			Codec.BOOL.optionalFieldOf("half", false).forGetter(Curse::half)).apply(i, Curse::new));
 
 		Curse changedOn(long nightNo) {
-			return new Curse(this.coat, this.scale, this.build, nightNo, this.night == nightNo ? this.moons : this.moons + 1);
+			return new Curse(this.coat, this.scale, this.build, nightNo, this.night == nightNo ? this.moons : this.moons + 1, this.half);
+		}
+
+		Curse halved() {
+			return new Curse(this.coat, this.scale, this.build, this.night, this.moons, true);
+		}
+
+		Curse withMoons(int moons) {
+			return new Curse(this.coat, this.scale, this.build, this.night, moons, false);
 		}
 	}
 
@@ -225,7 +235,7 @@ public final class Lycans {
 		float scale = SCALE_MIN + random.nextFloat() * (SCALE_MAX - SCALE_MIN);
 		float b = random.nextFloat();
 		int build = b < LEAN_CHANCE ? 0 : b < LEAN_CHANCE + HEAVY_CHANCE ? 2 : 1;
-		return new Curse(coat, scale, build, -1L, 0);
+		return new Curse(coat, scale, build, -1L, 0, false);
 	}
 
 	static void cure(PathfinderMob mob) {

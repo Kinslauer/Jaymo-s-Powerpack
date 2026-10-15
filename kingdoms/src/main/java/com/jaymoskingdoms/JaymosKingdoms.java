@@ -230,6 +230,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.0: players as vampires (by a bite) and werewolves (by ritual)
 		VampirePlayers.register();
 		WerewolfPlayers.register();
+		// 0.7.58: the night's gifts for vampire and werewolf players (dash, groundpound, leap, howl, kin-sense, wings...;
+		// their attachments)
+		LOGGER.debug("night gift attachments: {} {}", NightGifts.GIFT, VampirePlayers.HALF_TURN);
+		NightGifts.register();
 		// 0.7.7: sailing, stage 1: ships built from blocks (the helm, sails, the ship and its attachment)
 		com.jaymoskingdoms.sailing.Sailing.register();
 		// 0.7.42: sailing, stage 3: ships with crews of their own (pirates, warships, merchantmen), pirate coves, harbours,
