@@ -44,7 +44,7 @@ import net.minecraft.world.phys.Vec3;
  * ({@code jaymospowers:future}, built from Los Perrito City by Uospag; see {@link LosPerrito}).
  * <ul>
  * <li>Sneak+B (Fast Forward), for any Chrono user past the starter who has killed their echo for good (in the Nether,
- * since 0.10.108; {@link #ECHO_SLAIN}): you, and every player within
+ * since 0.10.109; {@link #ECHO_SLAIN}): you, and every player within
  * {@link #COMPANION_RADIUS} blocks, leap to the future. Sneak+B there brings you (and those near you) back to where
  * you left.</li>
  * <li>There's no other way home: only a Chrono's leap back, or dying (you wake at your own spawn as usual). Anyone

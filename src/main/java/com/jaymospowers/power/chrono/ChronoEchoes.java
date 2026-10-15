@@ -134,7 +134,7 @@ public final class ChronoEchoes {
 	}
 
 	/**
-	 * (0.10.108) One more of the player's echoes, near them now: in the future the one-per-Chrono rule doesn't hold (up
+	 * (0.10.109) One more of the player's echoes, near them now: in the future the one-per-Chrono rule doesn't hold (up
 	 * to {@code Future.ECHOES} stalk you at once), and those close behind you when you leave follow you home like any
 	 * echo. Returns whether it came.
 	 */
@@ -390,7 +390,7 @@ public final class ChronoEchoes {
 		UUID owner = echo.owner();
 		ServerPlayer player = owner == null ? null : level.getServer().getPlayerList().getPlayer(owner);
 		if (player != null) {
-			// (0.10.108) your echo ended for good: the way to the future opens for you
+			// (0.10.109) your echo ended for good: the way to the future opens for you
 			com.jaymospowers.power.chrono.future.Future.echoSlain(player);
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.chrono_echo_collapsed")
 				.withStyle(ChatFormatting.AQUA, ChatFormatting.ITALIC));
