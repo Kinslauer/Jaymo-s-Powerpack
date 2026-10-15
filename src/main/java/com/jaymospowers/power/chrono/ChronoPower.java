@@ -729,7 +729,8 @@ public final class ChronoPower implements Power {
 			activeTotal[STASIS] = state.stasis.duration;
 		}
 		if (state.overclockLeft > 0) {
-			activeLeft[OVERCLOCK] = state.overclockHeld ? OVERCLOCK_TICKS : state.overclockLeft; // held: always full
+			// held: kept short of full so the client's countdown between syncs never reaches the fade in or out
+			activeLeft[OVERCLOCK] = state.overclockHeld ? OVERCLOCK_TICKS - SYNC_INTERVAL : state.overclockLeft;
 			activeTotal[OVERCLOCK] = OVERCLOCK_TICKS;
 		}
 		if (state.bloom != null) {

@@ -35,6 +35,7 @@ import net.minecraft.world.phys.Vec3;
  * Since 0.11.37 for as long as you hold forward, with no sideways drift, a hop onto the top, and the body turned onto
  * the wall, legs running, the way Gravity's wall walk stands on it ({@link #WALL_RUN}, drawn by {@code GravityWalkPose}).</li>
  * <li>Sprinting, water holds you up: you run across it (see {@code ChronoWaterRunMixin}).</li>
+ * <li>(0.11.37) Holding Shift you walk at your normal speed (no Speed V, no sneaking slowdown): fine control.</li>
  * <li>V again, facing a wall: you vibrate through it, up to {@link #PHASE_DEPTH} blocks thick, to the first space you
  * fit on the other side. Every {@link #PHASE_GAP} ticks at most.</li>
  * </ul>
@@ -59,6 +60,8 @@ public final class ChronoSpeed {
 
 	static final Identifier SPRINT_MODIFIER = JaymosPowers.id("chrono_flash_sprint");
 	static final Identifier STEP_MODIFIER = JaymosPowers.id("chrono_flash_step");
+	static final Identifier CONTROL_SPEED_MODIFIER = JaymosPowers.id("chrono_flash_control");
+	static final Identifier CONTROL_SNEAK_MODIFIER = JaymosPowers.id("chrono_flash_control_sneak");
 
 	/**
 	 * The game time the client last saw its own player overclocked (the server's answer comes from {@link ChronoPower}).
@@ -122,6 +125,7 @@ public final class ChronoSpeed {
 
 	/** Each tick (server): the sprint and step modifiers follow Overclock and sprinting; the streak behind you. */
 	static void tick(ServerPlayer player, ServerLevel level, boolean overclocked) {
+		control(player, overclocked && player.isShiftKeyDown() && !player.isPassenger());
 		boolean sprinting = overclocked && player.isSprinting();
 		modifier(player.getAttribute(Attributes.MOVEMENT_SPEED), SPRINT_MODIFIER, SPRINT_BOOST, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, sprinting);
 		modifier(player.getAttribute(Attributes.STEP_HEIGHT), STEP_MODIFIER, STEP_BOOST, AttributeModifier.Operation.ADD_VALUE, overclocked);
@@ -154,6 +158,42 @@ public final class ChronoSpeed {
 		}
 	}
 
+	/**
+	 * (0.11.37) Shift while overclocked: back to plain walking speed. Whatever is speeding you up (Speed V and the rest)
+	 * is scaled away, and sneaking no longer slows you, so you move exactly as you'd walk. Updated only when it changes.
+	 */
+	private static void control(ServerPlayer player, boolean on) {
+		AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
+		AttributeInstance sneak = player.getAttribute(Attributes.SNEAKING_SPEED);
+		if (!on) {
+			if (speed != null && speed.hasModifier(CONTROL_SPEED_MODIFIER)) {
+				speed.removeModifier(CONTROL_SPEED_MODIFIER);
+			}
+			if (sneak != null && sneak.hasModifier(CONTROL_SNEAK_MODIFIER)) {
+				sneak.removeModifier(CONTROL_SNEAK_MODIFIER);
+			}
+			return;
+		}
+		if (speed != null) {
+			AttributeModifier old = speed.getModifier(CONTROL_SPEED_MODIFIER);
+			double without = speed.getValue() / (1.0 + (old == null ? 0.0 : old.amount()));
+			double amount = without > speed.getBaseValue() + 1.0E-4 ? speed.getBaseValue() / without - 1.0 : 0.0;
+			if (old == null || Math.abs(old.amount() - amount) > 1.0E-3) {
+				speed.removeModifier(CONTROL_SPEED_MODIFIER);
+				speed.addTransientModifier(new AttributeModifier(CONTROL_SPEED_MODIFIER, amount, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+			}
+		}
+		if (sneak != null) {
+			AttributeModifier old = sneak.getModifier(CONTROL_SNEAK_MODIFIER);
+			double without = sneak.getValue() - (old == null ? 0.0 : old.amount());
+			double amount = Math.max(0.0, 1.0 - without);
+			if (old == null || Math.abs(old.amount() - amount) > 1.0E-3) {
+				sneak.removeModifier(CONTROL_SNEAK_MODIFIER);
+				sneak.addTransientModifier(new AttributeModifier(CONTROL_SNEAK_MODIFIER, amount, AttributeModifier.Operation.ADD_VALUE));
+			}
+		}
+	}
+
 	private static void modifier(AttributeInstance attribute, Identifier id, double amount, AttributeModifier.Operation op, boolean on) {
 		if (attribute == null || attribute.hasModifier(id) == on) {
 			return;
@@ -168,6 +208,7 @@ public final class ChronoSpeed {
 
 	/** Take both modifiers off (power lost, Overclock cut short). */
 	static void clear(ServerPlayer player) {
+		control(player, false);
 		if (player.getAttached(WALL_RUN) != null) {
 			player.removeAttached(WALL_RUN);
 		}
