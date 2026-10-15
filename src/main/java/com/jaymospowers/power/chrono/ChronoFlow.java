@@ -93,6 +93,11 @@ public final class ChronoFlow {
 	public static final int ROLL_CHARGES = 3;
 	/** The time stop follows the Space counter: Space again while it plays or this many ticks after. */
 	public static final int FOLLOW_TICKS = 12;
+	/** The time stop's Stasis Field lasts this many times as long as G's (3-6 s, by abilities unlocked). */
+	static final int TIME_STOP_SCALE = 2;
+	/** The time stop's burst: this many enchanting glyphs flung out from you, up to this far (blocks). */
+	static final int GLYPH_BURST = 320;
+	static final double GLYPH_BURST_RADIUS = 7.0;
 	/** The Space counter's spinning kick: how far round you it reaches, and how hard it throws. */
 	static final double SPIN_RADIUS = 5.0, SPIN_PUSH = 1.2, SPIN_LIFT = 0.5;
 	/** Screen shake: the right-click counter, the Space counter (cast and landing), and the barrage (first punch, then more each). */
@@ -697,10 +702,29 @@ public final class ChronoFlow {
 	/** The time stop lands: arms out, time stops round you. */
 	private static void stopTime(ServerPlayer player) {
 		ServerLevel level = player.level();
-		ChronoPower.flowTimeStop(player);
+		ChronoPower.flowTimeStop(player, TIME_STOP_SCALE);
 		ChronoFx.particles(level, player, GOLD_FLASH, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+		glyphBurst(level, player.position().add(0.0, 1.0, 0.0));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 1.2F, 0.5F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 1.5F, 0.6F);
 		com.jaymospowers.core.Shakes.send(player, SPIN_LAND_SHAKE);
+	}
+
+	/**
+	 * A sphere of enchanting glyphs blown out from {@code center}. An enchant particle flies from (position + motion) to
+	 * its position, so each is sent at its end point with the motion pointing back to the centre.
+	 */
+	private static void glyphBurst(ServerLevel level, Vec3 center) {
+		net.minecraft.util.RandomSource random = level.getRandom();
+		for (int i = 0; i < GLYPH_BURST; i++) {
+			// a random direction, flattened a little so more of the burst runs along the ground
+			Vec3 dir = new Vec3(random.nextGaussian(), random.nextGaussian() * 0.6, random.nextGaussian());
+			if (dir.lengthSqr() < 1.0E-4) {
+				continue;
+			}
+			Vec3 to = dir.normalize().scale(GLYPH_BURST_RADIUS * (0.35 + random.nextDouble() * 0.65));
+			level.sendParticles(ParticleTypes.ENCHANT, center.x + to.x, center.y + to.y, center.z + to.z, 0, -to.x, -to.y, -to.z, 1.0);
+		}
 	}
 
 	/** The spinning kick lands: everything hostile round you is struck and thrown away. */
