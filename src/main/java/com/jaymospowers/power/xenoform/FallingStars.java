@@ -8,10 +8,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -124,14 +122,9 @@ public final class FallingStars {
 		rock.setAttached(BlockCluster.SCALE, 1.4F);
 		STARS.add(new Star(level.dimension(), rock.getId(), from, to, level.getGameTime()));
 		LAST.put(level.dimension(), level.getGameTime());
-		// a long whistle, and a word to everyone near enough to look up
+		// a long whistle, and no word: whoever looks up has to spot it and find where it lands
 		level.playSound(null, to.x, to.y, to.z, SoundEvents.FIRECHARGE_USE, SoundSource.AMBIENT, 12.0F, 0.5F);
 		level.playSound(null, to.x, to.y, to.z, SoundEvents.ELYTRA_FLYING, SoundSource.AMBIENT, 12.0F, 0.6F);
-		for (ServerPlayer player : level.players()) {
-			if (player.distanceToSqr(to) < 160.0 * 160.0) {
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.star_falling").withStyle(ChatFormatting.AQUA, ChatFormatting.ITALIC));
-			}
-		}
 		return true;
 	}
 
