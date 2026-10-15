@@ -32,6 +32,8 @@ abstract class McaScreensMixin {
 
 	/** (0.5.29) The main page's Quests button. */
 	private static final String QUESTS = "gui.button.quests";
+	/** (0.7.55) A tailor's Change Clothes button ({@code Tailors}). */
+	private static final String TAILOR = "gui.button.tailor";
 	/** How many rows of buttons MCA's own main page has (talk ... family tree): Quests goes under them. */
 	private static final int MAIN_ROWS = 6;
 
@@ -69,7 +71,10 @@ abstract class McaScreensMixin {
 			return;
 		}
 		int row = MAIN_ROWS;
+		// (0.7.55) and Change Clothes under it, shown only on a tailor (McaTailorButtonMixin)
 		String json = "[{\"identifier\":\"" + QUESTS + "\",\"x\":-90,\"y\":10,\"row\":" + row
+			+ ",\"width\":80,\"height\":20,\"notifyServer\":true,\"targetServer\":false,\"constraints\":\"adult\",\"hideOnFail\":true},"
+			+ "{\"identifier\":\"" + TAILOR + "\",\"x\":-90,\"y\":10,\"row\":" + (row + 1)
 			+ ",\"width\":80,\"height\":20,\"notifyServer\":true,\"targetServer\":false,\"constraints\":\"adult\",\"hideOnFail\":true}]";
 		List<MCAButton> all = new ArrayList<>(Arrays.asList(page));
 		all.addAll(Arrays.asList(Resources.GSON.fromJson(json, MCAButton[].class)));

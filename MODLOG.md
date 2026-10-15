@@ -1305,7 +1305,17 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   food tooltips show a meal's worth.
 - **0.11.46 / Kingdoms 0.7.54:** village fires get stone hearths and chimneys when villages generate, and golems only
   burn corpses at open, safe fires, so villages stop burning down (`kingdoms/MODLOG.md`).
-- **0.11.47, enchanting overhaul (Enchanting System Overhaul by CmdrJane, MIT, ported to 26.3 as our own):**
+- **0.11.48, no portal corruption messages:** Nether Portal Spread still spreads the nether round lit portals, but its
+  chat lines (the "corrupted energy" warning, the coal-block fade and portal-broken lines) are off: `core/PortalSpreadQuiet`
+  sets its three `sendMessageOn...` options false whenever a server starts, whatever its config file says.
+- **0.11.49 / Kingdoms 0.7.55:** tailors (shepherds) change your clothes for a fee that varies by tailor and
+  friendship, in MCA's editor on its clothing page only (`kingdoms/MODLOG.md`).
+- **0.11.50, Bobby:** Bobby 5.2.16 (LGPL-3.0, client-only; CurseForge 409301 / 9077335, Modrinth J7YnfCss) keeps the
+  chunks you've seen and draws them past the server's view distance, so explored land stays visible further out. It
+  doesn't help with land nobody has visited (Chunky pre-gen does that). Works with Sodium and Iris; in cached areas the
+  fast-flight slowdown (`TerrainAhead`) doesn't kick in, since those chunks are already there. C2ME was looked at and
+  left out: its 26.3 build is an early alpha that rewrites worldgen.
+- **0.11.51, enchanting overhaul (Enchanting System Overhaul by CmdrJane, MIT, ported to 26.3 as our own):**
   `enchanting/`. The enchanting table opens our table (`EnchantingTableMixin`): no XP and no random rolls. Right-click
   an enchanted book to learn what's in it (kept through death; the book burns up once it taught you everything). At
   the table, pick any known enchantment that fits the item (or a plain book, to pass it on) and pay its items in the 4

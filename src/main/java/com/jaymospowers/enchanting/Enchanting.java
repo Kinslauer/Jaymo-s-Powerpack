@@ -38,7 +38,7 @@ import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Level;
 
 /**
- * (0.11.47) Andy: Enchanting System Overhaul (CmdrJane, MIT; https://github.com/CmdrJane/enchanting-system-overhaul),
+ * (0.11.51) Andy: Enchanting System Overhaul (CmdrJane, MIT; https://github.com/CmdrJane/enchanting-system-overhaul),
  * ported to 26.3 as our own. The enchanting table no longer rolls random enchantments for XP:
  * <ul>
  * <li>Reading an enchanted book (right-click) teaches you what's in it; the book keeps what you knew and burns up when
