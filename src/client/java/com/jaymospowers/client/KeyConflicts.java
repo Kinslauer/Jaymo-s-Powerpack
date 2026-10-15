@@ -13,7 +13,8 @@ import net.minecraft.client.Minecraft;
  * The power keys (R, G, V, B, C, Z, X, H) belong to the powers. Once per install, anything else in the pack still on
  * one of them (at its default) is moved to a free key, or unbound. After that, players' own rebinds are never touched.
  * JEI's hover keys are the exception: R over an item shows its recipe and A bookmarks it, set once per install whatever
- * they were on. They only act over an item in an open screen, so they never clash with R the power key.
+ * they were on. They only act over an item in an open screen, so they never clash with R the power key. YDM's Weapon
+ * Master's settings key (Y, the Combat Arts key) is unbound once per install for everyone.
  */
 final class KeyConflicts {
 	/**
@@ -48,11 +49,19 @@ final class KeyConflicts {
 		"key.jei.showRecipe", "key.keyboard.r",
 		"key.jei.bookmark", "key.keyboard.a");
 
+	/** Bump to unbind YDM's Weapon Master again. v1 (0.11.22): its Open Settings key sat on Y. */
+	private static final String WEAPON_MASTER_MARKER = "jaymospowers-weaponmaster-keys-v1";
+
+	/** YDM's Weapon Master key mappings, unbound once per install whatever they were on. */
+	private static final Map<String, String> WEAPON_MASTER_KEYS = Map.of(
+		"key.weaponmaster_ydm.opengui", "key.keyboard.unknown");
+
 	private KeyConflicts() {
 	}
 
 	static void resolveOnce(Minecraft minecraft) {
-		setJeiKeysOnce(minecraft);
+		setKeysOnce(minecraft, "jei", JEI_MARKER, JEI_KEYS, "put JEI's Show Recipe on R and Bookmark on A");
+		setKeysOnce(minecraft, "weaponmaster_ydm", WEAPON_MASTER_MARKER, WEAPON_MASTER_KEYS, "unbound YDM's Weapon Master keys");
 		Path marker = FabricLoader.getInstance().getConfigDir().resolve(MARKER);
 		if (Files.exists(marker)) {
 			return;
@@ -76,14 +85,15 @@ final class KeyConflicts {
 		}
 	}
 
-	private static void setJeiKeysOnce(Minecraft minecraft) {
-		Path marker = FabricLoader.getInstance().getConfigDir().resolve(JEI_MARKER);
-		if (!FabricLoader.getInstance().isModLoaded("jei") || Files.exists(marker)) {
+	/** Sets each of {@code keys} once per install (marker file), whatever it was on, if {@code modId} is loaded. */
+	private static void setKeysOnce(Minecraft minecraft, String modId, String markerName, Map<String, String> keys, String what) {
+		Path marker = FabricLoader.getInstance().getConfigDir().resolve(markerName);
+		if (!FabricLoader.getInstance().isModLoaded(modId) || Files.exists(marker)) {
 			return;
 		}
 		int set = 0;
 		for (KeyMapping mapping : minecraft.options.keyMappings) {
-			String key = JEI_KEYS.get(mapping.getName());
+			String key = keys.get(mapping.getName());
 			if (key != null && !mapping.saveString().equals(key)) {
 				mapping.setKey(InputConstants.getKey(key));
 				set++;
@@ -94,7 +104,7 @@ final class KeyConflicts {
 			minecraft.options.save();
 		}
 		try {
-			Files.writeString(marker, "Jaymo's Powers put JEI's Show Recipe on R and Bookmark on A (" + set + " changed). Delete this file to do it again.\n");
+			Files.writeString(marker, "Jaymo's Powers " + what + " (" + set + " changed). Delete this file to do it again.\n");
 		} catch (IOException e) {
 			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't write {}", marker, e);
 		}
