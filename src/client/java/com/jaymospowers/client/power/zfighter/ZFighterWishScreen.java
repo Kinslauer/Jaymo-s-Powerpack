@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * The Eternal Dragon asks for your wish: six wishes, each with what it grants. Escape doesn't close it; the dragon
- * waits until you wish (or until it tires of waiting, and the orbs scatter all the same). (0.10.x) Restyled like the H
+ * waits until you wish (or until it tires of waiting, and the orbs scatter all the same). (0.11.0) Restyled like the H
  * screen: a striped row per wish (its name, what it grants in short, a Wish button) and the box at the bottom shows the
  * hovered wish in full, where the tooltips were.
  */

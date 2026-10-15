@@ -10,7 +10,7 @@ import net.minecraft.util.FormattedCharSequence;
 /**
  * (0.5.39) Answering someone who came over to ask you something ({@code Approaches}): what they said, and a button per
  * answer (greyed out when you can't: no emeralds for the fine, no food to give). The server does the rest; their reply
- * floats over their head. (0.7.41) Drawn like the H screen.
+ * floats over their head. (0.7.44) Drawn like the H screen.
  */
 final class TalkScreen extends Screen {
 	static final int PANEL_W = 280, PAD = 10, BUTTON_H = 20, GAP = 4;

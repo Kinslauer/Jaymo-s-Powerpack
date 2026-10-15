@@ -17,7 +17,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.5.29) A giver's quests: each one's story, what's left to do, what it pays (hover an item for its tooltip: a relic's
  * passive, a book's enchantment), and the buttons to take it, turn it in or give it up. The server decides everything;
- * a choice is sent back and the screen comes again with the result. (0.7.41) Restyled like the H screen: a row per quest
+ * a choice is sent back and the screen comes again with the result. (0.7.44) Restyled like the H screen: a row per quest
  * (press one to show it), and under them the shown quest in full, its rewards, and its buttons along the bottom.
  */
 final class QuestScreen extends Screen {

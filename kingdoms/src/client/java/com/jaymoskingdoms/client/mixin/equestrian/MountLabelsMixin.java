@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.7.41) A mount's inventory screen labels its animal in gold and the player's inventory dim, readable on the dark panel. */
+/** (0.7.44) A mount's inventory screen labels its animal in gold and the player's inventory dim, readable on the dark panel. */
 @Mixin(AbstractContainerScreen.class)
 abstract class MountLabelsMixin extends Screen {
 	@Shadow

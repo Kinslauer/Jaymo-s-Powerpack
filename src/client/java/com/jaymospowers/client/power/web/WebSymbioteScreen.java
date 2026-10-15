@@ -24,7 +24,7 @@ import net.minecraft.world.item.Items;
 /**
  * The symbiote's radial menu: hold X, point the mouse toward an ability, let go to use it (or click). Doesn't pause
  * the game. Six segments clockwise from the top, each with its icon and cooldown; the middle shows the pick's name and
- * how fed the symbiote is. (0.10.x) Restyled like the H screen: the H screen's dark panel colours for the disc and tiles,
+ * how fed the symbiote is. (0.11.0) Restyled like the H screen: the H screen's dark panel colours for the disc and tiles,
  * its bar, and a small panel under the ring (accent stripe, the pick's name in the accent, what's stopping it in dim)
  * where a tooltip would be.
  */

@@ -18,7 +18,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * The affinity choice, shown the first time a player is in survival without a power: which power will awaken in them
  * (it still takes its 3-5 days), or "let fate decide". Made once; Esc doesn't dodge it (H brings it back otherwise).
- * (0.10.x) Restyled like the H screen: a striped row per power (two columns where there's room), click one to pick it,
+ * (0.11.0) Restyled like the H screen: a striped row per power (two columns where there's room), click one to pick it,
  * the box at the bottom shows the hovered (or picked) power in full, and Lean / Let fate decide along the foot.
  */
 public class AffinityScreen extends Screen {

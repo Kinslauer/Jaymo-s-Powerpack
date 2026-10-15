@@ -26,7 +26,7 @@ import com.mojang.blaze3d.platform.InputConstants;
  * <li>Shadow Boxing: PUNCH (left click), BLOCK (right click) or DODGE (Space), quickly.</li>
  * <li>Precision: click each target before it shrinks away; the sooner, the more it's worth.</li>
  * </ul>
- * (0.10.x) Restyled like the H screen: the drills as striped rows (click one to start it) with the box at the bottom
+ * (0.11.0) Restyled like the H screen: the drills as striped rows (click one to start it) with the box at the bottom
  * showing the hovered one's rules; while one runs, its name and points sit in the header with a bar for how far along it
  * is, and its rules in the box under the arena.
  */

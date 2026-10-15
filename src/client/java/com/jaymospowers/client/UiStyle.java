@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.10.x) The look the H screen ({@link PowerScreen}) and the Z Fighter training screen have, for the other Powers
+ * (0.11.0) The look the H screen ({@link PowerScreen}) and the Z Fighter training screen have, for the other Powers
  * screens to share (the same one Jaymo's Kingdoms' {@code Ui} draws): a dark see-through panel with a coloured stripe
  * along its top, a header (title in the accent, a dim line under it, a rule), striped rows that light up under the
  * mouse, and a box at the bottom that shows the hovered row in full.

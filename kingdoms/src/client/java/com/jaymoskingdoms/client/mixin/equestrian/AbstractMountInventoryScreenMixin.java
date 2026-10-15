@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * (0.5.34) A tamed horse's breed and stats, in the empty space of its inventory screen; (0.5.44) its animal, for the Tack
- * button. (0.7.41) Every mount's inventory drawn like the H screen: a dark panel with a gold stripe in place of vanilla's
+ * button. (0.7.44) Every mount's inventory drawn like the H screen: a dark panel with a gold stripe in place of vanilla's
  * grey texture, sunken wells for the slots and the animal, no chest-slot or saddle/armour frame sprites.
  */
 @Mixin(AbstractMountInventoryScreen.class)
