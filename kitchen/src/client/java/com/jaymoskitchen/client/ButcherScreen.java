@@ -2,6 +2,7 @@ package com.jaymoskitchen.client;
 
 import com.jaymoskitchen.net.Payloads;
 import com.jaymoskitchen.net.Payloads.OpenButcher;
+import java.util.List;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -14,7 +15,8 @@ import net.minecraft.world.item.Items;
 
 /**
  * (0.4.32) A butcher villager sizes up the body you brought: what he charges, how good he is (up to three times what
- * you'd get yourself) if you've heard tell of him, and whether you hand it over.
+ * you'd get yourself) if you've heard tell of him, and whether you hand it over. (0.4.40) Restyled like the H screen:
+ * a dark panel with the Kitchen's stripe, a header with his skill as pips, striped rows, and what he says underneath.
  */
 public class ButcherScreen extends Screen {
 	private static final int PANEL_W = 260;
@@ -22,15 +24,8 @@ public class ButcherScreen extends Screen {
 	private static final int BUTTON_H = 20;
 	private static final int TIERS = 5;
 
-	private static final int COLOR_PANEL = 0xE0201812;
-	private static final int COLOR_BORDER = 0xFF8B5A2B;
-	private static final int COLOR_TEXT = 0xFFFFFFFF;
-	private static final int COLOR_DIM = 0xFFA0A0A0;
-	private static final int COLOR_TITLE = 0xFFFFDD55;
-	private static final int COLOR_GOOD = 0xFF55FF55;
-	private static final int COLOR_BAD = 0xFFFF5555;
-	private static final int COLOR_PIP = 0xFFC0392B;
-	private static final int COLOR_PIP_EMPTY = 0xFF3A2A20;
+	/** Height of one of the striped rows (what he'd get, the body, the price). */
+	private static final int ROW_H = 18;
 
 	private final OpenButcher offer;
 
@@ -74,42 +69,48 @@ public class ButcherScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left();
 		int y = top();
-		int cx = this.width / 2;
-		graphics.fill(x - 2, y - 2, x + PANEL_W + 2, y + PANEL_H + 2, COLOR_BORDER);
-		graphics.fill(x, y, x + PANEL_W, y + PANEL_H, COLOR_PANEL);
-		graphics.centeredText(this.font, this.title, cx, y + 8, COLOR_TITLE);
-
-		super.extractRenderState(graphics, mouseX, mouseY, a);
+		KitchenUi.panel(graphics, x, y, PANEL_W, PANEL_H, KitchenUi.ACCENT);
 
 		// how good they are: only if you've heard (gossip) or seen their work; otherwise every butcher swears they're the best
 		boolean known = offer.tier() >= 0;
 		Component tier = Component.translatable(known ? "screen.jaymoskitchen.butcher.tier." + offer.tier() : "screen.jaymoskitchen.butcher.tier.unknown");
-		graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.butcher.skill", tier), cx, y + 22, known ? COLOR_TEXT : COLOR_DIM);
-		int pipW = 14, pipGap = 3, pipsX = cx - (TIERS * pipW + (TIERS - 1) * pipGap) / 2;
+		int pipW = 12, pipGap = 3, pipsW = TIERS * pipW + (TIERS - 1) * pipGap, pipsX = x + PANEL_W - 9 - pipsW;
+		KitchenUi.header(graphics, this.font, x, y, PANEL_W, new ItemStack(Items.SMOKER), this.title,
+			Component.translatable("screen.jaymoskitchen.butcher.skill", tier), KitchenUi.ACCENT, pipsX - 6);
 		for (int i = 0; i < TIERS; i++) {
 			int px = pipsX + i * (pipW + pipGap);
-			graphics.fill(px, y + 34, px + pipW, y + 38, known && i <= offer.tier() ? COLOR_PIP : COLOR_PIP_EMPTY);
+			graphics.fill(px, y + 21, px + pipW, y + 25, known && i <= offer.tier() ? KitchenUi.ACCENT : KitchenUi.BAR_BACK);
 		}
-		if (known) {
-			graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.butcher.yield",
-				String.format(Locale.ROOT, "%.1f", offer.skill())), cx, y + 46, COLOR_GOOD);
-			graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.butcher.flavour." + offer.tier()), cx, y + 60, COLOR_DIM);
-		} else {
-			graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.butcher.unheard"), cx, y + 46, COLOR_DIM);
-			graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.butcher.boast"), cx, y + 60, COLOR_DIM);
-		}
-		graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.butcher.body", offer.what()), cx, y + 78, COLOR_TEXT);
 
-		// the price, with an emerald, in red if you can't cover it
+		int ry = y + KitchenUi.HEADER;
+		int textW = PANEL_W - 18;
+		// what he'd get out of it, the body, and the price (with an emerald, in red if you can't cover it)
+		KitchenUi.row(graphics, x + 6, ry, x + PANEL_W - 6, ry + ROW_H - 1, 0, false);
+		KitchenUi.line(graphics, this.font, known ? Component.translatable("screen.jaymoskitchen.butcher.yield",
+				String.format(Locale.ROOT, "%.1f", offer.skill())) : Component.translatable("screen.jaymoskitchen.butcher.unheard"),
+			x + 9, ry + 5, textW, known ? KitchenUi.GOOD : KitchenUi.DIM);
+		ry += ROW_H;
+		KitchenUi.row(graphics, x + 6, ry, x + PANEL_W - 6, ry + ROW_H - 1, 1, false);
+		KitchenUi.line(graphics, this.font, Component.translatable("screen.jaymoskitchen.butcher.body", offer.what()), x + 9, ry + 5,
+			textW, KitchenUi.TEXT);
+		ry += ROW_H;
 		boolean pay = canPay();
+		KitchenUi.row(graphics, x + 6, ry, x + PANEL_W - 6, ry + ROW_H - 1, 0, false);
+		graphics.item(new ItemStack(Items.EMERALD), x + 8, ry + 1);
 		Component price = Component.translatable("screen.jaymoskitchen.butcher.price", offer.price());
-		int pw = this.font.width(price);
-		int px = cx - (pw + 20) / 2;
-		graphics.item(new ItemStack(Items.EMERALD), px, y + 90);
-		graphics.text(this.font, price, px + 20, y + 94, pay ? COLOR_TEXT : COLOR_BAD);
+		KitchenUi.line(graphics, this.font, price, x + 28, ry + 5, textW - 19, pay ? KitchenUi.TEXT : KitchenUi.BAD);
 		if (!pay) {
-			graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.butcher.short"), cx, y + 108, COLOR_BAD);
+			int used = 28 + this.font.width(price) + 8;
+			KitchenUi.lineRight(graphics, this.font, Component.translatable("screen.jaymoskitchen.butcher.short"), x + PANEL_W - 9, ry + 5,
+				PANEL_W - 9 - used, KitchenUi.BAD);
 		}
+		ry += ROW_H + 3;
+
+		// what he says about himself, in full underneath
+		KitchenUi.detail(graphics, this.font, x, ry, PANEL_W, 2, null, KitchenUi.DIM, List.of(Component.translatable(
+			known ? "screen.jaymoskitchen.butcher.flavour." + offer.tier() : "screen.jaymoskitchen.butcher.boast")));
+
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
 	@Override

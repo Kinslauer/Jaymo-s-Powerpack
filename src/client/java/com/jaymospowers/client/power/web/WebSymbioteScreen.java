@@ -3,6 +3,7 @@ package com.jaymospowers.client.power.web;
 import com.jaymospowers.power.web.WebNet;
 import com.jaymospowers.power.web.WebSymbiote;
 import com.jaymospowers.power.web.WebSymbioteState;
+import com.jaymospowers.client.UiStyle;
 import com.mojang.blaze3d.platform.InputConstants;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -23,7 +24,9 @@ import net.minecraft.world.item.Items;
 /**
  * The symbiote's radial menu: hold X, point the mouse toward an ability, let go to use it (or click). Doesn't pause
  * the game. Six segments clockwise from the top, each with its icon and cooldown; the middle shows the pick's name and
- * how fed the symbiote is.
+ * how fed the symbiote is. (0.11.0) Restyled like the H screen: the H screen's dark panel colours for the disc and tiles,
+ * its bar, and a small panel under the ring (accent stripe, the pick's name in the accent, what's stopping it in dim)
+ * where a tooltip would be.
  */
 final class WebSymbioteScreen extends Screen {
 	/** Ring radius, segment tile size, and the dead zone in the middle (no pick). */
@@ -36,6 +39,9 @@ final class WebSymbioteScreen extends Screen {
 	private static final int MASK_H = 10;
 	private static final int ACCENT = 0xFF8A5AB0;
 	private static final int DIM = 0xFF505050;
+	/** The panel under the ring that names the pick and says what's stopping it. */
+	private static final int INFO_W = 190;
+	private static final int INFO_H = 30;
 	/** The abilities' icons, in menu order. */
 	private static final Item[] ICONS = {Items.TRIPWIRE_HOOK, Items.NETHERITE_CHESTPLATE, Items.SPIDER_EYE, Items.ROTTEN_FLESH,
 		Items.POINTED_DRIPSTONE, Items.INK_SAC};
@@ -127,14 +133,14 @@ final class WebSymbioteScreen extends Screen {
 		int outer = RADIUS + TILE / 2 + 6;
 		for (int y = -outer; y <= outer; y++) {
 			int half = (int)Math.sqrt(outer * outer - y * y);
-			graphics.fill(cx - half, cy + y, cx + half, cy + y + 1, 0x78000000);
+			graphics.fill(cx - half, cy + y, cx + half, cy + y + 1, 0xA0101018);
 		}
 		// a thin ring
 		for (int k = 0; k < 96; k++) {
 			double t = k * Math.PI * 2.0 / 96.0;
 			int x = cx + (int)Math.round(Math.cos(t) * (RADIUS - TILE / 2 - 6));
 			int y = cy + (int)Math.round(Math.sin(t) * (RADIUS - TILE / 2 - 6));
-			graphics.fill(x, y, x + 1, y + 1, 0x60A080C0);
+			graphics.fill(x, y, x + 1, y + 1, UiStyle.ROW);
 		}
 		// pointer: dots from the middle toward the mouse
 		if (selected >= 0 && selected < WebSymbiote.ABILITIES) {
@@ -161,8 +167,9 @@ final class WebSymbioteScreen extends Screen {
 			boolean affordable = state.satiety() >= WebSymbiote.COST[i] || player.isCreative();
 			boolean on = i == WebSymbiote.ARMOR && state.has(WebSymbioteState.ARMOR) || i == WebSymbiote.CRAWL && state.has(WebSymbioteState.CRAWL);
 			boolean picked = i == selected;
-			graphics.fill(x, y, x + TILE, y + TILE, picked ? 0xD0221430 : 0xB0000000);
-			graphics.outline(x, y, TILE, TILE, picked ? ACCENT : ready && affordable ? 0xA0A080C0 : 0x80404040);
+			graphics.fill(x, y, x + TILE, y + TILE, UiStyle.CHIP);
+			graphics.fill(x, y, x + TILE, y + TILE, picked ? UiStyle.ROW_HOVER : i % 2 == 0 ? UiStyle.ROW : UiStyle.ROW_ALT);
+			graphics.outline(x, y, TILE, TILE, picked ? ACCENT : ready && affordable ? 0x60FFFFFF : UiStyle.ROW_ALT);
 			graphics.item(new ItemStack(ICONS[i]), x + (TILE - 16) / 2, y + (TILE - 16) / 2);
 			if (!ready) {
 				int shade = (int)Math.ceil((TILE - 2) * Math.min(1.0, left / (double)WebSymbiote.COOLDOWN[i]));
@@ -185,11 +192,12 @@ final class WebSymbioteScreen extends Screen {
 		}
 
 		// the middle: the pick's name, and how fed it is
+		Component name = null;
 		if (selected >= 0) {
 			// in the big body, the Spike Burst is a roar
 			String key = selected >= NAMES.length ? "suit" : selected == WebSymbiote.SPIKES && WebSymbiote.bulked(player) ? "roar" : NAMES[selected];
-			Component name = Component.translatable("ability.jaymospowers.web_symbiote." + key);
-			graphics.centeredText(font, name, cx, cy - 10, 0xFFE8E0F0);
+			name = Component.translatable("ability.jaymospowers.web_symbiote." + key);
+			UiStyle.lineCentred(graphics, font, name, cx, cy - 10, 2 * DEAD_ZONE + 20, UiStyle.TEXT);
 		}
 		// the suit toggle: a little black mask, lit while the suit shows
 		boolean suit = state.has(WebSymbioteState.SUIT);
@@ -211,11 +219,45 @@ final class WebSymbioteScreen extends Screen {
 		float fed = Mth.clamp(state.satiety() / (float)WebSymbiote.SATIETY_MAX, 0.0F, 1.0F);
 		boolean starving = state.satiety() <= WebSymbiote.STARVING;
 		int barColor = starving && (now / 6) % 2 == 0 ? 0xFFB02030 : ACCENT;
-		graphics.fill(cx - barWidth / 2 - 1, cy + 4, cx + barWidth / 2 + 1, cy + 8, 0xFF000000);
-		graphics.fill(cx - barWidth / 2, cy + 5, cx - barWidth / 2 + Math.round(barWidth * fed), cy + 7, barColor);
-		graphics.outline(cx - barWidth / 2 - 1, cy + 4, barWidth + 2, 4, DIM);
+		UiStyle.bar(graphics, cx - barWidth / 2, cy + 5, barWidth, 2, fed, barColor);
 		// the bond, under the hunger
 		Component bond = Component.translatable("gui.jaymospowers.web_symbiote.bond", state.bond(), WebSymbiote.BOND_MAX);
-		graphics.centeredText(font, bond, cx, cy + 11, 0xFFA090C0);
+		graphics.centeredText(font, bond, cx, cy + 11, UiStyle.DIM);
+
+		// under the ring: the pick's name and what's stopping it (or what this is)
+		int ix = cx - INFO_W / 2;
+		int iy = Math.min(cy + outer + 4, height - 4 - INFO_H);
+		UiStyle.panel(graphics, ix, iy, INFO_W, INFO_H, ACCENT);
+		UiStyle.line(graphics, font, name != null ? name : title, ix + 8, iy + 6, INFO_W - 16, ACCENT);
+		UiStyle.line(graphics, font, status(player, state, cooldowns, now), ix + 8, iy + 17, INFO_W - 16, name != null ? UiStyle.DIM : UiStyle.HINT);
+	}
+
+	/** One dim line on the pick: ready, on, cooling, too hungry, or the bond it takes; with nothing picked, how to pick. */
+	private Component status(final LocalPlayer player, final WebSymbioteState state, final WebSymbioteState.Cooldowns cooldowns, final long now) {
+		if (selected < 0) {
+			return Component.translatable("gui.jaymospowers.web_symbiote.hint");
+		}
+		if (selected == WebSymbiote.SUIT_TOGGLE) {
+			if (state.has(WebSymbioteState.SUIT)) {
+				return Component.translatable("gui.jaymospowers.web_symbiote.suit_on");
+			}
+			return WebSymbiote.suitAllowed(player) ? Component.translatable("gui.jaymospowers.web_symbiote.suit_off")
+				: Component.translatable("gui.jaymospowers.web_symbiote.suit_wait", WebSymbiote.unlockedCount(player), WebSymbiote.SUIT_ABILITIES);
+		}
+		int i = selected;
+		if (!WebSymbiote.unlocked(player, i)) {
+			return Component.translatable("gui.jaymospowers.web_symbiote.unlock", WebSymbiote.UNLOCK_BOND[i]);
+		}
+		long left = cooldowns.end(i) - now;
+		boolean on = i == WebSymbiote.ARMOR && state.has(WebSymbioteState.ARMOR) || i == WebSymbiote.CRAWL && state.has(WebSymbioteState.CRAWL);
+		Component status;
+		if (left > 0) {
+			status = Component.translatable("gui.jaymospowers.web_symbiote.cooling", String.format(Locale.ROOT, "%.1f", left / 20.0));
+		} else if (state.satiety() < WebSymbiote.COST[i] && !player.isCreative()) {
+			status = Component.translatable("gui.jaymospowers.web_symbiote.hungry");
+		} else {
+			status = Component.translatable(on ? "gui.jaymospowers.web_symbiote.on" : "gui.jaymospowers.web_symbiote.ready");
+		}
+		return WebSymbiote.COST[i] > 0 ? Component.translatable("gui.jaymospowers.web_symbiote.cost", status, WebSymbiote.COST[i]) : status;
 	}
 }

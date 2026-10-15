@@ -23,7 +23,8 @@ import net.minecraft.world.item.ItemStack;
  * <li>Sprinkle: hold the mouse over the paper; the ground herb falls where the cursor is. Spread it evenly.</li>
  * <li>Roll: hold the mouse and drag it up and down at a steady pace. Too fast tears the paper.</li>
  * </ol>
- * Played here; the server is told how it went and judges it ({@link Rolling#score}).
+ * Played here; the server is told how it went and judges it ({@link Rolling#score}). (0.4.40) Restyled like the H
+ * screen: a dark panel with the Kitchen's stripe (red while the paper tears), a header naming the step.
  */
 public class RollingScreen extends Screen {
 	private enum Phase { WAITING, GRIND, SPRINKLE, ROLL, SENDING, RESULT }
@@ -35,13 +36,11 @@ public class RollingScreen extends Screen {
 	private static final int GRINDER_RADIUS = 42;
 	private static final int PAPER_MARGIN = 34;
 
-	private static final int COLOR_PANEL = 0xE0201812;
-	private static final int COLOR_BORDER = 0xFF8B5A2B;
-	private static final int COLOR_TEXT = 0xFFFFFFFF;
-	private static final int COLOR_DIM = 0xFFA0A0A0;
-	private static final int COLOR_GOOD = 0xFF55FF55;
-	private static final int COLOR_OK = 0xFFFFDD55;
-	private static final int COLOR_BAD = 0xFFFF5555;
+	private static final int COLOR_TEXT = KitchenUi.TEXT;
+	private static final int COLOR_DIM = KitchenUi.DIM;
+	private static final int COLOR_GOOD = KitchenUi.GOOD;
+	private static final int COLOR_OK = KitchenUi.OK;
+	private static final int COLOR_BAD = KitchenUi.BAD;
 	private static final int COLOR_HERB = 0xFF5E9A3A;
 	private static final int COLOR_HERB_DARK = 0xFF3E6E26;
 	private static final int COLOR_PAPER = 0xFFF2EAD8;
@@ -310,10 +309,17 @@ public class RollingScreen extends Screen {
 		trackMouse(mx, my);
 		int x = left();
 		int y = top();
-		graphics.fill(x - 2, y - 2, x + PANEL_W + 2, y + PANEL_H + 2, tearFlash > 0 ? COLOR_BAD : COLOR_BORDER);
-		graphics.fill(x, y, x + PANEL_W, y + PANEL_H, COLOR_PANEL);
-		graphics.centeredText(this.font, this.title.copy().append(" - ").append(Component.translatable("screen.jaymoskitchen.roll")),
-			this.width / 2, y + 8, COLOR_OK);
+		KitchenUi.panel(graphics, x, y, PANEL_W, PANEL_H, tearFlash > 0 ? COLOR_BAD : KitchenUi.ACCENT);
+		String sub = switch (phase) {
+			case GRIND -> "screen.jaymoskitchen.roll.step_grind";
+			case SPRINKLE -> "screen.jaymoskitchen.roll.step_sprinkle";
+			case ROLL -> "screen.jaymoskitchen.roll.step_roll";
+			case RESULT -> "screen.jaymoskitchen.roll.start";
+			default -> "screen.jaymoskitchen.waiting";
+		};
+		KitchenUi.header(graphics, this.font, x, y, PANEL_W, new ItemStack(ModItems.JOINT),
+			this.title.copy().append(" - ").append(Component.translatable("screen.jaymoskitchen.roll")), Component.translatable(sub),
+			KitchenUi.ACCENT, x + PANEL_W - 9);
 		super.extractRenderState(graphics, mx, my, a);
 
 		switch (phase) {
@@ -325,23 +331,23 @@ public class RollingScreen extends Screen {
 			case RESULT -> drawResult(graphics, x, y);
 		}
 		if (verdictTicks > 0) {
-			graphics.centeredText(this.font, Component.translatable(verdictKey), this.width / 2, y + 40, verdictColor);
+			graphics.centeredText(this.font, Component.translatable(verdictKey), this.width / 2, y + 56, verdictColor);
 		}
 	}
 
-	private void drawStepHeader(GuiGraphicsExtractor graphics, int y, String titleKey, String hintKey) {
-		graphics.centeredText(this.font, Component.translatable(titleKey), this.width / 2, y + 22, COLOR_TEXT);
-		graphics.centeredText(this.font, Component.translatable(hintKey), this.width / 2, y + 52, COLOR_DIM);
+	/** The step's hint, under the header and its time bar (the step's name is in the header). */
+	private void drawStepHeader(GuiGraphicsExtractor graphics, int y, String hintKey) {
+		KitchenUi.line(graphics, this.font, Component.translatable(hintKey), left() + 9, y + KitchenUi.HEADER + 9, PANEL_W - 18,
+			KitchenUi.HINT);
 	}
 
 	private void bar(GuiGraphicsExtractor graphics, int x0, int x1, int y, float fill, int color) {
-		graphics.fill(x0, y, x1, y + 4, 0xFF000000);
-		graphics.fill(x0, y, x0 + Math.round((x1 - x0) * Mth.clamp(fill, 0.0F, 1.0F)), y + 4, color);
+		KitchenUi.bar(graphics, x0, y, x1 - x0, 4, fill, color);
 	}
 
 	private void drawGrind(GuiGraphicsExtractor graphics, int x, int y) {
-		drawStepHeader(graphics, y, "screen.jaymoskitchen.roll.step_grind", "screen.jaymoskitchen.roll.hint_grind");
-		bar(graphics, x + 20, x + PANEL_W - 20, y + 34, 1.0F - grindTicks / (float) Rolling.GRIND_TICKS, COLOR_OK);
+		drawStepHeader(graphics, y, "screen.jaymoskitchen.roll.hint_grind");
+		bar(graphics, x + 20, x + PANEL_W - 20, y + KitchenUi.HEADER + 1, 1.0F - grindTicks / (float) Rolling.GRIND_TICKS, COLOR_OK);
 		int cx = this.width / 2;
 		int cy = grinderY();
 		// the grinder body
@@ -372,8 +378,8 @@ public class RollingScreen extends Screen {
 	}
 
 	private void drawSprinkle(GuiGraphicsExtractor graphics, int x, int y) {
-		drawStepHeader(graphics, y, "screen.jaymoskitchen.roll.step_sprinkle", "screen.jaymoskitchen.roll.hint_sprinkle");
-		bar(graphics, x + 20, x + PANEL_W - 20, y + 34, supply / Rolling.SUPPLY, COLOR_HERB);
+		drawStepHeader(graphics, y, "screen.jaymoskitchen.roll.hint_sprinkle");
+		bar(graphics, x + 20, x + PANEL_W - 20, y + KitchenUi.HEADER + 1, supply / Rolling.SUPPLY, COLOR_HERB);
 		int paperLeft = x + PAPER_MARGIN;
 		int paperRight = x + PANEL_W - PAPER_MARGIN;
 		int paperTop = y + 150;
@@ -408,8 +414,8 @@ public class RollingScreen extends Screen {
 	}
 
 	private void drawRoll(GuiGraphicsExtractor graphics, int x, int y) {
-		drawStepHeader(graphics, y, "screen.jaymoskitchen.roll.step_roll", "screen.jaymoskitchen.roll.hint_roll");
-		bar(graphics, x + 20, x + PANEL_W - 20, y + 34, 1.0F - rollTicks / (float) Rolling.ROLL_TICKS, COLOR_OK);
+		drawStepHeader(graphics, y, "screen.jaymoskitchen.roll.hint_roll");
+		bar(graphics, x + 20, x + PANEL_W - 20, y + KitchenUi.HEADER + 1, 1.0F - rollTicks / (float) Rolling.ROLL_TICKS, COLOR_OK);
 		int cx = this.width / 2;
 		float done = Mth.clamp(rollProgress / Rolling.ROLL_LENGTH, 0.0F, 1.0F);
 		// the flat paper shrinks as it wraps into the roll at the bottom
@@ -439,9 +445,9 @@ public class RollingScreen extends Screen {
 	private void drawResult(GuiGraphicsExtractor graphics, int x, int y) {
 		int cx = this.width / 2;
 		if (result.amount() > 0) {
-			ItemStack stack = new ItemStack(ModItems.JOINT, result.amount());
-			graphics.item(stack, cx - 8, y + 50);
-			graphics.itemDecorations(this.font, stack, cx - 8, y + 50, null);
+			KitchenUi.outputWell(graphics, this.font, new ItemStack(ModItems.JOINT, result.amount()), cx - 8, y + 50);
+		} else {
+			KitchenUi.well(graphics, cx - 13, y + 45, 26, 26);
 		}
 		int color = result == Prep.Result.PERFECT ? COLOR_GOOD : result == Prep.Result.GOOD ? COLOR_OK : COLOR_BAD;
 		graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.roll.result." + result.name().toLowerCase()),

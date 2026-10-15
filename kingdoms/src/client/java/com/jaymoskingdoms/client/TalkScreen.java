@@ -10,7 +10,7 @@ import net.minecraft.util.FormattedCharSequence;
 /**
  * (0.5.39) Answering someone who came over to ask you something ({@code Approaches}): what they said, and a button per
  * answer (greyed out when you can't: no emeralds for the fine, no food to give). The server does the rest; their reply
- * floats over their head.
+ * floats over their head. (0.7.44) Drawn like the H screen.
  */
 final class TalkScreen extends Screen {
 	static final int PANEL_W = 280, PAD = 10, BUTTON_H = 20, GAP = 4;
@@ -77,13 +77,9 @@ final class TalkScreen extends Screen {
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left(), y = top(), h = panelHeight();
-		graphics.fill(x, y, x + PANEL_W, y + h, QuestScreen.COLOR_PANEL);
-		graphics.fill(x, y, x + PANEL_W, y + 1, QuestScreen.COLOR_EDGE);
-		graphics.fill(x, y + h - 1, x + PANEL_W, y + h, QuestScreen.COLOR_EDGE);
-		graphics.fill(x, y, x + 1, y + h, QuestScreen.COLOR_EDGE);
-		graphics.fill(x + PANEL_W - 1, y, x + PANEL_W, y + h, QuestScreen.COLOR_EDGE);
-		graphics.fill(x, y, x + PANEL_W, y + 2, QuestScreen.COLOR_GOLD);
-		graphics.centeredText(this.font, this.title, this.width / 2, y + 8, QuestScreen.COLOR_GOLD);
+		Ui.panel(graphics, x, y, PANEL_W, h, Ui.GOLD);
+		Ui.line(graphics, this.font, this.title, x + PAD, y + 8, PANEL_W - PAD * 2, Ui.GOLD);
+		Ui.rule(graphics, x + 6, x + PANEL_W - 6, y + 19);
 		int ty = y + 24;
 		for (FormattedCharSequence line : this.font.split(this.ask.words(), textWidth())) {
 			graphics.text(this.font, line, x + PAD, ty, QuestScreen.COLOR_TEXT);

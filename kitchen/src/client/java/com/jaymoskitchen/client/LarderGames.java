@@ -18,7 +18,7 @@ import net.minecraft.util.Mth;
  */
 abstract class LarderGames {
 	static final int COLOR_TEXT = 0xFFFFFFFF;
-	static final int COLOR_DIM = 0xFFA0A0A0;
+	static final int COLOR_DIM = KitchenUi.DIM;
 	static final int COLOR_GOOD = 0xFF55FF55;
 	static final int COLOR_WARN = 0xFFFFDD55;
 	static final int COLOR_BAD = 0xFFFF5555;

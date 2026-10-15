@@ -295,22 +295,22 @@ public final class EquestrianClient {
 			return;
 		}
 		Font font = Minecraft.getInstance().font;
-		graphics.text(font, Component.translatable(e.breed().key()), x + 2, y + 1, 0xFF404040, false);
+		graphics.text(font, Component.translatable(e.breed().key()), x + 2, y + 1, com.jaymoskingdoms.client.Ui.GOLD, false);
 		// (0.5.44) a horse shows you what it's made of only once it trusts you
 		Player viewer = Minecraft.getInstance().player;
 		Bond b = horse.getAttached(Bonding.BOND);
 		if (viewer != null && (b == null || b.trustOf(viewer.getUUID()) < Bonding.STATS_TRUST)) {
-			graphics.textWithWordWrap(font, Component.translatable("tack.jaymoskingdoms.wary", (int)Bonding.STATS_TRUST), x + 2, y + 13, 86, 0xFF606060, false);
+			graphics.textWithWordWrap(font, Component.translatable("tack.jaymoskingdoms.wary", (int)Bonding.STATS_TRUST), x + 2, y + 13, 86, com.jaymoskingdoms.client.Ui.DIM, false);
 			return;
 		}
 		float[] values = {e.speed(), e.stamina(), e.jump(), e.courage(), e.temper()};
 		for (int i = 0; i < STATS.length; i++) {
 			int row = y + 11 + i * 9;
-			graphics.text(font, Component.translatable("stat.jaymoskingdoms.horse." + STATS[i]), x + 2, row, 0xFF404040, false);
+			graphics.text(font, Component.translatable("stat.jaymoskingdoms.horse." + STATS[i]), x + 2, row, com.jaymoskingdoms.client.Ui.TEXT, false);
 			int bx = x + 46;
 			int bw = 40;
-			graphics.fill(bx, row + 2, bx + bw, row + 6, 0xFF8B8B8B);
-			graphics.fill(bx, row + 2, bx + Mth.ceil(bw * values[i]), row + 6, 0xFF000000 | STAT_COLORS[i]);
+			graphics.fill(bx, row + 3, bx + bw, row + 6, com.jaymoskingdoms.client.Ui.BAR_BACK);
+			graphics.fill(bx, row + 3, bx + Mth.ceil(bw * values[i]), row + 6, 0xFF000000 | STAT_COLORS[i]);
 		}
 	}
 
