@@ -18,6 +18,7 @@
 		"CarryModelFeatureRendererMixin",
 		"CarryUseMixin",
 		"ContainerScreenAccessor",
+		"CostumeAvatarRendererMixin",
 		"HiddenArmorAvatarRendererMixin",
 		"LimbPickMixin",
 		"PoseLayersLivingEntityRendererMixin",

@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "jaymospowers:block/costume_table/front",
+    "north": "jaymospowers:block/costume_table/front",
+    "south": "jaymospowers:block/costume_table/front",
+    "east": "jaymospowers:block/costume_table/side",
+    "west": "jaymospowers:block/costume_table/side",
+    "up": "jaymospowers:block/costume_table/top",
+    "down": "jaymospowers:block/costume_table/bottom"
+  }
+}
