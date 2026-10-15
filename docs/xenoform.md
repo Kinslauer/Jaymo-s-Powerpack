@@ -12,12 +12,14 @@ The plan with the user's answers: the "Omnitrix Power Plan" doc (Claude Docs); s
   (unless it's already yours). Only `/power set` gives it by hand.
 - **Falling stars** are a world event. Every 10 s each player under the open night sky (overworld, not raining) has a
   0.2% chance of one; at most one per world per day. A glowing rock (a scripted `BlockCluster`, like a Gravity meteor)
-  comes down at a slant from 110 blocks up, 40–100 blocks from the player, in 4 s, whistling, with "A star is
-  falling..." shown to everyone within 160 blocks.
+  comes down at a slant from 110 blocks up, 40–100 blocks from the player, in 7 s, whistling, with "A star is
+  falling..." shown to everyone within 160 blocks. The rock is drawn big (2.5x) and glowing (outline through hills), and
+  its trail is forced to everyone within 400 blocks; after landing a signal-smoke plume with sparks stands over the
+  crater for 3 minutes (`FallingStars` tuning: `SEEN_FROM`, `ROCK_SCALE`, `PLUME_TICKS`).
 - It lands with a blast (power 2, breaks nothing itself), carves a crater with `WebCraterFeature.carve` (the Web
   symbiote's crater) and leaves a **Fallen Star** block in its heart instead of the goo: light 9, needs an iron pickaxe,
   slow to mine (hardness 5), can't be pushed.
-- **Mining it** (not in creative): 15% a **Xeno-Band**; else 7% the symbiote's black goo appears on the rock (a web
+- **Mining it** (not in creative): 3% a **Xeno-Band**; else 7% the symbiote's black goo appears on the rock (a web
   slinger can bond with it; a powerless finder is called to the Web for a day); else 2–5 raw iron, 1–2 amethyst, 12 XP.
 - **The band** (Epic, one per stack, fireproof): right-click it on. A powerless survival player is called to Xenoform at
   once (`Callings.call`); a creative player simply gets it; anyone with another power finds it won't close.

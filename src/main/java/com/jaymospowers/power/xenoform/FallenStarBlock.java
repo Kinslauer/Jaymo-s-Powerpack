@@ -47,7 +47,7 @@ public final class FallenStarBlock extends Block {
 
 	// ---- tuning ----
 	/** Chance a broken star holds the band, else (checked next) the symbiote's goo. */
-	public static final float BAND_CHANCE = 0.15F;
+	public static final float BAND_CHANCE = 0.03F;
 	public static final float SYMBIOTE_CHANCE = 0.07F;
 	/** Otherwise: this much raw iron and amethyst, and this much experience. */
 	public static final int IRON_MIN = 2, IRON_MAX = 5, AMETHYST_MIN = 1, AMETHYST_MAX = 2, XP = 12;
