@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "jaymospowers:block/rig_forge/side",
+    "north": "jaymospowers:block/rig_forge/front",
+    "south": "jaymospowers:block/rig_forge/side",
+    "east": "jaymospowers:block/rig_forge/side",
+    "west": "jaymospowers:block/rig_forge/side",
+    "up": "jaymospowers:block/rig_forge/top",
+    "down": "jaymospowers:block/rig_forge/bottom"
+  }
+}
