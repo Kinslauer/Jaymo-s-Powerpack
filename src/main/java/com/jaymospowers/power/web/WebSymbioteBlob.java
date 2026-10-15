@@ -1,7 +1,10 @@
 package com.jaymospowers.power.web;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.Dismember;
+import com.jaymospowers.core.Fractures;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.core.Shakes;
 import java.util.Comparator;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.core.BlockPos;
@@ -16,7 +19,10 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
@@ -39,6 +45,11 @@ import org.jspecify.annotations.Nullable;
  * slinger without a symbiote who comes near, or the dead host's body once it gets back up as a zombie (that one becomes
  * {@link WebBehemoth a behemoth}). With neither about it makes do with any mob nearby ({@link WebInhabit}), until that
  * one proves unfit; it won't take one it has just left again. Only fire, lava and explosions can hurt it; anything else it shrugs off.
+ * <p>
+ * It fights back ({@link #defend}): whoever goes for it (a blow, a shot, a fire or blast they set, or burning it with
+ * them standing by) is marked. A web slinger without a symbiote is taken there and then: it leaps up its tendril and
+ * bonds to them. Anyone else is lashed: a blow that leaves them badly hurt (a broken limb, reeling) or, often, dead; it
+ * comes after them for a while to finish it. A web slinger who already wears a symbiote is kin and only gets shrugged off.
  */
 public class WebSymbioteBlob extends PathfinderMob {
 	// ---- tuning ----
@@ -66,6 +77,18 @@ public class WebSymbioteBlob extends PathfinderMob {
 	static final float METEOR_ALIVE = 0.3F;
 	static final double METEOR_VICINITY = 128.0;
 	static final int FIRE_GRACE = 300;
+	/** Its tendril lash reaches this far; one who attacked it from farther off is chased until in reach. */
+	static final double LASH_REACH = 7.0;
+	/** Ticks between lashes. */
+	static final int LASH_COOLDOWN = 30;
+	/** A lash: this much damage, a broken limb, and this share of the time it simply kills. */
+	static final float LASH_DAMAGE = 14.0F, KILL_CHANCE = 0.35F, KILL_DAMAGE = 1000.0F;
+	/** How long the lashed reel (slowed, weakened; ticks). */
+	static final int LASH_REEL = 200;
+	/** It hunts whoever went for it this long (ticks), unless they get past its leash. */
+	static final int GRUDGE_TICKS = 300;
+	/** Burnt or blasted with no one to blame, it blames the nearest player this close. */
+	static final double BLAME_RANGE = 8.0;
 
 	public static EntityType<WebSymbioteBlob> TYPE;
 
@@ -82,6 +105,9 @@ public class WebSymbioteBlob extends PathfinderMob {
 
 	/** Who (or what) it's after right now; worked out again every {@link #SCAN_EVERY}. */
 	private @Nullable Entity quarry;
+	/** Whoever went for it, and until when it hunts them. */
+	private @Nullable LivingEntity grudge;
+	private int grudgeTicks, lashCooldown;
 
 	public WebSymbioteBlob(EntityType<? extends WebSymbioteBlob> type, Level level) {
 		super(type, level);
@@ -205,6 +231,25 @@ public class WebSymbioteBlob extends PathfinderMob {
 		if (this.mobRest > 0) {
 			this.mobRest--;
 		}
+		if (this.lashCooldown > 0) {
+			this.lashCooldown--;
+		}
+		if (this.grudge != null && (--this.grudgeTicks <= 0 || !hunts(this.grudge))) {
+			this.grudge = null;
+		}
+		if (this.isOnFire() && this.tickCount % SCAN_EVERY == 0 && this.grudge == null) {
+			this.blameNearest(level);
+		}
+		if (this.grudge != null) {
+			// someone is trying to kill it: they come first
+			this.quarry = this.grudge;
+			if (this.distanceTo(this.grudge) <= LASH_REACH) {
+				this.defend(level, this.grudge);
+				if (this.isRemoved()) {
+					return;
+				}
+			}
+		}
 		if (this.tickCount >= SETTLE_TICKS && this.quarry == null && this.onGround() && this.settle(level)) {
 			return;
 		}
@@ -220,7 +265,7 @@ public class WebSymbioteBlob extends PathfinderMob {
 				.min(Comparator.comparingDouble(e -> e.distanceToSqr(this)))
 				.ifPresent(corpse -> this.setHomeTo(corpse.blockPosition(), ROAM_RADIUS));
 		}
-		if (this.tickCount % SCAN_EVERY == 0) {
+		if (this.tickCount % SCAN_EVERY == 0 && this.grudge == null) {
 			this.quarry = findHost(level);
 		}
 		boolean moving = this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-4;
@@ -277,8 +322,112 @@ public class WebSymbioteBlob extends PathfinderMob {
 		this.discard();
 	}
 
+	private boolean hunts(LivingEntity target) {
+		return target.isAlive() && !target.isRemoved() && target.level() == this.level() && !target.isSpectator()
+			&& !(target instanceof Player p && (p.isCreative() || kin(p))) && target.distanceTo(this) <= LEASH;
+	}
+
+	/** A web slinger already wearing a symbiote: it won't turn on one of its own. */
+	private static boolean kin(Player player) {
+		return Powers.has(player, WebPower.INSTANCE) && WebSymbiote.state(player).bonded();
+	}
+
+	/** {@code source} hurt it (or tried): mark whoever did it. */
+	private void provoked(ServerLevel level, DamageSource source) {
+		if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+			return;
+		}
+		if (source.getEntity() instanceof LivingEntity attacker && attacker != this) {
+			this.marks(attacker);
+			if (this.distanceTo(attacker) <= LASH_REACH) {
+				this.defend(level, attacker);
+			}
+		} else if (source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypeTags.IS_EXPLOSION)) {
+			this.blameNearest(level);
+		}
+	}
+
+	private void marks(LivingEntity attacker) {
+		if (this.hunts(attacker)) {
+			this.grudge = attacker;
+			this.grudgeTicks = GRUDGE_TICKS;
+		}
+	}
+
+	/** Burning with nobody to blame: whoever stands nearest set it, as far as it's concerned. */
+	private void blameNearest(ServerLevel level) {
+		level.getEntitiesOfClass(Player.class, this.getBoundingBox().inflate(BLAME_RANGE), this::hunts).stream()
+			.min(Comparator.comparingDouble(p -> p.distanceToSqr(this)))
+			.ifPresent(this::marks);
+	}
+
+	/**
+	 * It turns on {@code foe}: a web slinger without a symbiote is taken on the spot; anyone else gets a tendril lash
+	 * that breaks a limb and leaves them reeling, or kills them outright.
+	 */
+	private void defend(ServerLevel level, LivingEntity foe) {
+		if (this.isRemoved() || this.lashCooldown > 0 || !this.hunts(foe)) {
+			return;
+		}
+		this.lashCooldown = LASH_COOLDOWN;
+		Vec3 from = this.position().add(0.0, 0.3, 0.0);
+		Vec3 to = foe.position().add(0.0, foe.getBbHeight() * 0.6, 0.0);
+		this.tendril(level, from, to);
+		this.getLookControl().setLookAt(foe, 90.0F, 90.0F);
+		if (foe instanceof ServerPlayer player && wants(player, player.position())) {
+			// it goes for the one it was always after: up the tendril and in
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.HOSTILE, 0.8F, 1.6F);
+			Shakes.send(player, 8.0F, from);
+			WebSymbiote.bond(player, from);
+			level.sendParticles(ParticleTypes.SQUID_INK, this.getX(), this.getY() + 0.3, this.getZ(), 30, 0.3, 0.2, 0.3, 0.1);
+			this.discard();
+			return;
+		}
+		level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.HOSTILE, 1.4F, 0.7F);
+		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WARDEN_ANGRY, SoundSource.HOSTILE, 0.8F, 1.6F);
+		if (foe instanceof ServerPlayer player) {
+			Shakes.send(player, 12.0F, from);
+		}
+		DamageSource lash = level.damageSources().mobAttack(this);
+		if (this.random.nextFloat() < KILL_CHANCE) {
+			// straight through
+			level.sendParticles(ParticleTypes.SQUID_INK, to.x, to.y, to.z, 40, 0.3, 0.4, 0.3, 0.15);
+			foe.hurtServer(level, lash, KILL_DAMAGE);
+			return;
+		}
+		Vec3 away = foe.position().subtract(this.position()).horizontal();
+		foe.hurtServer(level, lash, LASH_DAMAGE);
+		if (away.lengthSqr() > 1.0E-4) {
+			foe.setDeltaMovement(foe.getDeltaMovement().add(away.normalize().scale(1.1).add(0.0, 0.45, 0.0)));
+			foe.needsSync = true;
+			foe.syncVelocity = true;
+		}
+		if (foe.isAlive()) {
+			int[] limbs = {Dismember.RIGHT_ARM, Dismember.LEFT_ARM, Dismember.RIGHT_LEG, Dismember.LEFT_LEG};
+			Fractures.breakBone(foe, limbs[this.random.nextInt(limbs.length)], this);
+			foe.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, LASH_REEL, 1), this);
+			foe.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, LASH_REEL, 1), this);
+			foe.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 60, 0, false, false), this);
+		}
+	}
+
+	/** The lash itself: a black tendril snapping out from {@code from} to {@code to}. */
+	private void tendril(ServerLevel level, Vec3 from, Vec3 to) {
+		Vec3 step = to.subtract(from);
+		int n = Math.max(2, (int)(step.length() / 0.25));
+		for (int i = 0; i <= n; i++) {
+			Vec3 at = from.add(step.scale(i / (double)n));
+			level.sendParticles(WebSymbiote.dust(1.2F), at.x, at.y, at.z, 2, 0.04, 0.04, 0.04, 0.0);
+		}
+		level.sendParticles(ParticleTypes.SQUID_INK, from.x, from.y, from.z, 12, 0.3, 0.15, 0.3, 0.08);
+	}
+
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
+		this.provoked(level, source);
+		if (this.isRemoved()) {
+			return false;
+		}
 		if (this.fireGrace > 0 && (source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypeTags.IS_EXPLOSION))
 			&& !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
 			return false;
@@ -358,6 +507,9 @@ public class WebSymbioteBlob extends PathfinderMob {
 			if (--this.repath <= 0) {
 				this.repath = 10;
 				blob.getNavigation().moveTo(q, SEEK_SPEED);
+			}
+			if (q == blob.grudge) {
+				return; // tick() lashes it once it's in reach
 			}
 			if (blob.distanceTo(q) <= BOND_REACH + q.getBbWidth() * 0.5 && blob.level() instanceof ServerLevel level) {
 				blob.join(level, q);
