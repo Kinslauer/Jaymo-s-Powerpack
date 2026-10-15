@@ -29,6 +29,8 @@ import org.jspecify.annotations.Nullable;
  * <li>Sneak + X, Smoke Step ({@link SmokeStep}): re-form inside one of your clouds under the crosshair.</li>
  * <li>Z, Smoke Sight ({@link SmokeSight}): creatures in smoke are outlined through walls.</li>
  * <li>Fully mastered, cruising in Vapour Form turns the whole body to smoke ({@link SmokeVapour#WHOLLY}): intangible.</li>
+ * <li>Corrupted, Smog ({@link SmokeSmog}): the smoke turns toxic and kills what grows; C is Pyroclasm
+ * ({@link SmokePyroclasm}).</li>
  * <li>Mastered Smokescreen banks the cloud: it holds against the wind and fades slowly ({@code SmokeField.bank}).</li>
  * </ul>
  * You see through your own smoke (the client draws it faint and doesn't grey your view in it). The way in is a calling
@@ -64,6 +66,7 @@ public final class SmokePower implements Power {
 		SmokeVapour.init();
 		SmokeBomb.init();
 		SmokeJet.init();
+		SmokePyroclasm.init();
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			SmokeScreen.clear();
@@ -71,6 +74,8 @@ public final class SmokePower implements Power {
 			SmokeBomb.clear();
 			SmokeJet.clear();
 			SmokeVapour.clear();
+			SmokeSmog.clear();
+			SmokePyroclasm.clear();
 		});
 	}
 
@@ -80,6 +85,8 @@ public final class SmokePower implements Power {
 		SmokeJet.stop(player);
 		SmokeVapour.end(player);
 		SmokeSight.off(player);
+		SmokeSmog.forget(player);
+		SmokePyroclasm.forget(player);
 		SmokeField.forget(player);
 		SmokeHeat.forget(player);
 	}
@@ -142,6 +149,21 @@ public final class SmokePower implements Power {
 		SmokeSmother.tick(player);
 		SmokeJet.tick(player);
 		SmokeSight.tick(player);
+		SmokeSmog.tick(player);
+		SmokePyroclasm.gathering(player);
+	}
+
+	/** C answers the corrupted power: Pyroclasm. */
+	@Override
+	public boolean ultimateWhenCorrupted() {
+		return true;
+	}
+
+	@Override
+	public void onUltimate(ServerPlayer player, boolean down) {
+		if (com.jaymospowers.core.Fate.isCorrupted(player)) {
+			SmokePyroclasm.key(player, down);
+		}
 	}
 
 	@Override
