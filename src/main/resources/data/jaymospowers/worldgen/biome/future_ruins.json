@@ -19,16 +19,6 @@
               "type": "minecraft:zombie",
               "count": 4,
               "weight": 100
-            },
-            {
-              "type": "minecraft:husk",
-              "count": 4,
-              "weight": 20
-            },
-            {
-              "type": "minecraft:zombie_villager",
-              "count": 1,
-              "weight": 15
             }
           ],
           "underground_water_creature": [],

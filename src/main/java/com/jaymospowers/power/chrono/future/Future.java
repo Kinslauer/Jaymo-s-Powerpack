@@ -285,8 +285,8 @@ public final class Future {
 
 	/** The city's billboards and posters are maps; their ids are moved up past the world's own (see {@link LosPerrito}). */
 	private static void onEntityLoad(Entity entity, ServerLevel level) {
-		if (level.dimension() == FUTURE && isSpider(entity)) {
-			// no spiders in the future: only the dead
+		if (level.dimension() == FUTURE && unwanted(entity)) {
+			// only the dead walk the future: no spiders, husks, zombified villagers or camels
 			entity.discard();
 			return;
 		}
@@ -303,10 +303,16 @@ public final class Future {
 		}
 	}
 
-	/** The game's spiders and cave spiders, and any mod's spider (Stormie's Spiders' kinds among them). */
-	static boolean isSpider(Entity entity) {
-		return entity instanceof net.minecraft.world.entity.monster.spider.Spider
-			|| net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getPath().contains("spider");
+	/**
+	 * What never turns up in the future: spiders and cave spiders (any mod's spider too, Stormie's Spiders' kinds among
+	 * them), husks, zombified villagers, and camels (the husks' camels included).
+	 */
+	static boolean unwanted(Entity entity) {
+		String path = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getPath();
+		return entity instanceof net.minecraft.world.entity.monster.spider.Spider || path.contains("spider")
+			|| entity instanceof net.minecraft.world.entity.monster.zombie.Husk
+			|| entity instanceof net.minecraft.world.entity.monster.zombie.ZombieVillager
+			|| entity instanceof net.minecraft.world.entity.animal.camel.Camel || path.contains("camel");
 	}
 
 	// ---------------------------------------------------------------- testing

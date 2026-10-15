@@ -9,7 +9,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -20,7 +19,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 
 /**
- * The future's dead: feral hordes of zombies (husks and zombified villagers among them) roam the ruins in packs around
+ * The future's dead: feral hordes of zombies (no husks or zombified villagers) roam the ruins in packs around
  * every player there, by day as well as night (nothing burns in the future's ashen sun; see {@code FutureSunMixin}).
  * They shamble slower than the zombies back home while you watch them, and sprint as soon as you look away;
  * they hear you: anyone running within {@link #HEAR_RUNNING} blocks, or
@@ -181,9 +180,7 @@ public final class FutureFerals {
 			Zombie feral = random.nextFloat() < CORPSE_SHARE ? FutureKitchen.corpseZombie(level) : null;
 			boolean corpse = feral != null;
 			if (feral == null) {
-				float roll = random.nextFloat();
-				EntityType<? extends Zombie> type = roll < 0.15F ? EntityTypes.HUSK : roll < 0.3F ? EntityTypes.ZOMBIE_VILLAGER : EntityTypes.ZOMBIE;
-				feral = type.create(level, EntitySpawnReason.EVENT);
+				feral = EntityTypes.ZOMBIE.create(level, EntitySpawnReason.EVENT);
 			}
 			if (feral == null) {
 				continue;
