@@ -1305,3 +1305,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   food tooltips show a meal's worth.
 - **0.11.46 / Kingdoms 0.7.54:** village fires get stone hearths and chimneys when villages generate, and golems only
   burn corpses at open, safe fires, so villages stop burning down (`kingdoms/MODLOG.md`).
+- **0.11.47 / Kingdoms 0.7.55:** monsters see farther (Farsighted Mobs remade) and creepers stalk you, freezing
+  while you look at them (Stalker Creepers remade) (`kingdoms/MODLOG.md`).

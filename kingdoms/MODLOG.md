@@ -3067,3 +3067,11 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
   above it, open at the top. Chimney-top campfires (open sky) only get the hearth. New chunks only. A pyre
   (`Undertakers.isPyre`) must now be under open sky with nothing that catches within 2 blocks, so no corpse is
   dropped into an indoor hearth again; builders' fire pits pass.
+- **0.7.55, farsighted monsters and stalking creepers:** two mods remade (neither has a 26.3 Fabric build).
+  Farsighted Mobs (LGPL-3): every monster now notices you from at least 24 blocks (vanilla skeletons, creepers and
+  spiders: 16), 8 more on Hard and up to 4 more at the highest local difficulty; monsters that already see farther
+  (zombies, our legends) keep theirs, and illagers and witches keep their own (`Farsight`, a transient follow-range
+  modifier set as each monster loads). Stalker Creepers (Forge/NeoForge, no licence given): a creeper hunting you
+  freezes and stares while you look at it (within about 53 degrees of your view, in line of sight) and creeps on as
+  soon as you look away; within 3.5 blocks, or once it hisses, looking no longer stops it (`Stalkers`, a priority-1
+  goal holding its legs).
