@@ -131,7 +131,7 @@ public final class NightGifts {
 	/** Below this height, out of the sky's sight, a vampire's quick. */
 	static final int DEEP_Y = 60;
 	/** The sun's drain on a vampire's hunger (exhaustion a second). */
-	static final float SUN_EXHAUSTION = 0.35F;
+	static final float SUN_EXHAUSTION = 0.05F;
 	/** Safe fall distance added (blocks): human-form werewolves, the beast; the beast's fall damage share taken off. */
 	static final double WOLF_SAFE_FALL = 3.0, BEAST_SAFE_FALL = 10.0, BEAST_FALL_CUT = -0.5;
 

@@ -60,7 +60,7 @@ final class Lairs {
 			level.setBlock(side, Blocks.DARK_OAK_SLAB.defaultBlockState(), Block.UPDATE_ALL);
 		}
 		level.setBlock(head.north().above(), Blocks.SKELETON_SKULL.defaultBlockState().setValue(SkullBlock.ROTATION, 0), Block.UPDATE_ALL);
-		// candles in the corners, cobwebs and chains overhead
+		// candles in the corners, cobwebs and a lantern overhead
 		int h = CRYPT_HALF;
 		for (int[] c : new int[][] {{-h, -h}, {h, -h}, {-h, h}, {h, h}}) {
 			level.setBlock(new BlockPos(floor.getX() + c[0], y, floor.getZ() + c[1]),
@@ -70,8 +70,7 @@ final class Lairs {
 					Blocks.COBWEB.defaultBlockState(), Block.UPDATE_ALL);
 			}
 		}
-		level.setBlock(new BlockPos(floor.getX(), floor.getY() + CRYPT_HEIGHT, floor.getZ()), Blocks.IRON_CHAIN.defaultBlockState(), Block.UPDATE_ALL);
-		level.setBlock(new BlockPos(floor.getX(), floor.getY() + CRYPT_HEIGHT - 1, floor.getZ()), Blocks.SOUL_LANTERN.defaultBlockState()
+		level.setBlock(new BlockPos(floor.getX(), floor.getY() + CRYPT_HEIGHT, floor.getZ()), Blocks.SOUL_LANTERN.defaultBlockState()
 			.setValue(net.minecraft.world.level.block.LanternBlock.HANGING, true), Block.UPDATE_ALL);
 		ladder(level, floor, CRYPT_HALF, CRYPT_HEIGHT, player.blockPosition());
 		wake(level, player, foot, head);
@@ -136,7 +135,7 @@ final class Lairs {
 	}
 
 	private static boolean natural(BlockState s) {
-		return !s.hasBlockEntity() && s.getFluidState().isEmpty() && (s.is(BlockTags.BASE_STONE_OVERWORLD) || s.is(BlockTags.DIRT)
+		return !s.hasBlockEntity() && s.getFluidState().isEmpty() && (s.is(BlockTags.BASE_STONE_OVERWORLD) || s.is(BlockTags.SUBSTRATE_OVERWORLD)
 			|| s.is(BlockTags.SAND) || s.is(Blocks.GRAVEL) || s.is(Blocks.CLAY) || s.is(BlockTags.ORES) || s.is(Blocks.SNOW) || s.is(Blocks.SNOW_BLOCK)
 			|| s.is(BlockTags.REPLACEABLE_BY_TREES) || s.is(Blocks.SANDSTONE) || s.is(Blocks.RED_SANDSTONE) || s.is(Blocks.TERRACOTTA)
 			|| s.is(BlockTags.TERRACOTTA));
