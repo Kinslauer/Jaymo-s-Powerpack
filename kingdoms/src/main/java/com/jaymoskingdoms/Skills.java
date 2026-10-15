@@ -140,7 +140,9 @@ public final class Skills {
 		WAR_CRY(Pillar.STRENGTH, 1, 2, 21, 6, 2, EXECUTIONER, REND),
 		BLADESTORM(Pillar.STRENGTH, 1, 3, 24, 7, 1, CHARGE, WAR_CRY),
 		// (0.7.3) a thrown shield that ricochets between foes and comes home (ShieldThrow); last, so no ordinal moves
-		SHIELD_THROW(Pillar.STRENGTH, 3, 1, 21, 6, 1, EXECUTIONER);
+		SHIELD_THROW(Pillar.STRENGTH, 3, 1, 21, 6, 1, EXECUTIONER),
+		// (0.7.29) Survival's second root: the meditate key (Jaymo's Powers' Meditate). Rank 1 opens it, more ranks quicken it
+		MEDITATION(Pillar.SURVIVAL, 3, 1, 0, 0, 0);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;
@@ -414,6 +416,16 @@ public final class Skills {
 
 	static int rank(Player player, Perk perk) {
 		return of(player).rank(perk);
+	}
+
+	/** {@code player}'s rank in the perk named {@code key} (0 for an unknown one): for other mods, by reflection (Jaymo's Powers' Meditate). */
+	public static int rank(Player player, String key) {
+		for (Perk perk : Perk.values()) {
+			if (perk.key().equals(key)) {
+				return rank(player, perk);
+			}
+		}
+		return 0;
 	}
 
 	/** Gives {@code player} {@code amount} experience in {@code pillar}; a level reached is announced. */
