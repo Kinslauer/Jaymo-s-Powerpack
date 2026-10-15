@@ -20,15 +20,17 @@ import net.minecraft.world.entity.LivingEntity;
  * flat beside you; shimmying or climbing, it crawls hand over hand, the legs stepping in turn. In the suit the
  * tendrils hold the wall instead ({@code WebTendrilWalk}): the body hangs off them, arms and legs loose and ready.</li>
  * <li><b>Wall jump:</b> arched back off the wall, arms flung up and out, legs driving off it, then tucking.</li>
- * <li><b>Slide:</b> laid back on one hip, the lead leg straight out ahead, the other folded under, a hand trailing on
- * the ground and the other arm up for balance.</li>
+ * <li><b>Slide:</b> laid right back, both legs together and flat along the ground ahead, one hand thrown up high
+ * behind, the other along the side.</li>
  * </ul>
  * Your own moves don't show in first person.
  */
 public final class WebParkourPose {
 	// ===== the look: knobs to tweak ==================================================================================
 	/** How far the body tips over the planted hand in a vault, and leans back in a slide (degrees). */
-	static final float VAULT_TILT = 38.0F, SLIDE_LEAN = 62.0F;
+	static final float VAULT_TILT = 38.0F, SLIDE_LEAN = 70.0F;
+	/** How far a slide drops the body so the flat legs rest just over the ground (blocks). */
+	static final float SLIDE_DROP = 0.18F;
 	/** How far the body leans into the wall while clinging (degrees). */
 	static final float CLING_LEAN = 10.0F;
 	/** In the suit, the tendrils hold the body this far out from the wall (degrees, tipping the top back off it). */
@@ -95,7 +97,10 @@ public final class WebParkourPose {
 				poseStack.translate(0.0F, 0.35F * pose.in(), 0.0F);
 				poseStack.rotateDegrees(Axis.ZP, -VAULT_TILT * pose.in());
 			}
-			case WebParkour.SLIDE -> poseStack.rotateDegrees(Axis.XP, SLIDE_LEAN * pose.in());
+			case WebParkour.SLIDE -> {
+				poseStack.translate(0.0F, -SLIDE_DROP * pose.in(), 0.0F);
+				poseStack.rotateDegrees(Axis.XP, SLIDE_LEAN * pose.in());
+			}
 			case WebParkour.CLING -> poseStack.rotateDegrees(Axis.XP, (pose.tendrils() ? TENDRIL_HANG : -CLING_LEAN) * pose.in());
 			case WebParkour.WALL_JUMP -> poseStack.rotateDegrees(Axis.XP, 18.0F * pose.in());
 			default -> {
@@ -153,11 +158,13 @@ public final class WebParkourPose {
 				set(h.leftLeg, Mth.lerp(tuck, 0.3F, -0.7F), 0.0F, -0.1F, e);
 			}
 			case WebParkour.SLIDE -> {
-				// lead leg straight out, the other folded under; the right hand trails on the ground, the left up
-				set(h.rightLeg, -1.35F, 0.0F, 0.12F, e);
-				set(h.leftLeg, -0.45F, 0.0F, -0.35F, e);
-				set(h.rightArm, 0.55F, 0.0F, 0.55F, e);
-				set(h.leftArm, -1.9F, 0.0F, -0.35F, e);
+				// both legs flat along the ground ahead (swung forward by what the lean leaves of a right angle), together;
+				// the right hand thrown up high behind, the left along the side toward the knees
+				float flat = -(90.0F - SLIDE_LEAN) * Mth.DEG_TO_RAD;
+				set(h.rightLeg, flat, 0.0F, 0.05F, e);
+				set(h.leftLeg, flat, 0.0F, -0.05F, e);
+				set(h.rightArm, -2.55F, 0.0F, 0.4F, e);
+				set(h.leftArm, -0.45F, 0.0F, -0.25F, e);
 				// the head lifts to keep looking ahead
 				h.head.xRot = Mth.lerp(e, h.head.xRot, h.head.xRot - SLIDE_LEAN * 0.8F * Mth.DEG_TO_RAD);
 			}

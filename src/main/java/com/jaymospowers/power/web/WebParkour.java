@@ -67,6 +67,11 @@ public final class WebParkour {
 	/** A slide: the push at the start (times your speed, at least the minimum), how much speed is left each tick, how long at most, and the slowest it keeps going. */
 	public static final double SLIDE_BOOST = 1.5, SLIDE_MIN = 0.5, SLIDE_KEEP = 0.94, SLIDE_STOP = 0.14;
 	public static final int SLIDE_TICKS = 24;
+	/**
+	 * Jumping out of a slide: the upward kick (a vanilla jump is 0.42), and the speed along the ground it leaves with
+	 * (the slide's speed times this, plus that, at most the cap), so a slide is a run-up for a long, high leap.
+	 */
+	public static final double SLIDE_JUMP_UP = 0.62, SLIDE_JUMP_KEEP = 1.3, SLIDE_JUMP_ADD = 0.12, SLIDE_JUMP_MAX = 0.95;
 	/** Ticks before another vault or slide. */
 	public static final int VAULT_COOLDOWN = 8, SLIDE_COOLDOWN = 12;
 	/** How long the vault and wall jump poses last (ticks). */
