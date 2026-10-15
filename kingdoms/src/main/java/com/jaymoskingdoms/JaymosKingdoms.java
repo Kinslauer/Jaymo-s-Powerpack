@@ -216,6 +216,13 @@ public final class JaymosKingdoms implements ModInitializer {
 		WerewolfPlayers.register();
 		// 0.7.7: sailing, stage 1: ships built from blocks (the helm, sails, the ship and its attachment)
 		com.jaymoskingdoms.sailing.Sailing.register();
+		// 0.7.37: sailing, stage 3: ships with crews of their own (pirates, warships, merchantmen), pirate coves, harbours,
+		// treasure wrecks (and their attachments)
+		Corsairs.register();
+		Navies.register();
+		TreasureWrecks.register();
+		LOGGER.debug("sailing crew attachments: {} {} {} {} {}", com.jaymoskingdoms.sailing.Ship.SEAT, PirateCoves.COVES, Navies.HARBOURS,
+			TreasureWrecks.CHARTED, TreasureWrecks.LAID);
 		LOGGER.debug("ship attachment: {}", com.jaymoskingdoms.sailing.Ship.PIECES);
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Farmers.clear();

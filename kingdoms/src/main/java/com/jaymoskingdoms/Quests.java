@@ -882,7 +882,7 @@ public final class Quests {
 
 	/** The camp {@code entity} is chief or warlord of, or -1. */
 	private static int campOf(Entity entity) {
-		if (entity instanceof Folk folk && (folk.role() == Folk.CHIEF || folk.role() == Orcs.WARCHIEF)) {
+		if (entity instanceof Folk folk && (folk.role() == Folk.CHIEF || folk.role() == Orcs.WARCHIEF || Pirates.isCoveCaptain(folk))) {
 			return folk.factionId();
 		}
 		Illagers.Tag tag = Illagers.tag(entity);
@@ -1126,6 +1126,7 @@ public final class Quests {
 			case Quest.RACE -> Component.translatable(key, o.place(), Stables.raceSeconds(q), x(q), z(q));
 			case Quest.HUNT, Quest.SURVIVE -> Component.translatable(key, x(q), z(q));
 			case Quest.GRUDGE -> Component.translatable(key, o.otherName(), o.count(), x(q), z(q));
+			case Quest.ESCORT -> Component.translatable(key, o.place(), x(q), z(q));
 			default -> Component.empty();
 		};
 	}
@@ -1158,6 +1159,8 @@ public final class Quests {
 				? Component.translatable(o.spawned() ? "quest.jaymoskingdoms.objective.grudge_luring" : "quest.jaymoskingdoms.objective.grudge_lure",
 					o.otherName(), q.giver().name(), x(q), z(q))
 				: Component.translatable("quest.jaymoskingdoms.objective.grudge_beat", o.otherName(), o.progress(), o.count());
+			case Quest.ESCORT -> Component.translatable(o.spawned() ? "quest.jaymoskingdoms.objective.escorting" : "quest.jaymoskingdoms.objective.escort",
+				q.giver().name(), o.place(), x(q), z(q));
 			default -> Component.empty();
 		};
 	}

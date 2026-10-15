@@ -51,6 +51,8 @@ final class QuestBoard {
 	 */
 	static final float[] REGICIDE_CHANCE = {0.4F, 0.0F, 0.1F, 0.4F, 0.25F};
 	static final float WARBAND_CHANCE = 0.5F;
+	/** (0.7.37) The chance a king with a harbour asks for an escort (when he has another harbour to send her to). */
+	static final float ESCORT_CHANCE = 0.2F;
 	/** How far off the realm he sends you against may be. */
 	static final double RIVAL_RANGE = 2500.0;
 	/** Chance a villager's quest pays a relic: a smith's, a guard's or fletcher's, and anyone else's. */
@@ -419,6 +421,13 @@ final class QuestBoard {
 				return q;
 			}
 		}
+		if (random.nextFloat() < ESCORT_CHANCE) {
+			// (0.7.37) a merchantman to see safely to another realm's harbour
+			Quest q = Navies.escortQuest(level, f, who, royalReward(random));
+			if (q != null) {
+				return q;
+			}
+		}
 		Quest q = random.nextFloat() < 0.4F ? chief(level, f, who, random) : null;
 		if (q == null) {
 			q = champion(level, king, f, who, random);
@@ -439,9 +448,9 @@ final class QuestBoard {
 		if (best == null) {
 			return null;
 		}
-		boolean illager = Camps.illager(level.getServer(), best.id());
+		boolean illager = Camps.illager(level.getServer(), best.id()), pirate = Camps.pirate(level.getServer(), best.id());
 		Quest.Objective o = new Quest.Objective("camp:" + best.id(), 1, 0, Optional.of(best.seat()), best.leader(), "", best.name(), false);
-		return new Quest(UUID.randomUUID().toString(), Quest.CHIEF, illager ? "king.warlord" : "king.chief", who, o, royalReward(random), 0L);
+		return new Quest(UUID.randomUUID().toString(), Quest.CHIEF, pirate ? "king.pirate" : illager ? "king.warlord" : "king.chief", who, o, royalReward(random), 0L);
 	}
 
 	/** (Testing) {@code king}'s champion decree, its lair the nearest {@code lair} (a vanilla structure); null with none near. */

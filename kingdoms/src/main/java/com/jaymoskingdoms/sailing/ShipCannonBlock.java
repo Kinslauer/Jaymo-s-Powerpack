@@ -158,7 +158,13 @@ public final class ShipCannonBlock extends Block {
 
 	/** Fires: the bang, the smoke, and the ball. {@code centre} is its block's middle; {@code ship} doesn't hit itself. */
 	static void fire(ServerLevel level, Vec3 centre, double fx, double fz, @Nullable Player gunner, @Nullable Ship ship) {
-		Vec3 dir = aim(fx, fz, gunner);
+		fireAlong(level, centre, aim(fx, fz, gunner), gunner, ship);
+	}
+
+	/** (0.7.37) Fires along {@code dir} (a ship's crew lay their own guns), {@code gunner}'s shot. */
+	static void fireAlong(ServerLevel level, Vec3 centre, Vec3 dir, net.minecraft.world.entity.@Nullable Entity gunner, @Nullable Ship ship) {
+		double flat = Math.sqrt(dir.x * dir.x + dir.z * dir.z);
+		double fx = flat < 1.0E-4 ? 0.0 : dir.x / flat, fz = flat < 1.0E-4 ? 0.0 : dir.z / flat;
 		Vec3 muzzle = centre.add(fx * MUZZLE, 0.15, fz * MUZZLE);
 		ShipShot.fire(level, gunner, ship, muzzle, dir);
 		level.playSound(null, muzzle.x, muzzle.y, muzzle.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 2.5F, 0.6F);

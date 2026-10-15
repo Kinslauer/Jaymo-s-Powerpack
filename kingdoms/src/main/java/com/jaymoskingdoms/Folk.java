@@ -484,6 +484,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		Goblins.addGoals(this, this.goalSelector, this.targetSelector);
 		// (0.5.47) orcs hunt everyone but the other camps
 		Orcs.addGoals(this, this.goalSelector, this.targetSelector);
+		// (0.7.37) pirates hunt everyone but the other camps
+		Pirates.addGoals(this, this.goalSelector, this.targetSelector);
 		// realms at war: each other's folk (and sworn players) on sight
 		Wars.addGoals(this, this.targetSelector);
 	}
@@ -537,7 +539,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			// (0.5.54) they grow old, and at last die of it
 			return;
 		}
-		if (!Rickshaws.onDuty(this) && Homes.tick(level, this)) {
+		if (Pirates.aboard(this)) {
+			// (0.7.37) one of a ship's crew at their station: they fight from her, and nothing else
+			Corsairs.crewTick(level, this);
+		} else if (!Rickshaws.onDuty(this) && Homes.tick(level, this)) {
 			// (0.5.5) bedtime: its work waits till morning
 		} else if (!this.shying) {
 			Workers.work(level, this);
@@ -548,6 +553,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		}
 		// (0.5.47) an orc's blood rage and war cries, a warchief's slam
 		Orcs.tick(level, this);
+		// (0.7.37) a pirate's pistols and shouts
+		Pirates.tick(level, this);
 		// (0.5.12) javelins at a foe out of reach; attackers fight harder, break through and burn
 		// (0.5.64) the richest kingdoms' musketeers
 		Muskets.tick(level, this);

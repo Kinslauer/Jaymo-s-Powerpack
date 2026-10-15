@@ -57,7 +57,7 @@ public final class ShipKits {
 
 	/** A hull: half her length and beam, how many rows her bow narrows over, her deck's layer (-1: an open boat, walled
 	 * up to {@code walls}), and whether her bottom is a row narrower than her sides (a vee). */
-	private record Shape(int halfLength, int halfBeam, int taper, int deck, int walls, boolean vee) {
+	record Shape(int halfLength, int halfBeam, int taper, int deck, int walls, boolean vee) {
 		int width(int z) {
 			int k = this.halfLength - z;
 			if (k < this.taper) {
@@ -133,7 +133,7 @@ public final class ShipKits {
 	}
 
 	/** Her bottom, her sides and her deck (but its hatches). */
-	private static void hull(List<Cell> cells, Shape s, LongOpenHashSet holes) {
+	static void hull(List<Cell> cells, Shape s, LongOpenHashSet holes) {
 		for (int y = 0; y <= s.top(); y++) {
 			for (int z = -s.halfLength; z <= s.halfLength; z++) {
 				int w = s.width(y, z);
@@ -155,7 +155,7 @@ public final class ShipKits {
 	}
 
 	/** The rail round her deck, with oars and guns in it at the rows given (both sides), facing outboard. */
-	private static void rail(List<Cell> cells, Shape s, Map<Integer, ShipFrameBlock.Want> slots) {
+	static void rail(List<Cell> cells, Shape s, Map<Integer, ShipFrameBlock.Want> slots) {
 		int y = s.deck + 1;
 		for (int z = -s.halfLength; z <= s.halfLength; z++) {
 			int w = s.width(z);
@@ -176,7 +176,7 @@ public final class ShipKits {
 	}
 
 	/** A mast at row z, this tall above her deck, and its sail across her beam (2 blocks clear of the deck). */
-	private static void mast(List<Cell> cells, Shape s, int z, int height) {
+	static void mast(List<Cell> cells, Shape s, int z, int height) {
 		for (int y = s.deck + 1; y <= s.deck + height; y++) {
 			cells.add(new Cell(0, y, z, ShipFrameBlock.Want.MAST, Direction.NORTH));
 		}
