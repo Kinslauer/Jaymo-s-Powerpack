@@ -556,3 +556,11 @@ attachment (`ChronoSpeed.FLASH`) while Overclock is on. All of it scales with sp
 
 Not seen in game yet. Check that the afterimages face the right way and sit on the runner's path, that the bolts
 show from both sides, and that the lean doesn't clip the feet into the ground.
+
+## 0.11.78: the Time Flow time stop bursts with glyphs and lasts twice as long
+
+- Space after the Space counter (the time stop) now blows a sphere of enchanting-table glyphs out from you
+  (`ChronoFlow.glyphBurst`, `GLYPH_BURST` = 320 glyphs out to `GLYPH_BURST_RADIUS` = 7 blocks), with an enchanting
+  table chime under the bell.
+- Its Stasis Field lasts `TIME_STOP_SCALE` (2) times as long as G's: 6 s on a fresh power, up to 12 s with all four
+  abilities. G's own field is unchanged (3-6 s).
