@@ -252,6 +252,42 @@ public final class Languages {
 		return t == null || speaks(player, t) || (speaker instanceof Villager v && McaCompat.family(v, player));
 	}
 
+	/** (0.7.61) MCA voice lines that are words (hello, yes, no, a cheer, an angry shout) → the plain grunt heard instead without the tongue. */
+	static final java.util.Map<String, net.minecraft.sounds.SoundEvent> GRUNTS = java.util.Map.of(
+		"greet", net.minecraft.sounds.SoundEvents.VILLAGER_AMBIENT, "yes", net.minecraft.sounds.SoundEvents.VILLAGER_YES,
+		"no", net.minecraft.sounds.SoundEvents.VILLAGER_NO, "celebrate", net.minecraft.sounds.SoundEvents.VILLAGER_CELEBRATE,
+		"angry", net.minecraft.sounds.SoundEvents.VILLAGER_NO);
+
+	/**
+	 * (0.7.61) ({@code EntityVoiceMixin}) A villager speaks a voice line: each player near hears the words only if they
+	 * understand the speaker ({@link #understands}); everyone else hears a grunt. True if it was played here.
+	 */
+	public static boolean voice(Entity speaker, net.minecraft.sounds.SoundEvent sound, float volume, float pitch) {
+		if (!(speaker instanceof Villager) || !(speaker.level() instanceof ServerLevel level) || speaker.isSilent()) {
+			return false;
+		}
+		net.minecraft.resources.Identifier key = net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.getKey(sound);
+		if (key == null || !key.getNamespace().equals("mca") || !key.getPath().startsWith("villager.")) {
+			return false;
+		}
+		net.minecraft.sounds.SoundEvent grunt = GRUNTS.get(key.getPath().substring(key.getPath().lastIndexOf('.') + 1));
+		if (grunt == null || of(speaker) == null) {
+			return false;
+		}
+		double range = sound.getRange(volume);
+		long seed = level.getRandom().nextLong();
+		for (ServerPlayer p : level.players()) {
+			if (p.distanceToSqr(speaker) > range * range) {
+				continue;
+			}
+			net.minecraft.sounds.SoundEvent heard = understands(p, speaker) ? sound : grunt;
+			p.connection.send(new net.minecraft.network.protocol.game.ClientboundSoundPacket(
+				net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.wrapAsHolder(heard), speaker.getSoundSource(),
+				speaker.getX(), speaker.getY(), speaker.getZ(), volume, pitch, seed));
+		}
+		return true;
+	}
+
 	/** {@link #understands}, and if not, a reminder over the hotbar (now and then) that only simple things will do. */
 	public static boolean check(ServerPlayer player, Entity speaker) {
 		if (understands(player, speaker)) {

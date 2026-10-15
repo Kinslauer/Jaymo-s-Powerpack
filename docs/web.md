@@ -88,6 +88,9 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   `STRIDE_STEP_FAR` 1.1. Jump climbs (needs `STRIDE_RISE_ANCHORS` 4 ways to grab), Sneak lowers, Sneak on the ground
   stands you on your feet; nothing to grab within reach and you fall. Walls and ceilings still climb as before. While the
   four walk, four spare tendrils (`WebTendrilLayer.FIRST_SPARE`) grow, so strikes, grabs and the barrage keep theirs.
+- **Wall Crawl and Living Armor (0.11.66):** the tendrils carry you whenever Wall Crawl is on, flat ground included.
+  When Living Armor withdraws or is put away, Wall Crawl switches off with it (`WebSymbiote.set`). At full bond
+  (`BOND_MAX`) Living Armor no longer times out at `ARMOR_MAX_TICKS`: it stays until you put it away.
 
 ## Andy's symbiote and whip changes (0.9.8)
 - **Rigid tendrils:** Wall Crawl's walking tendrils are jointed limbs (two straight sections, a knee out from the

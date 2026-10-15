@@ -123,7 +123,17 @@ public final class Firefighting {
 		if (now % EVERY != 0 || FIRES.isEmpty()) {
 			return;
 		}
-		FIRES.removeIf(p -> !level.isLoaded(p) || !level.getBlockState(p).is(BlockTags.FIRE));
+		FIRES.removeIf(p -> {
+			if (!level.isLoaded(p)) {
+				return true;
+			}
+			if (level.getBlockState(p).is(BlockTags.FIRE)) {
+				return false;
+			}
+			// (0.7.61) out, and not by our people's hands (theirs are struck off as they do it): a player's, maybe
+			Deeds.fireOut(level, p);
+			return true;
+		});
 		CHOICES.values().removeIf(c -> c.until() < now);
 		int answered = 0;
 		for (BlockPos fire : new ArrayList<>(FIRES)) {

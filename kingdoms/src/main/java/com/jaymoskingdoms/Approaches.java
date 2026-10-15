@@ -822,8 +822,12 @@ public final class Approaches {
 				more = key(a) + ".you." + a.enemy + ".more";
 				args = new Object[] {name};
 			} else {
-				// (0.6.11) something strange seen lately; (0.5.56) a monster of legend seen out there; (0.5.51) a butcher
-				said = Oddities.gossip(level, a.mob);
+				// (0.7.61) what you did for them (or elsewhere, as they've heard); (0.6.11) something strange seen lately;
+				// (0.5.56) a monster of legend seen out there; (0.5.51) a butcher
+				said = Deeds.gossip(level, player, f);
+				if (said == null) {
+					said = Oddities.gossip(level, a.mob);
+				}
 				if (said == null && level.getRandom().nextFloat() < Sightings.GOSSIP_CHANCE) {
 					said = Sightings.gossip(level, a.mob);
 				}
