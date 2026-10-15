@@ -47,6 +47,8 @@ import org.jspecify.annotations.Nullable;
  * tornado within {@link #TORNADO_RANGE} you unwind it a rank at a time while it drags you in; under a storm you calm it
  * (a supercell never puts down its tornado). Both through Jaymo's Kingdoms' {@code SkyCalm} (found by reflection);
  * without Kingdoms a held C calms vanilla weather: thunder to rain, then clear.</li>
+ * <li><b>With both fates</b> ({@link SmokeAshStorm}): a tap is Ash Storm, sneak + tap a raincloud of soot, sneak +
+ * hold feeds a storm a tornado, and unwinding can finish a tornado off.</li>
  * </ul>
  */
 final class SmokeCloudshaper {
@@ -82,14 +84,18 @@ final class SmokeCloudshaper {
 
 	private static final class Hold {
 		final long from;
+		/** Both fates, sneaking as C went down: feeding a storm, not calming it, if held. */
+		final boolean sneak;
 		int seconds;
 
-		Hold(long from) {
+		Hold(long from, boolean sneak) {
 			this.from = from;
+			this.sneak = sneak;
 		}
 	}
 
-	private record Rain(ServerLevel level, UUID owner, BlockPos ground, int top, long until) {
+	/** {@code soot}: a both-fates raincloud, which rains soot (blinds, puts nothing out). */
+	private record Rain(ServerLevel level, UUID owner, BlockPos ground, int top, long until, boolean soot) {
 	}
 
 	private static final Map<UUID, Hold> HOLDS = new HashMap<>();
@@ -166,12 +172,13 @@ final class SmokeCloudshaper {
 
 	// ---------------------------------------------------------------- Harness the Sky
 
-	/** C pressed ({@code down}) or let go (ascended, not corrupted). */
+	/** C pressed ({@code down}) or let go (ascended; with both fates too, see {@link SmokeAshStorm}). */
 	static void key(ServerPlayer player, boolean down) {
 		long now = player.level().getGameTime();
+		boolean both = SmokeAshStorm.both(player);
 		if (down) {
 			if (!SmokeVapour.wholly(player)) {
-				HOLDS.put(player.getUUID(), new Hold(now));
+				HOLDS.put(player.getUUID(), new Hold(now, both && player.isShiftKeyDown()));
 			}
 			return;
 		}
@@ -179,12 +186,16 @@ final class SmokeCloudshaper {
 		if (hold == null || now - hold.from >= TAP_TICKS) {
 			return;
 		}
+		if (both && !hold.sneak) {
+			SmokeAshStorm.summon(player);
+			return;
+		}
 		long left = SmokePower.state(player).left(SmokeState.SKY, now);
 		if (left > 0) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.smoke_raincloud_wait", (left + 19) / 20).withStyle(ChatFormatting.GRAY));
 			return;
 		}
-		if (raincloud(player)) {
+		if (raincloud(player, both)) {
 			SmokePower.cooldown(player, SmokeState.SKY, RAIN_COOLDOWN);
 		}
 	}
@@ -204,7 +215,20 @@ final class SmokeCloudshaper {
 		}
 		player.causeFoodExhaustion(HOLD_EXHAUSTION);
 		boolean second = (held - TAP_TICKS) % 20 == 0;
+		if (hold.sneak) {
+			// both fates: feed the storm a tornado instead
+			if (second && SmokeAshStorm.feed(player, ++hold.seconds)) {
+				HOLDS.remove(player.getUUID());
+			}
+			return;
+		}
 		double[] tornado = second ? unwind(level, player) : null;
+		if (tornado != null && tornado.length > 3 && tornado[3] > 0.0) {
+			// both fates: it ropes out, and the corruption goes with it
+			HOLDS.remove(player.getUUID());
+			SmokeAshStorm.killed(player);
+			return;
+		}
 		if (tornado != null) {
 			Vec3 at = new Vec3(tornado[0], tornado[1] + 8.0, tornado[2]);
 			stream(level, at, player);
@@ -233,7 +257,7 @@ final class SmokeCloudshaper {
 			return null;
 		}
 		try {
-			return (double[])UNWIND.invokeExact((Level)level, player.getX(), player.getZ(), TORNADO_RANGE, 1.0F, false);
+			return (double[])UNWIND.invokeExact((Level)level, player.getX(), player.getZ(), TORNADO_RANGE, 1.0F, SmokeAshStorm.both(player));
 		} catch (Throwable t) {
 			return null;
 		}
@@ -277,7 +301,7 @@ final class SmokeCloudshaper {
 
 	// ---------------------------------------------------------------- the raincloud
 
-	private static boolean raincloud(ServerPlayer player) {
+	private static boolean raincloud(ServerPlayer player, boolean soot) {
 		ServerLevel level = player.level();
 		Vec3 eye = player.getEyePosition();
 		HitResult hit = level.clip(new ClipContext(eye, eye.add(player.getLookAngle().scale(RAIN_RANGE)), ClipContext.Block.COLLIDER,
@@ -294,8 +318,13 @@ final class SmokeCloudshaper {
 				break;
 			}
 		}
-		RAINS.add(new Rain(level, player.getUUID(), ground, top, level.getGameTime() + RAIN_TICKS));
-		SmokeField.puffCloud(level, new Vec3(ground.getX() + 0.5, top, ground.getZ() + 0.5), 30.0F, player);
+		RAINS.add(new Rain(level, player.getUUID(), ground, top, level.getGameTime() + RAIN_TICKS, soot));
+		Vec3 cloud = new Vec3(ground.getX() + 0.5, top, ground.getZ() + 0.5);
+		if (soot) {
+			SmokeField.puff(level, cloud, 30.0F, player);
+		} else {
+			SmokeField.puffCloud(level, cloud, 30.0F, player);
+		}
 		level.playSound(null, ground.getX(), top, ground.getZ(), SoundEvents.WEATHER_RAIN_ABOVE, SoundSource.WEATHER, 1.0F, 1.0F);
 		return true;
 	}
@@ -314,15 +343,28 @@ final class SmokeCloudshaper {
 			double cx = rain.ground.getX() + 0.5, cz = rain.ground.getZ() + 0.5;
 			// the cloud keeps itself up, and rains
 			if (now % 10 == 0) {
-				SmokeField.puffCloud(level, new Vec3(cx, rain.top, cz), 3.0F, owner);
+				if (rain.soot) {
+					SmokeField.puff(level, new Vec3(cx, rain.top, cz), 3.0F, owner);
+				} else {
+					SmokeField.puffCloud(level, new Vec3(cx, rain.top, cz), 3.0F, owner);
+				}
 			}
-			level.sendParticles(ParticleTypes.FALLING_WATER, cx, rain.top - 0.5, cz, 24, RAIN_RADIUS * 0.5, 0.2, RAIN_RADIUS * 0.5, 0.0);
-			level.sendParticles(ParticleTypes.CLOUD, cx, rain.top + 0.5, cz, 4, RAIN_RADIUS * 0.45, 0.3, RAIN_RADIUS * 0.45, 0.0);
+			if (rain.soot) {
+				level.sendParticles(ParticleTypes.ASH, cx, rain.top - 2.0, cz, 40, RAIN_RADIUS * 0.5, 2.0, RAIN_RADIUS * 0.5, 0.0);
+				level.sendParticles(ParticleTypes.LARGE_SMOKE, cx, rain.top + 0.5, cz, 3, RAIN_RADIUS * 0.45, 0.3, RAIN_RADIUS * 0.45, 0.0);
+			} else {
+				level.sendParticles(ParticleTypes.FALLING_WATER, cx, rain.top - 0.5, cz, 24, RAIN_RADIUS * 0.5, 0.2, RAIN_RADIUS * 0.5, 0.0);
+				level.sendParticles(ParticleTypes.CLOUD, cx, rain.top + 0.5, cz, 4, RAIN_RADIUS * 0.45, 0.3, RAIN_RADIUS * 0.45, 0.0);
+			}
 			if (now % 40 == 0) {
 				level.playSound(null, cx, rain.top, cz, SoundEvents.WEATHER_RAIN, SoundSource.WEATHER, 0.6F, 1.0F);
 			}
 			if (now % 10 == 0) {
-				water(level, rain);
+				if (rain.soot) {
+					soot(level, rain, owner);
+				} else {
+					water(level, rain);
+				}
 			}
 			return false;
 		});
@@ -346,6 +388,15 @@ final class SmokeCloudshaper {
 		AABB box = new AABB(g).inflate(RAIN_RADIUS, 0, RAIN_RADIUS).expandTowards(0, rain.top - g.getY() + 2, 0);
 		for (Entity e : level.getEntitiesOfClass(Entity.class, box, Entity::isOnFire)) {
 			e.clearFire();
+		}
+	}
+
+	/** Under a raincloud of soot: everyone but its maker is blinded; nothing is put out. */
+	private static void soot(ServerLevel level, Rain rain, @Nullable ServerPlayer owner) {
+		BlockPos g = rain.ground;
+		AABB box = new AABB(g).inflate(RAIN_RADIUS, 0, RAIN_RADIUS).expandTowards(0, rain.top - g.getY() + 2, 0);
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box, e -> e.isAlive() && e != owner)) {
+			e.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 40, 0, false, false, true));
 		}
 	}
 
