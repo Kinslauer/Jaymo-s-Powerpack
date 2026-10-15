@@ -61,6 +61,7 @@ final class KingdomCommands {
 				.then(Commands.literal("tower").executes(c -> found(c, Castle.Kind.TOWER)))
 				.then(Commands.literal("village").executes(KingdomCommands::foundVillage)))
 			.then(Camps.command())
+			.then(FleetCommands.command())
 			.then(Roads.command())
 			.then(RoamingCaravans.command())
 			.then(Milestones.command())

@@ -20,10 +20,10 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The smeltery, on Tinkers' screen (MIT): melting slots down the left with their heat, the molten pool in the middle
- * (hover for amounts, click to pour that one first), the lava bucket and its gauge on the right.
+ * (hover for amounts, click to pour that one first), the lava bucket and its gauge on the right. (0.10.127) Drawn like
+ * the H screen: dark panel, bronze stripe, sunken slots and pool.
  */
 public class SmelteryScreen extends AbstractContainerScreen<SmelteryMenu> {
-	private static final Identifier TEXTURE = JaymosPowers.id("textures/gui/tinkering/smeltery.png");
 	/** The pool's box and the fuel gauge's, on the texture. */
 	private static final int POOL_X = 8, POOL_Y = 16, POOL_W = 106, POOL_H = 106;
 	private static final int GAUGE_X = 152, GAUGE_Y = 32, GAUGE_W = 16, GAUGE_H = 90;
@@ -41,30 +41,27 @@ public class SmelteryScreen extends AbstractContainerScreen<SmelteryMenu> {
 	@Override
 	public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		super.extractBackground(graphics, mouseX, mouseY, a);
-		graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, leftPos, topPos, 0.0F, 0.0F, imageWidth, imageHeight, 256, 256);
+		TinkerUi.panel(graphics, leftPos, topPos, imageWidth, imageHeight);
 		int slots = menu.slotsInUse();
+		int rows = (slots + SmelteryMenu.COLUMNS - 1) / SmelteryMenu.COLUMNS;
 		if (slots > 0) {
-			int rows = (slots + SmelteryMenu.COLUMNS - 1) / SmelteryMenu.COLUMNS;
-			int x0 = leftPos + PANEL_X, y0 = topPos + SmelteryMenu.SLOT_Y - 6;
-			graphics.fill(x0, y0, x0 + PANEL_W, y0 + rows * 18 + 12, 0xFFC6C6C6);
-			graphics.fill(x0, y0, x0 + PANEL_W, y0 + 1, 0xFFFFFFFF);
-			graphics.fill(x0, y0, x0 + 1, y0 + rows * 18 + 12, 0xFFFFFFFF);
-			graphics.fill(x0, y0 + rows * 18 + 11, x0 + PANEL_W, y0 + rows * 18 + 12, 0xFF555555);
-			for (int i = 0; i < slots; i++) {
-				int x = leftPos + SmelteryMenu.SLOT_X + i % SmelteryMenu.COLUMNS * 18 - 1;
-				int y = topPos + SmelteryMenu.SLOT_Y + i / SmelteryMenu.COLUMNS * 18 - 1;
-				graphics.fill(x, y, x + 18, y + 18, 0xFF8B8B8B);
-				graphics.fill(x, y, x + 18, y + 1, 0xFF373737);
-				graphics.fill(x, y, x + 1, y + 18, 0xFF373737);
-				graphics.fill(x, y + 17, x + 18, y + 18, 0xFFFFFFFF);
-				graphics.fill(x + 17, y, x + 18, y + 18, 0xFFFFFFFF);
-				int progress = menu.progress(i);
-				if (progress < 0) {
-					graphics.fill(x + 1, y + 1, x + 17, y + 17, 0x60FF0000);
-				} else if (progress > 0) {
-					int h = Math.max(1, progress * 16 / 100);
-					graphics.fill(x + 1, y + 17 - h, x + 17, y + 17, 0x70FF7A00);
-				}
+			// the melting slots, on a panel of their own to the left
+			TinkerUi.panel(graphics, leftPos + PANEL_X, topPos + SmelteryMenu.SLOT_Y - 6, PANEL_W, rows * 18 + 12);
+		}
+		TinkerUi.slots(graphics, menu, leftPos, topPos, -1);
+		TinkerUi.well(graphics, leftPos + POOL_X - 1, topPos + POOL_Y - 1, POOL_W + 2, POOL_H + 2);
+		TinkerUi.well(graphics, leftPos + GAUGE_X - 1, topPos + GAUGE_Y - 1, GAUGE_W + 2, GAUGE_H + 2);
+		// lava goes in above, the empty bucket comes out below
+		TinkerUi.arrowDown(graphics, leftPos + SmelteryMenu.FUEL_X + 8, topPos + SmelteryMenu.FUEL_Y + 20, SmelteryMenu.BUCKET_Y - SmelteryMenu.FUEL_Y - 22, TinkerUi.DIM);
+		for (int i = 0; i < slots; i++) {
+			int x = leftPos + SmelteryMenu.SLOT_X + i % SmelteryMenu.COLUMNS * 18 - 1;
+			int y = topPos + SmelteryMenu.SLOT_Y + i / SmelteryMenu.COLUMNS * 18 - 1;
+			int progress = menu.progress(i);
+			if (progress < 0) {
+				graphics.fill(x + 1, y + 1, x + 17, y + 17, 0x60FF0000);
+			} else if (progress > 0) {
+				int h = Math.max(1, progress * 16 / 100);
+				graphics.fill(x + 1, y + 17 - h, x + 17, y + 17, 0x70FF7A00);
 			}
 		}
 		SmelteryEntity smeltery = smeltery();
@@ -163,6 +160,11 @@ public class SmelteryScreen extends AbstractContainerScreen<SmelteryMenu> {
 			return true;
 		}
 		return super.mouseClicked(event, doubleClick);
+	}
+
+	@Override
+	protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+		TinkerUi.labels(graphics, font, title, titleLabelX, titleLabelY, playerInventoryTitle, inventoryLabelX, inventoryLabelY);
 	}
 
 	@Override

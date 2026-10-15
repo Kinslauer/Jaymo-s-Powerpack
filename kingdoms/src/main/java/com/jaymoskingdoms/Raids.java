@@ -85,6 +85,8 @@ final class Raids {
 	static final int PILLAGERS_PER_VINDICATOR = 2;
 	/** (0.5.47) An orc war band: every this many, one is a ranger. */
 	static final int ORCS_PER_RANGER = 3;
+	/** (0.7.42) A pirate landing party: every this many, one is a gunner (pistols). */
+	static final int PIRATES_PER_GUNNER = 3;
 
 	enum Phase {
 		MARCH, PLUNDER, RETURN
@@ -182,6 +184,7 @@ final class Raids {
 	/** The nearest standing settlement within {@link #REACH} of {@code camp} that has a player near it and hasn't been raided lately. */
 	static @Nullable Faction target(MinecraftServer server, ServerLevel level, Faction camp) {
 		long now = level.getGameTime();
+		boolean pirates = Camps.pirate(server, camp.id());
 		Faction best = null;
 		double bestDist = REACH * REACH;
 		for (Faction f : Factions.all(server)) {
@@ -193,6 +196,10 @@ final class Raids {
 				continue;
 			}
 			if (ACTIVE.values().stream().anyMatch(r -> r.target == f.id())) {
+				continue;
+			}
+			if (pirates && !PirateCoves.coastal(level, f)) {
+				// (0.7.42) pirates raid only from the sea
 				continue;
 			}
 			best = f;
@@ -219,7 +226,8 @@ final class Raids {
 	static boolean start(ServerLevel level, Faction camp, Faction target) {
 		MinecraftServer server = level.getServer();
 		RandomSource random = level.getRandom();
-		BlockPos muster = muster(level, camp, target);
+		boolean pirates = Camps.pirate(server, camp.id());
+		BlockPos muster = pirates ? PirateCoves.landing(level, target) : muster(level, camp, target);
 		if (muster == null || raiding(camp.id())) {
 			return false;
 		}
@@ -229,7 +237,8 @@ final class Raids {
 		RAIDED.put(target.id(), now);
 		Camps.noteRaid(server, camp.id(), now);
 		boolean illagers = Camps.illager(server, camp.id()), orcs = Camps.orc(server, camp.id());
-		int band = illagers ? Illagers.fighters(camp) : orcs ? OrcCamps.fighters(camp) : camp.holdings().count(Folk.BARBARIAN);
+		int band = illagers ? Illagers.fighters(camp) : orcs ? OrcCamps.fighters(camp) : pirates ? PirateCoves.fighters(camp)
+			: camp.holdings().count(Folk.BARBARIAN);
 		int size = Math.min(PARTY_MAX, PARTY_BASE + band / PARTY_PER);
 		for (int i = 0; i < size; i++) {
 			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, muster.offset(random.nextInt(7) - 3, 0, random.nextInt(7) - 3));
@@ -247,20 +256,28 @@ final class Raids {
 			}
 			raider.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
 			// (0.5.47) an orc war band: grunts, every third one a ranger
-			int role = !orcs ? Folk.BARBARIAN : i % ORCS_PER_RANGER == ORCS_PER_RANGER - 1 ? Orcs.RANGER : Orcs.GRUNT;
+			int role = pirates ? (i % PIRATES_PER_GUNNER == PIRATES_PER_GUNNER - 1 ? Pirates.GUNNER : Pirates.DECKHAND)
+				: !orcs ? Folk.BARBARIAN : i % ORCS_PER_RANGER == ORCS_PER_RANGER - 1 ? Orcs.RANGER : Orcs.GRUNT;
 			raider.setup(role, camp, target.seat(), RAID_HOME_RADIUS);
 			level.addFreshEntity(raider);
 			// (after it's added: its load mustn't take it for a stray)
 			raider.setTask(TASK);
 			raid.party.add(raider.getUUID());
-			// (0.5.47) some ride steppe ponies
-			Stables.pony(level, raider, camp, i);
+			// (0.5.47) some ride steppe ponies (not pirates: they come ashore from their ship)
+			if (!pirates) {
+				Stables.pony(level, raider, camp, i);
+			}
 		}
 		tell(level, target.seat(), Component.translatable(illagers ? "message.jaymoskingdoms.raid.announce.illager"
-				: orcs ? "message.jaymoskingdoms.raid.announce.orc" : "message.jaymoskingdoms.raid.announce",
+				: orcs ? "message.jaymoskingdoms.raid.announce.orc" : pirates ? "message.jaymoskingdoms.raid.announce.pirate"
+				: "message.jaymoskingdoms.raid.announce",
 			camp.name(), target.name()).withStyle(ChatFormatting.RED));
 		for (ServerPlayer player : players(level, target.seat(), ANNOUNCE_RANGE)) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAID_HORN.value(), SoundSource.HOSTILE, 2.0F, 0.8F);
+		}
+		if (pirates) {
+			// (0.7.42) their ship stands off the landing while it's on
+			PirateCoves.raidStarted(level, camp, muster);
 		}
 		JaymosKingdoms.LOGGER.info("{} raids {} with {} raiders from {}", camp.name(), target.name(), raid.party.size(), muster);
 		return true;
@@ -486,7 +503,8 @@ final class Raids {
 	 * roster: {@code folk}); a player who killed him earns the target's thanks.
 	 */
 	static void raiderDied(ServerLevel level, LivingEntity raider, int camp, DamageSource source, boolean folk) {
-		if (folk) {
+		if (folk && !(raider instanceof Folk sailor && Pirates.offRoster(sailor.role()))) {
+			// ((0.7.42) a pirate gunner in a landing party was never on the roster)
 			UNDO.add(new int[] {camp, raider instanceof Folk f ? f.role() : Folk.BARBARIAN});
 		}
 		Raid raid = ACTIVE.get(camp);

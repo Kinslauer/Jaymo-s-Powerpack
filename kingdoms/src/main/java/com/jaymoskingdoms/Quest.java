@@ -36,10 +36,15 @@ public record Quest(String id, int kind, String template, Giver giver, Objective
 	 */
 	public static final int GRUDGE = 13;
 	/**
+	 * (0.7.42) Sailing ({@link Navies}): see a merchantman from the giver's harbour safely into another realm's (target
+	 * {@code faction:<id>}, pos its mooring, place its name; spawned: she's sailed, other: her).
+	 */
+	public static final int ESCORT = 14;
+	/**
 	 * (0.7.31) A settlement struck by a natural disaster asks for its rubble cleared ({@link DisasterRelief}): break
 	 * count blocks of stone, earth, sand, drifts or wreckage near pos (its seat). place: the settlement.
 	 */
-	public static final int RELIEF = 14;
+	public static final int RELIEF = 15;
 
 	/** Who asked: their UUID and name, their settlement, whether it's its king, and their trade (a profession's path). */
 	public record Giver(UUID uuid, String name, int faction, boolean king, String job) {
