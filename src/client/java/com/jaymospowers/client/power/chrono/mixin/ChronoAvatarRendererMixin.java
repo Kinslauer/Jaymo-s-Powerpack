@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Puts a Time Flow blow on a player's render state (see ChronoFlowPose). */
+/** Puts a Time Flow blow, Overclock's run and its streak mark on a player's render state (ChronoFlowPose, ChronoRunPose, ChronoStreak). */
 @Mixin(AvatarRenderer.class)
 abstract class ChronoAvatarRendererMixin {
 	@Inject(
@@ -17,5 +17,7 @@ abstract class ChronoAvatarRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$chronoFlow(Avatar entity, AvatarRenderState state, float partialTicks, CallbackInfo ci) {
 		ChronoFlowPose.extract(entity, state, partialTicks);
+		com.jaymospowers.client.power.chrono.ChronoRunPose.extract(entity, state, partialTicks);
+		com.jaymospowers.client.power.chrono.ChronoStreak.extract(entity, state);
 	}
 }

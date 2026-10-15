@@ -73,6 +73,13 @@ public final class ChronoSpeed {
 	public static final AttachmentType<Integer> WALL_RUN = AttachmentRegistry.create(JaymosPowers.id("chrono_wall_run"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 
+	/**
+	 * (0.11.57) On a player while Overclock runs, for everyone to see the speed-force streak, the run and the glyphs
+	 * ({@code ChronoStreak}, {@code ChronoRunPose}). Only on while overclocked, never saved.
+	 */
+	public static final AttachmentType<Boolean> FLASH = AttachmentRegistry.create(JaymosPowers.id("chrono_flash"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+
 	/** Client → server: running up the wall on side {@code face} (into it), or -1 for off it. */
 	public record WallRun(int face) implements CustomPacketPayload {
 		public static final Type<WallRun> TYPE = new Type<>(JaymosPowers.id("chrono_wall_run"));
@@ -113,6 +120,11 @@ public final class ChronoSpeed {
 		return player instanceof ServerPlayer sp && ChronoPower.overclocked(sp);
 	}
 
+	/** Whether {@code player} is overclocked as any client sees it (synced {@link #FLASH}, or the local player's own state). */
+	public static boolean flashing(Player player) {
+		return player.getAttached(FLASH) != null || overclocked(player);
+	}
+
 	/** Water and (since 0.11.40) lava hold up an overclocked player who's sprinting. Slow down on lava and you sink in. */
 	public static boolean runsOn(Player player, FluidState fluid) {
 		return (fluid.is(FluidTags.WATER) || fluid.is(FluidTags.LAVA)) && runsOnFluids(player);
@@ -126,6 +138,13 @@ public final class ChronoSpeed {
 	/** Each tick (server): the sprint and step modifiers follow Overclock and sprinting; the streak behind you. */
 	static void tick(ServerPlayer player, ServerLevel level, boolean overclocked) {
 		control(player, overclocked && player.isShiftKeyDown() && !player.isPassenger());
+		if (overclocked != (player.getAttached(FLASH) != null)) {
+			if (overclocked) {
+				player.setAttached(FLASH, true);
+			} else {
+				player.removeAttached(FLASH);
+			}
+		}
 		boolean sprinting = overclocked && player.isSprinting();
 		modifier(player.getAttribute(Attributes.MOVEMENT_SPEED), SPRINT_MODIFIER, SPRINT_BOOST, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, sprinting);
 		modifier(player.getAttribute(Attributes.STEP_HEIGHT), STEP_MODIFIER, STEP_BOOST, AttributeModifier.Operation.ADD_VALUE, overclocked);
@@ -209,6 +228,9 @@ public final class ChronoSpeed {
 	/** Take both modifiers off (power lost, Overclock cut short). */
 	static void clear(ServerPlayer player) {
 		control(player, false);
+		if (player.getAttached(FLASH) != null) {
+			player.removeAttached(FLASH);
+		}
 		if (player.getAttached(WALL_RUN) != null) {
 			player.removeAttached(WALL_RUN);
 		}
