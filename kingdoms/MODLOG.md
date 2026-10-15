@@ -3046,3 +3046,9 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
   `IMBUED` holds the stamp of their current one, and a blade with another stamp has gone cold (taken off when a player
   holds or carries it, swept every `SWEEP_EVERY` ticks). After a restart the blade's own clock decides. Tooltip:
   "Imbued with Fire by Andy (95s)". The Wind Cyclone's imbued element now comes from a blade the player holds or carries.
+- **0.7.51, emeralds in bundles; private conversations:** every price the kingdoms ask (a villager's bargain, tolls,
+  fines and bribes, the wizard's writ and respec, stables, rickshaws, a retinue, a lost coach fare) now counts and
+  takes emeralds carried in a bundle too, loose ones first (`Purse`). Before, emeralds in a bundle didn't count, so a
+  bargain you could afford was taken as a refusal and ended. What's said to one player in their own conversation (an
+  approach and its replies, a quest given, refused or thanked, the wizard's work) is shown only to that player
+  (`Speech.tell`); ambient talk, cries and festivals are still heard by everyone near.

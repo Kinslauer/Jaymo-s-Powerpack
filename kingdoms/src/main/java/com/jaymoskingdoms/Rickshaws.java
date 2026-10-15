@@ -687,19 +687,11 @@ public final class Rickshaws {
 		if (player.isCreative()) {
 			return true;
 		}
-		if (player.getInventory().countItem(Items.EMERALD) < fare) {
+		if (Purse.count(player, Items.EMERALD) < fare) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.rickshaw.cant_pay", fare).withStyle(ChatFormatting.RED));
 			return false;
 		}
-		int take = fare;
-		for (int slot = 0; slot < player.getInventory().getContainerSize() && take > 0; slot++) {
-			ItemStack stack = player.getInventory().getItem(slot);
-			if (stack.is(Items.EMERALD)) {
-				int n = Math.min(take, stack.getCount());
-				stack.shrink(n);
-				take -= n;
-			}
-		}
+		Purse.take(player, Items.EMERALD, fare);
 		Factions.update(player.level().getServer(), f.id(), x -> x.withTreasury(x.treasury() + fare));
 		return true;
 	}

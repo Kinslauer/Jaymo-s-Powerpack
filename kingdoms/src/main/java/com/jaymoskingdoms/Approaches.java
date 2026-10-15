@@ -839,7 +839,7 @@ public final class Approaches {
 		a.more = Component.translatable(more, args);
 		a.color = a.topic == ACCUSE ? Speech.RED : a.topic == HALT || a.topic == WARN || a.topic == SEARCH || a.topic == TOLL || a.topic == LOYALTY ? Speech.YELLOW
 			: a.topic == QUEST_OFFER || a.topic == QUEST_CHECK || a.topic == GIFT ? Speech.GOLD : Speech.WHITE;
-		Speech.say(level, a.mob, a.line, a.color, SPEECH_RANGE);
+		tell(level, a, a.line, a.color);
 		level.playSound(null, a.mob.getX(), a.mob.getY(), a.mob.getZ(), a.mob instanceof Villager ? SoundEvents.VILLAGER_AMBIENT : SoundEvents.VILLAGER_TRADE,
 			SoundSource.NEUTRAL, 0.8F, a.mob.isBaby() ? 1.5F : 1.0F);
 		if (a.foreign) {
@@ -930,7 +930,7 @@ public final class Approaches {
 		if (more) {
 			a.elaborated = true;
 		}
-		Speech.say(level, a.mob, more ? a.more : a.line, a.color, SPEECH_RANGE);
+		tell(level, a, more ? a.more : a.line, a.color);
 		level.playSound(null, a.mob.getX(), a.mob.getY(), a.mob.getZ(), a.mob instanceof Villager ? SoundEvents.VILLAGER_AMBIENT : SoundEvents.VILLAGER_TRADE,
 			SoundSource.NEUTRAL, 0.8F, a.mob.isBaby() ? 1.5F : 1.0F);
 		Approach active = ACTIVE.get(a.player);
@@ -1019,7 +1019,7 @@ public final class Approaches {
 			// (0.6.2) "tell me more": they do, and wait on your answer a while longer
 			a.elaborated = true;
 			a.until = Math.max(a.until, level.getGameTime() + ASK_TICKS);
-			Speech.say(level, a.mob, a.more, a.color, SPEECH_RANGE);
+			tell(level, a, a.more, a.color);
 			ask(player, a);
 			return;
 		}
@@ -1036,7 +1036,12 @@ public final class Approaches {
 	}
 
 	private static void reply(ServerLevel level, Approach a, String key, int color, Object... args) {
-		Speech.say(level, a.mob, Component.translatable(key, args), color, SPEECH_RANGE);
+		tell(level, a, Component.translatable(key, args), color);
+	}
+
+	/** (0.7.51) What they say in an approach is said to the one they came to: only that player sees it. */
+	private static void tell(ServerLevel level, Approach a, Component words, int color) {
+		Speech.tell(level, a.mob, level.getServer().getPlayerList().getPlayer(a.player), words, color);
 	}
 
 	private static void answered(ServerLevel level, Approach a, ServerPlayer player, Faction f, int option) {
@@ -1370,27 +1375,13 @@ public final class Approaches {
 
 	// ---- the player's pack ---------------------------------------------------------------------------------------------
 
+	/** Emeralds the player carries, bundles included ({@link Purse}). */
 	static int emeralds(ServerPlayer player) {
-		int n = 0;
-		for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
-			if (stack.is(Items.EMERALD)) {
-				n += stack.getCount();
-			}
-		}
-		return n;
+		return Purse.count(player, Items.EMERALD);
 	}
 
 	static void take(ServerPlayer player, Item item, int n) {
-		for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
-			if (n <= 0) {
-				return;
-			}
-			if (stack.is(item)) {
-				int k = Math.min(n, stack.getCount());
-				stack.shrink(k);
-				n -= k;
-			}
-		}
+		Purse.take(player, item, n);
 	}
 
 	/** Something the player could hand a hungry villager (the first plain food in their pack), or empty. */

@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.golem.IronGolem;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Words spoken aloud in the world (a ruler's temper, a witness crying thief): they float above the speaker's head for
@@ -56,6 +57,18 @@ public final class Speech {
 		} else {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.says", speaker.getDisplayName(), words).withColor(color));
 		}
+	}
+
+	/**
+	 * (0.7.51) {@code speaker} says {@code words} to {@code player}, in a conversation of theirs (an approach, a quest, the
+	 * wizard): only that player sees the bubble, so others nearby aren't shown talk that isn't theirs. In the speaker's
+	 * tongue, like {@link #say}.
+	 */
+	public static void tell(ServerLevel level, Entity speaker, @Nullable ServerPlayer player, Component words, int color) {
+		if (player == null || speaker instanceof IronGolem) {
+			return;
+		}
+		sayTo(level, speaker, player, Languages.heard(player, speaker, words), color);
 	}
 
 	/** {@code speaker} says {@code words} aloud: every player within {@code range} sees it over their head. */

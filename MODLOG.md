@@ -1274,3 +1274,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   big negative number, which passed the "within 2 ticks" test, so every client counted as overclocked and any sprint
   ran on water (since 0.10.96 gave the water run its standing shape). Now only 0 to 2 ticks ago counts
   (`ChronoSpeed.overclocked`).
+- **0.11.29 / Kingdoms 0.7.51:** emeralds in bundles pay for Kingdoms' bargains, tolls, stables and the rest; what a
+  villager says in your own conversation is only shown to you (`kingdoms/MODLOG.md`).

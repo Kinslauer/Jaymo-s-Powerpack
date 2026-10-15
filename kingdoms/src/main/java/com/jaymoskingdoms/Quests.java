@@ -326,8 +326,8 @@ public final class Quests {
 		}
 		int rep = Reputation.get(player, f.id());
 		if (rep <= Reputation.HOSTILE || (giver instanceof Folk && rep < Reputation.WELCOME)) {
-			Speech.say(level, giver, Component.translatable(giver instanceof Folk ? "quest.jaymoskingdoms.refuse.king" : "quest.jaymoskingdoms.refuse"),
-				Speech.RED, 16.0);
+			Speech.tell(level, giver, player, Component.translatable(giver instanceof Folk ? "quest.jaymoskingdoms.refuse.king" : "quest.jaymoskingdoms.refuse"),
+				Speech.RED);
 			send(player, new QuestNet.Open(giver.getId(), name, List.of(),
 				Component.translatable(giver instanceof Folk ? "quest.jaymoskingdoms.untrusted.king" : "quest.jaymoskingdoms.untrusted", f.name())));
 			return;
@@ -437,8 +437,8 @@ public final class Quests {
 			// (a dig: the giver lends a brush)
 			give(player, new ItemStack(Items.BRUSH));
 		}
-		Speech.say(level, giver, Component.translatable(q.royal() ? "quest.jaymoskingdoms.said.accept.king" : "quest.jaymoskingdoms.said.accept"),
-			Speech.GOLD, 16.0);
+		Speech.tell(level, giver, player, Component.translatable(q.royal() ? "quest.jaymoskingdoms.said.accept.king" : "quest.jaymoskingdoms.said.accept"),
+			Speech.GOLD);
 		player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.accepted", title(q)).withStyle(ChatFormatting.YELLOW));
 		level.playSound(null, player.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
 		sync(player, true);
@@ -475,8 +475,8 @@ public final class Quests {
 		if (member != null && r.standing() > 0) {
 			KingdomEvents.standing(level.getServer(), player, f, member.standing() + r.standing());
 		}
-		Speech.say(level, giver, Component.translatable(q.royal() ? "quest.jaymoskingdoms.said.thanks.king" : "quest.jaymoskingdoms.said.thanks"),
-			Speech.GOLD, 16.0);
+		Speech.tell(level, giver, player, Component.translatable(q.royal() ? "quest.jaymoskingdoms.said.thanks.king" : "quest.jaymoskingdoms.said.thanks"),
+			Speech.GOLD);
 		player.sendSystemMessage(Component.translatable("quest.jaymoskingdoms.complete", title(q)).withStyle(ChatFormatting.GOLD));
 		level.playSound(null, player.blockPosition(), q.royal() ? SoundEvents.UI_TOAST_CHALLENGE_COMPLETE : SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS,
 			1.0F, 1.0F);

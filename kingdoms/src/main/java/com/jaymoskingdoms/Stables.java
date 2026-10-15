@@ -605,19 +605,11 @@ public final class Stables {
 		if (player.isCreative() || cost <= 0) {
 			return true;
 		}
-		if (player.getInventory().countItem(Items.EMERALD) < cost) {
+		if (Purse.count(player, Items.EMERALD) < cost) {
 			tell(player, Component.translatable("message.jaymoskingdoms.stable.cant_pay", cost).withStyle(ChatFormatting.RED));
 			return false;
 		}
-		int take = cost;
-		for (int slot = 0; slot < player.getInventory().getContainerSize() && take > 0; slot++) {
-			ItemStack stack = player.getInventory().getItem(slot);
-			if (stack.is(Items.EMERALD)) {
-				int n = Math.min(take, stack.getCount());
-				stack.shrink(n);
-				take -= n;
-			}
-		}
+		Purse.take(player, Items.EMERALD, cost);
 		Factions.update(player.level().getServer(), f.id(), x -> x.withTreasury(x.treasury() + cost));
 		return true;
 	}

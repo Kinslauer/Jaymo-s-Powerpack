@@ -446,7 +446,7 @@ public final class Classes {
 		if (staff && answer.option() == 0) {
 			// the staff's recipe: into the recipe book, and said out loud
 			player.awardRecipesByKey(List.of(STAFF_RECIPE));
-			Speech.say(level, wizard, Component.translatable("talk.jaymoskingdoms.wizard.staff.done"), Speech.GOLD, 16.0);
+			Speech.tell(level, wizard, player, Component.translatable("talk.jaymoskingdoms.wizard.staff.done"), Speech.GOLD);
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.class.staff_recipe").withStyle(ChatFormatting.LIGHT_PURPLE));
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
 			return true;
@@ -462,7 +462,7 @@ public final class Classes {
 		Approaches.take(player, Items.EMERALD, WRIT_EMERALDS);
 		player.setAttached(WRIT_BOUGHT, player.level().getGameTime());
 		player.getInventory().placeItemBackInInventory(new ItemStack(WRIT), Prediction.SERVER_ONLY);
-		Speech.say(level, wizard, Component.translatable("talk.jaymoskingdoms.wizard.writ.done"), Speech.GOLD, 16.0);
+		Speech.tell(level, wizard, player, Component.translatable("talk.jaymoskingdoms.wizard.writ.done"), Speech.GOLD);
 		return true;
 	}
 

@@ -383,7 +383,7 @@ public final class Skills {
 		Approaches.take(player, Items.EMERALD, price);
 		respec(player);
 		ServerLevel level = (ServerLevel) player.level();
-		Speech.say(level, wizard, Component.translatable("talk.jaymoskingdoms.wizard.respec.done"), Speech.GOLD, 16.0);
+		Speech.tell(level, wizard, player, Component.translatable("talk.jaymoskingdoms.wizard.respec.done"), Speech.GOLD);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 0.8F, 1.2F);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.skills.respec.wizard").withStyle(ChatFormatting.LIGHT_PURPLE));
 		return true;

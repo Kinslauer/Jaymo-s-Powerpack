@@ -411,24 +411,10 @@ final class Retinue {
 
 	/** Takes {@code n} emeralds from {@code p} if they have that many. */
 	private static boolean takeEmeralds(ServerPlayer p, int n) {
-		int have = 0;
-		for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
-			if (p.getInventory().getItem(i).is(Items.EMERALD)) {
-				have += p.getInventory().getItem(i).getCount();
-			}
-		}
-		if (have < n) {
+		if (Purse.count(p, Items.EMERALD) < n) {
 			return false;
 		}
-		for (int i = 0; i < p.getInventory().getContainerSize() && n > 0; i++) {
-			ItemStack s = p.getInventory().getItem(i);
-			if (s.is(Items.EMERALD)) {
-				int take = Math.min(n, s.getCount());
-				s.shrink(take);
-				n -= take;
-			}
-		}
-		p.getInventory().setChanged();
+		Purse.take(p, Items.EMERALD, n);
 		return true;
 	}
 
