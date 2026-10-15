@@ -69,6 +69,7 @@ final class SmokeBomb {
 		ItemStack look = new ItemStack(Items.FIREWORK_STAR);
 		Snowball ball = Projectile.spawnProjectileFromRotation((l, owner, stack) -> new Snowball(l, owner, stack), level, look, player, 0.0F, SPEED,
 			1.0F);
+		SmokeMoves.begin(player, SmokeMoves.BOMB);
 		BOMBS.add(new Bomb(ball, player.getUUID(), SmokePower.mastered(player) ? AMOUNT_MASTERED : AMOUNT));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SNOWBALL_THROW, SoundSource.PLAYERS, 0.6F, 0.5F);
 		return true;

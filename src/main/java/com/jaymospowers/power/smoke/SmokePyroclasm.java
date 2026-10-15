@@ -75,6 +75,11 @@ final class SmokePyroclasm {
 		ServerTickEvents.END_SERVER_TICK.register(SmokePyroclasm::tick);
 	}
 
+	/** Gathering a Pyroclasm now. */
+	static boolean isGathering(java.util.UUID id) {
+		return GATHERING.containsKey(id);
+	}
+
 	/** C pressed ({@code down}) or let go. */
 	static void key(ServerPlayer player, boolean down) {
 		long now = player.level().getGameTime();
@@ -88,6 +93,7 @@ final class SmokePyroclasm {
 				return;
 			}
 			GATHERING.put(player.getUUID(), now);
+			SmokeMoves.begin(player, SmokeMoves.GATHER);
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BLAZE_AMBIENT, SoundSource.PLAYERS, 0.8F, 0.5F);
 			return;
 		}
@@ -105,6 +111,7 @@ final class SmokePyroclasm {
 		Vec3 start = ground(player.level(), player.position().add(dir.scale(1.5)));
 		FLOWS.add(new Flow(player.level(), player.getUUID(), start, dir, Mth.lerp(charge, REACH_MIN, REACH_MAX)));
 		SmokePower.cooldown(player, SmokeState.PYRO, COOLDOWN);
+		SmokeMoves.begin(player, SmokeMoves.PYRO);
 		ServerLevel level = player.level();
 		level.playSound(null, start.x, start.y, start.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.8F + charge, 0.5F);
 		level.playSound(null, start.x, start.y, start.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 1.2F, 0.4F);

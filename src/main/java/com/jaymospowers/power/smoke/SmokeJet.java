@@ -30,8 +30,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Smoke Jet (hold X): a hard jet of smoke out of your hands along where you look, for as long as you hold it and have
  * the food for it. The jet is the real gas ({@link SmokeField}): it's laid along the way, thickest where it ends, so it
- * lingers and drifts like any of your smoke, and the smoke already in its way is driven on. It nudges what it catches
- * and fills a ship's sails, more gently than a Wind user's gale (Jaymo's Kingdoms reads the {@link #KINGDOMS_TAG}).
+ * lingers and drifts like any of your smoke, and the smoke already in its way is driven on. It hurts and throws back
+ * what it catches, and fills a ship's sails, more gently than a Wind user's gale (Jaymo's Kingdoms reads the {@link #KINGDOMS_TAG}).
  * Everyone in view sees it ({@link #JETTING}; the client draws it).
  */
 public final class SmokeJet {
@@ -41,7 +41,12 @@ public final class SmokeJet {
 	static final float POUR = 1.5F;
 	static final double STEP = 2.0;
 	/** Its push on what it catches (blocks/tick a tick, near you; nothing at its far end), and the most it gives. */
-	static final double PUSH = 0.035, MOST = 0.5;
+	static final double PUSH = 0.09, MOST = 1.1;
+	/** It lifts what it shoves a little, so they're thrown back rather than dragged. */
+	static final double LIFT = 0.25;
+	/** Damage to the living it catches, every {@link #HIT_EVERY} ticks: full at your hands, half at its far end. */
+	static final float DAMAGE = 2.0F;
+	static final int HIT_EVERY = 10;
 	/** Hunger a tick; at or below this food you can't keep it up. */
 	static final float EXHAUSTION = 0.025F;
 	static final int MIN_FOOD = 6;
@@ -152,12 +157,15 @@ public final class SmokeJet {
 			if (push <= 0.0) {
 				continue;
 			}
-			Vec3 v = e.getDeltaMovement().add(look.scale(push));
+			Vec3 v = e.getDeltaMovement().add(look.scale(push)).add(0.0, push * LIFT, 0.0);
 			if (v.length() > MOST) {
 				v = v.normalize().scale(MOST);
 			}
 			e.setDeltaMovement(v);
 			e.syncVelocity = true;
+			if (e instanceof LivingEntity living && player.tickCount % HIT_EVERY == 0) {
+				living.hurtServer(level, player.damageSources().playerAttack(player), DAMAGE * (float)(1.0 - 0.5 * t / RANGE));
+			}
 			if (soot && e instanceof LivingEntity living && player.tickCount % 10 == 0) {
 				// Soot Jet (smog): it blinds what it catches
 				living.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.BLINDNESS, SOOT_BLIND_TICKS, 0), player);

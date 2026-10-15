@@ -52,6 +52,7 @@ public final class SmokeStep {
 		level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.8F, 0.7F);
 		player.teleportTo(level, to.x, to.y, to.z, Set.of(), player.getYRot(), player.getXRot(), false);
 		player.resetFallDistance();
+		SmokeMoves.begin(player, SmokeMoves.STEP);
 		Vec3 out = to.add(0.0, player.getBbHeight() * 0.5, 0.0);
 		SmokeField.puff(level, out, PUFF_TO, player);
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, out.x, out.y, out.z, 24, 0.3, 0.6, 0.3, 0.02);

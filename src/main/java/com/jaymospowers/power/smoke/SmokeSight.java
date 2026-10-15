@@ -52,6 +52,7 @@ public final class SmokeSight {
 			return;
 		}
 		player.setAttached(ON, true);
+		SmokeMoves.begin(player, SmokeMoves.SIGHT);
 		player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.4F, 1.6F);
 	}
 
