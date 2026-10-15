@@ -224,7 +224,7 @@ public final class ZFighterKi {
 		boolean griefing;
 		/** SPIRIT: the thrower's entity id, so the client keeps drawing the same sphere it watched gather. */
 		int fxId;
-		/** Which end crystal orb is this one's on the clients, and how big across (0: by kind). */
+		/** Which orb is this one's on the clients, and how big across (0: by kind). */
 		final int orbId = nextOrb++;
 		double orbSize;
 		/** SPIRIT: ticks it has been grinding into the ground (0 while it flies). */
@@ -262,7 +262,7 @@ public final class ZFighterKi {
 	}
 
 	private static final List<Bolt> BOLTS = new ArrayList<>();
-	/** This tick's end crystal orbs, by level: sent to everyone near at the end of the tick ({@code ZFighterOrbs} draws them). */
+	/** This tick's ki orbs, by level: sent to everyone near at the end of the tick ({@code ZFighterOrbs} draws them). */
 	private static final java.util.Map<ServerLevel, List<ZFighterNet.Orb>> ORBS = new java.util.HashMap<>();
 	/** Players this near an orb see it. */
 	static final double ORB_SEEN = 128.0;
@@ -420,13 +420,13 @@ public final class ZFighterKi {
 			1.6F + random.nextFloat() * 0.3F);
 	}
 
-	/** An end crystal orb {@code size} blocks across at {@code at} this tick, {@code id} the same tick to tick for the same orb. */
+	/** A ki orb {@code size} blocks across at {@code at} this tick, {@code id} the same tick to tick for the same orb. */
 	static void orb(ServerLevel level, int id, Vec3 at, double size, int color) {
 		ORBS.computeIfAbsent(level, l -> new ArrayList<>()).add(new ZFighterNet.Orb(id, at.x, at.y, at.z, (float)size, color & 0xFFFFFF));
 	}
 
 	/**
-	 * A ball of water drawn as an end crystal orb (Darktide's Drown): slow, wobbling and see-through rather than glowing.
+	 * A ball of water drawn as a plain orb (Darktide's Drown): slow, wobbling and see-through rather than glowing.
 	 * {@code id} must not clash with a ki orb's, so callers use negative ids of their own.
 	 */
 	public static void waterOrb(ServerLevel level, int id, Vec3 at, double size, int color) {
@@ -577,7 +577,7 @@ public final class ZFighterKi {
 				}
 			}
 			default -> {
-				// an end crystal orb, and a thin trail of one mote every other tick
+				// a ki orb, and a thin trail of one mote every other tick
 				orb(level, bolt.orbId, to, bolt.orbSize > 0 ? bolt.orbSize : bolt.kind == HOMING ? 0.3 : 0.45, orbColor);
 				if (bolt.age % 2 == 0) {
 					level.sendParticles(dust, true, false, from.x, from.y, from.z, 1, 0.03, 0.03, 0.03, 0.0);
@@ -813,7 +813,7 @@ public final class ZFighterKi {
 		}
 		DustParticleOptions dust = new DustParticleOptions(live.superOn() ? formColor(live) : sig.color(),
 			(0.8F + charge * 1.2F) * (sig.style() == NEEDLE ? 0.5F : 1.0F));
-		// the ki gathers as an end crystal orb between the hands, growing with the charge; now and then a mote drawn in
+		// the ki gathers as an orb between the hands, growing with the charge; now and then a mote drawn in
 		boolean needle = sig.style() == NEEDLE && ZFighterTraining.of(player).charged() != ZFighterTraining.KI_BOMB;
 		orb(level, -(player.getId() * 4 + 3), hands, needle ? 0.12 + 0.18 * charge : 0.25 + 0.75 * charge,
 			live.superOn() ? formColor(live) : sig.color());

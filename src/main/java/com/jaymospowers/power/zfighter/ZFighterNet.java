@@ -156,7 +156,7 @@ public final class ZFighterNet {
 		public static final int WATER = 0x01000000;
 	}
 
-	/** Server → client, every tick: the ki orbs near you (blasts in flight, ki gathering in the hands), drawn as end crystals. */
+	/** Server → client, every tick: the ki orbs near you (blasts in flight, ki gathering in the hands), drawn as plain orbs. */
 	public record KiOrbs(java.util.List<Orb> orbs) implements CustomPacketPayload {
 		public static final Type<KiOrbs> TYPE = new Type<>(JaymosPowers.id("zfighter_ki_orbs"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, KiOrbs> CODEC = CustomPacketPayload.codec(
