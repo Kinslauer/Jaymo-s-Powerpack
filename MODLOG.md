@@ -1228,7 +1228,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.11.1, character creation can't be skipped** (Andy: "force character creation on spawn"): Kingdoms 0.7.45. A new
   player makes MCA's character (look, then where they start) first, then picks a class; neither screen can be shut
   or put away until it's done, and they can't be hurt or hunted meanwhile. See `kingdoms/MODLOG.md`.
-- **0.11.4, village life** (Andy: Village Life's features in our systems; that mod is All Rights Reserved, so remade):
+- **0.11.5, village life** (Andy: Village Life's features in our systems; that mod is All Rights Reserved, so remade):
   Kingdoms 0.7.46. Festival days at the square (dancing, a feast from the storehouse, a musician, fireworks in the
   realm's colours; a lord can call one with `/kingdom festival`), villagers' own cats and dogs, couriers
   (`/kingdom deliver <player>`), and hunger when the storehouse is bare plus evening weariness. See `kingdoms/MODLOG.md`.
