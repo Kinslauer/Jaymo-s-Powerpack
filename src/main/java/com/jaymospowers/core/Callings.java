@@ -208,6 +208,7 @@ public final class Callings {
 				call(player, "zfighter", Integer.MAX_VALUE);
 				return;
 			}
+			progress(player, "zfighter", kills, FIST_KILLS_NEEDED);
 		}
 		String kind = weaponKind(player, source);
 		if (kind == null) {
@@ -219,8 +220,21 @@ public final class Callings {
 			player.setAttached(WEAPON_KILLS, kinds);
 			if (kinds.size() >= ARSENAL_TYPES) {
 				call(player, "arsenal", Integer.MAX_VALUE);
+			} else {
+				progress(player, "arsenal", kinds.size(), ARSENAL_TYPES);
 			}
 		}
+	}
+
+	/** A counted step toward a calling (fist kills, weapon kinds), shown above the hotbar so the player sees it count. */
+	private static void progress(ServerPlayer player, String powerName, int done, int needed) {
+		Power power = Powers.byName(powerName);
+		Power claimed = power(player);
+		if (power == null || claimed != null && claimed != power || player.isCreative() || player.isSpectator()) {
+			return;
+		}
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.calling_progress." + powerName, done, needed)
+			.withStyle(style -> style.withColor(TextColor.fromRgb(power.color())).withItalic(true)));
 	}
 
 	/** The kind of weapon a kill was made with: sword, axe, spear, trident, the bow or crossbow, or a modded weapon's id. */
