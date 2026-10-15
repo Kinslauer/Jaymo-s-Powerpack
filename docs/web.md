@@ -896,9 +896,9 @@ code). No keys of their own:
   (`WALL_JUMP_UP` by tier, `WALL_JUMP_OUT`). From a cling with W held you climb instead (more up, `CLIMB_OUT` out), so
   cling, jump, cling again scales a wall. Each wall face once until you land; two facing walls chain like a chimney.
 - **Slide:** sprinting, press Sneak: a fast low slide (`SLIDE_BOOST`, decays by `SLIDE_KEEP`, at most `SLIDE_TICKS`).
-  Let go of Sneak to stand. Jump out of it leaps higher and further than a plain jump (0.11.3: `SLIDE_JUMP_UP` 0.62
+  Let go of Sneak to stand. Jump out of it leaps higher and further than a plain jump (0.11.5: `SLIDE_JUMP_UP` 0.62
   up, the slide's speed × `SLIDE_JUMP_KEEP` 1.3 + `SLIDE_JUMP_ADD` 0.12 ahead, at most `SLIDE_JUMP_MAX` 0.95). The pose
-  (0.11.3, Andy): laid right back, both legs flat along the ground ahead, the right hand up high behind. The hitbox stays crouch-height (no sliding under one-block
+  (0.11.5, Andy): laid right back, both legs flat along the ground ahead, the right hand up high behind. The hitbox stays crouch-height (no sliding under one-block
   gaps; the double-tap crawl does that).
 None of them run during a web, zip, the wings, a wall run, a takeover or the symbiote's wall crawl.
 
