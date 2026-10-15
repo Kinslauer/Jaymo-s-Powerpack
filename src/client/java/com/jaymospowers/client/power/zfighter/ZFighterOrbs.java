@@ -36,6 +36,9 @@ public final class ZFighterOrbs {
 	static final int STALE = 2;
 	/** Degrees a tick each cage turns. */
 	static final float SPIN = 9.0F;
+	/** Water orbs: how much slower than ki they turn, how far they slosh out of round, and how see-through (0-255). */
+	static final float WATER_SPIN = 0.2F, WATER_WOBBLE = 0.06F;
+	static final int WATER_CAGE_ALPHA = 140, WATER_HEART_ALPHA = 95;
 	private static final float SIN_45 = (float)Math.sin(Math.PI / 4.0);
 
 	private static ModelPart glass;
@@ -47,6 +50,7 @@ public final class ZFighterOrbs {
 		float prevSize;
 		float size;
 		int color;
+		boolean water;
 		int quiet;
 		int age;
 	}
@@ -71,7 +75,8 @@ public final class ZFighterOrbs {
 				live.prevSize = live.size;
 				live.at = at;
 				live.size = orb.size();
-				live.color = orb.color();
+				live.color = orb.color() & 0xFFFFFF;
+				live.water = (orb.color() & ZFighterNet.Orb.WATER) != 0;
 				live.quiet = 0;
 			}
 		});
@@ -102,7 +107,12 @@ public final class ZFighterOrbs {
 			Vec3 at = live.prev.lerp(live.at, partial).subtract(camera);
 			// each orb starts its spin somewhere of its own, so a barrage doesn't turn in step
 			float time = live.age + partial + (entry.getKey() & 63) * 7.0F;
-			orb(context.submitNodeCollector(), context.poseStack(), at, Mth.lerp(partial, live.prevSize, live.size), live.color, time, 1.0F);
+			float size = Mth.lerp(partial, live.prevSize, live.size);
+			if (live.water) {
+				waterOrb(context.submitNodeCollector(), context.poseStack(), at, size, live.color, time);
+			} else {
+				orb(context.submitNodeCollector(), context.poseStack(), at, size, live.color, time, 1.0F);
+			}
 		}
 	}
 
@@ -138,9 +148,50 @@ public final class ZFighterOrbs {
 		poseStack.popPose();
 	}
 
+	/**
+	 * Water held in an end crystal (Darktide's Drown): the same cages and core, but turning slowly, the whole thing
+	 * wobbling like a held blob of water, pale glassy cages round a deep, see-through heart so who's drowning inside
+	 * still shows.
+	 */
+	static void waterOrb(SubmitNodeCollector collector, PoseStack poseStack, Vec3 at, float size, int color, float time) {
+		if (size <= 0.01F) {
+			return;
+		}
+		if (glass == null) {
+			glass = part(0);
+			core = part(32);
+		}
+		RenderType type = RenderTypes.entityTranslucentEmissive(TEXTURE);
+		int cage = WATER_CAGE_ALPHA << 24 | lighten(color);
+		int heart = WATER_HEART_ALPHA << 24 | (color & 0xFFFFFF);
+		float slow = time * WATER_SPIN;
+		poseStack.pushPose();
+		poseStack.translate(at.x, at.y, at.z);
+		float scale = size * 2.0F;
+		// a slow slosh: squashed one way, then the other
+		float slosh = Mth.sin(time * 0.18F) * WATER_WOBBLE;
+		float slosh2 = Mth.cos(time * 0.13F) * WATER_WOBBLE;
+		poseStack.scale(scale * (1.0F + slosh), scale * (1.0F - slosh - slosh2), scale * (1.0F + slosh2));
+		turn(poseStack, slow, 1.0F);
+		collector.submitModelPart(glass, poseStack, type, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, null, cage);
+		poseStack.scale(0.875F, 0.875F, 0.875F);
+		// the inner cage turns the other way, as currents do
+		turn(poseStack, slow, -1.6F);
+		collector.submitModelPart(glass, poseStack, type, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, null, cage);
+		poseStack.scale(0.765625F, 0.765625F, 0.765625F);
+		turn(poseStack, slow, 2.2F);
+		collector.submitModelPart(core, poseStack, type, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, null, heart);
+		poseStack.popPose();
+	}
+
 	/** As the end crystal turns its cages: round the up axis, tipped onto a corner. */
 	private static void turn(PoseStack poseStack, float time) {
-		poseStack.rotate(Axis.YP.rotationDegrees(time * SPIN));
+		turn(poseStack, time, 1.0F);
+	}
+
+	/** {@link #turn(PoseStack, float)} at {@code rate} times the speed (negative: the other way). */
+	private static void turn(PoseStack poseStack, float time, float rate) {
+		poseStack.rotate(Axis.YP.rotationDegrees(time * SPIN * rate));
 		poseStack.rotate(new Quaternionf().setAngleAxis((float)(Math.PI / 3.0), SIN_45, 0.0F, SIN_45));
 	}
 

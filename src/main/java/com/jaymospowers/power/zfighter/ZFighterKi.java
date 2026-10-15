@@ -58,7 +58,7 @@ import net.minecraft.world.phys.Vec3;
  * it, facing its back.</li>
  * </ul>
  */
-final class ZFighterKi {
+public final class ZFighterKi {
 	/** Ki Blast and Ki Wave's damage: ordinary, armour applies. */
 	static final ResourceKey<DamageType> KI = ResourceKey.create(Registries.DAMAGE_TYPE, JaymosPowers.id("zfighter_ki"));
 
@@ -423,6 +423,15 @@ final class ZFighterKi {
 	/** An end crystal orb {@code size} blocks across at {@code at} this tick, {@code id} the same tick to tick for the same orb. */
 	static void orb(ServerLevel level, int id, Vec3 at, double size, int color) {
 		ORBS.computeIfAbsent(level, l -> new ArrayList<>()).add(new ZFighterNet.Orb(id, at.x, at.y, at.z, (float)size, color & 0xFFFFFF));
+	}
+
+	/**
+	 * A ball of water drawn as an end crystal orb (Darktide's Drown): slow, wobbling and see-through rather than glowing.
+	 * {@code id} must not clash with a ki orb's, so callers use negative ids of their own.
+	 */
+	public static void waterOrb(ServerLevel level, int id, Vec3 at, double size, int color) {
+		ORBS.computeIfAbsent(level, l -> new ArrayList<>()).add(new ZFighterNet.Orb(id, at.x, at.y, at.z, (float)size,
+			color & 0xFFFFFF | ZFighterNet.Orb.WATER));
 	}
 
 	/** This tick's orbs to everyone near them. */
