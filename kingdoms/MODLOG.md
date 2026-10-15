@@ -3094,3 +3094,6 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
   Verdant (green skin and antennae, sun-fed, burns longer), Emberborn (burns briefly, thrives hot, starves cold),
   Frostborn (never freezes, thrives cold, starves hot), Nightborn (stronger in the dark, weaker in the sun). Players
   with a class already get the heritage screen once on their next join.
+- **0.7.59, skill commands:** `/kingdom skills set <players> <survival|stealth|strength> <level>` (perks refunded if the
+  new level can't pay for them), `add <players> <pillar> <xp>`, `get <player>`, `respec <players>` (perks back, levels
+  kept) and `reset <players>` (all gone), for ops (`SkillCommands`).

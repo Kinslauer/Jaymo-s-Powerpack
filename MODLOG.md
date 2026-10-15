@@ -1332,3 +1332,4 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   while you look at them (Stalker Creepers remade) (`kingdoms/MODLOG.md`).
 - **0.11.56 / Kingdoms 0.7.57:** Attributes on the K screen (PlayerEx remade) and a Heritage step in character
   creation (Origins remade) (`kingdoms/MODLOG.md`).
+- **0.11.62 / Kingdoms 0.7.59:** `/kingdom skills` commands for ops (`kingdoms/MODLOG.md`).
