@@ -2,7 +2,6 @@ package com.jaymospowers.client.power.zfighter;
 
 import com.jaymospowers.power.zfighter.ZFighterNet;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
 import java.util.HashMap;
 import java.util.Map;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -10,42 +9,25 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.geom.PartPose;
-import net.minecraft.client.model.geom.builders.CubeListBuilder;
-import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BeaconRenderer;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Quaternionf;
 
 /**
- * Ki drawn as orbs: plain glowing balls of the ki's colour round a white-hot heart (no end crystal cage). Darktide's
- * Drown still draws water held in end crystal cages ({@link #waterOrb}). Every blast in flight and the ki gathering in the hands; the
+ * Ki drawn as orbs: plain glowing balls of the ki's colour round a white-hot heart, and Darktide's Drown as a ball of
+ * water ({@link #waterOrb}); no end crystal cages. Every blast in flight and the ki gathering in the hands; the
  * server sends where each one is every tick ({@link ZFighterNet.KiOrbs}). They stand in for most of the old particles.
  */
 public final class ZFighterOrbs {
-	static final Identifier TEXTURE = Identifier.withDefaultNamespace("textures/entity/end_crystal/end_crystal.png");
-	static final int FULL_BRIGHT = 0xF000F0;
 	/** Ticks without word before an orb is dropped. */
 	static final int STALE = 2;
-	/** Degrees a tick each cage turns. */
-	static final float SPIN = 9.0F;
-	/** Water orbs: how much slower than ki they turn, how far they slosh out of round, and how see-through (0-255). */
-	static final float WATER_SPIN = 0.2F, WATER_WOBBLE = 0.06F;
-	static final int WATER_CAGE_ALPHA = 140, WATER_HEART_ALPHA = 95;
+	/** Water orbs: how much slower than ki their streaks flow, how far they slosh out of round, how see-through (0-255). */
+	static final float WATER_SPIN = 0.3F, WATER_WOBBLE = 0.06F;
+	static final int WATER_RIM_ALPHA = 140, WATER_HEART_ALPHA = 110;
 	/** Ki orbs: the heart's share of the radius, how much the ball breathes, how fast its energy streams. */
 	static final float ORB_HEART = 0.55F, ORB_PULSE = 0.04F, ORB_FLOW = 0.05F;
-	private static final float SIN_45 = (float)Math.sin(Math.PI / 4.0);
-
-	private static ModelPart glass;
-	private static ModelPart core;
 
 	private static final class Live {
 		Vec3 prev;
@@ -147,45 +129,29 @@ public final class ZFighterOrbs {
 	}
 
 	/**
-	 * Water held in an end crystal (Darktide's Drown): the same cages and core, but turning slowly, the whole thing
-	 * wobbling like a held blob of water, pale glassy cages round a deep, see-through heart so who's drowning inside
-	 * still shows.
+	 * A ball of water (Darktide's Drown): a plain see-through orb of the water's colour round a deeper heart, its
+	 * streaks turning slowly and the whole thing wobbling like a held blob of water, so who's drowning inside still shows.
 	 */
 	static void waterOrb(SubmitNodeCollector collector, PoseStack poseStack, Vec3 at, float size, int color, float time) {
 		if (size <= 0.01F) {
 			return;
 		}
-		if (glass == null) {
-			glass = part(0);
-			core = part(32);
-		}
-		RenderType type = RenderTypes.entityTranslucentEmissive(TEXTURE);
-		int cage = WATER_CAGE_ALPHA << 24 | lighten(color);
+		float r = size * 0.5F;
+		int rim = WATER_RIM_ALPHA << 24 | lighten(color);
 		int heart = WATER_HEART_ALPHA << 24 | (color & 0xFFFFFF);
-		float slow = time * WATER_SPIN;
+		float flow = time * ORB_FLOW * WATER_SPIN;
 		poseStack.pushPose();
 		poseStack.translate(at.x, at.y, at.z);
-		float scale = size * 2.0F;
 		// a slow slosh: squashed one way, then the other
 		float slosh = Mth.sin(time * 0.18F) * WATER_WOBBLE;
 		float slosh2 = Mth.cos(time * 0.13F) * WATER_WOBBLE;
-		poseStack.scale(scale * (1.0F + slosh), scale * (1.0F - slosh - slosh2), scale * (1.0F + slosh2));
-		turn(poseStack, slow, 1.0F);
-		collector.submitModelPart(glass, poseStack, type, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, null, cage);
-		poseStack.scale(0.875F, 0.875F, 0.875F);
-		// the inner cage turns the other way, as currents do
-		turn(poseStack, slow, -1.6F);
-		collector.submitModelPart(glass, poseStack, type, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, null, cage);
-		poseStack.scale(0.765625F, 0.765625F, 0.765625F);
-		turn(poseStack, slow, 2.2F);
-		collector.submitModelPart(core, poseStack, type, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, null, heart);
+		poseStack.scale(1.0F + slosh, 1.0F - slosh - slosh2, 1.0F + slosh2);
+		// the heart turns the other way, as currents do
+		collector.submitCustomGeometry(poseStack, RenderTypes.beaconBeam(BeaconRenderer.BEAM_LOCATION, true),
+			(pose, buffer) -> ZFighterSpirit.sphere(buffer, pose, Vec3.ZERO, r * 0.7F, heart, -flow * 1.6F, flow));
+		collector.submitCustomGeometry(poseStack, RenderTypes.beaconBeam(BeaconRenderer.BEAM_LOCATION, true),
+			(pose, buffer) -> ZFighterSpirit.sphere(buffer, pose, Vec3.ZERO, r, rim, flow, -flow * 0.7F));
 		poseStack.popPose();
-	}
-
-	/** As the end crystal turns its cages, round the up axis, tipped onto a corner, at {@code rate} times the speed (negative: the other way). */
-	private static void turn(PoseStack poseStack, float time, float rate) {
-		poseStack.rotate(Axis.YP.rotationDegrees(time * SPIN * rate));
-		poseStack.rotate(new Quaternionf().setAngleAxis((float)(Math.PI / 3.0), SIN_45, 0.0F, SIN_45));
 	}
 
 	/** {@code rgb} halfway to white, for the glass. */
@@ -202,13 +168,5 @@ public final class ZFighterOrbs {
 		int g = (int)Mth.lerp(amount, rgb >> 8 & 0xFF, 255);
 		int b = (int)Mth.lerp(amount, rgb & 0xFF, 255);
 		return r << 16 | g << 8 | b;
-	}
-
-	/** One 8-pixel cube of the end crystal texture, from texture column {@code u} (0 the glass, 32 the core). */
-	private static ModelPart part(int u) {
-		MeshDefinition mesh = new MeshDefinition();
-		mesh.getRoot().addOrReplaceChild("cube", CubeListBuilder.create().texOffs(u, 0).addBox(-4.0F, -4.0F, -4.0F, 8.0F, 8.0F, 8.0F),
-			PartPose.ZERO);
-		return LayerDefinition.create(mesh, 64, 32).bakeRoot();
 	}
 }

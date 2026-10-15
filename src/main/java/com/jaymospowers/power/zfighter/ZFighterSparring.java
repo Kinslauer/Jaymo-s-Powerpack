@@ -246,7 +246,7 @@ final class ZFighterSparring {
 		for (Iterator<Vec3[]> it = bout.blasts.iterator(); it.hasNext(); ) {
 			Vec3[] blast = it.next();
 			blast[0] = blast[0].add(blast[1]);
-			// an end crystal orb like a real Ki Blast, and one mote
+			// an orb like a real Ki Blast, and one mote
 			ZFighterKi.orb(level, System.identityHashCode(blast) | 0x40000000, blast[0], 0.4, ZFighterPower.COLOR);
 			level.sendParticles(dust, true, false, blast[0].x, blast[0].y, blast[0].z, 1, 0.05, 0.05, 0.05, 0.0);
 			if (owner.getBoundingBox().inflate(0.4).contains(blast[0])) {
