@@ -11,7 +11,7 @@ import org.jspecify.annotations.Nullable;
  * {@link #RANK_SECONDS} seconds (monster to tornado, tornado to dust devil) and shortens its life; only a caller allowed
  * to {@code kill} (Smoke with both fates, fully mastered) can finish a dust devil off.
  *
- * <p>(0.7.35) Smoke with both fates (Ash Storm) can also feed a storm instead: {@link #supercellOver} says whether
+ * <p>(0.7.39) Smoke with both fates (Ash Storm) can also feed a storm instead: {@link #supercellOver} says whether
  * there's a supercell to feed, and {@link #touchdown} puts its tornado down where they aim (or, under their own Ash
  * Storm, a lone tornado that wanders with the wind). The {@code disaster_damage} rule still decides what it breaks.
  */
@@ -60,7 +60,7 @@ public final class SkyCalm {
 
 	/**
 	 * Unwinds the nearest tornado within {@code range} of (x, z) by {@code seconds}. Returns where it is (x, y, z) and
-	 * (0.7.35) a fourth number, 1 if this call finished it off (else 0), or null if there's none. With {@code kill} a
+	 * (0.7.39) a fourth number, 1 if this call finished it off (else 0), or null if there's none. With {@code kill} a
 	 * dust devil unwound a rank's worth ropes out.
 	 */
 	public static double @Nullable [] unwind(Level level, double x, double z, double range, float seconds, boolean kill) {
@@ -99,7 +99,7 @@ public final class SkyCalm {
 		return new double[] {best.x, best.y, best.z, 0.0};
 	}
 
-	/** (0.7.35) Whether a supercell is over (x, z). Server, Overworld. */
+	/** (0.7.39) Whether a supercell is over (x, z). Server, Overworld. */
 	public static boolean supercellOver(Level level, double x, double z) {
 		return supercell(level, x, z) != null;
 	}
@@ -121,7 +121,7 @@ public final class SkyCalm {
 	}
 
 	/**
-	 * (0.7.35) A fed storm puts a tornado down at (aimX, aimZ): under the supercell over (x, z) if {@code supercell}
+	 * (0.7.39) A fed storm puts a tornado down at (aimX, aimZ): under the supercell over (x, z) if {@code supercell}
 	 * (false if there's none), or else a lone one with no storm of its own. Server, Overworld.
 	 */
 	public static boolean touchdown(Level level, double x, double z, double aimX, double aimZ, boolean supercell) {

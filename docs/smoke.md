@@ -133,7 +133,7 @@ Nothing explained in game (`SmokeSmog`).
   the nearest tornado a rank every 5 s (`Tornado.size` no longer final) and cuts 25% off its remaining life; a dust
   devil only dies with `kill` (stage 4's Ash Storm).
 
-## Stage 4: Ash Storm, both fates (0.10.121 / Kingdoms 0.7.35)
+## Stage 4: Ash Storm, both fates (0.10.126 / Kingdoms 0.7.39)
 `SmokeAshStorm`. Ascended and corrupted, C goes to `SmokeCloudshaper.key` (Pyroclasm is corrupted-only), which routes:
 - **Tap: Ash Storm** (`SmokeState.ASH`, 3600-tick cooldown): 600 ticks, radius 20 (grows from 40% over the first 100
   ticks), centred on you. Every 10 ticks 3 smog puffs (4 each) at the cloud base 16 over you (lower under a roof); ash
