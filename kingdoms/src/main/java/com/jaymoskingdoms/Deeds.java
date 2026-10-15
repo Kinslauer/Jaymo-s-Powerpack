@@ -300,7 +300,7 @@ public final class Deeds {
 		}
 		LivingEntity loud = seen.get(level.getRandom().nextInt(seen.size()));
 		lookAt(loud, player);
-		Speech.say(level, loud, Component.translatable(Oddities.line(family, level.getRandom()), player.getName()), Speech.WHITE, WITNESS_RANGE + 8.0);
+		Speech.say(level, loud, Component.translatable(Oddities.line(family, level.getRandom()), Identities.shownName(player)), Speech.WHITE, WITNESS_RANGE + 8.0);
 		for (LivingEntity w : seen) {
 			warm(w, player, WITNESS_HEARTS);
 			if (w instanceof Villager v) {
@@ -353,6 +353,10 @@ public final class Deeds {
 
 	/** {@code f} saw {@code player} do {@code kind}. */
 	private static void record(ServerPlayer player, Faction f, Kind kind) {
+		if (Identities.hidden(player, f.id())) {
+			// (0.7.62) a masked stranger did it: the costume's name is made by it (its reputation), not theirs
+			return;
+		}
 		Map<String, Deed> all = new HashMap<>(player.getAttachedOrElse(DEEDS, Map.of()));
 		String id = Integer.toString(f.id());
 		Deed d = all.get(id);
@@ -445,7 +449,7 @@ public final class Deeds {
 			return;
 		}
 		Faction f = Theft.lawAt(level, player.blockPosition());
-		if (f == null || known(player, f.id(), today(level.getServer())) == null) {
+		if (f == null || Identities.hidden(player, f.id()) || known(player, f.id(), today(level.getServer())) == null) {
 			return;
 		}
 		List<LivingEntity> near = new ArrayList<>();

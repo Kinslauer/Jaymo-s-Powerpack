@@ -183,7 +183,7 @@ public final class TinkeringJei implements IModPlugin {
 		return recipes;
 	}
 
-	/** (0.11.76) Each weapon head: gold over any of them makes its cast, and metal over the cast makes the head. */
+	/** (0.11.77) Each weapon head: gold over any of them makes its cast, and metal over the cast makes the head. */
 	private static void weaponCasting(List<SimpleCategory.Recipe> recipes) {
 		for (WeaponParts.Kind kind : WeaponParts.loaded()) {
 			ItemStack castStack = WeaponParts.cast(kind);
@@ -199,7 +199,7 @@ public final class TinkeringJei implements IModPlugin {
 		}
 	}
 
-	/** (0.11.76) Stone weapon heads at the Part Builder. */
+	/** (0.11.77) Stone weapon heads at the Part Builder. */
 	private static void weaponHeads(List<SimpleCategory.Recipe> recipes, Map<TinkerMaterial, List<ItemStack>> materials) {
 		List<ItemStack> stone = new ArrayList<>();
 		materials.forEach((material, items) -> {
@@ -217,7 +217,7 @@ public final class TinkeringJei implements IModPlugin {
 		}
 	}
 
-	/** (0.11.76) Each weapon from its head (every metal it comes in) and the parts its kind takes, any material. */
+	/** (0.11.77) Each weapon from its head (every metal it comes in) and the parts its kind takes, any material. */
 	private static void weaponAssembly(List<SimpleCategory.Recipe> recipes) {
 		Map<PartType, List<ItemStack>> anyMaterial = new EnumMap<>(PartType.class);
 		for (PartType part : PartType.values()) {

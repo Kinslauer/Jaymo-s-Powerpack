@@ -19,7 +19,7 @@ import org.jspecify.annotations.Nullable;
  * The Part Builder: a pattern and a material in, pick a part, take it out. Each part costs its material units
  * ({@link PartType#cost}); a log is worth 4 planks, a block of metal 9 ingots, and what's left over of the last item is lost.
  * The layout is Tinkers' own screen: pattern and material on the left, the 4x4 part buttons, the result on the right.
- * (0.11.76) Weapon heads ({@link WeaponParts}) are buttons {@link #WEAPON_BUTTONS} on, shaped from stone only.
+ * (0.11.77) Weapon heads ({@link WeaponParts}) are buttons {@link #WEAPON_BUTTONS} on, shaped from stone only.
  */
 public class PartBuilderMenu extends AbstractContainerMenu {
 	public static final int PATTERN = 0, MATERIAL = 1, RESULT = 2;

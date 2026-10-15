@@ -15,7 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.11.76) Andy: "all weapons should be forged", the Tinkers way. Every stone and metal weapon (Armory's, Balkon's
+ * (0.11.77) Andy: "all weapons should be forged", the Tinkers way. Every stone and metal weapon (Armory's, Balkon's
  * WeaponMod's, vanilla spears) is put together at the Tool Station from its own head or blade (a Claymore Blade) and
  * the parts its {@link Assembly} names (mostly a Tool Handle and a Tool Binding). Stone heads are shaped at the Part
  * Builder; pour gold over any head on a casting table for its cast, then iron, gold or copper over the cast for a metal
@@ -28,7 +28,7 @@ public final class WeaponParts {
 	public enum Scheme { PREFIX, SUFFIX, SINGLE }
 
 	/**
-	 * What else the Tool Station needs besides the head, any material. (0.11.76) Andy: the big weapons take a Tough
+	 * What else the Tool Station needs besides the head, any material. (0.11.77) Andy: the big weapons take a Tough
 	 * Handle, swords a Crossguard.
 	 */
 	public enum Assembly {

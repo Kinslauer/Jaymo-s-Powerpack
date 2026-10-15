@@ -51,5 +51,6 @@
   "screen.jaymospowers.costume.sew": "Sew",
   "screen.jaymospowers.costume.take_off": "Take off",
   "screen.jaymospowers.costume.wearing": "Wearing: %s",
-  "screen.jaymospowers.costume.wearing_none": "Wearing no costume"
+  "screen.jaymospowers.costume.wearing_none": "Wearing no costume",
+  "costume.jaymospowers.identity.unnamed": "Masked Stranger"
 }

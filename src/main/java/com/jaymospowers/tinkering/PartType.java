@@ -12,7 +12,7 @@ public enum PartType {
 	TOOL_HANDLE("tool_handle", Kind.HANDLE, 1),
 	TOUGH_HANDLE("tough_handle", Kind.HANDLE, 3),
 	TOOL_BINDING("tool_binding", Kind.BINDING, 1),
-	/** (0.11.76) Swords' guards, for weapon heads ({@link WeaponParts}); no Tinkering tool uses it. */
+	/** (0.11.77) Swords' guards, for weapon heads ({@link WeaponParts}); no Tinkering tool uses it. */
 	CROSSGUARD("crossguard", Kind.HANDLE, 1);
 
 	/** Which of a material's stats a part uses. */

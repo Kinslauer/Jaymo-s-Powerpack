@@ -21,7 +21,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * The Tool Station: parts in, a tool out, in any slot order. A tool and its head material repairs it (a broken tool
  * too); a tool and a modifier's items adds a level of it ({@link Modifier}); a tool and one part it uses swaps that part
- * in, the old one is lost. (0.11.76) A weapon head and the parts its kind takes (a Tool Handle and a Tool Binding, mostly) make that
+ * in, the old one is lost. (0.11.77) A weapon head and the parts its kind takes (a Tool Handle and a Tool Binding, mostly) make that
  * weapon ({@link WeaponParts}).
  */
 public class ToolStationMenu extends AbstractContainerMenu {

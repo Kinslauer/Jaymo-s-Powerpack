@@ -49,7 +49,7 @@ PARTS = [
     ("tool_handle", "Tool Handle", "handle", "parts/tool_handle", (0, 0)),
     ("tough_handle", "Tough Handle", "handle", "parts/tough_handle", (0, 0)),
     ("tool_binding", "Tool Binding", "binding", "parts/tool_binding", (0, 0)),
-    # (0.11.76) for swords' weapon heads (tinkering/WeaponParts), drawn from Tinkers' sword guard
+    # (0.11.77) for swords' weapon heads (tinkering/WeaponParts), drawn from Tinkers' sword guard
     ("crossguard", "Crossguard", "handle", "sword/guard", (3, -3)),
 ]
 PART_KIND = {p[0]: p[2] for p in PARTS}
@@ -139,7 +139,7 @@ CASTS = ["ingot", "nugget"] + [p[0] for p in PARTS]
 # casts Tinkers has no sprite for
 CAST_SPRITE = {"crossguard": "tool_binding"}
 
-# (0.11.76) weapon casts (tinkering/WeaponParts)
+# (0.11.77) weapon casts (tinkering/WeaponParts)
 WEAPON_CAST_LANG = {
     "item.jaymospowers.weapon_cast": "Weapon Cast",
     "tooltip.jaymospowers.tinkering.weapon_cast.makes": "Casts: %s",
@@ -384,7 +384,7 @@ def stations(tcon):
         if os.path.exists(src):
             copy_png(src, "gui/tinkering/icon/" + icon)
         elif icon == "crossguard":
-            # (0.11.76) Tinkers has no pattern icon for it: the guard's outline in the icons' grey
+            # (0.11.77) Tinkers has no pattern icon for it: the guard's outline in the icons' grey
             guard = shifted(sprite(tcon, "sword/guard", "iron"), (3, -3))
             out = Image.new("RGBA", guard.size, (0, 0, 0, 0))
             for y in range(guard.size[1]):
@@ -472,7 +472,7 @@ def smeltery(tcon):
         copy_png(os.path.join(tex, "item", "cast", CAST_SPRITE.get(cast, cast) + ".png"), "item/tinkering/cast/" + cast)
         model("item/tinkering/cast/" + cast, "minecraft:item/generated", "item/tinkering/cast/" + cast)
         write(os.path.join(ASSETS, "items", cast + "_cast.json"), {"model": ref("item/tinkering/cast/" + cast)})
-    # (0.11.76) the weapon cast looks like the small blade's (weapon heads: tools/weapon_parts_assets.py)
+    # (0.11.77) the weapon cast looks like the small blade's (weapon heads: tools/weapon_parts_assets.py)
     write(os.path.join(ASSETS, "items", "weapon_cast.json"), {"model": ref("item/tinkering/cast/small_blade")})
 
     # molten metal: animated in the world (block atlas), its first frame for the screen
@@ -587,7 +587,7 @@ OFF_TOOLS = ("pickaxe", "axe", "shovel", "hoe", "sword")
 OFF_ARMOUR = ("golden", "diamond")
 ARMOUR = ("helmet", "chestplate", "leggings", "boots")
 # Andy: no craftable diamond weapons at all (Armory's skip their recipe in tools/armory_assets.py, WeaponMod's are
-# dropped by tinkering/Uncraftable). (0.11.76) Andy: all weapons are forged, so stone and metal spears are put together
+# dropped by tinkering/Uncraftable). (0.11.77) Andy: all weapons are forged, so stone and metal spears are put together
 # at the Tool Station from a Spear Tip (tinkering/WeaponParts)
 OFF_WEAPONS = ("diamond_spear", "stone_spear", "copper_spear", "iron_spear", "golden_spear")
 

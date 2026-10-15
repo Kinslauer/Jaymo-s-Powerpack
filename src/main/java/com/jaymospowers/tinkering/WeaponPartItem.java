@@ -15,7 +15,7 @@ import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.TooltipDisplay;
 import org.jspecify.annotations.Nullable;
 
-/** (0.11.76) A weapon's head or blade in stone or a metal ({@link WeaponParts}): put together at the Tool Station. */
+/** (0.11.77) A weapon's head or blade in stone or a metal ({@link WeaponParts}): put together at the Tool Station. */
 public class WeaponPartItem extends Item {
 	public final WeaponParts.Kind kind;
 
