@@ -26,8 +26,11 @@ import net.minecraft.world.entity.player.Player;
 
 /**
  * Growing into a power. A power that awakens naturally starts with just its first ability (R); the rest unlock one by
- * one as the player builds mastery: by using the abilities they have, and by time spent with the power. A power
- * picked in creative, or given with {@code /power set}, comes with every ability.
+ * one as the player builds mastery. Time spent with the power alone earns the next ability in about 3 in-game days;
+ * using the abilities you have and meditating ({@link Meditate}) speed that up, to a day an ability at the most.
+ * Training in someone else's Immense Field (Gravity's Z) pushes past that, to half a day; the field's own owner gets
+ * that only while sparring inside it (GravityTrainingField). A power picked in creative, or given with
+ * {@code /power set}, comes with every ability.
  */
 public final class Mastery {
 	/**
@@ -42,14 +45,29 @@ public final class Mastery {
 
 	/** Every ability. */
 	public static final int ALL = 4;
-	/** Mastery needed to have {@code i} abilities unlocked (the starter at 0; then the 1st-4th in unlock order). */
-	public static final int[] UNLOCK_AT = {0, 20, 60, 120, 200};
-	/** One point per this many ticks of survival play with the power... */
+	/** Mastery needed to have {@code i} abilities unlocked (the starter at 0; then the 1st-4th in unlock order): 60 an ability. */
+	public static final int[] UNLOCK_AT = {0, 60, 120, 180, 240};
+	/** One point per this many ticks of survival play with the power: 60 points (an ability) in 3 in-game days. */
 	public static final int TICKS_PER_TIME_POINT = 1200;
-	/** ...and one per ability use, at most once per this many ticks (so mashing a key earns nothing extra). */
-	public static final int USE_CREDIT_SPACING = 100;
+	/**
+	 * Practice (ability use, meditating) earns points on top of time, but only as fast as time allows: each time point
+	 * lets this many practice points through, so practice can at most triple the pace (a day an ability).
+	 */
+	public static final int PRACTICE_PER_TIME_POINT = 2;
+	/** Practice allowance a player can bank (so a quiet spell can be caught up a little, not skipped). */
+	public static final int PRACTICE_BANK = 6;
+	/**
+	 * Training in someone else's Immense Field: every practice point counts double, and the allowance refills by one more
+	 * point per this many ticks (to six times the pace at the most: half a day an ability).
+	 */
+	public static final int FIELD_PRACTICE_MULTIPLIER = 2;
+	public static final int FIELD_ALLOWANCE_TICKS = 400;
+	/** One practice point per ability use, at most once per this many ticks (so mashing a key earns nothing extra). */
+	public static final int USE_CREDIT_SPACING = 600;
 
 	private static final Map<UUID, Long> LAST_USE_CREDIT = new HashMap<>();
+	/** Practice points each player may still earn (see {@link #PRACTICE_PER_TIME_POINT}). */
+	private static final Map<UUID, Integer> ALLOWANCE = new HashMap<>();
 
 	private Mastery() {
 	}
@@ -141,9 +159,36 @@ public final class Mastery {
 		if (unlocked(player) >= ALL || player.isCreative() || player.isSpectator() || !player.isAlive()) {
 			return;
 		}
-		if (player.tickCount % TICKS_PER_TIME_POINT == 0 && player.tickCount > 0) {
+		if (player.tickCount <= 0) {
+			return;
+		}
+		if (player.tickCount % TICKS_PER_TIME_POINT == 0) {
+			allow(player, PRACTICE_PER_TIME_POINT);
 			addPoints(player, 1);
 		}
+		if (player.tickCount % FIELD_ALLOWANCE_TICKS == 0 && fieldBoosted(player)) {
+			allow(player, 1);
+		}
+	}
+
+	/** In someone else's Immense Field, or the owner sparring in his own (the field's gravity alone isn't enough for him). */
+	public static boolean fieldBoosted(ServerPlayer player) {
+		return com.jaymospowers.power.gravity.GravityTrainingField.boosts(player);
+	}
+
+	private static void allow(ServerPlayer player, int amount) {
+		ALLOWANCE.merge(player.getUUID(), amount, (a, b) -> Math.min(PRACTICE_BANK, a + b));
+	}
+
+	/** Practice points, as far as the allowance goes (doubled in a field). */
+	private static void practise(ServerPlayer player, int amount) {
+		int wanted = amount * (fieldBoosted(player) ? FIELD_PRACTICE_MULTIPLIER : 1);
+		int allowed = Math.min(wanted, ALLOWANCE.getOrDefault(player.getUUID(), 0));
+		if (allowed <= 0) {
+			return;
+		}
+		ALLOWANCE.put(player.getUUID(), ALLOWANCE.get(player.getUUID()) - allowed);
+		addPoints(player, allowed);
 	}
 
 	/** An unlocked ability (or the starter) was used: that's practice (rate-limited). Powers with passive starters call it too. */
@@ -157,25 +202,28 @@ public final class Mastery {
 			return;
 		}
 		LAST_USE_CREDIT.put(player.getUUID(), now);
-		addPoints(player, 1);
+		practise(player, 1);
 	}
 
-	/** Practice away from the abilities (meditating, see {@link Meditate}): {@code amount} points, no rate limit. */
+	/** Practice away from the abilities (meditating, sparring; see {@link Meditate}): {@code amount} points, as the allowance lets. */
 	public static void practice(ServerPlayer player, int amount) {
 		if (unlocked(player) >= ALL || player.isCreative() || Powers.of(player) == null) {
 			return;
 		}
-		addPoints(player, amount);
+		practise(player, amount);
 	}
 
 	static void forget(Player player) {
 		LAST_USE_CREDIT.remove(player.getUUID());
+		ALLOWANCE.remove(player.getUUID());
 	}
 
 	private static void addPoints(ServerPlayer player, int amount) {
-		int points = points(player) + amount;
-		player.setAttached(POINTS, points);
 		int unlocked = unlocked(player);
+		// older saves earned abilities on a quicker scale: start them at the floor of what they already have
+		int floor = unlocked < ALL ? UNLOCK_AT[unlocked] : 0;
+		int points = Math.max(points(player), floor) + amount;
+		player.setAttached(POINTS, points);
 		if (unlocked < ALL && points >= UNLOCK_AT[unlocked + 1]) {
 			player.setAttached(UNLOCKED, unlocked + 1);
 			PowerKey[] order = order(player);
