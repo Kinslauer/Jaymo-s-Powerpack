@@ -299,6 +299,7 @@ public final class WebPower implements Power {
 			WebSlam.forget(handler.player);
 		});
 		WebSymbiote.register();
+		WebCracks.register();
 		WebMorph.register();
 		WebSymbioteBlob.init();
 		WebBehemoth.register();

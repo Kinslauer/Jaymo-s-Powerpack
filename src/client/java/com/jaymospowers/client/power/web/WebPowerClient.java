@@ -161,6 +161,17 @@ public final class WebPowerClient implements PowerClient {
 		LevelRenderEvents.COLLECT_SUBMITS.register(WebSenseBolts::render);
 		// every player's arms and legs (theirs and others'), whether or not we're a web slinger ourselves
 		ClientTickEvents.END_CLIENT_TICK.register(WebArms::tick);
+		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
+			// the walking tendrils' cracks fade (the server's own fade on the server)
+			if (minecraft.level != null && !minecraft.isPaused()) {
+				com.jaymospowers.power.web.WebCracks.tick(minecraft.level);
+				// your own walking tendrils step (and crack what they grab) even when your body isn't drawn
+				if (minecraft.player != null && minecraft.options.getCameraType().isFirstPerson() && !FirstPersonCompat.bodyShown()
+					&& com.jaymospowers.power.web.WebSymbiote.isBonded(minecraft.player) && WebTendrilWalk.climbing(minecraft.player)) {
+					WebTendrilLayer.walk(minecraft.player, 1.0F);
+				}
+			}
+		});
 		ClientTickEvents.END_CLIENT_TICK.register(WebLineRenderer::tick);
 		ClientPlayNetworking.registerGlobalReceiver(WebNet.SwingReject.TYPE, (payload, context) -> {
 			if (isActive(context.player())) {

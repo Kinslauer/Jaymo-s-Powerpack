@@ -139,6 +139,8 @@ public final class WebTendrils {
 	static final float CROSS_DAMAGE = 6.0F, CROSS_DAMAGE_PER_PIECE = 1.5F, CROSS_DAMAGE_MAX = 16.0F, CROSS_SHAKE = 1.2F;
 	/** Wall Crawl's latches may be no further than this from your eyes. */
 	static final double CLIMB_LATCH_REACH = 4.5;
+	/** How deep a Wall Crawl bite cracks the block it bites (0-9). */
+	static final int CLIMB_CRACK = 5;
 
 	/**
 	 * Where tendrils have latched onto the world (holding no thing): {@code mask} bit 1 the right (R) side's, at
@@ -574,6 +576,8 @@ public final class WebTendrils {
 			next = latch.with(hand, payload.at());
 			ServerLevel level = player.level();
 			level.playSound(null, payload.at().x, payload.at().y, payload.at().z, SoundEvents.SLIME_ATTACK, SoundSource.PLAYERS, 0.5F, 0.6F);
+			// it bites into the block, which cracks (and stays cracked a while after it lets go)
+			WebCracks.crackAt(level, payload.at(), CLIMB_CRACK);
 			if (player.getRandom().nextInt(4) == 0) {
 				WebSymbiote.narrate(player, "climb");
 			}
