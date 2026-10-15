@@ -282,6 +282,8 @@
 	"title.jaymoskingdoms.strength.master": "Master Warrior",
 	"message.jaymoskingdoms.skills.night": "You lived through the night. (+%s Survival)",
 	"message.jaymoskingdoms.skills.last_stand": "Last Stand! You cling on with half a heart.",
+	"message.jaymoskingdoms.downed.disarmed": "You take the weapons from %s.",
+	"message.jaymoskingdoms.downed.nothing": "There's nothing left in their hands to take.",
 	"message.jaymoskingdoms.skills.respec.bottle": "You drink the bottle o' enchanting. What you'd learned slips away; your points are yours to spend again.",
 	"message.jaymoskingdoms.skills.respec.wizard": "The wizard's spell unmakes what you'd learned. Your points are yours to spend again.",
 	"talk.jaymoskingdoms.wizard.respec": "I can unmake what you've learned, so you may learn again. It'll cost you %s emeralds.",
