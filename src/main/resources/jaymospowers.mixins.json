@@ -3,6 +3,7 @@
 	"package": "com.jaymospowers.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
+		"BackpackExplosionMixin",
 		"CarryBlockItemMixin",
 		"CarryLivingEntityMixin",
 		"CarryPacketListenerMixin",
