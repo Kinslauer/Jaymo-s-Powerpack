@@ -8,7 +8,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.inventory.Slot;
 
 /**
- * (0.7.33) The look every Kingdoms screen shares, the one Jaymo's Powers' screens have (the H screen, the Z Fighter
+ * (0.7.38) The look every Kingdoms screen shares, the one Jaymo's Powers' screens have (the H screen, the Z Fighter
  * training screen): a dark see-through panel with a coloured stripe along its top, a header, striped rows that light
  * up under the mouse, and a box at the bottom that shows the hovered row in full.
  */

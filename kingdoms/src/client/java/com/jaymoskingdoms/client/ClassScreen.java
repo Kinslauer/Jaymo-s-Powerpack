@@ -18,7 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.6.0) The class screen ({@link Classes}). (0.7.33) Restyled like the creative H screen: every class down the left
+ * (0.6.0) The class screen ({@link Classes}). (0.7.38) Restyled like the creative H screen: every class down the left
  * (its signature gear and name), and on the right the one you point at or picked: what it's good with
  * ({@link ClassPerks#card}) as striped rows, the gear it's good with ({@link Classes#gear}), a Mage's or a Sorcerer's
  * first spell or element to pick, and a box at the bottom with the class (or the hovered spell) in full. Pressing a
