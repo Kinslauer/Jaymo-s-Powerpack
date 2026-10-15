@@ -1355,3 +1355,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   `kingdoms/MODLOG.md`). Masked, the costume's name ("Masked Stranger" if unnamed) is your display name everywhere:
   chat, death and join messages, the tab list (resent when the mask goes on or off), the name tag
   (`mixin/CostumeNameMixin` on `Player.getDisplayName`, `CostumeTabListMixin` on `ServerPlayer.getTabListDisplayName`).
+- **0.11.77 / Kitchen 0.4.44, player corpses wear their villager look:** with MCA everyone is a villager, so a dead
+  player's corpse is drawn as the villager MCA draws them as (genes, skin, hair, clothes), by MCA's own renderer,
+  lying and ragdolling like any villager's body (Kitchen `client/corpse/McaLooks`, which asks
+  `MCAClient.getVillagerRendererData` and only touches MCA when it's loaded; `CorpseEntity.placeBody`). Their severed
+  head and limbs come off that villager too (`SeveredPartRenderer`). Without MCA, a player body, or before the look
+  arrives from the server, it's the player skin as before. Zombie players still wear the player skin.

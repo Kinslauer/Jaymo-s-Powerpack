@@ -92,7 +92,9 @@ public final class SeveredPartRenderer extends EntityRenderer<SeveredPart, Sever
 		int part = entity.part();
 		String first = Dismembered.names(part)[0];
 		state.player = entity.owner().isPresent() || entity.look().contains("\"minecraft:player\"");
-		if (state.player) {
+		// (0.11.77) a player's part comes off the villager MCA draws them as, when there is one (as their corpse does)
+		Entity look = state.player ? com.jaymoskitchen.client.corpse.McaLooks.of(entity.owner()) : null;
+		if (state.player && look == null) {
 			AvatarRenderState avatar = state.avatar;
 			avatar.skin = skin(entity.owner(), entity.look());
 			avatar.showCape = false;
@@ -110,7 +112,8 @@ public final class SeveredPartRenderer extends EntityRenderer<SeveredPart, Sever
 			state.centre.set(-mid.x / 16.0F, 1.501F - mid.y / 16.0F, mid.z / 16.0F).mul(0.9375F);
 			return;
 		}
-		Entity body = body(entity);
+		state.player = false;
+		Entity body = look != null ? look : body(entity);
 		if (body == null) {
 			return;
 		}
@@ -126,6 +129,10 @@ public final class SeveredPartRenderer extends EntityRenderer<SeveredPart, Sever
 		bodyState.nameTag = null;
 		bodyState.displayFireAnimation = false;
 		bodyState.setData(Dismembered.ONLY, part);
+		if (look != null) {
+			// MCA's villager for the player isn't in the world: lit where the part lies
+			bodyState.lightCoords = state.lightCoords;
+		}
 		float scale = 1.0F;
 		if (bodyState instanceof LivingEntityRenderState living) {
 			living.hasRedOverlay = false;
