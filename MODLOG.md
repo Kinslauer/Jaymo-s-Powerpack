@@ -1228,6 +1228,13 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.11.1, character creation can't be skipped** (Andy: "force character creation on spawn"): Kingdoms 0.7.45. A new
   player makes MCA's character (look, then where they start) first, then picks a class; neither screen can be shut
   or put away until it's done, and they can't be hurt or hunted meanwhile. See `kingdoms/MODLOG.md`.
+- **0.11.4, Yank moves swing the whole upper body** (Andy: "the web yank overhead spin should animate with more
+  gravity, swaying the upper body around as he spins, keeping the legs in a stable pose"): on any Yank web (the Yank,
+  its lead, and every Web Whip: overhead, seesaw, lasso) the torso turns at the waist with the weight, twisting after
+  the catch, bending into a slam and back under a haul overhead, leaning into it as it goes round, lagging and
+  swinging past it on a soft spring. Head and shoulders ride round with it (the web still leaves the hand), a free arm
+  swings with the chest, and the legs plant a wide staggered stance (giving way to walking). Knobs: the "heave" block
+  at the top of `WebArms`.
 - **0.11.5, village life** (Andy: Village Life's features in our systems; that mod is All Rights Reserved, so remade):
   Kingdoms 0.7.46. Festival days at the square (dancing, a feast from the storehouse, a musician, fireworks in the
   realm's colours; a lord can call one with `/kingdom festival`), villagers' own cats and dogs, couriers

@@ -18,6 +18,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -34,6 +36,9 @@ import org.jspecify.annotations.Nullable;
  * <li>Swinging along on a web, the slinger drives the swing instead: legs back on the drop, knees tucked through the
  * bottom of the arc, kicked out ahead on the upswing; the free arm flares out for balance, and the body banks into
  * turns.</li>
+ * <li>On a Yank web (the Yank, its lead, and every Web Whip), the weight on the line swings the upper body: it twists
+ * after the catch, bends forward into a slam and back under a haul overhead, and leans into it as it goes round,
+ * lagging and overshooting like something heavy, while the legs plant a wide, staggered stance.</li>
  * </ul>
  * The web line is drawn from the posed hand ({@link #handPos}), so it really comes out of the arm.
  */
@@ -60,7 +65,7 @@ public final class WebArms {
 	/** This frame's pose: an arm's aim is null when that hand has no web out. Angles are model-part radians. */
 	public record Pose(float amount, float @Nullable [] mainArm, float @Nullable [] offArm, float legTrail, float legSide, float wings, float lean,
 		float brake, float dive, float swayPitch, float swayRoll, float armSway, float legSway, float limbRoll, boolean airborne,
-		float drive, float pump, float tuck) {
+		float drive, float pump, float tuck, float heave, float torsoX, float torsoY, float torsoZ) {
 	}
 
 	/**
@@ -141,6 +146,36 @@ public final class WebArms {
 	/** Banking into a turn: roll per (radians turned per tick x blocks/tick), and the most it banks (radians). */
 	private static final float BANK_PER_TURN = 9.0F, BANK_MAX = 0.55F;
 
+	// ===== the heave: the upper body on a Yank or Web Whip line ======================================================
+	/**
+	 * The torso turns at the waist after the catch: twisting toward it ({@code HEAVE_TWIST} of its bearing, at most
+	 * {@code HEAVE_TWIST_MAX}), bending forward as it's in front ({@code HEAVE_BEND}) and further into a slam below
+	 * ({@code HEAVE_SLAM}), back under it overhead ({@code HEAVE_BACK}), and leaning toward its side ({@code HEAVE_LEAN}).
+	 * All radians.
+	 */
+	private static final float HEAVE_TWIST = 0.75F, HEAVE_TWIST_MAX = 1.0F;
+	private static final float HEAVE_BEND = 0.4F, HEAVE_SLAM = 0.35F, HEAVE_BACK = 0.5F, HEAVE_LEAN = 0.38F;
+	/** A Yank hauling something in leans back against it, this far (radians) per block/tick it comes, at most {@code HAUL_MAX}. */
+	private static final float HAUL_LEAN = 0.5F, HAUL_MAX = 0.35F;
+	/**
+	 * The faster the catch flies (full at {@code HEAVE_FAST} blocks/tick), the harder it drags the torso: from
+	 * {@code HEAVE_SLOW} of the angles above up to all of them.
+	 */
+	private static final float HEAVE_FAST = 1.4F, HEAVE_SLOW = 0.6F;
+	/** The torso's spring and damping: soft and underdamped, so it lags the catch and swings past it, like weight. */
+	private static final float HEAVE_SPRING = 0.16F, HEAVE_DAMPING = 0.8F;
+	/** How far the torso may bend (forward or back), lean and twist at most (radians). */
+	private static final float HEAVE_BEND_MAX = 0.75F, HEAVE_LEAN_MAX = 0.5F;
+	/** The waist the torso turns about: this far below the neck (model units). */
+	private static final float WAIST = 12.0F;
+	/**
+	 * The planted stance (thigh angles, radians): the leg on the main-arm side back ({@code STANCE_BACK}), the other
+	 * forward ({@code STANCE_FORWARD}), feet apart ({@code STANCE_SPREAD}) and turned out ({@code STANCE_TURN}). Walking,
+	 * it gives way to the walk, all of it by {@code STANCE_WALK} walk speed.
+	 */
+	private static final float STANCE_BACK = 0.32F, STANCE_FORWARD = -0.28F, STANCE_SPREAD = 0.14F, STANCE_TURN = 0.18F;
+	private static final float STANCE_WALK = 0.6F;
+
 	/** A player's springy state. Directions are world-space unit vectors (from the shoulder toward the web). */
 	private static final class Body {
 		final Vec3[] dir = new Vec3[2];
@@ -167,6 +202,12 @@ public final class WebArms {
 		Vec3 lastMotion = Vec3.ZERO;
 		/** Ticks into the current Web Zip (0 = not zipping). */
 		int zipAge;
+		/** On a Yank line (0-1); the torso's turn at the waist (model-part radians); where the catch was last tick. */
+		float heave, prevHeave;
+		float torsoX, torsoXVel, prevTorsoX;
+		float torsoY, torsoYVel, prevTorsoY;
+		float torsoZ, torsoZVel, prevTorsoZ;
+		@Nullable Vec3 lastCatch;
 	}
 
 	private static final Map<Integer, Body> BODIES = new HashMap<>();
@@ -214,6 +255,7 @@ public final class WebArms {
 			boolean swinging = !zipping && !winged && (swingLine(minecraft, player, WebNet.MAIN) || swingLine(minecraft, player, WebNet.OFF))
 				&& !twoHanded(player);
 			tickBody(player, body, main, off, swinging);
+			tickHeave(player, body, yanking(player) ? (main != null ? main : off) : null);
 		}
 		BODIES.entrySet().removeIf(entry -> entry.getValue().amount <= 0.0F && entry.getValue().prevAmount <= 0.0F
 			&& entry.getValue().wings <= 0.0F && entry.getValue().prevWings <= 0.0F || level.getEntity(entry.getKey()) == null);
@@ -479,6 +521,84 @@ public final class WebArms {
 		body.tuck += ((total < 1.0E-3 ? 0.0F : bottom / total) - body.tuck) * 0.3F;
 	}
 
+	/** On a Yank web: a Yank line out from either hand (the Yank, a Web Whip), or holding something on its lead. */
+	private static boolean yanking(Player player) {
+		for (int hand = 0; hand < 2; hand++) {
+			WebLine line = player.getAttached(WebPower.line(hand));
+			if (line != null && line.kind() == WebLine.YANK) {
+				return true;
+			}
+		}
+		return player.getAttached(WebPower.TETHER) != null;
+	}
+
+	/**
+	 * The heave: the torso chases where the catch is (and how hard it's moving) on a soft spring, so it trails behind
+	 * the whirl and swings past it at each turn, as if the weight were pulling it round.
+	 */
+	private static void tickHeave(Player player, Body body, @Nullable Vec3 caught) {
+		body.prevHeave = body.heave;
+		body.heave = caught != null ? Math.min(1.0F, body.heave + 0.2F) : Math.max(0.0F, body.heave - 0.15F);
+		float xWant = 0.0F, yWant = 0.0F, zWant = 0.0F;
+		if (caught != null) {
+			Vec3 chest = player.getPosition(1.0F).add(0.0, SHOULDER_HEIGHT * player.getScale(), 0.0);
+			Vec3 d = caught.subtract(chest);
+			Vec3 motion = new Vec3(player.getX() - player.xo, player.getY() - player.yo, player.getZ() - player.zo);
+			Vec3 moved = body.lastCatch == null ? Vec3.ZERO : caught.subtract(body.lastCatch).subtract(motion);
+			if (d.lengthSqr() > 1.0E-4) {
+				d = d.normalize();
+				float yaw = player.yBodyRot * Mth.DEG_TO_RAD;
+				// the catch in the body's frame: ahead, to the right, above
+				float f = (float)(-Mth.sin(yaw) * d.x + Mth.cos(yaw) * d.z);
+				float r = (float)(-Mth.cos(yaw) * d.x - Mth.sin(yaw) * d.z);
+				float u = (float)d.y;
+				float level = Mth.sqrt(f * f + r * r);
+				float pull = HEAVE_SLOW + (1.0F - HEAVE_SLOW) * Mth.clamp((float)moved.length() / HEAVE_FAST, 0.0F, 1.0F);
+				// twist after it (+ turns the chest to the right), less as it goes over the top and its bearing means little
+				yWant = Mth.clamp((float)Mth.atan2(r, f) * HEAVE_TWIST, -HEAVE_TWIST_MAX, HEAVE_TWIST_MAX) * Math.min(1.0F, level * 1.5F);
+				// + bends the top forward: into it in front (deeper into a slam), back under it overhead and behind
+				xWant = HEAVE_BEND * f + HEAVE_SLAM * Math.max(0.0F, -u) * Math.max(0.0F, f) - HEAVE_BACK * Math.max(0.0F, u);
+				// + leans the top to the left: lean toward its side
+				zWant = -HEAVE_LEAN * r;
+				if (!twoHanded(player)) {
+					// a Yank hauling it in: lean back against the line as it comes
+					double coming = -moved.dot(d);
+					xWant -= Mth.clamp((float)coming * HAUL_LEAN, 0.0F, HAUL_MAX);
+				}
+				xWant = Mth.clamp(xWant * pull, -HEAVE_BEND_MAX, HEAVE_BEND_MAX);
+				yWant *= pull;
+				zWant = Mth.clamp(zWant * pull, -HEAVE_LEAN_MAX, HEAVE_LEAN_MAX);
+			}
+		}
+		body.lastCatch = caught;
+		body.prevTorsoX = body.torsoX;
+		body.torsoXVel = (body.torsoXVel + (xWant - body.torsoX) * HEAVE_SPRING) * HEAVE_DAMPING;
+		body.torsoX += body.torsoXVel;
+		body.prevTorsoY = body.torsoY;
+		body.torsoYVel = (body.torsoYVel + (yWant - body.torsoY) * HEAVE_SPRING) * HEAVE_DAMPING;
+		body.torsoY += body.torsoYVel;
+		body.prevTorsoZ = body.torsoZ;
+		body.torsoZVel = (body.torsoZVel + (zWant - body.torsoZ) * HEAVE_SPRING) * HEAVE_DAMPING;
+		body.torsoZ += body.torsoZVel;
+	}
+
+	/** The torso's turn at the waist this frame, as drawn ({x, y, z} model-part radians), or null when it isn't turned. */
+	private static float @Nullable [] torso(Body body, float partialTick) {
+		float w = Mth.lerp(partialTick, body.prevHeave, body.heave) * Mth.lerp(partialTick, body.prevAmount, body.amount);
+		if (w <= 0.001F) {
+			return null;
+		}
+		return new float[] {Mth.lerp(partialTick, body.prevTorsoX, body.torsoX) * w, Mth.lerp(partialTick, body.prevTorsoY, body.torsoY) * w,
+			Mth.lerp(partialTick, body.prevTorsoZ, body.torsoZ) * w};
+	}
+
+	/** A point of the upper body (model units) moved with the torso's turn about the waist under {@code neck}. */
+	private static Vector3f turned(Quaternionf turn, float neckY, float x, float y, float z) {
+		Vector3f p = new Vector3f(x, y - neckY - WAIST, z);
+		turn.transform(p);
+		return p.add(0.0F, neckY + WAIST, 0.0F);
+	}
+
 	/** How far to bank (radians, + = toward the right) for turning from {@code before} to {@code now}. */
 	private static float bank(Vec3 before, Vec3 now) {
 		double was = Math.sqrt(before.x * before.x + before.z * before.z), is = Math.sqrt(now.x * now.x + now.z * now.z);
@@ -570,9 +690,21 @@ public final class WebArms {
 		float bodyYaw = Mth.lerp(partialTick, player.yBodyRotO, player.yBodyRot) * Mth.DEG_TO_RAD;
 		double scale = player.getScale();
 		double out = side(player, hand) * SHOULDER_OUT * scale;
-		// the body's right is (-cos, -sin) in x/z for Minecraft's yaw; then wherever the lean and sway have moved it
-		return posed(player, player.getPosition(partialTick).add(-Mth.cos(bodyYaw) * out, SHOULDER_HEIGHT * scale, -Mth.sin(bodyYaw) * out),
-			partialTick);
+		double up = SHOULDER_HEIGHT * scale, back = 0.0;
+		Body body = BODIES.get(player.getId());
+		float[] torso = body == null ? null : torso(body, partialTick);
+		if (torso != null) {
+			// turned with the torso about the waist (model units: x to the left, y down from the neck's height, z back)
+			Vector3f p = turned(new Quaternionf().rotationZYX(torso[2], torso[1], torso[0]), 0.0F, (float)(-out / scale * 16.0),
+				(float)(24.0 - SHOULDER_HEIGHT * 16.0), 0.0F);
+			out = -p.x / 16.0 * scale;
+			up = (24.0 - p.y) / 16.0 * scale;
+			back = p.z / 16.0 * scale;
+		}
+		// the body's right is (-cos, -sin) in x/z for Minecraft's yaw, its back (sin, -cos); then wherever the lean and
+		// sway have moved it
+		return posed(player, player.getPosition(partialTick).add(-Mth.cos(bodyYaw) * out + Mth.sin(bodyYaw) * back, up,
+			-Mth.sin(bodyYaw) * out - Mth.cos(bodyYaw) * back), partialTick);
 	}
 
 	/** Where the posed hand is (for the web line), or null if this player's arm isn't being posed for that hand. */
@@ -615,7 +747,9 @@ public final class WebArms {
 			swayRoll(body, partialTicks), Mth.lerp(partialTicks, body.prevArmSway, body.armSway) * amount,
 			Mth.lerp(partialTicks, body.prevLegSway, body.legSway) * amount, Mth.lerp(partialTicks, body.prevLimbRoll, body.limbRoll) * amount,
 			!player.onGround() && !player.isInWater(), Mth.lerp(partialTicks, body.prevDrive, body.drive) * amount,
-			Mth.lerp(partialTicks, body.prevPump, body.pump), Mth.lerp(partialTicks, body.prevTuck, body.tuck)));
+			Mth.lerp(partialTicks, body.prevPump, body.pump), Mth.lerp(partialTicks, body.prevTuck, body.tuck),
+			Mth.lerp(partialTicks, body.prevHeave, body.heave) * amount, Mth.lerp(partialTicks, body.prevTorsoX, body.torsoX),
+			Mth.lerp(partialTicks, body.prevTorsoY, body.torsoY), Mth.lerp(partialTicks, body.prevTorsoZ, body.torsoZ)));
 	}
 
 	/** An arm's {xRot, yRot} pointing it along its web, relative to the body (as the bow-aiming pose does it). */
@@ -739,6 +873,53 @@ public final class WebArms {
 			+ drift(age, 2.3F), 0.0F, Mth.lerp(drive, 0.08F + pose.legSide() * 0.9F, 0.06F + splay) + pose.limbRoll() * 0.15F, amount);
 		set(humanoid.leftLeg, Mth.lerp(drive, pose.legTrail() * 0.8F - 0.05F - flop + legLag * 0.9F, pose.pump() - rightLead + legLag * 0.3F)
 			+ drift(age, 5.9F), 0.0F, Mth.lerp(drive, -0.08F + pose.legSide() * 0.7F, -0.06F - splay) + pose.limbRoll() * 0.15F, amount);
+		heave(humanoid, avatar, pose, mainRight);
+	}
+
+	/**
+	 * On a Yank line: the torso turns at the waist with the weight (the head and shoulders carried round with it, the
+	 * arms still reaching along their webs, a free arm swinging with the chest) over legs planted in a wide stance.
+	 */
+	private static void heave(HumanoidModel<?> h, AvatarRenderState avatar, Pose pose, boolean mainRight) {
+		float w = pose.heave();
+		if (w <= 0.001F || avatar.isCrouching) {
+			return;
+		}
+		float tx = pose.torsoX() * w, ty = pose.torsoY() * w, tz = pose.torsoZ() * w;
+		Quaternionf turn = new Quaternionf().rotationZYX(tz, ty, tx);
+		float neckY = h.body.getInitialPose().y();
+		Vector3f neck = turned(turn, neckY, h.body.getInitialPose().x(), neckY, h.body.getInitialPose().z());
+		h.body.x = neck.x;
+		h.body.y = neck.y;
+		h.body.z = neck.z;
+		h.body.xRot = tx;
+		h.body.yRot = ty;
+		h.body.zRot = tz;
+		// the head rides on the neck, still looking where it looks
+		h.head.x = neck.x;
+		h.head.y = neck.y;
+		h.head.z = neck.z;
+		for (ModelPart arm : new ModelPart[] {h.rightArm, h.leftArm}) {
+			net.minecraft.client.model.geom.PartPose rest = arm.getInitialPose();
+			Vector3f shoulder = turned(turn, neckY, rest.x(), rest.y(), rest.z());
+			arm.x = shoulder.x;
+			arm.y = shoulder.y;
+			arm.z = shoulder.z;
+		}
+		// an arm with no web out goes round with the chest (set, not added: this pass can run twice a frame)
+		ModelPart mainArm = mainRight ? h.rightArm : h.leftArm;
+		ModelPart offArm = mainRight ? h.leftArm : h.rightArm;
+		for (ModelPart arm : new ModelPart[] {pose.mainArm() == null ? mainArm : null, pose.offArm() == null ? offArm : null}) {
+			if (arm != null) {
+				arm.yRot = Mth.lerp(w, arm.yRot, ty);
+				arm.zRot = Mth.lerp(w, arm.zRot, tz + (arm == h.rightArm ? 0.1F : -0.1F));
+			}
+		}
+		// the legs planted: the main side's back, the other forward, apart and turned out (on the ground, unless walking)
+		float stance = w * (pose.airborne() ? 0.6F : 1.0F - Mth.clamp(avatar.walkAnimationSpeed / STANCE_WALK, 0.0F, 1.0F));
+		float back = mainRight ? STANCE_BACK : STANCE_FORWARD, forward = mainRight ? STANCE_FORWARD : STANCE_BACK;
+		set(h.rightLeg, back, STANCE_TURN, STANCE_SPREAD, stance);
+		set(h.leftLeg, forward, -STANCE_TURN, -STANCE_SPREAD, stance);
 	}
 
 	/** A limb's slow wander (radians), out of step with the others by {@code phase}. */
