@@ -185,7 +185,7 @@ public final class Classes {
 	/** Player → the court wizard who offered them a writ (entity id). */
 	private static final Map<UUID, Integer> WRIT_OFFERS = new HashMap<>();
 
-	/** (0.7.44) While a player makes their character, mobs within this range that go for them are called off, this often (ticks). */
+	/** (0.7.45) While a player makes their character, mobs within this range that go for them are called off, this often (ticks). */
 	static final int UNMADE_SHOO_RANGE = 32, UNMADE_SHOO_EVERY = 10;
 
 	private Classes() {
@@ -199,13 +199,13 @@ public final class Classes {
 		ServerPlayNetworking.registerGlobalReceiver(Choose.TYPE, (payload, context) -> choose(context.player(), payload));
 		ServerPlayerEvents.JOIN.register(player -> {
 			refresh(player);
-			// (0.7.44) Andy: "force character creation on spawn". MCA's destiny screen (your look, where you start) comes
+			// (0.7.45) Andy: "force character creation on spawn". MCA's destiny screen (your look, where you start) comes
 			// first and can't be shut; the class screen follows it ({@link #afterDestiny}) and can't be shut either.
 			if (of(player).playerClass() == null && !McaCompat.destinyPending(player)) {
 				ask(player, true);
 			}
 		});
-		// (0.7.44) until both are done the player can't be hurt and nothing hunts them
+		// (0.7.45) until both are done the player can't be hurt and nothing hunts them
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer sp && unmade(sp)
 			&& !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)));
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> refresh(newPlayer));
@@ -272,14 +272,14 @@ public final class Classes {
 	}
 
 	/**
-	 * (0.7.44) Whether {@code player} is still making their character: no class yet (and their client has this mod,
+	 * (0.7.45) Whether {@code player} is still making their character: no class yet (and their client has this mod,
 	 * so the screen is up for them), or MCA's destiny screen still to finish.
 	 */
 	public static boolean unmade(ServerPlayer player) {
 		return classOf(player) == null && ServerPlayNetworking.canSend(player, Open.TYPE);
 	}
 
-	/** (0.7.44) MCA's destiny screen was just finished: the class screen is next, and can't be shut without picking. */
+	/** (0.7.45) MCA's destiny screen was just finished: the class screen is next, and can't be shut without picking. */
 	public static void afterDestiny(ServerPlayer player) {
 		if (classOf(player) == null) {
 			ask(player, true);

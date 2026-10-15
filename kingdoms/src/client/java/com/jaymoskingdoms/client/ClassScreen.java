@@ -43,9 +43,9 @@ final class ClassScreen extends Screen {
 		this.forced = forced;
 	}
 
-	/** (0.7.44) After Choose, how long the class may take to come back before the screen is put up again (ms). */
+	/** (0.7.45) After Choose, how long the class may take to come back before the screen is put up again (ms). */
 	static final long CHOOSE_GRACE_MS = 3000L;
-	/** (0.7.44) The server asked for a class that can't be put off: the screen comes back whenever it's shut. */
+	/** (0.7.45) The server asked for a class that can't be put off: the screen comes back whenever it's shut. */
 	private static boolean owed;
 	private static long quietUntil;
 
@@ -54,7 +54,7 @@ final class ClassScreen extends Screen {
 			owed |= payload.forced();
 			context.client().gui.setScreen(new ClassScreen(payload.forced()));
 		});
-		// (0.7.44) Andy: "force character creation on spawn": nothing else (another mod's screen, a pause) puts it away
+		// (0.7.45) Andy: "force character creation on spawn": nothing else (another mod's screen, a pause) puts it away
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			if (!owed || minecraft.player == null) {
 				return;

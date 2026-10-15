@@ -2988,7 +2988,7 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
   - **Moons**: a Harvest Moon brings no disaster (stage 1's supercells wait too; one foretold for it never comes); a
     Blood Moon twice as many, and quakes one stronger.
 
-## 0.7.44: character creation can't be skipped (pack 0.10.131)
+## 0.7.45: character creation can't be skipped (pack 0.11.1)
 - Andy: "force character creation on spawn". In order, on first joining:
   - **MCA's destiny screen** (your look, then where you start). MCA already opens it to everyone whose look isn't
     set (its `launchIntoDestiny`, on by default) and won't let it shut. The class screen now waits for it:

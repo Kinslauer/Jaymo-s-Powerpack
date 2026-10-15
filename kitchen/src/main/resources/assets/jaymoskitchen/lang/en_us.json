@@ -158,6 +158,7 @@
 	"screen.jaymoskitchen.hint.furnace": "Grilled dishes are cooked over a Campfire.",
 	"screen.jaymoskitchen.hint.smoker": "Smokers give 25% more time. Grill on a Campfire.",
 	"screen.jaymoskitchen.pick": "Pick a dish (greyed out = missing ingredients)",
+	"screen.jaymoskitchen.cook_hint": "Press the steps in order. The buttons shuffle after every press",
 	"screen.jaymoskitchen.waiting": "Firing up...",
 	"screen.jaymoskitchen.mistakes": "Mistakes: %s/%s",
 	"screen.jaymoskitchen.again": "Cook another",

@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.44) Andy: "force character creation on spawn". MCA's destiny screen tells the server it's done with an empty
+ * (0.7.45) Andy: "force character creation on spawn". MCA's destiny screen tells the server it's done with an empty
  * {@link DestinyMessage}; the class screen ({@link Classes#afterDestiny}) opens next.
  */
 @Mixin(DestinyMessage.class)

@@ -310,7 +310,7 @@ public final class McaCompat {
 	}
 
 	/**
-	 * (0.7.44) Whether MCA's destiny screen is still owed to {@code player}: MCA opens it to everyone whose look isn't
+	 * (0.7.45) Whether MCA's destiny screen is still owed to {@code player}: MCA opens it to everyone whose look isn't
 	 * set yet (its {@code launchIntoDestiny}), and keeps it open until they finish.
 	 */
 	public static boolean destinyPending(ServerPlayer player) {

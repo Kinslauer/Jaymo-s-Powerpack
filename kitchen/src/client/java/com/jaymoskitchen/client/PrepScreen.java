@@ -22,7 +22,8 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * The dough prep board: hold to pour water, hold to pour oil (release inside the green band), then knead by
- * alternating left and right. The pours and the knead run here; the server scores what we report.
+ * alternating left and right. The pours and the knead run here; the server scores what we report. (0.4.40) Restyled
+ * like the H screen: a dark panel with the Kitchen's stripe, a header naming the step, the how-to as striped rows.
  */
 public class PrepScreen extends Screen {
 	private enum Phase { INTRO, WAITING, WATER, OIL, KNEAD, SENDING, RESULT }
@@ -33,13 +34,13 @@ public class PrepScreen extends Screen {
 	/** How long the "just right / too much" verdict shows before moving on. */
 	private static final int VERDICT_TICKS = 20;
 
-	private static final int COLOR_PANEL = 0xE0201812;
-	private static final int COLOR_BORDER = 0xFF8B5A2B;
-	private static final int COLOR_TEXT = 0xFFFFFFFF;
-	private static final int COLOR_DIM = 0xFFA0A0A0;
-	private static final int COLOR_GOOD = 0xFF55FF55;
-	private static final int COLOR_OK = 0xFFFFDD55;
-	private static final int COLOR_BAD = 0xFFFF5555;
+	private static final int COLOR_TEXT = KitchenUi.TEXT;
+	private static final int COLOR_DIM = KitchenUi.DIM;
+	private static final int COLOR_GOOD = KitchenUi.GOOD;
+	private static final int COLOR_OK = KitchenUi.OK;
+	private static final int COLOR_BAD = KitchenUi.BAD;
+	/** Pitch of the how-to rows on the intro. */
+	private static final int HOW_ROW = 13;
 	private static final int COLOR_WATER = 0xFF3F76E4;
 	private static final int COLOR_OIL = 0xFFE0B040;
 	private static final int COLOR_BOWL = 0xFF8B5A2B;
@@ -317,10 +318,17 @@ public class PrepScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left();
 		int y = top();
-		graphics.fill(x - 2, y - 2, x + PANEL_W + 2, y + PANEL_H + 2, COLOR_BORDER);
-		graphics.fill(x, y, x + PANEL_W, y + PANEL_H, COLOR_PANEL);
-		graphics.centeredText(this.font, this.title.copy().append(" - ").append(Component.translatable("screen.jaymoskitchen.prep")),
-			this.width / 2, y + 8, COLOR_OK);
+		KitchenUi.panel(graphics, x, y, PANEL_W, PANEL_H, KitchenUi.ACCENT);
+		String sub = switch (phase) {
+			case WAITING, SENDING -> "screen.jaymoskitchen.waiting";
+			case WATER -> "screen.jaymoskitchen.prep.pour_water";
+			case OIL -> "screen.jaymoskitchen.prep.pour_oil";
+			case KNEAD -> "screen.jaymoskitchen.prep.knead";
+			default -> "screen.jaymoskitchen.prep.make_dough";
+		};
+		KitchenUi.header(graphics, this.font, x, y, PANEL_W, new ItemStack(ModItems.DOUGH),
+			this.title.copy().append(" - ").append(Component.translatable("screen.jaymoskitchen.prep")), Component.translatable(sub),
+			KitchenUi.ACCENT, x + PANEL_W - 9);
 
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
@@ -335,32 +343,38 @@ public class PrepScreen extends Screen {
 	}
 
 	private void drawIntro(GuiGraphicsExtractor graphics, int x, int y) {
-		int cx = this.width / 2;
-		graphics.item(new ItemStack(ModItems.DOUGH), cx - 8, y + 24);
-		graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.prep.make_dough"), cx, y + 44, COLOR_TEXT);
+		// what goes in, each in its well, and what you keep
+		int ry = y + KitchenUi.HEADER;
+		KitchenUi.row(graphics, x + 6, ry, x + PANEL_W - 6, ry + 22, 0, false);
 		Map<Step, Integer> ingredients = Prep.ingredients(Prep.Recipe.DOUGH);
-		int iconX = cx - ingredients.size() * 22 / 2;
+		int iconX = x + 11;
 		for (Map.Entry<Step, Integer> need : ingredients.entrySet()) {
-			ItemStack stack = need.getKey().icon(need.getValue());
-			graphics.item(stack, iconX + 3, y + 60);
-			graphics.itemDecorations(this.font, stack, iconX + 3, y + 60, null);
-			iconX += 22;
+			KitchenUi.itemWell(graphics, this.font, need.getKey().icon(need.getValue()), iconX, ry + 3);
+			iconX += 21;
 		}
-		graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.prep.bowl_kept"), cx, y + 82, COLOR_DIM);
-		graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.prep.how1"), cx, y + 102, COLOR_TEXT);
-		graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.prep.how2"), cx, y + 114, COLOR_TEXT);
-		graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.prep.how3"), cx, y + 126, COLOR_TEXT);
-		graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.prep.oil_hint"), cx, y + 142, COLOR_DIM);
-		graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.roll.or"), cx, y + 160, COLOR_OK);
+		KitchenUi.line(graphics, this.font, Component.translatable("screen.jaymoskitchen.prep.bowl_kept"), iconX + 4, ry + 7,
+			x + PANEL_W - 9 - iconX - 4, COLOR_DIM);
+		// how it goes, a row per step
+		ry += 26;
+		String[] how = {"screen.jaymoskitchen.prep.how1", "screen.jaymoskitchen.prep.how2", "screen.jaymoskitchen.prep.how3"};
+		for (int i = 0; i < how.length; i++) {
+			int hy = ry + i * HOW_ROW;
+			KitchenUi.row(graphics, x + 6, hy, x + PANEL_W - 6, hy + HOW_ROW - 1, i, false);
+			KitchenUi.line(graphics, this.font, Component.translatable(how[i]), x + 9, hy + 3, PANEL_W - 18, COLOR_TEXT);
+		}
+		ry += how.length * HOW_ROW + 4;
+		KitchenUi.line(graphics, this.font, Component.translatable("screen.jaymoskitchen.prep.oil_hint"), x + 9, ry, PANEL_W - 18,
+			KitchenUi.HINT);
+		// the other things this board does
+		KitchenUi.detail(graphics, this.font, x, ry + 14, PANEL_W, 2, null, COLOR_DIM,
+			java.util.List.of(Component.translatable("screen.jaymoskitchen.roll.or").withColor(KitchenUi.ACCENT & 0xFFFFFF)));
 	}
 
 	private void drawPour(GuiGraphicsExtractor graphics, int x, int y) {
 		boolean isWater = phase == Phase.WATER;
 		int cx = this.width / 2;
-		graphics.centeredText(this.font,
-			Component.translatable(isWater ? "screen.jaymoskitchen.prep.pour_water" : "screen.jaymoskitchen.prep.pour_oil"),
-			cx, y + 24, COLOR_TEXT);
-		graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.prep.hold"), cx, y + 36, COLOR_DIM);
+		KitchenUi.line(graphics, this.font, Component.translatable("screen.jaymoskitchen.prep.hold"), x + 9, y + KitchenUi.HEADER + 3,
+			PANEL_W - 18, KitchenUi.HINT);
 
 		// gauge: a measuring tube with the acceptable band and the perfect band marked
 		int gx = x + 60;
@@ -374,8 +388,7 @@ public class PrepScreen extends Screen {
 		float pMin = (isWater ? Prep.WATER_PERFECT_MIN : Prep.OIL_PERFECT_MIN) + shift;
 		float pMax = (isWater ? Prep.WATER_PERFECT_MAX : Prep.OIL_PERFECT_MAX) + shift;
 		int liquid = isWater ? COLOR_WATER : COLOR_OIL;
-		graphics.fill(gx - 2, gTop - 2, gx + 32, gBottom + 2, 0xFFCCCCCC);
-		graphics.fill(gx, gTop, gx + 30, gBottom, 0xFF101010);
+		KitchenUi.well(graphics, gx - 2, gTop - 2, 34, gBottom - gTop + 4);
 		graphics.fill(gx, gBottom - Math.round(gh * level), gx + 30, gBottom, liquid);
 		markBand(graphics, gx, gBottom, gh, min, max, 0x6055FF55, 3);
 		markBand(graphics, gx, gBottom, gh, pMin, pMax, 0xA055FF55, 6);
@@ -430,14 +443,10 @@ public class PrepScreen extends Screen {
 
 	private void drawKnead(GuiGraphicsExtractor graphics, int x, int y, float a) {
 		int cx = this.width / 2;
-		graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.prep.knead"), cx, y + 24, COLOR_TEXT);
-
 		// time left and knead progress
 		float timeLeft = 1.0F - Math.min(1.0F, (kneadTicks + a) / Prep.KNEAD_TICKS);
-		graphics.fill(x + 20, y + 40, x + PANEL_W - 20, y + 44, 0xFF000000);
-		graphics.fill(x + 20, y + 40, x + 20 + Math.round((PANEL_W - 40) * timeLeft), y + 44, timeLeft > 0.3F ? COLOR_OK : COLOR_BAD);
-		graphics.fill(x + 20, y + 48, x + PANEL_W - 20, y + 54, 0xFF000000);
-		graphics.fill(x + 20, y + 48, x + 20 + (PANEL_W - 40) * kneads / Prep.KNEADS, y + 54, COLOR_GOOD);
+		KitchenUi.bar(graphics, x + 20, y + 40, PANEL_W - 40, 4, timeLeft, timeLeft > 0.3F ? KitchenUi.ACCENT : COLOR_BAD);
+		KitchenUi.bar(graphics, x + 20, y + 48, PANEL_W - 40, 6, kneads / (float) Prep.KNEADS, COLOR_GOOD);
 
 		// the dough in its bowl, squashed the way it was last pushed
 		int bowlTop = y + 112;
@@ -457,9 +466,9 @@ public class PrepScreen extends Screen {
 	private void drawResult(GuiGraphicsExtractor graphics, int x, int y) {
 		int cx = this.width / 2;
 		if (result.amount() > 0) {
-			ItemStack stack = new ItemStack(ModItems.DOUGH, result.amount());
-			graphics.item(stack, cx - 8, y + 50);
-			graphics.itemDecorations(this.font, stack, cx - 8, y + 50, null);
+			KitchenUi.outputWell(graphics, this.font, new ItemStack(ModItems.DOUGH, result.amount()), cx - 8, y + 50);
+		} else {
+			KitchenUi.well(graphics, cx - 13, y + 45, 26, 26);
 		}
 		int color = result == Prep.Result.PERFECT ? COLOR_GOOD : result == Prep.Result.GOOD ? COLOR_OK : COLOR_BAD;
 		graphics.centeredText(this.font, Component.translatable("screen.jaymoskitchen.prep.result." + result.name().toLowerCase()),

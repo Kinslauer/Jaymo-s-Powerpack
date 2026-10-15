@@ -1,21 +1,27 @@
 package com.jaymospowers.client.power.zfighter;
 
+import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.power.zfighter.ZFighterNet;
 import com.jaymospowers.power.zfighter.ZFighterWishes;
+import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
 /**
- * The Eternal Dragon asks for your wish: six buttons, each with what it grants under it. Escape doesn't close it; the
- * dragon waits until you wish (or until it tires of waiting, and the orbs scatter all the same).
+ * The Eternal Dragon asks for your wish: six wishes, each with what it grants. Escape doesn't close it; the dragon
+ * waits until you wish (or until it tires of waiting, and the orbs scatter all the same). (0.11.0) Restyled like the H
+ * screen: a striped row per wish (its name, what it grants in short, a Wish button) and the box at the bottom shows the
+ * hovered wish in full, where the tooltips were.
  */
 public class ZFighterWishScreen extends Screen {
-	private static final int W = 280;
-	private static final int H = 190;
+	private static final int MAX_W = 300;
+	private static final int ROW = 18;
+	private static final int DETAIL_LINES = 4;
+	private static final int BUTTON_W = 50;
 	private static final int ACCENT = 0xFF3CC85A;
 
 	public ZFighterWishScreen() {
@@ -26,24 +32,38 @@ public class ZFighterWishScreen extends Screen {
 		ClientPlayNetworking.registerGlobalReceiver(ZFighterNet.OpenWish.TYPE, (payload, context) -> context.client().gui.setScreen(new ZFighterWishScreen()));
 	}
 
+	private int panelW() {
+		return Math.min(MAX_W, this.width - 12);
+	}
+
+	private int panelH() {
+		return UiStyle.HEADER + ZFighterWishes.WISHES * ROW + 6 + UiStyle.detailHeight(DETAIL_LINES);
+	}
+
 	private int left() {
-		return (this.width - W) / 2;
+		return (this.width - panelW()) / 2;
 	}
 
 	private int top() {
-		return (this.height - H) / 2;
+		return Math.max(4, (this.height - panelH()) / 2);
+	}
+
+	private int rowY(int i) {
+		return top() + UiStyle.HEADER + i * ROW;
+	}
+
+	private static String key(int i) {
+		return "wish.jaymospowers.zfighter." + ZFighterWishes.KEYS[i];
 	}
 
 	@Override
 	protected void init() {
 		for (int i = 0; i < ZFighterWishes.WISHES; i++) {
 			int wish = i;
-			String key = "wish.jaymospowers.zfighter." + ZFighterWishes.KEYS[i];
-			addRenderableWidget(Button.builder(Component.translatable(key), b -> {
+			addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter.wish_button"), b -> {
 				ClientPlayNetworking.send(new ZFighterNet.Wish(wish));
 				this.onClose();
-			}).bounds(left() + 14 + (i % 2) * 130, top() + 44 + (i / 2) * 44, 122, 20)
-				.tooltip(Tooltip.create(Component.translatable(key + ".desc"))).build());
+			}).bounds(left() + panelW() - BUTTON_W - 8, rowY(i) + 1, BUTTON_W, 14).build());
 		}
 	}
 
@@ -61,18 +81,35 @@ public class ZFighterWishScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left();
 		int y = top();
-		graphics.fill(x, y, x + W, y + H, 0xD0081008);
-		graphics.fill(x, y, x + W, y + 2, ACCENT);
-		graphics.centeredText(this.font, this.title, this.width / 2, y + 8, ACCENT);
-		var lines = this.font.split(Component.translatable("screen.jaymospowers.zfighter.wish_help"), W - 20);
-		for (int i = 0; i < Math.min(2, lines.size()); i++) {
-			graphics.centeredText(this.font, lines.get(i), this.width / 2, y + 20 + i * 9, 0xFFA8B8A8);
-		}
+		int w = panelW();
+		UiStyle.panel(graphics, x, y, w, panelH(), ACCENT);
+		UiStyle.header(graphics, this.font, x, y, w, ZFighterWishes.ORB[3] == null ? null : new ItemStack(ZFighterWishes.ORB[3]), this.title,
+			Component.translatable("screen.jaymospowers.zfighter.wish_sub"), ACCENT, 0);
+		int hovered = -1;
+		int nameW = 0;
 		for (int i = 0; i < ZFighterWishes.WISHES; i++) {
-			var desc = this.font.split(Component.translatable("wish.jaymospowers.zfighter." + ZFighterWishes.KEYS[i] + ".short"), 122);
-			if (!desc.isEmpty()) {
-				graphics.text(this.font, desc.get(0), x + 14 + (i % 2) * 130, y + 67 + (i / 2) * 44, 0xFF90A090);
+			nameW = Math.max(nameW, this.font.width(Component.translatable(key(i))));
+		}
+		nameW = Math.min(110, nameW);
+		int textX = x + 12 + nameW + 8;
+		int textW = x + w - BUTTON_W - 14 - textX;
+		for (int i = 0; i < ZFighterWishes.WISHES; i++) {
+			int ry = rowY(i);
+			boolean hover = UiStyle.over(mouseX, mouseY, x + 6, ry, w - 12, ROW - 2);
+			if (hover) {
+				hovered = i;
 			}
+			UiStyle.row(graphics, x + 6, ry, x + w - 6, ry + ROW - 2, i, hover);
+			UiStyle.line(graphics, this.font, Component.translatable(key(i)), x + 12, ry + 4, nameW, UiStyle.TEXT);
+			UiStyle.line(graphics, this.font, Component.translatable(key(i) + ".short"), textX, ry + 4, textW, UiStyle.DIM);
+		}
+		int dy = y + panelH() - UiStyle.detailHeight(DETAIL_LINES);
+		if (hovered >= 0) {
+			UiStyle.detail(graphics, this.font, x, dy, w, DETAIL_LINES, Component.translatable(key(hovered)), ACCENT,
+				List.of(Component.translatable(key(hovered) + ".desc")));
+		} else {
+			UiStyle.detail(graphics, this.font, x, dy, w, DETAIL_LINES, null, ACCENT,
+				List.of(Component.translatable("screen.jaymospowers.zfighter.wish_help")));
 		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}

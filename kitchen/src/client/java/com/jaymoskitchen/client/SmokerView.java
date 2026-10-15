@@ -88,9 +88,9 @@ final class SmokerView {
 		graphics.fill(needle - 1, gTop - 4, needle + 2, gBottom + 4, 0xFFFFFFFF);
 
 		// cure progress (green), scorch (red), time left (grey)
-		graphics.fill(barLeft, top + 16, barRight, top + 21, 0xFF000000);
+		graphics.fill(barLeft, top + 16, barRight, top + 21, KitchenUi.BAR_BACK);
 		graphics.fill(barLeft, top + 16, barLeft + Math.round(barW * Math.min(1.0F, cure)), top + 21, 0xFF55FF55);
-		graphics.fill(barLeft, top + 23, barRight, top + 26, 0xFF000000);
+		graphics.fill(barLeft, top + 23, barRight, top + 26, KitchenUi.BAR_BACK);
 		graphics.fill(barLeft, top + 23, barLeft + Math.round(barW * Math.min(1.0F, scorch)), top + 26, 0xFFFF5555);
 		graphics.fill(barLeft, top + 28, barLeft + Math.round(barW * Math.max(0.0F, timeLeft)), top + 30, 0xFF808080);
 
