@@ -56,6 +56,12 @@ XP: melee blows landed, monsters killed (+4), stone, ore and wood broken. Practi
 - Quarryman (lvl 5): break blocks 25% faster.
 - Packhorse (lvl 5): sprinting, mining and fighting tire you less (hunger).
 - Titan's Grip (lvl 10, 2 pts): a full-strength blow may stagger its target.
+- Weapon Forms (lvl 2, second root, Kingdoms 0.7.30): every weapon's full Better Combat combo. Without it a weapon
+  has only its first two plain swings (our twirl/spin/flip flourishes skipped). Andy, 2026-10-15: "weapon combo
+  animations are unlocked within the strength skill tree. simple one or two attacks otherwise. like most mobs. some mobs
+  will be more experienced like storied guards or kings." Mobs (`MobCombat`) do the same; `WeaponForms.experienced`
+  gives the whole combo to leaders (kings, lords, chiefs), a ruler's escort, assassins, the two wealthiest realms'
+  guards, folk grown 12+ days, and illager captains.
 
 ## Combat Arts (Strength's second page, Kingdoms 0.6.5)
 
