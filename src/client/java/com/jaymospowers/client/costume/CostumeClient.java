@@ -6,6 +6,7 @@ import com.jaymospowers.client.power.xenoform.XenoformClient;
 import com.jaymospowers.costume.Costume;
 import com.jaymospowers.costume.CostumeDesign;
 import com.jaymospowers.costume.CostumeNet;
+import com.jaymospowers.costume.SecretIdentity;
 import com.jaymospowers.power.web.WebSymbiote;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -24,6 +25,7 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelType;
@@ -76,6 +78,14 @@ public final class CostumeClient {
 			design = preview != null && player == Minecraft.getInstance().player ? preview : Costume.worn(player);
 		}
 		state.setData(KEY, design);
+		if (entity instanceof Player player && state.nameTag != null) {
+			// (0.11.70) a hidden face: the costume's name over their head, not theirs (nor their score)
+			Component masked = SecretIdentity.maskedName(player);
+			if (masked != null) {
+				state.nameTag = masked;
+				state.scoreText = null;
+			}
+		}
 		if (design == null) {
 			return;
 		}

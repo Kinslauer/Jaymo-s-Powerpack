@@ -36,7 +36,7 @@ import org.jspecify.annotations.Nullable;
  * player ({@link #WORN}: kept through death, synced to everyone), over the body in every pose, with the armour under it
  * still protecting but not drawn. Take it off at a table or with {@code /costume off}.
  * <p>
- * Later stages read the worn design: {@link #masked} is the hook for a secret identity.
+ * Later stages read the worn design: {@link #masked} is the hook for a secret identity ({@link SecretIdentity}, 0.11.70).
  */
 public final class Costume {
 	/** On a player: the costume they wear (synced to everyone, kept through death). */
@@ -60,6 +60,7 @@ public final class Costume {
 		item("costume_table", p -> new BlockItem(TABLE, p.useBlockDescriptionPrefix()));
 		COSTUME = item("costume", p -> new CostumeItem(p.stacksTo(1).component(DESIGN, CostumeDesign.DEFAULT)));
 		CostumeNet.init();
+		SecretIdentity.init();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
 			output.accept(TABLE);
 			output.accept(CostumeItem.of(CostumeDesign.DEFAULT));
@@ -98,6 +99,7 @@ public final class Costume {
 		if (old != null) {
 			player.getInventory().placeItemBackInInventory(CostumeItem.of(old), Prediction.SERVER_ONLY);
 		}
+		SecretIdentity.update(player);
 		rustle(player);
 	}
 
@@ -109,6 +111,7 @@ public final class Costume {
 		}
 		player.removeAttached(WORN);
 		player.getInventory().placeItemBackInInventory(CostumeItem.of(old), Prediction.SERVER_ONLY);
+		SecretIdentity.update(player);
 		rustle(player);
 		return true;
 	}

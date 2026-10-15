@@ -38,6 +38,11 @@ public final class Reputation {
 	 * with Minecraft Comes Alive, warmed (or cooled) by the hearts its people have for them ({@link McaCompat}).
 	 */
 	public static int get(ServerPlayer player, int kingdom) {
+		String persona = Identities.persona(player, kingdom);
+		if (persona != null) {
+			// (0.7.62) a masked stranger: what they think of the costume (and no hearts: nobody knows them)
+			return voidCrowned(player) ? MIN : Identities.reputation(player.level().getServer(), persona, kingdom);
+		}
 		return voidCrowned(player) ? MIN : Mth.clamp(stored(player, kingdom) + McaCompat.heartsReputation(player, kingdom), MIN, MAX);
 	}
 
@@ -59,6 +64,12 @@ public final class Reputation {
 		}
 		// (0.5.12) as its ruler's temper takes it
 		by = Tempers.reputation(kingdom, by);
+		String persona = Identities.persona(player, kingdom.id());
+		if (persona != null) {
+			// (0.7.62) done in a mask they don't see through: it's the costume's name that's made (or ruined)
+			Identities.changeReputation(player, persona, kingdom, by);
+			return;
+		}
 		// (0.6.6) a settlement that survived a raid you brought barely warms to you again
 		by = Omens.gain(player, kingdom, by);
 		int before = stored(player, kingdom.id());
