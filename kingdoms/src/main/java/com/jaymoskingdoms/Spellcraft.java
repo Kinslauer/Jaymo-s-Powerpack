@@ -11,9 +11,11 @@ import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
@@ -33,7 +35,9 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -49,6 +53,10 @@ import org.jspecify.annotations.Nullable;
  * (picked with the class: water, fire, earth, air, lightning or ice) for a while; every blow it lands carries the
  * element ({@link #strike}), and the blade trails its colour. Sneak and {@code J} throws a bolt of the element at what
  * they're looking at instead, on a short cooldown: few spells, quick ones.
+ *
+ * <p>(0.7.49) The element lives on the blade itself ({@link Charge}, in the stack's custom data), not on the Sorcerer:
+ * dropped, handed over or picked up from a corpse, it keeps burning in anyone's hand until it wears off. So a Sorcerer
+ * keeps one imbued blade at a time; imbuing another takes the element out of the last one, wherever it is.
  */
 public final class Spellcraft {
 	/** A Mage's spells hit this much harder (and last longer) than a scroll's. */
@@ -84,8 +92,20 @@ public final class Spellcraft {
 		}
 	}
 
-	/** Sorcerer → game time their blade's element wears off. */
-	private static final Map<UUID, Long> IMBUED = new HashMap<>();
+	/** The custom data key an imbued blade keeps its {@link Charge} under. */
+	static final String CHARGE_KEY = "jaymoskingdoms_imbue";
+	/** How often (ticks) a player's whole inventory is checked for blades whose element has gone out. */
+	static final int SWEEP_EVERY = 20;
+
+	/** An imbued blade's element: whose it is, until when, and which of their imbues ({@code stamp}, the game time of it). */
+	public record Charge(UUID sorcerer, String name, String element, long until, long stamp) {
+	}
+
+	/** Sorcerer → their one imbued blade (its stamp) and when it wears off. A blade whose stamp isn't here has gone cold. */
+	private record Current(long stamp, long until) {
+	}
+
+	private static final Map<UUID, Current> IMBUED = new HashMap<>();
 	/** Blows landed since an air blade's last lift, by player. */
 	private static final Map<UUID, Integer> AIR_BLOWS = new HashMap<>();
 
@@ -112,19 +132,24 @@ public final class Spellcraft {
 		});
 		// an imbued blade's blows
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
-			if (source.getEntity() instanceof ServerPlayer sp && source.getDirectEntity() == sp && entity != sp && damageTaken > 0.0F && !blocked
-				&& imbued(sp) && entity.level() instanceof ServerLevel level) {
+			// whoever swings it: the element is the blade's, not the hand's
+			if (source.getEntity() instanceof LivingEntity attacker && source.getDirectEntity() == attacker && entity != attacker
+				&& damageTaken > 0.0F && !blocked && entity.level() instanceof ServerLevel level) {
+				String element = live(attacker.getMainHandItem(), level.getGameTime());
+				if (element == null) {
+					return;
+				}
 				boolean burst;
-				if (element(sp).equals("air")) {
-					int blows = AIR_BLOWS.merge(sp.getUUID(), 1, Integer::sum);
+				if (element.equals("air")) {
+					int blows = AIR_BLOWS.merge(attacker.getUUID(), 1, Integer::sum);
 					burst = blows % AIR_EVERY == 0;
 				} else {
-					burst = sp.getRandom().nextInt(PROC_ONE_IN) == 0;
+					burst = attacker.getRandom().nextInt(PROC_ONE_IN) == 0;
 				}
 				if (burst) {
-					strike(level, sp, entity, false);
+					strike(level, attacker, entity, element, false);
 				} else {
-					level.sendParticles(particle(element(sp)), entity.getX(), entity.getY(0.6), entity.getZ(), 2, 0.2, 0.2, 0.2, 0.02);
+					level.sendParticles(particle(element), entity.getX(), entity.getY(0.6), entity.getZ(), 2, 0.2, 0.2, 0.2, 0.02);
 				}
 			}
 		});
@@ -190,9 +215,59 @@ public final class Spellcraft {
 
 	// ---- the Sorcerer ---------------------------------------------------------------------------------------------
 
-	static boolean imbued(ServerPlayer player) {
-		Long until = IMBUED.get(player.getUUID());
-		return until != null && until > player.level().getGameTime();
+	/** The charge a stack carries, read as it is (it may have worn off or gone cold): null for none. */
+	public static @Nullable Charge charge(ItemStack stack) {
+		if (stack.isEmpty()) {
+			return null;
+		}
+		CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+		if (data == null) {
+			return null;
+		}
+		return data.copyTag().getCompound(CHARGE_KEY).flatMap(t -> t.getString("sorcerer").map(id -> {
+			try {
+				return new Charge(UUID.fromString(id), t.getStringOr("name", ""), t.getStringOr("element", ""),
+					t.getLongOr("until", 0L), t.getLongOr("stamp", 0L));
+			} catch (IllegalArgumentException e) {
+				return null;
+			}
+		})).orElse(null);
+	}
+
+	/** The element still burning in a stack at {@code now}, or null: worn off, or its Sorcerer has imbued another since. */
+	static @Nullable String live(ItemStack stack, long now) {
+		Charge c = charge(stack);
+		if (c == null || c.until() <= now || c.element().isEmpty()) {
+			return null;
+		}
+		Current current = IMBUED.get(c.sorcerer());
+		// no entry: the server restarted since (or it ran out); the blade's own clock decides
+		return current == null || current.stamp() == c.stamp() ? c.element() : null;
+	}
+
+	private static void write(ItemStack stack, Charge c) {
+		CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {
+			CompoundTag t = new CompoundTag();
+			t.putString("sorcerer", c.sorcerer().toString());
+			t.putString("name", c.name());
+			t.putString("element", c.element());
+			t.putLong("until", c.until());
+			t.putLong("stamp", c.stamp());
+			tag.put(CHARGE_KEY, t);
+		});
+	}
+
+	private static void strip(ItemStack stack) {
+		CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.remove(CHARGE_KEY));
+	}
+
+	/** Takes a dead charge off a stack; true if there was one. */
+	private static boolean stripIfDead(ItemStack stack, long now) {
+		if (charge(stack) != null && live(stack, now) == null) {
+			strip(stack);
+			return true;
+		}
+		return false;
 	}
 
 	/** The Sorcerer's element, or "" for anyone else. */
@@ -223,12 +298,23 @@ public final class Spellcraft {
 		if (player.getCooldowns().isOnCooldown(Arcana.WIZARD_STAFF.getDefaultInstance())) {
 			return;
 		}
-		IMBUED.put(player.getUUID(), level.getGameTime() + IMBUE_TICKS);
+		long now = level.getGameTime();
+		Charge had = charge(held);
+		boolean sameBlade = had != null && had.sorcerer().equals(player.getUUID()) && live(held, now) != null;
+		Current before = IMBUED.get(player.getUUID());
+		// one blade at a time: this one takes the element, the last one goes cold wherever it is
+		IMBUED.put(player.getUUID(), new Current(now, now + IMBUE_TICKS));
+		write(held, new Charge(player.getUUID(), player.getGameProfile().name(), element, now + IMBUE_TICKS, now));
+		Inventory inv = player.getInventory();
+		for (int i = 0; i < inv.getContainerSize(); i++) {
+			stripIfDead(inv.getItem(i), now);
+		}
 		player.getCooldowns().addCooldown(Arcana.WIZARD_STAFF.getDefaultInstance(), IMBUE_COOLDOWN);
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		level.sendParticles(particle(element), player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.4, 0.6, 0.4, 0.05);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), sound(element), SoundSource.PLAYERS, 0.8F, 1.1F);
-		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.imbue.done", spellName(element)));
+		boolean moved = !sameBlade && before != null && before.until() > now;
+		player.sendOverlayMessage(Component.translatable(moved ? "message.jaymoskingdoms.imbue.moved" : "message.jaymoskingdoms.imbue.done", spellName(element)));
 		Theft.sorcery(player, level, player.blockPosition());
 	}
 
@@ -255,13 +341,12 @@ public final class Spellcraft {
 		}
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), sound(element), SoundSource.PLAYERS, 1.0F, 1.3F);
 		target.hurtServer(level, level.damageSources().indirectMagic(player, player), BOLT_DAMAGE);
-		strike(level, player, target, true);
+		strike(level, player, target, element, true);
 		Theft.sorcery(player, level, player.blockPosition());
 	}
 
-	/** The element bursting on a blow {@code player} landed on {@code target} ({@code bolt}: thrown, not struck). */
-	static void strike(ServerLevel level, ServerPlayer player, LivingEntity target, boolean bolt) {
-		String element = element(player);
+	/** {@code element} bursting on a blow {@code player} landed on {@code target} ({@code bolt}: thrown, not struck). */
+	static void strike(ServerLevel level, LivingEntity player, LivingEntity target, String element, boolean bolt) {
 		Vec3 away = target.position().subtract(player.position()).normalize();
 		switch (element) {
 			case "fire" -> {
@@ -340,26 +425,46 @@ public final class Spellcraft {
 		};
 	}
 
-	/** The imbued blade's trail; the element wearing off. */
+	/** The imbued blade's trail in anyone's hand; dead charges taken off; the Sorcerer told when theirs wears off. */
 	static void tick(ServerPlayer player) {
-		Long until = IMBUED.get(player.getUUID());
-		if (until == null) {
-			return;
-		}
 		long now = player.level().getGameTime();
-		if (until <= now) {
+		Current mine = IMBUED.get(player.getUUID());
+		if (mine != null && mine.until() <= now) {
 			IMBUED.remove(player.getUUID());
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.imbue.faded"));
-			return;
 		}
-		if (now % 4L == 0L && player.level() instanceof ServerLevel level) {
+		ItemStack held = player.getMainHandItem();
+		stripIfDead(held, now);
+		if (now % SWEEP_EVERY == 0L) {
+			Inventory inv = player.getInventory();
+			for (int i = 0; i < inv.getContainerSize(); i++) {
+				stripIfDead(inv.getItem(i), now);
+			}
+			stripIfDead(player.containerMenu.getCarried(), now);
+		}
+		String element = live(held, now);
+		if (element != null && now % 4L == 0L && player.level() instanceof ServerLevel level) {
 			Vec3 hand = player.position().add(player.getLookAngle().scale(0.6)).add(0.0, 1.0, 0.0);
-			level.sendParticles(particle(element(player)), hand.x, hand.y, hand.z, 1, 0.15, 0.2, 0.15, 0.01);
+			level.sendParticles(particle(element), hand.x, hand.y, hand.z, 1, 0.15, 0.2, 0.15, 0.01);
 		}
 	}
 
-	/** Anyone's imbued element, for a HUD or a look ("" for none). */
+	/** The element of an imbued blade someone holds (or, a player, carries), for a HUD or a look; null for none. */
 	public static @Nullable String imbuedElement(Entity entity) {
-		return entity instanceof ServerPlayer sp && imbued(sp) ? element(sp) : null;
+		if (!(entity instanceof LivingEntity living)) {
+			return null;
+		}
+		long now = living.level().getGameTime();
+		String element = live(living.getMainHandItem(), now);
+		if (element == null) {
+			element = live(living.getOffhandItem(), now);
+		}
+		if (element == null && living instanceof ServerPlayer player) {
+			Inventory inv = player.getInventory();
+			for (int i = 0; i < inv.getContainerSize() && element == null; i++) {
+				element = live(inv.getItem(i), now);
+			}
+		}
+		return element;
 	}
 }
