@@ -34,6 +34,8 @@ abstract class McaScreensMixin {
 	private static final String QUESTS = "gui.button.quests";
 	/** (0.7.55) A tailor's Change Clothes button ({@code Tailors}). */
 	private static final String TAILOR = "gui.button.tailor";
+	/** (0.7.69) A tailor's Costume Table and costumes sewn to order ({@code TailorCostumes}; only with Jaymo's Powers). */
+	private static final String COSTUME_TABLE = "gui.button.costume_table", COSTUME = "gui.button.costume";
 	/** How many rows of buttons MCA's own main page has (talk ... family tree): Quests goes under them. */
 	private static final int MAIN_ROWS = 6;
 
@@ -75,6 +77,11 @@ abstract class McaScreensMixin {
 		String json = "[{\"identifier\":\"" + QUESTS + "\",\"x\":-90,\"y\":10,\"row\":" + row
 			+ ",\"width\":80,\"height\":20,\"notifyServer\":true,\"targetServer\":false,\"constraints\":\"adult\",\"hideOnFail\":true},"
 			+ "{\"identifier\":\"" + TAILOR + "\",\"x\":-90,\"y\":10,\"row\":" + (row + 1)
+			+ ",\"width\":80,\"height\":20,\"notifyServer\":true,\"targetServer\":false,\"constraints\":\"adult\",\"hideOnFail\":true},"
+			// (0.7.69) and the tailor's costume work under it
+			+ "{\"identifier\":\"" + COSTUME + "\",\"x\":-90,\"y\":10,\"row\":" + (row + 2)
+			+ ",\"width\":80,\"height\":20,\"notifyServer\":true,\"targetServer\":false,\"constraints\":\"adult\",\"hideOnFail\":true},"
+			+ "{\"identifier\":\"" + COSTUME_TABLE + "\",\"x\":-90,\"y\":10,\"row\":" + (row + 3)
 			+ ",\"width\":80,\"height\":20,\"notifyServer\":true,\"targetServer\":false,\"constraints\":\"adult\",\"hideOnFail\":true}]";
 		List<MCAButton> all = new ArrayList<>(Arrays.asList(page));
 		all.addAll(Arrays.asList(Resources.GSON.fromJson(json, MCAButton[].class)));

@@ -6,6 +6,7 @@ import com.jaymospowers.client.power.xenoform.XenoformClient;
 import com.jaymospowers.costume.Costume;
 import com.jaymospowers.costume.CostumeDesign;
 import com.jaymospowers.costume.CostumeNet;
+import com.jaymospowers.costume.CostumeTailoring;
 import com.jaymospowers.costume.SecretIdentity;
 import com.jaymospowers.power.web.WebSymbiote;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -53,6 +54,9 @@ public final class CostumeClient {
 	public static void init() {
 		ClientPlayNetworking.registerGlobalReceiver(CostumeNet.Open.TYPE, (payload, context) ->
 			context.client().gui.setScreen(new CostumeScreen(payload.pos())));
+		// (0.11.78) a tailor's order: the designer, paid in emeralds
+		ClientPlayNetworking.registerGlobalReceiver(CostumeTailoring.Open.TYPE, (payload, context) ->
+			context.client().gui.setScreen(CostumeScreen.tailored(payload.price())));
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
 			if (renderer instanceof AvatarRenderer<?> avatar) {
 				helper.register(new Layer(avatar));
@@ -78,6 +82,9 @@ public final class CostumeClient {
 			design = preview != null && player == Minecraft.getInstance().player ? preview : Costume.worn(player);
 		}
 		state.setData(KEY, design);
+		// (0.11.78) filled in again as it is drawn (CostumeBody), never left over from another frame
+		state.setData(CostumeBody.BODY, null);
+		state.setData(CostumeBody.PARENT, null);
 		if (entity instanceof Player player && state.nameTag != null) {
 			// (0.11.70) a hidden face: the costume's name over their head, not theirs (nor their score)
 			Component masked = SecretIdentity.maskedName(player);
@@ -129,7 +136,10 @@ public final class CostumeClient {
 			}
 			int primary = 0xFF000000 | design.primary().getTextureDiffuseColor();
 			int secondary = 0xFF000000 | design.secondary().getTextureDiffuseColor();
-			boolean slim = state.skin.model() == PlayerModelType.SLIM;
+			// (0.11.78) the costume follows the model this player is drawn with now (CostumeBody): MCA swaps it per player
+			PlayerModel parent = getParentModel();
+			state.setData(CostumeBody.PARENT, parent);
+			boolean slim = CostumeBody.slim(parent, state.skin.model() == PlayerModelType.SLIM);
 			String cut = design.cut().getSerializedName();
 			CostumeModels.Worn suit = this.models.suit(design.cut(), slim);
 			renderColoredCutoutModel(suit, CostumeModels.texture("suit", cut, slim, false), poseStack, collector, lightCoords, state, primary, 1);
@@ -163,7 +173,7 @@ public final class CostumeClient {
 			// these never re-run a wearer's animation (only the arm's own pose is copied below)
 			handModels = new CostumeModels.Set(() -> source);
 		}
-		boolean slim = player.getSkin().model() == PlayerModelType.SLIM;
+		boolean slim = CostumeBody.slimArm(arm, player.getSkin().model() == PlayerModelType.SLIM);
 		CostumeModels.Worn suit = handModels.suit(design.cut(), slim);
 		ModelPart sleeve = arm == source.rightArm ? suit.rightArm : suit.leftArm;
 		sleeve.loadPose(arm.storePose());
