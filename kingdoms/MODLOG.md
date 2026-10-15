@@ -3030,3 +3030,10 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
   rumbling bellies, grumbles, MCA mood -2 each time, and no lunch routine until it's stocked. From time 10500 to
   nightfall they yawn and say they're for bed; at dawn they stretch.
 - `Routines.free` now also excludes festival-goers and couriers (`Routines.freeOf` is the rest, for Festivals).
+
+## 0.7.47: everyone is a villager (pack 0.11.9)
+- Andy: "lock everyone to make a villager instead of vanilla or player". MCA stores each player's body as
+  Villager, Player (player-shaped with the villager skin) or Vanilla; `mixin/mca/McaVillagerBodyMixin` makes
+  `VillagerLike.PlayerModel.byId` always answer VILLAGER, so every stored choice (old saves too) reads back as a
+  villager, for drawing and for size. `client/mixin/mca/McaVillagerBodyChoiceMixin` drops the three body buttons from
+  MCA's character screen (`VillagerEditorScreen.addModelSelectionWidgets`).

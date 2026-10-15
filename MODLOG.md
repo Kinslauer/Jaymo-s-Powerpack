@@ -1239,3 +1239,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Kingdoms 0.7.46. Festival days at the square (dancing, a feast from the storehouse, a musician, fireworks in the
   realm's colours; a lord can call one with `/kingdom festival`), villagers' own cats and dogs, couriers
   (`/kingdom deliver <player>`), and hunger when the storehouse is bare plus evening weariness. See `kingdoms/MODLOG.md`.
+- **0.11.9, everyone is a villager** (Andy: "lock everyone to make a villager instead of vanilla or player"):
+  Kingdoms 0.7.47. MCA's character screen no longer offers the player-shaped or vanilla body; every player is drawn
+  and sized as an MCA villager, old saves included. See `kingdoms/MODLOG.md`.
