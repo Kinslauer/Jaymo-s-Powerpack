@@ -48,7 +48,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Emberborn:</b> burns briefly, thrives in the heat; starves in the cold.</li>
  * <li><b>Frostborn:</b> never freezes, thrives in the cold; starves in the heat.</li>
  * <li><b>Nightborn:</b> stronger and quicker in the dark; weaker under the open sun.</li>
- * <li><b>Warrior-born:</b> hits harder the worse they're hurt; always hungry.</li>
+ * <li><b>Warrior-born:</b> starts far weaker than anyone (lighter blows, fewer hearts), and grows out of it as their
+ * character level climbs; hits harder the worse they're hurt; always hungry.</li>
  * </ul>
  * Each player carries an entity tag {@code jaymoskingdoms_heritage_<key>} for their heritage, so Jaymo's Powers can read
  * it without Kingdoms classes (a Z Fighter's lineage comes from it).
@@ -76,6 +77,12 @@ public final class Heritage {
 	static final float WARRIOR_WOUNDED = 0.5F;
 	static final double WARRIOR_FURY = 0.15;
 	static final float WARRIOR_HUNGER = 1.2F;
+	/**
+	 * Warrior-born start far weaker, to balance their potential: blows this much lighter (a share) and this much less
+	 * max health, both shrinking evenly to nothing by character level {@link #WARRIOR_GROWN_LEVEL}.
+	 */
+	static final double WARRIOR_GREEN_DAMAGE = 0.4, WARRIOR_GREEN_HEALTH = 8.0;
+	static final int WARRIOR_GROWN_LEVEL = 20;
 	/** The entity tag every player of a heritage carries: this, then the heritage's key. */
 	public static final String TAG = "jaymoskingdoms_heritage_";
 	/** How often the heritages that change with the light and the frost are looked at (ticks). */
@@ -289,6 +296,7 @@ public final class Heritage {
 		if (kind != Kind.WARRIORBORN) {
 			Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_fury", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		}
+		green(player, kind);
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -312,9 +320,27 @@ public final class Heritage {
 				// the worse they're hurt, the harder they fight
 				boolean wounded = player.getHealth() < player.getMaxHealth() * WARRIOR_WOUNDED;
 				Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_fury", wounded ? WARRIOR_FURY : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+				green(player, kind);
 			} else if (kind == Kind.FROSTBORN && player.getTicksFrozen() > 0) {
 				player.setTicksFrozen(0);
 			}
+		}
+	}
+
+	/** How much of a Warrior-born's early weakness is left, 1 (none grown) to 0 (character level {@link #WARRIOR_GROWN_LEVEL}). */
+	static double greenness(ServerPlayer player) {
+		return Math.clamp(1.0 - Stats.characterLevel(Skills.of(player)) / (double)WARRIOR_GROWN_LEVEL, 0.0, 1.0);
+	}
+
+	/** A Warrior-born's early weakness, as it stands now (taken off everyone else). */
+	private static void green(ServerPlayer player, @Nullable Kind kind) {
+		double left = kind == Kind.WARRIORBORN ? greenness(player) : 0.0;
+		Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_green", -WARRIOR_GREEN_DAMAGE * left, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		// whole hearts, so the bar doesn't flicker by halves as they grow
+		Skills.modifier(player, Attributes.MAX_HEALTH, "heritage_green_health", -2.0 * Math.ceil(WARRIOR_GREEN_HEALTH / 2.0 * left),
+			AttributeModifier.Operation.ADD_VALUE);
+		if (player.getHealth() > player.getMaxHealth()) {
+			player.setHealth(player.getMaxHealth());
 		}
 	}
 
