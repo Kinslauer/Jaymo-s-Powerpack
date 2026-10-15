@@ -154,6 +154,10 @@ public final class Melting {
 			return switch (castItem.shape) {
 				case INGOT -> ingot(molten);
 				case NUGGET -> nugget(molten);
+				case WEAPON -> {
+					WeaponCasts.Kind kind = WeaponCasts.ofCast(cast);
+					yield kind == null ? null : WeaponCasts.result(kind, molten);
+				}
 				default -> {
 					PartType part = castItem.shape.part;
 					yield part != null && molten.material != null && molten.material.makes(part.kind)
@@ -161,9 +165,12 @@ public final class Melting {
 				}
 			};
 		}
-		// gold over an ingot, nugget or part makes a cast of its shape
+		// gold over an ingot, nugget, part or weapon makes a cast of its shape
 		CastItem.Shape shape = CastItem.Shape.of(cast);
-		return molten == Molten.GOLD && shape != null ? new ItemStack(Tinkering.CASTS.get(shape)) : null;
+		if (molten != Molten.GOLD || shape == null) {
+			return null;
+		}
+		return shape == CastItem.Shape.WEAPON ? WeaponCasts.cast(WeaponCasts.of(cast)) : new ItemStack(Tinkering.CASTS.get(shape));
 	}
 
 	/** How much liquid the table needs for this cast and liquid (0: it can't cast it). */
@@ -178,6 +185,7 @@ public final class Melting {
 		return switch (castItem.shape) {
 			case INGOT -> Molten.INGOT;
 			case NUGGET -> Molten.NUGGET;
+			case WEAPON -> WeaponCasts.ofCast(cast).mb();
 			default -> castItem.shape.part.cost * Molten.INGOT;
 		};
 	}

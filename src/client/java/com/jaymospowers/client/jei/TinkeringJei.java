@@ -11,6 +11,7 @@ import com.jaymospowers.tinkering.ToolType;
 import com.jaymospowers.tinkering.smeltery.CastItem;
 import com.jaymospowers.tinkering.smeltery.Melting;
 import com.jaymospowers.tinkering.smeltery.Molten;
+import com.jaymospowers.tinkering.smeltery.WeaponCasts;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -138,6 +139,10 @@ public final class TinkeringJei implements IModPlugin {
 	private static List<SimpleCategory.Recipe> casting() {
 		List<SimpleCategory.Recipe> recipes = new ArrayList<>();
 		for (Map.Entry<CastItem.Shape, Item> cast : Tinkering.CASTS.entrySet()) {
+			if (cast.getKey() == CastItem.Shape.WEAPON) {
+				weaponCasting(recipes);
+				continue;
+			}
 			ItemStack castStack = new ItemStack(cast.getValue());
 			for (Molten molten : Molten.values()) {
 				ItemStack result = Melting.tableResult(castStack, molten);
@@ -168,6 +173,28 @@ public final class TinkeringJei implements IModPlugin {
 			}
 		}
 		return recipes;
+	}
+
+	/** (0.11.69) Each kind of weapon: gold over any of them makes its cast, and metal over the cast makes the weapon. */
+	private static void weaponCasting(List<SimpleCategory.Recipe> recipes) {
+		for (WeaponCasts.Kind kind : WeaponCasts.KINDS.values()) {
+			if (WeaponCasts.results(kind).isEmpty()) {
+				continue;
+			}
+			ItemStack castStack = WeaponCasts.cast(kind);
+			for (Molten molten : Molten.values()) {
+				ItemStack result = WeaponCasts.result(kind, molten);
+				if (result != null) {
+					recipes.add(new SimpleCategory.Recipe(List.of(List.of(castStack)), List.of(result),
+						List.of(pour(kind.mb(), molten), note("casting.kept"))));
+				}
+			}
+			List<ItemStack> members = WeaponCasts.members(kind);
+			if (!members.isEmpty()) {
+				recipes.add(new SimpleCategory.Recipe(List.of(members), List.of(castStack),
+					List.of(pour(Molten.INGOT, Molten.GOLD), note("casting.used_up"))));
+			}
+		}
 	}
 
 	private static List<SimpleCategory.Recipe> basin() {

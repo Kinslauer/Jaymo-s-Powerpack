@@ -135,6 +135,13 @@ INGOTS = [("rose_gold_ingot", "Rose Gold Ingot", "rose_gold_ingot"),
           ("pig_iron_ingot", "Pig Iron Ingot", "pigiron_ingot"), ("slimesteel_ingot", "Slimesteel Ingot", "slimesteel_ingot")]
 CASTS = ["ingot", "nugget"] + [p[0] for p in PARTS]
 
+# (0.11.69) weapon casts (tinkering/smeltery/WeaponCasts)
+WEAPON_CAST_LANG = {
+    "item.jaymospowers.weapon_cast": "Weapon Cast",
+    "tooltip.jaymospowers.tinkering.weapon_cast.makes": "Casts: %s",
+    "tooltip.jaymospowers.tinkering.weapon_cast.blank": "Pour gold over a weapon on a casting table to make its cast.",
+}
+
 SMELTERY_LANG = {
     "block.jaymospowers.grout": "Grout",
     "block.jaymospowers.seared_bricks": "Seared Bricks",
@@ -451,6 +458,8 @@ def smeltery(tcon):
         copy_png(os.path.join(tex, "item", "cast", cast + ".png"), "item/tinkering/cast/" + cast)
         model("item/tinkering/cast/" + cast, "minecraft:item/generated", "item/tinkering/cast/" + cast)
         write(os.path.join(ASSETS, "items", cast + "_cast.json"), {"model": ref("item/tinkering/cast/" + cast)})
+    # (0.11.69) the weapon cast looks like the small blade's
+    write(os.path.join(ASSETS, "items", "weapon_cast.json"), {"model": ref("item/tinkering/cast/small_blade")})
 
     # molten metal: animated in the world (block atlas), its first frame for the screen
     def save_molten(im, mcmeta, mid):
@@ -564,8 +573,9 @@ OFF_TOOLS = ("pickaxe", "axe", "shovel", "hoe", "sword")
 OFF_ARMOUR = ("golden", "diamond")
 ARMOUR = ("helmet", "chestplate", "leggings", "boots")
 # Andy: no craftable diamond weapons at all (Armory's skip their recipe in tools/armory_assets.py, WeaponMod's are
-# dropped by tinkering/Uncraftable)
-OFF_WEAPONS = ("diamond_spear",)
+# dropped by tinkering/Uncraftable). (0.11.69) Andy: all weapons are forged, so the metal spears are cast instead
+# (tinkering/smeltery/WeaponCasts)
+OFF_WEAPONS = ("diamond_spear", "copper_spear", "iron_spear", "golden_spear")
 
 
 def vanilla_off():
@@ -640,6 +650,7 @@ def lang():
     for cast in CASTS:
         base = {"ingot": "Ingot", "nugget": "Nugget"}.get(cast) or next(p[1] for p in PARTS if p[0] == cast)
         out["item.jaymospowers." + cast + "_cast"] = base + " Cast"
+    out.update(WEAPON_CAST_LANG)
     for mid, name, desc in MODIFIERS:
         out["modifier.jaymospowers." + mid] = name
         out["modifier.jaymospowers." + mid + ".desc"] = desc

@@ -19,6 +19,23 @@ public final class Uncraftable {
 		"weaponmod:katana.diamond", "weaponmod:flail.diamond", "weaponmod:boomerang.diamond",
 		"weaponmod:musketbayonet.diamond");
 
+	/**
+	 * (0.11.69) Andy: "all weapons should be forged". Balkon's iron, gold and copper weapons are cast in the smeltery
+	 * instead ({@code smeltery/WeaponCasts}); the musket bayonet stays a musket and a (cast) knife put together.
+	 */
+	static final Set<String> FORGED = forged();
+
+	private static Set<String> forged() {
+		Set<String> ids = new java.util.HashSet<>();
+		for (String weapon : List.of("knife", "spear", "halberd", "battleaxe", "warhammer", "katana", "flail", "boomerang")) {
+			for (String metal : List.of("iron", "gold", "copper")) {
+				ids.add("weaponmod:" + weapon + "." + metal);
+				ids.add("weaponmod:" + weapon + "." + metal + ".a");
+			}
+		}
+		return Set.copyOf(ids);
+	}
+
 	private Uncraftable() {
 	}
 
@@ -34,6 +51,6 @@ public final class Uncraftable {
 
 	public static boolean keeps(Holder.Reference<Recipe<?>> recipe) {
 		String id = recipe.key().identifier().toString();
-		return !RECIPES.contains(id) && !TACZ.contains(id) && PREFIXES.stream().noneMatch(id::startsWith);
+		return !RECIPES.contains(id) && !FORGED.contains(id) && !TACZ.contains(id) && PREFIXES.stream().noneMatch(id::startsWith);
 	}
 }

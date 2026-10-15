@@ -13,6 +13,7 @@ import com.jaymospowers.tinkering.smeltery.Molten;
 import com.jaymospowers.tinkering.smeltery.SmelteryBlock;
 import com.jaymospowers.tinkering.smeltery.SmelteryEntity;
 import com.jaymospowers.tinkering.smeltery.SmelteryMenu;
+import com.jaymospowers.tinkering.smeltery.WeaponCasts;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -69,6 +70,8 @@ public final class Tinkering {
 	public static DataComponentType<List<String>> TOOL_MATERIALS;
 	/** A part's material. */
 	public static DataComponentType<String> PART_MATERIAL;
+	/** (0.11.69) The kind of weapon a Weapon Cast casts ({@code smeltery/WeaponCasts}). */
+	public static DataComponentType<String> WEAPON_CAST;
 	/** A tool's modifiers (id to level), and the xp it has earned toward its next level. */
 	public static DataComponentType<Map<String, Integer>> TOOL_MODIFIERS;
 	public static DataComponentType<Integer> TOOL_XP;
@@ -107,6 +110,8 @@ public final class Tinkering {
 			DataComponentType.<List<String>>builder().persistent(Codec.STRING.listOf())
 				.networkSynchronized(ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list())).build());
 		PART_MATERIAL = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("part_material"),
+			DataComponentType.<String>builder().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
+		WEAPON_CAST = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("weapon_cast"),
 			DataComponentType.<String>builder().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
 		TOOL_MODIFIERS = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("tool_modifiers"),
 			DataComponentType.<Map<String, Integer>>builder().persistent(Codec.unboundedMap(Codec.STRING, Codec.INT))
@@ -160,7 +165,16 @@ public final class Tinkering {
 			output.accept(RAW_SILVER);
 			output.accept(SILVER_NUGGET);
 			ALLOY_INGOTS.values().forEach(output::accept);
-			CASTS.values().forEach(output::accept);
+			CASTS.forEach((shape, cast) -> {
+				if (shape != CastItem.Shape.WEAPON) {
+					output.accept(cast);
+				}
+			});
+			for (WeaponCasts.Kind kind : WeaponCasts.KINDS.values()) {
+				if (!WeaponCasts.results(kind).isEmpty()) {
+					output.accept(WeaponCasts.cast(kind));
+				}
+			}
 			for (ToolType type : ToolType.values()) {
 				for (TinkerMaterial head : TinkerMaterial.heads()) {
 					if (head.id.contains("_") && !head.id.startsWith("rock_stone")) {
