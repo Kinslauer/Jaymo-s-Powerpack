@@ -2909,7 +2909,7 @@ moon and back on at dawn (`DarkNights`), but without the "A dark night: shaders 
   can be laid again and again; rename them on an anvil. `ShipKits.lay`/`room` now take any design.
 - A wrecked ship's blocks go down solid ones first, so the torches and lanterns hung on them don't pop off.
 
-## 0.7.36: natural disasters, stages 2 and 3: the land's own, earthquakes, kingdoms and forecasts (pack 0.10.123)
+## 0.7.41: natural disasters, stages 2 and 3: the land's own, earthquakes, kingdoms and forecasts (pack 0.10.128)
 - Andy: "okay resume stage work while we test" (plan `/mnt/project-files/disasters/Disasters-Plan.md`, stage 2). All
   in `disasters/Calamities`; stage 1's `Storms`, `Tornadoes`, `Storm` and `Tornado` are untouched. Every
   `disaster_days` (6) on average, as often as stage 1's supercells, the land under someone brews what suits it:
