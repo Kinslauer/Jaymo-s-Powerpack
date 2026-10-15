@@ -65,14 +65,18 @@ final class WebSpentLines {
 	 * A hand's line as last seen: where it was stuck (on something that moves: {@code loose}), and where it left the hand;
 	 * on the Yank's lead, the creature it holds ({@code -1} otherwise) and how many hitches that creature had then.
 	 */
-	private record Seen(Vec3 anchor, Vec3 hand, boolean dark, boolean loose, int lead, int hitches) {
+	private record Seen(Vec3 anchor, Vec3 hand, boolean dark, boolean loose, int lead, List<Vec3> hitches) {
 	}
 
-	/** A lead just let go: if its creature turns up with one more hitch within {@code LEAD_WAIT} ticks, it was tied off. */
+	/**
+	 * A lead just let go: if its creature turns up with a hitch tied somewhere new within {@code LEAD_WAIT} ticks, it was
+	 * tied off. (0.11.33) A new tie point, not one more line: with one line out, tying a new one takes the old one off,
+	 * so the count stayed the same and the tied-off lead was left behind to fall as well.
+	 */
 	private record Let(Seen seen, int ticks) {
 	}
 
-	private static final int LEAD_WAIT = 4;
+	private static final int LEAD_WAIT = 10;
 	private static final List<Let> LET_GO = new ArrayList<>();
 	/** Every hitched creature's lines as last seen (creature id → where each is tied, and where the creature was). */
 	private static final Map<Integer, List<Seen>> HITCHES = new HashMap<>();
@@ -108,7 +112,7 @@ final class WebSpentLines {
 				Integer lead = hand == WebNet.MAIN && player.getAttached(WebPower.line(hand)) == null ? player.getAttached(WebPower.TETHER) : null;
 				int leadId = lead == null ? -1 : lead;
 				Seen seen = new Seen(end, WebLineRenderer.handPos(minecraft, player, hand, 1.0F), dark, onEntity(minecraft, player, hand),
-					leadId, leadId < 0 ? 0 : hitchCount(level.getEntity(leadId)));
+					leadId, leadId < 0 ? List.of() : hitchAnchors(level.getEntity(leadId)));
 				Seen before = SEEN.get(key);
 				if (before != null && !before.loose() && !seen.loose() && before.anchor().distanceToSqr(end) > RECAST_JUMP * RECAST_JUMP) {
 					spend(before);
@@ -130,7 +134,7 @@ final class WebSpentLines {
 		SEEN.putAll(now);
 		for (int i = LET_GO.size() - 1; i >= 0; i--) {
 			Let let = LET_GO.get(i);
-			if (hitchCount(level.getEntity(let.seen().lead())) > let.seen().hitches()) {
+			if (hitchAnchors(level.getEntity(let.seen().lead())).stream().anyMatch(a -> let.seen().hitches().stream().noneMatch(b -> b.distanceToSqr(a) < 1.0E-4))) {
 				// tied off: it lives on as the hitch, and falls only when that goes
 				LET_GO.remove(i);
 			} else if (let.ticks() + 1 >= LEAD_WAIT) {
@@ -154,9 +158,10 @@ final class WebSpentLines {
 		}
 	}
 
-	private static int hitchCount(net.minecraft.world.entity.@org.jspecify.annotations.Nullable Entity entity) {
+	/** Where a creature's hitch lines are tied (none: it's free). */
+	private static List<Vec3> hitchAnchors(net.minecraft.world.entity.@org.jspecify.annotations.Nullable Entity entity) {
 		List<com.jaymospowers.power.web.WebHitches.Line> lines = entity == null ? null : entity.getAttached(WebPower.HITCH);
-		return lines == null ? 0 : lines.size();
+		return lines == null ? List.of() : lines.stream().map(com.jaymospowers.power.web.WebHitches.Line::anchor).toList();
 	}
 
 	/**
@@ -173,7 +178,7 @@ final class WebSpentLines {
 			Vec3 center = entity.position().add(0.0, entity.getBbHeight() * 0.5, 0.0);
 			List<Seen> seen = new ArrayList<>();
 			for (com.jaymospowers.power.web.WebHitches.Line line : lines) {
-				seen.add(new Seen(line.anchor(), center, line.dark(), false, -1, 0));
+				seen.add(new Seen(line.anchor(), center, line.dark(), false, -1, List.of()));
 			}
 			now.put(entity.getId(), seen);
 		}

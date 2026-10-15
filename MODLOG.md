@@ -1287,3 +1287,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   left click shows the recipe, right click the uses (`KeyConflicts`).
 - **0.11.32, the counter flashes white:** when a Spider-Sense dodge opens the counter window, your screen's edges flare
   white, then glow faintly in time with the sense bolts until it shuts, in any camera (`WebSenseBolts.edges`).
+- **0.11.33, a tied-off lead doesn't leave a line behind:** releasing B ties Yank's lead to the block you look at, and
+  the client told that apart from a plain let-go by the creature having one more hitch line. With one line out, tying a
+  new one takes the old one off, so the count stayed the same and a fading web line was left behind as well. Now a new
+  tie point is what counts (`WebSpentLines.hitchAnchors`), given up to 10 ticks (`LEAD_WAIT`, was 4) to arrive. The
+  line falls and fades only when the tie breaks or runs out (or the old one is taken off for the new).
