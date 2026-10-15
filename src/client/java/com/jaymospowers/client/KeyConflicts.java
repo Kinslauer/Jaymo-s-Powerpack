@@ -12,6 +12,8 @@ import net.minecraft.client.Minecraft;
 /**
  * The power keys (R, G, V, B, C, Z, X, H) belong to the powers. Once per install, anything else in the pack still on
  * one of them (at its default) is moved to a free key, or unbound. After that, players' own rebinds are never touched.
+ * JEI's hover keys are the exception: R over an item shows its recipe and A bookmarks it, set once per install whatever
+ * they were on. They only act over an item in an open screen, so they never clash with R the power key.
  */
 final class KeyConflicts {
 	/**
@@ -38,10 +40,19 @@ final class KeyConflicts {
 		Map.entry("key.shouldersurfing.free_look", new Move("key.keyboard.left.alt", "key.keyboard.right.alt")),
 		Map.entry("key.shouldersurfing.swap_shoulder", new Move("key.keyboard.u", "key.keyboard.o")));
 
+	/** Bump to set JEI's hover keys again. v1 (0.11.9): showRecipe had come unbound in Andy's profile. */
+	private static final String JEI_MARKER = "jaymospowers-jei-keys-v1";
+
+	/** JEI key mapping name → its key, set once per install whatever it was. */
+	private static final Map<String, String> JEI_KEYS = Map.of(
+		"key.jei.showRecipe", "key.keyboard.r",
+		"key.jei.bookmark", "key.keyboard.a");
+
 	private KeyConflicts() {
 	}
 
 	static void resolveOnce(Minecraft minecraft) {
+		setJeiKeysOnce(minecraft);
 		Path marker = FabricLoader.getInstance().getConfigDir().resolve(MARKER);
 		if (Files.exists(marker)) {
 			return;
@@ -60,6 +71,30 @@ final class KeyConflicts {
 		}
 		try {
 			Files.writeString(marker, "Jaymo's Powers moved " + moved + " clashing key binding(s) off the power keys. Delete this file to do it again.\n");
+		} catch (IOException e) {
+			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't write {}", marker, e);
+		}
+	}
+
+	private static void setJeiKeysOnce(Minecraft minecraft) {
+		Path marker = FabricLoader.getInstance().getConfigDir().resolve(JEI_MARKER);
+		if (!FabricLoader.getInstance().isModLoaded("jei") || Files.exists(marker)) {
+			return;
+		}
+		int set = 0;
+		for (KeyMapping mapping : minecraft.options.keyMappings) {
+			String key = JEI_KEYS.get(mapping.getName());
+			if (key != null && !mapping.saveString().equals(key)) {
+				mapping.setKey(InputConstants.getKey(key));
+				set++;
+			}
+		}
+		if (set > 0) {
+			KeyMapping.resetMapping();
+			minecraft.options.save();
+		}
+		try {
+			Files.writeString(marker, "Jaymo's Powers put JEI's Show Recipe on R and Bookmark on A (" + set + " changed). Delete this file to do it again.\n");
 		} catch (IOException e) {
 			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't write {}", marker, e);
 		}
