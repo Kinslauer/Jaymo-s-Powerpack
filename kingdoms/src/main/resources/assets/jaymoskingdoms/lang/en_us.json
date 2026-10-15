@@ -2908,6 +2908,7 @@
 	"gui.jaymoskingdoms.bed_rest_sleep": "Sleep",
 	"block.jaymoskingdoms.ship_helm": "Ship's Helm",
 	"block.jaymoskingdoms.sail": "Sail",
+	"block.jaymoskingdoms.sandbag": "Sandbags",
 	"block.jaymoskingdoms.burnt_torch": "Burnt-out Torch",
 	"entity.jaymoskingdoms.ship": "Ship",
 	"ship.jaymoskingdoms.too_big": "Too many blocks for one ship (the most is %s): is the hull still tied to the land?",

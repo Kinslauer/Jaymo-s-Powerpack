@@ -829,7 +829,7 @@ public final class Approaches {
 					said = Oddities.gossip(level, a.mob);
 				}
 				if (said == null) {
-					// (0.7.63) old wives' talk of the night's gifts
+					// (0.7.66) old wives' talk of the night's gifts
 					said = NightGifts.gossip(level, player);
 				}
 				if (said == null && level.getRandom().nextFloat() < Sightings.GOSSIP_CHANCE) {

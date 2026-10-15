@@ -66,7 +66,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.63) The night's gifts: the moves and senses vampire and werewolf players get on top of {@link VampirePlayers} and
+ * (0.7.66) The night's gifts: the moves and senses vampire and werewolf players get on top of {@link VampirePlayers} and
  * {@link WerewolfPlayers}. Ideas from the Vampires Strike Back modpack's own origins (All Rights Reserved: nothing of
  * theirs is used, only the ideas, remade here).
  *
@@ -292,7 +292,7 @@ public final class NightGifts {
 	}
 
 	/**
-	 * (0.7.63) Now and then a villager's gossip is old wives' talk of vampires and werewolves that hints at a gift and
+	 * (0.7.66) Now and then a villager's gossip is old wives' talk of vampires and werewolves that hints at a gift and
 	 * how to come by it ({@link Approaches}): the dash, the pound, the wings and XP, the kin-sense, the golden apple, the
 	 * crypt; the leap, the howl, the climb, the ritual's moon, the den. Oftener for someone cursed or half-cursed.
 	 */
