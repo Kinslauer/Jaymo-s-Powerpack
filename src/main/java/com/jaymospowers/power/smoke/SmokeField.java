@@ -139,6 +139,7 @@ public final class SmokeField {
 			SENT.clear();
 			BANKED.clear();
 			SMOG.clear();
+			CLOUD.clear();
 		});
 	}
 
@@ -202,6 +203,19 @@ public final class SmokeField {
 
 	// ---------------------------------------------------------------- making smoke
 
+	/** Cloud (an ascended Smoke user's smoke): until when (game time) each owner's smoke shrugs off the rain. */
+	private static final Map<Integer, Long> CLOUD = new HashMap<>();
+
+	/** Marks {@code owner}'s smoke as cloud until game time {@code until} (refreshed every tick while they're ascended). */
+	static void markCloud(Entity owner, long until) {
+		CLOUD.put(owner.getId(), until);
+	}
+
+	/** Like {@link #puff}, but pure white cloud (soot 0) whatever the heat. */
+	static void puffCloud(ServerLevel level, Vec3 at, float amount, @org.jspecify.annotations.Nullable Entity owner) {
+		add(level, at, amount, owner, 0.0F);
+	}
+
 	/** Marks {@code owner}'s smoke as smog until game time {@code until} (refreshed every tick while they're corrupted). */
 	static void markSmog(Entity owner, long until) {
 		SMOG.put(owner.getId(), until);
@@ -256,8 +270,14 @@ public final class SmokeField {
 			soot = SmokeHeat.soot(player);
 			if (com.jaymospowers.core.Fate.isCorrupted(player)) {
 				soot = Math.max(soot, SMOG_SOOT);
+			} else if (SmokeCloudshaper.cloudy(player)) {
+				soot = 0.0F;
 			}
 		}
+		add(level, at, amount, owner, soot);
+	}
+
+	private static void add(ServerLevel level, Vec3 at, float amount, @org.jspecify.annotations.Nullable Entity owner, float soot) {
 		if (amount <= 0.0F) {
 			return;
 		}
@@ -455,6 +475,7 @@ public final class SmokeField {
 		long now = level.getGameTime();
 		BANKED.values().removeIf(until -> until < now);
 		SMOG.values().removeIf(until -> until < now);
+		CLOUD.values().removeIf(until -> until < now);
 
 		Long2FloatOpenHashMap from = field.density;
 		Long2FloatOpenHashMap next = new Long2FloatOpenHashMap(from.size() * 2);
@@ -483,7 +504,10 @@ public final class SmokeField {
 			// smog clings: slower to fade, and the rain only thins it
 			boolean smog = smog(owner);
 			float scaleHere = (banked ? decayScale / BANK_SLOWER : decayScale) / (smog ? SMOG_SLOWER : 1.0F);
-			float decay = DECAY + (open ? OPEN_DECAY + (level.isRainingAt(cursor) ? RAIN_DECAY * (smog ? SMOG_RAIN : 1.0F) : 0.0F) : 0.0F);
+			// a cloudshaper's cloud isn't washed out by the rain at all
+			boolean cloud = !smog && owner != 0 && !CLOUD.isEmpty() && CLOUD.containsKey(owner);
+			float rain = cloud ? 0.0F : RAIN_DECAY * (smog ? SMOG_RAIN : 1.0F);
+			float decay = DECAY + (open ? OPEN_DECAY + (level.isRainingAt(cursor) ? rain : 0.0F) : 0.0F);
 			float keep = d * (1.0F - FADE * scaleHere) - decay * scaleHere;
 			if (keep <= 0.0F) {
 				continue;
