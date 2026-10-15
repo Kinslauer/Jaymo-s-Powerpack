@@ -136,6 +136,10 @@ def packMods = [
 	// levers, buttons, chests, lecterns and more swing smoothly; lanterns and chains sway. Works with Sodium and Iris.
 	// Client-only.
 	[dep: "maven.modrinth:fwa:Ssrxtw49", cf: [1452982, 9131733]],
+	// Controlling (MIT, by Jaredlll08) and its library Searchables (MIT, same author): a search bar on the Controls >
+	// Key Binds screen (by name, by key, or by category), plus a filter for conflicting and unbound keys. Client-only.
+	[dep: "maven.modrinth:controlling:V6AbRm67", cf: [250398, 9110875]],
+	[dep: "maven.modrinth:searchables:wV79bLRS", cf: [858542, 9110866]],
 	// Naturalist (code MIT, art all rights reserved; Starfish Studios' own 26.3 Fabric build, needs only Fabric API):
 	// wildlife. Kingdoms keeps its predators out of natural spawning and sends them as rare wilderness encounters
 	// (Encounters), and keeps its elephants and mammoths out too since Kingdoms has its own
