@@ -37,6 +37,8 @@
 	"power.jaymospowers.chrono.key.ultimate.ascended_corrupted.name": "Chrono Punch",
 	"message.jaymospowers.future.recharging": "The future won't open again for %s s.",
 	"message.jaymospowers.future.forming": "The future is forming...",
+	"entity.jaymospowers.future_android": "Android",
+	"entity.jaymospowers.future_mech": "War Mech",
 	"message.jaymospowers.future.arrived": "A lifetime from now. The dead walk, and only a Chrono's leap or death takes you home.",
 	"message.jaymospowers.future.returned": "Back in your own time.",
 	"message.jaymospowers.future.credit": "This future is built from Los Perrito City by Uospag (curseforge.com/minecraft/worlds/los-perrito, CC BY 4.0), ruined by Jaymo's Powers. Click to visit the map's page.",

@@ -189,6 +189,16 @@ public final class FutureGuns {
 		double d = mob.distanceTo(foe);
 		boolean sight = mob.hasLineOfSight(foe);
 		keepDistance(mob, foe, kind, d, sight);
+		shoot(level, mob, foe, gun, d, sight);
+	}
+
+	/** A mob with a built-in gun (the mech's cannons): fire at its foe a burst at a time, if in range and in sight. */
+	static void tickWith(ServerLevel level, Mob mob, LivingEntity foe, Gun gun) {
+		shoot(level, mob, foe, gun, mob.distanceTo(foe), mob.hasLineOfSight(foe));
+	}
+
+	private static void shoot(ServerLevel level, Mob mob, LivingEntity foe, Gun gun, double d, boolean sight) {
+		Kind kind = gun.kind;
 		long now = level.getGameTime();
 		if (now < NEXT.getOrDefault(mob, 0L)) {
 			return;
@@ -225,7 +235,7 @@ public final class FutureGuns {
 		}
 	}
 
-	private static void fire(ServerLevel level, Mob mob, LivingEntity foe, Gun gun) {
+	static void fire(ServerLevel level, Mob mob, LivingEntity foe, Gun gun) {
 		RandomSource random = level.getRandom();
 		Kind kind = gun.kind;
 		boolean flintlock = !gun.id.startsWith("tacz:");

@@ -84,6 +84,7 @@ public final class FutureFerals {
 				spawnPack(level, player, Math.min(cap - near.size(), PACK_MIN + level.getRandom().nextInt(PACK_MAX - PACK_MIN + 1)));
 			}
 			listen(player, near);
+			FutureMachines.check(level, player);
 		}
 	}
 
