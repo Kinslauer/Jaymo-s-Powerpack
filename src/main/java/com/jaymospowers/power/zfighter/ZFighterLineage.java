@@ -32,10 +32,14 @@ import net.minecraft.world.level.MoonPhase;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.fabricmc.loader.api.FabricLoader;
+import java.util.Set;
 
 /**
- * Lineages, picked once when the power has awakened (the training screen asks first; a Writ of Rebirth read while
- * sneaking unmakes the choice):
+ * Lineages, never picked: they come from the player's heritage in Jaymo's Kingdoms (read off its entity tag,
+ * {@code jaymoskingdoms_heritage_<key>}): Warrior-born heritage makes a Warrior-born, Frostborn a Frost-born, Verdant a
+ * Verdant, and every other heritage (or no Kingdoms at all) an Earthling. Fighters who picked one before keep it; a Writ
+ * of Rebirth read while sneaking, or the rebirth wish, sets it back to what their blood says:
  * <ul>
  * <li><b>Earthling</b>: the training-born. TP 1.25x; Limit Break half the price and half the burn.</li>
  * <li><b>Warrior-born</b>: has a tail (sneak+Z on the ground wraps it round the waist or lets it out). Every defeat
@@ -114,6 +118,10 @@ public final class ZFighterLineage {
 	public static final AttachmentType<Boolean> GREAT_APE = AttachmentRegistry.create(JaymosPowers.id("zfighter_great_ape"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 
+	/** Jaymo's Kingdoms' heritage tag (then the heritage's key), and the heritages that make a lineage of their own. */
+	private static final String HERITAGE_TAG = "jaymoskingdoms_heritage_";
+	private static final String[][] HERITAGE_LINEAGES = {{"warriorborn", "warrior"}, {"frostborn", "frost"}, {"verdant", "verdant"}};
+
 	private static final Identifier WRIT = Identifier.fromNamespaceAndPath("jaymoskingdoms", "writ_of_rebirth");
 
 	private ZFighterLineage() {
@@ -128,11 +136,10 @@ public final class ZFighterLineage {
 				return InteractionResult.PASS;
 			}
 			ServerPlayer server = (ServerPlayer)player;
-			endApe(server, ZFighterPower.live(server));
-			player.removeAttached(LINEAGE);
-			player.removeAttached(TAIL_WRAPPED);
+			if (!reborn(server)) {
+				return InteractionResult.PASS;
+			}
 			stack.consume(1, player);
-			server.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_lineage_reset").withStyle(ChatFormatting.GOLD));
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 0.8F);
 			return InteractionResult.SUCCESS;
 		});
@@ -190,11 +197,52 @@ public final class ZFighterLineage {
 		return of(player) == WARRIOR ? WARRIOR_ZENKAI : 1;
 	}
 
-	/** Picked on the training screen, once. */
-	static void pick(ServerPlayer player, int lineage) {
-		if (of(player) != NONE || lineage <= NONE || lineage >= LINEAGES) {
+	/**
+	 * The lineage {@code player}'s blood gives: from their Kingdoms heritage, Earthling for the rest. {@link #NONE} while
+	 * Kingdoms is here but they haven't chosen a heritage yet (character creation isn't done).
+	 */
+	public static int fromHeritage(Player player) {
+		Set<String> tags = player.entityTags();
+		boolean any = false;
+		for (String tag : tags) {
+			if (tag.startsWith(HERITAGE_TAG)) {
+				any = true;
+				String key = tag.substring(HERITAGE_TAG.length());
+				for (String[] pair : HERITAGE_LINEAGES) {
+					if (pair[0].equals(key)) {
+						return java.util.Arrays.asList(KEYS).indexOf(pair[1]);
+					}
+				}
+			}
+		}
+		return any || !FabricLoader.getInstance().isModLoaded("jaymoskingdoms") ? EARTHLING : NONE;
+	}
+
+	/** Gives {@code player} the lineage of their blood, if they have none yet. */
+	static void inherit(ServerPlayer player) {
+		if (of(player) != NONE) {
 			return;
 		}
+		int lineage = fromHeritage(player);
+		if (lineage != NONE) {
+			become(player, lineage);
+		}
+	}
+
+	/** A Writ of Rebirth or the rebirth wish: the lineage goes back to what the blood says. False if it already is. */
+	static boolean reborn(ServerPlayer player) {
+		int blood = fromHeritage(player);
+		if (blood == NONE || blood == of(player)) {
+			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_lineage_same").withStyle(ChatFormatting.GRAY));
+			return false;
+		}
+		endApe(player, ZFighterPower.live(player));
+		player.removeAttached(TAIL_WRAPPED);
+		become(player, blood);
+		return true;
+	}
+
+	private static void become(ServerPlayer player, int lineage) {
 		player.setAttached(LINEAGE, lineage);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_lineage",
 			Component.translatable("lineage.jaymospowers.zfighter." + KEYS[lineage])).withStyle(ChatFormatting.GOLD));
@@ -240,6 +288,9 @@ public final class ZFighterLineage {
 	}
 
 	static void tick(ServerPlayer player, ZFighterPower.Live live) {
+		if (of(player) == NONE && player.tickCount % 20 == 0) {
+			inherit(player);
+		}
 		live.lineage = of(player);
 		tailTags(player, live.lineage == WARRIOR, tailOut(player));
 		ServerLevel level = player.level();

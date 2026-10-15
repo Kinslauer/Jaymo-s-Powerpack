@@ -311,6 +311,20 @@ public final class ZFighterPower implements Power {
 		return PowerKey.ABILITY_1;
 	}
 
+	/**
+	 * A charged technique bought with TP (the Ki Bomb) works on sneak+V before V has unlocked: it was paid for. The Ki
+	 * Wave, which every fighter starts with, still waits for V. Letting go of V always counts, so a gathered one fires.
+	 */
+	@Override
+	public boolean usableEarly(Player player, PowerKey key) {
+		if (key != PowerKey.ABILITY_3 || ZFighterLineage.ape(player)) {
+			return false;
+		}
+		int charged = ZFighterTraining.of(player).charged();
+		boolean bought = charged != ZFighterTraining.KI_WAVE && ZFighterTraining.of(player).knows(charged);
+		return bought && (player.isShiftKeyDown() || state(player).waveFrom() >= 0);
+	}
+
 	@Override
 	public PowerKey[] unlockOrder() {
 		return new PowerKey[] {PowerKey.ABILITY_1, PowerKey.ABILITY_2, PowerKey.ABILITY_4, PowerKey.ABILITY_3};
@@ -347,9 +361,8 @@ public final class ZFighterPower implements Power {
 	@Override
 	public void onGained(ServerPlayer player) {
 		player.setAttached(STATE, ZFighterState.NONE);
-		if (ZFighterLineage.of(player) == ZFighterLineage.NONE) {
-			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_pick_lineage").withStyle(ChatFormatting.GOLD));
-		}
+		// the lineage isn't chosen: it's in the blood (the heritage)
+		ZFighterLineage.inherit(player);
 	}
 
 	@Override

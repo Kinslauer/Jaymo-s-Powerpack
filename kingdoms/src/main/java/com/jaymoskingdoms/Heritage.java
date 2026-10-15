@@ -48,7 +48,10 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Emberborn:</b> burns briefly, thrives in the heat; starves in the cold.</li>
  * <li><b>Frostborn:</b> never freezes, thrives in the cold; starves in the heat.</li>
  * <li><b>Nightborn:</b> stronger and quicker in the dark; weaker under the open sun.</li>
+ * <li><b>Warrior-born:</b> hits harder the worse they're hurt; always hungry.</li>
  * </ul>
+ * Each player carries an entity tag {@code jaymoskingdoms_heritage_<key>} for their heritage, so Jaymo's Powers can read
+ * it without Kingdoms classes (a Z Fighter's lineage comes from it).
  */
 public final class Heritage {
 	/** Stoneborn: block break speed (a share), and walking speed lost (a share). */
@@ -69,6 +72,12 @@ public final class Heritage {
 	/** Nightborn: blows and speed in the dark (shares), blows in the sun (a share off). Dark: night, or light this low. */
 	static final double NIGHT_DAMAGE = 0.1, NIGHT_SPEED = 0.05, SUN_WEAK = 0.1;
 	static final int DARK_LIGHT = 7;
+	/** Warrior-born: below this share of their health their blows land this much harder (a share); hunger, as a factor. */
+	static final float WARRIOR_WOUNDED = 0.5F;
+	static final double WARRIOR_FURY = 0.15;
+	static final float WARRIOR_HUNGER = 1.2F;
+	/** The entity tag every player of a heritage carries: this, then the heritage's key. */
+	public static final String TAG = "jaymoskingdoms_heritage_";
 	/** How often the heritages that change with the light and the frost are looked at (ticks). */
 	static final int TICK_EVERY = 20;
 
@@ -81,7 +90,8 @@ public final class Heritage {
 		VERDANT(0, Items.MOSS_BLOCK, Stats.Stat.ENDURANCE, Stats.Stat.WITS),
 		EMBERBORN(0, Items.BLAZE_POWDER, Stats.Stat.MIGHT, Stats.Stat.MIGHT),
 		FROSTBORN(0, Items.SNOWBALL, Stats.Stat.GRIT, Stats.Stat.MIGHT),
-		NIGHTBORN(0, Items.PHANTOM_MEMBRANE, Stats.Stat.FINESSE, Stats.Stat.WITS);
+		NIGHTBORN(0, Items.PHANTOM_MEMBRANE, Stats.Stat.FINESSE, Stats.Stat.WITS),
+		WARRIORBORN(0, Items.IRON_SWORD, Stats.Stat.MIGHT, Stats.Stat.ENDURANCE);
 
 		/** Attribute points to spend as you like. */
 		public final int freePoints;
@@ -211,6 +221,7 @@ public final class Heritage {
 	static void set(ServerPlayer player, Kind kind) {
 		Kind was = of(player);
 		player.setAttached(HERITAGE, kind.key());
+		tag(player, kind);
 		look(player, was, kind);
 		Stats.settle(player);
 		Skills.refresh(player);
@@ -223,9 +234,21 @@ public final class Heritage {
 	static void clear(ServerPlayer player) {
 		Kind was = of(player);
 		player.removeAttached(HERITAGE);
+		tag(player, null);
 		look(player, was, null);
 		Stats.settle(player);
 		Skills.refresh(player);
+	}
+
+	/** Puts the tag of heritage {@code kind} on {@code player}, and takes every other heritage's off. */
+	private static void tag(ServerPlayer player, @Nullable Kind kind) {
+		for (Kind k : Kind.values()) {
+			if (k == kind) {
+				player.addTag(TAG + k.key());
+			} else {
+				player.removeTag(TAG + k.key());
+			}
+		}
 	}
 
 	/** A Verdant is green ({@link Verdants#SHADE}, seen by everyone); leaving it behind takes the green away. */
@@ -242,6 +265,10 @@ public final class Heritage {
 	/** Puts {@code player}'s heritage on them as they stand (the attributes that don't change with the light). */
 	static void attributes(ServerPlayer player) {
 		Kind kind = of(player);
+		if (kind != null && !player.entityTags().contains(TAG + kind.key())) {
+			// (picked before the tags were kept)
+			tag(player, kind);
+		}
 		if (kind == Kind.VERDANT && !Verdants.is(player)) {
 			// (the green isn't kept through death on its own)
 			look(player, null, kind);
@@ -258,6 +285,9 @@ public final class Heritage {
 		if (kind != Kind.NIGHTBORN) {
 			Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_night", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 			Skills.modifier(player, Attributes.MOVEMENT_SPEED, "heritage_night", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		}
+		if (kind != Kind.WARRIORBORN) {
+			Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_fury", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		}
 	}
 
@@ -278,6 +308,10 @@ public final class Heritage {
 				}
 				Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_night", damage, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 				Skills.modifier(player, Attributes.MOVEMENT_SPEED, "heritage_night", speed, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+			} else if (kind == Kind.WARRIORBORN) {
+				// the worse they're hurt, the harder they fight
+				boolean wounded = player.getHealth() < player.getMaxHealth() * WARRIOR_WOUNDED;
+				Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_fury", wounded ? WARRIOR_FURY : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 			} else if (kind == Kind.FROSTBORN && player.getTicksFrozen() > 0) {
 				player.setTicksFrozen(0);
 			}
@@ -309,6 +343,7 @@ public final class Heritage {
 			case VERDANT -> inSun(player) ? VERDANT_SUN_HUNGER : 1.0F;
 			case EMBERBORN -> hot(player) ? THRIVE_HUNGER : cold(player) ? WILT_HUNGER : 1.0F;
 			case FROSTBORN -> cold(player) ? THRIVE_HUNGER : hot(player) ? WILT_HUNGER : 1.0F;
+			case WARRIORBORN -> WARRIOR_HUNGER;
 			default -> 1.0F;
 		};
 	}
