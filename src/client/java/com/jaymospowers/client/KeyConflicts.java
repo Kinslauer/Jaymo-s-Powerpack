@@ -14,7 +14,8 @@ import net.minecraft.client.Minecraft;
  * one of them (at its default) is moved to a free key, or unbound. After that, players' own rebinds are never touched.
  * JEI's hover keys are the exception: R over an item shows its recipe and A bookmarks it, set once per install whatever
  * they were on. They only act over an item in an open screen, so they never clash with R the power key. YDM's Weapon
- * Master's settings key (Y, the Combat Arts key) is unbound once per install for everyone.
+ * Master's settings key (Y, the Combat Arts key) is unbound once per install for everyone, and so is the narrator's
+ * Ctrl+B hotkey (B is the fourth ability key).
  */
 final class KeyConflicts {
 	/**
@@ -56,12 +57,16 @@ final class KeyConflicts {
 	private static final Map<String, String> WEAPON_MASTER_KEYS = Map.of(
 		"key.weaponmaster_ydm.opengui", "key.keyboard.unknown");
 
+	/** Bump to switch the narrator hotkey off again. v1 (0.11.22). */
+	private static final String NARRATOR_MARKER = "jaymospowers-narrator-hotkey-v1";
+
 	private KeyConflicts() {
 	}
 
 	static void resolveOnce(Minecraft minecraft) {
 		setKeysOnce(minecraft, "jei", JEI_MARKER, JEI_KEYS, "put JEI's Show Recipe on R and Bookmark on A");
 		setKeysOnce(minecraft, "weaponmaster_ydm", WEAPON_MASTER_MARKER, WEAPON_MASTER_KEYS, "unbound YDM's Weapon Master keys");
+		narratorHotkeyOffOnce(minecraft);
 		Path marker = FabricLoader.getInstance().getConfigDir().resolve(MARKER);
 		if (Files.exists(marker)) {
 			return;
@@ -80,6 +85,23 @@ final class KeyConflicts {
 		}
 		try {
 			Files.writeString(marker, "Jaymo's Powers moved " + moved + " clashing key binding(s) off the power keys. Delete this file to do it again.\n");
+		} catch (IOException e) {
+			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't write {}", marker, e);
+		}
+	}
+
+	/** Switches off the narrator's Ctrl+B hotkey once per install (Accessibility Settings can turn it back on). */
+	private static void narratorHotkeyOffOnce(Minecraft minecraft) {
+		Path marker = FabricLoader.getInstance().getConfigDir().resolve(NARRATOR_MARKER);
+		if (Files.exists(marker)) {
+			return;
+		}
+		if (minecraft.options.narratorHotkey().get()) {
+			minecraft.options.narratorHotkey().set(false);
+			minecraft.options.save();
+		}
+		try {
+			Files.writeString(marker, "Jaymo's Powers switched off the narrator hotkey (Ctrl+B). Delete this file to do it again.\n");
 		} catch (IOException e) {
 			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't write {}", marker, e);
 		}
