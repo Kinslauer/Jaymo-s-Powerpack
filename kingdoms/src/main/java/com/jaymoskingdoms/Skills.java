@@ -142,7 +142,9 @@ public final class Skills {
 		// (0.7.3) a thrown shield that ricochets between foes and comes home (ShieldThrow); last, so no ordinal moves
 		SHIELD_THROW(Pillar.STRENGTH, 3, 1, 21, 6, 1, EXECUTIONER),
 		// (0.7.29) Survival's second root: the meditate key (Jaymo's Powers' Meditate). Rank 1 opens it, more ranks quicken it
-		MEDITATION(Pillar.SURVIVAL, 3, 1, 0, 0, 0);
+		MEDITATION(Pillar.SURVIVAL, 3, 1, 0, 0, 0),
+		// (0.7.30) Strength's second root: every weapon's full Better Combat combo (WeaponForms); without it, one or two plain swings
+		WEAPON_FORMS(Pillar.STRENGTH, 1, 1, 2, 0, 0);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;
