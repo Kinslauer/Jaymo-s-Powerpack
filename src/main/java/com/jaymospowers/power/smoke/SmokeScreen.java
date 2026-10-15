@@ -21,6 +21,8 @@ final class SmokeScreen {
 	static final int MAX_TICKS = 200;
 	/** Hunger a tick while pouring. */
 	static final float EXHAUSTION = 0.02F;
+	/** Mastered: how long after you stop pouring your smoke stays banked (no wind, slow to fade). */
+	static final int BANK_TICKS = 400;
 
 	/** Players pouring now, and since when (game time). */
 	private static final Map<UUID, Long> POURING = new HashMap<>();
@@ -68,6 +70,10 @@ final class SmokeScreen {
 		// it pours from the chest, and a little ahead when you move, so it trails behind you
 		Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.55, 0.0);
 		SmokeField.puff(level, at, POUR, player);
+		if (SmokePower.mastered(player)) {
+			// mastered: the bank holds while you pour and a while after
+			SmokeField.bank(player, level.getGameTime() + BANK_TICKS);
+		}
 		player.causeFoodExhaustion(EXHAUSTION);
 		if (held % 12 == 0) {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.CAMPFIRE_CRACKLE, SoundSource.PLAYERS, 0.7F, 0.6F + level.getRandom().nextFloat() * 0.2F);

@@ -71,7 +71,10 @@ public final class SmokeJet {
 	static void init() {
 		PayloadTypeRegistry.serverboundPlay().register(Hold.TYPE, Hold.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Hold.TYPE, (payload, ctx) -> {
-			if (payload.down()) {
+			if (payload.down() && ctx.player().isShiftKeyDown()) {
+				// Sneak + X steps into one of your clouds instead
+				SmokeStep.step(ctx.player());
+			} else if (payload.down()) {
 				start(ctx.player());
 			} else {
 				stop(ctx.player());
@@ -84,7 +87,7 @@ public final class SmokeJet {
 	}
 
 	static void start(ServerPlayer player) {
-		if (!Powers.has(player, SmokePower.INSTANCE) || !player.isAlive() || player.isSpectator() || spent(player)) {
+		if (!Powers.has(player, SmokePower.INSTANCE) || !player.isAlive() || player.isSpectator() || spent(player) || SmokeVapour.wholly(player)) {
 			return;
 		}
 		ACTIVE.add(player.getUUID());
