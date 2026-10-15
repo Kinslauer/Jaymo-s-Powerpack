@@ -15,7 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.11.74) Andy: "all weapons should be forged", the Tinkers way. Every stone and metal weapon (Armory's, Balkon's
+ * (0.11.76) Andy: "all weapons should be forged", the Tinkers way. Every stone and metal weapon (Armory's, Balkon's
  * WeaponMod's, vanilla spears) is put together at the Tool Station from its own head or blade (a Claymore Blade), a Tool
  * Handle and a Tool Binding. Stone heads are shaped at the Part Builder; pour gold over any head on a casting table for its cast,
  * then iron, gold or copper over the cast for a metal head. Their crafting recipes are switched off in data

@@ -1,4 +1,4 @@
-"""Writes the weapon parts' textures, models and lang (0.11.74, tinkering/WeaponParts): a head or blade for each forged
+"""Writes the weapon parts' textures, models and lang (0.11.76, tinkering/WeaponParts): a head or blade for each forged
 weapon, in stone and in each metal the weapon comes in.
 
 Each head is cut out of the weapon's own sprite: the pixels where that tier's weapon differs from its wooden one (the

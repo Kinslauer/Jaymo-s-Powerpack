@@ -1343,7 +1343,12 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Fighters stand on it. The old spot is used only if nowhere will do (`ZFighterArena`).
 - **0.11.73 / Kingdoms 0.7.65:** the whole realm on alert in a war: bells, sandbags round the seat, civilians hiding
   and guards at the sandbags when a war party comes (`kingdoms/MODLOG.md`).
-- **0.11.74:** Andy: "remove the metal knife recipes, all weapons should be forged", the Tinkers way. Stone and metal
+- **0.11.74 / Kingdoms 0.7.66:** night gifts for vampires and werewolves: dash, groundpound, leap, howl, kin-sense,
+  bat wings, lifeleech, frenzy, wall run, dhampirs, wolfbloods, crypts and dens (`kingdoms/MODLOG.md`).
+- **0.11.75 / Kingdoms 0.7.67:** two-handed weapons (any Better Combat `two_handed` weapon) reach 25% further, their
+  swing box is 35% wider and taller and their arc 25% wider (`core/TwoHanded`, `compat/mixin/TwoHandedReachMixin` on
+  `getRangeForItem` for client and server, client `TwoHandedSweepMixin`); mobs get the same reach and arc.
+- **0.11.76:** Andy: "remove the metal knife recipes, all weapons should be forged", the Tinkers way. Stone and metal
   weapons (Armory's, Balkon's WeaponMod's knives/spears/halberds/battleaxes/warhammers/katanas/flails/boomerangs,
   vanilla spears, kunai, throwing stars, harpoon, iron quarterstaff) lose their crafting recipes. Each has its own head
   or blade (Claymore Blade, Knife Blade...): shape it from stone at the Part Builder (arrows page to the weapon heads),

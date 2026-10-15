@@ -28,7 +28,7 @@ public class CastItem extends Item {
 		SMALL_BLADE(PartType.SMALL_BLADE), HAMMER_HEAD(PartType.HAMMER_HEAD), BROAD_BLADE(PartType.BROAD_BLADE),
 		LARGE_PLATE(PartType.LARGE_PLATE), TOOL_HANDLE(PartType.TOOL_HANDLE), TOUGH_HANDLE(PartType.TOUGH_HANDLE),
 		TOOL_BINDING(PartType.TOOL_BINDING),
-		/** (0.11.74) A weapon head of the kind it was made from ({@link WeaponParts}). */
+		/** (0.11.76) A weapon head of the kind it was made from ({@link WeaponParts}). */
 		WEAPON("weapon", null);
 
 		public final String id;
