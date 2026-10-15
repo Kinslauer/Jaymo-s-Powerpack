@@ -11,6 +11,9 @@
 		"CrawlPlayerMixin",
 		"DismemberMobMixin",
 		"ImpactShakeMixin",
+		"LeavesEntityMixin",
+		"LeavesJumperMixin",
+		"LeavesStateMixin",
 		"ServerGamePacketListenerImplMixin"
 	],
 	"injectors": {

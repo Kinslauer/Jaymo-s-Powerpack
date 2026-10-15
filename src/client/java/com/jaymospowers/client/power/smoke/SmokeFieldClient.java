@@ -56,6 +56,8 @@ public final class SmokeFieldClient {
 	private static LongOpenHashSet yours = new LongOpenHashSet();
 	/** Each block's soot (0 pale grey to 1 black), from the latest update. */
 	private static Long2FloatOpenHashMap soot = new Long2FloatOpenHashMap();
+	/** Blocks whose smoke is smog (a corrupted Smoke user's): drawn yellow-brown. */
+	private static LongOpenHashSet smog = new LongOpenHashSet();
 	private static int sinceUpdate;
 	private static int age;
 
@@ -83,6 +85,7 @@ public final class SmokeFieldClient {
 		now = new Long2FloatOpenHashMap();
 		yours = new LongOpenHashSet();
 		soot = new Long2FloatOpenHashMap();
+		smog = new LongOpenHashSet();
 	}
 
 	private static void receive(SmokeNet.Field field) {
@@ -90,6 +93,7 @@ public final class SmokeFieldClient {
 		Long2FloatOpenHashMap next = new Long2FloatOpenHashMap(cells.length / SmokeNet.Field.STRIDE * 2);
 		LongOpenHashSet mine = new LongOpenHashSet();
 		Long2FloatOpenHashMap soots = new Long2FloatOpenHashMap();
+		LongOpenHashSet smogs = new LongOpenHashSet();
 		int ox = BlockPos.getX(field.origin());
 		int oy = BlockPos.getY(field.origin());
 		int oz = BlockPos.getZ(field.origin());
@@ -100,11 +104,15 @@ public final class SmokeFieldClient {
 				mine.add(key);
 			}
 			soots.put(key, ((cells[i + 4] & 0xFF) >> 1) / 127.0F);
+			if ((cells[i + 5] & SmokeNet.Field.SMOG) != 0) {
+				smogs.add(key);
+			}
 		}
 		before = now;
 		now = next;
 		yours = mine;
 		soot = soots;
+		smog = smogs;
 		sinceUpdate = 0;
 	}
 
@@ -199,7 +207,8 @@ public final class SmokeFieldClient {
 					puffs[o + 4] = phase + time * 0.004F * ((h & 0x10000) == 0 ? 1.0F : -1.0F);
 					puffs[o + 5] = alpha;
 					puffs[o + 6] = h >>> 40 & 3;
-					puffs[o + 7] = (h >>> 42 & 0x1F) / 31.0F * 0.15F + 0.85F * (1.0F - soot.get(key));
+					// the shade; smog is flagged by adding SMOG_FLAG to it
+					puffs[o + 7] = (h >>> 42 & 0x1F) / 31.0F * 0.15F + 0.85F * (1.0F - soot.get(key)) + (smog.contains(key) ? SMOG_FLAG : 0.0F);
 					lights[count - 1] = light;
 				}
 			}
@@ -224,13 +233,20 @@ public final class SmokeFieldClient {
 
 	/** Floats kept per puff: x, y, z off the camera, half-size, turn, alpha, sheet cell, shade. */
 	private static final int PUFF = 8;
+	/** Added to a puff's shade to mark it as smog. */
+	private static final float SMOG_FLAG = 2.0F;
 
 	private static void puff(VertexConsumer buffer, PoseStack.Pose pose, Quaternionf turn, Vector3f corner, float x, float y, float z, float half,
 			float alpha, int light, int cell, float shade) {
 		float u0 = (cell & 1) * 0.5F;
 		float v0 = (cell >> 1) * 0.5F;
-		int grey = (int)(40 + 196 * shade);
-		int color = (int)(alpha * 255.0F) << 24 | grey << 16 | grey << 8 | Math.min(255, grey + 6);
+		boolean smoggy = shade >= SMOG_FLAG;
+		int grey = (int)(40 + 196 * (smoggy ? shade - SMOG_FLAG : shade));
+		// smog is a sickly yellow-brown; plain smoke a faintly blue grey
+		int r = smoggy ? Math.min(255, grey + 50) : grey;
+		int g = smoggy ? Math.min(255, grey + 32) : grey;
+		int b = smoggy ? Math.max(0, grey - 12) : Math.min(255, grey + 6);
+		int color = (int)(alpha * 255.0F) << 24 | r << 16 | g << 8 | b;
 		vertex(buffer, pose, turn, corner, x, y, z, -half, -half, color, u0, v0 + 0.5F, light);
 		vertex(buffer, pose, turn, corner, x, y, z, half, -half, color, u0 + 0.5F, v0 + 0.5F, light);
 		vertex(buffer, pose, turn, corner, x, y, z, half, half, color, u0 + 0.5F, v0, light);

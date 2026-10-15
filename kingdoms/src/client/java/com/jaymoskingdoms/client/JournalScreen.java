@@ -29,9 +29,9 @@ import net.minecraft.world.level.material.MapColor;
  * under the mouse, and on the quests page a box at the bottom with the hovered (or pressed) quest in full.
  */
 final class JournalScreen extends Screen {
-	static final int PANEL_W = 360, PANEL_H = 262, HEADER = 34, TAB_H = 16, BODY_Y = 56, FOOTER = 22, QUEST_ROW = 16, REP_ROW = 22, DETAIL_LINES = 8;
+	static final int PANEL_W = 360, PANEL_H = 230, HEADER = 34, TAB_H = 16, BODY_Y = 56, FOOTER = 22, QUEST_ROW = 16, REP_ROW = 22, DETAIL_LINES = 6;
 	/** The map: its size on screen (px), the size of one drawn cell (px), and the zooms (blocks per cell). */
-	static final int MAP_SIZE = 180, CELL = 2;
+	static final int MAP_SIZE = 150, CELL = 2;
 	static final int[] ZOOMS = {1, 2, 4, 8, 16, 32};
 	static final int DEFAULT_ZOOM = 2;
 	static final int COLOR_TEXT = Ui.TEXT, COLOR_DIM = Ui.DIM, COLOR_ROYAL = 0xFFFF6A50, COLOR_GOLD = Ui.GOLD, COLOR_DONE = 0xFF66EE66,

@@ -1206,3 +1206,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   There is no longer a portal so the only way out is death or with a chrono": guns you bring back are yours; echoes
   within 24 blocks when you leave follow you home with their guns and keep firing (a relearn no longer swaps a
   gunner's gun out); the Time Rift is gone, so the way home is a Chrono's sneak+B or dying. `docs/chrono.md`.
+- **0.10.116, soft leaves** (Andy: "i need this https://www.curseforge.com/minecraft/mc-mods/the-realistic-leaves-mod";
+  it only exists for 1.7.10 on the PML loader, so this is our own take, nothing of it copied): leaves are soft.
+  Players, mobs, animals, items and boats push into and through them instead of standing on them; inside, they drag
+  (you wade through hedges and settle down through a canopy at about two blocks a second), a fall into a tree is
+  cushioned, and holding Jump climbs up through them. Arrows and other projectiles still hit leaves, and falling sand
+  and gravel still land on them. Anything moving through leaves rustles them, knocks bits off and shakes real falling
+  leaves loose (vanilla sounds and particles drawn on each client, so Iris is fine). Tuning at the top of `core/Leaves`
+  and `client/LeafRustle`.

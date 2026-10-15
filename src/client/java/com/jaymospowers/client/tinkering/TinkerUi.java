@@ -7,7 +7,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 
 /**
- * (0.10.115) The Tinkering stations drawn like the H screen and the Z Fighter training screen, in place of Tinkers'
+ * (0.10.120) The Tinkering stations drawn like the H screen and the Z Fighter training screen, in place of Tinkers'
  * grey: a dark see-through panel with a bronze stripe along its top, sunken wells for the slots, light labels.
  */
 final class TinkerUi {

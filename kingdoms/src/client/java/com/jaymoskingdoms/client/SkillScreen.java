@@ -28,8 +28,8 @@ import org.jspecify.annotations.Nullable;
  * levels on, your class and your alignment ({@link Renown}). The server checks every spend and syncs the result back.
  */
 final class SkillScreen extends Screen {
-	static final int PANEL_W = 340, PANEL_H = 268, HEADER = 34, TAB_W = 98, TAB_H = 16, PERK_W = 98, PERK_H = 20, TIER_H = 30,
-		COLUMN_GAP = 106, TREE_Y = 58, DETAIL_Y = 176, DETAIL_LINES = 6, FOOTER = 22, XP_BAR_W = 120;
+	static final int PANEL_W = 340, PANEL_H = 230, HEADER = 34, TAB_W = 98, TAB_H = 16, PERK_W = 98, PERK_H = 18, TIER_H = 26,
+		COLUMN_GAP = 106, TREE_Y = 56, DETAIL_Y = 156, DETAIL_LINES = 5, FOOTER = 22, XP_BAR_W = 120;
 	static final int COLOR_LINE_OFF = 0xFF3A3A44;
 
 	private static KeyMapping key;
@@ -194,7 +194,7 @@ final class SkillScreen extends Screen {
 		} else if (!pillar.open) {
 			text.add(Component.translatable("gui.jaymoskingdoms.skills.plan." + pillar.key()));
 		} else {
-			text.add(Component.translatable("gui.jaymoskingdoms.skills.hint." + pillar.key() + (page > 0 ? ".1" : "")));
+			text.add(Component.translatable("gui.jaymoskingdoms.skills.hint." + pillar.key() + (page > 0 ? ".1" : "")).withColor(Ui.DIM));
 			Classes.PlayerClass cls = this.minecraft.player == null ? null : Classes.classOf(this.minecraft.player);
 			text.add(cls == null ? Component.translatable("gui.jaymoskingdoms.skills.class.none").withColor(Ui.DIM)
 				: Component.translatable("gui.jaymoskingdoms.skills.class", Component.translatable("class.jaymoskingdoms." + cls.key())).withColor(Ui.GOLD));
@@ -279,8 +279,8 @@ final class SkillScreen extends Screen {
 			String ranks = rank + "/" + perk.maxRank;
 			int ranksW = this.font.width(ranks);
 			int color = rank > 0 || open ? Ui.TEXT : Ui.DIM;
-			Ui.line(graphics, this.font, Component.translatable("skill.jaymoskingdoms.perk." + perk.key()), px + 6, py + 6, PERK_W - ranksW - 14, color);
-			graphics.text(this.font, ranks, px + PERK_W - ranksW - 5, py + 6, full ? accent : rank > 0 ? Ui.TEXT : Ui.HINT);
+			Ui.line(graphics, this.font, Component.translatable("skill.jaymoskingdoms.perk." + perk.key()), px + 6, py + 5, PERK_W - ranksW - 14, color);
+			graphics.text(this.font, ranks, px + PERK_W - ranksW - 5, py + 5, full ? accent : rank > 0 ? Ui.TEXT : Ui.HINT);
 		}
 	}
 }
