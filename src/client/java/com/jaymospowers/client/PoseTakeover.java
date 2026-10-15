@@ -64,6 +64,22 @@ public final class PoseTakeover {
 		return entity instanceof Entity e && POSED.contains(e.getId());
 	}
 
+	/**
+	 * (0.11.41) Drawing a bow, loading or aiming a crossbow, or raising a trident: the game's own arm pose. Fresh
+	 * Animations only takes these up when the arms sit at exactly the game's angles, and here (the villager body, our
+	 * tweaks over the arms) they don't, so it held the arms down by the sides and the bow was drawn and loosed unseen.
+	 */
+	static boolean aiming(AvatarRenderState s) {
+		return aims(s.rightArmPose) || aims(s.leftArmPose);
+	}
+
+	private static boolean aims(net.minecraft.client.model.HumanoidModel.ArmPose pose) {
+		return pose == net.minecraft.client.model.HumanoidModel.ArmPose.BOW_AND_ARROW
+			|| pose == net.minecraft.client.model.HumanoidModel.ArmPose.CROSSBOW_CHARGE
+			|| pose == net.minecraft.client.model.HumanoidModel.ArmPose.CROSSBOW_HOLD
+			|| pose == net.minecraft.client.model.HumanoidModel.ArmPose.THROW_TRIDENT;
+	}
+
 	/** One of the flights or glides: the body is in the air on purpose. */
 	static boolean flying(AvatarRenderState s) {
 		return s.getData(WindPose.KEY) != null || s.getData(WindHoverSway.KEY) != null || s.getData(FreefallPose.KEY) != null
@@ -82,7 +98,7 @@ public final class PoseTakeover {
 	}
 
 	public static boolean posed(AvatarRenderState s) {
-		return s.getData(CrawlPose.KEY) != null || s.getData(MeditatePose.KEY) != null || s.getData(FreefallPose.KEY) != null
+		return aiming(s) || s.getData(CrawlPose.KEY) != null || s.getData(MeditatePose.KEY) != null || s.getData(FreefallPose.KEY) != null
 			|| s.getData(CarryPose.CARRIER_KEY) != null || s.getData(CarryPose.HELD_KEY) != null || s.getData(CarryPose.THROWN_KEY) != null
 			|| WindPose.posed(s)
 			|| s.getData(GravityWalkPose.KEY) != null || s.getData(GravityBoardPose.KEY) != null || s.getData(GravityKneelPose.KEY) != null
