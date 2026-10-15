@@ -5,7 +5,7 @@
 	"power.jaymospowers.chrono.key.ability_1.name": "Rewind",
 	"power.jaymospowers.chrono.key.ability_2": "Stasis Field: stop time around you for 3s (players too) and reset all your other cooldowns",
 	"power.jaymospowers.chrono.key.ability_2.name": "Stasis Field",
-	"power.jaymospowers.chrono.key.ability_3": "Overclock: a speedster for 6 s (Speed V, faster blows), everyone near you slowed hard. Sprint to go far faster, run up walls and across water; V again at a wall to phase through it",
+	"power.jaymospowers.chrono.key.ability_3": "Overclock: a speedster for 6 s (Speed V, faster blows), everyone near you slowed hard. Sprint to go far faster, run up walls and across water; V again at a wall to phase through it. Timeless: a toggle, on until V again (away from a wall)",
 	"power.jaymospowers.chrono.key.ability_3.name": "Overclock",
 	"power.jaymospowers.chrono.key.ability_4": "Time Bloom (grow and cook fast, and mend your wounds and those of every creature near you). Sneak+B, once you've killed your echo for good: Fast Forward, a leap to the ruined future (and back) with everyone near you",
 	"power.jaymospowers.chrono.key.ability_4.name": "Time Bloom",

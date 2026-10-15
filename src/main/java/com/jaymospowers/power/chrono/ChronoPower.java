@@ -47,7 +47,8 @@ import net.minecraft.world.phys.Vec3;
  * other cooldown you have running (never its own).</li>
  * <li>V, Overclock: 6 s as a speedster: Speed V, Haste II and faster attacks, everyone near you slowed hard. Since
  * 0.10.28 the Flash's speed too ({@link ChronoSpeed}): a far faster sprint, running up walls and across water, and V
- * again to phase through a wall.</li>
+ * again to phase through a wall. Since 0.11.37 it's a toggle for the Timeless (max rank): V switches it on with no time
+ * limit, V again (away from a wall) switches it off, and only then does its cooldown start.</li>
  * <li>B, Time Bloom: 5 s of fast-forward for crops, saplings, furnaces, smokers and ovens within 5 blocks, and for
  * your own wounds and those of every creature within {@code BLOOM_HEAL_RADIUS} (they mend {@code BLOOM_HEAL} every
  * {@code BLOOM_HEAL_EVERY} ticks meanwhile).</li>
@@ -74,6 +75,8 @@ public final class ChronoPower implements Power {
 	static final int STASIS_COOLDOWN = 600;
 	static final int OVERCLOCK_TICKS = 120;
 	static final int OVERCLOCK_COOLDOWN = 500;
+	/** Held (Timeless) Overclock tops itself back up to {@code OVERCLOCK_TICKS} once it runs down to this. */
+	static final int OVERCLOCK_HELD_REFRESH = 40;
 	/** Attack speed while overclocked: x1.6 of the total (a sword goes from 1.6 to ~2.56 swings a second). */
 	static final double OVERCLOCK_ATTACK_SPEED = 0.6;
 	static final int BLOOM_COOLDOWN = 800;
@@ -258,6 +261,7 @@ public final class ChronoPower implements Power {
 		state.bloom = null;
 		state.trail = null;
 		state.overclockLeft = 0;
+		state.overclockHeld = false;
 		setOverclockModifier(player, false);
 		ChronoSpeed.clear(player);
 		state.synced = false;
@@ -321,6 +325,15 @@ public final class ChronoPower implements Power {
 			bloomHealNearby(player, level);
 		}
 		ChronoFlow.tickPlayer(player);
+		if (state.overclockHeld && state.overclockLeft <= OVERCLOCK_HELD_REFRESH) {
+			if (Fate.isAscended(player)) {
+				// switched on for good: keep it running until V switches it off
+				overclockEffects(player);
+				state.overclockLeft = OVERCLOCK_TICKS;
+			} else {
+				state.overclockHeld = false; // no longer Timeless: it runs out like anyone's
+			}
+		}
 		if (state.overclockLeft > 0) {
 			state.overclockLeft--;
 			overclockFx(player, level, state.overclockLeft);
@@ -360,6 +373,13 @@ public final class ChronoPower implements Power {
 			// V again mid-Overclock: phase through the wall ahead
 			if (now >= state.phaseReadyAt && ChronoSpeed.phase(player)) {
 				state.phaseReadyAt = now + ChronoSpeed.PHASE_GAP;
+			} else if (state.overclockHeld) {
+				// Timeless toggle: no wall to phase through, so V switches Overclock off and the cooldown starts now
+				overclockOff(player, state);
+				int cooldown = cooldown(player, OVERCLOCK);
+				state.readyAt[OVERCLOCK] = now + cooldown;
+				state.cooldownTotal[OVERCLOCK] = cooldown;
+				sync(player, state, now);
 			}
 			return;
 		}
@@ -386,6 +406,12 @@ public final class ChronoPower implements Power {
 		if (used) {
 			if (ability == STASIS) {
 				resetCooldowns(player, state);
+			}
+			if (ability == OVERCLOCK && state.overclockHeld) {
+				// a toggle: its cooldown starts when it's switched off
+				state.synced = false;
+				sync(player, state, now);
+				return;
 			}
 			int cooldown = cooldown(player, ability);
 			state.readyAt[ability] = now + cooldown;
@@ -576,15 +602,34 @@ public final class ChronoPower implements Power {
 	// ---------------------------------------------------------------- Overclock
 
 	private static boolean overclock(ServerPlayer player, ChronoState state) {
-		player.addEffect(new MobEffectInstance(MobEffects.SPEED, OVERCLOCK_TICKS, OVERCLOCK_SPEED_AMPLIFIER, false, false, true));
-		player.addEffect(new MobEffectInstance(MobEffects.HASTE, OVERCLOCK_TICKS, 1, false, false, true));
+		overclockEffects(player);
 		state.overclockLeft = OVERCLOCK_TICKS;
+		// (0.11.37) at max rank (Timeless) V is a toggle: on until V switches it off
+		state.overclockHeld = Fate.isAscended(player);
 		setOverclockModifier(player, true);
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.8F, 2.0F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 1.8F);
 		ChronoFx.particles(level, player, ParticleTypes.WAX_ON, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.7, 0.4, 0.6);
 		return true;
+	}
+
+	private static void overclockEffects(ServerPlayer player) {
+		player.addEffect(new MobEffectInstance(MobEffects.SPEED, OVERCLOCK_TICKS, OVERCLOCK_SPEED_AMPLIFIER, false, false, true));
+		player.addEffect(new MobEffectInstance(MobEffects.HASTE, OVERCLOCK_TICKS, 1, false, false, true));
+	}
+
+	/** Switches a held (Timeless) Overclock off: our effects go, the speed ends. */
+	private static void overclockOff(ServerPlayer player, ChronoState state) {
+		removeOverclockEffect(player, MobEffects.SPEED, OVERCLOCK_SPEED_AMPLIFIER, state.overclockLeft);
+		removeOverclockEffect(player, MobEffects.HASTE, 1, state.overclockLeft);
+		state.overclockLeft = 0;
+		state.overclockHeld = false;
+		setOverclockModifier(player, false);
+		ChronoSpeed.clear(player);
+		ServerLevel level = player.level();
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.6F, 1.7F);
+		state.synced = false;
 	}
 
 	/**
@@ -678,7 +723,7 @@ public final class ChronoPower implements Power {
 			activeTotal[STASIS] = state.stasis.duration;
 		}
 		if (state.overclockLeft > 0) {
-			activeLeft[OVERCLOCK] = state.overclockLeft;
+			activeLeft[OVERCLOCK] = state.overclockHeld ? OVERCLOCK_TICKS : state.overclockLeft; // held: always full
 			activeTotal[OVERCLOCK] = OVERCLOCK_TICKS;
 		}
 		if (state.bloom != null) {
