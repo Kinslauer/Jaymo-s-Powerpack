@@ -3111,3 +3111,6 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
   another after 3 days, 50%) and in 35% of dungeons (spawner on cobblestone): taken from the nearest settlement within
   1500, bound (NoAI, invulnerable, unseen by monsters), they cry for help. Right-click breaks the chains; they follow you
   home (lost after 30 s more than 48 blocks behind, or 3 days), and give 3-8 emeralds there. Ops: `/kingdom captive`.
+- **0.7.61, foreign voices grunt:** MCA's spoken voice lines (greet, yes, no, celebrate, angry) are sent per player:
+  those who don't understand the villager's tongue (`Languages.understands`: fluent, family or sworn) hear the vanilla
+  villager grunt instead (`EntityVoiceMixin` on `Entity.playSound`, `Languages.voice`).
