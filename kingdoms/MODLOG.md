@@ -3114,3 +3114,6 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
 - **0.7.61, foreign voices grunt:** MCA's spoken voice lines (greet, yes, no, celebrate, angry) are sent per player:
   those who don't understand the villager's tongue (`Languages.understands`: fluent, family or sworn) hear the vanilla
   villager grunt instead (`EntityVoiceMixin` on `Entity.playSound`, `Languages.voice`).
+- **0.7.62, raiders leave fires burning:** (`Firefighting.ours`) raiders and war parties' soldiers (`Assault.attacker`)
+  never fight fires, theirs or the town's, and no folk fights a fire on enemy land (`Assault.enemyLand`). The town's own
+  villagers, folk and golems still do.

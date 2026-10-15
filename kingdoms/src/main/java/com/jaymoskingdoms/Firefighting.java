@@ -177,7 +177,7 @@ public final class Firefighting {
 				default -> run(level, v, fire);
 			}
 		}
-		for (Folk folk : level.getEntitiesOfClass(Folk.class, near, f -> f.isAlive() && f.getTarget() == null && !Theft.rioting(f))) {
+		for (Folk folk : level.getEntitiesOfClass(Folk.class, near, f -> f.isAlive() && f.getTarget() == null && !Theft.rioting(f) && ours(level, f, fire))) {
 			Undertakers.calledAway(level, folk);
 			if (close(folk, fire)) {
 				putOut(level, folk, fire, now);
@@ -196,6 +196,14 @@ public final class Firefighting {
 			BlockPos to = beside(golem, fire);
 			golem.getNavigation().moveTo(to.getX() + 0.5, to.getY(), to.getZ() + 0.5, GOLEM_SPEED);
 		}
+	}
+
+	/**
+	 * (0.7.62) Folk fight only their own side's fires: never a raider or a war party's soldier (they set them, and leave
+	 * them burning, theirs or the town's), nor anyone standing on enemy land.
+	 */
+	private static boolean ours(ServerLevel level, Folk folk, BlockPos fire) {
+		return !Assault.attacker(folk) && !Assault.enemyLand(level, folk, fire);
 	}
 
 	/** {@code golem} beats out {@code fire}: an arm swung down on it (no water, nothing knocked out). */
