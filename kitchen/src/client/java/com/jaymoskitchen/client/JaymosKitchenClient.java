@@ -43,6 +43,8 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		// corpses look like the mob they were; dead players can get back up as zombies wearing their skin
 		EntityRendererRegistry.register(Corpses.CORPSE, CorpseRenderer::new);
 		EntityRendererRegistry.register(PlayerCorpses.ZOMBIE_PLAYER, ZombiePlayerRenderer::new);
+		ModelLayerRegistry.registerModelLayer(CorpseRenderer.PLAYER_BODY, () -> CorpseRenderer.playerBody(false));
+		ModelLayerRegistry.registerModelLayer(CorpseRenderer.PLAYER_BODY_SLIM, () -> CorpseRenderer.playerBody(true));
 		ModelLayerRegistry.registerModelLayer(ZombiePlayerModel.TATTERS, () -> ZombiePlayerModel.tatters(false));
 		ModelLayerRegistry.registerModelLayer(ZombiePlayerModel.TATTERS_SLIM, () -> ZombiePlayerModel.tatters(true));
 
