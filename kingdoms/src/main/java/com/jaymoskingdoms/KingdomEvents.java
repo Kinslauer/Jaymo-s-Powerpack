@@ -588,6 +588,12 @@ public final class KingdomEvents {
 		Faction.Member member = faction.member(player.getUUID());
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.audience", faction.name(),
 			Component.translatable("reputation.jaymoskingdoms." + Reputation.word(rep)), rep).withStyle(ChatFormatting.GOLD));
+		// (0.7.72) a fiefdom's court owns whose land it holds
+		Faction overlord = faction.type() == FactionType.FIEFDOM ? Relations.overlord(server, faction) : null;
+		if (overlord != null) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.audience.fief", faction.name(), overlord.name())
+				.withStyle(ChatFormatting.GRAY));
+		}
 		if (member != null) {
 			Rank rank = Rank.forStanding(member.standing());
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.audience.member", Component.translatable(rank.key()), member.standing())

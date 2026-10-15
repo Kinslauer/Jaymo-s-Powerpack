@@ -1398,3 +1398,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   paused, as Kingdoms' armour does) and the costume takes it. It also takes the model the renderer drew that player
   with (MCA swaps it per player), MCA's villager body's wide arms (not the skin's slim ones), its head size (masks
   scale with it) and its bust (the suit has one that copies MCA's; the emblem moves out in front of it).
+- **0.11.84 / Kingdoms 0.7.72, vassals set apart from kings:** Andy: "vassals should be differentiated from kings". A
+  kingdom made a fiefdom now has its king step down to lord in place (circlet, diamond, purple bar, lord's title) and
+  its folk take the overlord's arms; lords keep a smaller escort (4); a fiefdom's audience names its overlord. See
+  kingdoms/MODLOG.md.
