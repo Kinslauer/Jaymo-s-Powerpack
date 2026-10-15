@@ -900,7 +900,7 @@ code). No keys of their own:
   cling, jump, cling again scales a wall. Each wall face once until you land; two facing walls chain like a chimney.
 - **Slide:** sprinting, press Sneak: a fast low slide (`SLIDE_BOOST`, decays by `SLIDE_KEEP`, at most `SLIDE_TICKS`).
   Let go of Sneak to stand. Jump out of it leaps higher and further than a plain jump (0.11.19: `SLIDE_JUMP_UP` 0.62
-  up, the slide's speed × `SLIDE_JUMP_KEEP` 1.3 + `SLIDE_JUMP_ADD` 0.12 ahead, at most `SLIDE_JUMP_MAX` 0.95). Four slide
+  up, the slide's speed × `SLIDE_JUMP_KEEP` 1.3 + `SLIDE_JUMP_ADD` 0.12 ahead, at most `SLIDE_JUMP_MAX` 0.95). It always flips out: a front flip, corkscrew or cartwheel at random (`WebParkourClient.SLIDE_FLIPS`, Andy). Four slide
   looks, one at random (never the same twice running; 0.11.19, Andy): baseball (feet first, a hand trailing), knee
   slide (arms flung wide), hip slide (on one forearm, legs stacked ahead) and head-first dive. The hitbox stays crouch-height (no sliding under one-block
   gaps; the double-tap crawl does that).

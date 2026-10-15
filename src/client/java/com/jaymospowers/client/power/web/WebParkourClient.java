@@ -1,6 +1,7 @@
 package com.jaymospowers.client.power.web;
 
 import com.jaymospowers.power.web.WebParkour;
+import com.jaymospowers.power.web.WebPose;
 import com.jaymospowers.power.web.WebPower;
 import com.jaymospowers.power.web.WebSymbiote;
 import com.jaymospowers.power.web.WebSymbioteState;
@@ -27,6 +28,8 @@ final class WebParkourClient {
 	private static final double HUG = 0.02;
 	/** Moving at least this fast across the ground (blocks/tick) to vault or slide. */
 	private static final double MOVE_MIN = 0.15;
+	/** The flips a jump out of a slide turns into, one at random. */
+	private static final int[] SLIDE_FLIPS = {WebPose.FRONT_FLIP, WebPose.CORKSCREW, WebPose.CARTWHEEL};
 
 	private int kind = WebParkour.NONE;
 	/** The wall's side for a cling (null otherwise), and the slide's heading and speed. */
@@ -235,6 +238,9 @@ final class WebParkourClient {
 			player.setDeltaMovement(heading.scale(out).add(0.0, Math.max(player.getDeltaMovement().y, WebParkour.SLIDE_JUMP_UP), 0.0));
 			stop();
 			cooldown = WebParkour.SLIDE_COOLDOWN;
+			// and flips out of it (Andy: every slide)
+			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebTricks.Trick(
+				SLIDE_FLIPS[player.getRandom().nextInt(SLIDE_FLIPS.length)], player.getRandom().nextBoolean() ? 1 : -1));
 			WebSwing.play(player, SoundEvents.SLIME_JUMP, 0.7F, 1.2F);
 			for (int i = 0; i < 6; i++) {
 				player.level().addParticle(ParticleTypes.CLOUD, player.getX(), player.getY() + 0.1, player.getZ(), -heading.x * 0.12, 0.04, -heading.z * 0.12);
