@@ -216,7 +216,6 @@ public final class Callings {
 				call(player, "zfighter", Integer.MAX_VALUE);
 				return;
 			}
-			progress(player, "zfighter", kills, FIST_KILLS_NEEDED);
 		}
 		if (weaponKind(player, source) == null) {
 			return;
@@ -225,20 +224,7 @@ public final class Callings {
 		player.setAttached(ARSENAL_KILLS, kills);
 		if (kills >= ARSENAL_KILLS_NEEDED) {
 			call(player, "arsenal", Integer.MAX_VALUE);
-		} else {
-			progress(player, "arsenal", kills, ARSENAL_KILLS_NEEDED);
 		}
-	}
-
-	/** A counted step toward a calling (fist kills, weapon kills), shown above the hotbar so the player sees it count. */
-	private static void progress(ServerPlayer player, String powerName, int done, int needed) {
-		Power power = Powers.byName(powerName);
-		Power claimed = power(player);
-		if (power == null || claimed != null && claimed != power || player.isCreative() || player.isSpectator()) {
-			return;
-		}
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.calling_progress." + powerName, done, needed)
-			.withStyle(style -> style.withColor(TextColor.fromRgb(power.color())).withItalic(true)));
 	}
 
 	/**
