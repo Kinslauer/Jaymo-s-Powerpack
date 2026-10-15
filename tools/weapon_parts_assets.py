@@ -109,7 +109,7 @@ def as_stone(img):
 
 def tidy(img):
     """Drops stray specks (pieces of under 3 pixels, the handle's outline changing tier), then a head that's under half
-    the sprite across is cut out and drawn bigger, centred, so small heads (a flail's ball) read in a slot."""
+    the sprite across is cut out and centred at its own pixel size (Andy: drawn bigger they looked too chunky)."""
     w, h = img.size
     seen, pieces = set(), []
     for y in range(h):
@@ -137,10 +137,9 @@ def tidy(img):
     if box is None:
         return out
     bw, bh = box[2] - box[0], box[3] - box[1]
-    scale = min(4, int(w * 0.75) // max(bw, bh))
-    if max(bw, bh) * 2 > w or scale < 2:
+    if max(bw, bh) * 2 > w:
         return out
-    head = out.crop(box).resize((bw * scale, bh * scale), Image.NEAREST)
+    head = out.crop(box)
     centred = Image.new("RGBA", img.size, (0, 0, 0, 0))
     centred.paste(head, ((w - head.width) // 2, (h - head.height) // 2))
     return centred
