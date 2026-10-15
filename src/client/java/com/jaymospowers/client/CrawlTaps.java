@@ -9,19 +9,19 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Crawl gesture: press Jump and Sneak together twice in quick succession and you go flat; you stay flat while Jump is
- * held (Sneak can be let go). Releasing Jump stands you up when there's headroom; under a one-block ceiling vanilla keeps
- * you crawling until you're out. While crawling, double-tap Left or Right to roll one block that way (puts fire out);
- * keep holding it to keep rolling.
+ * Crawl gesture: hold Jump and Sneak together for a moment and you go flat; you stay flat while Jump is held (Sneak can
+ * be let go). Releasing Jump stands you up when there's headroom; under a one-block ceiling vanilla keeps you crawling
+ * until you're out. While crawling, double-tap Left or Right to roll one block that way; keep holding it to keep rolling,
+ * for up to 2 s one way before you must roll back (rolling back puts the fire on you out).
  */
 final class CrawlTaps {
-	/** The most ticks between two Jump + Sneak presses that count as a double tap. */
-	private static final int DOUBLE_TAP_TICKS = 8;
+	/** How long Jump + Sneak must be held together to go prone (short, so a quick sneak-jump doesn't drop you). */
+	private static final int HOLD_TICKS = 4;
 	/** The most ticks between two Left (or two Right) presses that count as a double tap for a roll. */
 	private static final int ROLL_TAP_TICKS = 7;
 
-	private static boolean bothWereDown;
-	private static int sinceLastTap = Integer.MAX_VALUE;
+	/** Ticks Jump + Sneak have been held together (0 when they aren't). */
+	private static int bothHeld;
 	private static boolean crawling;
 
 	private static boolean leftWasDown;
@@ -34,6 +34,8 @@ final class CrawlTaps {
 	private static boolean rollRight;
 	/** Client game time the local roll started, for drawing it before the server's copy arrives. */
 	private static long rollStart = Long.MIN_VALUE;
+	/** The local player's last roll, to spend a direction after 2 s just as the server does. */
+	private static Crawl.@Nullable Rolling lastRoll;
 
 	private CrawlTaps() {
 	}
@@ -56,32 +58,24 @@ final class CrawlTaps {
 		if (player == null) {
 			crawling = false;
 			Crawl.localCrawler = -1;
-			bothWereDown = false;
-			sinceLastTap = Integer.MAX_VALUE;
+			bothHeld = 0;
 			rollLeft = 0;
 			rollStart = Long.MIN_VALUE;
+			lastRoll = null;
 			return;
 		}
 		boolean jump = minecraft.options.keyJump.isDown();
 		boolean both = jump && minecraft.options.keyShift.isDown();
-		if (sinceLastTap < Integer.MAX_VALUE) {
-			sinceLastTap++;
-		}
+		bothHeld = both && minecraft.gui.screen() == null ? bothHeld + 1 : 0;
 		if (crawling) {
 			if (!jump || !Crawl.canCrawl(player)) {
 				stop();
 			}
-		} else if (both && !bothWereDown && minecraft.gui.screen() == null) {
-			if (sinceLastTap <= DOUBLE_TAP_TICKS && Crawl.canCrawl(player)) {
-				crawling = true;
-				Crawl.localCrawler = player.getId();
-				ClientPlayNetworking.send(new Crawl.Key(true));
-				sinceLastTap = Integer.MAX_VALUE;
-			} else {
-				sinceLastTap = 0;
-			}
+		} else if (bothHeld >= HOLD_TICKS && Crawl.canCrawl(player)) {
+			crawling = true;
+			Crawl.localCrawler = player.getId();
+			ClientPlayNetworking.send(new Crawl.Key(true));
 		}
-		bothWereDown = both;
 		tickRoll(minecraft, player);
 	}
 
@@ -122,9 +116,16 @@ final class CrawlTaps {
 	}
 
 	private static void startRoll(LocalPlayer player, boolean right) {
+		long now = player.level().getGameTime();
+		Crawl.Rolling next = Crawl.nextRoll(lastRoll, now, right);
+		if (next == null) {
+			// this way is spent: roll back the other way first
+			return;
+		}
+		lastRoll = next;
 		rollLeft = Crawl.ROLL_TICKS;
 		rollRight = right;
-		rollStart = player.level().getGameTime();
+		rollStart = now;
 		ClientPlayNetworking.send(new Crawl.Roll(right));
 	}
 
