@@ -1322,3 +1322,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   material slots, one level at a time (`EnchantRecipes`: ESO's costs; density, breach, wind burst, lunge ours; other
   mods' enchantments use the default price). Items hold 2-6 enchantments by material (`Enchanting.limit`), +1 with a
   curse; the anvil can't go past that (`AnvilLimitMixin`); loot keeps at most 3 (books 10). Tinkering tools stay out.
+- **0.11.52, Super hair remodelled:** the old cap-and-sticks hair is gone. Each Super fighter gets one of two sets for
+  good (`ZFighterHair.style`): Swept (locks raked back, close together) or Wild (long locks thrown up and to one side,
+  a huge billowing Super 3 mane). Locks are tapering box chains drawn joint by joint, so they blow back when moving
+  or flying (harder when cruising) and flutter and straighten while charging. Models live in
+  `tools/zfighter_hair/hair.js` (which also renders mock-ups); `export.js` writes `ZFighterHairStyles`. Texture:
+  `tools/gen_zfighter_hair.py`.

@@ -1,9 +1,12 @@
 package com.jaymospowers.client.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.client.power.wind.WindPose;
 import com.jaymospowers.power.zfighter.ZFighterLineage;
 import com.jaymospowers.power.zfighter.ZFighterPower;
 import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.HashMap;
+import java.util.Map;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
@@ -12,7 +15,6 @@ import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
-import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -21,25 +23,46 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
+import org.joml.Quaternionf;
 
 /**
- * Super's hair ({@code textures/entity/zfighter_hair.png}, pale strands tinted the form's colour, lit from within): a cap
- * over his own hair with spikes standing up, taller and sharper in Super 2, and in Super 3 a mane down to the waist.
- * Each fighter has one of {@link #STYLES} styles, picked at random from who he is and his for good. Earthlings and the
+ * Super's hair ({@code textures/entity/zfighter_hair.png}, pale strands tinted the form's colour, lit from within): a mass
+ * of wide, tapering locks, one model per form in {@link ZFighterHairStyles}, in one of two sets that is his for good:
+ * swept (every lock raked back, close together) or wild (long locks thrown up and to one side, a Super 3 mane that
+ * billows out). The locks blow back when he moves or flies and flutter up when he charges. Earthlings and the
  * Warrior-born only (the Verdant grow, the Frost-born have no hair to change); never the Great Ape; never drawn in your
  * own first-person view, where it would hang in front of your eyes.
  */
 public final class ZFighterHair {
-	/** The form (1-3) and its colour, or null for no Super hair. */
+	/** The form (1-3), its colour and his set (0 swept, 1 wild), or null for no Super hair. */
 	public record Hair(int form, int color, int style) {
 	}
 
-	/** How many styles there are: classic, swept back, flame crown, fringe, side-swept, crest. */
-	public static final int STYLES = 6;
+	/** How many sets there are: swept and wild. */
+	public static final int STYLES = 2;
 
-	/** The style that is his: random across fighters, the same every time for one. */
+	/** How hard the hair blows back per joint at full wind (radians), and the root of each lock (a little less). */
+	static final float BLOW_PER_JOINT = 0.1F;
+	static final float BLOW_ROOT = 0.04F;
+	/** Walking or running: wind from walk speed. Flying: from the flight pose, more when cruising fast. */
+	static final float WALK_WIND = 0.45F;
+	static final float HOVER_WIND = 0.45F;
+	static final float CRUISE_WIND = 1.0F;
+	/** Flutter (radians per joint) when still, per unit of wind, and while charging; how fast it ripples. */
+	static final float FLUTTER_IDLE = 0.012F;
+	static final float FLUTTER_WIND = 0.05F;
+	static final float FLUTTER_CHARGE = 0.07F;
+	static final float FLUTTER_SPEED = 0.2F;
+	static final float FLUTTER_SPEED_WIND = 0.35F;
+	static final float FLUTTER_SPEED_CHARGE = 0.55F;
+	/** Charging: how much the locks straighten up out of their curve (the ki lifts them), and the mane lifts back. */
+	static final float CHARGE_STRAIGHTEN = 0.5F;
+	static final float CHARGE_LIFT = 0.04F;
+
+	/** The set that is his: random across fighters, the same every time for one. */
 	public static int style(java.util.UUID id) {
 		long bits = id.getMostSignificantBits() ^ id.getLeastSignificantBits();
 		return (int)Math.floorMod(bits ^ (bits >>> 32), (long)STYLES);
@@ -48,89 +71,37 @@ public final class ZFighterHair {
 	public static final RenderStateDataKey<Hair> KEY = RenderStateDataKey.create(() -> "jaymospowers:zfighter_hair");
 	static final Identifier TEXTURE = JaymosPowers.id("textures/entity/zfighter_hair.png");
 	static final int FULL_BRIGHT = 0xF000F0;
+	/** The texture's 4 bands, darker at the roots, brighter toward the tips; each band is 16 pixels tall. */
+	static final int BANDS = 4;
 
-	private static final ModelPart[][] HAIR = new ModelPart[STYLES][4];
-	/** The cap sits this far out from the head: past the skin's hat layer (0.5). */
-	private static final CubeDeformation CAP = new CubeDeformation(0.7F);
+	private static final ModelPart[] CAPS = new ModelPart[ZFighterHairStyles.STYLES.length];
+	private static final Map<Long, ModelPart> SEGMENTS = new HashMap<>();
 
 	private ZFighterHair() {
 	}
 
-	/** Spikes as {x, z, height, tilt forward (radians), tilt out (radians)} on the crown (the head's top is y -8). */
-	private static final float[][] SPIKES_1 = {
-		{0, -2, 5, 0.5F, 0}, {-2.5F, -1, 5, 0.3F, -0.5F}, {2.5F, -1, 5, 0.3F, 0.5F}, {0, 1.5F, 6, -0.3F, 0},
-		{-2.5F, 2, 5, -0.4F, -0.5F}, {2.5F, 2, 5, -0.4F, 0.5F}, {0, -3.5F, 3, 1.1F, 0},
-	};
-	private static final float[][] SPIKES_2 = {
-		{0, -2, 7, 0.35F, 0}, {-2.5F, -1, 7, 0.2F, -0.4F}, {2.5F, -1, 7, 0.2F, 0.4F}, {0, 1.5F, 8, -0.25F, 0},
-		{-2.5F, 2, 7, -0.3F, -0.45F}, {2.5F, 2, 7, -0.3F, 0.45F}, {-1, -3.5F, 4, 1.2F, -0.2F}, {1, -3.5F, 4, 1.2F, 0.2F},
-	};
-
-	/** By style, Super's spikes (Super 2 and 3 grow them: see {@link #spikes}). Style 0 is the classic, with its own Super 2. */
-	private static final float[][][] STYLE_SPIKES = {
-		SPIKES_1,
-		// swept back: long spikes raked back over the crown
-		{{-2.5F, -2, 6, -0.9F, -0.3F}, {0, -2.5F, 7, -0.9F, 0}, {2.5F, -2, 6, -0.9F, 0.3F}, {-2, 0.5F, 7, -1.1F, -0.2F},
-			{2, 0.5F, 7, -1.1F, 0.2F}, {0, 1, 8, -1.2F, 0}, {-3, 2.5F, 5, -1.3F, -0.4F}, {3, 2.5F, 5, -1.3F, 0.4F}},
-		// flame crown: tall and upright, fanned out like a fire
-		{{0, 0, 8, 0, 0}, {-2, -1, 7, 0.1F, -0.25F}, {2, -1, 7, 0.1F, 0.25F}, {-3, 1, 6, -0.1F, -0.5F}, {3, 1, 6, -0.1F, 0.5F},
-			{0, -2.5F, 6, 0.25F, 0}, {0, 2.5F, 6, -0.25F, 0}},
-		// fringe: a heavy fringe hanging over the brow, short spikes on top
-		{{-2.5F, -4.5F, 3.5F, 2.5F, -0.15F}, {-0.8F, -4.5F, 4, 2.6F, -0.05F}, {0.8F, -4.5F, 4, 2.6F, 0.05F}, {2.5F, -4.5F, 3.5F, 2.5F, 0.15F},
-			{-2, 0, 4, 0.2F, -0.6F}, {2, 0, 4, 0.2F, 0.6F}, {0, 1.5F, 5, -0.4F, 0}},
-		// side-swept: everything leaning one way
-		{{-3, -1.5F, 6, 0.3F, 0.6F}, {-1, -2, 7, 0.3F, 0.7F}, {1, -1, 7, 0.1F, 0.8F}, {3, 0, 5, 0, 0.9F}, {-2, 1.5F, 6, -0.3F, 0.6F},
-			{0.5F, 2, 6, -0.3F, 0.8F}, {2.5F, 2.5F, 4, -0.4F, 1.0F}},
-		// crest: one ridge from brow to nape, tallest in the middle, short tufts over the ears
-		{{0, -3.5F, 5, 0.7F, 0}, {0, -2, 7, 0.35F, 0}, {0, -0.5F, 8, 0.1F, 0}, {0, 1, 8, -0.15F, 0}, {0, 2.5F, 7, -0.45F, 0},
-			{0, 3.5F, 5, -0.9F, 0}, {-3, 0, 3, 0, -0.8F}, {3, 0, 3, 0, 0.8F}},
-	};
-
-	/** One style's spikes in a form: Super 2 and up stand 2 taller (a hanging fringe only a little longer). */
-	private static float[][] spikes(int style, int form) {
-		if (form < 2) {
-			return STYLE_SPIKES[style];
+	private static ModelPart cap(int index) {
+		if (CAPS[index] == null) {
+			MeshDefinition mesh = new MeshDefinition();
+			CubeListBuilder cubes = CubeListBuilder.create();
+			for (float[] b : ZFighterHairStyles.STYLES[index].cap()) {
+				cubes.texOffs(0, 0).addBox(b[0], b[1], b[2], b[3], b[4], b[5], new CubeDeformation(b[6]));
+			}
+			mesh.getRoot().addOrReplaceChild("cap", cubes, PartPose.ZERO);
+			CAPS[index] = LayerDefinition.create(mesh, 64, 64).bakeRoot().getChild("cap");
 		}
-		if (style == 0) {
-			return SPIKES_2;
-		}
-		float[][] base = STYLE_SPIKES[style];
-		float[][] grown = new float[base.length][];
-		for (int i = 0; i < base.length; i++) {
-			grown[i] = base[i].clone();
-			grown[i][2] += base[i][3] > 2.0F ? 0.5F : 2.0F;
-		}
-		return grown;
+		return CAPS[index];
 	}
 
-	private static ModelPart hair(int style, int form) {
-		if (HAIR[style][form] == null) {
+	/** One lock segment: a box w x length x d standing up from its pivot, its strands from one band of the texture. */
+	private static ModelPart segment(float w, float d, float length, int band) {
+		long key = ((long)Math.round(w * 2) << 48) | ((long)Math.round(d * 2) << 32) | ((long)Math.round(length * 2) << 16) | band;
+		return SEGMENTS.computeIfAbsent(key, k -> {
 			MeshDefinition mesh = new MeshDefinition();
-			PartDefinition root = mesh.getRoot();
-			// the cap: over the top, a fringe above the eyes, down the back and over the ears, proud of the skin's own hat
-			// layer (0.5) so none of his own hair shows through
-			root.addOrReplaceChild("cap", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 4.0F, 8.0F, CAP)
-				.texOffs(0, 11).addBox(-4.0F, -4.0F, 1.0F, 8.0F, 4.0F, 3.0F, CAP)
-				.texOffs(24, 0).addBox(-4.0F, -4.0F, -2.0F, 1.0F, 2.0F, 3.0F, CAP)
-				.texOffs(24, 0).mirror().addBox(3.0F, -4.0F, -2.0F, 1.0F, 2.0F, 3.0F, CAP), PartPose.ZERO);
-			float[][] spikes = spikes(style, form);
-			for (int i = 0; i < spikes.length; i++) {
-				float[] s = spikes[i];
-				root.addOrReplaceChild("spike" + i, CubeListBuilder.create().texOffs(24, 11).addBox(-1.0F, -s[2], -1.0F, 2.0F, s[2], 2.0F),
-					PartPose.offsetAndRotation(s[0], -8.0F, s[1], -s[3], 0.0F, s[4]));
-			}
-			if (form == 3) {
-				// the mane: long, down the back to the waist, flaring a little
-				root.addOrReplaceChild("mane", CubeListBuilder.create().texOffs(0, 17).addBox(-4.5F, 0.0F, 0.0F, 9.0F, 14.0F, 2.0F),
-					PartPose.offsetAndRotation(0.0F, -7.0F, 3.5F, 0.18F, 0.0F, 0.0F));
-				root.addOrReplaceChild("mane_l", CubeListBuilder.create().texOffs(22, 17).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 11.0F, 2.0F),
-					PartPose.offsetAndRotation(-4.0F, -6.0F, 2.5F, 0.15F, 0.0F, 0.25F));
-				root.addOrReplaceChild("mane_r", CubeListBuilder.create().texOffs(22, 17).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 11.0F, 2.0F),
-					PartPose.offsetAndRotation(4.0F, -6.0F, 2.5F, 0.15F, 0.0F, -0.25F));
-			}
-			HAIR[style][form] = LayerDefinition.create(mesh, 32, 48).bakeRoot();
-		}
-		return HAIR[style][form];
+			mesh.getRoot().addOrReplaceChild("part", CubeListBuilder.create().texOffs(0, band * 16).addBox(-w / 2.0F, -length, -d / 2.0F, w, length, d),
+				PartPose.ZERO);
+			return LayerDefinition.create(mesh, 64, 64).bakeRoot().getChild("part");
+		});
 	}
 
 	static void extract(Avatar entity, AvatarRenderState state) {
@@ -152,6 +123,24 @@ public final class ZFighterHair {
 		}
 	}
 
+	/** How hard the wind is on his hair (0-1): from walking, or from flying (harder when cruising fast). */
+	static float wind(AvatarRenderState state) {
+		float wind = Mth.clamp(state.walkAnimationSpeed, 0.0F, 1.0F) * WALK_WIND;
+		ZFighterFlightPose.Pose flight = state.getData(ZFighterFlightPose.KEY);
+		if (flight != null && flight.amount() > 0.001F) {
+			Float cruise = state.getData(WindPose.KEY);
+			float fly = ZFighterFlightPose.smooth(flight.amount()) * Mth.lerp(cruise == null ? 0.0F : cruise, HOVER_WIND, CRUISE_WIND);
+			wind = Math.max(wind, fly);
+		}
+		return Mth.clamp(wind, 0.0F, 1.0F);
+	}
+
+	/** How far into the charge pose he is (0-1). */
+	static float charge(AvatarRenderState state) {
+		ZFighterChargePose.Pose pose = state.getData(ZFighterChargePose.KEY);
+		return pose == null ? 0.0F : ZFighterFlightPose.smooth(Mth.clamp(pose.amount(), 0.0F, 1.0F));
+	}
+
 	static final class Layer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		Layer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
 			super(renderer);
@@ -163,10 +152,47 @@ public final class ZFighterHair {
 			if (hair == null || state.isInvisible) {
 				return;
 			}
+			int index = Math.floorMod(hair.style(), STYLES) * 3 + Mth.clamp(hair.form(), 1, 3) - 1;
+			ZFighterHairStyles.Style style = ZFighterHairStyles.STYLES[index];
+			int color = 0xFF000000 | hair.color();
+			float wind = wind(state);
+			float charge = charge(state);
+			float time = state.ageInTicks;
+			float flutter = FLUTTER_IDLE + FLUTTER_WIND * wind + FLUTTER_CHARGE * charge;
+			float speed = FLUTTER_SPEED + FLUTTER_SPEED_WIND * wind + FLUTTER_SPEED_CHARGE * charge;
 			poseStack.pushPose();
 			this.getParentModel().head.translateAndRotate(poseStack);
-			collector.submitModelPart(hair(Math.floorMod(hair.style(), STYLES), hair.form()), poseStack, RenderTypes.entityCutout(TEXTURE), FULL_BRIGHT, OverlayTexture.NO_OVERLAY, null,
-				0xFF000000 | hair.color());
+			collector.submitModelPart(cap(index), poseStack, RenderTypes.entityCutout(TEXTURE), FULL_BRIGHT, OverlayTexture.NO_OVERLAY, null, color);
+			float[][] locks = style.locks();
+			for (int l = 0; l < locks.length; l++) {
+				float[] lock = locks[l];
+				int n = (lock.length - 6) / 5;
+				// "back" is toward +z: an upright lock leans back with less xRot, one hanging down (the mane) with more
+				float back = Mth.cos(lock[3]) >= 0.0F ? -1.0F : 1.0F;
+				float blow = wind * BLOW_PER_JOINT + (back > 0.0F ? charge * CHARGE_LIFT : 0.0F);
+				float phase = l * 1.7F;
+				poseStack.pushPose();
+				poseStack.translate(lock[0] / 16.0F, lock[1] / 16.0F, lock[2] / 16.0F);
+				for (int i = 0; i < n; i++) {
+					int s = 6 + i * 5;
+					float wave = flutter * Mth.sin(time * speed + phase + i * 0.7F);
+					float sway = flutter * 0.6F * Mth.cos(time * speed * 1.3F + phase + i * 0.5F);
+					float x, z;
+					if (i == 0) {
+						x = lock[3] + back * wind * BLOW_ROOT + wave * 0.5F;
+						z = lock[5] + sway * 0.5F;
+					} else {
+						poseStack.translate(0.0F, (-lock[s - 3] + 0.5F) / 16.0F, 0.0F);
+						x = lock[s + 3] * (1.0F - CHARGE_STRAIGHTEN * charge) + back * blow + wave;
+						z = lock[s + 4] * (1.0F - CHARGE_STRAIGHTEN * charge) + sway;
+					}
+					poseStack.rotate(new Quaternionf().rotationZYX(z, i == 0 ? lock[4] : 0.0F, x));
+					int band = Math.min(BANDS - 1, i * BANDS / n);
+					collector.submitModelPart(segment(lock[s], lock[s + 1], lock[s + 2], band), poseStack, RenderTypes.entityCutout(TEXTURE), FULL_BRIGHT,
+						OverlayTexture.NO_OVERLAY, null, color);
+				}
+				poseStack.popPose();
+			}
 			poseStack.popPose();
 		}
 	}
