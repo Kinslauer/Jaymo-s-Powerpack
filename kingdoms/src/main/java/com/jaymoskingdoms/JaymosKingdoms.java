@@ -185,6 +185,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.21: grudges: villagers who hate another set you on them (a beating, or a lure into an ambush)
 		Grudges.register();
 		Trespass.register();
+		// 0.7.46: after Village Life: festival days, village cats and dogs, couriers, hunger and weariness (their attachments)
+		LOGGER.debug("village life attachments: {} {}", Festivals.CALLED, Pets.VILLAGE_PET);
+		Festivals.register();
+		Pets.register();
+		Couriers.register();
+		Spirits.register();
 		// 0.5.37: sorcery: camps' shamans and necromancers, courts' wizards, the risen dead, spell scrolls (and the thralls' attachment)
 		Arcana.register();
 		LOGGER.debug("thrall attachment: {}", Thralls.TAG);
