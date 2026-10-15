@@ -40,6 +40,7 @@ public class JaymosKitchenClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
+		com.jaymoskitchen.client.stomach.StomachHud.register();
 		// corpses look like the mob they were; dead players can get back up as zombies wearing their skin
 		EntityRendererRegistry.register(Corpses.CORPSE, CorpseRenderer::new);
 		EntityRendererRegistry.register(PlayerCorpses.ZOMBIE_PLAYER, ZombiePlayerRenderer::new);

@@ -22,7 +22,10 @@
 		"PlayerMixin",
 		"ProjectileWeaponItemMixin",
 		"RangedAttackMobMixin",
-		"SlotOvenToolMixin"
+		"SlotOvenToolMixin",
+		"StomachConsumableMixin",
+		"StomachFoodDataMixin",
+		"StomachFoodMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
