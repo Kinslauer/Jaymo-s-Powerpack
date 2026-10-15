@@ -1398,3 +1398,25 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   paused, as Kingdoms' armour does) and the costume takes it. It also takes the model the renderer drew that player
   with (MCA swaps it per player), MCA's villager body's wide arms (not the skin's slim ones), its head size (masks
   scale with it) and its bust (the suit has one that copies MCA's; the emblem moves out in front of it).
+- **0.11.82, the Rig (stage 1):** Andy's AI armour suit, for everyone (`rig/`, `client/rig/`, `lang/parts/rig.json`,
+  art from `tools/gen_rig.py`). Four armour pieces: Helm (head: the HUD, bottom-right above the power chips: charge,
+  actives and cooldowns, the target under the crosshair to 32 blocks, the Mind's warnings; it hides the face like a
+  costume mask, keyed by the Helm's name), Core (chest: the charge, `rig_charge`, and the Mind), Arms (worn in the legs
+  slot, the frame that drives the arms: bare-fisted punch boost, Sneak + right-click lifts a heavy iron-golem corpse
+  through `KitchenCompat`), Thrusters (boots: jump boost). The actives need the whole set and charge: Hover (a toggle;
+  Jump rises, Sneak sinks, ends on landing or empty; no fall damage builds up at under 0.5 b/t), Palm Blast (an
+  instant beam, 6 damage) and the Shoulder Launcher (two mini-missiles that burst without breaking blocks). Keys: no
+  power: R/G/V, B for the Mind's report; with a power the power keys stay the power's and J uses the selected active,
+  Sneak + J picks the next. Each power adds one augment (Wind: hover drains less; Gravity: heavier punch; Chrono:
+  faster recharge; Web: palm blast slows; Arsenal: one more missile; Resonance: harder palm knockback; Darktide: the
+  Mind senses hunters farther behind; Smoke: palm blast blinds; Xenoform: longer palm reach; Z Fighter: punch
+  knockback). Charge: stand on a redstone block (trickle), right-click one empty-handed (drains it, a big gulp),
+  lightning (full), a lit Kingdoms smithy forge by block id (`RigCharge.FORGE_IDS`: the blast furnace, and
+  `jaymoskingdoms:forge` should Kingdoms get one). The Mind (Loyal, Dry or Grim, picked once on first wearing, kept on
+  the Core) only warns this stage, rate-limited on the action bar: low charge, low health, a projectile or blast about
+  to hit, lava or the void under a fall, a hostile hunting you from behind. The Rig Forge (crafted: iron, salvage,
+  redstone blocks, an anvil, a blast furnace) builds pieces from salvage points (Rig Salvage 3, Fallen Rig Scrap 1) plus
+  iron and a second material, and refits damaged pieces. Dead Rigs lie only in Los Perrito (one island chunk in 28,
+  guarded by two androids, sometimes a mech); Fallen Rigs, fallen explorers who sought a way off Earth (their logs on
+  salvaging), only in newly generated Nether (1 in 220) and End (1 in 160) chunks. Stage 3 (later): levels, lock-on,
+  scans, the takeover save, flight, calling the suit.
