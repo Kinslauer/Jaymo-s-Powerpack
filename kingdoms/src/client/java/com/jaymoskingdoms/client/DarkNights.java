@@ -15,7 +15,7 @@ import net.minecraft.world.level.MoonPhase;
  * each time it's worked out (mixin.moons.DarkNightsMixin).
  *
  * <p>Shader packs light the world themselves and would undo it, so on a night darker than full moon an Iris shader
- * pack is switched off at dusk, with a word on screen, and back on at dawn (Andy, 2026-10-14). Iris is reached by
+ * pack is switched off at dusk and back on at dawn (Andy, 2026-10-14). Iris is reached by
  * reflection, so it isn't a compile dependency.
  */
 public final class DarkNights {
@@ -26,11 +26,19 @@ public final class DarkNights {
 
 	/** Past this far into the night (0-1) on a waning moon, shader packs go off. */
 	static final float SHADERS_OFF_AT = 0.3F;
+	/**
+	 * (0.7.49) Seconds the night has to stay dark (or light) in a row before shaders are switched. A lightning flash
+	 * lights the sky for a moment, which used to flip shaders back on and off with every thunderclap (Andy: "thunder
+	 * at night turns shaders on and off, can we remove that").
+	 */
+	static final int SHADERS_OFF_AFTER = 4, SHADERS_ON_AFTER = 15;
 
 	/** The night and moonlight the lightmap last saw. */
 	private static volatile float lastNight, lastMoon = 1.0F;
 	/** We switched a shader pack off and owe it back. */
 	private static boolean shadersOff;
+	/** Seconds in a row the night has disagreed with the shaders' state. */
+	private static int streak;
 
 	private DarkNights() {
 	}
@@ -43,18 +51,27 @@ public final class DarkNights {
 				Iris.set(true);
 				shadersOff = false;
 			}
+			streak = 0;
 			return;
 		}
 		if (minecraft.player.tickCount % 20 != 0) {
 			return;
 		}
 		boolean dark = minecraft.level.dimensionType().hasSkyLight() && lastNight > SHADERS_OFF_AT && lastMoon < 1.0F;
-		if (dark && !shadersOff && Iris.inUse()) {
+		if (dark == shadersOff || !shadersOff && !Iris.inUse()) {
+			streak = 0;
+			return;
+		}
+		if (++streak < (dark ? SHADERS_OFF_AFTER : SHADERS_ON_AFTER)) {
+			return;
+		}
+		streak = 0;
+		if (dark) {
 			// (0.7.25) quietly, no message (Andy: "no shader disable message")
 			if (Iris.set(false)) {
 				shadersOff = true;
 			}
-		} else if (!dark && shadersOff) {
+		} else {
 			Iris.set(true);
 			shadersOff = false;
 		}
