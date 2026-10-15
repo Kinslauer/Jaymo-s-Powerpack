@@ -499,12 +499,16 @@ file), never as if Uospag endorsed us.
 
 | Piece | What it does | Numbers | Class |
 |---|---|---|---|
+| Echo first | Fast Forward opens only once your echo has died for good: killed in the Nether, or in the future (where it can die too). Until then sneak+B says so. | attachment `future_echo_slain` | `future/Future`, `ChronoEchoes.collapse` |
+| Echoes in the future | A Chrono there with no echo anywhere has one turn up; it carries a random flintlock and shoots. | due 30-90 s, checked every 5 s | `future/Future`, `ChronoEcho` |
 | Sneak+B, Fast Forward | You and every player within 4 blocks leap to `jaymospowers:future`, arriving at the map's own spawn facing the Time Rift. Sneak+B there brings you and those near you back to where each left (or world spawn). Not for a starter Chrono; B must be unlocked. Own recharge, Bloom's untouched. | radius 4, recharge 60 s | `future/Future` |
 | Time Rift | A golden whirl 5 blocks north of the arrival point; walk into it to go home. | radius 0.8 | `future/Future` |
 | Fetching the city | First leap on a server starts a background download from CurseForge (file 9033035, 801,180,636 bytes) or uses `LosPerrito2.0.1.zip` in the server or world folder; then unpacks `region/`, `entities/`, `poi/` into `dimensions/jaymospowers/future/` and moves `data/map_N.dat` to `data/minecraft/maps/<N+offset>.dat`, claiming those ids. Marker: `los_perrito.txt` (holds `mapOffset`). Delete the dimension folder to start over. | 764 MB zipped, 1.07 GB unpacked | `future/LosPerrito` |
 | Map art | Item frames in the future are pointed at the shifted map ids the first time each loads (an attachment marks it). | | `future/Future` |
 | Ruins | Each island chunk decays once, on first load, 2 chunks a tick, seeded by position, then turns to the `future_ruins` biome (biomes re-sent). | panes 65% / glass 45% smashed, lawns 35% dead (12% podzol), flowers 60% dead, road moss 3.5%, wall vines 1.2% (up to 6 down), cobwebs 1.2% | `future/FutureRuins` |
 | Ferals | Packs of 3-6 (70% zombie, 15% husk, 15% zombie villager) 24-44 blocks from each survival player, up to the cap. 35% faster, follow range 48. Running within 40 or walking within 16 draws them; in sight within 24, they attack. Tagged `jaymospowers.feral`. | cap 10 day / 20 night within 64 | `future/FutureFerals` |
+| Corpse zombies | 45% of each pack are Kitchen's zombie players with a random stranger's id, so they wear one of the 18 default skins at random; 30% of those carry a flintlock. | | `future/FutureKitchen` |
+| Guns | Our TaCZ musket, flintlock pistol or blunderbuss (no modern guns in the pack). The shot is traced from the muzzle, stopped by walls, hurts the first living thing hit; smoke trail, flash, bang. No ammo. Gun drops 10% (never from echoes). | musket 9 / 32 blocks / 5 s, pistol 6 / 18 / 3 s, blunderbuss 6x2.5 / 10 / 4.5 s | `future/FutureGuns` |
 | No sun burn | Mobs never burn by day in the future. | | `mixin/FutureSunMixin` |
 
 Outside the island (x -3584..5631, z -3584..3583) is the map's own flat sea (same layers as its superflat). The map's

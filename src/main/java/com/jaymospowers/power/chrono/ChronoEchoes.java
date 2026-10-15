@@ -128,6 +128,14 @@ public final class ChronoEchoes {
 		memory.echoesDue.add(between(player.getRandom(), ECHO_DELAY_MIN, ECHO_DELAY_MAX));
 	}
 
+	/** (0.10.106) In the future: if the player has no echo at all, one turns up soon ({@code min}-{@code max} ticks). */
+	public static void oweSoon(ServerPlayer player, int min, int max) {
+		ChronoMemory memory = ChronoMemory.of(player);
+		if (!hasEcho(player, memory)) {
+			memory.echoesDue.add(between(player.getRandom(), min, max));
+		}
+	}
+
 	/** Whether the player's one echo exists: owed, on its way back, blinked out of a Nether fight, or loaded somewhere. */
 	static boolean hasEcho(ServerPlayer player, ChronoMemory memory) {
 		return !memory.echoesDue.isEmpty() || !memory.returnsDue.isEmpty() || player.getAttached(NETHER_RETURN) != null
@@ -376,6 +384,8 @@ public final class ChronoEchoes {
 		UUID owner = echo.owner();
 		ServerPlayer player = owner == null ? null : level.getServer().getPlayerList().getPlayer(owner);
 		if (player != null) {
+			// (0.10.106) your echo ended for good: the way to the future opens for you
+			com.jaymospowers.power.chrono.future.Future.echoSlain(player);
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.chrono_echo_collapsed")
 				.withStyle(ChatFormatting.AQUA, ChatFormatting.ITALIC));
 			if (level.dimension() == net.minecraft.world.level.Level.NETHER && com.jaymospowers.core.Powers.has(player, ChronoPower.INSTANCE)

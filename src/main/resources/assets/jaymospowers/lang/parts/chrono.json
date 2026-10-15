@@ -7,7 +7,7 @@
 	"power.jaymospowers.chrono.key.ability_2.name": "Stasis Field",
 	"power.jaymospowers.chrono.key.ability_3": "Overclock: a speedster for 6 s (Speed V, faster blows), everyone near you slowed hard. Sprint to go far faster, run up walls and across water; V again at a wall to phase through it",
 	"power.jaymospowers.chrono.key.ability_3.name": "Overclock",
-	"power.jaymospowers.chrono.key.ability_4": "Time Bloom (grow and cook fast, and mend your wounds). Sneak+B: Fast Forward, a leap to the ruined future (and back) with everyone near you",
+	"power.jaymospowers.chrono.key.ability_4": "Time Bloom (grow and cook fast, and mend your wounds). Sneak+B, once you've killed your echo for good: Fast Forward, a leap to the ruined future (and back) with everyone near you",
 	"power.jaymospowers.chrono.key.ability_4.name": "Time Bloom",
 	"power.jaymospowers.chrono.ascended": "Timeless",
 	"power.jaymospowers.chrono.key.ultimate": "Chrono Punch: ten punches in half a second into everything in front of you",
@@ -44,5 +44,7 @@
 	"message.jaymospowers.future.returned": "Back in your own time.",
 	"message.jaymospowers.future.credit": "This future is built from Los Perrito City by Uospag (curseforge.com/minecraft/worlds/los-perrito, CC BY 4.0), ruined by Jaymo's Powers. Click to visit the map's page.",
 	"biome.jaymospowers.future_ruins": "Ruins of Los Perrito",
-	"dimension.jaymospowers.future": "The Future"
+	"dimension.jaymospowers.future": "The Future",
+	"message.jaymospowers.future.echo_first": "The future won't open while your echo still walks. End it for good first.",
+	"message.jaymospowers.future.unlocked": "Your echo is gone for good, and time lies open ahead of you. Sneak+B to fast forward."
 }

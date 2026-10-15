@@ -25,13 +25,18 @@ import net.minecraft.world.phys.AABB;
  * They're faster than the zombies back home and they hear you: anyone running within {@link #HEAR_RUNNING} blocks, or
  * walking within {@link #HEAR_WALKING}, draws the nearest ferals to them, and a feral that sees you attacks. They're
  * the game's own zombies, so Kitchen treats them like any other: the dead they leave are torn into by scavenging
- * zombies, and a zombie's body left lying gets back up.
+ * zombies, and a zombie's body left lying gets back up. Nearly half are Kitchen's corpse zombies in random skins
+ * ({@link FutureKitchen}), and some of those carry a flintlock and use it ({@link FutureGuns}).
  */
 public final class FutureFerals {
 	public static final String TAG = "jaymospowers.feral";
 	static final Identifier SPEED = JaymosPowers.id("feral_speed");
 	/** How often the hordes are topped up and listen for players. */
 	static final int EVERY = 40;
+	/** Of each pack, this share are Kitchen's corpse zombies in random skins (the rest the game's own), and this share of those carry a gun. */
+	static final float CORPSE_SHARE = 0.45F, GUNNER_SHARE = 0.3F;
+	/** Gunners look for a shot this often. */
+	static final int GUN_EVERY = 5;
 	/** At most this many ferals within {@link #COUNT_RADIUS} of a player, by day and by night. */
 	static final int CAP_DAY = 10, CAP_NIGHT = 20;
 	static final double COUNT_RADIUS = 64.0;
@@ -49,11 +54,14 @@ public final class FutureFerals {
 	}
 
 	static void tick(MinecraftServer server) {
-		if (server.getTickCount() % EVERY != 0) {
-			return;
-		}
 		ServerLevel level = server.getLevel(Future.FUTURE);
 		if (level == null || level.players().isEmpty()) {
+			return;
+		}
+		if (server.getTickCount() % GUN_EVERY == 0) {
+			shoot(level);
+		}
+		if (server.getTickCount() % EVERY != 0) {
 			return;
 		}
 		for (ServerPlayer player : level.players()) {
@@ -66,6 +74,19 @@ public final class FutureFerals {
 				spawnPack(level, player, Math.min(cap - near.size(), PACK_MIN + level.getRandom().nextInt(PACK_MAX - PACK_MIN + 1)));
 			}
 			listen(player, near);
+		}
+	}
+
+	/** Every gunner near a player fires if it can (each keeps its own reload). */
+	private static void shoot(ServerLevel level) {
+		java.util.Set<Mob> seen = new java.util.HashSet<>();
+		for (ServerPlayer player : level.players()) {
+			for (Mob gunner : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(COUNT_RADIUS),
+				m -> m.entityTags().contains(FutureGuns.TAG) && m.isAlive())) {
+				if (seen.add(gunner)) {
+					FutureGuns.tick(level, gunner);
+				}
+			}
 		}
 	}
 
@@ -103,15 +124,22 @@ public final class FutureFerals {
 				|| !level.noCollision(new AABB(x + 0.2, y, z + 0.2, x + 0.8, y + 1.9, z + 0.8))) {
 				continue;
 			}
-			float roll = random.nextFloat();
-			EntityType<? extends Zombie> type = roll < 0.15F ? EntityTypes.HUSK : roll < 0.3F ? EntityTypes.ZOMBIE_VILLAGER : EntityTypes.ZOMBIE;
-			Zombie feral = type.create(level, EntitySpawnReason.EVENT);
+			Zombie feral = random.nextFloat() < CORPSE_SHARE ? FutureKitchen.corpseZombie(level) : null;
+			boolean corpse = feral != null;
+			if (feral == null) {
+				float roll = random.nextFloat();
+				EntityType<? extends Zombie> type = roll < 0.15F ? EntityTypes.HUSK : roll < 0.3F ? EntityTypes.ZOMBIE_VILLAGER : EntityTypes.ZOMBIE;
+				feral = type.create(level, EntitySpawnReason.EVENT);
+			}
 			if (feral == null) {
 				continue;
 			}
 			feral.snapTo(x + 0.5, y, z + 0.5, random.nextFloat() * 360.0F, 0.0F);
 			feral.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), EntitySpawnReason.EVENT, null);
 			makeFeral(feral);
+			if (corpse && random.nextFloat() < GUNNER_SHARE) {
+				FutureGuns.arm(feral, random);
+			}
 			level.addFreshEntity(feral);
 		}
 	}

@@ -1185,4 +1185,12 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   villagers, 10 per player by day and 20 by night, 35% faster, tracking from 48 blocks, drawn to anyone running within
   40 or walking within 16 (sneak to slip by); nothing burns in the future's sun (`FutureSunMixin`). They're vanilla
   zombies, so Kitchen's scavenging and rising corpses work on them as on any other. `/future go|back|fetch|status` for
-  gamemasters. `docs/chrono.md`.
+  gamemasters. Andy, after: "you can only access the sneak + B after killing your echo. inside the dimension echos will
+  spawn with actual guns from Tacz, and the city will be further populated with randomly skinned corpse zombies and
+  randomly skinned zombies with tacz guns": Fast Forward opens only once your echo has died for good (killed in the
+  Nether, or in the future); until then sneak+B says so. A Chrono in the future with no echo has one turn up 30-90 s
+  later, carrying one of our TaCZ flintlocks (the pack has no modern guns), and there it can be killed. 45% of each
+  horde are Kitchen's corpse zombies (zombie players) wearing random default skins, and 30% of those carry a flintlock.
+  Gunners fire traced shots with smoke, flash and bang (musket 9 dmg to 32 blocks, pistol 6 to 18, blunderbuss 6x2.5 to
+  10; reloads 3-5 s; no ammo), and drop the gun 10% of the time (echoes never) (`FutureGuns`, `FutureKitchen`).
+  `docs/chrono.md`.

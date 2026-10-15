@@ -45,15 +45,17 @@ import net.minecraft.world.phys.Vec3;
  * Chronokinesis's leap into the future: a lifetime on, the world is a ruined city overrun by feral dead
  * ({@code jaymospowers:future}, built from Los Perrito City by Uospag; see {@link LosPerrito}).
  * <ul>
- * <li>Sneak+B (Fast Forward), for any Chrono user past the starter: you, and every player within
+ * <li>Sneak+B (Fast Forward), for any Chrono user past the starter who has killed their echo for good (in the Nether,
+ * since 0.10.106; {@link #ECHO_SLAIN}): you, and every player within
  * {@link #COMPANION_RADIUS} blocks, leap to the future. Sneak+B there brings you (and those near you) back to where
  * you left.</li>
  * <li>The Time Rift beside where you arrive takes anyone home, so no one is ever stranded without a Chrono user. Dying
  * there sends you to your own spawn as usual.</li>
  * <li>The first leap on a server fetches the city ({@link LosPerrito}); until it's in place, the leap only says how far
  * along it is.</li>
+ * <li>A Chrono in the future with no echo soon has one turn up there, armed with a flintlock; there it can be killed.</li>
  * </ul>
- * Ruins: {@link FutureRuins}. The dead: {@link FutureFerals}.
+ * Ruins: {@link FutureRuins}. The dead: {@link FutureFerals}. Guns: {@link FutureGuns}.
  */
 public final class Future {
 	public static final ResourceKey<Level> FUTURE = ResourceKey.create(Registries.DIMENSION, JaymosPowers.id("future"));
@@ -64,6 +66,8 @@ public final class Future {
 	/** The Time Rift stands this many blocks north of the arrival point; walk within RIFT_RADIUS of it to go home. */
 	static final int RIFT_OFFSET = 5;
 	static final double RIFT_RADIUS = 0.8;
+	/** In the future, a Chrono with no echo has one turn up this long after (30-90 s of survival play); checked this often. */
+	static final int ECHO_DUE_MIN = 600, ECHO_DUE_MAX = 1800, ECHO_CHECK = 100;
 	/** Nobody is sent through twice within this many ticks. */
 	static final int PASS_COOLDOWN = 60;
 
@@ -80,6 +84,9 @@ public final class Future {
 	/** Where the player left from. */
 	public static final AttachmentType<Return> RETURN = AttachmentRegistry.create(JaymosPowers.id("future_return"),
 		builder -> builder.persistent(Return.CODEC).copyOnDeath());
+	/** Has this player ended their echo for good (killed it in the Nether or the future)? Fast Forward needs it. */
+	public static final AttachmentType<Boolean> ECHO_SLAIN = AttachmentRegistry.create(JaymosPowers.id("future_echo_slain"),
+		builder -> builder.persistent(Codec.BOOL).copyOnDeath());
 	/** Has this player been told whose city this is? */
 	public static final AttachmentType<Boolean> CREDITED = AttachmentRegistry.create(JaymosPowers.id("future_credited"),
 		builder -> builder.persistent(Codec.BOOL).copyOnDeath());
@@ -110,6 +117,7 @@ public final class Future {
 		ServerTickEvents.END_SERVER_TICK.register(FutureRuins::tick);
 		ServerTickEvents.END_SERVER_TICK.register(FutureFerals::tick);
 		ServerTickEvents.END_SERVER_TICK.register(Future::tickRift);
+		ServerTickEvents.END_SERVER_TICK.register(Future::echoes);
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> register(dispatcher));
 	}
 
@@ -123,6 +131,10 @@ public final class Future {
 		if (now < ready) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.future.recharging", (ready - now + 19) / 20)
 				.withStyle(ChatFormatting.GOLD));
+			return;
+		}
+		if (player.level().dimension() != FUTURE && !Boolean.TRUE.equals(player.getAttached(ECHO_SLAIN))) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.future.echo_first").withStyle(ChatFormatting.GOLD));
 			return;
 		}
 		if (player.level().dimension() == FUTURE) {
@@ -140,6 +152,29 @@ public final class Future {
 			goForward(going.get(i), i, going.size());
 		}
 		READY_AT.put(player.getUUID(), now + LEAP_COOLDOWN);
+	}
+
+	/** From {@code ChronoEchoes.collapse}: the player's echo died for good. */
+	public static void echoSlain(ServerPlayer player) {
+		if (!Boolean.TRUE.equals(player.getAttached(ECHO_SLAIN))) {
+			player.setAttached(ECHO_SLAIN, true);
+			if (com.jaymospowers.core.Powers.has(player, com.jaymospowers.power.chrono.ChronoPower.INSTANCE)) {
+				player.sendSystemMessage(Component.translatable("message.jaymospowers.future.unlocked").withStyle(ChatFormatting.GOLD));
+			}
+		}
+	}
+
+	/** Every few seconds: a Chrono in the future with no echo anywhere soon has one stalking them there, armed. */
+	static void echoes(MinecraftServer server) {
+		ServerLevel future = server.getLevel(FUTURE);
+		if (future == null || server.getTickCount() % ECHO_CHECK != 0) {
+			return;
+		}
+		for (ServerPlayer player : future.players()) {
+			if (com.jaymospowers.core.Powers.has(player, com.jaymospowers.power.chrono.ChronoPower.INSTANCE)) {
+				com.jaymospowers.power.chrono.ChronoEchoes.oweSoon(player, ECHO_DUE_MIN, ECHO_DUE_MAX);
+			}
+		}
 	}
 
 	/** Is the city in place? If not, start it coming and say how far along it is. */
