@@ -80,7 +80,7 @@ public final class ChronoPower implements Power {
 	/** Time Bloom mends you too: this much health every this many ticks while it runs (5 hearts over its 5 s). */
 	static final float BLOOM_HEAL = 1.0F;
 	static final int BLOOM_HEAL_EVERY = 10;
-	/** since 0.11.25 the mending reaches every living thing this close to you as well (friend or foe alike). */
+	/** Since 0.11.25 the mending reaches every living thing this close to you as well (friend or foe alike). */
 	static final double BLOOM_HEAL_RADIUS = 5.0;
 	/** Overclock makes you a speedster: Speed amplifier (4 = Speed V). */
 	static final int OVERCLOCK_SPEED_AMPLIFIER = 4;
