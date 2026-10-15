@@ -40,7 +40,7 @@ final class KeyConflicts {
 		Map.entry("key.shouldersurfing.free_look", new Move("key.keyboard.left.alt", "key.keyboard.right.alt")),
 		Map.entry("key.shouldersurfing.swap_shoulder", new Move("key.keyboard.u", "key.keyboard.o")));
 
-	/** Bump to set JEI's hover keys again. v1 (0.11.9): showRecipe had come unbound in Andy's profile. */
+	/** Bump to set JEI's hover keys again. v1 (0.11.11): showRecipe had come unbound in Andy's profile. */
 	private static final String JEI_MARKER = "jaymospowers-jei-keys-v1";
 
 	/** JEI key mapping name → its key, set once per install whatever it was. */
