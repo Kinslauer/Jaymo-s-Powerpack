@@ -1345,3 +1345,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   and guards at the sandbags when a war party comes (`kingdoms/MODLOG.md`).
 - **0.11.74 / Kingdoms 0.7.66:** night gifts for vampires and werewolves: dash, groundpound, leap, howl, kin-sense,
   bat wings, lifeleech, frenzy, wall run, dhampirs, wolfbloods, crypts and dens (`kingdoms/MODLOG.md`).
+- **0.11.75 / Kingdoms 0.7.67:** two-handed weapons (any Better Combat `two_handed` weapon) reach 25% further, their
+  swing box is 35% wider and taller and their arc 25% wider (`core/TwoHanded`, `compat/mixin/TwoHandedReachMixin` on
+  `getRangeForItem` for client and server, client `TwoHandedSweepMixin`); mobs get the same reach and arc.
