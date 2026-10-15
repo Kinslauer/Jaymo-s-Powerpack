@@ -1,6 +1,7 @@
 package com.jaymospowers.client.power.smoke;
 
 import com.jaymospowers.client.ScreenShake;
+import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.power.smoke.SmokeVapour;
 import com.jaymospowers.power.wind.WindFlight;
@@ -53,6 +54,8 @@ public final class SmokeFlightClient {
 
 	private static boolean flying;
 	private static boolean cruising;
+	/** Ascended (Cloudshaper): top speed in the rain. */
+	static final double CLOUD_RAIN_SPEED = 1.15;
 	/** Whether the server was last told this flier is wholly smoke. */
 	private static boolean wholeSent;
 	private static boolean formWas;
@@ -81,7 +84,12 @@ public final class SmokeFlightClient {
 	}
 
 	private static double top(LocalPlayer player) {
-		return Mastery.starterOnly(player) ? STARTER_TOP_SPEED : TOP_SPEED;
+		double top = Mastery.starterOnly(player) ? STARTER_TOP_SPEED : TOP_SPEED;
+		// a cloudshaper (ascended, not smog) flies faster in the rain
+		if (Fate.isAscended(player) && !Fate.isCorrupted(player) && player.level().isRainingAt(player.blockPosition().above())) {
+			top *= CLOUD_RAIN_SPEED;
+		}
+		return top;
 	}
 
 	/** Every client tick, from the power's own tick. */

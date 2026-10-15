@@ -121,6 +121,13 @@ public final class SmokeField {
 	private static final Map<Integer, Long> BANKED = new HashMap<>();
 	/** A banked cloud fades this many times slower. */
 	static final float BANK_SLOWER = 3.0F;
+	/** Smog (a corrupted Smoke user's smoke): until when (game time) each owner's (entity id) smoke counts as smog. */
+	private static final Map<Integer, Long> SMOG = new HashMap<>();
+	/** Smog clings: it fades this many times slower, and only this share of the rain's washing touches it. */
+	static final float SMOG_SLOWER = 2.0F;
+	static final float SMOG_RAIN = 0.3F;
+	/** Smog is always at least this sooty (dark yellow-brown on the client). */
+	static final float SMOG_SOOT = 0.8F;
 
 	private SmokeField() {
 	}
@@ -131,6 +138,8 @@ public final class SmokeField {
 			FIELDS.clear();
 			SENT.clear();
 			BANKED.clear();
+			SMOG.clear();
+			CLOUD.clear();
 		});
 	}
 
@@ -194,6 +203,56 @@ public final class SmokeField {
 
 	// ---------------------------------------------------------------- making smoke
 
+	/** Cloud (an ascended Smoke user's smoke): until when (game time) each owner's smoke shrugs off the rain. */
+	private static final Map<Integer, Long> CLOUD = new HashMap<>();
+
+	/** Marks {@code owner}'s smoke as cloud until game time {@code until} (refreshed every tick while they're ascended). */
+	static void markCloud(Entity owner, long until) {
+		CLOUD.put(owner.getId(), until);
+	}
+
+	/** Like {@link #puff}, but pure white cloud (soot 0) whatever the heat. */
+	static void puffCloud(ServerLevel level, Vec3 at, float amount, @org.jspecify.annotations.Nullable Entity owner) {
+		add(level, at, amount, owner, 0.0F);
+	}
+
+	/** Marks {@code owner}'s smoke as smog until game time {@code until} (refreshed every tick while they're corrupted). */
+	static void markSmog(Entity owner, long until) {
+		SMOG.put(owner.getId(), until);
+	}
+
+	/** Whether the smoke {@code owner} (an entity id) made is smog. */
+	static boolean smog(int owner) {
+		return owner != 0 && !SMOG.isEmpty() && SMOG.containsKey(owner);
+	}
+
+	/**
+	 * Hands {@code visit} the blocks within {@code radius} of {@code center} holding at least {@code least} of
+	 * {@code owner}'s smoke, until it returns false.
+	 */
+	static void forEachOwned(Level level, int owner, BlockPos center, int radius, float least, java.util.function.BiPredicate<BlockPos, Float> visit) {
+		Field field = FIELDS.get(level.dimension());
+		if (field == null) {
+			return;
+		}
+		for (Long2FloatMap.Entry entry : field.density.long2FloatEntrySet()) {
+			long key = entry.getLongKey();
+			if (entry.getFloatValue() < least || field.owner.get(key) != owner || Math.abs(BlockPos.getX(key) - center.getX()) > radius
+				|| Math.abs(BlockPos.getY(key) - center.getY()) > radius || Math.abs(BlockPos.getZ(key) - center.getZ()) > radius) {
+				continue;
+			}
+			if (!visit.test(BlockPos.of(key), entry.getFloatValue())) {
+				return;
+			}
+		}
+	}
+
+	/** How sooty the smoke in the block at {@code pos} is (0 pale grey to 1 black). */
+	static float soot(Level level, BlockPos pos) {
+		Field field = FIELDS.get(level.dimension());
+		return field == null ? 0.0F : field.soot.get(pos.asLong());
+	}
+
 	/** Banks {@code owner}'s smoke until game time {@code until}: it stays put (no wind) and fades {@link #BANK_SLOWER}x slower. */
 	static void bank(Entity owner, long until) {
 		BANKED.merge(owner.getId(), until, Math::max);
@@ -209,7 +268,16 @@ public final class SmokeField {
 		if (owner instanceof ServerPlayer player) {
 			amount *= SmokeHeat.boost(player);
 			soot = SmokeHeat.soot(player);
+			if (com.jaymospowers.core.Fate.isCorrupted(player)) {
+				soot = Math.max(soot, SMOG_SOOT);
+			} else if (SmokeCloudshaper.cloudy(player)) {
+				soot = 0.0F;
+			}
 		}
+		add(level, at, amount, owner, soot);
+	}
+
+	private static void add(ServerLevel level, Vec3 at, float amount, @org.jspecify.annotations.Nullable Entity owner, float soot) {
 		if (amount <= 0.0F) {
 			return;
 		}
@@ -406,6 +474,8 @@ public final class SmokeField {
 		float decayScale = field.crowded ? 3.0F : 1.0F;
 		long now = level.getGameTime();
 		BANKED.values().removeIf(until -> until < now);
+		SMOG.values().removeIf(until -> until < now);
+		CLOUD.values().removeIf(until -> until < now);
 
 		Long2FloatOpenHashMap from = field.density;
 		Long2FloatOpenHashMap next = new Long2FloatOpenHashMap(from.size() * 2);
@@ -431,8 +501,13 @@ public final class SmokeField {
 			int owner = field.owner.get(key);
 			// a banked cloud (mastered Smokescreen) fades slower and the wind leaves it be
 			boolean banked = owner != 0 && !BANKED.isEmpty() && BANKED.containsKey(owner);
-			float scaleHere = banked ? decayScale / BANK_SLOWER : decayScale;
-			float decay = DECAY + (open ? OPEN_DECAY + (level.isRainingAt(cursor) ? RAIN_DECAY : 0.0F) : 0.0F);
+			// smog clings: slower to fade, and the rain only thins it
+			boolean smog = smog(owner);
+			float scaleHere = (banked ? decayScale / BANK_SLOWER : decayScale) / (smog ? SMOG_SLOWER : 1.0F);
+			// a cloudshaper's cloud isn't washed out by the rain at all
+			boolean cloud = !smog && owner != 0 && !CLOUD.isEmpty() && CLOUD.containsKey(owner);
+			float rain = cloud ? 0.0F : RAIN_DECAY * (smog ? SMOG_RAIN : 1.0F);
+			float decay = DECAY + (open ? OPEN_DECAY + (level.isRainingAt(cursor) ? rain : 0.0F) : 0.0F);
 			float keep = d * (1.0F - FADE * scaleHere) - decay * scaleHere;
 			if (keep <= 0.0F) {
 				continue;
@@ -608,6 +683,7 @@ public final class SmokeField {
 			data[i++] = (byte)Mth.clamp(Math.round(field.density.get(key) / CAP * 255.0F), 1, 255);
 			int soot = Math.round(Mth.clamp(field.soot.get(key), 0.0F, 1.0F) * 127.0F);
 			data[i++] = (byte)(soot << 1 | (field.owner.get(key) == self ? SmokeNet.Field.YOURS : 0));
+			data[i++] = (byte)(smog(field.owner.get(key)) ? SmokeNet.Field.SMOG : 0);
 		}
 		SmokeNet.send(player, new SmokeNet.Field(origin.asLong(), data));
 	}

@@ -60,7 +60,7 @@ import org.jspecify.annotations.Nullable;
  * settles on (Curse of Binding), and it only settles on a brow the void has taken: anyone else is refused, and if the
  * void lets its wearer go, the crown slips off.
  *
- * <p>Struck by something (a creature or a projectile), its wearer steps aside the way an Enderman does: to a random safe
+ * <p>Endermen take its stare for one of their own (ArsenalEnderManMixin). Struck by something (a creature or a projectile), its wearer steps aside the way an Enderman does: to a random safe
  * spot within {@link #STEP_RANGE}. Jaymo's Kingdoms looks for it by id in the head slot (every faction then sees you at
  * your worst); nothing here knows about that.
  */

@@ -86,3 +86,49 @@ harness clouds, stop tornadoes building and weaken them), Ash Storm (both: kill 
   Stopping the cruise brings the body back.
 - **Bank** (mastered Smokescreen): while pouring and 20 s after, the user's smoke (by owner) ignores the wind and fades
   3x slower (`SmokeField.bank`).
+
+## Stage 2: Smog, the corruption (0.10.112)
+Nothing explained in game (`SmokeSmog`).
+- **Meter:** while pouring (Smokescreen, jet, or Vapour Form's trail) black smoke, meaning 3+ heat sources round you
+  (`SmokeHeat`) or your eye block in your own smoke at soot 0.7+, a point every 48 ticks (100 = about 4 min). A raging
+  fire (8+ fire blocks within 6) doubles it. Grey pouring eases a point every 200 ticks. At 50 a hard cough and
+  "Your throat burns...".
+- **Smog:** each tick a corrupted user's entity id is marked in `SmokeField.SMOG` (40-tick lease). Their smoke is at
+  least soot 0.8, fades 2x slower and takes 30% of the rain's washing; a 6th byte per synced cell (`SmokeNet.Field.SMOG`)
+  makes the client draw it yellow-brown. Every second, anyone but the maker with their eye block holding 1.0+ of the
+  maker's smoke gets Poison I + Hunger (3 s), at 2.0+ Poison II + Nausea; golems only Blindness; the undead shrug
+  poison off (vanilla). Every 2 s, up to 6 of up to 64 cells of 1.0+ within 48 blocks wither the block there or below:
+  grass/podzol/mycelium to dirt, leaves destroyed (no drop), crops/flowers/saplings/grass/ferns broken.
+- **Costs:** at Y 100+, under the open sky, out of smoke: +0.012 exhaustion a tick and a cough every 5 s. (Planned
+  no-natural-regen and MCA villager mood are not built.)
+- **Kit:** G pours smog (Smog Bank). V Choke Bomb: those it blinds also get Poison (5 s) and cough out 6 of smog.
+  B Black Lung: air drains 1.5x, the target breathes out 4 of smog every second. X Soot Jet: what it catches is blinded
+  2 s. Lang `.corrupted` variants name them.
+- **C Pyroclasm** (`SmokePyroclasm`, `ultimateWhenCorrupted`): hold up to 3 s, let go: a cloud rolls along the ground
+  at 0.4 b/t for 12-24 blocks (by charge), widening from 2 to 5, climbing up to 2 blocks (a taller wall stops it). Every
+  5 ticks things inside burn 5 s, take 2 fire damage and are blinded; it pours 4 smog a tick; 35% a tick it lights a
+  spot at its front. 40 s cooldown (`SmokeState.PYRO`).
+- **Cure** (`Fate.purify`, for good): 60 s at Y 200+ in the Overworld not pouring (Vapour trail allowed; whisper the
+  first time), 3 min standing in rain not pouring, or 3 Minecraft days (`smoke_smog_since`, saved).
+
+## Stage 3: Cloudshaper, the ascension (0.10.117 / Kingdoms 0.7.34)
+`SmokeCloudshaper`.
+- **How:** with everything mastered (`Fate.canAscend`), in Vapour Form at Y 150+ with `WindWeather.stormOverhead`
+  (a real thunderstorm with rain on you, vanilla or a Kingdoms cell) for 600 ticks in a row: `Fate.ascend`. Cloud
+  gathers into you with soft thunder every 2 s; nothing is explained. (The plan's Storm Seed item was dropped: you
+  ascend on the spot.)
+- **Passive:** ascended and not smog, your smoke is soot 0 (white) at Y 120+, in the rain or while sneaking
+  (`SmokeField.puff`); your smoke takes no rain washing (`SmokeField.CLOUD` lease). Falling through 1.5+ of your own
+  cloud gives Slow Falling (the plan's "stand on it" became sinking slowly through it). Vapour Form's top speed is
+  x1.15 in the rain (`SmokeFlightClient`).
+- **C, Harness the Sky** (corrupted wins C while both, until stage 4): a tap (under 10 ticks) calls a raincloud where
+  you aim (64 blocks): 30 s, radius 10, 9 blocks over the ground (lower under a roof); fires in it go out, burning
+  things stop burning, crops get extra random ticks; 30 s cooldown (`SmokeState.SKY`). Held, every second: a tornado
+  within 48 is unwound by a second (`SkyCalm.unwind`, no kill) and drags you toward it; otherwise the cell overhead is
+  calmed by a second (`SkyCalm.calm`). Without Kingdoms (or with no cell overhead) vanilla weather: 20 s turns thunder
+  to rain, 60 s in all clears the sky. 0.05 hunger a tick held; stops at 6 food.
+- **Kingdoms `disasters/SkyCalm`** (found by reflection): `calm` takes 60 ticks of life a second off the cell most over
+  you (30%+ cover; never below a quarter gathering from now); a supercell calmed 10 s is spent (never touches down) and
+  becomes a thunderstorm, 30 s in all a rain cell (`Storm.kind` no longer final, `calmed` server-only). `unwind` drops
+  the nearest tornado a rank every 5 s (`Tornado.size` no longer final) and cuts 25% off its remaining life; a dust
+  devil only dies with `kill` (stage 4's Ash Storm).
