@@ -53,6 +53,12 @@ public final class FutureGuns {
 	static final Kind FLINTLOCK_PISTOL = new Kind(18.0, 6.0F, 1, 3.0F, 60, 1, 0);
 	static final Kind BLUNDERBUSS = new Kind(10.0, 2.5F, 6, 9.0F, 90, 1, 0);
 
+	/**
+	 * The dead can barely aim: a zombie's stray is this many times the gun's own, plus this many degrees (echoes and
+	 * androids shoot straight).
+	 */
+	static final float ZOMBIE_STRAY_SCALE = 3.0F, ZOMBIE_STRAY_ADD = 4.0F;
+
 	/** A gun a mob may carry: its TaCZ id, how it shoots, its ammo and magazine (what it drops with). */
 	record Gun(String id, Kind kind, String ammo, int magazine) {
 	}
@@ -243,8 +249,9 @@ public final class FutureGuns {
 		Vec3 eye = mob.getEyePosition();
 		Vec3 aim = foe.getBoundingBox().getCenter().subtract(eye).normalize();
 		Vec3 muzzle = eye.add(aim.scale(0.9));
+		float spread = mob instanceof net.minecraft.world.entity.monster.zombie.Zombie ? kind.spread * ZOMBIE_STRAY_SCALE + ZOMBIE_STRAY_ADD : kind.spread;
 		for (int i = 0; i < kind.balls; i++) {
-			Vec3 dir = stray(aim, kind.spread, random);
+			Vec3 dir = stray(aim, spread, random);
 			Vec3 end = eye.add(dir.scale(kind.range));
 			HitResult wall = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mob));
 			if (wall.getType() != HitResult.Type.MISS) {

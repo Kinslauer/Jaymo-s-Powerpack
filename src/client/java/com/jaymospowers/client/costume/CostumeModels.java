@@ -18,6 +18,7 @@ import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.resources.Identifier;
 import org.joml.Quaternionf;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The costume's models, all worn over the player model ({@link Worn}): the body suit (one per cut, wide and slim arms),
@@ -34,8 +35,18 @@ final class CostumeModels {
 	static final float CAPE_GAP = 0.45F;
 	/** The cape's length in pixels, per kind (the vanilla cape is 16). */
 	static final int SHORT_CAPE = 11, LONG_CAPE = 20, TATTERED_CAPE = 19;
+	/** (0.11.78) Wind's gale cloak (its tails reach past the knees) and Darktide's tide cape. */
+	static final int GALE_CAPE = 22, TIDE_CAPE = 20;
 	/** The emblem patch on the chest: its size (pixels) and the gap in front of the suit's chest. */
 	static final float EMBLEM_SIZE = 6.0F, EMBLEM_TOP = 1.5F, EMBLEM_GAP = 0.05F;
+	/**
+	 * (0.11.78) The suit's bust over MCA's (VillagerEntityBaseModelMCA.newBreasts: a 6x3x3 box at 18,21, drawn in the
+	 * body's space scaled by the bust's size; CommonVillagerModel.renderCommon/applyVillagerDimensions).
+	 */
+	static final float BUST_X = -3.25F, BUST_Y = -1.25F, BUST_Z = -1.5F, BUST_W = 6.0F, BUST_H = 3.0F, BUST_D = 3.0F;
+	static final int BUST_U = 18, BUST_V = 21;
+	/** MCA's bust scale for a size {@code b}: (b * 0.2 + 1.05, b * 0.75 + 0.75, b * 0.75 + 0.75); and the size from its z. */
+	static final float BUST_SX = 0.2F, BUST_SX0 = 1.05F, BUST_SYZ = 0.75F, BUST_SYZ0 = 0.75F, BUST_Z0 = -1.5F, BUST_Z_PER = 0.25F;
 
 	private CostumeModels() {
 	}
@@ -49,18 +60,24 @@ final class CostumeModels {
 	static class Worn extends PlayerModel {
 		private final Supplier<PlayerModel> wearer;
 		private final ModelPart cape;
+		/** (0.11.78) The suit's bust (over MCA's) and the emblem's patch, when this model has them. */
+		private final @Nullable ModelPart bust, emblem;
 
 		Worn(ModelPart root, boolean slim, Supplier<PlayerModel> wearer) {
 			super(root, slim);
 			this.wearer = wearer;
 			this.cape = this.body.hasChild("cape") ? this.body.getChild("cape") : null;
+			this.bust = this.body.hasChild(CostumeBody.BUST) ? this.body.getChild(CostumeBody.BUST) : null;
+			this.emblem = this.body.hasChild("emblem") ? this.body.getChild("emblem") : null;
 			hideSkinLayers();
 		}
 
 		@Override
 		public void setupAnim(AvatarRenderState state) {
 			resetPose();
-			PlayerModel parent = this.wearer.get();
+			// (0.11.78) the model this player was drawn with (MCA swaps it per player), animated for them
+			PlayerModel kept = state.getData(CostumeBody.PARENT);
+			PlayerModel parent = kept != null ? kept : this.wearer.get();
 			parent.setupAnim(state);
 			ModelPart[] from = parts(parent);
 			ModelPart[] to = parts(this);
@@ -71,6 +88,24 @@ final class CostumeModels {
 				to[i].zScale = from[i].zScale;
 				to[i].visible = from[i].visible;
 			}
+			// (0.11.78) the body as Fresh Animations moved it, when it did (CostumeBody)
+			PartPose[] body = state.getData(CostumeBody.BODY);
+			if (body != null) {
+				for (int i = 0; i < to.length; i++) {
+					to[i].loadPose(body[i]);
+				}
+			}
+			// (0.11.78) MCA draws the head at the villager's head size (scaled from the model's origin)
+			float head = CostumeBody.headScale(parent);
+			if (head != 1.0F) {
+				this.head.x *= head;
+				this.head.y *= head;
+				this.head.z *= head;
+				this.head.xScale *= head;
+				this.head.yScale *= head;
+				this.head.zScale *= head;
+			}
+			bust(parent);
 			hideSkinLayers();
 			if (this.cape != null) {
 				// as the vanilla cape (PlayerCapeModel)
@@ -79,6 +114,47 @@ final class CostumeModels {
 					.rotateX((6.0F + state.capeLean / 2.0F + state.capeFlap) * (float)(Math.PI / 180.0))
 					.rotateZ(state.capeLean2 / 2.0F * (float)(Math.PI / 180.0))
 					.rotateY((180.0F - state.capeLean2 / 2.0F) * (float)(Math.PI / 180.0)));
+			}
+		}
+
+		/**
+		 * (0.11.78) Over MCA's bust: the same box in the same place. MCA draws it in the body's space scaled by
+		 * {@code S}, then at its own pose; S scales y and z alike, so it turns with the bust's x rotation and the same
+		 * is had as a child of the body at pose {@code S * pos}, scale {@code S}. The emblem moves out in front of it.
+		 */
+		private void bust(PlayerModel parent) {
+			if (this.bust == null && this.emblem == null) {
+				return;
+			}
+			ModelPart theirs = CostumeBody.bust(parent);
+			// the bust's size from where MCA put it (z = -1.5 + size / 4), times the villager's bust dimension
+			float b = theirs != null ? (theirs.z - BUST_Z0) / BUST_Z_PER * CostumeBody.bustScale(parent) : 0.0F;
+			boolean shown = theirs != null && theirs.visible && parent.body.visible && b > 0.01F;
+			if (this.bust != null) {
+				this.bust.visible = shown;
+			}
+			if (!shown) {
+				return;
+			}
+			float sx = b * BUST_SX + BUST_SX0, syz = b * BUST_SYZ + BUST_SYZ0;
+			if (this.bust != null) {
+				this.bust.setPos(theirs.x * sx, theirs.y * syz, theirs.z * syz);
+				this.bust.setRotation(theirs.xRot, theirs.yRot, theirs.zRot);
+				this.bust.xScale = sx;
+				this.bust.yScale = syz;
+				this.bust.zScale = syz;
+			}
+			if (this.emblem != null) {
+				// the bust's front-most point (its box, grown like the suit, turned by its x rotation)
+				float sin = (float)Math.sin(theirs.xRot), cos = (float)Math.cos(theirs.xRot);
+				float front = Float.MAX_VALUE;
+				for (float y : new float[] {BUST_Y - SUIT_GROW, BUST_Y + BUST_H + SUIT_GROW}) {
+					for (float z : new float[] {BUST_Z - SUIT_GROW, BUST_Z + BUST_D + SUIT_GROW}) {
+						front = Math.min(front, y * sin + z * cos);
+					}
+				}
+				front = syz * (theirs.z + front);
+				this.emblem.z = Math.min(0.0F, front + 2.0F + SUIT_GROW);
 			}
 		}
 
@@ -92,7 +168,7 @@ final class CostumeModels {
 			this.rightPants.visible = false;
 		}
 
-		private static ModelPart[] parts(PlayerModel model) {
+		static ModelPart[] parts(PlayerModel model) {
 			return new ModelPart[] {model.root(), model.head, model.body, model.rightArm, model.leftArm, model.rightLeg, model.leftLeg};
 		}
 	}
@@ -136,10 +212,10 @@ final class CostumeModels {
 		}
 	}
 
-	/** The body suit: the player's own boxes, grown a little; the armoured cut adds shoulder pads. */
+	/** The body suit: the player's own boxes, grown a little; the armoured cut (and Gravity's dense one) adds shoulder pads. */
 	static LayerDefinition suit(CostumeDesign.Cut cut, boolean slim) {
 		MeshDefinition mesh = PlayerModel.createMesh(new CubeDeformation(SUIT_GROW), slim);
-		if (cut == CostumeDesign.Cut.ARMOURED) {
+		if (cut == CostumeDesign.Cut.ARMOURED || cut == CostumeDesign.Cut.DENSE) {
 			PartDefinition root = mesh.getRoot();
 			// pads over the shoulders, textured from the (unused) hat region
 			root.getChild("right_arm").addOrReplaceChild("pad", CubeListBuilder.create().texOffs(32, 0)
@@ -147,6 +223,9 @@ final class CostumeModels {
 			root.getChild("left_arm").addOrReplaceChild("pad", CubeListBuilder.create().texOffs(32, 0).mirror()
 				.addBox(slim ? -2.0F : -1.5F, -2.8F, -2.5F, 5.0F, 3.0F, 5.0F, new CubeDeformation(SUIT_GROW)), PartPose.ZERO);
 		}
+		// (0.11.78) a bust over MCA's, shown and placed only when the body has one (Worn.bust); textured from the chest
+		mesh.getRoot().getChild("body").addOrReplaceChild(CostumeBody.BUST, CubeListBuilder.create().texOffs(BUST_U, BUST_V)
+			.addBox(BUST_X, BUST_Y, BUST_Z, BUST_W, BUST_H, BUST_D, new CubeDeformation(SUIT_GROW)), PartPose.ZERO);
 		return LayerDefinition.create(mesh, 64, 64);
 	}
 
@@ -162,7 +241,7 @@ final class CostumeModels {
 		MeshDefinition mesh = bones();
 		PartDefinition head = mesh.getRoot().getChild("head");
 		float grow = switch (mask) {
-			case HOOD -> HOOD_GROW;
+			case HOOD, ASH_VEIL -> HOOD_GROW;
 			case HELMET -> HELMET_GROW;
 			default -> MASK_GROW;
 		};
@@ -180,6 +259,8 @@ final class CostumeModels {
 		int length = switch (cape) {
 			case SHORT -> SHORT_CAPE;
 			case TATTERED -> TATTERED_CAPE;
+			case GALE -> GALE_CAPE;
+			case TIDE -> TIDE_CAPE;
 			default -> LONG_CAPE;
 		};
 		mesh.getRoot().getChild("body").addOrReplaceChild("cape",

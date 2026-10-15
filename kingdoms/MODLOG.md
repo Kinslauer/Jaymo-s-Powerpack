@@ -3165,3 +3165,22 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   exile the vigilantes they know: when a settlement of theirs learns who wears a costume, and whenever that player is
   on its land, its guards see them out of the city (`Retinue.exile`, 3 days, where the realm has a ruler of its own),
   and after 60 s still there they're taken by force (`Theft.arrest`, 2 minutes).
+
+## 0.7.69: tailors sell Costume Tables and sew costumes
+- Andy: "Village tailors (the ones who already change MCA clothes) sell the table and can make a costume for you for
+  emeralds" (`TailorCostumes`, with Jaymo's Powers 0.11.81). A tailor's MCA page has two more buttons under Change
+  Clothes (only on a tailor, only with Powers): **Sew a Costume** names a price and opens Powers' designer in its
+  paid mode by running `/costume tailor <player> <price> <tailor>` as the server (you design it; the emeralds are
+  taken when it's sewn, near the tailor, within 5 minutes); **Costume Table** sells `jaymospowers:costume_table`.
+  Priced like the outfits (`Tailors.price`): table from 10, costume from 8, plus the tailor's own rate, less for
+  friends, more for people they dislike, half for family.
+
+## 0.7.70: guards are downed, not killed
+- Andy: "guards, when killed dont drop as a corpse, instead they get downed, and either crawl or otherwise fall into a
+  downed animation, they can be disarmed but not looted" (`Downed`, with Jaymo's Powers 0.11.82). The blow that would
+  kill a realm's guard or archer (Folk, a villager in its service, or any villager in MCA's guard/archer job) downs
+  them instead (saved, synced `downed` attachment): half crawl face down away from whoever felled them, the rest lie
+  on their backs (client `DownedPose`). Their AI stops (`DownedMobMixin`), nothing counts them a foe and they drop
+  nothing (`DownedMixin`), and they can't be pickpocketed; right-click takes the weapons from their hands. They bleed
+  out after 2 minutes (`BLEED_OUT_TICKS`) or a player's hit finishes them; the real death (wars, quests, crimes)
+  happens then, with no corpse. Void and /kill kill outright, also without loot.

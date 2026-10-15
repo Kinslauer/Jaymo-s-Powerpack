@@ -146,6 +146,11 @@ public final class CostumeNet {
 			return;
 		}
 		CostumeDesign design = raw.sanitized();
+		if (!CostumeSets.allowed(player, design)) {
+			// (0.11.78) a power's set is only sewn by someone with that power
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.costume.not_your_set"));
+			return;
+		}
 		List<Need> cost = cost(design);
 		if (!player.isCreative()) {
 			for (Need need : cost) {

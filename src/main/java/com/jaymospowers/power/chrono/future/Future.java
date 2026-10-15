@@ -287,7 +287,7 @@ public final class Future {
 	/** The city's billboards and posters are maps; their ids are moved up past the world's own (see {@link LosPerrito}). */
 	private static void onEntityLoad(Entity entity, ServerLevel level) {
 		if (level.dimension() == FUTURE && unwanted(entity)) {
-			// only the dead walk the future: no spiders, husks, zombified villagers or camels
+			// only the dead walk the future: no spiders, zombified villagers, camels, or husks but the hordes' own
 			entity.discard();
 			return;
 		}
@@ -306,12 +306,13 @@ public final class Future {
 
 	/**
 	 * What never turns up in the future: spiders and cave spiders (any mod's spider too, Stormie's Spiders' kinds among
-	 * them), husks, zombified villagers, and camels (the husks' camels included).
+	 * them), husks other than the hordes' own ({@link FutureFerals}), zombified villagers, and camels (the husks' camels
+	 * included).
 	 */
 	static boolean unwanted(Entity entity) {
 		String path = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getPath();
 		return entity instanceof net.minecraft.world.entity.monster.spider.Spider || path.contains("spider")
-			|| entity instanceof net.minecraft.world.entity.monster.zombie.Husk
+			|| entity instanceof net.minecraft.world.entity.monster.zombie.Husk && !entity.entityTags().contains(FutureFerals.TAG)
 			|| entity instanceof net.minecraft.world.entity.monster.zombie.ZombieVillager
 			|| entity instanceof net.minecraft.world.entity.animal.camel.Camel || path.contains("camel");
 	}
