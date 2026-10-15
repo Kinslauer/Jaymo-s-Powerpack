@@ -1308,3 +1308,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.11.48, no portal corruption messages:** Nether Portal Spread still spreads the nether round lit portals, but its
   chat lines (the "corrupted energy" warning, the coal-block fade and portal-broken lines) are off: `core/PortalSpreadQuiet`
   sets its three `sendMessageOn...` options false whenever a server starts, whatever its config file says.
+- **0.11.49 / Kingdoms 0.7.55:** tailors (shepherds) change your clothes for a fee that varies by tailor and
+  friendship, in MCA's editor on its clothing page only (`kingdoms/MODLOG.md`).

@@ -3067,3 +3067,10 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
   above it, open at the top. Chimney-top campfires (open sky) only get the hearth. New chunks only. A pyre
   (`Undertakers.isPyre`) must now be under open sky with nothing that catches within 2 blocks, so no corpse is
   dropped into an indoor hearth again; builders' fire pits pass.
+- **0.7.55, tailors:** Andy: "a way to change clothes", then "only possible at a tailor villager, and for varying
+  price". A grown shepherd (the villager at the loom) is the tailor: MCA's interact page has a Change Clothes button on
+  them alone (`McaTailorButtonMixin`). They name their fee and MCA's character editor opens held to its clothing page
+  (`Tailors`, `WardrobeScreen`: MCA's own Needle and Thread screen without the needle). Body, hair, genes and the
+  destiny can't be reached from it; picking an outfit pays the fee in emeralds (bundles count), saves it and closes;
+  Escape changes nothing and costs nothing. The fee: 3-7 emeralds by tailor, one off per 25 hearts with them (up to 3),
+  one on per 25 below zero (up to 2), half for family, at least 1; free in creative (`Tailors` constants).
