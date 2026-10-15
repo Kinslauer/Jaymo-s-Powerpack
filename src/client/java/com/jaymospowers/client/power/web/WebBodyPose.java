@@ -290,6 +290,15 @@ public final class WebBodyPose {
 				set(h.leftLeg, 0.0F, 0.0F, -0.32F, Math.max(hunch * 0.5F, rear));
 				h.head.xRot = Mth.lerp(rear, h.head.xRot, -0.75F);
 			}
+			case WebPose.SPIKES -> {
+				// braced as it bristles: arms thrown out and down, legs apart, head back, then easing back
+				float brace = hold(pose.p(), 0.12F, 0.55F);
+				set(h.rightArm, -0.25F, 0.0F, 1.15F, brace);
+				set(h.leftArm, -0.25F, 0.0F, -1.15F, brace);
+				set(h.rightLeg, 0.0F, 0.0F, 0.3F, brace);
+				set(h.leftLeg, 0.0F, 0.0F, -0.3F, brace);
+				h.head.xRot = Mth.lerp(brace, h.head.xRot, -0.35F);
+			}
 			case WebPose.RAGDOLL -> {
 				float t = pose.time();
 				float give = 1.0F - pose.p() * 0.7F;

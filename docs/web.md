@@ -449,8 +449,9 @@ action bar, each heard once.
 - Losing the web power drops the bond.
 
 **While bonded:**
-- **Suit:** `WebSymbioteLayer` draws an original 64�64 texture over the whole player model: mottled black, dark purple
-  vein walks, and white angular eye-patches. It covers the skin's outer layers too.
+- **Suit (0.10.105):** `WebSymbioteLayer` draws an original 64x64 texture over the whole player model: the classic
+  black suit (flat matte black, faint blue-grey sheen, big angular white eyes with black borders, no emblem). Veins
+  (`web_symbiote_veins_*`) show only while feral (bond under `VEIN_BOND` 40), while bulking, and on the big body. It covers the skin's outer layers too.
   - Everyone sees it. It hides while invisible.
   - The little mask in the middle of the radial menu toggles it (`SUIT_TOGGLE`). With the suit off, every ability
     and enhancement still works, but you and your webs look normal.
@@ -474,7 +475,7 @@ action bar, each heard once.
 | 1 | Living Armor (toggle) | 40 | 0 | +`ARMOR_ABSORPTION` 16 max absorption (8 hearts), regrowing `ARMOR_REGEN` 1 every `ARMOR_REGEN_TICKS` 40, and +0.6 knockback resistance. Satiety drains �`ARMOR_DRAIN_MULT` 3. |
 | 2 | Wall Crawl (toggle) | 20 | 0 | Client movement (`WebSymbioteClient.tickCrawl`). Next to a wall in the air, tendrils latch on and drag you the way you're moving (0.8.6: see below); Sneak goes down. Under a ceiling, Jump sticks you to it, you move with the movement keys, and Sneak drops you. Climbing over a top edge hops you onto the ledge. The server allows floating while it's on and resets fall distance while you're touching a wall or ceiling. |
 | 3 | Consume | 160 | 0 | Nothing is eaten alive (0.8). A corpse you carry is eaten. Else a free corpse within `CONSUME_CORPSE_RANGE` 6 (the one you look at first) is grabbed by a tendril, carried, then eaten. Else a non-player creature at **current** health <= `CONSUME_MAX_HEALTH` 10 within `CONSUME_RANGE` 3 is finished off by a lash (`CONSUME_FINISH_LAG` 8 ticks), and its corpse grabbed, carried and eaten. Tamed, name-tagged, inedible and corpse-less creatures are never taken. A corpse heals 6-16 and feeds 30-80 by size. |
-| 4 | Spike Burst | 240 | 8 | Everything within `SPIKE_RADIUS` 5 takes `SPIKE_DAMAGE` 8 (player attack) and is thrown `SPIKE_KNOCKBACK` 1.3 outward and 0.45 up. Rays of black dust. |
+| 4 | Spike Burst | 240 | 8 | Everything within `SPIKE_RADIUS` 5 takes `SPIKE_DAMAGE` 8 (player attack) and is thrown `SPIKE_KNOCKBACK` 1.3 outward and 0.45 up. 38 rigid black spikes shoot out of the whole body (`WebSpikeLayer`, pose `WebPose.SPIKES`, `SPIKE_TICKS` 16); each victim flashes (`spikeHit`, no blood). The roar throws the same spikes. |
 | 5 | Shroud | 600 | 5 | Invisibility (no particles) until you damage anything, or `SHROUD_TICKS` 100 (5 s). |
 
 **Hunger:**
