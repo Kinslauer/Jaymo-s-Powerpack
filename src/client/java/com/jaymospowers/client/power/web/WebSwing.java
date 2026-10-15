@@ -266,6 +266,12 @@ public final class WebSwing {
 		return strands[WebNet.MAIN].attached && strands[WebNet.OFF].attached;
 	}
 
+	/**
+	 * The last tick both webs were on things small enough to reel in: double-tap Sneak is then the hard yank (see
+	 * {@code WebPower.REEL_YANK_*}), not Combat Roll's roll.
+	 */
+	public static int reelReadyTick = Integer.MIN_VALUE / 2;
+
 	/** Both webs stuck to things small enough to reel in (see {@link WebAnchors#reelable}). */
 	private boolean reelingIn(LocalPlayer player) {
 		for (Strand strand : strands) {
@@ -525,7 +531,11 @@ public final class WebSwing {
 			return;
 		}
 		Input input = player.input.keyPresses;
-		if (input.shift() && reelingIn(player)) {
+		boolean reelable = reelingIn(player);
+		if (reelable) {
+			reelReadyTick = player.tickCount;
+		}
+		if (input.shift() && reelable) {
 			// both webs on small things: Sneak reels them in (the server hauls them; no slingshot, no letting out)
 			swingJumpTicks = 0;
 			if (slinging) {
