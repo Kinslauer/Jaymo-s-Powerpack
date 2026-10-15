@@ -2,6 +2,7 @@ package com.jaymospowers.power.chrono.future;
 
 import com.jaymospowers.JaymosPowers;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
@@ -49,12 +50,13 @@ import net.minecraft.world.phys.Vec3;
  * you left.</li>
  * <li>There's no other way home: only a Chrono's leap back, or dying (you wake at your own spawn as usual). Anyone
  * who goes forward without a Chrono stays until they die.</li>
- * <li>The first leap on a server fetches the city ({@link LosPerrito}); until it's in place, the leap only says how far
- * along it is.</li>
+ * <li>The first leap on a server quietly fetches the city ({@link LosPerrito}); until it's in place, the leap does
+ * nothing ({@code /future status} shows how far along it is).</li>
  * <li>A Chrono in the future is stalked by up to {@link #ECHOES} of their echoes at once, each armed with a modern gun;
  * there they can be killed. Those close behind you when you leave come home with you. TaCZ's modern guns are only
  * found in the future (in no creative tab or JEI), but one you bring back is yours.</li>
  * </ul>
+ * It is always night there (the {@code jaymospowers:future_night} timeline). Arrival square: {@link FutureStart}.
  * Ruins: {@link FutureRuins}. The dead: {@link FutureFerals}. Guns: {@link FutureGuns}.
  */
 public final class Future {
@@ -185,22 +187,18 @@ public final class Future {
 		}
 	}
 
-	/** Is the city in place? If not, start it coming and say how far along it is. */
+	/** Is the city in place? If not, start it coming (quietly; {@code /future status} shows progress). */
 	static boolean ready(ServerPlayer player) {
 		switch (LosPerrito.stage()) {
 			case READY -> {
 				return player.level().getServer().getLevel(FUTURE) != null;
 			}
-			case IDLE, FAILED -> {
-				boolean retry = LosPerrito.stage() == LosPerrito.Stage.FAILED;
+			case IDLE -> LosPerrito.begin(player.level().getServer());
+			case FAILED -> {
 				LosPerrito.begin(player.level().getServer());
-				player.sendSystemMessage(Component.translatable(retry ? "message.jaymospowers.future.retrying" : "message.jaymospowers.future.fetching")
-					.withStyle(ChatFormatting.GOLD));
+				player.sendSystemMessage(Component.translatable("message.jaymospowers.future.retrying").withStyle(ChatFormatting.GOLD));
 			}
-			case DOWNLOADING -> player.sendOverlayMessage(Component.translatable("message.jaymospowers.future.downloading", LosPerrito.percent())
-				.withStyle(ChatFormatting.GOLD));
-			case UNPACKING -> player.sendOverlayMessage(Component.translatable("message.jaymospowers.future.unpacking", LosPerrito.percent())
-				.withStyle(ChatFormatting.GOLD));
+			case DOWNLOADING, UNPACKING -> { }
 		}
 		return false;
 	}
@@ -227,6 +225,9 @@ public final class Future {
 			player.stopRiding();
 		}
 		player.setAttached(RETURN, new Return(from.dimension(), player.position(), player.getYRot(), player.getXRot()));
+		if (future.players().isEmpty()) {
+			FutureStart.restore(future);
+		}
 		burst(from, player.position());
 		double angle = of <= 1 ? 0.0 : Math.PI * 2.0 * index / of;
 		double radius = of <= 1 ? 0.0 : 1.5;
@@ -298,7 +299,8 @@ public final class Future {
 
 	/**
 	 * {@code /future go} (you and those near you, Chrono or not), {@code /future back}, {@code /future fetch} (start
-	 * fetching the city now; works from the console), {@code /future status} (gamemasters only).
+	 * fetching the city now; works from the console), {@code /future status}, {@code /future start save [radius]} and
+	 * {@code /future start clear} ({@link FutureStart}) (gamemasters only).
 	 */
 	static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("future")
@@ -328,11 +330,44 @@ public final class Future {
 				c.getSource().sendSuccess(() -> Component.literal("Los Perrito: " + LosPerrito.stage()), false);
 				return 1;
 			}))
+			.then(Commands.literal("start")
+				.then(Commands.literal("save")
+					.executes(c -> saveStart(c.getSource(), FutureStart.RADIUS))
+					.then(Commands.argument("radius", IntegerArgumentType.integer(FutureStart.MIN_RADIUS, FutureStart.MAX_RADIUS))
+						.executes(c -> saveStart(c.getSource(), IntegerArgumentType.getInteger(c, "radius")))))
+				.then(Commands.literal("clear").executes(c -> {
+					ServerLevel future = c.getSource().getServer().getLevel(FUTURE);
+					try {
+						boolean had = future != null && FutureStart.clear(future);
+						c.getSource().sendSuccess(() -> Component.literal(had ? "Forgot the saved arrival square." : "No arrival square was saved."), true);
+						return had ? 1 : 0;
+					} catch (java.io.IOException e) {
+						c.getSource().sendFailure(Component.literal("Couldn't delete it: " + e.getMessage()));
+						return 0;
+					}
+				})))
 			.then(Commands.literal("status").executes(c -> {
 				String failure = LosPerrito.failure();
 				c.getSource().sendSuccess(() -> Component.literal("Los Perrito: " + LosPerrito.stage() + " " + LosPerrito.percent() + "%"
 					+ (failure.isEmpty() ? "" : " (" + failure + ")") + ", map offset " + LosPerrito.mapOffset()), false);
 				return 1;
 			})));
+	}
+
+	private static int saveStart(CommandSourceStack source, int radius) {
+		ServerLevel future = source.getServer().getLevel(FUTURE);
+		if (future == null || LosPerrito.stage() != LosPerrito.Stage.READY) {
+			source.sendFailure(Component.literal("The future isn't in place yet."));
+			return 0;
+		}
+		try {
+			int blocks = FutureStart.save(future, radius);
+			source.sendSuccess(() -> Component.literal("Saved the arrival square (" + (radius * 2 + 1) + " blocks across, " + blocks
+				+ " blocks). It's put back like this whenever someone leaps into an empty future."), true);
+			return 1;
+		} catch (java.io.IOException e) {
+			source.sendFailure(Component.literal("Couldn't save it: " + e.getMessage()));
+			return 0;
+		}
 	}
 }
