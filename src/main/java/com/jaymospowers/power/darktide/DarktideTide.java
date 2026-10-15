@@ -3,6 +3,7 @@ package com.jaymospowers.power.darktide;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.power.arsenal.Summoned;
 import com.jaymospowers.power.web.KitchenCompat;
+import com.jaymospowers.power.zfighter.ZFighterKi;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -69,6 +70,8 @@ final class DarktideTide {
 	static final double DROWN_REACH = 24.0, DROWN_RADIUS = 6.0;
 	static final int DROWN_TICKS = 80, DROWN_COOLDOWN = 900, DROWN_EVERY = 10;
 	static final float DROWN_DAMAGE = 1.0F;
+	/** The water ball is an end crystal orb this colour, swelling to full size over this many ticks. */
+	static final int DROWN_COLOR = 0x1E5AB4, DROWN_SWELL = 8;
 
 	/** Jaymo's Kitchen leaves no corpse for an entity carrying this tag. */
 	static final String NO_CORPSE_TAG = "jaymoskitchen.no_corpse";
@@ -620,9 +623,13 @@ final class DarktideTide {
 					DROWN_RADIUS * 0.5, 0.3);
 				continue;
 			}
+			// a ball of dark water, drawn as a slow, wobbling end crystal orb (ZFighterOrbs), the cube just covering the sphere
+			float swell = Math.min(1.0F, (now - (zone.until - DROWN_TICKS) + 1) / (float)DROWN_SWELL);
+			ZFighterKi.waterOrb(level, -(zone.owner.getId() * 4 + 3), zone.center, DROWN_RADIUS * 2.0 * (1.0 - (1.0 - swell) * (1.0 - swell)),
+				DROWN_COLOR);
 			var random = level.getRandom();
-			for (int i = 0; i < 14; i++) {
-				// a ball of dark water: bubbles through it, a shimmering skin
+			for (int i = 0; i < 8; i++) {
+				// bubbles through it, a shimmering skin
 				Vec3 dir = new Vec3(random.nextGaussian(), random.nextGaussian(), random.nextGaussian()).normalize();
 				Vec3 skin = zone.center.add(dir.scale(DROWN_RADIUS));
 				level.sendParticles(ParticleTypes.FALLING_WATER, skin.x, skin.y, skin.z, 1, 0.0, 0.0, 0.0, 0.0);
