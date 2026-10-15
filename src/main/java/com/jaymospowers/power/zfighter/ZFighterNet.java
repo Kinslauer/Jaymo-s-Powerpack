@@ -152,6 +152,8 @@ public final class ZFighterNet {
 
 	/** One ki orb this tick: who it is (to follow it between ticks), where, how big across (blocks) and its colour. */
 	public record Orb(int id, double x, double y, double z, float size, int color) {
+		/** Set above the RGB in {@code color}: a ball of water, not ki. */
+		public static final int WATER = 0x01000000;
 	}
 
 	/** Server → client, every tick: the ki orbs near you (blasts in flight, ki gathering in the hands), drawn as end crystals. */
