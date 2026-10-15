@@ -93,6 +93,8 @@ public final class ZFighterPower implements Power {
 	/** At or below this food level he's hungry: no ki comes back by itself and his fists weaken. */
 	static final int HUNGRY_FOOD = 6;
 	static final double HUNGRY_WEAKNESS = 0.3;
+	/** Kitchen's hearty meals: stomach slots he has on top of everyone's three (he eats like three men). */
+	static final int EXTRA_STOMACH = 2;
 
 	// ---- fists (added to the player's attack damage) ----
 	static final double FIST_DAMAGE = 3.0;
@@ -264,6 +266,7 @@ public final class ZFighterPower implements Power {
 	/** Called once from {@link JaymosPowers#onInitialize()}. */
 	public static void init() {
 		Powers.register(INSTANCE);
+		com.jaymospowers.power.web.KitchenCompat.extraStomachSlots(player -> Powers.has(player, INSTANCE) ? EXTRA_STOMACH : 0);
 		ZFighterKi.init();
 		ZFighterItems.init();
 		ZFighterSparring.init();

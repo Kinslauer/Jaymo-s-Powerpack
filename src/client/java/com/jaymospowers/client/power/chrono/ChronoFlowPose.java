@@ -102,6 +102,30 @@ public final class ChronoFlowPose {
 				h.body.xRot = 0.3F * e;
 				h.body.yRot = side * -0.4F * e;
 			}
+			case ChronoFlow.SPIN -> {
+				// (0.11.40) the Space counter: a spinning kick, the leg swung out level, arms flung wide for the turn
+				float out = seg(p, 0.0F, 0.25F) * (1.0F - seg(p, 0.75F, 1.0F));
+				set(h.rightLeg, -0.2F, 0.0F, 1.35F, out);
+				set(h.leftLeg, 0.15F, 0.0F, -0.1F, out);
+				set(h.rightArm, -0.2F, 0.0F, 1.4F, out);
+				set(h.leftArm, -0.2F, 0.0F, -1.4F, out);
+				h.body.zRot = -0.3F * out;
+				h.head.zRot = 0.2F * out;
+			}
+			case ChronoFlow.PUSH -> {
+				// (0.11.40) the time stop: both palms drawn in to the chest, then driven straight out, braced
+				float hit = ChronoFlow.HIT_AT[ChronoFlow.PUSH] / (float)ChronoFlow.DURATION[ChronoFlow.PUSH];
+				float draw = seg(p, 0.0F, hit * 0.6F) * (1.0F - seg(p, hit * 0.6F, hit));
+				float push = seg(p, hit * 0.6F, hit) * (1.0F - seg(p, 0.8F, 1.0F));
+				set(h.rightArm, -0.9F, 0.5F, -0.3F, draw);
+				set(h.leftArm, -0.9F, -0.5F, 0.3F, draw);
+				h.body.xRot = -0.1F * draw;
+				set(h.rightArm, -Mth.HALF_PI - 0.05F, -0.12F, 0.0F, push);
+				set(h.leftArm, -Mth.HALF_PI - 0.05F, 0.12F, 0.0F, push);
+				set(h.leftLeg, -0.45F, 0.0F, 0.0F, push);
+				set(h.rightLeg, 0.4F, 0.0F, 0.0F, push);
+				h.body.xRot = Mth.lerp(push, h.body.xRot, 0.2F);
+			}
 			case ChronoFlow.KICK -> {
 				// the kicking leg straight out ahead, the body thrown back, arms flung out
 				set(h.rightLeg, -Mth.HALF_PI - 0.2F, 0.0F, 0.0F, e);
@@ -129,6 +153,17 @@ public final class ChronoFlowPose {
 			default -> {
 			}
 		}
+	}
+
+	/** The whole body turned: the Space counter's spinning kick goes once round (fast into the kick, easing out). */
+	public static void rotate(net.minecraft.client.renderer.entity.state.LivingEntityRenderState state, com.mojang.blaze3d.vertex.PoseStack poseStack) {
+		Pose pose = state.getData(KEY);
+		if (pose == null || pose.move().style() != ChronoFlow.SPIN) {
+			return;
+		}
+		float t = 1.0F - pose.p();
+		float turn = 1.0F - t * t * t;
+		poseStack.rotateDegrees(com.mojang.math.Axis.YP, -360.0F * turn);
 	}
 
 	/** A counter against one attacker: the evasion or the parry, then the answering blow when it lands. */
