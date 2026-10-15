@@ -47,8 +47,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Each power's own way in: things a powerless survival player can do to call one power to them. A calling decides which
- * power awakens (over affinity and fate) and cuts the wait, by a day or all of it:
+ * Each power's own way in: things a powerless survival player can do to call one power to them. The first calling
+ * claims that power for certain (over affinity and fate; a later calling for another power can't take it away) and
+ * cuts the wait, by a day or all of it:
  * <ul>
  * <li>Wind: kill a Breeze. Awakens at once.</li>
  * <li>Gravity: land a fall of {@link #GRAVITY_FALL}+ blocks and live. A day off.</li>
@@ -122,6 +123,11 @@ public final class Callings {
 	public static void call(ServerPlayer player, String powerName, int ticks) {
 		Power power = Powers.byName(powerName);
 		if (power == null || Powers.of(player) != null || player.isCreative() || player.isSpectator() || !player.isAlive()) {
+			return;
+		}
+		// the first power to call them is theirs for certain; another power's calling changes nothing after that
+		Power claimed = power(player);
+		if (claimed != null && claimed != power) {
 			return;
 		}
 		player.setAttached(CALLING, power.id());
