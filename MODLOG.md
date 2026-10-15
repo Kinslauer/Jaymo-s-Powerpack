@@ -1292,3 +1292,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   new one takes the old one off, so the count stayed the same and a fading web line was left behind as well. Now a new
   tie point is what counts (`WebSpentLines.hitchAnchors`), given up to 10 ticks (`LEAD_WAIT`, was 4) to arrive. The
   line falls and fades only when the tie breaks or runs out (or the old one is taken off for the new).
+- **0.11.34, slingshot lines pull tight:** while a slingshot is drawn, both lines tighten slowly from their slack to
+  stretched taut at a full draw (`WebSwing.SLING_STRETCH` 0.6 blocks past taut, so they thin and hum), for everyone:
+  the drawn length is sent like any rope change. How they look only; the swing's rope is unchanged.

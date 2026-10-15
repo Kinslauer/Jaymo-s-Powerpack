@@ -112,6 +112,8 @@ public final class WebSwing {
 	static final int SLING_LOCKOUT = 12;
 	/** The least draw that fires (a tap of Jump just reels in). */
 	static final float SLING_MIN_DRAW = 0.12F;
+	/** (0.11.34) How far past taut (blocks) both lines are drawn at a full draw: they tighten slowly as it builds. */
+	static final double SLING_STRETCH = 0.6;
 	// ===== web wings (hold Jump in mid-air) =========================================================================
 	/** Ticks Jump must be held in mid-air (while falling) before the wings spread. */
 	static final int WINGS_HOLD_TICKS = 6;
@@ -752,6 +754,14 @@ public final class WebSwing {
 			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebStrain.Strain(0.0F, back));
 		}
 		player.setDeltaMovement(v);
+		// both lines pulling tight: everyone else sees them tighten too
+		for (Strand strand : strands) {
+			double shown = shownRope(strand, strand.anchor.distanceTo(player.position().add(0.0, ROPE_HEIGHT, 0.0)));
+			if (strand.attached && Math.abs(shown - strand.sentRope) > ROPE_SYNC_CHANGE && player.tickCount % 2 == 0) {
+				strand.sentRope = shown;
+				ClientPlayNetworking.send(new WebNet.Rope(strand.hand, (float)shown));
+			}
+		}
 		if (slingDraw > 0.0F && player.tickCount % 3 == 0) {
 			// tension shivers along the webs
 			Vec3 at = player.position().add(0.0, 1.0, 0.0);
@@ -1197,7 +1207,16 @@ public final class WebSwing {
 		if (!strand.attached || strand.travel > 0 || player == null) {
 			return 0.0;
 		}
-		return strand.rope - strand.anchor.distanceTo(player.position().add(0.0, ROPE_HEIGHT, 0.0));
+		double distance = strand.anchor.distanceTo(player.position().add(0.0, ROPE_HEIGHT, 0.0));
+		return shownRope(strand, distance) - distance;
+	}
+
+	/**
+	 * (0.11.34) The line's length as it's drawn: its rope, but while a slingshot is drawn both lines pull in from their
+	 * slack to {@link #SLING_STRETCH} past taut at a full draw. Only how they look (and what everyone else is sent).
+	 */
+	private double shownRope(Strand strand, double distance) {
+		return slinging ? Mth.lerp(slingDraw, strand.rope, distance - SLING_STRETCH) : strand.rope;
 	}
 
 	/** Where the local player's own web from {@code hand} currently ends, or null. Zips and yanks come from the main hand. */
