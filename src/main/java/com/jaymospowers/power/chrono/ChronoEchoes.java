@@ -128,6 +128,20 @@ public final class ChronoEchoes {
 		memory.echoesDue.add(between(player.getRandom(), ECHO_DELAY_MIN, ECHO_DELAY_MAX));
 	}
 
+	/** How many of the player's echoes are about in {@code level} now. */
+	public static int loadedIn(ServerPlayer player, ServerLevel level) {
+		return level.getEntities(ECHO, e -> e.isAlive() && e.isEchoOf(player)).size();
+	}
+
+	/**
+	 * (0.10.111) One more of the player's echoes, near them now: in the future the one-per-Chrono rule doesn't hold (up
+	 * to {@code Future.ECHOES} stalk you at once), and those close behind you when you leave follow you home like any
+	 * echo. Returns whether it came.
+	 */
+	public static boolean spawnFutureEcho(ServerPlayer player) {
+		return spawn(player, ChronoMemory.of(player)) != null;
+	}
+
 	/** Whether the player's one echo exists: owed, on its way back, blinked out of a Nether fight, or loaded somewhere. */
 	static boolean hasEcho(ServerPlayer player, ChronoMemory memory) {
 		return !memory.echoesDue.isEmpty() || !memory.returnsDue.isEmpty() || player.getAttached(NETHER_RETURN) != null
@@ -376,6 +390,8 @@ public final class ChronoEchoes {
 		UUID owner = echo.owner();
 		ServerPlayer player = owner == null ? null : level.getServer().getPlayerList().getPlayer(owner);
 		if (player != null) {
+			// (0.10.111) your echo ended for good: the way to the future opens for you
+			com.jaymospowers.power.chrono.future.Future.echoSlain(player);
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.chrono_echo_collapsed")
 				.withStyle(ChatFormatting.AQUA, ChatFormatting.ITALIC));
 			if (level.dimension() == net.minecraft.world.level.Level.NETHER && com.jaymospowers.core.Powers.has(player, ChronoPower.INSTANCE)

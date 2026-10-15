@@ -7,7 +7,7 @@
 	"power.jaymospowers.chrono.key.ability_2.name": "Stasis Field",
 	"power.jaymospowers.chrono.key.ability_3": "Overclock: a speedster for 6 s (Speed V, faster blows), everyone near you slowed hard. Sprint to go far faster, run up walls and across water; V again at a wall to phase through it",
 	"power.jaymospowers.chrono.key.ability_3.name": "Overclock",
-	"power.jaymospowers.chrono.key.ability_4": "Time Bloom (grow and cook fast, and mend your wounds)",
+	"power.jaymospowers.chrono.key.ability_4": "Time Bloom (grow and cook fast, and mend your wounds). Sneak+B, once you've killed your echo for good: Fast Forward, a leap to the ruined future (and back) with everyone near you",
 	"power.jaymospowers.chrono.key.ability_4.name": "Time Bloom",
 	"power.jaymospowers.chrono.ascended": "Timeless",
 	"power.jaymospowers.chrono.key.ultimate": "Chrono Punch: ten punches in half a second into everything in front of you",
@@ -34,5 +34,17 @@
 	"power.jaymospowers.chrono.key.mode.ascended_corrupted": "Time Flow on/off (over-the-shoulder view): attack toward a foe to fly at it; right click to counter held blows, even mid-move",
 	"power.jaymospowers.chrono.key.mode.ascended_corrupted.name": "Time Flow",
 	"power.jaymospowers.chrono.key.ultimate.ascended_corrupted": "Chrono Punch (in Time Flow: lock onto a foe for a barrage, only a counter breaks it; the last punch throws everything in front away)",
-	"power.jaymospowers.chrono.key.ultimate.ascended_corrupted.name": "Chrono Punch"
+	"power.jaymospowers.chrono.key.ultimate.ascended_corrupted.name": "Chrono Punch",
+	"message.jaymospowers.future.recharging": "The future won't open again for %s s.",
+	"message.jaymospowers.future.fetching": "The future is still forming: fetching Los Perrito City from CurseForge (about 760 MB, once per server). Try again in a few minutes.",
+	"message.jaymospowers.future.retrying": "The future slipped away last time. Fetching Los Perrito City again...",
+	"message.jaymospowers.future.downloading": "The future is forming... %s%% fetched",
+	"message.jaymospowers.future.unpacking": "The future is forming... %s%% built",
+	"message.jaymospowers.future.arrived": "A lifetime from now. The dead walk, and only a Chrono's leap or death takes you home.",
+	"message.jaymospowers.future.returned": "Back in your own time.",
+	"message.jaymospowers.future.credit": "This future is built from Los Perrito City by Uospag (curseforge.com/minecraft/worlds/los-perrito, CC BY 4.0), ruined by Jaymo's Powers. Click to visit the map's page.",
+	"biome.jaymospowers.future_ruins": "Ruins of Los Perrito",
+	"dimension.jaymospowers.future": "The Future",
+	"message.jaymospowers.future.echo_first": "The future won't open while your echo still walks. End it for good first.",
+	"message.jaymospowers.future.unlocked": "Your echo is gone for good, and time lies open ahead of you. Sneak+B to fast forward."
 }

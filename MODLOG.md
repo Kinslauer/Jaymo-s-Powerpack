@@ -1169,3 +1169,40 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   `WindPose`, so `PoseTakeover.posed` keeps EMF/Fresh Animations off it).
   Ship's Plans (Andy: "can we make our own ship kits?"): sneak-use them on the helm of a ship you built to draw her,
   then use them on open water to lay her again (frames in survival, built exactly in creative); kept after use.
+- **0.10.111, the future** (Andy: "what if we made a new dimension, that was just this map, with feral zombies like the
+  ones we made for corpses? I want to simulate going to the future in an apocalypse."): Chronokinesis sneak+B, **Fast
+  Forward**, leaps you and every player within 4 blocks to `jaymospowers:future`, a lifetime from now: **Los Perrito
+  City by Uospag** (https://www.curseforge.com/minecraft/worlds/los-perrito, CC BY 4.0; credited in chat on each
+  player's first arrival), ruined. Sneak+B there (1 min recharge) brings you back to where you left, and a golden Time
+  Rift beside the arrival point takes anyone home, so friends without Chrono are never stranded. The map is 764 MB, so
+  it isn't in the jar: the first leap on a server fetches it from CurseForge (or uses `LosPerrito2.0.1.zip` dropped in
+  the server or world folder), unpacks its region/entity/POI files into the dimension's folder and moves its 5,800 map
+  arts above every map id the world has used (the city's item frames are pointed at them as they load); the leap shows
+  progress until it's ready. Its chunks are 1.19.2 saves the game upgrades as they first load. Each city chunk decays
+  the first time it loads (`FutureRuins`): windows smashed out, lights dead, lawns gone to dirt, dead bushes, moss on
+  the roads, vines down the walls, cobwebs under roofs, and an ashen biome (`future_ruins`: grey sky, dead grass, murky
+  water) around an empty sea like the map's own. Feral hordes (`FutureFerals`): packs of zombies, husks and zombie
+  villagers, 10 per player by day and 20 by night, 35% faster, tracking from 48 blocks, drawn to anyone running within
+  40 or walking within 16 (sneak to slip by); nothing burns in the future's sun (`FutureSunMixin`). They're vanilla
+  zombies, so Kitchen's scavenging and rising corpses work on them as on any other. `/future go|back|fetch|status` for
+  gamemasters. Andy, after: "you can only access the sneak + B after killing your echo. inside the dimension echos will
+  spawn with actual guns from Tacz, and the city will be further populated with randomly skinned corpse zombies and
+  randomly skinned zombies with tacz guns": Fast Forward opens only once your echo has died for good (killed in the
+  Nether, or in the future); until then sneak+B says so. A Chrono in the future with no echo has one turn up 30-90 s
+  later, carrying one of our TaCZ flintlocks (the pack has no modern guns), and there it can be killed. 45% of each
+  horde are Kitchen's corpse zombies (zombie players) wearing random default skins, and 30% of those carry a flintlock.
+  Gunners fire traced shots with smoke, flash and bang (musket 9 dmg to 32 blocks, pistol 6 to 18, blunderbuss 6x2.5 to
+  10; reloads 3-5 s; no ammo), and drop the gun 10% of the time (echoes never) (`FutureGuns`, `FutureKitchen`).
+  Andy, then: "yes i only want the modern guns in the future, but dont load them anywhere but that dimension. not even
+  in jei or creative. also spawn up to 4 echos at the same time in the future": TaCZ's default (modern) gunpack loads
+  again, exported by us without its gun smith table index (ours stays the Gunsmith's Bench), its recipes and its
+  bonus-chest pistol (`TaczGuns.trimDefaultPack`). Future gunners carry its guns now (51 of them; RPG, M320 and minigun
+  left out): pistols in pairs, SMGs in bursts of 6, rifles 3, machine guns 10, shotguns 8 pellets, snipers 12 dmg to
+  64 blocks, with TaCZ's own report for each gun; a dropped gun comes loaded and gunners leave rounds 35% of the time.
+  Modern guns, ammo and attachments are in no creative tab and so not in JEI (`TaczGuns.hideModern`); the resources
+  load everywhere (Minecraft can't load a pack for one dimension). Up to 4 of a Chrono's echoes stalk them in the
+  future at once, a new one 30-90 s after there's room. Andy, last: "they should stay available if you manage to get
+  them out of the future, that gives you a reason to go" and "They CAN follow you home, make sure you arent followed.
+  There is no longer a portal so the only way out is death or with a chrono": guns you bring back are yours; echoes
+  within 24 blocks when you leave follow you home with their guns and keep firing (a relearn no longer swaps a
+  gunner's gun out); the Time Rift is gone, so the way home is a Chrono's sneak+B or dying. `docs/chrono.md`.

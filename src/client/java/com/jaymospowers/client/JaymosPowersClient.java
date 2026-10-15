@@ -80,7 +80,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		EmfCompat.init();
 		com.jaymospowers.client.armory.TaczFirstPerson.init();
 		// after every mod's main entrypoint (TaCZ adds its modern pack there), before resources load
-		com.jaymospowers.armory.TaczGuns.dropDefaultPack();
+		com.jaymospowers.armory.TaczGuns.trimDefaultPack();
 		CrawlTaps.init();
 		MeditateClient.init();
 		HiddenArmorClient.init();
