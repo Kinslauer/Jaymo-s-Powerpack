@@ -29,7 +29,7 @@ final class SmokeJetClient {
 	private static final String KEY_NAME = "key.jaymospowers.web_symbiote";
 	/** How fast its smoke leaves the hands (blocks/tick) and how much it wanders; how many a tick. */
 	private static final double SPEED = 0.7, WANDER = 0.05;
-	private static final int PUFFS = 7;
+	private static final int PUFFS = 14;
 	/** How far ahead of the eyes it starts (blocks); your own in first person. */
 	private static final double OUT = 0.9, OWN_OUT = 1.6;
 

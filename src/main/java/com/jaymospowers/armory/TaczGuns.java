@@ -11,6 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -133,9 +134,47 @@ public final class TaczGuns {
 			return;
 		}
 		CreativeModeTabEvents.MODIFY_OUTPUT_ALL.register((tab, output) -> {
+			if (ZERO_TAB.equals(BuiltInRegistries.CREATIVE_MODE_TAB.getKey(tab))) {
+				// an empty category tab isn't shown at all
+				output.getDisplayStacks().clear();
+				output.getSearchTabStacks().clear();
+				return;
+			}
 			output.getDisplayStacks().removeIf(TaczGuns::isModern);
 			output.getSearchTabStacks().removeIf(TaczGuns::isModern);
 		});
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
+			Item bench = BuiltInRegistries.ITEM.getValue(GUN_SMITH_TABLE);
+			if (bench != Items.AIR) {
+				output.accept(bench);
+			}
+		});
+	}
+
+	/**
+	 * (0.11.9) Andy: TaCZ's "Timeless & Classics Guns: Zero" tab goes (its benches, targets, statue and ammo boxes are
+	 * uncraftable and modern anyway, {@code tinkering/Uncraftable}); the one thing in it we use, the gun smith table (our
+	 * Gunsmith's Bench), moves to Functional Blocks.
+	 */
+	static final Identifier ZERO_TAB = Identifier.fromNamespaceAndPath("tacz", "other");
+	static final Identifier GUN_SMITH_TABLE = Identifier.fromNamespaceAndPath("tacz", "gun_smith_table");
+
+	/**
+	 * (0.11.9) Andy: TaCZ's tabs showed modern guns (a 7.62x39 round, a Glock, an AK, a shotgun) as their icons; ours show
+	 * what's in them instead. TaCZ's tab id (tacz:ammo, tacz:pistol, ...) to our icon; tabs left out are empty, so hidden.
+	 * Read by the client's {@code CreativeModeTab.getIconItem} mixin, made once per tab.
+	 */
+	public static ItemStack tabIcon(Identifier tab) {
+		if (!LOADED || !"tacz".equals(tab.getNamespace())) {
+			return ItemStack.EMPTY;
+		}
+		return switch (tab.getPath()) {
+			case "ammo" -> modernAmmo(JaymosPowers.MOD_ID + ":musket_ball", 1);
+			case "pistol" -> gun("flintlock_pistol");
+			case "rifle" -> gun("musket");
+			case "shotgun" -> gun("blunderbuss");
+			default -> ItemStack.EMPTY;
+		};
 	}
 
 	/** One of TaCZ's own guns ({@code tacz:ak47}) with {@code rounds} in it; empty without TaCZ. */
@@ -143,7 +182,7 @@ public final class TaczGuns {
 		return gun(Identifier.fromNamespaceAndPath("tacz", name), rounds);
 	}
 
-	/** {@code count} rounds of TaCZ ammo {@code id} ({@code tacz:9mm}); empty without TaCZ. */
+	/** {@code count} rounds of TaCZ ammo {@code id} ({@code tacz:9mm}, or ours: {@code jaymospowers:musket_ball}); empty without TaCZ. */
 	public static ItemStack modernAmmo(String id, int count) {
 		Item item = LOADED ? BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath("tacz", "ammo")) : Items.AIR;
 		if (item == Items.AIR) {

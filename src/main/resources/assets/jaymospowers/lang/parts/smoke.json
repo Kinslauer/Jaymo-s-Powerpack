@@ -36,6 +36,7 @@
 	"message.jaymospowers.smoke_vapour_armour": "Armour won't go on smoke.",
 	"message.jaymospowers.smoke_vapour_on": "Vapour Form on: sprint to take off.",
 	"message.jaymospowers.smoke_vapour_off": "Vapour Form off.",
+	"message.jaymospowers.smoke_wholly_locked": "Your whole body turns to smoke once Smoke is fully mastered.",
 	"message.jaymospowers.smoke_step_none": "No thick smoke of yours there to step into.",
 	"message.jaymospowers.smoke_step_wait": "Smoke Step: %s s",
 	"message.jaymospowers.smoke_pyroclasm_wait": "Pyroclasm: %s s",

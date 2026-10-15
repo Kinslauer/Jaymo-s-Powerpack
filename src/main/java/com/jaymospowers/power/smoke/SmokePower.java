@@ -29,7 +29,8 @@ import org.jspecify.annotations.Nullable;
  * <li>X (hold), Smoke Jet ({@link SmokeJet}): a jet of smoke where you look; it fills a ship's sails.</li>
  * <li>Sneak + X, Smoke Step ({@link SmokeStep}): re-form inside one of your clouds under the crosshair.</li>
  * <li>Z, Smoke Sight ({@link SmokeSight}): creatures in smoke are outlined through walls.</li>
- * <li>Fully mastered, cruising in Vapour Form turns the whole body to smoke ({@link SmokeVapour#WHOLLY}): intangible.</li>
+ * <li>Fully mastered, Shift in Vapour Form turns the whole body to smoke ({@link SmokeVapour#WHOLLY}): intangible.</li>
+ * <li>No fall damage, ever: the legs go to smoke for a second as you land.</li>
  * <li>Corrupted, Smog ({@link SmokeSmog}): the smoke turns toxic and kills what grows; C is Pyroclasm
  * ({@link SmokePyroclasm}).</li>
  * <li>Ascended, Cloudshaper ({@link SmokeCloudshaper}): cloud smoke; C is Harness the Sky (a raincloud, or calm a

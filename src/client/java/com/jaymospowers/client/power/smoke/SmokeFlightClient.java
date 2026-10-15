@@ -24,7 +24,8 @@ import org.jspecify.annotations.Nullable;
  * <li>Take-off: Vapour Form switched on, a sprint starts it, straight into a cruise.</li>
  * <li>Cruise: along your look, picking up speed to the top and holding it with or without Sprint (a dive adds more, which
  * eases off again); S brakes, and slowed right down you hover. Turning is slower the faster you go.</li>
- * <li>Hover: WASD, Jump rises, Sneak sinks (and lands on the ground); Sprint cruises again.</li>
+ * <li>Hover: WASD along your look (look down to come down), Jump rises; Sprint cruises again.</li>
+ * <li>Shift, fully mastered: the whole body to smoke, or back (Shift no longer sinks).</li>
  * </ul>
  */
 public final class SmokeFlightClient {
@@ -62,7 +63,9 @@ public final class SmokeFlightClient {
 	/** Whether the server was last told this flier is wholly smoke. */
 	private static boolean wholeSent;
 	private static boolean formWas;
-	private static boolean sinkArmed;
+	/** Shift last tick, and whether the flier has asked (Shift) to be wholly smoke. */
+	private static boolean shiftWas;
+	private static boolean wholeWanted;
 	private static Vec3 velocity = Vec3.ZERO;
 	private static double speed;
 	private static long ticks;
@@ -98,8 +101,8 @@ public final class SmokeFlightClient {
 	/** Every client tick, from the power's own tick. */
 	static void tick(Minecraft minecraft, LocalPlayer player) {
 		fly(player);
-		// fully mastered, a cruise turns the whole body to smoke: the server is told when that starts and stops
-		boolean whole = cruising() && Mastery.unlocked(player) >= Mastery.ALL;
+		// fully mastered, Shift turns the whole body to smoke: the server is told when that starts and stops
+		boolean whole = flying && wholeWanted && Mastery.unlocked(player) >= Mastery.ALL;
 		if (whole != wholeSent && ClientPlayNetworking.canSend(SmokeVapour.Whole.TYPE)) {
 			wholeSent = whole;
 			ClientPlayNetworking.send(new SmokeVapour.Whole(whole));
@@ -122,6 +125,15 @@ public final class SmokeFlightClient {
 			return;
 		}
 		Input input = player.input.keyPresses;
+		if (input.shift() && !shiftWas) {
+			if (Mastery.unlocked(player) >= Mastery.ALL) {
+				wholeWanted = !wholeWanted;
+			} else {
+				player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymospowers.smoke_wholly_locked")
+					.withStyle(net.minecraft.ChatFormatting.GRAY));
+			}
+		}
+		shiftWas = input.shift();
 		if (player.horizontalCollision && cruising && speed > 0.9) {
 			// flew into something: the cruise is over
 			ScreenShake.add((float)Math.min(2.0, speed));
@@ -151,9 +163,10 @@ public final class SmokeFlightClient {
 	private static void takeOff(LocalPlayer player) {
 		owner = player;
 		flying = true;
+		wholeWanted = false;
+		shiftWas = player.input.keyPresses.shift();
 		cruising = false;
 		speed = 0.0;
-		sinkArmed = false;
 		Vec3 motion = player.getDeltaMovement();
 		if (player.isSprinting() || player.input.keyPresses.sprint()) {
 			// switched on and broke into a sprint: off along the look at once
@@ -172,27 +185,23 @@ public final class SmokeFlightClient {
 
 	private static void land() {
 		flying = false;
+		wholeWanted = false;
 		cruising = false;
 		speed = 0.0;
 		velocity = Vec3.ZERO;
 	}
 
 	private static void hover(LocalPlayer player, Input input) {
-		if (!input.shift()) {
-			sinkArmed = true;
-		}
 		Vec2 move = player.input.getMoveVector();
 		float sin = Mth.sin(player.getYRot() * Mth.DEG_TO_RAD);
 		float cos = Mth.cos(player.getYRot() * Mth.DEG_TO_RAD);
-		double wishX = (move.x * cos - move.y * sin) * HOVER_SPEED;
-		double wishZ = (move.y * cos + move.x * sin) * HOVER_SPEED;
-		double wishY = 0.0;
+		// forward goes along the look, up or down with it (Shift is the whole-body smoke now, not a sink)
+		Vec3 look = player.getLookAngle();
+		double wishX = (look.x * move.y + cos * move.x) * HOVER_SPEED;
+		double wishZ = (look.z * move.y + sin * move.x) * HOVER_SPEED;
+		double wishY = look.y * move.y * HOVER_SPEED;
 		if (input.jump()) {
 			wishY += HOVER_VERTICAL;
-		}
-		boolean sinking = input.shift() && sinkArmed;
-		if (sinking) {
-			wishY -= HOVER_VERTICAL;
 		}
 		if (wishY == 0.0 && wishX * wishX + wishZ * wishZ < 1.0E-4) {
 			wishY = Math.cos(ticks * 0.1) * HOVER_BOB;
@@ -207,7 +216,6 @@ public final class SmokeFlightClient {
 			player.level().playLocalSound(player, SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.4F, 0.8F);
 			ScreenShake.add(0.4F);
 		}
-		// Sneak on the ground lands: the server ends the form and the legs come back
 	}
 
 	private static void cruise(LocalPlayer player, Input input) {

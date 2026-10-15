@@ -23,6 +23,8 @@ public final class SmokeMoves {
 	/** One-shots: Smoke Bomb throw (V), Smoke Step's re-forming (sneak + X), Smoke Sight on (Z), Pyroclasm's release, the
 	 * raincloud (tap C), Ash Storm (tap C, both fates), Vapour Form switched on (R). */
 	public static final int BOMB = 10, STEP = 11, SIGHT = 12, PYRO = 13, RAIN = 14, ASH = 15, ARM = 16;
+	/** A hard landing: the legs go to smoke for a second and spill out round you (no fall damage, {@code SmokeVapour}). */
+	public static final int LAND = 17;
 
 	public record Move(int kind, long start) {
 		public static final StreamCodec<ByteBuf, Move> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, Move::kind, ByteBufCodecs.VAR_LONG,
@@ -46,6 +48,7 @@ public final class SmokeMoves {
 			case RAIN -> 18;
 			case ASH -> 30;
 			case ARM -> 12;
+			case LAND -> 20;
 			default -> 0;
 		};
 	}
