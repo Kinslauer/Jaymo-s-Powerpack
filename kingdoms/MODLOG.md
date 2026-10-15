@@ -3181,6 +3181,9 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   kill a realm's guard or archer (Folk, a villager in its service, or any villager in MCA's guard/archer job) downs
   them instead (saved, synced `downed` attachment): half crawl face down away from whoever felled them, the rest lie
   on their backs (client `DownedPose`). Their AI stops (`DownedMobMixin`), nothing counts them a foe and they drop
-  nothing (`DownedMixin`), and they can't be pickpocketed; right-click takes the weapons from their hands. They bleed
-  out after 2 minutes (`BLEED_OUT_TICKS`) or a player's hit finishes them; the real death (wars, quests, crimes)
-  happens then, with no corpse. Void and /kill kill outright, also without loot.
+  nothing (`DownedMixin`), and they can't be pickpocketed; right-click takes the weapons from their hands. Andy: "they
+  should get back up unless they are hit by a player, they can be hit repeatedly until they bleed out, up to 10 times":
+  left alone, they get up after 1 minute (`RECOVER_TICKS`) with 30% health; a player's hit is a wound (saved
+  `downed_wounds`), after which they never get up and bleed out 2 minutes after the last hit (`BLEED_OUT_TICKS`), and
+  the 10th hit kills (`MAX_WOUNDS`). Only then is it a death (wars, quests, crimes), with no corpse. Void and /kill
+  kill outright, also without loot.

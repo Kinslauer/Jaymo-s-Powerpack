@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -35,13 +36,20 @@ import org.jspecify.annotations.Nullable;
  * {@link Folk}, or a villager in its service or in a guard's or archer's job) puts them down instead. Downed, they're
  * out of the fight (nothing counts them as a foe, they go for no one): some drag themselves away from whoever felled
  * them, the rest lie where they dropped. A player can take the weapons out of their hands (right-click), but nothing
- * else: no pockets to pick, no corpse to search. They bleed out after {@link #BLEED_OUT_TICKS}, or when a player
- * finishes them, and then they're gone, leaving nothing behind (their death counts then, for wars, quests and crimes).
+ * else: no pockets to pick, no corpse to search. Left alone, they get back up after {@link #RECOVER_TICKS} (Andy: "they
+ * should get back up unless they are hit by a player, they can be hit repeatedly until they bleed out, up to 10
+ * times"): once a player has hit them they won't, and they bleed out {@link #BLEED_OUT_TICKS} after the last hit, or
+ * at the {@link #MAX_WOUNDS}th. Then they're gone, leaving nothing behind (their death counts then, for wars, quests
+ * and crimes).
  * Drawn lying down by the client's {@code DownedPose}; their AI is held by {@code DownedMixin}.
  */
 public final class Downed {
-	/** How long a downed guard lasts before bleeding out (ticks). */
+	/** How long a downed guard no player has hit lies there before getting back up (ticks), and the health it gets up with (share of its most). */
+	static final int RECOVER_TICKS = 1200;
+	static final float RECOVER_HEALTH = 0.3F;
+	/** How long after a player's last hit a wounded guard bleeds out (ticks), and the hit that kills it outright. */
 	static final int BLEED_OUT_TICKS = 2400;
+	static final int MAX_WOUNDS = 10;
 	/** The share of downed guards who drag themselves along; the rest lie still. */
 	static final float CRAWLER_CHANCE = 0.5F;
 	/** A crawler's pace, as a share of its walking speed, and how far it gets from whoever felled it before it stops. */
@@ -55,6 +63,10 @@ public final class Downed {
 	 */
 	public static final AttachmentType<Long> DOWNED = AttachmentRegistry.create(JaymosKingdoms.id("downed"),
 		builder -> builder.persistent(Codec.LONG).syncWith(ByteBufCodecs.VAR_LONG.cast(), AttachmentSyncPredicate.all()));
+
+	/** A downed guard players have hit: when the last hit landed, shifted up 4 bits, with how many hits in the low bits. Saved. */
+	public static final AttachmentType<Long> WOUNDS = AttachmentRegistry.create(JaymosKingdoms.id("downed_wounds"),
+		builder -> builder.persistent(Codec.LONG));
 
 	/** The blow that put each down: whose kill it is when it dies (not saved; after a reload it bleeds out unclaimed). */
 	private static final Map<LivingEntity, DamageSource> FELLED_BY = new WeakHashMap<>();
@@ -82,9 +94,9 @@ public final class Downed {
 			if (!isDowned(entity) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
 				return true;
 			}
-			// a player's blow (or arrow) finishes them; nothing else touches them now
+			// only a player's blow (or arrow) touches them now: a wound (they won't get up again), the tenth kills
 			if (source.getEntity() instanceof Player && entity.level() instanceof ServerLevel level) {
-				finish(level, entity, source);
+				wound(level, entity, source);
 			}
 			return false;
 		});
@@ -156,7 +168,13 @@ public final class Downed {
 		if (!(mob.level() instanceof ServerLevel level)) {
 			return;
 		}
-		if (level.getGameTime() - since(mob) >= BLEED_OUT_TICKS) {
+		long now = level.getGameTime();
+		Long wounds = mob.getAttached(WOUNDS);
+		if (wounds == null && now - since(mob) >= RECOVER_TICKS) {
+			getUp(level, mob);
+			return;
+		}
+		if (wounds != null && now - (wounds >> 4) >= BLEED_OUT_TICKS) {
 			DamageSource source = FELLED_BY.get(mob);
 			finish(level, mob, source != null ? source : level.damageSources().generic());
 			return;
@@ -175,6 +193,29 @@ public final class Downed {
 			mob.yBodyRot = yaw;
 			mob.setSpeed((float) (mob.getAttributeValue(Attributes.MOVEMENT_SPEED) * CRAWL_SPEED));
 		}
+	}
+
+	/** A player hit a downed guard: one more wound; the {@link #MAX_WOUNDS}th is its death. */
+	private static void wound(ServerLevel level, LivingEntity entity, DamageSource source) {
+		Long wounds = entity.getAttached(WOUNDS);
+		int count = (wounds == null ? 0 : (int) (wounds & 0xF)) + 1;
+		FELLED_BY.put(entity, source);
+		if (count >= MAX_WOUNDS) {
+			finish(level, entity, source);
+			return;
+		}
+		entity.setAttached(WOUNDS, level.getGameTime() << 4 | count);
+		level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, entity.getX(), entity.getY() + 0.3, entity.getZ(), 3, 0.3, 0.1, 0.3, 0.1);
+		level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.PLAYER_HURT, SoundSource.NEUTRAL, 0.7F, 0.8F);
+	}
+
+	/** Left alone long enough: it gets back on its feet, hurt, and back to its post (its AI takes up again). */
+	private static void getUp(ServerLevel level, Mob mob) {
+		FELLED_BY.remove(mob);
+		mob.removeAttached(DOWNED);
+		mob.removeAttached(WOUNDS);
+		mob.setHealth(Math.max(1.0F, mob.getMaxHealth() * RECOVER_HEALTH));
+		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.ARMOR_EQUIP_GENERIC.value(), SoundSource.NEUTRAL, 0.8F, 0.9F);
 	}
 
 	/** Its death, at last: no corpse, no loot (see {@code DownedMixin}); the body is simply gone. */

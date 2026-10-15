@@ -1401,4 +1401,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.11.82 / Kingdoms 0.7.70, downed guards:** Andy: "guards, when killed dont drop as a corpse, instead they get downed,
   and either crawl or otherwise fall into a downed animation, they can be disarmed but not looted". Kingdoms only
   (`Downed`): a killing blow downs a realm's guard or archer instead; they crawl away or lie on their backs, can be
-  disarmed by right-click, leave no corpse and no drops, and bleed out after 2 minutes (or a player finishes them).
+  disarmed by right-click, and leave no corpse and no drops. Left alone they get back up after a minute; once a player
+  hits them they bleed out 2 minutes after the last hit, and the 10th hit kills.
