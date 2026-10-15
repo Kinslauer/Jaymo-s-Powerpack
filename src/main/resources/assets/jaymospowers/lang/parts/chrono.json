@@ -40,12 +40,11 @@
 	"message.jaymospowers.future.retrying": "The future slipped away last time. Fetching Los Perrito City again...",
 	"message.jaymospowers.future.downloading": "The future is forming... %s%% fetched",
 	"message.jaymospowers.future.unpacking": "The future is forming... %s%% built",
-	"message.jaymospowers.future.arrived": "A lifetime from now. The dead walk; the golden rift behind you leads home.",
+	"message.jaymospowers.future.arrived": "A lifetime from now. The dead walk, and only a Chrono's leap or death takes you home.",
 	"message.jaymospowers.future.returned": "Back in your own time.",
 	"message.jaymospowers.future.credit": "This future is built from Los Perrito City by Uospag (curseforge.com/minecraft/worlds/los-perrito, CC BY 4.0), ruined by Jaymo's Powers. Click to visit the map's page.",
 	"biome.jaymospowers.future_ruins": "Ruins of Los Perrito",
 	"dimension.jaymospowers.future": "The Future",
 	"message.jaymospowers.future.echo_first": "The future won't open while your echo still walks. End it for good first.",
-	"message.jaymospowers.future.unlocked": "Your echo is gone for good, and time lies open ahead of you. Sneak+B to fast forward.",
-	"message.jaymospowers.future.guns_stay": "The future's guns stay in the future."
+	"message.jaymospowers.future.unlocked": "Your echo is gone for good, and time lies open ahead of you. Sneak+B to fast forward."
 }

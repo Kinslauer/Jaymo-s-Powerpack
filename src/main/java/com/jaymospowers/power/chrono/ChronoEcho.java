@@ -186,7 +186,9 @@ public class ChronoEcho extends Monster {
 		List<Identifier> held = ChronoMemory.top(memory.held, 1);
 		ItemStack item = held.isEmpty() ? ItemStack.EMPTY
 			: BuiltInRegistries.ITEM.getOptional(held.get(0)).map(ItemStack::new).orElse(ItemStack.EMPTY);
-		this.setItemSlot(EquipmentSlot.MAINHAND, item);
+		if (!this.entityTags().contains(com.jaymospowers.power.chrono.future.FutureGuns.TAG)) {
+			this.setItemSlot(EquipmentSlot.MAINHAND, item); // a gunner keeps its gun
+		}
 		List<BlockPos> path = memory.pathIn(this.level().dimension());
 		this.route = new ArrayList<>(path.subList(Math.max(0, path.size() - ROUTE_POINTS), path.size()));
 	}
@@ -238,15 +240,15 @@ public class ChronoEcho extends Monster {
 		if (this.tickCount % OWNER_CHECK_INTERVAL == 0 && !checkOwner(level)) {
 			return;
 		}
-		// (0.10.108) in the future it carries a modern gun and uses it (FutureFerals fires it); out of it, it puts it down
+		// (0.10.108) in the future it picks up a modern gun and uses it (FutureFerals fires it there); one that followed its
+		// owner home keeps it and fires it here too
 		boolean future = level.dimension() == com.jaymospowers.power.chrono.future.Future.FUTURE;
 		boolean gunner = this.entityTags().contains(com.jaymospowers.power.chrono.future.FutureGuns.TAG);
 		if (future && !gunner && this.tickCount % OWNER_CHECK_INTERVAL == 0) {
 			com.jaymospowers.power.chrono.future.FutureGuns.arm(this, this.getRandom());
 			this.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
-		} else if (!future && gunner) {
-			this.removeTag(com.jaymospowers.power.chrono.future.FutureGuns.TAG);
-			this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+		} else if (!future && gunner && this.tickCount % 2 == 0) {
+			com.jaymospowers.power.chrono.future.FutureGuns.tick(level, this);
 		}
 		if (level.dimension() == Level.NETHER) {
 			if (this.fight == null) {
@@ -286,10 +288,6 @@ public class ChronoEcho extends Monster {
 		ChronoMemory memory = ChronoMemory.peek(player);
 		if (!Powers.has(player, ChronoPower.INSTANCE) || memory == null || memory.bond != this.bond) {
 			fade(level);
-			return false;
-		}
-		if (player.level() != level && this.entityTags().contains(ChronoEchoes.FUTURE_BORN)) {
-			fade(level); // (0.10.108) a future echo stays in the future: you left, it's gone
 			return false;
 		}
 		if (player.level() == level) {

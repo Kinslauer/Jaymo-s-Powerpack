@@ -26,7 +26,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Guns in the future: the dead and the echoes there carry TaCZ's own modern guns (its default gunpack, which is for the
- * future only: {@code armory/TaczGuns}, {@link FutureContraband}) and fire them at what they're fighting. A mob can't
+ * future only: {@code armory/TaczGuns}) and fire them at what they're fighting. A mob can't
  * pull a TaCZ trigger, so the shots are ours: bullets (a shotgun's spread of pellets) traced from the muzzle, stopped by
  * walls, hurting the first thing they meet, in bursts for automatics, with TaCZ's own report for that gun. Then a
  * reload. No ammunition is used, but a dead gunner may drop its gun (loaded) and some rounds for it. The flintlocks
@@ -119,8 +119,7 @@ public final class FutureGuns {
 
 	static void init() {
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
-			if (entity instanceof Mob mob && mob.entityTags().contains(TAG) && mob.level() instanceof ServerLevel level
-				&& level.dimension() == Future.FUTURE) {
+			if (entity instanceof Mob mob && mob.entityTags().contains(TAG) && mob.level() instanceof ServerLevel level) {
 				dropAmmo(level, mob);
 			}
 		});

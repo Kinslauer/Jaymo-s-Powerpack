@@ -61,7 +61,7 @@ public final class TaczGuns {
 	 * (0.10.85) Andy: nothing modern in the pack, so TaCZ's default gunpack was kept from loading at all. (0.10.108) Andy:
 	 * the modern guns, but only in the future ({@code power/chrono/future}): the pack loads again (it can't load per
 	 * dimension; outside the future its guns, ammo and attachments are kept out of every creative tab and JEI,
-	 * {@link #hideModern}, and taken off anyone who brings them back, {@code FutureContraband}). We export it ourselves
+	 * {@link #hideModern}; one brought back from the future is yours to keep). We export it ourselves
 	 * (TaCZ's entry comes off its export list, so it can't undo this) and then take out what would leak it into the rest
 	 * of the game: its gun smith table index (ours points that table at our Gunsmith's Bench), its recipes (modern guns
 	 * are never craftable) and its bonus-chest pistol. TaCZ's art is CC BY-NC-ND: it's TaCZ's own copy, untouched apart

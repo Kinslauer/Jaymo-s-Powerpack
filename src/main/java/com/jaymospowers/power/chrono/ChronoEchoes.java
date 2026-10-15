@@ -128,25 +128,18 @@ public final class ChronoEchoes {
 		memory.echoesDue.add(between(player.getRandom(), ECHO_DELAY_MIN, ECHO_DELAY_MAX));
 	}
 
-	/**
-	 * (0.10.108) Echoes born in the future: the one-per-Chrono rule doesn't hold there (up to {@code Future.ECHOES}
-	 * stalk you at once). They belong to that time: they never follow you home, and fade when you leave.
-	 */
-	public static final String FUTURE_BORN = "jaymospowers.future_echo";
-
 	/** How many of the player's echoes are about in {@code level} now. */
 	public static int loadedIn(ServerPlayer player, ServerLevel level) {
 		return level.getEntities(ECHO, e -> e.isAlive() && e.isEchoOf(player)).size();
 	}
 
-	/** One more of the player's echoes, near them now, born where they are (see {@link #FUTURE_BORN}). Returns whether it came. */
+	/**
+	 * (0.10.108) One more of the player's echoes, near them now: in the future the one-per-Chrono rule doesn't hold (up
+	 * to {@code Future.ECHOES} stalk you at once), and those close behind you when you leave follow you home like any
+	 * echo. Returns whether it came.
+	 */
 	public static boolean spawnFutureEcho(ServerPlayer player) {
-		ChronoEcho echo = spawn(player, ChronoMemory.of(player));
-		if (echo == null) {
-			return false;
-		}
-		echo.addTag(FUTURE_BORN);
-		return true;
+		return spawn(player, ChronoMemory.of(player)) != null;
 	}
 
 	/** Whether the player's one echo exists: owed, on its way back, blinked out of a Nether fight, or loaded somewhere. */
@@ -353,7 +346,7 @@ public final class ChronoEchoes {
 	/** The player just changed dimension: echoes that were close behind them come along. */
 	static void follow(ServerPlayer player, ServerLevel from, Vec3 fromPos) {
 		List<ChronoEcho> close = new ArrayList<>(from.getEntities(ECHO,
-			e -> e.isAlive() && e.isEchoOf(player) && !e.entityTags().contains(FUTURE_BORN) && e.position().distanceToSqr(fromPos) < FOLLOW_RANGE * FOLLOW_RANGE));
+			e -> e.isAlive() && e.isEchoOf(player) && e.position().distanceToSqr(fromPos) < FOLLOW_RANGE * FOLLOW_RANGE));
 		for (ChronoEcho echo : close) {
 			BlockPos spot = findSpot(player, FOLLOW_MIN_DISTANCE, FOLLOW_MAX_DISTANCE, false);
 			Vec3 at = spot != null ? Vec3.atBottomCenterOf(spot) : player.position();

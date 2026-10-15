@@ -20,7 +20,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
@@ -38,7 +37,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.saveddata.maps.MapId;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -49,12 +47,13 @@ import net.minecraft.world.phys.Vec3;
  * since 0.10.108; {@link #ECHO_SLAIN}): you, and every player within
  * {@link #COMPANION_RADIUS} blocks, leap to the future. Sneak+B there brings you (and those near you) back to where
  * you left.</li>
- * <li>The Time Rift beside where you arrive takes anyone home, so no one is ever stranded without a Chrono user. Dying
- * there sends you to your own spawn as usual.</li>
+ * <li>There's no other way home: only a Chrono's leap back, or dying (you wake at your own spawn as usual). Anyone
+ * who goes forward without a Chrono stays until they die.</li>
  * <li>The first leap on a server fetches the city ({@link LosPerrito}); until it's in place, the leap only says how far
  * along it is.</li>
  * <li>A Chrono in the future is stalked by up to {@link #ECHOES} of their echoes at once, each armed with a modern gun;
- * there they can be killed. They stay in the future. TaCZ's modern guns are for the future only ({@link FutureContraband}).</li>
+ * there they can be killed. Those close behind you when you leave come home with you. TaCZ's modern guns are only
+ * found in the future (in no creative tab or JEI), but one you bring back is yours.</li>
  * </ul>
  * Ruins: {@link FutureRuins}. The dead: {@link FutureFerals}. Guns: {@link FutureGuns}.
  */
@@ -64,15 +63,10 @@ public final class Future {
 	static final double COMPANION_RADIUS = 4.0;
 	/** Fast Forward's own recharge (a minute; it doesn't touch Time Bloom's). */
 	static final int LEAP_COOLDOWN = 1200;
-	/** The Time Rift stands this many blocks north of the arrival point; walk within RIFT_RADIUS of it to go home. */
-	static final int RIFT_OFFSET = 5;
-	static final double RIFT_RADIUS = 0.8;
 	/** In the future, a Chrono with room for another echo has one turn up this long after (30-90 s of survival play); checked this often. */
 	static final int ECHO_DUE_MIN = 600, ECHO_DUE_MAX = 1800, ECHO_CHECK = 100;
 	/** At most this many of one Chrono's echoes stalk them in the future at once (one, anywhere else). */
 	static final int ECHOES = 4;
-	/** Nobody is sent through twice within this many ticks. */
-	static final int PASS_COOLDOWN = 60;
 
 	/** Where to send someone when they come back. */
 	public record Return(ResourceKey<Level> dimension, Vec3 pos, float yaw, float pitch) {
@@ -100,8 +94,6 @@ public final class Future {
 	private static final Map<UUID, Long> READY_AT = new HashMap<>();
 	/** When each Chrono in the future (with room for one) has their next echo turn up. */
 	private static final Map<UUID, Long> ECHO_DUE = new HashMap<>();
-	private static final Map<UUID, Long> LAST_PASS = new HashMap<>();
-	private static BlockPos rift;
 
 	private Future() {
 	}
@@ -109,23 +101,18 @@ public final class Future {
 	public static void init() {
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
 			LosPerrito.load(server);
-			rift = null;
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			READY_AT.clear();
 			ECHO_DUE.clear();
-			LAST_PASS.clear();
 			FutureRuins.clear();
-			rift = null;
 		});
 		ServerChunkEvents.CHUNK_LOAD.register(FutureRuins::onLoad);
 		ServerEntityEvents.ENTITY_LOAD.register(Future::onEntityLoad);
 		ServerTickEvents.END_SERVER_TICK.register(FutureRuins::tick);
 		ServerTickEvents.END_SERVER_TICK.register(FutureFerals::tick);
-		ServerTickEvents.END_SERVER_TICK.register(Future::tickRift);
 		ServerTickEvents.END_SERVER_TICK.register(Future::echoes);
 		FutureGuns.init();
-		FutureContraband.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> register(dispatcher));
 	}
 
@@ -247,8 +234,6 @@ public final class Future {
 		int z = LosPerrito.SPAWN_Z + (int) Math.round(Math.sin(angle) * radius);
 		future.getChunk(x >> 4, z >> 4);
 		int y = future.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-		LAST_PASS.put(player.getUUID(), server.getTickCount() + 0L);
-		// face the rift home, so the way back is the first thing you see
 		player.teleportTo(future, x + 0.5, y, z + 0.5, Set.of(), 180.0F, 0.0F, true);
 		burst(future, player.position());
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.future.arrived").withStyle(ChatFormatting.GOLD));
@@ -279,7 +264,6 @@ public final class Future {
 			player.stopRiding();
 		}
 		burst(player.level(), player.position());
-		LAST_PASS.put(player.getUUID(), server.getTickCount() + 0L);
 		player.teleportTo(to, at.x, at.y, at.z, Set.of(), yaw, pitch, true);
 		player.removeAttached(RETURN);
 		burst(to, at);
@@ -291,50 +275,6 @@ public final class Future {
 		level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y + 1.0, at.z, 30, 0.3, 0.8, 0.3, 0.06);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.8F, 0.6F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_TELEPORT, SoundSource.PLAYERS, 0.6F, 0.8F);
-	}
-
-	// ---------------------------------------------------------------- the rift home
-
-	static void tickRift(MinecraftServer server) {
-		ServerLevel future = server.getLevel(FUTURE);
-		if (future == null || future.players().isEmpty() || server.getTickCount() % 2 != 0) {
-			return;
-		}
-		int x = LosPerrito.SPAWN_X, z = LosPerrito.SPAWN_Z - RIFT_OFFSET;
-		if (!future.hasChunkAt(new BlockPos(x, 0, z))) {
-			return;
-		}
-		if (rift == null) {
-			rift = new BlockPos(x, future.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z);
-		}
-		double cx = rift.getX() + 0.5, cy = rift.getY(), cz = rift.getZ() + 0.5;
-		boolean watched = false;
-		for (ServerPlayer player : future.players()) {
-			if (player.distanceToSqr(cx, cy, cz) < 64.0 * 64.0) {
-				watched = true;
-				break;
-			}
-		}
-		if (!watched) {
-			return;
-		}
-		long tick = server.getTickCount();
-		// a slow golden whirl, two blocks tall
-		double turn = tick * 0.15;
-		for (int i = 0; i < 3; i++) {
-			double a = turn + i * Math.PI * 2.0 / 3.0;
-			future.sendParticles(ParticleTypes.END_ROD, cx + Math.cos(a) * 0.6, cy + 0.2 + (tick + i * 13) % 40 / 20.0, cz + Math.sin(a) * 0.6, 1, 0.0, 0.0, 0.0, 0.0);
-		}
-		future.sendParticles(ParticleTypes.REVERSE_PORTAL, cx, cy + 1.0, cz, 2, 0.25, 0.7, 0.25, 0.02);
-		if (tick % 80 == 0) {
-			future.playSound(null, cx, cy, cz, SoundEvents.BEACON_AMBIENT, SoundSource.BLOCKS, 0.6F, 1.4F);
-		}
-		AABB box = new AABB(cx - RIFT_RADIUS, cy - 0.5, cz - RIFT_RADIUS, cx + RIFT_RADIUS, cy + 2.0, cz + RIFT_RADIUS);
-		for (ServerPlayer player : future.getEntitiesOfClass(ServerPlayer.class, box)) {
-			if (player.isAlive() && !player.isSpectator() && tick - LAST_PASS.getOrDefault(player.getUUID(), -1000L) > PASS_COOLDOWN) {
-				goBack(player);
-			}
-		}
 	}
 
 	// ---------------------------------------------------------------- the city's map art

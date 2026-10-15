@@ -1199,9 +1199,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   bonus-chest pistol (`TaczGuns.trimDefaultPack`). Future gunners carry its guns now (51 of them; RPG, M320 and minigun
   left out): pistols in pairs, SMGs in bursts of 6, rifles 3, machine guns 10, shotguns 8 pellets, snipers 12 dmg to
   64 blocks, with TaCZ's own report for each gun; a dropped gun comes loaded and gunners leave rounds 35% of the time.
-  Modern guns, ammo and attachments are in no creative tab and so not in JEI (`TaczGuns.hideModern`), and can't leave
-  the future: taken off you on the way home (inventory, ender chest, cursor, shulker boxes, bundles), checked every
-  second elsewhere, dropped ones vanish and mobs drop theirs outside it (`FutureContraband`). The resources themselves
-  load everywhere (Minecraft can't load a pack for one dimension), but nothing modern can exist outside the future.
-  Up to 4 of a Chrono's echoes stalk them in the future at once, a new one 30-90 s after there's room; they stay in the
-  future (never follow you home, fade when you leave; tag `jaymospowers.future_echo`). `docs/chrono.md`.
+  Modern guns, ammo and attachments are in no creative tab and so not in JEI (`TaczGuns.hideModern`); the resources
+  load everywhere (Minecraft can't load a pack for one dimension). Up to 4 of a Chrono's echoes stalk them in the
+  future at once, a new one 30-90 s after there's room. Andy, last: "they should stay available if you manage to get
+  them out of the future, that gives you a reason to go" and "They CAN follow you home, make sure you arent followed.
+  There is no longer a portal so the only way out is death or with a chrono": guns you bring back are yours; echoes
+  within 24 blocks when you leave follow you home with their guns and keep firing (a relearn no longer swaps a
+  gunner's gun out); the Time Rift is gone, so the way home is a Chrono's sneak+B or dying. `docs/chrono.md`.
