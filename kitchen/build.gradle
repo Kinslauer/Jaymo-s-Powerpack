@@ -35,6 +35,9 @@ dependencies {
 	implementation "maven.modrinth:cooking-for-blockheads:26.3.0.2+fabric-26.3"
 	// (0.4.41) compiled against for the mill's recipe pages; touched only via client/jei (its jei_mod_plugin entrypoint)
 	compileOnly "maven.modrinth:jei:QfoQJyPO"
+	// (0.4.44) Minecraft Comes Alive (GPL-3.0): a dead player's villager look (client/corpse/McaLooks), touched only when
+	// it's loaded; compiled against the pack's jar in ../libs
+	compileOnly fileTree("../libs") { include "mca-fabric-*.jar" }
 }
 
 processResources {

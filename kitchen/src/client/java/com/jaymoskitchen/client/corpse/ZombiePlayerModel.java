@@ -31,9 +31,13 @@ public class ZombiePlayerModel extends HumanoidModel<ZombiePlayerRenderer.State>
 	@Override
 	public void setupAnim(ZombiePlayerRenderer.State state) {
 		super.setupAnim(state);
-		// as vanilla's zombies hold their arms
-		float attack = Mth.sin(state.swingAnimation * Mth.PI);
-		float swing = Mth.sin((1.0F - (1.0F - state.swingAnimation) * (1.0F - state.swingAnimation)) * Mth.PI);
+		armsOut(rightArm, leftArm, state.swingAnimation, state.ageInTicks);
+	}
+
+	/** As vanilla's zombies hold their arms. (0.4.44) Also for a zombie player drawn as their MCA villager. */
+	public static void armsOut(ModelPart rightArm, ModelPart leftArm, float swingAnimation, float ageInTicks) {
+		float attack = Mth.sin(swingAnimation * Mth.PI);
+		float swing = Mth.sin((1.0F - (1.0F - swingAnimation) * (1.0F - swingAnimation)) * Mth.PI);
 		rightArm.zRot = 0.0F;
 		leftArm.zRot = 0.0F;
 		rightArm.yRot = -(0.1F - attack * 0.6F);
@@ -41,6 +45,6 @@ public class ZombiePlayerModel extends HumanoidModel<ZombiePlayerRenderer.State>
 		float out = -Mth.PI / 2.25F;
 		rightArm.xRot = out + attack * 1.2F - swing * 0.4F;
 		leftArm.xRot = out + attack * 1.2F - swing * 0.4F;
-		AnimationUtils.bobArms(rightArm, leftArm, state.ageInTicks);
+		AnimationUtils.bobArms(rightArm, leftArm, ageInTicks);
 	}
 }

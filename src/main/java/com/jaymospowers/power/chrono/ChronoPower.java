@@ -592,16 +592,20 @@ public final class ChronoPower implements Power {
 	// ---------------------------------------------------------------- Stasis
 
 	/** (0.11.40) Time Flow's time stop (after a Space counter): a Stasis Field where you stand, no cooldown of its own. */
-	static void flowTimeStop(ServerPlayer player) {
-		stasis(player, state(player));
+	static void flowTimeStop(ServerPlayer player, int scale) {
+		stasis(player, state(player), StasisField.duration(player) * scale);
 		state(player).synced = false;
 	}
 
 	private static boolean stasis(ServerPlayer player, ChronoState state) {
+		return stasis(player, state, StasisField.duration(player));
+	}
+
+	private static boolean stasis(ServerPlayer player, ChronoState state, int duration) {
 		if (state.stasis != null) {
 			state.stasis.end();
 		}
-		state.stasis = new StasisField(player.level(), player.position(), player.getUUID(), StasisField.duration(player), ChronoFx.style(player));
+		state.stasis = new StasisField(player.level(), player.position(), player.getUUID(), duration, ChronoFx.style(player));
 		state.stasis.start();
 		return true;
 	}

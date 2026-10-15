@@ -19,14 +19,15 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 
 /**
- * The future's dead: feral hordes of zombies (no husks or zombified villagers) roam the ruins in packs around
+ * The future's dead: feral hordes of zombies and husks (no zombified villagers) roam the ruins in packs around
  * every player there, by day as well as night (nothing burns in the future's ashen sun; see {@code FutureSunMixin}).
  * They shamble slower than the zombies back home while you watch them, and sprint as soon as you look away;
  * they hear you: anyone running within {@link #HEAR_RUNNING} blocks, or
  * walking within {@link #HEAR_WALKING}, draws the nearest ferals to them, and a feral that sees you attacks. They're
  * the game's own zombies, so Kitchen treats them like any other: the dead they leave are torn into by scavenging
- * zombies, and a zombie's body left lying gets back up. Nearly half are Kitchen's corpse zombies in random skins
- * ({@link FutureKitchen}), and most of those carry a modern gun and use it ({@link FutureGuns}).
+ * zombies, and a zombie's body left lying gets back up. The horde is husks and plain zombies in our civilian skins; a
+ * few are Kitchen's corpse zombies in random skins ({@link FutureKitchen}), and every one of those carries a modern gun
+ * and uses it, badly ({@link FutureGuns}).
  */
 public final class FutureFerals {
 	public static final String TAG = "jaymospowers.feral";
@@ -34,8 +35,11 @@ public final class FutureFerals {
 	static final Identifier SPRINT = JaymosPowers.id("feral_sprint");
 	/** How often the hordes are topped up and listen for players. */
 	static final int EVERY = 40;
-	/** Of each pack, this share are Kitchen's corpse zombies in random skins (the rest the game's own), and this share of those carry a gun. */
-	static final float CORPSE_SHARE = 0.45F, GUNNER_SHARE = 0.65F;
+	/**
+	 * Of each pack, this share are Kitchen's corpse zombies in random skins, always armed (none if they can't be); of
+	 * the rest, this share are husks and the others plain zombies.
+	 */
+	static final float CORPSE_SHARE = 0.12F, HUSK_SHARE = 0.4F;
 	/** Gunners look for a shot this often. */
 	static final int GUN_EVERY = 2;
 	/** At most this many ferals within {@link #COUNT_RADIUS} of a player, by day and by night. */
@@ -181,7 +185,7 @@ public final class FutureFerals {
 			Zombie feral = random.nextFloat() < CORPSE_SHARE ? FutureKitchen.corpseZombie(level) : null;
 			boolean corpse = feral != null;
 			if (feral == null) {
-				feral = EntityTypes.ZOMBIE.create(level, EntitySpawnReason.EVENT);
+				feral = (random.nextFloat() < HUSK_SHARE ? EntityTypes.HUSK : EntityTypes.ZOMBIE).create(level, EntitySpawnReason.EVENT);
 			}
 			if (feral == null) {
 				continue;
@@ -189,8 +193,10 @@ public final class FutureFerals {
 			feral.snapTo(x + 0.5, y, z + 0.5, random.nextFloat() * 360.0F, 0.0F);
 			feral.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), EntitySpawnReason.EVENT, null);
 			makeFeral(feral);
-			if (corpse && random.nextFloat() < GUNNER_SHARE) {
-				FutureGuns.arm(feral, random);
+			if (corpse && !FutureGuns.arm(feral, random)) {
+				// a zombie player is never unarmed (no TaCZ, no guns): leave it out
+				feral.discard();
+				continue;
 			}
 			level.addFreshEntity(feral);
 		}
