@@ -2987,3 +2987,17 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
     one where you stand, a minute off; `/kingdom disaster quake` shakes now.
   - **Moons**: a Harvest Moon brings no disaster (stage 1's supercells wait too; one foretold for it never comes); a
     Blood Moon twice as many, and quakes one stronger.
+
+## 0.7.45: character creation can't be skipped (pack 0.11.1)
+- Andy: "force character creation on spawn". In order, on first joining:
+  - **MCA's destiny screen** (your look, then where you start). MCA already opens it to everyone whose look isn't
+    set (its `launchIntoDestiny`, on by default) and won't let it shut. The class screen now waits for it:
+    `Classes` JOIN skips asking while `McaCompat.destinyPending` (MCA's `PlayerSaveData.isEntityDataSet`), and
+    `mixin/mca/McaDestinyDoneMixin` asks (`Classes.afterDestiny`) when MCA's empty `DestinyMessage` says it's done.
+    Without MCA the class screen opens on joining as before.
+  - **The class screen**, forced as before (no Later, Escape does nothing), and now it comes back on the next tick if
+    anything else (another mod's screen) puts it away (`ClassScreen.owed`; 3 s grace after Choose while the class
+    syncs). The same holds after a Writ of Rebirth or a court wizard's respec.
+- **Protected until done** (`Classes.unmade`: no class yet and the client has this mod): no damage (except what
+  bypasses invulnerability, like the void), and mobs within 32 that go for them are called off every 10 ticks. MCA
+  makes them invisible during its screen too.
