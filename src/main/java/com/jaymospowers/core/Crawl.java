@@ -22,10 +22,9 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Crawling, for every player (no power needed): hold Jump + Sneak together and you drop flat for as long as you
- * hold Jump, which fits you through one-block-high gaps. Let go and you stand back up once there's room (vanilla keeps
- * you crawling while the ceiling is too low). The client spots the gesture and tells the server; the server's flag is
- * synced to everyone so every client draws the same pose and hitbox.
+ * Crawling, for every player (no power needed): press the Crawl key (Down Arrow) and you drop flat until you press it
+ * again (or Jump) with room to stand. The client spots all of that ({@code CrawlTaps}) and tells the server; the
+ * server's flag is synced to everyone so every client draws the same pose and hitbox.
  *
  * <p>While crawling, double-tapping Left or Right (A / D) rolls you one block that way: stop, drop and roll. Holding the
  * key keeps you rolling, but only for {@link #ROLL_STREAK_TICKS} one way; then that way is spent until you roll back the

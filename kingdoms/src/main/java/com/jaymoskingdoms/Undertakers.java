@@ -46,6 +46,9 @@ import org.jspecify.annotations.Nullable;
  * a villager) once it has lain untouched {@link #SETTLE_TICKS}, so a kill you mean to butcher is yours first. Never a
  * player's corpse (their things stay safe), nor a heavy iron golem's (fire doesn't take it). Golems never light a fire,
  * and a fire to put out ({@link Firefighting}) calls them away from a corpse.
+ * <p>
+ * (0.7.54) A fire is only used if it's safe ({@link #isPyre}): out in the open with nothing that catches beside it, so
+ * no corpse is dropped into a hearth in a wooden house again.
  */
 public final class Undertakers {
 	/** Corpses this close to a settlement's seat are cleared; guards this close to a corpse may answer it. */
@@ -382,16 +385,33 @@ public final class Undertakers {
 		return best;
 	}
 
-	/** Fire burning on something that burns forever (a fire pit), a lit campfire, or lava open to the sky above it. */
+	/**
+	 * Fire burning on something that burns forever (a fire pit), a lit campfire, or lava open to the sky above it.
+	 * (0.7.54) Only a safe one: out under the sky (never a hearth indoors) with nothing that catches within
+	 * {@link #CLEAR} blocks, since a burning corpse lights what it lies by and burned villages down.
+	 */
 	static boolean isPyre(ServerLevel level, BlockPos pos) {
 		BlockState state = level.getBlockState(pos);
+		boolean burning;
 		if (state.is(BlockTags.FIRE)) {
-			return level.getBlockState(pos.below()).is(BlockTags.INFINIBURN_OVERWORLD);
+			burning = level.getBlockState(pos.below()).is(BlockTags.INFINIBURN_OVERWORLD);
+		} else if (state.is(BlockTags.CAMPFIRES)) {
+			burning = state.getValueOrElse(CampfireBlock.LIT, false);
+		} else {
+			burning = state.getFluidState().is(FluidTags.LAVA) && state.getFluidState().isSource() && level.getBlockState(pos.above()).isAir();
 		}
-		if (state.is(BlockTags.CAMPFIRES)) {
-			return state.getValueOrElse(CampfireBlock.LIT, false);
+		return burning && level.canSeeSky(pos.above()) && safe(level, pos);
+	}
+
+	/** (0.7.54) Nothing that catches within {@link #CLEAR} blocks of a fire (other fires and campfires aside). */
+	private static boolean safe(ServerLevel level, BlockPos pos) {
+		for (BlockPos p : BlockPos.betweenClosed(pos.offset(-CLEAR, -1, -CLEAR), pos.offset(CLEAR, 2, CLEAR))) {
+			BlockState s = level.getBlockState(p);
+			if (s.ignitedByLava() && !s.is(BlockTags.CAMPFIRES) && !s.is(BlockTags.FIRE)) {
+				return false;
+			}
 		}
-		return state.getFluidState().is(FluidTags.LAVA) && state.getFluidState().isSource() && level.getBlockState(pos.above()).isAir();
+		return true;
 	}
 
 	/** Nothing that catches (wood, wool, leaves, grass...) within {@link #CLEAR} blocks of {@code pos}. */

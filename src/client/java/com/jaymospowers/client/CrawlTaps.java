@@ -1,28 +1,31 @@
 package com.jaymospowers.client;
 
 import com.jaymospowers.core.Crawl;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Crawl gesture: hold Jump and Sneak together for a moment and you go flat; you stay flat while Jump is held (Sneak can
- * be let go). Releasing Jump stands you up when there's headroom; under a one-block ceiling vanilla keeps you crawling
- * until you're out. While crawling, double-tap Left or Right to roll one block that way; keep holding it to keep rolling,
- * for up to 2 s one way before you must roll back (rolling back puts the fire on you out).
+ * Going prone: press the Crawl key (Down Arrow by default, rebindable) and you stay flat with nothing held; press it
+ * again (or Jump) to get up, which waits until there's room to stand. While crawling, double-tap Left or Right to roll
+ * one block that way; keep holding it to keep rolling, for up to 2 s one way before you must roll back (rolling back
+ * puts the fire on you out).
  */
 final class CrawlTaps {
-	/** How long Jump + Sneak must be held together to go prone (short, so a quick sneak-jump doesn't drop you). */
-	private static final int HOLD_TICKS = 4;
 	/** The most ticks between two Left (or two Right) presses that count as a double tap for a roll. */
 	private static final int ROLL_TAP_TICKS = 7;
 
-	/** Ticks Jump + Sneak have been held together (0 when they aren't). */
-	private static int bothHeld;
+	private static KeyMapping crawlKey;
 	private static boolean crawling;
+	/** Jump must be let go once after going prone before a press of it stands you up. */
+	private static boolean jumpReleased;
 
 	private static boolean leftWasDown;
 	private static boolean rightWasDown;
@@ -41,6 +44,8 @@ final class CrawlTaps {
 	}
 
 	static void init() {
+		crawlKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.crawl", InputConstants.KEY_DOWN,
+			JaymosPowersClient.CATEGORY));
 		ClientTickEvents.END_CLIENT_TICK.register(CrawlTaps::tick);
 	}
 
@@ -58,21 +63,26 @@ final class CrawlTaps {
 		if (player == null) {
 			crawling = false;
 			Crawl.localCrawler = -1;
-			bothHeld = 0;
 			rollLeft = 0;
 			rollStart = Long.MIN_VALUE;
 			lastRoll = null;
 			return;
 		}
+		boolean free = minecraft.gui.screen() == null;
 		boolean jump = minecraft.options.keyJump.isDown();
-		boolean both = jump && minecraft.options.keyShift.isDown();
-		bothHeld = both && minecraft.gui.screen() == null ? bothHeld + 1 : 0;
+		boolean keyPressed = false;
+		while (crawlKey.consumeClick()) {
+			keyPressed = free;
+		}
 		if (crawling) {
-			if (!jump || !Crawl.canCrawl(player)) {
+			boolean jumpPressed = jump && jumpReleased;
+			jumpReleased |= !jump;
+			if (!Crawl.canCrawl(player) || (keyPressed || jumpPressed) && roomToStand(player)) {
 				stop();
 			}
-		} else if (bothHeld >= HOLD_TICKS && Crawl.canCrawl(player)) {
+		} else if (keyPressed && Crawl.canCrawl(player)) {
 			crawling = true;
+			jumpReleased = !jump;
 			Crawl.localCrawler = player.getId();
 			ClientPlayNetworking.send(new Crawl.Key(true));
 		}
@@ -127,6 +137,12 @@ final class CrawlTaps {
 		rollRight = right;
 		rollStart = now;
 		ClientPlayNetworking.send(new Crawl.Roll(right));
+	}
+
+	/** Whether there's room overhead to stand up (or at least crouch, holding Sneak) right where the player lies. */
+	private static boolean roomToStand(LocalPlayer player) {
+		Pose up = player.isShiftKeyDown() ? Pose.CROUCHING : Pose.STANDING;
+		return player.level().noCollision(player, player.getDimensions(up).makeBoundingBox(player.position()).deflate(1.0E-7));
 	}
 
 	private static void stop() {

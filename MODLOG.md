@@ -1295,3 +1295,38 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.11.34, slingshot lines pull tight:** while a slingshot is drawn, both lines tighten slowly from their slack to
   stretched taut at a full draw (`WebSwing.SLING_STRETCH` 0.6 blocks past taut, so they thin and hum), for everyone:
   the drawn length is sent like any rope change. How they look only; the swing's rope is unchanged.
+- **0.11.45 / Kitchen 0.4.43, hearty meals (our own Spice of Life: Valheim Edition, which is LGPL but only for
+  1.19.2/1.20.1):** Kitchen's `stomach/Stomach`. You start at 3 hearts; each food you eat fills one of 3 stomach slots
+  (plus a drink slot for potions, milk, honey) and adds its own health (its nutrition, min 2) and regeneration for
+  180 s per nutrition point (5-40 min). The same food can't fill two slots, and a full slot only makes room in its last
+  20%. Meals add at most 34 health. All three slots full: 10% faster walking. The hunger bar stays as the fuel for
+  sprinting and powers, but no longer heals (`StomachFoodDataMixin`); meals heal you after 10 s unhurt. Kitchen dishes
+  count 1.25x, Perfect 1.5x. Z Fighters get 2 extra slots (`KitchenCompat.extraStomachSlots`). HUD right of the hotbar;
+  food tooltips show a meal's worth.
+- **0.11.46 / Kingdoms 0.7.54:** village fires get stone hearths and chimneys when villages generate, and golems only
+  burn corpses at open, safe fires, so villages stop burning down (`kingdoms/MODLOG.md`).
+- **0.11.48, no portal corruption messages:** Nether Portal Spread still spreads the nether round lit portals, but its
+  chat lines (the "corrupted energy" warning, the coal-block fade and portal-broken lines) are off: `core/PortalSpreadQuiet`
+  sets its three `sendMessageOn...` options false whenever a server starts, whatever its config file says.
+- **0.11.49 / Kingdoms 0.7.55:** tailors (shepherds) change your clothes for a fee that varies by tailor and
+  friendship, in MCA's editor on its clothing page only (`kingdoms/MODLOG.md`).
+- **0.11.50, Bobby:** Bobby 5.2.16 (LGPL-3.0, client-only; CurseForge 409301 / 9077335, Modrinth J7YnfCss) keeps the
+  chunks you've seen and draws them past the server's view distance, so explored land stays visible further out. It
+  doesn't help with land nobody has visited (Chunky pre-gen does that). Works with Sodium and Iris; in cached areas the
+  fast-flight slowdown (`TerrainAhead`) doesn't kick in, since those chunks are already there. C2ME was looked at and
+  left out: its 26.3 build is an early alpha that rewrites worldgen.
+- **0.11.51, enchanting overhaul (Enchanting System Overhaul by CmdrJane, MIT, ported to 26.3 as our own):**
+  `enchanting/`. The enchanting table opens our table (`EnchantingTableMixin`): no XP and no random rolls. Right-click
+  an enchanted book to learn what's in it (kept through death; the book burns up once it taught you everything). At
+  the table, pick any known enchantment that fits the item (or a plain book, to pass it on) and pay its items in the 4
+  material slots, one level at a time (`EnchantRecipes`: ESO's costs; density, breach, wind burst, lunge ours; other
+  mods' enchantments use the default price). Items hold 2-6 enchantments by material (`Enchanting.limit`), +1 with a
+  curse; the anvil can't go past that (`AnvilLimitMixin`); loot keeps at most 3 (books 10). Tinkering tools stay out.
+- **0.11.52, Super hair remodelled:** the old cap-and-sticks hair is gone. Each Super fighter gets one of two sets for
+  good (`ZFighterHair.style`): Swept (locks raked back, close together) or Wild (long locks thrown up and to one side,
+  a huge billowing Super 3 mane). Locks are tapering box chains drawn joint by joint, so they blow back when moving
+  or flying (harder when cruising) and flutter and straighten while charging. Models live in
+  `tools/zfighter_hair/hair.js` (which also renders mock-ups); `export.js` writes `ZFighterHairStyles`. Texture:
+  `tools/gen_zfighter_hair.py`.
+- **0.11.53 / Kingdoms 0.7.56:** monsters see farther (Farsighted Mobs remade) and creepers stalk you, freezing
+  while you look at them (Stalker Creepers remade) (`kingdoms/MODLOG.md`).

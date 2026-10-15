@@ -200,4 +200,11 @@ public final class KitchenCompat {
 			}
 		}
 	}
+
+	/** Kitchen's hearty meals: a power that gives its holder more stomach slots (summed with any others). */
+	public static void extraStomachSlots(java.util.function.ToIntFunction<Player> slots) {
+		if (LOADED) {
+			com.jaymoskitchen.stomach.Stomach.EXTRA_SLOTS.add(slots);
+		}
+	}
 }

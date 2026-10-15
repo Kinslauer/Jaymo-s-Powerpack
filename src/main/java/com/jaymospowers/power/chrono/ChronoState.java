@@ -44,6 +44,8 @@ final class ChronoState {
 	@Nullable StasisField stasis;
 	@Nullable TimeBloom bloom;
 	int overclockLeft;
+	/** (0.11.40) Max rank (all four abilities) only: Overclock was switched on with V and runs until V switches it off (or you die). */
+	boolean overclockHeld;
 	/** (0.10.28) Server tick when V may phase through a wall again (mid-Overclock). */
 	int phaseReadyAt;
 	@Nullable RewindTrail trail;

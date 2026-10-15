@@ -33,6 +33,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.OffhandLanterns.init();
 		com.jaymospowers.core.Shakes.register();
 		com.jaymospowers.core.Impacts.init();
+		com.jaymospowers.core.PortalSpreadQuiet.init();
 		// each power registers itself (and its items, entities, packets) from its own package
 		WindPower.init();
 		ArsenalPower.init();
@@ -48,6 +49,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.armory.Armory.init();
 		com.jaymospowers.armory.TaczGuns.init();
 		com.jaymospowers.tinkering.Tinkering.init();
+		// Enchanting System Overhaul (MIT) ported: learn from books, pay items at the table
+		com.jaymospowers.enchanting.Enchanting.init();
 		registerAttachments();
 	}
 
@@ -62,7 +65,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.arsenal.ArsenalArmory", "power.arsenal.ArsenalPower", "power.arsenal.ArsenalReach", "power.arsenal.ArsenalRelics",
 			"power.arsenal.ArsenalStash", "power.arsenal.ArsenalPocket", "power.arsenal.HundredBlades", "power.arsenal.ArsenalGates", "power.arsenal.ArsenalVoid",
 			"power.arsenal.ArsenalFlintlock", "power.arsenal.ArsenalDamocles", "power.arsenal.ArsenalCannons",
-			"power.chrono.ChronoEchoes", "power.chrono.ChronoMemory", "power.chrono.ChronoFlow", "power.chrono.future.Future", "power.chrono.future.FutureRuins", "power.wind.WindKick",
+			"power.chrono.ChronoEchoes", "power.chrono.ChronoSpeed", "power.chrono.ChronoMemory", "power.chrono.ChronoFlow", "power.chrono.future.Future", "power.chrono.future.FutureRuins", "power.wind.WindKick",
 			"power.gravity.GravityPower", "power.gravity.GravityForward", "power.gravity.GravityWalk",
 			"power.web.WebAscension", "power.web.WebCounter", "power.web.WebBehemoth", "power.web.WebInhabit", "power.web.WebSlam", "power.web.WebBridges", "power.web.WebPower", "power.web.WebSymbiote", "power.web.WebTendrils",
 			"power.web.WebWallRun", "power.web.WebParkour", "power.web.WebStrength",
@@ -74,6 +77,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.zfighter.ZFighterPower", "power.zfighter.ZFighterTraining", "power.zfighter.ZFighterLineage", "power.zfighter.ZFighterGuard", "power.zfighter.ZFighterCombo",
 			"power.zfighter.ZFighterSites", "power.zfighter.ZFighterFusion", "power.zfighter.ZFighterMasters", "power.zfighter.ZFighterRaids", "power.zfighter.ZFighterTournaments", "power.zfighter.ZFighterCorruption",
 			"power.smoke.SmokePower", "power.smoke.SmokeJet", "power.smoke.SmokeVapour", "power.smoke.SmokeSight", "power.smoke.SmokeSmog", "power.smoke.SmokeAshStorm", "power.smoke.SmokeMoves",
+			"enchanting.Enchanting",
 		};
 		for (String holder : holders) {
 			try {

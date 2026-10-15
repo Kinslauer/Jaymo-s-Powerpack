@@ -3057,3 +3057,28 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
   conversation, a remark on your accent, the wizard's disaster relief) now floats over the speaker's head for the
   players around too, each in their own understanding of the tongue (`Speech.overheard`, `McaMessageMixin`). The
   client shows a line once if it arrives twice within 1.5 s (`SpeechBubbles.REPEAT_MS`).
+- **0.7.54, hearths and chimneys:** villages burned down: golems and guards carried corpses to the nearest lit campfire,
+  often a fireplace inside a wooden house, and a burning corpse lights what it lies by (Kitchen, like lava). Now every
+  campfire, fire or lava source inside a village piece (vanilla's, Epic's, any structure with "village" in its id)
+  gets a stone hearth as the village generates (`Hearths`, from `StructureStartMixin`): what catches within 1 block,
+  and the floor within 2, turns to stone brick of the same shape (stairs, slabs, walls; logs to cobblestone), carpets
+  near it come up; beds, doors, chests and other block entities are left. Under a roof it gets a chimney: a 3 x 3 stone
+  brick hood from 2 blocks over the fire up through the roof (wood over the fire turned to stone), standing 2 blocks
+  above it, open at the top. Chimney-top campfires (open sky) only get the hearth. New chunks only. A pyre
+  (`Undertakers.isPyre`) must now be under open sky with nothing that catches within 2 blocks, so no corpse is
+  dropped into an indoor hearth again; builders' fire pits pass.
+- **0.7.55, tailors:** Andy: "a way to change clothes", then "only possible at a tailor villager, and for varying
+  price". A grown shepherd (the villager at the loom) is the tailor: MCA's interact page has a Change Clothes button on
+  them alone (`McaTailorButtonMixin`). They name their fee and MCA's character editor opens held to its clothing page
+  (`Tailors`, `WardrobeScreen`: MCA's own Needle and Thread screen without the needle). Body, hair, genes and the
+  destiny can't be reached from it; picking an outfit pays the fee in emeralds (bundles count), saves it and closes;
+  Escape changes nothing and costs nothing. The fee: 3-7 emeralds by tailor, one off per 25 hearts with them (up to 3),
+  one on per 25 below zero (up to 2), half for family, at least 1; free in creative (`Tailors` constants).
+- **0.7.56, farsighted monsters and stalking creepers:** two mods remade (neither has a 26.3 Fabric build).
+  Farsighted Mobs (LGPL-3): every monster now notices you from at least 24 blocks (vanilla skeletons, creepers and
+  spiders: 16), 8 more on Hard and up to 4 more at the highest local difficulty; monsters that already see farther
+  (zombies, our legends) keep theirs, and illagers and witches keep their own (`Farsight`, a transient follow-range
+  modifier set as each monster loads). Stalker Creepers (Forge/NeoForge, no licence given): a creeper hunting you
+  freezes and stares while you look at it (within about 53 degrees of your view, in line of sight) and creeps on as
+  soon as you look away; within 3.5 blocks, or once it hisses, looking no longer stops it (`Stalkers`, a priority-1
+  goal holding its legs).
