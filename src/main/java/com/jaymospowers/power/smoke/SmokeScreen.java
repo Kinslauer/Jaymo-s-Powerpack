@@ -30,6 +30,11 @@ final class SmokeScreen {
 	private SmokeScreen() {
 	}
 
+	/** Pouring now. */
+	static boolean pouring(ServerPlayer player) {
+		return POURING.containsKey(player.getUUID());
+	}
+
 	static void start(ServerPlayer player) {
 		long now = player.level().getGameTime();
 		POURING.put(player.getUUID(), now);
