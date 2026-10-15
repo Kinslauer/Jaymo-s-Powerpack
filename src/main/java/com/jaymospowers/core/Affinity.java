@@ -33,8 +33,8 @@ public final class Affinity {
 	public static final Identifier FATE = JaymosPowers.id("fate");
 	/** The choice screen is offered at all (switched off for now; /power affinity still sets an affinity). */
 	public static final boolean ENABLED = false;
-	/** The chance an awakening gives the affinity's power (the rest of the time fate picks any power). */
-	public static final float CHANCE = 0.95F;
+	/** The chance an awakening gives the affinity's power: always (Andy, 2026-10-15). */
+	public static final float CHANCE = 1.0F;
 	/** How often (ticks) a powerless survival player without an affinity is offered the choice. */
 	private static final int PROMPT_EVERY = 100;
 
