@@ -110,7 +110,7 @@ public final class Calamities {
 	/** Players hear of one within this distance. */
 	static final double NEWS_RANGE = 300.0;
 	/** How many sandstorms, blizzards and hail showers at once; floods and wildfires. */
-	static final int MOST = 3, MOST_FLOODS = 2, MOST_FIRES = 2;
+	static final int MOST = 4, MOST_FLOODS = 2, MOST_FIRES = 2;
 
 	static final ResourceKey<DamageType> HAIL = ResourceKey.create(Registries.DAMAGE_TYPE, JaymosKingdoms.id("hail"));
 
@@ -137,6 +137,7 @@ public final class Calamities {
 	/** Every sandstorm, blizzard and hail shower ends; floods drain at once. */
 	static void clear(@Nullable ServerLevel level) {
 		SERVER.clear();
+		FORECASTS.clear();
 		FIRES.clear();
 		HAIL_ROLLED.clear();
 		RAINED.clear();
@@ -201,6 +202,12 @@ public final class Calamities {
 		}
 		SERVER.removeIf(c -> c.age >= c.life);
 		boolean damage = level.getGameRules().get(Disasters.DISASTER_DAMAGE);
+		for (Calamity c : SERVER) {
+			if (c.kind == Calamity.QUAKE) {
+				Earthquakes.tick(level, c, random, now, damage);
+			}
+		}
+		forecasts(level, now);
 		if (!SERVER.isEmpty()) {
 			for (ServerPlayer p : level.players()) {
 				if (!p.isSpectator()) {
@@ -223,13 +230,93 @@ public final class Calamities {
 	private static void roll(ServerLevel level, RandomSource random) {
 		rain(level, random);
 		int days = level.getGameRules().get(Disasters.DISASTER_DAYS);
-		if (days <= 0 || random.nextDouble() >= ROLL_TICKS / (days * 24000.0)) {
+		// (stage 3) a Harvest Moon never brings one; a Blood Moon twice as often
+		if (days <= 0 || harvestMoon(level) || random.nextDouble() >= ROLL_TICKS / (days * 24000.0) * (bloodMoon(level) ? 2.0 : 1.0)) {
 			return;
 		}
 		ServerPlayer target = someone(level, random);
-		if (target != null) {
-			start(level, target, suits(level, target.blockPosition(), random), random);
+		if (target != null && FORECASTS.size() < MOST_FORECASTS) {
+			// (stage 3) it's foretold, and comes about half a day later
+			BlockPos at = target.blockPosition();
+			String kind = random.nextFloat() < (Earthquakes.mountainous(level, at) ? Earthquakes.MOUNTAINS : Earthquakes.ELSEWHERE)
+				? "quake" : suits(level, at, random);
+			FORECASTS.add(new Forecast(kind, at, level.getGameTime() + FORECAST_TICKS));
 		}
+	}
+
+	/** (Stage 3) A disaster foretold: what, where, and when it comes. Court wizards, the almanac and the Traveller's
+	 * Journal tell of it. */
+	record Forecast(String kind, BlockPos at, long when) {
+	}
+
+	/** (Stage 3) How long before a disaster it's foretold (ticks); how many can be foretold at once; it comes about
+	 * whoever is within this distance of where it was foretold then (or not at all). */
+	static final long FORECAST_TICKS = 12000L;
+	static final int MOST_FORECASTS = 3;
+	static final double FORECAST_REACH = 400.0;
+	/** (Stage 3) The almanac and the wizards foretell disasters within this distance. */
+	public static final double FORETOLD_RANGE = 1200.0;
+	private static final List<Forecast> FORECASTS = new ArrayList<>();
+
+	/** (Testing) Something suited to where {@code p} stands is foretold there, coming in a minute. */
+	static void foretellNow(ServerLevel level, ServerPlayer p) {
+		BlockPos at = p.blockPosition();
+		String kind = Earthquakes.mountainous(level, at) && level.getRandom().nextBoolean() ? "quake" : suits(level, at, level.getRandom());
+		FORECASTS.add(new Forecast(kind, at, level.getGameTime() + 1200L));
+	}
+
+	/** Foretold disasters whose time has come. */
+	private static void forecasts(ServerLevel level, long now) {
+		for (java.util.Iterator<Forecast> it = FORECASTS.iterator(); it.hasNext(); ) {
+			Forecast f = it.next();
+			if (now < f.when()) {
+				continue;
+			}
+			it.remove();
+			if (harvestMoon(level)) {
+				continue;
+			}
+			ServerPlayer near = null;
+			double best = FORECAST_REACH * FORECAST_REACH;
+			for (ServerPlayer p : level.players()) {
+				double d = p.blockPosition().distSqr(f.at());
+				if (!p.isSpectator() && d < best) {
+					best = d;
+					near = p;
+				}
+			}
+			if (near != null) {
+				start(level, near, f.kind(), level.getRandom());
+			}
+		}
+	}
+
+	/** (Stage 3) What's foretold within {@link #FORETOLD_RANGE} of {@code pos}, in words (empty: nothing). */
+	public static List<Component> foretold(ServerLevel level, BlockPos pos) {
+		List<Component> lines = new ArrayList<>();
+		long now = level.getGameTime();
+		for (Forecast f : FORECASTS) {
+			if (f.at().distSqr(pos) > FORETOLD_RANGE * FORETOLD_RANGE) {
+				continue;
+			}
+			long hours = Math.max(1L, Math.round((f.when() - now) / 1000.0));
+			int blocks = (int)Math.round(Math.sqrt(f.at().distSqr(pos)));
+			Component where = blocks < 64 ? Component.translatable("disaster.jaymoskingdoms.forecast.here")
+				: Component.translatable("disaster.jaymoskingdoms.forecast.there", Storms.direction(pos.getX(), pos.getZ(), f.at().getX(), f.at().getZ()), blocks);
+			lines.add(Component.translatable("disaster.jaymoskingdoms.forecast." + f.kind(), where, hours));
+		}
+		return lines;
+	}
+
+	/** (Stage 3) Tonight's moon. */
+	static boolean bloodMoon(ServerLevel level) {
+		com.jaymoskingdoms.Moons.Moon moon = com.jaymoskingdoms.Moons.now(level.getServer());
+		return moon == com.jaymoskingdoms.Moons.Moon.BLOOD || moon == com.jaymoskingdoms.Moons.Moon.SUPER_BLOOD;
+	}
+
+	/** (Stage 3) A Harvest Moon is up: no disaster comes (stage 1's supercells wait too). */
+	public static boolean harvestMoon(ServerLevel level) {
+		return com.jaymoskingdoms.Moons.now(level.getServer()) == com.jaymoskingdoms.Moons.Moon.HARVEST;
 	}
 
 	/** What the land at {@code pos} brews: a sandstorm on sand, a blizzard in snow, a wildfire where it's dry, else hail. */
@@ -251,6 +338,13 @@ public final class Calamities {
 	 * {@code target}. Whether it could (a flood needs water near, a wildfire needs block damage on). */
 	static boolean start(ServerLevel level, ServerPlayer target, String kind, RandomSource random) {
 		switch (kind) {
+			case "quake" -> {
+				Calamity c = Earthquakes.start(level, target.position(), 0, random);
+				if (c != null) {
+					com.jaymoskingdoms.DisasterRelief.struck(level, c.x, c.z, c.radius, "quake", Earthquakes.magnitude(c));
+				}
+				return c != null;
+			}
 			case "sandstorm" -> {
 				return land(level, target.position(), Calamity.SANDSTORM, random) != null;
 			}
@@ -303,6 +397,7 @@ public final class Calamities {
 			Mth.nextInt(random, LAND_LIFE_MIN, LAND_LIFE_MAX), -1);
 		SERVER.add(c);
 		news(level, c.x, c.z, "disaster.jaymoskingdoms." + Calamity.NAMES[kind]);
+		com.jaymoskingdoms.DisasterRelief.struck(level, near.x, near.z, radius, Calamity.NAMES[kind], 1);
 		return c;
 	}
 
@@ -348,6 +443,7 @@ public final class Calamities {
 				SERVER.add(new Calamity(Storms.nextId(), Calamity.HAIL, s.x, s.z, s.vx, s.vz, s.radius * HAIL_SHARE, 0,
 					Mth.nextInt(random, HAIL_LIFE_MIN, HAIL_LIFE_MAX), s.id));
 				news(level, s.x, s.z, "disaster.jaymoskingdoms.hail");
+				com.jaymoskingdoms.DisasterRelief.struck(level, s.x, s.z, s.radius, "hail", 1);
 			}
 		}
 	}
@@ -507,6 +603,7 @@ public final class Calamities {
 		}
 		FIRES.add(fire);
 		news(level, fire.x, fire.z, "disaster.jaymoskingdoms.wildfire");
+		com.jaymoskingdoms.DisasterRelief.struck(level, fire.x, fire.z, FIRE_REACH, "wildfire", 1);
 		return true;
 	}
 
@@ -656,6 +753,7 @@ public final class Calamities {
 		Flood flood = new Flood(center, level.getGameRules().get(Disasters.DISASTER_DAMAGE));
 		FLOODS.add(flood);
 		news(level, center.getX(), center.getZ(), "disaster.jaymoskingdoms.flood");
+		com.jaymoskingdoms.DisasterRelief.struck(level, center.getX(), center.getZ(), FLOOD_RADIUS + 20.0, "flood", 1);
 		return true;
 	}
 

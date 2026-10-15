@@ -47,6 +47,8 @@ public final class Disasters {
 	/** (0.7.31) The sand a sandstorm piles up, in layers like snow. */
 	public static Block SAND_LAYER, RED_SAND_LAYER;
 	public static Item STORM_BELL_ITEM, WEATHERVANE_ITEM, BAROMETER;
+	/** (0.7.31) The almanac: use it to read what disasters are foretold near you. */
+	public static Item ALMANAC;
 	/** The client's storm-cloud and funnel particles (spawned by the client only, from its copy of the storms). */
 	public static SimpleParticleType STORM_CLOUD, FUNNEL;
 	/** (0.7.31) The client's blowing sand, snow and hail (stage 2, {@link Calamities}). */
@@ -73,8 +75,11 @@ public final class Disasters {
 		WEATHERVANE_ITEM = blockItem("weathervane", WEATHERVANE);
 		ResourceKey<Item> barometer = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("barometer"));
 		BAROMETER = Registry.register(BuiltInRegistries.ITEM, barometer, new Item(new Item.Properties().setId(barometer).stacksTo(1)));
+		ResourceKey<Item> almanac = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("almanac"));
+		ALMANAC = Registry.register(BuiltInRegistries.ITEM, almanac, new Almanac(new Item.Properties().setId(almanac).stacksTo(1)));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			output.insertAfter(Items.CLOCK, BAROMETER);
+			output.insertAfter(BAROMETER, ALMANAC);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.REDSTONE_BLOCKS).register(output -> {
 			output.insertAfter(Items.DAYLIGHT_DETECTOR, STORM_BELL_ITEM);
@@ -116,6 +121,16 @@ public final class Disasters {
 			.then(Commands.literal("wildfire").executes(c -> land(c, "wildfire")))
 			.then(Commands.literal("flood").executes(c -> land(c, "flood")))
 			.then(Commands.literal("hail").executes(c -> land(c, "hail")))
+			.then(Commands.literal("quake").executes(c -> land(c, "quake")))
+			.then(Commands.literal("forecast").executes(c -> {
+				ServerPlayer p = c.getSource().getPlayerOrException();
+				if (!(p.level() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) {
+					return 0;
+				}
+				Calamities.foretellNow(level, p);
+				c.getSource().sendSuccess(() -> Component.translatable("disaster.jaymoskingdoms.foretold"), true);
+				return 1;
+			}))
 			.then(Commands.literal("clear").executes(c -> {
 				Storms.clear();
 				Calamities.clear(c.getSource().getServer().overworld());

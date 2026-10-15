@@ -1214,6 +1214,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   and gravel still land on them. Anything moving through leaves rustles them, knocks bits off and shakes real falling
   leaves loose (vanilla sounds and particles drawn on each client, so Iris is fine). Tuning at the top of `core/Leaves`
   and `client/LeafRustle`.
-- **0.10.118, natural disasters stage 2** (Andy: "okay resume stage work while we test"): Kingdoms 0.7.31 adds the
+- **0.10.118, natural disasters stages 2 and 3** (Andy: "okay resume stage work while we test", then "next stage?"): Kingdoms 0.7.31 adds the
   land's own disasters: sandstorms with drifting sand, blizzards that freeze you, wildfires settlements fight with
-  buckets, floods after long rain that drain again, and hail. See `kingdoms/MODLOG.md`.
+  buckets, floods after long rain that drain again, and hail; then earthquakes, struck settlements (news, repairs, tempers,
+  relief quests) and forecasts (court wizards, the Journal, a new Almanac). See `kingdoms/MODLOG.md`.

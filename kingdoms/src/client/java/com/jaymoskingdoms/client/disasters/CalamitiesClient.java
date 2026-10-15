@@ -31,6 +31,11 @@ import net.minecraft.world.phys.Vec3;
 public final class CalamitiesClient {
 	/** How thick the sand, snow and hail are at the camera, 0..1 (eased). The fog mixin reads the first two. */
 	public static float sand, snow, hail;
+	/** (Stage 3) How hard the ground shakes at the camera, in degrees of rattle (eased); {@code CalamityShakeMixin}. */
+	public static float quake;
+	/** A quake's rattle per magnitude (degrees), and how fast it rattles. */
+	static final float QUAKE_DEGREES = 0.9F, QUAKE_SPEED = 2.2F;
+	private static int clock;
 	/** How fast they ease (per tick). */
 	static final float EASE = 0.02F;
 	/** Specks a tick at full strength (sand, snow, hail), and how far round the camera they start. */
@@ -56,7 +61,7 @@ public final class CalamitiesClient {
 		});
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			Calamities.CLIENT = List.of();
-			sand = snow = hail = 0.0F;
+			sand = snow = hail = quake = 0.0F;
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(CalamitiesClient::tick);
 	}
@@ -70,6 +75,7 @@ public final class CalamitiesClient {
 			sand = ease(sand, 0.0F);
 			snow = ease(snow, 0.0F);
 			hail = ease(hail, 0.0F);
+			quake = Math.max(0.0F, quake - 0.1F);
 			if (Calamities.CLIENT.isEmpty() || level.dimension() != Level.OVERWORLD) {
 				return;
 			}
@@ -82,6 +88,18 @@ public final class CalamitiesClient {
 		sand = ease(sand, Calamities.cover(level, Calamity.SANDSTORM, eye.x, eye.z) * open);
 		snow = ease(snow, Calamities.cover(level, Calamity.BLIZZARD, eye.x, eye.z) * open);
 		hail = ease(hail, Calamities.cover(level, Calamity.HAIL, eye.x, eye.z));
+		clock++;
+		float shaking = 0.0F;
+		for (Calamity c : Calamities.CLIENT) {
+			if (c.kind == Calamity.QUAKE) {
+				int magnitude = c.radius >= 150.0F ? 3 : c.radius >= 100.0F ? 2 : 1;
+				shaking = Math.max(shaking, c.over(eye.x, eye.z) * magnitude * QUAKE_DEGREES);
+			}
+		}
+		quake += (shaking - quake) * 0.2F;
+		if (quake > 0.1F) {
+			rumble(level, eye, level.getRandom());
+		}
 		if (sprites == null) {
 			return;
 		}
@@ -131,6 +149,31 @@ public final class CalamitiesClient {
 			}
 			minecraft.particleEngine.add(p);
 		}
+	}
+
+	/** (Stage 3) The deep rumble of a quake, and stones and timbers creaking. */
+	private static void rumble(ClientLevel level, Vec3 eye, RandomSource random) {
+		if (clock % 20 == 0) {
+			level.playLocalSound(eye.x, eye.y - 4.0, eye.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.AMBIENT, 0.25F * quake, 0.25F, false);
+		}
+		if (random.nextInt(8) == 0) {
+			level.playLocalSound(eye.x + random.nextGaussian() * 6.0, eye.y - 2.0, eye.z + random.nextGaussian() * 6.0,
+				random.nextBoolean() ? SoundEvents.DEEPSLATE_BREAK : SoundEvents.WOOD_BREAK, SoundSource.AMBIENT, 0.35F * quake, 0.5F, false);
+		}
+	}
+
+	/** (Stage 3) Rattles the view by the quake (with the hurt bob, so your aim never moves). */
+	public static void shake(com.mojang.blaze3d.vertex.PoseStack pose, float partialTicks) {
+		if (quake <= 0.02F) {
+			return;
+		}
+		float p = (clock + partialTicks) * QUAKE_SPEED;
+		float pitch = quake * (0.6F * Mth.sin(p * 1.13F) + 0.4F * Mth.sin(p * 2.31F + 1.7F));
+		float roll = quake * 0.8F * (0.6F * Mth.sin(p * 0.97F + 3.1F) + 0.4F * Mth.sin(p * 1.87F + 0.6F));
+		float yaw = quake * 0.4F * Mth.sin(p * 0.71F + 2.0F);
+		pose.rotateDegrees(com.mojang.math.Axis.XP, pitch);
+		pose.rotateDegrees(com.mojang.math.Axis.YP, yaw);
+		pose.rotateDegrees(com.mojang.math.Axis.ZP, roll);
 	}
 
 	/** The wind howling through a sandstorm or blizzard, and hailstones clattering on the ground. */

@@ -2909,7 +2909,7 @@ moon and back on at dawn (`DarkNights`), but without the "A dark night: shaders 
   can be laid again and again; rename them on an anvil. `ShipKits.lay`/`room` now take any design.
 - A wrecked ship's blocks go down solid ones first, so the torches and lanterns hung on them don't pop off.
 
-## 0.7.31: natural disasters, stage 2: the land's own (pack 0.10.118)
+## 0.7.31: natural disasters, stages 2 and 3: the land's own, earthquakes, kingdoms and forecasts (pack 0.10.118)
 - Andy: "okay resume stage work while we test" (plan `/mnt/project-files/disasters/Disasters-Plan.md`, stage 2). All
   in `disasters/Calamities`; stage 1's `Storms`, `Tornadoes`, `Storm` and `Tornado` are untouched. Every
   `disaster_days` (6) on average, as often as stage 1's supercells, the land under someone brews what suits it:
@@ -2935,3 +2935,24 @@ moon and back on at dawn (`DarkNights`), but without the "A dark night: shaders 
 - Kept cheap (Andy asked that of the clouds): sandstorms, blizzards and hail are a few numbers sent to the clients 2x a
   second (`Calamities.Sync`), which draw the fog and a few dozen specks a tick round the camera (`CalamitiesClient`,
   `GustParticle`); the server only works round each player under one.
+- Stage 3 (Andy: "next stage?"):
+  - **Earthquakes** (`disasters/Earthquakes`), a land disaster: half of those near mountains (biome tag or ground 50
+    above the sea), 5% elsewhere; magnitude 1-3 (felt 60/100/150 round, 15-30 s; a Blood Moon adds one). Clients rattle
+    the view (`CalamityShakeMixin` on the hurt bob, so aim never moves) and rumble; anyone standing staggers; plain
+    whole blocks of hardness 3 or less hanging over air round each player (cave ceilings, overhangs, roofs) shake loose
+    and fall, hurting what they land on; magnitude 2-3 open jagged cracks 3-6 deep in natural ground; the strongest may
+    swallow a 3-5 round, 6-10 deep sinkhole once. All block damage waits on `disaster_damage`.
+  - **Kingdoms react** (`DisasterRelief`): a settlement within a disaster's reach is struck: news (across the land for
+    a realm, round about for a village); its treasury pays for repairs (storms 10, fire 25, flood 20, quake 25 a
+    magnitude; a NOBLE king pays half again and says so); a TYRANT levies a storm tax of twice that on top; a PARANOID
+    king blames anyone near with strange powers (Powers' oddity tags), -40 reputation. Two of its villagers ask for
+    help: bring food (bread, baked potatoes, steak or cod, a GATHER quest) and, after sandstorms, fires, floods and
+    quakes, clear the rubble (new `Quest.RELIEF`: break stone, earth, sand, drifts, timber within 96 of the seat).
+    Rebuilds puts the buildings back as ever.
+  - **Forecasts**: land disasters (not floods, which come of the rain, nor stage 1's storms) are foretold half a day
+    ahead and come about whoever is within 400 of the spot then. A court wizard, sneak-used, tells you what's coming
+    near him; the Traveller's Journal shows "The Weather Ahead" first; the new **Almanac** (book + clock + lapis) reads
+    them out (what, which way, how far, how many hours), or promises fair days. `/kingdom disaster forecast` foretells
+    one where you stand, a minute off; `/kingdom disaster quake` shakes now.
+  - **Moons**: a Harvest Moon brings no disaster (stage 1's supercells wait too; one foretold for it never comes); a
+    Blood Moon twice as many, and quakes one stronger.

@@ -168,7 +168,8 @@ public final class Storms {
 			return;
 		}
 		int days = level.getGameRules().get(Disasters.DISASTER_DAYS);
-		if (days > 0 && random.nextDouble() < ROLL_TICKS / (days * 24000.0)) {
+		// (0.7.31) a Harvest Moon never brings one
+		if (days > 0 && !Calamities.harvestMoon(level) && random.nextDouble() < ROLL_TICKS / (days * 24000.0)) {
 			ServerPlayer target = someone(level, random);
 			if (target != null) {
 				if (dry(level, target.blockPosition())) {

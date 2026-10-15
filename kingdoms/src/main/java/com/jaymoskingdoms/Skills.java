@@ -296,6 +296,8 @@ public final class Skills {
 				Languages.shrug(sp, wizard);
 				return InteractionResult.SUCCESS;
 			}
+			// (0.7.31) first, what the stars foretell
+			DisasterRelief.foretell(sp.level(), sp, wizard);
 			if (of(sp).spent() == 0) {
 				// (0.6.0) nothing to unmake: he offers a Writ of Rebirth instead
 				Classes.writOffer(sp, wizard);
