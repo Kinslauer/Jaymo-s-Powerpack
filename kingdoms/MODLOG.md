@@ -3114,7 +3114,10 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
 - **0.7.61, foreign voices grunt:** MCA's spoken voice lines (greet, yes, no, celebrate, angry) are sent per player:
   those who don't understand the villager's tongue (`Languages.understands`: fluent, family or sworn) hear the vanilla
   villager grunt instead (`EntityVoiceMixin` on `Entity.playSound`, `Languages.voice`).
-- **0.7.62, secret identities** (`Identities`, with Jaymo's Powers 0.11.70 costumes): a player masked by their costume
+- **0.7.62, raiders leave fires burning:** (`Firefighting.ours`) raiders and war parties' soldiers (`Assault.attacker`)
+  never fight fires, theirs or the town's, and no folk fights a fire on enemy land (`Assault.enemyLand`). The town's own
+  villagers, folk and golems still do.
+- **0.7.63, secret identities** (`Identities`, with Jaymo's Powers 0.11.71 costumes): a player masked by their costume
   (Powers' tag `jaymospowers_masked:<key>`) is a stranger. Done masked, a deed or crime goes on the costume's own
   reputation and wanted time with that settlement (`Reputation.get/change`, `Theft.wanted/outlaw/commit/arrest` ask
   `Identities.persona`); guards hunt the costume when they see it, not the player bare-faced. Members are strangers
