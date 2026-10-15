@@ -41,8 +41,8 @@ import org.jspecify.annotations.Nullable;
  * <p>A Z Fighter or a Gravity user doesn't sit: he shadowboxes, throwing punches and kicks at nothing (combos from
  * {@link Shadowbox}, more as he unlocks abilities), and that's his meditation (for a Z Fighter, ZFighterTraining gives
  * the TP, ki and form mastery too). Under heavy gravity (someone else's Immense Field; for a Z Fighter also Gravity's
- * weight) he sinks into a heavier stance. A Gravity user's own field isn't heavy enough for him: he has to spar in it
- * (GravityTrainingField).
+ * weight) he sinks into a heavier stance. A Gravity user's shadowboxing earns mastery only beside a partner (someone
+ * else shadowboxing within {@link #PARTNER_RANGE}); in his own field that also speeds him up (GravityTrainingField).
  *
  * <p>Moving, leaving the ground, or being hurt breaks it; keep holding the key and you settle in again once still. The
  * state is synced to everyone so every client draws the pose (MeditatePose).
@@ -217,7 +217,9 @@ public final class Meditate {
 				continue;
 			}
 			int perPoint = TICKS_PER_POINT[Math.min(TICKS_PER_POINT.length - 1, rank(player))];
-			if ((time - SETTLE) % perPoint == perPoint - 1) {
+			// a Gravity user's shadowboxing only pays beside a partner (another shadowboxer)
+			boolean pays = !Powers.has(player, com.jaymospowers.power.gravity.GravityPower.INSTANCE) || partnered(player);
+			if (pays && (time - SETTLE) % perPoint == perPoint - 1) {
 				Mastery.practice(player, 1);
 			}
 			if (kind == MEDITATING) {
@@ -250,6 +252,22 @@ public final class Meditate {
 	public static long ticks(Player player) {
 		State state = of(player);
 		return state == null ? -1L : player.level().getGameTime() - state.since();
+	}
+
+	/** How near another shadowboxer must be to count as a partner (blocks). */
+	static final double PARTNER_RANGE = 5.0;
+
+	/** Whether this player is shadowboxing with someone else shadowboxing beside him. */
+	public static boolean partnered(ServerPlayer player) {
+		if (!shadowboxing(player)) {
+			return false;
+		}
+		for (ServerPlayer other : player.level().players()) {
+			if (other != player && other.distanceToSqr(player) <= PARTNER_RANGE * PARTNER_RANGE && shadowboxing(other)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Whether this player is shadowboxing (settled in): a Z Fighter or a Gravity user. */
