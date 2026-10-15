@@ -180,6 +180,9 @@ public final class ZFighterPower implements Power {
 	private static final Identifier APE_FIST_ID = JaymosPowers.id("zfighter_ape_fists");
 	private static final Identifier APE_HEALTH_ID = JaymosPowers.id("zfighter_ape_health");
 	private static final Identifier APE_SPEED_ID = JaymosPowers.id("zfighter_ape_speed");
+	private static final Identifier APE_JUMP_ID = JaymosPowers.id("zfighter_ape_jump");
+	private static final Identifier APE_GRAVITY_ID = JaymosPowers.id("zfighter_ape_gravity");
+	private static final Identifier APE_FALL_ID = JaymosPowers.id("zfighter_ape_fall");
 
 	/** The owner's HUD state (ki, cooldowns, what he's doing). Not saved: a relog clears it. */
 	public static final AttachmentType<ZFighterState> STATE = AttachmentRegistry.create(JaymosPowers.id("zfighter_state"),
@@ -264,6 +267,8 @@ public final class ZFighterPower implements Power {
 		float apeStepAt;
 		/** Which foot comes down next (the Great Ape's stomps alternate). */
 		boolean apeLeftFoot;
+		/** The highest he's been since his feet last touched down: a long drop ends in a stomp. */
+		double apePeak;
 		/** The guard (right click held): up, since when, when he may parry again, until when his punch counters. */
 		boolean guarding;
 		long guardStart;
@@ -398,6 +403,9 @@ public final class ZFighterPower implements Power {
 		remove(player, Attributes.MAX_HEALTH, VITALITY_ID);
 		remove(player, Attributes.MAX_HEALTH, APE_HEALTH_ID);
 		remove(player, Attributes.MOVEMENT_SPEED, APE_SPEED_ID);
+		remove(player, Attributes.JUMP_STRENGTH, APE_JUMP_ID);
+		remove(player, Attributes.GRAVITY, APE_GRAVITY_ID);
+		remove(player, Attributes.FALL_DAMAGE_MULTIPLIER, APE_FALL_ID);
 		remove(player, Attributes.ENTITY_INTERACTION_RANGE, REACH_ID);
 		remove(player, Attributes.SCALE, SCALE_ID);
 		player.removeAttached(ZFighterGuard.GUARD);
@@ -419,13 +427,13 @@ public final class ZFighterPower implements Power {
 
 	@Override
 	public boolean allowsFloating(ServerPlayer player) {
-		return live(player).flying;
+		return live(player).flying || ZFighterLineage.ape(player);
 	}
 
 	@Override
 	public boolean skipsMovementCheck(ServerPlayer player) {
 		Live live = live(player);
-		return live.flying || live.stepUntil > player.level().getGameTime();
+		return live.flying || live.stepUntil > player.level().getGameTime() || ZFighterLineage.ape(player);
 	}
 
 	@Override
@@ -1053,14 +1061,17 @@ public final class ZFighterPower implements Power {
 		// lineages: a Verdant's long arms and Giant forms; the Great Ape
 		int lineage = ZFighterLineage.of(player);
 		boolean ape = ZFighterLineage.ape(player);
-		set(player, Attributes.ENTITY_INTERACTION_RANGE, REACH_ID, lineage == ZFighterLineage.VERDANT ? ZFighterLineage.REACH : 0.0,
-			AttributeModifier.Operation.ADD_VALUE);
+		set(player, Attributes.ENTITY_INTERACTION_RANGE, REACH_ID, ape ? ZFighterLineage.apeReach(player)
+			: lineage == ZFighterLineage.VERDANT ? ZFighterLineage.REACH : 0.0, AttributeModifier.Operation.ADD_VALUE);
 		double scale = live.apeSize > 0.0F ? ZFighterLineage.apeScale(live.apeSize)
 			: lineage == ZFighterLineage.VERDANT ? ZFighterLineage.GIANT_SCALE[live.form] : 0.0;
 		set(player, Attributes.SCALE, SCALE_ID, scale, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 		set(player, Attributes.ATTACK_DAMAGE, APE_FIST_ID, ape ? ZFighterLineage.APE_FISTS : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.MAX_HEALTH, APE_HEALTH_ID, ape ? ZFighterLineage.APE_HEALTH : 0.0, AttributeModifier.Operation.ADD_VALUE);
 		set(player, Attributes.MOVEMENT_SPEED, APE_SPEED_ID, ape ? ZFighterLineage.APE_SPEED : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		set(player, Attributes.JUMP_STRENGTH, APE_JUMP_ID, ape ? ZFighterLineage.APE_JUMP : 0.0, AttributeModifier.Operation.ADD_VALUE);
+		set(player, Attributes.GRAVITY, APE_GRAVITY_ID, ape ? -ZFighterLineage.APE_LIGHT : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		set(player, Attributes.FALL_DAMAGE_MULTIPLIER, APE_FALL_ID, ape ? -1.0 : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		ZFighterCorruption.attributes(player, live);
 		// fused: the partner's fists and health added, and a little more
 		set(player, Attributes.ATTACK_DAMAGE, ZFighterFusion.FIST_ID, ZFighterFusion.fists(player), AttributeModifier.Operation.ADD_VALUE);

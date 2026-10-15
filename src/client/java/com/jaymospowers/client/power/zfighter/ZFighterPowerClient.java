@@ -99,6 +99,7 @@ public final class ZFighterPowerClient implements PowerClient {
 	@Override
 	public void tick(Minecraft minecraft, LocalPlayer player) {
 		ZFighterFlightClient.tick(minecraft, player);
+		ZFighterApeGlide.tick(minecraft, player);
 		// the guard: right click held, bare-handed
 		boolean guard = minecraft.options.keyUse.isDown() && minecraft.gui.screen() == null && !player.isSpectator()
 			&& player.getMainHandItem().isEmpty();

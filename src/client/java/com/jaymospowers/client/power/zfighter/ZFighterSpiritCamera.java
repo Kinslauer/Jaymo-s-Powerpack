@@ -1,6 +1,7 @@
 package com.jaymospowers.client.power.zfighter;
 
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.power.zfighter.ZFighterLineage;
 import com.jaymospowers.power.zfighter.ZFighterPower;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -12,7 +13,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Raising a Spirit Bomb, the view pulls way back and up behind him, further as the sphere grows, so he sees the whole of
- * it over his head; let go, it eases back in. Walls stop it short.
+ * it over his head; let go, it eases back in. Walls stop it short. A Great Ape's view sits way out the same way, so he
+ * sees the whole of himself.
  */
 public final class ZFighterSpiritCamera {
 	/** How far back the view sits with a fresh bomb, and how much further a full one takes it (blocks). */
@@ -21,6 +23,8 @@ public final class ZFighterSpiritCamera {
 	static final double RISE = 0.45;
 	/** How fast it eases out and back in (a share of the way a frame). */
 	static final double EASE = 0.06;
+	/** How far back a Great Ape's view sits, per block of his height. */
+	static final double APE_BACK = 1.6;
 
 	private static double pulled;
 
@@ -35,6 +39,9 @@ public final class ZFighterSpiritCamera {
 			int bomb = ZFighterPower.state(player).bomb();
 			if (bomb >= 0) {
 				target = NEAR + (FAR - NEAR) * Math.sqrt(Mth.clamp(bomb / 100.0, 0.0, 1.0));
+			}
+			if (ZFighterLineage.ape(player)) {
+				target = Math.max(target, player.getBbHeight() * APE_BACK);
 			}
 		}
 		pulled += (target - pulled) * EASE;

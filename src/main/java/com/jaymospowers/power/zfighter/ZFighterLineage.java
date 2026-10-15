@@ -90,6 +90,12 @@ public final class ZFighterLineage {
 	/** Every footfall is a stomp: enemies this far from the foot (blocks, at full size) are hurt this much and thrown up. */
 	static final double APE_FOOT_REACH = 4.5;
 	static final float APE_FOOT_DAMAGE = 8.0F;
+	/** His jump (added to vanilla's 0.42) and how much of his weight he sheds, so he leaps ~20 blocks and drifts down slow. */
+	static final double APE_JUMP = 0.58, APE_LIGHT = 0.85;
+	/** A drop this far (blocks) lands as a stomp. */
+	static final double APE_LANDING = 5.0;
+	/** How far across the ground his fists reach (blocks), measured out from his body rather than his eyes up high. */
+	static final double APE_REACH = 20.0;
 	// ---- Verdant ----
 	static final int REGEN_EVERY = 40;
 	static final float REGEN = 1.0F;
@@ -156,6 +162,12 @@ public final class ZFighterLineage {
 
 	public static boolean tailOut(Player player) {
 		return of(player) == WARRIOR && !Boolean.TRUE.equals(player.getAttached(TAIL_WRAPPED));
+	}
+
+	/** The reach to add so his fists land {@link #APE_REACH} out along the ground, from eyes that far up. */
+	static double apeReach(Player player) {
+		double up = Math.max(0.0, player.getEyeHeight() - 1.0);
+		return Math.sqrt(APE_REACH * APE_REACH + up * up) - player.getAttributeBaseValue(net.minecraft.world.entity.ai.attributes.Attributes.ENTITY_INTERACTION_RANGE);
 	}
 
 	public static boolean ape(Player player) {
@@ -362,6 +374,7 @@ public final class ZFighterLineage {
 		boolean moonlit = tailOut(player) && level.isDarkOutside() && level.canSeeSky(BlockPos.containing(player.getEyePosition()))
 			&& level.environmentAttributes().getValue(EnvironmentAttributes.MOON_PHASE, BlockPos.ZERO) == MoonPhase.FULL_MOON;
 		if (!ape(player)) {
+			live.apePeak = player.getY();
 			if (moonlit && player.isAlive()) {
 				becomeApe(player, live);
 			}
@@ -379,10 +392,20 @@ public final class ZFighterLineage {
 		if (now % 200 == 0) {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 2.0F, 0.5F);
 		}
-		// every stride of his shakes the ground
+		// a long drop lands as a stomp
+		if (player.onGround()) {
+			if (live.apePeak - player.getY() >= APE_LANDING && live.apeSize >= 0.5F) {
+				footfall(player, live, level);
+				footfall(player, live, level);
+			}
+			live.apePeak = player.getY();
+		} else {
+			live.apePeak = Math.max(live.apePeak, player.getY());
+		}
+		// every stride of his shakes the ground (sprinting, he skims over it instead)
 		if (player.moveDist - live.apeStepAt >= APE_STRIDE * Math.max(0.5F, live.apeSize)) {
 			live.apeStepAt = player.moveDist;
-			if (player.onGround() && live.apeSize >= 0.5F) {
+			if (player.onGround() && !player.isSprinting() && live.apeSize >= 0.5F) {
 				footfall(player, live, level);
 			}
 		}
