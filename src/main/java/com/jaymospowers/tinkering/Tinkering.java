@@ -69,9 +69,9 @@ public final class Tinkering {
 	public static DataComponentType<List<String>> TOOL_MATERIALS;
 	/** A part's material. */
 	public static DataComponentType<String> PART_MATERIAL;
-	/** (0.11.70) The weapon head a Weapon Cast casts ({@link WeaponParts}), by the head's id. */
+	/** (0.11.71) The weapon head a Weapon Cast casts ({@link WeaponParts}), by the head's id. */
 	public static DataComponentType<String> WEAPON_CAST;
-	/** (0.11.70) What a weapon head is made of ({@link WeaponParts.Metal}). */
+	/** (0.11.71) What a weapon head is made of ({@link WeaponParts.Metal}). */
 	public static DataComponentType<String> WEAPON_PART_METAL;
 	/** A tool's modifiers (id to level), and the xp it has earned toward its next level. */
 	public static DataComponentType<Map<String, Integer>> TOOL_MODIFIERS;

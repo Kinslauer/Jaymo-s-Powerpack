@@ -22,12 +22,12 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * The Part Builder, laid out like Tinkers' screen (MIT): pattern and material left, the parts to pick in the middle, info
- * beside it. (0.10.127) Drawn like the H screen: dark panel, bronze stripe, sunken slots, flat part tiles. (0.11.70) The
+ * beside it. (0.10.127) Drawn like the H screen: dark panel, bronze stripe, sunken slots, flat part tiles. (0.11.71) The
  * arrows page through to the weapon heads ({@link WeaponParts}).
  */
 public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> {
 	private static final int GRID_X = 51, GRID_Y = 15, CELL = 18, COLUMNS = 4, CELLS = 16;
-	/** (0.11.70) The page arrows (tool parts, then weapon heads), above the pattern and material slots. */
+	/** (0.11.71) The page arrows (tool parts, then weapon heads), above the pattern and material slots. */
 	private static final int PAGE_X = 8, PAGE_Y = 20, PAGE_W = 16, PAGE_H = 14, PAGE_STEP = 21;
 
 	public PartBuilderScreen(PartBuilderMenu menu, Inventory inventory, Component title) {

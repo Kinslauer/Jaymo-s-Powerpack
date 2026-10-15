@@ -20,7 +20,7 @@ public final class Uncraftable {
 		"weaponmod:musketbayonet.diamond");
 
 	/**
-	 * (0.11.70) Andy: "all weapons should be forged". Balkon's stone and metal weapons are put together at the Tool
+	 * (0.11.71) Andy: "all weapons should be forged". Balkon's stone and metal weapons are put together at the Tool
 	 * Station from their heads instead ({@link WeaponParts}); the musket bayonet stays a musket and a knife put together.
 	 */
 	static final Set<String> FORGED = forged();
