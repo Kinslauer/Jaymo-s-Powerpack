@@ -3,7 +3,8 @@
 	"package": "com.jaymospowers.client.compat.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
-		"LimbSwingMixin"
+		"LimbSwingMixin",
+		"TwoHandedSweepMixin"
 	],
 	"injectors": { "defaultRequire": 0 }
 }

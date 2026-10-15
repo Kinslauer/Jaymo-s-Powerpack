@@ -48,6 +48,9 @@ final class BetterCombatBridge {
 		if (attributes.attackRange() == 0.0) {
 			reach += attributes.rangeBonus();
 		}
+		if (attributes.isTwoHanded()) {
+			reach *= MobCombat.TWO_HANDED_REACH;
+		}
 		List<MobCombat.Move> moves = new ArrayList<>();
 		for (WeaponAttributes.Attack attack : attributes.attacks()) {
 			if (attack == null) {

@@ -81,6 +81,8 @@ public final class MobCombat {
 	static final int COMBO_RESET_TICKS = 40;
 	/** Half-width of the arc for a stab (forward box) and for an overhead (vertical plane), in degrees. */
 	static final double STAB_HALF_ANGLE = 18.0, OVERHEAD_HALF_ANGLE = 28.0;
+	/** (0.7.64) Two-handed weapons reach this much further and sweep this much wider, as they do for players (Powers' TwoHanded). */
+	static final double TWO_HANDED_REACH = 1.25, TWO_HANDED_ARC = 1.25;
 	/** Most foes one swing can strike. */
 	static final int MAX_TARGETS = 5;
 	/** A player's base attack speed (attacks a second), before the weapon's modifiers. */
@@ -324,6 +326,9 @@ public final class MobCombat {
 			case 1 -> Math.max(OVERHEAD_HALF_ANGLE, Math.min(move.angle(), 60.0) / 2.0);
 			default -> STAB_HALF_ANGLE;
 		};
+		if (moves.twoHanded()) {
+			half = Math.min(180.0, half * TWO_HANDED_ARC);
+		}
 		float yaw = mob.getYHeadRot();
 		Vec3 facing = Vec3.directionFromRotation(0.0F, yaw);
 		List<LivingEntity> hits = new ArrayList<>();
