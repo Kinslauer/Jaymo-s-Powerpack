@@ -352,6 +352,8 @@ public final class WebSymbioteClient {
 				helper.register(new WebTendrilLayer(avatar));
 				helper.register(new WebMouthLayer(avatar));
 				helper.register(new WebSpikeLayer(avatar));
+				helper.register(new WebMorphLayer(avatar));
+				helper.register(new WebSuitWrapLayer(avatar));
 			}
 		});
 	}
@@ -390,6 +392,7 @@ public final class WebSymbioteClient {
 		state.setData(SUIT, entity instanceof Player player && WebSymbiote.suitShown(player) ? Boolean.TRUE : null);
 		state.setData(FERAL, entity instanceof Player player && WebSymbiote.isBonded(player)
 			? 1.0F - WebSymbiote.state(player).bond() / (float)WebSymbiote.BOND_MAX : null);
+		WebMorphLayer.extract(entity, state);
 		if (entity instanceof Player player) {
 			WebSuitGrowth.extract(player, state, net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false));
 		}

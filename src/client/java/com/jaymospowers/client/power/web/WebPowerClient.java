@@ -75,6 +75,21 @@ public final class WebPowerClient implements PowerClient {
 				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebTendrils.Smash(WebNet.MAIN));
 				return true;
 			}
+			if (com.jaymospowers.power.web.WebMorph.usable(player) && (grips == null || grips.get(WebNet.MAIN) < 0 && grips.get(WebNet.OFF) < 0)) {
+				// the suit, an empty hand: the arm goes out as a weapon (a block under the crosshair is still mined)
+				net.minecraft.world.phys.HitResult hit = minecraft.hitResult;
+				net.minecraft.world.entity.LivingEntity aimed = com.jaymospowers.power.web.WebMorph.aim(player);
+				boolean block = hit != null && hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK
+					&& (aimed == null || hit.getLocation().distanceToSqr(player.getEyePosition()) < aimed.distanceToSqr(player.getEyePosition()));
+				if (!block && (clicks > 0 || aimed != null)) {
+					ClientPlayNetworking.send(new com.jaymospowers.power.web.WebMorph.Strike(aimed == null ? -1 : aimed.getId()));
+					player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
+					return true;
+				}
+				if (!block) {
+					return true;
+				}
+			}
 			return false;
 		});
 		// a barrage lasts while the attack key is held: let go, and it stops

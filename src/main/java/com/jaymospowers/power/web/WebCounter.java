@@ -35,8 +35,8 @@ import org.jspecify.annotations.Nullable;
  * hurl, constrict and flurry, and the head swelling into the maw to snap, maul, roar and bite. The maw only bites;
  * it never feeds on anything living.
  *
- * <p>Each move plays out over a few ticks ({@link #ticks}): web moves use the slinger's acrobatic poses
- * ({@link WebPose}) and cobweb trails, tendril moves borrow the symbiote's tendril strike ({@link WebSymbiote#STRIKE},
+ * <p>Each move plays out over a few ticks ({@link #ticks}): every move has its own whole-body animation, drawn by the
+ * client from {@link #ACTIVE} ({@code WebCounterPose}); web moves leave cobweb trails, tendril moves borrow the symbiote's tendril strike ({@link WebSymbiote#STRIKE},
  * damage dealt here instead), and maw moves are drawn from {@link #ACTIVE} ({@link #maw}).
  */
 public final class WebCounter {
@@ -282,16 +282,15 @@ public final class WebCounter {
 	/** The first tick of each. */
 	private static void begin(ServerPlayer player, ServerLevel level, int kind, LivingEntity target) {
 		Vec3 away = away(player, target);
-		int side = player.getRandom().nextBoolean() ? 1 : -1;
+		// the same side the clients draw the body going (WebCounterPose): from the start tick
+		int side = (level.getGameTime() & 1L) == 0L ? 1 : -1;
 		switch (kind) {
 			case HEEL_KICK -> {
-				WebPower.pose(player, WebPose.CORKSCREW, side);
 				nudge(player, away.scale(0.2).add(0.0, 0.3, 0.0));
 				sound(level, player, SoundEvents.PLAYER_ATTACK_SWEEP, 0.8F, 1.4F);
 			}
 			case YANK_UPPERCUT -> {
 				webTrail(level, player, target);
-				WebPower.pose(player, WebPose.WEAVE, side);
 				push(target, away.scale(-0.85).add(0.0, 0.25, 0.0));
 				sound(level, player, SoundEvents.FISHING_BOBBER_THROW, 1.0F, 1.4F);
 			}
@@ -310,13 +309,11 @@ public final class WebCounter {
 				sound(level, target, SoundEvents.SLIME_SQUISH_SMALL, 1.0F, 1.2F);
 			}
 			case FLIP_KICK -> {
-				WebPower.pose(player, WebPose.FRONT_FLIP, side);
 				nudge(player, away.scale(0.45).add(0.0, 0.55, 0.0));
 				sound(level, player, SoundEvents.PLAYER_ATTACK_SWEEP, 0.8F, 1.6F);
 			}
 			case COCOON_THROW -> {
 				webTrail(level, player, target);
-				WebPower.pose(player, WebPose.SPIN, side);
 				target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, 3), player);
 				level.sendParticles(ParticleTypes.ITEM_COBWEB, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), 40,
 					target.getBbWidth() * 0.5, target.getBbHeight() * 0.4, target.getBbWidth() * 0.5, 0.03);
@@ -328,14 +325,12 @@ public final class WebCounter {
 				sound(level, player, SoundEvents.TRIDENT_RIPTIDE_1.value(), 0.7F, 1.6F);
 			}
 			case TRIP_SWEEP -> {
-				WebPower.pose(player, WebPose.ROLL, side);
 				nudge(player, away.scale(0.35));
 				level.sendParticles(ParticleTypes.ITEM_COBWEB, target.getX(), target.getY() + 0.2, target.getZ(), 16, 0.3, 0.1, 0.3, 0.02);
 				sound(level, player, SoundEvents.FISHING_BOBBER_THROW, 1.0F, 1.6F);
 			}
 			case PINNED_HAYMAKER -> {
 				webTrail(level, player, target);
-				WebPower.pose(player, WebPose.WEAVE, side);
 				target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 30, 6), player);
 				push(target, new Vec3(0.0, -0.2, 0.0));
 				level.sendParticles(ParticleTypes.ITEM_COBWEB, target.getX(), target.getY() + 0.1, target.getZ(), 24, 0.35, 0.05, 0.35, 0.02);
