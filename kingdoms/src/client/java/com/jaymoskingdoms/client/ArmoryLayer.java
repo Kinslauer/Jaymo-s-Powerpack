@@ -13,10 +13,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -46,10 +46,10 @@ import org.jspecify.annotations.Nullable;
  * anything humanoid that wears them: players, Kingdoms' folk, zombies, villagers with a humanoid model. Each set's pieces
  * are read from {@code assets/jaymoskingdoms/armory/<set>.json} ({@code tools/gen_armory.py}) and baked into one model per
  * slot and layer: "main" in its own colours, "cloth" (greyscale) tinted by the piece's dye, or the set's cloth colour.
- * The models follow the wearer's head, body and limbs by copying the parent model's pose each frame.
+ * The models follow the wearer's head, body and limbs by copying the parent model's pose each frame, and, being humanoid
+ * models themselves ({@link WornModel}), take every custom pose and Fresh Animations' movement the vanilla armour takes.
  */
 public final class ArmoryLayer<S extends HumanoidRenderState> extends RenderLayer<S, HumanoidModel<S>> {
-	private static final String[] BONES = {"head", "body", "right_arm", "left_arm", "right_leg", "left_leg"};
 	private static final EquipmentSlot[] SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 
 	/** A set as read from its JSON: one layer definition per slot and layer (absent when it has no pieces there). */
@@ -74,7 +74,7 @@ public final class ArmoryLayer<S extends HumanoidRenderState> extends RenderLaye
 
 	private Map<EquipmentSlot, Piece> bake(EntityRendererProvider.Context context, Map<EquipmentSlot, ModelLayerLocation> layers) {
 		Map<EquipmentSlot, Piece> out = new EnumMap<>(EquipmentSlot.class);
-		layers.forEach((slot, layer) -> out.put(slot, new Piece(context.bakeLayer(layer), this)));
+		layers.forEach((slot, layer) -> out.put(slot, new Piece(context.bakeLayer(layer), this::getParentModel)));
 		return out;
 	}
 
@@ -165,7 +165,7 @@ public final class ArmoryLayer<S extends HumanoidRenderState> extends RenderLaye
 	private static MeshDefinition skeleton() {
 		MeshDefinition mesh = new MeshDefinition();
 		PartDefinition root = mesh.getRoot();
-		root.addOrReplaceChild("head", CubeListBuilder.create(), PartPose.ZERO);
+		root.addOrReplaceChild("head", CubeListBuilder.create(), PartPose.ZERO).addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
 		root.addOrReplaceChild("body", CubeListBuilder.create(), PartPose.ZERO);
 		root.addOrReplaceChild("right_arm", CubeListBuilder.create(), PartPose.offset(-5.0F, 2.0F, 0.0F));
 		root.addOrReplaceChild("left_arm", CubeListBuilder.create(), PartPose.offset(5.0F, 2.0F, 0.0F));
@@ -211,32 +211,10 @@ public final class ArmoryLayer<S extends HumanoidRenderState> extends RenderLaye
 		return TEXTURES.computeIfAbsent(set + (cloth ? "_cloth" : ""), name -> JaymosKingdoms.id("textures/entity/armory/" + name + ".png"));
 	}
 
-	/** One slot's pieces of a set; posed by setting up the wearer's own model and copying its bones. */
-	private static final class Piece extends Model<HumanoidRenderState> {
-		private final ArmoryLayer<?> layer;
-		private final ModelPart[] bones = new ModelPart[BONES.length];
-
-		Piece(ModelPart root, ArmoryLayer<?> layer) {
-			super(root, RenderTypes::armorCutoutNoCull);
-			this.layer = layer;
-			for (int i = 0; i < BONES.length; i++) {
-				bones[i] = root.getChild(BONES[i]);
-			}
-		}
-
-		@Override
-		@SuppressWarnings({"unchecked", "rawtypes"})
-		public void setupAnim(HumanoidRenderState state) {
-			HumanoidModel parent = layer.getParentModel();
-			parent.setupAnim(state);
-			ModelPart[] from = {parent.head, parent.body, parent.rightArm, parent.leftArm, parent.rightLeg, parent.leftLeg};
-			for (int i = 0; i < bones.length; i++) {
-				bones[i].loadPose(from[i].storePose());
-				bones[i].xScale = from[i].xScale;
-				bones[i].yScale = from[i].yScale;
-				bones[i].zScale = from[i].zScale;
-				bones[i].visible = from[i].visible;
-			}
+	/** One slot's pieces of a set, posed as the wearer is (WornModel). */
+	private static final class Piece extends WornModel {
+		Piece(ModelPart root, Supplier<HumanoidModel<?>> wearer) {
+			super(root, wearer);
 		}
 	}
 }

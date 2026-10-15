@@ -7,8 +7,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.Model;
-import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
@@ -128,10 +126,11 @@ public final class SorcerySkins {
 
 	/**
 	 * (0.5.53) A villager wizard's hat ({@link #hat}'s shape, in the blue wizard's skin), over whatever humanoid model
-	 * draws them; it follows their head by setting up the wearer's own model and copying its pose. Not over a helmet.
+	 * draws them; it follows their head by setting up the wearer's own model and copying its pose, and takes the same poses
+	 * on top as the rest of the body ({@link WornModel}). Not over a helmet.
 	 */
 	static final class VillagerHat<S extends HumanoidRenderState> extends RenderLayer<S, HumanoidModel<S>> {
-		private final Piece model = new Piece(hatMesh().bakeRoot(), this);
+		private final WornModel model = new WornModel(hatMesh().bakeRoot(), this::getParentModel);
 
 		VillagerHat(RenderLayerParent<S, HumanoidModel<S>> parent) {
 			super(parent);
@@ -144,29 +143,6 @@ public final class SorcerySkins {
 			}
 			collector.submitModel(this.model, state, poseStack, RenderTypes.entityCutout(WIZARDS[VILLAGER_HAT.getId()]), lightCoords,
 				OverlayTexture.NO_OVERLAY, -1, null, state.outlineColor);
-		}
-
-		private static final class Piece extends Model<HumanoidRenderState> {
-			private final VillagerHat<?> layer;
-			private final ModelPart head;
-
-			Piece(ModelPart root, VillagerHat<?> layer) {
-				super(root, RenderTypes::entityCutout);
-				this.layer = layer;
-				this.head = root.getChild("head");
-			}
-
-			@Override
-			@SuppressWarnings({"unchecked", "rawtypes"})
-			public void setupAnim(HumanoidRenderState state) {
-				HumanoidModel parent = this.layer.getParentModel();
-				parent.setupAnim(state);
-				this.head.loadPose(parent.head.storePose());
-				this.head.xScale = parent.head.xScale;
-				this.head.yScale = parent.head.yScale;
-				this.head.zScale = parent.head.zScale;
-				this.head.visible = parent.head.visible;
-			}
 		}
 	}
 }

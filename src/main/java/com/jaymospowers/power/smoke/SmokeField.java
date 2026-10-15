@@ -59,6 +59,8 @@ public final class SmokeField {
 	static final float MIN = 0.03F;
 	/** The most smoke one block holds; more spills into the blocks around it. */
 	static final float CAP = 3.0F;
+	/** Every Smoke user's move puts out this many times the smoke its own numbers say (Andy: double, 2026-10-15). */
+	static final float MOVE_SMOKE = 2.0F;
 	/** Share of a block's smoke that climbs into the block above each step. */
 	static final float RISE = 0.2F;
 	/** Share of the difference that flows to a thinner neighbour beside it, and below it, each step. */
@@ -213,7 +215,7 @@ public final class SmokeField {
 
 	/** Like {@link #puff}, but pure white cloud (soot 0) whatever the heat. */
 	static void puffCloud(ServerLevel level, Vec3 at, float amount, @org.jspecify.annotations.Nullable Entity owner) {
-		add(level, at, amount, owner, 0.0F);
+		add(level, at, owner instanceof ServerPlayer ? amount * MOVE_SMOKE : amount, owner, 0.0F);
 	}
 
 	/** Marks {@code owner}'s smoke as smog until game time {@code until} (refreshed every tick while they're corrupted). */
@@ -266,7 +268,7 @@ public final class SmokeField {
 		// a Smoke user by a fire makes more smoke, and darker ({@link SmokeHeat})
 		float soot = SmokeHeat.BASE_SOOT;
 		if (owner instanceof ServerPlayer player) {
-			amount *= SmokeHeat.boost(player);
+			amount *= SmokeHeat.boost(player) * MOVE_SMOKE;
 			soot = SmokeHeat.soot(player);
 			if (com.jaymospowers.core.Fate.isCorrupted(player)) {
 				soot = Math.max(soot, SMOG_SOOT);

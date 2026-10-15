@@ -52,6 +52,11 @@ final class SmokeSmother {
 	private SmokeSmother() {
 	}
 
+	/** Smothering someone now. */
+	static boolean holding(ServerPlayer player) {
+		return HOLDS.containsKey(player.getUUID());
+	}
+
 	static void start(ServerPlayer player) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getViewVector(1.0F);
@@ -65,6 +70,7 @@ final class SmokeSmother {
 		long now = player.level().getGameTime();
 		HOLDS.put(player.getUUID(), new Hold(target.getId(), now));
 		SmokePower.set(player, SmokePower.state(player).withSmother(now));
+		SmokeMoves.begin(player, SmokeMoves.SMOTHER);
 		player.level().playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.8F, 0.4F);
 	}
 

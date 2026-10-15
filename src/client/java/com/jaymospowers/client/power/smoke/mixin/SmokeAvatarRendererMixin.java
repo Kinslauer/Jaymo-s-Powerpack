@@ -9,13 +9,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Vapour Form's smoke legs go on the player's render state (SmokeFlightPose). */
+/** Vapour Form's smoke legs and the Smoke moves' poses go on the player's render state (SmokeFlightPose, SmokeMovePose). */
 @Mixin(AvatarRenderer.class)
 abstract class SmokeAvatarRendererMixin {
 	@Inject(
 		method = "extractRenderState(Lnet/minecraft/world/entity/Avatar;Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;F)V",
 		at = @At("TAIL"))
 	private void jaymospowers$smokeVapour(Avatar entity, AvatarRenderState state, float partialTicks, CallbackInfo ci) {
-		SmokePowerClient.extract(entity, state);
+		SmokePowerClient.extract(entity, state, partialTicks);
 	}
 }

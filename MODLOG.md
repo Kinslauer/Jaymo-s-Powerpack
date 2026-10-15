@@ -1251,3 +1251,9 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   flintlocks' animations (musket, blunderbuss, pistol, Arsenal's pair): the shot's empty `sound_effects` list threw as
   it was read (Andy's log: "Failed to load gun animation runtime jaymospowers:musket_display"), so the reload, draw,
   inspect and shot animations all fell back to nothing. The shot has no sound list now (`tools/gen_tacz_guns.py`).
+- **0.11.17, Smoke moves animated; Vapour as a mode** (Andy: "smoke needs animations on every move"; "vapor mode should
+  be toggleable, activating when you enter sprint"; then Shift for full vapour, no fall damage, a harder Jet, double
+  smoke): `SmokeMoves` syncs the move being made and `SmokeMovePose` gives each Smoke move a pose (in `ModelPoses` and
+  `PoseTakeover`). R arms Vapour Form; a sprint takes off into a cruise that holds top speed until S brakes it to a
+  hover. Shift (mastered) toggles whole-body smoke and no longer sinks. No fall damage for Smoke users (a second of
+  smoke legs on landing). The Jet hurts and throws back; every move puts out double smoke (`SmokeField.MOVE_SMOKE`).
