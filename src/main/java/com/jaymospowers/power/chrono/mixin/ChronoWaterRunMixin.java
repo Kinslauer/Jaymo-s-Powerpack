@@ -18,6 +18,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * <p>(0.10.96) In 26.3 standing on a fluid takes two things: {@code canStandOnFluid} says yes, and
  * {@code getLiquidCollisionShape} gives the shape to stand on. That shape is empty for everyone but striders, so 0.10.28
  * runners always sank. Ours is a full block, so you run level with the shore, above the water rather than in it.
+ *
+ * <p>(0.11.40) Lava holds you up the same way (see {@link ChronoSpeed#runsOn}).
  */
 @Mixin(LivingEntity.class)
 abstract class ChronoWaterRunMixin {
@@ -30,7 +32,7 @@ abstract class ChronoWaterRunMixin {
 
 	@Inject(method = "getLiquidCollisionShape", at = @At("HEAD"), cancellable = true)
 	private void jaymospowers$chronoWaterRunShape(CallbackInfoReturnable<VoxelShape> cir) {
-		// the fluid itself is checked by canStandOnFluid above (water only)
+		// the fluid itself is checked by canStandOnFluid above (water or lava)
 		if ((Object) this instanceof Player player && ChronoSpeed.runsOnFluids(player)) {
 			cir.setReturnValue(Shapes.block());
 		}
