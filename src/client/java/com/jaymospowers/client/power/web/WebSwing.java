@@ -266,6 +266,16 @@ public final class WebSwing {
 		return strands[WebNet.MAIN].attached && strands[WebNet.OFF].attached;
 	}
 
+	/** Both webs stuck to things small enough to reel in (see {@link WebAnchors#reelable}). */
+	private boolean reelingIn(LocalPlayer player) {
+		for (Strand strand : strands) {
+			if (!strand.attached || strand.travel > 0 || strand.entityId < 0 || !WebAnchors.reelable(player.level().getEntity(strand.entityId))) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	/** Any web stuck right now. */
 	boolean attached() {
 		return strands[WebNet.MAIN].attached || strands[WebNet.OFF].attached;
@@ -515,6 +525,24 @@ public final class WebSwing {
 			return;
 		}
 		Input input = player.input.keyPresses;
+		if (input.shift() && reelingIn(player)) {
+			// both webs on small things: Sneak reels them in (the server hauls them; no slingshot, no letting out)
+			swingJumpTicks = 0;
+			if (slinging) {
+				endStrain();
+				slinging = false;
+				slingDraw = 0.0F;
+			}
+			for (Strand strand : strands) {
+				double distance = strand.anchor.distanceTo(player.position().add(0.0, ROPE_HEIGHT, 0.0));
+				strand.rope = Math.max(ROPE_MIN, Math.min(strand.rope, distance));
+				if (Math.abs(strand.rope - strand.sentRope) > ROPE_SYNC_CHANGE && player.tickCount % 2 == 0) {
+					strand.sentRope = strand.rope;
+					ClientPlayNetworking.send(new WebNet.Rope(strand.hand, (float)strand.rope));
+				}
+			}
+			return;
+		}
 		// hanging still in midair with no movement keys: Jump and Sneak raise and lower you gently
 		boolean hang = !player.onGround() && (input.jump() || input.shift())
 			&& !input.forward() && !input.backward() && !input.left() && !input.right()

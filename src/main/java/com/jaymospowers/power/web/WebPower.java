@@ -90,6 +90,14 @@ public final class WebPower implements Power {
 	static final double ENTITY_WEB_BREAK = 1.5;
 	static final double ENTITY_WEB_MAX_SIZE = 4.5;
 	/**
+	 * Both swing webs on small things (see {@link WebAnchors#reelable}) and Sneak held: you reel them in, hand over
+	 * hand, at {@code REEL_SPEED} b/t (lifted a little off the ground so they don't snag), until they're
+	 * {@code REEL_HOLD} blocks off, where they're held at your feet (an item is close enough to pick up). Bigger
+	 * catches are a slingshot as before.
+	 */
+	public static final double REEL_MAX_SIZE = 1.0;
+	static final double REEL_SPEED = 0.55, REEL_LIFT = 0.12, REEL_HOLD = 1.2;
+	/**
 	 * A <i>player</i> on the Yank line can fight it: they're pulled more gently than a mob ({@code PLAYER_TETHER_*}),
 	 * so they can lean away against it, and holding it stretched past {@code TETHER_LENGTH + PLAYER_STRAIN_OVER} for
 	 * {@code PLAYER_STRAIN_TICKS} snaps it. Attacking (a swing) breaks it outright, as before.
@@ -756,6 +764,14 @@ public final class WebPower implements Power {
 			|| target.distanceTo(player) > WebAnchors.ENTITY_RANGE * WebSymbiote.reachScale(player) * ENTITY_WEB_BREAK) {
 			return false;
 		}
+		if (reeling(player, state)) {
+			// Sneak with both webs on small things: hauled in (once per catch, if both webs share one)
+			if (hand == WebNet.MAIN || state.swingEntity[WebNet.MAIN] != state.swingEntity[WebNet.OFF]) {
+				reel(player, target);
+			}
+			state.swingLength[hand] = Math.max(REEL_HOLD, Math.min(state.swingLength[hand], target.distanceTo(player)));
+			return true;
+		}
 		double over = target.distanceTo(player) - state.swingLength[hand];
 		boolean movable = !KitchenCompat.isHeavy(target) && target.getBbWidth() * target.getBbHeight() <= ENTITY_WEB_MAX_SIZE
 			&& !(target instanceof Player other && (other.isCreative() || other.isSpectator()));
@@ -769,6 +785,42 @@ public final class WebPower implements Power {
 			target.syncVelocity = true;
 		}
 		return true;
+	}
+
+	/** Both swing webs stuck to things small enough to reel in, and Sneak held. */
+	private static boolean reeling(ServerPlayer player, State state) {
+		if (!player.getLastClientInput().shift()) {
+			return false;
+		}
+		for (int hand = WebNet.MAIN; hand <= WebNet.OFF; hand++) {
+			if (!state.swinging[hand] || state.swingEntity[hand] < 0 || !WebAnchors.reelable(player.level().getEntity(state.swingEntity[hand]))) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** One tick of reeling {@code target} in: toward you, a little up, and held at your feet once it's there. */
+	private static void reel(ServerPlayer player, Entity target) {
+		Vec3 to = player.position().add(0.0, 0.3, 0.0).subtract(target.position());
+		double distance = to.length();
+		Vec3 v;
+		if (distance <= REEL_HOLD) {
+			v = target.getDeltaMovement().scale(0.3);
+		} else {
+			v = to.scale(Math.min(REEL_SPEED, distance - REEL_HOLD * 0.5) / distance);
+			if (target.onGround() || v.y < REEL_LIFT) {
+				v = new Vec3(v.x, Math.max(v.y, REEL_LIFT), v.z);
+			}
+		}
+		target.setDeltaMovement(v);
+		target.resetFallDistance();
+		target.needsSync = true;
+		target.syncVelocity = true;
+		if (player.tickCount % 6 == 0 && distance > REEL_HOLD) {
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FISHING_BOBBER_RETRIEVE,
+				SoundSource.PLAYERS, 0.6F, 1.1F + player.getRandom().nextFloat() * 0.3F);
+		}
 	}
 
 	private static void dropSwing(ServerPlayer player, State state, int hand) {
