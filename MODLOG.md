@@ -1341,3 +1341,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   ground (no water, lava, houses or roads; at most 4 blocks from lowest to highest), and a floor is laid there: smooth
   stone edged in stone bricks at the ring's line, dips filled, grass, trees and snow cleared to 5 above (trees to 10).
   Fighters stand on it. The old spot is used only if nowhere will do (`ZFighterArena`).
+- **0.11.73 / Kingdoms 0.7.65:** the whole realm on alert in a war: bells, sandbags round the seat, civilians hiding
+  and guards at the sandbags when a war party comes (`kingdoms/MODLOG.md`).
