@@ -123,7 +123,7 @@ public final class ShipShot extends Projectile implements ItemSupplier {
 		}
 		EntityHitResult entityHit = ProjectileUtil.getEntityHitResult(level, this, pos, next, new AABB(pos, next).inflate(0.6),
 			e -> e != gunner && e instanceof LivingEntity && e.isAlive() && !e.isSpectator() && !(gunner != null && e == gunner.getVehicle())
-				// (0.7.37) nor her own crew, firing out past them
+				// (0.7.42) nor her own crew, firing out past them
 				&& !(e.getVehicle() != null && e.getVehicle().getId() == this.fromShip), 0.3F);
 		if (entityHit != null) {
 			this.burst(level, gunner, entityHit.getLocation(), entityHit.getEntity());

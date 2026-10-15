@@ -32,7 +32,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.37) Sailing, stage 3: the captains of the ships that sail on their own ({@link Crew}). Each one keeps a lookout,
+ * (0.7.42) Sailing, stage 3: the captains of the ships that sail on their own ({@link Crew}). Each one keeps a lookout,
  * and by his side:
  *
  * <ul>

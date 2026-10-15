@@ -161,7 +161,7 @@ public final class ShipCannonBlock extends Block {
 		fireAlong(level, centre, aim(fx, fz, gunner), gunner, ship);
 	}
 
-	/** (0.7.37) Fires along {@code dir} (a ship's crew lay their own guns), {@code gunner}'s shot. */
+	/** (0.7.42) Fires along {@code dir} (a ship's crew lay their own guns), {@code gunner}'s shot. */
 	static void fireAlong(ServerLevel level, Vec3 centre, Vec3 dir, net.minecraft.world.entity.@Nullable Entity gunner, @Nullable Ship ship) {
 		double flat = Math.sqrt(dir.x * dir.x + dir.z * dir.z);
 		double fx = flat < 1.0E-4 ? 0.0 : dir.x / flat, fz = flat < 1.0E-4 ? 0.0 : dir.z / flat;

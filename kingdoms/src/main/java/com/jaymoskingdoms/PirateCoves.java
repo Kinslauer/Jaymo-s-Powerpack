@@ -38,7 +38,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.37) Sailing, stage 3: pirate coves, a fifth kind of camp ({@link FactionType#BARBARIAN} factions whose
+ * (0.7.42) Sailing, stage 3: pirate coves, a fifth kind of camp ({@link FactionType#BARBARIAN} factions whose
  * {@link Camps.CampData#kind} is {@link #KIND}). One may rise on a coast near a coastal kingdom: a tarred shack over the
  * crew's hoard, a jetty out into the water, a black flag on a pole and a fire with deckhands round it, and offshore
  * their ship ({@link Fleet}, sailed by {@link Corsairs}), whose captain is the cove's leader. His ship patrols the coast,

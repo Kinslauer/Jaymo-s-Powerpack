@@ -216,7 +216,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		WerewolfPlayers.register();
 		// 0.7.7: sailing, stage 1: ships built from blocks (the helm, sails, the ship and its attachment)
 		com.jaymoskingdoms.sailing.Sailing.register();
-		// 0.7.37: sailing, stage 3: ships with crews of their own (pirates, warships, merchantmen), pirate coves, harbours,
+		// 0.7.42: sailing, stage 3: ships with crews of their own (pirates, warships, merchantmen), pirate coves, harbours,
 		// treasure wrecks (and their attachments)
 		Corsairs.register();
 		Navies.register();

@@ -37,7 +37,7 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.37) Sailing, stage 3: treasure wrecks. A pirate ship's hold may hold a Pirate's Chart (a map with its X out at
+ * (0.7.42) Sailing, stage 3: treasure wrecks. A pirate ship's hold may hold a Pirate's Chart (a map with its X out at
  * sea): sail there and the wreck it marks lies on the seabed, her chests full of a pirate's treasure (a chart's X on
  * land is a chest buried under it). Now and then, too, a player sailing the open ocean happens on one of their own: a
  * rare treasure wreck no chart led them to, far from any other.

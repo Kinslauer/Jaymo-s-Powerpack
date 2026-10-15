@@ -27,7 +27,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.37) Sailing, stage 3: ships we design ourselves for the crews that sail the seas on their own, built from
+ * (0.7.42) Sailing, stage 3: ships we design ourselves for the crews that sail the seas on their own, built from
  * blueprints as the kits are ({@link ShipKits}): a pirate's sloop and brigantine, a kingdom's frigate, a merchant's cog.
  * Each is laid on open water out of sight, blocks and all, then cast off at once ({@link Ship#castOff}) with her
  * {@link Crew}. Also what her captain needs to sail her: open water ahead ({@link #heading}), her helm set for a heading

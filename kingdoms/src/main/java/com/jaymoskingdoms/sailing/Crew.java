@@ -16,7 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.37) Sailing, stage 3: a ship with a crew of her own, sailed without a player. A pirate (a cove's ship, or a crew
+ * (0.7.42) Sailing, stage 3: a ship with a crew of her own, sailed without a player. A pirate (a cove's ship, or a crew
  * roaming free), a coastal kingdom's warship, or a merchantman on her way to another realm's harbour. Who she is, who
  * her captain is, where she calls home, where she's bound, which gunner serves which gun, and her hold (each player's
  * own share, once it's theirs to take). Her crew ride her at their stations ({@link Ship#SEAT}); Jaymo's Kingdoms

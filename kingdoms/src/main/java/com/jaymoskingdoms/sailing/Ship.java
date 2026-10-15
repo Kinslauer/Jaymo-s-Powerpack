@@ -127,16 +127,16 @@ public final class Ship extends Entity {
 	public static final AttachmentType<List<Piece>> PIECES = AttachmentRegistry.create(JaymosKingdoms.id("ship_pieces"),
 		builder -> builder.syncWith(Piece.STREAM_CODEC.apply(ByteBufCodecs.list()), AttachmentSyncPredicate.all()));
 	/**
-	 * (0.7.37) Where one of a ship's crew stands aboard her, in her frame (set on the crewman, kept and sent to everyone):
+	 * (0.7.42) Where one of a ship's crew stands aboard her, in her frame (set on the crewman, kept and sent to everyone):
 	 * crewmen ride the ship, each at their station, so they stay at their guns and the helm wherever she sails.
 	 */
 	public static final AttachmentType<Vec3> SEAT = AttachmentRegistry.create(JaymosKingdoms.id("ship_seat"),
 		builder -> builder.persistent(Vec3.CODEC).syncWith(Vec3.STREAM_CODEC, AttachmentSyncPredicate.all()));
-	/** (0.7.37) The most crew aboard one ship. */
+	/** (0.7.42) The most crew aboard one ship. */
 	public static final int MOST_CREW = 24;
 
 	/**
-	 * (0.7.37) What sails a crewed ship ({@link Crew}) when no player is at her wheel: Jaymo's Kingdoms' pirates, navies and
+	 * (0.7.42) What sails a crewed ship ({@link Crew}) when no player is at her wheel: Jaymo's Kingdoms' pirates, navies and
 	 * merchantmen ({@code com.jaymoskingdoms.Corsairs}). Called on the server only.
 	 */
 	public interface Captaincy {
@@ -181,9 +181,9 @@ public final class Ship extends Entity {
 	private final Map<Integer, BlockEntity> cargo = new HashMap<>();
 	private final Map<Integer, CompoundTag> cargoTags = new HashMap<>();
 	private boolean registered;
-	/** (0.7.37) Her crew, if she has one (a pirate, a navy's warship, a merchantman); null for a ship players built and sail. */
+	/** (0.7.42) Her crew, if she has one (a pirate, a navy's warship, a merchantman); null for a ship players built and sail. */
 	public @Nullable Crew crew;
-	/** (0.7.37) Server: who last holed her, and how fast she's moving over the ground (blocks a tick, x and z). */
+	/** (0.7.42) Server: who last holed her, and how fast she's moving over the ground (blocks a tick, x and z). */
 	private java.util.@Nullable UUID holedBy;
 	private Vec3 drift = Vec3.ZERO;
 	/** Client: how far it heels over in its turns (degrees, now and last tick). */
@@ -272,7 +272,7 @@ public final class Ship extends Entity {
 	}
 
 	/**
-	 * (0.7.37) Casts off the hull whose helm is at {@code helm}, with {@code player} at the wheel, or with nobody (a crewed
+	 * (0.7.42) Casts off the hull whose helm is at {@code helm}, with {@code player} at the wheel, or with nobody (a crewed
 	 * ship: {@code crew}, launched by {@link Fleet}). The ship, or null (and {@code player} is told why) if it can't.
 	 */
 	static @Nullable Ship castOff(ServerLevel level, BlockPos helm, @Nullable ServerPlayer player, @Nullable Crew crew) {
@@ -461,7 +461,7 @@ public final class Ship extends Entity {
 		Vec3 from = this.position();
 		float yawFrom = this.getYRot();
 		ServerPlayer pilot = this.pilot();
-		// (0.7.37) a crewed ship with nobody at her wheel is sailed by her captain, if she still has one
+		// (0.7.42) a crewed ship with nobody at her wheel is sailed by her captain, if she still has one
 		Input steered = pilot == null && this.crew != null && captaincy != null ? captaincy.helm(level, this, this.crew) : null;
 		Input input = pilot != null ? pilot.getLastClientInput() : steered != null ? steered : Input.EMPTY;
 		boolean helmed = pilot != null || steered != null;
@@ -692,7 +692,7 @@ public final class Ship extends Entity {
 
 	// ---- the helm ----
 
-	/** (0.7.37) The player at her wheel (null: none; a crewed ship's captain steers her without being one). */
+	/** (0.7.42) The player at her wheel (null: none; a crewed ship's captain steers her without being one). */
 	public @Nullable ServerPlayer pilot() {
 		for (Entity e : this.getPassengers()) {
 			if (e instanceof ServerPlayer p) {
@@ -702,7 +702,7 @@ public final class Ship extends Entity {
 		return null;
 	}
 
-	/** (0.7.37) The player at her wheel, on either side. */
+	/** (0.7.42) The player at her wheel, on either side. */
 	public @Nullable Player helmsman() {
 		for (Entity e : this.getPassengers()) {
 			if (e instanceof Player p) {
@@ -712,7 +712,7 @@ public final class Ship extends Entity {
 		return null;
 	}
 
-	/** (0.7.37) Her crew aboard (riding her at their stations). */
+	/** (0.7.42) Her crew aboard (riding her at their stations). */
 	public List<LivingEntity> crewAboard() {
 		List<LivingEntity> out = new ArrayList<>();
 		for (Entity e : this.getPassengers()) {
@@ -723,7 +723,7 @@ public final class Ship extends Entity {
 		return out;
 	}
 
-	/** (0.7.37) Takes {@code crewman} aboard at {@code seat} (in her frame). */
+	/** (0.7.42) Takes {@code crewman} aboard at {@code seat} (in her frame). */
 	public boolean takeAboard(LivingEntity crewman, Vec3 seat) {
 		crewman.setAttached(SEAT, seat);
 		Vec3 at = this.toWorld(seat.x, seat.y, seat.z);
@@ -747,7 +747,7 @@ public final class Ship extends Entity {
 
 	@Override
 	protected void positionRider(Entity passenger, Entity.MoveFunction moveFunction) {
-		// (0.7.37) her crew at their stations
+		// (0.7.42) her crew at their stations
 		Vec3 seat = passenger instanceof Player ? null : passenger.getAttached(SEAT);
 		Vec3 at = seat != null ? this.toWorld(seat.x, seat.y, seat.z) : this.helmStand();
 		moveFunction.accept(passenger, at.x, at.y, at.z);
@@ -759,7 +759,7 @@ public final class Ship extends Entity {
 			// one at her wheel, and (a crewed ship's) not while her captain still has it
 			return this.helmsman() == null && (this.crew == null || !this.crew.captained(this));
 		}
-		// (0.7.37) her crew, at their stations
+		// (0.7.42) her crew, at their stations
 		return passenger.hasAttached(SEAT) && this.getPassengers().size() < MOST_CREW;
 	}
 
@@ -960,7 +960,7 @@ public final class Ship extends Entity {
 			return;
 		}
 		BlockEntity be = this.cargo.get(i);
-		// (0.7.37) a crewed ship's hold: each player's own share, once the crew can't keep them out of it
+		// (0.7.42) a crewed ship's hold: each player's own share, once the crew can't keep them out of it
 		if (this.crew != null && this.crew.hold == BlockPos.asLong(x, y, z) && captaincy != null && this.level() instanceof ServerLevel level) {
 			Container share = captaincy.hold(level, this, this.crew, player);
 			if (share != null) {
@@ -1057,7 +1057,7 @@ public final class Ship extends Entity {
 		return new double[] {facing.getStepX() * c - facing.getStepZ() * s, facing.getStepX() * s + facing.getStepZ() * c};
 	}
 
-	// ---- (0.7.37) her guns, for her crew ----
+	// ---- (0.7.42) her guns, for her crew ----
 
 	/** Her guns' keys (each one's place in her frame, packed as a block position), bow to stern. */
 	public List<Long> guns() {
@@ -1317,7 +1317,7 @@ public final class Ship extends Entity {
 		if (now != null && (!now.floats || dryBefore > 0 && dryBelowWaterline(now) * 2 < dryBefore) && this.sinking == 0) {
 			this.sinking = 1;
 			this.entityData.set(FOUNDERING, true);
-			// (0.7.37) her crew go down with her
+			// (0.7.42) her crew go down with her
 			if (this.crew != null && captaincy != null) {
 				captaincy.foundering(level, this, this.crew, this.holedBy == null ? null : level.getEntity(this.holedBy));
 			}

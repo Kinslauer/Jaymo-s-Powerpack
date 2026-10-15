@@ -17,7 +17,7 @@ import net.minecraft.server.level.ServerPlayer;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.37) Operators' commands for the ships with crews of their own (debug: plain text): {@code /kingdom fleet harbour |
+ * (0.7.42) Operators' commands for the ships with crews of their own (debug: plain text): {@code /kingdom fleet harbour |
  * navy | merchant | pirate | wreck | chart | info}.
  */
 final class FleetCommands {

@@ -29,7 +29,7 @@ import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.37) Sailing, stage 3: pirates. A pirate crew is a camp's people ({@link FactionType#BARBARIAN} factions: a
+ * (0.7.42) Sailing, stage 3: pirates. A pirate crew is a camp's people ({@link FactionType#BARBARIAN} factions: a
  * {@link PirateCoves cove}'s, or a crew roaming free), in our own original looks (sun-browned sailors in striped shirts
  * and bandanas, a black flag over them). They sail ships of our own design ({@link com.jaymoskingdoms.sailing.Fleet})
  * and fight from them ({@link Corsairs}): their {@link #CAPTAIN} at the helm (a boss: a cutlass, a brace of pistols,

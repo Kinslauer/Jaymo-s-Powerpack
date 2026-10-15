@@ -197,7 +197,7 @@ public final class Camps {
 		Goblins.init();
 		// 0.5.45: orc war camps
 		Orcs.init();
-		// 0.7.37: pirate coves and the sailors of the kingdoms
+		// 0.7.42: pirate coves and the sailors of the kingdoms
 		Pirates.init();
 		CampBuildings.registerCatalogue();
 		ServerTickEvents.END_SERVER_TICK.register(Camps::tick);
@@ -374,7 +374,7 @@ public final class Camps {
 				&& random.nextFloat() < OrcCamps.CAMP_CHANCE && trySite(server, level, realm, players, OrcCamps.KIND)) {
 				return;
 			}
-			// (0.7.37) a pirate cove, on the coast near a coastal kingdom
+			// (0.7.42) a pirate cove, on the coast near a coastal kingdom
 			if (level.getDifficulty() != Difficulty.PEACEFUL && campsNear(server, realm, PirateCoves.KIND) < PirateCoves.COVES_PER_KINGDOM
 				&& random.nextFloat() < PirateCoves.COVE_CHANCE && PirateCoves.coastal(level, realm)
 				&& trySite(server, level, realm, players, PirateCoves.KIND)) {

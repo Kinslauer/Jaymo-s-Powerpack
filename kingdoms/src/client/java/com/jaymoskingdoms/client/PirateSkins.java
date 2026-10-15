@@ -5,7 +5,7 @@ import com.jaymoskingdoms.Pirates;
 import net.minecraft.resources.Identifier;
 
 /**
- * (0.7.37) The sailors' looks, all original (drawn by {@code tools/gen_pirates.py}): pirate deckhands in striped shirts
+ * (0.7.42) The sailors' looks, all original (drawn by {@code tools/gen_pirates.py}): pirate deckhands in striped shirts
  * and bandanas, sooty gunners in leather jerkins, ragged powder monkeys, the pirate captain in his tricorn and red coat,
  * a harbour's shipwright in his apron, and a realm's sea captain in navy blue.
  */

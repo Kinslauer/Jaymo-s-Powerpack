@@ -85,7 +85,7 @@ final class Raids {
 	static final int PILLAGERS_PER_VINDICATOR = 2;
 	/** (0.5.47) An orc war band: every this many, one is a ranger. */
 	static final int ORCS_PER_RANGER = 3;
-	/** (0.7.37) A pirate landing party: every this many, one is a gunner (pistols). */
+	/** (0.7.42) A pirate landing party: every this many, one is a gunner (pistols). */
 	static final int PIRATES_PER_GUNNER = 3;
 
 	enum Phase {
@@ -199,7 +199,7 @@ final class Raids {
 				continue;
 			}
 			if (pirates && !PirateCoves.coastal(level, f)) {
-				// (0.7.37) pirates raid only from the sea
+				// (0.7.42) pirates raid only from the sea
 				continue;
 			}
 			best = f;
@@ -276,7 +276,7 @@ final class Raids {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAID_HORN.value(), SoundSource.HOSTILE, 2.0F, 0.8F);
 		}
 		if (pirates) {
-			// (0.7.37) their ship stands off the landing while it's on
+			// (0.7.42) their ship stands off the landing while it's on
 			PirateCoves.raidStarted(level, camp, muster);
 		}
 		JaymosKingdoms.LOGGER.info("{} raids {} with {} raiders from {}", camp.name(), target.name(), raid.party.size(), muster);
@@ -504,7 +504,7 @@ final class Raids {
 	 */
 	static void raiderDied(ServerLevel level, LivingEntity raider, int camp, DamageSource source, boolean folk) {
 		if (folk && !(raider instanceof Folk sailor && Pirates.offRoster(sailor.role()))) {
-			// ((0.7.37) a pirate gunner in a landing party was never on the roster)
+			// ((0.7.42) a pirate gunner in a landing party was never on the roster)
 			UNDO.add(new int[] {camp, raider instanceof Folk f ? f.role() : Folk.BARBARIAN});
 		}
 		Raid raid = ACTIVE.get(camp);

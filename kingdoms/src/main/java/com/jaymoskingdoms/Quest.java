@@ -36,7 +36,7 @@ public record Quest(String id, int kind, String template, Giver giver, Objective
 	 */
 	public static final int GRUDGE = 13;
 	/**
-	 * (0.7.37) Sailing ({@link Navies}): see a merchantman from the giver's harbour safely into another realm's (target
+	 * (0.7.42) Sailing ({@link Navies}): see a merchantman from the giver's harbour safely into another realm's (target
 	 * {@code faction:<id>}, pos its mooring, place its name; spawned: she's sailed, other: her).
 	 */
 	public static final int ESCORT = 14;

@@ -51,7 +51,7 @@ final class QuestBoard {
 	 */
 	static final float[] REGICIDE_CHANCE = {0.4F, 0.0F, 0.1F, 0.4F, 0.25F};
 	static final float WARBAND_CHANCE = 0.5F;
-	/** (0.7.37) The chance a king with a harbour asks for an escort (when he has another harbour to send her to). */
+	/** (0.7.42) The chance a king with a harbour asks for an escort (when he has another harbour to send her to). */
 	static final float ESCORT_CHANCE = 0.2F;
 	/** How far off the realm he sends you against may be. */
 	static final double RIVAL_RANGE = 2500.0;
@@ -422,7 +422,7 @@ final class QuestBoard {
 			}
 		}
 		if (random.nextFloat() < ESCORT_CHANCE) {
-			// (0.7.37) a merchantman to see safely to another realm's harbour
+			// (0.7.42) a merchantman to see safely to another realm's harbour
 			Quest q = Navies.escortQuest(level, f, who, royalReward(random));
 			if (q != null) {
 				return q;

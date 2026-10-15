@@ -2909,7 +2909,7 @@ moon and back on at dawn (`DarkNights`), but without the "A dark night: shaders 
   can be laid again and again; rename them on an anvil. `ShipKits.lay`/`room` now take any design.
 - A wrecked ship's blocks go down solid ones first, so the torches and lanterns hung on them don't pop off.
 
-## 0.7.37: sailing, stage 3: pirates and navies (pack 0.10.124)
+## 0.7.42: sailing, stage 3: pirates and navies (pack 0.10.129)
 Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.md`, all our own designs and art.
 - **Crewed ships.** A `Crew` (`sailing/Crew`, saved on the ship) is who sails her: pirate, navy or merchant, her
   faction, name, captain, home, where she's bound, which gunner serves which gun, and each player's share of her hold.
