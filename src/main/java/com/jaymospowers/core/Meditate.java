@@ -38,10 +38,11 @@ import org.jspecify.annotations.Nullable;
  * and breathe. Once settled, it earns mastery toward your power's next move ({@link Mastery}). It's opened in Jaymo's
  * Kingdoms' Survival tree (the Meditation perk, K); more ranks make it quicker. Without Kingdoms anyone can meditate.
  *
- * <p>A Z Fighter doesn't sit: he shadowboxes, throwing punches and kicks at nothing, and that's his meditation
- * (ZFighterTraining gives the TP, ki and form mastery). Under heavy gravity (a Gravity user's Immense Field, or
- * Gravity's weight) shadowboxing is how he trains: it counts many times over, and only it counts toward the field
- * owner's own mastery (GravityTrainingField).
+ * <p>A Z Fighter or a Gravity user doesn't sit: he shadowboxes, throwing punches and kicks at nothing (combos from
+ * {@link Shadowbox}, more as he unlocks abilities), and that's his meditation (for a Z Fighter, ZFighterTraining gives
+ * the TP, ki and form mastery too). Under heavy gravity (someone else's Immense Field; for a Z Fighter also Gravity's
+ * weight) he sinks into a heavier stance. A Gravity user's own field isn't heavy enough for him: he has to spar in it
+ * (GravityTrainingField).
  *
  * <p>Moving, leaving the ground, or being hurt breaks it; keep holding the key and you settle in again once still. The
  * state is synced to everyone so every client draws the pose (MeditatePose).
@@ -49,8 +50,11 @@ import org.jspecify.annotations.Nullable;
 public final class Meditate {
 	/** Ticks of stillness before it starts counting (sitting down, finding the rhythm). */
 	public static final int SETTLE = 40;
-	/** One mastery point per this many ticks meditating, by Meditation rank (1-3; without Kingdoms, rank 1). */
-	static final int[] TICKS_PER_POINT = {600, 600, 450, 300};
+	/**
+	 * One practice point per this many ticks meditating, by Meditation rank (1-3; without Kingdoms, rank 1). Practice is
+	 * capped by Mastery's allowance: rank 2 alone already brings an ability down to a day; rank 3 only pays off in a field.
+	 */
+	static final int[] TICKS_PER_POINT = {900, 900, 600, 400};
 	/** How far you may drift in a tick and still be still (blocks, squared). */
 	static final double STILL = 0.0025;
 	/** After a hit, this long before you can settle again (ticks). */
@@ -58,11 +62,15 @@ public final class Meditate {
 
 	public static final int MEDITATING = 0, SHADOWBOXING = 1, SHADOWBOXING_HEAVY = 2;
 
-	/** On a meditating player: since when (game time) and how ({@link #MEDITATING}, {@link #SHADOWBOXING}...). Synced to everyone. */
-	public record State(long since, int kind) {
+	/**
+	 * On a meditating player: since when (game time), how ({@link #MEDITATING}, {@link #SHADOWBOXING}...) and how many
+	 * shadowboxing combos he has ({@link Shadowbox#combos}). Synced to everyone.
+	 */
+	public record State(long since, int kind, int combos) {
 		public static final StreamCodec<ByteBuf, State> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, State::since,
 			ByteBufCodecs.VAR_INT, State::kind,
+			ByteBufCodecs.VAR_INT, State::combos,
 			State::new);
 	}
 
@@ -159,10 +167,14 @@ public final class Meditate {
 
 	/** The kind of meditation this player falls into right now. */
 	private static int kind(ServerPlayer player) {
-		if (!Powers.has(player, com.jaymospowers.power.zfighter.ZFighterPower.INSTANCE)) {
-			return MEDITATING;
+		if (Powers.has(player, com.jaymospowers.power.zfighter.ZFighterPower.INSTANCE)) {
+			return com.jaymospowers.power.zfighter.ZFighterTraining.heavyGravity(player) ? SHADOWBOXING_HEAVY : SHADOWBOXING;
 		}
-		return com.jaymospowers.power.zfighter.ZFighterTraining.heavyGravity(player) ? SHADOWBOXING_HEAVY : SHADOWBOXING;
+		if (Powers.has(player, com.jaymospowers.power.gravity.GravityPower.INSTANCE)) {
+			// his own field doesn't weigh on him; someone else's does
+			return com.jaymospowers.power.gravity.GravityTrainingField.inField(player) ? SHADOWBOXING_HEAVY : SHADOWBOXING;
+		}
+		return MEDITATING;
 	}
 
 	private static boolean canMeditate(ServerPlayer player) {
@@ -191,12 +203,13 @@ public final class Meditate {
 			}
 			State state = player.getAttached(STATE);
 			int kind = kind(player);
+			int combos = Shadowbox.combos(Mastery.unlocked(player));
 			if (state == null) {
-				state = new State(now, kind);
+				state = new State(now, kind, combos);
 				player.setAttached(STATE, state);
-			} else if (state.kind() != kind) {
-				// stepping into (or out of) a field: the same session, a different rhythm
-				state = new State(state.since(), kind);
+			} else if (state.kind() != kind || state.combos() != combos) {
+				// stepping into (or out of) a field, or a new combo learned: the same session, a different rhythm
+				state = new State(state.since(), kind, combos);
 				player.setAttached(STATE, state);
 			}
 			long time = now - state.since();
@@ -211,13 +224,19 @@ public final class Meditate {
 				if (time % 20 == 0) {
 					level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.0, player.getZ(), 3, 0.4, 0.3, 0.4, 0.15);
 				}
-			} else if (time % 9 == 0) {
-				// a punch thrown at nothing: the swish, a puff of air off the fist
-				Vec3 look = Vec3.directionFromRotation(0.0F, player.getYRot());
-				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS,
-					0.35F, kind == SHADOWBOXING_HEAVY ? 0.7F : 1.1F);
-				level.sendParticles(kind == SHADOWBOXING_HEAVY ? ParticleTypes.REVERSE_PORTAL : ParticleTypes.CLOUD, player.getX() + look.x * 0.8,
-					player.getY() + 1.3, player.getZ() + look.z * 0.8, 1, 0.05, 0.05, 0.05, 0.01);
+			} else {
+				Shadowbox.Step step = Shadowbox.step(time, state.combos());
+				if (step.move() != null && step.into() == (int)(step.length() * Shadowbox.STRIKE)) {
+					// a blow thrown at nothing: the swish, a puff of air off the fist (or the foot, lower and heavier)
+					boolean kick = step.move().kick;
+					Vec3 look = Vec3.directionFromRotation(0.0F, player.getYRot());
+					float pitch = (kind == SHADOWBOXING_HEAVY ? 0.7F : 1.1F) * (kick ? 0.8F : 1.0F);
+					level.playSound(null, player.getX(), player.getY(), player.getZ(),
+						kick ? SoundEvents.PLAYER_ATTACK_SWEEP : SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS, kick ? 0.3F : 0.35F, pitch);
+					level.sendParticles(kind == SHADOWBOXING_HEAVY ? ParticleTypes.REVERSE_PORTAL : ParticleTypes.CLOUD,
+						player.getX() + look.x * (kick ? 1.1 : 0.8), player.getY() + (kick ? 0.9 : 1.3), player.getZ() + look.z * (kick ? 1.1 : 0.8), 1,
+						0.05, 0.05, 0.05, 0.01);
+				}
 			}
 		}
 	}
@@ -233,7 +252,7 @@ public final class Meditate {
 		return state == null ? -1L : player.level().getGameTime() - state.since();
 	}
 
-	/** Whether this Z Fighter is shadowboxing (settled in). */
+	/** Whether this player is shadowboxing (settled in): a Z Fighter or a Gravity user. */
 	public static boolean shadowboxing(Player player) {
 		State state = of(player);
 		return state != null && state.kind() != MEDITATING && ticks(player) >= SETTLE;

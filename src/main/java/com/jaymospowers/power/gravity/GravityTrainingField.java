@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
@@ -26,7 +27,6 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -35,9 +35,11 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * Z (Power Mode), the Immense Field: a dome of heavy gravity set down where you aim (or around you), for a while.
- * Everyone inside but you is heavy: slowed, low-jumping, falling fast. It's for training: a Z Fighter inside trains at
- * double the rate (the Z Fighter power asks {@link #inField}), and shadowboxing in it (the Meditate key) far more; you
- * earn mastery for every minute one spends shadowboxing in it.
+ * Everyone inside but you is heavy: slowed, low-jumping, falling fast. It's for training: anyone with a power inside
+ * grows into it faster than a day an ability allows ({@link Mastery#fieldBoosted}); a Z Fighter inside also trains at
+ * double the rate (the Z Fighter power asks {@link #inField}), and shadowboxing in it (the Meditate key) far more.
+ * Your own field's weight isn't enough for you: you get that boost only while sparring inside it (landing blows on
+ * someone or something in it, or taking them there), and every exchange is practice.
  * Z again takes it down. Once the Gravity Well (G) is yours.
  */
 public final class GravityTrainingField {
@@ -47,8 +49,10 @@ public final class GravityTrainingField {
 	static final int COOLDOWN = 1800;
 	/** Extra pull down on anything in the air inside (blocks a tick, each tick). */
 	static final double PULL = 0.05;
-	/** A Z Fighter's minutes shadowboxing in the field: each gives the field's owner one use towards mastery. */
-	static final int MASTERY_TICKS = 1200;
+	/** After a blow traded inside his own field, the owner counts as sparring this long (ticks). */
+	static final int SPAR_WINDOW = 100;
+	/** One practice point per this many ticks of sparring in his own field, at most. */
+	static final int SPAR_CREDIT_SPACING = 200;
 	static final int COLOR = 0x8A6CFF;
 	/** Hunger the field costs its owner each tick it stands, fresh (4 exhaustion = half a shank): about 5 shanks a full field. */
 	static final float EXHAUSTION = 0.035F;
@@ -61,18 +65,32 @@ public final class GravityTrainingField {
 	private static final List<Field> FIELDS = new ArrayList<>();
 	/** Owner → when they may set down another (game time). */
 	private static final Map<UUID, Long> READY = new HashMap<>();
-	/** Z Fighter → ticks spent training in someone's field (counted towards the owner's mastery). */
-	private static final Map<UUID, Integer> TRAINED = new HashMap<>();
+	/** Owner → when he last traded a blow inside his own field (game time); and when that last earned practice. */
+	private static final Map<UUID, Long> SPARRED = new HashMap<>();
+	private static final Map<UUID, Long> SPAR_CREDIT = new HashMap<>();
 
 	private GravityTrainingField() {
 	}
 
 	static void init() {
 		ServerTickEvents.END_SERVER_TICK.register(GravityTrainingField::tick);
+		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
+			if (FIELDS.isEmpty() || !(source.getEntity() instanceof LivingEntity attacker) || source.getDirectEntity() != attacker) {
+				return;
+			}
+			// a blow traded hand to hand, inside the owner's own field: sparring
+			if (attacker instanceof ServerPlayer owner && sparsWith(owner, entity)) {
+				spar(owner);
+			}
+			if (entity instanceof ServerPlayer owner && sparsWith(owner, attacker)) {
+				spar(owner);
+			}
+		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			FIELDS.clear();
 			READY.clear();
-			TRAINED.clear();
+			SPARRED.clear();
+			SPAR_CREDIT.clear();
 		});
 	}
 
@@ -125,6 +143,52 @@ public final class GravityTrainingField {
 		return true;
 	}
 
+	/** The owner's own field, if he stands in it. */
+	private static Field ownField(Entity owner) {
+		for (Field field : FIELDS) {
+			if (field.owner().equals(owner.getUUID()) && field.dimension() == owner.level().dimension()
+				&& owner.position().distanceToSqr(field.centre()) <= RADIUS * RADIUS) {
+				return field;
+			}
+		}
+		return null;
+	}
+
+	/** Whether {@code owner} stands in his own field with {@code other} in it too (a partner, not an armour stand). */
+	private static boolean sparsWith(ServerPlayer owner, Entity other) {
+		Field field = ownField(owner);
+		return field != null && other != owner && other instanceof LivingEntity && !(other instanceof ArmorStand) && other.isAlive()
+			&& other.position().distanceToSqr(field.centre()) <= RADIUS * RADIUS && Powers.has(owner, GravityPower.INSTANCE);
+	}
+
+	private static void spar(ServerPlayer owner) {
+		long now = owner.level().getGameTime();
+		Long last = SPARRED.put(owner.getUUID(), now);
+		if (last == null || now - last > SPAR_WINDOW) {
+			owner.sendOverlayMessage(Component.translatable("message.jaymospowers.gravity.field_spar").withStyle(ChatFormatting.LIGHT_PURPLE));
+		}
+		Long credit = SPAR_CREDIT.get(owner.getUUID());
+		if (credit == null || now - credit >= SPAR_CREDIT_SPACING) {
+			SPAR_CREDIT.put(owner.getUUID(), now);
+			Mastery.practice(owner, 1);
+		}
+	}
+
+	/**
+	 * Whether {@code player} trains faster right now (see {@link Mastery#fieldBoosted}): in someone else's field, or in
+	 * his own while sparring there.
+	 */
+	public static boolean boosts(ServerPlayer player) {
+		if (FIELDS.isEmpty()) {
+			return false;
+		}
+		if (inField(player)) {
+			return true;
+		}
+		Long sparred = SPARRED.get(player.getUUID());
+		return sparred != null && player.level().getGameTime() - sparred <= SPAR_WINDOW && ownField(player) != null;
+	}
+
 	/** Whether {@code entity} stands in someone else's Immense Field. */
 	public static boolean inField(Entity entity) {
 		return owner(entity) != null;
@@ -174,16 +238,6 @@ public final class GravityTrainingField {
 			if (!inside.onGround()) {
 				inside.addDeltaMovement(new Vec3(0.0, -PULL, 0.0));
 				inside.syncVelocity = true;
-			}
-			// a Z Fighter trains here by shadowboxing (the Meditate key): only that counts toward the owner's mastery
-			if (inside instanceof Player player && Powers.has(player, com.jaymospowers.power.zfighter.ZFighterPower.INSTANCE)
-				&& com.jaymospowers.core.Meditate.shadowboxing(player)) {
-				int trained = TRAINED.merge(player.getUUID(), 1, Integer::sum);
-				if (trained % MASTERY_TICKS == 0) {
-					Mastery.used(owner);
-					owner.sendOverlayMessage(Component.translatable("message.jaymospowers.gravity.field_trained", player.getDisplayName())
-						.withStyle(ChatFormatting.LIGHT_PURPLE));
-				}
 			}
 		}
 		if (now % 3 == 0) {
