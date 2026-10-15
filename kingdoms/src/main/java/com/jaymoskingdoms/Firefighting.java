@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.disasters.Calamities;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -59,6 +60,8 @@ public final class Firefighting {
 	static final int RUN = 12, WATER_TICKS = 30;
 	/** The share of grown villagers who fight it, and who look after a child (the rest run); a choice is kept this long. */
 	static final float FIGHT = 0.4F, GUARD = 0.3F;
+	/** (0.7.31) With a wildfire bearing down ({@code Calamities}), this share fight it, every one with a bucket. */
+	static final float WILDFIRE_FIGHT = 0.8F;
 	static final long CHOICE_TICKS = 600L;
 	/** How fast they go: villagers fighting or fleeing, and folk. */
 	static final float VILLAGER_SPEED = 0.7F;
@@ -198,7 +201,7 @@ public final class Firefighting {
 	/** How a grown villager answers: fights it, looks after a child (if one's near), or runs. */
 	private static Answer choose(ServerLevel level, Villager v) {
 		float roll = level.getRandom().nextFloat();
-		if (roll < FIGHT) {
+		if (roll < (Calamities.wildfireNear(v.blockPosition()) ? WILDFIRE_FIGHT : FIGHT)) {
 			return Answer.FIGHT;
 		}
 		if (roll < FIGHT + GUARD && child(level, v) != null) {
@@ -269,7 +272,8 @@ public final class Firefighting {
 	private static void putOut(ServerLevel level, Mob who, BlockPos fire, long now) {
 		who.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		who.getLookControl().setLookAt(fire.getX() + 0.5, fire.getY() + 0.5, fire.getZ() + 0.5);
-		if (level.getRandom().nextBoolean()) {
+		if (level.getRandom().nextBoolean() || Calamities.wildfireNear(fire)) {
+			// (0.7.31) against a wildfire, always a bucket: the whole settlement passing water along
 			level.setBlock(fire, Blocks.WATER.defaultBlockState(), Block.UPDATE_ALL);
 			WATER.add(new Water(fire, now + WATER_TICKS));
 			level.playSound(null, fire, SoundEvents.BUCKET_EMPTY, SoundSource.NEUTRAL, 1.0F, 1.0F);

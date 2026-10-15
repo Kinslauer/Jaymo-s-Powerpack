@@ -2908,3 +2908,30 @@ moon and back on at dawn (`DarkNights`), but without the "A dark night: shaders 
   counts them); in creative she's built exactly as drawn (sneak for the bare frames). The plans are kept, so one design
   can be laid again and again; rename them on an anvil. `ShipKits.lay`/`room` now take any design.
 - A wrecked ship's blocks go down solid ones first, so the torches and lanterns hung on them don't pop off.
+
+## 0.7.31: natural disasters, stage 2: the land's own (pack 0.10.113)
+- Andy: "okay resume stage work while we test" (plan `/mnt/project-files/disasters/Disasters-Plan.md`, stage 2). All
+  in `disasters/Calamities`; stage 1's `Storms`, `Tornadoes`, `Storm` and `Tornado` are untouched. Every
+  `disaster_days` (6) on average, as often as stage 1's supercells, the land under someone brews what suits it:
+  - **Sandstorm** on sand: a 150-230 block patch drifting with the wind for 5-8 minutes. Out in it, the fog closes to
+    20 blocks of orange dust (`client/mixin/disasters/CalamityFogMixin`, dimmed at night), sand blows past, the wind
+    howls and pushes you, and **Sand Drifts** / **Red Sand Drifts** (`SandLayerBlock`, layered like snow, up to 3 deep,
+    don't melt, dig for a sand) pile up round you, paths included.
+  - **Blizzard** in snowy land: a 14-block white-out, snow layers up to 4 deep, and anyone in the open freezes (the
+    game's own freezing: frost on the screen, slowed, then hurt), unless wearing leather or within 4 blocks of a fire,
+    campfire or lava.
+  - **Wildfire** in dry land (savanna, badlands): dry lightning strikes 45-75 blocks upwind and a fire line runs
+    downwind over grass and wood for 2-4 minutes (90 blocks at most), with tall signal smoke; rain puts it out. A
+    settlement within 120 blocks of one throws 80% of its grown villagers at the fires (else 40%), every one with a
+    bucket (`Firefighting`). Not a crime: only player arson is.
+  - **Hail** anywhere else: a thunderstorm drifts in carrying it. Besides, any thunderstorm over someone may drop hail
+    (12%, a supercell 40%), for 1.5-3 minutes under the middle of the storm: hailstones bounce and clatter, sting
+    anyone bareheaded for half a heart now and then (a helmet just rings), crack glass and beat down crops.
+  - **Flood** after long rain: 7.5 minutes of rain on someone, then a small chance each 10 s that the river or lake
+    near them rises 3 blocks, a layer at a time, over the low ground beside it (up to 3000 blocks, 44 round), stands 3
+    minutes and drains. Every block it put down is taken back out, at once if the server stops or skies are cleared.
+- The `disaster_damage` rule off: no drifts, no broken glass or crops, no wildfires, and floods fill only open air.
+- `/kingdom disaster sandstorm|blizzard|wildfire|flood|hail` (ops) calls one in by you; `clear` ends them too.
+- Kept cheap (Andy asked that of the clouds): sandstorms, blizzards and hail are a few numbers sent to the clients 2x a
+  second (`Calamities.Sync`), which draw the fog and a few dozen specks a tick round the camera (`CalamitiesClient`,
+  `GustParticle`); the server only works round each player under one.

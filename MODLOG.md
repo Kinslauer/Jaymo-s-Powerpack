@@ -1206,3 +1206,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   There is no longer a portal so the only way out is death or with a chrono": guns you bring back are yours; echoes
   within 24 blocks when you leave follow you home with their guns and keep firing (a relearn no longer swaps a
   gunner's gun out); the Time Rift is gone, so the way home is a Chrono's sneak+B or dying. `docs/chrono.md`.
+- **0.10.113, natural disasters stage 2** (Andy: "okay resume stage work while we test"): Kingdoms 0.7.31 adds the
+  land's own disasters: sandstorms with drifting sand, blizzards that freeze you, wildfires settlements fight with
+  buckets, floods after long rain that drain again, and hail. See `kingdoms/MODLOG.md`.
