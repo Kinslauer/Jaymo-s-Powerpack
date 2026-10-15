@@ -3082,3 +3082,15 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
   freezes and stares while you look at it (within about 53 degrees of your view, in line of sight) and creeps on as
   soon as you look away; within 3.5 blocks, or once it hisses, looking no longer stops it (`Stalkers`, a priority-1
   goal holding its legs).
+- **0.7.57, attributes and heritage:** PlayerEx and Origins remade (neither has a 26.3 build; Andy: "build em both").
+  **Attributes** (`Stats`, the K screen's fourth tab): your character level is Survival + Stealth + Strength levels
+  added up; every 2 levels is an attribute point for Might (+2.5% damage), Agility (+1% speed), Finesse (+2.5% attack
+  speed), Endurance (2.5% less hunger), Grit (+0.5 armour, +2% knockback resistance) or Wits (+3% skill experience,
+  +0.1 luck), each to 10. Your class gives a free point in its favoured attribute and your heritage one or two more.
+  No health: hearts stay Hearty Meals'. The points sit in the tree's ranks (`stat_<name>`), so a respec gives them back.
+  **Heritage** (`Heritage`, `HeritageScreen`): a forced step between MCA's destiny and the class, picked for life
+  (ops: `/kingdom heritage set|clear|get`). Eight, passive only: Heartlander (2 free points), Stoneborn (mines faster,
+  slower), Tideborn (water breath/swim/mining, hungrier dry), Sylvan (soft landing, quieter thieving, lighter blows),
+  Verdant (green skin and antennae, sun-fed, burns longer), Emberborn (burns briefly, thrives hot, starves cold),
+  Frostborn (never freezes, thrives cold, starves hot), Nightborn (stronger in the dark, weaker in the sun). Players
+  with a class already get the heritage screen once on their next join.

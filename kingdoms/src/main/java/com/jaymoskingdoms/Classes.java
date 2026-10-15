@@ -201,8 +201,9 @@ public final class Classes {
 			refresh(player);
 			// (0.7.45) Andy: "force character creation on spawn". MCA's destiny screen (your look, where you start) comes
 			// first and can't be shut; the class screen follows it ({@link #afterDestiny}) and can't be shut either.
-			if (of(player).playerClass() == null && !McaCompat.destinyPending(player)) {
-				ask(player, true);
+			// (0.7.57) the heritage screen ({@link Heritage}) sits between them
+			if (!McaCompat.destinyPending(player)) {
+				next(player);
 			}
 		});
 		// (0.7.45) until both are done the player can't be hurt and nothing hunts them
@@ -269,6 +270,8 @@ public final class Classes {
 	/** Puts {@code player}'s class on them as they stand (their attributes). */
 	static void refresh(ServerPlayer player) {
 		ClassPerks.attributes(player);
+		// (0.7.57) a class gives a free point in its favoured attribute
+		Stats.attributes(player);
 	}
 
 	/**
@@ -276,12 +279,19 @@ public final class Classes {
 	 * so the screen is up for them), or MCA's destiny screen still to finish.
 	 */
 	public static boolean unmade(ServerPlayer player) {
-		return classOf(player) == null && ServerPlayNetworking.canSend(player, Open.TYPE);
+		return classOf(player) == null && ServerPlayNetworking.canSend(player, Open.TYPE) || Heritage.of(player) == null && Heritage.canAsk(player);
 	}
 
-	/** (0.7.45) MCA's destiny screen was just finished: the class screen is next, and can't be shut without picking. */
+	/** (0.7.45) MCA's destiny screen was just finished: (0.7.57) the heritage screen is next, then the class screen; neither can be shut without picking. */
 	public static void afterDestiny(ServerPlayer player) {
-		if (classOf(player) == null) {
+		next(player);
+	}
+
+	/** (0.7.57) Puts up the next step of character creation {@code player} still owes: their heritage, then their class. */
+	static void next(ServerPlayer player) {
+		if (Heritage.of(player) == null && Heritage.canAsk(player)) {
+			Heritage.ask(player, true);
+		} else if (classOf(player) == null) {
 			ask(player, true);
 		}
 	}

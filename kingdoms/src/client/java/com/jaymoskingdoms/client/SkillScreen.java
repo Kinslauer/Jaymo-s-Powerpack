@@ -1,9 +1,11 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.Classes;
+import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Renown;
 import com.jaymoskingdoms.Skills;
+import com.jaymoskingdoms.Stats;
 import com.mojang.blaze3d.platform.InputConstants;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +28,11 @@ import org.jspecify.annotations.Nullable;
  * pillar's level, its experience bar and the points to spend; a tab per pillar; its perks as a tree of flat tiles (press
  * one to spend points on it); and a box at the bottom that shows the hovered perk in full, or else what the pillar
  * levels on, your class and your alignment ({@link Renown}). The server checks every spend and syncs the result back.
+ * (0.7.57) A fourth tab, Attributes ({@link Stats}): your character level (every pillar's level added up), the
+ * attribute points it earns, and the six attributes as rows of ten pips (yours, your heritage's, your class's).
  */
 final class SkillScreen extends Screen {
-	static final int PANEL_W = 340, PANEL_H = 230, HEADER = 34, TAB_W = 98, TAB_H = 16, PERK_W = 98, PERK_H = 18, TIER_H = 26,
+	static final int PANEL_W = 340, PANEL_H = 230, HEADER = 34, TAB_W = 78, TAB_H = 16, STAT_ROW = 16, PIP_W = 9, PERK_W = 98, PERK_H = 18, TIER_H = 26,
 		COLUMN_GAP = 106, TREE_Y = 56, DETAIL_Y = 156, DETAIL_LINES = 5, FOOTER = 22, XP_BAR_W = 120;
 	static final int COLOR_LINE_OFF = 0xFF3A3A44;
 
@@ -37,6 +41,8 @@ final class SkillScreen extends Screen {
 	private static Skills.Pillar pillar = Skills.Pillar.STEALTH;
 	/** (0.6.5) The page of the pillar's tree shown: 0, or 1 for the tiers past the first page (Strength's Combat Arts). */
 	private static int page;
+	/** (0.7.57) Whether the Attributes tab is the one shown. */
+	private static boolean stats;
 
 	SkillScreen() {
 		super(Component.translatable("gui.jaymoskingdoms.skills.title"));
@@ -109,21 +115,30 @@ final class SkillScreen extends Screen {
 
 	@Override
 	protected void init() {
-		int x = left() + (panelW() - TAB_W * 3 - 8) / 2, y = top() + HEADER + 2;
+		int tabs = Skills.Pillar.values().length + 1;
+		int tabW = Math.min(TAB_W, (panelW() - 12 - 4 * (tabs - 1)) / tabs);
+		int x = left() + (panelW() - tabW * tabs - 4 * (tabs - 1)) / 2, y = top() + HEADER + 2;
 		for (Skills.Pillar p : Skills.Pillar.values()) {
 			Button tab = Button.builder(Component.translatable("skill.jaymoskingdoms." + p.key()), b -> {
 				pillar = p;
 				page = 0;
+				stats = false;
 				rebuildWidgets();
-			}).bounds(x, y, TAB_W, TAB_H).build();
-			tab.active = p != pillar;
+			}).bounds(x, y, tabW, TAB_H).build();
+			tab.active = stats || p != pillar;
 			addRenderableWidget(tab);
-			x += TAB_W + 4;
+			x += tabW + 4;
 		}
+		Button statsTab = Button.builder(Component.translatable("gui.jaymoskingdoms.stats.tab"), b -> {
+			stats = true;
+			rebuildWidgets();
+		}).bounds(x, y, tabW, TAB_H).build();
+		statsTab.active = !stats;
+		addRenderableWidget(statsTab);
 		int fy = top() + PANEL_H - FOOTER + 3;
 		int right = left() + panelW() - 6;
 		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(right - 60, fy, 60, 16).build());
-		if (!twoPages()) {
+		if (stats || !twoPages()) {
 			page = 0;
 		} else {
 			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.skills.page." + pillar.key() + "." + (1 - page)), b -> {
@@ -134,7 +149,7 @@ final class SkillScreen extends Screen {
 	}
 
 	private Skills.@Nullable Perk perkAt(double mouseX, double mouseY) {
-		if (!pillar.open) {
+		if (stats || !pillar.open) {
 			return null;
 		}
 		for (Skills.Perk perk : Skills.Perk.values()) {
@@ -145,8 +160,95 @@ final class SkillScreen extends Screen {
 		return null;
 	}
 
+	// ---- (0.7.57) the Attributes tab --------------------------------------------------------------------------------
+
+	private int statY(Stats.Stat stat) {
+		return top() + TREE_Y + stat.ordinal() * STAT_ROW;
+	}
+
+	private Stats.@Nullable Stat statAt(double mouseX, double mouseY) {
+		if (!stats) {
+			return null;
+		}
+		for (Stats.Stat stat : Stats.Stat.values()) {
+			if (Ui.over((int)mouseX, (int)mouseY, left() + 8, statY(stat), panelW() - 16, STAT_ROW - 2)) {
+				return stat;
+			}
+		}
+		return null;
+	}
+
+	/** The header, the six rows of pips and the detail box. */
+	private void attributes(GuiGraphicsExtractor graphics, Skills.Progress shown, int mouseX, int mouseY) {
+		int x = left(), y = top(), w = panelW();
+		int accent = Ui.GOLD;
+		Ui.panel(graphics, x, y, w, PANEL_H, accent);
+		var player = this.minecraft.player;
+		int level = Stats.characterLevel(shown), points = player == null ? 0 : Stats.points(player, shown);
+		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.stats.level", level), x + 9, y + 8, w / 2 - 12, accent);
+		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.stats.points", points), x + 9, y + 19, w / 2 - 12, points > 0 ? Ui.GOOD : Ui.DIM);
+		Heritage.Kind kind = player == null ? null : Heritage.of(player);
+		Classes.PlayerClass cls = player == null ? null : Classes.classOf(player);
+		Ui.lineRight(graphics, this.font, kind == null ? Component.translatable("gui.jaymoskingdoms.stats.heritage.none")
+			: Component.translatable("gui.jaymoskingdoms.stats.heritage", Component.translatable("heritage.jaymoskingdoms." + kind.key())), x + w - 9, y + 8, w / 2 - 12,
+			HeritageScreen.ACCENT);
+		Ui.lineRight(graphics, this.font, cls == null ? Component.translatable("gui.jaymoskingdoms.skills.class.none")
+			: Component.translatable("gui.jaymoskingdoms.skills.class", Component.translatable("class.jaymoskingdoms." + cls.key())), x + w - 9, y + 19, w / 2 - 12, Ui.GOLD);
+		Ui.rule(graphics, x + 6, x + w - 6, y + HEADER - 4);
+
+		Stats.Stat hovered = statAt(mouseX, mouseY);
+		int pipsX = x + 84;
+		for (Stats.Stat stat : Stats.Stat.values()) {
+			int ry = statY(stat);
+			Ui.row(graphics, x + 8, ry, x + w - 8, ry + STAT_ROW - 2, stat.ordinal(), stat == hovered);
+			int spent = Stats.spent(shown, stat), fromHeritage = player == null ? 0 : Stats.fromHeritage(player, stat);
+			int fromClass = player == null ? 0 : Stats.fromClass(player, stat);
+			int value = Math.min(Stats.MAX, spent + fromHeritage + fromClass);
+			String blocked = player == null ? "" : Stats.blocked(player, shown, stat);
+			Ui.line(graphics, this.font, Component.translatable("stat.jaymoskingdoms." + stat.key()), x + 13, ry + 3, pipsX - x - 18, value > 0 ? Ui.TEXT : Ui.DIM);
+			// ten pips: heritage's (teal), then class's (gold), then yours (white); the rest empty
+			for (int i = 0; i < Stats.MAX; i++) {
+				int color = i < fromHeritage ? HeritageScreen.ACCENT : i < fromHeritage + fromClass ? Ui.GOLD : i < value ? Ui.TEXT : Ui.BAR_BACK;
+				int px = pipsX + i * (PIP_W + 2);
+				graphics.fill(px, ry + 4, px + PIP_W, ry + 10, color);
+			}
+			int nx = pipsX + Stats.MAX * (PIP_W + 2) + 6;
+			graphics.text(this.font, value + "/" + Stats.MAX, nx, ry + 3, value >= Stats.MAX ? accent : Ui.TEXT);
+			if (blocked == null) {
+				graphics.text(this.font, "+", x + w - 18, ry + 3, Ui.GOOD);
+			}
+		}
+
+		Component name;
+		List<Component> text = new ArrayList<>();
+		if (hovered != null && player != null) {
+			int value = Stats.value(player, shown, hovered);
+			name = Component.translatable("stat.jaymoskingdoms." + hovered.key()).append("  " + value + "/" + Stats.MAX);
+			text.add(Component.translatable("stat.jaymoskingdoms." + hovered.key() + ".desc"));
+			text.add(Stats.now(hovered, value).copy().withColor(accent));
+			text.add(Component.translatable("gui.jaymoskingdoms.stats.from", Stats.spent(shown, hovered), Stats.fromHeritage(player, hovered),
+				Stats.fromClass(player, hovered)).withColor(Ui.DIM));
+			String blocked = Stats.blocked(player, shown, hovered);
+			text.add(blocked == null ? Component.translatable("gui.jaymoskingdoms.stats.raise").withColor(Ui.GOOD)
+				: Component.translatable(blocked).withColor(blocked.endsWith(".max") ? accent : Ui.BAD));
+		} else {
+			name = Component.translatable("gui.jaymoskingdoms.stats.tab");
+			text.add(Component.translatable("gui.jaymoskingdoms.stats.hint", Stats.LEVELS_PER_POINT).withColor(Ui.DIM));
+			text.add(Component.translatable("gui.jaymoskingdoms.stats.legend").withColor(Ui.HINT));
+		}
+		Ui.detail(graphics, this.font, x, y + DETAIL_Y, w, DETAIL_LINES, name, accent, text);
+	}
+
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		Stats.Stat stat = statAt(event.x(), event.y());
+		if (stat != null) {
+			if (this.minecraft.player != null && Stats.blocked(this.minecraft.player, progress(), stat) == null) {
+				ClientPlayNetworking.send(new Stats.Raise(stat.ordinal()));
+				this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+			}
+			return true;
+		}
 		Skills.Perk perk = perkAt(event.x(), event.y());
 		if (perk != null) {
 			if (progress().blocked(perk) == null) {
@@ -161,6 +263,11 @@ final class SkillScreen extends Screen {
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		Skills.Progress shown = progress();
+		if (stats) {
+			attributes(graphics, shown, mouseX, mouseY);
+			super.extractRenderState(graphics, mouseX, mouseY, a);
+			return;
+		}
 		int x = left(), y = top(), w = panelW();
 		int accent = accent(pillar);
 		Ui.panel(graphics, x, y, w, PANEL_H, accent);

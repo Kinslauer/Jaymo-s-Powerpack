@@ -1,0 +1,372 @@
+package com.jaymoskingdoms;
+
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.serialization.Codec;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import org.jspecify.annotations.Nullable;
+
+/**
+ * (0.7.57) Heritage, the idea of Origins remade as a step of character creation (MCA's destiny, then this, then the
+ * class): where your blood comes from. Each heritage gives a point or two free in the attributes ({@link Stats}), a gift
+ * and a flaw, all passive: powers stay the Powers mod's to find. Picked once, for life (an op can change it:
+ * {@code /kingdom heritage set|clear|get}).
+ *
+ * <ul>
+ * <li><b>Heartlander:</b> plain folk: two attribute points of your own choosing, no flaw.</li>
+ * <li><b>Stoneborn:</b> mines faster; a little slower on foot.</li>
+ * <li><b>Tideborn:</b> long breath, swims and mines well under water; hungrier out of the wet.</li>
+ * <li><b>Sylvan:</b> lands soft, sneaks unseen; hits lighter.</li>
+ * <li><b>Verdant:</b> green skin and antennae ({@link Verdants}), hunger drains slow in the sun; burns longer.</li>
+ * <li><b>Emberborn:</b> burns briefly, thrives in the heat; starves in the cold.</li>
+ * <li><b>Frostborn:</b> never freezes, thrives in the cold; starves in the heat.</li>
+ * <li><b>Nightborn:</b> stronger and quicker in the dark; weaker under the open sun.</li>
+ * </ul>
+ */
+public final class Heritage {
+	/** Stoneborn: block break speed (a share), and walking speed lost (a share). */
+	static final double STONE_MINING = 0.15, STONE_SLOW = 0.06;
+	/** Tideborn: breath, swimming and mining under water; hunger out of the wet, as a factor. */
+	static final double TIDE_OXYGEN = 3.0, TIDE_SWIM = 0.5, TIDE_SUBMERGED_MINING = 0.6;
+	static final float TIDE_DRY_HUNGER = 1.2F;
+	/** Sylvan: blocks you can fall without harm, the share off how far sneaking is seen, and the share off your blows. */
+	static final double SYLVAN_SAFE_FALL = 1.5, SYLVAN_SNEAK = 0.1, SYLVAN_WEAK = 0.1;
+	/** Verdant: hunger in the sun, as a factor, and how much longer fire burns (a share). */
+	static final float VERDANT_SUN_HUNGER = 0.65F;
+	static final double VERDANT_BURN = 0.5;
+	/** Emberborn: how much shorter fire burns (a share). Both Emberborn and Frostborn: hunger where they thrive and where they don't. */
+	static final double EMBER_BURN = 0.5;
+	static final float THRIVE_HUNGER = 0.8F, WILT_HUNGER = 1.25F;
+	/** A biome this hot (base temperature) or hotter is hot; this cold or colder is cold. */
+	static final float HOT = 1.0F, COLD = 0.2F;
+	/** Nightborn: blows and speed in the dark (shares), blows in the sun (a share off). Dark: night, or light this low. */
+	static final double NIGHT_DAMAGE = 0.1, NIGHT_SPEED = 0.05, SUN_WEAK = 0.1;
+	static final int DARK_LIGHT = 7;
+	/** How often the heritages that change with the light and the frost are looked at (ticks). */
+	static final int TICK_EVERY = 20;
+
+	/** The heritages: free points to spend as you like, an icon, and the attributes each gives a free point in (one entry a point). */
+	public enum Kind {
+		HEARTLANDER(2, Items.WHEAT),
+		STONEBORN(0, Items.IRON_PICKAXE, Stats.Stat.GRIT, Stats.Stat.ENDURANCE),
+		TIDEBORN(0, Items.NAUTILUS_SHELL, Stats.Stat.AGILITY, Stats.Stat.ENDURANCE),
+		SYLVAN(0, Items.OAK_SAPLING, Stats.Stat.AGILITY, Stats.Stat.FINESSE),
+		VERDANT(0, Items.MOSS_BLOCK, Stats.Stat.ENDURANCE, Stats.Stat.WITS),
+		EMBERBORN(0, Items.BLAZE_POWDER, Stats.Stat.MIGHT, Stats.Stat.MIGHT),
+		FROSTBORN(0, Items.SNOWBALL, Stats.Stat.GRIT, Stats.Stat.MIGHT),
+		NIGHTBORN(0, Items.PHANTOM_MEMBRANE, Stats.Stat.FINESSE, Stats.Stat.WITS);
+
+		/** Attribute points to spend as you like. */
+		public final int freePoints;
+		public final Item icon;
+		public final List<Stats.Stat> bonuses;
+
+		Kind(int freePoints, Item icon, Stats.Stat... bonuses) {
+			this.freePoints = freePoints;
+			this.icon = icon;
+			this.bonuses = List.of(bonuses);
+		}
+
+		public String key() {
+			return name().toLowerCase(Locale.ROOT);
+		}
+
+		/** Free points in {@code stat}. */
+		public int bonus(Stats.Stat stat) {
+			int n = 0;
+			for (Stats.Stat s : this.bonuses) {
+				if (s == stat) {
+					n++;
+				}
+			}
+			return n;
+		}
+
+		public static @Nullable Kind byKey(String key) {
+			for (Kind k : values()) {
+				if (k.key().equals(key)) {
+					return k;
+				}
+			}
+			return null;
+		}
+
+		/** What the screen lists for it: the free points, the gift, the flaw. */
+		public List<Component> card() {
+			List<Component> out = new ArrayList<>();
+			if (this.freePoints > 0) {
+				out.add(Component.translatable("heritage.jaymoskingdoms.free", this.freePoints));
+			}
+			for (Stats.Stat stat : Stats.Stat.values()) {
+				int n = bonus(stat);
+				if (n > 0) {
+					out.add(Component.translatable("heritage.jaymoskingdoms.bonus", n, Component.translatable("stat.jaymoskingdoms." + stat.key())));
+				}
+			}
+			out.add(Component.translatable("heritage.jaymoskingdoms." + key() + ".gift"));
+			out.add(Component.translatable("heritage.jaymoskingdoms." + key() + ".flaw"));
+			return out;
+		}
+	}
+
+	/** Each player's heritage (its key). Saved, kept through death, synced to its own player (the screens). */
+	public static final AttachmentType<String> HERITAGE = AttachmentRegistry.create(JaymosKingdoms.id("heritage"),
+		builder -> builder.persistent(Codec.STRING).copyOnDeath().syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.targetOnly()));
+
+	/** Server → player: pick a heritage (the screen opens; {@code forced}: it can't be shut without picking). */
+	public record Open(boolean forced) implements CustomPacketPayload {
+		public static final Type<Open> TYPE = new Type<>(JaymosKingdoms.id("heritage_open"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Open> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeBoolean(p.forced), buf -> new Open(buf.readBoolean()));
+
+		@Override
+		public Type<Open> type() {
+			return TYPE;
+		}
+	}
+
+	/** Player → server: they picked heritage {@code kind} (its ordinal). */
+	public record Choose(int kind) implements CustomPacketPayload {
+		public static final Type<Choose> TYPE = new Type<>(JaymosKingdoms.id("heritage_choose"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Choose> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeVarInt(p.kind), buf -> new Choose(buf.readVarInt()));
+
+		@Override
+		public Type<Choose> type() {
+			return TYPE;
+		}
+	}
+
+	private Heritage() {
+	}
+
+	static void register() {
+		PayloadTypeRegistry.clientboundPlay().register(Open.TYPE, Open.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(Choose.TYPE, Choose.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Choose.TYPE, (payload, context) -> choose(context.player(), payload.kind()));
+		ServerTickEvents.END_SERVER_TICK.register(Heritage::tick);
+	}
+
+	public static @Nullable Kind of(Player player) {
+		String key = player.getAttached(HERITAGE);
+		return key == null ? null : Kind.byKey(key);
+	}
+
+	public static boolean is(Player player, Kind kind) {
+		return of(player) == kind;
+	}
+
+	/** Opens the heritage screen for {@code player} (if their client has this mod). */
+	static void ask(ServerPlayer player, boolean forced) {
+		if (ServerPlayNetworking.canSend(player, Open.TYPE)) {
+			ServerPlayNetworking.send(player, new Open(forced));
+		}
+	}
+
+	/** Whether the heritage screen can be put up for {@code player} (their client has this mod). */
+	static boolean canAsk(ServerPlayer player) {
+		return ServerPlayNetworking.canSend(player, Open.TYPE);
+	}
+
+	private static void choose(ServerPlayer player, int ordinal) {
+		Kind[] all = Kind.values();
+		if (ordinal < 0 || ordinal >= all.length || of(player) != null) {
+			return;
+		}
+		set(player, all[ordinal]);
+		// (character creation: the class comes next)
+		if (Classes.classOf(player) == null) {
+			Classes.ask(player, true);
+		}
+	}
+
+	/** Makes {@code player} of heritage {@code kind}: its look (a Verdant's green), its attributes, the word of it. */
+	static void set(ServerPlayer player, Kind kind) {
+		Kind was = of(player);
+		player.setAttached(HERITAGE, kind.key());
+		look(player, was, kind);
+		Stats.settle(player);
+		Skills.refresh(player);
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.8F, 1.0F);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.heritage.chosen", Component.translatable("heritage.jaymoskingdoms." + kind.key()))
+			.withStyle(ChatFormatting.GOLD));
+	}
+
+	/** Takes {@code player}'s heritage away (and asks again). */
+	static void clear(ServerPlayer player) {
+		Kind was = of(player);
+		player.removeAttached(HERITAGE);
+		look(player, was, null);
+		Stats.settle(player);
+		Skills.refresh(player);
+	}
+
+	/** A Verdant is green ({@link Verdants#SHADE}, seen by everyone); leaving it behind takes the green away. */
+	private static void look(ServerPlayer player, @Nullable Kind was, @Nullable Kind now) {
+		if (now == Kind.VERDANT && !Verdants.is(player)) {
+			player.setAttached(Verdants.SHADE, (player.getRandom().nextFloat() + player.getRandom().nextFloat()) / 2.0F);
+		} else if (was == Kind.VERDANT && now != Kind.VERDANT) {
+			player.removeAttached(Verdants.SHADE);
+		}
+	}
+
+	// ---- effects -----------------------------------------------------------------------------------------------
+
+	/** Puts {@code player}'s heritage on them as they stand (the attributes that don't change with the light). */
+	static void attributes(ServerPlayer player) {
+		Kind kind = of(player);
+		if (kind == Kind.VERDANT && !Verdants.is(player)) {
+			// (the green isn't kept through death on its own)
+			look(player, null, kind);
+		}
+		Skills.modifier(player, Attributes.BLOCK_BREAK_SPEED, "heritage_mining", kind == Kind.STONEBORN ? STONE_MINING : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+		Skills.modifier(player, Attributes.MOVEMENT_SPEED, "heritage_slow", kind == Kind.STONEBORN ? -STONE_SLOW : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		Skills.modifier(player, Attributes.OXYGEN_BONUS, "heritage_breath", kind == Kind.TIDEBORN ? TIDE_OXYGEN : 0.0, AttributeModifier.Operation.ADD_VALUE);
+		Skills.modifier(player, Attributes.WATER_MOVEMENT_EFFICIENCY, "heritage_swim", kind == Kind.TIDEBORN ? TIDE_SWIM : 0.0, AttributeModifier.Operation.ADD_VALUE);
+		Skills.modifier(player, Attributes.SUBMERGED_MINING_SPEED, "heritage_submerged", kind == Kind.TIDEBORN ? TIDE_SUBMERGED_MINING : 0.0, AttributeModifier.Operation.ADD_VALUE);
+		Skills.modifier(player, Attributes.SAFE_FALL_DISTANCE, "heritage_soft", kind == Kind.SYLVAN ? SYLVAN_SAFE_FALL : 0.0, AttributeModifier.Operation.ADD_VALUE);
+		Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_weak", kind == Kind.SYLVAN ? -SYLVAN_WEAK : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		Skills.modifier(player, Attributes.BURNING_TIME, "heritage_burn",
+			kind == Kind.VERDANT ? VERDANT_BURN : kind == Kind.EMBERBORN ? -EMBER_BURN : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		if (kind != Kind.NIGHTBORN) {
+			Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_night", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+			Skills.modifier(player, Attributes.MOVEMENT_SPEED, "heritage_night", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		}
+	}
+
+	private static void tick(MinecraftServer server) {
+		if (server.getTickCount() % TICK_EVERY != 0) {
+			return;
+		}
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			Kind kind = of(player);
+			if (kind == Kind.NIGHTBORN) {
+				// stronger and quicker in the dark, weaker under the open sun
+				double damage = 0.0, speed = 0.0;
+				if (dark(player)) {
+					damage = NIGHT_DAMAGE;
+					speed = NIGHT_SPEED;
+				} else if (inSun(player)) {
+					damage = -SUN_WEAK;
+				}
+				Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_night", damage, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+				Skills.modifier(player, Attributes.MOVEMENT_SPEED, "heritage_night", speed, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+			} else if (kind == Kind.FROSTBORN && player.getTicksFrozen() > 0) {
+				player.setTicksFrozen(0);
+			}
+		}
+	}
+
+	/** Night where they stand, or a dark place. */
+	static boolean dark(ServerPlayer player) {
+		Level level = player.level();
+		BlockPos pos = player.blockPosition();
+		return level.getMaxLocalRawBrightness(pos) <= DARK_LIGHT || level.isDarkOutside() && level.canSeeSky(pos);
+	}
+
+	/** Day, under the open sky, no rain. */
+	static boolean inSun(ServerPlayer player) {
+		Level level = player.level();
+		BlockPos pos = player.blockPosition().above();
+		return level.isBrightOutside() && level.canSeeSky(pos) && !level.isRainingAt(pos);
+	}
+
+	/** The factor on {@code player}'s hunger drain from their heritage, where they are now. */
+	static float exhaustion(ServerPlayer player) {
+		Kind kind = of(player);
+		if (kind == null) {
+			return 1.0F;
+		}
+		return switch (kind) {
+			case TIDEBORN -> player.isInWaterOrRain() ? 1.0F : TIDE_DRY_HUNGER;
+			case VERDANT -> inSun(player) ? VERDANT_SUN_HUNGER : 1.0F;
+			case EMBERBORN -> hot(player) ? THRIVE_HUNGER : cold(player) ? WILT_HUNGER : 1.0F;
+			case FROSTBORN -> cold(player) ? THRIVE_HUNGER : hot(player) ? WILT_HUNGER : 1.0F;
+			default -> 1.0F;
+		};
+	}
+
+	private static float temperature(ServerPlayer player) {
+		return player.level().getBiome(player.blockPosition()).value().getBaseTemperature();
+	}
+
+	static boolean hot(ServerPlayer player) {
+		return temperature(player) >= HOT;
+	}
+
+	static boolean cold(ServerPlayer player) {
+		return temperature(player) <= COLD;
+	}
+
+	/** Sylvan: the share off how far sneaking is seen. */
+	static double sneak(Player player) {
+		return is(player, Kind.SYLVAN) ? SYLVAN_SNEAK : 0.0;
+	}
+
+	// ---- for ops ------------------------------------------------------------------------------------------------
+
+	/** {@code /kingdom heritage set|clear|get}, for ops. */
+	static LiteralArgumentBuilder<CommandSourceStack> command() {
+		var players = Commands.argument("players", EntityArgument.players());
+		for (Kind kind : Kind.values()) {
+			players.then(Commands.literal(kind.key()).executes(c -> {
+				int n = 0;
+				for (ServerPlayer p : EntityArgument.getPlayers(c, "players")) {
+					set(p, kind);
+					n++;
+				}
+				int count = n;
+				c.getSource().sendSuccess(() -> Component.translatable("command.jaymoskingdoms.heritage.set", count,
+					Component.translatable("heritage.jaymoskingdoms." + kind.key())), true);
+				return n;
+			}));
+		}
+		return Commands.literal("heritage").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+			.then(Commands.literal("set").then(players))
+			.then(Commands.literal("clear").then(Commands.argument("players", EntityArgument.players()).executes(c -> {
+				int n = 0;
+				for (ServerPlayer p : EntityArgument.getPlayers(c, "players")) {
+					clear(p);
+					ask(p, true);
+					n++;
+				}
+				int count = n;
+				c.getSource().sendSuccess(() -> Component.translatable("command.jaymoskingdoms.heritage.cleared", count), true);
+				return n;
+			})))
+			.then(Commands.literal("get").then(Commands.argument("player", EntityArgument.player()).executes(c -> {
+				ServerPlayer p = EntityArgument.getPlayer(c, "player");
+				Kind kind = of(p);
+				c.getSource().sendSuccess(() -> kind == null ? Component.translatable("command.jaymoskingdoms.heritage.none", p.getDisplayName())
+					: Component.translatable("command.jaymoskingdoms.heritage.is", p.getDisplayName(), Component.translatable("heritage.jaymoskingdoms." + kind.key())), false);
+				return 1;
+			})));
+	}
+}

@@ -111,6 +111,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.6.0: player classes (picked on first joining; a Writ of Rebirth unmakes the pick) and their attachments
 		Classes.register();
 		LOGGER.debug("class attachments: {} {}", Classes.CLASS, Classes.WRIT_BOUGHT);
+		// 0.7.57: heritage (Origins remade: picked between MCA's destiny and the class) and its attachment
+		Heritage.register();
+		LOGGER.debug("heritage attachment: {}", Heritage.HERITAGE);
 		// 0.5.19: a boss's bar shows only to the players who've hit it
 		BossBars.register();
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
