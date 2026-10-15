@@ -125,7 +125,7 @@ final class WebParkourClient {
 	/** In the air, Sneak against a wall in front: hang on it. */
 	private void tryCling(LocalPlayer player) {
 		Direction facing = player.getDirection();
-		if (player.getDeltaMovement().y > 0.3 || !WebWallRun.wallAt(player.level(), player, facing, REACH)) {
+		if (player.getDeltaMovement().y > 0.3 || !WebParkour.canCling(player) || !WebWallRun.wallAt(player.level(), player, facing, REACH)) {
 			return;
 		}
 		player.setDeltaMovement(Vec3.ZERO);
@@ -135,6 +135,15 @@ final class WebParkourClient {
 
 	private void tickCling(LocalPlayer player, Input input, boolean jumpPressed) {
 		Direction face = wall;
+		if (face != null && input.forward() && input.shift() && !jumpPressed && !player.onGround()
+			&& !WebWallRun.wallAt(player.level(), player, face, REACH) && player.level().noCollision(player, player.getBoundingBox().move(0.0, 0.6, 0.0))) {
+			// climbed to the top of the wall: pull up and over it
+			player.setDeltaMovement(new Vec3(face.getStepX(), 0.0, face.getStepZ()).scale(WebParkour.MANTLE_IN).add(0.0, WebParkour.MANTLE_UP, 0.0));
+			player.resetFallDistance();
+			stop();
+			WebSwing.play(player, SoundEvents.SPIDER_STEP, 0.6F, 0.9F);
+			return;
+		}
 		if (face == null || player.onGround() || !input.shift() && !jumpPressed || ++ticks > WebParkour.CLING_MAX_TICKS
 			|| !WebWallRun.wallAt(player.level(), player, face, REACH)) {
 			stop();
@@ -147,8 +156,10 @@ final class WebParkourClient {
 		// shimmy along the wall with A/D; after the hold you start to slip
 		Direction left = face.getCounterClockWise();
 		double strafe = (input.left() ? 1.0 : 0.0) - (input.right() ? 1.0 : 0.0);
+		// W climbs; the suit's tendrils never slip, fists do after the hold
 		int hold = WebParkour.CLING_HOLD_TICKS[WebWallRun.tier(player)];
-		double down = ticks > hold ? -WebParkour.CLING_SLIP : 0.0;
+		boolean tendrils = WebSymbiote.suitShown(player);
+		double down = input.forward() ? WebParkour.CLING_CLIMB : ticks > hold && !tendrils ? -WebParkour.CLING_SLIP : 0.0;
 		Vec3 into = new Vec3(face.getStepX(), 0.0, face.getStepZ()).scale(HUG);
 		Vec3 side = new Vec3(left.getStepX(), 0.0, left.getStepZ()).scale(strafe * WebParkour.CLING_SHIMMY);
 		player.setDeltaMovement(side.add(into).add(0.0, down, 0.0));

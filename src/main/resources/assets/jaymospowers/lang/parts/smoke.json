@@ -14,6 +14,7 @@
 	"power.jaymospowers.smoke.key.special": "Smoke Jet (hold): a jet of smoke where you look (14 blocks) that lingers like your other smoke, drives smoke on and fills a ship's sails",
 	"power.jaymospowers.smoke.key.special.name": "Smoke Jet",
 	"message.jaymospowers.smoke_smother_nothing": "Nothing there to smother.",
+	"message.jaymospowers.smoke_vapour_armour": "Armour won't go on smoke.",
 	"hud.jaymospowers.smoke.pour": "Smokescreen",
 	"hud.jaymospowers.smoke.smother": "Smother",
 	"hud.jaymospowers.smoke.vapour": "Vapour Form",

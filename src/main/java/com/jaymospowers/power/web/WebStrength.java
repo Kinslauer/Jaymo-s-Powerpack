@@ -108,6 +108,10 @@ public final class WebStrength {
 	private static final Map<UUID, Bind> BINDS = new HashMap<>();
 	private static final Map<UUID, Stuck> STUCK = new HashMap<>();
 	private static final Map<UUID, Long> FISTS_UNTIL = new HashMap<>();
+	/** Webbed fists are on: synced so the client knows it may start a wall cling (see {@link WebParkour#canCling}). */
+	public static final net.fabricmc.fabric.api.attachment.v1.AttachmentType<Boolean> FISTS = net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry.create(
+		com.jaymospowers.JaymosPowers.id("web_fists"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.BOOL, net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate.all()));
 	private static final Map<UUID, Long> FISTS_READY = new HashMap<>();
 	private static final Map<UUID, Long> SHOCK_READY = new HashMap<>();
 	private static long clock;
@@ -151,6 +155,7 @@ public final class WebStrength {
 		remove(player, Attributes.KNOCKBACK_RESISTANCE, STEADY_ID);
 		remove(player, Attributes.FALL_DAMAGE_MULTIPLIER, FALL_ID);
 		FISTS_UNTIL.remove(player.getUUID());
+		player.removeAttached(FISTS);
 	}
 
 	private static void modifier(Player player, Holder<Attribute> attribute, Identifier id, double amount, AttributeModifier.Operation operation) {
@@ -265,6 +270,7 @@ public final class WebStrength {
 				if (player == null || clock >= entry.getValue() || !Powers.has(player, WebPower.INSTANCE)) {
 					it.remove();
 					if (player != null) {
+						player.removeAttached(FISTS);
 						player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_fists_off").withStyle(net.minecraft.ChatFormatting.GRAY));
 					}
 				} else if (clock % 5 == 0) {
@@ -323,6 +329,7 @@ public final class WebStrength {
 			return;
 		}
 		FISTS_UNTIL.put(player.getUUID(), clock + FISTS_TICKS);
+		player.setAttached(FISTS, true);
 		FISTS_READY.put(player.getUUID(), clock + FISTS_COOLDOWN);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_fists_on").withStyle(net.minecraft.ChatFormatting.WHITE));
 		player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.COBWEB_PLACE, SoundSource.PLAYERS, 1.0F, 1.3F);
