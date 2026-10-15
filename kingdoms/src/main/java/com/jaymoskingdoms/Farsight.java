@@ -12,7 +12,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.raid.Raider;
 
 /**
- * (0.7.55) Monsters see farther, after Farsighted Mobs (LGPL-3, remade here: no 26.3 Fabric build). Vanilla skeletons,
+ * (0.7.56) Monsters see farther, after Farsighted Mobs (LGPL-3, remade here: no 26.3 Fabric build). Vanilla skeletons,
  * creepers and spiders notice you at 16 blocks, so standing still kept you safe; now every monster sees at least
  * {@link #SIGHT} blocks, {@link #HARD_BONUS} more on Hard, and up to {@link #LOCAL_BONUS} more where the local
  * difficulty is high (long-settled, moonlit places). A monster that already sees farther (zombies, our own legends)

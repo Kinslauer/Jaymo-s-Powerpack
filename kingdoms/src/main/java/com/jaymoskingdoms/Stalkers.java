@@ -10,7 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.7.55) Creepers stalk you, after AtomicStryker's Stalker Creepers (Forge/NeoForge only, no licence given: the idea
+ * (0.7.56) Creepers stalk you, after AtomicStryker's Stalker Creepers (Forge/NeoForge only, no licence given: the idea
  * remade here). A creeper that has picked you freezes, staring, while you look at it, and creeps on the moment you look
  * away, so it is the one behind you that gets close. Within {@link #STRIKE} blocks, or once it has started to hiss,
  * looking no longer stops it.

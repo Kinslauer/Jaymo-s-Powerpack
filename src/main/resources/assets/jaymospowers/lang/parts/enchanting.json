@@ -1,0 +1,22 @@
+{
+	"message.jaymospowers.enchanting_learned": "You learned %s",
+	"message.jaymospowers.enchanting_known": "You already know everything in this book",
+	"message.jaymospowers.enchanting_ashes": "The book crumbles to ash",
+	"gui.jaymospowers.enchanting.put_item": "Put an item or a book in the top slot",
+	"gui.jaymospowers.enchanting.none_known": "You know no enchantment for this. Read enchanted books (right-click) to learn them",
+	"gui.jaymospowers.enchanting.cannot": "This can't be enchanted",
+	"gui.jaymospowers.enchanting.raise": "raise",
+	"gui.jaymospowers.enchanting.maxed": "max",
+	"gui.jaymospowers.enchanting.clashes": "clashes",
+	"gui.jaymospowers.enchanting.full": "no room",
+	"gui.jaymospowers.enchanting.unknown_level": "unread",
+	"gui.jaymospowers.enchanting.pick": "Pick an enchantment to see its price",
+	"gui.jaymospowers.enchanting.why.maxed": "Already as strong as the table makes it",
+	"gui.jaymospowers.enchanting.why.clashes": "Clashes with an enchantment already on it",
+	"gui.jaymospowers.enchanting.why.full": "No room for another enchantment (a curse makes room)",
+	"gui.jaymospowers.enchanting.why.unknown_level": "Read a book of this level first",
+	"gui.jaymospowers.enchanting.enchant": "Enchant",
+	"gui.jaymospowers.enchanting.missing": "Missing items",
+	"gui.jaymospowers.enchanting.levels": "Level %s of %s",
+	"gui.jaymospowers.enchanting.any_of": "(any of these)"
+}
