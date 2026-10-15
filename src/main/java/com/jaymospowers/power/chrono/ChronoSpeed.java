@@ -64,9 +64,9 @@ public final class ChronoSpeed {
 		return player instanceof ServerPlayer sp && ChronoPower.overclocked(sp);
 	}
 
-	/** Water holds up an overclocked player who's sprinting (lava doesn't: they'd still burn). */
+	/** Water and (since 0.11.37) lava hold up an overclocked player who's sprinting. Slow down on lava and you sink in. */
 	public static boolean runsOn(Player player, FluidState fluid) {
-		return fluid.is(FluidTags.WATER) && runsOnFluids(player);
+		return (fluid.is(FluidTags.WATER) || fluid.is(FluidTags.LAVA)) && runsOnFluids(player);
 	}
 
 	/** Overclocked and sprinting (not sneaking): the water run is on (which fluids hold you is {@link #runsOn}'s). */
@@ -90,7 +90,12 @@ public final class ChronoSpeed {
 				}
 				ChronoFx.particles(level, player, ParticleTypes.WAX_ON, was.x, was.y + 0.9, was.z, 1, 0.2, 0.4, 0.2, 0.0);
 			}
-			if (player.isInWater() || player.onGround() && !level.getFluidState(player.blockPosition().below()).isEmpty()) {
+			FluidState under = level.getFluidState(player.blockPosition().below());
+			if (player.onGround() && under.is(FluidTags.LAVA)) {
+				// lava spits behind your heels
+				ChronoFx.particles(level, player, ParticleTypes.LAVA, player.getX(), player.getY() + 0.1, player.getZ(), 1, 0.3, 0.0, 0.3, 0.0);
+				ChronoFx.particles(level, player, ParticleTypes.SMOKE, player.getX(), player.getY() + 0.1, player.getZ(), 3, 0.3, 0.0, 0.3, 0.02);
+			} else if (player.isInWater() || player.onGround() && !under.isEmpty()) {
 				ChronoFx.particles(level, player, ParticleTypes.SPLASH, player.getX(), player.getY() + 0.1, player.getZ(), 6, 0.3, 0.0, 0.3, 0.1);
 			}
 		}
