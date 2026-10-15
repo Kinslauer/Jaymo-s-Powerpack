@@ -192,9 +192,9 @@ public final class Skills {
 			return Skills.level(xp(pillar), pillar.maxLevel);
 		}
 
-		/** How many ranks are learned, in all pillars. */
+		/** How many ranks are learned, in all pillars, and (0.7.57) attribute points spent ({@link Stats}). */
 		public int spent() {
-			int n = 0;
+			int n = Stats.spent(this);
 			for (Perk perk : Perk.values()) {
 				n += rank(perk);
 			}
@@ -308,6 +308,7 @@ public final class Skills {
 		});
 		SurvivalSkill.register();
 		StrengthSkill.register();
+		Stats.register();
 		CombatArts.register();
 		ShieldThrow.register();
 		Renown.register();
@@ -318,6 +319,8 @@ public final class Skills {
 	static void refresh(ServerPlayer player) {
 		SurvivalSkill.attributes(player);
 		StrengthSkill.attributes(player);
+		Stats.attributes(player);
+		Heritage.attributes(player);
 		Renown.update(player);
 	}
 
@@ -335,9 +338,12 @@ public final class Skills {
 		}
 	}
 
-	/** The factor on {@code player}'s food exhaustion: Survival practice and Packhorse make hunger drain slower. */
+	/**
+	 * The factor on {@code player}'s food exhaustion: Survival practice and Packhorse make hunger drain slower, and
+	 * (0.7.57) Endurance ({@link Stats}) and their heritage ({@link Heritage}) where they stand.
+	 */
 	public static float exhaustion(ServerPlayer player) {
-		return SurvivalSkill.exhaustion(player) * StrengthSkill.exhaustion(player);
+		return SurvivalSkill.exhaustion(player) * StrengthSkill.exhaustion(player) * Stats.exhaustion(player) * Heritage.exhaustion(player);
 	}
 
 	/** Every point {@code player} spent comes back to spend again; their experience and levels stay. */
@@ -437,6 +443,8 @@ public final class Skills {
 		if (amount <= 0) {
 			return;
 		}
+		// (0.7.57) Wits: every pillar learns faster
+		amount = Math.max(amount, Math.round(amount * Stats.xpFactor(player)));
 		Progress p = of(player);
 		int before = p.xp(pillar);
 		int after = Math.min(total(pillar.maxLevel), before + amount);
@@ -523,7 +531,7 @@ public final class Skills {
 
 	/** The share of their sight sneaking hides {@code player} by (Soft Step). */
 	static double sneakFactor(Player player, double base) {
-		return Math.max(0.1, base - SOFT_STEP_PER_RANK * rank(player, Perk.SOFT_STEP));
+		return Math.max(0.1, base - SOFT_STEP_PER_RANK * rank(player, Perk.SOFT_STEP) - Heritage.sneak(player));
 	}
 
 	/** How far round the mark {@code player} may stand and still reach in (Quick Hands: the side will do). */
