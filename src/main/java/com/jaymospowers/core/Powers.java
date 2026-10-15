@@ -134,6 +134,7 @@ public final class Powers {
 			player.removeAttached(AWAKEN_SLOW);
 			player.removeAttached(Callings.CALLING);
 			player.removeAttached(Callings.WEAPON_KILLS);
+			player.removeAttached(Callings.ARSENAL_KILLS);
 			player.removeAttached(Callings.FIST_KILLS);
 			power.onGained(player);
 		}

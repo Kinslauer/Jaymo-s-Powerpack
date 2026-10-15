@@ -53,7 +53,7 @@ coloured blocks (terracotta, beds, banners, carpets) have no `Blocks.X` fields: 
   0.5 b/t, and Gravity's Weightless which they asked for).
 - Movement powers feel physical: hunger cost, inertia, crash damage scaling with speed².
 - Power HUDs sit bottom-right, right of the hotbar, in Wind's chip style; never mid-screen.
-- Natural awakenings start with one ability; the rest unlock through use (Mastery). Creative gets all.
+- Natural awakenings start with one ability; the rest unlock through Mastery: 3 in-game days an ability from time alone, ability use and meditating (I) bring it down to 1 day, training in someone else's Immense Field to half a day (the field's owner only while shadowboxing in it beside another shadowboxer; a Gravity user's shadowboxing pays only with a partner). Creative gets all.
 - Ascension/corruption is discovered in play; messages stay vague; cures are circumstances in the world.
 - Bump `version` on every release (new packets break old clients). After a release on the home PC:
   `packageModpack`, the friends get `modpack/Jaymos-Powers-Modpack-<v>.zip`, the server restarts.
