@@ -33,6 +33,7 @@
 		"jaymospowers.darktide.mixins.json",
 		{ "config": "jaymospowers.darktide.client.mixins.json", "environment": "client" },
 		"jaymospowers.tinkering.mixins.json",
+		"jaymospowers.enchanting.mixins.json",
 		"jaymospowers.xenoform.mixins.json",
 		{ "config": "jaymospowers.xenoform.client.mixins.json", "environment": "client" },
 		"jaymospowers.zfighter.mixins.json",
