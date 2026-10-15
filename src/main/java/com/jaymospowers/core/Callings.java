@@ -3,7 +3,6 @@ package com.jaymospowers.core;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
 import com.mojang.serialization.Codec;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +15,7 @@ import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
@@ -32,15 +32,19 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.breeze.Breeze;
 import net.minecraft.world.entity.monster.spider.CaveSpider;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.entity.projectile.arrow.ThrownTrident;
 import net.minecraft.world.entity.vehicle.boat.AbstractBoat;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -55,7 +59,7 @@ import org.jspecify.annotations.Nullable;
  * <li>Gravity: land a fall of {@link #GRAVITY_FALL}+ blocks and live. A day off.</li>
  * <li>Chrono: sleep through the night holding a clock. A day off.</li>
  * <li>Web: be bitten by a cave spider and live. A day off, once a day.</li>
- * <li>Arsenal: kill with {@link #ARSENAL_TYPES} different kinds of weapon. Awakens at once.</li>
+ * <li>Arsenal: kill {@link #ARSENAL_KILLS_NEEDED} things with weapons (any kind, never fists). Awakens at once.</li>
  * <li>Resonance: ring a village bell around midnight (a day off, once a night), or live through a Warden's sonic boom
  * (awakens at once).</li>
  * <li>Darktide: stay out at sea, swimming or in a boat, from dusk to dawn. Awakens at dawn.</li>
@@ -70,9 +74,13 @@ public final class Callings {
 	/** The power a calling has claimed: it's the one that awakens. Saved, kept through death. */
 	public static final AttachmentType<Identifier> CALLING = AttachmentRegistry.create(JaymosPowers.id("calling"),
 		builder -> builder.persistent(Identifier.CODEC).copyOnDeath());
-	/** The kinds of weapon a powerless player has killed with (for Arsenal). Saved, kept through death. */
+	/** The kinds of weapon a powerless player killed with (Arsenal's old calling, before 0.11.59). Still registered so old saves load. */
 	public static final AttachmentType<List<String>> WEAPON_KILLS = AttachmentRegistry.create(JaymosPowers.id("weapon_kills"),
 		builder -> builder.persistent(Codec.STRING.listOf()).copyOnDeath());
+
+	/** Kills a powerless player has made with a weapon (for Arsenal). Saved, kept through death. */
+	public static final AttachmentType<Integer> ARSENAL_KILLS = AttachmentRegistry.create(JaymosPowers.id("arsenal_kills"),
+		builder -> builder.persistent(Codec.INT).copyOnDeath());
 
 	/** Monsters a powerless player has killed with bare fists (for Z Fighter). Saved, kept through death. */
 	public static final AttachmentType<Integer> FIST_KILLS = AttachmentRegistry.create(JaymosPowers.id("fist_kills"),
@@ -82,8 +90,8 @@ public final class Callings {
 	public static final int DAY = 24000;
 	/** Gravity: the smallest fall (blocks) that counts. */
 	public static final double GRAVITY_FALL = 40.0;
-	/** Arsenal: how many different kinds of weapon must have killed something. */
-	public static final int ARSENAL_TYPES = 5;
+	/** Arsenal: kills with any weapon (never bare fists; Andy, 2026-10-15). */
+	public static final int ARSENAL_KILLS_NEEDED = 20;
 	/** Z Fighter: monsters to kill with bare fists. */
 	public static final int FIST_KILLS_NEEDED = 20;
 	/** Resonance: how near midnight (clock ticks either side of 18000) a bell has to be rung. */
@@ -191,7 +199,7 @@ public final class Callings {
 		IN_SMOKE.remove(id);
 	}
 
-	/** Wind (a Breeze), Z Fighter (bare fists) and Arsenal (weapon kinds): kills by a powerless player. */
+	/** Wind (a Breeze), Z Fighter (bare fists) and Arsenal (weapons): kills by a powerless player. */
 	private static void afterDeath(LivingEntity entity, DamageSource source) {
 		if (!(source.getEntity() instanceof ServerPlayer player) || Powers.of(player) != null) {
 			return;
@@ -210,23 +218,19 @@ public final class Callings {
 			}
 			progress(player, "zfighter", kills, FIST_KILLS_NEEDED);
 		}
-		String kind = weaponKind(player, source);
-		if (kind == null) {
+		if (weaponKind(player, source) == null) {
 			return;
 		}
-		List<String> kinds = new ArrayList<>(player.getAttachedOrElse(WEAPON_KILLS, List.of()));
-		if (!kinds.contains(kind)) {
-			kinds.add(kind);
-			player.setAttached(WEAPON_KILLS, kinds);
-			if (kinds.size() >= ARSENAL_TYPES) {
-				call(player, "arsenal", Integer.MAX_VALUE);
-			} else {
-				progress(player, "arsenal", kinds.size(), ARSENAL_TYPES);
-			}
+		int kills = player.getAttachedOrElse(ARSENAL_KILLS, 0) + 1;
+		player.setAttached(ARSENAL_KILLS, kills);
+		if (kills >= ARSENAL_KILLS_NEEDED) {
+			call(player, "arsenal", Integer.MAX_VALUE);
+		} else {
+			progress(player, "arsenal", kills, ARSENAL_KILLS_NEEDED);
 		}
 	}
 
-	/** A counted step toward a calling (fist kills, weapon kinds), shown above the hotbar so the player sees it count. */
+	/** A counted step toward a calling (fist kills, weapon kills), shown above the hotbar so the player sees it count. */
 	private static void progress(ServerPlayer player, String powerName, int done, int needed) {
 		Power power = Powers.byName(powerName);
 		Power claimed = power(player);
@@ -237,7 +241,10 @@ public final class Callings {
 			.withStyle(style -> style.withColor(TextColor.fromRgb(power.color())).withItalic(true)));
 	}
 
-	/** The kind of weapon a kill was made with: sword, axe, spear, trident, the bow or crossbow, or a modded weapon's id. */
+	/**
+	 * The kind of weapon a kill was made with: sword, axe, spear, trident, the bow or crossbow, or a modded weapon's id;
+	 * null for bare hands, mining tools and things that aren't weapons.
+	 */
 	private static @Nullable String weaponKind(ServerPlayer player, DamageSource source) {
 		if (source.getDirectEntity() instanceof ThrownTrident) {
 			return "trident";
@@ -255,7 +262,20 @@ public final class Callings {
 		if (weapon.is(ItemTags.SPEARS)) {
 			return "spear";
 		}
-		return BuiltInRegistries.ITEM.getKey(weapon.getItem()).toString();
+		// mining tools and anything that isn't a weapon (a torch, a block, food in hand) never count: only an item that
+		// adds attack damage, or one that fired the shot (bows, crossbows, guns)
+		boolean shot = source.getDirectEntity() != player && source.getDirectEntity() instanceof Projectile;
+		return !miningTool(weapon) && (shot || hits(weapon)) ? BuiltInRegistries.ITEM.getKey(weapon.getItem()).toString() : null;
+	}
+
+	private static boolean miningTool(ItemStack stack) {
+		return stack.is(ItemTags.PICKAXES) || stack.is(ItemTags.SHOVELS) || stack.is(ItemTags.HOES);
+	}
+
+	/** The item adds attack damage in the hand (swords, axes, clubs, modded melee weapons; not a torch or a block). */
+	private static boolean hits(ItemStack stack) {
+		return stack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY).modifiers().stream()
+			.anyMatch(entry -> entry.attribute().is(Attributes.ATTACK_DAMAGE) && entry.modifier().amount() > 0.0);
 	}
 
 	/** Every tick, for a powerless survival player: Gravity's falls, Chrono's sleep, Darktide's night at sea, Smoke's fires. */

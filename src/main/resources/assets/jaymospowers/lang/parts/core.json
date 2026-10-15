@@ -12,7 +12,7 @@
 	"message.jaymospowers.stirring_soon": "The feeling is overwhelming. It's almost here.",
 	"message.jaymospowers.calling": "Something answers. %s draws nearer.",
 	"message.jaymospowers.calling_progress.zfighter": "Your fists remember the fight (%s/%s)",
-	"message.jaymospowers.calling_progress.arsenal": "A new weapon learned in blood (%s/%s kinds)",
+	"message.jaymospowers.calling_progress.arsenal": "Steel remembers the fight (%s/%s)",
 	"message.jaymospowers.creative_only": "Powers can only be chosen in Creative. In Survival, yours will awaken on its own.",
 	"message.jaymospowers.chosen": "Power chosen: %s",
 	"commands.jaymospowers.unknown": "Unknown power",
