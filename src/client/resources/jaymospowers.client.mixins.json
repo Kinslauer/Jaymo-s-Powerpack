@@ -23,7 +23,8 @@
 		"PoseTakeoverLivingEntityRendererMixin",
 		"ScreenShakeMixin",
 		"ScreenShakeExplosionMixin",
-		"TerrainAheadMixin"
+		"TerrainAheadMixin",
+		"FallingLeavesInvoker"
 	],
 	"injectors": { "defaultRequire": 1 }
 }

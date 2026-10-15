@@ -74,6 +74,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 
 		ScreenShake.init();
 		Ambience.init();
+		LeafRustle.init();
 		CarryClient.init();
 		CombatRollTaps.init();
 		JeiCheats.init();
