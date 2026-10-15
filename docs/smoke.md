@@ -121,7 +121,7 @@ Nothing explained in game (`SmokeSmog`).
   (`SmokeField.puff`); your smoke takes no rain washing (`SmokeField.CLOUD` lease). Falling through 1.5+ of your own
   cloud gives Slow Falling (the plan's "stand on it" became sinking slowly through it). Vapour Form's top speed is
   x1.15 in the rain (`SmokeFlightClient`).
-- **C, Harness the Sky** (corrupted wins C while both, until stage 4): a tap (under 10 ticks) calls a raincloud where
+- **C, Harness the Sky** (with both fates see stage 4): a tap (under 10 ticks) calls a raincloud where
   you aim (64 blocks): 30 s, radius 10, 9 blocks over the ground (lower under a roof); fires in it go out, burning
   things stop burning, crops get extra random ticks; 30 s cooldown (`SmokeState.SKY`). Held, every second: a tornado
   within 48 is unwound by a second (`SkyCalm.unwind`, no kill) and drags you toward it; otherwise the cell overhead is
@@ -132,3 +132,20 @@ Nothing explained in game (`SmokeSmog`).
   becomes a thunderstorm, 30 s in all a rain cell (`Storm.kind` no longer final, `calmed` server-only). `unwind` drops
   the nearest tornado a rank every 5 s (`Tornado.size` no longer final) and cuts 25% off its remaining life; a dust
   devil only dies with `kill` (stage 4's Ash Storm).
+
+## Stage 4: Ash Storm, both fates (0.10.121 / Kingdoms 0.7.35)
+`SmokeAshStorm`. Ascended and corrupted, C goes to `SmokeCloudshaper.key` (Pyroclasm is corrupted-only), which routes:
+- **Tap: Ash Storm** (`SmokeState.ASH`, 3600-tick cooldown): 600 ticks, radius 20 (grows from 40% over the first 100
+  ticks), centred on you. Every 10 ticks 3 smog puffs (4 each) at the cloud base 16 over you (lower under a roof); ash
+  and white ash particles; Darkness 50 ticks every second on every living thing under it but you. Built up, every 30
+  ticks a visual-only bolt plus 6 lightning damage (2.5 reach, sparing you) on your last attacker within 400 ticks if
+  under it, else the nearest `Enemy` under open sky. Ends if you die or lose a fate.
+- **Sneak + tap:** the raincloud with `soot`: smog puffs instead of cloud, ash particles, Blindness 40 ticks on
+  everyone under it but you; no fires out, no crop ticks. Same `SKY` cooldown.
+- **Hold:** calm/unwind as Cloudshaper, with `kill`: `SkyCalm.unwind` returns a 4th number, 1 the call that ropes a
+  dust devil out (`Tornado.killed`, once). Then `SmokeAshStorm.killed`: `Fate.purify` (fanfare), then
+  `Fate.set(ascended, not corrupted, not purified, 0)` so it can corrupt again (Andy), `smoke_tornado_kills` +1
+  (saved). `SmokeSmog` meter needs `48 * 1.5^kills` black ticks a point.
+- **Sneak + hold:** feeds a storm: needs `SkyCalm.supercellOver` or your own Ash Storm 100+ ticks old; a column of
+  smoke where you aim (64 blocks) each second; 10 s calls `SkyCalm.touchdown`: a `TORNADO` under that supercell
+  (marked spawned) or a lone one that wanders with the wind. `disaster_damage` still decides what it breaks.

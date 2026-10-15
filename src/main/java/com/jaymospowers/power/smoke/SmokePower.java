@@ -33,6 +33,8 @@ import org.jspecify.annotations.Nullable;
  * ({@link SmokePyroclasm}).</li>
  * <li>Ascended, Cloudshaper ({@link SmokeCloudshaper}): cloud smoke; C is Harness the Sky (a raincloud, or calm a
  * storm / unwind a tornado).</li>
+ * <li>Both, Ashen Sky ({@link SmokeAshStorm}): C is Ash Storm; sneak + C rains soot or feeds a storm a tornado;
+ * Unwind can kill a tornado, which drains the corruption.</li>
  * <li>Mastered Smokescreen banks the cloud: it holds against the wind and fades slowly ({@code SmokeField.bank}).</li>
  * </ul>
  * You see through your own smoke (the client draws it faint and doesn't grey your view in it). The way in is a calling
@@ -80,6 +82,7 @@ public final class SmokePower implements Power {
 			SmokeSmog.clear();
 			SmokePyroclasm.clear();
 			SmokeCloudshaper.clear();
+			SmokeAshStorm.clear();
 		});
 	}
 
@@ -92,6 +95,7 @@ public final class SmokePower implements Power {
 		SmokeSmog.forget(player);
 		SmokePyroclasm.forget(player);
 		SmokeCloudshaper.forget(player);
+		SmokeAshStorm.forget(player);
 		SmokeField.forget(player);
 		SmokeHeat.forget(player);
 	}
@@ -157,9 +161,10 @@ public final class SmokePower implements Power {
 		SmokeSmog.tick(player);
 		SmokePyroclasm.gathering(player);
 		SmokeCloudshaper.tick(player);
+		SmokeAshStorm.tick(player);
 	}
 
-	/** C: Harness the Sky (ascended), Pyroclasm (corrupted, which wins while both). */
+	/** C: Harness the Sky (ascended), Pyroclasm (corrupted), Ash Storm and Harness the Sky's holds (both). */
 	@Override
 	public boolean ultimateWhenCorrupted() {
 		return true;
@@ -167,7 +172,7 @@ public final class SmokePower implements Power {
 
 	@Override
 	public void onUltimate(ServerPlayer player, boolean down) {
-		if (com.jaymospowers.core.Fate.isCorrupted(player)) {
+		if (com.jaymospowers.core.Fate.isCorrupted(player) && !com.jaymospowers.core.Fate.isAscended(player)) {
 			SmokePyroclasm.key(player, down);
 		} else {
 			SmokeCloudshaper.key(player, down);

@@ -131,7 +131,8 @@ public final class SmokeSmog {
 		if (black) {
 			d.grey = 0;
 			d.black += player.tickCount % 20 == 0 && raging(level, player.blockPosition()) ? 20 : 1;
-			if (d.black >= BLACK_TICKS_PER_POINT) {
+			// each tornado killed with both fates makes it slower to come back ({@link SmokeAshStorm#harder})
+			if (d.black >= BLACK_TICKS_PER_POINT * SmokeAshStorm.harder(player)) {
 				d.black = 0;
 				Fate.addCorruption(player, 1);
 				if (!d.coughed && Fate.corruption(player) >= Fate.MAX_CORRUPTION / 2) {
