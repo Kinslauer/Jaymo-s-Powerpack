@@ -28,6 +28,10 @@ abstract class McaMessageMixin {
 			return;
 		}
 		Entity speaker = player.level().getEntity(message.uuid());
+		// (0.7.51) what they say to you, everyone near sees over their head too (in their own understanding of it)
+		if (speaker != null && player.level() instanceof net.minecraft.server.level.ServerLevel level) {
+			com.jaymoskingdoms.Speech.overheard(level, speaker, player, message.message(), com.jaymoskingdoms.Speech.WHITE);
+		}
 		if (speaker == null || Languages.understands(player, speaker)) {
 			return;
 		}

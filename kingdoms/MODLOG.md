@@ -3052,3 +3052,8 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
   bargain you could afford was taken as a refusal and ended. What's said to one player in their own conversation (an
   approach and its replies, a quest given, refused or thanked, the wizard's work) is shown only to that player
   (`Speech.tell`); ambient talk, cries and festivals are still heard by everyone near.
+- **0.7.52, every bubble for everyone:** what's said to one player is seen by everyone near again, and more of it: 0.7.51's
+  private conversations are undone, and what was only ever shown to the player spoken to (an MCA villager's side of a
+  conversation, a remark on your accent, the wizard's disaster relief) now floats over the speaker's head for the
+  players around too, each in their own understanding of the tongue (`Speech.overheard`, `McaMessageMixin`). The
+  client shows a line once if it arrives twice within 1.5 s (`SpeechBubbles.REPEAT_MS`).

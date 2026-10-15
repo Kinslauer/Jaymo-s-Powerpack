@@ -22,6 +22,8 @@ import org.jspecify.annotations.Nullable;
 public final class Speech {
 	/** Bubble colours (RGB): plain talk, a warning, an angry shout. */
 	public static final int WHITE = 0xFFFFFF, GOLD = 0xFFD966, YELLOW = 0xFFFF66, RED = 0xFF6655;
+	/** (0.7.51) How near (blocks) others see words said to one player. */
+	static final double OVERHEARD_RANGE = 16.0;
 
 	/** Server → nearby players: {@code entityId} says {@code text}, drawn in {@code color}. */
 	public record Said(int entityId, Component text, int color) implements CustomPacketPayload {
@@ -57,18 +59,36 @@ public final class Speech {
 		} else {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.says", speaker.getDisplayName(), words).withColor(color));
 		}
+		overheard(level, speaker, player, words, color);
+	}
+
+	/**
+	 * (0.7.51) Words said to {@code player} are seen by everyone near too (a bubble over the speaker's head, in the
+	 * speaker's tongue for each of them): anyone can watch a conversation, as with {@link #say}. Bubbles only, no chat.
+	 */
+	public static void overheard(ServerLevel level, Entity speaker, ServerPlayer player, Component words, int color) {
+		if (speaker instanceof IronGolem) {
+			return;
+		}
+		for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, speaker.getBoundingBox().inflate(OVERHEARD_RANGE))) {
+			if (p != player && ServerPlayNetworking.canSend(p, Said.TYPE)) {
+				ServerPlayNetworking.send(p, new Said(speaker.getId(), Languages.heard(p, speaker, words), color));
+			}
+		}
 	}
 
 	/**
 	 * (0.7.51) {@code speaker} says {@code words} to {@code player}, in a conversation of theirs (an approach, a quest, the
-	 * wizard): only that player sees the bubble, so others nearby aren't shown talk that isn't theirs. In the speaker's
-	 * tongue, like {@link #say}.
+	 * wizard), in the speaker's tongue; everyone near sees it too ({@link #overheard}).
 	 */
 	public static void tell(ServerLevel level, Entity speaker, @Nullable ServerPlayer player, Component words, int color) {
 		if (player == null || speaker instanceof IronGolem) {
 			return;
 		}
-		sayTo(level, speaker, player, Languages.heard(player, speaker, words), color);
+		if (ServerPlayNetworking.canSend(player, Said.TYPE)) {
+			ServerPlayNetworking.send(player, new Said(speaker.getId(), Languages.heard(player, speaker, words), color));
+		}
+		overheard(level, speaker, player, words, color);
 	}
 
 	/** {@code speaker} says {@code words} aloud: every player within {@code range} sees it over their head. */

@@ -37,6 +37,8 @@ public final class SpeechBubbles {
 	static final long BASE_MS = 3000, PER_CHAR_MS = 60, MAX_MS = 9000;
 	/** The last stretch of it, fading out (milliseconds). */
 	static final long FADE_MS = 800;
+	/** (0.7.51) The same line from the same speaker within this long shows once (milliseconds). */
+	static final long REPEAT_MS = 1500;
 	/** Lines kept per speaker; a longer line wraps at this width (font pixels). */
 	static final int MAX_LINES = 3, WRAP_WIDTH = 170;
 	/** Seen from no farther than this (blocks), as chat reached before. */
@@ -46,7 +48,7 @@ public final class SpeechBubbles {
 	/** Background behind the words: black at this opacity (0-255), faded with the words. */
 	static final int BACKGROUND_ALPHA = 0x60;
 
-	private record Line(List<FormattedCharSequence> rows, int color, long shownAt, long until) {
+	private record Line(String said, List<FormattedCharSequence> rows, int color, long shownAt, long until) {
 	}
 
 	/** What a speaker shows this frame, taken off the entity for the renderer. */
@@ -82,7 +84,13 @@ public final class SpeechBubbles {
 		long now = Util.getMillis();
 		long lasts = Math.min(MAX_MS, BASE_MS + PER_CHAR_MS * text.getString().length());
 		Deque<Line> lines = SAID.computeIfAbsent(entityId, id -> new ArrayDeque<>());
-		lines.addLast(new Line(font.split(text, WRAP_WIDTH), color, now, now + lasts));
+		// (0.7.51) the same words twice at once (said to you and overheard, or one line sent to several of us) show once
+		String said = text.getString();
+		Line last = lines.peekLast();
+		if (last != null && now - last.shownAt < REPEAT_MS && last.said.equals(said)) {
+			return;
+		}
+		lines.addLast(new Line(said, font.split(text, WRAP_WIDTH), color, now, now + lasts));
 		while (lines.size() > MAX_LINES) {
 			lines.removeFirst();
 		}

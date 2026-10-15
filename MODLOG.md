@@ -1276,3 +1276,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (`ChronoSpeed.overclocked`).
 - **0.11.29 / Kingdoms 0.7.51:** emeralds in bundles pay for Kingdoms' bargains, tolls, stables and the rest; what a
   villager says in your own conversation is only shown to you (`kingdoms/MODLOG.md`).
+- **0.11.30 / Kingdoms 0.7.52:** every villager speech bubble is seen by all players near, MCA conversations included
+  (`kingdoms/MODLOG.md`).
