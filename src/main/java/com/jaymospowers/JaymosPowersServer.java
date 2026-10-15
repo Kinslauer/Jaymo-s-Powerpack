@@ -6,6 +6,6 @@ import net.fabricmc.api.DedicatedServerModInitializer;
 public final class JaymosPowersServer implements DedicatedServerModInitializer {
 	@Override
 	public void onInitializeServer() {
-		com.jaymospowers.armory.TaczGuns.dropDefaultPack();
+		com.jaymospowers.armory.TaczGuns.trimDefaultPack();
 	}
 }

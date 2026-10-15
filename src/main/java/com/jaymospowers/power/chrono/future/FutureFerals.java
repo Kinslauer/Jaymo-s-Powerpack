@@ -26,7 +26,7 @@ import net.minecraft.world.phys.AABB;
  * walking within {@link #HEAR_WALKING}, draws the nearest ferals to them, and a feral that sees you attacks. They're
  * the game's own zombies, so Kitchen treats them like any other: the dead they leave are torn into by scavenging
  * zombies, and a zombie's body left lying gets back up. Nearly half are Kitchen's corpse zombies in random skins
- * ({@link FutureKitchen}), and some of those carry a flintlock and use it ({@link FutureGuns}).
+ * ({@link FutureKitchen}), and some of those carry a modern gun and use it ({@link FutureGuns}).
  */
 public final class FutureFerals {
 	public static final String TAG = "jaymospowers.feral";
@@ -36,7 +36,7 @@ public final class FutureFerals {
 	/** Of each pack, this share are Kitchen's corpse zombies in random skins (the rest the game's own), and this share of those carry a gun. */
 	static final float CORPSE_SHARE = 0.45F, GUNNER_SHARE = 0.3F;
 	/** Gunners look for a shot this often. */
-	static final int GUN_EVERY = 5;
+	static final int GUN_EVERY = 2;
 	/** At most this many ferals within {@link #COUNT_RADIUS} of a player, by day and by night. */
 	static final int CAP_DAY = 10, CAP_NIGHT = 20;
 	static final double COUNT_RADIUS = 64.0;

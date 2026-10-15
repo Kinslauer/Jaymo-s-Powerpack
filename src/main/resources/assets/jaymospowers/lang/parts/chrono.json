@@ -46,5 +46,6 @@
 	"biome.jaymospowers.future_ruins": "Ruins of Los Perrito",
 	"dimension.jaymospowers.future": "The Future",
 	"message.jaymospowers.future.echo_first": "The future won't open while your echo still walks. End it for good first.",
-	"message.jaymospowers.future.unlocked": "Your echo is gone for good, and time lies open ahead of you. Sneak+B to fast forward."
+	"message.jaymospowers.future.unlocked": "Your echo is gone for good, and time lies open ahead of you. Sneak+B to fast forward.",
+	"message.jaymospowers.future.guns_stay": "The future's guns stay in the future."
 }

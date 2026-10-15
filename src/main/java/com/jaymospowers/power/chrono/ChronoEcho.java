@@ -238,7 +238,7 @@ public class ChronoEcho extends Monster {
 		if (this.tickCount % OWNER_CHECK_INTERVAL == 0 && !checkOwner(level)) {
 			return;
 		}
-		// (0.10.106) in the future it carries a flintlock and uses it (FutureFerals fires it); out of it, it puts it down
+		// (0.10.106) in the future it carries a modern gun and uses it (FutureFerals fires it); out of it, it puts it down
 		boolean future = level.dimension() == com.jaymospowers.power.chrono.future.Future.FUTURE;
 		boolean gunner = this.entityTags().contains(com.jaymospowers.power.chrono.future.FutureGuns.TAG);
 		if (future && !gunner && this.tickCount % OWNER_CHECK_INTERVAL == 0) {
@@ -286,6 +286,10 @@ public class ChronoEcho extends Monster {
 		ChronoMemory memory = ChronoMemory.peek(player);
 		if (!Powers.has(player, ChronoPower.INSTANCE) || memory == null || memory.bond != this.bond) {
 			fade(level);
+			return false;
+		}
+		if (player.level() != level && this.entityTags().contains(ChronoEchoes.FUTURE_BORN)) {
+			fade(level); // (0.10.106) a future echo stays in the future: you left, it's gone
 			return false;
 		}
 		if (player.level() == level) {

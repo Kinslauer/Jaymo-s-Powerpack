@@ -1193,4 +1193,15 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   horde are Kitchen's corpse zombies (zombie players) wearing random default skins, and 30% of those carry a flintlock.
   Gunners fire traced shots with smoke, flash and bang (musket 9 dmg to 32 blocks, pistol 6 to 18, blunderbuss 6x2.5 to
   10; reloads 3-5 s; no ammo), and drop the gun 10% of the time (echoes never) (`FutureGuns`, `FutureKitchen`).
-  `docs/chrono.md`.
+  Andy, then: "yes i only want the modern guns in the future, but dont load them anywhere but that dimension. not even
+  in jei or creative. also spawn up to 4 echos at the same time in the future": TaCZ's default (modern) gunpack loads
+  again, exported by us without its gun smith table index (ours stays the Gunsmith's Bench), its recipes and its
+  bonus-chest pistol (`TaczGuns.trimDefaultPack`). Future gunners carry its guns now (51 of them; RPG, M320 and minigun
+  left out): pistols in pairs, SMGs in bursts of 6, rifles 3, machine guns 10, shotguns 8 pellets, snipers 12 dmg to
+  64 blocks, with TaCZ's own report for each gun; a dropped gun comes loaded and gunners leave rounds 35% of the time.
+  Modern guns, ammo and attachments are in no creative tab and so not in JEI (`TaczGuns.hideModern`), and can't leave
+  the future: taken off you on the way home (inventory, ender chest, cursor, shulker boxes, bundles), checked every
+  second elsewhere, dropped ones vanish and mobs drop theirs outside it (`FutureContraband`). The resources themselves
+  load everywhere (Minecraft can't load a pack for one dimension), but nothing modern can exist outside the future.
+  Up to 4 of a Chrono's echoes stalk them in the future at once, a new one 30-90 s after there's room; they stay in the
+  future (never follow you home, fade when you leave; tag `jaymospowers.future_echo`). `docs/chrono.md`.

@@ -53,7 +53,8 @@ import net.minecraft.world.phys.Vec3;
  * there sends you to your own spawn as usual.</li>
  * <li>The first leap on a server fetches the city ({@link LosPerrito}); until it's in place, the leap only says how far
  * along it is.</li>
- * <li>A Chrono in the future with no echo soon has one turn up there, armed with a flintlock; there it can be killed.</li>
+ * <li>A Chrono in the future is stalked by up to {@link #ECHOES} of their echoes at once, each armed with a modern gun;
+ * there they can be killed. They stay in the future. TaCZ's modern guns are for the future only ({@link FutureContraband}).</li>
  * </ul>
  * Ruins: {@link FutureRuins}. The dead: {@link FutureFerals}. Guns: {@link FutureGuns}.
  */
@@ -66,8 +67,10 @@ public final class Future {
 	/** The Time Rift stands this many blocks north of the arrival point; walk within RIFT_RADIUS of it to go home. */
 	static final int RIFT_OFFSET = 5;
 	static final double RIFT_RADIUS = 0.8;
-	/** In the future, a Chrono with no echo has one turn up this long after (30-90 s of survival play); checked this often. */
+	/** In the future, a Chrono with room for another echo has one turn up this long after (30-90 s of survival play); checked this often. */
 	static final int ECHO_DUE_MIN = 600, ECHO_DUE_MAX = 1800, ECHO_CHECK = 100;
+	/** At most this many of one Chrono's echoes stalk them in the future at once (one, anywhere else). */
+	static final int ECHOES = 4;
 	/** Nobody is sent through twice within this many ticks. */
 	static final int PASS_COOLDOWN = 60;
 
@@ -95,6 +98,8 @@ public final class Future {
 		builder -> builder.persistent(Codec.BOOL));
 
 	private static final Map<UUID, Long> READY_AT = new HashMap<>();
+	/** When each Chrono in the future (with room for one) has their next echo turn up. */
+	private static final Map<UUID, Long> ECHO_DUE = new HashMap<>();
 	private static final Map<UUID, Long> LAST_PASS = new HashMap<>();
 	private static BlockPos rift;
 
@@ -108,6 +113,7 @@ public final class Future {
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			READY_AT.clear();
+			ECHO_DUE.clear();
 			LAST_PASS.clear();
 			FutureRuins.clear();
 			rift = null;
@@ -118,6 +124,8 @@ public final class Future {
 		ServerTickEvents.END_SERVER_TICK.register(FutureFerals::tick);
 		ServerTickEvents.END_SERVER_TICK.register(Future::tickRift);
 		ServerTickEvents.END_SERVER_TICK.register(Future::echoes);
+		FutureGuns.init();
+		FutureContraband.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> register(dispatcher));
 	}
 
@@ -164,15 +172,28 @@ public final class Future {
 		}
 	}
 
-	/** Every few seconds: a Chrono in the future with no echo anywhere soon has one stalking them there, armed. */
+	/**
+	 * Every few seconds: a Chrono in the future is stalked by their echoes, armed, up to {@link #ECHOES} at once; while
+	 * there are fewer, another turns up {@link #ECHO_DUE_MIN}-{@link #ECHO_DUE_MAX} ticks after the last check found room.
+	 */
 	static void echoes(MinecraftServer server) {
 		ServerLevel future = server.getLevel(FUTURE);
 		if (future == null || server.getTickCount() % ECHO_CHECK != 0) {
 			return;
 		}
+		long now = server.getTickCount();
 		for (ServerPlayer player : future.players()) {
-			if (com.jaymospowers.core.Powers.has(player, com.jaymospowers.power.chrono.ChronoPower.INSTANCE)) {
-				com.jaymospowers.power.chrono.ChronoEchoes.oweSoon(player, ECHO_DUE_MIN, ECHO_DUE_MAX);
+			if (!com.jaymospowers.core.Powers.has(player, com.jaymospowers.power.chrono.ChronoPower.INSTANCE)
+				|| !player.isAlive() || player.isCreative() || player.isSpectator()
+				|| com.jaymospowers.power.chrono.ChronoEchoes.loadedIn(player, future) >= ECHOES) {
+				ECHO_DUE.remove(player.getUUID());
+				continue;
+			}
+			Long due = ECHO_DUE.get(player.getUUID());
+			if (due == null) {
+				ECHO_DUE.put(player.getUUID(), now + ECHO_DUE_MIN + player.getRandom().nextInt(ECHO_DUE_MAX - ECHO_DUE_MIN + 1));
+			} else if (now >= due && com.jaymospowers.power.chrono.ChronoEchoes.spawnFutureEcho(player)) {
+				ECHO_DUE.remove(player.getUUID());
 			}
 		}
 	}
