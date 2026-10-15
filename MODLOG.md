@@ -1295,3 +1295,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.11.34, slingshot lines pull tight:** while a slingshot is drawn, both lines tighten slowly from their slack to
   stretched taut at a full draw (`WebSwing.SLING_STRETCH` 0.6 blocks past taut, so they thin and hum), for everyone:
   the drawn length is sent like any rope change. How they look only; the swing's rope is unchanged.
+- **0.11.37, no portal corruption messages:** Nether Portal Spread still spreads the nether round lit portals, but its
+  chat lines (the "corrupted energy" warning, the coal-block fade and portal-broken lines) are off: `core/PortalSpreadQuiet`
+  sets its three `sendMessageOn...` options false whenever a server starts, whatever its config file says.
