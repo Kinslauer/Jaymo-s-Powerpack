@@ -1,12 +1,37 @@
 package com.jaymospowers.client;
 
 import com.jaymospowers.client.armory.TaczFirstPerson;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import traben.entity_model_features.EMFAnimationApi;
+import traben.entity_model_features.models.animation.state.EMFEntityRenderState;
 import traben.entity_model_features.models.animation.state.EMFState;
+import traben.entity_model_features.models.parts.EMFModelPartRoot;
+import traben.entity_model_features.utils.EMFAnimationPauseHandler;
 
 /** The only class that touches Entity Model Features (see EmfCompat); loaded only when EMF is. */
 final class EmfAccess {
+	private static boolean broken;
+
 	private EmfAccess() {
+	}
+
+	/**
+	 * (0.11.78) Whether EMF has just animated this body: it has animations and nothing paused them (our poses, Better
+	 * Combat's swings and emotes do; then the vanilla pose stands, with our poses laid over it). See EmfCompat#bodyAnimated.
+	 */
+	static boolean animatedNow(EntityRenderState state, HumanoidModel<?> body) {
+		if (broken || !(body.root() instanceof EMFModelPartRoot root) || !root.hasAnimation()) {
+			return false;
+		}
+		try {
+			EMFEntityRenderState emf = EMFEntityRenderState.from(state);
+			return emf != null && !EMFAnimationPauseHandler.shouldAnimationsPause(emf);
+		} catch (Throwable e) {
+			broken = true;
+			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't ask Entity Model Features about the body's pose; costumes keep the plain one", e);
+			return false;
+		}
 	}
 
 	static void registerPause() {

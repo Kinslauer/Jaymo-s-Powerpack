@@ -76,6 +76,11 @@ public class CostumeItem extends Item {
 		if (design.hasEmblem()) {
 			builder.accept(Component.translatable("tooltip.jaymospowers.costume.emblem").withStyle(ChatFormatting.GRAY));
 		}
+		String power = CostumeSets.power(design);
+		if (power != null) {
+			// (0.11.78) from a power's set
+			builder.accept(Component.translatable("tooltip.jaymospowers.costume.set", CostumeSets.powerName(power)).withStyle(ChatFormatting.DARK_AQUA));
+		}
 		builder.accept(Component.translatable("tooltip.jaymospowers.costume.use").withStyle(ChatFormatting.DARK_GRAY));
 	}
 }

@@ -60,6 +60,7 @@ public final class Costume {
 		item("costume_table", p -> new BlockItem(TABLE, p.useBlockDescriptionPrefix()));
 		COSTUME = item("costume", p -> new CostumeItem(p.stacksTo(1).component(DESIGN, CostumeDesign.DEFAULT)));
 		CostumeNet.init();
+		CostumeTailoring.init();
 		SecretIdentity.init();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
 			output.accept(TABLE);

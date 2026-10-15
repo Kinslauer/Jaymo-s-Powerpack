@@ -51,14 +51,16 @@ def box_faces(u, v, w, h, d):
 
 
 def paint_box(primary, secondary, u, v, w, h, d, part, pattern, rng):
-    """Calls pattern(part, face, x, y, w, h, rng) for every pixel of a box; P or S pixels go to that colour's image."""
+    """Calls pattern(part, face, x, y, w, h, rng) for every pixel of a box; P or S pixels go to that colour's image.
+    A pattern may also return (P or S, shade): the shade is added to the cloth's (negative darkens the dye's colour)."""
     for face, (fx, fy, fw, fh) in box_faces(u, v, w, h, d).items():
         for y in range(fh):
             for x in range(fw):
                 which = pattern(part, face, x, y, fw, fh, rng)
                 if which is None:
                     continue
-                shade = cloth_shade(x, y, fw, fh, rng)
+                which, extra = which if isinstance(which, tuple) else (which, 0)
+                shade = max(0, min(255, cloth_shade(x, y, fw, fh, rng) + extra))
                 (primary if which == P else secondary).putpixel((fx + x, fy + y), (shade, shade, shade, 255))
 
 
@@ -209,7 +211,237 @@ def ragged(part, face, x, y, w, h, rng):
     return None if hole else (S if patch else P)
 
 
-CUTS = {"bodysuit": bodysuit, "armoured": armoured, "robes": robes, "coat": coat, "ragged": ragged}
+# ---- the power sets (0.11.78): one cut per power, offered at the table only while you have it -------------------
+
+def ring(x, y, cx, cy):
+    """The distance from (cx, cy), rounded to whole pixels."""
+    return int(((x - cx) ** 2 + (y - cy) ** 2) ** 0.5 + 0.5)
+
+
+def web_lines(x, y, cx, cy):
+    """A web round (cx, cy): eight spokes and a ring every 3 pixels."""
+    dx, dy = x - cx, y - cy
+    if abs(dx) < 0.6 or abs(dy) < 0.6 or abs(abs(dx) - abs(dy)) < 0.6:
+        return True
+    r = ring(x, y, cx, cy)
+    return r > 1 and r % 3 == 0
+
+
+def webbed(part, face, x, y, w, h, rng):
+    """Web: a suit webbed all over in the secondary colour, and web gloves."""
+    if is_arm(part):
+        if face == "bottom" or (face != "top" and y >= 9):
+            return S if not (face == "front" and x == w // 2) else (P, -20)  # the glove, a strand over its back
+        if face == "top":
+            return P
+        return S if (y % 3 == 1 or x == w // 2) else P
+    if is_leg(part):
+        if face == "bottom":
+            return S
+        if face == "top":
+            return P
+        return S if (y % 3 == 1 or x == w // 2) else P
+    if face in ("front", "back"):
+        return S if web_lines(x, y, 3.5, 3.5) else P
+    if face in ("left", "right"):
+        return S if y % 3 == 0 else P
+    return P
+
+
+def windswept(part, face, x, y, w, h, rng):
+    """Wind: gusts swept back across the suit, wrapped forearms and a sash."""
+    if is_arm(part):
+        if face == "bottom" or (face != "top" and y >= 8 and (y - x) % 2 == 0):
+            return S  # wraps
+        if face != "top" and (x + y) % 6 == 0:
+            return S
+        return P
+    if is_leg(part):
+        if face == "bottom" or (face != "top" and y >= 10):
+            return S
+        if face != "top" and (x + y) % 6 == 0:
+            return S
+        return P
+    if face != "top" and y in (9, 10):
+        return S  # the sash
+    if face in ("front", "back", "left", "right") and (x + y) % 6 == 0:
+        return S  # gusts
+    return P
+
+
+def dense(part, face, x, y, w, h, rng):
+    """Gravity: heavy plates over a dark undersuit, a dark core in the chest ringed in the primary."""
+    if is_arm(part) or is_leg(part):
+        if face in ("top", "bottom"):
+            return S
+        if y % 4 == 3:
+            return (P, -110)  # the seams between plates, the dark undersuit showing
+        return (S, -10)
+    if face == "front":
+        r = ((x - 3.5) ** 2 + (y - 4.5) ** 2) ** 0.5
+        if r < 1.6:
+            return (S, -175)  # the core: almost black
+        if r < 2.8:
+            return (P, -50)
+    if face != "top" and face != "bottom" and y % 4 == 3:
+        return (P, -110)
+    return (S, -10)
+
+
+def clockwork(part, face, x, y, w, h, rng):
+    """Chrono: clockwork trim (gear-toothed hems), a clock face on the chest and a gear on the back."""
+    if is_arm(part) or is_leg(part):
+        if face == "bottom" or (face != "top" and y >= 10):
+            return S
+        if face != "top" and y == 9 and x % 2 == 0:
+            return S  # the teeth
+        return P
+    if face == "front":
+        r = ((x - 3.5) ** 2 + (y - 4.5) ** 2) ** 0.5
+        if 2.2 <= r < 3.2:
+            return S  # the dial's rim
+        if (x == 3 and 2 <= y <= 4) or (y == 4 and 3 <= x <= 5):
+            return (S, -30)  # the hands, at a quarter past
+        if y == 11 or (y == 10 and x % 2 == 0):
+            return S
+        return P
+    if face == "back":
+        r = ((x - 3.5) ** 2 + (y - 4.5) ** 2) ** 0.5
+        if r < 1.2 or (2.0 <= r < 3.0 and (x + y) % 2 == 0):
+            return S  # a gear
+    if face != "top" and (y == 11 or (y == 10 and x % 2 == 0)):
+        return S
+    return P
+
+
+def bandolier(part, face, x, y, w, h, rng):
+    """Arsenal: a harness of crossed bandoliers with pouches, a belt, bracers, a thigh holster and boots."""
+    if is_arm(part):
+        if face != "top" and 8 <= y <= 10:
+            return S  # bracers
+        return P
+    if is_leg(part):
+        if face == "bottom" or (face != "top" and y >= 10):
+            return S
+        outer = (part == "right_leg" and face == "right") or (part == "left_leg" and face == "left")
+        if outer and 1 <= y <= 5 and 0 < x < w - 1:
+            return (S, -25)  # the holster
+        if face != "top" and y == 2:
+            return S  # its strap
+        return P
+    if face in ("front", "back") and y <= 9:
+        a = round(y * 0.7)
+        if x == a or x == 7 - a:
+            return S
+        if (x == a + 1 or x == 7 - a - 1) and y in (2, 5, 8):
+            return (S, -30)  # cartridges
+    if face != "top" and y == 10:
+        return S  # the belt
+    if face == "front" and y == 11 and x in (1, 2, 5, 6):
+        return (S, -20)  # pouches
+    if face == "top" and x in (1, 6):
+        return S  # the straps over the shoulders
+    return P
+
+
+def wave(x, period=4):
+    return (0, 1, 1, 0, -1, -1)[x % 6] if period == 6 else (0, 1, 0, -1)[x % 4]
+
+
+def resonant(part, face, x, y, w, h, rng):
+    """Resonance: rings of sound spreading from the chest, waves round the limbs."""
+    if is_arm(part) or is_leg(part):
+        if face == "bottom" or (face != "top" and y == 11):
+            return S
+        if face != "top" and (y + wave(x)) in (3, 7):
+            return S
+        return P
+    if face == "front":
+        r = ring(x, y, 3.5, 4.5)
+        return S if r in (1, 3, 5) else P
+    if face == "back":
+        return S if ring(x, y, 3.5, 4.5) in (2, 5) else P
+    if face in ("left", "right") and (y + wave(x)) % 4 == 0:
+        return S
+    return P
+
+
+def tidal(part, face, x, y, w, h, rng):
+    """Darktide: waves across a suit that darkens towards the feet, deep water below the knee."""
+    depth = -(y * 4) if face != "top" else 0
+    if is_leg(part):
+        if face == "bottom" or (face != "top" and y >= 7):
+            return (S, -50 - (y - 7) * 6)
+        depth -= 50
+    if face != "top" and face != "bottom" and (y + wave(x, 6)) % 5 == 0:
+        return (S, depth)
+    if is_arm(part) and (face == "bottom" or y >= 10):
+        return (S, depth)
+    return (P, depth)
+
+
+def ash_wraps(part, face, x, y, w, h, rng):
+    """Smoke: strips of ash-grey cloth wound round and round, gaps between them on the limbs, ragged at the ends."""
+    band = (y + x // 4) % 3
+    soot = -hash_of(part, face, x, y) % 25
+    if is_arm(part) or is_leg(part):
+        if face == "bottom":
+            return None
+        if face != "top" and (y + x // 2) % 5 == 4 and y >= 4:
+            return None  # a gap between the wraps
+        if is_arm(part) and face != "top" and y == 11 and x % 2 == 1:
+            return None  # loose ends at the fingers
+    if face == "top":
+        return (P, soot)
+    return (S, soot - 10) if band == 2 else (P, soot)
+
+
+def gi(part, face, x, y, w, h, rng):
+    """Z Fighter: a training gi, its top crossed over at the chest, a sash with hanging ends, wristbands and boots."""
+    if is_arm(part):
+        if face == "bottom" or (face != "top" and y == 11):
+            return None  # bare hands
+        if face != "top" and 8 <= y <= 10:
+            return S  # wristbands
+        if face != "top" and y >= 5:
+            return None  # bare forearms
+        return P
+    if is_leg(part):
+        if face == "bottom" or (face != "top" and y >= 9):
+            return S  # boots
+        return P
+    if face == "front":
+        if y < 6:
+            left, right = 1 + round(y * 0.5), 6 - round(y * 0.5)
+            if left < x < right:
+                return None  # the V of the neck
+            if x == left or x == right:
+                return (P, -25)  # the collar
+        if y in (8, 9):
+            return S  # the sash
+        if y in (10, 11) and x in (5, 6):
+            return S  # its ends
+        return P
+    if face != "top" and y in (8, 9):
+        return S
+    return P
+
+
+def carapace(part, face, x, y, w, h, rng):
+    """Xenoform: a segmented shell, ridged and darker between the segments, a spine down the back."""
+    if face == "back" and part == "body" and x in (3, 4):
+        return (S, -15 if y % 2 else 0)
+    if face in ("top", "bottom"):
+        return S
+    if y % 3 == 2:
+        return (S, -60)
+    edge = x == 0 or x == w - 1
+    return (P, -25 if edge else 0)
+
+
+CUTS = {"bodysuit": bodysuit, "armoured": armoured, "robes": robes, "coat": coat, "ragged": ragged,
+        "webbed": webbed, "windswept": windswept, "dense": dense, "clockwork": clockwork, "bandolier": bandolier,
+        "resonant": resonant, "tidal": tidal, "ash_wraps": ash_wraps, "gi": gi, "carapace": carapace}
 
 
 def suits():
@@ -220,7 +452,7 @@ def suits():
             secondary = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
             for part, (u, v, w, h, d) in suit_boxes(slim).items():
                 paint_box(primary, secondary, u, v, w, h, d, part, pattern, rng)
-            if name == "armoured":
+            if name in ("armoured", "dense"):
                 # the shoulder pads (CostumeModels: texOffs 32,0, 5x3x5): secondary plates, a primary rim
                 for face, (fx, fy, fw, fh) in box_faces(32, 0, 5, 3, 5).items():
                     for y in range(fh):
@@ -300,7 +532,45 @@ def goggles(face, x, y):
     return None
 
 
-MASKS = {"half_mask": half_mask, "full_mask": full_mask, "hood": hood, "helmet": helmet, "goggles": goggles}
+def web_mask(face, x, y):
+    """Web (0.11.78): a full mask webbed in the secondary, with big pale lenses."""
+    if face == "bottom":
+        return None
+    if face == "front":
+        if (x, y) in {(1, 3), (2, 3), (1, 4), (2, 4), (5, 3), (6, 3), (5, 4), (6, 4), (2, 5), (5, 5)}:
+            return (S, 15)  # the lenses
+        return (S, -60) if web_lines(x, y, 3.5, 3.5) else P
+    if face == "top":
+        return (S, -60) if web_lines(x, y, 3.5, 3.5) else P
+    return (S, -60) if (y % 3 == 0 or x == 3) else P
+
+
+def ash_veil(face, x, y):
+    """Smoke (0.11.78): wraps round the whole head, a slit left for the eyes."""
+    if face == "bottom":
+        return None
+    if face == "front" and y == 4 and 1 <= x <= 6:
+        return None  # the eye slit
+    if (y + x // 4) % 3 == 2:
+        return (S, -10)
+    return P
+
+
+def headband(face, x, y):
+    """Z Fighter (0.11.78): a band round the brow, knotted at the back, its tails hanging."""
+    if face in ("top", "bottom"):
+        return None
+    if y in (1, 2):
+        return S if (face == "front" and 3 <= x <= 4) else P  # a plate on the brow
+    if face == "back" and 3 <= y <= 6 and x in (3, 5):
+        return P  # the tails
+    if face == "back" and y == 3 and x == 4:
+        return S  # the knot
+    return None
+
+
+MASKS = {"half_mask": half_mask, "full_mask": full_mask, "hood": hood, "helmet": helmet, "goggles": goggles,
+         "web_mask": web_mask, "ash_veil": ash_veil, "headband": headband}
 
 
 def masks():
@@ -314,7 +584,8 @@ def masks():
                     which = pattern(face, x, y)
                     if which is None:
                         continue
-                    shade = cloth_shade(x, y, fw, fh, rng)
+                    which, extra = which if isinstance(which, tuple) else (which, 0)
+                    shade = max(0, min(255, cloth_shade(x, y, fw, fh, rng) + extra))
                     if name in ("helmet", "goggles") and which == S:
                         shade = min(255, shade + 10)  # polished
                     (primary if which == P else secondary).putpixel((fx + x, fy + y), (shade, shade, shade, 255))
@@ -332,7 +603,10 @@ def masks():
 # One box (10 wide, `length` long, 1 deep) at 0,0 in a 64x32 texture: its north face is the outside (primary, with a
 # secondary trim along the hem), its south face the lining (secondary).
 
-CAPES = {"short": 11, "long": 20, "tattered": 19}
+CAPES = {"short": 11, "long": 20, "tattered": 19, "gale": 22, "tide": 20}
+# (0.11.78) Wind's gale cloak: the hem split into three tails, the middle longest, swept with gusts; Darktide's tide
+# cape: a wavy hem and waves breaking up its lower half. How many rows each column loses:
+SHAPED = {"gale": [0, 1, 2, 8, 1, 0, 8, 2, 1, 0], "tide": [1, 2, 3, 2, 1, 0, 1, 2, 3, 2]}
 
 
 def capes():
@@ -341,7 +615,7 @@ def capes():
         primary = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
         secondary = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
         # tattered: a ragged hem (how many rows each column loses) and a few holes
-        torn = [rng.randint(0, 5) if name == "tattered" else 0 for _ in range(10)]
+        torn = SHAPED[name] if name in SHAPED else [rng.randint(0, 5) if name == "tattered" else 0 for _ in range(10)]
         holes = {(rng.randint(1, 8), rng.randint(6, length - 4)) for _ in range(5)} if name == "tattered" else set()
         for face, (fx, fy, fw, fh) in box_faces(0, 0, 10, length, 1).items():
             for y in range(fh):
@@ -355,6 +629,10 @@ def capes():
                             which = S
                         elif y >= length - torn[col] - 1 and name != "tattered":
                             which = S
+                        elif name == "gale" and (col + 2 * y) % 9 == 0:
+                            which = S  # gusts
+                        elif name == "tide" and y > length // 2 and (y + (0, 1, 1, 0, -1, -1)[col % 6]) % 4 == 0:
+                            which = S  # waves
                     shade = cloth_shade(x, y, fw, fh, rng)
                     # folds: soft vertical shading
                     if face in ("front", "back"):
