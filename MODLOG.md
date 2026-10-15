@@ -1305,3 +1305,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   food tooltips show a meal's worth.
 - **0.11.46 / Kingdoms 0.7.54:** village fires get stone hearths and chimneys when villages generate, and golems only
   burn corpses at open, safe fires, so villages stop burning down (`kingdoms/MODLOG.md`).
+- **0.11.48, no portal corruption messages:** Nether Portal Spread still spreads the nether round lit portals, but its
+  chat lines (the "corrupted energy" warning, the coal-block fade and portal-broken lines) are off: `core/PortalSpreadQuiet`
+  sets its three `sendMessageOn...` options false whenever a server starts, whatever its config file says.
