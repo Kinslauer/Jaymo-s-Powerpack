@@ -14,6 +14,9 @@
 		],
 		"client": [
 			"com.jaymoskitchen.client.JaymosKitchenClient"
+		],
+		"jei_mod_plugin": [
+			"com.jaymoskitchen.client.jei.MillJei"
 		]
 	},
 	"mixins": [

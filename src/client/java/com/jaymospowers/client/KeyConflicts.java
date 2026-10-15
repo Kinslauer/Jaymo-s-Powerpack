@@ -42,12 +42,17 @@ final class KeyConflicts {
 		Map.entry("key.shouldersurfing.free_look", new Move("key.keyboard.left.alt", "key.keyboard.right.alt")),
 		Map.entry("key.shouldersurfing.swap_shoulder", new Move("key.keyboard.u", "key.keyboard.o")));
 
-	/** Bump to set JEI's hover keys again. v1 (0.11.15): showRecipe had come unbound in Andy's profile. */
-	private static final String JEI_MARKER = "jaymospowers-jei-keys-v1";
+	/**
+	 * Bump to set JEI's hover keys again. v1 (0.11.15): showRecipe had come unbound in Andy's profile. v2 (0.11.31):
+	 * a left click shows an item's recipe and a right click its uses, wherever JEI's mouse keys had got to.
+	 */
+	private static final String JEI_MARKER = "jaymospowers-jei-keys-v2";
 
 	/** JEI key mapping name → its key, set once per install whatever it was. */
 	private static final Map<String, String> JEI_KEYS = Map.of(
 		"key.jei.showRecipe", "key.keyboard.r",
+		"key.jei.showRecipe2", "key.mouse.left",
+		"key.jei.showUses2", "key.mouse.right",
 		"key.jei.bookmark", "key.keyboard.a");
 
 	/** Bump to unbind YDM's Weapon Master again. v1 (0.11.22): its Open Settings key sat on Y. */
@@ -64,7 +69,7 @@ final class KeyConflicts {
 	}
 
 	static void resolveOnce(Minecraft minecraft) {
-		setKeysOnce(minecraft, "jei", JEI_MARKER, JEI_KEYS, "put JEI's Show Recipe on R and Bookmark on A");
+		setKeysOnce(minecraft, "jei", JEI_MARKER, JEI_KEYS, "put JEI's Show Recipe on R and left click, Show Uses on right click and Bookmark on A");
 		setKeysOnce(minecraft, "weaponmaster_ydm", WEAPON_MASTER_MARKER, WEAPON_MASTER_KEYS, "unbound YDM's Weapon Master keys");
 		narratorHotkeyOffOnce(minecraft);
 		Path marker = FabricLoader.getInstance().getConfigDir().resolve(MARKER);

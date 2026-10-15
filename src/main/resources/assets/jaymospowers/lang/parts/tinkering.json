@@ -205,5 +205,18 @@
   "modifier.jaymospowers.emerald": "Emerald",
   "modifier.jaymospowers.emerald.desc": "+50% durability, mines at least like iron.",
   "modifier.jaymospowers.netherite": "Netherite",
-  "modifier.jaymospowers.netherite.desc": "+20% durability, more attack, mines like netherite, won't burn (needs Diamond)."
+  "modifier.jaymospowers.netherite.desc": "+20% durability, more attack, mines like netherite, won't burn (needs Diamond).",
+  "jei.jaymospowers.part_builder": "Part Builder",
+  "jei.jaymospowers.tool_station": "Tool Station",
+  "jei.jaymospowers.casting": "Casting Table",
+  "jei.jaymospowers.casting_basin": "Casting Basin",
+  "jei.jaymospowers.melting": "Smeltery: Melting",
+  "jei.jaymospowers.alloying": "Smeltery: Alloying",
+  "jei.jaymospowers.part_builder.cost": "Takes %s units of material",
+  "jei.jaymospowers.casting.pour": "Pour %s of %s",
+  "jei.jaymospowers.casting.kept": "The cast is kept",
+  "jei.jaymospowers.casting.used_up": "The item is used up",
+  "jei.jaymospowers.melting.into": "Melts into %s of %s",
+  "jei.jaymospowers.alloying.in": "%s of %s",
+  "jei.jaymospowers.alloying.out": "makes %s of %s"
 }

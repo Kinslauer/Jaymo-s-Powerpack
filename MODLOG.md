@@ -1278,3 +1278,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   villager says in your own conversation is only shown to you (`kingdoms/MODLOG.md`).
 - **0.11.30 / Kingdoms 0.7.52:** every villager speech bubble is seen by all players near, MCA conversations included
   (`kingdoms/MODLOG.md`).
+- **0.11.31 / Kitchen 0.4.41, recipes in JEI; left click shows them:** JEI now shows how Tinkering's things are made
+  (`client/jei/TinkeringJei`): Part Builder (pattern + material, every part of every shaped material), Tool Station
+  (each tool in each head material), Casting Table (parts, ingots and nuggets poured on casts; gold over an item makes
+  its cast), Casting Basin, Smeltery melting (what melts into how much of what) and alloying. Kitchen's mill machines
+  have pages too (`kitchen/MODLOG.md`). JEI's cheat mode is kept off (`JeiCheats`; the server allows no JEI cheats), since
+  with it on a left click asked for the item, was refused and did nothing; JEI's mouse keys are set once more (v2):
+  left click shows the recipe, right click the uses (`KeyConflicts`).

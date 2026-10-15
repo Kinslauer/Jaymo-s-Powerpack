@@ -290,6 +290,8 @@ dependencies {
 	// compiled against to pause Fresh Animations' player animations under our poses; touched only via client/EmfAccess
 	compileOnly "maven.modrinth:entity-model-features:N7d5LddE"
 	compileOnly "maven.modrinth:entitytexturefeatures:O8J3sxxp"
+	// (0.11.31) compiled against for its recipe pages; touched only via client/jei (its jei_mod_plugin entrypoint)
+	compileOnly "maven.modrinth:jei:QfoQJyPO"
 	packMods.drop(1).findAll { it.dev != false }.each { localRuntime it.dep }
 	packMods.each { packJars it.dep }
 	packModsNoCf.each { localRuntime it.dep; packJars it.dep }

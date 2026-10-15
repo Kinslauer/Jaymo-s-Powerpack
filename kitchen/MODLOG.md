@@ -766,3 +766,6 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
     `BORN`, `CorpseEntity.markJustDied`) falls from the dying mob's keeled-over pose, limbs swinging out from straight.
   - Lying still it tips to the ground under it (slopes, steps, slabs; up to 35 degrees; walls aren't climbed) and
     bounces a little when it lands hard.
+- **0.4.41, the mill in JEI:** JEI has a page for each machine (Grinding, Chopping Block, Press), read off
+  `MachineRecipes`: wheat to flour, flowers to dye, logs to planks (by hand and with a horse), seeds to oil and leaves
+  to water, with the machines as their stations (`client/jei/MillJei`, the `jei_mod_plugin` entrypoint).
