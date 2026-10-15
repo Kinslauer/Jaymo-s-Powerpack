@@ -1228,3 +1228,26 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.11.1, character creation can't be skipped** (Andy: "force character creation on spawn"): Kingdoms 0.7.45. A new
   player makes MCA's character (look, then where they start) first, then picks a class; neither screen can be shut
   or put away until it's done, and they can't be hurt or hunted meanwhile. See `kingdoms/MODLOG.md`.
+- **0.11.4, Yank moves swing the whole upper body** (Andy: "the web yank overhead spin should animate with more
+  gravity, swaying the upper body around as he spins, keeping the legs in a stable pose"): on any Yank web (the Yank,
+  its lead, and every Web Whip: overhead, seesaw, lasso) the torso turns at the waist with the weight, twisting after
+  the catch, bending into a slam and back under a haul overhead, leaning into it as it goes round, lagging and
+  swinging past it on a soft spring. Head and shoulders ride round with it (the web still leaves the hand), a free arm
+  swings with the chest, and the legs plant a wide staggered stance (giving way to walking). Knobs: the "heave" block
+  at the top of `WebArms`.
+- **0.11.5, village life** (Andy: Village Life's features in our systems; that mod is All Rights Reserved, so remade):
+  Kingdoms 0.7.46. Festival days at the square (dancing, a feast from the storehouse, a musician, fireworks in the
+  realm's colours; a lord can call one with `/kingdom festival`), villagers' own cats and dogs, couriers
+  (`/kingdom deliver <player>`), and hunger when the storehouse is bare plus evening weariness. See `kingdoms/MODLOG.md`.
+- **0.11.12, everyone is a villager** (Andy: "lock everyone to make a villager instead of vanilla or player"):
+  Kingdoms 0.7.47. MCA's character screen no longer offers the player-shaped or vanilla body; every player is drawn
+  and sized as an MCA villager, old saves included. See `kingdoms/MODLOG.md`.
+- **0.11.14, gun arms hold still in first person** (Andy: "the arms animate in the gun pov"): TaCZ draws a gun's arms
+  with the vanilla first-person hand, and Entity Model Features laid Fresh Animations' first-person arm moves over
+  them, made for where the vanilla hand sits, so the arms swung off around the view. With a TaCZ gun in either hand
+  Fresh Animations now leaves first-person arms alone and only the gun's own animations move them
+  (`client/armory/TaczFirstPerson.holdingGun`, paused from `client/EmfAccess`).
+- **0.11.14, flintlock animations load again** (Andy: "muskets have no reload animation"): TaCZ couldn't load any of our
+  flintlocks' animations (musket, blunderbuss, pistol, Arsenal's pair): the shot's empty `sound_effects` list threw as
+  it was read (Andy's log: "Failed to load gun animation runtime jaymospowers:musket_display"), so the reload, draw,
+  inspect and shot animations all fell back to nothing. The shot has no sound list now (`tools/gen_tacz_guns.py`).
