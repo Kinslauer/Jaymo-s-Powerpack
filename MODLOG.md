@@ -1355,7 +1355,17 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   `kingdoms/MODLOG.md`). Masked, the costume's name ("Masked Stranger" if unnamed) is your display name everywhere:
   chat, death and join messages, the tab list (resent when the mask goes on or off), the name tag
   (`mixin/CostumeNameMixin` on `Player.getDisplayName`, `CostumeTabListMixin` on `ServerPlayer.getTabListDisplayName`).
-- **0.11.77 / Kitchen 0.4.44, player corpses wear their villager look:** with MCA everyone is a villager, so a dead
+- **0.11.77:** Andy: "remove the metal knife recipes, all weapons should be forged", the Tinkers way. Stone and metal
+  weapons (Armory's, Balkon's WeaponMod's knives/spears/halberds/battleaxes/warhammers/katanas/flails/boomerangs,
+  vanilla spears, kunai, throwing stars, harpoon, iron quarterstaff) lose their crafting recipes. Each has its own head
+  or blade (Claymore Blade, Knife Blade...): shape it from stone at the Part Builder (arrows page to the weapon heads),
+  pour gold over it on a casting table for its Weapon Cast, pour iron, gold or copper over the cast for a metal head,
+  then put the head, a Tool Handle and a Tool Binding together at the Tool Station (`tinkering/WeaponParts`; textures cut from
+  the weapons' sprites by `tools/weapon_parts_assets.py`). Andy: the big weapons (claymore, battleaxe, warhammer,
+  halberd) take a Tough Handle, and swords (longsword, broadsword, claymore, saber, ninjato, katana) a new Tinkering
+  part, the Crossguard, in place of the binding. Kunai take just a binding, throwing star blanks nothing.
+  Wooden weapons, round shields and the musket bayonet stay craftable.
+- **0.11.78 / Kitchen 0.4.44, player corpses wear their villager look:** with MCA everyone is a villager, so a dead
   player's corpse is drawn as the villager MCA draws them as (genes, skin, hair, clothes), by MCA's own renderer,
   lying and ragdolling like any villager's body (Kitchen `client/corpse/McaLooks`, which asks
   `MCAClient.getVillagerRendererData` and only touches MCA when it's loaded; `CorpseEntity.placeBody`). Their severed

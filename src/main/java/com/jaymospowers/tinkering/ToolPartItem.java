@@ -68,6 +68,9 @@ public class ToolPartItem extends Item {
 				tools.add(Component.translatable("item.jaymospowers." + type.itemId()));
 			}
 		}
+		if (tools.isEmpty()) {
+			return;
+		}
 		MutableComponent used = Component.empty();
 		for (int i = 0; i < tools.size(); i++) {
 			used.append(i > 0 ? Component.literal(", ") : Component.empty()).append(tools.get(i));

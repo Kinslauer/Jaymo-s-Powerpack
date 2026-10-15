@@ -1,5 +1,6 @@
 package com.jaymospowers.tinkering;
 
+import java.util.List;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
@@ -18,9 +19,12 @@ import org.jspecify.annotations.Nullable;
  * The Part Builder: a pattern and a material in, pick a part, take it out. Each part costs its material units
  * ({@link PartType#cost}); a log is worth 4 planks, a block of metal 9 ingots, and what's left over of the last item is lost.
  * The layout is Tinkers' own screen: pattern and material on the left, the 4x4 part buttons, the result on the right.
+ * (0.11.77) Weapon heads ({@link WeaponParts}) are buttons {@link #WEAPON_BUTTONS} on, shaped from stone only.
  */
 public class PartBuilderMenu extends AbstractContainerMenu {
 	public static final int PATTERN = 0, MATERIAL = 1, RESULT = 2;
+	/** Button ids of the weapon heads: this plus the head's place in {@link WeaponParts#loaded()}. */
+	public static final int WEAPON_BUTTONS = 100;
 	private final ContainerLevelAccess access;
 	private final DataSlot selected = DataSlot.standalone();
 	private final Container inputs = new SimpleContainer(2) {
@@ -61,10 +65,10 @@ public class PartBuilderMenu extends AbstractContainerMenu {
 
 			@Override
 			public void onTake(Player player, ItemStack carried) {
-				PartType part = selectedPart();
-				if (part != null) {
+				int cost = selectedCost();
+				if (cost > 0) {
 					inputs.removeItem(PATTERN, 1);
-					inputs.removeItem(MATERIAL, itemsNeeded(part, inputs.getItem(MATERIAL)));
+					inputs.removeItem(MATERIAL, itemsNeeded(cost, inputs.getItem(MATERIAL)));
 					access.execute((level, pos) -> level.playSound(null, pos, SoundEvents.UI_STONECUTTER_TAKE_RESULT, SoundSource.BLOCKS, 1.0F, 1.0F));
 				}
 				super.onTake(player, carried);
@@ -80,6 +84,25 @@ public class PartBuilderMenu extends AbstractContainerMenu {
 		return index >= 0 && index < PartType.values().length ? PartType.values()[index] : null;
 	}
 
+	/** The weapon head picked, or null. */
+	public WeaponParts.@Nullable Kind selectedWeapon() {
+		int index = selected.get() - WEAPON_BUTTONS;
+		List<WeaponParts.Kind> kinds = WeaponParts.loaded();
+		return index >= 0 && index < kinds.size() ? kinds.get(index) : null;
+	}
+
+	/** Material units the picked part or head takes (0: nothing picked). */
+	private int selectedCost() {
+		PartType part = selectedPart();
+		WeaponParts.Kind weapon = selectedWeapon();
+		return part != null ? part.cost : weapon != null ? weapon.stoneCost() : 0;
+	}
+
+	/** Whether this material shapes weapon heads: stone of any kind. */
+	public static boolean shapesWeapons(@Nullable TinkerMaterial material) {
+		return material != null && material.stats == TinkerMaterial.Stats.ROCK;
+	}
+
 	public ItemStack material() {
 		return slots.get(MATERIAL).getItem();
 	}
@@ -90,13 +113,18 @@ public class PartBuilderMenu extends AbstractContainerMenu {
 
 	/** Items of this stack the part takes (0 when it isn't a material). */
 	public static int itemsNeeded(PartType part, ItemStack material) {
+		return itemsNeeded(part.cost, material);
+	}
+
+	public static int itemsNeeded(int cost, ItemStack material) {
 		int units = TinkerMaterial.units(material);
-		return units <= 0 ? 0 : (part.cost + units - 1) / units;
+		return units <= 0 ? 0 : (cost + units - 1) / units;
 	}
 
 	@Override
 	public boolean clickMenuButton(Player player, int button) {
-		if (button < 0 || button >= PartType.values().length) {
+		boolean weapon = button >= WEAPON_BUTTONS && button - WEAPON_BUTTONS < WeaponParts.loaded().size();
+		if (!weapon && (button < 0 || button >= PartType.values().length)) {
 			return false;
 		}
 		selected.set(button);
@@ -121,6 +149,11 @@ public class PartBuilderMenu extends AbstractContainerMenu {
 		if (part != null && kind != null && !kind.cast && kind.makes(part.kind) && inputs.getItem(PATTERN).is(Tinkering.PATTERN)
 			&& material.getCount() >= itemsNeeded(part, material)) {
 			out = ToolPartItem.of(part, kind, 1);
+		}
+		WeaponParts.Kind weapon = selectedWeapon();
+		if (weapon != null && shapesWeapons(kind) && inputs.getItem(PATTERN).is(Tinkering.PATTERN)
+			&& material.getCount() >= itemsNeeded(weapon.stoneCost(), material)) {
+			out = WeaponPartItem.of(weapon, WeaponParts.Metal.STONE, 1);
 		}
 		result.setItem(RESULT, out);
 		broadcastChanges();
@@ -147,9 +180,8 @@ public class PartBuilderMenu extends AbstractContainerMenu {
 		int end = this.slots.size();
 		if (index == RESULT) {
 			// take as many as the inputs allow, one part at a time
-			PartType part = selectedPart();
 			int made = 0;
-			while (part != null && slot.hasItem() && made < 64) {
+			while (selectedCost() > 0 && slot.hasItem() && made < 64) {
 				ItemStack one = slot.getItem().copy();
 				if (!this.moveItemStackTo(one, 3, end, true)) {
 					break;
