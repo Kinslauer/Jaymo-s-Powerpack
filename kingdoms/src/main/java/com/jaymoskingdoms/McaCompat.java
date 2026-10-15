@@ -308,4 +308,12 @@ public final class McaCompat {
 			HEARTS.remove(player.getUUID());
 		}
 	}
+
+	/**
+	 * (0.7.44) Whether MCA's destiny screen is still owed to {@code player}: MCA opens it to everyone whose look isn't
+	 * set yet (its {@code launchIntoDestiny}), and keeps it open until they finish.
+	 */
+	public static boolean destinyPending(ServerPlayer player) {
+		return LOADED && McaBridge.destinyPending(player);
+	}
 }

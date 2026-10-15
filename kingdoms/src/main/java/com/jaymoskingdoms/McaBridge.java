@@ -11,6 +11,7 @@ import net.conczin.mca.entity.ai.relationship.EntityRelationship;
 import net.conczin.mca.entity.ai.relationship.Gender;
 import net.conczin.mca.entity.VillagerFactory;
 import net.conczin.mca.registry.ProfessionsMCA;
+import net.conczin.mca.server.world.data.PlayerSaveData;
 import net.conczin.mca.server.world.data.VillageManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -524,5 +525,9 @@ final class McaBridge {
 	/** (0.6.9) Where {@code villager} lives (their bed), if MCA knows. */
 	static java.util.Optional<net.minecraft.core.GlobalPos> home(Villager villager) {
 		return villager instanceof VillagerEntityMCA v ? v.getResidency().getHome() : java.util.Optional.empty();
+	}
+
+	static boolean destinyPending(ServerPlayer player) {
+		return Config.getInstance().launchIntoDestiny && !PlayerSaveData.get(player).isEntityDataSet();
 	}
 }

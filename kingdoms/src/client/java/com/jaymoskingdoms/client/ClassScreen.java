@@ -5,6 +5,8 @@ import com.jaymoskingdoms.Classes;
 import com.jaymoskingdoms.Classes.PlayerClass;
 import java.util.ArrayList;
 import java.util.List;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -41,8 +43,29 @@ final class ClassScreen extends Screen {
 		this.forced = forced;
 	}
 
+	/** (0.7.44) After Choose, how long the class may take to come back before the screen is put up again (ms). */
+	static final long CHOOSE_GRACE_MS = 3000L;
+	/** (0.7.44) The server asked for a class that can't be put off: the screen comes back whenever it's shut. */
+	private static boolean owed;
+	private static long quietUntil;
+
 	static void register() {
-		ClientPlayNetworking.registerGlobalReceiver(Classes.Open.TYPE, (payload, context) -> context.client().gui.setScreen(new ClassScreen(payload.forced())));
+		ClientPlayNetworking.registerGlobalReceiver(Classes.Open.TYPE, (payload, context) -> {
+			owed |= payload.forced();
+			context.client().gui.setScreen(new ClassScreen(payload.forced()));
+		});
+		// (0.7.44) Andy: "force character creation on spawn": nothing else (another mod's screen, a pause) puts it away
+		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
+			if (!owed || minecraft.player == null) {
+				return;
+			}
+			if (Classes.classOf(minecraft.player) != null) {
+				owed = false;
+			} else if (minecraft.gui.screen() == null && System.currentTimeMillis() > quietUntil) {
+				minecraft.gui.setScreen(new ClassScreen(true));
+			}
+		});
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, minecraft) -> owed = false);
 	}
 
 	@Override
@@ -99,6 +122,7 @@ final class ClassScreen extends Screen {
 		this.choose = addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.class.choose"), b -> {
 			if (this.picked != null) {
 				ClientPlayNetworking.send(new Classes.Choose(this.picked.ordinal(), this.option));
+				quietUntil = System.currentTimeMillis() + CHOOSE_GRACE_MS;
 				onClose();
 			}
 		}).bounds(right - 110, y, 110, 16).build());

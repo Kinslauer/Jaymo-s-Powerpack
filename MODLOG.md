@@ -1225,3 +1225,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   land's own disasters: sandstorms with drifting sand, blizzards that freeze you, wildfires settlements fight with
   buckets, floods after long rain that drain again, and hail; then earthquakes, struck settlements (news, repairs, tempers,
   relief quests) and forecasts (court wizards, the Journal, a new Almanac). See `kingdoms/MODLOG.md`.
+- **0.10.131, character creation can't be skipped** (Andy: "force character creation on spawn"): Kingdoms 0.7.44. A new
+  player makes MCA's character (look, then where they start) first, then picks a class; neither screen can be shut
+  or put away until it's done, and they can't be hurt or hunted meanwhile. See `kingdoms/MODLOG.md`.

@@ -13,6 +13,7 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -37,10 +38,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Prediction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -182,6 +185,9 @@ public final class Classes {
 	/** Player → the court wizard who offered them a writ (entity id). */
 	private static final Map<UUID, Integer> WRIT_OFFERS = new HashMap<>();
 
+	/** (0.7.44) While a player makes their character, mobs within this range that go for them are called off, this often (ticks). */
+	static final int UNMADE_SHOO_RANGE = 32, UNMADE_SHOO_EVERY = 10;
+
 	private Classes() {
 	}
 
@@ -193,10 +199,15 @@ public final class Classes {
 		ServerPlayNetworking.registerGlobalReceiver(Choose.TYPE, (payload, context) -> choose(context.player(), payload));
 		ServerPlayerEvents.JOIN.register(player -> {
 			refresh(player);
-			if (of(player).playerClass() == null) {
+			// (0.7.44) Andy: "force character creation on spawn". MCA's destiny screen (your look, where you start) comes
+			// first and can't be shut; the class screen follows it ({@link #afterDestiny}) and can't be shut either.
+			if (of(player).playerClass() == null && !McaCompat.destinyPending(player)) {
 				ask(player, true);
 			}
 		});
+		// (0.7.44) until both are done the player can't be hurt and nothing hunts them
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer sp && unmade(sp)
+			&& !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)));
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> refresh(newPlayer));
 		// (what's held and worn changes what a class is good with)
 		ServerEntityEvents.EQUIPMENT_CHANGE.register((entity, slot, previous, next) -> {
@@ -229,7 +240,13 @@ public final class Classes {
 	}
 
 	private static void tick(MinecraftServer server) {
+		boolean shoo = server.getTickCount() % UNMADE_SHOO_EVERY == 0;
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			if (shoo && unmade(player)) {
+				for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(UNMADE_SHOO_RANGE), m -> m.getTarget() == player)) {
+					mob.setTarget(null);
+				}
+			}
 			if (player.isAlive() && !player.isSpectator()) {
 				ClassPerks.tick(player);
 				Spellcraft.tick(player);
@@ -252,6 +269,21 @@ public final class Classes {
 	/** Puts {@code player}'s class on them as they stand (their attributes). */
 	static void refresh(ServerPlayer player) {
 		ClassPerks.attributes(player);
+	}
+
+	/**
+	 * (0.7.44) Whether {@code player} is still making their character: no class yet (and their client has this mod,
+	 * so the screen is up for them), or MCA's destiny screen still to finish.
+	 */
+	public static boolean unmade(ServerPlayer player) {
+		return classOf(player) == null && ServerPlayNetworking.canSend(player, Open.TYPE);
+	}
+
+	/** (0.7.44) MCA's destiny screen was just finished: the class screen is next, and can't be shut without picking. */
+	public static void afterDestiny(ServerPlayer player) {
+		if (classOf(player) == null) {
+			ask(player, true);
+		}
 	}
 
 	/** Opens the class screen for {@code player} (if their client has this mod). */
