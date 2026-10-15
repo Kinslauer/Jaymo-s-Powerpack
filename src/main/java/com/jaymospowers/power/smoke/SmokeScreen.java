@@ -39,6 +39,7 @@ final class SmokeScreen {
 		long now = player.level().getGameTime();
 		POURING.put(player.getUUID(), now);
 		SmokePower.set(player, SmokePower.state(player).withPour(now));
+		SmokeMoves.begin(player, SmokeMoves.POUR);
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.6F, 0.6F);
 	}
 

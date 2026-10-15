@@ -35,8 +35,10 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * R, Vapour Form: everything below your waist turns to smoke and you fly on it, Wind-style (the client flies you:
- * {@code SmokeFlightClient}; hover, Sprint to cruise, S to brake). R again comes back down, as does Sneak on the ground.
+ * R, Vapour Form: a mode you switch on and off ({@link #ARMED}). While it's on, breaking into a sprint turns everything
+ * below your waist to smoke and you shoot off along your look, Wind-style (the client flies you: {@code SmokeFlightClient}).
+ * The cruise holds its speed without Sprint held; S brakes, and slowed right down you hover (Sprint again to cruise).
+ * R switches the mode off (and lands you); Sneak on the ground lands you but the mode stays on (Andy, 2026-10-15).
  * It costs hunger, more the faster you go, and ends when you're too hungry. Your smoke half pours a thick trail into
  * the {@link SmokeField}; arrows and other shots pass through it (blows, fire and blasts still land). Everyone sees the
  * smoke legs ({@link #FORM}).
@@ -68,6 +70,10 @@ public final class SmokeVapour {
 	 */
 	public static final AttachmentType<Boolean> WHOLLY = AttachmentRegistry.create(JaymosPowers.id("smoke_wholly"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** On a Smoke user with Vapour Form switched on (R): sprinting turns them to smoke. Synced to them only (the HUD). */
+	public static final AttachmentType<Boolean> ARMED = AttachmentRegistry.create(JaymosPowers.id("smoke_vapour_armed"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.targetOnly()));
+
 	/** Smoke a tick the whole smoke body pours out, on top of the trail. */
 	static final float WHOLLY_TRAIL = 0.5F;
 
@@ -145,13 +151,30 @@ public final class SmokeVapour {
 		}
 	}
 
-	/** R: into Vapour Form, or back out of it. */
+	/** Vapour Form is switched on (both sides). */
+	public static boolean armed(Player player) {
+		return player.getAttached(ARMED) != null && Powers.has(player, SmokePower.INSTANCE);
+	}
+
+	/** R: Vapour Form switched on (sprint to take off; already sprinting, off you go), or off (landing you). */
 	static void toggle(ServerPlayer player) {
-		if (player.getAttached(FORM) != null) {
-			end(player);
-		} else if (SmokePower.ready(player, SmokeState.VAPOUR)) {
-			start(player);
+		if (player.getAttached(ARMED) != null) {
+			disarm(player);
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.smoke_vapour_off").withStyle(ChatFormatting.GRAY));
+			return;
 		}
+		player.setAttached(ARMED, true);
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.smoke_vapour_on").withStyle(ChatFormatting.GRAY));
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.4F, 1.4F);
+		SmokeMoves.begin(player, SmokeMoves.ARM);
+	}
+
+	/** The mode off, and back to flesh if in the form. */
+	static void disarm(ServerPlayer player) {
+		if (player.getAttached(ARMED) != null) {
+			player.removeAttached(ARMED);
+		}
+		end(player);
 	}
 
 	static void start(ServerPlayer player) {
@@ -176,6 +199,10 @@ public final class SmokeVapour {
 
 	static void tick(ServerPlayer player) {
 		if (player.getAttached(FORM) == null) {
+			// switched on: breaking into a sprint takes off (the client goes straight into a cruise)
+			if (player.getAttached(ARMED) != null && player.isSprinting() && SmokePower.ready(player, SmokeState.VAPOUR)) {
+				start(player);
+			}
 			return;
 		}
 		ServerLevel level = player.level();

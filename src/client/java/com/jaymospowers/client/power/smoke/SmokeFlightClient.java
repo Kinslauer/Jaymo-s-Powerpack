@@ -21,9 +21,10 @@ import org.jspecify.annotations.Nullable;
  * toward what the controls ask, handed to the player every tick. The server says when the form starts and ends
  * ({@link SmokeVapour#FORM}); the take-off is the moment it starts.
  * <ul>
- * <li>Hover: WASD, Jump rises, Sneak sinks (and lands on the ground).</li>
- * <li>Sprint: cruise along your look, picking up speed (a dive adds more); let go and you coast back to a hover; S
- * brakes. Turning is slower the faster you go.</li>
+ * <li>Take-off: Vapour Form switched on, a sprint starts it, straight into a cruise.</li>
+ * <li>Cruise: along your look, picking up speed to the top and holding it with or without Sprint (a dive adds more, which
+ * eases off again); S brakes, and slowed right down you hover. Turning is slower the faster you go.</li>
+ * <li>Hover: WASD, Jump rises, Sneak sinks (and lands on the ground); Sprint cruises again.</li>
  * </ul>
  */
 public final class SmokeFlightClient {
@@ -34,7 +35,9 @@ public final class SmokeFlightClient {
 	static final double HOVER_BOB = 0.012;
 	/** The take-off: thrown up this fast on a column of smoke. */
 	static final double TAKEOFF_BOOST = 0.8;
-	/** Cruise: speed on entering, acceleration while Sprint is held (tapering toward the top), coast-down and brake. */
+	/** A sprinting take-off goes straight into a cruise, lifted at least this steeply off the ground (look's y). */
+	static final double SPRINT_TAKEOFF_LIFT = 0.2;
+	/** Cruise: speed on entering, acceleration toward the top (tapering), easing back after a dive, and S's brake. */
 	static final double CRUISE_ENTER_SPEED = 0.8;
 	static final double CRUISE_ACCEL = 0.06;
 	static final double CRUISE_ACCEL_TAPER = 0.6;
@@ -152,6 +155,17 @@ public final class SmokeFlightClient {
 		speed = 0.0;
 		sinkArmed = false;
 		Vec3 motion = player.getDeltaMovement();
+		if (player.isSprinting() || player.input.keyPresses.sprint()) {
+			// switched on and broke into a sprint: off along the look at once
+			Vec3 look = player.getLookAngle();
+			Vec3 dir = new Vec3(look.x, Math.max(look.y, SPRINT_TAKEOFF_LIFT), look.z).normalize();
+			cruising = true;
+			speed = Math.max(CRUISE_ENTER_SPEED, motion.length());
+			velocity = dir.scale(speed);
+			player.level().playLocalSound(player, SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.4F, 0.8F);
+			ScreenShake.add(0.6F);
+			return;
+		}
 		velocity = new Vec3(motion.x * 0.5, Math.max(motion.y, TAKEOFF_BOOST), motion.z * 0.5);
 		ScreenShake.add(0.6F);
 	}
@@ -198,13 +212,14 @@ public final class SmokeFlightClient {
 
 	private static void cruise(LocalPlayer player, Input input) {
 		double top = top(player);
-		if (input.sprint() && speed < top) {
-			speed = Math.min(top, speed + CRUISE_ACCEL * (1.0 - CRUISE_ACCEL_TAPER * speed / top));
-		} else if (!input.sprint()) {
-			speed -= CRUISE_DECEL;
-		}
 		if (input.backward()) {
+			// S is the only way down to a hover: the cruise keeps its speed otherwise
 			speed -= CRUISE_BRAKE;
+		} else if (speed < top) {
+			speed = Math.min(top, speed + CRUISE_ACCEL * (1.0 - CRUISE_ACCEL_TAPER * speed / top));
+		} else if (speed > top) {
+			// a dive's extra eases back off
+			speed = Math.max(top, speed - CRUISE_DECEL);
 		}
 		Vec3 heading = velocity.lengthSqr() < 1.0E-6 ? player.getLookAngle() : velocity.normalize();
 		// a dive picks up speed past what the smoke alone gives; a climb costs a little

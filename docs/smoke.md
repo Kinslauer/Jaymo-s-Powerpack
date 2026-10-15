@@ -149,3 +149,14 @@ Nothing explained in game (`SmokeSmog`).
 - **Sneak + hold:** feeds a storm: needs `SkyCalm.supercellOver` or your own Ash Storm 100+ ticks old; a column of
   smoke where you aim (64 blocks) each second; 10 s calls `SkyCalm.touchdown`: a `TORNADO` under that supercell
   (marked spawned) or a lone one that wanders with the wind. `disaster_damage` still decides what it breaks.
+
+## Move poses and Vapour as a mode (0.11.5)
+Andy: "smoke needs animations on every move" and "vapor mode should be toggleable, activating when you enter sprint, and
+maintains it's extreme speed, but you should still be able to hover and slow down".
+- `SmokeMoves` (server) puts the move being made on the synced `smoke_move` attachment; held moves drop when the move
+  stops, one-shots after their length. `SmokeMovePose` (client) draws a pose for each (arms and head; listed in its
+  javadoc) plus the Vapour hover and the Smoke Jet. It is in `ModelPoses` and `PoseTakeover.posed` (Fresh Animations
+  steps aside).
+- Vapour Form: R toggles `smoke_vapour_armed`; while armed, `isSprinting()` on the server starts the form and the client
+  takes off straight into a cruise. The cruise accelerates to the top and holds it with or without Sprint; only S
+  brakes it down to a hover. R off lands you.

@@ -20,8 +20,9 @@ import org.jspecify.annotations.Nullable;
  * Smoke: you make smoke, and the smoke is a real gas ({@link SmokeField}) that rises, fills rooms, leaks through gaps,
  * drifts on the wind and hides whatever is inside it. Everything is decided here, on the server.
  * <ul>
- * <li>R, Vapour Form ({@link SmokeVapour}): everything below your waist turns to smoke and you fly on it, Wind-style;
- * R again lands. The starter (a thinner trail until more is unlocked).</li>
+ * <li>R, Vapour Form ({@link SmokeVapour}): switched on, a sprint turns everything below your waist to smoke and you
+ * cruise on it, Wind-style, at full speed until you brake to a hover; R switches it off. The starter (a thinner trail
+ * until more is unlocked).</li>
  * <li>G (hold), Smokescreen ({@link SmokeScreen}): smoke pours out of you.</li>
  * <li>V, Smoke Bomb ({@link SmokeBomb}): a thrown ball that bursts into a cloud.</li>
  * <li>B (hold), Smother ({@link SmokeSmother}): smoke wraps whoever you aim at; they're blinded, slowed and choke.</li>
@@ -90,7 +91,7 @@ public final class SmokePower implements Power {
 		SmokeScreen.stop(player, false);
 		SmokeSmother.stop(player, false);
 		SmokeJet.stop(player);
-		SmokeVapour.end(player);
+		SmokeVapour.disarm(player);
 		SmokeSight.off(player);
 		SmokeSmog.forget(player);
 		SmokePyroclasm.forget(player);
@@ -98,6 +99,7 @@ public final class SmokePower implements Power {
 		SmokeAshStorm.forget(player);
 		SmokeField.forget(player);
 		SmokeHeat.forget(player);
+		SmokeMoves.forget(player);
 	}
 
 	@Override
@@ -162,6 +164,7 @@ public final class SmokePower implements Power {
 		SmokePyroclasm.gathering(player);
 		SmokeCloudshaper.tick(player);
 		SmokeAshStorm.tick(player);
+		SmokeMoves.tick(player);
 	}
 
 	/** C: Harness the Sky (ascended), Pyroclasm (corrupted), Ash Storm and Harness the Sky's holds (both). */

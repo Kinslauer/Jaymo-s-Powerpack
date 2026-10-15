@@ -172,6 +172,11 @@ final class SmokeCloudshaper {
 
 	// ---------------------------------------------------------------- Harness the Sky
 
+	/** Holding C now (Harness the Sky, or feeding a storm). */
+	static boolean holding(ServerPlayer player) {
+		return HOLDS.containsKey(player.getUUID());
+	}
+
 	/** C pressed ({@code down}) or let go (ascended; with both fates too, see {@link SmokeAshStorm}). */
 	static void key(ServerPlayer player, boolean down) {
 		long now = player.level().getGameTime();
@@ -179,6 +184,7 @@ final class SmokeCloudshaper {
 		if (down) {
 			if (!SmokeVapour.wholly(player)) {
 				HOLDS.put(player.getUUID(), new Hold(now, both && player.isShiftKeyDown()));
+				SmokeMoves.begin(player, both && player.isShiftKeyDown() ? SmokeMoves.FEED : SmokeMoves.SKY);
 			}
 			return;
 		}
@@ -196,6 +202,7 @@ final class SmokeCloudshaper {
 			return;
 		}
 		if (raincloud(player, both)) {
+			SmokeMoves.begin(player, SmokeMoves.RAIN);
 			SmokePower.cooldown(player, SmokeState.SKY, RAIN_COOLDOWN);
 		}
 	}
