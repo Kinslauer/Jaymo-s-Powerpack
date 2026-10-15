@@ -1214,3 +1214,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   and gravel still land on them. Anything moving through leaves rustles them, knocks bits off and shakes real falling
   leaves loose (vanilla sounds and particles drawn on each client, so Iris is fine). Tuning at the top of `core/Leaves`
   and `client/LeafRustle`.
+- **0.10.124, pirates and navies** (Kingdoms 0.7.37; sailing plan stage 3, Andy: "resume stage work"): ships with
+  crews of their own. Pirate coves rise on coasts near coastal kingdoms, with a pirate ship offshore (sloop or
+  brigantine, black flag) that patrols, runs down every ship that isn't a pirate's and fires broadsides; kill her
+  captain and gunners and her hold opens, a share per player. Coastal kingdoms worth 1000+ emeralds build a harbour,
+  a shipwright and a warship (a frigate from 2000) that fights pirates, and send merchantmen to other realms'
+  harbours. Pirates raid coastal settlements by landing parties, kings ask you to sink a pirate or escort a
+  merchantman, and pirate holds carry Pirate's Charts to treasure wrecks. See `kingdoms/MODLOG.md` (0.7.37).
