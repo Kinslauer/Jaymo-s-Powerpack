@@ -1269,3 +1269,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.11.26, lanterns stay in the offhand:** a lantern held in the offhand (for LambDynamicLights' light) was set down
   whenever a right click had no use in the main hand. Lanterns (`minecraft:lanterns`: plain, soul, every copper one) are
   now only placed from the main hand (`core/OffhandLanterns`).
+- **0.11.27, no more walking on water:** every player could run across water. Chrono's Overclock water run asked the
+  client whether its player was overclocked: "last seen" starts at Long.MIN_VALUE, and now minus that overflowed into a
+  big negative number, which passed the "within 2 ticks" test, so every client counted as overclocked and any sprint
+  ran on water (since 0.10.96 gave the water run its standing shape). Now only 0 to 2 ticks ago counts
+  (`ChronoSpeed.overclocked`).

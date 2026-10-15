@@ -56,7 +56,10 @@ public final class ChronoSpeed {
 	/** Whether {@code player} is overclocked right now, on either side. */
 	public static boolean overclocked(Player player) {
 		if (player.level().isClientSide()) {
-			return player.isLocalPlayer() && player.level().getGameTime() - clientOverclockedAt <= 2L;
+			// (0.11.27) never seen is Long.MIN_VALUE, and now minus that overflows to a large negative number, which is
+			// "<= 2": every client thought its player overclocked, so anyone sprinting ran on water. Ago must be 0..2.
+			long ago = player.level().getGameTime() - clientOverclockedAt;
+			return player.isLocalPlayer() && ago >= 0L && ago <= 2L;
 		}
 		return player instanceof ServerPlayer sp && ChronoPower.overclocked(sp);
 	}
