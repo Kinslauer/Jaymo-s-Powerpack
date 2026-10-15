@@ -1295,7 +1295,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.11.34, slingshot lines pull tight:** while a slingshot is drawn, both lines tighten slowly from their slack to
   stretched taut at a full draw (`WebSwing.SLING_STRETCH` 0.6 blocks past taut, so they thin and hum), for everyone:
   the drawn length is sent like any rope change. How they look only; the swing's rope is unchanged.
-- **0.11.42 / Kitchen 0.4.43, hearty meals (our own Spice of Life: Valheim Edition, which is LGPL but only for
+- **0.11.45 / Kitchen 0.4.43, hearty meals (our own Spice of Life: Valheim Edition, which is LGPL but only for
   1.19.2/1.20.1):** Kitchen's `stomach/Stomach`. You start at 3 hearts; each food you eat fills one of 3 stomach slots
   (plus a drink slot for potions, milk, honey) and adds its own health (its nutrition, min 2) and regeneration for
   180 s per nutrition point (5-40 min). The same food can't fill two slots, and a full slot only makes room in its last

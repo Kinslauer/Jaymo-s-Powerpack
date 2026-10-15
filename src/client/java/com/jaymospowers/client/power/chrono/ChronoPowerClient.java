@@ -92,6 +92,7 @@ public final class ChronoPowerClient implements PowerClient {
 		EntityRendererRegistry.register(ChronoEchoes.ECHO, ChronoEchoRenderer::new);
 		ClientTickEvents.END_CLIENT_TICK.register(ChronoPowerClient::timelessHands);
 		ChronoFlowClient.init();
+		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ChronoSpaceCue::render);
 	}
 
 	/** Every Timeless player in view gets two slow clock hands circling them (yours too, in third person). */
