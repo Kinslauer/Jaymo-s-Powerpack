@@ -3057,5 +3057,6 @@
 	"journal.jaymoskingdoms.sub.quests": "Quests carried: %s",
 	"journal.jaymoskingdoms.sub.map": "The land about you, %s blocks across",
 	"journal.jaymoskingdoms.sub.reputation": "Settlements that know you: %s",
-	"gui.jaymoskingdoms.stable.hover": "Point at a row to read it in full."
+	"gui.jaymoskingdoms.stable.hover": "Point at a row to read it in full.",
+	"quest.jaymoskingdoms.screen.sub": "Quests on offer or carried: %s"
 }

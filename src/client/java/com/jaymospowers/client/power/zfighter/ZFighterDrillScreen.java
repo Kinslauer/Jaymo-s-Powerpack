@@ -2,11 +2,11 @@ package com.jaymospowers.client.power.zfighter;
 
 import com.jaymospowers.power.zfighter.ZFighterDrills;
 import com.jaymospowers.power.zfighter.ZFighterPower;
-import java.util.ArrayList;
+import com.jaymospowers.client.UiStyle;
+import com.jaymospowers.power.zfighter.ZFighterItems;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -14,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemStack;
 import com.mojang.blaze3d.platform.InputConstants;
 
 /**
@@ -25,11 +26,18 @@ import com.mojang.blaze3d.platform.InputConstants;
  * <li>Shadow Boxing: PUNCH (left click), BLOCK (right click) or DODGE (Space), quickly.</li>
  * <li>Precision: click each target before it shrinks away; the sooner, the more it's worth.</li>
  * </ul>
+ * (0.10.x) Restyled like the H screen: the drills as striped rows (click one to start it) with the box at the bottom
+ * showing the hovered one's rules; while one runs, its name and points sit in the header with a bar for how far along it
+ * is, and its rules in the box under the arena.
  */
 public class ZFighterDrillScreen extends Screen {
 	private static final int W = 260;
 	private static final int H = 190;
-	private static final int ARENA_TOP = 40;
+	private static final int ARENA_TOP = UiStyle.HEADER;
+	/** The menu's rows, and the lines of the box under them (or under the arena). */
+	private static final int MENU_ROW = 18;
+	private static final int MENU_DETAIL_LINES = 4;
+	private static final int DRILL_DETAIL_LINES = 2;
 	private static final int ARENA_H = 120;
 	private static final int ACCENT = 0xFF000000 | ZFighterPower.COLOR;
 	private static final int COUNT = 20;
@@ -46,7 +54,6 @@ public class ZFighterDrillScreen extends Screen {
 	private static final float TARGET_SIZE = 14.0F;
 
 	private final RandomSource random = RandomSource.create();
-	private final List<Button> menu = new ArrayList<>();
 	/** -1: the menu; otherwise the drill being played. */
 	private int drill = -1;
 	private int ticks;
@@ -82,17 +89,25 @@ public class ZFighterDrillScreen extends Screen {
 	}
 
 	private int top() {
-		return (this.height - H) / 2;
+		return Math.max(4, (this.height - H) / 2);
 	}
 
-	@Override
-	protected void init() {
-		menu.clear();
+	private int menuRowY(int i) {
+		return top() + UiStyle.HEADER + i * MENU_ROW;
+	}
+
+	/** The menu row under the mouse, or -1. */
+	private int menuRowAt(double mouseX, double mouseY) {
 		for (int i = 0; i < ZFighterDrills.DRILLS; i++) {
-			int d = i;
-			menu.add(addRenderableWidget(Button.builder(Component.translatable("drill.jaymospowers.zfighter." + ZFighterDrills.KEYS[i]), b -> start(d))
-				.bounds(left() + 20 + (i % 2) * 115, top() + 50 + (i / 2) * 50, 105, 20).build()));
+			if (UiStyle.over((int)mouseX, (int)mouseY, left() + 6, menuRowY(i), W - 12, MENU_ROW - 2)) {
+				return i;
+			}
 		}
+		return -1;
+	}
+
+	private static String key(int drill) {
+		return "drill.jaymospowers.zfighter." + ZFighterDrills.KEYS[drill];
 	}
 
 	@Override
@@ -116,9 +131,6 @@ public class ZFighterDrillScreen extends Screen {
 			noteLane[i] = random.nextInt(4);
 			noteDone[i] = false;
 		}
-		for (Button button : menu) {
-			button.visible = false;
-		}
 	}
 
 	private void finish() {
@@ -127,9 +139,6 @@ public class ZFighterDrillScreen extends Screen {
 		lastScore = result;
 		lastDrill = drill;
 		drill = -1;
-		for (Button button : menu) {
-			button.visible = true;
-		}
 		if (this.minecraft != null && this.minecraft.player != null) {
 			this.minecraft.player.playSound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 0.5F, 1.2F);
 		}
@@ -247,6 +256,14 @@ public class ZFighterDrillScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		if (drill < 0 && event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
+			int row = menuRowAt(event.x(), event.y());
+			if (row >= 0) {
+				click(1.2F);
+				start(row);
+				return true;
+			}
+		}
 		if (drill == ZFighterDrills.SHADOW_BOXING) {
 			answer(event.button() == InputConstants.MOUSE_BUTTON_RIGHT ? 1 : 0);
 			return true;
@@ -283,28 +300,54 @@ public class ZFighterDrillScreen extends Screen {
 		click(0.5F);
 	}
 
+	/** How far along the running drill is, 0-1. */
+	private float progress() {
+		return switch (drill) {
+			case ZFighterDrills.RHYTHM -> ticks / (float)(NOTE_GAP * COUNT + NOTE_FALL + NOTE_WINDOW + 10);
+			case ZFighterDrills.KI_CONTROL -> ticks / (float)KI_TICKS;
+			case ZFighterDrills.SHADOW_BOXING -> prompts / (float)COUNT;
+			case ZFighterDrills.PRECISION -> targets / (float)COUNT;
+			default -> 0.0F;
+		};
+	}
+
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left();
 		int y = top();
-		graphics.fill(x, y, x + W, y + H, 0xD0101018);
-		graphics.fill(x, y, x + W, y + 2, ACCENT);
-		Component title = drill < 0 ? this.title : Component.translatable("drill.jaymospowers.zfighter." + ZFighterDrills.KEYS[drill]);
-		graphics.centeredText(this.font, title, this.width / 2, y + 6, ACCENT);
-		Component help = Component.translatable(drill < 0 ? "screen.jaymospowers.zfighter.drills_help"
-			: "drill.jaymospowers.zfighter." + ZFighterDrills.KEYS[drill] + ".help");
-		var lines = this.font.split(help, W - 16);
-		for (int i = 0; i < Math.min(2, lines.size()); i++) {
-			graphics.centeredText(this.font, lines.get(i), this.width / 2, y + 18 + i * 9, 0xFFA8A8B8);
-		}
+		UiStyle.panel(graphics, x, y, W, H, ACCENT);
+		ItemStack icon = ZFighterItems.TRAINING_POST_ITEM == null ? null : new ItemStack(ZFighterItems.TRAINING_POST_ITEM);
 		if (drill < 0) {
-			if (lastScore >= 0) {
-				graphics.centeredText(this.font, Component.translatable("screen.jaymospowers.zfighter.drill_score",
-					Component.translatable("drill.jaymospowers.zfighter." + ZFighterDrills.KEYS[lastDrill]), lastScore), this.width / 2, y + H - 22, 0xFFFFFFFF);
+			UiStyle.header(graphics, this.font, x, y, W, icon, this.title, Component.translatable("screen.jaymospowers.zfighter.drills_sub"), ACCENT, 0);
+			int hovered = menuRowAt(mouseX, mouseY);
+			for (int i = 0; i < ZFighterDrills.DRILLS; i++) {
+				int ry = menuRowY(i);
+				UiStyle.row(graphics, x + 6, ry, x + W - 6, ry + MENU_ROW - 2, i, i == hovered);
+				UiStyle.line(graphics, this.font, Component.translatable(key(i)), x + 12, ry + 4, 80, UiStyle.TEXT);
+				UiStyle.line(graphics, this.font, Component.translatable(key(i) + ".help"), x + 96, ry + 4, W - 96 - 12, UiStyle.DIM);
+			}
+			int dy = y + H - UiStyle.detailHeight(MENU_DETAIL_LINES);
+			if (hovered >= 0) {
+				UiStyle.detail(graphics, this.font, x, dy, W, MENU_DETAIL_LINES, Component.translatable(key(hovered)), ACCENT,
+					List.of(Component.translatable(key(hovered) + ".help")));
+			} else {
+				Component lead = Component.translatable("screen.jaymospowers.zfighter.drills_help");
+				Component hint = Component.translatable("screen.jaymospowers.zfighter.drills_pick").withColor(UiStyle.HINT & 0xFFFFFF);
+				List<Component> text = lastScore < 0 ? List.of(lead, hint)
+					: List.of(Component.translatable("screen.jaymospowers.zfighter.drill_score", Component.translatable(key(lastDrill)), lastScore)
+						.withColor(UiStyle.TEXT & 0xFFFFFF), lead, hint);
+				UiStyle.detail(graphics, this.font, x, dy, W, MENU_DETAIL_LINES, null, ACCENT, text);
 			}
 			super.extractRenderState(graphics, mouseX, mouseY, a);
 			return;
 		}
+		// running: the drill and its points up top, how far along it is under them
+		int barW = 70;
+		UiStyle.header(graphics, this.font, x, y, W, icon, Component.translatable(key(drill)), this.title, ACCENT, W - 28 - barW - 16);
+		int shown = drill == ZFighterDrills.PRECISION ? Math.round(points) : score;
+		UiStyle.lineRight(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter.drill_points", shown), x + W - 8, y + 7, barW,
+			UiStyle.TEXT);
+		UiStyle.bar(graphics, x + W - 8 - barW, y + 19, barW, 3, progress(), ACCENT);
 		int ay = y + ARENA_TOP;
 		graphics.fill(x + 6, ay, x + W - 6, ay + ARENA_H, 0x60000000);
 		switch (drill) {
@@ -315,8 +358,8 @@ public class ZFighterDrillScreen extends Screen {
 			default -> {
 			}
 		}
-		int shown = drill == ZFighterDrills.PRECISION ? Math.round(points) : score;
-		graphics.centeredText(this.font, Component.translatable("screen.jaymospowers.zfighter.drill_points", shown), this.width / 2, y + H - 22, 0xFFFFFFFF);
+		UiStyle.detail(graphics, this.font, x, y + H - UiStyle.detailHeight(DRILL_DETAIL_LINES), W, DRILL_DETAIL_LINES, null, ACCENT,
+			List.of(Component.translatable(key(drill) + ".help")));
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
@@ -346,7 +389,7 @@ public class ZFighterDrillScreen extends Screen {
 
 	private void kiControl(GuiGraphicsExtractor graphics, int x, int ay) {
 		int bx = x + W / 2 - 15;
-		graphics.fill(bx, ay + 4, bx + 30, ay + ARENA_H - 4, 0xFF202020);
+		graphics.fill(bx, ay + 4, bx + 30, ay + ARENA_H - 4, UiStyle.BAR_BACK);
 		int span = ARENA_H - 8;
 		float band = band();
 		int bandTop = ay + 4 + Math.round((1.0F - band - 0.1F) * span);
@@ -354,7 +397,7 @@ public class ZFighterDrillScreen extends Screen {
 		int my = ay + 4 + Math.round((1.0F - meter) * span);
 		graphics.fill(bx + 2, my - 2, bx + 28, my + 2, Math.abs(meter - band) <= 0.1F ? 0xFF7CFF7C : 0xFFFF8C1A);
 		int left = Math.max(0, KI_TICKS - ticks);
-		graphics.text(this.font, (left + 19) / 20 + "s", x + 12, ay + 6, 0xFFA8A8B8);
+		graphics.text(this.font, (left + 19) / 20 + "s", x + 12, ay + 6, UiStyle.DIM);
 	}
 
 	private void boxing(GuiGraphicsExtractor graphics, int x, int ay) {
@@ -363,9 +406,9 @@ public class ZFighterDrillScreen extends Screen {
 			int color = prompt == 0 ? 0xFFFF6A50 : prompt == 1 ? 0xFF7CB0FF : 0xFF7CFF7C;
 			graphics.centeredText(this.font, Component.translatable("drill.jaymospowers.zfighter.box_" + key), this.width / 2, ay + ARENA_H / 2 - 4, color);
 			float left = 1.0F - (ticks - promptAt) / (float)BOX_WINDOW;
-			graphics.fill(x + W / 2 - 40, ay + ARENA_H / 2 + 10, x + W / 2 - 40 + Math.round(80 * left), ay + ARENA_H / 2 + 13, color);
+			UiStyle.bar(graphics, x + W / 2 - 40, ay + ARENA_H / 2 + 10, 80, 3, left, color);
 		}
-		graphics.text(this.font, prompts + "/" + COUNT, x + 12, ay + 6, 0xFFA8A8B8);
+		graphics.text(this.font, prompts + "/" + COUNT, x + 12, ay + 6, UiStyle.DIM);
 	}
 
 	private void precision(GuiGraphicsExtractor graphics, int x, int ay, float a) {
@@ -378,6 +421,6 @@ public class ZFighterDrillScreen extends Screen {
 			int inner = Math.max(1, size / 2);
 			graphics.fill(cx - inner, cy - inner, cx + inner, cy + inner, 0xFFFFFFFF);
 		}
-		graphics.text(this.font, targets + "/" + COUNT, x + 12, ay + 6, 0xFFA8A8B8);
+		graphics.text(this.font, targets + "/" + COUNT, x + 12, ay + 6, UiStyle.DIM);
 	}
 }
