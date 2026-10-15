@@ -165,3 +165,20 @@ Andy's follow-up (same day): sprinting keeps you a torso; Shift (fully mastered)
 longer sinks (hover moves along the look instead); Smoke users never take fall damage (hard landing: `SmokeMoves.LAND`,
 legs hidden a second, smoke spilled); the Smoke Jet hurts (`DAMAGE` every `HIT_EVERY`) and throws back harder
 (`PUSH`, `MOST`, `LIFT`); every move puts out double smoke (`SmokeField.MOVE_SMOKE`), with thicker client particles.
+
+## Lingering, ventilation and volume (0.11.58)
+Andy: "smoke should linger alot longer unless the area is ventilated then the smoke should continue to escape like it
+does now, only faster. right now people can escape the volume of smoke he can produce."
+- **Ventilation** (`SmokeField.ventilation`): each step a breadth-first pass from the smoke under the open sky (or in
+  a chimney vent, or beside an open block under the sky) gives every block of smoke its distance to a way out, through
+  fully open blocks only, up to 16. Closed doors, trapdoors, panes, fences and leaves don't ventilate (smoke still
+  seeps through them at their leak).
+- **Sealed** smoke (no way out within 16) fades at 0.03% + a flat 0.0003 a step (was 0.3% + 0.004): a thick room
+  stays thick for minutes instead of ~15 s. Past 36000 cells (was 24000) sealed smoke fades at the old rates, 3x.
+- **Ventilated** indoor smoke keeps the old fade and is also drawn 12% a step toward each neighbour nearer the way
+  out (`DRAUGHT`), so it streams out of doorways and windows. Under the sky it fades faster (0.011 a step, was 0.007)
+  and drifts more (16% downwind at full wind, was 12%).
+- **Volume**: every move pours 4x its own numbers (was 2x), Smokescreen pours 3 a tick (was 2) and opens with a
+  40-unit gout. A puff first fills everything in reach (up to 2400 blocks) to 1.0, thick enough to hide in, and only
+  then thickens toward the cap of 3, so clouds billow out about three times as wide at once. When more than 6000
+  blocks of smoke are near a player, the nearest are sent.
