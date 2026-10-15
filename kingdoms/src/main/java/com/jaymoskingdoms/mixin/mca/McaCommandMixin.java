@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * (0.5.21) MCA's Professions menu: its builder, farmer, miner and woodcutter buttons are the settlement's to answer ({@link McaCompat#promote}).
  * (0.5.29) And the main page's Quests button opens the villager's quests.
+ * (0.7.53) And Change Clothes asks a tailor for a fitting ({@link com.jaymoskingdoms.Tailors}).
  * (0.7.20) A villager whose tongue you don't speak ({@link Languages}) only does what needs no words ({@link Languages#SIMPLE_COMMANDS}).
  */
 @Mixin(VillagerCommandHandler.class)
@@ -33,6 +34,12 @@ abstract class McaCommandMixin extends EntityCommandHandler<VillagerEntityMCA> {
 		// (0.5.29) the main page's Quests button
 		if (command.equals("quests")) {
 			com.jaymoskingdoms.Quests.openLater(player, this.entity);
+			cir.setReturnValue(true);
+			return;
+		}
+		// (0.7.53) the Change Clothes button: a tailor's fitting
+		if (command.equals("tailor")) {
+			com.jaymoskingdoms.Tailors.ask(player, this.entity);
 			cir.setReturnValue(true);
 			return;
 		}
