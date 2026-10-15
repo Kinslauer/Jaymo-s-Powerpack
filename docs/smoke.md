@@ -150,7 +150,7 @@ Nothing explained in game (`SmokeSmog`).
   smoke where you aim (64 blocks) each second; 10 s calls `SkyCalm.touchdown`: a `TORNADO` under that supercell
   (marked spawned) or a lone one that wanders with the wind. `disaster_damage` still decides what it breaks.
 
-## Move poses and Vapour as a mode (0.11.5)
+## Move poses and Vapour as a mode (0.11.8)
 Andy: "smoke needs animations on every move" and "vapor mode should be toggleable, activating when you enter sprint, and
 maintains it's extreme speed, but you should still be able to hover and slow down".
 - `SmokeMoves` (server) puts the move being made on the synced `smoke_move` attachment; held moves drop when the move
