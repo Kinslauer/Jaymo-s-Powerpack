@@ -160,6 +160,14 @@ public final class Mastery {
 		addPoints(player, 1);
 	}
 
+	/** Practice away from the abilities (meditating, see {@link Meditate}): {@code amount} points, no rate limit. */
+	public static void practice(ServerPlayer player, int amount) {
+		if (unlocked(player) >= ALL || player.isCreative() || Powers.of(player) == null) {
+			return;
+		}
+		addPoints(player, amount);
+	}
+
 	static void forget(Player player) {
 		LAST_USE_CREDIT.remove(player.getUUID());
 	}

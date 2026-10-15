@@ -489,7 +489,7 @@ long-range barrage with a close grab. Not yet compiled or seen in game.
 - **Only loaded echoes count** toward the one-echo limit. An echo sitting in unloaded chunks far away isn't seen, so in
   that rare case a second one could be owed.
 
-## The future (0.10.103)
+## The future (0.10.106)
 
 Andy: "what if we made a new dimension, that was just this map, with feral zombies like the ones we made for corpses?
 I want to simulate going to the future in an apocalypse." The map is Los Perrito City by Uospag

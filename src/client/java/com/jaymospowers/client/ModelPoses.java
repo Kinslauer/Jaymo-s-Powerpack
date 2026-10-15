@@ -33,6 +33,7 @@ public final class ModelPoses {
 
 	public static void apply(Model<?> model, Object state) {
 		CrawlPose.applyModel(model, state);
+		MeditatePose.applyModel(model, state);
 		CarryPose.applyModel(model, state);
 		WindPose.applyModel(model, state);
 		ArsenalArmPose.applyModel(model, state);

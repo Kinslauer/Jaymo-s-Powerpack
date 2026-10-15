@@ -82,7 +82,7 @@ public final class PoseTakeover {
 	}
 
 	public static boolean posed(AvatarRenderState s) {
-		return s.getData(CrawlPose.KEY) != null || s.getData(FreefallPose.KEY) != null
+		return s.getData(CrawlPose.KEY) != null || s.getData(MeditatePose.KEY) != null || s.getData(FreefallPose.KEY) != null
 			|| s.getData(CarryPose.CARRIER_KEY) != null || s.getData(CarryPose.HELD_KEY) != null || s.getData(CarryPose.THROWN_KEY) != null
 			|| WindPose.posed(s)
 			|| s.getData(GravityWalkPose.KEY) != null || s.getData(GravityBoardPose.KEY) != null || s.getData(GravityKneelPose.KEY) != null

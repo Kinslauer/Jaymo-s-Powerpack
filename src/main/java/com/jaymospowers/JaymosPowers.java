@@ -25,6 +25,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.BlockCluster.register();
 		com.jaymospowers.core.Carry.init();
 		com.jaymospowers.core.Crawl.init();
+		com.jaymospowers.core.Meditate.init();
 		com.jaymospowers.core.FlightRoll.init();
 		com.jaymospowers.core.HiddenArmor.init();
 		com.jaymospowers.core.Dismember.init();
@@ -56,14 +57,14 @@ public class JaymosPowers implements ModInitializer {
 	 */
 	private static void registerAttachments() {
 		String[] holders = {
-			"core.Affinity", "core.BlockCluster", "core.Callings", "core.Carry", "core.CarryBlock", "core.Crawl", "core.Dismember", "core.FlightRoll", "core.Fate", "core.Fractures", "core.HiddenArmor", "core.Mastery", "core.Powers",
+			"core.Affinity", "core.BlockCluster", "core.Callings", "core.Carry", "core.CarryBlock", "core.Crawl", "core.Dismember", "core.FlightRoll", "core.Fate", "core.Fractures", "core.HiddenArmor", "core.Mastery", "core.Meditate", "core.Powers",
 			"power.arsenal.ArsenalArmory", "power.arsenal.ArsenalPower", "power.arsenal.ArsenalReach", "power.arsenal.ArsenalRelics",
 			"power.arsenal.ArsenalStash", "power.arsenal.ArsenalPocket", "power.arsenal.HundredBlades", "power.arsenal.ArsenalGates", "power.arsenal.ArsenalVoid",
 			"power.arsenal.ArsenalFlintlock", "power.arsenal.ArsenalDamocles", "power.arsenal.ArsenalCannons",
 			"power.chrono.ChronoEchoes", "power.chrono.ChronoMemory", "power.chrono.ChronoFlow", "power.chrono.future.Future", "power.chrono.future.FutureRuins", "power.wind.WindKick",
 			"power.gravity.GravityPower", "power.gravity.GravityForward", "power.gravity.GravityWalk",
 			"power.web.WebAscension", "power.web.WebCounter", "power.web.WebBehemoth", "power.web.WebInhabit", "power.web.WebSlam", "power.web.WebBridges", "power.web.WebPower", "power.web.WebSymbiote", "power.web.WebTendrils",
-			"power.web.WebWallRun", "power.web.WebParkour",
+			"power.web.WebWallRun", "power.web.WebParkour", "power.web.WebStrength",
 			"power.wind.WindModes", "power.wind.WindPower", "power.wind.WindStorm", "power.wind.WindTempest",
 			"power.wind.WindCyclone", "power.wind.WindJet",
 			"power.resonance.ResonancePower", "power.resonance.ResonanceHush",
