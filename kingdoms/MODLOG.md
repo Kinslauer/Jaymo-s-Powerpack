@@ -3117,7 +3117,7 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
 - **0.7.62, raiders leave fires burning:** (`Firefighting.ours`) raiders and war parties' soldiers (`Assault.attacker`)
   never fight fires, theirs or the town's, and no folk fights a fire on enemy land (`Assault.enemyLand`). The town's own
   villagers, folk and golems still do.
-- **0.7.63, the whole realm on alert in a war:** (`WarAlert`) from the day war is declared until peace, every realm on
+- **0.7.65, the whole realm on alert in a war:** (`WarAlert`) from the day war is declared until peace, every realm on
   either side (vassals and villages under them too) is on alert: the seat's bell peals, then tolls 3 strokes every
   2 minutes; once a war party musters against it (`WarParties.incoming`) the bell rings the alarm every 2 s (the real
   bell swung, so vanilla villagers hide too). Its villagers carry sandbags out (up to 4 at a time) and lay 5 walls of

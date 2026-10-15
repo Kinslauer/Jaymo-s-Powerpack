@@ -22,7 +22,7 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.MapColor;
 
 /**
- * (0.7.63) Sandbags: a block of burlap sacks laid in two courses, the top one set over the joints of the bottom, the
+ * (0.7.65) Sandbags: a block of burlap sacks laid in two courses, the top one set over the joints of the bottom, the
  * sacks lying along {@link #AXIS} (so a row of them reads as one wall). Players can make them (string and sand); a
  * realm at war puts them up round its seat ({@link WarAlert}), and those are {@link #RAISED}: the realm's own, taken
  * down again at peace, and they drop nothing.

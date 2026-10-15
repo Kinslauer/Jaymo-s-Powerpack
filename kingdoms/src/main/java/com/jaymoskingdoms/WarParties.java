@@ -155,7 +155,7 @@ final class WarParties {
 	}
 
 	/**
-	 * (0.7.63) Where a party marching on (or besieging) {@code faction} is: its lead, or its target's seat before it's
+	 * (0.7.65) Where a party marching on (or besieging) {@code faction} is: its lead, or its target's seat before it's
 	 * been seen; null if none is coming ({@link WarAlert}).
 	 */
 	static @Nullable BlockPos incoming(MinecraftServer server, int faction) {

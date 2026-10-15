@@ -44,7 +44,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.63) A realm at war is on alert, the whole of it (its vassals, and villages under it, too), from the day war is
+ * (0.7.65) A realm at war is on alert, the whole of it (its vassals, and villages under it, too), from the day war is
  * declared until peace:
  * <ul>
  * <li><b>Bells.</b> The seat's bell peals when war comes, and tolls now and then all through it. Once a war party

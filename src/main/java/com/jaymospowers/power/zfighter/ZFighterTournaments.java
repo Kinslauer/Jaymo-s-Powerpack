@@ -213,9 +213,13 @@ final class ZFighterTournaments {
 		if (current != null) {
 			return false;
 		}
-		double angle = level.getRandom().nextDouble() * Math.PI * 2.0;
-		BlockPos center = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-			seat.offset((int)(Math.cos(angle) * RING_OFFSET), 0, (int)(Math.sin(angle) * RING_OFFSET)));
+		// (0.11.71) a floor laid on the flattest plain ground near the seat (ZFighterArena); only if there's none, anywhere
+		BlockPos center = ZFighterArena.build(level, seat);
+		if (center == null) {
+			double angle = level.getRandom().nextDouble() * Math.PI * 2.0;
+			center = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+				seat.offset((int)(Math.cos(angle) * RING_OFFSET), 0, (int)(Math.sin(angle) * RING_OFFSET)));
+		}
 		current = new Tourney(level, kingdom, center, level.getGameTime() + SIGNUP_TICKS);
 		level.getServer().getPlayerList().broadcastSystemMessage(Component.translatable("message.jaymospowers.zfighter_tournament_open", kingdom,
 			center.getX(), center.getZ(), SIGNUP_TICKS / 1200).withStyle(ChatFormatting.GOLD), false);

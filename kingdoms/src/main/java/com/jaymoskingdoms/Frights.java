@@ -129,7 +129,7 @@ final class Frights {
 		flee(level, v, fright);
 	}
 
-	/** (0.7.63) It hides at {@code to} (its home) until {@code until}, as from a monster: a war party is coming ({@link WarAlert}). */
+	/** (0.7.65) It hides at {@code to} (its home) until {@code until}, as from a monster: a war party is coming ({@link WarAlert}). */
 	static void shelter(ServerLevel level, Villager v, BlockPos to, long until) {
 		Fright had = FRIGHTS.get(v.getUUID());
 		if (had != null && had.until() >= until) {

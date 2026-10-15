@@ -119,7 +119,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
 		LOGGER.debug("war attachment: {}", WarData.WARS);
 		Wars.register();
-		// 0.7.63: a realm at war is on alert: bells, sandbags round the seat, civilians hiding from a war party (and its attachment)
+		// 0.7.65: a realm at war is on alert: bells, sandbags round the seat, civilians hiding from a war party (and its attachment)
 		Sandbags.register();
 		LOGGER.debug("war alert attachment: {}", WarAlert.RAISED);
 		WarAlert.register();
