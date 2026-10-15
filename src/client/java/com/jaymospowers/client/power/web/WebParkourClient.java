@@ -178,6 +178,10 @@ final class WebParkourClient {
 	 * From a cling, holding forward climbs: more up, less out.
 	 */
 	private void tryWallJump(LocalPlayer player, Input input, @Nullable Direction from) {
+		if (from == null && !WebParkour.canWallJump(player)) {
+			// a free kick off a wall takes webbed fists (from a cling you already hold, you can always kick off)
+			return;
+		}
 		Direction face = from;
 		if (face == null) {
 			Direction facing = player.getDirection();

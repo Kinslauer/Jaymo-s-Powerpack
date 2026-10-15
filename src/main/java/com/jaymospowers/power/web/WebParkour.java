@@ -37,7 +37,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Wall cling:</b> in the air against a wall in front of you, hold Sneak to hang on it; A/D shimmy along, W climbs
  * (and pulls you over the top), let go of Sneak to drop. You hold on longer with mastery, then start to slip. It takes
  * webbed fists to start one (X; Sneak + X when bonded); in the symbiote's suit its tendrils hold you instead, and never slip.</li>
- * <li><b>Wall jump:</b> in the air against a wall (or clinging), Jump kicks you off it, up and away; holding forward
+ * <li><b>Wall jump:</b> in the air against a wall with webbed fists on (or clinging), Jump kicks you off it, up and away; holding forward
  * from a cling climbs instead, kicking up more than out. Each wall face once until you land, so two facing walls can be
  * climbed like a chimney.</li>
  * <li><b>Slide:</b> sprinting, press Sneak to drop into a slide that carries you on fast and low; Jump out of it keeps
@@ -129,6 +129,11 @@ public final class WebParkour {
 		return player.getAttached(WebStrength.FISTS) != null || WebSymbiote.suitShown(player);
 	}
 
+	/** A wall jump off a wall you aren't clinging to: only with webbed fists on. */
+	public static boolean canWallJump(net.minecraft.world.entity.player.Player player) {
+		return player.getAttached(WebStrength.FISTS) != null;
+	}
+
 	/** Clinging to a wall: the server lets them hang in the air. */
 	public static boolean clinging(ServerPlayer player) {
 		Doing doing = DOING.get(player.getUUID());
@@ -145,7 +150,7 @@ public final class WebParkour {
 		int kind = move.kind();
 		Direction side = move.face() >= 0 && move.face() < Direction.values().length ? Direction.from3DDataValue(move.face()) : null;
 		boolean wallMove = kind == CLING || kind == WALL_JUMP;
-		if (kind == CLING && !canCling(player)) {
+		if (kind == CLING && !canCling(player) || kind == WALL_JUMP && !canWallJump(player) && !clinging(player)) {
 			stop(player);
 			return;
 		}

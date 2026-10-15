@@ -57,8 +57,9 @@ final class CombatRollTaps {
 		if (sinceLastTap < Integer.MAX_VALUE) {
 			sinceLastTap++;
 		}
-		// Jump + Sneak held together is the crawl (CrawlTaps), not a roll
-		if (minecraft.options.keyJump.isDown()) {
+		// Jump + Sneak held together is the crawl (CrawlTaps), and double Sneak with two webs on small things is Web's yank: not a roll
+		if (minecraft.options.keyJump.isDown()
+			|| minecraft.player.tickCount - com.jaymospowers.client.power.web.WebSwing.reelReadyTick <= 1) {
 			sinceLastTap = Integer.MAX_VALUE;
 			sneakWasDown = sneak;
 			return;
