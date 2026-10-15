@@ -26,6 +26,10 @@ import org.jspecify.annotations.Nullable;
  * <li>V, Smoke Bomb ({@link SmokeBomb}): a thrown ball that bursts into a cloud.</li>
  * <li>B (hold), Smother ({@link SmokeSmother}): smoke wraps whoever you aim at; they're blinded, slowed and choke.</li>
  * <li>X (hold), Smoke Jet ({@link SmokeJet}): a jet of smoke where you look; it fills a ship's sails.</li>
+ * <li>Sneak + X, Smoke Step ({@link SmokeStep}): re-form inside one of your clouds under the crosshair.</li>
+ * <li>Z, Smoke Sight ({@link SmokeSight}): creatures in smoke are outlined through walls.</li>
+ * <li>Fully mastered, cruising in Vapour Form turns the whole body to smoke ({@link SmokeVapour#WHOLLY}): intangible.</li>
+ * <li>Mastered Smokescreen banks the cloud: it holds against the wind and fades slowly ({@code SmokeField.bank}).</li>
  * </ul>
  * You see through your own smoke (the client draws it faint and doesn't grey your view in it). The way in is a calling
  * ({@code core/Callings}): breathe the smoke of a fire (3 burning blocks or lit campfires round you) for a minute.
@@ -75,6 +79,7 @@ public final class SmokePower implements Power {
 		SmokeSmother.stop(player, false);
 		SmokeJet.stop(player);
 		SmokeVapour.end(player);
+		SmokeSight.off(player);
 		SmokeField.forget(player);
 		SmokeHeat.forget(player);
 	}
@@ -106,10 +111,17 @@ public final class SmokePower implements Power {
 		return PowerKey.ABILITY_1;
 	}
 
-	/** Nothing on Z yet; X (held) is the Smoke Jet ({@link SmokeJet}). */
+	/** Z is Smoke Sight (not for a fresh awakening); X (held) is the Smoke Jet, Sneak + X Smoke Step. */
 	@Override
 	public boolean slotUnlocked(Player player, String slot) {
-		return "special".equals(slot);
+		return "special".equals(slot) || "mode".equals(slot) && SmokeSight.unlocked(player);
+	}
+
+	@Override
+	public void onMode(ServerPlayer player, boolean down) {
+		if (down) {
+			SmokeSight.toggle(player);
+		}
 	}
 
 	@Override
@@ -129,10 +141,14 @@ public final class SmokePower implements Power {
 		SmokeVapour.tick(player);
 		SmokeSmother.tick(player);
 		SmokeJet.tick(player);
+		SmokeSight.tick(player);
 	}
 
 	@Override
 	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
+		if (down && key != PowerKey.ABILITY_1 && SmokeVapour.wholly(player)) {
+			return; // wholly smoke: nothing but landing
+		}
 		switch (key) {
 			case ABILITY_1 -> {
 				if (down) {

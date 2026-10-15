@@ -4,6 +4,7 @@ import com.jaymospowers.client.ScreenShake;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.power.smoke.SmokeVapour;
 import com.jaymospowers.power.wind.WindFlight;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -52,6 +53,8 @@ public final class SmokeFlightClient {
 
 	private static boolean flying;
 	private static boolean cruising;
+	/** Whether the server was last told this flier is wholly smoke. */
+	private static boolean wholeSent;
 	private static boolean formWas;
 	private static boolean sinkArmed;
 	private static Vec3 velocity = Vec3.ZERO;
@@ -83,6 +86,16 @@ public final class SmokeFlightClient {
 
 	/** Every client tick, from the power's own tick. */
 	static void tick(Minecraft minecraft, LocalPlayer player) {
+		fly(player);
+		// fully mastered, a cruise turns the whole body to smoke: the server is told when that starts and stops
+		boolean whole = cruising() && Mastery.unlocked(player) >= Mastery.ALL;
+		if (whole != wholeSent && ClientPlayNetworking.canSend(SmokeVapour.Whole.TYPE)) {
+			wholeSent = whole;
+			ClientPlayNetworking.send(new SmokeVapour.Whole(whole));
+		}
+	}
+
+	private static void fly(LocalPlayer player) {
 		ticks++;
 		boolean form = SmokeVapour.active(player);
 		if (form && !formWas) {
@@ -121,6 +134,7 @@ public final class SmokeFlightClient {
 	static void reset() {
 		land();
 		formWas = false;
+		wholeSent = false;
 	}
 
 	private static void takeOff(LocalPlayer player) {

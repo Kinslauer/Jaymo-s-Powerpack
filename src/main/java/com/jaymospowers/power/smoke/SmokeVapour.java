@@ -11,7 +11,14 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -54,6 +61,27 @@ public final class SmokeVapour {
 	public static final AttachmentType<Boolean> FORM = AttachmentRegistry.create(JaymosPowers.id("smoke_vapour"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 
+	/**
+	 * Fully mastered, cruising (Sprint) in Vapour Form turns the whole body to smoke: on a player who is, synced to
+	 * everyone (no body drawn, and blocks short of a full cube don't stop them on either side). Intangible: nothing hurts
+	 * them, shots and creatures pass through, and they can't attack or use abilities.
+	 */
+	public static final AttachmentType<Boolean> WHOLLY = AttachmentRegistry.create(JaymosPowers.id("smoke_wholly"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** Smoke a tick the whole smoke body pours out, on top of the trail. */
+	static final float WHOLLY_TRAIL = 0.5F;
+
+	/** Client → server: the local flier started ({@code on}) or stopped cruising, for the whole-body smoke. */
+	public record Whole(boolean on) implements CustomPacketPayload {
+		public static final Type<Whole> TYPE = new Type<>(JaymosPowers.id("smoke_wholly"));
+		public static final StreamCodec<ByteBuf, Whole> CODEC = ByteBufCodecs.BOOL.map(Whole::new, Whole::on);
+
+		@Override
+		public Type<Whole> type() {
+			return TYPE;
+		}
+	}
+
 	/** Each flier's last position and ticks on the ground. */
 	private static final Map<UUID, Vec3> LAST = new HashMap<>();
 	private static final Map<UUID, Integer> GROUNDED = new HashMap<>();
@@ -65,9 +93,16 @@ public final class SmokeVapour {
 	}
 
 	static void init() {
+		PayloadTypeRegistry.serverboundPlay().register(Whole.TYPE, Whole.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Whole.TYPE, (payload, ctx) -> setWhole(ctx.player(), payload.on()));
+		// wholly smoke can't strike anything
+		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> wholly(player) ? InteractionResult.FAIL : InteractionResult.PASS);
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
 			if (!(entity instanceof ServerPlayer player) || !active(player) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
 				return true;
+			}
+			if (wholly(player)) {
+				return false;
 			}
 			if (source.is(DamageTypeTags.IS_FALL)) {
 				return false;
@@ -87,6 +122,27 @@ public final class SmokeVapour {
 	/** In Vapour Form (both sides). */
 	public static boolean active(Player player) {
 		return player.getAttached(FORM) != null && Powers.has(player, SmokePower.INSTANCE);
+	}
+
+	/** Wholly smoke: in Vapour Form, fully mastered and cruising (both sides). */
+	public static boolean wholly(Player player) {
+		return player.getAttached(WHOLLY) != null && active(player);
+	}
+
+	/** From the client: cruising began or ended. Only a fully mastered flier in Vapour Form goes wholly to smoke. */
+	static void setWhole(ServerPlayer player, boolean on) {
+		boolean can = on && active(player) && SmokePower.mastered(player);
+		if (can == (player.getAttached(WHOLLY) != null)) {
+			return;
+		}
+		if (can) {
+			player.setAttached(WHOLLY, true);
+			Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
+			SmokeField.puff(player.level(), at, 3.0F, player);
+			player.level().playSound(null, at.x, at.y, at.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.6F, 0.4F);
+		} else {
+			player.removeAttached(WHOLLY);
+		}
 	}
 
 	/** R: into Vapour Form, or back out of it. */
@@ -135,6 +191,14 @@ public final class SmokeVapour {
 		}
 		player.resetFallDistance();
 		handBackArmour(player);
+		if (player.getAttached(WHOLLY) != null) {
+			if (!SmokePower.mastered(player)) {
+				player.removeAttached(WHOLLY);
+			} else {
+				// the whole body pours, head to the waist too
+				SmokeField.puff(level, player.position().add(0.0, player.getBbHeight() * 0.6, 0.0), WHOLLY_TRAIL, player);
+			}
+		}
 		Vec3 now = player.position();
 		Vec3 last = LAST.put(id, now);
 		double moved = last == null ? 0.0 : Math.min(4.0, now.distanceTo(last));
@@ -193,6 +257,9 @@ public final class SmokeVapour {
 		LAST.remove(player.getUUID());
 		GROUNDED.remove(player.getUUID());
 		WORN.remove(player.getUUID());
+		if (player.getAttached(WHOLLY) != null) {
+			player.removeAttached(WHOLLY);
+		}
 		if (player.getAttached(FORM) == null) {
 			return;
 		}
