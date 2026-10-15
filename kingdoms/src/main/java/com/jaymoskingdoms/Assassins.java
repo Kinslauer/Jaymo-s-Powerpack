@@ -403,12 +403,8 @@ final class Assassins {
 					continue;
 				}
 				Villager v = near.get(random.nextInt(near.size()));
+				// said aloud over the villager's head only: no copy in chat, so it's easy to miss
 				Speech.say(level, v, line, Speech.WHITE, 8.0);
-				player.sendSystemMessage(Component.translatable("assassin.jaymoskingdoms.whispers", v.getDisplayName(), line)
-					.withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
-				if (c.realm() >= 0) {
-					player.sendSystemMessage(Component.translatable("assassin.jaymoskingdoms.whisper.hint").withStyle(ChatFormatting.DARK_GRAY));
-				}
 				HEARD.computeIfAbsent(player.getUUID(), id -> new HashSet<>()).add(c.target());
 			}
 		}
@@ -579,9 +575,8 @@ final class Assassins {
 				if (victim instanceof ServerPlayer player && !p.sensed) {
 					double range = Skills.of(player).level(Skills.Pillar.STEALTH) >= ROGUE_SENSE_LEVEL ? ROGUE_FEEL_RANGE : FEEL_RANGE;
 					if (a.distanceTo(player) <= range) {
+						// only a sound to go on, no words on screen
 						p.sensed = true;
-						player.sendOverlayMessage(Component.translatable(range > FEEL_RANGE ? "assassin.jaymoskingdoms.sense.rogue" : "assassin.jaymoskingdoms.sense")
-							.withStyle(ChatFormatting.DARK_RED));
 						level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMBIENT_CAVE.value(), SoundSource.HOSTILE, 0.6F, 1.4F);
 					}
 				}

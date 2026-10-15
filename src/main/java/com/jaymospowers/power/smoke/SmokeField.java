@@ -1,6 +1,7 @@
 package com.jaymospowers.power.smoke;
 
 import com.jaymospowers.core.Powers;
+import it.unimi.dsi.fastutil.longs.Long2ByteOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2FloatMap;
 import it.unimi.dsi.fastutil.longs.Long2FloatOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
@@ -59,20 +60,39 @@ public final class SmokeField {
 	static final float MIN = 0.03F;
 	/** The most smoke one block holds; more spills into the blocks around it. */
 	static final float CAP = 3.0F;
-	/** Every Smoke user's move puts out this many times the smoke its own numbers say (Andy: double, 2026-10-15). */
-	static final float MOVE_SMOKE = 2.0F;
+	/**
+	 * Every Smoke user's move puts out this many times the smoke its own numbers say (Andy: double, 2026-10-15; then
+	 * "far more overwhelming" so people can't just walk out of it, 2026-10-15: 4).
+	 */
+	static final float MOVE_SMOKE = 4.0F;
+	/** A puff fills the blocks around it this thick first (enough to hide in), then tops them up toward {@link #CAP}. */
+	static final float BILLOW = 1.0F;
+	/** How many blocks one puff may reach out to fill. */
+	static final int PUFF_REACH = 2400;
 	/** Share of a block's smoke that climbs into the block above each step. */
 	static final float RISE = 0.2F;
 	/** Share of the difference that flows to a thinner neighbour beside it, and below it, each step. */
 	static final float SPREAD = 0.1F;
 	static final float SINK = 0.035F;
-	/** Lost each step: a share, plus a little more indoors, more under the sky, a lot in the rain. */
+	/**
+	 * Lost each step: a share, plus a little more indoors, more under the sky, a lot in the rain. Smoke in a sealed space
+	 * (no open way out within {@link #VENT_REACH} blocks) barely fades at all: it lingers for minutes (Andy, 2026-10-15).
+	 */
 	static final float FADE = 0.003F;
 	static final float DECAY = 0.004F;
-	static final float OPEN_DECAY = 0.007F;
+	static final float OPEN_DECAY = 0.011F;
 	static final float RAIN_DECAY = 0.035F;
+	static final float SEALED_FADE = 0.0003F;
+	static final float SEALED_DECAY = 0.0003F;
+	/**
+	 * Ventilation: indoor smoke within this many blocks (through open blocks) of the open sky, a vent or an open block
+	 * under the sky counts as ventilated, and each step this share of it is drawn toward each neighbour nearer the way out.
+	 * Closed doors, trapdoors, panes and the like don't ventilate (smoke still seeps through them slowly).
+	 */
+	static final int VENT_REACH = 16;
+	static final float DRAUGHT = 0.12F;
 	/** Share carried downwind each step under the sky, at full wind. */
-	static final float DRIFT = 0.12F;
+	static final float DRIFT = 0.16F;
 	/** How much gets through a part block (doors, slabs, fences, bars), and through leaves. */
 	static final float LEAK = 0.25F;
 	static final float LEAVES = 0.5F;
@@ -89,7 +109,7 @@ public final class SmokeField {
 	static final int HOT = 3;
 	static final int FILTER = 4;
 	/** Cells kept per dimension; past this it fades three times as fast until it's back under. */
-	static final int MAX_CELLS = 24000;
+	static final int MAX_CELLS = 36000;
 	/** Smoke this thick at your head hides you; the line between two pairs of eyes is blocked by this much in all. */
 	public static final float THICK = 0.5F;
 	static final float SIGHT_BLOCKED = 1.6F;
@@ -298,27 +318,40 @@ public final class SmokeField {
 		long first = start.asLong();
 		queue.enqueue(first);
 		seen.add(first);
+		// first everything in reach gets thick enough to hide in, so a big pour billows out wide at once; what's left
+		// then thickens the cloud from the middle out
+		it.unimi.dsi.fastutil.longs.LongArrayList filled = new it.unimi.dsi.fastutil.longs.LongArrayList();
 		float left = amount;
-		while (left > 0.0F && !queue.isEmpty() && seen.size() < 600) {
+		while (left > 0.0F && !queue.isEmpty()) {
 			long key = queue.dequeueLong();
-			float now = field.density.get(key);
-			float room = CAP - now;
-			if (room > 0.0F) {
-				float put = Math.min(room, left);
-				field.density.put(key, now + put);
-				field.soot.put(key, (field.soot.get(key) * now + soot * put) / (now + put));
-				if (ownerId != 0 || now < put) {
-					field.owner.put(key, ownerId);
-				}
-				left -= put;
-			}
+			filled.add(key);
+			left = fill(field, key, BILLOW, left, ownerId, soot);
 			for (Direction direction : Direction.values()) {
 				long next = BlockPos.offset(key, direction);
-				if (seen.add(next) && leak(level, BlockPos.of(next)) > 0.0F) {
+				if (seen.size() < PUFF_REACH && seen.add(next) && leak(level, BlockPos.of(next)) > 0.0F) {
 					queue.enqueue(next);
 				}
 			}
 		}
+		for (int i = 0; i < filled.size() && left > 0.0F; i++) {
+			left = fill(field, filled.getLong(i), CAP, left, ownerId, soot);
+		}
+	}
+
+	/** Fills the block {@code key} up to {@code upTo} from {@code left}; returns what's left. */
+	private static float fill(Field field, long key, float upTo, float left, int ownerId, float soot) {
+		float now = field.density.get(key);
+		float room = upTo - now;
+		if (room <= 0.0F) {
+			return left;
+		}
+		float put = Math.min(room, left);
+		field.density.put(key, now + put);
+		field.soot.put(key, (field.soot.get(key) * now + soot * put) / (now + put));
+		if (ownerId != 0 || now < put) {
+			field.owner.put(key, ownerId);
+		}
+		return left - put;
 	}
 
 	/** Blows the smoke within {@code radius} of {@code at} away along {@code push} (blocks; its length is how far). */
@@ -486,7 +519,9 @@ public final class SmokeField {
 		Long2FloatOpenHashMap cells = new Long2FloatOpenHashMap(from.size() * 3);
 		cells.defaultReturnValue(-1.0F);
 		BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
-		// up, the five other sides and two downwind: eight at most
+		Long2ByteOpenHashMap skies = new Long2ByteOpenHashMap(from.size() * 2);
+		Long2IntOpenHashMap vent = ventilation(level, from, cells, skies, cursor);
+		// up, the five other sides, two downwind and the draught toward the way out (onto those six): eight at most
 		long[] to = new long[8];
 		float[] flow = new float[8];
 		int[] kinds = new int[8];
@@ -499,7 +534,9 @@ public final class SmokeField {
 			}
 			boolean duct = kindOf(here) == CONDUIT;
 			cursor.set(key);
-			boolean open = !duct && level.canSeeSky(cursor);
+			boolean open = !duct && sky(level, skies, key, cursor);
+			// how far (blocks) the way out is; -1 when there's none near: sealed in, it lingers
+			int out = vent.get(key);
 			int owner = field.owner.get(key);
 			// a banked cloud (mastered Smokescreen) fades slower and the wind leaves it be
 			boolean banked = owner != 0 && !BANKED.isEmpty() && BANKED.containsKey(owner);
@@ -509,8 +546,9 @@ public final class SmokeField {
 			// a cloudshaper's cloud isn't washed out by the rain at all
 			boolean cloud = !smog && owner != 0 && !CLOUD.isEmpty() && CLOUD.containsKey(owner);
 			float rain = cloud ? 0.0F : RAIN_DECAY * (smog ? SMOG_RAIN : 1.0F);
-			float decay = DECAY + (open ? OPEN_DECAY + (level.isRainingAt(cursor) ? rain : 0.0F) : 0.0F);
-			float keep = d * (1.0F - FADE * scaleHere) - decay * scaleHere;
+			boolean sealed = out < 0 && !open && !duct && !field.crowded;
+			float decay = sealed ? SEALED_DECAY : DECAY + (open ? OPEN_DECAY + (level.isRainingAt(cursor.set(key)) ? rain : 0.0F) : 0.0F);
+			float keep = d * (1.0F - (sealed ? SEALED_FADE : FADE) * scaleHere) - decay * scaleHere;
 			if (keep <= 0.0F) {
 				continue;
 			}
@@ -558,6 +596,32 @@ public final class SmokeField {
 					flow[n++] = keep * DRIFT * Math.abs(windZ) * open(cellZ);
 				}
 			}
+			// ventilated: drawn toward the way out (onto the flows already headed that way, or as new ones)
+			if (out > 0 && !duct) {
+				for (Direction direction : Direction.values()) {
+					long side = BlockPos.offset(key, direction);
+					float cell = cellAt(level, cells, side, cursor);
+					if (open(cell) < 1.0F || kindOf(cell) == CONDUIT) {
+						continue;
+					}
+					int there = vent.containsKey(side) ? vent.get(side) : sky(level, skies, side, cursor) ? 0 : -1;
+					if (there < 0 || there >= out) {
+						continue;
+					}
+					float draught = keep * DRAUGHT;
+					int at = 0;
+					while (at < n && to[at] != side) {
+						at++;
+					}
+					if (at < n) {
+						flow[at] += draught;
+					} else if (n < to.length) {
+						to[n] = side;
+						kinds[n] = kindOf(cell);
+						flow[n++] = draught;
+					}
+				}
+			}
 			float total = 0.0F;
 			for (int i = 0; i < n; i++) {
 				total += flow[i];
@@ -590,6 +654,71 @@ public final class SmokeField {
 		field.owner = owners;
 		field.soot = soots;
 		field.crowded = next.size() > MAX_CELLS;
+	}
+
+	/**
+	 * How far (blocks, through fully open blocks holding smoke) each block of smoke is from a way out: 0 under the open
+	 * sky or in a chimney vent, 1 beside an open block under the sky, and so on up to {@link #VENT_REACH}. Blocks with
+	 * no way out that near are missing (sealed in).
+	 */
+	private static Long2IntOpenHashMap ventilation(ServerLevel level, Long2FloatOpenHashMap smoke, Long2FloatOpenHashMap cells,
+			Long2ByteOpenHashMap skies, BlockPos.MutableBlockPos cursor) {
+		Long2IntOpenHashMap dist = new Long2IntOpenHashMap(smoke.size() * 2);
+		dist.defaultReturnValue(-1);
+		LongArrayFIFOQueue queue = new LongArrayFIFOQueue();
+		// open to the sky first, then beside it, so the layers come off the queue in order
+		for (long key : smoke.keySet()) {
+			float here = cellAt(level, cells, key, cursor);
+			int kind = kindOf(here);
+			if (here > 0.0F && (kind == VENT || kind != CONDUIT && sky(level, skies, key, cursor))) {
+				dist.put(key, 0);
+				queue.enqueue(key);
+			}
+		}
+		for (long key : smoke.keySet()) {
+			float here = cellAt(level, cells, key, cursor);
+			if (here <= 0.0F || dist.containsKey(key) || open(here) < 1.0F || kindOf(here) == CONDUIT) {
+				continue;
+			}
+			for (Direction direction : Direction.values()) {
+				long side = BlockPos.offset(key, direction);
+				float cell = cellAt(level, cells, side, cursor);
+				if (open(cell) >= 1.0F && kindOf(cell) != CONDUIT && !smoke.containsKey(side) && sky(level, skies, side, cursor)) {
+					dist.put(key, 1);
+					queue.enqueue(key);
+					break;
+				}
+			}
+		}
+		while (!queue.isEmpty()) {
+			long key = queue.dequeueLong();
+			int d = dist.get(key);
+			if (d >= VENT_REACH) {
+				continue;
+			}
+			for (Direction direction : Direction.values()) {
+				long side = BlockPos.offset(key, direction);
+				if (!smoke.containsKey(side) || dist.containsKey(side)) {
+					continue;
+				}
+				float cell = cellAt(level, cells, side, cursor);
+				if (open(cell) >= 1.0F && kindOf(cell) != CONDUIT) {
+					dist.put(side, d + 1);
+					queue.enqueue(side);
+				}
+			}
+		}
+		return dist;
+	}
+
+	/** Whether the block {@code key} is under the open sky (cached for the step). */
+	private static boolean sky(Level level, Long2ByteOpenHashMap cache, long key, BlockPos.MutableBlockPos cursor) {
+		byte known = cache.getOrDefault(key, (byte)-1);
+		if (known < 0) {
+			known = (byte)(level.canSeeSky(cursor.set(key)) ? 1 : 0);
+			cache.put(key, known);
+		}
+		return known == 1;
 	}
 
 	/** The leak (0-1) part of a {@link #cell} value. */
@@ -662,10 +791,13 @@ public final class SmokeField {
 				if (Math.abs(BlockPos.getX(key) - ox) <= SYNC_RANGE && Math.abs(BlockPos.getY(key) - oy) <= SYNC_RANGE
 					&& Math.abs(BlockPos.getZ(key) - oz) <= SYNC_RANGE) {
 					cells.add(key);
-					if (cells.size() >= SYNC_MAX) {
-						break;
-					}
 				}
+			}
+			if (cells.size() > SYNC_MAX) {
+				// too much to send: the nearest first
+				cells.sort(java.util.Comparator.comparingInt(key -> Math.abs(BlockPos.getX(key) - ox) + Math.abs(BlockPos.getY(key) - oy)
+					+ Math.abs(BlockPos.getZ(key) - oz)));
+				cells.subList(SYNC_MAX, cells.size()).clear();
 			}
 		}
 		if (cells.isEmpty()) {

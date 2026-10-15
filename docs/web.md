@@ -56,7 +56,7 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   every slam throws block dust, smoke and a heavy mace thud, and shakes you, the one slammed and anyone within 12.
   Bosses can't be whipped; Living Armor's tendrils keep their own Sneak grab. `COOLDOWN` 20 ticks after one ends.
 
-## Weapon arm, counter animations, hulking big body (0.11.57)
+## Weapon arm, counter animations, hulking big body (0.11.62)
 - **Weapon arm (`WebMorph`):** in the suit or big body, with an empty main hand, left click morphs the arm into a
   random weapon (never the same twice running, arms alternate) and strikes what you aim at within `REACH` 6:
   - Mace (blunt): `DAMAGE` 10, `hurtArmor` x`ARMOR_WEAR` 4, breaks a bone `MACE_BREAK` 35% (shatters skeletons), slams back.
@@ -120,7 +120,7 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   while it roars), a frenzy under half health (lashes twice as often, x1.4, 18% snatch and hurl), and under a quarter
   the Shroud (5 s unseen, Regeneration III, Speed, a leap away) once a minute.
 - **Suits under Fresh Animations:** while the plain suit, the big body or its growth shows, `PoseTakeover.posed` pauses
-  EMF/FA so the suit models line up with the body. Since 0.11.57 the big body is its own hulking model
+  EMF/FA so the suit models line up with the body. Since 0.11.62 the big body is its own hulking model
   (`WebHulk`, see below); MCA player models hide their own skin, clothes and hair layers under it.
 - **Into the big body:** the bulk takes 3 s (`WebSuitGrowth.BULK_TICKS` 60): doubled over in pain, clutching the
   middle, spasming, knees buckling, head hanging and jerking (`WebFeral.agony`), then up into a deeper feral idle

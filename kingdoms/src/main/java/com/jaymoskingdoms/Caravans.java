@@ -92,8 +92,6 @@ final class Caravans {
 	static final long LONGEST = 24000L * 2;
 	/** Reputation: a cart broken open by a player (with the fiefdom, and its overlord). */
 	static final int REP_ROB = -60;
-	/** Players this close to either seat hear of it. */
-	static final double TELL_RANGE = 96.0;
 
 	static final String TAG = "jaymoskingdoms.caravan", TAG_OF = "jaymoskingdoms.caravan_of.";
 	/** A caravan folk's task. */
@@ -284,8 +282,6 @@ final class Caravans {
 		Map<String, Long> next = new HashMap<>(l.next());
 		next.put(Integer.toString(f.id()), now + CARAVAN_TICKS);
 		save(server, new Ledger(all, next, l.pending(), id + 1));
-		tell(level, f.seat(), Component.translatable("message.jaymoskingdoms.caravan.sets_out", f.name(), carts.size(), lord.name(), load)
-			.withStyle(ChatFormatting.GOLD));
 		JaymosKingdoms.LOGGER.info("{} sends a caravan of {} carts ({} goods) to {}", f.name(), carts.size(), load, lord.name());
 		if (level.isPositionEntityTicking(c.at())) {
 			appear(level, c);
@@ -455,8 +451,6 @@ final class Caravans {
 					deliver(level, lord, cart);
 				}
 				Treasuries.dues(server, lord, load);
-				tell(level, lord.seat(), Component.translatable("message.jaymoskingdoms.caravan.arrives", nameOf(server, c.home()), lord.name(), load)
-					.withStyle(ChatFormatting.GOLD));
 			}
 			List<Map<String, Integer>> back = List.of();
 			Focus.Kind focus = home == null ? null : Focus.of(server, home);
@@ -535,10 +529,6 @@ final class Caravans {
 			// home: the carters see to their horses, the guards go back to their posts
 			vanish(level, c);
 			remove(server, c, now + CARAVAN_TICKS);
-			Faction home = Factions.get(server, c.home());
-			if (home != null) {
-				tell(level, home.seat(), Component.translatable("message.jaymoskingdoms.caravan.home", home.name()).withStyle(ChatFormatting.GOLD));
-			}
 			return;
 		}
 		put(server, turned);
@@ -856,10 +846,6 @@ final class Caravans {
 		MinecraftServer server = level.getServer();
 		vanish(level, c);
 		remove(server, c, level.getGameTime() + CARAVAN_TICKS);
-		Faction home = Factions.get(server, c.home());
-		if (home != null) {
-			tell(level, home.seat(), Component.translatable("message.jaymoskingdoms.caravan.lost", home.name()).withStyle(ChatFormatting.RED));
-		}
 		JaymosKingdoms.LOGGER.info("The caravan from {} was lost on the road", nameOf(server, c.home()));
 	}
 
@@ -1039,15 +1025,6 @@ final class Caravans {
 		}
 	}
 
-	// ---- telling ----------------------------------------------------------------------------------------------------
-
-	private static void tell(ServerLevel level, BlockPos near, Component message) {
-		for (ServerPlayer p : level.players()) {
-			if (p.blockPosition().closerThan(near, TELL_RANGE)) {
-				p.sendSystemMessage(message);
-			}
-		}
-	}
 
 	private static void poof(ServerLevel level, Entity e) {
 		level.sendParticles(ParticleTypes.POOF, e.getX(), e.getY() + 1.0, e.getZ(), 10, 0.4, 0.5, 0.4, 0.02);

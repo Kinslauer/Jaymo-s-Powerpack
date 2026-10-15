@@ -516,7 +516,7 @@ Outside the island (x -3584..5631, z -3584..3583) is the map's own flat sea (sam
 chunks are DataVersion 3120 (1.19.2) though CurseForge tags it 26.3; vanilla upgrades each on first load, so a chunk's
 first visit is slower. Not playtested in-game yet.
 
-## 0.11.57: Overclock's speed-force streak, run and glyphs
+## 0.11.62: Overclock's speed-force streak, run and glyphs
 
 Andy asked for the comic-book speedster look on V (the idea only: built from scratch, nothing taken from any other mod).
 While Overclock runs and you're moving fast, every client draws it, because the server now syncs a `chrono_flash`
