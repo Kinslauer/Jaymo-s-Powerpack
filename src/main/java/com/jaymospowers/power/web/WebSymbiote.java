@@ -111,7 +111,8 @@ public final class WebSymbiote {
 	/**
 	 * Living Armor: put on, it can be put away again after {@code ARMOR_TOGGLE_GAP}; without the suit it withdraws
 	 * after {@code ARMOR_IDLE_TICKS} of no use (nothing held, struck, swung or torn), and it never stays out longer
-	 * than {@code ARMOR_MAX_TICKS}. Its cooldown ({@code COOLDOWN[ARMOR]}) starts when it withdraws, as Shroud's starts
+	 * than {@code ARMOR_MAX_TICKS} (the bond whole, it stays until you put it away). Wall Crawl rides on it: when it
+	 * withdraws (or is put away), Wall Crawl switches off too. Its cooldown ({@code COOLDOWN[ARMOR]}) starts when it withdraws, as Shroud's starts
 	 * when Shroud ends.
 	 */
 	public static final int ARMOR_TOGGLE_GAP = 10, ARMOR_IDLE_TICKS = 100, ARMOR_MAX_TICKS = 1200;
@@ -898,7 +899,12 @@ public final class WebSymbiote {
 	}
 
 	private static void set(ServerPlayer player, WebSymbioteState state) {
-		if (!state.equals(player.getAttached(STATE))) {
+		WebSymbioteState was = player.getAttached(STATE);
+		// Wall Crawl's tendrils go with Living Armor: when it withdraws (or is put away), the crawl ends too
+		if (was != null && was.has(WebSymbioteState.ARMOR) && !state.has(WebSymbioteState.ARMOR) && state.has(WebSymbioteState.CRAWL)) {
+			state = state.withFlag(WebSymbioteState.CRAWL, false);
+		}
+		if (!state.equals(was)) {
 			player.setAttached(STATE, state);
 		}
 	}
@@ -1087,7 +1093,7 @@ public final class WebSymbiote {
 			}
 			// (the bond whole, Living Armor is the big body you drive: it stays until you put it away)
 			boolean idle = !next.has(WebSymbioteState.SUIT) && next.bond() < BOND_MAX && now - live.armorUsedAt > ARMOR_IDLE_TICKS;
-			if (idle || now - live.armorOnAt > ARMOR_MAX_TICKS) {
+			if (idle || now - live.armorOnAt > ARMOR_MAX_TICKS && next.bond() < BOND_MAX) {
 				next = next.withFlag(WebSymbioteState.ARMOR, false);
 				armor = next.has(WebSymbioteState.BULK);
 				live.armorOnAt = 0L;
