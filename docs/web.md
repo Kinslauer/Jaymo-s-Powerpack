@@ -93,6 +93,12 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   walk. When the tendrils draw back in (Wall Crawl or Living Armor ending), they go the suit's way: strands pour over the
   body and coil round each part, then unwind into the chest (`WebSuitWrapLayer.retract`, `RETRACT_WRAP` 0.45, over
   `WebSymbioteClient.WITHDRAW_TICKS` 40).
+- **Hunger takeovers (0.11.83):** hungry (satiety under `WebSymbiote.HUNGRY_HUNT_BELOW` 45), each feeding check (every
+  `SELF_FEED_EVERY` 20 ticks, off the takeover cooldown) has `HUNGRY_HUNT_CHANCE` 8% that it takes the wheel, hunts the
+  nearest creature, eats it and lets go: strictly to feed, never a player. In a low mood (stress at `LOW_MOOD_STRESS` 60+)
+  it's a spree instead: after eating it keeps killing creature after creature (`spreeOn`) until you break free or nothing
+  is left near. A spree can always be fought (`SPREE_BREAK_FREE` 80 presses if you couldn't break a hold yet; synced
+  `SPREE` attachment).
 - **Slam latch (0.11.83):** with Wall Crawl on, pressing Sneak against a wall slams both tendrils into it at once (no
   reach first; the wall cracks at both bites), throws you at it (`WebSymbioteClient.LATCH_SLAM` 0.35, lifted
   `LATCH_LIFT` 0.3 off the ground) and pins you for `LATCH_HOLD_TICKS` 8. Once a tendril has bitten the wall, the
