@@ -46,6 +46,10 @@ dependencies {
 	localRuntime "maven.modrinth:better-combat:8Vyq1h9a"
 	localRuntime "maven.modrinth:player-animation-library:xJ30QmpE"
 	localRuntime "maven.modrinth:cloth-config:26.3.158+fabric"
+	// Entity Model Features (LGPL; EmfWornPose): our worn models (Armory pieces, wizard hats) take the body's Fresh
+	// Animations pose from it when it's loaded. Compiled against (the same versions as Powers' pack), never required.
+	compileOnly "maven.modrinth:entity-model-features:N7d5LddE"
+	compileOnly "maven.modrinth:entitytexturefeatures:O8J3sxxp"
 	// Cooking for Blockheads (and Balm, which it needs): its fruit baskets and tool racks are displays (Displays), looked
 	// up by name only; in the dev game to see them (the same versions as Powers' pack)
 	localRuntime "maven.modrinth:balm:26.3.0.3+fabric-26.3"
