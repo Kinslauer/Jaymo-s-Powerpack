@@ -3,6 +3,7 @@ package com.jaymospowers.power.web;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -40,17 +41,33 @@ public final class WebAnchors {
 	 */
 	public static final double ENTITY_RANGE = 32.0;
 	public static final double ENTITY_MAGNET = 2.0;
+	/** A dropped item only catches a web aimed right at it (this close to the crosshair's line), so loot on the floor doesn't steal swings. */
+	public static final double ITEM_MAGNET = 0.6;
 
 	private WebAnchors() {
 	}
 
-	/** Something a swing web can stick to: a living creature or player (not you, your mount or a spectator), or a corpse. */
+	/** Something a swing web can stick to: a living creature or player (not you, your mount or a spectator), a dropped item, or a corpse. */
 	public static boolean webbable(Player player, @Nullable Entity entity) {
 		if (entity == null || entity == player || !entity.isAlive() || entity.isSpectator() || entity == player.getVehicle()
 			|| player.hasPassenger(entity) || entity.isPassengerOfSameVehicle(player)) {
 			return false;
 		}
-		return entity instanceof LivingEntity || com.jaymospowers.power.gravity.GravityPower.isCorpse(entity);
+		return entity instanceof LivingEntity || entity instanceof ItemEntity || com.jaymospowers.power.gravity.GravityPower.isCorpse(entity);
+	}
+
+	/**
+	 * Small enough to reel in with both webs on it and Sneak held: a dropped item, or a creature or corpse no bigger
+	 * than {@link WebPower#REEL_MAX_SIZE} (a pig, a chicken, a child; not a grown villager or another player). Both sides.
+	 */
+	public static boolean reelable(@Nullable Entity entity) {
+		if (entity == null || entity instanceof Player) {
+			return false;
+		}
+		if (entity instanceof ItemEntity) {
+			return true;
+		}
+		return !KitchenCompat.isHeavy(entity) && entity.getBbWidth() * entity.getBbHeight() <= WebPower.REEL_MAX_SIZE;
 	}
 
 	/**
@@ -74,7 +91,7 @@ public final class WebAnchors {
 			}
 			// how far its middle is off the line, less its own size: a big creature is easier to hit
 			double off = middle.distanceTo(eye.add(look.scale(along))) - Math.min(e.getBbWidth(), e.getBbHeight()) * 0.5;
-			if (off > ENTITY_MAGNET) {
+			if (off > (e instanceof ItemEntity ? ITEM_MAGNET : ENTITY_MAGNET)) {
 				continue;
 			}
 			// nearest the line first, then nearest you

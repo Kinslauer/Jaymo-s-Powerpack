@@ -65,7 +65,7 @@ public final class PoseTakeover {
 	}
 
 	/**
-	 * (0.11.41) Drawing a bow, loading or aiming a crossbow, or raising a trident: the game's own arm pose. Fresh
+	 * (0.11.43) Drawing a bow, loading or aiming a crossbow, or raising a trident: the game's own arm pose. Fresh
 	 * Animations only takes these up when the arms sit at exactly the game's angles, and here (the villager body, our
 	 * tweaks over the arms) they don't, so it held the arms down by the sides and the bow was drawn and loosed unseen.
 	 */

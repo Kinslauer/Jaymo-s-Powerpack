@@ -69,7 +69,11 @@ public final class ChronoFlowClient {
 		ClientTickEvents.START_CLIENT_TICK.register(minecraft -> {
 			view(minecraft);
 			LocalPlayer player = minecraft.player;
-			if (player == null || !ChronoFlow.on(player) || minecraft.gui.screen() != null || player.isShiftKeyDown()) {
+			if (player == null || !ChronoFlow.on(player) || minecraft.gui.screen() != null) {
+				return;
+			}
+			spaceCounter(minecraft, player);
+			if (player.isShiftKeyDown()) {
 				return;
 			}
 			// right click is the counter: always sent (mid-move it answers a blow held on you); the guard is only shown when free
@@ -92,6 +96,50 @@ public final class ChronoFlowClient {
 			counterMotion(minecraft);
 			barrageMotion(minecraft);
 		});
+	}
+
+	/** (0.11.40) Until then, Space follows the Space counter with the time stop. */
+	private static long followUntil = Long.MIN_VALUE;
+
+	/**
+	 * (0.11.40) Space while the cue is open (a blow passed through you): the Space counter, a spinning kick. Space again
+	 * while it plays or just after: the time stop, if a roll charge is left (with none, a dull click and an ordinary jump).
+	 */
+	private static void spaceCounter(Minecraft minecraft, LocalPlayer player) {
+		long now = player.level().getGameTime();
+		boolean cue = ChronoSpaceCue.open(player, 0.0F) >= 0.0F;
+		boolean follow = now < followUntil;
+		if (!cue && !follow) {
+			return;
+		}
+		boolean pressed = false;
+		while (minecraft.options.keyJump.consumeClick()) {
+			pressed = true;
+		}
+		if (!pressed) {
+			return;
+		}
+		if (cue) {
+			minecraft.options.keyJump.setDown(false);
+			ClientPlayNetworking.send(new ChronoFlow.Spin());
+			local = new ChronoFlow.Move(ChronoFlow.SPIN, now, -1, 1);
+			followUntil = now + local.duration() + ChronoFlow.FOLLOW_TICKS;
+		} else {
+			Integer charges = player.getAttached(ChronoFlow.CHARGES);
+			if (charges == null || charges <= 0) {
+				minecraft.getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
+					net.minecraft.sounds.SoundEvents.COMPARATOR_CLICK, 0.6F, 0.5F));
+				return;
+			}
+			minecraft.options.keyJump.setDown(false);
+			ClientPlayNetworking.send(new ChronoFlow.TimeStop());
+			local = new ChronoFlow.Move(ChronoFlow.PUSH, now, -1, 1);
+			followUntil = Long.MIN_VALUE;
+		}
+		busyUntil = now + local.duration();
+		counter = null;
+		barrage = null;
+		dashTicks = 0;
 	}
 
 	/** Time Flow holds the view over your shoulder; when it ends, the view you had comes back. */
@@ -138,7 +186,8 @@ public final class ChronoFlowClient {
 			return;
 		}
 		ChronoFlow.Move move = player.getAttached(ChronoFlow.MOVE);
-		boolean locks = move != null && (move.style() == ChronoFlow.BARRAGE || move.style() == ChronoFlow.COUNTER && move.target() >= 0);
+		boolean locks = move != null && (move.style() == ChronoFlow.BARRAGE || move.style() == ChronoFlow.SPIN || move.style() == ChronoFlow.PUSH
+			|| move.style() == ChronoFlow.COUNTER && move.target() >= 0);
 		if (barrage != null && (move == null || move.start() != barrage.start())) {
 			barrage = null; // ended early, or broken off by a counter
 		}
@@ -152,7 +201,9 @@ public final class ChronoFlowClient {
 		if (local != null && local.style() == ChronoFlow.COUNTER) {
 			local = null; // the server's counter replaces the raised guard
 		}
-		if (move.style() == ChronoFlow.BARRAGE) {
+		if (move.style() == ChronoFlow.SPIN || move.style() == ChronoFlow.PUSH) {
+			counter = null; // the spinning kick and the time stop stand their ground
+		} else if (move.style() == ChronoFlow.BARRAGE) {
 			barrage = move;
 		} else if (move.variant() != ChronoFlow.CROWD) {
 			counter = move;
@@ -360,8 +411,20 @@ public final class ChronoFlowClient {
 		return best;
 	}
 
-	/** The combo count, big and gold, over the crosshair. */
+	/** The combo count, big and gold, over the crosshair; under it, the roll charges left (0.11.40). */
 	static void renderHud(GuiGraphicsExtractor graphics, LocalPlayer player) {
+		ChronoSpaceCue.renderHud(graphics, player);
+		Integer charges = player.getAttached(ChronoFlow.CHARGES);
+		if (charges != null && ChronoFlow.on(player)) {
+			int cx = graphics.guiWidth() / 2;
+			int y = graphics.guiHeight() / 2 + 14;
+			for (int i = 0; i < ChronoFlow.ROLL_CHARGES; i++) {
+				int x = cx + (i - 1) * 8;
+				boolean full = i < charges;
+				graphics.fill(x - 2, y - 2, x + 3, y + 3, full ? 0xC0F2C14E : 0x50000000);
+				graphics.fill(x - 1, y - 1, x + 2, y + 2, full ? 0xFFFFE08A : 0x60FFFFFF);
+			}
+		}
 		Integer combo = player.getAttached(ChronoFlow.COMBO);
 		if (combo == null || combo < 2 || !ChronoFlow.on(player)) {
 			return;
