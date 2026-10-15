@@ -3002,7 +3002,7 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
   bypasses invulnerability, like the void), and mobs within 32 that go for them are called off every 10 ticks. MCA
   makes them invisible during its screen too.
 
-## 0.7.46: village life (pack 0.11.2)
+## 0.7.46: village life (pack 0.11.4)
 - Andy: add Village Life's features (CurseForge `villagelife`, VillageLife+, Forge 1.20.1) to our systems. It's All
   Rights Reserved, so these are our own remakes of the ideas. Already covered and skipped: names and family surnames,
   partners and children, moods, per-player reputation, profession/time-of-day talk (MCA); routines, children trailing
