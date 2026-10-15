@@ -1266,3 +1266,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Time Bloom (B) runs, every living thing within 5 blocks of you (players, villagers, animals, monsters; not armour
   stands) mends the same `BLOOM_HEAL` every `BLOOM_HEAL_EVERY` ticks you do (`ChronoPower.bloomHealNearby`,
   `BLOOM_HEAL_RADIUS`).
+- **0.11.26, lanterns stay in the offhand:** a lantern held in the offhand (for LambDynamicLights' light) was set down
+  whenever a right click had no use in the main hand. Lanterns (`minecraft:lanterns`: plain, soul, every copper one) are
+  now only placed from the main hand (`core/OffhandLanterns`).
