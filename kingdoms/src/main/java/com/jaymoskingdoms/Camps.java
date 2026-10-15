@@ -135,6 +135,10 @@ public final class Camps {
 			return OrcCamps.KIND.equals(this.kind);
 		}
 
+		boolean pirate() {
+			return PirateCoves.KIND.equals(this.kind);
+		}
+
 		CampData withLastRaid(long at) {
 			return new CampData(this.center, this.gate, this.founded, at, this.lastDay, this.clearedAt, this.rot, this.lastRot, this.pending,
 				this.kind, this.built, this.grown);
@@ -193,6 +197,8 @@ public final class Camps {
 		Goblins.init();
 		// 0.5.45: orc war camps
 		Orcs.init();
+		// 0.7.42: pirate coves and the sailors of the kingdoms
+		Pirates.init();
 		CampBuildings.registerCatalogue();
 		ServerTickEvents.END_SERVER_TICK.register(Camps::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
@@ -201,11 +207,13 @@ public final class Camps {
 			GoblinVillages.clear();
 			OrcCamps.clear();
 			Orcs.clear();
+			PirateCoves.clear();
+			Pirates.clear();
 		});
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> Raids.loaded(entity));
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof Folk folk && folk.level() instanceof ServerLevel level) {
-				if (folk.role() == Folk.CHIEF || folk.role() == Goblins.KING || folk.role() == Orcs.WARCHIEF) {
+				if (folk.role() == Folk.CHIEF || folk.role() == Goblins.KING || folk.role() == Orcs.WARCHIEF || Pirates.isCoveCaptain(folk)) {
 					chiefSlain(level, folk, folk.factionId(), source);
 				} else if (Goblins.isGoblin(folk)) {
 					Goblins.died(level, folk, source);
@@ -261,6 +269,10 @@ public final class Camps {
 
 	static boolean orc(MinecraftServer server, int id) {
 		return OrcCamps.KIND.equals(kind(server, id));
+	}
+
+	static boolean pirate(MinecraftServer server, int id) {
+		return PirateCoves.KIND.equals(kind(server, id));
 	}
 
 	static void noteRaid(MinecraftServer server, int id, long at) {
@@ -362,6 +374,12 @@ public final class Camps {
 				&& random.nextFloat() < OrcCamps.CAMP_CHANCE && trySite(server, level, realm, players, OrcCamps.KIND)) {
 				return;
 			}
+			// (0.7.42) a pirate cove, on the coast near a coastal kingdom
+			if (level.getDifficulty() != Difficulty.PEACEFUL && campsNear(server, realm, PirateCoves.KIND) < PirateCoves.COVES_PER_KINGDOM
+				&& random.nextFloat() < PirateCoves.COVE_CHANCE && PirateCoves.coastal(level, realm)
+				&& trySite(server, level, realm, players, PirateCoves.KIND)) {
+				return;
+			}
 		}
 	}
 
@@ -374,6 +392,7 @@ public final class Camps {
 	/** Looks for a site for a camp round the players near {@code realm}, and founds one there. */
 	private static boolean trySite(MinecraftServer server, ServerLevel level, Faction realm, List<ServerPlayer> players, String kind) {
 		boolean illager = IllagerCamps.KIND.equals(kind), goblin = GoblinVillages.KIND.equals(kind), orc = OrcCamps.KIND.equals(kind);
+		boolean pirate = PirateCoves.KIND.equals(kind);
 		RandomSource random = level.getRandom();
 		for (int tries = 0; tries < SITE_TRIES; tries++) {
 			ServerPlayer player = players.get(random.nextInt(players.size()));
@@ -382,17 +401,21 @@ public final class Camps {
 			BlockPos at = player.blockPosition().offset((int)Math.round(Math.cos(angle) * r), 0, (int)Math.round(Math.sin(angle) * r));
 			double d = Math.sqrt(Raids.horizontal(at, realm.seat()));
 			if (d < MIN_DISTANCE || d > MAX_DISTANCE || !open(server, level, at) || (illager && !IllagerCamps.land(level, at))
-				|| (goblin && !GoblinVillages.land(level, at)) || (orc && !OrcCamps.land(level, at))) {
+				|| (goblin && !GoblinVillages.land(level, at)) || (orc && !OrcCamps.land(level, at)) || (pirate && !PirateCoves.land(level, at))) {
 				continue;
 			}
-			int floor = orc ? IllagerBuildings.floor(level, at, OrcCamps.MAX_SPREAD, OrcBuildings.CLEAR_RADIUS)
+			int floor = pirate ? IllagerBuildings.floor(level, at, PirateCoves.MAX_SPREAD, PirateCoves.RADIUS) : orc ? IllagerBuildings.floor(level, at, OrcCamps.MAX_SPREAD, OrcBuildings.CLEAR_RADIUS)
 				: goblin ? IllagerBuildings.floor(level, at, GoblinVillages.MAX_SPREAD, GoblinBuildings.CLEAR_RADIUS)
 				: illager ? IllagerBuildings.floor(level, at, IllagerCamps.MAX_SPREAD) : CampBuildings.floor(level, at, MAX_SPREAD);
 			if (floor == Integer.MIN_VALUE) {
 				continue;
 			}
 			Direction gate = Direction.getApproximateNearest(realm.seat().getX() - at.getX(), 0, realm.seat().getZ() - at.getZ());
-			if (orc) {
+			if (pirate) {
+				if (PirateCoves.found(level, at, floor) == null) {
+					continue;
+				}
+			} else if (orc) {
 				OrcCamps.found(level, at, floor, gate);
 			} else if (goblin) {
 				GoblinVillages.found(level, at, floor, gate);
@@ -485,6 +508,12 @@ public final class Camps {
 				if (grown != null && fresh != null) {
 					OrcCamps.tick(level, grown, fresh, false);
 				}
+			} else if (data.pirate()) {
+				Faction grown = Factions.get(server, id);
+				CampData fresh = data(server, id);
+				if (grown != null && fresh != null) {
+					PirateCoves.tick(level, grown, fresh, false);
+				}
 			}
 		}
 	}
@@ -502,6 +531,10 @@ public final class Camps {
 		}
 		if (orc(server, camp.id())) {
 			OrcCamps.grow(level, camp, days);
+			return;
+		}
+		if (pirate(server, camp.id())) {
+			PirateCoves.grow(level, camp, days);
 			return;
 		}
 		Palette p = CampBuildings.palette(level, camp);
@@ -584,7 +617,8 @@ public final class Camps {
 			return;
 		}
 		boolean illagers = illager(server, camp.id()), goblins = goblin(server, camp.id()), orcs = orc(server, camp.id());
-		String cleared = orcs ? "orc_camp" : goblins ? "goblin_village" : illagers ? "illager_camp" : "camp";
+		boolean pirates = pirate(server, camp.id());
+		String cleared = pirates ? "pirate_cove" : orcs ? "orc_camp" : goblins ? "goblin_village" : illagers ? "illager_camp" : "camp";
 		ServerPlayer killer = source.getEntity() instanceof ServerPlayer p ? p : null;
 		KingdomEvents.announce(server, Component.translatable("message.jaymoskingdoms." + cleared + ".cleared",
 			camp.name(),
@@ -607,7 +641,7 @@ public final class Camps {
 		}
 		Raids.scatter(level, camp.id());
 		for (Folk folk : level.getEntitiesOfClass(Folk.class, new AABB(camp.seat()).inflate(SCATTER_RANGE),
-			f -> f.factionId() == camp.id() && f != chief && f.isAlive())) {
+			f -> f.factionId() == camp.id() && f != chief && f.isAlive() && !Corsairs.isCrew(f))) {
 			if (folk.isCarrying()) {
 				folk.spawnAtLocation(level, folk.takeCarried());
 			}
@@ -625,13 +659,13 @@ public final class Camps {
 		CampData data = data(server, camp.id());
 		BlockPos center = data != null ? data.center() : camp.seat();
 		List<Long> rot = new ArrayList<>();
-		int reach = orcs ? OrcBuildings.CLEAR_RADIUS : goblins ? GoblinBuildings.CLEAR_RADIUS : illagers ? IllagerBuildings.CLEAR_RADIUS : CampBuildings.CLEAR_RADIUS;
-		int high = orcs ? OrcBuildings.CLEAR_HEIGHT : goblins ? GoblinBuildings.CLEAR_HEIGHT : illagers ? IllagerBuildings.CLEAR_HEIGHT : 8;
+		int reach = pirates ? PirateCoves.RADIUS + 1 : orcs ? OrcBuildings.CLEAR_RADIUS : goblins ? GoblinBuildings.CLEAR_RADIUS : illagers ? IllagerBuildings.CLEAR_RADIUS : CampBuildings.CLEAR_RADIUS;
+		int high = pirates ? PirateCoves.CLEAR_HEIGHT : orcs ? OrcBuildings.CLEAR_HEIGHT : goblins ? GoblinBuildings.CLEAR_HEIGHT : illagers ? IllagerBuildings.CLEAR_HEIGHT : 8;
 		// (a camp in a Grim ruin leaves the ruin as it stands: nothing of it rots)
 		Holds.Hold held = Holds.get(server, camp.id());
 		boolean grim = held != null && held.isGrim();
 		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-reach, -1, -reach), center.offset(reach, high, reach))) {
-			if (!grim && level.isLoaded(pos) && perishable(goblins, orcs, level.getBlockState(pos))) {
+			if (!grim && level.isLoaded(pos) && (pirates ? PirateCoves.perishable(level.getBlockState(pos)) : perishable(goblins, orcs, level.getBlockState(pos)))) {
 				rot.add(pos.asLong());
 			}
 		}
@@ -662,7 +696,7 @@ public final class Camps {
 				continue;
 			}
 			left.remove(pick);
-			if (perishable(data.goblin(), data.orc(), state)) {
+			if (data.pirate() ? PirateCoves.perishable(state) : perishable(data.goblin(), data.orc(), state)) {
 				level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 			}
 		}
@@ -683,7 +717,8 @@ public final class Camps {
 				.then(Commands.literal("barbarian").executes(c -> foundHere(c, BARBARIAN)))
 				.then(Commands.literal("illager").executes(c -> foundHere(c, IllagerCamps.KIND)))
 				.then(Commands.literal("goblin").executes(c -> foundHere(c, GoblinVillages.KIND)))
-				.then(Commands.literal("orc").executes(c -> foundHere(c, OrcCamps.KIND))))
+				.then(Commands.literal("orc").executes(c -> foundHere(c, OrcCamps.KIND)))
+				.then(Commands.literal("pirate").executes(c -> foundHere(c, PirateCoves.KIND))))
 			.then(Commands.literal("raid").executes(Camps::raidNow))
 			.then(Commands.literal("grow").executes(Camps::growNow))
 			.then(Commands.literal("info").executes(Camps::info));
@@ -698,6 +733,15 @@ public final class Camps {
 			return 0;
 		}
 		BlockPos at = player.blockPosition();
+		if (PirateCoves.KIND.equals(kind)) {
+			Faction cove = PirateCoves.found(level, at, at.getY());
+			if (cove == null) {
+				c.getSource().sendFailure(Component.literal("No open sea within " + PirateCoves.SEA_REACH + " blocks for a pirate cove's ship"));
+				return 0;
+			}
+			c.getSource().sendSuccess(() -> Component.literal("Founded the pirate cove of " + cove.name()), true);
+			return 1;
+		}
 		Faction camp = OrcCamps.KIND.equals(kind) ? OrcCamps.found(level, at, at.getY(), player.getDirection())
 			: GoblinVillages.KIND.equals(kind) ? GoblinVillages.found(level, at, at.getY(), player.getDirection())
 			: illager ? IllagerCamps.found(level, at, at.getY(), player.getDirection()) : found(level, at, at.getY(), player.getDirection());
@@ -772,9 +816,16 @@ public final class Camps {
 				OrcCamps.tick(level, Factions.get(server, camp.id()), data, true);
 			}
 		}
+		if (pirate(server, camp.id())) {
+			// (and its ship put out again now, if she's lost)
+			CampData data = data(server, camp.id());
+			if (data != null) {
+				PirateCoves.tick(level, Factions.get(server, camp.id()), data, true);
+			}
+		}
 		Faction after = Factions.get(server, camp.id());
 		int fighters = illagers ? Illagers.fighters(after) : goblin(server, camp.id()) ? GoblinVillages.goblins(after)
-			: orc(server, camp.id()) ? OrcCamps.fighters(after) : after.holdings().count(Folk.BARBARIAN);
+			: orc(server, camp.id()) ? OrcCamps.fighters(after) : pirate(server, camp.id()) ? PirateCoves.fighters(after) : after.holdings().count(Folk.BARBARIAN);
 		c.getSource().sendSuccess(() -> Component.literal(camp.name() + " grew a day (" + fighters + (illagers ? " illagers)" : " raiders)")), true);
 		return 1;
 	}

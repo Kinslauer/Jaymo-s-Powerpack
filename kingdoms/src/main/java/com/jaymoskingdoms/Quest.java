@@ -35,6 +35,11 @@ public record Quest(String id, int kind, String template, Giver giver, Objective
 	 * giver lies in wait (pos). other: the enemy, otherName: their name.
 	 */
 	public static final int GRUDGE = 13;
+	/**
+	 * (0.7.42) Sailing ({@link Navies}): see a merchantman from the giver's harbour safely into another realm's (target
+	 * {@code faction:<id>}, pos its mooring, place its name; spawned: she's sailed, other: her).
+	 */
+	public static final int ESCORT = 14;
 
 	/** Who asked: their UUID and name, their settlement, whether it's its king, and their trade (a profession's path). */
 	public record Giver(UUID uuid, String name, int faction, boolean king, String job) {

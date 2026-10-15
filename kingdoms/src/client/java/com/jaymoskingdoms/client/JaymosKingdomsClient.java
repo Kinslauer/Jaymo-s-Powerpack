@@ -43,6 +43,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		GoblinSkins.register();
 		// 0.5.45: orcs
 		OrcSkins.register();
+		// (0.7.42) pirates and the kingdoms' sailors
+		PirateSkins.register();
 		// 0.5.37: the casters
 		SorcerySkins.register();
 		com.jaymoskingdoms.client.lootgoblins.LootGoblinRenderer.register();

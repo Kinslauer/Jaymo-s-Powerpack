@@ -2908,3 +2908,35 @@ moon and back on at dawn (`DarkNights`), but without the "A dark night: shaders 
   counts them); in creative she's built exactly as drawn (sneak for the bare frames). The plans are kept, so one design
   can be laid again and again; rename them on an anvil. `ShipKits.lay`/`room` now take any design.
 - A wrecked ship's blocks go down solid ones first, so the torches and lanterns hung on them don't pop off.
+
+## 0.7.42: sailing, stage 3: pirates and navies (pack 0.10.129)
+Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.md`, all our own designs and art.
+- **Crewed ships.** A `Crew` (`sailing/Crew`, saved on the ship) is who sails her: pirate, navy or merchant, her
+  faction, name, captain, home, where she's bound, which gunner serves which gun, and each player's share of her hold.
+  Her crew are `Folk` riding her at their stations (`Ship.SEAT`, synced; up to 24); her captain at the helm drives the
+  same input a player would (`Ship.Captaincy`, `Corsairs`). Ships are built from our own designs (`Fleet`: sloop,
+  brigantine, a three-masted 8-gun frigate, a gunless cog) out of sight and cast off at once.
+- **Captains** (`Corsairs`): keep a lookout, chase, come about to bring a broadside to bear, sheer off when close,
+  steer round land (probes ahead, swings, backs off when embayed), row when head to wind. Pirates attack any ship
+  that isn't a pirate's (players' too); warships attack pirates and players their realm counts hostile; merchantmen
+  run. Gunners lay their own guns with lead and elevation for range, reload (faster with a powder monkey), and shoot
+  pistols at boarders. Kill the captain and she drifts (and a player can take her wheel); kill the gunners too and the
+  hold opens, Lootr-style, a share per player. A ship that founders takes her crew down; sinking a realm's ship
+  costs reputation with it.
+- **Pirates** (`Pirates`, roles 70-75): captain (boss, cutlass and pistol, tricorn), gunner, deckhand, powder monkey,
+  plus the kingdoms' shipwright and sea captain. Skins by `tools/gen_pirates.py`. Pistols use WeaponMod bullets when
+  loaded, else arrows.
+- **Pirate coves** (`PirateCoves`, camp kind `pirate`): on a coast near a coastal kingdom; a tarred shack over the
+  hoard, a jetty, a black flag, deckhands round the fire; their ship's captain is the cove's leader, so killing him
+  (or sinking her with him aboard) clears the cove. A lost ship is rebuilt after two days. Landing parties raid only
+  coastal settlements, and the ship stands off the landing while they're ashore.
+- **Navies** (`Navies`): a coastal realm with 1000+ emeralds builds a pier from its nearest shore (only over open
+  ground and water), a shipwright, and a warship crewed by its guards under a sea captain, rebuilt two days after a
+  loss. Merchantmen sail to the nearest friendly harbour (one out at a time); arriving, they pay both realms and
+  carry goods into the other's storage (caravans by sea).
+- **Quests:** "The Pirates of X" (a king's camp quest on the cove's captain) and **escort** (`Quest.ESCORT`): go to
+  the king's harbour and a merchantman sails with you; she arrives, it's done; she sinks, it fails.
+- **Treasure wrecks** (`TreasureWrecks`): pirate holds may carry a Pirate's Chart (a real map with an X on ocean); the
+  wreck is laid on the seabed when you come near, chests full of treasure (a chest buried if the X is on land).
+  Rarely, sailing the open ocean, you happen on one nobody charted.
+- Ops: `/kingdom camp found pirate`, `/kingdom fleet harbour | navy | merchant | pirate | wreck | chart | info`.

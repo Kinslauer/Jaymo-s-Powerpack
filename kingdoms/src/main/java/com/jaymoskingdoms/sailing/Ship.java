@@ -126,6 +126,31 @@ public final class Ship extends Entity {
 
 	public static final AttachmentType<List<Piece>> PIECES = AttachmentRegistry.create(JaymosKingdoms.id("ship_pieces"),
 		builder -> builder.syncWith(Piece.STREAM_CODEC.apply(ByteBufCodecs.list()), AttachmentSyncPredicate.all()));
+	/**
+	 * (0.7.42) Where one of a ship's crew stands aboard her, in her frame (set on the crewman, kept and sent to everyone):
+	 * crewmen ride the ship, each at their station, so they stay at their guns and the helm wherever she sails.
+	 */
+	public static final AttachmentType<Vec3> SEAT = AttachmentRegistry.create(JaymosKingdoms.id("ship_seat"),
+		builder -> builder.persistent(Vec3.CODEC).syncWith(Vec3.STREAM_CODEC, AttachmentSyncPredicate.all()));
+	/** (0.7.42) The most crew aboard one ship. */
+	public static final int MOST_CREW = 24;
+
+	/**
+	 * (0.7.42) What sails a crewed ship ({@link Crew}) when no player is at her wheel: Jaymo's Kingdoms' pirates, navies and
+	 * merchantmen ({@code com.jaymoskingdoms.Corsairs}). Called on the server only.
+	 */
+	public interface Captaincy {
+		/** Her helm this tick (as a player's keys would set it), or null if nobody is steering her (her captain is gone). */
+		@Nullable Input helm(ServerLevel level, Ship ship, Crew crew);
+
+		/** She's going down, holed by {@code by} (her crew go down with her). */
+		void foundering(ServerLevel level, Ship ship, Crew crew, @Nullable Entity by);
+
+		/** {@code player} opens her hold: per player, what's theirs to take (null: it isn't theirs yet, and they're told why). */
+		@Nullable Container hold(ServerLevel level, Ship ship, Crew crew, ServerPlayer player);
+	}
+
+	public static @Nullable Captaincy captaincy;
 
 	public static EntityType<Ship> TYPE;
 	/** The client's part each tick (carrying you with the deck), set by the client. */
@@ -156,6 +181,11 @@ public final class Ship extends Entity {
 	private final Map<Integer, BlockEntity> cargo = new HashMap<>();
 	private final Map<Integer, CompoundTag> cargoTags = new HashMap<>();
 	private boolean registered;
+	/** (0.7.42) Her crew, if she has one (a pirate, a navy's warship, a merchantman); null for a ship players built and sail. */
+	public @Nullable Crew crew;
+	/** (0.7.42) Server: who last holed her, and how fast she's moving over the ground (blocks a tick, x and z). */
+	private java.util.@Nullable UUID holedBy;
+	private Vec3 drift = Vec3.ZERO;
 	/** Client: how far it heels over in its turns (degrees, now and last tick). */
 	public float heel, heelO;
 
@@ -238,9 +268,17 @@ public final class Ship extends Entity {
 	 * as a ship, with them at the wheel. Tells them why if it can't.
 	 */
 	static void castOff(ServerLevel level, BlockPos helm, ServerPlayer player) {
+		castOff(level, helm, player, null);
+	}
+
+	/**
+	 * (0.7.42) Casts off the hull whose helm is at {@code helm}, with {@code player} at the wheel, or with nobody (a crewed
+	 * ship: {@code crew}, launched by {@link Fleet}). The ship, or null (and {@code player} is told why) if it can't.
+	 */
+	static @Nullable Ship castOff(ServerLevel level, BlockPos helm, @Nullable ServerPlayer player, @Nullable Crew crew) {
 		BlockState helmState = level.getBlockState(helm);
 		if (!(helmState.getBlock() instanceof HelmBlock)) {
-			return;
+			return null;
 		}
 		// every block joined to the helm (water and loose plants are where the hull ends)
 		List<BlockPos> found = new ArrayList<>();
@@ -253,8 +291,8 @@ public final class Ship extends Entity {
 			BlockPos p = open.poll();
 			found.add(p);
 			if (found.size() > MOST_BLOCKS) {
-				player.sendOverlayMessage(Component.translatable("ship.jaymoskingdoms.too_big", MOST_BLOCKS));
-				return;
+				tell(player, Component.translatable("ship.jaymoskingdoms.too_big", MOST_BLOCKS));
+				return null;
 			}
 			x0 = Math.min(x0, p.getX());
 			x1 = Math.max(x1, p.getX());
@@ -263,19 +301,19 @@ public final class Ship extends Entity {
 			z0 = Math.min(z0, p.getZ());
 			z1 = Math.max(z1, p.getZ());
 			if (x1 - x0 >= LONGEST || y1 - y0 >= LONGEST || z1 - z0 >= LONGEST) {
-				player.sendOverlayMessage(Component.translatable("ship.jaymoskingdoms.too_long", LONGEST));
-				return;
+				tell(player, Component.translatable("ship.jaymoskingdoms.too_long", LONGEST));
+				return null;
 			}
 			for (Direction d : Direction.values()) {
 				BlockPos q = p.relative(d);
 				if (seen.add(q.asLong()) && part(level.getBlockState(q))) {
 					if (level.getBlockState(q).getBlock() instanceof ShipFrameBlock) {
-						player.sendOverlayMessage(Component.translatable("ship.jaymoskingdoms.finish_frame"));
-						return;
+						tell(player, Component.translatable("ship.jaymoskingdoms.finish_frame"));
+						return null;
 					}
 					if (level.getBlockState(q).getDestroySpeed(level, q) < 0.0F) {
-						player.sendOverlayMessage(Component.translatable("ship.jaymoskingdoms.land"));
-						return;
+						tell(player, Component.translatable("ship.jaymoskingdoms.land"));
+						return null;
 					}
 					open.add(q);
 				}
@@ -300,8 +338,8 @@ public final class Ship extends Entity {
 			}
 		}
 		if (!wetKeel || sea == Integer.MIN_VALUE) {
-			player.sendOverlayMessage(Component.translatable("ship.jaymoskingdoms.not_afloat"));
-			return;
+			tell(player, Component.translatable("ship.jaymoskingdoms.not_afloat"));
+			return null;
 		}
 		// into its own frame: the helm's facing becomes forward (+z)
 		Direction facing = helmState.getValue(HelmBlock.FACING);
@@ -345,8 +383,8 @@ public final class Ship extends Entity {
 		}
 		Hull hull = new Hull(List.copyOf(pieces));
 		if (!hull.floats) {
-			player.sendOverlayMessage(Component.translatable("ship.jaymoskingdoms.too_heavy"));
-			return;
+			tell(player, Component.translatable("ship.jaymoskingdoms.too_heavy"));
+			return null;
 		}
 		Ship ship = new Ship(TYPE, level);
 		ship.setAttached(PIECES, hull.pieces);
@@ -354,6 +392,7 @@ public final class Ship extends Entity {
 		ship.cargoTags.putAll(tags);
 		ship.loadCargo(level);
 		ship.snapTo(origin.getX() + 0.5, origin.getY() + keel, origin.getZ() + 0.5, facing.toYRot(), 0.0F);
+		ship.crew = crew;
 		// the blocks leave the world: water fills in below the sea's level, air above (the dry hold too)
 		BlockState water = Blocks.WATER.defaultBlockState(), air = Blocks.AIR.defaultBlockState();
 		int quiet = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_SUPPRESS_DROPS | Block.UPDATE_SKIP_BLOCK_ENTITY_SIDEEFFECTS;
@@ -369,9 +408,18 @@ public final class Ship extends Entity {
 			}
 		}
 		level.addFreshEntity(ship);
-		player.startRiding(ship);
-		level.playSound(null, helm, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.0F, 0.6F);
-		level.playSound(null, helm, SoundEvents.BOAT_PADDLE_WATER, SoundSource.BLOCKS, 1.4F, 0.7F);
+		if (player != null) {
+			player.startRiding(ship);
+			level.playSound(null, helm, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.0F, 0.6F);
+			level.playSound(null, helm, SoundEvents.BOAT_PADDLE_WATER, SoundSource.BLOCKS, 1.4F, 0.7F);
+		}
+		return ship;
+	}
+
+	private static void tell(@Nullable ServerPlayer player, Component message) {
+		if (player != null) {
+			player.sendOverlayMessage(message);
+		}
 	}
 
 	/** Whether a block found joined to a helm is part of the ship: anything solid enough, not the sea and its weeds. */
@@ -412,8 +460,11 @@ public final class Ship extends Entity {
 		}
 		Vec3 from = this.position();
 		float yawFrom = this.getYRot();
-		ServerPlayer pilot = this.getFirstPassenger() instanceof ServerPlayer p ? p : null;
-		Input input = pilot != null ? pilot.getLastClientInput() : Input.EMPTY;
+		ServerPlayer pilot = this.pilot();
+		// (0.7.42) a crewed ship with nobody at her wheel is sailed by her captain, if she still has one
+		Input steered = pilot == null && this.crew != null && captaincy != null ? captaincy.helm(level, this, this.crew) : null;
+		Input input = pilot != null ? pilot.getLastClientInput() : steered != null ? steered : Input.EMPTY;
+		boolean helmed = pilot != null || steered != null;
 		boolean sails = h.sails > 0, oars = h.oars > 0;
 		// the sails (W/S), the oars (W/S with no sails; Space with them, S astern once they're furled) and the rudder
 		int row = 0;
@@ -432,7 +483,7 @@ public final class Ship extends Entity {
 			this.sail = 0.0;
 			row = input.forward() ? 1 : input.backward() ? -1 : 0;
 		}
-		if (pilot == null) {
+		if (!helmed) {
 			this.sail = Math.max(0.0, this.sail - SAIL_RATE);
 			row = 0;
 		}
@@ -493,6 +544,7 @@ public final class Ship extends Entity {
 		}
 		this.setYRot(yaw);
 		this.setPos(to);
+		this.drift = to.subtract(from);
 		this.carry(level, h, from, yawFrom);
 		this.shine(level, h);
 		// the wake and the creak of her timbers
@@ -506,8 +558,8 @@ public final class Ship extends Entity {
 		if (pilot != null && this.tickCount % 10 == 0) {
 			pilot.sendOverlayMessage(this.readout(level, h, row, sails ? top : oars ? rowTop : PADDLE));
 		}
-		// with no one aboard a while, it anchors itself
-		boolean manned = pilot != null;
+		// with no one aboard a while, it anchors itself (not a crewed ship under way: her captain keeps her at sea)
+		boolean manned = helmed;
 		for (Player p : level.players()) {
 			manned |= this.aboard(this.toLocal(p.position()), 1.0);
 		}
@@ -640,6 +692,49 @@ public final class Ship extends Entity {
 
 	// ---- the helm ----
 
+	/** (0.7.42) The player at her wheel (null: none; a crewed ship's captain steers her without being one). */
+	public @Nullable ServerPlayer pilot() {
+		for (Entity e : this.getPassengers()) {
+			if (e instanceof ServerPlayer p) {
+				return p;
+			}
+		}
+		return null;
+	}
+
+	/** (0.7.42) The player at her wheel, on either side. */
+	public @Nullable Player helmsman() {
+		for (Entity e : this.getPassengers()) {
+			if (e instanceof Player p) {
+				return p;
+			}
+		}
+		return null;
+	}
+
+	/** (0.7.42) Her crew aboard (riding her at their stations). */
+	public List<LivingEntity> crewAboard() {
+		List<LivingEntity> out = new ArrayList<>();
+		for (Entity e : this.getPassengers()) {
+			if (!(e instanceof Player) && e instanceof LivingEntity living && living.isAlive()) {
+				out.add(living);
+			}
+		}
+		return out;
+	}
+
+	/** (0.7.42) Takes {@code crewman} aboard at {@code seat} (in her frame). */
+	public boolean takeAboard(LivingEntity crewman, Vec3 seat) {
+		crewman.setAttached(SEAT, seat);
+		Vec3 at = this.toWorld(seat.x, seat.y, seat.z);
+		crewman.snapTo(at.x, at.y, at.z, this.getYRot(), 0.0F);
+		if (!crewman.startRiding(this, true, false)) {
+			crewman.removeAttached(SEAT);
+			return false;
+		}
+		return true;
+	}
+
 	/** Where the one at the wheel stands: behind the helm, on its deck. */
 	public Vec3 helmStand() {
 		Hull h = this.hull();
@@ -652,18 +747,28 @@ public final class Ship extends Entity {
 
 	@Override
 	protected void positionRider(Entity passenger, Entity.MoveFunction moveFunction) {
-		Vec3 at = this.helmStand();
+		// (0.7.42) her crew at their stations
+		Vec3 seat = passenger instanceof Player ? null : passenger.getAttached(SEAT);
+		Vec3 at = seat != null ? this.toWorld(seat.x, seat.y, seat.z) : this.helmStand();
 		moveFunction.accept(passenger, at.x, at.y, at.z);
 	}
 
 	@Override
 	protected boolean canAddPassenger(Entity passenger) {
-		return this.getPassengers().isEmpty() && passenger instanceof Player;
+		if (passenger instanceof Player) {
+			// one at her wheel, and (a crewed ship's) not while her captain still has it
+			return this.helmsman() == null && (this.crew == null || !this.crew.captained(this));
+		}
+		// (0.7.42) her crew, at their stations
+		return passenger.hasAttached(SEAT) && this.getPassengers().size() < MOST_CREW;
 	}
 
 	@Override
 	protected void removePassenger(Entity passenger) {
 		super.removePassenger(passenger);
+		if (!(passenger instanceof Player)) {
+			passenger.removeAttached(SEAT);
+		}
 		// leaving the wheel of a ship lying still drops anchor; under way, she drifts (sails furling) with you on deck
 		if (this.level() instanceof ServerLevel && !this.isRemoved() && passenger instanceof ServerPlayer player && player.isShiftKeyDown()) {
 			if (Math.abs(this.speed) > STILL) {
@@ -676,7 +781,8 @@ public final class Ship extends Entity {
 
 	@Override
 	public Vec3 getDismountLocationForPassenger(LivingEntity passenger) {
-		return this.helmStand().add(0.0, 0.05, 0.0);
+		Vec3 seat = passenger instanceof Player ? null : passenger.getAttached(SEAT);
+		return (seat != null ? this.toWorld(seat.x, seat.y, seat.z) : this.helmStand()).add(0.0, 0.05, 0.0);
 	}
 
 	// ---- dropping anchor ----
@@ -830,8 +936,12 @@ public final class Ship extends Entity {
 		}
 		BlockState state = h.pieces.get(i).blockState();
 		if (state.getBlock() instanceof HelmBlock) {
-			if (i == h.helm && this.getPassengers().isEmpty() && !player.isPassenger()) {
-				player.startRiding(this);
+			if (i == h.helm && !player.isPassenger()) {
+				if (this.crew != null && this.crew.captained(this)) {
+					player.sendOverlayMessage(Component.translatable("ship.jaymoskingdoms.crew.helm_held"));
+				} else if (this.helmsman() == null) {
+					player.startRiding(this);
+				}
 			}
 			return;
 		}
@@ -850,6 +960,17 @@ public final class Ship extends Entity {
 			return;
 		}
 		BlockEntity be = this.cargo.get(i);
+		// (0.7.42) a crewed ship's hold: each player's own share, once the crew can't keep them out of it
+		if (this.crew != null && this.crew.hold == BlockPos.asLong(x, y, z) && captaincy != null && this.level() instanceof ServerLevel level) {
+			Container share = captaincy.hold(level, this, this.crew, player);
+			if (share != null) {
+				Container held = new Held(share, this, i);
+				this.level().playSound(null, player.blockPosition(), SoundEvents.CHEST_OPEN, SoundSource.BLOCKS, 0.5F, 0.8F);
+				player.openMenu(new SimpleMenuProvider((id, inventory, p) -> new ChestMenu(MenuType.GENERIC_9x3, id, inventory, held, 3),
+					Component.translatable("ship.jaymoskingdoms.crew.hold", this.crew.name)));
+			}
+			return;
+		}
 		if (be instanceof Container chest && chest.getContainerSize() % 9 == 0 && chest.getContainerSize() <= 54) {
 			if (be.getLevel() == null) {
 				be.setLevel(this.level());
@@ -936,6 +1057,98 @@ public final class Ship extends Entity {
 		return new double[] {facing.getStepX() * c - facing.getStepZ() * s, facing.getStepX() * s + facing.getStepZ() * c};
 	}
 
+	// ---- (0.7.42) her guns, for her crew ----
+
+	/** Her guns' keys (each one's place in her frame, packed as a block position), bow to stern. */
+	public List<Long> guns() {
+		Hull h = this.hull();
+		List<Long> out = new ArrayList<>();
+		if (h != null) {
+			for (int i : h.cannons) {
+				Piece p = h.pieces.get(i);
+				out.add(BlockPos.asLong(p.x(), p.y(), p.z()));
+			}
+		}
+		return out;
+	}
+
+	private @Nullable BlockState gunState(long key) {
+		Hull h = this.hull();
+		int i = h == null ? -1 : h.index.get(key);
+		if (i < 0) {
+			return null;
+		}
+		BlockState state = h.pieces.get(i).blockState();
+		return state.getBlock() instanceof ShipCannonBlock ? state : null;
+	}
+
+	/** Whether the gun at {@code key} is still aboard, and loaded with powder and shot. */
+	public boolean gunLoaded(long key) {
+		BlockState state = this.gunState(key);
+		return state != null && state.getValue(ShipCannonBlock.LOAD) == ShipCannonBlock.Load.SHOT;
+	}
+
+	/** Whether the gun at {@code key} is still aboard. */
+	public boolean hasGun(long key) {
+		return this.gunState(key) != null;
+	}
+
+	/** Her crew load the gun at {@code key} (powder and shot at once). */
+	public void loadGun(long key) {
+		BlockState state = this.gunState(key);
+		if (state != null && state.getValue(ShipCannonBlock.LOAD) != ShipCannonBlock.Load.SHOT) {
+			this.setPiece(this.hull().index.get(key), state.setValue(ShipCannonBlock.LOAD, ShipCannonBlock.Load.SHOT));
+		}
+	}
+
+	/** The middle of the gun at {@code key}, in the world. */
+	public Vec3 gunAt(long key) {
+		BlockPos p = BlockPos.of(key);
+		return this.toWorld(p.getX(), p.getY() + 0.5, p.getZ());
+	}
+
+	/** The way the gun at {@code key} points, in the world (x, z), or null if it's gone. */
+	public double @Nullable [] gunWay(long key) {
+		BlockState state = this.gunState(key);
+		return state == null ? null : this.worldWay(state.getValue(ShipCannonBlock.FACING));
+	}
+
+	/** Her crew fire the (loaded) gun at {@code key} along {@code dir}, laid by {@code gunner}. False if it couldn't. */
+	public boolean fireGunAlong(ServerLevel level, long key, Vec3 dir, @Nullable Entity gunner) {
+		BlockState state = this.gunState(key);
+		if (state == null || state.getValue(ShipCannonBlock.LOAD) != ShipCannonBlock.Load.SHOT) {
+			return false;
+		}
+		this.setPiece(this.hull().index.get(key), state.setValue(ShipCannonBlock.LOAD, ShipCannonBlock.Load.EMPTY));
+		ShipCannonBlock.fireAlong(level, this.gunAt(key), dir, gunner, this);
+		return true;
+	}
+
+	/** How far she moved last tick (blocks, in the world). */
+	public Vec3 drift() {
+		return this.drift;
+	}
+
+	/** Her way (blocks a tick; astern below 0), and how far her sails are set (0 to 1). */
+	public double way() {
+		return this.speed;
+	}
+
+	public double sailsSet() {
+		return this.sail;
+	}
+
+	/** Her top speed under sail on her heading, and under oars (blocks a tick; 0 with none). */
+	public double sailSpeed() {
+		Hull h = this.hull();
+		return h == null ? 0.0 : this.topSpeed(h);
+	}
+
+	public double oarSpeed() {
+		Hull h = this.hull();
+		return h == null ? 0.0 : this.rowSpeed(h);
+	}
+
 	/** Gun {@code i} (now {@code state}, emptied) fires. */
 	private void fireGun(ServerLevel level, int i, BlockState state, @Nullable Player gunner) {
 		Hull h = this.hull();
@@ -1002,7 +1215,7 @@ public final class Ship extends Entity {
 			if (state.getBlock() instanceof ShipCannonBlock && state.getValue(ShipCannonBlock.LOAD) == ShipCannonBlock.Load.SHOT) {
 				BlockState empty = state.setValue(ShipCannonBlock.LOAD, ShipCannonBlock.Load.EMPTY);
 				this.setPiece(v[0], empty);
-				this.fireGun(level, v[0], empty, this.getFirstPassenger() instanceof Player p ? p : null);
+				this.fireGun(level, v[0], empty, this.pilot());
 			}
 		}
 	}
@@ -1024,6 +1237,9 @@ public final class Ship extends Entity {
 		int i = h.at(x, y, z);
 		if (i < 0) {
 			return false;
+		}
+		if (by != null) {
+			this.holedBy = by.getUUID();
 		}
 		BlockState state = h.pieces.get(i).blockState();
 		boolean in = false;
@@ -1101,6 +1317,10 @@ public final class Ship extends Entity {
 		if (now != null && (!now.floats || dryBefore > 0 && dryBelowWaterline(now) * 2 < dryBefore) && this.sinking == 0) {
 			this.sinking = 1;
 			this.entityData.set(FOUNDERING, true);
+			// (0.7.42) her crew go down with her
+			if (this.crew != null && captaincy != null) {
+				captaincy.foundering(level, this, this.crew, this.holedBy == null ? null : level.getEntity(this.holedBy));
+			}
 			for (Player p : level.players()) {
 				if (p.getVehicle() == this || this.aboard(this.toLocal(p.position()), 1.0)) {
 					p.sendOverlayMessage(Component.translatable("ship.jaymoskingdoms.sinking"));
@@ -1339,6 +1559,7 @@ public final class Ship extends Entity {
 			}
 		}
 		this.sail = input.getDoubleOr("Sail", 0.0);
+		this.crew = input.read("Crew", Crew.CODEC).orElse(null);
 		this.sinking = input.getIntOr("Sinking", 0);
 		this.lit.clear();
 		for (long key : input.read("Lit", com.mojang.serialization.Codec.LONG.listOf()).orElse(List.of())) {
@@ -1382,6 +1603,9 @@ public final class Ship extends Entity {
 		}
 		output.store("Hold", CompoundTag.CODEC.listOf(), hold);
 		output.putDouble("Sail", this.sail);
+		if (this.crew != null) {
+			output.store("Crew", Crew.CODEC, this.crew);
+		}
 		output.putInt("Sinking", this.sinking);
 		// (0.7.28) where its lights are, so a reload takes up any the save caught in the world
 		output.store("Lit", com.mojang.serialization.Codec.LONG.listOf(), List.copyOf(this.lit.keySet()));
