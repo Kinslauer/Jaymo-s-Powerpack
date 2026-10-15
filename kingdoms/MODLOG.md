@@ -3117,3 +3117,32 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
 - **0.7.62, raiders leave fires burning:** (`Firefighting.ours`) raiders and war parties' soldiers (`Assault.attacker`)
   never fight fires, theirs or the town's, and no folk fights a fire on enemy land (`Assault.enemyLand`). The town's own
   villagers, folk and golems still do.
+- **0.7.65, the whole realm on alert in a war:** (`WarAlert`) from the day war is declared until peace, every realm on
+  either side (vassals and villages under them too) is on alert: the seat's bell peals, then tolls 3 strokes every
+  2 minutes; once a war party musters against it (`WarParties.incoming`) the bell rings the alarm every 2 s (the real
+  bell swung, so vanilla villagers hide too). Its villagers carry sandbags out (up to 4 at a time) and lay 5 walls of
+  5 facing the nearest enemy seat (16-22 out) and 3 of 3 behind (13-18 out), on open ground only (no roofs, roads,
+  fields, doors). With a party coming, civilians run home and stay in (`Frights.shelter`) until 10 s after it's gone,
+  and idle guards and archers stand behind the front sandbags facing the enemy. Bags laid are saved (`war_sandbags`)
+  and taken down at peace, 2 a second. New block `Sandbags` (sacks along an axis; 4 from string + sand; the realm's
+  own are `raised` and drop nothing).
+- **0.7.66, the night's gifts** (ideas from the Vampires Strike Back modpack's origins, remade; nothing of theirs used):
+  vampire and werewolf players get two keys and a sense (`NightGifts`). Vampires: `O` Blood Dash (look up for a great
+  leap, one more dash in the air, no fall damage till they land); `P` in the air Groundpound (down like a stone, throws
+  back and hurts everyone within 5 blocks, no fall damage, every person within 32 shows through walls for 10 s); bat
+  wings (Space in the air glides with no elytra; 2 minutes of gliding, mended by experience; spread on the back while
+  gliding); Lifeleech (kills heal and lend Absorption that builds with quick kills); quick below y 60 out of the sky;
+  the sun drains their hunger. Werewolves: `O` Leap (look up to jump straight up; stronger as the beast); `P` Howl
+  (shows people through walls; as the beast it throws everyone back and sends villagers running; other werewolves hear
+  where it came from); Frenzy after a kill; the beast climbs any wall it runs into and falls far better; quick at
+  night in forests. Both: a kin-sense compass top left (arrows and distances to the 3 nearest of their kind).
+  Dhampirs: a golden apple eaten between the bite and nightfall half-saves you (no sun, starving or double fire, no
+  night strength, all the gifts). Wolfbloods: the bone ritual on any night but a full moon half-curses you (never
+  change, human-form gifts; finish the rite under a full moon). Newly turned vampires wake in a crypt dug beneath them
+  (coffin bed = respawn, candles, ladder up); werewolves wake from their first moon in a den. Natural ground only.
+  `/kingdom nightgift <vampire|dhampir|werewolf|wolfblood|crypt|den|none>` for ops. Villagers' gossip hints at all of
+  it as old wives' talk (`NightGifts.gossip`, 18 lines; 12% of gossip, 40% to the cursed or half-cursed).
+
+## 0.7.67: two-handed weapons reach further
+Mobs swinging a two-handed weapon reach `MobCombat.TWO_HANDED_REACH` (1.25x) further and sweep `TWO_HANDED_ARC` (1.25x)
+wider, matching players (Powers 0.11.75, `core/TwoHanded`).

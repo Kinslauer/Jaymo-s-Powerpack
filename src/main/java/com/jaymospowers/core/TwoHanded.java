@@ -5,7 +5,7 @@ import net.bettercombat.logic.WeaponRegistry;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * (0.11.72) Two-handed weapons (Better Combat's {@code two_handed}: claymores, war axes, glaives, spears, scythes,
+ * (0.11.75) Two-handed weapons (Better Combat's {@code two_handed}: claymores, war axes, glaives, spears, scythes,
  * quarterstaffs and every other mod's) reach further and sweep a bigger area than one-handed ones. Only touched from
  * the Better Combat mixins, so only ever loaded when Better Combat is.
  */

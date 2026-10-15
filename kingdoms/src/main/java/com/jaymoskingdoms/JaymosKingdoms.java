@@ -119,6 +119,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.3, war: declarations, war parties, banners, peace (and its attachment)
 		LOGGER.debug("war attachment: {}", WarData.WARS);
 		Wars.register();
+		// 0.7.65: a realm at war is on alert: bells, sandbags round the seat, civilians hiding from a war party (and its attachment)
+		Sandbags.register();
+		LOGGER.debug("war alert attachment: {}", WarAlert.RAISED);
+		WarAlert.register();
 		// 0.4, combat: Better Combat's weapon moves for humanoid mobs, and folk's sidestep (only with Better Combat)
 		MobCombat.register();
 		Speech.register();
@@ -233,6 +237,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.0: players as vampires (by a bite) and werewolves (by ritual)
 		VampirePlayers.register();
 		WerewolfPlayers.register();
+		// 0.7.66: the night's gifts for vampire and werewolf players (dash, groundpound, leap, howl, kin-sense, wings...;
+		// their attachments)
+		LOGGER.debug("night gift attachments: {} {}", NightGifts.GIFT, VampirePlayers.HALF_TURN);
+		NightGifts.register();
 		// 0.7.7: sailing, stage 1: ships built from blocks (the helm, sails, the ship and its attachment)
 		com.jaymoskingdoms.sailing.Sailing.register();
 		// 0.7.42: sailing, stage 3: ships with crews of their own (pirates, warships, merchantmen), pirate coves, harbours,

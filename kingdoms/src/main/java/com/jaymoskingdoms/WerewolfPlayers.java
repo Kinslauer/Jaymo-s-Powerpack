@@ -177,8 +177,12 @@ public final class WerewolfPlayers {
 
 	private static boolean ritual(ServerLevel level, ServerPlayer player) {
 		long clock = level.getOverworldClockTime();
-		if (level != level.getServer().overworld() || !Vampires.night(clock) || !Lycans.fullMoon(level, clock)
-			|| !level.canSeeSky(player.blockPosition().above()) || Lycans.cursed(player) || Vampires.isVampire(player)) {
+		// (0.7.66) under any other moon the ritual only half takes: a wolfblood ({@link NightGifts}), who can come back
+		// under a full moon to finish it
+		boolean full = Lycans.fullMoon(level, clock);
+		Lycans.Curse had = player.getAttached(Lycans.CURSE);
+		if (level != level.getServer().overworld() || !Vampires.night(clock) || !level.canSeeSky(player.blockPosition().above())
+			|| had != null && (!had.half() || !full) || Vampires.isVampire(player)) {
 			return false;
 		}
 		int fires = 0;
@@ -194,13 +198,17 @@ public final class WerewolfPlayers {
 		if (!player.isCreative()) {
 			player.getMainHandItem().shrink(1);
 		}
-		player.setAttached(Lycans.CURSE, Lycans.roll(level, player));
+		Lycans.Curse curse = had != null ? had.withMoons(had.moons()) : Lycans.roll(level, player);
+		player.setAttached(Lycans.CURSE, full ? curse : curse.halved());
 		player.removeAttached(Vampires.BITTEN);
 		level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, player.getX(), player.getY(0.5), player.getZ(), 60, 1.5, 1.0, 1.5, 0.05);
 		level.playSound(null, player.blockPosition(), SoundEvents.WOLF_SOUNDS.get(WolfSoundVariants.SoundSet.BIG).adultSounds().whineSound().value(),
-			SoundSource.PLAYERS, 3.0F, 0.4F);
-		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.werewolf.ritual").withStyle(ChatFormatting.DARK_RED));
-		begin(player, level.getGameTime(), true);
+			SoundSource.PLAYERS, 3.0F, full ? 0.4F : 0.7F);
+		player.sendSystemMessage(Component.translatable(full ? "message.jaymoskingdoms.werewolf.ritual" : "message.jaymoskingdoms.werewolf.wolfblood")
+			.withStyle(ChatFormatting.DARK_RED));
+		if (full) {
+			begin(player, level.getGameTime(), true);
+		}
 		return true;
 	}
 
@@ -210,6 +218,10 @@ public final class WerewolfPlayers {
 	private static void shift(ServerPlayer player) {
 		Lycans.Curse curse = player.getAttached(Lycans.CURSE);
 		if (curse == null || !player.isAlive()) {
+			return;
+		}
+		if (curse.half()) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.werewolf.half").withStyle(ChatFormatting.GRAY));
 			return;
 		}
 		ServerLevel overworld = player.level().getServer().overworld();
@@ -249,7 +261,7 @@ public final class WerewolfPlayers {
 		boolean moon = Vampires.night(clock) && Lycans.fullMoon(overworld, clock);
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			Lycans.Curse curse = player.getAttached(Lycans.CURSE);
-			if (curse == null || !player.isAlive()) {
+			if (curse == null || curse.half() || !player.isAlive()) {
 				continue;
 			}
 			Form f = FORMS.get(player.getUUID());
@@ -393,6 +405,11 @@ public final class WerewolfPlayers {
 		}
 		player.removeEffect(MobEffects.INVISIBILITY);
 		if (sick && player.level() instanceof ServerLevel level) {
+			// (0.7.66) after the first moon they come to in a den of their own, dug beneath where the night left them
+			Lycans.Curse curse = player.getAttached(Lycans.CURSE);
+			if (f.forced && curse != null && curse.moons() == 1 && Lairs.den(level, player)) {
+				player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.werewolf.den").withStyle(ChatFormatting.DARK_RED));
+			}
 			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, AFTER_TICKS, 0));
 			player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, AFTER_TICKS, 0));
 			player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 120, 0));

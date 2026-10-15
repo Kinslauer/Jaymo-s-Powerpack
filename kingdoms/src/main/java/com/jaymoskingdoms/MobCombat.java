@@ -81,7 +81,7 @@ public final class MobCombat {
 	static final int COMBO_RESET_TICKS = 40;
 	/** Half-width of the arc for a stab (forward box) and for an overhead (vertical plane), in degrees. */
 	static final double STAB_HALF_ANGLE = 18.0, OVERHEAD_HALF_ANGLE = 28.0;
-	/** (0.7.64) Two-handed weapons reach this much further and sweep this much wider, as they do for players (Powers' TwoHanded). */
+	/** (0.7.67) Two-handed weapons reach this much further and sweep this much wider, as they do for players (Powers' TwoHanded). */
 	static final double TWO_HANDED_REACH = 1.25, TWO_HANDED_ARC = 1.25;
 	/** Most foes one swing can strike. */
 	static final int MAX_TARGETS = 5;
