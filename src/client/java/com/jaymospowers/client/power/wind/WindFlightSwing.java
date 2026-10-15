@@ -52,7 +52,12 @@ public final class WindFlightSwing {
 
 	/** The kinds of swing, picked from the Better Combat animation's name. */
 	public enum Style {
-		SLASH, CHOP, THRUST, SPIN
+		SLASH, CHOP, THRUST, SPIN,
+		/**
+		 * The Staff Surge: the staff thrust out ahead and spun like a propeller for as long as left mouse is held;
+		 * {@code progress} is how far the arm is out (its weight) and {@code sweep} the spin's angle (radians).
+		 */
+		TWIRL
 	}
 
 	/**
@@ -63,6 +68,9 @@ public final class WindFlightSwing {
 	public record Swing(float progress, Style style, float sweep, boolean leftArm, boolean twoHanded, boolean dual) {
 		/** How far into the swing pose (0-1): in over the wind-up, out after the follow-through. */
 		public float weight() {
+			if (this.style == Style.TWIRL) {
+				return this.progress;
+			}
 			if (this.progress < WINDUP_END) {
 				return smooth(this.progress / WINDUP_END);
 			}
@@ -86,6 +94,8 @@ public final class WindFlightSwing {
 
 	/** entity id → the Better Combat attack being followed. */
 	private static final Map<Integer, Tracked> ATTACKS = new HashMap<>();
+	/** entity id → a Staff Surge twirl: {start (game time), let go at (-1 while held), turns a second}. */
+	private static final Map<Integer, float[]> TWIRLS = new HashMap<>();
 
 	private WindFlightSwing() {
 	}
@@ -95,11 +105,47 @@ public final class WindFlightSwing {
 			Entity entity = level.getEntity(entry.getKey());
 			return entity == null || level.getGameTime() - entry.getValue().start > entry.getValue().duration + 2.0F;
 		});
+		TWIRLS.entrySet().removeIf(entry -> level.getEntity(entry.getKey()) == null
+			|| entry.getValue()[1] >= 0.0F && level.getGameTime() - entry.getValue()[1] > com.jaymospowers.power.wind.WindStaffSurge.TWIRL_EASE_TICKS + 2.0F);
+	}
+
+	/**
+	 * The Staff Surge's twirl: {@code held} starts (or keeps) {@code entity}'s staff spinning out ahead; false lets it
+	 * drop back.
+	 */
+	public static void twirl(Entity entity, boolean ascended, boolean held) {
+		float now = entity.level().getGameTime();
+		float[] was = TWIRLS.get(entity.getId());
+		if (held) {
+			float rate = ascended ? com.jaymospowers.power.wind.WindStaffSurge.TWIRL_TURNS_PER_SECOND_ASCENDED : com.jaymospowers.power.wind.WindStaffSurge.TWIRL_TURNS_PER_SECOND;
+			if (was == null || was[1] >= 0.0F && now - was[1] >= com.jaymospowers.power.wind.WindStaffSurge.TWIRL_EASE_TICKS) {
+				TWIRLS.put(entity.getId(), new float[] {now, -1.0F, rate});
+			} else {
+				// picked up again while still dropping back: carry on spinning
+				was[1] = -1.0F;
+				was[2] = rate;
+			}
+		} else if (was != null && was[1] < 0.0F) {
+			was[1] = now;
+		}
 	}
 
 	/** From the avatar renderer: the swing this player is in, if any. */
 	static @Nullable Swing extract(Entity entity, AvatarRenderState state, float partialTicks) {
 		float now = entity.level().getGameTime() + partialTicks;
+		float[] twirl = TWIRLS.get(entity.getId());
+		if (twirl != null) {
+			// the surge's twirl wins over the swings Better Combat starts while left mouse is held
+			float ease = com.jaymospowers.power.wind.WindStaffSurge.TWIRL_EASE_TICKS;
+			float weight = Mth.clamp((now - twirl[0]) / ease, 0.0F, 1.0F);
+			if (twirl[1] >= 0.0F) {
+				weight = Math.min(weight, Mth.clamp(1.0F - (now - twirl[1]) / ease, 0.0F, 1.0F));
+			}
+			if (weight > 0.0F) {
+				float angle = Mth.TWO_PI * twirl[2] * (now - twirl[0]) / 20.0F;
+				return new Swing(smooth(weight), Style.TWIRL, angle, state.mainArm == HumanoidArm.LEFT, false, false);
+			}
+		}
 		CombatAnimCompat.Attack attack = CombatAnimCompat.attack(entity);
 		Tracked tracked = ATTACKS.get(entity.getId());
 		if (attack != null) {
@@ -163,7 +209,7 @@ public final class WindFlightSwing {
 		return switch (swing.style()) {
 			case SLASH -> swing.sweep() * SLASH_ROLL * Mth.sin(Mth.PI * Mth.clamp(swing.progress() / HOLD_END, 0.0F, 1.0F)) * w;
 			case CHOP -> swing.sweep() * CHOP_ROLL * Mth.sin(Mth.PI * swing.strike());
-			case THRUST -> 0.0F;
+			case THRUST, TWIRL -> 0.0F;
 			// a whole turn through the strike: no weight, so it ends level
 			case SPIN -> swing.sweep() * SPIN_ROLL * smooth(Mth.clamp((swing.progress() - 0.15F) / (HOLD_END - 0.15F), 0.0F, 1.0F));
 		};
@@ -210,8 +256,9 @@ public final class WindFlightSwing {
 			// the second blade cuts the mirror image (a spin holds both arms out)
 			aim(other, mirror(new Vector3f(arm)), mirror(new Vector3f(blade)), w);
 		}
-		// the legs kick back against the blow
-		float kick = LEG_KICK * Mth.sin(Mth.PI * u) * w;
+		// the legs kick back against the blow (a twirl keeps them trailing)
+		float kick = swing.style() == Style.TWIRL ? 0.0F : 1.0F;
+		kick *= LEG_KICK * Mth.sin(Mth.PI * u) * w;
 		h.rightLeg.xRot += kick;
 		h.leftLeg.xRot += kick * 0.7F;
 	}
@@ -239,6 +286,16 @@ public final class WindFlightSwing {
 				// drawn back along the side, then driven straight ahead
 				along(u, dir(-0.6F, 0.45F, 0.5F), dir(0.2F, 0.3F, 0.5F), dir(1.0F, 0.05F, 0.3F), arm);
 				motion = dir(1.0F, 0.0F, 0.0F);
+			}
+			case TWIRL -> {
+				// thrust out ahead, the staff (held by its middle) spinning round the forearm like a propeller
+				arm.set(dir(1.0F, 0.15F, 0.2F));
+				Vector3f across = new Vector3f(dir(0.0F, 1.0F, 0.0F));
+				across.sub(new Vector3f(arm).mul(across.dot(arm))).normalize();
+				Vector3f up = new Vector3f(arm).cross(across).normalize();
+				float angle = s;
+				blade.set(across).mul(Mth.cos(angle)).add(new Vector3f(up).mul(Mth.sin(angle))).normalize();
+				return;
 			}
 			default -> {
 				// straight out to the side, the body rolling round under it

@@ -125,6 +125,8 @@ public final class WindFlightController {
 	/** The air brake is on (S at speed): the palms-out pose and the gust ahead. */
 	private boolean braking;
 	private boolean sentBraking;
+	/** How far past the top speed Staff Surges may carry you right now (blocks/tick); fades each tick. */
+	private double surgeRoom;
 
 	public WindFlight state() {
 		return this.state;
@@ -207,6 +209,7 @@ public final class WindFlightController {
 		if (this.recoverTicks > 0) {
 			this.recoverTicks--;
 		}
+		this.surgeRoom = Math.max(0.0, this.surgeRoom - com.jaymospowers.power.wind.WindStaffSurge.ROOM_FADE);
 
 		if (this.state == WindFlight.TUMBLE) {
 			this.tumble(minecraft, player);
@@ -368,9 +371,11 @@ public final class WindFlightController {
 		double before = this.speed;
 		this.speed -= dir.y * (dir.y < 0.0 ? DIVE_GRAVITY : CLIMB_GRAVITY);
 		// the wind's push only reaches the top speed; a dive may carry you beyond it (and any extra bleeds off slowly)
-		double cap = this.top * DIVE_OVERSPEED;
-		if (this.speed > this.top && dir.y > -0.05) {
-			this.speed = Math.max(this.top, Math.min(this.speed, before) - CRUISE_DECEL * 2.0);
+		// a Staff Surge lifts the ceiling for a while, fading back down to the top speed
+		double ceiling = this.top + this.surgeRoom;
+		double cap = Math.max(this.top * DIVE_OVERSPEED, ceiling);
+		if (this.speed > ceiling && dir.y > -0.05) {
+			this.speed = Math.max(ceiling, Math.min(this.speed, before) - CRUISE_DECEL * 2.0);
 		}
 		this.speed = Mth.clamp(this.speed, 0.0, cap);
 		double fraction = this.speed / this.top;
@@ -608,7 +613,23 @@ public final class WindFlightController {
 		WindCamera.shake(0.6F, 6);
 	}
 
+	/**
+	 * A tick of the Staff Surge in flight: {@code boost} more speed along the path, and the ceiling lifted with it, up to
+	 * {@code room} past the top speed (it fades once let go). Only at cruise or sonic; returns false otherwise.
+	 */
+	boolean surge(double boost, double room) {
+		if (!this.state.fast()) {
+			return false;
+		}
+		this.surgeRoom = Math.min(room, Math.max(this.surgeRoom, this.speed + boost - this.top));
+		this.speed += boost;
+		Vec3 dir = this.velocity.lengthSqr() > 1.0E-6 ? this.velocity.normalize() : Vec3.ZERO;
+		this.velocity = dir.scale(this.speed);
+		return true;
+	}
+
 	void reset() {
+		this.surgeRoom = 0.0;
 		this.state = WindFlight.NONE;
 		this.locked = false;
 		this.speed = 0.0;
