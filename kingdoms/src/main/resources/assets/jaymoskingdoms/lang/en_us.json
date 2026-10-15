@@ -1575,6 +1575,8 @@
 	"item.jaymoskingdoms.journal": "Traveller's Journal",
 	"key.category.jaymoskingdoms.journal": "Jaymo's Kingdoms",
 	"key.jaymoskingdoms.journal": "Open Traveller's Journal",
+	"key.jaymoskingdoms.wardrobe": "Change Clothes",
+	"button.jaymoskingdoms.wardrobe": "Change clothes",
 	"journal.jaymoskingdoms.need": "You need a Traveller's Journal in your inventory (craft a book with a map)",
 	"journal.jaymoskingdoms.tab.quests": "Quests",
 	"journal.jaymoskingdoms.tab.map": "Map",

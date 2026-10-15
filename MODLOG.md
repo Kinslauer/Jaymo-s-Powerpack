@@ -1295,3 +1295,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.11.34, slingshot lines pull tight:** while a slingshot is drawn, both lines tighten slowly from their slack to
   stretched taut at a full draw (`WebSwing.SLING_STRETCH` 0.6 blocks past taut, so they thin and hum), for everyone:
   the drawn length is sent like any rope change. How they look only; the swing's rope is unchanged.
+- **0.11.36 / Kingdoms 0.7.53:** a shirt button on the inventory's player box changes your clothes in MCA's editor,
+  clothing page only (`kingdoms/MODLOG.md`).
