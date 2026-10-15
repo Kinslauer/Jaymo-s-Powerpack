@@ -3058,6 +3058,6 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
   players around too, each in their own understanding of the tongue (`Speech.overheard`, `McaMessageMixin`). The
   client shows a line once if it arrives twice within 1.5 s (`SpeechBubbles.REPEAT_MS`).
 - **0.7.53, the wardrobe:** Andy: "a way to change clothes". A small shirt button in the top right corner of the
-  inventory's player box (and a Change Clothes key, unbound until a player sets one) opens MCA's character editor held
+  inventory's player box (and the Change Clothes key, \ by default) opens MCA's character editor held
   to its clothing page (`Wardrobe`, `WardrobeScreen`): MCA's own Needle and Thread screen without the needle. Body,
   hair, genes and the destiny can't be reached from it; picking an outfit saves it and closes, Escape changes nothing.

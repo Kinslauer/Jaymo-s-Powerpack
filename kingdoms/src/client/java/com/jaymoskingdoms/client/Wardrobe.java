@@ -19,8 +19,8 @@ import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.network.chat.Component;
 
 /**
- * (0.7.53) Andy: "a way to change clothes". A shirt button in the corner of the inventory's player box (and a key, unbound
- * until a player sets one) opens MCA's editor on its clothing page only ({@link WardrobeScreen}). Needs MCA.
+ * (0.7.53) Andy: "a way to change clothes". A shirt button in the corner of the inventory's player box (and the \ key, Andy's
+ * pick) opens MCA's editor on its clothing page only ({@link WardrobeScreen}). Needs MCA.
  */
 public final class Wardrobe {
 	/** The button's size, and where it sits in the inventory: the player box's top right corner. */
@@ -36,7 +36,7 @@ public final class Wardrobe {
 			return;
 		}
 		KeyMapping.Category category = KeyMapping.Category.register(JaymosKingdoms.id("journal"));
-		key = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.wardrobe", InputConstants.UNKNOWN.getValue(), category));
+		key = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.wardrobe", InputConstants.KEY_BACKSLASH, category));
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			while (key.consumeClick()) {
 				open(minecraft);
