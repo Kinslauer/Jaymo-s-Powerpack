@@ -3037,3 +3037,12 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
   `VillagerLike.PlayerModel.byId` always answer VILLAGER, so every stored choice (old saves too) reads back as a
   villager, for drawing and for size. `client/mixin/mca/McaVillagerBodyChoiceMixin` drops the three body buttons from
   MCA's character screen (`VillagerEditorScreen.addModelSelectionWidgets`).
+
+## 0.7.49: imbued blades keep their element
+- Andy: "sorcerer imbuements carry over onto dropped weapons, because of this sorcerers can only imbue one weapon at a
+  time". The Imbue used to sit on the Sorcerer (any blade they swung burned, the dropped one didn't). Now
+  `Spellcraft.Charge` (sorcerer, name, element, until, stamp) lives in the blade's custom data: dropped, handed over or
+  looted, it bursts in anyone's hand (mobs too) until it wears off (`IMBUE_TICKS`). A Sorcerer keeps one imbued blade:
+  `IMBUED` holds the stamp of their current one, and a blade with another stamp has gone cold (taken off when a player
+  holds or carries it, swept every `SWEEP_EVERY` ticks). After a restart the blade's own clock decides. Tooltip:
+  "Imbued with Fire by Andy (95s)". The Wind Cyclone's imbued element now comes from a blade the player holds or carries.

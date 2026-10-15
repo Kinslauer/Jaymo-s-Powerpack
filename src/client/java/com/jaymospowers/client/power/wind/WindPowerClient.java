@@ -7,6 +7,7 @@ import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.wind.WindAbility;
 import com.jaymospowers.power.wind.WindNet;
 import com.jaymospowers.power.wind.WindPower;
+import com.jaymospowers.power.wind.WindStaffSurge;
 import com.jaymospowers.power.wind.WindTempest;
 import com.jaymospowers.power.wind.WindWeather;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -38,6 +39,8 @@ public final class WindPowerClient implements PowerClient {
 	/** Stood in the cold last tick (a line on the action bar when it first takes hold). */
 	private boolean wasCold;
 	private int lastColdNotice = -100000;
+	/** Twirling the staff for a Staff Surge right now (the server and the watchers have been told). */
+	private boolean surging;
 	/** The cold's line shows at most this often (ticks), however often a biome edge is crossed. */
 	private static final int COLD_NOTICE_SPACING = 1200;
 
@@ -51,6 +54,12 @@ public final class WindPowerClient implements PowerClient {
 		ClientPlayNetworking.registerGlobalReceiver(WindNet.Status.TYPE, (payload, ctx) -> INSTANCE.onStatus(ctx.client(), payload));
 		// screen washes and lightning flashes reach anyone near a mode, wind or not
 		ClientPlayNetworking.registerGlobalReceiver(WindNet.ScreenFx.TYPE, (payload, ctx) -> WindScreenFx.onPacket(payload));
+		ClientPlayNetworking.registerGlobalReceiver(WindStaffSurge.Twirl.TYPE, (payload, ctx) -> {
+			net.minecraft.world.entity.Entity entity = ctx.client().level == null ? null : ctx.client().level.getEntity(payload.entity());
+			if (entity != null) {
+				WindFlightSwing.twirl(entity, payload.ascended(), payload.held());
+			}
+		});
 		net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry.attachElementAfter(
 			net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements.MISC_OVERLAYS,
 			com.jaymospowers.JaymosPowers.id("wind_screen_fx"), WindScreenFx::render);
@@ -134,6 +143,7 @@ public final class WindPowerClient implements PowerClient {
 		}
 		this.wasCold = cold;
 		this.flight.tick(minecraft, player);
+		this.staffSurge(minecraft, player);
 		WindCycloneClient.root(player);
 		// the cloak of wind (every wind user, from the start): holding Jump in mid-air slows the fall
 		if (!this.flight.state().flying() && !player.onGround() && !player.isInWater() && !player.isFallFlying()
@@ -155,6 +165,40 @@ public final class WindPowerClient implements PowerClient {
 		}
 		if (this.channel != null && this.channelTicks < this.channelMax) {
 			this.channelTicks++;
+		}
+	}
+
+	/**
+	 * The Staff Surge: mastered, quarterstaff in hand, already past 30 m/s, holding left mouse twirls the staff and
+	 * the speed climbs slowly (faster when ascended). See {@link WindStaffSurge}.
+	 */
+	private void staffSurge(Minecraft minecraft, LocalPlayer player) {
+		boolean held = minecraft.options.keyAttack.isDown() && minecraft.gui.screen() == null && !player.isSpectator()
+			&& WindStaffSurge.eligible(player);
+		double accel = WindStaffSurge.accel(player);
+		boolean pushing = false;
+		if (held) {
+			if (this.flight.state().fast()) {
+				// (keeps twirling while it's already going, even dipping under 30 m/s for a moment in a turn)
+				pushing = (this.surging || this.flight.currentSpeed() > WindStaffSurge.MIN_SPEED) && this.flight.surge(accel, WindStaffSurge.room(player));
+			} else {
+				// falling, vaulting, thrown: push the body on along its own path
+				net.minecraft.world.phys.Vec3 v = player.getDeltaMovement();
+				double speed = v.length();
+				if (speed > WindStaffSurge.MIN_SPEED) {
+					player.setDeltaMovement(v.scale((speed + accel) / speed));
+					pushing = true;
+				}
+			}
+		}
+		if (pushing != this.surging) {
+			this.surging = pushing;
+			boolean ascended = com.jaymospowers.core.Fate.isAscended(player);
+			WindFlightSwing.twirl(player, ascended, pushing);
+			if (pushing) {
+				WindCamera.shake(ascended ? 0.6F : 0.4F, 5);
+			}
+			ClientPlayNetworking.send(new WindStaffSurge.Surge(pushing));
 		}
 	}
 
@@ -184,6 +228,11 @@ public final class WindPowerClient implements PowerClient {
 		Minecraft minecraft = Minecraft.getInstance();
 		if (!active) {
 			this.flight.forceLand(player);
+			if (this.surging) {
+				this.surging = false;
+				WindFlightSwing.twirl(player, false, false);
+				ClientPlayNetworking.send(new WindStaffSurge.Surge(false));
+			}
 		} else {
 			// forget presses made before the power arrived
 			while (minecraft.options.keyJump.consumeClick()) {
