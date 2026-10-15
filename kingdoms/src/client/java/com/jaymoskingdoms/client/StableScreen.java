@@ -22,16 +22,16 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 
 /**
  * (0.5.47) A stablehand's or farrier's screen: your horses (board, sell, shoe), the ones you keep here (take out for
  * the fee), today's horses for sale, the tack shop. A long list scrolls. The server decides everything; a button is
- * sent back and the screen comes again with what happened written under the list.
+ * sent back and the screen comes again with what happened written under the list. (0.7.40) Restyled like the H screen:
+ * striped rows that light up under the mouse, and a box under the list with the hovered row in full (or what happened).
  */
 final class StableScreen extends Screen {
-	static final int PANEL_W = 360, PAD = 8, HEADER = 34, FOOTER = 26, HEADING_H = 14, ROW_H = 24, ICON_W = 28, EMPTY_H = 12, SCROLL_STEP = 12, BUTTON_H = 16;
+	static final int PANEL_W = 360, PAD = 8, HEADER = 34, FOOTER = 24, DETAIL_LINES = 3, HEADING_H = 14, ROW_H = 24, ICON_W = 28, EMPTY_H = 12, SCROLL_STEP = 12, BUTTON_H = 16;
 
 	/** One line of the list: a heading, a section's "none" line, or a row; {@code y} from the list's top. */
 	private record Line(int y, int h, Component heading, StableNet.@Nullable Row row) {
@@ -51,6 +51,9 @@ final class StableScreen extends Screen {
 	private final List<Placed> placed = new ArrayList<>();
 	private int contentH;
 	private int scroll;
+	/** Where the mouse was when the screen came: until it moves, the box shows what just happened, not the row under it. */
+	private int firstX = Integer.MIN_VALUE, firstY;
+	private boolean moved;
 
 	StableScreen(StableNet.Open open, int scroll) {
 		super(open.title());
@@ -71,12 +74,8 @@ final class StableScreen extends Screen {
 		return false;
 	}
 
-	private int noteLines() {
-		return open.note().getString().isEmpty() ? 0 : Math.min(3, this.font.split(open.note(), PANEL_W - PAD * 2).size());
-	}
-
 	private int panelHeight() {
-		int want = HEADER + contentH + noteLines() * 10 + 4 + FOOTER;
+		int want = HEADER + contentH + detailH() + FOOTER;
 		return Math.min(this.height - 8, want);
 	}
 
@@ -88,12 +87,17 @@ final class StableScreen extends Screen {
 		return Math.max(4, (this.height - panelHeight()) / 2);
 	}
 
+	/** The box under the list: the hovered row in full, or what just happened. */
+	private int detailH() {
+		return 10 + DETAIL_LINES * Ui.LINE + 4;
+	}
+
 	private int viewTop() {
 		return top() + HEADER;
 	}
 
 	private int viewHeight() {
-		return panelHeight() - HEADER - noteLines() * 10 - 4 - FOOTER;
+		return panelHeight() - HEADER - detailH() - FOOTER;
 	}
 
 	private int maxScroll() {
@@ -140,10 +144,10 @@ final class StableScreen extends Screen {
 			}
 		}
 		place();
-		int bottom = top() + panelHeight() - FOOTER + 4;
+		int bottom = top() + panelHeight() - FOOTER + 4, edge = left() + PANEL_W - 6;
 		addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.stable.quests"),
-			b -> ClientPlayNetworking.send(new StableNet.Act(open.workerId(), StableNet.QUESTS, 0))).bounds(this.width / 2 - 84, bottom, 80, 18).build());
-		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(this.width / 2 + 4, bottom, 80, 18).build());
+			b -> ClientPlayNetworking.send(new StableNet.Act(open.workerId(), StableNet.QUESTS, 0))).bounds(left() + 6, bottom, 70, 16).build());
+		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(edge - 60, bottom, 60, 16).build());
 	}
 
 	/** Moves the rows' buttons with the scroll; those not wholly in view are hidden. */
@@ -170,35 +174,46 @@ final class StableScreen extends Screen {
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left(), y = top(), h = panelHeight();
-		graphics.fill(x, y, x + PANEL_W, y + h, QuestScreen.COLOR_PANEL);
-		edge(graphics, x, y, PANEL_W, h, QuestScreen.COLOR_EDGE);
-		graphics.centeredText(this.font, this.title, this.width / 2, y + 7, QuestScreen.COLOR_GOLD);
-		graphics.centeredText(this.font, open.subtitle(), this.width / 2, y + 19, QuestScreen.COLOR_DIM);
+		Ui.panel(graphics, x, y, PANEL_W, h, Ui.GOLD);
+		Ui.line(graphics, this.font, this.title, x + 9, y + 7, PANEL_W - 18, Ui.GOLD);
+		Ui.line(graphics, this.font, open.subtitle(), x + 9, y + 18, PANEL_W - 18, Ui.DIM);
+		Ui.rule(graphics, x + 6, x + PANEL_W - 6, y + HEADER - 4);
 		int top = viewTop(), view = viewHeight();
 		ItemStack hovered = ItemStack.EMPTY;
+		StableNet.Row hoveredRow = null;
+		boolean inView = mouseY >= top && mouseY < top + view;
 		graphics.enableScissor(x + 1, top, x + PANEL_W - 1, top + view);
+		int index = 0;
 		for (Line line : lines) {
 			int ly = top + line.y() - scroll;
-			if (ly + line.h() < top || ly > top + view) {
-				continue;
-			}
 			StableNet.Row r = line.row();
 			if (r == null) {
+				index = 0;
+			}
+			if (ly + line.h() < top || ly > top + view) {
+				index++;
+				continue;
+			}
+			if (r == null) {
 				boolean heading = line.h() == HEADING_H;
-				graphics.text(this.font, line.heading(), x + PAD + (heading ? 0 : 6), ly + 3, heading ? QuestScreen.COLOR_GOLD : QuestScreen.COLOR_DIM);
+				graphics.text(this.font, line.heading(), x + PAD + (heading ? 0 : 6), ly + 3, heading ? Ui.GOLD : Ui.DIM);
 				if (heading) {
-					graphics.fill(x + PAD, ly + HEADING_H - 2, x + PANEL_W - PAD, ly + HEADING_H - 1, 0x60B08A3C);
+					Ui.rule(graphics, x + PAD, x + PANEL_W - PAD, ly + HEADING_H - 2);
 				}
 				continue;
 			}
-			graphics.fill(x + PAD - 2, ly + 1, x + PANEL_W - PAD + 2, ly + ROW_H - 1, QuestScreen.COLOR_CARD);
+			boolean hover = inView && Ui.over(mouseX, mouseY, x + PAD - 2, ly + 1, PANEL_W - PAD * 2 + 4, ROW_H - 2);
+			Ui.row(graphics, x + PAD - 2, ly + 1, x + PANEL_W - PAD + 2, ly + ROW_H - 1, index++, hover);
+			if (hover) {
+				hoveredRow = r;
+			}
 			AbstractHorse model = r.horse().map(this::model).orElse(null);
 			if (model != null && drawHorse(graphics, model, x + PAD, ly + 1, x + PAD + ICON_W, ly + ROW_H - 1)) {
 				// drawn
 			} else {
 				graphics.item(r.icon(), x + PAD + 6, ly + 4);
 				graphics.itemDecorations(this.font, r.icon(), x + PAD + 6, ly + 4);
-				if (mouseX >= x + PAD + 6 && mouseX < x + PAD + 22 && mouseY >= ly + 4 && mouseY < ly + 20 && mouseY >= top && mouseY < top + view) {
+				if (inView && Ui.over(mouseX, mouseY, x + PAD + 6, ly + 4, 16, 16)) {
 					hovered = r.icon();
 				}
 			}
@@ -208,21 +223,24 @@ final class StableScreen extends Screen {
 				buttonsW += this.font.width(b.text()) + 15;
 			}
 			int textW = x + PANEL_W - PAD - buttonsW - textX - 2;
-			graphics.text(this.font, first(r.label(), textW), textX, ly + 3, QuestScreen.COLOR_TEXT);
-			graphics.text(this.font, first(r.detail(), textW), textX, ly + 13, QuestScreen.COLOR_DIM);
+			Ui.line(graphics, this.font, r.label(), textX, ly + 3, textW, Ui.TEXT);
+			Ui.line(graphics, this.font, r.detail(), textX, ly + 13, textW, Ui.DIM);
 		}
 		graphics.disableScissor();
-		if (maxScroll() > 0) {
-			// a thumb on the right edge
-			int barH = Math.max(12, view * view / contentH);
-			int barY = top + (view - barH) * scroll / maxScroll();
-			graphics.fill(x + PANEL_W - 4, barY, x + PANEL_W - 2, barY + barH, QuestScreen.COLOR_EDGE);
+		Ui.scrollbar(graphics, x + PANEL_W - 4, top, view, view, contentH, scroll);
+		// the box under the list: the hovered row in full, or what just happened (until the mouse moves off the button pressed)
+		if (firstX == Integer.MIN_VALUE) {
+			firstX = mouseX;
+			firstY = mouseY;
 		}
-		int ny = top + view + 2;
-		List<FormattedCharSequence> note = this.font.split(open.note(), PANEL_W - PAD * 2);
-		for (int i = 0; i < Math.min(3, note.size()); i++) {
-			graphics.centeredText(this.font, note.get(i), this.width / 2, ny, QuestScreen.COLOR_TEXT);
-			ny += 10;
+		moved |= Math.abs(mouseX - firstX) + Math.abs(mouseY - firstY) > 4;
+		if (hoveredRow != null && (moved || open.note().getString().isEmpty())) {
+			Ui.detail(graphics, this.font, x, top + view, PANEL_W, DETAIL_LINES, hoveredRow.label(), Ui.TEXT, List.of(hoveredRow.detail().copy().withColor(Ui.DIM)));
+		} else if (!open.note().getString().isEmpty()) {
+			Ui.detail(graphics, this.font, x, top + view, PANEL_W, DETAIL_LINES, Component.empty(), Ui.TEXT, List.of(open.note().copy().withColor(Ui.TEXT)));
+		} else {
+			Ui.detail(graphics, this.font, x, top + view, PANEL_W, DETAIL_LINES, Component.empty(), Ui.TEXT,
+				List.of(Component.translatable("gui.jaymoskingdoms.stable.hover").withColor(Ui.HINT)));
 		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 		if (!hovered.isEmpty()) {
@@ -271,18 +289,5 @@ final class StableScreen extends Screen {
 		Quaternionf rotation = new Quaternionf().rotateZ((float)Math.PI);
 		graphics.entity(state, size, new Vector3f(0.0F, state.boundingBoxHeight * 0.62F, 0.0F), rotation, null, x0, y0, x1, y1);
 		return true;
-	}
-
-	/** {@code text}'s first line within {@code width}. */
-	private FormattedCharSequence first(Component text, int width) {
-		List<FormattedCharSequence> split = this.font.split(text, Math.max(20, width));
-		return split.isEmpty() ? FormattedCharSequence.EMPTY : split.getFirst();
-	}
-
-	private static void edge(GuiGraphicsExtractor graphics, int x, int y, int w, int h, int color) {
-		graphics.fill(x, y, x + w, y + 1, color);
-		graphics.fill(x, y + h - 1, x + w, y + h, color);
-		graphics.fill(x, y, x + 1, y + h, color);
-		graphics.fill(x + w - 1, y, x + w, y + h, color);
 	}
 }

@@ -1,6 +1,5 @@
 package com.jaymospowers.client.tinkering;
 
-import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.tinkering.PartType;
 import com.jaymospowers.tinkering.TinkerMaterial;
 import com.jaymospowers.tinkering.ToolPartItem;
@@ -10,21 +9,21 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
-/** The Tool Station, on Tinkers' screen (MIT): parts around the big result slot; recipes or the result's stats to the right. */
+/**
+ * The Tool Station, laid out like Tinkers' screen (MIT): parts around the big result slot; recipes or the result's stats
+ * beside it. (0.10.127) Drawn like the H screen: dark panel, bronze stripe, sunken slots.
+ */
 public class ToolStationScreen extends AbstractContainerScreen<ToolStationMenu> {
-	private static final Identifier TEXTURE = JaymosPowers.id("textures/gui/tinkering/tool_station.png");
 	/** (0.8.125) Andy: an empty station shows each tool's parts in turn, this long apiece. */
 	static final long GHOST_CYCLE_MS = 1500L;
-	/** Laid over a ghost part so it reads as a faint outline: the slot's own grey, mostly opaque. */
-	static final int GHOST_FADE = 0x908B8B8B;
+	/** Laid over a ghost part so it reads as a faint outline: the slot's own dark, mostly opaque. */
+	static final int GHOST_FADE = 0xA80C0C12;
 	/** The tool whose outlines are showing (named in the recipe list), or null. */
 	private @Nullable ToolType shown;
 
@@ -36,10 +35,9 @@ public class ToolStationScreen extends AbstractContainerScreen<ToolStationMenu> 
 	@Override
 	public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		super.extractBackground(graphics, mouseX, mouseY, a);
-		graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, leftPos, topPos, 0.0F, 0.0F, imageWidth, imageHeight, 256, 256);
-		for (int[] at : ToolStationMenu.SLOT_AT) {
-			graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, leftPos + at[0] - 1, topPos + at[1] - 1, 0.0F, 238.0F, 18, 18, 256, 256);
-		}
+		TinkerUi.panel(graphics, leftPos, topPos, imageWidth, imageHeight);
+		TinkerUi.slots(graphics, menu, leftPos, topPos, ToolStationMenu.RESULT);
+		TinkerUi.arrowRight(graphics, leftPos + 80, topPos + 46, 22, TinkerUi.DIM);
 		PartType[] ghosts = ghosts();
 		for (int i = 0; i < ghosts.length; i++) {
 			if (ghosts[i] != null) {
@@ -77,6 +75,11 @@ public class ToolStationScreen extends AbstractContainerScreen<ToolStationMenu> 
 			}
 			SidePanel.draw(graphics, font, leftPos - SidePanel.WIDTH - 2, topPos, Component.translatable("gui.jaymospowers.tool_station.recipes"), lines);
 		}
+	}
+
+	@Override
+	protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+		TinkerUi.labels(graphics, font, title, titleLabelX, titleLabelY, playerInventoryTitle, inventoryLabelX, inventoryLabelY);
 	}
 
 	/**
