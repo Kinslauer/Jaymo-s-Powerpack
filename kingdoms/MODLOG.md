@@ -3031,7 +3031,7 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
   nightfall they yawn and say they're for bed; at dawn they stretch.
 - `Routines.free` now also excludes festival-goers and couriers (`Routines.freeOf` is the rest, for Festivals).
 
-## 0.7.47: everyone is a villager (pack 0.11.9)
+## 0.7.47: everyone is a villager (pack 0.11.12)
 - Andy: "lock everyone to make a villager instead of vanilla or player". MCA stores each player's body as
   Villager, Player (player-shaped with the villager skin) or Vanilla; `mixin/mca/McaVillagerBodyMixin` makes
   `VillagerLike.PlayerModel.byId` always answer VILLAGER, so every stored choice (old saves too) reads back as a
