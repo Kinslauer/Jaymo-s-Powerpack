@@ -55,6 +55,20 @@ public class WeaponPartItem extends Item {
 		}
 	}
 
+	/** "with a Crossguard and a Tough Handle", "on its own". */
+	public static Component with(WeaponParts.Assembly assembly) {
+		List<PartType> parts = assembly.parts;
+		return switch (parts.size()) {
+			case 0 -> Component.translatable("tooltip.jaymospowers.tinkering.weapon_part.alone");
+			case 1 -> Component.translatable("tooltip.jaymospowers.tinkering.weapon_part.with", name(parts.get(0)));
+			default -> Component.translatable("tooltip.jaymospowers.tinkering.weapon_part.with2", name(parts.get(0)), name(parts.get(1)));
+		};
+	}
+
+	private static Component name(PartType part) {
+		return Component.translatable("item.jaymospowers." + part.id);
+	}
+
 	@Override
 	@SuppressWarnings("deprecation")
 	public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> builder,
@@ -65,8 +79,6 @@ public class WeaponPartItem extends Item {
 			return;
 		}
 		builder.accept(Component.translatable("tooltip.jaymospowers.tinkering.weapon_part.makes", weapon.getHoverName()).withStyle(ChatFormatting.GOLD));
-		builder.accept(Component.translatable("tooltip.jaymospowers.tinkering.weapon_part",
-			Component.translatable("tooltip.jaymospowers.tinkering.weapon_part." + kind.assembly().name().toLowerCase(java.util.Locale.ROOT)))
-			.withStyle(ChatFormatting.GRAY));
+		builder.accept(Component.translatable("tooltip.jaymospowers.tinkering.weapon_part", with(kind.assembly())).withStyle(ChatFormatting.GRAY));
 	}
 }

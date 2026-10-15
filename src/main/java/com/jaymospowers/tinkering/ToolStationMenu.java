@@ -21,7 +21,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * The Tool Station: parts in, a tool out, in any slot order. A tool and its head material repairs it (a broken tool
  * too); a tool and a modifier's items adds a level of it ({@link Modifier}); a tool and one part it uses swaps that part
- * in, the old one is lost. (0.11.76) A weapon head and what its kind takes (a Tool Handle and a Tool Binding, mostly) make that
+ * in, the old one is lost. (0.11.76) A weapon head and the parts its kind takes (a Tool Handle and a Tool Binding, mostly) make that
  * weapon ({@link WeaponParts}).
  */
 public class ToolStationMenu extends AbstractContainerMenu {
@@ -173,7 +173,8 @@ public class ToolStationMenu extends AbstractContainerMenu {
 	 * wrong). The rod and binding can be any material.
 	 */
 	private @Nullable ItemStack assembleWeapon() {
-		int head = -1, rods = 0, bindings = 0, others = 0;
+		int head = -1;
+		List<PartType> others = new ArrayList<>();
 		for (int i = 0; i < INPUTS; i++) {
 			ItemStack stack = inputs.getItem(i);
 			if (stack.isEmpty()) {
@@ -184,22 +185,23 @@ public class ToolStationMenu extends AbstractContainerMenu {
 					return ItemStack.EMPTY;
 				}
 				head = i;
-			} else if (stack.getItem() instanceof ToolPartItem part && part.part == PartType.TOOL_HANDLE) {
-				rods++;
-			} else if (stack.getItem() instanceof ToolPartItem part && part.part == PartType.TOOL_BINDING) {
-				bindings++;
+			} else if (stack.getItem() instanceof ToolPartItem part && ToolPartItem.material(stack) != null) {
+				others.add(part.part);
 			} else {
-				others++;
+				others.add(null);
 			}
 		}
 		if (head == -1) {
 			return null;
 		}
-		WeaponParts.Assembly assembly = ((WeaponPartItem) inputs.getItem(head).getItem()).kind.assembly();
-		int needRods = assembly == WeaponParts.Assembly.ROD_BINDING ? 1 : 0;
-		int needBindings = assembly == WeaponParts.Assembly.ALONE ? 0 : 1;
+		List<PartType> needed = new ArrayList<>(((WeaponPartItem) inputs.getItem(head).getItem()).kind.assembly().parts);
 		ItemStack out = WeaponPartItem.weapon(inputs.getItem(head));
-		if (out == null || others > 0 || rods != needRods || bindings != needBindings) {
+		for (PartType part : others) {
+			if (!needed.remove(part)) {
+				return ItemStack.EMPTY;
+			}
+		}
+		if (out == null || !needed.isEmpty()) {
 			return ItemStack.EMPTY;
 		}
 		for (int i = 0; i < INPUTS; i++) {

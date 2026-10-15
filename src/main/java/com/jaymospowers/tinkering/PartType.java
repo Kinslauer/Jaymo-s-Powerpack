@@ -11,7 +11,9 @@ public enum PartType {
 	LARGE_PLATE("large_plate", Kind.HEAD, 4),
 	TOOL_HANDLE("tool_handle", Kind.HANDLE, 1),
 	TOUGH_HANDLE("tough_handle", Kind.HANDLE, 3),
-	TOOL_BINDING("tool_binding", Kind.BINDING, 1);
+	TOOL_BINDING("tool_binding", Kind.BINDING, 1),
+	/** (0.11.76) Swords' guards, for weapon heads ({@link WeaponParts}); no Tinkering tool uses it. */
+	CROSSGUARD("crossguard", Kind.HANDLE, 1);
 
 	/** Which of a material's stats a part uses. */
 	public enum Kind { HEAD, HANDLE, BINDING }

@@ -49,6 +49,8 @@ PARTS = [
     ("tool_handle", "Tool Handle", "handle", "parts/tool_handle", (0, 0)),
     ("tough_handle", "Tough Handle", "handle", "parts/tough_handle", (0, 0)),
     ("tool_binding", "Tool Binding", "binding", "parts/tool_binding", (0, 0)),
+    # (0.11.76) for swords' weapon heads (tinkering/WeaponParts), drawn from Tinkers' sword guard
+    ("crossguard", "Crossguard", "handle", "sword/guard", (3, -3)),
 ]
 PART_KIND = {p[0]: p[2] for p in PARTS}
 # shorter names for the Tool Station's recipe list
@@ -134,6 +136,8 @@ INGOTS = [("rose_gold_ingot", "Rose Gold Ingot", "rose_gold_ingot"),
           ("amethyst_bronze_ingot", "Amethyst Bronze Ingot", "amethyst_bronze_ingot"),
           ("pig_iron_ingot", "Pig Iron Ingot", "pigiron_ingot"), ("slimesteel_ingot", "Slimesteel Ingot", "slimesteel_ingot")]
 CASTS = ["ingot", "nugget"] + [p[0] for p in PARTS]
+# casts Tinkers has no sprite for
+CAST_SPRITE = {"crossguard": "tool_binding"}
 
 # (0.11.76) weapon casts (tinkering/WeaponParts)
 WEAPON_CAST_LANG = {
@@ -379,6 +383,16 @@ def stations(tcon):
         src = os.path.join(tex, "gui", "tinker_pattern", icon + ".png")
         if os.path.exists(src):
             copy_png(src, "gui/tinkering/icon/" + icon)
+        elif icon == "crossguard":
+            # (0.11.76) Tinkers has no pattern icon for it: the guard's outline in the icons' grey
+            guard = shifted(sprite(tcon, "sword/guard", "iron"), (3, -3))
+            out = Image.new("RGBA", guard.size, (0, 0, 0, 0))
+            for y in range(guard.size[1]):
+                for x in range(guard.size[0]):
+                    if guard.getpixel((x, y))[3] > 0:
+                        out.putpixel((x, y), (50, 50, 50, 255))
+            dest = os.path.join(ASSETS, "textures", "gui", "tinkering", "icon", "crossguard.png")
+            out.save(dest)
         else:
             print("no icon for", icon)
     shutil.copyfile(os.path.join(os.path.dirname(os.path.abspath(__file__)), "tinkers_license.txt"),
@@ -455,7 +469,7 @@ def smeltery(tcon):
         model("item/tinkering/" + item, "minecraft:item/generated", "item/tinkering/" + item)
         write(os.path.join(ASSETS, "items", item + ".json"), {"model": ref("item/tinkering/" + item)})
     for cast in CASTS:
-        copy_png(os.path.join(tex, "item", "cast", cast + ".png"), "item/tinkering/cast/" + cast)
+        copy_png(os.path.join(tex, "item", "cast", CAST_SPRITE.get(cast, cast) + ".png"), "item/tinkering/cast/" + cast)
         model("item/tinkering/cast/" + cast, "minecraft:item/generated", "item/tinkering/cast/" + cast)
         write(os.path.join(ASSETS, "items", cast + "_cast.json"), {"model": ref("item/tinkering/cast/" + cast)})
     # (0.11.76) the weapon cast looks like the small blade's (weapon heads: tools/weapon_parts_assets.py)

@@ -16,9 +16,10 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.11.76) Andy: "all weapons should be forged", the Tinkers way. Every stone and metal weapon (Armory's, Balkon's
- * WeaponMod's, vanilla spears) is put together at the Tool Station from its own head or blade (a Claymore Blade), a Tool
- * Handle and a Tool Binding. Stone heads are shaped at the Part Builder; pour gold over any head on a casting table for its cast,
- * then iron, gold or copper over the cast for a metal head. Their crafting recipes are switched off in data
+ * WeaponMod's, vanilla spears) is put together at the Tool Station from its own head or blade (a Claymore Blade) and
+ * the parts its {@link Assembly} names (mostly a Tool Handle and a Tool Binding). Stone heads are shaped at the Part
+ * Builder; pour gold over any head on a casting table for its cast, then iron, gold or copper over the cast for a metal
+ * head. Their crafting recipes are switched off in data
  * (tools/armory_assets.py, tools/tinkering_assets.py) and Balkon's by id ({@link Uncraftable}). Textures:
  * tools/weapon_parts_assets.py.
  */
@@ -26,8 +27,21 @@ public final class WeaponParts {
 	/** How a kind names its tiers: Armory {@code iron_dagger}, Balkon {@code knife.iron}, or one item made in iron only. */
 	public enum Scheme { PREFIX, SUFFIX, SINGLE }
 
-	/** What else the Tool Station needs besides the head. */
-	public enum Assembly { ROD_BINDING, BINDING, ALONE }
+	/**
+	 * What else the Tool Station needs besides the head, any material. (0.11.76) Andy: the big weapons take a Tough
+	 * Handle, swords a Crossguard.
+	 */
+	public enum Assembly {
+		ROD_BINDING(PartType.TOOL_HANDLE, PartType.TOOL_BINDING), TOUGH_BINDING(PartType.TOUGH_HANDLE, PartType.TOOL_BINDING),
+		GUARD_ROD(PartType.CROSSGUARD, PartType.TOOL_HANDLE), GUARD_TOUGH(PartType.CROSSGUARD, PartType.TOUGH_HANDLE),
+		BINDING(PartType.TOOL_BINDING), ALONE();
+
+		public final List<PartType> parts;
+
+		Assembly(PartType... parts) {
+			this.parts = List.of(parts);
+		}
+	}
 
 	/** What a head is made of: stone (Part Builder) or a cast metal. */
 	public enum Metal {
@@ -113,21 +127,21 @@ public final class WeaponParts {
 
 	static {
 		// Jaymo's Armory (round shields stay craftable, like iron armour)
-		armory("dagger_blade", "dagger", 1);
-		armory("hatchet_head", "hatchet", 2);
-		armory("skewer_head", "skewer", 1);
-		armory("longsword_blade", "longsword", 2);
-		armory("glaive_blade", "glaive", 2);
-		armory("lance_tip", "lance", 1);
-		armory("war_axe_head", "war_axe", 2);
-		armory("war_scythe_blade", "war_scythe", 2);
-		armory("flanged_mace_head", "flanged_mace", 4);
-		armory("broadsword_blade", "broadsword", 4);
-		armory("claymore_blade", "claymore", 5);
-		armory("cleaver_blade", "cleaver", 4);
-		armory("ninjato_blade", "ninjato", 2);
-		armory("saber_blade", "saber", 2);
-		armory("machete_blade", "machete", 2);
+		armory("dagger_blade", "dagger", 1, Assembly.ROD_BINDING);
+		armory("hatchet_head", "hatchet", 2, Assembly.ROD_BINDING);
+		armory("skewer_head", "skewer", 1, Assembly.ROD_BINDING);
+		armory("longsword_blade", "longsword", 2, Assembly.GUARD_ROD);
+		armory("glaive_blade", "glaive", 2, Assembly.ROD_BINDING);
+		armory("lance_tip", "lance", 1, Assembly.ROD_BINDING);
+		armory("war_axe_head", "war_axe", 2, Assembly.ROD_BINDING);
+		armory("war_scythe_blade", "war_scythe", 2, Assembly.ROD_BINDING);
+		armory("flanged_mace_head", "flanged_mace", 4, Assembly.ROD_BINDING);
+		armory("broadsword_blade", "broadsword", 4, Assembly.GUARD_ROD);
+		armory("claymore_blade", "claymore", 5, Assembly.GUARD_TOUGH);
+		armory("cleaver_blade", "cleaver", 4, Assembly.ROD_BINDING);
+		armory("ninjato_blade", "ninjato", 2, Assembly.GUARD_ROD);
+		armory("saber_blade", "saber", 2, Assembly.GUARD_ROD);
+		armory("machete_blade", "machete", 2, Assembly.ROD_BINDING);
 		add(new Kind("kunai_blade", "jaymospowers:kunai", Scheme.SINGLE, INGOT, Assembly.BINDING, 4));
 		add(new Kind("throwing_star_blank", "jaymospowers:throwing_star", Scheme.SINGLE, 4 * Molten.NUGGET, Assembly.ALONE, 2));
 		add(new Kind("harpoon_head", "jaymospowers:harpoon", Scheme.SINGLE, INGOT, Assembly.ROD_BINDING, 1));
@@ -135,25 +149,25 @@ public final class WeaponParts {
 		// vanilla spears
 		add(new Kind("spear_tip", "minecraft:spear", Scheme.PREFIX, INGOT, Assembly.ROD_BINDING, 1));
 		// Balkon's WeaponMod (the musket bayonet is still a musket and a knife put together)
-		balkon("knife_blade", "knife", 1);
-		balkon("spear_head", "spear", 1);
-		balkon("halberd_head", "halberd", 3);
-		balkon("battleaxe_head", "battleaxe", 5);
-		balkon("warhammer_head", "warhammer", 4);
-		balkon("katana_blade", "katana", 2);
-		balkon("flail_head", "flail", 1);
-		balkon("boomerang_edge", "boomerang", 1);
+		balkon("knife_blade", "knife", 1, Assembly.ROD_BINDING);
+		balkon("spear_head", "spear", 1, Assembly.ROD_BINDING);
+		balkon("halberd_head", "halberd", 3, Assembly.TOUGH_BINDING);
+		balkon("battleaxe_head", "battleaxe", 5, Assembly.TOUGH_BINDING);
+		balkon("warhammer_head", "warhammer", 4, Assembly.TOUGH_BINDING);
+		balkon("katana_blade", "katana", 2, Assembly.GUARD_ROD);
+		balkon("flail_head", "flail", 1, Assembly.ROD_BINDING);
+		balkon("boomerang_edge", "boomerang", 1, Assembly.ROD_BINDING);
 	}
 
 	private WeaponParts() {
 	}
 
-	private static void armory(String part, String base, int ingots) {
-		add(new Kind(part, "jaymospowers:" + base, Scheme.PREFIX, ingots * INGOT, Assembly.ROD_BINDING, 1));
+	private static void armory(String part, String base, int ingots, Assembly assembly) {
+		add(new Kind(part, "jaymospowers:" + base, Scheme.PREFIX, ingots * INGOT, assembly, 1));
 	}
 
-	private static void balkon(String part, String base, int ingots) {
-		add(new Kind(part, "weaponmod:" + base, Scheme.SUFFIX, ingots * INGOT, Assembly.ROD_BINDING, 1));
+	private static void balkon(String part, String base, int ingots, Assembly assembly) {
+		add(new Kind(part, "weaponmod:" + base, Scheme.SUFFIX, ingots * INGOT, assembly, 1));
 	}
 
 	private static void add(Kind kind) {

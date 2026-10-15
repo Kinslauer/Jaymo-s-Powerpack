@@ -217,15 +217,14 @@ public final class TinkeringJei implements IModPlugin {
 		}
 	}
 
-	/** (0.11.76) Each weapon from its head (every metal it comes in), a Tool Handle and a Tool Binding of any material. */
+	/** (0.11.76) Each weapon from its head (every metal it comes in) and the parts its kind takes, any material. */
 	private static void weaponAssembly(List<SimpleCategory.Recipe> recipes) {
-		List<ItemStack> rods = new ArrayList<>(), bindings = new ArrayList<>();
-		for (TinkerMaterial material : TinkerMaterial.values()) {
-			if (material.makes(PartType.Kind.HANDLE)) {
-				rods.add(ToolPartItem.of(PartType.TOOL_HANDLE, material, 1));
-			}
-			if (material.makes(PartType.Kind.BINDING)) {
-				bindings.add(ToolPartItem.of(PartType.TOOL_BINDING, material, 1));
+		Map<PartType, List<ItemStack>> anyMaterial = new EnumMap<>(PartType.class);
+		for (PartType part : PartType.values()) {
+			for (TinkerMaterial material : TinkerMaterial.values()) {
+				if (material.makes(part.kind)) {
+					anyMaterial.computeIfAbsent(part, p -> new ArrayList<>()).add(ToolPartItem.of(part, material, 1));
+				}
 			}
 		}
 		for (WeaponParts.Kind kind : WeaponParts.loaded()) {
@@ -236,11 +235,8 @@ public final class TinkeringJei implements IModPlugin {
 				}
 				List<List<ItemStack>> inputs = new ArrayList<>();
 				inputs.add(List.of(head));
-				if (kind.assembly() == WeaponParts.Assembly.ROD_BINDING) {
-					inputs.add(rods);
-				}
-				if (kind.assembly() != WeaponParts.Assembly.ALONE) {
-					inputs.add(bindings);
+				for (PartType part : kind.assembly().parts) {
+					inputs.add(anyMaterial.get(part));
 				}
 				recipes.add(new SimpleCategory.Recipe(inputs, List.of(weapon), List.of()));
 			}

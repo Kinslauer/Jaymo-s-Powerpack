@@ -1354,5 +1354,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   or blade (Claymore Blade, Knife Blade...): shape it from stone at the Part Builder (arrows page to the weapon heads),
   pour gold over it on a casting table for its Weapon Cast, pour iron, gold or copper over the cast for a metal head,
   then put the head, a Tool Handle and a Tool Binding together at the Tool Station (`tinkering/WeaponParts`; textures cut from
-  the weapons' sprites by `tools/weapon_parts_assets.py`). Kunai take just a binding, throwing star blanks nothing.
+  the weapons' sprites by `tools/weapon_parts_assets.py`). Andy: the big weapons (claymore, battleaxe, warhammer,
+  halberd) take a Tough Handle, and swords (longsword, broadsword, claymore, saber, ninjato, katana) a new Tinkering
+  part, the Crossguard, in place of the binding. Kunai take just a binding, throwing star blanks nothing.
   Wooden weapons, round shields and the musket bayonet stay craftable.
