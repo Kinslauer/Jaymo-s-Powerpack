@@ -57,12 +57,6 @@ final class CombatRollTaps {
 		if (sinceLastTap < Integer.MAX_VALUE) {
 			sinceLastTap++;
 		}
-		// Jump + Sneak held together is the crawl (CrawlTaps), not a roll
-		if (minecraft.options.keyJump.isDown()) {
-			sinceLastTap = Integer.MAX_VALUE;
-			sneakWasDown = sneak;
-			return;
-		}
 		if (sneak && !sneakWasDown) {
 			if (sinceLastTap <= DOUBLE_TAP_TICKS) {
 				roll.setDown(true);
