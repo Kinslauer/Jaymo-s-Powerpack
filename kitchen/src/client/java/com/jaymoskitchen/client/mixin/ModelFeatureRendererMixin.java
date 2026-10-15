@@ -19,6 +19,7 @@ abstract class ModelFeatureRendererMixin {
 		shift = At.Shift.AFTER))
 	private void jaymoskitchen$limpCorpse(ModelFeatureRenderer.Submit<?> submit, CallbackInfo ci) {
 		Model<?> model = submit.model();
+		com.jaymoskitchen.client.corpse.ZombiePlayerRenderer.armsOut(model, submit.state());
 		Limp.apply(model, submit.state());
 		CarryPose.apply(model, submit.state());
 		com.jaymoskitchen.client.corpse.CrawlPose.apply(model, submit.state());
