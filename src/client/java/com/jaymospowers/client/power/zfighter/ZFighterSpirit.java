@@ -131,7 +131,7 @@ public final class ZFighterSpirit {
 	}
 
 	/** A ball of {@link #LON} by {@link #LAT} faces, the texture wrapped round it and turning; both sides drawn. */
-	private static void sphere(VertexConsumer buffer, PoseStack.Pose pose, Vec3 c, float radius, int color, float uShift, float vShift) {
+	static void sphere(VertexConsumer buffer, PoseStack.Pose pose, Vec3 c, float radius, int color, float uShift, float vShift) {
 		for (int i = 0; i < LAT; i++) {
 			float t0 = Mth.PI * i / LAT;
 			float t1 = Mth.PI * (i + 1) / LAT;

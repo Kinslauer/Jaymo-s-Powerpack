@@ -16,6 +16,7 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.blockentity.BeaconRenderer;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -25,8 +26,8 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 
 /**
- * Ki drawn as end crystal orbs: the crystal's two spinning glass cages round its turning core (the end crystal's own
- * texture), tinted the ki's colour and lit from within. Every blast in flight and the ki gathering in the hands; the
+ * Ki drawn as orbs: plain glowing balls of the ki's colour round a white-hot heart (no end crystal cage). Darktide's
+ * Drown still draws water held in end crystal cages ({@link #waterOrb}). Every blast in flight and the ki gathering in the hands; the
  * server sends where each one is every tick ({@link ZFighterNet.KiOrbs}). They stand in for most of the old particles.
  */
 public final class ZFighterOrbs {
@@ -39,6 +40,8 @@ public final class ZFighterOrbs {
 	/** Water orbs: how much slower than ki they turn, how far they slosh out of round, and how see-through (0-255). */
 	static final float WATER_SPIN = 0.2F, WATER_WOBBLE = 0.06F;
 	static final int WATER_CAGE_ALPHA = 140, WATER_HEART_ALPHA = 95;
+	/** Ki orbs: the heart's share of the radius, how much the ball breathes, how fast its energy streams. */
+	static final float ORB_HEART = 0.55F, ORB_PULSE = 0.04F, ORB_FLOW = 0.05F;
 	private static final float SIN_45 = (float)Math.sin(Math.PI / 4.0);
 
 	private static ModelPart glass;
@@ -117,35 +120,30 @@ public final class ZFighterOrbs {
 	}
 
 	/**
-	 * One end crystal orb {@code size} blocks across at {@code at} (camera-relative), {@code color} (RGB) its tint,
-	 * {@code fade} (0-1) how solid. Also used for the ends of the ki beams.
+	 * One ki orb {@code size} blocks across at {@code at} (camera-relative): a plain ball of the ki's colour, see-through
+	 * at the rim, round a white-hot heart, energy streaming over it. {@code color} (RGB) its colour, {@code fade} (0-1)
+	 * how solid. Also used for the ends of the ki beams.
 	 */
 	static void orb(SubmitNodeCollector collector, PoseStack poseStack, Vec3 at, float size, int color, float time, float fade) {
 		if (size <= 0.01F || fade <= 0.01F) {
 			return;
 		}
-		if (glass == null) {
-			glass = part(0);
-			core = part(32);
+		float f = Mth.clamp(fade, 0.0F, 1.0F);
+		float r = size * 0.5F * (1.0F + ORB_PULSE * Mth.sin(time * 0.4F));
+		int heart = 0xFF000000 | whiten(color, 0.75F);
+		int glow = (int)(0xB0 * f) << 24 | (color & 0xFFFFFF);
+		int rim = (int)(0x70 * f) << 24 | lighten(color);
+		float spin = time * ORB_FLOW;
+		// the heart shrinks away as the orb fades, the rest thins out
+		float heartR = r * ORB_HEART * f;
+		if (heartR > 0.005F) {
+			collector.submitCustomGeometry(poseStack, RenderTypes.beaconBeam(BeaconRenderer.BEAM_LOCATION, false),
+				(pose, buffer) -> ZFighterSpirit.sphere(buffer, pose, at, heartR, heart, spin * 1.7F, spin * 1.5F));
 		}
-		RenderType type = RenderTypes.entityTranslucentEmissive(TEXTURE);
-		int alpha = (int)(Mth.clamp(fade, 0.0F, 1.0F) * 255.0F);
-		int cage = (alpha * 3 / 4) << 24 | lighten(color);
-		int heart = alpha << 24 | (color & 0xFFFFFF);
-		poseStack.pushPose();
-		poseStack.translate(at.x, at.y, at.z);
-		// the cube is 8 pixels (half a block) across
-		float scale = size * 2.0F;
-		poseStack.scale(scale, scale, scale);
-		turn(poseStack, time);
-		collector.submitModelPart(glass, poseStack, type, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, null, cage);
-		poseStack.scale(0.875F, 0.875F, 0.875F);
-		turn(poseStack, time);
-		collector.submitModelPart(glass, poseStack, type, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, null, cage);
-		poseStack.scale(0.765625F, 0.765625F, 0.765625F);
-		turn(poseStack, time);
-		collector.submitModelPart(core, poseStack, type, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, null, heart);
-		poseStack.popPose();
+		collector.submitCustomGeometry(poseStack, RenderTypes.beaconBeam(BeaconRenderer.BEAM_LOCATION, true),
+			(pose, buffer) -> ZFighterSpirit.sphere(buffer, pose, at, r * 0.85F, glow, -spin, spin));
+		collector.submitCustomGeometry(poseStack, RenderTypes.beaconBeam(BeaconRenderer.BEAM_LOCATION, true),
+			(pose, buffer) -> ZFighterSpirit.sphere(buffer, pose, at, r, rim, spin, -spin * 0.7F));
 	}
 
 	/**
@@ -184,12 +182,7 @@ public final class ZFighterOrbs {
 		poseStack.popPose();
 	}
 
-	/** As the end crystal turns its cages: round the up axis, tipped onto a corner. */
-	private static void turn(PoseStack poseStack, float time) {
-		turn(poseStack, time, 1.0F);
-	}
-
-	/** {@link #turn(PoseStack, float)} at {@code rate} times the speed (negative: the other way). */
+	/** As the end crystal turns its cages, round the up axis, tipped onto a corner, at {@code rate} times the speed (negative: the other way). */
 	private static void turn(PoseStack poseStack, float time, float rate) {
 		poseStack.rotate(Axis.YP.rotationDegrees(time * SPIN * rate));
 		poseStack.rotate(new Quaternionf().setAngleAxis((float)(Math.PI / 3.0), SIN_45, 0.0F, SIN_45));
@@ -200,6 +193,14 @@ public final class ZFighterOrbs {
 		int r = (rgb >> 16 & 0xFF) + 255 >> 1;
 		int g = (rgb >> 8 & 0xFF) + 255 >> 1;
 		int b = (rgb & 0xFF) + 255 >> 1;
+		return r << 16 | g << 8 | b;
+	}
+
+	/** {@code rgb} {@code amount} (0-1) of the way to white. */
+	private static int whiten(int rgb, float amount) {
+		int r = (int)Mth.lerp(amount, rgb >> 16 & 0xFF, 255);
+		int g = (int)Mth.lerp(amount, rgb >> 8 & 0xFF, 255);
+		int b = (int)Mth.lerp(amount, rgb & 0xFF, 255);
 		return r << 16 | g << 8 | b;
 	}
 
