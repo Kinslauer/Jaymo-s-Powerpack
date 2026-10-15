@@ -36,7 +36,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Z (Power Mode), the Immense Field: a dome of heavy gravity set down where you aim (or around you), for a while.
  * Everyone inside but you is heavy: slowed, low-jumping, falling fast. It's for training: a Z Fighter inside trains at
- * double the rate (the Z Fighter power asks {@link #inField}), and you earn mastery for every minute one spends in it.
+ * double the rate (the Z Fighter power asks {@link #inField}), and shadowboxing in it (the Meditate key) far more; you
+ * earn mastery for every minute one spends shadowboxing in it.
  * Z again takes it down. Once the Gravity Well (G) is yours.
  */
 public final class GravityTrainingField {
@@ -46,7 +47,7 @@ public final class GravityTrainingField {
 	static final int COOLDOWN = 1800;
 	/** Extra pull down on anything in the air inside (blocks a tick, each tick). */
 	static final double PULL = 0.05;
-	/** A Z Fighter's minutes in the field: each gives the field's owner one use towards mastery. */
+	/** A Z Fighter's minutes shadowboxing in the field: each gives the field's owner one use towards mastery. */
 	static final int MASTERY_TICKS = 1200;
 	static final int COLOR = 0x8A6CFF;
 	/** Hunger the field costs its owner each tick it stands, fresh (4 exhaustion = half a shank): about 5 shanks a full field. */
@@ -174,7 +175,9 @@ public final class GravityTrainingField {
 				inside.addDeltaMovement(new Vec3(0.0, -PULL, 0.0));
 				inside.syncVelocity = true;
 			}
-			if (inside instanceof Player player && Powers.has(player, com.jaymospowers.power.zfighter.ZFighterPower.INSTANCE)) {
+			// a Z Fighter trains here by shadowboxing (the Meditate key): only that counts toward the owner's mastery
+			if (inside instanceof Player player && Powers.has(player, com.jaymospowers.power.zfighter.ZFighterPower.INSTANCE)
+				&& com.jaymospowers.core.Meditate.shadowboxing(player)) {
 				int trained = TRAINED.merge(player.getUUID(), 1, Integer::sum);
 				if (trained % MASTERY_TICKS == 0) {
 					Mastery.used(owner);
