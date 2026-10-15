@@ -117,6 +117,10 @@ public final class SmokeField {
 	private static final Map<ResourceKey<Level>, Field> FIELDS = new HashMap<>();
 	/** Players who were last sent some smoke: they get one empty field when it's all gone or out of range. */
 	private static final Set<UUID> SENT = new HashSet<>();
+	/** Mastered Smokescreen's bank: until when (game time) each owner's (entity id) smoke ignores the wind and fades slowly. */
+	private static final Map<Integer, Long> BANKED = new HashMap<>();
+	/** A banked cloud fades this many times slower. */
+	static final float BANK_SLOWER = 3.0F;
 
 	private SmokeField() {
 	}
@@ -126,6 +130,7 @@ public final class SmokeField {
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			FIELDS.clear();
 			SENT.clear();
+			BANKED.clear();
 		});
 	}
 
@@ -188,6 +193,11 @@ public final class SmokeField {
 	}
 
 	// ---------------------------------------------------------------- making smoke
+
+	/** Banks {@code owner}'s smoke until game time {@code until}: it stays put (no wind) and fades {@link #BANK_SLOWER}x slower. */
+	static void bank(Entity owner, long until) {
+		BANKED.merge(owner.getId(), until, Math::max);
+	}
 
 	/**
 	 * Adds {@code amount} of smoke at {@code at}, made by {@code owner} (or null). What the block can't hold spills
@@ -394,6 +404,8 @@ public final class SmokeField {
 		Direction downwindX = windX >= 0 ? Direction.EAST : Direction.WEST;
 		Direction downwindZ = windZ >= 0 ? Direction.SOUTH : Direction.NORTH;
 		float decayScale = field.crowded ? 3.0F : 1.0F;
+		long now = level.getGameTime();
+		BANKED.values().removeIf(until -> until < now);
 
 		Long2FloatOpenHashMap from = field.density;
 		Long2FloatOpenHashMap next = new Long2FloatOpenHashMap(from.size() * 2);
@@ -416,12 +428,15 @@ public final class SmokeField {
 			boolean duct = kindOf(here) == CONDUIT;
 			cursor.set(key);
 			boolean open = !duct && level.canSeeSky(cursor);
+			int owner = field.owner.get(key);
+			// a banked cloud (mastered Smokescreen) fades slower and the wind leaves it be
+			boolean banked = owner != 0 && !BANKED.isEmpty() && BANKED.containsKey(owner);
+			float scaleHere = banked ? decayScale / BANK_SLOWER : decayScale;
 			float decay = DECAY + (open ? OPEN_DECAY + (level.isRainingAt(cursor) ? RAIN_DECAY : 0.0F) : 0.0F);
-			float keep = d * (1.0F - FADE * decayScale) - decay * decayScale;
+			float keep = d * (1.0F - FADE * scaleHere) - decay * scaleHere;
 			if (keep <= 0.0F) {
 				continue;
 			}
-			int owner = field.owner.get(key);
 			float soot = field.soot.get(key);
 			int n = 0;
 			// up: inside a chimney it's drawn up hard
@@ -450,7 +465,7 @@ public final class SmokeField {
 				flow[n++] = diff * share * open(cell);
 			}
 			// downwind, under the sky
-			if (open) {
+			if (open && !banked) {
 				long x = BlockPos.offset(key, downwindX);
 				float cellX = cellAt(level, cells, x, cursor);
 				if (cellX > 0.0F) {

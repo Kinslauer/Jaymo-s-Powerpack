@@ -2,6 +2,7 @@ package com.jaymospowers.client.power.smoke;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.power.smoke.SmokeNet;
+import com.jaymospowers.power.smoke.SmokeSight;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import it.unimi.dsi.fastutil.longs.Long2FloatOpenHashMap;
@@ -43,6 +44,8 @@ public final class SmokeFieldClient {
 	static final int RANGE = 56;
 	/** How see-through your own smoke is drawn. */
 	static final float OWN_ALPHA = 0.5F;
+	/** Your own smoke with Smoke Sight on: barely there. */
+	static final float OWN_ALPHA_SIGHT = 0.15F;
 	/** The grey your view goes in thick smoke, and the thickness that greys it out completely. */
 	static final int VIEW_GREY = 0x8E9094;
 	static final float VIEW_FULL = 1.6F;
@@ -144,6 +147,7 @@ public final class SmokeFieldClient {
 		Vec3 camera = context.levelState().cameraRenderState.pos;
 		Quaternionf facing = context.levelState().cameraRenderState.orientation;
 		float time = age + partial;
+		float ownAlpha = minecraft.player != null && SmokeSight.on(minecraft.player) ? OWN_ALPHA_SIGHT : OWN_ALPHA;
 		// gather the puffs first, then draw them in one go
 		int most = (now.size() + before.size()) * 3;
 		float[] puffs = new float[most * PUFF];
@@ -168,7 +172,7 @@ public final class SmokeFieldClient {
 					continue;
 				}
 				int light = LightCoordsUtil.getLightCoords(minecraft.level, cursor.set(x, y, z));
-				float own = yours.contains(key) ? OWN_ALPHA : 1.0F;
+				float own = yours.contains(key) ? ownAlpha : 1.0F;
 				int n = d >= 1.8F ? 3 : d >= 0.6F ? 2 : 1;
 				for (int i = 0; i < n; i++) {
 					long h = mix(key * 31L + i);

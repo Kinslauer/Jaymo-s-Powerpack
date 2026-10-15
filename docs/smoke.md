@@ -64,6 +64,25 @@ Hold X (`power/smoke/SmokeJet`): a jet of smoke along your look, 14 blocks, wide
 shove; 0.025 hunger a tick, stops at 6 food. While it runs the player carries the tag `jaymospowers_jet:smoke`, which
 Kingdoms' ships read to fill their sails (half a Wind user's Wind Whistle). Drawn by `client/power/smoke/SmokeJetClient`.
 
-## Stage 2 (proposed, not built)
-Z Smoke Sight, X Smoke Step, C Pyroclasm (ascended), corrupted Smog (toxic smoke), cure at Y 200+ in clean air,
-Vapour Form through 1-block gaps.
+## The rest of the power
+Plan: `/mnt/project-files/smoke/Smoke-Plan.md` (Andy, 2026-10-15): base kit, Smog (corrupted), Cloudshaper (ascended:
+harness clouds, stop tornadoes building and weaken them), Ash Storm (both: kill or create a tornado).
+
+## Stage 1: the base kit finished (0.10.110)
+- **Smoke Sight, Z** (`SmokeSight`, client `SmokeSightClient` + `SmokeSightGlowMixin`/`SmokeSightOutlineMixin`): a
+  toggle (`smoke_sight` attachment, synced to the user) for anyone past the starter. Creatures within 32 blocks with
+  0.5+ smoke (anyone's) at their feet or eyes are outlined through walls on the user's screen only, pale grey, near
+  black for `Enemy`. Your own smoke is drawn at 15% instead of 50%. 0.004 hunger a tick.
+- **Smoke Step, Sneak + X** (`SmokeStep`; the jet's Hold packet with Sneak held): along your look (32 blocks, through
+  walls) the first block holding 1.0+ of your own smoke; you come out there (or a block below/above, wherever you fit).
+  Puffs at both ends. Cooldown 6 s (4 s mastered), its own `SmokeState.STEP` slot.
+- **Wholly smoke** (Andy: "unlocked at max mastery, vapour flight makes you completely intangible while sprint flying,
+  meaning your whole body becomes smoke"): fully mastered, cruising in Vapour Form tells the server (`SmokeVapour.Whole`
+  packet) and it sets `smoke_wholly` (synced to all). While it holds: all damage refused but `bypasses_invulnerability`;
+  no attacks (`AttackEntityCallback`) and no G/V/B/X/Step; `SmokeIntangibleMixin` (shots pass), `SmokePushMixin` (no
+  pushing either way), `SmokePoseMixin` (swimming-pose box, so 1-block holes fit), `SmokeSeepMixin` (both sides: any
+  block whose collision isn't a full cube has none for them: doors, fences, bars, panes, trapdoors, slabs). The body,
+  armour, held items, cape and parrots aren't drawn; a body-sized cloud streams instead and the trail is thicker.
+  Stopping the cruise brings the body back.
+- **Bank** (mastered Smokescreen): while pouring and 20 s after, the user's smoke (by owner) ignores the wind and fades
+  3x slower (`SmokeField.bank`).
