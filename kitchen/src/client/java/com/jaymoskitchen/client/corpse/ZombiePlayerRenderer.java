@@ -3,7 +3,6 @@ package com.jaymoskitchen.client.corpse;
 import com.jaymoskitchen.JaymosKitchen;
 import com.jaymoskitchen.corpse.ZombiePlayer;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
@@ -39,9 +38,11 @@ public class ZombiePlayerRenderer extends LivingEntityRenderer<ZombiePlayer, Zom
 	private final ZombiePlayerModel slim;
 
 	public ZombiePlayerRenderer(EntityRendererProvider.Context context) {
-		super(context, new ZombiePlayerModel(context.bakeLayer(ModelLayers.PLAYER)), 0.5F);
+		// (0.4.42) the player corpse's layers, not the vanilla player ones: Fresh Animations would walk it like a player,
+		// arms down, over its zombie arms (see CorpseRenderer#PLAYER_BODY)
+		super(context, new ZombiePlayerModel(context.bakeLayer(CorpseRenderer.PLAYER_BODY)), 0.5F);
 		this.wide = this.model;
-		this.slim = new ZombiePlayerModel(context.bakeLayer(ModelLayers.PLAYER_SLIM));
+		this.slim = new ZombiePlayerModel(context.bakeLayer(CorpseRenderer.PLAYER_BODY_SLIM));
 		addLayer(new ItemInHandLayer<>(this));
 		addLayer(new Tatters(this, new ZombiePlayerModel(context.bakeLayer(ZombiePlayerModel.TATTERS)),
 			new ZombiePlayerModel(context.bakeLayer(ZombiePlayerModel.TATTERS_SLIM))));
