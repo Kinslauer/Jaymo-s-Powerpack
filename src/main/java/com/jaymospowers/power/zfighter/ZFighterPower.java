@@ -199,6 +199,12 @@ public final class ZFighterPower implements Power {
 	/** Charging ki right now, for everyone's client (the stance): the form he's in plus one; absent when he isn't. */
 	public static final AttachmentType<Integer> CHARGE = AttachmentRegistry.create(JaymosPowers.id("zfighter_charge"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+	/**
+	 * Hands raised to a Spirit Bomb, for everyone's client (the pose): the one raising it, and everyone lending to it (any
+	 * player, Z Fighter or not). Absent otherwise; not saved.
+	 */
+	public static final AttachmentType<Boolean> SPIRIT_HANDS = AttachmentRegistry.create(JaymosPowers.id("zfighter_spirit_hands"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	/** The form he's in (1-3), for everyone's client (the hair); absent in base form. */
 	public static final AttachmentType<Integer> FORM = AttachmentRegistry.create(JaymosPowers.id("zfighter_form"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));

@@ -224,6 +224,7 @@ final class ZFighterTechniques {
 			cancel(player, live);
 			return;
 		}
+		lenders(player);
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		// his own ki first
@@ -279,10 +280,80 @@ final class ZFighterTechniques {
 		}
 	}
 
-	/** What a living thing near gives each second: animals a little, folk more, players only if they sneak to lend it. */
+	/** Who is lending to whose Spirit Bomb: lender → the one raising it. */
+	private static final Map<UUID, UUID> LENDERS = new java.util.HashMap<>();
+
+	/**
+	 * Each tick of a Spirit Bomb: its raiser's hands are up; a player near who sneaks raises theirs and lends from then on,
+	 * sneaking or not, until they jump, go too far, fall, or the bomb is thrown or fizzles.
+	 */
+	private static void lenders(ServerPlayer raiser) {
+		hands(raiser, true);
+		UUID id = raiser.getUUID();
+		for (ServerPlayer other : raiser.level().players()) {
+			if (other == raiser || !other.isAlive() || other.isSpectator()) {
+				continue;
+			}
+			boolean near = other.distanceToSqr(raiser) <= SPIRIT_RANGE * SPIRIT_RANGE;
+			UUID lendsTo = LENDERS.get(other.getUUID());
+			if (lendsTo == null) {
+				if (near && other.isShiftKeyDown()) {
+					LENDERS.put(other.getUUID(), id);
+					hands(other, true);
+					other.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_spirit_lending").withStyle(ChatFormatting.AQUA));
+				}
+			} else if (lendsTo.equals(id) && (!near || other.getLastClientInput().jump())) {
+				LENDERS.remove(other.getUUID());
+				hands(other, false);
+			}
+		}
+	}
+
+	/** The bomb is gone: everyone lending to {@code raiser} lowers their hands, and so does {@code raiser}. */
+	private static void endLending(ServerPlayer raiser) {
+		hands(raiser, false);
+		UUID id = raiser.getUUID();
+		var server = raiser.level().getServer();
+		LENDERS.entrySet().removeIf(entry -> {
+			if (!entry.getValue().equals(id)) {
+				return false;
+			}
+			ServerPlayer lender = server.getPlayerList().getPlayer(entry.getKey());
+			if (lender != null) {
+				hands(lender, false);
+			}
+			return true;
+		});
+	}
+
+	/** Lenders whose raiser left, died or stopped without saying so lower their hands (every second). */
+	static void sweepLenders(net.minecraft.server.MinecraftServer server) {
+		LENDERS.entrySet().removeIf(entry -> {
+			ServerPlayer lender = server.getPlayerList().getPlayer(entry.getKey());
+			ServerPlayer raiser = server.getPlayerList().getPlayer(entry.getValue());
+			boolean gone = lender == null || !lender.isAlive() || raiser == null || !raiser.isAlive() || ZFighterPower.live(raiser).spiritFrom < 0
+				|| lender.level() != raiser.level();
+			if (gone && lender != null) {
+				hands(lender, false);
+			}
+			return gone;
+		});
+	}
+
+	private static void hands(ServerPlayer player, boolean up) {
+		if (up) {
+			if (!Boolean.TRUE.equals(player.getAttached(ZFighterPower.SPIRIT_HANDS))) {
+				player.setAttached(ZFighterPower.SPIRIT_HANDS, true);
+			}
+		} else {
+			player.removeAttached(ZFighterPower.SPIRIT_HANDS);
+		}
+	}
+
+	/** What a living thing near gives each second: animals a little, folk more, players only while they lend it. */
 	private static float lends(LivingEntity entity) {
 		if (entity instanceof ServerPlayer player) {
-			return player.isShiftKeyDown() ? SPIRIT_PLAYER : 0.0F;
+			return LENDERS.containsKey(player.getUUID()) ? SPIRIT_PLAYER : 0.0F;
 		}
 		if (entity instanceof Npc) {
 			return SPIRIT_FOLK;
@@ -317,6 +388,7 @@ final class ZFighterTechniques {
 		}
 		float energy = live.spiritEnergy;
 		Vec3 from = spherePos(player, live);
+		endLending(player);
 		live.spiritFrom = -1L;
 		live.spiritEnergy = 0.0F;
 		double size = size(energy);
@@ -336,6 +408,7 @@ final class ZFighterTechniques {
 		if (live.spiritFrom < 0) {
 			return;
 		}
+		endLending(player);
 		live.spiritFrom = -1L;
 		live.spiritEnergy = 0.0F;
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 1.0F, 0.8F);

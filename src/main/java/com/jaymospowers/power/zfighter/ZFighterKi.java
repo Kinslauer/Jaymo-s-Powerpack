@@ -335,6 +335,9 @@ public final class ZFighterKi {
 		}
 		sendOrbs();
 		NOVAS.removeIf(ZFighterKi::tickNova);
+		if (server.getTickCount() % 20 == 0) {
+			ZFighterTechniques.sweepLenders(server);
+		}
 		for (Iterator<Beam> it = BEAMS.iterator(); it.hasNext(); ) {
 			Beam beam = it.next();
 			drawBeam(beam);

@@ -78,6 +78,7 @@
   "hud.jaymospowers.zfighter.rage": "RAGE",
   "message.jaymospowers.zfighter_rage": "Rage! Your fists burn and nothing costs ki.",
   "message.jaymospowers.zfighter_spirit_ask": "%s is raising a Spirit Bomb. Sneak to lend your energy.",
+  "message.jaymospowers.zfighter_spirit_lending": "You lend your energy to the Spirit Bomb. Jump to stop.",
   "message.jaymospowers.zfighter_spirit_thrown": "The Spirit Bomb falls!",
   "message.jaymospowers.zfighter_spirit_wait": "The Spirit Bomb isn't ready yet.",
   "message.jaymospowers.zfighter_technique_learned": "You've learned %s.",
