@@ -47,9 +47,10 @@ public final class SmokePowerClient implements PowerClient {
 		ClientTickEvents.END_CLIENT_TICK.register(SmokeFlightPose::tick);
 	}
 
-	/** From the avatar renderer's extractRenderState (everyone): Vapour Form's smoke legs. */
-	public static void extract(Avatar entity, AvatarRenderState state) {
+	/** From the avatar renderer's extractRenderState (everyone): Vapour Form's smoke legs and every move's pose. */
+	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
 		SmokeFlightPose.extract(entity, state);
+		SmokeMovePose.extract(entity, state, partialTicks);
 	}
 
 	@Override

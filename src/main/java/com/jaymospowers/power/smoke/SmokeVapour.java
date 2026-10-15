@@ -35,8 +35,12 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * R, Vapour Form: everything below your waist turns to smoke and you fly on it, Wind-style (the client flies you:
- * {@code SmokeFlightClient}; hover, Sprint to cruise, S to brake). R again comes back down, as does Sneak on the ground.
+ * R, Vapour Form: a mode you switch on and off ({@link #ARMED}). While it's on, breaking into a sprint turns everything
+ * below your waist to smoke and you shoot off along your look, Wind-style (the client flies you: {@code SmokeFlightClient}).
+ * The cruise holds its speed without Sprint held; S brakes, and slowed right down you hover (Sprint again to cruise).
+ * Sprinting keeps you a torso on smoke; Shift (fully mastered) turns the whole body to smoke and back ({@link #WHOLLY}),
+ * so Shift no longer sinks. R switches the mode off (and lands you); standing on the ground a while lands you too, the
+ * mode staying on. A Smoke user never takes fall damage: the legs go to smoke as they hit (Andy, 2026-10-15).
  * It costs hunger, more the faster you go, and ends when you're too hungry. Your smoke half pours a thick trail into
  * the {@link SmokeField}; arrows and other shots pass through it (blows, fire and blasts still land). Everyone sees the
  * smoke legs ({@link #FORM}).
@@ -56,22 +60,28 @@ public final class SmokeVapour {
 	/** Standing on the ground this long (after the take-off's grace) ends it. */
 	static final int GROUNDED_TICKS = 30;
 	static final int TAKEOFF_GRACE = 10;
+	/** Smoke spilled round the feet on a hard landing (before the doubling every move gets). */
+	static final float LANDING_SMOKE = 2.5F;
 
 	/** On a player in Vapour Form: synced to everyone, who draw the smoke legs. */
 	public static final AttachmentType<Boolean> FORM = AttachmentRegistry.create(JaymosPowers.id("smoke_vapour"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 
 	/**
-	 * Fully mastered, cruising (Sprint) in Vapour Form turns the whole body to smoke: on a player who is, synced to
+	 * Fully mastered, Shift in Vapour Form turns the whole body to smoke (Shift again turns it back): on a player who is, synced to
 	 * everyone (no body drawn, and blocks short of a full cube don't stop them on either side). Intangible: nothing hurts
 	 * them, shots and creatures pass through, and they can't attack or use abilities.
 	 */
 	public static final AttachmentType<Boolean> WHOLLY = AttachmentRegistry.create(JaymosPowers.id("smoke_wholly"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/** On a Smoke user with Vapour Form switched on (R): sprinting turns them to smoke. Synced to them only (the HUD). */
+	public static final AttachmentType<Boolean> ARMED = AttachmentRegistry.create(JaymosPowers.id("smoke_vapour_armed"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.targetOnly()));
+
 	/** Smoke a tick the whole smoke body pours out, on top of the trail. */
 	static final float WHOLLY_TRAIL = 0.5F;
 
-	/** Client → server: the local flier started ({@code on}) or stopped cruising, for the whole-body smoke. */
+	/** Client → server: the local flier turned wholly to smoke ({@code on}, Shift) or back. */
 	public record Whole(boolean on) implements CustomPacketPayload {
 		public static final Type<Whole> TYPE = new Type<>(JaymosPowers.id("smoke_wholly"));
 		public static final StreamCodec<ByteBuf, Whole> CODEC = ByteBufCodecs.BOOL.map(Whole::new, Whole::on);
@@ -98,6 +108,12 @@ public final class SmokeVapour {
 		// wholly smoke can't strike anything
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> wholly(player) ? InteractionResult.FAIL : InteractionResult.PASS);
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
+			if (entity instanceof ServerPlayer player && source.is(DamageTypeTags.IS_FALL) && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)
+				&& Powers.has(player, SmokePower.INSTANCE)) {
+				// a Smoke user never takes a fall: the legs go to smoke as they hit and spill out round them
+				softLanding(player);
+				return false;
+			}
 			if (!(entity instanceof ServerPlayer player) || !active(player) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
 				return true;
 			}
@@ -119,17 +135,30 @@ public final class SmokeVapour {
 		});
 	}
 
+	/** A fall that would have hurt: a second of smoke legs (SmokeMoves.LAND) and a spill of smoke round the feet. */
+	private static void softLanding(ServerPlayer player) {
+		ServerLevel level = player.level();
+		Vec3 at = player.position().add(0.0, 0.3, 0.0);
+		if (!active(player)) {
+			SmokeMoves.begin(player, SmokeMoves.LAND);
+		}
+		SmokeField.puff(level, at, LANDING_SMOKE, player);
+		level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y, at.z, 40, 0.9, 0.1, 0.9, 0.08);
+		level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, at.x, at.y, at.z, 6, 0.6, 0.1, 0.6, 0.02);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.8F, 0.6F);
+	}
+
 	/** In Vapour Form (both sides). */
 	public static boolean active(Player player) {
 		return player.getAttached(FORM) != null && Powers.has(player, SmokePower.INSTANCE);
 	}
 
-	/** Wholly smoke: in Vapour Form, fully mastered and cruising (both sides). */
+	/** Wholly smoke: in Vapour Form, fully mastered, switched on with Shift (both sides). */
 	public static boolean wholly(Player player) {
 		return player.getAttached(WHOLLY) != null && active(player);
 	}
 
-	/** From the client: cruising began or ended. Only a fully mastered flier in Vapour Form goes wholly to smoke. */
+	/** From the client: Shift turned the whole body to smoke or back. Only a fully mastered flier in Vapour Form goes wholly to smoke. */
 	static void setWhole(ServerPlayer player, boolean on) {
 		boolean can = on && active(player) && SmokePower.mastered(player);
 		if (can == (player.getAttached(WHOLLY) != null)) {
@@ -145,13 +174,30 @@ public final class SmokeVapour {
 		}
 	}
 
-	/** R: into Vapour Form, or back out of it. */
+	/** Vapour Form is switched on (both sides). */
+	public static boolean armed(Player player) {
+		return player.getAttached(ARMED) != null && Powers.has(player, SmokePower.INSTANCE);
+	}
+
+	/** R: Vapour Form switched on (sprint to take off; already sprinting, off you go), or off (landing you). */
 	static void toggle(ServerPlayer player) {
-		if (player.getAttached(FORM) != null) {
-			end(player);
-		} else if (SmokePower.ready(player, SmokeState.VAPOUR)) {
-			start(player);
+		if (player.getAttached(ARMED) != null) {
+			disarm(player);
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.smoke_vapour_off").withStyle(ChatFormatting.GRAY));
+			return;
 		}
+		player.setAttached(ARMED, true);
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.smoke_vapour_on").withStyle(ChatFormatting.GRAY));
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.4F, 1.4F);
+		SmokeMoves.begin(player, SmokeMoves.ARM);
+	}
+
+	/** The mode off, and back to flesh if in the form. */
+	static void disarm(ServerPlayer player) {
+		if (player.getAttached(ARMED) != null) {
+			player.removeAttached(ARMED);
+		}
+		end(player);
 	}
 
 	static void start(ServerPlayer player) {
@@ -176,6 +222,10 @@ public final class SmokeVapour {
 
 	static void tick(ServerPlayer player) {
 		if (player.getAttached(FORM) == null) {
+			// switched on: breaking into a sprint takes off (the client goes straight into a cruise)
+			if (player.getAttached(ARMED) != null && player.isSprinting() && SmokePower.ready(player, SmokeState.VAPOUR)) {
+				start(player);
+			}
 			return;
 		}
 		ServerLevel level = player.level();
@@ -183,9 +233,8 @@ public final class SmokeVapour {
 		long since = level.getGameTime() - SmokePower.state(player).vapourFrom();
 		int grounded = player.onGround() && since > TAKEOFF_GRACE ? GROUNDED.getOrDefault(id, 0) + 1 : 0;
 		GROUNDED.put(id, grounded);
-		// landed (Sneak on the ground, or stood there a while), out of food, or something else has the body
-		if (!player.isAlive() || !WindFlight.canFly(player) || player.isFallFlying() || spent(player)
-			|| grounded > 0 && player.isShiftKeyDown() || grounded >= GROUNDED_TICKS) {
+		// landed (stood on the ground a while), out of food, or something else has the body
+		if (!player.isAlive() || !WindFlight.canFly(player) || player.isFallFlying() || spent(player) || grounded >= GROUNDED_TICKS) {
 			end(player);
 			return;
 		}

@@ -108,6 +108,7 @@ final class SmokeAshStorm {
 		}
 		STORMS.put(player.getUUID(), now);
 		SmokePower.cooldown(player, SmokeState.ASH, COOLDOWN);
+		SmokeMoves.begin(player, SmokeMoves.ASH);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 1.5F, 0.5F);
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, player.getX(), player.getY() + 1.0, player.getZ(), 60, 1.0, 1.0, 1.0, 0.2);
 	}

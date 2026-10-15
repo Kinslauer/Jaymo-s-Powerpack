@@ -2,6 +2,7 @@ package com.jaymospowers.client.power.smoke;
 
 import com.jaymospowers.client.Dismembered;
 import com.jaymospowers.client.power.wind.WindPose;
+import com.jaymospowers.power.smoke.SmokeMoves;
 import com.jaymospowers.power.smoke.SmokeVapour;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.minecraft.client.Minecraft;
@@ -17,8 +18,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * How Vapour Form looks, on everyone's screen (from the synced {@link SmokeVapour#FORM}): no legs (and no leggings or
- * boots), only a thick tail of smoke pouring from the waist, straight down while hovering and streaming out behind at
+ * How Vapour Form looks, on everyone's screen (from the synced {@link SmokeVapour#FORM}; also for a second after a hard
+ * landing, {@link SmokeMoves#LAND}, when the smoke spills out flat): no legs (and no leggings or boots), only a thick tail
+ * of smoke pouring from the waist, straight down while hovering and streaming out behind at
  * speed, where Wind's pose lays the flier out flat ({@link #cruising}).
  */
 public final class SmokeFlightPose {
@@ -28,12 +30,15 @@ public final class SmokeFlightPose {
 	/** Someone else moving at least this fast (blocks a tick) in Vapour Form is taken to be cruising. */
 	static final double CRUISE_SPEED = 0.6;
 	/** Smoke a tick from the waist: big dark puffs and pale wisps; fewer from your own in first person (they'd fill the view). */
-	static final int PUFFS = 4, WISPS = 3, OWN_FIRST_PERSON = 2;
+	static final int PUFFS = 8, WISPS = 6, OWN_FIRST_PERSON = 3;
 	/** How far the tail reaches below the waist (blocks, the legs' length) and how fast it pours. */
 	static final double TAIL = 0.9, POUR = 0.12;
 	/** Wholly smoke: extra puffs a tick for the rest of the body, and the body height the cloud keeps. */
-	static final int WHOLE_PUFFS = 5;
+	static final int WHOLE_PUFFS = 10;
 	static final double STANDING = 1.8;
+	/** A hard landing's spill: puffs a tick, and how fast they roll out along the ground. */
+	static final int SPILL = 6;
+	static final double SPILL_SPEED = 0.12;
 
 	private static final String[] LEGS = {"right_leg", "left_leg", "right_pants", "left_pants"};
 
@@ -62,7 +67,33 @@ public final class SmokeFlightPose {
 			if (SmokeVapour.active(player) && !player.isInvisible()) {
 				boolean own = player == minecraft.player && minecraft.options.getCameraType().isFirstPerson();
 				pour(level, player, own);
+			} else if (landing(player) && !player.isInvisible()) {
+				spill(level, player);
 			}
+		}
+	}
+
+	/** Landed hard (SmokeMoves.LAND): the legs are smoke for a second. */
+	static boolean landing(Player player) {
+		SmokeMoves.Move move = SmokeMoves.get(player);
+		Minecraft minecraft = Minecraft.getInstance();
+		if (move == null || move.kind() != SmokeMoves.LAND || minecraft.level == null) {
+			return false;
+		}
+		long t = minecraft.level.getGameTime() - move.start();
+		return t >= 0 && t < SmokeMoves.length(SmokeMoves.LAND);
+	}
+
+	/** The smoke legs of a hard landing spilling out flat round the feet. */
+	private static void spill(ClientLevel level, Player player) {
+		RandomSource random = player.getRandom();
+		Vec3 hips = player.position().add(0.0, player.getBbHeight() * 0.35, 0.0);
+		for (int i = 0; i < SPILL; i++) {
+			double a = random.nextDouble() * Math.PI * 2.0;
+			double out = SPILL_SPEED * (0.5 + random.nextDouble());
+			Vec3 at = hips.add(random.nextGaussian() * 0.15, -random.nextDouble() * 0.7, random.nextGaussian() * 0.15);
+			level.addParticle(random.nextInt(3) == 0 ? ParticleTypes.WHITE_SMOKE : ParticleTypes.LARGE_SMOKE, at.x, at.y, at.z, Math.cos(a) * out,
+				-0.01, Math.sin(a) * out);
 		}
 	}
 
@@ -116,7 +147,7 @@ public final class SmokeFlightPose {
 
 	/** From the avatar renderer's extractRenderState: no leggings or boots on smoke. */
 	static void extract(Avatar entity, AvatarRenderState state) {
-		boolean form = entity instanceof Player player && SmokeVapour.active(player);
+		boolean form = entity instanceof Player player && (SmokeVapour.active(player) || landing(player));
 		state.setData(KEY, form ? Boolean.TRUE : null);
 		if (form) {
 			state.legsEquipment = net.minecraft.world.item.ItemStack.EMPTY;
