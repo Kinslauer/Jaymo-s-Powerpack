@@ -17,6 +17,9 @@ import net.minecraft.world.phys.Vec3;
  * The Spider-Sense tingle: three faint lightning bolts that flash over a web slinger's head for as long as a dodge's
  * counter window is open ({@link WebCounter#sensing}). Everyone sees them over the head; in first person, your own
  * flash at the top of the screen instead.
+ *
+ * <p>(0.11.32) And your own screen's edges flash white as the window opens, then glow faintly in time with the bolts
+ * until it shuts (any camera): you can counter now.
  */
 final class WebSenseBolts {
 	/** Pale gold, and how faint it is at its brightest (alpha 0-255). */
@@ -31,6 +34,11 @@ final class WebSenseBolts {
 	private static final float FLASH_TICKS = 6.0F, FLASH_LIT = 0.55F;
 	/** The screen version: how big a bolt is, and how far down from the top it sits (gui pixels). */
 	private static final int HUD_SIZE = 10, HUD_TOP = 6, HUD_GAP = 14;
+	/** (0.11.32) The white edge flash: its strongest alpha (0-255), the opening flare's length (ticks) and what's left
+	 * of it after, how deep the frame is (share of the smaller screen side) and how many soft steps it's drawn in. */
+	private static final int EDGE_ALPHA = 170;
+	private static final float EDGE_FLARE_TICKS = 6.0F, EDGE_GLOW = 0.35F, EDGE_DEPTH = 0.22F;
+	private static final int EDGE_STEPS = 10;
 
 	private WebSenseBolts() {
 	}
@@ -97,10 +105,15 @@ final class WebSenseBolts {
 	/** First person: your own bolts, at the top of the screen. */
 	static void renderHud(GuiGraphicsExtractor graphics, Player player) {
 		Minecraft minecraft = Minecraft.getInstance();
+		float t = WebCounter.sensing(player, minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false));
+		if (t >= 0.0F) {
+			// a white flare as it opens, then a faint glow in time with the bolts
+			float flare = t < EDGE_FLARE_TICKS ? 1.0F - t / EDGE_FLARE_TICKS : 0.0F;
+			edges(graphics, Math.max(flare, EDGE_GLOW * flash(t)));
+		}
 		if (!minecraft.options.getCameraType().isFirstPerson()) {
 			return;
 		}
-		float t = WebCounter.sensing(player, minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false));
 		float lit = t < 0.0F ? 0.0F : flash(t);
 		if (lit <= 0.02F) {
 			return;
@@ -116,6 +129,28 @@ final class WebSenseBolts {
 				int px = x + kink - 1 + b * i / 3;
 				graphics.fill(px, y + i, px + 1, y + i + 1, color);
 			}
+		}
+	}
+
+	/** A white frame round the screen's edges, soft towards the middle, {@code strength} 0-1. */
+	private static void edges(GuiGraphicsExtractor graphics, float strength) {
+		int alpha = Math.round(EDGE_ALPHA * Mth.clamp(strength, 0.0F, 1.0F));
+		if (alpha <= 2) {
+			return;
+		}
+		int width = graphics.guiWidth(), height = graphics.guiHeight();
+		int step = Math.max(1, (int)(Math.min(width, height) * EDGE_DEPTH) / EDGE_STEPS);
+		for (int i = 0; i < EDGE_STEPS; i++) {
+			int a = alpha * (EDGE_STEPS - i) * (EDGE_STEPS - i) / (EDGE_STEPS * EDGE_STEPS);
+			if (a <= 0) {
+				break;
+			}
+			int c = ARGB.color(a, 0xFFFFFF);
+			int o = i * step;
+			graphics.fill(o, o, width - o, o + step, c);
+			graphics.fill(o, height - o - step, width - o, height - o, c);
+			graphics.fill(o, o + step, o + step, height - o - step, c);
+			graphics.fill(width - o - step, o + step, width - o, height - o - step, c);
 		}
 	}
 }

@@ -1285,3 +1285,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   have pages too (`kitchen/MODLOG.md`). JEI's cheat mode is kept off (`JeiCheats`; the server allows no JEI cheats), since
   with it on a left click asked for the item, was refused and did nothing; JEI's mouse keys are set once more (v2):
   left click shows the recipe, right click the uses (`KeyConflicts`).
+- **0.11.32, the counter flashes white:** when a Spider-Sense dodge opens the counter window, your screen's edges flare
+  white, then glow faintly in time with the sense bolts until it shuts, in any camera (`WebSenseBolts.edges`).
