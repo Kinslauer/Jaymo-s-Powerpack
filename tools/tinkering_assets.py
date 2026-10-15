@@ -135,7 +135,7 @@ INGOTS = [("rose_gold_ingot", "Rose Gold Ingot", "rose_gold_ingot"),
           ("pig_iron_ingot", "Pig Iron Ingot", "pigiron_ingot"), ("slimesteel_ingot", "Slimesteel Ingot", "slimesteel_ingot")]
 CASTS = ["ingot", "nugget"] + [p[0] for p in PARTS]
 
-# (0.11.69) weapon casts (tinkering/smeltery/WeaponCasts)
+# (0.11.70) weapon casts (tinkering/smeltery/WeaponCasts)
 WEAPON_CAST_LANG = {
     "item.jaymospowers.weapon_cast": "Weapon Cast",
     "tooltip.jaymospowers.tinkering.weapon_cast.makes": "Casts: %s",
@@ -458,7 +458,7 @@ def smeltery(tcon):
         copy_png(os.path.join(tex, "item", "cast", cast + ".png"), "item/tinkering/cast/" + cast)
         model("item/tinkering/cast/" + cast, "minecraft:item/generated", "item/tinkering/cast/" + cast)
         write(os.path.join(ASSETS, "items", cast + "_cast.json"), {"model": ref("item/tinkering/cast/" + cast)})
-    # (0.11.69) the weapon cast looks like the small blade's
+    # (0.11.70) the weapon cast looks like the small blade's
     write(os.path.join(ASSETS, "items", "weapon_cast.json"), {"model": ref("item/tinkering/cast/small_blade")})
 
     # molten metal: animated in the world (block atlas), its first frame for the screen
@@ -573,7 +573,7 @@ OFF_TOOLS = ("pickaxe", "axe", "shovel", "hoe", "sword")
 OFF_ARMOUR = ("golden", "diamond")
 ARMOUR = ("helmet", "chestplate", "leggings", "boots")
 # Andy: no craftable diamond weapons at all (Armory's skip their recipe in tools/armory_assets.py, WeaponMod's are
-# dropped by tinkering/Uncraftable). (0.11.69) Andy: all weapons are forged, so the metal spears are cast instead
+# dropped by tinkering/Uncraftable). (0.11.70) Andy: all weapons are forged, so the metal spears are cast instead
 # (tinkering/smeltery/WeaponCasts)
 OFF_WEAPONS = ("diamond_spear", "copper_spear", "iron_spear", "golden_spear")
 

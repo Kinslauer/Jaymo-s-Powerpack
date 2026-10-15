@@ -20,7 +20,7 @@ public final class Uncraftable {
 		"weaponmod:musketbayonet.diamond");
 
 	/**
-	 * (0.11.69) Andy: "all weapons should be forged". Balkon's iron, gold and copper weapons are cast in the smeltery
+	 * (0.11.70) Andy: "all weapons should be forged". Balkon's iron, gold and copper weapons are cast in the smeltery
 	 * instead ({@code smeltery/WeaponCasts}); the musket bayonet stays a musket and a (cast) knife put together.
 	 */
 	static final Set<String> FORGED = forged();

@@ -70,7 +70,7 @@ SINGLES = [
     ("throwing_star", "Throwing Star", "edo_period/throwing_star", None, None, [" N ", "N N", " N "], 2),
 ]
 SINGLE_KEYS = {"stone_cudgel": {"X": "#minecraft:stone_tool_materials"}}
-# (0.11.69) Andy: "all weapons should be forged". Metal weapons have no crafting recipe; they're cast in the smeltery
+# (0.11.70) Andy: "all weapons should be forged". Metal weapons have no crafting recipe; they're cast in the smeltery
 # (tinkering/smeltery/WeaponCasts). Round shields stay craftable, like iron armour.
 FORGED_TIERS = ("iron", "golden")
 FORGED_SINGLES = ("iron_quarterstaff", "harpoon", "kunai", "throwing_star")
@@ -242,7 +242,7 @@ def main(aow):
             if tier == "diamond":
                 pass  # (0.8.124) Andy: no craftable diamond weapons; the netherite ones still smith from loot
             elif tier in FORGED_TIERS and weapon != "round_shield":
-                pass  # (0.11.69) Andy: all weapons are forged; metal ones are cast (tinkering/smeltery/WeaponCasts)
+                pass  # (0.11.70) Andy: all weapons are forged; metal ones are cast (tinkering/smeltery/WeaponCasts)
             elif material:
                 shaped(item, pattern, dict(KEYS, X=material))
             else:

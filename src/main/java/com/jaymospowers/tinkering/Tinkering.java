@@ -70,7 +70,7 @@ public final class Tinkering {
 	public static DataComponentType<List<String>> TOOL_MATERIALS;
 	/** A part's material. */
 	public static DataComponentType<String> PART_MATERIAL;
-	/** (0.11.69) The kind of weapon a Weapon Cast casts ({@code smeltery/WeaponCasts}). */
+	/** (0.11.70) The kind of weapon a Weapon Cast casts ({@code smeltery/WeaponCasts}). */
 	public static DataComponentType<String> WEAPON_CAST;
 	/** A tool's modifiers (id to level), and the xp it has earned toward its next level. */
 	public static DataComponentType<Map<String, Integer>> TOOL_MODIFIERS;

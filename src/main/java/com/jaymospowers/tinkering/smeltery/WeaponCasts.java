@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.11.69) Andy: "all weapons should be forged". Metal weapons (Armory's, Balkon's WeaponMod's, vanilla spears) have
+ * (0.11.70) Andy: "all weapons should be forged". Metal weapons (Armory's, Balkon's WeaponMod's, vanilla spears) have
  * no crafting recipe; they're cast instead. Pour gold over any weapon of a kind on a casting table (a wooden or stone
  * one will do) to make a Weapon Cast of that kind, then pour iron, gold or copper over the cast for that weapon in that
  * metal. Their crafting recipes are switched off in data (tools/armory_assets.py, tools/tinkering_assets.py) and

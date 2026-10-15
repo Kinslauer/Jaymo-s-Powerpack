@@ -175,7 +175,7 @@ public final class TinkeringJei implements IModPlugin {
 		return recipes;
 	}
 
-	/** (0.11.69) Each kind of weapon: gold over any of them makes its cast, and metal over the cast makes the weapon. */
+	/** (0.11.70) Each kind of weapon: gold over any of them makes its cast, and metal over the cast makes the weapon. */
 	private static void weaponCasting(List<SimpleCategory.Recipe> recipes) {
 		for (WeaponCasts.Kind kind : WeaponCasts.KINDS.values()) {
 			if (WeaponCasts.results(kind).isEmpty()) {
