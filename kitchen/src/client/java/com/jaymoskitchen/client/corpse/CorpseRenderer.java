@@ -4,7 +4,10 @@ import com.jaymoskitchen.corpse.CorpseEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.geom.ModelLayers;
+import com.jaymoskitchen.JaymosKitchen;
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -68,13 +71,26 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		float flip;
 	}
 
+	/**
+	 * (0.4.42) A dead player's body: the player model, but baked from layers of its own. Entity Model Features finds
+	 * models by layer, so Fresh Animations: Player Extension's animations ran on the vanilla player layers as the body was
+	 * drawn, after its ragdoll pose (see Ragdoll, Flop), and stood its limbs back up. These layers have none.
+	 */
+	public static final ModelLayerLocation PLAYER_BODY = new ModelLayerLocation(JaymosKitchen.id("player_corpse"), "main");
+	public static final ModelLayerLocation PLAYER_BODY_SLIM = new ModelLayerLocation(JaymosKitchen.id("player_corpse"), "slim");
+
 	private final PlayerModel wide;
 	private final PlayerModel slim;
 
 	public CorpseRenderer(EntityRendererProvider.Context context) {
 		super(context);
-		this.wide = new PlayerModel(context.bakeLayer(ModelLayers.PLAYER), false);
-		this.slim = new PlayerModel(context.bakeLayer(ModelLayers.PLAYER_SLIM), true);
+		this.wide = new PlayerModel(context.bakeLayer(PLAYER_BODY), false);
+		this.slim = new PlayerModel(context.bakeLayer(PLAYER_BODY_SLIM), true);
+	}
+
+	/** The player model, as vanilla builds it (LayerDefinitions), for {@link #PLAYER_BODY}. */
+	public static LayerDefinition playerBody(boolean slim) {
+		return LayerDefinition.create(PlayerModel.createMesh(CubeDeformation.NONE, slim), 64, 64);
 	}
 
 	@Override

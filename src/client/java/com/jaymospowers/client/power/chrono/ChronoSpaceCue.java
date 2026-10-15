@@ -14,7 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.11.37) Time Flow's Space cue: a blow passed through an intangible Chrono. A red space bar flashes over their head
+ * (0.11.40) Time Flow's Space cue: a blow passed through an intangible Chrono. A red space bar flashes over their head
  * for everyone to see while it's open ({@link ChronoFlow#DODGE}), and their own screen's edges flash red, then glow in
  * time with the cue. The Space counter itself ({@link ChronoFlow#SPIN}) flashes the edges red again.
  */

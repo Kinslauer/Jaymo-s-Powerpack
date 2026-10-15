@@ -17,7 +17,7 @@ import org.joml.Matrix4f;
  * The body turned to its own "down", for everyone to see: walking on a wall it stands out from the wall, feet on it,
  * facing the way it looks along it; on a ceiling it hangs upside down, feet up; falling forward it dives head first
  * along the fall, belly to the ground. (The view stays upright: only the body turns, and not in your own first person.)
- * Since 0.11.37 Chrono's Overclock wall run stands on the wall the same way, facing straight up it, legs running.
+ * Since 0.11.40 Chrono's Overclock wall run stands on the wall the same way, facing straight up it, legs running.
  */
 public final class GravityWalkPose {
 	/** {@code up}: where the head points; {@code front}: where the chest faces; {@code feet}: where the feet go, from the entity's position. */

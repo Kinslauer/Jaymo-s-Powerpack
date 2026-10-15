@@ -62,7 +62,7 @@ import net.minecraft.world.phys.Vec3;
  * attackers at once, also knock everything in a short cone in front of you away.</li>
  * <li><b>Barrage:</b> C in Time Flow locks onto the enemy you look at for a flurry of {@link #BARRAGE_PUNCHES} punches
  * (only a counter breaks it off); the last one knocks everything in front of you away.</li>
- * <li><b>Intangible (0.11.37):</b> every right-click counter that lands leaves you intangible for {@link #INTANGIBLE_TICKS}:
+ * <li><b>Intangible (0.11.40):</b> every right-click counter that lands leaves you intangible for {@link #INTANGIBLE_TICKS}:
  * blows pass straight through you. One that does flashes your screen red and puts a Space cue over your head for
  * {@link #DODGE_TICKS}: press Space and you answer it with {@link #SPIN}, a spinning kick that throws everything around
  * you away. It costs one of the {@link #ROLL_CHARGES} roll charges you get each time you enter Time Flow.</li>
@@ -85,7 +85,7 @@ public final class ChronoFlow {
 	public static final int[] HIT_AT = {2, 3, 4, 5, 8, 4, 1, 0, 6};
 	/** Each style's damage (before the combo): low, so a zombie takes eight or nine blows from a fresh combo. */
 	static final float[] DAMAGE = {1.5F, 1.75F, 2.0F, 2.0F, 2.5F, 2.5F, 0.0F, 0.0F, 4.0F};
-	/** (0.11.37) After a right-click counter you're intangible this long; a blow through you opens the Space cue this long. */
+	/** (0.11.40) After a right-click counter you're intangible this long; a blow through you opens the Space cue this long. */
 	public static final int INTANGIBLE_TICKS = 40, DODGE_TICKS = 20;
 	/** Roll charges on entering Time Flow: each Space counter spends one. */
 	public static final int ROLL_CHARGES = 3;
@@ -194,7 +194,7 @@ public final class ChronoFlow {
 			ByteBufCodecs.VAR_INT, Reel::kind, ByteBufCodecs.VAR_INT, Reel::side, Reel::new);
 	}
 
-	/** (0.11.37) A blow passed through an intangible player: the Space cue is up until this game time (synced to all, who see it). */
+	/** (0.11.40) A blow passed through an intangible player: the Space cue is up until this game time (synced to all, who see it). */
 	public static final AttachmentType<Long> DODGE = AttachmentRegistry.create(JaymosPowers.id("chrono_flow_dodge"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
 	/** Roll charges left (synced to its owner, for the HUD). */
@@ -257,7 +257,7 @@ public final class ChronoFlow {
 
 	private static final class Fighter {
 		int combo;
-		/** (0.11.37) Blows pass through until then; the Space cue is open until {@code dodgeUntil}. */
+		/** (0.11.40) Blows pass through until then; the Space cue is open until {@code dodgeUntil}. */
 		long intangibleUntil = -100;
 		long dodgeUntil = -100;
 		int charges;
@@ -595,7 +595,7 @@ public final class ChronoFlow {
 	}
 
 	/**
-	 * (0.11.37) While intangible, a blow (from anyone, by any means) passes through you; the first opens the Space cue
+	 * (0.11.40) While intangible, a blow (from anyone, by any means) passes through you; the first opens the Space cue
 	 * (red flash on your screen, the cue over your head). True if it passed through.
 	 */
 	private static boolean intangible(ServerPlayer player, Entity attacker) {
@@ -746,7 +746,7 @@ public final class ChronoFlow {
 		}
 		fighter.lastCounter = now;
 		player.setAttached(MOVE, move);
-		// (0.11.37) a counter that lands leaves you out of step with time for a moment, and shakes the screen
+		// (0.11.40) a counter that lands leaves you out of step with time for a moment, and shakes the screen
 		fighter.intangibleUntil = Math.max(fighter.intangibleUntil, now + INTANGIBLE_TICKS);
 		com.jaymospowers.core.Shakes.send(player, COUNTER_SHAKE);
 	}

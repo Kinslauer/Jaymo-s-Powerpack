@@ -11,7 +11,7 @@ import org.jspecify.annotations.Nullable;
  * (0.10.28) Overclock's wall run, on the local player (movement is the client's to decide, so it's smooth): overclocked,
  * running into a wall with forward held, you run straight up it at {@link ChronoSpeed#WALL_CLIMB}. Sneak to let go.
  *
- * <p>(0.11.37) Straight up: held against the wall you face, with no sideways drift and no time limit while you hold
+ * <p>(0.11.40) Straight up: held against the wall you face, with no sideways drift and no time limit while you hold
  * forward; run off the top and you hop onto it. The server is told which wall, so everyone sees the body turned onto it,
  * legs running ({@link ChronoSpeed#WALL_RUN}).
  */

@@ -99,7 +99,7 @@ public final class ChronoFlowClient {
 	}
 
 	/**
-	 * (0.11.37) Space while the cue is open (a blow passed through you): the Space counter, if you have a roll charge.
+	 * (0.11.40) Space while the cue is open (a blow passed through you): the Space counter, if you have a roll charge.
 	 * The jump is taken for it; with no charge left, Space jumps as usual and a dull click says so.
 	 */
 	private static void spaceCounter(Minecraft minecraft, LocalPlayer player) {
@@ -398,7 +398,7 @@ public final class ChronoFlowClient {
 		return best;
 	}
 
-	/** The combo count, big and gold, over the crosshair; under it, the roll charges left (0.11.37). */
+	/** The combo count, big and gold, over the crosshair; under it, the roll charges left (0.11.40). */
 	static void renderHud(GuiGraphicsExtractor graphics, LocalPlayer player) {
 		ChronoSpaceCue.renderHud(graphics, player);
 		Integer charges = player.getAttached(ChronoFlow.CHARGES);

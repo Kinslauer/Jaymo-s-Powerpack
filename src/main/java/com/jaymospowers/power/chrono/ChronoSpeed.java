@@ -32,10 +32,10 @@ import net.minecraft.world.phys.Vec3;
  * <ul>
  * <li>Sprinting, you're far faster still ({@link #SPRINT_BOOST}) and stride up whole blocks without jumping.</li>
  * <li>Running into a wall holding forward, you run straight up it (the client drives it: {@code ChronoSpeedClient}).
- * Since 0.11.37 for as long as you hold forward, with no sideways drift, a hop onto the top, and the body turned onto
+ * Since 0.11.40 for as long as you hold forward, with no sideways drift, a hop onto the top, and the body turned onto
  * the wall, legs running, the way Gravity's wall walk stands on it ({@link #WALL_RUN}, drawn by {@code GravityWalkPose}).</li>
  * <li>Sprinting, water holds you up: you run across it (see {@code ChronoWaterRunMixin}).</li>
- * <li>(0.11.37) Holding Shift you walk at your normal speed (no Speed V, no sneaking slowdown): fine control.</li>
+ * <li>(0.11.40) Holding Shift you walk at your normal speed (no Speed V, no sneaking slowdown): fine control.</li>
  * <li>V again, facing a wall: you vibrate through it, up to {@link #PHASE_DEPTH} blocks thick, to the first space you
  * fit on the other side. Every {@link #PHASE_GAP} ticks at most.</li>
  * </ul>
@@ -113,7 +113,7 @@ public final class ChronoSpeed {
 		return player instanceof ServerPlayer sp && ChronoPower.overclocked(sp);
 	}
 
-	/** Water and (since 0.11.37) lava hold up an overclocked player who's sprinting. Slow down on lava and you sink in. */
+	/** Water and (since 0.11.40) lava hold up an overclocked player who's sprinting. Slow down on lava and you sink in. */
 	public static boolean runsOn(Player player, FluidState fluid) {
 		return (fluid.is(FluidTags.WATER) || fluid.is(FluidTags.LAVA)) && runsOnFluids(player);
 	}
@@ -159,7 +159,7 @@ public final class ChronoSpeed {
 	}
 
 	/**
-	 * (0.11.37) Shift while overclocked: back to plain walking speed. Whatever is speeding you up (Speed V and the rest)
+	 * (0.11.40) Shift while overclocked: back to plain walking speed. Whatever is speeding you up (Speed V and the rest)
 	 * is scaled away, and sneaking no longer slows you, so you move exactly as you'd walk. Updated only when it changes.
 	 */
 	private static void control(ServerPlayer player, boolean on) {

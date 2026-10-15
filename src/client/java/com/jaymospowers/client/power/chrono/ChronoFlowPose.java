@@ -103,7 +103,7 @@ public final class ChronoFlowPose {
 				h.body.yRot = side * -0.4F * e;
 			}
 			case ChronoFlow.SPIN -> {
-				// (0.11.37) the Space counter: a spinning kick, the leg swung out level, arms flung wide for the turn
+				// (0.11.40) the Space counter: a spinning kick, the leg swung out level, arms flung wide for the turn
 				float out = seg(p, 0.0F, 0.25F) * (1.0F - seg(p, 0.75F, 1.0F));
 				set(h.rightLeg, -0.2F, 0.0F, 1.35F, out);
 				set(h.leftLeg, 0.15F, 0.0F, -0.1F, out);

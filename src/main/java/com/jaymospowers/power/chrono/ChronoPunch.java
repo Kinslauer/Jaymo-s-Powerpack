@@ -125,7 +125,7 @@ final class ChronoPunch {
 			ChronoFx.particles(level, player, ParticleTypes.CRIT, at.x, at.y, at.z, 4, 0.25, 0.3, 0.25, 0.25);
 		}
 		if (any) {
-			// (0.11.37) each punch shakes harder than the last
+			// (0.11.40) each punch shakes harder than the last
 			com.jaymospowers.core.Shakes.send(player, SHAKE + SHAKE_STEP * n);
 		}
 		float pitch = 1.0F + n * 0.06F;

@@ -47,7 +47,7 @@ import net.minecraft.world.phys.Vec3;
  * other cooldown you have running (never its own).</li>
  * <li>V, Overclock: 6 s as a speedster: Speed V, Haste II and faster attacks, everyone near you slowed hard. Since
  * 0.10.28 the Flash's speed too ({@link ChronoSpeed}): a far faster sprint, running up walls and across water, and V
- * again to phase through a wall. Since 0.11.37 it's a toggle at max rank (all four abilities unlocked): V switches it on with no time
+ * again to phase through a wall. Since 0.11.40 it's a toggle at max rank (all four abilities unlocked): V switches it on with no time
  * limit, V again (away from a wall) switches it off, and only then does its cooldown start.</li>
  * <li>B, Time Bloom: 5 s of fast-forward for crops, saplings, furnaces, smokers and ovens within 5 blocks, and for
  * your own wounds and those of every creature within {@code BLOOM_HEAL_RADIUS} (they mend {@code BLOOM_HEAL} every
@@ -605,7 +605,7 @@ public final class ChronoPower implements Power {
 	private static boolean overclock(ServerPlayer player, ChronoState state) {
 		overclockEffects(player);
 		state.overclockLeft = OVERCLOCK_TICKS;
-		// (0.11.37) at max rank V is a toggle: on until V switches it off
+		// (0.11.40) at max rank V is a toggle: on until V switches it off
 		state.overclockHeld = overclockToggles(player);
 		setOverclockModifier(player, true);
 		ServerLevel level = player.level();
