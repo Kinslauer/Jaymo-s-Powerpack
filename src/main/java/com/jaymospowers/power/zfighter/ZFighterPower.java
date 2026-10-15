@@ -155,6 +155,8 @@ public final class ZFighterPower implements Power {
 	static final int CHARGE_CRACKLE = 10;
 	/** Charging: puffs of smoky fog (a Verdant's, mist) rolling out at his feet every other tick, per tier. */
 	static final int CHARGE_FOG = 1;
+	/** Charging: aura motes a tick (when full: {@link #CHARGE_AURA_FULL}). */
+	static final int CHARGE_AURA = 2, CHARGE_AURA_FULL = 4;
 	/**
 	 * In a form, standing (not charging): bits of ground floating round him (this many a form, every other tick), a crackle
 	 * of lightning with a chance of (form + 1) in {@link #IDLE_CRACKLE} a tick, and sparks (this many a form). No smoke.
@@ -457,7 +459,7 @@ public final class ZFighterPower implements Power {
 				if (!creative) {
 					player.causeFoodExhaustion(CHARGE_EXHAUSTION);
 				}
-				aura(player, live, live.ki >= max ? 6 : 3);
+				aura(player, live, live.ki >= max ? CHARGE_AURA_FULL : CHARGE_AURA);
 				chargeFx(player, live, now);
 				if (now % 16 == 0) {
 					float fill = Mth.clamp(live.ki / max, 0.0F, 1.0F);
@@ -501,7 +503,8 @@ public final class ZFighterPower implements Power {
 			float ease = 1.0F - MASTERY_EASE * ZFighterTraining.mastery(player, live.form);
 			live.ki -= FORM_DRAIN[live.form] * ease * (live.limit > 0 ? LIMIT_STACK_DRAIN : 1.0F) * ZFighterLineage.drainFactor(live.lineage, live.form);
 			// the aura roars harder with each form, and the ground under him breaks up and rises
-			aura(player, live, 1 + 2 * live.form);
+			// (thinner while charging, which has its own aura, so he isn't lost in it)
+			aura(player, live, live.charging ? live.form : 1 + 2 * live.form);
 			if (now % 2 == 0) {
 				debris(player, live);
 			}
@@ -879,7 +882,7 @@ public final class ZFighterPower implements Power {
 		DustParticleOptions dust = dust(live);
 		for (int i = 0; i < count; i++) {
 			double a = random.nextDouble() * Math.PI * 2.0;
-			double r = 0.45 + 0.12 * live.form + random.nextDouble() * (0.25 + 0.1 * live.form);
+			double r = 0.55 + 0.12 * live.form + random.nextDouble() * (0.25 + 0.1 * live.form);
 			double h = random.nextDouble() * player.getBbHeight();
 			level.sendParticles(dust, true, false, player.getX() + Math.cos(a) * r, player.getY() + h, player.getZ() + Math.sin(a) * r, 0, 0.0, 1.0,
 				0.0, 0.15 + 0.07 * live.form);
