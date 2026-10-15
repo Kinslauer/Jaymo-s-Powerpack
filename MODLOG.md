@@ -1360,4 +1360,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   lying and ragdolling like any villager's body (Kitchen `client/corpse/McaLooks`, which asks
   `MCAClient.getVillagerRendererData` and only touches MCA when it's loaded; `CorpseEntity.placeBody`). Their severed
   head and limbs come off that villager too (`SeveredPartRenderer`). Without MCA, a player body, or before the look
-  arrives from the server, it's the player skin as before. Zombie players still wear the player skin.
+  arrives from the server, it's the player skin as before. Zombie players are that villager too
+  (`ZombiePlayerRenderer.extractLook`): drawn by MCA's renderer at full infection (green-grey), walking, holding and
+  swinging as the zombie does, arms held out (`ARMS_OUT`, `ZombiePlayerModel.armsOut`). Only players the game knows
+  (online, or their look already sent) are asked for: the future's zombie players have made-up ids.
