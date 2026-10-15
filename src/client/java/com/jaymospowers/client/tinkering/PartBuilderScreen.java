@@ -18,9 +18,11 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
-/** The Part Builder, on Tinkers' screen (MIT): pattern and material left, the parts to pick in the middle, info to the right. */
+/**
+ * The Part Builder, laid out like Tinkers' screen (MIT): pattern and material left, the parts to pick in the middle, info
+ * beside it. (0.10.127) Drawn like the H screen: dark panel, bronze stripe, sunken slots, flat part tiles.
+ */
 public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> {
-	private static final Identifier TEXTURE = JaymosPowers.id("textures/gui/tinkering/part_builder.png");
 	private static final int GRID_X = 51, GRID_Y = 15, CELL = 18, COLUMNS = 4;
 
 	public PartBuilderScreen(PartBuilderMenu menu, Inventory inventory, Component title) {
@@ -31,18 +33,20 @@ public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> 
 	@Override
 	public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		super.extractBackground(graphics, mouseX, mouseY, a);
-		graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, leftPos, topPos, 0.0F, 0.0F, imageWidth, imageHeight, 256, 256);
+		TinkerUi.panel(graphics, leftPos, topPos, imageWidth, imageHeight);
+		TinkerUi.slots(graphics, menu, leftPos, topPos, PartBuilderMenu.RESULT);
+		int rows = (PartType.values().length + COLUMNS - 1) / COLUMNS;
+		TinkerUi.well(graphics, leftPos + GRID_X - 1, topPos + GRID_Y - 1, COLUMNS * CELL + 2, rows * CELL + 2);
 		TinkerMaterial material = TinkerMaterial.of(menu.material());
 		PartType[] parts = PartType.values();
 		for (int i = 0; i < parts.length; i++) {
 			int x = leftPos + GRID_X + i % COLUMNS * CELL, y = topPos + GRID_Y + i / COLUMNS * CELL;
 			boolean hover = mouseX >= x && mouseY >= y && mouseX < x + CELL && mouseY < y + CELL;
 			boolean chosen = parts[i] == menu.selectedPart();
-			graphics.fill(x, y, x + CELL, y + CELL, chosen ? 0xFF6E8B3D : hover ? 0xFF9A9A9A : 0xFF7A7A7A);
-			graphics.fill(x, y, x + CELL, y + 1, 0xFFC6C6C6);
-			graphics.fill(x, y, x + 1, y + CELL, 0xFFC6C6C6);
-			graphics.fill(x, y + CELL - 1, x + CELL, y + CELL, 0xFF373737);
-			graphics.fill(x + CELL - 1, y, x + CELL, y + CELL, 0xFF373737);
+			graphics.fill(x, y, x + CELL, y + CELL, hover ? TinkerUi.ROW_HOVER : chosen ? TinkerUi.ROW : (i + i / COLUMNS) % 2 == 0 ? 0x18FFFFFF : 0x0CFFFFFF);
+			if (chosen) {
+				graphics.fill(x, y + CELL - 1, x + CELL, y + CELL, TinkerUi.ACCENT);
+			}
 			if (material != null && material.makes(parts[i].kind)) {
 				graphics.item(ToolPartItem.of(parts[i], material, 1), x + 1, y + 1);
 			} else {
@@ -95,6 +99,11 @@ public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> 
 			lines.add(Component.translatable("tooltip.jaymospowers.tinkering.cost", part.cost));
 		}
 		return lines;
+	}
+
+	@Override
+	protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+		TinkerUi.labels(graphics, font, title, titleLabelX, titleLabelY, playerInventoryTitle, inventoryLabelX, inventoryLabelY);
 	}
 
 	@Override

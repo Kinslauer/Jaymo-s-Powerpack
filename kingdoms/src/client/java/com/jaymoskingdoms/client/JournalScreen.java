@@ -9,12 +9,14 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.MapColor;
@@ -23,16 +25,17 @@ import net.minecraft.world.level.material.MapColor;
  * (0.5.49) The traveller's journal ({@link Journal}): three pages. <b>Quests</b>: each quest you carry, who gave it, its
  * story, what's left and which way it lies. <b>Map</b>: the land about you as a map draws it (only what your eyes have
  * loaded; the rest is blank parchment), with you, your quests' places and the settlements on it, and zoom. <b>Reputation</b>:
- * what each settlement you know thinks of you.
+ * what each settlement you know thinks of you. (0.7.40) Restyled like the H screen: a header, striped rows that light up
+ * under the mouse, and on the quests page a box at the bottom with the hovered (or pressed) quest in full.
  */
 final class JournalScreen extends Screen {
-	static final int PANEL_W = 340, PANEL_H = 236, PAD = 8, TAB_H = 18;
+	static final int PANEL_W = 360, PANEL_H = 230, HEADER = 34, TAB_H = 16, BODY_Y = 56, FOOTER = 22, QUEST_ROW = 16, REP_ROW = 22, DETAIL_LINES = 6;
 	/** The map: its size on screen (px), the size of one drawn cell (px), and the zooms (blocks per cell). */
-	static final int MAP_SIZE = 200, CELL = 2;
+	static final int MAP_SIZE = 150, CELL = 2;
 	static final int[] ZOOMS = {1, 2, 4, 8, 16, 32};
 	static final int DEFAULT_ZOOM = 2;
-	static final int COLOR_PANEL = 0xF0201812, COLOR_CARD = 0xA0302820, COLOR_EDGE = 0xFFB08A3C, COLOR_TEXT = 0xFFF2E6CC, COLOR_DIM = 0xFFB8AA90,
-		COLOR_ROYAL = 0xFFFF6A50, COLOR_GOLD = 0xFFFFC21A, COLOR_DONE = 0xFF66EE66, COLOR_PARCHMENT = 0xFFD8C8A0, COLOR_HATED = 0xFFE04040;
+	static final int COLOR_TEXT = Ui.TEXT, COLOR_DIM = Ui.DIM, COLOR_ROYAL = 0xFFFF6A50, COLOR_GOLD = Ui.GOLD, COLOR_DONE = 0xFF66EE66,
+		COLOR_PARCHMENT = 0xFFD8C8A0, COLOR_HATED = 0xFFE04040;
 	static final int QUESTS = 0, MAP = 1, REPUTATION = 2;
 
 	private static int lastPage = QUESTS, lastZoom = DEFAULT_ZOOM;
@@ -40,6 +43,8 @@ final class JournalScreen extends Screen {
 	private final Journal.Book book;
 	private final KeyMapping key;
 	private int page = lastPage, zoom = lastZoom, scroll;
+	/** The quest last pressed, shown in the box when none is pointed at. */
+	private int selected;
 	/** The drawn map (ARGB per cell, row by row), its centre when drawn and the zoom it was drawn at. */
 	private int[] cells;
 	private int drawnX, drawnZ, drawnZoom = -1;
@@ -55,36 +60,52 @@ final class JournalScreen extends Screen {
 		return false;
 	}
 
+	private int panelW() {
+		return Math.min(PANEL_W, this.width - 12);
+	}
+
 	private int left() {
-		return (this.width - PANEL_W) / 2;
+		return (this.width - panelW()) / 2;
 	}
 
 	private int top() {
 		return Math.max(4, (this.height - PANEL_H) / 2);
 	}
 
+	private int detailY() {
+		return top() + PANEL_H - FOOTER - (10 + DETAIL_LINES * Ui.LINE + 2);
+	}
+
+	private int questRows() {
+		return Math.max(1, (detailY() - 4 - top() - BODY_Y) / QUEST_ROW);
+	}
+
+	private int repRows() {
+		return Math.max(1, (PANEL_H - FOOTER - 4 - BODY_Y) / REP_ROW);
+	}
+
 	@Override
 	protected void init() {
-		int x = left() + PAD, y = top() + 6;
 		String[] tabs = {"quests", "map", "reputation"};
-		int w = (PANEL_W - PAD * 2 - 8) / 3;
+		int w = 92;
+		int x = left() + (panelW() - w * 3 - 8) / 2, y = top() + HEADER + 2;
 		for (int i = 0; i < 3; i++) {
 			int which = i;
 			Button tab = Button.builder(Component.translatable("journal.jaymoskingdoms.tab." + tabs[i]), b -> show(which)).bounds(x + i * (w + 4), y, w, TAB_H).build();
 			tab.active = i != page;
 			addRenderableWidget(tab);
 		}
+		int fy = top() + PANEL_H - FOOTER + 3;
 		if (page == MAP) {
-			int bx = left() + PAD + MAP_SIZE + 10, by = top() + TAB_H + 16;
-			Button in = Button.builder(Component.literal("+"), b -> zoom(-1)).bounds(bx, by, 20, 18).build();
-			Button out = Button.builder(Component.literal("-"), b -> zoom(1)).bounds(bx + 24, by, 20, 18).build();
+			int bx = left() + 9 + MAP_SIZE + 12;
+			Button in = Button.builder(Component.literal("+"), b -> zoom(-1)).bounds(bx, top() + BODY_Y, 20, 16).build();
+			Button out = Button.builder(Component.literal("-"), b -> zoom(1)).bounds(bx + 24, top() + BODY_Y, 20, 16).build();
 			in.active = zoom > 0;
 			out.active = zoom < ZOOMS.length - 1;
 			addRenderableWidget(in);
 			addRenderableWidget(out);
 		}
-		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose())
-			.bounds(this.width / 2 - 40, top() + PANEL_H - 24, 80, 18).build());
+		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(left() + panelW() - 66, fy, 60, 16).build());
 	}
 
 	private void show(int which) {
@@ -115,63 +136,102 @@ final class JournalScreen extends Screen {
 			}
 			return true;
 		}
-		scroll = Math.max(0, scroll - (int)Math.signum(scrollY) * 20);
+		int rows = page == QUESTS ? book.entries().size() - questRows() : (int)book.places().stream().filter(Journal.Place::rated).count() - repRows();
+		scroll = Mth.clamp(scroll - (int)Math.signum(scrollY), 0, Math.max(0, rows));
 		return true;
 	}
 
 	@Override
+	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		if (page == QUESTS) {
+			int index = questAt((int)event.x(), (int)event.y());
+			if (index >= 0) {
+				selected = index;
+				return true;
+			}
+		}
+		return super.mouseClicked(event, doubleClick);
+	}
+
+	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
-		int x = left(), y = top();
-		graphics.fill(x, y, x + PANEL_W, y + PANEL_H, COLOR_PANEL);
-		edge(graphics, x, y, PANEL_W, PANEL_H, COLOR_EDGE);
-		int bodyTop = y + TAB_H + 12, bodyBottom = y + PANEL_H - 30;
+		int x = left(), y = top(), w = panelW();
+		Ui.panel(graphics, x, y, w, PANEL_H, COLOR_GOLD);
+		// the header: the journal, and what this page holds
+		graphics.item(new ItemStack(Journal.JOURNAL), x + 8, y + 8);
+		Ui.line(graphics, this.font, this.title, x + 28, y + 7, w - 36, COLOR_GOLD);
+		long rated = book.places().stream().filter(Journal.Place::rated).count();
+		Component sub = switch (page) {
+			case MAP -> Component.translatable("journal.jaymoskingdoms.sub.map", MAP_SIZE * ZOOMS[zoom] / CELL);
+			case REPUTATION -> Component.translatable("journal.jaymoskingdoms.sub.reputation", rated);
+			default -> Component.translatable("journal.jaymoskingdoms.sub.quests", book.entries().size());
+		};
+		Ui.line(graphics, this.font, sub, x + 28, y + 18, w - 36, COLOR_DIM);
+		Ui.rule(graphics, x + 6, x + w - 6, y + HEADER - 4);
+		int bodyTop = y + BODY_Y;
 		switch (page) {
-			case MAP -> map(graphics, x + PAD, bodyTop, mouseX, mouseY);
-			case REPUTATION -> reputation(graphics, x + PAD, bodyTop, bodyBottom);
-			default -> quests(graphics, x + PAD, bodyTop, bodyBottom);
+			case MAP -> map(graphics, x + 9, bodyTop, mouseX, mouseY);
+			case REPUTATION -> reputation(graphics, x, bodyTop, mouseX, mouseY);
+			default -> quests(graphics, x, bodyTop, mouseX, mouseY);
 		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
 	// ---- quests ----------------------------------------------------------------------------------------------------------
 
-	private void quests(GuiGraphicsExtractor graphics, int x, int top, int bottom) {
-		int w = PANEL_W - PAD * 2 - 8;
-		if (book.entries().isEmpty()) {
-			graphics.centeredText(this.font, Component.translatable("journal.jaymoskingdoms.no_quests"), this.width / 2, top + 20, COLOR_DIM);
-			return;
+	private int questAt(int mouseX, int mouseY) {
+		int x = left(), top = top() + BODY_Y;
+		int end = Math.min(book.entries().size(), scroll + questRows());
+		for (int i = scroll; i < end; i++) {
+			if (Ui.over(mouseX, mouseY, x + 6, top + (i - scroll) * QUEST_ROW, panelW() - 12, QUEST_ROW - 1)) {
+				return i;
+			}
 		}
-		List<Line> lines = new ArrayList<>();
-		LocalPlayer player = this.minecraft.player;
-		for (Journal.Entry e : book.entries()) {
-			lines.add(new Line(e.title().getVisualOrderText(), e.royal() ? COLOR_ROYAL : COLOR_GOLD, true));
-			lines.add(new Line(e.giver().getVisualOrderText(), COLOR_DIM, false));
-			for (FormattedCharSequence s : this.font.split(e.text(), w)) {
-				lines.add(new Line(s, COLOR_TEXT, false));
-			}
-			for (FormattedCharSequence s : this.font.split(e.objective(), w)) {
-				lines.add(new Line(s, e.ready() ? COLOR_DONE : COLOR_DIM, false));
-			}
-			if (e.target().isPresent() && player != null && book.here()) {
-				lines.add(new Line(where(player, e.target().get()).getVisualOrderText(), COLOR_DIM, false));
-			}
-			lines.add(null);
-		}
-		int total = lines.size() * 10;
-		scroll = Math.min(scroll, Math.max(0, total - (bottom - top)));
-		int ty = top - scroll;
-		for (Line line : lines) {
-			if (line != null && ty >= top && ty + 9 <= bottom) {
-				if (line.head()) {
-					graphics.fill(x, ty - 1, x + 2, ty + 9, line.color());
-				}
-				graphics.text(this.font, line.text(), x + 6, ty, line.color());
-			}
-			ty += line == null ? 6 : 10;
-		}
+		return -1;
 	}
 
-	private record Line(FormattedCharSequence text, int color, boolean head) {
+	private static int questColor(Journal.Entry e) {
+		return e.ready() ? COLOR_DONE : e.royal() ? COLOR_ROYAL : COLOR_GOLD;
+	}
+
+	/** A row per quest (its name, what's left, which way it lies), and the hovered or pressed one in full under them. */
+	private void quests(GuiGraphicsExtractor graphics, int x, int top, int mouseX, int mouseY) {
+		int w = panelW();
+		List<Journal.Entry> entries = book.entries();
+		if (entries.isEmpty()) {
+			graphics.centeredText(this.font, Component.translatable("journal.jaymoskingdoms.no_quests"), x + w / 2, top + 20, COLOR_DIM);
+			return;
+		}
+		scroll = Mth.clamp(scroll, 0, Math.max(0, entries.size() - questRows()));
+		selected = Mth.clamp(selected, 0, entries.size() - 1);
+		LocalPlayer player = this.minecraft.player;
+		int hovered = questAt(mouseX, mouseY);
+		int end = Math.min(entries.size(), scroll + questRows());
+		int nameW = Math.min(150, (w - 24) / 2);
+		for (int i = scroll; i < end; i++) {
+			Journal.Entry e = entries.get(i);
+			int ry = top + (i - scroll) * QUEST_ROW;
+			int color = questColor(e);
+			graphics.fill(x + 6, ry, x + w - 6, ry + QUEST_ROW - 1, i == hovered ? Ui.ROW_HOVER : i == selected ? Ui.ROW_PICKED : i % 2 == 0 ? Ui.ROW : Ui.ROW_ALT);
+			graphics.fill(x + 6, ry, x + 8, ry + QUEST_ROW - 1, color);
+			Ui.line(graphics, this.font, e.title(), x + 12, ry + 4, nameW, color);
+			int right = x + w - 10;
+			if (e.target().isPresent() && player != null && book.here()) {
+				Component where = where(player, e.target().get());
+				int ww = this.font.width(where);
+				graphics.text(this.font, where, right - ww, ry + 4, COLOR_DIM);
+				right -= ww + 8;
+			}
+			int textX = x + 12 + nameW + 8;
+			Ui.line(graphics, this.font, e.objective(), textX, ry + 4, right - textX, e.ready() ? COLOR_DONE : COLOR_DIM);
+		}
+		Ui.scrollbar(graphics, x + w - 4, top, questRows() * QUEST_ROW, questRows(), entries.size(), scroll);
+		Journal.Entry shown = entries.get(hovered >= 0 ? hovered : selected);
+		List<Component> text = new ArrayList<>();
+		text.add(shown.giver().copy().withColor(COLOR_DIM));
+		text.add(shown.text());
+		text.add(shown.objective().copy().withColor(shown.ready() ? COLOR_DONE : COLOR_GOLD));
+		Ui.detail(graphics, this.font, x, detailY(), w, DETAIL_LINES, shown.title(), questColor(shown), text);
 	}
 
 	/** How far and which way {@code pos} lies from the player. */
@@ -200,7 +260,7 @@ final class JournalScreen extends Screen {
 			drawnZ = player.getBlockZ();
 			drawnZoom = zoom;
 		}
-		edge(graphics, x - 1, y - 1, MAP_SIZE + 2, MAP_SIZE + 2, COLOR_EDGE);
+		Ui.well(graphics, x - 1, y - 1, MAP_SIZE + 2, MAP_SIZE + 2);
 		for (int row = 0; row < n; row++) {
 			int run = 0;
 			// (a row's cells of one colour are filled as one)
@@ -260,10 +320,8 @@ final class JournalScreen extends Screen {
 			int px = me[0] + (int)Math.round(fx * i), pz = me[1] + (int)Math.round(fz * i);
 			graphics.fill(px - 1, pz - 1, px + 1, pz + 1, 0xFFFFFFFF);
 		}
-		// beside it: the scale, the legend, where you stand
-		int lx = x + MAP_SIZE + 10, ly = y + 26;
-		graphics.text(this.font, Component.translatable("journal.jaymoskingdoms.scale", MAP_SIZE * scale / CELL), lx, ly, COLOR_DIM);
-		ly += 14;
+		// beside it: the legend, where you stand
+		int lx = x + MAP_SIZE + 12, ly = y + 24;
 		legend(graphics, lx, ly, 0xFFFFFFFF, "you");
 		legend(graphics, lx, ly += 12, COLOR_GOLD, "quest");
 		legend(graphics, lx, ly += 12, COLOR_ROYAL, "decree");
@@ -272,7 +330,9 @@ final class JournalScreen extends Screen {
 		ly += 18;
 		graphics.text(this.font, Component.translatable("journal.jaymoskingdoms.at", player.getBlockX(), player.getBlockZ()), lx, ly, COLOR_DIM);
 		if (!book.here()) {
-			graphics.text(this.font, Component.translatable("journal.jaymoskingdoms.elsewhere"), lx, ly + 12, COLOR_DIM);
+			for (FormattedCharSequence line : this.font.split(Component.translatable("journal.jaymoskingdoms.elsewhere"), left() + panelW() - 9 - lx)) {
+				graphics.text(this.font, line, lx, ly += 10, COLOR_DIM);
+			}
 		}
 		if (!hover.isEmpty()) {
 			graphics.setComponentTooltipForNextFrame(this.font, hover, mouseX, mouseY);
@@ -282,7 +342,7 @@ final class JournalScreen extends Screen {
 	private void legend(GuiGraphicsExtractor graphics, int x, int y, int color, String what) {
 		graphics.fill(x, y, x + 7, y + 7, 0xFF000000);
 		graphics.fill(x + 1, y + 1, x + 6, y + 6, color);
-		graphics.text(this.font, Component.translatable("journal.jaymoskingdoms.legend." + what), x + 11, y, COLOR_TEXT);
+		Ui.line(graphics, this.font, Component.translatable("journal.jaymoskingdoms.legend." + what), x + 11, y, left() + panelW() - 9 - x - 11, COLOR_TEXT);
 	}
 
 	/** Where {@code pos} goes on the map (screen px), held to its edge when it's off it. */
@@ -329,49 +389,44 @@ final class JournalScreen extends Screen {
 
 	// ---- reputation ------------------------------------------------------------------------------------------------------
 
-	private void reputation(GuiGraphicsExtractor graphics, int x, int top, int bottom) {
+	/** A row per settlement that rates you: its colour, name, kind and way, and what it thinks of you on a bar. */
+	private void reputation(GuiGraphicsExtractor graphics, int x, int top, int mouseX, int mouseY) {
 		List<Journal.Place> rated = book.places().stream().filter(Journal.Place::rated).toList();
+		int w = panelW();
 		if (rated.isEmpty()) {
-			graphics.centeredText(this.font, Component.translatable("journal.jaymoskingdoms.no_places"), this.width / 2, top + 20, COLOR_DIM);
+			graphics.centeredText(this.font, Component.translatable("journal.jaymoskingdoms.no_places"), x + w / 2, top + 20, COLOR_DIM);
 			return;
 		}
-		int rowH = 22;
-		int w = PANEL_W - PAD * 2;
-		scroll = Math.min(scroll, Math.max(0, rated.size() * rowH - (bottom - top)));
-		int ty = top - scroll;
+		scroll = Mth.clamp(scroll, 0, Math.max(0, rated.size() - repRows()));
 		LocalPlayer player = this.minecraft.player;
-		for (Journal.Place p : rated) {
-			if (ty >= top && ty + rowH - 2 <= bottom) {
-				graphics.fill(x, ty, x + w, ty + rowH - 2, COLOR_CARD);
-				graphics.fill(x, ty, x + 3, ty + rowH - 2, 0xFF000000 | p.color());
-				graphics.text(this.font, p.name(), x + 7, ty + 2, COLOR_TEXT);
-				Component kind = Component.translatable("journal.jaymoskingdoms.kind." + FactionType.values()[p.type()].id());
-				if (player != null && book.here()) {
-					kind = Component.translatable("journal.jaymoskingdoms.kind_where", kind, where(player, p.seat()));
-				}
-				graphics.text(this.font, kind, x + 7, ty + 11, COLOR_DIM);
-				// the bar: -1000 at its left, 1000 at its right, the middle marked
-				int bw = 90, bx = x + w - bw - 6, by = ty + 12;
-				graphics.fill(bx, by, bx + bw, by + 4, 0xFF000000);
-				int mid = bx + bw / 2;
-				int at = bx + (int)((p.reputation() + 1000) / 2000.0 * bw);
-				graphics.fill(Math.min(mid, at), by + 1, Math.max(mid, at) + 1, by + 3, repColor(p.reputation()));
-				graphics.fill(mid, by - 1, mid + 1, by + 5, COLOR_DIM);
-				Component word = Component.translatable("journal.jaymoskingdoms.rep", Component.translatable("journal.jaymoskingdoms.word." + p.word()), p.reputation());
-				graphics.text(this.font, word, x + w - 6 - this.font.width(word), ty + 2, repColor(p.reputation()));
+		int end = Math.min(rated.size(), scroll + repRows());
+		for (int i = scroll; i < end; i++) {
+			Journal.Place p = rated.get(i);
+			int ty = top + (i - scroll) * REP_ROW;
+			boolean hover = Ui.over(mouseX, mouseY, x + 6, ty, w - 12, REP_ROW - 2);
+			Ui.row(graphics, x + 6, ty, x + w - 6, ty + REP_ROW - 2, i, hover);
+			graphics.fill(x + 6, ty, x + 8, ty + REP_ROW - 2, 0xFF000000 | p.color());
+			int bw = 90, bx = x + w - bw - 12;
+			Ui.line(graphics, this.font, Component.literal(p.name()), x + 12, ty + 2, bx - x - 20, COLOR_TEXT);
+			Component kind = Component.translatable("journal.jaymoskingdoms.kind." + FactionType.values()[p.type()].id());
+			if (player != null && book.here()) {
+				kind = Component.translatable("journal.jaymoskingdoms.kind_where", kind, where(player, p.seat()));
 			}
-			ty += rowH;
+			Ui.line(graphics, this.font, kind, x + 12, ty + 11, bx - x - 20, COLOR_DIM);
+			// the bar: -1000 at its left, 1000 at its right, the middle marked
+			int by = ty + 13;
+			graphics.fill(bx, by, bx + bw, by + 3, Ui.BAR_BACK);
+			int mid = bx + bw / 2;
+			int at = bx + (int)((Mth.clamp(p.reputation(), -1000, 1000) + 1000) / 2000.0 * bw);
+			graphics.fill(Math.min(mid, at), by, Math.max(mid, at) + 1, by + 3, repColor(p.reputation()));
+			graphics.fill(mid, by - 1, mid + 1, by + 4, COLOR_DIM);
+			Component word = Component.translatable("journal.jaymoskingdoms.rep", Component.translatable("journal.jaymoskingdoms.word." + p.word()), p.reputation());
+			graphics.text(this.font, word, bx + bw - this.font.width(word), ty + 2, repColor(p.reputation()));
 		}
+		Ui.scrollbar(graphics, x + w - 4, top, repRows() * REP_ROW, repRows(), rated.size(), scroll);
 	}
 
 	static int repColor(int rep) {
 		return rep <= -100 ? COLOR_HATED : rep < 100 ? COLOR_DIM : rep < 400 ? 0xFFB0E070 : COLOR_DONE;
-	}
-
-	private static void edge(GuiGraphicsExtractor graphics, int x, int y, int w, int h, int color) {
-		graphics.fill(x, y, x + w, y + 1, color);
-		graphics.fill(x, y + h - 1, x + w, y + h, color);
-		graphics.fill(x, y, x + 1, y + h, color);
-		graphics.fill(x + w - 1, y, x + w, y + h, color);
 	}
 }
