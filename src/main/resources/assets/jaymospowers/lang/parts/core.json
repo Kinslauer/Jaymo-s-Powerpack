@@ -29,6 +29,7 @@
 	"commands.jaymospowers.level": "Unlocked %s abilities for %s player(s)",
 	"message.jaymospowers.unlocked": "New ability",
 	"key.jaymospowers.meditate": "Meditate (hold, standing still)",
+	"key.jaymospowers.crawl": "Crawl (go prone / get up)",
 	"message.jaymospowers.meditate.locked": "Learn Meditation in the Survival tree (K) first.",
 	"message.jaymospowers.unlocked_chat": "Your power grows: [%s] %s (hover, or see it on %s)",
 	"message.jaymospowers.locked": "That ability is still locked. Keep using your power to unlock it.",
