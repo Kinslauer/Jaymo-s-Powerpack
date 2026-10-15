@@ -3097,3 +3097,7 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
 - **0.7.59, skill commands:** `/kingdom skills set <players> <survival|stealth|strength> <level>` (perks refunded if the
   new level can't pay for them), `add <players> <pillar> <xp>`, `get <player>`, `respec <players>` (perks back, levels
   kept) and `reset <players>` (all gone), for ops (`SkillCommands`).
+- **0.7.60, fire spreads, ice bites:** an imbued (or thrown) fire burst now also catches up to 3 more creatures within
+  4 blocks (players spared), each lit for 4 s and burnt for 1, like lightning's chain. Ice's burst freezes far longer
+  (300 ticks, long enough for the cold's own damage), slows for 4 s, does 2 damage, and chills up to 4 creatures within
+  3 blocks (frozen a while, slowed 3 s). (`Spellcraft.strike`)
