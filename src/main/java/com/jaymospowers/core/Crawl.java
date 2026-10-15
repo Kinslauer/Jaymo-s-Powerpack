@@ -22,7 +22,7 @@ import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Crawling, for every player (no power needed): double-tap Jump + Sneak together and you drop flat for as long as you
+ * Crawling, for every player (no power needed): hold Jump + Sneak together and you drop flat for as long as you
  * hold Jump, which fits you through one-block-high gaps. Let go and you stand back up once there's room (vanilla keeps
  * you crawling while the ceiling is too low). The client spots the gesture and tells the server; the server's flag is
  * synced to everyone so every client draws the same pose and hitbox.
