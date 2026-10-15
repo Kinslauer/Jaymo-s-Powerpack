@@ -1262,3 +1262,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   player (`KeyConflicts`, marker `jaymospowers-weaponmaster-keys-v1`). Players can still bind it again in Controls.
   The narrator's Ctrl+B hotkey is switched off once per install too (Andy: "disable narrator hotkey";
   `jaymospowers-narrator-hotkey-v1`); Accessibility Settings can turn it back on.
+- **0.11.25, Time Bloom heals nearby creatures** (Andy: "chrono heal should heal nearby mobs as well"): while Chrono's
+  Time Bloom (B) runs, every living thing within 5 blocks of you (players, villagers, animals, monsters; not armour
+  stands) mends the same `BLOOM_HEAL` every `BLOOM_HEAL_EVERY` ticks you do (`ChronoPower.bloomHealNearby`,
+  `BLOOM_HEAL_RADIUS`).
