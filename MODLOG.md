@@ -1303,3 +1303,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   sprinting and powers, but no longer heals (`StomachFoodDataMixin`); meals heal you after 10 s unhurt. Kitchen dishes
   count 1.25x, Perfect 1.5x. Z Fighters get 2 extra slots (`KitchenCompat.extraStomachSlots`). HUD right of the hotbar;
   food tooltips show a meal's worth.
+- **0.11.46 / Kingdoms 0.7.54:** village fires get stone hearths and chimneys when villages generate, and golems only
+  burn corpses at open, safe fires, so villages stop burning down (`kingdoms/MODLOG.md`).
