@@ -1335,3 +1335,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.11.63 / Kingdoms 0.7.59:** `/kingdom skills` commands for ops (`kingdoms/MODLOG.md`).
 - **0.11.64 / Kingdoms 0.7.60:** Sorcerer fire bursts spread to nearby creatures; ice bursts freeze, hurt and chill
   (`kingdoms/MODLOG.md`).
+- **0.11.71 / Kingdoms 0.7.63:** the whole realm on alert in a war: bells, sandbags round the seat, civilians hiding
+  and guards at the sandbags when a war party comes (`kingdoms/MODLOG.md`).
