@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "T": "minecraft:string",
+    "S": "#minecraft:sand"
+  },
+  "pattern": [
+    "TST",
+    "TST"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:sandbag",
+    "count": 4
+  }
+}

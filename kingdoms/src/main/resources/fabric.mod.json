@@ -26,6 +26,7 @@
 		"jaymoskingdoms.disasters.mixins.json",
 		"jaymoskingdoms.sleep.mixins.json",
 		"jaymoskingdoms.sailing.mixins.json",
+		"jaymoskingdoms.nightgifts.mixins.json",
 		{ "config": "jaymoskingdoms.combat.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.mca.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.equestrian.client.mixins.json", "environment": "client" },
