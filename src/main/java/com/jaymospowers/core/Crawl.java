@@ -27,26 +27,57 @@ import org.jspecify.annotations.Nullable;
  * you crawling while the ceiling is too low). The client spots the gesture and tells the server; the server's flag is
  * synced to everyone so every client draws the same pose and hitbox.
  *
- * <p>While crawling, double-tapping Left or Right (A / D) rolls you one block that way: stop, drop and roll. A roll puts
- * out the fire on you and any fire you roll through; holding the key keeps you rolling. The client moves the player (movement is the client's); the
- * server puts the fire out and syncs the roll so everyone sees the body turn over.
+ * <p>While crawling, double-tapping Left or Right (A / D) rolls you one block that way: stop, drop and roll. Holding the
+ * key keeps you rolling, but only for {@link #ROLL_STREAK_TICKS} one way; then that way is spent until you roll back the
+ * other way. Rolling back (reversing) is what puts out the fire on you; any fire you roll through is smothered either way.
+ * The client moves the player (movement is the client's); the server puts the fire out and syncs the roll so everyone
+ * sees the body turn over.
  */
 public final class Crawl {
 	/** How long a roll takes, in ticks (the client spreads the one-block slide over these): quick, about walking pace. */
 	public static final int ROLL_TICKS = 5;
 	/** How far a roll carries you sideways, in blocks. */
 	public static final double ROLL_DISTANCE = 1.0;
+	/** How long you can keep rolling one way (2 s) before you must roll back the other way. */
+	public static final int ROLL_STREAK_TICKS = 40;
+	/** Lie still this long after a roll and the spent direction is fresh again (and the next roll isn't a reversal). */
+	public static final int ROLL_REST_TICKS = 40;
 
 	/** On a crawling player: present while they crawl (synced to everyone). */
 	public static final AttachmentType<Boolean> CRAWLING = AttachmentRegistry.create(JaymosPowers.id("crawling"),
 		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 
-	/** A roll in progress: when it started (game time) and which way ({@code right}). Synced to everyone for the animation. */
-	public record Rolling(long start, boolean right) {
+	/**
+	 * A roll in progress: when it started (game time), which way ({@code right}) and when the run of rolls that way began
+	 * ({@code streakStart}). Synced to everyone for the animation.
+	 */
+	public record Rolling(long start, boolean right, long streakStart) {
 		public static final StreamCodec<ByteBuf, Rolling> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, Rolling::start,
 			ByteBufCodecs.BOOL, Rolling::right,
+			ByteBufCodecs.VAR_LONG, Rolling::streakStart,
 			Rolling::new);
+
+		/** Whether this roll ended long enough before {@code now} that the next one starts fresh. */
+		boolean rested(long now) {
+			return now - (start + ROLL_TICKS) > ROLL_REST_TICKS;
+		}
+	}
+
+	/**
+	 * The roll that would start at {@code now} going {@code right} after {@code last} (null if none yet), or null when
+	 * that way is spent: you've rolled it for {@link #ROLL_STREAK_TICKS} and must roll back first. Shared by both sides.
+	 */
+	public static @Nullable Rolling nextRoll(@Nullable Rolling last, long now, boolean right) {
+		if (last == null || last.rested(now) || last.right() != right) {
+			return new Rolling(now, right, now);
+		}
+		return now - last.streakStart() >= ROLL_STREAK_TICKS ? null : new Rolling(now, right, last.streakStart());
+	}
+
+	/** Whether rolling {@code right} at {@code now} reverses a roll the other way (the back-and-forth that douses you). */
+	public static boolean reverses(@Nullable Rolling last, long now, boolean right) {
+		return last != null && !last.rested(now) && last.right() != right;
 	}
 
 	/** On a player who's rolling (or last rolled): see {@link Rolling}. */
@@ -107,9 +138,17 @@ public final class Crawl {
 		if (!player.hasAttached(CRAWLING) || !canCrawl(player) || last != null && now - last.start() < ROLL_TICKS - 2) {
 			return;
 		}
-		player.setAttached(ROLLING, new Rolling(now, right));
-		boolean doused = player.isOnFire();
-		player.clearFire();
+		Rolling next = nextRoll(last, now, right);
+		if (next == null) {
+			return;
+		}
+		player.setAttached(ROLLING, next);
+		// rolling one way only fans the flames; it's rolling back over that smothers them
+		boolean doused = false;
+		if (reverses(last, now, right) && player.isOnFire()) {
+			player.clearFire();
+			doused = true;
+		}
 		// the fire you're lying in and the fire you roll into
 		double yaw = Math.toRadians(player.getYRot());
 		double side = right ? ROLL_DISTANCE : -ROLL_DISTANCE;

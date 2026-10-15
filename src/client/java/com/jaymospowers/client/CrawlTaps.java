@@ -11,8 +11,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * Crawl gesture: press Jump and Sneak together twice in quick succession and you go flat; you stay flat while Jump is
  * held (Sneak can be let go). Releasing Jump stands you up when there's headroom; under a one-block ceiling vanilla keeps
- * you crawling until you're out. While crawling, double-tap Left or Right to roll one block that way (puts fire out);
- * keep holding it to keep rolling.
+ * you crawling until you're out. While crawling, double-tap Left or Right to roll one block that way; keep holding it to
+ * keep rolling, for up to 2 s one way before you must roll back (rolling back puts the fire on you out).
  */
 final class CrawlTaps {
 	/** The most ticks between two Jump + Sneak presses that count as a double tap. */
@@ -34,6 +34,8 @@ final class CrawlTaps {
 	private static boolean rollRight;
 	/** Client game time the local roll started, for drawing it before the server's copy arrives. */
 	private static long rollStart = Long.MIN_VALUE;
+	/** The local player's last roll, to spend a direction after 2 s just as the server does. */
+	private static Crawl.@Nullable Rolling lastRoll;
 
 	private CrawlTaps() {
 	}
@@ -60,6 +62,7 @@ final class CrawlTaps {
 			sinceLastTap = Integer.MAX_VALUE;
 			rollLeft = 0;
 			rollStart = Long.MIN_VALUE;
+			lastRoll = null;
 			return;
 		}
 		boolean jump = minecraft.options.keyJump.isDown();
@@ -122,9 +125,16 @@ final class CrawlTaps {
 	}
 
 	private static void startRoll(LocalPlayer player, boolean right) {
+		long now = player.level().getGameTime();
+		Crawl.Rolling next = Crawl.nextRoll(lastRoll, now, right);
+		if (next == null) {
+			// this way is spent: roll back the other way first
+			return;
+		}
+		lastRoll = next;
 		rollLeft = Crawl.ROLL_TICKS;
 		rollRight = right;
-		rollStart = player.level().getGameTime();
+		rollStart = now;
 		ClientPlayNetworking.send(new Crawl.Roll(right));
 	}
 
