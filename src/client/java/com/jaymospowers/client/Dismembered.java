@@ -14,9 +14,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
+import org.joml.Quaternionf;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -24,7 +28,8 @@ import org.jspecify.annotations.Nullable;
  * part (its renderer draws the whole body with only that part showing). Parts are found by name in any model (head,
  * arms, legs, and the hat, sleeves and trousers over them), hidden right after the model animates and shown again as
  * soon as it's drawn, so a model shared by many bodies is never left missing anything. A player who's lost their head
- * sees through it where it fell until they respawn.
+ * sees through it where it fell until they respawn: the view sits in the head and turns with it as it flies, rolls
+ * and settles ({@link #headView}), so it can end up sideways or face down in the dirt.
  */
 public final class Dismembered {
 	/** On a living body's render state: the parts it's lost. */
@@ -159,6 +164,31 @@ public final class Dismembered {
 			}
 			SKIPPED.clear();
 		}
+	}
+
+	/** The head cam looks out this far ahead of the head's middle (blocks), from just behind the face. */
+	private static final float HEAD_CAM_FORWARD = 0.12F;
+	/** The severed head's middle sits this high over its entity's feet (as {@link SeveredPartRenderer} draws it). */
+	private static final float HEAD_CAM_LIFT = 0.17F;
+
+	/**
+	 * The fallen head's view, for the camera, or null when the camera isn't on one of these heads: the head's own
+	 * turn as {@link SeveredPartRenderer} draws it (its yaw, then its tumble about a level axis), so a camera given this
+	 * rotation looks out of the face and rolls with it. Writes the eye into {@code eye}.
+	 */
+	public static @Nullable Quaternionf headView(@Nullable Entity camera, float partialTicks, Vector3d eye) {
+		if (!(camera instanceof SeveredPart head) || head.part() != Dismember.HEAD) {
+			return null;
+		}
+		float axis = head.spinAxis * Mth.DEG_TO_RAD;
+		float spin = Mth.lerp(partialTicks, head.spinO, head.spin) * Mth.DEG_TO_RAD;
+		Quaternionf view = new Quaternionf().rotationY(-head.getYRot(partialTicks) * Mth.DEG_TO_RAD)
+			.rotateAxis(spin, Mth.cos(axis), 0.0F, Mth.sin(axis));
+		Vector3f ahead = new Vector3f(0.0F, 0.0F, -HEAD_CAM_FORWARD).rotate(view);
+		eye.set(Mth.lerp(partialTicks, head.xo, head.getX()) + ahead.x,
+			Mth.lerp(partialTicks, head.yo, head.getY()) + HEAD_CAM_LIFT + ahead.y,
+			Mth.lerp(partialTicks, head.zo, head.getZ()) + ahead.z);
+		return view;
 	}
 
 	/** Every client tick: a player who's lost their head looks out from it until they're back. */

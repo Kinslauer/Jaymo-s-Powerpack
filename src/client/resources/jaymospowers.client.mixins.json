@@ -12,6 +12,7 @@
 		"DismemberLivingEntityRendererMixin",
 		"DismemberModelFeatureRendererMixin",
 		"CarryCameraMixin",
+		"HeadCamMixin",
 		"CarryFirstPersonMixin",
 		"CarryLivingEntityRendererMixin",
 		"CarryModelFeatureRendererMixin",
