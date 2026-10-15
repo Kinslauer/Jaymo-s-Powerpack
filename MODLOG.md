@@ -1305,3 +1305,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   food tooltips show a meal's worth.
 - **0.11.46 / Kingdoms 0.7.54:** village fires get stone hearths and chimneys when villages generate, and golems only
   burn corpses at open, safe fires, so villages stop burning down (`kingdoms/MODLOG.md`).
+- **0.11.47, enchanting overhaul (Enchanting System Overhaul by CmdrJane, MIT, ported to 26.3 as our own):**
+  `enchanting/`. The enchanting table opens our table (`EnchantingTableMixin`): no XP and no random rolls. Right-click
+  an enchanted book to learn what's in it (kept through death; the book burns up once it taught you everything). At
+  the table, pick any known enchantment that fits the item (or a plain book, to pass it on) and pay its items in the 4
+  material slots, one level at a time (`EnchantRecipes`: ESO's costs; density, breach, wind burst, lunge ours; other
+  mods' enchantments use the default price). Items hold 2-6 enchantments by material (`Enchanting.limit`), +1 with a
+  curse; the anvil can't go past that (`AnvilLimitMixin`); loot keeps at most 3 (books 10). Tinkering tools stay out.
