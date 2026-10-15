@@ -55,12 +55,15 @@ public final class ZFighterCombo {
 	static final float FINISHER_LENGTH = 1.6F;
 	/** Ticks to catch his breath after a finisher before the string starts over, by tier. */
 	static final int[] RECOVER_TICKS = {14, 12, 10, 9, 8};
-	/** A blow hits for this share of his fists, by tier... */
-	static final float[] HIT_SHARE = {0.8F, 0.9F, 1.0F, 1.1F, 1.2F};
+	/**
+	 * A blow hits for this share of his fists, by tier: less each tier, since the strings get longer and faster (about
+	 * 1.5 fists a second at the start, 1.7 at the top, before kicks)...
+	 */
+	static final float[] HIT_SHARE = {0.6F, 0.52F, 0.45F, 0.4F, 0.34F};
 	/** ...times the move's own weight (punches 1, kicks harder). */
 	static final float[] MOVE_WEIGHT = {1.0F, 1.0F, 1.1F, 1.2F, 1.15F, 1.25F, 1.3F, 1.4F, 1.35F, 1.0F, 1.0F};
 	/** The finisher hits for this many fists, by tier, and throws the foe this far (horizontal, up). */
-	static final float[] FINISHER_SHARE = {1.6F, 1.8F, 2.1F, 2.4F, 3.0F};
+	static final float[] FINISHER_SHARE = {1.4F, 1.5F, 1.6F, 1.8F, 2.0F};
 	static final double[] FINISHER_PUSH = {1.4, 1.6, 1.9, 2.2, 2.7};
 	static final double[] FINISHER_LIFT = {0.4, 0.45, 0.5, 0.55, 0.7};
 	/** An uppercut pops the foe up this much. */
