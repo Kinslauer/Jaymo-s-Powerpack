@@ -3142,7 +3142,11 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
   (coffin bed = respawn, candles, ladder up); werewolves wake from their first moon in a den. Natural ground only.
   `/kingdom nightgift <vampire|dhampir|werewolf|wolfblood|crypt|den|none>` for ops. Villagers' gossip hints at all of
   it as old wives' talk (`NightGifts.gossip`, 18 lines; 12% of gossip, 40% to the cursed or half-cursed).
-- **0.7.67, secret identities** (`Identities`, with Jaymo's Powers 0.11.75 costumes): a player masked by their costume
+
+## 0.7.67: two-handed weapons reach further
+Mobs swinging a two-handed weapon reach `MobCombat.TWO_HANDED_REACH` (1.25x) further and sweep `TWO_HANDED_ARC` (1.25x)
+wider, matching players (Powers 0.11.75, `core/TwoHanded`).
+- **0.7.68, secret identities** (`Identities`, with Jaymo's Powers 0.11.76 costumes): a player masked by their costume
   (Powers' tag `jaymospowers_masked:<key>`) is a stranger. Done masked, a deed or crime goes on the costume's own
   reputation and wanted time with that settlement (`Reputation.get/change`, `Theft.wanted/outlaw/commit/arrest` ask
   `Identities.persona`); guards hunt the costume when they see it, not the player bare-faced. Members are strangers
