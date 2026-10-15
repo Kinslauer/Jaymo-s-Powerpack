@@ -87,6 +87,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		CrawlTaps.init();
 		MeditateClient.init();
 		HiddenArmorClient.init();
+		com.jaymospowers.client.costume.CostumeClient.init();
 		WindPowerClient.init();
 		ArsenalPowerClient.init();
 		WebPowerClient.init();
