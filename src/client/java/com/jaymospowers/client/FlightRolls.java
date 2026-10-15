@@ -21,8 +21,8 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The barrel roll ({@link FlightRoll}), on the client: flying with Wind, a Xenoform alien, a Z Fighter's ki or Smoke's
- * Vapour Form, double-tap Left or Right (A / D) and you corkscrew a full turn that way and slide a few blocks aside. The
+ * The barrel roll ({@link FlightRoll}), on the client: flying with Wind, a Xenoform alien, a Z Fighter's ki, Smoke's
+ * Vapour Form or the Rig's thrusters, double-tap Left or Right (A / D) and you corkscrew a full turn that way and slide a few blocks aside. The
  * slide is added on top of whatever the flight set this tick, so the flight keeps its own momentum. Everyone sees the
  * body turn over (rolled about its own length: upright while hovering, laid out along the flight at speed), and your
  * own first-person view turns with it.
@@ -88,7 +88,9 @@ public final class FlightRolls {
 		if (WindPowerClient.isActive(player)) {
 			return WindPowerClient.INSTANCE.flight().state().flying();
 		}
-		return ZFighterFlightClient.pose() > 0 || SmokeFlightClient.flying() || XenoformState.flight(player) != XenoformState.FLY_NONE;
+		return ZFighterFlightClient.pose() > 0 || SmokeFlightClient.flying() || XenoformState.flight(player) != XenoformState.FLY_NONE
+			// (0.11.83) the Rig's thrusters, hovering or in full flight
+			|| com.jaymospowers.client.rig.RigClient.flying(player);
 	}
 
 	private static void start(LocalPlayer player, boolean right, long now) {

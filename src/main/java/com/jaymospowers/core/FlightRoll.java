@@ -81,6 +81,12 @@ public final class FlightRoll {
 	 * tumble), a flying Xenoform alien, a Z Fighter on ki, or Smoke's Vapour Form. Both sides (all synced).
 	 */
 	public static boolean flying(Player player) {
+		// (0.11.83) the Rig's thrusters roll too, hovering or in full flight (server: the client has its own check)
+		return powerFlying(player) || !player.onGround() && !player.isSpectator() && !player.isPassenger() && com.jaymospowers.rig.Rig.hovering(player);
+	}
+
+	/** {@link #flying} without the Rig: one of the powers' flights (the Rig's thrusters keep out of their way). */
+	public static boolean powerFlying(Player player) {
 		if (player.onGround() || player.isSpectator() || player.isPassenger()) {
 			return false;
 		}

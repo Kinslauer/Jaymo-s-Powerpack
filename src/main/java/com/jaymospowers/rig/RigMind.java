@@ -30,6 +30,9 @@ import net.minecraft.world.phys.Vec3;
  * hit, lava or the void below a fall, and a hostile closing in from behind. Lines are rate-limited: one every
  * {@link #GAP} ticks at most, and the same warning not again for {@link #REPEAT} (urgent ones {@link #REPEAT_URGENT}).
  * The warnings also light the Helm's HUD ({@link #warnings}).
+ *
+ * <p>(0.11.83) A warning that turned out right (you were still alive {@link #PROOF_TICKS} later) teaches the Mind
+ * ({@link RigLevels#WARNING_XP}); it remarks on each new level in its own voice ({@link #levelUp}).
  */
 public final class RigMind {
 	/** How often the Mind looks around (ticks). */
@@ -48,6 +51,8 @@ public final class RigMind {
 	static final int LAVA_DEPTH = 24;
 	/** Hostiles hunting you from behind, this close (Darktide's augment: farther), this far behind your look (dot). */
 	static final double BEHIND_RANGE = 8.0, DARKTIDE_BEHIND_RANGE = 14.0, BEHIND_DOT = -0.35;
+	/** (0.11.83) How long after a danger warning you must still be alive for it to count as right (ticks). */
+	static final int PROOF_TICKS = 200;
 
 	public enum Personality {
 		LOYAL, DRY, GRIM;
@@ -79,6 +84,8 @@ public final class RigMind {
 	private static final class State {
 		int warnings;
 		long lastLine = Long.MIN_VALUE / 2;
+		/** (0.11.83) When the last danger warning is proved right (0: none waiting). */
+		long proofAt;
 		final long[] lastWarned = new long[Warning.values().length];
 
 		State() {
@@ -132,6 +139,12 @@ public final class RigMind {
 			return;
 		}
 		long now = player.level().getGameTime();
+		if (state.proofAt != 0 && now >= state.proofAt) {
+			state.proofAt = 0;
+			if (player.isAlive()) {
+				RigLevels.add(player, RigLevels.WARNING_XP);
+			}
+		}
 		if (now - state.lastLine < GAP) {
 			return;
 		}
@@ -144,6 +157,9 @@ public final class RigMind {
 			}
 			state.lastWarned[warning.ordinal()] = now;
 			state.lastLine = now;
+			if ((warning.urgent || warning == Warning.LOW_HEALTH) && state.proofAt == 0) {
+				state.proofAt = now + PROOF_TICKS;
+			}
 			player.sendOverlayMessage(line(personality, warning.key()));
 			ping(player, warning.urgent ? 1.8F : 1.2F);
 			return;
@@ -237,7 +253,8 @@ public final class RigMind {
 		ping(player, 1.0F);
 	}
 
-	private static void say(ServerPlayer player, String key, float pitch) {
+	/** A line in the Mind's voice on the action bar (rate-limited: not within a third of {@link #GAP} of the last). */
+	static void say(ServerPlayer player, String key, float pitch, Object... args) {
 		ItemStack core = Rig.core(player);
 		String personality = core.isEmpty() ? null : core.get(Rig.MIND);
 		if (personality == null) {
@@ -249,8 +266,43 @@ public final class RigMind {
 			return;
 		}
 		state.lastLine = now;
-		player.sendOverlayMessage(line(personality, key));
+		player.sendOverlayMessage(line(personality, key, args));
 		ping(player, pitch);
+	}
+
+	/** (0.11.83) A line in the Mind's voice on the action bar, now, whatever was said last. */
+	static void sayAlways(ServerPlayer player, String key, float pitch, Object... args) {
+		String personality = personality(Rig.core(player));
+		if (personality == null) {
+			return;
+		}
+		STATES.computeIfAbsent(player.getUUID(), u -> new State()).lastLine = player.level().getGameTime();
+		player.sendOverlayMessage(line(personality, key, args));
+		ping(player, pitch);
+	}
+
+	/** (0.11.83) A longer line in the Mind's voice, in chat (scan results, level-ups). */
+	static void tell(ServerPlayer player, ItemStack core, String key, Object... args) {
+		String personality = personality(core);
+		if (personality != null) {
+			player.sendSystemMessage(line(personality, key, args));
+		}
+	}
+
+	/** The Core's personality id, or null (no Core, or its Mind hasn't woken). */
+	static @org.jspecify.annotations.Nullable String personality(ItemStack core) {
+		return core.isEmpty() ? null : core.get(Rig.MIND);
+	}
+
+	/** (0.11.83) The Mind reached {@code level}: it remarks on it, and names what it can do now. */
+	static void levelUp(ServerPlayer player, ItemStack core, int level) {
+		tell(player, core, "level." + level);
+		player.sendSystemMessage(Component.translatable("message.jaymospowers.rig.unlock." + level,
+			Component.keybind("key.jaymospowers.rig"), Component.keybind("key.jaymospowers.ability_4"), Component.keybind("key.jaymospowers.ultimate"),
+			Component.keybind("key.jump")).withStyle(ChatFormatting.DARK_AQUA));
+		player.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.PLAYER_LEVELUP),
+			SoundSource.PLAYERS, player.getX(), player.getY(), player.getZ(), 0.6F, 1.6F, player.getRandom().nextLong()));
+		ping(player, 1.8F);
 	}
 
 	private static MutableComponent line(String personality, String key, Object... args) {
