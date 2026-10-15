@@ -31,6 +31,8 @@ import org.jspecify.annotations.Nullable;
  * <li>Fully mastered, cruising in Vapour Form turns the whole body to smoke ({@link SmokeVapour#WHOLLY}): intangible.</li>
  * <li>Corrupted, Smog ({@link SmokeSmog}): the smoke turns toxic and kills what grows; C is Pyroclasm
  * ({@link SmokePyroclasm}).</li>
+ * <li>Ascended, Cloudshaper ({@link SmokeCloudshaper}): cloud smoke; C is Harness the Sky (a raincloud, or calm a
+ * storm / unwind a tornado).</li>
  * <li>Mastered Smokescreen banks the cloud: it holds against the wind and fades slowly ({@code SmokeField.bank}).</li>
  * </ul>
  * You see through your own smoke (the client draws it faint and doesn't grey your view in it). The way in is a calling
@@ -67,6 +69,7 @@ public final class SmokePower implements Power {
 		SmokeBomb.init();
 		SmokeJet.init();
 		SmokePyroclasm.init();
+		SmokeCloudshaper.init();
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			SmokeScreen.clear();
@@ -76,6 +79,7 @@ public final class SmokePower implements Power {
 			SmokeVapour.clear();
 			SmokeSmog.clear();
 			SmokePyroclasm.clear();
+			SmokeCloudshaper.clear();
 		});
 	}
 
@@ -87,6 +91,7 @@ public final class SmokePower implements Power {
 		SmokeSight.off(player);
 		SmokeSmog.forget(player);
 		SmokePyroclasm.forget(player);
+		SmokeCloudshaper.forget(player);
 		SmokeField.forget(player);
 		SmokeHeat.forget(player);
 	}
@@ -151,9 +156,10 @@ public final class SmokePower implements Power {
 		SmokeSight.tick(player);
 		SmokeSmog.tick(player);
 		SmokePyroclasm.gathering(player);
+		SmokeCloudshaper.tick(player);
 	}
 
-	/** C answers the corrupted power: Pyroclasm. */
+	/** C: Harness the Sky (ascended), Pyroclasm (corrupted, which wins while both). */
 	@Override
 	public boolean ultimateWhenCorrupted() {
 		return true;
@@ -163,6 +169,8 @@ public final class SmokePower implements Power {
 	public void onUltimate(ServerPlayer player, boolean down) {
 		if (com.jaymospowers.core.Fate.isCorrupted(player)) {
 			SmokePyroclasm.key(player, down);
+		} else {
+			SmokeCloudshaper.key(player, down);
 		}
 	}
 
