@@ -1295,3 +1295,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.11.34, slingshot lines pull tight:** while a slingshot is drawn, both lines tighten slowly from their slack to
   stretched taut at a full draw (`WebSwing.SLING_STRETCH` 0.6 blocks past taut, so they thin and hum), for everyone:
   the drawn length is sent like any rope change. How they look only; the swing's rope is unchanged.
+- **0.11.44 / Kingdoms 0.7.54:** village fires get stone hearths and chimneys when villages generate, and golems only
+  burn corpses at open, safe fires, so villages stop burning down (`kingdoms/MODLOG.md`).

@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.mixin;
 
 import com.jaymoskingdoms.Foundations;
+import com.jaymoskingdoms.Hearths;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
@@ -13,7 +14,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** After a structure's pieces are placed in a chunk, the gaps under any that float are filled ({@link Foundations}). */
+/**
+ * After a structure's pieces are placed in a chunk, the gaps under any that float are filled ({@link Foundations}), and a
+ * village's fires get stone hearths and chimneys ({@link Hearths}).
+ */
 @Mixin(StructureStart.class)
 abstract class StructureStartMixin {
 	@Inject(method = "placeInChunk", at = @At("RETURN"))
@@ -21,5 +25,6 @@ abstract class StructureStartMixin {
 		BoundingBox chunkBB, ChunkPos chunkPos, CallbackInfo ci) {
 		StructureStart self = (StructureStart)(Object)this;
 		Foundations.fill(level, self.getStructure(), self.getPieces(), chunkBB);
+		Hearths.build(level, self.getStructure(), self.getPieces(), chunkBB);
 	}
 }
