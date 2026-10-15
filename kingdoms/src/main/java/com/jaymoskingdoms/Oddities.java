@@ -276,7 +276,7 @@ final class Oddities {
 		REMARKED.put(player.getUUID(), now + POWER_TALK_GAP);
 		String line = talker.isBaby() ? "child" : POWERS.contains(power) ? "power." + power : "power";
 		say(level, talker, line, Speech.WHITE, now);
-		news(new News(POWER + power, player.blockPosition(), now, player.getDisplayName()));
+		news(new News(POWER + power, player.blockPosition(), now, Identities.shownName(player)));
 	}
 
 	/** Under a strange moon, those out at night remark on it now and then. */

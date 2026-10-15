@@ -1348,3 +1348,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.11.75 / Kingdoms 0.7.67:** two-handed weapons (any Better Combat `two_handed` weapon) reach 25% further, their
   swing box is 35% wider and taller and their arc 25% wider (`core/TwoHanded`, `compat/mixin/TwoHandedReachMixin` on
   `getRangeForItem` for client and server, client `TwoHandedSweepMixin`); mobs get the same reach and arc.
+- **0.11.76 / Kingdoms 0.7.68, secret identities (costumes stage 2):** a masked costume (full mask or helmet) shows
+  its name over your head to other players (`CostumeClient.extract`), and Powers tags the wearer for Kingdoms
+  (`costume/SecretIdentity`: `jaymospowers_masked:<key>`, `jaymospowers_mask_name:<name>`; the key is a stable hash
+  of the design's name and look). Kingdoms keeps the costume's own reputation and crimes (`Identities`; see
+  `kingdoms/MODLOG.md`). Masked, the costume's name ("Masked Stranger" if unnamed) is your display name everywhere:
+  chat, death and join messages, the tab list (resent when the mask goes on or off), the name tag
+  (`mixin/CostumeNameMixin` on `Player.getDisplayName`, `CostumeTabListMixin` on `ServerPlayer.getTabListDisplayName`).

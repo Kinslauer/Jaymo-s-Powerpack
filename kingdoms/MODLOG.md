@@ -3146,3 +3146,22 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
 ## 0.7.67: two-handed weapons reach further
 Mobs swinging a two-handed weapon reach `MobCombat.TWO_HANDED_REACH` (1.25x) further and sweep `TWO_HANDED_ARC` (1.25x)
 wider, matching players (Powers 0.11.75, `core/TwoHanded`).
+- **0.7.68, secret identities** (`Identities`, with Jaymo's Powers 0.11.76 costumes): a player masked by their costume
+  (Powers' tag `jaymospowers_masked:<key>`) is a stranger. Done masked, a deed or crime goes on the costume's own
+  reputation and wanted time with that settlement (`Reputation.get/change`, `Theft.wanted/outlaw/commit/arrest` ask
+  `Identities.persona`); guards hunt the costume when they see it, not the player bare-faced. Members are strangers
+  in a mask (no storehouse rights, no greetings, no MCA hearts, no remembered deeds). Putting the mask on or off in
+  sight of a settlement's people (16 blocks, looking), lifting it for a guard, or being seen using the same power
+  3 times masked and 3 times bare-faced (24 blocks, sightings 30 s apart) tells that settlement who wears it: the
+  costume's reputation is added to the player's and its wanted time carried over, and from then on it treats the
+  costume as the player. Word spreads each day (40%) to the rest of that realm. A paranoid king's guards stop masked
+  strangers (Approaches topic `unmask`): lift the mask, be searched (stolen goods: fine and arrest), or refuse (the
+  costume's name suffers; 30 s to leave the settlement or the guards come). Ops: `/kingdom identity [list|link
+  <settlement>|unlink [<settlement>]|forget]`, `/kingdom talk unmask`.
+  With MCA a masked player is a stranger to its villagers: their memories (hearts) of you are kept under the
+  costume's own stand-in id (`McaMemoriesMixin` on `VillagerBrain.getMemoriesForPlayer`, by the synced `masked_as`),
+  so the costume starts at 0 hearts and your real hearts are untouched; your names in what they say to you become the
+  costume's (`McaMessageMixin`, `Identities.withoutName`). Tyrants and paranoid kings (their own or their liege's)
+  exile the vigilantes they know: when a settlement of theirs learns who wears a costume, and whenever that player is
+  on its land, its guards see them out of the city (`Retinue.exile`, 3 days, where the realm has a ruler of its own),
+  and after 60 s still there they're taken by force (`Theft.arrest`, 2 minutes).
