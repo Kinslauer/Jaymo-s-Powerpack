@@ -515,28 +515,36 @@ public class CorpseEntity extends Entity {
 		}
 		Entity entity = this.body;
 		if (entity != null) {
-			entity.setPos(getX(), getY(), getZ());
-			entity.xo = this.xo;
-			entity.yo = this.yo;
-			entity.zo = this.zo;
-			entity.xOld = this.xOld;
-			entity.yOld = this.yOld;
-			entity.zOld = this.zOld;
-			entity.setYRot(yaw);
-			entity.yRotO = yaw;
-			entity.setXRot(0.0F);
-			entity.xRotO = 0.0F;
-			if (entity instanceof LivingEntity living) {
-				living.setYBodyRot(yaw);
-				living.yBodyRotO = yaw;
-				living.setYHeadRot(yaw);
-				living.yHeadRotO = yaw;
-				// fully keeled over, as at the end of the death animation
-				living.deathTime = 20;
-				living.hurtTime = 0;
-			}
+			placeBody(entity, yaw);
 		}
 		return entity;
+	}
+
+	/**
+	 * Client side: puts a body to draw where this corpse is, facing {@code yaw}, fully keeled over. (0.4.44) Also used
+	 * for a body this corpse doesn't own (a dead player's villager look, from MCA).
+	 */
+	public void placeBody(Entity entity, float yaw) {
+		entity.setPos(getX(), getY(), getZ());
+		entity.xo = this.xo;
+		entity.yo = this.yo;
+		entity.zo = this.zo;
+		entity.xOld = this.xOld;
+		entity.yOld = this.yOld;
+		entity.zOld = this.zOld;
+		entity.setYRot(yaw);
+		entity.yRotO = yaw;
+		entity.setXRot(0.0F);
+		entity.xRotO = 0.0F;
+		if (entity instanceof LivingEntity living) {
+			living.setYBodyRot(yaw);
+			living.yBodyRotO = yaw;
+			living.setYHeadRot(yaw);
+			living.yHeadRotO = yaw;
+			// fully keeled over, as at the end of the death animation
+			living.deathTime = 20;
+			living.hurtTime = 0;
+		}
 	}
 
 	/** Client: flames licking up out of the body and embers drifting off it, instead of a sheet of fire. */

@@ -1365,3 +1365,17 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   halberd) take a Tough Handle, and swords (longsword, broadsword, claymore, saber, ninjato, katana) a new Tinkering
   part, the Crossguard, in place of the binding. Kunai take just a binding, throwing star blanks nothing.
   Wooden weapons, round shields and the musket bayonet stay craftable.
+- **0.11.79 / Kitchen 0.4.44, player corpses wear their villager look:** with MCA everyone is a villager, so a dead
+  player's corpse is drawn as the villager MCA draws them as (genes, skin, hair, clothes), by MCA's own renderer,
+  lying and ragdolling like any villager's body (Kitchen `client/corpse/McaLooks`, which asks
+  `MCAClient.getVillagerRendererData` and only touches MCA when it's loaded; `CorpseEntity.placeBody`). Their severed
+  head and limbs come off that villager too (`SeveredPartRenderer`). Without MCA, a player body, or before the look
+  arrives from the server, it's the player skin as before. Zombie players are that villager too
+  (`ZombiePlayerRenderer.extractLook`): drawn by MCA's renderer at full infection (green-grey), walking, holding and
+  swinging as the zombie does, arms held out (`ARMS_OUT`, `ZombiePlayerModel.armsOut`). Only players the game knows
+  (online, or their look already sent) are asked for: the future's zombie players have made-up ids.
+- **0.11.80, the future's dead:** Kitchen's zombie players are rarer in future hordes (12% of a pack, `FutureFerals.CORPSE_SHARE`),
+  always carry a gun (one that can't be armed isn't spawned) and shoot far worse: a zombie's stray is 3x the gun's
+  own plus 4 degrees (`FutureGuns.ZOMBIE_STRAY_SCALE` / `ZOMBIE_STRAY_ADD`; echoes and androids aim as before). The
+  rest of the horde is 40% husks (`HUSK_SHARE`; only the hordes' own, tagged feral, are let into the future) and
+  plain zombies in our civilian skins.

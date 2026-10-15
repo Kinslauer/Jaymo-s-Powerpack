@@ -143,15 +143,21 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 			state.z = at.z;
 			state.carryYaw = yaw;
 		}
-		if (corpse.isPlayerCorpse()) {
+		// (0.4.44) a dead player is drawn as the villager MCA draws them as (their genes, hair and clothes), lying like any
+		// other villager's body; without one, in their player skin
+		Entity look = corpse.isPlayerCorpse() ? McaLooks.of(corpse.owner()) : null;
+		if (corpse.isPlayerCorpse() && look == null) {
 			extractPlayer(corpse, state, carrier, yaw, partialTicks);
 			state.avatar.setData(Severed.KEY, Severed.of(corpse.missing()));
 			physics(corpse, state, state.avatar, baseX, baseY, baseZ, partialTicks);
 			return;
 		}
-		Entity body = corpse.clientBody(yaw);
+		Entity body = look != null ? look : corpse.clientBody(yaw);
 		if (body == null) {
 			return;
+		}
+		if (look != null) {
+			corpse.placeBody(look, yaw);
 		}
 		state.bodyHeight = body.getBbHeight();
 		EntityRenderer<? super Entity, ?> renderer = this.entityRenderDispatcher.getRenderer(body);
@@ -166,7 +172,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 				&& living.getModel().root().hasChild("right_arm");
 			state.tall = !fourLegged && (humanoid || body.getBbHeight() > body.getBbWidth() * 1.1F);
 			// tall bodies face away before being laid back; long bodies lie across the arms
-			corpse.clientBody(state.tall ? yaw : yaw + 90.0F);
+			corpse.placeBody(body, state.tall ? yaw : yaw + 90.0F);
 		}
 		if (!state.carried && (kindOfRenderer instanceof SpiderRenderer<?> || kindOfRenderer instanceof SilverfishRenderer
 			|| kindOfRenderer instanceof EndermiteRenderer)) {
@@ -233,6 +239,10 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 			}
 		}
 		bodyState.displayFireAnimation = false;
+		if (look != null) {
+			// MCA's villager for the player isn't in the world: lit where the corpse lies, not where it was made
+			bodyState.lightCoords = state.lightCoords;
+		}
 		// no name over a body (a zombie player's, say)
 		bodyState.nameTag = null;
 		bodyState.setData(Severed.KEY, Severed.of(corpse.missing()));
