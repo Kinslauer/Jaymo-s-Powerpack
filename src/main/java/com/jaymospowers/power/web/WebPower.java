@@ -90,6 +90,20 @@ public final class WebPower implements Power {
 	static final double ENTITY_WEB_BREAK = 1.5;
 	static final double ENTITY_WEB_MAX_SIZE = 4.5;
 	/**
+	 * Both swing webs on small things (see {@link WebAnchors#reelable}) and Sneak held: you reel them in, hand over
+	 * hand, at {@code REEL_SPEED} b/t (lifted a little off the ground so they don't snag), until they're
+	 * {@code REEL_HOLD} blocks off, where they're held at your feet (an item is close enough to pick up). Bigger
+	 * catches are a slingshot as before.
+	 */
+	public static final double REEL_MAX_SIZE = 1.0;
+	static final double REEL_SPEED = 0.55, REEL_LIFT = 0.12, REEL_HOLD = 1.2;
+	/**
+	 * Double-tap Sneak (two presses within {@code REEL_TAP_TICKS}) while reeling: a hard yank, the catch snapped in at
+	 * {@code REEL_YANK_SPEED} b/t (with {@code REEL_YANK_LIFT}) for up to {@code REEL_YANK_TICKS}, Sneak held or not.
+	 */
+	static final int REEL_TAP_TICKS = 6, REEL_YANK_TICKS = 8;
+	static final double REEL_YANK_SPEED = 1.6, REEL_YANK_LIFT = 0.3;
+	/**
 	 * A <i>player</i> on the Yank line can fight it: they're pulled more gently than a mob ({@code PLAYER_TETHER_*}),
 	 * so they can lean away against it, and holding it stretched past {@code TETHER_LENGTH + PLAYER_STRAIN_OVER} for
 	 * {@code PLAYER_STRAIN_TICKS} snaps it. Attacking (a swing) breaks it outright, as before.
@@ -187,6 +201,10 @@ public final class WebPower implements Power {
 		int wingsTicks;
 		/** Ticks left of the wings' Feather Falling (it lingers a moment past folding, for the landing). */
 		int featherTicks;
+		/** Reeling: whether Sneak was down last tick, the game time of the last Sneak press, and ticks left of a hard yank. */
+		boolean reelSneak;
+		long reelPressAt = Long.MIN_VALUE / 2;
+		int reelYank;
 		/** Ticks a player on the Yank line has held it stretched. */
 		int tetherStrain;
 		/** The suit's charged jump is held: a fall caught in it doesn't count. */
@@ -548,6 +566,7 @@ public final class WebPower implements Power {
 		if (state.lineTicks > 0 && --state.lineTicks == 0 && !state.swinging[WebNet.MAIN]) {
 			player.removeAttached(LINE);
 		}
+		tickReelTaps(player, state);
 		for (int hand = WebNet.MAIN; hand <= WebNet.OFF; hand++) {
 			if (!state.swinging[hand]) {
 				continue;
@@ -756,6 +775,14 @@ public final class WebPower implements Power {
 			|| target.distanceTo(player) > WebAnchors.ENTITY_RANGE * WebSymbiote.reachScale(player) * ENTITY_WEB_BREAK) {
 			return false;
 		}
+		if (reeling(player, state)) {
+			// Sneak with both webs on small things: hauled in (once per catch, if both webs share one)
+			if (hand == WebNet.MAIN || state.swingEntity[WebNet.MAIN] != state.swingEntity[WebNet.OFF]) {
+				reel(player, state, target);
+			}
+			state.swingLength[hand] = Math.max(REEL_HOLD, Math.min(state.swingLength[hand], target.distanceTo(player)));
+			return true;
+		}
 		double over = target.distanceTo(player) - state.swingLength[hand];
 		boolean movable = !KitchenCompat.isHeavy(target) && target.getBbWidth() * target.getBbHeight() <= ENTITY_WEB_MAX_SIZE
 			&& !(target instanceof Player other && (other.isCreative() || other.isSpectator()));
@@ -769,6 +796,64 @@ public final class WebPower implements Power {
 			target.syncVelocity = true;
 		}
 		return true;
+	}
+
+	/** Both swing webs stuck to things small enough to reel in, and Sneak held. */
+	private static boolean reeling(ServerPlayer player, State state) {
+		if (!player.getLastClientInput().shift() && state.reelYank == 0) {
+			return false;
+		}
+		for (int hand = WebNet.MAIN; hand <= WebNet.OFF; hand++) {
+			if (!state.swinging[hand] || state.swingEntity[hand] < 0 || !WebAnchors.reelable(player.level().getEntity(state.swingEntity[hand]))) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** Sneak pressed twice quickly with both webs on small things: a hard yank starts. Once a tick, before the webs. */
+	private static void tickReelTaps(ServerPlayer player, State state) {
+		boolean sneak = player.getLastClientInput().shift();
+		long now = player.level().getGameTime();
+		if (state.reelYank > 0) {
+			state.reelYank--;
+		}
+		if (sneak && !state.reelSneak) {
+			if (now - state.reelPressAt <= REEL_TAP_TICKS && reeling(player, state)) {
+				state.reelYank = REEL_YANK_TICKS;
+				state.reelPressAt = Long.MIN_VALUE / 2;
+				player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8F, 1.3F);
+				player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_RETRIEVE, SoundSource.PLAYERS, 1.0F, 0.7F);
+			} else {
+				state.reelPressAt = now;
+			}
+		}
+		state.reelSneak = sneak;
+	}
+
+	/** One tick of reeling {@code target} in: toward you, a little up, and held at your feet once it's there. */
+	private static void reel(ServerPlayer player, State state, Entity target) {
+		boolean yank = state.reelYank > 0;
+		Vec3 to = player.position().add(0.0, 0.3, 0.0).subtract(target.position());
+		double distance = to.length();
+		Vec3 v;
+		if (distance <= REEL_HOLD) {
+			v = target.getDeltaMovement().scale(0.3);
+		} else {
+			double lift = yank ? REEL_YANK_LIFT : REEL_LIFT;
+			v = to.scale(Math.min(yank ? REEL_YANK_SPEED : REEL_SPEED, distance - REEL_HOLD * 0.5) / distance);
+			if (target.onGround() || v.y < lift) {
+				v = new Vec3(v.x, Math.max(v.y, lift), v.z);
+			}
+		}
+		target.setDeltaMovement(v);
+		target.resetFallDistance();
+		target.needsSync = true;
+		target.syncVelocity = true;
+		if (player.tickCount % 6 == 0 && distance > REEL_HOLD) {
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FISHING_BOBBER_RETRIEVE,
+				SoundSource.PLAYERS, 0.6F, 1.1F + player.getRandom().nextFloat() * 0.3F);
+		}
 	}
 
 	private static void dropSwing(ServerPlayer player, State state, int hand) {

@@ -57,6 +57,12 @@ final class CombatRollTaps {
 		if (sinceLastTap < Integer.MAX_VALUE) {
 			sinceLastTap++;
 		}
+		// double Sneak with two webs on small things is Web's yank, not a roll
+		if (minecraft.player.tickCount - com.jaymospowers.client.power.web.WebSwing.reelReadyTick <= 1) {
+			sinceLastTap = Integer.MAX_VALUE;
+			sneakWasDown = sneak;
+			return;
+		}
 		if (sneak && !sneakWasDown) {
 			if (sinceLastTap <= DOUBLE_TAP_TICKS) {
 				roll.setDown(true);

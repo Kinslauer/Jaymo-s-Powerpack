@@ -36,6 +36,8 @@ final class ChronoPunch {
 	/** The last punch's throw. */
 	static final double FINISH_PUSH = 1.3;
 	static final int COOLDOWN = 160;
+	/** Screen shake per landed punch: the first, then this much more each. */
+	static final float SHAKE = 0.1F, SHAKE_STEP = 0.06F;
 	private static final DustParticleOptions GOLD = new DustParticleOptions(0xFFE08A, 1.0F);
 	private static final SwingAnimation JAB = new SwingAnimation(SwingAnimationType.WHACK, EVERY);
 
@@ -121,6 +123,10 @@ final class ChronoPunch {
 			Vec3 at = target.getBoundingBox().getCenter();
 			ChronoFx.crackSound(level, player, at.x, at.y, at.z);
 			ChronoFx.particles(level, player, ParticleTypes.CRIT, at.x, at.y, at.z, 4, 0.25, 0.3, 0.25, 0.25);
+		}
+		if (any) {
+			// (0.11.40) each punch shakes harder than the last
+			com.jaymospowers.core.Shakes.send(player, SHAKE + SHAKE_STEP * n);
 		}
 		float pitch = 1.0F + n * 0.06F;
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), any ? SoundEvents.PLAYER_ATTACK_STRONG : SoundEvents.PLAYER_ATTACK_WEAK,
