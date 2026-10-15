@@ -20,7 +20,7 @@ import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.item.component.ItemContainerContents;
 
 /**
- * (0.10.106) Andy: the modern guns are for the future only. TaCZ's modern guns, their ammo and attachments
+ * (0.10.108) Andy: the modern guns are for the future only. TaCZ's modern guns, their ammo and attachments
  * ({@link TaczGuns#isModern}) can't leave it: they're taken off anyone who goes home (inventory, ender chest, the
  * stack on the cursor, and inside shulker boxes and bundles), checked again every second (so a {@code /give} or a
  * chest raided elsewhere doesn't keep one), dropped ones outside the future vanish as they load, and mobs out there put

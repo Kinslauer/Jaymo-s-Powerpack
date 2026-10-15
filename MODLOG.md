@@ -1169,7 +1169,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   `WindPose`, so `PoseTakeover.posed` keeps EMF/Fresh Animations off it).
   Ship's Plans (Andy: "can we make our own ship kits?"): sneak-use them on the helm of a ship you built to draw her,
   then use them on open water to lay her again (frames in survival, built exactly in creative); kept after use.
-- **0.10.106, the future** (Andy: "what if we made a new dimension, that was just this map, with feral zombies like the
+- **0.10.108, the future** (Andy: "what if we made a new dimension, that was just this map, with feral zombies like the
   ones we made for corpses? I want to simulate going to the future in an apocalypse."): Chronokinesis sneak+B, **Fast
   Forward**, leaps you and every player within 4 blocks to `jaymospowers:future`, a lifetime from now: **Los Perrito
   City by Uospag** (https://www.curseforge.com/minecraft/worlds/los-perrito, CC BY 4.0; credited in chat on each

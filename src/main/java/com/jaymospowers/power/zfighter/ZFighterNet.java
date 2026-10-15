@@ -51,6 +51,19 @@ public final class ZFighterNet {
 		}
 	}
 
+	/** Client → server: left mouse held bare-handed (the hold combo) or let go. */
+	public record Combo(boolean down) implements CustomPacketPayload {
+		public static final Type<Combo> TYPE = new Type<>(JaymosPowers.id("zfighter_hold_combo"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Combo> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeBoolean(p.down),
+			buf -> new Combo(buf.readBoolean()));
+
+		@Override
+		public Type<Combo> type() {
+			return TYPE;
+		}
+	}
+
 	/** Client → server: right click held bare-handed (the guard) or let go. */
 	public record Guard(boolean up) implements CustomPacketPayload {
 		public static final Type<Guard> TYPE = new Type<>(JaymosPowers.id("zfighter_guard"));
@@ -182,6 +195,12 @@ public final class ZFighterNet {
 		ServerPlayNetworking.registerGlobalReceiver(Guard.TYPE, (payload, ctx) -> {
 			if (Powers.has(ctx.player(), ZFighterPower.INSTANCE)) {
 				ZFighterGuard.set(ctx.player(), payload.up());
+			}
+		});
+		PayloadTypeRegistry.serverboundPlay().register(Combo.TYPE, Combo.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Combo.TYPE, (payload, ctx) -> {
+			if (Powers.has(ctx.player(), ZFighterPower.INSTANCE) || !payload.down()) {
+				ZFighterCombo.hold(ctx.player(), payload.down());
 			}
 		});
 		PayloadTypeRegistry.serverboundPlay().register(Train.TYPE, Train.CODEC);

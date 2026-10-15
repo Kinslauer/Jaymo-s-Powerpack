@@ -63,7 +63,7 @@ import org.jspecify.annotations.Nullable;
  * hold, mines what they mine (no drops), places what they place, and attacks every living thing near it, its owner
  * included. Outside the Nether any hurt shatters it, and it comes back later near its owner; only in the Nether can it
  * die, for good, and there it fights with its owner's own abilities ({@link ChronoEchoFight}). In the future
- * (0.10.106) it can die too, and it carries a flintlock and shoots. See {@link ChronoEchoes} for spawning, returning and following.
+ * (0.10.108) it can die too, and it carries a flintlock and shoots. See {@link ChronoEchoes} for spawning, returning and following.
  */
 public class ChronoEcho extends Monster {
 	// ---- tuning ----
@@ -238,7 +238,7 @@ public class ChronoEcho extends Monster {
 		if (this.tickCount % OWNER_CHECK_INTERVAL == 0 && !checkOwner(level)) {
 			return;
 		}
-		// (0.10.106) in the future it carries a modern gun and uses it (FutureFerals fires it); out of it, it puts it down
+		// (0.10.108) in the future it carries a modern gun and uses it (FutureFerals fires it); out of it, it puts it down
 		boolean future = level.dimension() == com.jaymospowers.power.chrono.future.Future.FUTURE;
 		boolean gunner = this.entityTags().contains(com.jaymospowers.power.chrono.future.FutureGuns.TAG);
 		if (future && !gunner && this.tickCount % OWNER_CHECK_INTERVAL == 0) {
@@ -289,7 +289,7 @@ public class ChronoEcho extends Monster {
 			return false;
 		}
 		if (player.level() != level && this.entityTags().contains(ChronoEchoes.FUTURE_BORN)) {
-			fade(level); // (0.10.106) a future echo stays in the future: you left, it's gone
+			fade(level); // (0.10.108) a future echo stays in the future: you left, it's gone
 			return false;
 		}
 		if (player.level() == level) {
@@ -434,7 +434,7 @@ public class ChronoEcho extends Monster {
 		if (this.gone || this.isRemoved()) {
 			return false;
 		}
-		// (0.10.106) in the future too it bleeds and can die, and dying for good opens the future to its owner
+		// (0.10.108) in the future too it bleeds and can die, and dying for good opens the future to its owner
 		if (source.is(DamageTypes.GENERIC_KILL) || level.dimension() == Level.NETHER
 			|| level.dimension() == com.jaymospowers.power.chrono.future.Future.FUTURE) {
 			if (this.fight != null && source.getEntity() instanceof ServerPlayer player) {

@@ -30,7 +30,7 @@ import org.jspecify.annotations.Nullable;
  * pull a TaCZ trigger, so the shots are ours: bullets (a shotgun's spread of pellets) traced from the muzzle, stopped by
  * walls, hurting the first thing they meet, in bursts for automatics, with TaCZ's own report for that gun. Then a
  * reload. No ammunition is used, but a dead gunner may drop its gun (loaded) and some rounds for it. The flintlocks
- * they carried before 0.10.106 still fire. Nothing here without TaCZ.
+ * they carried before 0.10.108 still fire. Nothing here without TaCZ.
  */
 public final class FutureGuns {
 	public static final String TAG = "jaymospowers.gunner";
@@ -48,7 +48,7 @@ public final class FutureGuns {
 	static final Kind MG = new Kind(36.0, 3.0F, 1, 5.0F, 70, 10, 2);
 	static final Kind SHOTGUN = new Kind(12.0, 2.0F, 8, 8.0F, 30, 1, 0);
 	static final Kind SNIPER = new Kind(64.0, 12.0F, 1, 0.6F, 80, 1, 0);
-	/** Our flintlocks (gunners from before 0.10.106). */
+	/** Our flintlocks (gunners from before 0.10.108). */
 	static final Kind MUSKET = new Kind(32.0, 9.0F, 1, 1.5F, 100, 1, 0);
 	static final Kind FLINTLOCK_PISTOL = new Kind(18.0, 6.0F, 1, 3.0F, 60, 1, 0);
 	static final Kind BLUNDERBUSS = new Kind(10.0, 2.5F, 6, 9.0F, 90, 1, 0);

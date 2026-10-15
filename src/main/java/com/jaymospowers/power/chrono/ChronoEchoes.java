@@ -129,7 +129,7 @@ public final class ChronoEchoes {
 	}
 
 	/**
-	 * (0.10.106) Echoes born in the future: the one-per-Chrono rule doesn't hold there (up to {@code Future.ECHOES}
+	 * (0.10.108) Echoes born in the future: the one-per-Chrono rule doesn't hold there (up to {@code Future.ECHOES}
 	 * stalk you at once). They belong to that time: they never follow you home, and fade when you leave.
 	 */
 	public static final String FUTURE_BORN = "jaymospowers.future_echo";
@@ -397,7 +397,7 @@ public final class ChronoEchoes {
 		UUID owner = echo.owner();
 		ServerPlayer player = owner == null ? null : level.getServer().getPlayerList().getPlayer(owner);
 		if (player != null) {
-			// (0.10.106) your echo ended for good: the way to the future opens for you
+			// (0.10.108) your echo ended for good: the way to the future opens for you
 			com.jaymospowers.power.chrono.future.Future.echoSlain(player);
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.chrono_echo_collapsed")
 				.withStyle(ChatFormatting.AQUA, ChatFormatting.ITALIC));

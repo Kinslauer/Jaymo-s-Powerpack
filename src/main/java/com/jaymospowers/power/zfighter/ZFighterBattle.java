@@ -231,7 +231,7 @@ final class ZFighterBattle {
 		live.lastHit = now;
 		live.ki = Math.min(ZFighterPower.maxKi(player), live.ki + ZFighterPower.KI_PER_PUNCH);
 		Mastery.used(player);
-		if (live.combo % COMBO_FINISHER != 0 || !target.isAlive()) {
+		if (live.combo % COMBO_FINISHER != 0 || !target.isAlive() || ZFighterCombo.running(player)) {
 			return;
 		}
 		// the finisher: one heavy blow that sends it flying
@@ -279,6 +279,7 @@ final class ZFighterBattle {
 			ZFighterPower.endFlight(player, live);
 		}
 		ZFighterPower.forget(player);
+		ZFighterCombo.drop(player);
 		LivingEntity victor = victor(player, source);
 		if (victor == null) {
 			return;

@@ -43,6 +43,11 @@ import net.minecraft.world.item.Items;
 public final class ZFighterPowerClient implements PowerClient {
 	public static final ZFighterPowerClient INSTANCE = new ZFighterPowerClient();
 	private static boolean guardWasUp;
+	/** The hold combo: how long the attack key has been held bare-handed, and whether the string is on. */
+	private static int attackHeld;
+	private static boolean comboOn;
+	/** Held this long (ticks) before a click becomes the hold combo: a tap stays an ordinary punch. */
+	private static final int COMBO_HOLD_TICKS = 4;
 
 	private static final int CHIP = 20;
 	private static final int CHIP_GAP = 2;
@@ -69,6 +74,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ClientTickEvents.END_CLIENT_TICK.register(ZFighterFlightPose::tick);
 		ClientTickEvents.END_CLIENT_TICK.register(ZFighterChargePose::tick);
 		ClientTickEvents.END_CLIENT_TICK.register(ZFighterDancePose::tick);
+		ClientTickEvents.END_CLIENT_TICK.register(ZFighterComboPose::tick);
 		// the Training Post: a Z Fighter's right click opens the drills
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
 			if (renderer instanceof AvatarRenderer<?> avatar) {
@@ -99,6 +105,22 @@ public final class ZFighterPowerClient implements PowerClient {
 			guardWasUp = guard;
 			ClientPlayNetworking.send(new ZFighterNet.Guard(guard));
 		}
+		// the hold combo: left mouse held, bare-handed, not at a block (that's digging)
+		boolean attack = minecraft.options.keyAttack.isDown() && minecraft.gui.screen() == null && !player.isSpectator()
+			&& player.getMainHandItem().isEmpty() && !guard;
+		attackHeld = attack ? attackHeld + 1 : 0;
+		boolean combo = comboOn ? attack
+			: attackHeld >= COMBO_HOLD_TICKS && (minecraft.hitResult == null || minecraft.hitResult.getType() != net.minecraft.world.phys.HitResult.Type.BLOCK);
+		if (combo != comboOn) {
+			comboOn = combo;
+			ClientPlayNetworking.send(new ZFighterNet.Combo(combo));
+		}
+	}
+
+	/** Whether the hold combo has the attack key (vanilla's held-click digging stands aside). */
+	public static boolean comboHeld() {
+		Minecraft minecraft = Minecraft.getInstance();
+		return comboOn && minecraft.player != null && Powers.has(minecraft.player, ZFighterPower.INSTANCE);
 	}
 
 	@Override
@@ -106,6 +128,11 @@ public final class ZFighterPowerClient implements PowerClient {
 		if (guardWasUp) {
 			guardWasUp = false;
 			ClientPlayNetworking.send(new ZFighterNet.Guard(false));
+		}
+		attackHeld = 0;
+		if (comboOn) {
+			comboOn = false;
+			ClientPlayNetworking.send(new ZFighterNet.Combo(false));
 		}
 	}
 
@@ -117,6 +144,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterChargePose.extract(entity, state, partialTicks);
 		ZFighterGuardPose.extract(entity, state);
 		ZFighterDancePose.extract(entity, state, partialTicks);
+		ZFighterComboPose.extract(entity, state, partialTicks);
 		ZFighterMark.extract(entity, state);
 		ZFighterVerdantLook.extract(entity, state);
 		ZFighterApe.extract(entity, state);
@@ -128,6 +156,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterChargePose.applyModel(model, state);
 		ZFighterGuardPose.applyModel(model, state);
 		ZFighterDancePose.applyModel(model, state);
+		ZFighterComboPose.applyModel(model, state);
 	}
 
 	@Override

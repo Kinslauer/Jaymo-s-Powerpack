@@ -19,7 +19,7 @@ import net.minecraft.world.item.component.CustomData;
 /**
  * (0.10.43) Our flintlocks in TaCZ: the musket, blunderbuss and flintlock pistol are a gunpack of our own
  * ({@code assets/jaymospowers/custom/jaymos_flintlocks}, made by tools/gen_tacz_guns.py), handed to TaCZ through its
- * API so it copies it into {@code .minecraft/tacz}; TaCZ's modern one loads too since 0.10.106, for the future only
+ * API so it copies it into {@code .minecraft/tacz}; TaCZ's modern one loads too since 0.10.108, for the future only
  * ({@link #trimDefaultPack}). Through reflection, so Jaymo's Powers
  * still runs without TaCZ. TaCZ's own modern guns, ammo and attachments are taken off its benches
  * ({@code tinkering/Uncraftable}). As TaCZ items the guns are {@code tacz:modern_kinetic_gun} with
@@ -58,7 +58,7 @@ public final class TaczGuns {
 	}
 
 	/**
-	 * (0.10.85) Andy: nothing modern in the pack, so TaCZ's default gunpack was kept from loading at all. (0.10.106) Andy:
+	 * (0.10.85) Andy: nothing modern in the pack, so TaCZ's default gunpack was kept from loading at all. (0.10.108) Andy:
 	 * the modern guns, but only in the future ({@code power/chrono/future}): the pack loads again (it can't load per
 	 * dimension; outside the future its guns, ammo and attachments are kept out of every creative tab and JEI,
 	 * {@link #hideModern}, and taken off anyone who brings them back, {@code FutureContraband}). We export it ourselves
@@ -127,7 +127,7 @@ public final class TaczGuns {
 		return false;
 	}
 
-	/** (0.10.106) TaCZ's modern guns, ammo and attachments are in no creative tab (JEI lists what the tabs hold). */
+	/** (0.10.108) TaCZ's modern guns, ammo and attachments are in no creative tab (JEI lists what the tabs hold). */
 	public static void hideModern() {
 		if (!LOADED) {
 			return;
