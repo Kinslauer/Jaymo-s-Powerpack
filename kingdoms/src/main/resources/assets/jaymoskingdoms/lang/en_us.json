@@ -2947,5 +2947,15 @@
 	"language.jaymoskingdoms.accent.slight.3": "You even swear like one of us now. My mother would be appalled.",
 	"language.jaymoskingdoms.accent.native.0": "%s, you sound like you were born here. Were you, and nobody told me?",
 	"language.jaymoskingdoms.accent.native.1": "Not a trace of an accent left. You're one of us now, %s.",
-	"language.jaymoskingdoms.accent.native.2": "I told my cousin you were a foreigner and he didn't believe me. Well done, %s."
+	"language.jaymoskingdoms.accent.native.2": "I told my cousin you were a foreigner and he didn't believe me. Well done, %s.",
+	"gui.jaymoskingdoms.skills.learn": "Press to learn it.",
+	"gui.jaymoskingdoms.skills.hover": "Point at a perk to read it in full; press one to learn it.",
+	"gui.jaymoskingdoms.class.picked": "Your pick",
+	"gui.jaymoskingdoms.class.press": "Press it in the list to pick it",
+	"gui.jaymoskingdoms.class.gear": "Good with",
+	"gui.jaymoskingdoms.class.sub": "Pick one, for keeps",
+	"journal.jaymoskingdoms.sub.quests": "Quests carried: %s",
+	"journal.jaymoskingdoms.sub.map": "The land about you, %s blocks across",
+	"journal.jaymoskingdoms.sub.reputation": "Settlements that know you: %s",
+	"gui.jaymoskingdoms.stable.hover": "Point at a row to read it in full."
 }

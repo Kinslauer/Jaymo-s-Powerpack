@@ -6,10 +6,10 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 
-/** The info panel beside a Tinkers table's screen, like Tinkers' own: a dark box with wrapped lines. */
+/** The info panel beside a Tinkers table's screen: (0.10.115) drawn like the H screen, a dark box with a bronze stripe and wrapped lines. */
 final class SidePanel {
 	static final int WIDTH = 118, PAD = 5;
-	private static final int BACK = 0xE0101010, EDGE = 0xFF5A5A5A, TEXT = 0xFFFFFFFF;
+	private static final int TEXT = TinkerUi.TEXT;
 
 	private SidePanel() {
 	}
@@ -17,20 +17,17 @@ final class SidePanel {
 	static void draw(GuiGraphicsExtractor graphics, Font font, int x, int y, Component title, List<Component> lines) {
 		int width = WIDTH - 2 * PAD;
 		List<FormattedCharSequence> titleLines = font.split(title, width);
-		int height = PAD * 2 + titleLines.size() * 10 + 3;
+		int height = PAD * 2 + 1 + titleLines.size() * 10 + 3;
 		for (Component line : lines) {
 			height += font.split(line, width).size() * 10;
 		}
-		graphics.fill(x, y, x + WIDTH, y + height, BACK);
-		graphics.fill(x, y, x + WIDTH, y + 1, EDGE);
-		graphics.fill(x, y + height - 1, x + WIDTH, y + height, EDGE);
-		graphics.fill(x, y, x + 1, y + height, EDGE);
-		graphics.fill(x + WIDTH - 1, y, x + WIDTH, y + height, EDGE);
-		int ty = y + PAD;
+		TinkerUi.panel(graphics, x, y, WIDTH, height);
+		int ty = y + PAD + 1;
 		for (FormattedCharSequence line : titleLines) {
-			graphics.text(font, line, x + PAD, ty, 0xFFFFD866, true);
+			graphics.text(font, line, x + PAD, ty, TinkerUi.ACCENT, true);
 			ty += 10;
 		}
+		graphics.fill(x + PAD - 1, ty, x + WIDTH - PAD + 1, ty + 1, TinkerUi.ROW);
 		ty += 3;
 		for (Component line : lines) {
 			for (FormattedCharSequence part : font.split(line, width)) {

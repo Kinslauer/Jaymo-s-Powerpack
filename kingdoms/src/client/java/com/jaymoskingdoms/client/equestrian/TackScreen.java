@@ -4,30 +4,27 @@ import com.jaymoskingdoms.equestrian.Bond;
 import com.jaymoskingdoms.equestrian.Bonding;
 import com.jaymoskingdoms.equestrian.Discipline;
 import com.jaymoskingdoms.equestrian.TackMenu;
+import com.jaymoskingdoms.client.Ui;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.Slot;
 
 /**
  * (0.5.44) The tack screen ({@link TackMenu}): saddle, bridle, blanket and barding down the left, the horse in the
  * middle, and on the right how much it trusts you, its four disciplines (level and progress), its hunger, thirst and
- * hooves. Drawn plainly in vanilla's grey.
+ * hooves. (0.7.33) Drawn like the H screen: a dark panel with a gold stripe, sunken slots.
  */
 public class TackScreen extends AbstractContainerScreen<TackMenu> {
-	private static final Identifier SLOT = Identifier.withDefaultNamespace("container/slot");
 	private static final int WIDTH = 176, HEIGHT = 184;
 	private static final int PANEL_X = 82, PANEL_Y = 18, ROW = 9, BAR_X = 50, BAR_W = 38;
 	static final int TRUST_LOW = 0xE04040, TRUST_MID = 0xFFC04A, TRUST_HIGH = 0x8FE07A;
 	static final int HUNGER_COLOR = 0xD9A040, THIRST_COLOR = 0x4AA8FF, HOOF_COLOR = 0xB8A890, SHOD_COLOR = 0xC8CCD2;
 	private static final int[] DISCIPLINE_COLORS = {0x8FE07A, 0x7FD4FF, 0xBFF4EA, 0xE06A4A};
-	private static final int TEXT = 0xFF404040;
+	private static final int TEXT = Ui.TEXT;
 	private float xMouse;
 	private float yMouse;
 
@@ -47,19 +44,10 @@ public class TackScreen extends AbstractContainerScreen<TackMenu> {
 		super.extractBackground(graphics, mouseX, mouseY, a);
 		int x = this.leftPos;
 		int y = this.topPos;
-		// a vanilla-grey panel with a bevelled edge
-		graphics.fill(x, y, x + WIDTH, y + HEIGHT, 0xFF000000);
-		graphics.fill(x + 1, y + 1, x + WIDTH - 1, y + HEIGHT - 1, 0xFFFFFFFF);
-		graphics.fill(x + 3, y + 3, x + WIDTH - 1, y + HEIGHT - 1, 0xFF555555);
-		graphics.fill(x + 3, y + 3, x + WIDTH - 3, y + HEIGHT - 3, 0xFFC6C6C6);
-		for (Slot slot : this.menu.slots) {
-			if (slot.isActive()) {
-				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT, x + slot.x - 1, y + slot.y - 1, 18, 18);
-			}
-		}
+		Ui.panel(graphics, x, y, WIDTH, HEIGHT, Ui.GOLD);
+		Ui.slots(graphics, this.menu.slots, x, y);
 		// the horse
-		graphics.fill(x + 26, y + 17, x + 78, y + 89, 0xFF000000);
-		graphics.fill(x + 27, y + 18, x + 77, y + 88, 0xFF8B8B8B);
+		Ui.well(graphics, x + 26, y + 17, 52, 72);
 		AbstractHorse horse = this.menu.horse;
 		if (horse != null) {
 			InventoryScreen.extractEntityInInventoryFollowsMouse(graphics, x + 27, y + 18, x + 77, y + 88, 17, 0.25F, this.xMouse, this.yMouse, horse);
@@ -94,8 +82,14 @@ public class TackScreen extends AbstractContainerScreen<TackMenu> {
 	private void row(GuiGraphicsExtractor graphics, int x, int y, Component label, float share, int color) {
 		graphics.text(this.font, label, x, y, TEXT, false);
 		int bx = x + BAR_X;
-		graphics.fill(bx, y + 2, bx + BAR_W, y + 6, 0xFF8B8B8B);
-		graphics.fill(bx, y + 2, bx + Mth.ceil(BAR_W * Mth.clamp(share, 0.0F, 1.0F)), y + 6, 0xFF000000 | color);
+		graphics.fill(bx, y + 3, bx + BAR_W, y + 6, Ui.BAR_BACK);
+		graphics.fill(bx, y + 3, bx + Mth.ceil(BAR_W * Mth.clamp(share, 0.0F, 1.0F)), y + 6, 0xFF000000 | color);
+	}
+
+	@Override
+	protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+		graphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, Ui.GOLD, false);
+		graphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, Ui.DIM, false);
 	}
 
 	static int trustColor(float trust) {

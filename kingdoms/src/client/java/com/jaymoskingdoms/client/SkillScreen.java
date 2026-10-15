@@ -1,40 +1,42 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.Classes;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Renown;
 import com.jaymoskingdoms.Skills;
 import com.mojang.blaze3d.platform.InputConstants;
+import java.util.ArrayList;
+import java.util.List;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.sounds.SoundEvents;
+import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.52) The skill tree ({@link Skills}), on the {@code K} key: a tab per pillar, its level and experience, and its
- * perks as a tree; press a perk to spend points on it. Under it, your alignment ({@link Renown}). The server checks every spend and syncs the result back.
+ * (0.5.52) The skill tree ({@link Skills}), on the {@code K} key. (0.7.33) Restyled like the H screen: a header with the
+ * pillar's level, its experience bar and the points to spend; a tab per pillar; its perks as a tree of flat tiles (press
+ * one to spend points on it); and a box at the bottom that shows the hovered perk in full, or else what the pillar
+ * levels on, your class and your alignment ({@link Renown}). The server checks every spend and syncs the result back.
  */
 final class SkillScreen extends Screen {
-	static final int PANEL_W = 320, PANEL_H = 262, PAD = 8, TAB_W = 98, PERK_W = 96, PERK_H = 20, TIER_H = 34, COLUMN_GAP = 104;
-	static final int COLOR_PANEL = 0xE0201812, COLOR_EDGE = 0xFFB08A3C, COLOR_TEXT = 0xFFF2E6CC, COLOR_DIM = 0xFFB8AA90,
-		COLOR_GOLD = 0xFFFFC21A, COLOR_BAR = 0xFF3A3024, COLOR_FILL = 0xFF66C266, COLOR_LINE_ON = 0xFFB08A3C, COLOR_LINE_OFF = 0xFF54483A;
+	static final int PANEL_W = 340, PANEL_H = 268, HEADER = 34, TAB_W = 98, TAB_H = 16, PERK_W = 98, PERK_H = 20, TIER_H = 30,
+		COLUMN_GAP = 106, TREE_Y = 58, DETAIL_Y = 176, DETAIL_LINES = 6, FOOTER = 22, XP_BAR_W = 120;
+	static final int COLOR_LINE_OFF = 0xFF3A3A44;
 
 	private static KeyMapping key;
 	/** The tab last looked at (Stealth first: it's the one built). */
 	private static Skills.Pillar pillar = Skills.Pillar.STEALTH;
 	/** (0.6.5) The page of the pillar's tree shown: 0, or 1 for the tiers past the first page (Strength's Combat Arts). */
 	private static int page;
-
-	/** What the widgets were built for; when the server's answer changes it, they're built again. */
-	private Skills.Progress shown = Skills.Progress.EMPTY;
 
 	SkillScreen() {
 		super(Component.translatable("gui.jaymoskingdoms.skills.title"));
@@ -62,21 +64,33 @@ final class SkillScreen extends Screen {
 		return minecraft.player == null ? Skills.Progress.EMPTY : Skills.of(minecraft.player);
 	}
 
+	static int accent(Skills.Pillar pillar) {
+		return switch (pillar) {
+			case SURVIVAL -> Ui.SURVIVAL;
+			case STEALTH -> Ui.STEALTH;
+			case STRENGTH -> Ui.STRENGTH;
+		};
+	}
+
+	private int panelW() {
+		return Math.min(PANEL_W, this.width - 12);
+	}
+
 	private int left() {
-		return (this.width - PANEL_W) / 2;
+		return (this.width - panelW()) / 2;
 	}
 
 	private int top() {
 		return Math.max(4, (this.height - PANEL_H) / 2);
 	}
 
-	/** Where perk {@code perk}'s button sits. */
+	/** Where perk {@code perk}'s tile sits. */
 	private int perkX(Skills.Perk perk) {
 		return this.width / 2 + (perk.column - 1) * COLUMN_GAP - PERK_W / 2;
 	}
 
 	private int perkY(Skills.Perk perk) {
-		return top() + 76 + (perk.tier % Skills.Perk.PAGE_TIERS) * TIER_H;
+		return top() + TREE_Y + (perk.tier % Skills.Perk.PAGE_TIERS) * TIER_H;
 	}
 
 	private static boolean onPage(Skills.Perk perk) {
@@ -95,111 +109,139 @@ final class SkillScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.shown = progress();
-		int x = left() + (PANEL_W - TAB_W * 3 - 8) / 2, y = top() + 6;
+		int x = left() + (panelW() - TAB_W * 3 - 8) / 2, y = top() + HEADER + 2;
 		for (Skills.Pillar p : Skills.Pillar.values()) {
 			Button tab = Button.builder(Component.translatable("skill.jaymoskingdoms." + p.key()), b -> {
 				pillar = p;
 				page = 0;
 				rebuildWidgets();
-			}).bounds(x, y, TAB_W, 18).build();
+			}).bounds(x, y, TAB_W, TAB_H).build();
 			tab.active = p != pillar;
 			addRenderableWidget(tab);
 			x += TAB_W + 4;
 		}
-		if (pillar.open) {
-			for (Skills.Perk perk : Skills.Perk.values()) {
-				if (!onPage(perk)) {
-					continue;
-				}
-				String blocked = shown.blocked(perk);
-				Button button = Button.builder(perkLabel(perk), b -> ClientPlayNetworking.send(new Skills.Spend(perk.ordinal())))
-					.bounds(perkX(perk), perkY(perk), PERK_W, PERK_H).build();
-				button.active = blocked == null;
-				button.setTooltip(Tooltip.create(tooltip(perk, blocked)));
-				addRenderableWidget(button);
-			}
-		}
+		int fy = top() + PANEL_H - FOOTER + 3;
+		int right = left() + panelW() - 6;
+		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose()).bounds(right - 60, fy, 60, 16).build());
 		if (!twoPages()) {
 			page = 0;
 		} else {
 			addRenderableWidget(Button.builder(Component.translatable("gui.jaymoskingdoms.skills.page." + pillar.key() + "." + (1 - page)), b -> {
 				page = 1 - page;
 				rebuildWidgets();
-			}).bounds(left() + PANEL_W - PAD - 92, top() + PANEL_H - 24, 92, 18).build());
+			}).bounds(left() + 6, fy, 92, 16).build());
 		}
-		addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose())
-			.bounds(this.width / 2 - 40, top() + PANEL_H - 24, 80, 18).build());
 	}
 
-	private Component perkLabel(Skills.Perk perk) {
-		int rank = shown.rank(perk);
-		MutableComponent name = Component.translatable("skill.jaymoskingdoms.perk." + perk.key());
-		return perk.maxRank == 1 ? name.withStyle(rank > 0 ? ChatFormatting.GOLD : ChatFormatting.RESET)
-			: name.append(" " + rank + "/" + perk.maxRank).withStyle(rank >= perk.maxRank ? ChatFormatting.GOLD : ChatFormatting.RESET);
+	private Skills.@Nullable Perk perkAt(double mouseX, double mouseY) {
+		if (!pillar.open) {
+			return null;
+		}
+		for (Skills.Perk perk : Skills.Perk.values()) {
+			if (onPage(perk) && Ui.over((int)mouseX, (int)mouseY, perkX(perk), perkY(perk), PERK_W, PERK_H)) {
+				return perk;
+			}
+		}
+		return null;
 	}
 
-	private Component tooltip(Skills.Perk perk, String blocked) {
-		MutableComponent text = Component.translatable("skill.jaymoskingdoms.perk." + perk.key()).withStyle(ChatFormatting.GOLD)
-			.append(Component.literal("\n"))
-			.append(Component.translatable("skill.jaymoskingdoms.perk." + perk.key() + ".desc").withStyle(ChatFormatting.WHITE));
-		text.append(Component.literal("\n"));
-		text.append(Component.translatable("gui.jaymoskingdoms.skills.cost", perk.cost).withStyle(ChatFormatting.GRAY));
-		if (perk.minLevel > 0) {
-			text.append(Component.literal("  "));
-			text.append(Component.translatable("gui.jaymoskingdoms.skills.needs_level", perk.minLevel).withStyle(ChatFormatting.GRAY));
+	@Override
+	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		Skills.Perk perk = perkAt(event.x(), event.y());
+		if (perk != null) {
+			if (progress().blocked(perk) == null) {
+				ClientPlayNetworking.send(new Skills.Spend(perk.ordinal()));
+				this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+			}
+			return true;
 		}
-		if (blocked != null && !blocked.endsWith(".max")) {
-			text.append(Component.literal("\n"));
-			text.append(Component.translatable(blocked).withStyle(ChatFormatting.RED));
-		}
-		return text;
+		return super.mouseClicked(event, doubleClick);
 	}
 
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
-		Skills.Progress now = progress();
-		if (!now.equals(this.shown)) {
-			rebuildWidgets();
+		Skills.Progress shown = progress();
+		int x = left(), y = top(), w = panelW();
+		int accent = accent(pillar);
+		Ui.panel(graphics, x, y, w, PANEL_H, accent);
+		header(graphics, shown, accent);
+
+		Skills.Perk hovered = perkAt(mouseX, mouseY);
+		if (pillar.open) {
+			tree(graphics, shown, accent, hovered);
 		}
-		int x = left(), y = top();
-		graphics.fill(x, y, x + PANEL_W, y + PANEL_H, COLOR_PANEL);
-		edge(graphics, x, y, PANEL_W, PANEL_H, COLOR_EDGE);
-		int cy = y + 30;
-		Component name = Component.translatable("skill.jaymoskingdoms." + pillar.key());
-		if (!pillar.open) {
-			graphics.centeredText(this.font, name, this.width / 2, cy, COLOR_GOLD);
-			cy += 16;
-			for (FormattedCharSequence line : this.font.split(Component.translatable("gui.jaymoskingdoms.skills.plan." + pillar.key()), PANEL_W - PAD * 4)) {
-				graphics.centeredText(this.font, line, this.width / 2, cy, COLOR_DIM);
-				cy += 10;
+
+		// the detail box: the hovered perk in full, or what the pillar is about, your class and your alignment
+		Component name = Component.empty();
+		int nameColor = accent;
+		List<Component> text = new ArrayList<>();
+		if (hovered != null) {
+			int rank = shown.rank(hovered);
+			name = Component.translatable("skill.jaymoskingdoms.perk." + hovered.key()).append("  " + rank + "/" + hovered.maxRank);
+			nameColor = rank > 0 ? accent : Ui.TEXT;
+			text.add(Component.translatable("skill.jaymoskingdoms.perk." + hovered.key() + ".desc"));
+			Component cost = Component.translatable("gui.jaymoskingdoms.skills.cost", hovered.cost);
+			if (hovered.minLevel > 0) {
+				cost = Component.empty().append(cost).append("  ·  ").append(Component.translatable("gui.jaymoskingdoms.skills.needs_level", hovered.minLevel));
 			}
-			super.extractRenderState(graphics, mouseX, mouseY, a);
+			text.add(cost.copy().withColor(Ui.DIM));
+			String blocked = shown.blocked(hovered);
+			if (blocked == null) {
+				text.add(Component.translatable("gui.jaymoskingdoms.skills.learn").withColor(Ui.GOOD));
+			} else {
+				text.add(Component.translatable(blocked).withColor(blocked.endsWith(".max") ? accent : Ui.BAD));
+			}
+		} else if (!pillar.open) {
+			text.add(Component.translatable("gui.jaymoskingdoms.skills.plan." + pillar.key()));
+		} else {
+			text.add(Component.translatable("gui.jaymoskingdoms.skills.hint." + pillar.key() + (page > 0 ? ".1" : "")));
+			Classes.PlayerClass cls = this.minecraft.player == null ? null : Classes.classOf(this.minecraft.player);
+			text.add(cls == null ? Component.translatable("gui.jaymoskingdoms.skills.class.none").withColor(Ui.DIM)
+				: Component.translatable("gui.jaymoskingdoms.skills.class", Component.translatable("class.jaymoskingdoms." + cls.key())).withColor(Ui.GOLD));
+			// (your alignment: the pillar you've made your own, as others see it over your head)
+			Skills.Pillar aligned = Renown.alignment(shown);
+			text.add(aligned == null ? Component.translatable("gui.jaymoskingdoms.skills.alignment.none", Renown.ALIGN_LEVEL).withColor(Ui.DIM)
+				: Component.translatable("gui.jaymoskingdoms.skills.alignment", Component.translatable("title.jaymoskingdoms." + aligned.key()
+					+ (shown.level(aligned) >= aligned.maxLevel ? ".master" : ""))).withColor(accent(aligned)));
+			text.add(Component.translatable("gui.jaymoskingdoms.skills.hover").withColor(Ui.HINT));
+		}
+		Ui.detail(graphics, this.font, x, y + DETAIL_Y, w, DETAIL_LINES, name, nameColor, text);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
+	}
+
+	/** The pillar (and page) and its level on the left; the points to spend, and the experience bar, on the right. */
+	private void header(GuiGraphicsExtractor graphics, Skills.Progress shown, int accent) {
+		int x = left(), y = top(), w = panelW();
+		Component name = Component.translatable("skill.jaymoskingdoms." + pillar.key());
+		if (page > 0) {
+			name = Component.translatable("gui.jaymoskingdoms.skills.page." + pillar.key() + ".1.title");
+		}
+		int textW = w - 20 - XP_BAR_W - 12;
+		if (!pillar.open) {
+			Ui.line(graphics, this.font, name, x + 9, y + 8, textW, accent);
+			Ui.line(graphics, this.font, this.title, x + 9, y + 19, textW, Ui.DIM);
+			Ui.rule(graphics, x + 6, x + w - 6, y + HEADER - 4);
 			return;
 		}
 		int level = shown.level(pillar), xp = shown.xp(pillar);
-		graphics.centeredText(this.font, Component.translatable("gui.jaymoskingdoms.skills.level", name, level), this.width / 2, cy, COLOR_GOLD);
-		cy += 12;
-		int barX = x + PAD * 4, barW = PANEL_W - PAD * 8;
-		graphics.fill(barX, cy, barX + barW, cy + 5, COLOR_BAR);
-		Component under;
+		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.skills.level", name, level), x + 9, y + 8, textW, accent);
+		int points = shown.points(pillar);
+		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.skills.points", points), x + 9, y + 19, textW,
+			points > 0 ? Ui.GOOD : Ui.DIM);
+		int bx = x + w - XP_BAR_W - 9;
 		if (level >= pillar.maxLevel) {
-			graphics.fill(barX, cy, barX + barW, cy + 5, COLOR_GOLD);
-			under = Component.translatable("gui.jaymoskingdoms.skills.mastered");
+			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.skills.mastered"), bx, y + 8, XP_BAR_W, accent);
+			Ui.bar(graphics, bx, y + 20, XP_BAR_W, 3, 1.0F, accent);
 		} else {
 			int into = xp - Skills.total(level), need = Skills.toNext(level);
-			graphics.fill(barX, cy, barX + barW * into / need, cy + 5, COLOR_FILL);
-			under = Component.translatable("gui.jaymoskingdoms.skills.xp", into, need);
+			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.skills.xp", into, need), bx, y + 8, XP_BAR_W, Ui.TEXT);
+			Ui.bar(graphics, bx, y + 20, XP_BAR_W, 3, into / (float)Math.max(1, need), accent);
 		}
-		cy += 8;
-		int points = shown.points(pillar);
-		Component pts = Component.translatable("gui.jaymoskingdoms.skills.points", points);
-		graphics.text(this.font, under, barX, cy, COLOR_DIM);
-		graphics.text(this.font, pts, barX + barW - this.font.width(pts), cy, points > 0 ? COLOR_FILL : COLOR_DIM);
-		if (page > 0) {
-			graphics.centeredText(this.font, Component.translatable("gui.jaymoskingdoms.skills.page." + pillar.key() + ".1.title"), this.width / 2, y + 63, COLOR_GOLD);
-		}
-		// (the lines from each perk to the ones it opens, on this page)
+		Ui.rule(graphics, x + 6, x + w - 6, y + HEADER - 4);
+	}
+
+	/** The lines from each perk to the ones it opens, then the perks' tiles, on this page. */
+	private void tree(GuiGraphicsExtractor graphics, Skills.Progress shown, int accent, Skills.@Nullable Perk hovered) {
 		for (Skills.Perk perk : Skills.Perk.values()) {
 			if (!onPage(perk)) {
 				continue;
@@ -208,7 +250,7 @@ final class SkillScreen extends Screen {
 				if (!onPage(need)) {
 					continue;
 				}
-				int color = shown.rank(need) > 0 ? COLOR_LINE_ON : COLOR_LINE_OFF;
+				int color = shown.rank(need) > 0 ? accent : COLOR_LINE_OFF;
 				int fromX = perkX(need) + PERK_W / 2, fromY = perkY(need) + PERK_H, toX = perkX(perk) + PERK_W / 2, toY = perkY(perk);
 				int midY = (fromY + toY) / 2;
 				graphics.fill(fromX - 1, fromY, fromX + 1, midY + 1, color);
@@ -216,25 +258,29 @@ final class SkillScreen extends Screen {
 				graphics.fill(toX - 1, midY, toX + 1, toY, color);
 			}
 		}
-		graphics.centeredText(this.font, Component.translatable("gui.jaymoskingdoms.skills.hint." + pillar.key() + (page > 0 ? ".1" : "")), this.width / 2, y + PANEL_H - 38, COLOR_DIM);
-		// (your alignment: the pillar you've made your own, as others see it over your head)
-		Skills.Pillar aligned = Renown.alignment(shown);
-		Component alignment = aligned == null ? Component.translatable("gui.jaymoskingdoms.skills.alignment.none", Renown.ALIGN_LEVEL)
-			: Component.translatable("gui.jaymoskingdoms.skills.alignment", Component.translatable("title.jaymoskingdoms." + aligned.key()
-				+ (shown.level(aligned) >= aligned.maxLevel ? ".master" : "")));
-		graphics.centeredText(this.font, alignment, this.width / 2, y + PANEL_H - 50, aligned == null ? COLOR_DIM : COLOR_GOLD);
-		// (0.6.0) your class, beside the tree
-		com.jaymoskingdoms.Classes.PlayerClass cls = Minecraft.getInstance().player == null ? null : com.jaymoskingdoms.Classes.classOf(Minecraft.getInstance().player);
-		Component clsLine = cls == null ? Component.translatable("gui.jaymoskingdoms.skills.class.none")
-			: Component.translatable("gui.jaymoskingdoms.skills.class", Component.translatable("class.jaymoskingdoms." + cls.key()));
-		graphics.centeredText(this.font, clsLine, this.width / 2, y + PANEL_H - 62, cls == null ? COLOR_DIM : COLOR_GOLD);
-		super.extractRenderState(graphics, mouseX, mouseY, a);
-	}
-
-	static void edge(GuiGraphicsExtractor graphics, int x, int y, int w, int h, int color) {
-		graphics.fill(x, y, x + w, y + 1, color);
-		graphics.fill(x, y + h - 1, x + w, y + h, color);
-		graphics.fill(x, y, x + 1, y + h, color);
-		graphics.fill(x + w - 1, y, x + w, y + h, color);
+		for (Skills.Perk perk : Skills.Perk.values()) {
+			if (!onPage(perk)) {
+				continue;
+			}
+			int px = perkX(perk), py = perkY(perk);
+			int rank = shown.rank(perk);
+			String blocked = shown.blocked(perk);
+			boolean open = blocked == null, full = rank >= perk.maxRank;
+			graphics.fill(px, py, px + PERK_W, py + PERK_H, perk == hovered ? Ui.ROW_HOVER : 0xE0181820);
+			graphics.fill(px, py, px + PERK_W, py + PERK_H, rank > 0 ? Ui.ROW : 0x00000000);
+			if (rank > 0) {
+				// learnt: the pillar's colour down its left
+				graphics.fill(px, py, px + 2, py + PERK_H, accent);
+			}
+			if (open) {
+				// can be learnt now: a green line under it
+				graphics.fill(px, py + PERK_H - 1, px + PERK_W, py + PERK_H, Ui.GOOD);
+			}
+			String ranks = rank + "/" + perk.maxRank;
+			int ranksW = this.font.width(ranks);
+			int color = rank > 0 || open ? Ui.TEXT : Ui.DIM;
+			Ui.line(graphics, this.font, Component.translatable("skill.jaymoskingdoms.perk." + perk.key()), px + 6, py + 6, PERK_W - ranksW - 14, color);
+			graphics.text(this.font, ranks, px + PERK_W - ranksW - 5, py + 6, full ? accent : rank > 0 ? Ui.TEXT : Ui.HINT);
+		}
 	}
 }

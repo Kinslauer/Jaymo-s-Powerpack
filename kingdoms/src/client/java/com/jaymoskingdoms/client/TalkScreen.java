@@ -82,6 +82,7 @@ final class TalkScreen extends Screen {
 		graphics.fill(x, y + h - 1, x + PANEL_W, y + h, QuestScreen.COLOR_EDGE);
 		graphics.fill(x, y, x + 1, y + h, QuestScreen.COLOR_EDGE);
 		graphics.fill(x + PANEL_W - 1, y, x + PANEL_W, y + h, QuestScreen.COLOR_EDGE);
+		graphics.fill(x, y, x + PANEL_W, y + 2, QuestScreen.COLOR_GOLD);
 		graphics.centeredText(this.font, this.title, this.width / 2, y + 8, QuestScreen.COLOR_GOLD);
 		int ty = y + 24;
 		for (FormattedCharSequence line : this.font.split(this.ask.words(), textWidth())) {
