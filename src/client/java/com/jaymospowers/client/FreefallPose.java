@@ -58,7 +58,8 @@ public final class FreefallPose {
 			|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.ROCK_FLIGHT) != null
 			|| player.getAttached(com.jaymospowers.power.gravity.GravityPower.WEIGHTLESS_ON) != null
 			|| player.getAttached(com.jaymospowers.power.gravity.GravityForward.FALLING) != null
-			|| player.getAttached(com.jaymospowers.power.gravity.GravityWalk.SURFACE) != null;
+			|| player.getAttached(com.jaymospowers.power.gravity.GravityWalk.SURFACE) != null
+			|| player.getAttached(com.jaymospowers.power.chrono.ChronoSpeed.WALL_RUN) != null;
 	}
 
 	/** After the body faces its way: a wind's dive tips the whole body over, head first, about its middle. */

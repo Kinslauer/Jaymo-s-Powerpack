@@ -17,6 +17,7 @@ import org.joml.Matrix4f;
  * The body turned to its own "down", for everyone to see: walking on a wall it stands out from the wall, feet on it,
  * facing the way it looks along it; on a ceiling it hangs upside down, feet up; falling forward it dives head first
  * along the fall, belly to the ground. (The view stays upright: only the body turns, and not in your own first person.)
+ * Since 0.11.40 Chrono's Overclock wall run stands on the wall the same way, facing straight up it, legs running.
  */
 public final class GravityWalkPose {
 	/** {@code up}: where the head points; {@code front}: where the chest faces; {@code feet}: where the feet go, from the entity's position. */
@@ -40,13 +41,19 @@ public final class GravityWalkPose {
 			return;
 		}
 		Integer surface = player.getAttached(GravityWalk.SURFACE);
+		boolean wallRun = false;
+		if (surface == null) {
+			surface = player.getAttached(com.jaymospowers.power.chrono.ChronoSpeed.WALL_RUN);
+			wallRun = surface != null;
+		}
 		Vec3 look = player.getViewVector(partialTicks);
 		float height = player.getBbHeight();
 		if (surface != null && surface >= 0 && surface < Direction.values().length) {
 			Direction face = Direction.from3DDataValue(surface);
 			Vec3 into = new Vec3(face.getStepX(), face.getStepY(), face.getStepZ());
 			Vec3 up = into.scale(-1.0);
-			Vec3 front = look.subtract(up.scale(look.dot(up)));
+			// a wall run always faces straight up the wall
+			Vec3 front = wallRun ? new Vec3(0.0, 1.0, 0.0) : look.subtract(up.scale(look.dot(up)));
 			if (front.lengthSqr() < 0.01) {
 				front = face == Direction.UP ? look.horizontal() : new Vec3(0.0, 1.0, 0.0);
 			}
@@ -56,6 +63,11 @@ public final class GravityWalkPose {
 			// feet against the surface: the ceiling over the head, or the wall beside the body's middle
 			Vec3 feet = face == Direction.UP ? new Vec3(0.0, height, 0.0) : new Vec3(0.0, height * 0.5, 0.0).add(into.scale(player.getBbWidth() * 0.5));
 			state.setData(KEY, new Turn(up, front.normalize(), feet));
+			if (wallRun) {
+				// climbing doesn't move the legs by itself (the walk animation only counts sideways movement): run
+				state.walkAnimationPos = (player.tickCount + partialTicks) * com.jaymospowers.power.chrono.ChronoSpeed.WALL_STRIDE;
+				state.walkAnimationSpeed = 1.0F;
+			}
 		} else if (player.getAttached(GravityForward.FALLING) != null) {
 			Vec3 motion = player.getDeltaMovement();
 			Vec3 up = motion.lengthSqr() > 0.04 ? motion.normalize() : look;

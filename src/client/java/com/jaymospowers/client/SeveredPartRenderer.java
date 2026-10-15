@@ -1,5 +1,6 @@
 package com.jaymospowers.client;
 
+import com.jaymoskitchen.client.corpse.CorpseRenderer;
 import com.jaymospowers.core.SeveredPart;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -8,7 +9,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -68,8 +68,10 @@ public final class SeveredPartRenderer extends EntityRenderer<SeveredPart, Sever
 	public SeveredPartRenderer(EntityRendererProvider.Context context) {
 		super(context);
 		this.shadowRadius = 0.2F;
-		this.wide = new PlayerModel(context.bakeLayer(ModelLayers.PLAYER), false);
-		this.slim = new PlayerModel(context.bakeLayer(ModelLayers.PLAYER_SLIM), true);
+		// (0.11.39) Kitchen's player corpse layers, not the vanilla player ones: Fresh Animations would animate a dead
+		// player's lost arm or head as if it were still on them
+		this.wide = new PlayerModel(context.bakeLayer(CorpseRenderer.PLAYER_BODY), false);
+		this.slim = new PlayerModel(context.bakeLayer(CorpseRenderer.PLAYER_BODY_SLIM), true);
 	}
 
 	@Override

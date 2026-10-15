@@ -47,7 +47,8 @@ import net.minecraft.world.phys.Vec3;
  * other cooldown you have running (never its own).</li>
  * <li>V, Overclock: 6 s as a speedster: Speed V, Haste II and faster attacks, everyone near you slowed hard. Since
  * 0.10.28 the Flash's speed too ({@link ChronoSpeed}): a far faster sprint, running up walls and across water, and V
- * again to phase through a wall.</li>
+ * again to phase through a wall. Since 0.11.40 it's a toggle at max rank (all four abilities unlocked): V switches it on with no time
+ * limit, V again (away from a wall) switches it off, and only then does its cooldown start.</li>
  * <li>B, Time Bloom: 5 s of fast-forward for crops, saplings, furnaces, smokers and ovens within 5 blocks, and for
  * your own wounds and those of every creature within {@code BLOOM_HEAL_RADIUS} (they mend {@code BLOOM_HEAL} every
  * {@code BLOOM_HEAL_EVERY} ticks meanwhile).</li>
@@ -74,6 +75,8 @@ public final class ChronoPower implements Power {
 	static final int STASIS_COOLDOWN = 600;
 	static final int OVERCLOCK_TICKS = 120;
 	static final int OVERCLOCK_COOLDOWN = 500;
+	/** Held (max rank) Overclock tops itself back up to {@code OVERCLOCK_TICKS} once it runs down to this. */
+	static final int OVERCLOCK_HELD_REFRESH = 40;
 	/** Attack speed while overclocked: x1.6 of the total (a sword goes from 1.6 to ~2.56 swings a second). */
 	static final double OVERCLOCK_ATTACK_SPEED = 0.6;
 	static final int BLOOM_COOLDOWN = 800;
@@ -123,6 +126,7 @@ public final class ChronoPower implements Power {
 		Powers.register(INSTANCE);
 		PayloadTypeRegistry.clientboundPlay().register(ChronoSync.TYPE, ChronoSync.CODEC);
 		StasisField.registerLocks();
+		ChronoSpeed.register();
 		ChronoEchoes.init();
 		StoppedClockItem.init();
 		// touch the attachment types so they register at startup
@@ -258,6 +262,7 @@ public final class ChronoPower implements Power {
 		state.bloom = null;
 		state.trail = null;
 		state.overclockLeft = 0;
+		state.overclockHeld = false;
 		setOverclockModifier(player, false);
 		ChronoSpeed.clear(player);
 		state.synced = false;
@@ -321,6 +326,15 @@ public final class ChronoPower implements Power {
 			bloomHealNearby(player, level);
 		}
 		ChronoFlow.tickPlayer(player);
+		if (state.overclockHeld && state.overclockLeft <= OVERCLOCK_HELD_REFRESH) {
+			if (overclockToggles(player)) {
+				// switched on for good: keep it running until V switches it off
+				overclockEffects(player);
+				state.overclockLeft = OVERCLOCK_TICKS;
+			} else {
+				state.overclockHeld = false; // no longer max rank: it runs out like anyone's
+			}
+		}
 		if (state.overclockLeft > 0) {
 			state.overclockLeft--;
 			overclockFx(player, level, state.overclockLeft);
@@ -360,6 +374,13 @@ public final class ChronoPower implements Power {
 			// V again mid-Overclock: phase through the wall ahead
 			if (now >= state.phaseReadyAt && ChronoSpeed.phase(player)) {
 				state.phaseReadyAt = now + ChronoSpeed.PHASE_GAP;
+			} else if (state.overclockHeld) {
+				// max-rank toggle: no wall to phase through, so V switches Overclock off and the cooldown starts now
+				overclockOff(player, state);
+				int cooldown = cooldown(player, OVERCLOCK);
+				state.readyAt[OVERCLOCK] = now + cooldown;
+				state.cooldownTotal[OVERCLOCK] = cooldown;
+				sync(player, state, now);
 			}
 			return;
 		}
@@ -386,6 +407,12 @@ public final class ChronoPower implements Power {
 		if (used) {
 			if (ability == STASIS) {
 				resetCooldowns(player, state);
+			}
+			if (ability == OVERCLOCK && state.overclockHeld) {
+				// a toggle: its cooldown starts when it's switched off
+				state.synced = false;
+				sync(player, state, now);
+				return;
 			}
 			int cooldown = cooldown(player, ability);
 			state.readyAt[ability] = now + cooldown;
@@ -564,6 +591,12 @@ public final class ChronoPower implements Power {
 
 	// ---------------------------------------------------------------- Stasis
 
+	/** (0.11.40) Time Flow's time stop (after a Space counter): a Stasis Field where you stand, no cooldown of its own. */
+	static void flowTimeStop(ServerPlayer player) {
+		stasis(player, state(player));
+		state(player).synced = false;
+	}
+
 	private static boolean stasis(ServerPlayer player, ChronoState state) {
 		if (state.stasis != null) {
 			state.stasis.end();
@@ -576,15 +609,39 @@ public final class ChronoPower implements Power {
 	// ---------------------------------------------------------------- Overclock
 
 	private static boolean overclock(ServerPlayer player, ChronoState state) {
-		player.addEffect(new MobEffectInstance(MobEffects.SPEED, OVERCLOCK_TICKS, OVERCLOCK_SPEED_AMPLIFIER, false, false, true));
-		player.addEffect(new MobEffectInstance(MobEffects.HASTE, OVERCLOCK_TICKS, 1, false, false, true));
+		overclockEffects(player);
 		state.overclockLeft = OVERCLOCK_TICKS;
+		// (0.11.40) at max rank V is a toggle: on until V switches it off
+		state.overclockHeld = overclockToggles(player);
 		setOverclockModifier(player, true);
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.8F, 2.0F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 1.8F);
 		ChronoFx.particles(level, player, ParticleTypes.WAX_ON, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.7, 0.4, 0.6);
 		return true;
+	}
+
+	private static void overclockEffects(ServerPlayer player) {
+		player.addEffect(new MobEffectInstance(MobEffects.SPEED, OVERCLOCK_TICKS, OVERCLOCK_SPEED_AMPLIFIER, false, false, true));
+		player.addEffect(new MobEffectInstance(MobEffects.HASTE, OVERCLOCK_TICKS, 1, false, false, true));
+	}
+
+	/** Max rank, all four abilities unlocked: Overclock is a toggle instead of 6 s. */
+	private static boolean overclockToggles(ServerPlayer player) {
+		return com.jaymospowers.core.Mastery.unlocked(player) >= com.jaymospowers.core.Mastery.ALL;
+	}
+
+	/** Switches a held (max rank) Overclock off: our effects go, the speed ends. */
+	private static void overclockOff(ServerPlayer player, ChronoState state) {
+		removeOverclockEffect(player, MobEffects.SPEED, OVERCLOCK_SPEED_AMPLIFIER, state.overclockLeft);
+		removeOverclockEffect(player, MobEffects.HASTE, 1, state.overclockLeft);
+		state.overclockLeft = 0;
+		state.overclockHeld = false;
+		setOverclockModifier(player, false);
+		ChronoSpeed.clear(player);
+		ServerLevel level = player.level();
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.6F, 1.7F);
+		state.synced = false;
 	}
 
 	/**
@@ -678,7 +735,8 @@ public final class ChronoPower implements Power {
 			activeTotal[STASIS] = state.stasis.duration;
 		}
 		if (state.overclockLeft > 0) {
-			activeLeft[OVERCLOCK] = state.overclockLeft;
+			// held: kept short of full so the client's countdown between syncs never reaches the fade in or out
+			activeLeft[OVERCLOCK] = state.overclockHeld ? OVERCLOCK_TICKS - SYNC_INTERVAL : state.overclockLeft;
 			activeTotal[OVERCLOCK] = OVERCLOCK_TICKS;
 		}
 		if (state.bloom != null) {

@@ -5,7 +5,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 
 /**
- * (0.7.53) A tailor's fitting: when one names their fee ({@link Tailors}), MCA's editor opens on its clothing page only
+ * (0.7.55) A tailor's fitting: when one names their fee ({@link Tailors}), MCA's editor opens on its clothing page only
  * ({@link WardrobeScreen}). Needs MCA.
  */
 public final class Wardrobe {

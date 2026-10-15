@@ -19,7 +19,7 @@ import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.item.Items;
 
 /**
- * (0.7.53) Andy: "only possible at a tailor villager, and for varying price". A shepherd (the villager at the loom) is
+ * (0.7.55) Andy: "only possible at a tailor villager, and for varying price". A shepherd (the villager at the loom) is
  * the tailor: MCA's Change Clothes button on them names their fee and opens MCA's editor on its clothing page only
  * (the client's {@code WardrobeScreen}); the fee is paid in emeralds (bundles count) when an outfit is picked. Each
  * tailor has their own rate, friends pay less, people they dislike more, and family half.

@@ -70,7 +70,7 @@ final class DarktideTide {
 	static final double DROWN_REACH = 24.0, DROWN_RADIUS = 6.0;
 	static final int DROWN_TICKS = 80, DROWN_COOLDOWN = 900, DROWN_EVERY = 10;
 	static final float DROWN_DAMAGE = 1.0F;
-	/** The water ball is an end crystal orb this colour, swelling to full size over this many ticks. */
+	/** The water ball is a plain orb this colour, swelling to full size over this many ticks. */
 	static final int DROWN_COLOR = 0x1E5AB4, DROWN_SWELL = 8;
 
 	/** Jaymo's Kitchen leaves no corpse for an entity carrying this tag. */
@@ -623,7 +623,7 @@ final class DarktideTide {
 					DROWN_RADIUS * 0.5, 0.3);
 				continue;
 			}
-			// a ball of dark water, drawn as a slow, wobbling end crystal orb (ZFighterOrbs), the cube just covering the sphere
+			// a ball of dark water, drawn as a slow, wobbling see-through orb (ZFighterOrbs)
 			float swell = Math.min(1.0F, (now - (zone.until - DROWN_TICKS) + 1) / (float)DROWN_SWELL);
 			ZFighterKi.waterOrb(level, -(zone.owner.getId() * 4 + 3), zone.center, DROWN_RADIUS * 2.0 * (1.0 - (1.0 - swell) * (1.0 - swell)),
 				DROWN_COLOR);

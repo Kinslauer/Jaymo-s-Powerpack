@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * (0.7.53) MCA's Change Clothes button ({@code McaScreensMixin}) is only there on a tailor: a grown shepherd
+ * (0.7.55) MCA's Change Clothes button ({@code McaScreensMixin}) is only there on a tailor: a grown shepherd
  * ({@code Tailors.is}; the server checks again).
  */
 @Mixin(targets = "net.conczin.mca.client.gui.AbstractDynamicScreen$ButtonEx")

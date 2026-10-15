@@ -3057,7 +3057,17 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
   conversation, a remark on your accent, the wizard's disaster relief) now floats over the speaker's head for the
   players around too, each in their own understanding of the tongue (`Speech.overheard`, `McaMessageMixin`). The
   client shows a line once if it arrives twice within 1.5 s (`SpeechBubbles.REPEAT_MS`).
-- **0.7.53, tailors:** Andy: "a way to change clothes", then "only possible at a tailor villager, and for varying
+- **0.7.54, hearths and chimneys:** villages burned down: golems and guards carried corpses to the nearest lit campfire,
+  often a fireplace inside a wooden house, and a burning corpse lights what it lies by (Kitchen, like lava). Now every
+  campfire, fire or lava source inside a village piece (vanilla's, Epic's, any structure with "village" in its id)
+  gets a stone hearth as the village generates (`Hearths`, from `StructureStartMixin`): what catches within 1 block,
+  and the floor within 2, turns to stone brick of the same shape (stairs, slabs, walls; logs to cobblestone), carpets
+  near it come up; beds, doors, chests and other block entities are left. Under a roof it gets a chimney: a 3 x 3 stone
+  brick hood from 2 blocks over the fire up through the roof (wood over the fire turned to stone), standing 2 blocks
+  above it, open at the top. Chimney-top campfires (open sky) only get the hearth. New chunks only. A pyre
+  (`Undertakers.isPyre`) must now be under open sky with nothing that catches within 2 blocks, so no corpse is
+  dropped into an indoor hearth again; builders' fire pits pass.
+- **0.7.55, tailors:** Andy: "a way to change clothes", then "only possible at a tailor villager, and for varying
   price". A grown shepherd (the villager at the loom) is the tailor: MCA's interact page has a Change Clothes button on
   them alone (`McaTailorButtonMixin`). They name their fee and MCA's character editor opens held to its clothing page
   (`Tailors`, `WardrobeScreen`: MCA's own Needle and Thread screen without the needle). Body, hair, genes and the

@@ -59,7 +59,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		QuestClient.register();
 		// 0.5.50: the traveller's journal on M
 		JournalClient.register();
-		// 0.7.53: the wardrobe (MCA's editor, clothes only) from the inventory
+		// 0.7.55: the wardrobe (MCA's editor, clothes only) from the inventory
 		Wardrobe.register();
 		// 0.5.52: the skill tree (K)
 		SkillScreen.register();

@@ -434,5 +434,7 @@
 	"jei.jaymoskitchen.chopping.horse": "With a horse (chopper): %s planks",
 	"jei.jaymoskitchen.pressing.load": "A load of %s, %s pulls (a horse: one lap)",
 	"jei.jaymoskitchen.pressing.oil": "%s mB of oil: draw it off with a glass bottle",
-	"jei.jaymoskitchen.pressing.water": "%s mB of water: draw it off with a bucket"
+	"jei.jaymoskitchen.pressing.water": "%s mB of water: draw it off with a bucket",
+	"message.jaymoskitchen.stomach.full": "Your stomach has no room for that: it only fills your hunger",
+	"tooltip.jaymoskitchen.stomach.meal": "Meal: +%s hearts for %s min, regen %s"
 }
