@@ -38,6 +38,11 @@ public final class WebSymbioteClient {
 	public static final RenderStateDataKey<Boolean> SUIT = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_suit");
 	/** Living Armor's tendrils on this player: how grown (0-1), how far into a lash (0-1), and a clock for the sway. */
 	public static final RenderStateDataKey<Tendrils> TENDRILS = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_tendrils");
+	/**
+	 * The tendrils drawing back in (Wall Crawl or Living Armor ending), as the suit comes off: how far along (0-1). They
+	 * pour back over the body, coiling round it, then unwind into the chest (see WebSuitWrapLayer).
+	 */
+	public static final RenderStateDataKey<Float> RETRACT = RenderStateDataKey.create(() -> "jaymospowers:web_symbiote_retract");
 
 	/**
 	 * @param strike   how far through a strike (0-1), or -1
@@ -155,6 +160,13 @@ public final class WebSymbioteClient {
 	 */
 	static final double STRIDE_HEIGHT = 1.2, STRIDE_LIFT = 0.3, STRIDE_SPEED = 0.2, STRIDE_SPRINT = 0.3, STRIDE_GRIP = 0.35;
 	static final double STRIDE_CLIMB = 0.22;
+	/**
+	 * Sneak against a wall with Wall Crawl on: the tendrils slam straight into it, no reaching first. You're thrown at the
+	 * wall ({@code LATCH_SLAM} blocks/tick), lifted off the ground ({@code LATCH_LIFT}) and pinned there for
+	 * {@code LATCH_HOLD_TICKS} before the keys move you again.
+	 */
+	static final double LATCH_SLAM = 0.35, LATCH_LIFT = 0.3;
+	static final int LATCH_HOLD_TICKS = 8;
 	static final int STRIDE_RISE_ANCHORS = 4;
 	/** Climbing off the top of a wall: a little hop forward onto the ledge. */
 	static final double LEDGE_HOP = 0.35;
@@ -217,6 +229,9 @@ public final class WebSymbioteClient {
 	private static boolean climbLedge;
 	private static int climbPhase;
 	private static boolean climbSent;
+	/** Sneak last tick (to catch the press), and how many more ticks a slammed-in latch pins you. */
+	private static boolean sneakWas;
+	private static int latchHold;
 	/** Keys pressed against a takeover's hold: last tick's movement keys (for presses), the last tick one was sent, and a local tally for the meter. */
 	private static Input heldKeys = Input.EMPTY;
 	private static int struggleTick = -1;
@@ -457,8 +472,9 @@ public final class WebSymbioteClient {
 			if (armored) {
 				LAST_GROWTH.put(player.getId(), growth);
 			} else if (climbing) {
-				// out on their own to climb: quick to bud, there as long as you climb (then drawn back in)
-				growth = Math.min(1.0F, growth * 1.6F);
+				// out on their own to climb: quick to bud, there as long as you climb (then drawn back in); once one has
+				// bitten into the wall they're all the way out at once
+				growth = player.getAttached(com.jaymospowers.power.web.WebTendrils.CLIMB) != null ? 1.0F : Math.min(1.0F, growth * 1.6F);
 				LAST_GROWTH.put(player.getId(), growth);
 			} else {
 				// out on their own: they lash out, then draw back in
@@ -560,12 +576,14 @@ public final class WebSymbioteClient {
 			float[] tethers = wall != null && wall.landed() >= 0L && !wall.points().isEmpty() ? WebTendrilLayer.tethers(player, wall, partialTick) : null;
 			// climbing: four of them walk you along the wall
 			float[] legs = tethers == null && wall == null ? WebTendrilLayer.walk(player, partialTick) : null;
+			state.setData(RETRACT, null);
 			state.setData(TENDRILS, new Tendrils(growth, player.tickCount, strike, aimYaw, aimPitch, side, smoothRun(player), held, bulk,
 				wallMode, wallYaw, wallPitch, heavy, variant, firstPerson, combo, rear, hit,
 				1.0F - WebSymbiote.state(player).bond() / (float)WebSymbiote.BOND_MAX, roar, tethers, legs));
 		} else {
 			ARMOR_SINCE.remove(entity.getId());
 			state.setData(TENDRILS, withdrawing(entity));
+			state.setData(RETRACT, retract(entity));
 		}
 	}
 
@@ -591,7 +609,18 @@ public final class WebSymbioteClient {
 			WebSymbiote.STRIKE_HIT / (float)WebSymbiote.STRIKE_TICKS, 1.0F - WebSymbiote.state(player).bond() / (float)WebSymbiote.BOND_MAX, -1.0F, null, null);
 	}
 
-	/** First person, after the hands: your own tendrils, unless First-person Model is already drawing your body. */
+	/** How far the tendrils have drawn back in (0-1), or null when they aren't. */
+	private static @org.jspecify.annotations.Nullable Float retract(Entity entity) {
+		Float last = LAST_GROWTH.get(entity.getId());
+		Long start = WITHDRAW.get(entity.getId());
+		if (last == null || start == null || last <= 0.0F) {
+			return null;
+		}
+		float t = (entity.level().getGameTime() - start) / (WITHDRAW_TICKS * last);
+		return t >= 0.0F && t < 1.0F ? t : null;
+	}
+
+		/** First person, after the hands: your own tendrils, unless First-person Model is already drawing your body. */
 	public static void firstPersonTendrils(com.mojang.blaze3d.vertex.PoseStack poseStack, net.minecraft.client.renderer.SubmitNodeCollector collector,
 		@org.jspecify.annotations.Nullable AvatarRenderState avatar) {
 		if (avatar != null) {
@@ -1137,10 +1166,19 @@ public final class WebSymbioteClient {
 			return;
 		}
 		ceilingClinging = false;
-		if (wall && (!player.onGround() || input.forward() && player.horizontalCollision)) {
+		boolean sneakPressed = input.shift() && !sneakWas;
+		sneakWas = input.shift();
+		if (wall && sneakPressed && !wallClinging) {
+			slamLatch(player);
+			return;
+		}
+		if (latchHold > 0) {
+			latchHold--;
+		}
+		if (wall && (!player.onGround() || input.forward() && player.horizontalCollision || latchHold > 0)) {
 			Vec3 out = wallNormal(player);
-			// the way you want to go along the wall: up or down, and sideways
-			double vertical = (input.jump() || input.forward() ? 1.0 : 0.0) - (input.shift() || input.backward() ? 1.0 : 0.0);
+			// the way you want to go along the wall: up or down, and sideways (pinned still just after a slam)
+			double vertical = latchHold > 0 ? 0.0 : (input.jump() || input.forward() ? 1.0 : 0.0) - (input.shift() || input.backward() ? 1.0 : 0.0);
 			Vec3 along = out.cross(new Vec3(0.0, 1.0, 0.0));
 			along = along.lengthSqr() < 1.0E-4 ? Vec3.ZERO : along.normalize();
 			Vec3 want = new Vec3(0.0, vertical, 0.0).add(along.scale(move.dot(along)));
@@ -1200,6 +1238,35 @@ public final class WebSymbioteClient {
 		Vec3 v = player.getDeltaMovement();
 		player.setDeltaMovement(Mth.lerp(STRIDE_GRIP, v.x, want.x), vy, Mth.lerp(STRIDE_GRIP, v.z, want.z));
 		player.resetFallDistance();
+	}
+
+	/** Sneak at a wall: both tendrils slam into it at once, throwing you against it, and you hang there. */
+	private static void slamLatch(LocalPlayer player) {
+		Vec3 out = wallNormal(player);
+		Vec3 center = player.getBoundingBox().getCenter();
+		net.minecraft.world.phys.BlockHitResult hit = player.level().clip(new net.minecraft.world.level.ClipContext(center,
+			center.subtract(out.scale(1.5)), net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, player));
+		Vec3 at = hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK ? hit.getLocation() : center.subtract(out.scale(0.4));
+		wallClinging = true;
+		climbAt = at;
+		climbWant = Vec3.ZERO;
+		climbLedge = false;
+		// already bitten in and hauled: no reach to wait out
+		climbPhase = CLIMB_REACH_TICKS + CLIMB_PULL_TICKS;
+		latchHold = LATCH_HOLD_TICKS;
+		if (ClientPlayNetworking.canSend(WebNet.ClimbLatch.TYPE)) {
+			// both of them, a little apart (the server cracks the wall where each bites)
+			Vec3 side = out.cross(new Vec3(0.0, 1.0, 0.0));
+			side = side.lengthSqr() < 1.0E-4 ? Vec3.ZERO : side.normalize().scale(0.45);
+			ClientPlayNetworking.send(new WebNet.ClimbLatch(WebNet.MAIN, at.add(side).add(0.0, 0.3, 0.0), true));
+			ClientPlayNetworking.send(new WebNet.ClimbLatch(WebNet.OFF, at.subtract(side).add(0.0, 0.3, 0.0), true));
+			climbSent = true;
+		}
+		player.setDeltaMovement(out.scale(-LATCH_SLAM).add(0.0, player.onGround() ? LATCH_LIFT : 0.0, 0.0));
+		player.resetFallDistance();
+		WebSwing.play(player, net.minecraft.sounds.SoundEvents.SLIME_ATTACK, 1.0F, 0.5F);
+		WebSwing.play(player, player.level().getBlockState(net.minecraft.core.BlockPos.containing(at.subtract(out.scale(0.05)))).getSoundType().getHitSound(),
+			1.0F, 0.6F);
 	}
 
 	/** Which way the wall you're on faces (out of it, toward you): the side your box is pressed against. */

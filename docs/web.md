@@ -88,6 +88,15 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   `STRIDE_STEP_FAR` 1.1. Jump climbs (needs `STRIDE_RISE_ANCHORS` 4 ways to grab), Sneak lowers, Sneak on the ground
   stands you on your feet; nothing to grab within reach and you fall. Walls and ceilings still climb as before. While the
   four walk, four spare tendrils (`WebTendrilLayer.FIRST_SPARE`) grow, so strikes, grabs and the barrage keep theirs.
+- **Ceilings and withdrawing (0.11.83):** striding with a ceiling within `STRIDE_REACH` overhead, the front pair
+  (`WebTendrilWalk.CEILING_DIRS`) bite the ceiling and walk along it while the back pair walk the ground; you still only
+  walk. When the tendrils draw back in (Wall Crawl or Living Armor ending), they go the suit's way: strands pour over the
+  body and coil round each part, then unwind into the chest (`WebSuitWrapLayer.retract`, `RETRACT_WRAP` 0.45, over
+  `WebSymbioteClient.WITHDRAW_TICKS` 40).
+- **Slam latch (0.11.83):** with Wall Crawl on, pressing Sneak against a wall slams both tendrils into it at once (no
+  reach first; the wall cracks at both bites), throws you at it (`WebSymbioteClient.LATCH_SLAM` 0.35, lifted
+  `LATCH_LIFT` 0.3 off the ground) and pins you for `LATCH_HOLD_TICKS` 8. Once a tendril has bitten the wall, the
+  tendrils are fully out at once.
 - **Wall Crawl and Living Armor (0.11.66):** the tendrils carry you whenever Wall Crawl is on, flat ground included.
   When Living Armor withdraws or is put away, Wall Crawl switches off with it (`WebSymbiote.set`). At full bond
   (`BOND_MAX`) Living Armor no longer times out at `ARMOR_MAX_TICKS`: it stays until you put it away.
