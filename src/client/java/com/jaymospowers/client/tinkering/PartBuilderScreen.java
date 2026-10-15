@@ -5,6 +5,8 @@ import com.jaymospowers.tinkering.PartBuilderMenu;
 import com.jaymospowers.tinkering.PartType;
 import com.jaymospowers.tinkering.TinkerMaterial;
 import com.jaymospowers.tinkering.ToolPartItem;
+import com.jaymospowers.tinkering.WeaponPartItem;
+import com.jaymospowers.tinkering.WeaponParts;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -20,14 +22,33 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * The Part Builder, laid out like Tinkers' screen (MIT): pattern and material left, the parts to pick in the middle, info
- * beside it. (0.10.127) Drawn like the H screen: dark panel, bronze stripe, sunken slots, flat part tiles.
+ * beside it. (0.10.127) Drawn like the H screen: dark panel, bronze stripe, sunken slots, flat part tiles. (0.11.77) The
+ * arrows page through to the weapon heads ({@link WeaponParts}).
  */
 public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> {
-	private static final int GRID_X = 51, GRID_Y = 15, CELL = 18, COLUMNS = 4;
+	private static final int GRID_X = 51, GRID_Y = 15, CELL = 18, COLUMNS = 4, CELLS = 16;
+	/** (0.11.77) The page arrows (tool parts, then weapon heads), above the pattern and material slots. */
+	private static final int PAGE_X = 8, PAGE_Y = 20, PAGE_W = 16, PAGE_H = 14, PAGE_STEP = 21;
 
 	public PartBuilderScreen(PartBuilderMenu menu, Inventory inventory, Component title) {
 		super(menu, inventory, title, 176, 184);
 		this.inventoryLabelY = this.imageHeight - 94;
+	}
+
+	/** Page 0: tool parts; page 1 on: weapon heads, 16 a page. */
+	private int page;
+
+	/** The button ids on this page, in grid order. */
+	private int[] buttons() {
+		if (page == 0) {
+			return java.util.stream.IntStream.range(0, PartType.values().length).toArray();
+		}
+		int count = WeaponParts.loaded().size(), from = (page - 1) * CELLS;
+		return java.util.stream.IntStream.range(from, Math.min(count, from + CELLS)).map(i -> PartBuilderMenu.WEAPON_BUTTONS + i).toArray();
+	}
+
+	private int pages() {
+		return 1 + (WeaponParts.loaded().size() + CELLS - 1) / CELLS;
 	}
 
 	@Override
@@ -35,37 +56,71 @@ public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> 
 		super.extractBackground(graphics, mouseX, mouseY, a);
 		TinkerUi.panel(graphics, leftPos, topPos, imageWidth, imageHeight);
 		TinkerUi.slots(graphics, menu, leftPos, topPos, PartBuilderMenu.RESULT);
-		int rows = (PartType.values().length + COLUMNS - 1) / COLUMNS;
+		int[] buttons = buttons();
+		int rows = Math.max(1, (buttons.length + COLUMNS - 1) / COLUMNS);
 		TinkerUi.well(graphics, leftPos + GRID_X - 1, topPos + GRID_Y - 1, COLUMNS * CELL + 2, rows * CELL + 2);
 		TinkerMaterial material = TinkerMaterial.of(menu.material());
-		PartType[] parts = PartType.values();
-		for (int i = 0; i < parts.length; i++) {
+		for (int i = 0; i < buttons.length; i++) {
 			int x = leftPos + GRID_X + i % COLUMNS * CELL, y = topPos + GRID_Y + i / COLUMNS * CELL;
 			boolean hover = mouseX >= x && mouseY >= y && mouseX < x + CELL && mouseY < y + CELL;
-			boolean chosen = parts[i] == menu.selectedPart();
+			boolean chosen = buttons[i] == selectedButton();
 			graphics.fill(x, y, x + CELL, y + CELL, hover ? TinkerUi.ROW_HOVER : chosen ? TinkerUi.ROW : (i + i / COLUMNS) % 2 == 0 ? 0x18FFFFFF : 0x0CFFFFFF);
 			if (chosen) {
 				graphics.fill(x, y + CELL - 1, x + CELL, y + CELL, TinkerUi.ACCENT);
 			}
-			if (material != null && material.makes(parts[i].kind)) {
-				graphics.item(ToolPartItem.of(parts[i], material, 1), x + 1, y + 1);
+			if (buttons[i] >= PartBuilderMenu.WEAPON_BUTTONS) {
+				WeaponParts.Kind kind = WeaponParts.loaded().get(buttons[i] - PartBuilderMenu.WEAPON_BUTTONS);
+				graphics.item(WeaponPartItem.of(kind, WeaponParts.Metal.STONE, 1), x + 1, y + 1);
+				if (material != null && !PartBuilderMenu.shapesWeapons(material)) {
+					graphics.fill(x + 1, y + 1, x + CELL - 1, y + CELL - 1, 0x80000000);
+				}
+				continue;
+			}
+			PartType part = PartType.values()[buttons[i]];
+			if (material != null && material.makes(part.kind)) {
+				graphics.item(ToolPartItem.of(part, material, 1), x + 1, y + 1);
 			} else {
-				graphics.blit(RenderPipelines.GUI_TEXTURED, JaymosPowers.id("textures/gui/tinkering/icon/" + parts[i].id + ".png"),
+				graphics.blit(RenderPipelines.GUI_TEXTURED, JaymosPowers.id("textures/gui/tinkering/icon/" + part.id + ".png"),
 					x + 1, y + 1, 0.0F, 0.0F, 16, 16, 16, 16);
 				if (material != null) {
 					graphics.fill(x + 1, y + 1, x + CELL - 1, y + CELL - 1, 0x80000000);
 				}
 			}
 		}
+		// page arrows above the pattern and material slots
+		for (int side = 0; side < 2; side++) {
+			int x = leftPos + PAGE_X + side * PAGE_STEP, y = topPos + PAGE_Y;
+			boolean hover = mouseX >= x && mouseY >= y && mouseX < x + PAGE_W && mouseY < y + PAGE_H;
+			graphics.fill(x, y, x + PAGE_W, y + PAGE_H, hover ? TinkerUi.ROW_HOVER : TinkerUi.ROW);
+			graphics.centeredText(font, Component.literal(side == 0 ? "<" : ">"), x + PAGE_W / 2, y + 3, TinkerUi.ACCENT);
+		}
 		SidePanel.draw(graphics, font, leftPos - SidePanel.WIDTH - 2, topPos, title(material), info(material));
 	}
 
+	private int selectedButton() {
+		PartType part = menu.selectedPart();
+		if (part != null) {
+			return part.ordinal();
+		}
+		WeaponParts.Kind kind = menu.selectedWeapon();
+		return kind == null ? -1 : PartBuilderMenu.WEAPON_BUTTONS + WeaponParts.loaded().indexOf(kind);
+	}
+
+	private Component pageName() {
+		return page == 0 ? Component.translatable("gui.jaymospowers.part_builder.tools")
+			: Component.translatable("gui.jaymospowers.part_builder.weapons", page, pages() - 1);
+	}
+
 	private Component title(TinkerMaterial material) {
+		WeaponParts.Kind weapon = menu.selectedWeapon();
+		if (weapon != null) {
+			return Component.translatable("item.jaymospowers." + weapon.part());
+		}
 		PartType part = menu.selectedPart();
 		if (part != null && material != null) {
 			return Component.translatable("jaymospowers.tinkering.named", material.displayName(), Component.translatable("item.jaymospowers." + part.id));
 		}
-		return material != null ? material.displayName() : Component.translatable("container.jaymospowers.part_builder");
+		return material != null ? material.displayName() : pageName();
 	}
 
 	private List<Component> info(TinkerMaterial material) {
@@ -81,6 +136,21 @@ public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> 
 			lines.add(Component.translatable("gui.jaymospowers.part_builder.unknown"));
 		} else {
 			lines.add(Component.translatable("gui.jaymospowers.part_builder.value", stack.getHoverName(), TinkerMaterial.units(stack)));
+		}
+		WeaponParts.Kind weapon = menu.selectedWeapon();
+		if (weapon != null) {
+			if (material != null && !PartBuilderMenu.shapesWeapons(material)) {
+				lines.add(Component.translatable("gui.jaymospowers.part_builder.stone_only"));
+			} else if (material != null) {
+				lines.add(Component.translatable("gui.jaymospowers.part_builder.need", PartBuilderMenu.itemsNeeded(weapon.stoneCost(), stack),
+					stack.getHoverName(), stack.getCount()));
+			} else {
+				lines.add(Component.translatable("tooltip.jaymospowers.tinkering.cost", weapon.stoneCost()));
+			}
+			ItemStack made = WeaponPartItem.weapon(WeaponPartItem.of(weapon, WeaponParts.Metal.STONE, 1));
+			lines.add(made != null ? Component.translatable("tooltip.jaymospowers.tinkering.weapon_part.makes", made.getHoverName())
+				: Component.translatable("tooltip.jaymospowers.tinkering.weapon_part.cast_only"));
+			return lines;
 		}
 		if (part == null) {
 			lines.add(Component.translatable("gui.jaymospowers.part_builder.pick"));
@@ -111,8 +181,13 @@ public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> 
 		super.extractTooltip(graphics, mouseX, mouseY);
 		int index = cellAt(mouseX, mouseY);
 		if (index >= 0) {
-			PartType part = PartType.values()[index];
-			graphics.setTooltipForNextFrame(font, Component.translatable("item.jaymospowers." + part.id), mouseX, mouseY);
+			int button = buttons()[index];
+			Component name = button >= PartBuilderMenu.WEAPON_BUTTONS
+				? Component.translatable("item.jaymospowers." + WeaponParts.loaded().get(button - PartBuilderMenu.WEAPON_BUTTONS).part())
+				: Component.translatable("item.jaymospowers." + PartType.values()[button].id);
+			graphics.setTooltipForNextFrame(font, name, mouseX, mouseY);
+		} else if (pageArrowAt(mouseX, mouseY) != 0) {
+			graphics.setTooltipForNextFrame(font, pageName(), mouseX, mouseY);
 		}
 	}
 
@@ -122,16 +197,36 @@ public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> 
 			return -1;
 		}
 		int index = cy * COLUMNS + cx;
-		return index < PartType.values().length ? index : -1;
+		return index < buttons().length ? index : -1;
+	}
+
+	/** -1 or 1 for the page arrow under the mouse, else 0. */
+	private int pageArrowAt(double mouseX, double mouseY) {
+		for (int side = 0; side < 2; side++) {
+			int x = leftPos + PAGE_X + side * PAGE_STEP, y = topPos + PAGE_Y;
+			if (mouseX >= x && mouseY >= y && mouseX < x + PAGE_W && mouseY < y + PAGE_H) {
+				return side == 0 ? -1 : 1;
+			}
+		}
+		return 0;
 	}
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-		int index = cellAt(event.x(), event.y());
-		if (index >= 0 && menu.clickMenuButton(minecraft.player, index)) {
-			minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0F));
-			minecraft.gameMode.handleInventoryButtonClick(menu.containerId, index);
+		int arrow = pageArrowAt(event.x(), event.y());
+		if (arrow != 0) {
+			page = Math.floorMod(page + arrow, pages());
+			minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 			return true;
+		}
+		int index = cellAt(event.x(), event.y());
+		if (index >= 0) {
+			int button = buttons()[index];
+			if (menu.clickMenuButton(minecraft.player, button)) {
+				minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0F));
+				minecraft.gameMode.handleInventoryButtonClick(menu.containerId, button);
+				return true;
+			}
 		}
 		return super.mouseClicked(event, doubleClick);
 	}

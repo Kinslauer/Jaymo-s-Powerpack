@@ -21,7 +21,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * The Tool Station: parts in, a tool out, in any slot order. A tool and its head material repairs it (a broken tool
  * too); a tool and a modifier's items adds a level of it ({@link Modifier}); a tool and one part it uses swaps that part
- * in, the old one is lost.
+ * in, the old one is lost. (0.11.77) A weapon head and the parts its kind takes (a Tool Handle and a Tool Binding, mostly) make that
+ * weapon ({@link WeaponParts}).
  */
 public class ToolStationMenu extends AbstractContainerMenu {
 	public static final int INPUTS = 4, RESULT = 4;
@@ -56,7 +57,7 @@ public class ToolStationMenu extends AbstractContainerMenu {
 			this.addSlot(new Slot(inputs, i, SLOT_AT[i][0], SLOT_AT[i][1]) {
 				@Override
 				public boolean mayPlace(ItemStack stack) {
-					return stack.getItem() instanceof ToolPartItem || Modifier.takes(stack) || TinkerMaterial.of(stack) != null
+					return stack.getItem() instanceof ToolPartItem || stack.getItem() instanceof WeaponPartItem || Modifier.takes(stack) || TinkerMaterial.of(stack) != null
 						|| Modifier.ingredient(stack);
 				}
 			});
@@ -128,6 +129,10 @@ public class ToolStationMenu extends AbstractContainerMenu {
 
 	/** Parts only: the tool whose parts they are. */
 	private ItemStack assemble() {
+		ItemStack weapon = assembleWeapon();
+		if (weapon != null) {
+			return weapon;
+		}
 		List<Integer> parts = new ArrayList<>();
 		for (int i = 0; i < INPUTS; i++) {
 			ItemStack stack = inputs.getItem(i);
@@ -161,6 +166,50 @@ public class ToolStationMenu extends AbstractContainerMenu {
 			}
 		}
 		return ItemStack.EMPTY;
+	}
+
+	/**
+	 * A weapon head with exactly what its kind takes: the weapon (null when there's no head; empty when the rest is
+	 * wrong). The rod and binding can be any material.
+	 */
+	private @Nullable ItemStack assembleWeapon() {
+		int head = -1;
+		List<PartType> others = new ArrayList<>();
+		for (int i = 0; i < INPUTS; i++) {
+			ItemStack stack = inputs.getItem(i);
+			if (stack.isEmpty()) {
+				continue;
+			}
+			if (stack.getItem() instanceof WeaponPartItem) {
+				if (head != -1) {
+					return ItemStack.EMPTY;
+				}
+				head = i;
+			} else if (stack.getItem() instanceof ToolPartItem part && ToolPartItem.material(stack) != null) {
+				others.add(part.part);
+			} else {
+				others.add(null);
+			}
+		}
+		if (head == -1) {
+			return null;
+		}
+		List<PartType> needed = new ArrayList<>(((WeaponPartItem) inputs.getItem(head).getItem()).kind.assembly().parts);
+		ItemStack out = WeaponPartItem.weapon(inputs.getItem(head));
+		for (PartType part : others) {
+			if (!needed.remove(part)) {
+				return ItemStack.EMPTY;
+			}
+		}
+		if (out == null || !needed.isEmpty()) {
+			return ItemStack.EMPTY;
+		}
+		for (int i = 0; i < INPUTS; i++) {
+			if (!inputs.getItem(i).isEmpty()) {
+				uses[i] = 1;
+			}
+		}
+		return out;
 	}
 
 	/** A damaged tool and its head material: as much repair as the material covers. */
