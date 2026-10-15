@@ -3168,7 +3168,7 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
 
 ## 0.7.69: tailors sell Costume Tables and sew costumes
 - Andy: "Village tailors (the ones who already change MCA clothes) sell the table and can make a costume for you for
-  emeralds" (`TailorCostumes`, with Jaymo's Powers 0.11.78). A tailor's MCA page has two more buttons under Change
+  emeralds" (`TailorCostumes`, with Jaymo's Powers 0.11.81). A tailor's MCA page has two more buttons under Change
   Clothes (only on a tailor, only with Powers): **Sew a Costume** names a price and opens Powers' designer in its
   paid mode by running `/costume tailor <player> <price> <tailor>` as the server (you design it; the emeralds are
   taken when it's sewn, near the tailor, within 5 minutes); **Costume Table** sells `jaymospowers:costume_table`.
