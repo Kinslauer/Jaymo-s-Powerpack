@@ -7,6 +7,7 @@ import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.wind.WindAbility;
 import com.jaymospowers.power.wind.WindNet;
 import com.jaymospowers.power.wind.WindPower;
+import com.jaymospowers.power.wind.WindStaffSurge;
 import com.jaymospowers.power.wind.WindTempest;
 import com.jaymospowers.power.wind.WindWeather;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -38,6 +39,9 @@ public final class WindPowerClient implements PowerClient {
 	/** Stood in the cold last tick (a line on the action bar when it first takes hold). */
 	private boolean wasCold;
 	private int lastColdNotice = -100000;
+	/** The attack key was down last tick (a Staff Surge is one per click), and ticks until the next surge. */
+	private boolean attackWasDown;
+	private int surgeCooldown;
 	/** The cold's line shows at most this often (ticks), however often a biome edge is crossed. */
 	private static final int COLD_NOTICE_SPACING = 1200;
 
@@ -134,6 +138,7 @@ public final class WindPowerClient implements PowerClient {
 		}
 		this.wasCold = cold;
 		this.flight.tick(minecraft, player);
+		this.staffSurge(minecraft, player);
 		WindCycloneClient.root(player);
 		// the cloak of wind (every wind user, from the start): holding Jump in mid-air slows the fall
 		if (!this.flight.state().flying() && !player.onGround() && !player.isInWater() && !player.isFallFlying()
@@ -156,6 +161,40 @@ public final class WindPowerClient implements PowerClient {
 		if (this.channel != null && this.channelTicks < this.channelMax) {
 			this.channelTicks++;
 		}
+	}
+
+	/**
+	 * The Staff Surge: mastered, quarterstaff in hand, already past 30 m/s, a left click speeds you up (more when
+	 * ascended). See {@link WindStaffSurge}.
+	 */
+	private void staffSurge(Minecraft minecraft, LocalPlayer player) {
+		if (this.surgeCooldown > 0) {
+			this.surgeCooldown--;
+		}
+		boolean down = minecraft.options.keyAttack.isDown() && minecraft.gui.screen() == null && !player.isSpectator();
+		boolean clicked = down && !this.attackWasDown;
+		this.attackWasDown = down;
+		if (!clicked || this.surgeCooldown > 0 || !WindStaffSurge.eligible(player)) {
+			return;
+		}
+		double boost = WindStaffSurge.boost(player);
+		if (this.flight.state().fast()) {
+			if (this.flight.currentSpeed() <= WindStaffSurge.MIN_SPEED || !this.flight.surge(boost, WindStaffSurge.room(player))) {
+				return;
+			}
+		} else {
+			// falling, vaulting, thrown: push the body on along its own path
+			net.minecraft.world.phys.Vec3 v = player.getDeltaMovement();
+			double speed = v.length();
+			if (speed <= WindStaffSurge.MIN_SPEED) {
+				return;
+			}
+			player.setDeltaMovement(v.scale((speed + boost) / speed));
+		}
+		this.surgeCooldown = WindStaffSurge.cooldown(player);
+		boolean ascended = com.jaymospowers.core.Fate.isAscended(player);
+		WindCamera.shake(ascended ? 0.8F : 0.5F, ascended ? 8 : 5);
+		ClientPlayNetworking.send(new WindStaffSurge.Surge());
 	}
 
 	@Override
