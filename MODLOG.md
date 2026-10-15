@@ -1335,3 +1335,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.11.63 / Kingdoms 0.7.59:** `/kingdom skills` commands for ops (`kingdoms/MODLOG.md`).
 - **0.11.64 / Kingdoms 0.7.60:** Sorcerer fire bursts spread to nearby creatures; ice bursts freeze, hurt and chill
   (`kingdoms/MODLOG.md`).
+- **0.11.70 / Kingdoms 0.7.62, secret identities (costumes stage 2):** a masked costume (full mask or helmet) shows
+  its name over your head to other players (`CostumeClient.extract`), and Powers tags the wearer for Kingdoms
+  (`costume/SecretIdentity`: `jaymospowers_masked:<key>`, `jaymospowers_mask_name:<name>`; the key is a stable hash
+  of the design's name and look). Kingdoms keeps the costume's own reputation and crimes (`Identities`; see
+  `kingdoms/MODLOG.md`).

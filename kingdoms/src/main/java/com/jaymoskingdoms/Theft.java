@@ -234,14 +234,35 @@ public final class Theft {
 
 	/** {@code player} is hunted by {@code faction}'s guards right now (a medium crime or worse, seen). */
 	public static boolean wanted(ServerPlayer player, int faction) {
-		Long until = player.getAttachedOrElse(WANTED, Map.of()).get(Integer.toString(faction));
-		return until != null && until > player.level().getGameTime();
+		return until(player, faction) > player.level().getGameTime();
 	}
 
 	/** {@code player} is an outlaw in {@code faction} (a heavy crime, seen, not yet forgotten). */
 	public static boolean outlaw(ServerPlayer player, int faction) {
+		long until = until(player, faction);
+		return until > 0L && until - player.level().getGameTime() > HUNT_TICKS;
+	}
+
+	/** (0.7.62) When {@code faction}'s guards stop hunting {@code player} (0: they aren't): a masked stranger's is the costume's ({@link Identities}). */
+	private static long until(ServerPlayer player, int faction) {
+		String persona = Identities.persona(player, faction);
+		if (persona != null) {
+			return Identities.wantedUntil(player.level().getServer(), persona, faction);
+		}
 		Long until = player.getAttachedOrElse(WANTED, Map.of()).get(Integer.toString(faction));
-		return until != null && until - player.level().getGameTime() > HUNT_TICKS;
+		return until == null ? 0L : until;
+	}
+
+	/** (0.7.62) {@code faction} hunts {@code player} until at least {@code until}: them, or the costume they're masked in there. */
+	private static void markWanted(ServerPlayer player, int faction, long until) {
+		String persona = Identities.persona(player, faction);
+		if (persona != null) {
+			Identities.markWanted(player.level().getServer(), persona, faction, until);
+			return;
+		}
+		Map<String, Long> wanted = new HashMap<>(player.getAttachedOrElse(WANTED, Map.of()));
+		wanted.merge(Integer.toString(faction), until, Math::max);
+		player.setAttached(WANTED, Map.copyOf(wanted));
 	}
 
 	/** {@code who} is one of a crowd set on an arsonist (they leave the fire to others). */
@@ -264,7 +285,8 @@ public final class Theft {
 
 	/** {@code player} answers to no one here: creative, or of rank enough in the faction to take from its stores. */
 	static boolean exempt(ServerPlayer player, Faction f) {
-		return player.isSpectator() || Storage.mayTake(player, f);
+		// (0.7.62: not in a mask they don't see through)
+		return player.isSpectator() || !Identities.hidden(player, f.id()) && Storage.mayTake(player, f);
 	}
 
 	private static void opened(ServerPlayer player, ServerLevel level, BlockPos pos) {
@@ -517,9 +539,7 @@ public final class Theft {
 			return;
 		}
 		long until = level.getGameTime() + (w == Weight.HEAVY ? OUTLAW_TICKS : HUNT_TICKS);
-		Map<String, Long> wanted = new HashMap<>(player.getAttachedOrElse(WANTED, Map.of()));
-		wanted.merge(Integer.toString(f.id()), until, Math::max);
-		player.setAttached(WANTED, Map.copyOf(wanted));
+		markWanted(player, f.id(), until);
 		if (w == Weight.HEAVY) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.theft.outlaw", f.name(), OUTLAW_TICKS / 24000L)
 				.withStyle(ChatFormatting.DARK_RED));
@@ -535,9 +555,7 @@ public final class Theft {
 		if (Wars.enemy(player, f)) {
 			return;
 		}
-		Map<String, Long> wanted = new HashMap<>(player.getAttachedOrElse(WANTED, Map.of()));
-		wanted.merge(Integer.toString(f.id()), level.getGameTime() + ticks, Math::max);
-		player.setAttached(WANTED, Map.copyOf(wanted));
+		markWanted(player, f.id(), level.getGameTime() + ticks);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.guard.arrest", f.name(), ticks / 20).withStyle(ChatFormatting.RED));
 		pursue(level, f, player);
 	}
@@ -694,8 +712,22 @@ public final class Theft {
 			return;
 		}
 		for (ServerPlayer player : level.players()) {
+			if (player.isCreative() || player.isSpectator()) {
+				continue;
+			}
+			// (0.7.62) a masked player: the guards hunt the costume where it's wanted and they don't know who wears it
+			String mask = Identities.key(player);
+			if (mask != null) {
+				for (var e : Identities.wantedBy(server, mask).entrySet()) {
+					int id = Integer.parseInt(e.getKey());
+					Faction f = e.getValue() > now ? Factions.get(server, id) : null;
+					if (f != null && !f.fallen() && Identities.hidden(player, id)) {
+						pursue(level, f, player);
+					}
+				}
+			}
 			Map<String, Long> wanted = player.getAttached(WANTED);
-			if (wanted == null || wanted.isEmpty() || player.isCreative() || player.isSpectator()) {
+			if (wanted == null || wanted.isEmpty()) {
 				continue;
 			}
 			Map<String, Long> still = new HashMap<>();
@@ -703,7 +735,7 @@ public final class Theft {
 				if (e.getValue() > now) {
 					still.put(e.getKey(), e.getValue());
 					Faction f = Factions.get(server, Integer.parseInt(e.getKey()));
-					if (f != null && !f.fallen()) {
+					if (f != null && !f.fallen() && !Identities.hidden(player, f.id())) {
 						pursue(level, f, player);
 					}
 				}

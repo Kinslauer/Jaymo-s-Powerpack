@@ -3114,3 +3114,15 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
 - **0.7.61, foreign voices grunt:** MCA's spoken voice lines (greet, yes, no, celebrate, angry) are sent per player:
   those who don't understand the villager's tongue (`Languages.understands`: fluent, family or sworn) hear the vanilla
   villager grunt instead (`EntityVoiceMixin` on `Entity.playSound`, `Languages.voice`).
+- **0.7.62, secret identities** (`Identities`, with Jaymo's Powers 0.11.70 costumes): a player masked by their costume
+  (Powers' tag `jaymospowers_masked:<key>`) is a stranger. Done masked, a deed or crime goes on the costume's own
+  reputation and wanted time with that settlement (`Reputation.get/change`, `Theft.wanted/outlaw/commit/arrest` ask
+  `Identities.persona`); guards hunt the costume when they see it, not the player bare-faced. Members are strangers
+  in a mask (no storehouse rights, no greetings, no MCA hearts, no remembered deeds). Putting the mask on or off in
+  sight of a settlement's people (16 blocks, looking), lifting it for a guard, or being seen using the same power
+  3 times masked and 3 times bare-faced (24 blocks, sightings 30 s apart) tells that settlement who wears it: the
+  costume's reputation is added to the player's and its wanted time carried over, and from then on it treats the
+  costume as the player. Word spreads each day (40%) to the rest of that realm. A paranoid king's guards stop masked
+  strangers (Approaches topic `unmask`): lift the mask, be searched (stolen goods: fine and arrest), or refuse (the
+  costume's name suffers; 30 s to leave the settlement or the guards come). Ops: `/kingdom identity [list|link
+  <settlement>|unlink [<settlement>]|forget]`, `/kingdom talk unmask`.

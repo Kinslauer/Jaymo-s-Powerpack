@@ -157,11 +157,13 @@ public final class Approaches {
 
 	/** What they come over about. */
 	static final int QUEST_OFFER = 0, QUEST_CHECK = 1, ACCUSE = 2, HALT = 3, QUESTION = 4, HUNGRY = 5, BARGAIN = 6, GIFT = 7, WAR = 8,
-		GOSSIP = 9, GREET = 10, CHILD = 11, WARN = 12, SEARCH = 13, TOLL = 14, BOUT = 15, LOYALTY = 16;
+		GOSSIP = 9, GREET = 10, CHILD = 11, WARN = 12, SEARCH = 13, TOLL = 14, BOUT = 15, LOYALTY = 16,
+		/** (0.7.62) a paranoid king's guard stops a masked stranger ({@link Identities}). */
+		UNMASK = 17;
 	static final String[] TOPICS = {"quest_offer", "quest_check", "accuse", "halt", "question", "hungry", "bargain", "gift", "war", "gossip",
-		"greet", "child", "warn", "search", "toll", "bout", "loyalty"};
+		"greet", "child", "warn", "search", "toll", "bout", "loyalty", "unmask"};
 	/** How many ways each topic has of opening (lang keys {@code talk.jaymoskingdoms.<topic>.<n>}); 0 for the guards' own, one per temper. */
-	static final int[] OPENINGS = {3, 3, 3, 3, 0, 3, 3, 3, 2, 10, 3, 3, 3, 0, 0, 0, 0};
+	static final int[] OPENINGS = {3, 3, 3, 3, 0, 3, 3, 3, 2, 10, 3, 3, 3, 0, 0, 0, 0, 3};
 	/** (0.6.2) Temper keys, in {@link Tempers.Temper} order, then a place with no ruler of its own. */
 	static final String[] TEMPERS = {"tyrant", "noble", "warlord", "paranoid", "reveler", "plain"};
 	static final int TYRANT = 0, NOBLE = 1, WARLORD = 2, PARANOID = 3, REVELER = 4, PLAIN = 5;
@@ -319,17 +321,18 @@ public final class Approaches {
 
 	/** (From {@link Theft}) {@code player} did a crime against {@code faction}, seen or noticed: its people will ask about it. */
 	static void suspect(ServerPlayer player, int faction, long now) {
-		SUSPECTS.computeIfAbsent(player.getUUID(), k -> new HashMap<>()).put(faction, now);
+		// (0.7.62) a masked stranger's crime is held against the costume
+		SUSPECTS.computeIfAbsent(Identities.suspectId(player, faction), k -> new HashMap<>()).put(faction, now);
 	}
 
 	private static boolean suspected(ServerPlayer player, int faction, long now) {
-		Map<Integer, Long> mine = SUSPECTS.get(player.getUUID());
+		Map<Integer, Long> mine = SUSPECTS.get(Identities.suspectId(player, faction));
 		Long at = mine == null ? null : mine.get(faction);
 		return at != null && now - at < SUSPECT_TICKS;
 	}
 
 	private static void clearSuspicion(ServerPlayer player, int faction) {
-		Map<Integer, Long> mine = SUSPECTS.get(player.getUUID());
+		Map<Integer, Long> mine = SUSPECTS.get(Identities.suspectId(player, faction));
 		if (mine != null) {
 			mine.remove(faction);
 		}
@@ -511,6 +514,9 @@ public final class Approaches {
 		if (bestTopic == HALT) {
 			MET.put("halt/" + bestFaction.id() + "/" + id, now);
 		}
+		if (bestTopic == UNMASK) {
+			Identities.challenged(player, bestFaction, now, false);
+		}
 		if (guard(best)) {
 			MET.put("guard/" + id, now);
 		}
@@ -587,15 +593,19 @@ public final class Approaches {
 			// (they hate you, or their guards are after you: nobody stops for a chat)
 			return null;
 		}
-		boolean sworn = f.member(player.getUUID()) != null;
+		// (0.7.62) a masked stranger is nobody they know: not sworn, no hearts
+		boolean masked = Identities.hidden(player, f.id());
+		boolean sworn = !masked && f.member(player.getUUID()) != null;
 		boolean suspected = suspected(player, f.id(), now);
-		int hearts = hearts(mob, player);
+		int hearts = masked ? 0 : hearts(mob, player);
 		boolean friend = McaCompat.isMca(mob) ? hearts >= GIFT_HEARTS : rep >= GIFT_REP;
 		boolean known = McaCompat.isMca(mob) ? hearts >= GREET_HEARTS : rep >= GREET_REP;
 		int[] w = new int[TOPICS.length];
 		if (guard(mob)) {
 			Long lastGuard = MET.get("guard/" + player.getUUID());
-			if (only < 0 && !suspected && lastGuard != null && now - lastGuard < GUARD_GAP) {
+			// (0.7.62) a paranoid king's guards stop a masked stranger, however lately they've had a word
+			boolean challenge = Identities.challenges(server, player, f, now);
+			if (only < 0 && !suspected && !challenge && lastGuard != null && now - lastGuard < GUARD_GAP) {
 				// (0.6.2) the guards have had a word with you lately
 				return null;
 			}
@@ -621,6 +631,9 @@ public final class Approaches {
 				w[WAR] = 1;
 			}
 			w[GOSSIP] = 1;
+			if (challenge) {
+				w[UNMASK] = Identities.CHALLENGE_WEIGHT;
+			}
 		} else if (night(level) && only < 0) {
 			return null;
 		} else if (mob.isBaby()) {
@@ -698,14 +711,14 @@ public final class Approaches {
 	 */
 	static boolean simple(int topic) {
 		return topic == GIFT || topic == GREET || topic == HUNGRY || topic == BARGAIN || topic == CHILD || topic == WARN || topic == TOLL
-			|| topic == BOUT;
+			|| topic == BOUT || topic == UNMASK;
 	}
 
 	/** (The test command) {@code mob} can be made to come over about {@code topic} whatever they know: anything but quests and wars they haven't got. */
 	private static boolean testable(Mob mob, int topic) {
 		if (guard(mob)) {
 			return topic == HALT || topic == WARN || topic == GOSSIP || topic == ACCUSE || topic == SEARCH || topic == TOLL || topic == BOUT
-				|| topic == LOYALTY;
+				|| topic == LOYALTY || topic == UNMASK;
 		}
 		if (mob.isBaby()) {
 			return topic == CHILD;
@@ -810,8 +823,8 @@ public final class Approaches {
 			case SEARCH, TOLL, BOUT -> new Object[] {a.price};
 			case BARGAIN -> new Object[] {a.goods.getCount(), a.goods.getHoverName(), a.price};
 			case WAR -> new Object[] {a.enemy};
-			case HALT -> new Object[] {realm};
-			case GREET -> new Object[] {name};
+			case HALT, UNMASK -> new Object[] {realm};
+			case GREET -> new Object[] {Identities.nameTo(player, a.faction)};
 			default -> new Object[0];
 		};
 		Component said = null;
@@ -841,7 +854,7 @@ public final class Approaches {
 		}
 		a.line = said != null ? said : Component.translatable(line, args);
 		a.more = Component.translatable(more, args);
-		a.color = a.topic == ACCUSE ? Speech.RED : a.topic == HALT || a.topic == WARN || a.topic == SEARCH || a.topic == TOLL || a.topic == LOYALTY ? Speech.YELLOW
+		a.color = a.topic == ACCUSE ? Speech.RED : a.topic == HALT || a.topic == UNMASK || a.topic == WARN || a.topic == SEARCH || a.topic == TOLL || a.topic == LOYALTY ? Speech.YELLOW
 			: a.topic == QUEST_OFFER || a.topic == QUEST_CHECK || a.topic == GIFT ? Speech.GOLD : Speech.WHITE;
 		tell(level, a, a.line, a.color);
 		level.playSound(null, a.mob.getX(), a.mob.getY(), a.mob.getZ(), a.mob instanceof Villager ? SoundEvents.VILLAGER_AMBIENT : SoundEvents.VILLAGER_TRADE,
@@ -992,6 +1005,8 @@ public final class Approaches {
 				new Option(Component.translatable(k + "decline"), true), new Option(Component.translatable(k + "insult"), true));
 			case LOYALTY -> List.of(new Option(Component.translatable(k + "praise"), true), new Option(Component.translatable(k + "silent"), true),
 				new Option(Component.translatable(k + "ill"), true));
+			case UNMASK -> List.of(new Option(Component.translatable(k + "lift"), true), new Option(Component.translatable(k + "search"), true),
+				new Option(Component.translatable(k + "refuse"), true));
 			default -> List.of();
 		};
 	}
@@ -1150,8 +1165,45 @@ public final class Approaches {
 				}
 			}
 			case SEARCH, TOLL, BOUT, LOYALTY -> guardsBusiness(level, a, player, f, option);
+			case UNMASK -> unmask(level, a, player, f, option);
 			default -> {
 			}
+		}
+	}
+
+	/**
+	 * (0.7.62) The player answered a paranoid king's guard who wants to see under their mask: lift it for him (the
+	 * realm knows who wears the costume from now on), let him search them masked, or refuse (and be sent off).
+	 */
+	private static void unmask(ServerLevel level, Approach a, ServerPlayer player, Faction f, int option) {
+		String k = key(a) + ".reply.";
+		long now = level.getGameTime();
+		if (option == 0) {
+			Identities.lifted(level, player, f);
+			Identities.challenged(player, f, now, true);
+			boolean trouble = Reputation.get(player, f.id()) <= Reputation.HOSTILE || Theft.wanted(player, f.id());
+			reply(level, a, k + (trouble ? "lift_trouble" : "lift"), trouble ? Speech.RED : Speech.WHITE, player.getName());
+			if (trouble) {
+				a.mob.setTarget(player);
+			}
+		} else if (option == 1) {
+			if (suspected(player, f.id(), now)) {
+				int fine = Math.min(FINE, emeralds(player));
+				take(player, Items.EMERALD, fine);
+				toTreasury(level, f, fine);
+				clearSuspicion(player, f.id());
+				Reputation.change(player, f, SEARCH_FOUND_REP);
+				reply(level, a, k + "search_found", Speech.RED, fine);
+				Theft.arrest(player, level, f, ARREST_TICKS);
+			} else {
+				Reputation.change(player, f, Identities.SEARCH_CLEAN_REP);
+				Identities.challenged(player, f, now, true);
+				reply(level, a, k + "search_clean", Speech.YELLOW);
+			}
+		} else {
+			Reputation.change(player, f, Identities.REFUSE_REP);
+			reply(level, a, k + "refuse", Speech.RED, f.name());
+			Identities.sendOff(level, player, f);
 		}
 	}
 
@@ -1347,6 +1399,14 @@ public final class Approaches {
 				reply(level, a, "talk.jaymoskingdoms.accuse.ignored", Speech.RED);
 			}
 			case QUEST_OFFER, QUEST_CHECK -> {
+			}
+			case UNMASK -> {
+				// (0.7.62) walking off on him is refusing
+				if (f != null) {
+					unmask(level, a, player, f, 2);
+				} else {
+					reply(level, a, "talk.jaymoskingdoms.halt.ignored", Speech.RED);
+				}
 			}
 			case SEARCH, TOLL -> {
 				// (0.6.2) walking off on a search or a toll is refusing it
