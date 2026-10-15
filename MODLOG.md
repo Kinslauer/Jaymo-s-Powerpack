@@ -1379,3 +1379,22 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   own plus 4 degrees (`FutureGuns.ZOMBIE_STRAY_SCALE` / `ZOMBIE_STRAY_ADD`; echoes and androids aim as before). The
   rest of the horde is 40% husks (`HUSK_SHARE`; only the hordes' own, tagged feral, are let into the future) and
   plain zombies in our civilian skins.
+- **0.11.81 / Kingdoms 0.7.69, power costume sets and tailors (costumes stage 3):** Andy: "each power adds its own
+  costume set to the table once you have it". New cuts, masks and capes, offered at the table only while you have
+  the power (`costume/CostumeSets`; the server refuses to sew them otherwise; a costume already sewn stays wearable
+  and drawn whoever has it): Web: Webbed Suit (web lines, web gloves) and Web Mask (hides the face); Wind:
+  Windswept and the Gale Cloak (three tails); Gravity: Dense Plate (shoulder pads, a dark core); Chrono: Clockwork
+  (gear-toothed hems, a dial); Arsenal: Bandolier Harness; Resonance: Resonant (sound rings); Darktide: Tidal (darker
+  towards the feet) and the Tide Cape; Smoke: Ash Wraps and Ash Veil (hides the face); Z Fighter: Training Gi and
+  Headband; Xenoform: Carapace. New enum values go at the end, so saved designs and identity keys are unchanged.
+  Textures from `tools/gen_costume.py` (patterns may now return a shade). Tailors: `/costume tailor <player> <price>
+  [<tailor>]` (gamemasters; Kingdoms runs it as the server) opens the designer in a paid mode
+  (`costume/CostumeTailoring`): no materials, the price in emeralds (bundles count) taken when sewn, within 5 minutes
+  and 8 blocks of the tailor; one costume per order.
+  Costumes now follow the body they're drawn over (Andy: "the costumes clip over every character, it doesnt move
+  consistently at all"; `client/costume/CostumeBody`): the costume re-ran the plain animation when drawn, so under
+  Fresh Animations (EMF) it stayed in the vanilla walk while the body moved; the body's EMF pose is now kept on the
+  render state just before the layers (`CostumePoseLivingEntityRendererMixin`, only when EMF animated it and isn't
+  paused, as Kingdoms' armour does) and the costume takes it. It also takes the model the renderer drew that player
+  with (MCA swaps it per player), MCA's villager body's wide arms (not the skin's slim ones), its head size (masks
+  scale with it) and its bust (the suit has one that copies MCA's; the emblem moves out in front of it).

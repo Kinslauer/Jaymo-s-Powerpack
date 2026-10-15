@@ -4,6 +4,8 @@ import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.costume.Costume;
 import com.jaymospowers.costume.CostumeDesign;
 import com.jaymospowers.costume.CostumeNet;
+import com.jaymospowers.costume.CostumeSets;
+import com.jaymospowers.costume.CostumeTailoring;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -20,6 +22,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import org.jspecify.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -29,6 +33,10 @@ import org.joml.Vector3f;
  * back) and the two colours, on the right the 16x16 emblem painter (left button paints with the picked palette entry,
  * right button rubs out), and along the bottom what sewing costs against what you carry, "Sew" and "Take off". The
  * design lives here until it is sewn; the server checks it and the materials again.
+ * <p>
+ * (0.11.78) Pieces from a power's set ({@link CostumeSets}) are offered only while you have that power. A tailor's
+ * order ({@link #tailored}) opens the same designer away from any table: the cost is the tailor's emeralds, not
+ * materials, and there is no taking off.
  */
 public class CostumeScreen extends Screen {
 	private static final int W = 372, H = 236;
@@ -44,7 +52,10 @@ public class CostumeScreen extends Screen {
 	private static final int CHIP = 14;
 	private static final int OK = 0xFF7CD67C, SHORT = 0xFFE06060;
 
-	private final BlockPos pos;
+	/** The table, or null for a tailor's order. */
+	private final @Nullable BlockPos pos;
+	/** A tailor's price in emeralds, or -1 at a table. */
+	private final int price;
 	/** Kept between openings (so a closed screen doesn't lose a half-done design). */
 	private static CostumeDesign design = CostumeDesign.DEFAULT;
 	private static float yaw = 20.0F;
@@ -57,8 +68,22 @@ public class CostumeScreen extends Screen {
 	private Button cut, mask, cape, sew, takeOff;
 
 	public CostumeScreen(BlockPos pos) {
-		super(Component.translatable("screen.jaymospowers.costume.title"));
+		this(pos, -1);
+	}
+
+	private CostumeScreen(@Nullable BlockPos pos, int price) {
+		super(Component.translatable(price >= 0 ? "screen.jaymospowers.costume.tailor_title" : "screen.jaymospowers.costume.title"));
 		this.pos = pos;
+		this.price = price;
+	}
+
+	/** (0.11.78) The designer for a tailor's order, at {@code price} emeralds. */
+	static CostumeScreen tailored(int price) {
+		return new CostumeScreen(null, Math.max(0, price));
+	}
+
+	private boolean tailoring() {
+		return this.price >= 0;
 	}
 
 	private int left() {
@@ -103,6 +128,10 @@ public class CostumeScreen extends Screen {
 
 	@Override
 	protected void init() {
+		if (this.minecraft.player != null) {
+			// a piece of a power's set you no longer have goes back to the plain one
+			design = CostumeSets.fit(this.minecraft.player, design);
+		}
 		this.pixels = design.pixels();
 		int mx = middleX();
 		int y = contentY();
@@ -120,10 +149,19 @@ public class CostumeScreen extends Screen {
 		}).bounds(emblemX(), paletteY() + CHIP + 14, CostumeDesign.EMBLEM_SIZE * CELL, 14).build());
 		int by = top() + H - 20;
 		this.sew = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.costume.sew"), b -> {
-			ClientPlayNetworking.send(new CostumeNet.Sew(this.pos, design));
+			if (this.pos != null) {
+				ClientPlayNetworking.send(new CostumeNet.Sew(this.pos, design));
+			} else {
+				ClientPlayNetworking.send(new CostumeTailoring.Sew(design));
+				onClose();
+			}
 		}).bounds(left() + W - 8 - 64, by, 64, 14).build());
-		this.takeOff = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.costume.take_off"),
-			b -> ClientPlayNetworking.send(new CostumeNet.TakeOff(this.pos))).bounds(left() + W - 8 - 64 - 4 - 64, by, 64, 14).build());
+		this.takeOff = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.costume.take_off"), b -> {
+			if (this.pos != null) {
+				ClientPlayNetworking.send(new CostumeNet.TakeOff(this.pos));
+			}
+		}).bounds(left() + W - 8 - 64 - 4 - 64, by, 64, 14).build());
+		this.takeOff.visible = !tailoring();
 		labels();
 	}
 
@@ -136,22 +174,18 @@ public class CostumeScreen extends Screen {
 			Component.translatable("costume.jaymospowers.cape." + design.cape().getSerializedName())));
 	}
 
-	private static <E extends Enum<E>> E step(E[] values, E now, int by) {
-		return values[Math.floorMod(now.ordinal() + by, values.length)];
-	}
-
 	private void cycleCut(int by) {
-		design = design.withCut(step(CostumeDesign.Cut.values(), design.cut(), by));
+		design = design.withCut(CostumeSets.step(this.minecraft.player, CostumeDesign.Cut.values(), design.cut(), by, c -> c.power));
 		labels();
 	}
 
 	private void cycleMask(int by) {
-		design = design.withMask(step(CostumeDesign.Mask.values(), design.mask(), by));
+		design = design.withMask(CostumeSets.step(this.minecraft.player, CostumeDesign.Mask.values(), design.mask(), by, m -> m.power));
 		labels();
 	}
 
 	private void cycleCape(int by) {
-		design = design.withCape(step(CostumeDesign.Cape.values(), design.cape(), by));
+		design = design.withCape(CostumeSets.step(this.minecraft.player, CostumeDesign.Cape.values(), design.cape(), by, c -> c.power));
 		labels();
 	}
 
@@ -163,7 +197,7 @@ public class CostumeScreen extends Screen {
 	@Override
 	public void tick() {
 		LocalPlayer player = this.minecraft.player;
-		if (player == null || player.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(this.pos)) > 64.0) {
+		if (player == null || this.pos != null && player.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(this.pos)) > 64.0) {
 			onClose();
 		}
 	}
@@ -270,13 +304,24 @@ public class CostumeScreen extends Screen {
 		int y = top();
 		UiStyle.panel(graphics, x, y, W, H, ACCENT);
 		UiStyle.header(graphics, this.font, x, y, W, new ItemStack(Costume.TABLE), this.title,
-			Component.translatable("screen.jaymospowers.costume.sub"), ACCENT, 0);
+			Component.translatable(tailoring() ? "screen.jaymospowers.costume.tailor_sub" : "screen.jaymospowers.costume.sub"), ACCENT, 0);
 		preview(graphics, player);
 		middle(graphics, mouseX, mouseY);
 		emblem(graphics, mouseX, mouseY);
 		cost(graphics, player);
-		this.takeOff.active = Costume.worn(player) != null;
+		this.takeOff.active = !tailoring() && Costume.worn(player) != null;
 		super.extractRenderState(graphics, mouseX, mouseY, a);
+		pieceTooltip(graphics, this.cut, design.cut().power, mouseX, mouseY);
+		pieceTooltip(graphics, this.mask, design.mask().power, mouseX, mouseY);
+		pieceTooltip(graphics, this.cape, design.cape().power, mouseX, mouseY);
+	}
+
+	/** (0.11.78) Over a piece of a power's set: whose it is. */
+	private void pieceTooltip(GuiGraphicsExtractor graphics, Button button, @Nullable String power, int mouseX, int mouseY) {
+		if (power != null && button.isMouseOver(mouseX, mouseY)) {
+			graphics.setTooltipForNextFrame(this.font, Component.translatable("screen.jaymospowers.costume.from_set", CostumeSets.powerName(power)),
+				mouseX, mouseY);
+		}
 	}
 
 	/** The player in the design, turned by dragging. */
@@ -379,7 +424,17 @@ public class CostumeScreen extends Screen {
 		x += Math.min(60, this.font.width(Component.translatable("screen.jaymospowers.costume.cost"))) + 6;
 		boolean creative = player.isCreative();
 		boolean enough = true;
-		List<CostumeNet.Need> needs = CostumeNet.cost(design);
+		if (tailoring()) {
+			// (0.11.78) the tailor's price, in emeralds (bundles count)
+			int have = CostumeTailoring.emeralds(player);
+			boolean ok = creative || have >= this.price;
+			enough = ok;
+			graphics.item(new ItemStack(Items.EMERALD), x, iy);
+			String text = creative ? "×" + this.price : Math.min(have, 999) + "/" + this.price;
+			graphics.text(this.font, text, x + 17, iy + 4, ok ? OK : SHORT);
+			x += 17 + this.font.width(text) + 6;
+		}
+		List<CostumeNet.Need> needs = tailoring() ? List.of() : CostumeNet.cost(design);
 		for (CostumeNet.Need need : needs) {
 			int have = need.have(player);
 			boolean ok = creative || have >= need.count();

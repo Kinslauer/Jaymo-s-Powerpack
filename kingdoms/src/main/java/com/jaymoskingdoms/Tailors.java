@@ -76,7 +76,15 @@ public final class Tailors {
 
 	/** What {@code tailor} charges {@code player} for an outfit. */
 	static int fee(Villager tailor, ServerPlayer player) {
-		int fee = BASE_FEE + Math.floorMod(tailor.getUUID().hashCode(), FEE_SPREAD);
+		return price(tailor, player, BASE_FEE);
+	}
+
+	/**
+	 * (0.7.69) What {@code tailor} charges {@code player} for work whose cheapest price is {@code base}: their own rate on
+	 * top, less for friends, more for people they dislike, half for family ({@link TailorCostumes} too).
+	 */
+	static int price(Villager tailor, ServerPlayer player, int base) {
+		int fee = base + Math.floorMod(tailor.getUUID().hashCode(), FEE_SPREAD);
 		int hearts = McaBridge.heartsOf(tailor, player);
 		fee -= Mth.clamp(hearts / HEARTS_PER_EMERALD, -MOST_ON, MOST_OFF);
 		if (McaBridge.family(tailor, player)) {

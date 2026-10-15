@@ -9,6 +9,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.DyeColor;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (0.11.66) One costume, as designed at the Costume Table: its name, body cut, two dye colours, what covers the head, the
@@ -33,12 +34,30 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 	/** A fresh design: a plain blue and white bodysuit. */
 	public static final CostumeDesign DEFAULT = new CostumeDesign("", Cut.BODYSUIT, DyeColor.BLUE, DyeColor.WHITE, Mask.NONE, Cape.NONE, "");
 
-	/** How the body is cut: each is a pair of mask textures (where the primary goes, where the secondary goes). */
+	/**
+	 * How the body is cut: each is a pair of mask textures (where the primary goes, where the secondary goes).
+	 * (0.11.78) The cuts after {@link #RAGGED} are power sets ({@link CostumeSets}): {@link #power} names the power
+	 * (its id's path) that adds it to the table. New ones only ever go at the end (saved designs keep their names, and
+	 * the network sends the ordinal).
+	 */
 	public enum Cut implements StringRepresentable {
-		BODYSUIT, ARMOURED, ROBES, COAT, RAGGED;
+		BODYSUIT, ARMOURED, ROBES, COAT, RAGGED,
+		WEBBED("web"), WINDSWEPT("wind"), DENSE("gravity"), CLOCKWORK("chrono"), BANDOLIER("arsenal"), RESONANT("resonance"),
+		TIDAL("darktide"), ASH_WRAPS("smoke"), GI("zfighter"), CARAPACE("xenoform");
 
 		public static final Codec<Cut> CODEC = StringRepresentable.fromEnum(Cut::values);
 		public static final StreamCodec<ByteBuf, Cut> STREAM_CODEC = CostumeDesign.byOrdinal(values());
+
+		/** The power whose set this is (its id's path), or null for anyone's. */
+		public final @Nullable String power;
+
+		Cut() {
+			this(null);
+		}
+
+		Cut(@Nullable String power) {
+			this.power = power;
+		}
 
 		@Override
 		public String getSerializedName() {
@@ -48,16 +67,25 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 
 	/** What covers the head. {@link #hidesFace} is what a later "masked" (secret identity) check reads. */
 	public enum Mask implements StringRepresentable {
-		NONE(false), HALF_MASK(false), FULL_MASK(true), HOOD(false), HELMET(true), GOGGLES(false);
+		NONE(false), HALF_MASK(false), FULL_MASK(true), HOOD(false), HELMET(true), GOGGLES(false),
+		// (0.11.78) power sets
+		WEB_MASK(true, "web"), ASH_VEIL(true, "smoke"), HEADBAND(false, "zfighter");
 
 		public static final Codec<Mask> CODEC = StringRepresentable.fromEnum(Mask::values);
 		public static final StreamCodec<ByteBuf, Mask> STREAM_CODEC = CostumeDesign.byOrdinal(values());
 
 		/** Whether it hides who you are (the whole face is covered). */
 		public final boolean hidesFace;
+		/** The power whose set this is (its id's path), or null for anyone's. */
+		public final @Nullable String power;
 
 		Mask(boolean hidesFace) {
+			this(hidesFace, null);
+		}
+
+		Mask(boolean hidesFace, @Nullable String power) {
 			this.hidesFace = hidesFace;
+			this.power = power;
 		}
 
 		@Override
@@ -68,10 +96,23 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 
 	/** The cape, if any. */
 	public enum Cape implements StringRepresentable {
-		NONE, SHORT, LONG, TATTERED;
+		NONE, SHORT, LONG, TATTERED,
+		// (0.11.78) power sets
+		GALE("wind"), TIDE("darktide");
 
 		public static final Codec<Cape> CODEC = StringRepresentable.fromEnum(Cape::values);
 		public static final StreamCodec<ByteBuf, Cape> STREAM_CODEC = CostumeDesign.byOrdinal(values());
+
+		/** The power whose set this is (its id's path), or null for anyone's. */
+		public final @Nullable String power;
+
+		Cape() {
+			this(null);
+		}
+
+		Cape(@Nullable String power) {
+			this.power = power;
+		}
 
 		@Override
 		public String getSerializedName() {
