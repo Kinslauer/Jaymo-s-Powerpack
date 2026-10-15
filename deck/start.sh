@@ -8,6 +8,14 @@ if [ ! -x jdk/bin/java ]; then
 	read -rp "Press Enter to close."
 	exit 1
 fi
+# one at a time: a double-click started two at once, and the second (failing on the locked world) took the
+# tunnel down with it on its way out
+exec 9>.start.lock
+if ! flock -n 9; then
+	echo "The server is already starting or running."
+	read -rp "Press Enter to close."
+	exit 1
+fi
 if ss -ltn 2>/dev/null | grep -q ':25565 '; then
 	echo "The server is already running."
 	read -rp "Press Enter to close."
@@ -17,7 +25,7 @@ fi
 PLAYIT_PID=
 if [ -s playit-secret.txt ]; then
 	pkill -x playit 2>/dev/null
-	./playit --secret-path playit-secret.txt --socket-path "${XDG_RUNTIME_DIR:-/tmp}/playit.sock" > playit.log 2>&1 &
+	./playit --secret-path playit-secret.txt --socket-path "${XDG_RUNTIME_DIR:-/tmp}/playit.sock" > playit.log 2>&1 9>&- &
 	PLAYIT_PID=$!
 	echo "playit tunnel started (its log: playit.log)."
 else
