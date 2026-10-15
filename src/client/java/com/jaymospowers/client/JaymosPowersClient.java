@@ -54,6 +54,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.core.SeveredPart.TYPE, SeveredPartRenderer::new);
 		ClientTickEvents.END_CLIENT_TICK.register(Dismembered::tick);
 		com.jaymospowers.client.tinkering.TinkeringClient.init();
+		net.minecraft.client.gui.screens.MenuScreens.register(com.jaymospowers.enchanting.Enchanting.MENU,
+			com.jaymospowers.client.enchanting.EnchantingScreen::new);
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.armory.ArmoryEntities.THROWN_WEAPON,
 			com.jaymospowers.client.armory.ThrownWeaponRenderer::new);
 		// once per install: move other mods' (and vanilla's) defaults off the power keys

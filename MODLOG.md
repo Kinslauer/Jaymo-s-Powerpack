@@ -1315,3 +1315,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   doesn't help with land nobody has visited (Chunky pre-gen does that). Works with Sodium and Iris; in cached areas the
   fast-flight slowdown (`TerrainAhead`) doesn't kick in, since those chunks are already there. C2ME was looked at and
   left out: its 26.3 build is an early alpha that rewrites worldgen.
+- **0.11.51, enchanting overhaul (Enchanting System Overhaul by CmdrJane, MIT, ported to 26.3 as our own):**
+  `enchanting/`. The enchanting table opens our table (`EnchantingTableMixin`): no XP and no random rolls. Right-click
+  an enchanted book to learn what's in it (kept through death; the book burns up once it taught you everything). At
+  the table, pick any known enchantment that fits the item (or a plain book, to pass it on) and pay its items in the 4
+  material slots, one level at a time (`EnchantRecipes`: ESO's costs; density, breach, wind burst, lunge ours; other
+  mods' enchantments use the default price). Items hold 2-6 enchantments by material (`Enchanting.limit`), +1 with a
+  curse; the anvil can't go past that (`AnvilLimitMixin`); loot keeps at most 3 (books 10). Tinkering tools stay out.
