@@ -155,6 +155,13 @@ public final class ZFighterPower implements Power {
 	static final int CHARGE_CRACKLE = 10;
 	/** Charging: puffs of smoky fog (a Verdant's, mist) rolling out at his feet every other tick, per tier. */
 	static final int CHARGE_FOG = 1;
+	/**
+	 * In a form, standing (not charging): bits of ground floating round him (this many a form, every other tick), a crackle
+	 * of lightning with a chance of (form + 1) in {@link #IDLE_CRACKLE} a tick, and sparks (this many a form). No smoke.
+	 */
+	static final int IDLE_FLOAT_PER_FORM = 2;
+	static final int IDLE_CRACKLE = 8;
+	static final int IDLE_SPARKS_PER_FORM = 2;
 	private static final int CRACKLE_COLOR = 0xD8ECFF;
 
 	private static final Identifier FIST_ID = JaymosPowers.id("zfighter_fists");
@@ -498,9 +505,8 @@ public final class ZFighterPower implements Power {
 			if (now % 2 == 0) {
 				debris(player, live);
 			}
-			if (now % (8 - live.form * 2) == 0) {
-				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 1 + live.form, 0.4,
-					0.6, 0.4, 0.1);
+			if (!live.charging) {
+				idleFx(player, live, now);
 			}
 			if (live.ki <= 0.0F) {
 				endSuper(player, live);
@@ -882,7 +888,45 @@ public final class ZFighterPower implements Power {
 
 	/** In a form near the ground: bits of the ground under him tear loose and rip upwards, more with each form. */
 	private static void debris(ServerPlayer player, Live live) {
-		debris(player, DEBRIS_PER_FORM * live.form, 1.2 + 0.8 * live.form, 0.4 + 0.25 * live.form, live.form >= 2);
+		debris(player, DEBRIS_PER_FORM * live.form, 1.2 + 0.8 * live.form, 0.4 + 0.25 * live.form, false);
+	}
+
+	/** Standing in a form: bits of the ground float round him, lightning crackles over him and sparks fly off him. */
+	private static void idleFx(ServerPlayer player, Live live, long now) {
+		ServerLevel level = player.level();
+		RandomSource random = level.getRandom();
+		if (now % 2 == 0) {
+			BlockState ground = groundUnder(player);
+			if (ground != null) {
+				BlockParticleOption bits = new BlockParticleOption(ParticleTypes.BLOCK, ground);
+				for (int i = 0; i < IDLE_FLOAT_PER_FORM * live.form; i++) {
+					// spawned at every height round him, each drifting gently up before it drops: they seem to hang there
+					double a = random.nextDouble() * Math.PI * 2.0;
+					double r = 0.8 + random.nextDouble() * (0.6 + 0.4 * live.form);
+					level.sendParticles(bits, true, false, player.getX() + Math.cos(a) * r, player.getY() + 0.1 + random.nextDouble() * 2.2,
+						player.getZ() + Math.sin(a) * r, 0, 0.0, 1.0, 0.0, 0.08 + random.nextDouble() * 0.1);
+				}
+			}
+		}
+		if (random.nextInt(IDLE_CRACKLE) <= live.form) {
+			crackle(player, random, live.form + 1);
+		}
+		if (now % (8 - live.form * 2) == 0) {
+			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, player.getX(), player.getY() + 1.0, player.getZ(),
+				IDLE_SPARKS_PER_FORM * live.form + 1, 0.5, 0.7, 0.5, 0.15);
+		}
+	}
+
+	/** The solid block he stands over (within {@link #DEBRIS_HEIGHT}), or null. */
+	private static BlockState groundUnder(ServerPlayer player) {
+		BlockPos feet = player.blockPosition();
+		for (int down = 1; down <= DEBRIS_HEIGHT; down++) {
+			BlockState state = player.level().getBlockState(feet.below(down));
+			if (!state.isAir() && state.getFluidState().isEmpty() && state.isSolidRender()) {
+				return state;
+			}
+		}
+		return null;
 	}
 
 	/**
