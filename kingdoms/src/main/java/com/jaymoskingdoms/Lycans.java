@@ -89,7 +89,7 @@ public final class Lycans {
 			Codec.INT.fieldOf("build").forGetter(Curse::build),
 			Codec.LONG.fieldOf("night").forGetter(Curse::night),
 			Codec.INT.optionalFieldOf("moons", 0).forGetter(Curse::moons),
-			// (0.7.61) a wolfblood: half-cursed by a ritual done under any moon but the full one; never changes ({@link NightGifts})
+			// (0.7.63) a wolfblood: half-cursed by a ritual done under any moon but the full one; never changes ({@link NightGifts})
 			Codec.BOOL.optionalFieldOf("half", false).forGetter(Curse::half)).apply(i, Curse::new));
 
 		Curse changedOn(long nightNo) {

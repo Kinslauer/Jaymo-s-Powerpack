@@ -1335,5 +1335,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.11.63 / Kingdoms 0.7.59:** `/kingdom skills` commands for ops (`kingdoms/MODLOG.md`).
 - **0.11.64 / Kingdoms 0.7.60:** Sorcerer fire bursts spread to nearby creatures; ice bursts freeze, hurt and chill
   (`kingdoms/MODLOG.md`).
-- **0.11.68 / Kingdoms 0.7.61:** night gifts for vampires and werewolves: dash, groundpound, leap, howl, kin-sense,
+- **0.11.71, tournament arenas:** the ring was any spot 14 blocks from the seat at whatever height the ground had
+  there (a hillside, a cliff's edge, a roof, the river), so fighters were set down inside the hill or over a drop and
+  fell out of it. Now the land 18-44 blocks round the seat is searched (16 ways at 5 distances) for the flattest plain
+  ground (no water, lava, houses or roads; at most 4 blocks from lowest to highest), and a floor is laid there: smooth
+  stone edged in stone bricks at the ring's line, dips filled, grass, trees and snow cleared to 5 above (trees to 10).
+  Fighters stand on it. The old spot is used only if nowhere will do (`ZFighterArena`).
+- **0.11.72 / Kingdoms 0.7.63:** night gifts for vampires and werewolves: dash, groundpound, leap, howl, kin-sense,
   bat wings, lifeleech, frenzy, wall run, dhampirs, wolfbloods, crypts and dens (`kingdoms/MODLOG.md`).

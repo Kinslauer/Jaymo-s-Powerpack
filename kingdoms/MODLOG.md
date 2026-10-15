@@ -3101,7 +3101,23 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
   4 blocks (players spared), each lit for 4 s and burnt for 1, like lightning's chain. Ice's burst freezes far longer
   (300 ticks, long enough for the cold's own damage), slows for 4 s, does 2 damage, and chills up to 4 creatures within
   3 blocks (frozen a while, slowed 3 s). (`Spellcraft.strike`)
-- **0.7.61, the night's gifts** (ideas from the Vampires Strike Back modpack's origins, remade; nothing of theirs used):
+- **0.7.61, villagers react to your deeds:** (`Deeds`) put out a fire in a settlement (a watched fire that goes out
+  within 6 blocks of a player who just used their hands or an item), kill whatever struck (or was going for) a villager,
+  or bring a captive home, and they react: the one saved thanks you (30% hand you a gift), witnesses cheer, MCA hearts
+  and mood rise, reputation with the settlement (fires +1, saves +6, capped at 60 a day; freed +10, brought home +40).
+  For 7 days folk there call out to you about it as you pass and gossips talk of it; each day word may reach the
+  nearest settlement that hasn't heard ("they say in X you..."). 12 lines per family, dealt as a deck.
+  (`Captives`) villagers in chains in camps (80%, 1-2 when a player first comes within 64; a camp left without takes
+  another after 3 days, 50%) and in 35% of dungeons (spawner on cobblestone): taken from the nearest settlement within
+  1500, bound (NoAI, invulnerable, unseen by monsters), they cry for help. Right-click breaks the chains; they follow you
+  home (lost after 30 s more than 48 blocks behind, or 3 days), and give 3-8 emeralds there. Ops: `/kingdom captive`.
+- **0.7.61, foreign voices grunt:** MCA's spoken voice lines (greet, yes, no, celebrate, angry) are sent per player:
+  those who don't understand the villager's tongue (`Languages.understands`: fluent, family or sworn) hear the vanilla
+  villager grunt instead (`EntityVoiceMixin` on `Entity.playSound`, `Languages.voice`).
+- **0.7.62, raiders leave fires burning:** (`Firefighting.ours`) raiders and war parties' soldiers (`Assault.attacker`)
+  never fight fires, theirs or the town's, and no folk fights a fire on enemy land (`Assault.enemyLand`). The town's own
+  villagers, folk and golems still do.
+- **0.7.63, the night's gifts** (ideas from the Vampires Strike Back modpack's origins, remade; nothing of theirs used):
   vampire and werewolf players get two keys and a sense (`NightGifts`). Vampires: `O` Blood Dash (look up for a great
   leap, one more dash in the air, no fall damage till they land); `P` in the air Groundpound (down like a stone, throws
   back and hurts everyone within 5 blocks, no fall damage, every person within 32 shows through walls for 10 s); bat
@@ -3115,4 +3131,5 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
   night strength, all the gifts). Wolfbloods: the bone ritual on any night but a full moon half-curses you (never
   change, human-form gifts; finish the rite under a full moon). Newly turned vampires wake in a crypt dug beneath them
   (coffin bed = respawn, candles, ladder up); werewolves wake from their first moon in a den. Natural ground only.
-  `/kingdom nightgift <vampire|dhampir|werewolf|wolfblood|crypt|den|none>` for ops.
+  `/kingdom nightgift <vampire|dhampir|werewolf|wolfblood|crypt|den|none>` for ops. Villagers' gossip hints at all of
+  it as old wives' talk (`NightGifts.gossip`, 18 lines; 12% of gossip, 40% to the cursed or half-cursed).

@@ -123,7 +123,17 @@ public final class Firefighting {
 		if (now % EVERY != 0 || FIRES.isEmpty()) {
 			return;
 		}
-		FIRES.removeIf(p -> !level.isLoaded(p) || !level.getBlockState(p).is(BlockTags.FIRE));
+		FIRES.removeIf(p -> {
+			if (!level.isLoaded(p)) {
+				return true;
+			}
+			if (level.getBlockState(p).is(BlockTags.FIRE)) {
+				return false;
+			}
+			// (0.7.61) out, and not by our people's hands (theirs are struck off as they do it): a player's, maybe
+			Deeds.fireOut(level, p);
+			return true;
+		});
 		CHOICES.values().removeIf(c -> c.until() < now);
 		int answered = 0;
 		for (BlockPos fire : new ArrayList<>(FIRES)) {
@@ -167,7 +177,7 @@ public final class Firefighting {
 				default -> run(level, v, fire);
 			}
 		}
-		for (Folk folk : level.getEntitiesOfClass(Folk.class, near, f -> f.isAlive() && f.getTarget() == null && !Theft.rioting(f))) {
+		for (Folk folk : level.getEntitiesOfClass(Folk.class, near, f -> f.isAlive() && f.getTarget() == null && !Theft.rioting(f) && ours(level, f, fire))) {
 			Undertakers.calledAway(level, folk);
 			if (close(folk, fire)) {
 				putOut(level, folk, fire, now);
@@ -186,6 +196,14 @@ public final class Firefighting {
 			BlockPos to = beside(golem, fire);
 			golem.getNavigation().moveTo(to.getX() + 0.5, to.getY(), to.getZ() + 0.5, GOLEM_SPEED);
 		}
+	}
+
+	/**
+	 * (0.7.62) Folk fight only their own side's fires: never a raider or a war party's soldier (they set them, and leave
+	 * them burning, theirs or the town's), nor anyone standing on enemy land.
+	 */
+	private static boolean ours(ServerLevel level, Folk folk, BlockPos fire) {
+		return !Assault.attacker(folk) && !Assault.enemyLand(level, folk, fire);
 	}
 
 	/** {@code golem} beats out {@code fire}: an arm swung down on it (no water, nothing knocked out). */

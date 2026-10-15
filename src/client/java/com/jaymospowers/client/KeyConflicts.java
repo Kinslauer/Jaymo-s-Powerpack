@@ -21,7 +21,7 @@ final class KeyConflicts {
 	/**
 	 * Bump to run the move again (for a new clash in a later pack version). v2 (0.9.23): Camera Utils' zoom, on Z (the
 	 * pack zooms with OK Zoomer). v3 (0.10.65): Traveler Tool Belt on R; Shoulder Surfing's free look on Left Alt (OK
-	 * Zoomer's zoom) and swap shoulder on U (Kingdoms' werewolf shift). v4 (0.11.68): Kingdoms' night gifts take O and
+	 * Zoomer's zoom) and swap shoulder on U (Kingdoms' werewolf shift). v4 (0.11.72): Kingdoms' night gifts take O and
 	 * P, so swap shoulder goes on to the full stop (from U or O) and the social interactions screen comes off P.
 	 */
 	private static final String MARKER = "jaymospowers-keys-v4";

@@ -195,7 +195,7 @@ final class Assault {
 	}
 
 	/** Its land is an enemy's (claimed by a faction not its own and not allied with it). */
-	private static boolean enemyLand(ServerLevel level, Folk folk, BlockPos pos) {
+	static boolean enemyLand(ServerLevel level, Folk folk, BlockPos pos) {
 		MinecraftServer server = level.getServer();
 		Faction owner = Banners.owner(server, ChunkPos.containing(pos));
 		return owner != null && owner.id() != folk.factionId() && Relations.between(server, folk.factionId(), owner.id()) != Relation.ALLIED;

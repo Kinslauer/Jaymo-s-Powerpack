@@ -22,7 +22,7 @@ import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.storage.LevelData;
 
 /**
- * (0.7.61) Where the newly cursed come to: a vampire wakes from its turning in a crypt, a werewolf from its first moon
+ * (0.7.63) Where the newly cursed come to: a vampire wakes from its turning in a crypt, a werewolf from its first moon
  * in a den, each dug out beneath where they stood, with a bed that's now where they wake after dying, and a ladder up.
  * Only natural ground is dug (stone, dirt, sand, gravel, ores); if there's anything else in the way (a build, a cave,
  * the sea), there's no lair and they wake where they are.

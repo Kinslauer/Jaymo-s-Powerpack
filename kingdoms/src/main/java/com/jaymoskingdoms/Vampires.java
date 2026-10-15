@@ -138,7 +138,7 @@ public final class Vampires {
 		ELDER, FEEDER, ABSTAINER, HUNTER,
 		/** (stage 3) a player ({@link VampirePlayers}). */
 		PLAYER,
-		/** (0.7.61) a player half turned ({@link VampirePlayers#ateGold}): none of the weaknesses. */
+		/** (0.7.63) a player half turned ({@link VampirePlayers#ateGold}): none of the weaknesses. */
 		DHAMPIR;
 
 		String id() {

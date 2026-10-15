@@ -63,9 +63,10 @@ import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.61) The night's gifts: the moves and senses vampire and werewolf players get on top of {@link VampirePlayers} and
+ * (0.7.63) The night's gifts: the moves and senses vampire and werewolf players get on top of {@link VampirePlayers} and
  * {@link WerewolfPlayers}. Ideas from the Vampires Strike Back modpack's own origins (All Rights Reserved: nothing of
  * theirs is used, only the ideas, remade here).
  *
@@ -134,6 +135,11 @@ public final class NightGifts {
 	static final float SUN_EXHAUSTION = 0.05F;
 	/** Safe fall distance added (blocks): human-form werewolves, the beast; the beast's fall damage share taken off. */
 	static final double WOLF_SAFE_FALL = 3.0, BEAST_SAFE_FALL = 10.0, BEAST_FALL_CUT = -0.5;
+
+	/** Old wives' talk of the night's gifts ({@link #gossip}): how often a villager's gossip turns to it, for most and
+	 * for someone cursed or half-cursed (they need it more); how many lines there are. */
+	static final float GOSSIP_CHANCE = 0.12F, GOSSIP_CURSED_CHANCE = 0.4F;
+	static final int GOSSIP_LINES = 18;
 
 	/** What gift a player has. */
 	public static final int NONE = 0, VAMPIRE = 1, DHAMPIR = 2, WEREWOLF = 3, WOLFBLOOD = 4;
@@ -283,6 +289,19 @@ public final class NightGifts {
 			return curse.half() ? WOLFBLOOD : WEREWOLF;
 		}
 		return NONE;
+	}
+
+	/**
+	 * (0.7.63) Now and then a villager's gossip is old wives' talk of vampires and werewolves that hints at a gift and
+	 * how to come by it ({@link Approaches}): the dash, the pound, the wings and XP, the kin-sense, the golden apple, the
+	 * crypt; the leap, the howl, the climb, the ritual's moon, the den. Oftener for someone cursed or half-cursed.
+	 */
+	static @Nullable Component gossip(ServerLevel level, ServerPlayer player) {
+		float chance = gift(player) != null ? GOSSIP_CURSED_CHANCE : GOSSIP_CHANCE;
+		if (level.getRandom().nextFloat() >= chance) {
+			return null;
+		}
+		return Component.translatable("talk.jaymoskingdoms.gossip.night." + level.getRandom().nextInt(GOSSIP_LINES));
 	}
 
 	/** What a client sees of {@code player}'s gift (either side), or null. */

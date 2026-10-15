@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 /**
- * (0.7.61) Gliding wears the glider it's done on; gliding on bat wings ({@code NightGifts}) there's none, so vanilla's
+ * (0.7.63) Gliding wears the glider it's done on; gliding on bat wings ({@code NightGifts}) there's none, so vanilla's
  * pick from an empty list would throw: then it picks the (empty) chest slot, and wearing that does nothing. The wings
  * tire their own way.
  */
