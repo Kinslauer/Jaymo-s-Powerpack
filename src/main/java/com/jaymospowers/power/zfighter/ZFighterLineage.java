@@ -75,7 +75,8 @@ public final class ZFighterLineage {
 	public static final double MAX_SCALE = 20.0;
 	static final double APE_FISTS = 1.0;
 	static final double APE_HEALTH = 40.0;
-	static final double APE_SPEED = 0.15;
+	/** The Great Ape lumbers: walking speed lost (a share). */
+	static final double APE_SPEED = -0.4;
 	static final int APE_BEAM_COOLDOWN = 80;
 	/** Out of the moonlight this long, the Great Ape shrinks back. */
 	static final int APE_MOONLESS = 200;
@@ -85,7 +86,10 @@ public final class ZFighterLineage {
 	static final double APE_STOMP_DEPTH = 3.0;
 	/** Screen shake: each footfall (every this many blocks walked, felt this far), a stomp that lands, the change itself. */
 	static final double APE_STRIDE = 3.0, APE_STEP_RANGE = 32.0;
-	static final float APE_STEP_SHAKE = 0.7F, APE_STOMP_SHAKE = 1.4F, APE_CHANGE_SHAKE = 2.5F;
+	static final float APE_STEP_SHAKE = 1.0F, APE_STOMP_SHAKE = 1.4F, APE_CHANGE_SHAKE = 2.5F;
+	/** Every footfall is a stomp: enemies this far from the foot (blocks, at full size) are hurt this much and thrown up. */
+	static final double APE_FOOT_REACH = 4.5;
+	static final float APE_FOOT_DAMAGE = 8.0F;
 	// ---- Verdant ----
 	static final int REGEN_EVERY = 40;
 	static final float REGEN = 1.0F;
@@ -379,11 +383,36 @@ public final class ZFighterLineage {
 		if (player.moveDist - live.apeStepAt >= APE_STRIDE * Math.max(0.5F, live.apeSize)) {
 			live.apeStepAt = player.moveDist;
 			if (player.onGround() && live.apeSize >= 0.5F) {
-				com.jaymospowers.core.Shakes.heavy(player, player.position(), APE_STEP_RANGE, APE_STEP_SHAKE * live.apeSize);
+				footfall(player, live, level);
 			}
 		}
 		if (now % APE_STOMP_EVERY == 0 && live.apeSize >= 0.5F) {
 			stomp(player, level);
+		}
+	}
+
+	/** One of the Great Ape's steps: the foot (left, then right) comes down like a stomp, shaking the ground and flinging what's near. */
+	private static void footfall(ServerPlayer player, ZFighterPower.Live live, ServerLevel level) {
+		live.apeLeftFoot = !live.apeLeftFoot;
+		float yaw = player.getYRot() * Mth.DEG_TO_RAD;
+		double side = (live.apeLeftFoot ? 1.0 : -1.0) * player.getBbWidth() * 0.25;
+		Vec3 foot = player.position().add(Math.cos(yaw) * side, 0.0, Math.sin(yaw) * side);
+		double reach = APE_FOOT_REACH * live.apeSize;
+		com.jaymospowers.core.Shakes.heavy(player, foot, APE_STEP_RANGE, APE_STEP_SHAKE * live.apeSize);
+		level.playSound(null, foot.x, foot.y, foot.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.6F, 0.45F);
+		level.playSound(null, foot.x, foot.y, foot.z, SoundEvents.RAVAGER_STEP, SoundSource.PLAYERS, 3.0F, 0.4F);
+		net.minecraft.world.level.block.state.BlockState ground = level.getBlockState(BlockPos.containing(foot).below());
+		if (!ground.isAir()) {
+			level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, ground), true, false, foot.x, foot.y + 0.1,
+				foot.z, 60, reach * 0.4, 0.2, reach * 0.4, 0.3);
+		}
+		level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, true, false, foot.x, foot.y + 0.2, foot.z, 6, reach * 0.3, 0.1, reach * 0.3, 0.02);
+		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(foot, foot).inflate(reach, 2.0, reach),
+			e -> e != player && e.isAlive() && (e instanceof Enemy || e instanceof net.minecraft.world.entity.Mob mob && mob.getTarget() == player))) {
+			if (victim.hurtServer(level, level.damageSources().playerAttack(player), APE_FOOT_DAMAGE)) {
+				Vec3 away = victim.position().subtract(foot).multiply(1.0, 0.0, 1.0).normalize();
+				victim.push(away.x * 0.6, 0.5, away.z * 0.6);
+			}
 		}
 	}
 

@@ -262,6 +262,8 @@ public final class ZFighterPower implements Power {
 		float apeSize;
 		/** How far he'd walked at the Great Ape's last footfall (the ground shakes every stride). */
 		float apeStepAt;
+		/** Which foot comes down next (the Great Ape's stomps alternate). */
+		boolean apeLeftFoot;
 		/** The guard (right click held): up, since when, when he may parry again, until when his punch counters. */
 		boolean guarding;
 		long guardStart;
