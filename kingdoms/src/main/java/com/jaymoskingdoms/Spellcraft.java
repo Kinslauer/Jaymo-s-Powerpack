@@ -71,7 +71,7 @@ public final class Spellcraft {
 	/** The elements' numbers: fire's burn (s) and extra damage; water's slow (ticks) and the hurt to what fears water;
 	 * earth's stagger (ticks); air's lift; lightning's damage, how far it chains and to how many; ice's freeze (ticks). */
 	static final float FIRE_SECONDS = 4.0F, FIRE_DAMAGE = 1.0F, WATER_DAMAGE = 6.0F, LIGHTNING_DAMAGE = 3.0F;
-	static final int WATER_SLOW = 60, EARTH_STAGGER = 40, ICE_FREEZE = 160, LIGHTNING_CHAIN = 2;
+	static final int WATER_SLOW = 60, EARTH_STAGGER = 40, ICE_FREEZE = 300, LIGHTNING_CHAIN = 2;
 	/** (0.6.8) One blow in this many bursts with the element; the rest only spark. A thrown bolt always does. */
 	static final int PROC_ONE_IN = 20;
 	/** (0.6.8) Air instead lifts on every this-many-th blow, so the next one lands in the air: an air combo. */
@@ -79,6 +79,15 @@ public final class Spellcraft {
 	/** (0.6.8) How long a lightning burst blinds, in ticks (0.3 s). */
 	static final int LIGHTNING_BLIND = 6;
 	static final double AIR_LIFT = 0.9, LIGHTNING_RANGE = 4.0;
+	/** (0.7.60) Fire's burst catches up to {@code FIRE_SPREAD} more creatures within {@code FIRE_SPREAD_RANGE} (players
+	 * spared), each lit for {@link #FIRE_SECONDS} and burnt for {@link #FIRE_DAMAGE}. */
+	static final int FIRE_SPREAD = 3;
+	static final double FIRE_SPREAD_RANGE = 4.0;
+	/** (0.7.60) Ice's burst: its damage and slow (ticks), and the chill on creatures within {@code ICE_CHILL_RANGE} (players
+	 * spared): their freeze and slow (ticks). */
+	static final float ICE_DAMAGE = 2.0F;
+	static final int ICE_SLOW = 80, ICE_CHILL_FREEZE = 140, ICE_CHILL_SLOW = 60, ICE_CHILL_COUNT = 4;
+	static final double ICE_CHILL_RANGE = 3.0;
 
 	/** Player → server: the Imbue key ({@code bolt}: with sneak, the bolt). */
 	public record Imbue(boolean bolt) implements CustomPacketPayload {
@@ -352,6 +361,17 @@ public final class Spellcraft {
 			case "fire" -> {
 				target.igniteForSeconds(FIRE_SECONDS);
 				target.hurtServer(level, level.damageSources().indirectMagic(player, player), FIRE_DAMAGE);
+				// (0.7.60) the flames leap to what's near
+				int caught = 0;
+				for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(FIRE_SPREAD_RANGE),
+					e -> e != target && e != player && e.isAlive() && !(e instanceof ServerPlayer) && !e.fireImmune())) {
+					other.igniteForSeconds(FIRE_SECONDS);
+					other.hurtServer(level, level.damageSources().indirectMagic(player, player), FIRE_DAMAGE);
+					level.sendParticles(ParticleTypes.FLAME, other.getX(), other.getY(0.6), other.getZ(), 8, 0.2, 0.3, 0.2, 0.03);
+					if (++caught >= FIRE_SPREAD) {
+						break;
+					}
+				}
 			}
 			case "water" -> {
 				target.clearFire();
@@ -390,8 +410,21 @@ public final class Spellcraft {
 				}
 			}
 			case "ice" -> {
+				// (0.7.60) frozen through (long enough to take the cold's own damage), and a bite of it now
 				target.setTicksFrozen(Math.max(target.getTicksFrozen(), ICE_FREEZE));
-				target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, WATER_SLOW, 2), player);
+				target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ICE_SLOW, 2), player);
+				target.hurtServer(level, level.damageSources().indirectMagic(player, player), ICE_DAMAGE);
+				// and a chill on what's near
+				int chilled = 0;
+				for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(ICE_CHILL_RANGE),
+					e -> e != target && e != player && e.isAlive() && !(e instanceof ServerPlayer))) {
+					other.setTicksFrozen(Math.max(other.getTicksFrozen(), ICE_CHILL_FREEZE));
+					other.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ICE_CHILL_SLOW, 0), player);
+					level.sendParticles(ParticleTypes.SNOWFLAKE, other.getX(), other.getY(0.6), other.getZ(), 8, 0.2, 0.3, 0.2, 0.02);
+					if (++chilled >= ICE_CHILL_COUNT) {
+						break;
+					}
+				}
 			}
 			default -> {
 				return;
