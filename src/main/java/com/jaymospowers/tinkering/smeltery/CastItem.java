@@ -3,6 +3,8 @@ package com.jaymospowers.tinkering.smeltery;
 import com.jaymospowers.tinkering.PartType;
 import com.jaymospowers.tinkering.Tinkering;
 import com.jaymospowers.tinkering.ToolPartItem;
+import com.jaymospowers.tinkering.WeaponPartItem;
+import com.jaymospowers.tinkering.WeaponParts;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -15,7 +17,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * A gold cast: set it on a casting table and pour metal over it to make an ingot, a nugget or a tool part. It's
- * reusable. Pour gold over an ingot, a nugget or any tool part on the table to make the cast of its shape.
+ * reusable. Pour gold over an ingot, a nugget, any tool part or weapon head ({@link WeaponParts}) on the table to make
+ * the cast of its shape.
  */
 public class CastItem extends Item {
 	/** The shapes there are casts for: ingots, nuggets and each tool part. */
@@ -24,7 +27,9 @@ public class CastItem extends Item {
 		PICK_HEAD(PartType.PICK_HEAD), SMALL_AXE_HEAD(PartType.SMALL_AXE_HEAD), ADZE_HEAD(PartType.ADZE_HEAD),
 		SMALL_BLADE(PartType.SMALL_BLADE), HAMMER_HEAD(PartType.HAMMER_HEAD), BROAD_BLADE(PartType.BROAD_BLADE),
 		LARGE_PLATE(PartType.LARGE_PLATE), TOOL_HANDLE(PartType.TOOL_HANDLE), TOUGH_HANDLE(PartType.TOUGH_HANDLE),
-		TOOL_BINDING(PartType.TOOL_BINDING);
+		TOOL_BINDING(PartType.TOOL_BINDING), CROSSGUARD(PartType.CROSSGUARD),
+		/** (0.11.77) A weapon head of the kind it was made from ({@link WeaponParts}). */
+		WEAPON("weapon", null);
 
 		public final String id;
 		public final @Nullable PartType part;
@@ -54,6 +59,9 @@ public class CastItem extends Item {
 			if (stack.is(Items.IRON_NUGGET) || stack.is(Items.GOLD_NUGGET) || stack.is(Items.COPPER_NUGGET) || stack.is(Tinkering.SILVER_NUGGET)) {
 				return NUGGET;
 			}
+			if (stack.getItem() instanceof WeaponPartItem) {
+				return WEAPON;
+			}
 			return null;
 		}
 	}
@@ -69,6 +77,17 @@ public class CastItem extends Item {
 	@SuppressWarnings("deprecation")
 	public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> builder,
 		TooltipFlag flag) {
+		if (shape == Shape.WEAPON) {
+			WeaponParts.Kind kind = WeaponParts.ofCast(stack);
+			if (kind == null) {
+				builder.accept(Component.translatable("tooltip.jaymospowers.tinkering.weapon_cast.blank").withStyle(ChatFormatting.GRAY));
+				return;
+			}
+			for (ItemStack result : WeaponParts.castResults(kind)) {
+				builder.accept(Component.translatable("tooltip.jaymospowers.tinkering.weapon_cast.makes", result.getHoverName())
+					.withStyle(ChatFormatting.GOLD));
+			}
+		}
 		builder.accept(Component.translatable("tooltip.jaymospowers.tinkering.cast").withStyle(ChatFormatting.GRAY));
 	}
 }
