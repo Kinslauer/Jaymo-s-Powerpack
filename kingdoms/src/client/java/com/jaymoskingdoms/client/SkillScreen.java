@@ -22,7 +22,7 @@ import net.minecraft.sounds.SoundEvents;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.5.52) The skill tree ({@link Skills}), on the {@code K} key. (0.7.38) Restyled like the H screen: a header with the
+ * (0.5.52) The skill tree ({@link Skills}), on the {@code K} key. (0.7.40) Restyled like the H screen: a header with the
  * pillar's level, its experience bar and the points to spend; a tab per pillar; its perks as a tree of flat tiles (press
  * one to spend points on it); and a box at the bottom that shows the hovered perk in full, or else what the pillar
  * levels on, your class and your alignment ({@link Renown}). The server checks every spend and syncs the result back.

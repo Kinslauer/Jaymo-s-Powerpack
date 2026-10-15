@@ -25,7 +25,7 @@ import net.minecraft.world.level.material.MapColor;
  * (0.5.49) The traveller's journal ({@link Journal}): three pages. <b>Quests</b>: each quest you carry, who gave it, its
  * story, what's left and which way it lies. <b>Map</b>: the land about you as a map draws it (only what your eyes have
  * loaded; the rest is blank parchment), with you, your quests' places and the settlements on it, and zoom. <b>Reputation</b>:
- * what each settlement you know thinks of you. (0.7.38) Restyled like the H screen: a header, striped rows that light up
+ * what each settlement you know thinks of you. (0.7.40) Restyled like the H screen: a header, striped rows that light up
  * under the mouse, and on the quests page a box at the bottom with the hovered (or pressed) quest in full.
  */
 final class JournalScreen extends Screen {

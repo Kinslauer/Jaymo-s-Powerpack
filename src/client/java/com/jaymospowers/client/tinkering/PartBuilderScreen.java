@@ -20,7 +20,7 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * The Part Builder, laid out like Tinkers' screen (MIT): pattern and material left, the parts to pick in the middle, info
- * beside it. (0.10.125) Drawn like the H screen: dark panel, bronze stripe, sunken slots, flat part tiles.
+ * beside it. (0.10.127) Drawn like the H screen: dark panel, bronze stripe, sunken slots, flat part tiles.
  */
 public class PartBuilderScreen extends AbstractContainerScreen<PartBuilderMenu> {
 	private static final int GRID_X = 51, GRID_Y = 15, CELL = 18, COLUMNS = 4;

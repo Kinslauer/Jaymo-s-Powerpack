@@ -25,6 +25,8 @@ public final class Tornado {
 	double shoveX, shoveZ;
 	/** (0.7.34) Seconds a Smoke cloudshaper has spent unwinding it ({@link SkyCalm}). Server only. */
 	float unwound;
+	/** (0.7.39) Whether a Smoke user with both fates has already finished it off (it's roping out). Server only. */
+	boolean killed;
 	/** A seed for its wander, so each one weaves its own way. */
 	final float seed;
 

@@ -6,7 +6,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 
-/** The info panel beside a Tinkers table's screen: (0.10.125) drawn like the H screen, a dark box with a bronze stripe and wrapped lines. */
+/** The info panel beside a Tinkers table's screen: (0.10.127) drawn like the H screen, a dark box with a bronze stripe and wrapped lines. */
 final class SidePanel {
 	static final int WIDTH = 118, PAD = 5;
 	private static final int TEXT = TinkerUi.TEXT;

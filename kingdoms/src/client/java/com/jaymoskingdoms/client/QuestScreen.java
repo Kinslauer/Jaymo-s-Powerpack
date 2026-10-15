@@ -16,7 +16,7 @@ import net.minecraft.world.item.ItemStack;
  */
 final class QuestScreen extends Screen {
 	static final int PANEL_W = 300, PAD = 8, ICON = 18;
-	/** (0.7.38) The H screen's colours (Ui), shared with the talk screen. */
+	/** (0.7.40) The H screen's colours (Ui), shared with the talk screen. */
 	static final int COLOR_PANEL = Ui.PANEL, COLOR_CARD = Ui.ROW_ALT, COLOR_EDGE = 0xFF4A4A56, COLOR_TEXT = Ui.TEXT, COLOR_DIM = Ui.DIM,
 		COLOR_ROYAL = 0xFFFF6A50, COLOR_GOLD = 0xFFFFC21A, COLOR_DONE = 0xFF66EE66;
 

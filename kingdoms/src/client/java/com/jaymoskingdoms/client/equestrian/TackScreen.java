@@ -16,7 +16,7 @@ import net.minecraft.world.entity.player.Inventory;
 /**
  * (0.5.44) The tack screen ({@link TackMenu}): saddle, bridle, blanket and barding down the left, the horse in the
  * middle, and on the right how much it trusts you, its four disciplines (level and progress), its hunger, thirst and
- * hooves. (0.7.38) Drawn like the H screen: a dark panel with a gold stripe, sunken slots.
+ * hooves. (0.7.40) Drawn like the H screen: a dark panel with a gold stripe, sunken slots.
  */
 public class TackScreen extends AbstractContainerScreen<TackMenu> {
 	private static final int WIDTH = 176, HEIGHT = 184;

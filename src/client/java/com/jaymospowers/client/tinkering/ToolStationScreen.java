@@ -17,7 +17,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The Tool Station, laid out like Tinkers' screen (MIT): parts around the big result slot; recipes or the result's stats
- * beside it. (0.10.125) Drawn like the H screen: dark panel, bronze stripe, sunken slots.
+ * beside it. (0.10.127) Drawn like the H screen: dark panel, bronze stripe, sunken slots.
  */
 public class ToolStationScreen extends AbstractContainerScreen<ToolStationMenu> {
 	/** (0.8.125) Andy: an empty station shows each tool's parts in turn, this long apiece. */

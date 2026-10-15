@@ -20,7 +20,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The smeltery, on Tinkers' screen (MIT): melting slots down the left with their heat, the molten pool in the middle
- * (hover for amounts, click to pour that one first), the lava bucket and its gauge on the right. (0.10.125) Drawn like
+ * (hover for amounts, click to pour that one first), the lava bucket and its gauge on the right. (0.10.127) Drawn like
  * the H screen: dark panel, bronze stripe, sunken slots and pool.
  */
 public class SmelteryScreen extends AbstractContainerScreen<SmelteryMenu> {
