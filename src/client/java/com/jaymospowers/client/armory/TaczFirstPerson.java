@@ -4,6 +4,12 @@ import com.jaymospowers.JaymosPowers;
 import java.util.Set;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 /**
  * TaCZ guns (our flintlocks) in first person beside First-person Model (tr7zw). Both hook the start of drawing the
@@ -16,12 +22,35 @@ import net.fabricmc.loader.api.FabricLoader;
  * Reached by reflection, so neither is a compile dependency: {@code FirstPersonModelCore.instance.getConfig()
  * .autoVanillaHands} and {@code getLogicHandler().reloadAutoVanillaHandsSettings()}. The config set isn't saved unless
  * the player saves First-person Model's settings screen, and then keeping the gun on it is right anyway.
+ * <p>
+ * TaCZ draws its arms with the vanilla first-person hand (AvatarRenderer.renderHand), which Entity Model Features
+ * animates with Fresh Animations' first-person arm moves. Those are made for the vanilla hand's spot; on arms TaCZ has
+ * moved to the gun's grips they swung the arms off around the view. EmfCompat pauses them while a gun's in hand
+ * ({@link #holdingGun}): the gun's own animations move the arms.
  */
 public final class TaczFirstPerson {
 	/** Every TaCZ gun is this one item, told apart by its GunId (armory/TaczGuns). */
 	private static final String GUN_ITEM = "tacz:modern_kinetic_gun";
 
+	private static final boolean LOADED = FabricLoader.getInstance().isModLoaded("tacz");
+	private static Item gun;
+
 	private TaczFirstPerson() {
+	}
+
+	/** {@code entity} has a TaCZ gun in either hand (the Arsenal's flintlocks go one to a hand). */
+	public static boolean holdingGun(Object entity) {
+		if (!LOADED || !(entity instanceof LivingEntity living)) {
+			return false;
+		}
+		if (gun == null) {
+			gun = BuiltInRegistries.ITEM.getValue(Identifier.parse(GUN_ITEM));
+		}
+		return gun != Items.AIR && (isGun(living.getMainHandItem()) || isGun(living.getOffhandItem()));
+	}
+
+	private static boolean isGun(ItemStack stack) {
+		return stack.is(gun);
 	}
 
 	public static void init() {
