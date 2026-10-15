@@ -1126,6 +1126,7 @@ public final class Quests {
 			case Quest.RACE -> Component.translatable(key, o.place(), Stables.raceSeconds(q), x(q), z(q));
 			case Quest.HUNT, Quest.SURVIVE -> Component.translatable(key, x(q), z(q));
 			case Quest.GRUDGE -> Component.translatable(key, o.otherName(), o.count(), x(q), z(q));
+			case Quest.RELIEF -> Component.translatable(key, o.count(), o.place());
 			case Quest.ESCORT -> Component.translatable(key, o.place(), x(q), z(q));
 			default -> Component.empty();
 		};
@@ -1159,6 +1160,7 @@ public final class Quests {
 				? Component.translatable(o.spawned() ? "quest.jaymoskingdoms.objective.grudge_luring" : "quest.jaymoskingdoms.objective.grudge_lure",
 					o.otherName(), q.giver().name(), x(q), z(q))
 				: Component.translatable("quest.jaymoskingdoms.objective.grudge_beat", o.otherName(), o.progress(), o.count());
+			case Quest.RELIEF -> Component.translatable("quest.jaymoskingdoms.objective.rubble", o.place(), o.progress(), o.count());
 			case Quest.ESCORT -> Component.translatable(o.spawned() ? "quest.jaymoskingdoms.objective.escorting" : "quest.jaymoskingdoms.objective.escort",
 				q.giver().name(), o.place(), x(q), z(q));
 			default -> Component.empty();

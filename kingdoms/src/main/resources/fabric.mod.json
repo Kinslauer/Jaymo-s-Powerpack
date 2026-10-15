@@ -32,7 +32,8 @@
 		{ "config": "jaymoskingdoms.moons.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.sleep.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.sailing.client.mixins.json", "environment": "client" },
-		{ "config": "jaymoskingdoms.vampires.client.mixins.json", "environment": "client" }
+		{ "config": "jaymoskingdoms.vampires.client.mixins.json", "environment": "client" },
+		{ "config": "jaymoskingdoms.disasters.client.mixins.json", "environment": "client" }
 	],
 	"depends": {
 		"fabricloader": ">=0.19.5",

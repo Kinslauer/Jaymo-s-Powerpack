@@ -172,6 +172,13 @@ public final class Journal {
 			Optional<BlockPos> target = ready ? f == null ? Optional.empty() : Optional.of(f.seat()) : q.objective().pos();
 			entries.add(new Entry(q.royal(), ready, Quests.title(q), giver, Quests.text(q), Quests.objective(level, player, q), target));
 		}
+		// (0.7.31) the weather foretold, first
+		Component weather = DisasterRelief.journal(level, player);
+		if (weather != null) {
+			entries.add(0, new Entry(false, false, Component.translatable("journal.jaymoskingdoms.forecast"),
+				Component.translatable("journal.jaymoskingdoms.forecast.by"), weather, Component.translatable("journal.jaymoskingdoms.forecast.objective"),
+				Optional.empty()));
+		}
 		Map<String, Integer> known = player.getAttachedOrElse(Reputation.REPUTATION, Map.of());
 		List<Place> places = new ArrayList<>();
 		for (Faction f : Factions.all(server).stream()

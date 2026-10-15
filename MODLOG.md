@@ -1221,3 +1221,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   a shipwright and a warship (a frigate from 2000) that fights pirates, and send merchantmen to other realms'
   harbours. Pirates raid coastal settlements by landing parties, kings ask you to sink a pirate or escort a
   merchantman, and pirate holds carry Pirate's Charts to treasure wrecks. See `kingdoms/MODLOG.md` (0.7.42).
+- **0.10.130, natural disasters stages 2 and 3** (Andy: "okay resume stage work while we test", then "next stage?"): Kingdoms 0.7.43 adds the
+  land's own disasters: sandstorms with drifting sand, blizzards that freeze you, wildfires settlements fight with
+  buckets, floods after long rain that drain again, and hail; then earthquakes, struck settlements (news, repairs, tempers,
+  relief quests) and forecasts (court wizards, the Journal, a new Almanac). See `kingdoms/MODLOG.md`.
