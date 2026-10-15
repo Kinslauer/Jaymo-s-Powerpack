@@ -1239,8 +1239,12 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Kingdoms 0.7.46. Festival days at the square (dancing, a feast from the storehouse, a musician, fireworks in the
   realm's colours; a lord can call one with `/kingdom festival`), villagers' own cats and dogs, couriers
   (`/kingdom deliver <player>`), and hunger when the storehouse is bare plus evening weariness. See `kingdoms/MODLOG.md`.
-- **0.11.9, gun arms hold still in first person** (Andy: "the arms animate in the gun pov"): TaCZ draws a gun's arms
+- **0.11.10, gun arms hold still in first person** (Andy: "the arms animate in the gun pov"): TaCZ draws a gun's arms
   with the vanilla first-person hand, and Entity Model Features laid Fresh Animations' first-person arm moves over
   them, made for where the vanilla hand sits, so the arms swung off around the view. With a TaCZ gun in either hand
   Fresh Animations now leaves first-person arms alone and only the gun's own animations move them
   (`client/armory/TaczFirstPerson.holdingGun`, paused from `client/EmfAccess`).
+- **0.11.10, flintlock animations load again** (Andy: "muskets have no reload animation"): TaCZ couldn't load any of our
+  flintlocks' animations (musket, blunderbuss, pistol, Arsenal's pair): the shot's empty `sound_effects` list threw as
+  it was read (Andy's log: "Failed to load gun animation runtime jaymospowers:musket_display"), so the reload, draw,
+  inspect and shot animations all fell back to nothing. The shot has no sound list now (`tools/gen_tacz_guns.py`).

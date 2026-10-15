@@ -478,7 +478,7 @@ def shoot(kick):
         "camera": {"rotation": keys([(0, [0, 0, 0]), (0.04, [-1.2 * k, 0.3, 0.8]), (0.3, [0, 0, 0])])},
         "hammer": {"rotation": keys([(0, HAMMER_COCKED), (0.02, HAMMER_DOWN)])},
         "frizzen": {"rotation": keys([(0, FRIZZEN_SHUT), (0.03, FRIZZEN_OPEN)])},
-    }, "sound_effects": {}}
+    }}  # no "sound_effects": TaCZ's shot sound is the gun's own, and an empty list fails the whole gun's animations
 
 
 def reload(hands, g, long, length):

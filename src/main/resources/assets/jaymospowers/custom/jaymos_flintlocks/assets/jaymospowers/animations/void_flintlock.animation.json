@@ -232,8 +232,7 @@
             ]
           }
         }
-      },
-      "sound_effects": {}
+      }
     },
     "draw": {
       "animation_length": 0.45,
