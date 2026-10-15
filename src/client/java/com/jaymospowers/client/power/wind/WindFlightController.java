@@ -614,8 +614,8 @@ public final class WindFlightController {
 	}
 
 	/**
-	 * A Staff Surge in flight: {@code boost} more speed along the path, and up to {@code room} past the top speed for a
-	 * while. Only at cruise or sonic; returns false otherwise (the caller pushes the body instead).
+	 * A tick of the Staff Surge in flight: {@code boost} more speed along the path, and the ceiling lifted with it, up to
+	 * {@code room} past the top speed (it fades once let go). Only at cruise or sonic; returns false otherwise.
 	 */
 	boolean surge(double boost, double room) {
 		if (!this.state.fast()) {
