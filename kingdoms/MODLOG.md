@@ -3001,3 +3001,32 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
 - **Protected until done** (`Classes.unmade`: no class yet and the client has this mod): no damage (except what
   bypasses invulnerability, like the void), and mobs within 32 that go for them are called off every 10 ticks. MCA
   makes them invisible during its screen too.
+
+## 0.7.46: village life (pack 0.11.5)
+- Andy: add Village Life's features (CurseForge `villagelife`, VillageLife+, Forge 1.20.1) to our systems. It's All
+  Rights Reserved, so these are our own remakes of the ideas. Already covered and skipped: names and family surnames,
+  partners and children, moods, per-player reputation, profession/time-of-day talk (MCA); routines, children trailing
+  grown-ups, neighbours' regard (Routines, Neighbours); a mayor (our rulers, lords and ranks).
+- **Festivals** (`Festivals`): a realm at peace with food in store keeps its own festival about once in 8 days (the
+  same days each time, `OWN_EVERY_DAYS`). At dawn the bell rings and players near or sworn to it are told. All day its
+  free townsfolk (tradespeople get the day off) gather at the square: dancing, feasting (up to 24 food from the
+  storehouse, then bread of their own), toasts, one musician playing the flute; children dash about. Each lifts their
+  MCA mood. A player at the square is welcomed once a festival (+5 reputation, unless held in ill repute). From dusk
+  fireworks go up in the realm's colours. **`/kingdom festival`**: a lord of the realm (or its player ruler) calls one,
+  32 emeralds from the treasury, held today (tomorrow if past noon), not within 3 days of the last called one, not at
+  war. Ops: `/kingdom festival now`. Called festivals are saved (level attachment `festivals`).
+- **Village pets** (`Pets`): a settlement wants a cat or dog per 5 grown (4 at most). Every 2 minutes it may take in a
+  stray cat or wild wolf about the place (or an orphaned pet whose villager died); with none about, a stray turns up
+  by someone at most once a day (60% a dog). Pets are tamed with the villager as owner (vanilla's taming: they trail
+  after them, a dog goes for whatever hurts its villager, players can't order them about), wear the realm's colour on
+  their collar and are marked with attachment `village_pet`. Villagers fuss over their pets; children throw sticks for
+  dogs, who bound off after them. A pet's death sinks its villager's mood (-15).
+- **Couriers** (`Couriers`): **`/kingdom deliver <player>`** in a realm (seat within 128) whose reputation for you
+  isn't negative: the nearest free grown villager within 24 takes what's in your hand and walks it to that player
+  (within 256, same world), hands it over and says who sent it (+1 MCA heart with you). Not reached within 2 minutes:
+  they bring it back; nor you: they leave it where they stand. Killed on the way: it drops. The server stopping hands
+  everything still out back. Couriers are busy for `Routines.free`.
+- **Hunger and weariness** (`Spirits`): a realm whose (loaded) storehouse has no food at all has hungry townsfolk:
+  rumbling bellies, grumbles, MCA mood -2 each time, and no lunch routine until it's stocked. From time 10500 to
+  nightfall they yawn and say they're for bed; at dawn they stretch.
+- `Routines.free` now also excludes festival-goers and couriers (`Routines.freeOf` is the rest, for Festivals).

@@ -179,9 +179,14 @@ final class Routines {
 		DOING.values().removeIf(d -> now - d.started > TRAVEL_TICKS + LINGER_MIN + LINGER_MORE + 200);
 	}
 
-	/** Free for a routine at {@code t}: awake, unafraid, not working, guarding, fighting or talking. */
+	/** Free for a routine at {@code t}: awake, unafraid, not working, guarding, fighting or talking (nor at a festival). */
 	static boolean free(Villager v, long t) {
-		if (Neighbours.meeting(v) || Grudges.busy(v) || v.isSleeping() || v.isPassenger() || v.isNoAi() || v.getTarget() != null || v.hurtTime > 0 || Frights.afraid(v.getUUID())
+		return !Festivals.going(v) && freeOf(v, t);
+	}
+
+	/** {@link #free}, a festival aside (Festivals asks this of its own). */
+	static boolean freeOf(Villager v, long t) {
+		if (Neighbours.meeting(v) || Couriers.carrying(v) || Grudges.busy(v) || v.isSleeping() || v.isPassenger() || v.isNoAi() || v.getTarget() != null || v.hurtTime > 0 || Frights.afraid(v.getUUID())
 			|| Theft.rioting(v) || Approaches.talking(v) || Quests.listening(v) || Tag.playing(v) || Trespass.watching(v) || McaCompat.busy(v)
 			|| McaCompat.panicking(v) || Hermits.is(v) || Rickshaws.onDuty(v)) {
 			return false;
@@ -213,7 +218,8 @@ final class Routines {
 		} else if (t < EVENING) {
 			kinds.addAll(List.of(Kind.MARKET, Kind.MARKET, Kind.CHAT, Kind.CHAT, Kind.STROLL, Kind.GARDEN, Kind.WATER, Kind.CHORES, Kind.READ,
 				Kind.SHOP, Kind.SHOP, Kind.ANIMALS, Kind.WATCH));
-			if (t >= LUNCH_FROM && t < LUNCH_TO) {
+			// (0.7.46) nobody has lunch when the storehouse is bare
+			if (t >= LUNCH_FROM && t < LUNCH_TO && !Spirits.hungry(level, f)) {
 				kinds.addAll(List.of(Kind.LUNCH, Kind.LUNCH, Kind.LUNCH));
 			}
 		} else {
