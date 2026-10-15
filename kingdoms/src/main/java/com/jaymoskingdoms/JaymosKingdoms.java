@@ -99,6 +99,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Oddities.register();
 		// 0.5.21: monsters hunt the settlements' folk as they do villagers
 		Prey.register();
+		// 0.7.56: monsters see farther (Farsighted Mobs) and creepers stalk you (Stalker Creepers), both remade
+		Farsight.register();
+		Stalkers.register();
 		Theft.register();
 		// 0.5.50: pickpocketing (before Quests, whose sneak-use on a villager it takes from behind)
 		Pickpocket.register();

@@ -1328,3 +1328,5 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   or flying (harder when cruising) and flutter and straighten while charging. Models live in
   `tools/zfighter_hair/hair.js` (which also renders mock-ups); `export.js` writes `ZFighterHairStyles`. Texture:
   `tools/gen_zfighter_hair.py`.
+- **0.11.53 / Kingdoms 0.7.56:** monsters see farther (Farsighted Mobs remade) and creepers stalk you, freezing
+  while you look at them (Stalker Creepers remade) (`kingdoms/MODLOG.md`).

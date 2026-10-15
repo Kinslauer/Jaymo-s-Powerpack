@@ -3074,3 +3074,11 @@ Andy: "resume stage work". Stage 3 of `/mnt/project-files/sailing/Sailing-Plan.m
   destiny can't be reached from it; picking an outfit pays the fee in emeralds (bundles count), saves it and closes;
   Escape changes nothing and costs nothing. The fee: 3-7 emeralds by tailor, one off per 25 hearts with them (up to 3),
   one on per 25 below zero (up to 2), half for family, at least 1; free in creative (`Tailors` constants).
+- **0.7.56, farsighted monsters and stalking creepers:** two mods remade (neither has a 26.3 Fabric build).
+  Farsighted Mobs (LGPL-3): every monster now notices you from at least 24 blocks (vanilla skeletons, creepers and
+  spiders: 16), 8 more on Hard and up to 4 more at the highest local difficulty; monsters that already see farther
+  (zombies, our legends) keep theirs, and illagers and witches keep their own (`Farsight`, a transient follow-range
+  modifier set as each monster loads). Stalker Creepers (Forge/NeoForge, no licence given): a creeper hunting you
+  freezes and stares while you look at it (within about 53 degrees of your view, in line of sight) and creeps on as
+  soon as you look away; within 3.5 blocks, or once it hisses, looking no longer stops it (`Stalkers`, a priority-1
+  goal holding its legs).
