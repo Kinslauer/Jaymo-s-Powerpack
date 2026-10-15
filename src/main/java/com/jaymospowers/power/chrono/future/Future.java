@@ -50,8 +50,8 @@ import net.minecraft.world.phys.Vec3;
  * you left.</li>
  * <li>There's no other way home: only a Chrono's leap back, or dying (you wake at your own spawn as usual). Anyone
  * who goes forward without a Chrono stays until they die.</li>
- * <li>The first leap on a server quietly fetches the city ({@link LosPerrito}); until it's in place, the leap does
- * nothing ({@code /future status} shows how far along it is).</li>
+ * <li>The first leap on a server fetches the city ({@link LosPerrito}); until it's in place, the leap only says the
+ * future is forming ({@code /future status} shows how far along it is).</li>
  * <li>A Chrono in the future is stalked by up to {@link #ECHOES} of their echoes at once, each armed with a modern gun;
  * there they can be killed. Those close behind you when you leave come home with you. TaCZ's modern guns are only
  * found in the future (in no creative tab or JEI), but one you bring back is yours.</li>
@@ -187,20 +187,23 @@ public final class Future {
 		}
 	}
 
-	/** Is the city in place? If not, start it coming (quietly; {@code /future status} shows progress). */
+	/** Is the city in place? If not, start it coming; all anyone is told is that the future is forming. */
 	static boolean ready(ServerPlayer player) {
 		switch (LosPerrito.stage()) {
 			case READY -> {
 				return player.level().getServer().getLevel(FUTURE) != null;
 			}
-			case IDLE -> LosPerrito.begin(player.level().getServer());
-			case FAILED -> {
+			case IDLE, FAILED -> {
 				LosPerrito.begin(player.level().getServer());
-				player.sendSystemMessage(Component.translatable("message.jaymospowers.future.retrying").withStyle(ChatFormatting.GOLD));
+				forming(player);
 			}
-			case DOWNLOADING, UNPACKING -> { }
+			case DOWNLOADING, UNPACKING -> forming(player);
 		}
 		return false;
+	}
+
+	private static void forming(ServerPlayer player) {
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.future.forming").withStyle(ChatFormatting.GOLD));
 	}
 
 	private static List<ServerPlayer> companions(ServerPlayer player) {
@@ -282,6 +285,11 @@ public final class Future {
 
 	/** The city's billboards and posters are maps; their ids are moved up past the world's own (see {@link LosPerrito}). */
 	private static void onEntityLoad(Entity entity, ServerLevel level) {
+		if (level.dimension() == FUTURE && isSpider(entity)) {
+			// no spiders in the future: only the dead
+			entity.discard();
+			return;
+		}
 		if (level.dimension() != FUTURE || !(entity instanceof ItemFrame frame) || Boolean.TRUE.equals(frame.getAttached(FRAME_FIXED))) {
 			return;
 		}
@@ -293,6 +301,12 @@ public final class Future {
 			moved.set(DataComponents.MAP_ID, new MapId(id.id() + LosPerrito.mapOffset()));
 			frame.setItem(moved, false);
 		}
+	}
+
+	/** The game's spiders and cave spiders, and any mod's spider (Stormie's Spiders' kinds among them). */
+	static boolean isSpider(Entity entity) {
+		return entity instanceof net.minecraft.world.entity.monster.spider.Spider
+			|| net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).getPath().contains("spider");
 	}
 
 	// ---------------------------------------------------------------- testing
