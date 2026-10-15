@@ -188,7 +188,7 @@
   "item.jaymospowers.tool_binding_cast": "Tool Binding Cast",
   "item.jaymospowers.weapon_cast": "Weapon Cast",
   "tooltip.jaymospowers.tinkering.weapon_cast.makes": "Casts: %s",
-  "tooltip.jaymospowers.tinkering.weapon_cast.blank": "Pour gold over a weapon on a casting table to make its cast.",
+  "tooltip.jaymospowers.tinkering.weapon_cast.blank": "Pour gold over a weapon head on a casting table to make its cast.",
   "modifier.jaymospowers.haste": "Haste",
   "modifier.jaymospowers.haste.desc": "Mines faster (redstone block).",
   "modifier.jaymospowers.sharpness": "Sharpness",

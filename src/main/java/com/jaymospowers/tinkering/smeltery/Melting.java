@@ -3,6 +3,8 @@ package com.jaymospowers.tinkering.smeltery;
 import com.jaymospowers.tinkering.PartType;
 import com.jaymospowers.tinkering.Tinkering;
 import com.jaymospowers.tinkering.ToolPartItem;
+import com.jaymospowers.tinkering.WeaponPartItem;
+import com.jaymospowers.tinkering.WeaponParts;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -127,6 +129,10 @@ public final class Melting {
 		if (alloy != null) {
 			return new Result(alloy, Molten.INGOT);
 		}
+		if (stack.getItem() instanceof WeaponPartItem part) {
+			Molten molten = WeaponPartItem.metal(stack).molten;
+			return molten == null ? null : new Result(molten, part.kind.mb());
+		}
 		if (stack.getItem() instanceof ToolPartItem part) {
 			Molten molten = Molten.of(ToolPartItem.material(stack));
 			if (molten != null) {
@@ -155,8 +161,8 @@ public final class Melting {
 				case INGOT -> ingot(molten);
 				case NUGGET -> nugget(molten);
 				case WEAPON -> {
-					WeaponCasts.Kind kind = WeaponCasts.ofCast(cast);
-					yield kind == null ? null : WeaponCasts.result(kind, molten);
+					WeaponParts.Kind kind = WeaponParts.ofCast(cast);
+					yield kind == null ? null : WeaponParts.castResult(kind, molten);
 				}
 				default -> {
 					PartType part = castItem.shape.part;
@@ -165,12 +171,12 @@ public final class Melting {
 				}
 			};
 		}
-		// gold over an ingot, nugget, part or weapon makes a cast of its shape
+		// gold over an ingot, nugget, part or weapon head makes a cast of its shape
 		CastItem.Shape shape = CastItem.Shape.of(cast);
 		if (molten != Molten.GOLD || shape == null) {
 			return null;
 		}
-		return shape == CastItem.Shape.WEAPON ? WeaponCasts.cast(WeaponCasts.of(cast)) : new ItemStack(Tinkering.CASTS.get(shape));
+		return shape == CastItem.Shape.WEAPON ? WeaponParts.cast(((WeaponPartItem) cast.getItem()).kind) : new ItemStack(Tinkering.CASTS.get(shape));
 	}
 
 	/** How much liquid the table needs for this cast and liquid (0: it can't cast it). */
@@ -185,7 +191,7 @@ public final class Melting {
 		return switch (castItem.shape) {
 			case INGOT -> Molten.INGOT;
 			case NUGGET -> Molten.NUGGET;
-			case WEAPON -> WeaponCasts.ofCast(cast).mb();
+			case WEAPON -> WeaponParts.ofCast(cast).mb();
 			default -> castItem.shape.part.cost * Molten.INGOT;
 		};
 	}

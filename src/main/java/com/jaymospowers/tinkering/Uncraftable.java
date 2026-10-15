@@ -20,15 +20,15 @@ public final class Uncraftable {
 		"weaponmod:musketbayonet.diamond");
 
 	/**
-	 * (0.11.70) Andy: "all weapons should be forged". Balkon's iron, gold and copper weapons are cast in the smeltery
-	 * instead ({@code smeltery/WeaponCasts}); the musket bayonet stays a musket and a (cast) knife put together.
+	 * (0.11.70) Andy: "all weapons should be forged". Balkon's stone and metal weapons are put together at the Tool
+	 * Station from their heads instead ({@link WeaponParts}); the musket bayonet stays a musket and a knife put together.
 	 */
 	static final Set<String> FORGED = forged();
 
 	private static Set<String> forged() {
 		Set<String> ids = new java.util.HashSet<>();
 		for (String weapon : List.of("knife", "spear", "halberd", "battleaxe", "warhammer", "katana", "flail", "boomerang")) {
-			for (String metal : List.of("iron", "gold", "copper")) {
+			for (String metal : List.of("stone", "iron", "gold", "copper")) {
 				ids.add("weaponmod:" + weapon + "." + metal);
 				ids.add("weaponmod:" + weapon + "." + metal + ".a");
 			}

@@ -13,7 +13,6 @@ import com.jaymospowers.tinkering.smeltery.Molten;
 import com.jaymospowers.tinkering.smeltery.SmelteryBlock;
 import com.jaymospowers.tinkering.smeltery.SmelteryEntity;
 import com.jaymospowers.tinkering.smeltery.SmelteryMenu;
-import com.jaymospowers.tinkering.smeltery.WeaponCasts;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -70,8 +69,10 @@ public final class Tinkering {
 	public static DataComponentType<List<String>> TOOL_MATERIALS;
 	/** A part's material. */
 	public static DataComponentType<String> PART_MATERIAL;
-	/** (0.11.70) The kind of weapon a Weapon Cast casts ({@code smeltery/WeaponCasts}). */
+	/** (0.11.70) The weapon head a Weapon Cast casts ({@link WeaponParts}), by the head's id. */
 	public static DataComponentType<String> WEAPON_CAST;
+	/** (0.11.70) What a weapon head is made of ({@link WeaponParts.Metal}). */
+	public static DataComponentType<String> WEAPON_PART_METAL;
 	/** A tool's modifiers (id to level), and the xp it has earned toward its next level. */
 	public static DataComponentType<Map<String, Integer>> TOOL_MODIFIERS;
 	public static DataComponentType<Integer> TOOL_XP;
@@ -113,6 +114,8 @@ public final class Tinkering {
 			DataComponentType.<String>builder().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
 		WEAPON_CAST = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("weapon_cast"),
 			DataComponentType.<String>builder().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
+		WEAPON_PART_METAL = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("weapon_part_metal"),
+			DataComponentType.<String>builder().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
 		TOOL_MODIFIERS = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("tool_modifiers"),
 			DataComponentType.<Map<String, Integer>>builder().persistent(Codec.unboundedMap(Codec.STRING, Codec.INT))
 				.networkSynchronized(ByteBufCodecs.map(java.util.LinkedHashMap::new, ByteBufCodecs.STRING_UTF8, ByteBufCodecs.VAR_INT)).build());
@@ -124,6 +127,7 @@ public final class Tinkering {
 		for (PartType part : PartType.values()) {
 			PARTS.put(part, item(part.id, p -> new ToolPartItem(p, part), Function.identity()));
 		}
+		WeaponParts.register();
 		for (ToolType type : ToolType.values()) {
 			TOOLS.put(type, item(type.itemId(), p -> new TinkerToolItem(p, type), p -> {
 				p = p.durability(100);
@@ -170,10 +174,11 @@ public final class Tinkering {
 					output.accept(cast);
 				}
 			});
-			for (WeaponCasts.Kind kind : WeaponCasts.KINDS.values()) {
-				if (!WeaponCasts.results(kind).isEmpty()) {
-					output.accept(WeaponCasts.cast(kind));
-				}
+			for (WeaponParts.Kind kind : WeaponParts.loaded()) {
+				output.accept(WeaponParts.cast(kind));
+			}
+			for (WeaponParts.Kind kind : WeaponParts.loaded()) {
+				WeaponParts.heads(kind).forEach(output::accept);
 			}
 			for (ToolType type : ToolType.values()) {
 				for (TinkerMaterial head : TinkerMaterial.heads()) {
@@ -267,7 +272,7 @@ public final class Tinkering {
 		return block;
 	}
 
-	private static Item item(String id, Function<Item.Properties, Item> factory, Function<Item.Properties, Item.Properties> props) {
+	static Item item(String id, Function<Item.Properties, Item> factory, Function<Item.Properties, Item.Properties> props) {
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosPowers.id(id));
 		return Registry.register(BuiltInRegistries.ITEM, key, factory.apply(props.apply(new Item.Properties().setId(key))));
 	}

@@ -1,0 +1,41 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "cases": [
+      {
+        "when": "stone",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/weapon_part/battleaxe_head_stone"
+        }
+      },
+      {
+        "when": "iron",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/weapon_part/battleaxe_head_iron"
+        }
+      },
+      {
+        "when": "gold",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/weapon_part/battleaxe_head_gold"
+        }
+      },
+      {
+        "when": "copper",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/tinkering/weapon_part/battleaxe_head_copper"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "jaymospowers:item/tinkering/weapon_part/battleaxe_head_stone"
+    }
+  }
+}

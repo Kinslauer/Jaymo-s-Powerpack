@@ -1335,9 +1335,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.11.63 / Kingdoms 0.7.59:** `/kingdom skills` commands for ops (`kingdoms/MODLOG.md`).
 - **0.11.64 / Kingdoms 0.7.60:** Sorcerer fire bursts spread to nearby creatures; ice bursts freeze, hurt and chill
   (`kingdoms/MODLOG.md`).
-- **0.11.70:** Andy: "remove the metal knife recipes, all weapons should be forged". Iron, gold and copper weapons
-  (Armory's, Balkon's WeaponMod's knives/spears/halberds/battleaxes/warhammers/katanas/flails/boomerangs, vanilla
-  spears, kunai, throwing stars, harpoon, iron quarterstaff) lose their crafting recipes and are cast instead: pour
-  gold over any weapon of a kind on a casting table (a wooden or stone one will do) for a reusable Weapon Cast, then
-  pour iron, gold or copper over it (`tinkering/smeltery/WeaponCasts`). Round shields and the musket bayonet stay
-  craftable.
+- **0.11.70:** Andy: "remove the metal knife recipes, all weapons should be forged", the Tinkers way. Stone and metal
+  weapons (Armory's, Balkon's WeaponMod's knives/spears/halberds/battleaxes/warhammers/katanas/flails/boomerangs,
+  vanilla spears, kunai, throwing stars, harpoon, iron quarterstaff) lose their crafting recipes. Each has its own head
+  or blade (Claymore Blade, Knife Blade...): shape it from stone at the Part Builder (arrows page to the weapon heads),
+  pour gold over it on a casting table for its Weapon Cast, pour iron, gold or copper over the cast for a metal head,
+  then put the head, a Tool Handle and a Tool Binding together at the Tool Station (`tinkering/WeaponParts`; textures cut from
+  the weapons' sprites by `tools/weapon_parts_assets.py`). Kunai take just a binding, throwing star blanks nothing.
+  Wooden weapons, round shields and the musket bayonet stay craftable.

@@ -8,10 +8,11 @@ import com.jaymospowers.tinkering.Tinkering;
 import com.jaymospowers.tinkering.ToolPartItem;
 import com.jaymospowers.tinkering.ToolStats;
 import com.jaymospowers.tinkering.ToolType;
+import com.jaymospowers.tinkering.WeaponPartItem;
+import com.jaymospowers.tinkering.WeaponParts;
 import com.jaymospowers.tinkering.smeltery.CastItem;
 import com.jaymospowers.tinkering.smeltery.Melting;
 import com.jaymospowers.tinkering.smeltery.Molten;
-import com.jaymospowers.tinkering.smeltery.WeaponCasts;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -81,7 +82,7 @@ public final class TinkeringJei implements IModPlugin {
 			if (material != null) {
 				materials.computeIfAbsent(material, m -> new ArrayList<>()).add(stack);
 			}
-			if (!(item instanceof ToolPartItem)) {
+			if (!(item instanceof ToolPartItem) && !(item instanceof WeaponPartItem)) {
 				melted(stack, melting, melts);
 			}
 		}
@@ -92,9 +93,16 @@ public final class TinkeringJei implements IModPlugin {
 				}
 			}
 		}
+		for (WeaponParts.Kind kind : WeaponParts.loaded()) {
+			WeaponParts.castResults(kind).forEach(head -> melted(head, melting, melts));
+		}
 
-		registration.addRecipes(PART_BUILDER, partBuilder(materials));
-		registration.addRecipes(TOOL_STATION, toolStation());
+		List<SimpleCategory.Recipe> parts = partBuilder(materials);
+		weaponHeads(parts, materials);
+		registration.addRecipes(PART_BUILDER, parts);
+		List<SimpleCategory.Recipe> tools = toolStation();
+		weaponAssembly(tools);
+		registration.addRecipes(TOOL_STATION, tools);
 		registration.addRecipes(CASTING, casting());
 		registration.addRecipes(CASTING_BASIN, basin());
 		registration.addRecipes(MELTING, melting);
@@ -175,24 +183,66 @@ public final class TinkeringJei implements IModPlugin {
 		return recipes;
 	}
 
-	/** (0.11.70) Each kind of weapon: gold over any of them makes its cast, and metal over the cast makes the weapon. */
+	/** (0.11.70) Each weapon head: gold over any of them makes its cast, and metal over the cast makes the head. */
 	private static void weaponCasting(List<SimpleCategory.Recipe> recipes) {
-		for (WeaponCasts.Kind kind : WeaponCasts.KINDS.values()) {
-			if (WeaponCasts.results(kind).isEmpty()) {
-				continue;
-			}
-			ItemStack castStack = WeaponCasts.cast(kind);
+		for (WeaponParts.Kind kind : WeaponParts.loaded()) {
+			ItemStack castStack = WeaponParts.cast(kind);
 			for (Molten molten : Molten.values()) {
-				ItemStack result = WeaponCasts.result(kind, molten);
+				ItemStack result = WeaponParts.castResult(kind, molten);
 				if (result != null) {
 					recipes.add(new SimpleCategory.Recipe(List.of(List.of(castStack)), List.of(result),
 						List.of(pour(kind.mb(), molten), note("casting.kept"))));
 				}
 			}
-			List<ItemStack> members = WeaponCasts.members(kind);
-			if (!members.isEmpty()) {
-				recipes.add(new SimpleCategory.Recipe(List.of(members), List.of(castStack),
-					List.of(pour(Molten.INGOT, Molten.GOLD), note("casting.used_up"))));
+			recipes.add(new SimpleCategory.Recipe(List.of(WeaponParts.heads(kind)), List.of(castStack),
+				List.of(pour(Molten.INGOT, Molten.GOLD), note("casting.used_up"))));
+		}
+	}
+
+	/** (0.11.70) Stone weapon heads at the Part Builder. */
+	private static void weaponHeads(List<SimpleCategory.Recipe> recipes, Map<TinkerMaterial, List<ItemStack>> materials) {
+		List<ItemStack> stone = new ArrayList<>();
+		materials.forEach((material, items) -> {
+			if (PartBuilderMenu.shapesWeapons(material)) {
+				stone.addAll(items);
+			}
+		});
+		if (stone.isEmpty()) {
+			return;
+		}
+		for (WeaponParts.Kind kind : WeaponParts.loaded()) {
+			List<ItemStack> needed = stone.stream().map(s -> s.copyWithCount(PartBuilderMenu.itemsNeeded(kind.stoneCost(), s))).toList();
+			recipes.add(new SimpleCategory.Recipe(List.of(List.of(new ItemStack(Tinkering.PATTERN)), needed),
+				List.of(WeaponPartItem.of(kind, WeaponParts.Metal.STONE, 1)), List.of(note("part_builder.cost", kind.stoneCost()))));
+		}
+	}
+
+	/** (0.11.70) Each weapon from its head (every metal it comes in), a Tool Handle and a Tool Binding of any material. */
+	private static void weaponAssembly(List<SimpleCategory.Recipe> recipes) {
+		List<ItemStack> rods = new ArrayList<>(), bindings = new ArrayList<>();
+		for (TinkerMaterial material : TinkerMaterial.values()) {
+			if (material.makes(PartType.Kind.HANDLE)) {
+				rods.add(ToolPartItem.of(PartType.TOOL_HANDLE, material, 1));
+			}
+			if (material.makes(PartType.Kind.BINDING)) {
+				bindings.add(ToolPartItem.of(PartType.TOOL_BINDING, material, 1));
+			}
+		}
+		for (WeaponParts.Kind kind : WeaponParts.loaded()) {
+			for (ItemStack head : WeaponParts.heads(kind)) {
+				ItemStack weapon = WeaponPartItem.weapon(head);
+				if (weapon == null) {
+					continue;
+				}
+				List<List<ItemStack>> inputs = new ArrayList<>();
+				inputs.add(List.of(head));
+				if (kind.assembly() == WeaponParts.Assembly.ROD_BINDING) {
+					inputs.add(rods);
+				}
+				if (kind.assembly() != WeaponParts.Assembly.ALONE) {
+					inputs.add(bindings);
+				}
+				recipes.add(new SimpleCategory.Recipe(inputs, List.of(weapon), List.of()));
 			}
 		}
 	}
