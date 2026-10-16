@@ -32,6 +32,9 @@ final class ZFighterKingdoms {
 	private static Method F_ID, F_TYPE, F_NAME, F_SEAT, F_FALLEN, F_TREASURY;
 	private static Class<?> AGING, WORKER;
 	private static Method TRAINED;
+	private static Method STAT_VALUE;
+	private static Object[] STATS;
+	private static int STAT_MAX;
 	private static final long UNKNOWN = Long.MIN_VALUE, CHILD = Long.MIN_VALUE + 1;
 
 	static {
@@ -59,6 +62,15 @@ final class ZFighterKingdoms {
 				ALL = null;
 			}
 			try {
+				Class<?> stats = Class.forName("com.jaymoskingdoms.Stats");
+				Class<?> stat = Class.forName("com.jaymoskingdoms.Stats$Stat");
+				STAT_VALUE = stats.getMethod("value", net.minecraft.world.entity.player.Player.class, stat);
+				STATS = stat.getEnumConstants();
+				STAT_MAX = stats.getField("MAX").getInt(null);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				STAT_VALUE = null;
+			}
+			try {
 				TRAINED = Class.forName("com.jaymoskingdoms.ClassPerks").getMethod("trainedWith", ServerPlayer.class, net.minecraft.world.item.ItemStack.class);
 			} catch (ReflectiveOperationException | LinkageError e) {
 				TRAINED = null;
@@ -75,6 +87,22 @@ final class ZFighterKingdoms {
 			return (boolean)TRAINED.invoke(null, player, weapon);
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			return false;
+		}
+	}
+
+	/** How far his Kingdoms attributes are maxed, 0-1 (all six at their most: 1), or -1 without Kingdoms. */
+	static double attributes(ServerPlayer player) {
+		if (STAT_VALUE == null || STATS == null || STATS.length == 0 || STAT_MAX <= 0) {
+			return -1.0;
+		}
+		try {
+			int total = 0;
+			for (Object stat : STATS) {
+				total += (int)STAT_VALUE.invoke(null, player, stat);
+			}
+			return total / (double)(STATS.length * STAT_MAX);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return -1.0;
 		}
 	}
 

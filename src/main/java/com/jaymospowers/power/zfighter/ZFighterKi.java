@@ -269,6 +269,22 @@ public final class ZFighterKi {
 	private static int nextOrb = 1;
 	private static final List<Beam> BEAMS = new ArrayList<>();
 
+	// ---- the Spirit Bomb's burst: a star going off ----
+	/** Blue motes flung out in every direction at once, and how fast (scaled by the bomb's size). */
+	static final int NOVA_MOTES = 500;
+	static final double NOVA_SPEED = 1.0;
+	/** Cracks of energy running out from the middle: how many, for how many ticks, and how far each tick (a share of the size). */
+	static final int NOVA_CRACKS = 22;
+	static final int NOVA_TICKS = 14;
+	static final double NOVA_STEP = 0.32;
+	static final int NOVA_BLUE = 0x5EC8FF, NOVA_PALE = 0xCFF4FF;
+
+	/** A star going off: cracks of energy (each a heading and where its jagged tip is now) running out from {@code at}. */
+	private record Nova(ServerLevel level, Vec3 at, double size, Vec3[] headings, Vec3[] tips, int[] age) {
+	}
+
+	private static final List<Nova> NOVAS = new ArrayList<>();
+
 	private ZFighterKi() {
 	}
 
@@ -318,6 +334,10 @@ public final class ZFighterKi {
 			}
 		}
 		sendOrbs();
+		NOVAS.removeIf(ZFighterKi::tickNova);
+		if (server.getTickCount() % 20 == 0) {
+			ZFighterTechniques.sweepLenders(server);
+		}
 		for (Iterator<Beam> it = BEAMS.iterator(); it.hasNext(); ) {
 			Beam beam = it.next();
 			drawBeam(beam);
@@ -656,7 +676,63 @@ public final class ZFighterKi {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, spirit ? 4.0F : 1.5F, spirit ? 0.5F : 0.9F);
 		if (spirit) {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 3.0F, 0.6F);
+			nova(level, at, Math.max(2.0, bolt.size));
 		}
+	}
+
+	/** The Spirit Bomb bursts like a star: a sea of blue motes flung out, and cracks of energy racing away from it. */
+	private static void nova(ServerLevel level, Vec3 at, double size) {
+		RandomSource random = level.getRandom();
+		DustParticleOptions blue = new DustParticleOptions(NOVA_BLUE, 4.0F);
+		DustParticleOptions pale = new DustParticleOptions(NOVA_PALE, 3.0F);
+		for (int i = 0; i < NOVA_MOTES; i++) {
+			Vec3 dir = new Vec3(random.nextGaussian(), random.nextGaussian(), random.nextGaussian()).normalize();
+			double speed = NOVA_SPEED * size * (0.4 + random.nextDouble() * 0.6);
+			Vec3 from = at.add(dir.scale(size * 0.2));
+			level.sendParticles(random.nextInt(3) == 0 ? pale : blue, true, false, from.x, from.y, from.z, 0, dir.x, dir.y, dir.z, speed);
+			if (i % 5 == 0) {
+				level.sendParticles(ParticleTypes.END_ROD, true, false, from.x, from.y, from.z, 0, dir.x, dir.y, dir.z, Math.min(1.2, speed * 0.06));
+			}
+		}
+		level.sendParticles(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH, 0xFF000000 | NOVA_PALE), true, false, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+		Vec3[] headings = new Vec3[NOVA_CRACKS];
+		Vec3[] tips = new Vec3[NOVA_CRACKS];
+		for (int i = 0; i < NOVA_CRACKS; i++) {
+			// mostly outward and upward, as from a blast in the ground
+			headings[i] = new Vec3(random.nextGaussian(), Math.abs(random.nextGaussian()) * 0.7, random.nextGaussian()).normalize();
+			tips[i] = at;
+		}
+		NOVAS.add(new Nova(level, at, size, headings, tips, new int[] {0}));
+	}
+
+	/** One tick of the cracks racing out: each runs on a jagged step, drawn as a line of pale-blue light. Done: true. */
+	private static boolean tickNova(Nova nova) {
+		ServerLevel level = nova.level();
+		RandomSource random = level.getRandom();
+		int age = ++nova.age()[0];
+		float width = 2.2F * (1.0F - age / (float)(NOVA_TICKS + 2));
+		DustParticleOptions crack = new DustParticleOptions(age % 2 == 0 ? NOVA_PALE : NOVA_BLUE, Math.max(0.6F, width));
+		double step = nova.size() * NOVA_STEP;
+		for (int i = 0; i < nova.tips().length; i++) {
+			Vec3 from = nova.tips()[i];
+			Vec3 jag = new Vec3(random.nextGaussian(), random.nextGaussian(), random.nextGaussian()).scale(0.35);
+			Vec3 to = from.add(nova.headings()[i].add(jag).normalize().scale(step));
+			int dots = Math.max(3, (int)(step * 3.0));
+			for (int k = 0; k < dots; k++) {
+				Vec3 p = from.lerp(to, k / (double)dots);
+				level.sendParticles(crack, true, false, p.x, p.y, p.z, 1, 0.0, 0.0, 0.0, 0.0);
+			}
+			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, to.x, to.y, to.z, 2, 0.1, 0.1, 0.1, 0.15);
+			if (random.nextInt(6) == 0) {
+				// a crack forks
+				nova.headings()[i] = nova.headings()[i].add(jag.scale(1.5)).normalize();
+			}
+			nova.tips()[i] = to;
+		}
+		if (age % 4 == 1) {
+			level.playSound(null, nova.at().x, nova.at().y, nova.at().z, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 2.5F, 0.7F + age * 0.05F);
+		}
+		return age >= NOVA_TICKS;
 	}
 
 	/** The Spirit Bomb grinding into the ground: slow, the earth shaking and spraying up round it, then the blast. */
