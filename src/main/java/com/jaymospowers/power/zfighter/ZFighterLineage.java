@@ -505,6 +505,7 @@ public final class ZFighterLineage {
 		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(foot, foot).inflate(reach, 2.0, reach),
 			e -> e != player && e.isAlive() && (e instanceof Enemy || e instanceof net.minecraft.world.entity.Mob mob && mob.getTarget() == player))) {
 			if (victim.hurtServer(level, level.damageSources().playerAttack(player), APE_FOOT_DAMAGE)) {
+				com.jaymospowers.core.BladeBlood.crushed(victim);
 				Vec3 away = victim.position().subtract(foot).multiply(1.0, 0.0, 1.0).normalize();
 				victim.push(away.x * 0.6, 0.5, away.z * 0.6);
 			}
@@ -519,6 +520,8 @@ public final class ZFighterLineage {
 		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, feet, e -> e != player && e.isAlive()
 			&& (e instanceof Enemy || e instanceof net.minecraft.world.entity.Mob mob && mob.getTarget() == player))) {
 			if (victim.hurtServer(level, level.damageSources().playerAttack(player), APE_STOMP)) {
+				// trodden flat: it bursts
+				com.jaymospowers.core.BladeBlood.crushed(victim);
 				hit = true;
 				victim.setDeltaMovement(victim.getDeltaMovement().multiply(0.3, 0.0, 0.3).add(0.0, -0.4, 0.0));
 				level.sendParticles(ParticleTypes.EXPLOSION, victim.getX(), victim.getY() + 0.3, victim.getZ(), 1, 0.0, 0.0, 0.0, 0.0);

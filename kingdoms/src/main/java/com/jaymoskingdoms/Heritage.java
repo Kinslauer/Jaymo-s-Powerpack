@@ -48,7 +48,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Sylvan:</b> lands soft, sneaks unseen; hits lighter.</li>
  * <li><b>Verdant:</b> green skin and antennae ({@link Verdants}), hunger drains slow in the sun; burns longer.</li>
  * <li><b>Emberborn:</b> (0.7.75) fire, lava and burning never hurt them, and they thrive in the heat; the cold (cold lands,
- * snow and freezing) saps their strength and speed and starves them.</li>
+ * snow and freezing) saps their strength and speed and starves them. Embers glow under the skin of
+ * their hands and in their eyes, and small flames rise off their hands (0.7.77, client EmberLook).</li>
  * <li><b>Frostborn:</b> never freezes, thrives in the cold; starves in the heat.</li>
  * <li><b>Nightborn:</b> stronger and quicker in the dark; weaker under the open sun.</li>
  * <li><b>Warrior-born:</b> starts far weaker than anyone (lighter blows, fewer hearts), and grows out of it as their
@@ -171,9 +172,12 @@ public final class Heritage {
 		}
 	}
 
-	/** Each player's heritage (its key). Saved, kept through death, synced to its own player (the screens). */
+	/**
+	 * Each player's heritage (its key). Saved, kept through death, synced to everyone (its own player's screens, and since
+	 * 0.7.75 everyone's view of an Emberborn's glow, client EmberLook).
+	 */
 	public static final AttachmentType<String> HERITAGE = AttachmentRegistry.create(JaymosKingdoms.id("heritage"),
-		builder -> builder.persistent(Codec.STRING).copyOnDeath().syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.targetOnly()));
+		builder -> builder.persistent(Codec.STRING).copyOnDeath().syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all()));
 
 	/** Server → player: pick a heritage (the screen opens; {@code forced}: it can't be shut without picking). */
 	public record Open(boolean forced) implements CustomPacketPayload {

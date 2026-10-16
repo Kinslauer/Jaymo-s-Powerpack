@@ -2167,6 +2167,10 @@ public final class GravityPower implements Power {
 		boolean byWeight = source.is(DamageTypeTags.IS_FALL) || crushing
 			|| source.is(net.minecraft.world.damagesource.DamageTypes.INDIRECT_MAGIC) && source.getEntity() != null
 				&& source.getEntity().getUUID().equals(touch.player());
+		if (byWeight && !entity.getUUID().equals(touch.player())) {
+			// crushed to death under the weight (a meteor's too): it bursts (Andy)
+			com.jaymospowers.core.BladeBlood.crushed(entity);
+		}
 		ServerPlayer player = level.getServer().getPlayerList().getPlayer(touch.player());
 		if (!byWeight || player == null || !Powers.has(player, INSTANCE) || entity == player) {
 			return;

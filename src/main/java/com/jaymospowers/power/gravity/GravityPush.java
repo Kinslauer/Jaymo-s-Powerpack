@@ -120,6 +120,8 @@ final class GravityPush {
 				// slammed into something that won't give
 				float damage = IMPACT_BASE + IMPACT_PER_SPEED * (float)push.speed;
 				target.hurtServer(level, pusher != null ? level.damageSources().mobAttack(pusher) : level.damageSources().flyIntoWall(), damage);
+				// crushed against it: it bursts
+				com.jaymospowers.core.BladeBlood.crushed(target);
 				com.jaymospowers.core.Debris.smash(level, next.getCenter(), push.speed, pusher);
 				release(target);
 				it.remove();

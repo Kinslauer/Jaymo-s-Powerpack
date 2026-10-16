@@ -1,6 +1,7 @@
 package com.jaymospowers.client.power.web;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.power.web.WebMorph;
 import com.jaymospowers.power.web.WebSymbiote;
 import com.jaymospowers.power.web.WebTendrilCombos;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -31,6 +32,12 @@ import net.minecraft.util.Mth;
  * swinging held debris it's slower and reaches much further. In first person (your own body drawn by First-person
  * Model, or {@link #submitFirstPerson} next to the hands without it) they reach forward over the shoulders into view.
  * On the move they stay supple, streaming back and rippling; only the walkers planted on a wall are rigid limbs.
+ *
+ * <p>The weapon on left click ({@link WebMorph}) forms here while Living Armor is up: the striking side's shoulder
+ * tendril (braided with the one inside it, for the mace and the hammer-fist) rears back and coils while the symbiote
+ * gathers, its tip swelling into the weapon head ({@link #heads}, the same heads as the arm's), then the strike lashes
+ * through it: a wind-up of its own for each weapon, the lash rolling out root first with the tip trailing, a ripple
+ * back up it at the impact, and back to rest ({@code TendrilModel.morph}).
  */
 final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 	private static final Identifier TEXTURE = JaymosPowers.id("textures/entity/web_symbiote_tendril.png");
@@ -59,8 +66,8 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 	};
 	/** The first of the spares (see {@link #ROOTS}): hidden unless the tendrils are walking you. */
 	static final int FIRST_SPARE = 8;
-	/** Which ones take turns stabbing in a barrage: those free to, walking or not. */
-	private static final int[] BARRAGE_FREE = {2, 3, 4, 5, 6, 7}, BARRAGE_FREE_WALKING = {0, 1, 2, 3, 8, 9, 10, 11};
+	/** The barrage's stabbers (Andy): the outermost pair, left and right by turns; walking, the outer spares. */
+	private static final int[] BARRAGE_FREE = {4, 5}, BARRAGE_FREE_WALKING = {8, 9};
 	/** Roots higher than this (model y) are the upper ones: the strikers, and the ones seen in first person. */
 	private static final float UPPER_ROOT_Y = 6.0F;
 	/** A whole tendril's length at its rest size (model pixels): the segments overlap a little. */
@@ -125,6 +132,30 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 	/** Without First-person Model: where they root (camera space: right, up, back, in blocks) and how big they're drawn. */
 	private static final float FP_ROOT_UP = -0.28F, FP_ROOT_BACK = 0.05F, FP_SCALE = 0.6F;
 
+	// ---- the weapon tendril (WebMorph with Living Armor up) ----
+	/**
+	 * Gathering, it rears into a coil: out this far to its side (yaw), raised this high (radians), each segment curled
+	 * over this much, drawn in to this share of its length, shuddering this much until the head has formed.
+	 */
+	private static final float MORPH_READY_YAW = 1.0F, MORPH_READY_PITCH = 1.2F, MORPH_READY_CURL = 0.32F, MORPH_READY_LENGTH = 0.75F;
+	private static final float MORPH_SHUDDER = 0.07F;
+	/** It's this much thicker than the others while it carries the weapon; the head is drawn this big; the tip swells this much under it. */
+	private static final float MORPH_THICK = 1.2F, MORPH_HEAD_SCALE = 1.1F, MORPH_TIP_SWELL = 0.6F;
+	/** The lash rolls out root first: the tip trails behind by this much curl (a whip-blade's far more). */
+	private static final float MORPH_LAG = 0.35F, MORPH_WHIP_LAG = 0.9F;
+	/** At the impact a ripple runs back up it (curl), dying away over this many ticks. */
+	private static final float MORPH_RIPPLE = 0.3F, MORPH_RIPPLE_TICKS = 5.0F;
+	/** It eases back to rest over the strike's last ticks; the hook claw reels in over these after it bites. */
+	private static final float MORPH_RETURN_TICKS = 5.0F, MORPH_REEL_TICKS = 4.0F;
+	/** The spear's wind-up: coiled like a spring (alternate segments bent this far each way), drawn in short. */
+	private static final float MORPH_SPRING = 0.45F;
+	/** Wind-ups: the hammer-fist dropped this low (radians below level); the whip-blade thrown this far back over the shoulder. */
+	private static final float MORPH_HAMMER_LOW = 1.0F, MORPH_WHIP_BACK = 2.6F;
+	/** Braided (mace, hammer-fist): the two twist round each other this much (radians a segment). */
+	private static final float MORPH_BRAID = 0.16F;
+	/** It never stretches further than this (blocks, model space). */
+	private static final float MORPH_MAX_REACH = 10.5F;
+
 	private final TendrilModel model;
 	private static TendrilModel firstPersonModel;
 
@@ -165,7 +196,39 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		if (tendrils.combo() == WebTendrilCombos.BARRAGE) {
 			blades(this.model, state, poseStack, collector, state.lightCoords);
 		}
+		heads(this.model, state, poseStack, collector, state.lightCoords);
 		poseStack.popPose();
+	}
+
+	/**
+	 * The weapon on a tendril ({@link WebMorph}): the head at the weapon tendril's tip (the pose stack in body space),
+	 * growing as it gathers, melting back at the end. The same heads as the weapon arm's ({@link WebMorphLayer#weapon}).
+	 */
+	private static void heads(TendrilModel model, AvatarRenderState state, PoseStack poseStack, SubmitNodeCollector collector, int light) {
+		WebMorphLayer.Strike strike = state.getData(WebMorphLayer.KEY);
+		WebMorphLayer.Gather gather = state.getData(WebMorphLayer.GATHER);
+		if (!(strike != null && strike.tendril() || strike == null && gather != null && gather.tendril())) {
+			return;
+		}
+		model.setupAnim(state);
+		int t = model.weaponTendril;
+		if (t < 0 || model.weaponGrow < 0.05F || !model.parts[t][0].visible) {
+			return;
+		}
+		PoseStack chain = new PoseStack();
+		model.root().translateAndRotate(chain);
+		for (int k = 0; k < SEGMENTS; k++) {
+			model.parts[t][k].translateAndRotate(chain);
+		}
+		org.joml.Matrix4f m = chain.last().pose();
+		org.joml.Vector3f end = m.transformPosition(new org.joml.Vector3f(0.0F, 0.0F, (SEGMENT_LENGTH - 0.6F) / 16.0F));
+		org.joml.Vector3f dir = m.transformDirection(new org.joml.Vector3f(0.0F, 0.0F, 1.0F)).normalize();
+		net.minecraft.world.phys.Vec3 at = new net.minecraft.world.phys.Vec3(end.x, end.y, end.z).scale(16.0);
+		net.minecraft.world.phys.Vec3 way = new net.minecraft.world.phys.Vec3(dir.x, dir.y, dir.z);
+		WebMorphLayer.Strike s = model.weaponStrike;
+		float grow = model.weaponGrow * MORPH_HEAD_SCALE;
+		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebTubes.TEXTURE),
+			(pose, buffer) -> WebMorphLayer.weapon(buffer, pose, s, at, way, grow, light));
 	}
 
 	/**
@@ -267,11 +330,17 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 			yaw >= 0.0F ? -1.0F : 1.0F, 0.0F, tendrils.held(), tendrils.armor(), tendrils.wall(), wallYaw, wallPitch, tendrils.heavy(),
 			tendrils.variant(), true, tendrils.combo(), tendrils.rear(), tendrils.hit(), tendrils.feral(), tendrils.roar(), tendrils.tethers(), null));
 		own.ageInTicks = avatar.ageInTicks;
+		// the weapon on a tendril, against the view too
+		WebMorphLayer.Strike strike = avatar.getData(WebMorphLayer.KEY);
+		own.setData(WebMorphLayer.KEY, strike == null ? null : new WebMorphLayer.Strike(strike.weapon(), strike.side(), strike.age(),
+			strike.aimYaw() - avatar.yRot * Mth.DEG_TO_RAD, strike.aimPitch() - avatar.xRot * Mth.DEG_TO_RAD, strike.reach(), strike.tendril()));
+		own.setData(WebMorphLayer.GATHER, avatar.getData(WebMorphLayer.GATHER));
 		poseStack.pushPose();
 		poseStack.translate(0.0F, FP_ROOT_UP, FP_ROOT_BACK);
 		// camera space to model space: model -Z is ahead, -Y up, +X the wearer's left
 		poseStack.scale(-FP_SCALE, -FP_SCALE, FP_SCALE);
 		collector.submitModel(firstPersonModel, own, poseStack, RenderTypes.entityCutout(TEXTURE), avatar.lightCoords, OverlayTexture.NO_OVERLAY, 0);
+		heads(firstPersonModel, own, poseStack, collector, avatar.lightCoords);
 		poseStack.popPose();
 	}
 
@@ -387,6 +456,10 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		private final ModelPart[][] parts = new ModelPart[ROOTS.length][SEGMENTS];
 		/** Which ones are stabbing in a barrage (they wear blade tips), as last posed. */
 		private final boolean[] stabbing = new boolean[ROOTS.length];
+		/** The weapon on a tendril, as last posed: the one wearing the head (-1 none), its strike, and how grown the head is. */
+		private int weaponTendril = -1;
+		private WebMorphLayer.Strike weaponStrike;
+		private float weaponGrow;
 
 		TendrilModel(ModelPart root) {
 			super(root, RenderTypes::entityCutout);
@@ -642,6 +715,198 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 					segment.yScale = pulse;
 				}
 			}
+			this.morph(state, tendrils, thick, length, fp);
+		}
+
+		/**
+		 * The weapon on a tendril ({@link WebMorph} with Living Armor up), over whatever pose it had: gathering, the
+		 * striking side's shoulder tendril rears into a coil, out to its side and up, its tip swelling; striking, it winds up
+		 * its own way for the weapon (the mace reared over the head, the hammer-fist dropped low for an uppercut, the scythe
+		 * drawn out wide, the spear coiled short like a spring, the whip-blade thrown far back over the shoulder, the hook
+		 * claw raised), lashes out at the target root first with the tip trailing, takes a ripple back up it at the impact
+		 * (the hook claw reeling in), and eases back to rest. The mace and the hammer-fist are two tendrils braided.
+		 */
+		private void morph(AvatarRenderState state, WebSymbioteClient.Tendrils tendrils, float thick, float length, boolean fp) {
+			this.weaponTendril = -1;
+			WebMorphLayer.Strike s = state.getData(WebMorphLayer.KEY);
+			WebMorphLayer.Gather g = state.getData(WebMorphLayer.GATHER);
+			if (s != null && !s.tendril()) {
+				s = null;
+			}
+			if (s != null) {
+				g = null;
+			} else if (g != null && !g.tendril()) {
+				g = null;
+			}
+			if (s == null && g == null) {
+				return;
+			}
+			int side = s != null ? s.side() : g.side();
+			int weapon = s != null ? s.weapon() : g.weapon();
+			// model +X is the wearer's left: tendril 0 roots on the right shoulder, 1 the left; 2 and 3 just inside them
+			int primary = side > 0 ? 0 : 1;
+			int partner = side > 0 ? 2 : 3;
+			if (!this.parts[primary][0].visible) {
+				// it's holding something
+				return;
+			}
+			boolean braid = (weapon == WebMorph.MACE || weapon == WebMorph.HAMMER) && tendrils.tethers() == null && this.parts[partner][0].visible;
+			float stretchFp = fp ? 1.0F + STRETCH_FIRST_PERSON : 1.0F;
+			// the coil it gathers into
+			float coil = g != null ? smooth(g.age() / WebMorph.FORMED_TICKS) : 1.0F;
+			float shudder = g != null && g.age() < WebMorph.FORMED_TICKS ? Mth.sin(g.age() * 2.7F) * MORPH_SHUDDER : 0.0F;
+			float yaw = side * MORPH_READY_YAW * coil, pitch = MORPH_READY_PITCH * coil + shudder;
+			float curl = MORPH_READY_CURL * coil, curlY = 0.0F;
+			float len = length * Mth.lerp(coil, 1.0F, MORPH_READY_LENGTH);
+			float on, lag = 0.0F, dPitch = 0.0F, dYaw = 0.0F, ripple = 0.0F, rippleAt = 0.0F, spring = 0.0F, swell;
+			if (s == null) {
+				on = smooth(g.age() / 4.0F);
+				this.weaponGrow = WebMorphLayer.grown(g);
+				this.weaponStrike = new WebMorphLayer.Strike(weapon, side, 0.0F, 0.0F, 0.0F, 0.0F, true);
+				swell = Math.min(1.0F, this.weaponGrow);
+			} else {
+				float age = s.age();
+				float ay = s.aimYaw(), ap = -s.aimPitch();
+				float reach = Mth.clamp(s.reach(), 0.5F, MORPH_MAX_REACH) * 16.0F / CHAIN;
+				// wound up (wy, wp, wc, wcy, wl), and at the impact (iy, ip, ic, icy, il)
+				float wy = ay, wp = ap, wc = 0.0F, wcy = 0.0F, wl = length;
+				float iy = ay, ip = ap, ic = 0.0F, icy = 0.0F, il = reach;
+				switch (weapon) {
+					case WebMorph.MACE -> {
+						wp = SLAM_HIGH;
+						wc = CURL_REARED;
+						ip = ap - SLAM_DIP;
+						ic = CURL_STRIKE;
+					}
+					case WebMorph.HAMMER -> {
+						wy = ay + side * 0.3F;
+						wp = -MORPH_HAMMER_LOW;
+						wc = -0.25F;
+						wl = length * 0.9F;
+						ip = ap + 0.1F;
+						ic = 0.06F;
+					}
+					case WebMorph.SCYTHE -> {
+						wy = ay + side * SWIPE_WIDE;
+						wp = ap + SWIPE_LIFT;
+						wc = CURL_STRIKE * 0.5F;
+						wcy = side * CURL_SWIPE;
+						iy = ay - side * 0.3F;
+						ip = ap + SWIPE_LIFT * 0.5F;
+						ic = CURL_STRIKE * 0.5F;
+						icy = side * CURL_SWIPE * 0.5F;
+					}
+					case WebMorph.SPEAR -> {
+						wy = ay + side * 0.3F;
+						wp = ap + 0.35F;
+						wc = 0.0F;
+						wl = length * 0.55F;
+						il = reach * 1.05F;
+					}
+					case WebMorph.WHIP -> {
+						wy = ay + side * 0.35F;
+						wp = MORPH_WHIP_BACK;
+						wc = 0.3F;
+						wl = length * 1.1F;
+						ip = ap - 0.05F;
+						ic = -0.04F;
+					}
+					default -> {
+						// the hook claw
+						wy = ay + side * 0.25F;
+						wp = ap + 0.6F;
+						wc = 0.25F;
+						wl = length * 0.8F;
+					}
+				}
+				if (age < WebMorph.FORM) {
+					// from the coil into the wind-up
+					float p = smooth(age / WebMorph.FORM);
+					yaw = Mth.lerp(p, yaw, wy);
+					pitch = Mth.lerp(p, pitch, wp);
+					curl = Mth.lerp(p, curl, wc);
+					curlY = Mth.lerp(p, curlY, wcy);
+					len = Mth.lerp(p, len, wl);
+					spring = weapon == WebMorph.SPEAR ? p : 0.0F;
+				} else if (age < WebMorph.HIT) {
+					// the lash, faster and faster, landing at the hit
+					float k = (age - WebMorph.FORM) / (WebMorph.HIT - WebMorph.FORM);
+					float sw = k * k;
+					yaw = Mth.lerp(sw, wy, iy);
+					pitch = Mth.lerp(sw, wp, ip);
+					curl = Mth.lerp(sw, wc, ic);
+					curlY = Mth.lerp(sw, wcy, icy);
+					len = Mth.lerp(sw, wl, il);
+					lag = 1.0F - sw;
+					dPitch = Math.signum(ip - wp);
+					dYaw = Math.signum(iy - wy);
+					spring = weapon == WebMorph.SPEAR ? 1.0F - k : 0.0F;
+				} else {
+					// the impact, and on through it a little
+					float after = age - WebMorph.HIT;
+					float follow = Math.min(1.0F, after / 3.0F);
+					yaw = iy;
+					pitch = ip;
+					curl = ic;
+					curlY = icy;
+					len = il;
+					switch (weapon) {
+						case WebMorph.MACE -> pitch -= 0.2F * follow;
+						case WebMorph.WHIP -> pitch -= 0.25F * follow;
+						case WebMorph.HAMMER -> pitch += 0.35F * follow;
+						case WebMorph.SCYTHE -> yaw -= side * 0.5F * follow;
+						case WebMorph.HOOK -> {
+							// it bites and reels in
+							float reel = smooth(after / MORPH_REEL_TICKS);
+							len = Mth.lerp(reel, il, length * MORPH_READY_LENGTH);
+							curl = Mth.lerp(reel, ic, 0.2F);
+						}
+						default -> {
+						}
+					}
+					ripple = 1.0F - smooth(after / MORPH_RIPPLE_TICKS);
+					rippleAt = after;
+				}
+				on = 1.0F - smooth((age - (WebMorph.TICKS - MORPH_RETURN_TICKS)) / MORPH_RETURN_TICKS);
+				this.weaponGrow = WebMorphLayer.formed(age);
+				this.weaponStrike = s;
+				swell = this.weaponGrow;
+			}
+			float trail = lag * (weapon == WebMorph.WHIP ? MORPH_WHIP_LAG : MORPH_LAG);
+			for (int n = 0; n < (braid ? 2 : 1); n++) {
+				int t = n == 0 ? primary : partner;
+				float[] r = ROOTS[t];
+				ModelPart base = this.parts[t][0];
+				base.visible = true;
+				base.yRot = Mth.lerp(on, base.yRot, aimYaw(yaw, r[3]));
+				base.xRot = Mth.lerp(on, base.xRot, pitch);
+				float th = thick * MORPH_THICK * (braid ? 0.8F : 1.0F);
+				base.xScale = Mth.lerp(on, base.xScale, th);
+				base.yScale = Mth.lerp(on, base.yScale, th);
+				base.zScale = Mth.lerp(on, base.zScale, len * stretchFp);
+				float twist = n == 0 ? 0.0F : Mth.PI;
+				for (int k = 1; k < SEGMENTS; k++) {
+					ModelPart segment = this.parts[t][k];
+					float u = k / (float)(SEGMENTS - 1);
+					// the tip trails behind the way it's going, a ripple runs back up it at the impact, a spear coiled like a spring
+					float cx = curl - dPitch * trail * u + ripple * MORPH_RIPPLE * Mth.sin(k * 1.1F - rippleAt * 2.2F)
+						+ spring * MORPH_SPRING * (k % 2 == 0 ? 1.0F : -1.0F);
+					float cy = curlY - dYaw * trail * u * 0.8F;
+					if (braid) {
+						// the two wound round each other
+						cx += MORPH_BRAID * 0.5F * Mth.cos(k * 1.7F + twist);
+						cy += MORPH_BRAID * Mth.sin(k * 1.7F + twist);
+					}
+					segment.xRot = Mth.lerp(on, segment.xRot, cx);
+					segment.yRot = Mth.lerp(on, segment.yRot, cy);
+					// the tip swells into the head
+					float size = k == SEGMENTS - 1 ? 1.0F + MORPH_TIP_SWELL * swell : 1.0F;
+					segment.xScale = Mth.lerp(on, segment.xScale, size);
+					segment.yScale = Mth.lerp(on, segment.yScale, size);
+				}
+			}
+			this.weaponTendril = primary;
 		}
 	}
 }
+

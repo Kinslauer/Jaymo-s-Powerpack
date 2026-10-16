@@ -106,9 +106,15 @@ public final class WebPowerClient implements PowerClient {
 				morphHeld = false;
 			} else if (!minecraft.options.keyAttack.isDown()) {
 				morphHeld = false;
-				net.minecraft.world.entity.LivingEntity aimed = com.jaymospowers.power.web.WebMorph.aim(player);
+				// the whip-blade and the hook claw reach further (the weapon forming is synced, so it's known here)
+				net.minecraft.world.entity.LivingEntity aimed = com.jaymospowers.power.web.WebMorph.aim(player,
+					com.jaymospowers.power.web.WebMorph.reachNow(player));
+				com.jaymospowers.power.web.WebMorph.Charge charge = player.getAttached(com.jaymospowers.power.web.WebMorph.CHARGE);
 				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebMorph.Strike(aimed == null ? -1 : aimed.getId()));
-				player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
+				if (charge == null || !charge.tendril()) {
+					// on a tendril, the arm stays put: the tendril does the striking
+					player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
+				}
 			}
 		});
 		// a barrage lasts while the attack key is held: let go, and it stops

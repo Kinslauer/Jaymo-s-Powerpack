@@ -50,6 +50,8 @@ public final class XenoformFlightPose {
 	/** Pyre's foot flames: particles per foot a tick, and their push out behind. */
 	static final int FOOT_FLAMES = 2;
 	static final double FOOT_PUSH = 0.12;
+	/** Pyre ablaze: one flame in this many ticks rises off its body (not in water or rain, nor round your own camera). */
+	static final int BODY_FLAME_EVERY = 3;
 
 	/** Pyre's jet arms: swept back this far (radians) and out from the body this far. */
 	static final float JET_ARM_BACK = 0.35F, JET_ARM_OUT = 0.3F;
@@ -74,7 +76,7 @@ public final class XenoformFlightPose {
 		return Math.sqrt(dx * dx + dy * dy + dz * dz);
 	}
 
-	/** Every client tick: the eased amounts for everyone in view, and Pyre's foot flames. */
+	/** Every client tick: the eased amounts for everyone in view, Pyre's foot flames, and the flames off its body. */
 	static void tick(Minecraft minecraft) {
 		ClientLevel level = minecraft.level;
 		if (level == null || minecraft.isPaused()) {
@@ -84,6 +86,11 @@ public final class XenoformFlightPose {
 			return;
 		}
 		for (AbstractClientPlayer player : level.players()) {
+			if ("pyre".equals(player.getAttached(XenoformState.FORM)) && !player.isInvisible() && !player.isInWaterOrRain()
+				&& !(player == minecraft.getCameraEntity() && minecraft.options.getCameraType().isFirstPerson())
+				&& player.getRandom().nextInt(BODY_FLAME_EVERY) == 0) {
+				bodyFlame(level, player);
+			}
 			int kind = XenoformState.flight(player);
 			float[] a = AMOUNTS.get(player.getId());
 			if (a == null) {
@@ -121,6 +128,15 @@ public final class XenoformFlightPose {
 	public static boolean handsAsJets(AvatarRenderState state) {
 		Flight flight = state.getData(KEY);
 		return flight != null && flight.jet() > 0.001F;
+	}
+
+	/** A flame off a random spot on Pyre's body, drifting up. */
+	private static void bodyFlame(ClientLevel level, Player player) {
+		RandomSource random = player.getRandom();
+		double width = player.getBbWidth() * 0.45;
+		level.addParticle(random.nextInt(3) == 0 ? ParticleTypes.FLAME : ParticleTypes.SMALL_FLAME,
+			player.getX() + (random.nextDouble() - 0.5) * 2.0 * width, player.getY() + random.nextDouble() * player.getBbHeight(),
+			player.getZ() + (random.nextDouble() - 0.5) * 2.0 * width, 0.0, 0.02 + random.nextDouble() * 0.03, 0.0);
 	}
 
 	/** Open flames pouring from both feet and both hands, out behind along the flight (or straight down while upright). */

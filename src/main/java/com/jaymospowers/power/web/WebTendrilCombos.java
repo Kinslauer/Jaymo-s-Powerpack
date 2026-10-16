@@ -516,7 +516,9 @@ public final class WebTendrilCombos {
 		}
 		float ramp = Math.min(1.0F, t / (float)BARRAGE_RAMP_TICKS);
 		victim.setInvulnerableTime(0);
+		float before = victim.getHealth();
 		victim.hurtServer(level, level.damageSources().playerAttack(player), Mth.lerp(ramp, BARRAGE_DAMAGE, BARRAGE_DAMAGE_MAX));
+		com.jaymospowers.core.BladeBlood.splash(victim, before - victim.getHealth());
 		Vec3 at = victim.getBoundingBox().getCenter();
 		level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(BLOOD, 1.2F), at.x, at.y, at.z, 6 + Math.round(ramp * 10.0F),
 			victim.getBbWidth() * 0.4, victim.getBbHeight() * 0.3, victim.getBbWidth() * 0.4, 0.0);

@@ -1471,3 +1471,33 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Also Andy: "allow me to charge jump while using wall crawl": in the suit, holding Jump on the walking tendrils coils a charged leap (instead of climbing) and letting go flings you.
 
 - **0.11.102, Z Fighter lineages are races anyone can be born to:** Andy: "add all zfighter lineages to the heritage screen and remove it from the zfighter's x ... so anyone can be any of those races". The X screen has had no lineage pick since 0.11.76; the lineage is the heritage. `ZFighterLineage.everyone` now gives players who aren't Z Fighters their race from the heritage too: a Warrior-born has the tail (and the villagers' fear of it; wrapped or let out with Kingdoms' `;`, tag `TOGGLE_TAG`), a Verdant is green, mends (health, bones, limbs) and reaches 1.5 further (`race_reach`). Ki things stay with the power: forms, techniques, the Great Ape, healing others, Earthling TP. New Earthling heritage (Kingdoms) maps to the Earthling lineage. Andy then: the Verdant's longer reach "is an animated up to 6 block stretch ... a quick punch activated on left mouse hold that grabs items if aimed at one", and the Frostborn ice prison "should be frostborns left mouse hold": `RaceMoves` + `RaceHoldClient` (bare hand, not at a block; a Z Fighter's hold combo keeps anything within plain reach). The stretch strikes the first living thing (a normal fist blow) or snatches the first item within 6 blocks, every 10 ticks while held, the right arm drawn out along the look (synced `verdant_stretch`); the passive +1.5 reach is gone. A Frost-born's hold (0.6 s) asks Kingdoms for the ice prison through the tag `jaymoskingdoms_frost_prison`; `;` is now only the Warrior-born tail. Andy also: "way too many dismemberments and decapitations, reduce the rate across the board by 50%": `Dismember.RATE` 0.5 multiplies every sever chance (blades 2.5%, katana slash 10%, players 2.5%, skeletons still 3x, symbiote scythe 22.5%). Same release: Emberborn fireproof and sapped by the cold, Frostborn ice prison on `;`, heritage cards scroll (Kingdoms 0.7.75).
+- **0.11.104, the Rig drawn as a layered suit that builds itself on:** Andy: "the rig looks good, it just clips a bit
+  currently with fresh anims, and it should materialize on the user, peice by peice, one large component unfolding and
+  mechanically interlocking onto the user. also make a more layered rig, add depth and detail". On players the Rig is
+  now its own model (`client/rig/RigSuit`, `RigSuitMesh` generated with its textures by `tools/gen_rig.py`; the
+  vanilla armour layers stay for armour stands and mobs): an under-suit with glowing seams, main plates, raised trim,
+  vents, the spine unit on the back (lit cells, side pistons, exhaust ports, wings), pistons and caps at the elbows
+  and knees, a lit chest reactor, visor, buckle, palm rings and heel nozzles, with a glow pass. It copies the wearer's
+  pose each frame and, under Fresh Animations, the pose EMF gave the body (`RigSuitPoseLivingEntityRendererMixin`, as
+  the costume does), so it no longer clips. Each piece builds on plate by plate when it's put on (by hand or a call),
+  each plate swinging or sliding in, overshooting and locking with a clunk and an iron clank (a piston thump on the
+  heavy ones): the Core's spine unit lands and unfolds its wings, the under-suit spreads from it, the chest halves swing
+  round from the back and meet, the reactor slots in and the lights flicker up, then abdomen, shoulders, upper arms,
+  collar; the Arms close the hip harness and lock the buckle, then thighs, gauntlets, elbow and knee joints; the
+  Thrusters raise the shins and clamp the boots; the Helm comes last, its faceplate swinging down. Off (or parked) it
+  comes apart backwards, 1.6x quicker. A suit call now lands the Core first, then Arms, Thrusters, Helm (`LAND_AT`).
+  Hidden pieces, costumes and Xeno forms still hide it; a backpack hangs clear of the spine unit. Tuning: the
+  constants at the top of `RigSuit`; plate timings and approaches in `gen_rig.py`'s `plate(...)` calls.
+- **0.11.104, blood on every blade, and the barrage from the outer tendrils:** Andy: "the Shift + R living tendril LMB
+  hold attack should animate from the left and right most tendrils, not the center like it does now. add the blood
+  effect to every bladed weapon kill and impact", "on every weapon not just symbiote". The barrage's stabs now come
+  from the outermost pair, left and right by turns (walking: the outer spares; `WebTendrilLayer.BARRAGE_FREE`). Every
+  blow from a blade (`Dismember.blade`: swords, axes, anything named like a blade, held or thrown, any mod's) sprays
+  blood, more the harder it lands (`core/BladeBlood`); so do the powers'
+  own cuts (`Dismember.cut`: Darktide's katana, the symbiote's scythe), the symbiote's spear, whip-blade, hook claw
+  (and its bleed), the barrage, and now Spike Burst and the roar's spikes (Andy: "add that too").
+  Only a creature crushed to death bursts with gore and a squelch (Andy: "burst should only be for if an enemy is killed
+  by a crush, like with gravity's modes and meteor impact. Or killed by a great ape stomp"): any death by Gravity's
+  weight (a fall after Lift or Crush, the slam, Collapse, Skyfall, the Singularity, a meteor), one slammed into a wall
+  by Push, and the Great Ape's stomps and footfalls (`BladeBlood.crushed`). Bones, golems and spirits don't bleed (tag `jaymospowers:bloodless`). Tuning: the
+  constants at the top of `BladeBlood`.

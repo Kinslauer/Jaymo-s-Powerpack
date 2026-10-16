@@ -82,6 +82,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		ArmoryLayer.register();
 		// 0.7.23: Verdants' antennae
 		VerdantLook.register();
+		// 0.7.75: the Emberborn's glowing embers and eyes, and flames off their hands
+		EmberLook.register();
 		// 0.5.34: Jaymo's Equestrian (gaits, the stamina HUD, coats, war elephants)
 		com.jaymoskingdoms.client.equestrian.EquestrianClient.register();
 		// 0.6.12: storm clouds, tornado funnels and the rain under a storm

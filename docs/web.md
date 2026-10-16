@@ -58,7 +58,8 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
 
 ## Weapon arm, counter animations, hulking big body (0.11.62)
 - **Weapon arm (`WebMorph`):** in the suit or big body, with an empty main hand, left click (held since 0.11.91, see below) morphs the arm into a
-  random weapon (never the same twice running, arms alternate) and strikes what you aim at within `REACH` 6:
+  random weapon (never the same twice running, arms alternate) and strikes what you aim at within `REACH` 6 (with Living
+  Armor up it forms on a tendril instead, and there are three more weapons: see "Weapon tendrils" below):
   - Mace (blunt): `DAMAGE` 10, `hurtArmor` x`ARMOR_WEAR` 4, breaks a bone `MACE_BREAK` 35% (shatters skeletons), slams back.
   - Scythe (slashing): 8, severs a limb `SCYTHE_SEVER` 45% (`Dismember.cut`), sweeps others within 2.5 for 60% at half the chance.
   - Spear (piercing): 9, `SPEAR_PIERCE` 35% of it ignores armour, armour wear x4, drives straight back.
@@ -67,8 +68,11 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
 - **Counter animations (`WebCounterPose`):** all 18 counters (9 web, 9 symbiote) have their own body animation,
   driven by the synced `WebCounter.ACTIVE`; the side is picked from game time so server and client agree.
 - **Hulking big body (`WebHulk`, mesh from `tools/gen_web_hulk.py` → `WebHulkMesh` + `web_symbiote_hulk.png`):**
-  53 boxes: huge traps/shoulders/lats, Popeye forearms, long clawed hands, thick legs, a small head sunk low and forward
-  (`HEAD_DOWN` 2.5, `HEAD_FORWARD` 1.5), arms out `ARM_OUT` 3.5, legs `LEG_OUT` 1.2. A hinged fanged jaw breathes and
+  since 0.11.99 built like a towering green-giant hero (Andy's pick, the TG Heroes Hulk as reference only: that pack is
+  All Rights Reserved) but all symbiote: 46 boxes, upright, a broad chest over deep lats, huge shoulders, thick arms
+  ending in big fists with bone spurs out of the forearms, tree-trunk legs with clawed toes, the head up on the traps
+  (`HEAD_DOWN` -0.5, `HEAD_FORWARD` 2), arms out `ARM_OUT` 5, legs `LEG_OUT` 2.2. Living Armor swells you 1.5x
+  (`WebSymbiote.ARMOR_SCALE` 0.5, was 0.25) and stands leaning, not hunched (`WebFeral.IDLE_BEND` 0.35, was 0.75). A hinged fanged jaw breathes and
   snarls (`JAW_REST` 0.22); a red tongue (12 pieces) lolls and lashes every `LASH_EVERY` 70 ticks. No emblem (earlier ruling).
   The behemoth (zombie-player host) still uses the old inflated body.
 - **Equip animation (`WebSuitGrowth` + `WebSuitWrapLayer`):** tendrils leech out and coil round the body, arms, head,
@@ -121,6 +125,30 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   When Living Armor withdraws or is put away, Wall Crawl switches off with it (`WebSymbiote.set`). At full bond
   (`BOND_MAX`) Living Armor no longer times out at `ARMOR_MAX_TICKS`: it stays until you put it away.
 
+## Weapon tendrils, and three more weapons (after 0.11.98)
+Andy: "the weapon on left click should be adapted to the living armor tendrils ... with 3 more variants."
+- **On a tendril:** while Living Armor is up (`WebSymbiote.armored`: its tendrils out, or the big body), the held left
+  click forms the weapon on a tendril instead of the arm (`WebMorph.onTendril`; synced as `tendril` on `CHARGE` and
+  `MORPH`). Living Armor without the suit now counts too. Gathering, the striking side's shoulder tendril (0 right,
+  1 left) rears into a coil out to its side and shudders, its tip swelling into the weapon head; the mace and the
+  hammer-fist are two tendrils braided (with 2 or 3, just inside). Let go and it winds up its own way (mace reared over
+  the head, hammer-fist dropped low, scythe drawn wide, spear coiled short like a spring, whip-blade thrown far back,
+  hook claw raised), lashes out root first with the tip trailing, a ripple runs back up it at the impact (the hook reels
+  in), and it eases back to rest. The arm stays put (no swing). Same timing, reach, damage and effects as the arm; the
+  server doesn't care which. Drawn by `WebTendrilLayer` (`TendrilModel.morph`, `heads`; tuning `MORPH_*` at the top),
+  with the heads from `WebMorphLayer.weapon`. Outside Living Armor the plain suit keeps the arm weapon unchanged.
+- **Whip-blade** (`WHIP`): reaches `WHIP_REACH` 9, cuts up to `WHIP_HITS` 3 along the line through the target (within
+  `WHIP_WIDTH` 0.9; each after the first `WHIP_FALLOFF` x0.8 of the one before, from 7), flicks the near ones aside and
+  drags the last toward you (`WHIP_PULL` 1.1). A lash of barbed links to a thin blade; the arm swings back low, then
+  up over the shoulder and cracks it out, the cord bowing and waving (`WebMorphLayer.WHIP_LAG`, `WHIP_WAVE`).
+- **Hammer-fist** (`HAMMER`): 9, thrown up `HAMMER_LIFT` 1.15 (back 0.45), stunned `HAMMER_STUN_TICKS` 30 (Slowness IV,
+  Weakness II), the block under it bursts into dust. A knuckled block of a club; an uppercut from low and back.
+- **Hook claw** (`HOOK`): reaches `HOOK_REACH` 8, 6 damage, reels the target in to just short of you (`HOOK_YANK`,
+  at most 1.6 b/t), then it bleeds `BLEED_DAMAGE` 1.5 (through armour) every `BLEED_EVERY` 10 ticks, `BLEED_HITS` 4
+  times, dripping red. Three curved bone hooks, a grapple; the arm raised, flung out, yanked back as it bites.
+- Never the same weapon twice running still holds (six now). The client aims with the forming weapon's reach
+  (`WebMorph.reachNow`, from the synced charge); the server checks it against `reach(weapon)`.
+
 ## Andy's symbiote and whip changes (0.9.8)
 - **Rigid tendrils:** Wall Crawl's walking tendrils are jointed limbs (two straight sections, a knee out from the
   surface, fixed length `WebTendrilWalk.LIMB` 32 px), Doc Ock style. Walking, running or climbing, every other tendril
@@ -130,8 +158,8 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   it tore); Sneak + the other key within `WebWhip.CATCH_TICKS` 60 puts the second web on it and starts the whip. In
   midair it's always the lasso and you hang in place for it (no gravity, held still); the seesaw only on a living
   creature; anything else is the overhead.
-- **Barrage combo:** one creature held by a tendril, the other empty, hold left click: it's pinned in front and every
-  other tendril stabs it in turn (the rest held poised), a stab every `BARRAGE_EVERY` 10 ticks (half a second) (i-frames ignored), 3 damage rising to 9 over
+- **Barrage combo:** one creature held by a tendril, the other empty, hold left click: it's pinned in front and the
+  outermost pair of tendrils (`BARRAGE_FREE`; walking, the outer spares) stab it left and right by turns (the rest held poised), a stab every `BARRAGE_EVERY` 10 ticks (half a second) (i-frames ignored), 3 damage rising to 9 over
   `BARRAGE_RAMP_TICKS` 60; letting go of the button (or `BARRAGE_MAX_TICKS` 160) ends it.
 - **Behemoth (symbiote in a zombie player):** all 6 back tendrils thrash wildly and each lashes on its own at a random
   living thing within `STRIKE_REACH` 7.5 (10 damage, 1-5 ticks between a tendril's lashes; normal i-frames).
@@ -156,7 +184,7 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   (`WebHulk`, see below); MCA player models hide their own skin, clothes and hair layers under it.
 - **Into the big body:** the bulk takes 3 s (`WebSuitGrowth.BULK_TICKS` 60): doubled over in pain, clutching the
   middle, spasming, knees buckling, head hanging and jerking (`WebFeral.agony`), then up into a deeper feral idle
-  (`IDLE_BEND` 0.75, arms low and wide, knees bent, head twitching).
+  (`IDLE_BEND` 0.35, arms low and wide, knees bent, head twitching).
 - **Overhead slam (`WebSlam`, big body):** jump and keep holding Space in the air: over `RAISE_TICKS` 10 it rears up,
   both fists over its head. Land still holding it (held at least `MIN_TICKS` 5) and it slams: `DAMAGE` 12 at the
   centre (half at the edge, +0.8 per block fallen, up to +10) to everything within `RADIUS` 4.5, hurled out and up, a
@@ -540,7 +568,7 @@ action bar, each heard once.
 | 1 | Living Armor (toggle) | 40 | 0 | +`ARMOR_ABSORPTION` 16 max absorption (8 hearts), regrowing `ARMOR_REGEN` 1 every `ARMOR_REGEN_TICKS` 40, and +0.6 knockback resistance. Satiety drains �`ARMOR_DRAIN_MULT` 3. |
 | 2 | Wall Crawl (toggle) | 20 | 0 | Client movement (`WebSymbioteClient.tickCrawl`). Next to a wall in the air, tendrils latch on and drag you the way you're moving (0.8.6: see below); Sneak goes down. Under a ceiling, Jump or a Sneak press slams you up into it, you move with the movement keys, and another Sneak press drops you. Climbing over a top edge hops you onto the ledge. The server allows floating while it's on and resets fall distance while you're touching a wall or ceiling. |
 | 3 | Consume | 160 | 0 | Nothing is eaten alive (0.8). A corpse you carry is eaten. Else a free corpse within `CONSUME_CORPSE_RANGE` 6 (the one you look at first) is grabbed by a tendril, carried, then eaten. Else a non-player creature at **current** health <= `CONSUME_MAX_HEALTH` 10 within `CONSUME_RANGE` 3 is finished off by a lash (`CONSUME_FINISH_LAG` 8 ticks), and its corpse grabbed, carried and eaten. Tamed, name-tagged, inedible and corpse-less creatures are never taken. A corpse heals 6-16 and feeds 30-80 by size. |
-| 4 | Spike Burst | 240 | 8 | Everything within `SPIKE_RADIUS` 5 takes `SPIKE_DAMAGE` 8 (player attack) and is thrown `SPIKE_KNOCKBACK` 1.3 outward and 0.45 up. 38 rigid black spikes shoot out of the whole body (`WebSpikeLayer`, pose `WebPose.SPIKES`, `SPIKE_TICKS` 16); each victim flashes (`spikeHit`, no blood). The roar throws the same spikes. |
+| 4 | Spike Burst | 240 | 8 | Everything within `SPIKE_RADIUS` 5 takes `SPIKE_DAMAGE` 8 (player attack) and is thrown `SPIKE_KNOCKBACK` 1.3 outward and 0.45 up. 38 rigid black spikes shoot out of the whole body (`WebSpikeLayer`, pose `WebPose.SPIKES`, `SPIKE_TICKS` 16); each victim flashes (`spikeHit`) and bleeds (`BladeBlood`). The roar throws the same spikes. |
 | 5 | Shroud | 600 | 5 | Invisibility (no particles) until you damage anything, or `SHROUD_TICKS` 100 (5 s). |
 
 **Hunger:**

@@ -181,7 +181,8 @@ public final class BackpackClient {
 			body.body.translateAndRotate(poseStack);
 			collector.submitModelPart(BackpackModel.straps(), poseStack, RenderTypes.entityCutout(BackpackModel.TEXTURE), lightCoords,
 				OverlayTexture.NO_OVERLAY, null);
-			submitBag(poseStack, collector, lightCoords, 0.0F, 1.0F + sway[3], OFF_BACK + (armour ? OVER_ARMOUR : 0.0F), sway[0], sway[1], sway[2]);
+			submitBag(poseStack, collector, lightCoords, 0.0F, 1.0F + sway[3], OFF_BACK + (armour ? OVER_ARMOUR : 0.0F)
+				+ com.jaymospowers.client.rig.RigSuit.backpackClearance(state), sway[0], sway[1], sway[2]);
 			poseStack.popPose();
 		}
 	}

@@ -109,29 +109,46 @@ public final class XenoFormModels {
 		}
 	}
 
-	/** Pyre: a lean body with plumes of flame on its head and shoulders that sway. */
+	/**
+	 * Pyre: a body of living flame, hair of fire streaming up and back off the head, flames licking off the shoulders
+	 * and forearms, all swaying; its skin is drawn a second time, fullbright, from {@link #GLOW} so it shines in the dark.
+	 */
 	static final class Pyre extends FormModel {
-		private final ModelPart crest, rightPlume, leftPlume;
+		static final Identifier GLOW = JaymosPowers.id("textures/entity/xenoform_pyre_glow.png");
+		private final ModelPart hair, hairTip, rightPlume, leftPlume, rightLick, leftLick;
 
 		Pyre() {
 			super(bake(mesh()), "pyre");
-			this.crest = this.head.getChild("crest");
+			this.hair = this.head.getChild("hair");
+			this.hairTip = this.hair.getChild("tip");
 			this.rightPlume = this.body.getChild("right_plume");
 			this.leftPlume = this.body.getChild("left_plume");
+			this.rightLick = this.rightArm.getChild("lick");
+			this.leftLick = this.leftArm.getChild("lick");
 		}
 
 		private static MeshDefinition mesh() {
 			MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.3F), 0.0F);
 			PartDefinition root = mesh.getRoot();
 			PartDefinition head = root.getChild("head");
-			head.addOrReplaceChild("crest", CubeListBuilder.create().texOffs(0, 64).addBox(-1.5F, -15.0F, -2.0F, 3.0F, 7.0F, 4.0F)
-				.texOffs(14, 64).addBox(-4.0F, -11.0F, 0.0F, 8.0F, 3.0F, 2.0F), PartPose.ZERO);
+			// a ring of flame round the top of the head, and the hair rising out of it, a thinner tongue at its tip
+			head.addOrReplaceChild("crown", CubeListBuilder.create().texOffs(0, 64).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 2.0F, 8.0F, new CubeDeformation(0.4F)),
+				PartPose.ZERO);
+			PartDefinition hair = head.addOrReplaceChild("hair", CubeListBuilder.create().texOffs(32, 64).addBox(-2.0F, -8.0F, -2.0F, 4.0F, 8.0F, 4.0F),
+				PartPose.offset(0.0F, -7.0F, 1.0F));
+			hair.addOrReplaceChild("tip", CubeListBuilder.create().texOffs(48, 64).addBox(-1.0F, -5.0F, -1.0F, 2.0F, 5.0F, 2.0F),
+				PartPose.offset(0.0F, -7.0F, 0.0F));
 			PartDefinition body = root.getChild("body");
-			body.addOrReplaceChild("right_plume", CubeListBuilder.create().texOffs(0, 76).addBox(-2.0F, -5.0F, -1.5F, 3.0F, 6.0F, 3.0F),
+			body.addOrReplaceChild("right_plume", CubeListBuilder.create().texOffs(0, 78).addBox(-2.0F, -5.0F, -1.5F, 3.0F, 6.0F, 3.0F),
 				PartPose.offset(-6.0F, 0.0F, 0.0F));
-			body.addOrReplaceChild("left_plume", CubeListBuilder.create().texOffs(0, 76).mirror().addBox(-1.0F, -5.0F, -1.5F, 3.0F, 6.0F, 3.0F),
+			body.addOrReplaceChild("left_plume", CubeListBuilder.create().texOffs(0, 78).mirror().addBox(-1.0F, -5.0F, -1.5F, 3.0F, 6.0F, 3.0F),
 				PartPose.offset(6.0F, 0.0F, 0.0F));
-			body.addOrReplaceChild("core", CubeListBuilder.create().texOffs(12, 76).addBox(-2.5F, 2.0F, -3.0F, 5.0F, 5.0F, 1.0F), PartPose.ZERO);
+			body.addOrReplaceChild("core", CubeListBuilder.create().texOffs(12, 78).addBox(-2.5F, 2.0F, -3.0F, 5.0F, 5.0F, 1.0F), PartPose.ZERO);
+			// a lick of flame off the outside of each forearm
+			root.getChild("right_arm").addOrReplaceChild("lick", CubeListBuilder.create().texOffs(24, 78).addBox(-1.0F, -5.0F, -1.0F, 2.0F, 5.0F, 2.0F),
+				PartPose.offset(-3.0F, 6.0F, 0.5F));
+			root.getChild("left_arm").addOrReplaceChild("lick", CubeListBuilder.create().texOffs(24, 78).mirror().addBox(-1.0F, -5.0F, -1.0F, 2.0F, 5.0F, 2.0F),
+				PartPose.offset(3.0F, 6.0F, 0.5F));
 			return mesh;
 		}
 
@@ -143,12 +160,27 @@ public final class XenoFormModels {
 			// the flames flicker faster and stream back the faster it goes, lean out of a turn, and leap up as it falls
 			float flicker = t * (1.0F + m.speed() * 0.8F);
 			float stream = m.speed() * 0.45F + Math.max(0.0F, m.fall()) * 0.4F;
-			this.crest.zRot = Mth.sin(flicker * 0.35F) * 0.12F - m.trail() * 0.25F;
-			this.crest.xRot = Mth.cos(flicker * 0.27F) * 0.08F - 0.15F - stream;
+			this.hair.xRot = Mth.cos(flicker * 0.27F) * 0.08F - 0.35F - stream;
+			this.hair.zRot = Mth.sin(flicker * 0.35F) * 0.12F - m.trail() * 0.25F;
+			this.hairTip.xRot = Mth.cos(flicker * 0.41F + 0.7F) * 0.15F - 0.3F - stream * 0.8F;
+			this.hairTip.zRot = Mth.sin(flicker * 0.53F + 1.3F) * 0.2F - m.trail() * 0.3F;
 			this.rightPlume.zRot = 0.3F + Mth.sin(flicker * 0.4F) * 0.15F - m.trail() * 0.2F;
 			this.leftPlume.zRot = -0.3F - Mth.sin(flicker * 0.4F + 1.0F) * 0.15F - m.trail() * 0.2F;
 			this.rightPlume.xRot = -stream;
 			this.leftPlume.xRot = -stream;
+			// the forearm flames point up whatever the arm does (cancelling its swing) and stream back
+			this.rightLick.xRot = -this.rightArm.xRot - stream + Mth.sin(flicker * 0.47F) * 0.15F;
+			this.leftLick.xRot = -this.leftArm.xRot - stream + Mth.sin(flicker * 0.47F + 2.0F) * 0.15F;
+			this.rightLick.zRot = 0.25F + Mth.cos(flicker * 0.38F) * 0.12F;
+			this.leftLick.zRot = -0.25F - Mth.cos(flicker * 0.38F + 0.5F) * 0.12F;
+		}
+
+		/** The forearm flames upright for the first-person arm (the model is shared, so they hold whoever was drawn last). */
+		void handPose() {
+			this.rightLick.xRot = 0.0F;
+			this.leftLick.xRot = 0.0F;
+			this.rightLick.zRot = 0.25F;
+			this.leftLick.zRot = -0.25F;
 		}
 	}
 
