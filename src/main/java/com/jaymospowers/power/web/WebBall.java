@@ -40,7 +40,8 @@ public class WebBall extends ThrowableItemProjectile {
 	public static final int SLOWNESS_MIN_TICKS = 60, SLOWNESS_MAX_TICKS = 220;
 
 	/**
-	 * A tapped V: a webshooter pellet, fast and light, a sting and nothing more (no splash, no webs). Damage on a direct
+	 * A tapped V: a webshooter pellet, fast and light: a sting (no splash, no webs) and a stack of web on what it hits
+	 * ({@link WebStrength#shotHit}; five in a row web it up). Damage on a direct
 	 * hit: a web's, and the symbiote's.
 	 */
 	public static final float PELLET_DAMAGE = 3.0F, DARK_PELLET_DAMAGE = 4.0F;
@@ -119,9 +120,12 @@ public class WebBall extends ThrowableItemProjectile {
 			return;
 		}
 		if (this.pellet) {
-			// a pellet stings what it hits, and that's all
+			// a pellet stings what it hits, and stacks web on it: enough hits in a row and it's webbed up
 			if (direct != null && direct != this.getOwner()) {
 				direct.hurtServer(level, this.damageSources().thrown(this, this.getOwner()), dark ? DARK_PELLET_DAMAGE : PELLET_DAMAGE);
+				if (direct instanceof LivingEntity living && this.getOwner() != null) {
+					WebStrength.shotHit(level, this.getOwner(), living);
+				}
 			}
 			level.sendParticles(dark ? WebSymbiote.dust(0.9F) : ParticleTypes.ITEM_COBWEB, this.getX(), this.getY(), this.getZ(), 5, 0.1, 0.1, 0.1, 0.03);
 			return;

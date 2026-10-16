@@ -171,6 +171,14 @@ public final class WebShooters {
 		return load != null && load.fluid(hand) > 0 && !WebSymbiote.suitShown(player);
 	}
 
+	/**
+	 * The wrist a Web Shot leaves from: the main hand's if it has fluid, else the other's, or -1 (no shooters, both dry,
+	 * or the suit on). Web Shot fires only from a shooter (Andy: organic web disables V).
+	 */
+	public static int shotHand(Player player) {
+		return loaded(player, WebNet.MAIN) ? WebNet.MAIN : loaded(player, WebNet.OFF) ? WebNet.OFF : -1;
+	}
+
 	/** The web out of {@code hand} came from a shooter (or would, fired now): drawn as the braided line, from the wrist. */
 	public static boolean nozzleLine(Player player, int hand) {
 		Load load = worn(player);

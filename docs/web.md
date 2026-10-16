@@ -5,6 +5,43 @@ of each arc, and get a boost if you let go on the upswing. You keep that speed i
 fire again mid-air to chain swings. Three utility webs round out the kit. Accent colour `0xE0303A`; the icon is a
 cobweb.
 
+## Rapid Web Shot from the shooters, longer fists, levels that build (`web-shot`)
+Andy: "make the web shot tap fire as fast as you can tap the button, so it can be more rapid and web an enemy up after
+5 hits, but you can only use it when you have web shooters equipped and spare web in the canisters. organic web
+disables V, but webbed fists last 30s instead of 10. you also now only get webbed fists and web wings before level 1.
+but you keep everything and build on it unlike before where you lost B."
+- **Rapid pellets (`WebPower.shoot`):** a tap of V (let go under `SHOT_TAP_TICKS` 20) fires one pellet per tap, as
+  fast as you tap: `PELLET_COOLDOWN` is now a 2-tick anti-spam floor (was 4) kept in the server state
+  (`State.pelletReady`), and pellets no longer set V's cooldown at all, so the V chip doesn't flicker. The charged blast
+  and the Sneak + tap bomb keep their cooldowns, which still hold pellets back too (V's shared cooldown).
+- **Five hits web it up (`WebStrength.shotHit`):** each pellet that hits a living thing adds a stack (per shooter):
+  a puff of web gathering on it (4 particles a stack), a squish rising in pitch, and Slowness one level higher a stack
+  for `SHOT_STACK_SLOW_TICKS` 30. A stack is forgotten `SHOT_STACK_TICKS` 60 (3 s) after its last hit. The
+  `SHOT_WRAP_HITS` 5th hit cocoons it for `SHOT_WRAP_TICKS` 80 (the same cocoon as the fists' third hit and the web
+  bomb: held where it stands, Slowness VII, no jumping, a cobweb at its feet).
+- **Shooters only; organic web disables V:** V is Web Shot (ABILITY_3), so "shooters only" and "organic web disables
+  V" are one rule. Every pellet, bomb and blast leaves a web shooter and uses one web of fluid from it: the main
+  hand's wrist if it has any, else the other (`WebShooters.shotHand`). With no shooters, or both wrists dry, V doesn't
+  charge or fire: a dry click (dispenser fail) and an action-bar line (`message.jaymospowers.web_shot.no_shooters` /
+  `.dry`); the HUD's V chip is shaded out and shows no charge bar. Swing webs, Zip and Yank still fall back to organic
+  web as before (`WebShooters.REQUIRED` is still false). The symbiote suit's V (its black mass; suit shown or Living
+  Armor) isn't web, so it needs no shooters, as the suit ignores them everywhere else. V while Yank holds something is
+  still the taser shock down the line (not a shot, no fluid).
+- **Webbed fists 30 s (`WebStrength.FISTS_TICKS` 600, was 200).** The cooldown is unchanged (`FISTS_COOLDOWN` 600
+  from when they're coated), so they can be coated again as soon as they dry up.
+- **Levels that build (`WebPower.starterKey`, `usableEarly`):** before level 1 (no ability unlocked) a web slinger has
+  only webbed fists (X) and web wings (hold Jump while falling); there's no starter key any more (it was weblines on B).
+  Both count as practice (`Mastery.used`). From level 1 B strings weblines (`WEBLINE_LEVEL` 1), and keeps doing so:
+  when Yank unlocks at its level (third, unlock order R, G, B, V unchanged), B aimed at a block (no creature) still
+  starts a webline as it always did, so nothing is lost on levelling. Before, the webline starter vanished at level 1
+  and B did nothing until Yank. The key guide (H) shows "Wings & Fists" at level 0 and B's "Webline" line
+  (`key.ability_4.early`, a generic `KeyGuide` hook for a key that works before its ability unlocks) until Yank.
+- **Not gated:** wall runs and parkour (passive movement, `WebWallRun`/`WebParkour`) still work at level 0, as before.
+- **Check first in game:** tapping V as fast as possible with shooters on (one pellet a tap, fluid going down one a
+  pellet); five pellets on a zombie cocooning it, and the stack dropping after 3 s without a hit; V with no shooters,
+  empty shooters, and in the suit; a level-0 player (`/power level 0`) having only wings and fists, then B's weblines
+  at level 1 and Yank (still stringing weblines at blocks) at level 3.
+
 ## The symbiote's removal fight, dormancy, and tendrils on every line (`WebSymbioteBond`)
 Andy: "symbiote's removal is different, its activation is added to the radial menu, the first few removals at low
 bond animate like a fight or struggle, requiring the same takeover inputs to regain control, eventually showing just
@@ -423,7 +460,7 @@ Andy: "the weapon on left click should be adapted to the living armor tendrils .
 |---|---|---|
 | **R** (hold) | **Web Swing.** Sticks a web where you aim. If you aim at the sky or far below you, it auto-picks an anchor above and ahead of you. Hold to swing; release to let go. While swinging: **W** on the downswing pumps speed, **Jump** reels in, **Sneak** lets out rope. | none |
 | **G** | **Web Zip.** Fires a web at the crosshair block (48 blocks) and reels you to it. Hitting a wall hops you up onto the ledge if there's one within 3 blocks. | 3 s |
-| **V** | **Web Shot.** A fast, nearly flat web ball. A hit does 1 damage and gives Slowness IV and no jumping for 4 s. It also puts a temporary cobweb at the target's feet for 5 s (only in air). | 2 s |
+| **V** | **Web Shot** (web shooters with fluid only; one web a shot). Tap as fast as you like: pellets, five hits in a row cocoon the target. Hold: the charged blast. Sneak + tap: web bomb. | pellets 0.1 s; blast 1.5-5 s; bomb 6 s |
 | **B** | **Yank.** Webs the entity under the crosshair (24 blocks). Small things are flung to land about 2 blocks in front of you. Things heavier than you can haul (bounding box over 4 m³, more in the suit or with friends holding it on their lines too, e.g. iron golems) pull **you** to **them**; at a torch, lantern or bell it tears it off. | 6 s |
 
 **Passives:**

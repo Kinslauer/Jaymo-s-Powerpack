@@ -60,12 +60,20 @@ public final class WebPower implements Power {
 	public static final int SHOT_COOLDOWN_MAX = 100;
 	/**
 	 * Let go of V before {@code SHOT_TAP_TICKS} (a second) and it's a webshooter pellet instead: {@code PELLET_SPEED},
-	 * {@code PELLET_COOLDOWN} (0.2 s) between them, so they can be tapped out fast. Held longer, it's the charged blast,
-	 * charging from when it was pressed. In the symbiote there's no pellet: V only ever charges the black blast.
+	 * one per tap, as fast as you can tap (Andy): only {@code PELLET_COOLDOWN} ticks apart at least, an anti-spam floor
+	 * of the pellet's own that doesn't touch V's cooldown (so the chip doesn't flicker). Pellet hits stack, and five
+	 * web the target up (see {@link WebStrength#shotHit}). Held longer, it's the charged blast, charging from when it was
+	 * pressed. In the symbiote there's no pellet: V only ever charges the black blast.
+	 * <p>Web Shot only leaves a web shooter (Andy: "only when you have web shooters equipped and spare web in the
+	 * canisters"; organic web disables V): every pellet, bomb and blast uses one web from a wrist with fluid (the main
+	 * hand's first, see {@link WebShooters#shotHand}). Without shooters, or dry, V clicks and says why. The symbiote's
+	 * black mass isn't web, so the suit's V needs no shooters.
 	 */
-	public static final int SHOT_TAP_TICKS = 20, PELLET_COOLDOWN = 4;
+	public static final int SHOT_TAP_TICKS = 20, PELLET_COOLDOWN = 2;
 	public static final float PELLET_SPEED = 3.6F;
 	public static final int YANK_COOLDOWN = 80;
+	/** From this level (abilities unlocked) B strings weblines, before Yank itself unlocks; kept for good after. */
+	public static final int WEBLINE_LEVEL = 1;
 	/** Zip reach, and how fast the client reels you in (blocks/tick; used here to time the zip). */
 	public static final double ZIP_RANGE = 48.0;
 	public static final double ZIP_SPEED = 1.8;
@@ -213,6 +221,8 @@ public final class WebPower implements Power {
 		@org.jspecify.annotations.Nullable Vec3 weblineFrom;
 		/** Game time a Web Shot charge started, or -1. */
 		long shotChargeStart = -1;
+		/** Game time the next pellet may go (the anti-spam floor, {@link #PELLET_COOLDOWN}). */
+		long pelletReady;
 		/** The entity held by the Yank web (-1 for none), and whether it was mid-swing when caught. */
 		int tetherId = -1;
 		boolean tetherWasSwinging;
@@ -348,7 +358,12 @@ public final class WebPower implements Power {
 		return ID;
 	}
 
-	/** Swinging, the second web, Yank, and the charged web blast last. */
+	/**
+	 * Swinging, the second web, Yank, and the charged web blast last. Before the first (level 0) there are only webbed
+	 * fists (X) and web wings (hold Jump falling), which never lock; from level 1 B strings weblines (see
+	 * {@link #usableEarly}), and Yank builds on that at its level (B aimed at a block still strings a webline), so
+	 * nothing learned is ever taken away.
+	 */
 	@Override
 	public PowerKey[] unlockOrder() {
 		return new PowerKey[] {PowerKey.ABILITY_1, PowerKey.ABILITY_2, PowerKey.ABILITY_4, PowerKey.ABILITY_3};
@@ -688,6 +703,8 @@ public final class WebPower implements Power {
 			state.grace = true;
 			state.graceTicks = 0;
 			player.setAttached(WINGS, true);
+			// the starter (with webbed fists): spreading them is practice
+			com.jaymospowers.core.Mastery.used(player);
 			ServerLevel level = player.level();
 			level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.PHANTOM_FLAP, SoundSource.PLAYERS, 0.7F, 1.4F);
 			level.sendParticles(ParticleTypes.ITEM_COBWEB, player.getX(), player.getY() + 1.2, player.getZ(), 10, 0.6, 0.2, 0.6, 0.02);
@@ -927,8 +944,8 @@ public final class WebPower implements Power {
 		if (!down) {
 			return;
 		}
-		if (key == PowerKey.ABILITY_4 && com.jaymospowers.core.Mastery.starterOnly(player)) {
-			// a fresh awakening can only string weblines
+		if (key == PowerKey.ABILITY_4 && !com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_4)) {
+			// from level 1 until Yank unlocks, B only strings weblines (they're kept: Yank builds on them)
 			startWebline(player);
 			return;
 		}
@@ -949,10 +966,19 @@ public final class WebPower implements Power {
 		return mastered(player) ? 0 : YANK_COOLDOWN;
 	}
 
-	/** The starter, on B (kept for good): weblines. */
+	/**
+	 * (Andy) No starter key: before level 1 a web slinger has only webbed fists (X) and web wings (hold Jump falling),
+	 * neither of which ever locks. The key guide's starter line says so.
+	 */
 	@Override
-	public PowerKey starterKey() {
-		return PowerKey.ABILITY_4;
+	public @org.jspecify.annotations.Nullable PowerKey starterKey() {
+		return null;
+	}
+
+	/** B strings weblines from level 1, before Yank unlocks (it used to be the starter, and was lost at level 1). */
+	@Override
+	public boolean usableEarly(Player player, PowerKey key) {
+		return key == PowerKey.ABILITY_4 && com.jaymospowers.core.Mastery.unlocked(player) >= WEBLINE_LEVEL;
 	}
 
 	/** B down aimed at a block: the webline's first end sticks there, and the line pays out from your hand. */
@@ -1172,10 +1198,32 @@ public final class WebPower implements Power {
 		ServerPlayNetworking.send(player, pull);
 	}
 
-	/** V down: start charging a web blast (if it's ready). */
+	/** The suit's V: the symbiote's black mass (not web, so no shooters needed). */
+	private static boolean darkShot(Player player) {
+		return WebSymbiote.suitShown(player) || WebSymbiote.isToggled(player, WebSymbioteState.ARMOR);
+	}
+
+	/** Whether V can fire now as far as web goes: the suit's mass, or a shooter with fluid. Both sides (the HUD asks). */
+	public static boolean shotLoaded(Player player) {
+		return darkShot(player) || WebShooters.shotHand(player) >= 0;
+	}
+
+	/** V with no shooter web to fire: a dry click, and why on the action bar. */
+	private static void dryShot(ServerPlayer player) {
+		boolean worn = WebShooters.worn(player) != null;
+		player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable(worn
+			? "message.jaymospowers.web_shot.dry" : "message.jaymospowers.web_shot.no_shooters").withStyle(net.minecraft.ChatFormatting.GRAY));
+		player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.DISPENSER_FAIL, SoundSource.PLAYERS, 0.35F, 1.8F);
+	}
+
+	/** V down: start charging a web blast (if it's ready, and there's shooter web to fire). */
 	private void startShot(ServerPlayer player) {
 		long now = player.level().getGameTime();
 		if (now < cooldowns(player).shot()) {
+			return;
+		}
+		if (!shotLoaded(player)) {
+			dryShot(player);
 			return;
 		}
 		state(player).shotChargeStart = now;
@@ -1198,7 +1246,21 @@ public final class WebPower implements Power {
 			return;
 		}
 		// wearing the suit, it's a black mass of the symbiote instead
-		boolean dark = WebSymbiote.suitShown(player) || WebSymbiote.isToggled(player, WebSymbioteState.ARMOR);
+		boolean dark = darkShot(player);
+		boolean pellet = held < SHOT_TAP_TICKS && !player.isShiftKeyDown() && !dark;
+		if (pellet && now < state.pelletReady) {
+			// tapped faster than the anti-spam floor
+			return;
+		}
+		// everything but the suit's mass leaves a web shooter, one web a shot (the wrists may have run dry while it charged)
+		int wrist = dark ? -1 : WebShooters.shotHand(player);
+		if (!dark) {
+			if (wrist < 0) {
+				dryShot(player);
+				return;
+			}
+			WebShooters.fire(player, wrist, false);
+		}
 		if (held < SHOT_TAP_TICKS && player.isShiftKeyDown()) {
 			// Sneak + tap: a web bomb, lobbed
 			Projectile.spawnProjectileFromRotation((lvl, owner, stack) -> new WebBall(lvl, owner, stack).bomb(), level,
@@ -1207,11 +1269,11 @@ public final class WebPower implements Power {
 			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.SNOWBALL_THROW, SoundSource.PLAYERS, 0.9F, 0.6F);
 			return;
 		}
-		if (held < SHOT_TAP_TICKS && !dark) {
-			// a tap: a quick webshooter pellet
+		if (pellet) {
+			// a tap: a quick webshooter pellet, one per tap (no V cooldown, just the floor)
 			Projectile.spawnProjectileFromRotation((lvl, owner, stack) -> new WebBall(lvl, owner, stack).pellet(), level,
-				new ItemStack(dark ? SYMBIOTE_MASS_ITEM : WEB_BALL_ITEM), player, 0.0F, PELLET_SPEED, 0.3F);
-			player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), now + PELLET_COOLDOWN, cooldowns.yank()));
+				new ItemStack(WEB_BALL_ITEM), player, 0.0F, PELLET_SPEED, 0.3F);
+			state.pelletReady = now + PELLET_COOLDOWN;
 			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 0.6F, 1.9F);
 			return;
 		}

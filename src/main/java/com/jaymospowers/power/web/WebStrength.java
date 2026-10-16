@@ -81,13 +81,26 @@ public final class WebStrength {
 	public static final int BOMB_COOLDOWN = 120;
 	public static final float BOMB_SPEED = 1.2F;
 
-	/** Webbed fists: how long they last, the cooldown from when they're coated, and the hit that cocoons. */
-	public static final int FISTS_TICKS = 200;
+	/**
+	 * Webbed fists: how long they last (30 s; Andy, was 10 s), the cooldown from when they're coated, and the hit that
+	 * cocoons.
+	 */
+	public static final int FISTS_TICKS = 600;
 	public static final int FISTS_COOLDOWN = 600;
 	public static final int FISTS_COCOON_HIT = 3;
 	public static final int FISTS_COCOON_TICKS = 60;
 	/** Each stuck hit's Slowness lasts this long; a target's stack of hits is forgotten after it. */
 	public static final int FISTS_SLOW_TICKS = 60;
+
+	/**
+	 * Web Shot pellets stack on what they hit (one stack per hit, per shooter): {@code SHOT_WRAP_HITS} hits, each within
+	 * {@code SHOT_STACK_TICKS} of the last (3 s; the stack is forgotten after that), and it's webbed up: cocooned for
+	 * {@code SHOT_WRAP_TICKS}. Each stack slows it a little more for {@code SHOT_STACK_SLOW_TICKS} while it builds.
+	 */
+	public static final int SHOT_WRAP_HITS = 5;
+	public static final int SHOT_STACK_TICKS = 60;
+	public static final int SHOT_WRAP_TICKS = 80;
+	public static final int SHOT_STACK_SLOW_TICKS = 30;
 
 	/** Slowness VII: nobody walks through that. */
 	private static final int COCOON_SLOWNESS = 6;
@@ -107,6 +120,8 @@ public final class WebStrength {
 
 	private static final Map<UUID, Bind> BINDS = new HashMap<>();
 	private static final Map<UUID, Stuck> STUCK = new HashMap<>();
+	/** Web Shot pellet stacks, by target (who's shooting, how many hits, when the stack is forgotten). */
+	private static final Map<UUID, Stuck> SHOT_STUCK = new HashMap<>();
 	private static final Map<UUID, Long> FISTS_UNTIL = new HashMap<>();
 	/** Webbed fists are on: synced so the client knows it may start a wall cling (see {@link WebParkour#canCling}). */
 	public static final net.fabricmc.fabric.api.attachment.v1.AttachmentType<Boolean> FISTS = net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry.create(
@@ -124,6 +139,7 @@ public final class WebStrength {
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			BINDS.clear();
 			STUCK.clear();
+			SHOT_STUCK.clear();
 			FISTS_UNTIL.clear();
 			FISTS_READY.clear();
 			SHOCK_READY.clear();
@@ -263,6 +279,9 @@ public final class WebStrength {
 		if (!STUCK.isEmpty()) {
 			STUCK.values().removeIf(stuck -> clock >= stuck.until());
 		}
+		if (!SHOT_STUCK.isEmpty()) {
+			SHOT_STUCK.values().removeIf(stuck -> clock >= stuck.until());
+		}
 		if (!FISTS_UNTIL.isEmpty()) {
 			for (Iterator<Map.Entry<UUID, Long>> it = FISTS_UNTIL.entrySet().iterator(); it.hasNext(); ) {
 				Map.Entry<UUID, Long> entry = it.next();
@@ -331,6 +350,8 @@ public final class WebStrength {
 		FISTS_UNTIL.put(player.getUUID(), clock + FISTS_TICKS);
 		player.setAttached(FISTS, true);
 		FISTS_READY.put(player.getUUID(), clock + FISTS_COOLDOWN);
+		// the starter (with the wings): coating them is practice
+		Mastery.used(player);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_fists_on").withStyle(net.minecraft.ChatFormatting.WHITE));
 		player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.COBWEB_PLACE, SoundSource.PLAYERS, 1.0F, 1.3F);
 		player.level().sendParticles(ParticleTypes.ITEM_COBWEB, player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.4, 0.3, 0.4, 0.02);
@@ -353,6 +374,31 @@ public final class WebStrength {
 		level.sendParticles(ParticleTypes.ITEM_COBWEB, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(),
 			6 * hits, target.getBbWidth() * 0.4, target.getBbHeight() * 0.3, target.getBbWidth() * 0.4, 0.02);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.PLAYERS, 0.8F, 0.9F + 0.2F * hits);
+	}
+
+	// ---- web shot stacks --------------------------------------------------------------------------------------------
+
+	/**
+	 * A Web Shot pellet from {@code shooter} hit {@code target}: one more stack (shown as web gathering on it, a rising
+	 * squish and a little more Slowness); the {@link #SHOT_WRAP_HITS}th webs it up (a cocoon).
+	 */
+	static void shotHit(ServerLevel level, Entity shooter, LivingEntity target) {
+		if (!target.isAlive()) {
+			return;
+		}
+		Stuck old = SHOT_STUCK.get(target.getUUID());
+		int hits = (old != null && old.by().equals(shooter.getUUID()) ? old.hits() : 0) + 1;
+		if (hits >= SHOT_WRAP_HITS) {
+			SHOT_STUCK.remove(target.getUUID());
+			cocoon(level, target, SHOT_WRAP_TICKS, false);
+			return;
+		}
+		SHOT_STUCK.put(target.getUUID(), new Stuck(shooter.getUUID(), hits, clock + SHOT_STACK_TICKS));
+		target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SHOT_STACK_SLOW_TICKS, hits - 1));
+		level.sendParticles(ParticleTypes.ITEM_COBWEB, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(),
+			4 * hits, target.getBbWidth() * 0.4, target.getBbHeight() * 0.35, target.getBbWidth() * 0.4, 0.01);
+		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.PLAYERS,
+			0.6F, 0.8F + 0.15F * hits);
 	}
 
 	// ---- web bomb ---------------------------------------------------------------------------------------------------

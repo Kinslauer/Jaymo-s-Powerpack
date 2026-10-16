@@ -74,6 +74,12 @@ final class KeyGuide {
 			}
 			// your own power's locked abilities show greyed out
 			boolean locked = mastering && !Mastery.isUnlocked(player, key);
+			// (a key that already does something before its ability unlocks, e.g. Web's weblines on B, says what: lang .early)
+			Resolved early = locked && power.usableEarly(player, key) ? resolve(base + key.id() + ".early", suffixes, args) : null;
+			if (early != null) {
+				lines.add(new Line(name(JaymosPowersClient.keyMapping(key)), early.name(), early.text(), COLOR_STARTER, false));
+				continue;
+			}
 			lines.add(locked ? locked(name(JaymosPowersClient.keyMapping(key)))
 				: new Line(name(JaymosPowersClient.keyMapping(key)), line.name(), line.text(), COLOR_TEXT, false));
 		}
