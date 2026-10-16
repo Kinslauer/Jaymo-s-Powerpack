@@ -57,7 +57,7 @@
 	"power.jaymospowers.arsenal.key.starter.name": "Rummage",
 	"item.jaymospowers.arsenal_relic.lore": "It hums, as if it remembers being somewhere else.",
 	"message.jaymospowers.arsenal.relic_kept": "%s slips into the Rift Hoard in your pocket. It's yours now.",
-	"power.jaymospowers.arsenal.key.ability_3.corrupted": "Void Gates: %3$s fixes a gate where you aim (up to 5); Sneak + %3$s steps through to the one you aim at; hold %3$s on one of your gates to close it; hold Sneak + %3$s with none to cast one ahead",
+	"power.jaymospowers.arsenal.key.ability_3.corrupted": "Void Gates: %3$s fixes a gate where you aim (up to 5); Sneak + %3$s steps through to the one you aim at (looking down, it opens your pocket, letting you in at a gate fixed inside); hold %3$s on one of your gates to close it; hold Sneak + %3$s with none to cast one ahead",
 	"power.jaymospowers.arsenal.key.ability_3.corrupted.name": "Void Gates",
 	"message.jaymospowers.arsenal_gate_placed": "Gate fixed (%s/%s).",
 	"message.jaymospowers.arsenal_gate_closed": "Gate closed (%s/%s).",
@@ -128,7 +128,7 @@
 	"power.jaymospowers.arsenal.key.ability_1.corrupted.name": "Void Reach",
 	"power.jaymospowers.arsenal.key.ability_1.ascended_corrupted": "Reach Through: void-touched, pinned first, sometimes flintlocks. Sneak + %1$s: pin (empty hand: unpin)",
 	"power.jaymospowers.arsenal.key.ability_1.ascended_corrupted.name": "Void Reach, Pinned",
-	"message.jaymospowers.arsenal.pocket_enter": "Your pocket. The ender chest is your Rift Hoard; Z opens a rift out, or use the crying obsidian pad by the door",
-	"message.jaymospowers.arsenal.pocket_visit": "Someone else's pocket. Right-click the crying obsidian pad by the door to step out",
+	"message.jaymospowers.arsenal.pocket_enter": "Your pocket. The ender chest is your Rift Hoard; walk into the portal by the door (or press Z) to step out",
+	"message.jaymospowers.arsenal.pocket_visit": "Someone else's pocket. Walk into the portal by the door to step out",
 	"message.jaymospowers.arsenal.pocket_not_yours": "This hoard isn't yours to open"
 }

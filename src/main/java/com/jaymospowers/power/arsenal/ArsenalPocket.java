@@ -42,6 +42,7 @@ import net.minecraft.world.level.block.EnderChestBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Pocket Dimension (the idea of MavLeague's Pocket Dimension datapack, remade for Arsenal): every Arsenal user owns one
@@ -49,8 +50,8 @@ import net.minecraft.world.phys.Vec3;
  * walk into it to go in (and from inside, Z opens one that leads back out to where you left). Z again closes it. Any
  * player who walks into your rift follows you, and it stays open a few seconds after you pass through.
  * The room is yours to build in; its shell can't be broken. The Rift Hoard (the ender chest at the back) is the old
- * Pocket Stash, so everything already stored, and every relic you claim, is still there. The crying obsidian pad by
- * the door takes anyone home.
+ * Pocket Stash, so everything already stored, and every relic you claim, is still there. The portal standing on the crying
+ * obsidian pad by the door takes anyone home.
  */
 public final class ArsenalPocket {
 	public static final ResourceKey<Level> POCKET = ResourceKey.create(Registries.DIMENSION, JaymosPowers.id("arsenal_pocket"));
@@ -99,17 +100,21 @@ public final class ArsenalPocket {
 		final UUID owner;
 		final int room;
 		final boolean out;
+		/** Where it lets you into the room: the opener's void gate in there, or null for the usual spot by the door. */
+		final @Nullable Vec3 arrive;
 		final boolean voidRift;
 		final long opened;
 		long until;
 
-		Rift(ResourceKey<Level> dimension, Vec3 pos, float yaw, UUID owner, int room, boolean out, boolean voidRift, long opened, long until) {
+		Rift(ResourceKey<Level> dimension, Vec3 pos, float yaw, UUID owner, int room, boolean out, @Nullable Vec3 arrive, boolean voidRift,
+			long opened, long until) {
 			this.dimension = dimension;
 			this.pos = pos;
 			this.yaw = yaw;
 			this.owner = owner;
 			this.room = room;
 			this.out = out;
+			this.arrive = arrive;
 			this.voidRift = voidRift;
 			this.opened = opened;
 			this.until = until;
@@ -119,6 +124,8 @@ public final class ArsenalPocket {
 	/** How far away a rift (or your own void gate) is drawn, and how often the list is re-sent. */
 	static final double VIEW_DISTANCE = 96.0;
 	static final int SYNC_EVERY = 5;
+	/** How long the door pad's portal stays after the last person leaves the room. */
+	static final int PAD_LINGER = 40;
 
 	/**
 	 * Server → client, every {@link #SYNC_EVERY} ticks: the doorways to draw near you. A pocket rift (nether portal swirl,
@@ -160,6 +167,8 @@ public final class ArsenalPocket {
 	}
 
 	private static final List<Rift> RIFTS = new ArrayList<>();
+	/** The standing portal over each occupied room's door pad belongs to no one (so no one's Z closes it). */
+	private static final UUID PAD = new UUID(0L, 0L);
 	/** Who was last sent a list with something in it (so they get one empty list when it all closes). */
 	private static final Set<UUID> SHOWING = new HashSet<>();
 	private static final Map<UUID, Long> LAST_PASS = new HashMap<>();
@@ -208,7 +217,8 @@ public final class ArsenalPocket {
 		boolean out = level.dimension() == POCKET;
 		int room = out ? roomAt(player.blockPosition()) : room(player);
 		Vec3 at = riftSpot(player);
-		RIFTS.add(new Rift(level.dimension(), at, player.getYRot(), player.getUUID(), room, out, ArsenalVoid.isVoid(player), level.getGameTime(),
+		RIFTS.add(new Rift(level.dimension(), at, player.getYRot(), player.getUUID(), room, out, out ? null : pocketGate(player, room),
+			ArsenalVoid.isVoid(player), level.getGameTime(),
 			level.getGameTime() + RIFT_TICKS));
 		level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y + 1.0, at.z, 30, 0.3, 0.8, 0.3, 0.06);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.4F, 1.6F);
@@ -240,7 +250,17 @@ public final class ArsenalPocket {
 		return room;
 	}
 
-	private static void enter(ServerPlayer player, int room) {
+	/** One of the player's void gates fixed inside their own room, if any. */
+	private static @Nullable Vec3 pocketGate(ServerPlayer player, int room) {
+		for (ArsenalGates.Gate gate : ArsenalGates.gates(player)) {
+			if (gate.dimension() == POCKET && roomAt(BlockPos.containing(gate.pos())) == room) {
+				return gate.pos();
+			}
+		}
+		return null;
+	}
+
+	private static void enter(ServerPlayer player, int room, @Nullable Vec3 arrive) {
 		MinecraftServer server = player.level().getServer();
 		ServerLevel pocket = server.getLevel(POCKET);
 		if (pocket == null) {
@@ -257,6 +277,10 @@ public final class ArsenalPocket {
 		build(pocket, room);
 		BlockPos centre = centre(room);
 		Vec3 at = new Vec3(centre.getX() + 0.5, FLOOR, centre.getZ() + HALF - 1.5);
+		Vec3 gate = arrive == null ? null : ArsenalGates.fit(player, pocket, arrive);
+		if (gate != null) {
+			at = gate;
+		}
 		LAST_PASS.put(player.getUUID(), server.getTickCount() + 0L);
 		player.teleportTo(pocket, at.x, at.y, at.z, Set.of(), 180.0F, 0.0F, true);
 		burst(pocket, at);
@@ -303,6 +327,7 @@ public final class ArsenalPocket {
 	// ---------------------------------------------------------------- the rift left behind
 
 	private static void serverTick(MinecraftServer server) {
+		keepPadPortals(server);
 		if (RIFTS.isEmpty()) {
 			return;
 		}
@@ -326,13 +351,41 @@ public final class ArsenalPocket {
 				if (rift.out) {
 					leave(other);
 				} else {
-					enter(other, rift.room);
+					enter(other, rift.room, rift.arrive);
 				}
 				if (other.getUUID().equals(rift.owner)) {
 					// the owner's gone through: the rift holds a while longer for anyone following
 					rift.until = level.getGameTime() + RIFT_TICKS;
 				}
 			}
+		}
+	}
+
+	/**
+	 * The door pad of every room someone is in holds a standing portal out (walk into it to leave, as through a rift
+	 * opened with Z); it closes a little after the room empties.
+	 */
+	private static void keepPadPortals(MinecraftServer server) {
+		ServerLevel pocket = server.getLevel(POCKET);
+		if (pocket == null || server.getTickCount() % 10 != 0) {
+			return;
+		}
+		long now = pocket.getGameTime();
+		for (ServerPlayer player : pocket.players()) {
+			int room = roomAt(player.blockPosition());
+			Rift pad = null;
+			for (Rift rift : RIFTS) {
+				if (rift.owner.equals(PAD) && rift.room == room) {
+					pad = rift;
+					break;
+				}
+			}
+			if (pad == null) {
+				Vec3 at = Vec3.atBottomCenterOf(exitPad(room).above());
+				// faces into the room
+				RIFTS.add(pad = new Rift(POCKET, at, 180.0F, PAD, room, true, null, false, now, now));
+			}
+			pad.until = now + PAD_LINGER;
 		}
 	}
 
@@ -353,7 +406,9 @@ public final class ArsenalPocket {
 			Vec3 me = player.position();
 			for (Rift rift : RIFTS) {
 				if (rift.dimension == here && rift.pos.distanceToSqr(me) < VIEW_DISTANCE * VIEW_DISTANCE) {
-					list.add(new Portal(rift.pos.x, rift.pos.y, rift.pos.z, rift.yaw, rift.opened, rift.voidRift, false));
+					// the door pad's portal shows each viewer their own kind (the void when they're corrupted)
+					boolean voidRift = rift.owner.equals(PAD) ? ArsenalVoid.isVoid(player) : rift.voidRift;
+					list.add(new Portal(rift.pos.x, rift.pos.y, rift.pos.z, rift.yaw, rift.opened, voidRift, false));
 				}
 			}
 			if (com.jaymospowers.core.Fate.isCorrupted(player)) {
