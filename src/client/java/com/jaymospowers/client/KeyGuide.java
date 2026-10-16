@@ -115,8 +115,9 @@ final class KeyGuide {
 			rigLine(lines, "call", (Component)names[5], args, com.jaymospowers.rig.Rig.CALL_LEVEL, level);
 		} else {
 			rigLine(lines, "rig", rigKey, args, 1, level);
-			rigLine(lines, "rig_next", Component.translatable("rig.jaymospowers.key.sneak", rigKey), args, 1, level);
 		}
+		// (0.11.110) the radial menu, for everyone
+		rigLine(lines, "rig_next", Component.translatable("rig.jaymospowers.key.sneak", rigKey), args, 1, level);
 		rigLine(lines, "lock", Component.translatable("rig.jaymospowers.key.hold", rigKey), args, com.jaymospowers.rig.Rig.LOCK_LEVEL, level);
 		rigLine(lines, "flight", Component.translatable("rig.jaymospowers.key.double", name(Minecraft.getInstance().options.keyJump)), args,
 			com.jaymospowers.rig.Rig.FLIGHT_LEVEL, level);

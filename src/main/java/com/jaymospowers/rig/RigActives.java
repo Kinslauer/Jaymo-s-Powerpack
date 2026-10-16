@@ -160,6 +160,14 @@ public final class RigActives {
 		if (!Rig.wearsAny(player)) {
 			return;
 		}
+		if (action == RigNet.FACEPLATE) {
+			RigHelm.toggleFace(player);
+			return;
+		}
+		if (action == RigNet.NIGHT) {
+			RigHelm.toggleNight(player);
+			return;
+		}
 		if (action == RigNet.REPORT) {
 			RigMind.report(player);
 			return;

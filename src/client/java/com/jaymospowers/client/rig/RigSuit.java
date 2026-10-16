@@ -90,6 +90,9 @@ public final class RigSuit {
 	static final RenderStateDataKey<Float> POD = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_pod");
 	/** The pods: how far they rise (pixels) and tip back (radians) when raised. */
 	static final float POD_RISE = 1.4F, POD_TIP = 0.5F;
+	/** (0.11.110) How far the faceplate is raised (0-1; RigHelm#FACE_UP), and how far it swings up (radians), per tick. */
+	static final RenderStateDataKey<Float> FACE = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_face");
+	static final float FACE_LIFT = 1.45F, FACE_EASE = 0.25F;
 	/** The glow pass's colour (its lights coming up). */
 	static final RenderStateDataKey<Integer> GLOW = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_glow");
 
@@ -169,6 +172,7 @@ public final class RigSuit {
 		ClientLevel level = minecraft.level;
 		if (level == null) {
 			TRACKS.clear();
+			FACES.clear();
 			return;
 		}
 		long now = level.getGameTime();
@@ -178,6 +182,7 @@ public final class RigSuit {
 			sounds(minecraft, level, player, track(player, now), now);
 		}
 		TRACKS.keySet().retainAll(seen);
+		FACES.keySet().retainAll(seen);
 	}
 
 	/** A clunk as each plate locks on (a hiss as it lets go), for players near enough to hear it. */
@@ -270,6 +275,7 @@ public final class RigSuit {
 		}
 		state.setData(AGES, ages);
 		state.setData(POD, ages == null ? null : RigPose.pods(player, partialTicks));
+		state.setData(FACE, ages == null ? null : face(player, (float)time));
 		state.setData(GLOW, ages == null ? null : glow(ages[Rig.Piece.CORE.ordinal()], (float)time));
 	}
 
@@ -280,6 +286,31 @@ public final class RigSuit {
 			case ARMS -> state.legsEquipment;
 			case THRUSTERS -> state.feetEquipment;
 		};
+	}
+
+	/** Per player: {how far the faceplate is up, the time it was last stepped}. */
+	private static final Map<Integer, float[]> FACES = new HashMap<>();
+
+	/** The faceplate's lift, easing toward up or down. */
+	private static float face(Player player, float now) {
+		boolean up = com.jaymospowers.rig.RigHelm.faceUp(player);
+		float[] track = FACES.get(player.getId());
+		if (track == null) {
+			if (!up) {
+				return 0.0F;
+			}
+			// first seen up: already up
+			track = new float[] {1.0F, now};
+			FACES.put(player.getId(), track);
+		}
+		float dt = Mth.clamp(now - track[1], 0.0F, 5.0F);
+		track[1] = now;
+		track[0] = Mth.clamp(track[0] + (up ? FACE_EASE : -FACE_EASE) * dt, 0.0F, 1.0F);
+		if (!up && track[0] <= 0.0F) {
+			FACES.remove(player.getId());
+		}
+		float x = track[0];
+		return x * x * (3.0F - 2.0F * x);
 	}
 
 	/** The glow pass's colour: full, but flickering up as the Core's reactor locks in (and down as it comes off). */
@@ -368,6 +399,8 @@ public final class RigSuit {
 		private final boolean[] arm;
 		/** (0.11.107) Which plates are the launcher's pods. */
 		private final boolean[] pod;
+		/** (0.11.110) Which plate is the faceplate. */
+		private final boolean[] face;
 
 		Suit(boolean slim, Supplier<PlayerModel> wearer) {
 			super(RigSuitMesh.create(slim).bakeRoot(), slim);
@@ -376,8 +409,10 @@ public final class RigSuit {
 			this.plates = new ModelPart[RigSuitMesh.PLATES.length];
 			this.arm = new boolean[this.plates.length];
 			this.pod = new boolean[this.plates.length];
+			this.face = new boolean[this.plates.length];
 			for (int i = 0; i < this.plates.length; i++) {
 				this.pod[i] = RigSuitMesh.PLATES[i][1].startsWith("pod_");
+				this.face[i] = RigSuitMesh.PLATES[i][1].equals("helm_face");
 				this.plates[i] = root().getChild(RigSuitMesh.PLATES[i][0]).getChild(RigSuitMesh.PLATES[i][1]);
 				this.arm[i] = RigSuitMesh.PLATES[i][0].endsWith("_arm");
 			}
@@ -408,6 +443,15 @@ public final class RigSuit {
 			}
 			hideSkinLayers();
 			assemble(state.getData(AGES));
+			Float face = state.getData(FACE);
+			if (face != null && face > 0.0F) {
+				// (0.11.110) the faceplate swung up off the face
+				for (int i = 0; i < this.plates.length; i++) {
+					if (this.face[i]) {
+						this.plates[i].xRot -= FACE_LIFT * face;
+					}
+				}
+			}
 			Float pod = state.getData(POD);
 			if (pod != null && pod > 0.0F) {
 				for (int i = 0; i < this.plates.length; i++) {

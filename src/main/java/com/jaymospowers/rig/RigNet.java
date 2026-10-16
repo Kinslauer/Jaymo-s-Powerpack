@@ -21,6 +21,8 @@ public final class RigNet {
 	public static final int SCAN = 4, CALL = 5, FLIGHT = 6;
 	/** (0.11.107) The Unibeam (level 4; no power: Sneak + G). */
 	public static final int UNIBEAM = 7;
+	/** (0.11.110) The Helm's switches, from the Rig menu: the faceplate up / down, night vision on / off. */
+	public static final int FACEPLATE = 8, NIGHT = 9;
 	/** The actives J cycles through, in order (the stage-2 ones only once the Mind's level has them). */
 	public static final int[] CYCLE = {HOVER, PALM, LAUNCHER, UNIBEAM, SCAN, CALL};
 	/** The first three of {@link #CYCLE} need no level. */

@@ -238,6 +238,7 @@ public final class Rig {
 				RigTakeover.tick(player);
 			}
 			RigCall.tick(player);
+			RigHelm.tick(player);
 			RigPassives.tick(player, any && !player.isSpectator());
 			RigActives.tick(player, any && !player.isSpectator());
 		}
@@ -362,7 +363,8 @@ public final class Rig {
 	 * "a Rig pilot"), or null without a Helm.
 	 */
 	public static @Nullable Component helmIdentity(Player player) {
-		if (!wears(player, Piece.HELM)) {
+		if (!wears(player, Piece.HELM) || RigHelm.faceUp(player)) {
+			// (0.11.110) faceplate up: the face shows
 			return null;
 		}
 		ItemStack helm = player.getItemBySlot(EquipmentSlot.HEAD);
