@@ -18,6 +18,12 @@ import net.minecraft.util.Mth;
  * {@code EPISODE_MAX}. Under {@code AMBIENT_BOND} it never quite leaves: a faint vignette breathes at the edges and
  * blinks darker now and then, more often and more deeply as the bond drops. Full strength is kept for a weak bond's own
  * lines ({@link WebNet.Dread#full}) and every takeover.
+ * <p>
+ * Every line it speaks ({@link WebNet.Dread#urgency} above 0) also sends tendrils of black pulsing in along the screen's
+ * edges, then fading: a plain whisper a few faint ones, a takeover's warning more and brighter, and the near-death alert
+ * (it takes over to save itself) the most, the longest and the brightest, their violet glow at its strongest; while it
+ * runs for its life they stay at full, and while it fights you for the suit they stay up too. Drawn procedurally (chains
+ * of soft squares from the edge inward, a glow under a black core), seeded per line so each one looks its own.
  */
 final class WebSymbioteDread {
 	/** How dark the whole screen gets (alpha 0-1), and the vignette's colour and strongest alpha (0-255). */
@@ -53,6 +59,23 @@ final class WebSymbioteDread {
 	 * by up to {@code STRUGGLE_FLICKER} as the bar swings, and pours back as it drains.
 	 */
 	private static final float STRUGGLE_CLEAR = 0.55F, STRUGGLE_FLICKER = 0.3F;
+	/** The tendrils: how many at the least and most urgent; how far in they reach (share of the smaller screen side). */
+	private static final int TENDRILS_MIN = 6, TENDRILS_MAX = 26;
+	private static final float REACH_MIN = 0.1F, REACH_MAX = 0.3F;
+	/** How long a line's tendrils last (ticks) at the least and most urgent; their swelling in and fading out. */
+	private static final int TENDRIL_TICKS_MIN = 45, TENDRIL_TICKS_MAX = 110, TENDRIL_IN = 8, TENDRIL_OUT = 20;
+	/** Squares down each tendril; its width at the root (gui pixels) at the least and most urgent; the glow's spread round it. */
+	private static final int TENDRIL_STEPS = 14;
+	private static final float WIDTH_MIN = 3.0F, WIDTH_MAX = 7.0F, GLOW_SPREAD = 2.5F;
+	/** The pulse: how fast it throbs (radians a tick, faster when urgent) and how much of the reach it takes back. */
+	private static final float TENDRIL_PULSE_MIN = 0.18F, TENDRIL_PULSE_MAX = 0.55F, TENDRIL_PULSE_DEPTH = 0.35F;
+	/** The core's colour and alpha; the glow's colour from faint to urgent, and its alpha from faint to urgent (0-255). */
+	private static final int CORE_COLOR = 0x0B0610, CORE_ALPHA = 0xE6;
+	private static final int GLOW_FAINT = 0x5A2A80, GLOW_URGENT = 0xD86CFF, GLOW_ALPHA_MIN = 0x20, GLOW_ALPHA_MAX = 0x90;
+	/** The glowing rim the most urgent lines light round the whole screen edge (alpha at urgency 1, and its width). */
+	private static final int RIM_ALPHA = 0x70, RIM_WIDTH = 3;
+	/** Held strength while it runs for its life, and while it fights you for the suit. */
+	private static final float FLEE_URGENCY = 1.0F, FIGHT_URGENCY = 0.55F;
 
 	private static long clock;
 	private static long start = -1L;
@@ -61,6 +84,12 @@ final class WebSymbioteDread {
 	private static boolean full;
 	private static float takeover;
 	private static long blinkAt = -1L, nextBlink;
+	/** The tendrils of the line being spoken: when they came, until when, how urgent, and their seed. */
+	private static long tendrilStart = -1L, tendrilUntil = -1L;
+	private static float tendrilUrgency;
+	private static long tendrilSeed;
+	/** The strength the tendrils were held at last tick (running for its life, fighting you for the suit), to fade from. */
+	private static float heldWas;
 
 	private WebSymbioteDread() {
 	}
@@ -73,6 +102,20 @@ final class WebSymbioteDread {
 		}
 		full |= payload.full();
 		until = Math.max(until, clock + ticks);
+		if (payload.urgency() > 0.0F) {
+			float urgency = Mth.clamp(payload.urgency(), 0.0F, 1.0F);
+			int last = Math.round(Mth.lerp(urgency, TENDRIL_TICKS_MIN, TENDRIL_TICKS_MAX));
+			if (tendrilUntil < clock) {
+				// a fresh line: new tendrils
+				tendrilStart = clock;
+				tendrilUrgency = urgency;
+				tendrilSeed = clock * 0x9E3779B97F4A7C15L + (long)(urgency * 1000.0F);
+			} else {
+				// on top of one still showing: as urgent as the more urgent of them
+				tendrilUrgency = Math.max(tendrilUrgency, urgency);
+			}
+			tendrilUntil = Math.max(tendrilUntil, clock + last);
+		}
 		if (payload.growl() && clock >= nextGrowl) {
 			nextGrowl = clock + GROWL_GAP;
 			Minecraft minecraft = Minecraft.getInstance();
@@ -85,6 +128,14 @@ final class WebSymbioteDread {
 
 	static void tick() {
 		clock++;
+		float held = held();
+		if (heldWas > 0.0F && held <= 0.0F && tendrilUntil < clock) {
+			// no longer held: they fade out rather than vanish
+			tendrilStart = clock - TENDRIL_IN;
+			tendrilUntil = clock;
+			tendrilUrgency = heldWas;
+		}
+		heldWas = held;
 		takeover = Mth.clamp(takeover + (WebSymbioteClient.inputLocked() || WebSymbioteClient.escaping()
 			? com.jaymospowers.power.web.WebSymbiote.SELF_TAKEOVER_SPEED : -1.0F) / TAKEOVER_FADE, 0.0F, 1.0F);
 		float low = weakness();
@@ -110,6 +161,15 @@ final class WebSymbioteDread {
 		takeover = 0.0F;
 		blinkAt = -1L;
 		nextBlink = 0L;
+		tendrilStart = -1L;
+		tendrilUntil = -1L;
+		tendrilUrgency = 0.0F;
+		heldWas = 0.0F;
+	}
+
+	/** How strongly the tendrils are held up right now: running for its life, or fighting you for the suit (0: not). */
+	private static float held() {
+		return WebSymbioteClient.fleeing() ? FLEE_URGENCY : WebSymbioteClient.peelFight() ? FIGHT_URGENCY : 0.0F;
 	}
 
 	/** How far under {@code AMBIENT_BOND} your bond is (0 above it, 1 at none), or 0 unbonded. */
@@ -164,11 +224,28 @@ final class WebSymbioteDread {
 			}
 			strength = Math.max(strength, ambient);
 		}
-		if (strength <= 0.0F) {
+		// its voice: tendrils along the edges (held up while it runs for its life, or fights you for the suit)
+		float urgency = 0.0F, life = 0.0F;
+		if (tendrilUntil >= 0L && clock < tendrilUntil + TENDRIL_OUT) {
+			float in = Mth.clamp((now - tendrilStart) / TENDRIL_IN, 0.0F, 1.0F);
+			float out = 1.0F - Mth.clamp((now - tendrilUntil) / TENDRIL_OUT, 0.0F, 1.0F);
+			life = in * out;
+			urgency = tendrilUrgency;
+		}
+		float held = held();
+		if (held > 0.0F && (life <= 0.0F || held >= urgency)) {
+			urgency = Math.max(urgency, held);
+			life = Math.max(life, 1.0F);
+		}
+		if (strength <= 0.0F && life <= 0.0F) {
 			return;
 		}
 		int width = graphics.guiWidth();
 		int height = graphics.guiHeight();
+		if (strength <= 0.0F) {
+			tendrils(graphics, width, height, now, urgency, life);
+			return;
+		}
 		int dark = (int)(255 * DARKEN * shade);
 		if (dark > 0) {
 			graphics.fill(0, 0, width, height, dark << 24);
@@ -191,5 +268,90 @@ final class WebSymbioteDread {
 			graphics.fill(o, o + step, o + step, height - o - step, c);
 			graphics.fill(width - o - step, o + step, width - o, height - o - step, c);
 		}
+		if (life > 0.0F) {
+			tendrils(graphics, width, height, now, urgency, life);
+		}
+	}
+
+	/**
+	 * Tendrils pulsing in from the screen's edges: {@code urgency} sets how many, how far, how wide, how fast and how
+	 * bright; {@code life} (0-1) swells them in and fades them out. Each is a chain of squares from a point on the edge
+	 * inward, writhing side to side and tapering, a violet glow under a black core.
+	 */
+	private static void tendrils(GuiGraphicsExtractor graphics, int width, int height, float now, float urgency, float life) {
+		int count = Math.round(Mth.lerp(urgency, TENDRILS_MIN, TENDRILS_MAX));
+		float reachMax = Math.min(width, height) * Mth.lerp(urgency, REACH_MIN, REACH_MAX) * life;
+		float speed = Mth.lerp(urgency, TENDRIL_PULSE_MIN, TENDRIL_PULSE_MAX);
+		float rootWidth = Mth.lerp(urgency, WIDTH_MIN, WIDTH_MAX);
+		int glowColor = lerpColor(GLOW_FAINT, GLOW_URGENT, urgency);
+		float glowAlpha = Mth.lerp(urgency, GLOW_ALPHA_MIN, GLOW_ALPHA_MAX) * life;
+		int coreAlpha = (int)(CORE_ALPHA * life);
+		float perimeter = 2.0F * (width + height);
+		for (int i = 0; i < count; i++) {
+			long h = tendrilSeed + i * 0x632BE59BD9B4E019L;
+			// spread round the edge, each nudged off its even spot
+			float u = (i + 0.5F + (float)(hash(h) - 0.5) * 0.7F) / count * perimeter;
+			u = (u % perimeter + perimeter) % perimeter;
+			float x, y, nx, ny;
+			if (u < width) {
+				x = u; y = 0.0F; nx = 0.0F; ny = 1.0F;
+			} else if (u < width + height) {
+				x = width; y = u - width; nx = -1.0F; ny = 0.0F;
+			} else if (u < 2.0F * width + height) {
+				x = width - (u - width - height); y = height; nx = 0.0F; ny = -1.0F;
+			} else {
+				x = 0.0F; y = height - (u - 2.0F * width - height); nx = 1.0F; ny = 0.0F;
+			}
+			float phase = (float)(hash(h + 1) * Math.PI * 2.0);
+			// each throbs inward on its own beat
+			float beat = Mth.sin(now * speed + phase);
+			float length = reachMax * (0.55F + 0.6F * (float)hash(h + 2)) * (1.0F - TENDRIL_PULSE_DEPTH + TENDRIL_PULSE_DEPTH * beat * beat);
+			if (length < 2.0F) {
+				continue;
+			}
+			float writhe = length * 0.16F;
+			for (int k = 0; k <= TENDRIL_STEPS; k++) {
+				float f = k / (float)TENDRIL_STEPS;
+				float d = length * f;
+				float side = Mth.sin(f * 3.4F + now * 0.21F + phase) * writhe * f;
+				float px = x + nx * d - ny * side;
+				float py = y + ny * d + nx * side;
+				float size = Math.max(1.0F, Mth.lerp(f, rootWidth, 1.0F));
+				// the glow round it, brightest at the root
+				int ga = (int)(glowAlpha * (1.0F - 0.6F * f));
+				if (ga > 0) {
+					float g = size * 0.5F + GLOW_SPREAD * (1.0F + urgency);
+					graphics.fill(Math.round(px - g), Math.round(py - g), Math.round(px + g), Math.round(py + g), ga << 24 | glowColor);
+				}
+				float c = size * 0.5F;
+				int ca = (int)(coreAlpha * (1.0F - 0.35F * f));
+				graphics.fill(Math.round(px - c), Math.round(py - c), Math.round(px + Math.max(1.0F, c)), Math.round(py + Math.max(1.0F, c)), ca << 24 | CORE_COLOR);
+			}
+		}
+		// the most urgent light a glowing rim round the whole edge, throbbing
+		int rim = (int)(RIM_ALPHA * urgency * urgency * life * (0.6F + 0.4F * Mth.sin(now * speed * 1.5F)));
+		if (rim > 0) {
+			int c = rim << 24 | glowColor;
+			graphics.fill(0, 0, width, RIM_WIDTH, c);
+			graphics.fill(0, height - RIM_WIDTH, width, height, c);
+			graphics.fill(0, RIM_WIDTH, RIM_WIDTH, height - RIM_WIDTH, c);
+			graphics.fill(width - RIM_WIDTH, RIM_WIDTH, width, height - RIM_WIDTH, c);
+		}
+	}
+
+	private static int lerpColor(int from, int to, float t) {
+		int r = Math.round(Mth.lerp(t, from >> 16 & 0xFF, to >> 16 & 0xFF));
+		int g = Math.round(Mth.lerp(t, from >> 8 & 0xFF, to >> 8 & 0xFF));
+		int b = Math.round(Mth.lerp(t, from & 0xFF, to & 0xFF));
+		return r << 16 | g << 8 | b;
+	}
+
+	/** A steady random number 0-1 for {@code seed}. */
+	private static double hash(long seed) {
+		long z = seed * 0x9E3779B97F4A7C15L;
+		z = (z ^ (z >>> 30)) * 0xBF58476D1CE4E5B9L;
+		z = (z ^ (z >>> 27)) * 0x94D049BB133111EBL;
+		z ^= z >>> 31;
+		return (z >>> 11) * 0x1.0p-53;
 	}
 }

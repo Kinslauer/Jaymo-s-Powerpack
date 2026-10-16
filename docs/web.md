@@ -5,6 +5,181 @@ of each arc, and get a boost if you let go on the upswing. You keep that speed i
 fire again mid-air to chain swings. Three utility webs round out the kit. Accent colour `0xE0303A`; the icon is a
 cobweb.
 
+## Rapid Web Shot from the shooters, longer fists, levels that build (`web-shot`)
+Andy: "make the web shot tap fire as fast as you can tap the button, so it can be more rapid and web an enemy up after
+5 hits, but you can only use it when you have web shooters equipped and spare web in the canisters. organic web
+disables V, but webbed fists last 30s instead of 10. you also now only get webbed fists and web wings before level 1.
+but you keep everything and build on it unlike before where you lost B."
+- **Rapid pellets (`WebPower.shoot`):** a tap of V (let go under `SHOT_TAP_TICKS` 20) fires one pellet per tap, as
+  fast as you tap: `PELLET_COOLDOWN` is now a 2-tick anti-spam floor (was 4) kept in the server state
+  (`State.pelletReady`), and pellets no longer set V's cooldown at all, so the V chip doesn't flicker. The charged blast
+  and the Sneak + tap bomb keep their cooldowns, which still hold pellets back too (V's shared cooldown).
+- **Five hits web it up (`WebStrength.shotHit`):** each pellet that hits a living thing adds a stack (per shooter):
+  a puff of web gathering on it (4 particles a stack), a squish rising in pitch, and Slowness one level higher a stack
+  for `SHOT_STACK_SLOW_TICKS` 30. A stack is forgotten `SHOT_STACK_TICKS` 60 (3 s) after its last hit. The
+  `SHOT_WRAP_HITS` 5th hit cocoons it for `SHOT_WRAP_TICKS` 80 (the same cocoon as the fists' third hit and the web
+  bomb: held where it stands, Slowness VII, no jumping, a cobweb at its feet).
+- **Shooters only; organic web disables V:** V is Web Shot (ABILITY_3), so "shooters only" and "organic web disables
+  V" are one rule. Every pellet, bomb and blast leaves a web shooter and uses one web of fluid from it: the main
+  hand's wrist if it has any, else the other (`WebShooters.shotHand`). With no shooters, or both wrists dry, V doesn't
+  charge or fire: a dry click (dispenser fail) and an action-bar line (`message.jaymospowers.web_shot.no_shooters` /
+  `.dry`); the HUD's V chip is shaded out and shows no charge bar. Swing webs, Zip and Yank still fall back to organic
+  web as before (`WebShooters.REQUIRED` is still false). The symbiote suit's V (its black mass; suit shown or Living
+  Armor) isn't web, so it needs no shooters, as the suit ignores them everywhere else. V while Yank holds something is
+  still the taser shock down the line (not a shot, no fluid).
+- **Webbed fists 30 s (`WebStrength.FISTS_TICKS` 600, was 200).** The cooldown is unchanged (`FISTS_COOLDOWN` 600
+  from when they're coated), so they can be coated again as soon as they dry up.
+- **Levels that build (`WebPower.starterKey`, `usableEarly`):** before level 1 (no ability unlocked) a web slinger has
+  only webbed fists (X) and web wings (hold Jump while falling); there's no starter key any more (it was weblines on B).
+  Both count as practice (`Mastery.used`). From level 1 B strings weblines (`WEBLINE_LEVEL` 1), and keeps doing so:
+  when Yank unlocks at its level (third, unlock order R, G, B, V unchanged), B aimed at a block (no creature) still
+  starts a webline as it always did, so nothing is lost on levelling. Before, the webline starter vanished at level 1
+  and B did nothing until Yank. The key guide (H) shows "Wings & Fists" at level 0 and B's "Webline" line
+  (`key.ability_4.early`, a generic `KeyGuide` hook for a key that works before its ability unlocks) until Yank.
+- **Not gated:** wall runs and parkour (passive movement, `WebWallRun`/`WebParkour`) still work at level 0, as before.
+- **Check first in game:** tapping V as fast as possible with shooters on (one pellet a tap, fluid going down one a
+  pellet); five pellets on a zombie cocooning it, and the stack dropping after 3 s without a hit; V with no shooters,
+  empty shooters, and in the suit; a level-0 player (`/power level 0`) having only wings and fists, then B's weblines
+  at level 1 and Yank (still stringing weblines at blocks) at level 3.
+
+## Yank and its lead catch enemies again; the lead climbs; roll charges; harsher on foreign hosts (`WebLead`, `WebRolls`)
+Andy: "the web yank and lead still needs to attach to enemies ... Also improve the web lead stair logic ... Web now has
+up to 5 roll charges, and sense counters use one per reaction. The symbiote should deal alot more damage per second to
+a host that isnt a web user."
+- **Why Yank wasn't holding enemies:** nothing in the braided-web / web-shooter patch cut the catch itself (the hit, the
+  `HELD` / `web_tether` sync and the braided line drawn to the held creature all still work). Enemies slipped it for
+  four older reasons, all on the server: Yank only caught what was dead under the crosshair (`entityInSight`, the
+  creature's own box), so a moving mob was easy to miss, and a miss at a block behind it strung a webline instead (a
+  line shooting past it that looked like it didn't stick); and once caught, a mob was let go the moment it fought: any
+  hit it landed snapped the lead (`AFTER_DAMAGE`), so did its arm swing (`isSwinging`, meant for players), and an undead
+  burning in daylight burned it through (`WebHeft.burning` on a burning catch) every 5 ticks. A punch knocking it past
+  `TETHER_BREAK` 4.5 snapped it at once too.
+- **Now (`WebLead`):** Yank aims like a swing web: dead under the crosshair first, else the creature, player or corpse
+  nearest the crosshair's line within `AIM_MAGNET` 1.5 blocks (less half its size), in sight and in reach (not dropped
+  items). A mob's own attacks and swings never snap it (a caught *player* still fights free by swinging or hitting, and
+  by straining, as before). An enemy alight on dry land doesn't burn it through (fire, lava or a lit campfire along the
+  line still do, and anything else alight). A mob past the break length snaps it only after `MOB_SNAP_TICKS` 8 ticks
+  there in a row. The braided line, the ragdoll, the hitch on release, the shock (V) and the weight rules are as they were.
+- **The lead climbs:** whatever is on it (a mob you're walking, or a player someone holds) gets `STEP_BOOST` +0.65 step
+  height while held (1.25 in all: it walks up full blocks like slabs, the player's own client too; taken off a tick
+  after the lead goes), and pulled at a taller face (up to `CLIMB_HEIGHT` 3 blocks, with headroom: no ceiling over it)
+  it's hauled up at `CLIMB_SPEED` 0.3 b/t, pressed `CLIMB_HUG` into the face and shoved `CLIMB_OVER` 0.22 over the lip,
+  with no fall counted. Only when the pull has at least `CLIMB_MIN_FLAT` 0.25 of its direction level (a pull straight up
+  lifts it already); never in water or riding.
+- **Roll charges (`WebRolls`, client `WebRollsClient`):** with Combat Roll in the pack, a web slinger holds
+  `ROLL_CHARGES` 5 roll charges (Combat Roll's `combat_roll:count`, a transient modifier while Web is your power,
+  checked every second; Combat Roll refills them one at a time on its own recharge and shows them on its own HUD). Each
+  Spider-Sense counter (`WebCounter`) spends one; with none left a dodge still sidesteps but opens no counter window.
+  The count lives on the client and is reported to the server (`web_rolls`); the server spends with `web_roll_charge`.
+  Without Combat Roll, counters cost nothing (as before).
+- **Foreign hosts (`WebInhabit`):** a mob the roaming symbiote takes wastes `FOREIGN_HOST_DPS_MULT` 3.5× faster: a hostile
+  host loses 4.2% of its max health a second (up to ×3 near its end), so it burns out in about 20 s instead of 60-90; a
+  peaceful one now wastes too, at `CALM_DECAY_SHARE` half that, and is spat out badly hurt but alive. Web slingers bonded
+  to it keep their numbers. It still never feeds on anything living.
+- **Check first in game:** Yank (tap and hold) on a zombie that's walking at you, and on one burning at noon; hit it on
+  the lead; walk a cow and a zombie up a staircase of full blocks and up a 2-3 block ledge; hold a friend on it while
+  you climb a hill; roll five times and see a counter refused at 0; a zombie and a cow taken by the blob.
+
+## One form a press, the body under the fight, a taller behemoth, the new maw (suit-peel)
+Andy, after the removal-fight test jar: "the struggle looks good, maybe make it slightly easier as bond increases.
+however the body isnt drawn underneath the struggle animation, also it should animate down to the regular black suit,
+then take that off as well. right now its just invisible and the suit pops up ... I'd also like the tounge to be kept
+to the large suit, and maybe increase the size of his torso/ abdomen? rightnow he looks short and stocky like a
+gremlin rather than a behemoth. he needs a thinner waist and legs that extend out to the current upper body bulk."
+Then: "activating the suit while wearing the living armor brings you back to the suit, THEn back to your skin ... that
+way you can acess whatever at whatever bond level", "fix the old large head eating animation to be more like the new
+style" and "the head clips and animates seperately it looks like".
+- **One form a press (`WebSymbiote.use`, the suit toggle):** in Living Armor or the big body (`armored`, and not in a
+  takeover or roar), the mask takes you down to the plain black suit and stops there: Living Armor is put away (its
+  usual `COOLDOWN[ARMOR]` starts) and the suit flag set, so the big body shrinks back the way it was built
+  (`WebSuitGrowth`, 2 → 1: the muscle peeled off from the head and claws down to the core, the frame drawing back in,
+  the whole suit under it) and Living Armor's tendrils draw back in. With Living Armor away the bond doesn't swell you
+  back into the big body, so any form can be worn at any bond. The next press takes the suit off (the fight under
+  `FIGHT_BOND`, else the tear-off). Living Armor from the menu goes back up as before.
+- **Easier with the bond (`WebSymbioteBond`):** presses to win now `FIGHT_PRESSES_MAX` 30 at no bond down to
+  `FIGHT_PRESSES_MIN` 12 (was 16) at `FIGHT_BOND`; the bar fades only `FIGHT_FADE_AT_BOND` 0.55 as fast there
+  (`fightFade`, the owner's own bar too), and it heaves back `FIGHT_SHOVE_AT_BOND` half as often and half as hard
+  (all eased by the bond's share of `FIGHT_BOND`).
+- **The body under the fight (the cause):** players drawn with MCA's model (Andy's pack) have all of MCA's body hidden
+  while the suit covers them (`WebSuitGrowth.mcaUnder`), and "covered" counted the tear-off and the fight, so as the
+  suit was torn at nothing was underneath. Now the body comes back whenever the suit is torn at, fought over or peeled
+  in a takeover's hold (`bared`), and on the vanilla model the jacket layer shows with the bared chest. The suit's torso
+  stays whole until the first strip starts to come away (`WebSuitTear.strips`, past `CLAW_END`). The raw goo's model
+  was left hidden after any tear-off (its root); it's shown again for the next time the suit goes on.
+- **No pop after the fight:** when the fight ends with the suit still on (won to a bare face, or lost), the tear-off
+  settles back over `FIGHT_SETTLE_TICKS` 10 (the suit flowing back over the chest and arms) instead of snapping back;
+  a bare face stays bare through it.
+- **Tongue only on the big body:** the plain suit's manual-equip tongue lash is gone (`WebHulk.submitSuitTongue`,
+  `SUIT_MOUTH`, `SUIT_TONGUE_SCALE` removed; both its calls in `WebSymbioteLayer`, the growing suit and the worn one).
+  The big body keeps its flicks, its lash when Living Armor is put on by hand, and its after-meal lick; Consume's maw
+  keeps its tongue on any body (it's eating).
+- **A taller behemoth (`tools/gen_web_hulk.py` → `WebHulkMesh`, `web_symbiote_hulk.png`; 52 boxes):** the hips sit
+  `LEG_LIFT` 4 higher and the neck `BODY_LIFT` 6 higher (along the torso, however it's bent; `WebHulk.shift`), so the
+  torso runs `TORSO` 14 from neck to hips (was 12) and the legs `LEG` 16 (were 12): about 3.6 blocks tall (was 3.05;
+  the hitbox is unchanged). The chest (`core` 13 wide) and lats (18, then `lats_low` 15) taper to a `waist` 9 wide over
+  the pelvis; the abs are longer. Legs: a thick `thigh` (9 wide at the top) over a narrower `thigh_low`, the `knee`
+  hinge at (0, 8.5, -2.5), a heavy `calf`, a slimmer `shin`, the foot. Arms are a pixel longer (`ELBOW` at y 9.5).
+  The suit and goo laid under the big body as it's built or peeled stretch to the frame (`WebHulk.stretch`,
+  `TORSO_STRETCH`, `LEG_STRETCH`). The world-space tendril roots follow the frame (`WebFeral.bodyPoint`), and the
+  wrapping tendrils use its new boxes (`WebSuitWrapLayer.HULK_BOXES`).
+- **The head on its neck (`WebHulk.neck`):** it used to turn with the full head yaw and swing its own twitches while
+  the torso hunched, breathed and galloped under it, and its offset (`HEAD_FORWARD` 2) wasn't along the torso, so the
+  big skull swung into the traps and shoulders. Now its place is in the torso's frame (`HEAD_FORWARD` 4 ahead of the
+  traps, `HEAD_DOWN` -1.5), it turns at most `HEAD_YAW_MAX` 0.45 and rolls `HEAD_ROLL_MAX` 0.12, takes `HEAD_FOLLOW`
+  0.3 of the torso's pitch (its breathing and lean) and is held within `HEAD_BACK_MAX` 0.4 back and `HEAD_FORWARD_MAX`
+  0.5 forward of the torso (galloping it looks down along the charge). Its twitch and tilt are smaller
+  (`WebFeral.HEAD_TWITCH` 0.1, `HEAD_TILT` 0.04; were 0.25 and 0.12).
+- **The maw in the new style (`WebMouthLayer`, `WebMawMesh` + `web_symbiote_mouth.png` from `tools/gen_web_hulk.py`;
+  `tools/gen_web_maw.py` is gone):** the big body's head grown huge: its wet black hide, veins and teal rims, the big
+  white eyes, a brow, a heavy snout over a red palate, rows of cut-out fangs above and below, a red throat. It hangs a
+  little open and breathes (`REST_OPEN`, `REST_BREATH`) as the meal comes up, gapes as wide as it goes (`SKULL_GAPE`
+  0.8, `JAW_GAPE` 1.15) over `GAPE_TICKS` 10, quivering, lashes its tongue at the meal before every bite
+  (`TONGUE_LEAD` 8), snaps shut in `SNAP_TICKS` 1.5 and the skull jolts down on the bite (`SNAP_JOLT`, `JOLT_TICKS`),
+  then chews. The meal is still carried in by Living Armor's grab, drawn with the bundled tendrils.
+- **Check first in game:** the mask in Living Armor and in the big body at a whole bond (shrinks to the suit, stays;
+  the next press tears it off or fights); the fight with an MCA skin and a vanilla one (the body under the tear, no
+  pop after); no tongue on the plain suit; the big body standing, walking, galloping, hunched over a meal and in a
+  takeover's peel (the head between the shoulders, never through them; the suit under the peel lined up); the maw
+  eating something small and something cow-sized.
+
+## The symbiote's removal fight, dormancy, and tendrils on every line (`WebSymbioteBond`)
+Andy: "symbiote's removal is different, its activation is added to the radial menu, the first few removals at low
+bond animate like a fight or struggle, requiring the same takeover inputs to regain control, eventually showing just
+the face, for a short variable duration until mastery increases. Upon first acquisition the suit lay dormant, doesn't
+allow you use any of its abilities (it will still takeover to survive) for up to two days, whispering to you and
+conforming itself to its new home. Every message should pulse with tendrils along the vignette drawn on screen,
+intensifying with glow and intensity to a maximum at low health takeover alerts." Built on the tear-off (`WebSuitTear`).
+- **Removal (the radial menu's mask, the same suit-off toggle):** under `FIGHT_BOND` 70, the first `FIGHTS` 3 times
+  with each new bond (`FOUGHT`, saved), taking the suit off is a fight: your keys are swallowed and every press is a
+  heave against it, as against a takeover (the same struggle packet, the same `STRUGGLE` bar and its fade; a bar at
+  the bottom of the screen; `FIGHT_PRESSES_MAX` 30 at no bond down to `FIGHT_PRESSES_MIN` 12, see above). Everyone sees the
+  tear-off driven back and forth by the bar (`WebSuitGrowth.FIGHT_TEAR_MIN` 0.06 to `FIGHT_TEAR_MAX` 0.3 of the way
+  through: clawing at the chest, the mask sliding off the face and back as it tugs); past `FIGHT_SHOVE_FROM` of the
+  bar it heaves back now and then (`FIGHT_SHOVE` of the bar, a shake). Win: only the face comes free (`FACE`, synced),
+  for a random `FACE_MIN_*`-`FACE_MAX_*` ticks (3-8 s at no bond up to 20-80 s at a whole one), the skin's hat layer
+  showing; then the suit flows back up over the face (`FACE_FLOW_TICKS`). Lose (`FIGHT_TICKS` 20 s up): it keeps you
+  covered. A takeover, the roar or the big body ends the fight or the bare face. Past the fights, or at bond 70+, the
+  toggle is the plain tear-off. The symbiote isn't a secret identity, so nothing changes in `SecretIdentity`.
+- **Dormancy:** the first time a player ever bonds (`MET`, saved through death; never in creative) it lies dormant for
+  a random `DORMANT_MIN_SHARE` 35%-100% of up to `DORMANT_MAX_TICKS` 48000 (two days; at a whole starting bond the cap
+  is `DORMANT_FULL_BOND_SHARE` a quarter of that), counted while online and saved (`DORMANT`, synced to the owner). No
+  radial pick answers (a whisper why; the menu shades every tile and says how many minutes are left), no reach/pull/Zip
+  bonus, no hunger, no hunting, instinct, curiosity, tours, neglect, climate walks or gifts, and the suit withdraws
+  after its debut. It still saves itself near death (the roar, the run, the desperate lashing). It whispers every
+  `DORMANT_WHISPER_MIN`-`MAX` ticks (10 lines), ripples up your body in a slow black spiral every
+  `DORMANT_RIPPLE_TICKS`, and wakes with a heartbeat. `/powerdebug web symbiote dormant <ticks>` sets it (0 wakes it).
+- **Tendrils on every line (`WebSymbioteDread`):** every whisper sends `WebNet.Dread` an urgency
+  (`WebSymbiote.urgency`: a plain line 0.2, moods, gifts and unlocks 0.4, struggles, lockouts and the fight 0.55,
+  takeovers, frights, the climate's last warning 0.75, hardening 0.9, the near-death panic 1.0). The client draws that
+  many tendrils (`TENDRILS_MIN` 6 to `MAX` 26) pulsing in from the screen's edges, reaching further, wider, faster and
+  with a brighter violet glow the more urgent; at the top a glowing rim lights the whole edge. They stay at full while
+  it runs for its life, and up while it fights you for the suit, then fade. Plain dread with no line (feeding, the
+  roar) has none.
+- **Check first in game:** a fresh bond's dormancy (whispers, ripples, refusals, a defend roar still firing at low
+  health); the fight (the tear pose back and forth for you and others, the bar, winning to a bare face and it flowing
+  back); a takeover starting mid-fight; the tendrils at each urgency, and the panic at full.
+
+## Braided webs, a true rope, web shooters (0.12.3)
 ## Braided webs, a true rope, web shooters (0.12.4)
 Andy, on the swinging video: "I like the web design, and web shooter idea", and earlier "remake as much as possible,
 while retaining our tethers, it should NOT attach to the air". That mod is someone else's: these are our own code and
@@ -195,7 +370,7 @@ living armor tendrils, and it helps them attack". No blood anywhere in it.
   since 0.11.99 built like a towering green-giant hero (Andy's pick, the TG Heroes Hulk as reference only: that pack is
   All Rights Reserved) but all symbiote: 46 boxes, upright, a broad chest over deep lats, huge shoulders, thick arms
   ending in big fists with bone spurs out of the forearms, tree-trunk legs with clawed toes, the head up on the traps
-  (`HEAD_DOWN` -0.5, `HEAD_FORWARD` 2), arms out `ARM_OUT` 5, legs `LEG_OUT` 2.2. Living Armor swells you 1.5x
+  (`HEAD_DOWN` -0.5, `HEAD_FORWARD` 2; since suit-peel taller, see the top), arms out `ARM_OUT` 5, legs `LEG_OUT` 2.2. Living Armor swells you 1.5x
   (`WebSymbiote.ARMOR_SCALE` 0.5, was 0.25) and stands leaning, not hunched (`WebFeral.IDLE_BEND` 0.35, was 0.75). A hinged fanged jaw breathes and
   snarls (`JAW_REST` 0.22); a red tongue (12 pieces; it used to loll out and lash every 70 ticks, but Andy: "the tounge
   should only lash out periodically") stays in the mouth and flicks out quickly every `TONGUE_EVERY` 140 ticks (7 s,
@@ -386,7 +561,7 @@ Andy: "the weapon on left click should be adapted to the living armor tendrils .
 |---|---|---|
 | **R** (hold) | **Web Swing.** Sticks a web where you aim. If you aim at the sky or far below you, it auto-picks an anchor above and ahead of you. Hold to swing; release to let go. While swinging: **W** on the downswing pumps speed, **Jump** reels in, **Sneak** lets out rope. | none |
 | **G** | **Web Zip.** Fires a web at the crosshair block (48 blocks) and reels you to it. Hitting a wall hops you up onto the ledge if there's one within 3 blocks. | 3 s |
-| **V** | **Web Shot.** A fast, nearly flat web ball. A hit does 1 damage and gives Slowness IV and no jumping for 4 s. It also puts a temporary cobweb at the target's feet for 5 s (only in air). | 2 s |
+| **V** | **Web Shot** (web shooters with fluid only; one web a shot). Tap as fast as you like: pellets, five hits in a row cocoon the target. Hold: the charged blast. Sneak + tap: web bomb. | pellets 0.1 s; blast 1.5-5 s; bomb 6 s |
 | **B** | **Yank.** Webs the entity under the crosshair (24 blocks). Small things are flung to land about 2 blocks in front of you. Things heavier than you can haul (bounding box over 4 m³, more in the suit or with friends holding it on their lines too, e.g. iron golems) pull **you** to **them**; at a torch, lantern or bell it tears it off. | 6 s |
 
 **Passives:**
@@ -791,6 +966,48 @@ it no longer lurches in a straight line into walls.
   takeover even with the suit hidden) and squelching, then leaps, nudged on at `LEAP_FORWARD` 0.12 and steered onto the
   ledge in the air. Coiling counts as progress for the stuck check. The leap numbers live in `power/web/WebLeap`,
   shared with the suit's own charged jump (`WebSwing`).
+- **Bounds and zips (Andy: "the symbiote should jump and zip to get out of the area faster during takeovers, along
+  with all its current actions").** On top of the walk, the sprint, the hops, the ledge leaps and the ripping (all
+  unchanged, as are the attacks, the lashing, the roar and the feeding):
+  - *Bounds (client, `WebSymbioteClient.startBound`/`tickBound`):* getting you away (the run for its life, a
+    sightseeing walk, the climate's walk out: `takeoverFlee`, or a target that's the tour's `Interaction` marker) it
+    leaps along the path, at most every `BOUND_EVERY` 30 ticks after a landing: to the waypoint furthest on,
+    `BOUND_MIN_RANGE` 4 to `BOUND_MAX_RANGE` 12 blocks off, that one clear arc reaches. The arc is the suit's charged
+    leap (`WebLeap.speed`/`apex`, at your gravity): the least charge (steps of `BOUND_CHARGE_STEP` 0.05, up to
+    `TAKEOVER_MAX_CHARGE` 0.75) that tops the landing by `BOUND_CLEAR` 0.4, never more than `BOUND_SAFE_FALL` 2.5 back
+    down from the top (no fall damage), at no more than `BOUND_MAX_SPEED` 1.0 blocks/tick over the ground, with the
+    whole body's box clear every half tick and floor under the landing. It coils `BOUND_COIL_TICKS` 4 (the crouch for
+    everyone, via `ChargeHold`), plans again from where it is and springs (squelch, wind burst); in the air it holds
+    that speed over the ground (a wall stops it pushing), and lands on the waypoint, picking the path up from the
+    nearest waypoint ahead. A flat 12-block bound takes about 19 ticks, coil included (at a web slinger's lighter
+    gravity): over 0.6 blocks/tick against the run's 0.46, and the zips on top. Every takeover (the hunt and rampage too) also bounds where the walk to a waypoint is
+    `BOUND_SHORTCUT` 1.5 times the arc (round a gap or down and up a dip) or wades through water. Never onto water, lava,
+    fire, campfires, magma, cactus, berry bushes or powder snow (`safeFooting`); not with an empty belly (food too low
+    to sprint, unless it's running for its life); nothing worth it, it looks again `BOUND_RETRY` 5 later.
+  - *Stuck bounds:* moved less than `BOUND_STUCK_MOVE` 0.6 in `BOUND_STUCK_TICKS` 16 on its way (before the server's
+    stuck check gives up and rips; never within `BOUND_STUCK_NEAR` 3 of what it's after, nor while it rips, coils or
+    holds you for a meal) it leaps for any waypoint ahead from `BOUND_STUCK_RANGE` 1.5 out; nothing, and it hops up
+    `BOUND_HOP_RISE` 2 blocks nudged on at `LEAP_FORWARD`, straight up if that would come down with no floor within
+    `BOUND_HOP_DROP` 3 or on something that burns.
+  - *Zips (server, `WebTakeoverPath.zip`, `WebPower.takeoverZip`):* getting you away, every `ZIP_EVERY` 50 ticks (the
+    first `ZIP_FIRST` 20 in; `ZIP_RETRY` 10 when there's nothing) it fires Web Zip's pull and line (the same
+    `startPull`: `WebNet.Pull` and the `LINE` everyone draws, the suit's black corded rope while the suit shows) at the
+    floor of the waypoint furthest along that's `ZIP_MIN_RANGE` 5 to `ZIP_MAX_RANGE` 18 off, never more than
+    `ZIP_MAX_FALL` 0.5 below your feet, not in water, nothing that burns there, in clear sight from the eyes (the ray
+    meets that very top, or for a ledge over your head its near face just under the edge, where the zip hangs you and
+    perches you up), and a clear line for the feet and the head the whole way (no blocks, water or lava). Each
+    waypoint skipped scores 1, and running (or climbing) each block up `ZIP_HIGH_WEIGHT` 1.5. Running, it also fans
+    out (`ZIP_FAN_YAWS` 5 ways over ±`ZIP_FAN_SPREAD` 60° round the line away from the threat, pitched up 15-60°) for
+    high ground off the path, `ZIP_FAN_MIN_RISE` 2+ up and `ZIP_FAN_GAIN` 2 further from the threat. Any takeover zips
+    up a waypoint `ZIP_CLIMB_RISE` 3+ above you (out of a pit, up a cliff). No cooldown on your own Zip and no shooter
+    needed: it's the symbiote's cord. While it reels you in the path isn't touched (that's progress); once you're within
+    `ZIP_ARRIVED` 1.5 of the spot, or the pull's over, it looks for a way again at once.
+  - *Your screen:* a bound's spring kicks your view on and up (`BOUND_SHAKE` 0.5 over `BOUND_SHAKE_TICKS` 8), its
+    landing jolts it (`BOUND_LAND_SHAKE` 0.3); a ledge leap flings it up (`LEDGE_LEAP_SHAKE` 0.35); a zip yanks it
+    along the cord (`WebTakeoverPath.ZIP_SHAKE` 0.6, from behind you) and pulses the dark over your screen
+    (`ZIP_DREAD` 25 ticks), and the cord lifts you off your feet (`ZIP_LIFT` 0.3) as it takes you, your eyes turned
+    along it.
+  - Dormant, it only ever takes the wheel to save itself, so only that run bounds and zips.
 - **Stuck:** moved less than `STUCK_MOVE` 0.9 in `STUCK_TICKS` 30 (and not in reach of the prey): it re-paths at once
   (and stays off the straight line for `DIRECT_BAN_TICKS` 60). Stuck `STUCK_RIP_AFTER` 2 times running: it rips.
 - **Ripping through (debris-style since 0.8.3):** no path within the budget, a sealed room, or stuck: the tendrils
@@ -952,8 +1169,8 @@ adds `BREAK_FREE_STRESS` 10 stress. A meter shows on the HUD (a tick mark at hal
 **Struggle lockout, ripping out, quicker takeovers, the gift.**
 - *Self takeovers are 2x quicker* (`SELF_TAKEOVER_SPEED` 2.0; every takeover is one it starts itself): the suit and big
   body engulf you in half the time (`WebSuitGrowth`, a change made while `WebSymbioteClient.seized`), the dread swells in
-  twice as fast (the struggle bar drains as before; doubled it was unwinnable). Put on by hand (`DONNED`), the suit
-  or big body lashes its tongue once as the head forms (`WebHulk.DON_LASH_AT`, `submitSuitTongue` on the plain suit).
+  twice as fast (the struggle bar drains as before; doubled it was unwinnable). Put on by hand (`DONNED`), the big
+  body lashes its tongue once as the head forms (`WebHulk.DON_LASH_AT`; the plain suit's lash is gone, see the top).
 - *Lockout:* push the bar past `LOCKOUT_SURGE` 0.5 twice in one takeover (it must fall back under `LOCKOUT_REARM` 0.25
   between: "it surges back over you", shake `SURGE_BACK_SHAKE` 0.8, full dread, a `surge.1-3` taunt) and you win: the
   takeover ends and the suit is disabled for `SUIT_LOCKOUT_TICKS` 1200 (`LOCKOUT` attachment, saved; counts as

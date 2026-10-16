@@ -144,9 +144,14 @@ public final class WebSuitTear {
 			model.root().visible = false;
 		} else if (role == WebSuitGrowth.Role.SUIT) {
 			float mask = 1.0F - ease(t / MASK_END);
+			Float face = avatar.getData(WebSuitGrowth.FACE);
+			if (face != null) {
+				// (the fight won: the face stays bare as the rest settles back)
+				mask = Math.min(mask, 1.0F - ease(face));
+			}
 			shrink(h.head, mask);
-			// the torso is drawn as torn strips (submit)
-			h.body.visible = false;
+			// the torso is drawn as torn strips (submit) once they start to come away; until then it's whole
+			h.body.visible = !strips(t);
 			float legs = 1.0F - ease((t - 0.6F) / 0.3F);
 			shrink(h.rightLeg, legs);
 			shrink(h.leftLeg, legs);
@@ -154,6 +159,11 @@ public final class WebSuitTear {
 			slide(h.rightArm, sleeves);
 			slide(h.leftArm, sleeves);
 		}
+	}
+
+	/** The torso is drawn as torn strips: from when the first strip starts to come away (before, the suit's own torso). */
+	static boolean strips(float t) {
+		return t > CLAW_END;
 	}
 
 	/** Shrinks a part toward its joint (its pivot), {@code cover} of it left. */
@@ -204,7 +214,7 @@ public final class WebSuitTear {
 
 	/** Draws the tear-off's strips, strands and tendrils ({@code poseStack} at the layer's, before the model root). */
 	static void submit(PoseStack poseStack, SubmitNodeCollector collector, AvatarRenderState state, PlayerModel parent, float t) {
-		if (state.isInvisible) {
+		if (state.isInvisible || !strips(t)) {
 			return;
 		}
 		float time = state.ageInTicks;

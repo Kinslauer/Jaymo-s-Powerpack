@@ -77,5 +77,15 @@
   "message.jaymospowers.costume.tailor.cannot_open": "That player can't open the costume designer",
   "screen.jaymospowers.costume.tailor_title": "Tailor's Costume",
   "screen.jaymospowers.costume.tailor_sub": "Design it, and the tailor sews it for emeralds",
-  "screen.jaymospowers.costume.from_set": "From your power: the %s set"
+  "screen.jaymospowers.costume.from_set": "From your power: the %s set",
+  "key.jaymospowers.costume_mask": "Costume Mask (off / on)",
+  "costume.jaymospowers.key.mask": "Take your %s off: your face shows (and who you are)",
+  "costume.jaymospowers.key.mask.name": "Unmask",
+  "costume.jaymospowers.key.mask.off": "Put your %s back on: your face is hidden again",
+  "costume.jaymospowers.key.mask.off.name": "Mask up",
+  "message.jaymospowers.costume.mask_off": "You take your %s off",
+  "message.jaymospowers.costume.mask_on": "You put your %s back on",
+  "message.jaymospowers.costume.no_mask": "Your costume has nothing on the head to take off",
+  "screen.jaymospowers.costume.mask_off": "Mask off",
+  "screen.jaymospowers.costume.mask_on": "Mask on"
 }

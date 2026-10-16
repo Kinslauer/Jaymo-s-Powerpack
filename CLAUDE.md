@@ -11,7 +11,7 @@ how to build, hard-won 26.3 API facts, the user's preferences, and what to do ne
 - Bump the version on every release. Never commit `Serverfiles/` (it holds a secret).
 - Build to check work; don't launch long dev client/server runs unless the user asks.
 - Next Powers patch: `docs/Plan-0.8.md` (4 tracks: Gravity, Arsenal, Chrono, Web; open questions at the end).
-- Default keys: R/G/V/B = abilities 1-4, C = ultimate, Z = mode, H = menu. "G+B" means G, then B (e.g. Crush
+- Default keys: R/G/V/B = abilities 1-4, C = ultimate, Z = mode, H = menu, ' = costume mask. "G+B" means G, then B (e.g. Crush
   released inside your own Gravity Well).
 - Tuning numbers live in `static final` constants at the top of each class; change balance there.
 - Optional mods (Kitchen, WeaponMod) only through a compat class that checks they're loaded (`KitchenCompat`).

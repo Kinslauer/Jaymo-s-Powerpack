@@ -22,6 +22,8 @@ public final class WebFeral {
 	static final float IDLE_BEND = 0.35F, RUN_BEND = 1.35F;
 	/** Doubled over in pain while it grows; the knees bent in the hunch (radians), and how far that sinks it (pixels). */
 	private static final float PAIN_BEND = 1.3F, KNEE_BEND = 0.3F;
+	/** The big body's head: how hard it twitches now and then, and how far it's tilted standing (radians; were 0.25/0.12). */
+	private static final float HEAD_TWITCH = 0.1F, HEAD_TILT = 0.04F;
 	/** Its share of the growth: doubling over until {@code PAIN_IN}, writhing until {@code PAIN_OUT}, then rising. */
 	private static final float PAIN_IN = 0.15F, PAIN_OUT = 0.7F;
 	/** The hip, in model pixels below the neck. */
@@ -182,11 +184,12 @@ public final class WebFeral {
 		place(h.leftArm, 5.0F, armY, bend);
 		h.body.xRot = bend + breathe * 0.03F;
 		h.body.yRot = 0.0F;
-		// the head stays up, looking ahead (and where the player looks, a little); now and then it twitches
+		// the head stays up, looking ahead (and where the player looks, a little); now and then it twitches, a little
+		// (it sits on the torso's neck, WebHulk.neck: Andy, "the head clips and animates separately it looks like")
 		float twitch = (float)Math.pow(Math.max(0.0F, Mth.sin(state.ageInTicks * 0.23F) * Mth.sin(state.ageInTicks * 0.071F)), 10.0);
-		h.head.xRot = state.xRot * Mth.DEG_TO_RAD * 0.5F - bend * 0.85F + twitch * 0.25F;
-		h.head.yRot += Mth.sin(state.ageInTicks * 1.7F) * 0.15F * twitch;
-		h.head.zRot = (1.0F - run) * 0.12F + twitch * 0.2F;
+		h.head.xRot = state.xRot * Mth.DEG_TO_RAD * 0.5F - bend * 0.85F + twitch * HEAD_TWITCH;
+		h.head.yRot += Mth.sin(state.ageInTicks * 1.7F) * HEAD_TWITCH * 0.5F * twitch;
+		h.head.zRot = (1.0F - run) * HEAD_TILT + twitch * HEAD_TWITCH * 0.5F;
 
 		// hunched: arms hang heavy, forward and out, swinging as it walks
 		float walkSwing = Mth.cos(pos * 0.6662F) * speed * 0.6F;
@@ -248,8 +251,11 @@ public final class WebFeral {
 	 * with the body bent {@code bend} at the hip.
 	 */
 	public static Vec3 bodyPoint(Player player, float partialTick, float bend, float x, float y, float z) {
-		float vy = y - HIP;
-		float my = HIP + vy * Mth.cos(bend) - z * Mth.sin(bend);
+		// the big body's frame: the hips LEG_LIFT higher, the torso TORSO long (WebHulk.shift)
+		boolean big = WebSymbiote.bulked(player);
+		float hip = big ? HIP - WebHulkMesh.LEG_LIFT : HIP;
+		float vy = (y - HIP) * (big && y < HIP ? WebHulkMesh.TORSO / 12.0F : 1.0F);
+		float my = hip + vy * Mth.cos(bend) - z * Mth.sin(bend);
 		float mz = vy * Mth.sin(bend) + z * Mth.cos(bend);
 		float yaw = Mth.lerp(partialTick, player.yBodyRotO, player.yBodyRot) * Mth.DEG_TO_RAD;
 		Vec3 forward = new Vec3(-Mth.sin(yaw), 0.0, Mth.cos(yaw));

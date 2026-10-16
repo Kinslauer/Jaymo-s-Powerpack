@@ -47,6 +47,8 @@ public final class WebPowerClient implements PowerClient {
 	/** Called once from {@link com.jaymospowers.client.JaymosPowersClient}: renderers, client packets, the PowerClient. */
 	public static void init() {
 		WebCutClient.register();
+		// Combat Roll's charges, for the Spider-Sense counters
+		WebRollsClient.init();
 		// a chunk of wall in a tendril's grip: left click swings the main one's, right click the other's; with the
 		// tendrils full (two creatures, debris and a creature, two clumps), left click is a combo instead
 		net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> {
@@ -236,7 +238,8 @@ public final class WebPowerClient implements PowerClient {
 		if (key == PowerKey.ABILITY_3) {
 			long now = player.level().getGameTime();
 			if (down) {
-				shotChargeStart = now;
+				// (no shooter web, no charge: the server clicks dry and says why)
+				shotChargeStart = WebPower.shotLoaded(player) ? now : -1;
 			} else {
 				if (shotChargeStart >= 0) {
 					shotFiredAt = now;
@@ -475,6 +478,11 @@ public final class WebPowerClient implements PowerClient {
 			strikeChip(graphics, font, x + (CHIP + CHIP_GAP) * 4, y, ready == null ? 0L : ready - now);
 		}
 		chip(graphics, font, x + CHIP + CHIP_GAP, y, PowerKey.ABILITY_3, Items.COBWEB, cooldowns.shot() - now, (int)Math.max(1L, cooldowns.shot() - shotFiredAt));
+		if (JaymosPowersClient.isUnlocked(PowerKey.ABILITY_3) && !WebPower.shotLoaded(player)) {
+			// on organic web (no shooters, or dry) V does nothing: the chip's icon is shaded out
+			int bx = x + CHIP + CHIP_GAP;
+			graphics.fill(bx + 2, y + 2, bx + 18, y + 18, 0xC0000000);
+		}
 		if (shotChargeStart >= 0 && now >= cooldowns.shot()) {
 			// charging: a bar fills under the chip, flashing when full
 			float charge = Math.min(1.0F, (now - shotChargeStart) / (float)WebPower.SHOT_CHARGE_TICKS);

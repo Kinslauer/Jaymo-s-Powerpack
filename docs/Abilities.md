@@ -3,7 +3,10 @@
 Edit the **Change to** column (or anything else) and send it back. Blank means keep it as it is.
 
 **Keys:** R G V B are the four abilities; **Z** is the power's mode; **C** is the ascended ability; **X** is the
-power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts with only its **starter**, and unlocks its four abilities one by one by using them.
+power skill key (Web: the symbiote menu; Wind: Tempest Kick). **'** (apostrophe, 0.12.3) is the costume mask key, for
+everyone: it takes a worn costume's mask, hood, helmet or other head piece off and puts it back (face shown: no secret
+identity), and with a Rig Helm and no costume head piece it flips the faceplate; also the Costume Table's Mask button and
+`/costume mask`. Every power starts with only its **starter**, and unlocks its four abilities one by one by using them.
 **Ascended** and **corrupted** are separate fates: a power can be one, the other, or both.
 
 ---
@@ -83,12 +86,12 @@ power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts
 
 | Line | Form | Key | Ability | What it does now | Change to |
 |---|---|---|---|---|---|
-| 85 | Starter | B | Webline | Hold on one block, let go on another: a walkable web bridge (24 blocks, lasts 60 s). Kept for good. Symbiote bridges are black rope (suit) or tendrils (Living Armor). | |
+| 85 | Starter | X / Jump (mid-air) | Webbed Fists, Web wings | Before level 1 these are all you have (Webbed Fists on X last 30 s; wings below). From level 1, B strings weblines: hold on one block, let go on another for a walkable web bridge (24 blocks, lasts 60 s); kept for good (Yank builds on it: B at a block is still a webline). Symbiote bridges are black rope (suit) or tendrils (Living Armor). | |
 | 86 | Base | R / G (hold) | Swing | Main- and off-hand swing webs; a real pendulum: speed builds through the bottom of the arc and stalls at the top. Let go on the upswing for a boost. Up to 5 lines when mastered. No fall damage while swinging. | |
 | 87 | Base | both webs + Sneak | Slingshot | Hold Jump to draw back, release to fire. The draw always grinds into the floor under you (and the wall behind): it cracks, then breaks (3×3 with Living Armor). If the floor goes and you're over air, the lines snap and you ragdoll for 2 s. | |
 | 88 | Base | Jump (mid-air) | Web wings | Glide like an elytra: pitch down to dive and build speed, pull up to trade it for height. Hold Sneak to airbrake (arms flare forward, legs tuck). Landing from a glide does no fall damage; a fast landing still rolls. | |
 | 89 | Base | Z | Web Zip | Zip to where you aim; let go short and you're flung up. | |
-| 90 | Base | V | Web Shot | **Tap**: a fast webshooter pellet (0.75 heart; 0.2 s cooldown, no webs; none with the symbiote, whose V only charges). **Hold 1 s+**: the charged blast (splash Slowness III, cobwebs, up to 5 hearts; the symbiote's black mass up to 9). | |
+| 90 | Base | V | Web Shot | Only from web shooters with fluid (one web a shot); on organic web V does nothing (the suit's black mass excepted). **Tap**: a fast webshooter pellet, one per tap as fast as you tap (0.75 heart; five hits in a row cocoon the target; none with the symbiote, whose V only charges). **Hold 1 s+**: the charged blast (splash Slowness III, cobwebs, up to 5 hearts; the symbiote's black mass up to 9). | |
 | 91 | Base | B | Yank | **Tap**: web a creature and pull it in. **Hold**: keep it on a lead; release aimed at a block to hitch it there. A big one pulls you to it. | |
 | 92 | Any | punch | Cut lines | Anyone can punch a web line (swing, hitch or bridge) to break it; each takes 1-4 punches. | |
 | 93 | Ascended (Spider-Sense) | passive | Spider-Sense | Threats about to hurt you glow red. Sense charges grow as the power levels (1 at the start, up to 4 with every ability, 5 ascended); each dodges a hit, and right click just after counters with one of 9 web moves (9 tendril/maw moves in the symbiote suit). Up to 5 hits are dodged, each charge on its own 20 s cooldown, with an acrobatic move every time: a spinning sidestep, a backflip into a crouch, a duck and roll, or a weave. | |

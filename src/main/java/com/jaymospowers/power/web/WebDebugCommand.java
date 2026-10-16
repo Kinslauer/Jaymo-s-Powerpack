@@ -8,7 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * Test commands (gamemasters): {@code /powerdebug web symbiote bond|reject|feed}, {@code /powerdebug web symbiote level <0-100>} (the bond's strength), {@code /powerdebug web swung <blocks>}
+ * Test commands (gamemasters): {@code /powerdebug web symbiote bond|reject|feed}, {@code /powerdebug web symbiote dormant <ticks>}, {@code /powerdebug web symbiote level <0-100>} (the bond's strength), {@code /powerdebug web swung <blocks>}
  * and {@code /powerdebug web crater} (a crater, goo and all, right where you stand).
  */
 final class WebDebugCommand {
@@ -38,6 +38,12 @@ final class WebDebugCommand {
 						.then(Commands.literal("use")
 							.then(Commands.argument("ability", IntegerArgumentType.integer(0, WebSymbiote.SUIT_TOGGLE)).executes(c -> {
 								WebSymbiote.use(c.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(c, "ability"));
+								return 1;
+							})))
+						// dormant for this many ticks (0 wakes it), as after the first bond (WebSymbioteBond)
+						.then(Commands.literal("dormant")
+							.then(Commands.argument("ticks", IntegerArgumentType.integer(0, WebSymbioteBond.DORMANT_MAX_TICKS)).executes(c -> {
+								WebSymbioteBond.setDormant(c.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(c, "ticks"));
 								return 1;
 							})))
 						.then(Commands.literal("reject").executes(c -> {
