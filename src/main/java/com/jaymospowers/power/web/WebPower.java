@@ -77,7 +77,8 @@ public final class WebPower implements Power {
 	/**
 	 * Holding Yank keeps the web stuck to its target like a lead: past {@code TETHER_LENGTH} it's pulled back toward
 	 * you (springy, at most {@code TETHER_MAX_PULL} b/t a tick), so you can drag it along or let it hang under you. The
-	 * line snaps if it's stretched past {@code TETHER_BREAK}, or if the target hits something (a player: swings).
+	 * line snaps if it's stretched past {@code TETHER_BREAK} (a mob: for {@code WebLead.MOB_SNAP_TICKS} in a row), or if
+	 * a held player hits something or swings (a mob's attacks don't break it; see {@link WebLead}).
 	 */
 	public static final double TETHER_LENGTH = 3.0;
 	public static final double TETHER_SPRING = 0.25;
@@ -328,10 +329,10 @@ public final class WebPower implements Power {
 
 			}
 		});
-		// a held target that hits anything breaks free
+		// a held player who hits anything breaks free (a mob's attacks don't: see WebLead)
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			Entity attacker = source.getEntity();
-			if (attacker == null || !(entity.level() instanceof ServerLevel level)) {
+			if (attacker == null || !WebLead.fightsFree(attacker) || !(entity.level() instanceof ServerLevel level)) {
 				return;
 			}
 			for (ServerPlayer caster : level.players()) {
@@ -341,6 +342,7 @@ public final class WebPower implements Power {
 				}
 			}
 		});
+		WebLead.register();
 	}
 
 	@Override
@@ -1019,7 +1021,7 @@ public final class WebPower implements Power {
 		Vec3 to = hand.subtract(target.position().add(0.0, target.getBbHeight() * 0.5, 0.0));
 		double distance = to.length();
 		if (player.tickCount % WebHeft.BURN_EVERY == 0) {
-			Vec3 burn = WebHeft.burning(player.level(), hand, target.getBoundingBox().getCenter(), target);
+			Vec3 burn = WebHeft.burning(player.level(), hand, target.getBoundingBox().getCenter(), WebLead.burnTarget(target));
 			if (burn != null) {
 				// it burns through
 				WebHeft.burnFx(player.level(), burn);
@@ -1027,22 +1029,30 @@ public final class WebPower implements Power {
 				return;
 			}
 		}
-		boolean swinging = target instanceof LivingEntity living && living.isSwinging();
+		// (only a caught player's swing fights it off: a mob attacking stays on the lead, see WebLead)
+		boolean swinging = WebLead.fightsFree(target) && target instanceof LivingEntity living && living.isSwinging();
 		boolean settling = player.level().getGameTime() - state.tetherSince < TETHER_SETTLE_TICKS;
-		if (distance > TETHER_BREAK && !settling || swinging && !state.tetherWasSwinging) {
+		boolean player2 = target instanceof Player;
+		boolean tooFar = distance > TETHER_BREAK && !settling;
+		if (tooFar && !player2) {
+			// a mob knocked past the break length (a punch, a fall) only snaps it if it stays out there
+			tooFar = ++state.tetherStrain >= WebLead.MOB_SNAP_TICKS;
+		} else if (!player2 && state.tetherStrain > 0) {
+			state.tetherStrain--;
+		}
+		if (tooFar || swinging && !state.tetherWasSwinging) {
 			// pulled too far, or a player fought it off
 			snapTether(player, state);
 			return;
 		}
 		state.tetherWasSwinging = swinging;
-		boolean player2 = target instanceof Player;
 		// a caught player can lean away against the line until it gives
 		if (player2 && distance > TETHER_LENGTH + PLAYER_STRAIN_OVER) {
 			if (++state.tetherStrain >= PLAYER_STRAIN_TICKS) {
 				snapTether(player, state);
 				return;
 			}
-		} else if (state.tetherStrain > 0) {
+		} else if (player2 && state.tetherStrain > 0) {
 			state.tetherStrain--;
 		}
 		if (distance > TETHER_LENGTH) {
@@ -1063,6 +1073,8 @@ public final class WebPower implements Power {
 				mob.getNavigation().stop();
 			}
 		}
+		// on the lead it steps up full blocks, and is hauled up taller faces it's pulled at
+		WebLead.hold(target, distance < 1.0E-4 ? Vec3.ZERO : to.scale(1.0 / distance), distance > TETHER_LENGTH);
 		if (player.tickCount % 6 == 0) {
 			Vec3 mid = target.position().add(0.0, target.getBbHeight() * 0.5, 0.0).add(to.scale(0.5));
 			player.level().sendParticles(ParticleTypes.ITEM_COBWEB, mid.x, mid.y, mid.z, 1, 0.05, 0.05, 0.05, 0.0);
@@ -1254,7 +1266,8 @@ public final class WebPower implements Power {
 			WebShooters.fire(player, WebNet.MAIN, false);
 			return;
 		}
-		Entity target = entityInSight(player, YANK_RANGE * WebSymbiote.reachScale(player) * WebShooters.rangeScale(player, WebNet.MAIN));
+		// (aimed like a swing web: the creature nearest the crosshair, not only one dead under it)
+		Entity target = WebLead.aim(player, YANK_RANGE * WebSymbiote.reachScale(player) * WebShooters.rangeScale(player, WebNet.MAIN));
 		if (target == null) {
 			// aimed at a torch, lantern or bell, the web tears it off; at any other block, B starts a webline
 			if (WebHeft.ripOut(player)) {

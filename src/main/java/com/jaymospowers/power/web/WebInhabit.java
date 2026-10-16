@@ -37,7 +37,8 @@ import net.minecraft.world.phys.Vec3;
  * Nothing living can keep it: a peaceful host is spat out as inadequate after {@code CALM_MIN}-{@code CALM_MAX} ticks
  * (the mob reels, but lives), and the symbiote drops off to look again. A hostile mob keeps it longer
  * ({@code HOSTILE_MIN}-{@code HOSTILE_MAX}): stronger, faster, lashing with tendrils at everything near (as a behemoth
- * does), but unfit for it, so it wastes away ({@code DECAY} of its health a second) and dies by the end. Whenever a
+ * does), but unfit for it, so it wastes away ({@code DECAY} × {@code FOREIGN_HOST_DPS_MULT} of its health a second) and
+ * dies long before the end; a peaceful host wastes too, at half that, and is spat out alive. Whenever a
  * host dies, the symbiote drops out where it fell.
  */
 public final class WebInhabit {
@@ -48,6 +49,13 @@ public final class WebInhabit {
 	static final double HEALTH_BONUS = 20.0, DAMAGE_BONUS = 4.0, SPEED_BONUS = 0.25, KNOCKBACK_RESIST = 0.4;
 	/** A hostile host wastes away: this share of its max health every second, more as it nears its end (up to x3). */
 	static final float DECAY = 0.012F;
+	/**
+	 * A host that isn't a web slinger (every mob it takes) suffers it far worse: its wasting is this many times
+	 * {@code DECAY} (a hostile host now burns out in about 20 s, not 60-90). A peaceful one wastes too, at
+	 * {@code CALM_DECAY_SHARE} of that, without the speed-up at the end: it's spat out badly hurt, but alive. A web
+	 * slinger bonded to it is never hurt by this (their numbers are their own, in {@link WebSymbiote}).
+	 */
+	static final float FOREIGN_HOST_DPS_MULT = 3.5F, CALM_DECAY_SHARE = 0.5F;
 	/** A rejected host reels this long (ticks). */
 	static final int REJECT_REEL = 100;
 
@@ -163,11 +171,14 @@ public final class WebInhabit {
 			if (host.tickCount % 20 == 0) {
 				long left = until - now;
 				float urgency = 1.0F + 2.0F * (1.0F - Math.min(1.0F, left / (float)HOSTILE_MIN));
-				host.hurtServer(level, level.damageSources().magic(), host.getMaxHealth() * DECAY * urgency);
+				host.hurtServer(level, level.damageSources().magic(), host.getMaxHealth() * DECAY * FOREIGN_HOST_DPS_MULT * urgency);
 			}
 		} else if (now >= until) {
 			reject(level, host);
 			return;
+		} else if (host.tickCount % 20 == 0) {
+			// it isn't made for this either: it wastes as it waits to be spat out
+			host.hurtServer(level, level.damageSources().magic(), host.getMaxHealth() * DECAY * FOREIGN_HOST_DPS_MULT * CALM_DECAY_SHARE);
 		}
 		if (host.getRandom().nextInt(5) == 0) {
 			level.sendParticles(WebSymbiote.dust(0.9F), host.getX(), host.getY() + host.getBbHeight() * 0.5, host.getZ(), 1,
