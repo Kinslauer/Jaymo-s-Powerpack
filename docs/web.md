@@ -121,6 +121,27 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   hooked claw blade, turn about (`WebTendrilLayer.blades`, sizes `BLADE_*`).
 - **Tendrils stay out (0.11.99):** with Wall Crawl on, the tendrils are drawn the whole time (`WebSymbioteClient.extract`), not only while they hold you; holding Jump (a coiled leap, nothing to grab) used to make them vanish. They go only when Wall Crawl is switched off.
 - **Charged leap on Wall Crawl (0.11.99):** in the suit, holding Jump while the tendrils carry you coils them (you sink to `WebSymbioteClient.STRIDE_COIL` 0.55 of the stride height) instead of climbing; let go and they fling you with the charged leap, as from the ground (`launchable`), letting you fly for `LEAP_GRACE_TICKS` 8 before they grab again. On a wall or ceiling Jump still climbs. Without the suit, Jump still climbs the stride.
+- **The big body's charged leap (fix):** "large suit charge jump doesnt seem to work". The charged jump was only for
+  `suitShown` (the suit flag), and Living Armor at a whole bond wears the big body without that flag, so Jump was a
+  plain hop. `WebSymbiote.leapBody` (suit or big body) now gates it (`WebSwing.holdingCharge`/`tick`, the server's
+  `ChargeHold`). In the big body, Jump held on the ground coils the leap; held in the air it's still the slam.
+- **Meals by size:** Consume's meal goes by what the corpse was in life, standing (`WebSymbiote.mealSize`:
+  sqrt(width² × height / `MEAL_FULL_VOLUME` 8) of its type; the corpse's own box is low and narrow, so a chicken and a
+  ravager used to be almost the same meal). Your hunger: `MEAL_FOOD_MIN` 1 to `MEAL_FOOD_MAX` 16 points (chicken 3,
+  cow 7, horse 10, ravager 16) at saturation 0.3-0.8; what a full bar can't take heals you, `MEAL_OVERFLOW_HEAL` 1
+  health a point, on top of `CORPSE_HEAL_MIN` 2 to `CORPSE_HEAL_MAX` 10. The symbiote: 30-80 satiety, as before.
+- **Climate takeover:** "Spending too long in hot or cold climates will make the suit takeover and pathfind until he
+  finds a new one." In a biome with base temperature at least `CLIMATE_HOT` 1.5 (desert, savanna, badlands, the
+  Nether) or at most `CLIMATE_COLD` 0.15 (snowy and frozen biomes, peaks), time adds up (`CLIMATE_TICKS` 2400, 2 min;
+  it drains twice as fast anywhere temperate). At half it complains (`climate.<hot|cold>.uneasy.*`), 20 s before
+  (`CLIMATE_WARN_TICKS` 400) it warns you with a full dread, a shake and a heartbeat (`.warn.*`), then it takes the
+  wheel (`startMigrate`: dread, shake, `.go.*`). It finds the nearest temperate land biome (not sea or river) within
+  `MIGRATE_SEARCH` 640 at your ground's height (`findClosestBiome3d`) and walks you there as a sightseeing tour
+  (`tourSight` "climate"), in legs of up to `MIGRATE_LEG` 20 blocks (a `TOUR_TAG` marker each, veering round water and
+  never onto lava), each allowed `MIGRATE_LEG_TICKS` 600. Once your feet are in a temperate biome it lets go
+  (`.there.*`). Stuck on a leg, past `MIGRATE_MAX_LEGS` 48, or nowhere to go (the Nether: `.lost`), it gives up and
+  tries again after `MIGRATE_RETRY` 1200. Not in creative; struggling breaks it as any takeover (then the usual
+  takeover cooldown).
 - **Wall Crawl and Living Armor (0.11.66):** the tendrils carry you whenever Wall Crawl is on, flat ground included.
   When Living Armor withdraws or is put away, Wall Crawl switches off with it (`WebSymbiote.set`). At full bond
   (`BOND_MAX`) Living Armor no longer times out at `ARMOR_MAX_TICKS`: it stays until you put it away.
@@ -567,7 +588,7 @@ action bar, each heard once.
 | 0 | Tendril Grab | 100 | 2 | Pulls the creature under the crosshair within `TENDRIL_RANGE` 20 to you. Things over `TENDRIL_HEAVY_VOLUME` 8 pull you to them instead. Aimed at a block, it zips you there. |
 | 1 | Living Armor (toggle) | 40 | 0 | +`ARMOR_ABSORPTION` 16 max absorption (8 hearts), regrowing `ARMOR_REGEN` 1 every `ARMOR_REGEN_TICKS` 40, and +0.6 knockback resistance. Satiety drains �`ARMOR_DRAIN_MULT` 3. |
 | 2 | Wall Crawl (toggle) | 20 | 0 | Client movement (`WebSymbioteClient.tickCrawl`). Next to a wall in the air, tendrils latch on and drag you the way you're moving (0.8.6: see below); Sneak goes down. Under a ceiling, Jump or a Sneak press slams you up into it, you move with the movement keys, and another Sneak press drops you. Climbing over a top edge hops you onto the ledge. The server allows floating while it's on and resets fall distance while you're touching a wall or ceiling. |
-| 3 | Consume | 160 | 0 | Nothing is eaten alive (0.8). A corpse you carry is eaten. Else a free corpse within `CONSUME_CORPSE_RANGE` 6 (the one you look at first) is grabbed by a tendril, carried, then eaten. Else a non-player creature at **current** health <= `CONSUME_MAX_HEALTH` 10 within `CONSUME_RANGE` 3 is finished off by a lash (`CONSUME_FINISH_LAG` 8 ticks), and its corpse grabbed, carried and eaten. Tamed, name-tagged, inedible and corpse-less creatures are never taken. A corpse heals 6-16 and feeds 30-80 by size. |
+| 3 | Consume | 160 | 0 | Nothing is eaten alive (0.8). A corpse you carry is eaten. Else a free corpse within `CONSUME_CORPSE_RANGE` 6 (the one you look at first) is grabbed by a tendril, carried, then eaten. Else a non-player creature at **current** health <= `CONSUME_MAX_HEALTH` 10 within `CONSUME_RANGE` 3 is finished off by a lash (`CONSUME_FINISH_LAG` 8 ticks), and its corpse grabbed, carried and eaten. Tamed, name-tagged, inedible and corpse-less creatures are never taken. By the creature's size (see **Meals by size**): your hunger 1-16 points, heals 2-10 (more past a full bar), feeds it 30-80. |
 | 4 | Spike Burst | 240 | 8 | Everything within `SPIKE_RADIUS` 5 takes `SPIKE_DAMAGE` 8 (player attack) and is thrown `SPIKE_KNOCKBACK` 1.3 outward and 0.45 up. 38 rigid black spikes shoot out of the whole body (`WebSpikeLayer`, pose `WebPose.SPIKES`, `SPIKE_TICKS` 16); each victim flashes (`spikeHit`) and bleeds (`BladeBlood`). The roar throws the same spikes. |
 | 5 | Shroud | 600 | 5 | Invisibility (no particles) until you damage anything, or `SHROUD_TICKS` 100 (5 s). |
 

@@ -288,6 +288,26 @@ public final class WebSymbiote {
 	public static final double TOUR_REACH = 2.5, TOUR_VIEW_RISE = 6.0;
 	public static final String TOUR_TAG = "jaymospowers_symbiote_sight";
 	/**
+	 * Climate: it can't stand a hot biome (base temperature at least {@code CLIMATE_HOT}) or a cold one (at most
+	 * {@code CLIMATE_COLD}). Counted every {@code CLIMATE_CHECK} ticks you're in one (and back down
+	 * {@code CLIMATE_RECOVER} times as fast anywhere temperate); at half of {@code CLIMATE_TICKS} it complains, at
+	 * {@code CLIMATE_TICKS - CLIMATE_WARN_TICKS} it warns you (the screen darkens and shudders), and at
+	 * {@code CLIMATE_TICKS} it takes the wheel and walks you (the takeover path, as a sightseeing tour) toward the
+	 * nearest temperate biome (not sea or river) within {@code MIGRATE_SEARCH} blocks, in legs of up to
+	 * {@code MIGRATE_LEG} blocks each allowed {@code MIGRATE_LEG_TICKS}, at most {@code MIGRATE_MAX_LEGS} legs; it lets go
+	 * once your feet are somewhere temperate. Stuck on a leg, or nowhere temperate to go (the Nether), it gives up and
+	 * tries again after {@code MIGRATE_RETRY}. Struggling breaks it as any takeover.
+	 */
+	public static final float CLIMATE_HOT = 1.5F, CLIMATE_COLD = 0.15F;
+	public static final int CLIMATE_TICKS = 2400, CLIMATE_WARN_TICKS = 400, CLIMATE_CHECK = 20, CLIMATE_RECOVER = 2;
+	public static final int MIGRATE_SEARCH = 640, MIGRATE_SEARCH_STEP = 16, MIGRATE_LEG = 20, MIGRATE_LEG_TICKS = 600,
+		MIGRATE_MAX_LEGS = 48, MIGRATE_RETRY = 1200, CLIMATE_LINES = 3;
+	/** The search only looks at the height of the ground you stand on (a step taller than the world): never a cave below. */
+	public static final int MIGRATE_SEARCH_VERTICAL = 4096;
+	public static final double MIGRATE_REACH = 2.5;
+	/** The tour "sight" that marks a climate takeover. */
+	private static final String MIGRATE_SIGHT = "climate";
+	/**
 	 * Tendril Grab at a block: every tendril reaches for the wall and hauls you in; there, you're turned with your back
 	 * to it and they fan out and slam into it, cracking it where each one hits, holding for {@code WALL_HOLD} ticks.
 	 */
@@ -468,9 +488,20 @@ public final class WebSymbiote {
 	/** In a rampage, every this many strikes on a player is a bite: this much more damage, and it feeds. */
 	public static final int RAMPAGE_BITE_EVERY = 3;
 	public static final float RAMPAGE_BITE_DAMAGE = 8.0F;
-	/** Consume, on a corpse you're carrying (any size): heal and feed by its size. */
-	public static final float CORPSE_HEAL_MIN = 6.0F, CORPSE_HEAL_MAX = 16.0F;
+	/**
+	 * Consume, on a corpse you're carrying (any size): everything by the size of what it was in life, 0-1:
+	 * sqrt(width² × height / {@code MEAL_FULL_VOLUME}) of the creature standing (a chicken about 0.12, a pig or a
+	 * zombie 0.3, a cow 0.38, a horse 0.6, a ravager 1). It heals you {@code CORPSE_HEAL_MIN}-{@code CORPSE_HEAL_MAX},
+	 * feeds the symbiote {@code CONSUME_FEED}-{@code CORPSE_FEED_MAX}, and fills your hunger bar by
+	 * {@code MEAL_FOOD_MIN}-{@code MEAL_FOOD_MAX} points (a chicken 3, a cow 7, a ravager 16) at saturation
+	 * {@code MEAL_SATURATION_MIN}-{@code MEAL_SATURATION_MAX}; whatever won't fit in a full bar
+	 * ({@code MEAL_FULL_HUNGER}) heals you instead, {@code MEAL_OVERFLOW_HEAL} health a point.
+	 */
+	public static final float CORPSE_HEAL_MIN = 2.0F, CORPSE_HEAL_MAX = 10.0F;
 	public static final int CORPSE_FEED_MAX = 80;
+	public static final float MEAL_FULL_VOLUME = 8.0F;
+	public static final int MEAL_FOOD_MIN = 1, MEAL_FOOD_MAX = 16, MEAL_FULL_HUNGER = 20;
+	public static final float MEAL_SATURATION_MIN = 0.3F, MEAL_SATURATION_MAX = 0.8F, MEAL_OVERFLOW_HEAL = 1.0F;
 
 	private static final Identifier ARMOR_SCALE_ID = JaymosPowers.id("web_symbiote_bulk");
 
@@ -621,10 +652,6 @@ public final class WebSymbiote {
 		return Math.max(EAT_REACH, (int)Math.ceil(distance / 0.6) + 6);
 	}
 
-	/** What a meal does for your own hunger: food points per point healed, and the saturation modifier. */
-	public static final float CONSUME_HUNGER_PER_HEAL = 0.75F;
-	public static final float CONSUME_SATURATION = 0.6F;
-
 	/** A meal in progress: when it began, and whether it takes two bites. Synced to everyone, who see the maw work. */
 	public record Meal(long start, boolean big, int reach) {
 		public static final net.minecraft.network.codec.StreamCodec<io.netty.buffer.ByteBuf, Meal> STREAM_CODEC =
@@ -665,6 +692,13 @@ public final class WebSymbiote {
 		boolean touring;
 		String tourSight = "";
 		Vec3 tourFrom = Vec3.ZERO;
+		/** Climate (see {@link #CLIMATE_TICKS}): time spent somewhere hot or cold, how far it's got in complaining (0-2), whether it's the heat, when it may try again, and where it's taking you (legs walked). */
+		int climateTicks;
+		int climateWarned;
+		boolean climateHot;
+		long climateRetryAt;
+		Vec3 migrateTo = Vec3.ZERO;
+		int migrateLegs;
 		/** When it next remarks on what's around (0: not yet set). */
 		long remarkAt;
 		/** When it can swell to save itself again; whether this takeover is it running for its life. */
@@ -724,6 +758,9 @@ public final class WebSymbiote {
 		Vec3 eatFrom = Vec3.ZERO;
 		float eatHeal;
 		int eatFeed;
+		/** What the meal does for your own hunger: food points, and the saturation modifier (see {@link #MEAL_FOOD_MAX}). */
+		int eatFood = MEAL_FOOD_MIN;
+		float eatSaturation = MEAL_SATURATION_MIN;
 		/** The feeding (see {@link #FEED_KILL}): its stage, its prey or corpse, when the stage began, when the prey was seen dead. */
 		int feedStage;
 		int feedTarget = -1;
@@ -831,6 +868,14 @@ public final class WebSymbiote {
 	/** The big body is up: swollen, galloping, absorbing hits, three times as hungry. Only near death or in a takeover. */
 	public static boolean bulked(Player player) {
 		return isToggled(player, WebSymbioteState.BULK);
+	}
+
+	/**
+	 * A body that coils Jump into a charged leap: the suit, or the big body (Living Armor at a whole bond wears the big
+	 * body without the suit flag, which is why its charged jump used to do nothing).
+	 */
+	public static boolean leapBody(Player player) {
+		return suitShown(player) || bulked(player) && Powers.has(player, WebPower.INSTANCE);
 	}
 
 	/** The suit comes at your call (it shows itself on bonding, and in every takeover, regardless). */
@@ -1263,6 +1308,10 @@ public final class WebSymbiote {
 				live.curious = true;
 				startTakeover(player, live, now);
 			}
+		}
+		// it can't stand the heat or the cold for long: in the end it walks you out of it
+		if (player.tickCount % CLIMATE_CHECK == 0) {
+			tickClimate(player, live, now);
 		}
 		// it talks: what it makes of where you are
 		if (live.takeoverTicks <= 0 && live.feedStage == FEED_NONE && live.roarAt <= 0L) {
@@ -1936,6 +1985,209 @@ public final class WebSymbiote {
 		return topics;
 	}
 
+	/** How warm a biome is to it: 1 hot, -1 cold, 0 temperate (see {@link #CLIMATE_HOT}). */
+	private static int climate(Holder<net.minecraft.world.level.biome.Biome> biome) {
+		float heat = biome.value().getBaseTemperature();
+		return heat >= CLIMATE_HOT ? 1 : heat <= CLIMATE_COLD ? -1 : 0;
+	}
+
+	/** Somewhere it'll walk you to get out of the heat or the cold: temperate, and not open water. */
+	private static boolean temperateLand(Holder<net.minecraft.world.level.biome.Biome> biome) {
+		return climate(biome) == 0 && !biome.is(net.minecraft.tags.BiomeTags.IS_OCEAN) && !biome.is(net.minecraft.tags.BiomeTags.IS_DEEP_OCEAN)
+			&& !biome.is(net.minecraft.tags.BiomeTags.IS_RIVER);
+	}
+
+	/** Every {@link #CLIMATE_CHECK} ticks: the heat or the cold wears on it, until it takes you out of it. */
+	private static void tickClimate(ServerPlayer player, Live live, long now) {
+		if (player.isCreative() || live.bondTicks > 0) {
+			live.climateTicks = 0;
+			live.climateWarned = 0;
+			return;
+		}
+		if (live.touring && MIGRATE_SIGHT.equals(live.tourSight)) {
+			// already on its way out
+			return;
+		}
+		int climate = climate(player.level().getBiome(player.blockPosition()));
+		if (climate == 0) {
+			live.climateTicks = Math.max(0, live.climateTicks - CLIMATE_CHECK * CLIMATE_RECOVER);
+			if (live.climateTicks == 0) {
+				live.climateWarned = 0;
+			}
+			return;
+		}
+		live.climateHot = climate > 0;
+		live.climateTicks = Math.min(CLIMATE_TICKS, live.climateTicks + CLIMATE_CHECK);
+		String kind = live.climateHot ? "hot" : "cold";
+		if (live.climateWarned < 1 && live.climateTicks >= CLIMATE_TICKS / 2) {
+			// it complains (the whisper darkens your screen)
+			live.climateWarned = 1;
+			whisper(player, "climate." + kind + ".uneasy." + (1 + player.getRandom().nextInt(CLIMATE_LINES)));
+		} else if (live.climateWarned < 2 && live.climateTicks >= CLIMATE_TICKS - CLIMATE_WARN_TICKS) {
+			// the last warning: your screen darkens and shudders as it strains against you
+			live.climateWarned = 2;
+			whisper(player, "climate." + kind + ".warn." + (1 + player.getRandom().nextInt(CLIMATE_LINES)));
+			dread(player, 80, true, true);
+			com.jaymospowers.core.Shakes.send(player, 0.7F, null);
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 1.4F, 0.9F);
+		} else if (live.climateTicks >= CLIMATE_TICKS && now >= live.climateRetryAt && now >= live.takeoverReadyAt && live.takeoverTicks <= 0
+			&& live.feedStage == FEED_NONE && live.roarAt <= 0L && player.getAttached(EATING) == null) {
+			startMigrate(player, live, now);
+		}
+	}
+
+	/** It's had enough of the heat or the cold: it finds somewhere temperate and takes the wheel to walk you there. */
+	private static void startMigrate(ServerPlayer player, Live live, long now) {
+		ServerLevel level = player.level();
+		String kind = live.climateHot ? "hot" : "cold";
+		com.mojang.datafixers.util.Pair<BlockPos, Holder<net.minecraft.world.level.biome.Biome>> found = level.findClosestBiome3d(
+			WebSymbiote::temperateLand, level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, player.blockPosition()),
+			MIGRATE_SEARCH, MIGRATE_SEARCH_STEP, MIGRATE_SEARCH_VERTICAL);
+		if (found == null) {
+			// nowhere to go (the Nether): it only suffers
+			live.climateRetryAt = now + MIGRATE_RETRY;
+			whisper(player, "climate." + kind + ".lost");
+			return;
+		}
+		BlockPos to = found.getFirst();
+		live.migrateTo = new Vec3(to.getX() + 0.5, player.getY(), to.getZ() + 0.5);
+		live.migrateLegs = 0;
+		net.minecraft.world.entity.Interaction marker = migrateLeg(player, live, now);
+		if (marker == null) {
+			live.climateRetryAt = now + MIGRATE_RETRY;
+			return;
+		}
+		live.rampage = false;
+		live.curious = false;
+		live.touring = true;
+		live.tourSight = MIGRATE_SIGHT;
+		live.tourFrom = player.position();
+		live.stareUntil = 0L;
+		live.struggle = 0.0F;
+		live.resisted = false;
+		live.takeoverReadyAt = now + TAKEOVER_COOLDOWN;
+		live.takeoverTicks = MIGRATE_LEG_TICKS;
+		live.takeoverTarget = marker.getId();
+		WebTakeoverPath.stop(player, live.route);
+		live.route = new WebTakeoverPath.Route();
+		ServerPlayNetworking.send(player, new WebNet.Takeover(marker.getId(), live.takeoverTicks, false));
+		// it seizes you: the screen goes dark under it and lurches
+		dread(player, 100, true, true);
+		com.jaymospowers.core.Shakes.send(player, 1.1F, null);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 1.6F, 1.0F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 1.0F, 0.8F);
+		level.sendParticles(dust(1.4F), player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.8, 0.4, 0.0);
+		whisper(player, "climate." + kind + ".go." + (1 + player.getRandom().nextInt(CLIMATE_LINES)));
+	}
+
+	/**
+	 * The next leg of the way out: a marker up to {@link #MIGRATE_LEG} blocks toward the temperate spot, on the ground
+	 * (veering round open water or lava if it can). Null if there's nowhere to put it.
+	 */
+	private static net.minecraft.world.entity.@org.jspecify.annotations.Nullable Interaction migrateLeg(ServerPlayer player, Live live, long now) {
+		ServerLevel level = player.level();
+		Vec3 way = live.migrateTo.subtract(player.position()).horizontal();
+		double length = Math.min(MIGRATE_LEG, way.length());
+		if (length < 1.0) {
+			// (there already, by the biome map, but not by the ground: a little further on the way it came)
+			way = player.position().subtract(live.tourFrom).horizontal();
+			length = MIGRATE_LEG * 0.5;
+			if (way.lengthSqr() < 1.0E-4) {
+				way = player.getLookAngle().horizontal();
+			}
+		}
+		if (way.lengthSqr() < 1.0E-4) {
+			return null;
+		}
+		way = way.normalize();
+		BlockPos best = null;
+		boolean wet = false;
+		for (double turn : new double[] {0.0, 0.5, -0.5, 1.0, -1.0}) {
+			Vec3 dir = way.yRot((float)turn);
+			BlockPos column = BlockPos.containing(player.getX() + dir.x * length, 0.0, player.getZ() + dir.z * length);
+			if (!level.hasChunkAt(column)) {
+				continue;
+			}
+			BlockPos top = level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
+			if (level.getFluidState(top.below()).is(net.minecraft.tags.FluidTags.LAVA) || level.getFluidState(top).is(net.minecraft.tags.FluidTags.LAVA)) {
+				continue;
+			}
+			boolean water = !level.getFluidState(top.below()).isEmpty();
+			if (best == null || wet && !water) {
+				best = top;
+				wet = water;
+			}
+			if (!water) {
+				break;
+			}
+		}
+		if (best == null) {
+			return null;
+		}
+		net.minecraft.world.entity.Interaction marker = net.minecraft.world.entity.EntityTypes.INTERACTION.create(level, net.minecraft.world.entity.EntitySpawnReason.TRIGGERED);
+		if (marker == null) {
+			return null;
+		}
+		marker.setPos(Vec3.atBottomCenterOf(best));
+		marker.addTag(TOUR_TAG);
+		SIGHTS.put(marker.getUUID(), now + MIGRATE_LEG_TICKS + 100L);
+		if (!level.addFreshEntity(marker)) {
+			SIGHTS.remove(marker.getUUID());
+			return null;
+		}
+		live.migrateLegs++;
+		return marker;
+	}
+
+	/** On its way out of the heat or the cold, a leg at a time; somewhere temperate, it lets go. */
+	private static void tickMigrate(ServerPlayer player, Live live, long now, @org.jspecify.annotations.Nullable Entity target) {
+		ServerLevel level = player.level();
+		String kind = live.climateHot ? "hot" : "cold";
+		if (player.tickCount % 10 == 0 && climate(level.getBiome(player.blockPosition())) == 0) {
+			// out of it: it lets go
+			endTakeover(player, live);
+			live.climateTicks = 0;
+			live.climateWarned = 0;
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SNIFF, SoundSource.PLAYERS, 0.8F, 1.0F);
+			whisper(player, "climate." + kind + ".there." + (1 + player.getRandom().nextInt(CLIMATE_LINES)));
+			return;
+		}
+		if (target == null || !target.isAlive() || --live.takeoverTicks <= 0 || live.migrateLegs > MIGRATE_MAX_LEGS) {
+			// stuck (or lost): it gives up for now, and tries again later
+			endTakeover(player, live);
+			live.climateRetryAt = now + MIGRATE_RETRY;
+			whisper(player, "climate." + kind + ".stuck");
+			return;
+		}
+		drive(player, live, target, false, now);
+		if (live.takeoverTicks % 5 == 0) {
+			level.sendParticles(dust(1.0F), player.getX(), player.getY() + 1.0, player.getZ(), 3, 0.3, 0.6, 0.3, 0.0);
+		}
+		if (live.takeoverTicks % 60 == 0) {
+			// the whole way, your screen stays dark under it
+			dread(player, 80, false);
+		}
+		Vec3 to = target.position().subtract(player.position());
+		if (to.horizontalDistance() > MIGRATE_REACH || Math.abs(to.y) > 2.5) {
+			return;
+		}
+		// this leg walked: on to the next
+		net.minecraft.world.entity.Interaction next = migrateLeg(player, live, now);
+		if (next == null) {
+			endTakeover(player, live);
+			live.climateRetryAt = now + MIGRATE_RETRY;
+			whisper(player, "climate." + kind + ".stuck");
+			return;
+		}
+		SIGHTS.remove(target.getUUID());
+		target.discard();
+		live.takeoverTicks = MIGRATE_LEG_TICKS;
+		live.takeoverTarget = next.getId();
+		WebTakeoverPath.stop(player, live.route);
+		live.route = new WebTakeoverPath.Route();
+		ServerPlayNetworking.send(player, new WebNet.Takeover(next.getId(), live.takeoverTicks, false));
+	}
+
 	/** It wants to see something: it finds it (see {@link #TOUR_CHANCE}) and takes the wheel to walk you there. */
 	private static void startTour(ServerPlayer player, Live live, long now) {
 		live.takeoverReadyAt = now + TAKEOVER_COOLDOWN;
@@ -2037,6 +2289,10 @@ public final class WebSymbiote {
 
 	/** On its way to the sight; there, it turns your head to it, says so, and lets go. */
 	private static void tickTour(ServerPlayer player, Live live, long now, @org.jspecify.annotations.Nullable Entity target) {
+		if (MIGRATE_SIGHT.equals(live.tourSight)) {
+			tickMigrate(player, live, now, target);
+			return;
+		}
 		if (target == null || !target.isAlive() || --live.takeoverTicks <= 0) {
 			endTakeover(player, live);
 			return;
@@ -2983,10 +3239,23 @@ public final class WebSymbiote {
 		return true;
 	}
 
-	/** FEED: carried, so it eats (by the corpse's size). */
+	/**
+	 * How big a meal this corpse is, 0-1 (see {@link #MEAL_FULL_VOLUME}): by what it was in life, standing, since a
+	 * corpse lies low and narrow whatever it was (its own box made a chicken and a ravager nearly the same meal).
+	 */
+	static float mealSize(Entity corpse) {
+		net.minecraft.world.entity.EntityType<?> type = KitchenCompat.sourceType(corpse);
+		float width = type == null ? corpse.getBbWidth() : type.getDimensions().width();
+		float height = type == null ? corpse.getBbHeight() : type.getDimensions().height();
+		return Mth.clamp((float)Math.sqrt(width * width * height / MEAL_FULL_VOLUME), 0.0F, 1.0F);
+	}
+
+	/** FEED: carried, so it eats (by the creature's size). */
 	private static void startMeal(ServerPlayer player, Live live, long now, Entity corpse) {
-		float size = Mth.clamp(corpse.getBbWidth() * corpse.getBbWidth() * corpse.getBbHeight() / 2.0F, 0.0F, 1.0F);
+		float size = mealSize(corpse);
 		startEating(player, corpse, Mth.lerp(size, CORPSE_HEAL_MIN, CORPSE_HEAL_MAX), Math.round(Mth.lerp(size, CONSUME_FEED, CORPSE_FEED_MAX)));
+		live.eatFood = Math.round(Mth.lerp(size, MEAL_FOOD_MIN, MEAL_FOOD_MAX));
+		live.eatSaturation = Mth.lerp(size, MEAL_SATURATION_MIN, MEAL_SATURATION_MAX);
 		narrate(player, "feed");
 		if (live.takeoverMeal) {
 			// fed on its own kill: maybe it gets you out of here, during the meal or just after
@@ -3545,13 +3814,15 @@ public final class WebSymbiote {
 		level.sendParticles(blood, at.x, at.y, at.z, meal.big() ? 30 : 14, food.getBbWidth() * 0.4, food.getBbHeight() * 0.4, food.getBbWidth() * 0.4, 0.0);
 		level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 20, food.getBbWidth() * 0.4, food.getBbHeight() * 0.4, food.getBbWidth() * 0.4, 0.05);
 		food.discard();
-		player.heal(live.eatHeal);
 		feed(player, live.eatFeed, CONSUME_CALM);
 		// fed, it warms to you
 		addBond(player, BOND_MEAL);
 		live.craving = false;
-		// and you're fed too: about a hunger point per half-heart it healed
-		player.getFoodData().eat(Math.max(2, Math.round(live.eatHeal * CONSUME_HUNGER_PER_HEAL)), CONSUME_SATURATION);
+		// and you're fed too, by the size of the kill; what a full bar can't take heals you instead
+		int room = Math.max(0, MEAL_FULL_HUNGER - player.getFoodData().getFoodLevel());
+		int overflow = Math.max(0, live.eatFood - room);
+		player.getFoodData().eat(live.eatFood, live.eatSaturation);
+		player.heal(live.eatHeal + overflow * MEAL_OVERFLOW_HEAL);
 		live.eatTarget = -1;
 	}
 
