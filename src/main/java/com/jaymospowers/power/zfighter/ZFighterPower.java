@@ -155,6 +155,15 @@ public final class ZFighterPower implements Power {
 	static final int CHARGE_CRACKLE = 10;
 	/** Charging: puffs of smoky fog (a Verdant's, mist) rolling out at his feet every other tick, per tier. */
 	static final int CHARGE_FOG = 1;
+	/** Charging: aura motes a tick (when full: {@link #CHARGE_AURA_FULL}). */
+	static final int CHARGE_AURA = 2, CHARGE_AURA_FULL = 4;
+	/**
+	 * In a form, standing (not charging): bits of ground floating round him (this many a form, every other tick), a crackle
+	 * of lightning with a chance of (form + 1) in {@link #IDLE_CRACKLE} a tick, and sparks (this many a form). No smoke.
+	 */
+	static final int IDLE_FLOAT_PER_FORM = 2;
+	static final int IDLE_CRACKLE = 8;
+	static final int IDLE_SPARKS_PER_FORM = 2;
 	private static final int CRACKLE_COLOR = 0xD8ECFF;
 
 	private static final Identifier FIST_ID = JaymosPowers.id("zfighter_fists");
@@ -171,6 +180,9 @@ public final class ZFighterPower implements Power {
 	private static final Identifier APE_FIST_ID = JaymosPowers.id("zfighter_ape_fists");
 	private static final Identifier APE_HEALTH_ID = JaymosPowers.id("zfighter_ape_health");
 	private static final Identifier APE_SPEED_ID = JaymosPowers.id("zfighter_ape_speed");
+	private static final Identifier APE_JUMP_ID = JaymosPowers.id("zfighter_ape_jump");
+	private static final Identifier APE_GRAVITY_ID = JaymosPowers.id("zfighter_ape_gravity");
+	private static final Identifier APE_FALL_ID = JaymosPowers.id("zfighter_ape_fall");
 
 	/** The owner's HUD state (ki, cooldowns, what he's doing). Not saved: a relog clears it. */
 	public static final AttachmentType<ZFighterState> STATE = AttachmentRegistry.create(JaymosPowers.id("zfighter_state"),
@@ -190,6 +202,12 @@ public final class ZFighterPower implements Power {
 	/** Charging ki right now, for everyone's client (the stance): the form he's in plus one; absent when he isn't. */
 	public static final AttachmentType<Integer> CHARGE = AttachmentRegistry.create(JaymosPowers.id("zfighter_charge"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+	/**
+	 * Hands raised to a Spirit Bomb, for everyone's client (the pose): the one raising it, and everyone lending to it (any
+	 * player, Z Fighter or not). Absent otherwise; not saved.
+	 */
+	public static final AttachmentType<Boolean> SPIRIT_HANDS = AttachmentRegistry.create(JaymosPowers.id("zfighter_spirit_hands"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 	/** The form he's in (1-3), for everyone's client (the hair); absent in base form. */
 	public static final AttachmentType<Integer> FORM = AttachmentRegistry.create(JaymosPowers.id("zfighter_form"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
@@ -247,6 +265,10 @@ public final class ZFighterPower implements Power {
 		float apeSize;
 		/** How far he'd walked at the Great Ape's last footfall (the ground shakes every stride). */
 		float apeStepAt;
+		/** Which foot comes down next (the Great Ape's stomps alternate). */
+		boolean apeLeftFoot;
+		/** The highest he's been since his feet last touched down: a long drop ends in a stomp. */
+		double apePeak;
 		/** The guard (right click held): up, since when, when he may parry again, until when his punch counters. */
 		boolean guarding;
 		long guardStart;
@@ -311,6 +333,20 @@ public final class ZFighterPower implements Power {
 		return PowerKey.ABILITY_1;
 	}
 
+	/**
+	 * A charged technique bought with TP (the Ki Bomb) works on sneak+V before V has unlocked: it was paid for. The Ki
+	 * Wave, which every fighter starts with, still waits for V. Letting go of V always counts, so a gathered one fires.
+	 */
+	@Override
+	public boolean usableEarly(Player player, PowerKey key) {
+		if (key != PowerKey.ABILITY_3 || ZFighterLineage.ape(player)) {
+			return false;
+		}
+		int charged = ZFighterTraining.of(player).charged();
+		boolean bought = charged != ZFighterTraining.KI_WAVE && ZFighterTraining.of(player).knows(charged);
+		return bought && (player.isShiftKeyDown() || state(player).waveFrom() >= 0);
+	}
+
 	@Override
 	public PowerKey[] unlockOrder() {
 		return new PowerKey[] {PowerKey.ABILITY_1, PowerKey.ABILITY_2, PowerKey.ABILITY_4, PowerKey.ABILITY_3};
@@ -347,9 +383,8 @@ public final class ZFighterPower implements Power {
 	@Override
 	public void onGained(ServerPlayer player) {
 		player.setAttached(STATE, ZFighterState.NONE);
-		if (ZFighterLineage.of(player) == ZFighterLineage.NONE) {
-			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_pick_lineage").withStyle(ChatFormatting.GOLD));
-		}
+		// the lineage isn't chosen: it's in the blood (the heritage)
+		ZFighterLineage.inherit(player);
 	}
 
 	@Override
@@ -368,6 +403,9 @@ public final class ZFighterPower implements Power {
 		remove(player, Attributes.MAX_HEALTH, VITALITY_ID);
 		remove(player, Attributes.MAX_HEALTH, APE_HEALTH_ID);
 		remove(player, Attributes.MOVEMENT_SPEED, APE_SPEED_ID);
+		remove(player, Attributes.JUMP_STRENGTH, APE_JUMP_ID);
+		remove(player, Attributes.GRAVITY, APE_GRAVITY_ID);
+		remove(player, Attributes.FALL_DAMAGE_MULTIPLIER, APE_FALL_ID);
 		remove(player, Attributes.ENTITY_INTERACTION_RANGE, REACH_ID);
 		remove(player, Attributes.SCALE, SCALE_ID);
 		player.removeAttached(ZFighterGuard.GUARD);
@@ -389,13 +427,13 @@ public final class ZFighterPower implements Power {
 
 	@Override
 	public boolean allowsFloating(ServerPlayer player) {
-		return live(player).flying;
+		return live(player).flying || ZFighterLineage.ape(player);
 	}
 
 	@Override
 	public boolean skipsMovementCheck(ServerPlayer player) {
 		Live live = live(player);
-		return live.flying || live.stepUntil > player.level().getGameTime();
+		return live.flying || live.stepUntil > player.level().getGameTime() || ZFighterLineage.ape(player);
 	}
 
 	@Override
@@ -437,7 +475,7 @@ public final class ZFighterPower implements Power {
 				if (!creative) {
 					player.causeFoodExhaustion(CHARGE_EXHAUSTION);
 				}
-				aura(player, live, live.ki >= max ? 6 : 3);
+				aura(player, live, live.ki >= max ? CHARGE_AURA_FULL : CHARGE_AURA);
 				chargeFx(player, live, now);
 				if (now % 16 == 0) {
 					float fill = Mth.clamp(live.ki / max, 0.0F, 1.0F);
@@ -481,13 +519,13 @@ public final class ZFighterPower implements Power {
 			float ease = 1.0F - MASTERY_EASE * ZFighterTraining.mastery(player, live.form);
 			live.ki -= FORM_DRAIN[live.form] * ease * (live.limit > 0 ? LIMIT_STACK_DRAIN : 1.0F) * ZFighterLineage.drainFactor(live.lineage, live.form);
 			// the aura roars harder with each form, and the ground under him breaks up and rises
-			aura(player, live, 1 + 2 * live.form);
+			// (thinner while charging, which has its own aura, so he isn't lost in it)
+			aura(player, live, live.charging ? live.form : 1 + 2 * live.form);
 			if (now % 2 == 0) {
 				debris(player, live);
 			}
-			if (now % (8 - live.form * 2) == 0) {
-				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 1 + live.form, 0.4,
-					0.6, 0.4, 0.1);
+			if (!live.charging) {
+				idleFx(player, live, now);
 			}
 			if (live.ki <= 0.0F) {
 				endSuper(player, live);
@@ -860,7 +898,7 @@ public final class ZFighterPower implements Power {
 		DustParticleOptions dust = dust(live);
 		for (int i = 0; i < count; i++) {
 			double a = random.nextDouble() * Math.PI * 2.0;
-			double r = 0.45 + 0.12 * live.form + random.nextDouble() * (0.25 + 0.1 * live.form);
+			double r = 0.55 + 0.12 * live.form + random.nextDouble() * (0.25 + 0.1 * live.form);
 			double h = random.nextDouble() * player.getBbHeight();
 			level.sendParticles(dust, true, false, player.getX() + Math.cos(a) * r, player.getY() + h, player.getZ() + Math.sin(a) * r, 0, 0.0, 1.0,
 				0.0, 0.15 + 0.07 * live.form);
@@ -869,7 +907,45 @@ public final class ZFighterPower implements Power {
 
 	/** In a form near the ground: bits of the ground under him tear loose and rip upwards, more with each form. */
 	private static void debris(ServerPlayer player, Live live) {
-		debris(player, DEBRIS_PER_FORM * live.form, 1.2 + 0.8 * live.form, 0.4 + 0.25 * live.form, live.form >= 2);
+		debris(player, DEBRIS_PER_FORM * live.form, 1.2 + 0.8 * live.form, 0.4 + 0.25 * live.form, false);
+	}
+
+	/** Standing in a form: bits of the ground float round him, lightning crackles over him and sparks fly off him. */
+	private static void idleFx(ServerPlayer player, Live live, long now) {
+		ServerLevel level = player.level();
+		RandomSource random = level.getRandom();
+		if (now % 2 == 0) {
+			BlockState ground = groundUnder(player);
+			if (ground != null) {
+				BlockParticleOption bits = new BlockParticleOption(ParticleTypes.BLOCK, ground);
+				for (int i = 0; i < IDLE_FLOAT_PER_FORM * live.form; i++) {
+					// spawned at every height round him, each drifting gently up before it drops: they seem to hang there
+					double a = random.nextDouble() * Math.PI * 2.0;
+					double r = 0.8 + random.nextDouble() * (0.6 + 0.4 * live.form);
+					level.sendParticles(bits, true, false, player.getX() + Math.cos(a) * r, player.getY() + 0.1 + random.nextDouble() * 2.2,
+						player.getZ() + Math.sin(a) * r, 0, 0.0, 1.0, 0.0, 0.08 + random.nextDouble() * 0.1);
+				}
+			}
+		}
+		if (random.nextInt(IDLE_CRACKLE) <= live.form) {
+			crackle(player, random, live.form + 1);
+		}
+		if (now % (8 - live.form * 2) == 0) {
+			level.sendParticles(ParticleTypes.ELECTRIC_SPARK, true, false, player.getX(), player.getY() + 1.0, player.getZ(),
+				IDLE_SPARKS_PER_FORM * live.form + 1, 0.5, 0.7, 0.5, 0.15);
+		}
+	}
+
+	/** The solid block he stands over (within {@link #DEBRIS_HEIGHT}), or null. */
+	private static BlockState groundUnder(ServerPlayer player) {
+		BlockPos feet = player.blockPosition();
+		for (int down = 1; down <= DEBRIS_HEIGHT; down++) {
+			BlockState state = player.level().getBlockState(feet.below(down));
+			if (!state.isAir() && state.getFluidState().isEmpty() && state.isSolidRender()) {
+				return state;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -985,14 +1061,17 @@ public final class ZFighterPower implements Power {
 		// lineages: a Verdant's long arms and Giant forms; the Great Ape
 		int lineage = ZFighterLineage.of(player);
 		boolean ape = ZFighterLineage.ape(player);
-		set(player, Attributes.ENTITY_INTERACTION_RANGE, REACH_ID, lineage == ZFighterLineage.VERDANT ? ZFighterLineage.REACH : 0.0,
-			AttributeModifier.Operation.ADD_VALUE);
+		set(player, Attributes.ENTITY_INTERACTION_RANGE, REACH_ID, ape ? ZFighterLineage.apeReach(player)
+			: lineage == ZFighterLineage.VERDANT ? ZFighterLineage.REACH : 0.0, AttributeModifier.Operation.ADD_VALUE);
 		double scale = live.apeSize > 0.0F ? ZFighterLineage.apeScale(live.apeSize)
 			: lineage == ZFighterLineage.VERDANT ? ZFighterLineage.GIANT_SCALE[live.form] : 0.0;
 		set(player, Attributes.SCALE, SCALE_ID, scale, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 		set(player, Attributes.ATTACK_DAMAGE, APE_FIST_ID, ape ? ZFighterLineage.APE_FISTS : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.MAX_HEALTH, APE_HEALTH_ID, ape ? ZFighterLineage.APE_HEALTH : 0.0, AttributeModifier.Operation.ADD_VALUE);
 		set(player, Attributes.MOVEMENT_SPEED, APE_SPEED_ID, ape ? ZFighterLineage.APE_SPEED : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		set(player, Attributes.JUMP_STRENGTH, APE_JUMP_ID, ape ? ZFighterLineage.APE_JUMP : 0.0, AttributeModifier.Operation.ADD_VALUE);
+		set(player, Attributes.GRAVITY, APE_GRAVITY_ID, ape ? -ZFighterLineage.APE_LIGHT : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		set(player, Attributes.FALL_DAMAGE_MULTIPLIER, APE_FALL_ID, ape ? -1.0 : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		ZFighterCorruption.attributes(player, live);
 		// fused: the partner's fists and health added, and a little more
 		set(player, Attributes.ATTACK_DAMAGE, ZFighterFusion.FIST_ID, ZFighterFusion.fists(player), AttributeModifier.Operation.ADD_VALUE);
