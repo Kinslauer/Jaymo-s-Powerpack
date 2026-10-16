@@ -140,6 +140,10 @@ def packMods = [
 	// Key Binds screen (by name, by key, or by category), plus a filter for conflicting and unbound keys. Client-only.
 	[dep: "maven.modrinth:controlling:V6AbRm67", cf: [250398, 9110875]],
 	[dep: "maven.modrinth:searchables:wV79bLRS", cf: [858542, 9110866]],
+	// Clumps (MIT, by Jaredlll08): experience orbs merge into one orb whatever their values, and you soak up a whole clump
+	// at once instead of one orb a tick. Far fewer orb entities around mob farms, big fights, blocks mined in bulk and
+	// smelted stacks, so less server tick time and fewer orbs to draw. Needs Fabric API only. Client and server.
+	[dep: "maven.modrinth:clumps:J4I1wxJZ", cf: [256717, 8897016]],
 	// Naturalist (code MIT, art all rights reserved; Starfish Studios' own 26.3 Fabric build, needs only Fabric API):
 	// wildlife. Kingdoms keeps its predators out of natural spawning and sends them as rare wilderness encounters
 	// (Encounters), and keeps its elephants and mammoths out too since Kingdoms has its own
