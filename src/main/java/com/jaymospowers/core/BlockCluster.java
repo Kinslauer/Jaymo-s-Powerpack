@@ -46,7 +46,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * A chunk of blocks torn out of a wall or the ground, held together: Living Armor's tendrils rip one loose (Sneak + R/G
  * at a block), Gravity's Lift tears one up (R aimed at a block). Held, it hangs in front of you like anything else
- * held; thrown, it batters whatever it flies into and shatters on what stops it. Left lying, it crumbles after a while.
+ * held; thrown, it batters whatever it flies into and shatters on what stops it. Left lying, it crumbles after a while
+ * (a tendril-torn chunk is kept: it lies there until something moves or breaks it).
  * Never saved: a chunk left in an unloaded area is simply gone.
  */
 public class BlockCluster extends Entity {
@@ -125,6 +126,8 @@ public class BlockCluster extends Entity {
 	/** Never real blocks (debris conjured from nothing): it gives nothing back, pocketed or broken. */
 	private boolean temporary;
 	private boolean crumbling;
+	/** Kept: left lying it stays put for good (a chunk the symbiote's tendrils tore out), until something moves or breaks it. */
+	private boolean kept;
 	/** What happens once it has crumbled or broken away (a symbiote crawling out of a meteor's wreck). */
 	private @Nullable Runnable onGone;
 	/** Client side: how far a resting piece of debris has turned in flight (degrees), this tick and last. */
@@ -296,6 +299,12 @@ public class BlockCluster extends Entity {
 	/** Lingering debris (a shockwave's or a meteor's, or a dropped earthboard): wells and the like leave it be. */
 	public boolean lingering() {
 		return this.lingers;
+	}
+
+	/** Lies where it falls until something moves or breaks it: never crumbles or ages away on its own. */
+	public BlockCluster keep() {
+		this.kept = true;
+		return this;
 	}
 
 	/** Something to do when it's gone (crumbled away or broken). */
@@ -522,7 +531,7 @@ public class BlockCluster extends Entity {
 	}
 
 	private void serverTick(ServerLevel level) {
-		if (this.pieces().isEmpty() && this.tickCount > 5 || this.tickCount > MAX_AGE) {
+		if (this.pieces().isEmpty() && this.tickCount > 5 || this.tickCount > MAX_AGE && !this.kept) {
 			this.shatter(level);
 			return;
 		}
@@ -557,7 +566,7 @@ public class BlockCluster extends Entity {
 			return;
 		}
 		// left lying (not held: held things have no gravity), it crumbles in a while
-		if (!this.isNoGravity() && this.onGround()) {
+		if (!this.isNoGravity() && this.onGround() && !this.kept) {
 			if (++this.idle > this.lifetime) {
 				if (this.lingers) {
 					this.crumbling = true;

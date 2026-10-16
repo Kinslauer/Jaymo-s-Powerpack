@@ -117,7 +117,7 @@ final class WebTendrilWalk {
 	 */
 	static boolean striding(Player player) {
 		return com.jaymospowers.power.web.WebSymbiote.isBonded(player)
-			&& com.jaymospowers.power.web.WebSymbiote.isToggled(player, com.jaymospowers.power.web.WebSymbioteState.CRAWL)
+			&& com.jaymospowers.power.web.WebSymbiote.crawlTendrils(player)
 			&& !player.onGround() && !player.isPassenger() && !player.isFallFlying() && !player.getAbilities().flying && !player.isInWater()
 			&& !player.isSpectator() && anchors(player, STRIDE_REACH * player.getScale()) >= 2;
 	}

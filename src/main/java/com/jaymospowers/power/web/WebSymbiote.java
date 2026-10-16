@@ -246,19 +246,20 @@ public final class WebSymbiote {
 	/** The hold is told to the client again this many ticks before it would run out. */
 	static final int HOLD_RENEW = 40;
 	/**
-	 * Near death (at or under {@code DEFEND_HEALTH}), it swells into the big body and takes over to save itself,
+	 * Near death (at or under {@code DEFEND_HEALTH} of your max health, a share so few-hearted bodies aren't always
+	 * "near death"), it swells into the big body and takes over to save itself,
 	 * going for whatever hurt you; it costs the bond {@code DEFEND_STRESS}, and can't happen again for {@code DEFEND_COOLDOWN}.
 	 */
-	public static final float DEFEND_HEALTH = 6.0F;
+	public static final float DEFEND_HEALTH = 0.3F;
 	public static final int DEFEND_STRESS = 15, DEFEND_COOLDOWN = 1200;
 	/**
-	 * It will stop at nothing to live. At or under {@code DESPERATE_HEALTH} with a threat about, every
+	 * It will stop at nothing to live. At or under {@code DESPERATE_HEALTH} of your max health with a threat about, every
 	 * {@code DESPERATE_EVERY} it throws everything it has: a Spike Burst whenever it's ready, its tendrils lashing
 	 * without pause. At or under {@link #DEFEND_HEALTH} it goes into the Shroud and runs: it takes over and flees
 	 * the fight, around whatever's in the way, for open sky, until nothing's within {@code FLEE_SAFE} (or
 	 * {@code RUN_TICKS} have gone).
 	 */
-	public static final float DESPERATE_HEALTH = 10.0F;
+	public static final float DESPERATE_HEALTH = 0.5F;
 	public static final int DESPERATE_EVERY = 20, RUN_TICKS = 300;
 	public static final double FLEE_SAFE = 24.0, THREAT_RANGE = 16.0;
 	/** Hungry, it goes looking for a corpse this far off (else for something to kill), and a tendril carries it in. */
@@ -593,7 +594,8 @@ public final class WebSymbiote {
 	 * swells into Living Armor unasked: out of it, its tendrils burst from your back to do it, then withdraw.
 	 */
 	public static final int INSTINCT_CHECK_TICKS = 10;
-	public static final float INSTINCT_LOW_HEALTH = 8.0F;
+	/** (a share of your max health) */
+	public static final float INSTINCT_LOW_HEALTH = 0.4F;
 	public static final double INSTINCT_THREAT_RANGE = 3.0;
 	public static final int INSTINCT_COOLDOWN = 30;
 	public static final double INSTINCT_FIRE_SHOVE = 0.9;
@@ -802,6 +804,8 @@ public final class WebSymbiote {
 		/** It swelled into the armour only to eat: once the meal's done it goes back (the suit as it was). */
 		boolean feedingArmor;
 		boolean suitBeforeFeeding;
+		/** The big body shed by the Suit key while Living Armor stays out: it doesn't swell back until the armour comes off. */
+		boolean armorSlim;
 		/** Once it has gone looking for food it keeps at it until it has eaten (not just killed). */
 		boolean craving;
 		/** Starving: it hunts and feeds until it's full again ({@link #GORGE_FULL}). */
@@ -1023,12 +1027,25 @@ public final class WebSymbiote {
 		return isBonded(player) && !WebSymbioteBond.dormant(player) ? (int)Math.round(WebPower.ZIP_COOLDOWN * ZIP_COOLDOWN_SCALE) : WebPower.ZIP_COOLDOWN;
 	}
 
+	/**
+	 * Wall Crawl's tendrils carry you: Wall Crawl on AND Living Armor out (Andy). Wall Crawl without Living Armor is
+	 * the plain Web wall climb, no tendrils pulled out.
+	 */
+	public static boolean crawlTendrils(Player player) {
+		return isToggled(player, WebSymbioteState.CRAWL) && armored(player);
+	}
+
 	/** Wall Crawl is on: the server lets them hang on walls and ceilings without the flying kick. */
 	static boolean allowsFloating(ServerPlayer player) {
 		return isToggled(player, WebSymbioteState.CRAWL);
 	}
 
 	// ---- server ------------------------------------------------------------------------------------------------------
+
+	/** Health at or under {@code share} of max health (a share, not a heart count: Warrior-born and unfed bodies have few hearts). */
+	static boolean lowHealth(Player player, float share) {
+		return player.getHealth() <= player.getMaxHealth() * share;
+	}
 
 	/** A takeover has the wheel (it walks you, and coils your leaps). */
 	static boolean driving(ServerPlayer player) {
@@ -1411,7 +1428,7 @@ public final class WebSymbiote {
 		}
 
 		// wall crawl: hanging on a wall or ceiling is like being on a ladder
-		live.clinging = state.has(WebSymbioteState.CRAWL) && !player.onGround() && touchingWall(player);
+		live.clinging = crawlTendrils(player) && !player.onGround() && touchingWall(player);
 		if (live.clinging) {
 			player.resetFallDistance();
 		}
@@ -1460,7 +1477,7 @@ public final class WebSymbiote {
 		}
 		// near death it will stop at nothing: everything it has, and under three hearts, the Shroud and a run for it
 		LivingEntity threat = sulking(player) ? null : threat(player);
-		if (threat != null && player.getHealth() <= DEFEND_HEALTH && now >= live.defendReadyAt && (live.takeoverTicks <= 0 || !live.fleeing)
+		if (threat != null && lowHealth(player, DEFEND_HEALTH) && now >= live.defendReadyAt && (live.takeoverTicks <= 0 || !live.fleeing)
 			&& !(live.roarAt > 0L && live.roarDefend)) {
 			live.defendReadyAt = now + DEFEND_COOLDOWN;
 			abortFeeding(player, live);
@@ -1481,7 +1498,7 @@ public final class WebSymbiote {
 			// then into the Shroud and away (see endRoar)
 			startRoar(player, live, now, true, threat);
 			next = next.withStress(Math.min(STRESS_MAX, next.stress() + DEFEND_STRESS));
-		} else if (threat != null && player.getHealth() <= DESPERATE_HEALTH && !live.fleeing && now >= live.desperateAt) {
+		} else if (threat != null && lowHealth(player, DESPERATE_HEALTH) && !live.fleeing && now >= live.desperateAt) {
 			live.desperateAt = now + DESPERATE_EVERY;
 			desperate(player, live, now, threat);
 		}
@@ -1541,9 +1558,12 @@ public final class WebSymbiote {
 		// the big body is up exactly while it has the wheel
 		// (and, the bond whole, whenever you wear Living Armor: the big body is yours to drive)
 		// (and while its gift lasts: the big body it was driving, yours to steer)
+		if (!next.has(WebSymbioteState.ARMOR)) {
+			live.armorSlim = false;
+		}
 		boolean bulkWanted = live.takeoverTicks > 0 || roarAge >= ROAR_BULK_AT
-			|| next.has(WebSymbioteState.ARMOR) && next.bond() >= BOND_MAX && !live.feedingArmor && live.takeoverTicks <= 0
-			|| next.has(WebSymbioteState.ARMOR) && live.giftUntil > now && !sulking(player);
+			|| next.has(WebSymbioteState.ARMOR) && next.bond() >= BOND_MAX && !live.feedingArmor && live.takeoverTicks <= 0 && !live.armorSlim
+			|| next.has(WebSymbioteState.ARMOR) && live.giftUntil > now && !sulking(player) && !live.armorSlim;
 		if (bulkWanted != next.has(WebSymbioteState.BULK)) {
 			next = next.withFlag(WebSymbioteState.BULK, bulkWanted);
 			if (bulkWanted) {
@@ -2751,7 +2771,18 @@ public final class WebSymbiote {
 				// the suit while wearing the living armor brings you back to the suit, then back to your skin ... that way
 				// you can access whatever at whatever bond level"); with Living Armor put away the bond doesn't swell it
 				// back into the big body. The next press takes the suit off (WebSymbioteBond's fight, or the tear-off).
+				// The big body worn by choice (the bond whole, or its gift) sheds only the big body: Living Armor's
+				// tendrils stay out over the suit (Andy), and the next press brings that down as usual.
 				player.removeAttached(WebSymbioteBond.FACE);
+				Live slim = live(player);
+				if (bulked(player) && state.has(WebSymbioteState.ARMOR) && slim.takeoverTicks <= 0 && !slim.armorSlim) {
+					slim.armorSlim = true;
+					set(player, state.withFlag(WebSymbioteState.SUIT, true));
+					ServerLevel level = player.level();
+					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_BREAK, SoundSource.PLAYERS, 1.0F, 0.8F);
+					level.sendParticles(dust(1.2F), player.getX(), player.getY() + 1.0, player.getZ(), 12, 0.35, 0.7, 0.35, 0.0);
+					return;
+				}
 				set(player, state.withFlag(WebSymbioteState.SUIT, true).withFlag(WebSymbioteState.ARMOR, false));
 				long at = player.level().getGameTime();
 				WebSymbioteState.Cooldowns cooldowns = player.getAttached(COOLDOWNS);
@@ -3009,7 +3040,7 @@ public final class WebSymbiote {
 				threat = mob;
 			}
 		}
-		boolean danger = burning || blast != null || falling || threat != null || player.getHealth() <= INSTINCT_LOW_HEALTH;
+		boolean danger = burning || blast != null || falling || threat != null || lowHealth(player, INSTINCT_LOW_HEALTH);
 		if (!danger) {
 			return state;
 		}
