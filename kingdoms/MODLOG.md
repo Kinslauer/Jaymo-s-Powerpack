@@ -3259,6 +3259,19 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   - Nightborn: shadow soaking the hands, stars in it; moon-silver eyes glowing by day only; dark wisps at night only.
   - Earthling: training wraps and a ki glow round the fists; no eye glow, no particles.
 
+## 0.7.80: Tideborn wet and dry, Sylvan glow dims, heritage text trimmed (pack 0.12.3)
+- Andy's notes on the heritage screen and looks:
+  - The hint under the heritage cards ("Your heritage gives free attribute points ...") shows once a game session
+    and fades out after 5 seconds (`HeritageScreen.LEAD_MS`, `LEAD_FADE_MS`).
+  - Cut from the cards, for players to find out on their own: Verdant's stretch punch, Frostborn's ice prison,
+    Warrior-born's tail keys and villager fear and its growing-out-of-the-flaw numbers, Earthling's "no tail, no
+    mending, no frost".
+  - Tideborn get wet touching water or rain and stay wet `Heritage.TIDE_WET_TICKS` 2400 (2 minutes) after (`WET`,
+    saved). Wet, their blows land `TIDE_WET_DAMAGE` 15% harder and they drip; dry, the drips and glow stop and the
+    hunger flaw starts. Their marks, eyes and fin edges glow under water always, on land only at night while wet.
+  - Sylvan glow dims while sneaking and goes out entirely for a Thief or anyone with a Stealth perk; no fireflies
+    while sneaking. The server syncs both through `Heritage.LOOK`.
+
 ## 0.7.81: heritage looks under costumes (pack 0.12.5)
 - With Jaymo's Powers loaded, `PowersCover` asks its `BodyCover` (by reflection) what a costume or the symbiote's suit
   covers: under a face mask or the suit no heritage look, Emberborn marks or vampire face at all; under a hood no

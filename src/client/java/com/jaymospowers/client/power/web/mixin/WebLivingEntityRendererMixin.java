@@ -21,6 +21,7 @@ abstract class WebLivingEntityRendererMixin {
 		com.jaymospowers.client.FreefallPose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.power.web.WebBodyPose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.power.web.WebCounterPose.rotate(state, poseStack, entityScale);
+		com.jaymospowers.client.power.web.WebSuitTear.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.power.web.WebWallRunPose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.power.web.WebParkourPose.rotate(state, poseStack, entityScale);
 	}

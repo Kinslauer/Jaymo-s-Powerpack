@@ -158,6 +158,8 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 
 	private final TendrilModel model;
 	private static TendrilModel firstPersonModel;
+	/** The same tendrils on the mobs the symbiote rides ({@link #submitOnMob}). */
+	private static TendrilModel mobModel;
 
 	WebTendrilLayer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
 		super(renderer);
@@ -341,6 +343,30 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		poseStack.scale(-FP_SCALE, -FP_SCALE, FP_SCALE);
 		collector.submitModel(firstPersonModel, own, poseStack, RenderTypes.entityCutout(TEXTURE), avatar.lightCoords, OverlayTexture.NO_OVERLAY, 0);
 		heads(firstPersonModel, own, poseStack, collector, avatar.lightCoords);
+		poseStack.popPose();
+	}
+
+	/**
+	 * A mob the symbiote rides (a behemoth, or a mob it inhabits; see WebBehemothClient): the same Living Armor tendrils
+	 * out of its back, from the mob's own model space (the pose stack as its render layers get it), rooted
+	 * {@code rootY}, {@code rootZ} (model pixels: down from the model's top, back from its middle) and drawn
+	 * {@code size} times a player's. Its lashes and slams swing them as a wearer's strikes do.
+	 */
+	static void submitOnMob(PoseStack poseStack, SubmitNodeCollector collector, int light,
+		net.minecraft.client.renderer.entity.state.LivingEntityRenderState state, WebSymbioteClient.Tendrils tendrils, float rootY, float rootZ,
+		float size) {
+		if (mobModel == null) {
+			mobModel = new TendrilModel(createLayer().bakeRoot());
+		}
+		AvatarRenderState own = new AvatarRenderState();
+		own.setData(WebSymbioteClient.TENDRILS, tendrils);
+		own.ageInTicks = state.ageInTicks;
+		own.walkAnimationPos = state.walkAnimationPos;
+		own.walkAnimationSpeed = state.walkAnimationSpeed;
+		poseStack.pushPose();
+		poseStack.translate(0.0F, rootY / 16.0F, rootZ / 16.0F);
+		poseStack.scale(size, size, size);
+		collector.submitModel(mobModel, own, poseStack, RenderTypes.entityCutout(TEXTURE), light, OverlayTexture.NO_OVERLAY, state.outlineColor);
 		poseStack.popPose();
 	}
 

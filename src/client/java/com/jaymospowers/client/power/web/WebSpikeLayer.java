@@ -75,7 +75,8 @@ final class WebSpikeLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			return null;
 		}
 		float age = switch (pose.kind()) {
-			case WebPose.SPIKES -> time - pose.start();
+			// (they burst once it has gathered itself)
+			case WebPose.SPIKES -> time - pose.start() - WebSymbiote.SPIKE_GATHER_TICKS;
 			case WebPose.ROAR -> time - pose.start() - WebSymbiote.ROAR_BLAST_AT + SHOOT_TICKS;
 			default -> -1.0F;
 		};

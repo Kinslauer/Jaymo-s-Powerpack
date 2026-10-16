@@ -5,6 +5,61 @@ of each arc, and get a boost if you let go on the upswing. You keep that speed i
 fire again mid-air to chain swings. Three utility webs round out the kit. Accent colour `0xE0303A`; the icon is a
 cobweb.
 
+## Braided webs, a true rope, web shooters (0.12.4)
+Andy, on the swinging video: "I like the web design, and web shooter idea", and earlier "remake as much as possible,
+while retaining our tethers, it should NOT attach to the air". That mod is someone else's: these are our own code and
+art after its ideas. Webs still only stick to real blocks and creatures (`WebAnchors`' rules are unchanged).
+- **Braided lines (`WebLineRenderer.braid`):** a web line is a white rope of strands twisting round each other (a turn
+  every `BRAID_TURN` 0.9 blocks), each a camera-facing ribbon of `textures/entity/web_rope.png` (solid down the middle,
+  see-through at its edges, lit by the world so it isn't glowing at night), gathered into one at the hand and at the
+  splat (`BRAID_GATHER`), with fine fibres fraying off it (two-segment translucent wisps placed by a hash, swaying).
+  A web shooter's line is the full rope: `SHOOTER_STRANDS` 3, `SHOOTER_STRAND_WIDTH` 0.05, `SHOOTER_TWIST` 0.032, a
+  fibre every `SHOOTER_FIBRE_EVERY` 0.5 blocks, a 1.3× splat. The power's own organic web (no shooters, or dry) is
+  thinner and plainer: 2 strands, 0.03 wide, a fibre every 1.4 blocks. Hitch lines and weblines are organic braids.
+  The rope sim, the snaking shot, twang, hum and thinning all still shape it (a stretched line's strands thin). Past
+  `BRAID_FAR` 72 blocks a line falls back to the old flat line; each line is at most `BRAID_MAX_PIECES` 160 pieces
+  per strand, so several swingers stay cheap. The symbiote's black corded ropes were already a 3-strand twist and are
+  unchanged; spent (let-go) lines still fall as thin fading lines.
+- **A true rope (`WebSwing`):** the rope is no longer a spring. Slack (closer than its length) it does nothing at all;
+  taut (|body - anchor| >= rope length) the body is put back on the sphere of that length round the anchor and only the
+  velocity outward along the line is removed (v -= (v·n)n with n pointing away from the anchor, only when v·n > 0), so
+  the arc keeps all its speed. On the web nothing but gravity acts otherwise: vanilla's air drag is undone (÷0.91 and
+  ÷0.98) and `SWING_DRAG` is now 1.0 (was 0.993); the taut swing still loses its little through `PENDULUM_DRAG` 0.996.
+  The correction is a real move (so walls and floors stop it), at most `ROPE_MAX_CATCH` 1.5 blocks a tick (an anchor
+  on something running off, or a hard reel, catches up smoothly), over `ROPE_PASSES` 2 passes for two webs. The
+  height you gain reeling in doesn't cost swing speed, and snapping taut from slack loses the speed it took
+  off along the line (the swing is measured again from there). Gone: `ROPE_SPRING` 0.3 / `ROPE_MAX_PULL` 0.7.
+  Momentum build-up, pumping, Jump thrust and tug, reel in/out, hanging still, two-web swings, the slingshot, jump-off,
+  the release boost and the active-swing pose are untouched.
+- **Web shooters (`WebShooters`, `WebShooterItem`, `WebCartridgeItem`, client `WebShootersClient`):** built as the
+  *optional upgrade* (the recommended default while Andy chooses; `WebShooters.REQUIRED` = true makes them needed:
+  a dry wrist then clicks and fires nothing, the suit excepted).
+  - **Items:** Web Shooters (one item is the pair; iron ×4, redstone ×2, string: `I I / RSR / I I`) and Web Cartridge
+    (string ×2, slime ball, glass bottle, shapeless; stacks to 16 while full). Art by `tools/gen_web_shooters.py`.
+  - **Wear:** right-click the pair: strapped on both wrists (`jaymospowers:web_shooters` player attachment, saved,
+    synced to everyone). **Take off:** Sneak + right-click with an empty main hand, aiming at nothing (the client sends
+    `web_shooters_off`): the pair comes back into your hand, cartridges in it. **Death:** dropped where you fall like
+    armour (kept on with keepInventory). Smoke users can't wear them, as with the backpack.
+  - **Load:** right-click a cartridge while wearing them: it goes into the emptier wrist and the old one comes back (a
+    part-used cartridge, or the glass bottle of a spent one). Or Sneak + right-click the pair in hand: its empty
+    wrists fill from the fullest cartridges you carry.
+  - **Fluid:** a cartridge holds `CARTRIDGE_SHOTS` 64 webs. Every web the power fires from a hand uses one shot from
+    that wrist: swing webs (R/G, their own wrist), and on the main hand Zip, Yank, weblines, hitches and torch rips
+    (`WebPower.thwip`). A loaded shot clicks (lever click, pitch 1.9) under the thwip; a dry wrist clicks empty
+    (dispenser fail) and the organic web goes out as before.
+  - **Boosts:** a loaded wrist's web reaches `RANGE_SCALE` 1.25× further (swing anchors 48 → 60, assisted 40 → 50,
+    Zip, Yank; the server allows it for anyone wearing them) and pulls `PULL_SCALE` 1.15× harder (reeling in on a
+    swing, Zip's haul). Lines leave the nozzle on the posed wrist (`WebArms.WRIST_LENGTH` 8.5 px down the arm) and
+    are the full braid; the symbiote's suit ignores the shooters entirely (its own black webs, shooters hidden).
+  - **Looks:** a silver cuff round each wrist with a red trigger pad, the nozzle on the palm side and the cartridge on
+    the back while one is in, on everyone in third person (`WebShootersClient.Layer`, on the posed arms) and on your
+    own first-person hands (`WebAvatarRendererMixin.renderHand`). Knobs: `CUFF_*`, `*_ARM_MIDDLE`.
+  - **HUD:** a gauge chip at the end of the Web chip row (above its start on narrow screens): a tank per wrist (left on
+    the left), white, amber under `LOW_SHOTS` 12, dark red when dry; the number is the main hand's shots.
+- **Check first in game:** swing feel on the new rope (it should whip round the bottom with no bounce at the end of
+  the line); reeling in hard against a ceiling; a two-web hang; the braid at night and up close in first person;
+  others seeing your braided line and cuffs; wear / load / take off / die with shooters.
+
 ## Slower momentum (0.8.93)
 Speed has to be built. A swing chain starts capped at 0.55 b/t (was 0.8) and the cap only climbs, 0.003 a tick (was
 0.011 regardless), while you're on a web moving at 85% of it or more: about half a minute of unbroken, well-driven
@@ -55,6 +110,75 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   its last slam into a creeper-sized crater (`CHUNK_CRATER`). Every swing whooshes, trails dust and jolts your screen;
   every slam throws block dust, smoke and a heavy mace thud, and shakes you, the one slammed and anyone within 12.
   Bosses can't be whipped; Living Armor's tendrils keep their own Sneak grab. `COOLDOWN` 20 ticks after one ends.
+
+## Tendril slams, the surge and the tear-off (Andy's PS5 / Spider-Man 3 references)
+Andy: "I'd also like the symbiote to animate its counters and applicable abilities more like these" (three contact
+sheets in `/mnt/project-files/web-shooters/refs/`). Then: "enemies mobs affected by the symbiote should also get the
+living armor tendrils, and it helps them attack". No blood anywhere in it.
+- **Tendril bundles (`WebTendrilBundle`, client):** counters, Tendril Grab and the combos are drawn as a thick bundle
+  of glossy strands (`STRANDS` 14, `GRAB_STRANDS` 6, `COMBO_STRANDS` 12) from the forearm and the back over the lead
+  shoulder. Each strand roots on its own and gathers into the bundle (`ROOT_SPREAD`, `SPREAD`). The last `WRAP_SHARE`
+  coils round the target `WRAP_TURNS` times, and the bundle lashes while it reaches and while it recoils (`LASH*`). In
+  your own first person it comes from the lower corner of the view (`FP_*`). It is drawn from the synced
+  `WebCounter.ACTIVE` and `WebCounter.bundle(kind)` timings, so everyone sees the same thing.
+- **Counters as tendril slams (`WebCounter`, server; `WebCounterPose`, client):** each counter now runs reach, wrap,
+  haul, slam and recoil (`Bundle(reached, wrapped, haulEnd, release, spear)`, `RECOIL_TICKS` 6).
+  - Impale: lifts the target `IMPALE_LIFT` and slams it down where it stood.
+  - Hurl: hauls it over your head (`HURL_APEX`) to the ground `HURL_BEHIND` behind you.
+  - Whiplash: swings it round to your side (`WHIP_*`).
+  - Constrict: holds it up in front (`CONSTRICT_*`), squeezes on `CONSTRICT_SQUEEZES`, then drops it.
+  - Spear Flurry: stabs on `FLURRY_STABS`.
+  - Jaw Snap, Maul and the Maw Roar: reel it to your face (`JAWS_AHEAD`).
+
+  A slam does its damage, `SLAM_STUN_TICKS` of Slowness IV and a burst of black mass, dust and ground debris
+  (`WebHaul.burst`, `SLAM_BURST`). It shakes your screen (`SLAM_SHAKE`) and a slammed player's (`SLAMMED_SHAKE`).
+  Durations grew a little: Jaw Snap 18, Impale and Whiplash 20, Drag to Jaws and the Roar 24, Maul and Hurl 28,
+  Flurry 30 (Constrict unchanged at 34). The body poses wind up, cast, heave and follow through.
+
+  The back tendrils no longer strike during a counter (the bundle is the strike). A symbiote counter's bundle and pose
+  play out even if the target dies. Hauling rules are in `WebHaul`: a target wider than `MAX_WIDTH` or taller than
+  `MAX_HEIGHT` isn't hauled, nor is a dragon or wither.
+- **Combos (`WebTendrilCombos`):** the thrash slam, clap, crush and shatter now land with the same burst (`BURST` 0.8).
+- **Spike Burst as the surge (`WebSymbiote`, `WebBodyPose`, `WebTendrilBundle.surge`):**
+  - It gathers first for `SPIKE_GATHER_TICKS` 6: crouched, arms crossed and trembling, with a heartbeat and sculk
+    charge.
+  - Then it bursts. The damage lands now, so it is 6 ticks later than before. Arms fling wide and the head is thrown
+    back. `SURGE_TENDRILS` 18 long thick tendrils shoot out (`SURGE_SHOOT`), whip (`SURGE_WHIP`, `SURGE_SWING`) and
+    dissolve into smoke from `SURGE_DISSOLVE`.
+  - A dark shockwave rolls out (`WebSymbiote.surgeWave`, with `SURGE_RINGS` rings and `SURGE_EMBERS` embers) and your
+    screen kicks by `SPIKE_SHAKE`.
+  - The roar's blast uses the same wave and tendrils.
+  - The spike hits spray black dust instead of blood.
+- **The suit torn off (`WebSuitTear`):** rejection, the death pour-out, the radial suit toggle (off) and the debut
+  withdraw set the synced `WebSymbiote.TORN`. The client sees it within `TORN_MATCH_TICKS` of the suit change and plays
+  the tear instead of the plain withdraw, over `TEAR_TICKS` 46 (the withdraw was 36).
+  - The wearer claws at the chest (`CLAW_END`), then wrenches it outward (`RIP_END`), then flings it off with the head
+    thrown back, leaning by `LEAN_*`.
+  - The suit splits from the middle of the chest outward (`CENTER_FIRST`, `PULL_SPAN`) in `COLUMNS` × `ROWS` strips
+    (`STRIP_*`). The strips' ends cling longest and are pulled into the hands, and the sleeves slide off over the hands.
+  - `STICKY` sticky strands stretch between the strips and the body and snap between `SNAP_MIN` and `SNAP_MAX`.
+  - `THRASH_TENDRILS` tendrils thrash out of each hand's clump.
+  - The mask peels by `MASK_END`.
+- **Ridden mobs get Living Armor's tendrils (`WebBehemothClient`, `WebTendrilLayer.submitOnMob`):**
+  - Every behemoth and every mob a loose symbiote inhabits wears the player's own back tendrils, drawn on its own model
+    and sized to it.
+    - Upright mobs root `UPRIGHT_ROOT` of their height up and `BACK_DEPTH` of their width back. Four-legged ones (wider
+      than `QUADRUPED_WIDE` of their height) root on top of the back (`QUADRUPED_ROOT`).
+    - Size is height / `SIZE_HEIGHT`, kept between `SIZE_MIN` and `SIZE_MAX`. A behemoth's sit out `BEHEMOTH_DEPTH`
+      on its big body.
+    - They grow out over `GROW_TICKS`. They are fully wild on hostile hosts and behemoths (`FERAL_HOSTILE`) and half
+      so on peaceful ones (`FERAL_PEACEFUL`).
+  - Each lash swings the tendrils on the target's side, and a short spear bundle (`LASH_STRANDS`) shoots from the back
+    to the target.
+  - The old world-space thrashing cords (`WebBehemothClient.render`) are gone, replaced by these tendrils.
+  - **Tendril slam (`WebBehemoth.SLAM`, synced):** hostile hosts and behemoths now also grab-and-slam.
+    - Every `SLAM_EVERY_MIN`-`SLAM_EVERY_MAX` ticks a `MOB_SLAM_STRANDS` bundle snatches prey within `SLAM_REACH`. It
+      wraps the prey by `SLAM_WRAPPED`, hauls it over the mob's head (`SLAM_APEX`) and slams it `SLAM_LAND` in front at
+      `SLAM_HIT`. All the back tendrils rear and crash down with it.
+    - The slam deals `SLAM_DAMAGE` 7 (less than a lash's 10), `SLAM_STUN_TICKS` of slowness and a burst
+      (`SLAM_BURST`), and shakes nearby screens (`SLAM_SHAKE`).
+    - Lashes are unchanged in rate and damage.
+  - Peaceful hosts show the tendrils but never attack.
 
 ## Weapon arm, counter animations, hulking big body (0.11.62)
 - **Weapon arm (`WebMorph`):** in the suit or big body, with an empty main hand, left click (held since 0.11.91, see below) morphs the arm into a
@@ -285,9 +409,9 @@ Andy: "the weapon on left click should be adapted to the living armor tendrils .
   player.
   - It undoes vanilla's air drag (0.91 horizontal, 0.98 vertical) and applies its own lighter drag, plus a little extra
     gravity.
-  - The rope is a distance constraint from the anchor to hand height (+1.2). If you're past the rope length, the
-    outward velocity is removed and replaced by a springy pull back (rope elasticity). That turns falling into a
-    pendulum arc, and the arc naturally speeds up at the bottom.
+  - The rope is a distance constraint from the anchor to hand height (+1.2). If you're at or past the rope length,
+    you're put back on its sphere and only the outward velocity is removed (a true rope since 0.12.4; it was a springy
+    pull back before). That turns falling into a pendulum arc, and the arc naturally speeds up at the bottom.
   - Release (`detach`) checks how steeply you're moving up. At 35° you get the full forward and up boost; the boost
     falls to 0 at ±35°. A good release plays a sweep sound and a cloud puff.
   - After any release, `tickFlight` keeps horizontal drag at 0.985 instead of 0.91 until you land.
@@ -333,9 +457,9 @@ Andy: "the weapon on left click should be adapted to the living armor tendrils .
 |---|---|---|
 | `ATTACH_SLACK` | 0.94 | The rope starts at this fraction of the anchor distance. Below 1 gives a tug on attach. |
 | `ROPE_MIN` | 3.0 | The shortest you can reel in to. |
-| `ROPE_SPRING` / `ROPE_MAX_PULL` | 0.3 / 0.7 | Rope elasticity: how hard an over-stretched rope pulls back (per block of stretch, per tick), and the cap on that pull. |
+| `ROPE_PASSES` / `ROPE_MAX_CATCH` | 2 / 1.5 | The true rope (0.12.4): passes a tick (two webs settle), and the most it moves you back onto its length in a tick. |
 | `SWING_GRAVITY` | 0.025 | Extra gravity while swinging, on top of vanilla's 0.08. More gives faster, heavier arcs. |
-| `SWING_DRAG` | 0.993 | Velocity kept per tick on the web. |
+| `SWING_DRAG` | 1.0 | Velocity kept per tick on the web, after vanilla's drag is undone (1 = gravity only; was 0.993). |
 | `PUMP` | 0.03 | Speed added per tick by holding W on the downswing. |
 | `REEL_IN` / `LET_OUT` | 0.45 / 0.35 | Rope change per tick with Jump / Sneak. |
 | `MAX_SPEED` | 2.6 | Speed cap in blocks/tick (sprinting is about 0.28). |

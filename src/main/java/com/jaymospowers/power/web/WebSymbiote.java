@@ -89,9 +89,17 @@ public final class WebSymbiote {
 	/**
 	 * Spike Burst: radius, damage, how hard it throws things away. Rigid black spikes shoot out of the whole body (head,
 	 * chest, back, arms and legs) for {@code SPIKE_TICKS}; the roar throws the same spikes out as it lands.
+	 * Since the PS5 surge look: it gathers first (crouched, curled in) for {@code SPIKE_GATHER_TICKS}, then bursts (the
+	 * damage lands then), long thick tendrils lashing out with the spikes for {@code SPIKE_LASH_TICKS} before they
+	 * dissolve into smoke; a dark shockwave of {@code SURGE_RINGS} rings rolls out with {@code SURGE_EMBERS} embers, and
+	 * your screen kicks by {@code SPIKE_SHAKE}.
 	 */
 	public static final double SPIKE_RADIUS = 5.0;
-	public static final int SPIKE_TICKS = 16;
+	public static final int SPIKE_TICKS = 16, SPIKE_GATHER_TICKS = 6, SPIKE_LASH_TICKS = 24;
+	/** The Spike Burst's whole pose: the gather, then the lashing tendrils until they've gone to smoke. */
+	public static final int SPIKE_POSE_TICKS = SPIKE_GATHER_TICKS + SPIKE_LASH_TICKS;
+	public static final int SURGE_RINGS = 3, SURGE_EMBERS = 40;
+	public static final float SPIKE_SHAKE = 1.1F;
 	public static final float SPIKE_DAMAGE = 8.0F;
 	public static final double SPIKE_KNOCKBACK = 1.3;
 	/**
@@ -439,6 +447,13 @@ public final class WebSymbiote {
 
 	/** The goo crawling up onto you takes this long. */
 	public static final int BOND_TICKS = 50;
+	/**
+	 * The suit was torn off you (rejection, death, the radial toggle, or it withdrawing once its debut is over): when
+	 * (game time). Synced, so every client plays the tear-off ({@code WebSuitTear}) instead of the plain withdraw.
+	 */
+	public static final AttachmentType<Long> TORN = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_torn"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
+
 	/** It crawls away from a rejected host for this long. */
 	public static final int CRAWL_AWAY_TICKS = 50;
 
@@ -764,6 +779,8 @@ public final class WebSymbiote {
 		long wallRefreshAt;
 		/** The roar: when it began (0: none), whether it's the one near death (the armour building, a run after), and at whom. */
 		long roarAt;
+		/** A Spike Burst gathering: when it began (0: none); it bursts {@link #SPIKE_GATHER_TICKS} later. */
+		long spikeAt;
 		boolean roarDefend;
 		int roarThreat = -1;
 		int rampageStrikes;
@@ -1271,7 +1288,7 @@ public final class WebSymbiote {
 		} else {
 			live.armorTicks = 0;
 			// (a counter's tendril strike is out without the armour: WebCounter ends it)
-			if (player.getAttached(STRIKE) != null && !WebCounter.ownsStrike(player)) {
+			if (player.getAttached(STRIKE) != null) {
 				player.removeAttached(STRIKE);
 			}
 		}
@@ -1429,6 +1446,12 @@ public final class WebSymbiote {
 		if (live.roarAt > 0L) {
 			tickRoar(player, live, now);
 		}
+		if (live.spikeAt > 0L && now - live.spikeAt >= SPIKE_GATHER_TICKS) {
+			live.spikeAt = 0L;
+			if (player.isAlive()) {
+				spikeBlast(player);
+			}
+		}
 		// a takeover just ended (not by the lockout, nor into another): now and then it leaves you its Living Armor
 		if (live.giftPending) {
 			live.giftPending = false;
@@ -1462,6 +1485,7 @@ public final class WebSymbiote {
 		if (next.has(WebSymbioteState.SUIT) && !suitAllowed(player) && !live.engulfed && !live.feedingArmor && live.bondTicks <= 0
 			&& now >= live.suitDebutUntil) {
 			next = next.withFlag(WebSymbioteState.SUIT, false);
+			torn(player);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.PLAYERS, 0.9F, 0.6F);
 			level.sendParticles(dust(1.2F), player.getX(), player.getY() + 1.0, player.getZ(), 16, 0.3, 0.7, 0.3, 0.0);
 			if (live.suitDebutUntil > 0L) {
@@ -1618,6 +1642,7 @@ public final class WebSymbiote {
 		set(player, new WebSymbioteState(false, 0, 0, 0, 0, old.hints(), 0));
 		removeArmor(player);
 		player.removeAttached(COOLDOWNS);
+		torn(player);
 		ServerLevel level = player.level();
 		level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.0, player.getZ(), 80, 0.45, 0.9, 0.45, 0.12);
 		level.sendParticles(dust(2.0F), player.getX(), player.getY() + 1.0, player.getZ(), 60, 0.5, 0.9, 0.5, 0.0);
@@ -1656,9 +1681,15 @@ public final class WebSymbiote {
 		}
 		WebTendrils.releaseAll(player, false);
 		set(player, new WebSymbioteState(false, 0, 0, old.rejections(), 0, old.hints(), 0));
+		torn(player);
 		removeArmor(player);
 		player.removeAttached(COOLDOWNS);
 		WebSymbioteBlob.release(player.level(), player.position());
+	}
+
+	/** The suit is coming off by tearing (see {@link #TORN}). */
+	private static void torn(ServerPlayer player) {
+		player.setAttached(TORN, player.level().getGameTime());
 	}
 
 	/** Fills it up and calms it down (a command, for testing). */
@@ -2669,6 +2700,9 @@ public final class WebSymbiote {
 			WebSymbioteState next = state.withFlag(WebSymbioteState.SUIT, on);
 			// (the tendrils stay out: they work over any suit, or none)
 			set(player, next);
+			if (!on) {
+				torn(player);
+			}
 			if (on) {
 				// put on by hand (for the manual-equip animation; see DONNED)
 				player.setAttached(DONNED, player.level().getGameTime());
@@ -3678,7 +3712,7 @@ public final class WebSymbiote {
 			long t = now - strike.start();
 			Entity target = level.getEntity(strike.target());
 			double range = strike.heavy() ? HEAVY_STRIKE_RANGE : STRIKE_RANGE;
-			if (t == strike.hitAt() && !WebCounter.ownsStrike(player) && target instanceof LivingEntity living && living.isAlive()
+			if (t == strike.hitAt() && target instanceof LivingEntity living && living.isAlive()
 				&& living.distanceTo(player) <= range + 1.5 + living.getBbWidth() * 0.5) {
 				land(player, strike, living);
 			}
@@ -4118,6 +4152,7 @@ public final class WebSymbiote {
 			}
 		}
 		level.sendParticles(ParticleTypes.SQUID_INK, center.x, center.y + 0.4, center.z, 40, 0.5, 0.5, 0.5, 0.3);
+		surgeWave(level, center, ROAR_RADIUS);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.PLAYERS, 2.0F, 0.8F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 1.6F, 0.55F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 0.6F, 0.7F);
@@ -4160,8 +4195,27 @@ public final class WebSymbiote {
 		return pose != null && pose.kind() == WebPose.ROAR && player.level().getGameTime() - pose.start() < pose.ticks();
 	}
 
-	/** Spike Burst: black spikes burst out all around, hurting and hurling everything near. */
+	/**
+	 * Spike Burst: it gathers itself (you curl in, crouched, for {@link #SPIKE_GATHER_TICKS}), then bursts
+	 * ({@link #spikeBlast}). Everyone sees the pose and the burst (WebBodyPose, WebSpikeLayer, WebTendrilBundle).
+	 */
 	private static boolean spikes(ServerPlayer player) {
+		ServerLevel level = player.level();
+		Live live = live(player);
+		if (live.spikeAt > 0L) {
+			return false;
+		}
+		live.spikeAt = level.getGameTime();
+		WebPower.pose(player, WebPose.SPIKES, player.getRandom().nextBoolean() ? 1 : -1);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 1.2F, 0.7F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SCULK_BLOCK_CHARGE, SoundSource.PLAYERS, 1.0F, 0.6F);
+		// black drawn in toward you as it gathers
+		level.sendParticles(dust(1.4F), player.getX(), player.getY() + 1.0, player.getZ(), 24, 0.9, 0.7, 0.9, 0.0);
+		return true;
+	}
+
+	/** The burst: black spikes and lashing tendrils all around, hurting and hurling everything near. */
+	private static void spikeBlast(ServerPlayer player) {
 		ServerLevel level = player.level();
 		Vec3 center = player.position().add(0.0, 1.0, 0.0);
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(SPIKE_RADIUS),
@@ -4183,18 +4237,49 @@ public final class WebSymbiote {
 				ServerPlayNetworking.send(other, new WebNet.Nudge(push));
 			}
 		}
-		// the spikes themselves are drawn for everyone, out of every part of the body (WebSpikeLayer)
-		WebPower.pose(player, WebPose.SPIKES, player.getRandom().nextBoolean() ? 1 : -1);
+		// the spikes and tendrils themselves are drawn for everyone (WebSpikeLayer, WebTendrilBundle), from the pose
 		level.sendParticles(ParticleTypes.SQUID_INK, center.x, center.y, center.z, 30, 0.5, 0.6, 0.5, 0.25);
+		surgeWave(level, center, SPIKE_RADIUS);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.EVOKER_FANGS_ATTACK, SoundSource.PLAYERS, 1.2F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.POINTED_DRIPSTONE_LAND, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_DEATH, SoundSource.PLAYERS, 0.8F, 0.5F);
-		return true;
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.7F, 0.7F);
+		// it bursts out of you: your screen kicks (on its own, too, when it bursts to save you)
+		com.jaymospowers.core.Shakes.send(player, SPIKE_SHAKE, null);
 	}
 
 	/**
-	 * A spike runs a creature through: a white flash where it strikes (the side facing you), and (0.11.104, Andy) it
-	 * bleeds as a blade's blow does ({@link com.jaymospowers.core.BladeBlood}).
+	 * The surge's dark shockwave (Spike Burst and the roar): rings of black rolling out along the ground to
+	 * {@code radius}, a flash of fire-dark in the middle and embers flung out through it. No blood.
+	 */
+	static void surgeWave(ServerLevel level, Vec3 center, double radius) {
+		for (int ring = 1; ring <= SURGE_RINGS; ring++) {
+			double r = ring * 0.6;
+			int count = 14 + ring * 6;
+			for (int k = 0; k < count; k++) {
+				double a = k * Math.PI * 2.0 / count + ring;
+				double cx = Math.cos(a), cz = Math.sin(a);
+				// flung outward (count 0: the offsets are the velocity's direction)
+				level.sendParticles(ParticleTypes.LARGE_SMOKE, center.x + cx * r, center.y - 0.6 + ring * 0.15, center.z + cz * r, 0, cx, 0.02, cz,
+					radius * 0.075 * (1.2 - ring * 0.15));
+				level.sendParticles(dust(1.8F), center.x + cx * r * 1.4, center.y - 0.5, center.z + cz * r * 1.4, 1, 0.05, 0.05, 0.05, 0.0);
+			}
+		}
+		level.sendParticles(ParticleTypes.EXPLOSION, center.x, center.y, center.z, 2, 0.3, 0.3, 0.3, 0.0);
+		for (int k = 0; k < SURGE_EMBERS; k++) {
+			double a = k * 2.399963;
+			double up = (k % 7) / 7.0 - 0.25;
+			double cx = Math.cos(a), cz = Math.sin(a);
+			level.sendParticles(k % 3 == 0 ? ParticleTypes.FLAME : ParticleTypes.SMALL_FLAME, center.x + cx * 0.4, center.y + up, center.z + cz * 0.4, 0,
+				cx, up * 0.8 + 0.15, cz, 0.35 + (k % 5) * 0.06);
+		}
+		level.sendParticles(ParticleTypes.LAVA, center.x, center.y, center.z, 8, 0.4, 0.3, 0.4, 0.0);
+		level.sendParticles(ParticleTypes.SQUID_INK, center.x, center.y, center.z, 24, 0.6, 0.4, 0.6, 0.35);
+	}
+
+	/**
+	 * A spike runs a creature through: a white flash where it strikes (the side facing you), and a spray of black. No
+	 * blood since the surge look (Andy: no blood); it used to bleed as a blade's blow does.
 	 */
 	private static void spikeHit(ServerLevel level, Vec3 center, LivingEntity living, float dealt) {
 		Vec3 mid = living.getBoundingBox().getCenter();
@@ -4203,7 +4288,7 @@ public final class WebSymbiote {
 		Vec3 hit = mid.subtract(dir.scale(living.getBbWidth() * 0.5));
 		level.sendParticles(ParticleTypes.EXPLOSION, hit.x, hit.y, hit.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.sendParticles(ParticleTypes.CRIT, hit.x, hit.y, hit.z, 10, 0.15, 0.15, 0.15, 0.4);
-		com.jaymospowers.core.BladeBlood.splash(living, dealt);
+		level.sendParticles(dust(1.3F), hit.x, hit.y, hit.z, (int)Math.min(20.0F, 6.0F + dealt), 0.2, 0.2, 0.2, 0.0);
 	}
 
 	/** Shroud: the suit swallows the light; you vanish until you strike, or until it tires. */

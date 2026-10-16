@@ -59,6 +59,8 @@ public final class WebArms {
 	private static final double SHOULDER_HEIGHT = 22.0 / 16.0;
 	private static final double SHOULDER_OUT = 5.0 / 16.0;
 	private static final double ARM_LENGTH = 10.0 / 16.0;
+	/** (0.12.3) From the shoulder to a web shooter's nozzle on the wrist (see WebShootersClient's cuff). */
+	private static final double WRIST_LENGTH = 8.5 / 16.0;
 	/** Both webs on one catch (a Web Whip): the hands meet on the one line this far out from the chest. */
 	private static final double GRIP_REACH = 8.0 / 16.0;
 
@@ -716,6 +718,17 @@ public final class WebArms {
 		Vec3 prev = body.prevDir[hand] == null ? body.dir[hand] : body.prevDir[hand];
 		Vec3 dir = prev.lerp(body.dir[hand], partialTick);
 		return shoulder(player, hand, partialTick).add(dir.scale(ARM_LENGTH * player.getScale()));
+	}
+
+	/** Where a web shooter's nozzle sits on that posed arm (the wrist, a little short of the hand), or null as for {@link #handPos}. */
+	static @Nullable Vec3 wristPos(Player player, int hand, float partialTick) {
+		Body body = BODIES.get(player.getId());
+		if (body == null || body.dir[hand] == null) {
+			return null;
+		}
+		Vec3 prev = body.prevDir[hand] == null ? body.dir[hand] : body.prevDir[hand];
+		Vec3 dir = prev.lerp(body.dir[hand], partialTick);
+		return shoulder(player, hand, partialTick).add(dir.scale(WRIST_LENGTH * player.getScale()));
 	}
 
 	// ---- rendering ------------------------------------------------------------------------------------------------

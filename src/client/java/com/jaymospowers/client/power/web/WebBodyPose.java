@@ -176,6 +176,16 @@ public final class WebBodyPose {
 				poseStack.rotateDegrees(Axis.ZP, shudder);
 				poseStack.translate(0.0F, -middle, 0.0F);
 			}
+			case WebPose.SPIKES -> {
+				// the surge: dropped into a crouch, curled over, trembling as it gathers; then thrown open, chest out, leaning back
+				float gather = spikeGather(p), burst = spikeBurst(p);
+				float shudder = Mth.sin(pose.time() * 3.7F) * 2.0F * gather;
+				poseStack.translate(0.0F, -0.3F * gather + 0.06F * burst, 0.0F);
+				poseStack.translate(0.0F, middle, 0.0F);
+				poseStack.rotateDegrees(Axis.XP, -26.0F * gather + 14.0F * burst);
+				poseStack.rotateDegrees(Axis.ZP, shudder);
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
 			case WebPose.RAGDOLL -> {
 				// flat on the back, a little twitch to it
 				float fall = Math.min(1.0F, p * 6.0F);
@@ -291,13 +301,20 @@ public final class WebBodyPose {
 				h.head.xRot = Mth.lerp(rear, h.head.xRot, -0.75F);
 			}
 			case WebPose.SPIKES -> {
-				// braced as it bristles: arms thrown out and down, legs apart, head back, then easing back
-				float brace = hold(pose.p(), 0.12F, 0.55F);
-				set(h.rightArm, -0.25F, 0.0F, 1.15F, brace);
-				set(h.leftArm, -0.25F, 0.0F, -1.15F, brace);
-				set(h.rightLeg, 0.0F, 0.0F, 0.3F, brace);
-				set(h.leftLeg, 0.0F, 0.0F, -0.3F, brace);
-				h.head.xRot = Mth.lerp(brace, h.head.xRot, -0.35F);
+				// gathering: arms crossed tight over the chest, knees bent, head down, trembling;
+				// the burst: arms flung out wide and up, legs braced apart, head thrown back
+				float gather = spikeGather(pose.p()), burst = spikeBurst(pose.p());
+				float tremble = Mth.sin(pose.time() * 3.3F) * 0.1F * gather;
+				set(h.rightArm, -1.5F + tremble, -0.9F, 0.2F, gather);
+				set(h.leftArm, -1.5F - tremble, 0.9F, -0.2F, gather);
+				set(h.rightLeg, -0.7F, 0.0F, 0.15F, gather);
+				set(h.leftLeg, -0.7F, 0.0F, -0.15F, gather);
+				h.head.xRot = Mth.lerp(gather, h.head.xRot, 0.6F);
+				set(h.rightArm, -0.5F, 0.0F, 1.9F, burst);
+				set(h.leftArm, -0.5F, 0.0F, -1.9F, burst);
+				set(h.rightLeg, 0.0F, 0.0F, 0.35F, burst);
+				set(h.leftLeg, 0.0F, 0.0F, -0.35F, burst);
+				h.head.xRot = Mth.lerp(burst, h.head.xRot, -0.6F);
 			}
 			case WebPose.RAGDOLL -> {
 				float t = pose.time();
@@ -315,6 +332,17 @@ public final class WebBodyPose {
 			default -> {
 			}
 		}
+	}
+
+	/** Spike Burst's gather (curled in until it bursts) and burst (thrown open, easing back by the end). */
+	private static float spikeGather(float p) {
+		float g = com.jaymospowers.power.web.WebSymbiote.SPIKE_GATHER_TICKS / (float)com.jaymospowers.power.web.WebSymbiote.SPIKE_POSE_TICKS;
+		return p < g ? ease(p / g) : 1.0F - ease((p - g) / 0.05F);
+	}
+
+	private static float spikeBurst(float p) {
+		float g = com.jaymospowers.power.web.WebSymbiote.SPIKE_GATHER_TICKS / (float)com.jaymospowers.power.web.WebSymbiote.SPIKE_POSE_TICKS;
+		return p < g ? 0.0F : hold((p - g) / (1.0F - g), 0.06F, 0.6F);
 	}
 
 	/** A roar's two halves: hunched while it builds (to just before it roars), and reared back through the roar. */

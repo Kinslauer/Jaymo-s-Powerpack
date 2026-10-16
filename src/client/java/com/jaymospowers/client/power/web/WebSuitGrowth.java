@@ -60,8 +60,11 @@ public final class WebSuitGrowth {
 		HULK
 	}
 
-	/** On a player's render state while their suit is changing. {@code from}, {@code to}: 0 bare, 1 suit, 2 Living Armor. */
-	public record Growth(int from, int to, float t) {
+	/**
+	 * On a player's render state while their suit is changing. {@code from}, {@code to}: 0 bare, 1 suit, 2 Living Armor.
+	 * {@code tear}: it's coming off by being torn away ({@link WebSuitTear}), not withdrawing.
+	 */
+	public record Growth(int from, int to, float t, boolean tear) {
 	}
 
 	public static final RenderStateDataKey<Growth> KEY = RenderStateDataKey.create(() -> "jaymospowers:web_suit_growth");
@@ -79,6 +82,11 @@ public final class WebSuitGrowth {
 
 	static void register(Model<?> model, Role role) {
 		MODELS.put(model, role);
+	}
+
+	/** What one of the suit layer's models is (null: any other model). */
+	static @org.jspecify.annotations.Nullable Role role(Model<?> model) {
+		return MODELS.get(model);
 	}
 
 	/** 0 bare, 1 the suit, 2 the big body. */
@@ -111,8 +119,11 @@ public final class WebSuitGrowth {
 			// it's seizing you (not being put on): it engulfs you SELF_TAKEOVER_SPEED times as fast
 			change[3] = 1;
 		}
-		float span = change[0] == 2 && change[1] < 2 ? BULK_TICKS : WebSymbiote.roaring(player) ? ROAR_TICKS : TICKS;
-		if (change[3] == 1) {
+		// torn off (WebSymbiote.TORN set as it came off): the Spider-Man 3 tear-off instead of the plain withdraw
+		Long torn = player.getAttached(WebSymbiote.TORN);
+		boolean tear = change[0] == 0 && change[1] >= 1 && torn != null && Math.abs(torn - change[2]) <= WebSuitTear.TORN_MATCH_TICKS;
+		float span = tear ? WebSuitTear.TEAR_TICKS : change[0] == 2 && change[1] < 2 ? BULK_TICKS : WebSymbiote.roaring(player) ? ROAR_TICKS : TICKS;
+		if (change[3] == 1 && !tear) {
 			span /= WebSymbiote.SELF_TAKEOVER_SPEED;
 		}
 		float t = (tick - change[2] + partialTicks) / span;
@@ -125,7 +136,7 @@ public final class WebSuitGrowth {
 		} else {
 			state.setData(PULL, null);
 		}
-		state.setData(KEY, t < 1.0F && change[1] != change[0] ? new Growth((int)change[1], (int)change[0], Math.max(0.0F, t)) : null);
+		state.setData(KEY, t < 1.0F && change[1] != change[0] ? new Growth((int)change[1], (int)change[0], Math.max(0.0F, t), tear) : null);
 		if (CHANGES.size() > 256) {
 			CHANGES.keySet().removeIf(id -> Minecraft.getInstance().level == null || Minecraft.getInstance().level.getEntity(id) == null);
 		}
@@ -242,6 +253,10 @@ public final class WebSuitGrowth {
 	/** The suit (or the goo under it) laid over each part from its joint out, as far as it's got. */
 	private static void lay(PlayerModel player, AvatarRenderState avatar, Role role) {
 		Growth growth = avatar.getData(KEY);
+		if (growth != null && growth.tear()) {
+			// torn off: WebSuitTear lays it (after the poses)
+			return;
+		}
 		ModelPart[] parts = {player.body, player.rightArm, player.leftArm, player.head, player.rightLeg, player.leftLeg};
 		Float pull = avatar.getData(PULL);
 		if (growth == null && pull != null && role == Role.SUIT) {

@@ -44,7 +44,8 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li><b>Heartlander:</b> plain folk: two attribute points of your own choosing, no flaw.</li>
  * <li><b>Stoneborn:</b> mines faster; a little slower on foot.</li>
- * <li><b>Tideborn:</b> long breath, swims and mines well under water; hungrier out of the wet.</li>
+ * <li><b>Tideborn:</b> long breath, swims and mines well under water; (0.7.80) wet from touching water until 2 minutes
+ * out of it, and hit harder while wet; hungrier once dry.</li>
  * <li><b>Sylvan:</b> lands soft, sneaks unseen; hits lighter.</li>
  * <li><b>Verdant:</b> green skin and antennae ({@link Verdants}), hunger drains slow in the sun; burns longer.</li>
  * <li><b>Emberborn:</b> (0.7.75) fire, lava and burning never hurt them, and they thrive in the heat; the cold (cold lands,
@@ -72,6 +73,12 @@ public final class Heritage {
 	/** Tideborn: breath, swimming and mining under water; hunger out of the wet, as a factor. */
 	static final double TIDE_OXYGEN = 3.0, TIDE_SWIM = 0.5, TIDE_SUBMERGED_MINING = 0.6;
 	static final float TIDE_DRY_HUNGER = 1.2F;
+	/**
+	 * (0.7.80) Tideborn are wet from touching water (or rain) until this long out of it (2 min): then they're dry, and
+	 * the hunger flaw sets in. Wet, their blows land this much harder (a share).
+	 */
+	static final int TIDE_WET_TICKS = 2400;
+	static final double TIDE_WET_DAMAGE = 0.15;
 	/** Sylvan: blocks you can fall without harm, the share off how far sneaking is seen, and the share off your blows. */
 	static final double SYLVAN_SAFE_FALL = 1.5, SYLVAN_SNEAK = 0.1, SYLVAN_WEAK = 0.1;
 	/** Verdant: hunger in the sun, as a factor, and how much longer fire burns (a share). */
@@ -180,6 +187,17 @@ public final class Heritage {
 	 */
 	public static final AttachmentType<String> HERITAGE = AttachmentRegistry.create(JaymosKingdoms.id("heritage"),
 		builder -> builder.persistent(Codec.STRING).copyOnDeath().syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all()));
+
+	/**
+	 * (0.7.80) What every client needs for a heritage's look ({@code client/HeritageLooks}): {@link #LOOK_WET} a Tideborn
+	 * who's wet, {@link #LOOK_UNSEEN} a Sylvan whose glow goes out entirely when they sneak (a Thief, or with a Stealth
+	 * perk). Synced to everyone, not saved.
+	 */
+	public static final AttachmentType<Integer> LOOK = AttachmentRegistry.create(JaymosKingdoms.id("heritage_look"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+	public static final int LOOK_WET = 1, LOOK_UNSEEN = 2;
+	/** (0.7.80) A Tideborn's ticks left wet. Saved. */
+	static final AttachmentType<Integer> WET = AttachmentRegistry.create(JaymosKingdoms.id("heritage_wet"), builder -> builder.persistent(Codec.INT));
 
 	/** Server → player: pick a heritage (the screen opens; {@code forced}: it can't be shut without picking). */
 	public record Open(boolean forced) implements CustomPacketPayload {
@@ -327,6 +345,9 @@ public final class Heritage {
 		if (kind != Kind.WARRIORBORN) {
 			Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_fury", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		}
+		if (kind != Kind.TIDEBORN) {
+			Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_tide", 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		}
 		green(player, kind);
 	}
 
@@ -336,6 +357,7 @@ public final class Heritage {
 		}
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			Kind kind = of(player);
+			look(player, kind);
 			if (kind == Kind.NIGHTBORN) {
 				// stronger and quicker in the dark, weaker under the open sun
 				double damage = 0.0, speed = 0.0;
@@ -371,6 +393,49 @@ public final class Heritage {
 				player.setTicksFrozen(0);
 			}
 		}
+	}
+
+	/**
+	 * (0.7.80) A Tideborn gets wet touching water (or rain) and dries {@link #TIDE_WET_TICKS} after; wet, they hit harder.
+	 * A Sylvan who's a Thief or has a Stealth perk can't be seen glowing while sneaking. Both go on {@link #LOOK}.
+	 */
+	private static void look(ServerPlayer player, @Nullable Kind kind) {
+		int look = 0;
+		if (kind == Kind.TIDEBORN) {
+			int left = player.isInWaterOrRain() ? TIDE_WET_TICKS : Math.max(0, player.getAttachedOrElse(WET, 0) - TICK_EVERY);
+			player.setAttached(WET, left);
+			boolean wet = left > 0;
+			Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_tide", wet ? TIDE_WET_DAMAGE : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+			look = wet ? LOOK_WET : 0;
+		} else if (kind == Kind.SYLVAN && unseen(player)) {
+			look = LOOK_UNSEEN;
+		}
+		if (player.getAttachedOrElse(LOOK, 0) != look) {
+			if (look == 0) {
+				player.removeAttached(LOOK);
+			} else {
+				player.setAttached(LOOK, look);
+			}
+		}
+	}
+
+	/** A Thief, or anyone who's learned a Stealth perk. */
+	static boolean unseen(ServerPlayer player) {
+		if (Classes.is(player, Classes.PlayerClass.THIEF)) {
+			return true;
+		}
+		Skills.Progress progress = Skills.of(player);
+		for (Skills.Perk perk : Skills.Perk.values()) {
+			if (perk.pillar == Skills.Pillar.STEALTH && progress.rank(perk) > 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** A Tideborn who's still wet (touched water within {@link #TIDE_WET_TICKS}). */
+	static boolean wet(ServerPlayer player) {
+		return player.isInWaterOrRain() || player.getAttachedOrElse(WET, 0) > 0;
 	}
 
 	/** How much of a Warrior-born's early weakness is left, 1 (none grown) to 0 (character level {@link #WARRIOR_GROWN_LEVEL}). */
@@ -411,7 +476,7 @@ public final class Heritage {
 			return 1.0F;
 		}
 		return switch (kind) {
-			case TIDEBORN -> player.isInWaterOrRain() ? 1.0F : TIDE_DRY_HUNGER;
+			case TIDEBORN -> wet(player) ? 1.0F : TIDE_DRY_HUNGER;
 			case VERDANT -> inSun(player) ? VERDANT_SUN_HUNGER : 1.0F;
 			case EMBERBORN -> hot(player) ? THRIVE_HUNGER : chilled(player) ? WILT_HUNGER : 1.0F;
 			case FROSTBORN -> cold(player) ? THRIVE_HUNGER : hot(player) ? WILT_HUNGER : 1.0F;
