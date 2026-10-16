@@ -1,5 +1,6 @@
 package com.jaymospowers.costume;
 
+import com.jaymospowers.power.smoke.SmokeVapour;
 import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
@@ -40,6 +41,11 @@ public class CostumeItem extends Item {
 		CostumeDesign design = stack.get(Costume.DESIGN);
 		if (design == null) {
 			return InteractionResult.PASS;
+		}
+		if (SmokeVapour.active(player)) {
+			// nothing stays on smoke
+			SmokeVapour.refuseArmour(player);
+			return InteractionResult.FAIL;
 		}
 		if (player instanceof ServerPlayer server) {
 			stack.shrink(1);

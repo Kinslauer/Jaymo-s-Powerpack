@@ -167,23 +167,32 @@ public final class Backpack {
 
 	/** Dying with one on: it is set down where they fell (or dropped, if there's nowhere), unless keepInventory holds. */
 	private static void onDeath(ServerPlayer player) {
-		ServerLevel level = player.level();
-		if (worn(player) == null || level.getGameRules().get(GameRules.KEEP_INVENTORY)) {
+		if (player.level().getGameRules().get(GameRules.KEEP_INVENTORY)) {
 			return;
 		}
+		dropWorn(player);
+	}
+
+	/**
+	 * Takes the worn backpack off and sets it down where the player stands (or drops it, if there's nowhere), contents
+	 * kept. Used on death and when a Smoke user goes up in smoke. False if they wore none.
+	 */
+	public static boolean dropWorn(ServerPlayer player) {
+		ServerLevel level = player.level();
 		ItemStack stack = takeOff(player);
 		if (stack == null) {
-			return;
+			return false;
 		}
 		BlockPos at = player.blockPosition();
 		for (int up = 0; up < 4; up++) {
 			BlockPos pos = at.above(up);
 			if (level.isInWorldBounds(pos) && level.getBlockState(pos).canBeReplaced() && level.getWorldBorder().isWithinBounds(pos)) {
 				setDown(level, pos, player.getDirection().getOpposite(), stack);
-				return;
+				return true;
 			}
 		}
 		Containers.dropItemStack(level, player.getX(), player.getY(), player.getZ(), stack);
+		return true;
 	}
 
 	/** Sets {@code stack} down as a placed backpack at {@code pos}, facing {@code facing}. */

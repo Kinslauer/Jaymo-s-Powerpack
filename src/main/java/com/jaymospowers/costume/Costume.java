@@ -106,6 +106,17 @@ public final class Costume {
 	}
 
 	/** Takes the worn costume off (server) and gives it back; false if none was worn. */
+	/** Takes the worn costume off and hands back its item (for the caller to drop), or null if none. */
+	public static @Nullable ItemStack strip(ServerPlayer player) {
+		CostumeDesign old = worn(player);
+		if (old == null) {
+			return null;
+		}
+		player.removeAttached(WORN);
+		SecretIdentity.update(player);
+		return CostumeItem.of(old);
+	}
+
 	public static boolean takeOff(ServerPlayer player) {
 		CostumeDesign old = worn(player);
 		if (old == null) {
