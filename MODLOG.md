@@ -1420,3 +1420,7 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   guarded by two androids, sometimes a mech); Fallen Rigs, fallen explorers who sought a way off Earth (their logs on
   salvaging), only in newly generated Nether (1 in 220) and End (1 in 160) chunks. Stage 3 (later): levels, lock-on,
   scans, the takeover save, flight, calling the suit.
+- **0.11.86 / Kingdoms 0.7.72, vassals set apart from kings:** Andy: "vassals should be differentiated from kings". A
+  kingdom made a fiefdom now has its king step down to lord in place (circlet, diamond, purple bar, lord's title) and
+  its folk take the overlord's arms; lords keep a smaller escort (4); a fiefdom's audience names its overlord. See
+  kingdoms/MODLOG.md.
