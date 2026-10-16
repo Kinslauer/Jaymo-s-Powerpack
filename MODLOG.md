@@ -1612,3 +1612,13 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     knot (4 damage to both, everyone near thrown, both streams cool down 5 s).
   - All in `core/BeamClash` (numbers at the top) and `client/BeamClashClient`; each beam joins with one call
     (`WindJet.init`, `SmokeJet.init`), so other beams can join later.
+- **0.13.9, Ki Bomb and Ki Disc fixed; the disc cuts through:** learning a technique (bought on the training screen or
+  taught by a master) never put it on its key, so G kept firing the Ki Blast and sneak+V the Ki Wave until "Use" was
+  pressed on the Techniques page, and before V unlocked the Ki Bomb just said "locked". Learning one now puts it on G
+  or V at once (a chat line says which), and a learned quick technique works on G before G unlocks, as the Ki Bomb
+  already did on V. Characters who learned them before this still press "Use" once.
+  - **The Ki Disc cuts through everything:** 60 blocks at 1.3 b/t; every creature its edge passes is hit once (7,
+    scaled by ki power, no longer missing one it starts inside); every block in a 1-thick, ~1.2-wide slice breaks and
+    drops. It shatters on anything as hard as obsidian, unbreakable blocks, block entities (chests, furnaces), blocks
+    the thrower may not break (spawn protection, adventure mode, claims) or an unloaded chunk. Fluids don't stop it.
+    Numbers at the top of `ZFighterKi`.
