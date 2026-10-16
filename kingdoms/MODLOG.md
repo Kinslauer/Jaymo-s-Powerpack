@@ -3243,7 +3243,7 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   everyone. `Monsters.mimic` now rolls the chest's loot table itself for the player who opened it (luck counts), so a
   mimic always drops that player's share. Vanilla loot chests behave as before.
 
-## 0.7.79: a look for every heritage (pack 0.11.108)
+## 0.7.79: a look for every heritage (pack 0.12.0)
 - Andy: "give every lineage a new visual like emberborn ... dont change warrior born or the hearthborn [Heartlander]".
   Designed as mockups first (project files `art-overhaul/lineages/`) and changed twice on his word. Client
   `HeritageLooks`, textures from `tools/gen_heritage_looks.py`; drawn like `EmberLook` (marks lit like skin, more
