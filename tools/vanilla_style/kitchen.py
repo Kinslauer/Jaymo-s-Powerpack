@@ -493,5 +493,6 @@ if __name__ == '__main__':
         items[f'{w}_supply_cart'] = carts.supply_cart(w); items[f'{w}_animal_cart'] = carts.animal_cart(w)
         items[f'{w}_plow'] = carts.plow(w)
         if w != 'oak': items[f'{w}_wagon'] = carts.wagon(w)
+    items.pop('quiver')   # Andy kept the original quiver
     for n, im in items.items(): im.save(f'{out}/{n}.png')
     print(len(items))

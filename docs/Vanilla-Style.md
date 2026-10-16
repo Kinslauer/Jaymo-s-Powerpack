@@ -35,7 +35,7 @@ fal.ai image generation and parallax parts don't apply to 16px item icons, so th
 | TaCZ | 21 | Art licence is no-derivatives: leave |
 
 ## In the pack
-- **Jaymo's Kitchen: all 98** (`kitchen.py`, `carts.py`). Soups use vanilla's stew bowl, pies vanilla's pumpkin pie,
+- **Jaymo's Kitchen: 97 of 98** (the quiver keeps its own art, Andy's call) (`kitchen.py`, `carts.py`). Soups use vanilla's stew bowl, pies vanilla's pumpkin pie,
   carrot cake vanilla's cake, meats vanilla's cooked meats; carts, wagons and plows are drawn once and painted in each
   wood's vanilla planks colours. Fried egg and hot chocolate are in `paint_batch.py`.
 - Kingdoms: ronin and gladiator chestplates. WeaponMod: iron katana (`paint_batch.py`).
