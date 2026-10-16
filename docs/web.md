@@ -156,8 +156,8 @@ Andy: "the weapon on left click should be adapted to the living armor tendrils .
   it tore); Sneak + the other key within `WebWhip.CATCH_TICKS` 60 puts the second web on it and starts the whip. In
   midair it's always the lasso and you hang in place for it (no gravity, held still); the seesaw only on a living
   creature; anything else is the overhead.
-- **Barrage combo:** one creature held by a tendril, the other empty, hold left click: it's pinned in front and every
-  other tendril stabs it in turn (the rest held poised), a stab every `BARRAGE_EVERY` 10 ticks (half a second) (i-frames ignored), 3 damage rising to 9 over
+- **Barrage combo:** one creature held by a tendril, the other empty, hold left click: it's pinned in front and the
+  outermost pair of tendrils (`BARRAGE_FREE`; walking, the outer spares) stab it left and right by turns (the rest held poised), a stab every `BARRAGE_EVERY` 10 ticks (half a second) (i-frames ignored), 3 damage rising to 9 over
   `BARRAGE_RAMP_TICKS` 60; letting go of the button (or `BARRAGE_MAX_TICKS` 160) ends it.
 - **Behemoth (symbiote in a zombie player):** all 6 back tendrils thrash wildly and each lashes on its own at a random
   living thing within `STRIKE_REACH` 7.5 (10 damage, 1-5 ticks between a tendril's lashes; normal i-frames).

@@ -126,6 +126,7 @@ public final class Dismember {
 	public static void init() {
 		SeveredPart.register();
 		Fractures.init();
+		BladeBlood.init();
 		ServerLivingEntityEvents.AFTER_DAMAGE.register(Dismember::afterDamage);
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof Projectile projectile) {
@@ -255,12 +256,14 @@ public final class Dismember {
 	 * kept from rolling a second time as an ordinary blade hit.
 	 */
 	public static boolean cut(LivingEntity attacker, LivingEntity target, int part, float mobChance, Runnable blow) {
+		float before = target.getHealth();
 		rolling = true;
 		try {
 			blow.run();
 		} finally {
 			rolling = false;
 		}
+		BladeBlood.splash(target, before - target.getHealth());
 		if (!canLoseParts(target) || target instanceof Player p && (p.isCreative() || p.isSpectator())) {
 			return false;
 		}

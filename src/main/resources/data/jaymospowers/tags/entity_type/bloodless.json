@@ -1,0 +1,20 @@
+{
+	"replace": false,
+	"values": [
+		"#minecraft:skeletons",
+		"minecraft:iron_golem",
+		"minecraft:snow_golem",
+		"minecraft:blaze",
+		"minecraft:breeze",
+		"minecraft:shulker",
+		"minecraft:vex",
+		"minecraft:allay",
+		"minecraft:wither",
+		"minecraft:armor_stand",
+		"minecraft:creaking",
+		{
+			"id": "minecraft:copper_golem",
+			"required": false
+		}
+	]
+}

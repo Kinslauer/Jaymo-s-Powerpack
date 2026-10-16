@@ -66,8 +66,8 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 	};
 	/** The first of the spares (see {@link #ROOTS}): hidden unless the tendrils are walking you. */
 	static final int FIRST_SPARE = 8;
-	/** Which ones take turns stabbing in a barrage: those free to, walking or not. */
-	private static final int[] BARRAGE_FREE = {2, 3, 4, 5, 6, 7}, BARRAGE_FREE_WALKING = {0, 1, 2, 3, 8, 9, 10, 11};
+	/** The barrage's stabbers (Andy): the outermost pair, left and right by turns; walking, the outer spares. */
+	private static final int[] BARRAGE_FREE = {4, 5}, BARRAGE_FREE_WALKING = {8, 9};
 	/** Roots higher than this (model y) are the upper ones: the strikers, and the ones seen in first person. */
 	private static final float UPPER_ROOT_Y = 6.0F;
 	/** A whole tendril's length at its rest size (model pixels): the segments overlap a little. */

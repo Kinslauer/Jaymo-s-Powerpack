@@ -1,6 +1,7 @@
 package com.jaymospowers.power.web;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.BladeBlood;
 import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.Fractures;
 import io.netty.buffer.ByteBuf;
@@ -464,12 +465,14 @@ public final class WebMorph {
 			case HAMMER -> hammer(player, level, target, damage, source, away);
 			case HOOK -> hook(player, level, target, damage, source);
 			default -> {
+				float before = target.getHealth();
 				blow(target, level, source, damage * (1.0F - SPEAR_PIERCE));
 				if (target.isAlive()) {
 					// straight through: this much ignores armour
 					target.setInvulnerableTime(0);
 					target.hurtServer(level, pierce(level, player), damage * SPEAR_PIERCE);
 				}
+				BladeBlood.splash(target, before - target.getHealth());
 				target.hurtArmor(source, damage * ARMOR_WEAR);
 				push(target, away.scale(SPEAR_KNOCK).add(0.0, 0.2, 0.0));
 				level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 14, 0.2, 0.2, 0.2, 0.4);
@@ -515,7 +518,7 @@ public final class WebMorph {
 			LivingEntity e = cut.get(i);
 			Vec3 at = e.getBoundingBox().getCenter();
 			e.setInvulnerableTime(0);
-			blow(e, level, source, damage * share);
+			slash(e, level, source, damage * share);
 			share *= WHIP_FALLOFF;
 			if (i == cut.size() - 1) {
 				// the barbs bite and the lash drags it in
@@ -567,7 +570,7 @@ public final class WebMorph {
 	/** The hook claw: hooks in, reels what it caught in to you, and leaves it bleeding a while. */
 	private static void hook(ServerPlayer player, ServerLevel level, LivingEntity target, float damage, DamageSource source) {
 		Vec3 at = target.getBoundingBox().getCenter();
-		blow(target, level, source, damage);
+		slash(target, level, source, damage);
 		Vec3 back = player.position().subtract(target.position());
 		double dist = back.length();
 		if (dist > 1.5) {
@@ -609,7 +612,9 @@ public final class WebMorph {
 			}
 			if (now >= b[1]) {
 				bleeding.setInvulnerableTime(0);
+				float before = bleeding.getHealth();
 				bleeding.hurtServer(level, pierce(level, player), BLEED_DAMAGE);
+				BladeBlood.splash(bleeding, before - bleeding.getHealth());
 				b[1] = now + BLEED_EVERY;
 				b[2]--;
 			}
@@ -625,6 +630,13 @@ public final class WebMorph {
 
 	private static void blow(LivingEntity target, ServerLevel level, DamageSource source, float damage) {
 		target.hurtServer(level, source, damage);
+	}
+
+	/** A blade's blow (the whip-blade, the hook claw): it bleeds ({@link BladeBlood}). */
+	private static void slash(LivingEntity target, ServerLevel level, DamageSource source, float damage) {
+		float before = target.getHealth();
+		blow(target, level, source, damage);
+		BladeBlood.splash(target, before - target.getHealth());
 	}
 
 	/** The mace: the bone it lands on breaks (a skeleton's shatters), at {@link #MACE_BREAK}. */
