@@ -188,7 +188,7 @@ final class Routines {
 	static boolean freeOf(Villager v, long t) {
 		if (Neighbours.meeting(v) || Couriers.carrying(v) || Grudges.busy(v) || v.isSleeping() || v.isPassenger() || v.isNoAi() || v.getTarget() != null || v.hurtTime > 0 || Frights.afraid(v.getUUID())
 			|| Theft.rioting(v) || Approaches.talking(v) || Quests.listening(v) || Tag.playing(v) || Trespass.watching(v) || McaCompat.busy(v)
-			|| McaCompat.panicking(v) || Hermits.is(v) || Rickshaws.onDuty(v) || WarAlert.carrying(v)) {
+			|| McaCompat.panicking(v) || Hermits.is(v) || Rickshaws.onDuty(v) || WarAlert.carrying(v) || Downed.helping(v)) {
 			return false;
 		}
 		if (v instanceof Worker w && w.role() >= 0) {

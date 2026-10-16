@@ -177,7 +177,9 @@ final class McaBridge {
 		VillagerEntityMCA villager = chosen != null ? chosen : candidate(level, f);
 		if (villager == null) {
 			// nobody to spare: someone new moves in to take the work
-			villager = VillagerFactory.newVillager(level).withPosition(Vec3.atBottomCenterOf(at)).withAge(0).spawn(EntitySpawnReason.MOB_SUMMONED);
+			// (0.7.83) on open ground by {@code at}, not shut in wherever it is (a seat can be indoors)
+			BlockPos open = ShutIn.openGround(level, at);
+			villager = VillagerFactory.newVillager(level).withPosition(Vec3.atBottomCenterOf(open != null ? open : at)).withAge(0).spawn(EntitySpawnReason.MOB_SUMMONED);
 		}
 		if (villager.getProfession() != job) {
 			villager.setProfession(job);

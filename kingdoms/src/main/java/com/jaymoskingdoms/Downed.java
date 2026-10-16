@@ -26,6 +26,8 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -45,6 +47,13 @@ import org.jspecify.annotations.Nullable;
  * at the {@link #MAX_WOUNDS}th. Then they're gone, leaving nothing behind (their death counts then, for wars, quests
  * and crimes).
  * Drawn lying down by the client's {@code DownedPose}; their AI is held by {@code DownedMixin}.
+ * <p>
+ * (0.7.83) Andy: "villagers should try to help others that are downed, and they can all be downed now, unless
+ * decapitated". Every villager (MCA's too, children too) and the settlements' own folk (not their rulers) go down
+ * now, not only guards; a blow that takes the head off still kills outright. A townsperson who isn't a guard leaves
+ * their body and belongings when they do die at last, as anyone would. And the folk about look after their own: a
+ * grown villager near a downed one, not afraid or fighting, comes over, kneels and tends them, and after
+ * {@link #TEND_TICKS} at their side has them back on their feet (a player's hit while they tend starts it over).
  */
 public final class Downed {
 	/** A downed guard's health: what mobs, fire and falls have left to take. */
@@ -61,6 +70,12 @@ public final class Downed {
 	static final float CRAWLER_CHANCE = 0.5F;
 	/** A crawler's pace, as a share of its walking speed, and how far it gets from whoever felled it before it stops. */
 	static final double CRAWL_SPEED = 0.3, CRAWL_FROM = 14.0;
+	/** (0.7.83) Help: how far a villager comes to tend a downed one, how often one is looked for, how close is at their side, how long tending takes (ticks). */
+	static final double HELP_RANGE = 24.0, TEND_REACH = 1.8;
+	static final int HELP_LOOK_TICKS = 20, TEND_TICKS = 200;
+	static final float HELP_SPEED = 0.8F;
+	/** (0.7.83) What a beheading is (matched by name: Jaymo's Powers deals it), and the tag a beheaded body carries. */
+	static final String DECAPITATION = "jaymospowers:decapitation", HEADLESS_TAG = "jaymoskitchen.missing.head";
 	/** Kitchen's tag for a body that leaves no corpse (matched by name: Kitchen is optional). */
 	static final String NO_CORPSE_TAG = "jaymoskitchen.no_corpse";
 
@@ -78,6 +93,22 @@ public final class Downed {
 	/** The blow that put each down: whose kill it is when it dies (not saved; after a reload it bleeds out unclaimed). */
 	private static final Map<LivingEntity, DamageSource> FELLED_BY = new WeakHashMap<>();
 
+	/** (0.7.83) Who's tending each downed one, and how long they've been at it (ticks). Not saved. */
+	private static final class Tending {
+		final Villager helper;
+		int ticks;
+
+		Tending(Villager helper) {
+			this.helper = helper;
+		}
+	}
+
+	private static final Map<LivingEntity, Tending> TENDED = new WeakHashMap<>();
+	/** The villagers tending someone just now. */
+	private static final Map<Villager, LivingEntity> HELPING = new WeakHashMap<>();
+	/** (0.7.83) Townsfolk being finished off (their death let through as it comes). */
+	private static final java.util.Set<LivingEntity> FINISHING = java.util.Collections.newSetFromMap(new WeakHashMap<>());
+
 	private Downed() {
 	}
 
@@ -86,12 +117,20 @@ public final class Downed {
 			if (!(entity.level() instanceof ServerLevel level)) {
 				return true;
 			}
+			if (FINISHING.contains(entity)) {
+				return true;
+			}
 			if (isDowned(entity)) {
+				if (!isGuard(entity)) {
+					// (0.7.83) a townsperson dies as anyone would, body and all
+					forget(entity);
+					return true;
+				}
 				// (a mob, fire, a fall, the void: it goes, but leaves nothing)
 				finish(level, entity, source);
 				return false;
 			}
-			if (!isGuard(entity) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+			if (!downable(entity) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || beheaded(entity, source)) {
 				return true;
 			}
 			goDown(level, entity, source);
@@ -105,6 +144,11 @@ public final class Downed {
 			// a player's blow (or arrow): a wound (they won't get up again), the tenth kills
 			if (entity.level() instanceof ServerLevel level) {
 				wound(level, entity, source);
+				Tending tending = TENDED.get(entity);
+				if (tending != null) {
+					// (whoever was tending them starts over)
+					tending.ticks = 0;
+				}
 			}
 			return false;
 		});
@@ -140,6 +184,44 @@ public final class Downed {
 			return job.equals("guard") || job.equals("archer");
 		}
 		return false;
+	}
+
+	/**
+	 * (0.7.83) Whether the blow that would kill {@code entity} downs it instead: any villager, a settlement's own folk
+	 * (its guards and workers, not its ruler, nor orcs, raiders or barbarians).
+	 */
+	public static boolean downable(LivingEntity entity) {
+		if (isGuard(entity) || entity instanceof Villager) {
+			return true;
+		}
+		if (entity instanceof Folk folk && !Orcs.isOrc(folk) && entity.level() instanceof ServerLevel level) {
+			Folk.Role role = Folk.role(folk.role());
+			if (role != null && role.leader() || Assault.attacker(folk)) {
+				return false;
+			}
+			Faction f = Factions.get(level.getServer(), folk.factionId());
+			return f != null && f.type() != FactionType.BARBARIAN;
+		}
+		return false;
+	}
+
+	/** A beheading (or a body already without its head): no getting up from that. */
+	private static boolean beheaded(LivingEntity entity, DamageSource source) {
+		return entity.entityTags().contains(HEADLESS_TAG)
+			|| source.typeHolder().unwrapKey().map(k -> k.identifier().toString().equals(DECAPITATION)).orElse(false);
+	}
+
+	/** (0.7.83) No longer down (dying as anyone would): its marks and its tending gone. */
+	private static void forget(LivingEntity entity) {
+		FELLED_BY.remove(entity);
+		untend(entity);
+		entity.removeAttached(DOWNED);
+		entity.removeAttached(WOUNDS);
+	}
+
+	/** (0.7.83) {@code v} is tending someone downed just now. */
+	public static boolean helping(LivingEntity v) {
+		return v instanceof Villager villager && HELPING.containsKey(villager);
 	}
 
 	public static boolean isDowned(Entity entity) {
@@ -197,6 +279,11 @@ public final class Downed {
 			finish(level, mob, source != null ? source : level.damageSources().generic());
 			return;
 		}
+		if (tend(level, mob)) {
+			getUp(level, mob);
+			level.sendParticles(ParticleTypes.HAPPY_VILLAGER, mob.getX(), mob.getY() + 0.8, mob.getZ(), 10, 0.4, 0.4, 0.4, 0.0);
+			return;
+		}
 		mob.setTarget(null);
 		mob.getNavigation().stop();
 		mob.setJumping(false);
@@ -218,6 +305,79 @@ public final class Downed {
 			mob.setYHeadRot(yaw);
 			mob.yBodyRot = yaw;
 			mob.setSpeed((float) (mob.getAttributeValue(Attributes.MOVEMENT_SPEED) * CRAWL_SPEED));
+		}
+	}
+
+	/**
+	 * (0.7.83) Someone comes to tend a downed {@code body}: the nearest grown villager free to (not downed, afraid,
+	 * fighting, asleep or tending another) walks over, kneels and sees to them. True once they've been at it long enough
+	 * to get them up.
+	 */
+	private static boolean tend(ServerLevel level, Mob body) {
+		if (body.isPassenger() || body.isOnFire()) {
+			untend(body);
+			return false;
+		}
+		Tending tending = TENDED.get(body);
+		if (tending != null && !canHelp(tending.helper, body)) {
+			untend(body);
+			tending = null;
+		}
+		if (tending == null) {
+			if (body.tickCount % HELP_LOOK_TICKS != 0) {
+				return false;
+			}
+			Villager helper = null;
+			double best = HELP_RANGE * HELP_RANGE;
+			for (Villager v : level.getEntitiesOfClass(Villager.class, body.getBoundingBox().inflate(HELP_RANGE), v -> canHelp(v, body) && !HELPING.containsKey(v))) {
+				double d = v.distanceToSqr(body);
+				if (d < best) {
+					best = d;
+					helper = v;
+				}
+			}
+			if (helper == null) {
+				return false;
+			}
+			tending = new Tending(helper);
+			TENDED.put(body, tending);
+			HELPING.put(helper, body);
+			level.playSound(null, helper.getX(), helper.getY(), helper.getZ(), SoundEvents.VILLAGER_AMBIENT, SoundSource.NEUTRAL, 1.0F, 1.2F);
+		}
+		Villager helper = tending.helper;
+		if (helper.distanceToSqr(body) > TEND_REACH * TEND_REACH) {
+			helper.setShiftKeyDown(false);
+			if (body.tickCount % 10 == 0) {
+				BehaviorUtils.setWalkAndLookTargetMemories(helper, body.blockPosition(), HELP_SPEED, 1);
+			}
+			return false;
+		}
+		// at their side: kneeling, hands busy
+		helper.getNavigation().stop();
+		helper.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+		helper.getLookControl().setLookAt(body.getX(), body.getY() + 0.2, body.getZ());
+		helper.setShiftKeyDown(true);
+		if (++tending.ticks % 25 == 0) {
+			helper.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+			level.sendParticles(ParticleTypes.HEART, body.getX(), body.getY() + 0.6, body.getZ(), 1, 0.3, 0.1, 0.3, 0.0);
+		}
+		if (tending.ticks >= TEND_TICKS) {
+			untend(body);
+			return true;
+		}
+		return false;
+	}
+
+	private static boolean canHelp(Villager v, LivingEntity body) {
+		return v.isAlive() && v != body && !v.isBaby() && !isDowned(v) && !v.isSleeping() && !v.isPassenger() && !v.isNoAi() && v.getTarget() == null
+			&& !Frights.afraid(v.getUUID()) && !McaCompat.panicking(v) && v.level() == body.level() && v.distanceToSqr(body) < HELP_RANGE * HELP_RANGE * 1.5;
+	}
+
+	private static void untend(LivingEntity body) {
+		Tending tending = TENDED.remove(body);
+		if (tending != null) {
+			HELPING.remove(tending.helper);
+			tending.helper.setShiftKeyDown(false);
 		}
 	}
 
@@ -276,6 +436,7 @@ public final class Downed {
 	/** Left alone long enough: it gets back on its feet, hurt, and back to its post (its AI takes up again). */
 	private static void getUp(ServerLevel level, Mob mob) {
 		FELLED_BY.remove(mob);
+		untend(mob);
 		mob.stopRiding();
 		mob.removeAttached(DOWNED);
 		mob.removeAttached(WOUNDS);
@@ -288,8 +449,21 @@ public final class Downed {
 		if (entity.isRemoved() || entity.isDeadOrDying()) {
 			return;
 		}
-		FELLED_BY.remove(entity);
 		entity.stopRiding();
+		if (!isGuard(entity)) {
+			// (0.7.83) anyone else dies as anyone would: their body and what they had are left behind
+			forget(entity);
+			FINISHING.add(entity);
+			try {
+				entity.setInvulnerableTime(0);
+				entity.hurtServer(level, source, Float.MAX_VALUE);
+			} finally {
+				FINISHING.remove(entity);
+			}
+			return;
+		}
+		FELLED_BY.remove(entity);
+		untend(entity);
 		entity.addTag(NO_CORPSE_TAG);
 		entity.setHealth(0.0F);
 		entity.die(source);
