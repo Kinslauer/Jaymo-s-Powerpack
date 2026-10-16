@@ -35,9 +35,12 @@ public final class GravityBoardPose {
 	static final float STANCE = 78.0F;
 	/** The hinge toward the toes from the hips (degrees), and the extra tuck at full speed ({@code TOP_SPEED} blocks/tick). */
 	static final float PITCH = 14.0F, SPEED_PITCH = 8.0F, TOP_SPEED = 0.95F;
-	/** The hips (blocks over the feet), and how far the body sinks (the wide stance, as knees we don't have). */
-	static final float HIP = 0.75F, CROUCH = 0.05F;
-	/** Each leg out to its side, so the feet stand wide apart along the board (radians). */
+	/** The hips (blocks over the feet; a leg is as long), and the soles kept this far over the board's top (blocks). */
+	static final float HIP = 0.75F, SOLE = 0.03F;
+	/**
+	 * Each leg out to its side, so the feet stand wide apart along the board (radians). The hips sink only as far as
+	 * the spread legs let them, so the feet stay on the board and never sink into it.
+	 */
 	static final float LEG_SPREAD = 0.3F;
 	/** The lead arm out over the nose and the back arm out over the tail (radians out from the side, and forward). */
 	static final float LEAD_OUT = 1.05F, LEAD_FORWARD = 0.3F, TRAIL_OUT = 0.75F, TRAIL_FORWARD = 0.15F;
@@ -50,8 +53,8 @@ public final class GravityBoardPose {
 	static final float CLIMB_TILT = 10.0F, SPEED_DIP = 4.0F;
 	/** Climbing or sinking at this speed (blocks/tick) is "flat out" for the tilt. */
 	static final float CLIMB_FULL = 0.18F;
-	/** The rider sinks deeper into the crouch climbing (blocks), and rises a little sinking. */
-	static final float CLIMB_CROUCH = 0.04F;
+	/** The legs spread this much wider climbing (radians), so the rider sinks deeper, and closer sinking. */
+	static final float CLIMB_SPREAD = 0.12F;
 	/** The slow bob of the board and its rider together (blocks, and radians per tick). */
 	static final float BOB = 0.035F, BOB_RATE = 0.11F;
 	/**
@@ -141,7 +144,8 @@ public final class GravityBoardPose {
 		poseStack.rotateDegrees(Axis.XP, ride.tilt());
 		poseStack.rotateDegrees(Axis.ZP, ride.lean());
 		poseStack.rotateDegrees(Axis.YP, ride.goofy() ? STANCE : -STANCE);
-		float crouch = CROUCH + CLIMB_CROUCH * ride.climb();
+		// the hips sink as far as the spread legs reach down (no further, or the feet would go into the board)
+		float crouch = HIP * (1.0F - Mth.cos(spread(ride))) - SOLE;
 		poseStack.translate(0.0F, HIP - crouch, 0.0F);
 		poseStack.rotateDegrees(Axis.XP, -ride.pitch());
 		poseStack.translate(0.0F, -HIP, 0.0F);
@@ -168,8 +172,9 @@ public final class GravityBoardPose {
 		set(lead, -LEAD_FORWARD + swing + sway, 0.0F, -LEAD_OUT * side + sway * 0.5F);
 		set(trail, -TRAIL_FORWARD + swing - sway, 0.0F, TRAIL_OUT * side - sway * 0.5F);
 		// the legs stand back up against the hinge, wide apart along the board
-		set(h.rightLeg, -pitch, 0.0F, LEG_SPREAD);
-		set(h.leftLeg, -pitch, 0.0F, -LEG_SPREAD);
+		float spread = spread(ride);
+		set(h.rightLeg, -pitch, 0.0F, spread);
+		set(h.leftLeg, -pitch, 0.0F, -spread);
 		h.body.xRot = 0.0F;
 		h.body.yRot = 0.0F;
 		h.body.zRot = 0.0F;
@@ -178,6 +183,11 @@ public final class GravityBoardPose {
 			.rotateY(h.head.yRot).rotateX(h.head.xRot);
 		Vector3f euler = look.getEulerAnglesZYX(new Vector3f());
 		set(h.head, euler.x, euler.y, euler.z);
+	}
+
+	/** How far each leg is out to its side right now: wider climbing, closer sinking. */
+	private static float spread(Ride ride) {
+		return LEG_SPREAD + CLIMB_SPREAD * ride.climb();
 	}
 
 	private static void set(ModelPart part, float x, float y, float z) {

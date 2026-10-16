@@ -49,6 +49,7 @@ public final class GravityPowerClient implements PowerClient {
 	public static void init() {
 		PowerClients.register(GravityPower.ID, INSTANCE);
 		GravityHeldClient.init();
+		GravityMeteorFx.init();
 		// every gravity user's aura, on every client
 		ClientTickEvents.END_CLIENT_TICK.register(GravityPowerClient::auras);
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
