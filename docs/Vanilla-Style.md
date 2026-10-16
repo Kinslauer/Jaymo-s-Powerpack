@@ -34,6 +34,11 @@ fal.ai image generation and parallax parts don't apply to 16px item icons, so th
 | MCA, Shippy Ships, Nature's Compass, Cooking for Blockheads, Old Cannons, Tool Belt | ~150 | Close: leave |
 | TaCZ | 21 | Art licence is no-derivatives: leave |
 
-## Batch 1 (in the pack)
-Kitchen: vegetable soup, fried egg, hot chocolate. Kingdoms: ronin and gladiator chestplates. WeaponMod: iron
-katana. Regenerate with `python -I tools/vanilla_style/paint_batch.py <vanilla textures/item folder>`.
+## In the pack
+- **Jaymo's Kitchen: all 98** (`kitchen.py`, `carts.py`). Soups use vanilla's stew bowl, pies vanilla's pumpkin pie,
+  carrot cake vanilla's cake, meats vanilla's cooked meats; carts, wagons and plows are drawn once and painted in each
+  wood's vanilla planks colours. Fried egg and hot chocolate are in `paint_batch.py`.
+- Kingdoms: ronin and gladiator chestplates. WeaponMod: iron katana (`paint_batch.py`).
+
+Regenerate from the repository root with the vanilla 26.3 `textures/item` folder:
+`python -I tools/vanilla_style/kitchen.py <folder>` and `python -I tools/vanilla_style/paint_batch.py <folder>`.

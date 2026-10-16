@@ -104,16 +104,7 @@ MUSKET = '''
 # vanilla; the flail also needs its thrown-state handle, flail-thrown, painted to match)
 paint(KATANA, 'iron', WOOD).save(item('weaponmod', 'katana.iron'))
 
-# Vegetable soup on vanilla's own bowl: keep the bowl, repaint the soup
-stew = Image.open(f'{VAN}/mushroom_stew.png').convert('RGBA'); px = stew.load()
-broth = {hx('be785e'): hx('c46a2c'), hx('cd8c6f'): hx('d98236'), hx('cc9978'): hx('e8a04a')}
-for y in range(16):
-    for x in range(16):
-        c = px[x, y]
-        if c[3] and c[:3] in broth: px[x, y] = broth[c[:3]] + (255,)
-for (x, y), c in {(5, 6): 'f2a33a', (9, 7): '4f8a2b', (6, 7): '4f8a2b', (10, 6): 'f2a33a', (8, 6): 'e9d27a', (11, 7): 'c43c2a'}.items():
-    px[x, y] = hx(c) + (255,)
-stew.save(item('jaymoskitchen', 'vegetable_soup'))
+# (vegetable soup moved to kitchen.py with the other soups)
 
 # Ronin chestplate: vanilla's chestplate silhouette in black lacquer, laced with red cord
 cp = Image.open(f'{VAN}/iron_chestplate.png').convert('RGBA'); px = cp.load()
