@@ -84,6 +84,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosPowers.id("power_hud"), PowerHud::render);
 
 		ScreenShake.init();
+		BeamClashClient.init();
 		Ambience.init();
 		LeafRustle.init();
 		CarryClient.init();
