@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.entity.player.PlayerModelType;
 
-/** The alien in first person: its arm in place of yours, pulsing red through the form's last seconds. */
+/** The alien in first person: its arm in place of yours (Pyre's glowing), pulsing red through the form's last seconds. */
 public final class XenoformHand {
 	private XenoformHand() {
 	}
@@ -31,12 +31,18 @@ public final class XenoformHand {
 		limb.resetPose();
 		limb.visible = true;
 		limb.zRot = right ? 0.1F : -0.1F;
+		if (model instanceof XenoFormModels.Pyre pyre) {
+			pyre.handPose();
+		}
 		poseStack.pushPose();
 		// a slim skin's arm is a pixel thinner; the alien's never is, so nudge it in
 		if (player.getSkin().model() == PlayerModelType.SLIM) {
 			poseStack.translate(right ? -0.03F : 0.03F, 0.0F, 0.0F);
 		}
 		collector.submitModelPart(limb, poseStack, RenderTypes.entityCutout(model.texture), light, OverlayTexture.NO_OVERLAY, null);
+		if (model instanceof XenoFormModels.Pyre) {
+			collector.submitModelPart(limb, poseStack, RenderTypes.eyes(XenoFormModels.Pyre.GLOW), light, OverlayTexture.NO_OVERLAY, null);
+		}
 		if (XenoformState.ending(player)) {
 			float time = player.tickCount + Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true);
 			collector.submitModelPart(limb, poseStack, RenderTypes.eyes(model.texture), light, OverlayTexture.NO_OVERLAY, null, XenoformLayer.glow(time));

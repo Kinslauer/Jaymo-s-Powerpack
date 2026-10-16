@@ -74,7 +74,8 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
   model (`renderColoredCutoutModel`, which unlike the "copy layer" helper doesn't skip invisible states) and clears
   `isInvisible` again so the shadow still falls.
 - `XenoFormModels`: each alien is a `HumanoidModel` built from `HumanoidModel.createMesh` with a different inflation and
-  extra parts hung on the head and body (Bulwark's brow, plates and lower arms; Pyre's crest, plumes and core; Blur's
+  extra parts hung on the head and body (Bulwark's brow, plates and lower arms; Pyre's crown and hair of fire,
+  shoulder plumes, forearm flames and core; Blur's
   fin, snout and tail; Prism's crown and back crystals; Wisp's hood and tatters, no legs; Gremlin's big skull and ears;
   Knell's horns, ribs, shoulders and jaw tendrils; Wyrm's horns, wings and finned tail; Bulwark's pauldrons, Blur's
   ears, Prism's shoulder shards, Gremlin's tail), so it takes the player's own pose, swing, crouch and swim. Skins are
@@ -82,6 +83,10 @@ four moves on R G V B with their own cooldowns (`Live.cooldownUntil`). HUD icons
   `tools/gen_xenoform.py` draws them face by face (lit from above, dark underneath) with each alien's own motifs, and
   every alien wears the xeno insignia (the band's green hourglass): on the chest, or on Pyre's core and Knell's sternum.
   `python tools/gen_xenoform.py preview.png` also writes a front-view contact sheet of all nine.
+- Pyre is living flame (since 0.11.97, an original look in the spirit of a flame-bodied hero): vanilla's fire colours,
+  hair of fire streaming back with speed, and a second skin (`xenoform_pyre_glow`) drawn again additive and fullbright
+  (`RenderTypes.eyes`) in third and first person, so it shines in the dark. Small flames rise off its body
+  (`XenoformFlightPose.bodyFlame`, not in water or rain, not round your own first-person camera).
 - First person: `renderHand` (head, cancellable) draws the alien's arm instead of the skin's; `XenoformFirstPersonMixin`
   lifts the render state's invisible flag for the hands (the body was hidden for the alien, and the renderer skips an
   invisible body's bare arm).

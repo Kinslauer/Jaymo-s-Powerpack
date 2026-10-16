@@ -330,8 +330,143 @@ def bulwark():
     save(img, "entity/xenoform_bulwark.png")
 
 
+# the vanilla fire ramp (campfire flames, blaze powder), hottest first
+FIRE_WHITE = (254, 254, 251)
+FIRE_PALE = (249, 235, 171)
+FIRE_YELLOW = (239, 205, 86)
+FIRE_GOLD = (233, 189, 57)
+FIRE_AMBER = (223, 162, 27)
+FIRE_ORANGE = (201, 108, 3)
+FIRE_RED = (177, 63, 0)
+FIRE_EMBER = (139, 52, 1)
+
+
+def tongues(img, b, n, length=(3, 7)):
+    """Licks of flame rising up a face: a pale root, yellow, gold at the tip, wavering a pixel side to side."""
+    x0, y0, x1, y1 = b
+    for _ in range(n):
+        x = rng.randrange(x0, x1)
+        y = rng.randrange(y0 + (y1 - y0) // 2, y1)
+        size = rng.randrange(*length)
+        for i in range(size):
+            if y < y0:
+                break
+            t = i / max(1, size - 1)
+            c = lerp(FIRE_PALE, FIRE_YELLOW, t * 2) if t < 0.5 else lerp(FIRE_YELLOW, FIRE_GOLD, t * 2 - 1)
+            img.putpixel((x, y), c)
+            y -= 1
+            if rng.random() < 0.3:
+                x = min(x1 - 1, max(x0, x + rng.choice((-1, 1))))
+
+
+def fire_body(img, part):
+    """A limb of living flame: gold at the heart of each face, orange to the sides, tongues licking up it, a ragged
+    red edge so the shape still reads, and the hottest flame at the hands and feet."""
+    for name, (x0, y0, x1, y1) in faces(*part).items():
+        light = 1.0 + (LIGHT[name] - 1.0) * 0.4   # fire is its own light: only a hint of shading
+        w = x1 - x0
+        for y in range(y0, y1):
+            for x in range(x0, x1):
+                edge = abs((x - x0 + 0.5) / w - 0.5) * 2.0   # 0 at the middle, 1 at the sides
+                c = lerp(FIRE_AMBER, FIRE_RED, edge * 1.2 + rng.random() * 0.45 - 0.15)
+                img.putpixel((x, y), shade(c, light))
+        if name in ("top", "bottom"):
+            continue
+        speckle(img, (x0, y0, x1, y1), FIRE_EMBER + (255,), w * (y1 - y0) // 12)
+        tongues(img, (x0, y0, x1, y1), max(2, w // 2 + (y1 - y0) // 4))
+        for y in range(y0, y1):
+            for x in (x0, x1 - 1):
+                if rng.random() < 0.35:
+                    img.putpixel((x, y), shade(FIRE_RED, 1.0 - rng.random() * 0.2))
+
+
+def flame_part(img, part):
+    """A loose flame (hair, plumes, the licks off the arms): white-hot at the root, red at ragged tips; its
+    top and bottom faces see-through."""
+    for name, (x0, y0, x1, y1) in faces(*part).items():
+        if name in ("top", "bottom"):
+            rect(img, (x0, y0, x1, y1), CLEAR)
+            continue
+        h = y1 - y0
+        for y in range(y0, y1):
+            t = (y - y0) / max(1, h - 1)   # 0 at the tip, 1 at the root
+            for x in range(x0, x1):
+                c = lerp(FIRE_RED, FIRE_GOLD, t * 1.6 + rng.random() * 0.3 - 0.15) if t < 0.6 else lerp(FIRE_GOLD, FIRE_PALE, (t - 0.6) * 2.5)
+                img.putpixel((x, y), c)
+        # ragged tips: the top row or two eaten away at random, a spark of white low down
+        for x in range(x0, x1):
+            if rng.random() < 0.5:
+                rect(img, (x, y0, x + 1, y0 + 1 + (rng.random() < 0.4)), CLEAR)
+            if rng.random() < 0.3:
+                img.putpixel((x, y1 - 1 - rng.randrange(0, 2)), FIRE_WHITE + (255,))
+
+
 def pyre():
-    """Scorched rock, magma cracks, flames for a crest, and the insignia burning on the core."""
+    """A body of living flame (vanilla's fire colours): gold-hearted limbs licked by tongues of fire, white-hot eyes,
+    hair of fire streaming off the head, flames off the shoulders and forearms, and the insignia burning on the
+    core. A second, emissive skin (xenoform_pyre_glow) makes it shine in the dark."""
+    global rng
+    shared, rng = rng, random.Random(26034)
+    img = new_skin()
+    for part in BASE_PARTS:
+        fire_body(img, part)
+    # hands and feet: the hottest flame
+    for part in LIMBS:
+        for name, (x0, y0, x1, y1) in faces(*part).items():
+            if name == "bottom":
+                noise_fill(img, FIRE_PALE, 0.08, (x0, y0, x1, y1))
+            elif name != "top":
+                for x in range(x0, x1):
+                    img.putpixel((x, y1 - 1), lerp(FIRE_PALE, FIRE_WHITE, rng.random()))
+                    if rng.random() < 0.5:
+                        img.putpixel((x, y1 - 2), FIRE_YELLOW + (255,))
+    # the face: a darker mask of flame round white-hot eyes, a brow, a faint mouth
+    hx0, hy0, hx1, hy1 = front(HEAD)
+    for y in range(hy0 + 2, hy1):
+        for x in range(hx0 + 1, hx1 - 1):
+            img.putpixel((x, y), lerp(FIRE_RED, FIRE_ORANGE, rng.random() * 0.8))
+    rect(img, (9, 10, 15, 11), FIRE_EMBER + (255,))
+    rect(img, (9, 11, 11, 12), FIRE_WHITE + (255,))
+    rect(img, (13, 11, 15, 12), FIRE_WHITE + (255,))
+    rect(img, (9, 12, 11, 13), FIRE_PALE + (255,))
+    rect(img, (13, 12, 15, 13), FIRE_PALE + (255,))
+    rect(img, (11, 14, 13, 15), FIRE_EMBER + (255,))
+    # the head's crown of flame burns down over the brow
+    for x in range(hx0, hx1):
+        if rng.random() < 0.6:
+            img.putpixel((x, hy0 + 1), FIRE_YELLOW + (255,))
+    # the chest round the core glows paler, as if the fire burns hottest there
+    bx0, by0, bx1, by1 = front(BODY)
+    for y in range(by0 + 1, by0 + 9):
+        for x in range(bx0 + 1, bx1 - 1):
+            if rng.random() < 0.55:
+                img.putpixel((x, y), lerp(FIRE_YELLOW, FIRE_PALE, rng.random()))
+    # extras: crown 8x2x8 (0,64), hair 4x8x4 (32,64), hair tip 2x5x2 (48,64), plumes 3x6x3 (0,78),
+    # core 5x5x1 (12,78), forearm flames 2x5x2 (24,78)
+    for part in ((0, 64, 8, 2, 8), (32, 64, 4, 8, 4), (48, 64, 2, 5, 2), (0, 78, 3, 6, 3), (24, 78, 2, 5, 2)):
+        flame_part(img, part)
+    core = (12, 78, 5, 5, 1)
+    box(img, core, FIRE_PALE, 0.08)
+    cx0, cy0, cx1, cy1 = front(core)
+    insignia(img, cx0 + 2, cy0, small=True, fill=GREEN, rim=FIRE_RED + (255,), heart=(240, 255, 240, 255))
+    clear_hat(img)
+    save(img, "entity/xenoform_pyre.png")
+    # the glow: drawn again over the body, additive and fullbright, so the hot flame shines and the rest smoulders
+    glow = Image.new("RGBA", (W, H), CLEAR)
+    for y in range(H):
+        for x in range(W):
+            r, g, b, a = img.getpixel((x, y))
+            if a:
+                lum = (r + g + b) / 3
+                glow.putpixel((x, y), shade((r, g, b), 0.85 if lum > 175 else 0.35))
+    save(glow, "entity/xenoform_pyre_glow.png")
+    rng = shared
+    _retired_pyre_noise()
+
+
+def _retired_pyre_noise():
+    """Pyre's old rock skin, painted and thrown away: it keeps the shared noise where it was, so the aliens drawn
+    after Pyre come out exactly as before. The new Pyre (below) draws from its own noise."""
     img = new_skin()
     rock = (50, 28, 22)
     char = (24, 14, 12, 255)
@@ -388,7 +523,6 @@ def pyre():
     cx0, cy0, cx1, cy1 = front(core)
     insignia(img, cx0 + 2, cy0, small=True, fill=GREEN, rim=(255, 140, 40, 255), heart=(240, 255, 240, 255))
     clear_hat(img)
-    save(img, "entity/xenoform_pyre.png")
 
 
 def blur():
@@ -910,7 +1044,7 @@ FORMS = ("bulwark", "pyre", "blur", "prism", "wisp", "gremlin", "knell", "wyrm",
 # for the preview: extra parts drawn over the front view, (part, where on the 24x36 card)
 EXTRAS_IN_FRONT = {
     "bulwark": (((0, 64, 10, 3, 3), (7, 1)), ((0, 72, 12, 4, 7), (6, 7))),
-    "pyre": (((12, 76, 5, 5, 1), (10, 10)),),
+    "pyre": (((12, 78, 5, 5, 1), (10, 10)),),
     "blur": (((22, 64, 4, 3, 3), (10, 4)),),
     "wisp": (((0, 64, 10, 10, 10), (7, 0)), ((0, 86, 8, 7, 4), (8, 20))),
     "gremlin": (((0, 64, 10, 10, 10), (7, 0)), ((40, 64, 4, 5, 1), (3, 2)), ((40, 64, 4, 5, 1), (17, 2))),

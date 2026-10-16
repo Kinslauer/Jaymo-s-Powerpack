@@ -13,7 +13,7 @@ import net.minecraft.util.Mth;
 /**
  * Draws the alien in a transformed player's place. {@link XenoformClient#extract} has already hidden the player's own
  * body (invisible, no armour, no held items), so only the form's model shows, in the player's pose and at the player's
- * (scaled) size. Through a form's last seconds ({@link XenoformClient#ENDING}) the whole alien pulses red, an emissive
+ * (scaled) size. Pyre is drawn a second time, fullbright, from its glow skin. Through a form's last seconds ({@link XenoformClient#ENDING}) the whole alien pulses red, an emissive
  * pass over the body ({@link #glow}).
  */
 final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
@@ -29,6 +29,11 @@ final class XenoformLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		}
 		// renderColoredCutoutModel, not the "copy layer" one: that skips invisible states, and the body was made invisible
 		renderColoredCutoutModel(model, model.texture, poseStack, collector, lightCoords, state, -1, 1);
+		if (model instanceof XenoFormModels.Pyre) {
+			// Pyre is fire: its glow skin again, fullbright, so it shines in the dark
+			collector.order(1).submitModel(model, state, poseStack, RenderTypes.eyes(XenoFormModels.Pyre.GLOW), lightCoords, OverlayTexture.NO_OVERLAY,
+				-1, null, 0);
+		}
 		boolean ending = Boolean.TRUE.equals(state.getData(XenoformClient.ENDING));
 		if (ending) {
 			collector.order(1).submitModel(model, state, poseStack, RenderTypes.eyes(model.texture), lightCoords, OverlayTexture.NO_OVERLAY,
