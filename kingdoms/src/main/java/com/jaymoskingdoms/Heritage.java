@@ -114,6 +114,13 @@ public final class Heritage {
 	public static final String TAG = "jaymoskingdoms_heritage_";
 	/** How often the heritages that change with the light and the frost are looked at (ticks). */
 	static final int TICK_EVERY = 20;
+	/**
+	 * (0.7.87) Andy: "max height should only be accessible to verdant". The top of MCA's Size slider (0 to 1) is a
+	 * Verdant's alone: anyone of another heritage is held to this, checked this often (ticks) and whenever they save
+	 * their MCA look.
+	 */
+	static final float MCA_SIZE_CAP = 0.75F;
+	static final int SIZE_CHECK_EVERY = 200;
 
 	/** The heritages: free points to spend as you like, an icon, and the attributes each gives a free point in (one entry a point). */
 	public enum Kind {
@@ -277,6 +284,9 @@ public final class Heritage {
 		look(player, was, kind);
 		Stats.settle(player);
 		Skills.refresh(player);
+		if (McaCompat.LOADED && sizeCapped(player)) {
+			McaBridge.capSize(player, MCA_SIZE_CAP);
+		}
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.8F, 1.0F);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.heritage.chosen", Component.translatable("heritage.jaymoskingdoms." + kind.key()))
 			.withStyle(ChatFormatting.GOLD));
@@ -355,9 +365,13 @@ public final class Heritage {
 		if (server.getTickCount() % TICK_EVERY != 0) {
 			return;
 		}
+		boolean sizes = McaCompat.LOADED && server.getTickCount() % SIZE_CHECK_EVERY == 0;
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			Kind kind = of(player);
 			look(player, kind);
+			if (sizes && sizeCapped(player)) {
+				McaBridge.capSize(player, MCA_SIZE_CAP);
+			}
 			if (kind == Kind.NIGHTBORN) {
 				// stronger and quicker in the dark, weaker under the open sun
 				double damage = 0.0, speed = 0.0;
@@ -417,6 +431,12 @@ public final class Heritage {
 				player.setAttached(LOOK, look);
 			}
 		}
+	}
+
+	/** (0.7.87) Held below the top of MCA's Size slider: chosen a heritage, and not Verdant ({@link #MCA_SIZE_CAP}). */
+	public static boolean sizeCapped(ServerPlayer player) {
+		Kind kind = of(player);
+		return kind != null && kind != Kind.VERDANT;
 	}
 
 	/** A Thief, or anyone who's learned a Stealth perk. */

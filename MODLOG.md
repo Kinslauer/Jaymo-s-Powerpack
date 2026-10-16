@@ -1579,3 +1579,4 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   - **Takeover camera:** your view is dragged to the way you're carried (`VIEW_DRAG` 0.2/tick); look more than 40
     degrees away and it tears it back with a jolt (`WebSymbioteClient.wrenchView`).
   - Packs Jaymo's Kitchen 0.4.46 (heartier meals, see `kitchen/MODLOG.md`).
+- **0.13.5, the tallest size is the Verdant's:** packs Jaymo's Kingdoms 0.7.87 (only a Verdant can take MCA's Size slider to the top; see `kingdoms/MODLOG.md`). No Powers code changed.
