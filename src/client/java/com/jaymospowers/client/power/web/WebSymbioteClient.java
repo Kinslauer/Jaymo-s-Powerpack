@@ -167,6 +167,13 @@ public final class WebSymbioteClient {
 	 */
 	static final double LATCH_SLAM = 0.35, LATCH_LIFT = 0.3;
 	static final int LATCH_HOLD_TICKS = 8;
+	/**
+	 * The same under a ceiling: one within {@code CEILING_LATCH_REACH} blocks over your head ({@code CEILING_LATCH_GROUND}
+	 * standing on the ground) and you're yanked up into it, {@code CEILING_SLAM_EXTRA} faster against gravity. By a wall,
+	 * the ceiling wins only looking up more than {@code CEILING_LATCH_LOOK} degrees.
+	 */
+	static final double CEILING_LATCH_REACH = 1.8, CEILING_LATCH_GROUND = 0.9, CEILING_SLAM_EXTRA = 0.15;
+	static final float CEILING_LATCH_LOOK = 30.0F;
 	static final int STRIDE_RISE_ANCHORS = 4;
 	/** Climbing off the top of a wall: a little hop forward onto the ledge. */
 	static final double LEDGE_HOP = 0.35;
@@ -1140,8 +1147,8 @@ public final class WebSymbioteClient {
 
 	/**
 	 * Wall Crawl: stuck to walls and ceilings, and dragged along them by the tendrils (see {@link #CLIMB_REACH}): forward
-	 * or Jump climbs, Sneak or back goes down, strafing goes along the wall; on a ceiling (Jump sticks you to it, Sneak
-	 * drops you) the movement keys drag you about upside down. Over the top of a wall, a tendril bites the ledge and
+	 * or Jump climbs, Sneak or back goes down, strafing goes along the wall; on a ceiling (Jump or a Sneak press under it
+	 * sticks you to it, another Sneak press drops you) the movement keys drag you about upside down. Over the top of a wall, a tendril bites the ledge and
 	 * hauls you onto it.
 	 */
 	private static void tickCrawl(LocalPlayer player, WebSwing swing) {
@@ -1157,23 +1164,45 @@ public final class WebSymbioteClient {
 		boolean ceiling = !player.onGround() && !player.level().noCollision(player, box.move(0.0, 0.15, 0.0).deflate(0.05, 0.0, 0.05));
 		Input input = player.input.keyPresses;
 		Vec3 move = inputDirection(player, input);
-		if (ceiling && !input.shift() && (input.jump() || ceilingClinging)) {
-			// on the ceiling: dragged about upside down
+		boolean sneakPressed = input.shift() && !sneakWas;
+		sneakWas = input.shift();
+		if (ceilingClinging && sneakPressed && latchHold <= 0) {
+			// Sneak again on the ceiling: they let go and you drop
+			ceilingClinging = false;
+			letGoOfWall();
+			return;
+		}
+		if (sneakPressed && !ceilingClinging && !wallClinging) {
+			// Sneak by a ceiling (looking up, or with no wall to hand): slammed up into it, just as into a wall
+			double reach = (player.onGround() ? CEILING_LATCH_GROUND : CEILING_LATCH_REACH) * player.getScale();
+			Vec3 overhead = ceilingOver(player, reach);
+			if (overhead != null && (!wall || player.getXRot() < -CEILING_LATCH_LOOK)) {
+				slamCeiling(player, overhead);
+				return;
+			}
+		}
+		if (latchHold > 0) {
+			latchHold--;
+		}
+		if (ceilingClinging && !ceiling && latchHold > 0) {
+			// slammed in, still flying up to it
+			Vec3 v = player.getDeltaMovement();
+			player.setDeltaMovement(v.x * 0.5, Math.max(v.y, LATCH_SLAM), v.z * 0.5);
+			player.resetFallDistance();
+			return;
+		}
+		if (ceiling && (input.jump() && !input.shift() || ceilingClinging)) {
+			// on the ceiling: dragged about upside down, the same as along a wall (pinned still just after a slam)
 			ceilingClinging = true;
 			wallClinging = false;
-			drag(player, move, new Vec3(0.0, -1.0, 0.0));
+			drag(player, latchHold > 0 ? Vec3.ZERO : move, new Vec3(0.0, -1.0, 0.0));
 			player.resetFallDistance();
 			return;
 		}
 		ceilingClinging = false;
-		boolean sneakPressed = input.shift() && !sneakWas;
-		sneakWas = input.shift();
 		if (wall && sneakPressed && !wallClinging) {
 			slamLatch(player);
 			return;
-		}
-		if (latchHold > 0) {
-			latchHold--;
 		}
 		if (wall && (!player.onGround() || input.forward() && player.horizontalCollision || latchHold > 0)) {
 			Vec3 out = wallNormal(player);
@@ -1266,6 +1295,41 @@ public final class WebSymbioteClient {
 		player.resetFallDistance();
 		WebSwing.play(player, net.minecraft.sounds.SoundEvents.SLIME_ATTACK, 1.0F, 0.5F);
 		WebSwing.play(player, player.level().getBlockState(net.minecraft.core.BlockPos.containing(at.subtract(out.scale(0.05)))).getSoundType().getHitSound(),
+			1.0F, 0.6F);
+	}
+
+	/** The ceiling point straight over your head within {@code reach} (blocks above the top of your head), or null. */
+	private static @org.jspecify.annotations.Nullable Vec3 ceilingOver(LocalPlayer player, double reach) {
+		AABB box = player.getBoundingBox();
+		Vec3 top = new Vec3(box.getCenter().x, box.maxY - 0.05, box.getCenter().z);
+		net.minecraft.world.phys.BlockHitResult hit = player.level().clip(new net.minecraft.world.level.ClipContext(top, top.add(0.0, reach + 0.05, 0.0),
+			net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, player));
+		return hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK && hit.getDirection() == net.minecraft.core.Direction.DOWN
+			? hit.getLocation() : null;
+	}
+
+	/** Sneak under a ceiling: both tendrils slam up into it at once, yanking you up against it, and you hang there. */
+	private static void slamCeiling(LocalPlayer player, Vec3 at) {
+		ceilingClinging = true;
+		wallClinging = false;
+		climbAt = at;
+		climbWant = Vec3.ZERO;
+		climbLedge = false;
+		climbPhase = CLIMB_REACH_TICKS + CLIMB_PULL_TICKS;
+		latchHold = LATCH_HOLD_TICKS;
+		if (ClientPlayNetworking.canSend(WebNet.ClimbLatch.TYPE)) {
+			// both of them, either side of your head (the server cracks the ceiling where each bites)
+			Vec3 side = player.getLookAngle().horizontal().cross(new Vec3(0.0, 1.0, 0.0));
+			side = side.lengthSqr() < 1.0E-4 ? new Vec3(0.45, 0.0, 0.0) : side.normalize().scale(0.45);
+			ClientPlayNetworking.send(new WebNet.ClimbLatch(WebNet.MAIN, at.add(side), true));
+			ClientPlayNetworking.send(new WebNet.ClimbLatch(WebNet.OFF, at.subtract(side), true));
+			climbSent = true;
+		}
+		Vec3 v = player.getDeltaMovement();
+		player.setDeltaMovement(v.x * 0.3, LATCH_SLAM + CEILING_SLAM_EXTRA, v.z * 0.3);
+		player.resetFallDistance();
+		WebSwing.play(player, net.minecraft.sounds.SoundEvents.SLIME_ATTACK, 1.0F, 0.5F);
+		WebSwing.play(player, player.level().getBlockState(net.minecraft.core.BlockPos.containing(at.add(0.0, 0.05, 0.0))).getSoundType().getHitSound(),
 			1.0F, 0.6F);
 	}
 

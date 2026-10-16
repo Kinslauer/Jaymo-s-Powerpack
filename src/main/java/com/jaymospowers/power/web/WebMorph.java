@@ -29,8 +29,10 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The weapon arm: in the suit, a left click with an empty hand (at a creature, or at the air) throws the arm out as a
- * tendril, and its end morphs into a weapon, picked at random each time: a <b>mace</b> (blunt: smashes armour, breaks
+ * The weapon arm: in the suit, hold left click with an empty hand and the symbiote gathers ({@link #CHARGE}): tendrils
+ * course and bulge through the suit toward the arm ({@link #COURSE_TICKS}), collect in it ({@link #COLLECT_TICKS}) and
+ * the hand forms into the weapon ({@link #FORMED_TICKS}). Let go (at a creature, or at the air) and the arm throws out as
+ * a tendril; let go early and it strikes the moment the weapon has formed. The weapon is picked at random each time: a <b>mace</b> (blunt: smashes armour, breaks
  * bones), a <b>scythe</b> (slashing: a wide sweep that severs limbs far more often than a blade, and catches what's
  * beside the target too) or a <b>spear</b> (piercing: a straight thrust through armour). Arms alternate, right then
  * left. Everyone sees it ({@link #MORPH}); the client draws the cord and the weapon ({@code WebMorphLayer}).
@@ -42,6 +44,12 @@ public final class WebMorph {
 	public static final double REACH = 6.0, REACH_SLACK = 1.5;
 	/** The whole move (ticks): the arm swells into the weapon until {@code FORM}, swings or thrusts, lands at {@code HIT}. */
 	public static final int TICKS = 16, FORM = 4, HIT = 8;
+	/**
+	 * The gathering, held (ticks from the press): bulges course through the suit until {@code COURSE_TICKS}, run down
+	 * into the arm until {@code COLLECT_TICKS}, and the weapon is whole at {@code FORMED_TICKS}. Held longer than
+	 * {@code CHARGE_MAX_TICKS}, it lets go of its own accord.
+	 */
+	public static final int COURSE_TICKS = 8, COLLECT_TICKS = 13, FORMED_TICKS = 18, CHARGE_MAX_TICKS = 600;
 	/** Ticks after a strike starts before the next one (a little past {@link #HIT}, so they chain arm over arm). */
 	public static final int COOLDOWN = 12;
 	/** Damage by weapon: mace, scythe, spear. */
@@ -77,15 +85,47 @@ public final class WebMorph {
 
 	public static final AttachmentType<Morph> MORPH = AttachmentRegistry.create(JaymosPowers.id("web_morph"),
 		builder -> builder.syncWith(Morph.STREAM_CODEC, AttachmentSyncPredicate.all()));
+
+	/** The gathering before a strike, held: which weapon it's forming, when the press began (game time), which arm. */
+	public record Charge(int weapon, long start, int side) {
+		public static final StreamCodec<ByteBuf, Charge> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_INT, Charge::weapon,
+			ByteBufCodecs.VAR_LONG, Charge::start,
+			ByteBufCodecs.VAR_INT, Charge::side,
+			Charge::new);
+
+		/** Ticks in, at {@code time} (game time + partial tick). */
+		public float age(float time) {
+			return time - start;
+		}
+	}
+
+	public static final AttachmentType<Charge> CHARGE = AttachmentRegistry.create(JaymosPowers.id("web_morph_charge"),
+		builder -> builder.syncWith(Charge.STREAM_CODEC, AttachmentSyncPredicate.all()));
 	private static final AttachmentType<Live> LIVE = AttachmentRegistry.create(JaymosPowers.id("web_morph_live"));
 
 	private static final class Live {
 		int lastWeapon = -1;
 		int side = -1;
 		long readyAt;
+		/** Let go before the weapon formed: strike at this creature (-1 the air) once it has; NONE: not let go. */
+		int pending = NONE;
 	}
 
-	/** Client → server: the arm goes out (at a creature's id, or -1). */
+	private static final int NONE = Integer.MIN_VALUE;
+
+	/** Client → server: left click pressed and held: the symbiote starts gathering into the arm. */
+	public record Gather() implements CustomPacketPayload {
+		public static final Type<Gather> TYPE = new Type<>(JaymosPowers.id("web_morph_gather"));
+		public static final StreamCodec<ByteBuf, Gather> CODEC = StreamCodec.unit(new Gather());
+
+		@Override
+		public Type<Gather> type() {
+			return TYPE;
+		}
+	}
+
+	/** Client → server: left click let go, the arm goes out (at a creature's id, or -1). */
 	public record Strike(int target) implements CustomPacketPayload {
 		public static final Type<Strike> TYPE = new Type<>(JaymosPowers.id("web_morph_strike"));
 		public static final StreamCodec<ByteBuf, Strike> CODEC = ByteBufCodecs.VAR_INT.map(Strike::new, Strike::target).cast();
@@ -101,7 +141,9 @@ public final class WebMorph {
 
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(Strike.TYPE, Strike.CODEC);
-		ServerPlayNetworking.registerGlobalReceiver(Strike.TYPE, (payload, ctx) -> strike(ctx.player(), payload.target()));
+		PayloadTypeRegistry.serverboundPlay().register(Gather.TYPE, Gather.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Strike.TYPE, (payload, ctx) -> release(ctx.player(), payload.target()));
+		ServerPlayNetworking.registerGlobalReceiver(Gather.TYPE, (payload, ctx) -> gather(ctx.player()));
 	}
 
 	/**
@@ -161,9 +203,9 @@ public final class WebMorph {
 		return live;
 	}
 
-	/** The arm goes out: a weapon picked (never the same twice running), on the other arm from last time. */
-	private static void strike(ServerPlayer player, int targetId) {
-		if (!usable(player) || WebSymbiote.driving(player)) {
+	/** Pressed: the symbiote starts gathering into the arm, a weapon picked (never the same twice running), the other arm from last time. */
+	private static void gather(ServerPlayer player) {
+		if (!usable(player) || WebSymbiote.driving(player) || player.getAttached(CHARGE) != null) {
 			return;
 		}
 		ServerLevel level = player.level();
@@ -172,6 +214,42 @@ public final class WebMorph {
 		if (now < live.readyAt) {
 			return;
 		}
+		int weapon;
+		do {
+			weapon = player.getRandom().nextInt(WEAPONS);
+		} while (weapon == live.lastWeapon);
+		live.lastWeapon = weapon;
+		live.side = -live.side;
+		live.pending = NONE;
+		player.setAttached(CHARGE, new Charge(weapon, now, live.side));
+		// it stirs under the skin
+		sound(level, player, SoundEvents.WARDEN_TENDRIL_CLICKS, 0.8F, 0.5F);
+		sound(level, player, SoundEvents.SLIME_SQUISH, 0.7F, 0.5F);
+	}
+
+	/** Let go: strikes now if the weapon has formed, else as soon as it has. */
+	private static void release(ServerPlayer player, int targetId) {
+		Charge charge = player.getAttached(CHARGE);
+		if (charge == null) {
+			return;
+		}
+		if (player.level().getGameTime() - charge.start() >= FORMED_TICKS) {
+			strike(player, charge, targetId);
+		} else {
+			live(player).pending = targetId;
+		}
+	}
+
+	/** The arm goes out with the weapon it formed. */
+	private static void strike(ServerPlayer player, Charge charge, int targetId) {
+		player.removeAttached(CHARGE);
+		Live live = live(player);
+		live.pending = NONE;
+		if (!usable(player) || WebSymbiote.driving(player)) {
+			return;
+		}
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
 		LivingEntity target = null;
 		if (targetId >= 0 && level.getEntity(targetId) instanceof LivingEntity living && living.isAlive() && living != player
 			&& player.getEyePosition().distanceTo(living.getBoundingBox().getCenter()) <= REACH + REACH_SLACK + living.getBbWidth() * 0.5) {
@@ -180,22 +258,16 @@ public final class WebMorph {
 				target = living;
 			}
 		}
-		int weapon;
-		do {
-			weapon = player.getRandom().nextInt(WEAPONS);
-		} while (weapon == live.lastWeapon);
-		live.lastWeapon = weapon;
-		live.side = -live.side;
+		int weapon = charge.weapon();
 		live.readyAt = now + COOLDOWN;
-		player.setAttached(MORPH, new Morph(weapon, target == null ? -1 : target.getId(), now, live.side));
+		player.setAttached(MORPH, new Morph(weapon, target == null ? -1 : target.getId(), now, charge.side()));
 		player.resetAttackStrengthTicker();
-		// the arm swells and splits into its shape
-		sound(level, player, SoundEvents.WARDEN_TENDRIL_CLICKS, 1.0F, 0.7F + 0.15F * weapon);
 		sound(level, player, SoundEvents.HONEY_BLOCK_SLIDE, 0.8F, 0.6F);
 	}
 
-	/** Every tick, for a web slinger: the strike under way lands, then ends. */
+	/** Every tick, for a web slinger: the gathering, held, then the strike under way lands, then ends. */
 	static void tick(ServerPlayer player) {
+		tickCharge(player);
 		Morph morph = player.getAttached(MORPH);
 		if (morph == null) {
 			return;
@@ -221,6 +293,38 @@ public final class WebMorph {
 		} else {
 			// the air: a crack of the whip, nothing more
 			sound(level, player, SoundEvents.PLAYER_ATTACK_NODAMAGE, 0.8F, 0.7F);
+		}
+	}
+
+	/** The gathering: noises as it courses, collects and forms; a let-go strikes once formed; it gives up if the suit goes. */
+	private static void tickCharge(ServerPlayer player) {
+		Charge charge = player.getAttached(CHARGE);
+		if (charge == null) {
+			return;
+		}
+		ServerLevel level = player.level();
+		long t = level.getGameTime() - charge.start();
+		if (!player.isAlive() || !(WebSymbiote.suitShown(player) || WebSymbiote.bulked(player)) || !player.getMainHandItem().isEmpty()
+			|| WebPower.ragdolled(player) || t > CHARGE_MAX_TICKS) {
+			player.removeAttached(CHARGE);
+			live(player).pending = NONE;
+			return;
+		}
+		if (t > 0 && t < COURSE_TICKS && t % 3 == 0) {
+			// lumps rolling under the suit
+			sound(level, player, SoundEvents.SLIME_SQUISH_SMALL, 0.6F, 0.6F + 0.1F * t / 3.0F);
+		} else if (t == COURSE_TICKS) {
+			sound(level, player, SoundEvents.HONEY_BLOCK_SLIDE, 0.9F, 0.5F);
+		} else if (t == COLLECT_TICKS) {
+			// the arm swells and splits into its shape
+			sound(level, player, SoundEvents.WARDEN_TENDRIL_CLICKS, 1.0F, 0.7F + 0.15F * charge.weapon());
+		} else if (t == FORMED_TICKS) {
+			sound(level, player, charge.weapon() == MACE ? SoundEvents.ANVIL_PLACE : SoundEvents.TRIDENT_RETURN, 0.5F,
+				charge.weapon() == MACE ? 0.5F : 0.8F);
+		}
+		Live live = live(player);
+		if (t >= FORMED_TICKS && live.pending != NONE) {
+			strike(player, charge, live.pending);
 		}
 	}
 
