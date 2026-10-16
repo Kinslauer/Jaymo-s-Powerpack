@@ -3277,7 +3277,7 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   covers: under a face mask or the suit no heritage look, Emberborn marks or vampire face at all; under a hood no
   antennae or Tideborn head fins; under any costume no Tideborn arm fins poking through the sleeves.
 
-## 0.7.82: world tiers (pack 0.12.8)
+## 0.7.82: world tiers (pack 0.12.9)
 - Andy: "world tiers are just what i need" (Apotheosis). Our own take on the idea, `WorldTiers`: no code, art or text
   from Apotheosis. Five tiers, Hearth (the plain game), Borderlands, Wildlands, Dread, Legend. Each player picks any
   tier open to them on the World Tier screen (`client/TierScreen`, a button on the skill screen K, or its own key,
