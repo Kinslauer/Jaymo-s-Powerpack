@@ -125,6 +125,22 @@ PART_PIVOTS = {
     "head": (0, 0, 0), "body": (0, 0, 0), "right_arm": (-5, 2, 0), "left_arm": (5, 2, 0),
     "right_leg": (-1.9, 12, 0), "left_leg": (1.9, 12, 0),
 }
+# the elbows and knees: the forearm (with its fist, knuckles and spurs) and the shin (calf, foot, toes) hang off a
+# hinge of their own so they bend (client WebHulk.Model.limbs). Each hinge sits a little to the side the joint opens
+# on (the elbow toward the back, the knee toward the front) so no gap shows as it bends.
+ELBOW = (0, 8.5, 2)
+KNEE = (0, 5.5, -2.5)
+HINGES = {"right_arm": ("elbow", ELBOW), "left_arm": ("elbow", ELBOW), "right_leg": ("knee", KNEE), "left_leg": ("knee", KNEE)}
+LOWER = {"fore", "fist", "knuckles", "spur0", "spur1", "spur2", "calf", "foot", "toe0", "toe1", "toe2"}
+
+
+def hinge(b):
+    """The hinge a box hangs off (its name and pivot in the part's space), or None."""
+    if b["part"] in HINGES and b["name"] in LOWER:
+        return HINGES[b["part"]]
+    return None
+
+
 EMPTY_CHILD = {"head": "hat", "body": "jacket", "right_arm": "right_sleeve", "left_arm": "left_sleeve",
                "right_leg": "right_pants", "left_leg": "left_pants"}
 
@@ -304,18 +320,21 @@ def java():
     lines.append("\tstatic final int TEX_W = %d, TEX_H = %d;" % (TEX_W, TEX_H))
     lines.append("\t/** The jaw's hinge in the head's space (pixels). */")
     lines.append("\tstatic final float JAW_X = %s, JAW_Y = %s, JAW_Z = %s;" % tuple(fmt(v) for v in JAW_PIVOT))
+    lines.append("\t/** The elbows' and knees' hinges in the arm's and leg's space (pixels): the forearms and shins hang off them. */")
+    lines.append("\tstatic final float ELBOW_Y = %s, ELBOW_Z = %s, KNEE_Y = %s, KNEE_Z = %s;" % (fmt(ELBOW[1]), fmt(ELBOW[2]), fmt(KNEE[1]), fmt(KNEE[2])))
     names = []
     for b in BOXES:
         if b["part"] != "jaw":
-            names.append((b["part"], b["name"], b["order"]))
-    names.append(("head", "jaw", 8))
-    lines.append("\t/** Each muscle part (its parent part, its name) and when the suit lays it on (0 first, to {@link #LAST_ORDER}). */")
+            h = hinge(b)
+            names.append(((b["part"], h[0], b["name"]) if h else (b["part"], b["name"]), b["order"]))
+    names.append((("head", "jaw"), 8))
+    lines.append("\t/** Each muscle part (its path of parts from the root, its name last) and when the suit lays it on (0 first, to {@link #LAST_ORDER}). */")
     lines.append("\tstatic final String[][] PARTS = {")
-    for part, name, order in names:
-        lines.append("\t\t{\"%s\", \"%s\"}," % (part, name))
+    for path, order in names:
+        lines.append("\t\t{%s}," % ", ".join("\"%s\"" % n for n in path))
     lines.append("\t};")
-    lines.append("\tstatic final int[] ORDER = {%s};" % ", ".join(str(o) for _, _, o in names))
-    lines.append("\tstatic final int LAST_ORDER = %d;" % max(o for _, _, o in names))
+    lines.append("\tstatic final int[] ORDER = {%s};" % ", ".join(str(o) for _, o in names))
+    lines.append("\tstatic final int LAST_ORDER = %d;" % max(o for _, o in names))
     lines.append("")
     lines.append("\tprivate WebHulkMesh() {")
     lines.append("\t}")
@@ -328,6 +347,10 @@ def java():
         lines.append("\t\tPartDefinition %s = root.addOrReplaceChild(\"%s\", CubeListBuilder.create(), PartPose.offset(%s, %s, %s));"
                      % (var, part, fmt(px), fmt(py), fmt(pz)))
         lines.append("\t\t%s.addOrReplaceChild(\"%s\", CubeListBuilder.create(), PartPose.ZERO);" % (var, EMPTY_CHILD[part]))
+    for part, (name, (hx, hy, hz)) in HINGES.items():
+        var = part.replace("_", "")
+        lines.append("\t\tPartDefinition %s%s = %s.addOrReplaceChild(\"%s\", CubeListBuilder.create(), PartPose.offset(%s, %s, %s));"
+                     % (var, name, var, name, fmt(hx), fmt(hy), fmt(hz)))
     lines.append("\t\tPartDefinition jaw = head.addOrReplaceChild(\"jaw\", CubeListBuilder.create(), PartPose.offset(%s, %s, %s));"
                  % tuple(fmt(v) for v in JAW_PIVOT))
     for b in BOXES:
@@ -341,6 +364,11 @@ def java():
                          % (var, b["name"], b["uv"][0], b["uv"][1], fmt(ox), fmt(oy), fmt(oz), *(math.ceil(s) for s in b["size"])))
             continue
         ox, oy, oz = b["frm"][0] - px, b["frm"][1] - py, b["frm"][2] - pz
+        h = hinge(b)
+        if h:
+            # hung off the elbow or knee: the same place, its pivot now from the hinge
+            var += h[0]
+            px, py, pz = px - h[1][0], py - h[1][1], pz - h[1][2]
         lines.append("\t\t%s.addOrReplaceChild(\"%s\", CubeListBuilder.create().texOffs(%d, %d).addBox(%s, %s, %s, %d, %d, %d), PartPose.offset(%s, %s, %s));"
                      % (var, b["name"], b["uv"][0], b["uv"][1], fmt(ox), fmt(oy), fmt(oz), *(math.ceil(s) for s in b["size"]), fmt(px), fmt(py), fmt(pz)))
     lines.append("\t\treturn LayerDefinition.create(mesh, TEX_W, TEX_H);")

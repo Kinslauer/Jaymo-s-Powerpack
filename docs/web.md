@@ -73,7 +73,20 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   ending in big fists with bone spurs out of the forearms, tree-trunk legs with clawed toes, the head up on the traps
   (`HEAD_DOWN` -0.5, `HEAD_FORWARD` 2), arms out `ARM_OUT` 5, legs `LEG_OUT` 2.2. Living Armor swells you 1.5x
   (`WebSymbiote.ARMOR_SCALE` 0.5, was 0.25) and stands leaning, not hunched (`WebFeral.IDLE_BEND` 0.35, was 0.75). A hinged fanged jaw breathes and
-  snarls (`JAW_REST` 0.22); a red tongue (12 pieces) lolls and lashes every `LASH_EVERY` 70 ticks. No emblem (earlier ruling).
+  snarls (`JAW_REST` 0.22); a red tongue (12 pieces; it used to loll out and lash every 70 ticks, but Andy: "the tounge
+  should only lash out periodically") stays in the mouth and flicks out quickly every `TONGUE_EVERY` 140 ticks (7 s,
+  `FLICK_TICKS` 12, the jaw opening `JAW_FLICK` wider), and once just after a meal ends (`WebHulk.noteMeal`). No emblem (earlier ruling).
+  - **Elbows and knees (Andy: "it should animate swinging at the elbows and knees"):** the mesh hangs each forearm (fist,
+    knuckles, spurs) off an `elbow` part (`ELBOW` (0, 8.5, 2), toward the back) and each shin (calf, foot, toes) off a
+    `knee` (`KNEE` (0, 5.5, -2.5), toward the front), so no gap opens as they bend. `WebHulk.Model.limbs` (after the
+    poses, from `WebSuitGrowth.applyModel`) bends them: elbows `ELBOW_REST` 0.25 plus up to `ELBOW_SWING` 0.75 trailing
+    the arm's swing by `ELBOW_LAG` 0.6; knees `KNEE_WALK` 0.15 plus up to `KNEE_SWING` 1.1 as each leg swings through
+    (walk and gallop); a raised thigh folds its shin back `KNEE_CROUCH` 2x (feet stay under the hips in the hunch, the
+    leap's coil, the slam's drawn-up knees), sitting `KNEE_SIT` 1x. Standing, the elbows breathe (`ELBOW_IDLE`) and the
+    arms rock (`IDLE_SWAY`). A hand holding something, punching or forming a weapon keeps `ELBOW_HOLDING` 25% of the bend.
+  - **The maw's tongue (Consume, `WebMouthLayer.tongue`, Andy: "consume large head should use the animated tongue"):**
+    the same tongue (`WebHulk.tongue`, 14 pieces, wider) tastes the air as the maw swells out (half length), then
+    `TONGUE_LEAD` 7 ticks before the last bite lashes out at the meal and is reeled back into the mouth as the jaws snap shut.
   The behemoth (zombie-player host) still uses the old inflated body.
 - **Equip animation (`WebSuitGrowth` + `WebSuitWrapLayer`):** tendrils leech out and coil round the body, arms, head,
   then legs from each joint (`WRAP_SPAN` 0.3); raw goo folds over each part (`GOO_AFTER` 0.28, `LAYER_SPAN` 0.26), then
