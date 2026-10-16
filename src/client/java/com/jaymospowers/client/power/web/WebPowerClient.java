@@ -183,6 +183,7 @@ public final class WebPowerClient implements PowerClient {
 		EntityRenderers.register(com.jaymospowers.power.web.WebSymbioteBlob.TYPE, WebBlobRenderer::new);
 		EntityRenderers.register(WebPower.WEB_BALL, context -> new ThrownItemRenderer<>(context, 0.85F, false));
 		LevelRenderEvents.COLLECT_SUBMITS.register(WebLineRenderer::render);
+		WebShootersClient.init();
 		LevelRenderEvents.COLLECT_SUBMITS.register(WebSenseBolts::render);
 		// every player's arms and legs (theirs and others'), whether or not we're a web slinger ourselves
 		ClientTickEvents.END_CLIENT_TICK.register(WebArms::tick);
@@ -487,6 +488,14 @@ public final class WebPowerClient implements PowerClient {
 			int bx = x + (CHIP + CHIP_GAP) * 2;
 			graphics.fill(bx + 1, y + CHIP - 3, bx + CHIP - 1, y + CHIP - 1, 0xFF000000 | CHIP_COLOR);
 		}
+		// (0.12.3) web shooters' fluid: on the end of the row, or above its start if the row reaches the screen's edge
+		int gaugeX = x - CHIP - CHIP_GAP + total + CHIP_GAP;
+		int gaugeY = y;
+		if (gaugeX + CHIP > width - 2) {
+			gaugeX = x - CHIP - CHIP_GAP;
+			gaugeY = y - CHIP - CHIP_GAP;
+		}
+		WebShootersClient.renderHud(graphics, font, player, gaugeX, gaugeY, CHIP, CHIP_COLOR);
 	}
 
 	/** Web Strike's chip (the ascended ability, on the ultimate key). */

@@ -292,6 +292,7 @@ public final class WebPower implements Power {
 		WebBridges.register();
 		WebTendrils.register();
 		WebStrength.register();
+		WebShooters.register();
 		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			WebTendrils.releaseAll(handler.player, false);
 			WebTendrils.forget(handler.player);
@@ -643,7 +644,14 @@ public final class WebPower implements Power {
 				return;
 			}
 			anchor = stuckTo.getBoundingBox().getCenter();
-		} else if (!WebAnchors.valid(player, anchor, WebAnchors.SWING_RANGE * WebSymbiote.reachScale(player) + 4.0) || hand == WebNet.OFF && !offHandFree(player)) {
+		} else if (!WebAnchors.valid(player, anchor, WebAnchors.SWING_RANGE * WebSymbiote.reachScale(player) * WebShooters.serverRangeScale(player) + 4.0)
+			|| hand == WebNet.OFF && !offHandFree(player)) {
+			ServerPlayNetworking.send(player, new WebNet.SwingReject(hand));
+			return;
+		}
+		if (WebShooters.blocked(player, hand)) {
+			// shooters required, and this wrist is dry
+			WebShooters.fire(player, hand, true);
 			ServerPlayNetworking.send(player, new WebNet.SwingReject(hand));
 			return;
 		}
@@ -664,7 +672,8 @@ public final class WebPower implements Power {
 		if (stuckTo != null) {
 			level.playSound(null, stuckTo.getX(), stuckTo.getY(), stuckTo.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.PLAYERS, 0.8F, 1.2F);
 		}
-		// the swinger hears their own thwip client-side; this is for everyone else
+		// the swinger hears their own thwip client-side; this is for everyone else (and from a shooter, its fluid is used)
+		WebShooters.fire(player, hand, true);
 		level.playSound(player, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 0.8F, 1.8F);
 		level.sendParticles(ParticleTypes.ITEM_COBWEB, anchor.x, anchor.y, anchor.z, 5, 0.15, 0.15, 0.15, 0.01);
 	}
@@ -992,7 +1001,9 @@ public final class WebPower implements Power {
 		player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 0.4F, 2.0F);
 	}
 
+	/** A web fired from the main hand (Zip, Yank, a webline, a hitch): its thwip, and a shot from that wrist's shooter. */
 	private static void thwip(ServerPlayer player) {
+		WebShooters.fire(player, WebNet.MAIN, false);
 		player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 0.9F, 1.7F);
 	}
 
@@ -1086,8 +1097,13 @@ public final class WebPower implements Power {
 		if (now < cooldowns.zip()) {
 			return;
 		}
+		if (WebShooters.blocked(player, WebNet.MAIN)) {
+			WebShooters.fire(player, WebNet.MAIN, false);
+			return;
+		}
 		Vec3 eye = player.getEyePosition();
-		BlockHitResult hit = WebAnchors.clip(player, eye, eye.add(player.getViewVector(1.0F).scale(ZIP_RANGE * WebSymbiote.reachScale(player))));
+		BlockHitResult hit = WebAnchors.clip(player, eye, eye.add(player.getViewVector(1.0F).scale(ZIP_RANGE * WebSymbiote.reachScale(player)
+			* WebShooters.rangeScale(player, WebNet.MAIN))));
 		if (hit.getType() == HitResult.Type.MISS) {
 			fwip(player);
 			return;
@@ -1234,7 +1250,11 @@ public final class WebPower implements Power {
 		if (now < cooldowns.yank()) {
 			return;
 		}
-		Entity target = entityInSight(player, YANK_RANGE * WebSymbiote.reachScale(player));
+		if (WebShooters.blocked(player, WebNet.MAIN)) {
+			WebShooters.fire(player, WebNet.MAIN, false);
+			return;
+		}
+		Entity target = entityInSight(player, YANK_RANGE * WebSymbiote.reachScale(player) * WebShooters.rangeScale(player, WebNet.MAIN));
 		if (target == null) {
 			// aimed at a torch, lantern or bell, the web tears it off; at any other block, B starts a webline
 			if (WebHeft.ripOut(player)) {

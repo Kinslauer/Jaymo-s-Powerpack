@@ -293,5 +293,16 @@
 	"message.jaymospowers.web_symbiote.climate.cold.there.2": "We can move again.",
 	"message.jaymospowers.web_symbiote.climate.cold.there.3": "Here. Don't take us back.",
 	"message.jaymospowers.web_symbiote.climate.cold.lost": "Ice everywhere. Nowhere to go.",
-	"message.jaymospowers.web_symbiote.climate.cold.stuck": "No way through. Still freezing."
+	"message.jaymospowers.web_symbiote.climate.cold.stuck": "No way through. Still freezing.",
+	"item.jaymospowers.web_shooter": "Web Shooters",
+	"item.jaymospowers.web_shooter.wrists": "Main hand: %1$s, other hand: %2$s",
+	"item.jaymospowers.web_shooter.shots": "%s/%s webs",
+	"item.jaymospowers.web_shooter.no_cartridge": "no cartridge",
+	"item.jaymospowers.web_shooter.hint": "Use: strap them on. Sneak + use: load cartridges from your inventory. Worn: Sneak + use with an empty hand, aiming at nothing, takes them off.",
+	"item.jaymospowers.web_cartridge": "Web Cartridge",
+	"item.jaymospowers.web_cartridge.hint": "Use while wearing web shooters to load the emptier one.",
+	"message.jaymospowers.web_shooter.already": "You're already wearing web shooters.",
+	"message.jaymospowers.web_shooter.none": "Strap on web shooters to load a cartridge.",
+	"message.jaymospowers.web_shooter.full": "Both shooters are loaded.",
+	"message.jaymospowers.web_shooter.no_cartridge": "No web cartridges to load."
 }

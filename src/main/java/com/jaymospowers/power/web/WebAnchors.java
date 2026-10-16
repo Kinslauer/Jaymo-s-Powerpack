@@ -109,10 +109,15 @@ public final class WebAnchors {
 	}
 
 	public static @Nullable Anchor find(Player player) {
+		return find(player, WebNet.MAIN);
+	}
+
+	/** {@link #find}, for a web from {@code hand} (a loaded web shooter on that wrist reaches further). */
+	public static @Nullable Anchor find(Player player, int hand) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getViewVector(1.0F);
 		// a symbiote's webs reach further; its tendrils (the suit on) don't reach far at all
-		double scale = WebSymbiote.swingScale(player);
+		double scale = WebSymbiote.swingScale(player) * WebShooters.rangeScale(player, hand);
 		BlockHitResult hit = clip(player, eye, eye.add(look.scale(SWING_RANGE * scale)));
 		Vec3 direct = hit.getType() == HitResult.Type.MISS ? null : hit.getLocation();
 		if (direct != null && direct.y >= eye.y - DIRECT_MAX_DROP) {
