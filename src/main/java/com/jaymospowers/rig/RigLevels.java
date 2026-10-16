@@ -7,7 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * (0.11.83) The Mind's experience, kept on the Core ({@link Rig#XP}; levels at {@link Rig#LEVEL_XP}). It learns from
+ * (0.11.87) The Mind's experience, kept on the Core ({@link Rig#XP}; levels at {@link Rig#LEVEL_XP}). It learns from
  * what it lives through with you, all while the Core is worn: kills (hostiles, players, anything boss-sized), wrecks
  * salvaged (the dead suits teach it), time worn, and warnings that turned out right ({@link RigMind}: you were still
  * alive after it). Each new level it remarks on in its own voice and names what it can do now.

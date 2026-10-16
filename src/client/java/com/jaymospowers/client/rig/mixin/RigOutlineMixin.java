@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.11.83) The Rig's glow colours: red hostiles, gold players, a hot pink lock. */
+/** (0.11.87) The Rig's glow colours: red hostiles, gold players, a hot pink lock. */
 @Mixin(EntityRenderer.class)
 abstract class RigOutlineMixin {
 	@Inject(

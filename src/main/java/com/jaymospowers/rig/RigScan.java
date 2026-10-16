@@ -26,7 +26,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.11.83) The Mind's scan (level 3; Helm and Core): a sweep round the wearer that, on their screen only, makes hostile
+ * (0.11.87) The Mind's scan (level 3; Helm and Core): a sweep round the wearer that, on their screen only, makes hostile
  * mobs and other players glow and marks chests and ores on the HUD for a few seconds (client: {@code RigScanClient}).
  * The Mind sums up what it found, in its own voice, and says what the target (the lock, else the nearest hostile) is
  * weak to. With no power: hold B. With one: the Rig key's Scan.

@@ -32,7 +32,7 @@ public class RigItem extends Item {
 				: Component.translatable("tooltip.jaymospowers.rig.mind", Component.translatable("rig.jaymospowers.personality." + mind))
 					.withStyle(ChatFormatting.AQUA));
 			if (mind != null) {
-				// (0.11.83) the Mind's level
+				// (0.11.87) the Mind's level
 				int level = Rig.level(stack);
 				int xp = stack.getOrDefault(Rig.XP, 0);
 				builder.accept(level >= Rig.MAX_LEVEL ? Component.translatable("tooltip.jaymospowers.rig.level_max", level).withStyle(ChatFormatting.AQUA)

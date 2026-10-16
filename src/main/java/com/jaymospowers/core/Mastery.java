@@ -88,7 +88,7 @@ public final class Mastery {
 			return true;
 		}
 		Power power = Powers.of(player);
-		return power != null && (starterOnly(player) && power.starterKey() == key || power.usableEarly(key));
+		return power != null && (starterOnly(player) && power.starterKey() == key || power.usableEarly(player, key));
 	}
 
 	public static boolean isUnlocked(Player player, PowerKey key) {

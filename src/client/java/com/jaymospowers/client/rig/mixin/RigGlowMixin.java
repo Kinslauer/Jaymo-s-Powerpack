@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.11.83) The Rig's scan finds and its locked target glow through walls, on the wearer's screen only. */
+/** (0.11.87) The Rig's scan finds and its locked target glow through walls, on the wearer's screen only. */
 @Mixin(Minecraft.class)
 abstract class RigGlowMixin {
 	@Inject(method = "shouldEntityAppearGlowing", at = @At("RETURN"), cancellable = true)

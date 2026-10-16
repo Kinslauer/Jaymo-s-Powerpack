@@ -11,7 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 
 /**
- * (0.11.83) A scan's finds, on the wearer's screen only: the creatures glow through walls in their kind's colour (the
+ * (0.11.87) A scan's finds, on the wearer's screen only: the creatures glow through walls in their kind's colour (the
  * mixins in {@code client.rig.mixin}), the chests and ores are marked on the HUD ({@link RigHud}), for
  * {@link #SHOW_TICKS}. The locked target glows too, for as long as the lock holds.
  */

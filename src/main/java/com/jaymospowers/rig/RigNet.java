@@ -17,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
 public final class RigNet {
 	/** {@link Use} actions. The first four are the power keys' order (R G V B) for a powerless wearer. */
 	public static final int HOVER = 0, PALM = 1, LAUNCHER = 2, REPORT = 3;
-	/** (0.11.83) Scan (level 3), call or park the suit (level 3), toggle full flight while hovering (level 5). */
+	/** (0.11.87) Scan (level 3), call or park the suit (level 3), toggle full flight while hovering (level 5). */
 	public static final int SCAN = 4, CALL = 5, FLIGHT = 6;
 	/** The actives J cycles through, in order (the stage-2 ones only once the Mind's level has them). */
 	public static final int[] CYCLE = {HOVER, PALM, LAUNCHER, SCAN, CALL};
@@ -42,7 +42,7 @@ public final class RigNet {
 		}
 	}
 
-	/** (0.11.83) Client → server: lock on to this entity (by id), or let go (-1). */
+	/** (0.11.87) Client → server: lock on to this entity (by id), or let go (-1). */
 	public record Lock(int entity) implements CustomPacketPayload {
 		public static final Type<Lock> TYPE = new Type<>(JaymosPowers.id("rig_lock"));
 		public static final StreamCodec<ByteBuf, Lock> CODEC = ByteBufCodecs.VAR_INT.map(Lock::new, Lock::entity);
@@ -83,7 +83,7 @@ public final class RigNet {
 	}
 
 	/**
-	 * (0.11.83) Server → client: what a scan found, for the wearer's eyes only: entities (by id) glow, blocks (packed
+	 * (0.11.87) Server → client: what a scan found, for the wearer's eyes only: entities (by id) glow, blocks (packed
 	 * positions) are marked on the HUD; {@code kinds} holds a {@code FOUND_} kind for each, entities first.
 	 */
 	public record Scan(List<Integer> entities, List<Long> blocks, List<Integer> kinds) implements CustomPacketPayload {
@@ -100,7 +100,7 @@ public final class RigNet {
 		}
 	}
 
-	/** (0.11.83) Server → client: the Mind has taken over, thrusting away from {@code threat}. */
+	/** (0.11.87) Server → client: the Mind has taken over, thrusting away from {@code threat}. */
 	public record Takeover(Vec3 threat) implements CustomPacketPayload {
 		public static final Type<Takeover> TYPE = new Type<>(JaymosPowers.id("rig_takeover"));
 		public static final StreamCodec<ByteBuf, Takeover> CODEC = Vec3.STREAM_CODEC.map(Takeover::new, Takeover::threat);

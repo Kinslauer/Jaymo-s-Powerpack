@@ -89,7 +89,7 @@ public final class FlightRolls {
 			return WindPowerClient.INSTANCE.flight().state().flying();
 		}
 		return ZFighterFlightClient.pose() > 0 || SmokeFlightClient.flying() || XenoformState.flight(player) != XenoformState.FLY_NONE
-			// (0.11.83) the Rig's thrusters, hovering or in full flight
+			// (0.11.87) the Rig's thrusters, hovering or in full flight
 			|| com.jaymospowers.client.rig.RigClient.flying(player);
 	}
 

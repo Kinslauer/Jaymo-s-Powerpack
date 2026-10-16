@@ -22,7 +22,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * (0.11.83) Suit calling (Mind level 3). The call key (no power: C; with one: the Rig key's Suit) <b>parks</b> the worn
+ * (0.11.87) Suit calling (Mind level 3). The call key (no power: C; with one: the Rig key's Suit) <b>parks</b> the worn
  * Rig: the pieces blast off (everyone sees them go) and wait wherever the Mind keeps them, remembered on the player
  * ({@link #PARKED}, kept through death: the suit wasn't on you). Pressed again it <b>calls</b> them: sparks stream in from
  * above and the pieces lock on one by one, boots first, each with a clank and a jolt on the wearer's screen. Only Rig

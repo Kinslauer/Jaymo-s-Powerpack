@@ -37,7 +37,7 @@ import org.jspecify.annotations.Nullable;
  * instant beam from the Core through the palm), and the <b>shoulder launcher</b> (a pair of mini-missiles that burst on
  * impact without breaking blocks). The Mind's report is here too ({@link RigNet#REPORT}).
  *
- * <p>(0.11.83) Stage 2: <b>lock-on</b> (Mind level 2; hold the Rig key: the target under the crosshair; palm blasts aim
+ * <p>(0.11.87) Stage 2: <b>lock-on</b> (Mind level 2; hold the Rig key: the target under the crosshair; palm blasts aim
  * at it when it's roughly ahead, missiles home on it), <b>scans</b> and <b>suit calling</b> (level 3, {@link RigScan},
  * {@link RigCall}), and <b>full flight</b> (level 5, whole set: double-tap Jump while hovering; faster, drains more,
  * costs hunger, and hitting a wall at speed hurts).
@@ -60,7 +60,7 @@ public final class RigActives {
 	static final float MISSILE_BURST = 1.6F;
 	/** How often the HUD's status goes out (ticks). */
 	static final int STATUS_EVERY = 5;
-	/** (0.11.83) Lock-on: how far a lock can be taken, and how far it holds before it breaks. */
+	/** (0.11.87) Lock-on: how far a lock can be taken, and how far it holds before it breaks. */
 	public static final double LOCK_RANGE = 32.0, LOCK_KEEP = 48.0;
 	/** A palm blast bends to the lock when it's within this of the look (dot of the directions: 0.8 is about 37 degrees). */
 	static final double PALM_LOCK_DOT = 0.8;
@@ -83,7 +83,7 @@ public final class RigActives {
 		/** The last status sent, to send a change at once. */
 		boolean sentHovering;
 		boolean wasWearing;
-		/** (0.11.83) Full flight (only while hovering). */
+		/** (0.11.87) Full flight (only while hovering). */
 		boolean flying;
 		boolean sentFlying;
 		/** The locked target's entity id, -1 for none. */
@@ -124,7 +124,7 @@ public final class RigActives {
 		return state != null && state.hovering && state.flying;
 	}
 
-	/** (0.11.83) The locked target, or null. */
+	/** (0.11.87) The locked target, or null. */
 	static @Nullable LivingEntity locked(ServerPlayer player) {
 		State state = STATES.get(player.getUUID());
 		if (state == null || state.lock < 0) {
@@ -187,7 +187,7 @@ public final class RigActives {
 		sendStatus(player, state);
 	}
 
-	/** (0.11.83) The Lock packet: lock on to {@code id}, or let go (-1). */
+	/** (0.11.87) The Lock packet: lock on to {@code id}, or let go (-1). */
 	static void lock(ServerPlayer player, int id) {
 		if (player.isSpectator() || !Rig.wears(player, Rig.Piece.HELM) || Rig.core(player).isEmpty()) {
 			return;
@@ -260,7 +260,7 @@ public final class RigActives {
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.4F, 1.8F);
 	}
 
-	/** (0.11.83) Double-tap Jump while hovering: full flight on, or back to hover. */
+	/** (0.11.87) Double-tap Jump while hovering: full flight on, or back to hover. */
 	private static void toggleFlight(ServerPlayer player, State state) {
 		if (!state.hovering) {
 			return;
@@ -350,7 +350,7 @@ public final class RigActives {
 		Vec3 look = player.getLookAngle();
 		LivingEntity lock = locked(player);
 		if (lock != null) {
-			// (0.11.83) the lock bends the beam on to it, when it's roughly ahead and in sight
+			// (0.11.87) the lock bends the beam on to it, when it's roughly ahead and in sight
 			Vec3 to = lock.getBoundingBox().getCenter().subtract(eye);
 			if (to.length() <= range && to.normalize().dot(look) > PALM_LOCK_DOT && player.hasLineOfSight(lock)) {
 				look = to.normalize();
@@ -431,7 +431,7 @@ public final class RigActives {
 			Vec3 from = missile.at()[0];
 			Entity target = missile.target();
 			if (target != null && target.isAlive() && target.level() == level) {
-				// (0.11.83) homing on the lock
+				// (0.11.87) homing on the lock
 				Vec3 want = target.getBoundingBox().getCenter().subtract(from).normalize().scale(MISSILE_SPEED);
 				missile.velocity()[0] = missile.velocity()[0].lerp(want, MISSILE_HOMING).normalize().scale(MISSILE_SPEED);
 			}

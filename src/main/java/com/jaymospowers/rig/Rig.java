@@ -52,7 +52,7 @@ import org.jspecify.annotations.Nullable;
  * power's; J uses the selected Rig active and Sneak+J picks the next (client: {@code RigClient}).</li>
  * <li>Each power adds one small augment ({@link Augment}).</li>
  * </ul>
- * (0.11.83) Stage 2, the Mind grows up: it levels 1 to {@link #MAX_LEVEL} on the Core ({@link #XP}; see {@link RigLevels}),
+ * (0.11.87) Stage 2, the Mind grows up: it levels 1 to {@link #MAX_LEVEL} on the Core ({@link #XP}; see {@link RigLevels}),
  * and each level unlocks one more thing: 2 lock-on, 3 scans ({@link RigScan}) and suit calling ({@link RigCall}), 4 the
  * takeover save ({@link RigTakeover}), 5 full flight (hover, then double-tap Jump). Creative counts as level 5.
  */
@@ -71,15 +71,15 @@ public final class Rig {
 	public static DataComponentType<Integer> CHARGE;
 	/** On a Rig Core: the Mind's personality, picked when it's first worn ({@link RigMind.Personality}). */
 	public static DataComponentType<String> MIND;
-	/** (0.11.83) On a Rig Core: the Mind's experience ({@link RigLevels}). */
+	/** (0.11.87) On a Rig Core: the Mind's experience ({@link RigLevels}). */
 	public static DataComponentType<Integer> XP;
-	/** (0.11.83) On a Rig Core: the game time its takeover save is ready again ({@link RigTakeover}). */
+	/** (0.11.87) On a Rig Core: the game time its takeover save is ready again ({@link RigTakeover}). */
 	public static DataComponentType<Long> TAKEOVER_READY;
 
-	/** (0.11.83) The Mind's levels: the experience each one starts at (level 1 at 0). */
+	/** (0.11.87) The Mind's levels: the experience each one starts at (level 1 at 0). */
 	public static final int MAX_LEVEL = 5;
 	public static final int[] LEVEL_XP = {0, 100, 300, 700, 1400};
-	/** (0.11.83) The level each stage-2 feature needs. */
+	/** (0.11.87) The level each stage-2 feature needs. */
 	public static final int LOCK_LEVEL = 2, SCAN_LEVEL = 3, CALL_LEVEL = 3, TAKEOVER_LEVEL = 4, FLIGHT_LEVEL = 5;
 
 	public static Item HELM, CORE, ARMS, THRUSTERS, SALVAGE, SCRAP;
@@ -275,7 +275,7 @@ public final class Rig {
 		return CORE != null && chest.is(CORE) ? chest : ItemStack.EMPTY;
 	}
 
-	/** (0.11.83) A Core's Mind level (1..{@link #MAX_LEVEL}; 0 for an empty stack). */
+	/** (0.11.87) A Core's Mind level (1..{@link #MAX_LEVEL}; 0 for an empty stack). */
 	public static int level(ItemStack core) {
 		if (core.isEmpty()) {
 			return 0;
@@ -290,13 +290,13 @@ public final class Rig {
 		return level;
 	}
 
-	/** (0.11.83) The worn Core's Mind level (0 with no Core; creative: {@link #MAX_LEVEL}). Both sides. */
+	/** (0.11.87) The worn Core's Mind level (0 with no Core; creative: {@link #MAX_LEVEL}). Both sides. */
 	public static int level(Player player) {
 		ItemStack core = core(player);
 		return core.isEmpty() ? 0 : player.isCreative() ? MAX_LEVEL : level(core);
 	}
 
-	/** (0.11.83) How far the worn Core is through its level (0..1; 1 at the top level). */
+	/** (0.11.87) How far the worn Core is through its level (0..1; 1 at the top level). */
 	public static float levelProgress(Player player) {
 		ItemStack core = core(player);
 		int level = level(core);
@@ -372,7 +372,7 @@ public final class Rig {
 		return RigActives.hovering(player);
 	}
 
-	/** (0.11.83) Whether this player is in the Rig's full flight (server). */
+	/** (0.11.87) Whether this player is in the Rig's full flight (server). */
 	public static boolean flying(Player player) {
 		return RigActives.flying(player);
 	}

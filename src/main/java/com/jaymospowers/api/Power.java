@@ -3,6 +3,7 @@ package com.jaymospowers.api;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -124,6 +125,11 @@ public interface Power {
 	/** Whether {@code key} works before it's unlocked (the power decides what it does meanwhile). */
 	default boolean usableEarly(PowerKey key) {
 		return false;
+	}
+
+	/** Whether {@code key} works for {@code player} before it's unlocked (by default, {@link #usableEarly(PowerKey)}). */
+	default boolean usableEarly(Player player, PowerKey key) {
+		return usableEarly(key);
 	}
 
 	default PowerKey[] unlockOrder() {

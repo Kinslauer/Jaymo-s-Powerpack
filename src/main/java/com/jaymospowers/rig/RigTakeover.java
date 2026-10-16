@@ -19,7 +19,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.11.83) The takeover save (Mind level 4, whole set): when a hit leaves you under {@link #HEALTH} health and the Core
+ * (0.11.87) The takeover save (Mind level 4, whole set): when a hit leaves you under {@link #HEALTH} health and the Core
  * has the charge, the Mind takes control for a moment. Your view snaps to the threat and the screen flashes (client:
  * {@code RigClient}), the thrusters throw you away from it, the Core floods you with absorption, and once the throw is
  * spent the thrusters catch you in a hover. Then it needs {@link #COOLDOWN} ticks to be ready again (kept on the Core,

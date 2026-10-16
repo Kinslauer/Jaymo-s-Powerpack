@@ -31,7 +31,7 @@ final class KeyGuide {
 	static final int COLOR_SPECIAL = 0xFF9FD8FF;
 	/** The X key is shared: Web's symbiote menu, Wind's Tempest Kick and Cyclone. */
 	private static final String SPECIAL_KEY = "key.jaymospowers.web_symbiote";
-	/** (0.11.83) The Rig's lines (shown while you wear or have parked a Rig). */
+	/** (0.11.87) The Rig's lines (shown while you wear or have parked a Rig). */
 	static final int COLOR_RIG = 0xFF5FE6FF;
 
 	/** One key's line: the key's name, the ability's short name (null if it has none), what it does, its colour. */
@@ -91,7 +91,7 @@ final class KeyGuide {
 	}
 
 	/**
-	 * (0.11.83) The Rig's keys, after the power's, while a piece is worn or the suit is parked: lang
+	 * (0.11.87) The Rig's keys, after the power's, while a piece is worn or the suit is parked: lang
 	 * {@code rig.jaymospowers.key.<line>} (and {@code .name}), with the same key arguments plus the Rig key (%8$s).
 	 * A line only shows once the Mind's level has reached it (Andy: nothing shows until you find it).
 	 */

@@ -1420,7 +1420,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   guarded by two androids, sometimes a mech); Fallen Rigs, fallen explorers who sought a way off Earth (their logs on
   salvaging), only in newly generated Nether (1 in 220) and End (1 in 160) chunks. Stage 3 (later): levels, lock-on,
   scans, the takeover save, flight, calling the suit.
-- **0.11.83, the Rig (stage 2): the Mind grows up.** Mind levels 1-5 on the Core (`rig_xp`; `Rig.LEVEL_XP` 0/100/300/
+- **0.11.86 / Kingdoms 0.7.72, vassals set apart from kings:** Andy: "vassals should be differentiated from kings". A
+  kingdom made a fiefdom now has its king step down to lord in place (circlet, diamond, purple bar, lord's title) and
+  its folk take the overlord's arms; lords keep a smaller escort (4); a fiefdom's audience names its overlord. See
+  kingdoms/MODLOG.md.
+- **0.11.87, the Rig (stage 2): the Mind grows up.** Mind levels 1-5 on the Core (`rig_xp`; `Rig.LEVEL_XP` 0/100/300/
   700/1400; creative counts as 5), learned while the Core is worn (`RigLevels`): kills (hostile 5, player 25, anything
   with 150+ max health 120), wrecks salvaged (40), time worn (1 a minute) and danger warnings proved right (8: still
   alive 10 s after an urgent or low-health warning; dying clears it). Each level the Mind remarks on in its own voice

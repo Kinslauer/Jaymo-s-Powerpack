@@ -31,7 +31,7 @@ import net.minecraft.world.phys.Vec3;
  * {@link #GAP} ticks at most, and the same warning not again for {@link #REPEAT} (urgent ones {@link #REPEAT_URGENT}).
  * The warnings also light the Helm's HUD ({@link #warnings}).
  *
- * <p>(0.11.83) A warning that turned out right (you were still alive {@link #PROOF_TICKS} later) teaches the Mind
+ * <p>(0.11.87) A warning that turned out right (you were still alive {@link #PROOF_TICKS} later) teaches the Mind
  * ({@link RigLevels#WARNING_XP}); it remarks on each new level in its own voice ({@link #levelUp}).
  */
 public final class RigMind {
@@ -51,7 +51,7 @@ public final class RigMind {
 	static final int LAVA_DEPTH = 24;
 	/** Hostiles hunting you from behind, this close (Darktide's augment: farther), this far behind your look (dot). */
 	static final double BEHIND_RANGE = 8.0, DARKTIDE_BEHIND_RANGE = 14.0, BEHIND_DOT = -0.35;
-	/** (0.11.83) How long after a danger warning you must still be alive for it to count as right (ticks). */
+	/** (0.11.87) How long after a danger warning you must still be alive for it to count as right (ticks). */
 	static final int PROOF_TICKS = 200;
 
 	public enum Personality {
@@ -84,7 +84,7 @@ public final class RigMind {
 	private static final class State {
 		int warnings;
 		long lastLine = Long.MIN_VALUE / 2;
-		/** (0.11.83) When the last danger warning is proved right (0: none waiting). */
+		/** (0.11.87) When the last danger warning is proved right (0: none waiting). */
 		long proofAt;
 		final long[] lastWarned = new long[Warning.values().length];
 
@@ -270,7 +270,7 @@ public final class RigMind {
 		ping(player, pitch);
 	}
 
-	/** (0.11.83) A line in the Mind's voice on the action bar, now, whatever was said last. */
+	/** (0.11.87) A line in the Mind's voice on the action bar, now, whatever was said last. */
 	static void sayAlways(ServerPlayer player, String key, float pitch, Object... args) {
 		String personality = personality(Rig.core(player));
 		if (personality == null) {
@@ -281,7 +281,7 @@ public final class RigMind {
 		ping(player, pitch);
 	}
 
-	/** (0.11.83) A longer line in the Mind's voice, in chat (scan results, level-ups). */
+	/** (0.11.87) A longer line in the Mind's voice, in chat (scan results, level-ups). */
 	static void tell(ServerPlayer player, ItemStack core, String key, Object... args) {
 		String personality = personality(core);
 		if (personality != null) {
@@ -294,7 +294,7 @@ public final class RigMind {
 		return core.isEmpty() ? null : core.get(Rig.MIND);
 	}
 
-	/** (0.11.83) The Mind reached {@code level}: it remarks on it, and names what it can do now. */
+	/** (0.11.87) The Mind reached {@code level}: it remarks on it, and names what it can do now. */
 	static void levelUp(ServerPlayer player, ItemStack core, int level) {
 		tell(player, core, "level." + level);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.rig.unlock." + level,

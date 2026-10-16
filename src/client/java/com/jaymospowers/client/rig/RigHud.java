@@ -30,7 +30,7 @@ import org.jspecify.annotations.Nullable;
  * The Helm's HUD, bottom-right above the power chips: the Core's charge and the Mind's level (a thin strip under the
  * top edge fills toward the next), the three actives (their keys, cooldowns, hover lit), from level 3 a second row
  * (Scan, Suit, the takeover save's readiness, full flight), what's under the crosshair out to {@link #TARGET_RANGE}
- * blocks (or the lock), and the Mind's warnings (blinking). Only with the Helm on. (0.11.83) Also in the world, on the
+ * blocks (or the lock), and the Mind's warnings (blinking). Only with the Helm on. (0.11.87) Also in the world, on the
  * wearer's screen: brackets round the locked target and marks on a scan's chests and ores; and, Helm or not, the red
  * frame of the Mind's takeover.
  */
@@ -125,7 +125,7 @@ final class RigHud {
 		}
 		row += LINE;
 
-		// (0.11.83) the Mind's own: Scan, Suit, the save, flight
+		// (0.11.87) the Mind's own: Scan, Suit, the save, flight
 		if (second) {
 			int cell = (WIDTH - 6) / 4;
 			int cx = x + 3;

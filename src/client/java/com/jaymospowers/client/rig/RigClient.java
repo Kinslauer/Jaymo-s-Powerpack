@@ -37,7 +37,7 @@ public final class RigClient {
 	static final double HOVER_RISE = 0.22, HOVER_SINK = 0.2, HOVER_PUSH = 0.03, HOVER_MAX = 0.35;
 	/** The gentle bob while holding height. */
 	static final double HOVER_BOB = 0.015;
-	/** (0.11.83) Full flight: top speed along the look (b/t; Sprint: this much more), climb / dive, how quickly it gets there (share a tick). */
+	/** (0.11.87) Full flight: top speed along the look (b/t; Sprint: this much more), climb / dive, how quickly it gets there (share a tick). */
 	static final double FLIGHT_SPEED = 0.85, FLIGHT_SPRINT = 1.3, FLIGHT_CLIMB = 0.35, FLIGHT_ACCEL = 0.12, FLIGHT_STRAFE = 0.35;
 	/** Holding the Rig key this long (ticks) locks on instead of using the active; B held this long scans. */
 	static final int LOCK_HOLD = 8, SCAN_HOLD = 12;
