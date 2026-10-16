@@ -1600,3 +1600,15 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   - **No fall waiver:** sinking faster than 0.5 b/t builds toward a hard landing that hurts the rider as a fall (past
     3 blocks); flying into a wall hurts by the speed lost, squared (x24).
   - Art: `tools/gen_bomb_glider.py` (the 128x64 skin and the item sprite).
+- **0.13.8, beam clashes:** a held Wind Whistle (Wind, sneak + hold X) and a Smoke or Soot Jet (Smoke, hold X) that meet
+  head-on lock into a clash instead of passing through (two of the same stream too). A churning knot of wind and smoke
+  grinds where they meet, both streams drawn into it, with a roar, rings and a light shake; everyone near sees it.
+  - **The struggle:** a balance from -1 to 1 moves the knot along the line between the two. Each side pushes steadily
+    (more when ascended, more per mastered ability) and harder by mashing X (short releases count as taps); a little
+    waver keeps no two clashes alike. Both are rooted and slowed and burn hunger; a "Clash" panel at the bottom right
+    shows the balance. Soot blinds near the knot, and the other user once it's close.
+  - **Endings:** the knot reaching you overwhelms you (6 damage, thrown back; wind spins you, smoke engulfs and blinds
+    you); letting go or looking away lets the other stream roll through (2 damage); a stalemate past 8 s detonates the
+    knot (4 damage to both, everyone near thrown, both streams cool down 5 s).
+  - All in `core/BeamClash` (numbers at the top) and `client/BeamClashClient`; each beam joins with one call
+    (`WindJet.init`, `SmokeJet.init`), so other beams can join later.
