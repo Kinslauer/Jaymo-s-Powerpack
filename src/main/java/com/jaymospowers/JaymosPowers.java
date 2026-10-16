@@ -55,6 +55,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.costume.Costume.init();
 		// (0.11.82) the Rig: an AI armour suit, salvaged and forged
 		com.jaymospowers.rig.Rig.init();
+		// (0.11.89) the Backpack: worn on the back, set down on the ground, torn apart only by strong blasts
+		com.jaymospowers.backpack.Backpack.init();
 		registerAttachments();
 	}
 
@@ -81,7 +83,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.zfighter.ZFighterPower", "power.zfighter.ZFighterTraining", "power.zfighter.ZFighterLineage", "power.zfighter.ZFighterGuard", "power.zfighter.ZFighterCombo",
 			"power.zfighter.ZFighterSites", "power.zfighter.ZFighterFusion", "power.zfighter.ZFighterMasters", "power.zfighter.ZFighterRaids", "power.zfighter.ZFighterTournaments", "power.zfighter.ZFighterCorruption",
 			"power.smoke.SmokePower", "power.smoke.SmokeJet", "power.smoke.SmokeVapour", "power.smoke.SmokeSight", "power.smoke.SmokeSmog", "power.smoke.SmokeAshStorm", "power.smoke.SmokeMoves",
-			"enchanting.Enchanting", "costume.Costume", "rig.RigWrecks", "rig.RigCall",
+			"enchanting.Enchanting", "costume.Costume", "rig.RigWrecks", "rig.RigCall", "backpack.Backpack",
 		};
 		for (String holder : holders) {
 			try {

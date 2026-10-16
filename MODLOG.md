@@ -1450,3 +1450,13 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   (`FlightRoll.flying`), and the Rig won't hover while a power's flight is on (`FlightRoll.powerFlying`). The H screen
   lists the Rig's keys after the power's while a piece is worn or the suit is parked; each line appears only once the
   Mind's level unlocks it (Andy: nothing shows until you find it).
+- **0.11.89, the Backpack:** Andy: "i need a backpack that animates on the player and can be placed on the ground. it is
+  only broken by strong explosions". Our own (`backpack/`, `client/backpack/`; Traveler's Backpack has no 26.3 Fabric
+  build). Crafted from leather, string, a chest and wool; four rows. Right-click the air to wear it (`Backpack.WORN`,
+  server-only contents; `SHOWN` synced for drawing), ` opens it, sneak+` takes it off into the hand. Drawn on the body
+  part as the body model holds it at the layers (Fresh Animations, our poses), plus its own spring sway (swings out as
+  you start, jump and fall, rocks with each step, flap bounces). Right-click a block to set it down: unmineable,
+  immovable, wither/dragon immune, 3,600,000 blast resistance; `BackpackExplosionMixin` tears apart set-down backpacks
+  in reach of a block-breaking explosion of power 6+ (`STRONG_BLAST`: charged creeper, end crystal), spilling the
+  contents and 3 leather. Sneak-right-click with an empty hand picks it up onto your back. Dying with one on sets it
+  down where you fell (kept on with keepInventory). Textures from `tools/gen_backpack.py`.
