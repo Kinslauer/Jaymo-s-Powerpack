@@ -3174,3 +3174,14 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   taken when it's sewn, near the tailor, within 5 minutes); **Costume Table** sells `jaymospowers:costume_table`.
   Priced like the outfits (`Tailors.price`): table from 10, costume from 8, plus the tailor's own rate, less for
   friends, more for people they dislike, half for family.
+
+## 0.7.72: vassal lords set apart from kings
+- Andy: "vassals should be differentiated from kings". A kingdom made a fiefdom (war terms, a taken seat, `/kingdom
+  vassal`) kept its living king: crown, netherite, yellow bar, "King of X", king's quests, its own colours. Now every
+  Folk checks its realm's type each second (`Folk.reform`): its folk take the overlord's bordered arms and colours, and
+  the king sets his crown aside and becomes the fiefdom's lord in place (circlet, trimmed diamond, purple bar, "Baron/
+  Count/Lord of X", 220 health, kept in proportion); players within 48 blocks are told. A lord leading a free kingdom
+  is crowned king the same way.
+- A lord walks his round with at most 4 guards (`Royals.LORD_ESCORT_MOST`; a king up to 8).
+- A fiefdom's audience says whose land it is: "X is a fiefdom: its lord holds it for Y and pays him tribute."
+- The "Vassal of X" title (read as if he served his own fiefdom) is now "Count of X" for new lords.

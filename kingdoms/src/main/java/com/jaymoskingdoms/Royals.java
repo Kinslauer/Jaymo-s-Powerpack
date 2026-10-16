@@ -34,6 +34,8 @@ public final class Royals {
 	static final long DAWN = 1000L, DUSK = 11000L;
 	/** The guards at his back: at least (with fewer he keeps to his hall, {@link Wardens}), at most. */
 	static final int ESCORT_LEAST = Wardens.GUARDS_LEAST, ESCORT_MOST = 8;
+	/** (0.7.72) A fiefdom's lord is a lesser man than a king: no more than this many at his back. */
+	static final int LORD_ESCORT_MOST = 4;
 	/** A guard posted this close to the gate keeps it (unless he's needed to make up the least). */
 	static final double GATE_POST = 8.0;
 	/** Guards are called to his side from this far round the seat. */
@@ -297,7 +299,7 @@ public final class Royals {
 
 	// ---- his escort -------------------------------------------------------------------------------------------------
 
-	/** Calls up to {@link #ESCORT_MOST} of the faction's guards (the nearest) to {@code king}'s back. */
+	/** Calls up to {@link #ESCORT_MOST} ({@link #LORD_ESCORT_MOST} for a lord) of the faction's guards (the nearest) to {@code king}'s back. */
 	static void escort(ServerLevel level, Faction faction, Folk king) {
 		List<Folk> guards = new ArrayList<>(level.getEntitiesOfClass(Folk.class, new AABB(faction.seat()).inflate(ESCORT_CALL),
 			g -> g.isAlive() && g.factionId() == faction.id() && g.role() == Folk.GUARD && g.getTarget() == null && g.task().isEmpty()
@@ -306,9 +308,10 @@ public final class Royals {
 		Castle.Keep keep = Factions.keep(level.getServer(), faction.id());
 		java.util.function.Predicate<Folk> atGate = g -> keep != null && g.escort() == null && g.getHomePosition().closerThan(keep.gate(), GATE_POST);
 		guards.sort(Comparator.comparing((Folk g) -> atGate.test(g)).thenComparingDouble(g -> g.distanceToSqr(king)));
+		int most = king.role() == Folk.LORD ? LORD_ESCORT_MOST : ESCORT_MOST;
 		int slot = 0;
 		for (Folk g : guards) {
-			if (slot < ESCORT_MOST && (slot < ESCORT_LEAST || !atGate.test(g))) {
+			if (slot < most && (slot < ESCORT_LEAST || !atGate.test(g))) {
 				g.follow(king.getUUID(), slot++);
 			} else if (king.getUUID().equals(g.escort())) {
 				g.unfollow();

@@ -57,6 +57,13 @@ final class ZFighterBattle {
 	static final int COMBO_WINDOW = 25;
 	static final int COMBO_FINISHER = 5;
 	static final float FINISHER_DAMAGE = 4.0F;
+	/**
+	 * Most a left-mouse blow (a punch, a hold-combo hit, a finisher) does: {@link #PUNCH_SOFT_CAP} for most of a fighter's
+	 * life, rising to {@link #PUNCH_MAX_CAP} only with every Z Fighter stat and Kingdoms attribute maxed (the rise follows
+	 * that progress to the power {@link #PUNCH_CAP_CURVE}, so it stays near the soft cap until the very end). Not the Great Ape.
+	 */
+	static final float PUNCH_SOFT_CAP = 8.0F, PUNCH_MAX_CAP = 11.0F;
+	static final double PUNCH_CAP_CURVE = 3.0;
 
 	// ---- hardship ----
 	static final int SUPER_HARDSHIP = 40;
@@ -217,9 +224,22 @@ final class ZFighterBattle {
 		if (attacker instanceof ServerPlayer player && attacker != victim && Powers.has(player, ZFighterPower.INSTANCE)) {
 			damage = ZFighterGuard.counter(player, source, damage);
 			damage = weaponBlow(player, source, damage);
-			return grudge(player, victim) ? damage * (1.0F + FOE_BONUS) : damage;
+			damage = grudge(player, victim) ? damage * (1.0F + FOE_BONUS) : damage;
+			if (source.getDirectEntity() == player && source.is(DamageTypes.PLAYER_ATTACK) && !ZFighterLineage.ape(player)) {
+				damage = Math.min(damage, punchCap(player));
+			}
+			return damage;
 		}
 		return damage;
+	}
+
+	/** The most one left-mouse blow of his does now (see {@link #PUNCH_SOFT_CAP}). */
+	static float punchCap(ServerPlayer player) {
+		ZFighterTraining.Data data = ZFighterTraining.of(player);
+		double stats = data.totalLevels() / (double)(ZFighterTraining.STATS * ZFighterTraining.STAT_CAP);
+		double attributes = ZFighterKingdoms.attributes(player);
+		double progress = Math.clamp(attributes < 0.0 ? stats : (stats + attributes) / 2.0, 0.0, 1.0);
+		return PUNCH_SOFT_CAP + (PUNCH_MAX_CAP - PUNCH_SOFT_CAP) * (float)Math.pow(progress, PUNCH_CAP_CURVE);
 	}
 
 	/** A bare-fisted punch landed: ki, the combo, and every fifth hit a finisher. */
@@ -237,7 +257,7 @@ final class ZFighterBattle {
 		// the finisher: one heavy blow that sends it flying
 		Vec3 look = player.getViewVector(1.0F);
 		target.setInvulnerableTime(0);
-		target.hurtServer(level, ZFighterKi.source(player), FINISHER_DAMAGE * ZFighterPower.FORM_KI[live.form]);
+		target.hurtServer(level, ZFighterKi.source(player), Math.min(FINISHER_DAMAGE * ZFighterPower.FORM_KI[live.form], punchCap(player)));
 		ZFighterKi.push(target, look, 1.8, 0.45);
 		Vec3 at = target.getBoundingBox().getCenter();
 		level.sendParticles(ParticleTypes.EXPLOSION, true, false, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);

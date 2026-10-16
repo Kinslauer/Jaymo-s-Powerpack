@@ -53,6 +53,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.enchanting.Enchanting.init();
 		// (0.11.66) costumes: design and sew them at the Costume Table
 		com.jaymospowers.costume.Costume.init();
+		// (0.11.82) the Rig: an AI armour suit, salvaged and forged
+		com.jaymospowers.rig.Rig.init();
 		registerAttachments();
 	}
 
@@ -79,7 +81,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.zfighter.ZFighterPower", "power.zfighter.ZFighterTraining", "power.zfighter.ZFighterLineage", "power.zfighter.ZFighterGuard", "power.zfighter.ZFighterCombo",
 			"power.zfighter.ZFighterSites", "power.zfighter.ZFighterFusion", "power.zfighter.ZFighterMasters", "power.zfighter.ZFighterRaids", "power.zfighter.ZFighterTournaments", "power.zfighter.ZFighterCorruption",
 			"power.smoke.SmokePower", "power.smoke.SmokeJet", "power.smoke.SmokeVapour", "power.smoke.SmokeSight", "power.smoke.SmokeSmog", "power.smoke.SmokeAshStorm", "power.smoke.SmokeMoves",
-			"enchanting.Enchanting", "costume.Costume",
+			"enchanting.Enchanting", "costume.Costume", "rig.RigWrecks", "rig.RigCall",
 		};
 		for (String holder : holders) {
 			try {
