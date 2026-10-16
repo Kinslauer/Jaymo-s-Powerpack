@@ -125,6 +125,8 @@ public final class Armory {
 	/** Every Armory item, by id, in the order the creative tab lists them. */
 	static final Map<String, Item> ITEMS = new java.util.LinkedHashMap<>();
 	static final Map<Tier, Item> LANCES = new EnumMap<>(Tier.class);
+	/** (Strains C) The bomb glider's item: placed like a boat, it's the {@link BombGlider}. */
+	public static Item BOMB_GLIDER;
 	public static final ResourceKey<EquipmentAsset> CAVEMAN = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosPowers.id("caveman"));
 
 	/** (0.10.13) A quarterstaff in a wind sorcerer's hand rides the gale (WindStaff). */
@@ -168,6 +170,9 @@ public final class Armory {
 				.build()));
 		item("throwing_star", props -> new ThrowingWeaponItem(props, 3.0F, true, false), p -> p.stacksTo(16));
 		throwing("harpoon", p -> p.sword(ToolMaterial.IRON, 3.5F, -2.9F), 8.0F, false);
+		// (Strains C) the bomb glider: a bat-winged board that drops dynamite
+		BOMB_GLIDER = item("bomb_glider", BombGliderItem::new, p -> p.stacksTo(1));
+		BombGliderNet.init();
 
 		ResourceKey<CreativeModeTab> tab = ResourceKey.create(Registries.CREATIVE_MODE_TAB, JaymosPowers.id("armory"));
 		Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, tab, FabricCreativeModeTab.builder()

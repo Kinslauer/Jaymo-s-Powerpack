@@ -59,6 +59,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 			com.jaymospowers.client.enchanting.EnchantingScreen::new);
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.jaymospowers.armory.ArmoryEntities.THROWN_WEAPON,
 			com.jaymospowers.client.armory.ThrownWeaponRenderer::new);
+		// (0.13.7) the bomb glider: its renderer, hold screen and drop keys
+		com.jaymospowers.client.armory.BombGliderClient.init();
 		// once per install: move other mods' (and vanilla's) defaults off the power keys
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(KeyConflicts::resolveOnce);
 		// once per install: switch on the pack's resource packs (medieval MCA villagers, Fresh Animations' player) the
@@ -193,7 +195,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 		// report ability key changes (a key held while a screen opens counts as released)
 		for (PowerKey key : PowerKey.values()) {
 			// a locked ability's key does nothing here; the server still says it's locked when it's pressed
-			boolean down = power != null && !seized && minecraft.gui.screen() == null && ABILITY_KEYS[key.ordinal()].isDown();
+			// (0.13.7) on a bomb glider, ability 1 drops its dynamite instead (BombGliderClient)
+			boolean down = power != null && !seized && minecraft.gui.screen() == null && ABILITY_KEYS[key.ordinal()].isDown()
+				&& !(key == PowerKey.ABILITY_1 && com.jaymospowers.client.armory.BombGliderClient.riding(player) != null);
 			if (down != wasDown[key.ordinal()]) {
 				wasDown[key.ordinal()] = down;
 				ClientPlayNetworking.send(new PowerPayloads.KeyInput(key.ordinal(), down));

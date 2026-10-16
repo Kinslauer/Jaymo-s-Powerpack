@@ -1581,3 +1581,22 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   - Packs Jaymo's Kitchen 0.4.46 (heartier meals, see `kitchen/MODLOG.md`).
 - **0.13.5, the tallest size is the Verdant's:** packs Jaymo's Kingdoms 0.7.87 (only a Verdant can take MCA's Size slider to the top; see `kingdoms/MODLOG.md`). No Powers code changed.
 - **0.13.6, Nightborn blood:** packs Jaymo's Kingdoms 0.7.88 (Nightborn and vampires lean together: Old Blood turning, a long thirst, the Elder's offer, starlit looks, night-deep gifts, born dhampirs, the cure's trace, Blood Moon kin; see `kingdoms/MODLOG.md`). No Powers code changed.
+- **0.13.7, the bomb glider (Strains C):** Andy: "make it just dynamite it drops." Finished from his paused draft.
+  Kingdoms unchanged (0.7.88).
+  - **The glider** (`armory/BombGlider`): our own bat-winged iron board, ridden standing (`BombGliderAvatarRendererMixin`).
+    Crafted from 4 phantom membrane, 3 iron and a redstone block (`M M / MRM / III`, unlocked by holding a membrane), set
+    down from its item on a block. Right-click to step on; sneak-right-click, or the inventory key on board, opens its
+    hold (`BombGliderMenu`/`BombGliderScreen`): a fuel slot with a burn gauge and a 16-stick rack. Health 20; broken, it
+    drops its item and everything in its hold.
+  - **Flying:** the server flies it from the rider's keys (no controlling passenger, so no flying kick on the server).
+    It cruises on its own (0.55 b/t; W 0.85, S 0.3), A/D turn 4.5 degrees a tick, Jump climbs, Sneak dives (the client
+    sends Sneak in the air as the dive bit, `BombGliderInputMixin`, so it doesn't dismount; the sprint key is ignored
+    aboard). Landed, Sneak steps off; Sneak+Jump bails out mid-air. Fuel: a blaze rod burns 1200 ticks, a lava bucket
+    6000 (the bucket back to the rider); a hum and flame puffs while it burns. Out of fuel it only glides down (0.12 b/t).
+  - **Dynamite:** left click (`BombGliderAttackMixin`) or R (ability 1; your power doesn't get R while riding) drops a
+    stick, falling with the glider's speed. WeaponMod's dynamite through `BombGliderCompat` when it's loaded, else TNT
+    on a 40-tick fuse, lit in the rider's name. A fuse is stretched to last the fall plus 10 ticks (`fallTicks`), so a
+    stick dropped from high up never bursts in the air. 8 ticks between drops; all checked on the server.
+  - **No fall waiver:** sinking faster than 0.5 b/t builds toward a hard landing that hurts the rider as a fall (past
+    3 blocks); flying into a wall hurts by the speed lost, squared (x24).
+  - Art: `tools/gen_bomb_glider.py` (the 128x64 skin and the item sprite).
