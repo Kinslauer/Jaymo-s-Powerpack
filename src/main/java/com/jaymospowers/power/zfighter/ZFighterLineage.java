@@ -119,6 +119,16 @@ public final class ZFighterLineage {
 	static final int BERSERK_SWING_EVERY = 16, BERSERK_PICK_EVERY = 20;
 	/** How far past its own bulk its fists reach while berserk (blocks, at full size). */
 	static final double BERSERK_REACH = 4.0;
+	/** (0.13.5) It only goes for what it can see and stand over: no higher or lower than this (blocks), nor under water. */
+	static final double BERSERK_DROP = 10.0;
+	/** Chasing one this long (ticks) without landing a blow, it gives up on it for this long and looks for another. */
+	static final int BERSERK_GIVE_UP = 300, BERSERK_IGNORE = 600;
+	/** With nothing to go for it roams: a spot this far off (blocks), picked again this often (ticks) or once there. */
+	static final double ROAM_MIN = 16.0, ROAM_MAX = 40.0;
+	static final int ROAM_EVERY = 200;
+	/** Hurt, it runs from the blow: this far (blocks) for this long (ticks), and won't run again for this long after. */
+	static final double FLEE_DISTANCE = 40.0;
+	static final int FLEE_TICKS = 60, FLEE_REST = 160;
 	/** Blows to the legs (landing from below this share of its height) cripple a Great Ape: this many, or one this hard. */
 	static final double LEG_SHARE = 0.4;
 	static final int CRIPPLE_HITS = 25, WILD_CRIPPLE_HITS = 15;
@@ -167,6 +177,12 @@ public final class ZFighterLineage {
 	/** (0.12.3) The wild ape's quarry (entity id): its own player's client walks him at it. Not saved. */
 	public static final AttachmentType<Integer> BERSERK = AttachmentRegistry.create(JaymosPowers.id("zfighter_ape_berserk"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
+	/** (0.13.5) Where the wild ape roams or runs to while it has no quarry: its own player's client walks him there. Not saved. */
+	public static final AttachmentType<BlockPos> WILD_GOAL = AttachmentRegistry.create(JaymosPowers.id("zfighter_ape_goal"),
+		builder -> builder.syncWith(BlockPos.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
+	/** (0.13.5) The wild ape is running from a hurt (to {@link #WILD_GOAL}, flat out). Not saved. */
+	public static final AttachmentType<Boolean> WILD_FLEE = AttachmentRegistry.create(JaymosPowers.id("zfighter_ape_flee"),
+		builder -> builder.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.targetOnly()));
 
 	/** Jaymo's Kingdoms' heritage tag (then the heritage's key), and the heritages that make a lineage of their own. */
 	private static final String HERITAGE_TAG = "jaymoskingdoms_heritage_";
@@ -643,6 +659,10 @@ public final class ZFighterLineage {
 		live.crippledUntil = -1L;
 		live.wildFrom = wild ? player.level().getGameTime() : -1L;
 		live.berserkTarget = -1;
+		live.berserkIgnore = -1;
+		live.fleeUntil = -1L;
+		live.fleeRestUntil = 0L;
+		live.roamAt = 0L;
 		player.setAttached(GREAT_APE, true);
 		ServerLevel level = player.level();
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, true, false, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
@@ -662,9 +682,12 @@ public final class ZFighterLineage {
 		player.removeAttached(GREAT_APE);
 		player.removeAttached(CRIPPLED);
 		player.removeAttached(BERSERK);
+		player.removeAttached(WILD_GOAL);
+		player.removeAttached(WILD_FLEE);
 		live.crippledUntil = -1L;
 		live.wildFrom = -1L;
 		live.berserkTarget = -1;
+		live.fleeUntil = -1L;
 		live.legHits = 0;
 		player.level().sendParticles(ParticleTypes.POOF, player.getX(), player.getY() + 1.0, player.getZ(), 30, 1.0, 1.5, 1.0, 0.05);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_ape_end").withStyle(ChatFormatting.GRAY));
@@ -728,6 +751,9 @@ public final class ZFighterLineage {
 		ZFighterPower.Live live = ZFighterPower.live(player);
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
+		if (wild(player) && !crippled(player) && taken > 0.0F) {
+			flee(player, live, source, now);
+		}
 		if (crippled(player)) {
 			if (source.getEntity() instanceof LivingEntity by && source.getDirectEntity() == by
 				&& com.jaymospowers.core.Dismember.blade(by.getMainHandItem())) {
@@ -765,40 +791,130 @@ public final class ZFighterLineage {
 		endApe(player, live);
 	}
 
-	/** The wild ape is berserk: it picks the nearest living thing, its player's client walks him at it, and he swings when it's in reach. */
+	/**
+	 * The wild ape is berserk: it picks the nearest living thing it can see and get at, its player's client walks him at it,
+	 * and he swings when it's in reach. Nothing near, it roams; hurt, it runs from the blow a while ({@link #flee}).
+	 */
 	private static void berserk(ServerPlayer player, ZFighterPower.Live live, ServerLevel level, long now) {
+		if (live.fleeUntil >= 0L) {
+			if (now < live.fleeUntil && !near(player, player.getAttached(WILD_GOAL))) {
+				return;
+			}
+			// run far enough: back to the fight
+			live.fleeUntil = -1L;
+			live.fleeRestUntil = now + FLEE_REST;
+			player.removeAttached(WILD_FLEE);
+			player.removeAttached(WILD_GOAL);
+			live.roamAt = 0L;
+		}
 		net.minecraft.world.entity.Entity known = live.berserkTarget >= 0 ? level.getEntity(live.berserkTarget) : null;
 		LivingEntity target = known instanceof LivingEntity living && living.isAlive() && living.distanceTo(player) <= BERSERK_RANGE * 1.5 ? living : null;
+		if (target != null && now - live.berserkSince >= BERSERK_GIVE_UP) {
+			// it can't get at this one: leave it be a while
+			live.berserkIgnore = target.getId();
+			live.berserkIgnoreUntil = now + BERSERK_IGNORE;
+			target = null;
+		}
 		if (target == null || now % BERSERK_PICK_EVERY == 0) {
 			LivingEntity nearest = null;
 			double best = BERSERK_RANGE * BERSERK_RANGE;
-			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(BERSERK_RANGE), e -> quarry(player, e))) {
+			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(BERSERK_RANGE), e -> quarry(player, live, e, now))) {
 				double d = e.distanceToSqr(player);
 				if (d < best) {
 					best = d;
 					nearest = e;
 				}
 			}
-			target = nearest;
+			if (nearest != null || target == null) {
+				target = nearest;
+			}
 		}
 		int id = target == null ? -1 : target.getId();
 		if (id != live.berserkTarget || !player.hasAttached(BERSERK)) {
 			live.berserkTarget = id;
+			live.berserkSince = now;
 			player.setAttached(BERSERK, id);
 		}
-		if (target != null && now >= live.berserkSwingAt
-			&& player.getBoundingBox().inflate(BERSERK_REACH * Math.max(0.25F, live.apeSize)).intersects(target.getBoundingBox())) {
+		if (target == null) {
+			roam(player, live, level, now);
+			return;
+		}
+		if (player.hasAttached(WILD_GOAL)) {
+			player.removeAttached(WILD_GOAL);
+		}
+		if (now >= live.berserkSwingAt && inReach(player, live, target)) {
 			live.berserkSwingAt = now + BERSERK_SWING_EVERY;
+			live.berserkSince = now;
 			player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 			player.attack(target);
 			player.resetAttackStrengthTicker();
 		}
 	}
 
-	/** Who the berserk ape goes for: anything alive but himself, armour stands, and players in creative or spectating. */
-	private static boolean quarry(ServerPlayer player, LivingEntity e) {
+	/** Its fists reach {@link #BERSERK_REACH} past its bulk, across the ground and from its feet up to its shoulders. */
+	private static boolean inReach(ServerPlayer player, ZFighterPower.Live live, LivingEntity target) {
+		double reach = BERSERK_REACH * Math.max(0.25F, live.apeSize);
+		AABB body = player.getBoundingBox();
+		return body.inflate(reach, 0.0, reach).expandTowards(0.0, -reach, 0.0).intersects(target.getBoundingBox());
+	}
+
+	/** Nothing to go for: it wanders off somewhere new every so often, or once it gets there. */
+	private static void roam(ServerPlayer player, ZFighterPower.Live live, ServerLevel level, long now) {
+		BlockPos goal = player.getAttached(WILD_GOAL);
+		if (goal != null && now < live.roamAt && !near(player, goal)) {
+			return;
+		}
+		live.roamAt = now + ROAM_EVERY;
+		float angle = player.getRandom().nextFloat() * Mth.TWO_PI;
+		double far = ROAM_MIN + player.getRandom().nextDouble() * (ROAM_MAX - ROAM_MIN);
+		player.setAttached(WILD_GOAL, groundAt(level, player.getX() + Math.cos(angle) * far, player.getZ() + Math.sin(angle) * far));
+	}
+
+	/** Hurt: the wild ape turns tail from the blow and runs a way off, unless it only just stopped running. */
+	private static void flee(ServerPlayer player, ZFighterPower.Live live, DamageSource source, long now) {
+		if (live.fleeUntil >= 0L || now < live.fleeRestUntil || live.apeSize < 0.5F) {
+			return;
+		}
+		Vec3 from = source.getSourcePosition();
+		Vec3 away = from == null ? Vec3.ZERO : player.position().subtract(from).multiply(1.0, 0.0, 1.0);
+		if (away.lengthSqr() < 1.0E-4) {
+			float angle = player.getRandom().nextFloat() * Mth.TWO_PI;
+			away = new Vec3(Math.cos(angle), 0.0, Math.sin(angle));
+		}
+		away = away.normalize().scale(FLEE_DISTANCE);
+		live.fleeUntil = now + FLEE_TICKS;
+		live.berserkTarget = -1;
+		player.setAttached(BERSERK, -1);
+		player.setAttached(WILD_GOAL, groundAt(player.level(), player.getX() + away.x, player.getZ() + away.z));
+		player.setAttached(WILD_FLEE, true);
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_HURT, SoundSource.PLAYERS, 4.0F, 0.4F);
+	}
+
+	private static BlockPos groundAt(ServerLevel level, double x, double z) {
+		BlockPos column = BlockPos.containing(x, 0.0, z);
+		return level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
+	}
+
+	/** He's stood about at {@code goal} (across the ground, within his own bulk). */
+	private static boolean near(ServerPlayer player, @org.jspecify.annotations.Nullable BlockPos goal) {
+		if (goal == null) {
+			return true;
+		}
+		double dx = goal.getX() + 0.5 - player.getX(), dz = goal.getZ() + 0.5 - player.getZ();
+		double r = Math.max(2.0, player.getBbWidth() * 0.6);
+		return dx * dx + dz * dz <= r * r;
+	}
+
+	/**
+	 * Who the berserk ape goes for: anything alive but himself, armour stands, and players in creative or spectating, that
+	 * he can see, that isn't far above or below him or under water, and that he hasn't just given up on.
+	 */
+	private static boolean quarry(ServerPlayer player, ZFighterPower.Live live, LivingEntity e, long now) {
 		return e != player && e.isAlive() && !(e instanceof ArmorStand) && !e.isInvisible()
-			&& !(e instanceof Player other && (other.isCreative() || other.isSpectator()));
+			&& !(e instanceof Player other && (other.isCreative() || other.isSpectator()))
+			&& !(e.getId() == live.berserkIgnore && now < live.berserkIgnoreUntil)
+			&& Math.abs(e.getY() - player.getY()) <= BERSERK_DROP && !e.isUnderWater()
+			&& player.hasLineOfSight(e);
 	}
 
 	// ---------------------------------------------------------------- Verdant: healing

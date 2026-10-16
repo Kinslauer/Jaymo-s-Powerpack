@@ -281,6 +281,16 @@ public final class ZFighterPower implements Power {
 		long wildRolledAt = Long.MIN_VALUE / 2;
 		int berserkTarget = -1;
 		long berserkSwingAt;
+		/**
+		 * The wild ape on the loose: since when it's chased its quarry without landing a blow, the one it gave up on (and
+		 * until when), when it next picks a spot to roam to, and until when it's running from a hurt (then can't again).
+		 */
+		long berserkSince;
+		int berserkIgnore = -1;
+		long berserkIgnoreUntil;
+		long roamAt;
+		long fleeUntil = -1L;
+		long fleeRestUntil;
 		/** The guard (right click held): up, since when, when he may parry again, until when his punch counters. */
 		boolean guarding;
 		long guardStart;
