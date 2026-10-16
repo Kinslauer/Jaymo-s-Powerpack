@@ -25,6 +25,9 @@ abstract class ServerGamePacketListenerImplMixin {
 		Power power = Powers.of(this.player);
 		if (entity == this.player && power != null && power.allowsFloating(this.player)) {
 			cir.setReturnValue(Integer.MAX_VALUE);
+		} else if (entity == this.player && com.jaymospowers.rig.Rig.hovering(this.player)) {
+			// (0.11.82) hovering on the Rig's thrusters
+			cir.setReturnValue(Integer.MAX_VALUE);
 		} else if (entity == this.player && this.player.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.GRAVITY) < LOW_GRAVITY) {
 			// someone else took their weight (Gravity's Lift): floating isn't their doing
 			cir.setReturnValue(Integer.MAX_VALUE);
