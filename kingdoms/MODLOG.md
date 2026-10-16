@@ -3258,3 +3258,8 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   - Frostborn: the same pink patches, rime on the fingers; ice-white eyes; snowflakes.
   - Nightborn: shadow soaking the hands, stars in it; moon-silver eyes glowing by day only; dark wisps at night only.
   - Earthling: training wraps and a ki glow round the fists; no eye glow, no particles.
+
+## 0.7.81: heritage looks under costumes (pack 0.12.5)
+- With Jaymo's Powers loaded, `PowersCover` asks its `BodyCover` (by reflection) what a costume or the symbiote's suit
+  covers: under a face mask or the suit no heritage look, Emberborn marks or vampire face at all; under a hood no
+  antennae or Tideborn head fins; under any costume no Tideborn arm fins poking through the sleeves.

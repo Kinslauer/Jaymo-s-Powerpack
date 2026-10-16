@@ -1531,3 +1531,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     body lashes its tongue once (`WebHulk.DON_LASH_AT`).
 - **0.11.107, Tendril Grab drawn like Wall Crawl:** Andy: "the tendril grab should attach you to the wall the exact same way visually that the wall crawl does, but it should still hold you where you attach and rubberband you back and forth like before." The tethered tendrils are now jointed limbs bitten into the wall, as Wall Crawl's walkers; the elastic hold is unchanged.
 - **0.12.0, a look for every heritage:** packs Jaymo's Kingdoms 0.7.79 (every heritage but Heartlander and Warrior-born gets marks that glow in the dark, glowing eyes for most, and Tideborn gills and fins; see `kingdoms/MODLOG.md`). No Powers code changed.
+- **0.12.5, nothing pokes through a costume or the suit:** Andy: "there is a lot of zfighting and clipping issues using
+  a warrior born with web power and symbiote should hide your tail and all costumes should hide as much underneath".
+  `client/BodyCover` works out on the render state (last, `BodyCoverAvatarRendererMixin` at priority 2300) what a
+  costume or the symbiote's suit covers: the skin's outer layer goes under it (the costume's suit at 0.3 and mask at
+  0.55 flickered against the jacket's 0.25 and the hat's 0.5), and the layers that hang off the body check it: the
+  Warrior-born tail and its belt, the Xeno-Band (body); Super hair, Verdant antennae (a mask over the whole head, a
+  hood); the corruption mark, storm eyes (a mask that hides the face). The symbiote covers all of it. Kingdoms 0.7.81
+  reads the same answers for the heritage looks.

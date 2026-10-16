@@ -111,7 +111,7 @@ public final class CostumeClient {
 	}
 
 	/** Whether something else covers the whole body just now (a Xeno-Band form, the symbiote's suit). */
-	private static boolean covered(AvatarRenderState state) {
+	public static boolean covered(AvatarRenderState state) {
 		if (state.getData(XenoformClient.FORM) != null || state.getData(WebSymbioteClient.SUIT) != null || state.getData(WebSuitGrowth.KEY) != null) {
 			return true;
 		}

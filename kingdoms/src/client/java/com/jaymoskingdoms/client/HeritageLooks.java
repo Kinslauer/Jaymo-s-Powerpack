@@ -163,9 +163,13 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 	@Override
 	public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
 		Look look = state.getData(KEY);
-		if (look == null || state.isInvisible) {
+		if (look == null || state.isInvisible || PowersCover.face(state)) {
+			// (0.7.81) a mask or the symbiote's suit over it all (a costume always covers the body too)
 			return;
 		}
+		// under a hood no head fins, under a costume's sleeves no arm fins
+		headFinsCovered = PowersCover.head(state);
+		armFinsCovered = PowersCover.body(state);
 		PlayerModel model = this.getParentModel();
 		Kind kind = look.kind();
 		collector.order(1).submitModel(model, state, poseStack, RenderTypes.entityCutout(kind.skin[look.variant()]), lightCoords,
@@ -183,22 +187,25 @@ public final class HeritageLooks extends RenderLayer<AvatarRenderState, PlayerMo
 		}
 	}
 
+	/** (0.7.81) What Jaymo's Powers covers on the player being drawn (set in submit, read by fins). */
+	private static boolean headFinsCovered, armFinsCovered;
+
 	/** A Tideborn's fins: on the head (crest, ear fins) and the backs of the forearms. */
 	private static void fins(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, PlayerModel model, int set) {
-		if (model.head.visible) {
+		if (model.head.visible && !headFinsCovered) {
 			poseStack.pushPose();
 			model.head.translateAndRotate(poseStack);
 			fin(poseStack, collector, lightCoords, headFins(set));
 			poseStack.popPose();
 		}
 		bakeArmFins();
-		if (model.rightArm.visible) {
+		if (model.rightArm.visible && !armFinsCovered) {
 			poseStack.pushPose();
 			model.rightArm.translateAndRotate(poseStack);
 			fin(poseStack, collector, lightCoords, LONG_ARMS[set] ? rightArmFinLong : rightArmFin);
 			poseStack.popPose();
 		}
-		if (model.leftArm.visible) {
+		if (model.leftArm.visible && !armFinsCovered) {
 			poseStack.pushPose();
 			model.leftArm.translateAndRotate(poseStack);
 			fin(poseStack, collector, lightCoords, LONG_ARMS[set] ? leftArmFinLong : leftArmFin);
