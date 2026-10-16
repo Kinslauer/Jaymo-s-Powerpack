@@ -56,6 +56,75 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   every slam throws block dust, smoke and a heavy mace thud, and shakes you, the one slammed and anyone within 12.
   Bosses can't be whipped; Living Armor's tendrils keep their own Sneak grab. `COOLDOWN` 20 ticks after one ends.
 
+## Tendril slams, the surge and the tear-off (Andy's PS5 / Spider-Man 3 references)
+Andy: "I'd also like the symbiote to animate its counters and applicable abilities more like these" (three contact
+sheets in `/mnt/project-files/web-shooters/refs/`). Then: "enemies mobs affected by the symbiote should also get the
+living armor tendrils, and it helps them attack". No blood anywhere in it.
+- **Tendril bundles (`WebTendrilBundle`, client):** counters, Tendril Grab and the combos are drawn as a thick bundle
+  of glossy strands (`STRANDS` 14, `GRAB_STRANDS` 6, `COMBO_STRANDS` 12) from the forearm and the back over the lead
+  shoulder. Each strand roots on its own and gathers into the bundle (`ROOT_SPREAD`, `SPREAD`). The last `WRAP_SHARE`
+  coils round the target `WRAP_TURNS` times, and the bundle lashes while it reaches and while it recoils (`LASH*`). In
+  your own first person it comes from the lower corner of the view (`FP_*`). It is drawn from the synced
+  `WebCounter.ACTIVE` and `WebCounter.bundle(kind)` timings, so everyone sees the same thing.
+- **Counters as tendril slams (`WebCounter`, server; `WebCounterPose`, client):** each counter now runs reach, wrap,
+  haul, slam and recoil (`Bundle(reached, wrapped, haulEnd, release, spear)`, `RECOIL_TICKS` 6).
+  - Impale: lifts the target `IMPALE_LIFT` and slams it down where it stood.
+  - Hurl: hauls it over your head (`HURL_APEX`) to the ground `HURL_BEHIND` behind you.
+  - Whiplash: swings it round to your side (`WHIP_*`).
+  - Constrict: holds it up in front (`CONSTRICT_*`), squeezes on `CONSTRICT_SQUEEZES`, then drops it.
+  - Spear Flurry: stabs on `FLURRY_STABS`.
+  - Jaw Snap, Maul and the Maw Roar: reel it to your face (`JAWS_AHEAD`).
+
+  A slam does its damage, `SLAM_STUN_TICKS` of Slowness IV and a burst of black mass, dust and ground debris
+  (`WebHaul.burst`, `SLAM_BURST`). It shakes your screen (`SLAM_SHAKE`) and a slammed player's (`SLAMMED_SHAKE`).
+  Durations grew a little: Jaw Snap 18, Impale and Whiplash 20, Drag to Jaws and the Roar 24, Maul and Hurl 28,
+  Flurry 30 (Constrict unchanged at 34). The body poses wind up, cast, heave and follow through.
+
+  The back tendrils no longer strike during a counter (the bundle is the strike). A symbiote counter's bundle and pose
+  play out even if the target dies. Hauling rules are in `WebHaul`: a target wider than `MAX_WIDTH` or taller than
+  `MAX_HEIGHT` isn't hauled, nor is a dragon or wither.
+- **Combos (`WebTendrilCombos`):** the thrash slam, clap, crush and shatter now land with the same burst (`BURST` 0.8).
+- **Spike Burst as the surge (`WebSymbiote`, `WebBodyPose`, `WebTendrilBundle.surge`):**
+  - It gathers first for `SPIKE_GATHER_TICKS` 6: crouched, arms crossed and trembling, with a heartbeat and sculk
+    charge.
+  - Then it bursts. The damage lands now, so it is 6 ticks later than before. Arms fling wide and the head is thrown
+    back. `SURGE_TENDRILS` 18 long thick tendrils shoot out (`SURGE_SHOOT`), whip (`SURGE_WHIP`, `SURGE_SWING`) and
+    dissolve into smoke from `SURGE_DISSOLVE`.
+  - A dark shockwave rolls out (`WebSymbiote.surgeWave`, with `SURGE_RINGS` rings and `SURGE_EMBERS` embers) and your
+    screen kicks by `SPIKE_SHAKE`.
+  - The roar's blast uses the same wave and tendrils.
+  - The spike hits spray black dust instead of blood.
+- **The suit torn off (`WebSuitTear`):** rejection, the death pour-out, the radial suit toggle (off) and the debut
+  withdraw set the synced `WebSymbiote.TORN`. The client sees it within `TORN_MATCH_TICKS` of the suit change and plays
+  the tear instead of the plain withdraw, over `TEAR_TICKS` 46 (the withdraw was 36).
+  - The wearer claws at the chest (`CLAW_END`), then wrenches it outward (`RIP_END`), then flings it off with the head
+    thrown back, leaning by `LEAN_*`.
+  - The suit splits from the middle of the chest outward (`CENTER_FIRST`, `PULL_SPAN`) in `COLUMNS` × `ROWS` strips
+    (`STRIP_*`). The strips' ends cling longest and are pulled into the hands, and the sleeves slide off over the hands.
+  - `STICKY` sticky strands stretch between the strips and the body and snap between `SNAP_MIN` and `SNAP_MAX`.
+  - `THRASH_TENDRILS` tendrils thrash out of each hand's clump.
+  - The mask peels by `MASK_END`.
+- **Ridden mobs get Living Armor's tendrils (`WebBehemothClient`, `WebTendrilLayer.submitOnMob`):**
+  - Every behemoth and every mob a loose symbiote inhabits wears the player's own back tendrils, drawn on its own model
+    and sized to it.
+    - Upright mobs root `UPRIGHT_ROOT` of their height up and `BACK_DEPTH` of their width back. Four-legged ones (wider
+      than `QUADRUPED_WIDE` of their height) root on top of the back (`QUADRUPED_ROOT`).
+    - Size is height / `SIZE_HEIGHT`, kept between `SIZE_MIN` and `SIZE_MAX`. A behemoth's sit out `BEHEMOTH_DEPTH`
+      on its big body.
+    - They grow out over `GROW_TICKS`. They are fully wild on hostile hosts and behemoths (`FERAL_HOSTILE`) and half
+      so on peaceful ones (`FERAL_PEACEFUL`).
+  - Each lash swings the tendrils on the target's side, and a short spear bundle (`LASH_STRANDS`) shoots from the back
+    to the target.
+  - The old world-space thrashing cords (`WebBehemothClient.render`) are gone, replaced by these tendrils.
+  - **Tendril slam (`WebBehemoth.SLAM`, synced):** hostile hosts and behemoths now also grab-and-slam.
+    - Every `SLAM_EVERY_MIN`-`SLAM_EVERY_MAX` ticks a `MOB_SLAM_STRANDS` bundle snatches prey within `SLAM_REACH`. It
+      wraps the prey by `SLAM_WRAPPED`, hauls it over the mob's head (`SLAM_APEX`) and slams it `SLAM_LAND` in front at
+      `SLAM_HIT`. All the back tendrils rear and crash down with it.
+    - The slam deals `SLAM_DAMAGE` 7 (less than a lash's 10), `SLAM_STUN_TICKS` of slowness and a burst
+      (`SLAM_BURST`), and shakes nearby screens (`SLAM_SHAKE`).
+    - Lashes are unchanged in rate and damage.
+  - Peaceful hosts show the tendrils but never attack.
+
 ## Weapon arm, counter animations, hulking big body (0.11.62)
 - **Weapon arm (`WebMorph`):** in the suit or big body, with an empty main hand, left click (held since 0.11.91, see below) morphs the arm into a
   random weapon (never the same twice running, arms alternate) and strikes what you aim at within `REACH` 6 (with Living

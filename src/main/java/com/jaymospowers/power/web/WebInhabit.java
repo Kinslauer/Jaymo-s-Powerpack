@@ -183,6 +183,7 @@ public final class WebInhabit {
 		host.removeAttached(HOST);
 		com.jaymospowers.core.Oddities.unmark(host, com.jaymospowers.core.Oddities.SYMBIOTE);
 		host.removeAttached(WebBehemoth.STRIKE);
+		host.removeAttached(WebBehemoth.SLAM);
 		HOSTS.remove(host);
 		host.addEffect(new MobEffectInstance(MobEffects.NAUSEA, REJECT_REEL, 0));
 		host.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, REJECT_REEL, 1));
