@@ -3200,3 +3200,27 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   sneak + right-click carries one over your shoulder (a passenger, placed by `DownedMixin`), then right-click throws
   them (`THROW_SPEED`) and sneak + right-click sets them down. Any death is a real one (wars, quests, crimes), with no
   corpse and no loot.
+
+## 0.7.75: Emberborn fireproof, sapped by the cold; Frostborn ice prison; heritage cards scroll (pack 0.11.102)
+- Andy: "emberborn should be immune to fire and weaker in the cold / winter". Fire, lava, hot floors and burning
+  never hurt an Emberborn (`DamageTypeTags.IS_FIRE` cancelled), and flame never stays lit on them (burn time -100%,
+  put out each second).
+- In the cold (biome base temperature 0.2 or less: snowy and frozen lands) their blows are 15% weaker and they walk
+  10% slower (`EMBER_COLD_WEAK`, `EMBER_COLD_SLOW`); freezing in powder snow doubles both (`EMBER_FREEZING_*`).
+  The old 25% hunger in the cold stays, and now counts freezing too. The pack has no seasons mod, so cold lands are
+  its winter.
+- Andy: "frostborn should be able to freeze an enemy in a block of ice, once a day". `FrostPrison`: a Frostborn presses
+  `;` (rebindable) at a living thing they look at (`Arcana.sighted`) and it's locked in a shell of packed ice for 10 s
+  (`HOLD_TICKS`), held still, numb and frozen through; the ice placed only in air, removed when it ends (or on
+  shutdown). Once per 24000 ticks of game time (`COOLDOWN_TICKS`, kept through death). Things over 2 wide or 3.2 tall
+  don't fit.
+- Andy: "heritage screen text is cut off, it should scroll". The heritage pane's rows wrap instead of cutting off;
+  the pane scrolls with the wheel, and pointing at it while it overflows scrolls it slowly on its own.
+- Andy: "add all zfighter lineages to the heritage screen ... so anyone can be any of those races, not just z
+  fighters". New **Earthling** heritage (Wits + Endurance; skill tree learns 25% faster, `EARTHLING_XP`); with
+  Warrior-born, Frostborn and Verdant all four lineages are heritages. Jaymo's Powers now gives anyone of that blood its
+  race (see the pack MODLOG). The `;` key is now the heritage gift: a Frostborn's ice prison, a Warrior-born's tail
+  (`Heritage.gift`, tag `jaymoskingdoms_tail_toggle`). Heritage list rows 19 high so ten fit.
+- Andy: the ice prison "should be frostborns left mouse hold": Jaymo's Powers' race hold (left mouse held bare-handed,
+  not at a block) tags the player `jaymoskingdoms_frost_prison` and `FrostPrison.tick` casts it. `;` is only the
+  Warrior-born tail now. Verdant card mentions the stretch punch (Powers' `RaceMoves`).
