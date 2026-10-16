@@ -81,6 +81,8 @@ public final class Rig {
 	public static final int[] LEVEL_XP = {0, 100, 300, 700, 1400};
 	/** (0.11.87) The level each stage-2 feature needs. */
 	public static final int LOCK_LEVEL = 2, SCAN_LEVEL = 3, CALL_LEVEL = 3, TAKEOVER_LEVEL = 4, FLIGHT_LEVEL = 5;
+	/** (0.11.107) The Unibeam ({@link RigUnibeam}) comes with the takeover save. */
+	public static final int UNIBEAM_LEVEL = 4;
 
 	public static Item HELM, CORE, ARMS, THRUSTERS, SALVAGE, SCRAP;
 	public static Block FORGE, DEAD_RIG, FALLEN_RIG;
@@ -236,6 +238,7 @@ public final class Rig {
 				RigTakeover.tick(player);
 			}
 			RigCall.tick(player);
+			RigHelm.tick(player);
 			RigPassives.tick(player, any && !player.isSpectator());
 			RigActives.tick(player, any && !player.isSpectator());
 		}
@@ -360,7 +363,8 @@ public final class Rig {
 	 * "a Rig pilot"), or null without a Helm.
 	 */
 	public static @Nullable Component helmIdentity(Player player) {
-		if (!wears(player, Piece.HELM)) {
+		if (!wears(player, Piece.HELM) || RigHelm.faceUp(player)) {
+			// (0.11.110) faceplate up: the face shows
 			return null;
 		}
 		ItemStack helm = player.getItemBySlot(EquipmentSlot.HEAD);

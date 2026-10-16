@@ -28,6 +28,7 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -37,6 +38,7 @@ import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.DyedItemColor;
 
 /**
  * (0.11.104) The worn Rig, drawn as a layered model of its own over the player (Andy: "it clips a bit currently with fresh
@@ -86,6 +88,17 @@ public final class RigSuit {
 	static final RenderStateDataKey<PartPose[]> BODY = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_body");
 	/** The model the player renderer drew this player with (MCA swaps it per player). */
 	static final RenderStateDataKey<PlayerModel> PARENT = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_parent");
+	/** (0.11.107) How far the shoulder launcher's pods are raised (0-1; firing, {@link RigPose#pods}). */
+	static final RenderStateDataKey<Float> POD = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_pod");
+	/** The pods: how far they rise (pixels) and tip back (radians) when raised. */
+	static final float POD_RISE = 1.4F, POD_TIP = 0.5F;
+	/** (0.11.110) How far the faceplate is raised (0-1; RigHelm#FACE_UP), and how far it swings up (radians), per tick. */
+	static final RenderStateDataKey<Float> FACE = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_face");
+	static final float FACE_LIFT = 1.45F, FACE_EASE = 0.25F;
+	/** (0.12.2) Each piece's dye from the Rig Forge (rgb), or -1 for bare metal; null when none is dyed. */
+	static final RenderStateDataKey<int[]> COLORS = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_colors");
+	/** The plates are mid grey, so a dye is brightened this much before it tints them (or it comes out dark). */
+	static final float DYE_LIFT = 1.7F;
 	/** The glow pass's colour (its lights coming up). */
 	static final RenderStateDataKey<Integer> GLOW = RenderStateDataKey.create(() -> "jaymospowers:rig_suit_glow");
 
@@ -165,6 +178,7 @@ public final class RigSuit {
 		ClientLevel level = minecraft.level;
 		if (level == null) {
 			TRACKS.clear();
+			FACES.clear();
 			return;
 		}
 		long now = level.getGameTime();
@@ -174,6 +188,7 @@ public final class RigSuit {
 			sounds(minecraft, level, player, track(player, now), now);
 		}
 		TRACKS.keySet().retainAll(seen);
+		FACES.keySet().retainAll(seen);
 	}
 
 	/** A clunk as each plate locks on (a hiss as it lets go), for players near enough to hear it. */
@@ -232,10 +247,18 @@ public final class RigSuit {
 		Track track = track(player, now);
 		double time = now + partialTicks;
 		float[] ages = null;
+		int[] colors = null;
 		for (int i = 0; i < PIECES.length; i++) {
 			Rig.Piece piece = PIECES[i];
 			boolean onState = piece.item() != null && equipment(state, piece).is(piece.item());
 			if (onState) {
+				DyedItemColor dye = equipment(state, piece).get(DataComponents.DYED_COLOR);
+				if (dye != null) {
+					if (colors == null) {
+						colors = new int[] {-1, -1, -1, -1};
+					}
+					colors[i] = dye.rgb() & 0xFFFFFF;
+				}
 				switch (piece) {
 					case HELM -> {
 						state.headEquipment = ItemStack.EMPTY;
@@ -265,6 +288,9 @@ public final class RigSuit {
 			}
 		}
 		state.setData(AGES, ages);
+		state.setData(COLORS, ages == null ? null : colors);
+		state.setData(POD, ages == null ? null : RigPose.pods(player, partialTicks));
+		state.setData(FACE, ages == null ? null : face(player, (float)time));
 		state.setData(GLOW, ages == null ? null : glow(ages[Rig.Piece.CORE.ordinal()], (float)time));
 	}
 
@@ -275,6 +301,31 @@ public final class RigSuit {
 			case ARMS -> state.legsEquipment;
 			case THRUSTERS -> state.feetEquipment;
 		};
+	}
+
+	/** Per player: {how far the faceplate is up, the time it was last stepped}. */
+	private static final Map<Integer, float[]> FACES = new HashMap<>();
+
+	/** The faceplate's lift, easing toward up or down. */
+	private static float face(Player player, float now) {
+		boolean up = com.jaymospowers.rig.RigHelm.faceUp(player);
+		float[] track = FACES.get(player.getId());
+		if (track == null) {
+			if (!up) {
+				return 0.0F;
+			}
+			// first seen up: already up
+			track = new float[] {1.0F, now};
+			FACES.put(player.getId(), track);
+		}
+		float dt = Mth.clamp(now - track[1], 0.0F, 5.0F);
+		track[1] = now;
+		track[0] = Mth.clamp(track[0] + (up ? FACE_EASE : -FACE_EASE) * dt, 0.0F, 1.0F);
+		if (!up && track[0] <= 0.0F) {
+			FACES.remove(player.getId());
+		}
+		float x = track[0];
+		return x * x * (3.0F - 2.0F * x);
 	}
 
 	/** The glow pass's colour: full, but flickering up as the Core's reactor locks in (and down as it comes off). */
@@ -330,14 +381,31 @@ public final class RigSuit {
 		return 1.0F + (OVERSHOOT + 1.0F) * q * q * q + OVERSHOOT * q * q;
 	}
 
+	/** A dye as the plates' tint: brightened (they're grey), opaque. -1 (bare metal) stays white. */
+	static int tint(int rgb) {
+		if (rgb < 0) {
+			return 0xFFFFFFFF;
+		}
+		int r = Math.min(255, Math.round((rgb >> 16 & 0xFF) * DYE_LIFT));
+		int g = Math.min(255, Math.round((rgb >> 8 & 0xFF) * DYE_LIFT));
+		int b = Math.min(255, Math.round((rgb & 0xFF) * DYE_LIFT));
+		return 0xFF000000 | r << 16 | g << 8 | b;
+	}
+
 	/** Draws the Rig over a player: the plates, then their lights. */
 	static final class Layer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		private final Suit wide, slim;
+		/** (0.12.2) One piece's plates only, for a suit dyed piece by piece. */
+		private final Suit[] wideParts = new Suit[PIECES.length], slimParts = new Suit[PIECES.length];
 
 		Layer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
 			super(renderer);
-			this.wide = new Suit(false, this::getParentModel);
-			this.slim = new Suit(true, this::getParentModel);
+			this.wide = new Suit(false, this::getParentModel, -1);
+			this.slim = new Suit(true, this::getParentModel, -1);
+			for (int i = 0; i < PIECES.length; i++) {
+				this.wideParts[i] = new Suit(false, this::getParentModel, i);
+				this.slimParts[i] = new Suit(true, this::getParentModel, i);
+			}
 		}
 
 		@Override
@@ -347,11 +415,30 @@ public final class RigSuit {
 			}
 			PlayerModel parent = getParentModel();
 			state.setData(PARENT, parent);
-			Suit suit = slimArm(parent.rightArm, state.skin.model() == PlayerModelType.SLIM) ? this.slim : this.wide;
-			renderColoredCutoutModel(suit, TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
+			boolean slimArms = slimArm(parent.rightArm, state.skin.model() == PlayerModelType.SLIM);
+			Suit suit = slimArms ? this.slim : this.wide;
+			int[] colors = state.getData(COLORS);
+			if (colors == null || same(colors)) {
+				renderColoredCutoutModel(suit, TEXTURE, poseStack, collector, lightCoords, state, tint(colors == null ? -1 : colors[0]), 1);
+			} else {
+				// dyed piece by piece: each piece's plates in its own colour
+				Suit[] parts = slimArms ? this.slimParts : this.wideParts;
+				for (int i = 0; i < parts.length; i++) {
+					renderColoredCutoutModel(parts[i], TEXTURE, poseStack, collector, lightCoords, state, tint(colors[i]), 1);
+				}
+			}
 			Integer glow = state.getData(GLOW);
 			collector.order(1).submitModel(suit, state, poseStack, RenderTypes.eyes(GLOW_TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY,
 				glow == null ? 0xFFFFFFFF : glow, null, 0);
+		}
+
+		private static boolean same(int[] colors) {
+			for (int c : colors) {
+				if (c != colors[0]) {
+					return false;
+				}
+			}
+			return true;
 		}
 	}
 
@@ -361,14 +448,25 @@ public final class RigSuit {
 		private final boolean slim;
 		private final ModelPart[] plates;
 		private final boolean[] arm;
+		/** (0.11.107) Which plates are the launcher's pods. */
+		private final boolean[] pod;
+		/** (0.11.110) Which plate is the faceplate. */
+		private final boolean[] face;
+		/** (0.12.2) The one piece (Rig.Piece's ordinal) this draws, or -1 for the whole suit. */
+		private final int only;
 
-		Suit(boolean slim, Supplier<PlayerModel> wearer) {
+		Suit(boolean slim, Supplier<PlayerModel> wearer, int only) {
 			super(RigSuitMesh.create(slim).bakeRoot(), slim);
 			this.wearer = wearer;
 			this.slim = slim;
+			this.only = only;
 			this.plates = new ModelPart[RigSuitMesh.PLATES.length];
 			this.arm = new boolean[this.plates.length];
+			this.pod = new boolean[this.plates.length];
+			this.face = new boolean[this.plates.length];
 			for (int i = 0; i < this.plates.length; i++) {
+				this.pod[i] = RigSuitMesh.PLATES[i][1].startsWith("pod_");
+				this.face[i] = RigSuitMesh.PLATES[i][1].equals("helm_face");
 				this.plates[i] = root().getChild(RigSuitMesh.PLATES[i][0]).getChild(RigSuitMesh.PLATES[i][1]);
 				this.arm[i] = RigSuitMesh.PLATES[i][0].endsWith("_arm");
 			}
@@ -399,13 +497,31 @@ public final class RigSuit {
 			}
 			hideSkinLayers();
 			assemble(state.getData(AGES));
+			Float face = state.getData(FACE);
+			if (face != null && face > 0.0F) {
+				// (0.11.110) the faceplate swung up off the face
+				for (int i = 0; i < this.plates.length; i++) {
+					if (this.face[i]) {
+						this.plates[i].xRot -= FACE_LIFT * face;
+					}
+				}
+			}
+			Float pod = state.getData(POD);
+			if (pod != null && pod > 0.0F) {
+				for (int i = 0; i < this.plates.length; i++) {
+					if (this.pod[i] && this.plates[i].visible) {
+						this.plates[i].y -= POD_RISE * pod;
+						this.plates[i].xRot += POD_TIP * pod;
+					}
+				}
+			}
 		}
 
 		/** Each plate as far as its piece's build has brought it: hidden, swinging in, locking, or on. */
 		private void assemble(float[] ages) {
 			for (int i = 0; i < this.plates.length; i++) {
 				ModelPart part = this.plates[i];
-				float age = ages == null ? -1.0F : ages[RigSuitMesh.PIECE[i]];
+				float age = ages == null || this.only >= 0 && RigSuitMesh.PIECE[i] != this.only ? -1.0F : ages[RigSuitMesh.PIECE[i]];
 				float[] time = RigSuitMesh.TIME[i];
 				float p = age < 0.0F ? -1.0F : (age - time[0]) / time[1];
 				if (p <= 0.0F) {

@@ -85,6 +85,8 @@ public final class PoseTakeover {
 		return s.getData(WindPose.KEY) != null || s.getData(WindHoverSway.KEY) != null || s.getData(FreefallPose.KEY) != null
 			|| s.getData(ZFighterFlightPose.KEY) != null || s.getData(XenoformFlightPose.KEY) != null
 			|| s.getData(com.jaymospowers.client.power.smoke.SmokeFlightPose.KEY) != null
+			|| s.getData(com.jaymospowers.client.rig.RigPose.KEY) != null && (s.getData(com.jaymospowers.client.rig.RigPose.KEY).hover() > 0.001F
+				|| s.getData(com.jaymospowers.client.rig.RigPose.KEY).flight() > 0.001F)
 			|| s.getData(WebArms.KEY) != null && s.getData(WebArms.KEY).wings() > 0.001F;
 	}
 
@@ -117,6 +119,7 @@ public final class PoseTakeover {
 			|| s.getData(ZFighterFlightPose.KEY) != null || s.getData(com.jaymospowers.client.power.smoke.SmokeFlightPose.KEY) != null || s.getData(ZFighterChargePose.KEY) != null
 			|| s.getData(com.jaymospowers.client.power.zfighter.ZFighterSpiritPose.KEY) != null
 			|| s.getData(com.jaymospowers.client.power.smoke.SmokeMovePose.KEY) != null
+			|| s.getData(com.jaymospowers.client.rig.RigPose.KEY) != null
 			|| Boolean.TRUE.equals(s.getData(ZFighterGuardPose.KEY))
 			|| s.getData(com.jaymospowers.client.power.zfighter.RaceHoldClient.STRETCH) != null
 			|| s.getData(com.jaymospowers.client.power.zfighter.ZFighterComboPose.KEY) != null

@@ -1,10 +1,12 @@
 package com.jaymospowers.rig;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -13,9 +15,12 @@ import net.minecraft.util.Prediction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -25,7 +30,8 @@ import net.minecraft.world.phys.BlockHitResult;
  * The Rig Forge: where salvage becomes a suit. Right-click to build the selected piece, Sneak + right-click to pick the
  * next one (the cost shows each time). Salvage is counted in points: Rig Salvage {@link #SALVAGE_POINTS}, Fallen Rig
  * Scrap {@link #SCRAP_POINTS}; scrap is spent first. Right-click holding a worn-down Rig piece to refit it
- * ({@link #REFIT_POINTS}). Creative builds for free.
+ * ({@link #REFIT_POINTS}). Creative builds for free. (0.12.2) Right-click with a dye to recolour the worn suit's plates,
+ * with a water bucket to wash them back.
  */
 public class RigForgeBlock extends Block {
 	/** What each salvage is worth at the Forge. */
@@ -67,6 +73,10 @@ public class RigForgeBlock extends Block {
 	}
 
 	private static void work(ServerPlayer player, ItemStack held, BlockPos pos) {
+		if (held.get(DataComponents.DYE) != null && held.getItem() instanceof DyeItem || held.is(Items.WATER_BUCKET)) {
+			recolour(player, held, pos);
+			return;
+		}
 		if (held.getItem() instanceof RigItem && held.isDamaged()) {
 			if (!player.isCreative() && points(player) < REFIT_POINTS) {
 				player.sendSystemMessage(Component.translatable("message.jaymospowers.rig_forge.refit_missing", REFIT_POINTS).withStyle(ChatFormatting.RED));
@@ -107,6 +117,37 @@ public class RigForgeBlock extends Block {
 		player.level().playSound(null, pos, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 0.5F, 1.6F);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.rig_forge.built",
 			Component.translatable("item.jaymospowers.rig_" + piece.id())).withStyle(ChatFormatting.AQUA));
+	}
+
+	/**
+	 * (0.12.2) A dye on the Forge recolours the plates of every Rig piece you wear (dyes mix like leather's, a few at a
+	 * time); a water bucket washes them back to bare metal. Andy: "allow the suit to be recolored".
+	 */
+	private static void recolour(ServerPlayer player, ItemStack held, BlockPos pos) {
+		DyeColor dye = held.get(DataComponents.DYE);
+		int pieces = 0;
+		for (Rig.Piece piece : Rig.Piece.values()) {
+			ItemStack worn = player.getItemBySlot(piece.slot);
+			if (piece.item() == null || !worn.is(piece.item())) {
+				continue;
+			}
+			if (dye == null) {
+				worn.remove(DataComponents.DYED_COLOR);
+			} else {
+				worn.set(DataComponents.DYED_COLOR, DyedItemColor.applyDyes(worn.get(DataComponents.DYED_COLOR), List.of(dye)));
+			}
+			pieces++;
+		}
+		if (pieces == 0) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_forge.recolour_none"));
+			return;
+		}
+		if (dye != null && !player.isCreative()) {
+			held.shrink(1);
+		}
+		player.level().playSound(null, pos, dye == null ? SoundEvents.BUCKET_EMPTY : SoundEvents.DYE_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
+		player.sendOverlayMessage(Component.translatable(dye == null ? "message.jaymospowers.rig_forge.washed" : "message.jaymospowers.rig_forge.recoloured",
+			pieces));
 	}
 
 	private static void describe(ServerPlayer player, Rig.Piece piece) {

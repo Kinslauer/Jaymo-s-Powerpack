@@ -109,13 +109,15 @@ final class KeyGuide {
 			rigLine(lines, "hover", (Component)names[0], args, 1, level);
 			rigLine(lines, "palm", (Component)names[1], args, 1, level);
 			rigLine(lines, "launcher", (Component)names[2], args, 1, level);
+			rigLine(lines, "unibeam", Component.translatable("rig.jaymospowers.key.sneak", names[1]), args, com.jaymospowers.rig.Rig.UNIBEAM_LEVEL, level);
 			rigLine(lines, "report", (Component)names[3], args, 1, level);
 			rigLine(lines, "scan_hold", Component.translatable("rig.jaymospowers.key.hold", names[3]), args, com.jaymospowers.rig.Rig.SCAN_LEVEL, level);
 			rigLine(lines, "call", (Component)names[5], args, com.jaymospowers.rig.Rig.CALL_LEVEL, level);
 		} else {
 			rigLine(lines, "rig", rigKey, args, 1, level);
-			rigLine(lines, "rig_next", Component.translatable("rig.jaymospowers.key.sneak", rigKey), args, 1, level);
 		}
+		// (0.11.110) the radial menu, for everyone
+		rigLine(lines, "rig_next", Component.translatable("rig.jaymospowers.key.sneak", rigKey), args, 1, level);
 		rigLine(lines, "lock", Component.translatable("rig.jaymospowers.key.hold", rigKey), args, com.jaymospowers.rig.Rig.LOCK_LEVEL, level);
 		rigLine(lines, "flight", Component.translatable("rig.jaymospowers.key.double", name(Minecraft.getInstance().options.keyJump)), args,
 			com.jaymospowers.rig.Rig.FLIGHT_LEVEL, level);
