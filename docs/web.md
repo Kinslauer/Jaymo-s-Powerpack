@@ -5,7 +5,7 @@ of each arc, and get a boost if you let go on the upswing. You keep that speed i
 fire again mid-air to chain swings. Three utility webs round out the kit. Accent colour `0xE0303A`; the icon is a
 cobweb.
 
-## Braided webs, a true rope, web shooters (0.12.3)
+## Braided webs, a true rope, web shooters (0.12.4)
 Andy, on the swinging video: "I like the web design, and web shooter idea", and earlier "remake as much as possible,
 while retaining our tethers, it should NOT attach to the air". That mod is someone else's: these are our own code and
 art after its ideas. Webs still only stick to real blocks and creatures (`WebAnchors`' rules are unchanged).
@@ -410,7 +410,7 @@ Andy: "the weapon on left click should be adapted to the living armor tendrils .
   - It undoes vanilla's air drag (0.91 horizontal, 0.98 vertical) and applies its own lighter drag, plus a little extra
     gravity.
   - The rope is a distance constraint from the anchor to hand height (+1.2). If you're at or past the rope length,
-    you're put back on its sphere and only the outward velocity is removed (a true rope since 0.12.3; it was a springy
+    you're put back on its sphere and only the outward velocity is removed (a true rope since 0.12.4; it was a springy
     pull back before). That turns falling into a pendulum arc, and the arc naturally speeds up at the bottom.
   - Release (`detach`) checks how steeply you're moving up. At 35° you get the full forward and up boost; the boost
     falls to 0 at ±35°. A good release plays a sweep sound and a cloud puff.
@@ -457,7 +457,7 @@ Andy: "the weapon on left click should be adapted to the living armor tendrils .
 |---|---|---|
 | `ATTACH_SLACK` | 0.94 | The rope starts at this fraction of the anchor distance. Below 1 gives a tug on attach. |
 | `ROPE_MIN` | 3.0 | The shortest you can reel in to. |
-| `ROPE_PASSES` / `ROPE_MAX_CATCH` | 2 / 1.5 | The true rope (0.12.3): passes a tick (two webs settle), and the most it moves you back onto its length in a tick. |
+| `ROPE_PASSES` / `ROPE_MAX_CATCH` | 2 / 1.5 | The true rope (0.12.4): passes a tick (two webs settle), and the most it moves you back onto its length in a tick. |
 | `SWING_GRAVITY` | 0.025 | Extra gravity while swinging, on top of vanilla's 0.08. More gives faster, heavier arcs. |
 | `SWING_DRAG` | 1.0 | Velocity kept per tick on the web, after vanilla's drag is undone (1 = gravity only; was 0.993). |
 | `PUMP` | 0.03 | Speed added per tick by holding W on the downswing. |
