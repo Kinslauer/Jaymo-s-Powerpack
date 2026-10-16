@@ -32,6 +32,7 @@ abstract class MobSwingLivingEntityRendererMixin {
 		DownedPose.extract(entity, state, partialTicks);
 		VerdantLook.extract(entity, state);
 		com.jaymoskingdoms.client.EmberLook.extract(entity, state);
+		com.jaymoskingdoms.client.HeritageLooks.extract(entity, state);
 	}
 
 	@Inject(
