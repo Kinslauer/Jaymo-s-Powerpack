@@ -1530,3 +1530,4 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     10% it leaves you its Living Armor big body for a minute (`gift.*`). Put on by hand (`DONNED`), the suit or big
     body lashes its tongue once (`WebHulk.DON_LASH_AT`).
 - **0.11.107, Tendril Grab drawn like Wall Crawl:** Andy: "the tendril grab should attach you to the wall the exact same way visually that the wall crawl does, but it should still hold you where you attach and rubberband you back and forth like before." The tethered tendrils are now jointed limbs bitten into the wall, as Wall Crawl's walkers; the elastic hold is unchanged.
+- **0.12.0, a look for every heritage:** packs Jaymo's Kingdoms 0.7.79 (every heritage but Heartlander and Warrior-born gets marks that glow in the dark, glowing eyes for most, and Tideborn gills and fins; see `kingdoms/MODLOG.md`). No Powers code changed.

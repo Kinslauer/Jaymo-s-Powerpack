@@ -3242,3 +3242,19 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   Lootr chest (each player's share lives in Lootr's own data): the mimic held nothing and the chest was gone for
   everyone. `Monsters.mimic` now rolls the chest's loot table itself for the player who opened it (luck counts), so a
   mimic always drops that player's share. Vanilla loot chests behave as before.
+
+## 0.7.79: a look for every heritage (pack 0.12.0)
+- Andy: "give every lineage a new visual like emberborn ... dont change warrior born or the hearthborn [Heartlander]".
+  Designed as mockups first (project files `art-overhaul/lineages/`) and changed twice on his word. Client
+  `HeritageLooks`, textures from `tools/gen_heritage_looks.py`; drawn like `EmberLook` (marks lit like skin, more
+  emissive over them, eyes found on each skin with `VampireLooks.glowingEyes`, a particle off a hand now and then):
+  - Stoneborn: stone over the hands, amethyst glowing in its cracks; violet eyes, glowing by day only; amethyst glints.
+  - Tideborn, fishmen: gills on the cheeks and sides of the head, fins (flat model parts) in one of three sets by UUID
+    (crest; ear fins; crest, ear fins and long arm fins), all with fins on the backs of the forearms; scales and
+    deep-sea lights on the forearms; cyan eyes; bubbles under water, drips on land.
+  - Sylvan: a thick vine winding round each arm, its own way on each player (four drawings by UUID); pale green eyes;
+    fireflies.
+  - Verdant: only pink forearm patches that glow in the dark (no eye glow, no particles).
+  - Frostborn: the same pink patches, rime on the fingers; ice-white eyes; snowflakes.
+  - Nightborn: shadow soaking the hands, stars in it; moon-silver eyes glowing by day only; dark wisps at night only.
+  - Earthling: training wraps and a ki glow round the fists; no eye glow, no particles.

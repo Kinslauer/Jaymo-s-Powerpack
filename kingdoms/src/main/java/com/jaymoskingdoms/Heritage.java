@@ -61,6 +61,8 @@ import org.jspecify.annotations.Nullable;
  * that blood its race (a Warrior-born's tail, a Verdant's mending and stretch punch, a Frostborn's ice prison
  * ({@link FrostPrison}) on left mouse held), Z Fighter or not. The heritage key ({@code ;}) wraps a Warrior-born's tail
  * away or lets it out.
+ * (0.7.79) Every heritage but Heartlander and Warrior-born has a look of its own too, like the Emberborn's: marks on
+ * the hands and forearms that glow in the dark, glowing eyes for most, a Tideborn's gills and fins (client HeritageLooks).
  * Each player carries an entity tag {@code jaymoskingdoms_heritage_<key>} for their heritage, so Jaymo's Powers can read
  * it without Kingdoms classes (a Z Fighter's lineage comes from it).
  */
