@@ -87,7 +87,16 @@ public final class VampireLooks extends RenderLayer<AvatarRenderState, PlayerMod
 
 	/** The red-eyes texture for {@code skin}, made the first time it's asked for once the skin's pixels can be read. */
 	private static Identifier eyesFor(Identifier skin) {
-		Identifier known = EYES_BY_SKIN.get(skin);
+		return glowingEyes(skin, GLOW, EYES, "vampire_eyes/", EYES_BY_SKIN);
+	}
+
+	/**
+	 * Eyes that glow {@code color} where {@code skin}'s own eyes are (an eyes-layer texture), made once per skin and kept
+	 * in {@code cache} under {@code prefix}; {@code stock} while the skin downloads or when no eyes can be told apart.
+	 * Shared with the Emberborn's eyes ({@link EmberLook}).
+	 */
+	static Identifier glowingEyes(Identifier skin, int color, Identifier stock, String prefix, Map<Identifier, Identifier> cache) {
+		Identifier known = cache.get(skin);
 		if (known != null) {
 			return known;
 		}
@@ -100,22 +109,22 @@ public final class VampireLooks extends RenderLayer<AvatarRenderState, PlayerMod
 		} else {
 			Optional<Resource> resource = minecraft.getResourceManager().getResource(skin);
 			if (resource.isEmpty()) {
-				return EYES; // still downloading: ask again next frame
+				return stock; // still downloading: ask again next frame
 			}
 			try (InputStream in = resource.get().open()) {
 				pixels = NativeImage.read(in);
 				owned = true;
 			} catch (IOException | RuntimeException e) {
-				EYES_BY_SKIN.put(skin, EYES);
-				return EYES;
+				cache.put(skin, stock);
+				return stock;
 			}
 		}
-		Identifier made = EYES;
+		Identifier made = stock;
 		try {
 			if (pixels != null && pixels.getWidth() == 64 && pixels.getHeight() >= 32) {
-				NativeImage eyes = findEyes(pixels);
+				NativeImage eyes = findEyes(pixels, color);
 				if (eyes != null) {
-					made = JaymosKingdoms.id("vampire_eyes/" + Integer.toHexString(skin.hashCode()) + "_" + EYES_BY_SKIN.size());
+					made = JaymosKingdoms.id(prefix + Integer.toHexString(skin.hashCode()) + "_" + cache.size());
 					minecraft.getTextureManager().register(made, new DynamicTexture(made::toString, eyes));
 				}
 			}
@@ -124,7 +133,7 @@ public final class VampireLooks extends RenderLayer<AvatarRenderState, PlayerMod
 				pixels.close();
 			}
 		}
-		EYES_BY_SKIN.put(skin, made);
+		cache.put(skin, made);
 		return made;
 	}
 
@@ -134,7 +143,7 @@ public final class VampireLooks extends RenderLayer<AvatarRenderState, PlayerMod
 	 * stock row, 12), plus the row below or above when the same columns stand out there too. Where the hat layer covers an eye, it's painted there too, so masks and glasses glow through.
 	 * Null when nothing pairs up (a blank or masked face): the stock spots are used.
 	 */
-	static NativeImage findEyes(NativeImage skin) {
+	static NativeImage findEyes(NativeImage skin, int color) {
 		int[][] face = new int[8][8];
 		for (int x = 0; x < 8; x++) {
 			for (int y = 0; y < 8; y++) {
@@ -165,9 +174,9 @@ public final class VampireLooks extends RenderLayer<AvatarRenderState, PlayerMod
 					continue;
 				}
 				for (int fx : new int[] {x, 7 - x}) {
-					out.setPixel(8 + fx, 8 + y, GLOW);
+					out.setPixel(8 + fx, 8 + y, color);
 					if (ARGB.alpha(skin.getPixel(40 + fx, 8 + y)) > 128) {
-						out.setPixel(40 + fx, 8 + y, GLOW);
+						out.setPixel(40 + fx, 8 + y, color);
 					}
 				}
 				if (dy != 0) {

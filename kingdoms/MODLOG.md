@@ -3200,3 +3200,12 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   sneak + right-click carries one over your shoulder (a passenger, placed by `DownedMixin`), then right-click throws
   them (`THROW_SPEED`) and sneak + right-click sets them down. Any death is a real one (wars, quests, crimes), with no
   corpse and no loot.
+
+## 0.7.75: the Emberborn glow (pack 0.11.98)
+- Andy: "add some of the fire effects to ember born as well, they should glow in the dark". An Emberborn player
+  (client `EmberLook`) has embers under the skin of the hands and forearms (a glowing hand, cracks of fire climbing
+  toward the elbow) and eyes of ember gold, both drawn emissive over their own skin so they shine in the dark; the
+  eyes are found on each skin the way a vampire's are (`VampireLooks.glowingEyes`, now shared). Now and then
+  (`FLAME_EVERY` 12 ticks) a small flame, sometimes with smoke, rises off a hand; not in water or rain, not round your
+  own first-person camera. Textures from `tools/gen_ember_look.py` (vanilla's fire colours, nothing copied).
+- The heritage attachment now syncs to everyone (was its own player only), so other players see the glow.

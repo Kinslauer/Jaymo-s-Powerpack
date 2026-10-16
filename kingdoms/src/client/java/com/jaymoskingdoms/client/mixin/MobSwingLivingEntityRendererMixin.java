@@ -31,6 +31,7 @@ abstract class MobSwingLivingEntityRendererMixin {
 		PickpocketPose.extract(entity, state, partialTicks);
 		DownedPose.extract(entity, state, partialTicks);
 		VerdantLook.extract(entity, state);
+		com.jaymoskingdoms.client.EmberLook.extract(entity, state);
 	}
 
 	@Inject(
