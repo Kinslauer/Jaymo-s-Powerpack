@@ -289,6 +289,18 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		return role == null || role.combatant();
 	}
 
+	/**
+	 * (0.7.85) Whether it fights at range just now: a ranged one with something to shoot with (a caster always). An
+	 * archer who's lost his bow, or picked up a sword instead, fights hand to hand ({@link Rearm}).
+	 */
+	public boolean shooting() {
+		if (!this.ranged()) {
+			return false;
+		}
+		ItemStack hand = this.getMainHandItem();
+		return Sorcery.isCaster(this.role()) || !hand.isEmpty() && !Rearm.isMelee(hand);
+	}
+
 	/** An archer (or a goblin slinger, or a caster): it keeps its post and shoots. */
 	public boolean ranged() {
 		return this.role() == ARCHER || Goblins.ranged(this.role()) || Orcs.ranged(this.role()) || Sorcery.isCaster(this.role());
@@ -416,6 +428,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
 		this.goalSelector.addGoal(1, new Shoot(this));
+		// (0.7.85) disarmed, it goes for a weapon before anything else (Rearm)
+		this.goalSelector.addGoal(1, new Rearm.Fetch(this));
 		this.goalSelector.addGoal(1, new net.minecraft.world.entity.ai.goal.PanicGoal(this, PANIC_SPEED) {
 			@Override
 			public boolean canUse() {
@@ -444,7 +458,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.15, true) {
 			@Override
 			public boolean canUse() {
-				return Folk.this.combatant() && !Folk.this.ranged() && super.canUse();
+				return Folk.this.combatant() && !Folk.this.shooting() && super.canUse();
 			}
 		});
 		// (0.5.1) a ruler's day out and his escort at his back; doors opened (and shut) on the way
@@ -774,7 +788,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 				// (0.5.64) a gunner fires his cannon (Cannon.tick); only a foe too close for it gets his arrows
 				return false;
 			}
-			return this.archer.ranged() && target != null && target.isAlive() && this.archer.distanceTo(target) <= ARCHER_RANGE;
+			return this.archer.shooting() && target != null && target.isAlive() && this.archer.distanceTo(target) <= ARCHER_RANGE;
 		}
 
 		@Override

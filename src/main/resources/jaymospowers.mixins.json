@@ -19,7 +19,8 @@
 		"LeavesPathMixin",
 		"LeavesStateMixin",
 		"MobGoalsAccessor",
-		"ServerGamePacketListenerImplMixin"
+		"ServerGamePacketListenerImplMixin",
+		"WorldGenReadMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
