@@ -76,3 +76,33 @@ def shade(mask, glint=None):
     if glint:
         for x, y in glint: out[y][x] = '6'
     return '\n'.join(''.join(r) for r in out)
+
+def rows(g):
+    r = g.strip('\n').split('\n')
+    assert len(r) == 16 and all(len(x) == 16 for x in r), [len(x) for x in r]
+    return r
+
+def parts(grid, ramps, accents=None, glints=None, grip=STICK, order=None):
+    """grid: one letter per part ('/' = wooden grip shaded like vanilla's stick); each part is shaded on its own
+    (outline in its darkest shade, lit top-left), later parts in `order` on top. accents: char -> (part, hex).
+    A ramp can be a function (level, x, y) -> colour, for patterns such as kernels or two-tone roots."""
+    accents = accents or {}; glints = glints or {}
+    g = rows(grid)
+    im = Image.new('RGBA', (16, 16)); px = im.load()
+    letters = order or sorted({c for r in g for c in r if c not in '.'} - set(accents))
+    for part in letters:
+        mine = {part} | {a for a, (p, _) in accents.items() if p == part}
+        if part == '/':
+            mask = '\n'.join(''.join('/' if c in mine else '.' for c in r) for r in g)
+        else:
+            mask = '\n'.join(''.join('#' if c in mine else '.' for c in r) for r in g)
+        lv = rows(shade(mask, glints.get(part)))
+        for y in range(16):
+            for x in range(16):
+                c = g[y][x]
+                if c not in mine: continue
+                if c in accents: px[x, y] = hx(accents[c][1]) + (255,)
+                elif part == '/': px[x, y] = grip['abcd'.index(lv[y][x])] + (255,)
+                elif callable(ramps[part]): px[x, y] = ramps[part](int(lv[y][x]), x, y) + (255,)
+                else: px[x, y] = ramps[part][int(lv[y][x])] + (255,)
+    return im

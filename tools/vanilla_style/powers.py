@@ -9,7 +9,7 @@ Run from the repository root:  python -I tools/vanilla_style/powers.py <vanilla 
 import os, sys
 from PIL import Image
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from vstyle import MAT, STICK, hx, ramp, shade
+from vstyle import MAT, STICK, hx, ramp, shade, rows, parts
 
 OUT = 'src/main/resources/resourcepacks/vanilla_style/assets/jaymospowers/textures/item'
 
@@ -51,11 +51,6 @@ PPP.............
 PPP.............
 """
 
-def rows(g):
-    r = g.strip('\n').split('\n')
-    assert len(r) == 16 and all(len(x) == 16 for x in r), [len(x) for x in r]
-    return r
-
 def sword(blade, guard, grip=STICK, pommel=None, marks=None):
     """vanilla's sword with each part in its own ramp; marks = {(x, y): hex} accents painted last"""
     im = Image.new('RGBA', (16, 16)); px = im.load()
@@ -67,29 +62,6 @@ def sword(blade, guard, grip=STICK, pommel=None, marks=None):
             else: c = {'B': blade, 'G': guard, 'P': pommel, 'H': guard}[p][int(l)]
             px[x, y] = c + (255,)
     for (x, y), c in (marks or {}).items(): px[x, y] = hx(c) + (255,)
-    return im
-
-def parts(grid, ramps, accents=None, glints=None, grip=STICK, order=None):
-    """grid: one letter per part ('/' = wooden grip shaded like vanilla's stick); each part is shaded on its own
-    (outline in its darkest shade, lit top-left), later parts in `order` on top. accents: char -> (part, hex)."""
-    accents = accents or {}; glints = glints or {}
-    g = rows(grid)
-    im = Image.new('RGBA', (16, 16)); px = im.load()
-    letters = order or sorted({c for r in g for c in r if c not in '.'} - set(accents))
-    for part in letters:
-        mine = {part} | {a for a, (p, _) in accents.items() if p == part}
-        if part == '/':
-            mask = '\n'.join(''.join('/' if c in mine else '.' for c in r) for r in g)
-        else:
-            mask = '\n'.join(''.join('#' if c in mine else '.' for c in r) for r in g)
-        lv = rows(shade(mask, glints.get(part)))
-        for y in range(16):
-            for x in range(16):
-                c = g[y][x]
-                if c not in mine: continue
-                if c in accents: px[x, y] = hx(accents[c][1]) + (255,)
-                elif part == '/': px[x, y] = grip['abcd'.index(lv[y][x])] + (255,)
-                else: px[x, y] = ramps[part][int(lv[y][x])] + (255,)
     return im
 
 GOLD = MAT['gold']

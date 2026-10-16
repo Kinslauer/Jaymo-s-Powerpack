@@ -29,7 +29,7 @@ fal.ai image generation and parallax parts don't apply to 16px item icons, so th
 | Jaymo's Powers (root) | 42 | Mostly close; 15 are 32px on normal-size models: **redrawn at 16px** |
 | Powers armory (Age of Weapons) | 116 | 33 are 32px on models scaled ×2 in hand, which is vanilla's pixel density: **keep 32px** |
 | Powers tinkering (Tinkers' parts) | 1,001 | Layered part sprites, already pixel-vanilla: leave |
-| Pantry for Blockheads | 87 | Thick dark-brown outlines on every food. Art is all rights reserved, so no edits of its pixels (`vanillaize.py` is for our own and MIT art): **paint fresh** |
+| Pantry for Blockheads | 87 | Thick dark-brown outlines on every food. Art is all rights reserved, so no edits of its pixels (`vanillaize.py` is for our own and MIT art): **painted fresh** |
 | Naturalist | 186 | Close to vanilla: leave |
 | Balkon's WeaponMod | 91 | Already close; iron katana redrawn (battleaxe, warhammer, musket, flail drafts in `paint_batch.py`) |
 | MCA, Shippy Ships, Nature's Compass, Cooking for Blockheads, Old Cannons, Tool Belt | ~150 | Close: leave |
@@ -46,7 +46,11 @@ fal.ai image generation and parallax parts don't apply to 16px item icons, so th
   Tidebreaker, Voidreaver, Gram) are vanilla's sword pixel for pixel, each part in its relic's colours; Echo
   Cleaver, Soul Saber, Laevateinn and Sunfang keep their shapes; the Frost Lance is vanilla's spear in ice; the
   Void Flintlock, Grand Shield and Void Crown are drawn fresh in their own palettes.
+- **Pantry for Blockheads: all 87, painted fresh** (`pantry.py`; its own art is All Rights Reserved and is never
+  read). Fruit and veg start from vanilla's apple, sweet berries and seeds or are drawn as shaded masks; soups and
+  rice use vanilla's bowl, soy milk vanilla's honey bottle; bacon, fried egg, frying pan, baking sheet, flatbread and
+  pot reuse our Kitchen icons.
 - WeaponMod: iron katana (`paint_batch.py`).
 
 Regenerate from the repository root with the vanilla 26.3 `textures/item` folder:
-`python -I tools/vanilla_style/kitchen.py <folder>`, `kingdoms.py <folder>`, `powers.py <folder>` and `python -I tools/vanilla_style/paint_batch.py <folder>`.
+`python -I tools/vanilla_style/kitchen.py <folder>`, `kingdoms.py <folder>`, `powers.py <folder>`, `pantry.py <folder>` (after `kitchen.py`) and `python -I tools/vanilla_style/paint_batch.py <folder>`.
