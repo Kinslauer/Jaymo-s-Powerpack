@@ -99,6 +99,15 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		return false;
 	}
 
+	/**
+	 * (0.4.45) Falling, the body turns over well outside the corpse's small box, so it isn't cut off at the screen's
+	 * edge by that box (see CorpseEntity#shouldRenderAtSqrDistance for distance).
+	 */
+	@Override
+	protected boolean affectedByCulling(CorpseEntity corpse) {
+		return !(corpse.isTumbling() || corpse.falling()) && super.affectedByCulling(corpse);
+	}
+
 	@Override
 	public State createRenderState() {
 		return new State();
