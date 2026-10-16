@@ -1,6 +1,7 @@
 package com.jaymospowers.backpack;
 
 import java.util.function.Consumer;
+import com.jaymospowers.power.smoke.SmokeVapour;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,6 +29,11 @@ public class BackpackItem extends BlockItem {
 			if (!level.isClientSide()) {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.backpack.already"));
 			}
+			return InteractionResult.FAIL;
+		}
+		if (SmokeVapour.active(player)) {
+			// nothing stays on smoke
+			SmokeVapour.refuseArmour(player);
 			return InteractionResult.FAIL;
 		}
 		if (player instanceof ServerPlayer server) {

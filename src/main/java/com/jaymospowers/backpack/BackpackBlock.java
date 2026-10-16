@@ -1,6 +1,7 @@
 package com.jaymospowers.backpack;
 
 import java.util.Map;
+import com.jaymospowers.power.smoke.SmokeVapour;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -86,7 +87,7 @@ public class BackpackBlock extends BaseEntityBlock {
 			if (player.isSecondaryUseActive()) {
 				ItemStack stack = backpack.pickUp();
 				level.removeBlock(pos, false);
-				if (Backpack.worn(server) == null) {
+				if (Backpack.worn(server) == null && !SmokeVapour.active(server)) {
 					Backpack.putOn(server, stack);
 				} else {
 					server.getInventory().placeItemBackInInventory(stack, Prediction.SERVER_ONLY);
