@@ -23,7 +23,6 @@ public class ZFighterTrainingScreen extends Screen {
 	private static final int H = 236;
 	private static final int ROW = 16;
 	private static final int FORM_ROW = 24;
-	private static final int LINEAGE_ROW = 46;
 	/** The box at the bottom that shows the hovered row's full description. */
 	private static final int DETAIL_H = 40;
 	private static final int BUTTON_W = 54;
@@ -43,7 +42,6 @@ public class ZFighterTrainingScreen extends Screen {
 	private final List<Button> statButtons = new ArrayList<>();
 	private final List<Button> formButtons = new ArrayList<>();
 	private final List<Button> techniqueButtons = new ArrayList<>();
-	private final List<Button> lineageButtons = new ArrayList<>();
 	private final List<Button> tabButtons = new ArrayList<>();
 	private Button limitButton;
 	/** Which page is open (kept between openings). */
@@ -83,7 +81,6 @@ public class ZFighterTrainingScreen extends Screen {
 		statButtons.clear();
 		formButtons.clear();
 		techniqueButtons.clear();
-		lineageButtons.clear();
 		tabButtons.clear();
 		int w = panelW();
 		int tabW = (w - 16) / 3;
@@ -91,11 +88,6 @@ public class ZFighterTrainingScreen extends Screen {
 			int tab = i;
 			tabButtons.add(addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter." + TAB_KEYS[i]), b -> page = tab)
 				.bounds(left() + 8 + i * (tabW + 0), top() + 30, tabW - 2, 16).build()));
-		}
-		for (int i = ZFighterLineage.EARTHLING; i < ZFighterLineage.LINEAGES; i++) {
-			int lineage = i;
-			lineageButtons.add(addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.zfighter.choose"),
-				b -> send(ZFighterNet.PICK_LINEAGE, lineage)).bounds(buttonX(), lineageY() + (i - 1) * LINEAGE_ROW - 3, BUTTON_W, 14).build()));
 		}
 		for (int i = 0; i < ZFighterTraining.STATS; i++) {
 			int stat = i;
@@ -114,10 +106,6 @@ public class ZFighterTrainingScreen extends Screen {
 			techniqueButtons.add(addRenderableWidget(Button.builder(Component.empty(), b -> techniqueAction(technique))
 				.bounds(buttonX(), contentY() + i * ROW - 3, BUTTON_W, 14).build()));
 		}
-	}
-
-	private int lineageY() {
-		return top() + 50;
 	}
 
 	private int limitY() {
@@ -180,18 +168,10 @@ public class ZFighterTrainingScreen extends Screen {
 		graphics.fill(x, y, x + w, y + 2, COLOR_ACCENT);
 		graphics.centeredText(this.font, this.title, this.width / 2, y + 6, COLOR_ACCENT);
 		graphics.centeredText(this.font, Component.translatable("screen.jaymospowers.zfighter.tp", data.tp()), this.width / 2, y + 18, COLOR_TEXT);
-		boolean picking = ZFighterLineage.of(player) == ZFighterLineage.NONE;
-		show(lineageButtons, picking);
-		show(tabButtons, !picking);
-		show(statButtons, !picking && page == STATS_PAGE);
-		show(formButtons, !picking && page == FORMS_PAGE);
-		limitButton.visible = !picking && page == FORMS_PAGE;
-		show(techniqueButtons, !picking && page == TECHNIQUES_PAGE);
-		if (picking) {
-			lineages(graphics, x, w);
-			super.extractRenderState(graphics, mouseX, mouseY, a);
-			return;
-		}
+		show(statButtons, page == STATS_PAGE);
+		show(formButtons, page == FORMS_PAGE);
+		limitButton.visible = page == FORMS_PAGE;
+		show(techniqueButtons, page == TECHNIQUES_PAGE);
 		for (int i = 0; i < tabButtons.size(); i++) {
 			tabButtons.get(i).active = page != i;
 		}
@@ -204,17 +184,6 @@ public class ZFighterTrainingScreen extends Screen {
 		graphics.fill(x + 6, dy - 3, x + w - 6, dy - 2, COLOR_ROW);
 		wrapped(graphics, detail, x + 8, dy, w - 16, 4, COLOR_DIM);
 		super.extractRenderState(graphics, mouseX, mouseY, a);
-	}
-
-	/** First, who he is: the lineage is picked once. */
-	private void lineages(GuiGraphicsExtractor graphics, int x, int w) {
-		wrapped(graphics, Component.translatable("screen.jaymospowers.zfighter.lineage"), x + 8, top() + 30, w - 16, 2, COLOR_GOLD);
-		for (int i = ZFighterLineage.EARTHLING; i < ZFighterLineage.LINEAGES; i++) {
-			int ry = lineageY() + (i - 1) * LINEAGE_ROW;
-			String key = "lineage.jaymospowers.zfighter." + ZFighterLineage.KEYS[i];
-			graphics.text(this.font, Component.translatable(key), x + 8, ry, 0xFF000000 | ZFighterLineage.color(i, 1));
-			wrapped(graphics, Component.translatable(key + ".desc"), x + 14, ry + 11, w - BUTTON_W - 26, 4, COLOR_DIM);
-		}
 	}
 
 	private Component stats(GuiGraphicsExtractor graphics, ZFighterTraining.Data data, boolean creative, int x, int w) {

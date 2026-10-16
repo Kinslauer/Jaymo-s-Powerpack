@@ -33,7 +33,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.70) Guards aren't killed where they stand: the blow that would kill one of a realm's guards or archers (its
+ * (0.7.73) Guards aren't killed where they stand: the blow that would kill one of a realm's guards or archers (its
  * {@link Folk}, or a villager in its service or in a guard's or archer's job) puts them down instead. Downed, they're
  * out of the fight (they go for no one): some drag themselves away from whoever felled them, the rest lie where they
  * dropped. A player can take the weapons out of their hands (right-click), but nothing else: no pockets to pick, no

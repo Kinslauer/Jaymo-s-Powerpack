@@ -12,7 +12,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
- * (0.7.70) A downed guard ({@link Downed}) on the ground: a crawler lies face down and hauls itself along on its
+ * (0.7.73) A downed guard ({@link Downed}) on the ground: a crawler lies face down and hauls itself along on its
  * forearms, legs dragging, head raised; the rest lie on their backs, one hand clutched to the chest, the other arm flung
  * out, a knee drawn up, head lolled to one side, breathing shallow. They drop into it over {@link #FALL_TICKS}.
  */

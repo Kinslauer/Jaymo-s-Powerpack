@@ -90,7 +90,8 @@ public final class Costume {
 	/** Whether this player's face is hidden by their costume (for a later secret identity). */
 	public static boolean masked(Player player) {
 		CostumeDesign worn = worn(player);
-		return worn != null && worn.mask().hidesFace;
+		// (0.11.82) a Rig Helm hides the face too
+		return worn != null && worn.mask().hidesFace || com.jaymospowers.rig.Rig.helmIdentity(player) != null;
 	}
 
 	/** Puts this design on (server): whatever was worn before goes back to the inventory, or drops. */

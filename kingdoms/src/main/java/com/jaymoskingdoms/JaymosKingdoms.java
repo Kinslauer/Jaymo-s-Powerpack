@@ -106,7 +106,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Farsight.register();
 		Stalkers.register();
 		Theft.register();
-		// 0.7.70: guards are downed, not killed: they crawl or lie there, can be disarmed, never looted (before
+		// 0.7.73: guards are downed, not killed: they crawl or lie there, can be disarmed, never looted (before
 		// Pickpocket and the villager screens, whose right-click on them it takes) (and its attachment)
 		LOGGER.debug("downed attachment: {}", Downed.DOWNED);
 		Downed.register();

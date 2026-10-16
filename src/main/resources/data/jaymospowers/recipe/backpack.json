@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "L": "minecraft:leather",
+    "S": "minecraft:string",
+    "C": "minecraft:chest",
+    "W": "#minecraft:wool"
+  },
+  "pattern": [
+    "SLS",
+    "LCL",
+    "LWL"
+  ],
+  "result": {
+    "id": "jaymospowers:backpack"
+  }
+}

@@ -44,7 +44,7 @@ abstract class MobSwingLivingEntityRendererMixin {
 		MobAnimations.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 	}
 
-	/** (0.7.70) A downed guard is laid on the ground (DownedPose). */
+	/** (0.7.73) A downed guard is laid on the ground (DownedPose). */
 	@Inject(method = "setupRotations", at = @At("TAIL"))
 	private void jaymoskingdoms$downed(LivingEntityRenderState state, PoseStack poseStack, float bodyRot, float entityScale, CallbackInfo ci) {
 		DownedPose.rotate(state, poseStack, entityScale);
