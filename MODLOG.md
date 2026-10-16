@@ -1565,8 +1565,8 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   `kingdoms/MODLOG.md`). No Powers code changed.
 - **0.12.10, symbiote fix list + heartier meals:** Andy's list.
   - **Sneak+R/G tear-out:** the chunk only tears loose if the key is still held when the struggle ends (checked on the
-    server against `PowerInput` every tick, not only on the release packet). Let go within 10 ticks of it tearing loose
-    and it's dropped, not thrown (`TORN_DROP_TICKS`). A tendril-torn chunk is kept (`BlockCluster.keep`): it lies where
+    server against `PowerInput` every tick, not only on the release packet). Let go any time before that and the line
+    just drops, the terrain whole (Andy: "it only breaks if you follow through"). A tendril-torn chunk is kept (`BlockCluster.keep`): it lies where
     it falls until something moves or breaks it (no crumbling, no max age). Still not saved across an unload.
   - **Wall Crawl tendrils need Living Armor:** `WebSymbiote.crawlTendrils` (Crawl on and armoured). Wall Crawl without
     Living Armor is the plain Web wall climb/cling.
