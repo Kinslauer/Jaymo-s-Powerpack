@@ -27,7 +27,7 @@ import org.jspecify.annotations.Nullable;
  * it while it overflows scrolls it slowly on its own, to the end and back.
  */
 final class HeritageScreen extends Screen {
-	static final int MAX_W = 420, MAX_H = 250, LIST_W = 118, LIST_ROW = 20, HEADER = 34, FOOTER = 24;
+	static final int MAX_W = 420, MAX_H = 250, LIST_W = 118, LIST_ROW = 19, HEADER = 34, FOOTER = 24;
 	/** The heritage screen's accent: a deep teal, apart from the class screen's gold. */
 	static final int ACCENT = 0xFF4FB8A8;
 	/** After Choose, how long the heritage may take to come back before the screen is put up again (ms). */

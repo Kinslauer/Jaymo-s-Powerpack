@@ -1469,3 +1469,11 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
 - **0.11.91, symbiote ceilings, held weapon arm, bladed barrage:** Andy: "Wall crawl should operate the same way for ceilings, also the left click for symbiote weapons should be a click and hold, starting the symbiote tendrils coursing and bulging through the suit before collecting into the arm and forming into the blade/mace. The stabbing while holding a mob should animate the spears like this" (Venom image, hooked blade tips). Sneak under a ceiling slams the tendrils up into it like a wall; the weapon arm gathers while left click is held (lumps over the suit, down the arm, the weapon grows out of the hand) and strikes on release; barrage stabs wear spear and hooked blade tips. See docs/web.md.
 - **0.11.99, Wall Crawl tendrils stay out:** Andy: "holding space while in wall climb makes the tendrils un animate and not appear... make it so the tendrils only go away when deactivated or on cooldown". The tendrils are now drawn whenever Wall Crawl is on.
   Also Andy: "allow me to charge jump while using wall crawl": in the suit, holding Jump on the walking tendrils coils a charged leap (instead of climbing) and letting go flings you.
+
+## 0.11.101: Z Fighter lineages are races anyone can be born to
+- Andy: "add all zfighter lineages to the heritage screen and remove it from the zfighter's x ... so anyone can be any
+  of those races". The X screen has had no lineage pick since 0.11.76; the lineage is the heritage. Now
+  `ZFighterLineage.everyone` gives players who aren't Z Fighters their race from the heritage too: a Warrior-born has
+  the tail (and the villagers' fear of it; wrapped or let out with Kingdoms' `;`, tag `TOGGLE_TAG`), a Verdant is
+  green, mends (health, bones, limbs) and reaches 1.5 further (`race_reach`). Ki things stay with the power: forms,
+  techniques, the Great Ape, healing others, Earthling TP. New Earthling heritage maps to the Earthling lineage.

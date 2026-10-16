@@ -43,7 +43,7 @@ public final class FrostPrison {
 	public static final AttachmentType<Long> LAST = AttachmentRegistry.create(JaymosKingdoms.id("frost_prison_last"),
 		builder -> builder.persistent(Codec.LONG).copyOnDeath());
 
-	/** Player → server: freeze what I'm looking at. */
+	/** Player → server: the heritage key was pressed ({@link Heritage#gift}). */
 	public record Cast() implements CustomPacketPayload {
 		public static final Type<Cast> TYPE = new Type<>(JaymosKingdoms.id("frost_prison"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Cast> CODEC = StreamCodec.unit(new Cast());
@@ -65,7 +65,7 @@ public final class FrostPrison {
 
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(Cast.TYPE, Cast.CODEC);
-		ServerPlayNetworking.registerGlobalReceiver(Cast.TYPE, (payload, context) -> cast(context.player()));
+		ServerPlayNetworking.registerGlobalReceiver(Cast.TYPE, (payload, context) -> Heritage.gift(context.player()));
 		ServerTickEvents.END_SERVER_TICK.register(FrostPrison::tick);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			// (no ice left standing over a restart)
@@ -76,7 +76,7 @@ public final class FrostPrison {
 		});
 	}
 
-	private static void cast(ServerPlayer player) {
+	static void cast(ServerPlayer player) {
 		if (!Heritage.is(player, Heritage.Kind.FROSTBORN) || !player.isAlive() || player.isSpectator()) {
 			return;
 		}

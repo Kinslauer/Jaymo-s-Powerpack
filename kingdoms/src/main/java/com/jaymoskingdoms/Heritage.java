@@ -53,7 +53,12 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Nightborn:</b> stronger and quicker in the dark; weaker under the open sun.</li>
  * <li><b>Warrior-born:</b> starts far weaker than anyone (lighter blows, fewer hearts), and grows out of it as their
  * character level climbs; hits harder the worse they're hurt; always hungry.</li>
+ * <li><b>Earthling:</b> (0.7.75) the Z Fighters' training-born race: the skill tree learns 25% faster; no gift of the
+ * blood beyond that.</li>
  * </ul>
+ * (0.7.75) Earthling, Warrior-born, Frostborn and Verdant are the Z Fighter lineages too: Jaymo's Powers gives anyone of
+ * that blood its race (a Warrior-born's tail, a Verdant's mending), Z Fighter or not. The heritage key ({@code ;})
+ * is a Frostborn's ice prison ({@link FrostPrison}) and a Warrior-born's tail, wrapped away or let out.
  * Each player carries an entity tag {@code jaymoskingdoms_heritage_<key>} for their heritage, so Jaymo's Powers can read
  * it without Kingdoms classes (a Z Fighter's lineage comes from it).
  */
@@ -84,6 +89,10 @@ public final class Heritage {
 	static final float WARRIOR_WOUNDED = 0.5F;
 	static final double WARRIOR_FURY = 0.15;
 	static final float WARRIOR_HUNGER = 1.2F;
+	/** Earthling: skill experience, as a factor. */
+	static final float EARTHLING_XP = 1.25F;
+	/** The tag Jaymo's Powers reads to wrap a Warrior-born's tail away or let it out (it takes the tag off). */
+	static final String TAIL_TOGGLE_TAG = "jaymoskingdoms_tail_toggle";
 	/**
 	 * Warrior-born start far weaker, to balance their potential: blows this much lighter (a share) and this much less
 	 * max health, both shrinking evenly to nothing by character level {@link #WARRIOR_GROWN_LEVEL}.
@@ -105,7 +114,8 @@ public final class Heritage {
 		EMBERBORN(0, Items.BLAZE_POWDER, Stats.Stat.MIGHT, Stats.Stat.MIGHT),
 		FROSTBORN(0, Items.SNOWBALL, Stats.Stat.GRIT, Stats.Stat.MIGHT),
 		NIGHTBORN(0, Items.PHANTOM_MEMBRANE, Stats.Stat.FINESSE, Stats.Stat.WITS),
-		WARRIORBORN(0, Items.IRON_SWORD, Stats.Stat.MIGHT, Stats.Stat.ENDURANCE);
+		WARRIORBORN(0, Items.IRON_SWORD, Stats.Stat.MIGHT, Stats.Stat.ENDURANCE),
+		EARTHLING(0, Items.BOOK, Stats.Stat.WITS, Stats.Stat.ENDURANCE);
 
 		/** Attribute points to spend as you like. */
 		public final int freePoints;
@@ -418,6 +428,21 @@ public final class Heritage {
 	/** In the cold, for an Emberborn: a cold land (snow, ice, the frozen peaks), or freezing. The pack has no seasons, so this is its winter. */
 	static boolean chilled(ServerPlayer player) {
 		return cold(player) || player.getTicksFrozen() > 0;
+	}
+
+	/** Earthling: the factor on skill experience. */
+	static float xpFactor(Player player) {
+		return is(player, Kind.EARTHLING) ? EARTHLING_XP : 1.0F;
+	}
+
+	/** The heritage key: a Frostborn's ice prison, a Warrior-born's tail. */
+	static void gift(ServerPlayer player) {
+		Kind kind = of(player);
+		if (kind == Kind.FROSTBORN) {
+			FrostPrison.cast(player);
+		} else if (kind == Kind.WARRIORBORN) {
+			player.addTag(TAIL_TOGGLE_TAG);
+		}
 	}
 
 	/** Sylvan: the share off how far sneaking is seen. */

@@ -3216,3 +3216,8 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   don't fit.
 - Andy: "heritage screen text is cut off, it should scroll". The heritage pane's rows wrap instead of cutting off;
   the pane scrolls with the wheel, and pointing at it while it overflows scrolls it slowly on its own.
+- Andy: "add all zfighter lineages to the heritage screen ... so anyone can be any of those races, not just z
+  fighters". New **Earthling** heritage (Wits + Endurance; skill tree learns 25% faster, `EARTHLING_XP`); with
+  Warrior-born, Frostborn and Verdant all four lineages are heritages. Jaymo's Powers now gives anyone of that blood its
+  race (see the pack MODLOG). The `;` key is now the heritage gift: a Frostborn's ice prison, a Warrior-born's tail
+  (`Heritage.gift`, tag `jaymoskingdoms_tail_toggle`). Heritage list rows 19 high so ten fit.

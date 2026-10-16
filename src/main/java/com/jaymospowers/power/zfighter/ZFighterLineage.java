@@ -6,6 +6,7 @@ import com.mojang.serialization.Codec;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -15,6 +16,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -23,6 +25,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
@@ -51,6 +55,11 @@ import java.util.Set;
  * <li><b>Frost-born</b>: evolution forms (Second, Final) that cost no ki to hold, then a Golden form past Final.</li>
  * </ul>
  * Each has its own aura colour.
+ * <p>(0.11.101) The lineages are races anyone can be born to, Z Fighter or not: the heritage screen (Kingdoms) has all
+ * four (Earthling, Warrior-born, Frostborn, Verdant). Without the Z Fighter power a Warrior-born still has the tail
+ * (wrapped or let out with the heritage key, {@link #TOGGLE_TAG}) and the villagers' fear of it, and a Verdant still
+ * mends, regrows limbs, reaches further and is green. What runs on ki (forms, techniques, the Great Ape, healing others,
+ * the Earthling's TP) stays the Z Fighter's.
  */
 public final class ZFighterLineage {
 	public static final int NONE = 0;
@@ -130,7 +139,11 @@ public final class ZFighterLineage {
 
 	/** Jaymo's Kingdoms' heritage tag (then the heritage's key), and the heritages that make a lineage of their own. */
 	private static final String HERITAGE_TAG = "jaymoskingdoms_heritage_";
-	private static final String[][] HERITAGE_LINEAGES = {{"warriorborn", "warrior"}, {"frostborn", "frost"}, {"verdant", "verdant"}};
+	private static final String[][] HERITAGE_LINEAGES = {{"earthling", "earthling"}, {"warriorborn", "warrior"}, {"frostborn", "frost"}, {"verdant", "verdant"}};
+	/** Kingdoms puts this tag on a player who pressed the heritage key as a Warrior-born: the tail is wrapped or let out. */
+	public static final String TOGGLE_TAG = "jaymoskingdoms_tail_toggle";
+	/** A Verdant's long arms when he's no Z Fighter (the power sets its own). */
+	private static final Identifier RACE_REACH_ID = JaymosPowers.id("race_reach");
 
 	private static final Identifier WRIT = Identifier.fromNamespaceAndPath("jaymoskingdoms", "writ_of_rebirth");
 
@@ -138,6 +151,7 @@ public final class ZFighterLineage {
 	}
 
 	static void init() {
+		ServerTickEvents.END_SERVER_TICK.register(ZFighterLineage::everyone);
 		// a Writ of Rebirth (Jaymo's Kingdoms), read while sneaking: the lineage is unmade and asked again
 		UseItemCallback.EVENT.register((player, level, hand) -> {
 			ItemStack stack = player.getItemInHand(hand);
@@ -234,6 +248,73 @@ public final class ZFighterLineage {
 		return any || !FabricLoader.getInstance().isModLoaded("jaymoskingdoms") ? EARTHLING : NONE;
 	}
 
+	/** The race {@code player}'s heritage gives anyone (no Z Fighter power needed): one of the four, or {@link #NONE}. */
+	public static int race(Player player) {
+		for (String tag : player.entityTags()) {
+			if (tag.startsWith(HERITAGE_TAG)) {
+				String key = tag.substring(HERITAGE_TAG.length());
+				for (String[] pair : HERITAGE_LINEAGES) {
+					if (pair[0].equals(key)) {
+						return java.util.Arrays.asList(KEYS).indexOf(pair[1]);
+					}
+				}
+			}
+		}
+		return NONE;
+	}
+
+	/**
+	 * Every player, every tick: the heritage key's tail toggle for anyone; and for those who aren't Z Fighters (the power
+	 * runs its own lineage), their race from the heritage, a Warrior-born's tail, a Verdant's mending and reach.
+	 */
+	private static void everyone(MinecraftServer server) {
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			if (player.entityTags().contains(TOGGLE_TAG)) {
+				player.removeTag(TOGGLE_TAG);
+				toggleTail(player);
+			}
+			if (Powers.has(player, ZFighterPower.INSTANCE)) {
+				ZFighterPower.set(player, Attributes.ENTITY_INTERACTION_RANGE, RACE_REACH_ID, 0.0, AttributeModifier.Operation.ADD_VALUE);
+				continue;
+			}
+			if (!player.isAlive()) {
+				continue;
+			}
+			if (player.tickCount % 20 == 0) {
+				int race = race(player);
+				if (race != of(player)) {
+					if (race == NONE) {
+						player.removeAttached(LINEAGE);
+					} else {
+						player.setAttached(LINEAGE, race);
+					}
+					player.removeAttached(GREAT_APE);
+				}
+			}
+			int lineage = of(player);
+			tailTags(player, lineage == WARRIOR, tailOut(player));
+			ZFighterPower.set(player, Attributes.ENTITY_INTERACTION_RANGE, RACE_REACH_ID, lineage == VERDANT ? REACH : 0.0,
+				AttributeModifier.Operation.ADD_VALUE);
+			if (lineage == VERDANT) {
+				mend(player, player.level().getGameTime());
+			}
+		}
+	}
+
+	/** A Verdant's body mends itself: health back while fed, breaks knit at once, lost limbs grow back one at a time. */
+	private static void mend(ServerPlayer player, long now) {
+		if (now % REGEN_EVERY != 0) {
+			return;
+		}
+		if (player.getHealth() < player.getMaxHealth() && player.getFoodData().getFoodLevel() > ZFighterPower.HUNGRY_FOOD) {
+			player.heal(REGEN);
+		}
+		com.jaymospowers.core.Fractures.heal(player);
+		if (now % REGROW_EVERY == 0) {
+			com.jaymospowers.core.Dismember.regrow(player, false);
+		}
+	}
+
 	/** Gives {@code player} the lineage of their blood, if they have none yet. */
 	static void inherit(ServerPlayer player) {
 		if (of(player) != NONE) {
@@ -267,7 +348,7 @@ public final class ZFighterLineage {
 		ZFighterPower.refresh(player, ZFighterPower.live(player));
 	}
 
-	/** Sneak+Z on the ground: a Warrior-born wraps his tail away or lets it out. */
+	/** Sneak+Z on the ground (or the heritage key): a Warrior-born wraps his tail away or lets it out. */
 	static void toggleTail(ServerPlayer player) {
 		if (of(player) != WARRIOR || ape(player)) {
 			return;
@@ -311,16 +392,8 @@ public final class ZFighterLineage {
 		tailTags(player, live.lineage == WARRIOR, tailOut(player));
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
-		if (live.lineage == VERDANT && now % REGEN_EVERY == 0 && player.getHealth() < player.getMaxHealth()
-			&& player.getFoodData().getFoodLevel() > ZFighterPower.HUNGRY_FOOD) {
-			player.heal(REGEN);
-		}
-		if (live.lineage == VERDANT && now % REGEN_EVERY == 0) {
-			// a Verdant's body mends itself: breaks knit at once, lost limbs grow back one at a time
-			com.jaymospowers.core.Fractures.heal(player);
-			if (now % REGROW_EVERY == 0) {
-				com.jaymospowers.core.Dismember.regrow(player, false);
-			}
+		if (live.lineage == VERDANT) {
+			mend(player, now);
 		}
 		if (live.lineage == WARRIOR) {
 			ape(player, live, level, now);
