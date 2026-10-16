@@ -248,7 +248,7 @@ public final class Pirates {
 	private static void shoot(ServerLevel level, Folk folk, LivingEntity foe) {
 		Projectile ball = Javelins.WEAPONMOD_LOADED ? WeaponModJavelins.bullet(level, folk, PISTOL_DAMAGE) : null;
 		if (ball == null) {
-			AbstractArrow bolt = ProjectileUtil.getMobArrow(folk, new ItemStack(Items.ARROW), 1.0F, folk.getMainHandItem());
+			AbstractArrow bolt = ProjectileUtil.getMobArrow(folk, new ItemStack(Items.ARROW), 1.0F, Folk.firingWeapon(folk));
 			bolt.setBaseDamage(PISTOL_DAMAGE / PISTOL_SPEED);
 			bolt.pickup = AbstractArrow.Pickup.DISALLOWED;
 			ball = bolt;
