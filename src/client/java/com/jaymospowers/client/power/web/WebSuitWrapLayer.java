@@ -61,6 +61,11 @@ final class WebSuitWrapLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			return;
 		}
 		WebSuitGrowth.Growth growth = state.getData(WebSuitGrowth.KEY);
+		Float pull = state.getData(WebSuitGrowth.PULL);
+		if (growth == null && pull != null) {
+			struggle(poseStack, collector, state, pull);
+			return;
+		}
 		Float retract = state.getData(WebSymbioteClient.RETRACT);
 		if (growth == null && retract != null) {
 			retract(poseStack, collector, state, retract);
@@ -140,6 +145,45 @@ final class WebSuitWrapLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebTubes.TEXTURE), (pose, buffer) -> {
 				for (int k = 0; k < STRANDS * (big ? 2 : 1); k++) {
 					strand(buffer, pose, box, part, k, wrap, thick, time, big, state.lightCoords);
+				}
+			});
+			poseStack.popPose();
+		}
+	}
+
+	/**
+	 * Fighting a takeover's hold: wherever you've torn out of the suit (WebSuitGrowth's peel), its tendrils cling on and
+	 * try to haul it back over you, coiling down the bared part from the suit's torn edge (a thick, heaving band), more
+	 * of them and thicker the further out you are, writhing faster than they ever do putting it on.
+	 */
+	private static final float STRUGGLE_THICK = 0.75F, STRUGGLE_WRITHE = 1.8F;
+
+	private void struggle(PoseStack poseStack, SubmitNodeCollector collector, AvatarRenderState state, float pull) {
+		PlayerModel parent = this.getParentModel();
+		WebSuitGrowth.shift(parent, state);
+		ModelPart[] parts = {parent.body, parent.rightArm, parent.leftArm, parent.head, parent.rightLeg, parent.leftLeg};
+		float time = state.ageInTicks * STRUGGLE_WRITHE;
+		boolean ownView = WebSymbioteClient.ownFirstPerson(state);
+		for (int i = 0; i < parts.length; i++) {
+			float peel = WebSuitGrowth.peel(pull, i);
+			if (peel <= 0.03F || ownView && i == 3) {
+				continue;
+			}
+			float[] box = BOXES[i];
+			float cover = 1.0F - peel;
+			float thick = STRUGGLE_THICK * (0.6F + 0.6F * peel);
+			int part = i;
+			poseStack.pushPose();
+			parent.root().translateAndRotate(poseStack);
+			parts[i].translateAndRotate(poseStack);
+			collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebTubes.TEXTURE), (pose, buffer) -> {
+				// the strands reach from the joint past the torn edge, over the bare part (as far as it's bared)
+				float wrap = Mth.clamp(cover + peel * 0.8F, 0.0F, 1.0F);
+				for (int k = 0; k < STRANDS; k++) {
+					strand(buffer, pose, box, part, k, wrap, thick, time, false, state.lightCoords);
+				}
+				if (cover > 0.02F) {
+					ring(buffer, pose, box, cover, time, state.lightCoords);
 				}
 			});
 			poseStack.popPose();

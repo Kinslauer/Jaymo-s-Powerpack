@@ -48,6 +48,14 @@ final class WebHulk {
 	 */
 	static final float TONGUE_EVERY = 140.0F, FLICK_TICKS = 12.0F, FLICK_OUT = 0.3F, FLICK_BACK = 0.6F, JAW_FLICK = 0.18F;
 	/**
+	 * Put on by hand (the suit from the menu, or Living Armor; {@link com.jaymospowers.power.web.WebSymbiote#DONNED}), it
+	 * lashes its tongue once {@code DON_LASH_AT} ticks after, as the head finishes forming, the lash taking
+	 * {@code DON_LASH_TICKS}. On the plain suit it comes out of the suit's own mouth ({@code SUIT_MOUTH}, model pixels
+	 * from the neck), {@code SUIT_TONGUE_SCALE} the size.
+	 */
+	static final float DON_LASH_AT = 20.0F, DON_LASH_TICKS = 22.0F, SUIT_TONGUE_SCALE = 0.6F;
+	static final Vec3 SUIT_MOUTH = new Vec3(0.0, -1.6, -4.1);
+	/**
 	 * The elbows: bent {@code ELBOW_REST} hanging, up to {@code ELBOW_SWING} more as the arm comes forward in a full stride
 	 * (the forearm trailing the swing by {@code ELBOW_LAG} of the cycle), breathing {@code ELBOW_IDLE} standing; an arm
 	 * holding something or striking keeps {@code ELBOW_HOLDING} of it (so the hand stays where the item is drawn).
@@ -222,6 +230,10 @@ final class WebHulk {
 	/** How far through a flick of the tongue it is (0-1), or -1 if it's in the mouth. */
 	static float flick(AvatarRenderState state) {
 		float age = state.ageInTicks;
+		float don = donLash(state);
+		if (don >= 0.0F) {
+			return don;
+		}
 		float[] meal = MEALS.get(state.id);
 		if (meal != null && meal[0] == 0.0F && age >= meal[1] && age - meal[1] < FLICK_TICKS) {
 			// licking its chops, just after a meal
@@ -229,6 +241,38 @@ final class WebHulk {
 		}
 		float cycle = (age + (state.id & 0xFFFF) * 37.0F) % TONGUE_EVERY;
 		return cycle < FLICK_TICKS ? cycle / FLICK_TICKS : -1.0F;
+	}
+
+	/** How far through the lash it gives when put on by hand (0-1), or -1 if not now. */
+	static float donLash(AvatarRenderState state) {
+		net.minecraft.client.Minecraft minecraft = net.minecraft.client.Minecraft.getInstance();
+		if (minecraft.level == null || !(minecraft.level.getEntity(state.id) instanceof net.minecraft.world.entity.player.Player player)) {
+			return -1.0F;
+		}
+		Long donned = player.getAttached(com.jaymospowers.power.web.WebSymbiote.DONNED);
+		if (donned == null) {
+			return -1.0F;
+		}
+		float since = minecraft.level.getGameTime() - donned - DON_LASH_AT;
+		return since >= 0.0F && since < DON_LASH_TICKS ? since / DON_LASH_TICKS : -1.0F;
+	}
+
+	/** The plain suit's tongue: only the lash when it's put on by hand, out of the suit's mouth. */
+	static void submitSuitTongue(PoseStack poseStack, SubmitNodeCollector collector, AvatarRenderState state, PlayerModel parent) {
+		float flick = donLash(state);
+		float out = flickOut(flick);
+		if (out <= 0.02F) {
+			return;
+		}
+		float age = state.ageInTicks;
+		float whip = Mth.sin(flick * Mth.PI);
+		poseStack.pushPose();
+		parent.root().translateAndRotate(poseStack);
+		parent.head.translateAndRotate(poseStack);
+		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebTubes.TEXTURE), (pose, buffer) ->
+			tongue(buffer, pose, SUIT_MOUTH.add(0.0, 0.0, (1.0F - out) * 2.0), 0.2F, TONGUE_PIECES, TONGUE_PIECE * SUIT_TONGUE_SCALE,
+				TONGUE_WIDTH * SUIT_TONGUE_SCALE, TONGUE_THICK * SUIT_TONGUE_SCALE, age, out, whip, TONGUE_DROOP, state.lightCoords));
+		poseStack.popPose();
 	}
 
 	/** How far out the tongue is in a flick {@code f} through (0-1): shot out fast, held a moment, drawn back in. */

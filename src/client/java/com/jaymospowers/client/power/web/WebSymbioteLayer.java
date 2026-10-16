@@ -77,6 +77,9 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 				coloredCutoutModelCopyLayerRender(slim ? this.gooSlim : this.gooWide, GOO, poseStack, collector, lightCoords, state, -1, 1);
 			}
 			coloredCutoutModelCopyLayerRender(slim ? this.suitSlim : this.suitWide, TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
+			if (high < 2 && !state.isInvisible && !WebSymbioteClient.ownFirstPerson(state)) {
+				WebHulk.submitSuitTongue(poseStack, collector, state, this.getParentModel());
+			}
 			if (high == 2) {
 				coloredCutoutModelCopyLayerRender(this.hulk, WebHulk.TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
 				tongue(poseStack, collector, state, WebSuitGrowth.hulkBuilt(state));
@@ -85,9 +88,13 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 		}
 		WebSymbioteClient.Tendrils tendrils = state.getData(WebSymbioteClient.TENDRILS);
 		if (tendrils != null && tendrils.armor()) {
+			if (state.getData(WebSuitGrowth.PULL) != null) {
+				// fighting its hold: as the big body comes apart you show through it, tearing out of the suit beneath
+				coloredCutoutModelCopyLayerRender(slim ? this.suitSlim : this.suitWide, TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
+			}
 			// the big body, whether or not the suit was showing
 			coloredCutoutModelCopyLayerRender(this.hulk, WebHulk.TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
-			tongue(poseStack, collector, state, 1.0F);
+			tongue(poseStack, collector, state, WebSuitGrowth.peeledHulk(state));
 			return;
 		}
 		if (state.getData(WebSymbioteClient.SUIT) == null) {
@@ -95,6 +102,10 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 		}
 		PlayerModel suit = slim ? this.suitSlim : this.suitWide;
 		coloredCutoutModelCopyLayerRender(suit, TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
+		if (!state.isInvisible && !WebSymbioteClient.ownFirstPerson(state)) {
+			// put on by hand: it shows its tongue (Andy)
+			WebHulk.submitSuitTongue(poseStack, collector, state, this.getParentModel());
+		}
 		Float feral = state.getData(WebSymbioteClient.FERAL);
 		if (feral != null && feral > 1.0F - VEIN_BOND / (float)com.jaymospowers.power.web.WebSymbiote.BOND_MAX) {
 			// still feral: its veins show through the suit

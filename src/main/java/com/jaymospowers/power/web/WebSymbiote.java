@@ -172,6 +172,29 @@ public final class WebSymbiote {
 	public static final int BREAK_FREE_ABILITIES = 3, BREAK_FREE_BASE = 80, BREAK_FREE_PER_ABILITY = 6, BREAK_FREE_STRESS = 10;
 	public static final float STRUGGLE_FADE = 0.25F;
 	/**
+	 * Every takeover is one it starts itself, and those run {@code SELF_TAKEOVER_SPEED} times quicker: the suit and the
+	 * big body engulf you that much faster (the client's WebSuitGrowth, and the dread swelling in). Your struggle bar
+	 * drains at {@code TAKEOVER_STRUGGLE_FADE} a tick (the same as before: doubled, it was too hard to ever win).
+	 */
+	public static final float SELF_TAKEOVER_SPEED = 2.0F;
+	public static final float TAKEOVER_STRUGGLE_FADE = STRUGGLE_FADE;
+	/**
+	 * The comeback: push the struggle bar past {@code LOCKOUT_SURGE} (half) twice in one takeover, letting it fall back
+	 * under {@code LOCKOUT_REARM} in between (it surges back over you: the screen lurches), and you win outright: it lets
+	 * go, and the suit is disabled for {@code SUIT_LOCKOUT_TICKS} (no suit, no Living Armor, no big body; it won't take
+	 * over either), with one of {@code LOCKOUT_LINES} scathing remarks. Synced in steps of {@code STRUGGLE_SYNC_STEP}
+	 * ({@link #STRUGGLE}) for everyone to see you tearing out of it.
+	 */
+	public static final float LOCKOUT_SURGE = 0.5F, LOCKOUT_REARM = 0.25F, STRUGGLE_SYNC_STEP = 0.02F, SURGE_BACK_SHAKE = 0.8F;
+	public static final int LOCKOUT_SURGES = 2, SUIT_LOCKOUT_TICKS = 1200, LOCKOUT_LINES = 4, SURGE_LINES = 3, LOCKED_OUT_LINES = 3;
+	/**
+	 * A takeover over (any way but the lockout), {@code TAKEOVER_GIFT_CHANCE} of the time it leaves you the Living Armor
+	 * it was driving, big body and all, yours to steer for {@code TAKEOVER_GIFT_TICKS} (whatever the bond), with one of
+	 * {@code GIFT_LINES} snide remarks; then it takes it back (unless the bond's whole, when it's yours anyway).
+	 */
+	public static final float TAKEOVER_GIFT_CHANCE = 0.1F;
+	public static final int TAKEOVER_GIFT_TICKS = 1200, GIFT_LINES = 3;
+	/**
 	 * It narrates what it does, more as the bond grows: each act has a {@code NARRATE_MIN} (bond 0) to {@code NARRATE_MAX}
 	 * (full) chance to be spoken, at most once every {@code NARRATE_GAP_MAX} to {@code NARRATE_GAP_MIN} ticks. Each act has
 	 * {@code SAY_LINES} lines (message.jaymospowers.web_symbiote.say.ACT.N).
@@ -621,11 +644,36 @@ public final class WebSymbiote {
 		return until == null || player.level().getGameTime() >= until ? -1L : until;
 	}
 
-	/** Sulking right now (the suit won't come). */
+	/** Sulking right now (the suit won't come); a struggle's lockout counts too. */
 	public static boolean sulking(Player player) {
 		Long until = player.getAttached(SULK);
+		return until != null && player.level().getGameTime() < until || lockedOut(player);
+	}
+
+	/** You won the struggle (see {@link #LOCKOUT_SURGE}): the suit is disabled until this game time. Saved; synced to the owner. */
+	public static final AttachmentType<Long> LOCKOUT = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_lockout"),
+		builder -> builder.persistent(com.mojang.serialization.Codec.LONG).syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG,
+			AttachmentSyncPredicate.targetOnly()));
+
+	/** The suit is disabled right now (you tore yourself out of it). */
+	public static boolean lockedOut(Player player) {
+		Long until = player.getAttached(LOCKOUT);
 		return until != null && player.level().getGameTime() < until;
 	}
+
+	/**
+	 * A takeover has you: present the whole time, holding how far your struggle bar is filled (0-1, in steps of
+	 * {@link #STRUGGLE_SYNC_STEP}). Synced to everyone: the suit visibly peels back off you as it fills (WebSuitGrowth).
+	 */
+	public static final AttachmentType<Float> STRUGGLE = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_struggling"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.FLOAT, AttachmentSyncPredicate.all()));
+
+	/**
+	 * When you last put the suit (or Living Armor) on by hand, from the radial menu (game time); never set by a takeover's
+	 * engulfing. Synced to everyone, for the manual-equip animation (the tongue).
+	 */
+	public static final AttachmentType<Long> DONNED = AttachmentRegistry.create(JaymosPowers.id("web_symbiote_donned"),
+		builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.all()));
 
 	/**
 	 * A meal, in order: a tendril picks it up and brings it to the head as the head swells into a maw
@@ -784,6 +832,12 @@ public final class WebSymbiote {
 		long struggleAt;
 		boolean resisted;
 		int frenzyVariant;
+		/** The comeback (see {@link #LOCKOUT_SURGE}): surges past half this takeover, and whether the bar is past half now (not yet fallen back). */
+		int surges;
+		boolean surged;
+		/** A takeover just ended: roll for the gift; the gift's Living Armor is yours until then (0: none). */
+		boolean giftPending;
+		long giftUntil;
 	}
 
 	private WebSymbiote() {
@@ -1144,9 +1198,37 @@ public final class WebSymbiote {
 				bulk = false;
 			}
 		}
+		// you tore yourself out of it: no suit at all until the lockout's over
+		Long lockedUntil = player.getAttached(LOCKOUT);
+		if (lockedUntil != null) {
+			if (now >= lockedUntil) {
+				player.removeAttached(LOCKOUT);
+				whisper(player, "lockout_over");
+			} else if (next.has(WebSymbioteState.SUIT) || next.has(WebSymbioteState.ARMOR) || next.has(WebSymbioteState.BULK)) {
+				next = next.withFlag(WebSymbioteState.SUIT, false).withFlag(WebSymbioteState.ARMOR, false).withFlag(WebSymbioteState.BULK, false);
+				removeArmor(player);
+				armor = false;
+				bulk = false;
+			}
+		}
+		// the gift's over (or put away): it takes its Living Armor back, unless the bond's whole and it's yours anyway
+		boolean giftEnded = false;
+		if (live.giftUntil > 0L && (now >= live.giftUntil || !next.has(WebSymbioteState.ARMOR))) {
+			live.giftUntil = 0L;
+			if (next.has(WebSymbioteState.ARMOR) && next.bond() < BOND_MAX) {
+				giftEnded = true;
+				next = next.withFlag(WebSymbioteState.ARMOR, false);
+				armor = next.has(WebSymbioteState.BULK);
+				live.armorOnAt = 0L;
+				WebTendrils.releaseAll(player, false);
+				WebSymbioteState.Cooldowns cooldowns = player.getAttachedOrElse(COOLDOWNS, WebSymbioteState.Cooldowns.NONE);
+				player.setAttached(COOLDOWNS, cooldowns.with(ARMOR, now + COOLDOWN[ARMOR], ABILITIES));
+				whisper(player, "gift_over");
+			}
+		}
 
-		// Living Armor withdraws on its own: unused for a while without the suit, or out too long
-		if (next.has(WebSymbioteState.ARMOR) && !live.feedingArmor && live.takeoverTicks <= 0) {
+		// Living Armor withdraws on its own: unused for a while without the suit, or out too long (never while it's a gift)
+		if (next.has(WebSymbioteState.ARMOR) && !live.feedingArmor && live.takeoverTicks <= 0 && live.giftUntil <= 0L) {
 			if (live.armorOnAt <= 0L) {
 				live.armorOnAt = now;
 				live.armorUsedAt = now;
@@ -1347,6 +1429,22 @@ public final class WebSymbiote {
 		if (live.roarAt > 0L) {
 			tickRoar(player, live, now);
 		}
+		// a takeover just ended (not by the lockout, nor into another): now and then it leaves you its Living Armor
+		if (live.giftPending) {
+			live.giftPending = false;
+			if (live.takeoverTicks <= 0 && live.roarAt <= 0L && !live.fleeing && !sulking(player) && player.isAlive()
+				&& player.getRandom().nextFloat() < TAKEOVER_GIFT_CHANCE) {
+				live.giftUntil = now + TAKEOVER_GIFT_TICKS;
+				// (its own now: not the armour it swelled into only to eat, put away after the meal)
+				live.feedingArmor = false;
+				next = next.withFlag(WebSymbioteState.ARMOR, true);
+				live.armorOnAt = now;
+				live.armorUsedAt = now;
+				com.jaymospowers.core.Shakes.send(player, ARMOR_ON_SHAKE);
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SNIFF, SoundSource.PLAYERS, 1.0F, 0.7F);
+				whisper(player, "gift." + (1 + player.getRandom().nextInt(GIFT_LINES)));
+			}
+		}
 		// the roar near death builds the armour up a piece at a time
 		long roarAge = live.roarAt > 0L && live.roarDefend ? now - live.roarAt : -1L;
 		// whenever it takes over it engulfs you: the suit and the big body over all of you; given back after
@@ -1375,8 +1473,10 @@ public final class WebSymbiote {
 		}
 		// the big body is up exactly while it has the wheel
 		// (and, the bond whole, whenever you wear Living Armor: the big body is yours to drive)
+		// (and while its gift lasts: the big body it was driving, yours to steer)
 		boolean bulkWanted = live.takeoverTicks > 0 || roarAge >= ROAR_BULK_AT
-			|| next.has(WebSymbioteState.ARMOR) && next.bond() >= BOND_MAX && !live.feedingArmor && live.takeoverTicks <= 0;
+			|| next.has(WebSymbioteState.ARMOR) && next.bond() >= BOND_MAX && !live.feedingArmor && live.takeoverTicks <= 0
+			|| next.has(WebSymbioteState.ARMOR) && live.giftUntil > now && !sulking(player);
 		if (bulkWanted != next.has(WebSymbioteState.BULK)) {
 			next = next.withFlag(WebSymbioteState.BULK, bulkWanted);
 			if (bulkWanted) {
@@ -1386,7 +1486,7 @@ public final class WebSymbiote {
 				com.jaymospowers.core.Shakes.heavy(player, player.position(), BULK_SHAKE_RANGE, BULK_SHAKE);
 			} else {
 				removeArmor(player);
-				if (!next.has(WebSymbioteState.ARMOR) || next.bond() < BOND_MAX) {
+				if ((!next.has(WebSymbioteState.ARMOR) || next.bond() < BOND_MAX) && !giftEnded && !lockedOut(player)) {
 					whisper(player, "bulk_down");
 				}
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_BREAK, SoundSource.PLAYERS, 1.0F, 0.8F);
@@ -1512,6 +1612,7 @@ public final class WebSymbiote {
 			dropSight(player, live);
 			WebTakeoverPath.stop(player, live.route);
 			live.route = null;
+			player.removeAttached(STRUGGLE);
 			ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0, false));
 		}
 		set(player, new WebSymbioteState(false, 0, 0, 0, 0, old.hints(), 0));
@@ -1550,6 +1651,7 @@ public final class WebSymbiote {
 			dropSight(player, live);
 			WebTakeoverPath.stop(player, live.route);
 			live.route = null;
+			player.removeAttached(STRUGGLE);
 			ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0, false));
 		}
 		WebTendrils.releaseAll(player, false);
@@ -1597,6 +1699,7 @@ public final class WebSymbiote {
 				dropSight(player, live);
 				WebTakeoverPath.stop(player, live.route);
 				live.route = null;
+				player.removeAttached(STRUGGLE);
 				ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0, false));
 			}
 		}
@@ -1720,8 +1823,12 @@ public final class WebSymbiote {
 		live.stareUntil = 0L;
 		live.struggle = 0.0F;
 		live.resisted = false;
+		live.surges = 0;
+		live.surged = false;
+		live.giftPending = false;
 		live.takeoverTicks = TAKEOVER_LIMIT;
 		live.takeoverTarget = target.getId();
+		syncStruggle(player, live);
 		WebTakeoverPath.stop(player, live.route);
 		live.route = new WebTakeoverPath.Route();
 		ServerPlayNetworking.send(player, new WebNet.Takeover(target.getId(), live.takeoverTicks, live.fleeing));
@@ -1812,6 +1919,11 @@ public final class WebSymbiote {
 		live.spree = false;
 		player.removeAttached(SPREE);
 		live.struggle = 0.0F;
+		live.surges = 0;
+		live.surged = false;
+		player.removeAttached(STRUGGLE);
+		// (the gift is rolled once the tick has settled: see TAKEOVER_GIFT_CHANCE)
+		live.giftPending = true;
 		live.stareUntil = 0L;
 		live.takeoverTicks = 0;
 		live.takeoverTarget = -1;
@@ -1871,17 +1983,59 @@ public final class WebSymbiote {
 			return;
 		}
 		live.struggle += 1.0F;
+		syncStruggle(player, live);
 		if (live.struggle >= needed) {
-			breakFree(player, live, now);
-		} else if (live.struggle >= needed * 0.5F && !live.resisted) {
-			live.resisted = true;
-			whisper(player, "resist");
+			breakFree(player, live, now, false);
+			return;
+		}
+		if (!live.surged && live.struggle >= needed * LOCKOUT_SURGE) {
+			// past half: a surge of yours (the second one this takeover wins it outright)
+			live.surged = true;
+			if (++live.surges >= LOCKOUT_SURGES) {
+				breakFree(player, live, now, true);
+				return;
+			}
+			if (!live.resisted) {
+				live.resisted = true;
+				whisper(player, "resist");
+			}
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.8F, 1.4F);
 		}
 	}
 
-	/** You wrench yourself back from it: the takeover ends, it seethes, and the bond frays a little. */
-	private static void breakFree(ServerPlayer player, Live live, long now) {
+	/** Tells everyone how far you've fought out of its hold (see {@link #STRUGGLE}): only when it has moved a step. */
+	private static void syncStruggle(ServerPlayer player, Live live) {
+		int needed = breakFreeNeeded(player);
+		float share = needed > 0 ? Mth.clamp(live.struggle / needed, 0.0F, 1.0F) : 0.0F;
+		share = Math.round(share / STRUGGLE_SYNC_STEP) * STRUGGLE_SYNC_STEP;
+		Float was = player.getAttached(STRUGGLE);
+		if (was == null || Math.abs(was - share) > 1.0E-4F) {
+			player.setAttached(STRUGGLE, share);
+		}
+	}
+
+	/** The struggle, a tick at a time: the bar drains, and once a surge of yours has fallen back it pours back over you. */
+	private static void tickStruggle(ServerPlayer player, Live live) {
+		live.struggle = Math.max(0.0F, live.struggle - TAKEOVER_STRUGGLE_FADE);
+		int needed = breakFreeNeeded(player);
+		if (live.surged && needed > 0 && live.struggle < needed * LOCKOUT_REARM) {
+			// it surges back over you: your screen lurches and darkens
+			live.surged = false;
+			ServerLevel level = player.level();
+			com.jaymospowers.core.Shakes.send(player, SURGE_BACK_SHAKE, null);
+			dread(player, 30, false, true);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_BLOCK_PLACE, SoundSource.PLAYERS, 1.1F, 0.5F);
+			level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.2, player.getZ(), 12, 0.3, 0.5, 0.3, 0.03);
+			whisper(player, "surge." + (1 + player.getRandom().nextInt(SURGE_LINES)));
+		}
+		syncStruggle(player, live);
+	}
+
+	/**
+	 * You wrench yourself back from it: the takeover ends, it seethes, and the bond frays a little. {@code lockout}: you
+	 * won it outright (see {@link #LOCKOUT_SURGE}), and it won't cover you again for {@link #SUIT_LOCKOUT_TICKS}.
+	 */
+	private static void breakFree(ServerPlayer player, Live live, long now, boolean lockout) {
 		if (live.hunting) {
 			abortFeeding(player, live);
 		}
@@ -1895,8 +2049,23 @@ public final class WebSymbiote {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ANGRY, SoundSource.PLAYERS, 0.9F, 1.4F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.PLAYERS, 1.0F, 0.6F);
 		level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.7, 0.4, 0.05);
-		com.jaymospowers.core.Shakes.send(player, 1.2F, null);
-		whisper(player, "break_free");
+		if (!lockout) {
+			com.jaymospowers.core.Shakes.send(player, 1.2F, null);
+			whisper(player, "break_free");
+			return;
+		}
+		// torn clean out of it: no gift, no suit, no taking you back, for a minute
+		live.giftPending = false;
+		live.giftUntil = 0L;
+		live.suitBeforeTakeover = false;
+		live.takeoverReadyAt = now + Math.max(TAKEOVER_COOLDOWN, SUIT_LOCKOUT_TICKS);
+		player.setAttached(LOCKOUT, now + SUIT_LOCKOUT_TICKS);
+		WebTendrils.releaseAll(player, false);
+		level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.0, player.getZ(), 50, 0.5, 0.9, 0.5, 0.1);
+		level.sendParticles(dust(1.8F), player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.5, 0.9, 0.5, 0.0);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_DEATH, SoundSource.PLAYERS, 1.2F, 0.6F);
+		com.jaymospowers.core.Shakes.send(player, 1.6F, null);
+		whisper(player, "lockout." + (1 + player.getRandom().nextInt(LOCKOUT_LINES)));
 	}
 
 	/** The sightseeing markers in use (anything else carrying {@link #TOUR_TAG} is a leftover). */
@@ -2065,9 +2234,13 @@ public final class WebSymbiote {
 		live.stareUntil = 0L;
 		live.struggle = 0.0F;
 		live.resisted = false;
+		live.surges = 0;
+		live.surged = false;
+		live.giftPending = false;
 		live.takeoverReadyAt = now + TAKEOVER_COOLDOWN;
 		live.takeoverTicks = MIGRATE_LEG_TICKS;
 		live.takeoverTarget = marker.getId();
+		syncStruggle(player, live);
 		WebTakeoverPath.stop(player, live.route);
 		live.route = new WebTakeoverPath.Route();
 		ServerPlayNetworking.send(player, new WebNet.Takeover(marker.getId(), live.takeoverTicks, false));
@@ -2276,8 +2449,12 @@ public final class WebSymbiote {
 		live.stareUntil = 0L;
 		live.struggle = 0.0F;
 		live.resisted = false;
+		live.surges = 0;
+		live.surged = false;
+		live.giftPending = false;
 		live.takeoverTicks = TOUR_TICKS;
 		live.takeoverTarget = marker.getId();
+		syncStruggle(player, live);
 		WebTakeoverPath.stop(player, live.route);
 		live.route = new WebTakeoverPath.Route();
 		ServerPlayNetworking.send(player, new WebNet.Takeover(marker.getId(), live.takeoverTicks, false));
@@ -2373,7 +2550,7 @@ public final class WebSymbiote {
 
 	private static void tickTakeover(ServerPlayer player, Live live, long now) {
 		Entity target = player.level().getEntity(live.takeoverTarget);
-		live.struggle = Math.max(0.0F, live.struggle - STRUGGLE_FADE);
+		tickStruggle(player, live);
 		if (live.fleeing) {
 			// running: until nothing's after it any more, or it's far enough off
 			LivingEntity threat = threat(player);
@@ -2468,6 +2645,12 @@ public final class WebSymbiote {
 
 	/** A radial-menu pick. Server-authoritative: bond, cooldown and satiety are all checked here. */
 	static void use(ServerPlayer player, int ability) {
+		if ((ability == SUIT_TOGGLE || ability == ARMOR) && isBonded(player) && lockedOut(player)) {
+			// you tore yourself out of it: it won't cover you again yet
+			whisper(player, "locked_out." + (1 + player.getRandom().nextInt(LOCKED_OUT_LINES)));
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.6F, 1.5F);
+			return;
+		}
 		if ((ability == SUIT_TOGGLE || ability == ARMOR) && isBonded(player) && sulking(player)) {
 			// it won't come: it's still angry with you
 			whisper(player, "sulking");
@@ -2486,6 +2669,10 @@ public final class WebSymbiote {
 			WebSymbioteState next = state.withFlag(WebSymbioteState.SUIT, on);
 			// (the tendrils stay out: they work over any suit, or none)
 			set(player, next);
+			if (on) {
+				// put on by hand (for the manual-equip animation; see DONNED)
+				player.setAttached(DONNED, player.level().getGameTime());
+			}
 			ServerLevel level = player.level();
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), on ? SoundEvents.SLIME_BLOCK_PLACE : SoundEvents.HONEY_BLOCK_SLIDE,
 				SoundSource.PLAYERS, 0.8F, on ? 0.6F : 1.2F);
@@ -2502,8 +2689,8 @@ public final class WebSymbiote {
 		}
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
-		if (!unlocked(player, ability)) {
-			// it hasn't given you that (yet)
+		if (!unlocked(player, ability) && !(ability == ARMOR && live.giftUntil > now)) {
+			// it hasn't given you that (yet) (its gift you can always put away)
 			whisper(player, "locked");
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.5F, 0.4F);
 			return;
@@ -2561,6 +2748,7 @@ public final class WebSymbiote {
 				cooldown = ARMOR_TOGGLE_GAP;
 				live.armorOnAt = now;
 				live.armorUsedAt = now;
+				player.setAttached(DONNED, now);
 				com.jaymospowers.core.Shakes.send(player, ARMOR_ON_SHAKE);
 			}
 		}
