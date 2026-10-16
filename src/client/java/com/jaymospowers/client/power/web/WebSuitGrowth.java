@@ -36,6 +36,19 @@ public final class WebSuitGrowth {
 	 */
 	static final float BODY = 0.0F, ARMS = 0.1F, HEAD = 0.16F, LEGS = 0.22F;
 	static final float WRAP_SPAN = 0.3F, GOO_AFTER = 0.28F, SUIT_AFTER = 0.14F, LAYER_SPAN = 0.26F;
+	/**
+	 * Fighting a takeover's hold (the struggle bar, {@link WebSymbiote#STRUGGLE}): you tear your way out of it as the bar
+	 * fills and it pours back over you as it drains. The big body comes apart from the last piece built (the head and
+	 * jaws, the claws, the hands and forearms) down to {@code HULK_PEEL} of it at a full bar; under it the suit peels back
+	 * off each part toward its joint (body, right arm, left arm, head, right leg, left leg), starting at
+	 * {@code PEEL_START} of the bar, over {@code PEEL_SPAN}, at most {@code PEEL_MAX} of the part: the face first, then the
+	 * arms, then the chest, the legs hardly at all. It never sits still: it tugs back and forth by up to
+	 * {@code TUG_WOBBLE} (more the further out you are), {@code TUG_SPEED} radians a tick.
+	 */
+	static final float HULK_PEEL = 0.55F;
+	static final float[] PEEL_START = {0.45F, 0.2F, 0.25F, 0.0F, 0.6F, 0.6F};
+	static final float[] PEEL_MAX = {0.6F, 0.85F, 0.85F, 1.0F, 0.35F, 0.35F};
+	static final float PEEL_SPAN = 0.45F, TUG_WOBBLE = 0.09F, TUG_SPEED = 0.85F;
 
 	/** What each of the suit layer's models is. */
 	enum Role {
@@ -52,11 +65,13 @@ public final class WebSuitGrowth {
 	}
 
 	public static final RenderStateDataKey<Growth> KEY = RenderStateDataKey.create(() -> "jaymospowers:web_suit_growth");
+	/** On a player's render state while they fight a takeover's hold: how far out of it they've torn (0-1, tugging), else null. */
+	public static final RenderStateDataKey<Float> PULL = RenderStateDataKey.create(() -> "jaymospowers:web_suit_pull");
 
 	/** The suit layer's own models (only these are grown), and what each one is. */
 	private static final Map<Model<?>, Role> MODELS = new WeakHashMap<>();
 
-	/** entity id → {shown level, level before the change, tick it changed}. */
+	/** entity id → {shown level, level before the change, tick it changed, 1 if a takeover put it on (quicker)}. */
 	private static final Map<Integer, long[]> CHANGES = new HashMap<>();
 
 	private WebSuitGrowth() {
@@ -80,17 +95,36 @@ public final class WebSuitGrowth {
 		long tick = player.level().getGameTime();
 		if (change == null) {
 			// first seen: as it is, no growing
-			CHANGES.put(player.getId(), new long[] {now, now, tick - 1000});
+			CHANGES.put(player.getId(), new long[] {now, now, tick - 1000, 0});
 			state.setData(KEY, null);
+			state.setData(PULL, null);
 			return;
 		}
+		boolean seized = WebSymbioteClient.seized(player);
 		if (change[0] != now) {
 			change[1] = change[0];
 			change[0] = now;
 			change[2] = tick;
+			change[3] = 0;
+		}
+		if (seized && change[0] > change[1]) {
+			// it's seizing you (not being put on): it engulfs you SELF_TAKEOVER_SPEED times as fast
+			change[3] = 1;
 		}
 		float span = change[0] == 2 && change[1] < 2 ? BULK_TICKS : WebSymbiote.roaring(player) ? ROAR_TICKS : TICKS;
+		if (change[3] == 1) {
+			span /= WebSymbiote.SELF_TAKEOVER_SPEED;
+		}
 		float t = (tick - change[2] + partialTicks) / span;
+		float share = seized ? WebSymbioteClient.struggleShare(player) : 0.0F;
+		if (share > 0.0F) {
+			// back and forth: it never quite lets you go, nor you it
+			float age = player.tickCount + partialTicks;
+			float tug = (Mth.sin(age * TUG_SPEED) * 0.6F + Mth.sin(age * TUG_SPEED * 2.7F + 1.3F) * 0.4F) * TUG_WOBBLE * (0.4F + share);
+			state.setData(PULL, Mth.clamp(share + tug, 0.0F, 1.0F));
+		} else {
+			state.setData(PULL, null);
+		}
 		state.setData(KEY, t < 1.0F && change[1] != change[0] ? new Growth((int)change[1], (int)change[0], Math.max(0.0F, t)) : null);
 		if (CHANGES.size() > 256) {
 			CHANGES.keySet().removeIf(id -> Minecraft.getInstance().level == null || Minecraft.getInstance().level.getEntity(id) == null);
@@ -131,7 +165,7 @@ public final class WebSuitGrowth {
 		}
 		if (role == Role.HULK) {
 			WebHulk.Model hulk = (WebHulk.Model)model;
-			hulk.build(hulkBuilt(avatar));
+			hulk.build(Math.min(hulkBuilt(avatar), peeledHulk(avatar)));
 			hulk.breathe(avatar.ageInTicks);
 		} else {
 			lay(player, avatar, role);
@@ -160,6 +194,17 @@ public final class WebSuitGrowth {
 	static float hulkBuilt(AvatarRenderState avatar) {
 		Growth growth = avatar.getData(KEY);
 		return growth != null && Math.max(growth.from(), growth.to()) == 2 ? built(growth) : 1.0F;
+	}
+
+	/** How much of the big body still holds you as you fight its hold (1 all of it; see {@link #HULK_PEEL}). */
+	static float peeledHulk(AvatarRenderState avatar) {
+		Float pull = avatar.getData(PULL);
+		return pull == null ? 1.0F : 1.0F - HULK_PEEL * ease(pull);
+	}
+
+	/** How far you've torn a part out of the suit (0 none, up to its {@link #PEEL_MAX}), for a pull (0-1). Parts as {@link #wrapped}. */
+	static float peel(float pull, int part) {
+		return PEEL_MAX[part] * ease((pull - PEEL_START[part]) / PEEL_SPAN);
 	}
 
 	/** How far toward the higher of the change's two levels it is (putting on reads 0 → 1, taking off 1 → 0). */
@@ -196,6 +241,20 @@ public final class WebSuitGrowth {
 	private static void lay(PlayerModel player, AvatarRenderState avatar, Role role) {
 		Growth growth = avatar.getData(KEY);
 		ModelPart[] parts = {player.body, player.rightArm, player.leftArm, player.head, player.rightLeg, player.leftLeg};
+		Float pull = avatar.getData(PULL);
+		if (growth == null && pull != null && role == Role.SUIT) {
+			// fighting its hold: each part torn partway out of it (back toward its joint), the edge rippling as it heaves
+			for (int i = 0; i < parts.length; i++) {
+				float cover = 1.0F - peel(pull, i);
+				ModelPart part = parts[i];
+				float ripple = cover < 1.0F ? Mth.sin(cover * Mth.PI * 3.0F + avatar.ageInTicks * 0.9F + i) * 0.05F : 0.0F;
+				part.yScale = cover;
+				part.xScale = Mth.lerp(cover, 0.92F, 1.0F) + ripple;
+				part.zScale = Mth.lerp(cover, 0.92F, 1.0F) + ripple;
+				part.visible = cover > 0.02F;
+			}
+			return;
+		}
 		if (growth == null || Math.min(growth.from(), growth.to()) >= 1) {
 			// nothing changing (or the suit under the big body as it comes or goes): whole, as it is
 			for (ModelPart part : parts) {

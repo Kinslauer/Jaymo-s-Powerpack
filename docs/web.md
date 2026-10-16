@@ -808,8 +808,30 @@ whisper, so the vignette, dark screen and growl play each time.
 **Takeovers can't be interrupted.** `WebTakeoverInputMixin` zeroes movement while it drives, and clicks, power keys,
 mode, ultimate and the menu key are swallowed. Each fresh press is a struggle (`WebNet.Struggle`): once you've
 earned `BREAK_FREE_ABILITIES` 3 abilities, `BREAK_FREE_BASE` 80 - 6 per ability presses (44 with all six, since 0.10.10; the
-count fades by `STRUGGLE_FADE` 0.25 per tick) break its hold, which adds `BREAK_FREE_STRESS` 10 stress. A meter shows on
-the HUD.
+count fades by `TAKEOVER_STRUGGLE_FADE` 0.5 per tick: `STRUGGLE_FADE` 0.25 × `SELF_TAKEOVER_SPEED` 2) break its hold, which
+adds `BREAK_FREE_STRESS` 10 stress. A meter shows on the HUD (a tick mark at half).
+
+**Struggle lockout, ripping out, quicker takeovers, the gift.**
+- *Self takeovers are 2x quicker* (`SELF_TAKEOVER_SPEED` 2.0; every takeover is one it starts itself): the suit and big
+  body engulf you in half the time (`WebSuitGrowth`, a change made while `WebSymbioteClient.seized`), the dread swells in
+  twice as fast, and the struggle bar drains twice as fast.
+- *Lockout:* push the bar past `LOCKOUT_SURGE` 0.5 twice in one takeover (it must fall back under `LOCKOUT_REARM` 0.25
+  between: "it surges back over you", shake `SURGE_BACK_SHAKE` 0.8, full dread, a `surge.1-3` taunt) and you win: the
+  takeover ends and the suit is disabled for `SUIT_LOCKOUT_TICKS` 1200 (`LOCKOUT` attachment, saved; counts as
+  `sulking()`, so no suit, Living Armor, big body, hunts, defence roar or takeovers), with a `lockout.1-4` remark;
+  asking for the suit or Living Armor answers `locked_out.1-3`; it ends with `lockout_over`.
+- *Ripping out:* the server syncs the bar to everyone (`STRUGGLE`, 0-1 in steps of `STRUGGLE_SYNC_STEP` 0.02, present
+  for the whole takeover; your own client uses its local tally). `WebSuitGrowth.PULL` (the share plus a back-and-forth
+  tug, `TUG_WOBBLE`) takes the big body apart from its last-built pieces (head and jaws, claws, hands: `HULK_PEEL`
+  0.55 at a full bar; the tongue draws in with it), shows the suit under it, and peels the suit back off each part toward
+  its joint (`PEEL_START`/`PEEL_MAX`: the face first, then arms, chest, barely the legs), with `WebSuitWrapLayer`'s
+  tendrils clinging to the bared parts. Each press shakes your view (`STRUGGLE_SHAKE` 0.25 + 0.6 × bar); the takeover
+  vignette and dread give way as the bar fills (`HUD_CLEAR` 0.6, `STRUGGLE_CLEAR` 0.55) and flicker.
+- *The gift:* any takeover ending (but the lockout) has `TAKEOVER_GIFT_CHANCE` 10% to leave you its Living Armor, big
+  body and all, yours to drive for `TAKEOVER_GIFT_TICKS` 1200 whatever the bond (no idle withdraw; you can always put it
+  away), with a `gift.1-3` remark; then `gift_over` and it takes it back (at a whole bond it's yours anyway).
+- *Manual equip signal:* `WebSymbiote.DONNED` (synced to all, game time) is set when the suit or Living Armor is put on
+  from the radial menu, never by a takeover: for the manual-equip tongue animation.
 
 **Takeover combat:** the tendrils do the fighting: `FRENZY_TICKS` 18 strikes every `FRENZY_EVERY` 4 ticks for
 `FRENZY_DAMAGE` 9, with a `FRENZY_SNATCH` 18% chance to snatch and hurl the prey. Its own punches slowed to
