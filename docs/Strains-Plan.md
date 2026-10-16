@@ -15,10 +15,11 @@ web power clears it back to black with the bond. Every strain keeps the full kit
 the big body, takeovers, feeding by kill-grab-carry-feed); what changes is below.
 
 ### White: purified (Andy: "what you get when you purify a symbiote")
-- **How:** heal a web slinger *while their symbiote has taken over*. Another player's **Zephyr's Breath** (Wind, B) or
-  **Time Bloom** (Chrono, B, which already heals everything near it) reaching the taken-over player adds **purity**:
-  Zephyr +`PURITY_ZEPHYR` 40, each Time Bloom heal tick +`PURITY_BLOOM` 8. Purity outside a takeover does nothing.
-  At `PURITY_FULL` 100 the takeover ends at once: the black suit boils off in white flakes, a choir-like chime, and the
+- **How (Andy: both):** heal a web slinger *while their symbiote has taken over*, with **both** a Wind user's
+  **Zephyr's Breath** (B) and a Chrono user's **Time Bloom** (B, which already heals everything near it). Each fills
+  its own half of **purity**: Zephyr +`PURITY_ZEPHYR` 25 to the wind half, each Time Bloom heal tick +`PURITY_BLOOM` 5
+  to the time half, each half capped at `PURITY_HALF` 50. Healing outside a takeover does nothing. When both halves are
+  full the takeover ends at once: the black suit boils off in white flakes, a choir-like chime, and the
   strain is White. Purity fades `PURITY_DECAY` 1 every 10 s, so it takes a few takeovers' worth of help in a row, not
   one lucky heal. A Chrono or Wind user who purifies one gets a whisper ("Something in it went quiet.").
 - **Look:** an original white suit with ragged black patches over the shoulders and face, black-rimmed white eyes;
@@ -38,10 +39,12 @@ the big body, takeovers, feeding by kill-grab-carry-feed); what changes is below
   (`say.white.<act>.1-3`, `see.white.<topic>.1-3`).
 
 ### Red: bloodlust (Andy: "Carnage always seeks murder and violence")
-- **How (default, see questions):** the black strain turns red from killing. Every kill made in a takeover or by the
-  symbiote's own abilities adds **blood** (+1, +5 for a player); at `BLOOD_FULL` 60 the next feed turns it red, with a
-  scream, a red flash and red veins spreading through the suit over 3 s. White can never turn red, and red can never be
-  purified back (purity just makes it angrier).
+- **A rival symbiote, not a changed one (Andy):** its own **red craters**, much rarer than black ones
+  (`RED_CRATER_RARITY` 1500 chunks, overworld, same site rules), with a **red goo** (`web_symbiote_red_goo`, "Red Ooze")
+  bonded the same way. Purity does nothing to it (healing during its takeover just makes it angrier).
+- **Aggressive at all times, even loose:** the red blob, settling or wandering, attacks everything near (players
+  included) with its tendrils instead of waiting for a host; it takes hostile *and* passive hosts and never spits a
+  host out early. A red host and a black/white bonded player or blob within 16 go for each other on sight (rivals).
 - **Look:** an original red suit with black veins and wiry, jagged edges, white slit eyes; red webs with a black sheen;
   tendrils end in hooked blades even when walking.
 - **Blades everywhere:** the weapon arm forms only blades (scythe and spear, plus a new **axe**), +`RED_BLADE_DAMAGE`
@@ -51,18 +54,20 @@ the big body, takeovers, feeding by kill-grab-carry-feed); what changes is below
   there's a `RED_HUNT_CHANCE` 10% each check that it goes for it, even fed. After a kill it often stays in for the next
   one (`RED_CHAIN` 50%). The neglect rampage happens at any bond under 40. Narration and remarks get a red set: gleeful,
   bloodthirsty.
-- **Players:** red takeovers go for players only if the server's PvP is on and they're within 12 (see questions).
+- **Players (Andy: yes):** red takeovers and the red blob go for players too, the nearest living thing within 12.
 
 ## B. Martial-arts combos (Z Fighter)
 
-Andy: "all added or replacing z fighter's current combo animations". The **hold combo** (Abilities 218b,
-`ZFighterCombo`) gets a martial-arts move set, each move with its own body animation like the existing ones:
+Andy: the current combo animations are too stiff; **replace them all** with martial-arts moves that move the whole
+body: steps and lunges into each blow, hips and shoulders turning through it, weight shifting foot to foot, a little
+travel forward, never a blow thrown from standing still. The **hold combo** (Abilities 218b, `ZFighterCombo`) gets:
 - New moves: **chi palm** (open-hand thrust, a puff of light), **elbow strike**, **rising knee**, **leg sweep** (the foe
   is tripped: knocked down and slowed 1 s), **crescent kick**, **spinning hook kick**, **double palm** (both hands, a
   heavy shove), **flying knee**, and a **rising dragon fist** finisher (a jumping uppercut that lifts the foe high).
-- Each tier's string is rebuilt from the old moves plus these, so the strings read as one martial art from the first
-  tier (fresh: jab, cross, palm, elbow, chi palm) to the top (Super 2: ten blows ending in the dragon fist). The old
-  front kick, roundhouse and axe kick stay; the plain hook and repeated jabs are what get replaced.
+- Kept as moves but **reanimated** in the new style: lead jab (a step in), reverse punch (hip turned through),
+  front snap kick, roundhouse, axe kick, spinning back kick, flying double kick. Every tier's string is rebuilt from this
+  set, from the first tier (step-in jab, reverse punch, elbow, chi palm) to the top (Super 2: ten blows ending in the
+  dragon fist).
 - Same timings, damage scaling and rules as now (each blow a real punch; strings soften per blow). Shadowboxing
   (`Shadowbox`) picks its extra combos from the same move set, so practice looks like the fight.
 
@@ -71,17 +76,16 @@ Andy: "all added or replacing z fighter's current combo animations". The **hold 
 Andy: "make it just dynamite it drops." An original flying wing you stand on (a bat-winged board, our own model).
 - **Item:** crafted from iron, phantom membrane and a redstone block; placed like a boat, ridden standing.
 - **Flying:** WASD steers, Jump climbs, Sneak dives, it glides forward on its own; out of fuel it only glides down.
-  Fuel: coal, charcoal or blaze rods in its slot (`FUEL_TICKS` per item), a hum and smoke while it burns.
+  Fuel (Andy: blaze rods or lava): a blaze rod (`FUEL_BLAZE_TICKS` 1200) or a lava bucket (`FUEL_LAVA_TICKS` 6000,
+  the bucket given back) in its fuel slot; a hum and flame puffs while it burns.
 - **Dynamite:** it carries up to 16 dynamite in its own slot. Left click (or the ability 1 key, R) drops one straight
   down, falling with the glider's speed. Uses WeaponMod's dynamite through its compat class when WeaponMod is loaded;
   without it, plain primed TNT with a short fuse.
 - Health 20, breaks into its item and its contents; no fall damage waiver for the rider (Andy's rule).
 
-## Open questions (defaults are what gets built if unanswered)
-1. White strain: should it take **both** a Wind and a Chrono heal (default: either one counts, purity adds up over a
-   few takeovers)?
-2. Red strain: how does a symbiote turn red (default: killing a lot, above)? Or is it found its own way, e.g. a red
-   goo in Nether craters?
-3. Red takeovers attacking other players (default: only with server PvP on).
-4. Z Fighter: keep the old moves that aren't replaced (default), or only martial-arts moves?
-5. Glider fuel: needs fuel (default), or free to fly like a boat?
+## Andy's answers (2026-10-16)
+1. Purifying needs both a Wind and a Chrono heal.
+2. Carnage is a rival red symbiote, found even more rarely, aggressive at all times, even wandering.
+3. Carnage's takeovers attack players too.
+4. Replace all the Z Fighter combo animations: too stiff, they need more movement.
+5. The glider needs blaze rods or lava.
