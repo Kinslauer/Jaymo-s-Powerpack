@@ -460,6 +460,7 @@ public final class GravityPower implements Power {
 		Powers.register(INSTANCE);
 		JaymosPowers.LOGGER.debug("gravity attachments: {} {} {} {} {} {}", COOLDOWNS, WEIGHTLESS_ON, LIFTED, KILLS, GRIP, SLAM_POSE, KNEEL);
 		net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.serverboundPlay().register(GravityGrip.TYPE, GravityGrip.CODEC);
+		net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.clientboundPlay().register(GravityMeteorBurst.TYPE, GravityMeteorBurst.CODEC);
 		net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(GravityGrip.TYPE, (payload, ctx) -> {
 			ServerPlayer player = ctx.player();
 			if (Powers.has(player, INSTANCE) && player.isAlive() && !player.isSpectator()) {
