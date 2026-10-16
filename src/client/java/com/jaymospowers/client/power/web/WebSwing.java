@@ -31,13 +31,22 @@ public final class WebSwing {
 	static final double ATTACH_SLACK = 1.0;
 	/** Shortest the rope can be reeled to. */
 	static final double ROPE_MIN = 3.0;
-	/** Pull-back speed per block the rope is over-stretched (rope elasticity), and the most it pulls back per tick. */
-	static final double ROPE_SPRING = 0.3;
-	static final double ROPE_MAX_PULL = 0.7;
+	/**
+	 * (0.12.3) The rope is a true rope, not a spring: slack, it does nothing at all; pulled to its length (taut,
+	 * |body - anchor| >= rope) the body is put back on the sphere of that length round the anchor, and only the speed
+	 * outward along the line is taken away, so every bit of the speed round the arc is kept. {@code ROPE_PASSES} passes a
+	 * tick, so two webs settle against each other; the body is moved back at most {@code ROPE_MAX_CATCH} blocks a tick
+	 * (an anchor on something running away, or a rope reeled in hard, catches up smoothly instead of teleporting you).
+	 */
+	static final int ROPE_PASSES = 2;
+	static final double ROPE_MAX_CATCH = 1.5;
 	/** Extra gravity while swinging (vanilla is 0.08/tick): heavier, snappier arcs that build speed at the bottom. */
 	static final double SWING_GRAVITY = 0.025;
-	/** Velocity kept per tick while on the web (replaces vanilla's 0.91 horizontal / 0.98 vertical air drag). */
-	static final double SWING_DRAG = 0.993;
+	/**
+	 * Velocity kept per tick while on the web, after vanilla's 0.91 horizontal / 0.98 vertical air drag is undone (1 is
+	 * break-even: gravity alone, as the rope wants; the taut swing loses its little through {@code PENDULUM_DRAG}).
+	 */
+	static final double SWING_DRAG = 1.0;
 	/** Holding forward on the downswing pumps this much extra speed along the swing, per tick. */
 	static final double PUMP = 0.015;
 	/** Holding Jump on a web also thrusts you along the swing this much per tick (on top of reeling in): it rockets
@@ -193,6 +202,8 @@ public final class WebSwing {
 	final Strand[] strands = {new Strand(WebNet.MAIN), new Strand(WebNet.OFF)};
 	/** The swing's energy per unit mass (see {@link #PENDULUM_DRAG}); NaN until the swing has measured it. */
 	private double swingEnergy = Double.NaN;
+	/** Whether a rope was taut last tick (see {@link #ROPE_PASSES}). */
+	private boolean wasTaut;
 	// after a release
 	boolean flying;
 	/** Speed cap for the current free flight (a slingshot launch may exceed the swing cap). */
@@ -320,9 +331,14 @@ public final class WebSwing {
 		if (strand.hand == WebNet.OFF && !WebPower.offHandFree(player)) {
 			return false;
 		}
+		if (com.jaymospowers.power.web.WebShooters.blocked(player, strand.hand)) {
+			// shooters required, and this wrist is dry
+			play(player, SoundEvents.DISPENSER_FAIL, 0.35F, 1.8F);
+			return false;
+		}
 		// near a creature, a player or a corpse (the crosshair's magnet): the web sticks to that instead
 		Entity stuckTo = WebAnchors.entityTarget(player);
-		WebAnchors.Anchor found = stuckTo != null ? new WebAnchors.Anchor(stuckTo.getBoundingBox().getCenter(), false) : WebAnchors.find(player);
+		WebAnchors.Anchor found = stuckTo != null ? new WebAnchors.Anchor(stuckTo.getBoundingBox().getCenter(), false) : WebAnchors.find(player, strand.hand);
 		if (found == null) {
 			return false;
 		}
@@ -332,6 +348,7 @@ public final class WebSwing {
 		tugReady = true;
 		flying = false;
 		swingEnergy = Double.NaN;
+		wasTaut = false;
 		foldWings();
 		strand.anchor = found.pos();
 		strand.entityId = stuckTo == null ? -1 : stuckTo.getId();
@@ -342,6 +359,11 @@ public final class WebSwing {
 		strand.travel = (int)(distance / (com.jaymospowers.power.web.WebSymbiote.suitShown(player) ? WebGrowth.ROPE_SPEED : WebGrowth.WEB_SPEED));
 		ClientPlayNetworking.send(new WebNet.Swing(strand.hand, true, strand.anchor, strand.entityId));
 		play(player, SoundEvents.FISHING_BOBBER_THROW, 0.9F, 1.7F + player.getRandom().nextFloat() * 0.2F);
+		if (com.jaymospowers.power.web.WebShooters.worn(player) != null && !com.jaymospowers.power.web.WebSymbiote.suitShown(player)) {
+			// from a web shooter: its mechanical click, or a dry one (the power's own web goes out instead)
+			boolean loaded = com.jaymospowers.power.web.WebShooters.loaded(player, strand.hand);
+			play(player, loaded ? SoundEvents.LEVER_CLICK : SoundEvents.DISPENSER_FAIL, loaded ? 0.5F : 0.35F, loaded ? 1.9F : 1.8F);
+		}
 		puff(player, strand.anchor, 5);
 		if (midAir) {
 			tricks.caught(player);
@@ -600,6 +622,7 @@ public final class WebSwing {
 		}
 		double before = v.lengthSqr();
 		Vec3 pullDir = Vec3.ZERO;
+		boolean reeling = false;
 		for (Strand strand : strands) {
 			if (!strand.attached || strand.travel > 0) {
 				continue;
@@ -607,11 +630,13 @@ public final class WebSwing {
 			if (hang) {
 				if (input.jump() && !input.shift()) {
 					strand.rope = Math.max(ROPE_MIN, strand.rope - HANG_REEL);
+					reeling = true;
 				} else if (input.shift() && !input.jump()) {
 					strand.rope = Math.min(WebAnchors.SWING_RANGE * com.jaymospowers.power.web.WebSymbiote.swingScale(player), strand.rope + HANG_REEL);
 				}
 			} else if (input.jump()) {
-				strand.rope = Math.max(ROPE_MIN, strand.rope - REEL_IN * boost);
+				strand.rope = Math.max(ROPE_MIN, strand.rope - REEL_IN * boost * com.jaymospowers.power.web.WebShooters.pullScale(player, strand.hand));
+				reeling = true;
 			} else if (input.shift()) {
 				strand.rope = Math.min(WebAnchors.SWING_RANGE * com.jaymospowers.power.web.WebSymbiote.swingScale(player), strand.rope + LET_OUT);
 			}
@@ -651,26 +676,48 @@ public final class WebSwing {
 		}
 		// what Jump and the pump put in stays in the swing
 		swingEnergy += 0.5 * (v.lengthSqr() - before);
-		// each rope: no moving further away than its length, and a springy pull back when stretched. Two passes, so
-		// two webs settle against each other instead of fighting
-		for (int pass = 0; pass < 2; pass++) {
+		// each rope, as a real rope: slack does nothing; taut (at or past its length) puts you back on its sphere and
+		// takes away only the speed outward along it (v -= (v.n)n, n away from the anchor, if v.n > 0)
+		Vec3 onRope = body;
+		boolean taut = false;
+		for (int pass = 0; pass < ROPE_PASSES; pass++) {
 			for (Strand strand : strands) {
 				if (!strand.attached || strand.travel > 0) {
 					continue;
 				}
-				Vec3 toAnchor = strand.anchor.subtract(body);
-				double distance = toAnchor.length();
-				if (distance < 1.0E-4 || distance <= strand.rope) {
+				Vec3 fromAnchor = onRope.subtract(strand.anchor);
+				double distance = fromAnchor.length();
+				if (distance < 1.0E-4 || distance < strand.rope) {
 					continue;
 				}
-				Vec3 dir = toAnchor.scale(1.0 / distance);
-				double inward = v.dot(dir);
-				double want = Math.min((distance - strand.rope) * ROPE_SPRING * boost, ROPE_MAX_PULL * boost);
-				if (inward < want) {
-					v = v.add(dir.scale(want - inward));
+				taut = true;
+				Vec3 out = fromAnchor.scale(1.0 / distance);
+				onRope = strand.anchor.add(out.scale(strand.rope));
+				double outward = v.dot(out);
+				if (outward > 0.0) {
+					v = v.subtract(out.scale(outward));
 				}
 			}
 		}
+		Vec3 catchUp = onRope.subtract(body);
+		if (catchUp.lengthSqr() > 1.0E-8) {
+			if (catchUp.length() > ROPE_MAX_CATCH) {
+				catchUp = catchUp.normalize().scale(ROPE_MAX_CATCH);
+			}
+			// moved, not set, so a wall or the floor in the way stops it as it stops anything
+			double y = player.getY();
+			player.move(net.minecraft.world.entity.MoverType.SELF, catchUp);
+			if (reeling) {
+				// (reeling in lifted you, not the swing's speed: hauling up a swing doesn't slow it)
+				swingEnergy += gravity * (player.getY() - y);
+			}
+			body = player.position().add(0.0, ROPE_HEIGHT, 0.0);
+		}
+		if (taut && !wasTaut) {
+			// snapping taut from slack loses the speed it took off along the line: measure the swing from here
+			swingEnergy = 0.5 * v.lengthSqr() + gravity * body.y;
+		}
+		wasTaut = taut;
 		v = pendulum(v, body, gravity, air);
 		if (hang) {
 			// gently: never faster up or down than the rope is being drawn in or let out
@@ -1183,7 +1230,9 @@ public final class WebSwing {
 			play(player, SoundEvents.SLIME_SQUISH_SMALL, 0.5F, 1.8F);
 			return;
 		}
-		double speed = Math.min(WebPower.ZIP_SPEED, 0.35 + distance * 0.45);
+		// (a web from a shooter hauls a little harder)
+		double haul = com.jaymospowers.power.web.WebShooters.nozzleLine(player, WebNet.MAIN) ? com.jaymospowers.power.web.WebShooters.PULL_SCALE : 1.0;
+		double speed = Math.min(WebPower.ZIP_SPEED * haul, (0.35 + distance * 0.45) * haul);
 		Vec3 v = player.getDeltaMovement().lerp(to.scale(speed / distance), ZIP_STEER);
 		player.setDeltaMovement(v);
 	}
