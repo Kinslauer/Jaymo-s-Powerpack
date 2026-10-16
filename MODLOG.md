@@ -1540,3 +1540,4 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   Warrior-born tail and its belt, the Xeno-Band (body); Super hair, Verdant antennae (a mask over the whole head, a
   hood); the corruption mark, storm eyes (a mask that hides the face). The symbiote covers all of it. Kingdoms 0.7.81
   reads the same answers for the heritage looks.
+- **0.12.6, Clumps:** Andy asked whether Clumps helps with lag. Added to the pack (MIT, 26.3 Fabric build 26.3.2): XP orbs merge into one entity whatever their values and are picked up all at once, so fewer orb entities to tick and draw. No Powers code changed.
