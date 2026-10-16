@@ -44,6 +44,7 @@ public final class ModelPoses {
 		WebRagdoll.applyModel(model, state);
 		WebBodyPose.applyModel(model, state);
 		com.jaymospowers.client.power.web.WebCounterPose.applyModel(model, state);
+		com.jaymospowers.client.power.web.WebSuitTear.applyModel(model, state);
 		com.jaymospowers.client.power.web.WebMorphLayer.applyModel(model, state);
 		WebWallRunPose.applyModel(model, state);
 		WebParkourPose.applyModel(model, state);

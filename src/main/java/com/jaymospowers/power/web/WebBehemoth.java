@@ -88,6 +88,37 @@ public final class WebBehemoth {
 			ByteBufCodecs.VAR_INT, Strike::tendril, ByteBufCodecs.VAR_INT, Strike::target, ByteBufCodecs.VAR_LONG, Strike::start, Strike::new);
 	}
 
+	/**
+	 * The tendril slam (Andy: "enemies mobs affected by the symbiote should also get the living armor tendrils, and it
+	 * helps them attack"): now and then (every {@code SLAM_EVERY_MIN}-{@code SLAM_EVERY_MAX} ticks) a bundle of its
+	 * tendrils snatches prey within {@code SLAM_REACH}, wraps it by {@code SLAM_WRAPPED}, hauls it up over its own head
+	 * ({@code SLAM_APEX} above it) and slams it down {@code SLAM_LAND} in front by {@code SLAM_HIT}: {@code SLAM_DAMAGE}
+	 * (less than a lash, so it's no deadlier), a moment's stun, a burst of black mass and dust, a struck player's screen
+	 * shaken. It lets go at {@code SLAM_RELEASE} and the bundle recoils by {@code SLAM_TICKS}.
+	 */
+	public static final int SLAM_REACHED = 5, SLAM_WRAPPED = 7, SLAM_HIT = 15, SLAM_RELEASE = 17, SLAM_TICKS = 23;
+	static final int SLAM_EVERY_MIN = 120, SLAM_EVERY_MAX = 220, SLAM_STUN_TICKS = 25;
+	static final double SLAM_REACH = 5.5, SLAM_APEX = 1.4, SLAM_LAND = 2.0;
+	static final float SLAM_DAMAGE = 7.0F, SLAM_SHAKE = 1.3F, SLAM_BURST = 0.9F;
+
+	/** A tendril slam under way: at whom, since when (synced, for the bundle every client draws). */
+	public record Slam(int target, long start) {
+		public static final StreamCodec<ByteBuf, Slam> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_INT, Slam::target, ByteBufCodecs.VAR_LONG, Slam::start, Slam::new);
+	}
+
+	public static final AttachmentType<Slam> SLAM = AttachmentRegistry.create(JaymosPowers.id("web_behemoth_slam"),
+		builder -> builder.syncWith(Slam.STREAM_CODEC, AttachmentSyncPredicate.all()));
+
+	/** Per host: when it may slam again, and the haul under way (from, apex, to). */
+	private static final class SlamLive {
+		long next;
+		Vec3 from = Vec3.ZERO, apex = Vec3.ZERO, to = Vec3.ZERO;
+		boolean hauling;
+	}
+
+	private static final Map<Mob, SlamLive> SLAMS = new WeakHashMap<>();
+
 	/** Every lash under way (one per tendril at most). */
 	public static final AttachmentType<java.util.List<Strike>> STRIKE = AttachmentRegistry.create(JaymosPowers.id("web_behemoth_strike"),
 		builder -> builder.syncWith(Strike.STREAM_CODEC.apply(ByteBufCodecs.list()), AttachmentSyncPredicate.all()));
@@ -282,6 +313,7 @@ public final class WebBehemoth {
 	 * living thing in reach (it doesn't pick: anything will do).
 	 */
 	static void lash(ServerLevel level, Mob host, long now) {
+		slam(level, host, now);
 		java.util.List<Strike> old = host.getAttachedOrElse(STRIKE, java.util.List.of());
 		java.util.List<Strike> lashes = new ArrayList<>();
 		long[] next = NEXT_STRIKE.computeIfAbsent(host, h -> new long[TENDRILS]);
@@ -326,6 +358,82 @@ public final class WebBehemoth {
 			} else {
 				host.setAttached(STRIKE, java.util.List.copyOf(lashes));
 			}
+		}
+	}
+
+	/** The tendril slam, a tick at a time (see {@link #SLAM}). */
+	private static void slam(ServerLevel level, Mob host, long now) {
+		SlamLive live = SLAMS.computeIfAbsent(host, h -> {
+			SlamLive fresh = new SlamLive();
+			fresh.next = now + SLAM_EVERY_MIN / 2 + h.getRandom().nextInt(SLAM_EVERY_MIN);
+			return fresh;
+		});
+		Slam slam = host.getAttached(SLAM);
+		if (slam == null) {
+			if (now < live.next) {
+				return;
+			}
+			LivingEntity prey = host.getTarget() != null && prey(host, host.getTarget()) && host.getTarget().distanceTo(host) <= SLAM_REACH
+				? host.getTarget() : null;
+			if (prey == null) {
+				java.util.List<LivingEntity> near = level.getEntitiesOfClass(LivingEntity.class, host.getBoundingBox().inflate(SLAM_REACH),
+					e -> prey(host, e) && e.distanceTo(host) <= SLAM_REACH && host.hasLineOfSight(e));
+				prey = near.isEmpty() ? null : near.get(host.getRandom().nextInt(near.size()));
+			}
+			if (prey == null) {
+				live.next = now + 20;
+				return;
+			}
+			host.setAttached(SLAM, new Slam(prey.getId(), now));
+			live.next = now + SLAM_EVERY_MIN + host.getRandom().nextInt(SLAM_EVERY_MAX - SLAM_EVERY_MIN + 1);
+			level.playSound(null, host.getX(), host.getY(), host.getZ(), SoundEvents.WARDEN_TENDRIL_CLICKS, SoundSource.HOSTILE, 1.2F, 0.5F);
+			return;
+		}
+		long t = now - slam.start();
+		Entity found = level.getEntity(slam.target());
+		if (t >= SLAM_TICKS || !host.isAlive()) {
+			host.removeAttached(SLAM);
+			return;
+		}
+		if (!(found instanceof LivingEntity target) || !target.isAlive() || t > SLAM_RELEASE) {
+			return;
+		}
+		if (t == SLAM_WRAPPED) {
+			if (target.distanceTo(host) > SLAM_REACH + 1.5) {
+				// it got away before the bundle reached it
+				host.removeAttached(SLAM);
+				return;
+			}
+			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SLIME_ATTACK, SoundSource.HOSTILE, 1.0F, 0.5F);
+			Vec3 ahead = target.position().subtract(host.position()).horizontal();
+			ahead = ahead.lengthSqr() < 1.0E-4 ? host.getLookAngle().horizontal() : ahead;
+			ahead = ahead.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : ahead.normalize();
+			live.hauling = WebHaul.haulable(target);
+			live.from = target.position();
+			live.apex = host.position().add(0.0, host.getBbHeight() + SLAM_APEX, 0.0);
+			// over its head and down on the near side, in front of it
+			live.to = WebHaul.ground(level, host.position().add(ahead.scale(SLAM_LAND + host.getBbWidth() * 0.5)), target);
+		}
+		if (t > SLAM_WRAPPED && t < SLAM_HIT) {
+			if (live.hauling) {
+				double u = (t - SLAM_WRAPPED) / (double)(SLAM_HIT - SLAM_WRAPPED);
+				WebHaul.steer(target, WebHaul.arc(live.from, live.apex, live.to, Math.pow(u, 1.35)));
+			} else {
+				WebHaul.push(target, Vec3.ZERO);
+			}
+		} else if (t == SLAM_HIT) {
+			Vec3 at = live.hauling ? live.to : WebHaul.ground(level, target.position(), target);
+			if (live.hauling) {
+				WebHaul.steer(target, live.to);
+			}
+			live.hauling = false;
+			target.hurtServer(level, level.damageSources().mobAttack(host), SLAM_DAMAGE);
+			target.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOWNESS, SLAM_STUN_TICKS, 3), host);
+			WebHaul.burst(level, at, SLAM_BURST);
+			if (target instanceof ServerPlayer player) {
+				com.jaymospowers.core.Shakes.send(player, SLAM_SHAKE, host.position());
+			}
+			com.jaymospowers.core.Shakes.around(level, at, 12.0, SLAM_SHAKE * 0.4F);
 		}
 	}
 

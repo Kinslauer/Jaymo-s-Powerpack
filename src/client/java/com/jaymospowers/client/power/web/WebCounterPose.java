@@ -19,6 +19,10 @@ import net.minecraft.world.entity.LivingEntity;
  * squeezes that go with its tendrils, and the head thrust forward (or thrown back roaring) for the maw. Each one's
  * beats line up with the server's ({@link WebCounter#ticks}, the hit ticks in {@code WebCounter.step}). Your own
  * whole-body turns don't show in first person (the limbs still move).
+ *
+ * <p>The symbiote's tendril slams (PS5 style, {@link WebCounter#bundle}) sell the bundle with the whole body: the lead
+ * arm cocked back and thrown at it as the bundle whips out, both arms heaving through the haul (up and over for Impale
+ * and Hurl, wrenched round for Whiplash), the body driven down into the slam, then easing back as the bundle recoils.
  */
 public final class WebCounterPose {
 	/** The counter, which way it goes, how many ticks in, and whether it's your own seen from your own eyes. */
@@ -136,31 +140,49 @@ public final class WebCounterPose {
 				poseStack.rotateDegrees(Axis.YP, side * (40.0F * coil - 35.0F * swing));
 				lean(poseStack, hips, 8.0F * coil - 22.0F * swing, 0.0F);
 			}
-			case WebCounter.IMPALE, WebCounter.SPEAR_FLURRY -> {
-				// reared up tall, then driving down and forward behind each tendril
-				float rear = WebCounter.IMPALE == pose.kind() ? bump(t, 5.0F, 5.0F, 4.0F) : 0.0F;
-				float drive = pose.kind() == WebCounter.IMPALE ? bump(t, 9.0F, 3.0F, 7.0F) : stab(t);
-				lean(poseStack, hips, 15.0F * rear - 32.0F * drive, side * 6.0F * drive);
+			case WebCounter.IMPALE -> {
+				// twisted back as the arm cocks, thrown at it, reared up tall heaving it into the air, then driven down into the slam
+				float wind = bump(t, 2.5F, 2.5F, 2.5F), cast = bump(t, 5.0F, 2.0F, 2.5F);
+				float heave = bump(t, 10.0F, 3.0F, 2.0F), slam = bump(t, 12.5F, 1.5F, 6.0F);
+				poseStack.rotateDegrees(Axis.YP, side * (30.0F * wind - 20.0F * cast));
+				lean(poseStack, hips, 6.0F * wind - 12.0F * cast + 20.0F * heave - 38.0F * slam, side * 6.0F * slam);
+				poseStack.translate(0.0F, 0.08F * heave - 0.25F * slam, 0.0F);
+			}
+			case WebCounter.SPEAR_FLURRY -> {
+				// coiled back, then driving down and forward behind each stab
+				float wind = bump(t, 4.0F, 4.0F, 3.0F);
+				float drive = stab(t);
+				poseStack.rotateDegrees(Axis.YP, side * 25.0F * wind);
+				lean(poseStack, hips, 8.0F * wind - 32.0F * drive, side * 6.0F * drive);
 				poseStack.translate(0.0F, -0.15F * drive, 0.0F);
 			}
 			case WebCounter.WHIPLASH -> {
-				// twisted back to the far side, then whipping round through it
-				float wind = ramp(t, 0.0F, 6.0F) * (1.0F - ramp(t, 6.0F, 9.0F));
-				float lash = bump(t, 9.0F, 3.0F, 8.0F);
-				poseStack.rotateDegrees(Axis.YP, side * (50.0F * wind - 45.0F * lash));
-				lean(poseStack, hips, -12.0F * lash, -side * 10.0F * lash);
+				// twisted back, the arm thrown at it, then wrenched round the way it swings it, and leaning into the slam
+				float wind = bump(t, 2.5F, 2.5F, 2.5F), cast = bump(t, 5.0F, 2.0F, 2.5F);
+				float swing = ramp(t, 7.0F, 12.0F) * (1.0F - ramp(t, 13.0F, 19.0F));
+				float slam = bump(t, 12.5F, 1.5F, 6.0F);
+				poseStack.rotateDegrees(Axis.YP, side * (30.0F * wind - 15.0F * cast - 70.0F * swing));
+				lean(poseStack, hips, -10.0F * cast - 25.0F * slam, -side * 18.0F * slam);
+				poseStack.translate(0.0F, -0.15F * slam, 0.0F);
 			}
 			case WebCounter.HURL -> {
-				// hunched to haul it up, arched back as it goes overhead, then pitched forward to fling it
-				float haul = bump(t, 9.0F, 4.0F, 3.0F), arch = bump(t, 11.0F, 2.0F, 2.0F), throwIt = bump(t, 13.0F, 2.0F, 5.0F);
-				lean(poseStack, hips, -15.0F * haul + 20.0F * arch - 30.0F * throwIt, 0.0F);
+				// the arm thrown at it, hunched to heave, arching further and further back as it goes up over your head,
+				// then whipped right back over as it slams down behind you
+				float wind = bump(t, 2.5F, 2.5F, 2.5F), cast = bump(t, 5.0F, 2.0F, 2.5F);
+				float heave = ramp(t, 8.0F, 15.0F) * (1.0F - ramp(t, 18.0F, 26.0F));
+				float slam = bump(t, 17.5F, 2.0F, 7.0F);
+				poseStack.rotateDegrees(Axis.YP, side * (25.0F * wind - 15.0F * cast + 20.0F * heave));
+				lean(poseStack, hips, -12.0F * cast - 10.0F * bump(t, 8.0F, 2.0F, 3.0F) + 22.0F * heave + 18.0F * slam, -side * 8.0F * slam);
+				poseStack.translate(0.0F, -0.15F * slam, 0.0F);
 			}
 			case WebCounter.CONSTRICT -> {
-				// hunched over what it holds, shuddering with every squeeze
+				// hunched over what it holds, shuddering with every squeeze, then heaved up and driven down into the slam
 				float hold = envelope(pose, 6.0F, 5.0F);
 				float squeeze = squeezes(t);
-				lean(poseStack, hips, -25.0F * hold - 8.0F * squeeze, Mth.sin(t * 2.7F) * 3.0F * squeeze);
-				poseStack.translate(0.0F, -0.12F * hold, 0.0F);
+				float heave = bump(t, 25.0F, 2.0F, 2.0F), slam = bump(t, 27.5F, 1.5F, 5.0F);
+				lean(poseStack, hips, -25.0F * hold * (1.0F - heave) - 8.0F * squeeze + 12.0F * heave - 20.0F * slam,
+					Mth.sin(t * 2.7F) * 3.0F * squeeze);
+				poseStack.translate(0.0F, -0.12F * hold - 0.15F * slam, 0.0F);
 			}
 			case WebCounter.JAW_SNAP -> {
 				// the head lunges and the body follows it
@@ -333,42 +355,63 @@ public final class WebCounterPose {
 				set(plant, -0.45F, 0.0F, 0.0F, Math.max(coil, swing));
 			}
 			case WebCounter.IMPALE -> {
-				// clawed hands up as it rears, then the lead arm drives down at it with the tendril
-				float rear = bump(t, 5.0F, 5.0F, 4.0F), drive = bump(t, 9.0F, 3.0F, 7.0F);
-				claws(h, rear, 1.0F);
-				set(arm, -1.3F, -out * 0.15F, out * 0.1F, drive);
-				set(other, 0.4F, 0.0F, -out * 0.5F, drive);
-				set(leg, -0.6F, 0.0F, out * 0.1F, drive);
+				// the lead arm cocked back and thrown at it as the bundle whips out; both arms heaving it up overhead;
+				// then hauled down hard into the slam, knees bent, and easing back as the bundle recoils
+				float wind = bump(t, 2.5F, 2.5F, 2.5F), cast = bump(t, 5.0F, 2.0F, 2.5F);
+				float heave = bump(t, 10.0F, 3.0F, 2.0F), slam = bump(t, 12.5F, 1.5F, 6.0F);
+				castArm(arm, other, out, wind, cast);
+				set(h.rightArm, -2.9F, 0.0F, 0.25F, heave);
+				set(h.leftArm, -2.9F, 0.0F, -0.25F, heave);
+				set(arm, -0.7F, -out * 0.2F, out * 0.15F, slam);
+				set(other, -0.4F, 0.0F, -out * 0.6F, slam);
+				set(leg, -0.7F, 0.0F, out * 0.12F, slam);
+				set(plant, 0.45F, 0.0F, -out * 0.12F, slam);
+				h.head.xRot = Mth.lerp(heave, h.head.xRot, -0.5F);
+				h.head.xRot = Mth.lerp(slam, h.head.xRot, 0.35F);
 			}
 			case WebCounter.WHIPLASH -> {
-				// the lead arm flung back wide, then whipped across with the tendril
-				float wind = ramp(t, 0.0F, 6.0F) * (1.0F - ramp(t, 6.0F, 9.0F));
-				float lash = bump(t, 9.0F, 3.0F, 8.0F);
-				set(arm, -1.2F, out * 1.3F, out * 0.6F, wind);
-				set(arm, -1.4F, -out * 1.0F, 0.0F, lash);
-				set(other, -0.3F, 0.0F, -out * 0.8F, Math.max(wind, lash));
-				set(plant, -0.3F, 0.0F, -out * 0.15F, e);
+				// thrown at it, then both arms wrenched round after it the way it swings, and down with it into the slam
+				float wind = bump(t, 2.5F, 2.5F, 2.5F), cast = bump(t, 5.0F, 2.0F, 2.5F);
+				float swing = ramp(t, 7.0F, 12.0F) * (1.0F - ramp(t, 13.0F, 19.0F));
+				float slam = bump(t, 12.5F, 1.5F, 6.0F);
+				castArm(arm, other, out, wind, cast);
+				set(arm, -1.6F, out * 1.1F, out * 0.7F, swing);
+				set(other, -1.4F, out * 1.0F, 0.0F, swing);
+				set(arm, -0.6F, out * 0.6F, out * 0.9F, slam);
+				set(plant, -0.3F, 0.0F, -out * 0.2F, e);
+				set(leg, 0.2F, 0.0F, out * 0.3F, slam);
 			}
 			case WebCounter.HURL -> {
-				// reaching for it, both arms hauling it up overhead, then flung over the shoulder
-				float reach = bump(t, 5.0F, 4.0F, 3.0F), haul = bump(t, 11.0F, 3.0F, 2.0F), throwIt = bump(t, 13.0F, 2.0F, 5.0F);
-				set(arm, -1.5F, 0.0F, 0.0F, reach);
-				set(h.rightArm, -3.0F, 0.0F, 0.2F, haul);
-				set(h.leftArm, -3.0F, 0.0F, -0.2F, haul);
-				set(h.rightArm, -1.0F, 0.2F, 0.3F, throwIt);
-				set(h.leftArm, -1.0F, -0.2F, -0.3F, throwIt);
-				set(h.rightLeg, -0.4F, 0.0F, 0.2F, Math.max(haul, throwIt));
-				set(h.leftLeg, 0.2F, 0.0F, -0.2F, Math.max(haul, throwIt));
+				// thrown at it, then both arms heaving it up and over your head, further and further back,
+				// whipped right back over the shoulder as it slams down behind you
+				float wind = bump(t, 2.5F, 2.5F, 2.5F), cast = bump(t, 5.0F, 2.0F, 2.5F);
+				float heave = ramp(t, 8.0F, 15.0F) * (1.0F - ramp(t, 18.0F, 26.0F));
+				float slam = bump(t, 17.5F, 2.0F, 7.0F);
+				castArm(arm, other, out, wind, cast);
+				set(h.rightArm, -2.4F - 0.7F * heave, 0.0F, 0.3F, heave);
+				set(h.leftArm, -2.4F - 0.7F * heave, 0.0F, -0.3F, heave);
+				set(h.rightArm, -3.3F, 0.2F, 0.5F, slam);
+				set(h.leftArm, -3.3F, -0.2F, -0.5F, slam);
+				set(h.rightLeg, -0.4F, 0.0F, 0.25F, Math.max(heave, slam));
+				set(h.leftLeg, 0.25F, 0.0F, -0.25F, Math.max(heave, slam));
+				h.head.xRot = Mth.lerp(Math.max(heave, slam), h.head.xRot, -0.7F);
 			}
 			case WebCounter.CONSTRICT -> {
-				// arms locked round it and pulled in tight with every squeeze
-				float hold = envelope(pose, 6.0F, 5.0F);
+				// thrown at it, arms locked round it and pulled in tight with every squeeze, then up and down into the slam
+				float cast = bump(t, 5.0F, 3.0F, 3.0F);
+				float hold = envelope(pose, 6.0F, 5.0F) * (1.0F - cast);
 				float squeeze = squeezes(t);
+				float heave = bump(t, 25.0F, 2.0F, 2.0F), slam = bump(t, 27.5F, 1.5F, 5.0F);
 				float tremble = Mth.sin(t * 3.1F) * 0.06F * squeeze;
+				castArm(arm, other, out, 0.0F, cast);
 				set(h.rightArm, -1.3F + tremble, -0.4F - 0.35F * squeeze, 0.0F, hold);
 				set(h.leftArm, -1.3F - tremble, 0.4F + 0.35F * squeeze, 0.0F, hold);
-				set(h.rightLeg, -0.25F, 0.0F, 0.25F, hold);
-				set(h.leftLeg, -0.25F, 0.0F, -0.25F, hold);
+				set(h.rightArm, -2.8F, 0.0F, 0.2F, heave);
+				set(h.leftArm, -2.8F, 0.0F, -0.2F, heave);
+				set(h.rightArm, -0.6F, 0.0F, 0.2F, slam);
+				set(h.leftArm, -0.6F, 0.0F, -0.2F, slam);
+				set(h.rightLeg, -0.25F, 0.0F, 0.25F, Math.max(hold, slam));
+				set(h.leftLeg, -0.25F, 0.0F, -0.25F, Math.max(hold, slam));
 				h.head.xRot = Mth.lerp(hold, h.head.xRot, 0.35F);
 			}
 			case WebCounter.JAW_SNAP -> {
@@ -376,6 +419,8 @@ public final class WebCounterPose {
 				float lunge = bump(t, 8.0F, 5.0F, 8.0F);
 				set(h.rightArm, 0.8F, 0.0F, 0.7F, lunge);
 				set(h.leftArm, 0.8F, 0.0F, -0.7F, lunge);
+				// the bundle thrown out of the lead arm first, to reel it in to the jaws
+				castArm(arm, other, out, 0.0F, bump(t, 2.5F, 2.5F, 3.0F));
 				set(h.rightLeg, -0.5F, 0.0F, 0.1F, lunge);
 				set(h.leftLeg, 0.4F, 0.0F, -0.1F, lunge);
 				h.head.xRot = Mth.lerp(lunge, h.head.xRot, -0.6F);
@@ -387,6 +432,7 @@ public final class WebCounterPose {
 				set(h.rightArm, -1.2F, -0.3F, 0.3F, on);
 				set(h.leftArm, -1.2F, 0.3F, -0.3F, on);
 				set(arm, -2.0F, out * 0.8F, 0.0F, toss);
+				castArm(arm, other, out, 0.0F, bump(t, 2.5F, 2.5F, 3.0F));
 				h.head.yRot += (t > 8.0F && t < 22.0F ? Mth.sin(t * 0.9F) * 0.5F : 0.0F) * on;
 				set(h.rightLeg, -0.35F, 0.0F, 0.2F, on);
 				set(h.leftLeg, -0.35F, 0.0F, -0.2F, on);
@@ -403,6 +449,8 @@ public final class WebCounterPose {
 				h.head.xRot = Mth.lerp(roar, h.head.xRot, -0.8F);
 				claws(h, bite, 0.8F);
 				h.head.xRot = Mth.lerp(bite, h.head.xRot, -0.5F);
+				// after the roar, the bundle thrown out to snatch it in for the bite
+				castArm(arm, other, out, 0.0F, bump(t, 11.0F, 2.0F, 3.0F));
 			}
 			case WebCounter.SPEAR_FLURRY -> {
 				// both arms pumping in turn behind each stab
@@ -410,6 +458,8 @@ public final class WebCounterPose {
 				float a1 = Math.max(bump(t, 9.0F, 3.0F, 3.0F), bump(t, 23.0F, 3.0F, 5.0F)), a2 = bump(t, 16.0F, 3.0F, 3.0F);
 				set(h.rightArm, -0.5F, 0.0F, 0.2F, on);
 				set(h.leftArm, -0.5F, 0.0F, -0.2F, on);
+				// the arm drawn back as the braid forms, before the stabs
+				set(arm, 0.7F, out * 0.3F, out * 0.4F, bump(t, 4.0F, 4.0F, 3.0F));
 				set(arm, -1.6F, -out * 0.1F, 0.0F, a1);
 				set(other, -1.6F, out * 0.1F, 0.0F, a2);
 				set(leg, -0.5F, 0.0F, 0.1F, on);
@@ -428,6 +478,17 @@ public final class WebCounterPose {
 			default -> {
 			}
 		}
+	}
+
+	/**
+	 * The tendril slam's throw: the lead arm cocked back and out ({@code wind}), then flung straight at it as the bundle
+	 * whips out ({@code cast}), the other arm swung back for balance.
+	 */
+	private static void castArm(ModelPart arm, ModelPart other, float out, float wind, float cast) {
+		set(arm, 0.6F, out * 0.5F, out * 0.9F, wind);
+		set(other, -0.6F, -out * 0.3F, -out * 0.3F, wind);
+		set(arm, -1.75F, -out * 0.15F, out * 0.05F, cast);
+		set(other, 0.5F, 0.0F, -out * 0.5F, cast);
 	}
 
 	/** Both arms up and out, clawed, framing the head (a beast rearing). */

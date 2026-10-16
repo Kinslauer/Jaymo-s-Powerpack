@@ -36,8 +36,10 @@ import org.jspecify.annotations.Nullable;
  * it never feeds on anything living.
  *
  * <p>Each move plays out over a few ticks ({@link #ticks}): every move has its own whole-body animation, drawn by the
- * client from {@link #ACTIVE} ({@code WebCounterPose}); web moves leave cobweb trails, tendril moves borrow the symbiote's tendril strike ({@link WebSymbiote#STRIKE},
- * damage dealt here instead), and maw moves are drawn from {@link #ACTIVE} ({@link #maw}).
+ * client from {@link #ACTIVE} ({@code WebCounterPose}); web moves leave cobweb trails, and maw moves are drawn from
+ * {@link #ACTIVE} ({@link #maw}). The symbiote's moves are the PS5 tendril slam: a thick bundle of glossy tendrils
+ * whips out of the arm ({@link #bundle}, drawn by {@code WebTendrilBundle}), wraps it, hauls it through a big arc
+ * ({@link WebHaul}) and slams it into the ground in a burst of black mass and dust, then recoils into the arm.
  */
 public final class WebCounter {
 	/** Ticks after a dodge that right click counters. */
@@ -96,8 +98,54 @@ public final class WebCounter {
 	static final double ROAR_RADIUS = 5.0, ROAR_PUSH = 1.1;
 	/** Zip Kick: how fast you fly at it and how close counts as a hit. */
 	static final double ZIP_SPEED = 1.5, ZIP_HIT = 2.2;
-	/** When a tendril strike lands, counted from when it's set ({@link WebSymbiote#FRENZY_HIT}). */
-	static final int LASH_HIT = WebSymbiote.FRENZY_HIT;
+	/** Spear Flurry: its stabs land at these ticks. */
+	public static final int[] FLURRY_STABS = {9, 16, 23};
+	/** Constrict: it squeezes at these ticks (the last squeeze is the slam, at its bundle's {@code haulEnd}). */
+	static final int[] CONSTRICT_SQUEEZES = {9, 17};
+
+	// ---- the tendril slam (the symbiote's moves) ----
+	/**
+	 * A symbiote counter's tendril bundle, in ticks from the start: it has reached the target by {@code reached}, wrapped
+	 * it by {@code wrapped}, hauls it until {@code haulEnd} (the slam, for those that slam), and lets go at
+	 * {@code release}, recoiling into the arm over {@link #RECOIL_TICKS}. {@code spear}: braided into a point that stabs
+	 * instead of wrapping.
+	 */
+	public record Bundle(int reached, int wrapped, int haulEnd, int release, boolean spear) {
+	}
+
+	/** How long the bundle takes to recoil back into the arm after letting go (ticks). */
+	public static final int RECOIL_TICKS = 6;
+	/** Impale: lifted this high (blocks) and driven back down where it stood. */
+	static final double IMPALE_LIFT = 1.9;
+	/** Hurl: over your head (this high over your eyes) and down onto the ground this far behind you. */
+	static final double HURL_APEX = 1.6, HURL_BEHIND = 2.4;
+	/** Whiplash: swung round in a wide arc (this far out to the side at its height, this high) and slammed down at your side. */
+	static final double WHIP_SWING = 3.0, WHIP_APEX = 1.6, WHIP_LAND = 2.6;
+	/** Constrict: held up this high, this far ahead, while it squeezes, then slammed down. */
+	static final double CONSTRICT_LIFT = 1.0, CONSTRICT_AHEAD = 2.0;
+	/** Maw moves: the bundle reels it in to this far in front of your eyes. */
+	static final double JAWS_AHEAD = 1.2;
+	/** A slam's screen shake (yours; whoever's slammed gets more), how far others feel it, and the burst's size. */
+	static final float SLAM_SHAKE = 1.0F, SLAMMED_SHAKE = 1.6F, SLAM_BURST = 1.0F;
+	static final double SLAM_FELT = 12.0;
+	/** Slammed: stunned (Slowness) for this long. */
+	static final int SLAM_STUN_TICKS = 30;
+
+	/** A symbiote counter's bundle, or null (a web move). */
+	public static @Nullable Bundle bundle(int kind) {
+		return switch (kind) {
+			case IMPALE -> new Bundle(5, 7, 12, 14, false);
+			case WHIPLASH -> new Bundle(5, 7, 12, 14, false);
+			case HURL -> new Bundle(5, 8, 17, 21, false);
+			case CONSTRICT -> new Bundle(5, 8, 27, 28, false);
+			case SPEAR_FLURRY -> new Bundle(6, 6, 6, 24, true);
+			case DRAG_TO_JAWS -> new Bundle(5, 8, 17, 18, false);
+			case JAW_SNAP -> new Bundle(3, 5, 8, 10, false);
+			case MAUL -> new Bundle(3, 5, 22, 22, false);
+			case MAW_ROAR -> new Bundle(11, 13, 16, 17, false);
+			default -> null;
+		};
+	}
 
 	/** A counter under way (synced to everyone, who see the maw): which, at whom, and when it began (game time). */
 	public record Active(int kind, int target, long start) {
@@ -122,6 +170,9 @@ public final class WebCounter {
 		/** What was just dodged. */
 		int attacker = -1;
 		int lastKind = -1;
+		/** The haul under way: from where, through what high point, to where (feet), and whether it's being hauled at all. */
+		Vec3 haulFrom = Vec3.ZERO, haulApex = Vec3.ZERO, haulTo = Vec3.ZERO;
+		boolean hauling;
 	}
 
 	/** Client → server: right click inside the window. */
@@ -149,9 +200,10 @@ public final class WebCounter {
 			case HEEL_KICK, TRIP_SWEEP -> 10;
 			case YANK_UPPERCUT, FLIP_KICK, ZIP_KICK -> 14;
 			case WEB_SLAM, BLIND_JABS, COCOON_THROW, PINNED_HAYMAKER -> 16;
-			case IMPALE, WHIPLASH, HURL, JAW_SNAP -> 18;
+			case JAW_SNAP -> 18;
+			case IMPALE, WHIPLASH -> 20;
 			case DRAG_TO_JAWS, MAW_ROAR -> 24;
-			case MAUL -> 28;
+			case MAUL, HURL -> 28;
 			case SPEAR_FLURRY -> 30;
 			case CONSTRICT -> 34;
 			default -> 10;
@@ -195,16 +247,7 @@ public final class WebCounter {
 		return open;
 	}
 
-	/** The symbiote's own tendril strike is one of ours (we deal its damage, not {@link WebSymbiote}). */
-	static boolean ownsStrike(Player player) {
-		Active active = player.getAttached(ACTIVE);
-		return active != null && active.kind() >= WEB_COUNTERS && (!mawKind(active.kind()) || active.kind() == DRAG_TO_JAWS);
-	}
-
 	static void clear(ServerPlayer player) {
-		if (ownsStrike(player)) {
-			player.removeAttached(WebSymbiote.STRIKE);
-		}
 		player.removeAttached(ACTIVE);
 		player.removeAttached(READY);
 		player.removeAttached(LIVE);
@@ -265,11 +308,15 @@ public final class WebCounter {
 		ServerLevel level = player.level();
 		int t = (int)(level.getGameTime() - active.start());
 		Entity found = level.getEntity(active.target());
-		if (t >= ticks(active.kind()) || !(found instanceof LivingEntity target) || !target.isAlive() || !player.isAlive()) {
-			if (ownsStrike(player)) {
-				player.removeAttached(WebSymbiote.STRIKE);
-			}
+		if (t >= ticks(active.kind()) || !player.isAlive()) {
 			player.removeAttached(ACTIVE);
+			return;
+		}
+		if (!(found instanceof LivingEntity target) || !target.isAlive()) {
+			// it's dead (or gone): the web moves stop there; the symbiote's bundle still recoils, the body still follows through
+			if (active.kind() < WEB_COUNTERS) {
+				player.removeAttached(ACTIVE);
+			}
 			return;
 		}
 		if (t > 0) {
@@ -282,8 +329,6 @@ public final class WebCounter {
 	/** The first tick of each. */
 	private static void begin(ServerPlayer player, ServerLevel level, int kind, LivingEntity target) {
 		Vec3 away = away(player, target);
-		// the same side the clients draw the body going (WebCounterPose): from the start tick
-		int side = (level.getGameTime() & 1L) == 0L ? 1 : -1;
 		switch (kind) {
 			case HEEL_KICK -> {
 				nudge(player, away.scale(0.2).add(0.0, 0.3, 0.0));
@@ -336,14 +381,14 @@ public final class WebCounter {
 				level.sendParticles(ParticleTypes.ITEM_COBWEB, target.getX(), target.getY() + 0.1, target.getZ(), 24, 0.35, 0.05, 0.35, 0.02);
 				sound(level, target, SoundEvents.SLIME_SQUISH, 1.0F, 0.8F);
 			}
-			case IMPALE, HURL, DRAG_TO_JAWS -> lash(player, target, WebSymbiote.STRIKE_SLAM);
-			case WHIPLASH, CONSTRICT -> lash(player, target, side > 0 ? WebSymbiote.STRIKE_SWIPE_LEFT : WebSymbiote.STRIKE_SWIPE_RIGHT);
-			case SPEAR_FLURRY -> lash(player, target, WebSymbiote.STRIKE_SLAM);
+			case IMPALE, HURL, DRAG_TO_JAWS, WHIPLASH, CONSTRICT, SPEAR_FLURRY -> lash(player);
 			case JAW_SNAP -> {
+				lash(player);
 				nudge(player, away.scale(0.45).add(0.0, 0.1, 0.0));
 				sound(level, player, SoundEvents.WARDEN_AGITATED, 0.8F, 1.6F);
 			}
 			case MAUL -> {
+				lash(player);
 				target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 28, 5), player);
 				nudge(player, away.scale(0.35));
 				sound(level, player, SoundEvents.WARDEN_AGITATED, 0.9F, 1.3F);
@@ -426,74 +471,55 @@ public final class WebCounter {
 					com.jaymospowers.core.Shakes.send(player, 0.6F, target.getBoundingBox().getCenter());
 				}
 			}
-			case IMPALE -> {
-				if (t == LASH_HIT) {
-					target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 3), player);
-					hit(player, target, IMPALE_DAMAGE, new Vec3(0.0, target.onGround() ? 0.0 : -1.0, 0.0), WebSymbiote.dust(1.4F),
-						SoundEvents.TRIDENT_HIT);
-					sound(level, target, SoundEvents.SLIME_ATTACK, 1.0F, 0.5F);
-				}
-			}
-			case WHIPLASH -> {
-				if (t == LASH_HIT) {
-					Vec3 right = new Vec3(-away.z, 0.0, away.x);
-					WebSymbiote.Strike strike = player.getAttached(WebSymbiote.STRIKE);
-					Vec3 sweep = strike != null && strike.variant() == WebSymbiote.STRIKE_SWIPE_LEFT ? right : right.reverse();
-					hit(player, target, WHIP_DAMAGE, sweep.scale(1.8).add(away.scale(0.4)).add(0.0, 0.5, 0.0), WebSymbiote.dust(1.4F),
-						SoundEvents.PLAYER_ATTACK_KNOCKBACK);
-					sound(level, target, SoundEvents.SLIME_ATTACK, 1.0F, 0.5F);
-				}
-			}
-			case HURL -> {
-				if (t == LASH_HIT) {
-					// coiled up and over your shoulder
-					push(target, new Vec3(0.0, 0.9, 0.0));
-					sound(level, target, SoundEvents.WARDEN_TENDRIL_CLICKS, 1.0F, 0.5F);
-				} else if (t == LASH_HIT + 4) {
-					hit(player, target, HURL_DAMAGE, away.scale(-1.6).add(0.0, 0.8, 0.0), WebSymbiote.dust(1.4F), SoundEvents.PLAYER_ATTACK_KNOCKBACK);
+			case IMPALE, WHIPLASH, HURL -> {
+				haulAndSlam(player, level, kind, t, target);
+				if (t == bundle(kind).haulEnd()) {
+					float damage = kind == IMPALE ? IMPALE_DAMAGE : kind == WHIPLASH ? WHIP_DAMAGE : HURL_DAMAGE;
+					Vec3 bounce = kind == WHIPLASH ? sideOf(player).scale(0.6).add(0.0, 0.3, 0.0) : new Vec3(0.0, 0.25, 0.0);
+					slam(player, level, target, damage, bounce);
 				}
 			}
 			case CONSTRICT -> {
-				if (t == LASH_HIT) {
-					target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ticks(kind) - LASH_HIT, 6), player);
-				}
-				if (t >= LASH_HIT) {
-					// held fast in the coils
-					push(target, Vec3.ZERO);
-					if ((t - LASH_HIT) % 8 == 0) {
+				for (int squeeze : CONSTRICT_SQUEEZES) {
+					if (t == squeeze) {
 						hit(player, target, SQUEEZE_DAMAGE, Vec3.ZERO, WebSymbiote.dust(1.2F), SoundEvents.SLIME_SQUISH);
 						sound(level, target, SoundEvents.BONE_BLOCK_BREAK, 1.0F, 0.6F);
-						if (player.getAttached(WebSymbiote.STRIKE) != null) {
-							lash(player, target, WebSymbiote.STRIKE_SLAM);
+					}
+				}
+				if (t == bundle(kind).wrapped()) {
+					target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, ticks(kind) - t, 6), player);
+				}
+				haulAndSlam(player, level, kind, t, target);
+				if (t == bundle(kind).haulEnd()) {
+					slam(player, level, target, SQUEEZE_DAMAGE, new Vec3(0.0, 0.2, 0.0));
+				}
+			}
+			case SPEAR_FLURRY -> {
+				for (int i = 0; i < FLURRY_STABS.length; i++) {
+					if (t == FLURRY_STABS[i]) {
+						boolean last = i == FLURRY_STABS.length - 1;
+						hit(player, target, STAB_DAMAGE, last ? away.scale(1.3).add(0.0, 0.3, 0.0) : away.scale(0.15), WebSymbiote.dust(1.2F),
+							SoundEvents.TRIDENT_HIT);
+						if (last) {
+							WebHaul.burst(level, target.getBoundingBox().getCenter().subtract(0.0, target.getBbHeight() * 0.3, 0.0), SLAM_BURST * 0.5F);
+							com.jaymospowers.core.Shakes.send(player, SLAM_SHAKE * 0.6F, target.getBoundingBox().getCenter());
 						}
 					}
 				}
 			}
-			case SPEAR_FLURRY -> {
-				if (t == LASH_HIT || t == LASH_HIT + 7 || t == LASH_HIT + 14) {
-					boolean last = t == LASH_HIT + 14;
-					hit(player, target, STAB_DAMAGE, last ? away.scale(1.3).add(0.0, 0.3, 0.0) : away.scale(0.15), WebSymbiote.dust(1.2F),
-						SoundEvents.TRIDENT_HIT);
-					if (!last) {
-						// the next one rears back already
-						player.setAttached(WebSymbiote.STRIKE, new WebSymbiote.Strike(target.getId(), level.getGameTime() - (LASH_HIT - 7), false,
-							(t / 7) % WebSymbiote.STRIKE_VARIANTS, true));
-					}
-				}
-			}
 			case JAW_SNAP -> {
+				reelToJaws(player, kind, t, target);
 				if (t == 8) {
 					bite(player, target, SNAP_DAMAGE, away.scale(0.8).add(0.0, 0.3, 0.0));
 				}
 			}
 			case MAUL -> {
+				reelToJaws(player, kind, t, target);
 				if (t == 8 || t == 15) {
 					bite(player, target, MAUL_DAMAGE, Vec3.ZERO);
 				} else if (t == 22) {
 					Vec3 right = new Vec3(-away.z, 0.0, away.x);
 					bite(player, target, MAUL_DAMAGE + 1.0F, right.scale(player.getRandom().nextBoolean() ? 1.4 : -1.4).add(0.0, 0.5, 0.0));
-				} else if (t > 8 && t < 22) {
-					push(target, Vec3.ZERO);
 				}
 			}
 			case MAW_ROAR -> {
@@ -501,18 +527,16 @@ public final class WebCounter {
 					roar(player, level, target);
 				} else if (t == 16) {
 					bite(player, target, ROAR_BITE_DAMAGE, away.scale(0.7).add(0.0, 0.3, 0.0));
+				} else {
+					reelToJaws(player, kind, t, target);
 				}
 			}
 			case DRAG_TO_JAWS -> {
-				if (t == LASH_HIT) {
-					// caught: hauled in to your face
-					Vec3 to = player.getEyePosition().add(player.getLookAngle().scale(1.2)).subtract(target.position());
-					push(target, to.scale(0.3).add(0.0, 0.15, 0.0));
+				if (t == bundle(kind).wrapped()) {
 					sound(level, target, SoundEvents.WARDEN_TENDRIL_CLICKS, 1.0F, 0.5F);
-				} else if (t > LASH_HIT && t < 17) {
-					Vec3 to = player.getEyePosition().add(player.getLookAngle().scale(1.2)).subtract(target.getBoundingBox().getCenter());
-					push(target, to.scale(0.35));
-				} else if (t == 17) {
+				}
+				reelToJaws(player, kind, t, target);
+				if (t == 17) {
 					bite(player, target, DRAG_BITE_DAMAGE, away.scale(1.0).add(0.0, 0.35, 0.0));
 				}
 			}
@@ -521,16 +545,113 @@ public final class WebCounter {
 		}
 	}
 
-	/** A tendril bursts out and strikes (drawn by the symbiote's own strike; it lands at {@link #LASH_HIT}). */
-	private static void lash(ServerPlayer player, LivingEntity target, int variant) {
+	/**
+	 * The bundle whips out of the arm (drawn by every client from {@link #ACTIVE} and {@link #bundle}); the back
+	 * tendrils come out writhing with it.
+	 */
+	private static void lash(ServerPlayer player) {
 		long now = player.level().getGameTime();
-		player.setAttached(WebSymbiote.STRIKE, new WebSymbiote.Strike(target.getId(), now, false, variant, true));
+		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		Long out = player.getAttached(WebSymbiote.TENDRILS_OUT);
 		long until = now + WebSymbiote.TENDRILS_OUT_TICKS;
 		if (out == null || out < until) {
 			player.setAttached(WebSymbiote.TENDRILS_OUT, until);
 		}
 		sound(player.level(), player, SoundEvents.WARDEN_TENDRIL_CLICKS, 1.0F, 0.6F);
+	}
+
+	/** The side the counter goes (as the clients draw it, from its start tick): flat, to your right (+1) or left. */
+	private static Vec3 sideOf(ServerPlayer player) {
+		Active active = player.getAttached(ACTIVE);
+		int side = active == null || (active.start() & 1L) == 0L ? 1 : -1;
+		Vec3 ahead = player.getLookAngle().horizontal();
+		ahead = ahead.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : ahead.normalize();
+		// (Minecraft's right of a heading (x, z) is (-z, x))
+		return new Vec3(-ahead.z, 0.0, ahead.x).scale(side);
+	}
+
+	/**
+	 * The tendril slam's haul: wrapped at the bundle's {@code wrapped} tick, it's hauled through its arc until
+	 * {@code haulEnd} (Impale: up and straight back down; Hurl: up over your head to the ground behind you; Whiplash:
+	 * swung round wide to your side; Constrict: held up in front while it squeezes, then down). Too big to lift, it's
+	 * only held.
+	 */
+	private static void haulAndSlam(ServerPlayer player, ServerLevel level, int kind, int t, LivingEntity target) {
+		Bundle bundle = bundle(kind);
+		Live live = live(player);
+		if (t == bundle.wrapped()) {
+			sound(level, target, SoundEvents.WARDEN_TENDRIL_CLICKS, 1.0F, 0.5F);
+			sound(level, target, SoundEvents.SLIME_ATTACK, 1.0F, 0.5F);
+			live.hauling = WebHaul.haulable(target);
+			Vec3 from = target.position();
+			Vec3 ahead = away(player, target);
+			Vec3 side = sideOf(player);
+			Vec3 feet = player.position();
+			live.haulFrom = from;
+			switch (kind) {
+				case IMPALE -> {
+					live.haulApex = from.lerp(feet, 0.25).add(0.0, IMPALE_LIFT, 0.0);
+					live.haulTo = WebHaul.ground(level, from, target);
+				}
+				case HURL -> {
+					live.haulApex = player.getEyePosition().add(0.0, HURL_APEX, 0.0);
+					live.haulTo = WebHaul.ground(level, feet.subtract(ahead.scale(HURL_BEHIND)), target);
+				}
+				case WHIPLASH -> {
+					live.haulApex = feet.add(side.scale(WHIP_SWING)).add(ahead.scale(1.0)).add(0.0, WHIP_APEX, 0.0);
+					live.haulTo = WebHaul.ground(level, feet.add(side.scale(WHIP_LAND)).subtract(ahead.scale(0.3)), target);
+				}
+				default -> {
+					// constrict: held up in front, then brought down there
+					live.haulApex = feet.add(ahead.scale(CONSTRICT_AHEAD)).add(0.0, CONSTRICT_LIFT, 0.0);
+					live.haulTo = WebHaul.ground(level, feet.add(ahead.scale(CONSTRICT_AHEAD + 0.2)), target);
+				}
+			}
+		}
+		if (t <= bundle.wrapped() || t > bundle.haulEnd()) {
+			return;
+		}
+		if (!live.hauling) {
+			// too big to lift: held where it is
+			WebHaul.push(target, Vec3.ZERO);
+			return;
+		}
+		Vec3 spot;
+		if (kind == CONSTRICT) {
+			// up into the hold, kept there through the squeezes, then down hard over the last few ticks
+			int drop = bundle.haulEnd() - 4;
+			spot = t < drop ? live.haulFrom.lerp(live.haulApex, Math.min(1.0, (t - bundle.wrapped()) / 4.0))
+				: live.haulApex.lerp(live.haulTo, Math.pow((t - drop) / 4.0, 1.6));
+		} else {
+			// slow off the ground, faster and faster over the top and down
+			double u = (t - bundle.wrapped()) / (double)(bundle.haulEnd() - bundle.wrapped());
+			spot = WebHaul.arc(live.haulFrom, live.haulApex, live.haulTo, Math.pow(u, 1.35));
+		}
+		WebHaul.steer(target, spot);
+	}
+
+	/** The slam: hurt, stunned, a burst of black mass and dust where it hits, every screen near shaken. */
+	private static void slam(ServerPlayer player, ServerLevel level, LivingEntity target, float damage, Vec3 bounce) {
+		Live live = live(player);
+		Vec3 at = live.hauling ? live.haulTo : WebHaul.ground(level, target.position(), target);
+		live.hauling = false;
+		hit(player, target, damage, bounce, ParticleTypes.EXPLOSION, SoundEvents.PLAYER_ATTACK_KNOCKBACK);
+		target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SLAM_STUN_TICKS, 3), player);
+		WebHaul.burst(level, at, SLAM_BURST);
+		com.jaymospowers.core.Shakes.heavy(player, at, SLAM_FELT, SLAM_SHAKE);
+		if (target instanceof ServerPlayer slammed) {
+			com.jaymospowers.core.Shakes.send(slammed, SLAMMED_SHAKE, player.position());
+		}
+	}
+
+	/** Maw moves: once the bundle has it, it's reeled in to your face for the jaws (until it lets go). */
+	private static void reelToJaws(ServerPlayer player, int kind, int t, LivingEntity target) {
+		Bundle bundle = bundle(kind);
+		if (t < bundle.wrapped() || t >= bundle.release() || !WebHaul.haulable(target)) {
+			return;
+		}
+		Vec3 spot = player.getEyePosition().add(player.getLookAngle().scale(JAWS_AHEAD)).subtract(0.0, target.getBbHeight() * 0.5, 0.0);
+		WebHaul.steer(target, target.position().lerp(spot, kind == MAUL ? 0.6 : 0.45));
 	}
 
 	/** The maw's jaws close on it: a bite (it never feeds on the living). */

@@ -116,6 +116,8 @@ public final class WebTendrilCombos {
 	static final float SIZE_BASE = 0.6F, SIZE_PER_PIECE = 0.1F, SIZE_MIN = 0.7F, SIZE_MAX = 1.5F, SHATTER_SIZE_MAX = 1.8F;
 	/** A spent falling block drops as an item this often (as a thrown chunk's blocks do). */
 	static final float SPENT_DROP_CHANCE = 0.3F;
+	/** The tendril slam's burst of black mass and dust at every impact (its size; see {@link WebHaul#burst}). */
+	static final float BURST = 0.8F;
 	/** Screen shake: yours at the impact, and a struck player's. */
 	static final float SHAKE = 1.8F, SHATTER_SHAKE = 2.2F, TARGET_SHAKE = 2.5F;
 
@@ -458,6 +460,7 @@ public final class WebTendrilCombos {
 			held.getBbWidth() * 0.6, 0.0);
 		level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(BLOOD, 1.0F), at.x, at.y + 0.5, at.z, 18, 0.9, 0.6, 0.9, 0.0);
 		groundDust(level, at.add(0.0, 0.5, 0.0));
+		WebHaul.burst(level, at, BURST);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.3F, 0.45F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 1.3F, 0.4F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.MACE_SMASH_GROUND, SoundSource.PLAYERS, 0.9F, 0.6F);
@@ -587,6 +590,7 @@ public final class WebTendrilCombos {
 		level.sendParticles(ParticleTypes.CRIT, meet.x, meet.y, meet.z, 24, 0.4, 0.4, 0.4, 0.3);
 		level.sendParticles(WebSymbiote.dust(1.6F), meet.x, meet.y, meet.z, 20, 0.5, 0.5, 0.5, 0.0);
 		groundDust(level, meet);
+		WebHaul.burst(level, meet, BURST);
 		level.playSound(null, meet.x, meet.y, meet.z, SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.3F, 0.5F);
 		level.playSound(null, meet.x, meet.y, meet.z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.3F, 0.5F);
 		level.playSound(null, meet.x, meet.y, meet.z, SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 1.2F, 0.5F);
@@ -633,6 +637,7 @@ public final class WebTendrilCombos {
 		Vec3 top = new Vec3((box.minX + box.maxX) * 0.5, box.maxY, (box.minZ + box.maxZ) * 0.5);
 		spend(level, debris, top);
 		groundDust(level, living.position());
+		WebHaul.burst(level, living.position(), BURST);
 		level.sendParticles(ParticleTypes.CRIT, top.x, top.y, top.z, 16, 0.4, 0.3, 0.4, 0.2);
 		level.sendParticles(ParticleTypes.EXPLOSION, top.x, top.y, top.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.playSound(null, top.x, top.y, top.z, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.5F, 0.5F);
@@ -726,6 +731,7 @@ public final class WebTendrilCombos {
 		}
 		level.sendParticles(ParticleTypes.EXPLOSION, meet.x, meet.y, meet.z, 1, 0.0, 0.0, 0.0, 0.0);
 		groundDust(level, meet.add(dir.scale(SHATTER_RANGE * 0.5)));
+		WebHaul.burst(level, meet, BURST);
 		level.playSound(null, meet.x, meet.y, meet.z, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.6F, 0.45F);
 		level.playSound(null, meet.x, meet.y, meet.z, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.7F, 0.45F);
 		level.playSound(null, meet.x, meet.y, meet.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.6F, 0.6F);

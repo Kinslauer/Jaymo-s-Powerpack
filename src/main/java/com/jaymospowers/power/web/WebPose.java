@@ -28,7 +28,10 @@ public record WebPose(int kind, long start, int side) {
 	 * together over you, then thrown back, arms flung wide, as it roars.
 	 */
 	public static final int ROAR = 13;
-	/** Spike Burst ({@link WebSymbiote#SPIKE_TICKS}): braced, arms thrown out, as spikes shoot out of the whole body. */
+	/**
+	 * Spike Burst ({@link WebSymbiote#SPIKE_POSE_TICKS}): curled in, gathering ({@link WebSymbiote#SPIKE_GATHER_TICKS}),
+	 * then thrown open as spikes and lashing tendrils burst out of the whole body.
+	 */
 	public static final int SPIKES = 14;
 
 	/** How long each kind lasts (ticks). */
@@ -50,7 +53,7 @@ public record WebPose(int kind, long start, int side) {
 			case HERO_LAND -> 28;
 			case WINGS_LAND -> 20;
 			case ROAR -> WebSymbiote.ROAR_TICKS;
-			case SPIKES -> WebSymbiote.SPIKE_TICKS;
+			case SPIKES -> WebSymbiote.SPIKE_POSE_TICKS;
 			default -> DODGE_TICKS;
 		};
 	}
