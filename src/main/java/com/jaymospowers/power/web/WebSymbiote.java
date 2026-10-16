@@ -863,6 +863,14 @@ public final class WebSymbiote {
 		/** A takeover just ended: roll for the gift; the gift's Living Armor is yours until then (0: none). */
 		boolean giftPending;
 		long giftUntil;
+		/**
+		 * Strains ({@link WebSymbioteStrains}): a white takeover walking you to someone hurt to mend them, and when its
+		 * next Mending Shot goes; a red one out for blood (not hunger); one gone after a rival symbiote.
+		 */
+		boolean mending;
+		long mendShotAt;
+		boolean bloodlust;
+		boolean rivalry;
 	}
 
 	private WebSymbiote() {
@@ -899,7 +907,7 @@ public final class WebSymbiote {
 			if (!alive) {
 				WebSymbioteState old = state(newPlayer);
 				if (old.bonded() || old.has(WebSymbioteState.SUIT) || old.has(WebSymbioteState.ARMOR) || old.has(WebSymbioteState.BULK)) {
-					newPlayer.setAttached(STATE, new WebSymbioteState(false, 0, 0, old.rejections(), 0, old.hints(), 0));
+					newPlayer.setAttached(STATE, new WebSymbioteState(false, 0, 0, old.rejections(), 0, old.hints(), 0, 0));
 				}
 				removeArmor(newPlayer);
 				newPlayer.removeAttached(COOLDOWNS);
@@ -1058,8 +1066,9 @@ public final class WebSymbiote {
 
 	/** It speaks: the line, and your screen darkens under it with a growl only you hear (see {@link WebNet.Dread}). */
 	public static void whisper(ServerPlayer player, String key) {
+		// (each strain speaks in its own colour: WebSymbioteStrains)
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_symbiote." + key)
-			.withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
+			.withStyle(WebSymbioteStrains.voice(player), ChatFormatting.ITALIC));
 		ServerPlayNetworking.send(player, new WebNet.Dread(WHISPER_FX_TICKS, true, LOW_BOND_LINES.stream().anyMatch(key::startsWith), urgency(key)));
 		Live live = player.getAttached(LIVE);
 		if (live != null) {
@@ -1104,7 +1113,8 @@ public final class WebSymbiote {
 		if (now < live.narrateAt || player.getRandom().nextFloat() >= Mth.lerp(bond, NARRATE_MIN, NARRATE_MAX)) {
 			return;
 		}
-		whisper(player, "say." + act + "." + (1 + player.getRandom().nextInt(SAY_LINES)));
+		// (white and red have lines of their own: say.white.<act>, say.red.<act>)
+		whisper(player, "say." + state(player).kind().lines() + act + "." + (1 + player.getRandom().nextInt(SAY_LINES)));
 		live.narrateAt = now + Math.round(Mth.lerp(bond, NARRATE_GAP_MAX, NARRATE_GAP_MIN));
 	}
 
@@ -1339,8 +1349,9 @@ public final class WebSymbiote {
 		boolean huntCheck = (hungry || next.satiety() < HUNGRY_HUNT_BELOW) && player.getAttached(EATING) == null && live.takeoverTicks <= 0
 			&& live.roarAt <= 0L && live.feedStage == FEED_NONE && !sulking(player) && !dormant && player.tickCount % SELF_FEED_EVERY == 0;
 		// hungry, it now and then takes the wheel to hunt (starving, it always does)
+		// (the white one only ever hunts when it's starving, and then only a hostile: see huntable)
 		boolean hunt = live.gorging || !player.isCreative() && next.satiety() < HUNGRY_HUNT_BELOW && now >= live.takeoverReadyAt
-			&& player.getRandom().nextFloat() < HUNGRY_HUNT_CHANCE;
+			&& next.kind() != WebSymbioteStrain.WHITE && player.getRandom().nextFloat() < HUNGRY_HUNT_CHANCE;
 		if (huntCheck && (hungry || hunt) && selfFeed(player, live, now, hunt, hungry)) {
 			live.craving = true;
 			if (!armor) {
@@ -1422,31 +1433,59 @@ public final class WebSymbiote {
 			if (live.takeoverTicks == 0) {
 				next = next.withStress(Math.max(0, next.stress() - TAKEOVER_RELIEF));
 			}
-		} else if (live.feedStage == FEED_NONE && live.roarAt <= 0L && now >= live.takeoverReadyAt && player.tickCount % TAKEOVER_CHECK_TICKS == 0
-			&& !player.isCreative() && !dormant) {
+		} else if (live.feedStage == FEED_NONE && live.roarAt <= 0L && !player.isCreative() && !dormant
+			&& player.tickCount % (next.kind() == WebSymbioteStrain.RED ? TAKEOVER_CHECK_TICKS / WebSymbioteStrains.RED_CHECK_DIVISOR : TAKEOVER_CHECK_TICKS) == 0) {
 			// (dormant, it only ever takes the wheel to save itself: see DEFEND_HEALTH below)
-			// besides starving (it gorges, above), it only takes the wheel when neglected, or for a look
-			float neglect = next.bond() >= NEGLECT_BOND || sulking(player) || live.gorging ? 0.0F
-				: NEGLECT_CHANCE * (1.0F - next.bond() / (float)NEGLECT_BOND);
-			if (neglect > 0.0F && player.getRandom().nextFloat() < neglect) {
-				// ignored too long: it does it its own way, tearing into whatever's near
-				live.rampage = false;
+			// (the red one checks twice as often)
+			WebSymbioteStrain strain = next.kind();
+			LivingEntity rival = WebSymbioteStrains.rival(player);
+			if (rival != null && !sulking(player)) {
+				// another strain's symbiote, close by: they go for each other on sight
+				live.rampage = true;
 				live.curious = false;
-				live.feral = true;
-				startTakeover(player, live, now);
-				live.feral = live.takeoverTicks > 0;
-			} else if (!starving && !live.gorging && next.stress() < CURIOUS_STRESS && next.satiety() >= SELF_FEED_BELOW && !sulking(player)
-				&& player.getRandom().nextFloat() < TOUR_CHANCE) {
-				// a good bond: somewhere it wants to see
-				live.rampage = false;
-				live.curious = false;
-				startTour(player, live, now);
-			} else if (!starving && !live.gorging && next.stress() < CURIOUS_STRESS && next.satiety() >= SELF_FEED_BELOW && !sulking(player)
-				&& player.getRandom().nextFloat() < CURIOUS_CHANCE) {
-				// a good bond: it only wants a look
-				live.rampage = false;
-				live.curious = true;
-				startTakeover(player, live, now);
+				live.feral = false;
+				live.rivalry = true;
+				startTakeover(player, live, now, rival);
+				live.rivalry = live.takeoverTicks > 0;
+			} else if (now >= live.takeoverReadyAt) {
+				// besides starving (it gorges, above), it only takes the wheel when neglected, or for a look
+				int neglectBond = strain == WebSymbioteStrain.RED ? WebSymbioteStrains.RED_NEGLECT_BOND : NEGLECT_BOND;
+				float neglect = next.bond() >= neglectBond || sulking(player) || live.gorging ? 0.0F
+					: NEGLECT_CHANCE * (1.0F - next.bond() / (float)neglectBond);
+				LivingEntity hurt = strain == WebSymbioteStrain.WHITE && !live.gorging && !sulking(player) ? WebSymbioteStrains.mostHurt(player) : null;
+				LivingEntity blood = strain == WebSymbioteStrain.RED && !live.gorging && !sulking(player)
+					&& player.getRandom().nextFloat() < WebSymbioteStrains.RED_HUNT_CHANCE ? prey(player, true) : null;
+				if (hurt != null && player.getRandom().nextFloat() < Math.max(neglect, WebSymbioteStrains.MEND_CHANCE)) {
+					// the white one: it takes the wheel to mend someone, never to tear into anything
+					startMending(player, live, now, hurt);
+				} else if (blood != null) {
+					// the red one: anything living near, fed or not
+					live.rampage = true;
+					live.curious = false;
+					live.feral = false;
+					live.bloodlust = true;
+					startTakeover(player, live, now, blood);
+					live.bloodlust = live.takeoverTicks > 0;
+				} else if (strain != WebSymbioteStrain.WHITE && neglect > 0.0F && player.getRandom().nextFloat() < neglect) {
+					// ignored too long: it does it its own way, tearing into whatever's near
+					live.rampage = false;
+					live.curious = false;
+					live.feral = true;
+					startTakeover(player, live, now);
+					live.feral = live.takeoverTicks > 0;
+				} else if (!starving && !live.gorging && next.stress() < CURIOUS_STRESS && next.satiety() >= SELF_FEED_BELOW && !sulking(player)
+					&& player.getRandom().nextFloat() < TOUR_CHANCE) {
+					// a good bond: somewhere it wants to see
+					live.rampage = false;
+					live.curious = false;
+					startTour(player, live, now);
+				} else if (!starving && !live.gorging && next.stress() < CURIOUS_STRESS && next.satiety() >= SELF_FEED_BELOW && !sulking(player)
+					&& player.getRandom().nextFloat() < CURIOUS_CHANCE) {
+					// a good bond: it only wants a look
+					live.rampage = false;
+					live.curious = true;
+					startTakeover(player, live, now);
+				}
 			}
 		}
 		// it can't stand the heat or the cold for long: in the end it walks you out of it
@@ -1615,7 +1654,8 @@ public final class WebSymbiote {
 	// ---- bonding -----------------------------------------------------------------------------------------------------
 
 	private static InteractionResult onUseBlock(Player player, net.minecraft.world.level.Level level, InteractionHand hand, BlockHitResult hit) {
-		if (WebPower.GOO == null || !level.getBlockState(hit.getBlockPos()).is(WebPower.GOO) || player.isSpectator()) {
+		// (the black goo or the red: whichever it is, that's the strain that bonds)
+		if (WebPower.GOO == null || !(level.getBlockState(hit.getBlockPos()).getBlock() instanceof WebSymbioteGooBlock goo) || player.isSpectator()) {
 			return InteractionResult.PASS;
 		}
 		if (hand != InteractionHand.MAIN_HAND) {
@@ -1637,15 +1677,21 @@ public final class WebSymbiote {
 			return InteractionResult.SUCCESS;
 		}
 		serverLevel.removeBlock(pos, false);
-		bond(sp, center);
+		bond(sp, center, goo.strain());
 		return InteractionResult.SUCCESS;
 	}
 
 	/** {@code player} takes the symbiote in (from the goo at {@code from}, or from a command). */
 	public static void bond(ServerPlayer player, Vec3 from) {
+		bond(player, from, WebSymbioteStrain.BLACK);
+	}
+
+	/** {@code player} takes in a symbiote of {@code strain} (black or red goo, a white blob, a command). */
+	public static void bond(ServerPlayer player, Vec3 from, WebSymbioteStrain strain) {
 		WebSymbioteState old = state(player);
 		// it barely knows you: anywhere from no trust at all to halfway
-		set(player, new WebSymbioteState(true, SATIETY_START, 0, 0, WebSymbioteState.SUIT, old.hints(), player.getRandom().nextInt(BOND_START_MAX + 1)));
+		set(player, new WebSymbioteState(true, SATIETY_START, 0, 0, WebSymbioteState.SUIT, old.hints(), player.getRandom().nextInt(BOND_START_MAX + 1), strain.id()));
+		WebSymbioteStrains.onBond(player);
 		player.setAttached(COOLDOWNS, WebSymbioteState.Cooldowns.NONE);
 		Live live = live(player);
 		live.bondTicks = BOND_TICKS;
@@ -1684,10 +1730,11 @@ public final class WebSymbiote {
 			player.removeAttached(STRUGGLE);
 			ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0, false));
 		}
-		set(player, new WebSymbioteState(false, 0, 0, 0, 0, old.hints(), 0));
+		set(player, new WebSymbioteState(false, 0, 0, 0, 0, old.hints(), 0, 0));
 		removeArmor(player);
 		player.removeAttached(COOLDOWNS);
 		WebSymbioteBond.clear(player);
+		WebSymbioteStrains.onUnbond(player);
 		torn(player);
 		ServerLevel level = player.level();
 		level.sendParticles(ParticleTypes.SQUID_INK, player.getX(), player.getY() + 1.0, player.getZ(), 80, 0.45, 0.9, 0.45, 0.12);
@@ -1726,12 +1773,14 @@ public final class WebSymbiote {
 			ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0, false));
 		}
 		WebTendrils.releaseAll(player, false);
-		set(player, new WebSymbioteState(false, 0, 0, old.rejections(), 0, old.hints(), 0));
+		set(player, new WebSymbioteState(false, 0, 0, old.rejections(), 0, old.hints(), 0, 0));
 		torn(player);
 		removeArmor(player);
 		player.removeAttached(COOLDOWNS);
 		WebSymbioteBond.clear(player);
-		WebSymbioteBlob.release(player.level(), player.position());
+		WebSymbioteStrains.onUnbond(player);
+		// the one that leaves is still the strain it was
+		WebSymbioteStrains.mark(WebSymbioteBlob.release(player.level(), player.position()), old.kind());
 	}
 
 	/** The suit is coming off by tearing (see {@link #TORN}). */
@@ -1916,7 +1965,14 @@ public final class WebSymbiote {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.PLAYERS, 0.8F, 0.6F);
 		level.sendParticles(dust(1.6F), player.getX(), player.getY() + 1.0, player.getZ(), 25, 0.4, 0.8, 0.4, 0.0);
 		if (!live.fleeing) {
-			if (live.feral && !live.curious && !live.hunting) {
+			String lines = state(player).kind().lines();
+			if (live.mending) {
+				whisper(player, "white.mending." + (1 + player.getRandom().nextInt(SAY_LINES)));
+			} else if (live.rivalry) {
+				whisper(player, lines + "rival." + (1 + player.getRandom().nextInt(SAY_LINES)));
+			} else if (live.bloodlust) {
+				whisper(player, "red.hunt." + (1 + player.getRandom().nextInt(SAY_LINES)));
+			} else if (live.feral && !live.curious && !live.hunting) {
 				// a different complaint each time
 				int line = player.getRandom().nextInt(NEGLECT_LINES - 1);
 				live.lastNeglect = line >= live.lastNeglect && live.lastNeglect >= 0 ? line + 1 : line;
@@ -1996,6 +2052,9 @@ public final class WebSymbiote {
 		live.hunting = false;
 		live.feral = false;
 		live.spree = false;
+		live.mending = false;
+		live.bloodlust = false;
+		live.rivalry = false;
 		player.removeAttached(SPREE);
 		live.struggle = 0.0F;
 		live.surges = 0;
@@ -2176,7 +2235,8 @@ public final class WebSymbiote {
 		live.remarkAt = now + gap;
 		List<String> topics = surroundings(player);
 		if (!topics.isEmpty()) {
-			whisper(player, "see." + topics.get(player.getRandom().nextInt(topics.size())) + "." + (1 + player.getRandom().nextInt(REMARK_LINES)));
+			whisper(player, "see." + state(player).kind().lines() + topics.get(player.getRandom().nextInt(topics.size())) + "."
+				+ (1 + player.getRandom().nextInt(REMARK_LINES)));
 		}
 	}
 
@@ -2657,6 +2717,10 @@ public final class WebSymbiote {
 			tickTour(player, live, now, target);
 			return;
 		}
+		if (live.mending) {
+			tickMending(player, live, now, target);
+			return;
+		}
 		if (target == player) {
 			// its kill carried off: it holds you still through the grab, the carry and the meal, and lets go after
 			// (on a spree, it's off after the next)
@@ -2693,6 +2757,11 @@ public final class WebSymbiote {
 			if (dead && spreeOn(player, live)) {
 				return;
 			}
+			if (dead && !live.curious && state(player).kind() == WebSymbioteStrain.RED
+				&& player.getRandom().nextFloat() < WebSymbioteStrains.RED_CHAIN && redChain(player, live)) {
+				// the red one: one wasn't enough
+				return;
+			}
 			endTakeover(player, live);
 			return;
 		}
@@ -2723,12 +2792,121 @@ public final class WebSymbiote {
 		}
 	}
 
+	/** The white strain takes the wheel to mend {@code hurt}: it walks you over and fires Mending Shots at it. */
+	private static void startMending(ServerPlayer player, Live live, long now, LivingEntity hurt) {
+		live.rampage = false;
+		live.curious = false;
+		live.feral = false;
+		live.mending = true;
+		live.mendShotAt = now + WebSymbioteStrains.MEND_FIRST_SHOT;
+		startTakeover(player, live, now, hurt);
+		live.mending = live.takeoverTicks > 0;
+	}
+
+	/** A mending takeover, a tick at a time: close in, a Mending Shot every so often, until it's whole (or gone, or it sleeps). */
+	private static void tickMending(ServerPlayer player, Live live, long now, @org.jspecify.annotations.Nullable Entity target) {
+		if (!(target instanceof LivingEntity hurt) || !hurt.isAlive() || hurt.getHealth() >= hurt.getMaxHealth()
+			|| target.distanceTo(player) > WebSymbioteStrains.MEND_RANGE * 2.0 || WebSymbioteBond.dormant(player)
+			|| state(player).kind() != WebSymbioteStrain.WHITE) {
+			if (target instanceof LivingEntity whole && whole.isAlive() && whole.getHealth() >= whole.getMaxHealth()) {
+				narrate(player, "mend");
+			}
+			endTakeover(player, live);
+			return;
+		}
+		renewHold(player, live);
+		drive(player, live, hurt, false, now);
+		if (now >= live.mendShotAt && player.distanceTo(hurt) <= WebSymbioteStrains.MEND_SHOT_RANGE && player.hasLineOfSight(hurt)) {
+			live.mendShotAt = now + WebSymbioteStrains.MEND_SHOT_EVERY;
+			player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+			WebSymbioteStrains.mendShot(player, hurt);
+			// your arm thrown out on its own: your screen feels it
+			com.jaymospowers.core.Shakes.send(player, 0.3F);
+		}
+		if (live.takeoverTicks % 5 == 0) {
+			player.level().sendParticles(WebSymbioteStrains.dust(player, 1.0F), player.getX(), player.getY() + 1.0, player.getZ(), 4, 0.3, 0.6, 0.3, 0.0);
+		}
+	}
+
+	/** The red strain after a kill: straight on to the next living thing near (players too). False when there's none. */
+	private static boolean redChain(ServerPlayer player, Live live) {
+		LivingEntity next = prey(player, true);
+		if (next == null) {
+			return false;
+		}
+		live.hunting = false;
+		live.curious = false;
+		live.rampage = true;
+		live.bloodlust = true;
+		live.takeoverTarget = next.getId();
+		live.takeoverTicks = TAKEOVER_LIMIT;
+		ServerPlayNetworking.send(player, new WebNet.Takeover(next.getId(), live.takeoverTicks, false));
+		narrate(player, "kill");
+		com.jaymospowers.core.Shakes.send(player, 0.5F);
+		return true;
+	}
+
+	/** Purified mid-takeover (see {@link WebSymbioteStrains#purifyHeal}): it lets go at once and is white from now on. */
+	static void purified(ServerPlayer player) {
+		Live live = live(player);
+		abortFeeding(player, live);
+		if (live.takeoverTicks > 0) {
+			endTakeover(player, live);
+		}
+		live.giftPending = false;
+		WebSymbioteState state = state(player);
+		set(player, state.withStrain(WebSymbioteStrain.WHITE.id()).withStress(0));
+	}
+
+	/** It lets go of the wheel if it has it (the white one falling asleep). */
+	static void letGoOfWheel(ServerPlayer player) {
+		Live live = player.getAttached(LIVE);
+		if (live != null && live.takeoverTicks > 0) {
+			endTakeover(player, live);
+		}
+	}
+
+	/** The white one falls asleep: Living Armor and the big body withdraw with the suit (the tick takes the suit itself). */
+	static void withdrawForSleep(ServerPlayer player) {
+		WebSymbioteState state = state(player);
+		if (state.has(WebSymbioteState.ARMOR) || state.has(WebSymbioteState.BULK)) {
+			WebTendrils.releaseAll(player, false);
+			set(player, state.withFlag(WebSymbioteState.ARMOR, false).withFlag(WebSymbioteState.BULK, false));
+			removeArmor(player);
+		}
+	}
+
+	/** A healing paid for out of its hunger (the white strain: {@link WebSymbioteStrains#paid}). Returns what's left. */
+	static int spendSatiety(ServerPlayer player, int amount) {
+		WebSymbioteState state = state(player);
+		int left = Math.max(0, state.satiety() - amount);
+		set(player, state.withSatiety(left));
+		return left;
+	}
+
+	/** Changes the stress by {@code delta} (the red one, healed against its will). */
+	static void addStress(ServerPlayer player, int delta) {
+		WebSymbioteState state = state(player);
+		if (state.bonded()) {
+			set(player, state.withStress(Mth.clamp(state.stress() + delta, 0, STRESS_MAX)));
+		}
+	}
+
+	/** Sets the strain outright (the debug command). */
+	public static void setStrain(ServerPlayer player, WebSymbioteStrain strain) {
+		WebSymbioteState state = state(player);
+		if (state.bonded()) {
+			set(player, state.withStrain(strain.id()));
+		}
+	}
+
 	// ---- abilities ---------------------------------------------------------------------------------------------------
 
 	/** A radial-menu pick. Server-authoritative: bond, cooldown and satiety are all checked here. */
 	static void use(ServerPlayer player, int ability) {
-		if (isBonded(player) && WebSymbioteBond.dormant(player)) {
-			// still settling in: nothing it has answers yet
+		if (isBonded(player) && WebSymbioteBond.dormant(player) && !(ability == CONSUME && WebSymbioteStrains.asleep(player))) {
+			// still settling in (or the white one asleep): nothing it has answers yet
+			// (asleep, a corpse fed to it wakes it: Consume still answers)
 			WebSymbioteBond.refuse(player);
 			return;
 		}
@@ -3441,7 +3619,7 @@ public final class WebSymbiote {
 			return false;
 		}
 		// in a low mood, this hunt won't stop at the one
-		live.spree = state(player).stress() >= LOW_MOOD_STRESS;
+		live.spree = state(player).stress() >= LOW_MOOD_STRESS && state(player).kind() != WebSymbioteStrain.WHITE;
 		startKill(player, live, now, prey, false);
 		if (live.spree && live.takeoverTicks > 0) {
 			player.setAttached(SPREE, true);
@@ -3478,6 +3656,10 @@ public final class WebSymbiote {
 	/** Something it may hunt for food: a creature that leaves a corpse (no pets, no named ones); players only in a rampage. */
 	private static boolean huntable(ServerPlayer player, LivingEntity e, boolean rampage) {
 		if (!e.isAlive() || e.isSpectator() || e instanceof ArmorStand || !edible(e)) {
+			return false;
+		}
+		if (state(player).kind() == WebSymbioteStrain.WHITE && !(e instanceof net.minecraft.world.entity.monster.Enemy)) {
+			// the white one kills nothing that isn't hostile
 			return false;
 		}
 		if (e instanceof Player p) {
@@ -3801,7 +3983,8 @@ public final class WebSymbiote {
 			return;
 		}
 		// a takeover's fight (not a look, not a run): the tendrils tear into what it took you for
-		boolean fighting = live.takeoverTicks > 0 && live.takeoverTarget != player.getId() && !live.curious && !live.touring && !live.fleeing;
+		boolean fighting = live.takeoverTicks > 0 && live.takeoverTarget != player.getId() && !live.curious && !live.touring && !live.fleeing
+			&& !live.mending;
 		if (now < live.nextStrikeAt || live.takeoverTicks > 0 && !fighting || live.fleeing
 			|| WebTendrilCombos.active(player)) {
 			return;
@@ -4012,6 +4195,11 @@ public final class WebSymbiote {
 		if (corpse != null) {
 			return startGrab(player, live, now, corpse);
 		}
+		if (WebSymbioteStrains.asleep(player)) {
+			// asleep, it only wakes for a corpse: it kills nothing
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.5F, 1.4F);
+			return false;
+		}
 		LivingEntity best = null;
 		bestScore = Double.MAX_VALUE;
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(CONSUME_RANGE),
@@ -4130,6 +4318,8 @@ public final class WebSymbiote {
 	private static void feed(ServerPlayer player, int satiety, int calm) {
 		WebSymbioteState state = state(player);
 		set(player, state.withSatiety(Math.min(SATIETY_MAX, state.satiety() + satiety)).withStress(Math.max(0, state.stress() - calm)));
+		// the white one asleep: a meal wakes it early
+		WebSymbioteStrains.wake(player);
 	}
 
 	/**
@@ -4296,6 +4486,12 @@ public final class WebSymbiote {
 	private static void spikeBlast(ServerPlayer player) {
 		ServerLevel level = player.level();
 		Vec3 center = player.position().add(0.0, 1.0, 0.0);
+		// the white one's Recoil: rounded nubs, half the harm, and players healed instead; the red one's blades leave them bleeding
+		WebSymbioteStrain strain = state(player).kind();
+		if (strain == WebSymbioteStrain.WHITE) {
+			WebSymbioteStrains.recoil(player, center, SPIKE_RADIUS);
+			return;
+		}
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(SPIKE_RADIUS),
 			e -> e != player && e.isAlive() && !e.isSpectator())) {
 			Vec3 to = living.getBoundingBox().getCenter().subtract(center);
@@ -4304,6 +4500,10 @@ public final class WebSymbiote {
 			}
 			float before = living.getHealth();
 			living.hurtServer(level, level.damageSources().playerAttack(player), SPIKE_DAMAGE);
+			if (strain == WebSymbioteStrain.RED && living.isAlive()) {
+				com.jaymospowers.core.BladeBlood.splash(living, before - living.getHealth());
+				WebMorph.bleed(player, living, WebSymbioteStrains.RED_BURST_BLEED_HITS);
+			}
 			spikeHit(level, center, living, before - living.getHealth());
 			Vec3 flat = new Vec3(to.x, 0.0, to.z);
 			flat = flat.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : flat.normalize();
@@ -4395,7 +4595,7 @@ public final class WebSymbiote {
 	/** Who's holding a symbiote's attention, for debug output. */
 	public static String describe(Player player) {
 		WebSymbioteState s = state(player);
-		return "bonded=" + s.bonded() + " bond=" + s.bond() + " satiety=" + s.satiety() + " stress=" + s.stress() + " rejections=" + s.rejections() + " flags=" + s.flags()
+		return "bonded=" + s.bonded() + " strain=" + s.kind() + " bond=" + s.bond() + " satiety=" + s.satiety() + " stress=" + s.stress() + " rejections=" + s.rejections() + " flags=" + s.flags()
 			+ (player instanceof ServerPlayer sp ? " feeding[" + describeFeeding(sp) + "]" : "");
 	}
 }

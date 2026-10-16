@@ -213,7 +213,7 @@ public final class WebBehemoth {
 			level.playSound(null, host.getX(), host.getY(), host.getZ(), SoundEvents.WARDEN_AGITATED, SoundSource.HOSTILE, 0.7F, 0.6F);
 		}
 		if (host.getRandom().nextInt(4) == 0) {
-			level.sendParticles(WebSymbiote.dust(1.0F), host.getX(), host.getY() + host.getBbHeight() * 0.6, host.getZ(), 1,
+			level.sendParticles(WebSymbioteStrains.dust(host, 1.0F), host.getX(), host.getY() + host.getBbHeight() * 0.6, host.getZ(), 1,
 				host.getBbWidth() * 0.4, host.getBbHeight() * 0.3, host.getBbWidth() * 0.4, 0.0);
 		}
 	}
@@ -439,7 +439,8 @@ public final class WebBehemoth {
 
 	/** What it hunts: every living thing but other behemoths, roaming symbiotes, stands, and players who can't be hurt. */
 	private static boolean prey(Mob host, LivingEntity e) {
-		return e != host && e.isAlive() && !isHost(e) && !(e instanceof WebSymbioteBlob) && !(e instanceof ArmorStand)
+		// (another symbiote's body only if it's a rival strain: WebSymbioteStrains)
+		return e != host && e.isAlive() && (!isHost(e) && !(e instanceof WebSymbioteBlob) || WebSymbioteStrains.rivals(host, e)) && !(e instanceof ArmorStand)
 			&& !(e instanceof Player p && (p.isCreative() || p.isSpectator()));
 	}
 
@@ -474,7 +475,7 @@ public final class WebBehemoth {
 		if (isHost(entity) && entity.level() instanceof ServerLevel level) {
 			entity.removeAttached(HOST);
 			com.jaymospowers.core.Oddities.unmark(entity, com.jaymospowers.core.Oddities.SYMBIOTE);
-			WebSymbioteBlob.release(level, entity.position());
+			WebSymbioteStrains.mark(WebSymbioteBlob.release(level, entity.position()), WebSymbioteStrains.of(entity));
 		}
 	}
 }

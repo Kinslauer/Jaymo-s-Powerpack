@@ -238,6 +238,10 @@ final class WebSymbioteScreen extends Screen {
 
 	/** One dim line on the pick: ready, on, cooling, too hungry, or the bond it takes; with nothing picked, how to pick. */
 	private Component status(final LocalPlayer player, final WebSymbioteState state, final WebSymbioteState.Cooldowns cooldowns, final long now) {
+		if (com.jaymospowers.power.web.WebSymbioteStrains.asleep(player)) {
+			// the white one, spent from mending: asleep until it's fed (WebSymbioteStrains.sleep)
+			return Component.translatable("gui.jaymospowers.web_symbiote.asleep");
+		}
 		if (com.jaymospowers.power.web.WebSymbioteBond.dormant(player)) {
 			// dormant after the first bond: how long it has left settling in (minutes, rounded up)
 			int ticks = com.jaymospowers.power.web.WebSymbioteBond.dormantTicks(player);

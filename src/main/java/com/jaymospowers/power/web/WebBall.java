@@ -22,6 +22,9 @@ import net.minecraft.world.phys.HitResult;
  * The Web Shot: a fast, flat-flying ball of web that bursts where it lands like a splash potion. Everything caught in
  * the splash gets Slowness III and a cobweb at its feet; whatever it hits directly also takes the full damage. All of
  * it grows with how long the shot was charged.
+ * <p>
+ * The white symbiote's shot is a Mending Shot ({@link #mending}): whatever it hits is healed
+ * ({@link WebSymbioteStrains#mend}), with no harm, no Slowness and no cobweb.
  */
 public class WebBall extends ThrowableItemProjectile {
 	/** Direct-hit damage at no charge and at a full charge; things in the splash take up to half that. */
@@ -45,12 +48,16 @@ public class WebBall extends ThrowableItemProjectile {
 	 * hit: a web's, and the symbiote's.
 	 */
 	public static final float PELLET_DAMAGE = 3.0F, DARK_PELLET_DAMAGE = 4.0F;
+	/** A Mending Shot that lands short mends whatever is this close to where it burst. */
+	public static final double MEND_SPLASH = 1.5;
 
 	/** 0-1: how long it was charged. Server only. */
 	private float charge;
 	private boolean pellet;
 	/** A web bomb (Sneak + tap V): lobbed, and it cocoons everything around where it bursts (see {@link WebStrength#bomb}). */
 	private boolean bomb;
+	/** A Mending Shot (the white symbiote's): it heals what it hits. Server only. */
+	private boolean mending;
 	private boolean burst;
 	/** Gravity per tick (a snowball is 0.03): it flies nearly flat. */
 	private static final double GRAVITY = 0.012;
@@ -81,6 +88,12 @@ public class WebBall extends ThrowableItemProjectile {
 	/** A web bomb (see {@link #bomb}). */
 	public WebBall bomb() {
 		this.bomb = true;
+		return this;
+	}
+
+	/** A Mending Shot (see {@link WebSymbioteStrains#MEND_SHOT_HEAL}). */
+	public WebBall mending() {
+		this.mending = true;
 		return this;
 	}
 
@@ -115,6 +128,18 @@ public class WebBall extends ThrowableItemProjectile {
 	private void burst(ServerLevel level, @org.jspecify.annotations.Nullable Entity direct) {
 		this.burst = true;
 		boolean dark = this.dark();
+		if (this.mending) {
+			// it mends what it hits (or, landing short, whatever's right there)
+			LivingEntity hit = direct instanceof LivingEntity living && living.isAlive() ? living
+				: level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(MEND_SPLASH), e -> e.isAlive() && !e.isSpectator()
+					&& e != this.getOwner()).stream().min(java.util.Comparator.comparingDouble(e -> e.distanceToSqr(this))).orElse(null);
+			if (hit != null) {
+				WebSymbioteStrains.mend(level, this.getOwner(), hit, WebSymbioteStrains.MEND_SHOT_HEAL);
+			}
+			level.sendParticles(new net.minecraft.core.particles.DustParticleOptions(WebSymbioteStrains.WHITE, 1.0F), this.getX(), this.getY(), this.getZ(),
+				10, 0.2, 0.2, 0.2, 0.02);
+			return;
+		}
 		if (this.bomb) {
 			WebStrength.bomb(level, this.position(), this.getOwner(), dark);
 			return;

@@ -66,6 +66,12 @@ import org.jspecify.annotations.Nullable;
  * Fire and blasts are the one thing it fears ({@link #danger}): flames, lava, a lit campfire, anything burning, primed
  * TNT, a hissing creeper, a fireball, someone holding flint and steel, a fire charge or lava, or being burnt or blasted
  * itself send it fleeing at full speed until it's {@link #FLEE_DISTANCE} away, and it makes its new home there.
+ * <p>
+ * Its strain ({@link WebSymbioteStrains#KIND}) goes with it into whoever it takes. The red one (from a red crater, or
+ * out of a red host) never waits to be provoked: it lashes at anything living within {@link #RED_AGGRO_RANGE}, players
+ * included (sparing only those who wear a red symbiote), and now and then pours itself into a mob it lashes at instead
+ * ({@link #RED_TAKE_CHANCE}). A red one and a black or white one (a blob, a host, a bonded web slinger) within
+ * {@link WebSymbioteStrains#RIVAL_RANGE} go for each other, and a rival's blows do hurt it.
  */
 public class WebSymbioteBlob extends PathfinderMob {
 	// ---- tuning ----
@@ -113,6 +119,9 @@ public class WebSymbioteBlob extends PathfinderMob {
 	/** It runs until this far from the fire (blocks), or for this long at most (ticks). */
 	static final double FLEE_DISTANCE = 40.0, FLEE_SPEED = 2.2;
 	static final int FLEE_TICKS = 400;
+	/** The red one: it goes for anything living this close, and this share of its lashes at a mob it could take take it instead. */
+	static final double RED_AGGRO_RANGE = 10.0;
+	static final float RED_TAKE_CHANCE = 0.3F;
 
 	public static EntityType<WebSymbioteBlob> TYPE;
 
@@ -185,7 +194,8 @@ public class WebSymbioteBlob extends PathfinderMob {
 
 	/** No host found: it sinks into a puddle of goo where it lies (Black Ooze), if there's room for one. */
 	private boolean settle(ServerLevel level) {
-		if (WebPower.GOO == null) {
+		net.minecraft.world.level.block.Block goo = this.strain() == WebSymbioteStrain.RED ? WebPower.RED_GOO : WebPower.GOO;
+		if (goo == null) {
 			return false;
 		}
 		BlockPos.MutableBlockPos pos = this.blockPosition().above().mutable();
@@ -193,7 +203,7 @@ public class WebSymbioteBlob extends PathfinderMob {
 			BlockPos below = pos.below();
 			if (level.getBlockState(below).isFaceSturdy(level, below, net.minecraft.core.Direction.UP)
 				&& (level.getBlockState(pos).isAir() || level.getBlockState(pos).canBeReplaced()) && level.getFluidState(pos).isEmpty()) {
-				level.setBlock(pos, WebPower.GOO.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_ALL);
+				level.setBlock(pos, goo.defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_ALL);
 				level.sendParticles(ParticleTypes.SQUID_INK, pos.getX() + 0.5, pos.getY() + 0.3, pos.getZ() + 0.5, 25, 0.3, 0.2, 0.3, 0.05);
 				level.playSound(null, pos, SoundEvents.SLIME_BLOCK_PLACE, SoundSource.BLOCKS, 1.0F, 0.5F);
 				level.playSound(null, pos, SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.BLOCKS, 0.8F, 0.5F);
@@ -308,6 +318,13 @@ public class WebSymbioteBlob extends PathfinderMob {
 				.ifPresent(corpse -> this.setHomeTo(corpse.blockPosition(), ROAM_RADIUS));
 		}
 		if (this.tickCount % SCAN_EVERY == 0 && this.grudge == null) {
+			// a rival symbiote near: they go for each other; the red one goes for anything living
+			LivingEntity foe = this.foe(level);
+			if (foe != null) {
+				this.marks(foe);
+			}
+		}
+		if (this.tickCount % SCAN_EVERY == 0 && this.grudge == null) {
 			this.quarry = findHost(level);
 		}
 		boolean moving = this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-4;
@@ -315,11 +332,34 @@ public class WebSymbioteBlob extends PathfinderMob {
 			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.HONEY_BLOCK_SLIDE, SoundSource.HOSTILE, 0.5F, 0.6F);
 		}
 		if (this.random.nextInt(moving ? 4 : 12) == 0) {
-			level.sendParticles(WebSymbiote.dust(0.9F), this.getX(), this.getY() + 0.1, this.getZ(), 1, 0.3, 0.02, 0.3, 0.0);
+			level.sendParticles(WebSymbioteStrains.dust(this, 0.9F), this.getX(), this.getY() + 0.1, this.getZ(), 1, 0.3, 0.02, 0.3, 0.0);
 		}
 		if (this.random.nextInt(240) == 0) {
 			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WARDEN_AMBIENT, SoundSource.HOSTILE, 0.4F, 1.6F);
 		}
+	}
+
+	/** Its strain (black unless marked). */
+	WebSymbioteStrain strain() {
+		return WebSymbioteStrains.of(this);
+	}
+
+	/**
+	 * Who it turns on unprovoked: the nearest rival symbiote within {@link WebSymbioteStrains#RIVAL_RANGE}; for the red
+	 * one, failing that, the nearest living thing within {@link #RED_AGGRO_RANGE}. Null: nobody.
+	 */
+	private @Nullable LivingEntity foe(ServerLevel level) {
+		double range = WebSymbioteStrains.RIVAL_RANGE;
+		LivingEntity rival = level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(range),
+				e -> e != this && WebSymbioteStrains.rivals(this, e) && e.distanceTo(this) <= range && this.hunts(e)).stream()
+			.min(Comparator.comparingDouble(e -> e.distanceToSqr(this))).orElse(null);
+		if (rival != null || this.strain() != WebSymbioteStrain.RED) {
+			return rival;
+		}
+		return level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(RED_AGGRO_RANGE),
+				e -> e != this && !(e instanceof net.minecraft.world.entity.decoration.ArmorStand) && e.distanceTo(this) <= RED_AGGRO_RANGE
+					&& this.hunts(e)).stream()
+			.min(Comparator.comparingDouble(e -> e.distanceToSqr(this))).orElse(null);
 	}
 
 	/** A risen body first (its old host's or anyone's), then the nearest web slinger without a symbiote, then any mob. */
@@ -352,11 +392,12 @@ public class WebSymbioteBlob extends PathfinderMob {
 			if (!wants(player, Vec3.atCenterOf(this.getHomePosition()))) {
 				return;
 			}
-			WebSymbiote.bond(player, this.position());
+			WebSymbiote.bond(player, this.position(), this.strain());
 		} else if (host instanceof Mob mob && KitchenCompat.isZombiePlayer(mob)) {
 			WebBehemoth.possess(level, mob);
+			WebSymbioteStrains.mark(mob, this.strain());
 		} else if (host instanceof Mob mob && WebInhabit.takeable(mob) && !this.spurned.contains(mob.getUUID())) {
-			WebInhabit.inhabit(level, mob);
+			WebInhabit.inhabit(level, mob, this.strain());
 		} else {
 			return;
 		}
@@ -366,12 +407,17 @@ public class WebSymbioteBlob extends PathfinderMob {
 
 	private boolean hunts(LivingEntity target) {
 		return target.isAlive() && !target.isRemoved() && target.level() == this.level() && !target.isSpectator()
-			&& !(target instanceof Player p && (p.isCreative() || kin(p))) && target.distanceTo(this) <= LEASH;
+			&& !(target instanceof Player p && (p.isCreative() || this.kin(p))) && target.distanceTo(this) <= LEASH
+			// another symbiote (roaming, or in a mob) only if it's a rival
+			&& (target instanceof Player || !WebSymbioteStrains.symbiotic(target) || WebSymbioteStrains.rivals(this, target));
 	}
 
-	/** A web slinger already wearing a symbiote: it won't turn on one of its own. */
-	private static boolean kin(Player player) {
-		return Powers.has(player, WebPower.INSTANCE) && WebSymbiote.state(player).bonded();
+	/**
+	 * A web slinger already wearing a symbiote: it won't turn on one of its own (a black or white one spares the black
+	 * and the white; the red one only the red).
+	 */
+	private boolean kin(Player player) {
+		return Powers.has(player, WebPower.INSTANCE) && WebSymbiote.state(player).bonded() && !WebSymbioteStrains.rivals(this, player);
 	}
 
 	/** {@code source} hurt it (or tried): mark whoever did it. */
@@ -420,9 +466,15 @@ public class WebSymbioteBlob extends PathfinderMob {
 			// it goes for the one it was always after: up the tendril and in
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_ROAR, SoundSource.HOSTILE, 0.8F, 1.6F);
 			Shakes.send(player, 8.0F, from);
-			WebSymbiote.bond(player, from);
+			WebSymbiote.bond(player, from, this.strain());
 			level.sendParticles(ParticleTypes.SQUID_INK, this.getX(), this.getY() + 0.3, this.getZ(), 30, 0.3, 0.2, 0.3, 0.1);
 			this.discard();
+			return;
+		}
+		if (this.strain() == WebSymbioteStrain.RED && foe instanceof Mob mob && this.random.nextFloat() < RED_TAKE_CHANCE
+			&& (KitchenCompat.isZombiePlayer(mob) && !WebBehemoth.isHost(mob) || WebInhabit.takeable(mob) && !this.spurned.contains(mob.getUUID()))) {
+			// the red one: up the tendril and into it, hostile or not
+			this.join(level, mob);
 			return;
 		}
 		level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.HOSTILE, 1.4F, 0.7F);
@@ -453,13 +505,13 @@ public class WebSymbioteBlob extends PathfinderMob {
 		}
 	}
 
-	/** The lash itself: a black tendril snapping out from {@code from} to {@code to}. */
+	/** The lash itself: a tendril (in its strain's colour) snapping out from {@code from} to {@code to}. */
 	private void tendril(ServerLevel level, Vec3 from, Vec3 to) {
 		Vec3 step = to.subtract(from);
 		int n = Math.max(2, (int)(step.length() / 0.25));
 		for (int i = 0; i <= n; i++) {
 			Vec3 at = from.add(step.scale(i / (double)n));
-			level.sendParticles(WebSymbiote.dust(1.2F), at.x, at.y, at.z, 2, 0.04, 0.04, 0.04, 0.0);
+			level.sendParticles(WebSymbioteStrains.dust(this, 1.2F), at.x, at.y, at.z, 2, 0.04, 0.04, 0.04, 0.0);
 		}
 		level.sendParticles(ParticleTypes.SQUID_INK, from.x, from.y, from.z, 12, 0.3, 0.15, 0.3, 0.08);
 	}
@@ -517,7 +569,9 @@ public class WebSymbioteBlob extends PathfinderMob {
 			&& !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
 			return false;
 		}
-		if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypeTags.IS_EXPLOSION)) {
+		if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypeTags.IS_EXPLOSION)
+			|| WebSymbioteStrains.rivals(this, source.getEntity())) {
+			// (a rival symbiote's blows tear into it too)
 			return super.hurtServer(level, source, damage);
 		}
 		// it splashes apart around the blow and flows back together

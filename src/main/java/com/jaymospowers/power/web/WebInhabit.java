@@ -40,6 +40,9 @@ import net.minecraft.world.phys.Vec3;
  * does), but unfit for it, so it wastes away ({@code DECAY} × {@code FOREIGN_HOST_DPS_MULT} of its health a second) and
  * dies long before the end; a peaceful host wastes too, at half that, and is spat out alive. Whenever a
  * host dies, the symbiote drops out where it fell.
+ * <p>
+ * The red strain ({@link WebSymbioteStrains#KIND}) treats every host as a hostile one: a cow or a villager it takes
+ * lashes at everything near, wastes away and dies in it; it is never spat out early. The strain goes back out with it.
  */
 public final class WebInhabit {
 	// ---- tuning ----
@@ -72,9 +75,14 @@ public final class WebInhabit {
 		return entity.hasAttached(HOST);
 	}
 
-	/** Inhabited by a hostile mob: it lashes with tendrils (clients draw them). */
+	/** Inhabited by a hostile mob (or any mob, by the red one): it lashes with tendrils (clients draw them). */
 	public static boolean lashing(Entity entity) {
-		return entity instanceof Enemy && isHost(entity);
+		return isHost(entity) && fierce(entity);
+	}
+
+	/** A host that fights and dies in it: a hostile mob, or anything the red one has taken. */
+	static boolean fierce(Entity host) {
+		return host instanceof Enemy || WebSymbioteStrains.of(host) == WebSymbioteStrain.RED;
 	}
 
 	/**
@@ -116,7 +124,8 @@ public final class WebInhabit {
 			if (isHost(entity) && entity.level() instanceof ServerLevel level) {
 				entity.removeAttached(HOST);
 				com.jaymospowers.core.Oddities.unmark(entity, com.jaymospowers.core.Oddities.SYMBIOTE);
-				WebSymbioteBlob.release(level, entity.position()).spurn(entity);
+				// (out comes the same strain it went in as)
+				WebSymbioteStrains.mark(WebSymbioteBlob.release(level, entity.position()), WebSymbioteStrains.of(entity)).spurn(entity);
 			}
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> HOSTS.clear());
@@ -124,7 +133,13 @@ public final class WebInhabit {
 
 	/** It pours itself over {@code mob}. */
 	static void inhabit(ServerLevel level, Mob mob) {
-		boolean hostile = mob instanceof Enemy;
+		inhabit(level, mob, WebSymbioteStrain.BLACK);
+	}
+
+	/** A symbiote of {@code strain} pours itself over {@code mob} (the red one makes a fighter of anything). */
+	static void inhabit(ServerLevel level, Mob mob, WebSymbioteStrain strain) {
+		WebSymbioteStrains.mark(mob, strain);
+		boolean hostile = fierce(mob);
 		long now = level.getGameTime();
 		int stay = hostile ? HOSTILE_MIN + mob.getRandom().nextInt(HOSTILE_MAX - HOSTILE_MIN + 1)
 			: CALM_MIN + mob.getRandom().nextInt(CALM_MAX - CALM_MIN + 1);
@@ -142,7 +157,7 @@ public final class WebInhabit {
 		Vec3 at = mob.position();
 		double h = mob.getBbHeight();
 		level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y + h * 0.5, at.z, 40, mob.getBbWidth() * 0.5, h * 0.4, mob.getBbWidth() * 0.5, 0.08);
-		level.sendParticles(WebSymbiote.dust(1.6F), at.x, at.y + h * 0.5, at.z, 30, mob.getBbWidth() * 0.5, h * 0.4, mob.getBbWidth() * 0.5, 0.0);
+		level.sendParticles(WebSymbioteStrains.dust(mob, 1.6F), at.x, at.y + h * 0.5, at.z, 30, mob.getBbWidth() * 0.5, h * 0.4, mob.getBbWidth() * 0.5, 0.0);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.SCULK_BLOCK_SPREAD, SoundSource.HOSTILE, 1.3F, 0.5F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.SLIME_SQUISH, SoundSource.HOSTILE, 1.2F, 0.4F);
 		if (hostile) {
@@ -161,7 +176,7 @@ public final class WebInhabit {
 		ServerLevel level = (ServerLevel)host.level();
 		long now = level.getGameTime();
 		long until = host.getAttachedOrElse(HOST, now);
-		if (host instanceof Enemy) {
+		if (fierce(host)) {
 			// lashing at everything near, and wasting away, faster toward the end
 			WebBehemoth.lash(level, host, now);
 			if (now >= until) {
@@ -181,7 +196,7 @@ public final class WebInhabit {
 			host.hurtServer(level, level.damageSources().magic(), host.getMaxHealth() * DECAY * FOREIGN_HOST_DPS_MULT * CALM_DECAY_SHARE);
 		}
 		if (host.getRandom().nextInt(5) == 0) {
-			level.sendParticles(WebSymbiote.dust(0.9F), host.getX(), host.getY() + host.getBbHeight() * 0.5, host.getZ(), 1,
+			level.sendParticles(WebSymbioteStrains.dust(host, 0.9F), host.getX(), host.getY() + host.getBbHeight() * 0.5, host.getZ(), 1,
 				host.getBbWidth() * 0.4, host.getBbHeight() * 0.3, host.getBbWidth() * 0.4, 0.0);
 		}
 		if (host.tickCount % 100 == 0) {
@@ -191,7 +206,9 @@ public final class WebInhabit {
 
 	/** Not good enough: it spits the mob out (reeling, but alive) and drops off to look again. */
 	private static void reject(ServerLevel level, Mob host) {
+		WebSymbioteStrain strain = WebSymbioteStrains.of(host);
 		host.removeAttached(HOST);
+		host.removeAttached(WebSymbioteStrains.KIND);
 		com.jaymospowers.core.Oddities.unmark(host, com.jaymospowers.core.Oddities.SYMBIOTE);
 		host.removeAttached(WebBehemoth.STRIKE);
 		host.removeAttached(WebBehemoth.SLAM);
@@ -199,6 +216,6 @@ public final class WebInhabit {
 		host.addEffect(new MobEffectInstance(MobEffects.NAUSEA, REJECT_REEL, 0));
 		host.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, REJECT_REEL, 1));
 		host.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, REJECT_REEL, 0));
-		WebSymbioteBlob.release(level, host.position()).spurn(host);
+		WebSymbioteStrains.mark(WebSymbioteBlob.release(level, host.position()), strain).spurn(host);
 	}
 }

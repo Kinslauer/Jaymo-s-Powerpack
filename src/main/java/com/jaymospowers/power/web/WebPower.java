@@ -192,6 +192,8 @@ public final class WebPower implements Power {
 	public static EntityType<WebBall> WEB_BALL;
 	/** The symbiote's goo, found at the heart of a meteor crater. */
 	public static net.minecraft.world.level.block.Block GOO;
+	/** The red symbiote's goo ("Red Ooze"), at the heart of the rarer red craters. */
+	public static net.minecraft.world.level.block.Block RED_GOO;
 
 	private static final class State {
 		/** Which hands have a swing web stuck ({@link WebNet#MAIN}, {@link WebNet#OFF}). */
@@ -280,7 +282,17 @@ public final class WebPower implements Power {
 			.sound(net.minecraft.world.level.block.SoundType.HONEY_BLOCK)
 			.pushReaction(net.minecraft.world.level.material.PushReaction.IMMOVEABLE)
 			.setId(gooKey)));
+		ResourceKey<net.minecraft.world.level.block.Block> redGooKey = ResourceKey.create(Registries.BLOCK, JaymosPowers.id("web_symbiote_red_goo"));
+		RED_GOO = Registry.register(BuiltInRegistries.BLOCK, redGooKey, new WebSymbioteGooBlock(net.minecraft.world.level.block.state.BlockBehaviour.Properties.of()
+			.mapColor(net.minecraft.world.level.material.MapColor.COLOR_RED)
+			.strength(-1.0F, 3600000.0F)
+			.noLootTable()
+			.noOcclusion()
+			.sound(net.minecraft.world.level.block.SoundType.HONEY_BLOCK)
+			.pushReaction(net.minecraft.world.level.material.PushReaction.IMMOVEABLE)
+			.setId(redGooKey), WebSymbioteStrain.RED));
 		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("web_crater"), WebCraterFeature.CODEC);
+		Registry.register(BuiltInRegistries.FEATURE_TYPE, JaymosPowers.id("web_red_crater"), WebRedCraterFeature.CODEC);
 		net.fabricmc.fabric.api.biome.v1.BiomeModifications.addFeature(
 			net.fabricmc.fabric.api.biome.v1.BiomeSelectors.foundInOverworld()
 				.and(net.fabricmc.fabric.api.biome.v1.BiomeSelectors.tag(net.minecraft.tags.BiomeTags.IS_OCEAN).negate())
@@ -289,6 +301,15 @@ public final class WebPower implements Power {
 				.and(net.fabricmc.fabric.api.biome.v1.BiomeSelectors.tag(net.minecraft.tags.BiomeTags.IS_BEACH).negate()),
 			net.minecraft.world.level.levelgen.GenerationStep.Decoration.VEGETAL_DECORATION,
 			ResourceKey.create(Registries.PLACED_FEATURE, JaymosPowers.id("web_crater")));
+		// the red symbiote's craters: the same sites, far rarer (WebSymbioteStrains.RED_CRATER_RARITY)
+		net.fabricmc.fabric.api.biome.v1.BiomeModifications.addFeature(
+			net.fabricmc.fabric.api.biome.v1.BiomeSelectors.foundInOverworld()
+				.and(net.fabricmc.fabric.api.biome.v1.BiomeSelectors.tag(net.minecraft.tags.BiomeTags.IS_OCEAN).negate())
+				.and(net.fabricmc.fabric.api.biome.v1.BiomeSelectors.tag(net.minecraft.tags.BiomeTags.IS_DEEP_OCEAN).negate())
+				.and(net.fabricmc.fabric.api.biome.v1.BiomeSelectors.tag(net.minecraft.tags.BiomeTags.IS_RIVER).negate())
+				.and(net.fabricmc.fabric.api.biome.v1.BiomeSelectors.tag(net.minecraft.tags.BiomeTags.IS_BEACH).negate()),
+			net.minecraft.world.level.levelgen.GenerationStep.Decoration.VEGETAL_DECORATION,
+			ResourceKey.create(Registries.PLACED_FEATURE, JaymosPowers.id("web_red_crater")));
 
 		WebNet.register();
 		WebCut.register();
@@ -1314,6 +1335,15 @@ public final class WebPower implements Power {
 				new ItemStack(WEB_BALL_ITEM), player, 0.0F, PELLET_SPEED, 0.3F);
 			state.pelletReady = now + PELLET_COOLDOWN;
 			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 0.6F, 1.9F);
+			return;
+		}
+		if (WebSymbioteStrains.mends(player)) {
+			// the white symbiote's Mending Shot: it heals what it hits (WebSymbioteStrains.mend)
+			Projectile.spawnProjectileFromRotation((lvl, owner, stack) -> new WebBall(lvl, owner, stack).mending(), level,
+				new ItemStack(WEB_BALL_ITEM), player, 0.0F, SHOT_SPEED, 0.5F);
+			player.setAttached(COOLDOWNS, new WebCooldowns(cooldowns.zip(), now + SHOT_COOLDOWN, cooldowns.yank()));
+			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 1.0F, 1.5F);
+			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.6F, 1.6F);
 			return;
 		}
 		Projectile.spawnProjectileFromRotation((lvl, owner, stack) -> new WebBall(lvl, owner, stack).charged(charge), level,

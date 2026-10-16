@@ -70,8 +70,8 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		WebFeral.applyModel(this.getParentModel(), state);
 		WebSuitGrowth.shift(this.getParentModel(), state);
 		this.getParentModel().head.translateAndRotate(poseStack);
-		collector.submitModel(this.model, state, poseStack, RenderTypes.entityCutout(TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY,
-			state.outlineColor);
+		collector.submitModel(this.model, state, poseStack, RenderTypes.entityCutout(WebStrainLook.texture(TEXTURE, state)), lightCoords,
+			OverlayTexture.NO_OVERLAY, state.outlineColor);
 		Float eating = state.getData(WebSymbioteClient.EATING);
 		if (eating != null) {
 			tongue(poseStack, collector, state, eating);
@@ -125,7 +125,7 @@ final class WebMouthLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 		poseStack.pushPose();
 		this.model.root.translateAndRotate(poseStack);
 		this.model.jaw.translateAndRotate(poseStack);
-		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebTubes.TEXTURE), (pose, buffer) ->
+		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebStrainLook.texture(WebTubes.TEXTURE, state)), (pose, buffer) ->
 			// from the floor of the mouth, aimed level out of the dropped jaw
 			WebHulk.tongue(buffer, pose, new net.minecraft.world.phys.Vec3(0.0, -0.5, -2.0), -0.05F - jawAngle * 0.5F, TONGUE_PIECES,
 				TONGUE_PIECE, TONGUE_WIDTH, TONGUE_THICK, age, drawn, whip, TONGUE_DROOP, light));

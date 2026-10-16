@@ -166,8 +166,8 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 		float back = s.age() > WebMorph.HIT ? ease((s.age() - WebMorph.HIT - 2.0F) / 5.0F) : 0.0F;
 		float x, y;
 		switch (s.weapon()) {
-			case WebMorph.MACE -> {
-				// reared up over the head, then brought down through the target and on a little
+			case WebMorph.MACE, WebMorph.AXE -> {
+				// reared up over the head, then brought down through the target and on a little (the axe chops the same way)
 				float wound = -2.95F;
 				x = Mth.lerp(sw, wound, aimX + 0.35F);
 				y = aimY * sw;
@@ -286,7 +286,7 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 		poseStack.pushPose();
 		parent.root().translateAndRotate(poseStack);
 		arm.translateAndRotate(poseStack);
-		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebTubes.TEXTURE), (pose, buffer) -> {
+		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebStrainLook.texture(WebTubes.TEXTURE, state)), (pose, buffer) -> {
 			Vec3 hand = new Vec3(handX, handY, 0.0);
 			Vec3 prev = hand;
 			for (int i = 1; i <= PIECES; i++) {
@@ -326,7 +326,7 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 			poseStack.pushPose();
 			parent.root().translateAndRotate(poseStack);
 			parent.body.translateAndRotate(poseStack);
-			collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebTubes.TEXTURE), (pose, buffer) -> {
+			collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebStrainLook.texture(WebTubes.TEXTURE, state)), (pose, buffer) -> {
 				for (int i = 0; i < COURSES.length; i++) {
 					float[] c = COURSES[i];
 					Vec3 from = new Vec3(c[0] * mirror, c[1], c[2]), to = new Vec3(c[3] * mirror, c[4], c[5]);
@@ -348,7 +348,7 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 		poseStack.pushPose();
 		parent.root().translateAndRotate(poseStack);
 		arm.translateAndRotate(poseStack);
-		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebTubes.TEXTURE), (pose, buffer) -> {
+		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebStrainLook.texture(WebTubes.TEXTURE, state)), (pose, buffer) -> {
 			// down the arm: one lump on the front, the back and the outside, one after another
 			float start = WebMorph.COURSE_TICKS - 1.5F;
 			Vec3[][] runs = {
@@ -496,6 +496,43 @@ public final class WebMorphLayer extends RenderLayer<AvatarRenderState, PlayerMo
 							WebTubes.BONE, light);
 					}
 				}
+			}
+			case WebMorph.PALM -> {
+				// the white strain's: a short wrist, then a broad flat open hand, the fingers pressed together, the heel pale
+				Vec3 wrist = at.add(dir.scale(2.0 * g));
+				WebTubes.cord(buffer, pose, px(at), px(wrist), 1.1 * g / 16.0, 1.4 * g / 16.0, WebTubes.BLACK, light);
+				Vec3 heel = wrist.add(dir.scale(1.5 * g));
+				// the palm: wide across the swing, thin through it
+				WebTubes.prism(buffer, pose, px(wrist), px(heel), sideways, 3.2 * g / 16.0, 1.0 * g / 16.0, 4.2 * g / 16.0, 1.0 * g / 16.0, WebTubes.BONE,
+					light);
+				Vec3 fingers = heel.add(dir.scale(5.0 * g));
+				WebTubes.prism(buffer, pose, px(heel), px(fingers), sideways, 4.2 * g / 16.0, 0.9 * g / 16.0, 3.4 * g / 16.0, 0.6 * g / 16.0, WebTubes.SHEEN,
+					light);
+				// four rounded fingertips
+				for (int i = 0; i < 4; i++) {
+					Vec3 f = fingers.add(sideways.scale((i - 1.5) * 1.8 * g));
+					WebTubes.cord(buffer, pose, px(f.add(dir.scale(-0.8 * g))), px(f.add(dir.scale(1.2 * g))), 0.8 * g / 16.0, 0.5 * g / 16.0,
+						WebTubes.SHEEN, light);
+				}
+			}
+			case WebMorph.AXE -> {
+				// the red strain's: a long haft, and a broad bearded blade out to one side, its cutting edge pale and hooked
+				Vec3 haft = at.add(dir.scale(7.0 * g));
+				WebTubes.cord(buffer, pose, px(at), px(haft), 1.0 * g / 16.0, 1.2 * g / 16.0, WebTubes.BLACK, light);
+				Vec3 out = across.scale(-s.side());
+				Vec3 head = haft.add(dir.scale(-3.5 * g));
+				// the cheek of the blade, flaring wider as it goes out from the haft
+				WebTubes.prism(buffer, pose, px(head), px(head.add(out.scale(6.0 * g))), dir, 2.0 * g / 16.0, 0.6 * g / 16.0, 4.2 * g / 16.0,
+					0.45 * g / 16.0, WebTubes.SHEEN, light);
+				// the edge: a pale arc down the blade's far side, its beard hooked back toward you
+				Vec3 edgeTop = head.add(out.scale(6.2 * g)).add(dir.scale(3.8 * g));
+				Vec3 edgeBottom = head.add(out.scale(6.2 * g)).add(dir.scale(-4.6 * g));
+				WebTubes.prism(buffer, pose, px(edgeTop), px(edgeBottom), out, 0.6 * g / 16.0, 0.3 * g / 16.0, 0.6 * g / 16.0, 0.3 * g / 16.0,
+					WebTubes.BONE, light);
+				WebTubes.cord(buffer, pose, px(edgeBottom), px(edgeBottom.add(out.scale(-2.2 * g)).add(dir.scale(-1.6 * g))), 0.6 * g / 16.0,
+					0.05 / 16.0, WebTubes.BONE, light);
+				// a spike out of the back of the head
+				WebTubes.cord(buffer, pose, px(head), px(head.add(out.scale(-3.5 * g))), 0.9 * g / 16.0, 0.05 / 16.0, WebTubes.BONE, light);
 			}
 			case WebMorph.HOOK -> {
 				// a knob of a palm, and three hooks out of it curving forward, out and back like a grapple, bone at the points

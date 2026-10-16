@@ -73,6 +73,8 @@ travel forward, never a blow thrown from standing still. The **hold combo** (Abi
 
 ## C. Bomb glider (Armory)
 
+**Paused (Andy, 2026-10-16):** a half-written draft is saved in the project files under `glider-wip/` (not in the mod).
+
 Andy: "make it just dynamite it drops." An original flying wing you stand on (a bat-winged board, our own model).
 - **Item:** crafted from iron, phantom membrane and a redstone block; placed like a boat, ridden standing.
 - **Flying:** WASD steers, Jump climbs, Sneak dives, it glides forward on its own; out of fuel it only glides down.

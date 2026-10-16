@@ -34,13 +34,25 @@ final class WebLineRenderer {
 
 	/** The colour at {@code t} (0-1) along a symbiote's web, right now. */
 	private static int sheen(float t) {
+		return sheen(t, lineStrain);
+	}
+
+	/**
+	 * The strain of the symbiote whose lines are being drawn right now (set for each player in {@link #render}'s
+	 * player loop, black everywhere else): its lines take that strain's colours ({@link WebStrainLook#line}). Read it
+	 * into a local before a deferred geometry lambda, never inside one.
+	 */
+	private static com.jaymospowers.power.web.WebSymbioteStrain lineStrain = com.jaymospowers.power.web.WebSymbioteStrain.BLACK;
+
+	/** {@link #sheen(float)} for {@code strain}'s lines. */
+	private static int sheen(float t, com.jaymospowers.power.web.WebSymbioteStrain strain) {
 		Minecraft minecraft = Minecraft.getInstance();
 		float time = minecraft.level == null ? 0.0F : (minecraft.level.getGameTime() + minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false)) * SHEEN_SPEED;
 		float phase = time - (float)Math.floor(time);
 		float d = Math.abs(t - phase);
 		d = Math.min(d, 1.0F - d);
 		float glow = Math.max(0.0F, 1.0F - d / SHEEN_WIDTH);
-		return net.minecraft.util.ARGB.srgbLerp(glow * glow * 0.8F, DARK, SHEEN);
+		return net.minecraft.util.ARGB.srgbLerp(glow * glow * 0.8F, WebStrainLook.line(strain, DARK), WebStrainLook.lineSheen(strain, SHEEN));
 	}
 	/** Lines are drawn this much thicker than vanilla's fishing line. */
 	private static final float WIDTH_SCALE = 1.4F;
@@ -120,6 +132,7 @@ final class WebLineRenderer {
 		Vec3 u = Math.abs(dir.y) < 0.95 ? dir.cross(new Vec3(0.0, 1.0, 0.0)).normalize() : dir.cross(new Vec3(1.0, 0.0, 0.0)).normalize();
 		Vec3 v = dir.cross(u).normalize();
 		int steps = Math.max(2, (int)Math.ceil(length / ROPE_STEP));
+		int ropeDark = ropeDark(lineStrain), ropeSheen = ropeSheen(lineStrain);
 		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.debugQuads(), (pose, buffer) -> {
 			for (int k = 0; k < strands; k++) {
 				double phase = k * Math.PI * 2.0 / strands;
@@ -141,7 +154,7 @@ final class WebLineRenderer {
 							// lit from above: the side whose middle faces up gets the sheen
 							double a = (j + 0.5) * Math.PI * 2.0 / ROPE_SIDES;
 							double up = u.scale(Math.cos(a)).add(v.scale(Math.sin(a))).y;
-							int color = shade(up);
+							int color = shade(up, ropeDark, ropeSheen);
 							quad(buffer, pose, prev[j], prev[n], ring[n], ring[j], color);
 						}
 					}
@@ -151,11 +164,27 @@ final class WebLineRenderer {
 		});
 	}
 
-	private static int shade(double up) {
+	private static int ropeDark(com.jaymospowers.power.web.WebSymbioteStrain strain) {
+		return switch (strain) {
+			case WHITE -> WebStrainLook.WHITE_ROPE;
+			case RED -> WebStrainLook.RED_ROPE;
+			default -> ROPE_DARK;
+		};
+	}
+
+	private static int ropeSheen(com.jaymospowers.power.web.WebSymbioteStrain strain) {
+		return switch (strain) {
+			case WHITE -> WebStrainLook.WHITE_ROPE_SHEEN;
+			case RED -> WebStrainLook.RED_ROPE_SHEEN;
+			default -> ROPE_SHEEN;
+		};
+	}
+
+	private static int shade(double up, int dark, int sheen) {
 		float light = (float)Math.max(0.0, up);
-		int r = (int)Mth.lerp(light, ROPE_DARK >> 16 & 0xFF, ROPE_SHEEN >> 16 & 0xFF);
-		int g = (int)Mth.lerp(light, ROPE_DARK >> 8 & 0xFF, ROPE_SHEEN >> 8 & 0xFF);
-		int b = (int)Mth.lerp(light, ROPE_DARK & 0xFF, ROPE_SHEEN & 0xFF);
+		int r = (int)Mth.lerp(light, dark >> 16 & 0xFF, sheen >> 16 & 0xFF);
+		int g = (int)Mth.lerp(light, dark >> 8 & 0xFF, sheen >> 8 & 0xFF);
+		int b = (int)Mth.lerp(light, dark & 0xFF, sheen & 0xFF);
 		return 0xFF000000 | r << 16 | g << 8 | b;
 	}
 
@@ -177,7 +206,7 @@ final class WebLineRenderer {
 	static void splat(LevelRenderContext context, Vec3 at, Vec3 dir, float width, boolean dark, double size) {
 		Vec3 across = Math.abs(dir.y) < 0.95 ? dir.cross(new Vec3(0.0, 1.0, 0.0)).normalize() : dir.cross(new Vec3(1.0, 0.0, 0.0)).normalize();
 		Vec3 across2 = dir.cross(across).normalize();
-		int color = dark ? DARK : SPLAT_COLOR;
+		int color = dark ? WebStrainLook.line(lineStrain, DARK) : SPLAT_COLOR;
 		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.lines(), (pose, buffer) -> {
 			Vec3[] inner = new Vec3[SPLAT_SPOKES];
 			Vec3[] outer = new Vec3[SPLAT_SPOKES];
@@ -216,8 +245,11 @@ final class WebLineRenderer {
 					continue;
 				}
 				Vec3 at = handPos(minecraft, player, handIndex, 1.0F).lerp(end, random.nextDouble());
-				level.addParticle(GOO, at.x, at.y - 0.05, at.z, 0.0, -0.08, 0.0);
-				if (random.nextInt(4) == 0) {
+				com.jaymospowers.power.web.WebSymbioteStrain strain = com.jaymospowers.power.web.WebSymbioteStrains.of(player);
+				level.addParticle(strain == com.jaymospowers.power.web.WebSymbioteStrain.BLACK ? GOO
+					: new net.minecraft.core.particles.DustParticleOptions(com.jaymospowers.power.web.WebSymbioteStrains.color(strain), 1.3F),
+					at.x, at.y - 0.05, at.z, 0.0, -0.08, 0.0);
+				if (strain == com.jaymospowers.power.web.WebSymbioteStrain.BLACK && random.nextInt(4) == 0) {
 					level.addParticle(net.minecraft.core.particles.ParticleTypes.FALLING_OBSIDIAN_TEAR, at.x, at.y - 0.05, at.z, 0.0, 0.0, 0.0);
 				}
 			}
@@ -273,8 +305,9 @@ final class WebLineRenderer {
 			}
 		}
 		for (Player player : level.players()) {
-			// a symbiote's webs are black, with a faint sheen running along them
+			// a symbiote's webs are black, with a faint sheen running along them (white or red for those strains)
 			boolean dark = com.jaymospowers.power.web.WebSymbiote.suitShown(player);
+			lineStrain = com.jaymospowers.power.web.WebSymbioteStrains.of(player);
 			// both webs on one catch (a Web Whip): one web, held in both hands
 			boolean twoHanded = WebArms.twoHanded(player);
 			for (int handIndex = WebNet.MAIN; handIndex <= (twoHanded ? WebNet.MAIN : WebNet.OFF); handIndex++) {
@@ -347,6 +380,7 @@ final class WebLineRenderer {
 				}
 			}
 		}
+		lineStrain = com.jaymospowers.power.web.WebSymbioteStrain.BLACK;
 	}
 
 	private static void latchCords(LevelRenderContext context, Minecraft minecraft, Player player,
@@ -398,7 +432,7 @@ final class WebLineRenderer {
 		float out = WebGrowth.fraction(((long)player.getId() << 24) ^ ((long)heldId << 2) ^ handIndex ^ 0x4000_0000_0000L, to, path,
 			com.jaymospowers.power.web.WebTendrils.TENDRIL_SPEED * path / Math.max(0.5, root.distanceTo(to)), true);
 		double reach = out * pieces;
-		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.entityCutout(TENDRIL_TEXTURE), (pose, buffer) -> {
+		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.entityCutout(WebStrainLook.texture(TENDRIL_TEXTURE, com.jaymospowers.power.web.WebSymbioteStrains.of(player))), (pose, buffer) -> {
 			for (int i = 0; i < pieces && i < reach; i++) {
 				double r0 = radius * (1.0 - 0.45 * i / pieces);
 				double r1 = radius * (1.0 - 0.45 * (i + 1) / pieces);
@@ -466,7 +500,7 @@ final class WebLineRenderer {
 				strands[k][i] = p;
 			}
 		}
-		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.entityCutout(TENDRIL_TEXTURE), (pose, buffer) -> {
+		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.entityCutout(WebStrainLook.texture(TENDRIL_TEXTURE, com.jaymospowers.power.web.WebSymbioteStrains.of(player))), (pose, buffer) -> {
 			for (Vec3[] strand : strands) {
 				for (int i = 0; i < pieces; i++) {
 					double r0 = SHEATH_RADIUS * scale * (1.0 - 0.6 * i / pieces) * (big ? 1.5 : 1.0);
@@ -567,8 +601,8 @@ final class WebLineRenderer {
 		double billow = BILLOW * brake;
 		Vec3 armpit = shoulder.lerp(hip, 0.15);
 		Vec3 n = normal;
-		int color = dark ? (WING_ALPHA << 24) | (DARK & 0xFFFFFF) : (WING_ALPHA << 24) | (COLOR & 0xFFFFFF);
-		int edgeColor = dark ? (WING_EDGE_ALPHA << 24) | (DARK & 0xFFFFFF) : (WING_EDGE_ALPHA << 24) | (COLOR & 0xFFFFFF);
+		int color = dark ? (WING_ALPHA << 24) | (WebStrainLook.line(lineStrain, DARK) & 0xFFFFFF) : (WING_ALPHA << 24) | (COLOR & 0xFFFFFF);
+		int edgeColor = dark ? (WING_EDGE_ALPHA << 24) | (WebStrainLook.line(lineStrain, DARK) & 0xFFFFFF) : (WING_EDGE_ALPHA << 24) | (COLOR & 0xFFFFFF);
 		// a point of the membrane: s along its spoke (0 armpit, 1 edge), e along the edge (0 shoulder, 1 hand, 2 hip)
 		java.util.function.BiFunction<Double, Double, Vec3> at = (s, e) -> {
 			Vec3 edge = e <= 1.0 ? shoulder.lerp(tip, e) : tip.lerp(hip, e - 1.0);
@@ -717,13 +751,14 @@ final class WebLineRenderer {
 		for (int i = 0; i <= SEGMENTS; i++) {
 			points[i] = shape.at((double)i / SEGMENTS);
 		}
+		com.jaymospowers.power.web.WebSymbioteStrain strain = lineStrain;
 		context.submitNodeCollector().submitCustomGeometry(poseStack, RenderTypes.lines(), (pose, buffer) -> {
 			for (int i = 0; i < SEGMENTS; i++) {
 				Vec3 d = points[i + 1].subtract(points[i]);
 				if (d.lengthSqr() < 1.0E-8) {
 					continue;
 				}
-				segment(buffer, pose, points[i], points[i + 1], d.normalize(), dark ? sheen((i + 0.5F) / SEGMENTS) : COLOR, width);
+				segment(buffer, pose, points[i], points[i + 1], d.normalize(), dark ? sheen((i + 0.5F) / SEGMENTS, strain) : COLOR, width);
 			}
 		});
 		if (stuck) {

@@ -654,6 +654,8 @@ public final class ChronoPower implements Power {
 	 */
 	/** Time Bloom's mending for everything living around you: players, villagers, animals and monsters alike. */
 	private static void bloomHealNearby(ServerPlayer player, ServerLevel level) {
+		// a symbiote mid-takeover feels the bloom (WebSymbioteStrains: purifying)
+		com.jaymospowers.power.web.WebSymbioteStrains.purifyAround(player, BLOOM_HEAL_RADIUS, com.jaymospowers.power.web.WebSymbioteStrains.Half.TIME);
 		AABB area = player.getBoundingBox().inflate(BLOOM_HEAL_RADIUS);
 		for (net.minecraft.world.entity.LivingEntity living : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, area,
 			e -> e != player && e.isAlive() && !e.isSpectator() && e.getHealth() < e.getMaxHealth()
