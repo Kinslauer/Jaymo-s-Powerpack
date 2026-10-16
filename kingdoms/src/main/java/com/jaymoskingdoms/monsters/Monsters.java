@@ -20,6 +20,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -38,6 +39,11 @@ import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * (0.5.56) The monsters of legend, after Fangs 'n Claws' list: the werewolf, the ogres (green, cave, fire), the wraiths
@@ -135,10 +141,20 @@ public final class Monsters {
 		}
 		BlockState state = level.getBlockState(pos);
 		float yaw = state.hasProperty(ChestBlock.FACING) ? state.getValue(ChestBlock.FACING).toYRot() : 0.0F;
-		chest.unpackLootTable(player);
+		// Roll the loot ourselves: a Lootr chest is a ChestBlockEntity whose unpackLootTable does nothing (each player's
+		// share lives elsewhere), so unpacking it left the mimic empty-handed and the chest gone for everyone.
 		List<ItemStack> loot = new ArrayList<>();
 		for (int i = 0; i < chest.getContainerSize(); i++) {
 			loot.add(chest.getItem(i).copy());
+		}
+		ResourceKey<LootTable> table = chest.getLootTable();
+		if (table != null) {
+			SimpleContainer rolled = new SimpleContainer(chest.getContainerSize());
+			LootParams params = new LootParams.Builder(level).withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pos))
+				.withLuck(player.getLuck()).withParameter(LootContextParams.THIS_ENTITY, player).create(LootContextParamSets.CHEST);
+			level.getServer().reloadableRegistries().getLootTable(table).fill(rolled, params, chest.getLootTableSeed());
+			loot.addAll(rolled.getItems());
+			chest.setLootTable(null);
 		}
 		chest.clearContent();
 		level.removeBlock(pos, false);
