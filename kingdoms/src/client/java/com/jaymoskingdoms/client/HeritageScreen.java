@@ -35,6 +35,8 @@ final class HeritageScreen extends Screen {
 	/** Pixels the pane moves for one notch of the wheel; its own slow scroll on hover (pixels a second), and the pause at each end (ms). */
 	static final int SCROLL_STEP = 12, AUTO_SPEED = 14;
 	static final long AUTO_PAUSE_MS = 1500L;
+	/** (0.7.80) The lead line under the story ("Your heritage gives..."): shown this long the first time the screen opens, fading out over the last of it (ms). */
+	static final long LEAD_MS = 5000L, LEAD_FADE_MS = 1500L;
 
 	private final boolean forced;
 	private Heritage.@Nullable Kind picked;
@@ -49,6 +51,8 @@ final class HeritageScreen extends Screen {
 	/** The server asked for a heritage that can't be put off: the screen comes back whenever it's shut. */
 	private static boolean owed;
 	private static long quietUntil;
+	/** When the lead line first showed (0: not yet); once gone it stays gone, whichever heritage or screen. */
+	private static long leadFrom;
 
 	HeritageScreen(boolean forced) {
 		super(Component.translatable("gui.jaymoskingdoms.heritage.title"));
@@ -201,8 +205,9 @@ final class HeritageScreen extends Screen {
 		}
 		List<Component> text = new ArrayList<>();
 		text.add(Component.translatable("heritage.jaymoskingdoms." + kind.key() + ".desc"));
-		if (this.picked == null) {
-			text.add(Component.translatable("gui.jaymoskingdoms.heritage.lead").withColor(Ui.HINT));
+		int lead = leadColor();
+		if (this.picked == null && lead != 0) {
+			text.add(Component.translatable("gui.jaymoskingdoms.heritage.lead").withColor(lead));
 		}
 		Component name = Component.translatable("heritage.jaymoskingdoms." + kind.key());
 		int storyLines = Ui.detailLines(this.font, pw, name, text);
@@ -245,6 +250,21 @@ final class HeritageScreen extends Screen {
 			return true;
 		}
 		return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+	}
+
+	/** The lead line's colour now (fading from the hint grey into the panel), or 0 once its time is up. */
+	private static int leadColor() {
+		long now = System.currentTimeMillis();
+		if (leadFrom == 0L) {
+			leadFrom = now;
+		}
+		long left = LEAD_MS - (now - leadFrom);
+		if (left <= 0L) {
+			return 0;
+		}
+		float f = Math.min(1.0F, left / (float)LEAD_FADE_MS);
+		int r = Math.round(0x10 + (0x70 - 0x10) * f), g = Math.round(0x10 + (0x70 - 0x10) * f), b = Math.round(0x18 + (0x80 - 0x18) * f);
+		return r << 16 | g << 8 | Math.max(1, b);
 	}
 
 	/** Pointing at a pane that runs long scrolls it slowly down, waits, and goes back to the top, over and over. */
