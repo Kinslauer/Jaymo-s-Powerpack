@@ -5,6 +5,61 @@ of each arc, and get a boost if you let go on the upswing. You keep that speed i
 fire again mid-air to chain swings. Three utility webs round out the kit. Accent colour `0xE0303A`; the icon is a
 cobweb.
 
+## Braided webs, a true rope, web shooters (0.12.3)
+Andy, on the swinging video: "I like the web design, and web shooter idea", and earlier "remake as much as possible,
+while retaining our tethers, it should NOT attach to the air". That mod is someone else's: these are our own code and
+art after its ideas. Webs still only stick to real blocks and creatures (`WebAnchors`' rules are unchanged).
+- **Braided lines (`WebLineRenderer.braid`):** a web line is a white rope of strands twisting round each other (a turn
+  every `BRAID_TURN` 0.9 blocks), each a camera-facing ribbon of `textures/entity/web_rope.png` (solid down the middle,
+  see-through at its edges, lit by the world so it isn't glowing at night), gathered into one at the hand and at the
+  splat (`BRAID_GATHER`), with fine fibres fraying off it (two-segment translucent wisps placed by a hash, swaying).
+  A web shooter's line is the full rope: `SHOOTER_STRANDS` 3, `SHOOTER_STRAND_WIDTH` 0.05, `SHOOTER_TWIST` 0.032, a
+  fibre every `SHOOTER_FIBRE_EVERY` 0.5 blocks, a 1.3× splat. The power's own organic web (no shooters, or dry) is
+  thinner and plainer: 2 strands, 0.03 wide, a fibre every 1.4 blocks. Hitch lines and weblines are organic braids.
+  The rope sim, the snaking shot, twang, hum and thinning all still shape it (a stretched line's strands thin). Past
+  `BRAID_FAR` 72 blocks a line falls back to the old flat line; each line is at most `BRAID_MAX_PIECES` 160 pieces
+  per strand, so several swingers stay cheap. The symbiote's black corded ropes were already a 3-strand twist and are
+  unchanged; spent (let-go) lines still fall as thin fading lines.
+- **A true rope (`WebSwing`):** the rope is no longer a spring. Slack (closer than its length) it does nothing at all;
+  taut (|body - anchor| >= rope length) the body is put back on the sphere of that length round the anchor and only the
+  velocity outward along the line is removed (v -= (v·n)n with n pointing away from the anchor, only when v·n > 0), so
+  the arc keeps all its speed. On the web nothing but gravity acts otherwise: vanilla's air drag is undone (÷0.91 and
+  ÷0.98) and `SWING_DRAG` is now 1.0 (was 0.993); the taut swing still loses its little through `PENDULUM_DRAG` 0.996.
+  The correction is a real move (so walls and floors stop it), at most `ROPE_MAX_CATCH` 1.5 blocks a tick (an anchor
+  on something running off, or a hard reel, catches up smoothly), over `ROPE_PASSES` 2 passes for two webs. The
+  height you gain reeling in doesn't cost swing speed, and snapping taut from slack loses the speed it took
+  off along the line (the swing is measured again from there). Gone: `ROPE_SPRING` 0.3 / `ROPE_MAX_PULL` 0.7.
+  Momentum build-up, pumping, Jump thrust and tug, reel in/out, hanging still, two-web swings, the slingshot, jump-off,
+  the release boost and the active-swing pose are untouched.
+- **Web shooters (`WebShooters`, `WebShooterItem`, `WebCartridgeItem`, client `WebShootersClient`):** built as the
+  *optional upgrade* (the recommended default while Andy chooses; `WebShooters.REQUIRED` = true makes them needed:
+  a dry wrist then clicks and fires nothing, the suit excepted).
+  - **Items:** Web Shooters (one item is the pair; iron ×4, redstone ×2, string: `I I / RSR / I I`) and Web Cartridge
+    (string ×2, slime ball, glass bottle, shapeless; stacks to 16 while full). Art by `tools/gen_web_shooters.py`.
+  - **Wear:** right-click the pair: strapped on both wrists (`jaymospowers:web_shooters` player attachment, saved,
+    synced to everyone). **Take off:** Sneak + right-click with an empty main hand, aiming at nothing (the client sends
+    `web_shooters_off`): the pair comes back into your hand, cartridges in it. **Death:** dropped where you fall like
+    armour (kept on with keepInventory). Smoke users can't wear them, as with the backpack.
+  - **Load:** right-click a cartridge while wearing them: it goes into the emptier wrist and the old one comes back (a
+    part-used cartridge, or the glass bottle of a spent one). Or Sneak + right-click the pair in hand: its empty
+    wrists fill from the fullest cartridges you carry.
+  - **Fluid:** a cartridge holds `CARTRIDGE_SHOTS` 64 webs. Every web the power fires from a hand uses one shot from
+    that wrist: swing webs (R/G, their own wrist), and on the main hand Zip, Yank, weblines, hitches and torch rips
+    (`WebPower.thwip`). A loaded shot clicks (lever click, pitch 1.9) under the thwip; a dry wrist clicks empty
+    (dispenser fail) and the organic web goes out as before.
+  - **Boosts:** a loaded wrist's web reaches `RANGE_SCALE` 1.25× further (swing anchors 48 → 60, assisted 40 → 50,
+    Zip, Yank; the server allows it for anyone wearing them) and pulls `PULL_SCALE` 1.15× harder (reeling in on a
+    swing, Zip's haul). Lines leave the nozzle on the posed wrist (`WebArms.WRIST_LENGTH` 8.5 px down the arm) and
+    are the full braid; the symbiote's suit ignores the shooters entirely (its own black webs, shooters hidden).
+  - **Looks:** a silver cuff round each wrist with a red trigger pad, the nozzle on the palm side and the cartridge on
+    the back while one is in, on everyone in third person (`WebShootersClient.Layer`, on the posed arms) and on your
+    own first-person hands (`WebAvatarRendererMixin.renderHand`). Knobs: `CUFF_*`, `*_ARM_MIDDLE`.
+  - **HUD:** a gauge chip at the end of the Web chip row (above its start on narrow screens): a tank per wrist (left on
+    the left), white, amber under `LOW_SHOTS` 12, dark red when dry; the number is the main hand's shots.
+- **Check first in game:** swing feel on the new rope (it should whip round the bottom with no bounce at the end of
+  the line); reeling in hard against a ceiling; a two-web hang; the braid at night and up close in first person;
+  others seeing your braided line and cuffs; wear / load / take off / die with shooters.
+
 ## Slower momentum (0.8.93)
 Speed has to be built. A swing chain starts capped at 0.55 b/t (was 0.8) and the cap only climbs, 0.003 a tick (was
 0.011 regardless), while you're on a web moving at 85% of it or more: about half a minute of unbroken, well-driven
@@ -285,9 +340,9 @@ Andy: "the weapon on left click should be adapted to the living armor tendrils .
   player.
   - It undoes vanilla's air drag (0.91 horizontal, 0.98 vertical) and applies its own lighter drag, plus a little extra
     gravity.
-  - The rope is a distance constraint from the anchor to hand height (+1.2). If you're past the rope length, the
-    outward velocity is removed and replaced by a springy pull back (rope elasticity). That turns falling into a
-    pendulum arc, and the arc naturally speeds up at the bottom.
+  - The rope is a distance constraint from the anchor to hand height (+1.2). If you're at or past the rope length,
+    you're put back on its sphere and only the outward velocity is removed (a true rope since 0.12.3; it was a springy
+    pull back before). That turns falling into a pendulum arc, and the arc naturally speeds up at the bottom.
   - Release (`detach`) checks how steeply you're moving up. At 35° you get the full forward and up boost; the boost
     falls to 0 at ±35°. A good release plays a sweep sound and a cloud puff.
   - After any release, `tickFlight` keeps horizontal drag at 0.985 instead of 0.91 until you land.
@@ -333,9 +388,9 @@ Andy: "the weapon on left click should be adapted to the living armor tendrils .
 |---|---|---|
 | `ATTACH_SLACK` | 0.94 | The rope starts at this fraction of the anchor distance. Below 1 gives a tug on attach. |
 | `ROPE_MIN` | 3.0 | The shortest you can reel in to. |
-| `ROPE_SPRING` / `ROPE_MAX_PULL` | 0.3 / 0.7 | Rope elasticity: how hard an over-stretched rope pulls back (per block of stretch, per tick), and the cap on that pull. |
+| `ROPE_PASSES` / `ROPE_MAX_CATCH` | 2 / 1.5 | The true rope (0.12.3): passes a tick (two webs settle), and the most it moves you back onto its length in a tick. |
 | `SWING_GRAVITY` | 0.025 | Extra gravity while swinging, on top of vanilla's 0.08. More gives faster, heavier arcs. |
-| `SWING_DRAG` | 0.993 | Velocity kept per tick on the web. |
+| `SWING_DRAG` | 1.0 | Velocity kept per tick on the web, after vanilla's drag is undone (1 = gravity only; was 0.993). |
 | `PUMP` | 0.03 | Speed added per tick by holding W on the downswing. |
 | `REEL_IN` / `LET_OUT` | 0.45 / 0.35 | Rope change per tick with Jump / Sneak. |
 | `MAX_SPEED` | 2.6 | Speed cap in blocks/tick (sprinting is about 0.28). |
