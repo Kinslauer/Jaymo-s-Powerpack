@@ -59,6 +59,11 @@ final class WebTendrilWalk {
 	 */
 	static final double STRIDE_REACH = 4.5, STRIDE_GROUND = 4.0;
 	private static final double[][] STRIDE_DIRS = {{0.8, -1.0, 0.7}, {-0.8, -1.0, 0.7}, {0.8, -1.0, -0.6}, {-0.8, -1.0, -0.6}};
+	/**
+	 * With a ceiling overhead (within {@code STRIDE_REACH}), the front pair reach up and grab it instead, the way Tendril
+	 * Grab's tethers bite a wall, and walk along it overhead while the back pair walk the ground: you still only walk.
+	 */
+	private static final double[][] CEILING_DIRS = {{0.55, 1.0, 0.5}, {-0.55, 1.0, 0.5}};
 	/** Striding, a tip trails its spot this far (blocks) before it steps, and steps this high. */
 	private static final double STRIDE_STEP_FAR = 1.1;
 	private static final float STRIDE_STEP_LIFT = 0.9F;
@@ -173,6 +178,7 @@ final class WebTendrilWalk {
 			stride = true;
 			normal = new Vec3(0.0, 1.0, 0.0);
 		}
+		boolean ceiling = stride && ceilingAbove(player, STRIDE_REACH * player.getScale());
 		Walk walk = WALKS.computeIfAbsent(player.getId(), id -> new Walk());
 		if (WALKS.size() > 64) {
 			WALKS.keySet().removeIf(id -> id != player.getId() && (player.level().getEntity(id) == null));
@@ -204,8 +210,15 @@ final class WebTendrilWalk {
 		for (int i = 0; i < WALKERS.length; i++) {
 			Leg leg = walk.legs[i];
 			Vec3 legOut = Vec3.ZERO;
+			Vec3 away = normal;
 			Vec3 spot;
-			if (stride) {
+			if (stride && ceiling && i < CEILING_DIRS.length) {
+				// up to the ceiling: it bites in overhead and walks along it
+				double[] d = CEILING_DIRS[i];
+				legOut = left.scale(-d[0]).add(0.0, d[1], 0.0).add(ahead.scale(d[2])).normalize();
+				spot = grab(player, middle.add(lead), legOut, STRIDE_REACH * scale);
+				away = new Vec3(0.0, -1.0, 0.0);
+			} else if (stride) {
 				// reaching out round you and down for whatever there is to grab
 				double[] d = STRIDE_DIRS[i];
 				legOut = left.scale(-d[0]).add(0.0, d[1], 0.0).add(ahead.scale(d[2])).normalize();
@@ -252,7 +265,7 @@ final class WebTendrilWalk {
 					}
 				} else {
 					float e = t * t * (3.0F - 2.0F * t);
-					tip = leg.from.lerp(leg.to, e).add(normal.scale((stride ? STRIDE_STEP_LIFT : STEP_LIFT) * scale * Mth.sin(t * Mth.PI)));
+					tip = leg.from.lerp(leg.to, e).add(away.scale((stride ? STRIDE_STEP_LIFT : STEP_LIFT) * scale * Mth.sin(t * Mth.PI)));
 				}
 			}
 			// from the tendril's root on the back, in the body's model space
@@ -265,7 +278,7 @@ final class WebTendrilWalk {
 			out[index * 6 + 1] = (float)-chord.y;
 			out[index * 6 + 2] = (float)-chord.dot(ahead);
 			// the way it bows: off the surface (striding, up and out to its own side)
-			Vec3 bow = stride ? normal.add(legOut.multiply(1.0, 0.0, 1.0)).normalize() : normal;
+			Vec3 bow = stride ? away.add(legOut.multiply(1.0, 0.0, 1.0)).normalize() : normal;
 			out[index * 6 + 3] = (float)bow.dot(left);
 			out[index * 6 + 4] = (float)-bow.y;
 			out[index * 6 + 5] = (float)-bow.dot(ahead);
@@ -301,7 +314,15 @@ final class WebTendrilWalk {
 		return from.add(dir.scale(reach * 0.4));
 	}
 
-	/** Which way the surface they're climbing faces (out of it): a ceiling above, or the wall their box presses on. */
+	/** A ceiling within {@code reach} over your middle. */
+	private static boolean ceilingAbove(Player player, double reach) {
+		Vec3 middle = player.getBoundingBox().getCenter();
+		BlockHitResult hit = player.level().clip(new ClipContext(middle, middle.add(0.0, reach, 0.0), ClipContext.Block.COLLIDER,
+			ClipContext.Fluid.NONE, player));
+		return hit.getType() == HitResult.Type.BLOCK && hit.getDirection() == Direction.DOWN;
+	}
+
+		/** Which way the surface they're climbing faces (out of it): a ceiling above, or the wall their box presses on. */
 	private static @Nullable Vec3 surface(Player player) {
 		AABB box = player.getBoundingBox();
 		if (!player.onGround() && !player.level().noCollision(player, box.move(0.0, 0.15, 0.0).deflate(0.05, 0.0, 0.05))) {

@@ -107,6 +107,11 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 	private static final float STAB_COCK = 0.45F, STAB_HIT = 0.6F, STAB_SHORT = 0.6F, STAB_LONG = 1.25F, STAB_UP = 0.5F, STAB_OUT = 0.45F;
 	/** Barrage: how far a tendril waiting its turn is drawn back (0-1 of a full cock). */
 	private static final float STAB_POISED = 0.4F;
+	/**
+	 * Barrage blade tips (model pixels): the spear's socket and point lengths and half-width; the hooked blade's length and
+	 * how far it curves over.
+	 */
+	private static final float BLADE_SOCKET = 2.5F, BLADE_POINT = 8.0F, BLADE_WIDTH = 2.0F, BLADE_HOOK = 9.0F, BLADE_CURVE = 3.5F;
 	/** The bulge (thickness pulse) every tendril has, wild or not. */
 	private static final float PULSE = 0.04F;
 	/** Combos: a clap's tendrils hauled out this wide each side (yaw) and this much up; a shatter's reared this far apart. */
@@ -157,7 +162,87 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		this.getParentModel().body.translateAndRotate(poseStack);
 		collector.submitModel(this.model, state, poseStack, RenderTypes.entityCutout(TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY,
 			state.outlineColor);
+		if (tendrils.combo() == WebTendrilCombos.BARRAGE) {
+			blades(this.model, state, poseStack, collector, state.lightCoords);
+		}
 		poseStack.popPose();
+	}
+
+	/**
+	 * Barrage: each stabbing tendril's tip hardens into a blade (the pose stack in body space). Turn about, a long spear
+	 * point with barbs swept back, or a hooked blade curving over like a claw, its inner edge pale.
+	 */
+	private static void blades(TendrilModel model, AvatarRenderState state, PoseStack poseStack, SubmitNodeCollector collector, int light) {
+		model.setupAnim(state);
+		java.util.List<net.minecraft.world.phys.Vec3[]> tips = new java.util.ArrayList<>();
+		java.util.List<Integer> kinds = new java.util.ArrayList<>();
+		for (int t = 0; t < ROOTS.length; t++) {
+			if (!model.stabbing[t] || !model.parts[t][0].visible) {
+				continue;
+			}
+			// walk the chain to its tip (in body space, blocks): where it ends, the way it points, and its "up"
+			PoseStack chain = new PoseStack();
+			model.root().translateAndRotate(chain);
+			for (int k = 0; k < SEGMENTS; k++) {
+				model.parts[t][k].translateAndRotate(chain);
+			}
+			org.joml.Matrix4f m = chain.last().pose();
+			org.joml.Vector3f end = m.transformPosition(new org.joml.Vector3f(0.0F, 0.0F, (SEGMENT_LENGTH - 0.6F) / 16.0F));
+			org.joml.Vector3f dir = m.transformDirection(new org.joml.Vector3f(0.0F, 0.0F, 1.0F)).normalize();
+			org.joml.Vector3f up = m.transformDirection(new org.joml.Vector3f(0.0F, -1.0F, 0.0F)).normalize();
+			tips.add(new net.minecraft.world.phys.Vec3[] {new net.minecraft.world.phys.Vec3(end.x, end.y, end.z) .scale(16.0),
+				new net.minecraft.world.phys.Vec3(dir.x, dir.y, dir.z), new net.minecraft.world.phys.Vec3(up.x, up.y, up.z)});
+			kinds.add(t % 2);
+		}
+		if (tips.isEmpty()) {
+			return;
+		}
+		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebTubes.TEXTURE), (pose, buffer) -> {
+			for (int i = 0; i < tips.size(); i++) {
+				net.minecraft.world.phys.Vec3[] tip = tips.get(i);
+				blade(buffer, pose, tip[0], tip[1], tip[2], kinds.get(i), light);
+			}
+		});
+	}
+
+	/** One blade tip at {@code at} (pixels), pointing along {@code dir}, {@code up} across it: 0 a spear point, 1 a hooked blade. */
+	private static void blade(com.mojang.blaze3d.vertex.VertexConsumer buffer, PoseStack.Pose pose, net.minecraft.world.phys.Vec3 at,
+		net.minecraft.world.phys.Vec3 dir, net.minecraft.world.phys.Vec3 up, int kind, int light) {
+		net.minecraft.world.phys.Vec3 across = dir.cross(up);
+		across = across.lengthSqr() < 1.0E-6 ? new net.minecraft.world.phys.Vec3(1.0, 0.0, 0.0) : across.normalize();
+		up = across.cross(dir).normalize();
+		if (kind == 0) {
+			// the spear: a socket swelling into a long leaf of a point, two barbs swept back from its base
+			net.minecraft.world.phys.Vec3 belly = at.add(dir.scale(BLADE_SOCKET));
+			net.minecraft.world.phys.Vec3 tip = belly.add(dir.scale(BLADE_POINT));
+			WebTubes.prism(buffer, pose, px(at), px(belly), up, 0.8 / 16.0, 0.7 / 16.0, BLADE_WIDTH / 16.0, 0.75 / 16.0, WebTubes.SHEEN, light);
+			WebTubes.prism(buffer, pose, px(belly), px(tip), up, BLADE_WIDTH / 16.0, 0.75 / 16.0, 0.03 / 16.0, 0.03 / 16.0, WebTubes.BLACK, light);
+			for (int side = -1; side <= 1; side += 2) {
+				net.minecraft.world.phys.Vec3 e = up.scale(side * BLADE_WIDTH * 0.85);
+				WebTubes.prism(buffer, pose, px(belly.add(e)), px(tip), up, 0.3 / 16.0, 0.3 / 16.0, 0.03 / 16.0, 0.03 / 16.0, WebTubes.BONE, light);
+				net.minecraft.world.phys.Vec3 barb = at.add(dir.scale(BLADE_SOCKET * 0.4)).add(up.scale(side * 0.6));
+				WebTubes.cord(buffer, pose, px(barb), px(barb.add(up.scale(side * 2.2)).add(dir.scale(-2.4))), 0.5 / 16.0, 0.03 / 16.0, WebTubes.BONE,
+					light);
+			}
+		} else {
+			// the hook: a flat blade curving up and over like a claw, broad at the root, its inner (underside) edge pale
+			int pieces = 6;
+			net.minecraft.world.phys.Vec3 prev = at;
+			for (int i = 1; i <= pieces; i++) {
+				double f = i / (double)pieces;
+				net.minecraft.world.phys.Vec3 p = at.add(dir.scale(BLADE_HOOK * f)).add(up.scale(BLADE_CURVE * f * f));
+				double w0 = BLADE_WIDTH * (1.0 - 0.9 * (f - 1.0 / pieces)), w1 = BLADE_WIDTH * (1.0 - 0.9 * f) + 0.03;
+				WebTubes.prism(buffer, pose, px(prev), px(p), up, w0 / 16.0, 0.4 / 16.0, w1 / 16.0, 0.3 / 16.0, WebTubes.SHEEN, light);
+				// the edge, along the inside of the curve
+				net.minecraft.world.phys.Vec3 e0 = prev.add(up.scale(-w0 * 0.85)), e1 = p.add(up.scale(-w1 * 0.85));
+				WebTubes.prism(buffer, pose, px(e0), px(e1), up, 0.35 / 16.0, 0.25 / 16.0, 0.2 / 16.0, 0.15 / 16.0, WebTubes.BONE, light);
+				prev = p;
+			}
+		}
+	}
+
+	private static net.minecraft.world.phys.Vec3 px(net.minecraft.world.phys.Vec3 v) {
+		return v.scale(1.0 / 16.0);
 	}
 
 	/**
@@ -300,6 +385,8 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 	/** The tendrils' pose, worked out per wearer at draw time. */
 	private static final class TendrilModel extends Model<AvatarRenderState> {
 		private final ModelPart[][] parts = new ModelPart[ROOTS.length][SEGMENTS];
+		/** Which ones are stabbing in a barrage (they wear blade tips), as last posed. */
+		private final boolean[] stabbing = new boolean[ROOTS.length];
 
 		TendrilModel(ModelPart root) {
 			super(root, RenderTypes::entityCutout);
@@ -316,6 +403,7 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		@Override
 		public void setupAnim(AvatarRenderState state) {
 			super.setupAnim(state);
+			java.util.Arrays.fill(this.stabbing, false);
 			WebSymbioteClient.Tendrils tendrils = state.getData(WebSymbioteClient.TENDRILS);
 			if (tendrils == null) {
 				return;
@@ -421,6 +509,7 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 					base.xScale = thick;
 					base.yScale = thick;
 					base.zScale = length * reach * (fp ? 1.0F + STRETCH_FIRST_PERSON : 1.0F);
+					this.stabbing[t] = true;
 					// rigid as a spear
 					for (int k = 1; k < SEGMENTS; k++) {
 						ModelPart segment = this.parts[t][k];
