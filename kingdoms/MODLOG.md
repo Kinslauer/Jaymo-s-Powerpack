@@ -3271,3 +3271,8 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
     hunger flaw starts. Their marks, eyes and fin edges glow under water always, on land only at night while wet.
   - Sylvan glow dims while sneaking and goes out entirely for a Thief or anyone with a Stealth perk; no fireflies
     while sneaking. The server syncs both through `Heritage.LOOK`.
+
+## 0.7.81: heritage looks under costumes (pack 0.12.5)
+- With Jaymo's Powers loaded, `PowersCover` asks its `BodyCover` (by reflection) what a costume or the symbiote's suit
+  covers: under a face mask or the suit no heritage look, Emberborn marks or vampire face at all; under a hood no
+  antennae or Tideborn head fins; under any costume no Tideborn arm fins poking through the sleeves.

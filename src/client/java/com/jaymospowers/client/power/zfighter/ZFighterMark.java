@@ -66,7 +66,7 @@ public final class ZFighterMark {
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
 			Integer mark = state.getData(KEY);
-			if (mark == null || mark == 0 || state.isInvisible) {
+			if (mark == null || mark == 0 || state.isInvisible || com.jaymospowers.client.BodyCover.face(state)) {
 				return;
 			}
 			boolean hair = state.getData(ZFighterHair.KEY) != null;

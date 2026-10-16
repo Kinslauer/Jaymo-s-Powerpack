@@ -56,7 +56,7 @@ final class WindStormEyes extends RenderLayer<AvatarRenderState, PlayerModel> {
 	@Override
 	public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
 		Minecraft minecraft = Minecraft.getInstance();
-		if (state.isInvisible || minecraft.level == null) {
+		if (state.isInvisible || minecraft.level == null || com.jaymospowers.client.BodyCover.face(state)) {
 			return;
 		}
 		Entity entity = minecraft.level.getEntity(state.id);

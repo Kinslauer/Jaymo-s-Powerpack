@@ -73,7 +73,7 @@ public final class XenoBand {
 	public static void submitFirstPerson(PoseStack poseStack, SubmitNodeCollector collector, int light, ModelPart arm, PlayerModel model) {
 		net.minecraft.client.player.LocalPlayer player = net.minecraft.client.Minecraft.getInstance().player;
 		if (arm != model.leftArm || player == null || !com.jaymospowers.power.xenoform.XenoformPower.has(player)
-			|| com.jaymospowers.power.xenoform.XenoformState.transformed(player) || player.isInvisible()) {
+			|| com.jaymospowers.power.xenoform.XenoformState.transformed(player) || player.isInvisible() || com.jaymospowers.client.BodyCover.ownArms()) {
 			return;
 		}
 		poseStack.pushPose();
@@ -93,7 +93,7 @@ public final class XenoBand {
 			PlayerModel model = this.getParentModel();
 			// an arm that isn't drawn (First-person Model hides your body's arms in first person, the hands stand in for
 			// them and carry their own band) wears no band floating where it would be
-			if (!Boolean.TRUE.equals(state.getData(KEY)) || state.isInvisible || !model.leftArm.visible) {
+			if (!Boolean.TRUE.equals(state.getData(KEY)) || state.isInvisible || !model.leftArm.visible || com.jaymospowers.client.BodyCover.body(state)) {
 				return;
 			}
 			// the slam pose is laid over the model after it animates; the arm here is before that, so lay it over again

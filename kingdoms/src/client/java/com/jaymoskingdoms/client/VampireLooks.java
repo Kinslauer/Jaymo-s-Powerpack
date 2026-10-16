@@ -71,7 +71,8 @@ public final class VampireLooks extends RenderLayer<AvatarRenderState, PlayerMod
 	@Override
 	public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
 		Integer look = state.getData(LOOK);
-		if (look == null || state.isInvisible) {
+		if (look == null || state.isInvisible || PowersCover.face(state)) {
+			// (0.7.81) under a mask or the symbiote's suit
 			return;
 		}
 		PlayerModel model = this.getParentModel();

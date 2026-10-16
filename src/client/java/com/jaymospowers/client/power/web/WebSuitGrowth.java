@@ -296,7 +296,8 @@ public final class WebSuitGrowth {
 	}
 
 	/** The suit (or Living Armor's bulk) is all over them, not growing or drawing back. */
-	private static boolean covered(AvatarRenderState avatar) {
+	/** (0.12.5) Also what BodyCover asks: whether the suit covers the wearer now. */
+	public static boolean covered(AvatarRenderState avatar) {
 		if (avatar.isInvisible) {
 			return false;
 		}

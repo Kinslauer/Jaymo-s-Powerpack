@@ -210,7 +210,7 @@ public final class ZFighterVerdantLook {
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
 			Look look = state.getData(KEY);
-			if (look == null || state.isInvisible || !this.getParentModel().head.visible) {
+			if (look == null || state.isInvisible || !this.getParentModel().head.visible || com.jaymospowers.client.BodyCover.head(state)) {
 				return;
 			}
 			poseStack.pushPose();

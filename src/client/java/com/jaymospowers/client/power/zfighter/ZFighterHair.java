@@ -149,7 +149,8 @@ public final class ZFighterHair {
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state, float yRot, float xRot) {
 			Hair hair = state.getData(KEY);
-			if (hair == null || state.isInvisible) {
+			if (hair == null || state.isInvisible || com.jaymospowers.client.BodyCover.head(state)) {
+				// (0.12.5) under a mask or hood that covers the head, or the symbiote
 				return;
 			}
 			int index = Math.floorMod(hair.style(), STYLES) * 3 + Mth.clamp(hair.form(), 1, 3) - 1;
