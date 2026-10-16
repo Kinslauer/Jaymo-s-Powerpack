@@ -132,7 +132,9 @@ public final class WebSuitGrowth {
 		if (role == Role.HULK) {
 			WebHulk.Model hulk = (WebHulk.Model)model;
 			hulk.build(hulkBuilt(avatar));
-			hulk.breathe(avatar.ageInTicks);
+			hulk.breathe(avatar);
+			// elbows and knees bending with the stride (after the limbs are posed above)
+			hulk.limbs(avatar);
 		} else {
 			lay(player, avatar, role);
 		}

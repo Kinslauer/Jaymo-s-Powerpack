@@ -14,7 +14,7 @@ import net.minecraft.resources.Identifier;
  * player model's own pose. Everyone sees it; it hides when the wearer is invisible or has the suit turned off.
  * The texture ({@code textures/entity/web_symbiote_suit.png}) is drawn by {@code tools/gen_web.py}: the clean black
  * suit. Its veins show only while it's feral (a bond under {@code VEIN_BOND}). The big body is its own hulking model
- * ({@link WebHulk}, veins in its texture) with a lolling tongue. While either is being put on (see WebSuitGrowth) a
+ * ({@link WebHulk}, veins in its texture) with a flicking tongue. While either is being put on (see WebSuitGrowth) a
  * layer of raw goo goes on under the suit first.
  */
 final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
@@ -102,8 +102,10 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 		}
 	}
 
-	/** The big body's tongue, lolling out of its jaws (it comes in with the head, the last thing built). */
+	/** The big body's tongue, flicking out of its jaws now and then (it comes in with the head, the last thing built). */
 	private void tongue(PoseStack poseStack, SubmitNodeCollector collector, AvatarRenderState state, float built) {
+		// (watching for the end of a meal, so it licks its chops after)
+		WebHulk.noteMeal(state);
 		if (state.isInvisible || WebSymbioteClient.ownFirstPerson(state) || state.getData(WebSymbioteClient.EATING) != null
 			|| state.getData(WebSymbioteClient.COUNTER_MAW) != null || state.getData(WebSymbioteClient.ROAR) != null) {
 			// (the maw has the head)
