@@ -1,6 +1,7 @@
 package com.jaymospowers.power.darktide;
 
 import com.jaymospowers.core.Fate;
+import com.jaymospowers.core.Oddities;
 import com.jaymospowers.power.arsenal.Summoned;
 import com.jaymospowers.power.web.KitchenCompat;
 import com.jaymospowers.power.zfighter.ZFighterKi;
@@ -17,12 +18,15 @@ import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
@@ -34,11 +38,14 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -48,7 +55,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * C and Z. Ascended: sneak + C <b>Tide Arms</b> (bare hands draw your own best blade; a real knife → a katana of dark
  * water of its tier, a real katana → twin daggers of its tier; your real items are stored and come back). While corrupted, Z on a Jaymo's Kitchen corpse takes its shadow; ascended, <b>Necromancy</b>: tap C
- * to raise one, which follows and defends you until the corruption lifts. Corrupted, not ascended: C is <b>Drown</b>, a
+ * to raise one, which follows and defends you until the corruption lifts (a villager rises as itself: a guard fights for
+ * you, anyone else goes back to its life, not quite right). Corrupted, not ascended: C is <b>Drown</b>, a
  * sphere of water around a target.
  */
 final class DarktideTide {
@@ -66,6 +74,8 @@ final class DarktideTide {
 	/** How long a risen shadow keeps after what you fought (ticks). */
 	static final int ENEMY_MEMORY = 200;
 	static final int RAISE_COOLDOWN = 20;
+	/** A villager's shadow keeps its whole saved data up to this long (characters; Kitchen's own cap). */
+	static final int MAX_LOOK = 30000;
 	// ---- Drown ----
 	static final double DROWN_REACH = 24.0, DROWN_RADIUS = 6.0;
 	static final int DROWN_TICKS = 80, DROWN_COOLDOWN = 900, DROWN_EVERY = 10;
@@ -433,10 +443,65 @@ final class DarktideTide {
 		level.playSound(null, from.x, from.y, from.z, SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 1.0F, 0.7F);
 		corpse.discard();
 		List<String> shadows = DarktideState.mutable(DarktideState.save(player).shadows());
-		shadows.add(BuiltInRegistries.ENTITY_TYPE.getKey(type).toString());
+		// (0.11.103) a villager's shadow is the villager itself (its whole saved data), so the same one rises
+		String look = villagerLook(level, corpse, type);
+		shadows.add(look != null ? look : BuiltInRegistries.ENTITY_TYPE.getKey(type).toString());
 		player.setAttached(DarktideState.SAVE, DarktideState.save(player).withShadows(shadows));
 		live.harvesting = -1;
 		DarktideMove.clear(player);
+	}
+
+	/** The corpse's look, if it was a villager's (vanilla or MCA) and the look kept its saved data; null otherwise. */
+	private static @Nullable String villagerLook(ServerLevel level, Entity corpse, EntityType<?> type) {
+		String look = KitchenCompat.lookOf(corpse);
+		if (look == null || !look.startsWith("{") || look.length() > MAX_LOOK) {
+			return null;
+		}
+		return type.create(level, EntitySpawnReason.LOAD) instanceof AbstractVillager ? look : null;
+	}
+
+	/** The villager saved in {@code look}, back on its feet at {@code at} (not yet in the world), or null. */
+	private static @Nullable Mob rebuild(ServerLevel level, String look, BlockPos at, float yaw) {
+		CompoundTag tag;
+		try {
+			tag = TagParser.parseCompoundFully(look);
+		} catch (Exception e) {
+			return null;
+		}
+		EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.tryParse(tag.getStringOr("id", "")));
+		if (type == null || !(type.create(level, EntitySpawnReason.LOAD) instanceof Mob mob)) {
+			return null;
+		}
+		mob.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), tag));
+		// the same villager, by the same id (its family, its home, what the realm knows of it), unless that's taken
+		if (level.getEntity(mob.getUUID()) != null) {
+			mob.setUUID(UUID.randomUUID());
+		}
+		mob.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0.0F);
+		mob.setDeltaMovement(Vec3.ZERO);
+		mob.setHealth(mob.getMaxHealth());
+		mob.deathTime = 0;
+		mob.hurtTime = 0;
+		mob.clearFire();
+		mob.setTarget(null);
+		return mob;
+	}
+
+	/**
+	 * One of the realm's guards or archers (vanilla or MCA profession; a realm's drafted guards take the job): a guard's
+	 * shadow fights for you like any other.
+	 */
+	static boolean guard(Entity entity) {
+		if (!(entity instanceof Villager v) || v.isBaby()) {
+			return false;
+		}
+		Identifier job = BuiltInRegistries.VILLAGER_PROFESSION.getKey(v.getVillagerData().profession().value());
+		return job != null && (job.getPath().equals("guard") || job.getPath().equals("archer"));
+	}
+
+	/** Whether {@code entity} is a villager raised as itself and gone back to its life ({@link DarktideState#HOLLOW}). */
+	static boolean hollow(Entity entity) {
+		return entity.getAttached(DarktideState.HOLLOW) != null;
 	}
 
 	private static void raise(ServerPlayer player) {
@@ -453,12 +518,19 @@ final class DarktideTide {
 		List<String> shadows = DarktideState.mutable(DarktideState.save(player).shadows());
 		String id = shadows.removeLast();
 		player.setAttached(DarktideState.SAVE, DarktideState.save(player).withShadows(shadows));
-		EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.tryParse(id));
 		Vec3 eye = player.getEyePosition();
 		BlockHitResult hit = level.clip(new ClipContext(eye, eye.add(player.getLookAngle().scale(RISE_REACH)), ClipContext.Block.COLLIDER,
 			ClipContext.Fluid.NONE, player));
 		BlockPos at = hit.getType() == HitResult.Type.MISS ? BlockPos.containing(eye.add(player.getLookAngle().scale(3.0))) : hit.getBlockPos().relative(hit.getDirection());
-		Entity spawned = type == null ? null : type.spawn(level, at, EntitySpawnReason.MOB_SUMMONED);
+		Entity spawned;
+		if (id.startsWith("{")) {
+			// (0.11.103) a villager's shadow: the very one that died
+			Mob villager = rebuild(level, id, at, player.getYRot() + 180.0F);
+			spawned = villager != null && level.addFreshEntity(villager) ? villager : null;
+		} else {
+			EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.tryParse(id));
+			spawned = type == null ? null : type.spawn(level, at, EntitySpawnReason.MOB_SUMMONED);
+		}
 		if (!(spawned instanceof Mob mob)) {
 			if (spawned != null) {
 				spawned.discard();
@@ -466,9 +538,28 @@ final class DarktideTide {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.shadow_lost").withStyle(ChatFormatting.GRAY));
 			return;
 		}
-		mob.setAttached(DarktideState.RISEN, player.getId());
 		// a shadow leaves no Kitchen corpse, even if it somehow dies instead of melting
 		mob.addTag(NO_CORPSE_TAG);
+		if (mob instanceof AbstractVillager && !guard(mob)) {
+			// (0.11.103) a villager who wasn't a guard gets up as itself and goes back to its life, not to war: it follows no
+			// one, fights no one, and doesn't melt at dawn. But it isn't right, and the townsfolk can tell (Kingdoms reads the
+			// mark: they stare, talk, and some run)
+			mob.setAttached(DarktideState.HOLLOW, true);
+			Oddities.mark(mob, Oddities.RISEN);
+			mob.setTarget(null);
+			mob.clearFire();
+			level.sendParticles(ParticleTypes.SQUID_INK, mob.getX(), mob.getY() + 0.3, mob.getZ(), 30, 0.4, 0.2, 0.4, 0.05);
+			level.sendParticles(ParticleTypes.SOUL, mob.getX(), mob.getY() + 0.5, mob.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
+			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.SOUL_SAND.defaultBlockState()), mob.getX(), mob.getY(), mob.getZ(),
+				30, 0.4, 0.1, 0.4, 0.1);
+			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.WARDEN_EMERGE, SoundSource.PLAYERS, 0.5F, 1.6F);
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.hollow_rises", mob.getDisplayName())
+				.withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
+			DarktideMove.play(player, DarktideMove.CAST, DarktideMove.CAST_TICKS, 4);
+			DarktidePower.cooldown(player, DarktideState.RAISE, RAISE_COOLDOWN);
+			return;
+		}
+		mob.setAttached(DarktideState.RISEN, player.getId());
 		RISEN_OWNER.put(mob.getUUID(), player.getUUID());
 		RISEN.add(mob);
 		live.risen.add(mob.getId());
@@ -529,7 +620,7 @@ final class DarktideTide {
 
 	/** A risen shadow never dies into loot or a corpse: it melts. */
 	static boolean allowDeath(LivingEntity entity, DamageSource source, float amount) {
-		if (entity instanceof Mob mob && RISEN_OWNER.containsKey(mob.getUUID())) {
+		if (entity instanceof Mob mob && (RISEN_OWNER.containsKey(mob.getUUID()) || hollow(mob))) {
 			RISEN.remove(mob);
 			melt(mob);
 			return false;
