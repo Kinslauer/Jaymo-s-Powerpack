@@ -24,8 +24,11 @@ final class Names {
 		return FIRST[random.nextInt(FIRST.length)] + HAMLET[random.nextInt(HAMLET.length)];
 	}
 
-	/** (0.5.9) What a fiefdom's ruler is called: a baron, a vassal or a lord (the same every time for its fiefdom). */
-	private static final String[] FIEF_TITLES = {"baron", "vassal", "lord"};
+	/**
+	 * (0.5.9) What a fiefdom's ruler is called: a baron, a count or a lord (the same every time for its fiefdom). (0.7.72:
+	 * a count where he was a "vassal", which read as if he served his own fiefdom.)
+	 */
+	private static final String[] FIEF_TITLES = {"baron", "count", "lord"};
 
 	static String fiefTitle(long seed) {
 		return FIEF_TITLES[RandomSource.create(seed ^ 0xF1EFL).nextInt(FIEF_TITLES.length)];

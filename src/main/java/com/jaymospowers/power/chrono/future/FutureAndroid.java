@@ -60,7 +60,7 @@ public class FutureAndroid extends Monster {
 	}
 
 	/** Sent out by {@link FutureMachines}: most get a gun. */
-	void outfit(ServerLevel level) {
+	public void outfit(ServerLevel level) {
 		if (getRandom().nextFloat() < ARMED) {
 			FutureGuns.arm(this, getRandom());
 		}

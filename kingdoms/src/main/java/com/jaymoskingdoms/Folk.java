@@ -95,6 +95,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 	}
 
 	/** The king's and the lord's health, and their blows. */
+	/** (0.7.72) Players this close hear when a ruler is made lord or king in place ({@link #reform}). */
+	static final double REFORM_NEWS = 48.0;
 	static final double KING_HEALTH = 300.0, KING_DAMAGE = 9.0, LORD_HEALTH = 220.0, LORD_DAMAGE = 7.5;
 	/** Builders: plain folk. */
 	static final double BUILDER_HEALTH = 20.0, BUILDER_DAMAGE = 2.0;
@@ -527,6 +529,10 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		if (this.outfit < Outfits.VERSION) {
 			this.restyle(level);
 		}
+		if (this.tickCount % 20 == 0) {
+			// (0.7.72) its realm bent the knee (or came out from under) since it was dressed
+			this.reform(level);
+		}
 		if (this.tickCount % 20 == 0 && Worker.isWork(this.role()) && McaCompat.becomeVillager(level, this)) {
 			// (0.5.21) with MCA, a realm's workers are its villagers: this one is one now
 			return;
@@ -586,6 +592,50 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 
 	/** (0.5.64) Its gear put on again from its faction's arms (a musketeer's musket sold back). */
 	void rearm(ServerLevel level) {
+		this.restyle(level);
+	}
+
+	/**
+	 * (0.7.72) Its realm became a fiefdom (or a kingdom again) since it was dressed: it takes the new colours and arms, and
+	 * a king made a vassal sets his crown aside and rules on as his fiefdom's lord (a lord who leads a free kingdom is
+	 * crowned its king). Players nearby are told.
+	 */
+	private void reform(ServerLevel level) {
+		Faction faction = Factions.get(level.getServer(), this.factionId());
+		if (faction == null || !faction.type().isRealm() || !this.style().isRealm() || this.style() == faction.type()) {
+			return;
+		}
+		boolean leads = faction.leader().map(this.getUUID()::equals).orElse(false);
+		int role = this.role();
+		if (role == KING && faction.type() == FactionType.FIEFDOM) {
+			role = LORD;
+		} else if (role == LORD && leads && faction.type() == FactionType.KINGDOM) {
+			role = KING;
+		}
+		this.entityData.set(STYLE, faction.type().ordinal());
+		this.entityData.set(COLOR, faction.styleColor(level.getServer()).getId());
+		if (role != this.role()) {
+			Component before = this.getDisplayName();
+			float health = this.getHealth() / this.getMaxHealth();
+			this.entityData.set(ROLE, role);
+			for (EquipmentSlot slot : EquipmentSlot.values()) {
+				this.setItemSlot(slot, ItemStack.EMPTY);
+			}
+			ROLES.get(role).outfit().accept(this, faction);
+			this.setHealth(this.getMaxHealth() * health);
+			// his bar in its new colour and name
+			if (this.bossBar != null) {
+				this.bossBar.removeAllPlayers();
+				this.bossBar = null;
+			}
+			Faction overlord = Relations.overlord(level.getServer(), faction);
+			Component news = role == LORD
+				? Component.translatable("message.jaymoskingdoms.king_demoted", before, this.getDisplayName(), overlord == null ? faction.name() : overlord.name())
+				: Component.translatable("message.jaymoskingdoms.lord_crowned", before, faction.name());
+			for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, this.getBoundingBox().inflate(REFORM_NEWS))) {
+				player.sendSystemMessage(news.copy().withStyle(ChatFormatting.GOLD));
+			}
+		}
 		this.restyle(level);
 	}
 

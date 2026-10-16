@@ -43,7 +43,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.11.82) The Backpack (Andy: "a backpack that animates on the player and can be placed on the ground. it is only
+ * (0.11.89) The Backpack (Andy: "a backpack that animates on the player and can be placed on the ground. it is only
  * broken by strong explosions"). Our own; Traveler's Backpack has no 26.3 Fabric build.
  * <ul>
  * <li>Four rows of storage. Right-click it in the air to put it on your back: it is drawn there over the body's pose

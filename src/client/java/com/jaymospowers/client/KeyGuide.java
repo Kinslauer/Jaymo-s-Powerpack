@@ -31,6 +31,8 @@ final class KeyGuide {
 	static final int COLOR_SPECIAL = 0xFF9FD8FF;
 	/** The X key is shared: Web's symbiote menu, Wind's Tempest Kick and Cyclone. */
 	private static final String SPECIAL_KEY = "key.jaymospowers.web_symbiote";
+	/** (0.11.87) The Rig's lines (shown while you wear or have parked a Rig). */
+	static final int COLOR_RIG = 0xFF5FE6FF;
 
 	/** One key's line: the key's name, the ability's short name (null if it has none), what it does, its colour. */
 	record Line(Component key, @Nullable Component name, Component text, int color, boolean locked) {
@@ -82,7 +84,49 @@ final class KeyGuide {
 			add(lines, power, player, "ultimate", base, suffixes, args, JaymosPowersClient.ultimateKey(), COLOR_ULTIMATE, false);
 		}
 		add(lines, power, player, "special", base, suffixes, args, special(), COLOR_SPECIAL, mastering);
+		if (player != null) {
+			rig(lines, player);
+		}
 		return lines;
+	}
+
+	/**
+	 * (0.11.87) The Rig's keys, after the power's, while a piece is worn or the suit is parked: lang
+	 * {@code rig.jaymospowers.key.<line>} (and {@code .name}), with the same key arguments plus the Rig key (%8$s).
+	 * A line only shows once the Mind's level has reached it (Andy: nothing shows until you find it).
+	 */
+	private static void rig(List<Line> lines, Player player) {
+		if (!com.jaymospowers.rig.Rig.wearsAny(player) && !com.jaymospowers.rig.RigCall.parked(player)) {
+			return;
+		}
+		Object[] names = keyNames();
+		Object[] args = java.util.Arrays.copyOf(names, 8);
+		Component rigKey = name(com.jaymospowers.client.rig.RigClient.rigKey());
+		args[7] = rigKey;
+		int level = com.jaymospowers.rig.Rig.level(player);
+		boolean powerless = com.jaymospowers.core.Powers.of(player) == null;
+		if (powerless) {
+			rigLine(lines, "hover", (Component)names[0], args, 1, level);
+			rigLine(lines, "palm", (Component)names[1], args, 1, level);
+			rigLine(lines, "launcher", (Component)names[2], args, 1, level);
+			rigLine(lines, "report", (Component)names[3], args, 1, level);
+			rigLine(lines, "scan_hold", Component.translatable("rig.jaymospowers.key.hold", names[3]), args, com.jaymospowers.rig.Rig.SCAN_LEVEL, level);
+			rigLine(lines, "call", (Component)names[5], args, com.jaymospowers.rig.Rig.CALL_LEVEL, level);
+		} else {
+			rigLine(lines, "rig", rigKey, args, 1, level);
+			rigLine(lines, "rig_next", Component.translatable("rig.jaymospowers.key.sneak", rigKey), args, 1, level);
+		}
+		rigLine(lines, "lock", Component.translatable("rig.jaymospowers.key.hold", rigKey), args, com.jaymospowers.rig.Rig.LOCK_LEVEL, level);
+		rigLine(lines, "flight", Component.translatable("rig.jaymospowers.key.double", name(Minecraft.getInstance().options.keyJump)), args,
+			com.jaymospowers.rig.Rig.FLIGHT_LEVEL, level);
+	}
+
+	private static void rigLine(List<Line> lines, String id, Component key, Object[] args, int needs, int level) {
+		String base = "rig.jaymospowers.key." + id;
+		Component name = shortName(base);
+		if (level >= needs) {
+			lines.add(new Line(key, name, Component.translatable(base, args), COLOR_RIG, false));
+		}
 	}
 
 	private static void add(List<Line> lines, Power power, @Nullable Player player, String slot, String base, List<String> suffixes,

@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.11.82) A worn backpack's sway goes on the player's render state (BackpackClient). */
+/** (0.11.89) A worn backpack's sway goes on the player's render state (BackpackClient). */
 @Mixin(AvatarRenderer.class)
 abstract class BackpackAvatarRendererMixin {
 	@Inject(

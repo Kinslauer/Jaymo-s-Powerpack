@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.11.82) A strong explosion that breaks blocks tears apart the set-down backpacks in its reach (Backpack.blast). */
+/** (0.11.89) A strong explosion that breaks blocks tears apart the set-down backpacks in its reach (Backpack.blast). */
 @Mixin(ServerExplosion.class)
 abstract class BackpackExplosionMixin {
 	@Shadow
