@@ -470,7 +470,9 @@ public final class WebSymbioteClient {
 		state.setData(STARE, staring == null ? null : Math.max(0.0F, entity.level().getGameTime() - staring
 			+ net.minecraft.client.Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false)));
 		long out = entity instanceof Player p && WebSymbiote.isBonded(p) ? WebSymbiote.tendrilsOut(p) : -1L;
-		boolean climbing = entity instanceof Player p && WebSymbiote.isBonded(p) && WebTendrilWalk.climbing(p);
+		// Wall Crawl on: they stay out the whole time (holding Jump, coiling a leap, between grabs), not only while they hold you
+		boolean climbing = entity instanceof Player p && WebSymbiote.isBonded(p)
+			&& (WebTendrilWalk.climbing(p) || WebSymbiote.isToggled(p, WebSymbioteState.CRAWL));
 		if (entity instanceof Player player && (armored || out >= 0 || climbing)) {
 			long now = player.level().getGameTime();
 			long since = ARMOR_SINCE.computeIfAbsent(player.getId(), id -> now);
