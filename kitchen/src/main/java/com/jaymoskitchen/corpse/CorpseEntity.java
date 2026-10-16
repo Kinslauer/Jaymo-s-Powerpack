@@ -1572,6 +1572,15 @@ public class CorpseEntity extends Entity {
 		return falling() ? CATCH_RADIUS : super.getPickRadius();
 	}
 
+	/**
+	 * (0.4.45) A body in the air is drawn however far it has fallen from you: the usual cut-off (64 times its small box,
+	 * about 50 blocks) made a long fall vanish part way down.
+	 */
+	@Override
+	public boolean shouldRenderAtSqrDistance(double distanceSq) {
+		return isTumbling() || falling() || super.shouldRenderAtSqrDistance(distanceSq);
+	}
+
 	/** In the air on its own: dropped, thrown, or falling off something (not held, not in a cart, not lying down). */
 	public boolean falling() {
 		return !onGround() && carrier() == null && !isPassenger() && !isNoGravity();
