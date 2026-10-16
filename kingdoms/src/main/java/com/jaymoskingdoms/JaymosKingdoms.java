@@ -120,6 +120,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("class attachments: {} {}", Classes.CLASS, Classes.WRIT_BOUGHT);
 		// 0.7.57: heritage (Origins remade: picked between MCA's destiny and the class) and its attachment
 		Heritage.register();
+		// 0.7.82: world tiers (after Apotheosis's): each player's chosen difficulty, foes near them take it (its attachments)
+		LOGGER.debug("world tier attachments: {} {} {} {}", WorldTiers.TIER, WorldTiers.PROGRESS, WorldTiers.CHANGED, WorldTiers.MOB_TIER);
+		WorldTiers.register();
 		FrostPrison.register();
 		LOGGER.debug("heritage attachments: {} {}", Heritage.HERITAGE, FrostPrison.LAST);
 		// 0.5.19: a boss's bar shows only to the players who've hit it

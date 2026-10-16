@@ -74,6 +74,7 @@ final class KingdomCommands {
 			.then(WarCommands.command())
 			.then(Classes.command())
 			.then(Heritage.command())
+			.then(WorldTiers.command())
 			.then(SkillCommands.command())
 			.then(Captives.command())
 			.then(Commands.literal("storage").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(c -> storage(c, null))

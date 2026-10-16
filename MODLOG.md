@@ -1560,3 +1560,6 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
   - **Behemoth** (`tools/gen_web_hulk.py`): about 3.7 blocks tall (was 3.05), longer torso, 9-wide waist, longer legs with thick thighs; elbow/knee hinges moved. Its head is placed on the neck in the torso's frame (`WebHulk.neck`), turns at most 0.45 rad, and no longer swings into the shoulders.
   - **Maw** (`WebMawMesh`, from the same tool; `gen_web_maw.py` removed): the behemoth's head grown huge, gaping wide, lashing its tongue and snapping shut on every bite.
   - **Takeover bounds and zips:** getting you away (flee, tour, climate walk) it crouches and bounds up to 12 blocks along the path every 30 ticks (safe landing, no fall damage), and zips a cord 5–18 blocks ahead every 50 ticks (`WebTakeoverPath.ZIP_*`, high ground when fleeing). Any takeover leaps gaps and water, zips out of pits and up cliffs, and jumps when stuck. Each shakes your view; a zip darkens the screen.
+- **0.12.8, world tiers:** Andy asked for Apotheosis's world tiers (its code is MIT, its art and text all rights
+  reserved; its only builds are NeoForge 26.1). Packs Jaymo's Kingdoms 0.7.82, which has our own world tiers (see
+  `kingdoms/MODLOG.md`). No Powers code changed.

@@ -45,7 +45,7 @@ final class BossBars {
 		}
 	}
 
-	private static boolean boss(Entity entity) {
+	static boolean boss(Entity entity) {
 		return entity instanceof Folk folk ? folk.leader() : Illagers.warlord(entity) || QuestFoes.champion(entity);
 	}
 
