@@ -27,7 +27,7 @@ import net.minecraft.world.item.component.ItemContainerContents;
  * <li>{@link #VEIL}: the veil is up and hides the name tag (synced to everyone);</li>
  * <li>{@link #CURED}: the corruption is cured for now (synced to everyone, for the name and the HUD);</li>
  * <li>{@link #RISEN}: a risen shadow (Necromancy), synced to everyone so it's drawn dark;</li>
- * <li>{@link #HOLLOW}: (0.11.102) a harvested villager raised as itself, back at its own life: saved, synced to everyone so
+ * <li>{@link #HOLLOW}: (0.11.103) a harvested villager raised as itself, back at its own life: saved, synced to everyone so
  * it's drawn ashen;</li>
  * <li>{@link #SHADE}: a user walking as their own shadow after dying at night (until the next nightfall), synced to everyone so they're drawn dark.</li>
  * </ul>

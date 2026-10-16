@@ -89,7 +89,7 @@ public final class KitchenCompat {
 	}
 
 	/**
-	 * (0.11.102) For Darktide's Necromancy: the corpse's look, the dead creature's whole saved data (its name, its face,
+	 * (0.11.103) For Darktide's Necromancy: the corpse's look, the dead creature's whole saved data (its name, its face,
 	 * its family, what it still wears), so a harvested villager can rise as itself. Null if it isn't a corpse.
 	 */
 	public static @Nullable String lookOf(Entity entity) {

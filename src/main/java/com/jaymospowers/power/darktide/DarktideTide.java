@@ -443,7 +443,7 @@ final class DarktideTide {
 		level.playSound(null, from.x, from.y, from.z, SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 1.0F, 0.7F);
 		corpse.discard();
 		List<String> shadows = DarktideState.mutable(DarktideState.save(player).shadows());
-		// (0.11.102) a villager's shadow is the villager itself (its whole saved data), so the same one rises
+		// (0.11.103) a villager's shadow is the villager itself (its whole saved data), so the same one rises
 		String look = villagerLook(level, corpse, type);
 		shadows.add(look != null ? look : BuiltInRegistries.ENTITY_TYPE.getKey(type).toString());
 		player.setAttached(DarktideState.SAVE, DarktideState.save(player).withShadows(shadows));
@@ -524,7 +524,7 @@ final class DarktideTide {
 		BlockPos at = hit.getType() == HitResult.Type.MISS ? BlockPos.containing(eye.add(player.getLookAngle().scale(3.0))) : hit.getBlockPos().relative(hit.getDirection());
 		Entity spawned;
 		if (id.startsWith("{")) {
-			// (0.11.102) a villager's shadow: the very one that died
+			// (0.11.103) a villager's shadow: the very one that died
 			Mob villager = rebuild(level, id, at, player.getYRot() + 180.0F);
 			spawned = villager != null && level.addFreshEntity(villager) ? villager : null;
 		} else {
@@ -541,7 +541,7 @@ final class DarktideTide {
 		// a shadow leaves no Kitchen corpse, even if it somehow dies instead of melting
 		mob.addTag(NO_CORPSE_TAG);
 		if (mob instanceof AbstractVillager && !guard(mob)) {
-			// (0.11.102) a villager who wasn't a guard gets up as itself and goes back to its life, not to war: it follows no
+			// (0.11.103) a villager who wasn't a guard gets up as itself and goes back to its life, not to war: it follows no
 			// one, fights no one, and doesn't melt at dawn. But it isn't right, and the townsfolk can tell (Kingdoms reads the
 			// mark: they stare, talk, and some run)
 			mob.setAttached(DarktideState.HOLLOW, true);

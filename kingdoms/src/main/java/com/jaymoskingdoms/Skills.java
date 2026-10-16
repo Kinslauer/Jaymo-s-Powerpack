@@ -444,7 +444,7 @@ public final class Skills {
 			return;
 		}
 		// (0.7.57) Wits: every pillar learns faster
-		amount = Math.max(amount, Math.round(amount * Stats.xpFactor(player)));
+		amount = Math.max(amount, Math.round(amount * Stats.xpFactor(player) * Heritage.xpFactor(player)));
 		Progress p = of(player);
 		int before = p.xp(pillar);
 		int after = Math.min(total(pillar.maxLevel), before + amount);

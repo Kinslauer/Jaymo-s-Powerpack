@@ -36,7 +36,7 @@ public final class DarktidePose {
 	static final float STANCE_BLEND_TICKS = 4.0F;
 	/** A risen shadow's tint (ARGB). */
 	public static final int RISEN_TINT = 0xFF262C3C;
-	/** (0.11.102) A villager raised as itself and back at its life: not black, just ashen and a little wrong (ARGB). */
+	/** (0.11.103) A villager raised as itself and back at its life: not black, just ashen and a little wrong (ARGB). */
 	public static final int HOLLOW_TINT = 0xFF8C919E;
 	public static final RenderStateDataKey<Boolean> HOLLOW = RenderStateDataKey.create(() -> "jaymospowers:darktide_hollow");
 

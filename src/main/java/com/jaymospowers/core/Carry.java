@@ -17,6 +17,7 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
@@ -51,7 +52,9 @@ import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -71,6 +74,10 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * A Gravity user ({@link GravityWeight}) carries any mob but a boss, with no slowdown; one too big for the arms goes up
  * {@link #OVERHEAD}. A carried mob's AI is on hold ({@code GravityCarriedMobMixin}).
+ * <p>
+ * A Wind user can also pick up a villager ({@link #VILLAGERS}: vanilla, MCA, Kingdoms folk) while off the ground, in
+ * flight or mid-jump, and fly off with them like anything else they carry ({@link #windCarries}). On the ground, sneak +
+ * right-click on a villager stays what it was (trades, quests, pickpocketing).
  * <p>
  * Single blocks can be carried too, held in front in both arms ({@link #BLOCK}, see {@link CarryBlock}).
  * <p>
@@ -132,6 +139,10 @@ public final class Carry {
 
 	/** Small animals anyone can pick up (wolves, cats, chickens...). Babies of any animal count too. */
 	public static final TagKey<EntityType<?>> CARRYABLE = TagKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("carryable"));
+	/** People a Wind user can carry off (any {@link AbstractVillager} counts too, so MCA's villagers do). */
+	public static final TagKey<EntityType<?>> VILLAGERS = TagKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("villagers"));
+	/** Wind's villager grab runs before other mods' sneak-use on villagers (quests, pickpockets), but only in the air. */
+	private static final Identifier WIND_GRAB_PHASE = JaymosPowers.id("wind_grab");
 
 	/** On a carrier: who they're carrying (entity id) and how. */
 	public record Carrying(int target, int hold) {
@@ -203,14 +214,17 @@ public final class Carry {
 		Vec3 lastCarrierPos;
 		/** Only a Gravity user could pick this up: if they stop being one, it's dropped. */
 		final boolean gravityOnly;
+		/** Only a Wind user could pick this up (a villager): if they stop being one, it's dropped. */
+		final boolean windOnly;
 
-		Entry(UUID carrier, Entity carried, int hold, boolean flying, Vec3 at, boolean gravityOnly) {
+		Entry(UUID carrier, Entity carried, int hold, boolean flying, Vec3 at, boolean gravityOnly, boolean windOnly) {
 			this.carrier = carrier;
 			this.carried = carried;
 			this.hold = hold;
 			this.flying = flying;
 			this.lastCarrierPos = at;
 			this.gravityOnly = gravityOnly;
+			this.windOnly = windOnly;
 		}
 	}
 
@@ -232,6 +246,9 @@ public final class Carry {
 		ServerPlayNetworking.registerGlobalReceiver(Release.TYPE, (payload, ctx) -> release(ctx.player(), payload.toss()));
 		ServerPlayNetworking.registerGlobalReceiver(Struggle.TYPE, (payload, ctx) -> struggle(ctx.player()));
 		UseEntityCallback.EVENT.register(Carry::onUseEntity);
+		UseEntityCallback.EVENT.addPhaseOrdering(WIND_GRAB_PHASE, Event.DEFAULT_PHASE);
+		UseEntityCallback.EVENT.register(WIND_GRAB_PHASE, (player, level, hand, target, hit) ->
+			windCarries(player, target) ? onUseEntity(player, level, hand, target, hit) : InteractionResult.PASS);
 		// a carried player's hands are held: no attacking, using, building or breaking
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> isCarried(player) ? InteractionResult.FAIL : InteractionResult.PASS);
 		AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) -> isCarried(player) ? InteractionResult.FAIL : InteractionResult.PASS);
@@ -295,7 +312,28 @@ public final class Carry {
 	 * work on them).
 	 */
 	public static boolean canBeCarriedBy(Player player, Entity entity) {
-		return canBeCarried(entity) || GravityWeight.lightens(player) && player.getMainHandItem().isEmpty() && GravityWeight.liftable(entity);
+		return canBeCarried(entity) || GravityWeight.lightens(player) && player.getMainHandItem().isEmpty() && GravityWeight.liftable(entity)
+			|| windCarries(player, entity);
+	}
+
+	/** A villager: vanilla's, a wandering trader, MCA's, or a Kingdoms settlement's folk. Carried as a person. */
+	public static boolean isVillager(Entity entity) {
+		return entity instanceof AbstractVillager || entity.getType().builtInRegistryHolder().is(VILLAGERS);
+	}
+
+	/** Whether this is carried in a person's holds (limp limbs), rather than cradled like an animal. */
+	public static boolean person(@Nullable Entity entity) {
+		return entity instanceof Player || entity != null && isVillager(entity);
+	}
+
+	/**
+	 * Whether a Wind user can pick this villager up: off the ground (flying, or mid-jump), and the villager standing
+	 * (not asleep in bed, or lying downed).
+	 */
+	public static boolean windCarries(Player player, Entity entity) {
+		return Powers.of(player) == WindPower.INSTANCE && (!player.onGround() || flying(player))
+			&& isVillager(entity) && entity.isAlive() && entity instanceof LivingEntity living && !living.isSleeping()
+			&& living.getPose() == Pose.STANDING;
 	}
 
 	/** Whether this carrier is up in Wind flight (it changes which holds can be rolled). */
@@ -378,7 +416,8 @@ public final class Carry {
 		boolean part = target instanceof SeveredPart;
 		boolean overhead = light && !block && !part && GravityWeight.overhead(target);
 		int hold = part ? PART : block ? BLOCK : overhead ? OVERHEAD : carrier.getRandom().nextInt(flying ? FLIGHT_HOLDS : FOOT_HOLDS);
-		Entry entry = new Entry(carrier.getUUID(), target, hold, flying, carrier.position(), !block && !canBeCarried(target));
+		Entry entry = new Entry(carrier.getUUID(), target, hold, flying, carrier.position(), !block && !canBeCarried(target) && !windCarries(carrier, target),
+			!block && !canBeCarried(target) && windCarries(carrier, target));
 		CARRIES.put(carrier.getUUID(), entry);
 		carrier.setAttached(CARRYING, new Carrying(target.getId(), hold));
 		target.setAttached(CARRIED_BY, carrier.getId());
@@ -399,7 +438,7 @@ public final class Carry {
 		AttributeInstance speed = carrier.getAttribute(Attributes.MOVEMENT_SPEED);
 		// a Gravity user feels no weight at all, and a head or a limb weighs nothing much
 		if (speed != null && !light && !part) {
-			speed.addOrUpdateTransientModifier(new AttributeModifier(WEIGHT_ID, -(target instanceof Player ? PLAYER_WEIGHT : block ? BLOCK_WEIGHT : ANIMAL_WEIGHT),
+			speed.addOrUpdateTransientModifier(new AttributeModifier(WEIGHT_ID, -(person(target) ? PLAYER_WEIGHT : block ? BLOCK_WEIGHT : ANIMAL_WEIGHT),
 				AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 		}
 		ServerLevel level = carrier.level();
@@ -565,7 +604,7 @@ public final class Carry {
 			return;
 		}
 		if (!carrier.isAlive() || carrier.isSpectator() || carrier.isSleeping() || carrier.isPassenger()
-			|| entry.gravityOnly && !GravityWeight.lightens(carrier)) {
+			|| entry.gravityOnly && !GravityWeight.lightens(carrier) || entry.windOnly && Powers.of(carrier) != WindPower.INSTANCE) {
 			end(carrier, entry, Let.DROP);
 			return;
 		}

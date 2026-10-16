@@ -118,6 +118,7 @@ public final class PoseTakeover {
 			|| s.getData(com.jaymospowers.client.power.zfighter.ZFighterSpiritPose.KEY) != null
 			|| s.getData(com.jaymospowers.client.power.smoke.SmokeMovePose.KEY) != null
 			|| Boolean.TRUE.equals(s.getData(ZFighterGuardPose.KEY))
+			|| s.getData(com.jaymospowers.client.power.zfighter.RaceHoldClient.STRETCH) != null
 			|| s.getData(com.jaymospowers.client.power.zfighter.ZFighterComboPose.KEY) != null
 			|| s.getData(ArsenalArmPose.KEY) != null || s.getData(ArsenalArmPose.AIM_KEY) != null;
 	}
