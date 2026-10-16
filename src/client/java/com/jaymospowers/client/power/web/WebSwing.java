@@ -912,7 +912,8 @@ public final class WebSwing {
 			return;
 		}
 		boolean jump = player.input.keyPresses.jump();
-		boolean ground = player.onGround();
+		// carried on Wall Crawl's tendrils counts as the ground: they fling you
+		boolean ground = player.onGround() || WebSymbioteClient.launchable(player);
 		if (jump && !attached()) {
 			if (chargeTicks < CHARGE_FULL) {
 				chargeTicks++;
@@ -934,6 +935,7 @@ public final class WebSwing {
 			Vec3 v = player.getDeltaMovement();
 			player.setDeltaMovement(v.x + flat.x, com.jaymospowers.power.web.WebLeap.speed(c), v.z + flat.z);
 			play(player, SoundEvents.SLIME_JUMP, 1.0F, 0.6F);
+			WebSymbioteClient.leapt();
 			if (c > 0.5F) {
 				play(player, SoundEvents.WIND_CHARGE_BURST.value(), 0.6F, 0.6F);
 			}

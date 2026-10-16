@@ -69,6 +69,12 @@ public class JaymosPowersClient implements ClientModInitializer {
 			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
 			net.minecraft.network.chat.Component.literal("Jaymo's Powers: 3D guns"),
 			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.ALWAYS_ENABLED);
+		// modded items redrawn in vanilla's style (tools/vanilla_style, docs/Vanilla-Style.md); on by default, and
+		// switching it off in Resource Packs shows each mod's own art again
+		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("vanilla_style"),
+			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
+			net.minecraft.network.chat.Component.literal("Jaymo's Powers: vanilla-style items"),
+			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.DEFAULT_ENABLED);
 		ClientTickEvents.END_CLIENT_TICK.register(JaymosPowersClient::tick);
 		// the affinity choice waits until no other screen is open
 		ClientPlayNetworking.registerGlobalReceiver(PowerPayloads.OpenAffinity.TYPE, (payload, context) -> affinityPending = true);
