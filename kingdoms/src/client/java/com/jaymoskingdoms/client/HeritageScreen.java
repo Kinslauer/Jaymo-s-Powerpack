@@ -14,6 +14,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
@@ -22,17 +23,28 @@ import org.jspecify.annotations.Nullable;
  * in the class screen's look: every heritage down the left, and on the right the one you point at or picked: its free
  * attribute points, its gift and its flaw as striped rows, and a box at the bottom with its story. Pressing one picks
  * it; Choose seals it, for life. It can't be shut without picking.
+ * (0.7.75) Rows wrap instead of being cut off, and the pane scrolls with the mouse wheel when it runs long; pointing at
+ * it while it overflows scrolls it slowly on its own, to the end and back.
  */
 final class HeritageScreen extends Screen {
-	static final int MAX_W = 420, MAX_H = 250, LIST_W = 118, LIST_ROW = 20, HEADER = 34, STAT_ROW = 13, FOOTER = 24, DETAIL_MIN_LINES = 4;
+	static final int MAX_W = 420, MAX_H = 250, LIST_W = 118, LIST_ROW = 20, HEADER = 34, FOOTER = 24;
 	/** The heritage screen's accent: a deep teal, apart from the class screen's gold. */
 	static final int ACCENT = 0xFF4FB8A8;
 	/** After Choose, how long the heritage may take to come back before the screen is put up again (ms). */
 	static final long CHOOSE_GRACE_MS = 3000L;
+	/** Pixels the pane moves for one notch of the wheel; its own slow scroll on hover (pixels a second), and the pause at each end (ms). */
+	static final int SCROLL_STEP = 12, AUTO_SPEED = 14;
+	static final long AUTO_PAUSE_MS = 1500L;
 
 	private final boolean forced;
 	private Heritage.@Nullable Kind picked;
 	private @Nullable Button choose;
+	/** How far down the right pane is scrolled, and for which heritage (it starts over for each one). */
+	private int scroll;
+	private Heritage.@Nullable Kind scrolled;
+	private int contentH, viewH;
+	/** The slow scroll on hover: when it began, and how far it had got (-1: not running). */
+	private long autoFrom = -1L;
 
 	/** The server asked for a heritage that can't be put off: the screen comes back whenever it's shut. */
 	private static boolean owed;
@@ -170,26 +182,51 @@ final class HeritageScreen extends Screen {
 			: Component.translatable("gui.jaymoskingdoms.heritage.press"), px + 28, y + 18, pw - 36, Ui.DIM);
 		Ui.rule(graphics, px + 6, px + pw - 6, y + HEADER - 4);
 
-		// the free points, the gift (green) and the flaw (red), a row each
-		List<Component> rows = kind.card();
-		for (int i = 0; i < rows.size(); i++) {
-			int ry = y + HEADER + i * STAT_ROW;
-			Ui.row(graphics, px + 6, ry, px + pw - 6, ry + STAT_ROW - 1, i, false);
-			int color = i == rows.size() - 1 ? Ui.BAD : i == rows.size() - 2 ? Ui.GOOD : Ui.TEXT;
-			Ui.line(graphics, this.font, rows.get(i), px + 10, ry + 2, pw - 20, color);
+		// the free points, the gift (green) and the flaw (red), a row each, wrapped; then its story. All of it scrolls.
+		if (kind != this.scrolled) {
+			this.scrolled = kind;
+			this.scroll = 0;
+			this.autoFrom = -1L;
 		}
-
-		// the story in full
-		int detailTop = y + HEADER + rows.size() * STAT_ROW + 6;
-		int footer = y + h - FOOTER;
-		int lines = Math.max(DETAIL_MIN_LINES, (footer - detailTop - 6) / Ui.LINE);
+		int textW = pw - 20;
+		int viewTop = y + HEADER, viewBottom = y + h - FOOTER - 2;
+		this.viewH = viewBottom - viewTop;
+		List<Component> rows = kind.card();
+		List<List<FormattedCharSequence>> wrapped = new ArrayList<>();
+		int contentH = 0;
+		for (Component row : rows) {
+			List<FormattedCharSequence> split = this.font.split(row, textW);
+			wrapped.add(split);
+			contentH += split.size() * Ui.LINE + 4;
+		}
 		List<Component> text = new ArrayList<>();
 		text.add(Component.translatable("heritage.jaymoskingdoms." + kind.key() + ".desc"));
 		if (this.picked == null) {
 			text.add(Component.translatable("gui.jaymoskingdoms.heritage.lead").withColor(Ui.HINT));
 		}
-		Ui.detail(graphics, this.font, px, Math.min(detailTop, footer - DETAIL_MIN_LINES * Ui.LINE - 8), pw, lines,
-			Component.translatable("heritage.jaymoskingdoms." + kind.key()), ACCENT, text);
+		Component name = Component.translatable("heritage.jaymoskingdoms." + kind.key());
+		int storyLines = Ui.detailLines(this.font, pw, name, text);
+		int storyTop = contentH + 6;
+		contentH = storyTop + 5 + storyLines * Ui.LINE + 4;
+		this.contentH = contentH;
+		autoScroll(Ui.over(mouseX, mouseY, px, viewTop, pw, this.viewH));
+		this.scroll = Math.clamp(this.scroll, 0, Math.max(0, contentH - this.viewH));
+
+		graphics.enableScissor(px + 1, viewTop, px + pw - 1, viewBottom);
+		int ry = viewTop - this.scroll;
+		for (int i = 0; i < rows.size(); i++) {
+			List<FormattedCharSequence> split = wrapped.get(i);
+			int rh = split.size() * Ui.LINE + 4;
+			Ui.row(graphics, px + 6, ry, px + pw - 6, ry + rh - 1, i, false);
+			int color = i == rows.size() - 1 ? Ui.BAD : i == rows.size() - 2 ? Ui.GOOD : Ui.TEXT;
+			for (int l = 0; l < split.size(); l++) {
+				graphics.text(this.font, split.get(l), px + 10, ry + 2 + l * Ui.LINE, color);
+			}
+			ry += rh;
+		}
+		Ui.detail(graphics, this.font, px, viewTop - this.scroll + storyTop, pw, storyLines + 1, name, ACCENT, text);
+		graphics.disableScissor();
+		Ui.scrollbar(graphics, px + pw - 4, viewTop, this.viewH, this.viewH, contentH, this.scroll);
 
 		if (this.choose != null) {
 			this.choose.setMessage(this.picked == null ? Component.translatable("gui.jaymoskingdoms.class.choose")
@@ -197,6 +234,36 @@ final class HeritageScreen extends Screen {
 			this.choose.active = this.picked != null;
 		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
+	}
+
+	@Override
+	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+		if (this.contentH > this.viewH && mouseX >= paneX()) {
+			this.scroll = Math.clamp(this.scroll - (int)Math.round(scrollY * SCROLL_STEP), 0, this.contentH - this.viewH);
+			// (the wheel takes over from the slow scroll until the mouse leaves)
+			this.autoFrom = Long.MAX_VALUE;
+			return true;
+		}
+		return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+	}
+
+	/** Pointing at a pane that runs long scrolls it slowly down, waits, and goes back to the top, over and over. */
+	private void autoScroll(boolean hovering) {
+		int max = this.contentH - this.viewH;
+		if (!hovering || max <= 0) {
+			this.autoFrom = -1L;
+			return;
+		}
+		long now = System.currentTimeMillis();
+		if (this.autoFrom == Long.MAX_VALUE) {
+			return;
+		}
+		if (this.autoFrom < 0L) {
+			this.autoFrom = now;
+		}
+		long run = max * 1000L / AUTO_SPEED;
+		long t = (now - this.autoFrom) % (AUTO_PAUSE_MS * 2 + run);
+		this.scroll = t < AUTO_PAUSE_MS ? 0 : (int)Math.min(max, (t - AUTO_PAUSE_MS) * AUTO_SPEED / 1000L);
 	}
 
 	/** Every heritage down the left, the picked one marked. */
