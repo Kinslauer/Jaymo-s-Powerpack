@@ -15,18 +15,19 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * The big body, remade far more hulking ({@link WebHulkMesh}, {@code tools/gen_web_hulk.py}): massive traps, shoulders
- * and lats, Popeye forearms, long clawed hands hanging to the knees, thick legs, and a small head sunk low and forward
- * between the shoulders, with big angular eyes, a heavy muzzle and a hinged jaw lined with fangs. The jaw hangs open
+ * The big body, built like a towering green-giant hero but all symbiote ({@link WebHulkMesh}, {@code tools/gen_web_hulk.py}):
+ * upright, a broad chest over deep lats, huge shoulders, thick arms ending in big fists with bone spurs breaking out of
+ * the forearms, legs like tree trunks, and the head up on the traps with big angular eyes, a heavy muzzle and a hinged
+ * jaw lined with fangs. The jaw hangs open
  * and breathes, now and then drawing back in a snarl; a long red tongue lolls out over it and lashes on its own
  * ({@link #submitTongue}). Everything keeps the player model's pivots, so every pose drives it; on top of them the
- * arms sit wider, the legs further apart and the head lower and further forward ({@link #shift}), over every model
+ * arms sit wider, the legs further apart and the head higher and further forward ({@link #shift}), over every model
  * drawn for that body (the wearer's own, the suits, armour), so they all line up.
  */
 final class WebHulk {
 	static final Identifier TEXTURE = JaymosPowers.id("textures/entity/web_symbiote_hulk.png");
-	/** How far the arms sit out, the legs apart, and the head sinks and juts forward on the big body (pixels). */
-	static final float ARM_OUT = 3.5F, LEG_OUT = 1.2F, HEAD_DOWN = 2.5F, HEAD_FORWARD = 1.5F;
+	/** How far the arms sit out, the legs apart, and the head sinks (negative: rises) and juts forward on the big body (pixels). */
+	static final float ARM_OUT = 5.0F, LEG_OUT = 2.2F, HEAD_DOWN = -0.5F, HEAD_FORWARD = 2.0F;
 	/** The jaw: how far it hangs open at rest (radians), how much it breathes, and a snarl's gape. */
 	static final float JAW_REST = 0.22F, JAW_BREATH = 0.08F, JAW_SNARL = 0.5F;
 	/** The tongue: pieces, each one's length (pixels), its width and thickness at the root (tapering to the tip). */

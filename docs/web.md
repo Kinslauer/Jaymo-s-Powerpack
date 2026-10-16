@@ -67,8 +67,11 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
 - **Counter animations (`WebCounterPose`):** all 18 counters (9 web, 9 symbiote) have their own body animation,
   driven by the synced `WebCounter.ACTIVE`; the side is picked from game time so server and client agree.
 - **Hulking big body (`WebHulk`, mesh from `tools/gen_web_hulk.py` → `WebHulkMesh` + `web_symbiote_hulk.png`):**
-  53 boxes: huge traps/shoulders/lats, Popeye forearms, long clawed hands, thick legs, a small head sunk low and forward
-  (`HEAD_DOWN` 2.5, `HEAD_FORWARD` 1.5), arms out `ARM_OUT` 3.5, legs `LEG_OUT` 1.2. A hinged fanged jaw breathes and
+  since 0.11.98 built like a towering green-giant hero (Andy's pick, the TG Heroes Hulk as reference only: that pack is
+  All Rights Reserved) but all symbiote: 46 boxes, upright, a broad chest over deep lats, huge shoulders, thick arms
+  ending in big fists with bone spurs out of the forearms, tree-trunk legs with clawed toes, the head up on the traps
+  (`HEAD_DOWN` -0.5, `HEAD_FORWARD` 2), arms out `ARM_OUT` 5, legs `LEG_OUT` 2.2. Living Armor swells you 1.5x
+  (`WebSymbiote.ARMOR_SCALE` 0.5, was 0.25) and stands leaning, not hunched (`WebFeral.IDLE_BEND` 0.35, was 0.75). A hinged fanged jaw breathes and
   snarls (`JAW_REST` 0.22); a red tongue (12 pieces) lolls and lashes every `LASH_EVERY` 70 ticks. No emblem (earlier ruling).
   The behemoth (zombie-player host) still uses the old inflated body.
 - **Equip animation (`WebSuitGrowth` + `WebSuitWrapLayer`):** tendrils leech out and coil round the body, arms, head,
@@ -154,7 +157,7 @@ is halved (0.035) and the forward pump too (0.015). Landing still starts the cha
   (`WebHulk`, see below); MCA player models hide their own skin, clothes and hair layers under it.
 - **Into the big body:** the bulk takes 3 s (`WebSuitGrowth.BULK_TICKS` 60): doubled over in pain, clutching the
   middle, spasming, knees buckling, head hanging and jerking (`WebFeral.agony`), then up into a deeper feral idle
-  (`IDLE_BEND` 0.75, arms low and wide, knees bent, head twitching).
+  (`IDLE_BEND` 0.35, arms low and wide, knees bent, head twitching).
 - **Overhead slam (`WebSlam`, big body):** jump and keep holding Space in the air: over `RAISE_TICKS` 10 it rears up,
   both fists over its head. Land still holding it (held at least `MIN_TICKS` 5) and it slams: `DAMAGE` 12 at the
   centre (half at the edge, +0.8 per block fallen, up to +10) to everything within `RADIUS` 4.5, hurled out and up, a

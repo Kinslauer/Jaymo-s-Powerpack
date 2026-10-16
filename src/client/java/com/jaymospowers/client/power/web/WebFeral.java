@@ -11,15 +11,15 @@ import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Living Armor moves like a beast. Standing, it hunches deep: bent far forward at the hip, head thrust forward, the
- * arms hanging heavy and wide to the knees, legs apart and bent, twitching now and then (a mutant zombie's stance).
+ * Living Armor moves like a beast. Standing, it looms like a giant: leaning forward at the hip, head thrust forward, the
+ * arms hanging heavy and wide, legs apart and bent, twitching now and then.
  * Sprinting, it drops onto all fours and gallops, the arms its front legs. Swelling into the big body it doubles
  * over in pain first, clutching itself and shuddering, then straightens into the hunch. Rearing for a slam in the
  * air (see WebSlam) both fists come up over its head. Everything is set outright from the render state, so applying it twice changes nothing.
  */
 public final class WebFeral {
 	/** How far the body bends forward at the hip (radians): hunched, and running on all fours. */
-	static final float IDLE_BEND = 0.75F, RUN_BEND = 1.35F;
+	static final float IDLE_BEND = 0.35F, RUN_BEND = 1.35F;
 	/** Doubled over in pain while it grows; the knees bent in the hunch (radians), and how far that sinks it (pixels). */
 	private static final float PAIN_BEND = 1.3F, KNEE_BEND = 0.3F;
 	/** Its share of the growth: doubling over until {@code PAIN_IN}, writhing until {@code PAIN_OUT}, then rising. */

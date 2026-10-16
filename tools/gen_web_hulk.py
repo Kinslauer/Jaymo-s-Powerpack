@@ -1,7 +1,8 @@
 """The symbiote's big body (the hulk): an original box model built over the player's skeleton (head, body, arms and legs
 keep the player model's pivots, so every pose still drives it), and its texture, drawn here pixel by pixel (no art is
-copied). Massive traps, shoulders and lats, Popeye forearms, long clawed hands, thick legs, a small head sunk low and
-forward with big angular eyes, a hinged lower jaw and rows of fangs (cut out of the texture). Every muscle is its own
+copied). Built like a towering green-giant hero, upright, but all symbiote: a broad chest over deep lats, huge shoulders,
+thick arms ending in big fists with bone spurs breaking out of the forearms, legs like tree trunks with clawed toes,
+and the head up on the traps with big angular eyes, a hinged lower jaw and rows of fangs (cut out of the texture). Every muscle is its own
 part, so the equip animation can lay them on one at a time (client WebSuitGrowth).
 
 Also draws web_symbiote_flesh.png: four swatches (wet black, black with its sheen, bone, the tongue's red) for the
@@ -47,24 +48,26 @@ def box(part, name, frm, size, paint, pivot, order):
     BOXES.append(dict(part=part, name=name, frm=frm, size=size, paint=paint, pivot=pivot, order=order))
 
 
-# ---- the torso (pivot at the neck) ----
-box("body", "core", (-6, 0, -3), (12, 13, 7), "muscle", (0, 0, 0), 0)
-box("body", "back", (-5.5, 1, 3), (11, 9, 2), "back", (0, 3, 3), 1)
-box("body", "lats", (-8, 2, -2), (16, 7, 5), "muscle", (0, 4, 0), 2)
-box("body", "pec_r", (-6.5, 1, -4.5), (6, 6, 2), "pec", (-3, 3, -3), 3)
-box("body", "pec_l", (0.5, 1, -4.5), (6, 6, 2), "pec", (3, 3, -3), 3)
-box("body", "abs", (-4, 7, -4), (8, 5, 1), "abs", (0, 9, -3), 4)
-box("body", "traps", (-6, -3, -1), (12, 4, 5), "muscle", (0, 1, 1), 5)
+# ---- the torso (pivot at the neck): a giant's, upright, a broad chest over a deep V of lats ----
+box("body", "core", (-7, 0, -3.5), (14, 12, 7), "muscle", (0, 0, 0), 0)
+box("body", "hips", (-6, 11, -3), (12, 2, 6), "muscle", (0, 12, 0), 1)
+box("body", "back", (-6, 1, 3.5), (12, 10, 2), "back", (0, 3, 3), 1)
+box("body", "lats", (-9, 1.5, -2.5), (18, 7, 5), "muscle", (0, 4, 0), 2)
+box("body", "pec_r", (-7, 0.5, -5.5), (7, 6, 2), "pec", (-3, 3, -3), 3)
+box("body", "pec_l", (0, 0.5, -5.5), (7, 6, 2), "pec", (3, 3, -3), 3)
+box("body", "abs", (-4, 6.5, -5), (8, 5, 2), "abs", (0, 9, -3), 4)
+box("body", "traps", (-6, -3.5, -0.5), (12, 4, 5), "muscle", (0, 1, 1), 5)
 
-# ---- the arms (right: pivot at the shoulder; the left is the mirror) ----
+# ---- the arms (right: pivot at the shoulder; the left is the mirror): huge shoulders, thick arms, big fists ----
 ARM = [
-    ("shoulder", (-5.5, -4, -3.5), (7, 7, 7), "muscle", (-2, 0, 0), 2),
-    ("upper", (-4.5, 2, -3), (6, 7, 6), "muscle", (-2, 2, 0), 3),
-    ("fore", (-5, 8, -3.5), (7, 6, 7), "fore", (-2, 8, 0), 4),
-    ("hand", (-4.5, 14, -2.5), (5, 3, 5), "muscle", (-2, 14, 0), 5),
+    ("shoulder", (-4.5, -4.5, -4), (8, 7, 8), "muscle", (0, -1, 0), 2),
+    ("upper", (-4, 2, -3.5), (7, 7, 7), "muscle", (0, 2, 0), 3),
+    ("fore", (-4.5, 8, -4), (8, 7, 8), "fore", (0, 8, 0), 4),
+    ("fist", (-4, 15, -3.5), (7, 5, 7), "muscle", (0, 15, 0), 5),
+    ("knuckles", (-4, 15.5, -4.5), (7, 3, 1), "knuckle", (0, 16, -4), 6),
 ]
-CLAWS = [((-3.5, 17, -2.5), (1, 4, 1)), ((-3.5, 17, -0.5), (1, 4, 1)), ((-3.5, 17, 1.5), (1, 4, 1)), ((-1.5, 17, -2), (1, 3, 1))]
-TIPS = [((-3.25, 21, -2.25), (1, 2, 1)), ((-3.25, 21, -0.25), (1, 2, 1)), ((-3.25, 21, 1.75), (1, 2, 1)), ((-1.25, 20, -1.75), (1, 2, 1))]
+# the symbiote's own touch: bone spurs breaking out along the outside of each forearm
+SPURS = [((-5.5, 9, -1.5), (1, 2, 1)), ((-5.5, 11.5, 0), (1, 2, 1)), ((-5.5, 13.5, -1), (1, 1, 1))]
 
 
 def mirror(frm, size):
@@ -80,29 +83,24 @@ for side, part in (("r", "right_arm"), ("l", "left_arm")):
         if side == "l":
             frm, pivot = mirror(frm, size), mirror_pivot(pivot)
         box(part, name, frm, size, paint, pivot, order)
-    for i, (frm, size) in enumerate(CLAWS):
-        pivot = (-2, 17, 0)
+    for i, (frm, size) in enumerate(SPURS):
+        pivot = (-4, 11, 0)
         if side == "l":
             frm, pivot = mirror(frm, size), mirror_pivot(pivot)
-        box(part, "claw%d" % i, frm, size, "claw", pivot, 6)
-    for i, (frm, size) in enumerate(TIPS):
-        pivot = (-2, 17, 0)
-        if side == "l":
-            frm, pivot = mirror(frm, size), mirror_pivot(pivot)
-        box(part, "tip%d" % i, frm, size, "bone", pivot, 6)
+        box(part, "spur%d" % i, frm, size, "bone", pivot, 6)
 
-# ---- the legs (pivot at the hip) ----
+# ---- the legs (pivot at the hip): thick as tree trunks, clawed toes ----
 LEG = [
-    ("thigh", (-3, -1, -3), (6, 8, 6), "muscle", (0, 0, 0), 1),
-    ("calf", (-2.5, 6, -2.5), (5, 5, 5), "muscle", (0, 6, 0), 2),
-    ("foot", (-3, 10, -5), (6, 2, 7), "foot", (0, 11, -1), 3),
+    ("thigh", (-4, -1, -3.5), (8, 7, 7), "muscle", (0, 0, 0), 1),
+    ("calf", (-3.5, 6, -3), (7, 5, 6), "muscle", (0, 6, 0), 2),
+    ("foot", (-4, 10, -5), (8, 2, 8), "foot", (0, 11, -1), 3),
 ]
 for side, part in (("r", "right_leg"), ("l", "left_leg")):
     for name, frm, size, paint, pivot, order in LEG:
         if side == "l":
             frm, pivot = mirror(frm, size), mirror_pivot(pivot)
         box(part, name, frm, size, paint, pivot, order)
-    for i, x in enumerate((-2.5, -0.5, 1.5)):
+    for i, x in enumerate((-3, -0.5, 2)):
         frm = (x, 11, -6.5)
         if side == "l":
             frm = mirror(frm, (1, 1, 2))
@@ -208,8 +206,8 @@ def paint(img, rnd):
                             c = lerp(c, SHEEN, 0.2)
                     if kind in ("fore", "muscle") and side and (xx + int(yy * 0.4)) % 3 == 0 and rnd.random() < 0.35:
                         c = lerp(c, DEEP, 0.45)
-                    if kind == "claw":
-                        c = lerp(BLACK, SHEEN, 0.2 + 0.4 * v)
+                    if kind == "knuckle":
+                        c = lerp(c, DEEP, 0.5) if side else lerp(c, SHEEN, 0.2)
                     if kind == "bone":
                         c = lerp(BONE, BONE_SHADE, v * 0.8 + rnd.random() * 0.1)
                     if kind == "red":

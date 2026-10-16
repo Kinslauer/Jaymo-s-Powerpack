@@ -425,7 +425,7 @@ public final class WebSymbiote {
 
 	// ---- Living Armor, bulked up (0.5.0) ----
 	/** The armour swells you: this much bigger (scale), too big for a 1x2 gap. */
-	public static final double ARMOR_SCALE = 0.25;
+	public static final double ARMOR_SCALE = 0.5;
 	/** The tendrils strike on their own: how often they look for something, how far they reach, the wind-up to the hit,
 	 * the whole strike (slow and deliberate), and how hard it hits. */
 	public static final int STRIKE_EVERY = 50;
