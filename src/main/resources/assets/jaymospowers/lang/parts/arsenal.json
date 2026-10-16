@@ -128,7 +128,7 @@
 	"power.jaymospowers.arsenal.key.ability_1.corrupted.name": "Void Reach",
 	"power.jaymospowers.arsenal.key.ability_1.ascended_corrupted": "Reach Through: void-touched, pinned first, sometimes flintlocks. Sneak + %1$s: pin (empty hand: unpin)",
 	"power.jaymospowers.arsenal.key.ability_1.ascended_corrupted.name": "Void Reach, Pinned",
-	"message.jaymospowers.arsenal.pocket_enter": "Your pocket. The ender chest is your Rift Hoard; Z opens a rift out, or use the crying obsidian pad by the door",
-	"message.jaymospowers.arsenal.pocket_visit": "Someone else's pocket. Right-click the crying obsidian pad by the door to step out",
+	"message.jaymospowers.arsenal.pocket_enter": "Your pocket. The ender chest is your Rift Hoard; walk into the portal by the door (or press Z) to step out",
+	"message.jaymospowers.arsenal.pocket_visit": "Someone else's pocket. Walk into the portal by the door to step out",
 	"message.jaymospowers.arsenal.pocket_not_yours": "This hoard isn't yours to open"
 }
