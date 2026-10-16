@@ -42,6 +42,44 @@ but you keep everything and build on it unlike before where you lost B."
   empty shooters, and in the suit; a level-0 player (`/power level 0`) having only wings and fists, then B's weblines
   at level 1 and Yank (still stringing weblines at blocks) at level 3.
 
+## Yank and its lead catch enemies again; the lead climbs; roll charges; harsher on foreign hosts (`WebLead`, `WebRolls`)
+Andy: "the web yank and lead still needs to attach to enemies ... Also improve the web lead stair logic ... Web now has
+up to 5 roll charges, and sense counters use one per reaction. The symbiote should deal alot more damage per second to
+a host that isnt a web user."
+- **Why Yank wasn't holding enemies:** nothing in the braided-web / web-shooter patch cut the catch itself (the hit, the
+  `HELD` / `web_tether` sync and the braided line drawn to the held creature all still work). Enemies slipped it for
+  four older reasons, all on the server: Yank only caught what was dead under the crosshair (`entityInSight`, the
+  creature's own box), so a moving mob was easy to miss, and a miss at a block behind it strung a webline instead (a
+  line shooting past it that looked like it didn't stick); and once caught, a mob was let go the moment it fought: any
+  hit it landed snapped the lead (`AFTER_DAMAGE`), so did its arm swing (`isSwinging`, meant for players), and an undead
+  burning in daylight burned it through (`WebHeft.burning` on a burning catch) every 5 ticks. A punch knocking it past
+  `TETHER_BREAK` 4.5 snapped it at once too.
+- **Now (`WebLead`):** Yank aims like a swing web: dead under the crosshair first, else the creature, player or corpse
+  nearest the crosshair's line within `AIM_MAGNET` 1.5 blocks (less half its size), in sight and in reach (not dropped
+  items). A mob's own attacks and swings never snap it (a caught *player* still fights free by swinging or hitting, and
+  by straining, as before). An enemy alight on dry land doesn't burn it through (fire, lava or a lit campfire along the
+  line still do, and anything else alight). A mob past the break length snaps it only after `MOB_SNAP_TICKS` 8 ticks
+  there in a row. The braided line, the ragdoll, the hitch on release, the shock (V) and the weight rules are as they were.
+- **The lead climbs:** whatever is on it (a mob you're walking, or a player someone holds) gets `STEP_BOOST` +0.65 step
+  height while held (1.25 in all: it walks up full blocks like slabs, the player's own client too; taken off a tick
+  after the lead goes), and pulled at a taller face (up to `CLIMB_HEIGHT` 3 blocks, with headroom: no ceiling over it)
+  it's hauled up at `CLIMB_SPEED` 0.3 b/t, pressed `CLIMB_HUG` into the face and shoved `CLIMB_OVER` 0.22 over the lip,
+  with no fall counted. Only when the pull has at least `CLIMB_MIN_FLAT` 0.25 of its direction level (a pull straight up
+  lifts it already); never in water or riding.
+- **Roll charges (`WebRolls`, client `WebRollsClient`):** with Combat Roll in the pack, a web slinger holds
+  `ROLL_CHARGES` 5 roll charges (Combat Roll's `combat_roll:count`, a transient modifier while Web is your power,
+  checked every second; Combat Roll refills them one at a time on its own recharge and shows them on its own HUD). Each
+  Spider-Sense counter (`WebCounter`) spends one; with none left a dodge still sidesteps but opens no counter window.
+  The count lives on the client and is reported to the server (`web_rolls`); the server spends with `web_roll_charge`.
+  Without Combat Roll, counters cost nothing (as before).
+- **Foreign hosts (`WebInhabit`):** a mob the roaming symbiote takes wastes `FOREIGN_HOST_DPS_MULT` 3.5× faster: a hostile
+  host loses 4.2% of its max health a second (up to ×3 near its end), so it burns out in about 20 s instead of 60-90; a
+  peaceful one now wastes too, at `CALM_DECAY_SHARE` half that, and is spat out badly hurt but alive. Web slingers bonded
+  to it keep their numbers. It still never feeds on anything living.
+- **Check first in game:** Yank (tap and hold) on a zombie that's walking at you, and on one burning at noon; hit it on
+  the lead; walk a cow and a zombie up a staircase of full blocks and up a 2-3 block ledge; hold a friend on it while
+  you climb a hill; roll five times and see a counter refused at 0; a zombie and a cow taken by the blob.
+
 ## The symbiote's removal fight, dormancy, and tendrils on every line (`WebSymbioteBond`)
 Andy: "symbiote's removal is different, its activation is added to the radial menu, the first few removals at low
 bond animate like a fight or struggle, requiring the same takeover inputs to regain control, eventually showing just

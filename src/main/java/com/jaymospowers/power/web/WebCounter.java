@@ -40,6 +40,8 @@ import org.jspecify.annotations.Nullable;
  * {@link #ACTIVE} ({@link #maw}). The symbiote's moves are the PS5 tendril slam: a thick bundle of glossy tendrils
  * whips out of the arm ({@link #bundle}, drawn by {@code WebTendrilBundle}), wraps it, hauls it through a big arc
  * ({@link WebHaul}) and slams it into the ground in a burst of black mass and dust, then recoils into the arm.
+ *
+ * <p>Every counter spends one Combat Roll charge ({@link WebRolls}); with none left, a dodge opens no counter.
  */
 public final class WebCounter {
 	/** Ticks after a dodge that right click counters. */
@@ -192,6 +194,7 @@ public final class WebCounter {
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(Strike.TYPE, Strike.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Strike.TYPE, (payload, ctx) -> strike(ctx.player()));
+		WebRolls.register();
 	}
 
 	/** How long each counter lasts (ticks). */
@@ -253,8 +256,12 @@ public final class WebCounter {
 		player.removeAttached(LIVE);
 	}
 
-	/** A sense dodge just happened: right click counters for a moment. */
+	/** A sense dodge just happened: right click counters for a moment (if there's a Combat Roll charge to spend on it). */
 	static void opened(ServerPlayer player, Entity attacker) {
+		if (!WebRolls.has(player)) {
+			// out of roll charges: the dodge still happens, but no counter
+			return;
+		}
 		Live live = live(player);
 		live.attacker = attacker.getId();
 		player.setAttached(READY, player.level().getGameTime() + WINDOW);
@@ -277,6 +284,11 @@ public final class WebCounter {
 		if (ready == null || now > ready || player.getAttached(ACTIVE) != null || !player.isAlive() || WebPower.ragdolled(player)) {
 			return;
 		}
+		if (!WebRolls.has(player)) {
+			// the roll charges went on rolling since the dodge: no counter
+			player.removeAttached(READY);
+			return;
+		}
 		Live live = live(player);
 		LivingEntity target = level.getEntity(live.attacker) instanceof LivingEntity attacker && attacker.isAlive()
 			&& attacker.distanceTo(player) <= REACH ? attacker : null;
@@ -294,6 +306,8 @@ public final class WebCounter {
 			kind = base + player.getRandom().nextInt(WEB_COUNTERS);
 		} while (kind == live.lastKind);
 		live.lastKind = kind;
+		// every counter spends a Combat Roll charge
+		WebRolls.spend(player);
 		player.removeAttached(READY);
 		player.setAttached(ACTIVE, new Active(kind, target.getId(), now));
 		begin(player, level, kind, target);

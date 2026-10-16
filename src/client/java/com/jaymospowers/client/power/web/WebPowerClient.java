@@ -47,6 +47,8 @@ public final class WebPowerClient implements PowerClient {
 	/** Called once from {@link com.jaymospowers.client.JaymosPowersClient}: renderers, client packets, the PowerClient. */
 	public static void init() {
 		WebCutClient.register();
+		// Combat Roll's charges, for the Spider-Sense counters
+		WebRollsClient.init();
 		// a chunk of wall in a tendril's grip: left click swings the main one's, right click the other's; with the
 		// tendrils full (two creatures, debris and a creature, two clumps), left click is a combo instead
 		net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> {
