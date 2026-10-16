@@ -286,7 +286,7 @@ public final class WebStrength {
 			for (Iterator<Map.Entry<UUID, Long>> it = FISTS_UNTIL.entrySet().iterator(); it.hasNext(); ) {
 				Map.Entry<UUID, Long> entry = it.next();
 				ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
-				if (player == null || clock >= entry.getValue() || !Powers.has(player, WebPower.INSTANCE)) {
+				if (player == null || clock >= entry.getValue() || !Powers.has(player, WebPower.INSTANCE) || suited(player)) {
 					it.remove();
 					if (player != null) {
 						player.removeAttached(FISTS);
@@ -337,11 +337,21 @@ public final class WebStrength {
 
 	static boolean fistsOn(Player player) {
 		Long until = FISTS_UNTIL.get(player.getUUID());
-		return until != null && clock < until;
+		return until != null && clock < until && !suited(player);
+	}
+
+	/** The symbiote suit (or its big body, or Living Armor) is on: no webbed fists under it (Andy). */
+	static boolean suited(Player player) {
+		return WebSymbiote.leapBody(player) || WebSymbiote.armored(player);
 	}
 
 	/** Sneak + Z: coat the fists in web. */
 	static void fists(ServerPlayer player) {
+		if (suited(player)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_fists_suit").withStyle(net.minecraft.ChatFormatting.GRAY));
+			player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 0.4F, 2.0F);
+			return;
+		}
 		Long ready = FISTS_READY.get(player.getUUID());
 		if (fistsOn(player) || ready != null && clock < ready) {
 			player.level().playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 0.4F, 2.0F);

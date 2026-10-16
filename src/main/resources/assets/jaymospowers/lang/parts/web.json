@@ -22,6 +22,7 @@
 	"key.jaymospowers.web_zip": "Web Zip",
 	"message.jaymospowers.web_fists_on": "Your fists are sticky with web.",
 	"message.jaymospowers.web_fists_off": "The web on your fists dries up.",
+	"message.jaymospowers.web_fists_suit": "No web gets through the suit.",
 	"message.jaymospowers.web_shot.no_shooters": "Web Shot needs web shooters: your own web won't shoot.",
 	"message.jaymospowers.web_shot.dry": "Your web shooters are dry. Load a Web Cartridge.",
 	"key.jaymospowers.web_symbiote": "Power Skill (Webbed Fists, Symbiote menu, Tempest Kick)",
