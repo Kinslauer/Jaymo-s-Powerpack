@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:string",
+    "minecraft:string",
+    "minecraft:slime_ball",
+    "minecraft:glass_bottle"
+  ],
+  "result": {
+    "id": "jaymospowers:web_cartridge"
+  }
+}

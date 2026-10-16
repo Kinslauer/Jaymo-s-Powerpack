@@ -74,6 +74,11 @@ final class WebSuitWrapLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 		if (growth == null) {
 			return;
 		}
+		if (growth.tear()) {
+			// torn off: strips, sticky strands and thrashing tendrils instead of the strands coiling back in
+			WebSuitTear.submit(poseStack, collector, state, this.getParentModel(), growth.t());
+			return;
+		}
 		boolean hulk = Math.min(growth.from(), growth.to()) >= 1;
 		float built = WebSuitGrowth.built(growth);
 		PlayerModel parent = this.getParentModel();
