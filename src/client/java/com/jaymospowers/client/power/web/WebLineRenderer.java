@@ -17,7 +17,9 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Draws every web line in view (the local player's from their own state, so it shows the same tick it fires; other
  * players' from the synced line attachments), each from its own hand, to the anchor, with a little
- * splat of strands where it sticks. Hooked into Fabric's level render "collect submits" phase.
+ * splat of strands where it sticks. Hooked into Fabric's level render "collect submits" phase. Since 0.12.3 a web line
+ * is a braided white rope (see {@link #braid}): the full rope from a web shooter, a thinner, plainer one from the
+ * power's own organic webs.
  */
 final class WebLineRenderer {
 	private static final int COLOR = 0xFFEDEDED;
@@ -168,6 +170,11 @@ final class WebLineRenderer {
 	 * Where a line sticks: a little cobweb, spokes fanning out across the line with two rings of thread between them.
 	 */
 	static void splat(LevelRenderContext context, Vec3 at, Vec3 dir, float width, boolean dark) {
+		splat(context, at, dir, width, dark, 1.0);
+	}
+
+	/** {@link #splat}, {@code size} times as big. */
+	static void splat(LevelRenderContext context, Vec3 at, Vec3 dir, float width, boolean dark, double size) {
 		Vec3 across = Math.abs(dir.y) < 0.95 ? dir.cross(new Vec3(0.0, 1.0, 0.0)).normalize() : dir.cross(new Vec3(1.0, 0.0, 0.0)).normalize();
 		Vec3 across2 = dir.cross(across).normalize();
 		int color = dark ? DARK : SPLAT_COLOR;
@@ -177,7 +184,7 @@ final class WebLineRenderer {
 			for (int k = 0; k < SPLAT_SPOKES; k++) {
 				double angle = k * Math.PI * 2.0 / SPLAT_SPOKES + 0.3;
 				// a little irregular, like a real web
-				double reach = SPLAT_RADIUS * (0.8 + 0.2 * Math.sin(k * 2.7));
+				double reach = SPLAT_RADIUS * size * (0.8 + 0.2 * Math.sin(k * 2.7));
 				Vec3 spoke = across.scale(Math.cos(angle)).add(across2.scale(Math.sin(angle)));
 				Vec3 tip = at.add(spoke.scale(reach)).subtract(dir.scale(0.08));
 				inner[k] = at.add(spoke.scale(reach * 0.45)).subtract(dir.scale(0.04));
@@ -275,8 +282,10 @@ final class WebLineRenderer {
 				if (end == null) {
 					continue;
 				}
+				// from a web shooter: the full braided rope, out of the nozzle on the wrist
+				boolean nozzle = !dark && com.jaymospowers.power.web.WebShooters.nozzleLine(player, handIndex);
 				Vec3 hand = twoHanded ? handPos(minecraft, player, WebNet.MAIN, partialTick).lerp(handPos(minecraft, player, WebNet.OFF, partialTick), 0.5)
-					: handPos(minecraft, player, handIndex, partialTick);
+					: nozzle ? nozzlePos(minecraft, player, handIndex, partialTick) : handPos(minecraft, player, handIndex, partialTick);
 				if (hand.distanceToSqr(end) > 96.0 * 96.0) {
 					continue;
 				}
@@ -308,7 +317,8 @@ final class WebLineRenderer {
 						armSheath(context, minecraft, player, handIndex, shape, from, to, time, partialTick, camera);
 					}
 				} else {
-					draw(context.poseStack(), context, shape, from, to, lineWidth, false, out >= 1.0F);
+					braid(context, level, camera, shape, from, to, width, WebLineShape.thin(-slack), nozzle, out >= 1.0F, time,
+						player.getId() * 31 + handIndex);
 				}
 			}
 			// whatever the tendrils hold, held up on its cords
@@ -674,10 +684,30 @@ final class WebLineRenderer {
 	}
 
 	private static void draw(PoseStack poseStack, LevelRenderContext context, Vec3 from, Vec3 to, float width, boolean dark) {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (!dark && minecraft.level != null) {
+			// a hitch's line or a webline: the power's own web, braided
+			Vec3 camera = context.levelState().cameraRenderState.pos;
+			Vec3 seed = to.add(camera);
+			braid(context, minecraft.level, camera, WebLineShape.straight(from, to), from, to, width, 1.0F, false, true,
+				minecraft.level.getGameTime(), java.util.Objects.hash((int)Math.floor(seed.x * 4.0), (int)Math.floor(seed.y * 4.0), (int)Math.floor(seed.z * 4.0)));
+			return;
+		}
 		draw(poseStack, context, WebLineShape.straight(from, to), from, to, width, dark, true);
 	}
 
 	/** A line along {@code shape} (sagging, snaking, twanging); {@code stuck}: it has reached its end, so splat there. */
+	/** Where a web shooter's line leaves: the nozzle on the posed wrist (in first person, the hand's screen corner as ever). */
+	static Vec3 nozzlePos(Minecraft minecraft, Player player, int handIndex, float partialTick) {
+		if (!(player == minecraft.player && minecraft.options.getCameraType().isFirstPerson())) {
+			Vec3 wrist = WebArms.wristPos(player, handIndex, partialTick);
+			if (wrist != null) {
+				return wrist;
+			}
+		}
+		return handPos(minecraft, player, handIndex, partialTick);
+	}
+
 	private static void draw(PoseStack poseStack, LevelRenderContext context, WebLineShape.Shape shape, Vec3 from, Vec3 to, float width,
 		boolean dark, boolean stuck) {
 		if (to.distanceToSqr(from) < 1.0E-6) {
@@ -701,6 +731,160 @@ final class WebLineRenderer {
 			Vec3 in = points[SEGMENTS].subtract(points[SEGMENTS - 1]);
 			splat(context, to, in.lengthSqr() < 1.0E-8 ? to.subtract(from).normalize() : in.normalize(), width, dark);
 		}
+	}
+
+	// ===== the braided web line (0.12.3; the look Andy liked in the swinging video, our own geometry) ================
+	static final net.minecraft.resources.Identifier ROPE_TEXTURE = com.jaymospowers.JaymosPowers.id("textures/entity/web_rope.png");
+	/**
+	 * A web shooter's line: {@code SHOOTER_STRANDS} strands, each a ribbon {@code SHOOTER_STRAND_WIDTH} blocks wide
+	 * (solid down its middle, see-through at its edges: textures/entity/web_rope.png), twisted round each other
+	 * {@code SHOOTER_TWIST} blocks out from the middle, with a fibre fraying off it every {@code SHOOTER_FIBRE_EVERY}
+	 * blocks and a splat {@code SHOOTER_SPLAT} times the usual where it sticks.
+	 */
+	private static final int SHOOTER_STRANDS = 3;
+	private static final double SHOOTER_STRAND_WIDTH = 0.05, SHOOTER_TWIST = 0.032, SHOOTER_FIBRE_EVERY = 0.5, SHOOTER_SPLAT = 1.3;
+	/** The power's own organic web: the same, thinner and plainer. */
+	private static final int ORGANIC_STRANDS = 2;
+	private static final double ORGANIC_STRAND_WIDTH = 0.03, ORGANIC_TWIST = 0.017, ORGANIC_FIBRE_EVERY = 1.4, ORGANIC_SPLAT = 1.0;
+	/**
+	 * The strands make a full turn every {@code BRAID_TURN} blocks, drawn in pieces of {@code BRAID_STEP} blocks (at most
+	 * {@code BRAID_MAX_PIECES} a line), and gather into one over the last {@code BRAID_GATHER} blocks at each end. The
+	 * strand round the back is shaded down to {@code BRAID_BACK_SHADE}. Further than {@code BRAID_FAR} from the camera a
+	 * line is drawn as the plain line it was (it would be a pixel or two wide anyway).
+	 */
+	private static final double BRAID_TURN = 0.9, BRAID_STEP = 0.25, BRAID_GATHER = 0.35, BRAID_FAR = 72.0;
+	private static final int BRAID_MAX_PIECES = 160;
+	private static final float BRAID_BACK_SHADE = 0.7F;
+	/** Fibres: about this long (blocks), swaying this much with the time, this see-through. */
+	private static final double FIBRE_LENGTH = 0.2, FIBRE_SWAY = 0.04;
+	private static final int FIBRE_ALPHA = 0x8C;
+
+	/**
+	 * A web line as a braided rope along {@code shape} ({@code from} to {@code to}, camera-relative): {@code nozzle} the
+	 * full rope of a web shooter, else the power's thinner organic one. {@code thin}: share of its width kept (a
+	 * stretched line thins); {@code stuck}: it has reached its end, so it splats there.
+	 */
+	static void braid(LevelRenderContext context, ClientLevel level, Vec3 camera, WebLineShape.Shape shape, Vec3 from, Vec3 to, float width,
+		float thin, boolean nozzle, boolean stuck, double time, int seed) {
+		double length = from.distanceTo(to);
+		if (length < 1.0E-3) {
+			return;
+		}
+		if (from.lerp(to, 0.5).lengthSqr() > BRAID_FAR * BRAID_FAR) {
+			draw(context.poseStack(), context, shape, from, to, width * (nozzle ? 1.4F : 1.0F) * thin, false, stuck);
+			return;
+		}
+		int strands = nozzle ? SHOOTER_STRANDS : ORGANIC_STRANDS;
+		double half = (nozzle ? SHOOTER_STRAND_WIDTH : ORGANIC_STRAND_WIDTH) * 0.5 * thin;
+		double twist = (nozzle ? SHOOTER_TWIST : ORGANIC_TWIST) * thin;
+		int pieces = Mth.clamp((int)Math.ceil(length / BRAID_STEP), 4, BRAID_MAX_PIECES);
+		Vec3 dir = to.subtract(from).scale(1.0 / length);
+		Vec3 u = Math.abs(dir.y) < 0.95 ? dir.cross(new Vec3(0.0, 1.0, 0.0)).normalize() : dir.cross(new Vec3(1.0, 0.0, 0.0)).normalize();
+		Vec3 v = dir.cross(u).normalize();
+		Vec3[] middle = new Vec3[pieces + 1];
+		int[] light = new int[pieces + 1];
+		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+		for (int i = 0; i <= pieces; i++) {
+			middle[i] = shape.at(i / (double)pieces);
+			// the world's light along it (looked up every few pieces), so it isn't bright white in the dark
+			if (i % 4 == 0 || i == pieces) {
+				Vec3 at = middle[i].add(camera);
+				light[i] = net.minecraft.util.LightCoordsUtil.getLightCoords(level, pos.set(at.x, at.y, at.z));
+			} else {
+				light[i] = light[i - i % 4];
+			}
+		}
+		double phase0 = (seed & 0xFF) * 0.37;
+		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.entityTranslucent(ROPE_TEXTURE), (pose, buffer) -> {
+			for (int k = 0; k < strands; k++) {
+				double phase = phase0 + k * Math.PI * 2.0 / strands;
+				Vec3 prev = null, prevSide = null;
+				int prevColor = 0;
+				for (int i = 0; i <= pieces; i++) {
+					double along = i / (double)pieces * length;
+					// gathered tight at each end: into the nozzle (or the palm) and into the splat
+					double gather = Math.min(1.0, Math.min(along, length - along) / BRAID_GATHER);
+					double angle = phase + along / BRAID_TURN * Math.PI * 2.0;
+					Vec3 offset = u.scale(Math.cos(angle)).add(v.scale(Math.sin(angle)));
+					Vec3 point = middle[i].add(offset.scale(twist * gather));
+					Vec3 tangent = middle[Math.min(pieces, i + 1)].subtract(middle[Math.max(0, i - 1)]);
+					// a ribbon turned to face the camera (at the origin here), as wide as the strand
+					Vec3 side = tangent.cross(point);
+					if (side.lengthSqr() < 1.0E-10) {
+						side = u;
+					}
+					side = side.normalize().scale(half);
+					// the strand round the back of the braid is in its shadow
+					double facing = point.lengthSqr() < 1.0E-8 ? 0.0 : -offset.dot(point.normalize());
+					float shade = (float)Mth.lerp(0.5 + 0.5 * facing * gather, BRAID_BACK_SHADE, 1.0);
+					int c = (int)(shade * 255.0F);
+					int color = 0xFF000000 | c << 16 | c << 8 | Math.min(255, c + 4);
+					if (prev != null) {
+						// the texture's fibres run a quarter of it per piece (it repeats every quarter)
+						float v0 = (i - 1) % 4 / 4.0F, v1 = v0 + 0.25F;
+						ribbon(buffer, pose, prev.subtract(prevSide), prev.add(prevSide), point.add(side), point.subtract(side), v0, v1, prevColor, color,
+							light[i - 1], light[i]);
+					}
+					prev = point;
+					prevSide = side;
+					prevColor = color;
+				}
+			}
+		});
+		fibres(context, shape, length, u, v, twist, width, nozzle ? SHOOTER_FIBRE_EVERY : ORGANIC_FIBRE_EVERY, time, seed);
+		if (stuck) {
+			Vec3 in = to.subtract(shape.at(Math.max(0.0, 1.0 - 0.5 / length)));
+			splat(context, to, in.lengthSqr() < 1.0E-8 ? dir : in.normalize(), width * (nozzle ? 1.3F : 1.0F), false,
+				nozzle ? SHOOTER_SPLAT : ORGANIC_SPLAT);
+		}
+	}
+
+	private static void ribbon(VertexConsumer buffer, PoseStack.Pose pose, Vec3 a0, Vec3 a1, Vec3 b1, Vec3 b0, float v0, float v1, int colorA,
+		int colorB, int lightA, int lightB) {
+		ropeVertex(buffer, pose, a0, 0.0F, v0, colorA, lightA);
+		ropeVertex(buffer, pose, a1, 1.0F, v0, colorA, lightA);
+		ropeVertex(buffer, pose, b1, 1.0F, v1, colorB, lightB);
+		ropeVertex(buffer, pose, b0, 0.0F, v1, colorB, lightB);
+	}
+
+	private static void ropeVertex(VertexConsumer buffer, PoseStack.Pose pose, Vec3 p, float u, float v, int color, int light) {
+		// lit from straight above, so it's evenly lit whichever way it runs
+		buffer.addVertex(pose, (float)p.x, (float)p.y, (float)p.z).setColor(color).setUv(u, v)
+			.setOverlay(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0.0F, 1.0F, 0.0F);
+	}
+
+	/**
+	 * Fine fibres fraying off a braided line: one about every {@code every} blocks, each starting on the rope's surface
+	 * and curling away from it (a little back toward the hand, as if combed by the shot), swaying gently.
+	 */
+	private static void fibres(LevelRenderContext context, WebLineShape.Shape shape, double length, Vec3 u, Vec3 v, double twist, float width,
+		double every, double time, int seed) {
+		int count = (int)(length / every);
+		if (count <= 0) {
+			return;
+		}
+		context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.linesTranslucent(), (pose, buffer) -> {
+			int color = FIBRE_ALPHA << 24 | 0xF2F4F8;
+			int faint = (FIBRE_ALPHA / 2) << 24 | 0xF2F4F8;
+			for (int j = 0; j < count; j++) {
+				// the same fibres every frame: placed by a hash, not the random source
+				int h = (j * 0x9E3779B1) ^ (seed * 0x85EBCA6B);
+				h ^= h >>> 15;
+				double r1 = (h & 0xFFFF) / 65535.0, r2 = (h >>> 16 & 0xFFFF) / 65535.0;
+				double t = Mth.clamp((j + 0.2 + 0.6 * r1) / count, 0.04, 0.96);
+				double angle = r2 * Math.PI * 2.0;
+				Vec3 outward = u.scale(Math.cos(angle)).add(v.scale(Math.sin(angle)));
+				Vec3 base = shape.at(t).add(outward.scale(twist));
+				Vec3 back = shape.at(Math.max(0.0, t - 0.02)).subtract(shape.at(t));
+				back = back.lengthSqr() < 1.0E-10 ? Vec3.ZERO : back.normalize();
+				double reach = FIBRE_LENGTH * (0.5 + 0.8 * r1);
+				double sway = Math.sin(time * 0.35 + j * 1.7) * FIBRE_SWAY;
+				Vec3 mid = base.add(outward.scale(reach * 0.5)).add(back.scale(reach * 0.25));
+				Vec3 tip = base.add(outward.scale(reach * 0.85)).add(back.scale(reach * 0.6)).add(v.scale(sway));
+				coloured(buffer, pose, base, mid, width * 0.55F, color);
+				coloured(buffer, pose, mid, tip, width * 0.4F, faint);
+			}
+		});
 	}
 
 	private static void segment(VertexConsumer buffer, PoseStack.Pose pose, Vec3 a, Vec3 b, Vec3 normal, int color, float width) {
