@@ -1,5 +1,6 @@
 package com.jaymospowers.client.costume;
 
+import com.jaymospowers.client.JaymosPowersClient;
 import com.jaymospowers.client.power.web.WebSuitGrowth;
 import com.jaymospowers.client.power.web.WebSymbioteClient;
 import com.jaymospowers.client.power.xenoform.XenoformClient;
@@ -9,11 +10,14 @@ import com.jaymospowers.costume.CostumeNet;
 import com.jaymospowers.costume.CostumeTailoring;
 import com.jaymospowers.costume.SecretIdentity;
 import com.jaymospowers.power.web.WebSymbiote;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.player.PlayerModel;
@@ -39,6 +43,10 @@ import org.jspecify.annotations.Nullable;
  * drawn), and {@link Layer} draws it over the body. In first person your own sleeves are drawn over your hands.
  * <p>
  * The costume gives way to a Xeno-Band form and to the symbiote's suit (both cover the whole body themselves).
+ * <p>
+ * (0.12.3) The mask key ({@link #maskKey}, apostrophe by default: every letter is taken by Powers, Kingdoms or
+ * vanilla) takes the costume's head piece off and puts it back ({@code Costume.toggleMask}); with it off
+ * ({@code Costume.UNMASKED}) the head piece isn't drawn and the face shows.
  */
 public final class CostumeClient {
 	/** The costume to draw on this player, or null. */
@@ -47,6 +55,8 @@ public final class CostumeClient {
 	/** While the designer draws its preview: the design shown on the local player in place of what they wear. */
 	private static @Nullable CostumeDesign preview;
 	private static CostumeModels.@Nullable Set handModels;
+	/** (0.12.3) The mask key. */
+	private static KeyMapping maskKey;
 
 	private CostumeClient() {
 	}
@@ -63,6 +73,30 @@ public final class CostumeClient {
 			}
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(CostumeEmblems::tick);
+		maskKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.costume_mask", InputConstants.KEY_APOSTROPHE,
+			JaymosPowersClient.CATEGORY));
+		ClientTickEvents.END_CLIENT_TICK.register(CostumeClient::maskTick);
+	}
+
+	/** (0.12.3) The mask key, for the key guide. */
+	public static KeyMapping maskKey() {
+		return maskKey;
+	}
+
+	/** (0.12.3) Asks the server to take the mask off or put it back on (the key and the designer's button). */
+	static void toggleMask() {
+		ClientPlayNetworking.send(new CostumeNet.ToggleMask());
+	}
+
+	/** Each press of the mask key (outside screens) flips the mask; the server checks there's one to flip. */
+	private static void maskTick(Minecraft minecraft) {
+		boolean pressed = false;
+		while (maskKey.consumeClick()) {
+			pressed = true;
+		}
+		if (pressed && minecraft.player != null && minecraft.getConnection() != null && minecraft.gui.screen() == null) {
+			toggleMask();
+		}
 	}
 
 	/** The designer's preview: while {@code run} extracts the local player's render state, they wear {@code design}. */
@@ -80,6 +114,10 @@ public final class CostumeClient {
 		CostumeDesign design = null;
 		if (entity instanceof Player player) {
 			design = preview != null && player == Minecraft.getInstance().player ? preview : Costume.worn(player);
+			if (design != null && design != preview && design.mask() != CostumeDesign.Mask.NONE && Costume.unmasked(player)) {
+				// (0.12.3) the mask is off: everything but the head piece is drawn
+				design = design.withMask(CostumeDesign.Mask.NONE);
+			}
 		}
 		state.setData(KEY, design);
 		// (0.11.78) filled in again as it is drawn (CostumeBody), never left over from another frame

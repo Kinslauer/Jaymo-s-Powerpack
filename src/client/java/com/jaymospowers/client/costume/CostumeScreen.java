@@ -65,7 +65,7 @@ public class CostumeScreen extends Screen {
 	private int dragging;
 
 	private EditBox name;
-	private Button cut, mask, cape, sew, takeOff;
+	private Button cut, mask, cape, sew, takeOff, maskToggle;
 
 	public CostumeScreen(BlockPos pos) {
 		this(pos, -1);
@@ -162,6 +162,9 @@ public class CostumeScreen extends Screen {
 			}
 		}).bounds(left() + W - 8 - 64 - 4 - 64, by, 64, 14).build());
 		this.takeOff.visible = !tailoring();
+		// (0.12.3) the worn costume's mask off / on (the mask key's, here too)
+		this.maskToggle = addRenderableWidget(Button.builder(Component.translatable("screen.jaymospowers.costume.mask_off"),
+			b -> CostumeClient.toggleMask()).bounds(left() + W - 8 - 64 - 4 - 64 - 4 - 64, by, 64, 14).build());
 		labels();
 	}
 
@@ -310,6 +313,10 @@ public class CostumeScreen extends Screen {
 		emblem(graphics, mouseX, mouseY);
 		cost(graphics, player);
 		this.takeOff.active = !tailoring() && Costume.worn(player) != null;
+		CostumeDesign wornNow = Costume.worn(player);
+		this.maskToggle.active = wornNow != null && wornNow.mask() != CostumeDesign.Mask.NONE;
+		this.maskToggle.setMessage(Component.translatable(Costume.unmasked(player) ? "screen.jaymospowers.costume.mask_on"
+			: "screen.jaymospowers.costume.mask_off"));
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 		pieceTooltip(graphics, this.cut, design.cut().power, mouseX, mouseY);
 		pieceTooltip(graphics, this.mask, design.mask().power, mouseX, mouseY);
@@ -452,6 +459,7 @@ public class CostumeScreen extends Screen {
 		Component wearing = worn != null
 			? Component.translatable("screen.jaymospowers.costume.wearing", com.jaymospowers.costume.CostumeItem.label(worn))
 			: Component.translatable("screen.jaymospowers.costume.wearing_none");
-		UiStyle.line(graphics, this.font, wearing, left() + 10, top() + H - 17, W - 160, UiStyle.DIM);
+		// (0.12.3) short of the three buttons (Mask, Take off, Sew)
+		UiStyle.line(graphics, this.font, wearing, left() + 10, top() + H - 17, W - 228, UiStyle.DIM);
 	}
 }

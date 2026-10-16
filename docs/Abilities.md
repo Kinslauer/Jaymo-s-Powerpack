@@ -3,7 +3,10 @@
 Edit the **Change to** column (or anything else) and send it back. Blank means keep it as it is.
 
 **Keys:** R G V B are the four abilities; **Z** is the power's mode; **C** is the ascended ability; **X** is the
-power skill key (Web: the symbiote menu; Wind: Tempest Kick). Every power starts with only its **starter**, and unlocks its four abilities one by one by using them.
+power skill key (Web: the symbiote menu; Wind: Tempest Kick). **'** (apostrophe, 0.12.3) is the costume mask key, for
+everyone: it takes a worn costume's mask, hood, helmet or other head piece off and puts it back (face shown: no secret
+identity), and with a Rig Helm and no costume head piece it flips the faceplate; also the Costume Table's Mask button and
+`/costume mask`. Every power starts with only its **starter**, and unlocks its four abilities one by one by using them.
 **Ascended** and **corrupted** are separate fates: a power can be one, the other, or both.
 
 ---

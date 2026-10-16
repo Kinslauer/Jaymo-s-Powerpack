@@ -76,6 +76,17 @@ public final class CostumeNet {
 		}
 	}
 
+	/** (0.12.3) Client → server: the mask key (or the designer's Mask button): the costume's head piece off / on. */
+	public record ToggleMask() implements CustomPacketPayload {
+		public static final Type<ToggleMask> TYPE = new Type<>(JaymosPowers.id("costume_toggle_mask"));
+		public static final StreamCodec<ByteBuf, ToggleMask> CODEC = StreamCodec.unit(new ToggleMask());
+
+		@Override
+		public Type<ToggleMask> type() {
+			return TYPE;
+		}
+	}
+
 	/** One line of the cost: what counts for it, how many, and an item to show for it. */
 	public record Need(Predicate<ItemStack> matches, int count, ItemStack icon) {
 		/** How many of these the player has, in the main inventory and offhand. */
@@ -101,6 +112,8 @@ public final class CostumeNet {
 		PayloadTypeRegistry.clientboundPlay().register(Open.TYPE, Open.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Sew.TYPE, Sew.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(TakeOff.TYPE, TakeOff.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(ToggleMask.TYPE, ToggleMask.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(ToggleMask.TYPE, (payload, ctx) -> Costume.toggleMask(ctx.player()));
 		ServerPlayNetworking.registerGlobalReceiver(Sew.TYPE, (payload, ctx) -> sew(ctx.player(), payload.pos(), payload.design()));
 		ServerPlayNetworking.registerGlobalReceiver(TakeOff.TYPE, (payload, ctx) -> {
 			if (atTable(ctx.player(), payload.pos()) && Costume.takeOff(ctx.player())) {

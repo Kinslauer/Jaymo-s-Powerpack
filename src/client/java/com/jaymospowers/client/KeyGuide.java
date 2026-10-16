@@ -33,6 +33,8 @@ final class KeyGuide {
 	private static final String SPECIAL_KEY = "key.jaymospowers.web_symbiote";
 	/** (0.11.87) The Rig's lines (shown while you wear or have parked a Rig). */
 	static final int COLOR_RIG = 0xFF5FE6FF;
+	/** (0.12.3) The costume's mask key's line (shown while you wear a costume with a head piece). */
+	static final int COLOR_COSTUME = 0xFFE89AC4;
 
 	/** One key's line: the key's name, the ability's short name (null if it has none), what it does, its colour. */
 	record Line(Component key, @Nullable Component name, Component text, int color, boolean locked) {
@@ -86,6 +88,7 @@ final class KeyGuide {
 		add(lines, power, player, "special", base, suffixes, args, special(), COLOR_SPECIAL, mastering);
 		if (player != null) {
 			rig(lines, player);
+			costume(lines, player);
 		}
 		return lines;
 	}
@@ -121,6 +124,18 @@ final class KeyGuide {
 		rigLine(lines, "lock", Component.translatable("rig.jaymospowers.key.hold", rigKey), args, com.jaymospowers.rig.Rig.LOCK_LEVEL, level);
 		rigLine(lines, "flight", Component.translatable("rig.jaymospowers.key.double", name(Minecraft.getInstance().options.keyJump)), args,
 			com.jaymospowers.rig.Rig.FLIGHT_LEVEL, level);
+	}
+
+	/** (0.12.3) The costume's mask key, while you wear a costume with a head piece: lang {@code costume.jaymospowers.key.mask(.off)}. */
+	private static void costume(List<Line> lines, Player player) {
+		com.jaymospowers.costume.CostumeDesign worn = com.jaymospowers.costume.Costume.worn(player);
+		if (worn == null || worn.mask() == com.jaymospowers.costume.CostumeDesign.Mask.NONE) {
+			return;
+		}
+		String base = com.jaymospowers.costume.Costume.unmasked(player) ? "costume.jaymospowers.key.mask.off" : "costume.jaymospowers.key.mask";
+		Component piece = Component.translatable("costume.jaymospowers.mask." + worn.mask().getSerializedName());
+		lines.add(new Line(name(com.jaymospowers.client.costume.CostumeClient.maskKey()), shortName(base), Component.translatable(base, piece),
+			COLOR_COSTUME, false));
 	}
 
 	private static void rigLine(List<Line> lines, String id, Component key, Object[] args, int needs, int level) {

@@ -25,6 +25,8 @@ import org.jspecify.annotations.Nullable;
  * (0.11.75) While masked the costume's name stands in for the player's display name everywhere (chat, the tab list,
  * death messages, the name tag: {@code mixin/CostumeNameMixin}, {@code CostumeTabListMixin}). Which power was just
  * used is already tagged by {@code core.Oddities} ({@code jaymospowers_odd:power/<power>}).
+ * <p>
+ * (0.12.3) With the costume's mask taken off ({@link Costume#UNMASKED}) the face shows: no identity, the real name.
  */
 public final class SecretIdentity {
 	/** The tags' prefixes. */
@@ -84,14 +86,15 @@ public final class SecretIdentity {
 	public static @Nullable Component maskedName(Player player) {
 		CostumeDesign worn = Costume.worn(player);
 		// (0.11.82) a Rig Helm hides the face when the costume doesn't: its name (or "a Rig pilot") is shown
-		return worn != null && worn.mask().hidesFace ? shownName(worn) : com.jaymospowers.rig.Rig.helmIdentity(player);
+		// (0.12.3) a mask taken off hides nobody (Costume#faceHidden)
+		return worn != null && Costume.faceHidden(player) ? shownName(worn) : com.jaymospowers.rig.Rig.helmIdentity(player);
 	}
 
 	/** Brings {@code player}'s tags in line with what they wear. */
 	public static void update(ServerPlayer player) {
 		CostumeDesign worn = Costume.worn(player);
 		Set<String> want = new HashSet<>();
-		if (worn != null && worn.mask().hidesFace) {
+		if (worn != null && Costume.faceHidden(player)) {
 			want.add(MASKED + key(worn));
 			if (!worn.name().isEmpty()) {
 				want.add(NAME + worn.name());

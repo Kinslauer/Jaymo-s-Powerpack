@@ -44,8 +44,8 @@ public final class RigHelm {
 		return Boolean.TRUE.equals(player.getAttached(NIGHT));
 	}
 
-	/** The menu's Faceplate: up or down. */
-	static void toggleFace(ServerPlayer player) {
+	/** The menu's Faceplate: up or down. (0.12.3) Also the costume mask key's, with a Helm and no costume mask. */
+	public static void toggleFace(ServerPlayer player) {
 		if (!Rig.wears(player, Rig.Piece.HELM)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig.needs_helm"));
 			return;
