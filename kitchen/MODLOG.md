@@ -769,3 +769,8 @@ All art is original (`tools/gen_kitchen.py`). The idea of cookware staying in th
 - **0.4.41, the mill in JEI:** JEI has a page for each machine (Grinding, Chopping Block, Press), read off
   `MachineRecipes`: wheat to flour, flowers to dye, logs to planks (by hand and with a horse), seeds to oil and leaves
   to water, with the machines as their stations (`client/jei/MillJei`, the `jei_mod_plugin` entrypoint).
+- **0.4.46, heartier meals:** Andy: "buff the heart and hunger saturation increase from better meals, with a slight
+  bump up across the board". `Stomach`: every meal's health is 1.15x its nutrition plus 0.4 per point past 5
+  (`HEALTH_SCALE`, `RICH_HEALTH`, `RICH_FROM`); dishes 1.35x (was 1.25), Perfect 1.25x on top (was 1.2); the food
+  health cap is 40 (was 34). On eating (`feed`), saturation +15% for anything, +35% more for a dish, +25% more for a
+  Perfect one, plus 0.3 per rich point; dishes fill 1 more hunger, Perfect ones 2.

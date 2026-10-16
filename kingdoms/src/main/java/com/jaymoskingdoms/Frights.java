@@ -184,7 +184,7 @@ final class Frights {
 		}
 		Vec3 to = v.position().add(off.normalize().scale(RUN));
 		int x = (int)Math.floor(to.x), z = (int)Math.floor(to.z);
-		// (0.7.83) on the ground about its own height, not the roof over it (running at a roof, they piled up in the
+		// (0.7.84) on the ground about its own height, not the roof over it (running at a roof, they piled up in the
 		// nooks under it, and then were shut in: ShutIn)
 		BlockPos ground = Construction.standable(level, new BlockPos(x, v.getBlockY(), z), 3);
 		if (Math.abs(ground.getY() - v.getBlockY()) <= ShutIn.DROP) {

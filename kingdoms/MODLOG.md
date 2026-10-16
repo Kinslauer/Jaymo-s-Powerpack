@@ -3293,7 +3293,7 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   shares the kill, 160 for the dragon). Borderlands 1; Wildlands 5 and a trip to the Nether; Dread 12 and the Wither;
   Legend 25 and the Ender Dragon. Numbers are the constants at the top of `WorldTiers`.
 
-## 0.7.83: every villager can be downed, villagers tend the downed, shut-in villagers get out
+## 0.7.84: every villager can be downed, villagers tend the downed, shut-in villagers get out
 - **Downed** (Andy: "villagers should try to help others that are downed, and they can all be downed now, unless
   decapitated"): every villager (MCA's, children too) and a settlement's own folk (not rulers, orcs, raiders or
   barbarians) go down instead of dying; a beheading still kills. Guards still leave nothing when they die at last;

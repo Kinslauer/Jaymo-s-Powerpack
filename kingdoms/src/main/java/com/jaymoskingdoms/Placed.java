@@ -59,7 +59,7 @@ public final class Placed {
 		return false;
 	}
 
-	/** (0.7.83) Some player placed the block at {@code pos}. */
+	/** (0.7.84) Some player placed the block at {@code pos}. */
 	public static boolean any(ServerLevel level, BlockPos pos) {
 		Map<String, Mark> marks = level.getChunkAt(pos).getAttached(MARKS);
 		return marks != null && marks.containsKey(Long.toString(pos.asLong()));

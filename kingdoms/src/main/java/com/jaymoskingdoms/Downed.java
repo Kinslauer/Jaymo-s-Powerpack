@@ -48,7 +48,7 @@ import org.jspecify.annotations.Nullable;
  * and crimes).
  * Drawn lying down by the client's {@code DownedPose}; their AI is held by {@code DownedMixin}.
  * <p>
- * (0.7.83) Andy: "villagers should try to help others that are downed, and they can all be downed now, unless
+ * (0.7.84) Andy: "villagers should try to help others that are downed, and they can all be downed now, unless
  * decapitated". Every villager (MCA's too, children too) and the settlements' own folk (not their rulers) go down
  * now, not only guards; a blow that takes the head off still kills outright. A townsperson who isn't a guard leaves
  * their body and belongings when they do die at last, as anyone would. And the folk about look after their own: a
@@ -70,11 +70,11 @@ public final class Downed {
 	static final float CRAWLER_CHANCE = 0.5F;
 	/** A crawler's pace, as a share of its walking speed, and how far it gets from whoever felled it before it stops. */
 	static final double CRAWL_SPEED = 0.3, CRAWL_FROM = 14.0;
-	/** (0.7.83) Help: how far a villager comes to tend a downed one, how often one is looked for, how close is at their side, how long tending takes (ticks). */
+	/** (0.7.84) Help: how far a villager comes to tend a downed one, how often one is looked for, how close is at their side, how long tending takes (ticks). */
 	static final double HELP_RANGE = 24.0, TEND_REACH = 1.8;
 	static final int HELP_LOOK_TICKS = 20, TEND_TICKS = 200;
 	static final float HELP_SPEED = 0.8F;
-	/** (0.7.83) What a beheading is (matched by name: Jaymo's Powers deals it), and the tag a beheaded body carries. */
+	/** (0.7.84) What a beheading is (matched by name: Jaymo's Powers deals it), and the tag a beheaded body carries. */
 	static final String DECAPITATION = "jaymospowers:decapitation", HEADLESS_TAG = "jaymoskitchen.missing.head";
 	/** Kitchen's tag for a body that leaves no corpse (matched by name: Kitchen is optional). */
 	static final String NO_CORPSE_TAG = "jaymoskitchen.no_corpse";
@@ -93,7 +93,7 @@ public final class Downed {
 	/** The blow that put each down: whose kill it is when it dies (not saved; after a reload it bleeds out unclaimed). */
 	private static final Map<LivingEntity, DamageSource> FELLED_BY = new WeakHashMap<>();
 
-	/** (0.7.83) Who's tending each downed one, and how long they've been at it (ticks). Not saved. */
+	/** (0.7.84) Who's tending each downed one, and how long they've been at it (ticks). Not saved. */
 	private static final class Tending {
 		final Villager helper;
 		int ticks;
@@ -106,7 +106,7 @@ public final class Downed {
 	private static final Map<LivingEntity, Tending> TENDED = new WeakHashMap<>();
 	/** The villagers tending someone just now. */
 	private static final Map<Villager, LivingEntity> HELPING = new WeakHashMap<>();
-	/** (0.7.83) Townsfolk being finished off (their death let through as it comes). */
+	/** (0.7.84) Townsfolk being finished off (their death let through as it comes). */
 	private static final java.util.Set<LivingEntity> FINISHING = java.util.Collections.newSetFromMap(new WeakHashMap<>());
 
 	private Downed() {
@@ -122,7 +122,7 @@ public final class Downed {
 			}
 			if (isDowned(entity)) {
 				if (!isGuard(entity)) {
-					// (0.7.83) a townsperson dies as anyone would, body and all
+					// (0.7.84) a townsperson dies as anyone would, body and all
 					forget(entity);
 					return true;
 				}
@@ -187,7 +187,7 @@ public final class Downed {
 	}
 
 	/**
-	 * (0.7.83) Whether the blow that would kill {@code entity} downs it instead: any villager, a settlement's own folk
+	 * (0.7.84) Whether the blow that would kill {@code entity} downs it instead: any villager, a settlement's own folk
 	 * (its guards and workers, not its ruler, nor orcs, raiders or barbarians).
 	 */
 	public static boolean downable(LivingEntity entity) {
@@ -211,7 +211,7 @@ public final class Downed {
 			|| source.typeHolder().unwrapKey().map(k -> k.identifier().toString().equals(DECAPITATION)).orElse(false);
 	}
 
-	/** (0.7.83) No longer down (dying as anyone would): its marks and its tending gone. */
+	/** (0.7.84) No longer down (dying as anyone would): its marks and its tending gone. */
 	private static void forget(LivingEntity entity) {
 		FELLED_BY.remove(entity);
 		untend(entity);
@@ -219,7 +219,7 @@ public final class Downed {
 		entity.removeAttached(WOUNDS);
 	}
 
-	/** (0.7.83) {@code v} is tending someone downed just now. */
+	/** (0.7.84) {@code v} is tending someone downed just now. */
 	public static boolean helping(LivingEntity v) {
 		return v instanceof Villager villager && HELPING.containsKey(villager);
 	}
@@ -309,7 +309,7 @@ public final class Downed {
 	}
 
 	/**
-	 * (0.7.83) Someone comes to tend a downed {@code body}: the nearest grown villager free to (not downed, afraid,
+	 * (0.7.84) Someone comes to tend a downed {@code body}: the nearest grown villager free to (not downed, afraid,
 	 * fighting, asleep or tending another) walks over, kneels and sees to them. True once they've been at it long enough
 	 * to get them up.
 	 */
@@ -451,7 +451,7 @@ public final class Downed {
 		}
 		entity.stopRiding();
 		if (!isGuard(entity)) {
-			// (0.7.83) anyone else dies as anyone would: their body and what they had are left behind
+			// (0.7.84) anyone else dies as anyone would: their body and what they had are left behind
 			forget(entity);
 			FINISHING.add(entity);
 			try {

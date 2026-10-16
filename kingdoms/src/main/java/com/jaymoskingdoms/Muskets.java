@@ -127,7 +127,7 @@ final class Muskets {
 	private static void fire(ServerLevel level, Folk folk, LivingEntity foe) {
 		Projectile ball = Javelins.WEAPONMOD_LOADED ? WeaponModJavelins.bullet(level, folk, DAMAGE) : null;
 		if (ball == null) {
-			AbstractArrow bolt = ProjectileUtil.getMobArrow(folk, new ItemStack(Items.ARROW), 1.0F, folk.getMainHandItem());
+			AbstractArrow bolt = ProjectileUtil.getMobArrow(folk, new ItemStack(Items.ARROW), 1.0F, Folk.firingWeapon(folk));
 			bolt.setBaseDamage(DAMAGE / SPEED);
 			bolt.pickup = AbstractArrow.Pickup.DISALLOWED;
 			ball = bolt;

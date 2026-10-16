@@ -17,7 +17,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.7.83) Villagers shut in. Andy found a settlement's townsfolk packed into a closed pocket of a building they had
+ * (0.7.84) Villagers shut in. Andy found a settlement's townsfolk packed into a closed pocket of a building they had
  * no way out of (they'd fled into it, or been put there), and there they'd have stayed: {@link Unstick} only sees a mob
  * with a path, and a villager with nowhere to go has none. Now a villager near a settlement that hasn't got anywhere
  * for {@link #STILL_TICKS} of the day, and can't find a way to open ground near it, turns up there in a puff, as our
