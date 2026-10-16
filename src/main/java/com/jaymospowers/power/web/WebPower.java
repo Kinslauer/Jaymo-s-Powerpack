@@ -323,7 +323,7 @@ public final class WebPower implements Power {
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.WingsBrake.TYPE, (payload, ctx) -> INSTANCE.onWingsBrake(ctx.player(), payload.on()));
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.ChargeHold.TYPE, (payload, ctx) -> {
 			if (Powers.has(ctx.player(), INSTANCE)) {
-				state(ctx.player()).chargeHold = payload.held() && (WebSymbiote.suitShown(ctx.player()) || WebSymbiote.driving(ctx.player()));
+				state(ctx.player()).chargeHold = payload.held() && (WebSymbiote.leapBody(ctx.player()) || WebSymbiote.driving(ctx.player()));
 
 			}
 		});
