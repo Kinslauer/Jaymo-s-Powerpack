@@ -115,7 +115,7 @@ public final class Workers {
 			return !mob.isSleeping() && !McaCompat.busy(mob) && CourtWizards.step(level, e);
 		}
 		if (!Worker.isWork(w.role()) || Homes.bedtime(level) && !Rickshaws.onDuty(mob) || mob.isSleeping() || mob.isBaby() || Frights.afraid(mob.getUUID())
-			|| mob.getLastHurtByMob() != null && mob.tickCount - mob.getLastHurtByMobTimestamp() < FLEE_TICKS || McaCompat.busy(mob)) {
+			|| mob.getLastHurtByMob() != null && mob.tickCount - mob.getLastHurtByMobTimestamp() < FLEE_TICKS || McaCompat.busy(mob) || Downed.helping(mob)) {
 			return false;
 		}
 		if (!w.isCarrying() && !w.getMainHandItem().is(w.tool().getItem())) {

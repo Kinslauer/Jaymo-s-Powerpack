@@ -3292,3 +3292,17 @@ wider, matching players (Powers 0.11.75, `core/TwoHanded`).
   bar, a monster of legend, the Wither, the Ender Dragon, an elder guardian, a warden; everyone within 64 blocks
   shares the kill, 160 for the dragon). Borderlands 1; Wildlands 5 and a trip to the Nether; Dread 12 and the Wither;
   Legend 25 and the Ender Dragon. Numbers are the constants at the top of `WorldTiers`.
+
+## 0.7.84: every villager can be downed, villagers tend the downed, shut-in villagers get out
+- **Downed** (Andy: "villagers should try to help others that are downed, and they can all be downed now, unless
+  decapitated"): every villager (MCA's, children too) and a settlement's own folk (not rulers, orcs, raiders or
+  barbarians) go down instead of dying; a beheading still kills. When they die at last they leave their body and
+  belongings as anyone would, guards too (Andy: "guards should have corpses too").
+- **Tending**: the nearest grown villager within 24 blocks who isn't afraid, fighting or asleep walks over, kneels and
+  tends a downed one (hearts, a hand at work); `TEND_TICKS` (10 s) at their side gets them up. A player's hit starts
+  it over. Helpers are kept from routines and work while they tend.
+- **Shut in** (`ShutIn`; Andy's clip of a realm's townsfolk packed in a closed pocket of a building): a villager near
+  a settlement who hasn't got anywhere for 2 minutes of the day and has no path to open ground nearby turns up there
+  in a puff. Not near player-placed blocks (trading halls stay), nor asleep, leashed, carried or downed. Frightened
+  villagers now run for ground about their own height, not the roof over it, and a new MCA hire turns up on open
+  ground by the seat rather than at it.

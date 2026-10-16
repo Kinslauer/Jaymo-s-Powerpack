@@ -92,6 +92,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Tempers.register();
 		Retinue.register();
 		Frights.register();
+		// 0.7.84: villagers shut in somewhere with no way out turn up on open ground
+		ShutIn.register();
 		// 0.6.4: Jaymo's Powers' aliens (the Xeno-Band) are monsters to folk who haven't seen you change (and its attachment)
 		LOGGER.debug("alien attachment: {}", Aliens.KNOWN);
 		LOGGER.debug("tail attachment: {}", Tails.EXPLAINED);
