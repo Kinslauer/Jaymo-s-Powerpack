@@ -213,6 +213,33 @@ public final class WebSymbioteClient {
 	static final double LEAP_MIN_RISE = 1.4, LEAP_START_RANGE = 1.3, LEAP_HOLD = 0.3, LEAP_FORWARD = 0.12;
 	/** A coil's squelch every this many ticks. */
 	static final int LEAP_SOUND_EVERY = 6;
+	/**
+	 * Bounding: getting you away (running for its life, a sightseeing or climate walk) it leaps the way ahead, at most
+	 * once every {@code BOUND_EVERY} ticks after a landing: to the waypoint furthest on, {@code BOUND_MIN_RANGE} to
+	 * {@code BOUND_MAX_RANGE} blocks off, that one clear arc reaches. Any takeover leaps where the walk is
+	 * {@code BOUND_SHORTCUT} times longer than the arc (round a gap or a drop) or wades through water. Nothing to leap
+	 * to, it looks again {@code BOUND_RETRY} later. It coils {@code BOUND_COIL_TICKS} (crouched, for everyone to see),
+	 * then flies at {@code BOUND_MAX_SPEED} over the ground at most, with the charge (up to the ledge leap's
+	 * {@link com.jaymospowers.power.web.WebLeap#TAKEOVER_MAX_CHARGE}) that lands it there with the least arc, never
+	 * falling more than {@code BOUND_SAFE_FALL} from the top of it (no fall damage) and clearing the landing by
+	 * {@code BOUND_CLEAR}. Past {@code BOUND_SLACK} ticks over the planned flight it lets the fall take over.
+	 */
+	static final int BOUND_EVERY = 30, BOUND_RETRY = 5, BOUND_COIL_TICKS = 4, BOUND_SLACK = 10;
+	static final double BOUND_MIN_RANGE = 4.0, BOUND_MAX_RANGE = 12.0, BOUND_MAX_SPEED = 1.0;
+	static final double BOUND_SHORTCUT = 1.5, BOUND_SAFE_FALL = 2.5, BOUND_CLEAR = 0.4;
+	static final float BOUND_CHARGE_STEP = 0.05F;
+	/**
+	 * Stuck (moved less than {@code BOUND_STUCK_MOVE} in {@code BOUND_STUCK_TICKS} on its way, before the server gives
+	 * up and rips): it leaps for any waypoint ahead it can reach from {@code BOUND_STUCK_RANGE} blocks; nothing, and it
+	 * hops up {@code BOUND_HOP_RISE} blocks nudged on at {@code LEAP_FORWARD} (straight up if that would land it nowhere
+	 * safe, within {@code BOUND_HOP_DROP}). Not while it's this close to what it's after ({@code BOUND_STUCK_NEAR}).
+	 */
+	static final int BOUND_STUCK_TICKS = 16;
+	static final double BOUND_STUCK_MOVE = 0.6, BOUND_STUCK_RANGE = 1.5, BOUND_HOP_RISE = 2.0, BOUND_HOP_DROP = 3.0, BOUND_STUCK_NEAR = 3.0;
+	/** Your screen: a leap kicks your view on (degrees, ticks), its landing jolts it, and a zip's cord lifts you off your feet (blocks/tick). */
+	static final float BOUND_SHAKE = 0.5F, BOUND_LAND_SHAKE = 0.3F, LEDGE_LEAP_SHAKE = 0.35F;
+	static final int BOUND_SHAKE_TICKS = 8;
+	static final double ZIP_LIFT = 0.3;
 	/** Edge guard: it looks this many ticks of movement ahead for ground within this drop, else it creeps. */
 	static final double LEDGE_LOOK_TICKS = 3.0, LEDGE_DROP = 1.1, LEDGE_CREEP = 0.25;
 	/** Swimming up along a path (or toward it), per tick. */
@@ -285,6 +312,22 @@ public final class WebSymbioteClient {
 	private static int leapTicks;
 	private static float leapCharge;
 	private static boolean leapTouched;
+	/**
+	 * A bound (see {@link #BOUND_EVERY}): ticks coiled (-1 none), ticks in the air (-1 none), the plan, and the tick it
+	 * may bound again. Where it last moved from (for the stuck check), and
+	 * whether a zip's cord had you last tick.
+	 */
+	private static int boundCoil = -1;
+	private static int boundFlight = -1;
+	private static @org.jspecify.annotations.Nullable Bound bound;
+	private static int boundReadyAt;
+	private static Vec3 stuckPos = Vec3.ZERO;
+	private static int stuckSince;
+	private static boolean zipped;
+
+	/** A planned leap: the speed over the ground (flat), up, the ticks to the landing, and where it lands (feet). */
+	private record Bound(Vec3 across, double up, int ticks, @org.jspecify.annotations.Nullable Vec3 land) {
+	}
 	/** The takeover has you sprinting (vanilla mustn't stop it for want of a forward key; see WebSprintMixin). */
 	private static boolean sprintHeld;
 	private static final Set<Integer> THREATS = new HashSet<>();
@@ -702,7 +745,7 @@ public final class WebSymbioteClient {
 		if (escapeCoil >= 0 && takeoverTicks <= 0) {
 			tickEscape(player);
 		} else if (takeoverTicks > 0) {
-			tickTakeover(player);
+			tickTakeover(player, swing);
 			struggleMeter = Math.max(0.0F, struggleMeter - WebSymbiote.TAKEOVER_STRUGGLE_FADE);
 		} else {
 			tickCrawl(player, swing);
@@ -861,6 +904,8 @@ public final class WebSymbioteClient {
 		pathIndex = 0;
 		sprintHeld = false;
 		endLeap();
+		endBound();
+		zipped = false;
 	}
 
 	/** A takeover has the legs right now: the suit's own charged jump stands aside (its steps are plain hops). */
@@ -935,8 +980,302 @@ public final class WebSymbioteClient {
 		leapCoil = -1;
 	}
 
+	/** Lets go of a bound, coiled or in the air (the server stops showing the crouch). */
+	private static void endBound() {
+		if (boundCoil >= 0 && ClientPlayNetworking.canSend(WebNet.ChargeHold.TYPE)) {
+			ClientPlayNetworking.send(new WebNet.ChargeHold(false));
+		}
+		boundCoil = -1;
+		boundFlight = -1;
+		bound = null;
+	}
+
+	/**
+	 * Looks for a bound (see {@link #BOUND_EVERY}) from where you stand: getting {@code away}, to the waypoint furthest on
+	 * that one clear arc reaches; otherwise only one that cuts a detour or a swim short. {@code stuck}: any waypoint ahead
+	 * from close by, else a hop up. True if it starts coiling.
+	 */
+	private static boolean startBound(LocalPlayer player, boolean away, boolean stuck) {
+		if (!player.onGround() || player.isInWater() || player.isInLava() || player.isPassenger() || leapCoil >= 0 || boundCoil >= 0
+			|| boundFlight >= 0) {
+			return false;
+		}
+		if (!stuck && !takeoverFlee && !player.getFoodData().hasEnoughFood() && !player.getAbilities().mayfly) {
+			// too hungry to sprint, too hungry to bound (but never too hungry to run for its life)
+			return false;
+		}
+		Bound plan = null;
+		int n = pathNodes.size();
+		if (pathMode == WebNet.TakeoverPath.PATH && pathIndex < n) {
+			// the walk's length to each waypoint, and whether it wades on the way
+			double[] walk = new double[n];
+			boolean[] wet = new boolean[n];
+			Vec3 prev = player.position();
+			double sum = 0.0;
+			boolean water = false;
+			for (int i = pathIndex; i < n; i++) {
+				Vec3 at = pathNodes.get(i);
+				sum += at.subtract(prev).horizontalDistance() + Math.abs(at.y - prev.y);
+				water |= !player.level().getFluidState(net.minecraft.core.BlockPos.containing(at.x, at.y + 0.1, at.z)).isEmpty();
+				walk[i] = sum;
+				wet[i] = water;
+				prev = at;
+			}
+			double min = stuck ? BOUND_STUCK_RANGE : BOUND_MIN_RANGE;
+			for (int j = n - 1; j >= pathIndex && plan == null; j--) {
+				Vec3 at = pathNodes.get(j);
+				double d = at.subtract(player.position()).horizontalDistance();
+				if (d < min || d > BOUND_MAX_RANGE || !away && walk[j] < d * BOUND_SHORTCUT && !wet[j]) {
+					continue;
+				}
+				net.minecraft.core.BlockPos block = net.minecraft.core.BlockPos.containing(at.x, at.y + 0.1, at.z);
+				if (!player.level().getFluidState(block).isEmpty() || !safeFooting(player, block)) {
+					// (never into water when it's leaping over it, never into anything that burns)
+					continue;
+				}
+				plan = planBound(player, new Vec3(at.x, landing(player, at), at.z));
+			}
+		}
+		if (plan == null && stuck) {
+			plan = hop(player);
+		}
+		if (plan == null) {
+			if (stuck) {
+				stuckSince = player.tickCount;
+			} else {
+				boundReadyAt = player.tickCount + BOUND_RETRY;
+			}
+			return false;
+		}
+		bound = plan;
+		boundCoil = 0;
+		if (ClientPlayNetworking.canSend(WebNet.ChargeHold.TYPE)) {
+			ClientPlayNetworking.send(new WebNet.ChargeHold(true));
+		}
+		holdCoiled(player);
+		return true;
+	}
+
+	/** Coiled to bound: down low, still but for a little give, facing the way it'll go. */
+	private static void holdCoiled(LocalPlayer player) {
+		sprint(player, false);
+		Bound plan = bound;
+		if (plan != null && plan.across().lengthSqr() > 1.0E-6) {
+			turnToward(player, plan.across(), takeoverFlee ? FLEE_TURN : TAKEOVER_TURN, false);
+		}
+		Vec3 v = player.getDeltaMovement();
+		player.setDeltaMovement(v.x * LEAP_HOLD, v.y, v.z * LEAP_HOLD);
+	}
+
+	/** A bound under way: the coil, the launch, the flight (the same speed over the ground each tick), the landing. False when there's none (or it just landed). */
+	private static boolean tickBound(LocalPlayer player, Entity target) {
+		if (boundCoil >= 0) {
+			if (!player.onGround() || player.isInWater() || bound == null) {
+				endBound();
+				return false;
+			}
+			if (++boundCoil < BOUND_COIL_TICKS) {
+				holdCoiled(player);
+				return true;
+			}
+			// the spring: planned again from where the coil left you (a stuck hop as it was)
+			Bound plan = bound.land() == null ? hop(player) : planBound(player, bound.land());
+			if (ClientPlayNetworking.canSend(WebNet.ChargeHold.TYPE)) {
+				ClientPlayNetworking.send(new WebNet.ChargeHold(false));
+			}
+			boundCoil = -1;
+			if (plan == null) {
+				endBound();
+				boundReadyAt = player.tickCount + BOUND_RETRY;
+				return false;
+			}
+			bound = plan;
+			boundFlight = 0;
+			player.setDeltaMovement(plan.across().x, plan.up(), plan.across().z);
+			WebSwing.play(player, net.minecraft.sounds.SoundEvents.SLIME_JUMP, 1.0F, 0.7F);
+			if (plan.across().length() > 0.5) {
+				WebSwing.play(player, net.minecraft.sounds.SoundEvents.WIND_CHARGE_BURST.value(), 0.5F, 0.7F);
+			}
+			// it throws your view on along the leap
+			Vec3 way = plan.across().lengthSqr() > 1.0E-6 ? plan.across().normalize() : Vec3.ZERO;
+			com.jaymospowers.client.ScreenShake.add(BOUND_SHAKE, BOUND_SHAKE_TICKS, player.position().subtract(way).add(0.0, -1.0, 0.0));
+			return true;
+		}
+		if (boundFlight < 0 || bound == null) {
+			return false;
+		}
+		boundFlight++;
+		if (boundFlight > 1 && (player.onGround() || player.isInWater() || player.isInLava() || player.onClimbable())
+			|| boundFlight > bound.ticks() + BOUND_SLACK) {
+			// down: a jolt, and on along the way from where it landed
+			if (player.onGround()) {
+				com.jaymospowers.client.ScreenShake.add(BOUND_LAND_SHAKE, BOUND_SHAKE_TICKS, player.position().add(0.0, -1.0, 0.0));
+			}
+			endBound();
+			resyncPath(player);
+			boundReadyAt = player.tickCount + BOUND_EVERY;
+			return false;
+		}
+		// carried on the arc: the same speed over the ground each tick (vanilla's fall does the up and down)
+		Vec3 across = player.horizontalCollision ? Vec3.ZERO : bound.across();
+		if (player.horizontalCollision) {
+			// (it hit something on the way: no more pushing into it, it drops)
+			bound = new Bound(Vec3.ZERO, bound.up(), bound.ticks(), bound.land());
+		}
+		Vec3 v = player.getDeltaMovement();
+		player.setDeltaMovement(across.x, v.y, across.z);
+		sprint(player, false);
+		if (!takeoverFlee && !(target instanceof net.minecraft.world.entity.Interaction)) {
+			// (chasing, the eyes stay on the prey)
+			turnToward(player, target.getBoundingBox().getCenter().subtract(player.getEyePosition()), TAKEOVER_TURN, true);
+		} else if (across.lengthSqr() > 1.0E-6) {
+			turnToward(player, across, FLEE_TURN, false);
+		}
+		return true;
+	}
+
+	/**
+	 * The flattest leap from where you stand that lands your feet on {@code land}: the least charge (in
+	 * {@code BOUND_CHARGE_STEP}s, up to {@link com.jaymospowers.power.web.WebLeap#TAKEOVER_MAX_CHARGE}) whose arc tops
+	 * the landing by {@code BOUND_CLEAR}, with no more than {@code BOUND_SAFE_FALL} back down, no faster than
+	 * {@code BOUND_MAX_SPEED} over the ground, and nothing in the way of the whole body the whole way. Null if none.
+	 */
+	private static @org.jspecify.annotations.Nullable Bound planBound(LocalPlayer player, Vec3 land) {
+		Vec3 pos = player.position();
+		Vec3 flat = new Vec3(land.x - pos.x, 0.0, land.z - pos.z);
+		double dist = flat.length();
+		if (dist < 0.5) {
+			return null;
+		}
+		double rise = land.y - pos.y;
+		double gravity = player.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.GRAVITY);
+		for (float charge = 0.0F; charge <= com.jaymospowers.power.web.WebLeap.TAKEOVER_MAX_CHARGE + 1.0E-4F; charge += BOUND_CHARGE_STEP) {
+			double up = com.jaymospowers.power.web.WebLeap.speed(charge);
+			double top = com.jaymospowers.power.web.WebLeap.apex(up, gravity);
+			if (top < rise + BOUND_CLEAR) {
+				continue;
+			}
+			if (top - rise > BOUND_SAFE_FALL) {
+				// (only higher from here)
+				return null;
+			}
+			// the flight: up and back down to the landing's height
+			double y = 0.0, v = up;
+			int ticks = 0;
+			while (ticks < 80 && !(v < 0.0 && y <= rise)) {
+				y += v;
+				v = (v - gravity) * com.jaymospowers.power.web.WebLeap.DRAG;
+				ticks++;
+			}
+			if (ticks >= 80 || dist / ticks > BOUND_MAX_SPEED) {
+				continue;
+			}
+			Vec3 across = flat.scale(1.0 / ticks);
+			if (arcClear(player, across, up, gravity, ticks, rise)) {
+				return new Bound(across, up, ticks, land);
+			}
+		}
+		return null;
+	}
+
+	/** Nothing in the way of your body along the arc (checked each tick and half-tick), room to stand at the end, and floor under it. */
+	private static boolean arcClear(LocalPlayer player, Vec3 across, double up, double gravity, int ticks, double rise) {
+		AABB box = player.getBoundingBox();
+		double y = 0.0, v = up;
+		for (int i = 1; i <= ticks; i++) {
+			double nextY = y + v;
+			for (int half = 1; half <= 2; half++) {
+				double f = (i - 1 + half * 0.5);
+				double at = y + (nextY - y) * half * 0.5;
+				if (i == ticks) {
+					// (the landing: standing on it, not in it)
+					at = Math.max(at, rise + 0.01);
+				}
+				if (!player.level().noCollision(player, box.move(across.x * f, at, across.z * f))) {
+					return false;
+				}
+			}
+			y = nextY;
+			v = (v - gravity) * com.jaymospowers.power.web.WebLeap.DRAG;
+		}
+		AABB end = box.move(across.x * ticks, rise + 0.01, across.z * ticks);
+		return !player.level().noCollision(player, new AABB(end.minX, end.minY - 0.3, end.minZ, end.maxX, end.minY - 0.005, end.maxZ));
+	}
+
+	/**
+	 * Stuck with nowhere in sight to leap to: a hop that clears {@code BOUND_HOP_RISE}, nudged on toward the next waypoint
+	 * (or the way it's running) at {@code LEAP_FORWARD}, or straight up if that would come down nowhere safe. Null with no
+	 * headroom for it.
+	 */
+	private static @org.jspecify.annotations.Nullable Bound hop(LocalPlayer player) {
+		double gravity = player.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.GRAVITY);
+		float charge = com.jaymospowers.power.web.WebLeap.chargeFor(BOUND_HOP_RISE, gravity, com.jaymospowers.power.web.WebLeap.TAKEOVER_MAX_CHARGE);
+		double up = com.jaymospowers.power.web.WebLeap.speed(charge);
+		AABB box = player.getBoundingBox();
+		if (!player.level().noCollision(player, box.expandTowards(0.0, BOUND_HOP_RISE, 0.0))) {
+			return null;
+		}
+		Vec3 way = Vec3.ZERO;
+		if (pathMode == WebNet.TakeoverPath.PATH && pathIndex < pathNodes.size()) {
+			way = pathNodes.get(pathIndex).subtract(player.position()).horizontal();
+		} else if (takeoverFlee) {
+			Entity threat = player.level().getEntity(takeoverTarget);
+			if (threat != null) {
+				way = player.position().subtract(threat.position()).horizontal();
+			}
+		}
+		// the flight's length, up and back down to where it left
+		double y = 0.0, v = up;
+		int ticks = 0;
+		while (ticks < 80 && !(v < 0.0 && y <= 0.0)) {
+			y += v;
+			v = (v - gravity) * com.jaymospowers.power.web.WebLeap.DRAG;
+			ticks++;
+		}
+		Vec3 across = way.lengthSqr() < 1.0E-4 ? Vec3.ZERO : way.normalize().scale(LEAP_FORWARD);
+		if (across.lengthSqr() > 0.0) {
+			// where it comes down: floor within a safe drop, and nothing that burns
+			AABB end = box.move(across.x * ticks, 0.0, across.z * ticks);
+			net.minecraft.core.BlockPos feet = net.minecraft.core.BlockPos.containing(end.getCenter().x, end.minY + 0.1, end.getCenter().z);
+			boolean floor = !player.level().noCollision(player, new AABB(end.minX, end.minY - BOUND_HOP_DROP, end.minZ, end.maxX, end.minY + 1.0, end.maxZ));
+			if (!floor || !safeFooting(player, feet) || !safeFooting(player, feet.below())) {
+				across = Vec3.ZERO;
+			}
+		}
+		return new Bound(across, up, ticks, null);
+	}
+
+	/** Nothing at {@code feet} (or the block under them) that burns or hurts: lava, fire, a campfire, magma, cactus, berry bushes, powder snow. */
+	private static boolean safeFooting(LocalPlayer player, net.minecraft.core.BlockPos feet) {
+		for (net.minecraft.core.BlockPos at : new net.minecraft.core.BlockPos[] {feet, feet.below()}) {
+			net.minecraft.world.level.block.state.BlockState state = player.level().getBlockState(at);
+			if (state.getFluidState().is(net.minecraft.tags.FluidTags.LAVA) || state.is(net.minecraft.tags.BlockTags.FIRE)
+				|| state.is(net.minecraft.tags.BlockTags.CAMPFIRES) || state.is(net.minecraft.world.level.block.Blocks.MAGMA_BLOCK)
+				|| state.is(net.minecraft.world.level.block.Blocks.CACTUS) || state.is(net.minecraft.world.level.block.Blocks.SWEET_BERRY_BUSH)
+				|| state.is(net.minecraft.world.level.block.Blocks.POWDER_SNOW)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** Landed somewhere along the way (a bound, a zip): on from the nearest waypoint still ahead. */
+	private static void resyncPath(LocalPlayer player) {
+		int n = pathNodes.size();
+		double best = Double.MAX_VALUE;
+		int at = pathIndex;
+		for (int i = pathIndex; i < n; i++) {
+			double d = pathNodes.get(i).distanceToSqr(player.position());
+			if (d < best) {
+				best = d;
+				at = i;
+			}
+		}
+		pathIndex = Math.max(pathIndex, at);
+	}
+
 	/** It's steering, view and all: along the server's path, straight at its prey when it's right there, or still while it rips. */
-	private static void tickTakeover(LocalPlayer player) {
+	private static void tickTakeover(LocalPlayer player, WebSwing swing) {
 		Entity target = player.level().getEntity(takeoverTarget);
 		// (the symbiote gone, a power swapped away: it can't be driving any more)
 		if (target == null || !target.isAlive() || --takeoverTicks <= 0 || !WebSymbiote.isBonded(player)) {
@@ -945,13 +1284,53 @@ public final class WebSymbioteClient {
 			return;
 		}
 		leapTouched = false;
+		if (swing.pull != null) {
+			// its cord has you (a zip it fired, see WebTakeoverPath#ZIP_EVERY): reeled in, eyes along the way
+			if (!zipped) {
+				zipped = true;
+				endBound();
+				endLeap();
+				if (player.onGround()) {
+					Vec3 v = player.getDeltaMovement();
+					player.setDeltaMovement(v.x, Math.max(v.y, ZIP_LIFT), v.z);
+				}
+			}
+			sprint(player, false);
+			turnToward(player, swing.pull.target().subtract(player.position()), takeoverFlee ? FLEE_TURN : TAKEOVER_TURN, false);
+			return;
+		}
+		if (zipped) {
+			// landed off the cord: on along the way from there
+			zipped = false;
+			resyncPath(player);
+		}
+		// no headway for a while (and not where it wants to be, or busy): it leaps for it
+		boolean settled = boundCoil >= 0 || boundFlight >= 0 || leapCoil >= 0 || target == player || pathMode == WebNet.TakeoverPath.RIP
+			|| !takeoverFlee && target.position().subtract(player.position()).horizontalDistance() < BOUND_STUCK_NEAR;
+		if (settled || player.position().distanceToSqr(stuckPos) > BOUND_STUCK_MOVE * BOUND_STUCK_MOVE) {
+			stuckPos = player.position();
+			stuckSince = player.tickCount;
+		}
+		boolean stuck = player.tickCount - stuckSince >= BOUND_STUCK_TICKS;
+		// getting away (running, or walking you somewhere: a sightseeing or climate walk's marker): it bounds along
+		boolean away = takeoverFlee || target instanceof net.minecraft.world.entity.Interaction;
 		if (target == player) {
 			// its kill carried off and eaten: it holds you still till it's done
+			endBound();
 			sprint(player, false);
 			Vec3 v = player.getDeltaMovement();
 			player.setDeltaMovement(v.x * RIP_HOLD, v.y, v.z * RIP_HOLD);
 		} else if (pathMode == WebNet.TakeoverPath.RIP) {
+			endBound();
 			holdForRip(player);
+		} else if (tickBound(player, target)) {
+			// coiled, or in the air
+		} else if (pathMode == WebNet.TakeoverPath.PATH && player.tickCount >= boundReadyAt && startBound(player, away, false)) {
+			// off on a bound along the way
+		} else if (stuck && startBound(player, true, true)) {
+			// stuck: a leap for it
+			stuckPos = player.position();
+			stuckSince = player.tickCount;
 		} else if (pathMode == WebNet.TakeoverPath.PATH && followPath(player, target)) {
 			// on its way
 		} else if (takeoverFlee) {
@@ -1085,6 +1464,8 @@ public final class WebSymbioteClient {
 		}
 		player.setDeltaMovement(dir.x * LEAP_FORWARD, com.jaymospowers.power.web.WebLeap.speed(leapCharge), dir.z * LEAP_FORWARD);
 		WebSwing.play(player, net.minecraft.sounds.SoundEvents.SLIME_JUMP, 1.0F, 0.6F);
+		// your view's flung up with it
+		com.jaymospowers.client.ScreenShake.add(LEDGE_LEAP_SHAKE, BOUND_SHAKE_TICKS, player.position().add(0.0, -1.0, 0.0));
 		if (leapCharge > 0.5F) {
 			WebSwing.play(player, net.minecraft.sounds.SoundEvents.WIND_CHARGE_BURST.value(), 0.6F, 0.6F);
 		}

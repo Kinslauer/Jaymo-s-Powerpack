@@ -965,6 +965,48 @@ it no longer lurches in a straight line into walls.
   takeover even with the suit hidden) and squelching, then leaps, nudged on at `LEAP_FORWARD` 0.12 and steered onto the
   ledge in the air. Coiling counts as progress for the stuck check. The leap numbers live in `power/web/WebLeap`,
   shared with the suit's own charged jump (`WebSwing`).
+- **Bounds and zips (Andy: "the symbiote should jump and zip to get out of the area faster during takeovers, along
+  with all its current actions").** On top of the walk, the sprint, the hops, the ledge leaps and the ripping (all
+  unchanged, as are the attacks, the lashing, the roar and the feeding):
+  - *Bounds (client, `WebSymbioteClient.startBound`/`tickBound`):* getting you away (the run for its life, a
+    sightseeing walk, the climate's walk out: `takeoverFlee`, or a target that's the tour's `Interaction` marker) it
+    leaps along the path, at most every `BOUND_EVERY` 30 ticks after a landing: to the waypoint furthest on,
+    `BOUND_MIN_RANGE` 4 to `BOUND_MAX_RANGE` 12 blocks off, that one clear arc reaches. The arc is the suit's charged
+    leap (`WebLeap.speed`/`apex`, at your gravity): the least charge (steps of `BOUND_CHARGE_STEP` 0.05, up to
+    `TAKEOVER_MAX_CHARGE` 0.75) that tops the landing by `BOUND_CLEAR` 0.4, never more than `BOUND_SAFE_FALL` 2.5 back
+    down from the top (no fall damage), at no more than `BOUND_MAX_SPEED` 1.0 blocks/tick over the ground, with the
+    whole body's box clear every half tick and floor under the landing. It coils `BOUND_COIL_TICKS` 4 (the crouch for
+    everyone, via `ChargeHold`), plans again from where it is and springs (squelch, wind burst); in the air it holds
+    that speed over the ground (a wall stops it pushing), and lands on the waypoint, picking the path up from the
+    nearest waypoint ahead. A flat 12-block bound takes about 19 ticks, coil included (at a web slinger's lighter
+    gravity): over 0.6 blocks/tick against the run's 0.46, and the zips on top. Every takeover (the hunt and rampage too) also bounds where the walk to a waypoint is
+    `BOUND_SHORTCUT` 1.5 times the arc (round a gap or down and up a dip) or wades through water. Never onto water, lava,
+    fire, campfires, magma, cactus, berry bushes or powder snow (`safeFooting`); not with an empty belly (food too low
+    to sprint, unless it's running for its life); nothing worth it, it looks again `BOUND_RETRY` 5 later.
+  - *Stuck bounds:* moved less than `BOUND_STUCK_MOVE` 0.6 in `BOUND_STUCK_TICKS` 16 on its way (before the server's
+    stuck check gives up and rips; never within `BOUND_STUCK_NEAR` 3 of what it's after, nor while it rips, coils or
+    holds you for a meal) it leaps for any waypoint ahead from `BOUND_STUCK_RANGE` 1.5 out; nothing, and it hops up
+    `BOUND_HOP_RISE` 2 blocks nudged on at `LEAP_FORWARD`, straight up if that would come down with no floor within
+    `BOUND_HOP_DROP` 3 or on something that burns.
+  - *Zips (server, `WebTakeoverPath.zip`, `WebPower.takeoverZip`):* getting you away, every `ZIP_EVERY` 50 ticks (the
+    first `ZIP_FIRST` 20 in; `ZIP_RETRY` 10 when there's nothing) it fires Web Zip's pull and line (the same
+    `startPull`: `WebNet.Pull` and the `LINE` everyone draws, the suit's black corded rope while the suit shows) at the
+    floor of the waypoint furthest along that's `ZIP_MIN_RANGE` 5 to `ZIP_MAX_RANGE` 18 off, never more than
+    `ZIP_MAX_FALL` 0.5 below your feet, not in water, nothing that burns there, in clear sight from the eyes (the ray
+    meets that very top, or for a ledge over your head its near face just under the edge, where the zip hangs you and
+    perches you up), and a clear line for the feet and the head the whole way (no blocks, water or lava). Each
+    waypoint skipped scores 1, and running (or climbing) each block up `ZIP_HIGH_WEIGHT` 1.5. Running, it also fans
+    out (`ZIP_FAN_YAWS` 5 ways over ±`ZIP_FAN_SPREAD` 60° round the line away from the threat, pitched up 15-60°) for
+    high ground off the path, `ZIP_FAN_MIN_RISE` 2+ up and `ZIP_FAN_GAIN` 2 further from the threat. Any takeover zips
+    up a waypoint `ZIP_CLIMB_RISE` 3+ above you (out of a pit, up a cliff). No cooldown on your own Zip and no shooter
+    needed: it's the symbiote's cord. While it reels you in the path isn't touched (that's progress); once you're within
+    `ZIP_ARRIVED` 1.5 of the spot, or the pull's over, it looks for a way again at once.
+  - *Your screen:* a bound's spring kicks your view on and up (`BOUND_SHAKE` 0.5 over `BOUND_SHAKE_TICKS` 8), its
+    landing jolts it (`BOUND_LAND_SHAKE` 0.3); a ledge leap flings it up (`LEDGE_LEAP_SHAKE` 0.35); a zip yanks it
+    along the cord (`WebTakeoverPath.ZIP_SHAKE` 0.6, from behind you) and pulses the dark over your screen
+    (`ZIP_DREAD` 25 ticks), and the cord lifts you off your feet (`ZIP_LIFT` 0.3) as it takes you, your eyes turned
+    along it.
+  - Dormant, it only ever takes the wheel to save itself, so only that run bounds and zips.
 - **Stuck:** moved less than `STUCK_MOVE` 0.9 in `STUCK_TICKS` 30 (and not in reach of the prey): it re-paths at once
   (and stays off the straight line for `DIRECT_BAN_TICKS` 60). Stuck `STUCK_RIP_AFTER` 2 times running: it rips.
 - **Ripping through (debris-style since 0.8.3):** no path within the budget, a sealed room, or stuck: the tendrils
