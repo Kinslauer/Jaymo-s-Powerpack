@@ -36,6 +36,13 @@ final class WindAura {
 	private static final int CRACKLE_TICKS = 50;
 	private static final float CRACKLE_VOLUME = 0.25F;
 
+	/** The Thunderhead in flight (flying at least this much): an arc of lightning off the body every this many ticks. */
+	private static final float THUNDER_FLIGHT = 0.3F;
+	private static final int ARC_EVERY = 2;
+	/** An arc: this many jagged steps of this length (blocks). */
+	private static final int ARC_STEPS = 7;
+	private static final double ARC_STEP = 0.22;
+
 	private WindAura() {
 	}
 
@@ -67,6 +74,9 @@ final class WindAura {
 			if ((mode & com.jaymospowers.power.wind.WindModes.TEMPEST) != 0) {
 				ring(level, player);
 			}
+			if (mode == com.jaymospowers.power.wind.WindModes.BOTH && WindPose.amount(player, 1.0F) > THUNDER_FLIGHT) {
+				thunderFlight(level, player, random, self);
+			}
 		}
 	}
 
@@ -86,6 +96,31 @@ final class WindAura {
 		if (random.nextInt(30) == 0) {
 			level.playLocalSound(player.getX(), player.getY() + 1.0, player.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS,
 				0.15F, 1.8F + random.nextFloat() * 0.2F, false);
+		}
+	}
+
+	/**
+	 * The Thunderhead in flight: lightning crackles over the body and leaps off it in jagged arcs that trail behind,
+	 * bright white sparks along each arc, and a quiet snap now and then (fewer round your own first-person camera).
+	 */
+	private static void thunderFlight(ClientLevel level, AbstractClientPlayer player, RandomSource random, boolean self) {
+		if (player.tickCount % ARC_EVERY != 0 || self && random.nextBoolean()) {
+			return;
+		}
+		net.minecraft.world.phys.Vec3 motion = player.getDeltaMovement();
+		double x = player.getX() + (random.nextDouble() - 0.5) * 0.6;
+		double y = player.getY() + random.nextDouble() * player.getBbHeight();
+		double z = player.getZ() + (random.nextDouble() - 0.5) * 0.6;
+		for (int i = 0; i < ARC_STEPS; i++) {
+			// each step jags off at random, drifting back against the flight
+			x += (random.nextDouble() - 0.5) * 2.0 * ARC_STEP - motion.x * 0.4;
+			y += (random.nextDouble() - 0.5) * 2.0 * ARC_STEP - motion.y * 0.4;
+			z += (random.nextDouble() - 0.5) * 2.0 * ARC_STEP - motion.z * 0.4;
+			level.addParticle(i % 2 == 0 ? ParticleTypes.ELECTRIC_SPARK : ParticleTypes.END_ROD, x, y, z, 0.0, 0.0, 0.0);
+		}
+		if (random.nextInt(12) == 0) {
+			level.playLocalSound(player.getX(), player.getY() + 1.0, player.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS,
+				0.12F, 1.9F + random.nextFloat() * 0.1F, false);
 		}
 	}
 
