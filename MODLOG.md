@@ -1529,3 +1529,4 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     each heave. Takeovers engulf you twice as fast (`SELF_TAKEOVER_SPEED`). After a takeover, `TAKEOVER_GIFT_CHANCE`
     10% it leaves you its Living Armor big body for a minute (`gift.*`). Put on by hand (`DONNED`), the suit or big
     body lashes its tongue once (`WebHulk.DON_LASH_AT`).
+- **0.11.107, Tendril Grab drawn like Wall Crawl:** Andy: "the tendril grab should attach you to the wall the exact same way visually that the wall crawl does, but it should still hold you where you attach and rubberband you back and forth like before." The tethered tendrils are now jointed limbs bitten into the wall, as Wall Crawl's walkers; the elastic hold is unchanged.
