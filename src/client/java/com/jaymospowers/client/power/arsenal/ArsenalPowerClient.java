@@ -6,6 +6,7 @@ import com.jaymospowers.client.PowerClient;
 import com.jaymospowers.client.PowerClients;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.power.arsenal.ArsenalArmory;
+import com.jaymospowers.power.arsenal.ArsenalChains;
 import com.jaymospowers.power.arsenal.ArsenalDamocles;
 import com.jaymospowers.power.arsenal.ArsenalPower;
 import com.jaymospowers.power.arsenal.HundredBlades;
@@ -53,6 +54,8 @@ public final class ArsenalPowerClient implements PowerClient {
 		// Cannon Battery: the rifts and their cannons, and X held and let go
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalCannonRenderer::render);
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalPortalRenderer::render);
+		// Rift Chains: the rifts around whatever is bound, and their chains
+		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalChainsRenderer::render);
 		ArsenalPortalRenderer.init();
 		EntityRendererRegistry.register(ArsenalEntities.RIFT_CANNONBALL, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));
 		ClientTickEvents.START_CLIENT_TICK.register(ArsenalPowerClient::cannonInput);
@@ -122,16 +125,19 @@ public final class ArsenalPowerClient implements PowerClient {
 		long now = minecraft.level.getGameTime();
 		ArsenalPower.Cooldowns cd = ArsenalPower.cooldowns(player);
 
-		// to the right of the hotbar, clear of the core's badge (top-left)
+		// to the right of the hotbar, clear of the core's badge (top-left); a row higher with Rift Chains to show
+		boolean corrupted = Fate.isCorrupted(player);
 		int x = graphics.guiWidth() / 2 + 98;
-		int y = graphics.guiHeight() - 34;
+		int y = graphics.guiHeight() - (corrupted ? 34 : 45);
 
 		row(graphics, font, x, y, PowerKey.ABILITY_1, "hud.jaymospowers.arsenal.reach", cd.reach() - now, ArsenalPower.REACH_COOLDOWN);
-		if (Fate.isCorrupted(player)) {
+		if (corrupted) {
 			// the Void Arsenal's V is its gates (no cooldown to show); its B is the Sword of Damocles
 			row(graphics, font, x, y + 11, PowerKey.ABILITY_4, "hud.jaymospowers.arsenal.damocles", cd.damocles() - now, ArsenalDamocles.COOLDOWN);
 		} else {
 			row(graphics, font, x, y + 11, PowerKey.ABILITY_3, "hud.jaymospowers.arsenal.barrage", cd.barrage() - now, ArsenalPower.BARRAGE_COOLDOWN);
+			row(graphics, font, x, y + 22, PowerKey.ABILITY_4, "hud.jaymospowers.arsenal.chains", cd.chains() - now, ArsenalChains.COOLDOWN);
+			y += 11;
 		}
 
 		// summoned weapons I'm holding: how many, and the soonest to go home

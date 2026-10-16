@@ -56,7 +56,8 @@ import org.jspecify.annotations.Nullable;
  * <li>R - Reach Through: open a rift, pull a random weapon (+ ammo) into your hand.</li>
  * <li>G - Return: send the held summoned weapon back; refunds part of Reach's cooldown. A standing Sword of Damocles is called back first.</li>
  * <li>V - Barrage: 3-5 rifts open around you and fire weapons at what you're looking at.</li>
- * <li>B - Pocket Stash (also on Z). Corrupted: Sword of Damocles ({@link ArsenalDamocles}).</li>
+ * <li>B - Rift Chains ({@link ArsenalChains}): chains out of rifts hold what you aim at; B again yanks it to you.
+ * Corrupted: Sword of Damocles ({@link ArsenalDamocles}).</li>
  * <li>Z - Pocket Stash: your personal 27-slot pocket dimension.</li>
  * <li>X - Cannon Battery ({@link ArsenalCannons}): hold to grow a fan of rift cannons, let go to fire them all.</li>
  * </ul>
@@ -90,14 +91,15 @@ public final class ArsenalPower implements Power {
 	public static final int DROPPED_TICKS = 60;
 
 	/** When each ability is ready again (game time). Saved, and synced to its owner for the HUD. */
-	public record Cooldowns(long reach, long barrage, long ultimate, long damocles, long cannons) {
-		public static final Cooldowns NONE = new Cooldowns(0, 0, 0, 0, 0);
+	public record Cooldowns(long reach, long barrage, long ultimate, long damocles, long cannons, long chains) {
+		public static final Cooldowns NONE = new Cooldowns(0, 0, 0, 0, 0, 0);
 		public static final Codec<Cooldowns> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.LONG.fieldOf("reach").forGetter(Cooldowns::reach),
 				Codec.LONG.fieldOf("barrage").forGetter(Cooldowns::barrage),
 				Codec.LONG.optionalFieldOf("ultimate", 0L).forGetter(Cooldowns::ultimate),
 				Codec.LONG.optionalFieldOf("damocles", 0L).forGetter(Cooldowns::damocles),
-				Codec.LONG.optionalFieldOf("cannons", 0L).forGetter(Cooldowns::cannons))
+				Codec.LONG.optionalFieldOf("cannons", 0L).forGetter(Cooldowns::cannons),
+				Codec.LONG.optionalFieldOf("chains", 0L).forGetter(Cooldowns::chains))
 			.apply(i, Cooldowns::new));
 		public static final StreamCodec<ByteBuf, Cooldowns> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, Cooldowns::reach,
@@ -105,26 +107,31 @@ public final class ArsenalPower implements Power {
 			ByteBufCodecs.VAR_LONG, Cooldowns::ultimate,
 			ByteBufCodecs.VAR_LONG, Cooldowns::damocles,
 			ByteBufCodecs.VAR_LONG, Cooldowns::cannons,
+			ByteBufCodecs.VAR_LONG, Cooldowns::chains,
 			Cooldowns::new);
 
 		public Cooldowns withReach(long ready) {
-			return new Cooldowns(ready, barrage, ultimate, damocles, cannons);
+			return new Cooldowns(ready, barrage, ultimate, damocles, cannons, chains);
 		}
 
 		public Cooldowns withBarrage(long ready) {
-			return new Cooldowns(reach, ready, ultimate, damocles, cannons);
+			return new Cooldowns(reach, ready, ultimate, damocles, cannons, chains);
 		}
 
 		public Cooldowns withUltimate(long ready) {
-			return new Cooldowns(reach, barrage, ready, damocles, cannons);
+			return new Cooldowns(reach, barrage, ready, damocles, cannons, chains);
 		}
 
 		public Cooldowns withDamocles(long ready) {
-			return new Cooldowns(reach, barrage, ultimate, ready, cannons);
+			return new Cooldowns(reach, barrage, ultimate, ready, cannons, chains);
 		}
 
 		public Cooldowns withCannons(long ready) {
-			return new Cooldowns(reach, barrage, ultimate, damocles, ready);
+			return new Cooldowns(reach, barrage, ultimate, damocles, ready, chains);
+		}
+
+		public Cooldowns withChains(long ready) {
+			return new Cooldowns(reach, barrage, ultimate, damocles, cannons, ready);
 		}
 	}
 
@@ -154,6 +161,7 @@ public final class ArsenalPower implements Power {
 		HundredBlades.init();
 		ArsenalDamocles.init();
 		ArsenalCannons.init();
+		ArsenalChains.init();
 		ArsenalVoid.init();
 		SwordStone.register();
 		RelicWeapons.register();
@@ -213,12 +221,12 @@ public final class ArsenalPower implements Power {
 				}
 			}
 			case ABILITY_3 -> barrage(player);
-			// the Void Arsenal's B drops the Sword of Damocles; the pocket lives on Z (B still opens it uncorrupted)
+			// B: Rift Chains; the Void Arsenal's drops the Sword of Damocles instead (the pocket lives on Z)
 			case ABILITY_4 -> {
 				if (voided) {
 					ArsenalDamocles.cast(player);
 				} else {
-					ArsenalPocket.toggle(player);
+					ArsenalChains.key(player);
 				}
 			}
 		}
@@ -265,6 +273,7 @@ public final class ArsenalPower implements Power {
 		HundredBlades.onLost(player);
 		ArsenalDamocles.onLost(player);
 		ArsenalCannons.onLost(player);
+		ArsenalChains.onLost(player);
 		PENDING.remove(player.getUUID());
 		BARRAGES.remove(player.getUUID());
 		player.removeAttached(ArsenalReach.REACH);
