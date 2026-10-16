@@ -1622,3 +1622,10 @@ A superpowers mod for Minecraft Java 26.3 (Fabric). It's the centrepiece of a mo
     drops. It shatters on anything as hard as obsidian, unbreakable blocks, block entities (chests, furnaces), blocks
     the thrower may not break (spawn protection, adventure mode, claims) or an unloaded chunk. Fluids don't stop it.
     Numbers at the top of `ZFighterKi`.
+- **0.13.10, a villager's ape:** packs Jaymo's Kingdoms 0.7.89 (villagers are born into heritages; see
+  `kingdoms/MODLOG.md`). A Warrior-born villager with a wrapped tail, outdoors at night under a full moon, has a 10% chance
+  once a night to turn into the wild Great Ape a non-Z-Fighter player becomes (`VillagerApe`: +80 health, 14-damage
+  fists; ends at dawn, after 10 s out of the moonlight, or after 5 minutes). Brought down the same way (blows to the
+  legs, then a blade while it lies there), its tail is cut for good and it never turns again; its lines change to
+  match. A villager cut at birth never turns. The ape body hides the villager's (`ZFighterHumanoidMobRendererMixin`), and
+  `ZFighterLineage.race(...)` now reads any entity's heritage.
